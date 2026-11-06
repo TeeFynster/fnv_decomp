@@ -2,8 +2,8 @@
 #define FNV_BSMENU_TILE_H
 
 #pragma optimize("", off)
-#include "Tile__FloatAction.h"
 #include "tile_h_decls.h"
+#include "Tile__FloatAction.h"
 #include "tile_types_Tile__RefValueAction.h"
 #pragma function(memcmp)
 

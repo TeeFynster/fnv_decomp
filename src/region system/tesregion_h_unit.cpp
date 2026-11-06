@@ -1,9 +1,12 @@
 
-// Header unit for region system/tesregion.h.
-// No @fnv markers here; the covered getter is defined and marked in the
-// header. This translation unit only forces the covered COMDAT to be
-// emitted so its bytes can be compared against the original.
-#include "tesregion.h"
+#include "../../include/NiColor.h"
+#include "../../include/TESRegion.h"
+
+// @fnv 0x005d8a70
+inline NiColor* TESRegion::GetDiffuseColor()
+{
+    return reinterpret_cast<NiColor*>(&m_kDiffuseColor);
+}
 
 void TESRegion_UnitReference()
 {

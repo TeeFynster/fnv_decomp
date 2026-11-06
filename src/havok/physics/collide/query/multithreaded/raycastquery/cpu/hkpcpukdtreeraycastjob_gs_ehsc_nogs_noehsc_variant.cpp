@@ -4,6 +4,9 @@
 
 // src/havok/physics/collide/query/multithreaded/raycastquery/cpu/hkpcpukdtreeraycastjob.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/query/multithreaded/raycastquery/cpu/hkpcpukdtreeraycastjob.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+
 struct FUN_00e4dd90_shell
 {
     void __thiscall FUN_00e4dd90(float* output);
@@ -48,21 +51,7 @@ struct FUN_00e4dde0
     int unk8C;
     FUN_00e4dde0();
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize);
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 struct FUN_00e4e3c0
 {
     int m_i04;
@@ -109,9 +98,11 @@ struct FUN_00e4e3c0
 
     static void operator delete(void* apMemory)
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(apMemory, sizeof(FUN_00e4e3c0));
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        // The game dispatches Free through vtable slot 2.
+        typedef void (__thiscall* FreeFunction)(hkMemoryAllocator*, void*, unsigned int);
+        ((FreeFunction)(*(void***)pAllocator)[2])(pAllocator, apMemory, sizeof(FUN_00e4e3c0));
     }
 };
 FUN_00e4e3c0::FUN_00e4e3c0()
@@ -143,13 +134,14 @@ class HkVec4
     {
         m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
     }
-    void setRotatedInverseDir(const struct Mat3& r, const HkVec4& b);
-    void SetRotatedVector(const struct Mat3& a, const HkVec4& b);
+    void setRotatedInverseDir(const struct KdRayRotation& r, const HkVec4& b);
+    void SetRotatedVector(const struct KdRayRotation& a, const HkVec4& b);
     void SetTransformedPosition(const struct Mat4& t, const HkVec4& b);
-    void SetRotatedDirection(const struct Mat3& r, const HkVec4& b);
+    void SetRotatedDirection(const struct KdRayRotation& r, const HkVec4& b);
     __m128 m_vComponents;
 };
-struct Mat3
+// hkRotation (three columns; rotation part of Mat4 = hkTransform) over this unit's HkVec4 stand-in.
+struct KdRayRotation
 {
     HkVec4 c0;
     HkVec4 c1;
@@ -161,9 +153,9 @@ struct Mat3
 };
 struct Mat4
 {
-    Mat3 rot;
+    KdRayRotation rot;
     HkVec4 trans;
-    const Mat3& getRotation() const
+    const KdRayRotation& getRotation() const
     {
         return rot;
     }
@@ -172,7 +164,7 @@ struct Mat4
         return trans;
     }
 };
-__forceinline void HkVec4::SetRotatedVector(const Mat3& a, const HkVec4& b)
+__forceinline void HkVec4::SetRotatedVector(const KdRayRotation& a, const HkVec4& b)
 {
     const __m128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
     const __m128 r0 = _mm_mul_ps(a.getColumn(0).m_vComponents, b0);
@@ -182,11 +174,11 @@ __forceinline void HkVec4::SetRotatedVector(const Mat3& a, const HkVec4& b)
     const __m128 r2 = _mm_mul_ps(a.getColumn(2).m_vComponents, b2);
     m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
-__forceinline void HkVec4::SetRotatedDirection(const Mat3& r, const HkVec4& v)
+__forceinline void HkVec4::SetRotatedDirection(const KdRayRotation& r, const HkVec4& v)
 {
     SetRotatedVector(r, v);
 }
-__forceinline void HkVec4::setRotatedInverseDir(const Mat3& r, const HkVec4& b)
+__forceinline void HkVec4::setRotatedInverseDir(const KdRayRotation& r, const HkVec4& b)
 {
     __m128 c0 = r.getColumn(0).m_vComponents;
     __m128 c1 = r.getColumn(1).m_vComponents;
@@ -545,7 +537,7 @@ void __thiscall Cls::FUN_00e4de10(Param* p1, const Mask& p2)
                     ((FUN_009c1aa0_Class*)dst)->FUN_009c1aa0(bundleOutput.entries[i]);
                     dst->info50 = *(int*)&(&bundleOutput.entries[i])[1].x;
                     f0c->entries[i].field50 = p1;
-                    const Mat3& rot = transform.getRotation();
+                    const KdRayRotation& rot = transform.getRotation();
                     ((HkVec4&)f0c->entries[i].u.row).SetRotatedDirection(rot, (const HkVec4&)bundleOutput.entries[i]);
                     float v;
                     if (f0c->flagc0 != 0)

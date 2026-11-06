@@ -1,18 +1,40 @@
 // bsshader/speedtreeleafshader.cpp: SpeedTreeLeafShader (5 functions)
 
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSShader.h"
+#include "../../include/NiD3DDefaultShader.h"
+#include "../../include/NiD3DShader.h"
+#include "../../include/NiD3DShaderConstantMap.h"
+#include "../../include/NiD3DShaderInterface.h"
+#include "../../include/NiShader.h"
+#include "../../include/NiShaderConstantMap.h"
 #include "speedtreeleafshader_decls.h"
 #include "speedtreeleafshader_types_SpeedTreeLeafShader.h"
-#include "speedtreeleafshader_types_NiD3DShaderConstantMap.h"
 #include "speedtreeleafshader_types_SpeedTreeShader.h"
-
-class SpeedTreeLeafShaderConstantMapCalls
+// The shared NiRefObject declares the reference-count methods; their inline bodies (Gamebryo NiRefObject.inl).
+inline void NiRefObject::IncRefCount()
 {
-  public:
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual unsigned int AddConstant(const char*, unsigned int, unsigned int, unsigned int, unsigned int, const char*,
-                                     unsigned int, unsigned int, const void*, bool);
-};
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+
+template <> inline NiPointer<NiD3DShaderConstantMap>&
+NiPointer<NiD3DShaderConstantMap>::operator=(NiD3DShaderConstantMap* object)
+{
+    if (m_pObject != object)
+    {
+        if (m_pObject)
+            static_cast<NiRefObject*>(m_pObject)->DecRefCount();
+        m_pObject = object;
+        if (m_pObject)
+            static_cast<NiRefObject*>(m_pObject)->IncRefCount();
+    }
+    return *this;
+}
 
 struct SpeedTreeLeafShaderColor
 {
@@ -24,7 +46,7 @@ struct SpeedTreeLeafShaderColor
 // @fnv 0x00bb2a00
 SpeedTreeLeafShader::SpeedTreeLeafShader() : BSShader()
 {
-    m_iPassId = 9;
+    iShaderType = 9;
     fnv_zlib_memset(m_afShaderConstants, 0, sizeof(m_afShaderConstants));
     reinterpret_cast<SpeedTreeLeafShaderColor&>(DAT_01200638) = SpeedTreeLeafShaderColor(1, 1, 1, 1);
     reinterpret_cast<SpeedTreeLeafShaderColor&>(DAT_01200648) = SpeedTreeLeafShaderColor(1, 1, 1, 1);
@@ -36,37 +58,28 @@ SpeedTreeLeafShader::SpeedTreeLeafShader() : BSShader()
 // @fnv 0x00bb2d10
 void SpeedTreeLeafShader::UpdateShaderConstants()
 {
-    if (m_spSecondShaderConstantMap.m_pObject)
+    if (m_spVertexConstantMap.m_pObject)
         return;
 
-    m_spSecondShaderConstantMap = new NiD3DShaderConstantMap(m_pShaderObject, NiGPUProgram__ProgramType_PROGRAM_VERTEX);
+    m_spVertexConstantMap = new NiD3DShaderConstantMap(m_pkD3DRenderer, NiGPUProgram__ProgramType_PROGRAM_VERTEX);
 
-    reinterpret_cast<SpeedTreeLeafShaderConstantMapCalls*>(m_spSecondShaderConstantMap.m_pObject)
-        ->AddConstant(DAT_010A1E50, 0x20000009, 0, 0, 4, 0, 0, 0, 0, false);
-    reinterpret_cast<SpeedTreeLeafShaderConstantMapCalls*>(m_spSecondShaderConstantMap.m_pObject)
-        ->AddConstant(DAT_010AF568, 0x10000007, 0, 5, 1, DAT_01011584, 0x10, 4, DAT_011FA0C0, false);
-    reinterpret_cast<SpeedTreeLeafShaderConstantMapCalls*>(m_spSecondShaderConstantMap.m_pObject)
-        ->AddConstant(DAT_010B92F8, 0x10000007, 0, 6, 1, DAT_01011584, 0x10, 4, DAT_011FA0D0, false);
-    reinterpret_cast<SpeedTreeLeafShaderConstantMapCalls*>(m_spSecondShaderConstantMap.m_pObject)
-        ->AddConstant(DAT_010B92E8, 0x10000007, 0, 7, 1, DAT_01011584, 0x10, 4, DAT_011FA0E0, false);
-    reinterpret_cast<SpeedTreeLeafShaderConstantMapCalls*>(m_spSecondShaderConstantMap.m_pObject)
-        ->AddConstant(DAT_010AF60C, 0x10000007, 0, 8, 1, DAT_01011584, 0x10, 4, DAT_011FA280, false);
-    reinterpret_cast<SpeedTreeLeafShaderConstantMapCalls*>(m_spSecondShaderConstantMap.m_pObject)
-        ->AddConstant(DAT_010AF5E4, 0x10000007, 0, 9, 1, DAT_01011584, 0x10, 4, DAT_011FA290, false);
+    m_spVertexConstantMap.m_pObject->SetConstant(DAT_010A1E50, 0x20000009, 0, 0, 4, 0, 0, 0, 0, false);
+    m_spVertexConstantMap.m_pObject->SetConstant(DAT_010AF568, 0x10000007, 0, 5, 1, DAT_01011584, 0x10, 4, DAT_011FA0C0, false);
+    m_spVertexConstantMap.m_pObject->SetConstant(DAT_010B92F8, 0x10000007, 0, 6, 1, DAT_01011584, 0x10, 4, DAT_011FA0D0, false);
+    m_spVertexConstantMap.m_pObject->SetConstant(DAT_010B92E8, 0x10000007, 0, 7, 1, DAT_01011584, 0x10, 4, DAT_011FA0E0, false);
+    m_spVertexConstantMap.m_pObject->SetConstant(DAT_010AF60C, 0x10000007, 0, 8, 1, DAT_01011584, 0x10, 4, DAT_011FA280, false);
+    m_spVertexConstantMap.m_pObject->SetConstant(DAT_010AF5E4, 0x10000007, 0, 9, 1, DAT_01011584, 0x10, 4, DAT_011FA290, false);
 
     if (DAT_011F941E)
     {
-        reinterpret_cast<SpeedTreeLeafShaderConstantMapCalls*>(m_spSecondShaderConstantMap.m_pObject)
-            ->AddConstant(DAT_010B92DC, 0x10000004, 0, 10, 1, DAT_01011584, 4, 4, DAT_011F918C, false);
+        m_spVertexConstantMap.m_pObject->SetConstant(DAT_010B92DC, 0x10000004, 0, 10, 1, DAT_01011584, 4, 4, DAT_011F918C, false);
     }
 
-    reinterpret_cast<SpeedTreeLeafShaderConstantMapCalls*>(m_spSecondShaderConstantMap.m_pObject)
-        ->AddConstant(DAT_010B8C34, 0x10000009, 0, 11, 6, DAT_01011584, 0x60, 4, DAT_01200618, false);
+    m_spVertexConstantMap.m_pObject->SetConstant(DAT_010B8C34, 0x10000009, 0, 11, 6, DAT_01011584, 0x60, 4, DAT_01200618, false);
 
-    SpeedTreeLeafShaderConstantMapSetup::ConfigureShaderConstantMap(m_spSecondShaderConstantMap.m_pObject, 0x11);
+    SpeedTreeLeafShaderConstantMapSetup::ConfigureShaderConstantMap(m_spVertexConstantMap.m_pObject, 0x11);
 
-    reinterpret_cast<SpeedTreeLeafShaderConstantMapCalls*>(m_spSecondShaderConstantMap.m_pObject)
-        ->AddConstant(DAT_010B92D0, 0x10000009, 0, 0x22, 0x30, DAT_01011584, 0x300, 4, m_afShaderConstants, false);
+    m_spVertexConstantMap.m_pObject->SetConstant(DAT_010B92D0, 0x10000009, 0, 0x22, 0x30, DAT_01011584, 0x300, 4, m_afShaderConstants, false);
 }
 
 struct FUN_00bb2bb0_holder
@@ -220,11 +233,6 @@ struct LeafV
     virtual void v78();
     virtual void Init79();
 };
-struct BSFadeNode
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*);
-};
 struct FadeTag
 {
 };
@@ -232,9 +240,10 @@ inline void* operator new(unsigned int sz, FadeTag*)
 {
     return BSFadeNode::operator new(sz);
 }
+// The original unwind (0x00f2b670) frees with the sized form: push 0x38c (sizeof(SpeedTreeLeafShader)).
 inline void operator delete(void* p, FadeTag*)
 {
-    BSFadeNode::operator delete(p);
+    BSFadeNode::operator delete(p, sizeof(SpeedTreeLeafShader));
 }
 struct FUN_00bb1d40_t
 {
@@ -250,7 +259,7 @@ SpeedTreeLeafShader* CreateSpeedTreeLeafShader()
     pDecl->SetEntry(2, 7, 5, 1, 0);
     pDecl->SetEntry8(0, 3, 8, 0x80000000, 3, 2, 0, 0);
     pDecl->Finalize();
-    SpeedTreeLeafShader* pLeafShader = new ((FadeTag*)0) SpeedTreeLeafShader;
+    SpeedTreeLeafShader* pLeafShader = ::new ((FadeTag*)0) SpeedTreeLeafShader;
     ((LeafV*)pLeafShader)->Init19();
     ((LeafV*)pLeafShader)->Init79();
     ((FUN_00bb1d40_t*)pLeafShader)->CreatePasses();

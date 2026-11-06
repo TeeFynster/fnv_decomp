@@ -1,3 +1,6 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#include "../../include/hkArray.h"
 
 // src/staging/blk_00e40000_o2_decl_variant_ob1_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /Ob1 /GS /EHsc /Gy (unit src/staging/blk_00e40000_o2_decl_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -9,6 +12,9 @@
 // src/staging/blk_00e40000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkMemoryRouter.h"
 struct FUN_00e428f0_class
 {
     void Remove(void*);
@@ -433,30 +439,18 @@ struct E4AAA0Element
     int m_iThirdValue;
     int m_iFourthElementInteger;
 };
-struct E4AAA0Array
+static __forceinline void E4AAA0Array_reserve(hkArrayBase<E4AAA0Element>& self, E4AAA0Allocator& alloc, int n);
+
+static __forceinline void E4AAA0Array_reserve(hkArrayBase<E4AAA0Element>& self, E4AAA0Allocator& alloc, int n)
 {
-    E4AAA0Element* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    void reserve(E4AAA0Allocator& alloc, int n)
-    {
-        const int cap = getCapacity();
+        const int cap = self.getCapacity();
         if (cap < n)
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(E4AAA0Element));
+            FUN_00c908c0(&alloc, (&self), newSize, sizeof(E4AAA0Element));
         }
     }
-
-    void InsertElements(E4AAA0Allocator& alloc, int index, int numdel, const E4AAA0Element* p, int numtoinsert);
-};
 class E4AE50ReferencedObject
 {
   public:
@@ -640,16 +634,6 @@ struct E53230Color
     float a;
 
     E53230Color& DivideByScalar(float fScalar);
-};
-struct FourFloatVector
-{
-    float x;
-    float y;
-    float z;
-    float w;
-
-    FourFloatVector& FUN_00e531a0(int parameter);
-    FourFloatVector FUN_00e53260(int parameter);
 };
 struct S_e53300_Vec;
 struct S_e53300_Vec
@@ -1608,16 +1592,7 @@ struct Entry
 struct Allocator
 {
 };
-struct Router
-{
-    int a, b, c, d;
-    Allocator* heap;
-    Allocator& getHeap()
-    {
-        return *heap;
-    }
-};
-Router* getRouter();
+hkMemoryRouter* getRouter();
 int FUN_00e60cb0(unsigned char type, int count);
 extern "C" void FUN_00c908c0(Allocator*, void*, int, int);
 void FUN_00cb1260(void*, const void*, int);
@@ -1761,41 +1736,21 @@ struct FloatArrayRef
 };
 int __cdecl FUN_00e57210(FloatArrayRef* array, int count);
 struct ArrayAllocator;
-struct FloatArray;
-void FUN_00c908c0(ArrayAllocator* alloc, FloatArray* arr, int newCap, int elemSize);
-struct FloatArray
+
+void FUN_00c908c0(ArrayAllocator* alloc, hkArrayBase<float>* arr, int newCap, int elemSize);
+static __forceinline void FloatArray_reserve(hkArrayBase<float>& self, ArrayAllocator& alloc, int n);
+
+static __forceinline void FloatArray_reserve(hkArrayBase<float>& self, ArrayAllocator& alloc, int n)
 {
-    float* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void reserve(ArrayAllocator& alloc, int n)
-    {
-        int cap = getCapacity();
+        int cap = self.getCapacity();
         if (cap < n)
         {
             int c = 2 * cap;
-            FUN_00c908c0(&alloc, this, n < c ? c : n, 4);
+            FUN_00c908c0(&alloc, (&self), n < c ? c : n, 4);
         }
     }
-};
-struct MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    ArrayAllocator* m_pStreamAllocator;
-    ArrayAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-MemoryRouter* GetMemoryRouter();
-int RemoveAdjacentDuplicates(FloatArray* arr, int last);
+hkMemoryRouter* GetMemoryRouter();
+int RemoveAdjacentDuplicates(hkArrayBase<float>* arr, int last);
 // Element-wise subtract another matrix of the same shape from this one.
 class E87E0Matrix
 {

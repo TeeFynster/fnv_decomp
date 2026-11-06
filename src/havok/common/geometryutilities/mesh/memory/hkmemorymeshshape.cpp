@@ -1,118 +1,32 @@
+#define FNV64_HKENUM_INLINE_BODIES
 
 // src/havok/common/geometryutilities/mesh/memory/hkmemorymeshshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/geometryutilities/mesh/memory/hkmemorymeshshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkMemoryMeshShape.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../include/hkStatisticsCollector.h"
 
-// @fnv 0x00e4a020
-void __stdcall FUN_00e4a020(void* unused)
-{}
-
-class hkMemMeshShapeCand : public hkMemoryMeshShape
+// include/ has no hkMeshShape header yet.
+class hkMeshShape : public hkReferencedObject
 {
-  public:
-    int FUN_00e4a030();
 };
 
-// @fnv 0x00e4a030
-int hkMemMeshShapeCand::FUN_00e4a030()
-{
-    return m_sections.m_iElementCount;
-}
 
-int FUN_00d06f80(const void* pvData, int iSize) throw();
+#include "../../../../../../include/hkEnum.h"
+using ::hkEnum;
 
-template <typename T> inline int hkGetSize(const hkArray<T>& a)
-{
-    return a.m_iElementCount;
-}
-template <typename T> inline int hkGetCapacity(const hkArray<T>& a)
-{
-    return a.m_iCapacityState & 0x3fffffff;
-}
-
-class hkMeshSectionCinfo
-{
-  public:
-    hkReferencedObject* m_pMeshVertexBuffer;
-    hkReferencedObject* m_iMaterialIndex;
-    int m_aiUnk08[6];
-};
-
-class hkStatisticsCollectorE4A0
-{
-  public:
-    virtual void V0() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual void AddObjectInstance(const char* pcFieldName, const hkReferencedObject* pkObject,
-                                   const hkClass* pkClass) throw();
-    virtual void V4() throw();
-    virtual void AddMemoryChunk(int iType, const char* pcFieldName, const void* pvChunk, int iUsedSize,
-                                int iAllocatedSize) throw();
-    int m_aiUnk04[3];
-    hkBool m_bExternalMemory;
-
-    template <typename T> void addArray(const char* pcFieldName, const hkArray<T>& kArray)
-    {
-        if (!(kArray.m_iCapacityState & 0x80000000) || m_bExternalMemory)
-        {
-            const T* pData = kArray.m_data;
-            int iAllocatedSize = FUN_00d06f80(pData, hkGetCapacity(kArray) * sizeof(T));
-            AddMemoryChunk(3, pcFieldName, kArray.m_data, hkGetSize(kArray) * sizeof(T), iAllocatedSize);
-        }
-    }
-};
-
-class hkMemoryMeshShapeE4A0 : public hkMemoryMeshShape
-{
-  public:
-    void CollectMemoryStatistics(hkStatisticsCollectorE4A0* pkCollector, const hkClass* pkClass) const throw();
-};
-
-// Reports the indices16, indices32 and sections arrays plus each section's vertexBuffer and material to the statistics collector.
-// @fnv 0x00e4a0c0
-void hkMemoryMeshShapeE4A0::CollectMemoryStatistics(hkStatisticsCollectorE4A0* pkCollector,
-                                                    const hkClass* pkClass) const throw()
-{
-    pkCollector->addArray("indices16", m_kIndices16);
-    pkCollector->addArray("indices32", m_kIndices32);
-    pkCollector->addArray("sections", m_sections);
-    const int iNumSections = m_sections.m_iElementCount;
-    for (int iIndex = 0; iIndex < iNumSections; iIndex++)
-    {
-        const hkMeshSectionCinfo& kSection = m_sections.m_data[iIndex];
-        pkCollector->AddObjectInstance("vertexBuffer", kSection.m_pMeshVertexBuffer, 0);
-        pkCollector->AddObjectInstance("material", kSection.m_iMaterialIndex, 0);
-    }
-}
-
-template <class ENUM, class STORAGE> class hkEnumE4A
-{
-  public:
-    STORAGE m_kStorage;
-    operator ENUM() const
-    {
-        return (ENUM)m_kStorage;
-    }
-    void operator=(ENUM e)
-    {
-        m_kStorage = (STORAGE)e;
-    }
-};
-
-enum PrimitiveTypeE4A
+enum PrimitiveType
 {
     PRIMITIVE_TYPE_UNKNOWN
 };
 
-int __cdecl FUN_00e60cb0(PrimitiveTypeE4A type, int numPrimitives);
-
-struct hkMeshSectionCinfoE4A
+// include/ has no hkMeshSectionCinfo header; the section stride at 0x00e4a040 is 0x20.
+struct hkMeshSectionCinfo
 {
-    void* m_pMeshVertexBuffer;
-    void* m_iMaterialIndex;
-    hkEnumE4A<PrimitiveTypeE4A, unsigned char> m_ePrimitiveType;
+    hkReferencedObject* m_pMeshVertexBuffer;
+    hkReferencedObject* m_iMaterialIndex;
+    hkEnum<PrimitiveType, unsigned char> m_ePrimitiveType;
     int m_iNumPrimitives;
     bool m_hasIndices;
     void* m_ppIndices;
@@ -120,35 +34,83 @@ struct hkMeshSectionCinfoE4A
     int m_iSectionVertexCount;
 };
 
-struct hkMeshSectionE4A
+// include/ has no hkMeshSection header; 0x00e4a040 writes this 0x28-byte section result.
+struct hkMeshSection
 {
-    hkEnumE4A<PrimitiveTypeE4A, unsigned char> m_ePrimitiveType;
+    hkEnum<PrimitiveType, unsigned char> m_ePrimitiveType;
     int m_iNumPrimitives;
     int m_iIndexCount;
     int m_iIndexType;
     int m_iSectionVertexCount;
     bool m_hasIndices;
     void* m_ppIndices;
-    void* m_pMeshVertexBuffer;
-    void* m_iMaterialIndex;
+    hkReferencedObject* m_pMeshVertexBuffer;
+    hkReferencedObject* m_iMaterialIndex;
     int m_iVertexOffset;
 };
 
-class hkMemoryMeshShapeE4A
+// The shared collector lacks beginObject(name, object, class), used at slot 3 by 0x00e4a0c0.
+
+// include/ has no hkMemoryMeshShape header; both former stand-ins access this same sections array at +8.
+class hkMemoryMeshShape : public hkMeshShape
 {
   public:
-    virtual ~hkMemoryMeshShapeE4A();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    hkMeshSectionCinfoE4A* m_sections;
-    void GetSection(int sectionIndex, unsigned char accessFlags, hkMeshSectionE4A& sectionOut);
+    int GetNumSections() const;
+    void GetSection(int sectionIndex, unsigned char accessFlags, hkMeshSection& sectionOut);
+    virtual void calcContentStatistics(hkStatisticsCollector* pkCollector, const hkClass* pkClass) const throw();
+
+    hkArray<hkMeshSectionCinfo> m_sections;
+    hkArray<unsigned short> m_kIndices16;
+    hkArray<unsigned int> m_kIndices32;
+    char* m_name;
 };
+
+// @fnv 0x00e4a020
+void __stdcall FUN_00e4a020(void* unused)
+{}
+
+// @fnv 0x00e4a030
+int hkMemoryMeshShape::GetNumSections() const
+{
+    return m_sections.m_iElementCount;
+}
+
+int FUN_00d06f80(const void* pvData, int iSize) throw();
+
+template <typename T> inline void CollectArray(hkStatisticsCollector* pkCollector, const char* pcFieldName,
+                                               const hkArray<T>& kArray)
+{
+    if (!(kArray.m_iCapacityState & 0x80000000) || pkCollector->m_reportInplaceAllocations)
+    {
+        const T* pData = kArray.m_data;
+        int iAllocatedSize = FUN_00d06f80(pData, kArray.getCapacity() * sizeof(T));
+        pkCollector->AddMemoryChunk(3, pcFieldName, kArray.m_data, kArray.m_iElementCount * sizeof(T), iAllocatedSize);
+    }
+}
+
+// Reports the indices16, indices32 and sections arrays plus each section's vertexBuffer and material to the statistics collector.
+// @fnv 0x00e4a0c0
+void hkMemoryMeshShape::calcContentStatistics(hkStatisticsCollector* pkCollector, const hkClass* pkClass) const throw()
+{
+    CollectArray(pkCollector, "indices16", m_kIndices16);
+    CollectArray(pkCollector, "indices32", m_kIndices32);
+    CollectArray(pkCollector, "sections", m_sections);
+    const int iNumSections = m_sections.m_iElementCount;
+    for (int iIndex = 0; iIndex < iNumSections; iIndex++)
+    {
+        const hkMeshSectionCinfo& kSection = m_sections.m_data[iIndex];
+        pkCollector->beginObject("vertexBuffer", kSection.m_pMeshVertexBuffer, 0);
+        pkCollector->beginObject("material", kSection.m_iMaterialIndex, 0);
+    }
+}
+
+int __cdecl FUN_00e60cb0(PrimitiveType type, int numPrimitives);
 
 // Copies the cinfo fields of the mesh section at sectionIndex into sectionOut, computing the index count and gating vertex/indices pointers by accessFlags.
 // @fnv 0x00e4a040
-void hkMemoryMeshShapeE4A::GetSection(int sectionIndex, unsigned char accessFlags, hkMeshSectionE4A& sectionOut)
+void hkMemoryMeshShape::GetSection(int sectionIndex, unsigned char accessFlags, hkMeshSection& sectionOut)
 {
-    const hkMeshSectionCinfoE4A& cinfo = m_sections[sectionIndex];
+    const hkMeshSectionCinfo& cinfo = m_sections.m_data[sectionIndex];
     sectionOut.m_ePrimitiveType = cinfo.m_ePrimitiveType;
     sectionOut.m_iNumPrimitives = cinfo.m_iNumPrimitives;
     sectionOut.m_iIndexCount = FUN_00e60cb0(cinfo.m_ePrimitiveType, cinfo.m_iNumPrimitives);

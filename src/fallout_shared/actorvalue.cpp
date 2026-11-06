@@ -66,19 +66,19 @@ void ActorValue::LoadActorValueDefinitions()
     RegisterActorValue(ActorValue__Index_SPEED_MULT, "SpeedMult", DERIVED_ATTRIBUTE, 0x801, 0x0, 0x0, 0x0, 0x0);
     RegisterActorValue(ActorValue__Index_FATIGUE, "Fatigue", DERIVED_ATTRIBUTE, 0x1841, FUN_00643820, 0x0,
                        UpdateActorValueFlag, 0x0);
-    RegisterActorValue(ActorValue__Index_PERCEPTION_CONDITION, "PerceptionCondition", SPECIAL, 0x821, FUN_00643a50, 0x0,
+    RegisterActorValue(ActorValue__Index_PERCEPTION_CONDITION, "PerceptionCondition", CONDITION, 0x821, FUN_00643a50, 0x0,
                        Actor::UpdateActorConditionValue, 0x0);
-    RegisterActorValue(ActorValue__Index_ENDURANCE_CONDITION, "EnduranceCondition", SPECIAL, 0x821, FUN_00643a50, 0x0,
+    RegisterActorValue(ActorValue__Index_ENDURANCE_CONDITION, "EnduranceCondition", CONDITION, 0x821, FUN_00643a50, 0x0,
                        Actor::UpdateActorConditionValue, 0x0);
-    RegisterActorValue(ActorValue__Index_LEFT_ATTACK_CONDITION, "LeftAttackCondition", SPECIAL, 0x821, FUN_00643a50,
+    RegisterActorValue(ActorValue__Index_LEFT_ATTACK_CONDITION, "LeftAttackCondition", CONDITION, 0x821, FUN_00643a50,
                        0x0, Actor::UpdateActorConditionValue, 0x0);
-    RegisterActorValue(ActorValue__Index_RIGHT_ATTACK_CONDITION, "RightAttackCondition", SPECIAL, 0x821, FUN_00643a50,
+    RegisterActorValue(ActorValue__Index_RIGHT_ATTACK_CONDITION, "RightAttackCondition", CONDITION, 0x821, FUN_00643a50,
                        0x0, Actor::UpdateActorConditionValue, 0x0);
-    RegisterActorValue(ActorValue__Index_LEFT_MOBILITY_CONDITION, "LeftMobilityCondition", SPECIAL, 0x821, FUN_00643a50,
+    RegisterActorValue(ActorValue__Index_LEFT_MOBILITY_CONDITION, "LeftMobilityCondition", CONDITION, 0x821, FUN_00643a50,
                        0x0, Actor::UpdateMobilityConditionValue, 0x0);
-    RegisterActorValue(ActorValue__Index_RIGHT_MOBILITY_CONDITION, "RightMobilityCondition", SPECIAL, 0x821,
+    RegisterActorValue(ActorValue__Index_RIGHT_MOBILITY_CONDITION, "RightMobilityCondition", CONDITION, 0x821,
                        FUN_00643a50, 0x0, Actor::UpdateMobilityConditionValue, 0x0);
-    RegisterActorValue(ActorValue__Index_BRAIN_CONDITION, "BrainCondition", SPECIAL, 0x820, FUN_00643a50, 0x0,
+    RegisterActorValue(ActorValue__Index_BRAIN_CONDITION, "BrainCondition", CONDITION, 0x820, FUN_00643a50, 0x0,
                        Actor::UpdateActorConditionValue, 0x0);
     RegisterActorValue(ActorValue__Index_KARMA, "Karma", DERIVED_ATTRIBUTE, 0x4000, 0x0, 0x0, 0x0, 0x0);
     RegisterActorValue(ActorValue__Index_EXPERIENCE_POINTS, "XP", DERIVED_ATTRIBUTE, 0x4000, 0x0, 0x0, FUN_008d53f0,
@@ -158,7 +158,7 @@ bool ActorValueInfo::Load(TESFile* file)
             readOBNDSubRecord(file);
             break;
         case 0x4c4c5546:
-            TESFullNameLoader::LoadFullNameChunk(this, file);
+            TESFullName::LoadFullNameChunk(this, file);
             break;
         case 0x43534544:
             TESDescription::ReadDescriptionFromFile(this, file);
@@ -216,7 +216,7 @@ ActorValue::Index ActorValue::GetActorValueForSectionIndex(Section section, char
         return (Index)(index + 32);
     case AI_ATTRIBUTE:
         return (Index)index;
-    case SPECIAL:
+    case CONDITION:
         return (Index)(index + 25);
     case INT_VALUE:
         return (Index)(index + 46);
@@ -239,7 +239,7 @@ unsigned int ActorValue::GetCountForSection(Section section)
         return 14;
     case AI_ATTRIBUTE:
         return 5;
-    case SPECIAL:
+    case CONDITION:
         return 7;
     case INT_VALUE:
         return 16;
@@ -300,15 +300,15 @@ void TESObjectWEAP::SetModItem(unsigned int slot, TESObjectIMOD* item)
 {
     if (slot == 1)
     {
-        modItem1 = item;
+        m_pWeaponMod1 = item;
     }
     else if (slot == 2)
     {
-        modItem2 = item;
+        m_pWeaponMod2 = item;
     }
     else if (slot == 4)
     {
-        modItem3 = item;
+        m_pWeaponMod3 = item;
     }
 }
 
@@ -420,7 +420,7 @@ void ActorValueInfo::SetEnumerated(int count, ...)
 
 // Returns true when index is one of the actor value indices 18-20, 52, or 58-61, otherwise false.
 // @fnv 0x0066eba0
-bool FUN_0066eba0(ActorValue__Index aeActorValue)
+bool FUN_0066eba0(ActorValue::Index aeActorValue)
 {
     bool result = false;
     switch (aeActorValue)
@@ -525,13 +525,9 @@ const char* __cdecl FUN_0066e9f0(ActorValue::Index aeActorValue)
 {
     ActorValueInfo* pinfo = ActorValue::GetActorValueInfo(aeActorValue);
     if (pinfo)
-        return reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(pinfo) + 0x2c)->GetFullName();
+        return reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(pinfo) +
+            offsetof(ActorValueInfo, FullNameComponent) - offsetof(TESTexture, FullNameComponent))->GetFullName();
     return 0;
-}
-
-extern "C"
-{
-    struct ActorValueInfo;
 }
 
 // @fnv 0x0066eac0
@@ -544,18 +540,13 @@ const char* __cdecl FUN_0066eac0(ActorValue::Index index)
     return presult;
 }
 
-struct Flt
-{
-    operator unsigned int() const;
-};
-
 // @fnv 0x0066eb00
 const char* __cdecl FUN_0066eb00(ActorValue::Index aiIndex)
 {
     const char* presult = 0;
     ActorValueInfo* pinfo = ActorValue::GetActorValueInfo(aiIndex);
     if (pinfo)
-        presult = (const char*)(reinterpret_cast<Flt*>((char*)pinfo + 0x3c))->operator unsigned int();
+        presult = pinfo->m_cAbbreviation.operator const char*();
     return presult;
 }
 
@@ -568,11 +559,6 @@ void __fastcall FUN_0066efd0(int)
 }
 
 int _stricmp(const char* a, const char* b);
-struct FUN_0066eb40_entry
-{
-    char pad[0x38];
-    const char* name;
-};
 // Scans up to 0x4D entries in g_011d61c8, comparing each entry's name case-insensitively to str, and returns the matching index or 0x4D if none match.
 // @fnv 0x0066eb40
 int FindEntryIndexByName(const char* apName)
@@ -580,26 +566,10 @@ int FindEntryIndexByName(const char* apName)
     int result = 0x4D;
     for (int i = 0; i < 0x4D && result == 0x4D; ++i)
     {
-        if (!_stricmp(((FUN_0066eb40_entry**)&g_011d61c8)[i]->name, apName))
+        if (!_stricmp(g_011d61c8.values[i]->m_pName, apName))
             result = i;
     }
     return result;
-}
-
-void __cdecl _Deallocate(void*);
-struct Holder00670050
-{
-    void FUN_00670080();
-    void* FUN_00670050(unsigned int);
-};
-// Calls FUN_00670080, deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x00670050
-void* Holder00670050::FUN_00670050(unsigned int flags)
-{
-    FUN_00670080();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
 }
 
 // Returns the icon texture path for the given weapon skill index, or null if the index has no mapped icon.
@@ -631,92 +601,36 @@ const char* __cdecl GetWeaponSkillIconPath(int aiSkillIndex)
     return path;
 }
 
-namespace fnv_006703b0 {
-struct S_00487010
-{
-    void FUN_00487010();
-};
-struct FUN_00482cb0_shell
-{
-    void FUN_00482cb0();
-};
-struct FUN_004855a0
-{
-    void M();
-};
-struct FUN_00485680
-{
-    void M();
-};
-struct FUN_0048e370_obj
-{
-    void FUN_0048e370(unsigned int);
-};
-struct S7010
-{
-    unsigned int Length();
-};
-struct Flt
-{
-    operator unsigned int();
-};
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
-struct FUN_006703b0_shell
-{
-    void FUN_006703b0();
-};
 // @fnv 0x006703b0
-void FUN_006703b0_shell::FUN_006703b0()
+void ActorValueInfo::Save()
 {
-    ((FUN_004855a0*)this)->M();
-    ((S_00487010*)((char*)this + 0x18))->FUN_00487010();
-    ((FUN_00482cb0_shell*)((char*)this + 0x24))->FUN_00482cb0();
-    ((FUN_0048e370_obj*)((char*)this + 0x2c))->FUN_0048e370(0x4e4f4349);
-    if (((S7010*)((char*)this + 0x3c))->Length())
-        FUN_004856f0(0x4d414e41, (void*)((Flt*)((char*)this + 0x3c))->operator unsigned int(),
-                     ((S7010*)((char*)this + 0x3c))->Length() + 1);
-    ((FUN_00485680*)this)->M();
+    TESForm::FUN_004855a0();
+    TESFullName::FUN_00487010();
+    TESDescription::FUN_00482cb0();
+    TESTexture::Save(0x4e4f4349);
+    if (m_cAbbreviation.Length())
+        FUN_004856f0(0x4d414e41, (void*)m_cAbbreviation.operator const char*(), m_cAbbreviation.Length() + 1);
+    TESForm::FUN_00485680();
 }
-}  // namespace fnv_006703b0
 
-struct Inner24
-{
-    virtual void u0();
-    virtual void u1();
-    virtual void u2();
-    virtual void u3();
-    virtual const char* GetDesc(int, int);
-};
-struct Overlay24
-{
-    char pad[36];
-    Inner24 inner;
-};
 // Looks up the ActorValueInfo for aiIndex and returns its description via GetDesc, or null if the info is missing.
 // @fnv 0x0066e9b0
 const char* GetActorValueDescription(ActorValue::Index aiIndex)
 {
     ActorValueInfo* pinfo = ActorValue::GetActorValueInfo(aiIndex);
     if (pinfo)
-        return ((Overlay24*)pinfo)->inner.GetDesc(0, 0x43534544);
+        return reinterpret_cast<TESDescription*>(reinterpret_cast<char*>(pinfo) +
+            offsetof(ActorValueInfo, m_uiDescriptionFileOffset) - offsetof(TESDescription, m_uiDescriptionFileOffset))
+            ->GetDescription((TESForm*)0, (CHUNK_ID)0x43534544);
     return 0;
 }
 
 extern double DAT_01012060;
 bool __cdecl FUN_00406d70(int, unsigned int);
 
-struct FUN_0066eea0_Object
-{
-    virtual void vf00();
-    virtual double vf04(int);
-    virtual void vf08();
-    virtual void vf0C();
-    virtual void vf10();
-    virtual double vf14(int);
-};
-
 // @fnv 0x0066eea0
-float __cdecl FUN_0066eea0(FUN_0066eea0_Object* object, int index, float value)
+float __cdecl FUN_0066eea0(ActorValueOwner* object, int index, float value)
 {
     float result = value;
 
@@ -724,7 +638,7 @@ float __cdecl FUN_0066eea0(FUN_0066eea0_Object* object, int index, float value)
     {
         if (FUN_00406d70(index, 0x20))
         {
-            float total = static_cast<float>(object->vf04(index) + object->vf14(index));
+            float total = static_cast<float>((double)object->GetBaseActorValueFloat((ActorValue::Index)index) + (double)object->GetTemporaryActorValue((ActorValue::Index)index));
             if (total < -value)
             {
                 result = -total;
@@ -735,20 +649,9 @@ float __cdecl FUN_0066eea0(FUN_0066eea0_Object* object, int index, float value)
     return result;
 }
 
-class ActorValueSlotObject
-{
-  public:
-    virtual void Unk_00();
-    virtual void Unk_01();
-    virtual void Unk_02();
-    virtual void Unk_03();
-    virtual int Unk_04(int flag);
-};
+extern ActorValueInfo* DAT_011d61c8[0x4d];
 
-extern ActorValueSlotObject* DAT_011d61c8[0x4d];
-extern bool DAT_011d6154;
-
-// Calls Unk_04(1) on each non-null entry of DAT_011d61c8, nulls the entries, and clears DAT_011d6154.
+// Deletes each non-null actor value, nulls the entries, and clears the initialization flag.
 // @fnv 0x0066f110
 void ClearActorValueSlots()
 {
@@ -756,88 +659,23 @@ void ClearActorValueSlots()
     {
         if (DAT_011d61c8[i] != 0)
         {
-            ActorValueSlotObject* tmp = DAT_011d61c8[i];
-            ActorValueSlotObject* objVal = tmp;
-            objVal != 0 ? objVal->Unk_04(1) : 0;
+            delete DAT_011d61c8[i];
             DAT_011d61c8[i] = 0;
         }
     }
     DAT_011d6154 = 0;
 }
 
-struct FUN_00670080_Primary
-{
-    virtual ~FUN_00670080_Primary();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-};
-
-struct FUN_00670080_Base18
-{
-    virtual ~FUN_00670080_Base18();
-    unsigned int unk04;
-    unsigned int unk08;
-};
-
-struct FUN_00670080_Base24
-{
-    virtual void unk00();
-    unsigned int unk04;
-};
-
-struct FUN_00670080_Base2c
-{
-    virtual ~FUN_00670080_Base2c();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-};
-
-struct FUN_00670080_Member
-{
-    ~FUN_00670080_Member();
-    unsigned int unk00;
-};
-
-struct FUN_00670080 : FUN_00670080_Primary, FUN_00670080_Base18, FUN_00670080_Base24, FUN_00670080_Base2c
-{
-    FUN_00670080_Member m_3c;
-    virtual ~FUN_00670080();
-};
-
-// Empty destructor for FUN_00670080; the compiler-generated member and base destructors run implicitly.
-// @fnv 0x00670080
-FUN_00670080::~FUN_00670080()
-{}
-
-struct BSStringTCharAssign
-{
-    BSStringTCharAssign& operator=(const BSStringTCharAssign&);
-};
-
-struct FormCopyHelper
-{
-    void CopyBaseForm(TESForm* form);
-};
-
-struct ActorValueInfoCopy : ActorValueInfo
-{
-    void FUN_00670430(TESForm* form);
-};
-
 // Clears data, copies fields and up to 15 array entries from a dynamic-cast ActorValueInfo source, pads the rest, then copies the base form.
 // @fnv 0x00670430
-void ActorValueInfoCopy::FUN_00670430(TESForm* form)
+void ActorValueInfo::Copy(TESForm* form)
 {
     ClearData();
     ActorValueInfo* pSource = dynamic_cast<ActorValueInfo*>(form);
     if (!pSource)
         return;
     m_pName = pSource->m_pName;
-    *(BSStringTCharAssign*)&m_cAbbreviation = *(BSStringTCharAssign*)&pSource->m_cAbbreviation;
+    m_cAbbreviation = pSource->m_cAbbreviation;
     uFlags = pSource->uFlags;
     m_pDerivedValueFunction = pSource->m_pDerivedValueFunction;
     m_pActorValueMapping = pSource->m_pActorValueMapping;
@@ -848,35 +686,30 @@ void ActorValueInfoCopy::FUN_00670430(TESForm* form)
         m_aiEnumeratedValues[i] = pSource->m_aiEnumeratedValues[i];
     for (; i < 15; i++)
         m_aiEnumeratedValues[i] = (ActorValue::Index)0x4d;
-    ((FormCopyHelper*)this)->CopyBaseForm(form);
+    TESForm::CopyFrom(form);
 }
 
-extern const int _DAT_01183028;
-extern const int typeinfo_BGSPerk;
-extern "C" void* __cdecl FNV_DynamicCast(void*, long, const void*, const void*, int);
-
-struct ActorValueStringCompare
+// The shared string has no declaration for this original non-virtual comparison entry.
+class ActorValueStringCompare : public BSStringT<char>
 {
+public:
     bool FUN_00501c30(const BSStringT<char>*);
 };
 
-struct ActorValueCompare : ActorValueInfo
-{
-    bool FUN_00485270(TESForm*);
-    bool FUN_00670540(TESForm* form);
-};
-
-// Returns true when the cast fails, FUN_00485270 succeeds, or the abbreviation strings compare equal.
+// Returns true when the cast fails, the base forms compare equal, or the abbreviations compare equal.
 // @fnv 0x00670540
-bool ActorValueCompare::FUN_00670540(TESForm* form)
+bool ActorValueInfo::Compare(TESForm* form)
 {
-    ActorValueInfo* other =
-        static_cast<ActorValueInfo*>(FNV_DynamicCast(form, 0, &_DAT_01183028, &typeinfo_BGSPerk, 0));
+    ActorValueInfo* other = dynamic_cast<ActorValueInfo*>(form);
     if (!other)
         return true;
-    if (FUN_00485270(other))
+    if (TESForm::Compare(other))
         return true;
-    if (reinterpret_cast<ActorValueStringCompare*>(&m_cAbbreviation)->FUN_00501c30(&other->m_cAbbreviation))
+    if (static_cast<ActorValueStringCompare&>(m_cAbbreviation).FUN_00501c30(&other->m_cAbbreviation))
         return true;
     return false;
 }
+
+// @fnv 0x00670080
+ActorValueInfo::~ActorValueInfo()
+{}

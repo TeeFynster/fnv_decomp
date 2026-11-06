@@ -1,3 +1,12 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#include "../../../../../../include/hkAabb.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/Transform.h"
 
 // src/havok/physics/utilities/dynamics/inertia/hkpinertiatensorcomputer_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/utilities/dynamics/inertia/hkpinertiatensorcomputer.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -198,76 +207,12 @@ void S00cec3d0_Base::FUN_00cec000(const float* v)
     P1 = v[A] * v[B];
     Pa = v[A];
 }
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-extern "C"
-{
-    __m128 _mm_setr_ps(float, float, float, float);
-    __m128 _mm_setzero_ps();
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-}
-struct Vector
-{
-    union
-    {
-        __m128 q;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-    Vector()
-    {}
-    Vector(const Vector& other) : q(other.q)
-    {}
-    void operator=(const Vector& other)
-    {
-        q = other.q;
-    }
-    void set(float x, float y, float z, float w)
-    {
-        q = _mm_setr_ps(x, y, z, w);
-    }
-    float& operator()(int i)
-    {
-        return q.m128_f32[i];
-    }
-    int maxAxisSecond() const
-    {
-        if (x < y)
-            return y < z ? 2 : 1;
-        return x < z ? 2 : 0;
-    }
-    int maxAxis() const
-    {
-        if (x < y)
-        {
-            if (z > y)
-                return 2;
-            return 1;
-        }
-        if (z > x)
-            return 2;
-        return 0;
-    }
-};
 struct Matrix
 {
-    Vector c0, c1, c2;
+    hkVector4 c0, c1, c2;
 };
-struct Transform
-{
-    Vector columns[4];
-};
-struct Bounds
-{
-    Vector lo, hi;
-};
-extern const Vector DAT_01017d10;
-void FUN_00d5ac50(char*, Matrix*, Vector*, Vector*, Vector*);
+extern const hkVector4 DAT_01017d10;
+void FUN_00d5ac50(char*, Matrix*, hkVector4*, hkVector4*, hkVector4*);
 struct Shape
 {
     virtual void v0();
@@ -277,28 +222,23 @@ struct Shape
     virtual void v4();
     virtual void v5();
     virtual void v6();
-    virtual void getAabb(const Transform*, float, Bounds*);
+    virtual void getAabb(const Transform*, float, hkAabb*);
 };
-void FUN_00cedae0(Shape* shape, const Matrix* input, Vector* outA, Vector* outB);
+void FUN_00cedae0(Shape* shape, const Matrix* input, hkVector4* outA, hkVector4* outB);
 
-extern "C" void _mm_store_ps(float*, __m128);
 
 extern const float DAT_01011d78;
 extern const double DAT_010240b0;
-struct __declspec(align(16)) CE50Vector
-{
-    float x, y, z, w;
-};
 struct CE50Matrix
 {
-    CE50Vector row0, row1, row2;
+    hkVector4 row0, row1, row2;
     void FUN_00c6cd00(const CE50Matrix* source);
     void Subtract(const CE50Matrix* source);
 };
 struct CE50Body
 {
     float volume, mass;
-    CE50Vector center;
+    hkVector4 center;
     CE50Matrix inertia;
     CE50Body() : volume(0.0f), mass(0.0f)
     {
@@ -340,7 +280,7 @@ int __cdecl FUN_00cece50(float* src, float mass, float thickness, CE50Body* out,
         float x = src[0] - thickness;
         float y = src[1] - thickness;
         float z = src[2] - thickness;
-        CE50Vector inner;
+        hkVector4 inner;
         _mm_store_ps(&inner.x, _mm_setr_ps(x, y, z, DAT_01011d78));
         float outerVolume = (float)(src[0] * DAT_010240b0 * src[1] * src[2]);
         float innerVolume = (float)(inner.x * DAT_010240b0 * inner.y * inner.z);
@@ -359,18 +299,6 @@ int __cdecl FUN_00cece50(float* src, float mass, float thickness, CE50Body* out,
     return 1;
 }
 
-extern "C"
-{
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_min_ps(__m128, __m128);
-    __m128 _mm_max_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-}
 
 extern const float DAT_0104da48;
 extern const float DAT_01016248;
@@ -397,16 +325,9 @@ __declspec(noinline) void __cdecl FUN_00cec7f0(int first, int count, float* b, f
 }
 __int64 __cdecl FUN_00cebaf0(float* source, float value, void* dest);
 
-__declspec(align(16)) struct Vec4F
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
 
-__declspec(align(16)) struct Pair
-{
+__declspec(align(16)) struct InertiaFloatPair
+{ // distinct from Pair: 0x00cebaf0 uses two floating-point inertia scalars in a 16-aligned work block; shared Pair stores two integers in 8 bytes.
     float x;
     float y;
 };
@@ -467,7 +388,7 @@ __declspec(align(16)) struct Solver
 
 __declspec(align(16)) struct Work
 {
-    Pair pair;
+    InertiaFloatPair pair;
     Mat4 mat;
     Solver solver;
 };
@@ -544,7 +465,7 @@ __declspec(noinline) void Solver::FUN_00ced390(State* self, float* shift)
     for (int i = 0; i < mesh->triangleCount; ++i)
     {
         MeshTriangle& face = mesh->triangles[i];
-        Vec4F p, q, r, n;
+        hkVector4 p, q, r, n;
         __m128 offset = _mm_load_ps(shift);
         __m128 a = _mm_add_ps(mesh->vertices[face.a], offset);
         __m128 b = _mm_add_ps(mesh->vertices[face.b], offset);
@@ -590,8 +511,8 @@ int __cdecl FUN_00ced8e0(State* self, float value, OutBlock* out)
 {
     if (value <= 0.0f)
         return 1;
-    Vec4F b;
-    Vec4F a;
+    hkVector4 b;
+    hkVector4 a;
     FUN_00cec7f0(self->first, self->count, (float*)&b, (float*)&a);
     Work w;
     w.pair.x = 0.0f;
@@ -640,24 +561,14 @@ int __cdecl FUN_00ced8e0(State* self, float value, OutBlock* out)
     return 0;
 }
 
-extern "C" __m128 _mm_mul_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_set_ps1(float _A);
-struct __declspec(align(16)) S00cf0690_Vec
-{
-    float x, y, z, w;
-};
 struct S00cf0690_Mass
 {
     float volume;
     float mass;
-    S00cf0690_Vec center;
-    S00cf0690_Vec row0, row1, row2;
+    hkVector4 center;
+    hkVector4 row0, row1, row2;
 };
-struct S00cf0690_Xf
-{
-    S00cf0690_Vec row0, row1, row2, translation;
-};
-void __cdecl FUN_00ceff00(void*, const S00cf0690_Xf*, float, S00cf0690_Mass*);
+void __cdecl FUN_00ceff00(void*, const Transform*, float, S00cf0690_Mass*);
 extern const float DAT_01013ea4;
 static __declspec(noinline) void FUN_00cebfd0(S00cf0690_Mass* p, float density)
 {
@@ -678,14 +589,14 @@ void __cdecl FUN_00cf0690(void* shape, float mass, S00cf0690_Mass* result)
     *(__m128*)&props.row0 = _mm_setzero_ps();
     *(__m128*)&props.row1 = _mm_setzero_ps();
     *(__m128*)&props.row2 = _mm_setzero_ps();
-    S00cf0690_Xf t;
-    *(__m128*)&t.row0 = _mm_setzero_ps();
-    t.row0.x = 1.0f;
-    *(__m128*)&t.row1 = _mm_setzero_ps();
-    t.row1.y = 1.0f;
-    *(__m128*)&t.row2 = _mm_setzero_ps();
-    t.row2.z = 1.0f;
-    *(__m128*)&t.translation = _mm_setzero_ps();
+    Transform t;
+    t.r[0] = _mm_setzero_ps();
+    t.m_f00 = 1.0f;
+    t.r[1] = _mm_setzero_ps();
+    t.m_f14 = 1.0f;
+    t.r[2] = _mm_setzero_ps();
+    t.m_f28 = 1.0f;
+    t.r[3] = _mm_setzero_ps();
     FUN_00ceff00(shape, &t, 0.0f, &props);
     if (props.volume == 0.0f)
         FUN_00ceff00(shape, &t, DAT_01013ea4, &props);

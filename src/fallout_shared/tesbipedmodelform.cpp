@@ -1,7 +1,8 @@
 // fallout_shared/tesbipedmodelform.cpp: TESBipedModelForm, TESModelRDT, BipedComparison, BipedModelCopy (20 functions)
 
 #include "tesbipedmodelform_decls.h"
-#include "TESForm.h"
+#include "layout_support.h"
+#include "../../include/TESForm.h"
 #include "tesbipedmodelform_types_TESBipedModelForm.h"
 #include "tesbipedmodelform_types_BIPED_OBJECT.h"
 #include "tesbipedmodelform_types_SEX.h"
@@ -16,7 +17,7 @@ TESBipedModelForm::TESBipedModelForm()
 // @fnv 0x00480d10
 bool TESBipedModelForm::IsPowerArmor()
 {
-    if (m_kBipedModelForm.m_ucBipedModelData & 0x20)
+    if (bipedFlags & 0x20)
         return true;
     else
         return false;
@@ -27,25 +28,25 @@ bool TESBipedModelForm::IsPowerArmor()
 void TESBipedModelForm::InitItem(TESForm* form)
 {
     bipedModel[0].InitItem(form);
-    worldModel[0].InitItem(form);
+    groundModel[0].InitItem(form);
     bipedModel[1].InitItem(form);
-    worldModel[1].InitItem(form);
+    groundModel[1].InitItem(form);
 }
 
 // Checks whether this form or a form in modelList fills the given biped slot, recursing into biped model forms found in the list.
 // @fnv 0x00480af0
 bool TESBipedModelForm::HasBipedModel(BIPED_OBJECT slot, bool hair, BGSBipedModelList* modelList)
 {
-    if (hair && slot == BIPED_OBJECT_BO_HAIR && (m_kBipedModelForm.m_uiBipedModelFlags & 1))
+    if (hair && slot == BIPED_OBJECT_BO_HAIR && (partMask & 1))
         return false;
 
-    bool fillsSlot = m_kBipedModelForm.m_uiBipedModelFlags & (1 << slot);
+    bool fillsSlot = partMask & (1 << slot);
     if (!fillsSlot && modelList)
     {
         BGSListForm* listForm = modelList->GetList();
         if (listForm)
         {
-            BSSimpleList<TESForm*>* itemList = listForm->FUN_00500940();
+            BSSimpleList<TESForm*>* itemList = listForm->GetList();
             while (!fillsSlot && itemList && !itemList->IsEmpty())
             {
                 struct
@@ -73,7 +74,7 @@ void TESBipedModelForm::SetBipedModel(BipedAnim* anim, SEX sex, BIPED_OBJECT slo
 
     anim->SetBipedObject(dynamic_cast<TESForm*>(this), &bipedModel[sex], slot);
 
-    if (m_kFaceGenModel.GetModelLength())
+    if (modelRDT.GetModelLength())
     {
         BSFaceGenModel* model = FUN_00480ce0();
         NiPointer<BSFaceGenModelExtraData> extra(0);
@@ -83,11 +84,11 @@ void TESBipedModelForm::SetBipedModel(BipedAnim* anim, SEX sex, BIPED_OBJECT slo
     }
 }
 
-// Returns the face gen model obtained by calling vfn_14 on the member object.
+// Returns the face gen model obtained through the member TESModelRDT's vtable slot 5.
 // @fnv 0x00480ce0
 BSFaceGenModel* TESBipedModelForm::FUN_00480ce0()
 {
-    return m_kFaceGenModel.vfn_14();
+    return (BSFaceGenModel*)modelRDT.GetModelFilePath();
 }
 
 // @fnv 0x004803e0
@@ -145,11 +146,11 @@ struct FUN_00481110_shell : public TESBipedModelForm
 // @fnv 0x00481110
 TESModelTextureSwap* FUN_00481110_shell::GetWorldModel(int aeSex)
 {
-    if (worldModel[aeSex].GetModelLength() == 0 && aeSex == 1)
+    if (groundModel[aeSex].GetModelLength() == 0 && aeSex == 1)
     {
         aeSex = 0;
     }
-    return &worldModel[aeSex];
+    return &groundModel[aeSex];
 }
 
 struct FUN_00480ad0_shell
@@ -195,7 +196,7 @@ BSFaceGenModel* FUN_00481190_standin::FUN_00481190(int aiIndex)
 {
     if (!models[aiIndex].GetModelLength() && aiIndex == 1)
         aiIndex = 0;
-    return models[aiIndex].vfn_14();
+    return (BSFaceGenModel*)models[aiIndex].GetModelFilePath();
 }
 
 struct FUN_004811e0_shell
@@ -209,7 +210,7 @@ const char* FUN_004811e0_shell::FUN_004811e0(int aeSex)
 {
     if (bipedModel[aeSex].GetModelLength() == 0 && aeSex == 1)
         aeSex = 0;
-    return (const char*)bipedModel[aeSex].vfn_14();
+    return bipedModel[aeSex].GetModelFilePath();
 }
 
 struct DoorPart3c
@@ -302,12 +303,12 @@ struct FUN_00480570_cls : public TESBipedModelForm
 void FUN_00480570_cls::FreeModels()
 {
     bipedModel[0].Free();
-    worldModel[0].Free();
-    m_kIcon[0].Free();
+    groundModel[0].Free();
+    icon[0].Free();
     bipedModel[1].Free();
-    worldModel[1].Free();
-    m_kIcon[1].Free();
-    m_kFaceGenModel.Free();
+    groundModel[1].Free();
+    icon[1].Free();
+    modelRDT.Free();
 }
 
 struct FUN_004804d0_shell;
@@ -536,25 +537,25 @@ bool BipedComparison::FUN_004808f0(BaseFormComponent* other)
     TESBipedModelForm* compared = dynamic_cast<TESBipedModelForm*>(other);
     if (!compared)
         return true;
-    if (memcmp(&m_kBipedModelForm, &compared->m_kBipedModelForm, sizeof(BipedModelForm)))
+    if (memcmp(&partMask, &compared->partMask, sizeof(BipedModelForm)))
         return true;
-    if (bipedModel[0].CompareWithBase(&compared->bipedModel[0]))
+    if (bipedModel[0].CompareWithBase(static_cast<BaseFormComponent*>(&compared->bipedModel[0])))
         return true;
-    if (worldModel[0].CompareWithBase(&compared->worldModel[0]))
+    if (groundModel[0].CompareWithBase(static_cast<BaseFormComponent*>(&compared->groundModel[0])))
         return true;
-    if (m_kIcon[0].CompareWithBase(&compared->m_kIcon[0]))
+    if (icon[0].CompareWithBase(static_cast<BaseFormComponent*>(&compared->icon[0])))
         return true;
-    if (messageIcon[0].CompareWithBase(&compared->messageIcon[0]))
+    if (messageIcon[0].CompareWithBase(static_cast<BaseFormComponent*>(&compared->messageIcon[0])))
         return true;
-    if (bipedModel[1].CompareWithBase(&compared->bipedModel[1]))
+    if (bipedModel[1].CompareWithBase(static_cast<BaseFormComponent*>(&compared->bipedModel[1])))
         return true;
-    if (worldModel[1].CompareWithBase(&compared->worldModel[1]))
+    if (groundModel[1].CompareWithBase(static_cast<BaseFormComponent*>(&compared->groundModel[1])))
         return true;
-    if (m_kIcon[1].CompareWithBase(&compared->m_kIcon[1]))
+    if (icon[1].CompareWithBase(static_cast<BaseFormComponent*>(&compared->icon[1])))
         return true;
-    if (messageIcon[1].CompareWithBase(&compared->messageIcon[1]))
+    if (messageIcon[1].CompareWithBase(static_cast<BaseFormComponent*>(&compared->messageIcon[1])))
         return true;
-    if (m_kFaceGenModel.CompareWithBase(&compared->m_kFaceGenModel))
+    if (modelRDT.CompareWithBase(static_cast<BaseFormComponent*>(&compared->modelRDT)))
         return true;
     return false;
 }
@@ -576,15 +577,15 @@ void BipedModelCopy::FUN_004807a0(BaseFormComponent* component)
     }
     else
     {
-        memcpy(&m_kBipedModelForm, &source->m_kBipedModelForm, sizeof(BipedModelForm));
-        bipedModel[0].CopyFromBase(&source->bipedModel[0]);
-        worldModel[0].CopyFromBase(&source->worldModel[0]);
-        m_kIcon[0].CopyFromBase(&source->m_kIcon[0]);
-        messageIcon[0].CopyFromBase(&source->messageIcon[0]);
-        bipedModel[1].CopyFromBase(&source->bipedModel[1]);
-        worldModel[1].CopyFromBase(&source->worldModel[1]);
-        m_kIcon[1].CopyFromBase(&source->m_kIcon[1]);
-        messageIcon[1].CopyFromBase(&source->messageIcon[1]);
-        m_kFaceGenModel.CopyFromBase(&source->m_kFaceGenModel);
+        memcpy(&partMask, &source->partMask, sizeof(BipedModelForm));
+        bipedModel[0].CopyFromBase(static_cast<BaseFormComponent*>(&source->bipedModel[0]));
+        groundModel[0].CopyFromBase(static_cast<BaseFormComponent*>(&source->groundModel[0]));
+        icon[0].CopyFromBase(static_cast<BaseFormComponent*>(&source->icon[0]));
+        messageIcon[0].CopyFromBase(static_cast<BaseFormComponent*>(&source->messageIcon[0]));
+        bipedModel[1].CopyFromBase(static_cast<BaseFormComponent*>(&source->bipedModel[1]));
+        groundModel[1].CopyFromBase(static_cast<BaseFormComponent*>(&source->groundModel[1]));
+        icon[1].CopyFromBase(static_cast<BaseFormComponent*>(&source->icon[1]));
+        messageIcon[1].CopyFromBase(static_cast<BaseFormComponent*>(&source->messageIcon[1]));
+        modelRDT.CopyFromBase(static_cast<BaseFormComponent*>(&source->modelRDT));
     }
 }

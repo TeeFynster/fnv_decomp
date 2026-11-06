@@ -1,7 +1,73 @@
+#include "../../../../include/BSScrapArray.h"
+#include "../../../../include/BSSimpleArray.h"
+#include "../../../../include/BGSReconstructFormsInAllFilesMap.h"
+#include "../../../../include/BGSReconstructFormsInFileMap.h"
+#include "../../../../include/BGSReconstructCellBlocksMap.h"
+#include "../../../../include/BGSReconstructCellsMap.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/BGSReconstructCellSubBlocksMap.h"
+#include "../../../../include/BGSReconstructFormsMap.h"
+#include "../../../../include/BGSReconstructWorldSpacesMap.h"
+#include "../../../../include/TESFile.h"
+#include "../../../../include/TESDataHandler.h"
+#include "../../../../include/BGSSaveLoadGame.h"
+#include "../../../../include/FormChangeMap.h"
+#include "../../../../include/DummyPointerMap.h"
+#include "../../../../include/TESGlobal.h"
+#include "../../../../include/TESObjectCELL.h"
+#include "../../../../include/TESWorldSpace.h"
+#include "../../../../include/BGSSaveLoadChangesMap.h"
 
-#include "bgsreconstructformsinallfilesmap_decls.h"
+// Remaining unit declarations are kept here because the old declarations
+// header also defines a partial TESForm, now supplied by the shared headers.
 
-// Empty destructor for the reconstruct-forms-in-all-files map object.
+
+
+
+
+struct ChangedFormRecord
+{
+    TESForm* pForm;
+    unsigned int iFlags;
+};
+// The shared FormChangeMap exposes the storage; additional operations stay method-only.
+struct FormChangeMapOperations : FormChangeMap
+{
+    void FUN_00843240();
+    void FUN_00843be0(unsigned int count);
+    ChangedFormRecord* FUN_008432e0(unsigned int index);
+    unsigned int GetElementAt(unsigned int index);
+    void FUN_00843270(ChangedFormRecord* data);
+};
+
+struct FormChangeArrayOperations : nitmapbase_FormMap
+{
+    void Resize(int, int);
+    unsigned int CallGetFlags();
+    void SetCount(unsigned int);
+    void Erase(unsigned int, int);
+    ChangedFormRecord* GetElement(unsigned int);
+};
+
+
+
+
+
+
+class TESFormInitFlag
+{
+  public:
+    bool IsFormInitialized() const;
+};
+
+extern BGSSaveLoadGame* g_BGSSaveLoadGame;
+extern TESDataHandler* g_dataHandler;
+
+
+#include "../../../../include/BGSCellNumericIDArrayMap.h"
+#include "../../../../include/NiPoint3.h"
+
+// Destroy both shared change-array members.
 // @fnv 0x00843540
 FormChangeMap::~FormChangeMap()
 {}
@@ -20,7 +86,7 @@ BGSReconstructFormsInAllFilesMap::~BGSReconstructFormsInAllFilesMap()
 
 // @fnv 0x008433d0
 BGSReconstructFormsInAllFilesMap::BGSReconstructFormsInAllFilesMap()
-    : BGSReconstructFormsInAllFilesMapBase(0x25), m_kFormChangeMap(), iCount(0)
+    : NiTMap<TESFile*, BGSReconstructFormsInFileMap*>(0x25), m_kFormChangeMap(), iCount(0)
 {}
 
 // @fnv 0x008439e0
@@ -47,7 +113,7 @@ void BGSReconstructFormsInAllFilesMap::BuildMap()
     } state;
 
     g_BGSSaveLoadGame->SetFlag4(true);
-    m_kFormChangeMap.FUN_00843be0(iCount);
+    static_cast<FormChangeMapOperations*>(&m_kFormChangeMap)->FUN_00843be0(iCount);
     state.wasLocked = g_dataHandler->FUN_004516b0();
     g_dataHandler->SetBoolAt61a(true);
 
@@ -66,7 +132,7 @@ void BGSReconstructFormsInAllFilesMap::BuildMap()
     state.removeIndex = 0;
     for (; state.removeIndex < m_kFormChangeMap.GetCombinedFlags(); ++state.removeIndex)
     {
-        state.removedForm = m_kFormChangeMap.FUN_008432e0(state.removeIndex);
+        state.removedForm = static_cast<FormChangeMapOperations*>(&m_kFormChangeMap)->FUN_008432e0(state.removeIndex);
         if (state.removedForm->pForm->GetIsReference())
         {
             state.form = state.removedForm->pForm;
@@ -82,7 +148,7 @@ void BGSReconstructFormsInAllFilesMap::BuildMap()
     state.initializeIndex = 0;
     for (; state.initializeIndex < state.size; ++state.initializeIndex)
     {
-        state.initializeForm = m_kFormChangeMap.FUN_008432e0(state.initializeIndex);
+        state.initializeForm = static_cast<FormChangeMapOperations*>(&m_kFormChangeMap)->FUN_008432e0(state.initializeIndex);
         if (!reinterpret_cast<TESFormInitFlag*>(state.initializeForm->pForm)->IsFormInitialized())
             state.initializeForm->pForm->InitItem();
     }
@@ -90,7 +156,7 @@ void BGSReconstructFormsInAllFilesMap::BuildMap()
     state.reconstructIndex = 0;
     for (; state.reconstructIndex < state.size; ++state.reconstructIndex)
     {
-        state.reconstructForm = m_kFormChangeMap.FUN_008432e0(state.reconstructIndex);
+        state.reconstructForm = static_cast<FormChangeMapOperations*>(&m_kFormChangeMap)->FUN_008432e0(state.reconstructIndex);
         AddFormFlagEntry(state.reconstructForm);
     }
 
@@ -107,43 +173,26 @@ void BGSReconstructFormsInAllFilesMap::Clear()
         TESFile* file = 0;
         BGSReconstructFormsInFileMap* map = 0;
         GetNext(position, file, map);
-        delete map;
+        delete reinterpret_cast<BGSCellNumericIDArrayMap*>(map);
     }
-    reinterpret_cast<NiTPointerMap<unsigned int, unsigned int>*>(this)->RemoveAll();
-    m_kFormChangeMap.FUN_00843240();
+    RemoveAll();
+    static_cast<FormChangeMapOperations*>(&m_kFormChangeMap)->FUN_00843240();
     iCount = 0;
 }
 
-struct S3240
-{
-    char pad[0x10];
-    void Resize(int, int);
-    void FUN_00843240();
-};
-// Calls Resize(0, 1) on this and on the object at offset 0x10.
+// Calls Resize(0, 1) on each change array.
 // @fnv 0x00843240
-void S3240::FUN_00843240()
+void FormChangeMapOperations::FUN_00843240()
 {
-    Resize(0, 1);
-    reinterpret_cast<S3240*>(reinterpret_cast<char*>(this) + 0x10)->Resize(0, 1);
+    reinterpret_cast<FormChangeArrayOperations*>(&first)->Resize(0, 1);
+    reinterpret_cast<FormChangeArrayOperations*>(&second)->Resize(0, 1);
 }
 
-struct FUN_00843bb0_shell : public FormChangeMap
-{
-    unsigned int GetCombinedFlags();
-};
-
-struct TESObjectREFR_GetFlags_caller : public TESObjectREFR
-{
-    unsigned int CallGetFlags();
-};
-
-// Returns the sum of the flags from the TESObjectREFR at offset 0x0 and the one at offset 0x10.
 // @fnv 0x00843bb0
-unsigned int FUN_00843bb0_shell::GetCombinedFlags()
+unsigned int FormChangeMap::GetCombinedFlags()
 {
-    return ((TESObjectREFR_GetFlags_caller*)((char*)this + 0x0))->CallGetFlags() +
-           ((TESObjectREFR_GetFlags_caller*)((char*)this + 0x10))->CallGetFlags();
+    return reinterpret_cast<FormChangeArrayOperations*>(&first)->CallGetFlags() +
+           reinterpret_cast<FormChangeArrayOperations*>(&second)->CallGetFlags();
 }
 
 extern int DAT_01031fac;
@@ -218,6 +267,7 @@ FUN_00844e20::~FUN_00844e20()
 struct ScrapHeapBuffer
 {
     void* Allocate(unsigned int, unsigned int);
+    void Deallocate(void*);
 };
 extern unsigned int DAT_010a2720;
 struct OffsetData
@@ -225,60 +275,35 @@ struct OffsetData
     unsigned int iOffset;
     void* m_pFormLookupMap;
 };
-struct FUN_006db9b0_s
-{
-    char pad[0x10];
-    ScrapHeapBuffer* m_pAllocator;
-    OffsetData* AllocateOffsetData(unsigned int aiSizeInItem);
-};
 // @fnv 0x006db9b0
-OffsetData* FUN_006db9b0_s::AllocateOffsetData(unsigned int aiSizeInItem)
+template <>
+OffsetData* BSScrapArray<OffsetData>::_Allocate(unsigned int aiSizeInItem)
 {
     OffsetData* pnewBuffer;
     pnewBuffer = (OffsetData*)m_pAllocator->Allocate(aiSizeInItem * 8, DAT_010a2720);
     return pnewBuffer;
 }
 
-struct FUN_00841320_shell
+// Operations missing from the shared forms map use its checked layout.
+struct ReconstructFormsMapOperations : BGSReconstructFormsMap
 {
-    void __thiscall FUN_00841320(int arg);
+    void AddFlags(int arg);
+    void ProcessRef(unsigned int, unsigned int, unsigned int);
 };
 
 // @fnv 0x00841320
-void __thiscall FUN_00841320_shell::FUN_00841320(int arg)
+void ReconstructFormsMapOperations::AddFlags(int arg)
 {
-    *(int*)((char*)this + 0x10) |= arg;
+    unk10 |= arg;
 }
 
-struct FUN_00844070_standin
-{
-    void FUN_00844070(int);
-};
-
-struct FUN_00842180 : FUN_00844070_standin
-{
-    void* vtable;
-    unsigned int field_04;
-    unsigned int field_08;
-    unsigned int field_0C;
-    void* field_10;
-    void* field_14;
-    unsigned int field_18;
-
-    FUN_00842180();
-};
-
-extern void* DAT_0107e9d0;
-
-// Calls the base constructor with 0x25, installs the vtable, and zeroes fields at offsets 0x10, 0x14 and 0x18.
 // @fnv 0x00842180
-FUN_00842180::FUN_00842180()
+BGSReconstructFormsInFileMap::BGSReconstructFormsInFileMap()
+    : NiTMap<unsigned int, BGSReconstructFormsMap*>(0x25)
 {
-    FUN_00844070_standin::FUN_00844070(0x25);
-    vtable = &DAT_0107e9d0;
-    field_10 = 0;
-    field_14 = 0;
-    field_18 = 0;
+    m_pInteriorMap = 0;
+    m_pExteriorMap = 0;
+    iCount = 0;
 }
 
 struct FUN_00844fc0_shell
@@ -294,11 +319,6 @@ void* __thiscall FUN_00844fc0_shell::FUN_00844fc0(int arg)
     return p;
 }
 
-struct BGSReconstructFormsMap
-{
-    void FUN_008411f0();
-    void* FUN_008411c0(unsigned int flags);
-};
 
 extern "C" void _Deallocate(void*);
 
@@ -312,18 +332,13 @@ void* BGSReconstructFormsMap::FUN_008411c0(unsigned int flags)
     return this;
 }
 
-struct BGSReconstructCellsMap
-{
-    void FUN_008413a0();
-    void* FUN_00841370(unsigned int flags);
-};
 
 void __cdecl _Deallocate(void*);
 
 // @fnv 0x00841370
 void* BGSReconstructCellsMap::FUN_00841370(unsigned int flags)
 {
-    FUN_008413a0();
+    BGSReconstructCellsMap::~BGSReconstructCellsMap();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -331,11 +346,6 @@ void* BGSReconstructCellsMap::FUN_00841370(unsigned int flags)
 
 extern "C" void __cdecl _Deallocate(void*);
 
-struct BGSReconstructCellSubBlocksMap
-{
-    virtual ~BGSReconstructCellSubBlocksMap();
-    void* __thiscall ScalarDeletingDestructor(unsigned int flags);
-};
 
 // Destroys the object, frees its storage with _Deallocate when flags has bit 0 set, and returns this.
 // @fnv 0x008416f0
@@ -385,15 +395,15 @@ void* __thiscall FUN_00844180_shell::FUN_00844180(unsigned int flags)
 
 extern "C" void _Deallocate(void*);
 
-struct FUN_00844270_shell : BGSReconstructFormsInAllFilesMapBase
+struct ReconstructFilesMapBaseOperations : NiTMap<TESFile*, BGSReconstructFormsInFileMap*>
 {
     void* FUN_00844270(unsigned int flags);
 };
 
 // @fnv 0x00844270
-void* FUN_00844270_shell::FUN_00844270(unsigned int flags)
+void* ReconstructFilesMapBaseOperations::FUN_00844270(unsigned int flags)
 {
-    BGSReconstructFormsInAllFilesMapBase::~BGSReconstructFormsInAllFilesMapBase();
+    NiTMap<TESFile*, BGSReconstructFormsInFileMap*>::~NiTMap();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -443,36 +453,6 @@ struct blob12
 {
     char b[12];
 };
-struct NiPoint3
-{
-    static struct blob12 ComponentProduct(void*, void*);
-    float Length();
-    float SqrLength();
-    float XYLength();
-    float SqrXYLength();
-    float Dot(void*);
-    void Unitize();
-    float GetLengthSquared();
-    struct blob12 Cross(void*);
-    struct blob12 CrossProduct(void*);
-    struct blob12 Perpendicular();
-    static void LoadBinary(NiStream*, NiPoint3*, unsigned int);
-    void LoadBinary(NiStream*);
-    static void SaveBinary(NiStream*, NiPoint3*, unsigned int);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    static void InitializePoint3();
-    static void ShutdownPoint3();
-    static void ProcessPointArray(NiPoint3*, unsigned int, unsigned int);
-    static void ComputeMagnitude(NiPoint3*);
-    static float VectorLength(void*);
-    static void PointsPlusEqualFloatTimesPoints(NiPoint3*, float, void*, unsigned int);
-    static void WeightedPointsPlusWeightedPoints(NiPoint3*, float, void*, unsigned int);
-    static unsigned int* InitSqrtTable();
-    float x;
-    float y;
-    float z;
-};
 typedef char _sizecheck_NiPoint3[sizeof(NiPoint3) == 12 ? 1 : -1];
 struct FUN_00416870_shell : public NiPoint3
 {
@@ -493,97 +473,47 @@ FUN_00416870_t* FUN_00416870_t::FUN_00416870(float fX, float fY, float fZ)
     return this;
 }
 
-struct FUN_00844040
-{
-    virtual void Unused();
-    int m04;
-    int m08;
-    int m0C;
-    FUN_00844040(int);
-};
-struct FUN_00841190 : FUN_00844040
-{
-    int m10;
-    FUN_00841190();
-};
-// Initializes the base with 0x25 and sets m10 to 0.
 // @fnv 0x00841190
-FUN_00841190::FUN_00841190() : FUN_00844040(0x25)
+BGSReconstructFormsMap::BGSReconstructFormsMap()
+    : NiTMap<unsigned int, ReconstructFormData>(0x25)
 {
-    m10 = 0;
+    unk10 = 0;
 }
 
-namespace fnv_00841340 {
-struct FUN_00844070_standin
-{
-    void FUN_00844070(int);
-};
-extern int DAT_0107e950;
-struct FUN_00841340_standin : FUN_00844070_standin
-{
-    void* FUN_00841340();
-};
-// Calls FUN_00844070 with 0x25, stores the address of DAT_0107e950 into this, and returns this.
 // @fnv 0x00841340
-void* FUN_00841340_standin::FUN_00841340()
-{
-    FUN_00844070(0x25);
-    *(int*)this = (int)&DAT_0107e950;
-    return this;
-}
-}  // namespace fnv_00841340
+BGSReconstructCellsMap::BGSReconstructCellsMap()
+    : NiTMap<unsigned int, BGSReconstructFormsMap*>(0x25)
+{}
+
 
 struct FUN_00452420_shell
 {
     bool GetFlag(unsigned int) const;
 };
-struct FUN_00841660_shell : BGSReconstructFormsInAllFilesMap
-{
-    bool HasFileMapWithFlag(unsigned int aiFlags);
-};
 // Iterates the map's entries and returns true if any file map's GetFlag(aiFlags) is set.
 // @fnv 0x00841660
-bool FUN_00841660_shell::HasFileMapWithFlag(unsigned int aiFlags)
+bool BGSReconstructCellsMap::HasFileMapWithFlag(unsigned int aiFlags)
 {
     void* it;
-    BGSReconstructFormsInFileMap* pformsMap;
-    TESFile* icellKey;
-    it = GetFirstPos();
+    BGSReconstructFormsMap* pformsMap;
+    unsigned int icellKey;
+    it = reinterpret_cast<NiTPointerMap<unsigned int, BGSReconstructFormsMap*>*>(this)->GetFirstPos();
     while (it != 0)
     {
         icellKey = 0;
         pformsMap = 0;
-        GetNext(it, icellKey, pformsMap);
+        reinterpret_cast<NiTPointerMap<unsigned int, BGSReconstructFormsMap*>*>(this)->GetNext(it, icellKey, pformsMap);
         if (((FUN_00452420_shell*)pformsMap)->GetFlag(aiFlags))
             return true;
     }
     return false;
 }
 
-struct FUN_008440a0
-{
-    FUN_008440a0(int);
-};
-extern int DAT_0107e970;
-struct FUN_008416c0 : FUN_008440a0
-{
-    FUN_008416c0();
-};
 // @fnv 0x008416c0
-FUN_008416c0::FUN_008416c0() : FUN_008440a0(0x25)
-{
-    *(int*)this = (int)&DAT_0107e970;
-}
+BGSReconstructCellSubBlocksMap::BGSReconstructCellSubBlocksMap()
+    : NiTMap<unsigned int, BGSReconstructCellsMap*>(0x25)
+{}
 
-namespace fnv_00841990 {
-struct BGSReconstructCellsMap
-{
-    bool HasFileMapWithFlag(unsigned int);
-};
-struct BGSReconstructCellSubBlocksMap
-{
-    bool HasCellWithFlag(unsigned int);
-};
 // Iterates the map's entries and returns true as soon as a contained cells map reports the given flags via HasFileMapWithFlag.
 // @fnv 0x00841990
 bool BGSReconstructCellSubBlocksMap::HasCellWithFlag(unsigned int aiFlags)
@@ -603,35 +533,15 @@ bool BGSReconstructCellSubBlocksMap::HasCellWithFlag(unsigned int aiFlags)
     }
     return false;
 }
-}  // namespace fnv_00841990
 
-struct FUN_008440d0
-{
-    virtual void Unk();
-    int _04;
-    int _08;
-    int _0C;
-    FUN_008440d0(int);
-};
-struct FUN_008419f0 : FUN_008440d0
-{
-    int _10;
-    bool _14;
-    FUN_008419f0(bool);
-};
-// Initializes the base with 0x25, sets _10 to 0 and stores the bool argument in _14.
 // @fnv 0x008419f0
-FUN_008419f0::FUN_008419f0(bool a) : FUN_008440d0(0x25)
+BGSReconstructCellBlocksMap::BGSReconstructCellBlocksMap(bool exterior)
+    : NiTMap<unsigned int, BGSReconstructCellSubBlocksMap*>(0x25)
 {
-    _10 = 0;
-    _14 = a;
+    unk10 = 0;
+    unk14 = exterior;
 }
 
-struct BGSReconstructCellBlocksMap
-{
-    void FUN_00841a60();
-    void* FUN_00841a30(unsigned int);
-};
 void __cdecl _Deallocate(void*);
 // Calls FUN_00841a60, then deallocates this when flags has bit 0 set, and returns this.
 // @fnv 0x00841a30
@@ -643,29 +553,12 @@ void* BGSReconstructCellBlocksMap::FUN_00841a30(unsigned int flags)
     return this;
 }
 
-struct Base00841ea0
-{
-    void FUN_00844100(int);
-};
-extern int DAT_0107e9b0;
-struct FUN_00841ea0 : Base00841ea0
-{
-    FUN_00841ea0();
-};
-// Calls FUN_00844100 with 0x25, then stores the address of DAT_0107e9b0 into the object's first field.
 // @fnv 0x00841ea0
-FUN_00841ea0::FUN_00841ea0()
-{
-    FUN_00844100(0x25);
-    *(int*)this = (int)&DAT_0107e9b0;
-}
+BGSReconstructWorldSpacesMap::BGSReconstructWorldSpacesMap()
+    : NiTMap<unsigned int, BGSReconstructCellBlocksMap*>(0x25)
+{}
 
 void __cdecl _Deallocate(void*);
-struct BGSReconstructWorldSpacesMap
-{
-    void FUN_00841f00();
-    void* FUN_00841ed0(unsigned int);
-};
 // Calls FUN_00841f00, deallocates this when flags has bit 0 set, and returns this.
 // @fnv 0x00841ed0
 void* BGSReconstructWorldSpacesMap::FUN_00841ed0(unsigned int flags)
@@ -677,102 +570,58 @@ void* BGSReconstructWorldSpacesMap::FUN_00841ed0(unsigned int flags)
 }
 
 void __cdecl _Deallocate(void*);
-struct Host008421c0
-{
-    void FUN_008421f0();
-    void* FUN_008421c0(unsigned int);
-};
 // @fnv 0x008421c0
-void* Host008421c0::FUN_008421c0(unsigned int flags)
+void* BGSReconstructFormsInFileMap::ScalarDeletingDestructor(unsigned int flags)
 {
-    FUN_008421f0();
+    BGSReconstructFormsInFileMap::~BGSReconstructFormsInFileMap();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-namespace fnv_008432e0 {
-struct ArrSI
-{
-    unsigned int GetFlags();
-};
-struct FUN_00844160_shell
-{
-    unsigned int FUN_00844160(unsigned int);
-};
-struct FUN_008432e0_Host
-{
-    unsigned int FUN_008432e0(unsigned int);
-};
 // @fnv 0x008432e0
-unsigned int FUN_008432e0_Host::FUN_008432e0(unsigned int auiIndex)
+ChangedFormRecord* FormChangeMapOperations::FUN_008432e0(unsigned int auiIndex)
 {
-    unsigned int flags = ((ArrSI*)this)->GetFlags();
+    unsigned int flags = reinterpret_cast<FormChangeArrayOperations*>(&first)->CallGetFlags();
     if (auiIndex < flags)
     {
-        return ((FUN_00844160_shell*)this)->FUN_00844160(auiIndex);
+        return reinterpret_cast<FormChangeArrayOperations*>(&first)->GetElement(auiIndex);
     }
     else
     {
-        return ((FUN_00844160_shell*)((char*)this + 16))->FUN_00844160(auiIndex - flags);
+        return reinterpret_cast<FormChangeArrayOperations*>(&second)->GetElement(auiIndex - flags);
     }
 }
-}  // namespace fnv_008432e0
 
-namespace fnv_00843330 {
-struct ArrSI
-{
-    unsigned int GetFlags();
-    unsigned int GetElementAt(unsigned int);
-};
-struct FUN_00844160_shell
-{
-    unsigned int FUN_00844160(unsigned int);
-};
-// Returns the element at index from this array if index is below GetFlags(), otherwise from the array at offset 0x10 with index minus flags.
 // @fnv 0x00843330
-unsigned int ArrSI::GetElementAt(unsigned int index)
+unsigned int FormChangeMapOperations::GetElementAt(unsigned int index)
 {
-    unsigned int flags = GetFlags();
+    unsigned int flags = reinterpret_cast<FormChangeArrayOperations*>(&first)->CallGetFlags();
     if (index < flags)
     {
-        return *(unsigned int*)((FUN_00844160_shell*)this)->FUN_00844160(index);
+        return *reinterpret_cast<unsigned int*>(reinterpret_cast<FormChangeArrayOperations*>(&first)->GetElement(index));
     }
     else
     {
-        return *(unsigned int*)((FUN_00844160_shell*)((char*)this + 0x10))->FUN_00844160(index - flags);
+        return *reinterpret_cast<unsigned int*>(reinterpret_cast<FormChangeArrayOperations*>(&second)->GetElement(index - flags));
     }
 }
-}  // namespace fnv_00843330
 
-struct Base00844c90
-{
-    char data[16];
-    void FUN_00844c90(unsigned int, int);
-};
-struct ArrSI : Base00844c90
-{
-    Base00844c90 second;
-    unsigned int GetFlags();
-    bool FUN_00843380(unsigned int);
-};
 // @fnv 0x00843380
-bool ArrSI::FUN_00843380(unsigned int auiIndex)
+bool FormChangeMap::RemoveForm(unsigned int auiIndex)
 {
-    unsigned int flags = GetFlags();
+    unsigned int flags = reinterpret_cast<FormChangeArrayOperations*>(&first)->CallGetFlags();
     if (auiIndex < flags)
     {
-        FUN_00844c90(auiIndex, 1);
+        reinterpret_cast<FormChangeArrayOperations*>(&first)->Erase(auiIndex, 1);
     }
     else
     {
-        second.FUN_00844c90(auiIndex - flags, 1);
+        reinterpret_cast<FormChangeArrayOperations*>(&second)->Erase(auiIndex - flags, 1);
     }
     return true;
 }
 
-class TESFile;
-class TESForm;
 template <typename T> class BSSimpleList;
 TESForm* __cdecl _ref_004839c0(unsigned int);
 unsigned int __cdecl GetOwnerFileByID(unsigned int);
@@ -780,16 +629,12 @@ struct FUN_00485b60
 {
     TESFile* GetFile(int);
 };
-struct TESDataHandlerSaveLoad
-{
-    TESFile* GetCompiledFileByIndex(int);
-};
-struct FUN_00843fe0_Holder
+struct ReconstructFilesSourceLookup
 {
     TESFile* FUN_00843fe0(BSSimpleList<TESFile*>* apFileList, unsigned int aiFormID);
 };
 // @fnv 0x00843fe0
-TESFile* FUN_00843fe0_Holder::FUN_00843fe0(BSSimpleList<TESFile*>* apFileList, unsigned int aiFormID)
+TESFile* ReconstructFilesSourceLookup::FUN_00843fe0(BSSimpleList<TESFile*>* apFileList, unsigned int aiFormID)
 {
     TESFile* pfile;
     TESForm* pform;
@@ -803,7 +648,7 @@ TESFile* FUN_00843fe0_Holder::FUN_00843fe0(BSSimpleList<TESFile*>* apFileList, u
     {
         return pfile;
     }
-    return ((TESDataHandlerSaveLoad*)g_dataHandler)->GetCompiledFileByIndex(aiFormID >> 24);
+    return g_dataHandler->GetCompiledFileByIndex(aiFormID >> 24);
 }
 
 namespace fnv_00844040 {
@@ -1014,39 +859,17 @@ unsigned int SaveGameSizeState::FUN_00844eb0(Elem* apElem)
 }
 }  // namespace fnv_00844eb0
 
-namespace fnv_00845050 {
-struct OffsetData
-{
-    int _0;
-    int _1;
-};
-struct ArrSI
-{
-    unsigned int GetFlags();
-    unsigned int _pad[4];
-};
-struct ScrapHeapBuffer
-{
-    void* Allocate(unsigned int, unsigned int);
-    void Deallocate(void*);
-};
-extern unsigned int DAT_010a2720;
 void* __memcpy(void*, const void*, unsigned int);
-struct BSScrapArray : ArrSI
-{
-    ScrapHeapBuffer* m_pAllocator;
-    OffsetData* ReallocateBuffer(OffsetData*, unsigned int);
-};
-// Allocates a new buffer of aiNewSizeInItem items, copies GetFlags() items from apBuffer into it, frees apBuffer and returns the new buffer.
+// Allocates a new buffer of aiNewSizeInItem items, copies GetTarget() items from apBuffer into it, frees apBuffer and returns the new buffer.
 // @fnv 0x00845050
-OffsetData* BSScrapArray::ReallocateBuffer(OffsetData* apBuffer, unsigned int aiNewSizeInItem)
+template <>
+OffsetData* BSScrapArray<OffsetData>::ReallocateBuffer(OffsetData* apBuffer, unsigned int aiNewSizeInItem)
 {
     OffsetData* pnewBuffer = (OffsetData*)m_pAllocator->Allocate(aiNewSizeInItem * sizeof(OffsetData), DAT_010a2720);
-    __memcpy(pnewBuffer, apBuffer, GetFlags() * sizeof(OffsetData));
+    __memcpy(pnewBuffer, apBuffer, GetTarget() * sizeof(OffsetData));
     m_pAllocator->Deallocate(apBuffer);
     return pnewBuffer;
 }
-}  // namespace fnv_00845050
 
 struct MyVal
 {
@@ -1123,22 +946,12 @@ FUN_00844db0_shell* __thiscall FUN_00844db0_shell::FUN_00844db0(int aiCount)
     return this;
 }
 
-struct S00844c20
-{
-    void SetCount(unsigned int);
-    char _pad[16];
-};
-struct H00843be0 : S00844c20
-{
-    S00844c20 sub;
-    void FUN_00843be0(unsigned int);
-};
-// Calls SetCount on the base and on the sub object with the same argument.
+// Sets the capacity of both change arrays.
 // @fnv 0x00843be0
-void H00843be0::FUN_00843be0(unsigned int auiValue)
+void FormChangeMapOperations::FUN_00843be0(unsigned int auiValue)
 {
-    S00844c20::SetCount(auiValue);
-    sub.SetCount(auiValue);
+    reinterpret_cast<FormChangeArrayOperations*>(&first)->SetCount(auiValue);
+    reinterpret_cast<FormChangeArrayOperations*>(&second)->SetCount(auiValue);
 }
 
 namespace fnv_00841e20 {
@@ -1150,21 +963,21 @@ struct FUN_00841990_shell
 {
     bool HasCellWithFlag(unsigned int);
 };
-struct FUN_00841e20_shell : public BGSReconstructFormsInAllFilesMap
+struct CellBlockFlagOperations : BGSReconstructCellBlocksMap
 {
     bool HasFlagInAnyFile(unsigned int flags);
 };
 // @fnv 0x00841e20
-bool FUN_00841e20_shell::HasFlagInAnyFile(unsigned int flags)
+bool CellBlockFlagOperations::HasFlagInAnyFile(unsigned int flags)
 {
-    if (*(unsigned int*)((char*)this + 0x10) && ((FUN_00452420_shell*)(*(void**)((char*)this + 0x10)))->GetFlag(flags))
+    if (unk10 && reinterpret_cast<FUN_00452420_shell*>(unk10)->GetFlag(flags))
         return true;
-    void* it = GetFirstPos();
+    void* it = reinterpret_cast<BGSReconstructFormsInAllFilesMap*>(this)->GetFirstPos();
     while (it)
     {
         TESFile* file = 0;
         BGSReconstructFormsInFileMap* map = 0;
-        GetNext(it, file, map);
+        reinterpret_cast<BGSReconstructFormsInAllFilesMap*>(this)->GetNext(it, file, map);
         if (((FUN_00841990_shell*)map)->HasCellWithFlag(flags))
             return true;
     }
@@ -1174,13 +987,8 @@ bool FUN_00841e20_shell::HasFlagInAnyFile(unsigned int flags)
 
 __declspec(thread) unsigned int DAT_00843c10_tls;
 
-struct FUN_00843c10_shell
-{
-    void __thiscall SetFlag4(bool bSet);
-};
-
 // @fnv 0x00843c10
-void __thiscall FUN_00843c10_shell::SetFlag4(bool bSet)
+void __thiscall BGSSaveLoadGame::SetFlag4(bool bSet)
 {
     if (bSet)
         DAT_00843c10_tls |= 4;
@@ -1254,88 +1062,38 @@ FUN_00844ff0::~FUN_00844ff0()
 }
 }  // namespace fnv_00844ff0
 
-namespace fnv_00841580 {
-extern void* __cdecl operator new(unsigned int);
-extern unsigned int _data_011c16bc;
-
-struct TESWorldSpace
+// These reconstruction operations are not yet declared by the shared cells map.
+struct ReconstructCellsOperations : BGSReconstructCellsMap
 {
-    static int __cdecl BuildCellKey(short, short);
-};
-
-struct SetAtHelper
-{
-    void SetAt(unsigned int, unsigned int);
-};
-
-struct DummyPointerMap : public SetAtHelper
-{
-    bool GetAt(unsigned int, unsigned int&);
+    void ProcessCell(TESObjectCELL*, TESObjectCELL*, unsigned int, unsigned int);
+    void SetAtCoordinates(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
     void SetAtCoordinates(unsigned int, short, short, unsigned int, unsigned int, unsigned int);
 };
 
-struct FUN_00841190
-{
-    int data[5];
-    FUN_00841190(void);
-    void ProcessRef(unsigned int, unsigned int, unsigned int);
-};
-
-// Looks up a value by worldspace coordinates, allocating and inserting a new FUN_00841190 if absent, then calls ProcessRef on it with a, b, c.
 // @fnv 0x00841580
-void DummyPointerMap::SetAtCoordinates(unsigned int, short x, short y, unsigned int auiArg1, unsigned int auiArg2,
-                                       unsigned int auiArg3)
+void ReconstructCellsOperations::SetAtCoordinates(unsigned int, short x, short y, unsigned int auiArg1,
+                                                 unsigned int auiArg2, unsigned int auiArg3)
 {
     int value = TESWorldSpace::BuildCellKey(x, y);
     unsigned int key = 0;
 
-    if (!GetAt(value, key))
+    if (!GetAt(value, reinterpret_cast<BGSReconstructFormsMap*&>(key)))
     {
-        key = (unsigned int)new FUN_00841190;
-        SetAt(value, key);
+        key = (unsigned int)new BGSReconstructFormsMap;
+        SetAt(value, reinterpret_cast<BGSReconstructFormsMap*>(key));
     }
 
-    reinterpret_cast<FUN_00841190*>(key)->ProcessRef(auiArg1, auiArg2, auiArg3);
+    reinterpret_cast<ReconstructFormsMapOperations*>(key)->ProcessRef(auiArg1, auiArg2, auiArg3);
 }
-}  // namespace fnv_00841580
-
-struct FUN_00544210_shell
-{
-    unsigned int FUN_00544210();
-};
-
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&);
-};
 
 struct SetAtHelper : public DummyPointerMap
 {
-    void SetAt(unsigned int, unsigned int);
-    void GetOrCreateAndDispatch(FUN_00544210_shell*, unsigned int, unsigned int, unsigned int);
+    void GetOrCreateAndDispatch(TESObjectCELL*, unsigned int, unsigned int, unsigned int);
 };
 
-struct FUN_00841460_shell
-{
-    void FUN_00841460(FUN_00544210_shell*, unsigned int, unsigned int, unsigned int);
-};
-
-struct FUN_00841340 : public FUN_00841460_shell
-{
-    unsigned char data[16];
-    FUN_00841340();
-};
-
-FUN_00841340::FUN_00841340()
-{}
-
-void FUN_00841460_shell::FUN_00841460(FUN_00544210_shell* param1, unsigned int param2, unsigned int param3,
-                                      unsigned int param4)
-{}
-
-// Looks up the entry for param1's key, creating a new FUN_00841340 if absent, then forwards param1-param4 to its FUN_00841460.
+// Creates the cells map for the key if needed, then dispatches the cell to it.
 // @fnv 0x008417e0
-void SetAtHelper::GetOrCreateAndDispatch(FUN_00544210_shell* pKeySource, unsigned int param2, unsigned int param3,
+void SetAtHelper::GetOrCreateAndDispatch(TESObjectCELL* pKeySource, unsigned int param2, unsigned int param3,
                                          unsigned int param4)
 {
     unsigned int uiKey = pKeySource->FUN_00544210();
@@ -1343,38 +1101,18 @@ void SetAtHelper::GetOrCreateAndDispatch(FUN_00544210_shell* pKeySource, unsigne
 
     if (!this->GetAt(uiKey, uiEntry))
     {
-        uiEntry = (unsigned int)new FUN_00841340;
+        uiEntry = (unsigned int)new BGSReconstructCellsMap;
         this->SetAt(uiKey, uiEntry);
     }
 
-    ((FUN_00841460_shell*)uiEntry)->FUN_00841460(pKeySource, param2, param3, param4);
+    static_cast<ReconstructCellsOperations*>((BGSReconstructCellsMap*)uiEntry)
+        ->ProcessCell(pKeySource, reinterpret_cast<TESObjectCELL*>(param2), param3, param4);
 }
 
 namespace fnv_008418b0 {
 void* operator new(unsigned int);
 
 int __cdecl FUN_005442c0(int, int);
-
-struct FUN_00841340
-{
-    int field_0;
-    int field_4;
-    int field_8;
-    int field_C;
-
-    FUN_00841340();
-    void SetAtCoordinates(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-};
-
-struct SetAtHelper
-{
-    void SetAt(unsigned int, FUN_00841340*);
-};
-
-struct DummyPointerMap : public SetAtHelper
-{
-    bool GetAt(unsigned int, FUN_00841340*&);
-};
 
 struct FUN_008418b0_shell : public DummyPointerMap
 {
@@ -1386,15 +1124,15 @@ void FUN_008418b0_shell::GetOrCreateEntry(unsigned int arg1, unsigned int arg2, 
                                           unsigned int arg5, unsigned int arg6)
 {
     unsigned int key = FUN_005442c0(arg2, arg3);
-    FUN_00841340* value = 0;
+    BGSReconstructCellsMap* value = 0;
 
-    if (!GetAt(key, value))
+    if (!GetAt(key, reinterpret_cast<unsigned int&>(value)))
     {
-        value = new FUN_00841340;
-        SetAt(key, value);
+        value = new BGSReconstructCellsMap;
+        SetAt(key, reinterpret_cast<unsigned int>(value));
     }
 
-    value->SetAtCoordinates(arg1, arg2, arg3, arg4, arg5, arg6);
+    static_cast<ReconstructCellsOperations*>(value)->SetAtCoordinates(arg1, arg2, arg3, arg4, arg5, arg6);
 }
 }  // namespace fnv_008418b0
 
@@ -1411,30 +1149,13 @@ struct SoundH
     unsigned int Deallocate();
 };
 
-struct DummyPointerMap
+// Dispatch methods absent from the shared cell-block header stay in method-only adapters.
+struct CellBlockEntryOperations : BGSReconstructCellBlocksMap
 {
-    bool GetAt(unsigned int, unsigned int&);
-};
-
-struct SetAtHelper : DummyPointerMap
-{
-    void SetAt(unsigned int, unsigned int);
-};
-
-struct FUN_008419f0
-{
-    unsigned int field0;
-    unsigned int field1;
-    unsigned int field2;
-    unsigned int field3;
-    unsigned int field4;
-    unsigned int field5;
-
-    FUN_008419f0(bool);
     void ProcessEntry(DoorH*, unsigned int, unsigned int, unsigned int);
 };
 
-struct FUN_00841fc0_class : SetAtHelper
+struct FUN_00841fc0_class : DummyPointerMap
 {
     void FUN_00841fc0(DoorH*, unsigned int, unsigned int, unsigned int);
 };
@@ -1452,32 +1173,18 @@ void FUN_00841fc0_class::FUN_00841fc0(DoorH* door, unsigned int arg1, unsigned i
 
     if (!GetAt(value, worldSpace))
     {
-        worldSpace = reinterpret_cast<unsigned int>(new FUN_008419f0(true));
+        worldSpace = reinterpret_cast<unsigned int>(new BGSReconstructCellBlocksMap(true));
         SetAt(value, worldSpace);
     }
 
-    reinterpret_cast<FUN_008419f0*>(worldSpace)->ProcessEntry(door, arg1, arg2, arg3);
+    reinterpret_cast<CellBlockEntryOperations*>(worldSpace)->ProcessEntry(door, arg1, arg2, arg3);
 }
 }  // namespace fnv_00841fc0
 
 namespace fnv_008420a0 {
-struct FUN_008419f0
+struct CellBlockReconstructionOperations : BGSReconstructCellBlocksMap
 {
-    unsigned char data[24];
-
-    FUN_008419f0(bool);
-
     void ReconstructFormEntry(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-};
-
-struct SetAtHelper
-{
-    void SetAt(unsigned int, FUN_008419f0*);
-};
-
-struct DummyPointerMap : public SetAtHelper
-{
-    bool GetAt(unsigned int, FUN_008419f0*&);
 };
 
 void* __cdecl operator new(unsigned int);
@@ -1494,39 +1201,22 @@ void FUN_008420a0_class::FUN_008420a0(unsigned int a1, unsigned int a2, unsigned
                                       unsigned int a5, unsigned int a6)
 {
     unsigned int map = _ref_0084e3a0(a1);
-    FUN_008419f0* object = 0;
+    BGSReconstructCellBlocksMap* object = 0;
 
-    if (!GetAt(map, object))
+    if (!GetAt(map, reinterpret_cast<unsigned int&>(object)))
     {
-        object = new FUN_008419f0(true);
-        SetAt(map, object);
+        object = new BGSReconstructCellBlocksMap(true);
+        SetAt(map, reinterpret_cast<unsigned int>(object));
     }
 
-    object->ReconstructFormEntry(a1, a2, a3, a4, a5, a6);
+    static_cast<CellBlockReconstructionOperations*>(object)->ReconstructFormEntry(a1, a2, a3, a4, a5, a6);
 }
 }  // namespace fnv_008420a0
 
 namespace fnv_00842600 {
 void* __cdecl operator new(unsigned int);
 
-struct TESObjectCELL
-{
-    bool IsInterior();
-};
-
-struct FUN_008419f0
-{
-    char padding[0x18];
-    FUN_008419f0(bool);
-};
-
-struct FUN_00841ea0
-{
-    char padding[0x10];
-    FUN_00841ea0();
-};
-
-struct FUN_00841b20_standin
+struct CellBlockReferenceOperations : BGSReconstructCellBlocksMap
 {
     void ProcessEntry(TESObjectCELL*, int, int, int);
 };
@@ -1536,76 +1226,68 @@ struct FUN_00841fc0_standin
     void FUN_00841fc0(TESObjectCELL*, int, int, int);
 };
 
-struct FUN_00842600_shell
+struct FileCellReconstructionOperations : BGSReconstructFormsInFileMap
 {
     void ProcessCell(TESObjectCELL*, int, int, int);
 };
 
 // Dispatches the cell to an interior or exterior handler, lazily allocating it, then increments a counter at offset 0x18.
 // @fnv 0x00842600
-void FUN_00842600_shell::ProcessCell(TESObjectCELL* cell, int aiArg1, int aiArg2, int aiArg3)
+void FileCellReconstructionOperations::ProcessCell(TESObjectCELL* cell, int aiArg1, int aiArg2, int aiArg3)
 {
     if (cell->IsInterior())
     {
-        if (!*reinterpret_cast<FUN_00841b20_standin**>(reinterpret_cast<char*>(this) + 0x10))
+        if (!m_pInteriorMap)
         {
-            *reinterpret_cast<FUN_00841b20_standin**>(reinterpret_cast<char*>(this) + 0x10) =
-                reinterpret_cast<FUN_00841b20_standin*>(new FUN_008419f0(false));
+            m_pInteriorMap = new BGSReconstructCellBlocksMap(false);
         }
 
-        reinterpret_cast<FUN_00841b20_standin*>(
-            *reinterpret_cast<FUN_00841b20_standin**>(reinterpret_cast<char*>(this) + 0x10))
+        reinterpret_cast<CellBlockReferenceOperations*>(
+            m_pInteriorMap)
             ->ProcessEntry(cell, aiArg1, aiArg2, aiArg3);
     }
     else
     {
-        if (!*reinterpret_cast<FUN_00841fc0_standin**>(reinterpret_cast<char*>(this) + 0x14))
+        if (!m_pExteriorMap)
         {
-            *reinterpret_cast<FUN_00841fc0_standin**>(reinterpret_cast<char*>(this) + 0x14) =
-                reinterpret_cast<FUN_00841fc0_standin*>(new FUN_00841ea0());
+            m_pExteriorMap = new BGSReconstructWorldSpacesMap();
         }
 
         reinterpret_cast<FUN_00841fc0_standin*>(
-            *reinterpret_cast<FUN_00841fc0_standin**>(reinterpret_cast<char*>(this) + 0x14))
+            m_pExteriorMap)
             ->FUN_00841fc0(cell, aiArg1, aiArg2, aiArg3);
     }
 
-    ++*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x18);
+    ++iCount;
 }
 }  // namespace fnv_00842600
 
 namespace fnv_00842730 {
 void* __cdecl operator new(unsigned int);
 
-struct FUN_00841ea0
+struct WorldSpaceMapOperations : BGSReconstructWorldSpacesMap
 {
-    int _unused[4];
-
-    FUN_00841ea0();
     void __thiscall FUN_008420a0(int, int, int, int, int, int);
 };
 
-struct FUN_00842730_shell
+struct FileWorldReconstructionOperations : BGSReconstructFormsInFileMap
 {
-    char _padding[0x14];
-    FUN_00841ea0* _object;
-    int _count;
 
     void EnsureObjectAndCall(int, int, int, int, int, int);
 };
 
 // Allocates the object if null, forwards the six arguments to its method, and increments the count.
 // @fnv 0x00842730
-void FUN_00842730_shell::EnsureObjectAndCall(int a, int b, int c, int d, int e, int f)
+void FileWorldReconstructionOperations::EnsureObjectAndCall(int a, int b, int c, int d, int e, int f)
 {
-    if (_object == 0)
+    if (m_pExteriorMap == 0)
     {
-        _object = new FUN_00841ea0;
+        m_pExteriorMap = new BGSReconstructWorldSpacesMap;
     }
 
-    _object->FUN_008420a0(a, b, c, d, e, f);
+    static_cast<WorldSpaceMapOperations*>(m_pExteriorMap)->FUN_008420a0(a, b, c, d, e, f);
 
-    _count += 1;
+    iCount += 1;
 }
 }  // namespace fnv_00842730
 
@@ -1624,77 +1306,19 @@ struct TESFormRefProxy
     unsigned int _ref_0084e3a0();
 };
 
-struct VirtualBase : TESForm
-{
-    virtual void vfn_61()
-    {}
-    virtual void vfn_62()
-    {}
-    virtual void vfn_63()
-    {}
-    virtual void vfn_64()
-    {}
-    virtual void vfn_65()
-    {}
-    virtual void vfn_66()
-    {}
-    virtual void vfn_67()
-    {}
-    virtual void vfn_68()
-    {}
-    virtual void vfn_69()
-    {}
-    virtual void vfn_70()
-    {}
-    virtual void vfn_71()
-    {}
-    virtual void vfn_72()
-    {}
-    virtual void vfn_73()
-    {}
-    virtual void vfn_74()
-    {}
-    virtual void vfn_75()
-    {}
-    virtual char const* vfn_76()
-    {
-        return 0;
-    }
-};
-
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&);
-};
-
-struct SetAtHelper
-{
-    void SetAt(unsigned int, unsigned int);
-};
-
-struct FUN_00842180
-{
-    unsigned char data[0x1c];
-
-    FUN_00842180();
-};
-
-FUN_00842180::FUN_00842180()
-{}
-
 struct MapCallProxy
 {
     void FUN_00842310(TESForm*, unsigned int);
 };
 
-struct FUN_00843630_shell : BGSReconstructFormsInAllFilesMap
+struct ReconstructFilesFormOperations : BGSReconstructFormsInAllFilesMap
 {
     void FUN_00843630(TESForm*, unsigned int);
 };
 
 // Adds apForm to the per-file map keyed by its TESFile, creating the entry if missing, then increments iCount; logs an error when the form has no file.
 // @fnv 0x00843630
-void FUN_00843630_shell::FUN_00843630(TESForm* apForm, unsigned int aiFlags)
+void ReconstructFilesFormOperations::FUN_00843630(TESForm* apForm, unsigned int aiFlags)
 {
     BGSReconstructFormsInFileMap* pformsInFileMap;
     TESFile* pfile;
@@ -1708,20 +1332,18 @@ void FUN_00843630_shell::FUN_00843630(TESForm* apForm, unsigned int aiFlags)
     {
         _fnv_call_845cc0("Form %08X %s with type %s and no file passed to BGSReconstructFormsInAllFilesMap::AddForm()",
                          reinterpret_cast<TESFormRefProxy*>(apForm)->_ref_0084e3a0(),
-                         reinterpret_cast<VirtualBase*>(apForm)->vfn_76(),
+                         apForm->GetName(),
                          reinterpret_cast<TESFormCallProxy*>(apForm)->FUN_00440e30());
         return;
     }
 
     pformsInFileMap = 0;
 
-    if (!reinterpret_cast<DummyPointerMap*>(this)->GetAt(reinterpret_cast<unsigned int>(pfile),
-                                                         reinterpret_cast<unsigned int&>(pformsInFileMap)))
+    if (!GetAt(pfile, pformsInFileMap))
     {
-        pformsInFileMap = reinterpret_cast<BGSReconstructFormsInFileMap*>(new FUN_00842180());
+        pformsInFileMap = new BGSReconstructFormsInFileMap();
 
-        reinterpret_cast<SetAtHelper*>(this)->SetAt(reinterpret_cast<unsigned int>(pfile),
-                                                    reinterpret_cast<unsigned int>(pformsInFileMap));
+        SetAt(pfile, pformsInFileMap);
     }
 
     reinterpret_cast<MapCallProxy*>(pformsInFileMap)->FUN_00842310(apForm, aiFlags);
@@ -1804,127 +1426,41 @@ void FUN_00844c90_shell::FUN_00844c90(unsigned int index, bool useArray)
 namespace fnv_00841b20 {
 void* __cdecl operator new(unsigned int);
 
-struct FUN_005441b0_S
+// The shared reference does not expose this save-state query.
+struct ReferenceSaveCheck : TESObjectREFR
 {
-    unsigned int FUN_005441b0(void);
+    bool FUN_00565450();
 };
 
-struct FUN_00565450_shell
+struct FormReferenceOperations : BGSReconstructFormsMap
 {
-    virtual bool v00() = 0;
-    virtual bool v01() = 0;
-    virtual bool v02() = 0;
-    virtual bool v03() = 0;
-    virtual bool v04() = 0;
-    virtual bool v05() = 0;
-    virtual bool v06() = 0;
-    virtual bool v07() = 0;
-    virtual bool v08() = 0;
-    virtual bool v09() = 0;
-    virtual bool v10() = 0;
-    virtual bool v11() = 0;
-    virtual bool v12() = 0;
-    virtual bool v13() = 0;
-    virtual bool v14() = 0;
-    virtual bool v15() = 0;
-    virtual bool v16() = 0;
-    virtual bool v17() = 0;
-    virtual bool v18() = 0;
-    virtual bool v19() = 0;
-    virtual bool v20() = 0;
-    virtual bool v21() = 0;
-    virtual bool v22() = 0;
-    virtual bool v23() = 0;
-    virtual bool v24() = 0;
-    virtual bool v25() = 0;
-    virtual bool v26() = 0;
-    virtual bool v27() = 0;
-    virtual bool v28() = 0;
-    virtual bool v29() = 0;
-    virtual bool v30() = 0;
-    virtual bool v31() = 0;
-    virtual bool v32() = 0;
-    virtual bool v33() = 0;
-    virtual bool v34() = 0;
-    virtual bool v35() = 0;
-    virtual bool v36() = 0;
-    virtual bool v37() = 0;
-    virtual bool v38() = 0;
-    virtual bool v39() = 0;
-    virtual bool v40() = 0;
-    virtual bool v41() = 0;
-    virtual bool v42() = 0;
-    virtual bool v43() = 0;
-    virtual bool v44() = 0;
-    virtual bool v45() = 0;
-    virtual bool v46() = 0;
-    virtual bool v47() = 0;
-    virtual bool v48() = 0;
-    virtual bool v49() = 0;
-    virtual bool v50() = 0;
-    virtual bool v51() = 0;
-    virtual bool v52() = 0;
-    virtual bool v53() = 0;
-    virtual bool v54() = 0;
-    virtual bool v55() = 0;
-    virtual bool v56() = 0;
-    virtual bool v57() = 0;
-    virtual bool v58() = 0;
-    virtual bool v59() = 0;
-    virtual bool FUN_00841b20_virtual() = 0;
-
-    bool FUN_00565450(void);
+    void ProcessRef(ReferenceSaveCheck*, unsigned int, unsigned int);
 };
 
-struct FUN_00841190
+struct CellSubBlockDispatch : BGSReconstructCellSubBlocksMap
 {
-    unsigned char data[0x14];
-
-    FUN_00841190(void);
-    void ProcessRef(FUN_00565450_shell*, unsigned int, unsigned int);
+    void GetOrCreateAndDispatch(TESObjectCELL*, ReferenceSaveCheck*, unsigned int, unsigned int);
 };
 
-struct FUN_008416c0
+struct CellBlockReferenceOperations : BGSReconstructCellBlocksMap
 {
-    unsigned char data[0x10];
-
-    FUN_008416c0(void);
-    void GetOrCreateAndDispatch(FUN_005441b0_S*, FUN_00565450_shell*, unsigned int, unsigned int);
-};
-
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&);
-};
-
-struct SetAtHelper
-{
-    void SetAt(unsigned int, unsigned int);
-};
-
-struct FUN_00841b20_shell
-{
-    unsigned char padding[0x10];
-    FUN_00841190* form;
-    unsigned char flag;
-
-    void ProcessEntry(FUN_005441b0_S*, FUN_00565450_shell*, unsigned int, unsigned int);
+    void ProcessEntry(TESObjectCELL*, ReferenceSaveCheck*, unsigned int, unsigned int);
 };
 
 // @fnv 0x00841b20
-void FUN_00841b20_shell::ProcessEntry(FUN_005441b0_S* first, FUN_00565450_shell* second, unsigned int third,
+void CellBlockReferenceOperations::ProcessEntry(TESObjectCELL* first, ReferenceSaveCheck* second, unsigned int third,
                                       unsigned int fourth)
 {
-    if (flag && second && second->FUN_00841b20_virtual())
+    if (unk14 && second && second->GetIsReference())
     {
-        FUN_00565450_shell* shell = second;
+        ReferenceSaveCheck* shell = second;
 
         if (shell->FUN_00565450())
         {
-            if (!form)
-                form = new FUN_00841190();
+            if (!unk10)
+                unk10 = reinterpret_cast<int>(new BGSReconstructFormsMap());
 
-            form->ProcessRef(second, third, fourth);
+            reinterpret_cast<FormReferenceOperations*>(unk10)->ProcessRef(second, third, fourth);
             return;
         }
     }
@@ -1932,53 +1468,19 @@ void FUN_00841b20_shell::ProcessEntry(FUN_005441b0_S* first, FUN_00565450_shell*
     unsigned int key = first->FUN_005441b0();
     unsigned int value = 0;
 
-    if (!reinterpret_cast<DummyPointerMap*>(this)->GetAt(key, value))
+    if (!GetAt(key, reinterpret_cast<BGSReconstructCellSubBlocksMap*&>(value)))
     {
-        value = reinterpret_cast<unsigned int>(new FUN_008416c0());
-        reinterpret_cast<SetAtHelper*>(this)->SetAt(key, value);
+        value = reinterpret_cast<unsigned int>(new BGSReconstructCellSubBlocksMap());
+        SetAt(key, reinterpret_cast<BGSReconstructCellSubBlocksMap*>(value));
     }
 
-    reinterpret_cast<FUN_008416c0*>(value)->GetOrCreateAndDispatch(first, second, third, fourth);
+    reinterpret_cast<CellSubBlockDispatch*>(value)->GetOrCreateAndDispatch(first, second, third, fourth);
 }
 }  // namespace fnv_00841b20
 
-namespace fnv_00844ae0 {
-struct FUN_0072ba80_shell
-{
-    void FUN_0072ba80(char*, unsigned int);
-};
-
-struct S5460
-{
-    void FUN_006a2770(unsigned int, unsigned int);
-};
-
-struct SaveGameSizeState
-{
-    void RecordSizeAndLength(unsigned int, unsigned int);
-};
-
-struct BSSimpleArrayActor
-{
-    typedef void*(__thiscall* Allocator)(BSSimpleArrayActor*, unsigned int);
-
-    struct VTable
-    {
-        void* vftableEntry;
-        Allocator allocator;
-    };
-
-    VTable* m_ppVirtualMethodTable;
-    unsigned char* m_data;
-    unsigned int m_iElementCount;
-    unsigned int m_pRayCursor;
-
-    void Clear(bool);
-    void Resize(unsigned int, bool);
-};
-
 // @fnv 0x00844ae0
-void BSSimpleArrayActor::Resize(unsigned int size, bool clear)
+template <>
+void BSSimpleArray<OffsetData>::SetSize(unsigned int size, bool clear)
 {
     if (size == 0)
     {
@@ -1986,98 +1488,56 @@ void BSSimpleArrayActor::Resize(unsigned int size, bool clear)
         return;
     }
 
-    if (size > this->m_pRayCursor)
+    if (size > this->SimpleArrayStorage)
     {
-        if (this->m_pRayCursor == 0)
+        if (this->SimpleArrayStorage == 0)
         {
-            this->m_data = static_cast<unsigned char*>(this->m_ppVirtualMethodTable->allocator(this, size));
-            this->m_pRayCursor = size;
+            this->pBuffer = this->_Allocate(size);
+            this->SimpleArrayStorage = size;
         }
         else
         {
-            reinterpret_cast<S5460*>(this)->FUN_006a2770(size, this->m_iElementCount);
-            this->m_pRayCursor = size;
+            this->ReallocateStorage(size, this->iSize);
+            this->SimpleArrayStorage = size;
         }
 
-        reinterpret_cast<SaveGameSizeState*>(this)->RecordSizeAndLength(
-            reinterpret_cast<unsigned int>(this->m_data + this->m_iElementCount * 8), size - this->m_iElementCount);
-        this->m_iElementCount = size;
+        this->InitializeItems(this->pBuffer + this->iSize, size - this->iSize);
+        this->iSize = size;
     }
-    else if (size < this->m_iElementCount)
+    else if (size < this->iSize)
     {
-        reinterpret_cast<FUN_0072ba80_shell*>(this)->FUN_0072ba80(reinterpret_cast<char*>(this->m_data + size * 8),
-                                                                  this->m_iElementCount - size);
-        this->m_iElementCount = size;
+        this->ReleaseElements(this->pBuffer + size, this->iSize - size);
+        this->iSize = size;
 
-        if (clear && size <= this->m_pRayCursor / 4)
+        if (clear && size <= this->SimpleArrayStorage / 4)
         {
-            reinterpret_cast<S5460*>(this)->FUN_006a2770(size, size);
-            this->m_pRayCursor = size;
+            this->ReallocateStorage(size, size);
+            this->SimpleArrayStorage = size;
         }
     }
     else
     {
-        reinterpret_cast<SaveGameSizeState*>(this)->RecordSizeAndLength(
-            reinterpret_cast<unsigned int>(this->m_data + this->m_iElementCount * 8), size - this->m_iElementCount);
-        this->m_iElementCount = size;
+        this->InitializeItems(this->pBuffer + this->iSize, size - this->iSize);
+        this->iSize = size;
     }
 }
-}  // namespace fnv_00844ae0
-
-class B411F0MapBase
-{
-  public:
-    virtual ~B411F0MapBase();
-
-    void RemoveAll();
-
-    unsigned int m_uiHashSize;
-    void** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
-
-class FUN_008411f0 : public B411F0MapBase
-{
-  public:
-    virtual ~FUN_008411f0();
-};
 
 // @fnv 0x008411f0
-FUN_008411f0::~FUN_008411f0()
+BGSReconstructFormsMap::~BGSReconstructFormsMap()
 {
-    RemoveAll();
+    reinterpret_cast<NiTPointerMap<unsigned int, unsigned int>*>(this)->RemoveAll();
 }
 
-struct FUN_008413a0_item
-{
-    virtual void* Free(unsigned int flags);
-};
-
-struct FUN_008413a0_base
-{
-    virtual ~FUN_008413a0_base();
-    void* GetFirstPos();
-    void GetNext(void*& pos, unsigned int& key, FUN_008413a0_item*& val);
-};
-
-struct FUN_008413a0 : FUN_008413a0_base
-{
-    virtual ~FUN_008413a0();
-};
-
-// Iterates the container's entries and frees each item with flags 1.
 // @fnv 0x008413a0
-FUN_008413a0::~FUN_008413a0()
+BGSReconstructCellsMap::~BGSReconstructCellsMap()
 {
-    void* pos2 = GetFirstPos();
+    void* pos2 = reinterpret_cast<NiTPointerMap<unsigned int, BGSReconstructFormsMap*>*>(this)->GetFirstPos();
     while (pos2 != 0)
     {
         unsigned int key = 0;
-        FUN_008413a0_item* data2 = 0;
-        GetNext(pos2, key, data2);
-        FUN_008413a0_item* tmp4 = data2;
-        FUN_008413a0_item* val = tmp4;
-        (val != 0) ? val->Free(1) : 0;
+        BGSReconstructFormsMap* data2 = 0;
+        reinterpret_cast<NiTPointerMap<unsigned int, BGSReconstructFormsMap*>*>(this)->GetNext(pos2, key, data2);
+        delete data2;
     }
 }
 
@@ -2085,29 +1545,18 @@ struct ValueItem
 {
     virtual ~ValueItem();
 };
-struct BaseMap
-{
-    virtual ~BaseMap();
-    void* FUN_004b9ba0();
-    void FUN_006b7f20(void**, unsigned int*, ValueItem**);
-    void FUN_008447e0();
-};
-struct FUN_00841720 : BaseMap
-{
-    virtual ~FUN_00841720();
-};
 // Iterates the map via FUN_004b9ba0/FUN_006b7f20, deleting each ValueItem until the position is null.
 // @fnv 0x00841720
-FUN_00841720::~FUN_00841720()
+BGSReconstructCellSubBlocksMap::~BGSReconstructCellSubBlocksMap()
 {
-    void* position = FUN_004b9ba0();
+    void* position = reinterpret_cast<NiTPointerMap<unsigned int, ValueItem*>*>(this)->GetFirstPos();
     while (position != 0)
     {
         ValueItem* item;
         {
             unsigned int key = 0;
             item = 0;
-            FUN_006b7f20(&position, &key, &item);
+            reinterpret_cast<NiTPointerMap<unsigned int, ValueItem*>*>(this)->GetNext(position, key, item);
         }
         delete item;
     }
@@ -2123,23 +1572,18 @@ struct FUN_00844eb0_shell
     void FUN_00844eb0(ChangedFormRecord* apData);
 };
 
-struct FUN_00843270_shell : public FormChangeMap
-{
-    void FUN_00843270(ChangedFormRecord* apData);
-};
-
 // Dispatches apData to one of two handlers depending on whether its form is a reference or has type 0x39 or 0x41.
 // @fnv 0x00843270
-void FUN_00843270_shell::FUN_00843270(ChangedFormRecord* apData)
+void FormChangeMapOperations::FUN_00843270(ChangedFormRecord* apData)
 {
     if (!apData->pForm->GetIsReference() && ((FUN_00401170_shell*)apData->pForm)->FUN_00401170() != 0x39 &&
         ((FUN_00401170_shell*)apData->pForm)->FUN_00401170() != 0x41)
     {
-        ((FUN_00844eb0_shell*)&m_kOrdinaryFormChanges)->FUN_00844eb0(apData);
+        ((FUN_00844eb0_shell*)&first)->FUN_00844eb0(apData);
     }
     else
     {
-        ((FUN_00844eb0_shell*)&m_kSpecialFormChanges)->FUN_00844eb0(apData);
+        ((FUN_00844eb0_shell*)&second)->FUN_00844eb0(apData);
     }
 }
 
@@ -2247,10 +1691,6 @@ FUN_008449e0_cls::~FUN_008449e0_cls()
 {
     Clear();
 }
-
-class TESGlobal
-{
-};
 
 struct FormContext
 {
@@ -2390,21 +1830,15 @@ struct ReconstructCellBlock
 {
     virtual ~ReconstructCellBlock();
 };
-struct FUN_00841a60 : FUN_008448e0
-{
-    virtual ~FUN_00841a60();
-    void* FUN_004b9ba0();
-    void FUN_006b7f20(void**, unsigned int*, ReconstructCellBlock**);
-};
 // @fnv 0x00841a60
-FUN_00841a60::~FUN_00841a60()
+BGSReconstructCellBlocksMap::~BGSReconstructCellBlocksMap()
 {
-    void* position = FUN_004b9ba0();
+    void* position = reinterpret_cast<NiTPointerMap<unsigned int, ValueItem*>*>(this)->GetFirstPos();
     while (position)
     {
         unsigned int key = 0;
         ReconstructCellBlock* pEntry = 0;
-        FUN_006b7f20(&position, &key, &pEntry);
+        reinterpret_cast<NiTPointerMap<unsigned int, ReconstructCellBlock*>*>(this)->GetNext(position, key, pEntry);
         delete pEntry;
     }
 }
@@ -2418,25 +1852,14 @@ struct ReconstructEntry
     void ProcessRef(FormWithSaveCheck*, int, int);
     void GetOrCreateEntry(int, int, int, FormWithSaveCheck*, int, int);
 };
-struct ReconstructedCellStorage : FUN_008416c0
-{
-    unsigned int recordID;
-    void* owner;
-    unsigned int flags;
-    unsigned int count;
-};
 int __cdecl GetCellCoordKey(int, int);
-struct SaveLoadDispatcher
+struct CellBlockSaveLoadOperations : BGSReconstructCellBlocksMap
 {
-    int state00, state04, state08, state0c;
-    ReconstructEntry* helper10;
-    bool Lookup(int, ReconstructEntry**);
-    void FUN_00844700(int, ReconstructEntry*);
     void ReconstructFormEntry(int, int, int, FormWithSaveCheck*, int, int);
 };
-// If form is a reference with a save check, forwards it to helper10; otherwise looks up or creates a ReconstructEntry for the handle and reconstructs the entry.
+// If form is a reference with a save check, forwards it through unk10; otherwise looks up or creates a ReconstructEntry for the handle and reconstructs the entry.
 // @fnv 0x00841ca0
-void SaveLoadDispatcher::ReconstructFormEntry(int value, int formID, int context, FormWithSaveCheck* form, int flag,
+void CellBlockSaveLoadOperations::ReconstructFormEntry(int value, int formID, int context, FormWithSaveCheck* form, int flag,
                                               int offset)
 {
     int handle3;
@@ -2444,59 +1867,38 @@ void SaveLoadDispatcher::ReconstructFormEntry(int value, int formID, int context
     ReconstructEntry* entry7;
     if (form != 0 && form->GetIsReference() && (referenceForm = form, referenceForm->FUN_00565450()))
     {
-        if (helper10 == 0)
-            helper10 = (ReconstructEntry*)new FUN_00841190;
-        helper10->ProcessRef(form, flag, offset);
+        if (unk10 == 0)
+            unk10 = reinterpret_cast<int>(new BGSReconstructFormsMap);
+        reinterpret_cast<ReconstructEntry*>(unk10)->ProcessRef(form, flag, offset);
     }
     else
     {
         handle3 = GetCellCoordKey(formID, context);
         entry7 = 0;
-        if (!Lookup(handle3, &entry7))
+        if (!GetAt(handle3, reinterpret_cast<BGSReconstructCellSubBlocksMap*&>(entry7)))
         {
-            entry7 = (ReconstructEntry*)new ReconstructedCellStorage;
-            FUN_00844700(handle3, entry7);
+            entry7 = (ReconstructEntry*)new BGSReconstructCellSubBlocksMap;
+            SetAt(handle3, reinterpret_cast<BGSReconstructCellSubBlocksMap*>(entry7));
         }
         entry7->GetOrCreateEntry(value, formID, context, form, flag, offset);
     }
 }
 
-namespace fnv_008421f0 {
-struct BGSCellNumericIDArrayMap
-{
-    virtual ~BGSCellNumericIDArrayMap();
-};
-struct FUN_00844600
-{
-    unsigned int m_uiHashSize;
-    void* m_ppHashTable;
-    unsigned int m_uiCount;
-    virtual ~FUN_00844600();
-    void* FUN_004b9ba0();
-    void FUN_006b7f20(void*& rpPos, unsigned int& ruiKey, BGSCellNumericIDArrayMap*& rpVal);
-};
-struct FUN_008421f0 : FUN_00844600
-{
-    BGSCellNumericIDArrayMap* m_pFirst;
-    BGSCellNumericIDArrayMap* m_pSecond;
-    virtual ~FUN_008421f0();
-};
-// Iterates the hash table deleting each BGSCellNumericIDArrayMap entry, then deletes m_pFirst and m_pSecond.
 // @fnv 0x008421f0
-FUN_008421f0::~FUN_008421f0()
+BGSReconstructFormsInFileMap::~BGSReconstructFormsInFileMap()
 {
-    void* pPos = FUN_004b9ba0();
+    void* pPos = reinterpret_cast<NiTPointerMap<unsigned int, BGSCellNumericIDArrayMap*>*>(this)->GetFirstPos();
     while (pPos)
     {
         unsigned int uiKey = 0;
         BGSCellNumericIDArrayMap* pItem = 0;
-        FUN_006b7f20(pPos, uiKey, pItem);
+        reinterpret_cast<NiTPointerMap<unsigned int, BGSCellNumericIDArrayMap*>*>(this)->GetNext(pPos, uiKey, pItem);
         delete pItem;
     }
-    delete m_pFirst;
-    delete m_pSecond;
+    delete reinterpret_cast<BGSCellNumericIDArrayMap*>(m_pInteriorMap);
+    delete reinterpret_cast<BGSCellNumericIDArrayMap*>(m_pExteriorMap);
 }
-}  // namespace fnv_008421f0
+
 
 int __cdecl FUN_00406d90(float afValue);
 
@@ -2664,14 +2066,12 @@ struct RegFormTypeEntry
 };
 extern RegFormTypeEntry g_aRegFormTypes[];
 
-struct RegManager
+struct RegManager : BGSReconstructFormsInFileMap
 {
-    int unk00, unk04, unk08, unk0C, unk10, unk14;
-    int iCount;
 
     void EnsureObjectAndCall(void* apCell, int aiX, int aiY, RegRef* apRef, int aiUnk, int aiArg);
     void ProcessCell(void* apCell, RegRef* apRef, int aiUnk, int aiArg);
-    bool Lookup(int aiKey, RegList** appList);
+    bool FUN_00853130(int aiKey, RegList** appList);
     void FUN_00844700(int aiKey, RegList* apList);
     void FUN_00842310(RegRef* apRef, int aiArg);
 };
@@ -2722,7 +2122,7 @@ void RegManager::FUN_00842310(RegRef* apRef, int aiArg)
     {
         int iKey8 = g_aRegFormTypes[apRef->GetFormType()].iKey;
         RegList* pList5 = 0;
-        if (!Lookup(iKey8, &pList5))
+        if (!FUN_00853130(iKey8, &pList5))
         {
             pList5 = new RegList;
             FUN_00844700(iKey8, pList5);
@@ -2739,25 +2139,9 @@ struct ExtendedForm : TESForm
     BSSimpleList<TESFile*>* GetSourceFiles();
     unsigned int GetFormID();
 
-    virtual void vfn_61();
-    virtual void vfn_62();
-    virtual void vfn_63();
-    virtual void vfn_64();
-    virtual void vfn_65();
-    virtual void vfn_66();
-    virtual void vfn_67();
-    virtual void vfn_68();
-    virtual void vfn_69();
-    virtual void vfn_70();
-    virtual void vfn_71();
-    virtual void vfn_72();
-    virtual void vfn_73();
-    virtual void vfn_74();
-    virtual void vfn_75();
-    virtual const char* GetFormDisplayName();
 };
 
-struct ExtendedFileMap : FUN_00842180
+struct ExtendedFileMap : BGSReconstructFormsInFileMap
 {
     void EnsureObjectAndCall(ExtendedForm* form, unsigned int arg2, unsigned int arg3, unsigned int zero,
                              unsigned int arg4, unsigned int arg5);
@@ -2766,8 +2150,6 @@ struct ExtendedFileMap : FUN_00842180
 struct ReconstructMapHelper : BGSReconstructFormsInAllFilesMap
 {
     TESFile* FUN_00843fe0(BSSimpleList<TESFile*>* apFileList, unsigned int arg4);
-    bool GetAt(TESFile* key, ExtendedFileMap*& val);
-    void SetAt(TESFile* key, ExtendedFileMap* val);
     void FUN_008438b0(ExtendedForm* form, unsigned int arg2, unsigned int arg3, unsigned int arg4, unsigned int arg5);
 };
 
@@ -2783,12 +2165,12 @@ void ReconstructMapHelper::FUN_008438b0(ExtendedForm* form, unsigned int arg2, u
     if (!file)
     {
         FUN_00845cc0("Worldspace %08X %s with no file passed to BGSReconstructFormsInAllFilesMap::AddReference()",
-                     form->GetFormID(), form->GetFormDisplayName());
+                     form->GetFormID(), form->GetName());
         return;
     }
 
     ExtendedFileMap* subMap = 0;
-    if (!this->GetAt(file, subMap))
+    if (!GetAt(file, reinterpret_cast<BGSReconstructFormsInFileMap*&>(subMap)))
     {
         subMap = new ExtendedFileMap();
         this->SetAt(file, subMap);
@@ -2882,106 +2264,19 @@ struct SecondaryForm
 };
 struct ExtendedForm : TESForm
 {
-    unsigned int field_04;
-    unsigned int field_08;
-    unsigned int field_0c;
-    unsigned int field_10;
-    unsigned int field_14;
     unsigned int field_18;
     unsigned int field_1c;
     unsigned int field_20;
     unsigned int field_24;
     unsigned int field_28;
     unsigned int field_2c;
-    virtual void slot61();
-    virtual bool IsSecondaryForm();
 };
 struct MultipleForm : ExtendedForm, SecondaryForm
 {
 };
-struct ReferenceView : ExtendedForm
+// Extra mobile-reference operations absent from the shared reference declaration.
+struct ReferenceView : TESObjectREFR
 {
-    virtual bool IsMobile();
-    virtual bool IsActor();
-    virtual void slot65();
-    virtual void slot66();
-    virtual void slot67();
-    virtual void slot68();
-    virtual void slot69();
-    virtual void slot70();
-    virtual void slot71();
-    virtual void slot72();
-    virtual void slot73();
-    virtual void slot74();
-    virtual void slot75();
-    virtual void slot76();
-    virtual void slot77();
-    virtual void slot78();
-    virtual void slot79();
-    virtual void slot80();
-    virtual void slot81();
-    virtual void slot82();
-    virtual void slot83();
-    virtual void slot84();
-    virtual void slot85();
-    virtual void slot86();
-    virtual void slot87();
-    virtual void slot88();
-    virtual void slot89();
-    virtual void slot90();
-    virtual void slot91();
-    virtual void slot92();
-    virtual void slot93();
-    virtual void slot94();
-    virtual void slot95();
-    virtual void slot96();
-    virtual void slot97();
-    virtual void slot98();
-    virtual void slot99();
-    virtual void slot100();
-    virtual void slot101();
-    virtual void slot102();
-    virtual void slot103();
-    virtual void slot104();
-    virtual void slot105();
-    virtual void slot106();
-    virtual void slot107();
-    virtual void slot108();
-    virtual void slot109();
-    virtual void slot110();
-    virtual void slot111();
-    virtual void slot112();
-    virtual void slot113();
-    virtual void slot114();
-    virtual void slot115();
-    virtual SceneNode* GetSceneNode();
-    virtual void slot117();
-    virtual void slot118();
-    virtual void slot119();
-    virtual void slot120();
-    virtual void slot121();
-    virtual void slot122();
-    virtual void slot123();
-    virtual void slot124();
-    virtual void slot125();
-    virtual void slot126();
-    virtual void slot127();
-    virtual void slot128();
-    virtual void slot129();
-    virtual void slot130();
-    virtual void slot131();
-    virtual void slot132();
-    virtual void slot133();
-    virtual void slot134();
-    virtual bool IsCreature();
-    virtual void slot136();
-    virtual void slot137();
-    virtual void slot138();
-    virtual void slot139();
-    virtual void slot140();
-    virtual void slot141();
-    virtual void slot142();
-    virtual void slot143();
     virtual void slot144();
     virtual void slot145();
     virtual void slot146();
@@ -2991,12 +2286,8 @@ struct ReferenceView : ExtendedForm
     virtual void slot150();
     virtual void slot151();
     virtual void InitializeProcess();
-    float GetScale();
     float FUN_00598040();
     void FUN_00567490(float);
-    ObjectBaseView* FUN_007af430();
-    bool FUN_00440da0();
-    WorldSpaceView* FUN_00575d70();
     bool FUN_00437b90();
     ProcessView* FUN_008d8520();
     int FUN_00931850();
@@ -3008,7 +2299,8 @@ struct ActorDeletionQueue
     void FUN_0096d470(ReferenceView*, int);
 };
 extern ActorDeletionQueue DAT_011e0e80;
-struct SaveLoadView
+// Additional operation over the shared save/load-game layout.
+struct SaveLoadView : BGSSaveLoadGame
 {
     void FUN_0084a520(ReferenceView*);
 };
@@ -3036,16 +2328,16 @@ void ReconstructionWorker::ReconstructForm(ReconstructDataView* data)
     if (data->pForm->GetIsReference())
     {
         ReferenceView* reference = (ReferenceView*)data->pForm;
-        SceneNode* sceneNode = reference->GetSceneNode();
-        if (sceneNode && sceneNode->GetFloatAt64() != reference->GetScale())
+        SceneNode* sceneNode = reinterpret_cast<SceneNode*>(reference->GetNiNode());
+        if (sceneNode && sceneNode->GetFloatAt64() != reference->FUN_00567400())
             reference->FUN_00567490(reference->FUN_00598040());
-        if (data->FUN_00461580(8) && reference->FUN_007af430()->FUN_00549580() && reference->FUN_00440da0())
+        if (data->FUN_00461580(8) && reinterpret_cast<ObjectBaseView*>(reference->FUN_007af430())->FUN_00549580() && reference->FUN_00440da0())
         {
-            WorldSpaceView* world = reference->FUN_00575d70();
+            WorldSpaceView* world = reinterpret_cast<WorldSpaceView*>(reference->FUN_00575d70());
             if (world)
                 world->FUN_00586170(reference, true)->FUN_006fcfa0();
         }
-        if (reference->IsMobile())
+        if (reference->IsMobileObject())
         {
             ReferenceView* mobile = reference;
             if (mobile->FUN_00437b90())
@@ -3066,7 +2358,7 @@ void ReconstructionWorker::ReconstructForm(ReconstructDataView* data)
             {
                 ReferenceView* actor = mobile;
                 ((SaveLoadView*)g_BGSSaveLoadGame)->FUN_0084a520(actor);
-                if (data->FUN_00461580(8) && actor->GetSceneNode())
+                if (data->FUN_00461580(8) && actor->GetNiNode())
                 {
                     if (actor->IsCreature())
                     {
@@ -3082,7 +2374,7 @@ void ReconstructionWorker::ReconstructForm(ReconstructDataView* data)
             }
         }
     }
-    else if (((ExtendedForm*)data->pForm)->IsSecondaryForm())
+    else if (((ExtendedForm*)data->pForm)->Unk_3E())
     {
         MultipleForm* form = (MultipleForm*)data->pForm;
         SecondaryForm* secondary = form;
@@ -3195,7 +2487,6 @@ FUN_00844470::~FUN_00844470()
 
 // Prior reconstruction by another contributor (2026-10-23); unverified; attribution retained.
 
-struct RebuildFile;
 
 struct RebuildForm
 {
@@ -3222,29 +2513,17 @@ struct RebuildHeader
     unsigned int type, sizeXA, label, group, formId4;
 };
 
-struct RebuildFile
+// TESFile does not yet expose these two reconstruction operations.
+struct ReconstructionFileOperations : TESFile
 {
-
     void ResetFileState(bool);
-    RebuildHeader* FUN_00462270();
-    void FUN_00472150(bool);
-    void FUN_00473660();
-    bool FUN_00471ca0();
-
-    unsigned int GetNextChunk();
-    void GetChunkData(void*, unsigned int);
-    bool FUN_00401680();
-    bool FUN_004726f0();
     void SkipCurrentForm();
-
-    unsigned int FUN_00467bb0();
-    void FUN_004723a0(RebuildForm*);
 };
 
 struct RebuildMap
 {
 
-    bool Lookup(unsigned int, RebuildMap**);
+    bool FUN_00853130(unsigned int, RebuildMap**);
 
     bool HasFlagInAnyFile(int);
     bool FUN_00452420(unsigned int);
@@ -3281,12 +2560,8 @@ struct RebuildOutput
     void FUN_00843270(RebuildResult*);
 };
 
-struct RebuildLoader
-{
-    void FUN_00467bd0(RebuildFile*, int, RebuildForm*, bool);
-};
 
-void ResolveFormID(unsigned int*, RebuildFile*);
+void ResolveFormID(unsigned int*, TESFile*);
 
 unsigned int PackShortPair(unsigned short, unsigned short);
 
@@ -3303,32 +2578,20 @@ extern unsigned int DAT_01187014, DAT_01187020, DAT_011872b4, DAT_01187314, DAT_
 
 extern RebuildForm* DAT_011c3f30;
 
-extern RebuildLoader* DAT_011c3f2c;
-
-struct RebuildRoot : RebuildMap
-{
-
-    unsigned int unk00, unk04, unk08, unk0c;
-
-    RebuildMap* defaultMap;
-    RebuildMap* worlds;
-    unsigned int count;
-
-    void RebuildForms(RebuildFile*, RebuildOutput*);
-};
+extern TESDataHandler* DAT_011c3f2c;
 
 // Walks a RebuildFile, resolving world/block/record context and reconstructing forms into output, queueing pending results as needed.
 // @fnv 0x008427f0
-void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
+void BGSReconstructFormsInFileMap::BuildMap(TESFile* file, FormChangeMap* output)
 
 {
 
-    if (!count)
+    if (!static_cast<unsigned int>(iCount))
         return;
 
-    file->ResetFileState(true);
+    static_cast<ReconstructionFileOperations*>(file)->ResetFileState(true);
 
-    RebuildHeader* pData7 = file->FUN_00462270();
+    RebuildHeader* pData7 = reinterpret_cast<RebuildHeader*>(file->GetRecordHeader());
 
     while (pData7->type == DAT_01187014)
         file->FUN_00472150(true);
@@ -3346,7 +2609,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
 
     DAT_011c3f30 = 0;
 
-    bool cached = file->FUN_00471ca0();
+    bool cached = file->GetCached();
 
     unsigned int restoredA = 0;
 
@@ -3358,7 +2621,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
 
     bool pending4 = false;
 
-    while (pData7->type && restoredA < count)
+    while (pData7->type && restoredA < static_cast<unsigned int>(iCount))
     {
 
         RebuildResult result;
@@ -3376,7 +2639,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
                 if (isWorld)
                 {
 
-                    if (worlds)
+                    if (reinterpret_cast<RebuildMap*>(m_pExteriorMap))
                         file->FUN_00472150(true);
 
                     else
@@ -3385,9 +2648,9 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
                 else
                 {
 
-                    if (defaultMap)
+                    if (reinterpret_cast<RebuildMap*>(m_pInteriorMap))
                     {
-                        world8 = defaultMap;
+                        world8 = reinterpret_cast<RebuildMap*>(m_pInteriorMap);
                         file->FUN_00472150(true);
                     }
 
@@ -3411,7 +2674,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
 
                     ResolveFormID(&id, file);
 
-                    if (worlds->Lookup(id, &world8))
+                    if (reinterpret_cast<RebuildMap*>(m_pExteriorMap)->FUN_00853130(id, &world8))
                     {
 
                         if (cached && world8->HasFlagInAnyFile(5))
@@ -3431,7 +2694,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
                 case 2:
                 case 4:
 
-                    if (world8->Lookup(pData7->label, &block3))
+                    if (world8->FUN_00853130(pData7->label, &block3))
                         file->FUN_00472150(true);
 
                     else
@@ -3445,7 +2708,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
                 case 3:
                 case 5:
 
-                    if (block3->Lookup(pData7->label, &subBlock))
+                    if (block3->FUN_00853130(pData7->label, &subBlock))
                         file->FUN_00472150(true);
 
                     else
@@ -3509,7 +2772,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
             else
             {
 
-                if (Lookup(pData7->label, &recordC))
+                if (GetAt(pData7->label, reinterpret_cast<BGSReconstructFormsMap*&>(recordC)))
                     file->FUN_00472150(true);
 
                 else
@@ -3540,7 +2803,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
 
                     FUN_00403d30(&coords9, 0, 12);
 
-                    unsigned int type3 = file->GetNextChunk();
+                    unsigned int type3 = file->FUN_004726b0();
 
                     while (type3)
                     {
@@ -3548,30 +2811,30 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
                         if (type3 == 0x434c4358)
                         {
 
-                            file->GetChunkData(&coords9, 12);
+                            file->FUN_00472890(&coords9, 12);
 
-                            if (file->FUN_00401680())
+                            if (file->IsEndianConversionRequired())
                                 coords9.FUN_00462230();
 
                             break;
                         }
-                        type3 = file->FUN_004726f0() ? file->GetNextChunk() : 0;
+                        type3 = file->FUN_004726f0() ? file->FUN_004726b0() : 0;
                     }
 
-                    file->SkipCurrentForm();
+                    static_cast<ReconstructionFileOperations*>(file)->SkipCurrentForm();
 
                     key = PackShortPair((unsigned short)coords9.x, (unsigned short)coords9.y);
                 }
 
                 DAT_011c3f30 = 0;
 
-                if (subBlock->Lookup(key, &recordC))
+                if (subBlock->FUN_00853130(key, &recordC))
                 {
 
                     if (recordC->FUN_00452420(1))
                     {
 
-                        DAT_011c3f2c->FUN_00467bd0(file, 0, 0, false);
+                        DAT_011c3f2c->ConstructObject(file, false, 0, false);
 
                         file->FUN_00472150(true);
 
@@ -3582,7 +2845,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
 
                             RebuildResult cell(form, recordC->FUN_0044edb0());
 
-                            output->FUN_00843270(&cell);
+                            reinterpret_cast<RebuildOutput*>(output)->FUN_00843270(&cell);
                         }
                         else
                             FUN_00845cc0("Cell with Form ID %08X was not able to be reconstructed", formId4);
@@ -3643,7 +2906,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
                 if (formId4 && (!DAT_011c3f30 || DAT_011c3f30->FUN_0084e3a0() != formId4))
                     DAT_011c3f30 = FUN_004839c0(formId4);
 
-                DAT_011c3f2c->FUN_00467bd0(file, 0, item.form, true);
+                DAT_011c3f2c->ConstructObject(file, false, reinterpret_cast<TESForm*>(item.form), true);
 
                 file->FUN_00472150(true);
 
@@ -3651,7 +2914,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
                     item.form = FUN_004839c0(id);
 
                 if (item.form)
-                    output->FUN_00843270(&item);
+                    reinterpret_cast<RebuildOutput*>(output)->FUN_00843270(&item);
 
                 else
                     FUN_00845cc0("Form %08X with type %s was not able to be reconstructed", id,
@@ -3663,7 +2926,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
                 file->FUN_00472150(true);
         }
 
-        if (groupEndA && groupEndA <= file->FUN_00467bb0())
+        if (groupEndA && groupEndA <= file->GetOffset())
         {
 
             if (queued3.FUN_0044ddc0() > next4)
@@ -3676,7 +2939,7 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
         if (result.FUN_005ca4f0())
         {
 
-            file->FUN_004723a0(result.form);
+            file->SetOffset(reinterpret_cast<unsigned int>(result.form));
 
             unsigned int sizeXA = 0;
 
@@ -3701,14 +2964,14 @@ void RebuildRoot::RebuildForms(RebuildFile* file, RebuildOutput* output)
             formId4 = 0;
             idA = 0;
 
-            groupEndA = file->FUN_00467bb0() + sizeXA;
+            groupEndA = file->GetOffset() + sizeXA;
 
             if (key17)
             {
 
                 idA = key17;
 
-                worlds->Lookup(idA, &world8);
+                reinterpret_cast<RebuildMap*>(m_pExteriorMap)->FUN_00853130(idA, &world8);
             }
             else
             {
@@ -3732,72 +2995,42 @@ struct MapValue41f
 {
     virtual ~MapValue41f();
 };
-struct MapBase41f
-{
-    virtual ~MapBase41f();
-};
-struct MapOwner841 : MapBase41f
-{
-    void* FUN_004b9ba0();
-    void FUN_006b7f20(void*& pos, unsigned int& key, MapValue41f*& data);
-    virtual ~MapOwner841();
-};
 // Iterates the map via FUN_004b9ba0 and FUN_006b7f20, deleting each MapValue41f data entry.
 // @fnv 0x00841f00
-MapOwner841::~MapOwner841()
+BGSReconstructWorldSpacesMap::~BGSReconstructWorldSpacesMap()
 {
-    void* pos = FUN_004b9ba0();
+    void* pos = reinterpret_cast<NiTPointerMap<unsigned int, MapValue41f*>*>(this)->GetFirstPos();
     while (pos)
     {
         unsigned int key = 0;
         MapValue41f* data = 0;
-        FUN_006b7f20(pos, key, data);
+        reinterpret_cast<NiTPointerMap<unsigned int, MapValue41f*>*>(this)->GetNext(pos, key, data);
         delete data;
     }
 }
 
-struct ReconstructCellEntry : FUN_00841190
+struct ReconstructCellEntry : BGSReconstructFormsMap
 {
     void AddFlags(int aiFlags);
     void SetData(void* apCell, unsigned int auiArg1, unsigned int auiArg2);
 };
 
-struct ReconstructCell
-{
-    bool IsInterior();
-    unsigned int GetFormIDKey();
-    int GetPosX();
-    int GetPosY();
-};
-
-int __cdecl TESWorldSpace_GetKeyForCellCoord(short x, short y);
-
-struct ReconstructCellMap
-{
-    bool GetAt(unsigned int key, ReconstructCellEntry*& entry) const;
-    void SetAt(unsigned int key, ReconstructCellEntry* entry);
-};
-
-struct BGSReconstructCellsMapImpl : ReconstructCellMap
-{
-    void FUN_00841460(ReconstructCell* apCell, ReconstructCell* apOther, unsigned int auiArg1, unsigned int auiArg2);
-};
 
 // Computes a key for apCell, creates a ReconstructCellEntry in the map if missing, then adds flags or stores apOther with auiArg1 and auiArg2.
 // @fnv 0x00841460
-void BGSReconstructCellsMapImpl::FUN_00841460(ReconstructCell* apCell, ReconstructCell* apOther, unsigned int auiArg1,
+void ReconstructCellsOperations::ProcessCell(TESObjectCELL* apCell, TESObjectCELL* apOther, unsigned int auiArg1,
                                               unsigned int auiArg2)
 {
     unsigned int uiKey4 = 0;
     if (apCell->IsInterior())
-        uiKey4 = apCell->GetFormIDKey();
+        uiKey4 = apCell->GetFormID();
     else
-        uiKey4 = TESWorldSpace_GetKeyForCellCoord(apCell->GetPosX(), apCell->GetPosY());
+        uiKey4 = TESWorldSpace::BuildCellKey(apCell->GetCellGridX(), apCell->GetCellGridY());
 
     ReconstructCellEntry* pEntry = 0;
-    if (!GetAt(uiKey4, pEntry))
+    if (!GetAt(uiKey4, reinterpret_cast<BGSReconstructFormsMap*&>(pEntry)))
     {
-        pEntry = (ReconstructCellEntry*)new FUN_00841190;
+        pEntry = (ReconstructCellEntry*)new BGSReconstructFormsMap;
         SetAt(uiKey4, pEntry);
     }
 
@@ -3813,63 +3046,45 @@ void BGSReconstructCellsMapImpl::FUN_00841460(ReconstructCell* apCell, Reconstru
 }
 
 void FUN_00845cc0(const char* apFormat, ...);
-struct FUN_00843750_Form : public TESForm
+// TESObjectCELL does not yet declare the save-parent lookup at 0x0054DDD0.
+// This method-only adapter uses the shared cell layout.
+struct CellSaveParentLookup : TESObjectCELL
 {
-    virtual void Unk_3D();
-    virtual void Unk_3E();
-    virtual void Unk_3F();
-    virtual void Unk_40();
-    virtual void Unk_41();
-    virtual void Unk_42();
-    virtual void Unk_43();
-    virtual void Unk_44();
-    virtual void Unk_45();
-    virtual void Unk_46();
-    virtual void Unk_47();
-    virtual void Unk_48();
-    virtual void Unk_49();
-    virtual void Unk_4A();
-    virtual void Unk_4B();
-    virtual const char* GetEditorID();
-    unsigned int FUN_0084e3a0();
-    BSSimpleList<TESFile*>* FUN_00460140();
-    FUN_00843750_Form* FUN_0054ddd0();
+    TESObjectCELL* GetSaveParentCell();
 };
-bool __fastcall FUN_00425fd0(FUN_00843750_Form* apForm);
-struct FUN_00842600_shell : public FUN_00842180
+bool __fastcall FUN_00425fd0(TESObjectCELL* apForm);
+struct FileReferenceOperations : public BGSReconstructFormsInFileMap
 {
-    void ProcessCell(FUN_00843750_Form* apForm, int aiUnused, unsigned int auiArg1, unsigned int auiArg2);
+    void ProcessCell(TESObjectCELL* apForm, int aiUnused, unsigned int auiArg1, unsigned int auiArg2);
 };
-struct FUN_00843750_shell : public BGSReconstructFormsInAllFilesMap
+struct ReconstructFilesCellOperations : public BGSReconstructFormsInAllFilesMap
 {
-    bool Lookup(TESFile* apFile, FUN_00842180*& rpMap) const;
-    void FUN_00844700(TESFile* apFile, FUN_00842180* apMap);
-    void FUN_00843750(FUN_00843750_Form* apRef, unsigned int auiArg1, unsigned int auiArg2);
+    void FUN_00843750(TESObjectCELL* apRef, unsigned int auiArg1, unsigned int auiArg2);
 };
 // Adds a form reference to the per-file map, creating the map if needed, and increments iCount.
 // @fnv 0x00843750
-void FUN_00843750_shell::FUN_00843750(FUN_00843750_Form* apRef, unsigned int auiArg1, unsigned int auiArg2)
+void ReconstructFilesCellOperations::FUN_00843750(TESObjectCELL* apRef, unsigned int auiArg1, unsigned int auiArg2)
 {
     if (!apRef)
         return;
     TESFile* pFile = 0;
     if (FUN_00425fd0(apRef))
-        pFile = ((FUN_00843fe0_Holder*)this)->FUN_00843fe0(apRef->FUN_00460140(), auiArg1);
+        pFile = ((ReconstructFilesSourceLookup*)this)->FUN_00843fe0(apRef->GetSourceFiles(), auiArg1);
     else
-        pFile = ((FUN_00843fe0_Holder*)this)->FUN_00843fe0(apRef->FUN_0054ddd0()->FUN_00460140(), auiArg1);
+        pFile = ((ReconstructFilesSourceLookup*)this)->FUN_00843fe0(static_cast<CellSaveParentLookup*>(apRef)->GetSaveParentCell()->GetSourceFiles(), auiArg1);
     if (!pFile)
     {
         FUN_00845cc0("Cell %08X %s with no file passed to BGSReconstructFormsInAllFilesMap::AddReference()",
-                     apRef->FUN_0084e3a0(), apRef->GetEditorID());
+                     apRef->FUN_0084e3a0(), apRef->GetName());
         return;
     }
-    FUN_00842180* pFileMap = 0;
-    if (!Lookup(pFile, pFileMap))
+    BGSReconstructFormsInFileMap* pFileMap = 0;
+    if (!GetAt(pFile, pFileMap))
     {
-        pFileMap = new FUN_00842180;
-        FUN_00844700(pFile, pFileMap);
+        pFileMap = new BGSReconstructFormsInFileMap;
+        SetAt(pFile, pFileMap);
     }
-    ((FUN_00842600_shell*)pFileMap)->ProcessCell(apRef, 0, auiArg1, auiArg2);
+    ((FileReferenceOperations*)pFileMap)->ProcessCell(apRef, 0, auiArg1, auiArg2);
     iCount++;
 }
 
@@ -3889,3 +3104,4 @@ void* __thiscall ReconstructMapDeletingView::FUN_00843440(unsigned int flags)
         _Deallocate(this);
     return this;
 }
+

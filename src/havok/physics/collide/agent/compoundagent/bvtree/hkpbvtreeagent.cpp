@@ -2,6 +2,10 @@
 // src/havok/physics/collide/agent/compoundagent/bvtree/hkpbvtreeagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/compoundagent/bvtree/hkpbvtreeagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/Transform.h"
+
 struct S_d2f5a0_Obj
 {
     virtual void v0();
@@ -21,20 +25,7 @@ struct S_d2f5a0_Entry
     int unk4;
     S_d2f5a0_Obj* m_obj;
 };
-struct S_d2f5a0_Array
-{
-    S_d2f5a0_Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    S_d2f5a0_Entry* begin()
-    {
-        return m_data;
-    }
-    S_d2f5a0_Entry* end()
-    {
-        return m_data + m_iElementCount;
-    }
-};
+typedef hkArrayBase<S_d2f5a0_Entry> S_d2f5a0_Array;
 struct S_d2f5a0
 {
     int unk0;
@@ -52,27 +43,6 @@ void S_d2f5a0::FUN_00d2f5a0(int a)
             it->m_obj->v9(a);
 }
 
-struct __declspec(align(16)) Transform
-{
-    float m_f00;
-    float m_f04;
-    float m_f08;
-    float m_f0c;
-    float m_f10;
-    float m_f14;
-    float m_f18;
-    float m_f1c;
-    float m_f20;
-    float m_f24;
-    float m_f28;
-    float m_f2c;
-    float m_f30;
-    float m_f34;
-    float m_f38;
-    float m_f3c;
-
-    Transform(void* apFirst, void* apSecond);
-};
 
 struct TargetObject
 {
@@ -104,7 +74,7 @@ struct ValueSource
 // @fnv 0x00d2f710
 void __cdecl ApplyTransformToTarget(Holder* apFirst, Holder* apSecond, ValueSource* apValue, void* apContext)
 {
-    Transform kTransform(apSecond->m_pData, apFirst->m_pData);
+    __declspec(align(16)) Transform kTransform(apSecond->m_pData, apFirst->m_pData);
     apFirst->m_pFlagTarget->Apply(&kTransform, apValue->m_fAmount, apContext);
 }
 
@@ -113,14 +83,6 @@ struct Allocator
     virtual void* release();
     virtual void* allocate(int size);
 };
-struct Global
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    Allocator* allocator;
-};
 struct Built
 {
     int field00;
@@ -128,13 +90,13 @@ struct Built
     int field08;
     void __thiscall FUN_00d2f980(int);
 };
-extern "C" Global* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
 // Allocates a 0x40-byte Built from the global allocator, sets its field04 to 0x40, and calls FUN_00d2f980 with arg4.
 // @fnv 0x00d2f9d0
 void __cdecl FUN_00d2f9d0(int aiUnused1, int aiUnused2, int aiUnused3, int arg4)
 {
-    Global* global = FUN_00c85750();
-    Built* pBuilt = (Built*)global->allocator->allocate(0x40);
+    hkMemoryRouter* global = FUN_00c85750();
+    Built* pBuilt = (Built*)global->m_heap->blockAlloc(0x40);
     pBuilt->field04 = 0x40;
     pBuilt->FUN_00d2f980(arg4);
 }
@@ -169,22 +131,8 @@ struct D2FA00Allocator
     virtual void* AllocateMemoryBlock(int numBytes);
 };
 
-struct D2FA00MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    D2FA00Allocator* m_pStreamAllocator;
-
-    D2FA00Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
 namespace fnvc_adapt {
-extern "C" D2FA00MemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 }
 
 class D2FA00ReferencedObject
@@ -193,7 +141,7 @@ class D2FA00ReferencedObject
     static void* operator new(unsigned int nbytes)
     {
         D2FA00ReferencedObject* b =
-            static_cast<D2FA00ReferencedObject*>(fnvc_adapt::FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
+            static_cast<D2FA00ReferencedObject*>(reinterpret_cast<D2FA00Allocator*>((&fnvc_adapt::FUN_00c85750().heap()))->AllocateMemoryBlock(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -347,30 +295,13 @@ struct EntryD2F5
     ListenerD2F5* m_pkListener;
 };
 
-template <class T> class hkArrayD2F5
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    T* begin()
-    {
-        return m_data;
-    }
-    T* end()
-    {
-        return m_data + m_iElementCount;
-    }
-};
-
 class OwnerD2F5
 {
   public:
     virtual ~OwnerD2F5();
 
     int unk04[2];
-    hkArrayD2F5<EntryD2F5> m_entries;
+    hkArray<EntryD2F5> m_entries;
 
     void FUN_00d2f550(void* pArg);
 };
@@ -473,6 +404,7 @@ struct ShapeCollection : HkShape
     virtual const ShapeContainer* GetShapeContainer() const;
 };
 
+// local form of hkpCdBody: 0x00d2f760 needs inline parent construction/getShape/SetCollisionShapeAndKey; canonical form does not reproduce exe bytes.
 struct CdBody
 {
     const HkShape* m_pCollisionShape;
@@ -697,20 +629,7 @@ struct CollisionAgentMapRecord
     CollisionAgent* m_pCollisionAgent;
 };
 
-struct AgentArray
-{
-    CollisionAgentMapRecord* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    CollisionAgentMapRecord& operator[](int i)
-    {
-        return m_data[i];
-    }
-};
+typedef hkArrayBase<CollisionAgentMapRecord> AgentArray;
 
 class ShapeCollectionAgent
 {
@@ -896,19 +815,12 @@ struct S_00d30f50_Heap
     virtual void ReturnMemory(void* p, int numBytes);
 };
 
-struct S_00d30f50_Router
-{
-    int unk00, unk04, unk08, unk0C;
-    S_00d30f50_Heap* unk10;
-    static S_00d30f50_Router& FUN_00c85750();
-    S_00d30f50_Heap& heap()
-    {
-        return *unk10;
-    }
-};
+namespace fnv_linear_cast {
+hkMemoryRouter& __cdecl FUN_00c85750();
+}
 
-template <class T> struct S_00d30f50_Array
-{
+template <class T> struct S_00d30f50_ArrayLocalForm
+{ // local form of hkArray: 0x00d30f50 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -938,13 +850,13 @@ template <class T> struct S_00d30f50_Array
         m_data = 0;
         m_iCapacityState = 0x80000000;
     }
-    ~S_00d30f50_Array() throw()
+    ~S_00d30f50_ArrayLocalForm() throw()
     {
-        _clearAndDeallocate(S_00d30f50_Router::FUN_00c85750().heap());
+        _clearAndDeallocate(*reinterpret_cast<S_00d30f50_Heap*>((&fnv_linear_cast::FUN_00c85750().heap())));
     }
 };
 
-template <class T, int N> struct S_00d30f50_InplaceArray : S_00d30f50_Array<T>
+template <class T, int N> struct S_00d30f50_InplaceArray : S_00d30f50_ArrayLocalForm<T>
 {
     T m_kStorage[N];
     S_00d30f50_InplaceArray() throw()
@@ -1005,7 +917,7 @@ struct S_00d30f50_BvTreeShape : S_00d30f50_Shape
     virtual void v24();
     virtual void v28();
     virtual void v2C();
-    virtual void GetAabbHits(const S_00d30f50_Aabb& aabb, S_00d30f50_Array<unsigned int>& hits) const;
+    virtual void GetAabbHits(const S_00d30f50_Aabb& aabb, S_00d30f50_ArrayLocalForm<unsigned int>& hits) const;
 };
 
 struct S_00d30f50_MotionState;
@@ -1270,15 +1182,6 @@ struct FloatOwner
     FloatSub* m_08;
 };
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pAllocator;
-};
-
 class SlotAllocator
 {
   public:
@@ -1294,7 +1197,7 @@ struct SpawnedObject
     SpawnedObject* FUN_00d2f980(int arg);
 };
 
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 
 // Allocates a 0x40-byte object and calls FUN_00d2f980 with a4; unless the first m_a0 is less than the second, it then calls the destructor; returns the object.
 // @fnv 0x00d2fa40
@@ -1304,14 +1207,14 @@ SpawnedObject* FUN_00d2fa40(FloatOwner* apFirstOwner, FloatOwner* apSecondOwner,
     FloatSub* pSecondSub = apSecondOwner->m_08;
     if (pFirstSub->m_a0 < pSecondSub->m_a0)
     {
-        AllocHolder* holder = FUN_00c85750();
-        SlotAllocator* alloc = (SlotAllocator*)holder->m_pAllocator;
+        hkMemoryRouter* holder = FUN_00c85750();
+        SlotAllocator* alloc = (SlotAllocator*)holder->m_heap;
         SpawnedObject* obj = (SpawnedObject*)alloc->Alloc(0x40);
         obj->m_04 = 0x40;
         return obj->FUN_00d2f980(a4);
     }
-    AllocHolder* holder = FUN_00c85750();
-    SlotAllocator* alloc = (SlotAllocator*)holder->m_pAllocator;
+    hkMemoryRouter* holder = FUN_00c85750();
+    SlotAllocator* alloc = (SlotAllocator*)holder->m_heap;
     SpawnedObject* obj = (SpawnedObject*)alloc->Alloc(0x40);
     obj->m_04 = 0x40;
     obj->FUN_00d2f980(a4);
@@ -1581,9 +1484,9 @@ extern "C" void __cdecl FUN_00d31110(void* apBodyA, void* apBodyB, void* apInput
         }
     }
 
-    Global* g = FUN_00c85750();
+    hkMemoryRouter* g = FUN_00c85750();
     int iCapFlags = hits.m_capFlags;
-    S00d31110_Free* pAllocator = (S00d31110_Free*)g->allocator;
+    S00d31110_Free* pAllocator = (S00d31110_Free*)g->m_heap;
     hits.m_iElementCount = 0;
     if ((iCapFlags & 0x80000000) == 0)
         pAllocator->deallocate(hits.m_data, (iCapFlags & 0x3fffffff) * 4);

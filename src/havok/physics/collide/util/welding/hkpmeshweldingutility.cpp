@@ -1,6 +1,53 @@
+#include "../../../../../../include/hkArray.h"
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
 
 // src/havok/physics/collide/util/welding/hkpmeshweldingutility.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/util/welding/hkpmeshweldingutility.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../include/hkVector4.h"
+
+#include "../../../../../../include/Vec4.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkVector4q.h"
+#include "../../../../../../include/hkpTriangleShape.h"
+#include "../../../../../../include/hkpShape.h"
+#include "../../../../../../include/hkpShapeContainer.h"
+
+// Keep the original intrinsic storage view: VC9 treats the byte arrays in the
+// CRT's __m128 as GS buffers and changes parameter copies in these functions.
+namespace welding_simd {
+// Exe 0x00ddd6f0 FUN_00ddd6f0: retain this LocalM128 view; the CRT type does not reproduce this function.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C"
+{
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_cmple_ps(LocalM128, LocalM128);
+    LocalM128 _mm_load_ps1(const float*);
+    int _mm_movemask_ps(LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+    LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_rsqrt_ss(LocalM128);
+    LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+    LocalM128 _mm_set_ss(float);
+    void _mm_store_ss(float*, LocalM128);
+    LocalM128 _mm_load_ps(const float*);
+    void _mm_store_ps(float*, LocalM128);
+}
+}  // namespace welding_simd
 
 struct Record
 {
@@ -55,13 +102,14 @@ void FUN_00ddeb70(Record* records, int left, int right, int comparator)
         FUN_00ddeb70(records, i, right, comparator);
 }
 
-struct DynamicArray
+// Exe 0x00ddecb0: unit-local DynamicArray view; declarations and layout are preserved.
+struct HkpmeshweldingutilityDynamicArrayView
 {
     void SpliceElements(int a, int b, int c, int d, int e);
     void FUN_00ddecb0(int a, int b, int c, int d);
 };
 // @fnv 0x00ddecb0
-void DynamicArray::FUN_00ddecb0(int a, int b, int c, int d)
+void HkpmeshweldingutilityDynamicArrayView::FUN_00ddecb0(int a, int b, int c, int d)
 {
     SpliceElements(a, b, 0, c, d);
 }
@@ -72,26 +120,21 @@ struct S_00ddecf0_Key
     float a;
     float b;
 };
-struct S_00ddecf0_Heap;
-struct S_00ddecf0_Router
+
+// This entry point is nonthrowing in the game; array cleanup depends on that contract.
+__declspec(nothrow) hkMemoryRouter* FUN_00c85750();
+
+
+template <typename T> __forceinline void hkMemoryAllocator::_bufFree(void* p, int numElem)
 {
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00ddecf0_Heap* m_pStreamAllocator;
-    S_00ddecf0_Heap& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-S_00ddecf0_Router* FUN_00c85750();
+    bufFree(p, numElem * (int)sizeof(T));
+}
 
 struct S_00ddecf0_Array
 {
     S_00ddecf0_Key* m_data;
     int m_iElementCount;
-    void FUN_00ddecd0(S_00ddecf0_Heap& heap, int index, const S_00ddecf0_Key& key);
+    void FUN_00ddecd0(hkMemoryAllocator& heap, int index, const S_00ddecf0_Key& key);
 };
 
 struct S_00ddecf0
@@ -117,7 +160,7 @@ void S_00ddecf0::InsertKey(float t, float a, float b)
     key.t = t;
     key.a = a;
     key.b = b;
-    m_keys.FUN_00ddecd0(FUN_00c85750()->heap(), n, key);
+    m_keys.FUN_00ddecd0(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750()->heap()), n, key);
 }
 
 extern double DAT_010cd5a8;
@@ -148,16 +191,6 @@ done:
     }
     return n;
 }
-
-struct Iface
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual Iface* GetSub();
-    virtual void* Query(void* key, void* out);
-};
 
 struct FlagTag
 {
@@ -312,14 +345,15 @@ __declspec(align(16)) struct QueryBuffer
     unsigned int unk1FC;
 };
 
-int FUN_00dde4c0(Iface* self, void* a, void* b, int idx, int zero, int* out);
+int FUN_00dde4c0(hkpShape* self, const hkpShape* a, void* b, int idx, int zero, int* out);
 
 // Reads a flag, clears it, runs up to three sub-queries via FUN_00dde4c0, sets result false if any returns 1, then restores the flag.
 // @fnv 0x00dde930
-bool* CheckSubQueries(bool* result, void* key, Iface* self)
+bool* CheckSubQueries(bool* result, void* key, hkpShape* self)
 {
     QueryBuffer queryBuf;
-    void* sub = self->GetSub()->Query(key, &queryBuf);
+    const hkpShape* sub = self->GetShapeContainer()->GetShapeForKey(
+        reinterpret_cast<hkpShapeKey>(key), *reinterpret_cast<hkpShapeBuffer*>(&queryBuf));
     bool flag;
     DAT_01268360->Read(&flag, 0xfe98751e);
     if (flag)
@@ -360,41 +394,22 @@ struct S_00ddeab0_Elem
     {}
 };
 
-struct S_00ddeab0
-{
-    S_00ddeab0_Elem* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+static __forceinline void S_00ddeab0_GrowArrayCapacity(hkArrayBase<S_00ddeab0_Elem>& self, void* alloc, int numElems);
 
-    __forceinline void GrowArrayCapacity(void* alloc, int numElems)
-    {
-        int cap = m_iCapacityState & 0x3fffffff;
+static __forceinline void S_00ddeab0_GrowArrayCapacity(hkArrayBase<S_00ddeab0_Elem>& self, void* alloc, int numElems)
+{
+        int cap = self.m_iCapacityState & 0x3fffffff;
         if (cap < numElems)
         {
             int cap2 = cap + cap;
             int newcap = (numElems < cap2) ? cap2 : numElems;
-            FUN_00c908c0(alloc, this, newcap, 12);
+            FUN_00c908c0(alloc, (&self), newcap, 12);
         }
     }
 
-    void SpliceElements(void* alloc, int index, int numdel, const S_00ddeab0_Elem* p, int numtoinsert);
-};
-
 // Replaces numdel elements at index with numtoinsert copies from p, shifting the tail and growing the buffer if needed.
 // @fnv 0x00ddeab0
-void S_00ddeab0::SpliceElements(void* alloc, int index, int numdel, const S_00ddeab0_Elem* apElems, int aiNumInsert)
-{
-    int newsize = m_iElementCount - numdel + aiNumInsert;
-    unsigned int numtomove = m_iElementCount - index - numdel;
-    GrowArrayCapacity(alloc, newsize);
-    FUN_00d2cc70(&m_data[index + aiNumInsert], &m_data[index + numdel], numtomove * 12);
-    S_00ddeab0_Elem* dst = m_data + index;
-    for (int i = 0; i < aiNumInsert; ++i)
-    {
-        new (&dst[i]) S_00ddeab0_Elem(apElems[i]);
-    }
-    m_iElementCount = newsize;
-}
+
 
 struct S_00ddecd0
 {
@@ -407,57 +422,26 @@ void S_00ddecd0::FUN_00ddecd0(int aiArg1, int aiArg2, int aiArg3)
     FUN_00ddecb0(aiArg1, aiArg2, aiArg3, 1);
 }
 
-struct FourFloatVector
-{
-    float x, y, z, w;
-};
-
-struct Transform
-{
-    int pad[8];
-    FourFloatVector v0;
-    FourFloatVector v1;
-    FourFloatVector v2;
-};
-
-struct ObjInner
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual Transform* GetTransform(void* p1, void* buffer);
-};
-
-struct ObjOuter
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual ObjInner* GetInner();
-};
-
 struct LocalBuffer
 {
     __declspec(align(16)) int data[125];
 };
 
-char* IsDegenerateTriangle(char* out, const FourFloatVector* v0, const FourFloatVector* v1, const FourFloatVector* v2,
+char* IsDegenerateTriangle(char* out, const hkVector4* v0, const hkVector4* v1, const hkVector4* v2,
                            float eps);
-int FUN_00dde4c0(ObjOuter* p2, Transform* trans, void* p1, int i, void* p3, int* outLocal);
+int FUN_00dde4c0(hkpShape* p2, const hkpTriangleShape* trans, void* p1, int i, void* p3, int* outLocal);
 
 // @fnv 0x00dde880
-int __cdecl CheckTransformAndProcess(void* p1, ObjOuter* pOuter, void* p3, short* outWord)
+int __cdecl CheckTransformAndProcess(void* p1, hkpShape* pOuter, void* p3, short* outWord)
 {
     LocalBuffer buffer;
     char checkResult;
 
-    ObjInner* inner = pOuter->GetInner();
-    Transform* trans = inner->GetTransform(p1, &buffer);
+    const hkpShapeContainer* inner = pOuter->GetShapeContainer();
+    const hkpTriangleShape* trans = static_cast<const hkpTriangleShape*>(
+        inner->GetShapeForKey(reinterpret_cast<hkpShapeKey>(p1), *reinterpret_cast<hkpShapeBuffer*>(&buffer)));
 
-    if (*IsDegenerateTriangle(&checkResult, &trans->v0, &trans->v1, &trans->v2, 1.0e-7f) != 0)
+    if (*IsDegenerateTriangle(&checkResult, reinterpret_cast<const hkVector4*>(&trans->m_kVertexA), reinterpret_cast<const hkVector4*>(&trans->m_kVertexB), reinterpret_cast<const hkVector4*>(&trans->m_kVertexC), 1.0e-7f) != 0)
     {
         *outWord = 0;
         return 1;
@@ -477,184 +461,127 @@ int __cdecl CheckTransformAndProcess(void* p1, ObjOuter* pOuter, void* p3, short
     return local2;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_and_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_cmple_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_load_ps1(const float* p);
-extern "C" int _mm_movemask_ps(__m128 a);
-
 extern const float DAT_01017d00;
-extern const __m128 DAT_01017d10;
+extern const welding_simd::LocalM128 DAT_01017d10;
 
-class hkBoolDDCE
+inline bool WeldingVectorsEqual3(const hkVector4& a, const hkVector4& b)
 {
-  public:
-    hkBoolDDCE(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-
-    char m_cBooleanValue;
-};
-
-struct hkVector4DDCE
-{
-    __m128 m_vComponents;
-
-    bool equals3(const hkVector4DDCE& v) const
-    {
-        __m128 t = _mm_sub_ps(m_vComponents, v.m_vComponents);
-        t = _mm_and_ps(t, DAT_01017d10);
-        const __m128 eps = _mm_load_ps1(&DAT_01017d00);
-        return (_mm_movemask_ps(_mm_cmple_ps(t, eps)) & 7) == 7;
-    }
-};
-
-struct hkTransformHolderDDCE
-{
-    unsigned int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
-    hkVector4DDCE m_kColumn0;
-    hkVector4DDCE m_kColumn1;
-    hkVector4DDCE m_kColumn2;
-};
+    welding_simd::LocalM128 t = welding_simd::_mm_sub_ps(
+        reinterpret_cast<const welding_simd::LocalM128&>(a), reinterpret_cast<const welding_simd::LocalM128&>(b));
+    t = welding_simd::_mm_and_ps(t, DAT_01017d10);
+    const welding_simd::LocalM128 eps = welding_simd::_mm_load_ps1(&DAT_01017d00);
+    return (welding_simd::_mm_movemask_ps(welding_simd::_mm_cmple_ps(t, eps)) & 7) == 7;
+}
 
 struct hkUtilDDCE
 {
-    static hkBoolDDCE FUN_00ddced0(const hkTransformHolderDDCE& kA, const hkTransformHolderDDCE& kB);
+    static hkBool FUN_00ddced0(const hkpTriangleShape& kA, const hkpTriangleShape& kB);
 };
 
-// Returns true when the three column vectors of kA and kB are all equal within epsilon, using hkVector4DDCE::equals3.
+// Returns true when the three vertices of kA and kB are all equal within epsilon.
 // @fnv 0x00ddced0
-hkBoolDDCE hkUtilDDCE::FUN_00ddced0(const hkTransformHolderDDCE& kA, const hkTransformHolderDDCE& kB)
+hkBool hkUtilDDCE::FUN_00ddced0(const hkpTriangleShape& kA, const hkpTriangleShape& kB)
 {
-    return kA.m_kColumn0.equals3(kB.m_kColumn0) && kA.m_kColumn1.equals3(kB.m_kColumn1) &&
-           kA.m_kColumn2.equals3(kB.m_kColumn2);
+    return WeldingVectorsEqual3(kA.m_kVertexA, kB.m_kVertexA) && WeldingVectorsEqual3(kA.m_kVertexB, kB.m_kVertexB) &&
+           WeldingVectorsEqual3(kA.m_kVertexC, kB.m_kVertexC);
+}
+
+namespace fnv_00ddd940 { extern welding_simd::LocalM128 DAT_010c4c00; }
+
+inline welding_simd::LocalM128& WeldingQuad(hkVector4& v)
+{
+    return reinterpret_cast<welding_simd::LocalM128&>(v.m_vComponents);
+}
+inline const welding_simd::LocalM128& WeldingQuad(const hkVector4& v)
+{
+    return reinterpret_cast<const welding_simd::LocalM128&>(v.m_vComponents);
+}
+
+__forceinline void hkVector4::operator=(const hkVector4& v)
+{
+    WeldingQuad(*this) = WeldingQuad(v);
+}
+__forceinline hkReal& hkVector4::operator()(int i)
+{
+    return reinterpret_cast<hkReal*>(&WeldingQuad(*this))[i];
+}
+
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    WeldingQuad(*this) = welding_simd::_mm_sub_ps(WeldingQuad(a), WeldingQuad(b));
+}
+__forceinline void hkVector4::setNeg3(const hkVector4& v)
+{
+    WeldingQuad(*this) = welding_simd::_mm_xor_ps(WeldingQuad(v), fnv_00ddd940::DAT_010c4c00);
+}
+__forceinline void hkVector4::setCross(const hkVector4& v0, const hkVector4& v1)
+{
+    welding_simd::LocalM128 cross0 = welding_simd::_mm_mul_ps(welding_simd::_mm_shuffle_ps(WeldingQuad(v0), WeldingQuad(v0), 0xc9),
+                               welding_simd::_mm_shuffle_ps(WeldingQuad(v1), WeldingQuad(v1), 0xd2));
+    welding_simd::LocalM128 cross1 = welding_simd::_mm_mul_ps(welding_simd::_mm_shuffle_ps(WeldingQuad(v0), WeldingQuad(v0), 0xd2),
+                               welding_simd::_mm_shuffle_ps(WeldingQuad(v1), WeldingQuad(v1), 0xc9));
+    WeldingQuad(*this) = welding_simd::_mm_sub_ps(cross0, cross1);
+}
+__forceinline hkReal hkVector4::dot3scalar(const hkVector4& v) const
+{
+    welding_simd::LocalM128 p = welding_simd::_mm_mul_ps(WeldingQuad(*this), WeldingQuad(v));
+    welding_simd::LocalM128 s = welding_simd::_mm_add_ss(welding_simd::_mm_shuffle_ps(p, p, 0x55), p);
+    s = welding_simd::_mm_add_ss(welding_simd::_mm_shuffle_ps(p, p, 0xaa), s);
+    hkReal r;
+    welding_simd::_mm_store_ss(&r, s);
+    return r;
+}
+__forceinline void hkVector4::normalize3()
+{
+    welding_simd::LocalM128 p = welding_simd::_mm_mul_ps(WeldingQuad(*this), WeldingQuad(*this));
+    welding_simd::LocalM128 len2 = welding_simd::_mm_add_ss(welding_simd::_mm_shuffle_ps(p, p, 0x55), p);
+    len2 = welding_simd::_mm_add_ss(welding_simd::_mm_shuffle_ps(p, p, 0xaa), len2);
+    welding_simd::LocalM128 e = welding_simd::_mm_rsqrt_ss(len2);
+    welding_simd::LocalM128 r = welding_simd::_mm_mul_ss(welding_simd::_mm_mul_ss(welding_simd::_mm_set_ss(0.5f), e),
+                          welding_simd::_mm_sub_ss(welding_simd::_mm_set_ss(3.0f), welding_simd::_mm_mul_ss(welding_simd::_mm_mul_ss(len2, e), e)));
+    r = welding_simd::_mm_andnot_ps(welding_simd::_mm_cmpeq_ss(len2, welding_simd::_mm_set_ss(0.0f)), r);
+    WeldingQuad(*this) = welding_simd::_mm_mul_ps(welding_simd::_mm_shuffle_ps(r, r, 0), WeldingQuad(*this));
 }
 
 namespace fnv_00ddd940 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_set_ss(float);
-    void _mm_store_ss(float*, __m128);
-}
 
 typedef float hkReal;
-
-extern __m128 DAT_010c4c00;
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline hkReal& operator()(int i)
-    {
-        return reinterpret_cast<hkReal*>(&m_vComponents)[i];
-    }
-
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setNeg3(const hkVector4& v)
-    {
-        m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c4c00);
-    }
-    __forceinline void setCross(const hkVector4& v0, const hkVector4& v1)
-    {
-        __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
-                                   _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
-        __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
-                                   _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    __forceinline hkReal dot3(const hkVector4& v) const
-    {
-        __m128 p = _mm_mul_ps(m_vComponents, v.m_vComponents);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
-        s = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
-        hkReal r;
-        _mm_store_ss(&r, s);
-        return r;
-    }
-    __forceinline void normalize3()
-    {
-        __m128 p = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 len2 = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
-        len2 = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), len2);
-        __m128 e = _mm_rsqrt_ss(len2);
-        __m128 r = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e),
-                              _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(len2, e), e)));
-        r = _mm_andnot_ps(_mm_cmpeq_ss(len2, _mm_set_ss(0.0f)), r);
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(r, r, 0), m_vComponents);
-    }
-};
-
-struct TriangleShape
-{
-    int m_kHeader[8];
-    hkVector4 m_kVertices[3];
-};
 
 void FUN_00ddd620(const hkVector4& a, const hkVector4& b, const hkVector4& c, hkVector4& normalOut);
 
 // Builds five planes for a triangle: its normal, the negated normal, and three edge planes (edge crossed with normal, normalized), each offset by -radius.
 // @fnv 0x00ddd940
-void GenerateTrianglePlanes(hkVector4* planes, const TriangleShape* triangle, hkReal radius)
+void GenerateTrianglePlanes(hkVector4* planes, const hkpTriangleShape* triangle, hkReal radius)
 {
     hkVector4 normal;
-    FUN_00ddd620(triangle->m_kVertices[0], triangle->m_kVertices[1], triangle->m_kVertices[2], normal);
+    FUN_00ddd620(triangle->m_kVertexA, triangle->m_kVertexB, triangle->m_kVertexC, normal);
 
     hkReal d = -radius;
 
     hkVector4 e0;
-    e0.setSub4(triangle->m_kVertices[1], triangle->m_kVertices[0]);
+    e0.setSub4(triangle->m_kVertexB, triangle->m_kVertexA);
     hkVector4 e1;
-    e1.setSub4(triangle->m_kVertices[2], triangle->m_kVertices[1]);
+    e1.setSub4(triangle->m_kVertexC, triangle->m_kVertexB);
     hkVector4 e2;
-    e2.setSub4(triangle->m_kVertices[0], triangle->m_kVertices[2]);
+    e2.setSub4(triangle->m_kVertexA, triangle->m_kVertexC);
 
     planes[0] = normal;
-    planes[0](3) = d - planes[0].dot3(triangle->m_kVertices[0]);
+    planes[0](3) = d - planes[0].dot3scalar(triangle->m_kVertexA);
 
     planes[1].setNeg3(normal);
-    planes[1](3) = d - planes[1].dot3(triangle->m_kVertices[0]);
+    planes[1](3) = d - planes[1].dot3scalar(triangle->m_kVertexA);
 
     planes[2].setCross(e0, normal);
     planes[2].normalize3();
-    planes[2](3) = d - planes[2].dot3(triangle->m_kVertices[0]);
+    planes[2](3) = d - planes[2].dot3scalar(triangle->m_kVertexA);
 
     planes[3].setCross(e1, normal);
     planes[3].normalize3();
-    planes[3](3) = d - planes[3].dot3(triangle->m_kVertices[1]);
+    planes[3](3) = d - planes[3].dot3scalar(triangle->m_kVertexB);
 
     planes[4].setCross(e2, normal);
     planes[4].normalize3();
-    planes[4](3) = d - planes[4].dot3(triangle->m_kVertices[2]);
+    planes[4](3) = d - planes[4].dot3scalar(triangle->m_kVertexC);
 }
 }  // namespace fnv_00ddd940
 
@@ -701,16 +628,16 @@ __declspec(align(16)) struct FUN_00ddea00_tmp
 
 __declspec(align(16)) struct FUN_00ddea00_cls
 {
-    __m128 m_v00;
-    __m128 m_v10;
-    __m128 m_v20;
-    __m128 m_v30;
+    welding_simd::LocalM128 m_v00;
+    welding_simd::LocalM128 m_v10;
+    welding_simd::LocalM128 m_v20;
+    welding_simd::LocalM128 m_v30;
     unsigned int m_i40;
 
     FUN_00ddea00_cls* CopyFromSource(const FUN_00ddea00_src* src);
 };
 
-// Copies all fields from the source struct into the __m128 members and m_i40 of this object, then returns this.
+// Copies all fields from the source struct into the welding_simd::__m128 members and m_i40 of this object, then returns this.
 // @fnv 0x00ddea00
 FUN_00ddea00_cls* FUN_00ddea00_cls::CopyFromSource(const FUN_00ddea00_src* src)
 {
@@ -731,43 +658,38 @@ FUN_00ddea00_cls* FUN_00ddea00_cls::CopyFromSource(const FUN_00ddea00_src* src)
     tmp.unk34 = src->unk34;
     tmp.unk38 = src->unk38;
     unsigned int uiLastWord = src->unk3C;
-    m_v00 = *(__m128*)&tmp.unk00;
-    m_v10 = *(__m128*)&tmp.unk10;
-    m_v20 = *(__m128*)&tmp.unk20;
+    m_v00 = *(welding_simd::LocalM128*)&tmp.unk00;
+    m_v10 = *(welding_simd::LocalM128*)&tmp.unk10;
+    m_v20 = *(welding_simd::LocalM128*)&tmp.unk20;
     tmp.unk3C = uiLastWord;
-    m_v30 = *(__m128*)&tmp.unk30;
+    m_v30 = *(welding_simd::LocalM128*)&tmp.unk30;
     m_i40 = src->unk40;
     return this;
 }
 
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" void _mm_store_ss(float*, __m128);
-
 // Rotates a's three vectors by index into out, then appends each b[i] not equal to out[0] or out[1] (else stores i in result[j]) and returns the count.
 // @fnv 0x00ddd6f0
-int __cdecl FUN_00ddd6f0(const __m128* apVectors, const __m128* b, int aiStartIndex, __m128* out, int* result)
+int __cdecl FUN_00ddd6f0(const welding_simd::LocalM128* apVectors, const welding_simd::LocalM128* b, int aiStartIndex, welding_simd::LocalM128* out, int* result)
 {
     out[0] = apVectors[aiStartIndex % 3];
     out[1] = apVectors[(aiStartIndex + 1) % 3];
     out[2] = apVectors[(aiStartIndex + 2) % 3];
     int count = 3;
     int i = 0;
-    __m128* append = out + 3;
+    welding_simd::LocalM128* append = out + 3;
     for (; i < 3; ++i)
     {
-        __m128 current = b[i];
+        welding_simd::LocalM128 current = b[i];
         for (int j = 0; j < 2; ++j)
         {
-            __m128 d = _mm_sub_ps(out[j], current);
-            __m128 p = _mm_mul_ps(d, d);
-            __m128 y = _mm_shuffle_ps(p, p, 0x55);
-            __m128 z = _mm_shuffle_ps(p, p, 0xaa);
-            y = _mm_add_ss(y, p);
-            z = _mm_add_ss(z, y);
+            welding_simd::LocalM128 d = welding_simd::_mm_sub_ps(out[j], current);
+            welding_simd::LocalM128 p = welding_simd::_mm_mul_ps(d, d);
+            welding_simd::LocalM128 y = welding_simd::_mm_shuffle_ps(p, p, 0x55);
+            welding_simd::LocalM128 z = welding_simd::_mm_shuffle_ps(p, p, 0xaa);
+            y = welding_simd::_mm_add_ss(y, p);
+            z = welding_simd::_mm_add_ss(z, y);
             float distance;
-            _mm_store_ss(&distance, z);
+            welding_simd::_mm_store_ss(&distance, z);
             if (distance == 0.0f)
             {
                 result[j] = i;
@@ -775,36 +697,12 @@ int __cdecl FUN_00ddd6f0(const __m128* apVectors, const __m128* b, int aiStartIn
             }
         }
         ++count;
-        __m128* destination = append;
+        welding_simd::LocalM128* destination = append;
         ++append;
         *destination = current;
     next:;
     }
     return count;
-}
-
-extern "C"
-{
-
-    __m128 _mm_set_ss(float);
-
-    __m128 _mm_sub_ps(__m128, __m128);
-
-    __m128 _mm_mul_ps(__m128, __m128);
-
-    __m128 _mm_mul_ss(__m128, __m128);
-
-    __m128 _mm_add_ss(__m128, __m128);
-
-    __m128 _mm_sub_ss(__m128, __m128);
-
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-
-    __m128 _mm_rsqrt_ss(__m128);
-
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-
-    __m128 _mm_andnot_ps(__m128, __m128);
 }
 
 extern const float DAT_01011d78;
@@ -813,47 +711,47 @@ extern const float DAT_01016248;
 
 struct ScalarNormal
 {
-    __m128 q;
-    ScalarNormal(__m128 value) : q(value)
+    welding_simd::LocalM128 q;
+    ScalarNormal(welding_simd::LocalM128 value) : q(value)
     {}
-    __m128 broadcast() const
+    welding_simd::LocalM128 broadcast() const
     {
-        return _mm_shuffle_ps(q, q, 0);
+        return welding_simd::_mm_shuffle_ps(q, q, 0);
     }
 };
 struct NormalVector
 {
-    __m128 q;
+    welding_simd::LocalM128 q;
     __forceinline void difference(const NormalVector& a, const NormalVector& b)
     {
-        q = _mm_sub_ps(a.q, b.q);
+        q = welding_simd::_mm_sub_ps(a.q, b.q);
     }
     __forceinline void cross(const NormalVector& a, const NormalVector& b)
     {
-        __m128 pos = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 201), _mm_shuffle_ps(b.q, b.q, 210));
-        __m128 neg = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 210), _mm_shuffle_ps(b.q, b.q, 201));
-        q = _mm_sub_ps(pos, neg);
+        welding_simd::LocalM128 pos = welding_simd::_mm_mul_ps(welding_simd::_mm_shuffle_ps(a.q, a.q, 201), welding_simd::_mm_shuffle_ps(b.q, b.q, 210));
+        welding_simd::LocalM128 neg = welding_simd::_mm_mul_ps(welding_simd::_mm_shuffle_ps(a.q, a.q, 210), welding_simd::_mm_shuffle_ps(b.q, b.q, 201));
+        q = welding_simd::_mm_sub_ps(pos, neg);
     }
     __forceinline ScalarNormal dot(const NormalVector& v) const
     {
-        __m128 square = _mm_mul_ps(q, v.q);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(square, square, 85), square);
-        return ScalarNormal(_mm_add_ss(_mm_shuffle_ps(square, square, 170), sum));
+        welding_simd::LocalM128 square = welding_simd::_mm_mul_ps(q, v.q);
+        welding_simd::LocalM128 sum = welding_simd::_mm_add_ss(welding_simd::_mm_shuffle_ps(square, square, 85), square);
+        return ScalarNormal(welding_simd::_mm_add_ss(welding_simd::_mm_shuffle_ps(square, square, 170), sum));
     }
     __forceinline ScalarNormal inverseLength() const
     {
-        __m128 half = _mm_set_ss(DAT_01016248);
-        __m128 three = _mm_set_ss(DAT_01017718);
-        __m128 zero = _mm_set_ss(DAT_01011d78);
-        __m128 len = dot(*this).q;
-        __m128 mask = _mm_cmpeq_ss(len, zero);
-        __m128 approx = _mm_rsqrt_ss(len);
-        __m128 correction = _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len, approx), approx));
-        return ScalarNormal(_mm_andnot_ps(mask, _mm_mul_ss(_mm_mul_ss(half, approx), correction)));
+        welding_simd::LocalM128 half = welding_simd::_mm_set_ss(DAT_01016248);
+        welding_simd::LocalM128 three = welding_simd::_mm_set_ss(DAT_01017718);
+        welding_simd::LocalM128 zero = welding_simd::_mm_set_ss(DAT_01011d78);
+        welding_simd::LocalM128 len = dot(*this).q;
+        welding_simd::LocalM128 mask = welding_simd::_mm_cmpeq_ss(len, zero);
+        welding_simd::LocalM128 approx = welding_simd::_mm_rsqrt_ss(len);
+        welding_simd::LocalM128 correction = welding_simd::_mm_sub_ss(three, welding_simd::_mm_mul_ss(welding_simd::_mm_mul_ss(len, approx), approx));
+        return ScalarNormal(welding_simd::_mm_andnot_ps(mask, welding_simd::_mm_mul_ss(welding_simd::_mm_mul_ss(half, approx), correction)));
     }
     __forceinline void normalize()
     {
-        q = _mm_mul_ps(inverseLength().broadcast(), q);
+        q = welding_simd::_mm_mul_ps(inverseLength().broadcast(), q);
     }
 };
 // Computes the normalized cross product of two triangle edge vectors (b-a) and (c-b) and stores the result in out.
@@ -870,21 +768,7 @@ void FUN_00ddd620(const NormalVector* apVertexA, const NormalVector* apVertexB, 
     *apNormal = n;
 }
 
-struct S_00ddecf0_Heap
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual void ReturnMemory(void* p, int numBytes) throw();
-    template <typename T> __forceinline void _bufFree(void* p, int numElem)
-    {
-        ReturnMemory(p, numElem * (int)sizeof(T));
-    }
-};
-
 extern const double DAT_010290b8;
-__declspec(nothrow) S_00ddecf0_Router* FUN_00c85750();
 void __cdecl ResizeAudioStream(void* heap, void* arr, int elemSize) throw();
 
 struct KeyLess
@@ -905,62 +789,31 @@ __declspec(noinline) ComparisonResult __cdecl AreZDiffering(const S_00ddecf0_Key
     return ComparisonResult(!same);
 }
 
-struct ArrayAllocator
+// hkArray bodies (allocator = the memory router's heap).
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    __forceinline S_00ddecf0_Heap& get(const void*) const
-    {
-        return FUN_00c85750()->heap();
-    }
-};
-template <typename T> struct SpanStorage
+    return reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750()->heap());
+}
+template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline SpanStorage() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    __forceinline int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    __forceinline int capacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    __forceinline void dispose(S_00ddecf0_Heap& alloc)
-    {
-        m_iElementCount = 0;
-        if (!(m_iCapacityState & 0x80000000))
-            alloc._bufFree<T>(m_data, capacity());
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    __forceinline void append(S_00ddecf0_Heap& alloc, const T& value)
-    {
-        if (m_iElementCount == capacity())
-            ResizeAudioStream(&alloc, this, sizeof(T));
-        T* dest = m_data + m_iElementCount;
-        new (dest) T(value);
-        ++m_iElementCount;
-    }
-};
-template <typename T, typename A = ArrayAllocator> struct hkArray : SpanStorage<T>
+    m_iElementCount = 0;
+    if (!(m_iCapacityState & 0x80000000))
+        alloc._bufFree<T>(m_data, getCapacity());
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
+template <typename T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& value)
 {
-    __forceinline hkArray()
-    {}
-    __forceinline ~hkArray()
-    {
-        dispose(A().get(this));
-    }
-    __forceinline void AddBack(const T& value)
-    {
-        append(A().get(this), value);
-    }
-};
+    if (m_iElementCount == getCapacity())
+        ResizeAudioStream(&alloc, this, sizeof(T));
+    T* dest = m_data + m_iElementCount;
+    new (dest) T(value);
+    ++m_iElementCount;
+}
+template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
+{
+    clearAndDeallocate();
+}
 
 static inline float clamp(float x, float lo, float hi)
 {
@@ -1002,7 +855,7 @@ float Track::FUN_00dded60()
             key.b = m_keys.m_data[start].b;
             key.t = 0.0f;
             key.a = clamp(sum, 0.0f, 1.0f);
-            spans.AddBack(key);
+            spans.pushBack(key);
             start = i;
         }
     }
@@ -1032,35 +885,23 @@ float Track::FUN_00dded60()
 // The result byte is written through the first argument; the argument pointer
 // is handed back to the caller.
 
-struct Vec4
-{
-    __m128 v;
-};
-
-struct Shape
-{
-    float unk00, unk04, unk08, unk0c;
-    float unk10, unk14, unk18, unk1c;
-    Vec4 p0, p1, p2;
-};
-
-// Stores true in *out when points a and b are each within a tolerance of one of the shape's points p0, p1, p2, and returns out.
+// Stores true when points a and b are each within tolerance of a triangle vertex, and returns out.
 // @fnv 0x00ddcf60
 volatile unsigned char* __cdecl FUN_00ddcf60(volatile unsigned char* out, const Vec4* apPointA, const Vec4* apPointB,
-                                             const Shape* apShape)
+                                             const hkpTriangleShape* apShape)
 {
-    __m128 pt = apShape->p0.v;
-    __m128 q = apPointA->v;
-    __m128 eps = _mm_load_ps1(&DAT_01017d00);
-    __m128 mask = DAT_01017d10;
+    welding_simd::LocalM128 pt = reinterpret_cast<const welding_simd::LocalM128&>(apShape->m_kVertexA);
+    welding_simd::LocalM128 q = reinterpret_cast<const welding_simd::LocalM128&>(*apPointA);
+    welding_simd::LocalM128 eps = welding_simd::_mm_load_ps1(&DAT_01017d00);
+    welding_simd::LocalM128 mask = DAT_01017d10;
 
     bool v =
-        (((_mm_movemask_ps(_mm_cmple_ps(_mm_and_ps(_mm_sub_ps(pt, q), mask), eps)) & 7) == 7) ||
-         ((_mm_movemask_ps(_mm_cmple_ps(_mm_and_ps(_mm_sub_ps(apShape->p1.v, q), mask), eps)) & 7) == 7) ||
-         ((_mm_movemask_ps(_mm_cmple_ps(_mm_and_ps(_mm_sub_ps(apShape->p2.v, q), mask), eps)) & 7) == 7)) &&
-        (((_mm_movemask_ps(_mm_cmple_ps(_mm_and_ps(_mm_sub_ps(pt, apPointB->v), mask), eps)) & 7) == 7) ||
-         ((_mm_movemask_ps(_mm_cmple_ps(_mm_and_ps(_mm_sub_ps(apShape->p1.v, apPointB->v), mask), eps)) & 7) == 7) ||
-         ((_mm_movemask_ps(_mm_cmple_ps(_mm_and_ps(_mm_sub_ps(apShape->p2.v, apPointB->v), mask), eps)) & 7) == 7));
+        (((welding_simd::_mm_movemask_ps(welding_simd::_mm_cmple_ps(welding_simd::_mm_and_ps(welding_simd::_mm_sub_ps(pt, q), mask), eps)) & 7) == 7) ||
+         ((welding_simd::_mm_movemask_ps(welding_simd::_mm_cmple_ps(welding_simd::_mm_and_ps(welding_simd::_mm_sub_ps(reinterpret_cast<const welding_simd::LocalM128&>(apShape->m_kVertexB), q), mask), eps)) & 7) == 7) ||
+         ((welding_simd::_mm_movemask_ps(welding_simd::_mm_cmple_ps(welding_simd::_mm_and_ps(welding_simd::_mm_sub_ps(reinterpret_cast<const welding_simd::LocalM128&>(apShape->m_kVertexC), q), mask), eps)) & 7) == 7)) &&
+        (((welding_simd::_mm_movemask_ps(welding_simd::_mm_cmple_ps(welding_simd::_mm_and_ps(welding_simd::_mm_sub_ps(pt, reinterpret_cast<const welding_simd::LocalM128&>(*apPointB)), mask), eps)) & 7) == 7) ||
+         ((welding_simd::_mm_movemask_ps(welding_simd::_mm_cmple_ps(welding_simd::_mm_and_ps(welding_simd::_mm_sub_ps(reinterpret_cast<const welding_simd::LocalM128&>(apShape->m_kVertexB), reinterpret_cast<const welding_simd::LocalM128&>(*apPointB)), mask), eps)) & 7) == 7) ||
+         ((welding_simd::_mm_movemask_ps(welding_simd::_mm_cmple_ps(welding_simd::_mm_and_ps(welding_simd::_mm_sub_ps(reinterpret_cast<const welding_simd::LocalM128&>(apShape->m_kVertexC), reinterpret_cast<const welding_simd::LocalM128&>(*apPointB)), mask), eps)) & 7) == 7));
 
     *out = v;
     return out;
@@ -1068,71 +909,49 @@ volatile unsigned char* __cdecl FUN_00ddcf60(volatile unsigned char* out, const 
 
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_set_ss(float);
-    void _mm_store_ss(float*, __m128);
     float __cdecl Atan2(float y, float x);
 }
 
-struct hkVector4q
+inline welding_simd::LocalM128& WeldingQuad(hkVector4q& v)
 {
-    __m128 m_vComponents;
+    return reinterpret_cast<welding_simd::LocalM128&>(v.m_vComponents);
+}
+inline const welding_simd::LocalM128& WeldingQuad(const hkVector4q& v)
+{
+    return reinterpret_cast<const welding_simd::LocalM128&>(v.m_vComponents);
+}
 
-    hkVector4q()
-    {}
-    hkVector4q(const hkVector4q& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void operator=(const hkVector4q& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
 
-    __forceinline void setSub4(const hkVector4q& a, const hkVector4q& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
+__forceinline void hkVector4q::normalize3()
+{
+    welding_simd::LocalM128 p = welding_simd::_mm_mul_ps(WeldingQuad(*this), WeldingQuad(*this));
+    welding_simd::LocalM128 len2 = welding_simd::_mm_add_ss(welding_simd::_mm_shuffle_ps(p, p, 0x55), p);
+    len2 = welding_simd::_mm_add_ss(welding_simd::_mm_shuffle_ps(p, p, 0xaa), len2);
+    welding_simd::LocalM128 e = welding_simd::_mm_rsqrt_ss(len2);
+    welding_simd::LocalM128 r = welding_simd::_mm_mul_ss(welding_simd::_mm_mul_ss(welding_simd::_mm_set_ss(0.5f), e),
+                          welding_simd::_mm_sub_ss(welding_simd::_mm_set_ss(3.0f), welding_simd::_mm_mul_ss(welding_simd::_mm_mul_ss(len2, e), e)));
+    r = welding_simd::_mm_andnot_ps(welding_simd::_mm_cmpeq_ss(len2, welding_simd::_mm_set_ss(0.0f)), r);
+    WeldingQuad(*this) = welding_simd::_mm_mul_ps(welding_simd::_mm_shuffle_ps(r, r, 0), WeldingQuad(*this));
+}
 
-    __forceinline void normalize3()
-    {
-        __m128 p = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 len2 = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
-        len2 = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), len2);
-        __m128 e = _mm_rsqrt_ss(len2);
-        __m128 r = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e),
-                              _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(len2, e), e)));
-        r = _mm_andnot_ps(_mm_cmpeq_ss(len2, _mm_set_ss(0.0f)), r);
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(r, r, 0), m_vComponents);
-    }
+__forceinline void hkVector4q::setCross(const hkVector4q& a, const hkVector4q& b)
+{
+    welding_simd::LocalM128 cross0 = welding_simd::_mm_mul_ps(welding_simd::_mm_shuffle_ps(WeldingQuad(a), WeldingQuad(a), 0xc9),
+                               welding_simd::_mm_shuffle_ps(WeldingQuad(b), WeldingQuad(b), 0xd2));
+    welding_simd::LocalM128 cross1 = welding_simd::_mm_mul_ps(welding_simd::_mm_shuffle_ps(WeldingQuad(a), WeldingQuad(a), 0xd2),
+                               welding_simd::_mm_shuffle_ps(WeldingQuad(b), WeldingQuad(b), 0xc9));
+    WeldingQuad(*this) = welding_simd::_mm_sub_ps(cross0, cross1);
+}
 
-    __forceinline void setCross(const hkVector4q& a, const hkVector4q& b)
-    {
-        __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9),
-                                   _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2));
-        __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2),
-                                   _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-
-    __forceinline float dot3(const hkVector4q& v) const
-    {
-        __m128 p = _mm_mul_ps(m_vComponents, v.m_vComponents);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
-        s = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
-        float r;
-        _mm_store_ss(&r, s);
-        return r;
-    }
-};
+__forceinline float hkVector4q::dot3(const hkVector4q& v) const
+{
+    welding_simd::LocalM128 p = welding_simd::_mm_mul_ps(WeldingQuad(*this), WeldingQuad(v));
+    welding_simd::LocalM128 s = welding_simd::_mm_add_ss(welding_simd::_mm_shuffle_ps(p, p, 0x55), p);
+    s = welding_simd::_mm_add_ss(welding_simd::_mm_shuffle_ps(p, p, 0xaa), s);
+    float r;
+    welding_simd::_mm_store_ss(&r, s);
+    return r;
+}
 
 static __forceinline float hkAtan2(float y, float x)
 {
@@ -1151,7 +970,7 @@ float FUN_00ddd7e0(const hkVector4q* apVertices, float* sinOut, float* cosOut)
     FUN_00ddd620_triNormal(apVertices[1], apVertices[0], apVertices[3], nB);
 
     hkVector4q edge;
-    edge.setSub4(apVertices[1], apVertices[0]);
+    WeldingQuad(edge) = welding_simd::_mm_sub_ps(WeldingQuad(apVertices[1]), WeldingQuad(apVertices[0]));
     edge.normalize3();
 
     hkVector4q c;
@@ -1162,8 +981,6 @@ float FUN_00ddd7e0(const hkVector4q* apVertices, float* sinOut, float* cosOut)
     return hkAtan2(*sinOut, *cosOut);
 }
 
-extern "C" __m128 _mm_load_ps(float const* _A);
-extern "C" void _mm_store_ps(float* _V, __m128 _A);
 struct __declspec(align(16)) Row
 {
     float x, y, z, w;
@@ -1177,15 +994,6 @@ struct __declspec(align(16)) Item
 {
     Matrix44 transform;
     int payload;
-};
-
-struct S00dde760_PoolState
-{
-    char* cursor;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00ddecf0_Heap* allocator;
 };
 
 struct S00dde760_ScratchVector
@@ -1204,25 +1012,25 @@ extern "C" void __cdecl FUN_00dddcd0(const Matrix44*, int, int, S00dde760_Scratc
 void __cdecl FUN_00dde760(int a, int aiPayload, int c, int d)
 {
     Item item;
-    _mm_store_ps(&item.transform.row0.x, _mm_load_ps(&DAT_01268370.row0.x));
-    _mm_store_ps(&item.transform.row1.x, _mm_load_ps(&DAT_01268370.row1.x));
-    _mm_store_ps(&item.transform.row2.x, _mm_load_ps(&DAT_01268370.row2.x));
-    _mm_store_ps(&item.transform.row3.x, _mm_load_ps(&DAT_01268370.row3.x));
+    welding_simd::_mm_store_ps(&item.transform.row0.x, welding_simd::_mm_load_ps(&DAT_01268370.row0.x));
+    welding_simd::_mm_store_ps(&item.transform.row1.x, welding_simd::_mm_load_ps(&DAT_01268370.row1.x));
+    welding_simd::_mm_store_ps(&item.transform.row2.x, welding_simd::_mm_load_ps(&DAT_01268370.row2.x));
+    welding_simd::_mm_store_ps(&item.transform.row3.x, welding_simd::_mm_load_ps(&DAT_01268370.row3.x));
     item.payload = aiPayload;
     S00dde760_ScratchVector vector;
     vector.elements = 0;
     vector.size = 0;
     vector.encodedCapacity = 0x80000000;
-    S00dde760_PoolState* poolState = ((S00dde760_PoolState*)FUN_00c85750());
-    char* cursor = poolState->cursor;
-    poolState->cursor = cursor + 0x80;
+    hkMemoryRouter* poolState = FUN_00c85750();
+    char* cursor = reinterpret_cast<char*&>(poolState->m_stack.m_next.m_storage);
+    reinterpret_cast<char*&>(poolState->m_stack.m_next.m_storage) = cursor + 0x80;
     vector.elements = reinterpret_cast<Item*>(cursor);
     vector.encodedCapacity = 0x80000001;
     vector.originalCursor = cursor;
-    poolState = ((S00dde760_PoolState*)FUN_00c85750());
+    poolState = FUN_00c85750();
     if (vector.size == (vector.encodedCapacity & 0x3fffffff))
     {
-        ResizeAudioStream(poolState->allocator, &vector, 0x50);
+        ResizeAudioStream(reinterpret_cast<hkMemoryAllocator*>(poolState->m_heap), &vector, 0x50);
     }
     Item* destination = vector.elements + vector.size;
     if (destination != 0)
@@ -1233,10 +1041,27 @@ void __cdecl FUN_00dde760(int a, int aiPayload, int c, int d)
     char* finalCursor = vector.originalCursor;
     if (finalCursor == reinterpret_cast<char*>(vector.elements))
         vector.size = 0;
-    ((S00dde760_PoolState*)FUN_00c85750())->cursor = finalCursor;
-    poolState = ((S00dde760_PoolState*)FUN_00c85750());
-    S_00ddecf0_Heap* currentAllocator = poolState->allocator;
+    reinterpret_cast<char*&>(FUN_00c85750()->m_stack.m_next.m_storage) = finalCursor;
+    poolState = FUN_00c85750();
+    hkMemoryAllocator* currentAllocator = reinterpret_cast<hkMemoryAllocator*>(poolState->m_heap);
     vector.size = 0;
     if ((vector.encodedCapacity & 0x80000000u) == 0)
-        currentAllocator->ReturnMemory(vector.elements, (vector.encodedCapacity & 0x3fffffff) * 0x50);
+        currentAllocator->bufFree(vector.elements, (vector.encodedCapacity & 0x3fffffff) * 0x50);
+}
+
+
+template <>
+void hkArrayBase<S_00ddeab0_Elem>::_spliceInto(hkMemoryAllocator& kSharedAlloc, int index, int numdel, const S_00ddeab0_Elem* apElems, int aiNumInsert)
+{
+    void* alloc = &kSharedAlloc;
+    int newsize = m_iElementCount - numdel + aiNumInsert;
+    unsigned int numtomove = m_iElementCount - index - numdel;
+    S_00ddeab0_GrowArrayCapacity(*this, alloc, newsize);
+    FUN_00d2cc70(&m_data[index + aiNumInsert], &m_data[index + numdel], numtomove * 12);
+    S_00ddeab0_Elem* dst = m_data + index;
+    for (int i = 0; i < aiNumInsert; ++i)
+    {
+        new (&dst[i]) S_00ddeab0_Elem(apElems[i]);
+    }
+    m_iElementCount = newsize;
 }

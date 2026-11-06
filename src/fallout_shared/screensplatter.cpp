@@ -1,12 +1,156 @@
+#include "../../include/Setting.h"
+// 0x00408d60 returns the setting value at +4 (or a fallback byte for null this).
+
 // fallout_shared/screensplatter.cpp: ScreenSplatter (16 functions)
 
-#include "screensplatter_decls.h"
+// ExtraShell_screensplatter: local type (was include/ExtraShell.h, which had no evidence of one real class); its methods are 0x00411ec0 ExtraDataList::CopyList, 0x004127e0 ExtraDataList::CompareList, 0x00418520 ExtraDataList::GetContainerChanges, 0x00418750 ExtraDataList::HasLeveledItem
+#include "../../include/ExtraDataList.h"
+
+class OpacityFadeState;
+class RefNode;
+class RefrShell;
+
+class ExtraShell_screensplatter : public ExtraDataList
+{
+public:
+    ExtraShell_screensplatter();
+
+    int FUN_00418520();
+    bool FUN_00418750();
+    short FUN_00418770();
+    bool FUN_004127e0(ExtraShell_screensplatter*);
+    void FUN_00419ad0(int);
+    void FUN_00411ec0(ExtraShell_screensplatter*);
+    signed char GetExtraByteValue();
+    void FUN_0042dec0();
+    OpacityFadeState* GetOffsetC();
+    void FUN_0041aeb0();
+    void FUN_0041af50();
+    void* FUN_0042e250();
+    RefNode* FUN_0041df90();
+    void FUN_0041dfd0();
+    void FUN_0041de40(int a);
+    RefrShell* FUN_0041e310();
+};
+#include "../../include/SkyTextureManager.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/NiCamera.h"
+#include "../../include/GO.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/NiSortAdjustNode.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/SettingT_GameSettingCollection_.h"
+
+class FUN_00622c80;
+
+class ScreenSplatter
+{
+  public:
+    static void Init();
+    static void Clear();
+    static FUN_00622c80* Activate(float time, bool enabled);
+};
+
+class FUN_00622c80
+{
+  public:
+    unsigned char data[0x3b0];
+    static void* operator new(unsigned int size);
+    static void operator delete(void*);
+    FUN_00622c80(float value, unsigned int id);
+};
+
+unsigned int FUN_005dbe10();
+float FUN_00622ba0();
+float FUN_00622bb0();
+
+extern unsigned char DAT_011c7834;
+extern unsigned int DAT_011c7828;
+extern NiPointer<NiAVObject> DAT_011c786c;
+extern FUN_00622c80* DAT_011cc200;
+extern FUN_00622c80* DAT_011cc1fc;
+
+#include "../../include/MEM_CONTEXT.h"
+union SETTING_VALUE;
+class INISettingCollection;
+template <class T> class SettingT;
+
+
+
+class GraphicsRenderer
+{
+  public:
+    unsigned int GetRenderTargetWidth();
+    unsigned int GetRenderTargetHeight();
+};
+class NiRenderer;
+NiRenderer* FUN_0043c4b0();
+
+#include "../../include/NiMemObject.h"
+
+
+
+
+
+// The shared frustum has the layout but does not declare this constructor.
+struct ScreenSplatterFrustum : NiFrustum
+{
+    ScreenSplatterFrustum(bool enabled);
+};
+
+struct ScreenSplatterRawData
+{
+    float value;
+    unsigned int first, second;
+};
+struct ScreenSplatterRawFrustum
+{
+    float left, right, top, bottom, nearPlane, farPlane;
+    bool ortho;
+};
+struct ScreenSplatterInitLocals
+{
+    float aspect;
+    ScreenSplatterRawFrustum frustum;
+    GraphicsRenderer* renderer;
+    ScreenSplatterRawData firstData;
+    ScreenSplatterRawData secondData;
+};
+
+
+
+
+
+
+
+
+extern Setting DAT_011c784c;
+extern NiPointer<NiAVObject> DAT_011c7840;
+extern NiPointer<NiTexture> DAT_011c7860;
+extern NiPointer<NiTexture> DAT_011c7864;
+extern NiPointer<NiTexture> DAT_011c7868;
+extern unsigned char DAT_011f941e;
+extern NiPoint3 DAT_011a9478;
+extern char DAT_01022ab8;
+extern float DAT_01022960;
+extern float DAT_0102295c;
+extern float DAT_01022958;
+extern float DAT_01016248;
+extern double DAT_01011598;
+extern const double runtimeInitializationDouble1;
+extern float DAT_01189550;
+extern float DAT_01189554;
+extern unsigned char DAT_011ce918;
+extern unsigned char DAT_011ce284;
+extern unsigned char DAT_011cede8;
 
 // @fnv 0x004e0540
 void ScreenSplatter::Init()
 {
     AutoMemContext m_uiMemoryContext(static_cast<MEM_CONTEXT>(7), true, &DAT_01022ab8, 181);
-    DAT_011c7834 = *reinterpret_cast<unsigned char*>(DAT_011c784c.GetLifeStateControlFlag());
+    DAT_011c7834 = *reinterpret_cast<unsigned char*>(DAT_011c784c.FUN_00408d60());
     if (DAT_011c7834)
     {
         ScreenSplatterInitLocals initLocals;
@@ -14,17 +158,17 @@ void ScreenSplatter::Init()
         initLocals.aspect = static_cast<float>(static_cast<double>(initLocals.renderer->GetRenderTargetWidth()) /
                                                initLocals.renderer->GetRenderTargetHeight());
 
-        DAT_011c7840 = reinterpret_cast<NiAVObject*>(new FUN_00a712f0());
+        DAT_011c7840 = reinterpret_cast<NiAVObject*>(new NiCamera());
 
         reinterpret_cast<NiAVObject*>(DAT_011c7840.operator->())->FUN_00440460(NiPoint3(0.0f, 0.0f, DAT_01022960));
 
         reinterpret_cast<NiUpdateData*>(&initLocals.firstData)->NiUpdateData::NiUpdateData(0.0f, 0, 0);
         reinterpret_cast<NiNode*>(DAT_011c7840.operator->())
-            ->Update(*reinterpret_cast<NiUpdateData*>(&initLocals.firstData));
+            ->Update(*reinterpret_cast<const NiUpdateData*>(&initLocals.firstData));
 
         reinterpret_cast<NiCamera*>(DAT_011c7840.operator->())->AimAt(NiPoint3::ZERO, DAT_011a9478);
 
-        reinterpret_cast<NiFrustum*>(&initLocals.frustum)->NiFrustum::NiFrustum(false);
+        reinterpret_cast<ScreenSplatterFrustum*>(&initLocals.frustum)->ScreenSplatterFrustum::ScreenSplatterFrustum(false);
         initLocals.frustum.ortho = false;
         initLocals.frustum.top = DAT_01016248;
         initLocals.frustum.bottom = DAT_0102295c;
@@ -37,7 +181,7 @@ void ScreenSplatter::Init()
 
         reinterpret_cast<NiUpdateData*>(&initLocals.secondData)->NiUpdateData::NiUpdateData(0.0f, 0, 0);
         reinterpret_cast<NiNode*>(DAT_011c7840.operator->())
-            ->Update(*reinterpret_cast<NiUpdateData*>(&initLocals.secondData));
+            ->Update(*reinterpret_cast<const NiUpdateData*>(&initLocals.secondData));
         DAT_01189550 = initLocals.frustum.right;
         DAT_01189554 = initLocals.frustum.top;
 
@@ -84,29 +228,19 @@ FUN_00622c80* ScreenSplatter::Activate(float time, bool enabled)
     }
 }
 
-class BSFadeNode
-{
-    int dummy;
 
-  public:
-    BSFadeNode(const char* name);
-};
+extern NiFixedString* DAT_011c7830;
 
-extern BSFadeNode* DAT_011c7830;
-
-// Allocates a BSFadeNode named "SPD" and stores it in DAT_011c7830.
+// The former BSFadeNode stand-in is a four-byte fixed string, not a scene node.
+// Allocates the fixed string "SPD" and stores it in DAT_011c7830.
 // @fnv 0x004e0050
 void CreateSpdFadeNode()
 {
-    DAT_011c7830 = new BSFadeNode("SPD");
+    DAT_011c7830 = ::new NiFixedString("SPD");
 }
 
-struct BSFadeNode;
-
-extern BSFadeNode* DAT_011c7830;
-
 // @fnv 0x004e0320
-BSFadeNode* FUN_004e0320()
+NiFixedString* FUN_004e0320()
 {
     return DAT_011c7830;
 }
@@ -139,43 +273,25 @@ float FUN_00622bb0()
     return runtimeFloatSettingDefault38;
 }
 
-namespace fnv_004e00d0 {
-struct BSFadeNode
-{
-};
-struct Holder_004b9900
-{
-    int FUN_004b9900(int);
-};
-extern BSFadeNode* DAT_011c7830;
 // Calls FUN_004b9900(1) on DAT_011c7830 if non-null, then sets DAT_011c7830 to null.
 // @fnv 0x004e00d0
 void FUN_004e00d0()
 {
-    BSFadeNode* b;
+    NiFixedString* b;
     {
-        BSFadeNode* a = DAT_011c7830;
+        NiFixedString* a = DAT_011c7830;
         b = a;
     }
-    (b ? ((Holder_004b9900*)b)->FUN_004b9900(1) : 0);
+    (b ? b->FUN_004b9900(1) : 0);
     DAT_011c7830 = 0;
 }
-}  // namespace fnv_004e00d0
 
-struct Flt
-{
-    operator unsigned int();
-};
-struct GO
-{
-    GO& operator=(void*);
-};
 // @fnv 0x004e0800
 void FUN_004e0800()
 {
     if (DAT_011c7834)
     {
-        ((NiNode*)((Flt*)&DAT_011c786c)->operator unsigned int())->FUN_004def90();
+        ((NiNode*)((GO*)&DAT_011c786c)->operator unsigned int())->FUN_004def90();
         ((GO*)&DAT_011c786c)->operator=(0);
         ((GO*)&DAT_011c7840)->operator=(0);
     }
@@ -221,14 +337,6 @@ struct FUN_004e04e0 : NiMemObject
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
     FUN_004e04e0(const Params&);
     unsigned int FUN_007d6bb0();
-};
-class NiFixedString
-{
-    int value;
-
-  public:
-    NiFixedString(const char*);
-    ~NiFixedString();
 };
 struct ObjectProxy
 {
@@ -334,13 +442,9 @@ struct OpacityFadeState
     float alpha;
     unsigned int count;
 };
-struct ExtraShell
-{
-    OpacityFadeState* GetOffsetC();
-};
 struct ObjShell
 {
-    ExtraShell* FUN_00a5bdd0(BSFadeNode*);
+    ExtraShell_screensplatter* FUN_00a5bdd0(NiFixedString*);
     void FUN_00a59c60(const NiUpdateData&);
 };
 struct RootCalls
@@ -392,7 +496,7 @@ void FUN_004e0110()
             NiAVObject* child4 = ((RootCalls*)DAT_011c786c.operator->())->FUN_0043b4a0(i5);
             if (child4)
             {
-                ExtraShell* extra4 = ((ObjShell*)child4)->FUN_00a5bdd0(FUN_004e0320());
+                ExtraShell_screensplatter* extra4 = ((ObjShell*)child4)->FUN_00a5bdd0(FUN_004e0320());
                 OpacityFadeState* data = extra4->GetOffsetC();
                 data->age += elapsed_2;
                 if (data->age >= data->life)

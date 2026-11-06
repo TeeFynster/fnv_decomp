@@ -1,8 +1,12 @@
+#include "../../../../../../include/hkArray.h"
+#define FNV_HAVOK_SHARED_ARRAYS
 
 // src/havok/animation/animation/animation/interleaved/hkainterleaveduncompressedanimation.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/animation/interleaved/hkainterleaveduncompressedanimation.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include "havok/hkaInterleavedUncompressedAnimation.h"
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkMonitorStream.h"
 
 struct FUN_00e3f950_class
 {
@@ -158,26 +162,13 @@ void __thiscall S00e3fd20_Desc::FUN_00e3fd20(int scale, int unused1, int* out, i
 }
 
 #include <xmmintrin.h>
+// local form of hkQsTransform: 0x00e3ffc0 needs legacy animation-header dispatch; shared header adoption changes exe virtual-call bytes.
 struct QsTransformX
 {
     __m128 m_vTranslation, m_rotation, m_vScale;
 };
-struct XformArrayX
-{
-    QsTransformX* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    XformArrayX() : m_data(0), m_iElementCount(0), m_iCapacityState((int)0x80000000)
-    {}
-};
-struct FloatArrayX
-{
-    float* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    FloatArrayX() : m_data(0), m_iElementCount(0), m_iCapacityState((int)0x80000000)
-    {}
-};
+typedef hkArrayBase<QsTransformX> XformArrayX;
+typedef hkArrayBase<float> FloatArrayX;
 
 struct SrcAnimX
 {
@@ -291,21 +282,6 @@ extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 typedef void*(__stdcall* TlsGetValueFn)(unsigned long);
 extern unsigned long DAT_0126835c;
 
-struct ProfRec
-{
-    const char* m_pName;
-    unsigned int m_iTick;
-    unsigned int unk08;
-};
-
-struct ProfBuf
-{
-    int unk00;
-    ProfRec* m_pCur;
-    int unk08;
-    ProfRec* m_pRecordEnd;
-};
-
 struct QsTm
 {
     __m128 t;
@@ -375,15 +351,15 @@ void hkaAnimSlot::FUN_00e3ffc0(float time, unsigned int nT, QsT* tOut, unsigned 
         float delta;
     } u;
     {
-        ProfBuf* pProfLog = (ProfBuf*)pfnTlsGetValue(DAT_0126835c);
-        ProfRec* pCurRec = pProfLog->m_pCur;
-        if (pCurRec < pProfLog->m_pRecordEnd)
+        hkMonitorStream* pProfLog = (hkMonitorStream*)pfnTlsGetValue(DAT_0126835c);
+        hkMonitorStream::TimerCommand* pCurRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pProfLog->m_end.m_storage);
+        if (reinterpret_cast<char*>(pCurRec) < pProfLog->m_capacityMinus16.m_storage)
         {
-            pCurRec->m_pName = "TtsamplePose";
+            pCurRec->m_commandAndMonitor = "TtsamplePose";
             _ReadWriteBarrier();
             u.tick = (unsigned int)__rdtsc();
-            pCurRec->m_iTick = u.tick;
-            pProfLog->m_pCur = pCurRec + 1;
+            pCurRec->m_time0 = u.tick;
+            pProfLog->m_end.m_storage = reinterpret_cast<char*>(pCurRec + 1);
         }
     }
     if (time >= m_fAnimationDuration)
@@ -399,15 +375,15 @@ void hkaAnimSlot::FUN_00e3ffc0(float time, unsigned int nT, QsT* tOut, unsigned 
         for (unsigned int iFloat = 0; iFloat < nF; ++iFloat)
             fOut[iFloat] = m_kFloats.m_data[m_kFloats.m_iElementCount - m_iNumberOfFloatTracks + iFloat];
         {
-            ProfBuf* pProfLog = (ProfBuf*)pfnTlsGetValue(DAT_0126835c);
-            ProfRec* pCurRec = pProfLog->m_pCur;
-            if (pCurRec < pProfLog->m_pRecordEnd)
+            hkMonitorStream* pProfLog = (hkMonitorStream*)pfnTlsGetValue(DAT_0126835c);
+            hkMonitorStream::TimerCommand* pCurRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pProfLog->m_end.m_storage);
+            if (reinterpret_cast<char*>(pCurRec) < pProfLog->m_capacityMinus16.m_storage)
             {
-                pCurRec->m_pName = "Et";
+                pCurRec->m_commandAndMonitor = "Et";
                 _ReadWriteBarrier();
                 u.tick = (unsigned int)__rdtsc();
-                pCurRec->m_iTick = u.tick;
-                pProfLog->m_pCur = pCurRec + 1;
+                pCurRec->m_time0 = u.tick;
+                pProfLog->m_end.m_storage = reinterpret_cast<char*>(pCurRec + 1);
             }
         }
         return;
@@ -419,15 +395,15 @@ void hkaAnimSlot::FUN_00e3ffc0(float time, unsigned int nT, QsT* tOut, unsigned 
         FUN_00e3fda0(frame, u.delta, nT, tOut, nF, fOut, recs, 3);
     }
     {
-        ProfBuf* pProfLog = (ProfBuf*)pfnTlsGetValue(DAT_0126835c);
-        ProfRec* pCurRec = pProfLog->m_pCur;
-        if (pCurRec < pProfLog->m_pRecordEnd)
+        hkMonitorStream* pProfLog = (hkMonitorStream*)pfnTlsGetValue(DAT_0126835c);
+        hkMonitorStream::TimerCommand* pCurRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pProfLog->m_end.m_storage);
+        if (reinterpret_cast<char*>(pCurRec) < pProfLog->m_capacityMinus16.m_storage)
         {
-            pCurRec->m_pName = "Et";
+            pCurRec->m_commandAndMonitor = "Et";
             _ReadWriteBarrier();
             u.tick = (unsigned int)__rdtsc();
-            pCurRec->m_iTick = u.tick;
-            pProfLog->m_pCur = pCurRec + 1;
+            pCurRec->m_time0 = u.tick;
+            pProfLog->m_end.m_storage = reinterpret_cast<char*>(pCurRec + 1);
         }
     }
 }

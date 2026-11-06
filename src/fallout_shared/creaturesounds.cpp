@@ -1,49 +1,37 @@
-// fallout_shared/creaturesounds.cpp: CreatureSoundCollection (14 functions)
+// fallout_shared/creaturesounds.cpp: CreatureSounds (14 functions)
 
 #include "creaturesounds_decls.h"
 
-class CreatureSoundCollection
-{
-  public:
-    CreatureSoundCollection();
-    bool SetSoundName(const char*);
-    void ClearSounds();
-    void FUN_005f0820();
-    void* DeleteThis(unsigned int);
-    void AddSoundForType(SoundListEntry*, CREATURE_SOUND_TYPE);
-    BSSimpleList<SoundListEntry*>* GetSoundListForType(CREATURE_SOUND_TYPE);
-    bool LoadSoundsFromFile(TESFile*, CREATURE_SOUND_TYPE, TESCreature*);
+#include "../../include/TESCreature.h"
+#include "../../include/TESSound.h"
 
-  private:
-    BSSimpleList<SoundListEntry*>* m_pSoundListsByType[22];
-};
-
+#include "../../include/CreatureSounds.h"
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 void* __cdecl operator new(unsigned int);
 void __cdecl operator delete(void*);
 
 // @fnv 0x005f0360
-CreatureSoundCollection::CreatureSoundCollection()
+CreatureSounds::CreatureSounds()
 {
     memset(this, 0, 0x58);
 }
 
 // Copies text into the BSStringT<char> at offset 0x1c and returns true.
 // @fnv 0x005f0040
-bool CreatureSoundCollection::SetSoundName(const char* text)
+bool CreatureSounds::SetSoundName(const char* text)
 {
     ((BSStringT<char>*)((char*)this + 0x1c))->Set(text, 0);
     return true;
 }
 
 // @fnv 0x005f0380
-void CreatureSoundCollection::ClearSounds()
+void CreatureSounds::ClearSounds()
 {
     FUN_005f0820();
 }
 
 // @fnv 0x005f7bf0
-void* CreatureSoundCollection::DeleteThis(unsigned int flags)
+void* CreatureSounds::DeleteThis(unsigned int flags)
 {
     ClearSounds();
     if (flags & 1)
@@ -52,7 +40,7 @@ void* CreatureSoundCollection::DeleteThis(unsigned int flags)
 }
 
 // @fnv 0x005f0900
-void CreatureSoundCollection::AddSoundForType(SoundListEntry* sound, CREATURE_SOUND_TYPE type)
+void CreatureSounds::AddSoundForType(SoundListEntry* sound, CREATURE_SOUND_TYPE type)
 {
     if (sound && type >= 0 && type < 22)
     {
@@ -77,7 +65,7 @@ void CreatureSoundCollection::AddSoundForType(SoundListEntry* sound, CREATURE_SO
 }
 
 // @fnv 0x005f0480
-bool CreatureSoundCollection::LoadSoundsFromFile(TESFile* file, CREATURE_SOUND_TYPE type, TESCreature* creature)
+bool CreatureSounds::LoadSoundsFromFile(TESFile* file, CREATURE_SOUND_TYPE type, TESCreature* creature)
 {
     bool result = false;
     if (file)
@@ -133,7 +121,7 @@ struct FUN_005f0860_helper
 
 // Calls ClearSoundList for each index from 0 to 21 on this object.
 // @fnv 0x005f0820
-void CreatureSoundCollection::FUN_005f0820()
+void CreatureSounds::FUN_005f0820()
 {
     for (char i = 0; i < 22; ++i)
     {
@@ -146,7 +134,7 @@ struct SoundListView_helper : SoundListView
     void _ref_0063f7b0();
 };
 
-struct CreatureSounds_shell : CreatureSoundCollection
+struct CreatureSounds_shell : CreatureSounds
 {
     void ClearSoundList(CREATURE_SOUND_TYPE type);
 };
@@ -167,7 +155,7 @@ void CreatureSounds_shell::ClearSoundList(CREATURE_SOUND_TYPE type)
 
 // Returns the list stored in the sound table at index aeType when it is in [0,22), otherwise returns null.
 // @fnv 0x005f0ac0
-BSSimpleList<SoundListEntry*>* CreatureSoundCollection::GetSoundListForType(CREATURE_SOUND_TYPE aeType)
+BSSimpleList<SoundListEntry*>* CreatureSounds::GetSoundListForType(CREATURE_SOUND_TYPE aeType)
 {
     BSSimpleList<SoundListEntry*>* pretlist = 0;
     if (aeType >= 0 && aeType < 22)
@@ -190,13 +178,13 @@ void CopyPointerAndByte(void* apDest, void* apSource)
 
 void __cdecl CopyPointerAndByte(void*, void*);
 
-struct FUN_005f0640_shell : public CreatureSoundCollection
+struct FUN_005f0640_shell : public CreatureSounds
 {
-    void CopyCreatureSoundLists(CreatureSoundCollection* apCopy);
+    void CopyCreatureSoundLists(CreatureSounds* apCopy);
 };
 
 // @fnv 0x005f0640
-void FUN_005f0640_shell::CopyCreatureSoundLists(CreatureSoundCollection* apCopy)
+void FUN_005f0640_shell::CopyCreatureSoundLists(CreatureSounds* apCopy)
 {
     FUN_005f0820();
     if (apCopy)
@@ -218,7 +206,7 @@ void FUN_005f0640_shell::CopyCreatureSoundLists(CreatureSoundCollection* apCopy)
 
 unsigned int __cdecl DialogueRandom(void);
 
-struct FUN_005f0a30_shell : CreatureSoundCollection
+struct FUN_005f0a30_shell : CreatureSounds
 {
     unsigned int GetRandomCreatureSound(CREATURE_SOUND_TYPE type);
 };
@@ -242,7 +230,7 @@ unsigned int FUN_005f0a30_shell::GetRandomCreatureSound(CREATURE_SOUND_TYPE aeSo
 void __cdecl FUN_004858f0(unsigned int, unsigned char);
 void __cdecl _FUN_00485910(unsigned int, unsigned int);
 
-struct FUN_005f03a0_shell : public CreatureSoundCollection
+struct FUN_005f03a0_shell : public CreatureSounds
 {
     void FUN_005f03a0();
 };
@@ -275,14 +263,14 @@ void FUN_005f03a0_shell::FUN_005f03a0()
     }
 }
 
-struct FUN_005f06f0_shell : CreatureSoundCollection
+struct FUN_005f06f0_shell : CreatureSounds
 {
-    bool IsDifferentFrom(CreatureSoundCollection* apCompare);
+    bool IsDifferentFrom(CreatureSounds* apCompare);
 };
 
 // Compares the 22 creature sound lists of this object and apCompare, returning true if any entry differs or list lengths mismatch.
 // @fnv 0x005f06f0
-bool FUN_005f06f0_shell::IsDifferentFrom(CreatureSoundCollection* apCompare)
+bool FUN_005f06f0_shell::IsDifferentFrom(CreatureSounds* apCompare)
 {
     char i;
 

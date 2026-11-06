@@ -1,33 +1,26 @@
 // fallout/misc/saveload/bgssaveloadfile.cpp: BGSSaveLoadFileEntry, SaveLoadFile, BGSSaveLoadManager (23 functions)
 
+// The generated layout support has an enum-only NiFile declaration.
+// Keep it separate from the shared BSFile base class.
+#include <windows.h> // before layout_support.h: the shared BGSSaveLoadFileEntry.h needs the SDK's FILETIME
+#include "layout_support.h"
+
+#include "../../../../include/NiTexture.h"
 #include "bgssaveloadfile_types_BGSSaveLoadFile.h"
 #include "bgssaveloadfile_types_BGSSaveLoadFileEntry.h"
-#include "bgssaveloadfile_types_BGSSaveLoadManager.h"
+#include "../../../../include/BGSSaveLoadManager.h"
 #include "bgssaveloadfile_types_BGSSaveLoadHeader.h"
-#include "bgssaveloadfile_types_NiTexture.h"
 #include "MemoryManager.h"
-
-class BSFile
-{
-  public:
-    char opaque[0x158];
-    BSFile(const char*, int, unsigned int, bool);
-    unsigned int Read(void*, unsigned int);
-    unsigned int GetFilePosition();
-};
-
-class FNVFileSeek
-{
-  public:
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    virtual void vfn_0c();
-    virtual void vfn_10();
-    virtual void Seek(int, int);
-};
+#include "../../../../include/BSFile.h"
 
 extern BGSSaveLoadManager* DAT_011de134;
+
+// These two operations are not declared by the shared manager yet.
+struct SaveLoadManagerFileOperations : public BGSSaveLoadManager
+{
+    void DeleteWeaponFile(unsigned int, int);
+    void RemoveAndDelete(void*);
+};
 extern int DAT_010a2480;
 
 void* __cdecl operator new(unsigned int);
@@ -77,7 +70,7 @@ void SaveLoadFile::SetFilePosition(int position)
     if (DAT_011de134->FUN_00424940())
         m_uiFilePosition = position;
     else
-        ((FNVFileSeek*)pFile)->Seek(position, DAT_010a2480);
+        pFile->Seek(position, DAT_010a2480);
 }
 
 // @fnv 0x00846820
@@ -143,36 +136,17 @@ void BGSSaveLoadFileEntry::ReadTypedData()
     m_bHeaderParsed = true;
 }
 
-struct VDestruct008462c0
-{
-    virtual ~VDestruct008462c0();
-};
-
-// Deletes the VDestruct008462c0 object stored at offset 0x104 of pThis.
+// Deletes the BSFile object stored at offset 0x104 of pThis.
 // @fnv 0x008462c0
 void __fastcall FUN_008462c0(char* pThis)
 {
-    delete *reinterpret_cast<VDestruct008462c0**>(pThis + 0x104);
+    delete *reinterpret_cast<BSFile**>(pThis + 0x104);
 }
-
-class UnknownVtbl008463c0
-{
-  public:
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    virtual void vfn_0c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual bool vfn_20(int, int);
-};
 
 struct UnknownOwner008463c0
 {
     char pad[0x104];
-    UnknownVtbl008463c0* unk104;
+    BSFile* unk104;
 };
 
 // @fnv 0x008463c0
@@ -180,7 +154,7 @@ bool __fastcall FUN_008463c0(UnknownOwner008463c0* _this)
 {
     if (DAT_011de134->FUN_00424940())
         return true;
-    return _this->unk104->vfn_20(0, 0);
+    return _this->unk104->Open(false, false);
 }
 
 extern int DAT_010a2484;
@@ -188,7 +162,7 @@ extern int DAT_010a2484;
 struct FUN_00846490_t
 {
     char pad_000[0x104];
-    FNVFileSeek* file;
+    BSFile* file;
     int unk_108;
     int pos_10c;
     void AdvancePosition(int offset);
@@ -242,20 +216,14 @@ struct FUN_008467b0_shell : public BGSSaveLoadFileEntry
     bool LoadSaveEntry();
 };
 
-struct BGSSaveLoadManager_ext : public BGSSaveLoadManager
-{
-    bool LoadGame(const char*, int, bool, bool);
-};
-
 // @fnv 0x008467b0
 bool FUN_008467b0_shell::LoadSaveEntry()
 {
-    return ((BGSSaveLoadManager_ext*)DAT_011de134)
-        ->LoadGame(*(const char**)this, *(int*)((char*)this + 0x34), false, false);
+    return DAT_011de134->LoadGame(*(const char**)this, *(int*)((char*)this + 0x34), false, false);
 }
 
 namespace fnv_00846a20 {
-struct _FILETIME_
+struct FileTimeValue
 {
     unsigned int dwLowDateTime;
     unsigned int dwHighDateTime;
@@ -264,9 +232,9 @@ struct _FILETIME_
 struct _WIN32_FIND_DATAA_
 {
     unsigned int dwFileAttributes;
-    _FILETIME_ ftCreationTime;
-    _FILETIME_ ftLastAccessTime;
-    _FILETIME_ ftLastWriteTime;
+    FileTimeValue ftCreationTime;
+    FileTimeValue ftLastAccessTime;
+    FileTimeValue ftLastWriteTime;
     unsigned int nFileSizeHigh;
     unsigned int nFileSizeLow;
     unsigned int dwReserved0;
@@ -278,11 +246,6 @@ struct _WIN32_FIND_DATAA_
 __declspec(dllimport) void* __stdcall FindFirstFileA(const char*, _WIN32_FIND_DATAA_*);
 __declspec(dllimport) int __stdcall FindClose(void*);
 
-struct BGSSaveLoadManager_ext : public BGSSaveLoadManager
-{
-    void GetFullPath(char*, char*, bool);
-};
-
 // @fnv 0x00846a20
 void __fastcall UpdateFileWriteTime(char* pThis)
 {
@@ -290,11 +253,11 @@ void __fastcall UpdateFileWriteTime(char* pThis)
     {
         char path[260];
         _WIN32_FIND_DATAA_ findData;
-        ((BGSSaveLoadManager_ext*)DAT_011de134)->GetFullPath(*(char**)pThis, path, false);
+        DAT_011de134->GetFullPath(*(char**)pThis, path, false);
         void* hFind = FindFirstFileA(path, &findData);
         if (hFind != (void*)-1)
         {
-            *(_FILETIME_*)(pThis + 0x2c) = findData.ftLastWriteTime;
+            *(FileTimeValue*)(pThis + 0x2c) = findData.ftLastWriteTime;
         }
         FindClose(hFind);
     }
@@ -302,28 +265,18 @@ void __fastcall UpdateFileWriteTime(char* pThis)
 }  // namespace fnv_00846a20
 
 namespace fnv_00846ad0 {
-struct BGSSaveLoadManager_ext : public BGSSaveLoadManager
-{
-    bool IsQuickSaveFileName(const char*);
-};
-
 // @fnv 0x00846ad0
 bool __fastcall FUN_00846ad0(const char** pThis)
 {
-    return ((BGSSaveLoadManager_ext*)DAT_011de134)->IsQuickSaveFileName(*pThis);
+    return DAT_011de134->IsQuickSaveFileName(*pThis);
 }
 }  // namespace fnv_00846ad0
 
 namespace fnv_00846af0 {
-struct BGSSaveLoadManager_ext : public BGSSaveLoadManager
-{
-    bool IsSaveFileNameLegacyAutosave(const char*);
-};
-
 // @fnv 0x00846af0
 bool __fastcall IsLegacyAutosaveFileName(const char** apFileName)
 {
-    return ((BGSSaveLoadManager_ext*)DAT_011de134)->IsSaveFileNameLegacyAutosave(*apFileName);
+    return DAT_011de134->IsSaveFileNameLegacyAutosave(*apFileName);
 }
 }  // namespace fnv_00846af0
 
@@ -367,10 +320,6 @@ FUN_008465b0_stub::FUN_008465b0_stub(const char* pcName, int p)
     strcpy_s(name, len + 1, pcName);
 }
 
-struct FUN_00473180_shell
-{
-    unsigned int FUN_00473180(const char*, unsigned int);
-};
 struct FUN_00846330_shell
 {
     unsigned int WriteToFile(const void* apBuffer, unsigned int aiBytes);
@@ -387,16 +336,8 @@ unsigned int FUN_00846330_shell::WriteToFile(const void* apBuffer, unsigned int 
         *(unsigned int*)((char*)this + 0x10c) += aiBytes;
         return aiBytes;
     }
-    return ((FUN_00473180_shell*)(*(char**)((char*)this + 0x104)))->FUN_00473180((const char*)apBuffer, aiBytes);
+    return (*reinterpret_cast<BSFile**>((char*)this + 0x104))->FUN_00473180((const char*)apBuffer, aiBytes);
 }
-
-struct FUN_00846710_mgr_view
-{
-    bool Probe00851980(const char* apName);
-    bool Probe00851a20(const char* apName);
-    bool Probe008503b0(const char* apName, int aiDeviceID, int aiFlag);
-    void Probe00851620(void* apEntry);
-};
 
 struct FUN_00846710_cls : public BGSSaveLoadFileEntry
 {
@@ -407,10 +348,10 @@ struct FUN_00846710_cls : public BGSSaveLoadFileEntry
 // @fnv 0x00846710
 bool FUN_00846710_cls::FUN_00846710()
 {
-    if (reinterpret_cast<FUN_00846710_mgr_view*>(DAT_011de134)->Probe00851980(pFileName) ||
-        reinterpret_cast<FUN_00846710_mgr_view*>(DAT_011de134)->Probe00851a20(pFileName))
+    if (DAT_011de134->IsSaveFileNameDefault(pFileName) ||
+        DAT_011de134->IsSaveFileNameLegacyAutosave(pFileName))
     {
-        if (reinterpret_cast<FUN_00846710_mgr_view*>(DAT_011de134)->Probe008503b0(0, m_iScreenshotOffset, 0))
+        if (DAT_011de134->FUN_008503b0(0, m_iScreenshotOffset, 0))
         {
             DispatchEvent();
             return true;
@@ -418,25 +359,14 @@ bool FUN_00846710_cls::FUN_00846710()
     }
     else
     {
-        if (reinterpret_cast<FUN_00846710_mgr_view*>(DAT_011de134)->Probe008503b0(pFileName, m_iScreenshotOffset, 0))
+        if (DAT_011de134->FUN_008503b0(pFileName, m_iScreenshotOffset, 0))
         {
-            reinterpret_cast<FUN_00846710_mgr_view*>(DAT_011de134)->Probe00851620(this);
+            static_cast<SaveLoadManagerFileOperations*>(DAT_011de134)->RemoveAndDelete(this);
             return true;
         }
     }
     return false;
 }
-
-class C8467E0Event;
-
-class C8467E0Manager
-{
-  public:
-    void DeleteWeaponFile(unsigned int uiType, int iData);
-    void RemoveAndDelete(C8467E0Event* pkEvent);
-};
-
-extern C8467E0Manager* g_pk8467E0Manager;
 
 class C8467E0Event
 {
@@ -462,8 +392,8 @@ class C8467E0Event
 // @fnv 0x008467e0
 void C8467E0Event::DispatchEvent()
 {
-    g_pk8467E0Manager->DeleteWeaponFile(m_uiType, m_iData);
-    g_pk8467E0Manager->RemoveAndDelete(this);
+    static_cast<SaveLoadManagerFileOperations*>(DAT_011de134)->DeleteWeaponFile(m_uiType, m_iData);
+    static_cast<SaveLoadManagerFileOperations*>(DAT_011de134)->RemoveAndDelete(this);
 }
 
 struct FUN_00850330_class
@@ -479,10 +409,6 @@ int __cdecl strcat_s(char*, unsigned int, const char*);
 int __cdecl FUN_00ecbf05(const char*, int);
 int __cdecl FUN_00ec862c(const char*, const char*);
 __declspec(dllimport) int __stdcall DeleteFileA(const char*);
-struct MgrShell
-{
-    void GetFullPath(char*, char*, unsigned char);
-};
 struct FUN_006815c0_Class
 {
     void* FUN_006815c0();
@@ -510,7 +436,7 @@ void BGSSaveLoadManager::FUN_00850100(SaveLoadHeader* header, int abRotate)
     (p2 ? p2->FUN_00850330(1) : (char*)0);
     if (*(unsigned char*)&abRotate)
     {
-        ((MgrShell*)this)->GetFullPath(bufA3, bufB, *(unsigned char*)&abRotate);
+        GetFullPath(bufA3, bufB, *(bool*)&abRotate);
         strcpy_s(bufC4, 260, bufB);
         bufC4[BSStringLength(bufC4) - 4] = 0;
         for (count2 = *DAT_011de2c8.Int() - 1; count2 >= 0; count2--)

@@ -5,14 +5,15 @@
 #include "../../include/layout_support.h"
 
 #pragma optimize("gty", on)
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00cfdbe0 FUN_00cfdbe0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x, y, z, w;
     } lanes;
-};
-extern "C" __m128 _mm_setzero_ps();
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setzero_ps();
 extern float DAT_01012054;
 
 namespace InvalidateTimDetail {
@@ -41,7 +42,7 @@ struct __declspec(align(16)) Node
 };
 struct TimNode : Node
 {
-    __m128 normal;
+    LocalM128 normal;
 };
 }
 

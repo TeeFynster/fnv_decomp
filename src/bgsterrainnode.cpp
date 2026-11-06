@@ -1,3 +1,4 @@
+#include "../include/BGSDistantTreeBlock.h"
 
 // fallout_shared/distant terrain system/bgsterrainnode.cpp
 // BGSTerrainNode::BGSTerrainNode (0x006fd210).
@@ -7,7 +8,80 @@
 // level size, subdivides while above the manager minimum, then derives the
 // split/morph distances from the [TerrainManager] INI mults.
 
-#include "bgsterrainnode.h"
+#include <float.h>
+#include <stddef.h>
+#include "../include/NiPoint2.h"
+#include "../include/TES.h"
+#include "../include/BSSimpleList.h"
+#include "../include/TESFile.h"
+#include "../include/TESWorldSpace.h"
+#include "../include/NiNode.h"
+#include "../include/Tile.h"
+#include "../include/AnimIdle.h"
+#include "../include/GO.h"
+#include "../include/GameTimerRecord.h"
+#include "../include/AutoMemContext.h"
+#include "../include/SettingT_GameSettingCollection_.h"
+
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+
+#include "../include/MEM_CONTEXT.h"
+#include "../include/BGSTerrainManager.h"
+#include "../include/BGSTerrainNode.h"
+
+// Shared DistantTreeBlockLocal_006fe330 is 0x35 bytes; the game allocates 0x4C at 0x006FE3D1.
+// Keep this local definition until the approved shared layout supports that size.
+// local form of BGSDistantTreeBlock: 0x006fe330 needs the 0x4c-byte allocation; the shared layout changes its allocation immediate (one byte differs).
+class DistantTreeBlockLocal_006fe330
+{
+  public:
+    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C,
+        unk40, unk44, unk48;
+    DistantTreeBlockLocal_006fe330(BGSTerrainNode* pNode, unsigned int uiTreeBlockIndex, unsigned short sX, unsigned short sY);
+    ~DistantTreeBlockLocal_006fe330();
+    bool IsLoaded();
+    void Prepare();
+    void Attach();
+};
+class BGSTerrainManager;
+class BGSTerrainChunk;
+class BGSDistantObjectBlock;
+
+
+extern SettingT_GameSettingCollection_ fSplitDistanceMult;
+extern SettingT_GameSettingCollection_ fMorphStartDistanceMult;
+extern SettingT_GameSettingCollection_ fMorphEndDistanceMult;
+extern SettingT_GameSettingCollection_ bKeepLowDetailTerrain;
+
+int Warning(const char* aFormat, ...);
+
+extern "C" void* memset(void* pDestination, int cValue, unsigned int uSize);
+
+FNV_STATIC_ASSERT(sizeof(BGSTerrainNode) == 96);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, pManager) == 0);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, iLevel) == 4);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_sX) == 8);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_sY) == 10);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_bWithinMaximumLevel) == 12);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_bNodeStateFlag) == 13);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, pChunk) == 16);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, pBlock) == 20);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, pTrees) == 24);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_pSceneNode) == 28);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, pChildren) == 32);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, pParent) == 48);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, Center) == 52);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_fNodeRadius) == 64);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_fSplitDistance) == 68);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_fMorphStartDistance) == 72);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_fMorphEndDistance) == 76);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, TerrainNodeData) == 80);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_bFlagBeforeParentPosition) == 84);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_eParentPosition) == 88);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_bPersistent) == 92);
+FNV_STATIC_ASSERT(offsetof(BGSTerrainNode, m_bNodeInitialized) == 93);
 
 const char kBGSTerrainNodeFileLabel[] =
     "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\Distant Terrain System\\BGSTerrainNode.cpp";
@@ -44,7 +118,7 @@ BGSTerrainNode::BGSTerrainNode(BGSTerrainManager* pManagerArg, BGSTerrainNode* p
     float kCtx = m_sY * 4096.0;
     NiPoint3 corner(fMin, kCtx, 0.0f);
     Center = NiPoint3(fCornerY, fZ, 0.0f);
-    m_fNodeRadius = (Center - corner).ComputeMagnitude();
+    m_fNodeRadius = static_cast<const NiPoint3&>(Center - corner).ComputeMagnitude();
     m_bPersistent = bPersistentArg;
     if (uiSize > pManager->GetMinLevel())
     {
@@ -52,7 +126,7 @@ BGSTerrainNode::BGSTerrainNode(BGSTerrainManager* pManagerArg, BGSTerrainNode* p
         short sMX = m_sX + (iLevel >> 1);
         short sMid = m_sY + (iLevel >> 1);
         bool bChildPersistent = false;
-        if (bKeepLowDetailTerrain.Bool()->b && uH == pManager->GetMaxLevel())
+        if (*bKeepLowDetailTerrain.FUN_00408d60() && uH == pManager->GetMaxLevel())
             bChildPersistent = true;
         pChildren[0] = new BGSTerrainNode(pManager, this, m_sX, m_sY, uH, bChildPersistent);
         pChildren[1] = new BGSTerrainNode(pManager, this, m_sX, sMid, uH, bChildPersistent);
@@ -85,18 +159,10 @@ BGSTerrainNode::BGSTerrainNode(BGSTerrainManager* pManagerArg, BGSTerrainNode* p
     m_bNodeStateFlag = false;
 }
 
-struct BSSimpleListX
-{
-    bool IsEmpty();
-};
-struct FileX
-{
-    BSSimpleListX* FUN_00464df0();
-};
 struct FUN_00485b60
 {
     unsigned int FUN_00485bc0();
-    FileX* GetFile(int);
+    TESFile* GetFile(int);
     unsigned int Go();
 };
 // Calls FUN_00485bc0, checks whether the first file's list is non-empty, and ORs that flag into bit 24 of the result.
@@ -105,7 +171,7 @@ unsigned int FUN_00485b60::Go()
 {
     char flag;
     unsigned int result;
-    FileX* file;
+    TESFile* file;
     result = FUN_00485bc0();
     flag = 0;
     file = GetFile(0);
@@ -186,25 +252,6 @@ void* FUN_006fd920::Del(unsigned int flags)
     return this;
 }
 
-void __cdecl operator delete(void*);
-struct FUN_006f76b0
-{
-    void Dtor();
-};
-struct FUN_006fd950
-{
-    void* Del(unsigned int flags);
-};
-// Calls Dtor on this, frees this with operator delete when flags has bit 0 set, and returns this.
-// @fnv 0x006fd950
-void* FUN_006fd950::Del(unsigned int flags)
-{
-    ((FUN_006f76b0*)this)->Dtor();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
 struct FUN_006fd980_shell;
 struct Mgr
 {
@@ -243,14 +290,6 @@ void FUN_006fd980_shell::FUN_006fd980(int aiFlags)
     }
 }
 
-struct NiObj;
-struct GO
-{
-    NiObj* p;
-    GO(int p);
-    ~GO();
-    operator NiObj*() const;
-};
 struct FUN_006fe280_shell
 {
     int f0;
@@ -283,11 +322,6 @@ bool FUN_006ff0a0::Chk(int aiIndex)
     return (*(Ent**)((char*)this + 0xc4))[aiIndex].b == 0;
 }
 
-struct NiPoint2
-{
-    float x, y;
-    NiPoint2(float a, float b);
-};
 struct FUN_006ff210_shell
 {
     char pad[0x58];
@@ -324,80 +358,12 @@ NiPoint2 FUN_006ff210_shell::FUN_006ff210()
     return NiPoint2(x, y);
 }
 
+// The shared SetBool declaration is nonvirtual; these terrain calls use slot 60.
+typedef void (__thiscall* TerrainSetBoolFunction)(NiNode*, int, int, int);
+#define SetTerrainNodeBool(node, index, enabled, value) \
+    ((*reinterpret_cast<TerrainSetBoolFunction**>(node))[60](node, index, enabled, value))
+
 namespace fnv_006ff2c0 {
-struct NiNode
-{
-    virtual void v0() = 0;
-    virtual void v1() = 0;
-    virtual void v2() = 0;
-    virtual void v3() = 0;
-    virtual void v4() = 0;
-    virtual void v5() = 0;
-    virtual void v6() = 0;
-    virtual void v7() = 0;
-    virtual void v8() = 0;
-    virtual void v9() = 0;
-    virtual void v10() = 0;
-    virtual void v11() = 0;
-    virtual void v12() = 0;
-    virtual void v13() = 0;
-    virtual void v14() = 0;
-    virtual void v15() = 0;
-    virtual void v16() = 0;
-    virtual void v17() = 0;
-    virtual void v18() = 0;
-    virtual void v19() = 0;
-    virtual void v20() = 0;
-    virtual void v21() = 0;
-    virtual void v22() = 0;
-    virtual void v23() = 0;
-    virtual void v24() = 0;
-    virtual void v25() = 0;
-    virtual void v26() = 0;
-    virtual void v27() = 0;
-    virtual void v28() = 0;
-    virtual void v29() = 0;
-    virtual void v30() = 0;
-    virtual void v31() = 0;
-    virtual void v32() = 0;
-    virtual void v33() = 0;
-    virtual void v34() = 0;
-    virtual void v35() = 0;
-    virtual void v36() = 0;
-    virtual void v37() = 0;
-    virtual void v38() = 0;
-    virtual void v39() = 0;
-    virtual void v40() = 0;
-    virtual void v41() = 0;
-    virtual void v42() = 0;
-    virtual void v43() = 0;
-    virtual void v44() = 0;
-    virtual void v45() = 0;
-    virtual void v46() = 0;
-    virtual void v47() = 0;
-    virtual void v48() = 0;
-    virtual void v49() = 0;
-    virtual void v50() = 0;
-    virtual void v51() = 0;
-    virtual void v52() = 0;
-    virtual void v53() = 0;
-    virtual void v54() = 0;
-    virtual void v55() = 0;
-    virtual void v56() = 0;
-    virtual void v57() = 0;
-    virtual void v58() = 0;
-    virtual void v59() = 0;
-    virtual void SetBool(int a, int b, int c) = 0;
-    void FUN_006fb940(float a, float b, float c);
-};
-struct Tile
-{
-    NiNode* FUN_0056c7f0();
-};
-struct NiPoint2
-{
-    float x, y;
-};
 struct Chunk
 {
     int FUN_006fabc0(int i);
@@ -406,10 +372,6 @@ struct Holder
 {
     int f0, f4, f8, fc;
     Chunk* chunk;
-};
-struct AnimIdle
-{
-    int GetSection();
 };
 extern AnimIdle g_timeGlobal;
 struct FUN_006ff2c0_shell
@@ -432,11 +394,11 @@ void FUN_006ff2c0_shell::UpdateTileFromChunk()
     int a;
     c = holder->chunk->FUN_006fabc0(0);
     a = holder->chunk->FUN_006fabc0(1);
-    b = tile->FUN_0056c7f0();
+    b = reinterpret_cast<NiNode*>(tile->FUN_0056c7f0());
     if (b)
     {
-        b->SetBool(0, 1, c);
-        b->SetBool(1, 1, a);
+        SetTerrainNodeBool(b, 0, 1, c);
+        SetTerrainNodeBool(b, 1, 1, a);
         NiPoint2 pt = FUN_006ff210();
         section = g_timeGlobal.GetSection();
         b->FUN_006fb940(pt.x, pt.y, 0.0f);
@@ -445,76 +407,6 @@ void FUN_006ff2c0_shell::UpdateTileFromChunk()
 }
 }  // namespace fnv_006ff2c0
 
-struct NiNode
-{
-    virtual void v0() = 0;
-    virtual void v1() = 0;
-    virtual void v2() = 0;
-    virtual void v3() = 0;
-    virtual void v4() = 0;
-    virtual void v5() = 0;
-    virtual void v6() = 0;
-    virtual void v7() = 0;
-    virtual void v8() = 0;
-    virtual void v9() = 0;
-    virtual void v10() = 0;
-    virtual void v11() = 0;
-    virtual void v12() = 0;
-    virtual void v13() = 0;
-    virtual void v14() = 0;
-    virtual void v15() = 0;
-    virtual void v16() = 0;
-    virtual void v17() = 0;
-    virtual void v18() = 0;
-    virtual void v19() = 0;
-    virtual void v20() = 0;
-    virtual void v21() = 0;
-    virtual void v22() = 0;
-    virtual void v23() = 0;
-    virtual void v24() = 0;
-    virtual void v25() = 0;
-    virtual void v26() = 0;
-    virtual void v27() = 0;
-    virtual void v28() = 0;
-    virtual void v29() = 0;
-    virtual void v30() = 0;
-    virtual void v31() = 0;
-    virtual void v32() = 0;
-    virtual void v33() = 0;
-    virtual void v34() = 0;
-    virtual void v35() = 0;
-    virtual void v36() = 0;
-    virtual void v37() = 0;
-    virtual void v38() = 0;
-    virtual void v39() = 0;
-    virtual void v40() = 0;
-    virtual void v41() = 0;
-    virtual void v42() = 0;
-    virtual void v43() = 0;
-    virtual void v44() = 0;
-    virtual void v45() = 0;
-    virtual void v46() = 0;
-    virtual void v47() = 0;
-    virtual void v48() = 0;
-    virtual void v49() = 0;
-    virtual void v50() = 0;
-    virtual void v51() = 0;
-    virtual void v52() = 0;
-    virtual void v53() = 0;
-    virtual void v54() = 0;
-    virtual void v55() = 0;
-    virtual void v56() = 0;
-    virtual void v57() = 0;
-    virtual void v58() = 0;
-    virtual void v59() = 0;
-    virtual void SetBool(int a, int b, int c) = 0;
-    void FUN_006fb940(float a, float b, float c);
-};
-struct Tile
-{
-    NiNode* FUN_0056c7f0();
-};
-struct Tile;
 struct FUN_006ff380_shell
 {
     int f0, f4, f8, fc;
@@ -532,8 +424,8 @@ void FUN_006ff380_shell::FUN_006ff380()
     if (node)
     {
         node->FUN_006fb940(0.0f, 0.0f, 1.0f);
-        node->SetBool(0, 1, 0);
-        node->SetBool(1, 1, 0);
+        SetTerrainNodeBool(node, 0, 1, 0);
+        SetTerrainNodeBool(node, 1, 1, 0);
     }
 }
 
@@ -614,21 +506,10 @@ void FUN_006fda10_shell::FUN_006fda10()
     }
 }
 
-struct AnimIdle
-{
-    int GetSection();
-};
 
-struct GameTimerRecord : AnimIdle
-{
-};
 extern GameTimerRecord g_timeGlobal;
 
-struct GlobalObject_0045cfe0
-{
-    int* Int();
-};
-extern GlobalObject_0045cfe0 g_011d8740;
+extern SettingT_GameSettingCollection_ g_011d8740;
 
 struct FUN_006ff3f0_shell : FUN_006ff380_shell
 {
@@ -645,13 +526,13 @@ void FUN_006ff3f0_shell::FUN_006ff3f0()
     if (!tile || !tile->FUN_0056c7f0())
         return;
 
-    if (delta > (unsigned int)*g_011d8740.Int())
+    if (delta > (unsigned int)*g_011d8740.FUN_0043d4d0())
     {
         FUN_006ff380();
     }
     else
     {
-        float f = (double)delta / (unsigned int)*g_011d8740.Int();
+        float f = (double)delta / (unsigned int)*g_011d8740.FUN_0043d4d0();
         NiPoint2 pt = ((FUN_006ff210_shell*)this)->FUN_006ff210();
         tile->FUN_0056c7f0()->FUN_006fb940(pt.x, pt.y, f);
     }
@@ -667,11 +548,6 @@ struct ClearPartB
 {
     int unk00;
     ~ClearPartB();
-};
-struct ClearPartC
-{
-    int unk00;
-    ~ClearPartC();
 };
 struct ClearFlagHolder
 {
@@ -691,7 +567,7 @@ struct FUN_006fd7b0_Owner
     bool bInitialized;
     ClearPartA* pPartA;
     ClearPartB* pPartB;
-    ClearPartC* pPartC;
+    DistantTreeBlockLocal_006fe330* pPartC;
     int unk1C;
     int unk20;
     int unk24;
@@ -796,10 +672,6 @@ struct SceneUpdate
     void FUN_00507700(float);
     void FUN_00450f90(bool);
 };
-struct WorldUpdate
-{
-    bool GetParentUseFlag(int);
-};
 struct TerrainMgrUpdate
 {
     unsigned int GetDaysPassed();
@@ -819,19 +691,11 @@ struct ChunkUpdate
 };
 struct WorldRefUpdate
 {
-    WorldUpdate* Get();
+    TESWorldSpace* Get();
     SceneUpdate* GetMenuRoot();
 };
-struct TESUpdate
-{
-    WorldUpdate* GetHitSound();
-};
-extern TESUpdate* g_TES;
-struct GlobalObject_0044f440
-{
-    float* Float();
-};
-extern GlobalObject_0044f440 g_011d86f8;
+extern TES* g_TES;
+extern SettingT_GameSettingCollection_ g_011d86f8;
 struct TerrainUpdate
 {
     TerrainMgrUpdate* manager;
@@ -908,7 +772,7 @@ void TerrainUpdate::UpdateTerrainNode(void* arg, bool update)
             if (chunk->GetInitialized() && !chunk->FUN_00759d80() && (!parent || parent->FUN_006fe920(true)))
             {
                 chunk->FUN_006facb0();
-                chunk->FUN_0056c7f0()->FUN_00507700((float)((level / 4.0) * *g_011d86f8.Float()));
+                chunk->FUN_0056c7f0()->FUN_00507700((float)((level / 4.0) * g_011d86f8.Float()->f));
                 SceneUpdate* root7 = Get()->GetMenuRoot();
                 root7->SetTaskFlag2000(false);
                 root7->Refresh();
@@ -924,8 +788,8 @@ void TerrainUpdate::UpdateTerrainNode(void* arg, bool update)
         }
         if (oldRoot && Get()->Get() != g_TES->GetHitSound())
         {
-            WorldUpdate* worldVal = g_TES->GetHitSound();
-            if (worldVal->GetParentUseFlag(1) && !worldVal->GetParentUseFlag(0) && FUN_006fede0())
+            TESWorldSpace* worldVal = g_TES->GetHitSound();
+            if (worldVal->GetParentUseFlag(TESWorldSpace::PU_LOD) && !worldVal->GetParentUseFlag(TESWorldSpace::PU_LAND) && FUN_006fede0())
                 oldRoot->FUN_00450f90(true);
         }
         if (update && chunk)
@@ -941,18 +805,6 @@ void TerrainUpdate::UpdateTerrainNode(void* arg, bool update)
 }
 
 extern const char kBGSTerrainNodeFileLabel[];
-
-class BGSDistantTreeBlock
-{
-  public:
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C,
-        unk40, unk44, unk48;
-    BGSDistantTreeBlock(BGSTerrainNode* pNode, unsigned int uiTreeBlockIndex, unsigned short sX, unsigned short sY);
-    ~BGSDistantTreeBlock();
-    bool IsLoaded();
-    void Prepare();
-    void Attach();
-};
 
 struct TerrainSceneX
 {
@@ -985,7 +837,7 @@ void TerrainNodeX::FUN_006fe330(int iArg)
         {
             if (pTrees == 0)
             {
-                pTrees = new BGSDistantTreeBlock(this, iLevel, m_sX, m_sY);
+                pTrees = reinterpret_cast<BGSDistantTreeBlock*>(new DistantTreeBlockLocal_006fe330(this, iLevel, m_sX, m_sY));
             }
             else if (pTrees != 0)
             {
@@ -1015,20 +867,6 @@ void TerrainNodeX::FUN_006fe330(int iArg)
 }
 
 namespace fnv_006ff0d0 {
-class TESObjectCELL;
-
-class TESWorldSpaceX
-{
-  public:
-    TESObjectCELL* GetCellAt(int x, int y);
-};
-
-class TES
-{
-  public:
-    TESWorldSpaceX* GetParentWorldSpace();
-    bool IsCellBuffered(TESObjectCELL* cell, bool b);
-};
 extern TES* g_TES;
 
 class TerrainVisibility
@@ -1056,7 +894,7 @@ class TerrainNodeX
 // @fnv 0x006ff0d0
 void TerrainNodeX::UpdateVisibility(TerrainVisibility* pVisibility, int unused)
 {
-    TESWorldSpaceX* pWorld = g_TES->GetParentWorldSpace();
+    TESWorldSpace* pWorld = g_TES->GetParentWorldSpace();
     TerrainVisibility* pVis3 = pVisibility;
     if (pVis3)
     {
@@ -1071,7 +909,7 @@ void TerrainNodeX::UpdateVisibility(TerrainVisibility* pVisibility, int unused)
                         int x5 = m_sX + i;
                         int y3 = m_sY + j_;
                         unsigned int idx5 = iLevel * i + j_;
-                        TESObjectCELL* pCell4 = pWorld->GetCellAt(x5, y3);
+                        TESObjectCELL* pCell4 = pWorld->GetCellAtGridPosition(x5, y3);
                         if (!pVis3->Chk(idx5) && g_TES->IsCellBuffered(pCell4, true))
                             pVis3->Hide(idx5);
                         else
@@ -1090,12 +928,6 @@ void TerrainNodeX::UpdateVisibility(TerrainVisibility* pVisibility, int unused)
 }  // namespace fnv_006ff0d0
 
 extern "C" char DAT_0106e4e0;
-struct FUN_00404eb0
-{
-    int x;
-    FUN_00404eb0(int, bool, char*, int);
-    ~FUN_00404eb0();
-};
 struct Thread006f
 {
     unsigned FUN_0059bb30();
@@ -1139,7 +971,7 @@ struct Node006f
 // @fnv 0x006fdfc0
 void Node006f::UpdateBlock(int a, bool abFlag)
 {
-    FUN_00404eb0 guard(0x24, true, &DAT_0106e4e0, 0x1ae);
+    AutoMemContext guard((MEM_CONTEXT)0x24, true, &DAT_0106e4e0, 0x1ae);
     if (FUN_00726070() == thread->FUN_0059bb30())
     {
         if (FUN_006fe620(a))
@@ -1209,10 +1041,6 @@ struct ObjA
     virtual void v9();
     virtual GridObj* v10();
 };
-struct GetterObj
-{
-    NodeObj* FUN_005875a0(int x, int y);
-};
 struct BlockObj
 {
     ObjA* GetNiObj(int a);
@@ -1221,12 +1049,7 @@ struct BlockObj
     void UpdateLodVisibility(void* p);
     void VisitNodeTree(void* p);
 };
-struct MgrObj
-{
-    GetterObj* FUN_004fd3e0();
-    bool FUN_004511e0(NodeObj* p, int a);
-};
-extern MgrObj* DAT_011dea10;
+extern TES* DAT_011dea10;
 struct FeeNode
 {
     int f00;
@@ -1244,7 +1067,7 @@ struct FeeNode
 // @fnv 0x006fee90
 void FeeNode::FUN_006fee90(int a)
 {
-    GetterObj* getter5 = DAT_011dea10->FUN_004fd3e0();
+    TESWorldSpace* getter5 = DAT_011dea10->GetParentWorldSpace();
     GridObj* grid;
     if (pBlock)
     {
@@ -1266,8 +1089,8 @@ void FeeNode::FUN_006fee90(int a)
                                 int x4 = baseX + i;
                                 int y3 = baseY + j_;
                                 int idx4 = count * i + j_;
-                                NodeObj* node = getter5->FUN_005875a0(x4, y3);
-                                if (!grid->FUN_006ff0a0(idx4) && DAT_011dea10->FUN_004511e0(node, 1) &&
+                                NodeObj* node = reinterpret_cast<NodeObj*>(getter5->GetCellAtGridPosition(x4, y3));
+                                if (!grid->FUN_006ff0a0(idx4) && DAT_011dea10->FUN_004511e0(reinterpret_cast<TESObjectCELL*>(node), 1) &&
                                     node->FUN_00557d30())
                                 {
                                     grid->DisableEntry(idx4);

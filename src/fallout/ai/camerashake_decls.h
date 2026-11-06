@@ -1,19 +1,9 @@
-// fallout/ai/camerashake_decls.h: declares NiFixedString, NiAVObject, NiNode, ModelLoader, FileFinder
-class NiFixedString
-{
-  public:
-    const char* handle;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
-class NiAVObject
-{
-  public:
-    void SetName(const NiFixedString&);
-};
-class NiNode : public NiAVObject
-{
-};
+// fallout/ai/camerashake_decls.h: declares ModelLoader and FileFinder
+// This unit calls the game's out-of-line fixed-string constructor and destructor.
+#define FNV64_NIFIXEDSTRING_OWN_BODIES
+#include "../../../include/NiNode.h"
+#undef FNV64_NIFIXEDSTRING_OWN_BODIES
+
 class ModelLoader
 {
   public:

@@ -1,5 +1,10 @@
 // fallout/ai/guardpackage.cpp: GuardActorPackageData, std (6 functions)
 
+#include "../../../include/Actor.h"
+#include "../../../include/GuardActorPackageData.h"
+#include "../../../include/BGSLoadFormBuffer.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/BGSSaveFormBuffer.h"
 #include "guardpackage_decls.h"
 // @fnv 0x00408840
 double std::abs(float value)
@@ -10,9 +15,9 @@ double std::abs(float value)
 // @fnv 0x009f28b0
 void GuardActorPackageData::LoadGame(BGSLoadFormBuffer* buffer)
 {
-    buffer->ReadTypedData(&eState, 4);
-    buffer->ReadTypedData(&m_fWarningTimer, 4);
-    buffer->ReadTypedData(&iWarningCount, 4);
+    buffer->ReadTypedData(static_cast<void*>(&eState), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&m_fWarningTimer), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&iWarningCount), 4u);
     buffer->ReadFormIdentifier(&pWarningTarget);
 }
 // Resolves the stored form reference to an Actor and, if found, calls the reference helper with true.
@@ -25,55 +30,28 @@ void GuardActorPackageData::InitLoadGame(BGSLoadFormBuffer* buffer)
         ((TESObjectREFRHelper*)pWarningTarget)->SetTargetingState(true);
 }
 
-struct FUN_009f2800Stub
+// Saves the guard state, warning timer, warning count and warning target.
+// @fnv 0x009f2850
+void GuardActorPackageData::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
 {
-    void FUN_009f2830();
-    void* DestroyIfFlagged(unsigned int);
-};
+    apSaveGameBuffer->SaveData(&eState, 4, 0);
+    apSaveGameBuffer->SaveData(&m_fWarningTimer, 4, 0);
+    apSaveGameBuffer->SaveData(&iWarningCount, 4, 0);
+    apSaveGameBuffer->SerializeFormData(pWarningTarget, 0);
+}
+
 void _Deallocate(void*);
-// Calls FUN_009f2830, frees this when bit 0 of flags is set, and returns this.
+
 // @fnv 0x009f2800
-void* FUN_009f2800Stub::DestroyIfFlagged(unsigned int flags)
+void* GuardActorPackageData::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_009f2830();
+    this->~GuardActorPackageData();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-    void SerializeFormData(void*, int);
-};
-struct FUN_009f2850_holder
-{
-    int unk00;
-    int unk04;
-    void* unk08;
-    int unk0C;
-    int unk10;
-    void SaveToBuffer(BGSSaveFormBuffer*);
-};
-// @fnv 0x009f2850
-void FUN_009f2850_holder::SaveToBuffer(BGSSaveFormBuffer* apSaveGameBuffer)
-{
-    apSaveGameBuffer->SaveData(&unk04, 4, 0);
-    apSaveGameBuffer->SaveData(&unk10, 4, 0);
-    apSaveGameBuffer->SaveData(&unk0C, 4, 0);
-    apSaveGameBuffer->SerializeFormData(unk08, 0);
-}
-
-extern int DAT_010933c8;
-
-struct FUN_0067d970_Class
-{
-    void FUN_0067d970();
-};
-
 // @fnv 0x009f2830
-void FUN_009f2800Stub::FUN_009f2830()
+GuardActorPackageData::~GuardActorPackageData()
 {
-    *reinterpret_cast<int*>(this) = reinterpret_cast<int>(&DAT_010933c8);
-    reinterpret_cast<FUN_0067d970_Class*>(this)->FUN_0067d970();
 }

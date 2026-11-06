@@ -1,16 +1,25 @@
 // bsshader/bsshaderpplightingproperty_passes_1x.cpp: free functions (1 function)
 
-#include "bsshaderpplightingproperty_passes_1x_decls.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiNode.h"
+#include "../../include/BSShaderPPLightingProperty.h"
+
+class ShadowSceneLight;
+
+class BSShaderProperty__RenderPassArray
+{
+  public:
+    void Add(NiGeometry*, unsigned short, bool, unsigned char, ShadowSceneLight*, ShadowSceneLight*, ShadowSceneLight*,
+             ShadowSceneLight*);
+};
 
 int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
 
-struct NiGeometry
-{
-    char pad00[0x08];
-    const char* m_kName;
-    char pad0C[0x0C];
-    NiGeometry* m_pParentNode;
-};
+extern const char DAT_01019f08[];
+extern const char DAT_010250cc[];
+extern const char DAT_010bc580[];
+extern const char DAT_010bc5e8[];
+extern const char DAT_010bc5f4[];
 
 struct FUN_00bdac00_t : BSShaderPPLightingProperty
 {
@@ -32,14 +41,14 @@ void* FUN_00bdac00_t::FUN_00bdac00(NiGeometry* apGeom, ShadowSceneLight* apLight
                 if (!abFacegenBlend)
                 {
                     if (abUpdateList == 1)
-                        pRenderPassList->Add(apGeom, 330, *abFirst, 0, 0, 0, 0, 0);
+                        static_cast<BSShaderProperty__RenderPassArray*>(pRenderPassList)->Add(apGeom, 330, *abFirst, 0, 0, 0, 0, 0);
                     else
                         (*asCount)++;
                 }
                 else
                 {
                     if (abUpdateList == 1)
-                        pRenderPassList->Add(apGeom, 331, *abFirst, 0, 0, 0, 0, 0);
+                        static_cast<BSShaderProperty__RenderPassArray*>(pRenderPassList)->Add(apGeom, 331, *abFirst, 0, 0, 0, 0, 0);
                     else
                         (*asCount)++;
                 }
@@ -47,14 +56,14 @@ void* FUN_00bdac00_t::FUN_00bdac00(NiGeometry* apGeom, ShadowSceneLight* apLight
             else if (!abHair)
             {
                 if (abUpdateList == 1)
-                    pRenderPassList->Add(apGeom, 334, *abFirst, 0, 0, 0, 0, 0);
+                    static_cast<BSShaderProperty__RenderPassArray*>(pRenderPassList)->Add(apGeom, 334, *abFirst, 0, 0, 0, 0, 0);
                 else
                     (*asCount)++;
             }
             else
             {
                 if (abUpdateList == 1)
-                    pRenderPassList->Add(apGeom, 332, *abFirst, 0, 0, 0, 0, 0);
+                    static_cast<BSShaderProperty__RenderPassArray*>(pRenderPassList)->Add(apGeom, 332, *abFirst, 0, 0, 0, 0, 0);
                 else
                     (*asCount)++;
             }
@@ -62,7 +71,7 @@ void* FUN_00bdac00_t::FUN_00bdac00(NiGeometry* apGeom, ShadowSceneLight* apLight
         else
         {
             if (abUpdateList == 1)
-                pRenderPassList->Add(apGeom, 337, *abFirst, 0, 0, 0, 0, 0);
+                static_cast<BSShaderProperty__RenderPassArray*>(pRenderPassList)->Add(apGeom, 337, *abFirst, 0, 0, 0, 0, 0);
             else
                 (*asCount)++;
         }
@@ -74,21 +83,21 @@ void* FUN_00bdac00_t::FUN_00bdac00(NiGeometry* apGeom, ShadowSceneLight* apLight
             if (!abVertexColors)
             {
                 if (abUpdateList == 1)
-                    pRenderPassList->Add(apGeom, 333, *abFirst, 0, 0, 0, 0, 0);
+                    static_cast<BSShaderProperty__RenderPassArray*>(pRenderPassList)->Add(apGeom, 333, *abFirst, 0, 0, 0, 0, 0);
                 else
                     (*asCount)++;
             }
             else if (!abHair)
             {
                 if (abUpdateList == 1)
-                    pRenderPassList->Add(apGeom, 335, *abFirst, 0, 0, 0, 0, 0);
+                    static_cast<BSShaderProperty__RenderPassArray*>(pRenderPassList)->Add(apGeom, 335, *abFirst, 0, 0, 0, 0, 0);
                 else
                     (*asCount)++;
             }
             else
             {
                 if (abUpdateList == 1)
-                    pRenderPassList->Add(apGeom, 338, *abFirst, 0, 0, 0, 0, 0);
+                    static_cast<BSShaderProperty__RenderPassArray*>(pRenderPassList)->Add(apGeom, 338, *abFirst, 0, 0, 0, 0, 0);
                 else
                     (*asCount)++;
             }
@@ -96,7 +105,7 @@ void* FUN_00bdac00_t::FUN_00bdac00(NiGeometry* apGeom, ShadowSceneLight* apLight
         else if (!abVertexColors)
         {
             if (abUpdateList == 1)
-                pRenderPassList->Add(apGeom, 336, *abFirst, 0, 0, 0, 0, 0);
+                static_cast<BSShaderProperty__RenderPassArray*>(pRenderPassList)->Add(apGeom, 336, *abFirst, 0, 0, 0, 0, 0);
             else
                 (*asCount)++;
         }
@@ -105,16 +114,16 @@ void* FUN_00bdac00_t::FUN_00bdac00(NiGeometry* apGeom, ShadowSceneLight* apLight
             char szName[128];
             if (apGeom)
             {
-                if (apGeom->m_pParentNode && apGeom->m_pParentNode->m_kName)
+                if (apGeom->m_pkParent && apGeom->m_pkParent->m_kName.m_kHandle)
                 {
-                    if (apGeom->m_kName)
-                        _sprintf_s(szName, 128, DAT_010bc5f4, apGeom->m_pParentNode->m_kName, apGeom->m_kName);
+                    if (apGeom->m_kName.m_kHandle)
+                        _sprintf_s(szName, 128, DAT_010bc5f4, apGeom->m_pkParent->m_kName.m_kHandle, apGeom->m_kName.m_kHandle);
                     else
-                        _sprintf_s(szName, 128, DAT_010bc5e8, apGeom->m_pParentNode->m_kName);
+                        _sprintf_s(szName, 128, DAT_010bc5e8, apGeom->m_pkParent->m_kName.m_kHandle);
                 }
-                else if (apGeom->m_kName)
+                else if (apGeom->m_kName.m_kHandle)
                 {
-                    _sprintf_s(szName, 128, DAT_01019f08, apGeom->m_kName);
+                    _sprintf_s(szName, 128, DAT_01019f08, apGeom->m_kName.m_kHandle);
                 }
                 else
                 {

@@ -2,34 +2,35 @@
 // src/havok/physics/internal/collide/gjk/hkpgskcache.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/gjk/hkpgskcache.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00dafcd0 FUN_00dafcd0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
+#define FNV_VEC4_NO_SSE
+#define FNV_VEC4_SIMD
+#include "../../../../../../include/Vec4.h"
+
 extern "C"
 {
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_load_ps(float const*);
-    void _mm_store_ps(float*, __m128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+    LocalM128 _mm_load_ps(float const*);
+    void _mm_store_ps(float*, LocalM128);
 }
 
-extern __m128 DAT_010c44d0;
+extern LocalM128 DAT_010c44d0;
 
-struct Vec4Q
-{
-    __m128 m_vComponents;
-    Vec4Q(__m128 q) : m_vComponents(q)
-    {}
-};
+__forceinline Vec4::Vec4(const LocalM128& q) : m_vComponents(q)
+{}
 
 class Node
 {
@@ -48,7 +49,7 @@ class Node
     virtual int v2c();
     virtual void v30();
     virtual void v34();
-    virtual void v38(const Vec4Q& in, void* out);
+    virtual void v38(const Vec4& in, void* out);
     virtual void v3c(int* flag, int on, void* out);
 };
 
@@ -62,10 +63,10 @@ __declspec(align(16)) struct Vec4Blk
 
 struct Xform
 {
-    __m128 c0;
-    __m128 c1;
-    __m128 c2;
-    __m128 t;
+    LocalM128 c0;
+    LocalM128 c1;
+    LocalM128 c2;
+    LocalM128 t;
 };
 
 class Cls_dafcd0
@@ -98,32 +99,32 @@ void Cls_dafcd0::FUN_00dafcd0(Node* apNodeA, Node* apNodeB, const Vec4Blk* apMat
         apNodeB->v3c(&flag, 1, &P);
     }
 
-    __m128 pv = _mm_load_ps(&P.x);
+    LocalM128 pv = _mm_load_ps(&P.x);
     const Xform& X = *(const Xform*)apMatrix;
-    __m128 R = _mm_add_ps(
+    LocalM128 R = _mm_add_ps(
         _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(pv, pv, 0x55), X.c1), _mm_mul_ps(_mm_shuffle_ps(pv, pv, 0), X.c0)),
         _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(pv, pv, 0xaa), X.c2), X.t));
-    Vec4Q C(_mm_sub_ps(R, _mm_load_ps(&t40.x)));
+    Vec4 C(_mm_sub_ps(R, _mm_load_ps(&t40.x)));
     apNodeA->v38(C, &Q);
 
-    __m128 D = _mm_sub_ps(R, _mm_load_ps(&Q.x));
-    __m128 c0 = _mm_load_ps(&apMatrix[0].x);
-    __m128 c1 = _mm_load_ps(&apMatrix[1].x);
-    __m128 c2 = _mm_load_ps(&apMatrix[2].x);
+    LocalM128 D = _mm_sub_ps(R, _mm_load_ps(&Q.x));
+    LocalM128 c0 = _mm_load_ps(&apMatrix[0].x);
+    LocalM128 c1 = _mm_load_ps(&apMatrix[1].x);
+    LocalM128 c2 = _mm_load_ps(&apMatrix[2].x);
     {
-        __m128 tmp = _mm_unpacklo_ps(c0, c1);
-        __m128 ctmp = _mm_unpackhi_ps(c0, c1);
+        LocalM128 tmp = _mm_unpacklo_ps(c0, c1);
+        LocalM128 ctmp = _mm_unpackhi_ps(c0, c1);
         c0 = _mm_movelh_ps(tmp, c2);
         tmp = _mm_movehl_ps(c0, tmp);
         c1 = _mm_shuffle_ps(tmp, c2, 0xd4);
         c2 = _mm_shuffle_ps(ctmp, c2, 0xe4);
     }
-    __m128 S =
+    LocalM128 S =
         _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(D, D, 0x55), c1), _mm_mul_ps(_mm_shuffle_ps(D, D, 0), c0)),
                    _mm_mul_ps(_mm_shuffle_ps(D, D, 0xaa), c2));
     C.m_vComponents = D;
     S = _mm_xor_ps(S, DAT_010c44d0);
-    apNodeB->v38(Vec4Q(S), &out60);
+    apNodeB->v38(Vec4(S), &out60);
 
     m_02 = *(short*)((char*)&out60 + 0xc);
     m_00 = *(short*)((char*)&Q + 0xc);
@@ -186,27 +187,22 @@ class Iface
     {}
 };
 
-__declspec(align(16)) struct V4
-{
-    unsigned int u0;
-    unsigned int u1;
-    unsigned int u2;
-    unsigned int u3;
-};
+
 
 __declspec(align(16)) struct Mat4
 {
-    V4 r0;
-    V4 r1;
-    V4 r2;
-    V4 r3;
+    Vec4 r0;
+    Vec4 r1;
+    Vec4 r2;
+    Vec4 r3;
 };
 
-__declspec(align(16)) struct P3
+// distinct from P3: exe 0x00dafe70 works with three 16-byte SIMD basis columns (48 bytes), not a three-float point.
+__declspec(align(16)) struct GskBasisColumns
 {
-    V4 v0;
-    V4 v1;
-    V4 v2;
+    Vec4 v0;
+    Vec4 v1;
+    Vec4 v2;
 };
 
 struct Src
@@ -222,9 +218,9 @@ struct Src
     unsigned char m_flag17;
     void* unk18;
     void* unk1C;
-    __m128 m_v20;
-    __m128 m_v30;
-    __m128 m_v40;
+    LocalM128 m_v20;
+    LocalM128 m_v30;
+    LocalM128 m_v40;
 };
 
 class FUN_00dafe70_cls
@@ -245,23 +241,19 @@ class FUN_00dafe70_cls
 
 extern "C"
 {
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
 }
 
-static __m128 Xf(__m128 v, const __m128& r0, const __m128& r1, const __m128& r2, const __m128& r3)
+static LocalM128 Xf(LocalM128 v, const LocalM128& r0, const LocalM128& r1, const LocalM128& r2, const LocalM128& r3)
 {
-    __m128 x = _mm_mul_ps(_mm_shuffle_ps(v, v, 0), r0);
-    __m128 y = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), r1);
-    __m128 z = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), r2);
+    LocalM128 x = _mm_mul_ps(_mm_shuffle_ps(v, v, 0), r0);
+    LocalM128 y = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), r1);
+    LocalM128 z = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), r2);
     return _mm_add_ps(_mm_add_ps(y, x), _mm_add_ps(z, r3));
 }
 
-__declspec(align(16)) union UQ
-{
-    V4 u;
-    __m128 q;
-};
+typedef Vec4 UQ; // Shared SIMD storage also supplies the integer lane views.
 __declspec(align(16)) struct Frame3
 {
     UQ r1;
@@ -284,52 +276,52 @@ void FUN_00dafe70_cls::FUN_00dafe70(Iface* apIface, Src* apSrc, const unsigned i
     m_w6 = 2;
 
     UQ row0, row1, row2, row3;
-    __m128 pv[3];
-    row0.u.u0 = pMatrix[0];
-    row0.u.u1 = pMatrix[1];
-    row0.u.u2 = pMatrix[2];
-    row0.u.u3 = pMatrix[3];
-    row1.u.u0 = pMatrix[4];
-    row1.u.u1 = pMatrix[5];
-    row1.u.u2 = pMatrix[6];
-    row1.u.u3 = pMatrix[7];
-    __m128 r0 = row0.q;
-    __m128 r1 = row1.q;
-    row2.u.u0 = pMatrix[8];
-    row2.u.u1 = pMatrix[9];
-    row2.u.u2 = pMatrix[10];
-    row2.u.u3 = pMatrix[11];
-    __m128 r2 = row2.q;
-    row3.u.u0 = pMatrix[12];
-    row3.u.u1 = pMatrix[13];
-    row3.u.u2 = pMatrix[14];
-    row3.u.u3 = pMatrix[15];
-    __m128 r3 = row3.q;
+    LocalM128 pv[3];
+    row0.xb = pMatrix[0];
+    row0.yb = pMatrix[1];
+    row0.zb = pMatrix[2];
+    row0.wb = pMatrix[3];
+    row1.xb = pMatrix[4];
+    row1.yb = pMatrix[5];
+    row1.zb = pMatrix[6];
+    row1.wb = pMatrix[7];
+    LocalM128 r0 = row0.v;
+    LocalM128 r1 = row1.v;
+    row2.xb = pMatrix[8];
+    row2.yb = pMatrix[9];
+    row2.zb = pMatrix[10];
+    row2.wb = pMatrix[11];
+    LocalM128 r2 = row2.v;
+    row3.xb = pMatrix[12];
+    row3.yb = pMatrix[13];
+    row3.zb = pMatrix[14];
+    row3.wb = pMatrix[15];
+    LocalM128 r3 = row3.v;
 
-    const __m128* vin = (const __m128*)&apSrc->m_v20;
-    __m128* out = pv;
+    const LocalM128* vin = (const LocalM128*)&apSrc->m_v20;
+    LocalM128* out = pv;
     for (int k = 2; k >= 0; --k)
     {
         out[k] = Xf(vin[k], r0, r1, r2, r3);
     }
 
-    __m128 vMid = pv[1];
-    __m128 d = _mm_sub_ps(vMid, pv[0]);
-    __m128 e = _mm_sub_ps(pv[2], vMid);
-    __m128 t2 = _mm_mul_ps(_mm_shuffle_ps(d, d, 0xc9), _mm_shuffle_ps(e, e, 0xd2));
-    __m128 t1 = _mm_mul_ps(_mm_shuffle_ps(d, d, 0xd2), _mm_shuffle_ps(e, e, 0xc9));
+    LocalM128 vMid = pv[1];
+    LocalM128 d = _mm_sub_ps(vMid, pv[0]);
+    LocalM128 e = _mm_sub_ps(pv[2], vMid);
+    LocalM128 t2 = _mm_mul_ps(_mm_shuffle_ps(d, d, 0xc9), _mm_shuffle_ps(e, e, 0xd2));
+    LocalM128 t1 = _mm_mul_ps(_mm_shuffle_ps(d, d, 0xd2), _mm_shuffle_ps(e, e, 0xc9));
     UQ hit;
     UQ nq;
     UQ vResult;
-    nq.q = _mm_sub_ps(t2, t1);
+    nq.v = _mm_sub_ps(t2, t1);
 
     apIface->v0F(pWords, 1, &hit);
 
-    __m128 dt = _mm_mul_ps(_mm_sub_ps(hit.q, pv[0]), nq.q);
-    __m128 vSum = _mm_add_ss(_mm_shuffle_ps(dt, dt, 0x55), dt);
+    LocalM128 dt = _mm_mul_ps(_mm_sub_ps(hit.v, pv[0]), nq.v);
+    LocalM128 vSum = _mm_add_ss(_mm_shuffle_ps(dt, dt, 0x55), dt);
     vSum = _mm_add_ss(_mm_shuffle_ps(dt, dt, 0xaa), vSum);
-    __m128 bc = _mm_shuffle_ps(vSum, vSum, 0);
-    nq.q = _mm_xor_ps(_mm_and_ps(bc, DAT_010c44d0), nq.q);
+    LocalM128 bc = _mm_shuffle_ps(vSum, vSum, 0);
+    nq.v = _mm_xor_ps(_mm_and_ps(bc, DAT_010c44d0), nq.v);
 
     apIface->v0E(&nq, &vResult);
 

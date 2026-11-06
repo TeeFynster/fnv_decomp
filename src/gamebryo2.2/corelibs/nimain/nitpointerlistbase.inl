@@ -1,6 +1,7 @@
 
 #include "NiProperty.h"
 #include "RecursiveSpinLock.h"
+#include "../../../../include/layout_support.h"
 #include "Script.h"
 #include "nitpointerlistbase_lifetime.h"
 
@@ -8,13 +9,13 @@
 // Element ownership is released before the node is returned to the free list.
 template<class T> void NiTPointerAllocator<T>::Deallocate(void* pointer)
 {
-    typedef typename PoolAllocatorBase<T>::LinkedListEntry LinkedListEntry;
-    LinkedListEntry* node = static_cast<LinkedListEntry*>(pointer);
-    PoolAllocatorBase<T>::ms_kPoolState.Lock(0);
-    node->m_pUserData = 0;
-    node->m_pkNext = PoolAllocatorBase<T>::ms_pFreeList;
-    PoolAllocatorBase<T>::ms_pFreeList = node;
-    PoolAllocatorBase<T>::ms_kPoolState.Unlock();
+    typedef typename NiTAbstractPoolAllocator<T>::AllocNode AllocNode;
+    AllocNode* node = static_cast<AllocNode*>(pointer);
+    NiTAbstractPoolAllocator<T>::ms_kCriticalSection.Lock(0);
+    node->m_pkData = 0;
+    node->m_pkNext = NiTAbstractPoolAllocator<T>::ms_pkFreeMem;
+    NiTAbstractPoolAllocator<T>::ms_pkFreeMem = node;
+    NiTAbstractPoolAllocator<T>::ms_kCriticalSection.Unlock();
 }
 
 template<class Allocator, class T>
@@ -79,27 +80,7 @@ template<class Allocator, class T> T NiTPointerListBase<Allocator,T>::RemovePos(
     return element;
 }
 
-// char* explicit specialization. The shared layout header declares only the
-// member subset used by the NiPointer instantiations, while char* consumers
-// additionally call Remove(T&). Layout is inherited unchanged from
-// NiTListBase, so offsets match the primary template exactly.
-template<> class NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*> : public NiTListBase<NiTPointerAllocator<unsigned int>, char*>
-{
-public:
-    void RemoveAll();
-    void* AddHead();
-    char* RemoveHead();
-    char* RemoveTail();
-    char* RemovePos(void*& position);
-    char* Remove(char*& element);
-    void DeleteItem(NiTListItem<char*>* item);
-};
-FNV_STATIC_ASSERT(sizeof(NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>) == 12);
-typedef NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*> NiTPointerListBaseCharPtr;
-FNV_STATIC_ASSERT(offsetof(NiTPointerListBaseCharPtr, m_pkHead) == 0);
-FNV_STATIC_ASSERT(offsetof(NiTPointerListBaseCharPtr, m_pkTail) == 4);
-FNV_STATIC_ASSERT(offsetof(NiTPointerListBaseCharPtr, m_kItemCount) == 8);
-
+template <>
 inline void NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::DeleteItem(NiTListItem<char*>* item)
 {
     item->m_element = 0;
@@ -111,9 +92,10 @@ inline void NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::Delete
 
 #pragma optimize("", off)
 // @fnv 0x0057c730
-Script* NiTPointerListBase<NiTPointerAllocator<unsigned int>,Script*>::Remove(Script*& element)
+template <>
+Script* NiTPointerListBase<NiTPointerAllocator<unsigned int>,Script*>::Remove(Script* const& element)
 {
-    void* position = reinterpret_cast<NiTPointerList<TESForm*>*>(this)->Find(reinterpret_cast<TESForm* const&>(element),0);
+    void* position = reinterpret_cast<NiTPointerList<TESForm*>*>(this)->FindPos(reinterpret_cast<TESForm* const&>(element),0);
     return position ? RemovePos(position) : element;
 }
 #pragma optimize("", on)
@@ -123,8 +105,9 @@ Script* NiTPointerListBase<NiTPointerAllocator<unsigned int>,Script*>::Remove(Sc
 // @fnv 0x00e74d40
 template void NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<NiProperty> >::RemoveAll();
 
-// char* explicit-specialization members (declared in the .inl above).
+// char* member specializations.
 // RemoveTail is defined in its own original TU and linked externally.
+template <>
 void NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::RemoveAll()
 {
     NiTListItem<char*>* item = this->m_pkHead;
@@ -140,6 +123,7 @@ void NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::RemoveAll()
 }
 
 // @fnv 0x00b602d0
+template <>
 char* NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::RemoveHead()
 {
     NiTListItem<char*>* item = this->m_pkHead;
@@ -156,6 +140,7 @@ char* NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::RemoveHead()
 }
 
 // @fnv 0x00e7d7f0
+template <>
 char* NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::RemovePos(void*& position)
 {
     NiTListItem<char*>* item = static_cast<NiTListItem<char*>*>(position);
@@ -182,7 +167,8 @@ char* NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::RemovePos(vo
     return element;
 }
 
-char* NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::Remove(char*& element)
+template <>
+char* NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::Remove(char* const& element)
 {
     NiTListItem<char*>* item = this->m_pkHead;
     while (item)
@@ -198,6 +184,7 @@ char* NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>::Remove(char*
 }
 #pragma optimize("", off)
 // @fnv 0x004edf00
+template <>
 Script* NiTPointerListBase<NiTPointerAllocator<unsigned int>,Script*>::RemoveTail()
 {
     NiTListItem<Script*>* item = m_pkTail;
@@ -212,9 +199,10 @@ Script* NiTPointerListBase<NiTPointerAllocator<unsigned int>,Script*>::RemoveTai
 #pragma optimize("", on)
 
 // @fnv 0x00a5a310
+template <>
 void NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSMultiBound> >::AddTail(const NiPointer<BSMultiBound>& element)
 {
-    NiTListItem<NiPointer<BSMultiBound> >* item = static_cast<NiTListItem<NiPointer<BSMultiBound> >*>(reinterpret_cast<NiTPointerListBase<NiTPointerAllocator<unsigned int>,char*>*>(&m_kItemCount)->AddHead());
+    NiTListItem<NiPointer<BSMultiBound> >* item = static_cast<NiTListItem<NiPointer<BSMultiBound> >*>(m_kItemCount.Allocate());
     BSMultiBound* oldObject = item->m_element.m_pObject;
     if (oldObject != element.m_pObject)
     {
@@ -232,6 +220,7 @@ void NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSMultiBound
 
 #pragma optimize("", off)
 // @fnv 0x0049f590
+template <>
 Script* NiTPointerListBase<NiTPointerAllocator<unsigned int>,Script*>::RemovePos(void*& position)
 {
     NiTListItem<Script*>* item = static_cast<NiTListItem<Script*>*>(position);

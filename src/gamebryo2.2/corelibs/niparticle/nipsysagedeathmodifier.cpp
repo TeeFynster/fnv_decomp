@@ -1,8 +1,14 @@
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiPSysModifier.h"
+#include "../../../../include/NiPSysSpawnModifier.h"
+#include "../../../../include/StrArr.h"
+#include "../../../../include/NiTPointerMap.h"
 
 // src/gamebryo2.2/corelibs/niparticle/nipsysagedeathmodifier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysagedeathmodifier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiRTTI;
 extern NiRTTI g_01202798;
 
 // @fnv 0x00c2efe0
@@ -19,9 +25,18 @@ const void* __cdecl FUN_00c2f3d0()
     return &g_012027a0;
 }
 
+struct FUN_00c2f3f0Target
+{
+    char _pad[0x64];
+    float unk64;
+};
+
 struct NiPSysAirFieldSpreadCtlr
 {
+    char _pad[0x3c];
+    FUN_00c2f3f0Target* unk3c;
     void __thiscall FUN_00c2f3e0(float& fValue);
+    void __thiscall FUN_00c2f3f0(float fValue);
 };
 
 // @fnv 0x00c2f3e0
@@ -32,61 +47,57 @@ void __thiscall NiPSysAirFieldSpreadCtlr::FUN_00c2f3e0(float& fValue)
     fValue = *reinterpret_cast<float*>(reinterpret_cast<unsigned char*>(ptr) + 0x64);
 }
 
-struct NiStream
-{
-    void* GetLoadedObject();
-};
 
-struct NiPSysModifier
-{
-    virtual void LinkObject(NiStream&);
-};
-
-struct NiPSysSpawnModifier;
-
+// No shared NiPSysAgeDeathModifier header is available yet; keep one local definition.
+struct ParticleSystem;
 struct NiPSysAgeDeathModifier : NiPSysModifier
 {
-    char _pad[0x18];
+    bool m_bSpawnOnDeath;
     NiPSysSpawnModifier* m_pSpawnModifier;
     void FUN_00c2ef60(NiStream&);
+    void __thiscall FUN_00c2f1a0(CloningProcess&);
+    void* __thiscall Destroy(unsigned int);
+    void FUN_00c2f2c0(StrArr*);
+    NiPSysAgeDeathModifier* FUN_00c2f150(CloningProcess&);
+    bool FUN_00c2ef80(NiObject*);
+    void UpdateAges(float, ParticleSystem*);
+    void FUN_00c2f200(NiStream&);
+    void SaveAgeDeathModifier(NiStream*);
 };
+
+// NiStream is opaque here; the unit only needs its existing load/link entry points.
+NiObject* __cdecl FUN_00a63430();
+void __cdecl FUN_00a645b0();
 
 // @fnv 0x00c2ef60
 void NiPSysAgeDeathModifier::FUN_00c2ef60(NiStream& kStream)
 {
     NiPSysModifier::LinkObject(kStream);
-    m_pSpawnModifier = (NiPSysSpawnModifier*)kStream.GetLoadedObject();
+    typedef NiObject*(__thiscall * GetLoadedObjectProc)(NiStream*);
+    m_pSpawnModifier = (NiPSysSpawnModifier*)reinterpret_cast<GetLoadedObjectProc>(&FUN_00a63430)(&kStream);
 }
 
 namespace fnv_00c2eff0 {
 void __cdecl FUN_00c31750();
 void __cdecl _delete(void*, unsigned int);
-struct NiPSysAgeDeathModifier
-{
-    void* __thiscall Destroy(unsigned int);
-};
+}  // namespace fnv_00c2eff0
 // Calls FUN_00c31750, then frees this with _delete when flag has bit 0 set, and returns this.
 // @fnv 0x00c2eff0
 void* __thiscall NiPSysAgeDeathModifier::Destroy(unsigned int flag)
 {
-    FUN_00c31750();
+    fnv_00c2eff0::FUN_00c31750();
     if (flag & 1)
-        _delete(this, 0x20);
+        fnv_00c2eff0::_delete(this, 0x20);
     return this;
 }
-}  // namespace fnv_00c2eff0
 
-namespace fnv_00c2f1a0 {
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+#include "../../../../include/NiMemObject.h"
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
 struct CloningProcess
 {
     void __dflt_ctor_closure();
     void* __vecDelDtor(unsigned int);
-    void* m_pCloneMap;
+    NiTPointerMap<NiObject*, NiObject*>* m_pCloneMap;
     void* m_pProcessMap;
     int m_eCloneCopyMode;
     char m_bExactType;
@@ -94,29 +105,8 @@ struct CloningProcess
 };
 typedef char _sizecheck_NiCloningProcess[sizeof(CloningProcess) == 16 ? 1 : -1];
 
-struct NiPSysModifier
-{
-    char _pad_00[0x1c];
-    void __thiscall ProcessClone(CloningProcess&);
-};
-struct NiObject
-{
-    char _pad_00[1];
-};
-struct NiPSysSpawnModifier
-{
-    char _pad_00[1];
-};
-struct ShaderBufferRecord;
-struct NiTStringPointerMap_00e93020
-{
-    bool __thiscall GetAt(char const*, ShaderBufferRecord*&);
-};
-struct NiPSysAgeDeathModifier : NiPSysModifier
-{
-    NiPSysSpawnModifier* m_pSpawnModifier;
-    void __thiscall FUN_00c2f1a0(CloningProcess&);
-};
+// Clone keys are NiObject pointers; GetAt at 0x00a53c30 is also bound to this
+// shared NiTPointerMap specialization by nitimecontroller.cpp and niblendinterpolator.cpp.
 // Calls the base ProcessClone, looks up the clone in the cloning map, and remaps the spawn modifier pointer to its cloned counterpart.
 // @fnv 0x00c2f1a0
 void __thiscall NiPSysAgeDeathModifier::FUN_00c2f1a0(CloningProcess& kCloning)
@@ -126,12 +116,11 @@ void __thiscall NiPSysAgeDeathModifier::FUN_00c2f1a0(CloningProcess& kCloning)
     NiPSysAgeDeathModifier* pkDest;
     NiPSysModifier::ProcessClone(kCloning);
     pkClone = 0;
-    ((NiTStringPointerMap_00e93020*)kCloning.m_pCloneMap)->GetAt((const char*)this, (ShaderBufferRecord*&)pkClone);
+    kCloning.m_pCloneMap->GetAt(this, pkClone);
     pkDest = (NiPSysAgeDeathModifier*)pkClone;
     if (m_pSpawnModifier)
     {
-        bFound = ((NiTStringPointerMap_00e93020*)kCloning.m_pCloneMap)
-                     ->GetAt((const char*)m_pSpawnModifier, (ShaderBufferRecord*&)pkClone);
+        bFound = kCloning.m_pCloneMap->GetAt(m_pSpawnModifier, pkClone);
         if (bFound)
         {
             pkDest->m_pSpawnModifier = (NiPSysSpawnModifier*)pkClone;
@@ -140,12 +129,7 @@ void __thiscall NiPSysAgeDeathModifier::FUN_00c2f1a0(CloningProcess& kCloning)
         pkDest->m_pSpawnModifier = m_pSpawnModifier;
     }
 }
-}  // namespace fnv_00c2f1a0
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 struct FUN_00c32d80
 {
     FUN_00c32d80();
@@ -168,42 +152,28 @@ FUN_00c32d80* __cdecl FUN_00c2f3a0()
     return 0;
 }
 
-struct StrArr
-{
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
-struct Base00c319e0
-{
-    void FUN_00c319e0(StrArr*);
-};
+void __cdecl FUN_00c319e0();
 char* __cdecl FUN_00a7d330(char*);
 char* __cdecl FUN_00a7d370(char const*, bool);
 char* __cdecl FUN_00a7d5e0(char const*, char const*);
 extern char const* const g_011d1f8c_arg1;
-struct FUN_00c2f2c0_shell : Base00c319e0
-{
-    char _pad[0x18];
-    bool m_bHasString;
-    char* m_pSpawnModifier;
-    void FUN_00c2f2c0(StrArr* pkStrings);
-};
 // @fnv 0x00c2f2c0
-void FUN_00c2f2c0_shell::FUN_00c2f2c0(StrArr* pkStrings)
+void NiPSysAgeDeathModifier::FUN_00c2f2c0(StrArr* pkStrings)
 {
-    FUN_00c319e0(pkStrings);
+    typedef void(__thiscall * ViewerStringsProc)(NiPSysModifier*, StrArr*);
+    reinterpret_cast<ViewerStringsProc>(&FUN_00c319e0)(this, pkStrings);
     char* pcString = FUN_00a7d330(*(char**)&g_01202798);
     unsigned int uiIndex = ((unsigned short*)pkStrings)[5];
     if (uiIndex >= ((unsigned short*)pkStrings)[4])
         pkStrings->SetSize(((unsigned short*)pkStrings)[7] + uiIndex);
     pkStrings->SetAt(uiIndex, pcString);
-    pcString = FUN_00a7d370("Spawn on Death", m_bHasString);
+    pcString = FUN_00a7d370("Spawn on Death", m_bSpawnOnDeath);
     uiIndex = ((unsigned short*)pkStrings)[5];
     if (uiIndex >= ((unsigned short*)pkStrings)[4])
         pkStrings->SetSize(((unsigned short*)pkStrings)[7] + uiIndex);
     pkStrings->SetAt(uiIndex, pcString);
     char const* pcModifierName =
-        m_pSpawnModifier ? *(char const**)((char*)m_pSpawnModifier + 8) : (char const*)&g_011d1f8c_arg1;
+        m_pSpawnModifier ? m_pSpawnModifier->m_kName.m_kHandle : (char const*)&g_011d1f8c_arg1;
     pcString = FUN_00a7d5e0("Spawn Modifier", pcModifierName);
     uiIndex = ((unsigned short*)pkStrings)[5];
     if (uiIndex >= ((unsigned short*)pkStrings)[4])
@@ -211,29 +181,16 @@ void FUN_00c2f2c0_shell::FUN_00c2f2c0(StrArr* pkStrings)
     pkStrings->SetAt(uiIndex, pcString);
 }
 
-struct NiPSysPositionModifier
-{
-    NiPSysPositionModifier();
-};
-struct CloningProcess;
-struct NiPSysAgeDeathModifierClone : NiPSysPositionModifier
-{
-    char _pad[0x18];
-    bool m_bHasString;
-    NiPSysSpawnModifier* m_pSpawnModifier;
-    void CopyMemberData(NiPSysModifier*, CloningProcess&);
-    NiPSysAgeDeathModifierClone* FUN_00c2f150(CloningProcess& kCloning);
-};
 extern int DAT_010c0304;
 // @fnv 0x00c2f150
-NiPSysAgeDeathModifierClone* NiPSysAgeDeathModifierClone::FUN_00c2f150(CloningProcess& kCloning)
+NiPSysAgeDeathModifier* NiPSysAgeDeathModifier::FUN_00c2f150(CloningProcess& kCloning)
 {
-    NiPSysAgeDeathModifierClone* pkObject = (NiPSysAgeDeathModifierClone*)BSFadeNode::operator new(0x20);
+    NiPSysAgeDeathModifier* pkObject = (NiPSysAgeDeathModifier*)BSFadeNode::operator new(0x20);
     if (pkObject)
     {
-        pkObject->NiPSysPositionModifier::NiPSysPositionModifier();
+        pkObject->NiPSysModifier::NiPSysModifier();
         *reinterpret_cast<void**>(pkObject) = &DAT_010c0304;
-        pkObject->m_bHasString = false;
+        pkObject->m_bSpawnOnDeath = false;
         pkObject->m_pSpawnModifier = 0;
     }
     else
@@ -241,94 +198,25 @@ NiPSysAgeDeathModifierClone* NiPSysAgeDeathModifierClone::FUN_00c2f150(CloningPr
         pkObject = 0;
     }
     CopyMemberData((NiPSysModifier*)pkObject, kCloning);
-    pkObject->m_bHasString = m_bHasString;
+    pkObject->m_bSpawnOnDeath = m_bSpawnOnDeath;
     return pkObject;
 }
 
-class BC2EF80Object
-{
-  public:
-    virtual void VFunc00();
-    virtual void VFunc04();
-    virtual void VFunc08();
-    virtual void VFunc0C();
-    virtual void VFunc10();
-    virtual void VFunc14();
-    virtual void VFunc18();
-    virtual void VFunc1C();
-    virtual void VFunc20();
-    virtual void VFunc24();
-    virtual void VFunc28();
-    virtual void VFunc2C();
-    virtual void VFunc30();
-    virtual void VFunc34();
-    virtual void VFunc38();
-    virtual void VFunc3C();
-    virtual void VFunc40();
-    virtual void VFunc44();
-    virtual void VFunc48();
-    virtual void VFunc4C();
-    virtual void VFunc50();
-    virtual void VFunc54();
-    virtual void VFunc58();
-    virtual bool IsEqual(BC2EF80Object* pkObject);
-};
-
-template <class T> class BC2EF80Pointer
-{
-  public:
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-    bool operator!() const
-    {
-        return m_pObject == 0;
-    }
-
-    T* m_pObject;
-};
-
-class BC2EF80Modifier : public BC2EF80Object
-{
-  public:
-    bool ModifierIsEqual(BC2EF80Object* pkObject);
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class BC2EF80Emitter : public BC2EF80Modifier
-{
-  public:
-    bool FUN_00c2ef80(BC2EF80Object* pkObject);
-
-    bool m_bFlag;
-    BC2EF80Object* m_pUserData;
-};
-
 // @fnv 0x00c2ef80
-bool BC2EF80Emitter::FUN_00c2ef80(BC2EF80Object* pkObject)
+bool NiPSysAgeDeathModifier::FUN_00c2ef80(NiObject* pkObject)
 {
-    if (!ModifierIsEqual(pkObject))
+    if (!NiPSysModifier::IsEqual(pkObject))
         return false;
 
-    BC2EF80Emitter* pkOther = (BC2EF80Emitter*)pkObject;
+    NiPSysAgeDeathModifier* pkOther = (NiPSysAgeDeathModifier*)pkObject;
 
-    if (pkOther->m_bFlag != m_bFlag)
+    if (pkOther->m_bSpawnOnDeath != m_bSpawnOnDeath)
         return false;
 
-    if ((pkOther->m_pUserData && !m_pUserData) || (!pkOther->m_pUserData && m_pUserData))
+    if ((pkOther->m_pSpawnModifier && !m_pSpawnModifier) || (!pkOther->m_pSpawnModifier && m_pSpawnModifier))
         return false;
 
-    if (pkOther->m_pUserData && m_pUserData && !pkOther->m_pUserData->IsEqual(m_pUserData))
+    if (pkOther->m_pSpawnModifier && m_pSpawnModifier && !static_cast<const NiObject*>(pkOther->m_pSpawnModifier)->IsEqual(m_pSpawnModifier))
         return false;
 
     return true;
@@ -414,66 +302,11 @@ struct ParticleSystem
     int unk6c;
     ParticleInfo* info;
 };
-struct SpawnModifier
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void SpawnChildParticles(float, float, unsigned short, ParticleSystem*);
-};
-struct AgeDeath
-{
-    virtual ~AgeDeath();
-    int unk04, unk08, unk0c;
-    ParticleSystem* system;
-    int unk14;
-    bool spawnOnDeath;
-    SpawnModifier* spawn;
-    void UpdateAges(float time, ParticleSystem* particles);
-};
 // Advances each particle's age by the elapsed time and removes particles whose age exceeds their lifespan, optionally spawning on death.
 // @fnv 0x00c2f010
-void AgeDeath::UpdateAges(float time, ParticleSystem* particles)
+void NiPSysAgeDeathModifier::UpdateAges(float time, ParticleSystem* particles)
 {
-    if (spawnOnDeath && spawn)
+    if (m_bSpawnOnDeath && m_pSpawnModifier)
     {
         unsigned short info = particles->count;
         while (info > 0)
@@ -485,7 +318,12 @@ void AgeDeath::UpdateAges(float time, ParticleSystem* particles)
             age->age = r;
             if (age->lifespan < r)
             {
-                spawn->SpawnChildParticles(time, age->lifespan + time - r, index, system);
+                // The shared overload takes an unsigned int; this call uses the original unsigned-short ABI.
+                typedef void(__thiscall * SpawnChildProc)(NiPSysSpawnModifier*, float, float,
+                                                         unsigned short, ParticleSystem*);
+                SpawnChildProc* vtable = *reinterpret_cast<SpawnChildProc**>(m_pSpawnModifier);
+                vtable[41](m_pSpawnModifier, time, age->lifespan + time - r, index,
+                           reinterpret_cast<ParticleSystem*>(m_pkTarget));
                 particles->SetParticleCount(index);
             }
             --info;
@@ -507,78 +345,40 @@ void AgeDeath::UpdateAges(float time, ParticleSystem* particles)
     }
 }
 
-struct NiBinaryStream_c2f200
+// Stream storage is opaque in the shared header; retain the original inline transfers.
+inline void NiBinaryStream::ReadScalar(void* pvValue, unsigned int uiSize)
 {
-    void* vtable;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(NiBinaryStream_c2f200*, void*, unsigned int, unsigned int*, unsigned int);
-    void ReadScalar(void* pvValue, unsigned int uiSize)
-    {
-        unsigned int uiComponentSize = uiSize;
-        m_uiStreamFlags += m_pfnRead(this, pvValue, 1, &uiComponentSize, 1);
-    }
-};
-
-struct NiStream_c2f200
-{
-    char pad[0x24c];
-    NiBinaryStream_c2f200* m_pUnderlyingStream;
-    void ResetStreamState();
-};
-
-struct NiPSysModifier_c2f200
-{
-    char pad[0x18];
-    void LoadBinary(NiStream_c2f200& kStream);
-};
-
-struct NiPSysAgeDeathModifier_c2f200 : NiPSysModifier_c2f200
-{
-    bool m_bHasString;
-    void FUN_00c2f200(NiStream_c2f200& kStream);
-};
-
-// @fnv 0x00c2f200
-void NiPSysAgeDeathModifier_c2f200::FUN_00c2f200(NiStream_c2f200& kStream)
-{
-    NiPSysModifier_c2f200::LoadBinary(kStream);
-    unsigned char ucFlag;
-    kStream.m_pUnderlyingStream->ReadScalar(&ucFlag, 1);
-    m_bHasString = ucFlag != 0;
-    kStream.ResetStreamState();
+    unsigned int uiComponentSize = uiSize;
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4) +=
+        (*reinterpret_cast<ReadFunction*>(reinterpret_cast<char*>(this) + 8))(
+            this, pvValue, 1, &uiComponentSize, 1);
 }
 
-struct NiBinaryStream;
-typedef unsigned int(__cdecl* BinaryWriteProc)(NiBinaryStream*, const void*, unsigned int, const void*, unsigned int);
-struct NiBinaryStream
+// @fnv 0x00c2f200
+void NiPSysAgeDeathModifier::FUN_00c2f200(NiStream& kStream)
 {
-    void* m_pVtbl;
-    unsigned int m_uiWriteOffset;
-    void* m_pReadProc;
-    BinaryWriteProc m_pWriteProc;
+    NiPSysModifier::LoadBinary(kStream);
+    unsigned char ucFlag;
+    (*reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(&kStream) + 0x24c))->ReadScalar(&ucFlag, 1);
+    m_bSpawnOnDeath = ucFlag != 0;
+    typedef void(__thiscall * ResetStreamProc)(NiStream*);
+    reinterpret_cast<ResetStreamProc>(&FUN_00a645b0)(&kStream);
+}
 
-    void WriteSpawnFlag(const bool& onDeath)
-    {
-        unsigned int count = 1;
-        unsigned int amount = m_pWriteProc(this, &onDeath, 1, &count, 1);
-        m_uiWriteOffset += amount;
-    }
-};
-struct NiPSysModifierSaveBase
+inline void NiBinaryStream::WriteSpawnFlag(const bool& onDeath)
 {
-    void FUN_00c31950(NiStream* stream);
-};
-struct FUN_00c2f260_shell
-{
-    void SaveAgeDeathModifier(NiStream* stream);
-};
+    unsigned int count = 1;
+    unsigned int amount = (*reinterpret_cast<WriteFunction*>(reinterpret_cast<char*>(this) + 12))(
+        this, &onDeath, 1, &count, 1);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4) += amount;
+}
 // Calls the base modifier save, writes the spawn-on-death flag to the stream's binary output, then writes the spawn modifier link.
 // @fnv 0x00c2f260
-void FUN_00c2f260_shell::SaveAgeDeathModifier(NiStream* stream)
+void NiPSysAgeDeathModifier::SaveAgeDeathModifier(NiStream* stream)
 {
-    reinterpret_cast<NiPSysModifierSaveBase*>(this)->FUN_00c31950(stream);
-    NiPSysAgeDeathModifierClone* modifier = reinterpret_cast<NiPSysAgeDeathModifierClone*>(this);
-    bool spawnOnDeath = modifier->m_bHasString;
+    reinterpret_cast<NiPSysModifier*>(this)->FUN_00c31950(*stream);
+    NiPSysAgeDeathModifier* modifier = reinterpret_cast<NiPSysAgeDeathModifier*>(this);
+    bool spawnOnDeath = modifier->m_bSpawnOnDeath;
     NiBinaryStream* output = *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(stream) + 0x250);
     output->WriteSpawnFlag(spawnOnDeath);
     typedef void(__thiscall * WriteLinkProc)(NiStream*, NiPSysSpawnModifier*);
@@ -586,25 +386,12 @@ void FUN_00c2f260_shell::SaveAgeDeathModifier(NiStream* stream)
     pVtbl[12](stream, modifier->m_pSpawnModifier);
 }
 
-struct FUN_00c2f3f0Target
-{
-    char _pad[0x64];
-    float unk64;
-};
-
-struct NiPSysSpawnModifier
-{
-    char _pad[0x3c];
-    FUN_00c2f3f0Target* unk3c;
-    void __thiscall FUN_00c2f3f0(float fValue);
-};
-
 double g_01012060 = 0.0;
 double g_01012070 = 1.0;
 
 // Clamps fValue to [0,1] and stores it into the target's unk64 field.
 // @fnv 0x00c2f3f0
-void __thiscall NiPSysSpawnModifier::FUN_00c2f3f0(float fValue)
+void __thiscall NiPSysAirFieldSpreadCtlr::FUN_00c2f3f0(float fValue)
 {
     FUN_00c2f3f0Target* target = this->unk3c;
     float fClamped = fValue;

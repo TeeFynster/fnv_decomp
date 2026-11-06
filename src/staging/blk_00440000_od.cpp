@@ -2,17 +2,129 @@
 // src/staging/blk_00440000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
-
-struct FUN_004410d0_Class
+#include <windows.h>
+#undef small
+#include "../../include/BSSimpleArray.h"
+// BSSpinLockUnlock_blk_00440000_od: local type (was include/BSSpinLockUnlock.h, which had no evidence of one real class); its methods are 0x0040fba0 BSSpinLock::Unlock, 0x0040fbf0 BSSpinLock::Lock
+class BSSpinLockUnlock_blk_00440000_od
 {
-    void SetByteAtOffset38(unsigned char a);
+public:
+    void Lock(const char*);
+    void Unlock();
 };
+#include "../../include/SETTING_VALUE.h"
+#include "../../include/TESQueuedCellManager.h"
+#include "../../include/TESSaveLoadGame.h"
+
+#include "../../include/TESDataHandler.h"
+
+#include "../../include/MEM_CONTEXT.h"
+
+template <class T> class LayoutNiPointer
+{
+  public:
+    T* m_pObject;
+    LayoutNiPointer(T* object = 0)
+    {
+        m_pObject = object;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    LayoutNiPointer(const LayoutNiPointer<T>& other)
+    {
+        m_pObject = other.m_pObject;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    ~LayoutNiPointer()
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+    }
+    operator T*() const
+    {
+        return m_pObject;
+    }
+    T* operator->() const
+    {
+        return m_pObject;
+    }
+    LayoutNiPointer<T>& operator=(T* object)
+    {
+        if (m_pObject != object)
+        {
+            if (m_pObject != 0)
+                m_pObject->DecRefCount();
+            m_pObject = object;
+            if (m_pObject != 0)
+                m_pObject->IncRefCount();
+        }
+        return *this;
+    }
+    LayoutNiPointer<T>& operator=(const LayoutNiPointer<T>& other)
+    {
+        if (m_pObject != other.m_pObject)
+        {
+            if (m_pObject != 0)
+                m_pObject->DecRefCount();
+            m_pObject = other.m_pObject;
+            if (m_pObject != 0)
+                m_pObject->IncRefCount();
+        }
+        return *this;
+    }
+    bool operator==(T* object) const
+    {
+        return m_pObject == object;
+    }
+    bool operator==(const LayoutNiPointer<T>& other) const
+    {
+        return m_pObject == other.m_pObject;
+    }
+    bool operator!=(const LayoutNiPointer<T>& other) const
+    {
+        return m_pObject != other.m_pObject;
+    }
+};
+#include "../../include/Actor.h"
+#include "../../include/BSFaceGenNiNode.h"
+#include "../../include/NiGeometryData.h"
+#include "../../include/bhkWorld.h"
+#include "../../include/HUDMainMenu.h"
+// The shared LoadingMenu and Menu disagree on the GetClass return type.
+// Retain only the two member declarations used here until they agree.
+#include "../../include/NiAVObject.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiCamera.h"
+#include "../../include/Setting.h"
+#include "../../include/TESRegionList.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/AutoMemHelper.h"
+#include "../../include/BSSystemUtility.h"
+#include "../../include/GridCellArray.h"
+#include "../../include/RecursiveSpinLock.h"
+#include "../../include/TESModel.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/GO.h"
+#include "../../include/NavMeshPtr.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TES.h"
+#include "../../include/TESBipedModelForm.h"
+#include "../../include/TESObjectLAND.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TESWorldSpace.h"
+// Avoid colliding with the compiler-generated constructor closure.
+#define __local_vftable_ctor_closure DeclaredVftableCtorClosure
+#include "../../include/TESBoundObject.h"
+#include "../../include/LoadingMenu.h"
+#undef __local_vftable_ctor_closure
 
 // @fnv 0x004410d0
-void FUN_004410d0_Class::SetByteAtOffset38(unsigned char aucValue)
+void NiGeometryData::SetByteAtOffset38(unsigned char aucValue)
 {
-    *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x38) = aucValue;
+    m_ucKeepFlags = aucValue;
 }
 
 struct FUN_00444020_Class
@@ -68,14 +180,15 @@ void FUN_00446f20_cls::FUN_00446f20()
 }
 
 unsigned int __cdecl gm_GetCurrentThreadId();
-struct ArrSI
+// Exe 0x00446f40: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int GetFlags();
     void FUN_00446f70();
     void FUN_00446f40();
 };
 // @fnv 0x00446f40
-void ArrSI::FUN_00446f40()
+void BlkOffset08View::FUN_00446f40()
 {
     if (GetFlags() != gm_GetCurrentThreadId())
         FUN_00446f70();
@@ -114,7 +227,8 @@ void __thiscall FUN_00446fa0_class::CallMemberAtOffset28()
 namespace fnv_00446fc0 {
 unsigned int __cdecl gm_GetCurrentThreadId();
 
-struct ArrSI
+// Exe 0x00446fc0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int GetFlags();
 };
@@ -133,7 +247,7 @@ struct FUN_00446fc0_Class
 // @fnv 0x00446fc0
 void __thiscall FUN_00446fc0_Class::FUN_00446fc0()
 {
-    if (((ArrSI*)this)->GetFlags() != gm_GetCurrentThreadId())
+    if (((BlkOffset08View*)this)->GetFlags() != gm_GetCurrentThreadId())
         ((Elem00c3e7d0*)this)->FUN_00446ff0();
 }
 }  // namespace fnv_00446fc0
@@ -482,10 +596,6 @@ unsigned char FUN_004524f0_Class::GetByteB5()
     return ((unsigned char*)this)[0xb5];
 }
 
-struct RecursiveSpinLock
-{
-    void Lock(const char*);
-};
 
 extern RecursiveSpinLock g_spinLock;
 
@@ -613,16 +723,16 @@ void __thiscall FUN_00456520_Class::FUN_00456520()
     ((FUN_00c3dfa0_Class*)this)->FUN_00c3dfa0(5);
 }
 
-struct FUN_00456630_helper
+
+struct NiAVObjectBoolFlagTest
 {
     bool FUN_00456630(unsigned int);
-    bool FUN_00456610();
 };
-
+// The shared flagSet returns unsigned char; retain the bool call declaration.
 // @fnv 0x00456610
-bool FUN_00456630_helper::FUN_00456610()
+bool NiAVObject::FUN_00456610()
 {
-    return FUN_00456630(1);
+    return ((NiAVObjectBoolFlagTest*)this)->FUN_00456630(1);
 }
 
 struct FUN_004567e0_Class
@@ -651,21 +761,11 @@ void FUN_00456c90(unsigned char value)
 }
 }  // namespace fnv_00456c90
 
-struct GridCell;
-struct GridCellArray
-{
-    GridCell* Get(unsigned int, unsigned int);
-};
-struct TES
-{
-    GridCellArray* m_pGridCells;
-    GridCell* FUN_00457050(int x, int y);
-};
-// Returns the grid cell at coordinates x and y from the grid cell array stored at offset 8 of this TES object.
+// Returns the grid cell at coordinates x and y.
 // @fnv 0x00457050
 GridCell* TES::FUN_00457050(int x, int y)
 {
-    return (*reinterpret_cast<GridCellArray**>(reinterpret_cast<char*>(this) + 8))->Get(x, y);
+    return m_pGridCells->Get(x, y);
 }
 
 float __cdecl FUN_004019b0(float);
@@ -676,15 +776,10 @@ float __cdecl FUN_004579e0(float value)
     return FUN_004019b0(value);
 }
 
-struct FUN_00457b80_class
-{
-    int FUN_00457b80();
-};
-
 // @fnv 0x00457b80
-int FUN_00457b80_class::FUN_00457b80()
+int NiGeometryData::FUN_00457b80()
 {
-    return *(unsigned short*)((char*)this + 0xe) & 0x7000;
+    return m_usDirtyFlags & 0x7000;
 }
 
 struct FUN_00457ff0_class
@@ -711,14 +806,7 @@ void __thiscall FUN_00458010_class::FUN_00458010()
         *(int*)((char*)this + 0x5c) = 1;
 }
 
-struct BSSystemUtility
-{
-    static int s_iUpdateEnabled;
-};
-struct LoadingMenu
-{
-    bool GetFloat(int);
-};
+
 // Returns the result of LoadingMenu::GetFloat(0xa) when s_iUpdateEnabled is set, otherwise returns 0.
 // @fnv 0x004580e0
 char FUN_004580e0()
@@ -882,10 +970,6 @@ void __cdecl FUN_0045b050()
     FUN_004e00d0();
 }
 
-struct GO
-{
-    GO& operator=(void*);
-};
 
 struct FUN_0045bc40_Class
 {
@@ -1065,26 +1149,19 @@ void FUN_0045dfa0_shell::FUN_0045dfa0()
     FUN_00473270(GetFileList());
 }
 
-struct HUDMainMenu
-{
-    enum HUD_MENU_MODE
-    {
-        HUD_MENU_NONE = 0
-    };
-    HUD_MENU_MODE m_eHudMenuMode;
-};
+
 
 extern HUDMainMenu* _pme;
 
-// Returns the HUD menu mode stored at offset 0x1c4 of _pme, or HUD_MENU_NONE when _pme is null.
+// Returns the HUD menu mode stored at offset 0x1c4 of _pme, or HMM_NONE when _pme is null.
 // @fnv 0x00458030
 HUDMainMenu::HUD_MENU_MODE FUN_00458030()
 {
     HUDMainMenu::HUD_MENU_MODE mode;
     if (_pme)
-        mode = *(HUDMainMenu::HUD_MENU_MODE*)((char*)_pme + 0x1c4);
+        mode = (HUDMainMenu::HUD_MENU_MODE)_pme->m_eHudMenuMode;
     else
-        mode = HUDMainMenu::HUD_MENU_NONE;
+        mode = HUDMainMenu::HMM_NONE;
     return mode;
 }
 
@@ -1575,11 +1652,6 @@ int __thiscall FUN_00446de0_Class::FUN_00446de0()
     return m38->f4() + m34;
 }
 
-struct TESSaveLoadGame
-{
-    bool __thiscall GetLoading();
-    void __thiscall FUN_00861ea0();
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 struct FalloutAudioMedia
 {
@@ -1953,7 +2025,6 @@ FUN_0044d000::FUN_0044d000(int aiA, int aiB, int aiC, int aiD)
     i = 0;
 }
 
-extern "C" __declspec(dllimport) void __stdcall TlsGetValue(unsigned int);
 
 // @fnv 0x0044d5b0
 void __cdecl FUN_0044d5b0(unsigned int a)
@@ -2159,7 +2230,6 @@ void FUN_00450560(unsigned char value)
     DAT_011f4460 = value;
 }
 
-class NiNode;
 struct Model
 {
     NiNode* GetObject3D();
@@ -2192,12 +2262,10 @@ void __cdecl FUN_004505e0(int value)
 }
 
 namespace fnv_004505f0 {
-struct NiNode
-{
-    NiNode(unsigned short);
-};
+
 extern int DAT_010178bc;
-struct FUN_004505f0 : NiNode
+// The constructor assigns its original vtable explicitly.
+struct __declspec(novtable) FUN_004505f0 : NiNode
 {
     FUN_004505f0();
 };
@@ -2280,23 +2348,6 @@ void* __thiscall Unk_00450bc0::FUN_00450bc0(unsigned int flags)
     return this;
 }
 
-struct FUN_00856870_Holder
-{
-    void __thiscall FUN_00856870();
-};
-struct S_00450bf0
-{
-    void* __thiscall FUN_00450bf0(unsigned int flags);
-};
-// Calls FUN_00856870 on this, deletes this when flags has bit 0 set, and returns this.
-// @fnv 0x00450bf0
-void* __thiscall S_00450bf0::FUN_00450bf0(unsigned int flags)
-{
-    ((FUN_00856870_Holder*)this)->FUN_00856870();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
 
 struct S_00450d50
 {
@@ -2321,7 +2372,6 @@ void __thiscall This_00450d00::FUN_00450d00()
     _p64 = 0;
 }
 
-struct NiNode;
 extern Flt g_011ca0d8;
 // @fnv 0x00451010
 unsigned int __cdecl FUN_00451010()
@@ -2329,14 +2379,10 @@ unsigned int __cdecl FUN_00451010()
     return g_011ca0d8;
 }
 
-struct BSSpinLockUnlock
-{
-    void Unlock();
-};
 // @fnv 0x00452530
 void __cdecl FUN_00452530()
 {
-    ((BSSpinLockUnlock*)&g_spinLock)->Unlock();
+    ((BSSpinLockUnlock_blk_00440000_od*)&g_spinLock)->Unlock();
 }
 
 extern unsigned char DAT_011af70c;
@@ -2373,13 +2419,9 @@ void __thiscall FUN_00453900_Class::FUN_00453900()
         ((FUN_004baab0_Class*)((int*)this)[2])->FUN_004baab0();
 }
 
-struct FUN_004567b0_Owner
-{
-    unsigned short __thiscall FUN_004567b0();
-};
 // Converts the float at offset 0xB8 to an unsigned int and calls GetShortAtOffset40 on the resulting object, returning its unsigned short result.
 // @fnv 0x004567b0
-unsigned short __thiscall FUN_004567b0_Owner::FUN_004567b0()
+unsigned short __thiscall NiGeometry::GetActiveVertexQuantity()
 {
     unsigned int v = ((Flt*)((char*)this + 0xB8))->operator unsigned int();
     return ((FUN_004567e0_Class*)v)->GetShortAtOffset40();
@@ -2449,11 +2491,6 @@ unsigned int __thiscall FUN_00457880_Class::FUN_00457880(int arg)
     return pRes;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3& __thiscall Subtract(const NiPoint3& pt);
-};
 // Subtracts pt's x, y and z from this point's components and returns *this.
 // @fnv 0x004578c0
 NiPoint3& __thiscall NiPoint3::Subtract(const NiPoint3& aPoint)
@@ -2465,10 +2502,7 @@ NiPoint3& __thiscall NiPoint3::Subtract(const NiPoint3& aPoint)
 }
 
 struct CloningProcess;
-struct NiAVObject
-{
-    NiAVObject* CloneObject(CloningProcess&);
-};
+
 void __cdecl FUN_00457a00(NiAVObject*);
 struct FUN_00457ba0_class
 {
@@ -2487,15 +2521,11 @@ NiAVObject* __thiscall FUN_00457ba0_class::FUN_00457ba0(NiAVObject* apObject, Cl
     return pClonedObject;
 }
 
-struct LoadingMenuHelper
-{
-    void __thiscall SetFloatFlag(int, bool);
-};
 // @fnv 0x00458060
 void FUN_00458060(bool param_1)
 {
     if (BSSystemUtility::s_iUpdateEnabled)
-        ((LoadingMenuHelper*)BSSystemUtility::s_iUpdateEnabled)->SetFloatFlag(10, param_1);
+        ((LoadingMenu*)BSSystemUtility::s_iUpdateEnabled)->SetFloatFlag(10, param_1);
 }
 
 // Returns 1 if the update-enabled loading menu exists and its float value at index 3 is nonzero, otherwise 0.
@@ -2722,7 +2752,7 @@ struct FUN_0044df00Class
     void* m_pHead;
     int* FUN_0044df00();
 };
-struct Interface
+struct DebugInterface
 {
     static void PrintDebugMessage();
 };
@@ -2771,7 +2801,7 @@ bool FUN_006ec9b0_Class::FUN_0044eb80(int a, int* pKey, int* pOut)
                 m_pEntryObject->v30(*m_list18.FUN_0044df00(), pKey);
                 *pOut = m_list18.FUN_0044df00()[1];
                 bResult = true;
-                Interface::PrintDebugMessage();
+                DebugInterface::PrintDebugMessage();
                 if (((FUN_0044df20_b*)m_list18.FUN_0044df00())->Call())
                 {
                     *pOut = 0;
@@ -2794,7 +2824,7 @@ bool FUN_006ec9b0_Class::FUN_0044eb80(int a, int* pKey, int* pOut)
                 m_pEntryObject->v30(*m_list14.FUN_0044df00(), pKey);
                 *pOut = m_list14.FUN_0044df00()[1];
                 bResult = true;
-                Interface::PrintDebugMessage();
+                DebugInterface::PrintDebugMessage();
                 if (((FUN_0044df20_b*)m_list14.FUN_0044df00())->Call())
                 {
                     *pOut = 0;
@@ -2832,28 +2862,15 @@ void __cdecl FUN_00457000(int aiBitIndex, bool abSet)
     abSet ? (DAT_011ca08c |= (1 << aiBitIndex)) : (DAT_011ca08c &= ~(1 << aiBitIndex));
 }
 
-struct BSFaceGenNiNode
-{
-    void* GetAnimationData();
-};
-struct TESObjectREFR
-{
-    void SetFlags(unsigned int);
-};
-
 struct TL
 {
     void* GetNext(void*&);
 };
-struct FUN_0045c570_Class : BSFaceGenNiNode
-{
-    void FUN_0045c570(unsigned int a);
-};
 // Sets the given flags on this node's object 3D and on each node in the linked list at offset 0xd0.
 // @fnv 0x0045c570
-void FUN_0045c570_Class::FUN_0045c570(unsigned int uiFlags)
+void BSFaceGenNiNode::FUN_0045c570(unsigned int uiFlags)
 {
-    ((TESObjectREFR*)((Model*)GetAnimationData())->GetObject3D())->SetFlags(uiFlags);
+    ((TESObjectREFR*)((Model*)BSFaceGenNiNode::GetAnimationData())->GetObject3D())->SetFlags(uiFlags);
     unsigned int p = *(Flt*)((char*)this + 0xd0);
     while (p)
     {
@@ -2898,7 +2915,6 @@ unsigned long long FUN_0044e0d0_Class::GetValue64()
     return *(unsigned long long*)((char*)this + 0x10);
 }
 
-extern "C" __declspec(dllimport) void __stdcall TlsFree(unsigned long);
 
 // @fnv 0x0044e360
 void FUN_0044e360(unsigned long param_1)
@@ -2964,29 +2980,13 @@ void FUN_0044f420_class::FUN_0044f420()
         FUN_0044f070();
 }
 
-struct Setting_S
-{
-    float* Float();
-};
-
-struct FUN_00450410_Class
-{
-    float FUN_00450410();
-};
-
+// Setting.h has no float-value getter; preserve its ECX argument without a stand-in class.
 // @fnv 0x00450410
-float FUN_00450410_Class::FUN_00450410()
+float __fastcall GetSettingFloatValue(Setting* setting)
 {
-    return *reinterpret_cast<Setting_S*>(this)->Float();
+    return *setting->Float();
 }
 
-struct AutoMemHelper
-{
-    char data[3];
-
-    AutoMemHelper(int context, bool condition, const char* file, int line);
-    ~AutoMemHelper();
-};
 
 struct FUN_004e1650
 {
@@ -3007,10 +3007,6 @@ void FUN_00450c50_Class::FUN_00450c50()
     *reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x64) = new FUN_004e1650;
 }
 
-struct TESQueuedCellManager
-{
-    void FUN_00528540();
-};
 extern TESQueuedCellManager* DAT_011c9618;
 
 struct FUN_00452eb0_Class
@@ -3024,7 +3020,6 @@ void FUN_00452eb0_Class::FUN_00452eb0()
     DAT_011c9618->FUN_00528540();
 }
 
-extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 struct FUN_004538e0_Class
 {
     void __thiscall FUN_004538e0(int);
@@ -3032,7 +3027,7 @@ struct FUN_004538e0_Class
 // @fnv 0x004538e0
 void __thiscall FUN_004538e0_Class::FUN_004538e0(int)
 {
-    EnterCriticalSection(this);
+    EnterCriticalSection((LPCRITICAL_SECTION)this);
 }
 
 struct FUN_00454420_Class
@@ -3081,14 +3076,7 @@ struct Vector2
     float y;
 };
 
-struct Vector3
-{
-};
 
-struct TESObjectLAND
-{
-    Vector3* FUN_0053a5e0();
-};
 
 struct FakeCell
 {
@@ -3098,19 +3086,19 @@ struct FakeCell
 struct FUN_00451900_shell
 {
     FakeCell* FUN_00451900(int, int);
-    Vector3* __thiscall FUN_00457720(const Vector2*);
+    NiPoint3* __thiscall FUN_00457720(const Vector2*);
 };
 
 int __cdecl _TruncateFloatToInt(float);
 
 extern int DAT_01186088;
 extern int DAT_0118608c;
-extern Vector3* DAT_011c3ef8;
+extern NiPoint3* DAT_011c3ef8;
 
 // @fnv 0x00457720
-Vector3* __thiscall FUN_00451900_shell::FUN_00457720(const Vector2* position)
+NiPoint3* __thiscall FUN_00451900_shell::FUN_00457720(const Vector2* position)
 {
-    Vector3* yBlock = 0;
+    NiPoint3* yBlock = 0;
     int y8 = _TruncateFloatToInt(position->x);
     int xBlock = _TruncateFloatToInt(position->y);
     int result;
@@ -3242,13 +3230,6 @@ FUN_0044a690_cls* FUN_0044a690_cls::EraseRange(unsigned int uiStart, unsigned in
 
 extern const char kThreadSafeStructuresSourceFile[];
 
-class AutoMemContext
-{
-  public:
-    AutoMemContext(MEM_CONTEXT aeMemoryContext, bool bPush, const char* pFile, int iLine);
-    ~AutoMemContext();
-    int iPrev;
-};
 
 struct QHeadPtr
 {
@@ -3279,7 +3260,8 @@ struct QueueRoot
     HandlerRegistration* pTail;
 };
 
-struct LockFreeQueue
+// Exe 0x0044cd40: two-pointer enqueue receiver; not the 0x40-byte owning queue.
+struct StagingEnqueueInterfaceView
 {
     QueueRoot* pRoot;
     HandlerRegistration** ppHazard;
@@ -3288,7 +3270,7 @@ struct LockFreeQueue
 
 // Allocates a node holding rkValue and appends it to the lock-free queue, retrying until the tail link is swapped and signalling the root.
 // @fnv 0x0044cd40
-void LockFreeQueue::Enqueue(const QHeadPtr& rkValue)
+void StagingEnqueueInterfaceView::Enqueue(const QHeadPtr& rkValue)
 {
     AutoMemContext kMemContext2(MEM_CONTEXT_MEM_CONTEXT_TASK_OVERHEAD, true, kThreadSafeStructuresSourceFile, 0x76);
     HandlerRegistration* volatile pTail = 0;
@@ -3564,7 +3546,6 @@ FUN_0044dd40::~FUN_0044dd40()
 {}
 
 // Thin cdecl wrapper that forwards directly to the kernel32 TLS allocator.
-extern "C" __declspec(dllimport) unsigned int __stdcall TlsAlloc();
 
 // @fnv 0x0044e330
 unsigned int __cdecl FUN_0044e330()
@@ -3768,7 +3749,7 @@ struct S_00453720_Obj
     int unk04;
     int unk08;
     static void* operator new(unsigned int size);
-    static void operator delete(void*, unsigned int);
+    static void operator delete(void*);
 };
 extern S_00453720_Obj* DAT_011cc224;
 
@@ -3795,57 +3776,35 @@ int __cdecl FUN_00456510()
     return DAT_011f4500;
 }
 
-class AVObj
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void* IsSceneNode();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void* IsGeometry();
-    void IncRefCount();
-    void DecRefCount();
-    bool FUN_00456610();
-    unsigned short FUN_004567b0();
-};
 
-class NodeObj : public AVObj
-{
-  public:
-    unsigned int GetChildCount();
-    AVObj* GetChildAt(unsigned int index);
-};
 
 struct GeomCounter
 {
-    int CountGeometry(NodeObj* apNode, bool abAll);
+    int CountGeometry(NiNode* apNode, bool abAll);
 };
 
 // Recursively counts geometry in a node's children, summing FUN_004567b0 for geometry objects unless abAll is false and FUN_00456610 is true.
 // @fnv 0x00456670
-int GeomCounter::CountGeometry(NodeObj* apNode, bool abAll)
+int GeomCounter::CountGeometry(NiNode* apNode, bool abAll)
 {
     int iCount = 0;
     if (!apNode)
         return iCount;
-    for (unsigned int i = 0; i < apNode->GetChildCount(); i++)
+    for (unsigned int i = 0; i < apNode->GetNumChildren(); i++)
     {
-        NiPointer<AVObj> spChild(apNode->GetChildAt(i));
+        LayoutNiPointer<NiAVObject> spChild(apNode->GetChildAt(i));
         if (spChild)
         {
             if (spChild->IsSceneNode())
             {
-                iCount += CountGeometry((NodeObj*)(AVObj*)spChild, abAll);
+                iCount += CountGeometry((NiNode*)(NiAVObject*)spChild, abAll);
             }
-            else if (spChild->IsGeometry())
+            else if (spChild->IsTriBasedGeometry())
             {
-                AVObj* pGeom = spChild;
+                NiGeometry* pGeom = (NiGeometry*)(NiAVObject*)spChild;
                 if (abAll || !pGeom->FUN_00456610())
                 {
-                    iCount += pGeom->FUN_004567b0();
+                    iCount += pGeom->GetActiveVertexQuantity();
                 }
             }
         }
@@ -3895,16 +3854,6 @@ void B456AA0TES::FUN_00456aa0()
         m_pkSky->FUN_004bae20(bToggled);
 }
 
-class TESWorldSpace
-{
-  public:
-    TESObjectCELL* GetInteriorCell();
-};
-class bhkWorld
-{
-  public:
-    void FUN_00c67430(const char* name);
-};
 extern TES* g_TES;
 int __cdecl FUN_00406d30(char* dst, unsigned int size, const char* src);
 int __cdecl FUN_00406d50(char* dst, unsigned int size, const char* src);
@@ -3938,102 +3887,20 @@ void Stand_456b10::FUN_00456b10(const char* name)
     }
 }
 
-class NiGeometryData
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-    int FUN_00457b80();
-    void* GetSharedObject();
-    void CreateCopy(NiPointer<NiGeometryData>* apCopy);
-};
 
-class NiGeometry;
-class NiNodeS;
-struct NiAVObjectV
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual NiNodeS* IsNiNode();
-    virtual void vf10();
-    virtual void vf14();
-    virtual NiGeometry* IsGeometry();
-    virtual void vf1c();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2c();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void vf38();
-    virtual void vf3c();
-    virtual void vf40();
-    virtual void vf44();
-    virtual void vf48();
-    virtual void vf4c();
-    virtual void vf50();
-    virtual void vf54();
-    virtual void vf58();
-    virtual void vf5c();
-    virtual void vf60();
-    virtual void vf64();
-    virtual void vf68();
-    virtual void vf6c();
-    virtual void vf70();
-    virtual void vf74();
-    virtual void vf78();
-    virtual void vf7c();
-    virtual void vf80();
-    virtual void vf84();
-    virtual void vf88();
-    virtual void vf8c();
-    virtual void vf90();
-    virtual void vf94();
-    virtual void vf98();
-    virtual void vf9c();
-    virtual void vfa0();
-    virtual void vfa4();
-    virtual void vfa8();
-    virtual void vfac();
-    virtual void vfb0();
-    virtual void vfb4();
-    virtual void vfb8();
-    virtual void vfbc();
-    virtual void vfc0();
-    virtual void vfc4();
-    virtual void vfc8();
-    virtual void vfcc();
-    virtual void vfd0();
-    virtual void vfd4();
-    virtual void vfd8();
-    virtual void vfdc();
-    virtual void vfe0();
-    virtual void ReplaceModelData(NiGeometryData* apData);
-};
-class NiGeometry : public NiAVObjectV
-{
-  public:
-    NiGeometryData* GetModelData();
-};
-class NiNodeS : public NiAVObjectV
-{
-  public:
-    unsigned int GetArrayCount();
-    NiAVObject* GetAt(unsigned int auiIndex);
-};
+
 
 // @fnv 0x00457a00
 void __cdecl FUN_00457a00(NiAVObject* apObject)
 {
-    NiPointer<NiGeometryData> spCopy2(0);
+    LayoutNiPointer<NiGeometryData> spCopy2(0);
     NiGeometry* pGeom = 0;
     if (apObject)
     {
-        pGeom = ((NiAVObjectV*)apObject)->IsGeometry();
+        pGeom = apObject->IsGeometry();
         if (pGeom)
         {
-            NiPointer<NiGeometryData> spScreenData(pGeom->GetModelData());
+            LayoutNiPointer<NiGeometryData> spScreenData(pGeom->GetModelData());
             if (spScreenData)
             {
                 if (!spScreenData->FUN_00457b80() && spScreenData->GetSharedObject())
@@ -4050,10 +3917,10 @@ void __cdecl FUN_00457a00(NiAVObject* apObject)
         }
         else
         {
-            NiNodeS* pNode = ((NiAVObjectV*)apObject)->IsNiNode();
+            NiNode* pNode = apObject->IsSceneNode();
             if (pNode)
             {
-                unsigned int i2 = pNode->GetArrayCount();
+                unsigned int i2 = pNode->GetNumChildren();
                 while (i2--)
                     FUN_00457a00(pNode->GetAt(i2));
             }
@@ -4622,11 +4489,6 @@ struct ShutdownGrid
 {
     virtual ~ShutdownGrid();
 };
-struct ShutdownSaveGame
-{
-    ~ShutdownSaveGame();
-    void FUN_008a8150(int);
-};
 struct ShutdownDataHandler
 {
     ~ShutdownDataHandler();
@@ -4828,7 +4690,7 @@ FUN_00450770::~FUN_00450770()
     g_011de7b8.ZeroSixInts();
     FUN_00527f40();
     _g_thePlayer->Reset(0, 0);
-    ((ShutdownSaveGame*)g_TESSaveLoadGame)->FUN_008a8150(0);
+    g_TESSaveLoadGame->SetLoading(false);
     field20 = 0;
     field1c = 0;
     field68 = 0;
@@ -4856,7 +4718,7 @@ FUN_00450770::~FUN_00450770()
     delete DAT_01202df4;
     DAT_01202df4 = 0;
     delete grid;
-    delete (ShutdownSaveGame*)g_TESSaveLoadGame;
+    delete g_TESSaveLoadGame;
     g_TESSaveLoadGame = 0;
     FUN_00847500();
     FUN_0084fd30();
@@ -4938,10 +4800,6 @@ struct Proxy08
     Vec08& FUN_004585f0(Vec08&);
     Vec08& FUN_004587f0(Vec08&);
 };
-struct NavMeshPtr
-{
-    void* FUN_00458b50();
-};
 struct Results08
 {
     NavMeshPtr* FUN_00968670(unsigned int);
@@ -4999,40 +4857,22 @@ namespace SceneUpdate {
 struct World;
 struct Array;
 struct Entity;
-struct Actor;
 struct Region;
 struct Cell;
 struct Query;
-struct Vec3
-{
-    float x, y;
 
-  private:
-    float z;
-
-  public:
-    Vec3 ApplyScaled(float) const;
-    Vec3 FUN_00439e90(const Vec3&) const;
-};
-struct Bound
-{
-    float x, y, z, w, radius;
-};
 struct View
 {
-    const Vec3& FUN_0045bb80();
-    Vec3 FUN_0045bba0();
-    Bound* FUN_0045bbe0();
+    const NiPoint3& FUN_0045bb80();
+    NiPoint3 FUN_0045bba0();
+    ::NiFrustum* FUN_0045bbe0();
 };
 struct Marker
 {
     void FUN_00483710();
 };
 extern Marker DAT_011c3c0f;
-struct Setting
-{
-    const unsigned int* FUN_0043d4d0();
-};
+
 extern Setting DAT_011c63cc;
 struct Query
 {
@@ -5075,7 +4915,7 @@ struct Query
     Query(int);
     ~Query();
     void FUN_0041fd00(View*);
-    void FUN_00a694a0(Bound*);
+    void FUN_00a694a0(::NiFrustum*);
     unsigned int FUN_005d8a70(bool);
     unsigned int FUN_0084e3a0();
 };
@@ -5147,7 +4987,7 @@ struct Entity
     virtual void v63();
     virtual void v64();
     virtual int IsExcluded();
-    virtual bool Contains(const Vec3&);
+    virtual bool Contains(const NiPoint3&);
     virtual void v67();
 };
 struct Array
@@ -5182,127 +5022,7 @@ struct Region
     int unk20;
     List actors;
 };
-struct Actor
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual Array* Nodes();
-    void* FUN_007af430();
-};
+
 struct Area
 {
     List* FUN_005a8080();
@@ -5339,7 +5059,7 @@ struct State
 };
 struct Renderer
 {
-    void ProcessTargetIfEligible(Entity*, Vec3, Query*);
+    void ProcessTargetIfEligible(Entity*, NiPoint3, Query*);
     Entity* FUN_0045bc00(int);
     State* FUN_00454b30();
     void UpdateVisibility(Entity*, unsigned int, unsigned int);
@@ -5374,7 +5094,7 @@ void World::FUN_0045b070(View* view)
     Query query(0);
     query.FUN_0041fd00(view);
     query.FUN_00a694a0(view->FUN_0045bbe0());
-    Vec3 origin4 = view->FUN_0045bb80();
+    NiPoint3 origin4 = view->FUN_0045bb80();
     Renderer* renderer = FUN_00450b80(0);
     if (cell)
     {
@@ -5467,7 +5187,7 @@ void World::FUN_0045b070(View* view)
                     {
                         Actor* actor = (Actor*)*region->actors.AddEight(actorPos3);
                         void* unused = actor->FUN_007af430();
-                        Array* actorNodes = actor->Nodes();
+                        Array* actorNodes = (Array*)actor->GetNiNode();
                         if (FUN_0045bad0(&DAT_01202e74, actorNodes->FUN_0043b4a0(0)))
                         {
                             Entity* object5 = actorNodes->FUN_0043b4a0(0);
@@ -5491,7 +5211,7 @@ void World::FUN_0045b070(View* view)
                 {
                     Actor* actor2 = (Actor*)*region->actors.AddEight(pos2);
                     void* unused2 = actor2->FUN_007af430();
-                    Array* actorNodes3 = actor2->Nodes();
+                    Array* actorNodes3 = (Array*)actor2->GetNiNode();
                     if (FUN_0045bad0(&DAT_01202e74, actorNodes3->FUN_0043b4a0(0)))
                     {
                         Entity* object6 = actorNodes3->FUN_0043b4a0(0);
@@ -5509,7 +5229,7 @@ void World::FUN_0045b070(View* view)
         View* active8 = 0;
         if (!active8)
             active8 = view;
-        Vec3 point3 = view->FUN_0045bb80().FUN_00439e90(view->FUN_0045bba0().ApplyScaled(view->FUN_0045bbe0()->radius));
+        NiPoint3 point3 = view->FUN_0045bb80().FUN_00439e90(view->FUN_0045bba0().ApplyScaled(view->FUN_0045bbe0()->m_fNearPlane));
         if (chosen.FUN_00559450())
         {
             if (!chosen.FUN_00559450()->Contains(point3))
@@ -5657,14 +5377,7 @@ struct FUN_005100d0
     int unk0c;
     FUN_005100d0(int);
 };
-struct TESRegionList
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    TESRegionList(int);
-};
+
 struct FUN_004f3660
 {
     int unk00;
@@ -6525,11 +6238,6 @@ class FUN_0044e370 : public GlobalObject_00528cb0
     FUN_0044e370(const FUN_0044e370& sp);
 };
 
-struct Lock44b
-{
-    void Wait(char* pszName);
-    void Leave();
-};
 
 class List44b
 {
@@ -6547,17 +6255,17 @@ class List44b
     int m_04;
     unsigned int m_uiCount;
     char pad0c[0x14];
-    Lock44b m_kLock;
+    BSSpinLockUnlock_blk_00440000_od m_kLock;
 };
 
 // @fnv 0x0044bdb0
 bool List44b::FUN_0044bdb0(FUN_0044e370 pSceneObject)
 {
     bool bResult = false;
-    m_kLock.Wait(0);
+    m_kLock.Lock(0);
     for (unsigned int i = 0; i < m_uiCount && !bResult; i++)
         bResult = Visit(i, pSceneObject);
-    m_kLock.Leave();
+    m_kLock.Unlock();
     return bResult;
 }
 
@@ -6582,14 +6290,6 @@ FUN_0044dc50::~FUN_0044dc50()
     FormHeap_Free(pkTail);
 }
 
-struct FUN_0040fbf0_Class
-{
-    void __thiscall Wait(char* p);
-};
-struct SpinQ
-{
-    void Unlock();
-};
 struct AutoMemQ
 {
     int m0;
@@ -6628,14 +6328,14 @@ struct FUN_0044e170_Class
     CurQ* current;
     void* owner;
     int unk1c;
-    FUN_0040fbf0_Class lock;
+    BSSpinLockUnlock_blk_00440000_od lock;
     void __thiscall FUN_0044e170(bool recreate);
 };
 // Deletes all nodes and the current object, and when recreate is false allocates a fresh head node and current object; unlocks lock at the end.
 // @fnv 0x0044e170
 void __thiscall FUN_0044e170_Class::FUN_0044e170(bool recreate)
 {
-    lock.Wait(0);
+    lock.Lock(0);
     AutoMemQ memory(6, true, "d:\\_fallout3\\platforms\\common\\code\\bsmain\\ThreadSafeStructures.inl", 0x115);
     unsigned int oldCurrent = current->FUN_00559450();
     delete current;
@@ -6654,7 +6354,7 @@ void __thiscall FUN_0044e170_Class::FUN_0044e170(bool recreate)
         tail = head;
         current = (CurQ*)new NewCurQ(oldCurrent);
     }
-    ((SpinQ*)&lock)->Unlock();
+    lock.Unlock();
 }
 
 extern "C" __declspec(dllimport) int __stdcall TlsSetValue(unsigned long dwTlsIndex, void* lpTlsValue);
@@ -6761,11 +6461,11 @@ struct FUN_0044f4c0 : GlobalObject_0044f440
 FUN_0044f4c0::~FUN_0044f4c0()
 {}
 
+
 struct FUN_00456630_Class
 {
     int __thiscall FUN_00456630(int aFlag);
 };
-
 // @fnv 0x00456630
 int __thiscall FUN_00456630_Class::FUN_00456630(int aFlag)
 {
@@ -6909,19 +6609,8 @@ void ModelLoader::FUN_00448420()
 }
 }  // namespace fnv_00448420
 
-class TESModel
-{
-};
 
-class TESBoundObject
-{
-  public:
-    virtual ~TESBoundObject();
-};
 
-class TESBipedModelForm
-{
-};
 
 struct BoundObjectModelLookup
 {
@@ -6948,21 +6637,6 @@ struct TESNPC_GetSex_Helper
     int __thiscall GetSex();
 };
 
-struct TESBipedModelForm_GetWorldTESModel_Helper
-{
-    TESModel* __thiscall GetWeaponModel(int sex);
-};
-
-struct TESObjectREFR_GetOwner_Helper
-{
-    TESForm* __thiscall GetOwner();
-};
-
-struct TESObjectREFR_GetTESModel_Helper
-{
-    TESModel* __thiscall GetTESModel();
-};
-
 // Returns a TESModel for form: the reference's model if GetNext equals form, else a weapon, direct or biped model (sex from the reference's owner NPC).
 // @fnv 0x00446a60
 TESModel* BoundObjectModelLookup::FUN_00446a60(TESForm* form, TESObjectREFR* reference)
@@ -6971,7 +6645,7 @@ TESModel* BoundObjectModelLookup::FUN_00446a60(TESForm* form, TESObjectREFR* ref
     {
         TESObjectWEAP_GetWorldTESModel_Helper* pWeapon;
         {
-            TESBipedModelForm_GetWorldTESModel_Helper* pBiped;
+            TESBipedModelForm* pBiped;
             {
                 int m_eSex;
                 {
@@ -6980,7 +6654,7 @@ TESModel* BoundObjectModelLookup::FUN_00446a60(TESForm* form, TESObjectREFR* ref
                     if (reference &&
                         ((TESObject_GetNext_Helper*)reference)->GetNext() == reinterpret_cast<unsigned int>(form))
                     {
-                        return ((TESObjectREFR_GetTESModel_Helper*)reference)->GetTESModel();
+                        return reference->GetTESModel();
                     }
 
                     m_kModelObjectsItem = 0;
@@ -6996,7 +6670,7 @@ TESModel* BoundObjectModelLookup::FUN_00446a60(TESForm* form, TESObjectREFR* ref
 
                         if (!m_kModelObjectsItem)
                         {
-                            pBiped = (TESBipedModelForm_GetWorldTESModel_Helper*)dynamic_cast<TESBipedModelForm*>(
+                            pBiped = dynamic_cast<TESBipedModelForm*>(
                                 (TESBoundObject*)form);
 
                             if (pBiped)
@@ -7005,7 +6679,7 @@ TESModel* BoundObjectModelLookup::FUN_00446a60(TESForm* form, TESObjectREFR* ref
 
                                 if (reference)
                                 {
-                                    pOwner = ((TESObjectREFR_GetOwner_Helper*)reference)->GetOwner();
+                                    pOwner = reference->GetOwner();
 
                                     if (pOwner && ((TESForm_GetFormType_Helper*)pOwner)->GetFormType() == 0x2a)
                                     {
@@ -7013,7 +6687,7 @@ TESModel* BoundObjectModelLookup::FUN_00446a60(TESForm* form, TESObjectREFR* ref
                                     }
                                 }
 
-                                m_kModelObjectsItem = pBiped->GetWeaponModel(m_eSex);
+                                m_kModelObjectsItem = pBiped->GetWeaponModel((SEX)m_eSex);
                             }
                         }
                     }

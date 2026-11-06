@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 
 // src/staging/blk_00e40000_od_o2_gs_nood_nogs_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/staging/blk_00e40000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,18 +8,19 @@
 // src/staging/blk_00e40000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkQuaternion.h"
 
 #include <xmmintrin.h>
 #include <math.h>
 struct RotationVector
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     float& operator()(int i)
     {
         return m_vComponents.m128_f32[i];
     }
 };
-extern const __m128 DAT_01017d10;
+extern const LocalM128 DAT_01017d10;
 extern const float DAT_01011d78;
 extern const float DAT_01017718;
 extern const float DAT_01016248;
@@ -51,12 +54,12 @@ void __cdecl FUN_00e52320(const RotationVector* rotation, unsigned int* packed)
     float magnitude = value(3);
     if (value(0) != 0.0f || value(1) != 0.0f || value(2) != 0.0f)
     {
-        __m128 lanes = value.m_vComponents;
-        __m128 squared = _mm_mul_ps(lanes, lanes);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(squared, squared, 0x55), squared);
+        LocalM128 lanes = value.m_vComponents;
+        LocalM128 squared = _mm_mul_ps(lanes, lanes);
+        LocalM128 sum = _mm_add_ss(_mm_shuffle_ps(squared, squared, 0x55), squared);
         sum = _mm_add_ss(_mm_shuffle_ps(squared, squared, 0xaa), sum);
-        __m128 estimate = _mm_rsqrt_ss(sum);
-        __m128 mask = _mm_cmpeq_ss(sum, _mm_set_ss(DAT_01011d78));
+        LocalM128 estimate = _mm_rsqrt_ss(sum);
+        LocalM128 mask = _mm_cmpeq_ss(sum, _mm_set_ss(DAT_01011d78));
         squared = _mm_sub_ss(_mm_set_ss(DAT_01017718), _mm_mul_ss(_mm_mul_ss(sum, estimate), estimate));
         sum = _mm_andnot_ps(mask, _mm_mul_ss(_mm_mul_ss(_mm_set_ss(DAT_01016248), estimate), squared));
         value.m_vComponents = _mm_mul_ps(_mm_shuffle_ps(sum, sum, 0), lanes);
@@ -71,34 +74,27 @@ void __cdecl FUN_00e52320(const RotationVector* rotation, unsigned int* packed)
 }
 
 namespace fnv_00e526f0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
+typedef ::__m128 LocalM128;
 
 extern "C"
 {
-    __m128 _mm_and_ps(__m128 a, __m128 b);
+using ::_mm_and_ps;
     double __cdecl sqrt(double);
 }
 
-extern const __m128 DAT_01017d10;
-
-struct hkQuaternion
-{
-    union
-    {
-        __m128 m_vComponents;
-        float m_f[4];
-    };
-};
+extern const LocalM128 DAT_01017d10;
 
 // @fnv 0x00e526f0
 void __cdecl FUN_00e526f0(const hkQuaternion* q, short* out)
 {
-    static float scale = float(sqrt(2.0)) * 16383.0;
-    __m128 a = _mm_and_ps(q->m_vComponents, DAT_01017d10);
+    extern float packingScale;
+    extern unsigned int scaleInitialized;
+    if ((scaleInitialized & 1) == 0)
+    {
+        scaleInitialized |= 1;
+        packingScale = float(sqrt(2.0)) * 16383.0;
+    }
+    LocalM128 a = _mm_and_ps(*reinterpret_cast<const LocalM128*>(&q->unk00), DAT_01017d10);
     short largest = 0;
     if (a.m128_f32[1] > a.m128_f32[0])
         largest = 1;
@@ -110,30 +106,36 @@ void __cdecl FUN_00e526f0(const hkQuaternion* q, short* out)
     int L = largest;
     int i = (L == 0);
     short v[3];
-    v[0] = (short)(int)(q->m_f[i] * scale) + 0x3fff;
+    v[0] = (short)(int)(reinterpret_cast<const float*>(&q->unk00)[i] * packingScale) + 0x3fff;
     i++;
     i += (i == L);
-    v[1] = (short)(int)(q->m_f[i] * scale) + 0x3fff;
+    v[1] = (short)(int)(reinterpret_cast<const float*>(&q->unk00)[i] * packingScale) + 0x3fff;
     i++;
     i += (i == L);
-    v[2] = (short)(int)(q->m_f[i] * scale) + 0x3fff;
+    v[2] = (short)(int)(reinterpret_cast<const float*>(&q->unk00)[i] * packingScale) + 0x3fff;
 
     out[0] = (short)((largest << 15) | v[0]);
     out[1] = (short)(((largest >> 1) << 15) | v[1]);
-    int sign = (q->m_f[L] < 0.0f) ? 1 : 0;
+    int sign = (reinterpret_cast<const float*>(&q->unk00)[L] < 0.0f) ? 1 : 0;
     out[2] = (short)((sign << 15) | v[2]);
 }
 }  // namespace fnv_00e526f0
 
 union __declspec(align(16)) PackedQuaternionOutput
 {
-    __m128 simd;
+    LocalM128 simd;
     float components[4];
 };
 // @fnv 0x00e52920
 void FUN_00e52920(const unsigned char* p, PackedQuaternionOutput* output)
 {
-    static float scale = (float)(1.0 / ((float)sqrt(2.0) * 63.0));
+    static float scale;
+    extern unsigned int scaleInitialized;
+    if ((scaleInitialized & 1) == 0)
+    {
+        scaleInitialized |= 1;
+        scale = (float)(1.0 / ((float)sqrt(2.0) * 63.0));
+    }
     struct
     {
         short a, b, c;
@@ -162,13 +164,19 @@ void FUN_00e52920(const unsigned char* p, PackedQuaternionOutput* output)
 namespace fnv_00e52c30 {
 union __declspec(align(16)) PackedQuaternionOutput
 {
-    __m128 simd;
+    LocalM128 simd;
     float components[4];
 };
 // @fnv 0x00e52c30
 void FUN_00e52c30(const unsigned char* p, PackedQuaternionOutput* output)
 {
-    static float scale = (float)(1.0 / ((float)sqrt(2.0) * 2047.0));
+    static float scale;
+    extern unsigned int scaleInitialized;
+    if ((scaleInitialized & 1) == 0)
+    {
+        scaleInitialized |= 1;
+        scale = (float)(1.0 / ((float)sqrt(2.0) * 2047.0));
+    }
     struct
     {
         short a, b, c;

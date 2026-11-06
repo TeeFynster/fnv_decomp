@@ -1,18 +1,40 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
+#include "../../include/hkAabb.h"
+#include "../../include/NiNode.h"
+#include "../../include/StrArr.h"
+#include "../../include/hkVector4.h"
+#include "../../include/bhkRefObject.h"
+#include "../../include/bhkRigidBody.h"
+#include "../../include/hkVector4.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/NiTransform.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiBinaryStream.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTPointerList.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/hkTransform.h"
+#include "../../include/hkAabb.h"
+#include "../../include/hkpShape.h"
+#include "../../include/hkpCdBody.h"
+
+inline const NiRTTI* NiRTTI::GetBaseRTTI() const { return m_pBaseRTTI; }
+
+inline const hkpShape* hkpCdBody::getShape() const { return m_pCollisionShape; }
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiObject;
-struct NiStream
-{
-    NiObject* GetLoadedObject();
-    unsigned int GetLinkID();
-};
-struct bhkRigidBody
-{
-    void FUN_00c859e0(NiStream*);
-    void FUN_00c8ef80(NiObject*);
-    void FUN_00c8f3c0(NiStream*);
-};
 // Calls FUN_00c859e0, reads a count from the stream, then reads that many NiObjects and passes each non-null one to FUN_00c8ef80.
 // @fnv 0x00c8f3c0
 void bhkRigidBody::FUN_00c8f3c0(NiStream* stream)
@@ -28,28 +50,6 @@ void bhkRigidBody::FUN_00c8f3c0(NiStream* stream)
 }
 
 char* __cdecl FUN_00a7d5e0(const char*, const char*);
-struct NiTPrimitiveArray_unsigned_int_
-{
-    unsigned int AddFirstEmpty(unsigned int const&);
-};
-struct StrArr
-{
-    void* vtbl;
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-    void Add(char*& e)
-    {
-        unsigned int i = m_usSize;
-        if (i >= m_usMaxSize)
-            SetSize(i + m_usGrowBy);
-        SetAt(i, e);
-    }
-};
 
 // Appends the MOTION type name string matching type (DYNAMIC, SPHERE, BOX, KEYFRAMED, FIXED, THIN BOX, else INVALID) to arr.
 // @fnv 0x00c8ee20
@@ -60,45 +60,44 @@ void __cdecl AddMotionTypeName(StrArr* arr, int type)
     {
     case 1:
         s = FUN_00a7d5e0("MOTION", "DYNAMIC");
-        ((NiTPrimitiveArray_unsigned_int_*)arr)->AddFirstEmpty((unsigned int&)s);
+        ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     case 2:
         s = FUN_00a7d5e0("MOTION", "SPHERE");
-        ((NiTPrimitiveArray_unsigned_int_*)arr)->AddFirstEmpty((unsigned int&)s);
+        ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     case 3:
         s = FUN_00a7d5e0("MOTION", "BOX");
-        ((NiTPrimitiveArray_unsigned_int_*)arr)->AddFirstEmpty((unsigned int&)s);
+        ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     case 4:
         s = FUN_00a7d5e0("MOTION", "KEYFRAMED");
-        ((NiTPrimitiveArray_unsigned_int_*)arr)->AddFirstEmpty((unsigned int&)s);
+        ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     case 5:
         s = FUN_00a7d5e0("MOTION", "FIXED");
-        ((NiTPrimitiveArray_unsigned_int_*)arr)->AddFirstEmpty((unsigned int&)s);
+        ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     case 6:
         s = FUN_00a7d5e0("MOTION", "THIN BOX");
-        ((NiTPrimitiveArray_unsigned_int_*)arr)->AddFirstEmpty((unsigned int&)s);
+        ((NiTPrimitiveArray<unsigned int>*)arr)->AddFirstEmpty((unsigned int&)s);
         break;
     default:
         s = FUN_00a7d5e0("MOTION", "INVALID");
-        arr->Add(s);
+        {
+            unsigned int i = arr->m_usSize;
+            if (i >= arr->m_usMaxSize)
+                arr->SetSize(i + arr->m_usGrowBy);
+            arr->SetAt(i, s);
+        }
         break;
     }
 }
 
-struct FUN_00c8eb00_s
-{
-    void __thiscall ProcessListNodes();
-    void __thiscall FUN_00c9d590();
-    void __thiscall FUN_00c8eb00();
-};
 // @fnv 0x00c8eb00
-void __thiscall FUN_00c8eb00_s::FUN_00c8eb00()
+void __thiscall bhkRigidBody::FUN_00c8eb00()
 {
-    *(unsigned int*)(this + 0x10) &= 0xffffff77;
+    iFlags &= 0xffffff77;
     ProcessListNodes();
     FUN_00c9d590();
 }
@@ -303,9 +302,6 @@ struct NativeThing
     unsigned int unk0e0;
     unsigned int unk0e4;
     unsigned char motionType;
-};
-struct NiRTTI
-{
 };
 extern NiRTTI DAT_01267b70;
 struct NativeLink
@@ -633,13 +629,13 @@ bool C8Owner::SetState(int state)
     return result;
 }
 
-struct ListNode;
+struct BhkrigidbodyListNodeView;
 
 struct ObjBase
 {
     virtual void v00();
     virtual void v04();
-    virtual ListNode* v08();
+    virtual BhkrigidbodyListNodeView* v08();
     virtual void v0C();
     virtual void v10();
     virtual void v14();
@@ -682,21 +678,11 @@ struct ObjBase
     int Helper2();
 };
 
-struct ListNode
+// Exe 0x00c8e770: unit-local ListNode view; declarations and layout are preserved.
+struct BhkrigidbodyListNodeView
 {
     ObjBase* m_00;
-    ListNode* m_04;
-};
-
-struct FUN_00c8e770_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    ListNode m_14;
-    void ProcessListNodes();
+    BhkrigidbodyListNodeView* m_04;
 };
 
 extern char DAT_0126818c;
@@ -704,9 +690,9 @@ extern char DAT_01268158;
 
 // Walks the m_14 list; for each node with an ObjBase, checks its v08 list for DAT_0126818c/DAT_01268158 and calls Helper1/Helper2, invoking vA0 if nonzero.
 // @fnv 0x00c8e770
-void FUN_00c8e770_cls::ProcessListNodes()
+void bhkRigidBody::ProcessListNodes()
 {
-    ListNode* n = &m_14;
+    BhkrigidbodyListNodeView* n = reinterpret_cast<BhkrigidbodyListNodeView*>(&m_kSerializableList);
     while (n)
     {
         if (n->m_04 == 0 && n->m_00 == 0)
@@ -715,12 +701,12 @@ void FUN_00c8e770_cls::ProcessListNodes()
         if (o)
         {
             int r = 0;
-            ListNode* p = o->v08();
+            BhkrigidbodyListNodeView* p = o->v08();
             if (p)
             {
                 for (; p; p = p->m_04)
                 {
-                    if (p == (ListNode*)&DAT_0126818c)
+                    if (p == (BhkrigidbodyListNodeView*)&DAT_0126818c)
                     {
                         r = o->Helper1();
                         goto L_070;
@@ -732,7 +718,7 @@ void FUN_00c8e770_cls::ProcessListNodes()
             {
                 for (; p; p = p->m_04)
                 {
-                    if (p == (ListNode*)&DAT_01268158)
+                    if (p == (BhkrigidbodyListNodeView*)&DAT_01268158)
                     {
                         r = o->Helper2();
                         goto L_070;
@@ -749,18 +735,12 @@ void FUN_00c8e770_cls::ProcessListNodes()
     }
 }
 
-struct C8EC60RTTI
-{
-    const char* m_pcName;
-    const C8EC60RTTI* m_pBaseRTTI;
-};
-
 class C8EC60Object
 {
   public:
     virtual void vfunc00();
     virtual void vfunc01();
-    virtual const C8EC60RTTI* GetRTTI() const;
+    virtual const NiRTTI* GetRTTI() const;
     virtual void vfunc03();
     virtual void vfunc04();
     virtual void vfunc05();
@@ -800,9 +780,9 @@ class C8EC60Object
     virtual void vfunc27();
     virtual void ResetWorldObject();
 
-    bool IsKindOfType(const C8EC60RTTI& kRTTI) const
+    bool IsKindOfType(const NiRTTI& kRTTI) const
     {
-        for (const C8EC60RTTI* pkRTTI = GetRTTI(); pkRTTI; pkRTTI = pkRTTI->m_pBaseRTTI)
+        for (const NiRTTI* pkRTTI = GetRTTI(); pkRTTI; pkRTTI = pkRTTI->m_pBaseRTTI)
         {
             if (pkRTTI == &kRTTI)
                 return true;
@@ -814,7 +794,7 @@ class C8EC60Object
 class C8EC60Constraint : public C8EC60Object
 {
   public:
-    static const C8EC60RTTI ms_kRTTI;
+    static const NiRTTI ms_kRTTI;
 
     void* GetConstraint();
 };
@@ -822,7 +802,7 @@ class C8EC60Constraint : public C8EC60Object
 class C8EC60RefObject : public C8EC60Object
 {
   public:
-    static const C8EC60RTTI ms_kRTTI;
+    static const NiRTTI ms_kRTTI;
 
     void* GetReferencedData();
 };
@@ -944,7 +924,6 @@ SpawnedObject* __cdecl FUN_00c8ed70()
     return new SpawnedObject();
 }
 
-struct NiNode;
 struct HavokShape
 {
     void FUN_00c8f080();
@@ -979,37 +958,7 @@ struct HavokObject
 
     void FUN_00a68bf0();
 };
-struct NiTransform
-{
-    float rotation[3][3];
-    float translation[3];
-    float scale;
-};
-struct NiBound
-{
-    float center[3];
-    float radius;
-};
-struct NiNode
-{
-    void* vtbl;
-    unsigned int referenceCount;
-    const char* name;
-    void* controller;
-    void* extraData;
-    unsigned short extraDataCount;
-    unsigned short extraDataCapacity;
-    void* parent;
-    NiBound worldBound;
-    NiTransform local;
-    NiTransform world;
-    void* collisionObject;
-    unsigned int flags;
-    unsigned int unknown9C;
-    HavokObject** children;
-    unsigned short maxChildren;
-    unsigned short childCount;
-};
+
 extern char DAT_012043f8;
 // @fnv 0x00c8f210
 void __cdecl ApplyHavokOperation(HavokObject* object, int operation, void* context)
@@ -1032,13 +981,12 @@ void __cdecl ApplyHavokOperation(HavokObject* object, int operation, void* conte
         NiNode* node = object->GetCellChildAt();
         if (node)
         {
-            for (unsigned int index = 0; index < node->childCount; ++index)
-                ApplyHavokOperation(node->children[index], operation, context);
+            for (unsigned int index = 0; index < node->m_kChildren.m_usSize; ++index)
+                ApplyHavokOperation(((HavokObject**)node->m_kChildren.m_pBase)[index], operation, context);
         }
     }
 }
 
-struct NiObject;
 struct CloningProcess
 {
     int unk00;
@@ -1048,32 +996,9 @@ struct CloningProcess
     float scale;
 };
 
-struct NiCloneable
-{
-    virtual void V00();
-    virtual void V04();
-    virtual void V08();
-    virtual void V0C();
-    virtual void V10();
-    virtual void V14();
-    virtual void V18();
-    virtual void V1C();
-    virtual void V20();
-    virtual void V24();
-    virtual void V28();
-    virtual void V2C();
-    virtual void V30();
-    virtual void V34();
-    virtual void V38();
-    virtual void V3C();
-    virtual void V40();
-    virtual void V44();
-    virtual NiObject* CreateCloneStub(CloningProcess* c);
-};
-
 struct CloneNode
 {
-    NiCloneable* data;
+    NiObject* data;
     CloneNode* next;
 };
 
@@ -1404,7 +1329,7 @@ void RigidBodyS::CopyBodyToClone(RigidBodyS* dest, CloningProcess* c)
         dest->UpdateStub();
     }
     for (; n && n->data; n = n->next)
-        reinterpret_cast<bhkRigidBody*>(dest)->FUN_00c8ef80(n->data->CreateCloneStub(c));
+        reinterpret_cast<bhkRigidBody*>(dest)->FUN_00c8ef80(n->data->MakeClone(*c));
 }
 
 extern __declspec(thread) unsigned int hkThreadMemoryFlags;
@@ -1430,133 +1355,106 @@ extern unsigned int g_iRefObjectCountA;
 extern int g_iSerializableCount;
 extern int g_iLiquidActionCount;
 
+// CreateAndAddLiquidAction (0x00c8f400) allocates 0x1c bytes and inlines this constructor chain. The object is a
+// bhkRigidBody, not a bhkLiquidAction (0x40): after the out-of-line bhkRefObject ctor 0x00c87c30 it installs the
+// bhkWorldObject (0x01030394), bhkEntity (0x010302bc) and bhkRigidBody (0x010301b4) vftables and bumps their instance
+// counters (0x0126810c, 0x012681fc, 0x012681bc). Kept local under descriptive names: the shared bhkWorldObject/
+// bhkEntity/bhkRigidBody headers have no inline counting constructors.
 struct bhkRefObjectBase
+
 {
+
     virtual ~bhkRefObjectBase();
+
     int refCount;
+
     int unk08;
+
     bhkRefObjectBase();
+
     static void* operator new(unsigned int size);
+
     static void operator delete(void* p);
+
 };
 
 struct bhkRefObjectLvl : bhkRefObjectBase
+
 {
+
     struct LinkPair
+
     {
+
         void* unk0C;
+
         void* unk10;
+
         LinkPair() : unk0C(0), unk10(0)
+
         {}
+
     } links;
+
     bhkRefObjectLvl()
+
     {
+
         ++g_iRefObjectCountA;
+
     }
+
 };
 
 struct bhkSerializableLvl : bhkRefObjectLvl
+
 {
+
     bhkSerializableLvl()
+
     {
+
         ++g_iSerializableCount;
+
     }
+
 };
 
-struct bhkLiquidAction : bhkSerializableLvl
+struct bhkRigidBodyInline : bhkSerializableLvl
+
 {
+
     int unk14;
+
     int unk18;
-    bhkLiquidAction()
+
+    bhkRigidBodyInline()
+
     {
+
         unk14 = 0;
+
         unk18 = 0;
+
         ++g_iLiquidActionCount;
+
     }
+
 };
 
-struct bhkRigidBodyX
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0C();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1C();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2C();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void vf38();
-    virtual void vf3C();
-    virtual void vf40();
-    virtual void vf44();
-    virtual void vf48();
-    virtual void vf4C();
-    virtual void vf50();
-    virtual void vf54();
-    virtual void vf58();
-    virtual void vf5C();
-    virtual void vf60();
-    virtual void vf64();
-    virtual void vf68();
-    virtual void vf6C();
-    virtual void vf70();
-    virtual void vf74();
-    virtual void vf78();
-    virtual void vf7C();
-    virtual void vf80();
-    virtual void vf84();
-    virtual void vf88();
-    virtual void vf8C();
-    virtual void vf90();
-    virtual void vf94();
-    virtual void vf98();
-    virtual void vf9C();
-    virtual void vfA0();
-    virtual void vfA4();
-    virtual void vfA8();
-    virtual void vfAC();
-    virtual void vfB0();
-    virtual void vfB4();
-    virtual void vfB8();
-    virtual void vfBC();
-    virtual void vfC0();
-    virtual void vfC4();
-    virtual void vfC8();
-    virtual void vfCC();
-    virtual void vfD0();
-    virtual void vfD4();
-    virtual void vfD8();
-    virtual void vfDC();
-    virtual void vfE0();
-    virtual void vfE4();
-    virtual void vfE8();
-    virtual void vfEC();
-    virtual void vfF0();
-    virtual void vfF4();
-    virtual void vfF8();
-    virtual void SetLockedStub(bool locked);
-    void AddActionStub(bhkLiquidAction* action, int param);
-    bhkLiquidAction* CreateAndAddLiquidAction(int param);
-};
-
-// Creates a new bhkLiquidAction, adds it to the rigid body with param, and returns it while locking and unlocking the world.
+// The shared class has no clone entry point; explicit ECX and an unused EDX preserve its thiscall ABI.
+// Creates a rigid-body clone using the inline constructor chain, while locking and unlocking the world.
 // @fnv 0x00c8f400
-bhkLiquidAction* bhkRigidBodyX::CreateAndAddLiquidAction(int param)
+bhkRigidBody* __fastcall CloneRigidBody(bhkRigidBody* source, void*, CloningProcess* process)
 {
     ThreadFlagsGuard guard;
     LockWorldStub();
-    SetLockedStub(false);
-    bhkLiquidAction* action = new bhkLiquidAction;
-    AddActionStub(action, param);
-    SetLockedStub(true);
+    source->vf63(false);
+    bhkRigidBodyInline* action = new bhkRigidBodyInline;
+    ((RigidBodyS*)source)->CopyBodyToClone((RigidBodyS*)action, process);
+    source->vf63(true);
     UnlockWorldStub();
-    return action;
+    return (bhkRigidBody*)action;
 }
 
 extern __declspec(thread) int g_tlsMemContext;
@@ -1606,11 +1504,6 @@ void Shell_c8da40::FUN_00c8da40()
     FUN_00c9d4c0();
 }
 
-struct C8DAC0RTTI
-{
-    const char* m_pcName;
-    const C8DAC0RTTI* m_pBaseRTTI;
-};
 extern char DAT_0126818c;
 extern char DAT_01268628;
 class C8DAC0Object
@@ -1618,7 +1511,7 @@ class C8DAC0Object
   public:
     virtual void vfunc00();
     virtual void vfunc01();
-    virtual const C8DAC0RTTI* GetRTTI() const;
+    virtual const NiRTTI* GetRTTI() const;
     virtual void vfunc03();
     virtual void vfunc04();
     virtual void vfunc05();
@@ -1657,11 +1550,11 @@ class C8DAC0Object
     virtual void vfunc26();
     virtual void Update(void* pvContext);
 };
-inline bool C8DAC0IsKindOf(const C8DAC0RTTI& kRTTI, const C8DAC0Object* pkObject)
+inline bool C8DAC0IsKindOf(const NiRTTI& kRTTI, const C8DAC0Object* pkObject)
 {
     if (!pkObject)
         return false;
-    for (const C8DAC0RTTI* pkRTTI = pkObject->GetRTTI(); pkRTTI; pkRTTI = pkRTTI->m_pBaseRTTI)
+    for (const NiRTTI* pkRTTI = pkObject->GetRTTI(); pkRTTI; pkRTTI = pkRTTI->m_pBaseRTTI)
     {
         if (pkRTTI == &kRTTI)
             return true;
@@ -1700,8 +1593,8 @@ void C8DAC0Owner::UpdateMatchingNodes(void* pvContext)
         if (!pkNode->m_pPointer)
             break;
         bool bMatch = bFilterByKind &&
-                      C8DAC0IsKindOf(reinterpret_cast<const C8DAC0RTTI&>(DAT_0126818c), pkNode->m_pPointer) &&
-                      C8DAC0IsKindOf(reinterpret_cast<const C8DAC0RTTI&>(DAT_01268628), pkNode->m_pPointer);
+                      C8DAC0IsKindOf(reinterpret_cast<const NiRTTI&>(DAT_0126818c), pkNode->m_pPointer) &&
+                      C8DAC0IsKindOf(reinterpret_cast<const NiRTTI&>(DAT_01268628), pkNode->m_pPointer);
         if (!bFilterByKind || bMatch)
             pkNode->m_pPointer->Update(pvContext);
     }
@@ -1748,92 +1641,60 @@ struct AllocTagScopeC8E
         g_iAllocTagC8E = m_iSaved;
     }
 };
-class NiRTTIC8E
+
+extern const NiRTTI g_kGeometryRTTIC8E;
+extern const NiRTTI g_kNodeRTTIC8E;
+
+NiTListItem<NiPointer<NiObject> >* __cdecl NewListItemC8E(NiObject* pkObject);
+
+template <>
+inline __declspec(noinline) void NiTPointerListBase<NiTPointerAllocator<unsigned int>, NiPointer<NiObject> >::AddTail(
+    const NiPointer<NiObject>& spRetainedObject)
 {
-  public:
-    const char* m_pcName;
-    const NiRTTIC8E* m_pBaseRTTI;
+    NiTListItem<NiPointer<NiObject> >* pkItem = NewListItemC8E(spRetainedObject.m_pObject);
+    pkItem->m_pkNext = 0;
+    pkItem->m_pkPrev = m_pkTail;
+    if (m_pkTail)
+        m_pkTail->m_pkNext = pkItem;
+    else
+        m_pkHead = pkItem;
+    m_pkTail = pkItem;
+    m_kItemCount.m_uiCount++;
+}
 
-    const NiRTTIC8E* GetBaseRTTI() const
-    {
-        return m_pBaseRTTI;
-    }
-};
-class NiObjectC8E
+inline void NiRefObject::IncRefCount()
 {
-  public:
-    virtual ~NiObjectC8E();
-    virtual void DeleteThis();
-    virtual const NiRTTIC8E* GetRTTI() const;
-
-    bool IsKindOfType(const NiRTTIC8E& kRTTI) const
-    {
-        for (const NiRTTIC8E* pkRTTI = GetRTTI(); pkRTTI; pkRTTI = pkRTTI->GetBaseRTTI())
-        {
-            if (pkRTTI == &kRTTI)
-                return true;
-        }
-        return false;
-    }
-
-    void IncRefCount()
-    {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    unsigned int m_uiRefCount;
-};
-extern const NiRTTIC8E g_kGeometryRTTIC8E;
-extern const NiRTTIC8E g_kNodeRTTIC8E;
-template <class T> class NiPointerC8E
+    InterlockedIncrement((long volatile*)&m_uiRefCount);
+}
+inline void NiRefObject::DecRefCount()
 {
-  public:
-    NiPointerC8E(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointerC8E()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-
-    T* m_pObject;
-};
-struct ListItemC8E
+    if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+inline bool NiObject::IsKindOfType(const NiRTTI* pkType) const
 {
-    ListItemC8E* m_pkNext;
-    ListItemC8E* m_pkPrev;
-    NiObjectC8E* m_pkElement;
-};
-ListItemC8E* __cdecl NewListItemC8E(NiObjectC8E* pkObject);
-class ObjectListC8E
-{
-  public:
-    __declspec(noinline) void AddTail(const NiPointerC8E<NiObjectC8E>& spRetainedObject)
+    for (const NiRTTI* pkRTTI = GetRTTI(); pkRTTI; pkRTTI = pkRTTI->GetBaseRTTI())
     {
-        ListItemC8E* pkItem = NewListItemC8E(spRetainedObject.m_pObject);
-        pkItem->m_pkNext = 0;
-        pkItem->m_pkPrev = m_pkTail;
-        if (m_pkTail)
-            m_pkTail->m_pkNext = pkItem;
-        else
-            m_pkHead = pkItem;
-        m_pkTail = pkItem;
-        m_uiCount++;
+        if (pkRTTI == pkType)
+            return true;
     }
+    return false;
+}
+template <class T> inline NiPointer<T>::NiPointer(T* pObject) : m_pObject(pObject)
+{
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
 
-    ListItemC8E* m_pkHead;
-    ListItemC8E* m_pkTail;
-    unsigned int m_uiCount;
-};
-class SceneC8E
+// 0x00c8ef80 appends to a 12-byte NiTPointerList at +0x14. Keep this owner view:
+// bhkRigidBody::m_kSerializableList is an 8-byte BSSimpleList, so that shared member
+// cannot represent this function's head/tail/count operations.
+class SerializableObjectListOwner
 {
   public:
     int unk00;
@@ -1841,29 +1702,22 @@ class SceneC8E
     int unk08;
     int unk0C;
     int unk10;
-    ObjectListC8E m_kThirdFollowingStreamField;
+    NiTPointerList<NiPointer<NiObject> > m_kThirdFollowingStreamField;
 
-    void FUN_00c8ef80(NiObjectC8E* pkObject);
+    void FUN_00c8ef80(NiObject* pkObject);
 };
 // Adds pkObject to the object list if it is a geometry or node, using an allocation tag scope of 0x10.
 // @fnv 0x00c8ef80
-void SceneC8E::FUN_00c8ef80(NiObjectC8E* pkObject)
+void SerializableObjectListOwner::FUN_00c8ef80(NiObject* pkObject)
 {
     AllocTagScopeC8E kScope(0x10);
-    if (pkObject && (pkObject->IsKindOfType(g_kGeometryRTTIC8E) || pkObject->IsKindOfType(g_kNodeRTTIC8E)))
+    if (pkObject && (pkObject->IsKindOfType(&g_kGeometryRTTIC8E) || pkObject->IsKindOfType(&g_kNodeRTTIC8E)))
         m_kThirdFollowingStreamField.AddTail(pkObject);
 }
 
-struct RefCountedObj
-{
-    virtual void v0();
-    virtual void Destroy();
-    long m_iRef;
-};
-
 struct LinkNode
 {
-    RefCountedObj* m_pEntryObject;
+    NiRefObject* m_pEntryObject;
     LinkNode* m_pNext;
     void Release();
 };
@@ -1877,7 +1731,7 @@ extern LinkNodePool g_linkNodePool;
 class FUN_00c88990_cls
 {
   public:
-    RefCountedObj* m_pEntryObject;
+    NiRefObject* m_pEntryObject;
     LinkNode* m_pNext;
     void PopAndRelease();
 };
@@ -1889,17 +1743,17 @@ void FUN_00c88990_cls::PopAndRelease()
     if (node != 0)
     {
         m_pNext = node->m_pNext;
-        RefCountedObj* pOldObject = m_pEntryObject;
+        NiRefObject* pOldObject = m_pEntryObject;
         if (pOldObject != node->m_pEntryObject)
         {
             if (pOldObject != 0)
             {
-                if (InterlockedDecrement(&pOldObject->m_iRef) == 0)
-                    pOldObject->Destroy();
+                if (InterlockedDecrement((long volatile*)&pOldObject->m_uiRefCount) == 0)
+                    pOldObject->DeleteThis();
             }
             m_pEntryObject = node->m_pEntryObject;
             if (m_pEntryObject != 0)
-                InterlockedIncrement(&m_pEntryObject->m_iRef);
+                InterlockedIncrement((long volatile*)&m_pEntryObject->m_uiRefCount);
         }
 
         node->m_pNext = 0;
@@ -1908,11 +1762,11 @@ void FUN_00c88990_cls::PopAndRelease()
     }
     else
     {
-        RefCountedObj* obj = m_pEntryObject;
+        NiRefObject* obj = m_pEntryObject;
         if (obj != 0)
         {
-            if (InterlockedDecrement(&obj->m_iRef) == 0)
-                obj->Destroy();
+            if (InterlockedDecrement((long volatile*)&obj->m_uiRefCount) == 0)
+                obj->DeleteThis();
             m_pEntryObject = 0;
         }
     }
@@ -1935,41 +1789,32 @@ void __cdecl FUN_00c8ecf0(HavokObject* object)
     NiNode* node = object->GetCellChildAt();
     if (node)
     {
-        for (unsigned int i = 0; i < node->childCount; ++i)
-            FUN_00c8ecf0(node->children[i]);
+        for (unsigned int i = 0; i < node->m_kChildren.m_usSize; ++i)
+            FUN_00c8ecf0(((HavokObject**)node->m_kChildren.m_pBase)[i]);
     }
 }
 
 #include <xmmintrin.h>
-struct hkVector
-{
-    __m128 m_vComponents;
-    hkVector()
-    {}
-    hkVector(const hkVector& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-extern hkVector DAT_01267e30;
+
+extern hkVector4 DAT_01267e30;
 namespace c8d {
 struct Body
 {
     char pad[0x170];
-    hkVector m_kPos;
+    hkVector4 m_kPos;
 };
 struct Ent
 {
     int unk;
     int unkCur;
     Body* m_pPhysicsBody;
-    hkVector FUN_00c8d200();
+    hkVector4 FUN_00c8d200();
 };
 // Returns the physics body's m_kPos, or the global DAT_01267e30 vector when this or the body pointer is null.
 // @fnv 0x00c8d200
-hkVector Ent::FUN_00c8d200()
+hkVector4 Ent::FUN_00c8d200()
 {
-    const hkVector* p;
+    const hkVector4* p;
     if (this && m_pPhysicsBody)
         p = &m_pPhysicsBody->m_kPos;
     else
@@ -1978,19 +1823,8 @@ hkVector Ent::FUN_00c8d200()
 }
 }
 
-struct __declspec(align(16)) hkVector4
-{
-    __m128 m_vComponents;
-    hkVector4()
-    {}
-    hkVector4(const hkVector4& o) : m_vComponents(o.m_vComponents)
-    {}
-    hkVector4& operator=(const hkVector4& o)
-    {
-        m_vComponents = o.m_vComponents;
-        return *this;
-    }
-};
+inline hkVector4::hkVector4(const hkVector4& o) : m_vComponents(o.m_vComponents) {}
+inline void hkVector4::operator=(const hkVector4& o) { m_vComponents = o.m_vComponents; }
 
 extern hkVector4 g_zero;
 
@@ -2015,49 +1849,14 @@ hkVector4 Outer::GetVec() const
     return *p;
 }
 
-struct Transform_c8d3
-{
-    __m128 m_kColumn0;
-    __m128 m_kColumn1;
-    __m128 m_kColumn2;
-    __m128 m_vTranslation;
-};
-extern Transform_c8d3 DAT_01268370;
-
-struct Aabb_c8d3
-{
-    __m128 m_kMinimumCorner;
-    __m128 m_kMaximumCorner;
-};
-
-class Shape_c8d3
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void getAabb(const Transform_c8d3& kLocalToWorld, float fTolerance, Aabb_c8d3& kOut) const;
-};
-
-struct CdBody_c8d3
-{
-    Shape_c8d3* m_pkShape;
-    Shape_c8d3* getShape() const
-    {
-        return m_pkShape;
-    }
-};
+extern hkTransform DAT_01268370;
 
 struct EntityBase_c8d3
 {
     int unk00, unk04, unk08, unk0c;
 };
 
-struct Entity_c8d3 : public EntityBase_c8d3, public CdBody_c8d3
+struct Entity_c8d3 : public EntityBase_c8d3, public hkpCdBody
 {
 };
 
@@ -2069,46 +1868,37 @@ class WorldObject_c8d3
     Entity_c8d3* m_pkEntity;
 
     void FUN_00a29680();
-    void GetAabb(Aabb_c8d3& kOut);
+    void GetAabb(hkAabb& kOut);
 };
 
 // Fills kOut from the entity shape's getAabb (global transform DAT_01268370, tolerance 0.001), or a +-0.001 box around zero when there is no shape.
 // @fnv 0x00c8d390
-void WorldObject_c8d3::GetAabb(Aabb_c8d3& kOut)
+void WorldObject_c8d3::GetAabb(hkAabb& kOut)
 {
-    CdBody_c8d3* pkBody = 0;
+    hkpCdBody* pkBody = 0;
     if (this)
     {
         Entity_c8d3* pkEntity = m_pkEntity;
         if (pkEntity)
         {
             FUN_00a29680();
-            pkBody = static_cast<CdBody_c8d3*>(pkEntity);
+            pkBody = static_cast<hkpCdBody*>(pkEntity);
             FUN_00a29680();
         }
     }
-    Shape_c8d3* pkShape = pkBody ? pkBody->getShape() : 0;
+    const hkpShape* pkShape = pkBody ? pkBody->getShape() : 0;
     if (pkShape)
     {
-        pkShape->getAabb(DAT_01268370, 0.001f, kOut);
+        pkShape->CalculateAabb(DAT_01268370, 0.001f, kOut);
     }
     else
     {
-        kOut.m_kMinimumCorner = _mm_setr_ps(-0.001f, -0.001f, -0.001f, 0.0f);
-        kOut.m_kMaximumCorner = _mm_setr_ps(0.001f, 0.001f, 0.001f, 0.0f);
+        kOut.m_kMinimumCorner.m_vComponents = _mm_setr_ps(-0.001f, -0.001f, -0.001f, 0.0f);
+        kOut.m_kMaximumCorner.m_vComponents = _mm_setr_ps(0.001f, 0.001f, 0.001f, 0.0f);
     }
 }
 
 namespace fnv_00c8d510 {
-struct hkVector4
-{
-    __m128 m_vComponents;
-    hkVector4& operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
-};
 
 struct OldCinfo
 {
@@ -2464,11 +2254,7 @@ struct BodyNative
     unsigned int unk00, unk04, unk08, unk0C;
     BodyMotion motion;
 };
-struct Bounds
-{
-    __m128 minimum;
-    __m128 maximum;
-};
+
 extern float DAT_012677bc;
 extern float DAT_012677c0;
 extern float DAT_011b0c48;
@@ -2525,7 +2311,7 @@ struct BodyBuild
     unsigned int unk04;
     BodyNative* native;
     void FUN_00a29680();
-    void GetAabb(Bounds* bounds);
+    void GetAabb(hkAabb* bounds);
     float FUN_00577b50();
     BodyMotion* GetMotion()
     {
@@ -2589,9 +2375,10 @@ void BodyBuild::ConfigureBody(BuildSettings* settings)
         BodyMotion* nativeMotion = GetMotion();
         if (nativeMotion)
         {
-            Bounds bounds;
-            GetAabb(&bounds);
-            __m128 extent = _mm_sub_ps(bounds.maximum, bounds.minimum);
+            // Preserve the original aligned SIMD temporary storage.
+            __m128 boundsStorage[2];
+            GetAabb(reinterpret_cast<hkAabb*>(boundsStorage));
+            __m128 extent = _mm_sub_ps(boundsStorage[1], boundsStorage[0]);
             int axis;
             if (extent.m128_f32[0] > extent.m128_f32[1])
                 axis = extent.m128_f32[1] > extent.m128_f32[2] ? 2 : 1;
@@ -2691,35 +2478,30 @@ void CollisionOwner::DispatchCollision(Receiver* target)
     }
 }
 
-namespace fnv_00c8e800 {
-struct RTTI
+inline void hkVector4::Interpolate(const hkVector4& oldValue, const hkVector4& newValue, float factor)
 {
-    const char* name;
-    const RTTI* parent;
-};
-extern RTTI DAT_012043f8;
+    extern const __m128 DAT_010ec7f0;
+    __m128 weight = _mm_set1_ps(factor);
+    m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, weight), oldValue.m_vComponents),
+                       _mm_mul_ps(weight, newValue.m_vComponents));
+}
+
+namespace fnv_00c8e800 {
+
+extern NiRTTI DAT_012043f8;
 struct Node;
 struct Collision;
 struct Object
 {
     virtual void Slot0();
     virtual void Slot1();
-    virtual const RTTI* GetRTTI();
+    virtual const NiRTTI* GetRTTI();
     virtual Node* GetAsNode();
     unsigned int unk04, unk08, unk0c, unk10, unk14, unk18;
     Collision* collision;
 };
 extern const __m128 DAT_010ec7f0;
-struct Vector
-{
-    __m128 value;
-    void Interpolate(const Vector& oldValue, const Vector& newValue, float factor)
-    {
-        __m128 weight = _mm_set1_ps(factor);
-        value = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, weight), oldValue.value),
-                           _mm_mul_ps(weight, newValue.value));
-    }
-};
+
 struct Body
 {
     virtual void Slot0();
@@ -2782,7 +2564,7 @@ struct Body
     virtual void Slot57();
     virtual void Slot58();
     virtual void Slot59();
-    virtual void GetNavMeshData(Vector* out);
+    virtual void GetNavMeshData(hkVector4* out);
     float FUN_0062ab20();
 };
 struct Collision : Object
@@ -2833,25 +2615,27 @@ struct CollisionData
 {
     virtual void Slot0();
     virtual void Slot1();
-    virtual const RTTI* GetRTTI();
+    virtual const NiRTTI* GetRTTI();
     unsigned int unk04, unk08, unk0c;
     Body* body;
 };
 extern const __m128 DAT_010ec7f0;
 inline bool IsKindOfType(Collision* object)
 {
-    const RTTI* type = object->GetRTTI();
+    const NiRTTI* type = object->GetRTTI();
     while (type)
     {
         if (type == &DAT_012043f8)
             return true;
-        type = type->parent;
+        type = type->m_pBaseRTTI;
     }
     return false;
 }
 // Recursively walks a node's children, then adds the collision body's mass to total and blends center toward the body's nav-mesh data by the mass ratio.
 // @fnv 0x00c8e800
-void __cdecl AccumulateCenterOfMass(Object* object, Vector* center, float* total)
+// hkVector4 has constructors in the shared header; retain the original stack cookie.
+#pragma strict_gs_check(push, on)
+void __cdecl AccumulateCenterOfMass(Object* object, hkVector4* center, float* total)
 {
     if (!object)
         return;
@@ -2871,12 +2655,13 @@ void __cdecl AccumulateCenterOfMass(Object* object, Vector* center, float* total
     if (!body)
         return;
     float mass = body->FUN_0062ab20();
-    Vector next;
+    hkVector4 next;
     body->GetNavMeshData(&next);
     *total += mass;
     float factor = mass / *total;
     center->Interpolate(*center, next, factor);
 }
+#pragma strict_gs_check(pop)
 }  // namespace fnv_00c8e800
 
 extern const float g_fConst01011d78;
@@ -2894,21 +2679,13 @@ void __cdecl GetScalarAndVector(void* a, __m128* out, float* pf)
     *pf = f;
 }
 
-struct BinaryStream_c8ea
+inline unsigned int NiBinaryStream::Read(void* pvBuffer, unsigned int uiBytes)
 {
-    int unk00;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(BinaryStream_c8ea* pkThis, void* pvBuffer, unsigned int uiBytes,
-                                     unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    unsigned int Read(void* pvBuffer, unsigned int uiBytes)
-    {
-        unsigned int uiSize = 4;
-        unsigned int uiRead = m_pfnRead(this, pvBuffer, uiBytes, &uiSize, 1);
-        m_uiStreamFlags += uiRead;
-        return uiRead;
-    }
-};
+    unsigned int uiSize = 4;
+    unsigned int uiRead = m_pfnRead(this, pvBuffer, uiBytes, &uiSize, 1);
+    m_uiAbsoluteCurrentPos += uiRead;
+    return uiRead;
+}
 
 class RigidBody_c8ea
 {
@@ -3008,23 +2785,17 @@ void Entity_c8ea::FUN_00c8ea30(char* pkStream)
             *(unsigned char*)(pkBody + 0xd4) = 4;
     }
     ((LoadStream_c8ea*)pkStream)->FUN_00a64670();
-    (*(BinaryStream_c8ea**)(pkStream + 0x24c))->Read(&m_iSlotCount, 4);
+    (*(NiBinaryStream**)(pkStream + 0x24c))->Read(&m_iSlotCount, 4);
 }
 
 extern "C" void _ReadWriteBarrier(void);
-
-struct RTTI_eb20
-{
-    const char* m_pcName;
-    const RTTI_eb20* m_pBaseRTTI;
-};
 
 class Constraint_eb20
 {
   public:
     virtual ~Constraint_eb20();
     virtual void DeleteThis();
-    virtual const RTTI_eb20* GetRTTI() const;
+    virtual const NiRTTI* GetRTTI() const;
     virtual void vf0c();
     virtual void vf10();
     virtual void vf14();
@@ -3064,9 +2835,9 @@ class Constraint_eb20
     virtual void SetWorld(int iWorld);
     virtual void RegisterWithWorld();
 
-    bool IsKindOfType(const RTTI_eb20& kRTTI) const
+    bool IsKindOfType(const NiRTTI& kRTTI) const
     {
-        for (const RTTI_eb20* pkRTTI = GetRTTI(); pkRTTI; pkRTTI = pkRTTI->m_pBaseRTTI)
+        for (const NiRTTI* pkRTTI = GetRTTI(); pkRTTI; pkRTTI = pkRTTI->m_pBaseRTTI)
         {
             if (pkRTTI == &kRTTI)
                 return true;
@@ -3360,7 +3131,7 @@ void RefObject_eb20::FUN_00c8eb20(bool bSetWorld)
                     if (!pkItem)
                         break;
                     Constraint_eb20* pkConstraint =
-                        pkItem->IsKindOfType(reinterpret_cast<const RTTI_eb20&>(DAT_0126818c)) ? pkItem : 0;
+                        pkItem->IsKindOfType(reinterpret_cast<const NiRTTI&>(DAT_0126818c)) ? pkItem : 0;
                     if (pkConstraint)
                     {
                         if (pkConstraint->GetLinkedRecordValue())
@@ -3579,17 +3350,13 @@ struct MemScope
         block->unk2b4 = saved;
     }
 };
-struct RTTI
-{
-    const char* name;
-    RTTI* parent;
-};
+
 extern const unsigned char* const g_01268310_arg1;
 struct Obj
 {
     virtual void v0();
     virtual void v1();
-    virtual RTTI* type();
+    virtual const NiRTTI* type();
     virtual void v3();
     virtual void v4();
     virtual void v5();
@@ -3628,14 +3395,14 @@ struct Obj
     virtual void v38();
     virtual void attach(void*);
     virtual void detach();
-    bool isType(const RTTI* p)
+    bool isType(const NiRTTI* p)
     {
-        RTTI* r = type();
+        const NiRTTI* r = type();
         while (r)
         {
             if (r == p)
                 return true;
-            r = r->parent;
+            r = r->m_pBaseRTTI;
         }
         return false;
     }
@@ -3861,10 +3628,7 @@ struct IntegerTriple
     int unk34c;
     void* unk350;
 };
-struct bhkRefObject
-{
-    void* GetReferencedData();
-};
+
 Obj* __cdecl FUN_00cc81c0(Obj*, float);
 struct ParentData
 {
@@ -3889,7 +3653,7 @@ struct Target
     Node list;
     void* getOwner()
     {
-        IntegerTriple* data = (IntegerTriple*)((bhkRefObject*)this)->GetReferencedData();
+        IntegerTriple* data = (IntegerTriple*)((bhkRefObject*)this)->bhkRefObject::GetReferencedData();
         return data ? data->unk350 : 0;
     }
     unsigned char getFlag()
@@ -3910,7 +3674,7 @@ void Target::FUN_00c8f080()
     MemScope scope;
     if (getFlag() & 1)
         return;
-    IntegerTriple* data = (IntegerTriple*)((bhkRefObject*)this)->GetReferencedData();
+    IntegerTriple* data = (IntegerTriple*)((bhkRefObject*)this)->bhkRefObject::GetReferencedData();
     void* owner;
     if (data)
         *(void* volatile*)&owner = data->unk350;
@@ -3924,7 +3688,7 @@ void Target::FUN_00c8f080()
         Obj* object = node->object;
         if (!object)
             break;
-        bool valid = object->isType((const RTTI*)&g_01268310_arg1);
+        bool valid = object->isType((const NiRTTI*)&g_01268310_arg1);
         node = node->next;
         Obj* body = valid ? object : 0;
         if (body)

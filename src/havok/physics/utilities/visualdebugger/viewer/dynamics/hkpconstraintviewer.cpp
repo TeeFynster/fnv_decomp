@@ -2,10 +2,13 @@
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/hkpconstraintviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/hkpconstraintviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkDisplayGeometry
-{
-    ~hkDisplayGeometry();
-};
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/Transform.h"
+#include "../../../../../../../include/hkDisplayGeometry.h"
+#include "../../../../../../../include/hkProcessFactory.h"
 
 struct FUN_00d69a80
 {
@@ -16,10 +19,10 @@ struct FUN_00d69a80
 // @fnv 0x00d69a80
 FUN_00d69a80::~FUN_00d69a80()
 {
-    ((hkDisplayGeometry*)((char*)this + 0x280))->~hkDisplayGeometry();
-    ((hkDisplayGeometry*)((char*)this + 0x1f0))->~hkDisplayGeometry();
-    ((hkDisplayGeometry*)((char*)this + 0x160))->~hkDisplayGeometry();
-    ((hkDisplayGeometry*)((char*)this + 0xd0))->~hkDisplayGeometry();
+    ((hkDisplayGeometry*)((char*)this + 0x280))->hkDisplayGeometry::~hkDisplayGeometry();
+    ((hkDisplayGeometry*)((char*)this + 0x1f0))->hkDisplayGeometry::~hkDisplayGeometry();
+    ((hkDisplayGeometry*)((char*)this + 0x160))->hkDisplayGeometry::~hkDisplayGeometry();
+    ((hkDisplayGeometry*)((char*)this + 0xd0))->hkDisplayGeometry::~hkDisplayGeometry();
 }
 
 class D698B0Listener
@@ -104,17 +107,14 @@ FUN_00d698b0::FUN_00d698b0(void* info) : D698B0Base(info)
     }
 }
 
-struct hkProcessFactory
-{
-    void* FUN_00dd9380(const char*, void*);
-};
+
 extern hkProcessFactory* FUN_00dd9380;
 extern void* DAT_0126901c;
 void FUN_00d699c0();
 // @fnv 0x00d69a00
 void RegisterConstraintsProcessFactory()
 {
-    DAT_0126901c = FUN_00dd9380->FUN_00dd9380("Constraints", (void*)&FUN_00d699c0);
+    DAT_0126901c = FUN_00dd9380->RegisterProcess("Constraints", (void*)&FUN_00d699c0);
 }
 
 struct S_00d69a20_Base
@@ -240,25 +240,7 @@ void FUN_00d69230_cls::InvokeTargetWithSelfOffset(Target* apTarget)
 }
 
 namespace fnv_00d69920 {
-struct AudioAllocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0c();
-    virtual void FreeData(void* apMemory, unsigned int auiSize);
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct Target
 {
@@ -346,36 +328,22 @@ FUN_00d69920_cls::~FUN_00d69920_cls() throw()
             m_pSharedOwner->m_ppItems[i]->ClearValue(static_cast<SubObject*>(this));
         }
     }
-    AudioHolder* pHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     m_iField30 = 0;
     unsigned int uiDataFlags = m_uiObjectFlags;
     if ((uiDataFlags & 0x80000000u) == 0)
     {
-        pAllocator->FreeData(m_pData, (uiDataFlags & 0x3fffffffu) * 4);
+        typedef void (__thiscall* FreeDataFunction)(hkMemoryAllocator*, void*, unsigned int);
+        reinterpret_cast<FreeDataFunction>((*reinterpret_cast<void***>(pAllocator))[4])(
+            pAllocator, m_pData, (uiDataFlags & 0x3fffffffu) * 4);
     }
     m_pData = 0;
     m_uiObjectFlags = 0x80000000u;
 }
 }  // namespace fnv_00d69920
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void* Alloc(unsigned int auiSize);
-    virtual void Free(void* apMemory, unsigned int auiSize);
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct SpawnedObject
 {
@@ -390,9 +358,11 @@ struct SpawnedObject
 // @fnv 0x00d699c0
 void* __cdecl FUN_00d699c0(void* apSource)
 {
-    AudioHolder* pHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
-    SpawnedObject* pObject = (SpawnedObject*)pAllocator->Alloc(0x38);
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+    typedef void* (__thiscall* AllocFunction)(hkMemoryAllocator*, unsigned int);
+    SpawnedObject* pObject = (SpawnedObject*)reinterpret_cast<AllocFunction>(
+        (*reinterpret_cast<void***>(pAllocator))[1])(pAllocator, 0x38);
     pObject->m_uSize = 0x38;
     void* pResult = pObject->InitFrom(apSource);
     if (pResult != 0)
@@ -538,28 +508,12 @@ Derived::Derived()
 }  // namespace fnv_00d69ae0
 
 namespace fnv_00d69af0 {
-struct FUN_00d69af0_Allocator
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+
+inline hkMemoryAllocator& heap(hkMemoryRouter& holder)
 {
-    virtual void unk00();
-    virtual void unk04();
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-
-struct FUN_00d69af0_MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    FUN_00d69af0_Allocator* m_pStreamAllocator;
-
-    FUN_00d69af0_Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" FUN_00d69af0_MemoryRouter& __cdecl FUN_00c85750();
+    return *reinterpret_cast<hkMemoryAllocator*>(holder.m_heap);
+}
 
 struct FUN_00d69af0
 {
@@ -572,7 +526,10 @@ struct FUN_00d69af0
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00d69af0* b = static_cast<FUN_00d69af0*>(p);
-        FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        hkMemoryAllocator& allocator = heap(FUN_00c85750());
+        typedef void (__thiscall* FreeFunction)(hkMemoryAllocator*, void*, int);
+        reinterpret_cast<FreeFunction>((*reinterpret_cast<void***>(&allocator))[2])(
+            &allocator, p, b->m_usMemSizeAndFlags);
     }
 };
 
@@ -587,43 +544,34 @@ extern "C" unsigned __int64 __rdtsc(void);
 extern "C" void _ReadWriteBarrier(void);
 extern unsigned int DAT_0126835c;
 
-struct CommandTimingEntry
+__forceinline void hkMonitorStream::TimerCommand::setTime()
 {
-    const char* m_pCommandName;
-    unsigned int m_uiStartTicks;
-    unsigned int m_uiEndTicks;
-    void setTime()
-    {
-        _ReadWriteBarrier();
-        volatile unsigned int t = (unsigned int)__rdtsc();
-        m_uiStartTicks = t;
-    }
-};
+    _ReadWriteBarrier();
+    volatile unsigned int t = (unsigned int)__rdtsc();
+    m_time0 = t;
+}
 
-struct MonitorStream
+__forceinline hkMonitorStream& hkMonitorStream::getInstance()
 {
-    int m_kRayStart;
-    char* m_kRayEnd;
-    int m_pRayCursor;
-    char* m_capacityMinusDefaultSize;
+    return *(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+}
 
-    static MonitorStream& GetMonitorStream()
-    {
-        return *(MonitorStream*)TlsGetValue(DAT_0126835c);
-    }
-    bool memoryAvailable() const
-    {
-        return m_kRayEnd < m_capacityMinusDefaultSize;
-    }
-    char* GetStreamEnd()
-    {
-        return m_kRayEnd;
-    }
-    void setEnd(char* e)
-    {
-        m_kRayEnd = e;
-    }
-};
+// A unit-local view: the original inlines a differently shaped variant of this Havok accessor.
+struct hkMonitorStream_hkpconstraintviewer : hkMonitorStream { bool memoryAvailable() const; };
+__forceinline bool hkMonitorStream_hkpconstraintviewer::memoryAvailable() const
+{
+    return m_end.m_storage < m_capacityMinus16.m_storage;
+}
+
+__forceinline char* __cdecl hkMonitorStream::getEnd()
+{
+    return m_end.m_storage;
+}
+
+__forceinline void __cdecl hkMonitorStream::setEnd(char* e)
+{
+    m_end.m_storage = e;
+}
 
 struct ConstraintInternal
 {
@@ -819,14 +767,14 @@ void ConstraintViewer::FUN_00d69730(World* world)
 {
     int second_i;
     {
-        MonitorStream& mStream = MonitorStream::GetMonitorStream();
-        if (mStream.memoryAvailable())
+        hkMonitorStream& mStream = hkMonitorStream::getInstance();
+        if (static_cast<const hkMonitorStream_hkpconstraintviewer&>(mStream).memoryAvailable())
         {
-            CommandTimingEntry* h = (CommandTimingEntry*)mStream.GetStreamEnd();
-            h->m_pCommandName = "TthkpConstraintViewer";
+            hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)mStream.getEnd();
+            h->m_commandAndMonitor = "TthkpConstraintViewer";
             _ReadWriteBarrier();
             *(volatile unsigned int*)&second_i = (unsigned int)__rdtsc();
-            h->m_uiStartTicks = *(volatile unsigned int*)&second_i;
+            h->m_time0 = *(volatile unsigned int*)&second_i;
             mStream.setEnd((char*)(h + 1));
         }
     }
@@ -863,11 +811,11 @@ void ConstraintViewer::FUN_00d69730(World* world)
         }
     }
     {
-        MonitorStream& mStream = MonitorStream::GetMonitorStream();
-        if (mStream.memoryAvailable())
+        hkMonitorStream& mStream = hkMonitorStream::getInstance();
+        if (static_cast<const hkMonitorStream_hkpconstraintviewer&>(mStream).memoryAvailable())
         {
-            CommandTimingEntry* h = (CommandTimingEntry*)mStream.GetStreamEnd();
-            h->m_pCommandName = "Et";
+            hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)mStream.getEnd();
+            h->m_commandAndMonitor = "Et";
             h->setTime();
             mStream.setEnd((char*)(h + 1));
         }
@@ -878,19 +826,8 @@ extern float DAT_011b6168;
 void EnterTlsGuard();
 void FUN_00c904e0();
 namespace ConstraintDrawDetail {
-struct TraceEntry
-{
-    const char* volatile name;
-    unsigned tick;
-    unsigned value;
-};
-struct TraceBuffer
-{
-    TraceEntry* begin;
-    TraceEntry* current;
-    TraceEntry* end;
-    TraceEntry* limit;
-};
+
+
 struct Shape
 {
     virtual void v00();
@@ -932,17 +869,7 @@ struct LocalCollidable : Collidable
     void FUN_00cf3ea0(void*, void*, Shape*, bool);
     void FUN_00cf40b0();
 };
-struct Transform
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    __declspec(align(16)) float x;
-    float y;
-    float z;
-    float w;
-};
+
 struct __declspec(align(16)) Renderer
 {
     int unk00;
@@ -1236,19 +1163,19 @@ void ConstraintDrawDetail::Viewer::FUN_00d69260(int aiCollidable, Entity* entity
     Extended renderer;
     Complex complexRenderer;
     LocalCollidable child;
-    TraceBuffer* trace = (TraceBuffer*)TlsGetValue(DAT_0126835c);
-    if (trace->current < trace->limit)
+    hkMonitorStream* trace = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (trace->m_end.m_storage < trace->m_capacityMinus16.m_storage)
     {
-        TraceEntry* entry = trace->current;
-        entry->name = "Ttdraw";
+        hkMonitorStream::TimerCommand* entry = (hkMonitorStream::TimerCommand*)trace->m_end.m_storage;
+        *(const char* volatile*)&entry->m_commandAndMonitor = "Ttdraw";
         _ReadWriteBarrier();
         uiShapeType = (unsigned)__rdtsc();
-        entry->tick = uiShapeType;
-        trace->current = entry + 1;
+        entry->m_time0 = uiShapeType;
+        trace->m_end.m_storage = (char*)(entry + 1);
     }
     uiShapeType = object->shape->getType();
     EnterTlsGuard();
-    void* position = &transform->x;
+    void* position = &transform->m_f10;
     switch (uiShapeType)
     {
     case 0: {
@@ -1352,14 +1279,14 @@ void ConstraintDrawDetail::Viewer::FUN_00d69260(int aiCollidable, Entity* entity
     }
     }
     FUN_00c904e0();
-    trace = (TraceBuffer*)TlsGetValue(DAT_0126835c);
-    if (trace->current < trace->limit)
+    trace = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (trace->m_end.m_storage < trace->m_capacityMinus16.m_storage)
     {
-        TraceEntry* entry = trace->current;
-        entry->name = "Et";
+        hkMonitorStream::TimerCommand* entry = (hkMonitorStream::TimerCommand*)trace->m_end.m_storage;
+        *(const char* volatile*)&entry->m_commandAndMonitor = "Et";
         _ReadWriteBarrier();
         volatile unsigned tick = (unsigned)__rdtsc();
-        entry->tick = tick;
-        trace->current = entry + 1;
+        entry->m_time0 = tick;
+        trace->m_end.m_storage = (char*)(entry + 1);
     }
 }

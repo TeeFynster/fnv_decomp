@@ -1,6 +1,33 @@
-// bsmenu/tiletext.cpp: TileText, FontManager, TextNode, TextTile (4 functions)
+// bsmenu/tiletext.cpp: TileText, FontManager, TextNode (4 functions)
 
-#include "tiletext.h"
+#include "layout_support.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/TileText.h"
+#include "../../include/Font.h"
+#include "../../include/FontManager.h"
+#include "../../include/FontData.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
 
 // @fnv 0x00a0bbd0
 int TileText::GetType()
@@ -8,68 +35,38 @@ int TileText::GetType()
     return eText;
 }
 
-struct FUN_00a21a10_shell : public TileText
-{
-    void InitTileText(Tile*, char*, Tile*);
-};
-
-struct TileHelper
-{
-    void Init(Tile*, const char*, Tile*);
-    void Set(int, float, bool);
-    void Set(int, const char*, bool);
-    void SetTileType(int);
-};
-
 // @fnv 0x00a21a10
-void FUN_00a21a10_shell::InitTileText(Tile* apParent, char* apName, Tile* apReplacedTile)
+void TileText::Init(Tile* apParent, const char* apName, Tile* apReplacedTile)
 {
-    ((TileHelper*)this)->Init(apParent, apName, apReplacedTile);
-    ((TileHelper*)this)->Set(0xfc4, "", true);
-    ((TileHelper*)this)->Set(0xff5, 255.0f, true);
-    ((TileHelper*)this)->Set(0xfb2, 255.0f, true);
-    ((TileHelper*)this)->Set(0xfb3, 255.0f, true);
-    ((TileHelper*)this)->Set(0xfb4, 255.0f, true);
-    ((TileHelper*)this)->Set(0xfa9, 255.0f, true);
-    ((TileHelper*)this)->Set(0xfa3, 1.0f, true);
-    ((TileHelper*)this)->SetTileType(3);
+    Tile::Init(apParent, apName, apReplacedTile);
+    Set(0xfc4, "", true);
+    Set(0xff5, 255.0f, true);
+    Set(0xfb2, 255.0f, true);
+    Set(0xfb3, 255.0f, true);
+    Set(0xfb4, 255.0f, true);
+    Set(0xfa9, 255.0f, true);
+    Set(0xfa3, 1.0f, true);
+    SetTileType(3);
 }
 
-struct FUN_00a225b0_shell : public TileText
-{
-    Tile* FUN_00a225b0(int, float, char*);
-};
-
-struct FUN_00a011f0_shell : public Tile
-{
-    char* FUN_00a011f0(int);
-};
-struct TGF
-{
-    float GetFloat(int);
-};
-struct TAN
-{
-    void SetImageFlags(int);
-};
 int __cdecl FUN_00ec6da0(const char*, const char*);
 // @fnv 0x00a225b0
-Tile* FUN_00a225b0_shell::FUN_00a225b0(int aiTrait, float afValue, char* axString)
+Tile* TileText::SetTraitValue(int aiTrait, float afValue, const char* axString)
 {
     if (aiTrait == 0xfc4)
     {
-        char* strValue = ((FUN_00a011f0_shell*)this)->FUN_00a011f0(0xfc4);
+        const char* strValue = GetString(0xfc4);
         if (!strValue || (strValue && !FUN_00ec6da0(axString, strValue)))
         {
-            ((TAN*)this)->SetImageFlags(2);
+            SetImageFlags(2);
             return (Tile*)(void*)this;
         }
     }
     else if (aiTrait == 0xfb7)
     {
-        if (((TGF*)this)->GetFloat(0xfb7) != afValue)
+        if (GetFloat(0xfb7) != afValue)
         {
-            ((TAN*)this)->SetImageFlags(2);
+            SetImageFlags(2);
             return (Tile*)(void*)this;
         }
     }
@@ -86,6 +83,7 @@ void __cdecl FormHeap_Free(void*);
 
 void __cdecl FUN_00401460(void*, const void*, unsigned);
 
+// local form of BSStringT<char>: 0x00a21af0 needs the forced-inline default ctor and local destructor/Set split; shared replacement changes bytes.
 struct TextString
 {
 
@@ -183,41 +181,23 @@ struct TextParams
     }
 };
 
-struct TextNode;
 struct TileExtra;
 
-struct Font
+inline float Font::GetHeight() const
 {
+    return pFontData ? pFontData->fBaseLine : 0.0f;
+}
 
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C, unk30, unk34;
-
-    float* height;
-
-    float GetHeight() const
-    {
-        return height ? *height : 0.0f;
-    }
-
-    void SetHeight(float value)
-    {
-        if (height)
-            *height = value;
-    }
-
-    void FUN_00a12880(TextString&, int*, int*, int, int, int, int, const Color4*, TextNode**, TextNode**);
-};
-
-struct FontManager
+inline void Font::SetHeight(float value)
 {
-    Font* fonts[8];
-    bool multibyte;
-    static FontManager* Get();
-    Font* GetFont(int index)
-    {
-        return fonts[index];
-    }
-    bool CreateTextRun(TextString, TextParams*, TextNode*);
-};
+    if (pFontData)
+        pFontData->fBaseLine = value;
+}
+
+inline Font* FontManager::GetFont(int index)
+{
+    return pFont[index];
+}
 
 extern FontManager* DAT_011f33f8;
 
@@ -386,25 +366,14 @@ struct TextNode
 
     int unk54;
 
-    struct Point
-    {
-        float x, y, z;
-        Point()
-        {}
-        Point(float px, float py, float pz)
-        {
-            x = px;
-            y = py;
-            z = pz;
-        }
-    } position;
+    NiPoint3 position;
 
-    const Point& GetPosition() const
+    const NiPoint3& GetPosition() const
     {
         return position;
     }
 
-    void SetPosition(const Point& p)
+    void SetPosition(const NiPoint3& p)
     {
         position = p;
     }
@@ -665,38 +634,9 @@ inline float ParseFloatValue(const int& value)
     return (float)number;
 }
 
-struct TextTile
-{
-
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28;
-
-    NodePtr node;
-
-    int unk30, unk34, unk38;
-
-    TextNode::Point position;
-
-    bool multibyte;
-
-    void SetPosition(const TextNode::Point& p)
-    {
-        position = p;
-    }
-
-    TextNode* GetNiNode();
-    float FUN_00a011b0(int);
-    const char* FUN_00a011f0(int);
-
-    void SetFloat(int, float, bool);
-    void SetChangeFlag(int);
-    bool IsTraitNonZero(int);
-
-    TextNode* BuildTextNode();
-};
-
 // Creates a TextNode using tile text and settings, adds it to a node, and attaches a TileExtra.
 // @fnv 0x00a21af0
-TextNode* TextTile::BuildTextNode()
+NiNode* TileText::CalculateNode()
 {
 
     // Locals retain the MSVC stack ordering.
@@ -741,7 +681,7 @@ TextNode* TextTile::BuildTextNode()
 
     Color4 colorX(scale != 0.0 ? scale / 255.0 : 0.0);
 
-    if (!fontA || !fontA->height)
+    if (!fontA || !fontA->pFontData)
         return 0;
 
     TextString current(" ");
@@ -763,10 +703,10 @@ TextNode* TextTile::BuildTextNode()
 
     fontA->SetHeight((float)(oldStateVal + offsetTmp));
 
-    if (allowedX || DAT_011f33f8->multibyte)
+    if (allowedX || DAT_011f33f8->bUseNewFonts)
     {
 
-        node = (TextNode*)new NewTextNode(0);
+        reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry) = (TextNode*)new NewTextNode(0);
 
         TextParams params;
 
@@ -783,13 +723,13 @@ TextNode* TextTile::BuildTextNode()
         params.maxLines = maximumTmp;
         params.multibyte = allowedX;
 
-        if (!FontManager::Get()->CreateTextRun(current, &params, node))
+        if (!FontManager::Get()->CreateTextRun(current, &params, reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry)))
             return 0;
 
         maximumX = params.width;
         countVal = params.height;
 
-        SetFloat(0xfd5, ParseFloatValue(params.lineCount), true);
+        FUN_00a012d0(0xfd5, ParseFloatValue(params.lineCount), true);
 
         multibyte = params.multibyte;
     }
@@ -799,30 +739,30 @@ TextNode* TextTile::BuildTextNode()
         TextNode* first = 0;
         TextNode* second = 0;
 
-        node = (TextNode*)new NewTextNode(0);
+        reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry) = (TextNode*)new NewTextNode(0);
 
         fontA->FUN_00a12880(current, &maximumX, &countVal, 0, maximumTmp, kIndex, 10, &colorX, &first, &second);
 
         SetPosition(first->GetPosition());
 
-        first->SetPosition(TextNode::Point(x, (float)(FUN_00a011b0(0xfad) * -0.00800000037997961), kPos));
+        first->SetPosition(NiPoint3(x, (float)(FUN_00a011b0(0xfad) * -0.00800000037997961), kPos));
 
-        ((TextNode*)node)->AddObject(first, true);
+        ((TextNode*)reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry))->AddObject(first, true);
 
         if (second)
         {
 
-            second->SetPosition(TextNode::Point(x, (float)(FUN_00a011b0(0xfad) * -0.00800000037997961), kPos));
+            second->SetPosition(NiPoint3(x, (float)(FUN_00a011b0(0xfad) * -0.00800000037997961), kPos));
 
-            ((TextNode*)node)->AddObject(second, true);
+            ((TextNode*)reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry))->AddObject(second, true);
         }
     }
 
     fontA->SetHeight((float)oldStateVal);
 
-    SetFloat(0xfb1, ParseFloatValue(maximumX), true);
+    FUN_00a012d0(0xfb1, ParseFloatValue(maximumX), true);
 
-    SetFloat(0xfb0, ParseFloatValue(countVal), true);
+    FUN_00a012d0(0xfb0, ParseFloatValue(countVal), true);
 
     SetChangeFlag(9);
 
@@ -832,15 +772,15 @@ TextNode* TextTile::BuildTextNode()
     if (!kFirst)
         kFirst = FUN_00706d30();
 
-    kFirst->AddObject(node, true);
+    kFirst->AddObject(reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry), true);
 
-    node->SetCulled(!IsTraitNonZero(0xfa3));
+    reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry)->SetCulled(!IsTraitNonZero(0xfa3));
 
-    node->FUN_00a5a040();
+    reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry)->FUN_00a5a040();
 
     FUN_00707930(1);
 
-    node->SetExtraDataName(new TileExtra((Tile*)this, node));
+    reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry)->SetExtraDataName(new TileExtra((Tile*)this, reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry)));
 
-    return node;
+    return (NiNode*)(TextNode*)reinterpret_cast<NodePtr&>(m_pRenderedNodeEntry);
 }

@@ -1,8 +1,24 @@
-// bsshader/bsfogproperty.cpp: BSFogProperty, StandIn (8 functions)
+// bsshader/bsfogproperty.cpp: FogPropertyWithBase (8 functions)
 
 #include "bsfogproperty_decls.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTArray.h"
+#include "../../include/NiTNewInterface.h"
+
+inline NiColor::NiColor() : r(0), g(0), b(0)
+{}
+
+inline NiFogProperty::NiFogProperty()
+{
+    m_uiObjectFlags = 0;
+    m_fFogDepth = 1.0f;
+    m_kFogTint = DAT_011f4998;
+}
+
 // @fnv 0x00bb8180
-BSFogProperty::BSFogProperty()
+FogPropertyWithBase::FogPropertyWithBase()
 {
     m_fFogStartDistance = (1.0 - m_fFogDepth * DAT_010b9e30) * DAT_0103a480;
     m_fFogEndDistance = 163840.0f;
@@ -13,68 +29,46 @@ BSFogProperty::BSFogProperty()
     m_fAlpha = 1.0f;
 }
 
-struct FUN_00bb8140_shell : public BSFogProperty
-{
-    void SetDepthParams(float);
-};
-
 // Stores a scaled depth value at offset 0x2c and the constant 163840.0f at offset 0x30.
 // @fnv 0x00bb8140
-void FUN_00bb8140_shell::SetDepthParams(float afDepth)
+void __fastcall SetDepthParams(FogPropertyWithBase* property, void*, float afDepth)
 {
-    *(float*)((char*)this + 0x2c) = (1.0 - afDepth * DAT_010b9e30) * DAT_0103a480;
-    *(float*)((char*)this + 0x30) = 163840.0f;
+    property->m_fFogStartDistance = (1.0 - afDepth * DAT_010b9e30) * DAT_0103a480;
+    property->m_fFogEndDistance = 163840.0f;
 }
 
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+#include "../../include/NiMemObject.h"
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct FUN_00a5c240_shell : public NiFogProperty
-{
-    void DestroyFogProperty();
-};
-
 __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 
 extern unsigned char* DAT_0109b244;
 extern int EmptyFS;
 
-struct NiRefObject
+inline void NiRefObject::DecRefCount()
 {
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    volatile long m_uiRefCount;
-    void DecRefCount()
-    {
-        if (!InterlockedDecrement(&m_uiRefCount))
-            DeleteThis();
-    }
-};
+    if (!InterlockedDecrement((volatile long*)&m_uiRefCount))
+        DeleteThis();
+}
 
-struct NiAVObject
-{
-    void UpdateModelBound();
-};
-
+// The original destructor body is kept here because the shared declaration
+// does not provide its inlined base-class teardown.
 // @fnv 0x00a5c240
-void FUN_00a5c240_shell::DestroyFogProperty()
+void __fastcall DestroyProperty(NiProperty* property)
 {
-    *(void**)this = (void*)&DAT_0109b244;
-    ((NiAVObject*)this)->UpdateModelBound();
+    *(void**)property = (void*)&DAT_0109b244;
+    ((NiAVObject*)property)->UpdateModelBound();
 
-    NiRefObject* pExtra = *(NiRefObject**)((char*)this + 0xc);
+    NiRefObject* pExtra = (NiRefObject*)property->m_spControllers;
     if (pExtra)
         pExtra->DecRefCount();
 
-    char* pString = *(char**)((char*)this + 8);
+    char* pString = property->m_kName.m_kHandle;
     if (pString != (char*)EmptyFS)
     {
         InterlockedDecrement((volatile long*)(pString - 8));
     }
 
-    ((NiRefObject*)this)->NiRefObject::~NiRefObject();
+    property->NiRefObject::~NiRefObject();
 }
 
 extern int g_012007e0;
@@ -93,43 +87,34 @@ char const* const* __cdecl FUN_00a99f20()
     return &g_012007e0_arg1;
 }
 
-void __fastcall DestroyFogProperty(void*);
 void __cdecl _delete(void*, unsigned int);
-struct S00a99f40
-{
-    void* DestroyIfFlagged(unsigned int);
-};
-// Calls DestroyFogProperty on this, deletes this with size 0x2c when bit 0 of a1 is set, and returns this.
 // @fnv 0x00a99f40
-void* S00a99f40::DestroyIfFlagged(unsigned int auiFlags)
+void* __fastcall DestroyFogProperty(NiFogProperty* property, void*, unsigned int auiFlags)
 {
-    DestroyFogProperty(this);
+    DestroyProperty(property);
     if (auiFlags & 1)
-        _delete(this, 0x2c);
-    return this;
+        _delete(property, sizeof(NiFogProperty));
+    return property;
 }
 
 void __cdecl ReleaseObjectArray(void*);
 extern int DAT_010a1458;
-struct MMStandIn
-{
-    void __thiscall _DeallocateAlias(void*);
-};
-extern MMStandIn g_memoryManager;
-struct StandIn
-{
-    void* __thiscall Destroy(unsigned int);
-};
+extern MemoryManager g_memoryManager;
+// The original vftable's RTTI identifies this array specialization.
+class NiMetricsOutputModule;
 // @fnv 0x00a9bbc0
-void* __thiscall StandIn::Destroy(unsigned int auiFlags)
+void* __fastcall DestroyObjectArray(
+    NiTArray<NiPointer<NiMetricsOutputModule>, NiTNewInterface<NiPointer<NiMetricsOutputModule> > >* array,
+    void*, unsigned int auiFlags)
 {
-    void* p = *(void**)((char*)this + 4);
-    *(void**)this = (void*)&DAT_010a1458;
+    void* p = array->m_pBase;
+    *(void**)array = (void*)&DAT_010a1458;
     ReleaseObjectArray(p);
     if (auiFlags & 1)
-        g_memoryManager._DeallocateAlias(this);
-    return this;
+        g_memoryManager._DeallocateAlias(array);
+    return array;
 }
+
 
 void DestroyFogProperty();
 // @fnv 0x00a99f30

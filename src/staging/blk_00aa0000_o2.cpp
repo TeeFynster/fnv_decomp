@@ -3,6 +3,11 @@
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiTFixedStringMap.h"
+#include "../../include/NiTFixedStringMap_NiAVObject___.h"
 
 extern void* DAT_011f6044;
 
@@ -14,11 +19,6 @@ void FUN_00aa0000()
 }
 
 extern "C" void* DAT_011f6078;
-
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 
 extern MemoryManager g_memoryManager;
 
@@ -134,35 +134,18 @@ FUN_00aa2ff0_s* FUN_00aa2ff0_s::FUN_00aa2ff0()
 extern char DAT_010a2138;
 extern MemoryManager _g_memoryManager;
 
-struct NiTFixedStringMap_NiAVObject___
-{
-    void* m_pVtable;
-    unsigned int m_unknown04;
-    void* m_pData;
-
-    void RemoveAll();
-    void* Destroy(int flags);
-};
-
 // @fnv 0x00aa02b0
 void* NiTFixedStringMap_NiAVObject___::Destroy(int flags)
 {
-    m_pVtable = &DAT_010a2138;
+    m_baseData0 = &DAT_010a2138;
     RemoveAll();
-    _NiFree(m_pData);
+    _NiFree(*(void**)((char*)this + 0x08));
     if (flags & 1)
         _g_memoryManager.Deallocate(this);
     return this;
 }
 
 namespace fnv_00aa02f0 {
-struct NiTFixedStringMap_NiAVObject___
-{
-    void* m_pVtable;
-    int m_unknown04;
-    void RemoveAll();
-};
-
 struct FUN_00aa02f0_s : public NiTFixedStringMap_NiAVObject___
 {
     void* m_pData;
@@ -176,10 +159,10 @@ extern MemoryManager _g_memoryManager;
 // @fnv 0x00aa02f0
 void* FUN_00aa02f0_s::FUN_00aa02f0(unsigned char bDelete)
 {
-    m_pVtable = &DAT_010a2154;
+    m_baseData0 = &DAT_010a2154;
     RemoveAll();
 
-    m_pVtable = &DAT_010a2138;
+    m_baseData0 = &DAT_010a2138;
     RemoveAll();
 
     _NiFree(m_pData);
@@ -278,12 +261,7 @@ bool HashTableBase::FUN_00aa0250(const unsigned int* key)
     return false;
 }
 
-struct FUN_00aa09c0_base
-{
-    virtual ~FUN_00aa09c0_base();
-};
-
-struct FUN_00aa09c0_cls : FUN_00aa09c0_base
+struct FUN_00aa09c0_cls : NiRefObject
 {
     virtual ~FUN_00aa09c0_cls();
 };
@@ -430,17 +408,12 @@ struct FUN_00aa2020_Holder
     FUN_00aa2020_Impl* m_pImpl;
 };
 
-struct FUN_00aa2020_Allocator
-{
-    FUN_00aa2020_Holder* FUN_00aa3e40(int size);
-};
-
 struct FUN_00aa2020_Source
 {
     FUN_00aa2020_Impl* FUN_009fd0f0();
 };
 
-extern FUN_00aa2020_Allocator DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 extern FUN_00aa2020_Source* DAT_011f6118;
 extern FUN_00aa2020_Holder* DAT_011f6080;
 
@@ -448,7 +421,7 @@ extern FUN_00aa2020_Holder* DAT_011f6080;
 // @fnv 0x00aa2020
 extern "C" void __cdecl InitHolder()
 {
-    DAT_011f6080 = DAT_011f6238.FUN_00aa3e40(4);
+    DAT_011f6080 = static_cast<FUN_00aa2020_Holder*>(DAT_011f6238.Allocate(4));
     DAT_011f6080->m_pImpl = DAT_011f6118->FUN_009fd0f0();
     DAT_011f6080->m_pImpl->FUN_00aa2020_07();
 }
@@ -474,7 +447,7 @@ void __cdecl FUN_00aa2080(FUN_00aa2080_callback callback, int value)
 }
 
 namespace fnv_00aa2170 {
-extern unsigned char DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 extern unsigned char DAT_011f610c;
 extern unsigned char DAT_011f610d;
 extern unsigned int DAT_011f6108;
@@ -489,10 +462,6 @@ struct FUN_00aa21e0_shell
     void __thiscall FUN_00aa21e0();
 };
 
-struct FUN_00aa4060_shell
-{
-    void __thiscall FUN_00aa4060(void* arg);
-};
 // @fnv 0x00aa2170
 void __cdecl FUN_00aa2170()
 {
@@ -511,7 +480,7 @@ void __cdecl FUN_00aa2170()
         if (DAT_011f6118 != 0)
         {
             ((FUN_00aa21e0_shell*)DAT_011f6118)->FUN_00aa21e0();
-            ((FUN_00aa4060_shell*)&DAT_011f6238)->FUN_00aa4060(obj);
+            DAT_011f6238.Deallocate(obj);
         }
     }
     DAT_011f610c = 0;
@@ -869,55 +838,37 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volati
 void* __cdecl NiMallocAA3(unsigned int uiSize) throw();
 extern "C" void* __cdecl MemSetAA3(void* pvDest, int iValue, unsigned int uiSize);
 
-class NiRefObjectAA3
+__forceinline NiRefObject::NiRefObject()
 {
-  public:
-    __forceinline NiRefObjectAA3() throw()
-    {
-        m_uiRefCount = 0;
-        InterlockedIncrement((long volatile*)&ms_lObjectCount);
-    }
-    virtual ~NiRefObjectAA3() throw();
+    m_uiRefCount = 0;
+    InterlockedIncrement((long volatile*)&ms_lObjectCount);
+}
 
-    unsigned int m_uiRefCount;
-    static unsigned int ms_lObjectCount;
-};
+class NiGlobalConstantEntry;
 
-struct NiTMapItemAA3;
-
-class NiTMapBaseAA3
+// Vftables 0x010a2138/0x010a2154 identify the fixed-string global-constant map (nishaderfactory.cpp).
+template <>
+__forceinline NiTFixedStringMapBase<DFALL<NiTMapItem<NiFixedString, NiGlobalConstantEntry*> >, NiGlobalConstantEntry*>::NiTFixedStringMapBase(unsigned int uiHashSize)
 {
-  public:
-    __forceinline NiTMapBaseAA3(unsigned int uiHashSize = 37) throw()
-    {
-        m_uiHashSize = uiHashSize;
-        m_uiCount = 0;
-        unsigned int uiSize = sizeof(NiTMapItemAA3*) * m_uiHashSize;
-        m_ppkHashTable = (NiTMapItemAA3**)NiMallocAA3(uiSize);
-        MemSetAA3(m_ppkHashTable, 0, m_uiHashSize * sizeof(NiTMapItemAA3*));
-    }
-    virtual ~NiTMapBaseAA3() throw();
+    m_uiHashSize = uiHashSize;
+    m_kItemCount.m_uiCount = 0;
+    unsigned int uiSize = sizeof(EntryType*) * m_uiHashSize;
+    m_ppkHashTable = (EntryType**)NiMallocAA3(uiSize);
+    MemSetAA3(m_ppkHashTable, 0, m_uiHashSize * sizeof(EntryType*));
+}
 
-    unsigned int m_uiHashSize;
-    NiTMapItemAA3** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
+template <>
+__forceinline NiTFixedStringMap<NiGlobalConstantEntry*>::NiTFixedStringMap(unsigned int uiHashSize)
+    : NiTFixedStringMapBase<DFALL<NiTMapItem<NiFixedString, NiGlobalConstantEntry*> >, NiGlobalConstantEntry*>(uiHashSize)
+{}
 
-class NiTStringMapAA3 : public NiTMapBaseAA3
-{
-  public:
-    __forceinline NiTStringMapAA3(unsigned int uiHashSize = 37) throw() : NiTMapBaseAA3(uiHashSize)
-    {}
-    virtual ~NiTStringMapAA3() throw();
-};
-
-class FUN_00aa0390 : public NiRefObjectAA3
+class FUN_00aa0390 : public NiRefObject
 {
   public:
     FUN_00aa0390() throw();
     virtual ~FUN_00aa0390() throw();
 
-    NiTStringMapAA3 m_kFormatEntries;
+    NiTFixedStringMap<NiGlobalConstantEntry*> m_kFormatEntries;
     void* m_pkFirst;
     void* m_pkSecond;
     void* m_pkThird;
@@ -1133,17 +1084,13 @@ bool FileNameComponents::BuildFullPath(char* pcOutPath, unsigned int uiBufferSiz
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 extern "C" char* DAT_0109b220;
 char* __cdecl FUN_00a5b690(const char* pcString);
-struct StringHandleAllocatorAA0
-{
-    void* FUN_00aa3e40(unsigned int uiSize) throw();
-};
-extern StringHandleAllocatorAA0 DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 class FixedStringAA0
 {
   public:
     static void* operator new(unsigned int uiSize) throw()
     {
-        return DAT_011f6238.FUN_00aa3e40(uiSize);
+        return DAT_011f6238.Allocate(uiSize);
     }
     FixedStringAA0() throw()
     {
@@ -1171,7 +1118,7 @@ class FixedStringAA0
     }
     char* m_kHandle;
 };
-class FUN_00aa00d0 : public NiRefObjectAA3
+class FUN_00aa00d0 : public NiRefObject
 {
   public:
     FUN_00aa00d0(const char* pcName, unsigned int uiValue, unsigned int uiSize, const void* pvData) throw();
@@ -1229,18 +1176,14 @@ struct StringMapItemAA0
     FixedStrAA0 m_key;
     void* m_val;
 };
-struct StringMapAllocAA0
-{
-    void FUN_00aa4060(void* p);
-};
-// Resets the key and value of a StringMapItemAA0, runs its destructor, and returns it to the StringMapAllocAA0 allocator.
+// Resets the key and value of a StringMapItemAA0, runs its destructor, and returns it to the memory manager.
 // @fnv 0x00aa0330
 void __stdcall FUN_00aa0330(StringMapItemAA0* pkItem)
 {
     pkItem->m_key = 0;
     pkItem->m_val = 0;
     pkItem->~StringMapItemAA0();
-    ((StringMapAllocAA0*)&DAT_011f6238)->FUN_00aa4060(pkItem);
+    DAT_011f6238.Deallocate(pkItem);
 }
 
 struct ProcessingState
@@ -1467,7 +1410,7 @@ void __cdecl FUN_00aa20b0(void* value)
     {
         if (!existing)
         {
-            void* allocated = DAT_011f6238.FUN_00aa3e40(8);
+            void* allocated = DAT_011f6238.Allocate(8);
             if (allocated)
                 value = ((FUN_00aa2200_shell*)allocated)->FUN_00aa2200();
             else
@@ -1509,11 +1452,6 @@ unsigned int ThreadSuspendForward::FUN_00aa3040()
     return SuspendThreadHandle();
 }
 
-struct Heap
-{
-    void* Allocate(unsigned int);
-};
-
 struct SysInfoQ
 {
     unsigned long dwOemId;
@@ -1534,7 +1472,7 @@ extern void* _DAT_011f6078;
 // @fnv 0x00aa1920
 void __cdecl FUN_00aa1920()
 {
-    unsigned int* p = (unsigned int*)((Heap*)&_g_memoryManager)->Allocate(8);
+    unsigned int* p = (unsigned int*)_g_memoryManager.Allocate(8);
     if (p)
     {
         SysInfoQ sysInfo;

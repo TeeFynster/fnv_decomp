@@ -1,6 +1,7 @@
 // fallout_shared/tesfurniture.cpp: TESFurniture, TESObjectACTI (21 functions)
 
 #include "tesfurniture_tesfurniture.h"
+#include "../../include/FurnitureMark.h"
 
 // @fnv 0x00508f70
 void TESFurniture::ResetFormData()
@@ -136,9 +137,9 @@ NiPoint3 TESFurniture::GetMarkerOffset(unsigned int auMarkerIndex, float afScale
     NiPoint3 offset = NiPoint3::ZERO;
     if (auMarkerIndex > 0 && auMarkerIndex <= 40)
     {
-        offset.x = g_ppFurnitureMarkerOffsetSettings[auMarkerIndex - 1][0]->Float()->f;
-        offset.y = g_ppFurnitureMarkerOffsetSettings[auMarkerIndex - 1][1]->Float()->f;
-        offset.z = g_ppFurnitureMarkerOffsetSettings[auMarkerIndex - 1][2]->Float()->f * (afScale - 1.0f);
+        offset.x = *g_ppFurnitureMarkerOffsetSettings[auMarkerIndex - 1][0]->Float();
+        offset.y = *g_ppFurnitureMarkerOffsetSettings[auMarkerIndex - 1][1]->Float();
+        offset.z = *g_ppFurnitureMarkerOffsetSettings[auMarkerIndex - 1][2]->Float() * (afScale - 1.0f);
     }
     return offset;
 }
@@ -158,11 +159,11 @@ void TESFurniture::InitializeMarkerFlags()
         return;
     if (m_iMarkerCount == 0)
     {
-        if (!FUN_00c54400(Create3DModel(0)))
+        if (!FUN_00c54400(Clone3DAlt(0)))
             Warning("MODELS: No FurnitureMarkers found in '%s'.", GetModelFilePath());
         else
             Warning("MODELS: You have not selected any FurnitureMarkers for '%s'.", GetName());
-        vfn_150(0);
+        Destroy3DModel(0);
     }
 }
 
@@ -174,33 +175,12 @@ int __fastcall FUN_00509490(char* pThis)
     return FUN_009938b0(pThis + 0xc);
 }
 
-struct NiStream;
-struct FurnitureMark
-{
-    unsigned int QNumber();
-    void SetNumber(unsigned int);
-    void* QPosition();
-    void SetPosition(void*);
-    float GetCurrentTargetDistance();
-    void SetFurnitureHeading(float);
-    void LoadBinary(NiStream*);
-    void SaveBinary(NiStream*);
-    void __dflt_ctor_closure();
-    NiPoint3 Position;
-    unsigned short m_usMarkerId;
-    unsigned char m_ucFlags;
-    char _pad_f[1];
-};
 typedef char _sizecheck_FurnitureMark[sizeof(FurnitureMark) == 16 ? 1 : -1];
-struct FUN_005094b0_shell : public FurnitureMark
-{
-    unsigned int FUN_005094b0();
-};
 
 // @fnv 0x005094b0
-unsigned int FUN_005094b0_shell::FUN_005094b0()
+unsigned int FurnitureMark::QNumber()
 {
-    return m_ucFlags;
+    return cMarkerType;
 }
 
 struct DummyArr
@@ -246,7 +226,7 @@ float FUN_005099c0_shell::GetFurnitureHeading(unsigned int aiIndex)
     float fheading = 0.0f;
     if (aiIndex > 0 && aiIndex <= 0x28)
     {
-        fheading = DAT_01189fa4[aiIndex - 1].pHeadingSetting->Float()->f;
+        fheading = *DAT_01189fa4[aiIndex - 1].pHeadingSetting->Float();
     }
     return fheading;
 }

@@ -1,3 +1,4 @@
+#include "../../include/hkArray.h"
 // bshavok/bhkrigidbody_h_unit.cpp: WorldObject (4 functions)
 
 #include "bhkrigidbody.h"
@@ -98,27 +99,16 @@ struct C8F670Pair
     int m_iValue;
 };
 
-template <class T> struct C8F670Array
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    ~C8F670Array() throw()
-    {
         C8F670Allocator& alloc = FUN_00c85750().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-};
+    
+}
 
 class __declspec(novtable) C8F670Object
 {
@@ -139,7 +129,7 @@ class __declspec(novtable) C8F670Object
 
     int unk04;
     int unk08;
-    C8F670Array<C8F670Pair> m_kPairs;
+    hkArray<C8F670Pair> m_kPairs;
 };
 
 // Calls the object's destructor and, when uiFlags has bit 0 set, frees the object, then returns this.

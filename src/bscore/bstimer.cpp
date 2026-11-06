@@ -1,6 +1,6 @@
 // bscore/bstimer.cpp: free functions (4 functions)
 
-#include "GameTimerRecord.h"
+#include "../../include/GameTimerRecord.h"
 
 // The engine tick-count helper lives outside this unit; the PC build resolves
 unsigned int gm_GetTickCount();
@@ -29,18 +29,13 @@ void GameTimerRecord::Update()
     Update(gm_GetTickCount());
 }
 
-struct FUN_00aa4db0_shell : public GameTimerRecord
-{
-    void FUN_00aa4db0(float, bool);
-};
-
 extern float DAT_011ac3a0;
 extern float DAT_011ac3a4;
 
 // @fnv 0x00aa4db0
-void FUN_00aa4db0_shell::FUN_00aa4db0(float afMult, bool abNow)
+void GameTimerRecord::SetGlobalTimeMultiplier(float afMult, bool abNow)
 {
-    bool bUseGlobal = *(bool*)((char*)this + 0x1c);
+    bool bUseGlobal = m_bFirstTimerFlag;
     if (bUseGlobal)
     {
         DAT_011ac3a4 = afMult;
@@ -56,9 +51,9 @@ void FUN_00aa4db0_shell::FUN_00aa4db0(float afMult, bool abNow)
         {
             return;
         }
-        *(float*)((char*)this + 0xc) /= DAT_011ac3a0;
+        fTimeSinceScaleStart /= DAT_011ac3a0;
         DAT_011ac3a0 = afMult;
-        *(float*)((char*)this + 0xc) *= DAT_011ac3a0;
+        fTimeSinceScaleStart *= DAT_011ac3a0;
     }
 }
 
@@ -68,7 +63,7 @@ extern float DAT_011ac3ac;
 
 // Moves DAT_011ac3a0 toward DAT_011ac3a4 by a fraction of DAT_011ac3ac, clamping so it does not overshoot the target.
 // @fnv 0x00aa4e40
-void FUN_00aa4e40()
+void GameTimerRecord::UpdateGlobalTimeMultiplier()
 {
     if (DAT_011ac3a0 < DAT_011ac3a4)
     {

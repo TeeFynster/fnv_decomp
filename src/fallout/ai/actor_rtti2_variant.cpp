@@ -2,27 +2,18 @@
 // polymorphic classes (TESBoundObject). The skeleton of src/fallout/ai/actor.cpp with those classes made polymorphic; move the functions to
 // their real unit once its classes are.
 
-#include "actor_rtti2_actor.h"
+// The legacy utility header has an unguarded smart pointer template.
+#include "mobileobject_topicinfo.h"  // first: its shared headers include <windows.h> before layout_support.h
+#include "layout_support.h"
 
-// Reuse complete component classes when this code is inserted into actor.cpp.
-__if_not_exists(BGSPickupPutdownSounds::BGSPickupPutdownSounds)
-{
-    class BGSPickupPutdownSounds : public BaseFormComponent
-    {
-      public:
-        TESSound* m_pPickupSound;
-        TESSound* m_pPutdownSound;
-    };
-}
-__if_not_exists(BGSEquipType::BGSEquipType)
-{
-    class BGSEquipType : public BaseFormComponent
-    {
-      public:
-        static int GetEquipType(TESForm*);
-        int m_eEquipType;
-    };
-}
+#include "../../../include/MiddleHighProcess.h"
+#include "../../../include/NiCamera.h"
+#include "../../../include/NiControllerSequence.h"
+#include "../../../include/TESBoundObject.h"
+#include "../../../include/BGSEquipType.h"
+#include "../../../include/BGSPickupPutdownSounds.h"
+
+#include "../../../include/Actor.h"
 
 struct PickupSoundActorView : public Actor
 {
@@ -145,7 +136,7 @@ char* __thiscall PickupSoundActorView::FUN_008adcf0(::TESBoundObject* apobjREFR,
                     return ((PickupSoundVirtualView*)((PickupPutdownSoundView*)ppickupPutdownSound)->FUN_0044ddc0())
                         ->s76();
                 }
-                eformType = apobjREFR ? _FNV_GetFormType(apobjREFR) : 0;
+                eformType = apobjREFR ? ::_FNV_GetFormType(apobjREFR) : 0;
                 switch (eformType)
                 {
                 case 0x2f:

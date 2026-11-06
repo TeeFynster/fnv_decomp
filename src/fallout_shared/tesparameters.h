@@ -1,17 +1,10 @@
-// fallout_shared/tesparameters.h: declares ConditionItemData, TESConditionItem, ParamInfo, CommandInfo, ParamTypeInfo and more
+// fallout_shared/tesparameters.h: local script function data and parameter metadata
 #ifndef FNV_TESPARAMETERS_LOCAL_H
 #define FNV_TESPARAMETERS_LOCAL_H
 
-// Community-derived names, not canonical. Declarations represent PC layout.
-class TESGlobal;
-class TESObjectREFR;
 class TESForm;
-class TESFile;
 class Script;
-class TESQuest;
-struct ScriptReferencedObject;
-struct ScriptVariableInfo;
-struct ScriptLocals;
+class ScriptFunctionInfo;
 struct FunctionData
 {
     union Parameter
@@ -23,44 +16,12 @@ struct FunctionData
     unsigned short usFunction;
     Parameter uParam[2];
 };
-struct ConditionItemData
-{
-    signed char ucType;
-    union Comparison
-    {
-        float fValue;
-        TESGlobal* pGlobalForm;
-    } uComparisonValue;
-    FunctionData kFunctionData;
-    unsigned int eRunOn;
-    TESObjectREFR* m_pWorldReferenceInfo;
-};
-class TESConditionItem
-{
-  public:
-    ConditionItemData kData;
-    TESConditionItem* pNext;
-    bool GetValueIsGlobal() const;
-};
+// src: COMMUNITY
 struct ParamInfo
 {
     const char* typeStr;
     unsigned int typeID;
     unsigned int isOptional;
-};
-struct CommandInfo
-{
-    const char* longName;
-    const char* shortName;
-    unsigned int opcode;
-    const char* helpText;
-    unsigned short needsParent;
-    unsigned short numParams;
-    ParamInfo* params;
-    void* execute;
-    void* parse;
-    void* eval;
-    unsigned int flags;
 };
 struct ParamTypeInfo
 {
@@ -82,8 +43,8 @@ extern const char DAT_01069540[];
 extern "C" void* __cdecl __RTDynamicCast(void* source, long vfDelta, void* sourceType, void* targetType,
                                          int isReference);
 int __cdecl Warning(const char* format, ...);
-// Public community name, declared as the original PC command table.
-extern CommandInfo g_scriptCommands[];
+// src: COMMUNITY
+extern ScriptFunctionInfo g_scriptCommands[];
 class ScriptFunctionData
 {
   public:

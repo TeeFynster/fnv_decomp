@@ -8,10 +8,11 @@
 
 #include <math.h>
 #include <xmmintrin.h>
-struct __declspec(align(16)) hkVector4
+// local form of hkVector4: 0x00db4e40 needs the trivial default/copy and reference-returning assignment (shared form: 1207 bytes, exe: 1151).
+struct __declspec(align(16)) SweepVectorLocal_00db4e40
 {
     float x, y, z, w;
-    hkVector4& operator=(const hkVector4& o)
+    SweepVectorLocal_00db4e40& operator=(const SweepVectorLocal_00db4e40& o)
     {
         *(__m128*)this = *(const __m128*)&o;
         return *this;
@@ -30,7 +31,7 @@ struct SweepObj
 {
     void* unk00;
     void* unk04;
-    hkVector4* m_items;
+    SweepVectorLocal_00db4e40* m_items;
     int m_uiItemCount;
     int unk10;
     int unk14;
@@ -46,23 +47,23 @@ struct SweepOut
 {
     float t;
     int unk04, unk08, unk0c;
-    hkVector4 v;
+    SweepVectorLocal_00db4e40 v;
 };
 
 struct SweepState
 {
-    hkVector4 r00, r10, r20, r30, r40, r50, r60, r70, r80, r90, ra0, rb0;
-    hkVector4 n;   // c0
-    hkVector4 o;   // d0
-    hkVector4 c;   // e0
-    hkVector4 a;   // f0
-    hkVector4 b;   // 100
-    hkVector4 oa;  // 110
-    hkVector4 ob;  // 120
+    SweepVectorLocal_00db4e40 r00, r10, r20, r30, r40, r50, r60, r70, r80, r90, ra0, rb0;
+    SweepVectorLocal_00db4e40 n;   // c0
+    SweepVectorLocal_00db4e40 o;   // d0
+    SweepVectorLocal_00db4e40 c;   // e0
+    SweepVectorLocal_00db4e40 a;   // f0
+    SweepVectorLocal_00db4e40 b;   // 100
+    SweepVectorLocal_00db4e40 oa;  // 110
+    SweepVectorLocal_00db4e40 ob;  // 120
 };
 
 void __cdecl FUN_00db4b50(SweepObj* obj, float t, SweepState* st);
-float __cdecl FUN_00db4ca0(SweepObj* obj, float* p, hkVector4* v, float a, float b, float c, float d, float e,
+float __cdecl FUN_00db4ca0(SweepObj* obj, float* p, SweepVectorLocal_00db4e40* v, float a, float b, float c, float d, float e,
                            SweepOut* out);
 
 static inline __m128 Cross(const __m128& a, const __m128& b)
@@ -101,9 +102,9 @@ void __cdecl FUN_00db4e40(SweepObj* obj, float* p, SweepOut* out)
         SweepState st;
         FUN_00db4b50(obj, tCur, &st);
         int i = *(volatile int*)&num;
-        hkVector4* it = obj->m_items;
+        SweepVectorLocal_00db4e40* it = obj->m_items;
         float dt = tEnd - tCur;
-        hkVector4* dst = it;
+        SweepVectorLocal_00db4e40* dst = it;
         num = 0;
         float margin = obj->m_44 * dt;
         float tNext = tEnd;
@@ -141,7 +142,7 @@ void __cdecl FUN_00db4e40(SweepObj* obj, float* p, SweepOut* out)
             }
             else
             {
-                hkVector4 tmp = *it;
+                SweepVectorLocal_00db4e40 tmp = *it;
                 *it = *dst;
                 *dst = tmp;
                 dst->w = dist;

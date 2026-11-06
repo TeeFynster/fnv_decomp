@@ -1,14 +1,11 @@
+#include "../../../include/TES.h"
+#include "../../../include/Actor.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/LoadedAreaBound.h"
 
 // src/havok/unplaced/loadedareabound.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/loadedareabound.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-
-struct LoadedAreaBound
-{
-    virtual ~LoadedAreaBound();
-    void FUN_006270f0();
-    void* FUN_006270c0(unsigned int flags);
-    static void operator delete(void* p, size_t size);
-};
 
 // Calls FUN_006270f0, then deletes this with size 0x44 when flags has bit 0 set, and returns this.
 // @fnv 0x006270c0
@@ -20,13 +17,6 @@ void* LoadedAreaBound::FUN_006270c0(unsigned int flags)
     return this;
 }
 
-struct Point3
-{
-    float x;
-    float y;
-    float z;
-};
-struct Actor;
 struct Refr;
 struct ObjA
 {
@@ -382,165 +372,6 @@ struct Proc
     virtual Refr* v514();
     Refr* FUN_0045cd60();
 };
-struct Actor : Refr
-{
-    int FUN_00575ca0();
-    virtual void vtbl000();
-    virtual void vtbl001();
-    virtual void vtbl002();
-    virtual void vtbl003();
-    virtual void vtbl004();
-    virtual void vtbl005();
-    virtual void vtbl006();
-    virtual void vtbl007();
-    virtual void vtbl008();
-    virtual void vtbl009();
-    virtual void vtbl010();
-    virtual void vtbl011();
-    virtual void vtbl012();
-    virtual void vtbl013();
-    virtual void vtbl014();
-    virtual void vtbl015();
-    virtual void vtbl016();
-    virtual void vtbl017();
-    virtual void vtbl018();
-    virtual void vtbl019();
-    virtual void vtbl020();
-    virtual void vtbl021();
-    virtual void vtbl022();
-    virtual void vtbl023();
-    virtual void vtbl024();
-    virtual void vtbl025();
-    virtual void vtbl026();
-    virtual void vtbl027();
-    virtual void vtbl028();
-    virtual void vtbl029();
-    virtual void vtbl030();
-    virtual void vtbl031();
-    virtual void vtbl032();
-    virtual void vtbl033();
-    virtual void vtbl034();
-    virtual void vtbl035();
-    virtual void vtbl036();
-    virtual void vtbl037();
-    virtual void vtbl038();
-    virtual void vtbl039();
-    virtual void vtbl040();
-    virtual void vtbl041();
-    virtual void vtbl042();
-    virtual void vtbl043();
-    virtual void vtbl044();
-    virtual void vtbl045();
-    virtual void vtbl046();
-    virtual void vtbl047();
-    virtual void vtbl048();
-    virtual void vtbl049();
-    virtual void vtbl050();
-    virtual void vtbl051();
-    virtual void vtbl052();
-    virtual void vtbl053();
-    virtual void vtbl054();
-    virtual void vtbl055();
-    virtual void vtbl056();
-    virtual void vtbl057();
-    virtual void vtbl058();
-    virtual void vtbl059();
-    virtual void vtbl060();
-    virtual void vtbl061();
-    virtual void vtbl062();
-    virtual void vtbl063();
-    virtual bool v100();
-    virtual void vtbl065();
-    virtual void vtbl066();
-    virtual void vtbl067();
-    virtual void vtbl068();
-    virtual void vtbl069();
-    virtual void vtbl070();
-    virtual void vtbl071();
-    virtual void vtbl072();
-    virtual void vtbl073();
-    virtual void vtbl074();
-    virtual void vtbl075();
-    virtual void vtbl076();
-    virtual void vtbl077();
-    virtual void vtbl078();
-    virtual void vtbl079();
-    virtual void vtbl080();
-    virtual void vtbl081();
-    virtual void vtbl082();
-    virtual void vtbl083();
-    virtual void vtbl084();
-    virtual void vtbl085();
-    virtual void vtbl086();
-    virtual void vtbl087();
-    virtual void vtbl088();
-    virtual void vtbl089();
-    virtual void vtbl090();
-    virtual void vtbl091();
-    virtual void vtbl092();
-    virtual void vtbl093();
-    virtual void vtbl094();
-    virtual void vtbl095();
-    virtual void vtbl096();
-    virtual void vtbl097();
-    virtual void vtbl098();
-    virtual void vtbl099();
-    virtual void vtbl100();
-    virtual void vtbl101();
-    virtual void vtbl102();
-    virtual void vtbl103();
-    virtual void vtbl104();
-    virtual void vtbl105();
-    virtual void vtbl106();
-    virtual void vtbl107();
-    virtual void vtbl108();
-    virtual void vtbl109();
-    virtual void vtbl110();
-    virtual void vtbl111();
-    virtual void vtbl112();
-    virtual void vtbl113();
-    virtual void vtbl114();
-    virtual void vtbl115();
-    virtual int v1d0();
-    virtual void vtbl117();
-    virtual void vtbl118();
-    virtual void vtbl119();
-    virtual void vtbl120();
-    virtual void vtbl121();
-    virtual void vtbl122();
-    virtual void vtbl123();
-    virtual void vtbl124();
-    virtual Point3* v1f4();
-    virtual void vtbl126();
-    virtual void vtbl127();
-    virtual void v200(int a);
-    virtual void vtbl129();
-    virtual void vtbl130();
-    virtual void vtbl131();
-    virtual void vtbl132();
-    virtual int v214();
-    virtual bool v218();
-    virtual void vtbl135();
-    virtual void vtbl136();
-    virtual void vtbl137();
-    virtual void vtbl138();
-    virtual bool v22c(int flags);
-    bool FUN_004938e0();
-    bool FUN_008a3b30();
-    Proc* FUN_008d8520();
-    void FUN_008c3c40(int a, int b);
-    Refr* FUN_00886080();
-    Refr* FUN_00881650();
-    struct Pkg* FUN_009344a0();
-    Refr* FUN_00569b80();
-    bool FUN_00579670();
-    void* FUN_00891d30();
-    bool FUN_008a7870();
-    bool FUN_0088d2f0(Refr* r, int a, int b, bool c);
-    void* FUN_008d6f30();
-    void FUN_00575830(Point3* p);
-    void FUN_00562020();
-};
 struct Pkg
 {
     virtual void vtbl000();
@@ -637,11 +468,6 @@ struct MgrNode
     void FUN_00905330(Refr** pp);
     MgrNode* FUN_00726070();
 };
-struct TES
-{
-    MgrNode* FUN_0055ac00();
-    void ClearList();
-};
 struct IOMgr
 {
     void FUN_00c3dfa0(int a);
@@ -649,7 +475,7 @@ struct IOMgr
 extern TES* DAT_011dea10;
 extern IOMgr* DAT_01202d98;
 void* __fastcall FUN_00575d70(Actor* a);
-void __cdecl FUN_006d6f80(void* a, void* b, Point3* c, Point3* d);
+void __cdecl FUN_006d6f80(void* a, void* b, NiPoint3* c, NiPoint3* d);
 struct ThisCls
 {
     int m_00;
@@ -678,39 +504,39 @@ void ThisCls::FUN_00972d30()
                 j = 0;
                 if (!!b)
                 {
-                    if (b->v100())
+                    if (b->IsActor())
                         j = b;
                 }
                 if (j != 0)
                 {
-                    if (!j->v22c(0))
+                    if (!j->HasHealth(false))
                     {
-                        if (j->v218())
+                        if (j->IsCharacter())
                         {
                             if (!j->FUN_004938e0())
                             {
                                 if (!j->FUN_008a3b30())
                                 {
-                                    if (j->v214() == 0)
+                                    if (j->GetSitSleepState() == 0)
                                     {
-                                        if (j->FUN_008d8520()->FUN_0045cd60() != 0)
+                                        if (((Proc*)j->FUN_008d8520())->FUN_0045cd60() != 0)
                                             continue;
                                         {
                                             j->FUN_008c3c40(0, 0);
-                                            int pObj4 = j->FUN_00575ca0();
+                                            int pObj4 = (int)j->FUN_00575ca0();
                                             Refr* accepted = 0;
                                             bool visible = false;
                                             bool _x = false;
                                             Refr* refr38;
                                             Refr* found = j->FUN_00886080();
                                             refr38 = j->FUN_00881650();
-                                            Pkg* tmp26 = j->FUN_009344a0();
+                                            Pkg* tmp26 = (Pkg*)j->FUN_009344a0();
                                             if (!!tmp26)
                                             {
                                                 if (tmp26->FUN_0041ca90() == 13)
                                                 {
                                                     Obj44* p5c;
-                                                    p5c = j->FUN_008d8520()->v274();
+                                                    p5c = ((Proc*)j->FUN_008d8520())->v274();
                                                     if (0 != p5c)
                                                     {
                                                         if (p5c->v008() == 13)
@@ -728,14 +554,14 @@ void ThisCls::FUN_00972d30()
                                             if (found != 0)
                                             {
                                                 if (found->FUN_00678ca0() == 6)
-                                                    q = j->FUN_00569b80();
+                                                    q = (Refr*)j->FUN_00569b80();
                                             }
                                             if (!q)
                                             {
-                                                q = j->FUN_008d8520() ? j->FUN_008d8520()->v514() : 0;
+                                                q = j->FUN_008d8520() ? ((Proc*)j->FUN_008d8520())->v514() : 0;
                                             }
                                             long _object;
-                                            _object = j->FUN_008d8520()->v4d4();
+                                            _object = ((Proc*)j->FUN_008d8520())->v4d4();
                                             unsigned int idx13 = -1;
                                             if (refr38 != 0 && refr38->FUN_00568680() &&
                                                 refr38->FUN_00575ca0() == pObj4)
@@ -769,7 +595,7 @@ void ThisCls::FUN_00972d30()
                                             {
                                                 if (!j->FUN_00579670())
                                                 {
-                                                    j->FUN_008d8520()->v284(1);
+                                                    ((Proc*)j->FUN_008d8520())->v284(1);
                                                 }
                                                 while (0 != iter && !iter->FUN_008256d0() && accepted == 0)
                                                 {
@@ -810,8 +636,8 @@ void ThisCls::FUN_00972d30()
                                                 {
                                                     if (!j->FUN_008a7870())
                                                     {
-                                                        j->FUN_008d8520()->v288(j, 1);
-                                                        j->v200(1);
+                                                        ((Proc*)j->FUN_008d8520())->v288(j, 1);
+                                                        j->Unk_80(1);
                                                     }
                                                     while (iter != 0 && !iter->FUN_008256d0() && accepted == 0)
                                                     {
@@ -847,15 +673,15 @@ void ThisCls::FUN_00972d30()
                                                     }
                                                 }
                                             }
-                                            if (accepted != 0 && j->v1d0() != 0)
+                                            if (accepted != 0 && j->GetNiNode() != 0)
                                             {
                                                 resultFlag = j->FUN_0088d2f0(accepted, _object, idx13, visible);
                                             }
                                             else if (_x)
                                             {
-                                                Point3* _origin;
-                                                _origin = j->v1f4();
-                                                Point3 pt = *_origin;
+                                                NiPoint3* _origin;
+                                                _origin = (NiPoint3*)static_cast<const MobileObject*>(j)->GetPos();
+                                                NiPoint3 pt = *_origin;
                                                 FUN_006d6f80(FUN_00575d70(j), j->FUN_008d6f30(), _origin, &pt);
                                                 j->FUN_00575830(&pt);
                                                 j->FUN_00562020();
@@ -888,75 +714,6 @@ struct CF845
     CF845(void* p);
     int FUN_0043b4d0();
     int unk;
-};
-
-struct TESObjectREFR
-{
-    virtual void vtbl000();
-    virtual void vtbl001();
-    virtual void vtbl002();
-    virtual void vtbl003();
-    virtual void vtbl004();
-    virtual void vtbl005();
-    virtual void vtbl006();
-    virtual void vtbl007();
-    virtual void vtbl008();
-    virtual void vtbl009();
-    virtual void vtbl010();
-    virtual void vtbl011();
-    virtual void vtbl012();
-    virtual void vtbl013();
-    virtual void vtbl014();
-    virtual void vtbl015();
-    virtual void vtbl016();
-    virtual void vtbl017();
-    virtual void vtbl018();
-    virtual void vtbl019();
-    virtual void vtbl020();
-    virtual void vtbl021();
-    virtual void vtbl022();
-    virtual void vtbl023();
-    virtual void vtbl024();
-    virtual void vtbl025();
-    virtual void vtbl026();
-    virtual void vtbl027();
-    virtual void vtbl028();
-    virtual void vtbl029();
-    virtual void vtbl030();
-    virtual void vtbl031();
-    virtual void vtbl032();
-    virtual void vtbl033();
-    virtual void vtbl034();
-    virtual void vtbl035();
-    virtual void vtbl036();
-    virtual void vtbl037();
-    virtual void vtbl038();
-    virtual void vtbl039();
-    virtual void vtbl040();
-    virtual void vtbl041();
-    virtual void vtbl042();
-    virtual void vtbl043();
-    virtual void vtbl044();
-    virtual void vtbl045();
-    virtual void vtbl046();
-    virtual void vtbl047();
-    virtual void vtbl048();
-    virtual void vtbl049();
-    virtual void vtbl050();
-    virtual void vtbl051();
-    virtual void vtbl052();
-    virtual void vtbl053();
-    virtual void vtbl054();
-    virtual void vtbl055();
-    virtual void vtbl056();
-    virtual void vtbl057();
-    virtual void vtbl058();
-    virtual void vtbl059();
-    virtual void vtbl060();
-    virtual void vtbl061();
-    virtual void vtbl062();
-    virtual void vtbl063();
-    virtual bool vfunc_0x100();
 };
 
 TESObjectREFR* __cdecl FUN_0062b4e0(void* p);
@@ -1041,7 +798,7 @@ void FUN_00628df0_class::FUN_00628df0(Arg1* a1, Arg2* apItems, Arg3* apTarget)
                 if (filter.FUN_0043b4d0() == 0x1e)
                 {
                     TESObjectREFR* refr = FUN_0062b4e0(p38);
-                    if (refr && refr->vfunc_0x100())
+                    if (refr && refr->IsActor())
                     {
                         TESObjectREFR* pRefr = refr;
                         this->FUN_006295e0(pRefr);

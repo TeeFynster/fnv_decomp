@@ -1,6 +1,17 @@
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit defines its own form
 
 // src/havok/common/base/math/swepttransform/hkswepttransformutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/math/swepttransform/hkswepttransformutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/NiBinaryStream.h"
+#include "../../../../../../include/V4.h"
+#include "../../../../../../include/hkSimdReal.h"
+#include "../../../../../../include/hkMatrix3.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkQuaternion.h"
+#include "../../../../../../include/hkSweptTransform.h"
+#include "../../../../../../include/hkVector4.h"
 
 // @fnv 0x00cf1480
 void FUN_00cf1480(float afValue1, float afValue2, int* piTarget)
@@ -9,27 +20,16 @@ void FUN_00cf1480(float afValue1, float afValue2, int* piTarget)
     *reinterpret_cast<float*>(piTarget + 23) = afValue2;
 }
 
-struct S_00cf10f0_BinaryStream;
-typedef unsigned int(__cdecl* S_00cf10f0_ReadFn)(S_00cf10f0_BinaryStream* pkThis, void* pvBuffer, unsigned int uiBytes,
-                                                 unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-struct S_00cf10f0_BinaryStream
+inline unsigned int NiBinaryStream::BinaryRead(void* pvBuffer, unsigned int uiTotalBytes,
+                                              unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-    void* vtbl;
-    unsigned int m_uiStreamFlags;
-    S_00cf10f0_ReadFn m_pfnRead;
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
+    unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    m_uiAbsoluteCurrentPos += uiBytesRead;
+    return uiBytesRead;
+}
 
 template <class T>
-inline void S_00cf10f0_BinaryStreamLoad(S_00cf10f0_BinaryStream& kStream, T* pValue, unsigned int uiNumEls)
+inline void BinaryStreamLoad(NiBinaryStream& kStream, T* pValue, unsigned int uiNumEls)
 {
     unsigned int uiComponentSize = sizeof(T);
     kStream.BinaryRead(pValue, uiNumEls * sizeof(T), &uiComponentSize, 1);
@@ -184,7 +184,7 @@ struct S_00cf10f0_Stream
     int unk240;
     int unk244;
     int unk248;
-    S_00cf10f0_BinaryStream* unk24c;
+    NiBinaryStream* unk24c;
 };
 
 struct S_00cf10f0_Tls
@@ -380,34 +380,10 @@ struct S_00cf10f0_Ctx
     }
 };
 
-struct S_00cf10f0_Heap
-{
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    virtual void vfn_0c();
-    virtual void vfn_10(void* p, int bytes) throw();
-    __forceinline void ReturnMemory(void* p, int bytes) throw()
-    {
-        vfn_10(p, bytes);
-    }
-};
-struct S_00cf10f0_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00cf10f0_Heap* m10;
-    __forceinline S_00cf10f0_Heap& heap()
-    {
-        return *m10;
-    }
-};
-S_00cf10f0_Router* FUN_00c85750() throw();
+hkMemoryRouter* FUN_00c85750() throw();
 
 struct S_00cf10f0_Arr4;
-void __cdecl FUN_00c908c0(S_00cf10f0_Heap* heap, S_00cf10f0_Arr4* arr, int n, int elemSize);
+void __cdecl FUN_00c908c0(hkMemoryAllocator* heap, S_00cf10f0_Arr4* arr, int n, int elemSize);
 
 struct S_00cf10f0_Arr4
 {
@@ -416,7 +392,7 @@ struct S_00cf10f0_Arr4
     int m_cap;
     __forceinline void reserve(int n) throw()
     {
-        S_00cf10f0_Heap& h = FUN_00c85750()->heap();
+        hkMemoryAllocator& h = FUN_00c85750()->heap();
         int cap = m_cap & 0x3fffffff;
         if (cap < n)
             FUN_00c908c0(&h, this, (n < cap * 2) ? cap * 2 : n, 4);
@@ -426,12 +402,12 @@ struct S_00cf10f0_Arr4
         reserve(n);
         m_iElementCount = n;
     }
-    __forceinline void _clearAndDeallocate(S_00cf10f0_Heap& h) throw()
+    __forceinline void _clearAndDeallocate(hkMemoryAllocator& h) throw()
     {
         int cap = m_cap;
         m_iElementCount = 0;
         if ((cap & 0x80000000) == 0)
-            h.ReturnMemory(m_data, (cap & 0x3fffffff) * 4);
+            h.bufFree(m_data, (cap & 0x3fffffff) * 4);
         m_data = 0;
         m_cap = 0x80000000;
     }
@@ -443,30 +419,16 @@ int __cdecl LoadIntArray(S_00cf10f0_Stream* kStream, S_00cf10f0_Arr4* pArray)
 {
     S_00cf10f0_Ctx guard(0x10);
     int n = 0;
-    S_00cf10f0_BinaryStreamLoad(*kStream->unk24c, &n, 1);
+    BinaryStreamLoad(*kStream->unk24c, &n, 1);
     pArray->_clearAndDeallocate(FUN_00c85750()->heap());
     pArray->SetSizeAndGrow(n);
     int bytes = n * 4;
     for (int iIndex = 0; iIndex < n; iIndex++)
-        S_00cf10f0_BinaryStreamLoad(*kStream->unk24c, &pArray->m_data[iIndex], 1);
+        BinaryStreamLoad(*kStream->unk24c, &pArray->m_data[iIndex], 1);
     return bytes;
 }
 
 namespace fnv_00cf1270 {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-
-extern "C" __m128 _mm_setzero_ps(void);
 extern "C" unsigned long __cdecl _byteswap_ulong(unsigned long value);
 
 extern __declspec(thread) unsigned int g_uiHeapContext;
@@ -485,64 +447,13 @@ struct HeapContextGuard
     }
 };
 
-struct hkMemoryAllocator
+__declspec(nothrow) hkMemoryRouter* __cdecl FUN_00c85750();
+inline hkMemoryRouter* audio()
 {
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-};
-
-struct AudioMgr
-{
-    int unk00, unk04, unk08;
-    hkMemoryAllocator* unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-
-struct BSAudio;
-__declspec(nothrow) BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
-{
-    return (AudioMgr*)FUN_00c85750();
+    return FUN_00c85750();
 }
 
 __declspec(nothrow) void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
-
-struct NiBinaryStreamStandIn
-{
-    void* vtable;
-    unsigned int absolutePosition;
-    unsigned int(__cdecl* read)(NiBinaryStreamStandIn* stream, void* buffer, unsigned int totalBytes,
-                                unsigned int* componentSizes, unsigned int componentCount);
-
-    unsigned int BinaryRead(void* buffer, unsigned int totalBytes, unsigned int* componentSizes,
-                            unsigned int componentCount)
-    {
-        unsigned int bytesRead = read(this, buffer, totalBytes, componentSizes, componentCount);
-        absolutePosition += bytesRead;
-        return bytesRead;
-    }
-    template <class T> unsigned int Read(T* value)
-    {
-        unsigned int size = sizeof(T);
-        return BinaryRead(value, sizeof(T), &size, 1);
-    }
-    template <class T> unsigned int Read(T* array, unsigned int count)
-    {
-        unsigned int size = sizeof(T);
-        return BinaryRead(array, sizeof(T) * count, &size, 1);
-    }
-    unsigned int ReadRaw(void* buffer, unsigned int bytes)
-    {
-        return BinaryRead(buffer, bytes, 0, 0);
-    }
-};
 
 struct BlobStream
 {
@@ -552,7 +463,7 @@ struct BlobStream
     char pad1dc[9];
     unsigned char unk1e5;
     char pad1e6[0x66];
-    NiBinaryStreamStandIn* istr;
+    NiBinaryStream* istr;
 };
 
 extern char DAT_0102e368[];
@@ -562,8 +473,8 @@ struct __declspec(align(16)) BlobVec
     unsigned int x, y, z, w;
 };
 
-struct ByteArray
-{
+struct ByteArrayLocalForm
+{ // local form of hkArray: 0x00cf1270 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     char* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -602,7 +513,7 @@ struct BlobObject
     int unk08;
     int unk0c;
     BlobVec m_kHeader;
-    ByteArray m_data;
+    ByteArrayLocalForm m_data;
     unsigned char unk2c;
 
     void Init()
@@ -620,22 +531,22 @@ struct BlobObject
 int __cdecl ReadBlobObject(BlobStream* stream, BlobObject** ppOut)
 {
     HeapContextGuard guard(0x10);
-    BlobObject* obj = (BlobObject*)audio()->heap().AllocateMemoryBlock(0x30);
+    BlobObject* obj = (BlobObject*)audio()->heap().blockAlloc(0x30);
     obj->Init();
     *ppOut = obj;
     int count = 0;
-    stream->istr->Read(&count);
-    stream->istr->ReadRaw(&(*ppOut)->m_kHeader, 0x10);
+    BinaryStreamLoad(*stream->istr, &count, 1);
+    stream->istr->BinaryRead(&(*ppOut)->m_kHeader, 0x10, static_cast<unsigned int*>(0), 0);
     if (stream->unk04 < 6 && count)
     {
         count -= 0x30;
         int skip[8];
-        stream->istr->Read(skip, 8);
+        BinaryStreamLoad(*stream->istr, skip, 8);
     }
     if (count)
     {
         (*ppOut)->m_data.SetSizeAndGrow(count);
-        stream->istr->ReadRaw((*ppOut)->m_data.m_data, count);
+        stream->istr->BinaryRead((*ppOut)->m_data.m_data, count, static_cast<unsigned int*>(0), 0);
     }
     if (stream->unk1e5 != 1)
     {
@@ -657,7 +568,6 @@ int __cdecl FUN_00cf2160(unsigned int uiValue, unsigned int arg1)
     return (int)callResult0;
 }
 
-#include <xmmintrin.h>
 struct F4
 {
     float x, y, z, w;
@@ -732,11 +642,6 @@ __forceinline void normalize4(__m128& q)
     nr = _mm_andnot_ps(eq, nr);
     q = _mm_mul_ps(q, _mm_shuffle_ps(nr, nr, 0));
 }
-
-struct V4
-{
-    __m128 q;
-};
 
 struct FUN_008cd6a0_Class
 {
@@ -960,82 +865,53 @@ void __cdecl FUN_00cf1f80(const __m128& apTranslation, const __m128& second, Obj
 extern double DAT_010924a8;
 extern double DAT_01016ff0;
 
-struct VectorComponentValue
+// Inline implementations retained here to preserve this unit's instruction sequences.
+__forceinline hkSimdReal::hkSimdReal(float f)
 {
-    __m128 m_vValue;
-    __forceinline VectorComponentValue(float f)
-    {
-        m_vValue = _mm_load_ss(&f);
-    }
-    __forceinline __m128 broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-    __forceinline VectorComponentValue(__m128 q) : m_vValue(q)
-    {}
-};
+    m_vValue = _mm_load_ss(&f);
+}
+__forceinline __m128 hkSimdReal::broadcast() const
+{
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+__forceinline hkSimdReal::hkSimdReal(const __m128& q) : m_vValue(q)
+{}
 
-struct hkVector4
+__forceinline void hkVector4::setAdd4(const hkVector4& a, const hkVector4& b)
 {
-    union
-    {
-        __m128 m_vComponents;
-        float m_f[4];
-    };
-    __forceinline void setAdd4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void mul4(const VectorComponentValue& s)
-    {
-        m_vComponents = _mm_mul_ps(s.broadcast(), m_vComponents);
-    }
-    __forceinline void setMul4(const VectorComponentValue& s, const hkVector4& v)
-    {
-        m_vComponents = _mm_mul_ps(s.broadcast(), v.m_vComponents);
-    }
-    __forceinline void sub4(const hkVector4& v)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline float lengthSquared4() const
-    {
-        __m128 l = _mm_mul_ps(m_vComponents, m_vComponents);
-        l = _mm_add_ps(_mm_shuffle_ps(l, l, 0x4e), l);
-        l = _mm_add_ps(_mm_shuffle_ps(l, l, 0xb1), l);
-        float r;
-        _mm_store_ss(&r, l);
-        return r;
-    }
-    __forceinline void setInterpolate4(const hkVector4& a, const hkVector4& b, const VectorComponentValue& t)
-    {
-        __m128 av = a.m_vComponents;
-        __m128 weight = t.broadcast();
-        __m128 rest = _mm_sub_ps(_mm_load_ps(DAT_010ec7f0), weight);
-        m_vComponents = _mm_add_ps(_mm_mul_ps(rest, av), _mm_mul_ps(weight, b.m_vComponents));
-    }
-    __forceinline void normalize4()
-    {
-        __m128 l = _mm_mul_ps(m_vComponents, m_vComponents);
-        l = _mm_add_ps(_mm_shuffle_ps(l, l, 0x4e), l);
-        l = _mm_add_ps(_mm_shuffle_ps(l, l, 0xb1), l);
-        __m128 e = _mm_rsqrt_ss(l);
-        __m128 isZero = _mm_cmpeq_ss(l, _mm_set_ss(DAT_01011d78));
-        __m128 three = _mm_sub_ss(_mm_set_ss(DAT_01017718), _mm_mul_ss(_mm_mul_ss(l, e), e));
-        __m128 inv = _mm_andnot_ps(isZero, _mm_mul_ss(_mm_mul_ss(_mm_set_ss(DAT_01016248), e), three));
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(inv, inv, 0), m_vComponents);
-    }
-};
-
-struct hkQuaternion
+    m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
+}
+__forceinline void hkVector4::setMul4(const hkSimdReal& s, const hkVector4& v)
 {
-    hkVector4 m_vec;
-};
-
-struct hkMatrix3
+    m_vComponents = _mm_mul_ps(s.broadcast(), v.m_vComponents);
+}
+__forceinline float hkVector4::lengthSquared4() const
 {
-    hkVector4 m_kColumn0, m_kColumn1, m_kColumn2;
-};
+    __m128 l = _mm_mul_ps(m_vComponents, m_vComponents);
+    l = _mm_add_ps(_mm_shuffle_ps(l, l, 0x4e), l);
+    l = _mm_add_ps(_mm_shuffle_ps(l, l, 0xb1), l);
+    float r;
+    _mm_store_ss(&r, l);
+    return r;
+}
+__forceinline void hkVector4::setInterpolate4(const hkVector4& a, const hkVector4& b, const hkSimdReal& t)
+{
+    __m128 av = a.m_vComponents;
+    __m128 weight = t.broadcast();
+    __m128 rest = _mm_sub_ps(_mm_load_ps(DAT_010ec7f0), weight);
+    m_vComponents = _mm_add_ps(_mm_mul_ps(rest, av), _mm_mul_ps(weight, b.m_vComponents));
+}
+__forceinline void hkVector4::normalize4()
+{
+    __m128 l = _mm_mul_ps(m_vComponents, m_vComponents);
+    l = _mm_add_ps(_mm_shuffle_ps(l, l, 0x4e), l);
+    l = _mm_add_ps(_mm_shuffle_ps(l, l, 0xb1), l);
+    __m128 e = _mm_rsqrt_ss(l);
+    __m128 isZero = _mm_cmpeq_ss(l, _mm_set_ss(DAT_01011d78));
+    __m128 three = _mm_sub_ss(_mm_set_ss(DAT_01017718), _mm_mul_ss(_mm_mul_ss(l, e), e));
+    __m128 inv = _mm_andnot_ps(isZero, _mm_mul_ss(_mm_mul_ss(_mm_set_ss(DAT_01016248), e), three));
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(inv, inv, 0), m_vComponents);
+}
 
 __forceinline void SetRotatedDirection(hkVector4& out, const hkMatrix3& r, const hkVector4& v)
 {
@@ -1045,23 +921,6 @@ __forceinline void SetRotatedDirection(hkVector4& out, const hkMatrix3& r, const
     out.m_vComponents =
         _mm_add_ps(x, _mm_mul_ps(_mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xaa), r.m_kColumn2.m_vComponents));
 }
-
-struct __declspec(align(16)) hkVector4L
-{
-    float x, y, z, w;
-    __m128 Vector4f() const
-    {
-        return _mm_load_ps(&x);
-    }
-};
-struct hkSweptTransform
-{
-    hkVector4L m_vCenterOfMass0;
-    hkVector4L m_vCenterOfMass1;
-    hkVector4L m_qRotation0;
-    hkVector4L m_qRotation1;
-    hkVector4L m_vCenterOfMassLocal;
-};
 
 struct OutputArg
 {
@@ -1073,42 +932,42 @@ struct OutputArg
 // @fnv 0x00cf1920
 void __cdecl FUN_00cf1920(const hkSweptTransform* sweptTrans, float afTime, FUN_008cd6a0_Class* apTransform, ...)
 {
-    hkQuaternion qResult;
+    hkVector4 qResult;
     {
-        hkQuaternion q0;
-        q0.m_vec.m_vComponents = sweptTrans->m_qRotation0.Vector4f();
-        hkQuaternion q1;
-        q1.m_vec.m_vComponents = sweptTrans->m_qRotation1.Vector4f();
-        qResult.m_vec.setAdd4(q0.m_vec, q1.m_vec);
-        float fLengthSquared = qResult.m_vec.lengthSquared4();
+        hkVector4 q0;
+        q0.m_vComponents = reinterpret_cast<const hkVector4&>(sweptTrans->m_qRotation0).m_vComponents;
+        hkVector4 q1;
+        q1.m_vComponents = reinterpret_cast<const hkVector4&>(sweptTrans->m_qRotation1).m_vComponents;
+        qResult.setAdd4(q0, q1);
+        float fLengthSquared = qResult.lengthSquared4();
         float r = (float)(0.75 - DAT_010924a8 * fLengthSquared);
         r = (float)(r * (DAT_01016ff0 - 0.5 * fLengthSquared * r * r));
         hkVector4 qhalf;
-        qhalf.setMul4(r, qResult.m_vec);
+        qhalf.setMul4(hkSimdReal(r), qResult);
         if (afTime < 0.5f)
         {
-            qResult.m_vec.setInterpolate4(q0.m_vec, qhalf, afTime + afTime);
+            qResult.setInterpolate4(q0, qhalf, afTime + afTime);
         }
         else
         {
-            qResult.m_vec.setInterpolate4(qhalf, q1.m_vec, (float)(afTime + afTime - 1.0));
+            qResult.setInterpolate4(qhalf, q1, (float)(afTime + afTime - 1.0));
         }
-        qResult.m_vec.normalize4();
+        qResult.normalize4();
     }
     FUN_008cd6a0_Class* pTransform = apTransform;
     pTransform->FUN_00cb2d90(&qResult);
 
     hkVector4& vTranslation = *((hkVector4*)&pTransform->translation);
     __m128 vTimeWeight = _mm_load_ss(&afTime);
-    __m128 vStartPosition = sweptTrans->m_vCenterOfMass0.Vector4f();
+    __m128 vStartPosition = sweptTrans->m_vCenterOfMass0.m_vComponents;
     __m128 vOnes = _mm_load_ps(DAT_010ec7f0);
     vTimeWeight = _mm_shuffle_ps(vTimeWeight, vTimeWeight, 0);
     __m128 vStartTerm = _mm_mul_ps(_mm_sub_ps(vOnes, vTimeWeight), vStartPosition);
-    __m128 vEndTerm = _mm_mul_ps(sweptTrans->m_vCenterOfMass1.Vector4f(), vTimeWeight);
+    __m128 vEndTerm = _mm_mul_ps(sweptTrans->m_vCenterOfMass1.m_vComponents, vTimeWeight);
     vTranslation.m_vComponents = _mm_add_ps(vStartTerm, vEndTerm);
     hkVector4 vCenterShift;
     hkVector4 vCenterLocal;
-    vCenterLocal.m_vComponents = sweptTrans->m_vCenterOfMassLocal.Vector4f();
+    vCenterLocal.m_vComponents = sweptTrans->m_vCenterOfMassLocal.m_vComponents;
     SetRotatedDirection(vCenterShift, *(hkMatrix3*)&pTransform->col0, vCenterLocal);
     ((hkVector4*)&pTransform->translation)->sub4(vCenterShift);
 }

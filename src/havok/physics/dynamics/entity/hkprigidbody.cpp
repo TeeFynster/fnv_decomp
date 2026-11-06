@@ -1,7 +1,39 @@
-
+#include "../../../../../include/hkArray.h"
 // src/havok/physics/dynamics/entity/hkprigidbody.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/entity/hkprigidbody.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkStringPtr.h"
+#include "../../../../../include/hkpEntity.h"
+#include "../../../../../include/hkpMotion.h"
+#include "../../../../../include/hkpCollidable.h"
+#include "../../../../../include/hkpRigidBody.h"
+#include "../../../../../include/NiPoint3.h"
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkRotation.h"
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkpShape.h"
+#include "../../../../../include/hkpShapeContainer.h"
+#include "../../../../../include/hkpShapeCollection.h"
+#include "../../../../../include/hkpWorld.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+
+// The approved router header declares heap() out of line. Preserve the inline accessor here.
+__forceinline hkMemoryAllocator& heapAllocator(hkMemoryRouter& router)
+{
+    return *router.m_heap;
+}
+
+// Some shared motion virtuals are still declared without their argument types.
+template <typename Function>
+__forceinline Function motionVirtual(hkpMotion& motion, unsigned int slot)
+{
+    return reinterpret_cast<Function>((*reinterpret_cast<void***>(&motion))[slot]);
+}
+
+
+// The approved rigid-body header does not yet declare the remaining local entry points.
 struct FUN_00ca86c0_class
 {
     unsigned int __thiscall FUN_00ca86c0();
@@ -57,90 +89,14 @@ void FUN_00ca8910_class::FUN_00ca8910(float v)
     *(float*)((char*)this + 0x94) = v;
 }
 
-struct FUN_00ca80b0_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int m_iValueAtF0;
-
-    int* FUN_00ca80b0();
-};
-
 // @fnv 0x00ca80b0
-int* FUN_00ca80b0_cls::FUN_00ca80b0()
+const hkTransform& hkpRigidBody::getTransform() const
 {
-    return &m_iValueAtF0;
+    return m_pMotionState.m_kMotionState.m_kMotionTransform;
 }
 
 extern float DAT_01016248;
-struct Vector3
-{
-    float x, y, z;
-};
-struct Output
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34,
-        unk38, unk3c, unk40, unk44, unk48;
-    float value;
-};
+
 inline float lowerPair(float left, float right)
 {
     return left < right ? left : right;
@@ -149,40 +105,18 @@ inline float lowerPairReversed(float left, float right)
 {
     return left > right ? right : left;
 }
-// Computes the minimum of the three components of values and stores 0.2 times it in result->value if below DAT_01016248, otherwise 0.1.
+// Computes the minimum of the three components of values and stores 0.2 times it in result->m_fAllowedPenetrationDepth if below DAT_01016248, otherwise 0.1.
 // @fnv 0x00ca80d0
-void __fastcall ComputeScaledMinimum(const Vector3* values, Output* result)
+void __fastcall ComputeScaledMinimum(const NiPoint3* values, hkpCollidable* result)
 {
     float firstMinimum = lowerPair(values->x, values->y);
     float minimum = lowerPair(firstMinimum, values->z);
     if (DAT_01016248 > minimum)
-        result->value = 0.2 * minimum;
+        result->m_fAllowedPenetrationDepth = 0.2 * minimum;
     else
-        result->value = 0.1f;
+        result->m_fAllowedPenetrationDepth = 0.1f;
 }
 
-struct __declspec(align(16)) Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct Subobject
-{
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void update(unsigned int value);
-};
 struct Owner
 {
     unsigned int unk00;
@@ -241,16 +175,16 @@ struct Owner
     unsigned int unkd4;
     unsigned int unkd8;
     unsigned int unkdc;
-    Subobject subobjectE0;
-    void FUN_00ca8150(unsigned int value, Vec4* result);
+    hkpMotion subobjectE0;
+    void FUN_00ca8150(unsigned int value, hkVector4* result);
     void FUN_00ca85f0(unsigned int value);
 };
 // @fnv 0x00ca85f0
 void Owner::FUN_00ca85f0(unsigned int value)
 {
-    subobjectE0.update(value);
+    motionVirtual<void(__thiscall*)(hkpMotion*, unsigned int)>(subobjectE0, 11)(&subobjectE0, value);
     unsigned int source = unk10;
-    Vec4 result;
+    hkVector4 result;
     FUN_00ca8150(source, &result);
 }
 
@@ -398,27 +332,6 @@ void* CA86E0Object::FUN_00ca86e0()
     return 0;
 }
 
-struct AudioInterface;
-struct AudioInterfaceVTable
-{
-    void* slot00;
-    void* slot04;
-    void* slot08;
-    void* slot0C;
-    void* slot10;
-    void* slot14;
-    void* slot18;
-    void* slot1C;
-    void* slot20;
-    void* slot24;
-    void* slot28;
-    void* slot2C;
-    void(__thiscall* dispatch)(AudioInterface*, int);
-};
-struct AudioInterface
-{
-    AudioInterfaceVTable* vtbl;
-};
 struct FUN_00ca8800_Class
 {
     int unk00;
@@ -477,7 +390,7 @@ struct FUN_00ca8800_Class
     int unkD4;
     int unkD8;
     int unkDC;
-    AudioInterface interfaceE0;
+    hkpMotion interfaceE0;
     void FUN_00ca8800(int value);
 };
 extern "C" void __cdecl FUN_00ca8700(FUN_00ca8800_Class* self);
@@ -485,27 +398,9 @@ extern "C" void __cdecl FUN_00ca8700(FUN_00ca8800_Class* self);
 // @fnv 0x00ca8800
 void FUN_00ca8800_Class::FUN_00ca8800(int value)
 {
-    interfaceE0.vtbl->dispatch(&interfaceE0, value);
+    motionVirtual<void(__thiscall*)(hkpMotion*, int)>(interfaceE0, 12)(&interfaceE0, value);
     FUN_00ca8700(this);
 }
-
-struct CA8830Member
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
-    virtual void unk2C();
-    virtual void unk30();
-    virtual void setValue(int value);
-};
 
 struct CA8830Object;
 
@@ -514,7 +409,7 @@ void __cdecl FUN_00ca8700(CA8830Object* obj);
 struct CA8830Object
 {
     char unk000[0xe0];
-    CA8830Member m_kMemberDescriptor;
+    hkpMotion m_kMemberDescriptor;
 
     void FUN_00ca8830(int value);
 };
@@ -523,37 +418,9 @@ struct CA8830Object
 // @fnv 0x00ca8830
 void CA8830Object::FUN_00ca8830(int value)
 {
-    m_kMemberDescriptor.setValue(value);
+    motionVirtual<void(__thiscall*)(hkpMotion*, int)>(m_kMemberDescriptor, 13)(&m_kMemberDescriptor, value);
     FUN_00ca8700(this);
 }
-
-struct SubObject;
-
-typedef void(__thiscall* SubDoFn)(SubObject* apThis, int aiFirst, int aiSecond);
-
-struct SubObjectVtbl
-{
-    void* fn00;
-    void* fn04;
-    void* fn08;
-    void* fn0c;
-    void* fn10;
-    void* fn14;
-    void* fn18;
-    void* fn1c;
-    void* fn20;
-    void* fn24;
-    void* fn28;
-    void* fn2c;
-    void* fn30;
-    void* fn34;
-    SubDoFn Do;
-};
-
-struct SubObject
-{
-    SubObjectVtbl* m_pVtbl;
-};
 
 void __cdecl FUN_00ca8700(void* apOwner);
 
@@ -615,7 +482,7 @@ struct FUN_00ca8860_cls
     int unkd4;
     int unkd8;
     int unkdc;
-    SubObject m_sub;
+    hkpMotion m_sub;
     void FUN_00ca8860(int aiFirst, int aiSecond);
 };
 
@@ -623,16 +490,9 @@ struct FUN_00ca8860_cls
 // @fnv 0x00ca8860
 void FUN_00ca8860_cls::FUN_00ca8860(int aiFirst, int aiSecond)
 {
-    m_sub.m_pVtbl->Do(&m_sub, aiFirst, aiSecond);
+    motionVirtual<void(__thiscall*)(hkpMotion*, int, int)>(m_sub, 14)(&m_sub, aiFirst, aiSecond);
     FUN_00ca8700(this);
 }
-
-struct CA8B80Point3
-{
-    float x;
-    float y;
-    float z;
-};
 
 struct CA8B80Command
 {
@@ -643,6 +503,7 @@ struct CA8B80Command
     float z;
 };
 
+// The approved hkpWorld header lacks the pending-operation queue entry point (0x00c91160).
 struct CA8B80Queue
 {
     int unk00;
@@ -685,32 +546,6 @@ struct CA8B80Queue
     void* m_bSlotEnabled;
 
     void Push(CA8B80Command* pkCommand);
-};
-
-struct CA8B80Handler
-{
-    virtual void vfunc000();
-    virtual void vfunc004();
-    virtual void vfunc008();
-    virtual void vfunc00C();
-    virtual void vfunc010();
-    virtual void vfunc014();
-    virtual void vfunc018();
-    virtual void vfunc01C();
-    virtual void vfunc020();
-    virtual void vfunc024();
-    virtual void vfunc028();
-    virtual void vfunc02C();
-    virtual void vfunc030();
-    virtual void vfunc034();
-    virtual void vfunc038();
-    virtual void vfunc03C();
-    virtual void vfunc040();
-    virtual void vfunc044();
-    virtual void vfunc048();
-    virtual void vfunc04C();
-    virtual void vfunc050();
-    virtual void SetPosition(const CA8B80Point3& kPos);
 };
 
 struct CA8B80Object
@@ -771,14 +606,14 @@ struct CA8B80Object
     int unkD4;
     int unkD8;
     int unkDC;
-    CA8B80Handler m_handler;
+    hkpMotion m_handler;
 
     void Update();
-    void FUN_00ca8b80(const CA8B80Point3& kPos);
+    void FUN_00ca8b80(const hkVector4& kPos);
 };
 
 // @fnv 0x00ca8b80
-void CA8B80Object::FUN_00ca8b80(const CA8B80Point3& kPos)
+void CA8B80Object::FUN_00ca8b80(const hkVector4& kPos)
 {
     if (m_queue && m_queue->m_bSlotEnabled)
     {
@@ -792,7 +627,7 @@ void CA8B80Object::FUN_00ca8b80(const CA8B80Point3& kPos)
         return;
     }
     Update();
-    m_handler.SetPosition(kPos);
+    motionVirtual<void(__thiscall*)(hkpMotion*, const hkVector4&)>(m_handler, 21)(&m_handler, kPos);
 }
 
 struct FUN_00ca9240_Base
@@ -838,12 +673,7 @@ FUN_00ca9270::FUN_00ca9270(void* apFirst, void* apSecond) : BaseRecord(apFirst, 
     m_c08 = 2;
 }
 
-struct FUN_00ca80a0_base
-{
-    virtual ~FUN_00ca80a0_base();
-};
-
-struct FUN_00ca80a0_cls : FUN_00ca80a0_base
+struct FUN_00ca80a0_cls : hkpEntity
 {
     virtual ~FUN_00ca80a0_cls();
 };
@@ -852,209 +682,7 @@ struct FUN_00ca80a0_cls : FUN_00ca80a0_base
 FUN_00ca80a0_cls::~FUN_00ca80a0_cls()
 {}
 
-struct S_00ca8630_Owner
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    unsigned int unk15c;
-    unsigned int unk160;
-    unsigned int unk164;
-    unsigned int unk168;
-    unsigned int unk16c;
-    unsigned int unk170;
-    unsigned int unk174;
-    unsigned int unk178;
-    unsigned int unk17c;
-    unsigned int unk180;
-    unsigned int unk184;
-    unsigned int unk188;
-    unsigned int unk18c;
-    unsigned int unk190;
-    unsigned int unk194;
-    unsigned int unk198;
-    unsigned int unk19c;
-    unsigned int unk1a0;
-    unsigned int unk1a4;
-    unsigned int unk1a8;
-    unsigned int unk1ac;
-    unsigned int unk1b0;
-    unsigned int unk1b4;
-    unsigned int unk1b8;
-    unsigned int unk1bc;
-    unsigned int unk1c0;
-    unsigned int unk1c4;
-    unsigned int unk1c8;
-    unsigned int unk1cc;
-    unsigned int unk1d0;
-    unsigned int unk1d4;
-    unsigned int unk1d8;
-    unsigned int unk1dc;
-    unsigned int unk1e0;
-    unsigned int unk1e4;
-    unsigned int unk1e8;
-    unsigned int unk1ec;
-    unsigned int unk1f0;
-    unsigned int unk1f4;
-    unsigned int unk1f8;
-    unsigned int unk1fc;
-    unsigned int unk200;
-    unsigned int unk204;
-    unsigned int unk208;
-    unsigned int unk20c;
-    unsigned int unk210;
-    unsigned int unk214;
-    unsigned int unk218;
-    unsigned int unk21c;
-    unsigned int unk220;
-    unsigned int unk224;
-    unsigned int unk228;
-    unsigned int unk22c;
-    unsigned int unk230;
-    unsigned int unk234;
-    unsigned int unk238;
-    unsigned int unk23c;
-    unsigned int unk240;
-    unsigned int unk244;
-    unsigned int unk248;
-    unsigned int unk24c;
-    unsigned int unk250;
-    unsigned int unk254;
-    unsigned int unk258;
-    unsigned int unk25c;
-    unsigned int unk260;
-    unsigned int unk264;
-    unsigned int unk268;
-    unsigned int unk26c;
-    unsigned int unk270;
-    unsigned int unk274;
-    unsigned int unk278;
-    unsigned int unk27c;
-    unsigned int unk280;
-    unsigned int unk284;
-    unsigned int unk288;
-    unsigned int unk28c;
-    unsigned int unk290;
-    unsigned int unk294;
-    unsigned int unk298;
-    unsigned int unk29c;
-    unsigned int unk2a0;
-    unsigned int unk2a4;
-    unsigned int unk2a8;
-    unsigned int unk2ac;
-    unsigned int unk2b0;
-    unsigned int unk2b4;
-    unsigned int unk2b8;
-    unsigned int unk2bc;
-    unsigned int unk2c0;
-    unsigned int unk2c4;
-    unsigned int unk2c8;
-    unsigned int unk2cc;
-    unsigned int unk2d0;
-    unsigned int unk2d4;
-    unsigned int unk2d8;
-    unsigned int unk2dc;
-    unsigned int unk2e0;
-    unsigned int unk2e4;
-    unsigned int unk2e8;
-    unsigned int unk2ec;
-    unsigned int unk2f0;
-    unsigned int unk2f4;
-    unsigned int unk2f8;
-    unsigned int unk2fc;
-    unsigned char unk300;
-    unsigned char unk301;
-    unsigned char unk302;
-    unsigned char unk303;
-    unsigned char unk304;
-    unsigned char unk305;
-    unsigned char unk306;
-    unsigned char unk307;
-};
+// The approved hkpMotion header lacks the three-argument helper at 0x00c90ed0.
 struct S_00ca8630_Sub
 {
     unsigned char unk00;
@@ -1080,7 +708,7 @@ struct S_00ca8630_Class
 {
     unsigned int unk00;
     unsigned int unk04;
-    S_00ca8630_Owner* unk08;
+    hkpWorld* unk08;
     unsigned int unk0c;
     unsigned int unk10;
     unsigned int unk14;
@@ -1147,11 +775,11 @@ void S_00ca8630_Class::FUN_00ca8630(bool f)
     {
         if (unk08)
         {
-            S_00ca8630_Owner* volatile* pv = (S_00ca8630_Owner* volatile*)&unk08;
-            S_00ca8630_Owner* o = *pv;
-            int c = o->unk307;
-            int b = o->unk306;
-            int a = o->unk305;
+            hkpWorld* volatile* pv = (hkpWorld* volatile*)&unk08;
+            hkpWorld* o = *pv;
+            int c = reinterpret_cast<unsigned char*>(o)[0x307];
+            int b = reinterpret_cast<unsigned char*>(o)[0x306];
+            int a = reinterpret_cast<unsigned char*>(o)[0x305];
             unke0.Set(unkd4 & 0xf, a, b, c);
         }
         else
@@ -1166,26 +794,6 @@ void S_00ca8630_Class::FUN_00ca8630(bool f)
         unke0.unk0c = 0;
     }
 }
-
-struct CA8890Member
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
-    virtual void unk2C();
-    virtual void unk30();
-    virtual void unk34();
-    virtual void unk38();
-    virtual void setValue(int value);
-};
 
 struct CA8890Object;
 
@@ -1249,7 +857,7 @@ struct CA8890Object
     int unkD4;
     int unkD8;
     int unkDC;
-    CA8890Member m_kMemberDescriptor;
+    hkpMotion m_kMemberDescriptor;
 
     void FUN_00ca8890(int value);
 };
@@ -1258,18 +866,9 @@ struct CA8890Object
 // @fnv 0x00ca8890
 void CA8890Object::FUN_00ca8890(int value)
 {
-    m_kMemberDescriptor.setValue(value);
+    motionVirtual<void(__thiscall*)(hkpMotion*, int)>(m_kMemberDescriptor, 15)(&m_kMemberDescriptor, value);
     FUN_00ca8700(this);
 }
-
-struct SpawnedSub
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10(float f);
-};
 
 struct FUN_00ca88e0_cls
 {
@@ -1329,7 +928,7 @@ struct FUN_00ca88e0_cls
     int unkD4;
     int unkD8;
     int unkDC;
-    SpawnedSub m_sub;
+    hkpMotion m_sub;
 
     void FUN_00ca88e0(float f);
 };
@@ -1337,27 +936,11 @@ struct FUN_00ca88e0_cls
 // @fnv 0x00ca88e0
 void FUN_00ca88e0_cls::FUN_00ca88e0(float afValue)
 {
-    m_sub.v10(afValue);
+    motionVirtual<void(__thiscall*)(hkpMotion*, float)>(m_sub, 4)(&m_sub, afValue);
 }
 
-struct CA92A0Allocator;
-
-struct CA92A0MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    CA92A0Allocator* m_pStreamAllocator;
-
-    CA92A0Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" CA92A0MemoryRouter& __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(CA92A0Allocator* alloc, void* array, int numElements, int sizeElem);
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+void __cdecl FUN_00c908c0(hkMemoryAllocator* alloc, void* array, int numElements, int sizeElem);
 
 struct CA92A0Element
 {
@@ -1372,50 +955,48 @@ struct CA92A0Element
     }
 };
 
-struct CA92A0Array
+static __forceinline void CA92A0Array_reserve(hkArrayBase<CA92A0Element>& self, hkMemoryAllocator& alloc, int n);
+
+static __forceinline hkArrayBase<CA92A0Element>& CA92A0Array_assign(hkArrayBase<CA92A0Element>& self, const hkArrayBase<CA92A0Element>& a);
+
+static __forceinline void CA92A0Array_reserve(hkArrayBase<CA92A0Element>& self, hkMemoryAllocator& alloc, int n)
 {
-    CA92A0Element* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    void reserve(CA92A0Allocator& alloc, int n)
-    {
-        const int cap = getCapacity();
+        const int cap = self.getCapacity();
         if (cap < n)
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(CA92A0Element));
+            FUN_00c908c0(&alloc, (&self), newSize, sizeof(CA92A0Element));
         }
     }
 
-    __forceinline CA92A0Array& operator=(const CA92A0Array& a)
-    {
-        CA92A0Allocator& alloc = FUN_00c85750().heap();
-        const int oldSize = m_iElementCount;
+static __forceinline hkArrayBase<CA92A0Element>& CA92A0Array_assign(hkArrayBase<CA92A0Element>& self, const hkArrayBase<CA92A0Element>& a)
+{
+        hkMemoryAllocator& alloc = heapAllocator(FUN_00c85750());
+        const int oldSize = self.m_iElementCount;
         const int newSize = a.m_iElementCount;
         const int copiedSize = newSize > oldSize ? oldSize : newSize;
-        reserve(alloc, newSize);
+        CA92A0Array_reserve(self, alloc, newSize);
         {
             const CA92A0Element* src = a.m_data;
-            CA92A0Element* dst = m_data;
+            CA92A0Element* dst = self.m_data;
             for (int i = 0; i < copiedSize; i++)
                 dst[i] = src[i];
         }
         {
             const CA92A0Element* src = a.m_data + copiedSize;
-            CA92A0Element* dst = m_data + copiedSize;
+            CA92A0Element* dst = self.m_data + copiedSize;
             for (int i = 0; i < newSize - copiedSize; i++)
                 new (dst + i) CA92A0Element(src[i]);
         }
-        m_iElementCount = newSize;
-        return *this;
+        self.m_iElementCount = newSize;
+        return *(&self);
     }
+
+struct CA92A0ArrayPolicy
+{
+    static __forceinline void destroy(hkArrayBase<CA92A0Element>& self) { }
+    static __forceinline void assign(hkArrayBase<CA92A0Element>& self, const hkArrayBase<CA92A0Element>& other) { CA92A0Array_assign(self, other); }
 };
 
 struct CA92A0Object
@@ -1450,7 +1031,7 @@ struct CA92A0Object
     int unk6C;
     int unk70;
     int unk74;
-    CA92A0Array m_entries;
+    hkArray<CA92A0Element, CA92A0ArrayPolicy> m_entries;
 
     void CopyEntriesFrom(const CA92A0Object* other);
 };
@@ -1461,12 +1042,6 @@ void CA92A0Object::CopyEntriesFrom(const CA92A0Object* other)
 {
     m_entries = other->m_entries;
 }
-
-struct CA92A0Allocator
-{
-    virtual void v00();
-    virtual void* Alloc(unsigned int auiSize);
-};
 
 extern int DAT_010c6c64;
 
@@ -1538,11 +1113,6 @@ __declspec(align(16)) struct FnvScratch
     void FUN_00cf5ea0();
 };
 
-struct FnvSubObj
-{
-    void FUN_00cb0c10(unsigned int auiFlags);
-};
-
 struct FnvThing
 {
     virtual void v00();
@@ -1575,13 +1145,13 @@ FUN_00ca90c0_cls* FUN_00ca90c0_cls::Clone()
     FnvScratch cinfo;
     cinfo.FUN_00cf5ea0();
     WriteToInfo(&cinfo);
-    FUN_00ca90c0_cls* pBlock = (FUN_00ca90c0_cls*)FUN_00c85750().heap().Alloc(0x220);
+    FUN_00ca90c0_cls* pBlock = (FUN_00ca90c0_cls*)heapAllocator(FUN_00c85750()).blockAlloc(0x220);
     *(unsigned short*)((char*)pBlock + 4) = 0x220;
     FUN_00ca90c0_cls* pCopy = pBlock->FUN_00ca8c90(&cinfo);
     memCpy16NonEmpty((char*)pCopy + 0xe0, (char*)this + 0xe0, 0x12);
     if (*(char**)((char*)this + 0x1f8))
     {
-        char* pObj = (char*)FUN_00c85750().heap().Alloc(0x120);
+        char* pObj = (char*)heapAllocator(FUN_00c85750()).blockAlloc(0x120);
         *(unsigned short*)(pObj + 4) = 0x120;
         *(int*)(pObj + 0x118) = 0;
         *(int*)pObj = (int)&DAT_010c6c64;
@@ -1590,52 +1160,18 @@ FUN_00ca90c0_cls* FUN_00ca90c0_cls::Clone()
     }
     *(int*)((char*)pCopy + 0x18) = pCopy->v10();
     pCopy->CopyEntriesFrom(this);
-    ((FnvSubObj*)((char*)pCopy + 0x74))->FUN_00cb0c10(*(unsigned int*)((char*)this + 0x74) & 0xfffffffe);
+    ((hkStringPtr*)((char*)pCopy + 0x74))->Assign(reinterpret_cast<const char*>(*(unsigned int*)((char*)this + 0x74) & 0xfffffffe));
     *(int*)((char*)pCopy + 0xc) = *(int*)((char*)this + 0xc);
     if (*(void**)((char*)this + 0xa0))
         *(void**)((char*)pCopy + 0xa0) = ((FnvThing*)*(void**)((char*)this + 0xa0))->v0C(pCopy);
     return pCopy;
 }
 
-class hkBoolCA8B
-{
-  public:
-    hkBoolCA8B(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-    char m_cBooleanValue;
-};
-
-class hkpShapeContainerCA8B
-{
-  public:
-    virtual ~hkpShapeContainerCA8B();
-    virtual int GetNumChildShapes() const;
-};
-
-class hkpShapeCA8B
-{
-  public:
-    virtual ~hkpShapeCA8B();
-    virtual void vfn04();
-    virtual void vfn08();
-    virtual void vfn0C();
-    virtual const hkpShapeContainerCA8B* GetShapeContainer() const;
-    int unk04;
-    int unk08;
-    int m_type;
-};
-
-class hkpShapeCollectionCA8B : public hkpShapeCA8B, public hkpShapeContainerCA8B
-{
-};
-
 class HostCA8B
 {
   public:
     int unk00, unk04, unk08, unk0C;
-    const hkpShapeCA8B* m_pCollisionShape;
+    const hkpShape* m_pCollisionShape;
     int unk14, unk18, unk1C, unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C;
     int unk40, unk44, unk48, unk4C, unk50, unk54, unk58, unk5C, unk60, unk64, unk68, unk6C;
     int unk70, unk74, unk78, unk7C, unk80, unk84, unk88, unk8C, unk90, unk94, unk98, unk9C;
@@ -1643,19 +1179,19 @@ class HostCA8B
     int unkD0, unkD4, unkD8, unkDC, unkE0, unkE4;
     unsigned char m_bFlag;
 
-    hkBoolCA8B FUN_00ca8bf0() const;
+    hkBool FUN_00ca8bf0() const;
 };
 
 // Returns false for a null shape, type 0xf, or types 7, 8, 9, 10, 0x17 with over 100 child shapes (8 and 10 are skipped when m_bFlag is 4 or 5); else true.
 // @fnv 0x00ca8bf0
-hkBoolCA8B HostCA8B::FUN_00ca8bf0() const
+hkBool HostCA8B::FUN_00ca8bf0() const
 {
-    const hkpShapeCA8B* shape = m_pCollisionShape;
+    const hkpShape* shape = m_pCollisionShape;
     if (!shape)
         return false;
 
     bool bOk = true;
-    int type = shape->m_type;
+    int type = *reinterpret_cast<const int*>(&shape->m_type);
     if (m_bFlag != 5 && m_bFlag != 4 && (type == 10 || type == 8))
     {
         if (shape->GetShapeContainer()->GetNumChildShapes() > 100)
@@ -1664,12 +1200,12 @@ hkBoolCA8B HostCA8B::FUN_00ca8bf0() const
 
     if (type == 0x17)
     {
-        if (static_cast<const hkpShapeCollectionCA8B*>(m_pCollisionShape)->GetNumChildShapes() > 100)
+        if (static_cast<const hkpShapeCollection*>(m_pCollisionShape)->GetNumChildShapes() > 100)
             bOk = false;
     }
     else if (type == 7)
     {
-        if (static_cast<const hkpShapeCollectionCA8B*>(m_pCollisionShape)->GetNumChildShapes() > 100)
+        if (static_cast<const hkpShapeCollection*>(m_pCollisionShape)->GetNumChildShapes() > 100)
             bOk = false;
     }
     else if (type == 0xf)
@@ -1678,17 +1214,11 @@ hkBoolCA8B HostCA8B::FUN_00ca8bf0() const
     }
     else if (type == 9)
     {
-        if (static_cast<const hkpShapeCollectionCA8B*>(shape)->GetNumChildShapes() > 100)
+        if (static_cast<const hkpShapeCollection*>(shape)->GetNumChildShapes() > 100)
             bOk = false;
     }
     return bOk;
 }
-
-struct S_00ca84b0_Shape
-{
-    void RetainReference();  // FUN_00c90510
-    void removeReference();  // FUN_00c905b0
-};
 
 struct S_00ca84b0_Entity;
 
@@ -1696,7 +1226,7 @@ struct S_00ca84b0_Op
 {
     unsigned char m_type;
     S_00ca84b0_Entity* m_pEntity;
-    S_00ca84b0_Shape* m_pCollisionShape;
+    hkpShape* m_pCollisionShape;
 };
 
 struct S_00ca84b0_World
@@ -1765,6 +1295,7 @@ struct S_00ca84b0_World
     int unka4;
 };
 
+// Using the shared SIMD union for this stack temporary adds a /GS cookie in 0x00ca84b0.
 struct S_00ca84b0_Vector4
 {
     float x, y, z, w;
@@ -1797,7 +1328,7 @@ struct S_00ca84b0_Entity
     int unk4;
     S_00ca84b0_World* m_pOwningWorld;
     int unkc;
-    S_00ca84b0_Shape* m_pCollisionShape;
+    hkpShape* m_pCollisionShape;
     int unk14;
     int unk18;
     int unk1c;
@@ -1818,14 +1349,14 @@ struct S_00ca84b0_Entity
     int unk58;
     float m_fAllowedPenetrationDepth;  // 0x5c
 
-    void FUN_00ca8150(S_00ca84b0_Shape* shape, S_00ca84b0_Vector4* extentOut);
-    void UpdateBoundingVolume(S_00ca84b0_World* world, S_00ca84b0_Shape* shape);
-    int FUN_00ca84b0(S_00ca84b0_Shape* shape);
+    void FUN_00ca8150(hkpShape* shape, S_00ca84b0_Vector4* extentOut);
+    void UpdateBoundingVolume(S_00ca84b0_World* world, hkpShape* shape);
+    int FUN_00ca84b0(hkpShape* shape);
 };
 
 // Sets the entity's collision shape, updating penetration depth and notifying the owning world of the change.
 // @fnv 0x00ca84b0
-int S_00ca84b0_Entity::FUN_00ca84b0(S_00ca84b0_Shape* shape)
+int S_00ca84b0_Entity::FUN_00ca84b0(hkpShape* shape)
 {
     if (m_pOwningWorld && m_pOwningWorld->unk94)
     {
@@ -1843,9 +1374,9 @@ int S_00ca84b0_Entity::FUN_00ca84b0(S_00ca84b0_Shape* shape)
         FUN_00cb5c10(m_pOwningWorld, this);
     }
 
-    S_00ca84b0_Shape* oldShape = m_pCollisionShape;
+    hkpShape* oldShape = m_pCollisionShape;
     m_pCollisionShape = shape;
-    shape->RetainReference();
+    shape->addReference();
     if (oldShape)
         oldShape->removeReference();
 
@@ -1874,22 +1405,8 @@ int S_00ca84b0_Entity::FUN_00ca84b0(S_00ca84b0_Shape* shape)
 
 #include <xmmintrin.h>
 namespace fnv_00ca8af0 {
-struct AllocIface
-{
-    virtual void* unk00();
-    virtual void* Alloc(unsigned int size);
-};
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AllocIface* m_pAllocator;
-};
-
-AllocHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct EventBlock
 {
@@ -1940,31 +1457,6 @@ struct EventDispatcher
     int m_94;
 
     void FUN_00c91160(EventBlock* ev);
-};
-
-struct EventSub
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2C();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3C();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4C();
-    virtual void v50(void* a1, void* a2);
 };
 
 struct FUN_00ca8af0_cls
@@ -2025,7 +1517,7 @@ struct FUN_00ca8af0_cls
     int unkD4;
     int unkD8;
     int unkDC;
-    EventSub m_e0;
+    hkpMotion m_e0;
 
     void DispatchEvent(void* a1, void* a2);
     void FUN_00c9c1d0();
@@ -2041,8 +1533,8 @@ void FUN_00ca8af0_cls::DispatchEvent(void* a1, void* a2)
             EventBlock ev;
             ev.m_type = 0x1c;
             ev.m_pSender = this;
-            AllocHolder* holder = FUN_00c85750();
-            ev.m_pData = holder->m_pAllocator->Alloc(0x20);
+            hkMemoryRouter* holder = FUN_00c85750();
+            ev.m_pData = holder->m_heap->blockAlloc(0x20);
             *(__m128*)ev.m_pData = *(__m128*)a2;
             *(__m128*)((char*)ev.m_pData + 0x10) = *(__m128*)a1;
             m_08->FUN_00c91160(&ev);
@@ -2050,57 +1542,10 @@ void FUN_00ca8af0_cls::DispatchEvent(void* a1, void* a2)
         }
     }
     FUN_00c9c1d0();
-    m_e0.v50(a1, a2);
+    motionVirtual<void(__thiscall*)(hkpMotion*, void*, void*)>(m_e0, 20)(&m_e0, a1, a2);
 }
 }  // namespace fnv_00ca8af0
 
-struct S_00ca8f50_Vec
-{
-    __m128 m_vComponents;
-};
-struct S_00ca8f50_Half
-{
-    short m_uiFilterValue;
-    operator float() const
-    {
-        int t = ((int)m_uiFilterValue) << 16;
-        return *(float*)&t;
-    }
-};
-struct S_00ca8f50_Transform
-{
-    S_00ca8f50_Vec m_kColumn0;
-    S_00ca8f50_Vec m_kColumn1;
-    S_00ca8f50_Vec m_kColumn2;
-};
-struct S_00ca8f50_Sub
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void getTransform(S_00ca8f50_Transform& out);
-    float FUN_00c86430();
-    int unk4;
-    unsigned char unk8;
-    unsigned char unk9;
-    unsigned char unkA;
-    unsigned char unkB;
-    int unkC;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-};
 extern float DAT_010c7948[];
 struct S_00ca8f50_Info
 {
@@ -2110,12 +1555,12 @@ struct S_00ca8f50_Info
     unsigned char mC;
     unsigned char unkD;
     short mE;
-    S_00ca8f50_Vec m10;
-    S_00ca8f50_Vec m20;
-    S_00ca8f50_Vec m30;
-    S_00ca8f50_Vec m40;
-    S_00ca8f50_Transform m50;
-    S_00ca8f50_Vec m80;
+    hkVector4 m10;
+    hkVector4 m20;
+    hkVector4 m30;
+    hkVector4 m40;
+    hkRotation m50;
+    hkVector4 m80;
     float m90;
     float m94;
     float m98;
@@ -2210,57 +1655,8 @@ struct S_00ca8f50_Src
     int unkD4;
     int unkD8;
     int unkDC;
-    S_00ca8f50_Sub mE0;
-    S_00ca8f50_Vec m120;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    S_00ca8f50_Vec m160;
-    S_00ca8f50_Vec m170;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    float m194;
-    float m198;
-    unsigned char m19C;
-    unsigned char m19D;
-    unsigned char m19E;
-    unsigned char unk19F;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    S_00ca8f50_Vec m1B0;
-    S_00ca8f50_Vec m1C0;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    unsigned char unk1FC;
-    unsigned char unk1FD;
-    S_00ca8f50_Half m1FE;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
+    hkpMotion mE0;
+    char pad200[0x10];
     int m210;
     int unk214;
     int unk218;
@@ -2280,64 +1676,40 @@ void S_00ca8f50_Src::WriteToInfo(S_00ca8f50_Info* info)
     info->mA0 = m90;
     info->mC = m8C;
     info->mA4 = m94;
-    info->m94 = m194;
-    info->m98 = m198;
-    info->m30.m_vComponents = m1B0.m_vComponents;
-    info->m40.m_vComponents = m1C0.m_vComponents;
-    info->m90 = mE0.FUN_00c86430();
-    mE0.getTransform(info->m50);
-    info->mB4 = mE0.unk8;
-    info->mB6 = m19E;
-    info->mA8 = DAT_010c7948[m19C];
-    info->mAC = DAT_010c7948[m19D];
-    info->m10.m_vComponents = m120.m_vComponents;
-    info->m20.m_vComponents = m160.m_vComponents;
-    info->m80.m_vComponents = m170.m_vComponents;
+    info->m94 = mE0.m_kMotionState.m_fLinearDamping;
+    info->m98 = mE0.m_kMotionState.m_fAngularDamping;
+    info->m30.m_vComponents = mE0.m_kTranslationalVelocity.m_vComponents;
+    info->m40.m_vComponents = mE0.m_kAngularVelocity.m_vComponents;
+    info->m90 = mE0.GetMassValue();
+    motionVirtual<void(__thiscall*)(hkpMotion*, hkRotation&)>(mE0, 5)(&mE0, info->m50);
+    info->mB4 = *reinterpret_cast<unsigned char*>(&mE0.m_type);
+    info->mB6 = mE0.m_kMotionState.m_uiDeactivationClass;
+    info->mA8 = DAT_010c7948[*reinterpret_cast<const unsigned char*>(&mE0.m_kMotionState.m_fSurfaceFriction)];
+    info->mAC = DAT_010c7948[*reinterpret_cast<const unsigned char*>(&mE0.m_kMotionState.m_fRestitution)];
+    info->m10.m_vComponents = mE0.m_kMotionState.m_kMotionTransform.m_row3;
+    info->m20.m_vComponents = *reinterpret_cast<const __m128*>(&mE0.m_kMotionState.m_kSweptTransform.m_qRotation1);
+    info->m80.m_vComponents = mE0.m_kMotionState.m_kSweptTransform.m_vCenterOfMassLocal.m_vComponents;
     info->m4 = m10;
     info->m0 = m2C;
     info->mB0 = m5C;
     info->mB7 = m2A;
-    info->m9C = m1FE;
+    int gravityBits = ((int)mE0.m_fGravityFactor.m_value) << 16;
+    info->m9C = *reinterpret_cast<float*>(&gravityBits);
 }
 
 namespace fnv_00ca9210 {
-struct S_00ca9210_Alloc
-{
-    virtual ~S_00ca9210_Alloc();
-    virtual void* AllocateMemoryBlock(int n);
-    virtual void ReleaseBlock(void* p, int n);
-};
-struct S_00ca9210_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00ca9210_Alloc* m_pStreamAllocator;
-    S_00ca9210_Alloc& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-S_00ca9210_Router* FUN_00c85750();
 
-struct S_00ca9210_RefObj
-{
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    virtual ~S_00ca9210_RefObj() throw()
-    {}
-    void operator delete(void* p)
-    {
-        S_00ca9210_RefObj* b = static_cast<S_00ca9210_RefObj*>(p);
-        FUN_00c85750()->heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
-    }
-};
+hkMemoryRouter* FUN_00c85750();
 
-struct FUN_00ca9210 : S_00ca9210_RefObj
+struct FUN_00ca9210 : hkReferencedObject
 {
     FUN_00ca9210();
     virtual ~FUN_00ca9210() throw();
+    static void operator delete(void* p)
+    {
+        hkReferencedObject* b = static_cast<hkReferencedObject*>(p);
+        heapAllocator(*FUN_00c85750()).blockFree(p, b->m_usMemSizeAndFlags);
+    }
 };
 
 // @fnv 0x00ca9210
@@ -2564,8 +1936,22 @@ void __cdecl FUN_00ca8700(Entity* apEntity)
 // @fnv 0x00ca8920
 void __fastcall FUN_00ca8920(FUN_00ca8860_cls* body, void*, int inertia)
 {
-    SubObject* motion = &body->m_sub;
-    typedef void(__thiscall * SetInertia)(SubObject*, int);
-    SetInertia set = reinterpret_cast<SetInertia>(motion->m_pVtbl->fn1c);
+    hkpMotion* motion = &body->m_sub;
+    typedef void(__thiscall * SetInertia)(hkpMotion*, int);
+    SetInertia set = motionVirtual<SetInertia>(*motion, 7);
     set(motion, inertia);
+}
+
+
+
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
+{
+    __if_exists(A::destroy) { A::destroy(*this); }
+    __if_not_exists(A::destroy) { clearAndDeallocate(); }
+}
+
+template <class T, class A> __forceinline hkArray<T, A>& hkArray<T, A>::operator=(const hkArray<T, A>& other)
+{
+    A::assign(*this, other);
+    return *this;
 }

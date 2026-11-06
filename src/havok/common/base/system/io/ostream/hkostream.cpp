@@ -2,7 +2,64 @@
 // src/havok/common/base/system/io/ostream/hkostream.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/system/io/ostream/hkostream.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkOstream.h"
+#include "../../../../../../../include/NiBinaryStream.h"
+#include "../../../../../../../include/NiStream.h"
+#include "../../../../../../../include/HavokError.h"
+#include "../../../../../../../include/bhkMoppBvTreeShape.h"
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+
+// hkMemoryRouter is the shared Havok memory-router layout: heap allocator at +0x10.
+namespace HavokHeap {
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+}
+
+
+
+__declspec(nothrow) inline void* hkReferencedObject::operator new(std::size_t nbytes)
+{
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(
+        HavokHeap::FUN_00c85750().heap().blockAlloc(nbytes));
+    b->m_usMemSizeAndFlags = (unsigned short)nbytes;
+    return b;
+}
+inline void hkReferencedObject::operator delete(void* p)
+{
+    HavokHeap::FUN_00c85750().heap().blockFree(
+        p, static_cast<hkReferencedObject*>(p)->m_usMemSizeAndFlags);
+}
+
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+    return HavokHeap::FUN_00c85750().heap();
+}
+
+template <class T>
+__forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& kHeap, int iWanted)
+{
+    const int iHave = getCapacity();
+    if (iHave < iWanted)
+    {
+        int iTwice = 2 * iHave;
+        int iGrowTo = (iWanted < iTwice) ? iTwice : iWanted;
+        hkArrayUtil::_reserve(kHeap, this, iGrowTo, sizeof(T));
+    }
+}
+
+template <class T, class Allocator>
+__forceinline hkArray<T, Allocator>::~hkArray()
+{
+    hkMemoryAllocator& alloc = Allocator().get(this);
+    this->m_iElementCount = 0;
+    if ((this->m_iCapacityState & 0x80000000) == 0)
+        alloc.bufFree(this->m_data, (this->m_iCapacityState & 0x3fffffff) * sizeof(T));
+    this->m_data = 0;
+    this->m_iCapacityState = 0x80000000;
+}
+
 
 extern int DAT_01268108;
 extern "C" __declspec(dllimport) void __stdcall free(void*);
@@ -35,22 +92,18 @@ FUN_00cc00e0::~FUN_00cc00e0()
     vtbl = (void*)&_DAT_0102e388;
 }
 
-struct hkReferencedObjectStandIn
-{
-    void RetainReference();
-    void removeReference();
-};
+
 struct DDCC60WorldStandIn
 {
     int m_uiStandInValue;
     int m_iValueAfterStandIn;
-    hkReferencedObjectStandIn* m_ref;
-    void FUN_00cc0480(hkReferencedObjectStandIn* pNew);
+    hkReferencedObject* m_ref;
+    void FUN_00cc0480(hkReferencedObject* pNew);
 };
 // @fnv 0x00cc0480
-void DDCC60WorldStandIn::FUN_00cc0480(hkReferencedObjectStandIn* pNew)
+void DDCC60WorldStandIn::FUN_00cc0480(hkReferencedObject* pNew)
 {
-    pNew->RetainReference();
+    pNew->addReference();
     m_ref->removeReference();
     m_ref = pNew;
 }
@@ -68,20 +121,7 @@ int FUN_00cc0680::tell()
     return *(int*)(p + 4) + *(int*)(p + 0) * n;
 }
 
-struct FUN_00cc07f0_Router
-{
-    virtual void Slot0();
-    virtual void Slot1();
-    virtual void Free(void*, unsigned short);
-};
-
-struct FUN_00cc07f0_MemoryRouter
-{
-    unsigned char padding[0x10];
-    FUN_00cc07f0_Router* pRouter;
-};
-
-extern FUN_00cc07f0_MemoryRouter* _D1A0E0GetMemoryRouter();
+extern hkMemoryRouter* _D1A0E0GetMemoryRouter();
 
 struct FUN_00cc07f0_StandIn
 {
@@ -101,9 +141,9 @@ FUN_00cc07f0_StandIn* FUN_00cc07f0_StandIn::FUN_00cc07f0(unsigned int deletingFl
 
     if (deletingFlag & 1)
     {
-        FUN_00cc07f0_MemoryRouter* memoryRouter = _D1A0E0GetMemoryRouter();
+        hkMemoryRouter* memoryRouter = _D1A0E0GetMemoryRouter();
         unsigned short size = m_nSize;
-        memoryRouter->pRouter->Free(this, size);
+        memoryRouter->heap().blockFree(this, size);
     }
 
     return this;
@@ -198,54 +238,7 @@ void FUN_00cc04a0_Cls::RegisterWriter(FUN_00cc04a0_Slots* apSlots, int unused)
     apSlots->slot0C("writer", unk08, 0);
 }
 
-class hkMemoryAllocatorCC06
-{
-  public:
-    virtual ~hkMemoryAllocatorCC06() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterCC06
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorCC06* m_pStreamAllocator;
-
-    hkMemoryAllocatorCC06& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-namespace hkRouterCC06 {
-extern "C" hkMemoryRouterCC06& __cdecl FUN_00c85750() throw();
-}
-
-class hkRefObjCC06
-{
-  public:
-    virtual ~hkRefObjCC06() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    hkRefObjCC06()
-    {
-        m_sReferenceCount = 1;
-    }
-
-    static void* operator new(unsigned int nbytes) throw()
-    {
-        hkRefObjCC06* b = static_cast<hkRefObjCC06*>(hkRouterCC06::FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
-        b->m_usMemSizeAndFlags = (unsigned short)nbytes;
-        return b;
-    }
-    static void operator delete(void* p);
-};
-
-class FUN_00cc06f0 : public hkRefObjCC06
+class FUN_00cc06f0 : public hkReferencedObject
 {
   public:
     int unk08;
@@ -255,7 +248,7 @@ class FUN_00cc06f0 : public hkRefObjCC06
     FUN_00cc06f0(void* owner, int flag) throw();
 };
 
-class FUN_00cc0630 : public hkRefObjCC06
+class FUN_00cc0630 : public hkReferencedObject
 {
   public:
     FUN_00cc06f0* m_pChildAtom;
@@ -271,29 +264,6 @@ FUN_00cc0630::FUN_00cc0630(void* owner)
 }
 
 namespace fnv_00cc0690 {
-class hkMemoryAllocatorCC06
-{
-  public:
-    virtual ~hkMemoryAllocatorCC06() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterCC06
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorCC06* m_pStreamAllocator;
-    hkMemoryAllocatorCC06& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-namespace hkRouterCC06 {
-extern "C" hkMemoryRouterCC06& __cdecl FUN_00c85750();
-}
 
 class FUN_00d46be0_class
 {
@@ -311,32 +281,11 @@ class FUN_00d46be0_class
     }
     static void operator delete(void* p) throw()
     {
-        hkRouterCC06::FUN_00c85750().heap().ReleaseBlock(p, sizeof(FUN_00d46be0_class));
+        HavokHeap::FUN_00c85750().heap().blockFree(p, sizeof(FUN_00d46be0_class));
     }
 };
 
-struct FUN_00d1df70
-{
-    void FUN_00c90510() throw();
-    void removeReference() throw();
-};
-
-class hkReferencedObjectCC06
-{
-  public:
-    virtual ~hkReferencedObjectCC06() throw()
-    {}
-    hkUint16 m_usMemSizeAndFlags;
-    hkInt16 m_sReferenceCount;
-
-    static void operator delete(void* p) throw()
-    {
-        hkRouterCC06::FUN_00c85750().heap().ReleaseBlock(p,
-                                                         static_cast<hkReferencedObjectCC06*>(p)->m_usMemSizeAndFlags);
-    }
-};
-
-class hkStreamCC06 : public hkReferencedObjectCC06
+class hkStreamCC06 : public hkReferencedObject
 {
   public:
     FUN_00d46be0_class* m_stream;
@@ -362,84 +311,21 @@ hkStreamCC06* hkStreamCC06::DestroyStream(unsigned int uiFlags) throw()
 }  // namespace fnv_00cc0690
 
 namespace fnv_00cc06f0 {
-class hkMemoryAllocatorCC06;
 
-struct hkMemoryRouterCC06
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkMemoryAllocatorCC06* m_pTemp;
-    hkMemoryAllocatorCC06* m_pStreamAllocator;
-    hkMemoryAllocatorCC06& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-namespace hkRouterCC06 {
-extern "C" hkMemoryRouterCC06& __cdecl FUN_00c85750() throw();
-}
-void __cdecl FUN_00c908c0(hkMemoryAllocatorCC06& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
-
-template <class T> class hkArrayCC06
+class FUN_00cc06f0 : public hkReferencedObject
 {
   public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void reserve(hkMemoryAllocatorCC06& kAlloc, int n)
-    {
-        const int iCap = getCapacity();
-        if (iCap < n)
-        {
-            int iCap2 = 2 * iCap;
-            int iNewCap = (n < iCap2) ? iCap2 : n;
-            FUN_00c908c0(kAlloc, this, iNewCap, sizeof(T));
-        }
-    }
-    __forceinline void reserve(int n)
-    {
-        reserve(hkRouterCC06::FUN_00c85750().heap(), n);
-    }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        reserve(hkRouterCC06::FUN_00c85750().heap(), n);
-        m_iElementCount = n;
-    }
-};
-
-class hkRefObjCC06
-{
-  public:
-    virtual ~hkRefObjCC06() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    hkRefObjCC06() throw()
-    {
-        m_sReferenceCount = 1;
-    }
-};
-
-class FUN_00cc06f0 : public hkRefObjCC06
-{
-  public:
-    hkArrayCC06<char>* m_buffer;
+    hkArray<char>* m_buffer;
     int m_kRayStart;
     int m_flags;
 
-    FUN_00cc06f0(hkArrayCC06<char>* buffer, int flags) throw();
+    FUN_00cc06f0(hkArray<char>* buffer, int flags) throw();
     virtual ~FUN_00cc06f0() throw();
 };
 
 // Stores the buffer and its size, reserves one extra char, and appends a terminating null byte.
 // @fnv 0x00cc06f0
-FUN_00cc06f0::FUN_00cc06f0(hkArrayCC06<char>* buffer, int flags) throw()
+FUN_00cc06f0::FUN_00cc06f0(hkArray<char>* buffer, int flags) throw()
     : m_buffer(buffer), m_kRayStart(buffer->m_iElementCount), m_flags(flags)
 {
     buffer->reserve(buffer->m_iElementCount + 1);
@@ -447,66 +333,10 @@ FUN_00cc06f0::FUN_00cc06f0(hkArrayCC06<char>* buffer, int flags) throw()
 }
 }  // namespace fnv_00cc06f0
 
-class hkMemoryAllocatorCC07
+class FUN_00cc0780 : public hkReferencedObject
 {
   public:
-    virtual ~hkMemoryAllocatorCC07() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void* AllocateBufferWithSize(int& iNumBytes) throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterCC07
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorCC07* m_pStreamAllocator;
-    hkMemoryAllocatorCC07& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-namespace hkRouterCC07 {
-extern "C" hkMemoryRouterCC07& __cdecl FUN_00c85750() throw();
-}
-
-template <class T> class hkArrayCC07
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    static void operator delete(void* p, unsigned int nbytes)
-    {
-        hkRouterCC07::FUN_00c85750().heap().ReleaseBlock(p, nbytes);
-    }
-    ~hkArrayCC07() throw()
-    {
-        hkMemoryAllocatorCC07& kAlloc = hkRouterCC07::FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
-
-class hkBaseObjectCC07
-{
-  public:
-    virtual ~hkBaseObjectCC07() throw()
-    {}
-};
-
-class FUN_00cc0780 : public hkBaseObjectCC07
-{
-  public:
-    int unk04;
-    hkArrayCC07<unsigned char>* m_buffer;
+    hkArray<unsigned char>* m_buffer;
     int unk0C;
     int m_external;
 
@@ -518,7 +348,14 @@ class FUN_00cc0780 : public hkBaseObjectCC07
 FUN_00cc0780::~FUN_00cc0780() throw()
 {
     if (!m_external)
-        delete m_buffer;
+    {
+        hkArray<unsigned char>* buffer = m_buffer;
+        if (buffer)
+        {
+            buffer->~hkArray();
+            HavokHeap::FUN_00c85750().heap().blockFree(buffer, sizeof(*buffer));
+        }
+    }
 }
 
 struct GlobalObject_0045cfe0
@@ -540,54 +377,7 @@ FUN_00cbf430::~FUN_00cbf430()
     FUN_00cbf2f0();
 }
 
-class hkMemoryAllocatorD60B
-{
-  public:
-    virtual ~hkMemoryAllocatorD60B() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterD60B
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorD60B* m_pStreamAllocator;
-
-    hkMemoryAllocatorD60B& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-namespace hkRouterD60B {
-extern "C" hkMemoryRouterD60B& __cdecl FUN_00c85750() throw();
-}
-
-class hkRefObjD60B
-{
-  public:
-    virtual ~hkRefObjD60B() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    hkRefObjD60B()
-    {
-        m_sReferenceCount = 1;
-    }
-
-    static void* operator new(unsigned int nbytes)
-    {
-        hkRefObjD60B* b = static_cast<hkRefObjD60B*>(hkRouterD60B::FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
-        b->m_usMemSizeAndFlags = (unsigned short)nbytes;
-        return b;
-    }
-    static void operator delete(void* p);
-};
-
-class FUN_00d60b40 : public hkRefObjD60B
+class FUN_00d60b40 : public hkReferencedObject
 {
   public:
     FUN_00cc06f0* m_pChildAtom;
@@ -605,60 +395,7 @@ FUN_00d60b40::FUN_00d60b40(void* owner, char flag) throw()
     m_pChildAtom = new FUN_00cc06f0(owner, 1);
 }
 
-struct NiBinaryStream;
-typedef unsigned int(__cdecl* NiBinaryReadFn)(NiBinaryStream* stream, void* buffer, unsigned int bytes,
-                                              unsigned int* componentSizes, unsigned int numComponents);
 
-struct NiBinaryStream
-{
-    void* vtbl;
-    unsigned int m_uiStreamFlags;
-    NiBinaryReadFn m_pfnRead;
-};
-
-struct NiStream
-{
-    void* vtbl;
-    unsigned int m_uiFormatVersion;
-    char m_author[0xd8];
-    char m_fileName[0x105];
-    char m_bLittleEndian;
-    short unk1e6;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    NiBinaryStream* m_binaryStream;
-};
-
-struct HavokError
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual int Warning(int type, int id, const char* desc, const char* file, int line);
-};
 extern HavokError* DAT_01268360;
 
 struct BoolType
@@ -694,59 +431,6 @@ struct MoppCodeHeader
     unsigned long m_data;
 };
 
-struct bhkMoppBvTreeShape
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual unsigned int slotA8();
-    virtual void v2b();
-    virtual void v2c();
-    virtual MoppCodeHeader* slotB4(char* pAllocated);
-
-    void FUN_00c87710(NiStream& stream);
-
-    unsigned int FUN_00cc9f60(NiStream& stream);
-};
 
 extern "C" unsigned long __cdecl _byteswap_ulong(unsigned long);
 
@@ -758,13 +442,18 @@ unsigned int bhkMoppBvTreeShape::FUN_00cc9f60(NiStream& stream)
     char allocated;
     MoppCodeHeader* buffer = slotB4(&allocated);
 
-    if (stream.m_uiFormatVersion < 6)
+    // NiStream keeps these fields opaque in the shared header.
+    if (*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(&stream) + 4) < 6)
     {
-        NiBinaryStream* pBinaryStream = stream.m_binaryStream;
-        pBinaryStream->m_uiStreamFlags += pBinaryStream->m_pfnRead(pBinaryStream, buffer, size -= 4, 0, 0);
+        NiBinaryStream* pBinaryStream =
+            *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(&stream) + 0x24c);
+        // The shared header does not yet declare the position counter or read callback.
+        *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(pBinaryStream) + 4) +=
+            (*reinterpret_cast<NiBinaryStream::NIBINARYSTREAM_READFN*>(reinterpret_cast<char*>(pBinaryStream) + 8))(
+                pBinaryStream, buffer, size -= 4, 0, 0);
 
-        const char* pcFileName = stream.m_fileName;
-        const char* pcAuthor = stream.m_author;
+        const char* pcFileName = (reinterpret_cast<char*>(&stream) + 0xe0);
+        const char* pcAuthor = (reinterpret_cast<char*>(&stream) + 8);
         if (!*pcAuthor)
         {
             pcAuthor = "Please";
@@ -773,13 +462,13 @@ unsigned int bhkMoppBvTreeShape::FUN_00cc9f60(NiStream& stream)
         char szWarning[512];
         OStream s(szWarning, sizeof(szWarning), true);
         s << "File " << pcFileName << " contains an old bhkMoppBvTreeShape! " << pcAuthor << " re-export\n";
-        DAT_01268360->Warning(1, 0x234f2250, szWarning,
+        DAT_01268360->message(1, 0x234f2250, szWarning,
                               "D:\\_Fallout3\\Platforms\\Common\\Code\\BSHavok\\bhkMoppBvTreeShape.cpp", 187);
     }
     else
     {
         FUN_00c87710(stream);
-        if (stream.m_bLittleEndian != 1)
+        if (*reinterpret_cast<char*>(reinterpret_cast<char*>(&stream) + 0x1e5) != 1)
         {
             buffer->m_data = _byteswap_ulong(buffer->m_data);
         }

@@ -1,3 +1,28 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+// Keep the unit's float-only SIMD intrinsic type for the original aliasing behavior.
+#define _INCLUDED_MM2
+// Exe 0x00d92900 FUN_00d92900: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float f0;
+    float f1;
+    float f2;
+    float f3;
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
+
+#include "../../../../../../include/hkContactPoint.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkpConstraintOwner.h"
+#include "../../../../../../include/hkpSimpleContactConstraintAtom.h"
 
 // src/havok/physics/dynamics/constraint/contact/hkpsimplecontactconstraintdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/contact/hkpsimplecontactconstraintdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -39,45 +64,34 @@ struct S_00d92690_Mgr
         return unk10;
     }
 };
-struct S_00d92690
-{
-    unsigned short unk0;
-    unsigned short unk2;
-    unsigned short count;
-    unsigned short capacity;
-    unsigned char unk8;
-    unsigned char unk9;
-    unsigned char elemSize;
-    unsigned char unkB;
-    unsigned short maxCapacity;
-};
-S_00d92690* AllocateBlock(int cap, int a, int b, int maxCap);
-void FUN_00d925b0(S_00d92690* dst, S_00d92690* src);
+
+hkpSimpleContactConstraintAtom* AllocateBlock(int cap, int a, int b, int maxCap);
+void FUN_00d925b0(hkpSimpleContactConstraintAtom* dst, hkpSimpleContactConstraintAtom* src);
 int RoundUpToBucketSize(int size);
 S_00d92690_Mgr* FUN_00c85750();
 
 // @fnv 0x00d92690
-S_00d92690* FUN_00d92690(S_00d92690* apContainer, bool* grew)
+hkpSimpleContactConstraintAtom* FUN_00d92690(hkpSimpleContactConstraintAtom* apContainer, bool* grew)
 {
-    S_00d92690* result = apContainer;
-    S_00d92690* pContainer = apContainer;
-    int iCount = apContainer->count;
-    if (iCount >= apContainer->capacity)
+    hkpSimpleContactConstraintAtom* result = apContainer;
+    hkpSimpleContactConstraintAtom* pContainer = apContainer;
+    int iCount = apContainer->m_usNumContactPoints;
+    if (iCount >= apContainer->m_usMaxNumContactPoints)
     {
         int iNewCapacity = iCount > 2 ? iCount : 2;
         iNewCapacity *= 2;
-        if (iNewCapacity >= apContainer->maxCapacity)
-            iNewCapacity = apContainer->maxCapacity;
-        result = AllocateBlock(iNewCapacity, apContainer->unk8, apContainer->unk9, apContainer->maxCapacity);
+        if (iNewCapacity >= apContainer->m_usMaxNumContactPointProperties)
+            iNewCapacity = apContainer->m_usMaxNumContactPointProperties;
+        result = AllocateBlock(iNewCapacity, apContainer->m_ucNumReservedContactPoints, apContainer->m_ucNumContactPointProperties, apContainer->m_usMaxNumContactPointProperties);
         FUN_00d925b0(result, apContainer);
-        int size = RoundUpToBucketSize(apContainer->unk2);
+        int size = RoundUpToBucketSize(apContainer->m_usSizeOfAllAtoms);
         FUN_00c85750()->GetAllocator()->Free(apContainer, size);
         pContainer = result;
         *grew = true;
     }
-    pContainer->count = iCount + 1;
-    int iElemSize = pContainer->elemSize;
-    int* data = (int*)((char*)pContainer + pContainer->capacity * 32 + 0x30 + (short)iCount * (short)iElemSize);
+    pContainer->m_usNumContactPoints = iCount + 1;
+    int iElemSize = pContainer->m_ucContactPointPropertiesStriding;
+    int* data = (int*)((char*)pContainer + pContainer->m_usMaxNumContactPoints * 32 + 0x30 + (short)iCount * (short)iElemSize);
     for (int i = (iElemSize >> 2) - 1; i >= 0; --i)
         *data++ = 0;
     return result;
@@ -129,7 +143,7 @@ struct FUN_00d92f20
     unsigned int field1c;
     unsigned int field20;
     void* volatile context24;
-    S_00d92690* buffer28;
+    hkpSimpleContactConstraintAtom* buffer28;
     unsigned int size2c;
 
     FUN_00d92f20(void* atom, const unsigned char* first, const unsigned char* second);
@@ -163,7 +177,7 @@ FUN_00d92f20::FUN_00d92f20(void* atom, const unsigned char* first, const unsigne
     result->ptr28 = 0;
     result->ptr2c = 0;
 
-    size2c = buffer28->unk2;
+    size2c = buffer28->m_usSizeOfAllAtoms;
 }
 
 struct S_00d92fd0_Atom
@@ -382,11 +396,6 @@ struct hkVector4f
     float z;
     float w;
 };
-struct hkContactPoint
-{
-    hkVector4f m_vContactPosition;
-    hkVector4f m_vSeparatingNormal;
-};
 struct PhysicsMaterial
 {
     float m_fAccumulatedImpulse;
@@ -403,54 +412,34 @@ struct PhysicsMaterial
         m_flags = 1;
     }
 };
-struct hkpSimpleContactConstraintAtom
-{
-    unsigned short m_type;
-    unsigned short m_usSizeOfAllAtoms;
-    unsigned short m_usNumContactPoints;
-    unsigned short m_usMaxNumContactPoints;
-    unsigned char m_ucNumReservedContactPoints;
-    unsigned char m_ucNumContactPointProperties;
-    unsigned char m_ucContactPointPropertiesStriding;
-    unsigned char unk0B;
-    unsigned short m_usMaxNumContactPointProperties;
-    unsigned short unk0E;
-    unsigned short m_infoFlags;
-    unsigned short unk12;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
 
-    hkContactPoint* getContactPoints()
-    {
-        return reinterpret_cast<hkContactPoint*>(this + 1);
-    }
-    PhysicsMaterial* getContactPointPropertiesStream(int i)
-    {
-        return reinterpret_cast<PhysicsMaterial*>(reinterpret_cast<char*>(getContactPoints()) +
-                                                  m_usMaxNumContactPoints * sizeof(hkContactPoint) +
-                                                  i * m_ucContactPointPropertiesStriding);
-    }
-};
-class hkBool
+inline hkContactPoint* hkpSimpleContactConstraintAtom::getContactPoints()
 {
-  public:
-    char m_cBooleanValue;
-    hkBool()
-    {}
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
+    return reinterpret_cast<hkContactPoint*>(this + 1);
+}
+
+inline hkContactPoint* hkpSimpleContactConstraintAtom::getContactPoints() const
+{
+    return (hkContactPoint*)(this + 1);
+}
+
+inline PhysicsMaterial* hkpSimpleContactConstraintAtom::getContactPointPropertiesStream(int i)
+{
+    return reinterpret_cast<PhysicsMaterial*>(reinterpret_cast<char*>(getContactPoints()) +
+                                              m_usMaxNumContactPoints * sizeof(hkContactPoint) +
+                                              i * m_ucContactPointPropertiesStriding);
+}
+
+inline UInt32Value* hkpSimpleContactConstraintAtom::getContactPointPropertiesStream() const
+{
+    return (UInt32Value*)(getContactPoints() + m_usMaxNumContactPoints);
+}
+
+inline int hkpSimpleContactConstraintAtom::getContactPointPropertiesStriding() const
+{
+    return m_ucContactPointPropertiesStriding;
+}
+
 hkpSimpleContactConstraintAtom* FUN_00d92690(hkpSimpleContactConstraintAtom* atom, hkBool* atomReallocated);
 void __cdecl ReplaceEntry(void* constraint, hkpSimpleContactConstraintAtom* oldAtom,
                           hkpSimpleContactConstraintAtom* newAtom, int newSize);
@@ -475,34 +464,10 @@ struct GenericConstraintAtomScheme
         m_iSolverElementTemporaryCount += numSolverElemTemps;
     }
 };
-struct hkpConstraintOwner
-{
-    void AccumulateStats(void* constraint, GenericConstraintAtomScheme& info);
-};
-struct MutableByteArray
-{
-    unsigned char* m_iSlotIds;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int ReplaceOrAppendByte(int index);
-};
+// Exe 0x00d93140: opaque free-slot accessor on the byte IDs at data+0x0c.
+struct ContactAtomIdsCallView { int ReplaceOrAppendByte(int index); };
 
-struct hkpSimpleContactConstraintData
-{
-    void* m_ppVirtualMethodTable;
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    unsigned int m_ulUserData;
-    MutableByteArray m_kAtoms;
-    int unk18;
-    int unk1C;
-    int unk20;
-    void* m_pHavokConstraint;
-    hkpSimpleContactConstraintAtom* m_pAtom;
-    int m_iAtomSize;
-
-    int FUN_00d92df0(hkpConstraintOwner& constraintOwner, hkContactPoint** cpOut, PhysicsMaterial** cpPropsOut);
-};
+#include "../../../../../../include/hkpSimpleContactConstraintData.h"
 
 // Adds a contact point at index size, initializes its properties, updates constraint stats, and reallocates the atom if needed.
 // @fnv 0x00d92df0
@@ -558,19 +523,10 @@ int hkpSimpleContactConstraintData::FUN_00d92df0(hkpConstraintOwner& constraintO
         ReplaceEntry(m_pHavokConstraint, oldAtom, m_pAtom, localAtom->m_usSizeOfAllAtoms);
         m_iAtomSize = localAtom->m_usSizeOfAllAtoms;
     }
-    return m_kAtoms.ReplaceOrAppendByte(size);
+    return reinterpret_cast<ContactAtomIdsCallView*>(&m_kAtoms)->ReplaceOrAppendByte(size);
 }
 
 // Dispatch contact callbacks and prepare new contact solver state.
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float f0;
-    float f1;
-    float f2;
-    float f3;
-};
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" void _mm_store_ss(float* p, __m128 a);
 
 extern float DAT_01017870;   // 0.3f
 extern float DAT_0104da48;   // HK_REAL_MAX
@@ -681,22 +637,15 @@ struct S00d92900_World
         return m_pCollisionInput;
     }
 };
-struct S00d92900_ContactPoint
+inline void hkContactPoint::setDistance(float d)
 {
-    hkVector4f m_vContactPosition;
-    float m_normalX;
-    float m_normalY;
-    float m_normalZ;
-    float m_fClosestPointDistanceSquared;
-    void setDistance(float d)
-    {
-        m_fClosestPointDistanceSquared = d;
-    }
-    float getDistance() const
-    {
-        return m_fClosestPointDistanceSquared;
-    }
-};
+    m_vSeparatingNormal.w = d;
+}
+
+inline float hkContactPoint::getDistance() const
+{
+    return m_vSeparatingNormal.w;
+}
 struct S00d92900_Props
 {
     float m_fAccumulatedImpulse;
@@ -719,7 +668,7 @@ struct S00d92900_Props
     {
         return DAT_010c7948[m_usFlags];
     }
-    unsigned int* getStartOfExtendedUserData(const struct S00d92900_Atom* atom)
+    unsigned int* getStartOfExtendedUserData(const hkpSimpleContactConstraintAtom* atom)
     {
         return (unsigned int*)(this + 1);
     }
@@ -731,38 +680,7 @@ struct S00d92900_PropsStream
         return (S00d92900_Props*)this;
     }
 };
-struct S00d92900_Atom
-{
-    unsigned short m_type;
-    unsigned short m_usSizeOfAllAtoms;
-    unsigned short m_usNumContactPoints;
-    unsigned short m_usMaxNumContactPoints;
-    unsigned char m_ucNumReservedContactPoints;
-    unsigned char m_ucNumContactPointProperties;
-    unsigned char m_ucContactPointPropertiesStriding;
-    unsigned char unk0b;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    S00d92900_ContactPoint* getContactPoints() const
-    {
-        return (S00d92900_ContactPoint*)(this + 1);
-    }
-    S00d92900_PropsStream* getContactPointPropertiesStream() const
-    {
-        return (S00d92900_PropsStream*)(getContactPoints() + m_usMaxNumContactPoints);
-    }
-    int getContactPointPropertiesStriding() const
-    {
-        return m_ucContactPointPropertiesStriding;
-    }
-};
+
 struct S00d92900_Event;
 struct S00d92900_Bool
 {
@@ -884,7 +802,7 @@ struct S00d92900_Body
     int unk194;
     int unk198;
     int unk19c;
-    __m128 m_kInertiaAndMassInv;
+    LocalM128 m_kInertiaAndMassInv;
     int unk1b0;
     int unk1b4;
     int unk1b8;
@@ -1027,7 +945,7 @@ struct S00d92900_CollisionEvent
 struct S00d92900_Event : S00d92900_CollisionEvent
 {
     int m_type;
-    S00d92900_ContactPoint* m_vContactPoint;
+    hkContactPoint* m_vContactPoint;
     S00d92900_Props* m_pContactPointProperties;
     S00d92900_Bool m_bFullManifold;
     S00d92900_Bool m_bFirstCallback;
@@ -1037,7 +955,7 @@ struct S00d92900_Event : S00d92900_CollisionEvent
     unsigned int* m_puiKeyStorage;
     S00d92900_Accum* m_pVelocityAccumulatorA[2];
     S00d92900_Event(int source, S00d92900_Body* a, S00d92900_Body* b, S00d92900_Mgr* mgr, int type,
-                    S00d92900_ContactPoint* cp, S00d92900_Props* cpp, float* sepVel, float* rotNorm,
+                    hkContactPoint* cp, S00d92900_Props* cpp, float* sepVel, float* rotNorm,
                     S00d92900_Bool fullManifold, S00d92900_Bool firstCallback, S00d92900_Bool lastCallback,
                     unsigned int* keyStorage, S00d92900_Accum* accA, S00d92900_Accum* accB)
         : S00d92900_CollisionEvent(source, a, b, mgr), m_type(type), m_vContactPoint(cp),
@@ -1069,8 +987,8 @@ struct __declspec(align(16)) S00d92900_BreachInfo
     unsigned short m_usSecondaryField;
     S00d92900_Instance* m_pConstraintChainInstance;
     S00d92900_Props* m_kProperties;
-    S00d92900_ContactPoint* m_vContactPoint;
-    void set(S00d92900_Instance* instance, S00d92900_Props* properties, S00d92900_ContactPoint* cp, bool toi)
+    hkContactPoint* m_vContactPoint;
+    void set(S00d92900_Instance* instance, S00d92900_Props* properties, hkContactPoint* cp, bool toi)
     {
         m_type = 1 + toi;
         m_usSecondaryField = true;
@@ -1081,10 +999,10 @@ struct __declspec(align(16)) S00d92900_BreachInfo
 };
 
 extern float FUN_00df2510(const S00d92900_Body* a, const S00d92900_Body* b, const float* comA, const float* comB,
-                          const S00d92900_ContactPoint* cp);
+                          const hkContactPoint* cp);
 extern void FUN_00d00ca0(S00d92900_World* world, S00d92900_Event& event);
 extern void FUN_00cfff00(S00d92900_Body* entity, S00d92900_Event& event);
-extern void FUN_00d9ee50(S00d92900_Data* data, const S00d92900_ContactPoint& cp, S00d92900_CollideParams& params,
+extern void FUN_00d9ee50(S00d92900_Data* data, const hkContactPoint& cp, S00d92900_CollideParams& params,
                          S00d92900_Body* rbA, S00d92900_Body* rbB, S00d92900_Accum* accA, S00d92900_Accum* accB,
                          S00d92900_Output& output);
 extern void FUN_00d01700(S00d92900_World* world, const S00d92900_BreachInfo* info, int num);
@@ -1108,7 +1026,7 @@ template <typename T> static __forceinline T* S00d92900_addByteOffset(T* base, i
 }
 
 static __forceinline void dispatchContacts(S00d92900_Data* constraintData, const S00d92900_QueryIn* in,
-                                           S00d92900_Atom* atom, int type, int& bound)
+                                           hkpSimpleContactConstraintAtom* atom, int type, int& bound)
 {
     S00d92900_Instance* instance = in->m_pConstraintChainInstance;
     S00d92900_Body* rbA = instance->getRigidBodyA();
@@ -1118,10 +1036,10 @@ static __forceinline void dispatchContacts(S00d92900_Data* constraintData, const
     S00d92900_Accum* accB = in->m_pBodyB;
     S00d92900_Bool fireCallbacksForNewPoints = (instance->m_pConstraintInternal->m_ucCallbackRequest & 8) > 0;
 
-    S00d92900_PropsStream* cpp = atom->getContactPointPropertiesStream();
+    S00d92900_PropsStream* cpp = reinterpret_cast<S00d92900_PropsStream*>(atom->getContactPointPropertiesStream());
     S00d92900_PropsStream* prevCpp = 0;
     const int cppStriding = atom->getContactPointPropertiesStriding();
-    S00d92900_ContactPoint* cp = atom->getContactPoints();
+    hkContactPoint* cp = atom->getContactPoints();
     const int nA = atom->m_usNumContactPoints;
     __assume(nA >= 0);
     bound = nA - 1;
@@ -1226,7 +1144,7 @@ static __forceinline void dispatchContacts(S00d92900_Data* constraintData, const
 
 // Wraps dispatchContacts to process contact points for a constraint atom, firing events and resolving collisions.
 // @fnv 0x00d92900
-void FUN_00d92900(S00d92900_Data* constraintData, const S00d92900_QueryIn* in, S00d92900_Atom* atom, int type)
+void FUN_00d92900(S00d92900_Data* constraintData, const S00d92900_QueryIn* in, hkpSimpleContactConstraintAtom* atom, int type)
 {
     int bound;
     dispatchContacts(constraintData, in, atom, type, bound);

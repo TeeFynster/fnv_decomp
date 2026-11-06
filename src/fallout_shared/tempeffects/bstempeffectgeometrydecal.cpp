@@ -1,16 +1,40 @@
+#include "../../../include/BSDismemberSkinInstance.h"
+#include "../../../include/BSTempEffectGeometryDecal.h"
+#include "../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../../include/NiSkinInstance.h"
+#include "../../../include/NiTriShape.h"
+#include "../../../include/BSThread.h"
+#include "../../../include/GO.h"
+#include "../../../include/NiRTTI.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/TESActorBaseData.h"
+#include "../../../include/NiPoint2.h"
+#include "../../../include/NiNode.h"
 
 // src/fallout_shared/tempeffects/bstempeffectgeometrydecal.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/tempeffects/bstempeffectgeometrydecal.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiRTTI
-{
-};
 extern const NiRTTI g_011d6b04;
-
-struct BSTempEffectGeometryDecal
-{
-    const NiRTTI* FUN_006838a0() const;
-};
 
 // @fnv 0x006838a0
 const NiRTTI* __thiscall BSTempEffectGeometryDecal::FUN_006838a0() const
@@ -34,8 +58,6 @@ void __cdecl ForwardFloatAndInt(float afValue, int aiValue)
     PowFloat(afValue, aiValue);
 }
 
-struct NiFixedString;
-
 extern NiFixedString* DAT_011c6228;
 
 // @fnv 0x00688460
@@ -50,22 +72,11 @@ struct GlobalObjectO2_00a7b610
 };
 GlobalObjectO2_00a7b610 g_011f5b2c;
 
-struct FUN_00688590_shell
-{
-    GlobalObjectO2_00a7b610* GetRTTI() const;
-};
-
 // @fnv 0x00688590
-GlobalObjectO2_00a7b610* FUN_00688590_shell::GetRTTI() const
+const NiRTTI* BSDismemberSkinInstance::GetRTTI() const
 {
-    return &g_011f5b2c;
+    return (const NiRTTI*)&g_011f5b2c;
 }
-
-struct BSDismemberSkinInstance
-{
-    void* __thiscall FUN_006885e0(unsigned int);
-    void __thiscall FUN_00688610();
-};
 
 void* __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
 
@@ -91,11 +102,6 @@ void __thiscall FUN_00685e60_shell::FUN_00685e60(unsigned int a, unsigned int b)
     *(unsigned int*)(this + 0x08) = b;
 }
 
-struct NiSkinInstance
-{
-    void __thiscall FUN_00a85580();
-    void* __thiscall FUN_006885a0(unsigned int flags);
-};
 extern "C" void __cdecl _delete(void* p, unsigned int size);
 // Calls FUN_00a85580, then frees this with _delete when flags has bit 0 set, and returns this.
 // @fnv 0x006885a0
@@ -107,15 +113,9 @@ void* NiSkinInstance::FUN_006885a0(unsigned int flags)
     return this;
 }
 
-void __cdecl FUN_00688770();
-struct FUN_006838d0_shell
-{
-    void __thiscall FUN_00688770();
-    void* __thiscall FUN_006838d0(unsigned int flags);
-};
 // Calls FUN_00688770 on this, then deletes this with size 100 when flags has bit 0 set, and returns this.
 // @fnv 0x006838d0
-void* __thiscall FUN_006838d0_shell::FUN_006838d0(unsigned int flags)
+void* __thiscall BSTempEffectGeometryDecal::FUN_006838d0(unsigned int flags)
 {
     this->FUN_00688770();
     if (flags & 1)
@@ -139,14 +139,6 @@ void* __thiscall FUN_00685d40_shell::ResetToZero()
     return this;
 }
 
-struct TESActorBaseData
-{
-    unsigned short __thiscall GetFatigue() const;
-};
-struct BSThread
-{
-    unsigned int __thiscall GetThreadID();
-};
 struct RefObj
 {
     void* __thiscall _FNV_GetObjectReference();
@@ -165,55 +157,53 @@ void __thiscall Class87d40::ForwardActorBaseData(void* apObject, int aiArg2, int
                  ((TESActorBaseData*)apObject)->GetFatigue(), aiArg2, aiArg3, aiArg4, aiArg5, aiArg6);
 }
 
-struct NineDwords688430
+struct NineDw
 {
-    int v[9];
+    int m_00;
+    int m_04;
+    int m_08;
+    int m_0c;
+    int m_10;
+    int m_14;
+    int m_18;
+    int m_1c;
+    int m_20;
+    void FUN_004b45b0(void* p);
 };
-struct FUN_00688430_shell
-{
-    char _pad[0x68];
-    NineDwords688430 data;
-    void __thiscall FUN_00688430(NineDwords688430* src);
-};
+
 // Copies the nine dwords from src into the data member at offset 0x68.
 // @fnv 0x00688430
-void __thiscall FUN_00688430_shell::FUN_00688430(NineDwords688430* apSource)
+void __thiscall NiTriShape::FUN_00688430(NineDw* apSource)
 {
-    data = *apSource;
+    *reinterpret_cast<NineDw*>(&m_kWorld) = *apSource;
 }
 
 extern int DAT_01069a84;
-struct FUN_00688470_shell
-{
-    void* __thiscall FUN_006884c0(int a, int b, int c);
-    void* __thiscall ConstructShell(int a, int b, int c, int d, int e);
-};
+
 // Calls FUN_006884c0 with a, b, c, then sets the vtable, stores e at +0x34 and d at +0x38, sets the byte at +0x3c to 1, and returns this.
 // @fnv 0x00688470
-void* __thiscall FUN_00688470_shell::ConstructShell(int aiArg1, int aiArg2, int aiArg3, int aiValue38, int aiValue34)
+void* __thiscall BSDismemberSkinInstance::ConstructShell(int aiArg1, int aiArg2, int aiArg3, int aiValue38, int aiValue34)
 {
     FUN_006884c0(aiArg1, aiArg2, aiArg3);
     *(int*)this = (int)&DAT_01069a84;
-    *(int*)((char*)this + 0x34) = aiValue34;
-    *(int*)((char*)this + 0x38) = aiValue38;
-    *(char*)((char*)this + 0x3c) = 1;
+    unk34 = aiValue34;
+    unk38 = (Partition*)aiValue38;
+    unk3C = 1;
     return this;
 }
-
-extern int DAT_01069a84;
 
 // @fnv 0x00688610
 void __thiscall BSDismemberSkinInstance::FUN_00688610()
 {
     *reinterpret_cast<int**>(this) = &DAT_01069a84;
-    if (*reinterpret_cast<void***>(reinterpret_cast<char*>(this) + 0x38))
+    if (unk38)
     {
-        void* p = *reinterpret_cast<void***>(reinterpret_cast<char*>(this) + 0x38);
-        operator delete(p);
-        *reinterpret_cast<void***>(reinterpret_cast<char*>(this) + 0x38) = 0;
-        *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x34) = 0;
+        void* p = unk38;
+        ::operator delete(p);
+        unk38 = 0;
+        unk34 = 0;
     }
-    reinterpret_cast<NiSkinInstance*>(this)->FUN_00a85580();
+    NiSkinInstance::FUN_00a85580();
 }
 
 struct Flt
@@ -237,16 +227,8 @@ CtlV* FUN_00688730_shell::GetNextIfSet()
     return 0;
 }
 
-struct Point
-{
-    float x, y, z;
-};
-struct Decal
-{
-    bool FUN_00683a70(int, int, bool, const unsigned short*, const Point*, const unsigned short*);
-};
 // @fnv 0x00683a70
-bool Decal::FUN_00683a70(int triangle, int base, bool strip, const unsigned short* indices, const Point* vertices,
+bool BSTempEffectGeometryDecal::FUN_00683a70(int triangle, int base, bool strip, const unsigned short* indices, const NiPoint3* vertices,
                          const unsigned short* remap)
 {
     int flags;
@@ -480,49 +462,16 @@ struct A8660Solution
     A8660Controller* GetController();
 };
 
-struct A8660Ref
-{
-    A8660Solution* m_pObject;
-
-    A8660Solution* operator->();
-    void Reset(void* pObject);
-};
-
-struct A8660Path
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    bool m_bForced;
-    char unk15;
-    char unk16;
-    char unk17;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    A8660Ref m_spPrimary;
-    A8660Ref m_spSecondary;
-
-    void Smooth();
-    void Straighten();
-    void Finalize();
-    void FinalizePath();
-};
-
 // @fnv 0x00688660
-void A8660Path::FinalizePath()
+void BSTempEffectGeometryDecal::FinalizePath()
 {
-    if (!m_spPrimary->GetSkin())
+    if (!((A8660Solution*)m_sp2C.operator->())->GetSkin())
         return;
-    if (!m_bForced)
+    if (!bInitialized)
     {
-        if (m_spSecondary->GetCount() > 1 && m_spPrimary->GetCount() > 1)
+        if (((A8660Solution*)m_sp30.operator->())->GetCount() > 1 && ((A8660Solution*)m_sp2C.operator->())->GetCount() > 1)
         {
-            A8660Controller* pkController = m_spPrimary->GetController();
+            A8660Controller* pkController = ((A8660Solution*)m_sp2C.operator->())->GetController();
             if (pkController && pkController->IsActive())
                 Smooth();
             else
@@ -530,8 +479,8 @@ void A8660Path::FinalizePath()
         }
     }
     Finalize();
-    m_spPrimary.Reset(0);
-    m_spSecondary.Reset(0);
+    m_sp2C = 0;
+    m_sp30 = 0;
 }
 
 extern int DAT_011c57f0;
@@ -613,103 +562,45 @@ struct Node_cls
     Stateful_cls* FUN_00a59d30(int n);
 };
 
-struct DecalEffect_cls
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual Node_cls* v38();
-    int unk04;
-    float m_08;
-    int unk0c;
-    float m_10;
-    int unk14;
-    int unk18;
-    Obj_cls m_1c;
-    int unk20;
-    int unk24;
-    unsigned char m_28;
-    int unk2c;
-    int unk30;
-    Obj_cls m_34;
-    bool FUN_006828a0(float f);
-    bool FUN_006888a0(float f);
-};
-
 // If m_28 is clear, runs FUN_006828a0(f), sets a node's 0xbc float to m_10/m_08, and when m_10 > m_08 links m_34/m_1c objects and sets m_28.
 // @fnv 0x006888a0
-bool DecalEffect_cls::FUN_006888a0(float afValue)
+bool BSTempEffectGeometryDecal::FUN_006888a0(float afValue)
 {
     Obj_cls* outTmp;
     bool ok5;
     Stateful_cls* aSt;
     Node_cls* node7;
     Stateful_cls* t_;
-    if (m_28 != 0)
+    if (unk28 != 0)
     {
         return false;
     }
     ok5 = FUN_006828a0(afValue);
-    node7 = v38();
+    node7 = (Node_cls*)Get3D();
     t_ = node7->FUN_00a59d30(3);
     aSt = t_;
-    *(float*)((char*)aSt + 0xbc) = m_10 / m_08;
-    if (m_10 > m_08)
+    *(float*)((char*)aSt + 0xbc) = m_fFirstFloatValue / m_fParticleParameter5;
+    if (m_fFirstFloatValue > m_fParticleParameter5)
     {
         outTmp = 0;
-        if (m_34.FUN_00559450() != 0)
+        if (((Obj_cls*)m_sp34.operator->()) != 0)
         {
-            m_34.FUN_00559450()->v58(m_1c.FUN_00559450());
-            if (m_34.FUN_00559450()->FUN_009611e0() != 0)
+            ((Obj_cls*)m_sp34.operator->())->v58(((Obj_cls*)m_spGeometry.operator->()));
+            if (((Obj_cls*)m_sp34.operator->())->FUN_009611e0() != 0)
             {
-                outTmp = m_34.FUN_00559450()->FUN_009611e0();
+                outTmp = ((Obj_cls*)m_sp34.operator->())->FUN_009611e0();
                 outTmp->RemoveEffect(this);
             }
         }
         if (outTmp != 0)
         {
-            if (m_34.FUN_00559450()->FUN_00453470() == 0)
+            if (((Obj_cls*)m_sp34.operator->())->FUN_00453470() == 0)
             {
-                m_34.FUN_00559450()->FUN_009611e0()->v58(m_34.FUN_00559450());
+                ((Obj_cls*)m_sp34.operator->())->FUN_009611e0()->v58(((Obj_cls*)m_sp34.operator->()));
                 DAT_011c57f0 = DAT_011c57f0 - 1;
             }
         }
-        m_28 = 1;
+        unk28 = 1;
     }
     return ok5;
 }
@@ -736,14 +627,9 @@ void __cdecl FUN_0040fbe0(const char* format, ...);
 
 typedef unsigned int(__fastcall* VirtualQuery)(void* object);
 
-struct RuntimeController
-{
-    unsigned short GetRuntimeFlags();
-};
-
 // Builds a flags value from DAT_011de45c state and, when DAT_011de4e8 is set, logs details of the current object via FUN_0040fbe0.
 // @fnv 0x00688a10
-unsigned short RuntimeController::GetRuntimeFlags()
+unsigned short BSTempEffectGeometryDecal::GetRuntimeFlags()
 {
     unsigned short usFlags = 0;
     unsigned short usInitialFlags = usFlags;
@@ -772,13 +658,6 @@ unsigned short RuntimeController::GetRuntimeFlags()
     return usFlags;
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    float DotProduct(NiPoint3* p);
-};
 struct Pt3Obj
 {
     float x;
@@ -886,11 +765,6 @@ extern void(__cdecl* DAT_00fdf0c8)();
 extern GlobalObjectO2_00a7b610 g_011f49d8;
 unsigned char __cdecl FUN_0045bad0(GlobalObjectO2_00a7b610* g, void* p);
 void __cdecl FUN_00403d30(void* p, int v, unsigned int n);
-struct BSString
-{
-    char* m_p;
-    const char* FUN_00559450() const;
-};
 struct GeomObj
 {
     NiSkinInstance* FUN_0043fad0();
@@ -902,19 +776,6 @@ struct CtrlObj
 struct SkinBase
 {
     CtrlObj* FUN_0043b230();
-};
-struct NineDw
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    void FUN_004b45b0(void* p);
 };
 struct ThirteenDw
 {
@@ -1041,10 +902,7 @@ struct Entry4
     unsigned char b1;
     unsigned short w;
 };
-struct SavedObj
-{
-    Entry4* GetField38();
-};
+
 struct Ctrl150
 {
     int a;
@@ -1098,37 +956,10 @@ struct BigEntry
     int t28;
 };
 extern NiPoint3 DAT_011f426c;
-struct ThisObj
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    BSString m_2c;
-    int m_30;
-    int m_34;
-    Src38 m_38;
-    NiPoint3 m_44;
-    float m_50;
-    float m_54;
-    int m_58;
-    int m_5c;
-    int m_60;
-    void BuildSkinPartitions();
-    unsigned char FUN_00683a70(int a, int b, bool c, unsigned short* d, Pt3Obj* e, int f);
-    void CreateDecalGeometry(const char* s, int a, int b, Pt3Obj* c, Pt3Obj* d, unsigned short* e, Obj4c* f, void* g,
-                             unsigned short* h);
-};
+
 // Builds per-part skin partition data from the skin instance and control tables, then passes the assembled arrays to CreateDecalGeometry.
 // @fnv 0x00683c10
-void ThisObj::BuildSkinPartitions()
+void BSTempEffectGeometryDecal::BuildSkinPartitions()
 {
     unsigned short* a1c4LocalAF;
     float* a1c0LocalAN;
@@ -1156,7 +987,7 @@ void ThisObj::BuildSkinPartitions()
     unsigned int flagsLocalBC;
     unsigned char byteE9LocalBH;
     Pt3Obj* arrE8LocalFA;
-    NiPoint3 ptE4LocalAB;
+    float ptE4LocalAB[3];
     void* xD8LocalDC;
     int* aD4LocalAA;
     unsigned short* aD0LocalBA;
@@ -1179,7 +1010,7 @@ void ThisObj::BuildSkinPartitions()
     unsigned short word14LocalBL;
     Obj16* arr10LocalCD;
 
-    skinInstLocalAA = ((GeomObj*)m_2c.FUN_00559450())->FUN_0043fad0();
+    skinInstLocalAA = ((GeomObj*)((const char*)m_sp2C.operator->()))->FUN_0043fad0();
     savedLocalAB = 0;
     if (FUN_0045bad0(&g_011f49d8, skinInstLocalAA))
         savedLocalAB = skinInstLocalAA;
@@ -1189,7 +1020,7 @@ void ThisObj::BuildSkinPartitions()
 
     sph1LocalAC.m_afExtents.FUN_006815c0();
 
-    nineLocalBC = *((ConvObjA*)m_2c.FUN_00559450())->FUN_00461130();
+    nineLocalBC = *((ConvObjA*)((const char*)m_sp2C.operator->()))->FUN_00461130();
 
     nineLocalBC.FUN_004b45b0(&obj1bcLocalAE);
 
@@ -1200,15 +1031,15 @@ void ThisObj::BuildSkinPartitions()
     sph3LocalCK.FUN_004a0c90(m_54);
     sph1LocalAC = sph3LocalCK.FUN_0043f8d0(FUN_00c4b600(m_44));
 
-    thirteenLocalAI = *((ConvObjB*)m_2c.FUN_00559450())->FUN_00461130();
-    ((Obj160*)&thirteenLocalAI.m_24)->Subtract(&m_38);
+    thirteenLocalAI = *((ConvObjB*)((const char*)m_sp2C.operator->()))->FUN_00461130();
+    ((Obj160*)&thirteenLocalAI.m_24)->Subtract((Src38*)&m_38);
 
     s1LocalBB.FUN_00534550();
     s2LocalAK.FUN_00534550();
     s3LocalBN.FUN_00534550();
     s4LocalAA.FUN_00534550();
     s5LocalAF.FUN_00534550();
-    p144LocalEF = ((MidObj*)m_2c.FUN_00559450())->FUN_005495f0()->FUN_004a8a90();
+    p144LocalEF = ((MidObj*)((const char*)m_sp2C.operator->()))->FUN_005495f0()->FUN_004a8a90();
     z140LocalBM = 0;
     data38LocalAM = 0;
     arr198LocalAB = 0;
@@ -1220,12 +1051,12 @@ void ThisObj::BuildSkinPartitions()
     if (data38LocalAM == 0)
         return;
     cntFcLocalBB = (int)((ChainObj*)p144LocalEF)->FUN_0047d370();
-    byteE9LocalBH = ((MidObj*)m_2c.FUN_00559450())->FUN_005495f0()->FUN_00a67360(0);
-    ((MidObj*)m_2c.FUN_00559450())->FUN_005495f0()->FUN_00a67410(&s1LocalBB);
-    ((MidObj*)m_2c.FUN_00559450())->FUN_005495f0()->GetBounds(&s2LocalAK);
-    ((MidObj*)m_2c.FUN_00559450())->FUN_005495f0()->GetKeyAndMode(0, &s3LocalBN);
-    ((MidObj*)m_2c.FUN_00559450())->FUN_005495f0()->GetOutRec(&s4LocalAA);
-    ((MidObj*)m_2c.FUN_00559450())->FUN_005495f0()->FillOutRec674(&s5LocalAF);
+    byteE9LocalBH = ((MidObj*)((const char*)m_sp2C.operator->()))->FUN_005495f0()->FUN_00a67360(0);
+    ((MidObj*)((const char*)m_sp2C.operator->()))->FUN_005495f0()->FUN_00a67410(&s1LocalBB);
+    ((MidObj*)((const char*)m_sp2C.operator->()))->FUN_005495f0()->GetBounds(&s2LocalAK);
+    ((MidObj*)((const char*)m_sp2C.operator->()))->FUN_005495f0()->GetKeyAndMode(0, &s3LocalBN);
+    ((MidObj*)((const char*)m_sp2C.operator->()))->FUN_005495f0()->GetOutRec(&s4LocalAA);
+    ((MidObj*)((const char*)m_sp2C.operator->()))->FUN_005495f0()->FillOutRec674(&s5LocalAF);
     word110LocalBC = 0;
     byte89LocalAD = 0;
     count194LocalBA = 0;
@@ -1239,8 +1070,8 @@ void ThisObj::BuildSkinPartitions()
             unsigned char byteCDValueAL;
             int intCCValueDC;
 
-            byteCDValueAL = ((SavedObj*)savedLocalAB)->GetField38()[iValueDA].b0;
-            wordD4ValueBD = ((SavedObj*)savedLocalAB)->GetField38()[iValueDA].w;
+            byteCDValueAL = ((BSDismemberSkinInstance*)savedLocalAB)->GetField38()[iValueDA].b0;
+            wordD4ValueBD = ((BSDismemberSkinInstance*)savedLocalAB)->GetField38()[iValueDA].w;
             if ((int)wordD4ValueBD > 1000)
                 wordD4ValueBD = (unsigned short)((int)wordD4ValueBD / 1000);
             else if ((int)wordD4ValueBD > 100)
@@ -1303,7 +1134,7 @@ void ThisObj::BuildSkinPartitions()
         }
     }
 
-    ptE4LocalAB = *(NiPoint3*)&sph2LocalAI;
+    (*reinterpret_cast<NiPoint3*>(ptE4LocalAB)) = *(NiPoint3*)&sph2LocalAI;
 
     pt50LocalAN.FUN_006815c0();
 
@@ -1312,11 +1143,11 @@ void ThisObj::BuildSkinPartitions()
     {
         {
             float tmp200ValueAC;
-            NiPoint3 gPtAValueAG;
-            NiPoint3 gPtBValueBI;
+            float gPtAValueAG[3];
+            float gPtBValueBI[3];
             float tmp1e4ValueAC;
 
-            gPtAValueAG = DAT_011f426c;
+            (*reinterpret_cast<NiPoint3*>(gPtAValueAG)) = DAT_011f426c;
             *(NiPoint3*)&pt50LocalAN = *(NiPoint3*)&arr10cLocalAB[kValueBC];
             *(NiPoint3*)&ptCCLocalAD = *(NiPoint3*)&arrE8LocalFA[kValueBC];
             s4LocalAA.ReadWeights(kValueBC, &arr10LocalCD[kValueBC]);
@@ -1325,14 +1156,14 @@ void ThisObj::BuildSkinPartitions()
             if ((double)arr10LocalCD[kValueBC].w < DAT_01030f28)
                 arr10LocalCD[kValueBC].w = 0.0f;
             pt50LocalAN.FUN_00439180(*(float*)&thirteenLocalAI.m_30);
-            gPtBValueBI = DAT_011f426c;
-            FUN_00a582f0(&thirteenLocalAI, &thirteenLocalAI.m_24, 1, &pt50LocalAN, &gPtBValueBI);
-            FUN_00a582f0(&sph1LocalAC, &DAT_011f426c, 1, &gPtBValueBI, &gPtAValueAG);
-            arr34LocalCA[kValueBC].x = gPtAValueAG.x / m_50 + 0.5f;
-            arr34LocalCA[kValueBC].y = gPtAValueAG.y / m_50 + 0.5f;
-            tmp1e4ValueAC = 1.0f - FUN_00404010(0.0f, ptE4LocalAB.DotProduct((NiPoint3*)&ptCCLocalAD));
+            (*reinterpret_cast<NiPoint3*>(gPtBValueBI)) = DAT_011f426c;
+            FUN_00a582f0(&thirteenLocalAI, &thirteenLocalAI.m_24, 1, &pt50LocalAN, &(*reinterpret_cast<NiPoint3*>(gPtBValueBI)));
+            FUN_00a582f0(&sph1LocalAC, &DAT_011f426c, 1, &(*reinterpret_cast<NiPoint3*>(gPtBValueBI)), &(*reinterpret_cast<NiPoint3*>(gPtAValueAG)));
+            arr34LocalCA[kValueBC].x = (*reinterpret_cast<NiPoint3*>(gPtAValueAG)).x / m_50 + 0.5f;
+            arr34LocalCA[kValueBC].y = (*reinterpret_cast<NiPoint3*>(gPtAValueAG)).y / m_50 + 0.5f;
+            tmp1e4ValueAC = 1.0f - FUN_00404010(0.0f, (*reinterpret_cast<NiPoint3*>(ptE4LocalAB)).DotProduct((NiPoint3*)&ptCCLocalAD));
             arr34LocalCA[kValueBC].z =
-                Calc685::ForwardFloatAndInt(tmp1e4ValueAC, 10) * (1.0f - FUN_00408840(gPtAValueAG.z) / 256.0f);
+                Calc685::ForwardFloatAndInt(tmp1e4ValueAC, 10) * (1.0f - FUN_00408840((*reinterpret_cast<NiPoint3*>(gPtAValueAG)).z) / 256.0f);
         }
     }
 
@@ -1348,8 +1179,8 @@ void ThisObj::BuildSkinPartitions()
             int intCC2ValueAH;
 
             x214ValueAG = 0;
-            byteCD2ValueAH = ((SavedObj*)savedLocalAB)->GetField38()[mValueBC].b0;
-            wordD4bValueBD = ((SavedObj*)savedLocalAB)->GetField38()[mValueBC].w;
+            byteCD2ValueAH = ((BSDismemberSkinInstance*)savedLocalAB)->GetField38()[mValueBC].b0;
+            wordD4bValueBD = ((BSDismemberSkinInstance*)savedLocalAB)->GetField38()[mValueBC].w;
             if ((int)wordD4bValueBD > 1000)
                 wordD4bValueBD = (unsigned short)((int)wordD4bValueBD / 1000);
             else if ((int)wordD4bValueBD > 100)
@@ -1613,10 +1444,10 @@ void ThisObj::BuildSkinPartitions()
         }
 
         if (x18cLocalCE != 0)
-            CreateDecalGeometry(m_2c.FUN_00559450(), (int)word14LocalBL, (int)wordF4LocalAD, x280ValueAD, x27cValueBB,
+            CreateDecalGeometry(((const char*)m_sp2C.operator->()), (int)word14LocalBL, (int)wordF4LocalAD, x280ValueAD, x27cValueBB,
                                 x284ValueBI, arr198LocalAB, x18cLocalCE, a148LocalAD);
         else
-            CreateDecalGeometry(m_2c.FUN_00559450(), (int)word14LocalBL, (int)wordF4LocalAD, x280ValueAD, x27cValueBB,
+            CreateDecalGeometry(((const char*)m_sp2C.operator->()), (int)word14LocalBL, (int)wordF4LocalAD, x280ValueAD, x27cValueBB,
                                 x284ValueBI, arr198LocalAB, 0, 0);
         m_5c = (int)word14LocalBL;
     }
@@ -1642,10 +1473,10 @@ void ThisObj::BuildSkinPartitions()
     delete a114LocalBI;
     delete a148LocalAD;
     if (byteE9LocalBH)
-        ((MidObj*)m_2c.FUN_00559450())->FUN_005495f0()->FUN_00a673d0();
+        ((MidObj*)((const char*)m_sp2C.operator->()))->FUN_005495f0()->FUN_00a673d0();
     (void)cnt88LocalFB;
     (void)arr54LocalAD;
-    (void)ptE4LocalAB;
+    (void)(*reinterpret_cast<NiPoint3*>(ptE4LocalAB));
     (void)cntC0LocalBB;
 }
 
@@ -1700,11 +1531,6 @@ struct DBone
     unsigned short count, unk4a;
     DBone();
 };
-struct DPartitionFlag
-{
-    unsigned char enabled, unk01;
-    unsigned short bodyPart;
-};
 struct DPartitionData
 {
     unsigned int FUN_0044ddc0();
@@ -1719,7 +1545,6 @@ struct DSkin
 {
     DPartitionData* FUN_0043b230();
     DSkinData* FUN_005585e0();
-    DPartitionFlag* GetField38();
     void ForwardActorBaseData(void*, DPoint*, DPoint*, int, int, int);
 };
 struct DGeometryData
@@ -1733,10 +1558,6 @@ struct DGeometry
     DSkin* FUN_0043fad0();
     DTransform& FUN_00461130();
     DGeometryData* FUN_005495f0();
-};
-struct DGeometryRef
-{
-    DGeometry* FUN_00559450();
 };
 struct DNewPartition
 {
@@ -1760,23 +1581,10 @@ void* __cdecl NiMalloc(unsigned int);
 void* __cdecl memcpy(void*, const void*, unsigned int);
 void* __cdecl memset(void*, int, unsigned int);
 extern "C" __declspec(dllimport) void __stdcall DebugBreak();
-struct DDecal
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28;
-    DGeometryRef geometry;
-    int unk30, unk34;
-    DPoint position;
-    DPoint direction;
-    float size, angle;
-    int unk58, vertexCount, bodyParts;
-    bool FUN_00683a70(int, int, bool, const unsigned short*, const DPoint*, const unsigned short*);
-    void CreateDecalGeometry(DGeometry*, unsigned short, unsigned short, DPoint*, DPoint*, unsigned short*, DBone*,
-                             DNewPartition*, unsigned short*);
-    void BuildDecalGeometry();
-};
+
 // Projects the skin's vertices onto the decal plane, rebuilds the selected body-part partitions and bones, and passes the new geometry to CreateDecalGeometry.
 // @fnv 0x00685ef0
-void DDecal::BuildDecalGeometry()
+void BSTempEffectGeometryDecal::BuildDecalGeometry()
 {
     unsigned short* partitionIndices_10;
     float* weights_6;
@@ -1811,9 +1619,9 @@ void DDecal::BuildDecalGeometry()
     DPoint* texcoords_0;
     DSkin* skin_1;
     unsigned short outputVertexCount_4;
-    if (bodyParts == 0)
+    if (m_60 == 0)
         return;
-    skin_1 = geometry.FUN_00559450()->FUN_0043fad0();
+    skin_1 = ((DGeometry*)m_sp2C.operator->())->FUN_0043fad0();
     dismember_9 = 0;
     if (FUN_0045bad0(&g_011f49d8, skin_1))
         dismember_9 = skin_1;
@@ -1821,15 +1629,15 @@ void DDecal::BuildDecalGeometry()
         return;
     partitionCount_10 = skin_1->FUN_0043b230()->FUN_0044ddc0();
     DMatrix basis_6;
-    DMatrix worldRotation_4 = geometry.FUN_00559450()->FUN_00461130().rotation;
+    DMatrix worldRotation_4 = ((DGeometry*)m_sp2C.operator->())->FUN_00461130().rotation;
     DMatrix inverse_11 = worldRotation_4.FUN_004b45b0();
     DPoint localDirection_29;
-    localDirection_29 = inverse_11.FUN_004b4500(&direction);
+    localDirection_29 = inverse_11.FUN_004b4500(&(*(DPoint*)&m_44));
     DMatrix rotation_6;
-    rotation_6.FUN_004a0c90(angle);
-    basis_6 = rotation_6.FUN_0043f8d0(&FUN_00c4b600(direction));
-    DTransform transform_40 = geometry.FUN_00559450()->FUN_00461130();
-    transform_40.position.Subtract(position);
+    rotation_6.FUN_004a0c90(m_54);
+    basis_6 = rotation_6.FUN_0043f8d0(&FUN_00c4b600((*(DPoint*)&m_44)));
+    DTransform transform_40 = ((DGeometry*)m_sp2C.operator->())->FUN_00461130();
+    transform_40.position.Subtract((*(DPoint*)&m_38));
     boneData_4 = skin_1->FUN_005585e0()->FUN_008d6f30();
     if (boneData_4 == 0 || boneData_4->weights == 0)
         return;
@@ -1838,7 +1646,7 @@ void DDecal::BuildDecalGeometry()
     newBones_3 = 0;
     skinData_1 = 0;
     partitions_15 = 0;
-    sourceVertexCount_3 = geometry.FUN_00559450()->FUN_005495f0()->FUN_004a8ae0();
+    sourceVertexCount_3 = ((DGeometry*)m_sp2C.operator->())->FUN_005495f0()->FUN_004a8ae0();
     triangleCount_33 = 0;
     triangleData_17 = 0;
     vertexMap_22 = 0;
@@ -1848,8 +1656,8 @@ void DDecal::BuildDecalGeometry()
     strips_17 = partitions_15->stripCount > 0;
     for (int scanPartitionIndex = 0; scanPartitionIndex < partitionCount_10; scanPartitionIndex++)
     {
-        unsigned char scanEnabled_1 = dismember_9->GetField38()[scanPartitionIndex].enabled;
-        unsigned short scanPart_50 = dismember_9->GetField38()[scanPartitionIndex].bodyPart;
+        unsigned char scanEnabled_1 = ((BSDismemberSkinInstance*)dismember_9)->GetField38()[scanPartitionIndex].enabled;
+        unsigned short scanPart_50 = ((BSDismemberSkinInstance*)dismember_9)->GetField38()[scanPartitionIndex].bodyPart;
         if (scanPart_50 > 1000)
             scanPart_50 /= 1000;
         else if (scanPart_50 > 100)
@@ -1858,7 +1666,7 @@ void DDecal::BuildDecalGeometry()
                 scanPart_50 -= 100;
         }
         int scanPartIndex_40 = scanPart_50;
-        if (scanEnabled_1 && ((1 << (scanPartIndex_40 + 1)) & bodyParts))
+        if (scanEnabled_1 && ((1 << (scanPartIndex_40 + 1)) & m_60))
         {
             selected_21 = true;
             triangleCount_33 += partitions_15[scanPartitionIndex].triangleCount;
@@ -1884,7 +1692,7 @@ void DDecal::BuildDecalGeometry()
     normals_17 = 0;
     positions_6 = new DPoint[sourceVertexCount_3];
     normals_17 = new DPoint[sourceVertexCount_3];
-    skin_1->ForwardActorBaseData(geometry.FUN_00559450()->FUN_005495f0(), positions_6, normals_17, 0, 0, 12);
+    skin_1->ForwardActorBaseData(((DGeometry*)m_sp2C.operator->())->FUN_005495f0(), positions_6, normals_17, 0, 0, 12);
     skinData_1 = skin_1->FUN_005585e0();
     bones_53 = skinData_1->FUN_008d6f30();
     boneCount_4 = skinData_1->FUN_008041a0();
@@ -1910,8 +1718,8 @@ void DDecal::BuildDecalGeometry()
         vertex_3.FUN_00439180(transform_40.scale);
         FUN_00a582f0(&transform_40.rotation, &transform_40.position, 1, &vertex_3, &world_20);
         FUN_00a582f0(&basis_6, &NiPoint3_ZERO, 1, &world_20, &projected_8);
-        texcoords_0[projectionVertex].x = projected_8.x / size + 0.5f;
-        texcoords_0[projectionVertex].y = projected_8.y / size + 0.5f;
+        texcoords_0[projectionVertex].x = projected_8.x / m_50 + 0.5f;
+        texcoords_0[projectionVertex].y = projected_8.y / m_50 + 0.5f;
         float opacity_6 = 1.0f - FUN_00404010(0.0f, normalDirection_1.DotProduct(normal_35));
         texcoords_0[projectionVertex].z = DecalPower(opacity_6, 10) * (1.0f - FloatAbs(projected_8.z) / 200.0f);
     }
@@ -1920,8 +1728,8 @@ void DDecal::BuildDecalGeometry()
     selectedCount_12 = 0;
     for (int buildPartitionIndex = 0; buildPartitionIndex < partitionCount_10; buildPartitionIndex++)
     {
-        unsigned char buildEnabled_2 = dismember_9->GetField38()[buildPartitionIndex].enabled;
-        unsigned short buildPart_43 = dismember_9->GetField38()[buildPartitionIndex].bodyPart;
+        unsigned char buildEnabled_2 = ((BSDismemberSkinInstance*)dismember_9)->GetField38()[buildPartitionIndex].enabled;
+        unsigned short buildPart_43 = ((BSDismemberSkinInstance*)dismember_9)->GetField38()[buildPartitionIndex].bodyPart;
         if (buildPart_43 > 1000)
             buildPart_43 /= 1000;
         else if (buildPart_43 > 100)
@@ -1930,7 +1738,7 @@ void DDecal::BuildDecalGeometry()
                 buildPart_43 -= 100;
         }
         int buildPartIndex_11 = buildPart_43;
-        if (buildEnabled_2 && ((1 << (buildPartIndex_11 + 1)) & bodyParts))
+        if (buildEnabled_2 && ((1 << (buildPartIndex_11 + 1)) & m_60))
         {
             triangleCount_33 = partitions_15[buildPartitionIndex].triangleCount;
             triangleData_17 = partitions_15[buildPartitionIndex].triangles;
@@ -2070,8 +1878,8 @@ void DDecal::BuildDecalGeometry()
     {
         unsigned short* finalIndices_1 = new unsigned short[indexCount_11];
         memcpy(finalIndices_1, indices_3, indexCount_11 * 2);
-        DPoint* sourcePositions_18 = geometry.FUN_00559450()->FUN_005495f0()->FUN_007af430();
-        DPoint* sourceNormals_7 = geometry.FUN_00559450()->FUN_005495f0()->FUN_0059bb30();
+        DPoint* sourcePositions_18 = ((DGeometry*)m_sp2C.operator->())->FUN_005495f0()->FUN_007af430();
+        DPoint* sourceNormals_7 = ((DGeometry*)m_sp2C.operator->())->FUN_005495f0()->FUN_0059bb30();
         DPoint* finalPositions_26 = new DPoint[outputVertexCount_4];
         DPoint* finalTexcoords_13 = new DPoint[outputVertexCount_4];
         for (int iSourceVertexIndex = 0; iSourceVertexIndex < sourceVertexCount_3; iSourceVertexIndex++)
@@ -2104,12 +1912,12 @@ void DDecal::BuildDecalGeometry()
             delete[] oldWeights_41;
         }
         if (newPartition_14)
-            CreateDecalGeometry(geometry.FUN_00559450(), outputVertexCount_4, indexCount_11, finalPositions_26,
+            CreateDecalGeometry(((DGeometry*)m_sp2C.operator->()), outputVertexCount_4, indexCount_11, finalPositions_26,
                                 finalTexcoords_13, finalIndices_1, newBones_3, newPartition_14, flags_7);
         else
-            CreateDecalGeometry(geometry.FUN_00559450(), outputVertexCount_4, indexCount_11, finalPositions_26,
+            CreateDecalGeometry(((DGeometry*)m_sp2C.operator->()), outputVertexCount_4, indexCount_11, finalPositions_26,
                                 finalTexcoords_13, finalIndices_1, newBones_3, 0, 0);
-        vertexCount = outputVertexCount_4;
+        m_5c = outputVertexCount_4;
     }
     else
     {
@@ -2133,32 +1941,13 @@ void DDecal::BuildDecalGeometry()
     delete[] flags_7;
 }
 
-struct NiFixedString;
-struct NiPoint2
-{
-    float x;
-    float y;
-};
 struct NiObj;
-struct NiAVObject;
-struct DPoint;
-struct DBone;
-struct DNewPartition;
-struct DGeometry;
 struct ObjC;
-struct ObjD;
 
 unsigned char __cdecl FUN_0043b300(const NiRTTI* rtti, NiAVObject* obj);
 void __cdecl FUN_00b57e30(void* a, int b, int c);
 extern const NiRTTI DAT_011f444c;
 
-struct GO
-{
-    NiObj* m_p;
-    GO(int a);
-    ~GO();
-    operator NiObj*() const;
-};
 struct PtrHolder
 {
     void* FUN_0066b0d0(void* p);
@@ -2218,120 +2007,6 @@ struct VSubOwner
     int f28;
     int f2c;
     VSub sub;
-};
-struct NiTriShape
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    int tf04;
-    int tf08;
-    int tf0c;
-    int tf10;
-    int tf14;
-    int tf18;
-    int tf1c;
-    int tf20;
-    int tf24;
-    int tf28;
-    int tf2c;
-    int tf30;
-    int tf34;
-    int tf38;
-    int tf3c;
-    int tf40;
-    int tf44;
-    int tf48;
-    int tf4c;
-    int tf50;
-    int tf54;
-    int tf58;
-    int tf5c;
-    int tf60;
-    int tf64;
-    int tf68;
-    int tf6c;
-    int tf70;
-    int tf74;
-    int tf78;
-    int tf7c;
-    int tf80;
-    int tf84;
-    int tf88;
-    int tf8c;
-    int tf90;
-    int tf94;
-    int tf98;
-    int tf9c;
-    int tfa0;
-    int tfa4;
-    int tfa8;
-    int tfac;
-    int tfb0;
-    int tfb4;
-    int tfb8;
-    int tfbc;
-    int tfc0;
-    static void* operator new(unsigned int n);
-    static void operator delete(void*, unsigned int);
-    NiTriShape(unsigned short a, NiPoint3* c, NiPoint3* d, void* z1, NiPoint2* z2, unsigned short z3, unsigned int z4,
-               unsigned short div, unsigned short* e);
-    void AssignFixedString(const NiFixedString& s);
-    void FUN_00439410(void* b);
-    void* FUN_005495f0(ObjC* c, int a, int b, int d, int e, int f, int g);
-    void FUN_004adde0(ObjD* d);
-    void FUN_00440460(int v);
-    void FUN_0043fa80(int v);
-    void FUN_00440490(float v);
-    void FUN_004f00e0(int v);
-    void FUN_00688430(NineDw* p);
-    void SetValue(float v);
-    void FUN_00a5a040();
 };
 struct ObjB
 {
@@ -2428,29 +2103,7 @@ struct ObjC
     static void operator delete(void*, unsigned int);
     ObjC(int partList, DBone* bone, int x);
 };
-struct ObjD
-{
-    virtual ~ObjD();
-    int df04;
-    int df08;
-    int df0c;
-    int df10;
-    int df14;
-    int df18;
-    int df1c;
-    int df20;
-    int df24;
-    int df28;
-    int df2c;
-    int df30;
-    int df34;
-    int df38;
-    int df3c;
-    static void* operator new(unsigned int n);
-    static void operator delete(void*, unsigned int);
-    ObjD(ObjC* c, int x, int* arr, Entry4* textObj, int n);
-    void FUN_004addc0(void* p);
-};
+
 struct ObjE
 {
     virtual ~ObjE();
@@ -2474,19 +2127,19 @@ struct GeomX
 
 // Builds a NiTriShape from the given points and indices, attaches skin/partition data and copies transform properties from the geometry, then stores the shape.
 // @fnv 0x00687d90
-void DDecal::CreateDecalGeometry(DGeometry* geom, unsigned short ausVertexCount, unsigned short ausIndexCount,
+void BSTempEffectGeometryDecal::CreateDecalGeometry(DGeometry* geom, unsigned short ausVertexCount, unsigned short ausIndexCount,
                                  DPoint* apVertices, DPoint* d, unsigned short* apIndices, DBone* bone,
                                  DNewPartition* apNewPartition, unsigned short* apPartMap)
 {
     NiTriShape* objA =
-        new NiTriShape(ausVertexCount, (NiPoint3*)apVertices, (NiPoint3*)d, 0, 0, 0, 0, ausIndexCount / 3, apIndices);
+        new NiTriShape(ausVertexCount, (NiPoint3*)apVertices, (NiPoint3*)d, (void*)0, (NiPoint2*)0, 0, 0, ausIndexCount / 3, apIndices);
     objA->AssignFixedString(*FUN_00688460());
     ObjB* entries;
     entries = new ObjB();
     objA->FUN_00439410(entries);
     entries->FUN_004ee4b0(1.0f);
     GO strLocal(0);
-    ((VSubOwner*)unk58)->sub.v36(0, &strLocal);
+    ((VSubOwner*)m_58)->sub.v36(0, &strLocal);
     NiObj* partCount;
     partCount = strLocal;
     if (FUN_0043b300(&DAT_011f444c, (NiAVObject*)partCount))
@@ -2516,7 +2169,7 @@ void DDecal::CreateDecalGeometry(DGeometry* geom, unsigned short ausVertexCount,
         idx = 2;
         for (unsigned int bitIdx = 0; bitIdx < 15; bitIdx++)
         {
-            if (bodyParts & idx)
+            if (m_60 & idx)
             {
                 vertexMap[skin] = bitIdx;
                 skin++;
@@ -2538,11 +2191,11 @@ void DDecal::CreateDecalGeometry(DGeometry* geom, unsigned short ausVertexCount,
                 kIter[j].w = (unsigned short)vertexMap[j];
         }
     }
-    ObjD* arr1 = new ObjD(textObj, count->FUN_0044edb0(), partList, kIter, skin);
+    BSDismemberSkinInstance* arr1 = new BSDismemberSkinInstance(textObj, count->FUN_0044edb0(), partList, kIter, skin);
     if (apNewPartition)
     {
-        arr1->FUN_004addc0(apNewPartition);
-        objA->FUN_004adde0(arr1);
+        arr1->FUN_004addc0((NiSkinPartition*)apNewPartition);
+        objA->SetSkinInstance(arr1);
     }
     else
     {
@@ -2550,8 +2203,8 @@ void DDecal::CreateDecalGeometry(DGeometry* geom, unsigned short ausVertexCount,
         val = new ObjE();
         if (val->FUN_00a84980(objA->FUN_005495f0(textObj, 0x12, 4, 1, 0, 0, 0)))
         {
-            arr1->FUN_004addc0(val);
-            objA->FUN_004adde0(arr1);
+            arr1->FUN_004addc0((NiSkinPartition*)val);
+            objA->SetSkinInstance(arr1);
         }
         else
         {
@@ -2559,130 +2212,27 @@ void DDecal::CreateDecalGeometry(DGeometry* geom, unsigned short ausVertexCount,
             delete arr1;
         }
     }
-    objA->FUN_00440460(((GeomX*)geometry.FUN_00559450())->FUN_0043c490());
-    objA->FUN_0043fa80(((GeomX*)geometry.FUN_00559450())->FUN_006a9540());
-    objA->FUN_00440490(((GeomX*)geometry.FUN_00559450())->GetFloatAt64());
-    objA->FUN_004f00e0(((GeomX*)geometry.FUN_00559450())->FUN_0045bb80());
-    objA->FUN_00688430(((GeomX*)geometry.FUN_00559450())->FUN_00461130());
-    objA->SetValue(((GeomX*)geometry.FUN_00559450())->FUN_008d01e0());
-    objA->v47();
+    objA->FUN_00440460(((GeomX*)((DGeometry*)m_sp2C.operator->()))->FUN_0043c490());
+    objA->FUN_0043fa80(((GeomX*)((DGeometry*)m_sp2C.operator->()))->FUN_006a9540());
+    objA->FUN_00440490(((GeomX*)((DGeometry*)m_sp2C.operator->()))->GetFloatAt64());
+    objA->FUN_004f00e0(((GeomX*)((DGeometry*)m_sp2C.operator->()))->FUN_0045bb80());
+    objA->FUN_00688430(((GeomX*)((DGeometry*)m_sp2C.operator->()))->FUN_00461130());
+    objA->SetValue(((GeomX*)((DGeometry*)m_sp2C.operator->()))->FUN_008d01e0());
+    objA->UpdateWorldBound();
     objA->FUN_00a5a040();
     FUN_00b57e30(objA, 0, 0);
-    ((PtrHolder*)&unk1c)->FUN_0066b0d0(objA);
-    unk20 = (int)geometry.FUN_00559450();
+    m_spGeometry = objA;
+    unk20 = (int)((DGeometry*)m_sp2C.operator->());
 }
-
-namespace fnv_00688770 {
-class NiNode;
-class NiAVObject
-{
-  public:
-    NiNode* GetParent();
-};
-class NiNode
-{
-  public:
-    virtual void FUN_000();
-    virtual void FUN_004();
-    virtual void FUN_008();
-    virtual void FUN_00c();
-    virtual void FUN_010();
-    virtual void FUN_014();
-    virtual void FUN_018();
-    virtual void FUN_01c();
-    virtual void FUN_020();
-    virtual void FUN_024();
-    virtual void FUN_028();
-    virtual void FUN_02c();
-    virtual void FUN_030();
-    virtual void FUN_034();
-    virtual void FUN_038();
-    virtual void FUN_03c();
-    virtual void FUN_040();
-    virtual void FUN_044();
-    virtual void FUN_048();
-    virtual void FUN_04c();
-    virtual void FUN_050();
-    virtual void FUN_054();
-    virtual void FUN_058();
-    virtual void FUN_05c();
-    virtual void FUN_060();
-    virtual void FUN_064();
-    virtual void FUN_068();
-    virtual void FUN_06c();
-    virtual void FUN_070();
-    virtual void FUN_074();
-    virtual void FUN_078();
-    virtual void FUN_07c();
-    virtual void FUN_080();
-    virtual void FUN_084();
-    virtual void FUN_088();
-    virtual void FUN_08c();
-    virtual void FUN_090();
-    virtual void FUN_094();
-    virtual void FUN_098();
-    virtual void FUN_09c();
-    virtual void FUN_0a0();
-    virtual void FUN_0a4();
-    virtual void FUN_0a8();
-    virtual void FUN_0ac();
-    virtual void FUN_0b0();
-    virtual void FUN_0b4();
-    virtual void FUN_0b8();
-    virtual void FUN_0bc();
-    virtual void FUN_0c0();
-    virtual void FUN_0c4();
-    virtual void FUN_0c8();
-    virtual void FUN_0cc();
-    virtual void FUN_0d0();
-    virtual void FUN_0d4();
-    virtual void FUN_0d8();
-    virtual void FUN_0dc();
-    virtual void FUN_0e0();
-    virtual void FUN_0e4();
-    virtual void FUN_0e8(NiAVObject* pkChild);
-};
-template <class T> class NiPointer
-{
-  public:
-    ~NiPointer();
-    NiPointer<T>& operator=(T* pObject);
-    operator T*() const;
-    T* operator->() const;
-    T* m_pObject;
-};
-
-struct FUN_00682860
-{
-    virtual ~FUN_00682860();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-};
-
-struct FUN_00688770 : FUN_00682860
-{
-    NiPointer<NiAVObject> m_spGeometry;
-    int unk20;
-    char* m_pData;
-    int unk28;
-    NiPointer<NiAVObject> m_sp2C;
-    NiPointer<NiAVObject> m_sp30;
-    NiPointer<NiAVObject> m_sp34;
-    virtual ~FUN_00688770();
-};
 
 // Detaches m_spGeometry from its parent, deletes m_pData, and clears m_sp2C and m_sp30.
 // @fnv 0x00688770
-FUN_00688770::~FUN_00688770()
+BSTempEffectGeometryDecal::~BSTempEffectGeometryDecal()
 {
     if (m_spGeometry)
     {
         if (m_spGeometry->GetParent())
-            m_spGeometry->GetParent()->FUN_0e8(m_spGeometry);
+            m_spGeometry->GetParent()->RemoveObject(m_spGeometry);
         m_spGeometry = 0;
     }
     if (m_pData)
@@ -2690,7 +2240,6 @@ FUN_00688770::~FUN_00688770()
     m_sp2C = 0;
     m_sp30 = 0;
 }
-}  // namespace fnv_00688770
 
 struct SaveGameBuffer688
 {
@@ -2779,14 +2328,9 @@ struct SaveForm688
 };
 void __cdecl FUN_005b5e40(const char* pcMessage, const char* pcFile, int iLine);
 
-struct Decal688 : BSTempEffectGeometryDecal
-{
-    void FUN_00688b00();
-};
-
 // Writes a BLOK-tagged save block for the decal, logs the record size and form info, and back-patches the block size.
 // @fnv 0x00688b00
-void Decal688::FUN_00688b00()
+void BSTempEffectGeometryDecal::FUN_00688b00()
 {
     unsigned short usSize = 0;
     char* pcSizePos = 0;
@@ -2833,33 +2377,6 @@ void Decal688::FUN_00688b00()
     }
 }
 
-extern int DAT_010699bc;
-
-struct BaseA
-{
-    BaseA(int a, float b);
-    ~BaseA() throw();
-};
-
-struct Sub1c
-{
-    Sub1c(int a);
-    ~Sub1c() throw();
-    void Reset(int a);
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned char unk0c;
-};
-
-struct Sub4
-{
-    Sub4(int a);
-    ~Sub4() throw();
-    void Reset(unsigned int a);
-    unsigned int unk00;
-};
-
 struct SubDef
 {
     SubDef();
@@ -2879,39 +2396,19 @@ struct Aux30
     int unk20, unk24, unk28, unk2c, m_30;
 };
 
-struct FUN_00683900_cls : BaseA
-{
-    int m_00;
-    unsigned int unk04, unk08, unk0c, unk10, unk14, unk18;
-    Sub1c m_1c;
-    Sub4 m_2c;
-    Sub4 m_30;
-    Sub4 m_34;
-    SubDef m_38;
-    SubDef m_44;
-    float m_50;
-    float m_54;
-    unsigned int m_58;
-    unsigned int m_5c;
-    unsigned int m_60;
-
-    FUN_00683900_cls(int a1, float a2, const Aux30* a3, Obj4* a4, SubDef a5, SubDef a6, float a11, float a12,
-                     unsigned int a13);
-};
-
-// Initializes BaseA and members, copying a5, a6, and a3->m_30 into their corresponding fields.
+// Initializes BSTempEffect and members, copying a5, a6, and a3->m_30 into their corresponding fields.
 // @fnv 0x00683900
-FUN_00683900_cls::FUN_00683900_cls(int a1, float a2, const Aux30* a3, Obj4* a4, SubDef a5, SubDef a6, float a11,
+BSTempEffectGeometryDecal::BSTempEffectGeometryDecal(int a1, float a2, const Aux30* a3, Obj4* a4, SubDef a5, SubDef a6, float a11,
                                    float a12, unsigned int a13)
-    : BaseA(a1, a2), m_00((int)&DAT_010699bc), m_1c(0), m_2c(0), m_30(0), m_34(0), m_38(), m_44()
+    : BSTempEffect((TESObjectCELL*)a1, a2), m_spGeometry(0), m_sp2C(0), m_sp30(0), m_sp34(0)
 {
-    m_1c.unk0c = 0;
-    m_1c.Reset(0);
-    m_1c.unk08 = 0;
-    m_2c.Reset((unsigned int)a4);
-    m_30.Reset(a4->GetVal());
-    m_38 = a5;
-    m_44 = a6;
+    unk28 = 0;
+    m_spGeometry = 0;
+    m_pData = 0;
+    m_sp2C = (NiAVObject*)a4;
+    m_sp30 = (NiAVObject*)a4->GetVal();
+    *(SubDef*)&m_38 = a5;
+    *(SubDef*)&m_44 = a6;
     m_50 = a11;
     m_54 = a12;
     m_60 = a13;
@@ -2954,14 +2451,10 @@ struct DecalLoad688Runtime
     DecalLoad688Header* FUN_004fd3c0();
 };
 void __cdecl FUN_005b5e40(const char* format, ...);
-struct DecalLoad688 : BSTempEffectGeometryDecal
-{
-    bool FUN_00688c90();
-};
 
 // Reads a four-byte marker and two-byte value, then logs when the current buffer position differs from their sum.
 // @fnv 0x00688c90
-bool DecalLoad688::FUN_00688c90()
+bool BSTempEffectGeometryDecal::FUN_00688c90()
 {
     bool result5 = 1;
     unsigned short count = 0;

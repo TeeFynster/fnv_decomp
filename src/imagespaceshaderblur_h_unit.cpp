@@ -150,43 +150,13 @@ FUN_00b8ec40_cls* FUN_00b8ec40_cls::FUN_00b8ec40(unsigned int flags)
     return this;
 }
 
-struct S_00b8e450_B1
-{
-    virtual void FUN_00b8e450();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-};
 
 struct S_00b8e450_B2
 {
     virtual void FUN_00b8e450();
 };
 
-struct S_00b8e450 : S_00b8e450_B1, S_00b8e450_B2
+struct S_00b8e450 : BSShader, S_00b8e450_B2
 {
     S_00b8e450();
 // @fnv 0x00b8e450
@@ -196,43 +166,13 @@ struct S_00b8e450 : S_00b8e450_B1, S_00b8e450_B2
 S_00b8e450::S_00b8e450()
 {}
 
-struct ThunkBasePrimary
-{
-    virtual void* FUN_00b8e5f0(unsigned int flags);
-    unsigned int m_unk04;
-    unsigned int m_unk08;
-    unsigned int m_unk0c;
-    unsigned int m_unk10;
-    unsigned int m_unk14;
-    unsigned int m_unk18;
-    unsigned int m_unk1c;
-    unsigned int m_unk20;
-    unsigned int m_unk24;
-    unsigned int m_unk28;
-    unsigned int m_unk2c;
-    unsigned int m_unk30;
-    unsigned int m_unk34;
-    unsigned int m_unk38;
-    unsigned int m_unk3c;
-    unsigned int m_unk40;
-    unsigned int m_unk44;
-    unsigned int m_unk48;
-    unsigned int m_unk4c;
-    unsigned int m_unk50;
-    unsigned int m_unk54;
-    unsigned int m_unk58;
-    unsigned int m_unk5c;
-    unsigned int m_unk60;
-    unsigned int m_unk64;
-    unsigned int m_unk68;
-};
 
 struct ThunkBaseSecondary
 {
     virtual void* FUN_00b8e5f0(unsigned int flags);
 };
 
-struct FUN_00b8e5c0_host : ThunkBasePrimary, ThunkBaseSecondary
+struct FUN_00b8e5c0_host : BSShader, ThunkBaseSecondary
 {
 // @fnv 0x00b8e5f0
     void* FUN_00b8e5f0(unsigned int flags);
@@ -273,18 +213,12 @@ FUN_00b8e760::~FUN_00b8e760()
 }
 
 // FUN_00b8e790 : MSVC this-adjusting thunk  (sub ecx, 0x6c ; jmp <impl>)
-struct A1_00b8e790
-{
-    A1_00b8e790();
-    virtual void FUN_00b8e790();
-    char pad[0x68];
-};
 struct A2_00b8e790
 {
     A2_00b8e790();
     virtual void FUN_00b8e790();
 };
-struct Own_00b8e790 : A1_00b8e790, A2_00b8e790
+struct Own_00b8e790 : BSShader, A2_00b8e790
 {
     Own_00b8e790();
     virtual void key_fn();
@@ -317,44 +251,14 @@ FUN_00b8e900::~FUN_00b8e900()
 }
 
 // Adjustor thunk for FUN_00b8e930: "sub ecx, 0x6c; jmp FUN_00b8e900".
-// Derived overrides a virtual inherited from a secondary base; the thunk moves this back by the primary base size (vptr + 26 ints = 0x6c).
-struct PrimaryBase
-{
-    virtual void FUN_00b8e930();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-};
+// Derived overrides a virtual inherited from a secondary base; the thunk moves this back by the BSShader primary base size (0x6c).
 
 struct SecondaryBase
 {
     virtual void FUN_00b8e930();
 };
 
-struct Derived : PrimaryBase, SecondaryBase
+struct Derived : BSShader, SecondaryBase
 {
     Derived();
 // @fnv 0x00b8e930
@@ -372,44 +276,14 @@ namespace fnv_00b8ead0 {
 // The derived shader class inherits the virtual from a secondary base, so the
 // thunk moves `this` back to the primary base sub-object before tail jumping
 // to the final overrider.  0x6c is the size of the primary base: the vtable
-// pointer plus 26 int members (4 + 26*4 = 0x6c).
-struct PrimaryBase
-{
-    virtual void FUN_00b8ead0();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-};
+// pointer and inherited BSShader storage (0x6c).
 
 struct SecondaryBase
 {
     virtual void FUN_00b8ead0();
 };
 
-struct Derived : PrimaryBase, SecondaryBase
+struct Derived : BSShader, SecondaryBase
 {
     Derived();
 // @fnv 0x00b8ead0
@@ -427,44 +301,14 @@ namespace fnv_00b8ec70 {
 // from a secondary base, so the thunk converts the secondary base sub-object
 // pointer back to the derived object pointer (sub ecx, 0x6c) and tail jumps
 // to the final overrider.  The subtracted offset is the size of the primary
-// base: vtable pointer plus 26 int members (4 + 26*4 = 0x6c).
-struct PrimaryBase
-{
-    virtual void FUN_00b8ec70();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-};
+// BSShader base (0x6c).
 
 struct SecondaryBase
 {
     virtual void FUN_00b8ec70();
 };
 
-struct Derived : PrimaryBase, SecondaryBase
+struct Derived : BSShader, SecondaryBase
 {
     Derived();
 // @fnv 0x00b8ec70

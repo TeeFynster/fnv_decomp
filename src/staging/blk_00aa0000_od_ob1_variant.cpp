@@ -1,3 +1,4 @@
+#include "../../include/NiTMapItem.h"
 
 // src/staging/blk_00aa0000_od_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/staging/blk_00aa0000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,16 +7,154 @@
 // src/staging/blk_00aa0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+// BaseTag_blk_00aa0000_od_ob1_variant: local type (was include/BaseTag.h, which had no evidence of one real class); no method of it is bound to a named game function
+class BaseTag_blk_00aa0000_od_ob1_variant
+{
+};
+#include "../../include/AbstractHeap.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3; with NiPoint3 (its in-class inline bodies, no stand-in constructor/operators), 0x00ab46f0 does not match.
+#include "../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+#include "../../include/NiPoint3.h"
+#define FNV_VEC4_SCALAR
+#include "../../include/Vec4.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/BSThread.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/IMemoryHeap.h"
+#include "../../include/MemoryPool.h"
+#include "../../include/FutBinaryFileC.h"
+// These constructors must remain inline for the original /Ob1 callers.
+inline LocalVec3::LocalVec3() : xb(0), yb(0), zb(0)
+{}
+inline LocalVec3::LocalVec3(float a, float b, float c) : x(a), y(b), z(c)
+{}
 extern "C" void* __cdecl _malloc(unsigned int);
-struct FUN_00aa4290_Class
-{
-    void* __thiscall AllocateBuffer(unsigned int size, unsigned int pad);
-};
+
 extern "C" void __cdecl free(void*);
-struct FUN_00aa42c0_class
-{
-    void __thiscall FreePointer(void* p, int dummy);
-};
+
 struct FUN_00aa4790_Class
 {
     void __thiscall FUN_00aa4710(int, unsigned char, int);
@@ -55,13 +194,6 @@ struct FUN_00aa7e50_Class
     int GetM4();
 };
 extern int DAT_010a29c0;
-struct BSThread
-{
-    BSThread();
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-};
 struct FUN_00aa8410 : BSThread
 {
     FUN_00aa8410();
@@ -77,11 +209,8 @@ struct FUN_00aa8a20_class
 {
     void FUN_00aa8a20();
 };
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
-extern P03MM g_memoryManager;
+
+extern MemoryManager g_memoryManager;
 struct FUN_00aa8b00_Class
 {
     void* __thiscall FUN_00aa8b00();
@@ -119,10 +248,6 @@ struct FUN_00aa46a0_holder
 struct FUN_00aa4710_Class
 {
     char __thiscall FUN_00aa4710(int a, unsigned char b, int c);
-};
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
 };
 struct FUN_00aa4b20_Class
 {
@@ -239,44 +364,6 @@ struct FUN_00aa8a40_Class
 {
     FUN_00aa8c40_H m_kNode;
     void __thiscall FUN_00aa8a40(FUN_00aa8a40_Node* node);
-};
-struct HeapFreeBlock
-{
-};
-struct HeapFreeList
-{
-    void* m0;
-    HeapFreeBlock* m4;
-};
-struct AbstractHeap
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13(void* value);
-
-    unsigned char m_pad00[0x10];
-    int m14;
-    unsigned char m_pad18[0x18];
-    void* m30;
-    unsigned char m_pad34[0x10];
-    HeapFreeList m_lists[0x400];
-    unsigned char m_pad2044[4];
-    HeapFreeBlock* m2048;
-    HeapFreeBlock* m204c;
-
-    void __thiscall FUN_00aa9e50(HeapFreeList* list, HeapFreeBlock* block);
-    void __thiscall Clear();
 };
 struct FUN_00aaaa80_Class
 {
@@ -464,21 +551,6 @@ struct LinkedNode
 struct NodeSorter
 {
     LinkedNode* SortList(LinkedNode* head);
-};
-struct MemoryPool
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    void Wait(char*);
-    void FUN_00aa7260();
 };
 extern MemoryPool* DAT_011f67b8[];
 extern char DAT_010a2850;
@@ -821,7 +893,7 @@ struct FUN_00aa7300_pool
 {
     int m_00;
     int m_04;
-    void Wait(const char* name);
+    void FUN_0040fbf0(const char* name);
 };
 class FUN_00aa7300_cls
 {
@@ -968,7 +1040,7 @@ struct FUN_00aa7400 : HeapBlockBase
 // @fnv 0x00aa7400
 FUN_00aa7400::FUN_00aa7400(unsigned int a, unsigned int b) : m_04(a), m_08(b), m_14(0)
 {
-    m_0c = ((FUN_00aa4290_Class*)&DAT_011f6238)->AllocateBuffer(a, 1);
+    m_0c = DAT_011f6238.DoSystemAllocation(a, true);
     m_10 = m_0c;
 }
 
@@ -989,7 +1061,7 @@ struct FUN_00aa74c0 : AA74C0Base
 // @fnv 0x00aa74c0
 FUN_00aa74c0::~FUN_00aa74c0()
 {
-    ((FUN_00aa42c0_class*)&DAT_011f6238)->FreePointer(m_0c, 1);
+    DAT_011f6238.DoSystemDeallocation(m_0c, true);
 }
 
 // The supplied unit has incompatible Win32 prototypes, so retain its pointer-erased ABI.
@@ -1806,16 +1878,13 @@ extern "C" inline ShortPoint* __cdecl FUN_0065f9e0(unsigned int _Count, int)
 ShortPoint* __cdecl FUN_0065fde0(ShortPoint*, ShortPoint*, ShortPoint*, PointAlloc&);
 void __cdecl FUN_00ab23c0(ShortPoint*, unsigned int, const ShortPoint&, PointAlloc&, CopyTag, RangeTag);
 
-struct BaseTag
-{
-};
-template <class T> inline T CheckedBase(T& _It, BaseTag)
+template <class T> inline T CheckedBase(T& _It, BaseTag_blk_00aa0000_od_ob1_variant)
 {
     return _It;
 }
 template <class T> inline T CheckedBase(T& _It)
 {
-    BaseTag _Base_tag;
+    BaseTag_blk_00aa0000_od_ob1_variant _Base_tag;
     return CheckedBase(_It, _Base_tag);
 }
 template <class T> inline CopyTag PtrCat(T&, T&)
@@ -2054,11 +2123,6 @@ struct FnvElem
     int m54;
 };
 
-__forceinline void* operator new(unsigned int, void* p) throw()
-{
-    return p;
-}
-void operator delete(void*, void*) throw();
 
 extern "C" void __cdecl FUN_0065eb50(void* p);
 
@@ -2120,7 +2184,8 @@ struct ElemB9F1
     int unk18;
     int unk1C;
 };
-struct VectorB9F1 : public ContainerBaseAuxB9F1
+// Checked STL-style container: auxiliary owner, allocators and three element pointers; shared Vector is four SIMD floats.
+struct CheckedElementRange : public ContainerBaseAuxB9F1
 {
     AuxContB9F1* _Myownedaux;
     int _Alaux;
@@ -2141,7 +2206,7 @@ FUN_00ab9f10_It& FUN_00ab9f10_It::FUN_00ab9f10()
 {
     if (!(this->_Has_container()))
         FUN_00ec7c56();
-    if (!(_Myptr < ((VectorB9F1*)this->_Getmycont())->_Mylast))
+    if (!(_Myptr < ((CheckedElementRange*)this->_Getmycont())->_Mylast))
         FUN_00ec7c56();
     ++_Myptr;
     return *this;
@@ -2366,11 +2431,8 @@ extern "C" __declspec(dllimport) int __stdcall MessageBoxA(void* hWnd, const cha
                                                            unsigned int uiType);
 extern "C" __declspec(noreturn) void __cdecl exit(int iCode);
 extern "C" void __cdecl FUN_00ec61c0(void* pvDst, int iValue, unsigned int uiSize);
-struct MemoryManagerAA3880
-{
-    void* Allocate(unsigned int uiSize);
-};
-extern MemoryManagerAA3880 g_kMemoryAA3880;
+
+extern MemoryManager g_kMemoryAA3880;
 inline void* AllocateAA3880(unsigned int uiSize)
 {
     void* pvMem = g_kMemoryAA3880.Allocate(uiSize);
@@ -2441,12 +2503,7 @@ FUN_00aa3880::FUN_00aa3880()
     FUN_00aa58d0();
 }
 
-struct HeapStandIn
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void* Allocate(unsigned int size, unsigned int flags);
-};
+
 
 class PoolStandIn
 {
@@ -2485,40 +2542,19 @@ inline PoolStandIn* __cdecl GetPoolForSize(unsigned int size)
 
 extern __declspec(thread) int tlsHeapIndex;
 
-struct MemoryManagerStandIn
-{
-    bool initialized;
-    char unk01;
-    char unk02;
-    char unk03;
-    int unk04;
-    int unk08;
-    HeapStandIn* heaps[0x41];
-    HeapStandIn* defaultHeap;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    char unk128;
-    bool usePools;
 
-    void* FallbackAllocate(unsigned int size, unsigned int flags);
-    int HandleOutOfMemory(HeapStandIn* heap, int attempt, bool* retry);
-    void* FUN_00aa3e40(unsigned int size);
-};
 
 // @fnv 0x00aa3e40
-void* MemoryManagerStandIn::FUN_00aa3e40(unsigned int size)
+void* MemoryManager::FUN_00aa3e40(unsigned int size)
 {
-    if (!initialized)
+    if (!bInitialized)
     {
-        return FallbackAllocate(size, 0);
+        return DoSystemAllocation(size, false);
     }
-    HeapStandIn* mainHeap = defaultHeap;
+    IMemoryHeap* mainHeap = pHeapsByContextA[65];
     if (!mainHeap)
     {
-        return FallbackAllocate(size, 0);
+        return DoSystemAllocation(size, false);
     }
     unsigned int requested3 = size;
     void* result2 = 0;
@@ -2531,7 +2567,7 @@ void* MemoryManagerStandIn::FUN_00aa3e40(unsigned int size)
         size = (size + 3) & ~3;
     }
     int heapIndex6 = tlsHeapIndex;
-    if (usePools)
+    if (bAllowPoolUse)
     {
         PoolStandIn* pool = size <= 0x3fc ? reinterpret_cast<PoolStandIn*>(DAT_011f67b8[size >> 2]) : 0;
         if (!pool)
@@ -2550,9 +2586,9 @@ void* MemoryManagerStandIn::FUN_00aa3e40(unsigned int size)
     bool retry2 = false;
     bool recovered7 = false;
     int attempt2 = 0;
-    HeapStandIn* heap = 0;
-    HeapStandIn* threadHeapB = 0;
-    threadHeapB = heaps[heapIndex6];
+    IMemoryHeap* heap = 0;
+    IMemoryHeap* threadHeapB = 0;
+    threadHeapB = pHeapsByContextA[heapIndex6];
     do
     {
         heap = threadHeapB ? threadHeapB : mainHeap;
@@ -2564,10 +2600,10 @@ void* MemoryManagerStandIn::FUN_00aa3e40(unsigned int size)
         }
         if (!result2)
         {
-            attempt2 = HandleOutOfMemory(threadHeapB ? threadHeapB : mainHeap, attempt2, &retry2);
+            attempt2 = HandleAllocationFailure(threadHeapB ? threadHeapB : mainHeap, attempt2, &retry2);
             if (retry2)
             {
-                result2 = FallbackAllocate(size, 0);
+                result2 = DoSystemAllocation(size, false);
                 recovered7 = result2 != 0;
             }
         }
@@ -2577,29 +2613,21 @@ void* MemoryManagerStandIn::FUN_00aa3e40(unsigned int size)
 
 void __cdecl NiFree4A60(void* pvMem);
 
-struct MemoryManager4A60
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManager4A60 g_kMemoryManager4A60;
+
+extern MemoryManager g_kMemoryManager;
 inline void __cdecl operator delete[](void* pvMem)
 {
-    g_kMemoryManager4A60.Deallocate(pvMem);
+    g_kMemoryManager.Deallocate(pvMem);
 }
 
-struct MapItem4A60
-{
-    MapItem4A60* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+
 
 class MapBase4A60
 {
   public:
     static void operator delete(void* pvMem)
     {
-        g_kMemoryManager4A60.Deallocate(pvMem);
+        g_kMemoryManager.Deallocate(pvMem);
     }
     virtual ~MapBase4A60()
     {
@@ -2608,17 +2636,17 @@ class MapBase4A60
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItem4A60* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItem4A60* pkItem);
-    virtual MapItem4A60* NewItem();
-    virtual void DeleteItem(MapItem4A60* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
     void RemoveAll()
     {
         for (unsigned int i = 0; i < m_uiHashSize; i++)
         {
             while (m_ppkHashTable[i])
             {
-                MapItem4A60* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -2627,7 +2655,7 @@ class MapBase4A60
         m_uiCount = 0;
     }
     unsigned int m_uiHashSize;
-    MapItem4A60** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 class FUN_00aa4a60 : public MapBase4A60
@@ -2679,7 +2707,7 @@ void* __thiscall S00aa8950_Obj::FUN_00aa8950(unsigned int flags)
 extern "C" unsigned int __cdecl strlen(const char*);
 void* __cdecl FUN_0044d670(unsigned int, int);
 
-namespace std {
+namespace FnvControlStd {
 template <class E> struct char_traits;
 template <> struct char_traits<char>
 {
@@ -2801,7 +2829,7 @@ inline basic_string<E, Tr, A>& basic_string<E, Tr, A>::assign(const E* ptr, size
 }
 }
 
-typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > Str;
+typedef FnvControlStd::basic_string<char, FnvControlStd::char_traits<char>, FnvControlStd::allocator<char> > Str;
 
 struct Obj00aaa730
 {
@@ -3366,7 +3394,7 @@ extern const char DAT_010a27f4[];
 struct MatrixPoolLock
 {
     unsigned int owner, count, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    void Wait(const char*);
+    void FUN_0040fbf0(const char*);
 };
 struct MatrixPool
 {
@@ -3388,7 +3416,7 @@ struct MatrixPool
     {
         if (!pointer)
             return;
-        lock.Wait(DAT_010a27f4);
+        lock.FUN_0040fbf0(DAT_010a27f4);
         FUN_00aa6e00(pointer);
         unsigned int page = ((unsigned int)pointer - begin) >> 12;
         --pageCounts[page];
@@ -5587,8 +5615,6 @@ struct PoolX
     void FUN_00aa4060(void* p);
 };
 extern "C" PoolX g_pool_011f6238;
-inline void operator delete(void*, void*)
-{}
 struct FUN_00aaec10
 {
     char b[0x3c];
@@ -5800,15 +5826,6 @@ template <class E, class Tr, class A> class basic_string
 };
 typedef basic_string<char, char_traits<char>, allocator<char> > string;
 }
-struct FutBinaryFileC
-{
-    virtual ~FutBinaryFileC();
-    std::string signature;
-    std::string path;
-    unsigned int unk3c;
-    FutBinaryFileC(std::string);
-    char FUN_00ac3fe0(const std::string&);
-};
 // @fnv 0x00aafbe0
 char __cdecl FUN_00aafbe0(const std::string& name)
 {
@@ -6227,7 +6244,7 @@ struct MMDealloc
             FreePointer(p, 0);
     }
 };
-extern P03MM g_memoryManager;
+extern MemoryManager g_memoryManager;
 extern DeallocPool* smallPools[256];
 DeallocPool* GetSmallPool(unsigned int);
 unsigned int GetHeapIndex();
@@ -8006,53 +8023,7 @@ struct Vec2
     {}
     Vec2(const Vec2& other);
 };
-struct Vec3
-{
-    union
-    {
-        float x;
-        unsigned int xb;
-    };
-    union
-    {
-        float y;
-        unsigned int yb;
-    };
-    union
-    {
-        float z;
-        unsigned int zb;
-    };
-    Vec3() : xb(0), yb(0), zb(0)
-    {}
-    Vec3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-};
-struct Vec4
-{
-    union
-    {
-        float x;
-        unsigned int xb;
-    };
-    union
-    {
-        float y;
-        unsigned int yb;
-    };
-    union
-    {
-        float z;
-        unsigned int zb;
-    };
-    union
-    {
-        float w;
-        unsigned int wb;
-    };
-    Vec4() : xb(0), yb(0), zb(0), wb(0)
-    {}
-};
+
 struct FUN_00abbeb0
 {
     void* owner;
@@ -8121,12 +8092,12 @@ template <class T> struct Sequence
         return FUN_00abbeb0(qrEZrs, this);
     }
 };
-struct Seq3 : Sequence<Vec3>
+struct Seq3 : Sequence<LocalVec3>
 {
-    void FUN_00aba7b0(unsigned int count, Vec3 initial);
+    void FUN_00aba7b0(unsigned int count, LocalVec3 initial);
     void Resize(unsigned int count)
     {
-        Vec3 fill(0.0f, 0.0f, 0.0f);
+        LocalVec3 fill(0.0f, 0.0f, 0.0f);
         FUN_00aba7b0(count, fill);
     }
 };
@@ -8159,7 +8130,7 @@ struct Item32
 struct FUN_00aba220
 {
     unsigned int category;
-    Vec3 vector;
+    LocalVec3 vector;
     CStringInfo text;
     FUN_00aba220();
     ~FUN_00aba220()
@@ -8244,7 +8215,8 @@ __forceinline void Copy44(FUN_00abbeb0& d, FUN_00abbeb0& s)
     FUN_00aba220* qsSDDgz = reinterpret_cast<FUN_00aba220*>(d.FUN_00abbf50());
     FUN_00aba220* qrEZrs = reinterpret_cast<FUN_00aba220*>(s.FUN_00abbf50());
     qsSDDgz->category = qrEZrs->category;
-    qsSDDgz->vector = qrEZrs->vector;
+    // Preserve the original trivial component copy; LocalVec3::operator= assigns floats.
+    reinterpret_cast<NiPoint3&>(qsSDDgz->vector) = reinterpret_cast<const NiPoint3&>(qrEZrs->vector);
     qsSDDgz->text.AssignSubstring(&qrEZrs->text, 0, DAT_010173f0);
 }
 template <class T> __forceinline void CopyText(FUN_00abbeb0& d, FUN_00abbeb0& s)
@@ -8256,7 +8228,8 @@ template <class T> __forceinline void CopyText(FUN_00abbeb0& d, FUN_00abbeb0& s)
 inline void Assign44(FUN_00aba220* dest, FUN_00aba220* orig)
 {
     orig->category = dest->category;
-    orig->vector = dest->vector;
+    // Preserve the original trivial component copy.
+    reinterpret_cast<NiPoint3&>(orig->vector) = reinterpret_cast<const NiPoint3&>(dest->vector);
     orig->text.AssignSubstring(&dest->text, 0, DAT_010173f0);
 }
 inline FUN_00aba2f0* SaveRow(FUN_00aba2f0* source)
@@ -8265,7 +8238,7 @@ inline FUN_00aba2f0* SaveRow(FUN_00aba2f0* source)
 }
 inline void ResizePoints(Seq3* dest, unsigned int count)
 {
-    Vec3 fill(0.0f, 0.0f, 0.0f);
+    LocalVec3 fill(0.0f, 0.0f, 0.0f);
     dest->FUN_00aba7b0(count, fill);
 }
 inline void ResizeWords(SeqWord* dest, unsigned int count)
@@ -8293,12 +8266,12 @@ struct CopyCollection
     Seq56 rows56;
     void Resize_coordinates(unsigned int count)
     {
-        Vec3 fill(0.0f, 0.0f, 0.0f);
+        LocalVec3 fill(0.0f, 0.0f, 0.0f);
         coordinates.FUN_00aba7b0(count, fill);
     }
     void Resize_normals(unsigned int count)
     {
-        Vec3 fill;
+        LocalVec3 fill;
         normals.FUN_00aba7b0(count, fill);
     }
     void Resize_colors(unsigned int count)
@@ -8312,7 +8285,7 @@ struct CopyCollection
     }
     void Resize_tangents(unsigned int count)
     {
-        Vec3 fill;
+        LocalVec3 fill;
         tangents.FUN_00aba7b0(count, fill);
     }
     void Resize_otherVectors(unsigned int count)
@@ -8338,15 +8311,15 @@ struct CopyCollection
 void CopyCollection::FUN_00ab46f0(const CopyCollection* source)
 {
     Resize_coordinates(source->coordinates.Count());
-    CopyBytes(&coordinates[0], &source->coordinates[0], coordinates.Count() * sizeof(Vec3));
+    CopyBytes(&coordinates[0], &source->coordinates[0], coordinates.Count() * sizeof(LocalVec3));
     Resize_normals(source->normals.Count());
-    CopyBytes(&normals[0], &source->normals[0], normals.Count() * sizeof(Vec3));
+    CopyBytes(&normals[0], &source->normals[0], normals.Count() * sizeof(LocalVec3));
     Resize_colors(source->colors.Count());
     CopyBytes(&colors[0], &source->colors[0], colors.Count() * sizeof(Vec4));
     Resize_uvCoordinates(source->uvCoordinates.Count());
     CopyBytes(&uvCoordinates[0], &source->uvCoordinates[0], uvCoordinates.Count() * sizeof(Vec2));
     Resize_tangents(source->tangents.Count());
-    CopyBytes(&tangents[0], &source->tangents[0], tangents.Count() * sizeof(Vec3));
+    CopyBytes(&tangents[0], &source->tangents[0], tangents.Count() * sizeof(LocalVec3));
     Resize_otherVectors(source->otherVectors.Count());
     CopyBytes(&otherVectors[0], &source->otherVectors[0], otherVectors.Count() * sizeof(Vec4));
     rows32.FUN_00ab9eb0(source->rows32.Count());
@@ -8373,7 +8346,7 @@ void CopyCollection::FUN_00ab46f0(const CopyCollection* source)
                      reinterpret_cast<FUN_00aba270*>(src56.FUN_00abbf50())->Values().Count());
         CopyBytes(&reinterpret_cast<FUN_00aba270*>(src32.FUN_00abbf50())->Values()[0],
                   &reinterpret_cast<FUN_00aba270*>(src56.FUN_00abbf50())->Values()[0],
-                  reinterpret_cast<FUN_00aba270*>(src32.FUN_00abbf50())->Values().Count() * sizeof(Vec3));
+                  reinterpret_cast<FUN_00aba270*>(src32.FUN_00abbf50())->Values().Count() * sizeof(LocalVec3));
     }
     Resize_rows56(source->rows56.Count());
     FUN_00abbeb0 dst32 = rows56.Begin();
@@ -16160,11 +16133,8 @@ void FanControls::FUN_00aac820(int model, int category, int channel, float amoun
 
 namespace fnv_00aacdb0 {
 void __cdecl ReportAssertionViolation(const char* pcFile, int iLine);
-struct MemoryManagerAACDB0
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerAACDB0 g_kMemoryAACDB0;
+
+extern MemoryManager g_kMemoryAACDB0;
 struct ProxyAACDB0
 {
     void* m_pkContainer;
@@ -17179,16 +17149,13 @@ struct ElementAllocator
     }
 };
 // Empty category tags model VC9's algorithm dispatch.
-struct BaseTag
-{
-};
-inline VectorElement* checked_base_inner(VectorElement*& _It, BaseTag)
+inline VectorElement* checked_base_inner(VectorElement*& _It, BaseTag_blk_00aa0000_od_ob1_variant)
 {
     return _It;
 }
 inline VectorElement* checked_base(VectorElement*& _It)
 {
-    BaseTag _Base_tag;
+    BaseTag_blk_00aa0000_od_ob1_variant _Base_tag;
     return checked_base_inner(_It, _Base_tag);
 }
 struct RangeTag
@@ -17872,14 +17839,7 @@ struct TriHeader
     unsigned char reserved[16];
     void FUN_00ab46e0();
 };
-struct Point3
-{
-    float x, y, z;
-    Point3() : x(0), y(0), z(0)
-    {}
-    Point3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-};
+
 struct ShortPoint
 {
     short x, y, z;
@@ -17978,12 +17938,12 @@ template <class T> struct CheckedBuffer
         return first[index];
     }
 };
-struct PointBuffer : CheckedBuffer<Point3>
+struct PointBuffer : CheckedBuffer<NiPoint3>
 {
-    void FUN_00aba7b0(unsigned int, Point3);
+    void FUN_00aba7b0(unsigned int, NiPoint3);
     void resize(unsigned int count)
     {
-        FUN_00aba7b0(count, Point3());
+        FUN_00aba7b0(count, reinterpret_cast<const NiPoint3&>(LocalVec3(0.0f, 0.0f, 0.0f)));
     }
 };
 struct IndexBuffer : CheckedBuffer<TriIndex>
@@ -18036,7 +17996,7 @@ struct MaterialBuffer : CheckedBuffer<Material>
 struct FUN_00aba220
 {
     unsigned int id;
-    Point3 position;
+    NiPoint3 position;
     TriString name;
     FUN_00aba220();
 };
@@ -18324,7 +18284,8 @@ bool __cdecl FUN_00ab5ec0(const TriString& filename, Geometry* geometry)
             if (!reader.FUN_00ac5cf0(&displacement, 2, 3))
                 return false;
             geometry->morphs[item].points[vertex] =
-                Point3(displacement.x * morphScale, displacement.y * morphScale, displacement.z * morphScale);
+                reinterpret_cast<const NiPoint3&>(
+                    LocalVec3(displacement.x * morphScale, displacement.y * morphScale, displacement.z * morphScale));
         }
     }
     accumulated = triHeader.vertices;
@@ -18500,7 +18461,7 @@ template <class T> inline T* Allocate(unsigned int count, T*)
     return (T*)FUN_0044d670(count, 0);
 }
 
-template <class T> struct Allocator
+template <class T> struct ContainerAllocator
 {
     typedef T value_type;
     typedef T* pointer;
@@ -18511,13 +18472,13 @@ template <class T> struct Allocator
     typedef int difference_type;
     template <class U> struct rebind
     {
-        typedef Allocator<U> other;
+        typedef ContainerAllocator<U> other;
     };
-    Allocator()
+    ContainerAllocator()
     {}
-    Allocator(const Allocator&)
+    ContainerAllocator(const ContainerAllocator&)
     {}
-    template <class U> Allocator(const Allocator<U>&)
+    template <class U> ContainerAllocator(const ContainerAllocator<U>&)
     {}
     pointer allocate(size_type count)
     {
@@ -18730,7 +18691,7 @@ inline bool FUN_00abc260_cls::FUN_00abc260(unsigned int count)
     return true;
 }
 
-struct FUN_00aba4f0 : VectorVal_aba4f0<unsigned int, Allocator<unsigned int> >
+struct FUN_00aba4f0 : VectorVal_aba4f0<unsigned int, ContainerAllocator<unsigned int> >
 {
     FUN_00aba4f0();
     unsigned int* myfirst;
@@ -18739,7 +18700,7 @@ struct FUN_00aba4f0 : VectorVal_aba4f0<unsigned int, Allocator<unsigned int> >
 };
 
 // @fnv 0x00aba4f0
-FUN_00aba4f0::FUN_00aba4f0() : VectorVal_aba4f0<unsigned int, Allocator<unsigned int> >()
+FUN_00aba4f0::FUN_00aba4f0() : VectorVal_aba4f0<unsigned int, ContainerAllocator<unsigned int> >()
 {
     ((FUN_00abc260_cls*)this)->FUN_00abc260(0);
 }
@@ -20306,9 +20267,6 @@ struct ScalarTag
 struct RangeTag
 {
 };
-struct BaseTag
-{
-};
 struct InputTag
 {
 };
@@ -20324,22 +20282,22 @@ struct RandomTag : BidirectionalTag
 struct MoveTag
 {
 };
-template <class I> inline I base_inner(const I& _Val, BaseTag)
+template <class I> inline I base_inner(const I& _Val, BaseTag_blk_00aa0000_od_ob1_variant)
 {
     return _Val;
 }
 template <class I> inline I checked_base(const I& _Val)
 {
-    BaseTag _Cat;
+    BaseTag_blk_00aa0000_od_ob1_variant _Cat;
     return base_inner(_Val, _Cat);
 }
-template <class I> inline I base_inner(I& _Val, BaseTag)
+template <class I> inline I base_inner(I& _Val, BaseTag_blk_00aa0000_od_ob1_variant)
 {
     return _Val;
 }
 template <class I> inline I checked_base(I& _Val)
 {
-    BaseTag _Cat;
+    BaseTag_blk_00aa0000_od_ob1_variant _Cat;
     return base_inner(_Val, _Cat);
 }
 template <class I, class O> inline ScalarTag ptr_category(const I&, const O&)
@@ -20496,7 +20454,9 @@ struct VectorBase : ProxyBase
 {
     Allocator<Word> _Al;
 };
-struct Vector : VectorBase
+// std::vector<Word> (VC9 _Vector_val proxy base, then _First/_Last/_End); 0x00abc320 is its _Insert_n.
+// Not the shared SIMD Vector.
+struct WordVector : VectorBase
 {
     Word* _First;
     Word* _Last;
@@ -20535,7 +20495,7 @@ struct Vector : VectorBase
 }
 
 // @fnv 0x00abc320
-void WordInsert::Vector::FUN_00abc320(Iterator _Where, unsigned int _Count, const Word& _Val)
+void WordInsert::WordVector::FUN_00abc320(Iterator _Where, unsigned int _Count, const Word& _Val)
 {
     unsigned int _Capacity = capacity();
     if (_Count == 0)
@@ -20709,14 +20669,15 @@ template <class T, class A> struct WriterVectorVal : ContainerBaseAuxAlloc<A>
     typename A::template rebind<T>::other alval;
 };
 
-template <class T, class A = Allocator<T> > struct Vector : WriterVectorVal<T, A>
+// Unit-local view of Vector for the code in namespace TriWriterRework: built on the shared Vector, that code does not compile or does not match.
+template <class T, class A = Allocator<T> > struct Vector_TriWriterRework : WriterVectorVal<T, A>
 {
     typedef unsigned int size_type;
-    explicit Vector(size_type count) : WriterVectorVal<T, A>()
+    explicit Vector_TriWriterRework(size_type count) : WriterVectorVal<T, A>()
     {
         ConstructN(count, T());
     }
-    ~Vector()
+    ~Vector_TriWriterRework()
     {
         Tidy();
     }
@@ -21121,26 +21082,26 @@ struct EA8
 struct EC0
 {
     WriterString name;
-    Vector<V3> verts;
+    Vector_TriWriterRework<V3> verts;
 };
 struct ED8
 {
     WriterString name;
     int unk1C;
-    Vector<int> idx;
+    Vector_TriWriterRework<int> idx;
 };
 
-struct Tri : Vector<E0>
+struct Tri : Vector_TriWriterRework<E0>
 {
-    Vector<E0> v18;
-    Vector<E30> v30;
-    Vector<E48> v48;
-    Vector<E0> v60;
-    Vector<E30> v78;
-    Vector<E90> v90;
-    Vector<EA8> va8;
-    Vector<EC0> vc0;
-    Vector<ED8> vd8;
+    Vector_TriWriterRework<E0> v18;
+    Vector_TriWriterRework<E30> v30;
+    Vector_TriWriterRework<E48> v48;
+    Vector_TriWriterRework<E0> v60;
+    Vector_TriWriterRework<E30> v78;
+    Vector_TriWriterRework<E90> v90;
+    Vector_TriWriterRework<EA8> va8;
+    Vector_TriWriterRework<EC0> vc0;
+    Vector_TriWriterRework<ED8> vd8;
     unsigned int FUN_0065a5a0() const;
     unsigned int FUN_0065a5a0()
     {
@@ -21151,7 +21112,7 @@ struct Tri : Vector<E0>
         return n;
     }
 };
-typedef Vector<char> Buf;
+typedef Vector_TriWriterRework<char> Buf;
 
 struct Writer
 {

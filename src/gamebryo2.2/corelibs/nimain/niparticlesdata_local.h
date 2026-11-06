@@ -8,7 +8,7 @@
 #include "layout_support.h"
 class NiAdditionalGeometryData;
 class NiBound;
-class RgbaColor;
+class NiColorA;
 class NiGeometryData;
 class NiGeometryData__RendererData;
 class NiParticlesData;
@@ -60,7 +60,7 @@ class NiGeometryData : public NiObject
     NiBound m_kBound;                                            // +0x10, 16 bytes
     NiPoint3* m_pkVertex;                                        // +0x20, 4 bytes
     NiPoint3* m_pkNormal;                                        // +0x24, 4 bytes
-    RgbaColor* m_pkColor;                                        // +0x28, 4 bytes
+    NiColorA* m_pkColor;                                        // +0x28, 4 bytes
     NiPoint2* m_pkTexture;                                       // +0x2C, 4 bytes
     NiPointer<NiAdditionalGeometryData> m_spAdditionalGeomData;  // +0x30, 4 bytes
     NiGeometryData__RendererData* m_pkGeometryRendererData;      // +0x34, 4 bytes
@@ -94,7 +94,7 @@ class NiGeometryData : public NiObject
     // GetTextures
     // GetTextureSet
     // void __cdecl NiGeometryData::*(NiPoint2*)
-    // void __cdecl NiGeometryData::*(unsigned short, NiPoint3*, NiPoint3*, RgbaColor*, NiPoint2*, unsigned short, NiGeometryData::DataFlags)
+    // void __cdecl NiGeometryData::*(unsigned short, NiPoint3*, NiPoint3*, NiColorA*, NiPoint2*, unsigned short, NiGeometryData::DataFlags)
     // bool __cdecl NiGeometryData::*(bool)
     // void __cdecl NiGeometryData::*()
     // NiGeometryData::Consistency __cdecl NiGeometryData::*()
@@ -114,8 +114,8 @@ class NiGeometryData : public NiObject
     // unsigned short __cdecl NiGeometryData::*()
     // void __cdecl NiGeometryData::*()
     // unsigned short __cdecl NiGeometryData::*()
-    // void __cdecl NiGeometryData::*(unsigned short, NiPoint3*, NiPoint3*, RgbaColor*, NiPoint2*, unsigned short, NiGeometryData::DataFlags)
-    // void __cdecl NiGeometryData::*(unsigned short, NiPoint3*, NiPoint3*, RgbaColor*, NiPoint2*, unsigned short, NiGeometryData::DataFlags)
+    // void __cdecl NiGeometryData::*(unsigned short, NiPoint3*, NiPoint3*, NiColorA*, NiPoint2*, unsigned short, NiGeometryData::DataFlags)
+    // void __cdecl NiGeometryData::*(unsigned short, NiPoint3*, NiPoint3*, NiColorA*, NiPoint2*, unsigned short, NiGeometryData::DataFlags)
     // void __cdecl NiGeometryData::*(unsigned short*&, unsigned short*&, unsigned char)
     // int __cdecl NiGeometryData::*(unsigned short, unsigned short, unsigned char)
     // NiGeometryData
@@ -161,7 +161,7 @@ class NiParticlesData : public NiGeometryData
     float* m_pfRotationAngles;                // +0x5C, 4 bytes
     NiPoint3* m_pkRotationAxes;               // +0x60, 4 bytes
     unsigned char* m_pucTextureIndices;       // +0x64, 4 bytes
-    RgbaColor* m_pkSubTextureOffsets;         // +0x68, 4 bytes
+    NiColorA* m_pkSubTextureOffsets;         // +0x68, 4 bytes
     unsigned char m_ucSubTextureOffsetCount;  // +0x6C, 1 bytes
     unsigned char layoutPadding6D[3];
     // Authored declaration for this unit's covered function (layout unchanged).
@@ -192,14 +192,14 @@ class NiParticlesData : public NiGeometryData
     // void __cdecl NiParticlesData::*(float*)
     // void __cdecl NiParticlesData::*(NiPoint3*)
     // void __cdecl NiParticlesData::*(unsigned char*)
-    // void __cdecl NiParticlesData::*(RgbaColor*, unsigned char)
+    // void __cdecl NiParticlesData::*(NiColorA*, unsigned char)
     // void __cdecl NiParticlesData::*(float*)
     // void __cdecl NiParticlesData::*(float*)
     // void __cdecl NiParticlesData::*(NiQuaternion*)
     // void __cdecl NiParticlesData::*(float*)
     // void __cdecl NiParticlesData::*(NiPoint3*)
     // void __cdecl NiParticlesData::*(unsigned char*)
-    // void __cdecl NiParticlesData::*(RgbaColor*, unsigned char)
+    // void __cdecl NiParticlesData::*(NiColorA*, unsigned char)
     // void __cdecl NiParticlesData::*()
     // NiObject* __cdecl NiParticlesData::*()
     // unsigned short* __cdecl NiParticlesData::*()

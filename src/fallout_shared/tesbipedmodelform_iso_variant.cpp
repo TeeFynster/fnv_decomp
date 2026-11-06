@@ -2,7 +2,8 @@
 // with VC9 SP1 and /MT /Od /Oy- /GS /EHsc /Gy (unit lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
 #include "tesbipedmodelform_decls.h"
-#include "TESForm.h"
+#include "layout_support.h"
+#include "../../include/TESForm.h"
 #include "tesbipedmodelform_types_TESBipedModelForm.h"
 #include "tesbipedmodelform_types_BIPED_OBJECT.h"
 #include "tesbipedmodelform_types_SEX.h"
@@ -16,10 +17,10 @@ class FUN_00480400
 
     BipedModelForm m_kBipedModelForm;
     TESModelTextureSwap bipedModel[2];
-    TESModelTextureSwap worldModel[2];
-    TESIcon m_kIcon[2];
+    TESModelTextureSwap groundModel[2];
+    TESIcon icon[2];
     BGSMessageIcon messageIcon[2];
-    TESModelRDT m_kFaceGenModel;
+    TESModelRDT modelRDT;
 };
 
 // @fnv 0x00480400

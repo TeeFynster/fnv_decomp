@@ -1,6 +1,14 @@
-// fallout_shared/pathfinding/pathingsolution.cpp: PathingSolution, OwnS, DelS, HermiteStub and more (34 functions)
+// fallout_shared/pathfinding/pathingsolution.cpp: pathing solutions and spline helpers (34 functions)
 
+#include "PointStorage.h"
+#include "../../../include/PathingSolution.h"
+#include "../../../include/PathingInfo.h"
 #include "pathingsolution_types_PathingSolution.h"
+#include "../../../include/BGSLoadFormBuffer.h"
+#include "../../../include/BGSLoadGameBuffer.h"
+#include "../../../include/PathingAvoidNodeArray.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/PathingAvoidNode.h"
 
 // Initializes the PathingSolution object by setting two local sentinel values to -1 and clearing the boolean member.
 // @fnv 0x006e7650
@@ -16,11 +24,12 @@ PathingSolution::PathingSolution()
 // @fnv 0x006e7800
 float PathingSolution::CalculatePathLength()
 {
-    struct Stack
+// distinct from Stack: exe 0x006e7800 uses three PointStorage locals and traversal state, not items/top.
+    struct PathLengthFrameView
     {
-        NiPoint3 thirdPoint;
-        NiPoint3 secondPoint;
-        NiPoint3 firstPoint;
+        PointStorage thirdPoint;
+        PointStorage secondPoint;
+        PointStorage firstPoint;
         unsigned int index;
         unsigned int count;
         PacketNodeRecord* second;
@@ -36,29 +45,13 @@ float PathingSolution::CalculatePathLength()
             continue;
         stack.second = GetVirtualNode(stack.index);
         stack.distance += stack.second
-                              ->GetPosition(stack.firstPoint, stack.thirdPoint,
-                                            stack.first->GetPosition(stack.secondPoint)->GetLocation())
+                              ->GetPosition(reinterpret_cast<NiPoint3&>(stack.firstPoint), reinterpret_cast<NiPoint3&>(stack.thirdPoint),
+                                            stack.first->GetPosition(reinterpret_cast<NiPoint3&>(stack.secondPoint))->GetLocation())
                               ->GetLocation()
                               ->GetDoorPathingPoint()
                               ->GetDistance();
     }
     return stack.distance;
-}
-
-struct DelS
-{
-    void FUN_006e7720();
-    static void operator delete(void*, unsigned int);
-    void* FUN_006e76f0(unsigned int flags);
-};
-// Calls FUN_006e7720, then frees this with operator delete when flags has bit 0 set, and returns this.
-// @fnv 0x006e76f0
-void* DelS::FUN_006e76f0(unsigned int flags)
-{
-    FUN_006e7720();
-    if (flags & 1)
-        DelS::operator delete(this, 0x44);
-    return this;
 }
 
 struct PSClearStub
@@ -86,28 +79,17 @@ void __fastcall ResetPathingSolution(PathingSolution* self)
     self->m_bHasValidPath = false;
 }
 
-struct FUN_006e78b0_shell : public PathingSolution
-{
-    void* FUN_006e78b0(unsigned int);
-};
-
-struct PathBuilder
+// SolutionNodePool: unit-local view of PathingSolution's node pool (member1), not PathBuilder: 0x006e78b0 and 0x006e8f60 call its slot lookup 0x006e8f40
+struct SolutionNodePool
 {
     void* FUN_006e8f40(void*);
 };
 
 // @fnv 0x006e78b0
-void* FUN_006e78b0_shell::FUN_006e78b0(unsigned int aiIndex)
+LocationDescriptor* PathingSolution::FUN_006e78b0(unsigned int aiIndex)
 {
-    return ((PathBuilder*)((char*)this + 8))->FUN_006e8f40((void*)aiIndex);
+    return (LocationDescriptor*)((SolutionNodePool*)&member1)->FUN_006e8f40((void*)aiIndex);
 }
-
-struct FUN_006e7970_shell : public PathingSolution
-{
-    void* FUN_006e7970(unsigned int);
-};
-
-void* __fastcall FUN_006e8f80(void* this_ptr);
 
 struct Dummy_006e8f80
 {
@@ -115,9 +97,9 @@ struct Dummy_006e8f80
 };
 
 // @fnv 0x006e7970
-void* FUN_006e7970_shell::FUN_006e7970(unsigned int aiIndex)
+const PathingGraphNode* PathingSolution::FUN_006e7970(unsigned int aiIndex)
 {
-    return ((Dummy_006e8f80*)((char*)this + 0x20))->FUN_006e8f80(aiIndex);
+    return (const PathingGraphNode*)((Dummy_006e8f80*)&member2)->FUN_006e8f80(aiIndex);
 }
 
 struct FUN_00457990_shell
@@ -125,24 +107,17 @@ struct FUN_00457990_shell
     float FUN_00457990();
 };
 
-struct FUN_006e7990_shell
-{
-    int GetObjectFlags();
-    PacketNodeRecord* FUN_006e7970(int);
-    float FUN_006e7990(int);
-};
-
 // Returns 0.0f if the index is at or past the last element, otherwise computes a value from the positions of the element at the index and the next one.
 // @fnv 0x006e7990
-float FUN_006e7990_shell::FUN_006e7990(int aiIndex)
+float PathingSolution::FUN_006e7990(int aiIndex)
 {
-    if (aiIndex >= GetObjectFlags() - 1)
+    if (aiIndex >= (int)GetObjectFlags() - 1)
         return 0.0f;
-    NiPoint3 loc1;
-    NiPoint3 loc2;
-    NiPoint3 loc3;
-    return ((FUN_00457990_shell*)FUN_006e7970(aiIndex)
-                ->GetPosition(loc3, loc2, FUN_006e7970(aiIndex + 1)->GetPosition(loc1)->GetLocation())
+    PointStorage loc1;
+    PointStorage loc2;
+    PointStorage loc3;
+    return ((FUN_00457990_shell*)((PacketNodeRecord*)FUN_006e7970(aiIndex))
+                ->GetPosition(reinterpret_cast<NiPoint3&>(loc3), reinterpret_cast<NiPoint3&>(loc2), ((PacketNodeRecord*)FUN_006e7970(aiIndex + 1))->GetPosition(reinterpret_cast<NiPoint3&>(loc1))->GetLocation())
                 ->GetLocation()
                 ->GetDoorPathingPoint())
         ->FUN_00457990();
@@ -241,15 +216,10 @@ RetS OwnS::FUN_006e7cc0(int aiFirst, int aiSecond)
     return FUN_006e7d60(aiFirst, aiSecond);
 }
 
-struct _S_006e7d10_vec
-{
-    float x, y, z;
-};
-
 struct _S_006e7d10
 {
-    _S_006e7d10_vec a;
-    _S_006e7d10_vec b;
+    NiPoint3 a;
+    NiPoint3 b;
 };
 
 struct _Arg_006e7d10
@@ -347,7 +317,8 @@ void FUN_006e8450_shell::FUN_006e8450(void* aKey1, void* aKey2)
 }
 
 namespace fnv_006e8f60 {
-class PathBuilder
+// SolutionNodePool: as above (0x006e8f60 forwards to 0x006e8f40)
+class SolutionNodePool
 {
   public:
     void* FUN_006e8f40(void*);
@@ -355,7 +326,7 @@ class PathBuilder
 };
 
 // @fnv 0x006e8f60
-void* PathBuilder::FUN_006e8f60(void* apArg)
+void* SolutionNodePool::FUN_006e8f60(void* apArg)
 {
     return FUN_006e8f40(apArg);
 }
@@ -372,99 +343,51 @@ bool S3e60::FUN_006e8fa0(unsigned int auiFlag)
     return GetFlag(auiFlag);
 }
 
-struct FUN_006e9080
-{
-    char b[0x18];
-    ~FUN_006e9080();
-};
-struct FUN_006e9260
-{
-    char b[0x10];
-    ~FUN_006e9260();
-};
-struct FUN_00438690
-{
-    char b[8];
-    ~FUN_00438690();
-};
-struct EBase
-{
-    virtual ~EBase();
-    char b[4];
-};
-struct FUN_006e7720 : public EBase
-{
-    FUN_006e9080 m1;
-    FUN_006e9260 m2;
-    FUN_00438690 m3;
-    virtual ~FUN_006e7720();
-};
-void __fastcall ResetPathingSolution(FUN_006e7720*);
 // @fnv 0x006e7720
-FUN_006e7720::~FUN_006e7720()
+PathingSolution::~PathingSolution()
 {
     ResetPathingSolution(this);
 }
 
 namespace fnv_006e78d0 {
-struct FUN_006e78d0_shell : public PathingSolution
-{
-    float GetTotalPathLength();
-};
-
-struct FUN_006e7970_shell
-{
-    void* FUN_006e7970(unsigned int);
-};
-struct SizeH
-{
-    unsigned int GetObjectFlags();
-};
 struct NiPoint3H
 {
     float Length() const;
 };
 // Sums the lengths of the segments between consecutive path nodes and returns the total length.
+} // namespace fnv_006e78d0
 // @fnv 0x006e78d0
-float FUN_006e78d0_shell::GetTotalPathLength()
+float PathingSolution::GetTotalPathLength()
 {
     float ftotalLength = 0.0f;
     PacketNodeRecord* plastNode;
     PacketNodeRecord* pnextNode;
-    unsigned int isize = ((SizeH*)this)->GetObjectFlags();
+    unsigned int isize = GetObjectFlags();
     for (unsigned int i = 1; i < isize; i++)
     {
-        plastNode = (PacketNodeRecord*)((FUN_006e7970_shell*)this)->FUN_006e7970(i - 1);
-        pnextNode = (PacketNodeRecord*)((FUN_006e7970_shell*)this)->FUN_006e7970(i);
-        NiPoint3 a;
-        NiPoint3 b;
-        NiPoint3 c;
-        ftotalLength += ((NiPoint3H*)pnextNode->GetPosition(a, c, plastNode->GetPosition(b)->GetLocation())
+        plastNode = (PacketNodeRecord*)FUN_006e7970(i - 1);
+        pnextNode = (PacketNodeRecord*)FUN_006e7970(i);
+        PointStorage a;
+        PointStorage b;
+        PointStorage c;
+        ftotalLength += ((fnv_006e78d0::NiPoint3H*)pnextNode->GetPosition(reinterpret_cast<NiPoint3&>(a), reinterpret_cast<NiPoint3&>(c), plastNode->GetPosition(reinterpret_cast<NiPoint3&>(b))->GetLocation())
                              ->GetLocation()
                              ->GetDoorPathingPoint())
                             ->Length();
     }
     return ftotalLength;
 }
-}  // namespace fnv_006e78d0
 
-struct _ref_006815c0
-{
-    float x;
-    float y;
-    float z;
-    _ref_006815c0();
-};
 struct FUN_006e7d60_stub
 {
     float ComputeWeightedSum(float*, float*, float*, float*);
-    _ref_006815c0 FUN_006e7d60(char* p3, char* p4);
+    NiPoint3 FUN_006e7d60(char* p3, char* p4);
 };
 // Computes a vector from two structures by calling ComputeWeightedSum on each of the x, y and z component pairs.
 // @fnv 0x006e7d60
-_ref_006815c0 FUN_006e7d60_stub::FUN_006e7d60(char* pFirst, char* pSecond)
+NiPoint3 FUN_006e7d60_stub::FUN_006e7d60(char* pFirst, char* pSecond)
 {
-    _ref_006815c0 vecResult;
+    NiPoint3 vecResult;
     vecResult.x = ComputeWeightedSum((float*)pFirst, (float*)pSecond, (float*)(pFirst + 0xc), (float*)(pSecond + 0xc));
     vecResult.y = ComputeWeightedSum((float*)(pFirst + 4), (float*)(pSecond + 4), (float*)(pFirst + 0x10),
                                      (float*)(pSecond + 0x10));
@@ -488,33 +411,9 @@ int FUN_006e8f40_shell::FUN_006e8f40(int aiIndex) const
 }
 
 namespace fnv_006e7e70 {
-struct blob12
-{
-    char b[12];
-};
-struct SplineInterpolator
-{
-    void SetParameter(float);
-    void SetKeyData(void*, void*);
-    struct blob12 Interpolate();
-    struct blob12 Interpolate(float);
-    struct blob12 Interpolate(void*, void*, float);
-    struct blob12 Interpolate(void*, void*);
-    bool FindPointOnSpline(float, float, bool, float*, NiPoint3*, float);
-    float ApproxLength(float, float, unsigned int);
-    struct blob12 InterpolateNoZ(void*, void*);
-    void* __vecDelDtor(unsigned int);
-    char SplinePath[20];
-    char Key1[24];
-    char Key2[24];
-};
-typedef char _sizecheck_PathingSpline[sizeof(SplineInterpolator) == 68 ? 1 : -1];
-struct FUN_006e7e70_shell : public PathingSolution
-{
-    bool FUN_006e7e70(float, float, bool, float*, NiPoint3*);
-};
 
-struct ArrSI
+// Exe 0x006e7e70: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct PathingsolutionOffset08View
 {
     unsigned int GetFlags();
 };
@@ -522,16 +421,15 @@ struct FUN_0052d240_obj
 {
     ~FUN_0052d240_obj();
 };
-unsigned int __fastcall GetObjectFlags(char*);
-PathingGraphNode* __fastcall FUN_006b05a0(PathingSolution*);
 PathingGraphNode* __fastcall FUN_006e8480(PathingSolution*);
-struct PathingSplineKeyS
+// 0x006e7e10 returns a 24-byte location/tangent value; this ABI-only POD has no PathingSplineKey constructors.
+struct SplineLocationTangent
 {
     float fData[6];
 };
 struct OwnS2
 {
-    PathingSplineKeyS GetLocationAndTangent();
+    SplineLocationTangent GetLocationAndTangent();
 };
 struct Dummy_006e8f80
 {
@@ -542,48 +440,50 @@ struct PathingLocationExt
     NiPoint3 FUN_005c3420() const;
 };
 PathingLocationExt& __fastcall FUN_00717e50(PathingGraphNode*);
-struct BSSplineS
+// 0x006e7c40 writes t and four Hermite weights here: plain coefficient storage, without BSSpline methods.
+struct CubicHermiteWeights
 {
-    void* pData[5];
+    float t, a, b, c, d;
 };
 struct FUN_006e7b60
 {
     FUN_006e7b60();
     ~FUN_006e7b60();
-    void FUN_006e8450(const PathingSplineKeyS&, const PathingSplineKeyS&);
+    void FUN_006e8450(const SplineLocationTangent&, const SplineLocationTangent&);
     bool FindPointAtDistance(float, float, bool, float*, NiPoint3*, float);
     float MeasurePathLength(float, float, unsigned int);
-    BSSplineS SplinePath;
-    PathingSplineKeyS Key1;
-    PathingSplineKeyS Key2;
+    CubicHermiteWeights SplinePath;
+    SplineLocationTangent Key1;
+    SplineLocationTangent Key2;
 };
 
 // Walks the spline segments forward or backward from afCurrentParameter by afDist, writing the resulting parameter and point to the output pointers.
+} // namespace fnv_006e7e70
 // @fnv 0x006e7e70
-bool FUN_006e7e70_shell::FUN_006e7e70(float afCurrentParameter, float afDist, bool abForward, float* apNewParameter,
+bool PathingSolution::FUN_006e7e70(float afCurrentParameter, float afDist, bool abForward, float* apNewParameter,
                                       NiPoint3* apNewPoint)
 {
-    if (!GetObjectFlags((char*)this))
+    if (!GetObjectFlags())
         return false;
     if (abForward)
     {
         bool bfound;
-        int isize = GetObjectFlags((char*)this) - 1;
+        int isize = GetObjectFlags() - 1;
         if (afCurrentParameter >= isize)
         {
             if (apNewParameter)
                 *apNewParameter = isize;
             if (apNewPoint)
-                *apNewPoint = FUN_00717e50(FUN_006b05a0(this)).FUN_005c3420();
+                *apNewPoint = fnv_006e7e70::FUN_00717e50(FUN_006b05a0()).FUN_005c3420();
             return false;
         }
         int icurrentSpline = (int)afCurrentParameter;
         float fcurrentParam = afCurrentParameter;
         float fdist = afDist;
-        FUN_006e7b60 spline;
+        fnv_006e7e70::FUN_006e7b60 spline;
         spline.FUN_006e8450(
-            ((OwnS2*)((Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline))->GetLocationAndTangent(),
-            ((OwnS2*)((Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline + 1))->GetLocationAndTangent());
+            ((fnv_006e7e70::OwnS2*)((fnv_006e7e70::Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline))->GetLocationAndTangent(),
+            ((fnv_006e7e70::OwnS2*)((fnv_006e7e70::Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline + 1))->GetLocationAndTangent());
         bfound = spline.FindPointAtDistance(fcurrentParam - icurrentSpline, fdist, abForward, apNewParameter,
                                             apNewPoint, 1.0f);
         while (!bfound)
@@ -596,12 +496,12 @@ bool FUN_006e7e70_shell::FUN_006e7e70(float afCurrentParameter, float afDist, bo
                 if (apNewParameter)
                     *apNewParameter = isize;
                 if (apNewPoint)
-                    *apNewPoint = FUN_00717e50(FUN_006b05a0(this)).FUN_005c3420();
+                    *apNewPoint = fnv_006e7e70::FUN_00717e50(FUN_006b05a0()).FUN_005c3420();
                 return false;
             }
             spline.FUN_006e8450(
-                ((OwnS2*)((Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline))->GetLocationAndTangent(),
-                ((OwnS2*)((Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline + 1))->GetLocationAndTangent());
+                ((fnv_006e7e70::OwnS2*)((fnv_006e7e70::Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline))->GetLocationAndTangent(),
+                ((fnv_006e7e70::OwnS2*)((fnv_006e7e70::Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline + 1))->GetLocationAndTangent());
             bfound = spline.FindPointAtDistance(0.0f, fdist, abForward, apNewParameter, apNewPoint, 1.0f);
         }
         if (apNewParameter)
@@ -611,26 +511,26 @@ bool FUN_006e7e70_shell::FUN_006e7e70(float afCurrentParameter, float afDist, bo
     else
     {
         bool bfound;
-        int isize = GetObjectFlags((char*)this) - 1;
+        int isize = GetObjectFlags() - 1;
         if (afCurrentParameter <= 0.0)
         {
             if (apNewParameter)
                 *apNewParameter = 0.0f;
             if (apNewPoint)
-                *apNewPoint = FUN_00717e50(FUN_006e8480(this)).FUN_005c3420();
+                *apNewPoint = fnv_006e7e70::FUN_00717e50(fnv_006e7e70::FUN_006e8480(this)).FUN_005c3420();
             return false;
         }
         int icurrentSpline = (int)afCurrentParameter;
         if (icurrentSpline < 0)
             icurrentSpline = 0;
-        if (icurrentSpline >= (int)((ArrSI*)&member2)->GetFlags() - 1)
+        if (icurrentSpline >= (int)((fnv_006e7e70::PathingsolutionOffset08View*)&member2)->GetFlags() - 1)
             --icurrentSpline;
         float fcurrentParam = afCurrentParameter;
         float fdist = afDist;
-        FUN_006e7b60 spline;
+        fnv_006e7e70::FUN_006e7b60 spline;
         spline.FUN_006e8450(
-            ((OwnS2*)((Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline))->GetLocationAndTangent(),
-            ((OwnS2*)((Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline + 1))->GetLocationAndTangent());
+            ((fnv_006e7e70::OwnS2*)((fnv_006e7e70::Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline))->GetLocationAndTangent(),
+            ((fnv_006e7e70::OwnS2*)((fnv_006e7e70::Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline + 1))->GetLocationAndTangent());
         bfound = spline.FindPointAtDistance(fcurrentParam - icurrentSpline, fdist, abForward, apNewParameter,
                                             apNewPoint, 1.0f);
         while (!bfound)
@@ -643,12 +543,12 @@ bool FUN_006e7e70_shell::FUN_006e7e70(float afCurrentParameter, float afDist, bo
                 if (apNewParameter)
                     *apNewParameter = 0.0f;
                 if (apNewPoint)
-                    *apNewPoint = FUN_00717e50(FUN_006e8480(this)).FUN_005c3420();
+                    *apNewPoint = fnv_006e7e70::FUN_00717e50(fnv_006e7e70::FUN_006e8480(this)).FUN_005c3420();
                 return false;
             }
             spline.FUN_006e8450(
-                ((OwnS2*)((Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline))->GetLocationAndTangent(),
-                ((OwnS2*)((Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline + 1))->GetLocationAndTangent());
+                ((fnv_006e7e70::OwnS2*)((fnv_006e7e70::Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline))->GetLocationAndTangent(),
+                ((fnv_006e7e70::OwnS2*)((fnv_006e7e70::Dummy_006e8f80*)&member2)->FUN_006e8f80(icurrentSpline + 1))->GetLocationAndTangent());
             bfound = spline.FindPointAtDistance(1.0f, fdist, abForward, apNewParameter, apNewPoint, 1.0f);
         }
         if (apNewParameter)
@@ -656,28 +556,21 @@ bool FUN_006e7e70_shell::FUN_006e7e70(float afCurrentParameter, float afDist, bo
         return true;
     }
 }
-}  // namespace fnv_006e7e70
 
 struct ArrHelper
 {
     bool FUN_0076b610() const;
     int FUN_006e8fc0();
 };
-struct FUN_006e8480_shell
-{
-    char _pad[32];
-    ArrHelper m;
-    int FUN_006e8480();
-};
-// Returns 0 when m.FUN_0076b610() is true, otherwise returns m.FUN_006e8fc0().
+// The shared header has no first-node accessor declaration; keep the accessor as a free function.
 // @fnv 0x006e8480
-int FUN_006e8480_shell::FUN_006e8480()
+int __fastcall FirstPathingNode(PathingSolution* self)
 {
-    if (m.FUN_0076b610())
+    if (((ArrHelper*)&self->member2)->FUN_0076b610())
     {
         return 0;
     }
-    return m.FUN_006e8fc0();
+    return ((ArrHelper*)&self->member2)->FUN_006e8fc0();
 }
 
 struct HelperA
@@ -690,27 +583,23 @@ struct HelperB
     char data[32];
     void FUN_006e9470(void*);
 };
-struct MyClass
+struct SaveBuffer;
+// Only the unsupported copy-to and save declarations live here; all fields come from the shared class.
+struct PathingSolutionOperations : public PathingSolution
 {
-    char _0[8];
-    HelperA ha;
-    int m18;
-    int m1c;
-    HelperB hb;
-    unsigned char m40;
-    void FUN_006e8ab0(MyClass* p);
+    void CopyTo(PathingSolution*);
+    void SaveGame(SaveBuffer*);
 };
 // @fnv 0x006e8ab0
-void MyClass::FUN_006e8ab0(MyClass* apTarget)
+void PathingSolutionOperations::CopyTo(PathingSolution* apTarget)
 {
-    apTarget->m18 = m18;
-    apTarget->m1c = m1c;
-    apTarget->m40 = m40;
-    ha.FUN_006e9410(&apTarget->ha);
-    hb.FUN_006e9470(&apTarget->hb);
+    apTarget->member1.firstValue = member1.firstValue;
+    apTarget->member1.secondValue = member1.secondValue;
+    apTarget->m_bHasValidPath = m_bHasValidPath;
+    ((HelperA*)&member1)->FUN_006e9410(&apTarget->member1);
+    ((HelperB*)&member2)->FUN_006e9470(&apTarget->member2);
 }
 
-struct PathingGraphNode;
 struct BSSimpleArray_PathingNode_1024
 {
     int m_auiShapeKeys;
@@ -744,39 +633,9 @@ RetS OwnS::FUN_006e9ab0(float f)
 }  // namespace fnv_006e9ab0
 
 namespace fnv_006e7a10 {
-struct blob12
-{
-    char b[12];
-};
-struct SplineInterpolator
-{
-    void SetParameter(float);
-    void SetKeyData(void*, void*);
-    struct blob12 Interpolate();
-    struct blob12 Interpolate(float);
-    struct blob12 Interpolate(void*, void*, float);
-    struct blob12 Interpolate(void*, void*);
-    bool FindPointOnSpline(float, float, bool, float*, NiPoint3*, float);
-    float ApproxLength(float, float, unsigned int);
-    struct blob12 InterpolateNoZ(void*, void*);
-    void* __vecDelDtor(unsigned int);
-    char SplinePath[20];
-    char Key1[24];
-    char Key2[24];
-};
-typedef char _sizecheck_PathingSpline[sizeof(SplineInterpolator) == 68 ? 1 : -1];
-struct FUN_006e7a10_shell : public PathingSolution
-{
-    void GetLocationAtSplineParameter(float, NiPoint3*);
-};
 
 struct StageItemNode;
 StageItemNode* __fastcall FUN_00717e50(void*);
-unsigned int __fastcall GetObjectFlags(char*);
-struct FUN_006e7970_shell
-{
-    void* FUN_006e7970(unsigned int);
-};
 struct NP3S
 {
     float x;
@@ -819,53 +678,28 @@ struct OwnS
 };
 
 // Clamps the spline parameter to the last node and returns the interpolated location between the surrounding nodes into aOutLoc.
+} // namespace fnv_006e7a10
 // @fnv 0x006e7a10
-void FUN_006e7a10_shell::GetLocationAtSplineParameter(float afCurrentSplineParameter, NiPoint3* aOutLoc)
+void PathingSolution::GetLocationAtSplineParameter(float afCurrentSplineParameter, NiPoint3* aOutLoc)
 {
     unsigned int uiNodeIndex = (int)afCurrentSplineParameter;
     float remainder = afCurrentSplineParameter - uiNodeIndex;
-    int isize = GetObjectFlags((char*)this) - 1;
+    int isize = GetObjectFlags() - 1;
     if ((int)uiNodeIndex >= isize)
     {
-        *(NP3S*)aOutLoc = ((LocS*)FUN_00717e50(((FUN_006e7970_shell*)this)->FUN_006e7970(isize)))->GetLocation();
+        *(fnv_006e7a10::NP3S*)aOutLoc = ((fnv_006e7a10::LocS*)fnv_006e7a10::FUN_00717e50((void*)FUN_006e7970(isize)))->GetLocation();
         return;
     }
-    FUN_006e7b60 spline;
-    FUN_006e7c20(&spline, remainder);
-    *(RetS*)aOutLoc =
-        ((OwnS*)&spline)
+    fnv_006e7a10::FUN_006e7b60 spline;
+    fnv_006e7a10::FUN_006e7c20(&spline, remainder);
+    *(fnv_006e7a10::RetS*)aOutLoc =
+        ((fnv_006e7a10::OwnS*)&spline)
             ->FUN_006e7cc0(
-                ((OwnS2*)((FUN_006e7970_shell*)this)->FUN_006e7970(uiNodeIndex))->GetLocationAndTangent(),
-                ((OwnS2*)((FUN_006e7970_shell*)this)->FUN_006e7970(uiNodeIndex + 1))->GetLocationAndTangent());
+                ((fnv_006e7a10::OwnS2*)FUN_006e7970(uiNodeIndex))->GetLocationAndTangent(),
+                ((fnv_006e7a10::OwnS2*)FUN_006e7970(uiNodeIndex + 1))->GetLocationAndTangent());
 }
-}  // namespace fnv_006e7a10
 
 namespace fnv_006e84b0 {
-struct blob12
-{
-    char b[12];
-};
-struct SplineInterpolator
-{
-    void SetParameter(float);
-    void SetKeyData(void*, void*);
-    struct blob12 Interpolate();
-    struct blob12 Interpolate(float);
-    struct blob12 Interpolate(void*, void*, float);
-    struct blob12 Interpolate(void*, void*);
-    bool FindPointOnSpline(float, float, bool, float*, NiPoint3*, float);
-    float ApproxLength(float, float, unsigned int);
-    struct blob12 InterpolateNoZ(void*, void*);
-    void* __vecDelDtor(unsigned int);
-    char SplinePath[20];
-    char Key1[24];
-    char Key2[24];
-};
-typedef char _sizecheck_PathingSpline[sizeof(SplineInterpolator) == 68 ? 1 : -1];
-struct FUN_006e84b0_shell : public PathingSolution
-{
-    float GetSplineLengthAtParameter(float);
-};
 
 struct M24
 {
@@ -894,61 +728,44 @@ struct FUN_006e9af0_S
 {
     float MeasurePathLength(float, float, unsigned int);
 };
-struct FUN_006e7970_shell
-{
-    OwnS2* FUN_006e7970(unsigned int);
-};
-struct FUN_008b6800_S
-{
-    unsigned int GetObjectFlags();
-};
-struct FUN_006e78d0_S
-{
-    float GetTotalPathLength();
-};
 
+} // namespace fnv_006e84b0
 // @fnv 0x006e84b0
-float FUN_006e84b0_shell::GetSplineLengthAtParameter(float afParameter)
+float PathingSolution::GetSplineLengthAtParameter(float afParameter)
 {
-    if (((FUN_008b6800_S*)this)->GetObjectFlags() == 0)
+    if (GetObjectFlags() == 0)
         return 0.0f;
-    if (afParameter >= ((FUN_008b6800_S*)this)->GetObjectFlags() - 1)
-        return ((FUN_006e78d0_S*)this)->GetTotalPathLength();
+    if (afParameter >= GetObjectFlags() - 1)
+        return GetTotalPathLength();
     int inode = (int)afParameter;
     float ftotalLength = 0.0f;
-    FUN_0052d240_obj spline;
+    fnv_006e84b0::FUN_0052d240_obj spline;
     for (int i = 0; i < inode; ++i)
     {
-        ((FUN_006e8450_shell*)&spline)
-            ->FUN_006e8450(((FUN_006e7970_shell*)this)->FUN_006e7970(i)->GetLocationAndTangent(),
-                           ((FUN_006e7970_shell*)this)->FUN_006e7970(i + 1)->GetLocationAndTangent());
-        ftotalLength += ((FUN_006e9af0_S*)&spline)->MeasurePathLength(0.0f, 1.0f, 2);
+        ((fnv_006e84b0::FUN_006e8450_shell*)&spline)
+            ->FUN_006e8450(((fnv_006e84b0::OwnS2*)FUN_006e7970(i))->GetLocationAndTangent(),
+                           ((fnv_006e84b0::OwnS2*)FUN_006e7970(i + 1))->GetLocationAndTangent());
+        ftotalLength += ((fnv_006e84b0::FUN_006e9af0_S*)&spline)->MeasurePathLength(0.0f, 1.0f, 2);
     }
-    ((FUN_006e8450_shell*)&spline)
-        ->FUN_006e8450(((FUN_006e7970_shell*)this)->FUN_006e7970(inode)->GetLocationAndTangent(),
-                       ((FUN_006e7970_shell*)this)->FUN_006e7970(inode + 1)->GetLocationAndTangent());
-    ftotalLength += ((FUN_006e9af0_S*)&spline)->MeasurePathLength(0.0f, afParameter - inode, 2);
+    ((fnv_006e84b0::FUN_006e8450_shell*)&spline)
+        ->FUN_006e8450(((fnv_006e84b0::OwnS2*)FUN_006e7970(inode))->GetLocationAndTangent(),
+                       ((fnv_006e84b0::OwnS2*)FUN_006e7970(inode + 1))->GetLocationAndTangent());
+    ftotalLength += ((fnv_006e84b0::FUN_006e9af0_S*)&spline)->MeasurePathLength(0.0f, afParameter - inode, 2);
     return ftotalLength;
 }
-}  // namespace fnv_006e84b0
 
 namespace fnv_006e8680 {
 void __cdecl FUN_005330e0(float&, float, float);
 extern double _gModifierZero;
-struct FUN_006e7990_shell
-{
-    float FUN_006e7990(int);
-    int GetObjectFlags();
-    float FindSegmentAtFraction(float, float, unsigned int*);
-};
+} // namespace fnv_006e8680
 // @fnv 0x006e8680
-float FUN_006e7990_shell::FindSegmentAtFraction(float afPosition, float afScale, unsigned int* piNode)
+float PathingSolution::FindSegmentAtFraction(float afPosition, float afScale, unsigned int* piNode)
 {
     bool bFound;
     float fTotal;
     float fDistance;
     float fSequenceTimeRatio;
-    FUN_005330e0(afPosition, 0.0f, 1.0f);
+    fnv_006e8680::FUN_005330e0(afPosition, 0.0f, 1.0f);
     fDistance = afPosition * afScale;
     fTotal = 0.0f;
     bFound = false;
@@ -960,7 +777,7 @@ float FUN_006e7990_shell::FindSegmentAtFraction(float afPosition, float afScale,
         if (fTotal + fSeg >= fDistance)
         {
             *piNode = i;
-            fSequenceTimeRatio = fSeg != _gModifierZero ? (fDistance - fTotal) / fSeg : 0.0;
+            fSequenceTimeRatio = fSeg != fnv_006e8680::_gModifierZero ? (fDistance - fTotal) / fSeg : 0.0;
             bFound = true;
             break;
         }
@@ -973,113 +790,11 @@ float FUN_006e7990_shell::FindSegmentAtFraction(float afPosition, float afScale,
     }
     return *piNode + fSequenceTimeRatio;
 }
-}  // namespace fnv_006e8680
 
-struct Actor;
 struct BGSSaveFormBuffer;
-struct SaveLoadFile;
-struct ThreeByThreeMatrix;
-struct NiQuaternion;
-struct hkVector4;
-struct blob4
-{
-    char b[4];
-};
-struct BGSLoadGameBuffer
-{
-    virtual unsigned char GetVersion();
-    virtual TESForm* GetForm();
-    virtual TESObjectREFR* GetReference();
-    virtual Actor* GetActor();
-    int Load(SaveLoadFile*, unsigned int);
-    int Load(SaveLoadFile*);
-    void ResetReadPosition();
-    void SetBuffer(char*, unsigned int, unsigned int);
-    char* GetCurrentBufferPointer();
-    bool ReadFormIdentifier(unsigned int*);
-    unsigned int ReadFormIdentifier();
-    void ReadTypedData(NiQuaternion*, unsigned int);
-    void ReadTypedData(hkVector4*, unsigned int);
-    void ReadTypedData(double*, unsigned int);
-    void ReadTypedData(NiPoint3*, unsigned int);
-    void ReadTypedData(float*, unsigned int);
-    void ReadTypedData(unsigned long*, unsigned int);
-    void ReadTypedData(long*, unsigned int);
-    void ReadTypedData(unsigned int*, unsigned int);
-    void ReadTypedData(int*, unsigned int);
-    void ReadTypedData(unsigned short*, unsigned int);
-    void ReadTypedData(short*, unsigned int);
-    void ReadTypedData(ThreeByThreeMatrix*, unsigned int);
-    void ReadTypedData(void*, unsigned int);
-    char* LoadString(char*);
-    int ReadElementCount();
-    void AdvanceBuffer(unsigned int);
-    void ReadElementData(void*, unsigned int, unsigned int);
-    void ReadDataBlock(void*, unsigned int);
-    void* __vecDelDtor(unsigned int);
-    char* pBuffer;
-    unsigned int iBufferSize;
-    unsigned int m_uiReadOffset;
-};
 typedef char _sizecheck_BGSLoadGameBuffer[sizeof(BGSLoadGameBuffer) == 16 ? 1 : -1];
-struct BGSLoadFormBuffer : public BGSLoadGameBuffer
-{
-    int LoadHeader(SaveLoadFile*);
-    int ReadFormData(SaveLoadFile*);
-    void SkipData(SaveLoadFile*, unsigned int);
-    unsigned int GetFormID();
-    void SetForm(TESForm*);
-    virtual TESForm* GetForm();
-    virtual TESObjectREFR* GetReference();
-    virtual Actor* GetActor();
-    int GetFormType();
-    struct blob4 GetChangeFlags();
-    void SetChangeFlags(struct blob4);
-    struct blob4 GetOldChangeFlags();
-    void SetOldChangeFlags(struct blob4);
-    void SetVersion(unsigned char);
-    virtual unsigned char GetVersion();
-    void SetSkipForm(bool);
-    bool GetSkipForm();
-    void SetFormPending(bool);
-    bool GetFormPending();
-    void SetRevertOnly(bool);
-    bool GetRevertOnly();
-    void SetReconstructedForm(bool);
-    bool GetReconstructedForm();
-    void SetCellChanged(bool);
-    bool GetCellChanged();
-    void* __vecDelDtor(unsigned int);
-    unsigned int iFormID;
-    char Header[9];
-    char _pad_1d[3];
-    unsigned int iSize;
-    TESForm* pForm;
-    unsigned int iFlags;
-    char m_cReservedBytes[4];
-};
 typedef char _sizecheck_BGSLoadFormBuffer[sizeof(BGSLoadFormBuffer) == 48 ? 1 : -1];
-struct PathingAvoidanceNode
-{
-    float GetAvoidanceAtPoint(NiPoint3*);
-    int GetType();
-    void* GetPoint1();
-    void* GetPoint2();
-    float GetRadius();
-    float GetCost();
-    void SaveGame(BGSSaveFormBuffer*);
-    void LoadGame(BGSLoadFormBuffer*);
-    NiPoint3 m_kLocation;
-    NiPoint3 TwoComponentVector;
-    float fRadius;
-    float m_fPathingCostCur;
-    int eType;
-};
-typedef char _sizecheck_PathingAvoidNode[sizeof(PathingAvoidanceNode) == 36 ? 1 : -1];
-struct FUN_006e8d50_shell : public PathingSolution
-{
-    void FUN_006e8d50(BGSLoadFormBuffer*);
-};
+typedef char _sizecheck_PathingAvoidNode[sizeof(PathingAvoidNode) == 36 ? 1 : -1];
 
 struct FUN_006f5100_shell
 {
@@ -1088,10 +803,6 @@ struct FUN_006f5100_shell
 struct FUN_006e23b0_shell
 {
     void FUN_006e23b0(BGSLoadFormBuffer*);
-};
-struct FUN_006dc910_shell
-{
-    void LoadPathingAvoidNode(BGSLoadFormBuffer*);
 };
 struct FUN_006e90a0_shell
 {
@@ -1103,10 +814,6 @@ struct FUN_006e9280_shell
     void FUN_006e9280(unsigned int, bool);
     FUN_006e23b0_shell* FUN_006e8fa0(unsigned int);
 };
-struct FUN_006a1400_shell
-{
-    FUN_006dc910_shell* FUN_006a1400(unsigned int);
-};
 struct _Mem_20a4
 {
     void SetSize(unsigned int, bool);
@@ -1115,56 +822,49 @@ struct FUN_006a7ad0_shell
 {
     unsigned int& FUN_006a7ad0(int);
 };
-struct PathingAvoidNodeArray
-{
-    int pad[6];
-    PathingAvoidNodeArray();
-    ~PathingAvoidNodeArray();
-    void SetSize(unsigned int, bool);
-};
 
 // Loads pathing solution data from a BGSLoadFormBuffer: fixed fields, then virtual nodes, pathing nodes, avoid nodes, and door IDs when version >= 0x12.
 // @fnv 0x006e8d50
-void FUN_006e8d50_shell::FUN_006e8d50(BGSLoadFormBuffer* apLoadGameBuffer)
+void PathingSolution::LoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    apLoadGameBuffer->ReadTypedData((char*)this + 0x40, 1);
-    apLoadGameBuffer->ReadTypedData((char*)this + 0x18, 4);
-    apLoadGameBuffer->ReadTypedData((char*)this + 0x1c, 4);
+    apLoadGameBuffer->BGSLoadGameBuffer::ReadTypedData((void*)&m_bHasValidPath, 1u);
+    apLoadGameBuffer->BGSLoadGameBuffer::ReadTypedData((void*)&member1.firstValue, 4u);
+    apLoadGameBuffer->BGSLoadGameBuffer::ReadTypedData((void*)&member1.secondValue, 4u);
     {
-        unsigned int isaveGameCount = apLoadGameBuffer->ReadElementCount();
-        ((FUN_006e90a0_shell*)((char*)this + 8))->FUN_006e90a0(isaveGameCount, true);
+        unsigned int isaveGameCount = apLoadGameBuffer->BGSLoadGameBuffer::ReadElementCount();
+        ((FUN_006e90a0_shell*)&member1)->FUN_006e90a0(isaveGameCount, true);
         for (unsigned int i = 0; i < isaveGameCount; i++)
         {
-            FUN_006f5100_shell* virtualNode = ((FUN_006e90a0_shell*)((char*)this + 8))->FUN_006e8f60(i);
+            FUN_006f5100_shell* virtualNode = ((FUN_006e90a0_shell*)&member1)->FUN_006e8f60(i);
             virtualNode->FUN_006f5100(apLoadGameBuffer);
         }
     }
     {
-        unsigned int isaveGameCount = apLoadGameBuffer->ReadElementCount();
-        ((FUN_006e9280_shell*)((char*)this + 0x20))->FUN_006e9280(isaveGameCount, true);
+        unsigned int isaveGameCount = apLoadGameBuffer->BGSLoadGameBuffer::ReadElementCount();
+        ((FUN_006e9280_shell*)&member2)->FUN_006e9280(isaveGameCount, true);
         for (unsigned int i = 0; i < isaveGameCount; i++)
         {
-            FUN_006e23b0_shell* pathingNode = ((FUN_006e9280_shell*)((char*)this + 0x20))->FUN_006e8fa0(i);
+            FUN_006e23b0_shell* pathingNode = ((FUN_006e9280_shell*)&member2)->FUN_006e8fa0(i);
             pathingNode->FUN_006e23b0(apLoadGameBuffer);
         }
     }
     PathingAvoidNodeArray avoidNodeArray;
     {
-        unsigned int isaveGameCount = apLoadGameBuffer->ReadElementCount();
+        unsigned int isaveGameCount = apLoadGameBuffer->BGSLoadGameBuffer::ReadElementCount();
         avoidNodeArray.SetSize(isaveGameCount, true);
         for (unsigned int i = 0; i < isaveGameCount; i++)
         {
-            FUN_006dc910_shell* avoidNode = ((FUN_006a1400_shell*)&avoidNodeArray)->FUN_006a1400(i);
-            avoidNode->LoadPathingAvoidNode(apLoadGameBuffer);
+            PathingAvoidNode* avoidNode = avoidNodeArray.FUN_006a1400(i);
+            avoidNode->LoadGame(apLoadGameBuffer);
         }
     }
     if (apLoadGameBuffer->GetVersion() >= 0x12)
     {
-        unsigned int isaveGameCount = apLoadGameBuffer->ReadElementCount();
-        ((_Mem_20a4*)((char*)this + 0x30))->SetSize(isaveGameCount, true);
+        unsigned int isaveGameCount = apLoadGameBuffer->BGSLoadGameBuffer::ReadElementCount();
+        ((_Mem_20a4*)&member3)->SetSize(isaveGameCount, true);
         for (unsigned int i = 0; i < isaveGameCount; i++)
         {
-            unsigned int* puiDoorID = &((FUN_006a7ad0_shell*)((char*)this + 0x30))->FUN_006a7ad0(i);
+            unsigned int* puiDoorID = &((FUN_006a7ad0_shell*)&member3)->FUN_006a7ad0(i);
             apLoadGameBuffer->ReadFormIdentifier(puiDoorID);
         }
     }
@@ -1220,12 +920,6 @@ float FUN_006e9af0_cls::MeasurePathLength(float afStart, float afEnd, unsigned i
     return sum_2;
 }
 
-struct Vec
-{
-    float x, y, z;
-    Vec();
-};
-
 struct Key
 {
     float x, y, z, tx, ty, tz;
@@ -1237,7 +931,7 @@ struct Node
 };
 struct Location
 {
-    Vec FUN_005c3420();
+    NiPoint3 FUN_005c3420();
 };
 struct Tail
 {
@@ -1252,28 +946,21 @@ struct SplinePath
 
     void FUN_006e8450(Key*, Key*);
     float MeasurePathLength(float, float, unsigned int);
-    bool FindPointOnSpline(float, float, bool, float*, Vec*, float);
-};
-struct Solution
-{
-    unsigned int GetNodeCount();
-    Tail* FUN_006b05a0();
-    Node* FUN_006e7970(unsigned int);
-    Vec GetPointAtDistance(float position, float distance);
+    bool FindPointOnSpline(float, float, bool, float*, NiPoint3*, float);
 };
 // Walks the spline nodes from the given position until the remaining distance is consumed, returning the interpolated point or the tail location.
 // @fnv 0x006e8790
-Vec Solution::GetPointAtDistance(float position, float distance)
+NiPoint3 PathingSolution::GetPointAtDistance(float position, float distance)
 {
     if (!GetNodeCount())
-        return (const Vec&)_NiPoint3_ZERO;
+        return _NiPoint3_ZERO;
     if (position >= GetNodeCount() - 1)
-        return FUN_006b05a0()->FUN_00717e50()->FUN_005c3420();
+        return ((Tail*)FUN_006b05a0())->FUN_00717e50()->FUN_005c3420();
     float remaining7 = distance;
     int index = (int)position;
     float parameterTmp = position - index;
-    Key next2 = FUN_006e7970(index + 1)->GetLocationAndTangent();
-    Key current = FUN_006e7970(index)->GetLocationAndTangent();
+    Key next2 = ((Node*)FUN_006e7970(index + 1))->GetLocationAndTangent();
+    Key current = ((Node*)FUN_006e7970(index))->GetLocationAndTangent();
     SplinePath spline3;
     ((SplinePath*)&spline3)->FUN_006e8450(&current, &next2);
     float lengthVal = ((SplinePath*)&spline3)->MeasurePathLength(parameterTmp, 1.0f, 2);
@@ -1282,7 +969,7 @@ Vec Solution::GetPointAtDistance(float position, float distance)
         remaining7 -= lengthVal;
         index = index + 1;
         current.FUN_006e7d10(next2);
-        next2.FUN_006e7d10(FUN_006e7970(index + 1)->GetLocationAndTangent());
+        next2.FUN_006e7d10(((Node*)FUN_006e7970(index + 1))->GetLocationAndTangent());
         ((SplinePath*)&spline3)->FUN_006e8450(&current, &next2);
         parameterTmp = 0.0f;
         lengthVal = ((SplinePath*)&spline3)->MeasurePathLength(0.0f, 1.0f, 2);
@@ -1290,16 +977,16 @@ Vec Solution::GetPointAtDistance(float position, float distance)
     if (lengthVal > remaining7)
     {
         float result6;
-        Vec point2;
+        NiPoint3 point2;
         if (!(int)((SplinePath*)&spline3)->FindPointOnSpline(parameterTmp, remaining7, true, &result6, &point2, 10.0f))
         {
-            point2 = (const Vec&)next2;
+            point2 = (const NiPoint3&)next2;
         }
-        return point2;
+        return (const NiPoint3&)point2;
     }
     else
     {
-        return FUN_006b05a0()->FUN_00717e50()->FUN_005c3420();
+        return ((Tail*)FUN_006b05a0())->FUN_00717e50()->FUN_005c3420();
     }
 }
 
@@ -1316,10 +1003,6 @@ struct SaveEntryA
 struct SaveEntryB
 {
     void FUN_006e2350(SaveBuffer*);
-};
-struct SaveEntryC
-{
-    void SaveGame(SaveBuffer*);
 };
 struct CountView
 {
@@ -1349,69 +1032,45 @@ struct SaveArrayD
     int unk0c;
     unsigned int& GetEntry(unsigned int);
 };
-struct AvoidArray
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    AvoidArray();
-    ~AvoidArray();
-    SaveEntryC* GetEntry(unsigned int);
-};
-struct SaveSolution
-{
-    int unk00;
-    int unk04;
-    SaveArrayA first;
-    int unk18;
-    int unk1c;
-    SaveArrayB second;
-    SaveArrayD fourth;
-    unsigned char flags;
-    void FUN_006e8b10(SaveBuffer* buffer);
-};
-// Writes flags, unk18 and unk1c to the buffer, then serializes the counts and entries of first, second, a local AvoidArray and fourth.
+// Writes flags, unk18 and unk1c to the buffer, then serializes the counts and entries of first, second, a local PathingAvoidNodeArray and fourth.
 // @fnv 0x006e8b10
-void SaveSolution::FUN_006e8b10(SaveBuffer* buffer)
+void PathingSolutionOperations::SaveGame(SaveBuffer* buffer)
 {
-    buffer->SaveData(&flags, 1, 0);
-    buffer->SaveData(&unk18, 4, 0);
-    buffer->SaveData(&unk1c, 4, 0);
-    unsigned int countA9 = &first ? ((CountView*)&first)->Count() : 0;
+    buffer->SaveData(&m_bHasValidPath, 1, 0);
+    buffer->SaveData(&member1.firstValue, 4, 0);
+    buffer->SaveData(&member1.secondValue, 4, 0);
+    unsigned int countA9 = &member1 ? ((CountView*)&member1)->Count() : 0;
     buffer->FUN_00865f60(countA9);
     for (unsigned int indexA = 0; indexA < countA9; ++indexA)
     {
-        SaveEntryA* entryA8 = first.FUN_006e8f60(indexA);
+        SaveEntryA* entryA8 = ((SaveArrayA*)&member1)->FUN_006e8f60(indexA);
         entryA8->FUN_006f50b0(buffer);
     }
     {
-        unsigned int countB8 = &second ? ((CountView*)&second)->Count() : 0;
+        unsigned int countB8 = &member2 ? ((CountView*)&member2)->Count() : 0;
         buffer->FUN_00865f60(countB8);
         for (unsigned int indexB6 = 0; indexB6 < countB8; ++indexB6)
         {
-            SaveEntryB* entryB9 = second.GetEntry(indexB6);
+            SaveEntryB* entryB9 = ((SaveArrayB*)&member2)->GetEntry(indexB6);
             entryB9->FUN_006e2350(buffer);
         }
     }
-    AvoidArray avoided5;
+    PathingAvoidNodeArray avoided5;
     {
         unsigned int countCA = &avoided5 ? ((CountView*)&avoided5)->Count() : 0;
         buffer->FUN_00865f60(countCA);
         for (unsigned int indexC5 = 0; indexC5 < countCA; ++indexC5)
         {
-            SaveEntryC* entryC2 = avoided5.GetEntry(indexC5);
-            entryC2->SaveGame(buffer);
+            PathingAvoidNode* entryC2 = avoided5.FUN_006a1400(indexC5);
+            entryC2->SaveGame((BGSSaveFormBuffer*)buffer);
         }
     }
     {
-        unsigned int countD8 = &fourth ? ((CountView*)&fourth)->Count() : 0;
+        unsigned int countD8 = &member3 ? ((CountView*)&member3)->Count() : 0;
         buffer->FUN_00865f60(countD8);
         for (unsigned int indexD = 0; indexD < countD8; ++indexD)
         {
-            unsigned int& entryD3 = fourth.GetEntry(indexD);
+            unsigned int& entryD3 = ((SaveArrayD*)&member3)->GetEntry(indexD);
             buffer->FUN_00865db0(entryD3, 0);
         }
     }

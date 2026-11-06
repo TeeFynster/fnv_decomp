@@ -14,35 +14,35 @@ bool NiD3DShaderInterface::Initialize()
 // @fnv 0x00e818d0
 void NiD3DShaderInterface::SetShaderObject(GraphicsRenderer* renderer)
 {
-    m_pShaderObject = renderer;
+    m_pkD3DRenderer = renderer;
     if (renderer)
     {
         ShaderPassRenderer* state = renderer->m_pCurrentRenderState;
-        if (m_pRenderState)
+        if (m_pkD3DDevice)
         {
             typedef void(__stdcall * ReleaseFunction)(ShaderPassRenderer*);
-            ReleaseFunction release = (ReleaseFunction)m_pRenderState->m_ppVirtualMethodTable[2];
-            release(m_pRenderState);
+            ReleaseFunction release = (ReleaseFunction)(*(void***)m_pkD3DDevice)[2];
+            release((ShaderPassRenderer*)m_pkD3DDevice);
         }
-        m_pRenderState = state;
+        m_pkD3DDevice = (Direct3DDeviceInterface*)state;
         if (state)
         {
             typedef void(__stdcall * AddRefFunction)(ShaderPassRenderer*);
             AddRefFunction addRef = (AddRefFunction)state->m_ppVirtualMethodTable[1];
             addRef(state);
         }
-        m_pD3DDevice = m_pShaderObject->m_pD3DDevice;
+        m_pkD3DRenderState = (ShaderPassRenderer*)m_pkD3DRenderer->m_pD3DDevice;
     }
     else
     {
-        m_pD3DDevice = 0;
-        if (m_pRenderState)
+        m_pkD3DRenderState = 0;
+        if (m_pkD3DDevice)
         {
             typedef void(__stdcall * ReleaseFunction)(ShaderPassRenderer*);
-            ReleaseFunction release = (ReleaseFunction)m_pRenderState->m_ppVirtualMethodTable[2];
-            release(m_pRenderState);
+            ReleaseFunction release = (ReleaseFunction)(*(void***)m_pkD3DDevice)[2];
+            release((ShaderPassRenderer*)m_pkD3DDevice);
         }
-        m_pRenderState = 0;
+        m_pkD3DDevice = 0;
     }
 }
 
@@ -104,48 +104,16 @@ const char* const* __fastcall FUN_00a8f480(void* p, int)
     return &g_0126f75c_arg1;
 }
 
-struct VF
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void Op(int);
-};
 void FUN_00aa0000();
 void DestroyProgram();
 // @fnv 0x00e819f0
 int FUN_00e819f0()
 {
-    VF* pShaderFactory = (VF*)NiD3DShaderFactory::GetShaderFactory();
+    NiD3DShaderFactory* pShaderFactory = NiD3DShaderFactory::GetShaderFactory();
     if (pShaderFactory)
     {
         FUN_00aa0000();
-        pShaderFactory->Op(0);
+        pShaderFactory->vfn_70(0);
     }
     FUN_00e7f920(0);
     FUN_00e7e8d0(0);
@@ -164,26 +132,18 @@ struct Rel
     virtual void b();
     virtual unsigned long __stdcall Release();
 };
-struct Obj
-{
-    void* vt;
-    int p[4];
-    Rel* dev;
-    int r;
-    int s;
-};
-void __fastcall FUN_00a8f490(Obj*);
+void __fastcall FUN_00a8f490(NiD3DShaderInterface*);
 // Sets the object's vtable, clears r and s, releases dev if set, nulls dev, then calls FUN_00a8f490.
 // @fnv 0x00e81a50
-void __fastcall FUN_00e81a50(Obj* pObj, int)
+void __fastcall FUN_00e81a50(NiD3DShaderInterface* pObj, int)
 {
     *(int**)pObj = &DAT_010ef39c;
-    Rel* d = pObj->dev;
-    pObj->r = 0;
-    pObj->s = 0;
+    Rel* d = (Rel*)pObj->m_pkD3DDevice;
+    pObj->m_pkD3DRenderer = 0;
+    pObj->m_pkD3DRenderState = 0;
     if (d)
         d->Release();
-    pObj->dev = 0;
+    pObj->m_pkD3DDevice = 0;
     FUN_00a8f490(pObj);
 }
 
@@ -195,27 +155,19 @@ struct Rel
     virtual void b();
     virtual unsigned long __stdcall Release();
 };
-struct Obj
-{
-    void* vt;
-    int p[4];
-    Rel* dev;
-    int r;
-    int s;
-};
-void __fastcall FUN_00a8f490(Obj*);
+void __fastcall FUN_00a8f490(NiD3DShaderInterface*);
 void __cdecl __Dummy_00b6fef0(void*, unsigned int);
 // @fnv 0x00e81ab0
-Obj* __fastcall FUN_00e81ab0(Obj* o, int, unsigned int flags)
+NiD3DShaderInterface* __fastcall FUN_00e81ab0(NiD3DShaderInterface* o, int, unsigned int flags)
 {
     *(int**)o = &DAT_010ef39c;
-    Rel* d = o->dev;
-    o->r = 0;
-    o->s = 0;
+    Rel* d = (Rel*)o->m_pkD3DDevice;
+    o->m_pkD3DRenderer = 0;
+    o->m_pkD3DRenderState = 0;
     if (d)
         d->Release();
-    o->dev = 0;
-    FUN_00a8f490(o);
+    o->m_pkD3DDevice = 0;
+    fnv_00e81ab0::FUN_00a8f490(o);
     if (flags & 1)
         __Dummy_00b6fef0(o, 0x24);
     return o;
@@ -252,7 +204,7 @@ void FUN_00e93f50(void* apObject)
     }
 }
 
-// Constructor of a derived object: base ctor call, two zeroed fields, vtable pointer, one more zeroed field.
+// Ni2DBuffer constructor: base constructor and initial state.
 extern int DAT_0109f4dc;
 
 struct FUN_00a8f190_cls

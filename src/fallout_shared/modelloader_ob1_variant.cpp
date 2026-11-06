@@ -3,9 +3,7 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/fallout_shared/modelloader.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "modelloader_verified_packet.h"
-NiRenderer* FUN_0043c4b0();
-const NiFixedString& FUN_00448a80();
+#include "../../include/DummyPointerMap.h"
 
 void __cdecl ReportAssertionViolation(const char*, unsigned int);
 
@@ -128,7 +126,7 @@ extern RttiX DAT_011f49a4;
 struct ObjX;
 struct MapX
 {
-    bool Lookup(void* pkKey, void** ppVal);
+    bool FUN_00853130(void* pkKey, void** ppVal);
     void AddOrUpdate(void* pkKey, ObjX* pkObj);
     void RemoveKey(void* pkKey);
 };
@@ -242,7 +240,7 @@ void WalkX::FUN_00c3a9c0(ObjX* pkObj, unsigned int uiFlags)
             if (uiFlags & 0x80)
             {
                 void* pkVal;
-                if (!m_pTaskMap->Lookup(pkKey, &pkVal))
+                if (!m_pTaskMap->FUN_00853130(pkKey, &pkVal))
                     m_pTaskMap->AddOrUpdate(pkKey, pkObj);
             }
             else
@@ -314,10 +312,6 @@ struct StreamRTTI
 };
 
 unsigned int __cdecl FUN_00a63630(const char*);
-struct DummyPointerMap
-{
-    bool Lookup(unsigned int, unsigned int&);
-};
 struct StreamObject
 {
     virtual void slot0();
@@ -772,7 +766,7 @@ struct TargetStream
         unsigned int idx;
         void* item;
         if (map && aVal)
-            map->Lookup(aVal, aItem);
+            map->GetAt(aVal, aItem);
         return aItem;
     }
     bool FUN_00c3ac10();
@@ -927,7 +921,7 @@ struct Z : FUN_00a5d3a0
 };
 struct MapY
 {
-    bool Lookup(void* k, void** pv);
+    bool FUN_00853130(void* k, void** pv);
 };
 struct Map274
 {
@@ -1344,7 +1338,7 @@ class WalkY
         void* aVal = object->m8;
         void* aItem = 0;
         if (m_pTaskMap && aVal)
-            m_pTaskMap->Lookup(aVal, &aItem);
+            m_pTaskMap->FUN_00853130(aVal, &aItem);
         return aItem;
     }
     bool FUN_00c3afc0(ObjY* pkObj);
@@ -1709,10 +1703,10 @@ struct C3B270_Ref
     {
         if (m_pObject != object)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = object;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;

@@ -1,24 +1,24 @@
-
 // src/fallout/magic/frenzyeffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/frenzyeffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct Actor;
+#include "../../../include/Actor.h"
+#include "../../../include/FrenzyEffect.h"
+#include "../../../include/MagicTarget.h"
+#include "../../../include/TESSaveLoadGame.h"
 
-struct ValueModifierEffect
+// These base serialization entry points are absent from the approved shared header.
+struct ValueModifierEffectSerialization
 {
-    unsigned short __thiscall FUN_00802d90(Actor* apActor);
-};
-
-struct FrenzyEffect : ValueModifierEffect
-{
-    unsigned short __thiscall FUN_0080df90(Actor* apActor);
+    unsigned short FUN_00802d90(Actor* apActor);
+    void FUN_00802db0(Actor* apActor);
+    void FUN_00802dd0(Actor* apActor);
 };
 
 // @fnv 0x0080df90
 unsigned short FrenzyEffect::FUN_0080df90(Actor* apActor)
 {
     unsigned short isize = 0;
-    isize += ValueModifierEffect::FUN_00802d90(apActor);
+    isize += reinterpret_cast<ValueModifierEffectSerialization*>(this)->FUN_00802d90(apActor);
     isize += 1;
     return isize;
 }
@@ -38,225 +38,64 @@ struct ValueModifierEffectCtor
 {
     void __thiscall FUN_0080dbb0_ctor(void* a, void* b, void* c);
 };
-struct FrenzyEffectShell : ValueModifierEffect
-{
-    void* __thiscall ConstructFrenzyEffect(void* a, void* b, void* c);
-};
 // Runs the ValueModifierEffect constructor, installs the vtable pointer at DAT_0107a16c, clears the byte at offset 0x4c, and returns this.
 // @fnv 0x0080dbb0
-void* FrenzyEffectShell::ConstructFrenzyEffect(void* apArg1, void* apArg2, void* apArg3)
+void* FrenzyEffect::ConstructFrenzyEffect(void* apArg1, void* apArg2, void* apArg3)
 {
     ((ValueModifierEffectCtor*)this)->FUN_0080dbb0_ctor(apArg1, apArg2, apArg3);
     *reinterpret_cast<void**>(this) = &DAT_0107a16c;
-    *reinterpret_cast<char*>(this + 0x4c) = 0;
+    exhausted = 0;
     return this;
 }
 
-struct TESSaveLoadGame
-{
-    void __thiscall FUN_008579b0(void*, int);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
-struct FUN_0080dfd0_shell : ValueModifierEffect
-{
-    void __thiscall FUN_00802db0(Actor*);
-    void __thiscall FUN_0080dfd0(Actor* actor);
-};
 // Calls FUN_00802db0 on the actor, then passes this+0x4c and 1 to TESSaveLoadGame::FUN_008579b0.
 // @fnv 0x0080dfd0
-void __thiscall FUN_0080dfd0_shell::FUN_0080dfd0(Actor* actor)
+void __thiscall FrenzyEffect::FUN_0080dfd0(Actor* actor)
 {
-    FUN_00802db0(actor);
-    g_TESSaveLoadGame->FUN_008579b0((char*)this + 0x4c, 1);
+    reinterpret_cast<ValueModifierEffectSerialization*>(this)->FUN_00802db0(actor);
+    g_TESSaveLoadGame->FUN_008579b0(&exhausted, 1);
 }
 
-namespace fnv_0080e000 {
-struct Base00802dd0
-{
-    void FUN_00802dd0(Actor* apActor);
-};
-struct TESSaveLoadGame
-{
-    void ReadTypedData(void* data, unsigned int size);
-};
-extern TESSaveLoadGame* g_TESSaveLoadGame;
-struct FUN_0080e000_shell : Base00802dd0
-{
-    void FUN_0080e000(Actor* apActor);
-};
+
 // @fnv 0x0080e000
-void FUN_0080e000_shell::FUN_0080e000(Actor* apActor)
+void FrenzyEffect::FUN_0080e000(Actor* apActor)
 {
-    FUN_00802dd0(apActor);
-    g_TESSaveLoadGame->ReadTypedData((char*)this + 0x4c, 1);
+    reinterpret_cast<ValueModifierEffectSerialization*>(this)->FUN_00802dd0(apActor);
+    g_TESSaveLoadGame->ReadTypedData(&exhausted, 1);
 }
-}  // namespace fnv_0080e000
 
-struct Actor;
-struct MagicCaster
-{
-    Actor* GetCasterActor();
-};
-struct MagicTarget
-{
-    Actor* GetOwnerActor() const;
-};
-struct PCH
-{
-    bool HasCombatState();
-};
-struct BSThread
-{
-    unsigned int GetThreadID();
-};
 struct Proc_S
 {
     void* GetNext();
 };
-struct FUN_0080dd30_shell : ValueModifierEffect
-{
-    void FUN_0082c000();
-    unsigned int GetThreadID();
-    void* GetNext();
-    Actor* GetOwnerActor() const;
-    Actor* GetCasterActor();
-    void FUN_0080dd30();
-};
 // Calls FUN_0082c000, resolves target and caster, and sets byte at offset 0x4c to 1 when both exist and the target check passes.
 // @fnv 0x0080dd30
-void FUN_0080dd30_shell::FUN_0080dd30()
+void FrenzyEffect::FUN_0080dd30()
 {
-    FUN_0082c000();
-    Actor* target = GetThreadID() ? ((MagicTarget*)(void*)GetThreadID())->GetOwnerActor() : 0;
+    ValueModifierEffect::Start();
+    Actor* target = ActiveEffect::FUN_0059bb30() ? ActiveEffect::FUN_0059bb30()->GetOwnerActor() : 0;
     Actor* caster = ((Proc_S*)this)->GetNext() ? ((MagicCaster*)((Proc_S*)this)->GetNext())->GetCasterActor() : 0;
-    if (target && caster && ((PCH*)target)->HasCombatState())
-        ((char*)this)[0x4c] = 1;
+    if (target && caster && target->HasCombatState())
+        exhausted = 1;
 }
 
-struct FrenzyEffectCopy : FrenzyEffectShell
-{
-    int u00;
-    int u04;
-    int u08;
-    int u0c;
-    int u10;
-    int u14;
-    int u18;
-    int u1c;
-    int u20;
-    int u24;
-    int u28;
-    int u2c;
-    int u30;
-    int u34;
-    int u38;
-    int u3c;
-    int u40;
-    int u44;
-    int u48;
-    unsigned char u4c;
-    unsigned char u4d;
-    unsigned char u4e;
-    unsigned char u4f;
-    FrenzyEffectCopy(void* a, void* b, void* c)
-    {
-        ConstructFrenzyEffect(a, b, c);
-    }
-};
-struct EffectCloneSource : ValueModifierEffect
-{
-    virtual void V00();
-    virtual void V04();
-    virtual void V08();
-    virtual void V0c();
-    virtual void V10();
-    virtual void V14();
-    virtual void V18();
-    virtual void V1c();
-    virtual void V20();
-    virtual void V24();
-    virtual void V28();
-    virtual void V2c();
-    virtual void V30();
-    virtual void V34();
-    virtual void V38();
-    virtual void V3c();
-    virtual void V40();
-    virtual void OnClone(void* clone);
-    unsigned int unk04;
-    void* unk08;
-    void* unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    void* unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    unsigned char flag4c;
-    FrenzyEffectCopy* FUN_0080dbf0();
-};
-// Allocates a FrenzyEffectCopy from unk28, unk08 and unk0c, copies flag4c into u4c, calls OnClone and returns the copy.
+// Allocates a FrenzyEffect, copies exhausted, calls CopyData and returns the copy.
 // @fnv 0x0080dbf0
-FrenzyEffectCopy* EffectCloneSource::FUN_0080dbf0()
+FrenzyEffect* FrenzyEffect::FUN_0080dbf0()
 {
-    FrenzyEffectCopy* copy = new FrenzyEffectCopy(unk28, unk08, unk0c);
-    copy->u4c = flag4c;
-    OnClone(copy);
+    FrenzyEffect* copy = new FrenzyEffect(m_pEffectInstance, pSpell, pEffect);
+    copy->exhausted = exhausted;
+    CopyData(copy);
     return copy;
 }
 
-struct FrenzyEffectObject
-{
-    int m_i00;
-    int m_i04;
-    int m_i08;
-    int m_i0c;
-    int m_i10;
-    int m_i14;
-    int m_i18;
-    int m_i1c;
-    int m_i20;
-    int m_i24;
-    int m_i28;
-    int m_i2c;
-    int m_i30;
-    int m_i34;
-    int m_i38;
-    int m_i3c;
-    int m_i40;
-    int m_i44;
-    int m_i48;
-    int m_i4c;
-    FrenzyEffectObject(void* apFirst, void* apSecond, void* apThird);
-};
-
-// Allocates and constructs a FrenzyEffectObject from three pointers and returns it.
+// Allocates and constructs a FrenzyEffect from three pointers and returns it.
 // @fnv 0x0080df10
 void* __cdecl CreateFrenzyEffectObject(void* apFirst, void* apSecond, void* apThird)
 {
-    return new FrenzyEffectObject(apFirst, apSecond, apThird);
+    return new FrenzyEffect(apFirst, apSecond, apThird);
 }
-
-struct Actor
-{
-    void** vtbl;
-    unsigned char FUN_00493bb0();
-    void FUN_008a6730(Actor*);
-};
-
-struct Ref
-{
-    Actor* FUN_00822b40();
-};
 
 struct Population
 {
@@ -271,43 +110,29 @@ struct World
 
 extern "C" World DAT_011e0e80;
 
-struct FrenzyEffectCore
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    unsigned int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
-    unsigned int unk40, unk44, unk48;
-    unsigned char exhausted;
-    void ApplyEffect();
-    Ref* FUN_0059bb30();
-    void FUN_0080ddd0();
-};
-
-typedef void(__thiscall* ActorAction)(Actor*, Actor*);
-typedef unsigned char(__thiscall* ActorPredicate)(Actor*);
-
 // @fnv 0x0080ddd0
-void FrenzyEffectCore::FUN_0080ddd0()
+void FrenzyEffect::FUN_0080ddd0()
 {
     ApplyEffect();
     if (exhausted)
         return;
     {
-        Actor* actor = FUN_0059bb30() ? FUN_0059bb30()->FUN_00822b40() : 0;
+        Actor* actor = ActiveEffect::FUN_0059bb30() ? ActiveEffect::FUN_0059bb30()->FUN_00822b40() : 0;
         if (actor != 0 && actor->FUN_00493bb0())
         {
-            ((ActorAction)actor->vtbl[269])(actor, 0);
+            actor->Unk_10D(0);
             Population* pPopulation = DAT_011e0e80.FUN_00717e50();
             for (unsigned int uiIndex = 0; uiIndex < pPopulation->FUN_005be5c0(0); uiIndex++)
             {
                 Actor* element = pPopulation->FUN_00968670(uiIndex);
                 if (element != actor)
                 {
-                    Actor* pOtherActor = element != 0 && ((ActorPredicate)element->vtbl[64])(element) ? element : 0;
+                    Actor* pOtherActor = element != 0 && element->IsActor() ? element : 0;
                     if (pOtherActor)
                     {
                         pOtherActor->FUN_008a6730(actor);
                         if (pOtherActor->FUN_00493bb0())
-                            ((ActorAction)pOtherActor->vtbl[269])(pOtherActor, actor);
+                            pOtherActor->Unk_10D(actor);
                     }
                 }
             }
@@ -513,15 +338,9 @@ struct FrenzyCheckCharacter
 
 bool FUN_006494d0(int aiLevel, float afMagnitude);
 
-struct FrenzyCheckEffectView : FrenzyEffect
-{
-    float GetFloatAtOffset1C();
-    bool FUN_0080dca0(MagicTarget* apTarget);
-};
-
 // Checks whether apTarget is a valid, non-dead, non-immune character that passes the level and magnitude check for the Frenzy effect.
 // @fnv 0x0080dca0
-bool FrenzyCheckEffectView::FUN_0080dca0(MagicTarget* apTarget)
+bool FrenzyEffect::FUN_0080dca0(MagicTarget* apTarget)
 {
     FrenzyCheckCharacter* pChar =
         static_cast<FrenzyCheckCharacter*>(FUN_00ec43fb(apTarget, 0, &DAT_011a0ef8, &DAT_011a0f14, 0));

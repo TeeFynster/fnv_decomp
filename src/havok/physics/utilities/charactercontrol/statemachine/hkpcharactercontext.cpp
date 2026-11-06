@@ -1,101 +1,59 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
 
 // src/havok/physics/utilities/charactercontrol/statemachine/hkpcharactercontext.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/charactercontrol/statemachine/hkpcharactercontext.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../include/hkpCharacterContext.h"
+#include "../../../../../../include/hkSimdReal.h"
+#include "../../../../../../include/hkVector4.h"
+
 extern int DAT_0102e388;
 extern int DAT_010c8198;
-struct hkReferencedObject
-{
-    void removeReference();
-};
-struct FUN_00ca95e0_class
-{
-    int m_p;
-    int m_uiX;
-    int m_uiY;
-    int m_uiZ;
-    void FUN_00ca95e0();
-};
+// These helpers have no member declarations in the shared context header.
+// Keep the original this pointer in ECX and stack arguments in their original slots.
 // @fnv 0x00ca95e0
-void FUN_00ca95e0_class::FUN_00ca95e0()
+__declspec(noinline) void __fastcall FUN_00ca95e0(hkpCharacterContext* context)
 {
-    m_p = (int)&DAT_010c8198;
-    ((hkReferencedObject*)m_uiZ)->removeReference();
-    m_p = (int)&DAT_0102e388;
+    *reinterpret_cast<int**>(context) = &DAT_010c8198;
+    static_cast<hkReferencedObject*>(context->unk0C)->removeReference();
+    *reinterpret_cast<int**>(context) = &DAT_0102e388;
 }
 
-struct FUN_00ca9670_cls
-{
-    void __thiscall FUN_00ca9670(float a, float b, float c);
-};
 // @fnv 0x00ca9670
-void __thiscall FUN_00ca9670_cls::FUN_00ca9670(float a, float b, float c)
+void __fastcall FUN_00ca9670(hkpCharacterContext* context, void*, float a, float b, float c)
 {
-    *(float*)((char*)this + 0x24) = a;
-    *(float*)((char*)this + 0x20) = b;
-    *(float*)((char*)this + 0x1c) = c;
+    context->unk24 = a;
+    context->unk20 = b;
+    context->unk1C = c;
 }
-
-struct FUN_00ca9660_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned char m_18;
-
-    void FUN_00ca9660(unsigned char value);
-};
 
 // @fnv 0x00ca9660
-void FUN_00ca9660_cls::FUN_00ca9660(unsigned char value)
+void __fastcall FUN_00ca9660(hkpCharacterContext* context, void*, unsigned char value)
 {
-    m_18 = value;
+    context->unk18 = value;
 }
-
-struct FUN_00ca9690_cls
-{
-    int unk00;
-    int unk04;
-    int m_08;
-
-    void FUN_00ca9690(int value);
-};
 
 // @fnv 0x00ca9690
-void FUN_00ca9690_cls::FUN_00ca9690(int value)
+void __fastcall FUN_00ca9690(hkpCharacterContext* context, void*, int value)
 {
-    m_08 = value;
+    context->unk08 = value;
 }
-
-extern int DAT_010c8198;
-void __fastcall FUN_00c90510(void*);
-
-struct hkpCharacterContext
-{
-    int* vtbl;
-    short unk04;
-    short unk06;
-    int unk08;
-    void* unk0C;
-    int unk10;
-    int unk14;
-    unsigned char unk18;
-    float unk1C;
-    float unk20;
-    float unk24;
-
-    hkpCharacterContext* Initialize(void* arg0, int arg1);
-};
 
 // @fnv 0x00ca9580
 hkpCharacterContext* hkpCharacterContext::Initialize(void* arg0, int arg1)
 {
-    unk06 = 1;
+    m_sReferenceCount = 1;
     unk0C = arg0;
-    vtbl = &DAT_010c8198;
+    *reinterpret_cast<int**>(this) = &DAT_010c8198;
     unk10 = arg1;
     unk14 = arg1;
     unk08 = 0;
@@ -105,62 +63,52 @@ hkpCharacterContext* hkpCharacterContext::Initialize(void* arg0, int arg1)
     f20 = 20.0f;
     unk1C = 625.0f;
     unk24 = 1.0f;
-    FUN_00c90510(unk0C);
+    static_cast<hkReferencedObject*>(unk0C)->addReference();
 
     return this;
 }
 
 // @fnv 0x00ca9600
-int __fastcall FUN_00ca9600(char* object)
+int __fastcall FUN_00ca9600(hkpCharacterContext* context)
 {
-    return *reinterpret_cast<int*>(object + 0x10);
+    return context->unk10;
 }
 
-class hkpCharacterContextCA96;
-struct hkpCharacterInputCA96;
-struct hkpCharacterOutputCA96;
+struct PhysicsDataBlock;
+struct Vector4Data;
 
-class hkpCharacterStateCA96
+// Transition-call view: 0x00ca9610 uses slots 0x10/0x14; this omits the real state's hkReferencedObject base.
+class CharacterTransitionDispatch
 {
   public:
-    virtual ~hkpCharacterStateCA96() throw();
-    virtual int getType() const throw();
-    virtual void update(hkpCharacterContextCA96& kContext, const hkpCharacterInputCA96& kInput,
-                        hkpCharacterOutputCA96& kOutput) throw();
-    virtual void change(hkpCharacterContextCA96& kContext, const hkpCharacterInputCA96& kInput,
-                        hkpCharacterOutputCA96& kOutput) throw();
-    virtual void enterState(hkpCharacterContextCA96& kContext, int iPrevState, const hkpCharacterInputCA96& kInput,
-                            hkpCharacterOutputCA96& kOutput) throw();
-    virtual void leaveState(hkpCharacterContextCA96& kContext, int iNextState, const hkpCharacterInputCA96& kInput,
-                            hkpCharacterOutputCA96& kOutput) throw();
+    virtual void slot00();
+    virtual void slot04();
+    virtual void slot08();
+    virtual void slot0C();
+    virtual void enterState(hkpCharacterContext& kContext, int iPrevState, const PhysicsDataBlock& kInput,
+                            Vector4Data& kOutput) throw();
+    virtual void leaveState(hkpCharacterContext& kContext, int iNextState, const PhysicsDataBlock& kInput,
+                            Vector4Data& kOutput) throw();
 };
 
-class hkpCharacterStateManagerCA96
+// Lookup-call view: 0x00cbc510 reads states at +0x08 in the owning unit; this declares no object layout.
+class CharacterStateLookup
 {
   public:
-    hkpCharacterStateCA96* FUN_00cbc510(int iState) const throw();
-};
-
-class hkpCharacterContextCA96
-{
-  public:
-    int unk00;
-    int unk04;
-    int m_iCurrentState;
-    const hkpCharacterStateManagerCA96* pCharacterStateManager;
-    int m_iPreviousState;
-
-    void SetState(int iState, const hkpCharacterInputCA96& kInput, hkpCharacterOutputCA96& kOutput);
+    CharacterTransitionDispatch* FUN_00cbc510(int iState) const throw();
 };
 
 // Leaves the current state, stores the new state id, then enters the new state via the state manager.
 // @fnv 0x00ca9610
-void hkpCharacterContextCA96::SetState(int iState, const hkpCharacterInputCA96& kInput, hkpCharacterOutputCA96& kOutput)
+void __fastcall SetState(hkpCharacterContext* context, void*, int iState,
+                         const PhysicsDataBlock& kInput, Vector4Data& kOutput)
 {
-    int iPrevState = m_iPreviousState;
-    pCharacterStateManager->FUN_00cbc510(m_iPreviousState)->leaveState(*this, iState, kInput, kOutput);
-    m_iPreviousState = iState;
-    pCharacterStateManager->FUN_00cbc510(iState)->enterState(*this, iPrevState, kInput, kOutput);
+    int iPrevState = context->unk10;
+    static_cast<const CharacterStateLookup*>(context->unk0C)
+        ->FUN_00cbc510(context->unk10)->leaveState(*context, iState, kInput, kOutput);
+    context->unk10 = iState;
+    static_cast<const CharacterStateLookup*>(context->unk0C)
+        ->FUN_00cbc510(iState)->enterState(*context, iPrevState, kInput, kOutput);
 }
 
 struct FnvCpu_FUN_00ca9810_CpuAllocator
@@ -178,87 +126,77 @@ struct FnvCpu_FUN_00ca9810_CpuAllocatorHolder
     FnvCpu_FUN_00ca9810_CpuAllocator* allocator;
 };
 FnvCpu_FUN_00ca9810_CpuAllocatorHolder* __cdecl FUN_00c85750();
-struct FnvCpu_FUN_00ca9810_CpuObject
-{
-    unsigned int unk00;
-    unsigned short size;
-    void FUN_00ca95e0();
-    FnvCpu_FUN_00ca9810_CpuObject* Destroy(unsigned int flags);
-};
 // Calls FUN_00ca95e0, then if bit 0 of flags is set, invokes the allocator from FUN_00c85750 on this with size, and returns this.
 // @fnv 0x00ca9810
-FnvCpu_FUN_00ca9810_CpuObject* FnvCpu_FUN_00ca9810_CpuObject::Destroy(unsigned int flags)
+hkpCharacterContext* __fastcall Destroy(hkpCharacterContext* context, void*, unsigned int flags)
 {
-    FUN_00ca95e0();
+    FUN_00ca95e0(context);
     if (flags & 1)
     {
         FnvCpu_FUN_00ca9810_CpuAllocatorHolder* pAllocatorHolder = FUN_00c85750();
-        pAllocatorHolder->allocator->Invoke(this, size);
+        pAllocatorHolder->allocator->Invoke(context, context->m_usMemSizeAndFlags);
     }
-    return this;
+    return context;
 }
 
-#include <xmmintrin.h>
-class VectorComponentValue
-{
-  public:
-    __m128 m_vValue;
-    inline VectorComponentValue()
-    {}
-    inline VectorComponentValue(__m128 x) : m_vValue(x)
-    {}
-    inline VectorComponentValue(const float& x)
-    {
-        m_vValue = _mm_load_ss(&x);
-    }
-    inline float getReal() const
-    {
-        float r;
-        _mm_store_ss(&r, m_vValue);
-        return r;
-    }
-    inline operator float() const
-    {
-        return getReal();
-    }
-};
+inline hkSimdReal::hkSimdReal()
+{}
 
-typedef const VectorComponentValue& hkSimdRealParameter;
+inline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x)
+{}
 
-class hkVector4
+inline hkSimdReal::hkSimdReal(float x)
 {
-  public:
-    __m128 m_vComponents;
-    inline hkVector4()
-    {}
-    inline hkVector4(__m128 q) : m_vComponents(q)
-    {}
-    inline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    inline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    inline void mul4(hkSimdRealParameter r)
-    {
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), m_vComponents);
-    }
-    inline void addMul4(hkSimdRealParameter r, const hkVector4& a)
-    {
-        m_vComponents =
-            _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), a.m_vComponents), m_vComponents);
-    }
-    inline VectorComponentValue length3() const
-    {
-        __m128 mul = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 y = _mm_shuffle_ps(mul, mul, 0x55);
-        __m128 z = _mm_shuffle_ps(mul, mul, 0xaa);
-        __m128 sum = _mm_add_ss(z, _mm_add_ss(y, mul));
-        return _mm_sqrt_ss(sum);
-    }
-};
+    m_vValue = _mm_load_ss(&x);
+}
+
+inline float hkSimdReal::getReal() const
+{
+    float r;
+    _mm_store_ss(&r, m_vValue);
+    return r;
+}
+
+inline hkSimdReal::operator float() const
+{
+    return getReal();
+}
+
+typedef const hkSimdReal& hkSimdRealParameter;
+
+
+inline hkVector4::hkVector4(__m128 q) : m_vComponents(q)
+{}
+
+inline void hkVector4::operator=(const hkVector4& v)
+{
+    m_vComponents = v.m_vComponents;
+}
+
+inline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+
+inline void hkVector4::mul4(hkSimdRealParameter r)
+{
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), m_vComponents);
+}
+
+inline void hkVector4::addMul4(hkSimdRealParameter r, const hkVector4& a)
+{
+    m_vComponents =
+        _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), a.m_vComponents), m_vComponents);
+}
+
+inline hkSimdReal hkVector4::length3() const
+{
+    __m128 mul = _mm_mul_ps(m_vComponents, m_vComponents);
+    __m128 y = _mm_shuffle_ps(mul, mul, 0x55);
+    __m128 z = _mm_shuffle_ps(mul, mul, 0xaa);
+    __m128 sum = _mm_add_ss(z, _mm_add_ss(y, mul));
+    return _mm_sqrt_ss(sum);
+}
 
 struct PhysicsDataBlock
 {
@@ -310,8 +248,6 @@ struct Vector4Data
     hkVector4 m_fVelocity;
 };
 
-struct Context;
-
 struct State
 {
     virtual void unk00();
@@ -320,8 +256,8 @@ struct State
     virtual void unk0c();
     virtual void unk10();
     virtual void unk14();
-    virtual void change(Context* ctx, const PhysicsDataBlock& input, Vector4Data& output);
-    virtual void update(Context* ctx, const PhysicsDataBlock& input, Vector4Data& output);
+    virtual void change(hkpCharacterContext* ctx, const PhysicsDataBlock& input, Vector4Data& output);
+    virtual void update(hkpCharacterContext* ctx, const PhysicsDataBlock& input, Vector4Data& output);
 };
 
 struct StateManager
@@ -329,64 +265,45 @@ struct StateManager
     State* GetReferenceTimeStep(int state);
 };
 
-struct Context
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    StateManager* pCharacterStateManager;
-    int m_iPreviousState;
-    int m_iStateIndex;
-    char m_filterParameters;
-    char pad19;
-    char pad1A;
-    char pad1B;
-    float m_characterWidth;
-    float m_fSurfaceFriction;
-    float m_fGain;
-
-    void FUN_00ca96a0(const PhysicsDataBlock& input, Vector4Data& output);
-};
-
 // @fnv 0x00ca96a0
-void Context::FUN_00ca96a0(const PhysicsDataBlock& input, Vector4Data& output)
+void __fastcall FUN_00ca96a0(hkpCharacterContext* context, void*, const PhysicsDataBlock& input, Vector4Data& output)
 {
     output.m_fVelocity = input.m_fVelocity;
 
-    pCharacterStateManager->GetReferenceTimeStep(m_iPreviousState)->update(this, input, output);
+    static_cast<StateManager*>(context->unk0C)->GetReferenceTimeStep(context->unk10)->update(context, input, output);
 
-    if (m_iPreviousState == m_iStateIndex)
+    if (context->unk10 == context->unk14)
     {
-        pCharacterStateManager->GetReferenceTimeStep(m_iPreviousState)->change(this, input, output);
+        static_cast<StateManager*>(context->unk0C)->GetReferenceTimeStep(context->unk10)->change(context, input, output);
     }
 
-    m_iStateIndex = m_iPreviousState;
+    context->unk14 = context->unk10;
 
-    if (m_filterParameters)
+    if (context->unk18)
     {
         float length = output.m_fVelocity.length3();
-        if (length > m_fSurfaceFriction)
+        if (length > context->unk20)
         {
-            float fClampScale = m_fSurfaceFriction / length;
-            output.m_fVelocity.mul4(fClampScale);
+            float fClampScale = context->unk20 / length;
+            output.m_fVelocity.mul4(hkSimdReal(fClampScale));
         }
 
         float grav = input.m_fSecondScalar;
         hkVector4 vDelta;
         vDelta.setSub4(output.m_fVelocity, input.m_fVelocity);
-        vDelta.mul4(grav);
+        vDelta.mul4(hkSimdReal(grav));
         float fDeltaLength = vDelta.length3();
-        float fDeltaRatio = fDeltaLength / m_characterWidth;
+        float fDeltaRatio = fDeltaLength / context->unk1C;
         output.m_fVelocity = input.m_fVelocity;
 
         float fBlendFactor;
-        if (fDeltaRatio > 1.0f && m_iPreviousState != 1)
+        if (fDeltaRatio > 1.0f && context->unk10 != 1)
         {
-            fBlendFactor = (input.m_pStepInfo * m_fGain) / fDeltaRatio;
+            fBlendFactor = (input.m_pStepInfo * context->unk24) / fDeltaRatio;
         }
         else
         {
-            fBlendFactor = input.m_pStepInfo * m_fGain;
+            fBlendFactor = input.m_pStepInfo * context->unk24;
         }
 
         output.m_fVelocity.addMul4(fBlendFactor, vDelta);

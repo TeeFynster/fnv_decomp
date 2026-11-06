@@ -1,3 +1,13 @@
+#include "../../../../../../../include/BSAudio.h"
+#include "../../../../../../../include/hkpCollisionFilter.h"
+#include "../../../../../../../include/hkpEntity.h"
+#include "../../../../../../../include/hkpWorld.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkpCdBody.h"
+#include "../../../../../../../include/hkpCollidable.h"
+#include "../../../../../../../include/hkpCollidableCollidableFilter.h"
+#include "../../../../../../../include/hkReferencedObject.h"
 
 // src/havok/physics/dynamics/collide/filter/constraint/hkpconstraintcollisionfilter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/collide/filter/constraint/hkpconstraintcollisionfilter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -39,40 +49,13 @@ void Owner::FUN_00d87c20(int value, bool mode)
         p->v1(value);
 }
 
-struct Primary
+struct hkpPairCollisionFilter : hkpCollisionFilter
 {
-    virtual void Operation();
-    unsigned int unk04;
-};
-struct Interface0
-{
-    virtual void Operation();
-};
-struct Interface1
-{
-    virtual void Operation();
-};
-struct Interface2
-{
-    virtual void Operation();
-};
-struct Interface3
-{
-    virtual void Operation();
-};
-struct FUN_00def350 : Primary, Interface0, Interface1, Interface2, Interface3
-{
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
     unsigned int unk30;
     unsigned int unk34;
     unsigned int unk38;
     unsigned int unk3C;
-    FUN_00def350(void*);
+    hkpPairCollisionFilter(void*);
 };
 struct Secondary
 {
@@ -80,120 +63,35 @@ struct Secondary
     Secondary()
     {}
 };
-struct FUN_00d87c50 : FUN_00def350, Secondary
+struct hkpConstraintCollisionFilter : hkpPairCollisionFilter, Secondary
 {
-    FUN_00d87c50(void*);
+    hkpConstraintCollisionFilter(void*);
     virtual void AnotherOperation();
 };
-// Constructs the object from p, delegating to the base constructor and setting unk20 to 6.
+// Constructs the constraint filter from p and sets the filter type.
 // @fnv 0x00d87c50
-FUN_00d87c50::FUN_00d87c50(void* p) : FUN_00def350(p)
+hkpConstraintCollisionFilter::hkpConstraintCollisionFilter(void* p) : hkpPairCollisionFilter(p)
 {
-    unk20 = 6;
+    m_type = HK_FILTER_CONSTRAINT;
 }
 
-struct hkBool
+__forceinline void hkpWorld::lockCriticalOperations()
 {
-    char m_cBooleanValue;
-    hkBool()
-    {}
-    hkBool(bool b)
+    m_iCriticalOperationsLockCount++;
+}
+
+__forceinline void hkpWorld::unlockAndAttemptToExecutePendingOperations()
+{
+    m_iCriticalOperationsLockCount--;
+    if (m_iCriticalOperationsLockCount == 0 && !m_bBlockExecutingPendingOperations.m_cBooleanValue)
     {
-        m_cBooleanValue = (char)b;
+        if (m_iPendingOperationCount)
+            FUN_00c91120();
+        if (m_iPendingOperationQueueCount == 1 && m_iQueuedOperationCount)
+            FUN_00c91140();
     }
-};
-struct hkpCdBody
-{
-    void* m_pCollisionShape;
-};
-struct hkpCollidable : hkpCdBody
-{
-};
-struct hkReferencedObject
-{
-    virtual ~hkReferencedObject();
-    int m_usMemSizeAndFlags;
-};
-struct hkpCollidableCollidableFilter
-{
-    virtual ~hkpCollidableCollidableFilter();
-    virtual hkBool IsCollisionEnabled(const hkpCollidable& a, const hkpCollidable& b) const = 0;
-};
-struct hkpCollisionFilter : hkReferencedObject, hkpCollidableCollidableFilter
-{
-};
-struct hkpEntity;
-struct hkpWorld
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int m_iPendingOperationCount;
-    int m_iQueuedOperationCount;
-    int m_iCriticalOperationsLockCount;
-    int unk98;
-    hkBool m_bBlockExecutingPendingOperations;
-    int unkA0;
-    int m_iPendingOperationQueueCount;
-    void FUN_00c91120();
-    void FUN_00c91140();
-    void ProcessPair(hkpEntity* a, hkpEntity* b);
-    __forceinline void lockCriticalOperations()
-    {
-        m_iCriticalOperationsLockCount++;
-    }
-    __forceinline void unlockAndAttemptToExecutePendingOperations()
-    {
-        m_iCriticalOperationsLockCount--;
-        if (m_iCriticalOperationsLockCount == 0 && !m_bBlockExecutingPendingOperations.m_cBooleanValue)
-        {
-            if (m_iPendingOperationCount)
-                FUN_00c91120();
-            if (m_iPendingOperationQueueCount == 1 && m_iQueuedOperationCount)
-                FUN_00c91140();
-        }
-    }
-};
-struct hkpEntity
-{
-    int unk00;
-    int unk04;
-    hkpWorld* m_pOwningWorld;
-    int unk0C;
-    hkpCollidable m_kCollidable;
-};
+}
+
 struct S_00d87e30_Typed
 {
     virtual void v00();
@@ -216,6 +114,12 @@ struct S_00d87e30_Event
     hkpEntity* m_pEntityA;
     hkpEntity* m_pEntityB;
 };
+// Expose the inherited collidable overload hidden by hkpCollisionFilter's other overloads.
+struct CollidableFilterView : hkpCollisionFilter
+{
+    using hkpCollidableCollidableFilter::IsCollisionEnabled;
+};
+
 struct S_00d87e30_Base
 {
     virtual void v00();
@@ -257,9 +161,9 @@ void S_00d87e30::ProcessCollisionEvent(S_00d87e30_Event* pEvent)
     if (DecrementPairCount(a, b) > 0)
         return;
     if (m_pCollisionFilter &&
-        !m_pCollisionFilter->IsCollisionEnabled(a->m_kCollidable, b->m_kCollidable).m_cBooleanValue)
+        !static_cast<CollidableFilterView*>(m_pCollisionFilter)->IsCollisionEnabled(a->m_kCollidable, b->m_kCollidable).m_cBooleanValue)
         return;
-    hkpWorld* world = a->m_pOwningWorld;
+    hkpWorld* world = static_cast<hkpWorld*>(a->m_pOwningWorld);
     if (!world)
         return;
     world->lockCriticalOperations();
@@ -281,10 +185,6 @@ struct Provider
     virtual int unk20();
 };
 
-struct D;
-struct B;
-struct C;
-
 struct A
 {
     int unk00;
@@ -292,84 +192,15 @@ struct A
     int unk08;
     Provider* m_prov;
     int unk10;
-    B* m_kPointB;
-    C* m_iThirdValue;
+    hkpEntity* m_kPointB;
+    hkpEntity* m_iThirdValue;
     int unk1C;
-};
-
-struct B
-{
-    int unk00;
-    int unk04;
-    D* m_iFourthElementInteger;
-    int unk0C;
-    int m_iB10;
-};
-
-struct C
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int m_iC10;
-};
-
-struct D
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int m_i8c;
-    int m_i90;
-    int m_i94;
-    int unk98;
-    unsigned char m_b9c;
-    unsigned char unk9D;
-    unsigned char unk9E;
-    unsigned char unk9F;
-    int unkA0;
-    int m_ia4;
-    void CleanupFirst();
-    void CleanupSecond();
 };
 
 class Cls40
 {
   public:
-    int CheckPair(B* b, C* c);
+    int CheckPair(hkpEntity* b, hkpEntity* c);
 };
 
 int __cdecl CallA(void* a, void* b);
@@ -381,7 +212,7 @@ class FUN_00d87d70_cls
     void FUN_00d87d70(A* p);
 };
 
-// Validates p and its linked B/C/D objects, calls CallA on their fields, then runs CallB and cleans up D when its counter drops to zero.
+// Validates the two entities, calls CallA on their collidables, then runs CallB and processes pending world operations when the lock count drops to zero.
 // @fnv 0x00d87d70
 void FUN_00d87d70_cls::FUN_00d87d70(A* p)
 {
@@ -393,12 +224,12 @@ void FUN_00d87d70_cls::FUN_00d87d70(A* p)
     {
         return;
     }
-    B* b = p->m_kPointB;
-    if (b->m_iB10 == 0)
+    hkpEntity* b = p->m_kPointB;
+    if (b->m_kCollidable.m_pCollisionShape == 0)
     {
         return;
     }
-    if (p->m_iThirdValue->m_iC10 == 0)
+    if (p->m_iThirdValue->m_kCollidable.m_pCollisionShape == 0)
     {
         return;
     }
@@ -406,47 +237,47 @@ void FUN_00d87d70_cls::FUN_00d87d70(A* p)
     {
         return;
     }
-    C* pC = p->m_iThirdValue;
-    B* pB = p->m_kPointB;
-    void* pResult = (void*)CallA(&pB->m_iB10, &pC->m_iC10);
+    hkpEntity* pC = p->m_iThirdValue;
+    hkpEntity* pB = p->m_kPointB;
+    void* pResult = (void*)CallA(&pB->m_kCollidable, &pC->m_kCollidable);
     if (pResult == 0)
     {
         return;
     }
-    D* d = b->m_iFourthElementInteger;
+    hkpWorld* d = static_cast<hkpWorld*>(b->m_pOwningWorld);
     if (d == 0)
     {
         return;
     }
-    d->m_i94 += 1;
+    d->m_iCriticalOperationsLockCount += 1;
     CallB(pResult);
-    d->m_i94 -= 1;
-    if (d->m_i94 != 0)
+    d->m_iCriticalOperationsLockCount -= 1;
+    if (d->m_iCriticalOperationsLockCount != 0)
     {
         return;
     }
-    if (d->m_b9c != 0)
+    if (d->m_bBlockExecutingPendingOperations.m_cBooleanValue != 0)
     {
         return;
     }
-    if (d->m_i8c != 0)
+    if (d->m_iPendingOperationCount != 0)
     {
-        d->CleanupFirst();
+        d->FUN_00c91120();
     }
-    if (d->m_ia4 != 1)
-    {
-        return;
-    }
-    if (d->m_i90 == 0)
+    if (d->m_iPendingOperationQueueCount != 1)
     {
         return;
     }
-    d->CleanupSecond();
+    if (d->m_iQueuedOperationCount == 0)
+    {
+        return;
+    }
+    d->FUN_00c91140();
 }
 
 struct S_00d87f60_Arg
 {
-    struct S_00d87f60_Obj* unk00;
+    hkpWorld* unk00;
     int unk04;
 };
 struct S_00d87f60_Flag
@@ -472,47 +303,10 @@ struct S_00d87f60_Base
 {
     void FUN_00d87c20(int, S_00d87f60_Flag);
 };
-struct S_00d87f60_Obj
+// hkpWorld's pending-operation entry point is not declared in the shared header yet.
+struct PendingWorldOperationReceiver
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    void FUN_00c91160(S_00d87f60_Data*);
+    void FUN_00c91160(void* operation);
 };
 struct S_00d87f60
 {
@@ -522,15 +316,15 @@ struct S_00d87f60
 // @fnv 0x00d87f60
 void S_00d87f60::FUN_00d87f60(S_00d87f60_Arg* arg)
 {
-    S_00d87f60_Obj* obj = arg->unk00;
-    if (obj->unk94 != 0)
+    hkpWorld* obj = arg->unk00;
+    if (obj->m_iCriticalOperationsLockCount != 0)
     {
         S_00d87f60_Data d;
         d.unk00 = 0x23;
         d.unk04 = (char*)this - 0x40;
         d.unk08 = arg->unk04;
         d.unk0c = 0;
-        obj->FUN_00c91160(&d);
+        reinterpret_cast<PendingWorldOperationReceiver*>(obj)->FUN_00c91160(&d);
     }
     else
     {
@@ -784,12 +578,12 @@ Derived::Derived()
 {}
 }  // namespace fnv_00d88030
 
-struct Obj_d87f00;
 struct Owner_d87f00;
 
-struct Pair_d87f00
+// 0x00d87f00 reads an hkpWorld* and callback value; shared Pair instead has integer fields and reflection/serialization methods.
+struct ConstraintFilterWorldCallbackContext
 {
-    Obj_d87f00* m_pHeadNode;
+    hkpWorld* m_pHeadNode;
     unsigned int m_iSecondInteger;
 };
 
@@ -818,50 +612,6 @@ struct Flag_d87f00
     unsigned char unk03;
 };
 
-struct Obj_d87f00
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int m_94;
-
-    void FUN_00c91160(Event_d87f00* apEvent);
-};
-
 struct Owner_d87f00
 {
     void FUN_00d87c20(unsigned int aValue, Flag_d87f00 aFlag);
@@ -870,22 +620,22 @@ struct Owner_d87f00
 struct S_00d87f00
 {
     int unk00;
-    void FUN_00d87f00(Pair_d87f00* apPair);
+    void FUN_00d87f00(ConstraintFilterWorldCallbackContext* apPair);
 };
 
 // Dispatches a pair event to the head node when m_94 is set, otherwise forwards the second integer and a flag to the owner.
 // @fnv 0x00d87f00
-void S_00d87f00::FUN_00d87f00(Pair_d87f00* apPair)
+void S_00d87f00::FUN_00d87f00(ConstraintFilterWorldCallbackContext* apPair)
 {
-    Obj_d87f00* obj = apPair->m_pHeadNode;
-    if (obj->m_94 != 0)
+    hkpWorld* obj = apPair->m_pHeadNode;
+    if (obj->m_iCriticalOperationsLockCount != 0)
     {
         Event_d87f00 ev;
         ev.m_ptr = (char*)this - 0x40;
         ev.m_kind = 0x23;
         ev.m_val = apPair->m_iSecondInteger;
         ev.m_flag = 1;
-        obj->FUN_00c91160(&ev);
+        reinterpret_cast<PendingWorldOperationReceiver*>(obj)->FUN_00c91160(&ev);
     }
     else
     {
@@ -894,17 +644,6 @@ void S_00d87f00::FUN_00d87f00(Pair_d87f00* apPair)
     }
 }
 
-struct ConstraintFilterMemory
-{
-    virtual void unknown00() = 0;
-    virtual void unknown04() = 0;
-    virtual void Release(void* object, unsigned int bytes) = 0;
-};
-struct BSAudio
-{
-    unsigned int unk00, unk04, unk08, unk0c;
-    ConstraintFilterMemory* allocator;
-};
 BSAudio* FUN_00c85750();
 struct ConstraintFilterDeleteReceiver
 {
@@ -922,7 +661,7 @@ ConstraintFilterDeleteReceiver* ConstraintFilterDeleteReceiver::FUN_00d88000(uns
     {
         BSAudio* audio = FUN_00c85750();
         unsigned int bytes = size4;
-        audio->allocator->Release(this, bytes);
+        reinterpret_cast<hkMemoryAllocator*>(audio->pListener)->blockFree(this, bytes);
     }
     return this;
 }

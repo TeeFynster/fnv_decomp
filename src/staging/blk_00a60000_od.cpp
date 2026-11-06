@@ -1,6 +1,7 @@
 // staging/blk_00a60000_od.cpp: free functions (4 functions)
 
 #include "fnv_asm_helpers.h"
+#include "../../include/NiPoint3.h"
 // src/staging/blk_00a60000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
@@ -36,12 +37,6 @@ done:
     ;
 }
 
-struct Vec3Local {
-    float x;
-    float y;
-    float z;
-};
-
 struct XfRSLocal {
     float m00;
     float m01;
@@ -60,7 +55,7 @@ struct XfRSLocal {
 
 // Transforms count points from in to out by the 3x3 matrix in xf, then scales and translates each result.
 // @fnv 0x00a74bc0
-void FUN_00a74bc0(unsigned short count, Vec3Local* in, Vec3Local* out, XfRSLocal* xf)
+void FUN_00a74bc0(unsigned short count, NiPoint3* in, NiPoint3* out, XfRSLocal* xf)
 {
     XfRSLocal* pXf = xf;
     for (unsigned int i = 0; i < count; i++, in++, out++) {
@@ -70,18 +65,12 @@ void FUN_00a74bc0(unsigned short count, Vec3Local* in, Vec3Local* out, XfRSLocal
     }
 }
 
-struct A74CB0Point3 {
-    float x;
-    float y;
-    float z;
-};
-
 struct A74CB0Matrix3 {
     float m_afEntries[3][3];
 };
 
 // @fnv 0x00a74cb0
-void FUN_00a74cb0(unsigned short ausCount, const A74CB0Point3* pkIn, A74CB0Point3* pkOut, const A74CB0Matrix3* pkMatrix) {
+void FUN_00a74cb0(unsigned short ausCount, const NiPoint3* pkIn, NiPoint3* pkOut, const A74CB0Matrix3* pkMatrix) {
     const A74CB0Matrix3* pkM = pkMatrix;
     for (unsigned int i = 0; i < ausCount; i++, pkIn++, pkOut++) {
         pkOut->x = pkM->m_afEntries[0][0] * pkIn->x + pkIn->y * pkM->m_afEntries[0][1] + pkIn->z * pkM->m_afEntries[0][2];

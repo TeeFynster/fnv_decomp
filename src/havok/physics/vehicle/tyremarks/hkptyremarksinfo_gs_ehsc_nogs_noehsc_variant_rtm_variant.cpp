@@ -7,80 +7,11 @@
 // to their real unit once identified.
 // src/havok/physics/vehicle/tyremarks/hkptyremarksinfo.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/tyremarks/hkptyremarksinfo.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpTyremarksInfo.h"
-class hkClassE39E;
-int __cdecl FUN_00d06f80(const void* pvChunk, int iNumBytes) throw();
-template <class T> class hkArrayE39E
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-};
-class hkStatisticsCollectorE39E
-{
-  public:
-    virtual ~hkStatisticsCollectorE39E() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual void V3() throw();
-    virtual void V4() throw();
-    virtual void AddMemoryChunk(int iType, const char* pcName, const void* pvChunk, int iUsedSize,
-                                int iAllocatedSize) throw();
-
-    int m_04;
-    int m_08;
-    int m_0c;
-    bool m_countDontDeallocate;
-
-    template <class T> void addArray(const char* pcName, const hkArrayE39E<T>& kArray)
-    {
-        if ((kArray.m_iCapacityState & 0x80000000) == 0 || m_countDontDeallocate)
-        {
-            const T* pData = kArray.m_data;
-            int iAllocated = FUN_00d06f80(pData, kArray.getCapacity() * sizeof(T));
-            AddMemoryChunk(3, pcName, kArray.m_data, kArray.GetLogicalSize() * sizeof(T), iAllocated);
-        }
-    }
-};
-struct hkVector4E39E
-{
-    float x, y, z, w;
-};
-struct hkRayE39E
-{
-    hkVector4E39E m_vFrom;
-    hkVector4E39E m_vTo;
-};
-class hkPointSetE39E
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkArrayE39E<hkRayE39E> m_kPoints;
-};
-class hkObjE39E
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkArrayE39E<hkPointSetE39E*> m_kPointSets;
-
-    void FUN_00e39ee0(hkStatisticsCollectorE39E* pkCollector, const hkClassE39E* pkClass) const throw();
-};
+#include "../../../../../include/V4.h"
+#include "../../../../../include/hkpTyremarksWheel.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkStatisticsCollector.h"
+#include "../../../../../include/hkVector4.h"
 #include <xmmintrin.h>
 struct __declspec(align(16)) hkpTyremarkV
 {
@@ -90,33 +21,17 @@ struct __declspec(align(16)) hkpTyremark
 {
     hkpTyremarkV m_kPointA, m_kPointB;
 };
-class hkpTyremarksWheel
-{
-  public:
-    int unk00;
-    int unk04;
-    int m_iMaxNumTyremarks;
-    int m_numTyremarks;
-    hkpTyremark* m_data;
-    hkpTyremark* __thiscall ComputeIndex(int index);
-};
 __declspec(noinline) hkpTyremark* __thiscall hkpTyremarksWheel::ComputeIndex(int index)
 {
     return &m_data[(m_iMaxNumTyremarks + index) % m_numTyremarks];
 }
-struct hkArrayWheel
-{
-    hkpTyremarksWheel** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
 struct S00e39e90_Info
 {
     int unk00;
     int unk04;
     int unk08;
     int unk0C;
-    hkArrayWheel m_kTyremarksWheels;
+    hkArray<hkpTyremarksWheel*> m_kTyremarksWheels;
 
     void __thiscall FUN_00e39e90(int arg1, int wheelIndex, hkpTyremark* out);
 };
@@ -147,61 +62,50 @@ __forceinline Scalar4 operator+(const Scalar4& a, const Scalar4& b)
 {
     return Scalar4(_mm_add_ss(a.lane, b.lane));
 }
-struct V4
+inline V4::V4()
+{}
+inline V4::V4(const V4& other)
 {
-    union
+    q = other.q;
+}
+inline V4::V4(const __m128& value)
+{
+    q = value;
+}
+inline void V4::operator=(const V4& other)
+{
+    q = other.q;
+}
+inline void V4::scaled(const Scalar4& scale, const V4& other)
+{
+    q = _mm_mul_ps(scale.expanded(), other.q);
+}
+inline Scalar4 V4::laneY() const
+{
+    return Scalar4(_mm_shuffle_ps(q, q, 0x55));
+}
+inline Scalar4 V4::laneZ() const
+{
+    return Scalar4(_mm_shuffle_ps(q, q, 0xaa));
+}
+inline Scalar4 V4::laneAt(int i) const
+{
+    switch (i)
     {
-        __m128 q;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-    V4()
-    {}
-    V4(const V4& other)
-    {
-        q = other.q;
+    case 0:
+        return Scalar4(q);
+    case 1:
+        return laneY();
+    case 2:
+        return laneZ();
+    default:
+        return Scalar4(_mm_shuffle_ps(q, q, 0xff));
     }
-    V4(const __m128& value)
-    {
-        q = value;
-    }
-    void operator=(const V4& other)
-    {
-        q = other.q;
-    }
-    void scaled(const Scalar4& scale, const V4& other)
-    {
-        q = _mm_mul_ps(scale.expanded(), other.q);
-    }
-    Scalar4 laneY() const
-    {
-        return Scalar4(_mm_shuffle_ps(q, q, 0x55));
-    }
-    Scalar4 laneZ() const
-    {
-        return Scalar4(_mm_shuffle_ps(q, q, 0xaa));
-    }
-    Scalar4 laneAt(int i) const
-    {
-        switch (i)
-        {
-        case 0:
-            return Scalar4(q);
-        case 1:
-            return laneY();
-        case 2:
-            return laneZ();
-        default:
-            return Scalar4(_mm_shuffle_ps(q, q, 0xff));
-        }
-    }
-    void add(const V4& other)
-    {
-        q = _mm_add_ps(q, other.q);
-    }
-};
+}
+inline void V4::add(const V4& other)
+{
+    q = _mm_add_ps(q, other.q);
+}
 
 struct P2Sub18
 {
@@ -452,23 +356,8 @@ class Seg
     Seg* FUN_00e39e50();
     float FUN_00e39e80() const;
 };
-class WheelQ
-{
-  public:
-    int unk00;
-    int unk04;
-    int index;
-    int count;
-    Seg* data;
-    void FUN_00e39f50(Seg* o);
-};
-struct InfoS : hkReferencedObject
-{
-    float m_fMinTyremarkPointDistance;
-    float m_fMaxTyremarkPointDistance;
-    hkArray<WheelQ*> m_kTyremarksWheels;
-    void FUN_00e39fd0(float p1, P2* p2);
-};
+#include "../../../../../include/hkpTyremarksInfo.h"
+
 
 __declspec(noinline) Seg* Seg::FUN_00e39e50()
 {
@@ -480,13 +369,14 @@ __declspec(noinline) float Seg::FUN_00e39e80() const
 {
     return v1.w;
 }
-__declspec(noinline) void WheelQ::FUN_00e39f50(Seg* o)
+__declspec(noinline) void hkpTyremarksWheel::FUN_00e39f50(hkpTyremark* tyremark)
 {
-    if (o->FUN_00e39e80() != 0.0f || data[(index + count - 1) % count].FUN_00e39e80() != 0.0f)
+    Seg* o = reinterpret_cast<Seg*>(tyremark);
+    if (o->FUN_00e39e80() != 0.0f || reinterpret_cast<Seg*>(m_data)[(m_iMaxNumTyremarks + m_numTyremarks - 1) % m_numTyremarks].FUN_00e39e80() != 0.0f)
     {
-        *(__m128*)&data[index].v0 = *(__m128*)&o->v0;
-        *(__m128*)&data[index].v1 = *(__m128*)&o->v1;
-        index = (index + 1) % count;
+        *(__m128*)&reinterpret_cast<Seg*>(m_data)[m_iMaxNumTyremarks].v0 = *(__m128*)&o->v0;
+        *(__m128*)&reinterpret_cast<Seg*>(m_data)[m_iMaxNumTyremarks].v1 = *(__m128*)&o->v1;
+        m_iMaxNumTyremarks = (m_iMaxNumTyremarks + 1) % m_numTyremarks;
     }
 }
 __forceinline __m128 scalar(float f)
@@ -505,8 +395,9 @@ __forceinline float toFloat(__m128 v)
 }
 
 // @fnv 0x00e39fd0
-void InfoS::FUN_00e39fd0(float p1, P2* p2)
+void hkpTyremarksInfo::FUN_00e39fd0(float p1, void* vehicle)
 {
+    P2* p2 = static_cast<P2*>(vehicle);
     V4 A;
     A.scaled(p1, p2->f18->f_1b0);
     BObj B;
@@ -544,6 +435,6 @@ void InfoS::FUN_00e39fd0(float p1, P2* p2)
         seg.v1.y = (W.laneAt(1) + A.laneAt(1));
         seg.v1.z = (W.laneAt(2) + A.laneAt(2));
         seg.v1.w = energy;
-        m_kTyremarksWheels.m_data[i]->FUN_00e39f50(&seg);
+        m_kTyremarksWheels.m_data[i]->FUN_00e39f50(reinterpret_cast<hkpTyremark*>(&seg));
     }
 }

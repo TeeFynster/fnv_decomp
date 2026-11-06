@@ -1,5 +1,11 @@
 // NiRenderedTexture.cpp: NiRenderedTexture (6 functions)
 
+#include "../include/Ni2DBuffer.h"
+#include "../include/NiObject.h"
+#include "../include/NiObjectNET.h"
+#include "../include/NiRefObject.h"
+#include "../include/NiRenderedTexture.h"
+#include "../include/NiRenderer.h"
 #include "NiRenderedTexture.h"
 
 // @fnv 0x00a7fc00
@@ -25,11 +31,11 @@ NiRenderedTexture* NiRenderedTexture::Create(const NiFixedString& name, unsigned
     }
     if (!dimensionsPowerOfTwo)
     {
-        if (!(dxRenderer->Unk_28() & 8) && !(dxRenderer->Unk_28() & 4))
+        if (!(dxRenderer->GetFlags() & 8) && !(dxRenderer->GetFlags() & 4))
             return 0;
     }
     NiRenderedTexture* texture = new NiRenderedTexture;
-    texture->m_kTextureFormatPreferences = preferences;
+    texture->m_kFormatPrefs = preferences;
     texture->m_pReuseTexture = reuseTexture;
     texture->m_uiAliasOffset = aliasOffset;
     Ni2DBuffer* buffer = Ni2DBuffer::Create(width, height);
@@ -102,67 +108,34 @@ void* __fastcall DestroyRenderedTexture(NiRenderedTexture* self, int, unsigned c
     return self;
 }
 
-struct FUN_00a7fbd0_shell : public NiRenderedTexture
-{
-    void* FUN_00a7fbd0();
-};
-
 extern char const* const g_012708e4_arg1[];
 
 // @fnv 0x00a7fbd0
-void* FUN_00a7fbd0_shell::FUN_00a7fbd0()
+NiRTTI* NiRenderedTexture::GetType()
 {
-    return reinterpret_cast<void*>(const_cast<char const**>(g_012708e4_arg1));
+    return reinterpret_cast<NiRTTI*>(const_cast<char const**>(g_012708e4_arg1));
 }
-
-struct FUN_00a7fbe0_shell : public NiRenderedTexture
-{
-    unsigned int FUN_00a7fbe0();
-};
 
 // @fnv 0x00a7fbe0
-unsigned int FUN_00a7fbe0_shell::FUN_00a7fbe0()
+unsigned int NiTexture::GetRenderedWidth()
 {
-    void* p = *reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x30);
-    if (p)
-        return *reinterpret_cast<unsigned int*>(reinterpret_cast<unsigned char*>(p) + 8);
+    Ni2DBuffer* buffer = static_cast<NiRenderedTexture*>(this)->m_spRenderTargetBuffer.m_pObject;
+    if (buffer)
+        return buffer->m_uiImageWidth;
     return 0;
 }
-
-struct FUN_00a7fbf0_shell : public NiRenderedTexture
-{
-    unsigned int FUN_00a7fbf0();
-};
 
 // @fnv 0x00a7fbf0
-unsigned int FUN_00a7fbf0_shell::FUN_00a7fbf0()
+unsigned int NiTexture::GetRenderedHeight()
 {
-    NiRenderedTexture* this_ = static_cast<NiRenderedTexture*>(this);
-    void* ptr = *reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this_) + 0x30);
-    if (ptr)
-        return *reinterpret_cast<unsigned int*>(reinterpret_cast<unsigned char*>(ptr) + 0xc);
+    Ni2DBuffer* buffer = static_cast<NiRenderedTexture*>(this)->m_spRenderTargetBuffer.m_pObject;
+    if (buffer)
+        return buffer->m_uiImageHeight;
     return 0;
 }
 
-struct FnvCpu_FUN_00be0b90_CpuObject
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    int value;
-    int FUN_00be0b90();
-};
 // @fnv 0x00be0b90
-int FnvCpu_FUN_00be0b90_CpuObject::FUN_00be0b90()
+int NiRenderedTexture::vf41()
 {
-    return value;
+    return reinterpret_cast<int>(m_spRenderTargetBuffer.m_pObject);
 }

@@ -1,7 +1,8 @@
 
 // hudmainmenu_ctx2_variant.cpp: context variant of src/fallout/interface/menus/hudmainmenu.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
-#include "HUDMainMenu.h"
+#include "../../../../include/HUDMainMenu.h"
+#include "../../../../include/Tile.h"
 static const int kGetClassValue = 1004;
 // m_pTiles is addressed by 1-based tile ID; slot 0 is the menu root.
 enum
@@ -9,20 +10,6 @@ enum
     kTileIDMax = 86
 };
 
-class Tile
-{
-  public:
-    void Set(int, int);
-    void Set(int, float, bool);
-    void Set(int, const char*, bool);
-    float Read(int);
-    bool Done(int);
-    bool Flag(int);
-    void Animate(int, float, float, float, int);
-    float AnimValue(int);
-    void Stop(int);
-    void SetUInt(int, unsigned int);
-};
 struct XPState
 {
     bool Ready();
@@ -154,7 +141,7 @@ void XPMenu::FUN_0077c4e0()
     bool canLevelUp13 = _g_thePlayer->State()->Ready();
     if ((FUN_00702360() && FUN_007023c0() != 1008 && FUN_007023c0() != 1055 && FUN_007023c0() != 1057 &&
          FUN_007023c0() != 1009) ||
-        xpVats.Flags() == 4 || ((XPGate*)m_kMenuData)->Active())
+        xpVats.Flags() == 4 || ((XPGate*)&m_kMenuData)->Active())
     {
         HUDMainMenu_pme->m_pTiles[44]->Set(4003, 0);
         HUDMainMenu_pme->m_pTiles[45]->Set(4003, 0);
@@ -178,20 +165,20 @@ void XPMenu::FUN_0077c4e0()
         bool done = m_pTiles[44]->Done(4009);
         if (xpFlags & 1)
         {
-            if (!visible && done && !((BSSimpleList<AmountEntry*>*)m_kXPUpdates)->IsEmpty())
+            if (!visible && done && !((BSSimpleList<AmountEntry*>*)&m_kXPUpdates)->IsEmpty())
             {
-                BSSimpleList<AmountEntry*>* node = (BSSimpleList<AmountEntry*>*)m_kXPUpdates;
+                BSSimpleList<AmountEntry*>* node = (BSSimpleList<AmountEntry*>*)&m_kXPUpdates;
                 int total = 0;
                 while (node && !node->IsEmpty())
                 {
                     total += node->GetItem()->amount;
                     node = node->GetNext();
                 }
-                while (((BSSimpleList<AmountEntry*>*)m_kXPUpdates)->GetItem())
+                while (((BSSimpleList<AmountEntry*>*)&m_kXPUpdates)->GetItem())
                 {
-                    AmountEntry* update = ((BSSimpleList<AmountEntry*>*)m_kXPUpdates)->GetItem();
+                    AmountEntry* update = ((BSSimpleList<AmountEntry*>*)&m_kXPUpdates)->GetItem();
                     delete update;
-                    ((BSSimpleList<AmountEntry*>*)m_kXPUpdates)->RemoveHead();
+                    ((BSSimpleList<AmountEntry*>*)&m_kXPUpdates)->RemoveHead();
                 }
                 if (total > 0 && !m_bSequenceActive)
                 {

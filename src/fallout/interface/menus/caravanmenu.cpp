@@ -1,39 +1,90 @@
+#include "../../../../include/BSSimpleList.h"
+#include "../../../../include/InterfaceManager.h"
+#include "../../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+
+// 0x00a011b0: this unit passes the propagation argument missing from Tile.h.
+void __cdecl ReadTileTraitWithPropagation();
+#include "../../../../include/BSAudio.h"
+#include "../../../../include/Actor.h"
+// BSShaderRenderUtility_caravanmenu: local type (was include/BSShaderRenderUtility.h, which had no evidence of one real class); its methods are 0x00469860 TESDataHandler::IsFormIDCreated, 0x00b6ba70 BSShaderUtil::InitSDM, 0x00b6bb30 BSShaderUtil::RecursiveSetPropertyFadeAlpha, 0x00b6c0d0 BSShaderUtil::RenderScene
+class AnimIdle;
+class BSShaderAccumulator;
+class NiCamera;
+class NiNode;
+
+class BSShaderRenderUtility_caravanmenu
+{
+public:
+    bool IsRenderTargetId(unsigned int value);
+    static void InitializeMultiBounds();
+    static void SetRenderCamera(NiCamera* camera, BSShaderAccumulator* accumulator, bool unused);
+    static void SetRenderCamera(AnimIdle* camera, AnimIdle* accumulator, bool unused);
+    static void SetRenderCamera(void* camera, unsigned int accumulator, bool unused);
+    static void SetAlphaOnNode(NiNode* node, float alpha);
+};
+#include "../../../../include/TESCaravanCard.h"
+#include "../../../../include/ShadowSceneNode.h"
+#include "../../../../include/GO.h"
+#include "../../../../include/BSSimpleArray.h"
+#include "../../../../include/BSFaceGenNiNode.h"
+#include "../../../../include/BGSMessage.h"
+#include "../../../../include/Bound.h"
+#include "../../../../include/CaravanMenu.h"
+#include "../../../../include/Menu.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiAdditionalGeometryData.h"
+#include "../../../../include/NiControllerManager.h"
+#include "../../../../include/NiUpdateData.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/Setting.h"
+#include "../../../../include/SettingT_GameSettingCollection_.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/Tile.h"
+#include "../../../../include/ActorValueOwner.h"
+#include "../../../../include/AnimIdle.h"
+#include "../../../../include/BSSoundHandle.h"
+#include "../../../../include/MiddleLowProcess.h"
+#include "../../../../include/NP.h"
+#include "../../../../include/NiFixedString.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/OSGlobals.h"
 
 // src/fallout/interface/menus/caravanmenu.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/interface/menus/caravanmenu.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct FUN_0073bb10_shell
-{
-    void ClearField();
-};
 
 // @fnv 0x0073bb10
-void FUN_0073bb10_shell::ClearField()
+void CaravanMenu::ClearField()
 {
     ((int*)this)[0x39d] = 0;
 }
 
-struct FUN_0073bb30_shell
-{
-    int FUN_0073bb30();
-};
 
 // @fnv 0x0073bb30
-int FUN_0073bb30_shell::FUN_0073bb30()
+int CaravanMenu::FUN_0073bb30()
 {
     return 0x43b;
 }
-
-struct Tile
-{
-    unsigned int uiFlags;
-};
-struct CaravanMenu
-{
-    void* m_0x00;
-    Tile* m_pTiles[204];
-    void SetTile(int id, Tile* tile);
-};
 
 // Stores tile into the menu's tile array at index id when id is in [0, 0x33).
 // @fnv 0x0073bb40
@@ -155,16 +206,8 @@ struct FUN_00a253d0_shell
 {
     void __thiscall FUN_00a253d0(void);
 };
-struct FUN_0073bab0_shell
-{
-    void __thiscall SetFlag(int a, int b);
-};
-struct OSGlobals
-{
-    void* __thiscall FUN_00877720(void);
-};
 extern OSGlobals* g_osGlobals;
-extern FUN_0073bab0_shell* DAT_011d917c;
+extern CaravanMenu* DAT_011d917c;
 char __cdecl ConsumeByteAtE4(void);
 
 // @fnv 0x0074a270
@@ -193,20 +236,15 @@ void __thiscall FUN_00740e70_shell::FUN_00740e70(int value)
 }
 
 // @fnv 0x0073bab0
-void FUN_0073bab0_shell::SetFlag(int auiMask, int abSet)
+void CaravanMenu::SetFlag(int auiMask, int abSet)
 {
     *(unsigned char*)&abSet ? *(int*)((char*)this + 0xe74) |= auiMask : *(int*)((char*)this + 0xe74) &= ~auiMask;
 }
 
 void __cdecl Deallocate(void* p);
-struct FUN_0073bb70_shell
-{
-    void __thiscall FUN_0073bba0();
-    void* __thiscall Destroy(unsigned int flags);
-};
 // Calls FUN_0073bba0, then frees this via Deallocate when flags has bit 1 set, and returns this.
 // @fnv 0x0073bb70
-void* __thiscall FUN_0073bb70_shell::Destroy(unsigned int flags)
+void* __thiscall CaravanMenu::Destroy(unsigned int flags)
 {
     FUN_0073bba0();
     if (flags & 1)
@@ -214,13 +252,9 @@ void* __thiscall FUN_0073bb70_shell::Destroy(unsigned int flags)
     return this;
 }
 
-struct FUN_007414c0_shell
-{
-    char __thiscall HasAllTiles();
-};
 // Checks the 0x33 Tile pointers at offset 0x30 and returns 1 only if none of them is null.
 // @fnv 0x007414c0
-char __thiscall FUN_007414c0_shell::HasAllTiles()
+char __thiscall CaravanMenu::HasAllTiles()
 {
     for (int i = 0; i < 0x33; ++i)
     {
@@ -230,37 +264,13 @@ char __thiscall FUN_007414c0_shell::HasAllTiles()
     return 1;
 }
 
-struct FUN_00740f10_shell
-{
-    char _pad[0xe74];
-    unsigned int m_flags;
-    bool FUN_00740f10(unsigned int aFlag);
-};
 
 // @fnv 0x00740f10
-bool FUN_00740f10_shell::FUN_00740f10(unsigned int aFlag)
+bool CaravanMenu::FUN_00740f10(unsigned int aFlag)
 {
-    return (m_flags & aFlag) != 0;
+    return (*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0xe74) & aFlag) != 0;
 }
 
-struct Tile_Set_Helper
-{
-    void Set(int, int);
-};
-struct FUN_00a01290_shell
-{
-    void SetTraitAndReset(int, float);
-};
-struct ActorValueOwner
-{
-    float GetActorValueFloatByIndex(int);
-};
-struct CaravanMenu_0074a090
-{
-    void UpdateControls();
-    void FUN_00749a40(int);
-    void PlaceBillsAndCoins(int, int);
-};
 int __cdecl MinInt(int, int);
 int __cdecl FUN_00647b70(int, int);
 extern int DAT_011d9174;
@@ -271,8 +281,8 @@ void __cdecl FUN_0074a090(int aiAmount)
 {
     int iDelta = aiAmount - (*(int*)((char*)DAT_011d917c + 0xadc));
     (*(int*)((char*)DAT_011d917c + 0xadc)) = (*(int*)((char*)DAT_011d917c + 0xadc)) + aiAmount;
-    (*(FUN_00a01290_shell**)((char*)DAT_011d917c + 0x44))->SetTraitAndReset(DAT_011d9174, 1.0f);
-    ((Tile_Set_Helper*)(*(FUN_00a01290_shell**)((char*)DAT_011d917c + 0x44)))
+    (*(Tile**)((char*)DAT_011d917c + 0x44))->SetTraitFloat(DAT_011d9174, 1.0f);
+    ((Tile*)(*(Tile**)((char*)DAT_011d917c + 0x44)))
         ->Set(DAT_011d9174, (*(int*)((char*)DAT_011d917c + 0xadc)));
     DAT_011d917c->SetFlag(1, 0);
     int iMax = (int)((*(int*)((char*)DAT_011d917c + 0x110)) * (*(float*)((char*)DAT_011d917c + 0x10c)) +
@@ -282,213 +292,44 @@ void __cdecl FUN_0074a090(int aiAmount)
     if ((*(int*)((char*)DAT_011d917c + 0xadc)) > (*(int*)((char*)DAT_011d917c + 0xae0)))
     {
         (*(int*)((char*)DAT_011d917c + 0xae0)) = MinInt(iMax, (*(int*)((char*)DAT_011d917c + 0xadc)));
-        (*(FUN_00a01290_shell**)((char*)DAT_011d917c + 0x40))->SetTraitAndReset(DAT_011d9174, 1.0f);
-        ((Tile_Set_Helper*)(*(FUN_00a01290_shell**)((char*)DAT_011d917c + 0x40)))
+        (*(Tile**)((char*)DAT_011d917c + 0x40))->SetTraitFloat(DAT_011d9174, 1.0f);
+        ((Tile*)(*(Tile**)((char*)DAT_011d917c + 0x40)))
             ->Set(DAT_011d9174, (*(int*)((char*)DAT_011d917c + 0xae0)));
     }
     iDelta +=
         FUN_00647b70(MinInt((*(int*)((char*)DAT_011d917c + 0xadc)), iMax) - (*(int*)((char*)DAT_011d917c + 0xae0)), 0);
-    ((CaravanMenu_0074a090*)DAT_011d917c)->UpdateControls();
-    ((CaravanMenu_0074a090*)DAT_011d917c)->FUN_00749a40(-1);
-    ((CaravanMenu_0074a090*)DAT_011d917c)->PlaceBillsAndCoins(iMax, iDelta);
+    ((CaravanMenu*)DAT_011d917c)->UpdateControls();
+    ((CaravanMenu*)DAT_011d917c)->FUN_00749a40(-1);
+    ((CaravanMenu*)DAT_011d917c)->PlaceBillsAndCoins(iMax, iDelta);
 }
 
 struct TGF
 {
     float GetFloat(int);
 };
-struct InterfaceManager
-{
-    int FUN_00747d00();
-};
+
 extern int DAT_011d9170;
 extern InterfaceManager* DAT_011d9180;
-struct FUN_007492f0_shell
-{
-    void InitType15State(int aiType, int aiPad);
-};
 // @fnv 0x007492f0
-void FUN_007492f0_shell::InitType15State(int aiType, int aiPad)
+void CaravanMenu::InitType15State(int aiType, int aiPad)
 {
     ((char*)this)[0xe85] = 0;
     if (*(int*)((char*)this + 0x28) == 1 && aiType == 15 && *(int*)((char*)this + 0x2c) == 0)
     {
         *(int*)((char*)this + 0xaf8) = (int)((TGF*)*(int*)((char*)this + 0x6c))->GetFloat(DAT_011d9170);
         ((char*)this)[0xe85] = 1;
-        *(int*)((char*)this + 0xb00) = DAT_011d9180->FUN_00747d00();
+        *(int*)((char*)this + 0xb00) = DAT_011d9180->GetPickCursorX();
     }
 }
 
-struct Interface
-{
-    static void __cdecl PrintDebugMessage(const char*, ...);
-};
+void __cdecl PrintDebugMessage(const char*, ...);
 
-struct BSSimpleArray
+struct NPCHandArray
 {
     unsigned int& GetAt(int);
 };
 
-struct TESCaravanCard
-{
-    virtual void f00()
-    {}
-    virtual void f01()
-    {}
-    virtual void f02()
-    {}
-    virtual void f03()
-    {}
-    virtual void f04()
-    {}
-    virtual void f05()
-    {}
-    virtual void f06()
-    {}
-    virtual void f07()
-    {}
-    virtual void f08()
-    {}
-    virtual void f09()
-    {}
-    virtual void f10()
-    {}
-    virtual void f11()
-    {}
-    virtual void f12()
-    {}
-    virtual void f13()
-    {}
-    virtual void f14()
-    {}
-    virtual void f15()
-    {}
-    virtual void f16()
-    {}
-    virtual void f17()
-    {}
-    virtual void f18()
-    {}
-    virtual void f19()
-    {}
-    virtual void f20()
-    {}
-    virtual void f21()
-    {}
-    virtual void f22()
-    {}
-    virtual void f23()
-    {}
-    virtual void f24()
-    {}
-    virtual void f25()
-    {}
-    virtual void f26()
-    {}
-    virtual void f27()
-    {}
-    virtual void f28()
-    {}
-    virtual void f29()
-    {}
-    virtual void f30()
-    {}
-    virtual void f31()
-    {}
-    virtual void f32()
-    {}
-    virtual void f33()
-    {}
-    virtual void f34()
-    {}
-    virtual void f35()
-    {}
-    virtual void f36()
-    {}
-    virtual void f37()
-    {}
-    virtual void f38()
-    {}
-    virtual void f39()
-    {}
-    virtual void f40()
-    {}
-    virtual void f41()
-    {}
-    virtual void f42()
-    {}
-    virtual void f43()
-    {}
-    virtual void f44()
-    {}
-    virtual void f45()
-    {}
-    virtual void f46()
-    {}
-    virtual void f47()
-    {}
-    virtual void f48()
-    {}
-    virtual void f49()
-    {}
-    virtual void f50()
-    {}
-    virtual void f51()
-    {}
-    virtual void f52()
-    {}
-    virtual void f53()
-    {}
-    virtual void f54()
-    {}
-    virtual void f55()
-    {}
-    virtual void f56()
-    {}
-    virtual void f57()
-    {}
-    virtual void f58()
-    {}
-    virtual void f59()
-    {}
-    virtual void f60()
-    {}
-    virtual void f61()
-    {}
-    virtual void f62()
-    {}
-    virtual void f63()
-    {}
-    virtual void f64()
-    {}
-    virtual void f65()
-    {}
-    virtual void f66()
-    {}
-    virtual void f67()
-    {}
-    virtual void f68()
-    {}
-    virtual void f69()
-    {}
-    virtual void f70()
-    {}
-    virtual void f71()
-    {}
-    virtual void f72()
-    {}
-    virtual void f73()
-    {}
-    virtual void f74()
-    {}
-    virtual void f75()
-    {}
-// @fnv 0x0073b730
-    virtual char* FUN_0073b730_card()
-    {
-        return 0;
-    }
-};
+
 
 struct NPCHandArrayInfo
 {
@@ -500,20 +341,20 @@ struct NPCHandArrayInfo
     int m_0x14;
     int m_0x18;
 
-    void __thiscall FUN_0073b730(BSSimpleArray* pNPCHandArray);
+    void __thiscall FUN_0073b730(NPCHandArray* pNPCHandArray);
 };
 
-void __thiscall NPCHandArrayInfo::FUN_0073b730(BSSimpleArray* pNPCHandArray)
+void __thiscall NPCHandArrayInfo::FUN_0073b730(NPCHandArray* pNPCHandArray)
 {
     if (pNPCHandArray)
     {
-        Interface::PrintDebugMessage("track:%i row:%i dcard:%i goal:%i calcresult:%i priority:%i card:%s", m_0x0c,
+        PrintDebugMessage("track:%i row:%i dcard:%i goal:%i calcresult:%i priority:%i card:%s", m_0x0c,
                                      m_0x10, m_0x14, m_0x00, m_0x04, m_0x18,
-                                     ((TESCaravanCard*)pNPCHandArray->GetAt(m_0x14))->FUN_0073b730_card());
+                                     ((TESCaravanCard*)pNPCHandArray->GetAt(m_0x14))->GetName());
     }
     else
     {
-        Interface::PrintDebugMessage("track:%i row:%i dcard:%i goal:%i calcresult:%i priority:%i", m_0x0c, m_0x10,
+        PrintDebugMessage("track:%i row:%i dcard:%i goal:%i calcresult:%i priority:%i", m_0x0c, m_0x10,
                                      m_0x14, m_0x00, m_0x04, m_0x18);
     }
 }
@@ -521,12 +362,8 @@ void __thiscall NPCHandArrayInfo::FUN_0073b730(BSSimpleArray* pNPCHandArray)
 struct AnimIdle;
 struct Accum_00733500;
 struct S148c0;
-struct BSFaceGenNiNode;
 struct MiddleLowProcess;
 struct Mgr_00733500;
-struct NiAdditionalGeometryData;
-struct BSShaderRenderUtility;
-struct GlobalObject_00633c90;
 
 S148c0* __cdecl FUN_0043c4b0();
 unsigned int __cdecl FUN_0045c670();
@@ -538,19 +375,9 @@ struct S148c0
     void FUN_007148c0(int a, int b);
 };
 
-struct MiddleLowProcess
-{
-    int GetProcessInteger();
-};
 
-struct BSFaceGenNiNode
-{
-    void* GetAnimationData();
-};
 
-struct AnimIdle
-{
-};
+
 
 struct Accum_00733500
 {
@@ -566,33 +393,13 @@ struct Mgr_00733500
 
 Mgr_00733500* __cdecl _FUN_004b7210();
 
-struct GO
-{
-    unsigned int value;
 
-    GO(int value);
-    operator unsigned int() const;
-    void operator=(void* value);
-    ~GO();
-};
 
-struct GlobalObject_00633c90 : GO
-{
-    GlobalObject_00633c90();
-};
 
-extern GlobalObject_00633c90 g_011d91a8;
+
+extern GO g_011d91a8;
 extern float const g_011db5ec_arg1;
 
-struct NiAdditionalGeometryData
-{
-    static void* __cdecl GetShadowSceneNodeForIndex(int value);
-};
-
-struct BSShaderRenderUtility
-{
-    static void __cdecl SetRenderCamera(AnimIdle* a, AnimIdle* b, bool flag);
-};
 
 GO::GO(int value) : value(value)
 {}
@@ -602,16 +409,21 @@ GO::operator unsigned int() const
     return value;
 }
 
-void GO::operator=(void* value)
+GO::operator unsigned int()
+{
+    return value;
+}
+
+GO& GO::operator=(void* value)
 {
     this->value = 0;
+    return *this;
 }
 
 GO::~GO()
 {}
 
-GlobalObject_00633c90::GlobalObject_00633c90() : GO(0)
-{}
+
 
 // @fnv 0x00740f30
 void __cdecl FUN_00740f30()
@@ -624,7 +436,7 @@ void __cdecl FUN_00740f30()
     FUN_0043c4b0()->FUN_007148c0(0, 4);
 
     pBase = (void*)FUN_0045c670();
-    uiGlobal = (Accum_00733500*)((MiddleLowProcess*)pBase)->GetProcessInteger();
+    uiGlobal = (Accum_00733500*)((MiddleLowProcess*)pBase)->MiddleLowProcess::GetProcessInteger();
     uiGlobal->FUN_00c4f270(1);
 
     pPackage = g_011d91a8.operator unsigned int();
@@ -634,63 +446,49 @@ void __cdecl FUN_00740f30()
 
     uiGlobal->FUN_004a0fd0((AnimIdle*)animation.operator unsigned int());
 
-    pSelected = pPackage ? (AnimIdle*)pPackage : (AnimIdle*)((BSFaceGenNiNode*)pBase)->GetAnimationData();
+    pSelected = pPackage ? (AnimIdle*)pPackage : (AnimIdle*)((BSFaceGenNiNode*)pBase)->BSFaceGenNiNode::GetAnimationData();
 
     FUN_00b6bee0(pSelected, NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1), uiGlobal);
-    BSShaderRenderUtility::SetRenderCamera(pSelected, (AnimIdle*)animation.operator unsigned int(), false);
+    BSShaderRenderUtility_caravanmenu::SetRenderCamera(pSelected, (AnimIdle*)animation.operator unsigned int(), false);
 
     uiGlobal->FUN_004a0fd0(0);
     animation.operator=(0);
     uiGlobal->FUN_00c4f2d0();
 }
 
-namespace fnv_0074f600 {
-struct ArrSI
-{
-    unsigned int GetFlags(void);
-};
 
-struct BSSimpleArray : public ArrSI
-{
-    unsigned int& GetAt(int index);
-};
 
-struct MiddleLowProcess
-{
-    int GetProcessInteger(void);
-};
 
-struct FUN_0074f600_shell
-{
-    int __thiscall FUN_0074f600(int index1, int index2);
-};
+
+
+
 
 // @fnv 0x0074f600
-int __thiscall FUN_0074f600_shell::FUN_0074f600(int index1, int index2)
+int __thiscall CaravanMenu::FUN_0074f600(int index1, int index2)
 {
     int evaluateHour = 0;
     int flags;
     int i;
 
     flags =
-        reinterpret_cast<BSSimpleArray*>(reinterpret_cast<unsigned char*>(this) + 0xB44 + index1 * 0x70 + index2 * 0x10)
-            ->GetFlags();
+        reinterpret_cast<BSSimpleArray<unsigned int>*>(reinterpret_cast<unsigned char*>(this) + 0xB44 + index1 * 0x70 + index2 * 0x10)
+            ->GetSize();
 
     if (flags > 0)
     {
         evaluateHour = reinterpret_cast<MiddleLowProcess*>(
-                           reinterpret_cast<BSSimpleArray*>(reinterpret_cast<unsigned char*>(this) + 0xB44 +
+                           reinterpret_cast<BSSimpleArray<unsigned int>*>(reinterpret_cast<unsigned char*>(this) + 0xB44 +
                                                             index1 * 0x70 + index2 * 0x10)
                                ->GetAt(0))
-                           ->GetProcessInteger();
+                           ->MiddleLowProcess::GetProcessInteger();
 
         for (i = 1; i < flags; ++i)
         {
             if (reinterpret_cast<MiddleLowProcess*>(
-                    reinterpret_cast<BSSimpleArray*>(reinterpret_cast<unsigned char*>(this) + 0xB44 + index1 * 0x70 +
+                    reinterpret_cast<BSSimpleArray<unsigned int>*>(reinterpret_cast<unsigned char*>(this) + 0xB44 + index1 * 0x70 +
                                                      index2 * 0x10)
                         ->GetAt(i))
-                    ->GetProcessInteger() == 14)
+                    ->MiddleLowProcess::GetProcessInteger() == 14)
             {
                 evaluateHour *= 2;
             }
@@ -699,7 +497,7 @@ int __thiscall FUN_0074f600_shell::FUN_0074f600(int index1, int index2)
 
     return evaluateHour;
 }
-}  // namespace fnv_0074f600
+
 
 struct BSSimpleListTESRaceSize
 {
@@ -708,10 +506,7 @@ struct BSSimpleListTESRaceSize
     BSSimpleListTESRaceSize* __thiscall _ref_00726070();
 };
 
-struct BSSimpleArrayActor
-{
-    unsigned int __thiscall Add(void*& value);
-};
+
 
 struct FUN_006e2b50_shell
 {
@@ -725,13 +520,9 @@ struct FUN_00729970_shell
 
 void __cdecl FUN_0059ae10();
 
-struct FUN_0073ced0_shell
-{
-    bool RebuildCardLists();
-};
 
 // @fnv 0x0073ced0
-bool FUN_0073ced0_shell::RebuildCardLists()
+bool CaravanMenu::RebuildCardLists()
 {
     int i;
     BSSimpleListTESRaceSize* activelist;
@@ -753,7 +544,7 @@ bool FUN_0073ced0_shell::RebuildCardLists()
     {
         pCard = *inactivelist->_ref_006815c0();
         reinterpret_cast<FUN_006e2b50_shell*>(pCard)->SetCantOpenDoors(false);
-        reinterpret_cast<BSSimpleArrayActor*>(reinterpret_cast<char*>(this) + 0xa6c)
+        reinterpret_cast<BSSimpleArray<void*>*>(reinterpret_cast<char*>(this) + 0xa6c)
             ->Add(reinterpret_cast<void*&>(pCard));
         inactivelist = inactivelist->_ref_00726070();
     }
@@ -765,7 +556,7 @@ bool FUN_0073ced0_shell::RebuildCardLists()
         {
             pCard = *activelist->_ref_006815c0();
             reinterpret_cast<FUN_006e2b50_shell*>(pCard)->SetCantOpenDoors(true);
-            reinterpret_cast<BSSimpleArrayActor*>(reinterpret_cast<char*>(this) + 0xa6c)
+            reinterpret_cast<BSSimpleArray<void*>*>(reinterpret_cast<char*>(this) + 0xa6c)
                 ->Add(reinterpret_cast<void*&>(pCard));
             activelist = activelist->_ref_00726070();
         }
@@ -792,677 +583,6 @@ struct CardArray
     Card*& FUN_006a7ad0(unsigned int index);
     void FUN_005ae3d0(Card* const& card);
 };
-struct Menu
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int state;
-    unsigned int selection;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    unsigned int unk15c;
-    unsigned int unk160;
-    unsigned int unk164;
-    unsigned int unk168;
-    unsigned int unk16c;
-    unsigned int unk170;
-    unsigned int unk174;
-    unsigned int unk178;
-    unsigned int unk17c;
-    unsigned int unk180;
-    unsigned int unk184;
-    unsigned int unk188;
-    unsigned int unk18c;
-    unsigned int unk190;
-    unsigned int unk194;
-    unsigned int unk198;
-    unsigned int unk19c;
-    unsigned int unk1a0;
-    unsigned int unk1a4;
-    unsigned int unk1a8;
-    unsigned int unk1ac;
-    unsigned int unk1b0;
-    unsigned int unk1b4;
-    unsigned int unk1b8;
-    unsigned int unk1bc;
-    unsigned int unk1c0;
-    unsigned int unk1c4;
-    unsigned int unk1c8;
-    unsigned int unk1cc;
-    unsigned int unk1d0;
-    unsigned int unk1d4;
-    unsigned int unk1d8;
-    unsigned int unk1dc;
-    unsigned int unk1e0;
-    unsigned int unk1e4;
-    unsigned int unk1e8;
-    unsigned int unk1ec;
-    unsigned int unk1f0;
-    unsigned int unk1f4;
-    unsigned int unk1f8;
-    unsigned int unk1fc;
-    unsigned int unk200;
-    unsigned int unk204;
-    unsigned int unk208;
-    unsigned int unk20c;
-    unsigned int unk210;
-    unsigned int unk214;
-    unsigned int unk218;
-    unsigned int unk21c;
-    unsigned int unk220;
-    unsigned int unk224;
-    unsigned int unk228;
-    unsigned int unk22c;
-    unsigned int unk230;
-    unsigned int unk234;
-    unsigned int unk238;
-    unsigned int unk23c;
-    unsigned int unk240;
-    unsigned int unk244;
-    unsigned int unk248;
-    unsigned int unk24c;
-    unsigned int unk250;
-    unsigned int unk254;
-    unsigned int unk258;
-    unsigned int unk25c;
-    unsigned int unk260;
-    unsigned int unk264;
-    unsigned int unk268;
-    unsigned int unk26c;
-    unsigned int unk270;
-    unsigned int unk274;
-    unsigned int unk278;
-    unsigned int unk27c;
-    unsigned int unk280;
-    unsigned int unk284;
-    unsigned int unk288;
-    unsigned int unk28c;
-    unsigned int unk290;
-    unsigned int unk294;
-    unsigned int unk298;
-    unsigned int unk29c;
-    unsigned int unk2a0;
-    unsigned int unk2a4;
-    unsigned int unk2a8;
-    unsigned int unk2ac;
-    unsigned int unk2b0;
-    unsigned int unk2b4;
-    unsigned int unk2b8;
-    unsigned int unk2bc;
-    unsigned int unk2c0;
-    unsigned int unk2c4;
-    unsigned int unk2c8;
-    unsigned int unk2cc;
-    unsigned int unk2d0;
-    unsigned int unk2d4;
-    unsigned int unk2d8;
-    unsigned int unk2dc;
-    unsigned int unk2e0;
-    unsigned int unk2e4;
-    unsigned int unk2e8;
-    unsigned int unk2ec;
-    unsigned int unk2f0;
-    unsigned int unk2f4;
-    unsigned int unk2f8;
-    unsigned int unk2fc;
-    unsigned int unk300;
-    unsigned int unk304;
-    unsigned int unk308;
-    unsigned int unk30c;
-    unsigned int unk310;
-    unsigned int unk314;
-    unsigned int unk318;
-    unsigned int unk31c;
-    unsigned int unk320;
-    unsigned int unk324;
-    unsigned int unk328;
-    unsigned int unk32c;
-    unsigned int unk330;
-    unsigned int unk334;
-    unsigned int unk338;
-    unsigned int unk33c;
-    unsigned int unk340;
-    unsigned int unk344;
-    unsigned int unk348;
-    unsigned int unk34c;
-    unsigned int unk350;
-    unsigned int unk354;
-    unsigned int unk358;
-    unsigned int unk35c;
-    unsigned int unk360;
-    unsigned int unk364;
-    unsigned int unk368;
-    unsigned int unk36c;
-    unsigned int unk370;
-    unsigned int unk374;
-    unsigned int unk378;
-    unsigned int unk37c;
-    unsigned int unk380;
-    unsigned int unk384;
-    unsigned int unk388;
-    unsigned int unk38c;
-    unsigned int unk390;
-    unsigned int unk394;
-    unsigned int unk398;
-    unsigned int unk39c;
-    unsigned int unk3a0;
-    unsigned int unk3a4;
-    unsigned int unk3a8;
-    unsigned int unk3ac;
-    unsigned int unk3b0;
-    unsigned int unk3b4;
-    unsigned int unk3b8;
-    unsigned int unk3bc;
-    unsigned int unk3c0;
-    unsigned int unk3c4;
-    unsigned int unk3c8;
-    unsigned int unk3cc;
-    unsigned int unk3d0;
-    unsigned int unk3d4;
-    unsigned int unk3d8;
-    unsigned int unk3dc;
-    unsigned int unk3e0;
-    unsigned int unk3e4;
-    unsigned int unk3e8;
-    unsigned int unk3ec;
-    unsigned int unk3f0;
-    unsigned int unk3f4;
-    unsigned int unk3f8;
-    unsigned int unk3fc;
-    unsigned int unk400;
-    unsigned int unk404;
-    unsigned int unk408;
-    unsigned int unk40c;
-    unsigned int unk410;
-    unsigned int unk414;
-    unsigned int unk418;
-    unsigned int unk41c;
-    unsigned int unk420;
-    unsigned int unk424;
-    unsigned int unk428;
-    unsigned int unk42c;
-    unsigned int unk430;
-    unsigned int unk434;
-    unsigned int unk438;
-    unsigned int unk43c;
-    unsigned int unk440;
-    unsigned int unk444;
-    unsigned int unk448;
-    unsigned int unk44c;
-    unsigned int unk450;
-    unsigned int unk454;
-    unsigned int unk458;
-    unsigned int unk45c;
-    unsigned int unk460;
-    unsigned int unk464;
-    unsigned int unk468;
-    unsigned int unk46c;
-    unsigned int unk470;
-    unsigned int unk474;
-    unsigned int unk478;
-    unsigned int unk47c;
-    unsigned int unk480;
-    unsigned int unk484;
-    unsigned int unk488;
-    unsigned int unk48c;
-    unsigned int unk490;
-    unsigned int unk494;
-    unsigned int unk498;
-    unsigned int unk49c;
-    unsigned int unk4a0;
-    unsigned int unk4a4;
-    unsigned int unk4a8;
-    unsigned int unk4ac;
-    unsigned int unk4b0;
-    unsigned int unk4b4;
-    unsigned int unk4b8;
-    unsigned int unk4bc;
-    unsigned int unk4c0;
-    unsigned int unk4c4;
-    unsigned int unk4c8;
-    unsigned int unk4cc;
-    unsigned int unk4d0;
-    unsigned int unk4d4;
-    unsigned int unk4d8;
-    unsigned int unk4dc;
-    unsigned int unk4e0;
-    unsigned int unk4e4;
-    unsigned int unk4e8;
-    unsigned int unk4ec;
-    unsigned int unk4f0;
-    unsigned int unk4f4;
-    unsigned int unk4f8;
-    unsigned int unk4fc;
-    unsigned int unk500;
-    unsigned int unk504;
-    unsigned int unk508;
-    unsigned int unk50c;
-    unsigned int unk510;
-    unsigned int unk514;
-    unsigned int unk518;
-    unsigned int unk51c;
-    unsigned int unk520;
-    unsigned int unk524;
-    unsigned int unk528;
-    unsigned int unk52c;
-    unsigned int unk530;
-    unsigned int unk534;
-    unsigned int unk538;
-    unsigned int unk53c;
-    unsigned int unk540;
-    unsigned int unk544;
-    unsigned int unk548;
-    unsigned int unk54c;
-    unsigned int unk550;
-    unsigned int unk554;
-    unsigned int unk558;
-    unsigned int unk55c;
-    unsigned int unk560;
-    unsigned int unk564;
-    unsigned int unk568;
-    unsigned int unk56c;
-    unsigned int unk570;
-    unsigned int unk574;
-    unsigned int unk578;
-    unsigned int unk57c;
-    unsigned int unk580;
-    unsigned int unk584;
-    unsigned int unk588;
-    unsigned int unk58c;
-    unsigned int unk590;
-    unsigned int unk594;
-    unsigned int unk598;
-    unsigned int unk59c;
-    unsigned int unk5a0;
-    unsigned int unk5a4;
-    unsigned int unk5a8;
-    unsigned int unk5ac;
-    unsigned int unk5b0;
-    unsigned int unk5b4;
-    unsigned int unk5b8;
-    unsigned int unk5bc;
-    unsigned int unk5c0;
-    unsigned int unk5c4;
-    unsigned int unk5c8;
-    unsigned int unk5cc;
-    unsigned int unk5d0;
-    unsigned int unk5d4;
-    unsigned int unk5d8;
-    unsigned int unk5dc;
-    unsigned int unk5e0;
-    unsigned int unk5e4;
-    unsigned int unk5e8;
-    unsigned int unk5ec;
-    unsigned int unk5f0;
-    unsigned int unk5f4;
-    unsigned int unk5f8;
-    unsigned int unk5fc;
-    unsigned int unk600;
-    unsigned int unk604;
-    unsigned int unk608;
-    unsigned int unk60c;
-    unsigned int unk610;
-    unsigned int unk614;
-    unsigned int unk618;
-    unsigned int unk61c;
-    unsigned int unk620;
-    unsigned int unk624;
-    unsigned int unk628;
-    unsigned int unk62c;
-    unsigned int unk630;
-    unsigned int unk634;
-    unsigned int unk638;
-    unsigned int unk63c;
-    unsigned int unk640;
-    unsigned int unk644;
-    unsigned int unk648;
-    unsigned int unk64c;
-    unsigned int unk650;
-    unsigned int unk654;
-    unsigned int unk658;
-    unsigned int unk65c;
-    unsigned int unk660;
-    unsigned int unk664;
-    unsigned int unk668;
-    unsigned int unk66c;
-    unsigned int unk670;
-    unsigned int unk674;
-    unsigned int unk678;
-    unsigned int unk67c;
-    unsigned int unk680;
-    unsigned int unk684;
-    unsigned int unk688;
-    unsigned int unk68c;
-    unsigned int unk690;
-    unsigned int unk694;
-    unsigned int unk698;
-    unsigned int unk69c;
-    unsigned int unk6a0;
-    unsigned int unk6a4;
-    unsigned int unk6a8;
-    unsigned int unk6ac;
-    unsigned int unk6b0;
-    unsigned int unk6b4;
-    unsigned int unk6b8;
-    unsigned int unk6bc;
-    unsigned int unk6c0;
-    unsigned int unk6c4;
-    unsigned int unk6c8;
-    unsigned int unk6cc;
-    unsigned int unk6d0;
-    unsigned int unk6d4;
-    unsigned int unk6d8;
-    unsigned int unk6dc;
-    unsigned int unk6e0;
-    unsigned int unk6e4;
-    unsigned int unk6e8;
-    unsigned int unk6ec;
-    unsigned int unk6f0;
-    unsigned int unk6f4;
-    unsigned int unk6f8;
-    unsigned int unk6fc;
-    unsigned int unk700;
-    unsigned int unk704;
-    unsigned int unk708;
-    unsigned int unk70c;
-    unsigned int unk710;
-    unsigned int unk714;
-    unsigned int unk718;
-    unsigned int unk71c;
-    unsigned int unk720;
-    unsigned int unk724;
-    unsigned int unk728;
-    unsigned int unk72c;
-    unsigned int unk730;
-    unsigned int unk734;
-    unsigned int unk738;
-    unsigned int unk73c;
-    unsigned int unk740;
-    unsigned int unk744;
-    unsigned int unk748;
-    unsigned int unk74c;
-    unsigned int unk750;
-    unsigned int unk754;
-    unsigned int unk758;
-    unsigned int unk75c;
-    unsigned int unk760;
-    unsigned int unk764;
-    unsigned int unk768;
-    unsigned int unk76c;
-    unsigned int unk770;
-    unsigned int unk774;
-    unsigned int unk778;
-    unsigned int unk77c;
-    unsigned int unk780;
-    unsigned int unk784;
-    unsigned int unk788;
-    unsigned int unk78c;
-    unsigned int unk790;
-    unsigned int unk794;
-    unsigned int unk798;
-    unsigned int unk79c;
-    unsigned int unk7a0;
-    unsigned int unk7a4;
-    unsigned int unk7a8;
-    unsigned int unk7ac;
-    unsigned int unk7b0;
-    unsigned int unk7b4;
-    unsigned int unk7b8;
-    unsigned int unk7bc;
-    unsigned int unk7c0;
-    unsigned int unk7c4;
-    unsigned int unk7c8;
-    unsigned int unk7cc;
-    unsigned int unk7d0;
-    unsigned int unk7d4;
-    unsigned int unk7d8;
-    unsigned int unk7dc;
-    unsigned int unk7e0;
-    unsigned int unk7e4;
-    unsigned int unk7e8;
-    unsigned int unk7ec;
-    unsigned int unk7f0;
-    unsigned int unk7f4;
-    unsigned int unk7f8;
-    unsigned int unk7fc;
-    unsigned int unk800;
-    unsigned int unk804;
-    unsigned int unk808;
-    unsigned int unk80c;
-    unsigned int unk810;
-    unsigned int unk814;
-    unsigned int unk818;
-    unsigned int unk81c;
-    unsigned int unk820;
-    unsigned int unk824;
-    unsigned int unk828;
-    unsigned int unk82c;
-    unsigned int unk830;
-    unsigned int unk834;
-    unsigned int unk838;
-    unsigned int unk83c;
-    unsigned int unk840;
-    unsigned int unk844;
-    unsigned int unk848;
-    unsigned int unk84c;
-    unsigned int unk850;
-    unsigned int unk854;
-    unsigned int unk858;
-    unsigned int unk85c;
-    unsigned int unk860;
-    unsigned int unk864;
-    unsigned int unk868;
-    unsigned int unk86c;
-    unsigned int unk870;
-    unsigned int unk874;
-    unsigned int unk878;
-    unsigned int unk87c;
-    unsigned int unk880;
-    unsigned int unk884;
-    unsigned int unk888;
-    unsigned int unk88c;
-    unsigned int unk890;
-    unsigned int unk894;
-    unsigned int unk898;
-    unsigned int unk89c;
-    unsigned int unk8a0;
-    unsigned int unk8a4;
-    unsigned int unk8a8;
-    unsigned int unk8ac;
-    unsigned int unk8b0;
-    unsigned int unk8b4;
-    unsigned int unk8b8;
-    unsigned int unk8bc;
-    unsigned int unk8c0;
-    unsigned int unk8c4;
-    unsigned int unk8c8;
-    unsigned int unk8cc;
-    unsigned int unk8d0;
-    unsigned int unk8d4;
-    unsigned int unk8d8;
-    unsigned int unk8dc;
-    unsigned int unk8e0;
-    unsigned int unk8e4;
-    unsigned int unk8e8;
-    unsigned int unk8ec;
-    unsigned int unk8f0;
-    unsigned int unk8f4;
-    unsigned int unk8f8;
-    unsigned int unk8fc;
-    unsigned int unk900;
-    unsigned int unk904;
-    unsigned int unk908;
-    unsigned int unk90c;
-    unsigned int unk910;
-    unsigned int unk914;
-    unsigned int unk918;
-    unsigned int unk91c;
-    unsigned int unk920;
-    unsigned int unk924;
-    unsigned int unk928;
-    unsigned int unk92c;
-    unsigned int unk930;
-    unsigned int unk934;
-    unsigned int unk938;
-    unsigned int unk93c;
-    unsigned int unk940;
-    unsigned int unk944;
-    unsigned int unk948;
-    unsigned int unk94c;
-    unsigned int unk950;
-    unsigned int unk954;
-    unsigned int unk958;
-    unsigned int unk95c;
-    unsigned int unk960;
-    unsigned int unk964;
-    unsigned int unk968;
-    unsigned int unk96c;
-    unsigned int unk970;
-    unsigned int unk974;
-    unsigned int unk978;
-    unsigned int unk97c;
-    unsigned int unk980;
-    unsigned int unk984;
-    unsigned int unk988;
-    unsigned int unk98c;
-    unsigned int unk990;
-    unsigned int unk994;
-    unsigned int unk998;
-    unsigned int unk99c;
-    unsigned int unk9a0;
-    unsigned int unk9a4;
-    unsigned int unk9a8;
-    unsigned int unk9ac;
-    unsigned int unk9b0;
-    unsigned int unk9b4;
-    unsigned int unk9b8;
-    unsigned int unk9bc;
-    unsigned int unk9c0;
-    unsigned int unk9c4;
-    unsigned int unk9c8;
-    unsigned int unk9cc;
-    unsigned int unk9d0;
-    unsigned int unk9d4;
-    unsigned int unk9d8;
-    unsigned int unk9dc;
-    unsigned int unk9e0;
-    unsigned int unk9e4;
-    unsigned int unk9e8;
-    unsigned int unk9ec;
-    unsigned int unk9f0;
-    unsigned int unk9f4;
-    unsigned int unk9f8;
-    unsigned int unk9fc;
-    unsigned int unka00;
-    unsigned int unka04;
-    unsigned int unka08;
-    unsigned int unka0c;
-    unsigned int unka10;
-    unsigned int unka14;
-    unsigned int unka18;
-    unsigned int unka1c;
-    unsigned int unka20;
-    unsigned int unka24;
-    unsigned int unka28;
-    unsigned int unka2c;
-    unsigned int unka30;
-    unsigned int unka34;
-    unsigned int unka38;
-    unsigned int unka3c;
-    unsigned int unka40;
-    unsigned int unka44;
-    unsigned int unka48;
-    unsigned int unka4c;
-    unsigned int unka50;
-    unsigned int unka54;
-    unsigned int unka58;
-    unsigned int unka5c;
-    unsigned int unka60;
-    unsigned int unka64;
-    unsigned int unka68;
-    CardArray cards;
-};
 struct Manager
 {
     CardArray* GetField618();
@@ -1477,11 +597,11 @@ void __cdecl UpdateCardSelection()
 {
     if (DAT_011d917c)
     {
-        ((Menu*)DAT_011d917c)->selection = 23;
+        (*(unsigned int*)((char*)DAT_011d917c + 0x2c)) = 23;
         void* owner = FUN_00a09030(FUN_0073cbe0());
         if (!owner)
             return;
-        switch (((Menu*)DAT_011d917c)->state)
+        switch ((*(unsigned int*)((char*)DAT_011d917c + 0x28)))
         {
         default:
             return;
@@ -1491,12 +611,12 @@ void __cdecl UpdateCardSelection()
             CardArray* first = DAT_011dea3c->GetField614();
             second->FUN_00470470();
             first->FUN_00470470();
-            for (unsigned int index = 0; index < ((Menu*)DAT_011d917c)->cards.FUN_0044ddc0(); ++index)
+            for (unsigned int index = 0; index < (*(CardArray*)((char*)DAT_011d917c + 0xa6c)).FUN_0044ddc0(); ++index)
             {
-                if (((Menu*)DAT_011d917c)->cards.FUN_006a7ad0(index)->FUN_0073cb80())
-                    second->FUN_005ae3d0(((Menu*)DAT_011d917c)->cards.FUN_006a7ad0(index));
+                if ((*(CardArray*)((char*)DAT_011d917c + 0xa6c)).FUN_006a7ad0(index)->FUN_0073cb80())
+                    second->FUN_005ae3d0((*(CardArray*)((char*)DAT_011d917c + 0xa6c)).FUN_006a7ad0(index));
                 else
-                    first->FUN_005ae3d0(((Menu*)DAT_011d917c)->cards.FUN_006a7ad0(index));
+                    first->FUN_005ae3d0((*(CardArray*)((char*)DAT_011d917c + 0xa6c)).FUN_006a7ad0(index));
             }
             second = 0;
             first = 0;
@@ -1509,7 +629,7 @@ struct FNV_74A000_Item;
 
 struct FNV_74A000_Action
 {
-    void __thiscall SetFloat();
+    void __thiscall FUN_00a012d0();
 };
 
 struct FNV_74A000_List
@@ -1526,37 +646,17 @@ struct FNV_74A000_Slot
     FNV_74A000_List list;
 };
 
-struct FNV_74A000_Root
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    FNV_74A000_Slot* slots[1];
-};
 
-struct FNV_74A000_This
-{
-    void __thiscall FUN_0074a000(int slot, float amount);
-};
 
 // @fnv 0x0074a000
-void FNV_74A000_This::FUN_0074a000(int slot, float amount)
+void CaravanMenu::FUN_0074a000(int slot, float amount)
 {
-    FNV_74A000_Item* item = reinterpret_cast<FNV_74A000_Root*>(DAT_011d917c)->slots[slot]->list.FUN_00559450();
-    FNV_74A000_List* list = &reinterpret_cast<FNV_74A000_Root*>(DAT_011d917c)->slots[slot]->list;
+    FNV_74A000_Item* item = reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(DAT_011d917c) + 0x30)[slot]->list.FUN_00559450();
+    FNV_74A000_List* list = &reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(DAT_011d917c) + 0x30)[slot]->list;
 
     while (item && list && *list->FUN_0073ac90())
     {
-        (*list->AddEight(item, 0xfa9, amount, 1))->SetFloat();
+        (*list->AddEight(item, 0xfa9, amount, 1))->FUN_00a012d0();
         item = list->DereferenceIfNotNull(item);
     }
 }
@@ -1768,196 +868,44 @@ void HudGlyphMenu::UpdateIconResources(int iconIndex)
 
 extern float DAT_01017718;
 
-struct FUN_004bc1f0_shell
-{
-    void __thiscall FUN_004bc1f0(float a, float b, float c);
-};
-
-struct FUN_0043d410_shell
-{
-    unsigned int m_unk00;
-    unsigned int m_unk04;
-    unsigned int m_unk08;
-    unsigned int __thiscall FUN_0043d410(float a, int b, int c);
-};
-
-struct FUN_00a59c60_shell
-{
-    void __thiscall FUN_00a59c60(unsigned int v);
-};
-
 struct Entry_0074ecb0
 {
     unsigned int m_slots[7];
 };
 
-struct FUN_0074ecb0_cls
-{
-    char unk000[0x198];
-    Entry_0074ecb0 m_entries[8];
 
-    void FUN_0074ecb0(int a1);
-};
 
 // For each of the 7 slots in entry a1, calls FUN_004bc1f0 with zeroed values and DAT_01017718, then FUN_00a59c60 with the result of FUN_0043d410.
 // @fnv 0x0074ecb0
-void FUN_0074ecb0_cls::FUN_0074ecb0(int aiEntryIndex)
+void CaravanMenu::FUN_0074ecb0(int aiEntryIndex)
 {
     for (int i = 0; i < 7; i++)
     {
-        ((FUN_004bc1f0_shell*)m_entries[aiEntryIndex].m_slots[i])->FUN_004bc1f0(0.0f, 0.0f, DAT_01017718);
-        FUN_0043d410_shell tmp;
-        ((FUN_00a59c60_shell*)m_entries[aiEntryIndex].m_slots[i])->FUN_00a59c60(tmp.FUN_0043d410(0.0f, 0, 0));
+        ((NiAVObject*)(*reinterpret_cast<Entry_0074ecb0 (*)[8]>((reinterpret_cast<char*>(this) + 0x198)))[aiEntryIndex].m_slots[i])->FUN_004bc1f0(0.0f, 0.0f, DAT_01017718);
+        ((NiAVObject*)(*reinterpret_cast<Entry_0074ecb0 (*)[8]>((reinterpret_cast<char*>(this) + 0x198)))[aiEntryIndex].m_slots[i])->Update(NiUpdateData(0.0f, 0, 0));
     }
 }
 
-struct FUN_004bc1f0_S
-{
-    void __thiscall FUN_004bc1f0(float x, float y, float z);
-};
-
-struct NiUpdateData
-{
-    float time;
-    bool a;
-    bool b;
-    bool c;
-    bool d;
-    bool e;
-    NiUpdateData(float time, bool a, bool b);
-};
-
 NiUpdateData::NiUpdateData(float t, bool x, bool y)
 {
-    this->time = t;
-    this->a = x;
-    this->b = y;
-    this->c = false;
-    this->d = false;
-    this->e = false;
+    this->fTime = t;
+    this->pad1 = x;
+    this->pad2 = y;
+    this->pad3 = false;
+    this->pad4 = false;
+    this->pad5 = false;
 }
 
-struct NiAVObject : public FUN_004bc1f0_S
-{
-    void __thiscall Update(const NiUpdateData& data);
-};
 
-struct S_0074ed40_Cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    NiAVObject* m_rows[16][7];
-    void __thiscall FUN_0074ed40(int index);
-};
 
 // For each of the 7 objects in m_rows[index], calls FUN_004bc1f0 with zero coordinates and Update with a zero-time NiUpdateData.
 // @fnv 0x0074ed40
-void __thiscall S_0074ed40_Cls::FUN_0074ed40(int aiRowIndex)
+void __thiscall CaravanMenu::FUN_0074ed40(int aiRowIndex)
 {
     for (int i = 0; i < 7; i++)
     {
-        this->m_rows[aiRowIndex][i]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
-        this->m_rows[aiRowIndex][i]->Update(NiUpdateData(0.0f, false, false));
+        (*reinterpret_cast<NiAVObject* (*)[16][7]>((reinterpret_cast<char*>(this) + 0x198)))[aiRowIndex][i]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        (*reinterpret_cast<NiAVObject* (*)[16][7]>((reinterpret_cast<char*>(this) + 0x198)))[aiRowIndex][i]->Update(NiUpdateData(0.0f, false, false));
     }
 }
 
@@ -1973,979 +921,27 @@ struct CaravanObj
     void FUN_004bc1f0(float, float, float);
     void FUN_00a59c60(Vec3Temp*);
 };
-struct FUN_0074edd0_cls
-{
-    unsigned int unk0000;
-    unsigned int unk0004;
-    unsigned int unk0008;
-    unsigned int unk000C;
-    unsigned int unk0010;
-    unsigned int unk0014;
-    unsigned int unk0018;
-    unsigned int unk001C;
-    unsigned int unk0020;
-    unsigned int unk0024;
-    unsigned int unk0028;
-    unsigned int unk002C;
-    unsigned int unk0030;
-    unsigned int unk0034;
-    unsigned int unk0038;
-    unsigned int unk003C;
-    unsigned int unk0040;
-    unsigned int unk0044;
-    unsigned int unk0048;
-    unsigned int unk004C;
-    unsigned int unk0050;
-    unsigned int unk0054;
-    unsigned int unk0058;
-    unsigned int unk005C;
-    unsigned int unk0060;
-    unsigned int unk0064;
-    unsigned int unk0068;
-    unsigned int unk006C;
-    unsigned int unk0070;
-    unsigned int unk0074;
-    unsigned int unk0078;
-    unsigned int unk007C;
-    unsigned int unk0080;
-    unsigned int unk0084;
-    unsigned int unk0088;
-    unsigned int unk008C;
-    unsigned int unk0090;
-    unsigned int unk0094;
-    unsigned int unk0098;
-    unsigned int unk009C;
-    unsigned int unk00A0;
-    unsigned int unk00A4;
-    unsigned int unk00A8;
-    unsigned int unk00AC;
-    unsigned int unk00B0;
-    unsigned int unk00B4;
-    unsigned int unk00B8;
-    unsigned int unk00BC;
-    unsigned int unk00C0;
-    unsigned int unk00C4;
-    unsigned int unk00C8;
-    unsigned int unk00CC;
-    unsigned int unk00D0;
-    unsigned int unk00D4;
-    unsigned int unk00D8;
-    unsigned int unk00DC;
-    unsigned int unk00E0;
-    unsigned int unk00E4;
-    unsigned int unk00E8;
-    unsigned int unk00EC;
-    unsigned int unk00F0;
-    unsigned int unk00F4;
-    unsigned int unk00F8;
-    unsigned int unk00FC;
-    unsigned int unk0100;
-    unsigned int unk0104;
-    unsigned int unk0108;
-    unsigned int unk010C;
-    unsigned int unk0110;
-    unsigned int unk0114;
-    unsigned int unk0118;
-    unsigned int unk011C;
-    unsigned int unk0120;
-    unsigned int unk0124;
-    unsigned int unk0128;
-    unsigned int unk012C;
-    unsigned int unk0130;
-    unsigned int unk0134;
-    unsigned int unk0138;
-    unsigned int unk013C;
-    unsigned int unk0140;
-    unsigned int unk0144;
-    unsigned int unk0148;
-    unsigned int unk014C;
-    unsigned int unk0150;
-    unsigned int unk0154;
-    unsigned int unk0158;
-    unsigned int unk015C;
-    unsigned int unk0160;
-    unsigned int unk0164;
-    unsigned int unk0168;
-    unsigned int unk016C;
-    unsigned int unk0170;
-    unsigned int unk0174;
-    unsigned int unk0178;
-    unsigned int unk017C;
-    unsigned int unk0180;
-    unsigned int unk0184;
-    unsigned int unk0188;
-    unsigned int unk018C;
-    unsigned int unk0190;
-    unsigned int unk0194;
-    unsigned int unk0198;
-    unsigned int unk019C;
-    unsigned int unk01A0;
-    unsigned int unk01A4;
-    unsigned int unk01A8;
-    unsigned int unk01AC;
-    unsigned int unk01B0;
-    unsigned int unk01B4;
-    unsigned int unk01B8;
-    unsigned int unk01BC;
-    unsigned int unk01C0;
-    unsigned int unk01C4;
-    unsigned int unk01C8;
-    unsigned int unk01CC;
-    unsigned int unk01D0;
-    unsigned int unk01D4;
-    unsigned int unk01D8;
-    unsigned int unk01DC;
-    unsigned int unk01E0;
-    unsigned int unk01E4;
-    unsigned int unk01E8;
-    unsigned int unk01EC;
-    unsigned int unk01F0;
-    unsigned int unk01F4;
-    unsigned int unk01F8;
-    unsigned int unk01FC;
-    unsigned int unk0200;
-    unsigned int unk0204;
-    unsigned int unk0208;
-    unsigned int unk020C;
-    unsigned int unk0210;
-    unsigned int unk0214;
-    unsigned int unk0218;
-    unsigned int unk021C;
-    unsigned int unk0220;
-    unsigned int unk0224;
-    unsigned int unk0228;
-    unsigned int unk022C;
-    unsigned int unk0230;
-    unsigned int unk0234;
-    unsigned int unk0238;
-    unsigned int unk023C;
-    unsigned int unk0240;
-    unsigned int unk0244;
-    unsigned int unk0248;
-    unsigned int unk024C;
-    unsigned int unk0250;
-    unsigned int unk0254;
-    unsigned int unk0258;
-    unsigned int unk025C;
-    unsigned int unk0260;
-    unsigned int unk0264;
-    unsigned int unk0268;
-    unsigned int unk026C;
-    unsigned int unk0270;
-    unsigned int unk0274;
-    unsigned int unk0278;
-    unsigned int unk027C;
-    unsigned int unk0280;
-    unsigned int unk0284;
-    unsigned int unk0288;
-    unsigned int unk028C;
-    unsigned int unk0290;
-    unsigned int unk0294;
-    unsigned int unk0298;
-    unsigned int unk029C;
-    unsigned int unk02A0;
-    unsigned int unk02A4;
-    unsigned int unk02A8;
-    unsigned int unk02AC;
-    unsigned int unk02B0;
-    unsigned int unk02B4;
-    unsigned int unk02B8;
-    unsigned int unk02BC;
-    unsigned int unk02C0;
-    unsigned int unk02C4;
-    unsigned int unk02C8;
-    unsigned int unk02CC;
-    unsigned int unk02D0;
-    unsigned int unk02D4;
-    unsigned int unk02D8;
-    unsigned int unk02DC;
-    unsigned int unk02E0;
-    unsigned int unk02E4;
-    unsigned int unk02E8;
-    unsigned int unk02EC;
-    unsigned int unk02F0;
-    unsigned int unk02F4;
-    unsigned int unk02F8;
-    unsigned int unk02FC;
-    unsigned int unk0300;
-    unsigned int unk0304;
-    unsigned int unk0308;
-    unsigned int unk030C;
-    unsigned int unk0310;
-    unsigned int unk0314;
-    unsigned int unk0318;
-    unsigned int unk031C;
-    unsigned int unk0320;
-    unsigned int unk0324;
-    unsigned int unk0328;
-    unsigned int unk032C;
-    unsigned int unk0330;
-    unsigned int unk0334;
-    unsigned int unk0338;
-    unsigned int unk033C;
-    unsigned int unk0340;
-    unsigned int unk0344;
-    unsigned int unk0348;
-    unsigned int unk034C;
-    unsigned int unk0350;
-    unsigned int unk0354;
-    unsigned int unk0358;
-    unsigned int unk035C;
-    unsigned int unk0360;
-    unsigned int unk0364;
-    unsigned int unk0368;
-    unsigned int unk036C;
-    unsigned int unk0370;
-    unsigned int unk0374;
-    unsigned int unk0378;
-    unsigned int unk037C;
-    unsigned int unk0380;
-    unsigned int unk0384;
-    unsigned int unk0388;
-    unsigned int unk038C;
-    unsigned int unk0390;
-    unsigned int unk0394;
-    unsigned int unk0398;
-    unsigned int unk039C;
-    unsigned int unk03A0;
-    unsigned int unk03A4;
-    unsigned int unk03A8;
-    unsigned int unk03AC;
-    unsigned int unk03B0;
-    unsigned int unk03B4;
-    unsigned int unk03B8;
-    unsigned int unk03BC;
-    unsigned int unk03C0;
-    unsigned int unk03C4;
-    unsigned int unk03C8;
-    unsigned int unk03CC;
-    unsigned int unk03D0;
-    unsigned int unk03D4;
-    unsigned int unk03D8;
-    unsigned int unk03DC;
-    unsigned int unk03E0;
-    unsigned int unk03E4;
-    unsigned int unk03E8;
-    unsigned int unk03EC;
-    unsigned int unk03F0;
-    unsigned int unk03F4;
-    unsigned int unk03F8;
-    unsigned int unk03FC;
-    unsigned int unk0400;
-    unsigned int unk0404;
-    unsigned int unk0408;
-    unsigned int unk040C;
-    unsigned int unk0410;
-    unsigned int unk0414;
-    unsigned int unk0418;
-    unsigned int unk041C;
-    unsigned int unk0420;
-    unsigned int unk0424;
-    unsigned int unk0428;
-    unsigned int unk042C;
-    unsigned int unk0430;
-    unsigned int unk0434;
-    unsigned int unk0438;
-    unsigned int unk043C;
-    unsigned int unk0440;
-    unsigned int unk0444;
-    unsigned int unk0448;
-    unsigned int unk044C;
-    unsigned int unk0450;
-    unsigned int unk0454;
-    unsigned int unk0458;
-    unsigned int unk045C;
-    unsigned int unk0460;
-    unsigned int unk0464;
-    unsigned int unk0468;
-    unsigned int unk046C;
-    unsigned int unk0470;
-    unsigned int unk0474;
-    unsigned int unk0478;
-    unsigned int unk047C;
-    unsigned int unk0480;
-    unsigned int unk0484;
-    unsigned int unk0488;
-    unsigned int unk048C;
-    unsigned int unk0490;
-    unsigned int unk0494;
-    unsigned int unk0498;
-    unsigned int unk049C;
-    unsigned int unk04A0;
-    unsigned int unk04A4;
-    unsigned int unk04A8;
-    unsigned int unk04AC;
-    unsigned int unk04B0;
-    unsigned int unk04B4;
-    unsigned int unk04B8;
-    unsigned int unk04BC;
-    unsigned int unk04C0;
-    unsigned int unk04C4;
-    unsigned int unk04C8;
-    unsigned int unk04CC;
-    unsigned int unk04D0;
-    unsigned int unk04D4;
-    unsigned int unk04D8;
-    unsigned int unk04DC;
-    unsigned int unk04E0;
-    unsigned int unk04E4;
-    unsigned int unk04E8;
-    unsigned int unk04EC;
-    unsigned int unk04F0;
-    unsigned int unk04F4;
-    unsigned int unk04F8;
-    unsigned int unk04FC;
-    unsigned int unk0500;
-    unsigned int unk0504;
-    unsigned int unk0508;
-    unsigned int unk050C;
-    unsigned int unk0510;
-    unsigned int unk0514;
-    unsigned int unk0518;
-    unsigned int unk051C;
-    unsigned int unk0520;
-    unsigned int unk0524;
-    unsigned int unk0528;
-    unsigned int unk052C;
-    unsigned int unk0530;
-    unsigned int unk0534;
-    unsigned int unk0538;
-    unsigned int unk053C;
-    unsigned int unk0540;
-    unsigned int unk0544;
-    unsigned int unk0548;
-    unsigned int unk054C;
-    unsigned int unk0550;
-    unsigned int unk0554;
-    unsigned int unk0558;
-    unsigned int unk055C;
-    unsigned int unk0560;
-    unsigned int unk0564;
-    unsigned int unk0568;
-    unsigned int unk056C;
-    unsigned int unk0570;
-    unsigned int unk0574;
-    unsigned int unk0578;
-    unsigned int unk057C;
-    unsigned int unk0580;
-    unsigned int unk0584;
-    unsigned int unk0588;
-    unsigned int unk058C;
-    unsigned int unk0590;
-    unsigned int unk0594;
-    unsigned int unk0598;
-    unsigned int unk059C;
-    unsigned int unk05A0;
-    unsigned int unk05A4;
-    unsigned int unk05A8;
-    unsigned int unk05AC;
-    unsigned int unk05B0;
-    unsigned int unk05B4;
-    unsigned int unk05B8;
-    unsigned int unk05BC;
-    unsigned int unk05C0;
-    unsigned int unk05C4;
-    unsigned int unk05C8;
-    unsigned int unk05CC;
-    unsigned int unk05D0;
-    unsigned int unk05D4;
-    unsigned int unk05D8;
-    unsigned int unk05DC;
-    unsigned int unk05E0;
-    unsigned int unk05E4;
-    unsigned int unk05E8;
-    unsigned int unk05EC;
-    unsigned int unk05F0;
-    unsigned int unk05F4;
-    unsigned int unk05F8;
-    unsigned int unk05FC;
-    unsigned int unk0600;
-    unsigned int unk0604;
-    unsigned int unk0608;
-    unsigned int unk060C;
-    unsigned int unk0610;
-    unsigned int unk0614;
-    unsigned int unk0618;
-    unsigned int unk061C;
-    unsigned int unk0620;
-    unsigned int unk0624;
-    unsigned int unk0628;
-    unsigned int unk062C;
-    unsigned int unk0630;
-    unsigned int unk0634;
-    unsigned int unk0638;
-    unsigned int unk063C;
-    unsigned int unk0640;
-    unsigned int unk0644;
-    unsigned int unk0648;
-    unsigned int unk064C;
-    unsigned int unk0650;
-    unsigned int unk0654;
-    unsigned int unk0658;
-    unsigned int unk065C;
-    unsigned int unk0660;
-    unsigned int unk0664;
-    unsigned int unk0668;
-    unsigned int unk066C;
-    unsigned int unk0670;
-    unsigned int unk0674;
-    unsigned int unk0678;
-    unsigned int unk067C;
-    unsigned int unk0680;
-    unsigned int unk0684;
-    unsigned int unk0688;
-    unsigned int unk068C;
-    unsigned int unk0690;
-    unsigned int unk0694;
-    unsigned int unk0698;
-    unsigned int unk069C;
-    unsigned int unk06A0;
-    unsigned int unk06A4;
-    unsigned int unk06A8;
-    unsigned int unk06AC;
-    unsigned int unk06B0;
-    unsigned int unk06B4;
-    unsigned int unk06B8;
-    unsigned int unk06BC;
-    unsigned int unk06C0;
-    unsigned int unk06C4;
-    unsigned int unk06C8;
-    unsigned int unk06CC;
-    unsigned int unk06D0;
-    unsigned int unk06D4;
-    unsigned int unk06D8;
-    unsigned int unk06DC;
-    unsigned int unk06E0;
-    unsigned int unk06E4;
-    unsigned int unk06E8;
-    unsigned int unk06EC;
-    unsigned int unk06F0;
-    unsigned int unk06F4;
-    unsigned int unk06F8;
-    unsigned int unk06FC;
-    unsigned int unk0700;
-    unsigned int unk0704;
-    unsigned int unk0708;
-    unsigned int unk070C;
-    unsigned int unk0710;
-    unsigned int unk0714;
-    unsigned int unk0718;
-    unsigned int unk071C;
-    unsigned int unk0720;
-    unsigned int unk0724;
-    unsigned int unk0728;
-    unsigned int unk072C;
-    unsigned int unk0730;
-    unsigned int unk0734;
-    unsigned int unk0738;
-    unsigned int unk073C;
-    unsigned int unk0740;
-    unsigned int unk0744;
-    unsigned int unk0748;
-    unsigned int unk074C;
-    unsigned int unk0750;
-    unsigned int unk0754;
-    unsigned int unk0758;
-    unsigned int unk075C;
-    unsigned int unk0760;
-    unsigned int unk0764;
-    unsigned int unk0768;
-    unsigned int unk076C;
-    unsigned int unk0770;
-    unsigned int unk0774;
-    unsigned int unk0778;
-    unsigned int unk077C;
-    unsigned int unk0780;
-    unsigned int unk0784;
-    unsigned int unk0788;
-    unsigned int unk078C;
-    unsigned int unk0790;
-    unsigned int unk0794;
-    unsigned int unk0798;
-    unsigned int unk079C;
-    unsigned int unk07A0;
-    unsigned int unk07A4;
-    unsigned int unk07A8;
-    unsigned int unk07AC;
-    unsigned int unk07B0;
-    unsigned int unk07B4;
-    unsigned int unk07B8;
-    unsigned int unk07BC;
-    unsigned int unk07C0;
-    unsigned int unk07C4;
-    unsigned int unk07C8;
-    unsigned int unk07CC;
-    unsigned int unk07D0;
-    unsigned int unk07D4;
-    unsigned int unk07D8;
-    unsigned int unk07DC;
-    unsigned int unk07E0;
-    unsigned int unk07E4;
-    unsigned int unk07E8;
-    unsigned int unk07EC;
-    unsigned int unk07F0;
-    unsigned int unk07F4;
-    unsigned int unk07F8;
-    unsigned int unk07FC;
-    unsigned int unk0800;
-    unsigned int unk0804;
-    unsigned int unk0808;
-    unsigned int unk080C;
-    unsigned int unk0810;
-    unsigned int unk0814;
-    unsigned int unk0818;
-    unsigned int unk081C;
-    unsigned int unk0820;
-    unsigned int unk0824;
-    unsigned int unk0828;
-    unsigned int unk082C;
-    unsigned int unk0830;
-    unsigned int unk0834;
-    unsigned int unk0838;
-    unsigned int unk083C;
-    unsigned int unk0840;
-    unsigned int unk0844;
-    unsigned int unk0848;
-    unsigned int unk084C;
-    unsigned int unk0850;
-    unsigned int unk0854;
-    unsigned int unk0858;
-    unsigned int unk085C;
-    unsigned int unk0860;
-    unsigned int unk0864;
-    unsigned int unk0868;
-    unsigned int unk086C;
-    unsigned int unk0870;
-    unsigned int unk0874;
-    unsigned int unk0878;
-    unsigned int unk087C;
-    unsigned int unk0880;
-    unsigned int unk0884;
-    unsigned int unk0888;
-    unsigned int unk088C;
-    unsigned int unk0890;
-    unsigned int unk0894;
-    unsigned int unk0898;
-    unsigned int unk089C;
-    unsigned int unk08A0;
-    unsigned int unk08A4;
-    unsigned int unk08A8;
-    unsigned int unk08AC;
-    unsigned int unk08B0;
-    unsigned int unk08B4;
-    unsigned int unk08B8;
-    unsigned int unk08BC;
-    unsigned int unk08C0;
-    unsigned int unk08C4;
-    unsigned int unk08C8;
-    unsigned int unk08CC;
-    unsigned int unk08D0;
-    unsigned int unk08D4;
-    unsigned int unk08D8;
-    unsigned int unk08DC;
-    unsigned int unk08E0;
-    unsigned int unk08E4;
-    unsigned int unk08E8;
-    unsigned int unk08EC;
-    unsigned int unk08F0;
-    unsigned int unk08F4;
-    unsigned int unk08F8;
-    unsigned int unk08FC;
-    unsigned int unk0900;
-    unsigned int unk0904;
-    unsigned int unk0908;
-    unsigned int unk090C;
-    unsigned int unk0910;
-    unsigned int unk0914;
-    unsigned int unk0918;
-    unsigned int unk091C;
-    unsigned int unk0920;
-    unsigned int unk0924;
-    unsigned int unk0928;
-    unsigned int unk092C;
-    unsigned int unk0930;
-    unsigned int unk0934;
-    unsigned int unk0938;
-    unsigned int unk093C;
-    unsigned int unk0940;
-    unsigned int unk0944;
-    unsigned int unk0948;
-    unsigned int unk094C;
-    unsigned int unk0950;
-    unsigned int unk0954;
-    unsigned int unk0958;
-    unsigned int unk095C;
-    unsigned int unk0960;
-    unsigned int unk0964;
-    unsigned int unk0968;
-    unsigned int unk096C;
-    unsigned int unk0970;
-    unsigned int unk0974;
-    unsigned int unk0978;
-    unsigned int unk097C;
-    unsigned int unk0980;
-    unsigned int unk0984;
-    unsigned int unk0988;
-    unsigned int unk098C;
-    unsigned int unk0990;
-    unsigned int unk0994;
-    unsigned int unk0998;
-    unsigned int unk099C;
-    unsigned int unk09A0;
-    unsigned int unk09A4;
-    unsigned int unk09A8;
-    unsigned int unk09AC;
-    unsigned int unk09B0;
-    unsigned int unk09B4;
-    unsigned int unk09B8;
-    unsigned int unk09BC;
-    unsigned int unk09C0;
-    unsigned int unk09C4;
-    unsigned int unk09C8;
-    unsigned int unk09CC;
-    unsigned int unk09D0;
-    unsigned int unk09D4;
-    unsigned int unk09D8;
-    unsigned int unk09DC;
-    unsigned int unk09E0;
-    unsigned int unk09E4;
-    unsigned int unk09E8;
-    unsigned int unk09EC;
-    unsigned int unk09F0;
-    unsigned int unk09F4;
-    unsigned int unk09F8;
-    unsigned int unk09FC;
-    unsigned int unk0A00;
-    unsigned int unk0A04;
-    unsigned int unk0A08;
-    unsigned int unk0A0C;
-    unsigned int unk0A10;
-    unsigned int unk0A14;
-    unsigned int unk0A18;
-    unsigned int unk0A1C;
-    unsigned int unk0A20;
-    unsigned int unk0A24;
-    unsigned int unk0A28;
-    unsigned int unk0A2C;
-    unsigned int unk0A30;
-    unsigned int unk0A34;
-    unsigned int unk0A38;
-    unsigned int unk0A3C;
-    unsigned int unk0A40;
-    unsigned int unk0A44;
-    unsigned int unk0A48;
-    unsigned int unk0A4C;
-    unsigned int unk0A50;
-    unsigned int unk0A54;
-    unsigned int unk0A58;
-    unsigned int unk0A5C;
-    unsigned int unk0A60;
-    unsigned int unk0A64;
-    unsigned int unk0A68;
-    unsigned int unk0A6C;
-    unsigned int unk0A70;
-    unsigned int unk0A74;
-    unsigned int unk0A78;
-    unsigned int unk0A7C;
-    unsigned int unk0A80;
-    unsigned int unk0A84;
-    unsigned int unk0A88;
-    unsigned int unk0A8C;
-    unsigned int unk0A90;
-    unsigned int unk0A94;
-    unsigned int unk0A98;
-    unsigned int unk0A9C;
-    unsigned int unk0AA0;
-    unsigned int unk0AA4;
-    unsigned int unk0AA8;
-    unsigned int unk0AAC;
-    unsigned int unk0AB0;
-    unsigned int unk0AB4;
-    unsigned int unk0AB8;
-    unsigned int unk0ABC;
-    unsigned int unk0AC0;
-    unsigned int unk0AC4;
-    unsigned int unk0AC8;
-    unsigned int unk0ACC;
-    unsigned int unk0AD0;
-    unsigned int unk0AD4;
-    unsigned int unk0AD8;
-    unsigned int unk0ADC;
-    unsigned int unk0AE0;
-    unsigned int unk0AE4;
-    unsigned int unk0AE8;
-    unsigned int unk0AEC;
-    unsigned int unk0AF0;
-    unsigned int unk0AF4;
-    unsigned int unk0AF8;
-    unsigned int unk0AFC;
-    unsigned int unk0B00;
-    unsigned int unk0B04;
-    unsigned int unk0B08;
-    unsigned int unk0B0C;
-    unsigned int unk0B10;
-    unsigned int unk0B14;
-    unsigned int unk0B18;
-    unsigned int unk0B1C;
-    unsigned int unk0B20;
-    unsigned int unk0B24;
-    unsigned int unk0B28;
-    unsigned int unk0B2C;
-    unsigned int unk0B30;
-    unsigned int unk0B34;
-    unsigned int unk0B38;
-    unsigned int unk0B3C;
-    unsigned int unk0B40;
-    unsigned int unk0B44;
-    unsigned int unk0B48;
-    unsigned int unk0B4C;
-    unsigned int unk0B50;
-    unsigned int unk0B54;
-    unsigned int unk0B58;
-    unsigned int unk0B5C;
-    unsigned int unk0B60;
-    unsigned int unk0B64;
-    unsigned int unk0B68;
-    unsigned int unk0B6C;
-    unsigned int unk0B70;
-    unsigned int unk0B74;
-    unsigned int unk0B78;
-    unsigned int unk0B7C;
-    unsigned int unk0B80;
-    unsigned int unk0B84;
-    unsigned int unk0B88;
-    unsigned int unk0B8C;
-    unsigned int unk0B90;
-    unsigned int unk0B94;
-    unsigned int unk0B98;
-    unsigned int unk0B9C;
-    unsigned int unk0BA0;
-    unsigned int unk0BA4;
-    unsigned int unk0BA8;
-    unsigned int unk0BAC;
-    unsigned int unk0BB0;
-    unsigned int unk0BB4;
-    unsigned int unk0BB8;
-    unsigned int unk0BBC;
-    unsigned int unk0BC0;
-    unsigned int unk0BC4;
-    unsigned int unk0BC8;
-    unsigned int unk0BCC;
-    unsigned int unk0BD0;
-    unsigned int unk0BD4;
-    unsigned int unk0BD8;
-    unsigned int unk0BDC;
-    unsigned int unk0BE0;
-    unsigned int unk0BE4;
-    unsigned int unk0BE8;
-    unsigned int unk0BEC;
-    unsigned int unk0BF0;
-    unsigned int unk0BF4;
-    unsigned int unk0BF8;
-    unsigned int unk0BFC;
-    unsigned int unk0C00;
-    unsigned int unk0C04;
-    unsigned int unk0C08;
-    unsigned int unk0C0C;
-    unsigned int unk0C10;
-    unsigned int unk0C14;
-    unsigned int unk0C18;
-    unsigned int unk0C1C;
-    unsigned int unk0C20;
-    unsigned int unk0C24;
-    unsigned int unk0C28;
-    unsigned int unk0C2C;
-    unsigned int unk0C30;
-    unsigned int unk0C34;
-    unsigned int unk0C38;
-    unsigned int unk0C3C;
-    unsigned int unk0C40;
-    unsigned int unk0C44;
-    unsigned int unk0C48;
-    unsigned int unk0C4C;
-    unsigned int unk0C50;
-    unsigned int unk0C54;
-    unsigned int unk0C58;
-    unsigned int unk0C5C;
-    unsigned int unk0C60;
-    unsigned int unk0C64;
-    unsigned int unk0C68;
-    unsigned int unk0C6C;
-    unsigned int unk0C70;
-    unsigned int unk0C74;
-    unsigned int unk0C78;
-    unsigned int unk0C7C;
-    unsigned int unk0C80;
-    unsigned int unk0C84;
-    unsigned int unk0C88;
-    unsigned int unk0C8C;
-    unsigned int unk0C90;
-    unsigned int unk0C94;
-    unsigned int unk0C98;
-    unsigned int unk0C9C;
-    unsigned int unk0CA0;
-    unsigned int unk0CA4;
-    unsigned int unk0CA8;
-    unsigned int unk0CAC;
-    unsigned int unk0CB0;
-    unsigned int unk0CB4;
-    unsigned int unk0CB8;
-    unsigned int unk0CBC;
-    unsigned int unk0CC0;
-    unsigned int unk0CC4;
-    unsigned int unk0CC8;
-    unsigned int unk0CCC;
-    unsigned int unk0CD0;
-    unsigned int unk0CD4;
-    unsigned int unk0CD8;
-    unsigned int unk0CDC;
-    unsigned int unk0CE0;
-    unsigned int unk0CE4;
-    unsigned int unk0CE8;
-    unsigned int unk0CEC;
-    unsigned int unk0CF0;
-    unsigned int unk0CF4;
-    unsigned int unk0CF8;
-    unsigned int unk0CFC;
-    unsigned int unk0D00;
-    unsigned int unk0D04;
-    unsigned int unk0D08;
-    unsigned int unk0D0C;
-    unsigned int unk0D10;
-    unsigned int unk0D14;
-    unsigned int unk0D18;
-    unsigned int unk0D1C;
-    unsigned int unk0D20;
-    unsigned int unk0D24;
-    unsigned int unk0D28;
-    unsigned int unk0D2C;
-    unsigned int unk0D30;
-    unsigned int unk0D34;
-    unsigned int unk0D38;
-    unsigned int unk0D3C;
-    unsigned int unk0D40;
-    unsigned int unk0D44;
-    unsigned int unk0D48;
-    unsigned int unk0D4C;
-    unsigned int unk0D50;
-    unsigned int unk0D54;
-    unsigned int unk0D58;
-    unsigned int unk0D5C;
-    unsigned int unk0D60;
-    unsigned int unk0D64;
-    unsigned int unk0D68;
-    unsigned int unk0D6C;
-    unsigned int unk0D70;
-    unsigned int unk0D74;
-    unsigned int unk0D78;
-    unsigned int unk0D7C;
-    unsigned int unk0D80;
-    unsigned int unk0D84;
-    unsigned int unk0D88;
-    unsigned int unk0D8C;
-    unsigned int unk0D90;
-    unsigned int unk0D94;
-    unsigned int unk0D98;
-    unsigned int unk0D9C;
-    unsigned int unk0DA0;
-    unsigned int unk0DA4;
-    unsigned int unk0DA8;
-    unsigned int unk0DAC;
-    unsigned int unk0DB0;
-    unsigned int unk0DB4;
-    unsigned int unk0DB8;
-    unsigned int unk0DBC;
-    unsigned int unk0DC0;
-    unsigned int unk0DC4;
-    unsigned int unk0DC8;
-    unsigned int unk0DCC;
-    unsigned int unk0DD0;
-    unsigned int unk0DD4;
-    unsigned int unk0DD8;
-    unsigned int unk0DDC;
-    unsigned int unk0DE0;
-    unsigned int unk0DE4;
-    unsigned int unk0DE8;
-    unsigned int unk0DEC;
-    unsigned int unk0DF0;
-    unsigned int unk0DF4;
-    unsigned int unk0DF8;
-    unsigned int unk0DFC;
-    unsigned int unk0E00;
-    unsigned int unk0E04;
-    unsigned int unk0E08;
-    unsigned int unk0E0C;
-    unsigned int unk0E10;
-    unsigned int unk0E14;
-    unsigned int unk0E18;
-    unsigned int unk0E1C;
-    unsigned int unk0E20;
-    unsigned int unk0E24;
-    unsigned int unk0E28;
-    unsigned int unk0E2C;
-    unsigned int unk0E30;
-    unsigned int unk0E34;
-    unsigned int unk0E38;
-    unsigned int unk0E3C;
-    unsigned int unk0E40;
-    unsigned int unk0E44;
-    unsigned int unk0E48;
-    unsigned int unk0E4C;
-    unsigned int unk0E50;
-    unsigned int unk0E54;
-    unsigned int unk0E58;
-    unsigned int unk0E5C;
-    unsigned int unk0E60;
-    unsigned int unk0E64;
-    unsigned int unk0E68;
-    CaravanObj* m_0e6c;
-    CaravanObj* m_0e70;
-    void FUN_0074edd0();
-};
+
 extern float DAT_01024100;
 
 // @fnv 0x0074edd0
-void FUN_0074edd0_cls::FUN_0074edd0()
+void CaravanMenu::FUN_0074edd0()
 {
     Vec3Temp a;
     Vec3Temp b;
-    m_0e6c->FUN_004bc1f0(0.0f, 0.0f, DAT_01024100);
-    m_0e70->FUN_004bc1f0(0.0f, 0.0f, DAT_01024100);
-    m_0e6c->FUN_00a59c60(a.FUN_0043d410(0.0f, 0, 0));
-    m_0e70->FUN_00a59c60(b.FUN_0043d410(0.0f, 0, 0));
+    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe6c)))->FUN_004bc1f0(0.0f, 0.0f, DAT_01024100);
+    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe70)))->FUN_004bc1f0(0.0f, 0.0f, DAT_01024100);
+    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe6c)))->FUN_00a59c60(a.FUN_0043d410(0.0f, 0, 0));
+    (*reinterpret_cast<CaravanObj**>((reinterpret_cast<char*>(this) + 0xe70)))->FUN_00a59c60(b.FUN_0043d410(0.0f, 0, 0));
 }
 
 namespace fnv_0074fc00 {
 int __cdecl MinInt(int, int);
 unsigned int __cdecl GetRandomNumberInRange(int, int);
 
-struct NiRTTI
-{
-    int unk00;
-};
 extern NiRTTI g_controllerManagerRTTI;
 
-struct NiFixedString
-{
-    const char* m_kHandle;
-    NiFixedString(const char* s);
-    ~NiFixedString();
-};
 
-struct NiControllerSequence;
-
-struct NiControllerManager
-{
-    NiControllerSequence* FUN_0047a520(const NiFixedString& name);
-    bool FUN_0047aab0(NiControllerSequence* seq, int priority, int startOver, float weight, float easeInTime,
-                      NiControllerSequence* timeSyncSeq);
-};
-
-struct NiAVObject
-{
-    NiAVObject* Clone();
-    NiControllerManager* GetController(const NiRTTI* rtti);
-};
 
 void __cdecl UpdateNodeTransforms(NiAVObject* node);
 
@@ -3119,7 +1115,7 @@ void CaravanCardMenu::PlayCardPlacement(int aiIndex)
     aiIndex = MinInt(aiIndex, 2);
     NiAVObject* pNode = cardModels[aiIndex]->Clone();
     unsigned int uiPlace = GetRandomNumberInRange(0, 2);
-    NiControllerManager* pController4 = pNode->GetController(&g_controllerManagerRTTI);
+    NiControllerManager* pController4 = (NiControllerManager*)pNode->GetController(&g_controllerManagerRTTI);
     NiControllerSequence* pSequenceTmp;
     switch (uiPlace)
     {
@@ -3128,7 +1124,7 @@ void CaravanCardMenu::PlayCardPlacement(int aiIndex)
         {
             NiControllerManager* pManager5 = pController4;
             pSequenceTmp = pManager5->FUN_0047a520(NiFixedString("Top_Place"));
-            pManager5->FUN_0047aab0(pSequenceTmp, 0, 0, 1.0f, 0.0f, 0);
+            pManager5->FUN_0047aab0(pSequenceTmp, 0, 0, 1.0f, 0.0f, (NiControllerSequence*)0);
             UpdateNodeTransforms(pNode);
         }
         break;
@@ -3137,7 +1133,7 @@ void CaravanCardMenu::PlayCardPlacement(int aiIndex)
         {
             NiControllerManager* pMgr4 = pController4;
             pSequenceTmp = pMgr4->FUN_0047a520(NiFixedString("Bottom_Place"));
-            pMgr4->FUN_0047aab0(pSequenceTmp, 0, 0, 1.0f, 0.0f, 0);
+            pMgr4->FUN_0047aab0(pSequenceTmp, 0, 0, 1.0f, 0.0f, (NiControllerSequence*)0);
             UpdateNodeTransforms(pNode);
         }
         break;
@@ -3157,7 +1153,7 @@ struct GameList
 };
 struct GroupRegistry
 {
-    bool __thiscall Lookup(void* key, GameList** result);
+    bool __thiscall FUN_00853130(void* key, GameList** result);
     void __thiscall RemoveKey(void* key);
     void __thiscall RemoveValueFromGroup(void* key, int value);
 };
@@ -3166,7 +1162,7 @@ struct GroupRegistry
 void __thiscall GroupRegistry::RemoveValueFromGroup(void* key, int value)
 {
     GameList* entries = 0;
-    if (Lookup(key, &entries))
+    if (FUN_00853130(key, &entries))
     {
         for (unsigned int index = 0; index < entries->FUN_0044ddc0(); ++index)
         {
@@ -3187,19 +1183,43 @@ void __thiscall GroupRegistry::RemoveValueFromGroup(void* key, int value)
     }
 }
 
-struct ConstructorBase
+// Exe 0x0073b7e0: unit-local MenuList view; declarations and layout are preserved.
+
+struct ArrayMember
 {
-    ConstructorBase();
-    virtual ~ConstructorBase();
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
+    ArrayMember();
+    ~ArrayMember();
+    int a;
+    int b;
+    int c;
+    int d;
+    BSSimpleList<void*>* list;
+    int f;
+};
+struct SmallMember
+{
+    SmallMember();
+    ~SmallMember();
+    int a;
+    int b;
+    int c;
+    int d;
+};
+struct OtherMember
+{
+    OtherMember();
+    ~OtherMember();
+    int a;
+    int b;
+    int c;
+    int d;
+};
+extern int DAT_011d9170, DAT_011d9174, DAT_011d916c;
+int __cdecl RegisterTrait(const char*, int);
+// Retained: CaravanMenu.h lacks typed members and their implicit construction/EH cleanup;
+// using its byte-array layout leaves the original constructor at 0x0073b7e0 unpaired.
+struct FUN_0073b7e0 : Menu
+{
     int unk028;
     int unk02c;
     int unk030;
@@ -3267,47 +1287,7 @@ struct ConstructorBase
     int unk128;
     int unk12c;
     int unk130;
-};
-struct MenuList
-{
-    MenuList();
-    ~MenuList();
-    int value;
-    int next;
-};
-struct ArrayMember
-{
-    ArrayMember();
-    ~ArrayMember();
-    int a;
-    int b;
-    int c;
-    int d;
-    MenuList* list;
-    int f;
-};
-struct SmallMember
-{
-    SmallMember();
-    ~SmallMember();
-    int a;
-    int b;
-    int c;
-    int d;
-};
-struct OtherMember
-{
-    OtherMember();
-    ~OtherMember();
-    int a;
-    int b;
-    int c;
-    int d;
-};
-extern int DAT_011d9170, DAT_011d9174, DAT_011d916c;
-int __cdecl RegisterTrait(const char*, int);
-struct FUN_0073b7e0 : ConstructorBase
-{
+
     ArrayMember first;
     ArrayMember second;
     SmallMember one;
@@ -3975,8 +1955,8 @@ FUN_0073b7e0::FUN_0073b7e0()
     unke86 = 1;
     Initialize();
     SetState(1, 1);
-    second.list = new MenuList;
-    first.list = new MenuList;
+    second.list = new BSSimpleList<void*>;
+    first.list = new BSSimpleList<void*>;
 }
 
 struct SceneNode;
@@ -3998,10 +1978,6 @@ struct Controller
 {
     void* Find(const FixedName&);
     void SetTime(float);
-};
-struct Bound
-{
-    float Radius() const;
 };
 struct SceneNode
 {
@@ -4122,7 +2098,7 @@ struct Loader
 {
     SceneNode* LoadFile(const char*, int, bool, bool, bool, bool);
 };
-extern Loader* loader;
+extern Loader* caravanModelLoader;
 extern int controllerType;
 void __cdecl PrepareScene(SceneNode*);
 SceneNode* __cdecl FindObject(SceneNode*, const char*);
@@ -4287,7 +2263,7 @@ struct SceneMenu
 // @fnv 0x0073cbf0
 void SceneMenu::InitCaravanTable()
 {
-    model = loader->LoadFile("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Table.NIF", 0, true, false, false, false);
+    model = caravanModelLoader->LoadFile("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Table.NIF", 0, true, false, false, false);
     sceneRoot = new SceneNode(0);
     ((SceneNode*)sceneRoot)->Attach(model, 1);
     UpdateInfo update8(0.0f, false, false);
@@ -5188,16 +3164,6 @@ struct Array
     unsigned int unk00, unk04, unk08, unk0c;
     void FUN_008454f0(bool);
 };
-struct TileView
-{
-    void SetTraitAndReset(int, float);
-    void FUN_00715c60(int, const char*);
-    void FUN_00a01350(int, const char*, bool);
-    float FUN_00a011b0(int, bool = true);
-    void SetFloat(int, float);
-    void SetChangeFlag(int);
-    void FUN_00700320(int, bool);
-};
 struct PlayerName
 {
     const char* FUN_005ae380();
@@ -5207,10 +3173,6 @@ struct Player
     PlayerName* GetField618();
 };
 extern Player* DAT_011dea3c;
-struct Setting
-{
-    const char* FUN_00403df0();
-};
 extern Setting DAT_011d2e68;
 extern Setting DAT_011d3d48;
 extern Setting DAT_011d2f70;
@@ -5251,661 +3213,48 @@ void FUN_00406d00(char*, unsigned int, const char*, ...);
 Node* FUN_004aae30(Node*, const char*);
 bool FUN_004b71d0();
 int FUN_00a01860(const char*);
-struct Menu
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    TileView* unk30;
-    TileView* unk34;
-    TileView* unk38;
-    TileView* unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    TileView* unk50;
-    TileView* unk54;
-    TileView* unk58;
-    TileView* unk5c;
-    TileView* unk60;
-    TileView* unk64;
-    TileView* unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    TileView* unkcc;
-    int unkd0;
-    int unkd4;
-    TileView* unkd8;
-    TileView* unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    Array array164;
-    Array array174;
-    int unk184;
-    Node* unk188;
-    Node* unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    Node* unk254;
-    Node* unk258;
-    Node* unk25c;
-    Node* unk260;
-    Node* unk264;
-    Node* unk268;
-    Node* unk26c;
-    Node* unk270;
-    Node* unk274;
-    Node* unk278;
-    Node* unk27c;
-    Node* unk280;
-    Node* unk284;
-    Node* unk288;
-    int unk28c;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29c;
-    int unk2a0;
-    int unk2a4;
-    int unk2a8;
-    int unk2ac;
-    int unk2b0;
-    int unk2b4;
-    int unk2b8;
-    int unk2bc;
-    int unk2c0;
-    int unk2c4;
-    int unk2c8;
-    int unk2cc;
-    int unk2d0;
-    int unk2d4;
-    int unk2d8;
-    int unk2dc;
-    int unk2e0;
-    int unk2e4;
-    int unk2e8;
-    int unk2ec;
-    int unk2f0;
-    int unk2f4;
-    int unk2f8;
-    int unk2fc;
-    int unk300;
-    int unk304;
-    int unk308;
-    int unk30c;
-    int unk310;
-    int unk314;
-    int unk318;
-    int unk31c;
-    int unk320;
-    int unk324;
-    int unk328;
-    int unk32c;
-    int unk330;
-    int unk334;
-    int unk338;
-    int unk33c;
-    int unk340;
-    int unk344;
-    int unk348;
-    int unk34c;
-    int unk350;
-    int unk354;
-    int unk358;
-    int unk35c;
-    int unk360;
-    int unk364;
-    int unk368;
-    int unk36c;
-    int unk370;
-    int unk374;
-    int unk378;
-    int unk37c;
-    int unk380;
-    int unk384;
-    int unk388;
-    int unk38c;
-    int unk390;
-    int unk394;
-    int unk398;
-    int unk39c;
-    int unk3a0;
-    int unk3a4;
-    int unk3a8;
-    int unk3ac;
-    int unk3b0;
-    int unk3b4;
-    int unk3b8;
-    int unk3bc;
-    int unk3c0;
-    int unk3c4;
-    int unk3c8;
-    int unk3cc;
-    int unk3d0;
-    int unk3d4;
-    int unk3d8;
-    int unk3dc;
-    int unk3e0;
-    int unk3e4;
-    int unk3e8;
-    int unk3ec;
-    int unk3f0;
-    int unk3f4;
-    int unk3f8;
-    int unk3fc;
-    int unk400;
-    int unk404;
-    int unk408;
-    int unk40c;
-    int unk410;
-    int unk414;
-    int unk418;
-    int unk41c;
-    int unk420;
-    int unk424;
-    int unk428;
-    int unk42c;
-    int unk430;
-    int unk434;
-    int unk438;
-    int unk43c;
-    int unk440;
-    int unk444;
-    int unk448;
-    int unk44c;
-    int unk450;
-    int unk454;
-    int unk458;
-    int unk45c;
-    int unk460;
-    int unk464;
-    int unk468;
-    int unk46c;
-    int unk470;
-    int unk474;
-    int unk478;
-    int unk47c;
-    int unk480;
-    int unk484;
-    int unk488;
-    int unk48c;
-    int unk490;
-    int unk494;
-    int unk498;
-    int unk49c;
-    int unk4a0;
-    int unk4a4;
-    int unk4a8;
-    int unk4ac;
-    int unk4b0;
-    int unk4b4;
-    int unk4b8;
-    int unk4bc;
-    int unk4c0;
-    int unk4c4;
-    int unk4c8;
-    int unk4cc;
-    int unk4d0;
-    int unk4d4;
-    int unk4d8;
-    int unk4dc;
-    int unk4e0;
-    int unk4e4;
-    int unk4e8;
-    int unk4ec;
-    int unk4f0;
-    int unk4f4;
-    int unk4f8;
-    int unk4fc;
-    int unk500;
-    int unk504;
-    int unk508;
-    int unk50c;
-    int unk510;
-    int unk514;
-    int unk518;
-    int unk51c;
-    int unk520;
-    int unk524;
-    int unk528;
-    int unk52c;
-    int unk530;
-    int unk534;
-    int unk538;
-    int unk53c;
-    int unk540;
-    int unk544;
-    int unk548;
-    int unk54c;
-    int unk550;
-    int unk554;
-    int unk558;
-    int unk55c;
-    int unk560;
-    int unk564;
-    int unk568;
-    int unk56c;
-    int unk570;
-    int unk574;
-    int unk578;
-    int unk57c;
-    int unk580;
-    int unk584;
-    int unk588;
-    int unk58c;
-    int unk590;
-    int unk594;
-    int unk598;
-    int unk59c;
-    int unk5a0;
-    int unk5a4;
-    int unk5a8;
-    int unk5ac;
-    int unk5b0;
-    int unk5b4;
-    int unk5b8;
-    int unk5bc;
-    int unk5c0;
-    int unk5c4;
-    int unk5c8;
-    int unk5cc;
-    int unk5d0;
-    int unk5d4;
-    int unk5d8;
-    int unk5dc;
-    int unk5e0;
-    int unk5e4;
-    int unk5e8;
-    int unk5ec;
-    int unk5f0;
-    int unk5f4;
-    int unk5f8;
-    int unk5fc;
-    int unk600;
-    int unk604;
-    int unk608;
-    int unk60c;
-    int unk610;
-    int unk614;
-    int unk618;
-    int unk61c;
-    int unk620;
-    int unk624;
-    int unk628;
-    int unk62c;
-    int unk630;
-    int unk634;
-    int unk638;
-    int unk63c;
-    int unk640;
-    int unk644;
-    int unk648;
-    int unk64c;
-    int unk650;
-    int unk654;
-    int unk658;
-    int unk65c;
-    int unk660;
-    int unk664;
-    int unk668;
-    int unk66c;
-    int unk670;
-    int unk674;
-    int unk678;
-    int unk67c;
-    int unk680;
-    int unk684;
-    int unk688;
-    int unk68c;
-    int unk690;
-    int unk694;
-    int unk698;
-    int unk69c;
-    int unk6a0;
-    int unk6a4;
-    int unk6a8;
-    int unk6ac;
-    int unk6b0;
-    int unk6b4;
-    int unk6b8;
-    int unk6bc;
-    int unk6c0;
-    int unk6c4;
-    int unk6c8;
-    int unk6cc;
-    int unk6d0;
-    int unk6d4;
-    int unk6d8;
-    int unk6dc;
-    int unk6e0;
-    int unk6e4;
-    int unk6e8;
-    int unk6ec;
-    int unk6f0;
-    int unk6f4;
-    int unk6f8;
-    int unk6fc;
-    int unk700;
-    int unk704;
-    int unk708;
-    int unk70c;
-    int unk710;
-    int unk714;
-    int unk718;
-    int unk71c;
-    int unk720;
-    int unk724;
-    int unk728;
-    int unk72c;
-    int unk730;
-    int unk734;
-    int unk738;
-    int unk73c;
-    int unk740;
-    int unk744;
-    int unk748;
-    int unk74c;
-    int unk750;
-    int unk754;
-    int unk758;
-    int unk75c;
-    int unk760;
-    int unk764;
-    int unk768;
-    int unk76c;
-    int unk770;
-    int unk774;
-    int unk778;
-    int unk77c;
-    int unk780;
-    int unk784;
-    int unk788;
-    int unk78c;
-    int unk790;
-    int unk794;
-    int unk798;
-    int unk79c;
-    int unk7a0;
-    int unk7a4;
-    int unk7a8;
-    int unk7ac;
-    int unk7b0;
-    int unk7b4;
-    int unk7b8;
-    int unk7bc;
-    int unk7c0;
-    int unk7c4;
-    int unk7c8;
-    int unk7cc;
-    int unk7d0;
-    int unk7d4;
-    int unk7d8;
-    int unk7dc;
-    int unk7e0;
-    int unk7e4;
-    int unk7e8;
-    int unk7ec;
-    int unk7f0;
-    int unk7f4;
-    int unk7f8;
-    int unk7fc;
-    int unk800;
-    int unk804;
-    int unk808;
-    int unk80c;
-    int unk810;
-    int unk814;
-    int unk818;
-    int unk81c;
-    int unk820;
-    int unk824;
-    int unk828;
-    int unk82c;
-    int unk830;
-    int unk834;
-    int unk838;
-    int unk83c;
-    int unk840;
-    int unk844;
-    int unk848;
-    int unk84c;
-    int unk850;
-    int unk854;
-    int unk858;
-    int unk85c;
-    int unk860;
-    int unk864;
-    int unk868;
-    int unk86c;
-    int unk870;
-    int unk874;
-    int unk878;
-    int unk87c;
-    int unk880;
-    int unk884;
-    int unk888;
-    int unk88c;
-    int unk890;
-    int unk894;
-    int unk898;
-    int unk89c;
-    int unk8a0;
-    int unk8a4;
-    int unk8a8;
-    int unk8ac;
-    int unk8b0;
-    int unk8b4;
-    int unk8b8;
-    int unk8bc;
-    int unk8c0;
-    int unk8c4;
-    int unk8c8;
-    int unk8cc;
-    int unk8d0;
-    int unk8d4;
-    int unk8d8;
-    int unk8dc;
-    int unk8e0;
-    int unk8e4;
-    int unk8e8;
-    union
-    {
-        Property* properties[96];
-        struct
-        {
-            Property* playerFaces[24];
-            Property* playerBacks[24];
-            Property* npcFaces[24];
-            Property* npcBacks[24];
-        };
-    };
-    int unka6c;
-    int unka70;
-    int unka74;
-    int unka78;
-    int unka7c;
-    int unka80;
-    int unka84;
-    int unka88;
-    int unka8c;
-    int unka90;
-    int unka94;
-    int unka98;
-    int unka9c;
-    int unkaa0;
-    int unkaa4;
-    int unkaa8;
-    int unkaac;
-    int unkab0;
-    int unkab4;
-    int unkab8;
-    int unkabc;
-    int unkac0;
-    int unkac4;
-    int unkac8;
-    int unkacc;
-    int unkad0;
-    int unkad4;
-    int unkad8;
-    int unkadc;
-    int unkae0;
-    int unkae4;
-    int unkae8;
-    int unkaec;
-    const char* unkaf0;
-    void UpdateCardSlots(int, int);
-    void UpdateControls();
-    void InitMenu();
-};
 // @fnv 0x0073d850
-void Menu::InitMenu()
+}
+
+void CaravanMenu::InitMenu()
 {
-    unk18c = DAT_011c3b3c->LoadModel(DAT_0107121c, 0, true, 0, 0, 0);
-    unk188 = DAT_011c3b3c->LoadModel(DAT_010711e4, 0, true, 0, 0, 0);
-    DAT_011d91e4.FUN_00559450()->Attach(unk188, true);
-    DAT_011d91e4.FUN_00559450()->Attach(unk18c, true);
-    array164.FUN_008454f0(true);
-    array174.FUN_008454f0(true);
+    using namespace CaravanSetup;
+    (*(Node**)((char*)this + 0x18c)) = DAT_011c3b3c->LoadModel(DAT_0107121c, 0, true, 0, 0, 0);
+    (*(Node**)((char*)this + 0x188)) = DAT_011c3b3c->LoadModel(DAT_010711e4, 0, true, 0, 0, 0);
+    DAT_011d91e4.FUN_00559450()->Attach((*(Node**)((char*)this + 0x188)), true);
+    DAT_011d91e4.FUN_00559450()->Attach((*(Node**)((char*)this + 0x18c)), true);
+    (*(Array*)((char*)this + 0x164)).FUN_008454f0(true);
+    (*(Array*)((char*)this + 0x174)).FUN_008454f0(true);
     DAT_011d91e4.FUN_00559450()->FUN_00a59c60(UpdateData(0, 0, 0));
-    unkae8 = MinInt(unkadc, unkae0);
-    Node* pNode = unk18c->FUN_00a5c570(&DAT_011f36ac);
+    (*(int*)((char*)this + 0xae8)) = CaravanSetup::MinInt((*(int*)((char*)this + 0xadc)), (*(int*)((char*)this + 0xae0)));
+    Node* pNode = (*(Node**)((char*)this + 0x18c))->FUN_00a5c570(&DAT_011f36ac);
     if (pNode)
     {
-        unk270 = pNode;
-        unk274 = unk270->FUN_0047a520(FixedString(DAT_010714c8));
-        unk278 = unk270->FUN_0047a520(FixedString(DAT_010714b4));
-        unk27c = unk270->FUN_0047a520(FixedString(DAT_010714a8));
-        unk280 = unk270->FUN_0047a520(FixedString(DAT_01071494));
-        unk284 = unk270->FUN_0047a520(FixedString(DAT_01071480));
-        unk288 = unk270->FUN_0047a520(FixedString(DAT_01071474));
-        unk270->FUN_0048fef0(0);
-        FUN_00a6d2d0(unk18c);
+        (*(Node**)((char*)this + 0x270)) = pNode;
+        (*(Node**)((char*)this + 0x274)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_010714c8));
+        (*(Node**)((char*)this + 0x278)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_010714b4));
+        (*(Node**)((char*)this + 0x27c)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_010714a8));
+        (*(Node**)((char*)this + 0x280)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_01071494));
+        (*(Node**)((char*)this + 0x284)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_01071480));
+        (*(Node**)((char*)this + 0x288)) = (*(Node**)((char*)this + 0x270))->FUN_0047a520(FixedString(DAT_01071474));
+        (*(Node**)((char*)this + 0x270))->FUN_0048fef0(0);
+        FUN_00a6d2d0((*(Node**)((char*)this + 0x18c)));
     }
-    pNode = unk188->FUN_00a5c570(&DAT_011f36ac);
+    pNode = (*(Node**)((char*)this + 0x188))->FUN_00a5c570(&DAT_011f36ac);
     if (pNode)
     {
-        unk254 = pNode;
-        unk258 = unk254->FUN_0047a520(FixedString(DAT_0107145c));
-        unk25c = unk254->FUN_0047a520(FixedString(DAT_01071444));
-        unk260 = unk254->FUN_0047a520(FixedString(DAT_01071430));
-        unk264 = unk254->FUN_0047a520(FixedString(DAT_01071418));
-        unk268 = unk254->FUN_0047a520(FixedString(DAT_01071400));
-        unk26c = unk254->FUN_0047a520(FixedString(DAT_010713f0));
-        unk254->FUN_0048fef0(0);
-        FUN_00a6d2d0(unk188);
+        (*(Node**)((char*)this + 0x254)) = pNode;
+        (*(Node**)((char*)this + 0x258)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_0107145c));
+        (*(Node**)((char*)this + 0x25c)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_01071444));
+        (*(Node**)((char*)this + 0x260)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_01071430));
+        (*(Node**)((char*)this + 0x264)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_01071418));
+        (*(Node**)((char*)this + 0x268)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_01071400));
+        (*(Node**)((char*)this + 0x26c)) = (*(Node**)((char*)this + 0x254))->FUN_0047a520(FixedString(DAT_010713f0));
+        (*(Node**)((char*)this + 0x254))->FUN_0048fef0(0);
+        FUN_00a6d2d0((*(Node**)((char*)this + 0x188)));
     }
     for (int iClearIndex = 0; iClearIndex < 96; ++iClearIndex)
-        properties[iClearIndex] = 0;
+        ((Property**)((char*)this + 0x8ec))[iClearIndex] = 0;
     for (int index = 0; index < 24; ++index)
     {
         if (index < 9)
@@ -5917,26 +3266,26 @@ void Menu::InitMenu()
             FUN_00406d00(cardNames[2], 25, DAT_010713c0, index + 1, index);
             FUN_00406d00(cardNames[3], 25, DAT_010713a8, index + 1);
             Node* pCardNode = 0;
-            pCardNode = FUN_004aae30(unk18c, cardNames[0]);
-            playerFaces[index] = (!pCardNode->FUN_00a59d30(3) ? 0
+            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x18c)), cardNames[0]);
+            ((Property**)((char*)this + 0x8ec))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                               : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                                  pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                      ? pCardNode->FUN_00a59d30(3)
                                      : 0;
-            pCardNode = FUN_004aae30(unk18c, cardNames[1]);
-            playerBacks[index] = (!pCardNode->FUN_00a59d30(3) ? 0
+            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x18c)), cardNames[1]);
+            ((Property**)((char*)this + 0x94c))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                               : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                                  pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                      ? pCardNode->FUN_00a59d30(3)
                                      : 0;
-            pCardNode = FUN_004aae30(unk188, cardNames[2]);
-            npcFaces[index] = (!pCardNode->FUN_00a59d30(3) ? 0
+            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x188)), cardNames[2]);
+            ((Property**)((char*)this + 0x9ac))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                            : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                               pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                   ? pCardNode->FUN_00a59d30(3)
                                   : 0;
-            pCardNode = FUN_004aae30(unk188, cardNames[3]);
-            npcBacks[index] = (!pCardNode->FUN_00a59d30(3) ? 0
+            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x188)), cardNames[3]);
+            ((Property**)((char*)this + 0xa0c))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                            : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                               pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                   ? pCardNode->FUN_00a59d30(3)
@@ -5951,26 +3300,26 @@ void Menu::InitMenu()
             FUN_00406d00(cardNames[2], 25, DAT_0107137c, index + 1, index);
             FUN_00406d00(cardNames[3], 25, DAT_01071368, index + 1);
             Node* pCardNode = 0;
-            pCardNode = FUN_004aae30(unk18c, cardNames[0]);
-            playerFaces[index] = (!pCardNode->FUN_00a59d30(3) ? 0
+            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x18c)), cardNames[0]);
+            ((Property**)((char*)this + 0x8ec))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                               : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                                  pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                      ? pCardNode->FUN_00a59d30(3)
                                      : 0;
-            pCardNode = FUN_004aae30(unk18c, cardNames[1]);
-            playerBacks[index] = (!pCardNode->FUN_00a59d30(3) ? 0
+            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x18c)), cardNames[1]);
+            ((Property**)((char*)this + 0x94c))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                               : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                                  pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                      ? pCardNode->FUN_00a59d30(3)
                                      : 0;
-            pCardNode = FUN_004aae30(unk188, cardNames[2]);
-            npcFaces[index] = (!pCardNode->FUN_00a59d30(3) ? 0
+            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x188)), cardNames[2]);
+            ((Property**)((char*)this + 0x9ac))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                            : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                               pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                   ? pCardNode->FUN_00a59d30(3)
                                   : 0;
-            pCardNode = FUN_004aae30(unk188, cardNames[3]);
-            npcBacks[index] = (!pCardNode->FUN_00a59d30(3) ? 0
+            pCardNode = FUN_004aae30((*(Node**)((char*)this + 0x188)), cardNames[3]);
+            ((Property**)((char*)this + 0xa0c))[index] = (!pCardNode->FUN_00a59d30(3) ? 0
                                                            : (pCardNode->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
                                                               pCardNode->FUN_00a59d30(3)->FUN_00441110() <= 12))
                                   ? pCardNode->FUN_00a59d30(3)
@@ -5978,36 +3327,35 @@ void Menu::InitMenu()
         }
     }
     UpdateCardSlots(12, 0);
-    unk28 = 1;
-    unk2c = 1;
-    unk54->SetTraitAndReset(DAT_011d9174, 1.0f);
-    unk54->FUN_00715c60(DAT_011d9174, unkaf0);
-    unk50->SetTraitAndReset(DAT_011d9174, 1.0f);
-    unk50->FUN_00715c60(DAT_011d9174, DAT_011dea3c->GetField618()->FUN_005ae380());
+    (*(int*)((char*)this + 0x28)) = 1;
+    (*(int*)((char*)this + 0x2c)) = 1;
+    (*(Tile**)((char*)this + 0x54))->SetTraitFloat(CaravanSetup::DAT_011d9174, 1.0f);
+    (*(Tile**)((char*)this + 0x54))->Set(CaravanSetup::DAT_011d9174, (*(unsigned int*)((char*)this + 0xaf0)));
+    (*(Tile**)((char*)this + 0x50))->SetTraitFloat(CaravanSetup::DAT_011d9174, 1.0f);
+    (*(Tile**)((char*)this + 0x50))->Set(CaravanSetup::DAT_011d9174, (unsigned int)CaravanSetup::DAT_011dea3c->GetField618()->FUN_005ae380());
     char labelText[260];
     FUN_00406d00(labelText, 260, DAT_01012058, DAT_011d3d48.FUN_00403df0(), DAT_011d2e68.FUN_00403df0());
-    unk58->FUN_00a01350(4036, labelText, true);
-    unk58->SetFloat(4001, unk58->FUN_00a011b0(4001) - 150.0);
-    unk58->SetChangeFlag(1);
+    (*(Tile**)((char*)this + 0x58))->FUN_00a01350(4036, labelText, true);
+    (*(Tile**)((char*)this + 0x58))->FUN_00a012d0(4001, reinterpret_cast<float (__thiscall*)(Tile*, int, bool)>(ReadTileTraitWithPropagation)((*(Tile**)((char*)this + 0x58)), 4001, true) - 150.0);
+    (*(Tile**)((char*)this + 0x58))->SetChangeFlag(1);
     if (!FUN_004b71d0())
-        unk58->FUN_00a01350(FUN_00a01860(DAT_01071358), DAT_010633a0, true);
-    unk5c->SetFloat(4001, unk5c->FUN_00a011b0(4001) - 150.0);
-    unk5c->SetChangeFlag(1);
-    unk30->FUN_00700320(4003, false);
-    unk34->FUN_00700320(4003, true);
-    unk38->FUN_00700320(4003, false);
-    unk3c->FUN_00700320(4003, false);
-    unkd8->FUN_00a01350(4036, DAT_011d2e68.FUN_00403df0(), true);
-    unkdc->FUN_00a01350(4036, DAT_011d2f70.FUN_00403df0(), true);
-    unk5c->FUN_00a01350(4036, DAT_011d2160.FUN_00403df0(), true);
-    unkcc->FUN_00a01350(4036, DAT_011d2ec8.FUN_00403df0(), true);
-    unk60->FUN_00a01350(4036, DAT_011d3ea4.FUN_00403df0(), true);
-    unk64->FUN_00a01350(4036, DAT_011d354c.FUN_00403df0(), true);
-    unk68->FUN_00a01350(4036, DAT_011d2784.FUN_00403df0(), true);
-    unkcc->FUN_00700320(4003, false);
-    unkcc->SetChangeFlag(4);
+        (*(Tile**)((char*)this + 0x58))->FUN_00a01350(FUN_00a01860(DAT_01071358), DAT_010633a0, true);
+    (*(Tile**)((char*)this + 0x5c))->FUN_00a012d0(4001, reinterpret_cast<float (__thiscall*)(Tile*, int, bool)>(ReadTileTraitWithPropagation)((*(Tile**)((char*)this + 0x5c)), 4001, true) - 150.0);
+    (*(Tile**)((char*)this + 0x5c))->SetChangeFlag(1);
+    (*(Tile**)((char*)this + 0x30))->FUN_00700320(4003, false);
+    (*(Tile**)((char*)this + 0x34))->FUN_00700320(4003, true);
+    (*(Tile**)((char*)this + 0x38))->FUN_00700320(4003, false);
+    (*(Tile**)((char*)this + 0x3c))->FUN_00700320(4003, false);
+    (*(Tile**)((char*)this + 0xd8))->FUN_00a01350(4036, DAT_011d2e68.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0xdc))->FUN_00a01350(4036, DAT_011d2f70.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0x5c))->FUN_00a01350(4036, DAT_011d2160.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0xcc))->FUN_00a01350(4036, DAT_011d2ec8.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0x60))->FUN_00a01350(4036, DAT_011d3ea4.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0x64))->FUN_00a01350(4036, DAT_011d354c.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0x68))->FUN_00a01350(4036, DAT_011d2784.FUN_00403df0(), true);
+    (*(Tile**)((char*)this + 0xcc))->FUN_00700320(4003, false);
+    (*(Tile**)((char*)this + 0xcc))->SetChangeFlag(4);
     UpdateControls();
-}
 }
 
 struct TileNode
@@ -6017,7 +3365,7 @@ struct TileNode
 
     double FUN_00a011b0(unsigned int, int);
 
-    void SetFloat(unsigned int, float);
+    void FUN_00a012d0(unsigned int, float);
 
     void SetChangeFlag(unsigned int);
 
@@ -6030,15 +3378,6 @@ struct TileNode
     void FUN_00700320(int, int);
 };
 
-struct Resource
-{
-
-    unsigned int m000, m004, m008;
-
-    ~Resource();
-
-    void FUN_00ad8830();
-};
 
 struct GlobalString
 {
@@ -6099,1462 +3438,56 @@ void __cdecl FUN_004d5c60(int);
 
 struct SoundManager
 {
-    Resource FUN_00ad7550(const char*, int, int);
+    BSSoundHandle FUN_00ad7550(const char*, int);
 };
 SoundManager* __cdecl FUN_00453a70();
 
 void __cdecl FUN_00406d00(char*, int, const char*, ...);
 
-struct MenuView
-{
 
-    unsigned int m000;
-
-    unsigned int m004;
-
-    unsigned int m008;
-
-    unsigned int m00c;
-
-    unsigned int m010;
-
-    unsigned int m014;
-
-    unsigned int m018;
-
-    unsigned int m01c;
-
-    unsigned int m020;
-
-    unsigned int m024;
-
-    unsigned int m028;
-
-    unsigned int m02c;
-
-    TileNode* m030;
-
-    TileNode* m034;
-
-    TileNode* m038;
-
-    TileNode* m03c;
-
-    unsigned int m040;
-
-    unsigned int m044;
-
-    unsigned int m048;
-
-    unsigned int m04c;
-
-    unsigned int m050;
-
-    unsigned int m054;
-
-    unsigned int m058;
-
-    unsigned int m05c;
-
-    unsigned int m060;
-
-    unsigned int m064;
-
-    unsigned int m068;
-
-    unsigned int m06c;
-
-    unsigned int m070;
-
-    unsigned int m074;
-
-    unsigned int m078;
-
-    unsigned int m07c;
-
-    unsigned int m080;
-
-    unsigned int m084;
-
-    unsigned int m088;
-
-    unsigned int m08c;
-
-    unsigned int m090;
-
-    unsigned int m094;
-
-    unsigned int m098;
-
-    unsigned int m09c;
-
-    unsigned int m0a0;
-
-    unsigned int m0a4;
-
-    unsigned int m0a8;
-
-    TileNode* m0ac;
-
-    TileNode* m0b0;
-
-    TileNode* m0b4;
-
-    TileNode* m0b8;
-
-    TileNode* m0bc;
-
-    unsigned int m0c0;
-
-    unsigned int m0c4;
-
-    unsigned int m0c8;
-
-    unsigned int m0cc;
-
-    unsigned int m0d0;
-
-    unsigned int m0d4;
-
-    unsigned int m0d8;
-
-    unsigned int m0dc;
-
-    unsigned int m0e0;
-
-    unsigned int m0e4;
-
-    unsigned int m0e8;
-
-    TileNode* m0ec;
-
-    TileNode* m0f0;
-
-    TileNode* m0f4;
-
-    TileNode* m0f8;
-
-    unsigned int m0fc;
-
-    unsigned int m100;
-
-    unsigned int m104;
-
-    unsigned int m108;
-
-    unsigned int m10c;
-
-    unsigned int m110;
-
-    unsigned int m114;
-
-    unsigned int m118;
-
-    unsigned int m11c;
-
-    unsigned int m120;
-
-    unsigned int m124;
-
-    unsigned int m128;
-
-    unsigned int m12c;
-
-    unsigned int m130;
-
-    unsigned int m134;
-
-    unsigned int m138;
-
-    unsigned int m13c;
-
-    unsigned int m140;
-
-    unsigned int m144;
-
-    unsigned int m148;
-
-    unsigned int m14c;
-
-    unsigned int m150;
-
-    unsigned int m154;
-
-    unsigned int m158;
-
-    unsigned int m15c;
-
-    unsigned int m160;
-
-    unsigned int m164;
-
-    unsigned int m168;
-
-    unsigned int m16c;
-
-    unsigned int m170;
-
-    unsigned int m174;
-
-    unsigned int m178;
-
-    unsigned int m17c;
-
-    unsigned int m180;
-
-    unsigned int m184;
-
-    unsigned int m188;
-
-    unsigned int m18c;
-
-    unsigned int m190;
-
-    unsigned int m194;
-
-    unsigned int m198;
-
-    unsigned int m19c;
-
-    unsigned int m1a0;
-
-    unsigned int m1a4;
-
-    unsigned int m1a8;
-
-    unsigned int m1ac;
-
-    unsigned int m1b0;
-
-    unsigned int m1b4;
-
-    unsigned int m1b8;
-
-    unsigned int m1bc;
-
-    unsigned int m1c0;
-
-    unsigned int m1c4;
-
-    unsigned int m1c8;
-
-    unsigned int m1cc;
-
-    unsigned int m1d0;
-
-    unsigned int m1d4;
-
-    unsigned int m1d8;
-
-    unsigned int m1dc;
-
-    unsigned int m1e0;
-
-    unsigned int m1e4;
-
-    unsigned int m1e8;
-
-    unsigned int m1ec;
-
-    unsigned int m1f0;
-
-    unsigned int m1f4;
-
-    unsigned int m1f8;
-
-    unsigned int m1fc;
-
-    unsigned int m200;
-
-    unsigned int m204;
-
-    unsigned int m208;
-
-    unsigned int m20c;
-
-    unsigned int m210;
-
-    unsigned int m214;
-
-    unsigned int m218;
-
-    unsigned int m21c;
-
-    unsigned int m220;
-
-    unsigned int m224;
-
-    unsigned int m228;
-
-    unsigned int m22c;
-
-    unsigned int m230;
-
-    unsigned int m234;
-
-    unsigned int m238;
-
-    unsigned int m23c;
-
-    unsigned int m240;
-
-    unsigned int m244;
-
-    unsigned int m248;
-
-    unsigned int m24c;
-
-    unsigned int m250;
-
-    unsigned int m254;
-
-    unsigned int m258;
-
-    unsigned int m25c;
-
-    unsigned int m260;
-
-    unsigned int m264;
-
-    unsigned int m268;
-
-    unsigned int m26c;
-
-    unsigned int m270;
-
-    unsigned int m274;
-
-    unsigned int m278;
-
-    unsigned int m27c;
-
-    unsigned int m280;
-
-    unsigned int m284;
-
-    unsigned int m288;
-
-    unsigned int m28c;
-
-    unsigned int m290;
-
-    unsigned int m294;
-
-    unsigned int m298;
-
-    unsigned int m29c;
-
-    unsigned int m2a0;
-
-    unsigned int m2a4;
-
-    unsigned int m2a8;
-
-    unsigned int m2ac;
-
-    unsigned int m2b0;
-
-    unsigned int m2b4;
-
-    unsigned int m2b8;
-
-    unsigned int m2bc;
-
-    unsigned int m2c0;
-
-    unsigned int m2c4;
-
-    unsigned int m2c8;
-
-    unsigned int m2cc;
-
-    unsigned int m2d0;
-
-    unsigned int m2d4;
-
-    unsigned int m2d8;
-
-    unsigned int m2dc;
-
-    unsigned int m2e0;
-
-    unsigned int m2e4;
-
-    unsigned int m2e8;
-
-    unsigned int m2ec;
-
-    unsigned int m2f0;
-
-    unsigned int m2f4;
-
-    unsigned int m2f8;
-
-    unsigned int m2fc;
-
-    unsigned int m300;
-
-    unsigned int m304;
-
-    unsigned int m308;
-
-    unsigned int m30c;
-
-    unsigned int m310;
-
-    unsigned int m314;
-
-    unsigned int m318;
-
-    unsigned int m31c;
-
-    unsigned int m320;
-
-    unsigned int m324;
-
-    unsigned int m328;
-
-    unsigned int m32c;
-
-    unsigned int m330;
-
-    unsigned int m334;
-
-    unsigned int m338;
-
-    unsigned int m33c;
-
-    unsigned int m340;
-
-    unsigned int m344;
-
-    unsigned int m348;
-
-    unsigned int m34c;
-
-    unsigned int m350;
-
-    unsigned int m354;
-
-    unsigned int m358;
-
-    unsigned int m35c;
-
-    unsigned int m360;
-
-    unsigned int m364;
-
-    unsigned int m368;
-
-    unsigned int m36c;
-
-    unsigned int m370;
-
-    unsigned int m374;
-
-    unsigned int m378;
-
-    unsigned int m37c;
-
-    unsigned int m380;
-
-    unsigned int m384;
-
-    unsigned int m388;
-
-    unsigned int m38c;
-
-    unsigned int m390;
-
-    unsigned int m394;
-
-    unsigned int m398;
-
-    unsigned int m39c;
-
-    unsigned int m3a0;
-
-    unsigned int m3a4;
-
-    unsigned int m3a8;
-
-    unsigned int m3ac;
-
-    unsigned int m3b0;
-
-    unsigned int m3b4;
-
-    unsigned int m3b8;
-
-    unsigned int m3bc;
-
-    unsigned int m3c0;
-
-    unsigned int m3c4;
-
-    unsigned int m3c8;
-
-    unsigned int m3cc;
-
-    unsigned int m3d0;
-
-    unsigned int m3d4;
-
-    unsigned int m3d8;
-
-    unsigned int m3dc;
-
-    unsigned int m3e0;
-
-    unsigned int m3e4;
-
-    unsigned int m3e8;
-
-    unsigned int m3ec;
-
-    unsigned int m3f0;
-
-    unsigned int m3f4;
-
-    unsigned int m3f8;
-
-    unsigned int m3fc;
-
-    unsigned int m400;
-
-    unsigned int m404;
-
-    unsigned int m408;
-
-    unsigned int m40c;
-
-    unsigned int m410;
-
-    unsigned int m414;
-
-    unsigned int m418;
-
-    unsigned int m41c;
-
-    unsigned int m420;
-
-    unsigned int m424;
-
-    unsigned int m428;
-
-    unsigned int m42c;
-
-    unsigned int m430;
-
-    unsigned int m434;
-
-    unsigned int m438;
-
-    unsigned int m43c;
-
-    unsigned int m440;
-
-    unsigned int m444;
-
-    unsigned int m448;
-
-    unsigned int m44c;
-
-    unsigned int m450;
-
-    unsigned int m454;
-
-    unsigned int m458;
-
-    unsigned int m45c;
-
-    unsigned int m460;
-
-    unsigned int m464;
-
-    unsigned int m468;
-
-    unsigned int m46c;
-
-    unsigned int m470;
-
-    unsigned int m474;
-
-    unsigned int m478;
-
-    unsigned int m47c;
-
-    unsigned int m480;
-
-    unsigned int m484;
-
-    unsigned int m488;
-
-    unsigned int m48c;
-
-    unsigned int m490;
-
-    unsigned int m494;
-
-    unsigned int m498;
-
-    unsigned int m49c;
-
-    unsigned int m4a0;
-
-    unsigned int m4a4;
-
-    unsigned int m4a8;
-
-    unsigned int m4ac;
-
-    unsigned int m4b0;
-
-    unsigned int m4b4;
-
-    unsigned int m4b8;
-
-    unsigned int m4bc;
-
-    unsigned int m4c0;
-
-    unsigned int m4c4;
-
-    unsigned int m4c8;
-
-    unsigned int m4cc;
-
-    unsigned int m4d0;
-
-    unsigned int m4d4;
-
-    unsigned int m4d8;
-
-    unsigned int m4dc;
-
-    unsigned int m4e0;
-
-    unsigned int m4e4;
-
-    unsigned int m4e8;
-
-    unsigned int m4ec;
-
-    unsigned int m4f0;
-
-    unsigned int m4f4;
-
-    unsigned int m4f8;
-
-    unsigned int m4fc;
-
-    unsigned int m500;
-
-    unsigned int m504;
-
-    unsigned int m508;
-
-    unsigned int m50c;
-
-    unsigned int m510;
-
-    unsigned int m514;
-
-    unsigned int m518;
-
-    unsigned int m51c;
-
-    unsigned int m520;
-
-    unsigned int m524;
-
-    unsigned int m528;
-
-    unsigned int m52c;
-
-    unsigned int m530;
-
-    unsigned int m534;
-
-    unsigned int m538;
-
-    unsigned int m53c;
-
-    unsigned int m540;
-
-    unsigned int m544;
-
-    unsigned int m548;
-
-    unsigned int m54c;
-
-    unsigned int m550;
-
-    unsigned int m554;
-
-    unsigned int m558;
-
-    unsigned int m55c;
-
-    unsigned int m560;
-
-    unsigned int m564;
-
-    unsigned int m568;
-
-    unsigned int m56c;
-
-    unsigned int m570;
-
-    unsigned int m574;
-
-    unsigned int m578;
-
-    unsigned int m57c;
-
-    unsigned int m580;
-
-    unsigned int m584;
-
-    unsigned int m588;
-
-    unsigned int m58c;
-
-    unsigned int m590;
-
-    unsigned int m594;
-
-    unsigned int m598;
-
-    unsigned int m59c;
-
-    unsigned int m5a0;
-
-    unsigned int m5a4;
-
-    unsigned int m5a8;
-
-    unsigned int m5ac;
-
-    unsigned int m5b0;
-
-    unsigned int m5b4;
-
-    unsigned int m5b8;
-
-    unsigned int m5bc;
-
-    unsigned int m5c0;
-
-    unsigned int m5c4;
-
-    unsigned int m5c8;
-
-    unsigned int m5cc;
-
-    unsigned int m5d0;
-
-    unsigned int m5d4;
-
-    unsigned int m5d8;
-
-    unsigned int m5dc;
-
-    unsigned int m5e0;
-
-    unsigned int m5e4;
-
-    unsigned int m5e8;
-
-    unsigned int m5ec;
-
-    unsigned int m5f0;
-
-    unsigned int m5f4;
-
-    unsigned int m5f8;
-
-    unsigned int m5fc;
-
-    unsigned int m600;
-
-    unsigned int m604;
-
-    unsigned int m608;
-
-    unsigned int m60c;
-
-    unsigned int m610;
-
-    unsigned int m614;
-
-    unsigned int m618;
-
-    unsigned int m61c;
-
-    unsigned int m620;
-
-    unsigned int m624;
-
-    unsigned int m628;
-
-    unsigned int m62c;
-
-    unsigned int m630;
-
-    unsigned int m634;
-
-    unsigned int m638;
-
-    unsigned int m63c;
-
-    unsigned int m640;
-
-    unsigned int m644;
-
-    unsigned int m648;
-
-    unsigned int m64c;
-
-    unsigned int m650;
-
-    unsigned int m654;
-
-    unsigned int m658;
-
-    unsigned int m65c;
-
-    unsigned int m660;
-
-    unsigned int m664;
-
-    unsigned int m668;
-
-    unsigned int m66c;
-
-    unsigned int m670;
-
-    unsigned int m674;
-
-    unsigned int m678;
-
-    unsigned int m67c;
-
-    unsigned int m680;
-
-    unsigned int m684;
-
-    unsigned int m688;
-
-    unsigned int m68c;
-
-    unsigned int m690;
-
-    unsigned int m694;
-
-    unsigned int m698;
-
-    unsigned int m69c;
-
-    unsigned int m6a0;
-
-    unsigned int m6a4;
-
-    unsigned int m6a8;
-
-    unsigned int m6ac;
-
-    unsigned int m6b0;
-
-    unsigned int m6b4;
-
-    unsigned int m6b8;
-
-    unsigned int m6bc;
-
-    unsigned int m6c0;
-
-    unsigned int m6c4;
-
-    unsigned int m6c8;
-
-    unsigned int m6cc;
-
-    unsigned int m6d0;
-
-    unsigned int m6d4;
-
-    unsigned int m6d8;
-
-    unsigned int m6dc;
-
-    unsigned int m6e0;
-
-    unsigned int m6e4;
-
-    unsigned int m6e8;
-
-    unsigned int m6ec;
-
-    unsigned int m6f0;
-
-    unsigned int m6f4;
-
-    unsigned int m6f8;
-
-    unsigned int m6fc;
-
-    unsigned int m700;
-
-    unsigned int m704;
-
-    unsigned int m708;
-
-    unsigned int m70c;
-
-    unsigned int m710;
-
-    unsigned int m714;
-
-    unsigned int m718;
-
-    unsigned int m71c;
-
-    unsigned int m720;
-
-    unsigned int m724;
-
-    unsigned int m728;
-
-    unsigned int m72c;
-
-    unsigned int m730;
-
-    unsigned int m734;
-
-    unsigned int m738;
-
-    unsigned int m73c;
-
-    unsigned int m740;
-
-    unsigned int m744;
-
-    unsigned int m748;
-
-    unsigned int m74c;
-
-    unsigned int m750;
-
-    unsigned int m754;
-
-    unsigned int m758;
-
-    unsigned int m75c;
-
-    unsigned int m760;
-
-    unsigned int m764;
-
-    unsigned int m768;
-
-    unsigned int m76c;
-
-    unsigned int m770;
-
-    unsigned int m774;
-
-    unsigned int m778;
-
-    unsigned int m77c;
-
-    unsigned int m780;
-
-    unsigned int m784;
-
-    unsigned int m788;
-
-    unsigned int m78c;
-
-    unsigned int m790;
-
-    unsigned int m794;
-
-    unsigned int m798;
-
-    unsigned int m79c;
-
-    unsigned int m7a0;
-
-    unsigned int m7a4;
-
-    unsigned int m7a8;
-
-    unsigned int m7ac;
-
-    unsigned int m7b0;
-
-    unsigned int m7b4;
-
-    unsigned int m7b8;
-
-    unsigned int m7bc;
-
-    unsigned int m7c0;
-
-    unsigned int m7c4;
-
-    unsigned int m7c8;
-
-    unsigned int m7cc;
-
-    unsigned int m7d0;
-
-    unsigned int m7d4;
-
-    unsigned int m7d8;
-
-    unsigned int m7dc;
-
-    unsigned int m7e0;
-
-    unsigned int m7e4;
-
-    unsigned int m7e8;
-
-    unsigned int m7ec;
-
-    unsigned int m7f0;
-
-    unsigned int m7f4;
-
-    unsigned int m7f8;
-
-    unsigned int m7fc;
-
-    unsigned int m800;
-
-    unsigned int m804;
-
-    unsigned int m808;
-
-    unsigned int m80c;
-
-    unsigned int m810;
-
-    unsigned int m814;
-
-    unsigned int m818;
-
-    unsigned int m81c;
-
-    unsigned int m820;
-
-    unsigned int m824;
-
-    unsigned int m828;
-
-    unsigned int m82c;
-
-    unsigned int m830;
-
-    unsigned int m834;
-
-    unsigned int m838;
-
-    unsigned int m83c;
-
-    unsigned int m840;
-
-    unsigned int m844;
-
-    unsigned int m848;
-
-    unsigned int m84c;
-
-    unsigned int m850;
-
-    unsigned int m854;
-
-    unsigned int m858;
-
-    unsigned int m85c;
-
-    unsigned int m860;
-
-    unsigned int m864;
-
-    unsigned int m868;
-
-    unsigned int m86c;
-
-    unsigned int m870;
-
-    unsigned int m874;
-
-    unsigned int m878;
-
-    unsigned int m87c;
-
-    unsigned int m880;
-
-    unsigned int m884;
-
-    unsigned int m888;
-
-    unsigned int m88c;
-
-    unsigned int m890;
-
-    unsigned int m894;
-
-    unsigned int m898;
-
-    unsigned int m89c;
-
-    unsigned int m8a0;
-
-    unsigned int m8a4;
-
-    unsigned int m8a8;
-
-    unsigned int m8ac;
-
-    unsigned int m8b0;
-
-    unsigned int m8b4;
-
-    unsigned int m8b8;
-
-    unsigned int m8bc;
-
-    unsigned int m8c0;
-
-    unsigned int m8c4;
-
-    unsigned int m8c8;
-
-    unsigned int m8cc;
-
-    unsigned int m8d0;
-
-    unsigned int m8d4;
-
-    unsigned int m8d8;
-
-    unsigned int m8dc;
-
-    unsigned int m8e0;
-
-    unsigned int m8e4;
-
-    unsigned int m8e8;
-
-    unsigned int m8ec;
-
-    unsigned int m8f0;
-
-    unsigned int m8f4;
-
-    unsigned int m8f8;
-
-    unsigned int m8fc;
-
-    unsigned int m900;
-
-    unsigned int m904;
-
-    unsigned int m908;
-
-    unsigned int m90c;
-
-    unsigned int m910;
-
-    unsigned int m914;
-
-    unsigned int m918;
-
-    unsigned int m91c;
-
-    unsigned int m920;
-
-    unsigned int m924;
-
-    unsigned int m928;
-
-    unsigned int m92c;
-
-    unsigned int m930;
-
-    unsigned int m934;
-
-    unsigned int m938;
-
-    unsigned int m93c;
-
-    unsigned int m940;
-
-    unsigned int m944;
-
-    unsigned int m948;
-
-    unsigned int m94c;
-
-    unsigned int m950;
-
-    unsigned int m954;
-
-    unsigned int m958;
-
-    unsigned int m95c;
-
-    unsigned int m960;
-
-    unsigned int m964;
-
-    unsigned int m968;
-
-    unsigned int m96c;
-
-    unsigned int m970;
-
-    unsigned int m974;
-
-    unsigned int m978;
-
-    unsigned int m97c;
-
-    unsigned int m980;
-
-    unsigned int m984;
-
-    unsigned int m988;
-
-    unsigned int m98c;
-
-    unsigned int m990;
-
-    unsigned int m994;
-
-    unsigned int m998;
-
-    unsigned int m99c;
-
-    unsigned int m9a0;
-
-    unsigned int m9a4;
-
-    unsigned int m9a8;
-
-    unsigned int m9ac;
-
-    unsigned int m9b0;
-
-    unsigned int m9b4;
-
-    unsigned int m9b8;
-
-    unsigned int m9bc;
-
-    unsigned int m9c0;
-
-    unsigned int m9c4;
-
-    unsigned int m9c8;
-
-    unsigned int m9cc;
-
-    unsigned int m9d0;
-
-    unsigned int m9d4;
-
-    unsigned int m9d8;
-
-    unsigned int m9dc;
-
-    unsigned int m9e0;
-
-    unsigned int m9e4;
-
-    unsigned int m9e8;
-
-    unsigned int m9ec;
-
-    unsigned int m9f0;
-
-    unsigned int m9f4;
-
-    unsigned int m9f8;
-
-    unsigned int m9fc;
-
-    unsigned int ma00;
-
-    unsigned int ma04;
-
-    unsigned int ma08;
-
-    unsigned int ma0c;
-
-    unsigned int ma10;
-
-    unsigned int ma14;
-
-    unsigned int ma18;
-
-    unsigned int ma1c;
-
-    unsigned int ma20;
-
-    unsigned int ma24;
-
-    unsigned int ma28;
-
-    unsigned int ma2c;
-
-    unsigned int ma30;
-
-    unsigned int ma34;
-
-    unsigned int ma38;
-
-    unsigned int ma3c;
-
-    unsigned int ma40;
-
-    unsigned int ma44;
-
-    unsigned int ma48;
-
-    unsigned int ma4c;
-
-    unsigned int ma50;
-
-    unsigned int ma54;
-
-    unsigned int ma58;
-
-    unsigned int ma5c;
-
-    unsigned int ma60;
-
-    unsigned int ma64;
-
-    unsigned int ma68;
-
-    unsigned int ma6c;
-
-    unsigned int ma70;
-
-    unsigned int ma74;
-
-    unsigned int ma78;
-
-    unsigned int ma7c;
-
-    unsigned int ma80;
-
-    unsigned int ma84;
-
-    unsigned int ma88;
-
-    unsigned int ma8c;
-
-    unsigned int ma90;
-
-    unsigned int ma94;
-
-    unsigned int ma98;
-
-    unsigned int ma9c;
-
-    unsigned int maa0;
-
-    unsigned int maa4;
-
-    unsigned int maa8;
-
-    unsigned int maac;
-
-    unsigned int mab0;
-
-    unsigned int mab4;
-
-    unsigned int mab8;
-
-    unsigned int mabc;
-
-    unsigned int mac0;
-
-    unsigned int mac4;
-
-    unsigned int mac8;
-
-    unsigned int macc;
-
-    unsigned int mad0;
-
-    unsigned int mad4;
-
-    unsigned int mad8;
-
-    unsigned int madc;
-
-    unsigned int mae0;
-
-    unsigned int mae4;
-
-    unsigned int mae8;
-
-    bool FUN_00740f10(unsigned int);
-
-    void TransferBarterItems(unsigned int);
-
-    void UpdateCaravanMenu();
-};
 
 // @fnv 0x00740980
-void MenuView::UpdateCaravanMenu()
+void CaravanMenu::UpdateCaravanMenu()
 
 {
 
-    m02c = 3;
+    (*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0x2c))) = 3;
 
     if (FUN_00740f10(0x400))
     {
 
-        ((CaravanState*)DAT_011dea3c)->FUN_00740e70(((CaravanState*)DAT_011dea3c)->GetFieldAtOffset61C() + mae8);
+        ((CaravanState*)DAT_011dea3c)->FUN_00740e70(((CaravanState*)DAT_011dea3c)->GetFieldAtOffset61C() + (*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))));
 
         ((CaravanState*)DAT_011dea3c)->SetField624(((CaravanState*)DAT_011dea3c)->GetRegionDataManager() + 1);
 
-        if (mae8 > ((CaravanState*)DAT_011dea3c)->GetMember62C())
+        if ((*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))) > ((CaravanState*)DAT_011dea3c)->GetMember62C())
 
-            ((CaravanState*)DAT_011dea3c)->FUN_00740ef0(mae8);
+            ((CaravanState*)DAT_011dea3c)->FUN_00740ef0((*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))));
 
         FUN_004d5c60(0x25);
 
-        FUN_00453a70()->FUN_00ad7550(str_010716a4, 0x121, 0).FUN_00ad8830();
+        FUN_00453a70()->FUN_00ad7550(str_010716a4, 0x121).Play(false);
     }
     else
     {
 
-        ((CaravanState*)DAT_011dea3c)->FUN_00740e90(((CaravanState*)DAT_011dea3c)->GetField620() + mae8);
+        ((CaravanState*)DAT_011dea3c)->FUN_00740e90(((CaravanState*)DAT_011dea3c)->GetField620() + (*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xae8))));
 
         ((CaravanState*)DAT_011dea3c)->SetField628(((CaravanState*)DAT_011dea3c)->FUN_00740960() + 1);
 
         FUN_004d5c60(0x26);
 
-        FUN_00453a70()->FUN_00ad7550(str_01071694, 0x121, 0).FUN_00ad8830();
+        FUN_00453a70()->FUN_00ad7550(str_01071694, 0x121).Play(false);
     }
 
     char buffer[0x104];
     {
-        TileNode* pGainTile = m03c->FUN_00a03da0(UNK_01071684);
+        TileNode* pGainTile = (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0x3c)))->FUN_00a03da0(UNK_01071684);
 
         if (pGainTile != 0)
         {
 
-            pGainTile->SetFloat(0xfb1, (float)(pGainTile->FUN_00a011b0(0xfb1, 1) + DAT_0106c948));
+            pGainTile->FUN_00a012d0(0xfb1, (float)(pGainTile->FUN_00a011b0(0xfb1, 1) + DAT_0106c948));
 
             pGainTile->SetChangeFlag(0x10);
         }
@@ -7563,51 +3496,43 @@ void MenuView::UpdateCaravanMenu()
     FUN_00406d00(buffer, 0x104, UNK_010714ec, ((CaravanState*)DAT_011dea3c)->GetRegionDataManager(),
                  ((CaravanState*)DAT_011dea3c)->FUN_00740960());
 
-    m0ac->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xac)))->SetTraitAndReset(DAT_011d9174, 1.0f);
 
-    m0ac->FUN_00715c60(DAT_011d9174, ((CaravanState*)DAT_011dea3c)->GetFieldAtOffset61C());
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xac)))->FUN_00715c60(DAT_011d9174, ((CaravanState*)DAT_011dea3c)->GetFieldAtOffset61C());
 
-    m0b0->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb0)))->SetTraitAndReset(DAT_011d9174, 1.0f);
 
-    m0b0->FUN_00715c60(DAT_011d9174, ((CaravanState*)DAT_011dea3c)->GetField620());
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb0)))->FUN_00715c60(DAT_011d9174, ((CaravanState*)DAT_011dea3c)->GetField620());
 
-    m0b4->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb4)))->SetTraitAndReset(DAT_011d9174, 1.0f);
 
-    m0b4->FUN_00a01350(DAT_011d9174, (unsigned int)buffer, 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb4)))->FUN_00a01350(DAT_011d9174, (unsigned int)buffer, 1);
 
-    m0b8->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb8)))->SetTraitAndReset(DAT_011d9174, 1.0f);
 
-    m0b8->FUN_00715c60(DAT_011d9174, ((CaravanState*)DAT_011dea3c)->GetMember62C());
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xb8)))->FUN_00715c60(DAT_011d9174, ((CaravanState*)DAT_011dea3c)->GetMember62C());
 
-    m0bc->FUN_00a01350(0xfc4, FUN_00740f10(0x400) ? DAT_011d4b58.FUN_00403df0() : DAT_011d1e6c.FUN_00403df0(), 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xbc)))->FUN_00a01350(0xfc4, FUN_00740f10(0x400) ? DAT_011d4b58.FUN_00403df0() : DAT_011d1e6c.FUN_00403df0(), 1);
 
-    m030->FUN_00700320(0xfa3, 0);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0x30)))->FUN_00700320(0xfa3, 0);
 
-    m034->FUN_00700320(0xfa3, 0);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0x34)))->FUN_00700320(0xfa3, 0);
 
-    m038->FUN_00700320(0xfa3, 0);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0x38)))->FUN_00700320(0xfa3, 0);
 
-    m03c->FUN_00700320(0xfa3, 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0x3c)))->FUN_00700320(0xfa3, 1);
 
-    m0ec->FUN_00a01350(0xfc4, DAT_011d309c.FUN_00403df0(), 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xec)))->FUN_00a01350(0xfc4, DAT_011d309c.FUN_00403df0(), 1);
 
-    m0f0->FUN_00a01350(0xfc4, DAT_011d4f3c.FUN_00403df0(), 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xf0)))->FUN_00a01350(0xfc4, DAT_011d4f3c.FUN_00403df0(), 1);
 
-    m0f4->FUN_00a01350(0xfc4, DAT_011d2ab4.FUN_00403df0(), 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xf4)))->FUN_00a01350(0xfc4, DAT_011d2ab4.FUN_00403df0(), 1);
 
-    m0f8->FUN_00a01350(0xfc4, DAT_011d3360.FUN_00403df0(), 1);
+    (*reinterpret_cast<TileNode**>((reinterpret_cast<char*>(this) + 0xf8)))->FUN_00a01350(0xfc4, DAT_011d3360.FUN_00403df0(), 1);
 
-    TransferBarterItems(FUN_00740f10(0x400));
+    TransferBarterItems((unsigned int)FUN_00740f10(0x400));
 }
 
-class TESForm
-{
-  public:
-    virtual void f00();
-};
-class BGSMessage : public TESForm
-{
-};
 extern char DAT_01018dec[];
 extern char DAT_01025cc4[];
 extern char DAT_01049638[];
@@ -7636,7 +3561,7 @@ struct IFace
 
 struct Obj6c
 {
-    int SetFloat(int id, float v, int z);
+    int FUN_00a012d0(int id, float v, int z);
     static int FUN_00a01860(const char* s);
 };
 
@@ -8600,7 +4525,7 @@ struct Mid2
 {
     double FUN_00a011b0(int id);
     static float FUN_00a01530();
-    int SetFloat(int id, float v, bool b);
+    int FUN_00a012d0(int id, float v, bool b);
     void* FUN_00a03c90();
 };
 
@@ -8635,27 +4560,9 @@ struct GlobalF8
     const char* FUN_004c69f0();
 };
 
-struct BSSoundHandleEx
-{
-    unsigned int id, state, flags;
-    ~BSSoundHandleEx();
-    void FUN_00ad8830();
-};
 
-struct StrHelper
-{
-    void FUN_00ad8830();
-};
 
-struct BSAudioLike
-{
-    BSSoundHandleEx FUN_00ad7550(const char* s, int n, int z);
-};
 
-struct AudioFactory
-{
-    static BSAudioLike* FUN_00453a70();
-};
 
 struct SubObj
 {
@@ -8691,7 +4598,7 @@ int __cdecl FUN_00741060(int a0, int a1, int a2, float a3, char a4)
         CdeclFns::FUN_00406d00(buf, 0x104, g_011d47f8.FUN_004c69f0());
         CdeclFns::DispatchMessageToSink(buf, 0, DAT_01049638, 0, 2.0f, false);
         {
-            AudioFactory::FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121, 0).FUN_00ad8830();
+            BSAudio::FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121).Play(false);
         }
         return 0;
     }
@@ -8701,7 +4608,7 @@ int __cdecl FUN_00741060(int a0, int a1, int a2, float a3, char a4)
         delete p4;
     }
     mid5 = ((MgrX*)DAT_011d9180)->FUN_00586150(DAT_0107170c)->FUN_00a01b00();
-    DAT_011d917c = (FUN_0073bab0_shell*)mid5->FUN_00a03c90();
+    DAT_011d917c = (CaravanMenu*)mid5->FUN_00a03c90();
     if (DAT_011d917c && ((Obj917c*)DAT_011d917c)->V13() == FUN_0073cbe0())
     {
         ((Obj917c*)DAT_011d917c)->m_100 = a0;
@@ -8709,7 +4616,7 @@ int __cdecl FUN_00741060(int a0, int a1, int a2, float a3, char a4)
         ((Obj917c*)DAT_011d917c)->m_108 = a2;
         ((Obj917c*)DAT_011d917c)->m_10c = a3;
         ((Obj917c*)DAT_011d917c)->FUN_00a1dc70(mid5, 0);
-        if (!(unsigned char)((FUN_007414c0_shell*)DAT_011d917c)->HasAllTiles())
+        if (!(unsigned char)((CaravanMenu*)DAT_011d917c)->HasAllTiles())
         {
             CdeclFns::FUN_005b5e40(DAT_010716b8);
             UpdateCardSelection();
@@ -8717,13 +4624,13 @@ int __cdecl FUN_00741060(int a0, int a1, int a2, float a3, char a4)
         }
         if (mid5->FUN_00a011b0(0xfa7) == 6006.0 || mid5->FUN_00a011b0(0xfa7) == 102.0)
         {
-            mid5->SetFloat(0xfad, (float)mid5->FUN_00a01530(), true);
+            mid5->FUN_00a012d0(0xfad, (float)mid5->FUN_00a01530(), true);
         }
         ((Obj917c*)DAT_011d917c)->RebuildCardLists();
-        ((Obj917c*)DAT_011d917c)->m_6c->SetFloat(0x1004, (float)((Obj917c*)DAT_011d917c)->m_af0, 0);
-        ((Obj917c*)DAT_011d917c)->m_6c->SetFloat(DAT_011d9170, 12.0f, 0);
-        ((FUN_00a01290_shell*)((Obj917c*)DAT_011d917c)->m_6c)
-            ->SetTraitAndReset(((Obj917c*)DAT_011d917c)->m_6c->FUN_00a01860(DAT_01070250), 1.0f);
+        ((Obj917c*)DAT_011d917c)->m_6c->FUN_00a012d0(0x1004, (float)((Obj917c*)DAT_011d917c)->m_af0, 0);
+        ((Obj917c*)DAT_011d917c)->m_6c->FUN_00a012d0(DAT_011d9170, 12.0f, 0);
+        ((Tile*)((Obj917c*)DAT_011d917c)->m_6c)
+            ->SetTraitFloat(((Obj917c*)DAT_011d917c)->m_6c->FUN_00a01860(DAT_01070250), 1.0f);
         DAT_011d9184 = a4;
         ((Obj917c*)DAT_011d917c)->InitCaravanTable();
         ((Obj917c*)DAT_011d917c)->FUN_0073d020();
@@ -9861,7 +5768,7 @@ void ActionDispatch::HandleEvent(unsigned int event, unsigned int unused)
 struct ControlTile
 {
     float GetFloat(int);
-    void SetFloat(int, float, bool);
+    void FUN_00a012d0(int, float, bool);
 };
 struct SelectedCard
 {
@@ -10838,12 +6745,12 @@ void CaravanControls::UpdateControls()
         if (cardCount < 30)
         {
             Enable(2, 1);
-            button->SetFloat(4009, 128.0f, true);
+            button->FUN_00a012d0(4009, 128.0f, true);
         }
         else
         {
             Enable(2, 0);
-            button->SetFloat(4009, 255.0f, true);
+            button->FUN_00a012d0(4009, 255.0f, true);
         }
         if (cardCount < 1)
             Enable(16, 1);
@@ -12224,7 +8131,7 @@ struct SceneObject
     void Update(const NiUpdateData&);
 };
 SceneObject* __cdecl FindObject(SceneObject*, const char*);
-int __cdecl strcpy_s(char*, unsigned int, const char*);
+int __cdecl CopyCaravanString(char*, unsigned int, const char*);
 int __cdecl FormatPath(char*, unsigned int, const char*, ...);
 void __cdecl NormalizePath(const char*, char*, unsigned int);
 struct TextureLoader
@@ -13151,7 +9058,7 @@ void CardMenuTexture::UpdateDeckTextures(bool player)
     SceneObject* root = player ? playerRoot : opponentRoot;
     char path2[260];
     char normalized3[260];
-    player ? strcpy_s(path2, 260, textureLiteral0) : strcpy_s(path2, 260, opponentDeckName);
+    player ? CopyCaravanString(path2, 260, textureLiteral0) : CopyCaravanString(path2, 260, opponentDeckName);
     SceneObject* object5 = FindObject(root, path2);
     ShaderProperty* property3 = (!object5->GetProperty(3) ? false
                                                           : (object5->GetProperty(3)->FUN_00441110() >= 8 &&
@@ -13172,7 +9079,7 @@ void CardMenuTexture::UpdateDeckTextures(bool player)
         if (texture)
             property3->SetTexture(0, 0, texture);
     }
-    player ? strcpy_s(path2, 260, textureLiteral3) : strcpy_s(path2, 260, textureLiteral4);
+    player ? CopyCaravanString(path2, 260, textureLiteral3) : CopyCaravanString(path2, 260, textureLiteral4);
     object5 = FindObject(root, path2);
     property3 = (!object5->GetProperty(3)
                      ? false
@@ -13306,7 +9213,7 @@ struct Scene
 };
 Scene* __cdecl FUN_004aae30(Scene*, const char*);
 int __cdecl formatDeck(char*, unsigned int, const char*, ...);
-int __cdecl strcpy_s(char*, unsigned int, const char*);
+int __cdecl CopyCaravanString(char*, unsigned int, const char*);
 void __cdecl normalizeDeck(char*, char*, unsigned int);
 struct TextureManager
 {
@@ -14297,7 +10204,7 @@ void DeckMenu::UpdateDeckCardNodes(bool player, int unused)
             }
             if (!FUN_00740f10(0x800))
             {
-                player ? strcpy_s(nodeName, 260, "Player-Deck_06:5") : strcpy_s(nodeName, 260, "Opponent-Deck_06:5");
+                player ? CopyCaravanString(nodeName, 260, "Player-Deck_06:5") : CopyCaravanString(nodeName, 260, "Opponent-Deck_06:5");
                 node = FUN_004aae30(c, nodeName);
                 l = (!node->GetProperty(3)
                          ? 0
@@ -14338,13 +10245,6 @@ struct CardNode
 };
 CardNode* __cdecl FUN_004aae30(NiAVObject* root, const char* name);
 int __cdecl _sprintf_s(char* buffer, unsigned int size, const char* format, ...);
-struct NP
-{
-    unsigned int value;
-    NP(int value);
-    ~NP();
-    operator int() const;
-};
 struct CardAssetArray
 {
     unsigned int unk00;
@@ -14353,523 +10253,12 @@ struct CardAssetArray
     unsigned int unk0c;
     UIAssetSource** FUN_006a7ad0(int index);
 };
-struct CaravanCardMenu : S_0074ed40_Cls
-{
-    unsigned int unk358;
-    unsigned int unk35c;
-    unsigned int unk360;
-    unsigned int unk364;
-    unsigned int unk368;
-    unsigned int unk36c;
-    unsigned int unk370;
-    unsigned int unk374;
-    unsigned int unk378;
-    unsigned int unk37c;
-    unsigned int unk380;
-    unsigned int unk384;
-    unsigned int unk388;
-    unsigned int unk38c;
-    unsigned int unk390;
-    unsigned int unk394;
-    unsigned int unk398;
-    unsigned int unk39c;
-    unsigned int unk3a0;
-    unsigned int unk3a4;
-    unsigned int unk3a8;
-    unsigned int unk3ac;
-    unsigned int unk3b0;
-    unsigned int unk3b4;
-    unsigned int unk3b8;
-    unsigned int unk3bc;
-    unsigned int unk3c0;
-    unsigned int unk3c4;
-    unsigned int unk3c8;
-    unsigned int unk3cc;
-    unsigned int unk3d0;
-    unsigned int unk3d4;
-    unsigned int unk3d8;
-    unsigned int unk3dc;
-    unsigned int unk3e0;
-    unsigned int unk3e4;
-    unsigned int unk3e8;
-    unsigned int unk3ec;
-    unsigned int unk3f0;
-    unsigned int unk3f4;
-    unsigned int unk3f8;
-    unsigned int unk3fc;
-    unsigned int unk400;
-    unsigned int unk404;
-    unsigned int unk408;
-    unsigned int unk40c;
-    unsigned int unk410;
-    unsigned int unk414;
-    unsigned int unk418;
-    unsigned int unk41c;
-    unsigned int unk420;
-    unsigned int unk424;
-    unsigned int unk428;
-    unsigned int unk42c;
-    unsigned int unk430;
-    unsigned int unk434;
-    unsigned int unk438;
-    unsigned int unk43c;
-    unsigned int unk440;
-    unsigned int unk444;
-    unsigned int unk448;
-    unsigned int unk44c;
-    unsigned int unk450;
-    unsigned int unk454;
-    unsigned int unk458;
-    unsigned int unk45c;
-    unsigned int unk460;
-    unsigned int unk464;
-    unsigned int unk468;
-    unsigned int unk46c;
-    unsigned int unk470;
-    unsigned int unk474;
-    unsigned int unk478;
-    unsigned int unk47c;
-    unsigned int unk480;
-    unsigned int unk484;
-    unsigned int unk488;
-    unsigned int unk48c;
-    unsigned int unk490;
-    unsigned int unk494;
-    unsigned int unk498;
-    unsigned int unk49c;
-    unsigned int unk4a0;
-    unsigned int unk4a4;
-    unsigned int unk4a8;
-    unsigned int unk4ac;
-    unsigned int unk4b0;
-    unsigned int unk4b4;
-    unsigned int unk4b8;
-    unsigned int unk4bc;
-    unsigned int unk4c0;
-    unsigned int unk4c4;
-    unsigned int unk4c8;
-    unsigned int unk4cc;
-    unsigned int unk4d0;
-    unsigned int unk4d4;
-    unsigned int unk4d8;
-    unsigned int unk4dc;
-    unsigned int unk4e0;
-    unsigned int unk4e4;
-    unsigned int unk4e8;
-    unsigned int unk4ec;
-    unsigned int unk4f0;
-    unsigned int unk4f4;
-    unsigned int unk4f8;
-    unsigned int unk4fc;
-    unsigned int unk500;
-    unsigned int unk504;
-    unsigned int unk508;
-    unsigned int unk50c;
-    unsigned int unk510;
-    unsigned int unk514;
-    unsigned int unk518;
-    unsigned int unk51c;
-    unsigned int unk520;
-    unsigned int unk524;
-    unsigned int unk528;
-    unsigned int unk52c;
-    unsigned int unk530;
-    unsigned int unk534;
-    unsigned int unk538;
-    unsigned int unk53c;
-    unsigned int unk540;
-    unsigned int unk544;
-    unsigned int unk548;
-    unsigned int unk54c;
-    unsigned int unk550;
-    unsigned int unk554;
-    unsigned int unk558;
-    unsigned int unk55c;
-    unsigned int unk560;
-    unsigned int unk564;
-    unsigned int unk568;
-    unsigned int unk56c;
-    unsigned int unk570;
-    unsigned int unk574;
-    unsigned int unk578;
-    unsigned int unk57c;
-    unsigned int unk580;
-    unsigned int unk584;
-    unsigned int unk588;
-    unsigned int unk58c;
-    unsigned int unk590;
-    unsigned int unk594;
-    unsigned int unk598;
-    unsigned int unk59c;
-    unsigned int unk5a0;
-    unsigned int unk5a4;
-    unsigned int unk5a8;
-    unsigned int unk5ac;
-    unsigned int unk5b0;
-    unsigned int unk5b4;
-    unsigned int unk5b8;
-    unsigned int unk5bc;
-    unsigned int unk5c0;
-    unsigned int unk5c4;
-    unsigned int unk5c8;
-    unsigned int unk5cc;
-    unsigned int unk5d0;
-    unsigned int unk5d4;
-    unsigned int unk5d8;
-    unsigned int unk5dc;
-    unsigned int unk5e0;
-    unsigned int unk5e4;
-    unsigned int unk5e8;
-    unsigned int unk5ec;
-    unsigned int unk5f0;
-    unsigned int unk5f4;
-    unsigned int unk5f8;
-    unsigned int unk5fc;
-    unsigned int unk600;
-    unsigned int unk604;
-    unsigned int unk608;
-    unsigned int unk60c;
-    unsigned int unk610;
-    unsigned int unk614;
-    unsigned int unk618;
-    unsigned int unk61c;
-    unsigned int unk620;
-    unsigned int unk624;
-    unsigned int unk628;
-    unsigned int unk62c;
-    unsigned int unk630;
-    unsigned int unk634;
-    unsigned int unk638;
-    unsigned int unk63c;
-    unsigned int unk640;
-    unsigned int unk644;
-    unsigned int unk648;
-    unsigned int unk64c;
-    unsigned int unk650;
-    unsigned int unk654;
-    unsigned int unk658;
-    unsigned int unk65c;
-    unsigned int unk660;
-    unsigned int unk664;
-    unsigned int unk668;
-    unsigned int unk66c;
-    unsigned int unk670;
-    unsigned int unk674;
-    unsigned int unk678;
-    unsigned int unk67c;
-    unsigned int unk680;
-    unsigned int unk684;
-    unsigned int unk688;
-    unsigned int unk68c;
-    unsigned int unk690;
-    unsigned int unk694;
-    unsigned int unk698;
-    unsigned int unk69c;
-    unsigned int unk6a0;
-    unsigned int unk6a4;
-    unsigned int unk6a8;
-    unsigned int unk6ac;
-    unsigned int unk6b0;
-    unsigned int unk6b4;
-    unsigned int unk6b8;
-    unsigned int unk6bc;
-    unsigned int unk6c0;
-    unsigned int unk6c4;
-    unsigned int unk6c8;
-    unsigned int unk6cc;
-    unsigned int unk6d0;
-    unsigned int unk6d4;
-    unsigned int unk6d8;
-    unsigned int unk6dc;
-    unsigned int unk6e0;
-    unsigned int unk6e4;
-    unsigned int unk6e8;
-    unsigned int unk6ec;
-    unsigned int unk6f0;
-    unsigned int unk6f4;
-    unsigned int unk6f8;
-    unsigned int unk6fc;
-    unsigned int unk700;
-    unsigned int unk704;
-    unsigned int unk708;
-    unsigned int unk70c;
-    unsigned int unk710;
-    unsigned int unk714;
-    unsigned int unk718;
-    unsigned int unk71c;
-    unsigned int unk720;
-    unsigned int unk724;
-    unsigned int unk728;
-    unsigned int unk72c;
-    unsigned int unk730;
-    unsigned int unk734;
-    unsigned int unk738;
-    unsigned int unk73c;
-    unsigned int unk740;
-    unsigned int unk744;
-    unsigned int unk748;
-    unsigned int unk74c;
-    unsigned int unk750;
-    unsigned int unk754;
-    unsigned int unk758;
-    unsigned int unk75c;
-    unsigned int unk760;
-    unsigned int unk764;
-    unsigned int unk768;
-    unsigned int unk76c;
-    unsigned int unk770;
-    unsigned int unk774;
-    unsigned int unk778;
-    unsigned int unk77c;
-    unsigned int unk780;
-    unsigned int unk784;
-    unsigned int unk788;
-    unsigned int unk78c;
-    unsigned int unk790;
-    unsigned int unk794;
-    unsigned int unk798;
-    unsigned int unk79c;
-    unsigned int unk7a0;
-    unsigned int unk7a4;
-    unsigned int unk7a8;
-    unsigned int unk7ac;
-    unsigned int unk7b0;
-    unsigned int unk7b4;
-    unsigned int unk7b8;
-    unsigned int unk7bc;
-    unsigned int unk7c0;
-    unsigned int unk7c4;
-    unsigned int unk7c8;
-    unsigned int unk7cc;
-    unsigned int unk7d0;
-    unsigned int unk7d4;
-    unsigned int unk7d8;
-    unsigned int unk7dc;
-    unsigned int unk7e0;
-    unsigned int unk7e4;
-    unsigned int unk7e8;
-    unsigned int unk7ec;
-    unsigned int unk7f0;
-    unsigned int unk7f4;
-    unsigned int unk7f8;
-    unsigned int unk7fc;
-    unsigned int unk800;
-    unsigned int unk804;
-    unsigned int unk808;
-    unsigned int unk80c;
-    unsigned int unk810;
-    unsigned int unk814;
-    unsigned int unk818;
-    unsigned int unk81c;
-    unsigned int unk820;
-    unsigned int unk824;
-    unsigned int unk828;
-    unsigned int unk82c;
-    unsigned int unk830;
-    unsigned int unk834;
-    unsigned int unk838;
-    unsigned int unk83c;
-    unsigned int unk840;
-    unsigned int unk844;
-    unsigned int unk848;
-    unsigned int unk84c;
-    unsigned int unk850;
-    unsigned int unk854;
-    unsigned int unk858;
-    unsigned int unk85c;
-    unsigned int unk860;
-    unsigned int unk864;
-    unsigned int unk868;
-    unsigned int unk86c;
-    unsigned int unk870;
-    unsigned int unk874;
-    unsigned int unk878;
-    unsigned int unk87c;
-    unsigned int unk880;
-    unsigned int unk884;
-    unsigned int unk888;
-    unsigned int unk88c;
-    unsigned int unk890;
-    unsigned int unk894;
-    unsigned int unk898;
-    unsigned int unk89c;
-    unsigned int unk8a0;
-    unsigned int unk8a4;
-    unsigned int unk8a8;
-    unsigned int unk8ac;
-    unsigned int unk8b0;
-    unsigned int unk8b4;
-    unsigned int unk8b8;
-    unsigned int unk8bc;
-    unsigned int unk8c0;
-    unsigned int unk8c4;
-    unsigned int unk8c8;
-    unsigned int unk8cc;
-    unsigned int unk8d0;
-    unsigned int unk8d4;
-    unsigned int unk8d8;
-    unsigned int unk8dc;
-    unsigned int unk8e0;
-    unsigned int unk8e4;
-    unsigned int unk8e8;
-    unsigned int unk8ec;
-    unsigned int unk8f0;
-    unsigned int unk8f4;
-    unsigned int unk8f8;
-    unsigned int unk8fc;
-    unsigned int unk900;
-    unsigned int unk904;
-    unsigned int unk908;
-    unsigned int unk90c;
-    unsigned int unk910;
-    unsigned int unk914;
-    unsigned int unk918;
-    unsigned int unk91c;
-    unsigned int unk920;
-    unsigned int unk924;
-    unsigned int unk928;
-    unsigned int unk92c;
-    unsigned int unk930;
-    unsigned int unk934;
-    unsigned int unk938;
-    unsigned int unk93c;
-    unsigned int unk940;
-    unsigned int unk944;
-    unsigned int unk948;
-    unsigned int unk94c;
-    unsigned int unk950;
-    unsigned int unk954;
-    unsigned int unk958;
-    unsigned int unk95c;
-    unsigned int unk960;
-    unsigned int unk964;
-    unsigned int unk968;
-    unsigned int unk96c;
-    unsigned int unk970;
-    unsigned int unk974;
-    unsigned int unk978;
-    unsigned int unk97c;
-    unsigned int unk980;
-    unsigned int unk984;
-    unsigned int unk988;
-    unsigned int unk98c;
-    unsigned int unk990;
-    unsigned int unk994;
-    unsigned int unk998;
-    unsigned int unk99c;
-    unsigned int unk9a0;
-    unsigned int unk9a4;
-    unsigned int unk9a8;
-    unsigned int unk9ac;
-    unsigned int unk9b0;
-    unsigned int unk9b4;
-    unsigned int unk9b8;
-    unsigned int unk9bc;
-    unsigned int unk9c0;
-    unsigned int unk9c4;
-    unsigned int unk9c8;
-    unsigned int unk9cc;
-    unsigned int unk9d0;
-    unsigned int unk9d4;
-    unsigned int unk9d8;
-    unsigned int unk9dc;
-    unsigned int unk9e0;
-    unsigned int unk9e4;
-    unsigned int unk9e8;
-    unsigned int unk9ec;
-    unsigned int unk9f0;
-    unsigned int unk9f4;
-    unsigned int unk9f8;
-    unsigned int unk9fc;
-    unsigned int unka00;
-    unsigned int unka04;
-    unsigned int unka08;
-    unsigned int unka0c;
-    unsigned int unka10;
-    unsigned int unka14;
-    unsigned int unka18;
-    unsigned int unka1c;
-    unsigned int unka20;
-    unsigned int unka24;
-    unsigned int unka28;
-    unsigned int unka2c;
-    unsigned int unka30;
-    unsigned int unka34;
-    unsigned int unka38;
-    unsigned int unka3c;
-    unsigned int unka40;
-    unsigned int unka44;
-    unsigned int unka48;
-    unsigned int unka4c;
-    unsigned int unka50;
-    unsigned int unka54;
-    unsigned int unka58;
-    unsigned int unka5c;
-    unsigned int unka60;
-    unsigned int unka64;
-    unsigned int unka68;
-    unsigned int unka6c;
-    unsigned int unka70;
-    unsigned int unka74;
-    unsigned int unka78;
-    unsigned int unka7c;
-    unsigned int unka80;
-    unsigned int unka84;
-    unsigned int unka88;
-    unsigned int unka8c;
-    unsigned int unka90;
-    unsigned int unka94;
-    unsigned int unka98;
-    unsigned int unka9c;
-    unsigned int unkaa0;
-    unsigned int unkaa4;
-    unsigned int unkaa8;
-    unsigned int unkaac;
-    unsigned int unkab0;
-    unsigned int unkab4;
-    unsigned int unkab8;
-    unsigned int unkabc;
-    unsigned int unkac0;
-    unsigned int unkac4;
-    unsigned int unkac8;
-    unsigned int unkacc;
-    unsigned int unkad0;
-    unsigned int unkad4;
-    unsigned int unkad8;
-    unsigned int unkadc;
-    unsigned int unkae0;
-    unsigned int unkae4;
-    unsigned int unkae8;
-    unsigned int unkaec;
-    unsigned int unkaf0;
-    unsigned int unkaf4;
-    unsigned int unkaf8;
-    unsigned int unkafc;
-    unsigned int unkb00;
-    unsigned int unkb04;
-    unsigned int unkb08;
-    unsigned int unkb0c;
-    unsigned int unkb10;
-    unsigned int unkb14;
-    unsigned int unkb18;
-    unsigned int unkb1c;
-    unsigned int unkb20;
-    unsigned int unkb24;
-    unsigned int unkb28;
-    unsigned int unkb2c;
-    unsigned int unkb30;
-    unsigned int unkb34;
-    unsigned int unkb38;
-    unsigned int unkb3c;
-    unsigned int unkb40;
-    CardAssetArray assets[8][7];
-    void FUN_0074e220(int track, int row, int card);
-};
+
 // @fnv 0x0074e220
-void CaravanCardMenu::FUN_0074e220(int track, int row, int card)
+void CaravanMenu::FUN_0074e220(int track, int row, int card)
 {
     // Local names preserve the original MSVC9 stack layout.
-    NiAVObject* f = m_rows[track][row];
+    NiAVObject* f = (*reinterpret_cast<NiAVObject* (*)[16][7]>((reinterpret_cast<char*>(this) + 0x198)))[track][row];
     char h[260];  // Node name, later reused for the texture filename.
     char a[260];  // Normalized resource path.
     if (track >= 3)
@@ -14886,7 +10275,7 @@ void CaravanCardMenu::FUN_0074e220(int track, int row, int card)
     if (s)
     {
         _sprintf_s(h, 260, &UNK_0101996c, &UNK_0101d7fc,
-                   (*assets[track][row].FUN_006a7ad0(card))->FUN_0050d100()->FUN_00408da0());
+                   (*(*reinterpret_cast<CardAssetArray (*)[8][7]>((reinterpret_cast<char*>(this) + 0xb44)))[track][row].FUN_006a7ad0(card))->FUN_0050d100()->FUN_00408da0());
         FUN_004b7240(h, a, 260);
         DAT_011dea10->FUN_004568c0(a, (GO*)&p, 0, 0);
         if (p)
@@ -17652,12 +13041,6 @@ struct NiFixedStringBase
 {
     void FUN_004381b0();
 };
-struct NiFixedString : NiFixedStringBase
-{
-    const char* m_str;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
 struct RTTIObj
 {
     int tag;
@@ -18838,10 +14221,6 @@ bool CaravanResultMenu::CheckCaravanResult()
     return false;
 }
 
-struct PointX
-{
-    float x, y, z;
-};
 
 struct UpdateDataX
 {
@@ -18855,7 +14234,7 @@ struct UpdateDataX
 struct NodeX
 {
     void GetTransformScale(float afX, float afY, float afZ);
-    const PointX& GetTranslate();
+    const NiPoint3& GetTranslate();
     void Update(const UpdateDataX& arData);
 };
 
@@ -18959,34 +14338,19 @@ float __fastcall xFUN_00526ae0(CardSlotX* apSlot);
 static const char s_acAvailableShadowFmt[] = "Available_%i_Shadow:0";
 int sprintf_s(char* apBuffer, unsigned int auiSize, const char* apFormat, ...);
 
-struct CaravanMenuX
-{
-    char _pad000[0x188];
-    NodeX* pAvailableRoot;
-    NodeX* pDeckRoot;
-    char _pad190[0x8ec - 0x190];
-    CardSlotX* pFronts[24];
-    CardSlotX* pBacks[24];
-    CardSlotX* pShadows[24];
-    CardSlotX* pOverlays[24];
-    CardArrayX kCards;
-    char _padA70[0xaf0 - 0xa70];
-    unsigned int uiNumCards;
 
-    void UpdateCardSlots(int aiFirstCard, bool abFlat);
-};
 
 // @fnv 0x0074b700
-void CaravanMenuX::UpdateCardSlots(int aiFirstCard, bool abFlat)
+void CaravanMenu::UpdateCardSlots(int aiFirstCard, bool abFlat)
 {
     for (int i = 0; i < 0x18; i++)
     {
-        if (pFronts[i] && pBacks[i] && pShadows[i] && pOverlays[i])
+        if ((*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x8ec)))[i] && (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x94c)))[i] && (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x9ac)))[i] && (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0xa0c)))[i])
         {
             char acFullPathZ[260];
             int iCardIndex;
             char acPathNum48[260];
-            if ((iCardIndex = aiFirstCard - (11 - i)) < 0 || iCardIndex >= uiNumCards)
+            if ((iCardIndex = aiFirstCard - (11 - i)) < 0 || iCardIndex >= (*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xaf0))))
             {
                 int iZOffset = -50;
                 if (abFlat)
@@ -18998,62 +14362,62 @@ void CaravanMenuX::UpdateCardSlots(int aiFirstCard, bool abFlat)
                 {
                     char acName[25];
                     sprintf_s(acName, 0x19, "Deck_0%i:%i", i + 1, i);
-                    pNode = xFUN_004aae30(pDeckRoot, acName);
+                    pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                     pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                     sprintf_s(acName, 0x19, "Deck_0%i_Back:0", i + 1);
-                    pNode = xFUN_004aae30(pDeckRoot, acName);
+                    pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                     pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                     sprintf_s(acName, 0x19, "Available_0%i:%i", i + 1, i);
-                    pNode = xFUN_004aae30(pAvailableRoot, acName);
+                    pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                     pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                     sprintf_s(acName, 0x19, "Available_0%i_Back:0", i + 1);
-                    pNode = xFUN_004aae30(pAvailableRoot, acName);
+                    pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                     pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                     sprintf_s(acName, 0x19, "Deck_0%i_Shadow:0", i + 1);
-                    pNode = xFUN_004aae30(pDeckRoot, acName);
+                    pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                     pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                     sprintf_s(acName, 0x19, "Available_0%i_Shadow:0", i + 1);
-                    pNode = xFUN_004aae30(pAvailableRoot, acName);
+                    pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                     pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                 }
                 else
                 {
                     char acName[25];
                     sprintf_s(acName, 0x19, "Deck_%i:%i", i + 1, i);
-                    pNode = xFUN_004aae30(pDeckRoot, acName);
+                    pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                     pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                     sprintf_s(acName, 0x19, "Deck_%i_Back:0", i + 1);
-                    pNode = xFUN_004aae30(pDeckRoot, acName);
+                    pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                     pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                     sprintf_s(acName, 0x19, "Available_%i:%i", i + 1, i);
-                    pNode = xFUN_004aae30(pAvailableRoot, acName);
+                    pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                     pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                     sprintf_s(acName, 0x19, "Available_%i_Back:0", i + 1);
-                    pNode = xFUN_004aae30(pAvailableRoot, acName);
+                    pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                     pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                     if (i != 12 && i != 11)
                     {
                         sprintf_s(acName, 0x19, "Deck_%i_Shadow:0", i + 1);
-                        pNode = xFUN_004aae30(pDeckRoot, acName);
+                        pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                         pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                         sprintf_s(acName, 0x19, s_acAvailableShadowFmt, i + 1);
-                        pNode = xFUN_004aae30(pAvailableRoot, acName);
+                        pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                         pNode->GetTransformScale(0.0f, 0.0f, (float)iZOffset);
                     }
                     else
                     {
                         sprintf_s(acName, 0x19, "Deck_%i_Shadow:0", i + 1);
-                        pNode = xFUN_004aae30(pDeckRoot, acName);
-                        PointX kPos = pNode->GetTranslate();
+                        pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
+                        NiPoint3 kPos = pNode->GetTranslate();
                         pNode->GetTransformScale(kPos.x, kPos.y, (float)iZOffset);
                         sprintf_s(acName, 0x19, s_acAvailableShadowFmt, i + 1);
-                        pNode = xFUN_004aae30(pAvailableRoot, acName);
+                        pNode = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                         kPos = pNode->GetTranslate();
                         pNode->GetTransformScale(kPos.x, kPos.y, (float)iZOffset);
                     }
                 }
-                pAvailableRoot->Update(UpdateDataX(0.0f, 0, 0));
-                pDeckRoot->Update(UpdateDataX(0.0f, 0, 0));
+                (*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188)))->Update(UpdateDataX(0.0f, 0, 0));
+                (*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c)))->Update(UpdateDataX(0.0f, 0, 0));
             }
             else
             {
@@ -19062,150 +14426,150 @@ void CaravanMenuX::UpdateCardSlots(int aiFirstCard, bool abFlat)
                 {
                     char acName[25];
                     sprintf_s(acName, 0x19, "Deck_0%i:%i", i + 1, i);
-                    pNodeB = xFUN_004aae30(pDeckRoot, acName);
+                    pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                     pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                     sprintf_s(acName, 0x19, "Deck_0%i_Back:0", i + 1);
-                    pNodeB = xFUN_004aae30(pDeckRoot, acName);
+                    pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                     pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                     sprintf_s(acName, 0x19, "Deck_0%i_Shadow:0", i + 1);
-                    pNodeB = xFUN_004aae30(pDeckRoot, acName);
+                    pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                     pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                     sprintf_s(acName, 0x19, "Available_0%i:%i", i + 1, i);
-                    pNodeB = xFUN_004aae30(pAvailableRoot, acName);
+                    pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                     pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                     sprintf_s(acName, 0x19, "Available_0%i_Back:0", i + 1);
-                    pNodeB = xFUN_004aae30(pAvailableRoot, acName);
+                    pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                     pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                     sprintf_s(acName, 0x19, "Available_0%i_Shadow:0", i + 1);
-                    pNodeB = xFUN_004aae30(pAvailableRoot, acName);
+                    pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                     pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                 }
                 else
                 {
                     char acName[25];
                     sprintf_s(acName, 0x19, "Deck_%i:%i", i + 1, i);
-                    pNodeB = xFUN_004aae30(pDeckRoot, acName);
+                    pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                     pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                     sprintf_s(acName, 0x19, "Deck_%i_Back:0", i + 1);
-                    pNodeB = xFUN_004aae30(pDeckRoot, acName);
+                    pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                     pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                     sprintf_s(acName, 0x19, "Available_%i:%i", i + 1, i);
-                    pNodeB = xFUN_004aae30(pAvailableRoot, acName);
+                    pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                     pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                     sprintf_s(acName, 0x19, "Available_%i_Back:0", i + 1);
-                    pNodeB = xFUN_004aae30(pAvailableRoot, acName);
+                    pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                     pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                     if (i != 12 && i != 11)
                     {
                         sprintf_s(acName, 0x19, "Deck_%i_Shadow:0", i + 1);
-                        pNodeB = xFUN_004aae30(pDeckRoot, acName);
+                        pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
                         pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                         sprintf_s(acName, 0x19, s_acAvailableShadowFmt, i + 1);
-                        pNodeB = xFUN_004aae30(pAvailableRoot, acName);
+                        pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                         pNodeB->GetTransformScale(0.0f, 0.0f, 0.0f);
                     }
                     else
                     {
                         sprintf_s(acName, 0x19, "Deck_%i_Shadow:0", i + 1);
-                        pNodeB = xFUN_004aae30(pDeckRoot, acName);
-                        PointX kPos = pNodeB->GetTranslate();
+                        pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c))), acName);
+                        NiPoint3 kPos = pNodeB->GetTranslate();
                         pNodeB->GetTransformScale(kPos.x, kPos.y, 0.0f);
                         sprintf_s(acName, 0x19, s_acAvailableShadowFmt, i + 1);
-                        pNodeB = xFUN_004aae30(pAvailableRoot, acName);
+                        pNodeB = xFUN_004aae30((*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188))), acName);
                         kPos = pNodeB->GetTranslate();
                         pNodeB->GetTransformScale(kPos.x, kPos.y, 0.0f);
                     }
                 }
-                pAvailableRoot->Update(UpdateDataX(0.0f, 0, 0));
-                pDeckRoot->Update(UpdateDataX(0.0f, 0, 0));
-                float fValue = xFUN_00526ae0(pFronts[i]);
-                if (kCards.GetAt(iCardIndex)->FUN_0073cb80())
+                (*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x188)))->Update(UpdateDataX(0.0f, 0, 0));
+                (*reinterpret_cast<NodeX**>((reinterpret_cast<char*>(this) + 0x18c)))->Update(UpdateDataX(0.0f, 0, 0));
+                float fValue = xFUN_00526ae0((*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x8ec)))[i]);
+                if ((*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_0073cb80())
                 {
                     TexturePtrX spTexture(0);
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              kCards.GetAt(iCardIndex)->FUN_0050d100()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_0050d100()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
                     {
-                        pFronts[i]->SetTexture(0, 0, spTexture);
+                        (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x8ec)))[i]->SetTexture(0, 0, spTexture);
                     }
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              kCards.GetAt(iCardIndex)->FUN_00503650()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_00503650()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
                     {
-                        pBacks[i]->SetTexture(0, 0, spTexture);
+                        (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x94c)))[i]->SetTexture(0, 0, spTexture);
                     }
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              kCards.GetAt(iCardIndex)->FUN_00503650()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_00503650()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
                     {
-                        pShadows[i]->SetTexture(0, 0, spTexture);
+                        (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x9ac)))[i]->SetTexture(0, 0, spTexture);
                     }
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              kCards.GetAt(iCardIndex)->FUN_0050d100()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_0050d100()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
                     {
-                        pOverlays[i]->SetTexture(0, 0, spTexture);
+                        (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0xa0c)))[i]->SetTexture(0, 0, spTexture);
                     }
                 }
-                else if (kCards.GetAt(iCardIndex)->FUN_0050d100())
+                else if ((*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_0050d100())
                 {
                     TexturePtrX spTexture(0);
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              kCards.GetAt(iCardIndex)->FUN_0050d100()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_0050d100()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
                     {
-                        pShadows[i]->SetTexture(0, 0, spTexture);
+                        (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x9ac)))[i]->SetTexture(0, 0, spTexture);
                     }
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              kCards.GetAt(iCardIndex)->FUN_00503650()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_00503650()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
                     {
-                        pOverlays[i]->SetTexture(0, 0, spTexture);
+                        (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0xa0c)))[i]->SetTexture(0, 0, spTexture);
                     }
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              kCards.GetAt(iCardIndex)->FUN_00503650()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_00503650()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
                     {
-                        pFronts[i]->SetTexture(0, 0, spTexture);
+                        (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x8ec)))[i]->SetTexture(0, 0, spTexture);
                     }
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              kCards.GetAt(iCardIndex)->FUN_0050d100()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_0050d100()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
                     {
-                        pBacks[i]->SetTexture(0, 0, spTexture);
+                        (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x94c)))[i]->SetTexture(0, 0, spTexture);
                     }
                 }
                 else
                 {
                     TexturePtrX spTexture(0);
                     sprintf_s(acPathNum48, 0x104, "%s%s", "Textures\\",
-                              kCards.GetAt(iCardIndex)->FUN_00503650()->GetFullName());
+                              (*reinterpret_cast<CardArrayX*>((reinterpret_cast<char*>(this) + 0xa6c))).GetAt(iCardIndex)->FUN_00503650()->GetFullName());
                     xFUN_004b7240(acPathNum48, acFullPathZ, 0x104);
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
                     {
-                        pShadows[i]->SetTexture(0, 0, spTexture);
+                        (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x9ac)))[i]->SetTexture(0, 0, spTexture);
                     }
                     xDAT_011dea10->CreateTextureImage(acFullPathZ, spTexture, 0, 0);
                     if (spTexture)
                     {
-                        pFronts[i]->SetTexture(0, 0, spTexture);
+                        (*reinterpret_cast<CardSlotX* (*)[24]>((reinterpret_cast<char*>(this) + 0x8ec)))[i]->SetTexture(0, 0, spTexture);
                     }
                 }
             }
@@ -19272,74 +14636,8 @@ extern GlobalPtr DAT_011d91a8;
 extern ModelLoader* DAT_011c3b3c;
 extern DataHandler* DAT_011c3f2c;
 int __cdecl sprintf_s(char* v5, unsigned int n, const char* fmt, ...);
-int __cdecl strcpy_s(char* v5, unsigned int n, const char* m26);
-struct ShadowSceneNode
-{
-    virtual void s00();
-    virtual void s01();
-    virtual void s02();
-    virtual void s03();
-    virtual void s04();
-    virtual void s05();
-    virtual void s06();
-    virtual void s07();
-    virtual void s08();
-    virtual void s09();
-    virtual void s10();
-    virtual void s11();
-    virtual void s12();
-    virtual void s13();
-    virtual void s14();
-    virtual void s15();
-    virtual void s16();
-    virtual void s17();
-    virtual void s18();
-    virtual void s19();
-    virtual void s20();
-    virtual void s21();
-    virtual void s22();
-    virtual void s23();
-    virtual void s24();
-    virtual void s25();
-    virtual void s26();
-    virtual void s27();
-    virtual void s28();
-    virtual void s29();
-    virtual void s30();
-    virtual void s31();
-    virtual void s32();
-    virtual void s33();
-    virtual void s34();
-    virtual void s35();
-    virtual void s36();
-    virtual void s37();
-    virtual void s38();
-    virtual void s39();
-    virtual void s40();
-    virtual void s41();
-    virtual void s42();
-    virtual void s43();
-    virtual void s44();
-    virtual void s45();
-    virtual void s46();
-    virtual void s47();
-    virtual void s48();
-    virtual void s49();
-    virtual void s50();
-    virtual void s51();
-    virtual void s52();
-    virtual void s53();
-    virtual void s54();
-    virtual void s55();
-    virtual void s56();
-    virtual void s57();
-    virtual void slot58(void* arg);
-    void FUN_00b5d180();
-};
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-};
+int __cdecl CopyCaravanString(char* v5, unsigned int n, const char* m26);
+
 struct Cell1
 {
     int vals[7];
@@ -19356,17 +14654,10 @@ union GridU
     Cell1 c1[6];
     Cell2 c2[6];
 };
-struct FUN_0073bba0 : Menu_007a8b10
+// Retained with the constructor: CaravanMenu.h lacks the typed array members whose
+// destructors and exception cleanup are emitted automatically for 0x0073bba0.
+struct FUN_0073bba0 : Menu
 {
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
     int m_028;
     int unk02c;
     int unk030;
@@ -19563,7 +14854,7 @@ FUN_0073bba0::~FUN_0073bba0()
     char v5[260];
     DAT_011d91a8 = 0;
     DAT_011c3b3c->FUN_0045a5e0("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Table.NIF");
-    ((ShadowSceneNode*)FUN_00450b80(1))->slot58((NodeFromGO*)DAT_011d91e4.FUN_00559450());
+    ((NiNode*)(ShadowSceneNode*)FUN_00450b80(1))->RemoveObject((NiAVObject*)DAT_011d91e4.FUN_00559450());
     ((ShadowSceneNode*)FUN_00450b80(1))->FUN_00b5d180();
     if ((NodeFromGO*)DAT_011d91e4.FUN_00559450())
     {
@@ -19700,21 +14991,21 @@ FUN_0073bba0::~FUN_0073bba0()
                     m_b44[x49][q13].FUN_008454f0(true);
             }
         }
-        strcpy_s(n29, 260, "PlayerGrid_1.NIF");
+        CopyCaravanString(n29, 260, "PlayerGrid_1.NIF");
         DAT_011c3b3c->FUN_0045a5e0(n29);
-        strcpy_s(n29, 260, "PlayerGrid_2.NIF");
+        CopyCaravanString(n29, 260, "PlayerGrid_2.NIF");
         DAT_011c3b3c->FUN_0045a5e0(n29);
-        strcpy_s(n29, 260, "PlayerGrid_3.NIF");
+        CopyCaravanString(n29, 260, "PlayerGrid_3.NIF");
         DAT_011c3b3c->FUN_0045a5e0(n29);
-        strcpy_s(n29, 260, "OppGrid_1.NIF");
+        CopyCaravanString(n29, 260, "OppGrid_1.NIF");
         DAT_011c3b3c->FUN_0045a5e0(n29);
-        strcpy_s(n29, 260, "OppGrid_2.NIF");
+        CopyCaravanString(n29, 260, "OppGrid_2.NIF");
         DAT_011c3b3c->FUN_0045a5e0(n29);
-        strcpy_s(n29, 260, "OppGrid_3.NIF");
+        CopyCaravanString(n29, 260, "OppGrid_3.NIF");
         DAT_011c3b3c->FUN_0045a5e0(n29);
-        strcpy_s(n29, 260, "Select_Add.NIF");
+        CopyCaravanString(n29, 260, "Select_Add.NIF");
         DAT_011c3b3c->FUN_0045a5e0(n29);
-        strcpy_s(n29, 260, "Select_Remove.NIF");
+        CopyCaravanString(n29, 260, "Select_Remove.NIF");
         DAT_011c3b3c->FUN_0045a5e0(n29);
         m_e6c = 0;
         m_e70 = 0;
@@ -19747,10 +15038,6 @@ FUN_0073bba0::~FUN_0073bba0()
     }
 }
 
-struct SettingT_GameSettingCollection_
-{
-    const char* FUN_00403df0();
-};
 extern SettingT_GameSettingCollection_ g_011d3684;
 extern SettingT_GameSettingCollection_ g_011d34f8;
 extern SettingT_GameSettingCollection_ g_011d43b4;
@@ -20752,7 +16039,7 @@ struct MenuTile
     void FUN_00700320(int, int);
     void FUN_00a01350(int, const char*, bool);
     float FUN_00a011b0(int);
-    void SetFloat(int, float, bool);
+    void FUN_00a012d0(int, float, bool);
     void SetTraitAndReset(int, float);
     MenuTile* FUN_00a03da0(const char*);
     void SetChangeFlag(int);
@@ -20782,819 +16069,94 @@ struct IntArray
     int unk0, unk4, unk8, unkC;
     unsigned FUN_007cb2e0(const int&);
 };
-struct ActorStats
-{
-    float FUN_0066ef50(int);
-};
-struct ActorView
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    ActorStats stats;
-};
-extern ActorView* DAT_011dea3c;
-struct FUN_0073d020_Class
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int stateA;
-    int stateB;
-    MenuTile* screenA;
-    MenuTile* screenB;
-    MenuTile* screenC;
-    MenuTile* screenD;
-    MenuTile* npcBet;
-    MenuTile* playerBet;
-    MenuTile* pool;
-    MenuTile* labelA;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    MenuTile* labelB;
-    MenuTile* labelC;
-    MenuTile* labelD;
-    int unk0CC;
-    MenuTile* labelE;
-    MenuTile* labelF;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    NameView* name;
-    int unk104;
-    int unk108;
-    float multiplier;
-    int baseBet;
-    ModelNode* billGrid;
-    ModelNode* coinGrid;
-    ModelNode* coins[3];
-    ModelNode* bills[3];
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int stateC;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int stateD;
-    IntArray ranks;
-    IntArray cards;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28C;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29C;
-    int unk2A0;
-    int unk2A4;
-    int unk2A8;
-    int unk2AC;
-    int unk2B0;
-    int unk2B4;
-    int unk2B8;
-    int unk2BC;
-    int unk2C0;
-    int unk2C4;
-    int unk2C8;
-    int unk2CC;
-    int unk2D0;
-    int unk2D4;
-    int unk2D8;
-    int unk2DC;
-    int unk2E0;
-    int unk2E4;
-    int unk2E8;
-    int unk2EC;
-    int unk2F0;
-    int unk2F4;
-    int unk2F8;
-    int unk2FC;
-    int unk300;
-    int unk304;
-    int unk308;
-    int unk30C;
-    int unk310;
-    int unk314;
-    int unk318;
-    int unk31C;
-    int unk320;
-    int unk324;
-    int unk328;
-    int unk32C;
-    int unk330;
-    int unk334;
-    int unk338;
-    int unk33C;
-    int unk340;
-    int unk344;
-    int unk348;
-    int unk34C;
-    int unk350;
-    int unk354;
-    int unk358;
-    int unk35C;
-    int unk360;
-    int unk364;
-    int unk368;
-    int unk36C;
-    int unk370;
-    int unk374;
-    int unk378;
-    int unk37C;
-    int unk380;
-    int unk384;
-    int unk388;
-    int unk38C;
-    int unk390;
-    int unk394;
-    int unk398;
-    int unk39C;
-    int unk3A0;
-    int unk3A4;
-    int unk3A8;
-    int unk3AC;
-    int unk3B0;
-    int unk3B4;
-    int unk3B8;
-    int unk3BC;
-    int unk3C0;
-    int unk3C4;
-    int unk3C8;
-    int unk3CC;
-    int unk3D0;
-    int unk3D4;
-    int unk3D8;
-    int unk3DC;
-    int unk3E0;
-    int unk3E4;
-    int unk3E8;
-    int unk3EC;
-    int unk3F0;
-    int unk3F4;
-    int unk3F8;
-    int unk3FC;
-    int unk400;
-    int unk404;
-    int unk408;
-    int unk40C;
-    int unk410;
-    int unk414;
-    int unk418;
-    int unk41C;
-    int unk420;
-    int unk424;
-    int unk428;
-    int unk42C;
-    int unk430;
-    int unk434;
-    int unk438;
-    int unk43C;
-    int unk440;
-    int unk444;
-    int unk448;
-    int unk44C;
-    int unk450;
-    int unk454;
-    int unk458;
-    int unk45C;
-    int unk460;
-    int unk464;
-    int unk468;
-    int unk46C;
-    int unk470;
-    int unk474;
-    int unk478;
-    int unk47C;
-    int unk480;
-    int unk484;
-    int unk488;
-    int unk48C;
-    int unk490;
-    int unk494;
-    int unk498;
-    int unk49C;
-    int unk4A0;
-    int unk4A4;
-    int unk4A8;
-    int unk4AC;
-    int unk4B0;
-    int unk4B4;
-    int unk4B8;
-    int unk4BC;
-    int unk4C0;
-    int unk4C4;
-    int unk4C8;
-    int unk4CC;
-    int unk4D0;
-    int unk4D4;
-    int unk4D8;
-    int unk4DC;
-    int unk4E0;
-    int unk4E4;
-    int unk4E8;
-    int unk4EC;
-    int unk4F0;
-    int unk4F4;
-    int unk4F8;
-    int unk4FC;
-    int unk500;
-    int unk504;
-    int unk508;
-    int unk50C;
-    int unk510;
-    int unk514;
-    int unk518;
-    int unk51C;
-    int unk520;
-    int unk524;
-    int unk528;
-    int unk52C;
-    int unk530;
-    int unk534;
-    int unk538;
-    int unk53C;
-    int unk540;
-    int unk544;
-    int unk548;
-    int unk54C;
-    int unk550;
-    int unk554;
-    int unk558;
-    int unk55C;
-    int unk560;
-    int unk564;
-    int unk568;
-    int unk56C;
-    int unk570;
-    int unk574;
-    int unk578;
-    int unk57C;
-    int unk580;
-    int unk584;
-    int unk588;
-    int unk58C;
-    int unk590;
-    int unk594;
-    int unk598;
-    int unk59C;
-    int unk5A0;
-    int unk5A4;
-    int unk5A8;
-    int unk5AC;
-    int unk5B0;
-    int unk5B4;
-    int unk5B8;
-    int unk5BC;
-    int unk5C0;
-    int unk5C4;
-    int unk5C8;
-    int unk5CC;
-    int unk5D0;
-    int unk5D4;
-    int unk5D8;
-    int unk5DC;
-    int unk5E0;
-    int unk5E4;
-    int unk5E8;
-    int unk5EC;
-    int unk5F0;
-    int unk5F4;
-    int unk5F8;
-    int unk5FC;
-    int unk600;
-    int unk604;
-    int unk608;
-    int unk60C;
-    int unk610;
-    int unk614;
-    int unk618;
-    int unk61C;
-    int unk620;
-    int unk624;
-    int unk628;
-    int unk62C;
-    int unk630;
-    int unk634;
-    int unk638;
-    int unk63C;
-    int unk640;
-    int unk644;
-    int unk648;
-    int unk64C;
-    int unk650;
-    int unk654;
-    int unk658;
-    int unk65C;
-    int unk660;
-    int unk664;
-    int unk668;
-    int unk66C;
-    int unk670;
-    int unk674;
-    int unk678;
-    int unk67C;
-    int unk680;
-    int unk684;
-    int unk688;
-    int unk68C;
-    int unk690;
-    int unk694;
-    int unk698;
-    int unk69C;
-    int unk6A0;
-    int unk6A4;
-    int unk6A8;
-    int unk6AC;
-    int unk6B0;
-    int unk6B4;
-    int unk6B8;
-    int unk6BC;
-    int unk6C0;
-    int unk6C4;
-    int unk6C8;
-    int unk6CC;
-    int unk6D0;
-    int unk6D4;
-    int unk6D8;
-    int unk6DC;
-    int unk6E0;
-    int unk6E4;
-    int unk6E8;
-    int unk6EC;
-    int unk6F0;
-    int unk6F4;
-    int unk6F8;
-    int unk6FC;
-    int unk700;
-    int unk704;
-    int unk708;
-    int unk70C;
-    int unk710;
-    int unk714;
-    int unk718;
-    int unk71C;
-    int unk720;
-    int unk724;
-    int unk728;
-    int unk72C;
-    int unk730;
-    int unk734;
-    int unk738;
-    int unk73C;
-    int unk740;
-    int unk744;
-    int unk748;
-    int unk74C;
-    int unk750;
-    int unk754;
-    int unk758;
-    int unk75C;
-    int unk760;
-    int unk764;
-    int unk768;
-    int unk76C;
-    int unk770;
-    int unk774;
-    int unk778;
-    int unk77C;
-    int unk780;
-    int unk784;
-    int unk788;
-    int unk78C;
-    int unk790;
-    int unk794;
-    int unk798;
-    int unk79C;
-    int unk7A0;
-    int unk7A4;
-    int unk7A8;
-    int unk7AC;
-    int unk7B0;
-    int unk7B4;
-    int unk7B8;
-    int unk7BC;
-    int unk7C0;
-    int unk7C4;
-    int unk7C8;
-    int unk7CC;
-    int unk7D0;
-    int unk7D4;
-    int unk7D8;
-    int unk7DC;
-    int unk7E0;
-    int unk7E4;
-    int unk7E8;
-    int unk7EC;
-    int unk7F0;
-    int unk7F4;
-    int unk7F8;
-    int unk7FC;
-    int unk800;
-    int unk804;
-    int unk808;
-    int unk80C;
-    int unk810;
-    int unk814;
-    int unk818;
-    int unk81C;
-    int unk820;
-    int unk824;
-    int unk828;
-    int unk82C;
-    int unk830;
-    int unk834;
-    int unk838;
-    int unk83C;
-    int unk840;
-    int unk844;
-    int unk848;
-    int unk84C;
-    int unk850;
-    int unk854;
-    int unk858;
-    int unk85C;
-    int unk860;
-    int unk864;
-    int unk868;
-    int unk86C;
-    int unk870;
-    int unk874;
-    int unk878;
-    int unk87C;
-    int unk880;
-    int unk884;
-    int unk888;
-    int unk88C;
-    int unk890;
-    int unk894;
-    int unk898;
-    int unk89C;
-    int unk8A0;
-    int unk8A4;
-    int unk8A8;
-    int unk8AC;
-    int unk8B0;
-    int unk8B4;
-    int unk8B8;
-    int unk8BC;
-    int unk8C0;
-    int unk8C4;
-    int unk8C8;
-    int unk8CC;
-    int unk8D0;
-    int unk8D4;
-    int unk8D8;
-    int unk8DC;
-    int unk8E0;
-    int unk8E4;
-    int unk8E8;
-    int unk8EC;
-    int unk8F0;
-    int unk8F4;
-    int unk8F8;
-    int unk8FC;
-    int unk900;
-    int unk904;
-    int unk908;
-    int unk90C;
-    int unk910;
-    int unk914;
-    int unk918;
-    int unk91C;
-    int unk920;
-    int unk924;
-    int unk928;
-    int unk92C;
-    int unk930;
-    int unk934;
-    int unk938;
-    int unk93C;
-    int unk940;
-    int unk944;
-    int unk948;
-    int unk94C;
-    int unk950;
-    int unk954;
-    int unk958;
-    int unk95C;
-    int unk960;
-    int unk964;
-    int unk968;
-    int unk96C;
-    int unk970;
-    int unk974;
-    int unk978;
-    int unk97C;
-    int unk980;
-    int unk984;
-    int unk988;
-    int unk98C;
-    int unk990;
-    int unk994;
-    int unk998;
-    int unk99C;
-    int unk9A0;
-    int unk9A4;
-    int unk9A8;
-    int unk9AC;
-    int unk9B0;
-    int unk9B4;
-    int unk9B8;
-    int unk9BC;
-    int unk9C0;
-    int unk9C4;
-    int unk9C8;
-    int unk9CC;
-    int unk9D0;
-    int unk9D4;
-    int unk9D8;
-    int unk9DC;
-    int unk9E0;
-    int unk9E4;
-    int unk9E8;
-    int unk9EC;
-    int unk9F0;
-    int unk9F4;
-    int unk9F8;
-    int unk9FC;
-    int unkA00;
-    int unkA04;
-    int unkA08;
-    int unkA0C;
-    int unkA10;
-    int unkA14;
-    int unkA18;
-    int unkA1C;
-    int unkA20;
-    int unkA24;
-    int unkA28;
-    int unkA2C;
-    int unkA30;
-    int unkA34;
-    int unkA38;
-    int unkA3C;
-    int unkA40;
-    int unkA44;
-    int unkA48;
-    int unkA4C;
-    int unkA50;
-    int unkA54;
-    int unkA58;
-    int unkA5C;
-    int unkA60;
-    int unkA64;
-    int unkA68;
-    int unkA6C;
-    int unkA70;
-    int unkA74;
-    int unkA78;
-    int unkA7C;
-    int unkA80;
-    int unkA84;
-    int unkA88;
-    int unkA8C;
-    int unkA90;
-    int unkA94;
-    int unkA98;
-    int unkA9C;
-    int unkAA0;
-    int unkAA4;
-    int unkAA8;
-    int unkAAC;
-    int unkAB0;
-    int unkAB4;
-    int unkAB8;
-    int unkABC;
-    int unkAC0;
-    int unkAC4;
-    int unkAC8;
-    int unkACC;
-    int unkAD0;
-    int unkAD4;
-    int unkAD8;
-    int playerAmount;
-    int npcAmount;
-    int poolAmount;
-    void FUN_0073d020();
-    void ComputePlayerAndTargetTotals();
-    void UpdateControls();
-    void FUN_00749a40(int);
-    void PlaceBillsAndCoins(int, int);
-};
+extern Actor* DAT_011dea3c;
+
 // Loads currency NIFs, resets state, computes bet totals, updates UI labels and controls, and places bills and coins.
 // @fnv 0x0073d020
-void FUN_0073d020_Class::FUN_0073d020()
+}  // namespace fnv_0073d020
+
+void CaravanMenu::FUN_0073d020()
 {
+    using fnv_0073d020::FUN_0044a670;
+    using fnv_0073d020::FUN_00406d00;
+    using fnv_0073d020::FUN_00a08b20;
+    using fnv_0073d020::DAT_011c3b3c;
+    using fnv_0073d020::DAT_011d2034;
+    using fnv_0073d020::DAT_011d2a60;
+    using fnv_0073d020::DAT_011d33fc;
+    using fnv_0073d020::DAT_011d4168;
+    using fnv_0073d020::DAT_011d44ec;
+    using fnv_0073d020::DAT_011d4954;
+    using fnv_0073d020::DAT_011dea3c;
+    using fnv_0073d020::IntArray;
+    using fnv_0073d020::Loader;
+    using fnv_0073d020::MenuTile;
+    using fnv_0073d020::ModelNode;
+    using fnv_0073d020::NameView;
+    using fnv_0073d020::SettingText;
+
     int amount;
     char path[260];
     {
         FUN_00406d00(path, 260, "%sCurrency-Bill_Grid.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-        billGrid = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
+        (*reinterpret_cast<ModelNode**>((reinterpret_cast<char*>(this) + 0x114))) = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
         FUN_00406d00(path, 260, "%sCurrency-Coin_Grid.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-        coinGrid = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
+        (*reinterpret_cast<ModelNode**>((reinterpret_cast<char*>(this) + 0x118))) = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
         for (int i = 0; i < 3; i++)
         {
             FUN_00406d00(path, 260, "%sCurrency-Bill_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", i + 1);
-            bills[i] = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
+            (*reinterpret_cast<ModelNode* (*)[3]>((reinterpret_cast<char*>(this) + 0x128)))[i] = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
             FUN_00406d00(path, 260, "%sCurrency-Coin_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", i + 1);
-            coins[i] = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
+            (*reinterpret_cast<ModelNode* (*)[3]>((reinterpret_cast<char*>(this) + 0x11c)))[i] = DAT_011c3b3c->LoadModel(path, 0, true, false, false, false);
         }
-        stateA = 0;
-        stateB = 0;
-        stateD = 0;
-        stateC = 0;
-        screenA->FUN_00700320(0xfa3, 1);
-        screenB->FUN_00700320(0xfa3, 0);
-        screenC->FUN_00700320(0xfa3, 0);
-        screenD->FUN_00700320(0xfa3, 0);
-        labelE->FUN_00a01350(0xfc4, DAT_011d2a60.FUN_00403df0(), true);
-        labelF->FUN_00a01350(0xfc4, DAT_011d4954.FUN_00403df0(), true);
-        labelC->FUN_00a01350(0xfc4, DAT_011d4168.FUN_00403df0(), true);
-        labelB->FUN_00a01350(0xfc4, DAT_011d2034.FUN_00403df0(), true);
-        labelA->FUN_00a01350(0xfc4, DAT_011d44ec.FUN_00403df0(), true);
-        labelD->FUN_00a01350(0xfc4, DAT_011d33fc.FUN_00403df0(), true);
+        (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x28))) = 0;
+        (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x2c))) = 0;
+        (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x160))) = 0;
+        (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x148))) = 0;
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x30)))->FUN_00700320(0xfa3, 1);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x34)))->FUN_00700320(0xfa3, 0);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x38)))->FUN_00700320(0xfa3, 0);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x3c)))->FUN_00700320(0xfa3, 0);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xd0)))->FUN_00a01350(0xfc4, DAT_011d2a60.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xd4)))->FUN_00a01350(0xfc4, DAT_011d4954.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xc4)))->FUN_00a01350(0xfc4, DAT_011d4168.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xc0)))->FUN_00a01350(0xfc4, DAT_011d2034.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x4c)))->FUN_00a01350(0xfc4, DAT_011d44ec.FUN_00403df0(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0xc8)))->FUN_00a01350(0xfc4, DAT_011d33fc.FUN_00403df0(), true);
         ComputePlayerAndTargetTotals();
-        npcAmount = (int)(baseBet * multiplier);
-        if (FUN_0044a670(name->FUN_0055d520()) > 17)
+        (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xae0))) = (int)((*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x110))) * (*reinterpret_cast<float*>((reinterpret_cast<char*>(this) + 0x10c))));
+        if (FUN_0044a670((*reinterpret_cast<NameView**>((reinterpret_cast<char*>(this) + 0x100)))->FUN_0055d520()) > 17)
         {
-            int value = FUN_0044a670(name->FUN_0055d520()) - 17;
+            int value = FUN_0044a670((*reinterpret_cast<NameView**>((reinterpret_cast<char*>(this) + 0x100)))->FUN_0055d520()) - 17;
             value *= 15;
-            MenuTile* extra = FUN_00a08b20(npcBet, "CBM_NPCBetValue");
-            extra->SetFloat(0xfa1, extra->FUN_00a011b0(0xfa1) + value, true);
+            MenuTile* extra = FUN_00a08b20((*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x40))), "CBM_NPCBetValue");
+            extra->FUN_00a012d0(0xfa1, extra->FUN_00a011b0(0xfa1) + value, true);
         }
-        MenuTile* info = screenA->FUN_00a03da0("CBM_InfoRect");
+        MenuTile* info = (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x30)))->FUN_00a03da0("CBM_InfoRect");
         if (info)
         {
-            info->SetFloat(0xfb1, info->FUN_00a011b0(0xfb1) + 150.0, true);
+            info->FUN_00a012d0(0xfb1, info->FUN_00a011b0(0xfb1) + 150.0, true);
             info->SetChangeFlag(16);
         }
-        npcBet->FUN_00a01350(0xfc4, name->FUN_0055d520(), true);
-        npcBet->SetTraitAndReset(DAT_011d9174, 1.0f);
-        npcBet->FUN_00700320(DAT_011d9174, npcAmount);
-        playerBet->SetTraitAndReset(DAT_011d9174, 1.0f);
-        playerBet->FUN_00700320(DAT_011d9174, playerAmount);
-        pool->SetTraitAndReset(DAT_011d9174, 1.0f);
-        pool->FUN_00700320(DAT_011d9174, poolAmount);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x40)))->FUN_00a01350(0xfc4, (*reinterpret_cast<NameView**>((reinterpret_cast<char*>(this) + 0x100)))->FUN_0055d520(), true);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x40)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x40)))->FUN_00700320(DAT_011d9174, (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xae0))));
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x44)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x44)))->FUN_00700320(DAT_011d9174, (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xadc))));
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x48)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+        (*reinterpret_cast<MenuTile**>((reinterpret_cast<char*>(this) + 0x48)))->FUN_00700320(DAT_011d9174, (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xae4))));
         UpdateControls();
         FUN_00749a40(0);
         for (int rank = 0; rank < 9; rank++)
-            ranks.FUN_007cb2e0(rank);
+            (*reinterpret_cast<IntArray*>((reinterpret_cast<char*>(this) + 0x164))).FUN_007cb2e0(rank);
         for (int card = 0; card < 42; card++)
-            cards.FUN_007cb2e0(card);
-        amount = (int)(((FUN_0073d020_Class*)DAT_011d917c)->baseBet * ((FUN_0073d020_Class*)DAT_011d917c)->multiplier +
-                       ((FUN_0073d020_Class*)DAT_011d917c)->baseBet * ((FUN_0073d020_Class*)DAT_011d917c)->multiplier *
-                           (DAT_011dea3c->stats.FUN_0066ef50(32) / 100.0));
-        PlaceBillsAndCoins(amount, npcAmount);
+            (*reinterpret_cast<IntArray*>((reinterpret_cast<char*>(this) + 0x174))).FUN_007cb2e0(card);
+        amount = (int)((*reinterpret_cast<int*>((reinterpret_cast<char*>(DAT_011d917c) + 0x110))) * (*reinterpret_cast<float*>((reinterpret_cast<char*>(DAT_011d917c) + 0x10c))) +
+                       (*reinterpret_cast<int*>((reinterpret_cast<char*>(DAT_011d917c) + 0x110))) * (*reinterpret_cast<float*>((reinterpret_cast<char*>(DAT_011d917c) + 0x10c))) *
+                           (DAT_011dea3c->GetActorValueFloatByIndex(32) / 100.0));
+        PlaceBillsAndCoins(amount, (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xae0))));
     }
 }
-}  // namespace fnv_0073d020
 
 // 0x741500: CaravanMenu per-frame update (the caravan card game state machine).
 struct CaravanGame;
@@ -21619,20 +16181,14 @@ struct CMNodePtr
 {
     CMNode* FUN_00559450();
 };
-struct CMSound
-{
-    unsigned int id, state, flags;
-    ~CMSound();
-    bool FUN_00ad8830(bool loop);
-};
 struct CMAudio
 {
     static CMAudio* __cdecl FUN_00453a70();
-    CMSound FUN_00ad7550(const char* editorID, unsigned int flags);
+    BSSoundHandle FUN_00ad7550(const char* editorID, unsigned int flags);
 };
 struct CMTile
 {
-    void SetFloat(int trait, float value, bool propagate);
+    void FUN_00a012d0(int trait, float value, bool propagate);
     void FUN_00700320(int trait, int value);
     float FUN_00a011b0(int trait);
     void FUN_00a01350(int trait, const char* value, bool propagate);
@@ -21782,7 +16338,7 @@ struct E_Marker
 struct E_Wager
 {
     float FUN_00639aa0();
-    int FUN_00747d00();
+    int GetPickCursorX();
 };
 struct E_Input
 {
@@ -21994,7 +16550,7 @@ void CaravanGame::FUN_00741500()
     startTime = DAT_011f6394.FUN_00825c00();
     DAT_011d9204 = state;
     if (!active || mode == 1)
-        CMFn::FUN_004b7210()->FUN_0045cd60()->SetFloat(0xfa9, 255.0f, true);
+        CMFn::FUN_004b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
     if (FUN_00740f10(0x20000))
     {
         if (active)
@@ -22012,7 +16568,7 @@ void CaravanGame::FUN_00741500()
     case 23:
         if (FUN_0059bb30() != 2)
         {
-            CMFn::FUN_004b7210()->FUN_0045cd60()->SetFloat(0xfa9, 255.0f, true);
+            CMFn::FUN_004b7210()->FUN_0045cd60()->FUN_00a012d0(0xfa9, 255.0f, true);
             FUN_00726070()->FUN_00700320(0x1772, 1);
             FUN_00a1d910();
             DAT_011d917c = 0;
@@ -22067,7 +16623,7 @@ void CaravanGame::FUN_00741500()
             sideMgr[0]->FUN_0047aab0(sideSeq[0][0], 0, false, 1.0f, 0.0f, 0);
             sideMgr[1]->FUN_0047aab0(sideSeq[1][0], 0, false, 1.0f, 0.0f, 0);
             stateTimer = 0.0f;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanStartMatch", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanStartMatch", 0x121).Play(false);
             FUN_00749a40(-1);
         }
         if (true)
@@ -22092,14 +16648,14 @@ void CaravanGame::FUN_00741500()
             CMAVObject* sel = A_Fn::FUN_004aae30(sceneRoot, "Select1_01:0");
             ((CMNodePtr*)&g_011d91a8)->FUN_00559450()->ProjectToScreen(sel->FUN_0045bb80(), &x, &y, 1e-05f);
             x = tileWidth * x - DAT_010718b8;
-            laneTile0->SetFloat(0xfa1, x, true);
-            laneTile5->SetFloat(0xfa1, x, true);
+            laneTile0->FUN_00a012d0(0xfa1, x, true);
+            laneTile5->FUN_00a012d0(0xfa1, x, true);
             x += DAT_010718b0;
-            laneTile1->SetFloat(0xfa1, x, true);
-            laneTile4->SetFloat(0xfa1, x, true);
+            laneTile1->FUN_00a012d0(0xfa1, x, true);
+            laneTile4->FUN_00a012d0(0xfa1, x, true);
             x += DAT_010718b0;
-            laneTile2->SetFloat(0xfa1, x, true);
-            laneTile3->SetFloat(0xfa1, x, true);
+            laneTile2->FUN_00a012d0(0xfa1, x, true);
+            laneTile3->FUN_00a012d0(0xfa1, x, true);
             A_Fn::FUN_00a08b20(mainTile, "CGM_NPCTrackRect")->FUN_00700320(0xfa3, 1);
             A_Fn::FUN_00a08b20(mainTile, "CGM_PlayerTrackRect")->FUN_00700320(0xfa3, 1);
             UpdateControls();
@@ -22150,7 +16706,7 @@ void CaravanGame::FUN_00741500()
         if (DAT_011d9208 == DAT_01012060)
         {
             SetFlag(1, 1);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanFundsDrop", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanFundsDrop", 0x121).Play(false);
         }
         if (true)
         {
@@ -22179,7 +16735,7 @@ void CaravanGame::FUN_00741500()
             SetFlag(1, 1);
             FUN_00749a40(-1);
             scrollPos--;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanNavigate", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanNavigate", 0x121).Play(false);
         }
         if (true)
         {
@@ -22229,7 +16785,7 @@ void CaravanGame::FUN_00741500()
             FUN_00749a40(-1);
             scrollPos--;
             UpdateCardSlots(rootTile->FUN_00a011b0(DAT_011d9170) + scrollPos, false);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanNavigate", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanNavigate", 0x121).Play(false);
         }
         if (true)
         {
@@ -22284,7 +16840,7 @@ void CaravanGame::FUN_00741500()
             boardMgrA->FUN_0047aab0(changeDeckSeqA0, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
             FUN_00749a40(-1);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanChangeDeck", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanChangeDeck", 0x121).Play(false);
         }
         if (true)
         {
@@ -22317,7 +16873,7 @@ void CaravanGame::FUN_00741500()
             boardMgrA->FUN_0047aab0(changeDeckSeqA, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
             FUN_00749a40(-1);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanChangeDeck", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanChangeDeck", 0x121).Play(false);
         }
         if (true)
         {
@@ -22351,7 +16907,7 @@ void CaravanGame::FUN_00741500()
             boardMgrA->FUN_0047aab0(addRemoveSeqA, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
             FUN_00749a40(-1);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddRemove", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddRemove", 0x121).Play(false);
         }
         if (true)
         {
@@ -22390,7 +16946,7 @@ void CaravanGame::FUN_00741500()
             boardMgrA->FUN_0047aab0(deckDoneSeqA, 0, false, 1.0f, 0.0f, 0);
             SetFlag(1, 1);
             FUN_00749a40(-1);
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanChangeDeck", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanChangeDeck", 0x121).Play(false);
         }
         if (true)
         {
@@ -22435,7 +16991,7 @@ void CaravanGame::FUN_00741500()
                 UpdateSelection(1);
             SetFlag(1, 1);
             stateTimer = 0.0f;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanConfirmAddtoDeck", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanConfirmAddtoDeck", 0x121).Play(false);
         }
         if (true)
         {
@@ -22508,7 +17064,7 @@ void CaravanGame::FUN_00741500()
                 UpdateSelection(true);
             SetFlag(1, 1);
             stateTimer = 0.0f;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanRemoveCard", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanRemoveCard", 0x121).Play(false);
         }
         if (true)
         {
@@ -22576,7 +17132,7 @@ void CaravanGame::FUN_00741500()
                 UpdateSelection(true);
             SetFlag(1, 1);
             stateTimer = 0.0f;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanConfirmAddToTrack", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanConfirmAddToTrack", 0x121).Play(false);
         }
         if (true)
         {
@@ -22653,12 +17209,12 @@ void CaravanGame::FUN_00741500()
             if ((side == 0 ? pickPlayer : pickOpponent) == -1)
             {
                 sideMgr[side]->FUN_0047aab0(removeSeq[side][handIndex], 0, false, 1.0f, 0.0f, 0);
-                CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanRemoveCard", 0x121).FUN_00ad8830(false);
+                CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanRemoveCard", 0x121).Play(false);
             }
             else
             {
                 sideMgr[side]->FUN_0047aab0(sideSeq[side][handIndex + 1], 0, false, 1.0f, 0.0f, 0);
-                CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddRemoveCard", 0x121).FUN_00ad8830(false);
+                CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddRemoveCard", 0x121).Play(false);
             }
             if (side == 0)
                 UpdateSelection(true);
@@ -22714,7 +17270,7 @@ void CaravanGame::FUN_00741500()
             }
             SetFlag(1, 1);
             stateTimer = 0.0f;
-            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanRemoveCard", 0x121).FUN_00ad8830(false);
+            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanRemoveCard", 0x121).Play(false);
         }
         for (int i = 0; i < 7; i++)
         {
@@ -23127,7 +17683,7 @@ void CaravanGame::FUN_00741500()
                 if (pos >= 0 && pos < wagerMax)
                 {
                     scrollPos = 1;
-                    rootTile->SetFloat(DAT_011d9170, (float)pos, false);
+                    rootTile->FUN_00a012d0(DAT_011d9170, (float)pos, false);
                     rootTile->SetTraitAndReset(E_Fn::FUN_00a01860("_SetInCode"), 1.0f);
                     state = mx > DAT_01012060 ? 5 : 6;
                 }
@@ -23143,12 +17699,12 @@ void CaravanGame::FUN_00741500()
                     if (!(diff = cur - wagerValue) && false)
                     {
                         int step = (int)(E_Fn::FUN_00715d40() / wagerMax);
-                        int base = ((E_Wager*)DAT_011d9180)->FUN_00747d00();
-                        diff = ((E_Wager*)DAT_011d9180)->FUN_00747d00() - wagerBase;
+                        int base = ((E_Wager*)DAT_011d9180)->GetPickCursorX();
+                        diff = ((E_Wager*)DAT_011d9180)->GetPickCursorX() - wagerBase;
                         diff = diff / -step;
                         if (diff)
                         {
-                            rootTile->SetFloat(DAT_011d9170,
+                            rootTile->FUN_00a012d0(DAT_011d9170,
                                                    (float)MinInt(FUN_00647b70(wagerValue + diff, 0), wagerMax), false);
                             rootTile->SetTraitAndReset(E_Fn::FUN_00a01860("_SetInCode"), 1.0f);
                             if (E_Fn::FUN_00ec7d40(diff) < 5)
@@ -23186,7 +17742,7 @@ void CaravanGame::FUN_00741500()
                 {
                     wagerValue = (int)rootTile->FUN_00a011b0(DAT_011d9170);
                     wagerHeld = true;
-                    wagerBase = ((E_Wager*)DAT_011d9180)->FUN_00747d00();
+                    wagerBase = ((E_Wager*)DAT_011d9180)->GetPickCursorX();
                 }
                 if (state == 0)
                 {
@@ -23220,7 +17776,7 @@ void CaravanGame::FUN_00741500()
                                 int pos = (int)(rootTile->FUN_00a011b0(DAT_011d9170) + padX);
                                 if (pos >= 0 && pos < wagerMax)
                                 {
-                                    rootTile->SetFloat(DAT_011d9170, (float)pos, false);
+                                    rootTile->FUN_00a012d0(DAT_011d9170, (float)pos, false);
                                     rootTile->SetTraitAndReset(E_Fn::FUN_00a01860("_SetInCode"), 1.0f);
                                     state = padX > 0 ? 5 : 6;
                                     scrollPos = 1;
@@ -23273,7 +17829,7 @@ void CaravanGame::FUN_00741500()
                             handIndex = 0;
                         else if (handIndex < 0)
                             handIndex = count - 1;
-                        CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanSwitchCard", 0x121).FUN_00ad8830(false);
+                        CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanSwitchCard", 0x121).Play(false);
                         UpdateSelection(0);
                         if (FUN_00740f10(0x800) && ((C_Card*)hand.FUN_006a7ad0(handIndex))->FUN_008d80e0() > 10)
                             SetFlag(4, 1);
@@ -23290,7 +17846,7 @@ void CaravanGame::FUN_00741500()
                             FUN_0074ed40(curLane);
                             curLane = curLane + stepX;
                             curLane = MinInt(FUN_00647b70(0, curLane), 2);
-                            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanToggleTrack", 0x121).FUN_00ad8830(false);
+                            CMAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanToggleTrack", 0x121).Play(false);
                             FUN_0074ecb0(curLane);
                         }
                         else
@@ -23346,17 +17902,10 @@ template <class T> struct xArr
     void FUN_008454f0(bool);
     int m_iWordAt00, m_iWordAt04, m_8, m_iThirdValue;
 };
-struct xSound
-{
-    xSound();
-    ~xSound();
-    bool FUN_00ad8830(bool);
-    int m_iWordAt00, m_iWordAt04, m_8;
-};
 struct xAudio
 {
     static xAudio* FUN_00453a70();
-    xSound FUN_00ad7550(const char*, unsigned int);
+    BSSoundHandle FUN_00ad7550(const char*, unsigned int);
 };
 struct xAVOwner
 {
@@ -23516,14 +18065,14 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
                 if (m_e30 < 3)
                     SelectCard(m_e30, m_e34);
                 UpdateSelection(true);
-                xAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddToTrack", 0x121).FUN_00ad8830(false);
+                xAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddToTrack", 0x121).Play(false);
                 FUN_00749a40(-1);
                 SetFlag(0x1000, 1);
                 handled = true;
             }
             else if (!FUN_00740f10(0x1000))
             {
-                xAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddToTrack", 0x121).FUN_00ad8830(false);
+                xAudio::FUN_00453a70()->FUN_00ad7550("GAMECaravanAddToTrack", 0x121).Play(false);
                 SetFlag(0x1000, 1);
                 m_e30 = 0;
                 m_e34 = 0;
@@ -23665,7 +18214,7 @@ bool xCaravan::FUN_00747d30(int aiKey, int aiUnused)
             if (m_adc > 0 || m_ae0 == 0)
             {
                 InitMenu();
-                xAudio::FUN_00453a70()->FUN_00ad7550("UIMenuOK", 0x121).FUN_00ad8830(false);
+                xAudio::FUN_00453a70()->FUN_00ad7550("UIMenuOK", 0x121).Play(false);
             }
             handled = true;
         }
@@ -23837,51 +18386,13 @@ struct Slot_749a40
     int unk00;
     List_749a40 list;
 };
-struct Root_749a40 : FNV_74A000_Root
-{
-};
-struct Menu_749a40 : Menu
-{
-    unsigned int unka70;
-    unsigned int unka74;
-    unsigned int unka78;
-    unsigned int unka7c;
-    unsigned int unka80;
-    unsigned int unka84;
-    unsigned int unka88;
-    unsigned int unka8c;
-    unsigned int unka90;
-    unsigned int unka94;
-    unsigned int unka98;
-    unsigned int unka9c;
-    unsigned int unkaa0;
-    unsigned int unkaa4;
-    unsigned int unkaa8;
-    unsigned int unkaac;
-    unsigned int unkab0;
-    unsigned int unkab4;
-    unsigned int unkab8;
-    unsigned int unkabc;
-    unsigned int unkac0;
-    unsigned int unkac4;
-    unsigned int unkac8;
-    unsigned int unkacc;
-    unsigned int unkad0;
-    unsigned int unkad4;
-    unsigned int unkad8;
-    unsigned int unkadc;
-    unsigned int unkae0;
-    unsigned int unkae4;
-    unsigned int unkae8;
-    unsigned int unkaec;
-    void FUN_00749a40(int slot);
-};
+
 // Updates slots with 128.0f or 255.0f according to flag checks, recursively processing grouped slots.
 // @fnv 0x00749a40
-void Menu_749a40::FUN_00749a40(int slot)
+void CaravanMenu::FUN_00749a40(int slot)
 {
     if (slot == -1)
-        slot = state;
+        slot = (*(unsigned int*)((char*)this + 0x28));
     switch (slot)
     {
     case 0:
@@ -23910,90 +18421,90 @@ void Menu_749a40::FUN_00749a40(int slot)
     case 6:
         break;
     case 7:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(2) || ((FUN_00740f10_shell*)this)->FUN_00740f10(1))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(2) || ((CaravanMenu*)this)->FUN_00740f10(1))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 37:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(4) || ((FUN_00740f10_shell*)this)->FUN_00740f10(1))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(4) || ((CaravanMenu*)this)->FUN_00740f10(1))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 36:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(16) || ((FUN_00740f10_shell*)this)->FUN_00740f10(1))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(16) || ((CaravanMenu*)this)->FUN_00740f10(1))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 8:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(2))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(2))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
         {
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
-            if (unkaec < 30)
-                (*((Slot_749a40*)((FNV_74A000_Root*)this)->slots[slot])->list.FUN_0073ac90(4009, 128.0f, 1))
-                    ->SetFloat();
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
+            if ((*reinterpret_cast<unsigned int*>((reinterpret_cast<char*>(this) + 0xaec))) < 30)
+                (*((Slot_749a40*)reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(this) + 0x30)[slot])->list.FUN_0073ac90(4009, 128.0f, 1))
+                    ->FUN_00a012d0();
             else
-                (*((Slot_749a40*)((FNV_74A000_Root*)this)->slots[slot])->list.FUN_0073ac90(4009, 255.0f, 1))
-                    ->SetFloat();
+                (*((Slot_749a40*)reinterpret_cast<FNV_74A000_Slot**>(reinterpret_cast<char*>(this) + 0x30)[slot])->list.FUN_0073ac90(4009, 255.0f, 1))
+                    ->FUN_00a012d0();
         }
         break;
     case 9:
-        ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+        ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 10:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(64))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(64))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 11:
-        ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+        ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 12:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(4) || ((FUN_00740f10_shell*)this)->FUN_00740f10(1))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(4) || ((CaravanMenu*)this)->FUN_00740f10(1))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 13:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(16) || ((FUN_00740f10_shell*)this)->FUN_00740f10(1))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(16) || ((CaravanMenu*)this)->FUN_00740f10(1))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 14:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(2) || ((FUN_00740f10_shell*)this)->FUN_00740f10(1))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(2) || ((CaravanMenu*)this)->FUN_00740f10(1))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 20:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(128) || ((FUN_00740f10_shell*)this)->FUN_00740f10(1))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(128) || ((CaravanMenu*)this)->FUN_00740f10(1))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 21:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(256) || ((FUN_00740f10_shell*)this)->FUN_00740f10(1))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(256) || ((CaravanMenu*)this)->FUN_00740f10(1))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 19:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(4) || ((FUN_00740f10_shell*)this)->FUN_00740f10(1))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(4) || ((CaravanMenu*)this)->FUN_00740f10(1))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     case 22:
-        if (((FUN_00740f10_shell*)this)->FUN_00740f10(8) || ((FUN_00740f10_shell*)this)->FUN_00740f10(1))
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 128.0f);
+        if (((CaravanMenu*)this)->FUN_00740f10(8) || ((CaravanMenu*)this)->FUN_00740f10(1))
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 128.0f);
         else
-            ((FNV_74A000_This*)this)->FUN_0074a000(slot, 255.0f);
+            ((CaravanMenu*)this)->FUN_0074a000(slot, 255.0f);
         break;
     }
 }
@@ -24047,13 +18558,6 @@ struct FixedStr
     void* m_pData;
     FixedStr(const char* str);
     ~FixedStr();
-};
-struct Point3
-{
-    float x;
-    float y;
-    float z;
-    Point3(float ax, int ay, int az);
 };
 struct AnimSeq
 {
@@ -24128,7 +18632,7 @@ struct SceneNode
     virtual void v59();
     virtual void RemoveChildAt(int index);
     void FUN_00450f90(int visible);
-    void FUN_00a59c60(const Point3& pos);
+    void FUN_00a59c60(const NiUpdateData& pos);
     void FUN_004bc1f0(float x, float y, float z);
     AnimCtrl* FUN_00a5c570(void* rtti);
     int FUN_00453470();
@@ -24150,7 +18654,7 @@ struct UiTile
     void FUN_00715c60(int id, int value);
     UiTile* FUN_00a03da0(const char* name);
     float FUN_00a011b0(int id, int flag);
-    void SetFloat(int id, float value);
+    void FUN_00a012d0(int id, float value);
     void SetChangeFlag(int value);
 };
 struct GameSetting
@@ -24191,259 +18695,116 @@ int __cdecl FUN_00944460(int lo, int hi);
 int __cdecl FUN_00406d00(char* buf, int size, const char* fmt, ...);
 void __cdecl FUN_00a6d2d0(SceneNode* node);
 
-struct CaravanMenuX
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int m_28;
-    int m_2c;
-    UiTile* m_pTile30;
-    UiTile* m_pTile34;
-    UiTile* m_pTile38;
-    UiTile* m_pTile3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    UiTile* m_pTile70;
-    UiTile* m_pTile74;
-    UiTile* m_pTile78;
-    UiTile* m_pTile7c;
-    UiTile* m_pTile80;
-    UiTile* m_pTile84;
-    UiTile* m_pTile88;
-    UiTile* m_pTile8c;
-    UiTile* m_pTile90;
-    UiTile* m_pTile94;
-    UiTile* m_pTile98;
-    UiTile* m_pTile9c;
-    UiTile* m_pTilea0;
-    UiTile* m_pTilea4;
-    UiTile* m_pTilea8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    UiTile* m_pTilee0;
-    UiTile* m_pTilee4;
-    UiTile* m_pTilee8;
-    int unkEC;
-    int unkF0;
-    int unkF4;
-    int unkF8;
-    int unkFC;
-    int unk100;
-    CardNode* m_pPending;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int m_188;
-    int m_18c;
-    SceneNode* m_pDecks[2];
-    SceneNode* m_pCardNodes[6][7];
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int m_254;
-    int m_258[6];
-    int m_270;
-    int m_274[6];
-    AnimCtrl* m_pDeckCtrl[2];
-    AnimSeq* m_pDeckSeqA[2][6];
-    AnimSeq* m_pDeckSeqB[2][8];
-    AnimCtrl* m_pCardCtrl[6][7];
-    CardAnims m_cardAnims[6][7];
-    int m_8ec[0x60];
-    CardArray m_hand;
-    int unkA7C;
-    int unkA80;
-    int unkA84;
-    int unkA88;
-    int unkA8C;
-    int unkA90;
-    int unkA94;
-    int unkA98;
-    int unkA9C;
-    int unkAA0;
-    int unkAA4;
-    int unkAA8;
-    int unkAAC;
-    int unkAB0;
-    int unkAB4;
-    int unkAB8;
-    int unkABC;
-    int unkAC0;
-    int unkAC4;
-    int unkAC8;
-    int unkACC;
-    int unkAD0;
-    int unkAD4;
-    int unkAD8;
-    int unkADC;
-    int unkAE0;
-    int unkAE4;
-    int m_ae8;
-    int unkAEC;
-    int unkAF0;
-    int unkAF4;
-    int unkAF8;
-    int unkAFC;
-    int unkB00;
-    CardArray m_deckA;
-    CardArray m_deckB;
-    CardArray m_drawA;
-    CardArray m_drawB;
-    CardArray m_slots[6][7];
-    SlotState m_slotState[6];
-    int unkE2C;
-    int unkE30;
-    int unkE34;
-    int unkE38;
-    int unkE3C;
-    int m_e40;
-    int m_e44;
-    int m_e48;
-    int m_e4c;
-    int m_e50;
-    SceneNode* m_pPlayerGrid[3];
-    SceneNode* m_pOppGrid[3];
-    SceneNode* m_pSelectAdd;
-    SceneNode* m_pSelectRemove;
-    void FUN_0073ea90();
-    void UpdateHandStats(int index);
-    void SetFlag(int flag, int set);
-    void UpdateDeckCardNodes(int which, int set);
-    void ClearField();
-    void UpdateControls();
-};
+
 
 // Routes m_hand cards to player and opponent lists, draws eight cards from each deck, builds scene nodes and animation controls, and updates UI tiles.
 // @fnv 0x0073ea90
-void CaravanMenuX::FUN_0073ea90()
+}  // namespace fnv_0073ea90
+
+void CaravanMenu::FUN_0073ea90()
 {
+    using fnv_0073ea90::AnimCtrl;
+    using fnv_0073ea90::AnimPair;
+    using fnv_0073ea90::AnimSeq;
+    using fnv_0073ea90::CaravanGame;
+    using fnv_0073ea90::Card;
+    using fnv_0073ea90::CardAnims;
+    using fnv_0073ea90::CardArray;
+    using fnv_0073ea90::CardBase0;
+    using fnv_0073ea90::CardBase1;
+    using fnv_0073ea90::CardList;
+    using fnv_0073ea90::CardNode;
+    using fnv_0073ea90::DAT_0102caf8;
+    using fnv_0073ea90::DAT_0106c948;
+    using fnv_0073ea90::DAT_011c3b3c;
+    using fnv_0073ea90::DAT_011d1fec;
+    using fnv_0073ea90::DAT_011d24b4;
+    using fnv_0073ea90::DAT_011d2964;
+    using fnv_0073ea90::DAT_011d29f4;
+    using fnv_0073ea90::DAT_011d4198;
+    using fnv_0073ea90::DAT_011d41f8;
+    using fnv_0073ea90::DAT_011d4204;
+    using fnv_0073ea90::DAT_011d4d80;
+    using fnv_0073ea90::DAT_011d91e4;
+    using fnv_0073ea90::DAT_011dea3c;
+    using fnv_0073ea90::DAT_011f36ac;
+    using fnv_0073ea90::FUN_00406d00;
+    using fnv_0073ea90::FUN_00944460;
+    using fnv_0073ea90::FUN_00a6d2d0;
+    using fnv_0073ea90::FixedStr;
+    using fnv_0073ea90::GameSetting;
+    using fnv_0073ea90::ModelLoader;
+    using fnv_0073ea90::SceneNode;
+    using fnv_0073ea90::SceneRoot;
+    using fnv_0073ea90::SlotState;
+    using fnv_0073ea90::UiTile;
     CardList* pPlayerList = DAT_011dea3c->GetField618();
     CardList* pOpponent = DAT_011dea3c->GetField614();
     pPlayerList->FUN_00470470();
     pOpponent->FUN_00470470();
 
-    for (unsigned int i = 0; i < m_hand.FUN_0044ddc0(); i++)
+    for (unsigned int i = 0; i < (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_0044ddc0(); i++)
     {
-        if (m_hand.FUN_006a7ad0(i)->FUN_0073cb80())
+        if ((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_006a7ad0(i)->FUN_0073cb80())
         {
-            pPlayerList->FUN_005ae3d0(m_hand.FUN_006a7ad0(i));
-            m_deckA.FUN_007cb2e0(m_hand.FUN_006a7ad0(i));
+            pPlayerList->FUN_005ae3d0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_006a7ad0(i));
+            (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_007cb2e0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_006a7ad0(i));
         }
         else
         {
-            pOpponent->FUN_005ae3d0(m_hand.FUN_006a7ad0(i));
+            pOpponent->FUN_005ae3d0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_006a7ad0(i));
         }
     }
 
-    while (m_pPending && *m_pPending->FUN_006815c0())
+    while ((*reinterpret_cast<CardNode**>((reinterpret_cast<char*>(this) + 0x104))) && *(*reinterpret_cast<CardNode**>((reinterpret_cast<char*>(this) + 0x104)))->FUN_006815c0())
     {
-        m_deckB.FUN_007cb2e0(*m_pPending->FUN_006815c0());
-        m_pPending = m_pPending->FUN_00726070();
+        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).FUN_007cb2e0(*(*reinterpret_cast<CardNode**>((reinterpret_cast<char*>(this) + 0x104)))->FUN_006815c0());
+        (*reinterpret_cast<CardNode**>((reinterpret_cast<char*>(this) + 0x104))) = (*reinterpret_cast<CardNode**>((reinterpret_cast<char*>(this) + 0x104)))->FUN_00726070();
     }
 
     for (int iDraw = 0; iDraw < 8; iDraw++)
     {
-        int iPick = FUN_00944460(0, m_deckA.FUN_0044ddc0());
-        m_drawA.FUN_007cb2e0(m_deckA.FUN_006a7ad0(iPick));
-        m_deckA.FUN_009a4320(iPick, 1);
-        iPick = FUN_00944460(0, m_deckB.FUN_0044ddc0());
-        m_drawB.FUN_007cb2e0(m_deckB.FUN_006a7ad0(iPick));
-        m_deckB.FUN_009a4320(iPick, 1);
+        int iPick = FUN_00944460(0, (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_0044ddc0());
+        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb24))).FUN_007cb2e0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_006a7ad0(iPick));
+        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_009a4320(iPick, 1);
+        iPick = FUN_00944460(0, (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).FUN_0044ddc0());
+        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb34))).FUN_007cb2e0((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).FUN_006a7ad0(iPick));
+        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).FUN_009a4320(iPick, 1);
     }
 
-    m_e40 = FUN_00944460(0, m_deckA.FUN_0044ddc0());
-    m_e44 = FUN_00944460(0, m_deckB.FUN_0044ddc0());
-    m_pPending = 0;
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xe40))) = FUN_00944460(0, (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_0044ddc0());
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xe44))) = FUN_00944460(0, (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).FUN_0044ddc0());
+    (*reinterpret_cast<CardNode**>((reinterpret_cast<char*>(this) + 0x104))) = 0;
     pPlayerList = 0;
     pOpponent = 0;
 
-    if (m_hand.FUN_0044ddc0() > 0)
+    if ((*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_0044ddc0() > 0)
     {
-        m_hand.FUN_008454f0(1);
+        (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_008454f0(1);
     }
     for (int iClear = 0; iClear < 0x60; iClear++)
     {
-        m_8ec[iClear] = 0;
+        (*reinterpret_cast<int (*)[0x60]>((reinterpret_cast<char*>(this) + 0x8ec)))[iClear] = 0;
     }
-    m_hand.FUN_008454f0(1);
-    m_254 = 0;
-    m_270 = 0;
+    (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xa6c))).FUN_008454f0(1);
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x254))) = 0;
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x270))) = 0;
     for (int iLane = 0; iLane < 6; iLane++)
     {
-        m_258[iLane] = 0;
-        m_274[iLane] = 0;
+        (*reinterpret_cast<int (*)[6]>((reinterpret_cast<char*>(this) + 0x258)))[iLane] = 0;
+        (*reinterpret_cast<int (*)[6]>((reinterpret_cast<char*>(this) + 0x274)))[iLane] = 0;
     }
     for (int iClear2 = 0; iClear2 < 0x60; iClear2++)
     {
-        m_8ec[iClear2] = 0;
+        (*reinterpret_cast<int (*)[0x60]>((reinterpret_cast<char*>(this) + 0x8ec)))[iClear2] = 0;
     }
 
     DAT_011d91e4.FUN_00559450()->RemoveChildAt(DAT_011d91e4.FUN_00559450()->FUN_00453470() - 1);
     DAT_011d91e4.FUN_00559450()->RemoveChildAt(DAT_011d91e4.FUN_00559450()->FUN_00453470() - 1);
     DAT_011c3b3c->FUN_0045a5e0("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Deck.NIF");
     DAT_011c3b3c->FUN_0045a5e0("Meshes\\Terminals\\NV_Caravan\\NV_Caravan-Available.NIF");
-    m_188 = 0;
-    m_18c = 0;
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x188))) = 0;
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x18c))) = 0;
 
     char szModel[0x104];
     for (int iSide = 0; iSide < 3; iSide++)
@@ -24452,72 +18813,72 @@ void CaravanMenuX::FUN_0073ea90()
         {
             FUN_00406d00(szModel, 0x104, "%sPlayer_%i_0%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iSide + 1,
                          iCard + 1);
-            m_pCardNodes[iSide][iCard] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-            DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pCardNodes[iSide][iCard], 1);
+            (*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide][iCard] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
+            DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide][iCard], 1);
             FUN_00406d00(szModel, 0x104, "%sOpponent_%i_0%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iSide + 1,
                          iCard + 1);
-            m_pCardNodes[iSide + 3][iCard] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-            DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pCardNodes[iSide + 3][iCard], 1);
+            (*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide + 3][iCard] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
+            DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iSide + 3][iCard], 1);
         }
     }
 
     for (int iGrid = 0; iGrid < 3; iGrid++)
     {
         FUN_00406d00(szModel, 0x104, "%sPlayerGrid_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iGrid + 1);
-        m_pPlayerGrid[iGrid] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
+        (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe54)))[iGrid] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
         FUN_00406d00(szModel, 0x104, "%sOppGrid_%i.NIF", "Meshes\\Terminals\\NV_Caravan\\", iGrid + 1);
-        m_pOppGrid[iGrid] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
+        (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe60)))[iGrid] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
     }
 
     FUN_00406d00(szModel, 0x104, "%sSelect_Add.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-    m_pSelectAdd = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pSelectAdd, 1);
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c))) = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
+    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c))), 1);
     FUN_00406d00(szModel, 0x104, "%sSelect_Remove.NIF", "Meshes\\Terminals\\NV_Caravan\\");
-    m_pSelectRemove = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pSelectRemove, 1);
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70))) = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
+    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70))), 1);
 
     FUN_00406d00(szModel, 0x104, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Player_Deck.NIF");
-    m_pDecks[0] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
+    (*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[0] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
     FUN_00406d00(szModel, 0x104, "%s%s", "Meshes\\Terminals\\NV_Caravan\\", "Opponent_Deck.NIF");
-    m_pDecks[1] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
-    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pDecks[0], 1);
-    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot(m_pDecks[1], 1);
+    (*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[1] = DAT_011c3b3c->LoadModel(szModel, 0, 1, 0, 0, 0);
+    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[0], 1);
+    DAT_011d91e4.FUN_00559450()->AttachChildInAvailableSlot((*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[1], 1);
 
     for (int iGridPos = 0; iGridPos < 6; iGridPos++)
     {
-        m_pPlayerGrid[iGridPos]->FUN_00450f90(1);
-        m_pPlayerGrid[iGridPos]->FUN_00a59c60(Point3(0.0f, 0, 0));
+        (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe54)))[iGridPos]->FUN_00450f90(1);
+        (*reinterpret_cast<SceneNode* (*)[3]>((reinterpret_cast<char*>(this) + 0xe54)))[iGridPos]->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
     }
-    m_pSelectAdd->FUN_00a59c60(Point3(0.0f, 0, 0));
-    m_pSelectRemove->FUN_00a59c60(Point3(0.0f, 0, 0));
-    m_pSelectAdd->FUN_004bc1f0(0.0f, 0.0f, DAT_0102caf8);
-    m_pSelectRemove->FUN_004bc1f0(0.0f, 0.0f, DAT_0102caf8);
-    m_pSelectAdd->FUN_00a59c60(Point3(0.0f, 0, 0));
-    m_pSelectRemove->FUN_00a59c60(Point3(0.0f, 0, 0));
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c)))->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70)))->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c)))->FUN_004bc1f0(0.0f, 0.0f, DAT_0102caf8);
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70)))->FUN_004bc1f0(0.0f, 0.0f, DAT_0102caf8);
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe6c)))->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
+    (*reinterpret_cast<SceneNode**>((reinterpret_cast<char*>(this) + 0xe70)))->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
 
     AnimCtrl* pCtrl;
     for (int iDeck = 0; iDeck < 2; iDeck++)
     {
-        pCtrl = m_pDecks[iDeck]->FUN_00a5c570(&DAT_011f36ac);
+        pCtrl = (*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[iDeck]->FUN_00a5c570(&DAT_011f36ac);
         if (pCtrl != 0)
         {
-            m_pDeckCtrl[iDeck] = pCtrl;
-            m_pDeckSeqA[iDeck][0] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck-Cards_In"));
-            m_pDeckSeqA[iDeck][1] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck-Card1_Out"));
-            m_pDeckSeqA[iDeck][2] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck-Card2_Out"));
-            m_pDeckSeqA[iDeck][3] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck-Card3_Out"));
-            m_pDeckSeqA[iDeck][4] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck-Card4_Out"));
-            m_pDeckSeqA[iDeck][5] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck-Card5_Out"));
-            m_pDeckSeqB[iDeck][0] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck8-Card1_Out"));
-            m_pDeckSeqB[iDeck][1] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck8-Card2_Out"));
-            m_pDeckSeqB[iDeck][2] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck8-Card3_Out"));
-            m_pDeckSeqB[iDeck][3] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck8-Card4_Out"));
-            m_pDeckSeqB[iDeck][4] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck8-Card5_Out"));
-            m_pDeckSeqB[iDeck][5] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck8-Card6_Out"));
-            m_pDeckSeqB[iDeck][6] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck8-Card7_Out"));
-            m_pDeckSeqB[iDeck][7] = m_pDeckCtrl[iDeck]->FUN_0047a520(FixedStr("Deck8-Card8_Out"));
-            m_pDeckCtrl[iDeck]->FUN_0048fef0(0.0f);
-            FUN_00a6d2d0(m_pDecks[iDeck]);
+            (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck] = pCtrl;
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][0] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Cards_In"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][1] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Card1_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][2] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Card2_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][3] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Card3_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][4] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Card4_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][6]>((reinterpret_cast<char*>(this) + 0x294)))[iDeck][5] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck-Card5_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][0] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card1_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][1] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card2_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][2] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card3_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][3] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card4_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][4] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card5_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][5] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card6_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][6] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card7_Out"));
+            (*reinterpret_cast<AnimSeq* (*)[2][8]>((reinterpret_cast<char*>(this) + 0x2c4)))[iDeck][7] = (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0047a520(FixedStr("Deck8-Card8_Out"));
+            (*reinterpret_cast<AnimCtrl* (*)[2]>((reinterpret_cast<char*>(this) + 0x28c)))[iDeck]->FUN_0048fef0(0.0f);
+            FUN_00a6d2d0((*reinterpret_cast<SceneNode* (*)[2]>((reinterpret_cast<char*>(this) + 0x190)))[iDeck]);
         }
     }
 
@@ -24525,112 +18886,102 @@ void CaravanMenuX::FUN_0073ea90()
     {
         for (int iCol = 0; iCol < 7; iCol++)
         {
-            pCtrl = m_pCardNodes[iRow][iCol]->FUN_00a5c570(&DAT_011f36ac);
+            pCtrl = (*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iRow][iCol]->FUN_00a5c570(&DAT_011f36ac);
             if (pCtrl != 0)
             {
-                m_pCardCtrl[iRow][iCol] = pCtrl;
-                m_cardAnims[iRow][iCol].pairs[0].pIn = m_pCardCtrl[iRow][iCol]->FUN_0047a520(FixedStr("Card1_In"));
-                m_cardAnims[iRow][iCol].pairs[1].pIn = m_pCardCtrl[iRow][iCol]->FUN_0047a520(FixedStr("Card2_In"));
-                m_cardAnims[iRow][iCol].pairs[2].pIn = m_pCardCtrl[iRow][iCol]->FUN_0047a520(FixedStr("Card3_In"));
-                m_cardAnims[iRow][iCol].pairs[3].pIn = m_pCardCtrl[iRow][iCol]->FUN_0047a520(FixedStr("Card4_In"));
-                m_cardAnims[iRow][iCol].pairs[0].pOut = m_pCardCtrl[iRow][iCol]->FUN_0047a520(FixedStr("Card1_Out"));
-                m_cardAnims[iRow][iCol].pairs[1].pOut = m_pCardCtrl[iRow][iCol]->FUN_0047a520(FixedStr("Card2_Out"));
-                m_cardAnims[iRow][iCol].pairs[2].pOut = m_pCardCtrl[iRow][iCol]->FUN_0047a520(FixedStr("Card3_Out"));
-                m_cardAnims[iRow][iCol].pairs[3].pOut = m_pCardCtrl[iRow][iCol]->FUN_0047a520(FixedStr("Card4_Out"));
-                m_pCardCtrl[iRow][iCol]->FUN_0048fef0(0.0f);
+                (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol] = pCtrl;
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[0].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card1_In"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[1].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card2_In"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[2].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card3_In"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[3].pIn = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card4_In"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[0].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card1_Out"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[1].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card2_Out"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[2].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card3_Out"));
+                (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[3].pOut = (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0047a520(FixedStr("Card4_Out"));
+                (*reinterpret_cast<AnimCtrl* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x304)))[iRow][iCol]->FUN_0048fef0(0.0f);
                 for (int iAnim = 0; iAnim < 4; iAnim++)
                 {
-                    m_cardAnims[iRow][iCol].pairs[iAnim].pIn->FUN_007408d0(2);
-                    m_cardAnims[iRow][iCol].pairs[iAnim].pOut->FUN_007408d0(2);
+                    (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[iAnim].pIn->FUN_007408d0(2);
+                    (*reinterpret_cast<CardAnims (*)[6][7]>((reinterpret_cast<char*>(this) + 0x3ac)))[iRow][iCol].pairs[iAnim].pOut->FUN_007408d0(2);
                 }
-                FUN_00a6d2d0(m_pCardNodes[iRow][iCol]);
-                m_slots[iRow][iCol].FUN_008454f0(1);
+                FUN_00a6d2d0((*reinterpret_cast<SceneNode* (*)[6][7]>((reinterpret_cast<char*>(this) + 0x198)))[iRow][iCol]);
+                (*reinterpret_cast<CardArray (*)[6][7]>((reinterpret_cast<char*>(this) + 0xb44)))[iRow][iCol].FUN_008454f0(1);
             }
         }
     }
 
-    DAT_011d91e4.FUN_00559450()->FUN_00a59c60(Point3(0.0f, 0, 0));
+    DAT_011d91e4.FUN_00559450()->FUN_00a59c60(NiUpdateData(0.0f, 0, 0));
 
     for (int iSlot = 0; iSlot < 6; iSlot++)
     {
-        m_slotState[iSlot].iC = 0;
-        m_slotState[iSlot].iB = 5;
-        m_slotState[iSlot].iA = 0;
+        (*reinterpret_cast<SlotState (*)[6]>((reinterpret_cast<char*>(this) + 0xde4)))[iSlot].iC = 0;
+        (*reinterpret_cast<SlotState (*)[6]>((reinterpret_cast<char*>(this) + 0xde4)))[iSlot].iB = 5;
+        (*reinterpret_cast<SlotState (*)[6]>((reinterpret_cast<char*>(this) + 0xde4)))[iSlot].iA = 0;
         UpdateHandStats(iSlot);
     }
 
     SetFlag(0x800, 1);
     UpdateDeckCardNodes(1, 1);
     UpdateDeckCardNodes(0, 1);
-    m_e48 = 0;
-    m_e4c = 0;
-    m_e50 = 0;
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xe48))) = 0;
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xe4c))) = 0;
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xe50))) = 0;
     ClearField();
     SetFlag(0x4000, 1);
     SetFlag(1, 1);
 
     char szCountBuf[0x104];
     FUN_00406d00(szCountBuf, 0x104, "%i/%i", DAT_011dea3c->GetRegionDataManager(), DAT_011dea3c->FUN_00740960());
-    m_pTile70->SetTraitAndReset(DAT_011d9174, 1.0f);
-    m_pTile70->FUN_00700320(DAT_011d9174, m_ae8 * 2);
-    m_pTile74->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x70)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x70)))->FUN_00700320(DAT_011d9174, (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0xae8))) * 2);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x74)))->SetTraitAndReset(DAT_011d9174, 1.0f);
     int nLeft = DAT_011dea3c->GetFieldAtOffset61C() - DAT_011dea3c->GetField620();
-    m_pTile74->FUN_00700320(DAT_011d9174, nLeft);
-    m_pTile78->SetTraitAndReset(DAT_011d9174, 1.0f);
-    m_pTile78->FUN_00a01350(DAT_011d9174, szCountBuf, 1);
-    m_pTile98->SetTraitAndReset(DAT_011d9174, 1.0f);
-    m_pTile98->FUN_00700320(DAT_011d9174, 0);
-    m_pTile9c->SetTraitAndReset(DAT_011d9174, 1.0f);
-    m_pTile9c->FUN_00700320(DAT_011d9174, 0);
-    m_pTilea0->SetTraitAndReset(DAT_011d9174, 1.0f);
-    m_pTilea0->FUN_00700320(DAT_011d9174, 0);
-    m_pTile8c->SetTraitAndReset(DAT_011d9174, 1.0f);
-    m_pTile8c->FUN_00700320(DAT_011d9174, 0);
-    m_pTile90->SetTraitAndReset(DAT_011d9174, 1.0f);
-    m_pTile90->FUN_00700320(DAT_011d9174, 0);
-    m_pTile94->SetTraitAndReset(DAT_011d9174, 1.0f);
-    m_pTile94->FUN_00700320(DAT_011d9174, 0);
-    m_pTilea4->SetTraitAndReset(DAT_011d9174, 1.0f);
-    m_pTilea4->FUN_00715c60(DAT_011d9174, m_deckA.FUN_0044ddc0());
-    m_pTilea8->SetTraitAndReset(DAT_011d9174, 1.0f);
-    m_pTilea8->FUN_00715c60(DAT_011d9174, m_deckB.FUN_0044ddc0());
-    m_28 = 2;
-    m_2c = 2;
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x74)))->FUN_00700320(DAT_011d9174, nLeft);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x78)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x78)))->FUN_00a01350(DAT_011d9174, szCountBuf, 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x98)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x98)))->FUN_00700320(DAT_011d9174, 0);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x9c)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x9c)))->FUN_00700320(DAT_011d9174, 0);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xa0)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xa0)))->FUN_00700320(DAT_011d9174, 0);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x8c)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x8c)))->FUN_00700320(DAT_011d9174, 0);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x90)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x90)))->FUN_00700320(DAT_011d9174, 0);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x94)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x94)))->FUN_00700320(DAT_011d9174, 0);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xa4)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xa4)))->FUN_00715c60(DAT_011d9174, (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb04))).FUN_0044ddc0());
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xa8)))->SetTraitAndReset(DAT_011d9174, 1.0f);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xa8)))->FUN_00715c60(DAT_011d9174, (*reinterpret_cast<CardArray*>((reinterpret_cast<char*>(this) + 0xb14))).FUN_0044ddc0());
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x28))) = 2;
+    (*reinterpret_cast<int*>((reinterpret_cast<char*>(this) + 0x2c))) = 2;
 
-    UiTile* pInfoRect = m_pTile38->FUN_00a03da0("CGM_InfoRect");
+    UiTile* pInfoRect = (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x38)))->FUN_00a03da0("CGM_InfoRect");
     if (pInfoRect != 0)
     {
-        pInfoRect->SetFloat(0xfb1, pInfoRect->FUN_00a011b0(0xfb1, 1) + DAT_0106c948);
-        pInfoRect->SetFloat(0xfa1, pInfoRect->FUN_00a011b0(0xfa1, 1) - DAT_0106c948);
+        pInfoRect->FUN_00a012d0(0xfb1, pInfoRect->FUN_00a011b0(0xfb1, 1) + DAT_0106c948);
+        pInfoRect->FUN_00a012d0(0xfa1, pInfoRect->FUN_00a011b0(0xfa1, 1) - DAT_0106c948);
         pInfoRect->SetChangeFlag(0x11);
     }
 
-    m_pTile88->FUN_00a01350(0xfc4, DAT_011d1fec.FUN_00403df0(), 1);
-    m_pTile30->FUN_00700320(0xfa3, 0);
-    m_pTile34->FUN_00700320(0xfa3, 0);
-    m_pTile38->FUN_00700320(0xfa3, 1);
-    m_pTile3c->FUN_00700320(0xfa3, 0);
-    m_pTilee0->FUN_00a01350(0xfc4, DAT_011d2964.FUN_00403df0(), 1);
-    m_pTilee4->FUN_00a01350(0xfc4, DAT_011d24b4.FUN_00403df0(), 1);
-    m_pTilee8->FUN_00a01350(0xfc4, DAT_011d41f8.FUN_00403df0(), 1);
-    m_pTile7c->FUN_00a01350(0xfc4, DAT_011d4204.FUN_00403df0(), 1);
-    m_pTile80->FUN_00a01350(0xfc4, DAT_011d4d80.FUN_00403df0(), 1);
-    m_pTile84->FUN_00a01350(0xfc4, DAT_011d4198.FUN_00403df0(), 1);
-    m_pTile88->FUN_00a01350(0xfc4, DAT_011d29f4.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x88)))->FUN_00a01350(0xfc4, DAT_011d1fec.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x30)))->FUN_00700320(0xfa3, 0);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x34)))->FUN_00700320(0xfa3, 0);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x38)))->FUN_00700320(0xfa3, 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x3c)))->FUN_00700320(0xfa3, 0);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xe0)))->FUN_00a01350(0xfc4, DAT_011d2964.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xe4)))->FUN_00a01350(0xfc4, DAT_011d24b4.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0xe8)))->FUN_00a01350(0xfc4, DAT_011d41f8.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x7c)))->FUN_00a01350(0xfc4, DAT_011d4204.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x80)))->FUN_00a01350(0xfc4, DAT_011d4d80.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x84)))->FUN_00a01350(0xfc4, DAT_011d4198.FUN_00403df0(), 1);
+    (*reinterpret_cast<UiTile**>((reinterpret_cast<char*>(this) + 0x88)))->FUN_00a01350(0xfc4, DAT_011d29f4.FUN_00403df0(), 1);
     UpdateControls();
 }
-}  // namespace fnv_0073ea90
 
 class NiSourceTexture;
-template <class T> class NiPointer
-{
-    T* ptr;
-
-  public:
-    NiPointer(T*);
-    ~NiPointer();
-    operator T*() const;
-};
 // @fnv 0x0074df90
 void CaravanGame::UpdateCardTexture()
 {
@@ -24679,15 +19030,9 @@ struct R74Matrix
     void FUN_004a0c90(float);
     R74Matrix FUN_0043f8d0(R74Matrix&);
 };
-struct R74Sound
-{
-    unsigned int id, state, frequency;
-    ~R74Sound();
-    void Play();
-};
 struct R74Resource
 {
-    R74Sound GetSoundByEditorID(const char*, unsigned int, unsigned int);
+    BSSoundHandle GetSoundByEditorID(const char*, unsigned int);
 };
 struct R74CardSlot
 {
@@ -25574,7 +19919,7 @@ void R74Menu::SelectCard(int row, int column)
     {
         if (sideTmp)
         {
-            reinterpret_cast<R74Resource*>(FUN_00453a70())->GetSoundByEditorID(DAT_01071728, 0x121, 0).Play();
+            reinterpret_cast<R74Resource*>(FUN_00453a70())->GetSoundByEditorID(DAT_01071728, 0x121).Play(false);
             sel = left;
             reinterpret_cast<R74Positioner*>(right)->FUN_004bc1f0(0.0f, 0.0f, DAT_0104f7c4);
             reinterpret_cast<R74TextureNode*>(right)->Update(NiUpdateData(0.0f, false, false));
@@ -25590,7 +19935,7 @@ void R74Menu::SelectCard(int row, int column)
         }
         else
         {
-            reinterpret_cast<R74Resource*>(FUN_00453a70())->GetSoundByEditorID(DAT_01071a84, 0x121, 0).Play();
+            reinterpret_cast<R74Resource*>(FUN_00453a70())->GetSoundByEditorID(DAT_01071a84, 0x121).Play(false);
             sel = right;
             reinterpret_cast<R74Positioner*>(left)->FUN_004bc1f0(0.0f, 0.0f, DAT_0104f7c4);
             reinterpret_cast<R74TextureNode*>(left)->Update(NiUpdateData(0.0f, false, false));

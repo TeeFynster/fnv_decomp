@@ -13,12 +13,14 @@ void ImageSpaceEffectFourTexturePass::Setup(ImageSpaceManager* manager, ImageSpa
         ImageSpaceShaderParam* first = new ImageSpaceShaderParam;
         first->AllocateShaderConstants(0, 1);
         first->SetShaderConstantVector4(0, 0.0f, DAT_011ae6c8, DAT_011ae6cc, 0.0f);
-        pEffectParamList.SetAt(0, first);
+        ImageSpaceEffectParam* effectParam = first;
+        pEffectParamList.SetAt(0, effectParam);
         SetEffectParamAt(0, 1, 1);
 
         SetEffectAt(0, manager->GetEffect(45), first, 2);
         first = 0;
-        pEffectParamList.SetAt(1, first);
+        ImageSpaceEffectParam* nullEffectParam = first;
+        pEffectParamList.SetAt(1, nullEffectParam);
         SetTextureArrayAt(1, 2, 3, NiTexturingProperty::FILTER_NEAREST, NiTexturingProperty::FILTER_NEAREST);
 
         SetEffectAt(1, manager->GetEffect(19), first, 2);
@@ -27,7 +29,8 @@ void ImageSpaceEffectFourTexturePass::Setup(ImageSpaceManager* manager, ImageSpa
     second->AllocateShaderConstants(0, 1);
     *((unsigned char*)second + 0x56) = 0;
     second->SetShaderConstantVector4(0, 1.0f, 1.0f, 1.0f, 1.0f);
-    pEffectParamList.SetAt(2, second);
+    ImageSpaceEffectParam* effectParam = second;
+    pEffectParamList.SetAt(2, effectParam);
     SetTextureArrayAt(2, 2, 1, NiTexturingProperty::FILTER_BILERP, NiTexturingProperty::FILTER_NEAREST);
 
     SetEffectAt(2, manager->GetEffect(46), second, 0);

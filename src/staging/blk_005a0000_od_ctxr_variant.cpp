@@ -3,6 +3,13 @@
 // src/staging/blk_005a0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+// layout_support.h already provides BSSimpleList.
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/BaseFormComponent.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESRecipeCategory.h"
+#include "../../include/Script.h"
 struct FUN_005a3740_cls
 {
     unsigned char GetByteAt14C();
@@ -239,15 +246,6 @@ struct FUN_005a7b00_Class
     void InitializeFromRecord(unsigned int id);
 };
 extern "C" int __cdecl memcmp(const void* a, const void* b, unsigned int n);
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
-class TESRecipeCategory : public TESForm
-{
-  public:
-};
 struct FUN_008ad910_rd;
 class FUN_008ad910_ref
 {
@@ -277,12 +275,6 @@ struct FUN_005a7870_cls
 {
     virtual ~FUN_005a7870_cls();
 };
-struct ScriptLocals;
-struct Script
-{
-    static bool __cdecl GetValue(double& result, char const* format, unsigned int& value, TESObjectREFR* reference1,
-                                 TESObjectREFR* reference2, Script* script, ScriptLocals* locals, bool evaluate);
-};
 void* memset(void* destination, int value, unsigned int size);
 bool __cdecl FUN_005b4960(int unused, char const* data, TESObjectREFR* reference1, TESObjectREFR* reference2,
                           Script* script, ScriptLocals* locals, int unused2, unsigned int& value, char const* format,
@@ -290,11 +282,6 @@ bool __cdecl FUN_005b4960(int unused, char const* data, TESObjectREFR* reference
 
 // Generated address-based names identify the native TESForm base destructor
 // and TESRecipe destructor to this checker; layouts/ownership follow native RTTI.
-class BaseFormComponent
-{
-  public:
-    virtual ~BaseFormComponent();
-};
 class FUN_00483630_holder : public BaseFormComponent
 {
   public:
@@ -306,12 +293,6 @@ class FUN_00483630_holder : public BaseFormComponent
     unsigned int unk10;
     unsigned int unk14;
     virtual ~FUN_00483630_holder();
-};
-class TESFullName : public BaseFormComponent
-{
-  public:
-    BSStringT<char> fullName;
-    virtual ~TESFullName();
 };
 class FUN_005a7d40 : public FUN_00483630_holder, public TESFullName
 {

@@ -1,9 +1,11 @@
+#include "../../../../../include/hkArray.h"
 // src/havok/common/serialize/copier/hkobjectcopier_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-31 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/common/serialize/copier/hkobjectcopier.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
 
 #include "fnv_asm_helpers.h"
+#include "../../../../../include/Pair.h"
 int __stdcall FUN_00e032d0(const void* a, const void* b);
 int __cdecl FUN_00e049c0(int a, int b);
 extern int DAT_0102e388;
@@ -29,21 +31,7 @@ struct E04A00Entry {
     void* m_iThirdValue;
     void* m_iFourthElementInteger;
 };
-struct E04A00EntryArray {
-    E04A00Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    void _pushBack(E04A00Allocator& alloc, const E04A00Entry& e)
-    {
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(&alloc, this, sizeof(E04A00Entry));
-        m_data[m_iElementCount] = e;
-        m_iElementCount++;
-    }
-
-    void AddBack(const E04A00Entry& e) { _pushBack(FUN_00c85750().heap(), e); }
-};
+typedef hkArray<E04A00Entry> E04A00EntryArray;
 struct E04A00Registry {
     int unk00;
     int unk04;
@@ -79,10 +67,6 @@ struct FUN_00e03120 {
 };
 struct Writer {
     void write(const void* data, int elemSize, int count);
-};
-struct Pair {
-    unsigned int lo;
-    unsigned int hi;
 };
 extern "C" unsigned int* __cdecl FNV_e03300_arena();
 static void WriteUIntArray(const unsigned int* data, int count, Writer* pWriter, int elemSize);
@@ -205,13 +189,13 @@ struct Reader
     virtual void r1c();
     virtual int GetReadOffset();
 };
-struct CharArray
-{
+struct CharArrayLocalForm
+{ // local form of hkArray: 0x00e03460 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     char* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    CharArray() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
+    CharArrayLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
     __forceinline void destroy(HeapAlloc* h)
     {
         m_iElementCount = 0;
@@ -234,7 +218,7 @@ struct CharArray
         m_iElementCount = n;
     }
 };
-struct LocalCharArray : CharArray
+struct LocalCharArray : CharArrayLocalForm
 {
     char* m_localMem;
 
@@ -314,11 +298,6 @@ struct S00e03ea0_Writer {
     void WriteSwapped(const void* p, int size, int n);
 };
 
-struct S00e03ea0_Scr2 {
-    int a;
-    int b;
-};
-
 struct S00e03ea0_Scr4 {
     int a;
     int b;
@@ -337,7 +316,7 @@ struct RootPair {
     const char* name;
     RootPair(int where, const char* what) : offset(where), name(what) {}
 };
-struct S00e03ea0_PairArray {
+struct S00e03ea0_PairArrayLocalForm { // local form of hkArray: 0x00e03ea0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     RootPair* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -352,7 +331,7 @@ struct S00e03ea0_PairArray {
         m_iElementCount++;
     }
 
-    void AddBack(const RootPair& e) { _pushBack(FUN_00c85750().heap(), e); }
+    void pushBack(const RootPair& e) { _pushBack(FUN_00c85750().heap(), e); }
 };
 
 struct S00e03ea0_Out {
@@ -362,7 +341,7 @@ struct S00e03ea0_Out {
     int unk0c;
     int unk10;
     int unk14;
-    S00e03ea0_PairArray m_pairs;
+    S00e03ea0_PairArrayLocalForm m_pairs;
 
     void AppendPair(int at, int data);
     void AddEntry(int at, void* obj, void* cls, int n);
@@ -399,9 +378,9 @@ struct S00e03ea0_Error {
 struct S00e03ea0_Locals {
     S00e03ea0_Ostream osDefault;
     S00e03ea0_Ostream os13;
-    S00e03ea0_Scr2 s21;
-    S00e03ea0_Scr2 s14;
-    S00e03ea0_Scr2 s1d;
+    int s21[2];
+    int s14[2];
+    int s1d[2];
     S00e03ea0_Scr4 s1c;
     char buf[512];
 };
@@ -425,8 +404,8 @@ __declspec(noinline) static void WriteUIntArray(const unsigned int* data, int co
         *arena = mark + ((count * 8 + 127) & ~127u);
         Pair* converted = (Pair*)mark;
         for (int i = 0; i < count; ++i) {
-            converted[i].lo = data[i];
-            converted[i].hi = 0;
+            converted[i].a = data[i];
+            converted[i].b = 0;
         }
         w->write(converted, elemSize, count);
         *FNV_e03300_arena() = mark;
@@ -515,7 +494,7 @@ void S00e03ea0_Ser::FUN_00e03ea0(char* src, S00e03ea0_Schema* srcClass, S00e03ea
 
     if (depth == 0) {
         RootPair p(dst, dstClass->FUN_00d46d40());
-        out->m_pairs.AddBack(p);
+        out->m_pairs.pushBack(p);
     }
     depth++;
 
@@ -564,7 +543,7 @@ void S00e03ea0_Ser::FUN_00e03ea0(char* src, S00e03ea0_Schema* srcClass, S00e03ea
                 break;
             if (sub == 0x14) {
                 out->AppendPair(dst + member->getOffset(), (int)writer->FUN_00d60800()->v20());
-                S00e03ea0_Scr2& scratch = sc.s14;
+                Pair& scratch = reinterpret_cast<Pair&>(sc.s14);
                 scratch.a = 0;
                 scratch.b = 0;
                 int stride = type->GetTagValue();
@@ -580,7 +559,7 @@ void S00e03ea0_Ser::FUN_00e03ea0(char* src, S00e03ea0_Schema* srcClass, S00e03ea
                 } while (++j < arr->m_iElementCount); }
             } else if (sub == 0x1d) {
                 out->AppendPair(dst + member->getOffset(), (int)writer->FUN_00d60800()->v20());
-                S00e03ea0_Scr2& scratch = sc.s1d;
+                Pair& scratch = reinterpret_cast<Pair&>(sc.s1d);
                 scratch.a = 0;
                 scratch.b = 0;
                 int d = (int)writer->FUN_00d60800()->v20();
@@ -594,7 +573,7 @@ void S00e03ea0_Ser::FUN_00e03ea0(char* src, S00e03ea0_Schema* srcClass, S00e03ea
                 }
             } else if (sub == 0x21) {
                 out->AppendPair(dst + member->getOffset(), (int)writer->FUN_00d60800()->v20());
-                S00e03ea0_Scr2& scratch = sc.s21;
+                Pair& scratch = reinterpret_cast<Pair&>(sc.s21);
                 scratch.a = 0;
                 scratch.b = 0;
                 int d = (int)writer->FUN_00d60800()->v20();

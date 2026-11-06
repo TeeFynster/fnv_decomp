@@ -5,22 +5,10 @@
 
 // src/fallout/magic/magiccaster_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/magic/magiccaster.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
-#include "magiccaster_private_match.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/Setting.h"
 
 #include <xmmintrin.h>
-struct Vec3
-{
-    float x, y, z;
-    Vec3();
-    Vec3(float ix, float iy, float iz);
-    Vec3 FUN_00439e90(const Vec3& source);
-};
-struct Box3
-{
-    Vec3 minimum;
-    Vec3 maximum;
-    int kind;
-};
 struct __declspec(align(16)) BoundShape
 {
     int field00, field04, field08, field0c, field10, field14, field18, field1c;
@@ -83,7 +71,7 @@ struct TargetInterface
     int unused90;
     int origin94;
     bool FUN_008ace90();
-    float FUN_00572380(Vec3* point);
+    float FUN_00572380(NiPoint3* point);
     struct TargetInterface** FUN_006815c0();
     TargetInterface* FUN_00726070();
 };
@@ -103,10 +91,6 @@ struct TimeObject
     bool FUN_00403e60(unsigned int flags);
     float FUN_00639b20();
 };
-struct CalcObject
-{
-    float* FUN_00403e20();
-};
 struct ListHandle
 {
     void* FUN_004543c0();
@@ -120,21 +104,15 @@ struct Master
     int field10;
     int field14;
     int field18;
-    void FUN_00817b90(Vec3 center, ListHandle* item, void* filter, RangeManager* source, TargetInterface* first,
+    void FUN_00817b90(NiPoint3 center, ListHandle* item, void* filter, RangeManager* source, TargetInterface* first,
                       float scale, float strength);
     TargetInterface* FUN_00815410();
     bool CheckHealthDamageKill(int* origin, void* filter);
-    void FUN_00818150(TargetInterface* selected, Vec3 location, RangeManager* source, float attenuation);
-    void ApplyExplosion(TargetInterface* selected, Vec3 location, RangeManager* source, float attenuation);
+    void FUN_00818150(TargetInterface* selected, NiPoint3 location, RangeManager* source, float attenuation);
+    void ApplyExplosion(TargetInterface* selected, NiPoint3 location, RangeManager* source, float attenuation);
 };
 extern TargetInterface* DAT_011dea3c;
-class GameSettingCollection;
-template <> class SettingT<GameSettingCollection>
-{
-  public:
-    float* FUN_00403e20();
-};
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting1112;
+extern Setting originalRuntimeFloatSetting1112;
 extern const double DAT_01012060;
 extern const double DAT_01011588;
 extern void* __stdcall FUN_005dbe10(int which);
@@ -151,12 +129,12 @@ struct FormRef
 extern int __cdecl FUN_004b59f0(int object);
 extern float __cdecl CalcEffectCost(float value, int area, int duration, int magnitude, bool special);
 extern int __cdecl FUN_00ec62c0();
-extern void __cdecl FUN_004a3e00(Vec3* destination, Vec3* source);
+extern void __cdecl FUN_004a3e00(NiPoint3* destination, NiPoint3* source);
 extern int* __cdecl FUN_00403e20(unsigned int);
 extern void* __cdecl FUN_00416870(float, float, float);
 
 // @fnv 0x00817b90
-void Master::FUN_00817b90(Vec3 center, ListHandle* item, void* filter, RangeManager* source, TargetInterface* first,
+void Master::FUN_00817b90(NiPoint3 center, ListHandle* item, void* filter, RangeManager* source, TargetInterface* first,
                           float scale, float strength)
 {
     if (source->FUN_00825c00()->FUN_00403e60(0x20000000))
@@ -169,8 +147,8 @@ void Master::FUN_00817b90(Vec3 center, ListHandle* item, void* filter, RangeMana
                                                (int)(source->FUN_00404390() * scale), source->FUN_0084e3a0() == 2);
             float size = (float)(range * DAT_01011588);
             BoundShape space;
-            FUN_004a3e00((Vec3*)&space.low, &center.FUN_00439e90(Vec3(-size, -size, -size)));
-            FUN_004a3e00((Vec3*)&space.high, &center.FUN_00439e90(Vec3(size, size, size)));
+            FUN_004a3e00((NiPoint3*)&space.low, &center.FUN_00439e90(NiPoint3(-size, -size, -size)));
+            FUN_004a3e00((NiPoint3*)&space.high, &center.FUN_00439e90(NiPoint3(size, size, size)));
             MediaSelector obj;
             space.field00 = obj.FUN_00622290(0x29, FUN_005dbe10(0))->FUN_00559450();
             PhantomShape results(&space);

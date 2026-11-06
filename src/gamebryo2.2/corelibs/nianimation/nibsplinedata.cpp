@@ -1,6 +1,17 @@
-// gamebryo2.2/corelibs/nianimation/nibsplinedata.cpp: NiBSplineData, SplData (7 functions)
+// gamebryo2.2/corelibs/nianimation/nibsplinedata.cpp: NiBSplineData (7 functions)
 
+#include "../../../../include/NiBSplineBasisData.h"
+#include "../../../../include/NiBSplineData.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiStream.h"
 #include "nibsplinedata_decls.h"
+
+// Preserve the per-transfer component size temporary used by the stream callbacks.
+inline unsigned int* ComponentSize(const unsigned int& size)
+{
+    return const_cast<unsigned int*>(&size);
+}
 
 // Reads the control point count and compact control point count from the stream, allocating and reading the corresponding float and short arrays.
 // @fnv 0x00a52870
@@ -8,28 +19,30 @@ void NiBSplineData::LoadBinary(NiStream& stream)
 {
     ReadGroup(stream);
 
-    NiBinaryStream* pStream = stream.m_pUnderlyingStream;
+    NiBinaryStream* pStream = stream.m_pkIstr;
     unsigned int* puiControlPointCount = &m_uiControlPointCount;
-    pStream->m_uiStreamFlags += pStream->m_pfnRead(pStream, puiControlPointCount, 4, 4, 1);
+    pStream->m_uiAbsoluteCurrentPos += pStream->m_pfnRead(pStream, puiControlPointCount, 4, ComponentSize(4), 1);
     if (*puiControlPointCount)
     {
         float* pfControlPoints = (float*)FUN_00aa1070(*puiControlPointCount * 4);
         unsigned int controlPointBytes = *puiControlPointCount * 4;
         m_pfControlPoints = pfControlPoints;
-        pStream = stream.m_pUnderlyingStream;
-        pStream->m_uiStreamFlags += pStream->m_pfnRead(pStream, pfControlPoints, controlPointBytes, 4, 1);
+        pStream = stream.m_pkIstr;
+        pStream->m_uiAbsoluteCurrentPos += pStream->m_pfnRead(
+            pStream, pfControlPoints, controlPointBytes, ComponentSize(4), 1);
     }
 
-    pStream = stream.m_pUnderlyingStream;
+    pStream = stream.m_pkIstr;
     puiControlPointCount = &m_uiCompactControlPointCount;
-    pStream->m_uiStreamFlags += pStream->m_pfnRead(pStream, puiControlPointCount, 4, 4, 1);
+    pStream->m_uiAbsoluteCurrentPos += pStream->m_pfnRead(pStream, puiControlPointCount, 4, ComponentSize(4), 1);
     if (*puiControlPointCount)
     {
         short* psCompactControlPoints = (short*)FUN_00aa1070(*puiControlPointCount * 2);
         unsigned int compactControlPointBytes = *puiControlPointCount * 2;
         m_psCompactControlPoints = psCompactControlPoints;
-        pStream = stream.m_pUnderlyingStream;
-        pStream->m_uiStreamFlags += pStream->m_pfnRead(pStream, psCompactControlPoints, compactControlPointBytes, 2, 1);
+        pStream = stream.m_pkIstr;
+        pStream->m_uiAbsoluteCurrentPos += pStream->m_pfnRead(
+            pStream, psCompactControlPoints, compactControlPointBytes, ComponentSize(2), 1);
     }
 }
 
@@ -83,84 +96,47 @@ void* __fastcall FUN_00a52510(void** pThis, int, unsigned int flags)
     return pThis;
 }
 
-extern "C" bool __stdcall IsSameAs(NiObject*);
-
-struct NiBSplineData_shell : NiBSplineData
-{
-    bool FUN_00a51e50(NiObject* pkObject);
-};
-
 // @fnv 0x00a51e50
-bool NiBSplineData_shell::FUN_00a51e50(NiObject* pkObject)
+bool __fastcall IsSplineDataEqual(NiBSplineData* self, int, NiObject* pkObject)
 {
-    if (IsSameAs(pkObject))
+    if (self->NiObject::IsSameAs(pkObject))
     {
         NiBSplineData* pkData = static_cast<NiBSplineData*>(pkObject);
-        if (pkData->m_uiControlPointCount == m_uiControlPointCount &&
-            pkData->m_uiCompactControlPointCount == m_uiCompactControlPointCount)
+        if (pkData->m_uiControlPointCount == self->m_uiControlPointCount &&
+            pkData->m_uiCompactControlPointCount == self->m_uiCompactControlPointCount)
             return true;
     }
     return false;
 }
 
-struct NiBSplineBaseStand
+template <class T> inline void WriteSplineValue(NiBinaryStream* stream, T* value)
 {
-    void* vtable;
-    unsigned int refCount;
-    void LoadStream(NiStream& stream);
-};
+    unsigned int size = sizeof(T);
+    stream->m_uiAbsoluteCurrentPos += stream->m_pfnWrite(stream, value, sizeof(T), &size, 1);
+}
 
-struct NiBSplineBinaryView
+inline void NiBinaryStream::BinaryWrite(const void* buffer, unsigned int totalBytes, unsigned int elementSize)
 {
-    void* vtable;
-    unsigned int absolutePosition;
-    unsigned int unk08;
-    unsigned int(__cdecl* read)(NiBSplineBinaryView* stream, void* buffer, unsigned int totalBytes,
-                                unsigned int* componentSizes, unsigned int componentCount);
+    unsigned int size = elementSize;
+    m_uiAbsoluteCurrentPos += m_pfnWrite(this, buffer, totalBytes, &size, 1);
+}
 
-    template <class T> void Load(T* value)
-    {
-        unsigned int size = sizeof(T);
-        absolutePosition += read(this, value, sizeof(T), &size, 1);
-    }
-
-    void LoadArray(void* buffer, unsigned int totalBytes, unsigned int elementSize)
-    {
-        unsigned int size = elementSize;
-        absolutePosition += read(this, buffer, totalBytes, &size, 1);
-    }
-};
-
-struct NiBSplineStreamView
-{
-    void* vtable;
-    unsigned int version;
-    char unk08[0x248];
-    NiBSplineBinaryView* m_pUnderlyingStream;
-};
-
-struct FUN_00a52950_cls : NiBSplineData
-{
-    void LoadControlPoints(NiStream& stream);
-};
-
-// Loads the base spline data, then reads the control point count and its array, followed by the compact control point count and its array.
+// Saves the base spline data, then writes the control point count and array, followed by the compact control points.
 // @fnv 0x00a52950
-void FUN_00a52950_cls::LoadControlPoints(NiStream& stream)
+void __fastcall SaveSplineControlPoints(NiBSplineData* self, int, NiStream& stream)
 {
-    reinterpret_cast<NiBSplineBaseStand*>(this)->LoadStream(stream);
-    NiBSplineStreamView* pStreamView = reinterpret_cast<NiBSplineStreamView*>(&stream);
-    pStreamView->m_pUnderlyingStream->Load(&m_uiControlPointCount);
-    if (m_uiControlPointCount != 0)
+    self->NiObject::SaveBinary(stream);
+    WriteSplineValue(stream.m_pkOstr, &self->m_uiControlPointCount);
+    if (self->m_uiControlPointCount != 0)
     {
-        void* buf = m_pfControlPoints;
-        unsigned int bytes = m_uiControlPointCount * 4;
-        pStreamView->m_pUnderlyingStream->LoadArray(buf, bytes, 4);
+        void* buf = self->m_pfControlPoints;
+        unsigned int bytes = self->m_uiControlPointCount * 4;
+        stream.m_pkOstr->BinaryWrite(buf, bytes, 4);
     }
-    pStreamView->m_pUnderlyingStream->Load(&m_uiCompactControlPointCount);
-    if (m_uiCompactControlPointCount != 0)
+    WriteSplineValue(stream.m_pkOstr, &self->m_uiCompactControlPointCount);
+    if (self->m_uiCompactControlPointCount != 0)
     {
-        pStreamView->m_pUnderlyingStream->LoadArray(m_psCompactControlPoints, m_uiCompactControlPointCount * 2, 2);
+        stream.m_pkOstr->BinaryWrite(self->m_psCompactControlPoints, self->m_uiCompactControlPointCount * 2, 2);
     }
 }
 
@@ -183,29 +159,10 @@ struct ArrayArg
     void FUN_0096ae90(unsigned int uiPos, void* pvData);
 };
 
-struct NiBase_stand
-{
-    void* vtable;
-    unsigned int refcount;
-    void LoadStream(ArrayArg& kStream);
-};
-
-class FUN_00a52a20_cls
-{
-  public:
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int m_10;
-    unsigned int m_14;
-    void LoadFromStream(ArrayArg& kStream);
-};
-
 // @fnv 0x00a52a20
-void FUN_00a52a20_cls::LoadFromStream(ArrayArg& kStream)
+void __fastcall GetSplineViewerStrings(NiBSplineData* self, int, ArrayArg& kStream)
 {
-    reinterpret_cast<NiBase_stand*>(this)->LoadStream(kStream);
+    self->NiObject::AddViewerStrings(reinterpret_cast<NiViewerStringsArray*>(&kStream));
     {
         void* p = FUN_00a7d330(g_011f4034);
         unsigned int uiPos = kStream.m_0a;
@@ -216,7 +173,7 @@ void FUN_00a52a20_cls::LoadFromStream(ArrayArg& kStream)
         kStream.FUN_0096ae90(uiPos, &p);
     }
     {
-        void* q = FUN_00a7d510(str_01099f08, m_10);
+        void* q = FUN_00a7d510(str_01099f08, self->m_uiControlPointCount);
         unsigned int uiPos = kStream.m_0a;
         if (uiPos >= kStream.m_08)
         {
@@ -225,7 +182,7 @@ void FUN_00a52a20_cls::LoadFromStream(ArrayArg& kStream)
         kStream.FUN_0096ae90(uiPos, &q);
     }
     {
-        void* r = FUN_00a7d510(str_01099ee8, m_14);
+        void* r = FUN_00a7d510(str_01099ee8, self->m_uiCompactControlPointCount);
         unsigned int uiPos = kStream.m_0a;
         if (uiPos >= kStream.m_08)
         {
@@ -235,17 +192,10 @@ void FUN_00a52a20_cls::LoadFromStream(ArrayArg& kStream)
     }
 }
 
-class SplData : public NiBSplineData
-{
-  public:
-    void FUN_00a52550(float fTime, float* afPos, unsigned int uiDimension, NiBSplineBasisData* pkBasisData,
-                      unsigned int uiControlPointOffset);
-};
-
 // Evaluates a B-spline at fTime by accumulating weighted control points into afPos using basis weights and uiDimension.
 // @fnv 0x00a52550
-void SplData::FUN_00a52550(float fTime, float* afPos, unsigned int uiDimension, NiBSplineBasisData* pkBasisData,
-                           unsigned int uiControlPointOffset)
+void __fastcall CalculateSplineValue(NiBSplineData* self, int, float fTime, float* afPos, unsigned int uiDimension,
+                                     NiBSplineBasisData* pkBasisData, unsigned int uiControlPointOffset)
 {
     NiBSplineBasis_float_3_& kBasis = pkBasisData->GetBSplineBasis();
     int iMax;
@@ -253,7 +203,7 @@ void SplData::FUN_00a52550(float fTime, float* afPos, unsigned int uiDimension, 
     kBasis.Compute(fTime, iMin, iMax);
 
     const int iFirst = iMin;
-    const float* pkSource = &m_pfControlPoints[uiControlPointOffset + iFirst * uiDimension];
+    const float* pkSource = &self->m_pfControlPoints[uiControlPointOffset + iFirst * uiDimension];
     float fBasisValue = kBasis.weights[0];
     unsigned int j;
     for (j = 0; j < uiDimension; j++)

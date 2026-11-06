@@ -2,7 +2,8 @@
 #ifndef FNV_BGSEXPLOSION_DECLS_H
 #define FNV_BGSEXPLOSION_DECLS_H
 
-#include "TESForm.h"
+#include "layout_support.h"
+#include "../../include/TESForm.h"
 
 struct TESFormInitFlag : public TESForm
 {
@@ -10,10 +11,7 @@ struct TESFormInitFlag : public TESForm
     static TESForm* GetFormByID(unsigned int formID);
 };
 
-class TESObjectLIGH : public TESForm
-{
-};
-
+#include "../../include/TESObjectLIGH.h"
 class TESFileChunkData16
 {
   public:
@@ -21,61 +19,15 @@ class TESFileChunkData16
 };
 
 class CombatController;
-class CombatProcedure
-{
-  public:
-    void Initialize(CombatController* controller);
-};
-
-class BGSImpactData
-{
-  public:
-    void ReadTypedData(TESFile* file, void* data, unsigned short size);
-    char _pdbpad_1[47];
-    char Data_pad2f_pad2f_pad2f[24];
-    void* m_pDecalTextureSet;
-    void* m_pPrimaryImpactSound;
-    void* m_pSecondaryImpactSound;
-    char ImpactDecalInfo[36];
-};
-
-class EndianConvertibleData
-{
-  public:
-    void Endian();
-};
-class TESSound : public TESForm
-{
-};
-class BGSImpactDataSet : public TESForm
-{
-};
-
-class EffectSetting
-{
-  public:
-    unsigned char bgsexplosion_padding[0x80];
-    TESSound* bgsexplosion_castSound;
-    TESSound* bgsexplosion_boltSound;
-    TESSound* GetCastSound();
-    void SetCastSound(TESSound* sound);
-    TESSound* GetBoltSound();
-    void SetBoltSound(TESSound* sound);
-};
-
+#include "../../include/CombatProcedure.h"
+#include "../../include/BGSImpactData.h"
+#include "../../include/EndianConvertibleData.h"
+#include "../../include/TESSound.h"
+#include "../../include/BGSImpactDataSet.h"
+#include "../../include/EffectSetting.h"
 class MagicItem;
 
-class MagicCaster
-{
-  public:
-    MagicItem* GetSelectedMagicItem();
-};
-
-class PlayerMover
-{
-  public:
-    unsigned int GetActorStateFlags();
-};
-
+#include "../../include/MagicCaster.h"
+#include "../../include/PlayerMover.h"
 int Warning(const char* format, ...);
 #endif

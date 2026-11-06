@@ -5,16 +5,16 @@
 
 // src/havok/common/serialize/util/hkserializeutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/util/hkserializeutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/Pair.h"
+#include "../../../../../include/hkStringPtr.h"
+
 void __cdecl FUN_00d48620(int a, int b, int c);
 void __cdecl FUN_00d48640(int a, int b);
 extern "C" void __cdecl FUN_00d485a0(int, int, int, int, int);
 void __cdecl FUN_00d48660(int a, int b, int c);
 extern int DAT_0102e388;
 extern int DAT_010d7540;
-struct hkReferencedObject
-{
-    void removeReference();
-};
 struct FUN_00dcc160_cls
 {
     void* vtbl;
@@ -131,16 +131,6 @@ static inline int S_00d49350_Compare(const char* a, const char* b)
     }
     return b ? -1 : 0;
 }
-struct S_00d49350
-{
-    unsigned int m_pcText;
-
-    const char* cString() const
-    {
-        return (const char*)(m_pcText & ~1u);
-    }
-    int Equals(const char* s) const;
-};
 struct FUN_00d493a0_cls
 {
     char m_00;
@@ -168,11 +158,6 @@ struct D493E0Loader
     D493E0Registry* m_registry;
 
     D493E0Ref FindObject(const void* key, int flags) const;
-};
-struct Pair
-{
-    void* first;
-    void* second;
 };
 struct Vt4Obj
 {
@@ -263,11 +248,6 @@ struct S00d48d30_Stream
     virtual void v1();
     virtual void v2();
     virtual S00d48d30_Bool IsStreamValid() const;
-};
-struct hkStringPtr
-{
-    void* m_pcText;
-    void operator=(const char* s);
 };
 struct S00d48d30_Result
 {
@@ -414,13 +394,8 @@ struct FormatInfo
     hkStringPtr version;
     unsigned char layout[4];
 };
-struct StringOps
-{
-    unsigned int bits;
-    void FUN_00cb0a60();
-    void FUN_00cb0c00();
-    void FUN_00cb0c50(const char*, int);
-};
+// The shared class does not yet declare the original substring-copy method.
+extern "C" void __cdecl FUN_00cb0c50();
 struct HeapApi
 {
     virtual void v0();
@@ -593,7 +568,8 @@ static __declspec(noinline) int ParseQuotedValue(const char* text, const char* k
     const char* last = FUN_00cb1140(first, '"');
     if (!last)
         return 0;
-    reinterpret_cast<StringOps*>(&out)->FUN_00cb0c50(first, int(last - first));
+    typedef void (__thiscall* CopySubstring)(hkStringPtr*, const char*, int);
+    reinterpret_cast<CopySubstring>(&FUN_00cb0c50)(&out, first, int(last - first));
     return 1;
 }
 
@@ -627,7 +603,6 @@ static __forceinline void detect(VersionedDataBlock* reader, FormatInfo& out)
         BufferedText header;
         header.FUN_00d61a50(FUN_00cb1130(bytes, "<hkpackfile"));
         hkStringPtr version;
-        reinterpret_cast<StringOps*>(&version)->FUN_00cb0a60();
         if (ParseQuotedValue(header.cString(), "classversion", version))
         {
             int v = CallWithZeroMiddleArg(stringText(version), 0);
@@ -652,7 +627,6 @@ static __forceinline void detect(VersionedDataBlock* reader, FormatInfo& out)
         }
         else
             out.version = "Havok-3.0.0";
-        reinterpret_cast<StringOps*>(&version)->FUN_00cb0c00();
     }
 }
 // @fnv 0x00d48af0

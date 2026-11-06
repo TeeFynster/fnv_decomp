@@ -1,34 +1,17 @@
-// gamebryo2.2/corelibs/nimain/nilight_decls.h: declares NiBinaryStream, NiLightTransform, NiAVObject, NiColor, NiLight
+// Local light declarations pending the missing shared light/effect methods.
 #ifndef FNV_NILIGHT_DECLS_H
 #define FNV_NILIGHT_DECLS_H
 
 #include "NiObjectNET.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiColor.h"
 #include "NiPoint3.h"
 #include "nilight_types_NiStream.h"
 
 class NiCollisionObject;
 class FourComponentFloatVector;
 class CloningProcess;
-
-class NiBinaryStream
-{
-  public:
-    void** m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(NiBinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int(__cdecl* m_pfnWrite)(NiBinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int Read(void* data, unsigned int size)
-    {
-        unsigned int componentSizes[1] = {size};
-        return BinaryRead(data, size, componentSizes, 1);
-    }
-    unsigned int BinaryRead(void* data, unsigned int size, unsigned int* componentSizes, unsigned int components)
-    {
-        unsigned int read = m_pfnRead(this, data, size, componentSizes, components);
-        m_uiStreamFlags += read;
-        return read;
-    }
-};
+struct StrArr;
 
 template <class T> inline void ReadBinaryValue(NiStream& stream, T& value)
 {
@@ -76,10 +59,14 @@ class NiAVObject : public NiObjectNET
     NiLightTransform m_kWorldSpaceTransform;
 };
 
+// The shared declaration lacks IsEqual, SaveBinary, and AppendEffectProperties.
 class NiDynamicEffect : public NiAVObject
 {
   public:
     NiDynamicEffect();
+    bool IsEqual(NiObject*) const;
+    void SaveBinary(NiStream&);
+    void AppendEffectProperties(StrArr*);
     virtual void LoadBinary(NiStream&);
     virtual void LinkObject(NiStream&);
     bool m_bEffectEnabled;
@@ -91,17 +78,18 @@ class NiDynamicEffect : public NiAVObject
     NiTListBase<NiTPointerAllocator<unsigned int>, NiNode*> m_kAffectedNodes;
 };
 
-class NiColor
-{
-  public:
-    float r, g, b;
-    void LoadBinary(NiStream&);
-};
-
+// The shared declaration lacks the link/save/equality and viewer-string overrides.
 class NiLight : public NiDynamicEffect
 {
   public:
     NiLight();
+    const NiRTTI* GetRTTI() const;
+    void DestroyMembers();
+    void* Destroy(unsigned int);
+    bool IsEqual(NiObject*) const;
+    void AppendEffectProperties(StrArr*);
+    void SaveBinary(NiStream&);
+    void LinkObject(NiStream&);
     virtual void LoadBinary(NiStream&);
     void CopyMemberData(NiLight*, CloningProcess&);
     float m_fDimmer;

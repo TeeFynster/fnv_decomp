@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 
 // src/havok/physics/dynamics/constraint/bilateral/ragdoll/hkpragdollconstraintdata_decl_variant.cpp - declaration variant unit created 2026-10-26 by decl_variants.py for paused function 0x00cdf090: the skeleton of src/havok/physics/dynamics/constraint/bilateral/ragdoll/hkpragdollconstraintdata.cpp
 // with declarations corrected to what the original code does (hkBase.h: typedef char hkBool; -> class hkBool { public: __forceinline hkBool() {} _; hkpRagdollConstraintData.h: hkpRagdollConstraintData += hkBool FUN_00cdf090() const;; hkBase.h: struct hkRotation : hkMatrix3 {}; -> struct hkRotation : hkMatrix3 { hkBool FUN_00cb2e7). Move the function to its real unit once
@@ -131,10 +133,7 @@ struct RagdollBodiesToNotify : public hkpRagdollConstraintData
     int __thiscall FUN_00cde9a0();
 };
 int __cdecl FUN_00cdead0();
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
+typedef ::__m128 LocalM128;
 struct __declspec(align(16)) FUN_00cdf190_Vec
 {
     float x;

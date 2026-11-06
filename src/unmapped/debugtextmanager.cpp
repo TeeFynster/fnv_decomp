@@ -2,6 +2,9 @@
 // src/unmapped/debugtextmanager.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/debug/debugtextmanager.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/NiFixedString.h"
+#include "../../include/FontManager.h"
+
 extern "C" void __cdecl FUN_00802a90();
 extern "C" int DAT_011db800;
 
@@ -67,10 +70,6 @@ struct PageTable
 };
 
 // Stand-in for the class that owns FUN_00802220 (this pointer is unused by it).
-struct FontManager
-{
-    void FUN_00802220(PageTable* pPages, int index, unsigned char value);
-};
 
 // @fnv 0x00802220
 void FontManager::FUN_00802220(PageTable* pPages, int index, unsigned char value)
@@ -451,12 +450,6 @@ struct GeomObj
     NiObj* __thiscall FUN_0043fad0();
 };
 
-struct NiFixedString
-{
-    const char* m_psz;
-    NiFixedString(const char* s);
-    ~NiFixedString();
-};
 struct ListObj
 {
     virtual void tv00();

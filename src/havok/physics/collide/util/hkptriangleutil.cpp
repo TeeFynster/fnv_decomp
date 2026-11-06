@@ -1,79 +1,72 @@
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#include "../../../../../include/hkBool.h"
 
 // src/havok/physics/collide/util/hkptriangleutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/util/hkptriangleutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Retain the original SIMD intrinsic type: the extra byte lanes in the CRT
+// definition change VC9 alias analysis and register allocation in this unit.
+#define _INCLUDED_MM2
+// Exe 0x00ceb8d0 IsDegenerateTriangle: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
     __int32 m128_i32[4];
     __int64 m128_i64[2];
     unsigned __int32 m128_u32[4];
-} __m128;
+} __m128, LocalM128;
 
-extern "C" __m128 _mm_mul_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_sub_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_add_ss(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_shuffle_ps(__m128 _A, __m128 _B, unsigned int _Imm8);
-extern "C" void _mm_store_ss(float* _V, __m128 _A);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_add_ss(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 _A, LocalM128 _B, unsigned int _Imm8);
+extern "C" void _mm_store_ss(float* _V, LocalM128 _A);
+
+#include "../../../../../include/hkVector4.h"
 
 typedef float hkReal;
 
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
+inline hkSimdReal::hkSimdReal(const LocalM128& x) : m_vValue(x)
+{}
 
-class VectorComponentValue
+inline hkSimdReal::operator float() const
 {
-  public:
-    __m128 m_vValue;
-    VectorComponentValue(const __m128& x) : m_vValue(x)
-    {}
-    operator hkReal() const
-    {
-        hkReal s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-};
+    hkReal s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
 
-class hkVector4
+
+inline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
 {
-  public:
-    __m128 m_vComponents;
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
 
-    void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void setCross(const hkVector4& v1, const hkVector4& v2)
-    {
-        const __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
-                                         _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        const __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
-                                         _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    VectorComponentValue lengthSquared3() const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        s = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), s);
-        return s;
-    }
-    VectorComponentValue dot3(const hkVector4& v) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, v.m_vComponents);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        s = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), s);
-        return s;
-    }
-};
+inline void hkVector4::setCross(const hkVector4& v1, const hkVector4& v2)
+{
+    const LocalM128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
+                                     _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
+    const LocalM128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
+                                     _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(cross0, cross1);
+}
+
+inline hkSimdReal hkVector4::lengthSquared3() const
+{
+    const LocalM128 x2 = _mm_mul_ps(m_vComponents, m_vComponents);
+    LocalM128 s = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    s = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), s);
+    return s;
+}
+
+inline hkSimdReal hkVector4::dot3(const hkVector4& v) const
+{
+    const LocalM128 x2 = _mm_mul_ps(m_vComponents, v.m_vComponents);
+    LocalM128 s = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    s = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), s);
+    return s;
+}
 
 // @fnv 0x00ceb8d0
 hkBool __cdecl IsDegenerateTriangle(const hkVector4& aVertexA, const hkVector4& aVertexB, const hkVector4& aVertexC,

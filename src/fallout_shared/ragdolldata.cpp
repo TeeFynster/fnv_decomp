@@ -1,10 +1,46 @@
-// fallout_shared/ragdolldata.cpp: RagDollData, RagDollDataEx, RagDollRefUpdater, RagDollWalker and more (17 functions)
+// fallout_shared/ragdolldata.cpp: RagDollData, RagDollRefUpdater, RagDollWalker and more (17 functions)
 
-#include "ragdolldata_decls.h"
+#include "layout_support.h"
+#include "../../include/TESObjectREFR.h"
+
+#include "../../include/NiAVObject.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/bhkWorldObject.h"
+#include "../../include/bhkCollisionObject.h"
+#include "../../include/bhkFilter.h"
+class RagdollCollisionFlags : public bhkCollisionObject
+{
+  public:
+    void SetFlags(bool abSet, unsigned short uFlags);
+};
+
+typedef void (__thiscall* RagdollCollisionUpdate)(bhkCollisionObject*, int, int, int);
+
+bhkCollisionObject* FUN_004a8b00(NiNode*);
+struct TransformEntry
+{
+    signed char id;
+    NiPoint3 translate;
+    NiPoint3 rotate;
+};
+// Retained locally: include/ has no RagDollData.h. The former RagDollDataEx
+// used this layout and called RagDollData routines at 0x004da340, 0x004da010 and 0x004d9bd0.
+class RagDollData
+{
+  public:
+    unsigned char count;
+    TransformEntry* bones;
+    bool FindBoneIndex(NiNode*, unsigned int&);
+    void ReadFromActor(TESObjectREFR* apRef);
+    void ReadFromRef(TESObjectREFR* apRef);
+    bool ApplyToAnimationData(NiNode* apNode, unsigned int& auiIndex, unsigned int auiDepth);
+    bool FUN_004d9800(TESObjectREFR* apRef);
+};
 
 // Returns the negation of operator== for this matrix compared with another matrix.
 // @fnv 0x004d9ab0
-bool ThreeByThreeMatrix::operator!=(const ThreeByThreeMatrix& matrix) const
+bool NiMatrix3::operator!=(const NiMatrix3& matrix) const
 {
     return !(*this == matrix);
 }
@@ -25,11 +61,11 @@ bool RagDollData::FindBoneIndex(NiNode* node, unsigned int& ruiIndex)
                     return false;
             }
             node->FUN_00440460(bones[ruiIndex].translate);
-            ThreeByThreeMatrix rotation;
-            rotation.FUN_00a59540(bones[ruiIndex].rotate.x, bones[ruiIndex].rotate.y, bones[ruiIndex].rotate.z);
+            NiMatrix3 rotation;
+            rotation.FromEulerAnglesXYZ(bones[ruiIndex].rotate.x, bones[ruiIndex].rotate.y, bones[ruiIndex].rotate.z);
             node->FUN_0043fa80(&rotation);
             collision->FUN_004d9fa0(true);
-            collision->vfn_b0(1, 0, 0);
+            reinterpret_cast<RagdollCollisionUpdate>((*reinterpret_cast<void***>(collision))[0xb0 / 4])(collision, 1, 0, 0);
             ++ruiIndex;
         }
         NiUpdateData update(0.0f, false, false);
@@ -85,16 +121,10 @@ unsigned int FUN_004d9da0_shell::FUN_004d9da0()
     return (iFilter >> 8) & 0x1f;
 }
 
-struct _dummy_4d9fa0
-{
-    void FUN_004d9fc0(bool, unsigned short);
-    void FUN_004d9fa0(bool abTF);
-};
-
 // @fnv 0x004d9fa0
-void _dummy_4d9fa0::FUN_004d9fa0(bool abTF)
+void bhkCollisionObject::FUN_004d9fa0(bool abTF)
 {
-    FUN_004d9fc0(abTF, 0x40);
+    static_cast<RagdollCollisionFlags*>(this)->SetFlags(abTF, 0x40);
 }
 
 template <int N> struct EndianSizeTag
@@ -120,15 +150,9 @@ void __thiscall FUN_004d9280::EndianSwap()
     BSEndian((int*)this + 6, EndianSizeTag<4>());
 }
 
-struct FUN_004d9fc0_shell
-{
-    unsigned short m_flags;  // +0xc
-    void FUN_004d9fc0(bool abSet, unsigned short uFlags);
-};
-
 // Sets or clears the given flag bits in the 16-bit flags field at offset 0xc of this object.
 // @fnv 0x004d9fc0
-void FUN_004d9fc0_shell::FUN_004d9fc0(bool abSet, unsigned short uFlags)
+void RagdollCollisionFlags::SetFlags(bool abSet, unsigned short uFlags)
 {
     if (abSet)
         ((unsigned short*)((char*)this + 0xc))[0] |= uFlags;
@@ -157,6 +181,12 @@ unsigned char FUN_004da180(NiNode* node)
     return count;
 }
 
+// TESFileAccessor_ragdolldata: local type (was include/TESFileAccessor.h, which had no evidence of one real class); its methods are 0x00401680 TESFile::QEndian
+class TESFileAccessor_ragdolldata
+{
+public:
+    bool GetChunkData();
+};
 namespace fnv_004d94a0 {
 struct FUN_004d94a0_shell : public RagDollData
 {
@@ -177,10 +207,6 @@ struct FUN_0055a400 : FUN_004d9280
     char pad[0x1c];
     FUN_0055a400();
 };
-struct TESFileAccessor
-{
-    bool GetChunkData();
-};
 // @fnv 0x004d94a0
 bool FUN_004d94a0_shell::LoadRagdollChunk(TESFile* apFile)
 {
@@ -193,7 +219,7 @@ bool FUN_004d94a0_shell::LoadRagdollChunk(TESFile* apFile)
         {
             *(FUN_0055a400**)((char*)this + 4) = new FUN_0055a400[*(unsigned char*)this];
             apFile->GetChunkData(*(FUN_0055a400**)((char*)this + 4), isize);
-            if (((TESFileAccessor*)apFile)->GetChunkData())
+            if (((TESFileAccessor_ragdolldata*)apFile)->GetChunkData())
             {
                 for (unsigned int I = 0; I < *(unsigned char*)this; I++)
                     (*(FUN_0055a400**)((char*)this + 4))[I].EndianSwap();
@@ -206,7 +232,7 @@ bool FUN_004d94a0_shell::LoadRagdollChunk(TESFile* apFile)
     if (apFile->GetChunkID() == 0x42475258)
     {
         apFile->GetChunkData((char*)this + 8, 0xc);
-        if (((TESFileAccessor*)apFile)->GetChunkData())
+        if (((TESFileAccessor_ragdolldata*)apFile)->GetChunkData())
         {
             BSEndian((unsigned char*)this + 8, EndianSizeTag<1>());
             BSEndian((unsigned char*)this + 0xc, EndianSizeTag<1>());
@@ -259,7 +285,8 @@ struct DoorTeleportLoadData
 
 struct FUN_004d9670_shell
 {
-    struct Data
+    // 12-byte block at +0x08 that FUN_004d9670 copies by value (3 dword moves); identity unknown
+    struct Payload0C
     {
         unsigned int value0;
         unsigned int value1;
@@ -268,7 +295,7 @@ struct FUN_004d9670_shell
 
     unsigned char count;
     DoorTeleportLoadData* items;
-    Data data;
+    Payload0C data;
 
     void FUN_004d9670(const FUN_004d9670_shell* source);
 };
@@ -346,145 +373,14 @@ void FUN_004d93c0_cls::FUN_004d93c0()
     }
 }
 
-class RagDollRefStandIn
-{
-  public:
-    virtual void vfn_000();
-    virtual void vfn_004();
-    virtual void vfn_008();
-    virtual void vfn_00c();
-    virtual void vfn_010();
-    virtual void vfn_014();
-    virtual void vfn_018();
-    virtual void vfn_01c();
-    virtual void vfn_020();
-    virtual void vfn_024();
-    virtual void vfn_028();
-    virtual void vfn_02c();
-    virtual void vfn_030();
-    virtual void vfn_034();
-    virtual void vfn_038();
-    virtual void vfn_03c();
-    virtual void vfn_040();
-    virtual void vfn_044();
-    virtual void vfn_048();
-    virtual void vfn_04c();
-    virtual void vfn_050();
-    virtual void vfn_054();
-    virtual void vfn_058();
-    virtual void vfn_05c();
-    virtual void vfn_060();
-    virtual void vfn_064();
-    virtual void vfn_068();
-    virtual void vfn_06c();
-    virtual void vfn_070();
-    virtual void vfn_074();
-    virtual void vfn_078();
-    virtual void vfn_07c();
-    virtual void vfn_080();
-    virtual void vfn_084();
-    virtual void vfn_088();
-    virtual void vfn_08c();
-    virtual void vfn_090();
-    virtual void vfn_094();
-    virtual void vfn_098();
-    virtual void vfn_09c();
-    virtual void vfn_0a0();
-    virtual void vfn_0a4();
-    virtual void vfn_0a8();
-    virtual void vfn_0ac();
-    virtual void vfn_0b0();
-    virtual void vfn_0b4();
-    virtual void vfn_0b8();
-    virtual void vfn_0bc();
-    virtual void vfn_0c0();
-    virtual void vfn_0c4();
-    virtual void vfn_0c8();
-    virtual void vfn_0cc();
-    virtual void vfn_0d0();
-    virtual void vfn_0d4();
-    virtual void vfn_0d8();
-    virtual void vfn_0dc();
-    virtual void vfn_0e0();
-    virtual void vfn_0e4();
-    virtual void vfn_0e8();
-    virtual void vfn_0ec();
-    virtual void vfn_0f0();
-    virtual void vfn_0f4();
-    virtual void vfn_0f8();
-    virtual void vfn_0fc();
-    virtual bool IsActor();
-    virtual void vfn_104();
-    virtual void vfn_108();
-    virtual void vfn_10c();
-    virtual void vfn_110();
-    virtual void vfn_114();
-    virtual void vfn_118();
-    virtual void vfn_11c();
-    virtual void vfn_120();
-    virtual void vfn_124();
-    virtual void vfn_128();
-    virtual void vfn_12c();
-    virtual void vfn_130();
-    virtual void vfn_134();
-    virtual void vfn_138();
-    virtual void vfn_13c();
-    virtual void vfn_140();
-    virtual void vfn_144();
-    virtual void vfn_148();
-    virtual void vfn_14c();
-    virtual void vfn_150();
-    virtual void vfn_154();
-    virtual void vfn_158();
-    virtual void vfn_15c();
-    virtual void vfn_160();
-    virtual void vfn_164();
-    virtual void vfn_168();
-    virtual void vfn_16c();
-    virtual void vfn_170();
-    virtual void vfn_174();
-    virtual void vfn_178();
-    virtual void vfn_17c();
-    virtual void vfn_180();
-    virtual void vfn_184();
-    virtual void vfn_188();
-    virtual void vfn_18c();
-    virtual void vfn_190();
-    virtual void vfn_194();
-    virtual void vfn_198();
-    virtual void vfn_19c();
-    virtual void vfn_1a0();
-    virtual void vfn_1a4();
-    virtual void vfn_1a8();
-    virtual void vfn_1ac();
-    virtual void vfn_1b0();
-    virtual void vfn_1b4();
-    virtual void vfn_1b8();
-    virtual void vfn_1bc();
-    virtual void vfn_1c0();
-    virtual void vfn_1c4();
-    virtual void vfn_1c8();
-    virtual void vfn_1cc();
-    virtual NiAVObject* Get3D();
-};
-
-class RagDollDataEx : public RagDollData
-{
-  public:
-    void ReadFromActor(RagDollRefStandIn* apRef);
-    void ReadFromRef(RagDollRefStandIn* apRef);
-    bool ApplyToAnimationData(NiNode* apNode, unsigned int& auiIndex, unsigned int auiDepth);
-    bool FUN_004d9800(RagDollRefStandIn* apRef);
-};
-
 // @fnv 0x004d9800
-bool RagDollDataEx::FUN_004d9800(RagDollRefStandIn* apRef)
+bool RagDollData::FUN_004d9800(TESObjectREFR* apRef)
 {
     unsigned int uiIndex = 0;
     bool bResultTmp = true;
-    if (apRef && apRef->Get3D())
+    if (apRef && apRef->GetNiNode())
     {
-        NiAVObject* p3D = apRef->Get3D();
+        NiAVObject* p3D = apRef->GetNiNode();
         NiNode* pNode2 = p3D ? p3D->IsSceneNode() : 0;
         if (apRef->IsActor())
             ReadFromActor(apRef);
@@ -498,147 +394,6 @@ bool RagDollDataEx::FUN_004d9800(RagDollRefStandIn* apRef)
     return uiIndex == count && bResultTmp;
 }
 
-class TESObjectREFR
-{
-  public:
-    virtual void vf000();
-    virtual void vf004();
-    virtual void vf008();
-    virtual void vf00c();
-    virtual void vf010();
-    virtual void vf014();
-    virtual void vf018();
-    virtual void vf01c();
-    virtual void vf020();
-    virtual void vf024();
-    virtual void vf028();
-    virtual void vf02c();
-    virtual void vf030();
-    virtual void vf034();
-    virtual void vf038();
-    virtual void vf03c();
-    virtual void vf040();
-    virtual void vf044();
-    virtual void vf048();
-    virtual void vf04c();
-    virtual void vf050();
-    virtual void vf054();
-    virtual void vf058();
-    virtual void vf05c();
-    virtual void vf060();
-    virtual void vf064();
-    virtual void vf068();
-    virtual void vf06c();
-    virtual void vf070();
-    virtual void vf074();
-    virtual void vf078();
-    virtual void vf07c();
-    virtual void vf080();
-    virtual void vf084();
-    virtual void vf088();
-    virtual void vf08c();
-    virtual void vf090();
-    virtual void vf094();
-    virtual void vf098();
-    virtual void vf09c();
-    virtual void vf0a0();
-    virtual void vf0a4();
-    virtual void vf0a8();
-    virtual void vf0ac();
-    virtual void vf0b0();
-    virtual void vf0b4();
-    virtual void vf0b8();
-    virtual void vf0bc();
-    virtual void vf0c0();
-    virtual void vf0c4();
-    virtual void vf0c8();
-    virtual void vf0cc();
-    virtual void vf0d0();
-    virtual void vf0d4();
-    virtual void vf0d8();
-    virtual void vf0dc();
-    virtual void vf0e0();
-    virtual void vf0e4();
-    virtual void vf0e8();
-    virtual void vf0ec();
-    virtual void vf0f0();
-    virtual void vf0f4();
-    virtual void vf0f8();
-    virtual void vf0fc();
-    virtual bool IsDynamicHavok();
-    virtual void vf104();
-    virtual void vf108();
-    virtual void vf10c();
-    virtual void vf110();
-    virtual void vf114();
-    virtual void vf118();
-    virtual void vf11c();
-    virtual void vf120();
-    virtual void vf124();
-    virtual void vf128();
-    virtual void vf12c();
-    virtual void vf130();
-    virtual void vf134();
-    virtual void vf138();
-    virtual void vf13c();
-    virtual void vf140();
-    virtual void vf144();
-    virtual void vf148();
-    virtual void vf14c();
-    virtual void vf150();
-    virtual void vf154();
-    virtual void vf158();
-    virtual void vf15c();
-    virtual void vf160();
-    virtual void vf164();
-    virtual void vf168();
-    virtual void vf16c();
-    virtual void vf170();
-    virtual void vf174();
-    virtual void vf178();
-    virtual void vf17c();
-    virtual void vf180();
-    virtual void vf184();
-    virtual void vf188();
-    virtual void vf18c();
-    virtual void vf190();
-    virtual void vf194();
-    virtual void vf198();
-    virtual void vf19c();
-    virtual void vf1a0();
-    virtual void vf1a4();
-    virtual void vf1a8();
-    virtual void vf1ac();
-    virtual void vf1b0();
-    virtual void vf1b4();
-    virtual void vf1b8();
-    virtual void vf1bc();
-    virtual void vf1c0();
-    virtual void vf1c4();
-    virtual void vf1c8();
-    virtual void vf1cc();
-    virtual void vf1d0();
-    virtual void vf1d4();
-    virtual void vf1d8();
-    virtual void vf1dc();
-    virtual void vf1e0();
-    virtual void vf1e4();
-    virtual void vf1e8();
-    virtual void vf1ec();
-    virtual void vf1f0();
-    virtual NiPoint3* GetPos();
-    NiAVObject* Get3DSimple();
-    ThreeByThreeMatrix GetRotation();
-};
-
-class NiAVObjectEx : public NiAVObject
-{
-  public:
-    NiPoint3& GetLocalTranslate();
-    ThreeByThreeMatrix& GetLocalRotate();
-    void SetLocalRotate(const ThreeByThreeMatrix&);
-    void Update(NiUpdateData&);
-};
 
 struct NiPoint3Cmp
 {
@@ -647,7 +402,7 @@ struct NiPoint3Cmp
 
 struct NiMatrix3Cmp
 {
-    bool NotEqual(const ThreeByThreeMatrix& m) const;
+    bool NotEqual(const NiMatrix3& m) const;
 };
 
 void __cdecl FUN_00c6bd00(NiAVObject* apObject, bool abFlag);
@@ -668,18 +423,18 @@ bool RagDollRefUpdater::FUN_004d9910(TESObjectREFR* apRef)
     bool bResult = true;
     if (apRef && apRef->Get3DSimple() && bEnabled)
     {
-        NiAVObjectEx* p3D2 = (NiAVObjectEx*)apRef->Get3DSimple();
+        NiAVObject* p3D2 = apRef->Get3DSimple();
         NiNode* pNode4 = p3D2 ? p3D2->IsSceneNode() : 0;
-        if (apRef->IsDynamicHavok())
+        if (apRef->IsActor())
             SyncRef(apRef);
         bResult = ApplyToAnimationData(pNode4, ItemUpdateArray);
         if (p3D2)
         {
-            if (((NiPoint3Cmp&)p3D2->GetLocalTranslate()).NotEqual(*apRef->GetPos()) ||
-                ((NiMatrix3Cmp&)p3D2->GetLocalRotate()).NotEqual(apRef->GetRotation()))
+            if (((NiPoint3Cmp&)p3D2->FUN_0043c490()).NotEqual(*static_cast<const TESObjectREFR*>(apRef)->GetPos()) ||
+                ((NiMatrix3Cmp&)p3D2->FUN_006a9540()).NotEqual(apRef->GetRotation()))
             {
-                p3D2->FUN_00440460(*apRef->GetPos());
-                p3D2->SetLocalRotate(apRef->GetRotation());
+                p3D2->FUN_00440460(*static_cast<const TESObjectREFR*>(apRef)->GetPos());
+                p3D2->FUN_0043fa80(apRef->GetRotation());
                 FUN_00c6bd00(p3D2, true);
                 NiUpdateData kData6(0.0f, false, false);
                 p3D2->Update(kData6);
@@ -691,15 +446,6 @@ bool RagDollRefUpdater::FUN_004d9910(TESObjectREFR* apRef)
     return ItemUpdateArray == bEnabled && bResult;
 }
 
-struct EulerMatrix
-{
-    void ExtractEulerAnglesXYZ(float& x, float& y, float& z);
-};
-struct AVObjectLocal
-{
-    NiPoint3& GetLocalTranslate();
-    EulerMatrix* GetLocalRotate();
-};
 
 struct RagDollWalker
 {
@@ -725,10 +471,9 @@ bool RagDollWalker::CollectBoneTransforms(NiNode* apNode, unsigned int& arIndex,
             {
                 return false;
             }
-            bones[arIndex].translate = ((AVObjectLocal*)apNode)->GetLocalTranslate();
-            ((AVObjectLocal*)apNode)
-                ->GetLocalRotate()
-                ->ExtractEulerAnglesXYZ(bones[arIndex].rotate.x, bones[arIndex].rotate.y, bones[arIndex].rotate.z);
+            bones[arIndex].translate = apNode->FUN_0043c490();
+            apNode->FUN_006a9540().ToEulerAnglesXYZ(
+                bones[arIndex].rotate.x, bones[arIndex].rotate.y, bones[arIndex].rotate.z);
             arIndex++;
         }
         unsigned int uiCount5 = apNode->FUN_0043b480();
@@ -752,148 +497,6 @@ bool RagDollWalker::CollectBoneTransforms(NiNode* apNode, unsigned int& arIndex,
     return bResult2;
 }
 
-struct VisualNode;
-struct VisualObject
-{
-    virtual void vfn_000();
-    virtual void vfn_004();
-    virtual void vfn_008();
-    virtual VisualNode* IsSceneNode();
-};
-struct SceneInput
-{
-    virtual void vfn_000();
-    virtual void vfn_004();
-    virtual void vfn_008();
-    virtual void vfn_00c();
-    virtual void vfn_010();
-    virtual void vfn_014();
-    virtual void vfn_018();
-    virtual void vfn_01c();
-    virtual void vfn_020();
-    virtual void vfn_024();
-    virtual void vfn_028();
-    virtual void vfn_02c();
-    virtual void vfn_030();
-    virtual void vfn_034();
-    virtual void vfn_038();
-    virtual void vfn_03c();
-    virtual void vfn_040();
-    virtual void vfn_044();
-    virtual void vfn_048();
-    virtual void vfn_04c();
-    virtual void vfn_050();
-    virtual void vfn_054();
-    virtual void vfn_058();
-    virtual void vfn_05c();
-    virtual void vfn_060();
-    virtual void vfn_064();
-    virtual void vfn_068();
-    virtual void vfn_06c();
-    virtual void vfn_070();
-    virtual void vfn_074();
-    virtual void vfn_078();
-    virtual void vfn_07c();
-    virtual void vfn_080();
-    virtual void vfn_084();
-    virtual void vfn_088();
-    virtual void vfn_08c();
-    virtual void vfn_090();
-    virtual void vfn_094();
-    virtual void vfn_098();
-    virtual void vfn_09c();
-    virtual void vfn_0a0();
-    virtual void vfn_0a4();
-    virtual void vfn_0a8();
-    virtual void vfn_0ac();
-    virtual void vfn_0b0();
-    virtual void vfn_0b4();
-    virtual void vfn_0b8();
-    virtual void vfn_0bc();
-    virtual void vfn_0c0();
-    virtual void vfn_0c4();
-    virtual void vfn_0c8();
-    virtual void vfn_0cc();
-    virtual void vfn_0d0();
-    virtual void vfn_0d4();
-    virtual void vfn_0d8();
-    virtual void vfn_0dc();
-    virtual void vfn_0e0();
-    virtual void vfn_0e4();
-    virtual void vfn_0e8();
-    virtual void vfn_0ec();
-    virtual void vfn_0f0();
-    virtual void vfn_0f4();
-    virtual void vfn_0f8();
-    virtual void vfn_0fc();
-    virtual bool FUN_0100();
-    virtual void vfn_104();
-    virtual void vfn_108();
-    virtual void vfn_10c();
-    virtual void vfn_110();
-    virtual void vfn_114();
-    virtual void vfn_118();
-    virtual void vfn_11c();
-    virtual void vfn_120();
-    virtual void vfn_124();
-    virtual void vfn_128();
-    virtual void vfn_12c();
-    virtual void vfn_130();
-    virtual void vfn_134();
-    virtual void vfn_138();
-    virtual void vfn_13c();
-    virtual void vfn_140();
-    virtual void vfn_144();
-    virtual void vfn_148();
-    virtual void vfn_14c();
-    virtual void vfn_150();
-    virtual void vfn_154();
-    virtual void vfn_158();
-    virtual void vfn_15c();
-    virtual void vfn_160();
-    virtual void vfn_164();
-    virtual void vfn_168();
-    virtual void vfn_16c();
-    virtual void vfn_170();
-    virtual void vfn_174();
-    virtual void vfn_178();
-    virtual void vfn_17c();
-    virtual void vfn_180();
-    virtual void vfn_184();
-    virtual void vfn_188();
-    virtual void vfn_18c();
-    virtual void vfn_190();
-    virtual void vfn_194();
-    virtual void vfn_198();
-    virtual void vfn_19c();
-    virtual void vfn_1a0();
-    virtual void vfn_1a4();
-    virtual void vfn_1a8();
-    virtual void vfn_1ac();
-    virtual void vfn_1b0();
-    virtual void vfn_1b4();
-    virtual void vfn_1b8();
-    virtual void vfn_1bc();
-    virtual void vfn_1c0();
-    virtual void vfn_1c4();
-    virtual void vfn_1c8();
-    virtual void vfn_1cc();
-    virtual struct VisualObject* FUN_01d0();
-};
-struct NamedLink;
-struct VisualNode
-{
-    NamedLink* FUN_0045bc00(int mode);
-};
-struct Controller;
-struct NamedLink
-{
-    Controller* FUN_006a9540(int* x, int* y, int* z);
-};
-struct Controller
-{
-    void DecomposeToEulerAngles();
-};
 struct LocalRagdollTransform
 {
     int field00;
@@ -901,185 +504,54 @@ struct LocalRagdollTransform
     int field08;
     int field0c;
     int field10;
-    void FUN_004da340(SceneInput* source);
+    void FUN_004da340(TESObjectREFR* source);
 };
 // @fnv 0x004da340
-void LocalRagdollTransform::FUN_004da340(SceneInput* source)
+void LocalRagdollTransform::FUN_004da340(TESObjectREFR* source)
 {
-    VisualObject* pObject = source && source->FUN_0100() ? source->FUN_01d0() : 0;
-    VisualNode* node = pObject ? pObject->IsSceneNode() : 0;
+    NiAVObject* pObject = source && source->IsActor() ? source->GetNiNode() : 0;
+    NiNode* node = pObject ? pObject->IsSceneNode() : 0;
     if (node != 0)
     {
-        NamedLink* link = node->FUN_0045bc00(0);
+        NiAVObject* link = node->FUN_0045bc00(0);
         if (link != 0)
         {
-            link->FUN_006a9540(&field08, &field0c, &field10)->DecomposeToEulerAngles();
+            link->FUN_006a9540().ToEulerAnglesXYZ(
+                reinterpret_cast<float&>(field08), reinterpret_cast<float&>(field0c), reinterpret_cast<float&>(field10));
         }
     }
 }
 
 extern NiPoint3 _NiPoint3_ZERO;
 
-struct FUN_004da230_node : public NiNode
-{
-    NiNode* FUN_0045bc00(unsigned int);
-};
 
-struct FUN_004da230_intermediate
-{
-    virtual void vfn_0();
-    virtual void vfn_1();
-    virtual void vfn_2();
-    virtual FUN_004da230_node* GetNode();
-};
-
-struct FUN_004da230_param
-{
-    virtual void vfn_0();
-    virtual void vfn_1();
-    virtual void vfn_2();
-    virtual void vfn_3();
-    virtual void vfn_4();
-    virtual void vfn_5();
-    virtual void vfn_6();
-    virtual void vfn_7();
-    virtual void vfn_8();
-    virtual void vfn_9();
-    virtual void vfn_10();
-    virtual void vfn_11();
-    virtual void vfn_12();
-    virtual void vfn_13();
-    virtual void vfn_14();
-    virtual void vfn_15();
-    virtual void vfn_16();
-    virtual void vfn_17();
-    virtual void vfn_18();
-    virtual void vfn_19();
-    virtual void vfn_20();
-    virtual void vfn_21();
-    virtual void vfn_22();
-    virtual void vfn_23();
-    virtual void vfn_24();
-    virtual void vfn_25();
-    virtual void vfn_26();
-    virtual void vfn_27();
-    virtual void vfn_28();
-    virtual void vfn_29();
-    virtual void vfn_30();
-    virtual void vfn_31();
-    virtual void vfn_32();
-    virtual void vfn_33();
-    virtual void vfn_34();
-    virtual void vfn_35();
-    virtual void vfn_36();
-    virtual void vfn_37();
-    virtual void vfn_38();
-    virtual void vfn_39();
-    virtual void vfn_40();
-    virtual void vfn_41();
-    virtual void vfn_42();
-    virtual void vfn_43();
-    virtual void vfn_44();
-    virtual void vfn_45();
-    virtual void vfn_46();
-    virtual void vfn_47();
-    virtual void vfn_48();
-    virtual void vfn_49();
-    virtual void vfn_50();
-    virtual void vfn_51();
-    virtual void vfn_52();
-    virtual void vfn_53();
-    virtual void vfn_54();
-    virtual void vfn_55();
-    virtual void vfn_56();
-    virtual void vfn_57();
-    virtual void vfn_58();
-    virtual void vfn_59();
-    virtual void vfn_60();
-    virtual void vfn_61();
-    virtual void vfn_62();
-    virtual void vfn_63();
-    virtual bool IsReady();
-    virtual void vfn_65();
-    virtual void vfn_66();
-    virtual void vfn_67();
-    virtual void vfn_68();
-    virtual void vfn_69();
-    virtual void vfn_70();
-    virtual void vfn_71();
-    virtual void vfn_72();
-    virtual void vfn_73();
-    virtual void vfn_74();
-    virtual void vfn_75();
-    virtual void vfn_76();
-    virtual void vfn_77();
-    virtual void vfn_78();
-    virtual void vfn_79();
-    virtual void vfn_80();
-    virtual void vfn_81();
-    virtual void vfn_82();
-    virtual void vfn_83();
-    virtual void vfn_84();
-    virtual void vfn_85();
-    virtual void vfn_86();
-    virtual void vfn_87();
-    virtual void vfn_88();
-    virtual void vfn_89();
-    virtual void vfn_90();
-    virtual void vfn_91();
-    virtual void vfn_92();
-    virtual void vfn_93();
-    virtual void vfn_94();
-    virtual void vfn_95();
-    virtual void vfn_96();
-    virtual void vfn_97();
-    virtual void vfn_98();
-    virtual void vfn_99();
-    virtual void vfn_100();
-    virtual void vfn_101();
-    virtual void vfn_102();
-    virtual void vfn_103();
-    virtual void vfn_104();
-    virtual void vfn_105();
-    virtual void vfn_106();
-    virtual void vfn_107();
-    virtual void vfn_108();
-    virtual void vfn_109();
-    virtual void vfn_110();
-    virtual void vfn_111();
-    virtual void vfn_112();
-    virtual void vfn_113();
-    virtual void vfn_114();
-    virtual void vfn_115();
-    virtual FUN_004da230_intermediate* GetContainer();
-};
 
 struct FUN_004da230_shell
 {
     unsigned int unk00;
     unsigned int unk04;
     NiPoint3 position;
-    void UpdateNodeFromPosition(FUN_004da230_param* object);
+    void UpdateNodeFromPosition(TESObjectREFR* object);
 };
 
 // @fnv 0x004da230
-void FUN_004da230_shell::UpdateNodeFromPosition(FUN_004da230_param* object)
+void FUN_004da230_shell::UpdateNodeFromPosition(TESObjectREFR* object)
 {
     if (reinterpret_cast<Call_439090&>(position) == reinterpret_cast<Call_439090&>(_NiPoint3_ZERO))
     {
-        FUN_004da230_intermediate* pContainer;
-        FUN_004da230_node* pNode;
+        NiAVObject* pContainer;
+        NiNode* pNode;
 
-        pContainer = (object != 0 && object->IsReady()) ? object->GetContainer() : 0;
-        pNode = (pContainer != 0) ? pContainer->GetNode() : 0;
+        pContainer = (object != 0 && object->IsActor()) ? object->GetNiNode() : 0;
+        pNode = (pContainer != 0) ? pContainer->IsSceneNode() : 0;
 
         if (pNode != 0)
         {
-            NiNode* node = pNode->FUN_0045bc00(0);
+            NiNode* node = static_cast<NiNode*>(pNode->FUN_0045bc00(0));
             if (node != 0)
             {
-                ThreeByThreeMatrix rotation;
-                rotation.FUN_00a59540(position.x, position.y, position.z);
+                NiMatrix3 rotation;
+                rotation.FromEulerAnglesXYZ(position.x, position.y, position.z);
                 node->FUN_0043fa80(&rotation);
                 NiUpdateData update(0.0f, false, false);
                 node->UpdateWorldData(update);
@@ -1099,18 +571,18 @@ struct RagDollBoneInit : public TransformEntry
 class RagDollDataInit : public RagDollData
 {
   public:
-    void InitFromRef(RagDollRefStandIn* apRef);
+    void InitFromRef(TESObjectREFR* apRef);
 };
 
 // Initializes ragdoll bone data from a reference's 3D node, collecting bone transforms and warning on failure.
 // @fnv 0x004da010
-void RagDollDataInit::InitFromRef(RagDollRefStandIn* apRef)
+void RagDollDataInit::InitFromRef(TESObjectREFR* apRef)
 {
     count = 0;
     delete[] bones;
-    if (apRef && apRef->Get3D())
+    if (apRef && apRef->GetNiNode())
     {
-        NiAVObject* pObj = apRef->Get3D();
+        NiAVObject* pObj = apRef->GetNiNode();
         NiNode* pNode = pObj ? pObj->IsSceneNode() : 0;
         count = FUN_004da180(pNode);
         if (count)

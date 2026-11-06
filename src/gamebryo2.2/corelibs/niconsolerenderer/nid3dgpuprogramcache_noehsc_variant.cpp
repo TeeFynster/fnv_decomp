@@ -2,12 +2,12 @@
 // to their real unit once identified.
 
 #include "nid3dgpuprogramcache_decls.h"
+#include "../../../../include/MemoryHeap.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiFixedString.h"
+#include "../../../../include/NiPointer.h"
 __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern char* EmptyFS;
-struct MemoryManager
-{
-    void _DeallocateAlias(void*);
-};
 extern MemoryManager g_memoryManager;
 void FUN_00a644a0(char** p);
 const char* __cdecl FUN_00e8dd60();
@@ -153,91 +153,6 @@ struct FUN_00e8eb10_cls
 
     FUN_00e8eb10_cls* Destroy(unsigned char acFlags);
 };
-__declspec(nothrow) int FUN_00aa1360(const char*, const char*);
-__declspec(dllimport) __declspec(nothrow) long __stdcall InterlockedDecrement(volatile long*);
-__declspec(dllimport) __declspec(nothrow) long __stdcall InterlockedIncrement(volatile long*);
-extern char* EmptyFS;
-__declspec(nothrow) inline long NiAtomicSubtract(volatile long* value)
-{
-    return InterlockedDecrement(value);
-}
-struct StringHeader
-{
-    volatile long refs;
-    unsigned int length;
-};
-struct NiGlobalStringTable
-{
-    __declspec(nothrow) static char* AddString(const char*);
-    __declspec(nothrow) static volatile long* GetRefCount(char*& h)
-    {
-        return &((StringHeader*)h - 1)->refs;
-    }
-    __declspec(nothrow) static void IncRefCount(char*& h)
-    {
-        if (h == EmptyFS)
-            return;
-        InterlockedIncrement(GetRefCount(h));
-    }
-    __declspec(nothrow) static void DecRefCount(char*& h)
-    {
-        if (h == EmptyFS)
-            return;
-        volatile long* count = GetRefCount(h);
-        NiAtomicSubtract(count);
-    }
-};
-class NiFixedString
-{
-  public:
-    char* data;
-    __declspec(nothrow) NiFixedString() : data(EmptyFS)
-    {}
-    __declspec(nothrow) NiFixedString(const char* text);
-    __declspec(nothrow) ~NiFixedString();
-    NiFixedString& operator=(const char* text)
-    {
-        if (data != text)
-        {
-            char* old = data;
-            data = NiGlobalStringTable::AddString(text);
-            if (old != EmptyFS)
-                InterlockedDecrement(&((StringHeader*)old - 1)->refs);
-        }
-        return *this;
-    }
-    NiFixedString& operator=(const NiFixedString& other)
-    {
-        char* incoming = other.data;
-        if (data != incoming)
-        {
-            NiGlobalStringTable::IncRefCount(incoming);
-            char* outgoing = data;
-            NiGlobalStringTable::DecRefCount(outgoing);
-            data = incoming;
-        }
-        return *this;
-    }
-    bool operator==(const char* text) const
-    {
-        if (data == text)
-            return true;
-        if (!text || !data)
-            return false;
-        return FUN_00aa1360(data, text) == 0;
-    }
-};
-__declspec(nothrow) NiFixedString::NiFixedString(const char* text)
-{
-    if (!text)
-        data = EmptyFS;
-    else
-        data = NiGlobalStringTable::AddString(text);
-}
-__declspec(nothrow) NiFixedString::~NiFixedString()
-{
-    NiGlobalStringTable::DecRefCount(data);
-}
 struct W20Profiles
 {
     NiFixedString* data;
@@ -301,14 +216,6 @@ struct ShaderBuffer8e
     virtual void* __stdcall GetBufferPointer();
     virtual unsigned long __stdcall GetBufferSize();
 };
-struct FixedString8e
-{
-    const char* m_kHandle;
-    operator const char*() const
-    {
-        return m_kHandle;
-    }
-};
 struct ShaderProgram8e;
 struct ShaderFactory8e
 {
@@ -362,10 +269,10 @@ struct ShaderLoader8e
     virtual void v18();
     virtual void v19();
     virtual void v20();
-    virtual const FixedString8e& GetLoaderName();
+    virtual const NiFixedString& GetLoaderName();
 
     void FUN_00ee92d0(ShaderStream8e* pkStream, char* pcBuffer, unsigned int uiMaxLen);
-    bool LoadShaderProgram(ShaderStream8e* pkStream, const FixedString8e& kName, ShaderProgram8e** ppkProgram,
+    bool LoadShaderProgram(ShaderStream8e* pkStream, const NiFixedString& kName, ShaderProgram8e** ppkProgram,
                            bool bSkip);
 };
 
@@ -373,41 +280,21 @@ class NiD3DPass;
 
 namespace sc1d790 {
 
-struct MemoryHeap
-{
-    void* FUN_00aa3e40(unsigned int uiSize);
-    void FUN_00aa4060(void* pvMem);
-};
-
-extern MemoryHeap DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 
 }
 
-template <class T> class NiPointer
+inline void* operator new[](unsigned int uiSize, MemoryManager& allocator)
 {
-  public:
-    NiPointer() throw();
-    ~NiPointer()
-    {}
-
-    static void* operator new[](unsigned int uiSize)
-    {
-        return sc1d790::DAT_011f6238.FUN_00aa3e40(uiSize);
-    }
-    static void operator delete[](void* pvMem, unsigned int uiSize)
-    {
-        sc1d790::DAT_011f6238.FUN_00aa4060(pvMem);
-    }
-
-    T* m_pObject;
-};
+    return allocator.FUN_00aa3e40(uiSize);
+}
 
 namespace sc1d790 {
 
 // @fnv 0x00c1d790
 NiPointer<NiD3DPass>* FUN_00c1d790(unsigned int ItemUpdateArray)
 {
-    return new NiPointer<NiD3DPass>[ItemUpdateArray];
+    return new (DAT_011f6238) NiPointer<NiD3DPass>[ItemUpdateArray];
 }
 
 }

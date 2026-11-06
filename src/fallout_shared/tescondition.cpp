@@ -1,6 +1,12 @@
-// fallout_shared/tescondition.cpp: free functions (14 functions)
+// fallout_shared/tescondition.cpp: condition operations (14 functions)
 
-#include "tescondition_decls.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/PackageList.h"
+#include "../../include/PerkEntryConditionSet.h"
+#include "../../include/TESConditionItem.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESTopicInfoData.h"
 
 // Runs the condition on subject and target references, discarding the result and passing false.
 // @fnv 0x00680c30
@@ -67,7 +73,7 @@ bool PerkEntryConditionSet::Compare(PerkEntryConditionSet* other)
             return true;
         items.leftItem = left->GetItem();
         items.rightItem = right->GetItem();
-        if (items.leftItem->Compare(items.rightItem))
+        if (items.leftItem->IsDifferentFrom(items.rightItem))
             return true;
         left = left->GetNext();
         right = right->GetNext();
@@ -219,17 +225,10 @@ void* __fastcall FUN_005e9530(FUN_005e9530_Obj* pThis)
     return pThis;
 }
 
-class FUN_006808b0
-{
-  public:
-    BSSimpleList<TESConditionItem*> m_kConditionItems;
-    ~FUN_006808b0();
-};
-
 // @fnv 0x006808b0
-FUN_006808b0::~FUN_006808b0()
+PerkEntryConditionSet::~PerkEntryConditionSet()
 {
-    ((PerkEntryConditionSet*)this)->InitializeConditionItems();
+    InitializeConditionItems();
 }
 
 // Evaluates a comparison condition code (0-5) between two floats and returns true if the comparison holds.
@@ -277,14 +276,10 @@ struct ListNode_680910
     bool _ref_008256d0();
     ListNode_680910* _ref_00726070();
 };
-struct FUN_00680910_shell : ListNode_680910
-{
-    void ProcessItems();
-};
 // @fnv 0x00680910
-void FUN_00680910_shell::ProcessItems()
+void PerkEntryConditionSet::ProcessItems()
 {
-    ListNode_680910* pNode = this->_ref_006815c0();
+    ListNode_680910* pNode = ((ListNode_680910*)this)->_ref_006815c0();
     while (pNode != 0 && !pNode->_ref_008256d0())
     {
         pNode->_ref_006815c0()->item->SerializeCondition();
@@ -292,10 +287,6 @@ void FUN_00680910_shell::ProcessItems()
     }
 }
 
-struct FUN_00680a70_shell
-{
-    void CopyConditions(PerkEntryConditionSet*, PerkEntryConditionSet*);
-};
 struct FUN_00404760_shell
 {
     void FUN_00404760(PerkEntryConditionSet*);
@@ -305,30 +296,24 @@ struct FUN_00404760_shell
 void FUN_00404760_shell::FUN_00404760(PerkEntryConditionSet* source)
 {
     if (source)
-        ((FUN_00680a70_shell*)((char*)this + 0x1c))->CopyConditions(source, 0);
+        ((PerkEntryConditionSet*)((char*)this + 0x1c))->CopyConditions(source, 0);
     else
     {
         PerkEntryConditionSet empty;
-        ((FUN_00680a70_shell*)((char*)this + 0x1c))->CopyConditions(&empty, 0);
+        ((PerkEntryConditionSet*)((char*)this + 0x1c))->CopyConditions(&empty, 0);
     }
 }
 
-struct FUN_005ea2c0_cls
-{
-    void FUN_006808b0();
-    void* FUN_005ea2c0(unsigned int flags);
-};
-
-extern "C" void __stdcall FUN_00ec5fce(void* object, int elementSize, int count, void (FUN_005ea2c0_cls::*callback)());
+extern "C" void __stdcall FUN_00ec5fce(void* object, int elementSize, int count, void (PerkEntryConditionSet::*callback)());
 
 extern "C" void __cdecl FormHeap_Free(void* apMemory);
 
 // @fnv 0x005ea2c0
-void* FUN_005ea2c0_cls::FUN_005ea2c0(unsigned int flags)
+void* PerkEntryConditionSet::DeleteConditions(unsigned int flags)
 {
     if (flags & 2)
     {
-        FUN_00ec5fce(this, 0x8, reinterpret_cast<int*>(this)[-1], &FUN_005ea2c0_cls::FUN_006808b0);
+        FUN_00ec5fce(this, 0x8, reinterpret_cast<int*>(this)[-1], &PerkEntryConditionSet::Destroy);
 
         if (flags & 1)
         {
@@ -338,7 +323,7 @@ void* FUN_005ea2c0_cls::FUN_005ea2c0(unsigned int flags)
         return reinterpret_cast<char*>(this) - 4;
     }
 
-    FUN_006808b0();
+    Destroy();
 
     if (flags & 1)
     {
@@ -361,7 +346,7 @@ struct ListOps_680a70
 
 // Clears this list, then walks the nodes of a1, appending a new TESConditionItem built from each node's form to the destination list.
 // @fnv 0x00680a70
-void FUN_00680a70_shell::CopyConditions(PerkEntryConditionSet* apSourceList, PerkEntryConditionSet* a2)
+void PerkEntryConditionSet::CopyConditions(PerkEntryConditionSet* apSourceList, PerkEntryConditionSet* a2)
 {
     ((ListOps_680a70*)this)->FUN_00680fe0();
     ListOps_680a70* dst = ((ListOps_680a70*)this)->FUN_006815c0();
@@ -379,22 +364,17 @@ void FUN_00680a70_shell::CopyConditions(PerkEntryConditionSet* apSourceList, Per
     }
 }
 
-struct FUN_00680f70_cls : ListNode_680910
-{
-    TESItem_680910* GetItemByIndex(int index);
-};
-
-// Walks the node list from _ref_006815c0, skipping nodes where _ref_008256d0 is true, and returns the TESItem_680910 at the given index or 0.
+// Walks the node list from _ref_006815c0, skipping nodes where _ref_008256d0 is true, and returns the TESConditionItem at the given index or 0.
 // @fnv 0x00680f70
-TESItem_680910* FUN_00680f70_cls::GetItemByIndex(int index)
+TESConditionItem* PerkEntryConditionSet::GetItemByIndex(int index)
 {
     int iCurrent = 0;
-    ListNode_680910* pNode = _ref_006815c0();
+    ListNode_680910* pNode = ((ListNode_680910*)this)->_ref_006815c0();
     while (pNode != 0 && !pNode->_ref_008256d0())
     {
         if (iCurrent == index)
         {
-            return *(TESItem_680910**)pNode->_ref_006815c0();
+            return *(TESConditionItem**)pNode->_ref_006815c0();
         }
         iCurrent = iCurrent + 1;
         pNode = pNode->_ref_00726070();

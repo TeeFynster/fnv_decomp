@@ -1,94 +1,99 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
 // src/havok/physics/constraintsolver/constraint/bilateral/hkp1dbilateralconstraintbuildjacobian_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/constraintsolver/constraint/bilateral/hkp1dbilateralconstraintbuildjacobian.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
 // src/havok/physics/constraintsolver/constraint/bilateral/hkp1dbilateralconstraintbuildjacobian.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/constraintsolver/constraint/bilateral/hkp1dbilateralconstraintbuildjacobian.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Preserve the unit's original intrinsic layout: VC9 /GS treats the SDK's
+// additional byte lanes as a local character buffer and changes parameter spills.
+#define _INCLUDED_MM2
+// Exe 0x00dcfc00 FUN_00dcfc00: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
     int m128_i32[4];
     __int64 m128_i64[2];
     unsigned int m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_unpackhi_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-struct hkVector4
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_unpackhi_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
+extern "C" LocalM128 _mm_xor_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" LocalM128 _mm_sqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_load_ss(const float*);
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkMatrix3.h"
+
+inline float& hkVector4::component(int i)
 {
-    __m128 m_vComponents;
-    void operator=(const hkVector4& o)
-    {
-        m_vComponents = o.m_vComponents;
-    }
-    void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void setMul4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void mul4(const hkVector4& a)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, a.m_vComponents);
-    }
-    void add4(const hkVector4& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    void setAdd4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void setCross(const hkVector4& v1, const hkVector4& v2)
-    {
-        __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
-                                   _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
-                                   _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    void setXYZW(const hkVector4& xyz, const hkVector4& w)
-    {
-        m_vComponents = _mm_shuffle_ps(xyz.m_vComponents, _mm_unpackhi_ps(xyz.m_vComponents, w.m_vComponents), 0xc4);
-    }
-    float horizontalAdd4() const
-    {
-        __m128 sum0 = _mm_add_ps(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x4e), m_vComponents);
-        __m128 sum1 = _mm_add_ps(_mm_shuffle_ps(sum0, sum0, 0xb1), sum0);
-        float r;
-        _mm_store_ss(&r, sum1);
-        return r;
-    }
-    float dot3(const hkVector4& a) const
-    {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 r = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2));
-        float f;
-        _mm_store_ss(&f, r);
-        return f;
-    }
-};
-struct hkMatrix3
+    return m_vComponents.m128_f32[i];
+}
+
+
+inline void hkVector4::operator=(const hkVector4& o)
 {
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-};
+    m_vComponents = o.m_vComponents;
+}
+inline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+inline void hkVector4::setMul4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+}
+inline void hkVector4::mul4(const hkVector4& a)
+{
+    m_vComponents = _mm_mul_ps(m_vComponents, a.m_vComponents);
+}
+inline void hkVector4::add4(const hkVector4& a)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
+}
+inline void hkVector4::setAdd4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
+}
+inline void hkVector4::setCross(const hkVector4& v1, const hkVector4& v2)
+{
+    LocalM128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
+                               _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
+    LocalM128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
+                               _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(cross0, cross1);
+}
+inline void hkVector4::setXYZW(const hkVector4& xyz, const hkVector4& w)
+{
+    m_vComponents = _mm_shuffle_ps(xyz.m_vComponents, _mm_unpackhi_ps(xyz.m_vComponents, w.m_vComponents), 0xc4);
+}
+static __forceinline float HorizontalAdd4Scalar(const hkVector4& vector)
+{
+    LocalM128 sum0 = _mm_add_ps(_mm_shuffle_ps(vector.m_vComponents, vector.m_vComponents, 0x4e), vector.m_vComponents);
+    LocalM128 sum1 = _mm_add_ps(_mm_shuffle_ps(sum0, sum0, 0xb1), sum0);
+    float r;
+    _mm_store_ss(&r, sum1);
+    return r;
+}
 inline void SetRotatedDirection(hkVector4& out, const hkMatrix3& r, const hkVector4& b)
 {
-    __m128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
-    __m128 r0 = _mm_mul_ps(r.m_kColumn0.m_vComponents, b0);
-    __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
-    __m128 r1 = _mm_mul_ps(r.m_kColumn1.m_vComponents, b1);
-    __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
-    __m128 r2 = _mm_mul_ps(r.m_kColumn2.m_vComponents, b2);
+    LocalM128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
+    LocalM128 r0 = _mm_mul_ps(r.m_kColumn0.m_vComponents, b0);
+    LocalM128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
+    LocalM128 r1 = _mm_mul_ps(r.m_kColumn1.m_vComponents, b1);
+    LocalM128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
+    LocalM128 r2 = _mm_mul_ps(r.m_kColumn2.m_vComponents, b2);
     out.m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
 struct Accum_dcf880
@@ -144,10 +149,6 @@ struct QueryOut_dcf880
 };
 void __cdecl ComputeAngularJacobian(const Info_dcf880& info, const QueryIn_dcf880& aQueryIn,
                                     QueryOut_dcf880& aQueryOut);
-struct __declspec(align(16)) S_00dcf100_V4
-{
-    float x, y, z, w;
-};
 struct __declspec(align(16)) S_00dcf100_Body
 {
     int unk00;
@@ -162,11 +163,11 @@ struct __declspec(align(16)) S_00dcf100_Body
     int unk24;
     int unk28;
     int unk2c;
-    S_00dcf100_V4 invI;
-    S_00dcf100_V4 pos;
-    S_00dcf100_V4 col0;
-    S_00dcf100_V4 col1;
-    S_00dcf100_V4 col2;
+    hkVector4 invI;
+    hkVector4 pos;
+    hkVector4 col0;
+    hkVector4 col1;
+    hkVector4 col2;
 };
 struct S_00dcf100_Ref
 {
@@ -175,8 +176,8 @@ struct S_00dcf100_Ref
 };
 struct __declspec(align(16)) S_00dcf100_In
 {
-    S_00dcf100_V4 v0;
-    S_00dcf100_V4 v1;
+    hkVector4 v0;
+    hkVector4 v1;
     float f20;
     S_00dcf100_Ref* p24;
 };
@@ -199,26 +200,26 @@ struct S_00dcf100_Cfg
 };
 struct __declspec(align(16)) S_00dcf100_Out
 {
-    S_00dcf100_V4 q0;
-    S_00dcf100_V4 t0;
-    S_00dcf100_V4 t1;
+    hkVector4 q0;
+    hkVector4 t0;
+    hkVector4 t1;
     float f30;
     int unk34;
     int unk38;
     int unk3c;
 };
-static __forceinline __m128 S_Ld(const S_00dcf100_V4& v)
+static __forceinline LocalM128 S_Ld(const hkVector4& v)
 {
-    return *(const __m128*)&v;
+    return v.m_vComponents;
 }
-static __forceinline __m128 S_Cross(__m128 a, __m128 b)
+static __forceinline LocalM128 S_Cross(LocalM128 a, LocalM128 b)
 {
     return _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a, a, 0xc9), _mm_shuffle_ps(b, b, 0xd2)),
                       _mm_mul_ps(_mm_shuffle_ps(a, a, 0xd2), _mm_shuffle_ps(b, b, 0xc9)));
 }
-static __forceinline __m128 S_Rot(__m128 v, const S_00dcf100_Body* b)
+static __forceinline LocalM128 S_Rot(LocalM128 v, const S_00dcf100_Body* b)
 {
-    __m128 r = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), S_Ld(b->col1)),
+    LocalM128 r = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), S_Ld(b->col1)),
                           _mm_mul_ps(_mm_shuffle_ps(v, v, 0x00), S_Ld(b->col0)));
     return _mm_add_ps(r, _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), S_Ld(b->col2)));
 }
@@ -233,35 +234,25 @@ volatile float g_scale_dcf460;
 void CallTarget_dcf460();
 struct Input_dcf5b0
 {
-    __m128 pivot;
-    __m128 unused10;
-    __m128 direction;
-};
-union Vector_dcf5b0
-{
-    __m128 quad;
-    struct
-    {
-        float x, y, z, w;
-    } lanes;
-    unsigned char tag;
+    LocalM128 pivot;
+    LocalM128 unused10;
+    LocalM128 direction;
 };
 struct Jacobian_dcf5b0
 {
-    Vector_dcf5b0 linear;
-    Vector_dcf5b0 angularA;
-    Vector_dcf5b0 angularB;
+    hkVector4 linear;
+    hkVector4 angularA;
+    hkVector4 angularB;
 };
 extern double DAT_010c9300;
 void __cdecl FUN_00dcf5b0(Input_dcf5b0* a1, S_00dcf100_Cfg* a2, Jacobian_dcf5b0** a3, float k);
 extern double DAT_010c9300;
 void __cdecl FUN_00dcfa30(Info_dcf880* a1, S_00dcf100_Cfg* a2, Jac_dcf880** a3);
-extern "C" __m128 _mm_xor_ps(__m128, __m128);
 extern double DAT_010c9300;
-extern __m128 DAT_010c44d0;
+extern LocalM128 DAT_010c44d0;
 struct Src
 {
-    __m128* verts;
+    LocalM128* verts;
     float* volatile fl;
     float unk08;
     int count;
@@ -275,77 +266,41 @@ struct Cfg
     S_00dcf100_Body* A;
     S_00dcf100_Body* B;
 };
-union VOut
-{
-    __m128 quad;
-    struct
-    {
-        float x, y, z, w;
-    } lanes;
-    unsigned char tag;
-};
 struct JOut
 {
-    VOut a, b;
+    hkVector4 a, b;
     float c20;
     int unk24, unk28, unk2c;
 };
 void __cdecl FUN_00dcefb0(Src* s, Cfg* cfg, JOut** a3);
 struct Input_dcf280
 {
-    __m128 pivot;
-    __m128 pivotB;
-    __m128 direction;
-};
-union Vector_dcf280
-{
-    __m128 quad;
-    struct
-    {
-        float x, y, z, w;
-    } lanes;
-    unsigned char tag;
+    LocalM128 pivot;
+    LocalM128 pivotB;
+    LocalM128 direction;
 };
 struct Jacobian_dcf280
 {
-    Vector_dcf280 linear;
-    Vector_dcf280 angularA;
-    Vector_dcf280 angularB;
+    hkVector4 linear;
+    hkVector4 angularA;
+    hkVector4 angularB;
 };
 extern double DAT_010c9300;
 void __cdecl FUN_00dcf280(Input_dcf280* a1, S_00dcf100_Cfg* a2, Jacobian_dcf280** a3);
-struct S_00dcf720_Vector4
+static __forceinline LocalM128 S_00dcf720_cross(const LocalM128& a, const LocalM128& b)
 {
-    float x, y, z, w;
-    __m128& q()
-    {
-        return reinterpret_cast<__m128&>(*this);
-    }
-    const __m128& q() const
-    {
-        return reinterpret_cast<const __m128&>(*this);
-    }
-};
-static __forceinline __m128 S_00dcf720_cross(const __m128& a, const __m128& b)
-{
-    const __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(a, a, 0xc9), _mm_shuffle_ps(b, b, 0xd2));
-    const __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(a, a, 0xd2), _mm_shuffle_ps(b, b, 0xc9));
+    const LocalM128 cross0 = _mm_mul_ps(_mm_shuffle_ps(a, a, 0xc9), _mm_shuffle_ps(b, b, 0xd2));
+    const LocalM128 cross1 = _mm_mul_ps(_mm_shuffle_ps(a, a, 0xd2), _mm_shuffle_ps(b, b, 0xc9));
     return _mm_sub_ps(cross0, cross1);
 }
-struct S_00dcf720_Rotation
+static __forceinline LocalM128 S_00dcf720_rotate(const hkMatrix3& r, const LocalM128& v)
 {
-    S_00dcf720_Vector4 m_kColumn0;
-    S_00dcf720_Vector4 m_kColumn1;
-    S_00dcf720_Vector4 m_kColumn2;
-};
-static __forceinline __m128 S_00dcf720_rotate(const S_00dcf720_Rotation& r, const __m128& v)
-{
-    const __m128 b0 = _mm_shuffle_ps(v, v, 0x0);
-    const __m128 r0 = _mm_mul_ps(b0, r.m_kColumn0.q());
-    const __m128 b1 = _mm_shuffle_ps(v, v, 0x55);
-    const __m128 r1 = _mm_mul_ps(b1, r.m_kColumn1.q());
-    const __m128 b2 = _mm_shuffle_ps(v, v, 0xaa);
-    const __m128 r2 = _mm_mul_ps(b2, r.m_kColumn2.q());
+    const LocalM128 b0 = _mm_shuffle_ps(v, v, 0x0);
+    const LocalM128 r0 = _mm_mul_ps(b0, r.m_kColumn0.m_vComponents);
+    const LocalM128 b1 = _mm_shuffle_ps(v, v, 0x55);
+    const LocalM128 r1 = _mm_mul_ps(b1, r.m_kColumn1.m_vComponents);
+    const LocalM128 b2 = _mm_shuffle_ps(v, v, 0xaa);
+    const LocalM128 r2 = _mm_mul_ps(b2, r.m_kColumn2.m_vComponents);
     return _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
 struct S_00dcf720_Accumulator
@@ -354,11 +309,11 @@ struct S_00dcf720_Accumulator
     int unk04;
     int unk08;
     int unk0c;
-    S_00dcf720_Vector4 unk10;
-    S_00dcf720_Vector4 unk20;
-    S_00dcf720_Vector4 m_vInverseInertiaAndMass;
-    S_00dcf720_Vector4 m_kCenterOfMass1;
-    S_00dcf720_Rotation m_coreFromWorld;
+    hkVector4 unk10;
+    hkVector4 unk20;
+    hkVector4 m_vInverseInertiaAndMass;
+    hkVector4 m_kCenterOfMass1;
+    hkMatrix3 m_coreFromWorld;
 };
 struct S_00dcf720_QueryIn
 {
@@ -379,25 +334,25 @@ struct S_00dcf720_QueryIn
 };
 struct S_00dcf720_Info
 {
-    S_00dcf720_Vector4 m_kPivotVector;
-    S_00dcf720_Vector4 unk10;
-    S_00dcf720_Vector4 m_kAxisEndPoints;
+    hkVector4 m_kPivotVector;
+    hkVector4 unk10;
+    hkVector4 m_kAxisEndPoints;
 };
 struct S_00dcf720_Jacobian
 {
-    S_00dcf720_Vector4 m_kLinearJacobian;
-    S_00dcf720_Vector4 m_kAngularVelocity[2];
+    hkVector4 m_kLinearJacobian;
+    hkVector4 m_kAngularVelocity[2];
 
     __forceinline float getDiag(const S_00dcf720_Accumulator& mA, const S_00dcf720_Accumulator& mB) const
     {
-        __m128 ang0 = _mm_mul_ps(m_kAngularVelocity[0].q(), m_kAngularVelocity[0].q());
-        __m128 ang1 = _mm_mul_ps(m_kAngularVelocity[1].q(), m_kAngularVelocity[1].q());
-        ang0 = _mm_mul_ps(ang0, mA.m_vInverseInertiaAndMass.q());
-        ang1 = _mm_mul_ps(ang1, mB.m_vInverseInertiaAndMass.q());
-        const __m128 sumInvMass = _mm_add_ps(mA.m_vInverseInertiaAndMass.q(), mB.m_vInverseInertiaAndMass.q());
+        LocalM128 ang0 = _mm_mul_ps(m_kAngularVelocity[0].m_vComponents, m_kAngularVelocity[0].m_vComponents);
+        LocalM128 ang1 = _mm_mul_ps(m_kAngularVelocity[1].m_vComponents, m_kAngularVelocity[1].m_vComponents);
+        ang0 = _mm_mul_ps(ang0, mA.m_vInverseInertiaAndMass.m_vComponents);
+        ang1 = _mm_mul_ps(ang1, mB.m_vInverseInertiaAndMass.m_vComponents);
+        const LocalM128 sumInvMass = _mm_add_ps(mA.m_vInverseInertiaAndMass.m_vComponents, mB.m_vInverseInertiaAndMass.m_vComponents);
         ang0 = _mm_add_ps(ang0, ang1);
         ang0 = _mm_shuffle_ps(ang0, _mm_unpackhi_ps(ang0, sumInvMass), 0xc4);
-        __m128 sum = _mm_add_ps(_mm_shuffle_ps(ang0, ang0, 0x4e), ang0);
+        LocalM128 sum = _mm_add_ps(_mm_shuffle_ps(ang0, ang0, 0x4e), ang0);
         sum = _mm_add_ps(_mm_shuffle_ps(sum, sum, 0xb1), sum);
         float r;
         _mm_store_ss(&r, sum);
@@ -406,78 +361,17 @@ struct S_00dcf720_Jacobian
 };
 void FUN_00dcf720(const S_00dcf720_Info& info, const S_00dcf720_QueryIn& in, S_00dcf720_Jacobian* jac, float rhsFactor);
 // Adapted from an earlier contributor's 2026-10-21 WIP; retain prior credit.
-extern "C" __m128 _mm_xor_ps(__m128 a, __m128 b);
 static const double S00dcee80_kEps = 1.1920928955078125e-07;
-struct __declspec(align(16)) S_00dcee80_Vector4
+static inline void S_00dcee80_setRotatedDir(hkVector4& out, const hkMatrix3& a, const LocalM128 b)
 {
 
-    float x;
-    float y;
-    float z;
-    float w;
-    float scalarDot(const S_00dcee80_Vector4& a) const
-    {
-        return y * a.y + x * a.x + z * a.z;
-    }
+    const LocalM128 r1 = _mm_mul_ps(_mm_shuffle_ps(b, b, 0x55), a.m_kColumn1.m_vComponents);
 
-    __m128& q()
-    {
-        return reinterpret_cast<__m128&>(*this);
-    }
+    const LocalM128 r0 = _mm_mul_ps(_mm_shuffle_ps(b, b, 0x00), a.m_kColumn0.m_vComponents);
 
-    const __m128& q() const
-    {
-        return reinterpret_cast<const __m128&>(*this);
-    }
+    const LocalM128 r2 = _mm_mul_ps(_mm_shuffle_ps(b, b, 0xaa), a.m_kColumn2.m_vComponents);
 
-    __forceinline void setNeg4(const S_00dcee80_Vector4& v);
-
-    void setMul4(const S_00dcee80_Vector4& a, const S_00dcee80_Vector4& b)
-    {
-        q() = _mm_mul_ps(a.q(), b.q());
-    }
-
-    void mul4(const S_00dcee80_Vector4& a)
-    {
-        q() = _mm_mul_ps(q(), a.q());
-    }
-
-    void add4(const S_00dcee80_Vector4& a)
-    {
-        q() = _mm_add_ps(q(), a.q());
-    }
-
-    float horizontalAdd3() const
-    {
-
-        const __m128 s = _mm_add_ss(_mm_shuffle_ps(q(), q(), 0x55), q());
-
-        float r;
-
-        _mm_store_ss(&r, _mm_add_ss(_mm_shuffle_ps(q(), q(), 0xaa), s));
-
-        return r;
-    }
-};
-__forceinline void S_00dcee80_Vector4::setNeg4(const S_00dcee80_Vector4& v)
-{
-
-    q() = _mm_xor_ps(v.q(), DAT_010c44d0);
-}
-struct S_00dcee80_Matrix3
-{
-    S_00dcee80_Vector4 m_kColumn0, m_kColumn1, m_kColumn2;
-};
-static inline void S_00dcee80_setRotatedDir(S_00dcee80_Vector4& out, const S_00dcee80_Matrix3& a, const __m128 b)
-{
-
-    const __m128 r1 = _mm_mul_ps(_mm_shuffle_ps(b, b, 0x55), a.m_kColumn1.q());
-
-    const __m128 r0 = _mm_mul_ps(_mm_shuffle_ps(b, b, 0x00), a.m_kColumn0.q());
-
-    const __m128 r2 = _mm_mul_ps(_mm_shuffle_ps(b, b, 0xaa), a.m_kColumn2.q());
-
-    out.q() = _mm_add_ps(_mm_add_ps(r1, r0), r2);
+    out.m_vComponents = _mm_add_ps(_mm_add_ps(r1, r0), r2);
 }
 struct S_00dcee80_Accumulator
 {
@@ -496,9 +390,9 @@ struct S_00dcee80_Accumulator
     int unk28;
     int unk2c;
 
-    S_00dcee80_Vector4 m_vInverseInertiaAndMass, m_kCenterOfMass1;
+    hkVector4 m_vInverseInertiaAndMass, m_kCenterOfMass1;
 
-    S_00dcee80_Matrix3 m_kInverseInertiaMatrix;
+    hkMatrix3 m_kInverseInertiaMatrix;
 };
 struct S_00dcee80_QueryIn
 {
@@ -523,29 +417,32 @@ struct S_00dcee80_QueryIn
 };
 struct S_00dcee80_Info
 {
-    S_00dcee80_Vector4 m_kPointA, m_kAxisEndPoints, m_kPointB;
+    hkVector4 m_kPointA, m_kAxisEndPoints, m_kPointB;
 };
 struct __declspec(align(16)) S_00dcee80_Jacobian
 {
 
-    S_00dcee80_Vector4 m_kAngularVelocity[2];
+    hkVector4 m_kAngularVelocity[2];
 
     __forceinline float getAngularDiag(const S_00dcee80_Accumulator& mA, const S_00dcee80_Accumulator& mB) const
     {
 
-        S_00dcee80_Vector4 dia;
+        hkVector4 dia;
         dia.setMul4(m_kAngularVelocity[0], m_kAngularVelocity[0]);
 
         dia.mul4(mA.m_vInverseInertiaAndMass);
 
-        S_00dcee80_Vector4 dib;
+        hkVector4 dib;
         dib.setMul4(m_kAngularVelocity[1], m_kAngularVelocity[1]);
 
         dib.mul4(mB.m_vInverseInertiaAndMass);
 
         dia.add4(dib);
 
-        return dia.horizontalAdd3();
+        const LocalM128 s = _mm_add_ss(_mm_shuffle_ps(dia.m_vComponents, dia.m_vComponents, 0x55), dia.m_vComponents);
+        float r;
+        _mm_store_ss(&r, _mm_add_ss(_mm_shuffle_ps(dia.m_vComponents, dia.m_vComponents, 0xaa), s));
+        return r;
     }
 };
 struct S_00dcee80_SchemaHeader
@@ -559,9 +456,6 @@ struct S_00dcee80_QueryOut
 void FUN_00dcee80(const S_00dcee80_Info& info, const S_00dcee80_QueryIn& in, S_00dcee80_QueryOut& out);
 
 #include <math.h>
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" __m128 _mm_sqrt_ss(__m128);
-extern "C" __m128 _mm_load_ss(const float*);
 struct Input102
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
@@ -578,10 +472,10 @@ extern hkVector4 DAT_010ec7f0;
 extern double DAT_010c9300;
 extern hkVector4 DAT_01268370[];
 void FUN_00d6c970(const hkVector4*, const hkVector4*, const Input102*, Row102*);
-static float DotValue(__m128 v, __m128 a)
+static float DotValue(LocalM128 v, LocalM128 a)
 {
-    __m128 p = _mm_mul_ps(v, a);
-    __m128 t = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p));
+    LocalM128 p = _mm_mul_ps(v, a);
+    LocalM128 t = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p));
     float f;
     _mm_store_ss(&f, t);
     return f;
@@ -589,36 +483,24 @@ static float DotValue(__m128 v, __m128 a)
 static void RotateCols(hkVector4& out, const hkVector4& c0, const hkVector4& c1, const hkVector4& c2,
                        const hkVector4& v)
 {
-    __m128 r0 = _mm_mul_ps(c0.m_vComponents, _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0));
-    __m128 r1 = _mm_mul_ps(c1.m_vComponents, _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55));
-    __m128 r2 = _mm_mul_ps(c2.m_vComponents, _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xaa));
+    LocalM128 r0 = _mm_mul_ps(c0.m_vComponents, _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0));
+    LocalM128 r1 = _mm_mul_ps(c1.m_vComponents, _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55));
+    LocalM128 r2 = _mm_mul_ps(c2.m_vComponents, _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xaa));
     out.m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
-union Velocity102
-{
-    __m128 m_vComponents;
-    struct
-    {
-        float x, y, z, w;
-    } lanes;
-    float& at(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-};
 // @fnv 0x00dcfc00
 void FUN_00dcfc00(const hkVector4* pivotA, const hkVector4* pivotB, float maxForce, const Input102* in, Row102* jac)
 {
     Accum_dcf880* bodyA = in->bodyA;
     Accum_dcf880* bodyB = in->bodyB;
     FUN_00d6c970(pivotA, pivotB, in, jac);
-    Velocity102 velocity;
-    velocity.at(0) = jac[0].linear.m_vComponents.m128_f32[3];
-    velocity.at(1) = jac[1].linear.m_vComponents.m128_f32[3];
-    velocity.at(2) = jac[2].linear.m_vComponents.m128_f32[3];
+    hkVector4 velocity;
+    velocity.component(0) = jac[0].linear.m_vComponents.m128_f32[3];
+    velocity.component(1) = jac[1].linear.m_vComponents.m128_f32[3];
+    velocity.component(2) = jac[2].linear.m_vComponents.m128_f32[3];
     float limit = in->factor * maxForce;
-    __m128 squared = _mm_mul_ps(velocity.m_vComponents, velocity.m_vComponents);
-    __m128 sum =
+    LocalM128 squared = _mm_mul_ps(velocity.m_vComponents, velocity.m_vComponents);
+    LocalM128 sum =
         _mm_add_ss(_mm_shuffle_ps(squared, squared, 0xaa), _mm_add_ss(_mm_shuffle_ps(squared, squared, 0x55), squared));
     float length;
     _mm_store_ss(&length, _mm_sqrt_ss(sum));
@@ -628,14 +510,14 @@ void FUN_00dcfc00(const hkVector4* pivotA, const hkVector4* pivotB, float maxFor
         scale = sqrtf(scale);
         scale = sqrtf(scale);
         double eps = DAT_010c9300;
-        __m128 ones = DAT_010ec7f0.m_vComponents;
-        __m128 t = _mm_load_ss(&scale);
-        __m128 sa = _mm_shuffle_ps(t, t, 0);
+        LocalM128 ones = DAT_010ec7f0.m_vComponents;
+        LocalM128 t = _mm_load_ss(&scale);
+        LocalM128 sa = _mm_shuffle_ps(t, t, 0);
         hkVector4 a;
         a.m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(ones, sa), bodyA->m_kCenterPosition.m_vComponents),
                                      _mm_mul_ps(pivotA->m_vComponents, sa));
-        __m128 t2 = _mm_load_ss(&scale);
-        __m128 sb = _mm_shuffle_ps(t2, t2, 0);
+        LocalM128 t2 = _mm_load_ss(&scale);
+        LocalM128 sb = _mm_shuffle_ps(t2, t2, 0);
         hkVector4 b;
         b.m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(ones, sb), bodyB->m_kCenterPosition.m_vComponents),
                                      _mm_mul_ps(pivotB->m_vComponents, sb));
@@ -656,11 +538,11 @@ void FUN_00dcfc00(const hkVector4* pivotA, const hkVector4* pivotB, float maxFor
             ca.setCross(ra, *axis);
             cb.setCross(*axis, rb);
             RotateCols(row->angularA, bodyA->m_rot.m_kColumn0, bodyA->m_rot.m_kColumn1, bodyA->m_rot.m_kColumn2, ca);
-            __m128 rotationB0 = _mm_mul_ps(bodyB->m_rot.m_kColumn0.m_vComponents,
+            LocalM128 rotationB0 = _mm_mul_ps(bodyB->m_rot.m_kColumn0.m_vComponents,
                                            _mm_shuffle_ps(cb.m_vComponents, cb.m_vComponents, 0));
-            __m128 rotationB1 = _mm_mul_ps(bodyB->m_rot.m_kColumn1.m_vComponents,
+            LocalM128 rotationB1 = _mm_mul_ps(bodyB->m_rot.m_kColumn1.m_vComponents,
                                            _mm_shuffle_ps(cb.m_vComponents, cb.m_vComponents, 85));
-            __m128 rotationB2 = _mm_mul_ps(bodyB->m_rot.m_kColumn2.m_vComponents,
+            LocalM128 rotationB2 = _mm_mul_ps(bodyB->m_rot.m_kColumn2.m_vComponents,
                                            _mm_shuffle_ps(cb.m_vComponents, cb.m_vComponents, 170));
             row->angularB.m_vComponents = _mm_add_ps(_mm_add_ps(rotationB0, rotationB1), rotationB2);
             hkVector4 invB;
@@ -678,8 +560,8 @@ void FUN_00dcfc00(const hkVector4* pivotA, const hkVector4* pivotB, float maxFor
             total.setAdd4(massA, massB);
             linearMass.setAdd4(invA, invB);
             total.setXYZW(total, linearMass);
-            float diagonal = total.horizontalAdd4() + eps;
-            __m128 projectedInput = _mm_sub_ps(b.m_vComponents, a.m_vComponents);
+            float diagonal = HorizontalAdd4Scalar(total) + eps;
+            LocalM128 projectedInput = _mm_sub_ps(b.m_vComponents, a.m_vComponents);
             row->angularB.m_vComponents.m128_f32[3] = diagonal;
             row->angularA.m_vComponents.m128_f32[3] = tau / diagonal;
             row->linear.m_vComponents.m128_f32[3] = DotValue(projectedInput, axis->m_vComponents) * factor;

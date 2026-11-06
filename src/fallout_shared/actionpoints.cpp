@@ -2,36 +2,8 @@
 // fallout_shared/actionpoints.cpp
 // ActionPoints::GetActionPoints (0x0066dda0).
 //
-// The restore-rate setting is a SettingT<GameSettingCollection> global whose
-// vanilla reference accessors live on the shared Setting base class. The
-// canonical generated Setting.h omits those vanilla accessors, so the needed
-// declarations are authored locally for this TU.
-
-#pragma pack(push, 4)
-union SETTING_VALUE
-{
-  public:
-    const char* str;  // +0x0
-    int i;            // +0x0
-    unsigned int u;   // +0x0
-    float f;          // +0x0
-    bool b;           // +0x0
-    char c;           // +0x0
-    unsigned char h;  // +0x0
-};
-#pragma pack(pop)
-
-class GameSettingCollection
-{
-};
-
-class SettingT_GameSettingCollection_
-{
-  public:
-    SettingT_GameSettingCollection_();
-    ~SettingT_GameSettingCollection_();
-    SETTING_VALUE* Float();
-};
+#include "../../include/SettingT_GameSettingCollection_.h"
+#include "../../include/StartMenu.h"
 
 extern SettingT_GameSettingCollection_ fActionPointsRestoreRate;
 
@@ -119,15 +91,10 @@ int FUN_0066dba0(int aeWeaponType)
     return result;
 }
 
-struct StartMenu
-{
-    char const* GetMenuTitle();
-};
-
 extern StartMenu* DAT_0119bb50[];
 
 // @fnv 0x0066ddc0
 char const* FUN_0066ddc0(int index)
 {
-    return DAT_0119bb50[index]->GetMenuTitle();
+    return reinterpret_cast<char const*>(DAT_0119bb50[index]->GetMenuTitle());
 }

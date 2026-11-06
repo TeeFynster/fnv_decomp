@@ -1,29 +1,38 @@
 // gamebryo2.2/corelibs/nimain/nitexture.cpp: NiObjectNET, NiTexture, Elements (13 functions)
 
-#include "nitexture_match.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiProperty.h"
+
+#include "../../../../include/NiExtraData.h"
+#include "../../../../include/NiTexture.h"
+
+extern "C" void(__stdcall* fnv_EnterCriticalSection)(void*);
+extern "C" void(__stdcall* fnv_LeaveCriticalSection)(void*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
+extern unsigned char DAT_011f4380;
 
 // Removes the extra-data entry at index under a critical section, releasing its reference and shifting the remaining entries down.
 // @fnv 0x00a5b990
 void NiObjectNET::DeleteExtraData(unsigned short index)
 {
     fnv_EnterCriticalSection(&DAT_011f4380);
-    if (index >= m_usExtraDataCount)
+    if (index >= m_usExtraDataSize)
     {
         fnv_LeaveCriticalSection(&DAT_011f4380);
         return;
     }
 
-    if (m_ppExtraData[index])
+    if (m_ppkExtra[index])
     {
-        NiExtraData* extra = m_ppExtraData[index];
-        if (InterlockedDecrement(&extra->m_uiRefCount) == 0)
+        NiExtraData* extra = m_ppkExtra[index];
+        if (InterlockedDecrement(reinterpret_cast<volatile long*>(&extra->m_uiRefCount)) == 0)
             extra->DeleteThis();
     }
 
-    for (unsigned short i = index; i < m_usExtraDataCount - 1; ++i)
-        m_ppExtraData[i] = m_ppExtraData[i + 1];
-    --m_usExtraDataCount;
-    m_ppExtraData[m_usExtraDataCount] = 0;
+    for (unsigned short i = index; i < m_usExtraDataSize - 1; ++i)
+        m_ppkExtra[i] = m_ppkExtra[i + 1];
+    --m_usExtraDataSize;
+    m_ppkExtra[m_usExtraDataSize] = 0;
     fnv_LeaveCriticalSection(&DAT_011f4380);
 }
 
@@ -35,24 +44,11 @@ void NiTexture::LoadBinary(NiStream& stream)
 
 extern int DAT_010983bc;
 
-class BSFadeNode
-{
-  public:
-    static void* __cdecl operator new(unsigned int);
-};
-
-class NiProperty : public BSFadeNode
-{
-  public:
-    NiProperty();
-    char pad[0x18];
-};
-
 // Allocates a 0x18-byte NiProperty, runs its constructor, installs the vtable at DAT_010983bc, and returns it (or null on allocation failure).
 // @fnv 0x00a47380
 void* __cdecl FUN_00a47380()
 {
-    NiProperty* p = (NiProperty*)BSFadeNode::operator new(0x18);
+    NiProperty* p = (NiProperty*)NiRefObject::operator new(0x18);
     if (p)
     {
         p->NiProperty::NiProperty();
@@ -62,10 +58,6 @@ void* __cdecl FUN_00a47380()
     return 0;
 }
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
 extern MemoryManager g_memoryManager;
 
 struct Pool00a91290
@@ -115,10 +107,7 @@ void* __fastcall FUN_00a473b0(void* self, int, unsigned int flags)
 }
 
 struct ActorCombatGroup;
-template <class T> struct NiTMallocInterface
-{
-};
-template <class T, class A> struct NiTArray
+template <class T, class A> struct ViewerFieldArray
 {
     void* m_vtbl;
     unsigned int m_pad4;
@@ -129,24 +118,22 @@ template <class T, class A> struct NiTArray
     void SetSize(unsigned int);
     void SetAt(unsigned int, T&);
 };
-typedef NiTArray<ActorCombatGroup*, NiTMallocInterface<ActorCombatGroup*> > CGArray;
+typedef ViewerFieldArray<ActorCombatGroup*, NiTMallocInterface<ActorCombatGroup*> > CGArray;
 extern const char* const g_011f444c_arg1;
-struct FUN_00a62a40_this
-{
-    void FUN_00a5ca80(CGArray*);
-};
+// NiObjectNET's viewer routine is not yet declared by the shared header.
+void __fastcall FUN_00a5ca80(NiObjectNET*, int, CGArray*);
 ActorCombatGroup* __cdecl FUN_00a7d330(const char*);
 ActorCombatGroup* __cdecl FUN_00a7d4d0(const char*, unsigned int);
 // @fnv 0x00a62a40
-void __fastcall FUN_00a62a40(FUN_00a62a40_this* self, int, CGArray* apArray)
+void __fastcall FUN_00a62a40(NiTexture* self, int unused, CGArray* apArray)
 {
-    self->FUN_00a5ca80(apArray);
+    FUN_00a5ca80(self, unused, apArray);
     ActorCombatGroup* pEntry = FUN_00a7d330(g_011f444c_arg1);
     unsigned int n = apArray->m_usESize;
     if (n >= apArray->m_usMaxSize)
         apArray->SetSize(n + apArray->m_usGrowBy);
     apArray->SetAt(n, pEntry);
-    unsigned char* st = *reinterpret_cast<unsigned char**>(reinterpret_cast<unsigned char*>(self) + 0x24);
+    unsigned char* st = reinterpret_cast<unsigned char*>(self->m_pkRendererData);
     pEntry = FUN_00a7d4d0("State", st ? st[0x5b] : 0);
     n = apArray->m_usESize;
     if (n >= apArray->m_usMaxSize)
@@ -166,32 +153,17 @@ struct TexInfo
     int m_i18;
 };
 
-class FUN_00a62670_cls
-{
-  public:
-    int m_i00;
-    int m_i04;
-    int m_i08;
-    int m_i0C;
-    int m_i10;
-    int m_i14;
-    int m_i18;
-    int m_i1C;
-    int m_i20;
-    TexInfo* m_pObjectInfo;
-    int FUN_00a62670();
-};
-
 // @fnv 0x00a62670
-int FUN_00a62670_cls::FUN_00a62670()
+// The shared NiTexture header does not yet declare this renderer-data query.
+int __fastcall FUN_00a62670(NiTexture* self)
 {
     unsigned int result = 0;
-    if (m_pObjectInfo != 0)
+    if (self->m_pkRendererData != 0)
     {
-        result = (unsigned char)m_pObjectInfo->m_c15;
+        result = (unsigned char)reinterpret_cast<TexInfo*>(self->m_pkRendererData)->m_c15;
         result >>= 3;
-        result *= (unsigned int)m_pObjectInfo->m_i10;
-        result *= (unsigned int)m_pObjectInfo->m_i0C;
+        result *= (unsigned int)reinterpret_cast<TexInfo*>(self->m_pkRendererData)->m_i10;
+        result *= (unsigned int)reinterpret_cast<TexInfo*>(self->m_pkRendererData)->m_i0C;
     }
     return (int)result;
 }
@@ -297,18 +269,10 @@ extern "C" void __cdecl FUN_00a47360()
     FUN_00a5c0e0();
 }
 
-struct FUN_00a62660_cls
-{
-    int unk00;
-    int unk04;
-    int m_08;
-    const int& FUN_00a62660();
-};
-
 // @fnv 0x00a62660
-const int& FUN_00a62660_cls::FUN_00a62660()
+const ExtraName& NiTexture::FUN_00a62660()
 {
-    return m_08;
+    return reinterpret_cast<const ExtraName&>(m_kName);
 }
 
 namespace sa912d0 {

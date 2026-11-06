@@ -1,8 +1,129 @@
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTArray.h"
+#include "../../include/NiTPointerMap.h"
 
 // src/staging/blk_004a0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/BGSBodyPart.h"
+#include "../../include/BGSPrimitiveBox.h"
+#include "../../include/BSAudio.h"
+#include "../../include/GO.h"
+#include "../../include/MapEntryCount.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former NiPoint3_ext stand-in.
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x - kRhs.x, y - kRhs.y, z - kRhs.z);
+}
+
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x + kRhs.x, y + kRhs.y, z + kRhs.z);
+}
+
+inline float NiPoint3::operator*(const NiPoint3& point) const
+{
+    return x * point.x + y * point.y + z * point.z;
+}
+
+inline NiPoint3 operator*(float scalar, const NiPoint3& point)
+{
+    return NiPoint3(scalar * point.x, scalar * point.y, scalar * point.z);
+}
+#include "../../include/NiPoint3.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/NiTriShape.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/RecursiveSpinLock.h"
+#include "../../include/NiColorA.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESSound.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/NiMemObject.h"
+
+#include "../../include/BSShaderNoLightingProperty.h"
+
+#pragma pack(push, 4)
+
+#include "../../include/NiTMapItem.h"
+
+template <> NiTPointerMap<NiObject*, NiObject*>::~NiTPointerMap();
+template <> NiTPointerMap<NiObject*, bool>::~NiTPointerMap();
+
+// The shared pointer exposes storage and lifetime operations; these comparison
+// entry points preserve the game's out-of-line pointer comparisons.
+template <class T> struct NiPointerComparisons
+{
+    bool Equals(T* object) const;
+    bool Differs(const NiPointer<T>& other) const;
+};
+
+template <class T> NiPointer<T>::NiPointer(T* pkNew)
+{
+    m_pObject = pkNew;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+
+template <class T> NiPointer<T>::NiPointer(const NiPointer<T>& kSrc)
+{
+    m_pObject = kSrc.m_pObject;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+
+template <class T> NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+
+template <class T> NiPointer<T>::operator T*() const
+{
+    return m_pObject;
+}
+
+template <class T> T* NiPointer<T>::operator->() const
+{
+    return m_pObject;
+}
+
+template <class T> NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+
+template <class T> NiPointer<T>& NiPointer<T>::operator=(const NiPointer<T>& kSrc)
+{
+    if (m_pObject != kSrc.m_pObject)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = kSrc.m_pObject;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
 
 extern int DAT_011c57e4;
 extern int DAT_011c57e8;
@@ -13,13 +134,6 @@ void __cdecl FUN_004a0010()
     DAT_011c57e4 = 0;
     DAT_011c57e8 = 0;
 }
-
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
 
 struct FUN_004a0d60_Class
 {
@@ -32,7 +146,8 @@ struct FUN_004a0d60_Class
 // @fnv 0x004a0d60
 NiPoint3& FUN_004a0d60_Class::FUN_004a0d60(NiPoint3& arDest)
 {
-    arDest = m_kPoint;
+    // Preserve the game's bitwise point copy independently of shared NiPoint3 assignment declarations.
+    reinterpret_cast<NiPoint3&>(arDest) = reinterpret_cast<const NiPoint3&>(m_kPoint);
     return arDest;
 }
 
@@ -211,10 +326,6 @@ void __thiscall FUN_004a4440_Class::FUN_004a4440()
     FUN_004a46d0();
 }
 
-struct BSAudio
-{
-    void* GetAudioBackendData();
-};
 extern "C" BSAudio* __cdecl FUN_00c85750();
 struct FUN_004a4840_class
 {
@@ -258,10 +369,7 @@ struct Flt
 {
     operator unsigned int();
 };
-struct TESActorBaseData
-{
-    unsigned short GetFatigue() const;
-};
+
 struct FUN_004a8ab0_shell
 {
     unsigned short GetActorBaseFatigue();
@@ -388,44 +496,20 @@ FUN_004aa1b0_class* __thiscall FUN_004aa1b0_class::FUN_004aa1b0(int a)
     return this;
 }
 
-extern int DAT_0101fb8c;
-struct FUN_004afb20_class
-{
-    int* m_p;
-    void __thiscall FUN_004aff30(int a);
-    FUN_004afb20_class* __thiscall FUN_004afb20(int a);
-};
-// Calls FUN_004aff30 with a, sets m_p to point at DAT_0101fb8c, and returns this.
+// RTTI at vftable 0x0101fb8c identifies the pointer-to-pointer map.
 // @fnv 0x004afb20
-FUN_004afb20_class* __thiscall FUN_004afb20_class::FUN_004afb20(int a)
-{
-    FUN_004aff30(a);
-    m_p = &DAT_0101fb8c;
-    return this;
-}
+template <>
+NiTPointerMap<NiObject*, NiObject*>::NiTPointerMap(unsigned int uiHashSize)
+    : NiTMapBase<NiTPointerAllocator<unsigned int>, NiObject*, NiObject*>(uiHashSize)
+{}
 
-extern int DAT_0101fbac;
-
-struct FUN_004afb50_class
-{
-    int* p;
-    void FUN_004b0030(int a);
-    FUN_004afb50_class* InitializeWithGlobal(int a);
-};
-
-// Calls FUN_004b0030 with the argument, sets p to point at DAT_0101fbac, and returns this.
+// RTTI at vftable 0x0101fbac identifies the pointer-to-bool map.
 // @fnv 0x004afb50
-FUN_004afb50_class* FUN_004afb50_class::InitializeWithGlobal(int a)
-{
-    this->FUN_004b0030(a);
-    p = &DAT_0101fbac;
-    return this;
-}
+template <>
+NiTPointerMap<NiObject*, bool>::NiTPointerMap(unsigned int uiHashSize)
+    : NiTMapBase<NiTPointerAllocator<unsigned int>, NiObject*, bool>(uiHashSize)
+{}
 
-struct RecursiveSpinLock
-{
-    void Lock(const char*);
-};
 struct FUN_004afb80_shell
 {
     void LockAtOffset();
@@ -437,10 +521,6 @@ void FUN_004afb80_shell::LockAtOffset()
 }
 
 namespace fnv_004afba0 {
-struct RecursiveSpinLock
-{
-    void Unlock();
-};
 
 struct FUN_004afba0_class
 {
@@ -450,7 +530,7 @@ struct FUN_004afba0_class
 // @fnv 0x004afba0
 void FUN_004afba0_class::UnlockAtOffset()
 {
-    ((RecursiveSpinLock*)((char*)this + 0x20))->Unlock();
+    ((RecursiveSpinLock*)((char*)this + 0x20))->Leave();
 }
 }  // namespace fnv_004afba0
 
@@ -570,11 +650,6 @@ float FUN_004b5590(float afY, float afX)
 {
     return (float)atan2((double)afY, (double)afX);
 }
-
-struct TESSound
-{
-    unsigned int Deallocate();
-};
 
 // If p is non-null, calls p->Deallocate() and returns its result; otherwise returns 0.
 // @fnv 0x004b5aa0
@@ -746,7 +821,6 @@ struct FUN_004aa150_class
     void* vtable;
     void* m_iWordAt04;
     void* m_8;
-    void __thiscall NiTPointerMap_RemoveAll();
     void __thiscall FUN_004aa150();
 };
 
@@ -754,7 +828,7 @@ struct FUN_004aa150_class
 void __thiscall FUN_004aa150_class::FUN_004aa150()
 {
     *reinterpret_cast<void**>(this) = &DAT_0101ee20;
-    NiTPointerMap_RemoveAll();
+    reinterpret_cast<NiTPointerMap<int, int>*>(this)->RemoveAll();
     NiFreeAlias(m_8);
 }
 }  // namespace fnv_004aa150
@@ -940,22 +1014,6 @@ FUN_004aa310_Class* __thiscall FUN_004aa310_Class::FUN_004aa310(unsigned int fla
     return this;
 }
 
-void __cdecl FUN_004affa0();
-void __cdecl Deallocate(void*);
-struct FUN_004afbc0_Class
-{
-    void* __thiscall FUN_004afbc0(unsigned int flags);
-};
-// Calls FUN_004affa0 on this, frees this with Deallocate when flags has bit 0 set, and returns this.
-// @fnv 0x004afbc0
-void* __thiscall FUN_004afbc0_Class::FUN_004afbc0(unsigned int flags)
-{
-    ((void(__thiscall*)(void*))FUN_004affa0)(this);
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
-
 void __fastcall FUN_004afc20(void*);
 void __cdecl operator delete(void*);
 struct FUN_004b0160_class
@@ -1023,18 +1081,13 @@ void* __thiscall FUN_004b08e0_Class::FUN_004b08e0(unsigned int flags)
     return this;
 }
 
-struct NiFixedString
-{
-    ~NiFixedString();
-    void* __thiscall FUN_004b9900(unsigned int flags);
-};
 // Destroys the NiFixedString and, if the flags bit 0 is set, frees the object's memory, returning this.
 // @fnv 0x004b9900
 void* NiFixedString::FUN_004b9900(unsigned int flags)
 {
     NiFixedString::~NiFixedString();
     if (flags & 1)
-        operator delete(this);
+        ::operator delete(this);
     return this;
 }
 
@@ -1120,7 +1173,7 @@ float __thiscall BSRandomHelper::FUN_004a4260()
 }
 
 struct ObstacleData;
-template <class T> struct NiPointer;
+
 struct FUN_004a4650_ListBase
 {
     NiTListItem<NiPointer<ObstacleData> >* m_pItemHead;
@@ -1144,10 +1197,6 @@ void __fastcall FUN_004a4650(FUN_004a4650_ListBase* self)
     self->m_pItemPrev = 0;
 }
 
-struct GO
-{
-    void __thiscall operator=(void*);
-};
 struct FUN_004a4930_class
 {
     char _pad[8];
@@ -1220,10 +1269,7 @@ void __thiscall FUN_004a4a10_Holder::FUN_004a4a10(int aiArg1, int aiArg2)
 }
 
 namespace fnv_004a4c50 {
-struct GO
-{
-    void operator=(void*);
-};
+
 struct FUN_004a4c50_Class
 {
     char pad[0x24];
@@ -1242,10 +1288,6 @@ void __thiscall FUN_004a4c50_Class::ClearSlots()
 }
 }  // namespace fnv_004a4c50
 
-struct BGSBodyPart
-{
-    const char* __thiscall GetPartName();
-};
 struct Mid
 {
     virtual void v00();
@@ -1380,10 +1422,6 @@ void* __thiscall GlobalObject_004a9d80::FUN_004a9db0(unsigned int flags)
     return this;
 }
 
-struct FUN_00519c50_class
-{
-    void __thiscall NiTPointerMap_RemoveAll();
-};
 struct FUN_004a9fc0_Class
 {
     void* _00;
@@ -1397,7 +1435,7 @@ void __cdecl _NiFree(void*);
 void __thiscall FUN_004a9fc0_Class::FUN_004a9fc0()
 {
     *(void**)this = (void*)&DAT_0101ede0;
-    ((FUN_00519c50_class*)this)->NiTPointerMap_RemoveAll();
+    reinterpret_cast<NiTPointerMap<int, int>*>(this)->RemoveAll();
     _NiFree(_08);
 }
 
@@ -1425,22 +1463,6 @@ FUN_004aa210_class* __thiscall FUN_004aa210_class::FUN_004aa210(int aiCount)
     return this;
 }
 }  // namespace fnv_004aa210
-
-void __cdecl _Deallocate(void*);
-struct FUN_004afbf0_class
-{
-    void __thiscall FUN_004b00a0();
-    void* __thiscall FUN_004afbf0(unsigned int);
-};
-// Calls FUN_004b00a0, then deallocates this if flags has bit 0 set, and returns this.
-// @fnv 0x004afbf0
-void* __thiscall FUN_004afbf0_class::FUN_004afbf0(unsigned int flags)
-{
-    FUN_004b00a0();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
 
 extern int DAT_0101fbfc;
 void* __cdecl NiMalloc(unsigned int);
@@ -1498,10 +1520,7 @@ void __cdecl FUN_004b0220(int pObject)
 }
 
 extern int DAT_0101fc8c;
-template <> struct NiTMallocInterface<void*>
-{
-    static void __cdecl Deallocate(void**);
-};
+#include "../../include/NiTMallocInterface.h"
 struct FUN_004b07b0_Struct
 {
     void* vtbl;
@@ -1622,7 +1641,7 @@ struct Helper62d0
 // @fnv 0x004b0f70
 void __thiscall Helper62d0::AssignNodePointer(const NiPointer<NiNode>& other)
 {
-    if (other == 0)
+    if (((const NiPointerComparisons<NiNode>*)&other)->Equals(0))
         return;
     operator=(reinterpret_cast<void const*>(&other));
 }
@@ -1675,39 +1694,21 @@ int __cdecl FUN_004b12d0(char* pcString)
     return 0;
 }
 
-struct ThreeByThreeMatrix
-{
-    float m[9];
-    void __thiscall _ref_006815c0();
-    bool __thiscall Inverse(ThreeByThreeMatrix&);
-    void __thiscall FUN_004b4600();
-    ThreeByThreeMatrix* __thiscall FUN_004b45b0(ThreeByThreeMatrix*);
-};
 // @fnv 0x004b45b0
-ThreeByThreeMatrix* __thiscall ThreeByThreeMatrix::FUN_004b45b0(ThreeByThreeMatrix* apDest)
+NiMatrix3 NiMatrix3::Inverse() const
 {
-    ThreeByThreeMatrix tmp;
-    tmp._ref_006815c0();
+    NiMatrix3 tmp;
     if (!Inverse(tmp))
-        tmp.FUN_004b4600();
-    *apDest = tmp;
-    return apDest;
+        tmp.MakeZero();
+    return tmp;
 }
 
-struct M3_
-{
-    void FUN_004b4660(unsigned int, float, float, float);
-};
-struct FUN_004b4600_Class
-{
-    void FUN_004b4600();
-};
 // @fnv 0x004b4600
-void FUN_004b4600_Class::FUN_004b4600()
+void NiMatrix3::MakeZero()
 {
-    ((M3_*)this)->FUN_004b4660(0, 0.0f, 0.0f, 0.0f);
-    ((M3_*)this)->FUN_004b4660(1, 0.0f, 0.0f, 0.0f);
-    ((M3_*)this)->FUN_004b4660(2, 0.0f, 0.0f, 0.0f);
+    SetCol(0, 0.0f, 0.0f, 0.0f);
+    SetCol(1, 0.0f, 0.0f, 0.0f);
+    SetCol(2, 0.0f, 0.0f, 0.0f);
 }
 
 extern const char* DAT_01188f84[];
@@ -1786,11 +1787,6 @@ void __thiscall FUN_004bcbd0_Class::ProcessNodes()
         node = node->GetNext();
     }
 }
-
-struct TESForm
-{
-    unsigned int __thiscall FNV_GetFormType();
-};
 
 struct FUN_004be1a0_Class
 {
@@ -1903,10 +1899,7 @@ struct Struct_004b0680
     Struct_004b0680(float* a, float* b);
     ~Struct_004b0680();
 };
-struct NiTPrimitiveArray_unsigned_int_
-{
-    unsigned int AddFirstEmpty(unsigned int const&);
-};
+
 struct FUN_004b05d0_Class
 {
     int FindPairIndex(float*, float*);
@@ -1918,7 +1911,7 @@ char FUN_004b05d0_Class::AddPairIfMissing(float* pfFirst, float* pfSecond)
     char r = 0;
     if (FindPairIndex(pfFirst, pfSecond) == -1)
     {
-        ((NiTPrimitiveArray_unsigned_int_*)((char*)this + 8))
+        ((NiTPrimitiveArray<unsigned int>*)((char*)this + 8))
             ->AddFirstEmpty((unsigned int)new Struct_004b0680(pfFirst, pfSecond));
     }
     return r;
@@ -2067,15 +2060,10 @@ FUN_004aff30_Class* __thiscall FUN_004aff30_Class::FUN_004aff30(unsigned int aSi
     return this;
 }
 
-struct Arr
-{
-    unsigned int GetSize();
-    unsigned int* GetAt(int);
-};
 struct FUN_004b06b0_Class
 {
     char pad[8];
-    Arr arr;
+    NiTPrimitiveArray<unsigned int> arr;
     int FindPairIndex(int a, int b);
 };
 // Scans arr for the last entry whose two leading ints equal a and b, returning its index or -1 if none match.
@@ -2085,7 +2073,7 @@ int FUN_004b06b0_Class::FindPairIndex(int aiFirst, int aiSecond)
     int result = -1;
     for (unsigned int i = 0; i < arr.GetSize(); ++i)
     {
-        if ((int)*(int*)*arr.GetAt(i) == aiFirst && (int)*(int*)((char*)*arr.GetAt(i) + 4) == aiSecond)
+        if ((int)*(int*)arr.GetAt(i) == aiFirst && (int)*(int*)((char*)arr.GetAt(i) + 4) == aiSecond)
             result = i;
     }
     return result;
@@ -2164,38 +2152,18 @@ char* FUN_004a46b0_class::GetEntryAt(int aiIndex)
     return m_p + aiIndex * 0x60;
 }
 
-struct Point3
-{
-    float x;
-    float y;
-    float z;
-    Point3 operator*(float value) const;
-};
-
-struct BGSPrimitiveBox
-{
-    virtual ~BGSPrimitiveBox();
-    virtual void FUN_004a5040_dummy();
-    virtual void SetSize(int value);
-    virtual void SetPosition(Point3& position);
-
-    int m_enabled;
-    char m_auiShapeKeys[0x44];
-
-    BGSPrimitiveBox();
-};
-
-// Allocates a BGSPrimitiveBox, sets its size and position to half of point, enables it, and returns it.
+// Allocates a box, applies its color and half extents, and sets its primitive type.
 // @fnv 0x004a5040
-BGSPrimitiveBox* __cdecl CreatePrimitiveBox(Point3* point, int iSize)
+BGSPrimitiveBox* __cdecl CreatePrimitiveBox(NiPoint3* point, int iSize)
 {
     BGSPrimitiveBox* box = new BGSPrimitiveBox;
-    box->SetSize(iSize);
+    // BGSPrimitive still declares its shared color API with NiColorA.
+    box->ApplyColor(*reinterpret_cast<NiColorA*>(iSize));
 
-    Point3 position = point->operator*(0.5f);
-    box->SetPosition(position);
+    NiPoint3 position = point->operator*(0.5f);
+    box->vf03(*reinterpret_cast<NiPoint3*>(&position));
 
-    box->m_enabled = 1;
+    box->eType = 1;
     return box;
 }
 
@@ -2325,7 +2293,7 @@ struct FUN_004a0490_cls
 };
 struct FUN_004ed900_cls
 {
-    void __thiscall RemoveAll();
+    void __thiscall FUN_004ed900();
 };
 
 // @fnv 0x004a42a0
@@ -2355,7 +2323,7 @@ void __cdecl FUN_004a42a0()
             r = 0;
         }
     }
-    ((FUN_004ed900_cls*)kObj)->RemoveAll();
+    ((FUN_004ed900_cls*)kObj)->FUN_004ed900();
 }
 
 struct FUN_004a4650_ListBase;
@@ -2715,12 +2683,6 @@ void __cdecl FUN_004ab0c0(Ref_cls* apRef)
     }
 }
 
-struct NiAVObject
-{
-    void IncRefCount();
-    void DecRefCount();
-};
-
 struct Pn4afe
 {
     int unk00;
@@ -2736,7 +2698,7 @@ void Pn4afe::TrimTrailingNullPointers()
 {
     while (unk0A > 0)
     {
-        if (unk04[unk0A - 1] != NiPointer<NiAVObject>(0))
+        if (((const NiPointerComparisons<NiAVObject>*)&unk04[unk0A - 1])->Differs(NiPointer<NiAVObject>(0)))
         {
             break;
         }
@@ -2744,27 +2706,11 @@ void Pn4afe::TrimTrailingNullPointers()
     }
 }
 
-struct Unk438Helper
-{
-    void FUN_00438af0();
-};
-
-struct Unk438Base
-{
-    virtual void v00();
-    ~Unk438Base();
-};
-
-struct FUN_004affa0 : Unk438Base
-{
-    virtual ~FUN_004affa0();
-};
-
-// Destructor that calls FUN_00438af0 on this object.
 // @fnv 0x004affa0
-FUN_004affa0::~FUN_004affa0()
+template <>
+NiTPointerMap<NiObject*, NiObject*>::~NiTPointerMap()
 {
-    ((Unk438Helper*)this)->FUN_00438af0();
+    RemoveAll();
 }
 
 struct FUN_00658930_cls
@@ -2864,145 +2810,18 @@ void FUN_004b0ef0_cls::FUN_004b0ef0()
 namespace fnv_004b3570 {
 void* __cdecl NiMalloc(unsigned int);
 
-struct NiPoint3V
-{
-    float x;
-    float y;
-    float z;
-    NiPoint3V();
-};
-
-struct RgbaColor
-{
-    float r;
-    float g;
-    float b;
-    float a;
-    RgbaColor();
-};
-
-struct NiPoint2
-{
-    float x;
-    float y;
-};
-
-struct NiObject
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-
-struct NiAVObject : NiObject
-{
-    void AttachProperty(NiObject* apProperty);
-};
-
-struct NiTriShape : NiAVObject
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    NiTriShape(unsigned short usVertices, NiPoint3V* pkVertex, NiPoint3V* pkNormal, RgbaColor* pkColor,
-               NiPoint2* pkTexture, unsigned short usNumTextureSets, unsigned int eNBTMethod,
-               unsigned short usTriangles, unsigned short* pusTriList);
-};
-
-struct BSShaderLightingProperty : NiObject
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    BSShaderLightingProperty();
-};
-
 void __cdecl InitGeometryShader(NiAVObject* apObject, int a, int b);
 
 // Builds a three-vertex NiTriShape from three points and a color, optionally attaching a lighting property and initializing the geometry shader.
 // @fnv 0x004b3570
-NiTriShape* __cdecl FUN_004b3570(NiPoint3V kP0, NiPoint3V kP1, NiPoint3V kP2, const RgbaColor& kColor,
+NiTriShape* __cdecl FUN_004b3570(NiPoint3 kP0, NiPoint3 kP1, NiPoint3 kP2, const NiColorA& kColor,
                                  bool bEnableLighting)
 {
-    NiPoint3V* aPVerts = new NiPoint3V[3];
+    NiPoint3* aPVerts = new NiPoint3[3];
     aPVerts[0] = kP0;
     aPVerts[1] = kP1;
     aPVerts[2] = kP2;
-    RgbaColor* pColors2 = new RgbaColor[3];
+    NiColorA* pColors2 = new NiColorA[3];
     pColors2[0] = kColor;
     pColors2[1] = kColor;
     pColors2[2] = kColor;
@@ -3013,24 +2832,16 @@ NiTriShape* __cdecl FUN_004b3570(NiPoint3V kP0, NiPoint3V kP1, NiPoint3V kP2, co
     pTris[3] = 0;
     pTris[4] = 1;
     pTris[5] = 2;
-    NiTriShape* pShape_ = new NiTriShape(3, aPVerts, 0, pColors2, 0, 0, 0, 2, pTris);
+    NiTriShape* pShape_ = new NiTriShape(3, (NiPoint3*)aPVerts, 0, (void*)pColors2, (NiPoint2*)0, 0, 0, 2, pTris);
     if (bEnableLighting)
     {
-        BSShaderLightingProperty* pProp2 = new BSShaderLightingProperty;
-        pShape_->AttachProperty(pProp2);
+        BSShaderNoLightingProperty* pProp2 = new BSShaderNoLightingProperty;
+        pShape_->AttachProperty(reinterpret_cast<NiObject*>(pProp2));
         InitGeometryShader(pShape_, 0, 0);
     }
     return pShape_;
 }
 }  // namespace fnv_004b3570
-
-struct FUN_006815c0
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    FUN_006815c0();
-};
 
 struct FUN_004b4910_Source
 {
@@ -3041,16 +2852,16 @@ struct FUN_004b4910_Source
 
 int __cdecl FUN_004b4a10(unsigned short a1, int a2, int a3, int a4);
 
-// Allocates an array of FUN_006815c0 sized by source->FUN_00456650() and fills it via FUN_004b4a10, returning null if source is null or its count is zero.
+// Allocates an array of points sized by source->FUN_00456650() and fills it via FUN_004b4a10, returning null if source is null or its count is zero.
 // @fnv 0x004b4910
-FUN_006815c0* __cdecl CreateElementArray(FUN_004b4910_Source* source)
+NiPoint3* __cdecl CreateElementArray(FUN_004b4910_Source* source)
 {
-    FUN_006815c0* elements = 0;
+    NiPoint3* elements = 0;
     if (!source || !source->FUN_00456650())
     {
         return 0;
     }
-    elements = new FUN_006815c0[source->FUN_00456650()];
+    elements = new NiPoint3[source->FUN_00456650()];
     FUN_004b4a10(source->FUN_00456650(), source->FUN_0049ec60(), (int)elements, source->FUN_00461130());
     return elements;
 }
@@ -3303,15 +3114,6 @@ FUN_004b9cd0::~FUN_004b9cd0()
     FUN_00438af0();
 }
 
-struct Pt3_4ba280
-{
-    float x;
-    float y;
-    float z;
-    Pt3_4ba280();
-    Pt3_4ba280(float ax, float ay, float az);
-};
-
 struct NodePtr_4ba280
 {
     void* m_pObject;
@@ -3338,7 +3140,7 @@ extern char DAT_01189184;
 struct FUN_004ba280 : Base_4ba280
 {
     int* grid;
-    Pt3_4ba280 origin;
+    NiPoint3 origin;
     bool bFlag;
     NodePtr_4ba280 m_pController;
     FUN_004ba280();
@@ -3352,28 +3154,19 @@ FUN_004ba280::FUN_004ba280() : m_pController(0)
     SetType_4ba280(*g_011c63cc.Int());
     grid = new int[GetDim_4ba280() * GetDim_4ba280()];
     memset(grid, 0, GetDim_4ba280() * 4 * GetDim_4ba280());
-    origin = Pt3_4ba280(0.0f, 0.0f, 0.0f);
+    origin = NiPoint3(0.0f, 0.0f, 0.0f);
     DAT_01189184 = 1;
     m_pController = 0;
     bFlag = false;
 }
 
-struct Pt3
-{
-    float x;
-    float y;
-    float z;
-    Pt3();
-    Pt3(float ax, float ay, float az);
-};
-
-extern const Pt3 NiPoint3_ZERO_v;
+extern const NiPoint3 NiPoint3_ZERO_v;
 
 struct FUN_004a37b0
 {
-    Pt3 pos0;
-    Pt3 pos1;
-    Pt3 pos2;
+    NiPoint3 pos0;
+    NiPoint3 pos1;
+    NiPoint3 pos2;
     int unk24;
     int unk28;
     int unk2C;
@@ -3389,7 +3182,7 @@ struct FUN_004a37b0
     float unk54;
     float unk58;
     float unk5C;
-    Pt3 scale;
+    NiPoint3 scale;
     int unk6C;
     bool unk70;
     bool unk71;
@@ -3433,19 +3226,12 @@ FUN_004a37b0::FUN_004a37b0() : scale(0.0f, 0.0f, 0.0f)
     unk54 = 4.0f;
     unk58 = 15.0f;
     unk5C = 16.0f;
-    scale = Pt3(1.0f, 1.0f, 1.0f);
+    scale = NiPoint3(1.0f, 1.0f, 1.0f);
     unk77 = false;
     unk78 = false;
     unk79 = false;
     unk6C = 0;
 }
-
-class NiNode
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
 
 struct FUN_004a4860_node
 {
@@ -3484,159 +3270,26 @@ NiPointer<NiNode> FUN_004a4860_cls::PopFront()
     return item;
 }
 
-class B4B00A0MapBase
-{
-  public:
-    virtual ~B4B00A0MapBase();
-
-    void RemoveAll();
-
-    unsigned int m_uiHashSize;
-    void** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
-
-class FUN_004b00a0_cls : public B4B00A0MapBase
-{
-  public:
-    FUN_004b00a0_cls();
-    virtual ~FUN_004b00a0_cls();
-};
-
-// Destructor that calls RemoveAll to clear the hash table entries.
 // @fnv 0x004b00a0
-FUN_004b00a0_cls::~FUN_004b00a0_cls()
+template <>
+NiTPointerMap<NiObject*, bool>::~NiTPointerMap()
 {
     RemoveAll();
 }
 
-struct NiPoint3_ext
-{
-    float x, y, z;
-    NiPoint3_ext();
-};
-struct NiPoint3Ex : NiPoint3_ext
-{
-    NiPoint3Ex(float x, float y, float z);
-};
-struct FUN_004a7800
-{
-    float r, g, b, a;
-    FUN_004a7800();
-};
-struct NiMemObjectAllocation
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-struct NiObject
-{
-};
-struct BSShaderLightingProperty : NiMemObjectAllocation
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    BSShaderLightingProperty();
-};
-struct NiPoint2;
-struct NiTriShape : NiMemObjectAllocation
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9C;
-    unsigned int unkA0;
-    unsigned int unkA4;
-    unsigned int unkA8;
-    unsigned int unkAC;
-    unsigned int unkB0;
-    unsigned int unkB4;
-    unsigned int unkB8;
-    unsigned int unkBC;
-    unsigned int unkC0;
-    NiTriShape(unsigned short, NiPoint3*, NiPoint3*, void*, NiPoint2*, unsigned short, unsigned int, unsigned short,
-               unsigned short*);
-    void FUN_00439410(NiObject*);
-};
 void __cdecl FUN_00b57e30(NiTriShape*, int, int);
 // Builds an octahedron NiTriShape from six vertices and 24 indices around a given size and color, optionally attaching a lighting property.
 // @fnv 0x004b29b0
-NiTriShape* __cdecl CreateOctahedron(float size, const FUN_004a7800* color, bool lighting)
+NiTriShape* __cdecl CreateOctahedron(float size, const NiColorA* color, bool lighting)
 {
-    NiPoint3_ext* indices = new NiPoint3_ext[6];
-    indices[0] = NiPoint3Ex(0.0f, 0.0f, float(size * 1.4142135381698608));
-    indices[1] = NiPoint3Ex(-size, size, 0.0f);
-    indices[2] = NiPoint3Ex(size, size, 0.0f);
-    indices[3] = NiPoint3Ex(size, -size, 0.0f);
-    indices[4] = NiPoint3Ex(-size, -size, 0.0f);
-    indices[5] = NiPoint3Ex(0.0f, 0.0f, float(-size * 1.4142135381698608));
-    FUN_004a7800* colors = new FUN_004a7800[6];
+    NiPoint3* indices = new NiPoint3[6];
+    indices[0] = NiPoint3(0.0f, 0.0f, float(size * 1.4142135381698608));
+    indices[1] = NiPoint3(-size, size, 0.0f);
+    indices[2] = NiPoint3(size, size, 0.0f);
+    indices[3] = NiPoint3(size, -size, 0.0f);
+    indices[4] = NiPoint3(-size, -size, 0.0f);
+    indices[5] = NiPoint3(0.0f, 0.0f, float(-size * 1.4142135381698608));
+    NiColorA* colors = new NiColorA[6];
     colors[0] = *color;
     colors[1] = *color;
     colors[2] = *color;
@@ -3668,131 +3321,27 @@ NiTriShape* __cdecl CreateOctahedron(float size, const FUN_004a7800* color, bool
     shape[21] = 4;
     shape[22] = 1;
     shape[23] = 5;
-    NiTriShape* vertices = new NiTriShape(6, (NiPoint3*)indices, 0, colors, 0, 0, 0, 8, shape);
+    NiTriShape* vertices = new NiTriShape(6, (NiPoint3*)indices, 0, (void*)colors, (NiPoint2*)0, 0, 0, 8, shape);
     if (lighting)
     {
-        BSShaderLightingProperty* property = new BSShaderLightingProperty;
+        BSShaderNoLightingProperty* property = new BSShaderNoLightingProperty;
         vertices->FUN_00439410((NiObject*)property);
         FUN_00b57e30(vertices, 0, 0);
     }
     return vertices;
 }
 
-struct Vec87
-{
-    float x, y, z;
-    Vec87();
-};
-struct Color87
-{
-    float r, g, b, a;
-    Color87();
-};
-struct Extra87
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    Extra87();
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-struct Mesh87
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    Mesh87(int, Vec87*, void*, Color87*, void*, int, int, int, unsigned short*);
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    void FUN_00439410(Extra87*);
-};
 void* operator new[](unsigned int);
 void operator delete[](void*);
 void* FUN_00aa1070(unsigned int);
-void FUN_00b57e30(Mesh87*, int, int);
+void FUN_00b57e30(NiTriShape*, int, int);
 // Builds an 8-vertex box mesh from eight corner positions and a color, with 72 triangle indices, and optionally attaches extra data.
 // @fnv 0x004b2eb0
-Mesh87* CreateBoxMesh(const Vec87& aCorner0, const Vec87& aCorner1, const Vec87& aCorner2, const Vec87& aCorner3,
-                      const Vec87& aCorner4, const Vec87& aCorner5, const Vec87& aCorner6, const Vec87& aCorner7,
-                      const Color87& color, bool extra)
+NiTriShape* CreateBoxMesh(const NiPoint3& aCorner0, const NiPoint3& aCorner1, const NiPoint3& aCorner2, const NiPoint3& aCorner3,
+                      const NiPoint3& aCorner4, const NiPoint3& aCorner5, const NiPoint3& aCorner6, const NiPoint3& aCorner7,
+                      const NiColorA& color, bool extra)
 {
-    Vec87* vertices2 = new Vec87[8];
+    NiPoint3* vertices2 = new NiPoint3[8];
     vertices2[0] = aCorner0;
     vertices2[1] = aCorner1;
     vertices2[2] = aCorner2;
@@ -3801,7 +3350,7 @@ Mesh87* CreateBoxMesh(const Vec87& aCorner0, const Vec87& aCorner1, const Vec87&
     vertices2[5] = aCorner5;
     vertices2[6] = aCorner6;
     vertices2[7] = aCorner7;
-    Color87* colors73 = new Color87[8];
+    NiColorA* colors73 = new NiColorA[8];
     colors73[0] = color;
     colors73[1] = color;
     colors73[2] = color;
@@ -3883,64 +3432,21 @@ Mesh87* CreateBoxMesh(const Vec87& aCorner0, const Vec87& aCorner1, const Vec87&
     indices21[69] = 4;
     indices21[70] = 5;
     indices21[71] = 6;
-    Mesh87* mesh1 = new Mesh87(8, vertices2, 0, colors73, 0, 0, 0, 24, indices21);
+    NiTriShape* mesh1 = new NiTriShape(8, (NiPoint3*)vertices2, 0, (void*)colors73, (NiPoint2*)0, 0, 0, 24, indices21);
     if (extra)
     {
-        Extra87* data = new Extra87;
-        mesh1->FUN_00439410(data);
+        BSShaderNoLightingProperty* data = new BSShaderNoLightingProperty;
+        mesh1->FUN_00439410(reinterpret_cast<NiObject*>(data));
         FUN_00b57e30(mesh1, 0, 0);
     }
     return mesh1;
 }
 
 namespace fnv_004b3890 {
-struct FUN_004a7800
-{
-    float red, green, blue, alpha;
-    FUN_004a7800();
-};
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-struct BSShaderLightingProperty : NiMemObject
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    BSShaderLightingProperty();
-};
+// This geometry's construction cleanup passes its allocation size.
+using ::NiMemObject;
+
+
 struct FUN_00a746e0 : NiMemObject
 {
     unsigned int unk00;
@@ -3992,19 +3498,19 @@ struct FUN_00a746e0 : NiMemObject
     unsigned int unkB8;
     unsigned int unkBC;
     unsigned int unkC0;
-    FUN_00a746e0(unsigned short, FUN_006815c0*, FUN_004a7800*, void*, unsigned int, unsigned int, bool*);
-    void FUN_00439410(BSShaderLightingProperty*);
+    FUN_00a746e0(unsigned short, NiPoint3*, NiColorA*, void*, unsigned int, unsigned int, bool*);
+    void FUN_00439410(BSShaderNoLightingProperty*);
 };
 void FUN_00b57e30(FUN_00a746e0*, unsigned int, unsigned int);
 
 // @fnv 0x004b3890
-FUN_00a746e0* __cdecl FUN_004b3890(const FUN_006815c0& aStartVertex, const FUN_004a7800& startColor,
-                                   const FUN_006815c0& aEndVertex, const FUN_004a7800& endColor, bool addShader)
+FUN_00a746e0* __cdecl FUN_004b3890(const NiPoint3& aStartVertex, const NiColorA& startColor,
+                                   const NiPoint3& aEndVertex, const NiColorA& endColor, bool addShader)
 {
-    FUN_006815c0* vertices = new FUN_006815c0[2];
+    NiPoint3* vertices = new NiPoint3[2];
     vertices[0] = aStartVertex;
     vertices[1] = aEndVertex;
-    FUN_004a7800* colors = new FUN_004a7800[2];
+    NiColorA* colors = new NiColorA[2];
     colors[0] = startColor;
     colors[1] = endColor;
     // Each flag enables the outgoing segment from the corresponding vertex.
@@ -4015,7 +3521,7 @@ FUN_00a746e0* __cdecl FUN_004b3890(const FUN_006815c0& aStartVertex, const FUN_0
     FUN_00a746e0* connections = new FUN_00a746e0(2, vertices, colors, 0, 0, 0, lines);
     if (addShader)
     {
-        BSShaderLightingProperty* shader = new BSShaderLightingProperty;
+        BSShaderNoLightingProperty* shader = new BSShaderNoLightingProperty;
         connections->FUN_00439410(shader);
         FUN_00b57e30(connections, 0, 0);
     }
@@ -4077,31 +3583,18 @@ void Owner4a4::FUN_004a4340()
     }
 }
 
-struct NiColorA004a4d40
-{
-    float r;
-    float g;
-    float b;
-    float a;
-};
-
-struct NiPoint2_004a4d40
-{
-    float x;
-    float y;
-    NiPoint2_004a4d40(float x, float y);
-};
-
 struct Target004a4d40
 {
     int __thiscall FUN_00726070();
-    Point3 __thiscall FUN_00413fc0() const;
-    NiColorA004a4d40* __thiscall FUN_00413f90(NiColorA004a4d40* out);
+    NiPoint3 __thiscall FUN_00413fc0() const;
+    NiColorA* __thiscall FUN_00413f90(NiColorA* out);
     float __thiscall FUN_004a7bd0() const;
 };
 
-extern void* __cdecl FUN_004a5100(float value, NiColorA004a4d40* color);
+extern void* __cdecl FUN_004a5100(float value, NiColorA* color);
 
+// The game fills these aligned color buffers through its output routine;
+// constructing NiColorA here would add initialization calls absent from the original.
 // @fnv 0x004a4d40
 void* __cdecl FUN_004a4d40(Target004a4d40* pTarget)
 {
@@ -4110,35 +3603,35 @@ void* __cdecl FUN_004a4d40(Target004a4d40* pTarget)
 
         if (3 == pTarget->FUN_00726070())
         {
-            NiColorA004a4d40 colorA;
+            float colorA[sizeof(NiColorA) / sizeof(float)];
             {
-                Point3 w = pTarget->FUN_00413fc0() * 2.0f;
+                NiPoint3 w = pTarget->FUN_00413fc0() * 2.0f;
             }
-            pTarget->FUN_00413f90(&colorA);
+            pTarget->FUN_00413f90(reinterpret_cast<NiColorA*>(colorA));
 
-            NiColorA004a4d40 kIter;
+            float kIter[sizeof(NiColorA) / sizeof(float)];
             {
-                NiPoint2_004a4d40 point(pTarget->FUN_00413fc0().x * 2.0, pTarget->FUN_00413fc0().z * 2.0f);
-                pTarget->FUN_00413f90(&kIter);
+                NiPoint2 point(pTarget->FUN_00413fc0().x * 2.0, pTarget->FUN_00413fc0().z * 2.0f);
+                pTarget->FUN_00413f90(reinterpret_cast<NiColorA*>(kIter));
                 bResult = FUN_004a4f80((const float*)&point, (unsigned int)&kIter);
             }
         }
 
         if (pTarget->FUN_00726070() == 1)
         {
-            NiColorA004a4d40 colorA;
+            float colorA[sizeof(NiColorA) / sizeof(float)];
             {
-                Point3 point = pTarget->FUN_00413fc0() * 2.0f;
-                pTarget->FUN_00413f90(&colorA);
+                NiPoint3 point = pTarget->FUN_00413fc0() * 2.0f;
+                pTarget->FUN_00413f90(reinterpret_cast<NiColorA*>(colorA));
                 bResult = CreatePrimitiveBox(&point, (int)&colorA);
             }
         }
 
         if (pTarget->FUN_00726070() == 2)
         {
-            NiColorA004a4d40 cnt;
-            pTarget->FUN_00413f90(&cnt);
-            bResult = FUN_004a5100(pTarget->FUN_004a7bd0(), &cnt);
+            float cnt[sizeof(NiColorA) / sizeof(float)];
+            pTarget->FUN_00413f90(reinterpret_cast<NiColorA*>(cnt));
+            bResult = FUN_004a5100(pTarget->FUN_004a7bd0(), reinterpret_cast<NiColorA*>(cnt));
         }
 
         return bResult;
@@ -4406,3 +3899,5 @@ struct FUN_004b0190 : GlobalObject_004aff00
 // @fnv 0x004b0190
 FUN_004b0190::~FUN_004b0190()
 {}
+
+#pragma pack(pop)

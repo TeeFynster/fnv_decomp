@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 // src/havok/common/internal/convexhull/hkplaneequationutil_gs_nogs_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/convexhull/hkplaneequationutil.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS- /EHsc /Gy (unit lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
@@ -33,31 +35,27 @@ struct A
 };
 int __cdecl ProcessArg(Arg* a, int second);
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    __m128 _mm_setr_ps(float, float, float, float);
-    __m128 _mm_set_ps(float, float, float, float);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_set_ss(float);
-    void _mm_store_ss(float*, __m128);
+    LocalM128 _mm_setr_ps(float, float, float, float);
+    LocalM128 _mm_set_ps(float, float, float, float);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+    LocalM128 _mm_load_ss(const float*);
+    LocalM128 _mm_set_ss(float);
+    void _mm_store_ss(float*, LocalM128);
     double fabs(double);
 }
 extern const float DAT_0104da4c;
 extern const float DAT_010c4990;
 extern const float DAT_01011d78;
-typedef __m128 hkQuadReal;
+typedef LocalM128 hkQuadReal;
 struct S00dd6380_hkSimdReal
 {
     hkQuadReal m_vValue;
@@ -125,6 +123,7 @@ __forceinline void SetCrossPtr(S00dd6380_hkVector4* dst, const S00dd6380_hkVecto
 {
     dst->setCross(*v1, *v2);
 }
+// local form of hkMatrix3: 0x00dd6380 needs implicit construction and original vector aliases; shared form gives 422 bytes vs exe 397.
 struct S00dd6380_hkMatrix3
 {
     S00dd6380_hkVector4 m_kColumn0, m_kColumn1, m_kColumn2;
@@ -147,7 +146,7 @@ struct S00dd6380_PlaneSet
 };
 
 // Keep SP1 scalar negations separate from its packed-mask lowering.
-__forceinline __m128 Dd6380NegativeDistances(const float& x, const float& y, const float& z)
+__forceinline LocalM128 Dd6380NegativeDistances(const float& x, const float& y, const float& z)
 {
     if (_MSC_FULL_VER >= 150030729)
     {

@@ -1,109 +1,10 @@
-// fallout_shared/tesdatahandler_files.h: declares NiFile, FILETIME, TESRecordHeader, BSFile, TESFile and more
+// Unit file, loading, queue, and thread declarations.
 #ifndef FNV_TESDATAHANDLER_FILES_H
 #define FNV_TESDATAHANDLER_FILES_H
 
-class NiFile
-{
-  public:
-    enum OpenMode
-    {
-        READ_ONLY = 0,
-        WRITE_ONLY = 1
-    };
-};
-struct FILETIME
-{
-    unsigned int low, high;
-};
-struct WIN32_FIND_DATAA
-{
-    unsigned int attributes;
-    FILETIME created, accessed, written;
-    unsigned int sizeHigh, sizeLow, reserved0, reserved1;
-    char name[260];
-    char alternate[14];
-};
-extern "C" __declspec(dllimport) void* __stdcall FindFirstFileA(const char*, WIN32_FIND_DATAA*);
-extern "C" __declspec(dllimport) int __stdcall FindNextFileA(void*, WIN32_FIND_DATAA*);
-extern "C" __declspec(dllimport) int __stdcall FindClose(void*);
 struct TESRecordHeader
 {
     unsigned int type, size, flags, formID;
-};
-class BSFile
-{
-  public:
-    BSFile(const char*, NiFile::OpenMode, unsigned int, bool);
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual void vfn_8();
-    virtual void vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void Seek(int, int);
-    virtual void vfn_24();
-    virtual unsigned int GetSize();
-    bool IsOpen();
-    unsigned char fileData[0x154];
-};
-class TESFile
-{
-  public:
-    unsigned int error;
-    unsigned char data004[12];
-    BSFile* stream;
-    unsigned char data014[12];
-    char fileName[260];
-    char directory[260];
-    unsigned int data228;
-    unsigned int bufferSize;
-    unsigned char data230[40];
-    unsigned int currentChunk;
-    unsigned int data25c;
-    unsigned int fileSize;
-    unsigned char data264[56];
-    WIN32_FIND_DATAA fileData;
-    unsigned char data3dc[12];
-    unsigned int fileFlags;
-    bool OpenTESFile(const char*, const char*, NiFile::OpenMode, bool);
-    void GetZeroByte();
-    void LoadFormAndUpdateFlag();
-    void SetGroupMode(bool);
-    void SetField3DC(float);
-    int GetTESForm();
-    unsigned int GetFormID();
-    unsigned char GetFileCompileIndex();
-    TESRecordHeader* GetRecordHeader();
-    unsigned int GetChunkID();
-    unsigned int GetChunkSize();
-    bool GetNextChunk();
-    bool IsEndianConversionRequired();
-    bool GetChunkData(void*, unsigned int);
-    static void SetTempIDOwnerForForm(unsigned int, TESFile*);
-    float GetFileVersion();
-    ~TESFile();
-    void SetBufferSize(int);
-    TESFile* GetParentTESFile();
-    int ReadTESInfo();
-    bool CheckMasterFiles(BSSimpleList<TESFile*>*, bool);
-    bool GetIsChecked();
-    void SetChecked(bool);
-    bool IsMasterFile();
-    bool IsValidFileVersion();
-    unsigned int FUN_00471ad0();
-    TESFile* GetMasterFile(unsigned int);
-    const char* FUN_00471a60(unsigned int);
-    bool HasMasterFileChanged();
-    const char* GetName();
-    bool GetActive();
-    void SetCompileIndex(unsigned char);
-    bool OpenTESFile(NiFile::OpenMode, bool);
-    unsigned int GetFieldAt3E0();
-    BSSimpleList<TESFile*>* FUN_00464df0();
-    TESForm* FUN_0044edb0();
-    bool GetByteAt428();
 };
 void FUN_0040fbe0(const char*, ...);
 void FUN_0043b2b0(bool);
@@ -131,20 +32,6 @@ class ArchiveManager
     static Archive* PluginFile(const char*, unsigned short, bool);
 };
 Archive* FindArchiveByName(const char*);
-class TESTopic : public TESForm
-{
-  public:
-    TESTopic(int);
-    unsigned char topicData[0x30];
-    static void RemoveQuestInfo(TESQuest*);
-    static void ReorderTopics(bool, BSSimpleList<TESTopic*>*);
-};
-class PlayerCharacter
-{
-  public:
-    BSSimpleList<TESTopic*>* GetSelfOffset6A8();
-    class PlayerBase* FUN_00464e10();
-};
 class PlayerBase
 {
   public:
@@ -167,77 +54,11 @@ class Calendar
     void FUN_00867890();
 };
 extern Calendar g_calendar;
-class TESDataHandler;
 extern TESDataHandler* g_dataHandler;
 
-class TESTopicInfo : public TESForm
-{
-  public:
-    TESTopicInfo(int);
-    unsigned char infoData[0x38];
-};
-class ExtraDataList
-{
-  public:
-    void CallExtraDataListMethod35(TESObjectCELL*);
-};
-class BGSSaveLoadGame
-{
-  public:
-    bool FUN_00469570();
-};
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
-class TESSaveLoadGame
-{
-  public:
-    bool FUN_0047c850();
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
-class ActorDeletionQueue
-{
-  public:
-    void FUN_0096d470(MobileObject*, int);
-};
-extern ActorDeletionQueue DAT_011e0e80;
-class GameSettingCollection
-{
-  public:
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual void vfn_8();
-    virtual void vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28(TESFile*, const char*);
-    static GameSettingCollection* Instance();
-};
-class NavMeshInfoMap : public TESForm
-{
-  public:
-    NavMeshInfoMap();
-    unsigned char mapData[0x28];
-};
-template <class T> class NiPointer
-{
-    T* pointer;
-
-  public:
-    NiPointer(T*);
-    NiPointer(const NiPointer&);
-    ~NiPointer();
-    T* Get();
-};
-class NavMeshCollection
-{
-  public:
-    NavMeshCollection();
-    unsigned int data[4];
-    void AppendNavMesh(NiPointer<NavMesh>);
-};
+extern ActorDeletionQueue_tesdatahandler DAT_011e0e80;
 template <int N> struct EndianSizeTag
 {
 };
@@ -258,8 +79,6 @@ extern "C" void* _alloca(unsigned int);
 NiPointer<NavMesh> MakeNavMeshPointer(NavMesh*);
 
 int strcat_s(char*, unsigned int, const char*);
-extern "C" __declspec(dllimport) char* __stdcall lstrcpyA(char*, const char*);
-extern "C" __declspec(dllimport) char* __stdcall lstrcatA(char*, const char*);
 char* strchr(char*, int);
 int FUN_00ec4835(const void*, const void*, unsigned int);
 extern "C" void* memcpy(void*, const void*, unsigned int);
@@ -268,15 +87,17 @@ extern "C" int* _errno();
 extern "C" int _mbsnicmp(const unsigned char*, const unsigned char*, unsigned int);
 extern "C" int _mbsicmp(const unsigned char*, const unsigned char*);
 int FUN_00404dc0(const char*, const char*);
-class RecursiveSpinLock
+// DataHandlerLock: unit-local 8-byte lock, not the 32-byte RecursiveSpinLock: FAMThread's at +0x34 (0x0082f610
+// constructs it with the folded two-dword ctor 0x0096a2d0, state at +0x3c) and DAT_011c4000; Lock/Unlock are the out-of-line 0x0040fbf0/0x0040fba0
+class DataHandlerLock
 {
   public:
-    RecursiveSpinLock();
+    DataHandlerLock();
     void Lock(const char*);
     void Unlock();
     unsigned int thread, count;
 };
-extern RecursiveSpinLock DAT_011c4000;
+extern DataHandlerLock DAT_011c4000;
 class BSFlags
 {
   public:
@@ -284,27 +105,17 @@ class BSFlags
     void Clear(unsigned int);
 };
 
-class BSThread
-{
-  public:
-    BSThread();
-    virtual ~BSThread();
-    virtual void Run();
-    unsigned int GetThreadID();
-    unsigned char threadData[0x2c];
-};
 class FAMThread : public BSThread
 {
   public:
     FAMThread();
     virtual void Run();
     void* event;
-    RecursiveSpinLock lock;
+    DataHandlerLock lock;
     unsigned int state;
     void* work;
     void* result;
     unsigned int threadID;
 };
-extern "C" __declspec(dllimport) void* __stdcall CreateEventA(void*, int, int, const char*);
 
 #endif

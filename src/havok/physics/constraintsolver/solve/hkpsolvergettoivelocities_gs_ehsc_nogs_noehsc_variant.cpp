@@ -1,3 +1,4 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
 // src/havok/physics/constraintsolver/solve/hkpsolvergettoivelocities_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-29 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/constraintsolver/solve/hkpsolvergettoivelocities.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
@@ -6,26 +7,14 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <xmmintrin.h>
-struct __declspec(align(16)) Vector
-{
-    __m128 quad;
-    __forceinline __m128 get() const
-    {
-        return quad;
-    }
-    __forceinline void set(__m128 value)
-    {
-        quad = value;
-    }
-    void FUN_00c7f750(const void*, const Vector*);
-};
+#include "../../../../../include/hkVector4.h"
 struct State
 {
     int type;
     int index;
     float scale;
     float parameter;
-    Vector position, axis, basis0, basis1, basis2, extra0, extra1;
+    hkVector4 position, axis, basis0, basis1, basis2, extra0, extra1;
     void FUN_00d72030(const State*);
 };
 struct Header
@@ -36,12 +25,14 @@ struct Header
     int flags;
     int size;
 };
-struct Command
+// hkp1Lin2AngJacobian (48 bytes): linear row then the two angular rows; evaluate() dots linear with the position
+// difference and the angular rows with each body's axis. Not the console-command Command.
+struct Lin2AngJacobian
 {
-    Vector a, b, c;
+    hkVector4 a, b, c;
 };
 extern unsigned char DAT_011b9414[];
-static __forceinline float evaluate(const Command* command, const State* first, const State* second,
+static __forceinline float evaluate(const Lin2AngJacobian* command, const State* first, const State* second,
                                     bool firstTermFirst = false)
 {
     __m128 sum;
@@ -58,7 +49,7 @@ static __forceinline float evaluate(const Command* command, const State* first, 
     _mm_store_ss(&value, _mm_add_ss(z, _mm_add_ss(y, sum)));
     return value;
 }
-static __forceinline float evaluatePair(const Command* command, const State* first, const State* second,
+static __forceinline float evaluatePair(const Lin2AngJacobian* command, const State* first, const State* second,
                                         bool firstTermFirst = false)
 {
     __m128 sum =
@@ -114,7 +105,7 @@ int __cdecl FUN_00d9f6f0(void* unused, const Header* header, const State* states
             first = &firstLocal;
             secondLocal.FUN_00d72030(second);
             second = &secondLocal;
-            Vector firstAxis, secondAxis, firstBasis, secondBasis;
+            hkVector4 firstAxis, secondAxis, firstBasis, secondBasis;
             firstAxis.FUN_00c7f750(cursor, &firstLocal.axis);
             secondAxis.FUN_00c7f750(cursor + 48, &secondLocal.axis);
             firstBasis.FUN_00c7f750(cursor, &firstLocal.basis2);
@@ -136,7 +127,7 @@ int __cdecl FUN_00d9f6f0(void* unused, const Header* header, const State* states
             if (single > limit)
                 return count;
             ++pair;
-            float value = evaluate(reinterpret_cast<const Command*>(cursor), first, second);
+            float value = evaluate(reinterpret_cast<const Lin2AngJacobian*>(cursor), first, second);
             ++count;
             ++single;
             *output++ = clampValue(value);
@@ -148,7 +139,7 @@ int __cdecl FUN_00d9f6f0(void* unused, const Header* header, const State* states
             if (pair > limit)
                 return count;
             pair += 2;
-            const Command* command = reinterpret_cast<const Command*>(cursor);
+            const Lin2AngJacobian* command = reinterpret_cast<const Lin2AngJacobian*>(cursor);
             float value = evaluatePair(command, first, second);
             count += 2;
             single += 2;
@@ -163,7 +154,7 @@ int __cdecl FUN_00d9f6f0(void* unused, const Header* header, const State* states
             if (single > limit)
                 return count;
             ++pair;
-            *output = evaluate(reinterpret_cast<const Command*>(cursor), first, second);
+            *output = evaluate(reinterpret_cast<const Lin2AngJacobian*>(cursor), first, second);
             ++count;
             ++single;
             ++output;
@@ -173,7 +164,7 @@ int __cdecl FUN_00d9f6f0(void* unused, const Header* header, const State* states
             if (single > limit)
                 return count;
             ++pair;
-            *output = evaluate(reinterpret_cast<const Command*>(cursor), first, second);
+            *output = evaluate(reinterpret_cast<const Lin2AngJacobian*>(cursor), first, second);
             ++count;
             ++single;
             ++output;

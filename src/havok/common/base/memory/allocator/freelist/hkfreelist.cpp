@@ -2,319 +2,247 @@
 // src/havok/common/base/memory/allocator/freelist/hkfreelist.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/memory/allocator/freelist/hkfreelist.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkFreeListNode
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkFreeListAllocator.h"
+#include "../../../../../../../include/hkFreeListAllocatorServer.h"
+
+// include/hkFreeList.h is absent. Keep one local definition of hkFreeList
+// until the shared header supports these methods (0x00dd71c0 through 0x00dd7c40).
+
+struct FreeListStatistics;
+namespace memory_walk { class LocalhkBool; }
+typedef void(__cdecl* FreeBlockWalkCallback)(void*, int, memory_walk::LocalhkBool, int, void*);
+
+class hkFreeList
 {
-    hkFreeListNode* next;
-    int a;
-    int b;
-    int size;
+  public:
+    struct Element
+    {
+        Element* m_next;
+    };
+
+    struct Block
+    {
+        Block* m_next;
+        int m_blockSize;
+        char* m_start;
+        unsigned int m_numElements;
+    };
+
+    Element* m_free;
+    unsigned int m_elementSize;
+    Block* m_incrementalBlock;
+    Block* m_blocks;
+    Block* m_freeBlocks;
+    unsigned int m_blockSize;
+    unsigned int m_alignment;
+    unsigned int m_maxBlockSize;
+    char* m_top;
+    char* m_blockEnd;
+    int m_numFreeElements;
+    int m_numElements;
+    hkFreeListAllocatorServer* m_blockServer;
+
+    __declspec(noinline) int FreeBlocks(Block* node);
+    __declspec(noinline) void FUN_00dd7200();
+    void FUN_00dd7360();
+    void CollectFreeNodes(Block** blocks, int unused);
+    __declspec(noinline) void FUN_00dd74b0(int, int, int, int);
+    void FUN_00dd7510(int, int, int, int);
+    bool* ValidateFreeList(bool* result);
+    unsigned int FUN_00dd7240();
+    __declspec(noinline) int SumNodeCounts(Block* node);
+    int FUN_00dd72d0();
+    void FUN_00dd7380(unsigned int key);
+    void FUN_00dd7430(FreeListStatistics* info);
+    void ResetFreeList();
+    __declspec(noinline) void WalkFreeBlocks(Block*, FreeBlockWalkCallback, int, void*);
+    int Compact();
+    void FUN_00dd78f0(hkMemoryWalkCallback callback, int pool, void* param);
+    void* AllocateElement();
+    int FUN_00dd7b40(Block*);
+    hkBool FUN_00dd7c40(int, int&) throw();
 };
 
 // @fnv 0x00dd7280
-int __cdecl SumFreeListSizes(hkFreeListNode* node)
+__declspec(noinline) int __cdecl SumFreeListSizes(hkFreeList::Block* node)
 {
     int total = 0;
     while (node)
     {
-        total += node->size;
-        node = node->next;
+        total += node->m_numElements;
+        node = node->m_next;
     }
     return total;
 }
 
-struct PointerChainNode
-{
-    void* m_data;
-    void* m_kBlocks;
-    void* m_next;
-    void* m_pSecondNode;
-    void* m_pFreeBlocks;
-    void* m_field5;
-    void* m_field6;
-    void* m_field7;
-    void AttachPointer(void*);
-    void FUN_00dd7360();
-};
 // @fnv 0x00dd7360
-void PointerChainNode::FUN_00dd7360()
+void hkFreeList::FUN_00dd7360()
 {
-    AttachPointer(m_pFreeBlocks);
-    m_pFreeBlocks = 0;
+    FreeBlocks(m_freeBlocks);
+    m_freeBlocks = 0;
 }
 
 // @fnv 0x00dd73d0
-void* FUN_00dd73d0(void* p, unsigned int n)
+__declspec(noinline) void* FUN_00dd73d0(void* p, unsigned int n)
 {
     if (n <= 0x10)
         return (char*)p + 0x10;
     return (char*)p + n;
 }
 
-namespace fnv_00dd7510 {
-struct PointerChainNode
-{
-    void FUN_00dd7200();
-    void FUN_00dd74b0(int, int, int, int);
-    void FUN_00dd7510(int a, int b, int c, int d);
-};
-
 // Calls FUN_00dd7200, then forwards the four int arguments to FUN_00dd74b0.
 // @fnv 0x00dd7510
-void PointerChainNode::FUN_00dd7510(int a, int b, int c, int d)
+void hkFreeList::FUN_00dd7510(int a, int b, int c, int d)
 {
     FUN_00dd7200();
     FUN_00dd74b0(a, b, c, d);
 }
-}  // namespace fnv_00dd7510
-
-struct hkFreeListAllocator
-{
-    virtual void unused1()
-    {}
-    virtual void unused2()
-    {}
-    virtual void freeBlock(hkFreeListNode* node)
-    {
-        (void)node;
-    }
-};
-
-struct hkFreeListStandin
-{
-    void* m_data;
-    void* m_kBlocks;
-    void* m_next;
-    unsigned char m_ucUnknownByte[0x1c];
-    int m_field8;
-    int m_field9;
-    hkFreeListAllocator* m_pThreadAllocator;
-
-    int FreeBlocks(hkFreeListNode* node);
-};
 
 // @fnv 0x00dd71c0
-int hkFreeListStandin::FreeBlocks(hkFreeListNode* node)
+int hkFreeList::FreeBlocks(Block* node)
 {
     int count = 0;
 
     while (node)
     {
-        m_field9 -= node->size;
-        m_field8 -= node->size;
+        m_numElements -= node->m_numElements;
+        m_numFreeElements -= node->m_numElements;
 
-        hkFreeListAllocator* allocator = m_pThreadAllocator;
-        hkFreeListNode* next = node->next;
+        hkFreeListAllocatorServer* allocator = m_blockServer;
+        Block* next = node->m_next;
 
         ++count;
-        allocator->freeBlock(node);
+        // The shared freeBlock declaration is nonvirtual; this block server's
+        // release operation uses vtable slot 2 with a single block argument.
+        typedef void(__thiscall* ReleaseFreeListBlock)(hkFreeListAllocatorServer*, Block*);
+        reinterpret_cast<ReleaseFreeListBlock>((*reinterpret_cast<void***>(allocator))[2])(allocator, node);
         node = next;
     }
 
     return count;
 }
 
-struct FUN_00dd7200_hkFreeList : PointerChainNode
-{
-    void FUN_00dd7200();
-};
-
 // @fnv 0x00dd7200
-void FUN_00dd7200_hkFreeList::FUN_00dd7200()
+void hkFreeList::FUN_00dd7200()
 {
-    PointerChainNode* p = this;
+    hkFreeList* p = this;
 
-    p->AttachPointer(p->m_pSecondNode);
-    p->m_pSecondNode = 0;
-    p->AttachPointer(p->m_pFreeBlocks);
-    p->m_pFreeBlocks = 0;
-    p->m_data = 0;
-    p->m_field5 = 0;
-    *(void**)((char*)p + 0x28) = 0;
-    *(void**)((char*)p + 0x2c) = 0;
-    *(void**)((char*)p + 0x20) = 0;
-    *(void**)((char*)p + 0x24) = 0;
-    p->m_next = 0;
+    p->FreeBlocks(p->m_blocks);
+    p->m_blocks = 0;
+    p->FreeBlocks(p->m_freeBlocks);
+    p->m_freeBlocks = 0;
+    p->m_free = 0;
+    p->m_blockSize = 0;
+    p->m_numFreeElements = 0;
+    p->m_numElements = 0;
+    p->m_top = 0;
+    p->m_blockEnd = 0;
+    p->m_incrementalBlock = 0;
 }
 
-struct hkFreeListStandIn
-{
-    void* m_data;
-    void* m_kBlocks;
-    void* m_next;
-    void* m_pSecondNode;
-    void* m_pFreeBlocks;
-    void* m_field5;
-    void* m_field6;
-    void* m_field7;
-    unsigned int m_field8;
-    unsigned int m_field9;
-
-    unsigned int FUN_00dd7240();
-};
-
 // @fnv 0x00dd7240
-unsigned int hkFreeListStandIn::FUN_00dd7240()
+unsigned int hkFreeList::FUN_00dd7240()
 {
     unsigned int count = 0;
-    hkFreeListNode* node = static_cast<hkFreeListNode*>(m_data);
+    Element* node = m_free;
 
     while (node != 0)
     {
         ++count;
-        node = node->next;
+        node = node->m_next;
     }
 
-    count += (m_field9 - m_field8) / reinterpret_cast<unsigned int>(m_kBlocks);
+    count += (reinterpret_cast<unsigned int>(m_blockEnd) - reinterpret_cast<unsigned int>(m_top)) / m_elementSize;
 
-    node = static_cast<hkFreeListNode*>(m_pFreeBlocks);
-    while (node != 0)
+    Block* block = m_freeBlocks;
+    while (block != 0)
     {
-        count += node->size;
-        node = node->next;
+        count += block->m_numElements;
+        block = block->m_next;
     }
 
     return count;
 }
 
-namespace fnv_00dd73f0 {
-struct hkFreeListStandIn
-{
-    void* m_data;
-    void* m_kBlocks;
-    void* m_next;
-    hkFreeListNode* m_pSecondNode;
-    hkFreeListNode* m_pFreeBlocks;
-    void* m_field5;
-    void* m_field6;
-    void* m_field7;
-    void* m_field8;
-    void* m_field9;
-    int m_field10;
-    int m_field11;
-
-    void ResetFreeList();
-};
-
 // @fnv 0x00dd73f0
-void hkFreeListStandIn::ResetFreeList()
+void hkFreeList::ResetFreeList()
 {
-    *(int*)((char*)this + 0x28) = *(int*)((char*)this + 0x2c);
+    m_numFreeElements = m_numElements;
 
-    hkFreeListNode* node = m_pSecondNode;
+    Block* node = m_blocks;
     if (node != 0)
     {
-        m_data = 0;
-        while (node->next != 0)
-            node = node->next;
+        m_free = 0;
+        while (node->m_next != 0)
+            node = node->m_next;
 
-        node->next = m_pFreeBlocks;
-        m_pFreeBlocks = m_pSecondNode;
-        m_pSecondNode = 0;
-        m_field8 = 0;
-        m_field9 = 0;
-        m_next = 0;
+        node->m_next = m_freeBlocks;
+        m_freeBlocks = m_blocks;
+        m_blocks = 0;
+        m_top = 0;
+        m_blockEnd = 0;
+        m_incrementalBlock = 0;
     }
 }
-}  // namespace fnv_00dd73f0
-
-struct hkFreeListFUN_00dd7480 : PointerChainNode
-{
-    void CollectFreeNodes(hkFreeListNode** blocks, int unused);
-};
 
 // Writes every node of the two free lists into the blocks array, following each list's next pointer until null.
 // @fnv 0x00dd7480
-void hkFreeListFUN_00dd7480::CollectFreeNodes(hkFreeListNode** blocks, int)
+void hkFreeList::CollectFreeNodes(Block** blocks, int)
 {
-    hkFreeListNode* node = static_cast<hkFreeListNode*>(m_pSecondNode);
+    Block* node = m_blocks;
     while (node != 0)
     {
         *blocks++ = node;
-        node = node->next;
+        node = node->m_next;
     }
 
-    node = static_cast<hkFreeListNode*>(m_pFreeBlocks);
+    node = m_freeBlocks;
     while (node != 0)
     {
         *blocks++ = node;
-        node = node->next;
+        node = node->m_next;
     }
 }
 
-struct FreeNode
-{
-    FreeNode* next;
-};
-struct FreeBlock
-{
-    FreeBlock* next;
-    unsigned int unk04;
-    unsigned int m_pRayStart;
-    unsigned int m_uiItemCount;
-};
-struct HavokBool
-{
-    unsigned char value;
-    HavokBool(bool v) : value(v)
-    {}
-    operator bool() const
-    {
-        return value != 0;
-    }
-};
+// Block-server interface: slot 3 returns hkBool in 0x00dd7140; this is not a free-list object.
 struct FreeAllocator
 {
     virtual void unknown00();
     virtual void unknown04();
     virtual void unknown08();
-    virtual HavokBool TestBlock(FreeBlock* block);
+    virtual hkBool TestBlock(hkFreeList::Block* block);
 };
-struct FreeListCheck
-{
-    FreeNode* m_freeHead;
-    unsigned int m_iFirstIndex;
-    unsigned int unk08;
-    FreeBlock* m_kBlocks;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int m_alignment;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    FreeAllocator* m_pThreadAllocator;
-    bool* ValidateFreeList(bool* result);
-};
+
 // Walks the free list, checking each node's alignment and that it lies inside a block accepted by TestBlock; writes true or false to result.
 // @fnv 0x00dd7140
-bool* FreeListCheck::ValidateFreeList(bool* result)
+bool* hkFreeList::ValidateFreeList(bool* result)
 {
-    FreeNode* pNode = m_freeHead;
+    Element* pNode = m_free;
     while (pNode != 0)
     {
         if ((reinterpret_cast<unsigned int>(pNode) & (m_alignment - 1)) != 0)
             goto invalid;
-        FreeBlock* block = m_kBlocks;
+        Block* block = m_blocks;
         if (block == 0)
             goto invalid;
         do
         {
-            if (!m_pThreadAllocator->TestBlock(block))
+            if (!reinterpret_cast<FreeAllocator*>(m_blockServer)->TestBlock(block))
                 goto invalid;
-            unsigned int base = block->m_pRayStart;
+            unsigned int base = reinterpret_cast<unsigned int>(block->m_start);
             unsigned int addr = reinterpret_cast<unsigned int>(pNode);
-            if (addr >= base && addr < base + block->m_uiItemCount * m_iFirstIndex)
+            if (addr >= base && addr < base + block->m_numElements * m_elementSize)
             {
-                if ((addr - base) % m_iFirstIndex != 0)
+                if ((addr - base) % m_elementSize != 0)
                     goto invalid;
                 break;
             }
-            block = block->next;
+            block = block->m_next;
         } while (block != 0);
         if (block == 0)
             goto invalid;
-        pNode = pNode->next;
+        pNode = pNode->m_next;
     }
     *result = true;
     return result;
@@ -323,267 +251,158 @@ invalid:
     return result;
 }
 
-struct hkNodeDD72
-{
-    hkNodeDD72* m_next;
-    int m_iElementCount;
-};
-
-class hkCounterDD72
-{
-  public:
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual int count(hkNodeDD72* pNode, int iSize);
-};
-
-class hkObjDD72
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    hkCounterDD72* m_iFirstInteger;
-
-    int SumNodeCounts(hkNodeDD72* pNode);
-};
-
 // Walks the linked list from pNode and sums the counter's count for each node, returning the total.
 // @fnv 0x00dd72a0
-int hkObjDD72::SumNodeCounts(hkNodeDD72* pStartNode)
+int hkFreeList::SumNodeCounts(Block* pStartNode)
 {
     int iSum = 0;
     for (; pStartNode; pStartNode = pStartNode->m_next)
-        iSum += m_iFirstInteger->count(pStartNode, pStartNode->m_iElementCount);
+        iSum += reinterpret_cast<int(__thiscall*)(hkFreeListAllocatorServer*, Block*, int)>((*reinterpret_cast<void***>(m_blockServer))[4])(m_blockServer, pStartNode, pStartNode->m_blockSize);
     return iSum;
 }
 
-class hkBoolDD72
+// LocalhkBool: include/hkBool.h has a trivial copy; 0x00dd72f0 passes the flag through a non-trivial copy constructor.
+namespace memory_walk {
+class LocalhkBool
 {
   public:
-    hkBoolDD72(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    hkBoolDD72(const hkBoolDD72& o)
-    {
-        m_cBooleanValue = o.m_cBooleanValue;
-    }
+    LocalhkBool(bool b) { m_cBooleanValue = (char)b; }
+    LocalhkBool(const LocalhkBool& o) { m_cBooleanValue = o.m_cBooleanValue; }
     char m_cBooleanValue;
 };
-
-typedef void(__cdecl* hkMemoryWalkCallbackDD72)(void* start, int size, hkBoolDD72 allocated, int pool, void* param);
-
-struct hkBlockDD72
-{
-    hkBlockDD72* m_next;
-    int unk04;
-    char* m_kRayStart;
-    int m_iCapacity;
-};
-
-class hkFreeListDD72
-{
-  public:
-    int unk00;
-    int m_iFirstIndex;
-
-    void WalkFreeBlocks(hkBlockDD72* block, hkMemoryWalkCallbackDD72 callback, int pool, void* param);
-};
+}
 
 // Walks the free list and invokes callback on each element of every block, reporting it as not allocated.
 // @fnv 0x00dd72f0
-void hkFreeListDD72::WalkFreeBlocks(hkBlockDD72* block, hkMemoryWalkCallbackDD72 callback, int pool, void* param)
+void hkFreeList::WalkFreeBlocks(hkFreeList::Block* block, FreeBlockWalkCallback callback, int pool, void* param)
 {
     for (; block; block = block->m_next)
     {
-        char* p = block->m_kRayStart;
-        char* end = p + block->m_iCapacity * m_iFirstIndex;
-        for (; p < end; p += m_iFirstIndex)
-            callback(p, m_iFirstIndex, hkBoolDD72(false), pool, param);
+        char* p = block->m_start;
+        char* end = p + block->m_numElements * m_elementSize;
+        for (; p < end; p += m_elementSize)
+            callback(p, m_elementSize, memory_walk::LocalhkBool(false), pool, param);
     }
 }
 
-struct hkFreeListCallsDD75
-{
-    static unsigned int __cdecl FUN_00dd73d0(unsigned int uiSize, unsigned int uiAlign);
-};
-
-struct hkMemoryAllocatorDD75
-{
-    virtual void V0();
-    virtual void* AllocateMemoryBlock(int iNumBytes);
-    virtual void V2();
-    virtual void V3();
-    virtual int GetUsableSize(const void* pObj, int iNumBytes);
-};
-
-struct hkFreeListBlockDD75
-{
-    hkFreeListBlockDD75* m_pkNext;
-    int m_iBlockSize;
-    char* m_pcStart;
-    unsigned int m_uiNumElements;
-};
-
-struct hkFreeListDD75
-{
-    void* m_pkFree;
-    unsigned int m_uiFreeCount;
-    int m_iUnk08;
-    hkFreeListBlockDD75* m_pkActiveBlocks;
-    hkFreeListBlockDD75* m_pkFreeBlocks;
-    unsigned int m_uiIndexCapacity;
-    unsigned int m_uiAlign;
-    unsigned int m_uiMaxBlockSize;
-    char* m_pcTop;
-    char* m_pcBlockEnd;
-    int m_iNumFreeElements;
-    int m_iTotalNumElements;
-    hkMemoryAllocatorDD75* m_pkBlockAllocator;
-    void* AllocateElement();
-};
-
-// Returns one free element from the free list, reusing a free block or allocating a new block from m_pkBlockAllocator when none is available.
+// Returns an element from a reused free block or a newly allocated server block.
 // @fnv 0x00dd7540
-void* hkFreeListDD75::AllocateElement()
+void* hkFreeList::AllocateElement()
 {
-    hkFreeListBlockDD75* pkBlock = m_pkFreeBlocks;
+    hkFreeList::Block* pkBlock = m_freeBlocks;
     if (pkBlock)
     {
-        m_pkFreeBlocks = pkBlock->m_pkNext;
-        m_pcTop = pkBlock->m_pcStart;
-        m_pcBlockEnd = pkBlock->m_pcStart + pkBlock->m_uiNumElements * m_uiFreeCount;
-        pkBlock->m_pkNext = m_pkActiveBlocks;
-        m_pkActiveBlocks = pkBlock;
-        m_iNumFreeElements--;
-        void* p = m_pcTop;
-        m_pcTop += m_uiFreeCount;
+        m_freeBlocks = pkBlock->m_next;
+        m_top = pkBlock->m_start;
+        m_blockEnd = pkBlock->m_start + pkBlock->m_numElements * m_elementSize;
+        pkBlock->m_next = m_blocks;
+        m_blocks = pkBlock;
+        m_numFreeElements--;
+        void* p = m_top;
+        m_top += m_elementSize;
         return p;
     }
 
-    if (m_uiIndexCapacity <= 0)
+    if (m_blockSize <= 0)
     {
-        unsigned int auiCount = 256 / m_uiFreeCount;
+        unsigned int auiCount = 256 / m_elementSize;
         if (auiCount < 1)
             auiCount = 1;
-        m_uiIndexCapacity = hkFreeListCallsDD75::FUN_00dd73d0(m_uiFreeCount * auiCount, m_uiAlign);
+        m_blockSize = reinterpret_cast<unsigned int>(FUN_00dd73d0(reinterpret_cast<void*>(m_elementSize * auiCount), m_alignment));
     }
-    else if (m_uiIndexCapacity < m_uiMaxBlockSize)
+    else if (m_blockSize < m_maxBlockSize)
     {
-        unsigned int auiCount = m_uiIndexCapacity / m_uiFreeCount;
+        unsigned int auiCount = m_blockSize / m_elementSize;
         if (auiCount < 8)
             auiCount = 8;
         else
             auiCount += auiCount >> 1;
-        m_uiIndexCapacity = hkFreeListCallsDD75::FUN_00dd73d0(m_uiFreeCount * auiCount, m_uiAlign);
+        m_blockSize = reinterpret_cast<unsigned int>(FUN_00dd73d0(reinterpret_cast<void*>(m_elementSize * auiCount), m_alignment));
     }
 
-    pkBlock = (hkFreeListBlockDD75*)m_pkBlockAllocator->AllocateMemoryBlock(m_uiIndexCapacity);
+    // The block server allocates at slot 1 and reports allocated size at slot 4;
+    // hkMemoryAllocator uses slot 4 for ReturnMemory. The shared server is opaque.
+    typedef void*(__thiscall* AllocateBlock)(hkFreeListAllocatorServer*, int);
+    typedef int(__thiscall* GetAllocatedSize)(hkFreeListAllocatorServer*, const void*, int);
+    pkBlock = (hkFreeList::Block*)reinterpret_cast<AllocateBlock>(
+        (*reinterpret_cast<void***>(m_blockServer))[1])(m_blockServer, m_blockSize);
     if (!pkBlock)
         return 0;
-    int iAllocatedSize = m_pkBlockAllocator->GetUsableSize(pkBlock, m_uiIndexCapacity);
-    pkBlock->m_iBlockSize = iAllocatedSize;
-    char* pcStart = (char*)(((unsigned int)(pkBlock + 1) + m_uiAlign - 1) & ~(m_uiAlign - 1));
-    pkBlock->m_pcStart = pcStart;
-    pkBlock->m_uiNumElements = (unsigned int)((char*)pkBlock + iAllocatedSize - pkBlock->m_pcStart) / m_uiFreeCount;
-    m_pcTop = pkBlock->m_pcStart;
-    m_pcBlockEnd = pkBlock->m_pcStart + pkBlock->m_uiNumElements * m_uiFreeCount;
-    pkBlock->m_pkNext = m_pkActiveBlocks;
-    m_pkActiveBlocks = pkBlock;
-    m_iTotalNumElements += pkBlock->m_uiNumElements;
-    m_iNumFreeElements += pkBlock->m_uiNumElements - 1;
-    void* p = m_pcTop;
-    m_pcTop += m_uiFreeCount;
+    int iAllocatedSize = reinterpret_cast<GetAllocatedSize>(
+        (*reinterpret_cast<void***>(m_blockServer))[4])(m_blockServer, pkBlock, m_blockSize);
+    pkBlock->m_blockSize = iAllocatedSize;
+    char* pcStart = (char*)(((unsigned int)(pkBlock + 1) + m_alignment - 1) & ~(m_alignment - 1));
+    pkBlock->m_start = pcStart;
+    pkBlock->m_numElements = (unsigned int)((char*)pkBlock + iAllocatedSize - pkBlock->m_start) / m_elementSize;
+    m_top = pkBlock->m_start;
+    m_blockEnd = pkBlock->m_start + pkBlock->m_numElements * m_elementSize;
+    pkBlock->m_next = m_blocks;
+    m_blocks = pkBlock;
+    m_numElements += pkBlock->m_numElements;
+    m_numFreeElements += pkBlock->m_numElements - 1;
+    void* p = m_top;
+    m_top += m_elementSize;
     return p;
 }
 
-struct hkStackDD7B
+// 0x00c85750 returns a thread-local cursor whose first field is the scratch-stack top.
+struct StackAllocationCursor
 {
     char* m_pcCur;
 };
-extern "C" hkStackDD7B* __cdecl FUN_00c85750();
+extern "C" StackAllocationCursor* __cdecl FUN_00c85750();
 
-template <class T> inline T* hkAllocateStackDD7B(int iCount)
+template <class T> inline T* AllocateFreeListScratch(int iCount)
 {
-    hkStackDD7B* pkStack = FUN_00c85750();
+    StackAllocationCursor* pkStack = FUN_00c85750();
     T* pResult = (T*)pkStack->m_pcCur;
     pkStack->m_pcCur = (char*)pResult + ((iCount * sizeof(T) + 127) & ~127);
     return pResult;
 }
 
-template <class T> inline void hkDeallocateStackDD7B(T* p)
+template <class T> inline void ReleaseFreeListScratch(T* p)
 {
     FUN_00c85750()->m_pcCur = (char*)p;
 }
 
-bool __cdecl CompareLessThan(const hkFreeListNode* pkA, const hkFreeListNode* pkB);
-void __cdecl FUN_00dd7d00(hkFreeListNode** ppArray, int iLow, int iHigh,
-                          bool(__cdecl* pfnLess)(const hkFreeListNode*, const hkFreeListNode*));
+bool __cdecl CompareLessThan(const hkFreeList::Element* pkA, const hkFreeList::Element* pkB);
+void __cdecl FUN_00dd7d00(hkFreeList::Element** ppArray, int iLow, int iHigh,
+                          bool(__cdecl* pfnLess)(const hkFreeList::Element*, const hkFreeList::Element*));
 
-struct hkBlockDD7B
-{
-    int m_iUnk00;
-    int m_iUnk04;
-    char* m_pcStart;
-    int m_iNumElements;
-};
-
-struct hkFreeListDD7B
-{
-    hkFreeListNode* m_pkFree;
-    unsigned int m_uiFreeCount;
-    char m_acUnk08[0x18];
-    char* m_pcTop;
-    char* m_pcBlockEnd;
-    int FUN_00dd7b40(hkBlockDD7B* pkBlock);
-};
-
-// Removes free-list nodes that fall inside pkBlock's range, re-sorts them and relinks them into m_pkFree; returns 1 if the block is fully free, else 0.
+// Removes elements in the block range, then sorts and relinks them; returns 1 for a fully free block.
 // @fnv 0x00dd7b40
-int hkFreeListDD7B::FUN_00dd7b40(hkBlockDD7B* pkBlock)
+int hkFreeList::FUN_00dd7b40(hkFreeList::Block* pkBlock)
 {
-    hkFreeListNode** ppElems = hkAllocateStackDD7B<hkFreeListNode*>(pkBlock->m_iNumElements);
+    Element** ppElems = AllocateFreeListScratch<Element*>(static_cast<int>(pkBlock->m_numElements));
 
     int iNumFound = 0;
-    char* pcStart = pkBlock->m_pcStart;
-    char* pcEnd = pcStart + pkBlock->m_iNumElements * m_uiFreeCount;
-    hkFreeListNode* pkPrev = (hkFreeListNode*)this;
-    for (hkFreeListNode* pkNode = m_pkFree; pkNode; pkNode = pkNode->next)
+    char* pcStart = pkBlock->m_start;
+    char* pcEnd = pcStart + static_cast<int>(pkBlock->m_numElements) * m_elementSize;
+    Element* pkPrev = (Element*)this;
+    for (Element* pkNode = m_free; pkNode; pkNode = pkNode->m_next)
     {
         if ((char*)pkNode >= pcStart && (char*)pkNode < pcEnd)
         {
             ppElems[iNumFound++] = pkNode;
-            pkPrev->next = pkNode->next;
+            pkPrev->m_next = pkNode->m_next;
         }
         else
             pkPrev = pkNode;
     }
 
-    if (m_pcTop >= pcStart && m_pcTop < pcEnd)
+    if (m_top >= pcStart && m_top < pcEnd)
     {
-        if (iNumFound + (m_pcBlockEnd - m_pcTop) / m_uiFreeCount == pkBlock->m_iNumElements)
+        if (iNumFound + (m_blockEnd - m_top) / m_elementSize == static_cast<int>(pkBlock->m_numElements))
         {
-            m_pcTop = 0;
-            m_pcBlockEnd = 0;
-            hkDeallocateStackDD7B(ppElems);
+            m_top = 0;
+            m_blockEnd = 0;
+            ReleaseFreeListScratch(ppElems);
             return 1;
         }
     }
-    else if (iNumFound == pkBlock->m_iNumElements)
+    else if (iNumFound == static_cast<int>(pkBlock->m_numElements))
     {
-        hkDeallocateStackDD7B(ppElems);
+        ReleaseFreeListScratch(ppElems);
         return 1;
     }
 
@@ -591,56 +410,29 @@ int hkFreeListDD7B::FUN_00dd7b40(hkBlockDD7B* pkBlock)
     {
         if (iNumFound > 1)
             FUN_00dd7d00(ppElems, 0, iNumFound - 1, CompareLessThan);
-        hkFreeListNode* pkLast = ppElems[0];
+        Element* pkLast = ppElems[0];
         for (int i = 1; i < iNumFound; i++)
         {
-            hkFreeListNode* pkNext = ppElems[i];
-            pkLast->next = pkNext;
+            Element* pkNext = ppElems[i];
+            pkLast->m_next = pkNext;
             pkLast = pkNext;
         }
-        ppElems[iNumFound - 1]->next = m_pkFree;
-        m_pkFree = ppElems[0];
+        ppElems[iNumFound - 1]->m_next = m_free;
+        m_free = ppElems[0];
     }
-    hkDeallocateStackDD7B(ppElems);
+    ReleaseFreeListScratch(ppElems);
     return 0;
 }
 
-struct hkBoolDD7C
-{
-    char m_cBooleanValue;
-    hkBoolDD7C(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-};
-
-struct hkFreeListBlockDD7C
-{
-    hkFreeListBlockDD7C* m_next;
-};
-
-class hkFreeListDD7C
-{
-  public:
-    int unk00;
-    int unk04;
-    hkFreeListBlockDD7C* m_incrementalBlock;
-    hkFreeListBlockDD7C* m_kBlocks;
-    hkFreeListBlockDD7C* m_pFreeBlocks;
-
-    int FUN_00dd7b40(hkFreeListBlockDD7C* pkBlock) throw();
-    hkBoolDD7C FUN_00dd7c40(int m_iFreeBlockCount, int& iNumBlocksOut) throw();
-};
-
 // @fnv 0x00dd7c40
-hkBoolDD7C hkFreeListDD7C::FUN_00dd7c40(int iMaxBlocks, int& iNumBlocksOut) throw()
+hkBool hkFreeList::FUN_00dd7c40(int iMaxBlocks, int& iNumBlocksOut) throw()
 {
     int i = 0;
     for (; i < iMaxBlocks; i++)
     {
         if (m_incrementalBlock)
         {
-            hkFreeListBlockDD7C* pkBlock = m_incrementalBlock->m_next;
+            hkFreeList::Block* pkBlock = m_incrementalBlock->m_next;
             if (!pkBlock)
             {
                 iNumBlocksOut = i;
@@ -650,8 +442,8 @@ hkBoolDD7C hkFreeListDD7C::FUN_00dd7c40(int iMaxBlocks, int& iNumBlocksOut) thro
             if (FUN_00dd7b40(pkBlock))
             {
                 m_incrementalBlock->m_next = pkBlock->m_next;
-                pkBlock->m_next = m_pFreeBlocks;
-                m_pFreeBlocks = pkBlock;
+                pkBlock->m_next = m_freeBlocks;
+                m_freeBlocks = pkBlock;
             }
             else
             {
@@ -660,7 +452,7 @@ hkBoolDD7C hkFreeListDD7C::FUN_00dd7c40(int iMaxBlocks, int& iNumBlocksOut) thro
         }
         else
         {
-            hkFreeListBlockDD7C* pkBlock = m_kBlocks;
+            hkFreeList::Block* pkBlock = m_blocks;
             if (!pkBlock)
             {
                 iNumBlocksOut = i;
@@ -669,9 +461,9 @@ hkBoolDD7C hkFreeListDD7C::FUN_00dd7c40(int iMaxBlocks, int& iNumBlocksOut) thro
             }
             if (FUN_00dd7b40(pkBlock))
             {
-                m_kBlocks = pkBlock->m_next;
-                pkBlock->m_next = m_pFreeBlocks;
-                m_pFreeBlocks = pkBlock;
+                m_blocks = pkBlock->m_next;
+                pkBlock->m_next = m_freeBlocks;
+                m_freeBlocks = pkBlock;
             }
             else
             {
@@ -787,56 +579,21 @@ empty:
     *result = 0;
 }
 
-struct hkBlockDD73
-{
-    hkBlockDD73* m_next;
-    unsigned int m_key;
-    int unk08;
-    int m_iElementCount;
-};
-
-class hkBlockAllocDD73
-{
-  public:
-    virtual ~hkBlockAllocDD73();
-    virtual void* alloc(int n);
-    virtual void free(hkBlockDD73* block);
-};
-
-class hkBlockListDD73
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkBlockDD73* m_pFirstNode;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int m_totalSize;
-    int m_usedSize;
-    hkBlockAllocDD73* m_alloc;
-
-    void FUN_00dd7380(unsigned int key);
-};
-
 // @fnv 0x00dd7380
-void hkBlockListDD73::FUN_00dd7380(unsigned int key)
+void hkFreeList::FUN_00dd7380(unsigned int key)
 {
-    hkBlockDD73** prev = &m_pFirstNode;
-    hkBlockDD73* block = m_pFirstNode;
+    Block** prev = &m_freeBlocks;
+    Block* block = m_freeBlocks;
     while (block)
     {
-        if (block->m_key <= key)
+        if (static_cast<unsigned int>(block->m_blockSize) <= key)
         {
-            hkBlockDD73* next = block->m_next;
+            Block* next = block->m_next;
             *prev = next;
-            m_usedSize -= block->m_iElementCount;
-            m_totalSize -= block->m_iElementCount;
-            m_alloc->free(block);
+            m_numElements -= block->m_numElements;
+            hkFreeListAllocatorServer* allocator = m_blockServer;
+            m_numFreeElements -= block->m_numElements;
+            reinterpret_cast<void(__thiscall*)(hkFreeListAllocatorServer*, Block*)>((*reinterpret_cast<void***>(allocator))[2])(allocator, block);
             block = next;
         }
         else
@@ -847,7 +604,7 @@ void hkBlockListDD73::FUN_00dd7380(unsigned int key)
     }
 }
 
-struct Info_dd7430
+struct FreeListStatistics
 {
     int m_iTotal;
     int m_iSpan;
@@ -856,37 +613,22 @@ struct Info_dd7430
     int m_iStartCopy;
     int m_iArrayCapacity;
 };
-struct FUN_00dd7430_cls
-{
-    int unk00;
-    int m_iArrayCapacity;
-    int unk08;
-    int m_iB;
-    int m_iA;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int m_iFirst;
-    int m_iLast;
-    int SumNodeCounts(int iValue);
-    void FUN_00dd7430(Info_dd7430* pkInfo);
-};
-// Fills pkInfo with total node counts, start, span, and array capacity derived from m_iA, m_iB, m_iFirst, and m_iLast.
+
+// Fills the statistics record from the block lists, element size and element counts.
 // @fnv 0x00dd7430
-void FUN_00dd7430_cls::FUN_00dd7430(Info_dd7430* pkInfo)
+void hkFreeList::FUN_00dd7430(FreeListStatistics* pkInfo)
 {
-    pkInfo->m_iTotal = SumNodeCounts(m_iA) + SumNodeCounts(m_iB);
-    int iFirst = m_iFirst;
-    int iLast = m_iLast;
-    pkInfo->m_iStart = m_iArrayCapacity * iFirst;
-    pkInfo->m_iSpan = (iLast - iFirst) * m_iArrayCapacity;
-    pkInfo->m_iArrayCapacity = m_iArrayCapacity;
+    pkInfo->m_iTotal = SumNodeCounts(m_freeBlocks) + SumNodeCounts(m_blocks);
+    int iFirst = m_numFreeElements;
+    int iLast = m_numElements;
+    pkInfo->m_iStart = m_elementSize * iFirst;
+    pkInfo->m_iSpan = (iLast - iFirst) * m_elementSize;
+    pkInfo->m_iArrayCapacity = m_elementSize;
     pkInfo->m_iStartCopy = pkInfo->m_iStart;
 }
 
-struct hkFreeListBlockAllocator
+// Block-server view: 0x00dd7680 uses virtual slots 6 and 7 for temporary buffers.
+struct BlockBufferAllocatorInterface
 {
     virtual void vf00();
     virtual void vf01();
@@ -901,64 +643,32 @@ struct hkFreeListBlockAllocator
 void __cdecl hkFreeList_quickSortRecursive(void** pArr, int d, int h, bool(__cdecl* cmpLess)(const void*, const void*));
 bool __cdecl hkFreeList_comparePointers(const void* a, const void* b);
 
-struct hkFreeListGC
-{
-    struct Element
-    {
-        Element* m_next;
-    };
-
-    struct Block
-    {
-        Block* m_next;
-        int m_unk04;
-        char* m_kRayStart;
-        int m_iCapacity;
-    };
-
-    Element* m_free;
-    unsigned int m_iFirstIndex;
-    int m_iFreeCount;
-    Block* m_kBlocks;
-    Block* m_pFreeBlocks;
-    int m_unk14;
-    int m_unk18;
-    int m_unk1C;
-    char* m_fMinimumV;
-    char* m_pSecondString;
-    int m_unk28;
-    int m_unk2C;
-    hkFreeListBlockAllocator* m_blockAllocator;
-
-    int Compact();
-};
-
-// Sorts block and element pointers, merges free blocks into m_pFreeBlocks, rebuilds m_kBlocks and m_free lists, and returns the number of freed blocks.
+// Sorts blocks and free elements, collects fully free blocks, and rebuilds the active and free-element lists.
 // @fnv 0x00dd7680
-int hkFreeListGC::Compact()
+int hkFreeList::Compact()
 {
-    if (!m_kBlocks)
+    if (!m_blocks)
     {
         return 0;
     }
 
     int numBlocks = 0;
-    for (Block* block = m_kBlocks; block; block = block->m_next)
+    for (Block* block = m_blocks; block; block = block->m_next)
     {
         numBlocks++;
     }
 
     int blocksSize = numBlocks * sizeof(Block*);
-    Block** blocks = (Block**)m_blockAllocator->AllocateBufferWithSize(blocksSize);
+    Block** blocks = (Block**)reinterpret_cast<BlockBufferAllocatorInterface*>(m_blockServer)->AllocateBufferWithSize(blocksSize);
     if (!blocks)
     {
         return -1;
     }
 
-    if (m_kBlocks)
+    if (m_blocks)
     {
         Block** dst = blocks;
-        for (Block* block = m_kBlocks; block; block = block->m_next)
+        for (Block* block = m_blocks; block; block = block->m_next)
         {
             *dst++ = block;
         }
@@ -969,17 +679,17 @@ int hkFreeListGC::Compact()
         hkFreeList_quickSortRecursive((void**)blocks, 0, numBlocks - 1, hkFreeList_comparePointers);
     }
 
-    int numElements = int(m_pSecondString - m_fMinimumV) / m_iFirstIndex;
+    int numElements = int(m_blockEnd - m_top) / m_elementSize;
     for (Element* pElement = m_free; pElement; pElement = pElement->m_next)
     {
         numElements++;
     }
 
     int elementsSize = numElements * sizeof(Element*);
-    Element** elements = (Element**)m_blockAllocator->AllocateBufferWithSize(elementsSize);
+    Element** elements = (Element**)reinterpret_cast<BlockBufferAllocatorInterface*>(m_blockServer)->AllocateBufferWithSize(elementsSize);
     if (!elements)
     {
-        m_blockAllocator->ReturnMemory(blocks, blocksSize);
+        reinterpret_cast<BlockBufferAllocatorInterface*>(m_blockServer)->ReturnMemory(blocks, blocksSize);
         return -1;
     }
 
@@ -989,13 +699,13 @@ int hkFreeListGC::Compact()
         {
             elements[n++] = pElement;
         }
-        for (char* p = m_fMinimumV; p < m_pSecondString; p += m_iFirstIndex)
+        for (char* p = m_top; p < m_blockEnd; p += m_elementSize)
         {
             elements[n++] = (Element*)p;
         }
     }
 
-    m_fMinimumV = m_pSecondString = 0;
+    m_top = m_blockEnd = 0;
 
     if (numElements > 1)
     {
@@ -1009,9 +719,9 @@ int hkFreeListGC::Compact()
     for (unsigned int i = 0; i < (unsigned int)numBlocks && cur < end; i++)
     {
         Block* block = blocks[i];
-        int blockElements = block->m_iCapacity;
-        unsigned int elementSize = m_iFirstIndex;
-        char* p = block->m_kRayStart;
+        int blockElements = block->m_numElements;
+        unsigned int elementSize = m_elementSize;
+        char* p = block->m_start;
         char* blockEnd = p + blockElements * elementSize;
 
         while (cur < end)
@@ -1027,8 +737,8 @@ int hkFreeListGC::Compact()
         if (p == blockEnd)
         {
             numFreed++;
-            block->m_next = m_pFreeBlocks;
-            m_pFreeBlocks = block;
+            block->m_next = m_freeBlocks;
+            m_freeBlocks = block;
             blocks[i] = 0;
             for (Element** e = cur - blockElements; e < cur; e++)
             {
@@ -1045,7 +755,7 @@ int hkFreeListGC::Compact()
     }
 
     {
-        Block** prev = &m_kBlocks;
+        Block** prev = &m_blocks;
         for (unsigned int i = 0; i < (unsigned int)numBlocks; i++)
         {
             Block* block = blocks[i];
@@ -1072,26 +782,16 @@ int hkFreeListGC::Compact()
         *prev = 0;
     }
 
-    m_blockAllocator->ReturnMemory(elements, elementsSize);
-    m_blockAllocator->ReturnMemory(blocks, blocksSize);
-    m_iFreeCount = 0;
+    reinterpret_cast<BlockBufferAllocatorInterface*>(m_blockServer)->ReturnMemory(elements, elementsSize);
+    reinterpret_cast<BlockBufferAllocatorInterface*>(m_blockServer)->ReturnMemory(blocks, blocksSize);
+    m_incrementalBlock = 0;
     return numFreed;
 }
 
-struct hkBool
+// Block-server view: 0x00dd78f0 uses virtual slots 2, 6 and 7; not an hkFreeList.
+struct BlockWalkServerInterface
 {
-    char m_cBooleanValue;
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-
-typedef void(__cdecl* hkMemoryWalkCallback)(void* start, unsigned int size, hkBool allocated, int pool, void* param);
-
-struct hkFreeListBlockServer
-{
-    virtual ~hkFreeListBlockServer();
+    virtual ~BlockWalkServerInterface();
     virtual void* unk04();
     virtual void free(void* p);
     virtual void unk0c();
@@ -1099,19 +799,6 @@ struct hkFreeListBlockServer
     virtual void unk14();
     virtual void* AllocateBufferWithSize(int numBytes);
     virtual void ReturnMemory(void* p, int numBytes);
-};
-
-struct hkFreeListElement
-{
-    hkFreeListElement* m_next;
-};
-
-struct hkFreeListBlock
-{
-    hkFreeListBlock* m_next;
-    unsigned int m_unk04;
-    char* m_kRayStart;
-    unsigned int m_iCapacity;
 };
 
 bool __cdecl CompareLessThan(void* a, void* b);
@@ -1125,77 +812,57 @@ inline void quickSortPointers(void** arr, int numElem)
     }
 }
 
-struct hkFreeListWalker
-{
-    hkFreeListElement* m_free;
-    unsigned int m_iFirstIndex;
-    unsigned int m_unk08;
-    hkFreeListBlock* m_activeBlocks;
-    hkFreeListBlock* m_pFreeBlocks;
-    unsigned int m_unk14;
-    unsigned int m_unk18;
-    unsigned int m_unk1c;
-    char* m_fMinimumV;
-    char* m_pSecondString;
-    unsigned int m_unk28;
-    unsigned int m_unk2c;
-    hkFreeListBlockServer* m_blockServer;
-
-    void WalkFreeBlocks(hkFreeListBlock* blocks, hkMemoryWalkCallback callback, int pool, void* param);
-    void FUN_00dd78f0(hkMemoryWalkCallback callback, int pool, void* param);
-};
-
 // Walks free blocks, then reports slots in active blocks through the callback with their allocation status.
 // @fnv 0x00dd78f0
-void hkFreeListWalker::FUN_00dd78f0(hkMemoryWalkCallback callback, int pool, void* param)
+void hkFreeList::FUN_00dd78f0(hkMemoryWalkCallback callback, int pool, void* param)
 {
-    WalkFreeBlocks(m_pFreeBlocks, callback, pool, param);
+    WalkFreeBlocks(m_freeBlocks, reinterpret_cast<FreeBlockWalkCallback>(callback), pool, param);
 
-    if (m_activeBlocks == 0 && m_free == 0)
+    if (m_blocks == 0 && m_free == 0)
     {
         return;
     }
 
     int numBlocks = 0;
-    for (hkFreeListBlock* block = m_activeBlocks; block; block = block->m_next)
+    for (Block* block = m_blocks; block; block = block->m_next)
     {
         numBlocks++;
     }
 
-    hkFreeListBlock** blocks =
-        (hkFreeListBlock**)m_blockServer->AllocateBufferWithSize(numBlocks * sizeof(hkFreeListBlock*));
+    Block** blocks =
+        (Block**)reinterpret_cast<BlockWalkServerInterface*>(m_blockServer)->AllocateBufferWithSize(numBlocks * sizeof(Block*));
     if (!blocks)
     {
         return;
     }
     {
         int i = 0;
-        for (hkFreeListBlock* block = m_activeBlocks; block; block = block->m_next)
+        for (Block* block = m_blocks; block; block = block->m_next)
         {
             blocks[i++] = block;
         }
     }
     quickSortPointers((void**)blocks, numBlocks);
 
-    int numFree = (m_pSecondString - m_fMinimumV) / m_iFirstIndex;
-    for (hkFreeListElement* elem = m_free; elem; elem = elem->m_next)
+    int numFree = (m_blockEnd - m_top) / m_elementSize;
+    for (Element* elem = m_free; elem; elem = elem->m_next)
     {
         numFree++;
     }
 
-    char** freeElems = (char**)m_blockServer->AllocateBufferWithSize(numFree * sizeof(char*));
+    char** freeElems = (char**)reinterpret_cast<BlockWalkServerInterface*>(m_blockServer)->AllocateBufferWithSize(numFree * sizeof(char*));
     if (!freeElems)
     {
-        m_blockServer->free(blocks);
+        reinterpret_cast<BlockWalkServerInterface*>(m_blockServer)->free(blocks);
         return;
     }
     {
         int i = 0;
-        for (hkFreeListElement* elem = m_free; elem; elem = elem->m_next)
+        for (Element* elem = m_free; elem; elem = elem->m_next)
         {
             freeElems[i++] = (char*)elem;
         }
-        for (char* p = m_fMinimumV; p < m_pSecondString; p += m_iFirstIndex)
+        for (char* p = m_top; p < m_blockEnd; p += m_elementSize)
         {
             freeElems[i++] = p;
         }
@@ -1212,80 +879,53 @@ void hkFreeListWalker::FUN_00dd78f0(hkMemoryWalkCallback callback, int pool, voi
         {
             break;
         }
-        hkFreeListBlock* block = blocks[i];
-        unsigned int numElements = block->m_iCapacity;
-        char* start = block->m_kRayStart;
-        char* end = start + m_iFirstIndex * numElements;
-        for (char* p = start; p < end; p += m_iFirstIndex)
+        Block* block = blocks[i];
+        unsigned int numElements = block->m_numElements;
+        char* start = block->m_start;
+        char* end = start + m_elementSize * numElements;
+        for (char* p = start; p < end; p += m_elementSize)
         {
             if (p == *curFree)
             {
-                callback(p, m_iFirstIndex, false, pool, param);
+                callback(p, m_elementSize, false, pool, param);
                 curFree++;
             }
             else
             {
-                callback(p, m_iFirstIndex, true, pool, param);
+                callback(p, m_elementSize, true, pool, param);
             }
         }
     }
     for (; i < (unsigned int)numBlocks; i++)
     {
-        hkFreeListBlock* block = blocks[i];
-        char* p = block->m_kRayStart;
-        for (unsigned int j = 0; j < block->m_iCapacity; j++)
+        Block* block = blocks[i];
+        char* p = block->m_start;
+        for (unsigned int j = 0; j < block->m_numElements; j++)
         {
-            callback(p, m_iFirstIndex, true, pool, param);
-            p += m_iFirstIndex;
+            callback(p, m_elementSize, true, pool, param);
+            p += m_elementSize;
         }
     }
 
-    m_blockServer->ReturnMemory(freeElems, numFree * sizeof(char*));
-    m_blockServer->ReturnMemory(blocks, numBlocks * sizeof(hkFreeListBlock*));
+    reinterpret_cast<BlockWalkServerInterface*>(m_blockServer)->ReturnMemory(freeElems, numFree * sizeof(char*));
+    reinterpret_cast<BlockWalkServerInterface*>(m_blockServer)->ReturnMemory(blocks, numBlocks * sizeof(Block*));
 }
 
-namespace fnv_00dd74b0 {
-static __declspec(noinline) void* FUN_00dd73d0(void* p, unsigned int n)
-{
-    void** pp = &p;
-    unsigned int* pn = &n;
-    return (char*)*pp + *pn;
-}
-
-struct S00dd74b0_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-
-    void FUN_00dd74b0(int a2, int a3, int a4, int a5);
-};
-
-// Initializes fields, stores a4 and a5, computes a rounded-up size from a2 and a3, and sets unk1C to a pointer offset by a3.
+// Initializes the list, rounds the element size to its alignment, and records the block-server settings.
 // @fnv 0x00dd74b0
-void S00dd74b0_cls::FUN_00dd74b0(int a2, int aiAlignment, int a4, int a5)
+void hkFreeList::FUN_00dd74b0(int a2, int aiAlignment, int a4, int a5)
 {
-    unk00 = 0;
-    unk0C = 0;
-    unk10 = 0;
-    unk14 = a4;
-    unk20 = 0;
-    unk24 = 0;
-    unk28 = 0;
-    unk2C = 0;
-    unk18 = aiAlignment;
-    unk30 = a5;
-    unk08 = 0;
+    m_free = 0;
+    m_blocks = 0;
+    m_freeBlocks = 0;
+    m_blockSize = a4;
+    m_top = 0;
+    m_blockEnd = 0;
+    m_numFreeElements = 0;
+    m_numElements = 0;
+    m_alignment = aiAlignment;
+    m_blockServer = reinterpret_cast<hkFreeListAllocatorServer*>(a5);
+    m_incrementalBlock = 0;
 
     unsigned int size;
     if ((unsigned int)a2 < (unsigned int)aiAlignment)
@@ -1293,27 +933,13 @@ void S00dd74b0_cls::FUN_00dd74b0(int a2, int aiAlignment, int a4, int a5)
     else
         size = ((unsigned int)a2 + (unsigned int)aiAlignment - 1u) & ~((unsigned int)aiAlignment - 1u);
 
-    unk04 = (int)size;
-    unk1C = (int)FUN_00dd73d0((void*)0xFF0u, (unsigned int)aiAlignment);
+    m_elementSize = (int)size;
+    m_maxBlockSize = (int)FUN_00dd73d0((void*)0xFF0u, (unsigned int)aiAlignment);
 }
-}  // namespace fnv_00dd74b0
-
-__declspec(noinline) int SumFreeListSizes(hkFreeListBlockDD75* node)
-{
-    int sum = 0;
-    for (hkFreeListBlockDD75* n = node; n != 0; n = n->m_pkNext)
-        sum += n->m_uiNumElements;
-    return sum;
-}
-
-struct FreeListElementCounter : hkFreeListDD75
-{
-    int FUN_00dd72d0();
-};
 
 // @fnv 0x00dd72d0
-int FreeListElementCounter::FUN_00dd72d0()
+int hkFreeList::FUN_00dd72d0()
 {
-    int first = SumFreeListSizes(this->m_pkFreeBlocks);
-    return first + SumFreeListSizes(this->m_pkActiveBlocks);
+    int first = SumFreeListSizes(this->m_freeBlocks);
+    return first + SumFreeListSizes(this->m_blocks);
 }

@@ -1,20 +1,10 @@
-// gamebryo2.2/corelibs/nimain/nishader.h: declares NiRTTI, NiObject, NiAVObject, GarbageCollectorObjectPtr, NiShader
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/NiShader.h"
+
+// gamebryo2.2/corelibs/nimain/nishader.h
 
 #pragma optimize("", off)
-class NiRTTI
-{
-  public:
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
-class NiObject
-{
-  public:
-    bool IsKindOfType(const NiRTTI*) const;
-};
-class NiAVObject : public NiObject
-{
-};
 bool FUN_0043b300(const NiRTTI*, NiAVObject*);
 class GarbageCollectorObjectPtr
 {
@@ -24,26 +14,17 @@ class GarbageCollectorObjectPtr
 };
 extern NiRTTI DAT_01267b70;
 GarbageCollectorObjectPtr* FUN_00c85ef0(GarbageCollectorObjectPtr*, NiAVObject*, const NiRTTI*);
-class NiShader
+__forceinline bool NiShader::IsKindOfType(const NiRTTI* type) const
 {
-  public:
-    virtual ~NiShader();
-    virtual void DeleteThis();
-    virtual const NiRTTI* GetRTTI() const;
-    static NiAVObject* DynamicCast(NiAVObject*);
-    NiShader* DynamicCast(const NiRTTI*);
-    __forceinline bool IsKindOfType(const NiRTTI* type) const
+    const NiRTTI* current = GetRTTI();
+    while (current)
     {
-        const NiRTTI* current = GetRTTI();
-        while (current)
-        {
-            if (current == type)
-                return true;
-            current = current->m_pBaseRTTI;
-        }
-        return false;
+        if (current == type)
+            return true;
+        current = current->m_pBaseRTTI;
     }
-};
+    return false;
+}
 // @fnv 0x0043b300
 bool FUN_0043b300(const NiRTTI* type, NiAVObject* object)
 {

@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 // src/havok/physics/internal/collide/mopp/machine/hkpmopplongrayvirtualmachine_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/internal/collide/mopp/machine/hkpmopplongrayvirtualmachine_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -7,45 +9,64 @@
 // src/havok/physics/internal/collide/mopp/machine/hkpmopplongrayvirtualmachine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/machine/hkpmopplongrayvirtualmachine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include <xmmintrin.h>
+#include "../../../../../../../include/hkVector4.h"
 extern "C" void _ReadWriteBarrier(void);
 
-struct LongRayScalar
+__forceinline hkVector4::hkVector4(const hkVector4& src)
 {
-    __m128 m;
-    LongRayScalar(float f)
-    {
-        m = _mm_load_ss(&f);
-    }
-};
-struct __declspec(align(16)) LongRayVector
+    reinterpret_cast<unsigned*>(this)[0] = reinterpret_cast<const unsigned*>(&src)[0];
+    reinterpret_cast<unsigned*>(this)[1] = reinterpret_cast<const unsigned*>(&src)[1];
+    reinterpret_cast<unsigned*>(this)[2] = reinterpret_cast<const unsigned*>(&src)[2];
+    reinterpret_cast<unsigned*>(this)[3] = reinterpret_cast<const unsigned*>(&src)[3];
+}
+__forceinline hkSimdReal::hkSimdReal(float value)
 {
-    float x, y, z, w;
-    __m128& q()
-    {
-        return *(__m128*)&x;
-    }
-    const __m128& q() const
-    {
-        return *(const __m128*)&x;
-    }
-    void setZero4()
-    {
-        q() = _mm_setzero_ps();
-    }
-    void setSub4(const LongRayVector& a, const LongRayVector& b)
-    {
-        q() = _mm_sub_ps(a.q(), b.q());
-    }
-    void mul4s(const LongRayScalar& s)
-    {
-        q() = _mm_mul_ps(_mm_shuffle_ps(s.m, s.m, 0), q());
-    }
-    void operator=(const LongRayVector& v)
-    {
-        q() = v.q();
-    }
-};
+    m_vValue = _mm_load_ss(&value);
+}
+__forceinline __m128& hkVector4::getQuad()
+{
+    return m_vComponents;
+}
+__forceinline const __m128& hkVector4::getQuad() const
+{
+    return m_vComponents;
+}
+__forceinline void hkVector4::operator=(const __m128& src)
+{
+    m_vComponents = src;
+}
+__forceinline float& hkVector4::operator()(int n)
+{
+    return m_vComponents.m128_f32[n];
+}
+__forceinline const float& hkVector4::operator()(int n) const
+{
+    return m_vComponents.m128_f32[n];
+}
+__forceinline void hkVector4::set(float x, float y, float z, float w)
+{
+    m_vComponents = _mm_setr_ps(x, y, z, w);
+}
+__forceinline void hkVector4::setZero4()
+{
+    m_vComponents = _mm_setzero_ps();
+}
+__forceinline void hkVector4::mul4s(const hkSimdReal& s)
+{
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(s.m_vValue, s.m_vValue, 0), m_vComponents);
+}
+__forceinline void hkVector4::mul4(const hkSimdReal& s)
+{
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(s.m_vValue, s.m_vValue, 0), m_vComponents);
+}
+extern "C" __m128 DAT_010ec7f0;
+__forceinline void hkVector4::setInterpolate4(const hkVector4& a, const hkVector4& b,
+                                             const hkSimdReal& factor)
+{
+    __m128 t = _mm_shuffle_ps(factor.m_vValue, factor.m_vValue, 0);
+    __m128 rest = _mm_sub_ps(DAT_010ec7f0, t);
+    m_vComponents = _mm_add_ps(_mm_mul_ps(rest, a.m_vComponents), _mm_mul_ps(t, b.m_vComponents));
+}
 
 struct LongRayBool
 {
@@ -69,7 +90,7 @@ struct LongRayBool
 
 struct LongRayCodeInfo
 {
-    LongRayVector m_offset;
+    hkVector4 m_offset;
 };
 struct LongRayCode
 {
@@ -80,15 +101,15 @@ struct LongRayCode
 
 struct LongRayInput
 {
-    LongRayVector m_vFrom;
-    LongRayVector m_vTo;
+    hkVector4 m_vFrom;
+    hkVector4 m_vTo;
     unsigned int m_uiFilterInfo;
     const void* m_pRayShapeCollectionFilter;
 };
 
 struct LongRayQueryInt
 {
-    LongRayVector m_offset;
+    hkVector4 m_offset;
     int m_iIndex;
     float m_FtoBoxScale;
     unsigned int m_uiPropertyCount;
@@ -97,8 +118,8 @@ struct LongRayQueryInt
 
 struct LongRayQueryFloat
 {
-    LongRayVector m_rayStart;
-    LongRayVector m_rayEnd;
+    hkVector4 m_rayStart;
+    hkVector4 m_rayEnd;
 };
 
 struct LongRayVm
@@ -161,16 +182,6 @@ __declspec(noinline) void LongRayVm::FUN_00dd1f30(const LongRayQueryInt* query, 
 }
 
 namespace LongRayTreeDetail {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
 static __forceinline int readTriple(const unsigned char* q)
 {
     int x = q[0] << 8;
@@ -184,84 +195,6 @@ extern "C" __m128 DAT_010ec7f0;
 extern "C" float DAT_01011d78;
 extern "C" const char DAT_010d5100[];
 extern "C" const char DAT_010d7b2c[];
-class Scalar4
-{
-    __m128 bits;
-
-  public:
-    Scalar4(float x)
-    {
-        bits = _mm_load_ss(&x);
-    }
-    Scalar4(const __m128& x) : bits(x)
-    {}
-    Scalar4()
-    {}
-    __forceinline __m128 splat() const
-    {
-        return _mm_shuffle_ps(bits, bits, 0);
-    }
-};
-class hkVector4
-{
-    __m128 bits;
-
-  public:
-    __forceinline operator __m128() const
-    {
-        return bits;
-    }
-    __forceinline __m128& getQuad()
-    {
-        return bits;
-    }
-    __forceinline const __m128& getQuad() const
-    {
-        return bits;
-    }
-    __forceinline void operator=(const hkVector4& src)
-    {
-        bits = src.bits;
-    }
-    __forceinline void operator=(const __m128& src)
-    {
-        bits = src;
-    }
-    __forceinline float& operator()(int n)
-    {
-        return bits.m128_f32[n];
-    }
-    __forceinline const float& operator()(int n) const
-    {
-        return bits.m128_f32[n];
-    }
-    __forceinline void set(float x, float y, float z, float w)
-    {
-        bits = _mm_setr_ps(x, y, z, w);
-    }
-    __forceinline void sub4(const hkVector4& src)
-    {
-        bits = _mm_sub_ps(bits, src.bits);
-    }
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        bits = _mm_sub_ps(a.bits, b.bits);
-    }
-    __forceinline void setAdd4(const hkVector4& a, const hkVector4& b)
-    {
-        bits = _mm_add_ps(a.bits, b.bits);
-    }
-    __forceinline void mul4(const Scalar4& f)
-    {
-        bits = _mm_mul_ps(f.splat(), bits);
-    }
-    __forceinline void setInterpolate4(const hkVector4& a, const hkVector4& b, const Scalar4& factor)
-    {
-        __m128 t = factor.splat();
-        __m128 rest = _mm_sub_ps(DAT_010ec7f0, t);
-        bits = _mm_add_ps(_mm_mul_ps(rest, a.bits), _mm_mul_ps(t, b.bits));
-    }
-};
 struct BoolResult
 {
     char value;
@@ -560,7 +493,7 @@ void MoppMachine::FUN_00dd1f30(const RayState* state, const unsigned char* code,
                     hkVector4 point;
                     point.setInterpolate4(this->ray.start, this->ray.end, f);
                     ray->ends[1].setSub4(point, data->translation);
-                    ray->ends[1].mul4(state->scale);
+                    ray->ends[1].mul4(hkSimdReal(state->scale));
                     ray->ends[1].sub4(state->offset);
                     if (axis < 3 && ray->ends[1](axis) < upper)
                         return;
@@ -585,7 +518,7 @@ void MoppMachine::FUN_00dd1f30(const RayState* state, const unsigned char* code,
                     hkVector4 point;
                     point.setInterpolate4(this->ray.start, this->ray.end, f);
                     ray->ends[1].setSub4(point, data->translation);
-                    ray->ends[1].mul4(state->scale);
+                    ray->ends[1].mul4(hkSimdReal(state->scale));
                     ray->ends[1].sub4(state->offset);
                     if (axis < 3 && ray->ends[1](axis) > lower)
                         return;
@@ -682,10 +615,10 @@ void MoppMachine::FUN_00dd1f30(const RayState* state, const unsigned char* code,
             float factor = (float)(1 << command);
             ray->ends[0].sub4(dv);
             ray->ends[1].sub4(dv);
-            ray->ends[0].mul4(factor);
-            ray->ends[1].mul4(factor);
+            ray->ends[0].mul4(hkSimdReal(factor));
+            ray->ends[1].mul4(hkSimdReal(factor));
             localState.offset.setAdd4(state->offset, dv);
-            localState.offset.mul4(factor);
+            localState.offset.mul4(hkSimdReal(factor));
             localState.shift = state->shift + command;
             localState.scale = state->scale * factor;
             code += 4;

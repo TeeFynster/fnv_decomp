@@ -1,26 +1,13 @@
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiColor.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiPSysGravityFieldModifier.h"
 
 // src/gamebryo2.2/corelibs/niparticle/nipsysgravityfieldmodifier_od_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/niparticle/nipsysgravityfieldmodifier.cpp functions whose prologue its flags cannot
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 // src/gamebryo2.2/corelibs/niparticle/nipsysgravityfieldmodifier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysgravityfieldmodifier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct NiStream
-{
-    void GetLoadedObject();
-};
-struct NiColor
-{
-    void SaveBinary(NiStream&);
-};
-struct NiPSysFieldModifier
-{
-    void SaveBinary(NiStream&);
-};
-struct NiPSysGravityFieldModifier : NiPSysFieldModifier
-{
-    NiPSysGravityFieldModifier();
-    void FUN_00c267f0(NiStream&);
-};
 extern "C"
 {
     extern const void* g_01202708;
@@ -32,11 +19,6 @@ const void* __cdecl FUN_00c2a9b0()
     return &g_01202708;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    float Length() const;
-};
 extern double DAT_01017cf8;
 struct FUN_004a0c10_s
 {

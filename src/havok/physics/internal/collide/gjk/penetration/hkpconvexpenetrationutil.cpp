@@ -1,26 +1,12 @@
 
+
 // src/havok/physics/internal/collide/gjk/penetration/hkpconvexpenetrationutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/gjk/penetration/hkpconvexpenetrationutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
+#include "../../../../../../../include/hkTransform.h"
 
-struct __declspec(align(16)) hkVector4
-{
-    float x, y, z, w;
-    void operator=(const hkVector4& o)
-    {
-        *(__m128*)&x = *(const __m128*)&o.x;
-    }
-};
+#include "../../../../../../../include/hkVector4.h"
+
 
 struct Entry
 {
@@ -100,15 +86,6 @@ void FUN_00df9c40_Obj::PushVectorTriple(const __m128* src)
     this->unk60[idx] = src[1];
     this->unk64[idx] = src[2];
     this->unk6C = idx + 1;
-}
-
-extern "C"
-{
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_add_ss(__m128, __m128);
-    void _mm_store_ss(float*, __m128);
 }
 
 struct S00cd7530_SimdReal
@@ -255,7 +232,6 @@ void FUN_00cd7530(P pos, P t0, Mid t1, __int64 packedTail)
     }
 }
 
-extern "C" __m128 _mm_add_ps(__m128, __m128);
 extern const double DAT_01032980;
 extern const double DAT_010dbb40;
 
@@ -439,15 +415,10 @@ struct S_00dfaac0_MonitorStream
     }
 };
 
-struct S_00dfaac0_Transform
-{
-    float m[16];
-};
-
 struct __declspec(align(16)) S_00dfaac0_Penetration
 {
     int unk00;
-    S_00dfaac0_Penetration(int a, int b, const S_00dfaac0_Transform& t, float f, int c, int d, int e, int g);
+    S_00dfaac0_Penetration(int a, int b, const hkTransform& t, float f, int c, int d, int e, int g);
     int FUN_00dfa940(int out);
     int unk04;
     int unk08;
@@ -478,11 +449,11 @@ struct __declspec(align(16)) S_00dfaac0_Penetration
     int unk6C;
 };
 
-int __cdecl FUN_00e2db70(int a, int b, const S_00dfaac0_Transform& t, int c, int d, int out);
+int __cdecl FUN_00e2db70(int a, int b, const hkTransform& t, int c, int d, int out);
 
 // Constructs a Penetration object and calls FUN_00dfa940; if it returns 3, calls FUN_00e2db70 and returns 1, otherwise returns the original result.
 // @fnv 0x00dfaac0
-int __cdecl TestPenetration(int a, int b, const S_00dfaac0_Transform& t, float f, int c, int d, int e, int g, int out)
+int __cdecl TestPenetration(int a, int b, const hkTransform& t, float f, int c, int d, int e, int g, int out)
 {
     S_00dfaac0_MonitorStream::GetMonitorStream().timer("TtPenetration");
     S_00dfaac0_Penetration penetration(a, b, t, f, c, d, e, g);
@@ -496,18 +467,10 @@ int __cdecl TestPenetration(int a, int b, const S_00dfaac0_Transform& t, float f
     return result;
 }
 
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_load_ps(const float*);
 extern "C"
 {
     void** FUN_00c85750();
     void FUN_00e2d6c0(void*, void*, void*, void*, void*);
-
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_set_ps1(float);
 }
 
 extern "C" const __m128 DAT_010c44d0;
@@ -547,18 +510,13 @@ struct LocalStruct70
     float m_f;
 };
 
-struct hkTransform
+inline void hkTransform::operator=(const hkTransform& o)
 {
-    hkVector4 m_rotation[3];
-    hkVector4 m_vTranslation;
-    void operator=(const hkTransform& o)
-    {
-        *(__m128*)this = *(const __m128*)&o.m_rotation[0];
-        m_rotation[1] = o.m_rotation[1];
-        m_rotation[2] = o.m_rotation[2];
-        m_vTranslation = o.m_vTranslation;
-    }
-};
+    m_kColumn0 = o.m_kColumn0;
+    m_kColumn1 = o.m_kColumn1;
+    m_kColumn2 = o.m_kColumn2;
+    m_vTranslation = o.m_vTranslation;
+}
 
 struct WorkObject
 {
@@ -727,16 +685,16 @@ int FUN_00dfaba0(const hkTransform* transform, Arg1* arg1, Arg2** arg2, int coun
         normal_z = _mm_shuffle_ps(neg_vec, neg_vec, 0xAA);
         normal_x = _mm_shuffle_ps(neg_vec, neg_vec, 0x00);
         *(__m128*)&pItem->m_arg5->direction =
-            _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_load_ps((const float*)&normal_y), *(__m128*)&transform->m_rotation[1]),
-                                  _mm_mul_ps(normal_x, *(__m128*)&transform->m_rotation[0])),
-                       _mm_mul_ps(_mm_load_ps((const float*)&normal_z), *(__m128*)&transform->m_rotation[2]));
+            _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_load_ps((const float*)&normal_y), *(__m128*)&transform->m_kColumn1),
+                                  _mm_mul_ps(normal_x, *(__m128*)&transform->m_kColumn0)),
+                       _mm_mul_ps(_mm_load_ps((const float*)&normal_z), *(__m128*)&transform->m_kColumn2));
 
         __m128 pt_y = _mm_mul_ps(_mm_shuffle_ps(*(__m128*)&local_s.m_v1, *(__m128*)&local_s.m_v1, 0x55),
-                                 *(__m128*)&transform->m_rotation[1]);
+                                 *(__m128*)&transform->m_kColumn1);
         __m128 pt_x = _mm_mul_ps(_mm_shuffle_ps(*(__m128*)&local_s.m_v1, *(__m128*)&local_s.m_v1, 0x00),
-                                 *(__m128*)&transform->m_rotation[0]);
+                                 *(__m128*)&transform->m_kColumn0);
         __m128 pt_z = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(*(__m128*)&local_s.m_v1, *(__m128*)&local_s.m_v1, 0xAA),
-                                            *(__m128*)&transform->m_rotation[2]),
+                                            *(__m128*)&transform->m_kColumn2),
                                  *(__m128*)&transform->m_vTranslation);
         float w = neg_w - f10 - pItem->m_arg2_copy->getRadius();
         *(__m128*)&pItem->m_arg5->point = _mm_add_ps(_mm_add_ps(pt_y, pt_x), pt_z);

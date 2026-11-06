@@ -1,29 +1,45 @@
-// gamebryo2.2/corelibs/niconsolerenderer/nidynamicgeometrygroup.cpp: NiDynamicGeometryGroup, SomeClass, UnsharedGroupStub, Group and more (17 functions)
+// Exe 0x00e957b0: nothrow primitive-array constructors retain the original cleanup states.
+#define FNV64_NITARRAY_CTOR_SPEC throw()
+#define FNV64_NITPRIMITIVEARRAY_CTOR_SPEC throw()
+// gamebryo2.2/corelibs/niconsolerenderer/nidynamicgeometrygroup.cpp: dynamic geometry groups and buffer helpers (17 functions)
 
+#include "../../../../include/NiDynamicGeometryGroup.h"
+#include "../../../../include/NiGeometryGroup.h"
 #include "nidynamicgeometrygroup_decls.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiGeometryBufferData.h"
+#include "../../../../include/NiGeometryData.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/NiSkinPartition.h"
+#include "../../../../include/NiScreenTexture.h"
+#include "../../../../include/NiTMapBase.h"
+#include "../../../../include/NiTPointerMap.h"
+#include "../../../../include/NiTArray.h"
+#include "../../../../include/NiTMallocInterface.h"
+
+typedef NiTArray<NiVBDynamicSet*, NiTMallocInterface<NiVBDynamicSet*> > DynamicSetArray;
+typedef NiTArray<NiVBChip*, NiTMallocInterface<NiVBChip*> > DynamicChipArray;
+
+// RTTI vftables 0x010f107c / 0x010f109c identify the sets/chips maps as
+// NiTPointerMap<unsigned int, NiVBDynamicSet*> / NiTPointerMap<unsigned int, NiVBChip*>.
+// Their bases at 0x010f103c / 0x010f105c use NiTPointerAllocator<unsigned int>.
+inline void* __cdecl operator new(unsigned int, void* pvMem) throw()
+{
+    return pvMem;
+}
+
 // Constructs a NiDynamicGeometryGroup and initializes nextIndex to 0.
 // @fnv 0x00e957b0
 NiDynamicGeometryGroup::NiDynamicGeometryGroup() : nextIndex(0)
 {}
 
-struct NiStream;
-struct NiObject
-{
-    virtual void LinkObject(NiStream&);
-};
-struct Direct3D9RenderSystem;
 struct NiVBChip
 {
     unsigned int m_uiPosition;
     NiObject* m_pkTreeBlock;
     NiStream* m_pkOwningStream;
-};
-struct NiGeometryBufferData
-{
-    char pad[0x20];
-    unsigned int m_uiRegisterStreamCount;
-    char pad2[4];
-    NiVBChip** m_ppkVertexBuffers;
 };
 // @fnv 0x00e951e0
 void __stdcall FUN_00e951e0(NiGeometryBufferData* pkBuffData, unsigned int uiStream)
@@ -44,10 +60,6 @@ void __stdcall FUN_00e951e0(NiGeometryBufferData* pkBuffData, unsigned int uiStr
     }
 }
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 
 extern NiGeometryGroup* DAT_0126fa34;
 extern void* DAT_010f1008;
@@ -75,326 +87,174 @@ NiGeometryGroup* __cdecl GetGeometryGroup()
 }
 
 void __cdecl _NiFreeAlias(void*);
-struct MM
-{
-    void __thiscall _DeallocateAlias(void*);
-};
-extern MM g_memoryManager;
+extern MemoryManager g_memoryManager;
 extern int DAT_010f1034;
-struct FUN_00e95780_shell
-{
-    void* _0;
-    void* _4;
-    void* __thiscall FUN_00e95780(unsigned int);
-};
 // Frees the stored pointer via _NiFreeAlias, sets the first field to &DAT_010f1034, and deallocates this when f has bit 0 set.
 // @fnv 0x00e95780
-void* __thiscall FUN_00e95780_shell::FUN_00e95780(unsigned int auiFlags)
+void* __fastcall DestroySetArray(DynamicSetArray* array, void*, unsigned int auiFlags)
 {
-    void* tmp = _4;
-    _0 = (void*)&DAT_010f1034;
+    void* tmp = array->m_pBase;
+    *reinterpret_cast<void**>(array) = &DAT_010f1034;
     _NiFreeAlias(tmp);
     if (auiFlags & 1)
-        g_memoryManager._DeallocateAlias(this);
-    return this;
+        g_memoryManager._DeallocateAlias(array);
+    return array;
 }
 
-void __cdecl FUN_00e95880();
 void __cdecl operator delete(void*, unsigned int);
-struct FUN_00e95b40_shell
-{
-    virtual ~FUN_00e95b40_shell();
-    void* __thiscall DestroyIfFlagged(unsigned int uiFlags);
-};
-// Calls FUN_00e95880, then deletes this with size 0x50 when bit 0 of uiFlags is set, and returns this.
+// Destroys the group, frees it when bit 0 of uiFlags is set, and returns its address.
 // @fnv 0x00e95b40
-void* __thiscall FUN_00e95b40_shell::DestroyIfFlagged(unsigned int uiFlags)
+void* __fastcall DestroyIfFlagged(NiDynamicGeometryGroup* group, void*, unsigned int uiFlags)
 {
-    FUN_00e95880();
+    group->NiDynamicGeometryGroup::~NiDynamicGeometryGroup();
     if (uiFlags & 1)
-        operator delete(this, 0x50);
-    return this;
+        operator delete(group, 0x50);
+    return group;
 }
 
-// Stand-ins for the unnamed/undeclared entities used by this function.
-struct NiTMapBaseStub
-{
-    void __thiscall RemoveAll();
-};
-
-extern MM _g_memoryManager;
+extern MemoryManager _g_memoryManager;
 
 void __cdecl _NiFree(void*);
 
 extern void* vftable_DynamicMap;
 extern void* vftable_DynamicMapBase;
 
-// Minimal polymorphic stand-in for the DynamicMap<NiVBChip> class hierarchy.
-struct FUN_00e95380_shell
-{
-    void* m_pVftable;  // +0x00
-    void* m_pUnk04;    // +0x04
-    void* m_pUnk08;    // +0x08
-
-    void* __thiscall DestroyDynamicMap(unsigned int uiFlags);
-};
-
 // @fnv 0x00e95380
-void* __thiscall FUN_00e95380_shell::DestroyDynamicMap(unsigned int uiFlags)
+void* __fastcall DestroyChipMap(NiTPointerMap<unsigned int, NiVBChip*>* map, void*, unsigned int uiFlags)
 {
-    m_pVftable = &vftable_DynamicMap;
-    ((NiTMapBaseStub*)this)->RemoveAll();
-    m_pVftable = &vftable_DynamicMapBase;
-    ((NiTMapBaseStub*)this)->RemoveAll();
-    _NiFree(m_pUnk08);
+    *reinterpret_cast<void**>(map) = &vftable_DynamicMap;
+    map->RemoveAll();
+    *reinterpret_cast<void**>(map) = &vftable_DynamicMapBase;
+    map->RemoveAll();
+    _NiFree(map->m_ppkHashTable);
     if (uiFlags & 1)
     {
-        _g_memoryManager._DeallocateAlias(this);
+        _g_memoryManager._DeallocateAlias(map);
     }
-    return this;
+    return map;
 }
 
-struct SomeClass
-{
-    void* vtbl;
-    void** data;
-    unsigned short capacity;
-    unsigned short size;
-    unsigned short firstFree;
-    unsigned short grow;
-
-    void* FUN_00a93c50(unsigned int uiIndex);
-};
-
-// Clears the element at uiIndex, decrements firstFree if it was non-null, shrinks size when removing the last slot, and returns the removed pointer.
+// Clears a slot and updates the array's logical size and occupied count.
 // @fnv 0x00a93c50
-void* SomeClass::FUN_00a93c50(unsigned int uiIndex)
+template <class T, class TAlloc>
+inline T NiTArray<T, TAlloc>::RemoveAt(unsigned int uiIndex)
 {
-    if (uiIndex >= size)
+    if (uiIndex >= m_usSize)
         return 0;
 
-    void* element = data[uiIndex];
-    data[uiIndex] = 0;
+    T element = m_pBase[uiIndex];
+    m_pBase[uiIndex] = 0;
     if (element)
-        firstFree--;
+        m_usESize--;
 
-    if (uiIndex == (unsigned short)(size - 1))
-        size--;
+    if (uiIndex == (unsigned short)(m_usSize - 1))
+        m_usSize--;
 
     return element;
 }
 
-struct Base_00b601a0
-{
-    void __thiscall FUN_00b601a0();
-};
+template NiVBDynamicSet* DynamicSetArray::RemoveAt(unsigned int);
 
-struct Base_00aa4060
-{
-    void __thiscall FUN_00aa4060(void*);
-};
-
-extern "C" void __cdecl FUN_00aa10f0(int);
 extern void* DAT_010f107c;
 extern void* DAT_010f103c;
-extern void* DAT_011f6238;
-
-struct S_00e95300
-{
-    void* m_vftable;
-    void* m_unk04;
-    void* m_unk08;
-
-    S_00e95300* __thiscall FUN_00e95300(int param);
-};
 
 // @fnv 0x00e95300
-S_00e95300* __thiscall S_00e95300::FUN_00e95300(int aiFlags)
+void* __fastcall DestroySetMap(NiTPointerMap<unsigned int, NiVBDynamicSet*>* map, void*, unsigned int uiFlags)
 {
-    m_vftable = &DAT_010f107c;
-    ((Base_00b601a0*)this)->FUN_00b601a0();
-    m_vftable = &DAT_010f103c;
-    ((Base_00b601a0*)this)->FUN_00b601a0();
-    FUN_00aa10f0((int)m_unk08);
-    if (aiFlags & 1)
+    *reinterpret_cast<void**>(map) = &DAT_010f107c;
+    map->RemoveAll();
+    *reinterpret_cast<void**>(map) = &DAT_010f103c;
+    map->RemoveAll();
+    _NiFree(map->m_ppkHashTable);
+    if (uiFlags & 1)
     {
-        ((Base_00aa4060*)&DAT_011f6238)->FUN_00aa4060(this);
+        _g_memoryManager._DeallocateAlias(map);
     }
-    return this;
+    return map;
 }
 
 namespace fnv_00e95500 {
-struct MemoryManager
-{
-    void* __thiscall FUN_00aa3e40(unsigned int);
-};
 extern MemoryManager DAT_011f6238;
 extern char DAT_01400000;
-struct Buffer
-{
-    unsigned int unk00;
-    const char* unk04;
-    unsigned int unk08, unk0c, unk10, unk14, unk18, unk1c;
-    unsigned int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
-    unsigned int unk40, unk44, unk48, unk4c, unk50;
-    Buffer* __thiscall FUN_00e947c0();
-};
-struct Destination
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14;
-    unsigned short index18, unk1a;
-    Buffer* buffer1c;
-};
-struct FUN_00e95500_Class
-{
-    void __thiscall FUN_00e98730(Buffer*);
-    void __thiscall EnsureBuffer(Destination*);
-};
-// If destination->buffer1c is null, allocates a 0x54-byte Buffer, initializes it, stores it in buffer1c, calls FUN_00e98730, and sets index18 to 0xffff.
+// NiGeometryGroup's buffer-registration operation is not in the shared
+// declaration yet.  Give the external entry point its original member ABI.
+void __cdecl FUN_00e98730();
+typedef void(__thiscall* RegisterBuffer)(NiGeometryGroup*, NiGeometryBufferData*);
+// Creates and registers renderer data for a screen texture on first use.
 // @fnv 0x00e95500
-void FUN_00e95500_Class::EnsureBuffer(Destination* destination)
+void __fastcall EnsureBuffer(NiDynamicGeometryGroup* group, void*, NiScreenTexture* destination)
 {
-    if (destination->buffer1c == 0)
+    if (destination->m_pkGeometryRendererData == 0)
     {
-        Buffer* ptr = static_cast<Buffer*>(DAT_011f6238.FUN_00aa3e40(0x54));
-        Buffer* newBuffer = ptr ? ptr->FUN_00e947c0() : 0;
-        newBuffer->unk3c = 4;
-        destination->buffer1c = newBuffer;
-        newBuffer->unk04 = &DAT_01400000;
-        FUN_00e98730(newBuffer);
-        destination->index18 = 0xffff;
+        NiGeometryBufferData* ptr = static_cast<NiGeometryBufferData*>(DAT_011f6238.FUN_00aa3e40(sizeof(NiGeometryBufferData)));
+        NiGeometryBufferData* newBuffer = ptr ? ::new (ptr) NiGeometryBufferData : 0;
+        newBuffer->m_eRequestType = 4;
+        destination->m_pkGeometryRendererData = newBuffer;
+        newBuffer->m_uiValue1 = reinterpret_cast<unsigned int>(&DAT_01400000);
+        reinterpret_cast<RegisterBuffer>(&FUN_00e98730)(group, newBuffer);
+        destination->flags = 0xffff;
     }
 }
 }  // namespace fnv_00e95500
 
-struct RttiStub
-{
-    const char* m_pcName;
-    const RttiStub* m_pBaseRTTI;
-};
-extern const RttiStub kRtti_TriShapeData;
-extern const RttiStub kRtti_TriStripsData;
+extern const NiRTTI kRtti_TriShapeData;
+extern const NiRTTI kRtti_TriStripsData;
 
-struct MemMgrStub
-{
-    void* Allocate(unsigned int uiSize);
-};
-extern MemMgrStub g_kMemMgrStub;
+extern MemoryManager g_kMemoryManager;
 
 extern int DAT_011bf558;
 
-struct GeomDataStub
-{
-    virtual void V0();
-    virtual void V1();
-    virtual const RttiStub* GetRTTI() const;
-    int unk04;
-    int unk08;
-    unsigned short m_usFlags;
-    unsigned short unk0e;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    void* m_pkNormal;
-    void* m_pkColor;
-    int unk2c;
-    int unk30;
-    struct BuffDataStub* m_pkGeometryRendererData;
-    void SetConsistencyMask(unsigned short usMask);
-};
+// This overload is absent from NiGeometryData's shared declarations. Keep
+// its external entry point with the original thiscall ABI, without a class copy.
+void __cdecl SetConsistencyMaskEntry();
+typedef void(__thiscall* SetConsistencyMaskFn)(NiGeometryData*, unsigned short);
 
-bool __cdecl IsKindOfStub(const RttiStub* pkRTTI, GeomDataStub* pkObject);
+bool __cdecl IsKindOfGeometryData(const NiRTTI* pkRTTI, NiGeometryData* pkObject);
 
-inline bool IsKindOfInline(const RttiStub* pkRTTI, GeomDataStub* pkObject)
+inline bool IsKindOfInline(const NiRTTI* pkRTTI, NiGeometryData* pkObject)
 {
-    for (const RttiStub* p = pkObject->GetRTTI(); p; p = p->m_pBaseRTTI)
+    for (const NiRTTI* p = pkObject->GetRTTI(); p; p = p->m_pBaseRTTI)
         if (p == pkRTTI)
             return true;
     return false;
 }
 
-struct BuffDataStub
+// Explicit allocation and placement construction preserve this unit's original
+// constructor-call ABI without adding a class-specific allocation overload.
+inline NiGeometryBufferData* AllocateGeometryBufferData()
 {
-    BuffDataStub() throw();
-    static void* operator new(unsigned int uiSize)
-    {
-        return g_kMemMgrStub.Allocate(uiSize);
-    }
-    int unk00;
-    unsigned int m_uiValue1;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    unsigned int m_uiType;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-};
-
-struct PartitionStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    unsigned short unk20;
-    unsigned short m_usStrips;
-    int unk24;
-    BuffDataStub* m_pkGeometryRendererData;
-};
-
-struct UnsharedGroupStub
-{
-    void AddToBuffer(BuffDataStub* pkBuffData);
-    void CreateBufferData(GeomDataStub* pkData, bool bHasAnimation, PartitionStub* pkPartition);
-};
+    NiGeometryBufferData* data = static_cast<NiGeometryBufferData*>(g_kMemoryManager.Allocate(sizeof(NiGeometryBufferData)));
+    return data ? ::new (data) NiGeometryBufferData : 0;
+}
 
 // @fnv 0x00e953c0
-void UnsharedGroupStub::CreateBufferData(GeomDataStub* pkData, bool abUnused, PartitionStub* pkPartition)
+void __fastcall CreateBufferData(NiDynamicGeometryGroup* group, void*, NiGeometryData* pkData, bool abUnused, NiSkinPartition::Partition* pkPartition)
 {
-    BuffDataStub* pkBuffData;
+    NiGeometryBufferData* pkBuffData;
     if (pkPartition)
     {
         if (pkPartition->m_pkGeometryRendererData)
             return;
-        pkBuffData = new BuffDataStub;
-        pkBuffData->m_uiType = (pkPartition->m_usStrips != 0) + 4;
+        pkBuffData = AllocateGeometryBufferData();
+        pkBuffData->m_eRequestType = (pkPartition->m_usStrips != 0) + 4;
         pkPartition->m_pkGeometryRendererData = pkBuffData;
     }
     else
     {
-        if (pkData->m_pkGeometryRendererData)
+        if (pkData->m_pkBuffData)
             return;
-        pkBuffData = new BuffDataStub;
+        pkBuffData = AllocateGeometryBufferData();
         if (IsKindOfInline(&kRtti_TriShapeData, pkData))
-            pkBuffData->m_uiType = 4;
-        else if (IsKindOfStub(&kRtti_TriStripsData, pkData))
-            pkBuffData->m_uiType = 5;
-        pkData->m_pkGeometryRendererData = pkBuffData;
+            pkBuffData->m_eRequestType = 4;
+        else if (IsKindOfGeometryData(&kRtti_TriStripsData, pkData))
+            pkBuffData->m_eRequestType = 5;
+        pkData->m_pkBuffData = pkBuffData;
     }
 
     bool bColors = pkData->m_pkColor != 0;
     bool bHasNormals = pkData->m_pkNormal != 0;
-    bool bBinormals = bHasNormals && (pkData->m_usFlags & 0xf000);
-    unsigned int uiT = pkData->m_usFlags & 1;
+    bool bBinormals = bHasNormals && (pkData->m_usDataFlags & 0xf000);
+    unsigned int uiT = pkData->m_usDataFlags & 1;
     if (uiT > (unsigned int)DAT_011bf558)
         uiT = DAT_011bf558;
     unsigned int uiFlags = 0;
@@ -405,8 +265,8 @@ void UnsharedGroupStub::CreateBufferData(GeomDataStub* pkData, bool abUnused, Pa
     if (bBinormals)
         uiFlags |= 0x200000;
     pkBuffData->m_uiValue1 = (uiT << 24) | uiFlags;
-    AddToBuffer(pkBuffData);
-    pkData->SetConsistencyMask(0xffff);
+    reinterpret_cast<fnv_00e95500::RegisterBuffer>(&fnv_00e95500::FUN_00e98730)(group, pkBuffData);
+    reinterpret_cast<SetConsistencyMaskFn>(&SetConsistencyMaskEntry)(pkData, 0xffff);
 }
 
 struct ByteFlag
@@ -434,76 +294,41 @@ struct Chip
 };
 MemoryAllocationProvider* __cdecl CreateBufferSetData(unsigned int, void*, unsigned int, unsigned int);
 Chip* __cdecl FUN_00537d60(unsigned int, void*, unsigned int, unsigned int, unsigned int);
-template <class T> struct Map
-{
-    unsigned int vtable, size;
-    void* table;
-    unsigned int count;
-    bool FUN_00a53c30(unsigned int, T*&);
-    void InsertOrUpdate(unsigned int, T*);
-};
-template <class T> struct Array
-{
-    unsigned int vtable;
-    T** data;
-    unsigned short capacity, size, firstFree, grow;
-    void FUN_00a90180(unsigned int);
-    void FUN_00ba3aa0(unsigned int, T* const&);
-};
-struct Data
-{
-    unsigned int unk00, unk04, unk08, key, unk10;
-    bool flag;
-    unsigned char unk15;
-    unsigned short unk16;
-    unsigned int unk18, stride, count;
-    unsigned int* lengths;
-    unsigned int unk28, unk2c, unk30, unk34, result;
-};
-struct Group
-{
-    unsigned int vtable, refs;
-    void* device;
-    Map<MemoryAllocationProvider> sets;
-    Map<Chip> chips;
-    Array<MemoryAllocationProvider> streamSets;
-    Array<Chip> streamChips;
-    unsigned int nextIndex;
-    Chip* GetOrCreateChip(Data*, unsigned int);
-};
+// These operations are not yet declared on the shared dynamic group.  The
+// unused EDX parameter keeps the original member-call register convention.
 // @fnv 0x00e95550
-Chip* Group::GetOrCreateChip(Data* data, unsigned int stream)
+Chip* __fastcall GetOrCreateChip(NiDynamicGeometryGroup* group, void*, NiGeometryBufferData* data, unsigned int stream)
 {
     Chip* chip = 0;
-    unsigned int count = data->count;
-    unsigned int key = data->key;
-    unsigned int length = stream < count ? data->lengths[stream] : 0;
-    unsigned int stride = data->stride * length;
+    unsigned int count = data->m_uiRegisterStreamCount;
+    unsigned int key = data->m_uiGroupIndex;
+    unsigned int length = stream < count ? data->m_puiVertexStrides[stream] : 0;
+    unsigned int stride = data->m_uiVertexDataSize * length;
     unsigned int size = 0;
     unsigned int offset = 0;
     if (count > 1)
     {
-        if (streamSets.capacity < count)
+        if (reinterpret_cast<DynamicSetArray&>(group->streamSets).m_usMaxSize < count)
         {
-            streamSets.FUN_00a90180(count);
-            streamChips.FUN_00a90180(count);
+            reinterpret_cast<DynamicSetArray&>(group->streamSets).SetSize(count);
+            reinterpret_cast<DynamicChipArray&>(group->streamChips).SetSize(count);
         }
-        if (nextIndex >= streamSets.capacity)
-            nextIndex = 0;
-        MemoryAllocationProvider* set = streamSets.data[nextIndex];
+        if (group->nextIndex >= reinterpret_cast<DynamicSetArray&>(group->streamSets).m_usMaxSize)
+            group->nextIndex = 0;
+        MemoryAllocationProvider* set = reinterpret_cast<MemoryAllocationProvider*>(reinterpret_cast<DynamicSetArray&>(group->streamSets).m_pBase[group->nextIndex]);
         if (!set)
         {
-            set = CreateBufferSetData(2048, device, 0, 0);
-            streamSets.FUN_00ba3aa0(nextIndex, set);
+            set = CreateBufferSetData(2048, group->m_pD3DDevice, 0, 0);
+            reinterpret_cast<DynamicSetArray&>(group->streamSets).SetAt(group->nextIndex, reinterpret_cast<NiVBDynamicSet* const&>(set));
         }
-        ByteFlag flag(data->flag);
+        ByteFlag flag(data->m_bIsInitialized);
         void* buffer = set->AllocateStream(stride, &size, &offset, true, flag);
-        Chip* branchChip = streamChips.data[nextIndex];
+        Chip* branchChip = reinterpret_cast<Chip*>(reinterpret_cast<DynamicChipArray&>(group->streamChips).m_pBase[group->nextIndex]);
         if (!branchChip)
         {
             branchChip = FUN_00537d60(0, buffer, size, stride, 0);
             chip = branchChip;
-            streamChips.FUN_00ba3aa0(nextIndex, chip);
+            reinterpret_cast<DynamicChipArray&>(group->streamChips).SetAt(group->nextIndex, reinterpret_cast<NiVBChip* const&>(chip));
         }
         else
         {
@@ -513,27 +338,27 @@ Chip* Group::GetOrCreateChip(Data* data, unsigned int stream)
         }
         branchChip->set = set;
         branchChip->offset = offset;
-        data->result = 0;
-        ++nextIndex;
+        data->m_uiBufferSize = 0;
+        ++group->nextIndex;
         return branchChip;
     }
     else
     {
         MemoryAllocationProvider* set = 0;
         unsigned int mapKey = key ? key : length | 0x80000000;
-        if (!sets.FUN_00a53c30(mapKey, set) || !set)
+        if (!reinterpret_cast<NiTPointerMap<unsigned int, NiVBDynamicSet*>&>(group->sets).GetAt(mapKey, reinterpret_cast<NiVBDynamicSet*&>(set)) || !set)
         {
-            set = CreateBufferSetData(2048, device, key, 0);
-            sets.InsertOrUpdate(mapKey, set);
+            set = CreateBufferSetData(2048, group->m_pD3DDevice, key, 0);
+            reinterpret_cast<NiTPointerMap<unsigned int, NiVBDynamicSet*>&>(group->sets).SetAt(mapKey, reinterpret_cast<NiVBDynamicSet*>(set));
         }
-        ByteFlag flag(data->flag);
+        ByteFlag flag(data->m_bIsInitialized);
         void* buffer = set->AllocateStream(stride, &size, &offset, false, flag);
-        chips.FUN_00a53c30(mapKey, chip);
+        reinterpret_cast<NiTPointerMap<unsigned int, NiVBChip*>&>(group->chips).GetAt(mapKey, reinterpret_cast<NiVBChip*&>(chip));
         Chip* result = chip;
         if (!result)
         {
             result = FUN_00537d60(0, buffer, size, stride, 0);
-            chips.InsertOrUpdate(mapKey, result);
+            reinterpret_cast<NiTPointerMap<unsigned int, NiVBChip*>&>(group->chips).SetAt(mapKey, reinterpret_cast<NiVBChip*>(result));
         }
         else
         {
@@ -543,19 +368,11 @@ Chip* Group::GetOrCreateChip(Data* data, unsigned int stream)
         }
         result->set = set;
         result->offset = offset;
-        data->result = size / length;
+        data->m_uiBufferSize = size / length;
         return result;
     }
 }
 
-struct NiMemObject
-{
-    static void* __cdecl operator new(unsigned int uiSize);
-};
-inline void* __cdecl operator new(unsigned int, void* pvMem) throw()
-{
-    return pvMem;
-}
 extern NiGeometryGroup* DAT_0126fa38;
 
 // Creates the NiDynamicGeometryGroup singleton on first use and returns it.
@@ -563,7 +380,7 @@ extern NiGeometryGroup* DAT_0126fa38;
 NiGeometryGroup* __cdecl GetNiGeometryGroup() throw()
 {
     if (!DAT_0126fa38)
-        DAT_0126fa38 = new (NiMemObject::operator new(sizeof(NiDynamicGeometryGroup))) NiDynamicGeometryGroup;
+        DAT_0126fa38 = ::new (NiMemObject::operator new(sizeof(NiDynamicGeometryGroup))) NiDynamicGeometryGroup;
     return DAT_0126fa38;
 }
 
@@ -624,64 +441,30 @@ MemoryAllocationProvider* __cdecl CreateBufferSetData(unsigned int size, void* b
     return (MemoryAllocationProvider*)set;
 }
 
-namespace fnv_00e952c0 {
-void _NiFreeAlias(void*);
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
-extern MemoryManager g_memoryManager;
-struct NiTMapBaseStub
-{
-    virtual void RemoveAll();
-};
-struct FUN_00e952c0 : NiTMapBaseStub
-{
-    int m_04;
-    void* m_08;
-    virtual ~FUN_00e952c0();
-    static void operator delete(void* p)
-    {
-        g_memoryManager.Deallocate(p);
-    }
-};
-// Destructor that calls RemoveAll and then frees the m_08 alias via _NiFreeAlias.
+// Scalar deleting destructor entry points retain the original member ABI.
 // @fnv 0x00e952c0
-FUN_00e952c0::~FUN_00e952c0()
+void* __fastcall DestroySetMapBase(NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, NiVBDynamicSet*>* map,
+                                 void*, unsigned int uiFlags)
 {
-    RemoveAll();
-    _NiFreeAlias(m_08);
+    *reinterpret_cast<void**>(map) = &DAT_010f103c;
+    map->RemoveAll();
+    _NiFree(map->m_ppkHashTable);
+    if (uiFlags & 1)
+        _g_memoryManager._DeallocateAlias(map);
+    return map;
 }
-}  // namespace fnv_00e952c0
 
-namespace fnv_00e95340 {
-void __cdecl _NiFreeAlias(void*);
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
-extern MemoryManager g_memoryManager;
-struct NiTMapBaseStub
-{
-    void RemoveAll();
-};
-struct FUN_00e95340
-{
-    int _04;
-    void* _08;
-    virtual ~FUN_00e95340();
-    void operator delete(void* p)
-    {
-        g_memoryManager.Deallocate(p);
-    }
-};
 // @fnv 0x00e95340
-FUN_00e95340::~FUN_00e95340()
+void* __fastcall DestroyChipMapBase(NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, NiVBChip*>* map,
+                                  void*, unsigned int uiFlags)
 {
-    ((NiTMapBaseStub*)this)->RemoveAll();
-    _NiFreeAlias(_08);
+    *reinterpret_cast<void**>(map) = &vftable_DynamicMapBase;
+    map->RemoveAll();
+    _NiFree(map->m_ppkHashTable);
+    if (uiFlags & 1)
+        _g_memoryManager._DeallocateAlias(map);
+    return map;
 }
-}  // namespace fnv_00e95340
 
 struct S_00e987c0_Stream
 {
@@ -817,144 +600,99 @@ struct DynamicChipData
     ReleaseBuffer* buffer;
     unsigned int size, offset, stride, unk18, unk1c;
 };
-template <class T> struct MapEntryData
+template <class TAlloc, class TKEY, class TVAL>
+inline void* NiTMapBase<TAlloc, TKEY, TVAL>::GetFirstPos() const
 {
-    MapEntryData* next;
-    const char* key;
-    T* value;
-};
-template <class T> struct DynamicMapData;
-template <class T> struct MapVtableData
-{
-    void* slot0;
-    unsigned int(__thiscall* hash)(DynamicMapData<T>*, const char*);
-};
-template <class T> struct DynamicMapData
-{
-    MapVtableData<T>* vtable;
-    unsigned int size;
-    MapEntryData<T>** table;
-    unsigned int count;
-    bool FUN_00e91fd0(const char*);
-    void FUN_00b601a0();
-    void Destroy(void* derivedVtable, void* baseVtable)
-    {
-        vtable = (MapVtableData<T>*)derivedVtable;
-        FUN_00b601a0();
-        vtable = (MapVtableData<T>*)baseVtable;
-        FUN_00b601a0();
-        _NiFree(table);
-    }
-    void* GetFirst() const
-    {
-        for (unsigned int i = 0; i < size; ++i)
-            if (table[i])
-                return table[i];
-        return 0;
-    }
-    void GetNext(void*& pos, const char*& key, T*& value)
-    {
-        MapEntryData<T>* item = (MapEntryData<T>*)pos;
-        key = item->key;
-        value = item->value;
-        if (item->next)
-        {
-            pos = item->next;
-        }
-        else
-        {
-            unsigned int i = vtable->hash(this, item->key);
-            for (++i; i < size; i++)
-            {
-                item = table[i];
-                if (item)
-                {
-                    pos = item;
-                    return;
-                }
-            }
-            pos = 0;
-        }
-    }
-};
-template <class T> struct DynamicArrayData
-{
-    void* vtable;
-    T** data;
-    unsigned short capacity, size, count, grow;
-    T* RemoveAt(unsigned int i)
-    {
-        if (i >= size)
-            return 0;
-        T* value = data[i];
-        data[i] = 0;
-        if (value)
-            --count;
-        if (i == (unsigned short)(size - 1))
-            --size;
-        return value;
-    }
-};
-struct DynamicGroupData
-{
-    void* vtable;
-    unsigned int refs;
-    void* device;
-    DynamicMapData<DynamicSetData> sets;
-    DynamicMapData<DynamicChipData> chips;
-    DynamicArrayData<DynamicSetData> streamSets;
-    DynamicArrayData<DynamicChipData> streamChips;
-    unsigned int nextIndex;
-    void FUN_00e98710();
-    void FUN_00e95880();
-};
+    for (unsigned int i = 0; i < m_uiHashSize; ++i)
+        if (m_ppkHashTable[i])
+            return m_ppkHashTable[i];
+    return 0;
+}
 
-// Iterates the set and chip maps and stream arrays, destroys entries, updates vtables, clears a matching global pointer, and calls FUN_00e98710.
-// @fnv 0x00e95880
-void DynamicGroupData::FUN_00e95880()
+template <class TAlloc, class TKEY, class TVAL>
+inline void NiTMapBase<TAlloc, TKEY, TVAL>::GetNext(void*& pos, TKEY& key, TVAL& value) const
 {
-    vtable = &DAT_010f10c4;
-    const char* key;
+    EntryType* item = (EntryType*)pos;
+    key = item->m_key;
+    value = item->m_val;
+    if (item->m_pkNext)
+    {
+        pos = item->m_pkNext;
+    }
+    else
+    {
+        unsigned int i = KeyToHashIndex(item->m_key);
+        for (++i; i < m_uiHashSize; i++)
+        {
+            item = m_ppkHashTable[i];
+            if (item)
+            {
+                pos = item;
+                return;
+            }
+        }
+        pos = 0;
+    }
+}
+
+template <class TKEY, class TVAL>
+inline void DestroyPointerMap(NiTPointerMap<TKEY, TVAL>& map, void* derivedVtable, void* baseVtable)
+{
+    *reinterpret_cast<void**>(&map) = derivedVtable;
+    map.RemoveAll();
+    *reinterpret_cast<void**>(&map) = baseVtable;
+    map.RemoveAll();
+    _NiFree(map.m_ppkHashTable);
+}
+
+// Iterates the set and chip maps and stream arrays, destroys entries, updates vtables, clears a matching global pointer, and destroys the base group.
+// @fnv 0x00e95880
+// The cleanup body keeps the original member-call convention without a local
+// copy of the group.  The shared base destructor completes its destruction.
+void __fastcall DestroyDynamicGeometryGroup(NiDynamicGeometryGroup* group, void*)
+{
+    *reinterpret_cast<void**>(group) = &DAT_010f10c4;
+    unsigned int key;
     DynamicSetData* set;
     DynamicChipData* chip;
-    void* setPos = sets.GetFirst();
+    void* setPos = reinterpret_cast<NiTPointerMap<unsigned int, NiVBDynamicSet*>&>(group->sets).GetFirstPos();
     while (setPos)
     {
-        sets.GetNext(setPos, key, set);
-        sets.FUN_00e91fd0(key);
+        reinterpret_cast<NiTPointerMap<unsigned int, NiVBDynamicSet*>&>(group->sets).GetNext(setPos, key, reinterpret_cast<NiVBDynamicSet*&>(set));
+        reinterpret_cast<NiTPointerMap<unsigned int, NiVBDynamicSet*>&>(group->sets).RemoveAt(key);
         if (set)
         {
             set->Destroy();
-            operator delete(set, sizeof(DynamicSetData));
+            ::operator delete(set, sizeof(DynamicSetData));
         }
     }
-    void* chipPos = chips.GetFirst();
+    void* chipPos = reinterpret_cast<NiTPointerMap<unsigned int, NiVBChip*>&>(group->chips).GetFirstPos();
     while (chipPos)
     {
-        chips.GetNext(chipPos, key, chip);
-        chips.FUN_00e91fd0(key);
+        reinterpret_cast<NiTPointerMap<unsigned int, NiVBChip*>&>(group->chips).GetNext(chipPos, key, reinterpret_cast<NiVBChip*&>(chip));
+        reinterpret_cast<NiTPointerMap<unsigned int, NiVBChip*>&>(group->chips).RemoveAt(key);
         chip->buffer = 0;
         delete chip;
     }
-    for (unsigned int i = 0; i < streamSets.capacity; ++i)
+    for (unsigned int i = 0; i < reinterpret_cast<DynamicSetArray&>(group->streamSets).m_usMaxSize; ++i)
     {
-        set = streamSets.RemoveAt(i);
+        set = reinterpret_cast<DynamicSetData*>(reinterpret_cast<DynamicSetArray&>(group->streamSets).RemoveAt(i));
         if (set)
         {
             set->Destroy();
-            operator delete(set, sizeof(DynamicSetData));
+            ::operator delete(set, sizeof(DynamicSetData));
         }
-        chip = streamChips.RemoveAt(i);
+        chip = reinterpret_cast<DynamicChipData*>(reinterpret_cast<DynamicChipArray&>(group->streamChips).RemoveAt(i));
         chip->buffer = 0;
         delete chip;
     }
-    if (this == (void*)DAT_0126fa38)
+    if (group == (void*)DAT_0126fa38)
         DAT_0126fa38 = 0;
-    streamChips.vtable = &DAT_010f0f7c;
-    _NiFree(streamChips.data);
-    streamSets.vtable = &DAT_010f1034;
-    _NiFree(streamSets.data);
-    chips.Destroy(&DAT_010f109c, &DAT_010f105c);
-    sets.Destroy(&DAT_010f107c, &DAT_010f103c);
-    FUN_00e98710();
+    *reinterpret_cast<void**>(&group->streamChips) = &DAT_010f0f7c;
+    _NiFree(reinterpret_cast<DynamicChipArray&>(group->streamChips).m_pBase);
+    *reinterpret_cast<void**>(&group->streamSets) = &DAT_010f1034;
+    _NiFree(reinterpret_cast<DynamicSetArray&>(group->streamSets).m_pBase);
+    DestroyPointerMap(reinterpret_cast<NiTPointerMap<unsigned int, NiVBChip*>&>(group->chips), &DAT_010f109c, &DAT_010f105c);
+    DestroyPointerMap(reinterpret_cast<NiTPointerMap<unsigned int, NiVBDynamicSet*>&>(group->sets), &DAT_010f107c, &DAT_010f103c);
+    group->NiGeometryGroup::~NiGeometryGroup();
 }

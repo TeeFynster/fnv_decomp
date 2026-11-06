@@ -2,6 +2,13 @@
 // src/gamebryo2.2/corelibs/nimain/niextradata_od_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/nimain/niextradata.cpp functions whose prologue its flags cannot
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
+#include "../../../../include/NiAccumulator.h"
+#include "../../../../include/NiBinaryExtraData.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiExtraData.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiStream.h"
+
 #include "niextradata_packet.h"
 
 extern "C" void* __fastcall FUN_00c6b910(void*);
@@ -20,16 +27,7 @@ FUN_0066b640::FUN_0066b640()
     m_vft = &DAT_0103046c;
 }
 
-class B539F50Base
-{
-  public:
-    B539F50Base();
-    virtual ~B539F50Base();
-
-    int unk04;
-};
-
-class FUN_00539f50 : public B539F50Base
+class FUN_00539f50 : public NiExtraData
 {
   public:
     void Init(int iA, int iB);

@@ -8,6 +8,7 @@
 // src/staging/blk_00d60000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkQuaternion.h"
 namespace sd6ae50 {
 
 extern "C" const char DAT_010cc040[];
@@ -131,6 +132,7 @@ __declspec(align(16)) class FUN_00d6aec0_obj
 int FUN_00d6aec0() throw();
 #include <xmmintrin.h>
 #include <math.h>
+#include "../../include/Vec4.h"
 extern float DAT_0104da4c;
 extern const float DAT_01011d78;
 union Basis
@@ -198,10 +200,6 @@ static __forceinline void buildBasis(const MotionInput* input, __m128 normal, Ba
     basis.z = input->axis;
 }
 void __cdecl FUN_00d6aef0(const MotionInput* input, float outputBits);
-struct Vec4
-{
-    __m128 m_vComponents;
-};
 struct BodySource
 {
     Vec4 m_000, m_010, m_020, m_030, m_040, m_050, m_060, m_070;
@@ -275,8 +273,9 @@ extern "C" __declspec(noinline) void d6c030_dummy_caller(void)
 }
 
 namespace SimdC {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00d6b510 FUN_00d6b510: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x, y, z, w;
@@ -285,77 +284,81 @@ union __declspec(intrin_type) __declspec(align(16)) __m128
     {
         unsigned __int64 lo, hi;
     } m128_u64;
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_load_ps(float const*);
-    __m128 _mm_load_ss(float const*);
-    __m128 _mm_load_ps1(float const*);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    void _mm_store_ps(float*, __m128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_set_ps1(float);
+    LocalM128 _mm_load_ps(float const*);
+    LocalM128 _mm_load_ss(float const*);
+    LocalM128 _mm_load_ps1(float const*);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    void _mm_store_ps(float*, LocalM128);
 }
 
 }
 extern "C" void _ReadWriteBarrier();
-extern SimdC::__m128 DAT_010c71e0;
-extern SimdC::__m128 DAT_010ec7f0;
+extern SimdC::LocalM128 DAT_010c71e0;
+extern SimdC::LocalM128 DAT_010ec7f0;
 extern float DAT_01267e30;
 
-struct hkQuaternion;
-struct Vec
+// hkVector4 of the hkQsTransform/pose records (translation, scale) with the unit's own inline forms over SimdC::__m128.
+struct PoseVector4
 {
-    SimdC::__m128 m_vComponents;
-    __forceinline SimdC::__m128& quad()
+    SimdC::LocalM128 m_vComponents;
+    __forceinline SimdC::LocalM128& quad()
     {
         return m_vComponents;
     }
-    __forceinline const SimdC::__m128& quad() const
+    __forceinline const SimdC::LocalM128& quad() const
     {
         return m_vComponents;
     }
-    __forceinline void SetRotatedDirection(const hkQuaternion& q, const Vec& d);
-    __forceinline void setRotatedTranslation(const hkQuaternion& q, const Vec& d);
-    __forceinline void setAdd4(const Vec& a, const Vec& b)
+    __forceinline void SetRotatedDirection(const hkQuaternion& q, const PoseVector4& d);
+    __forceinline void setRotatedTranslation(const hkQuaternion& q, const PoseVector4& d);
+    __forceinline void setAdd4(const PoseVector4& a, const PoseVector4& b)
     {
         m_vComponents = SimdC::_mm_add_ps(a.m_vComponents, b.m_vComponents);
     }
-    __forceinline void add4(const Vec& a)
+    __forceinline void add4(const PoseVector4& a)
     {
         m_vComponents = SimdC::_mm_add_ps(m_vComponents, a.m_vComponents);
     }
-    __forceinline void setMul4(const Vec& a, const Vec& b)
+    __forceinline void setMul4(const PoseVector4& a, const PoseVector4& b)
     {
         m_vComponents = SimdC::_mm_mul_ps(a.m_vComponents, b.m_vComponents);
     }
 };
-struct hkQuaternion
+// Keep this unit's empty construction and aggregate SIMD copy inline.
+__forceinline hkQuaternion::hkQuaternion()
+{}
+
+__forceinline void hkQuaternion::operator=(const hkQuaternion& q)
 {
-    SimdC::__m128 m_vComponents;
-    void FUN_00c66320(const hkQuaternion&, const hkQuaternion&);
-    void FUN_00cb2850(const hkQuaternion&, const hkQuaternion&, float);
-};
-struct Transform
+    reinterpret_cast<PoseVector4&>(*this) = reinterpret_cast<const PoseVector4&>(q);
+}
+
+// hkQsTransform layout (translation, hkQuaternion, scale) over this unit's Vec stand-in.
+struct PoseQsTransform
 {
-    Vec position;
+    PoseVector4 position;
     hkQuaternion rotation;
-    Vec scale;
-    __forceinline void SetProduct(const Transform& a, const Transform& b);
+    PoseVector4 scale;
+    __forceinline void SetProduct(const PoseQsTransform& a, const PoseQsTransform& b);
 };
 struct Pose
 {
-    Vec position;
+    PoseVector4 position;
     hkQuaternion rotation;
 };
 struct OutputPair
 {
-    Transform world;
-    Transform local;
+    PoseQsTransform world;
+    PoseQsTransform local;
 };
 struct Binding
 {
@@ -371,71 +374,71 @@ struct Weight
     float unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
 };
 
-__forceinline SimdC::__m128 rotate(SimdC::__m128 q, SimdC::__m128 v)
+__forceinline SimdC::LocalM128 rotate(SimdC::LocalM128 q, SimdC::LocalM128 v)
 {
-    SimdC::__m128 w = SimdC::_mm_shuffle_ps(q, q, 0xff);
-    SimdC::__m128 p = SimdC::_mm_mul_ps(v, q);
-    SimdC::__m128 y = SimdC::_mm_shuffle_ps(p, p, 0x55);
+    SimdC::LocalM128 w = SimdC::_mm_shuffle_ps(q, q, 0xff);
+    SimdC::LocalM128 p = SimdC::_mm_mul_ps(v, q);
+    SimdC::LocalM128 y = SimdC::_mm_shuffle_ps(p, p, 0x55);
     y = SimdC::_mm_add_ss(y, p);
-    SimdC::__m128 z = SimdC::_mm_shuffle_ps(p, p, 0xaa);
-    SimdC::__m128 d = SimdC::_mm_add_ss(z, y);
-    SimdC::__m128 cross =
+    SimdC::LocalM128 z = SimdC::_mm_shuffle_ps(p, p, 0xaa);
+    SimdC::LocalM128 d = SimdC::_mm_add_ss(z, y);
+    SimdC::LocalM128 cross =
         SimdC::_mm_sub_ps(SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(v, v, 0xd2), SimdC::_mm_shuffle_ps(q, q, 0xc9)),
                           SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(v, v, 0xc9), SimdC::_mm_shuffle_ps(q, q, 0xd2)));
-    SimdC::__m128 r = SimdC::_mm_add_ps(
+    SimdC::LocalM128 r = SimdC::_mm_add_ps(
         SimdC::_mm_mul_ps(cross, w),
         SimdC::_mm_add_ps(SimdC::_mm_mul_ps(SimdC::_mm_add_ps(SimdC::_mm_mul_ps(w, w), DAT_010c71e0), v),
                           SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(d, d, 0), q)));
     return SimdC::_mm_add_ps(r, r);
 }
-__forceinline void Vec::SetRotatedDirection(const hkQuaternion& quat, const Vec& direction)
+__forceinline void PoseVector4::SetRotatedDirection(const hkQuaternion& quat, const PoseVector4& direction)
 {
-    SimdC::__m128 qreal = SimdC::_mm_shuffle_ps(quat.m_vComponents, quat.m_vComponents, 0xff);
-    SimdC::__m128 p = SimdC::_mm_mul_ps(quat.m_vComponents, direction.m_vComponents);
-    SimdC::__m128 y = SimdC::_mm_add_ss(SimdC::_mm_shuffle_ps(p, p, 0x55), p);
-    SimdC::__m128 d = SimdC::_mm_add_ss(SimdC::_mm_shuffle_ps(p, p, 0xaa), y);
-    SimdC::__m128 cross = SimdC::_mm_sub_ps(
-        SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(quat.m_vComponents, quat.m_vComponents, 0xc9),
+    SimdC::LocalM128 qreal = SimdC::_mm_shuffle_ps(reinterpret_cast<const PoseVector4&>(quat).m_vComponents, reinterpret_cast<const PoseVector4&>(quat).m_vComponents, 0xff);
+    SimdC::LocalM128 p = SimdC::_mm_mul_ps(reinterpret_cast<const PoseVector4&>(quat).m_vComponents, direction.m_vComponents);
+    SimdC::LocalM128 y = SimdC::_mm_add_ss(SimdC::_mm_shuffle_ps(p, p, 0x55), p);
+    SimdC::LocalM128 d = SimdC::_mm_add_ss(SimdC::_mm_shuffle_ps(p, p, 0xaa), y);
+    SimdC::LocalM128 cross = SimdC::_mm_sub_ps(
+        SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(reinterpret_cast<const PoseVector4&>(quat).m_vComponents, reinterpret_cast<const PoseVector4&>(quat).m_vComponents, 0xc9),
                           SimdC::_mm_shuffle_ps(direction.m_vComponents, direction.m_vComponents, 0xd2)),
-        SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(quat.m_vComponents, quat.m_vComponents, 0xd2),
+        SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(reinterpret_cast<const PoseVector4&>(quat).m_vComponents, reinterpret_cast<const PoseVector4&>(quat).m_vComponents, 0xd2),
                           SimdC::_mm_shuffle_ps(direction.m_vComponents, direction.m_vComponents, 0xc9)));
-    SimdC::__m128 r = SimdC::_mm_add_ps(
+    SimdC::LocalM128 r = SimdC::_mm_add_ps(
         SimdC::_mm_mul_ps(cross, qreal),
         SimdC::_mm_add_ps(SimdC::_mm_mul_ps(SimdC::_mm_add_ps(SimdC::_mm_mul_ps(qreal, qreal), DAT_010c71e0),
                                             direction.m_vComponents),
-                          SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(d, d, 0), quat.m_vComponents)));
+                          SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(d, d, 0), reinterpret_cast<const PoseVector4&>(quat).m_vComponents)));
     m_vComponents = SimdC::_mm_add_ps(r, r);
 }
-__forceinline void Vec::setRotatedTranslation(const hkQuaternion& quat, const Vec& direction)
+__forceinline void PoseVector4::setRotatedTranslation(const hkQuaternion& quat, const PoseVector4& direction)
 {
-    SimdC::__m128 qreal = SimdC::_mm_shuffle_ps(quat.m_vComponents, quat.m_vComponents, 0xff);
-    SimdC::__m128 p = SimdC::_mm_mul_ps(SimdC::_mm_load_ps(&quat.m_vComponents.m128_f32.x), direction.m_vComponents);
-    SimdC::__m128 y = SimdC::_mm_add_ss(SimdC::_mm_shuffle_ps(p, p, 0x55), p);
-    SimdC::__m128 d = SimdC::_mm_add_ss(SimdC::_mm_shuffle_ps(p, p, 0xaa), y);
-    SimdC::__m128 cross = SimdC::_mm_sub_ps(
-        SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(quat.m_vComponents, quat.m_vComponents, 0xc9),
+    SimdC::LocalM128 qreal = SimdC::_mm_shuffle_ps(reinterpret_cast<const PoseVector4&>(quat).m_vComponents, reinterpret_cast<const PoseVector4&>(quat).m_vComponents, 0xff);
+    SimdC::LocalM128 p = SimdC::_mm_mul_ps(SimdC::_mm_load_ps(&reinterpret_cast<const PoseVector4&>(quat).m_vComponents.m128_f32.x), direction.m_vComponents);
+    SimdC::LocalM128 y = SimdC::_mm_add_ss(SimdC::_mm_shuffle_ps(p, p, 0x55), p);
+    SimdC::LocalM128 d = SimdC::_mm_add_ss(SimdC::_mm_shuffle_ps(p, p, 0xaa), y);
+    SimdC::LocalM128 cross = SimdC::_mm_sub_ps(
+        SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(reinterpret_cast<const PoseVector4&>(quat).m_vComponents, reinterpret_cast<const PoseVector4&>(quat).m_vComponents, 0xc9),
                           SimdC::_mm_shuffle_ps(direction.m_vComponents, direction.m_vComponents, 0xd2)),
-        SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(quat.m_vComponents, quat.m_vComponents, 0xd2),
+        SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(reinterpret_cast<const PoseVector4&>(quat).m_vComponents, reinterpret_cast<const PoseVector4&>(quat).m_vComponents, 0xd2),
                           SimdC::_mm_shuffle_ps(direction.m_vComponents, direction.m_vComponents, 0xc9)));
-    SimdC::__m128 r = SimdC::_mm_add_ps(
+    SimdC::LocalM128 r = SimdC::_mm_add_ps(
         SimdC::_mm_mul_ps(cross, qreal),
         SimdC::_mm_add_ps(SimdC::_mm_mul_ps(SimdC::_mm_add_ps(SimdC::_mm_mul_ps(qreal, qreal), DAT_010c71e0),
                                             direction.m_vComponents),
-                          SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(d, d, 0), quat.m_vComponents)));
+                          SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(d, d, 0), reinterpret_cast<const PoseVector4&>(quat).m_vComponents)));
     m_vComponents = SimdC::_mm_add_ps(r, r);
 }
-__forceinline void Transform::SetProduct(const Transform& a, const Transform& b)
+__forceinline void PoseQsTransform::SetProduct(const PoseQsTransform& a, const PoseQsTransform& b)
 {
-    Vec extra;
+    PoseVector4 extra;
     extra.setRotatedTranslation(a.rotation, b.position);
     position.setAdd4(extra, a.position);
     rotation.FUN_00c66320(a.rotation, b.rotation);
     scale.setMul4(a.scale, b.scale);
 }
-__forceinline SimdC::__m128 blendPosition(const Vec& position, const Vec& target, float weight)
+__forceinline SimdC::LocalM128 blendPosition(const PoseVector4& position, const PoseVector4& target, float weight)
 {
-    SimdC::__m128 scalar = SimdC::_mm_load_ss(&weight);
-    SimdC::__m128 t = SimdC::_mm_shuffle_ps(scalar, scalar, 0);
+    SimdC::LocalM128 scalar = SimdC::_mm_load_ss(&weight);
+    SimdC::LocalM128 t = SimdC::_mm_shuffle_ps(scalar, scalar, 0);
     return SimdC::_mm_add_ps(SimdC::_mm_mul_ps(SimdC::_mm_sub_ps(DAT_010ec7f0, t), position.quad()),
                              SimdC::_mm_mul_ps(t, target.quad()));
 }
@@ -444,35 +447,35 @@ extern "C" unsigned int __security_cookie;
 extern "C" void __fastcall __security_check_cookie(unsigned int);
 __declspec(noinline) void hkQuaternion::FUN_00c66320(const hkQuaternion& a, const hkQuaternion& b)
 {
-    SimdC::__m128 av = a.m_vComponents, bv = b.m_vComponents;
-    SimdC::__m128 cross =
+    SimdC::LocalM128 av = reinterpret_cast<const PoseVector4&>(a).m_vComponents, bv = reinterpret_cast<const PoseVector4&>(b).m_vComponents;
+    SimdC::LocalM128 cross =
         SimdC::_mm_sub_ps(SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(bv, bv, 0xd2), SimdC::_mm_shuffle_ps(av, av, 0xc9)),
                           SimdC::_mm_mul_ps(SimdC::_mm_shuffle_ps(bv, bv, 0xc9), SimdC::_mm_shuffle_ps(av, av, 0xd2)));
-    SimdC::__m128 ar = SimdC::_mm_shuffle_ps(av, av, 0xff);
+    SimdC::LocalM128 ar = SimdC::_mm_shuffle_ps(av, av, 0xff);
     ar = SimdC::_mm_shuffle_ps(ar, ar, 0);
-    SimdC::__m128 br = SimdC::_mm_shuffle_ps(bv, bv, 0xff);
+    SimdC::LocalM128 br = SimdC::_mm_shuffle_ps(bv, bv, 0xff);
     br = SimdC::_mm_shuffle_ps(br, br, 0);
-    SimdC::__m128 xyz =
+    SimdC::LocalM128 xyz =
         SimdC::_mm_add_ps(SimdC::_mm_mul_ps(br, av), SimdC::_mm_add_ps(SimdC::_mm_mul_ps(ar, bv), cross));
-    SimdC::__m128 p = SimdC::_mm_mul_ps(bv, av);
-    SimdC::__m128 dot =
+    SimdC::LocalM128 p = SimdC::_mm_mul_ps(bv, av);
+    SimdC::LocalM128 dot =
         SimdC::_mm_add_ss(SimdC::_mm_shuffle_ps(p, p, 0xaa), SimdC::_mm_add_ss(SimdC::_mm_shuffle_ps(p, p, 0x55), p));
-    SimdC::__m128 w = SimdC::_mm_sub_ps(p, SimdC::_mm_shuffle_ps(dot, dot, 0));
-    m_vComponents = SimdC::_mm_shuffle_ps(xyz, SimdC::_mm_unpackhi_ps(xyz, w), 0xc4);
+    SimdC::LocalM128 w = SimdC::_mm_sub_ps(p, SimdC::_mm_shuffle_ps(dot, dot, 0));
+    reinterpret_cast<PoseVector4*>(this)->m_vComponents = SimdC::_mm_shuffle_ps(xyz, SimdC::_mm_unpackhi_ps(xyz, w), 0xc4);
     __security_check_cookie(__security_cookie);
 }
 
 // @fnv 0x00d6b510
-static __declspec(noinline) void FUN_00d6b510(Binding* binding, Weight* weights, const Transform* root,
-                                              Transform* output, const Transform* __restrict transforms)
+static __declspec(noinline) void FUN_00d6b510(Binding* binding, Weight* weights, const PoseQsTransform* root,
+                                              PoseQsTransform* output, const PoseQsTransform* __restrict transforms)
 {
     for (int i = 0; i < binding->count; ++i)
     {
-        const Transform& input = transforms[i];
-        Transform& outWorld = output[2 * i];
-        Transform& outLocal = output[2 * i + 1];
+        const PoseQsTransform& input = transforms[i];
+        PoseQsTransform& outWorld = output[2 * i];
+        PoseQsTransform& outLocal = output[2 * i + 1];
         int parentIndex = binding->parents[i];
-        const Transform* parent = parentIndex >= 0 ? &output[2 * parentIndex + 1] : root;
+        const PoseQsTransform* parent = parentIndex >= 0 ? &output[2 * parentIndex + 1] : root;
         outLocal.SetProduct(*parent, input);
         Pose local;
         local.rotation = outLocal.rotation;
@@ -486,25 +489,25 @@ static __declspec(noinline) void FUN_00d6b510(Binding* binding, Weight* weights,
         if (weight > 0.0f && parentIndex >= 0)
         {
             BodySource* node = binding->nodes[parentIndex];
-            Transform reference;
-            reference.position = *reinterpret_cast<const Vec*>(&node->m_120);
+            PoseQsTransform reference;
+            reference.position = *reinterpret_cast<const PoseVector4*>(&node->m_120);
             reference.scale.quad() = SimdC::_mm_set_ps1(1.0f);
             reference.rotation = *reinterpret_cast<const hkQuaternion*>(&node->m_160);
-            Transform composed;
+            PoseQsTransform composed;
             composed.SetProduct(reference, input);
             local.rotation.FUN_00cb2850(local.rotation, composed.rotation, weight);
             local.position.quad() = blendPosition(local.position, composed.position, weight);
         }
-        Vec offset;
-        offset.SetRotatedDirection(local.rotation, *reinterpret_cast<const Vec*>(&binding->nodes[i]->m_170));
+        PoseVector4 offset;
+        offset.SetRotatedDirection(local.rotation, *reinterpret_cast<const PoseVector4*>(&binding->nodes[i]->m_170));
         outWorld.position.setAdd4(offset, local.position);
-        outWorld.rotation.m_vComponents = local.rotation.m_vComponents;
+        reinterpret_cast<PoseVector4&>(outWorld.rotation).m_vComponents = reinterpret_cast<const PoseVector4&>(local.rotation).m_vComponents;
         outWorld.scale.quad() = SimdC::_mm_load_ps(&DAT_01267e30);
     }
 }
 
-void RunCompose_d6b510(Binding* binding, Weight* weights, const Transform* root, Transform* output,
-                       const Transform* __restrict transforms)
+void RunCompose_d6b510(Binding* binding, Weight* weights, const PoseQsTransform* root, PoseQsTransform* output,
+                       const PoseQsTransform* __restrict transforms)
 {
     FUN_00d6b510(binding, weights, root, output, transforms);
 }

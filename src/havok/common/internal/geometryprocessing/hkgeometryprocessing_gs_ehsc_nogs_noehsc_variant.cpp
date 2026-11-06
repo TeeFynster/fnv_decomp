@@ -1,3 +1,4 @@
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
 
 // src/havok/common/internal/geometryprocessing/hkgeometryprocessing_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/common/internal/geometryprocessing/hkgeometryprocessing.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,6 +6,12 @@
 
 // src/havok/common/internal/geometryprocessing/hkgeometryprocessing.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/geometryprocessing/hkgeometryprocessing.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/NiPoint3.h"
+#include "../../../../../include/hkSimdReal.h"
+#include "../../../../../include/hkVector4.h"
+
 extern "C" void __cdecl Deallocate(void*);
 extern int DAT_010d9fc4;
 struct FUN_00dee620
@@ -21,21 +28,7 @@ struct FUN_00dee6b0_Class
     float FUN_00dee6b0(int testFlag);
 };
 extern int DAT_010cd664;
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00dee6c0_cls
 {
     int m_vptr;
@@ -47,13 +40,9 @@ struct FUN_00dee6c0_cls
 #include <math.h>
 double __cdecl Atan2(float y, float x);
 
-struct Vector3
-{
-    float x, y, z;
-};
 
 // @fnv 0x00de98c0
-void FUN_00de98c0(const Vector3* v, __m128* out)
+void FUN_00de98c0(const NiPoint3* v, __m128* out)
 {
     float ly = v->y;
     float lx = v->x;
@@ -120,51 +109,44 @@ void FUN_00de98c0(const Vector3* v, __m128* out)
     *out = _mm_setr_ps(a, b, 0, 0);
 }
 
-class VectorComponentValue
-{
-  public:
-    __forceinline VectorComponentValue()
-    {}
-    __forceinline VectorComponentValue(const __m128& x) : m_vValue(x)
-    {}
-    __forceinline operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-    __m128 m_vValue;
-};
+__forceinline hkSimdReal::hkSimdReal()
+{}
 
-class hkVector4
+__forceinline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x)
+{}
+
+__forceinline hkSimdReal::operator float() const
 {
-  public:
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setCross(const hkVector4& v1, const hkVector4& v2)
-    {
-        m_vComponents =
-            _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)),
-                                  _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2))),
-                       _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)),
-                                  _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1))));
-    }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        const __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
-        const __m128 z = _mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2));
-        return _mm_add_ss(z, xySum);
-    }
-    __m128 m_vComponents;
-};
+    float s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
+
+
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+__forceinline void hkVector4::setCross(const hkVector4& v1, const hkVector4& v2)
+{
+    m_vComponents =
+        _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)),
+                              _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2))),
+                   _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)),
+                              _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1))));
+}
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    const __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
+    const __m128 z = _mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2));
+    return _mm_add_ss(z, xySum);
+}
 
 struct Interval
 {
-    VectorComponentValue m_kMinimumCorner;
-    VectorComponentValue m_kMaximumCorner;
+    hkSimdReal m_kMinimumCorner;
+    hkSimdReal m_kMaximumCorner;
 };
 
 static __forceinline void projectTriangle(const hkVector4* tri, const hkVector4& axis, Interval& out)
@@ -173,7 +155,7 @@ static __forceinline void projectTriangle(const hkVector4* tri, const hkVector4&
     out.m_kMinimumCorner = out.m_kMaximumCorner;
     for (int i = 1; i < 3; i++)
     {
-        VectorComponentValue d = tri[i].dot3(axis);
+        hkSimdReal d = tri[i].dot3(axis);
         if (d < out.m_kMinimumCorner)
         {
             out.m_kMinimumCorner = d;
@@ -393,15 +375,15 @@ struct FourPointArray
     int size;
     int capacity;
 };
-void __cdecl FUN_00c908c0(AudioAllocator*, void*, int, int);
+void __cdecl FUN_00c908c0(hkMemoryAllocator*, void*, int, int);
 // @fnv 0x00dedcf0
 void __cdecl FUN_00dedcf0(const VertexArray& vertices, FourPointArray& output)
 {
     Point4 points[4];
     int used = 0;
     int count = (vertices.size + 3) >> 2;
-    AudioHolder* holder = FUN_00c85750();
-    AudioAllocator* allocator = holder->m_pAllocator;
+    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryAllocator* allocator = reinterpret_cast<hkMemoryAllocator*>(holder->m_heap);
     int start = output.size;
     int required = start + count;
     int capacity = output.capacity & 0x3fffffff;

@@ -7,6 +7,9 @@
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 // src/gamebryo2.2/corelibs/nicollision/nicollisiontraversals.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/nicollisiontraversals.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/Vec4.h"
+
 extern int DAT_0126fa68;
 extern int DAT_0126fa6c;
 extern int DAT_0126fa70;
@@ -14,76 +17,45 @@ extern int DAT_0126fa74;
 extern float DAT_0126fa78;
 int* __cdecl FUN_00e9c7d0(float f, int* p);
 
-struct Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-    __forceinline Vec4()
-    {}
-    __forceinline Vec4(float a, float b, float c, float d) : x(a), y(b), z(c), w(d)
-    {}
-};
+__forceinline Vec4::Vec4(float a, float b, float c, float d) : x(a), y(b), z(c), w(d)
+{}
 extern double DAT_01017cf8;
 struct PairB
 {
     unsigned char a;
     unsigned char b;
 };
-class NiPoint3
+inline NiPoint3::NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
+{}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& o) const
 {
-  public:
-    float x;
-    float y;
-    float z;
-    __forceinline NiPoint3()
-    {}
-    inline NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    inline NiPoint3 operator-(const NiPoint3& o) const
-    {
-        return NiPoint3(x - o.x, y - o.y, z - o.z);
-    }
-    inline NiPoint3 operator+(const NiPoint3& o) const
-    {
-        return NiPoint3(x + o.x, y + o.y, z + o.z);
-    }
-    inline NiPoint3 operator*(float s) const
-    {
-        return NiPoint3(s * x, s * y, s * z);
-    }
-    float Length() const;
-    inline void FUN_004a0c10()
-    {
-        float len = Length();
-        if (len > DAT_01017cf8)
-        {
-            float inv = 1.0f / len;
-            x *= inv;
-            y *= inv;
-            z *= inv;
-        }
-        else
-        {
-            x = 0.0f;
-            y = 0.0f;
-            z = 0.0f;
-        }
-    }
-};
-struct PtOp
+    return NiPoint3(x - o.x, y - o.y, z - o.z);
+}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& o) const
 {
-    NiPoint3 operator-(const NiPoint3& o) const;
-};
-struct NiPoint3Ex
+    return NiPoint3(x + o.x, y + o.y, z + o.z);
+}
+inline NiPoint3 NiPoint3::operator*(float s) const
 {
-    NiPoint3 operator+(const NiPoint3& o) const;
-};
-struct NiPoint3_helper
+    return NiPoint3(s * x, s * y, s * z);
+}
+inline void NiPoint3::FUN_004a0c10()
 {
-    NiPoint3 operator*(float s) const;
-};
+    float len = Length();
+    if (len > DAT_01017cf8)
+    {
+        float inv = 1.0f / len;
+        x *= inv;
+        y *= inv;
+        z *= inv;
+    }
+    else
+    {
+        x = 0.0f;
+        y = 0.0f;
+        z = 0.0f;
+    }
+}
 typedef NiPoint3 Pt;
 struct Sub
 {
@@ -359,9 +331,9 @@ void Host::FUN_00c34ad0(Pt p0, Obj* pA, Obj* pB, Vec4 color, unsigned char flag)
     t23[9][0] = 7;
     t23[9][1] = 4;
     t23[9][2] = 0;
-    Vec4 colObj;
-    Vec4 colorA;
-    Vec4 colorB;
+    Vec4 colObj(Vec4::Uninitialized);
+    Vec4 colorA(Vec4::Uninitialized);
+    Vec4 colorB(Vec4::Uninitialized);
     colObj = color;
     colorA = DAT_011a9be0;
     colorA.x = colObj.w;

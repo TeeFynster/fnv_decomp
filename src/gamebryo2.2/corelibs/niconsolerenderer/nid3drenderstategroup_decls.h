@@ -3,9 +3,7 @@
 #define NID3DRENDERSTATEGROUP_DECLS_H
 
 class D3DRenderStateGroup;
-template <class T> class NiTNewInterface
-{
-};
+#include "../../../../include/NiTNewInterface.h"
 template <class T, class A> class ObjectPool;
 extern ObjectPool<D3DRenderStateGroup, NiTNewInterface<D3DRenderStateGroup> >* DAT_0126f718;
 struct D3DRenderStateGroup

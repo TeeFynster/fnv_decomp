@@ -2,6 +2,20 @@
 // src/effectsetting_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/effectsetting.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
+#include "../include/BaseFormComponent.h"
+#include "../include/EffectSetting.h"
+#include "../include/FileEntryList.h"
+#include "../include/TESDescription.h"
+#include "../include/TESEffectShader.h"
+#include "../include/TESFile.h"
+#include "../include/TESForm.h"
+#include "../include/TESFullName.h"
+#include "../include/TESIcon.h"
+#include "../include/TESModel.h"
+#include "../include/TESObjectLIGH.h"
+#include "../include/TESSound.h"
+#include "../include/TESTexture.h"
+
 #include "effectsetting_decls.h"
 
 struct BEB3890Body

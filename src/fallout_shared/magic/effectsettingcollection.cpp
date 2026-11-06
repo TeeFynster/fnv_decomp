@@ -1,33 +1,11 @@
 // fallout_shared/magic/effectsettingcollection.cpp: EffectSettingCollection (3 functions)
 
-#include "TESForm.h"
+#include "../../../include/EffectSetting.h"
+#include "../../../include/LowProcess.h"
+#include "../../../include/MiddleHighProcess.h"
+#include "../../../include/TESSaveLoadGame.h"
 
-class EffectSetting : public TESForm
-{
-    unsigned char layoutPadding18[0x98];
-
-  public:
-    EffectSetting();
-    void UpdateEffectName(const char* name);
-    void FUN_004ee4b0(float value);
-    void SetAssociatedActorValue(int value);
-    void SetEffectID(int value);
-};
-
-class TargetDoorController;
 class Date;
-
-class LowProcess
-{
-  public:
-    void SetPackageObjectType(int value);
-};
-
-class MiddleHighProcess
-{
-  public:
-    void AddDeferredHideLimb(TargetDoorController* value);
-};
 
 class PlayerQuestData
 {
@@ -78,11 +56,11 @@ EffectSetting* EffectSettingCollection::CreateEffectSetting(unsigned int formID,
     EffectSetting* effect = new EffectSetting();
     effect->SetRefID(formID, true);
     effect->SetEditorID_AtRuntime(editorID);
-    ((LowProcess*)effect)->SetPackageObjectType(count);
+    ((LowProcess*)effect)->LowProcess::SetPackageObjectType(count);
     effect->UpdateEffectName(fullName);
     effect->FUN_004ee4b0(cost);
     effect->SetAssociatedActorValue(skill);
-    ((MiddleHighProcess*)effect)->AddDeferredHideLimb((TargetDoorController*)item);
+    ((MiddleHighProcess*)effect)->MiddleHighProcess::AddDeferredHideLimb((ObjectToAcquire*)item);
     ((PlayerQuestData*)effect)->SetLogDate((Date*)resist);
     effect->SetEffectID(flags);
     RegisterEffectSetting(effect);
@@ -133,16 +111,6 @@ struct ChangedForm
     unsigned char changeType;
 };
 
-struct EffectSettingFlags
-{
-    bool IsFlagSet(unsigned int flag);
-};
-
-struct TESSaveLoadGame
-{
-    bool FUN_00862110();
-    ChangedForm* GetCurrentChangedForm();
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct GlobalObject_0045cf30
@@ -170,12 +138,12 @@ unsigned int FUN_00408c30()
     for (BSSimpleList<EffectSetting*>* node = (BSSimpleList<EffectSetting*>*)&g_011c3400;
          node && (mgef = node->GetItem()) != 0; node = node->GetNext())
     {
-        if (((EffectSettingFlags*)mgef)->IsFlagSet(0x200000))
+        if (mgef->IsFlagSet(0x200000))
             size += 4;
     }
     if (*g_011de4e8.Bool())
     {
-        ChangedForm* changed = g_TESSaveLoadGame->GetCurrentChangedForm();
+        ChangedForm* changed = (ChangedForm*)g_TESSaveLoadGame->FUN_004fd3e0();
         if (changed)
         {
             TESForm* form = FUN_004839c0(changed->formID);

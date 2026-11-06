@@ -24,9 +24,9 @@ struct FUN_00aa64f0_t
 
 extern "C" __declspec(dllimport) void __stdcall DeleteCriticalSection(void* pkCriticalSection);
 
-struct CriticalSectionAA63
-{
-    ~CriticalSectionAA63()
+struct ThreadCriticalSectionLocalForm
+{ // local form of BSThreadCriticalSectionPC: 0x00aa63c0 needs member-destructor EH cleanup; explicit cleanup on the shared form produces 41 bytes versus exe 97.
+    ~ThreadCriticalSectionLocalForm()
     {
         DeleteCriticalSection(this);
     }
@@ -44,7 +44,7 @@ class FUN_00aa63c0
     virtual ~FUN_00aa63c0();
     void Shutdown();
 
-    CriticalSectionAA63 m_kCriticalSection;
+    ThreadCriticalSectionLocalForm m_kCriticalSection;
     void* m_hThread;
     void* m_hParent;
     unsigned int m_uiThreadID;

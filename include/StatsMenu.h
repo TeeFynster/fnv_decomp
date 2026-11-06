@@ -1,56 +1,87 @@
-// Source layout: StatsMenu. PC corrections are in generate_headers.py.
-#ifndef FNV_STATSMENU_H
-#define FNV_STATSMENU_H
+#pragma once
 
-#include "layout_support.h"
-#include "ListBox_PerkRankData___.h"
-#include "ListBox_StatsMenu__StatusEffect___.h"
-#include "ListBox_TESReputation___.h"
-#include "ListBox_enum_ActorValue__Index_.h"
-#include "ListBox_enum_MiscStatManager__MiscStatID_.h"
 #include "Menu.h"
 #include "StatsMenu__HealingOption.h"
 #include "StatsMenu__NamedEffectsList.h"
 #include "StatsMenu__StatusEffectList.h"
-#pragma pack(push, 4)
+#include "ListBox_enum_ActorValue__Index_.h"
+#include "ListBox_enum_MiscStatManager__MiscStatID_.h"
+#include "ListBox_PerkRankData___.h"
+#include "ListBox_StatsMenu__StatusEffect___.h"
+#include "ListBox_TESReputation___.h"
+
+#include "MiscStatManager.h"
+
 class StatsMenu : public Menu
 {
-  public:
-    StatsMenu__HealingOption m_kHealingOptions[4];               // +0x28
-    StatsMenu__NamedEffectsList m_kNamedEffectsList;             // +0x68
-    StatsMenu__StatusEffect* m_pStatusEffectAtIndex0;            // +0x74
-    StatsMenu__StatusEffect* m_pStatusEffectAtIndex1;            // +0x78
-    StatsMenu__StatusEffect* m_pStatusEffectAtIndex2;            // +0x7C
-    StatsMenu__StatusEffect* m_pStatusEffectAtIndex3;            // +0x80
-    StatsMenu__StatusEffectList m_kStatusEffectEntries;          // +0x84
-    Tile* m_pTiles[60];                                          // +0x90
-    ListBox_enum_ActorValue__Index_ m_kPrimaryActorValueList;    // +0x180
-    ListBox_enum_ActorValue__Index_ m_kSecondaryActorValueList;  // +0x1B0
-    ListBox_PerkRankData___ m_kPerkRankList;                     // +0x1E0
-    ListBox_enum_MiscStatManager__MiscStatID_ m_kMiscStatList;   // +0x210
-    ListBox_StatsMenu__StatusEffect___ m_kStatusEffectList;      // +0x240
-    ListBox_TESReputation___ m_kReputationList;                  // +0x270
-    bool m_bUpdateOption;                                        // +0x2A0
-    bool m_bStatUpdatePending;                                   // +0x2A1
-    unsigned short layoutPadding2A2;
-    int GetClass();
+public:
+    enum Page
+    {
+        SM_STATUS = 0,
+        SM_FIRST_PAGE = 0,
+        SM_SPECIAL = 1,
+        SM_SKILLS = 2,
+        SM_PERKS = 3,
+        SM_GENERAL = 4,
+        SM_LAST_PAGE = 4,
+        SM_PAGE_COUNT = 5
+    };
+
+    class BodyPartDisplay
+    {
+    public:
+        int m_iBodyPartCount;
+        BSSimpleList<Tile*> m_kBodyPartTileLists[6];
+        unsigned int m_auiBodyPartValues[6];
+
+        BodyPartDisplay();
+    };
+
+    virtual void AssignTileByID(int, Tile*);
+    virtual int GetClass();
+
+    StatsMenu__HealingOption m_kHealingOptions[4];
+    StatsMenu__NamedEffectsList m_kNamedEffectsList;
+    StatsMenu__StatusEffect* m_pStatusEffectAtIndex0;
+    StatsMenu__StatusEffect* m_pStatusEffectAtIndex1;
+    StatsMenu__StatusEffect* m_pStatusEffectAtIndex2;
+    StatsMenu__StatusEffect* m_pStatusEffectAtIndex3;
+    StatsMenu__StatusEffectList m_kStatusEffectEntries;
+
+    Tile* m_pTiles[60];
+    ListBox_enum_ActorValue__Index_ m_kPrimaryActorValueList;
+    ListBox_enum_ActorValue__Index_ m_kSecondaryActorValueList;
+    ListBox_PerkRankData___ m_kPerkRankList;
+    ListBox_enum_MiscStatManager__MiscStatID_ m_kMiscStatList;
+    ListBox_StatsMenu__StatusEffect___ m_kStatusEffectList;
+    ListBox_TESReputation___ m_kReputationList;
+    union
+    {
+        bool m_bUpdateOption;
+        unsigned char m_bHealingMode;
+    };
+    bool m_bStatUpdatePending;
+    unsigned char unk2A2[2];
+
+    static StatsMenu* ms_pInventoryMenu;
+    static float GetChartScale();
+    static void SetStatsPage(unsigned char page);
+    static bool SetTileFlashing(Tile*, unsigned int);
+    static void UpdatePrimaryActorValueTile(Tile* tile, ActorValue::Index value);
+    static void UpdateSecondaryActorValueTile(Tile* tile, ActorValue::Index value);
+    static void UpdateMiscStatTile(Tile* tile, MiscStatManager__MiscStatID value);
+    static void __cdecl UpdateStatusEffects();
+    static void ClearPerks();
+
+    void SetCurrentPage(Page page);
+    Page GetCurrentPage();
+    void SetCurrentPageFromChar(char a);
+    int GetTraitForValue(ActorValue::Index value);
+    void UpdateActorValueTiles();
+    void RefreshActorValueTile(ActorValue::Index value);
+    void RefreshMiscStat(MiscStatManager__MiscStatID value);
+    void RefreshMiscStat(MiscStatManager::MiscStat value);
+    void __thiscall RefreshHealingOptions();
+    void FUN_0071f700();
+    void* FUN_0071f6d0(unsigned int flags);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(StatsMenu) == 0x2A4);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_kHealingOptions) == 0x28);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_kNamedEffectsList) == 0x68);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_pStatusEffectAtIndex0) == 0x74);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_pStatusEffectAtIndex1) == 0x78);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_pStatusEffectAtIndex2) == 0x7C);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_pStatusEffectAtIndex3) == 0x80);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_kStatusEffectEntries) == 0x84);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_pTiles) == 0x90);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_kPrimaryActorValueList) == 0x180);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_kSecondaryActorValueList) == 0x1B0);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_kPerkRankList) == 0x1E0);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_kMiscStatList) == 0x210);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_kStatusEffectList) == 0x240);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_kReputationList) == 0x270);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_bUpdateOption) == 0x2A0);
-FNV_STATIC_ASSERT(offsetof(StatsMenu, m_bStatUpdatePending) == 0x2A1);
-#endif

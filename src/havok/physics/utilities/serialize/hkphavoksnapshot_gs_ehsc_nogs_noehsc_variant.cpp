@@ -1,3 +1,5 @@
+#include "../../../../../include/hkBool.h"
+
 // src/havok/physics/utilities/serialize/hkphavoksnapshot_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-31 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/utilities/serialize/hkphavoksnapshot.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
@@ -71,12 +73,6 @@ extern CC0D30Registry g_CC0D30DefaultRegistry;
 CC0D30Result __cdecl FUN_00cc0bc0(const void* data, const CC0D30Registry& registry, const void* pClassInfo, void* out,
                                   int flags);
 CC0D30Result __cdecl FUN_00cc0d30(const void* data, const void* pClassInfo, void* out, int flags);
-struct S_00cc0d60_R
-{
-    char v;
-    S_00cc0d60_R()
-    {}
-};
 struct S_00cc0d60_A
 {
     int unk0;
@@ -89,24 +85,12 @@ struct S_00cc0d60_A
     void FUN_00d4c2d0(void* a, int b);
     void FUN_00d4c250();
 };
-S_00cc0d60_R* FUN_00cc0d30(void** pa, S_00cc0d60_A* a, void* b, int c, int d);
-S_00cc0d60_R FUN_00cc0d60(void* a2, void* a3, int a4, int a5, int a6);
+hkBool* FUN_00cc0d30(void** pa, S_00cc0d60_A* a, void* b, int c, int d);
+hkBool FUN_00cc0d60(void* a2, void* a3, int a4, int a5, int a6);
 struct Allocator
 {
     virtual void* unk0();
     virtual void* allocate(unsigned int size);
-};
-struct hkBool
-{
-    char m_kPointB;
-    hkBool()
-    {}
-    hkBool(bool b) : m_kPointB(b)
-    {}
-    operator bool() const
-    {
-        return m_kPointB != 0;
-    }
 };
 struct PtrList;
 void __cdecl ResizeAudioStream(void* a, PtrList* l, unsigned int n);
@@ -356,25 +340,6 @@ struct DirectoryOutput
 typedef const char*(__cdecl* DirectoryConvert)(const char*, DirectoryString&);
 extern DirectoryConvert DAT_011b3dc0;
 extern const char DAT_01063cbc[], DAT_0101ffbc[], DAT_01044c28[], DAT_010a2560[];
-struct DirectoryBool
-{
-    char value;
-    inline DirectoryBool()
-    {}
-    inline DirectoryBool(bool b)
-    {
-        value = static_cast<char>(b);
-    }
-    inline operator bool() const
-    {
-        return value != 0;
-    }
-    inline DirectoryBool& operator=(bool b)
-    {
-        value = static_cast<char>(b);
-        return *this;
-    }
-};
 enum DirectoryResult
 {
     DirectorySuccess,
@@ -405,7 +370,7 @@ DirectoryResult __cdecl FUN_00da25a0(const char* input, DirectoryOutput& listing
         path.FUN_00d61df0(DAT_0101ffbc);
     WIN32_FIND_DATAA found;
     HANDLE handle = FindFirstFileA(path, &found);
-    DirectoryBool more = handle != INVALID_HANDLE_VALUE;
+    hkBool more = handle != INVALID_HANDLE_VALUE;
     while (more)
     {
         if (FUN_00cb0fa0(found.cFileName, DAT_01044c28) && FUN_00cb0fa0(found.cFileName, DAT_010a2560))

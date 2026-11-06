@@ -3,18 +3,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <string.h>
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-struct NiBound
-{
-    NiPoint3 m_kCenter;
-    float m_fBoundRadius;
-    char* FUN_00a7fb20(const char* pPrefix);
-};
+#include "../../../../include/NiBound.h"
 void* _NiMalloc(unsigned int);
 int NiSprintf(char*, unsigned int, const char*, ...);
 // Formats and returns a string containing the prefix, center coordinates, and bound radius.
@@ -26,6 +15,6 @@ char* NiBound::FUN_00a7fb20(const char* pPrefix)
     uiPrefixLen = strlen(pPrefix);
     pString = (char*)_NiMalloc(uiPrefixLen + 0x41);
     NiSprintf(pString, uiPrefixLen + 0x41, "%s = (%g, %g, %g) , %g", pPrefix, m_kCenter.x, m_kCenter.y, m_kCenter.z,
-              m_fBoundRadius);
+              m_fRadius);
     return pString;
 }

@@ -2,6 +2,8 @@
 // src/havok/common/base/debugutil/statisticscollector/hkstatisticscollector.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/debugutil/statisticscollector/hkstatisticscollector.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/hkMemoryRouter.h"
+
 extern int DAT_0102e388;
 
 struct FUN_00d06f70_s
@@ -71,23 +73,24 @@ void Handler::EmitString(int a, unsigned int* str)
     }
 }
 
-struct SlotAllocator
+class Allocator
 {
+  public:
     virtual void v00();
     virtual void* Alloc(unsigned int size);
     virtual void Free(void* ptr, unsigned int size);
+    virtual void v0c();
+    virtual void v10();
+    virtual void v14();
+    virtual void v18();
+    virtual void v1c();
+    virtual void v20();
+    virtual void v24();
+    virtual void v28();
+    virtual int ComputeHash(const void* data, int len);
 };
 
-struct AllocHolder
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    SlotAllocator* m_pAllocator;
-};
-
-AllocHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 void* __cdecl FUN_00ec44d0(void* dst, const void* src, unsigned int count);
 
 struct GrowBuf
@@ -110,16 +113,16 @@ void __cdecl FUN_00d06cb0(GrowBuf* buf, unsigned int elemSize)
         newCount = 1;
     }
 
-    AllocHolder* holder = FUN_00c85750();
-    void* newData = holder->m_pAllocator->Alloc(newCount * elemSize);
+    hkMemoryRouter* holder = FUN_00c85750();
+    void* newData = holder->m_heap->blockAlloc(newCount * elemSize);
     FUN_00ec44d0(newData, buf->m_pData, (unsigned int)buf->m_uCap * elemSize);
 
     if ((buf->m_uiObjectFlags & 0x8000u) == 0)
     {
         void* oldData = buf->m_pData;
         unsigned int oldBytes = (buf->m_uiObjectFlags & 0x3fffu) * elemSize;
-        AllocHolder* pAllocHolder2 = FUN_00c85750();
-        pAllocHolder2->m_pAllocator->Free(oldData, oldBytes);
+        hkMemoryRouter* pAllocHolder2 = FUN_00c85750();
+        pAllocHolder2->m_heap->blockFree(oldData, oldBytes);
     }
 
     buf->m_pData = newData;
@@ -131,7 +134,7 @@ struct D06D50Class;
 struct D06D50Object
 {
     virtual void unk00();
-    virtual const D06D50Class* GetClassType() const;
+    virtual const D06D50Class* getClassType() const;
 };
 
 struct D06D50Registry
@@ -158,7 +161,7 @@ const D06D50Class* D06D50Finder::FindClass(const D06D50Object* object) const
 {
     if (object)
     {
-        const D06D50Class* pClass = object->GetClassType();
+        const D06D50Class* pClass = object->getClassType();
         if (pClass)
             return pClass;
         if (m_registry)
@@ -222,37 +225,6 @@ int FUN_00d06d90_cls::GetFlagsOrProcess(Rec* pRec)
 }
 
 namespace fnv_00d06dd0 {
-struct S_00d06dd0_Heap
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual int vfn2c(int a, int b);
-};
-
-struct S_00d06dd0_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00d06dd0_Heap* unk10;
-    S_00d06dd0_Heap& heap()
-    {
-        return *unk10;
-    }
-};
-
-S_00d06dd0_Router* FUN_00c85750();
-
 struct S_00d06dd0_Obj
 {
     virtual void v0();
@@ -265,14 +237,14 @@ struct S_00d06dd0_Obj
     void DispatchIfNotFlagged(int a, unsigned int flags);
 };
 
-// When bit 0 of flags is clear, computes a value from a, calls the router heap's vfn2c with both, and passes the results to slot14.
+// When bit 0 of flags is clear, computes a value from a, calls the allocator with both, and passes the results to slot14.
 // @fnv 0x00d06dd0
 void S_00d06dd0_Obj::DispatchIfNotFlagged(int a, unsigned int flags)
 {
     if ((flags & 1) == 0)
     {
         int b = GetFlagsOrProcess(a);
-        int r = FUN_00c85750()->heap().vfn2c(a, b);
+        int r = (&FUN_00c85750()->heap())->getAllocatedSize((const void*)a, b);
         slot14(0, 0, a, b, r);
     }
 }
@@ -283,33 +255,6 @@ struct FUN_00d06e10_src
 {
     int Read();
 };
-
-struct FUN_00d06e10_obj
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual int v2c(int a, int b);
-};
-
-struct FUN_00d06e10_holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    FUN_00d06e10_obj* m_10;
-};
-
-FUN_00d06e10_holder* __cdecl FUN_00c85750();
 
 class FUN_00d06e10_cls
 {
@@ -324,15 +269,15 @@ class FUN_00d06e10_cls
     void FUN_00d06e10(int a1, int a2, unsigned char flag);
 };
 
-// When flag bit 0 is clear, reads a length from a1, computes a hash via holder->m_10->v2c(a2, len), and calls Emit with that length and hash.
+// When flag bit 0 is clear, reads a length from a1, computes a hash through the allocator, and calls Emit with that length and hash.
 // @fnv 0x00d06e10
 void FUN_00d06e10_cls::FUN_00d06e10(int pSource, int pData, unsigned char flag)
 {
     if ((flag & 1) == 0)
     {
         int len = ((FUN_00d06e10_src*)pSource)->Read();
-        FUN_00d06e10_holder* holder = FUN_00c85750();
-        int hash = holder->m_10->v2c(pData, len);
+        hkMemoryRouter* holder = FUN_00c85750();
+        int hash = holder->m_heap->getAllocatedSize((const void*)pData, len);
         Emit(0, 0, (const char*)pData, len, hash);
     }
 }
@@ -365,41 +310,14 @@ FUN_00d06f50::FUN_00d06f50(void* owner) : m_pOwnerObject(owner), m_flag(false)
 {}
 
 namespace fnv_00d06f80 {
-struct Target
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual int v11(const char* s, int len);
-};
-
-struct Holder
-{
-    void* vtbl;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    Target* unk10;
-};
-
-extern void* __cdecl FUN_00c85750();
-
-// If s is non-null, gets a Holder via FUN_00c85750 and returns holder->unk10->v11(s, len); otherwise returns len.
+// If s is non-null, hashes it through the allocator; otherwise returns len.
 // @fnv 0x00d06f80
 extern "C" int __cdecl FUN_00d06f80(const char* pcString, int iLength)
 {
     if (pcString)
     {
-        Holder* holder = (Holder*)FUN_00c85750();
-        return holder->unk10->v11(pcString, iLength);
+        hkMemoryRouter* holder = FUN_00c85750();
+        return holder->m_heap->getAllocatedSize(pcString, iLength);
     }
 
     return iLength;

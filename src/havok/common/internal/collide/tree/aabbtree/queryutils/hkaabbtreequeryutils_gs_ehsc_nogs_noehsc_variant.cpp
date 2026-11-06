@@ -1,3 +1,12 @@
+#include "../../../../../../../../include/hkArray.h"
+#include "../../../../../../../../include/Pair.h"
+#include "../../../../../../../../include/hkVector4.h"
+#include "../../../../../../../../include/hkAabb.h"
+
+inline Pair::Pair() throw()
+{
+}
+
 
 // src/havok/common/internal/collide/tree/aabbtree/queryutils/hkaabbtreequeryutils_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/common/internal/collide/tree/aabbtree/queryutils/hkaabbtreequeryutils.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -36,28 +45,7 @@ struct S_00d1bcb0_Entry
     int m_kPointA;
     int m_kPointB;
 };
-struct S_00d1bcb0_Array
-{
-    S_00d1bcb0_Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void _pushBack(S_00d1bcb0_Allocator& alloc, const S_00d1bcb0_Entry& e)
-    {
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(alloc, this, sizeof(S_00d1bcb0_Entry));
-        new (m_data + m_iElementCount) S_00d1bcb0_Entry(e);
-        m_iElementCount++;
-    }
-    void AddBack(const S_00d1bcb0_Entry& e)
-    {
-        _pushBack(FUN_00c85750()->heap(), e);
-    }
-};
+typedef hkArray<S_00d1bcb0_Entry> S_00d1bcb0_Array;
 struct S_00d1bcb0
 {
     int unk00;
@@ -98,35 +86,21 @@ extern "C" void __cdecl FUN_00d1d530()
 extern int __cdecl FUN_00d1bfa0();
 int __cdecl FUN_00d1d490();
 
-#include <xmmintrin.h>
-class hkVector4D1C
+inline hkAabb::hkAabb()
 {
-  public:
-    __m128 m_vComponents;
+}
 
-    inline hkVector4D1C& operator=(const hkVector4D1C& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
-};
-
-struct hkAabbD1C
+// hkAabb's shared declaration has no overlaps method; keep the SIMD bounds test local.
+static inline bool overlaps(const hkAabb& bounds, const hkAabb& other)
 {
-    hkVector4D1C m_kMinimumCorner;
-    hkVector4D1C m_kMaximumCorner;
-
-    bool overlaps(const hkAabbD1C& other) const
-    {
-        __m128 mins = _mm_cmple_ps(m_kMinimumCorner.m_vComponents, other.m_kMaximumCorner.m_vComponents);
-        __m128 maxs = _mm_cmple_ps(other.m_kMinimumCorner.m_vComponents, m_kMaximumCorner.m_vComponents);
-        return (_mm_movemask_ps(_mm_and_ps(mins, maxs)) & 7) == 7;
-    }
-};
+    __m128 mins = _mm_cmple_ps(bounds.m_kMinimumCorner.m_vComponents, other.m_kMaximumCorner.m_vComponents);
+    __m128 maxs = _mm_cmple_ps(other.m_kMinimumCorner.m_vComponents, bounds.m_kMaximumCorner.m_vComponents);
+    return (_mm_movemask_ps(_mm_and_ps(mins, maxs)) & 7) == 7;
+}
 
 struct TreeNodeD1C
 {
-    hkAabbD1C m_kBounds;
+    hkAabb m_kBounds;
     union
     {
         unsigned short m_pChildAtom;
@@ -143,8 +117,8 @@ class CollectorD1C
     virtual float GetHitDistance(TreeNodeD1C* pkNode);
 };
 
-struct hkArrayIntD1C
-{
+struct hkArrayIntD1CLocalForm
+{ // local form of hkArray: 0x00d1ce50 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     int* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -158,7 +132,7 @@ struct hkArrayIntD1C
     {
         return m_iCapacityState & 0x3fffffff;
     }
-    void AddBack(int e)
+    void pushBack(int e)
     {
         S_00d1bcb0_Allocator& alloc = FUN_00c85750()->heap();
         if (m_iElementCount == getCapacity())
@@ -179,11 +153,11 @@ struct TreeD1C
     int unk18;
     FUN_00d1bb40_Class m_kNodeCollection;
 
-    __forceinline int queryAll(const hkAabbD1C& kAabb, CollectorD1C* pkCollector, hkArrayIntD1C* pkHits, int** ppiOut,
+    __forceinline int queryAll(const hkAabb& kAabb, CollectorD1C* pkCollector, hkArrayIntD1CLocalForm* pkHits, int** ppiOut,
                                int iMaxOut);
 };
 
-__forceinline int TreeD1C::queryAll(const hkAabbD1C& kAabb, CollectorD1C* pkCollector, hkArrayIntD1C* pkHits,
+__forceinline int TreeD1C::queryAll(const hkAabb& kAabb, CollectorD1C* pkCollector, hkArrayIntD1CLocalForm* pkHits,
                                     int** ppiOut, int iMaxOut)
 {
     TreeNodeD1C* pkNode = m_pTreeNode;
@@ -192,11 +166,11 @@ __forceinline int TreeD1C::queryAll(const hkAabbD1C& kAabb, CollectorD1C* pkColl
     {
         for (;;)
         {
-            hkAabbD1C kNodeAabb;
+            hkAabb kNodeAabb;
             kNodeAabb = pkNode->m_kBounds;
             TreeNodeD1C* pkNext =
                 (pkNode->m_next != 0x7fff) ? (TreeNodeD1C*)m_kNodeCollection.FUN_00d1bb40(pkNode->m_next) : 0;
-            if (kAabb.overlaps(kNodeAabb))
+            if (overlaps(kAabb, kNodeAabb))
             {
                 if (!(pkNode->m_flags & 0x8000))
                 {
@@ -218,11 +192,11 @@ __forceinline int TreeD1C::queryAll(const hkAabbD1C& kAabb, CollectorD1C* pkColl
     {
         for (;;)
         {
-            hkAabbD1C kNodeAabb;
+            hkAabb kNodeAabb;
             kNodeAabb = pkNode->m_kBounds;
             TreeNodeD1C* pkNext =
                 (pkNode->m_next != 0x7fff) ? (TreeNodeD1C*)m_kNodeCollection.FUN_00d1bb40(pkNode->m_next) : 0;
-            if (kAabb.overlaps(kNodeAabb))
+            if (overlaps(kAabb, kNodeAabb))
             {
                 if (!(pkNode->m_flags & 0x8000))
                 {
@@ -245,18 +219,18 @@ __forceinline int TreeD1C::queryAll(const hkAabbD1C& kAabb, CollectorD1C* pkColl
     {
         for (;;)
         {
-            hkAabbD1C kNodeAabb;
+            hkAabb kNodeAabb;
             kNodeAabb = pkNode->m_kBounds;
             TreeNodeD1C* pkNext =
                 (pkNode->m_next != 0x7fff) ? (TreeNodeD1C*)m_kNodeCollection.FUN_00d1bb40(pkNode->m_next) : 0;
-            if (kAabb.overlaps(kNodeAabb))
+            if (overlaps(kAabb, kNodeAabb))
             {
                 if (!(pkNode->m_flags & 0x8000))
                 {
                     pkNode = (TreeNodeD1C*)m_kNodeCollection.FUN_00d1bb40(pkNode->m_pChildAtom);
                     continue;
                 }
-                pkHits->AddBack(pkNode->m_data);
+                pkHits->pushBack(pkNode->m_data);
                 iCount++;
             }
             pkNode = pkNext;
@@ -268,7 +242,7 @@ __forceinline int TreeD1C::queryAll(const hkAabbD1C& kAabb, CollectorD1C* pkColl
 }
 
 // @fnv 0x00d1ce50
-int __cdecl FUN_00d1ce50(TreeD1C* pkTree, const hkAabbD1C& kAabb, CollectorD1C* pkCollector, hkArrayIntD1C* pkHits,
+int __cdecl FUN_00d1ce50(TreeD1C* pkTree, const hkAabb& kAabb, CollectorD1C* pkCollector, hkArrayIntD1CLocalForm* pkHits,
                          int** ppiOut, int iMaxOut)
 {
     if (!pkTree->m_pTreeNode)
@@ -310,12 +284,6 @@ struct Collider
     virtual bool collide(Node* a, Node* b);
 };
 
-struct Pair
-{
-    Node* a;
-    Node* b;
-};
-
 struct HkAllocator
 {
     virtual void v0();
@@ -327,22 +295,9 @@ struct HkAllocator
 
 void FUN_00c908c0(S_00d1bcb0_Allocator* alloc, void* arr, int cap, int elemSize);
 
-struct Stack
-{
-    Pair* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    Pair m_kStorage[64];
-
-    __forceinline void init()
-    {
-        m_data = m_kStorage;
-        m_iElementCount = 0;
-        m_iCapacityState = 0x80000040;
-    }
-
-    __forceinline void SetSizeAndGrow(int n)
-    {
+// src: XBOX_PDB (hkInplaceArray<...::NodePair,64,hkContainerHeapAllocator> family).
+// Exe 0x00d1d890: 64 inline node pairs, grown and released with the heap allocator.
+template <> __forceinline void hkArray<Pair,hkContainerHeapAllocator>::setSize(int n) {
         S_00d1bcb0_Router* router = FUN_00c85750();
         S_00d1bcb0_Allocator* alloc = router->m_pStreamAllocator;
         int cap = m_iCapacityState & 0x3fffffff;
@@ -355,9 +310,7 @@ struct Stack
         }
         m_iElementCount = n;
     }
-
-    __forceinline void release()
-    {
+template <> __forceinline hkArray<Pair,hkContainerHeapAllocator>::~hkArray() {
         S_00d1bcb0_Router* router = FUN_00c85750();
         HkAllocator* alloc = (HkAllocator*)router->m_pStreamAllocator;
         int flags = m_iCapacityState;
@@ -365,7 +318,8 @@ struct Stack
         if ((flags & 0x80000000) == 0)
             alloc->ReturnMemory(m_data, (flags & 0x3fffffff) * (int)sizeof(Pair));
     }
-};
+typedef hkInplaceArray<Pair,64,hkContainerHeapAllocator> AabbQueryPairStack;
+
 
 // @fnv 0x00d1d890
 int FUN_00d1d890(Tree* treeA, Tree* treeB, Collider* cb)
@@ -375,11 +329,11 @@ int FUN_00d1d890(Tree* treeA, Tree* treeB, Collider* cb)
     if (rootA && rootB)
     {
         int iAllocationSize = 64;
-        Stack stack;
-        stack.init();
-        stack.SetSizeAndGrow(iAllocationSize);
-        stack.m_data[0].a = rootA;
-        stack.m_data[0].b = rootB;
+        AabbQueryPairStack stack;
+
+        stack.setSize(iAllocationSize);
+        stack.m_data[0].a = (int)rootA;
+        stack.m_data[0].b = (int)rootB;
         int index = 1;
 
         do
@@ -391,13 +345,13 @@ int FUN_00d1d890(Tree* treeA, Tree* treeB, Collider* cb)
             int p3 = p2;
             int p4 = p3;
             index = p4;
-            Node* nodeA = stack.m_data[index - 1].a;
-            Node* nodeB = stack.m_data[index - 1].b;
+            Node* nodeA = (Node*)stack.m_data[index - 1].a;
+            Node* nodeB = (Node*)stack.m_data[index - 1].b;
             index--;
             if (index > iAllocationSize - 4)
             {
                 iAllocationSize *= 2;
-                stack.SetSizeAndGrow(iAllocationSize);
+                stack.setSize(iAllocationSize);
             }
 
             unsigned int aLeaf = nodeA->m_flags & 0x80000000u;
@@ -412,14 +366,14 @@ int FUN_00d1d890(Tree* treeA, Tree* treeB, Collider* cb)
                 _mm_prefetch((const char*)c0, _MM_HINT_NTA);
                 Node* c1 = treeA->m_kNodeCollection.FUN_00d9a4c0(nodeA->m_child1);
                 _mm_prefetch((const char*)c1, _MM_HINT_NTA);
-                stack.m_data[index].a = c0;
-                stack.m_data[index].b = c0;
+                stack.m_data[index].a = (int)c0;
+                stack.m_data[index].b = (int)c0;
                 index++;
-                stack.m_data[index].a = c0;
-                stack.m_data[index].b = c1;
+                stack.m_data[index].a = (int)c0;
+                stack.m_data[index].b = (int)c1;
                 index++;
-                stack.m_data[index].a = c1;
-                stack.m_data[index].b = c1;
+                stack.m_data[index].a = (int)c1;
+                stack.m_data[index].b = (int)c1;
                 index++;
             }
             else
@@ -440,12 +394,12 @@ int FUN_00d1d890(Tree* treeA, Tree* treeB, Collider* cb)
                     {
                         Node* c0 = treeB->m_kNodeCollection.FUN_00d9a4c0(nodeB->m_child0);
                         Node* c1 = treeB->m_kNodeCollection.FUN_00d9a4c0(nodeB->m_child1);
-                        stack.m_data[index].a = nodeA;
-                        stack.m_data[index].b = c0;
+                        stack.m_data[index].a = (int)nodeA;
+                        stack.m_data[index].b = (int)c0;
                         _mm_prefetch((const char*)c0, _MM_HINT_NTA);
                         index++;
-                        stack.m_data[index].a = nodeA;
-                        stack.m_data[index].b = c1;
+                        stack.m_data[index].a = (int)nodeA;
+                        stack.m_data[index].b = (int)c1;
                         _mm_prefetch((const char*)c1, _MM_HINT_NTA);
                         index++;
                     }
@@ -454,12 +408,12 @@ int FUN_00d1d890(Tree* treeA, Tree* treeB, Collider* cb)
                 {
                     Node* c0 = treeA->m_kNodeCollection.FUN_00d9a4c0(nodeA->m_child0);
                     Node* c1 = treeA->m_kNodeCollection.FUN_00d9a4c0(nodeA->m_child1);
-                    stack.m_data[index].a = c0;
-                    stack.m_data[index].b = nodeB;
+                    stack.m_data[index].a = (int)c0;
+                    stack.m_data[index].b = (int)nodeB;
                     _mm_prefetch((const char*)c0, _MM_HINT_NTA);
                     index++;
-                    stack.m_data[index].a = c1;
-                    stack.m_data[index].b = nodeB;
+                    stack.m_data[index].a = (int)c1;
+                    stack.m_data[index].b = (int)nodeB;
                     _mm_prefetch((const char*)c1, _MM_HINT_NTA);
                     index++;
                 }
@@ -473,23 +427,23 @@ int FUN_00d1d890(Tree* treeA, Tree* treeB, Collider* cb)
                     _mm_prefetch((const char*)b0, _MM_HINT_NTA);
                     Node* b1 = treeB->m_kNodeCollection.FUN_00d9a4c0(nodeB->m_child1);
                     _mm_prefetch((const char*)b1, _MM_HINT_NTA);
-                    stack.m_data[index].a = a0;
-                    stack.m_data[index].b = b0;
+                    stack.m_data[index].a = (int)a0;
+                    stack.m_data[index].b = (int)b0;
                     index++;
-                    stack.m_data[index].a = a0;
-                    stack.m_data[index].b = b1;
+                    stack.m_data[index].a = (int)a0;
+                    stack.m_data[index].b = (int)b1;
                     index++;
-                    stack.m_data[index].a = a1;
-                    stack.m_data[index].b = b0;
+                    stack.m_data[index].a = (int)a1;
+                    stack.m_data[index].b = (int)b0;
                     index++;
-                    stack.m_data[index].a = a1;
-                    stack.m_data[index].b = b1;
+                    stack.m_data[index].a = (int)a1;
+                    stack.m_data[index].b = (int)b1;
                     index++;
                 }
             }
         } while (index);
 
-        stack.release();
+
     }
     return 0;
 }

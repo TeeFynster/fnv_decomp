@@ -3,10 +3,11 @@
 
 template <>
 // @fnv 0x00a642a0
-void NiTStringTemplateMap<NiTPointerMap<const char*, NiShader*>, NiShader*>::SetAt(
+void NiTMapBase<NiTPointerAllocator<unsigned int>, const char*, NiShader*>::SetAt(
     const char* key, NiShader* value)
 {
-    register NiTStringTemplateMap<NiTPointerMap<const char*, NiShader*>, NiShader*>* map = this;
+    register NiTStringTemplateMap<NiTPointerMap<const char*, NiShader*>, NiShader*>* map =
+        static_cast<NiTStringTemplateMap<NiTPointerMap<const char*, NiShader*>, NiShader*>*>(this);
     register unsigned int index = map->KeyToHashIndex(key);
     register NiTMapItem<const char*, NiShader*>* item = map->m_ppkHashTable[index];
     while (item)
@@ -15,25 +16,26 @@ void NiTStringTemplateMap<NiTPointerMap<const char*, NiShader*>, NiShader*>::Set
         {
             if (!map->m_bCopy)
                 item->m_key = key;
-            item->m_uiFilterValue = value;
+            item->m_val = value;
             return;
         }
         item = item->m_pkNext;
     }
 
-    item = (NiTMapItem<const char*, NiShader*>*)map->m_kList.AddHead();
+    item = (NiTMapItem<const char*, NiShader*>*)map->m_kItemCount.Allocate();
     map->SetValue(item, key, value);
     item->m_pkNext = map->m_ppkHashTable[index];
     map->m_ppkHashTable[index] = item;
-    ++map->m_kList.m_uiCount;
+    ++map->m_kItemCount.m_uiCount;
 }
 
 template <>
 // @fnv 0x00a643e0
-void NiTStringTemplateMap<NiTPointerMap<const char*, unsigned short>, unsigned short>::SetAt(
+void NiTMapBase<NiTPointerAllocator<unsigned int>, const char*, unsigned short>::SetAt(
     const char* key, unsigned short value)
 {
-    register NiTStringTemplateMap<NiTPointerMap<const char*, unsigned short>, unsigned short>* map = this;
+    register NiTStringTemplateMap<NiTPointerMap<const char*, unsigned short>, unsigned short>* map =
+        static_cast<NiTStringTemplateMap<NiTPointerMap<const char*, unsigned short>, unsigned short>*>(this);
     register unsigned int index = map->KeyToHashIndex(key);
     register NiTMapItem<const char*, unsigned short>* item = map->m_ppkHashTable[index];
     while (item)
@@ -42,17 +44,17 @@ void NiTStringTemplateMap<NiTPointerMap<const char*, unsigned short>, unsigned s
         {
             if (!map->m_bCopy)
                 item->m_key = key;
-            item->m_uiFilterValue = value;
+            item->m_val = value;
             return;
         }
         item = item->m_pkNext;
     }
 
-    item = (NiTMapItem<const char*, unsigned short>*)map->m_kList.AddHead();
+    item = (NiTMapItem<const char*, unsigned short>*)map->m_kItemCount.Allocate();
     map->SetValue(item, key, value);
     item->m_pkNext = map->m_ppkHashTable[index];
     map->m_ppkHashTable[index] = item;
-    ++map->m_kList.m_uiCount;
+    ++map->m_kItemCount.m_uiCount;
 }
 
 #pragma function(strlen)
@@ -70,7 +72,7 @@ void NiTStringTemplateMap<NiTPointerMap<const char*, int>, int>::SetValue(NiTMap
     }
     else
         item->m_key = key;
-    item->m_uiFilterValue = value;
+    item->m_val = value;
 }
 
 

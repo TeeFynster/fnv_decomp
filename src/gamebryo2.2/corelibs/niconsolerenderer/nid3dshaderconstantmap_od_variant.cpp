@@ -2,7 +2,7 @@
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 #include "nid3dshaderconstantmap_decls.h"
-void BuildTransformMatrix(float* d, const ThreeByThreeMatrix& r, const NiPoint3& t, float s);
+void BuildTransformMatrix(float* d, const NiMatrix3& r, const NiPoint3& t, float s);
 struct NiShaderConstantMap
 {
     static bool __cdecl FindConstantMapping(char const*, unsigned int&, unsigned int&);

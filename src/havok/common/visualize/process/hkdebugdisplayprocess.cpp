@@ -33,13 +33,14 @@ struct Owner
     virtual void unk14();
     virtual void forward(unsigned int, unsigned int, unsigned int, float, float, float, unsigned int);
 };
-struct Interface
+// Exe 0x00ddc9c0: unit-local Interface view; declarations and layout are preserved.
+struct HkdebugdisplayprocessInterfaceView
 {
     void ForwardToOwner(unsigned int, unsigned int, unsigned int, float, float, float, unsigned int);
 };
 // Retrieves the Owner pointer stored 8 bytes before this Interface and forwards all seven arguments to its forward method.
 // @fnv 0x00ddc9c0
-void Interface::ForwardToOwner(unsigned int a, unsigned int b, unsigned int c, float d, float e, float f,
+void HkdebugdisplayprocessInterfaceView::ForwardToOwner(unsigned int a, unsigned int b, unsigned int c, float d, float e, float f,
                                unsigned int g)
 {
     Owner* owner = *(Owner**)((char*)this - 8);

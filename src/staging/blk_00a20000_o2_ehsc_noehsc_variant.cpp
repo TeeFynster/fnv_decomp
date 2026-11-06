@@ -5,7 +5,33 @@
 
 // src/staging/blk_00a20000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiBinaryStream.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiQuaternion.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiColor.h"
+#include "../../include/NiFloatInterpolator.h"
+#include "../../include/NiKeyBasedInterpolator.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTFixedStringMapBase.h"
+#include "../../include/NiTStringPointerMap.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+inline unsigned int NiBinaryStream::BinaryRead(void* buffer, unsigned int bytes, unsigned int* sizes, unsigned int count)
+{
+    unsigned int read = m_pfnRead(this, buffer, bytes, sizes, count);
+    m_uiAbsoluteCurrentPos += read;
+    return read;
+}
+
+inline unsigned int NiBinaryStream::BinaryWrite(const void* buffer, unsigned int bytes, unsigned int* sizes, unsigned int count)
+{
+    unsigned int written = m_pfnWrite(this, buffer, bytes, sizes, count);
+    m_uiAbsoluteCurrentPos += written;
+    return written;
+}
+
 void FUN_00a26f80(float* a, const float* b);
 extern "C" int _NiPoint3_ZERO;
 extern "C" unsigned int DAT_011f4270;
@@ -13,9 +39,6 @@ extern "C" unsigned int DAT_011f4274;
 void __cdecl FUN_00a27470(int a, int b, int c, int* p);
 extern "C" void __cdecl ReadBlockEntries(void*, void*);
 void __cdecl FUN_00a2a0e0(void* a, void* b, unsigned int c);
-struct MemoryManager {
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 void FUN_00a2a600(void* p);
 extern "C" void __cdecl SaveKey(int, int);
@@ -35,20 +58,20 @@ struct FUN_00a3ea40_cls {
 };
 struct P03MM { void* Allocate(unsigned int); };
 void* _memmove(void* d, const void* s, unsigned int n);
-struct Vec3S { float x, y, z; };
-struct Vec3R : Vec3S { Vec3R() {} };
+// Animation position/tangent payload: aggregate initialization and no constructor, unlike Vec3.
+struct AnimationPositionPayload { float x, y, z; };
 struct TCBKeyS {
     float time;
-    Vec3S pos;
-    Vec3S in;
-    Vec3S out;
+    AnimationPositionPayload pos;
+    AnimationPositionPayload in;
+    AnimationPositionPayload out;
     float extra[6];
     ~TCBKeyS() {}
     static void* operator new[](unsigned int n) { return ((P03MM*)&g_memoryManager)->Allocate(n); }
     static void operator delete[](void* p, unsigned int) { g_memoryManager.Deallocate(p); }
 };
 bool FindKeyIndex(float t, TCBKeyS* keys, unsigned int count, unsigned int* idx, unsigned int stride);
-Vec3R GetKeyPosAtTime(float t, TCBKeyS* keys, int type, unsigned int count, unsigned int stride);
+NiPoint3 GetKeyPosAtTime(float t, TCBKeyS* keys, int type, unsigned int count, unsigned int stride);
 void FUN_00a420e0(float p0, float t0, float* tan0, float p1, float t1, float* tan1, float t, float p, float* a, float* b);
 void ComputeTCBKeyTangents(TCBKeyS* keys, unsigned int count, unsigned int stride);
 bool FUN_00a282a0(float t, TCBKeyS** pKeys, unsigned int* pCount);
@@ -57,19 +80,8 @@ void StoreGlobalByte(int a, int b, int c, unsigned char* d);
 struct Inner_00a6db50 { void Set(float, float, float, float); };
 Inner_00a6db50* ScaleAndApply(Inner_00a6db50* a, float b, const float* c);
 void CopyFloat7(float* dst, const float* src);
-struct NiTMapBaseStub { void RemoveAll(); };
 struct FUN_00a30880_T { void ReleaseItems(); };
 struct HolderBase { void FUN_00a2e620(); };
-struct NiTMapBase_StandIn {
-    char pad[0x34];
-    HolderBase h1;
-    unsigned short usSize1;
-    void** pp1;
-    NiTMapBaseStub map1;
-    unsigned short usSize2;
-    NiTMapBaseStub map2;
-    void ClearEntries();
-};
 void CopyFloatBlock(float* dst, const float* src);
 struct FUN_00a29a70 : public Inner_00a6db50 {
     float a, b, c, d;
@@ -109,14 +121,8 @@ struct FUN_00a30700_T {
     void* p1;
     void ReleaseRefs();
 };
-struct NiStream {
-    void* GetLoadedObject();
-};
 struct Base_00a26eb0 {
     void AccumulateAnimSink(NiStream&);
-};
-struct NiColor {
-    void LoadBinary(NiStream&);
 };
 struct FUN_00a27430_T : Base_00a26eb0 {
     char pad[4];
@@ -143,17 +149,9 @@ struct SStream;
 struct SObj;
 void __cdecl WriteFloatToStream(SStream*, SObj*);
 void __cdecl FUN_00a2d230(SStream* a, SObj* b, unsigned int c);
-struct NiTFixedStringMap_NiAVObject___ {
-    void* pad[2];
-    void RemoveAll();
-};
 extern int DAT_01096114;
 extern void __cdecl _NiFree(void*);
 extern MemoryManager _g_memoryManager;
-struct FUN_00a2e790_StandIn : public NiTFixedStringMap_NiAVObject___ {
-    void* p;
-    void* DestroyFixedStringMap(unsigned char deleting);
-};
 struct FUN_00a39120_cls {
     float x, y, z, w;
     Inner_00a6db50* FUN_00a39120(Inner_00a6db50* out, float s);
@@ -204,18 +202,6 @@ class A27250Heap {
 public:
     void* Allocate(unsigned int uiSize);
 };
-struct A27250BinaryStream {
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int (*m_pfnRead)(A27250BinaryStream* pkStream, void* pvBuffer, unsigned int uiSize, unsigned int* puiSizes, unsigned int ItemUpdateArray);
-
-    unsigned int BinaryRead(void* p, unsigned int n, unsigned int* sizes, unsigned int count)
-    {
-        unsigned int read = m_pfnRead(this, p, n, sizes, count);
-        m_uiStreamFlags += read;
-        return read;
-    }
-};
 class A27250Stream {
 public:
     int unk000;
@@ -232,10 +218,10 @@ public:
     int unk1E4; int unk1E8; int unk1EC; int unk1F0; int unk1F4; int unk1F8; int unk1FC; int unk200; int unk204; int unk208; int unk20C; int unk210;
     int unk214; int unk218; int unk21C; int unk220; int unk224; int unk228; int unk22C; int unk230; int unk234; int unk238; int unk23C; int unk240;
     int unk244; int unk248;
-    A27250BinaryStream* m_pUnderlyingStream;
+    NiBinaryStream* m_pUnderlyingStream;
 };
 template <class T>
-inline void A27250BinaryStreamLoad(A27250BinaryStream& kIstr, T* pValue, unsigned int uiNumEls = 1)
+inline void A27250BinaryStreamLoad(NiBinaryStream& kIstr, T* pValue, unsigned int uiNumEls = 1)
 {
     unsigned int uiSize = sizeof(T);
     kIstr.BinaryRead(pValue, uiNumEls * uiSize, &uiSize, 1);
@@ -366,7 +352,7 @@ struct A27C80CubicKey {
 void EvaluateCubicKey(float fTime, const A27C80CubicKey& kKey, unsigned int uiUnused, A27C80Point3& kResult);
 extern double DAT_01021928;
 extern double DAT_01011590;
-void __cdecl FUN_00a27d60(float t, TCBKeyS* key, unsigned int type, Vec3S* result);
+void __cdecl FUN_00a27d60(float t, TCBKeyS* key, unsigned int type, AnimationPositionPayload* result);
 class A281E0Heap {
 public:
     void* Allocate(unsigned int uiSize);
@@ -422,20 +408,8 @@ struct A28260Key {
 };
 void __cdecl ApplyAnimToTarget(NiStream& kStream, A28260Key* pkKey);
 void __cdecl SaveKeyArray(NiStream& kStream, A28260Key* pkKeys, unsigned int uiNumKeys);
-struct Vec4_b5508 {
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct Inner_b5508 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    Vec4_b5508* Set(float a, float b, float c, float d);
-};
-void FUN_00a286e0(unsigned int a0, unsigned int a1, unsigned int a2, Vec4_b5508* out);
+// Identity rotation output; the original setter at 0x00a6db50 is NiQuaternion::SetValues.
+void FUN_00a286e0(unsigned int a0, unsigned int a1, unsigned int a2, NiQuaternion* out);
 struct FUN_00a28720_target {
     void __thiscall FUN_00a6e4a0(void* value);
 };
@@ -503,11 +477,6 @@ extern void  __cdecl FUN_00a28ab0(FNVAnim* obj, unsigned int count, unsigned int
 extern FNVQuat* __cdecl FUN_00a6dd50(FNVQuat* out, FNVQuat* a, FNVQuat* b, FNVQuat* c);
 void __cdecl FUN_00a28dc0(FNVAnim* obj, unsigned int count, unsigned int flag);
 // The game class NiBound - a 16-byte bound (three position floats and a radius).
-class NiBound {
-public:
-    float x, y, z, r;
-    bool FUN_00a92660(const NiBound& other);
-};
 // UHelper layout as read off the image: a float at +0, then two 16-byte
 // NiBound sub-objects at +4 and at +0x14.
 struct UHelper {
@@ -742,19 +711,6 @@ extern "C" void __stdcall FNV_array_ctor_iterator(void* base, unsigned int size,
 // The element constructor of the allocated object.
 extern "C" void __cdecl FNV_element_ctor(void* self);
 bool UpdateArrayElements(float t, void** pOut, int* pFlag);
-class A29F00BinaryStream {
-public:
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int (__cdecl *m_pfnRead)(A29F00BinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
 class A29F00Stream {
 public:
     int unk000;
@@ -904,10 +860,10 @@ public:
     int unk240;
     int unk244;
     int unk248;
-    A29F00BinaryStream* m_pUnderlyingStream;
+    NiBinaryStream* m_pUnderlyingStream;
 };
 template <class T>
-inline void A29F00BinaryStreamLoad(A29F00BinaryStream& kIstr, T* pValue, unsigned int uiNumEls = 1)
+inline void A29F00BinaryStreamLoad(NiBinaryStream& kIstr, T* pValue, unsigned int uiNumEls = 1)
 {
     unsigned int uiSize = sizeof(T);
     kIstr.BinaryRead(pValue, uiNumEls * uiSize, &uiSize, 1);
@@ -933,22 +889,6 @@ public:
     unsigned int m_aeKeyType[3];
     unsigned char m_aucKeySize[4];
     void* m_ppKeyData[3];
-};
-struct A29FE0Stream {
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    int unk08;
-    unsigned int (*m_pfnRead)(A29FE0Stream* pkStream, void* pvBuffer, unsigned int uiSize, unsigned int* puiSizes, unsigned int ItemUpdateArray);
-
-    unsigned int BinaryRead(void* p, unsigned int n, unsigned int* sizes, unsigned int count) {
-        unsigned int read = m_pfnRead(this, p, n, sizes, count);
-        m_uiStreamFlags += read;
-        return read;
-    }
-    unsigned int Read(void* p, unsigned int n) {
-        unsigned int size = n;
-        return BinaryRead(p, n, &size, 1);
-    }
 };
 struct A29FE0Context {
     int unk000;
@@ -1099,7 +1039,7 @@ struct A29FE0Context {
     int unk244;
     int unk248;
     int unk24C;
-    A29FE0Stream* m_pDataStream;
+    NiBinaryStream* m_pDataStream;
 };
 struct A29FE0Block {
     int unk00;
@@ -1141,13 +1081,8 @@ struct QuaternionKey {
     Quaternion value;
 };
 void __cdecl InterpolateQuaternion(float interpolation, const QuaternionKey* first, const QuaternionKey* second, Quaternion* output);
-struct Pt3 {
-    float x;
-    float y;
-    float z;
-};
 float __cdecl FUN_00a42050(float a, float b, float c);
-void __cdecl FUN_00a2a560(float s, const Pt3* a, const Pt3* b, float* out);
+void __cdecl FUN_00a2a560(float s, const NiPoint3* a, const NiPoint3* b, float* out);
 struct CopyTail12 {
     unsigned int m_00;
     unsigned int m_04;
@@ -1179,19 +1114,19 @@ struct VertexRecord {
     static void* operator new[](unsigned int size) { return ((P03MM*)&g_memoryManager)->Allocate(size); }
 };
 VertexRecord* __cdecl CreateVertexRecords(int v, unsigned int count);
-// MemoryManager, P03MM, Vec3S, Vec3R come from the pack header.
+// MemoryManager, P03MM, AnimationPositionPayload, NiPoint3 come from the pack header.
 extern MemoryManager g_memoryManager;
 void* _memmove(void* d, const void* s, unsigned int n);
 struct TCBKeyS;
 bool FindKeyIndex(float t, TCBKeyS* keys, unsigned int count, unsigned int* idx, unsigned int stride);
-Vec3R GetKeyPosAtTime(float t, TCBKeyS* keys, int type, unsigned int count, unsigned int stride);
+NiPoint3 GetKeyPosAtTime(float t, TCBKeyS* keys, int type, unsigned int count, unsigned int stride);
 // Linear position key: time + position (16 bytes).
 struct AnimKeyBase {
     float time;
     ~AnimKeyBase() throw() {}
 };
 struct LinPosKey : AnimKeyBase {
-    Vec3S pos;
+    AnimationPositionPayload pos;
     static void* operator new[](unsigned int n) { return ((P03MM*)&g_memoryManager)->Allocate(n); }
     static void operator delete[](void* p) { g_memoryManager.Deallocate(p); }
 };
@@ -1225,13 +1160,13 @@ bool __cdecl IsLightEqual(A2AE90Light* pkA, A2AE90Light* pkB);
 // FNV candidate v2: AllocateBezierKeys (0x00a2af30, 61 bytes)
 // return new BezierKeyS[count]; with sizeof(element)=76 (0x4c), non-trivial dtor -> 4-byte cookie,
 // class-specific operator new[] inlining to ((P03MM*)&g_memoryManager)->Allocate(n).
-// Packet TU already provides MemoryManager/Vec3S/P03MM/g_memoryManager/TCBKeyS(64B);
+// Packet TU already provides MemoryManager/AnimationPositionPayload/P03MM/g_memoryManager/TCBKeyS(64B);
 // element type must be 76 bytes, so it is a distinct type, not the packet's TCBKeyS.
 struct BezierKeyS {
     float time;
-    Vec3S pos;
-    Vec3S in;
-    Vec3S out;
+    AnimationPositionPayload pos;
+    AnimationPositionPayload in;
+    AnimationPositionPayload out;
     float extra[9];
     ~BezierKeyS() {}
     static void* operator new[](unsigned int n) { return ((P03MM*)&g_memoryManager)->Allocate(n); }
@@ -1279,57 +1214,15 @@ struct S_00a2b050_Obj {
 S_00a2b050_V3* __cdecl ComputeInterpolatedPosition(float t, S_00a2b050_Obj* o, int unused, S_00a2b050_V3* out);
 extern "C" double DAT_01034208;
 extern "C" double DAT_01011590;
-struct Vector3 {
-    float x, y, z;
-    Vector3 operator*(double multiplier) const {
-        Vector3 scaled;
-        scaled.x = float(x * multiplier);
-        scaled.y = float(y * multiplier);
-        scaled.z = float(z * multiplier);
-        return scaled;
-    }
-    Vector3 operator*(float multiplier) const {
-        Vector3 scaled;
-        scaled.x = x * multiplier;
-        scaled.y = y * multiplier;
-        scaled.z = z * multiplier;
-        return scaled;
-    }
-    Vector3 operator+(const Vector3& right) const {
-        Vector3 sum;
-        sum.x = x + right.x;
-        sum.y = y + right.y;
-        sum.z = z + right.z;
-        return sum;
-    }
-};
-void __cdecl FUN_00a2b130(float amount, const float* transform, unsigned int unused, Vector3* result);
-struct NiBinaryStreamStandIn {
-    virtual void v00(); virtual void v01(); virtual void v02(); virtual void v03();
-    virtual void SetEndianSwap(bool bSwap);
-
-    unsigned int m_uiStreamFlags;
-    unsigned int (__cdecl* m_pfnRead)(NiBinaryStreamStandIn* pkThis, void* pvBuffer, unsigned int uiBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-    template <class T> unsigned int Read(T* pValue)
-    {
-        unsigned int uiSize = sizeof(T);
-        return BinaryRead(pValue, sizeof(T), &uiSize, 1);
-    }
-};
+void __cdecl FUN_00a2b130(float amount, const float* transform, unsigned int unused, NiPoint3* result);
 struct NiStreamImpl {
     char pad[0x24c];
-    NiBinaryStreamStandIn* m_pUnderlyingStream;
+    NiBinaryStream* m_pUnderlyingStream;
 };
 template <class T> inline void ReadBinaryValue(NiStreamImpl& stream, T& value)
 {
-    stream.m_pUnderlyingStream->Read(&value);
+    unsigned int size = sizeof(T);
+    stream.m_pUnderlyingStream->BinaryRead(&value, sizeof(T), &size, 1);
 }
 struct FUN_00a2b980_cls {
     char unk00[0x10];
@@ -1339,27 +1232,6 @@ struct FUN_00a2b980_cls {
 
     void FUN_00a27430(NiStreamImpl& stream);
     void FUN_00a2b980(NiStreamImpl& stream);
-};
-class BA2BA10BinaryStream {
-public:
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int (__cdecl *m_pfnRead)(BA2BA10BinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int (__cdecl *m_pfnWrite)(BA2BA10BinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-
-    unsigned int BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesWritten = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesWritten;
-        return uiBytesWritten;
-    }
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
 };
 class BA2BA10Stream {
 public:
@@ -1510,11 +1382,11 @@ public:
     int unk240;
     int unk244;
     int unk248;
-    BA2BA10BinaryStream* m_pUnderlyingStream;
-    BA2BA10BinaryStream* m_pBackingStream;
+    NiBinaryStream* m_pUnderlyingStream;
+    NiBinaryStream* m_pBackingStream;
 };
 template <class T>
-inline void BA2BA10BinaryStreamSave(BA2BA10BinaryStream& kOstr, const T* pValue, unsigned int uiNumEls = 1)
+inline void BA2BA10BinaryStreamSave(NiBinaryStream& kOstr, const T* pValue, unsigned int uiNumEls = 1)
 {
     unsigned int uiSize = sizeof(T);
     kOstr.BinaryWrite(pValue, uiNumEls * uiSize, &uiSize, 1);
@@ -1618,11 +1490,6 @@ struct Quad64
 };
 void __cdecl FUN_00a28ab0(void* a, unsigned int count, void* c);
 void __cdecl FUN_00a2c130(Quad64* base, unsigned int count, void* c);
-struct S_a2c300_Istr {
-    int unk0;
-    int unk4;
-    unsigned (__cdecl *unk8)(S_a2c300_Istr*, void*, unsigned, unsigned*, unsigned);
-};
 struct S_a2c300_Stream {
     int unk0;
     int unk4;
@@ -1771,11 +1638,11 @@ struct S_a2c300_Stream {
     int unk240;
     int unk244;
     int unk248;
-    S_a2c300_Istr* unk24c;
+    NiBinaryStream* unk24c;
 };
-__forceinline void S_a2c300_SaveI(S_a2c300_Istr* i, void* src, unsigned bytes) {
+__forceinline void S_a2c300_SaveI(NiBinaryStream* i, void* src, unsigned bytes) {
     unsigned sz = bytes;
-    i->unk4 += i->unk8(i, src, bytes, &sz, 1);
+    i->m_uiAbsoluteCurrentPos += i->m_pfnRead(i, src, bytes, &sz, 1);
 }
 __forceinline void S_a2c300_Save(S_a2c300_Stream* s, void* src, unsigned bytes) {
     S_a2c300_SaveI(s->unk24c, src, bytes);
@@ -2182,36 +2049,14 @@ struct FUN_00a2c9d0_cls {
     void FUN_00a26eb0(S_00a2c9d0_Owner* owner);
     void FUN_00a2c9d0(S_00a2c9d0_Owner* owner);
 };
-struct NiBinaryStreamW {
-    void* m_vtbl;
-    unsigned int m_uiStreamFlags;
-    char _08[4];
-    unsigned int (__cdecl* m_pfnWrite)(NiBinaryStreamW* pkThis, const void* pvBuffer, unsigned int uiBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    unsigned int BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesWritten = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesWritten;
-        return uiBytesWritten;
-    }
-    template <class T> unsigned int Write(const T* pValue)
-    {
-        unsigned int uiSize = sizeof(T);
-        return BinaryWrite(pValue, sizeof(T), &uiSize, 1);
-    }
-};
-struct NiStreamStandInW {
-    char _000[0x250];
-    NiBinaryStreamW* m_pBackingStream;
-};
 struct FUN_00a2ca60_Obj {
     char _00[8];
     unsigned int m_08;
     unsigned int m_0c;
     unsigned int m_10;
 };
-void __cdecl WriteFloatToStream(NiStreamStandInW* pkStream, FUN_00a2ca60_Obj* pkObj);
-void __cdecl FUN_00a2ca60(NiStreamStandInW* pkStream, FUN_00a2ca60_Obj* pkObj);
+void __cdecl WriteFloatToStream(NiStream* pkStream, FUN_00a2ca60_Obj* pkObj);
+void __cdecl FUN_00a2ca60(NiStream* pkStream, FUN_00a2ca60_Obj* pkObj);
 struct KeyframeElement {
     float time;
     float value;
@@ -2485,29 +2330,8 @@ public:
     virtual void v40(int a, int b, int c, int d);
     void FUN_00a3a730(int a, int b);
 };
-class NiMemObject {
-public:
-    static void* operator new(unsigned int size);
-};
-class NiKeyBasedInterpolator : public NiMemObject {
-public:
-    virtual ~NiKeyBasedInterpolator();
-    unsigned int unk04;
-    float unk08;
-    NiKeyBasedInterpolator();
-};
+#include "../../include/NiMemObject.h"
 extern float DAT_0109a918;
-class NiFloatInterpolator : public NiKeyBasedInterpolator {
-public:
-    float value;
-    void* data;
-    unsigned int lastIndex;
-    NiFloatInterpolator() : NiKeyBasedInterpolator() {
-        value = DAT_0109a918;
-        data = 0;
-        lastIndex = 0;
-    }
-};
 inline void* __cdecl operator new(unsigned int, void* memory) throw() {
     return memory;
 }
@@ -2739,32 +2563,18 @@ struct FUN_00a2ab10_T {
 void __cdecl FUN_00a2ab10(FUN_00a2ab10_T* dst, const FUN_00a2ab10_T* src);
 struct BezPosKey {
     float time;
-    Vec3S pos;
-    Vec3S in;
-    Vec3S out;
-    Vec3S unk28;
-    Vec3S unk34;
-    Vec3S unk40;
+    AnimationPositionPayload pos;
+    AnimationPositionPayload in;
+    AnimationPositionPayload out;
+    AnimationPositionPayload unk28;
+    AnimationPositionPayload unk34;
+    AnimationPositionPayload unk40;
     ~BezPosKey() {}
     static void* operator new[](unsigned int n) { return ((P03MM*)&g_memoryManager)->Allocate(n); }
     static void operator delete[](void* p) { g_memoryManager.Deallocate(p); }
 };
 void BezSortKeys(BezPosKey* keys, unsigned int count, unsigned int stride);
 bool InsertBezPosKey(float t, BezPosKey** pKeys, unsigned int* pCount);
-class NiAnimationKeyA3D {
-public:
-    float GetTime() const { return m_fTime; }
-
-    NiAnimationKeyA3D* GetKeyPointerByIndex(unsigned int uiIndex, unsigned char ucKeySize)
-    {
-        return (NiAnimationKeyA3D*)((char*)this + uiIndex * ucKeySize);
-    }
-
-    static bool FindKeyIndex(float fTime, NiAnimationKeyA3D* pkKeys, unsigned int uiNumKeys,
-        unsigned int& uiIndex, unsigned char ucKeySize);
-
-    float m_fTime;
-};
 extern "C" double DAT_01011590;
 extern "C" double DAT_01021928;
 void ComputeTCBKeyTangents(TCBKeyS* keys, unsigned int count, unsigned int stride);
@@ -2800,16 +2610,9 @@ bool AreRecordsEqual(const A2C550Key& kA, const A2C550Key& kB);
 bool FUN_00a2c550(const A2C550Key& kA, const A2C550Key& kB);
 void __cdecl FUN_00a29660(void* dst, const void* src);
 void __cdecl FUN_00a2cfd0(void* target, const unsigned char* source, unsigned int count);
-struct Point415 {
- float x,y,z;
- Point415() {}
- Point415(float a,float b,float c):x(a),y(b),z(c) {}
- Point415 operator-(const Point415& other) const {
-  return Point415(x-other.x,y-other.y,z-other.z);
- }
-};
-struct Key415 { float time; Point415 value; };
-void FUN_00a2d420(float unused,const Key415& a,const Key415& b,Point415& result);
+// Position-key subtraction at 0x00a2d420 uses NiPoint3, not the unrelated Point interface.
+struct Key415 { float time; NiPoint3 value; };
+void FUN_00a2d420(float unused,const Key415& a,const Key415& b,NiPoint3& result);
 struct FNVAnim;
 void __cdecl FUN_00a28ab0(FNVAnim* object, unsigned int count, unsigned int flags);
 void __cdecl FUN_00a2d670(FNVAnim* object, unsigned int count, unsigned int flags);

@@ -2,18 +2,15 @@
 // src/fallout/interface/interface_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/interface/interface.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
+#include "../../../include/BSSystemUtility.h"
+#include "../../../include/QueuedTreeModel.h"
 #include "interface_rebase_packet.h"
 class TESWorldSpace;
 class Menu;
 class TESForm;
-class TESObjectREFR;
 class NiControllerSequence;
-class BSSystemUtility
-{
-  public:
-    static int s_iUpdateEnabled;
-};
-class Interface
+// Exe 0x00b60040: unit-local InterfaceInterfaceView view used by this matched implementation.
+class InterfaceInterfaceView
 {
   public:
     static const char* GetInterfaceName();
@@ -95,7 +92,6 @@ class Interface
     static void SetHUDVisible(bool);
     static void SetTileFormattedText(Tile*, int, const char*, ...);
 };
-#include "interface_rebase_closure.h"
 const char kMeshesFolder[] = "Meshes";
 unsigned int FUN_00702440();
 bool FUN_00705100();
@@ -163,12 +159,6 @@ void Outer060::FUN_00b60060()
 }
 
 extern "C" char DAT_010ade08[];
-
-struct QueuedTreeModel
-{
-    bool FUN_00c3d0e0(char* pBuf, unsigned int uiSize, char const* pszName);
-    bool FUN_00b600c0(char* pBuf, unsigned int uiSize);
-};
 
 // @fnv 0x00b600c0
 bool QueuedTreeModel::FUN_00b600c0(char* pBuf, unsigned int uiSize)

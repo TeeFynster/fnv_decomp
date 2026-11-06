@@ -2,18 +2,17 @@
 // src/gamebryo2.2/corelibs/nimain/nicolorextradata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nicolorextradata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct FUN_00a893b0_shell
-{
-    void __thiscall SetValues(int a, int b, int c, int d);
-};
+#include <stddef.h>
+
+#include "../../../../include/NiColor.h"
+#include "../../../../include/NiColorExtraData.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiColorA.h"
 
 // @fnv 0x00a893b0
-void __thiscall FUN_00a893b0_shell::SetValues(int aiValue0, int aiValue1, int aiValue2, int aiValue3)
+void NiColorExtraData::SetColor(NiColorA kColor)
 {
-    *(int*)(this + 0xc) = aiValue0;
-    *(int*)(this + 0x10) = aiValue1;
-    *(int*)(this + 0x14) = aiValue2;
-    *(int*)(this + 0x18) = aiValue3;
+    m_kFogTint = kColor;
 }
 
 extern void* g_011f5b68;
@@ -28,89 +27,59 @@ extern "C" void __cdecl _FUN_00a7b300();
 extern void __cdecl _delete(void*, unsigned int);
 extern int DAT_0109eccc;
 
-struct NiColorExtraData_shell
-{
-    NiColorExtraData_shell* __thiscall Destroy(unsigned int flags);
-};
-
 // @fnv 0x00a89560
-NiColorExtraData_shell* __thiscall NiColorExtraData_shell::Destroy(unsigned int flags)
+NiColorExtraData* __fastcall DestroyColorExtraData(NiColorExtraData* self, void*, unsigned int flags)
 {
-    *reinterpret_cast<int**>(this) = &DAT_0109eccc;
+    *reinterpret_cast<int**>(self) = &DAT_0109eccc;
     _FUN_00a7b300();
     if (flags & 1)
-        _delete(this, 0x1c);
-    return this;
+        _delete(self, 0x1c);
+    return self;
 }
 
-struct NiStream;
+extern const NiColorA kBlackColor;
 
-struct NiExtraData
+// Keep construction and copying inline, as in the original clone routine.
+static __forceinline NiColorExtraData* InitializeColorExtraData(NiColorExtraData* self) throw()
 {
-    NiExtraData();
-    virtual ~NiExtraData();
-    void SaveBinary(NiStream& kStream);
-};
+    self->NiExtraData::FUN_00a7b2e0();
+    *reinterpret_cast<int**>(self) = &DAT_0109eccc;
+    volatile float* pColor = &self->m_kFogTint.r;
+    pColor[0] = 0.0f;
+    pColor[1] = 0.0f;
+    pColor[2] = 0.0f;
+    pColor[3] = 0.0f;
+    self->m_kFogTint = kBlackColor;
+    return self;
+}
 
-struct RgbaColor
+static __forceinline void CopyColorExtraData(NiColorExtraData* self, NiColorExtraData* pkDest, CloningProcess& kCloning)
 {
-    RgbaColor();
-    void SaveBinary(NiStream& kStream);
-};
-
-struct NiColorExtraData : NiExtraData
-{
-    unsigned char _pad[8];
-    RgbaColor m_kPrimaryColor;
-    void FUN_00a893d0(NiStream& kStream);
-};
+    self->NiExtraData::FUN_00a7b330(pkDest, &kCloning);
+    pkDest->m_kFogTint = self->m_kFogTint;
+}
 
 // @fnv 0x00a893d0
 void NiColorExtraData::FUN_00a893d0(NiStream& kStream)
 {
     NiExtraData::SaveBinary(kStream);
-    m_kPrimaryColor.SaveBinary(kStream);
+    m_kFogTint.SaveBinary(kStream);
 }
 
-struct NiColor
-{
-    float r, g, b;
-    void __thiscall LoadBinary(NiStream& kStream);
-};
-
-struct NiStream
-{
-    unsigned char _pad[0xd8];
-    unsigned int m_uiNifVersion;
-};
-
-struct NiColorA_LoadBinary_helper
-{
-    void __thiscall LoadBinary(NiStream& kStream);
-};
-
-struct NiExtraData_LoadBinary_helper
-{
-    void __thiscall LoadBinary(NiStream& kStream);
-};
-
-struct FUN_00a894f0_shell : NiColorExtraData
-{
-    void FUN_00a894f0(NiStream& kStream);
-};
-
 // @fnv 0x00a894f0
-void FUN_00a894f0_shell::FUN_00a894f0(NiStream& kStream)
+void __fastcall LoadColorExtraData(NiColorExtraData* self, void*, NiStream& kStream)
 {
-    ((NiExtraData_LoadBinary_helper*)this)->LoadBinary(kStream);
-    if (kStream.m_uiNifVersion < 0x0500000e)
+    self->NiExtraData::LoadBinary(kStream);
+    if (kStream.m_uiNifFileVersion < 0x0500000e)
     {
-        NiColor kTmpColor;
+        // The original initializes this temporary inline.
+        float afTmpColor[3];
+        NiColor& kTmpColor = reinterpret_cast<NiColor&>(afTmpColor);
         kTmpColor.r = 0.0f;
         kTmpColor.g = 0.0f;
         kTmpColor.b = 0.0f;
         kTmpColor.LoadBinary(kStream);
-        float* pColor = (float*)&m_kPrimaryColor;
+        float* pColor = (float*)&self->m_kFogTint;
         pColor[0] = kTmpColor.r;
         pColor[1] = kTmpColor.g;
         pColor[2] = kTmpColor.b;
@@ -118,90 +87,25 @@ void FUN_00a894f0_shell::FUN_00a894f0(NiStream& kStream)
     }
     else
     {
-        ((NiColorA_LoadBinary_helper*)&m_kPrimaryColor)->LoadBinary(kStream);
+        self->m_kFogTint.LoadBinary(kStream);
     }
 }
 
-class A89400CloningProcess;
-
-class A89400ColorA
-{
-  public:
-    float r;
-    float g;
-    float b;
-    float a;
-
-    A89400ColorA() : r(0.0f), g(0.0f), b(0.0f), a(0.0f)
-    {}
-
-    static const A89400ColorA BLACK;
-};
-
-class A89400ExtraData
-{
-  public:
-    A89400ExtraData() throw();
-    virtual ~A89400ExtraData();
-    static void* operator new(unsigned int uiSize) throw();
-    static void operator delete(void* pvMem);
-
-    void CopyMemberData(A89400ExtraData* pkDest, A89400CloningProcess& kCloning);
-
-    unsigned int m_uiRefCount;
-    char* m_kName;
-};
-
-class A89400ColorExtraData : public A89400ExtraData
-{
-  public:
-    __forceinline A89400ColorExtraData() throw()
-    {
-        m_kFogTint = A89400ColorA::BLACK;
-    }
-    virtual ~A89400ColorExtraData();
-
-    void CopyMemberData(A89400ColorExtraData* pkDest, A89400CloningProcess& kCloning)
-    {
-        A89400ExtraData::CopyMemberData(pkDest, kCloning);
-        pkDest->m_kFogTint = m_kFogTint;
-    }
-    A89400ColorExtraData* FUN_00a89400(A89400CloningProcess& kCloning);
-
-    A89400ColorA m_kFogTint;
-};
-
 // @fnv 0x00a89400
-A89400ColorExtraData* A89400ColorExtraData::FUN_00a89400(A89400CloningProcess& kCloning)
+NiColorExtraData* __fastcall CloneColorExtraData(NiColorExtraData* self, void*, CloningProcess& kCloning)
 {
-    A89400ColorExtraData* pkDest = new A89400ColorExtraData;
-    CopyMemberData(pkDest, kCloning);
+    NiColorExtraData* pkDest = static_cast<NiColorExtraData*>(NiExtraData::operator new(sizeof(NiColorExtraData)));
+    pkDest = pkDest ? InitializeColorExtraData(pkDest) : NULL;
+    CopyColorExtraData(self, pkDest, kCloning);
     return pkDest;
 }
 
-struct S_00a89590_Member
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    bool FUN_004a4c90(S_00a89590_Member* other);
-};
-
-struct S_00a89590
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    S_00a89590_Member m_unk0c;
-    bool FUN_00a89590(S_00a89590* other);
-};
-
 // @fnv 0x00a89590
-bool S_00a89590::FUN_00a89590(S_00a89590* other)
+bool __fastcall EqualColorExtraData(NiColorExtraData* self, void*, NiColorExtraData* other)
 {
     if (!other)
         return false;
-    if (m_unk0c.FUN_004a4c90(&other->m_unk0c))
+    if (self->m_kFogTint.operator!=(other->m_kFogTint))
         return false;
     return true;
 }
@@ -223,23 +127,9 @@ struct StreamShell
 void __stdcall FUN_00a7b580(void* pv);
 void* __cdecl FUN_00a7d330(void* pv);
 
-struct NameSink
-{
-    void* ToString(const char* pcText);
-};
-
-class ClaimCls
-{
-    unsigned char unk0[0xc];
-    NameSink m_sink;
-
-  public:
-    void WriteColorToStream(StreamShell& kStream);
-};
-
 // Writes a pointer obtained from g_011f5b68 and the result of ToString("Color = ") into kStream, growing the stream when its position reaches its size.
 // @fnv 0x00a895c0
-void ClaimCls::WriteColorToStream(StreamShell& kStream)
+void __fastcall WriteColorToStream(NiColorExtraData* self, void*, StreamShell& kStream)
 {
     FUN_00a7b580(&kStream);
     void* p = FUN_00a7d330(g_011f5b68);
@@ -250,7 +140,7 @@ void ClaimCls::WriteColorToStream(StreamShell& kStream)
         kStream.FUN_0096ad30(uiPos + kStream.m_usAdd);
     }
     kStream.FUN_0096ae90(uiPos, &p);
-    p = m_sink.ToString("Color = ");
+    p = self->m_kFogTint.GetViewerString("Color = ");
     uiPos = kStream.m_usPos;
     uiSize = kStream.m_usSize;
     if (uiPos >= uiSize)
@@ -259,13 +149,6 @@ void ClaimCls::WriteColorToStream(StreamShell& kStream)
     }
     kStream.FUN_0096ae90(uiPos, &p);
 }
-
-#include <stddef.h>
-struct NiExtraData_StandIn
-{
-    virtual ~NiExtraData_StandIn();
-    void FUN_00a7b2e0();
-};
 
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
 extern int DAT_0109eccc;
@@ -282,7 +165,7 @@ unsigned int* __cdecl FUN_00a89490()
 
     if (ptr != NULL)
     {
-        ((NiExtraData_StandIn*)ptr)->FUN_00a7b2e0();
+        ((NiExtraData*)ptr)->FUN_00a7b2e0();
 
         ptr[0] = (unsigned int)&DAT_0109eccc;
 

@@ -2,6 +2,9 @@
 // src/havok/physics/internal/collide/mopp/builder/splitter/hkpmoppdefaultsplitter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/builder/splitter/hkpmoppdefaultsplitter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../../include/BSAudio.h"
+#include "../../../../../../../../include/hkBool.h"
+
 struct FUN_00e0a070
 {
     void* m_00;
@@ -85,17 +88,9 @@ int S_00e0a0a0::FUN_00e0a0a0()
     return unk1C + unk14;
 }
 
-struct hkBoolE09F
-{
-    char m_cBooleanValue;
-    hkBoolE09F& operator=(bool e)
-    {
-        m_cBooleanValue = static_cast<char>(e);
-        return *this;
-    }
-};
 
-struct hkKeyPairE09F
+// Extent bit views at tree-node offsets 0x0c..0x20; these are min/max floats, not hkKeyPair keys.
+struct MoppExtentBits
 {
     int m_kMinimumCorner;
     int m_kMaximumCorner;
@@ -104,20 +99,20 @@ struct hkKeyPairE09F
 struct hkNodeE09F
 {
     hkNodeE09F* m_next;
-    hkBoolE09F m_uiBufferCapacity;
+    hkBool m_uiBufferCapacity;
     int unk08;
-    hkKeyPairE09F m_keys[3];
+    MoppExtentBits m_keys[3];
     int unk24;
     int unk28;
     int unk2C;
     int unk30;
     int unk34;
-    hkBoolE09F unk38;
-    hkBoolE09F unk39;
-    hkBoolE09F unk3A;
-    hkBoolE09F unk3B;
-    hkBoolE09F unk3C;
-    hkBoolE09F unk3D;
+    hkBool unk38;
+    hkBool unk39;
+    hkBool unk3A;
+    hkBool unk3B;
+    hkBool unk3C;
+    hkBool unk3D;
     int unk40;
     int unk44;
     int unk48;
@@ -329,15 +324,6 @@ struct FUN_00e0ac80_Alloc
     virtual void __thiscall FUN_00e0ac80_2(void* p, unsigned short size);
 };
 
-struct BSAudio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    FUN_00e0ac80_Alloc* unk10;
-};
-
 BSAudio* __cdecl FUN_00c85750(void);
 
 struct FUN_00e0ac80_class
@@ -356,7 +342,7 @@ FUN_00e0ac80_class* FUN_00e0ac80_class::Construct(int flags)
     if (flags & 1)
     {
         BSAudio* audio = FUN_00c85750();
-        audio->unk10->FUN_00e0ac80_2(this, this->m_04);
+        reinterpret_cast<FUN_00e0ac80_Alloc*>(audio->pListener)->FUN_00e0ac80_2(this, this->m_04);
     }
 
     return this;
@@ -454,20 +440,11 @@ void Obj::FUN_00e09970(Node* node, int* axes, float* weights)
     }
 }
 
-struct hkBoolE0A
-{
-    char m_cBooleanValue;
-    hkBoolE0A& operator=(bool b)
-    {
-        m_cBooleanValue = (char)b;
-        return *this;
-    }
-};
 
 struct NodeE0A
 {
     NodeE0A* m_next;
-    hkBoolE0A m_bSlotEnabled;
+    hkBool m_bSlotEnabled;
     char unk05;
     short unk06;
     int unk08;
@@ -541,13 +518,14 @@ NodeE0A* NodePoolE0A::PopNode()
     return node;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00e0a950 FUN_00e0a950: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_xor_ps(__m128, __m128);
-extern __m128 DAT_010c44d0;
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+extern LocalM128 DAT_010c44d0;
 extern double DAT_01011588;
 
 struct FUN_00e0a950_E
@@ -565,7 +543,7 @@ struct FUN_00e0a950_Sink
     virtual void v14();
     virtual void v18();
     virtual void v1c();
-    virtual void v20(FUN_00e0a950_E* e, const __m128* v, float f, int a2, void* p);
+    virtual void v20(FUN_00e0a950_E* e, const LocalM128* v, float f, int a2, void* p);
 };
 
 struct FUN_00e0a950_Src
@@ -573,7 +551,7 @@ struct FUN_00e0a950_Src
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
     int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     int unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c;
-    const __m128* unk60;
+    const LocalM128* unk60;
     float unk64;
     float unk68;
 };
@@ -613,10 +591,10 @@ void Cls_00e0a950::FUN_00e0a950(int a0, FUN_00e0a950_Src* a1, int a2, int* a3, i
         *a3 -= 1;
         *a4 += 1;
         *a7 -= 1;
-        const __m128* v = a1->unk60;
+        const LocalM128* v = a1->unk60;
         float f = (a1->unk68 + a1->unk64) * DAT_01011588;
         unk28->v20(*a5, v, f, a2, *a7);
-        __m128 neg = _mm_xor_ps(*v, DAT_010c44d0);
+        LocalM128 neg = _mm_xor_ps(*v, DAT_010c44d0);
         unk28->v20(*a5, &neg, -f, a2, *a5);
         *a5 += 1;
         break;
@@ -900,26 +878,18 @@ SplitNode* SplitBuilder::FUN_00e0a270(SplitNode* parent, SplitList* list, int si
     return node;
 }
 
-struct hkMemoryRouterE0A5
-{
-    void* m_00;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    void* m_10;
-};
 void* __cdecl AllocateWithHeader(void* pvAllocator, int iNumBytes);
 void __cdecl FUN_00c856c0(void* pvAllocator, void* pvMem);
 
 template <typename T> inline T* hkAllocateStackE0A5(int n)
 {
-    void* pvAllocator = (void*)FUN_00c85750()->unk10;
+    void* pvAllocator = (void*)FUN_00c85750()->pListener;
     return (T*)AllocateWithHeader(pvAllocator, n * sizeof(T));
 }
 
 template <typename T> inline void hkDeallocateStackE0A5(T* p)
 {
-    void* pvAllocator = (void*)FUN_00c85750()->unk10;
+    void* pvAllocator = (void*)FUN_00c85750()->pListener;
     FUN_00c856c0(pvAllocator, p);
 }
 
@@ -975,7 +945,8 @@ struct hkNodeBE0A5
         unk44, unk48, unk4c, unk50, unk54, unk58, unk5c, unk60;
 };
 
-template <typename T> struct hkFreeListE0A5
+// Two-field MOPP node pool (head/count), matching hkpFreeList rather than the 0x34-byte hkFreeList allocator.
+template <typename T> struct MoppNodeFreeList
 {
     T* m_pFirstNode;
     int m_uiItemCount;
@@ -996,7 +967,8 @@ template <typename T> struct hkFreeListE0A5
     }
 };
 
-struct hkJobE0A5
+// The split call at 0x00e0a270 takes primitives/count/split budget, not the 0x10-byte hkJob metadata.
+struct MoppPrimitiveSpan
 {
     int m_00;
     int m_iElementCount;
@@ -1018,8 +990,8 @@ class hkProcessorE0A5
     int m_04;
     hkSettingsE0A5* m_settings;
     hkStackE0A5* m_aiEntries;
-    hkFreeListE0A5<hkNodeAE0A5> m_nodesA;
-    hkFreeListE0A5<hkNodeBE0A5> m_nodesB;
+    MoppNodeFreeList<hkNodeAE0A5> m_nodesA;
+    MoppNodeFreeList<hkNodeBE0A5> m_nodesB;
     int m_20;
     hkOutputE0A5* m_pRayCastOutput;
     hkInputE0A5* m_pRayCastInput;
@@ -1028,7 +1000,7 @@ class hkProcessorE0A5
     int m_34;
     int m_iNumBits;
 
-    int FUN_00e0a270(int a, hkJobE0A5* pkJob, int b, int c) throw();
+    int FUN_00e0a270(int a, MoppPrimitiveSpan* pkJob, int b, int c) throw();
     int FUN_00e0a550(hkInputE0A5* pkInput, int iArg, hkOutputE0A5* pkOutput, hkSettingsE0A5* pkSettings,
                      hkBuffersE0A5* pkBuffers) throw();
 };
@@ -1043,7 +1015,7 @@ int hkProcessorE0A5::FUN_00e0a550(hkInputE0A5* pkInput, int iArg, hkOutputE0A5* 
     m_pRayCastInput = pkInput;
     m_pRayCastOutput = pkOutput;
 
-    hkJobE0A5 kJob;
+    MoppPrimitiveSpan kJob;
     int iSize = pkInput->GetLogicalSize();
     kJob.m_iElementCount = iSize;
     kJob.m_extra = pkSettings->m_04;

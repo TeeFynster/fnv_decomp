@@ -3,13 +3,10 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/MemoryManager.h"
 
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
 
-extern P03MM g_memoryManager;
+extern MemoryManager g_memoryManager;
 
 struct FUN_00a1c020_Class
 {
@@ -25,12 +22,7 @@ void* FUN_00a1c020_Class::AllocateShifted(unsigned int size)
 }
 
 namespace fnv_00a1c050 {
-struct MemoryManager
-{
-    void* Reallocate(void* p, unsigned int size);
-};
 
-extern MemoryManager g_memoryManager;
 
 struct FUN_00a1c050_Class
 {
@@ -75,10 +67,6 @@ void __thiscall FUN_00a1e1a0_class::FUN_00a1e1a0()
     NiFreeAlias(p);
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 struct FUN_00a11d80_Class
 {
     void __thiscall InitAndClear();
@@ -90,17 +78,12 @@ void* __thiscall FUN_00a11d80_Class::DestroyIfFlagged(unsigned int flags)
 {
     InitAndClear();
     if (flags & 1)
-        ((MemoryManager*)&g_memoryManager)->Deallocate(this);
+        g_memoryManager.Deallocate(this);
     return this;
 }
 
 namespace fnv_00a1c100 {
-extern P03MM g_memoryManager;
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 
 struct FUN_00a1c100_Class
 {
@@ -113,16 +96,12 @@ void* __thiscall FUN_00a1c100_Class::FUN_00a1c100(unsigned int flags)
 {
     Reset();
     if (flags & 1)
-        ((MemoryManager*)&g_memoryManager)->Deallocate(this);
+        g_memoryManager.Deallocate(this);
     return this;
 }
 }  // namespace fnv_00a1c100
 
 namespace fnv_00a1e400 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 void NiFree(void*);
 
 struct FUN_00a1e400_class
@@ -141,7 +120,7 @@ FUN_00a1e400_class* __thiscall FUN_00a1e400_class::FUN_00a1e400(int flags)
     old = (void*)m_field;
     NiFree(old);
     if (flags & 1)
-        ((MemoryManager*)&g_memoryManager)->Deallocate(this);
+        g_memoryManager.Deallocate(this);
     return this;
 }
 }  // namespace fnv_00a1e400
@@ -273,7 +252,7 @@ int FUN_00a1c080_Class::PopFront()
     int result5 = next6->m_uiItemCount;
     next6->m_uiItemCount = 0;
     oldNext = next6;
-    ((MemoryManager*)&g_memoryManager)->Deallocate(oldNext);
+    g_memoryManager.Deallocate(oldNext);
     --m_uiItemCount;
     return result5;
 }
@@ -440,7 +419,7 @@ FUN_00a1ee60_class* FUN_00a1ee60_class::FUN_00a1ee60(int freeMem)
     void* data = m_data;
     _NiFree(data);
     if (freeMem & 1)
-        ((MemoryManager*)&g_memoryManager)->Deallocate(this);
+        g_memoryManager.Deallocate(this);
     return this;
 }
 
@@ -550,12 +529,7 @@ struct FUN_00a0d2a0_Obj
     void FUN_00a0d2a0();
 };
 
-struct FUN_00aa4060_Class
-{
-    void __thiscall FUN_00aa4060(void*);
-};
 
-extern FUN_00aa4060_Class DAT_011f6238;
 
 struct FUN_00a0d5c0_Local
 {
@@ -583,7 +557,7 @@ int __thiscall FUN_00a0d5c0_Class::FUN_00a0d5c0(int aiFlags)
 
     if ((aiFlags & 1) != 0)
     {
-        DAT_011f6238.FUN_00aa4060(this);
+        g_memoryManager.Deallocate(this);
     }
 
     return reinterpret_cast<int>(this);
@@ -628,13 +602,7 @@ void FUN_00a0d7c0_cls::ResetAndProcess(FUN_00a0d7c0_Arg* arg)
 }
 
 namespace fnv_00a11fa0 {
-extern int DAT_011f6238;
 
-class FUN_00a11fa0_pool
-{
-  public:
-    void ReleaseNode(void* node);
-};
 
 class FUN_00a11fa0_cls
 {
@@ -663,7 +631,7 @@ int FUN_00a11fa0_cls::RemoveNextNode()
     int result2 = node2->m_08;
     node2->m_08 = 0;
     FUN_00a11fa0_cls* volatile released = node2;
-    reinterpret_cast<FUN_00a11fa0_pool*>(&DAT_011f6238)->ReleaseNode(released);
+    g_memoryManager.Deallocate(released);
     this->m_08 = this->m_08 - 1;
     return result2;
 }
@@ -687,14 +655,13 @@ void FUN_00a1e880_class::FUN_00a1e880()
 
 // FUN_00a1ea70 (unit_1a635d660b3a.cpp) - 48B scalar-deleting-destructor shape
 // v0: verbatim transcription of IDA a1ea70..0xa1eaa0 (push ebp/mov/sub esp,20h/
-// mov[ebp-20h],ecx; call FUN_00a1e900(this); if(a2&1) MemoryManager::_g_memoryManager.Deallocate(this); return this)
+// mov[ebp-20h],ecx; call FUN_00a1e900(this); if(a2&1) g_memoryManager.Deallocate(this); return this)
 // frame pinned via unused Q7 struct (probe2/probe3 verified sub esp,20h + this@-20h, zero extra insns)
 struct FUN_00a1e900_Class
 {
     int __thiscall FUN_00a1e900();
 };
 
-extern MemoryManager _g_memoryManager;
 struct Q7
 {
     int v4, v8, vC, v10, v14, v18, v1C;
@@ -710,19 +677,14 @@ void* __thiscall FUN_00a1ea70_Class::FUN_00a1ea70(unsigned int auiFlags)
     (void)q;
     ((FUN_00a1e900_Class*)this)->FUN_00a1e900();
     if ((auiFlags & 1) != 0)
-        _g_memoryManager.Deallocate((void*)this);
+        g_memoryManager.Deallocate((void*)this);
     return this;
 }
 
 namespace fnv_00a1ebf0 {
 extern int DAT_01095664;
 
-struct FUN_00aa4060_Manager
-{
-    void* __thiscall FUN_00aa4060(void* object);
-};
 
-extern FUN_00aa4060_Manager DAT_011f6238;
 
 struct FUN_00a1ebf0_Class : S00a0d390
 {
@@ -743,7 +705,7 @@ void* __thiscall FUN_00a1ebf0_Class::FUN_00a1ebf0(int flags)
     FUN_00aa10f0(m_data);
     if ((flags & 1) != 0)
     {
-        DAT_011f6238.FUN_00aa4060(this);
+        g_memoryManager.Deallocate(this);
     }
     return this;
 }
@@ -825,7 +787,6 @@ void FUN_00a0d790_class::FUN_00a0d790()
 }
 
 extern int DAT_01094e9c;
-extern FUN_00aa4060_Class DAT_011f6238;
 extern void* __cdecl FUN_00aa10f0(void*);
 
 struct FUN_00a0d990_cls : S00a0d390
@@ -846,7 +807,7 @@ int __thiscall FUN_00a0d990_cls::FUN_00a0d990(int aiFlags)
     FUN_00aa10f0(this->m_data);
     if ((aiFlags & 1) != 0)
     {
-        DAT_011f6238.FUN_00aa4060(this);
+        g_memoryManager.Deallocate(this);
     }
     return reinterpret_cast<int>(this);
 }
@@ -883,7 +844,6 @@ void S::Reset()
     Clear(true);
 }
 
-extern FUN_00aa4060_Class DAT_011f6238;
 
 struct FUN_00a1ec40_Class
 {
@@ -906,7 +866,7 @@ FUN_00a1ec40_Class* FUN_00a1ec40_Class::FUN_00a1ec40(unsigned int flags)
     int l0, l1, l2, l3, l4, l5, l6;
     FUN_00a1ec70();
     if (flags & 1)
-        DAT_011f6238.FUN_00aa4060(this);
+        g_memoryManager.Deallocate(this);
     return this;
 }
 

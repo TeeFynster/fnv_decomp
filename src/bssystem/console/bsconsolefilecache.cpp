@@ -1,6 +1,7 @@
 // bssystem/console/bsconsolefilecache.cpp: FaceGenData (13 functions)
 
 #include "bsconsolefilecache_decls.h"
+#include "../../../include/MemoryManager.h"
 
 // Initializes the object's fields to zero/default values and clears the three primitive arrays.
 // @fnv 0x005dd590
@@ -10,10 +11,10 @@ FaceGenData::FaceGenData()
     iHairColor = 0;
     m_fHairLength = 0.0f;
     pEyes = 0;
-    m_eSex = SEX_MALE;
-    reinterpret_cast<NiTPrimitiveArray_unsigned_int_*>(&m_kModelObjectsItem)->RemoveAll();
-    reinterpret_cast<NiTPrimitiveArray_unsigned_int_*>(&pTexture)->RemoveAll();
-    reinterpret_cast<NiTPrimitiveArray_unsigned_int_*>(&m_kTexturePaths)->RemoveAll();
+    m_eSex = SEX_SEX_MALE;
+    m_kModelObjectsItem.RemoveAll();
+    pTexture.RemoveAll();
+    m_kTexturePaths.RemoveAll();
     bFaceGenTexturing = false;
     m_bFaceGenDataValid = false;
     m_eFaceGenLOD = BS_FACEGEN_LOD_NONE;
@@ -140,10 +141,6 @@ bool FUN_00b02600_shell::ContainsValue(int aiValue)
     return false;
 }
 
-struct MemoryManager
-{
-    void _DeallocateAlias(void*);
-};
 extern MemoryManager g_memoryManager;
 struct S00b02640
 {

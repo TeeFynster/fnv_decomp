@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 // src/havok/physics/constraintsolver/solve/hkpsolver_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/constraintsolver/solve/hkpsolver.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -7,37 +9,29 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern unsigned char DAT_011b9434[128];
 int __cdecl FUN_00d921d0(const signed char* index);
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
+typedef ::__m128 LocalM128;
+using ::_mm_add_ss;
 // Adds the lowest single-precision float of b to that of a and stores the result in out.
 // @fnv 0x00c6cce0
-extern "C" void __cdecl AddScalarFloat(__m128* pResult, const __m128* pLeft, const __m128* pRight)
+extern "C" void __cdecl AddScalarFloat(LocalM128* pResult, const LocalM128* pLeft, const LocalM128* pRight)
 {
     *pResult = _mm_add_ss(*pLeft, *pRight);
 }
 char* __cdecl FUN_00d921c0(char* dst, const char* src);
-extern "C" __m128 _mm_sub_ss(__m128 a, __m128 b);
+using ::_mm_sub_ss;
 // @fnv 0x00c6ccc0
-extern "C" void __cdecl SubtractScalarFloat(__m128* pResult, const __m128* pLeft, const __m128* pRight)
+extern "C" void __cdecl SubtractScalarFloat(LocalM128* pResult, const LocalM128* pLeft, const LocalM128* pRight)
 {
     *pResult = _mm_sub_ss(*pLeft, *pRight);
 }
 void FUN_00d892d0();
 
 extern "C" void _ReadWriteBarrier();
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_setzero_ps();
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
+using ::_mm_load_ss;
+using ::_mm_setzero_ps;
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
+using ::_mm_shuffle_ps;
 
 struct SpawnedVec4 {
     unsigned int m_uiX;
@@ -54,7 +48,7 @@ struct SpawnedOwner {
     SpawnedVec4 m_vec10;
 };
 
-struct ZeroVec { __m128 q; __forceinline void clear() { q = _mm_setzero_ps(); } };
+struct ZeroVec { LocalM128 q; __forceinline void clear() { q = _mm_setzero_ps(); } };
 struct SpawnedElem {
     unsigned char m_type;
     unsigned char unk01;
@@ -63,13 +57,13 @@ struct SpawnedElem {
     unsigned int unk04;
     float m_fl08;
     unsigned int unk0C;
-    __m128 m_vec10;
-    __m128 unk20;
-    __m128 unk30;
+    LocalM128 m_vec10;
+    LocalM128 unk20;
+    LocalM128 unk30;
     ZeroVec m_v40;
     ZeroVec m_v50;
-    __m128 unk60;
-    __m128 unk70;
+    LocalM128 unk60;
+    LocalM128 unk70;
 };
 
 struct BeginArg { SpawnedElem* p; BeginArg(SpawnedElem* q):p(q){} };
@@ -92,12 +86,12 @@ void __cdecl FUN_00d89ed0(SpawnedOwner* owner, BeginArg begin, SpawnedElem* limi
         case 0:
         {
             do {
-                __m128 f = _mm_load_ss(&p->m_fl08);
+                LocalM128 f = _mm_load_ss(&p->m_fl08);
                 p->m_v40.clear();
                 p->m_v50.clear();
                 _ReadWriteBarrier();
-                __m128 b = _mm_shuffle_ps(f, f, 0);
-                p->m_vec10 = _mm_add_ps(_mm_mul_ps(b, *(const __m128*)&scale), p->m_vec10);
+                LocalM128 b = _mm_shuffle_ps(f, f, 0);
+                p->m_vec10 = _mm_add_ps(_mm_mul_ps(b, *(const LocalM128*)&scale), p->m_vec10);
                 ++p;
             } while (p->m_type == 0 && (unsigned int)p < end);
             break;
@@ -112,38 +106,38 @@ void __cdecl FUN_00d89ed0(SpawnedOwner* owner, BeginArg begin, SpawnedElem* limi
     }
 }
 
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_and_ps(__m128, __m128);
-extern "C" __m128 _mm_cmpeq_ps(__m128, __m128);
-extern "C" __m128 _mm_cmplt_ps(__m128, __m128);
-extern "C" __m128 _mm_cmple_ps(__m128, __m128);
-extern "C" __m128 _mm_setzero_ps();
-extern "C" int _mm_movemask_ps(__m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" __m128 _mm_set_ss(float);
-extern "C" __m128 _mm_mul_ss(__m128, __m128);
-extern "C" __m128 _mm_cmpeq_ss(__m128, __m128);
-extern "C" __m128 _mm_rsqrt_ss(__m128);
-extern "C" __m128 _mm_andnot_ps(__m128, __m128);
+using ::_mm_load_ss;
+using ::_mm_store_ss;
+using ::_mm_set_ps1;
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
+using ::_mm_sub_ps;
+using ::_mm_and_ps;
+using ::_mm_cmpeq_ps;
+using ::_mm_cmplt_ps;
+using ::_mm_cmple_ps;
+using ::_mm_setzero_ps;
+using ::_mm_movemask_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_set_ss;
+using ::_mm_mul_ss;
+using ::_mm_cmpeq_ss;
+using ::_mm_rsqrt_ss;
+using ::_mm_andnot_ps;
 struct __declspec(align(16)) Step_PlainQuad {
  float x,y,z,w;
- __forceinline operator __m128() const { return *(const __m128*)this; }
- __forceinline void operator=(const __m128& v) { *(__m128*)this = v; }
- __forceinline void operator=(const Step_PlainQuad& v) { *(__m128*)this = *(const __m128*)&v; }
+ __forceinline operator LocalM128() const { return *(const LocalM128*)this; }
+ __forceinline void operator=(const LocalM128& v) { *(LocalM128*)this = v; }
+ __forceinline void operator=(const Step_PlainQuad& v) { *(LocalM128*)this = *(const LocalM128*)&v; }
 };
 class Step_SimdReal {
 public:
-    __forceinline Step_SimdReal(const __m128& x) { m_vValue=x; }
+    __forceinline Step_SimdReal(const LocalM128& x) { m_vValue=x; }
     __forceinline Step_SimdReal(float x) { m_vValue = _mm_load_ss(&x); }
     __forceinline Step_SimdReal() {}
     __forceinline operator float() const { float s; _mm_store_ss(&s, m_vValue); return s; }
-    __forceinline __m128 broadcast() const { return _mm_shuffle_ps(m_vValue, m_vValue, 0); }
-    __forceinline const __m128& getQuad() const { return *(const __m128*)&m_vValue; }
+    __forceinline LocalM128 broadcast() const { return _mm_shuffle_ps(m_vValue, m_vValue, 0); }
+    __forceinline const LocalM128& getQuad() const { return *(const LocalM128*)&m_vValue; }
 private:
     Step_PlainQuad m_vValue;
 };
@@ -168,7 +162,7 @@ public:
     __forceinline void mul4(Step_SimdRealParameter s) { m_vComponents = _mm_mul_ps(s.broadcast(), m_vComponents); }
     __forceinline void setMul4(Step_SimdRealParameter r, const Step_Vector4& v1) { m_vComponents = _mm_mul_ps(r.broadcast(), v1.m_vComponents); }
     __forceinline void addMul4(Step_SimdRealParameter r, const Step_Vector4& v1) { m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(r.broadcast(), v1.m_vComponents)); }
-    __forceinline void setAbs4(const Step_Vector4& v) { m_vComponents = _mm_and_ps(v.m_vComponents, *(const __m128*)&DAT_01017d10); }
+    __forceinline void setAbs4(const Step_Vector4& v) { m_vComponents = _mm_and_ps(v.m_vComponents, *(const LocalM128*)&DAT_01017d10); }
     __forceinline Step_Comparison compareLessThan4(const Step_Vector4& a) const { Step_Comparison m; m.m_uiMask = _mm_cmplt_ps(m_vComponents, a.m_vComponents); return m; }
     __forceinline Step_Comparison compareEqual4(const Step_Vector4& a) const { Step_Comparison m; m.m_uiMask = _mm_cmpeq_ps(m_vComponents, a.m_vComponents); return m; }
     __forceinline Step_Comparison compareLessThanEqual4(const Step_Vector4& a) const { Step_Comparison m; m.m_uiMask = _mm_cmple_ps(m_vComponents, a.m_vComponents); return m; }
@@ -176,25 +170,25 @@ public:
     __forceinline void subMul4(Step_SimdRealParameter r, const Step_Vector4& v1) { m_vComponents = _mm_sub_ps(m_vComponents, _mm_mul_ps(r.broadcast(), v1.m_vComponents)); }
     __forceinline Step_SimdReal dot3(const Step_Vector4& a) const
     {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+        LocalM128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+        LocalM128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
         return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
     }
     __forceinline Step_SimdReal lengthInverse3() const
     {
-        const __m128 half = _mm_set_ss(0.5f);
-        const __m128 three = _mm_set_ss(3.0f);
-        const __m128 zero = _mm_set_ss(0.0f);
-        const __m128 len2 = this->dot3(*this).getQuad();
-        const __m128 len2EqualsZero = _mm_cmpeq_ss(len2, zero);
-        const __m128 approx = _mm_rsqrt_ss(len2);
-        const __m128 refined = _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
+        const LocalM128 half = _mm_set_ss(0.5f);
+        const LocalM128 three = _mm_set_ss(3.0f);
+        const LocalM128 zero = _mm_set_ss(0.0f);
+        const LocalM128 len2 = this->dot3(*this).getQuad();
+        const LocalM128 len2EqualsZero = _mm_cmpeq_ss(len2, zero);
+        const LocalM128 approx = _mm_rsqrt_ss(len2);
+        const LocalM128 refined = _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
         return _mm_andnot_ps(len2EqualsZero, refined);
     }
     __forceinline Step_SimdReal normalizeWithLength3()
     {
-        __m128 len2 = this->dot3(*this).getQuad();
-        __m128 lenInv = lengthInverse3().broadcast();
+        LocalM128 len2 = this->dot3(*this).getQuad();
+        LocalM128 lenInv = lengthInverse3().broadcast();
         m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
         return _mm_mul_ss(len2, lenInv);
     }
@@ -205,6 +199,7 @@ public:
 };
 extern Step_Vector4 DAT_01267e30; 
 __forceinline const Step_Vector4& Step_Vector4::getZero() { return DAT_01267e30; }
+// local form of hkMatrix3: 0x00d89f80 needs inline column access and original scalar aliases; shared form gives 1328 bytes vs exe 1044.
 class Step_Matrix3 {
 public:
     Step_Vector4 m_kColumn0, m_kColumn1, m_kColumn2;
@@ -288,8 +283,8 @@ struct Step_SolverInfo {
     float m_fInverseStepCount;
 };
 __forceinline float Step_min2(float x, float y) { return x < y ? x : y; }
-__forceinline Step_Comparison eqRaw(__m128 x) { Step_Comparison r; r.m_uiMask=_mm_cmpeq_ps(x,x); return r; }
-__forceinline Step_Comparison ltRaw(__m128 x,__m128 lim) { Step_Comparison r; r.m_uiMask=_mm_cmplt_ps(x,lim); return r; }
+__forceinline Step_Comparison eqRaw(LocalM128 x) { Step_Comparison r; r.m_uiMask=_mm_cmpeq_ps(x,x); return r; }
+__forceinline Step_Comparison ltRaw(LocalM128 x,LocalM128 lim) { Step_Comparison r; r.m_uiMask=_mm_cmplt_ps(x,lim); return r; }
 
 template<bool top> static __forceinline void Step_integrateVelocityAccumulator(const Step_SolverInfo& info, Step_Accumulator* accu)
 {
@@ -303,7 +298,7 @@ template<bool top> static __forceinline void Step_integrateVelocityAccumulator(c
     const Step_Vector4& maxVel = *(const Step_Vector4*)&DAT_010d3da0;
     int mask;
     if(top) {
-    __m128 angCopy=accu->m_vAngularVelocity.m_vComponents;
+    LocalM128 angCopy=accu->m_vAngularVelocity.m_vComponents;
 mask=(int)((unsigned char)(eqRaw(angCopy).GetLaneMask()) & (unsigned char)(ltRaw(absAngVel.m_vComponents,maxVel.m_vComponents).GetLaneMask()) & (unsigned char)(accu->m_vLinearVelocity.compareEqual4(accu->m_vLinearVelocity).GetLaneMask()) & (short)(ltRaw(absLinVel.m_vComponents,maxVel.m_vComponents).GetLaneMask()));
     } else {
     mask = absLinVel.compareLessThan4(maxVel).GetLaneMask() & absAngVel.compareLessThan4(maxVel).GetLaneMask();

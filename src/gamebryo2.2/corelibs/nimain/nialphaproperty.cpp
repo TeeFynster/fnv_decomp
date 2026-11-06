@@ -1,23 +1,53 @@
 // gamebryo2.2/corelibs/nimain/nialphaproperty.cpp: NiAlphaProperty (12 functions)
 
-#include "nialphaproperty_decls.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiAlphaProperty.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/StrArr.h"
 
+// The shared declaration does not expose the stream position or callbacks.
+template <class T> inline void NiBinaryStream::Read(T& value)
+{
+    unsigned int size = sizeof(T);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4) +=
+        (*reinterpret_cast<ReadFunction*>(reinterpret_cast<char*>(this) + 8))(this, &value, sizeof(T), &size, 1);
+}
+// The shared stream declaration keeps its fields opaque.
+inline unsigned int NiStream::GetFileVersion() const
+{
+    return *reinterpret_cast<const unsigned int*>(reinterpret_cast<const char*>(this) + 0xd8);
+}
+
+inline unsigned short NiStream::savedFlags()
+{
+    return *reinterpret_cast<unsigned short*>(reinterpret_cast<char*>(this) + 0x288);
+}
+
+inline NiBinaryStream& NiStream::Istr()
+{
+    return **reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(this) + 0x24c);
+}
+
+inline NiBinaryStream* NiStream::GetBinaryStream()
+{
+    return *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(this) + 0x250);
+}
 // @fnv 0x00a5cf90
 void NiAlphaProperty::LoadBinary(NiStream& stream)
 {
     NiProperty::LoadBinary(stream);
-    if (stream.version < 0x0a000102)
+    if (stream.GetFileVersion() < 0x0a000102)
     {
-        m_uiObjectFlags = stream.propertyFlags & 0x3fff;
+        m_usAlphaArg = stream.savedFlags() & 0x3fff;
     }
     else
     {
-        stream.input->Read(m_uiObjectFlags);
+        stream.Istr().Read(m_usAlphaArg);
     }
-    stream.input->Read(m_ucAlphaThreshold);
+    stream.Istr().Read(m_ucAlphaArg2);
 }
 
-struct NiObject;
 struct EqBase
 {
     bool FUN_00a62140(NiObject*);
@@ -27,13 +57,13 @@ unsigned char __fastcall IsAlphaPropertyEqual(NiAlphaProperty* self, int, NiObje
 {
     NiAlphaProperty* pkAlpha = reinterpret_cast<NiAlphaProperty*>(pkObject);
     return reinterpret_cast<EqBase*>(self)->FUN_00a62140(pkObject) &&
-           ((unsigned char)pkAlpha->m_uiObjectFlags & 1) == ((unsigned char)self->m_uiObjectFlags & 1) &&
-           (self->m_uiObjectFlags & 0x1e) == (pkAlpha->m_uiObjectFlags & 0x1e) &&
-           (self->m_uiObjectFlags & 0x1e0) == (pkAlpha->m_uiObjectFlags & 0x1e0) &&
-           ((unsigned char)(self->m_uiObjectFlags >> 9) & 1) == ((unsigned char)(pkAlpha->m_uiObjectFlags >> 9) & 1) &&
-           (self->m_uiObjectFlags & 0x1c00) == (pkAlpha->m_uiObjectFlags & 0x1c00) &&
-           self->m_ucAlphaThreshold == pkAlpha->m_ucAlphaThreshold &&
-           ((unsigned char)(self->m_uiObjectFlags >> 13) & 1) == ((unsigned char)(pkAlpha->m_uiObjectFlags >> 13) & 1);
+           ((unsigned char)pkAlpha->m_usAlphaArg & 1) == ((unsigned char)self->m_usAlphaArg & 1) &&
+           (self->m_usAlphaArg & 0x1e) == (pkAlpha->m_usAlphaArg & 0x1e) &&
+           (self->m_usAlphaArg & 0x1e0) == (pkAlpha->m_usAlphaArg & 0x1e0) &&
+           ((unsigned char)(self->m_usAlphaArg >> 9) & 1) == ((unsigned char)(pkAlpha->m_usAlphaArg >> 9) & 1) &&
+           (self->m_usAlphaArg & 0x1c00) == (pkAlpha->m_usAlphaArg & 0x1c00) &&
+           self->m_ucAlphaArg2 == pkAlpha->m_ucAlphaArg2 &&
+           ((unsigned char)(self->m_usAlphaArg >> 13) & 1) == ((unsigned char)(pkAlpha->m_usAlphaArg >> 13) & 1);
 }
 
 __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
@@ -109,10 +139,6 @@ void CreateSdmDerived()
     DAT_011f5d30 = false;
 }
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 struct NiPropertyCtorStub
 {
     void FUN_00a9a640();
@@ -148,19 +174,14 @@ void FUN_00a5cef0()
     }
 }
 
-struct A51BF0Base
-{
-    static void* __cdecl operator new(unsigned int);
-};
-
 // @fnv 0x00a5ceb0
 NiAlphaProperty* __cdecl CreateNiAlphaProperty()
 {
-    NiAlphaProperty* p = (NiAlphaProperty*)A51BF0Base::operator new(0x1c);
+    NiAlphaProperty* p = (NiAlphaProperty*)BSFadeNode::operator new(0x1c);
     if (p)
     {
         ((NiPropertyCtorStub*)p)->FUN_00a9a640();
-        p->m_uiObjectFlags = 0xec;
+        p->m_usAlphaArg = 0xec;
         *(void**)p = vftable_NiAlphaProperty;
         *((unsigned char*)p + 0x1a) = 0;
         return p;
@@ -168,186 +189,24 @@ NiAlphaProperty* __cdecl CreateNiAlphaProperty()
     return 0;
 }
 
-class A5D020BinaryStream
+inline unsigned int NiBinaryStream::BinaryWrite(const void* p, unsigned int n, unsigned int* sizes, unsigned int count)
 {
-  public:
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(A5D020BinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int(__cdecl* m_pfnWrite)(A5D020BinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-
-    unsigned int BinaryWrite(const void* p, unsigned int n, unsigned int* sizes, unsigned int count)
-    {
-        unsigned int written = m_pfnWrite(this, p, n, sizes, count);
-        m_uiStreamFlags += written;
-        return written;
-    }
-};
-
-class A5D020Stream
-{
-  public:
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    A5D020BinaryStream* m_pBackingStream;
-};
+    unsigned int written =
+        (*reinterpret_cast<WriteFunction*>(reinterpret_cast<char*>(this) + 0xc))(this, p, n, sizes, count);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4) += written;
+    return written;
+}
 
 template <class T>
-inline void A5D020BinaryStreamSave(A5D020BinaryStream& kOstr, const T* pValue, unsigned int uiNumEls = 1)
+inline void NiBinaryStreamSave(NiBinaryStream& kOstr, const T* pValue, unsigned int uiNumEls = 1)
 {
     unsigned int uiSize = sizeof(T);
     kOstr.BinaryWrite(pValue, uiNumEls * uiSize, &uiSize, 1);
 }
 
-template <class T> inline void A5D020SaveBinary(A5D020Stream& kStream, const T& value)
+template <class T> inline void A5D020SaveBinary(NiStream& kStream, const T& value)
 {
-    A5D020BinaryStreamSave(*kStream.m_pBackingStream, &value);
+    NiBinaryStreamSave(*kStream.GetBinaryStream(), &value);
 }
 
 class A5D020Base
@@ -360,26 +219,16 @@ class A5D020Base
     int unk10;
     int unk14;
 
-    void FUN_00a5d7b0(A5D020Stream& kStream);
+    void FUN_00a5d7b0(NiStream& kStream);
 };
 
-class A5D020Property : public A5D020Base
-{
-  public:
-    unsigned short m_usFlags;
-    unsigned char m_ucMode;
-
-    void SaveToStream(A5D020Stream& kStream);
-};
-
-// SaveBinary
-// Calls the base save routine, then writes m_usFlags and m_ucMode to the stream.
+// The shared header does not declare the alpha SaveBinary override.
 // @fnv 0x00a5d020
-void A5D020Property::SaveToStream(A5D020Stream& kStream)
+void __fastcall SaveAlphaPropertyBinary(NiAlphaProperty* self, int, NiStream& kStream)
 {
-    FUN_00a5d7b0(kStream);
-    A5D020SaveBinary(kStream, m_usFlags);
-    A5D020SaveBinary(kStream, m_ucMode);
+    reinterpret_cast<A5D020Base*>(self)->FUN_00a5d7b0(kStream);
+    A5D020SaveBinary(kStream, self->m_usAlphaArg);
+    A5D020SaveBinary(kStream, self->m_ucAlphaArg2);
 }
 
 struct GlobalObjectO2_00a7b610
@@ -394,30 +243,17 @@ char* __cdecl FUN_00a7d410(const char*, unsigned char);
 char* __cdecl GetAlphaBlendFuncName(const char*, unsigned int);
 char* __cdecl FormatTestCondition(const char*, unsigned int);
 
-struct StrArr
+inline unsigned int StrArr::AddInline(char* pcElement)
 {
-    void* vtable;
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usAlloced;
-    unsigned short unk0C;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char*& pcElement);
-
-    unsigned int Add(char* pcElement)
+    unsigned int uiAlloced = m_usSize;
+    unsigned int uiMaxSize = m_usMaxSize;
+    if (uiAlloced >= uiMaxSize)
     {
-        unsigned int uiAlloced = m_usAlloced;
-        unsigned int uiMaxSize = m_usMaxSize;
-        if (uiAlloced >= uiMaxSize)
-        {
-            SetSize(uiAlloced + m_usGrowBy);
-        }
-        SetAt(uiAlloced, pcElement);
-        return uiAlloced;
+        SetSize(uiAlloced + m_usGrowBy);
     }
-};
+    SetAt(uiAlloced, pcElement);
+    return uiAlloced;
+}
 
 class FUN_00a62a40_this : public A5D020Base
 {
@@ -425,57 +261,48 @@ class FUN_00a62a40_this : public A5D020Base
     void AppendString(StrArr* pkStrings);
 };
 
-class A5D080Property : public FUN_00a62a40_this
+inline bool GetAlphaBlending(const NiAlphaProperty* self)
 {
-  public:
-    unsigned short m_usFlags;
-    unsigned char m_ucAlphaThreshold;
+    return (self->m_usAlphaArg & 1) != 0;
+}
+inline unsigned int GetSrcBlend(const NiAlphaProperty* self)
+{
+    return (self->m_usAlphaArg >> 1) & 0xF;
+}
+inline unsigned int GetDestBlend(const NiAlphaProperty* self)
+{
+    return (self->m_usAlphaArg >> 5) & 0xF;
+}
+inline bool GetAlphaTesting(const NiAlphaProperty* self)
+{
+    return (self->m_usAlphaArg >> 9) & 1;
+}
+inline unsigned int GetTestMode(const NiAlphaProperty* self)
+{
+    return (self->m_usAlphaArg >> 10) & 7;
+}
+inline unsigned char GetTestRef(const NiAlphaProperty* self)
+{
+    return self->m_ucAlphaArg2;
+}
+inline bool GetNoSorter(const NiAlphaProperty* self)
+{
+    return (self->m_usAlphaArg >> 13) & 1;
+}
 
-    bool GetAlphaBlending() const
-    {
-        return (m_usFlags & 1) != 0;
-    }
-    unsigned int GetSrcBlend() const
-    {
-        return (m_usFlags >> 1) & 0xF;
-    }
-    unsigned int GetDestBlend() const
-    {
-        return (m_usFlags >> 5) & 0xF;
-    }
-    bool GetAlphaTesting() const
-    {
-        return (m_usFlags >> 9) & 1;
-    }
-    unsigned int GetTestMode() const
-    {
-        return (m_usFlags >> 10) & 7;
-    }
-    unsigned char GetTestRef() const
-    {
-        return m_ucAlphaThreshold;
-    }
-    bool GetNoSorter() const
-    {
-        return (m_usFlags >> 13) & 1;
-    }
-
-    void AppendPropertyStrings(StrArr* pkStrings);
-};
-
-// Appends the base class strings plus formatted alpha, blend, test and sorter property strings to pkStrings.
+// The shared header does not declare the alpha viewer-string override.
 // @fnv 0x00a5d080
-void A5D080Property::AppendPropertyStrings(StrArr* pkStrings)
+void __fastcall AppendAlphaPropertyStrings(NiAlphaProperty* self, int, StrArr* pkStrings)
 {
-    FUN_00a62a40_this::AppendString(pkStrings);
-    pkStrings->Add(FUN_00a7d330(g_011f4408.m_name));
-    pkStrings->Add(FUN_00a7d370("m_bAlpha", GetAlphaBlending()));
-    pkStrings->Add(GetAlphaBlendFuncName("m_eSrcBlend", GetSrcBlend()));
-    pkStrings->Add(GetAlphaBlendFuncName("m_eDestBlend", GetDestBlend()));
-    pkStrings->Add(FUN_00a7d370("m_bAlphaTest", GetAlphaTesting()));
-    pkStrings->Add(FormatTestCondition("m_eTestMode", GetTestMode()));
-    pkStrings->Add(FUN_00a7d410("m_ucTestRef", GetTestRef()));
-    pkStrings->Add(FUN_00a7d370("m_bNoSorter", GetNoSorter()));
+    reinterpret_cast<FUN_00a62a40_this*>(self)->AppendString(pkStrings);
+    pkStrings->AddInline(FUN_00a7d330(g_011f4408.m_name));
+    pkStrings->AddInline(FUN_00a7d370("m_bAlpha", GetAlphaBlending(self)));
+    pkStrings->AddInline(GetAlphaBlendFuncName("m_eSrcBlend", GetSrcBlend(self)));
+    pkStrings->AddInline(GetAlphaBlendFuncName("m_eDestBlend", GetDestBlend(self)));
+    pkStrings->AddInline(FUN_00a7d370("m_bAlphaTest", GetAlphaTesting(self)));
+    pkStrings->AddInline(FormatTestCondition("m_eTestMode", GetTestMode(self)));
+    pkStrings->AddInline(FUN_00a7d410("m_ucTestRef", GetTestRef(self)));
+    pkStrings->AddInline(FUN_00a7d370("m_bNoSorter", GetNoSorter(self)));
 }
 
 void __cdecl FUN_00a62130();
@@ -490,45 +317,38 @@ extern char DAT_011f4404;
 extern int DAT_010162dc;
 void* __cdecl FUN_00aa13e0(unsigned int size);
 
-struct S00a5ce30_cls
+// Base helpers not exposed by the shared NiProperty declaration.
+struct NiPropertyCloneStub
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    unsigned short unk18;
-    unsigned char unk1a;
     void FUN_00a5c200();
-    void FUN_00a5d7a0(S00a5ce30_cls* dst, int proc);
-    S00a5ce30_cls* FUN_00a5ce30(int a0);
+    void FUN_00a5d7a0(NiAlphaProperty* dst, int proc);
 };
-void __stdcall CreateVertexBufferSet(S00a5ce30_cls* self, int proc);
+void __stdcall CreateVertexBufferSet(NiAlphaProperty* self, int proc);
 
+// The shared header does not declare the alpha clone override.
 // @fnv 0x00a5ce30
-S00a5ce30_cls* S00a5ce30_cls::FUN_00a5ce30(int a0)
+NiAlphaProperty* __fastcall CloneAlphaProperty(NiAlphaProperty* self, int, int a0)
 {
-    if (unk0c == 0 && DAT_011f4404 == 0)
+    if (self->m_spControllers == 0 && DAT_011f4404 == 0)
     {
-        CreateVertexBufferSet(this, a0);
-        return this;
+        CreateVertexBufferSet(self, a0);
+        return self;
     }
-    S00a5ce30_cls* n = (S00a5ce30_cls*)FUN_00aa13e0(0x1c);
+    NiAlphaProperty* n = (NiAlphaProperty*)FUN_00aa13e0(0x1c);
     if (n)
     {
-        n->FUN_00a5c200();
+        reinterpret_cast<NiPropertyCloneStub*>(n)->FUN_00a5c200();
         *(int**)n = &DAT_010162dc;
-        n->unk18 = 0xec;
-        n->unk1a = 0;
+        n->m_usAlphaArg = 0xec;
+        n->m_ucAlphaArg2 = 0;
     }
     else
     {
         n = 0;
     }
-    FUN_00a5d7a0(n, a0);
-    n->unk18 = unk18;
-    n->unk1a = unk1a;
+    reinterpret_cast<NiPropertyCloneStub*>(self)->FUN_00a5d7a0(n, a0);
+    n->m_usAlphaArg = self->m_usAlphaArg;
+    n->m_ucAlphaArg2 = self->m_ucAlphaArg2;
     return n;
 }
 

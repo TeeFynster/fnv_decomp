@@ -2,6 +2,23 @@
 // src/havok/common/visualize/hkserverprocesshandler.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/hkserverprocesshandler.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/hkArray.h"
+#include "../../../../include/hkBool.h"
+#include "../../../../include/hkMemoryAllocator.h"
+#include "../../../../include/hkMemoryRouter.h"
+#include "../../../../include/hkReferencedObject.h"
+
+// hkMemoryRouter is the shared Havok router returned by 0x00c85750.
+
+
+inline void* hkReferencedObject::operator new(std::size_t size)
+{
+    hkReferencedObject* p = static_cast<hkReferencedObject*>(
+        hkMemoryRouter::getInstance().heap().blockAlloc(size));
+    p->m_usMemSizeAndFlags = static_cast<unsigned short>(size);
+    return p;
+}
+
 extern int DAT_010d1508;
 void __cdecl Deallocate(void*);
 struct FUN_00d60bb0
@@ -197,21 +214,6 @@ struct FUN_00d61260_Class
     void* FUN_00d61260(int flags);
 };
 
-struct FUN_00d61260_MemoryManager
-{
-    virtual void FUN_00d61260_0();
-    virtual void FUN_00d61260_1();
-    virtual void Deallocate(void* p, unsigned short size);
-};
-
-struct FUN_00d61260_Router
-{
-    void* m_p[4];
-    FUN_00d61260_MemoryManager* m_pMemoryManager;
-};
-
-FUN_00d61260_Router* __cdecl _D1A0E0GetMemoryRouter();
-
 // @fnv 0x00d61260
 void* FUN_00d61260_Class::FUN_00d61260(int flags)
 {
@@ -219,8 +221,8 @@ void* FUN_00d61260_Class::FUN_00d61260(int flags)
 
     if (flags & 1)
     {
-        FUN_00d61260_Router* router = _D1A0E0GetMemoryRouter();
-        router->m_pMemoryManager->Deallocate(this, m_iElementCount);
+        hkMemoryRouter* router = &hkMemoryRouter::getInstance();
+        router->heap().blockFree(this, m_iElementCount);
     }
 
     return this;
@@ -256,17 +258,12 @@ hkObjD60B* hkObjD60B::FUN_00d60bd0(unsigned int uiFlags) throw()
     return this;
 }
 
-struct hkEntryD60D
+// Registry records at DAT_01269cd0 + 0x0c have stride 12 and a tagged name word; this is a process registration, not a generic hkEntry.
+struct ProcessRegistration
 {
     unsigned int m_name;
     int unk04;
     int unk08;
-};
-
-struct hkEntryArrayD60D
-{
-    hkEntryD60D* m_data;
-    int m_iElementCount;
 };
 
 struct hkRegistryD60D
@@ -274,7 +271,7 @@ struct hkRegistryD60D
     int unk00;
     int unk04;
     int unk08;
-    hkEntryArrayD60D m_entries;
+    hkArray<ProcessRegistration> m_entries;
 };
 
 struct hkVisitorD60D
@@ -296,7 +293,7 @@ struct hkObjD60D
 // @fnv 0x00d60d80
 int hkObjD60D::VisitEntryNames()
 {
-    hkEntryArrayD60D& entries = reinterpret_cast<hkRegistryD60D*>(DAT_01269cd0)->m_entries;
+    hkArray<ProcessRegistration>& entries = reinterpret_cast<hkRegistryD60D*>(DAT_01269cd0)->m_entries;
     for (int i = 0; i < entries.m_iElementCount; i++)
         m_visitor.v04((const char*)(entries.m_data[i].m_name & ~1u), i);
     return 0;
@@ -351,49 +348,41 @@ void FUN_00d60dd0_Class::ApplyToElements(float afValue)
     }
 }
 
-extern int DAT_0102e388;
-
-class hkMemoryAllocatorD610
+template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
 {
-  public:
-    virtual void V0() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual void V3() throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
+    hkMemoryAllocator& kHeap = hkMemoryRouter::getInstance().heap();
+    this->m_iElementCount = 0;
+    if ((this->m_iCapacityState & 0x80000000) == 0)
+        kHeap.bufFree(this->m_data, (this->m_iCapacityState & 0x3fffffff) * sizeof(T));
+    this->m_data = 0;
+    this->m_iCapacityState = 0x80000000;
+}
 
-struct hkMemoryRouterD610
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorD610* m_pStreamAllocator;
-    hkMemoryAllocatorD610& heap()
+    return hkMemoryRouter::getInstance().heap();
+}
+
+template <typename T, typename A>
+__forceinline hkArray<T, A>& hkArray<T, A>::operator=(const hkArray<T, A>& a)
+{
+    hkMemoryAllocator& alloc = hkMemoryRouter::getInstance().heap();
+    if (this->getCapacity() < a.GetLogicalSize())
     {
-        return *m_pStreamAllocator;
+        if ((this->m_iCapacityState & this->DONT_DEALLOCATE_FLAG) == 0)
+            alloc.bufFree(this->m_data, this->getCapacity() * int(sizeof(T)));
+        int numBytes = a.GetLogicalSize() * int(sizeof(T));
+        this->m_data = (T*)alloc.bufAlloc(numBytes);
+        this->m_iCapacityState = numBytes / int(sizeof(T));
     }
-};
-extern "C" hkMemoryRouterD610& __cdecl FUN_00c85750();
-
-template <class T> class hkArrayD610
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    ~hkArrayD610() throw()
-    {
-        hkMemoryAllocatorD610& kHeap = FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kHeap.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
+    int n = a.GetLogicalSize();
+    this->m_iElementCount = n;
+    T* d = this->m_data;
+    T* src = a.m_data;
+    for (int i = 0; i < n; i++)
+        d[i] = src[i];
+    return *this;
+}
 
 class hkMapBaseD610
 {
@@ -406,7 +395,7 @@ class hkMapBaseD610
     {
         FUN_00a29680();
     }
-    void ProcessArgument(hkMemoryAllocatorD610& kAlloc) throw();
+    void ProcessArgument(hkMemoryAllocator& kAlloc) throw();
     void FUN_00a29680() throw();
 };
 
@@ -417,19 +406,8 @@ class hkPointerMapD610
 
     ~hkPointerMapD610() throw()
     {
-        m_map.ProcessArgument(FUN_00c85750().heap());
+        m_map.ProcessArgument(hkMemoryRouter::getInstance().heap());
     }
-};
-
-class hkReferencedObjectD610
-{
-  public:
-    virtual ~hkReferencedObjectD610() throw()
-    {
-        *reinterpret_cast<int**>(this) = &DAT_0102e388;
-    }
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
 };
 
 class hkInterfaceAD610
@@ -453,7 +431,7 @@ class hkOwnedD610
     virtual ~hkOwnedD610() throw();
 };
 
-class FUN_00d610e0 : public hkReferencedObjectD610, public hkInterfaceAD610, public hkInterfaceBD610
+class FUN_00d610e0 : public hkReferencedObject, public hkInterfaceAD610, public hkInterfaceBD610
 {
   public:
     virtual ~FUN_00d610e0() throw();
@@ -462,10 +440,10 @@ class FUN_00d610e0 : public hkReferencedObjectD610, public hkInterfaceAD610, pub
     hkOwnedD610* m_18;
     hkOwnedD610* m_1c;
     int unk20;
-    hkReferencedObjectD610 m_24;
+    hkReferencedObject m_24;
     hkPointerMapD610 m_2c;
-    hkArrayD610<hkOwnedD610*> m_38;
-    hkArrayD610<int> m_44;
+    hkArray<hkOwnedD610*> m_38;
+    hkArray<int> m_44;
 };
 
 // Destructor: deletes every element of m_38, then deletes m_14, m_18 and m_1c; member destructors run afterwards.
@@ -479,19 +457,10 @@ FUN_00d610e0::~FUN_00d610e0() throw()
     delete m_1c;
 }
 
-struct hkBoolD611
-{
-    char m_cBooleanValue;
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-
 class hkInnerD611
 {
   public:
-    hkBoolD611 ForwardValueToObject() const throw();
+    hkBool ForwardValueToObject() const throw();
 };
 
 class hkObjD611
@@ -525,28 +494,6 @@ void __cdecl FUN_00d61250()
 }
 
 namespace fnv_00dd9cc0 {
-class hkMemoryAllocatorDD9C
-{
-  public:
-    virtual ~hkMemoryAllocatorDD9C() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterDD9C
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorDD9C* m_pStreamAllocator;
-    hkMemoryAllocatorDD9C& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterDD9C& __cdecl FUN_00c85750();
-
 class FUN_00cf6da0
 {
   public:
@@ -554,7 +501,7 @@ class FUN_00cf6da0
 
     static void* operator new(unsigned int uiSize) throw()
     {
-        return FUN_00c85750().heap().AllocateMemoryBlock(uiSize);
+        return hkMemoryRouter::getInstance().heap().blockAlloc(uiSize);
     }
     static void operator delete(void* p) throw();
 
@@ -566,25 +513,13 @@ class FUN_00cf6da0
     int unk14;
 };
 
-class hkReferencedObjectDD9C
-{
-  public:
-    hkReferencedObjectDD9C()
-    {
-        m_sReferenceCount = 1;
-    }
-    virtual ~hkReferencedObjectDD9C() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-
 class hkListenerBaseDD9C
 {
   public:
     virtual ~hkListenerBaseDD9C() throw();
 };
 
-class FUN_00dd9cc0 : public hkReferencedObjectDD9C, public hkListenerBaseDD9C
+class FUN_00dd9cc0 : public hkReferencedObject, public hkListenerBaseDD9C
 {
   public:
     void* m_pOwnerObject;
@@ -614,40 +549,13 @@ template <int SIZE> __forceinline void memCpyOneAlignedD60E(void* dst, const voi
     } while (++i < SIZE / 4);
 }
 
-struct hkMemoryRouterD60E
+template <typename T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& e)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pStreamAllocator;
-};
-
-namespace hkRouterD60E {
-extern "C" hkMemoryRouterD60E& __cdecl FUN_00c85750() throw();
+    if (m_iElementCount == getCapacity())
+        hkArrayUtil::_reserveMore(alloc, this, sizeof(T));
+    memCpyOneAlignedD60E<sizeof(T)>(m_data + m_iElementCount, &e);
+    m_iElementCount++;
 }
-void __cdecl ResizeAudioStream(void* m_pPoolBase, void* pArray, int iSizeElem);
-
-template <class T> class hkArrayD60E
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void AddBack(const T& e)
-    {
-        hkMemoryRouterD60E& router = hkRouterD60E::FUN_00c85750();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(router.m_pStreamAllocator, this, sizeof(T));
-        memCpyOneAlignedD60E<sizeof(T)>(m_data + m_iElementCount, &e);
-        m_iElementCount++;
-    }
-};
 
 class ListenerD60E
 {
@@ -701,7 +609,7 @@ class OwnerD60E : public OwnerBaseD60E, public ListenerD60E
     int unk20;
     EntryListD60E m_kEntryList;
     int unk28, unk2C, unk30, unk34;
-    hkArrayD60E<EntryD60E*> m_kEntries;
+    hkArray<EntryD60E*> m_kEntries;
     int m_unk44;
 
     int FUN_00d60d40(int aiSoundId);
@@ -723,7 +631,7 @@ int OwnerD60E::FUN_00d60e80(int aiSoundId)
         receiver->m_pkListener = this;
         receiver->m_unk10 = m_unk1C;
         receiver->vfn_14();
-        m_kEntries.AddBack(pkEntry);
+        m_kEntries.pushBack(pkEntry);
         m_kEntryList.ProcessInputData(pkEntry);
         return 0;
     }
@@ -736,22 +644,12 @@ inline void memCpy4_d60e(void* dst, const void* src, int nbytes)
         *(unsigned int*)((char*)dst + i) = *(const unsigned int*)((const char*)src + i);
 }
 
-template <class T> struct hkArray_d60e
+template <typename T> __forceinline void hkArrayBase<T>::removeAt(int index)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            memCpy4_d60e(m_data + index, m_data + m_iElementCount, sizeof(T));
-    }
-};
+    m_iElementCount--;
+    if (m_iElementCount != index)
+        memCpy4_d60e(m_data + index, m_data + m_iElementCount, sizeof(T));
+}
 
 struct Item_d60e
 {
@@ -773,7 +671,7 @@ struct Part_d60e
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18;
     Listeners_d60e m_kListeners;
     int unk20, unk24, unk28, unk2C;
-    hkArray_d60e<Item_d60e*> m_items;
+    hkArray<Item_d60e*> m_items;
     int FUN_00d60e20(void* key);
 };
 
@@ -842,86 +740,6 @@ Derived::Derived()
 {}
 
 namespace fnv_00d60f30 {
-struct MemManager
-{
-    virtual void v0();
-    virtual void* Alloc(unsigned int size);
-    virtual void v2();
-    virtual void* AllocBytes(int* size);
-    virtual void Free(void* p, int size);
-};
-struct BSAudio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    MemManager* m_mm;
-    MemManager& heap()
-    {
-        return *m_mm;
-    }
-};
-BSAudio& __cdecl FUN_00c85750();
-
-struct __declspec(novtable) RefObject
-{
-    virtual void RefObject_v0();
-    unsigned short m_iElementCount;
-    unsigned short m_refs;
-    RefObject() : m_refs(1)
-    {}
-    static void* operator new(unsigned int size)
-    {
-        RefObject* p = (RefObject*)FUN_00c85750().heap().Alloc(size);
-        p->m_iElementCount = (unsigned short)size;
-        return p;
-    }
-};
-
-struct PtrArray
-{
-    enum
-    {
-        CAPACITY_MASK = int(0x3FFFFFFF),
-        DONT_DEALLOCATE_FLAG = int(0x80000000)
-    };
-    int* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    PtrArray() : m_data(0), m_iElementCount(0), m_iCapacityState(DONT_DEALLOCATE_FLAG)
-    {}
-    int getCapacity() const
-    {
-        return m_iCapacityState & CAPACITY_MASK;
-    }
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    __forceinline void copyFromArray(MemManager& alloc, const PtrArray& a)
-    {
-        if (getCapacity() < a.GetLogicalSize())
-        {
-            if ((m_iCapacityState & DONT_DEALLOCATE_FLAG) == 0)
-                alloc.Free(m_data, getCapacity() * int(sizeof(int)));
-            int numBytes = a.GetLogicalSize() * int(sizeof(int));
-            m_data = (int*)alloc.AllocBytes(&numBytes);
-            m_iCapacityState = numBytes / int(sizeof(int));
-        }
-        int n = a.GetLogicalSize();
-        m_iElementCount = n;
-        int* d = m_data;
-        int* s = a.m_data;
-        for (int i = 0; i < n; i++)
-            d[i] = s[i];
-    }
-    __forceinline PtrArray& operator=(const PtrArray& a)
-    {
-        copyFromArray(FUN_00c85750().heap(), a);
-        return *this;
-    }
-};
 struct HandleSet
 {
     int unk00;
@@ -929,15 +747,15 @@ struct HandleSet
     int unk08;
     HandleSet(int count = 0) : unk00(0), unk04(0), unk08(-1)
     {
-        EnsureCapacity(&FUN_00c85750().heap(), count);
+        EnsureCapacity(&hkMemoryRouter::getInstance().heap(), count);
     }
-    void EnsureCapacity(MemManager* mm, int count) throw();
+    void EnsureCapacity(hkMemoryAllocator* mm, int count) throw();
 };
 
-struct OwnerObject : RefObject
+struct OwnerObject : hkReferencedObject
 {
     HandleSet m_handles;
-    OwnerObject()
+    OwnerObject() throw()
     {}
     virtual void OwnerObject_v1();
     void ProcessInputData(struct ListenerC* listener) throw();
@@ -961,13 +779,13 @@ struct OwnerHolder : OwnerObject
     void ProcessInputData(ListenerC* listener) throw();
 };
 
-struct FUN_00ddabe0 : RefObject
+struct FUN_00ddabe0 : hkReferencedObject
 {
     int unk08;
     int unk0c;
     FUN_00ddabe0(void* src) throw();
 };
-struct FUN_00dda6e0 : RefObject
+struct FUN_00dda6e0 : hkReferencedObject
 {
     int unk08;
     int unk0c;
@@ -977,24 +795,24 @@ struct ChildBase
 {
     virtual void ChildBase_v0();
 };
-struct FUN_00dd9cc0 : RefObject, ChildBase
+struct FUN_00dd9cc0 : hkReferencedObject, ChildBase
 {
     int unk0c;
     int unk10;
     FUN_00dd9cc0(FUN_00dda6e0* src) throw();
 };
 
-struct FUN_00d60f30 : RefObject, ListenerB, ListenerC
+struct FUN_00d60f30 : hkReferencedObject, ListenerB, ListenerC
 {
     FUN_00ddabe0* m_pHeadNode;
     FUN_00dda6e0* m_iSecondInteger;
     ChildBase* m_pChildAtom;
     ListenerB* m_kListener;
     OwnerObject m_pOwnerObject;
-    PtrArray m_arr38;
-    PtrArray m_arr44;
+    hkArray<int> m_arr38;
+    hkArray<int> m_arr44;
 
-    FUN_00d60f30(const PtrArray& arr, void* first, void* second);
+    FUN_00d60f30(const hkArray<int>& arr, void* first, void* second) throw();
     virtual void Thing_v1();
     virtual void ListenerB_v0();
     virtual void ListenerC_v0();
@@ -1002,7 +820,7 @@ struct FUN_00d60f30 : RefObject, ListenerB, ListenerC
 
 // Calls m_pOwnerObject.FUN_00dd9600(this), copies arr to m_arr44, conditionally constructs two objects, then constructs a child and assigns m_kListener.
 // @fnv 0x00d60f30
-FUN_00d60f30::FUN_00d60f30(const PtrArray& apArray, void* first, void* second)
+FUN_00d60f30::FUN_00d60f30(const hkArray<int>& apArray, void* first, void* second) throw()
 {
     m_pOwnerObject.ProcessInputData(this);
     m_arr44 = apArray;

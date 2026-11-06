@@ -1,50 +1,24 @@
+#include "../../include/NiObject.h"
+#include "../../include/NiPointer.h"
+#include "../../include/hkTransform.h"
+#include "../../include/bhkRigidBody.h"
+#include "../../include/bhkLiquidAction.h"
+#include "../../include/hkAabb.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiTransform.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/StrArr.h"
+#include "../../include/bhkRefObject.h"
 // src/unmapped/bhkrigidbody_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/unmapped/bhkrigidbody.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct NiObject;
-struct NiStream
-{
-    NiObject* GetLoadedObject();
-    unsigned int GetLinkID();
-};
-struct bhkRigidBody
-{
-    void FUN_00c859e0(NiStream*);
-    void FUN_00c8ef80(NiObject*);
-    void FUN_00c8f3c0(NiStream*);
-};
 char* __cdecl FUN_00a7d5e0(const char*, const char*);
-struct NiTPrimitiveArray_unsigned_int_
-{
-    unsigned int AddFirstEmpty(unsigned int const&);
-};
-struct StrArr
-{
-    void* vtbl;
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-    void Add(char*& e)
-    {
-        unsigned int i = m_usSize;
-        if (i >= m_usMaxSize)
-            SetSize(i + m_usGrowBy);
-        SetAt(i, e);
-    }
-};
 void __cdecl AddMotionTypeName(StrArr* arr, int type);
-struct FUN_00c8eb00_s
-{
-    void __thiscall ProcessListNodes();
-    void __thiscall FUN_00c9d590();
-    void __thiscall FUN_00c8eb00();
-};
 struct LinkedRecord
 {
     unsigned int unk00;
@@ -217,9 +191,6 @@ struct NativeThing
     unsigned int unk0e0;
     unsigned int unk0e4;
     unsigned char motionType;
-};
-struct NiRTTI
-{
 };
 extern NiRTTI DAT_01267b70;
 struct NativeLink
@@ -402,12 +373,12 @@ static inline bool IsSpecial(unsigned int t)
 {
     return t == 8 || t == 0x1d;
 }
-struct ListNode;
+struct BhkrigidbodyListNodeView;
 struct ObjBase
 {
     virtual void v00();
     virtual void v04();
-    virtual ListNode* v08();
+    virtual BhkrigidbodyListNodeView* v08();
     virtual void v0C();
     virtual void v10();
     virtual void v14();
@@ -449,20 +420,11 @@ struct ObjBase
     int Helper1();
     int Helper2();
 };
-struct ListNode
+// Exe 0x00c8d200: unit-local ListNode view; declarations and layout are preserved.
+struct BhkrigidbodyListNodeView
 {
     ObjBase* m_00;
-    ListNode* m_04;
-};
-struct FUN_00c8e770_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    ListNode m_14;
-    void ProcessListNodes();
+    BhkrigidbodyListNodeView* m_04;
 };
 extern char DAT_0126818c;
 extern char DAT_01268158;
@@ -620,7 +582,6 @@ struct SpawnedObject : public ChainB_cls
     }
 };
 SpawnedObject* __cdecl FUN_00c8ed70();
-struct NiNode;
 struct HavokShape
 {
     void FUN_00c8f080();
@@ -655,40 +616,8 @@ struct HavokObject
 
     void FUN_00a68bf0();
 };
-struct NiTransform
-{
-    float rotation[3][3];
-    float translation[3];
-    float scale;
-};
-struct NiBound
-{
-    float center[3];
-    float radius;
-};
-struct NiNode
-{
-    void* vtbl;
-    unsigned int referenceCount;
-    const char* name;
-    void* controller;
-    void* extraData;
-    unsigned short extraDataCount;
-    unsigned short extraDataCapacity;
-    void* parent;
-    NiBound worldBound;
-    NiTransform local;
-    NiTransform world;
-    void* collisionObject;
-    unsigned int flags;
-    unsigned int unknown9C;
-    HavokObject** children;
-    unsigned short maxChildren;
-    unsigned short childCount;
-};
 extern char DAT_012043f8;
 void __cdecl ApplyHavokOperation(HavokObject* object, int operation, void* context);
-struct NiObject;
 struct CloningProcess
 {
     int unk00;
@@ -1041,119 +970,6 @@ struct ThreadFlagsGuard
 };
 void LockWorldStub();
 void UnlockWorldStub();
-extern unsigned int g_iRefObjectCountA;
-extern int g_iSerializableCount;
-extern int g_iLiquidActionCount;
-struct bhkRefObjectBase
-{
-    virtual ~bhkRefObjectBase();
-    int refCount;
-    int unk08;
-    bhkRefObjectBase();
-    static void* operator new(unsigned int size);
-    static void operator delete(void* p);
-};
-struct bhkRefObjectLvl : bhkRefObjectBase
-{
-    struct LinkPair
-    {
-        void* unk0C;
-        void* unk10;
-        LinkPair() : unk0C(0), unk10(0)
-        {}
-    } links;
-    bhkRefObjectLvl()
-    {
-        ++g_iRefObjectCountA;
-    }
-};
-struct bhkSerializableLvl : bhkRefObjectLvl
-{
-    bhkSerializableLvl()
-    {
-        ++g_iSerializableCount;
-    }
-};
-struct bhkLiquidAction : bhkSerializableLvl
-{
-    int unk14;
-    int unk18;
-    bhkLiquidAction()
-    {
-        unk14 = 0;
-        unk18 = 0;
-        ++g_iLiquidActionCount;
-    }
-};
-struct bhkRigidBodyX
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0C();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1C();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2C();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void vf38();
-    virtual void vf3C();
-    virtual void vf40();
-    virtual void vf44();
-    virtual void vf48();
-    virtual void vf4C();
-    virtual void vf50();
-    virtual void vf54();
-    virtual void vf58();
-    virtual void vf5C();
-    virtual void vf60();
-    virtual void vf64();
-    virtual void vf68();
-    virtual void vf6C();
-    virtual void vf70();
-    virtual void vf74();
-    virtual void vf78();
-    virtual void vf7C();
-    virtual void vf80();
-    virtual void vf84();
-    virtual void vf88();
-    virtual void vf8C();
-    virtual void vf90();
-    virtual void vf94();
-    virtual void vf98();
-    virtual void vf9C();
-    virtual void vfA0();
-    virtual void vfA4();
-    virtual void vfA8();
-    virtual void vfAC();
-    virtual void vfB0();
-    virtual void vfB4();
-    virtual void vfB8();
-    virtual void vfBC();
-    virtual void vfC0();
-    virtual void vfC4();
-    virtual void vfC8();
-    virtual void vfCC();
-    virtual void vfD0();
-    virtual void vfD4();
-    virtual void vfD8();
-    virtual void vfDC();
-    virtual void vfE0();
-    virtual void vfE4();
-    virtual void vfE8();
-    virtual void vfEC();
-    virtual void vfF0();
-    virtual void vfF4();
-    virtual void vfF8();
-    virtual void SetLockedStub(bool locked);
-    void AddActionStub(bhkLiquidAction* action, int param);
-    bhkLiquidAction* CreateAndAddLiquidAction(int param);
-};
 extern __declspec(thread) int g_tlsMemContext;
 struct ScopedMemoryContext
 {
@@ -1272,22 +1088,6 @@ class C8DAC0Owner
 
     void UpdateMatchingNodes(void* pvContext);
 };
-// Define the known helper from the preserved surrounding source.
-struct LiquidBase
-{
-    virtual ~LiquidBase();
-    unsigned int refCount, unk08, unk0c, unk10;
-};
-struct LiquidLink
-{
-    ~LiquidLink();
-};
-struct FUN_00c8e9c0 : LiquidBase
-{
-    LiquidLink link;
-    void FUN_00c8da40();
-    virtual ~FUN_00c8e9c0();
-};
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 extern __declspec(thread) int g_iAllocTagC8E;
@@ -1305,75 +1105,19 @@ struct AllocTagScopeC8E
         g_iAllocTagC8E = m_iSaved;
     }
 };
-class NiRTTIC8E
-{
-  public:
-    const char* m_pcName;
-    const NiRTTIC8E* m_pBaseRTTI;
-
-    const NiRTTIC8E* GetBaseRTTI() const
-    {
-        return m_pBaseRTTI;
-    }
-};
-class NiObjectC8E
-{
-  public:
-    virtual ~NiObjectC8E();
-    virtual void DeleteThis();
-    virtual const NiRTTIC8E* GetRTTI() const;
-
-    bool IsKindOfType(const NiRTTIC8E& kRTTI) const
-    {
-        for (const NiRTTIC8E* pkRTTI = GetRTTI(); pkRTTI; pkRTTI = pkRTTI->GetBaseRTTI())
-        {
-            if (pkRTTI == &kRTTI)
-                return true;
-        }
-        return false;
-    }
-
-    void IncRefCount()
-    {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    unsigned int m_uiRefCount;
-};
-extern const NiRTTIC8E g_kGeometryRTTIC8E;
-extern const NiRTTIC8E g_kNodeRTTIC8E;
-template <class T> class NiPointerC8E
-{
-  public:
-    NiPointerC8E(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointerC8E()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-
-    T* m_pObject;
-};
+extern const NiRTTI g_kGeometryRTTIC8E;
+extern const NiRTTI g_kNodeRTTIC8E;
 struct ListItemC8E
 {
     ListItemC8E* m_pkNext;
     ListItemC8E* m_pkPrev;
-    NiObjectC8E* m_pkElement;
+    NiObject* m_pkElement;
 };
-ListItemC8E* __cdecl NewListItemC8E(NiObjectC8E* pkObject);
+ListItemC8E* __cdecl NewListItemC8E(NiObject* pkObject);
 class ObjectListC8E
 {
   public:
-    __declspec(noinline) void AddTail(const NiPointerC8E<NiObjectC8E>& spRetainedObject)
+    __declspec(noinline) void AddTail(const NiPointer<NiObject>& spRetainedObject)
     {
         ListItemC8E* pkItem = NewListItemC8E(spRetainedObject.m_pObject);
         pkItem->m_pkNext = 0;
@@ -1400,7 +1144,7 @@ class SceneC8E
     int unk10;
     ObjectListC8E m_kThirdFollowingStreamField;
 
-    void FUN_00c8ef80(NiObjectC8E* pkObject);
+    void FUN_00c8ef80(NiObject* pkObject);
 };
 struct RefCountedObj
 {
@@ -1463,19 +1207,6 @@ hkVector Ent::FUN_00c8d200()
     return *p;
 }
 }
-struct __declspec(align(16)) hkVector4
-{
-    __m128 m_vComponents;
-    hkVector4()
-    {}
-    hkVector4(const hkVector4& o) : m_vComponents(o.m_vComponents)
-    {}
-    hkVector4& operator=(const hkVector4& o)
-    {
-        m_vComponents = o.m_vComponents;
-        return *this;
-    }
-};
 extern hkVector4 g_zero;
 struct Inner
 {
@@ -1488,14 +1219,8 @@ struct Outer
     Inner* m_pChildAtom;
     hkVector4 GetVec() const;
 };
-struct Transform_c8d3
-{
-    __m128 m_kColumn0;
-    __m128 m_kColumn1;
-    __m128 m_kColumn2;
-    __m128 m_vTranslation;
-};
-extern Transform_c8d3 DAT_01268370;
+// Havok getAabb takes four SIMD columns (0x40 bytes), matching hkTransform.h.
+extern hkTransform DAT_01268370;
 struct Aabb_c8d3
 {
     __m128 m_kMinimumCorner;
@@ -1511,7 +1236,7 @@ class Shape_c8d3
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void getAabb(const Transform_c8d3& kLocalToWorld, float fTolerance, Aabb_c8d3& kOut) const;
+    virtual void getAabb(const hkTransform& kLocalToWorld, float fTolerance, Aabb_c8d3& kOut) const;
 };
 struct CdBody_c8d3
 {
@@ -1771,11 +1496,6 @@ struct BodyNative
     unsigned int unk00, unk04, unk08, unk0C;
     BodyMotion motion;
 };
-struct Bounds
-{
-    __m128 minimum;
-    __m128 maximum;
-};
 extern float DAT_012677bc;
 extern float DAT_012677c0;
 extern float DAT_011b0c48;
@@ -1832,7 +1552,7 @@ struct BodyBuild
     unsigned int unk04;
     BodyNative* native;
     void FUN_00a29680();
-    void GetAabb(Bounds* bounds);
+    void GetAabb(hkAabb* bounds);
     float FUN_00577b50();
     BodyMotion* GetMotion()
     {
@@ -2777,10 +2497,6 @@ struct IntegerTriple
     int unk34c;
     void* unk350;
 };
-struct bhkRefObject
-{
-    void* GetReferencedData();
-};
 Obj* __cdecl FUN_00cc81c0(Obj*, float);
 struct ParentData
 {
@@ -3597,7 +3313,7 @@ struct SmartObj160
 {
     int unk00;
     int ref04;
-    void Wait(int x);
+    void FUN_0040fbf0(int x);
 };
 struct Vec50Obj
 {
@@ -3787,7 +3503,7 @@ void This160::FUN_00c8e160(float* p1, RotationArg160 input, unsigned int p3)
     if (DAT_0106b798 < len)
     {
         if (a3)
-            a3->Wait(0);
+            a3->FUN_0040fbf0(0);
         FUN_005610f0(p1);
         if (a3)
         {

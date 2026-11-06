@@ -1,42 +1,20 @@
 // fallout_shared/packagelist.cpp: PackageList, TESAIForm (10 functions)
 
+// This unit also needs ItemsInList, which the shared list declaration lacks.
+#include "../../include/BSSimpleList.h"
+
+#include "../../include/BSStringT.h"
+#include "../../include/Actor.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/PerkEntryConditionSet.h"
+#include "../../include/Script.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESPackage.h"
 #include "packagelist_decls.h"
-template <class T> class BSSimpleList
-{
-  public:
-    void RemoveAll();
-    void AddHead(T&);
-    T& GetItem();
-    BSSimpleList<T>* GetNext();
-    bool IsEmpty();
-    void SetItem(T const& item);
-    void Remove(T const& item);
-    void RemoveHead();
-    bool IsInList(T& item);
-    void AddTail(T const& item);
-    unsigned int ItemsInList();
-};
-
-class PackageList
-{
-  public:
-    BSSimpleList<TESPackage*>* GetListOfPackages();
-    void Copy(const PackageList* src);
-    void ClearPackageList();
-    TESPackage* GetPackageForActor(Actor* actor);
-    void CollectEligiblePackages(Actor*, BSSimpleList<TESPackage*>*, float, float);
-    void InitItem(TESForm*);
-    void AddPackage(TESPackage*);
-    BSSimpleList<TESPackage*>* GetListOfPackages() const;
-};
-
-class TESAIForm
-{
-  public:
-    PackageList* GetPackageList();
-    const PackageList* GetPackageList() const;
-    void CopyAIPackageList(const TESAIForm* src);
-};
+#include "../../include/PackageList.h"
+#include "../../include/TESAIForm.h"
 
 // @fnv 0x0067e400
 void PackageList::ClearPackageList()
@@ -66,14 +44,14 @@ TESPackage* PackageList::GetPackageForActor(Actor* actor)
     selection.list = GetListOfPackages();
     selection.current = 0;
     if (actor)
-        selection.current = actor->GetCurrentPackage();
+        selection.current = reinterpret_cast<TESPackage*>(actor->GetCurrentPackage());
     if (!selection.list->IsEmpty())
     {
         selection.package = 0;
         selection.schedule = 0;
         while (selection.list && (selection.package = selection.list->GetItem()))
         {
-            if ((selection.package->vfn_138(actor) && !selection.package->IsFlag10000Set() &&
+            if ((selection.package->IsPackageValidForActor(actor) && !selection.package->IsFlag10000Set() &&
                  !selection.package->IsMustReachLocation()) ||
                 (selection.package->IsMustReachLocation() &&
                  !actor->GetExtraData()->CanReachPackageLocation(selection.package)))
@@ -125,7 +103,7 @@ TESPackage* PackageList::GetPackageForActor(Actor* actor)
                             if (FUN_00703180() == actor)
                             {
                                 sprintf(
-                                    message, "%s Picked Package %s (%s)", actor->GetFullName(),
+                                    message, "%s Picked Package %s (%s)", actor->TESObjectREFR::GetFullName(),
                                     PrepareScriptMessage(g_packageTypeNames[selection.package->GetPackType()], false),
                                     PrepareScriptMessage(selection.package->GetName(), false));
                                 DebugLog(message);
@@ -135,15 +113,15 @@ TESPackage* PackageList::GetPackageForActor(Actor* actor)
                             if (selection.current && selection.current != selection.package &&
                                 selection.current->GetPackType() == 1)
                             {
-                                Actor* leader = dynamic_cast<Actor*>(actor->GetProcess()->GetLowProcess40());
+                                Actor* leader = dynamic_cast<Actor*>(actor->GetProcess()->GetTarget());
                                 if (leader)
                                     leader->GetExtraData()->AddFollowerActor(actor);
                             }
                             if (selection.current && selection.current != selection.package)
                             {
                                 Script::GetLocalData(selection.current, actor->GetExtraData(), 0x800);
-                                actor->GetProcess()->HandleOnPackageChange(actor, selection.current);
-                                actor->GetProcess()->vfn_5a8(0);
+                                actor->GetProcess()->OnPackageStart(actor, selection.current);
+                                actor->GetProcess()->SetProcessModeEnabled(false);
                             }
                             if (selection.package && selection.package != selection.current)
                                 Script::GetLocalData(selection.package, actor->GetExtraData(), 0x200);
@@ -178,9 +156,9 @@ void PackageList::CollectEligiblePackages(Actor* actor, BSSimpleList<TESPackage*
         BSSimpleList<TESPackage*>* cursor;
     } sortCtx;
     sortCtx.current = 0;
-    scan.day = actor->GetProcess()->vfn_30();
-    scan.month = actor->GetProcess()->vfn_34();
-    scan.year = actor->GetProcess()->vfn_38();
+    scan.day = actor->GetProcess()->GetPackedStateBits0To8();
+    scan.month = actor->GetProcess()->GetPackedStateBits9To12();
+    scan.year = actor->GetProcess()->GetPackedStateBits13To26();
     scan.hour = startHour;
     sortCtx.today = g_calendar.GetGameHour();
     scan.currentMonth = g_calendar.GetCurrentMonth();
@@ -188,7 +166,7 @@ void PackageList::CollectEligiblePackages(Actor* actor, BSSimpleList<TESPackage*
     {
         BSSimpleList<TESPackage*>* pList = GetListOfPackages();
         if (actor)
-            sortCtx.current = actor->GetCurrentPackage();
+            sortCtx.current = reinterpret_cast<TESPackage*>(actor->GetCurrentPackage());
         if (!pList->IsEmpty())
         {
             TESPackage* pPackage = 0;
@@ -368,48 +346,35 @@ void PackageList::AddPackage(TESPackage* package)
     GetListOfPackages()->AddTail(package);
 }
 
-struct FUN_0067efd0_shell : public TESPackage
-{
-    bool FUN_0067efd0();
-};
-
 // @fnv 0x0067efd0
-bool FUN_0067efd0_shell::FUN_0067efd0()
+bool TESPackage::FUN_0067efd0()
 {
-    return (*(unsigned int*)((char*)this + 0x1c) & 4) ? true : false;
+    return (packageFlags & 4) ? true : false;
 }
 
-class FUN_0067e4a0_cls
-{
-  public:
-    unsigned int* FUN_006815c0();
-    bool FUN_008256d0();
-    bool FUN_0067e4a0(FUN_0067e4a0_cls* other);
-};
-
-// Compares two lists element by element via FUN_006815c0 and FUN_00726070, returning true if they differ or one is exhausted first.
+// Compares two lists element by element, returning true if they differ or one is exhausted first.
 // @fnv 0x0067e4a0
-bool FUN_0067e4a0_cls::FUN_0067e4a0(FUN_0067e4a0_cls* other)
+bool PackageList::DiffersFrom(PackageList* other)
 {
     unsigned int q;
     unsigned int r;
-    FUN_0067e4a0_cls* p;
-    FUN_0067e4a0_cls* s;
+    BSSimpleList<TESPackage*>* p;
+    BSSimpleList<TESPackage*>* s;
 
-    s = (FUN_0067e4a0_cls*)FUN_006815c0();
-    p = (FUN_0067e4a0_cls*)other->FUN_006815c0();
-    if (!s->FUN_008256d0())
+    s = GetListOfPackages();
+    p = other->GetListOfPackages();
+    if (!s->IsEmpty())
     {
-        while (s != 0 && *s->FUN_006815c0() != 0 && p != 0 && *p->FUN_006815c0() != 0)
+        while (s != 0 && s->GetItem() != 0 && p != 0 && p->GetItem() != 0)
         {
-            r = *s->FUN_006815c0();
-            q = *p->FUN_006815c0();
+            r = reinterpret_cast<unsigned int>(s->GetItem());
+            q = reinterpret_cast<unsigned int>(p->GetItem());
             if (r != q)
             {
                 return true;
             }
-            s = (FUN_0067e4a0_cls*)((DurationData*)s)->FUN_00726070();
-            p = (FUN_0067e4a0_cls*)((DurationData*)p)->FUN_00726070();
+            s = s->GetNext();
+            p = p->GetNext();
         }
         if (s != 0 || p != 0)
         {
@@ -418,7 +383,7 @@ bool FUN_0067e4a0_cls::FUN_0067e4a0(FUN_0067e4a0_cls* other)
     }
     else
     {
-        if (!p->FUN_008256d0())
+        if (!p->IsEmpty())
         {
             return true;
         }

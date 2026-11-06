@@ -2,34 +2,17 @@
 // src/bsshader/imagespaceeffecttv.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/imagespaceeffecttv.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
+#include "../../include/MemoryManager.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiTexture.h"
 
-struct MemoryManagerStandIn
-{
-    void* FUN_00aa3e40(unsigned int uiSize);
-};
-extern MemoryManagerStandIn g_memoryManager_011f6238;
+extern MemoryManager g_memoryManager_011f6238;
 void __cdecl PipboyFree(void* pvMem);
 
-struct NiRefObjectStandIn
-{
-    virtual void v00();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
+extern NiTexture* g_pkDistortMap_01200840;
+extern NiTexture* g_pkScanlines_0120083c;
 
-struct NiTextureStandIn : NiRefObjectStandIn
-{
-};
-extern NiTextureStandIn* g_pkDistortMap_01200840;
-extern NiTextureStandIn* g_pkScanlines_0120083c;
-
-void __cdecl FUN_00b55840(const char* pPath, int iFlags, NiTextureStandIn** ppTexture, int a4, int a5);
+void __cdecl FUN_00b55840(const char* pPath, int iFlags, NiTexture** ppTexture, int a4, int a5);
 
 struct PipboySourceTexture
 {
@@ -100,7 +83,7 @@ struct PipboyPass
     {
         PipboyFree(pvMem);
     }
-    void FUN_00ba37f0(NiTextureStandIn* pkTexture);
+    void FUN_00ba37f0(NiTexture* pkTexture);
     void FUN_00ba3760(int iValue);
     PipboySourceTexture* FUN_00ba3780();
 };
@@ -308,8 +291,8 @@ void PipboyShader2::SetupPipboyPasses(PipboyGeometry* pkGeometry, int iUnused)
 
     FUN_00b55840(s_szDistortMap, 1, &g_pkDistortMap_01200840, 0, 0);
     FUN_00b55840(s_szScanlines, 1, &g_pkScanlines_0120083c, 0, 0);
-    NiTextureStandIn* pkScanlines = g_pkScanlines_0120083c;
-    NiTextureStandIn* pkDistort = g_pkDistortMap_01200840;
+    NiTexture* pkScanlines = g_pkScanlines_0120083c;
+    NiTexture* pkDistort = g_pkDistortMap_01200840;
 
     m_kPasses.FUN_00ba3aa0(1, new PipboyPass);
     m_kPasses.GetAt(1)->FUN_00ba3760(0);

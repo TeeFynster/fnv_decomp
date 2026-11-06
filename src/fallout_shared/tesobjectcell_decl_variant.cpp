@@ -3,29 +3,24 @@
 // with declarations corrected to what the original code does (tesobjectcell_packet.h: class TESForm; class NiNode; -> class TESForm { public: virtual void TESFormV00();; tesobjectcell_packet.h: class TESObjectREFR { public: static BGSEncounterZ -> class TESObjectREFR : public TESForm { public: sta; tesobjectcell_packet.h: T& GetItem(); BSSimpleList* GetNext();). Move the function to its real unit once
 // that unit declares it this way.
 
-#include "tesobjectcell_packet_decl_tesobjectcell.h"
+#include "../../include/TES.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESObjectSTAT.h"
+#include "../../include/TESObjectREFR.h"
+
+#include "../../include/TESObjectCELL.h"
+
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
 unsigned int FUN_0054f4c0();
 NiAVObject* FUN_0054f4f0();
 
-class TES
-{
-  public:
-    void* FUN_00458be0(TESObjectCELL*, int);
-};
 extern TES* g_TES;
 struct ModelLoader
 {
     void QueueReference(TESObjectREFR*, void*, int);
 };
 extern ModelLoader* g_pModelLoader;
-class TESBoundObject : public TESForm
-{
-};
-class TESObjectSTAT : public TESBoundObject
-{
-};
 extern TESObjectSTAT* DAT_011ca238;
 extern TESObjectSTAT* DAT_011ca230;
 // @fnv 0x005571a0
@@ -33,10 +28,10 @@ void TESObjectCELL::FUN_005571a0(bool active)
 {
     CellRefLockEnter();
     void* list = g_TES->FUN_00458be0(this, 0);
-    BSSimpleList<TESObjectREFR*>* terrain = FUN_009604f0();
+    BSSimpleList<TESObjectREFR*>* terrain = reinterpret_cast<BSSimpleList<TESObjectREFR*>*>(FUN_009604f0());
     while (terrain)
     {
-        TESObjectREFR* reference = terrain->FUN_006815c0();
+        TESObjectREFR* reference = terrain->GetItem();
         if (reference && (reference->FUN_007af430() == DAT_011ca238 || reference->FUN_007af430() == DAT_011ca230))
         {
             if (!reference->GetNiNode() || reference->FUN_005651e0())
@@ -50,12 +45,12 @@ void TESObjectCELL::FUN_005571a0(bool active)
                     reference->Set3D(0, true);
             }
         }
-        terrain = terrain->FUN_00726070();
+        terrain = terrain->GetNext();
     }
-    terrain = FUN_009604f0();
+    terrain = reinterpret_cast<BSSimpleList<TESObjectREFR*>*>(FUN_009604f0());
     while (terrain)
     {
-        TESObjectREFR* other = terrain->FUN_006815c0();
+        TESObjectREFR* other = terrain->GetItem();
         if (other && other->FUN_007af430() != DAT_011ca238 && other->FUN_007af430() != DAT_011ca230)
         {
             if (!other->GetNiNode() || other->FUN_005651e0())
@@ -69,7 +64,7 @@ void TESObjectCELL::FUN_005571a0(bool active)
                     other->Set3D(0, false);
             }
         }
-        terrain = terrain->FUN_00726070();
+        terrain = terrain->GetNext();
     }
     CellRefLockLeave();
 }

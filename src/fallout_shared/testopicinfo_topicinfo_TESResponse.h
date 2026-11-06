@@ -3,12 +3,10 @@
 #define FNV_TESRESPONSE_H
 
 #include "testopicinfo_topicinfo_layout_support.h"
-#include "testopicinfo_topicinfo_TESTopic.h"
-#include "testopicinfo_topicinfo_layout_support.h"
+#include "../../include/TESIdleForm.h"
+#include "../../include/TESTopic.h"
 class DialogueResponseData;
-class TESIdleForm : public TESForm
-{
-};
+
 class DialogueResponseData
 {
   public:
@@ -39,12 +37,15 @@ class TESResponse
     TESIdleForm* m_pSecondIdleForm;   // +0x24, 4 bytes
     TESResponse* pNext;               // +0x28, 4 bytes
     TESResponse();
+    ~TESResponse();
     void Load(TESFile* file);
     void InitItem(TESForm* owner);
     void SetResponseText(const char* text);
     void SetSpeakerIdle(TESIdleForm* idle);
     void GetListenerIdle(TESIdleForm* idle);
     TESResponse* GetNext();
+    void AppendResponse(TESResponse* response);
+    void SetNext(TESResponse* apNext);  // 0x0061cc40 (folded +0x28 setter)
     // TESResponse
     // void __cdecl TESResponse::*()
     // void __cdecl TESResponse::*()

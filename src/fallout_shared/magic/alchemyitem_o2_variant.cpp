@@ -2,7 +2,6 @@
 // src/fallout_shared/magic/alchemyitem_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/magic/alchemyitem.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "alchemyitem_decls.h"
 
 // sub ecx,0x30; jmp FUN_004029b0
 // MSVC adjustor thunk: a derived class overrides a virtual declared by two bases;

@@ -3,73 +3,8 @@
 #define FNV_BGSDEFAULTOBJECTMANAGER_H
 
 #include "layout_support.h"
-#include "TESForm.h"
-class BGSDefaultObjectManager;
-enum DEFAULT_OBJECT
-{
-    DEFAULT_OBJECT_DO_STIMPAK = 0,
-    DEFAULT_OBJECT_DO_SUPERSTIMPAK = 1,
-    DEFAULT_OBJECT_DO_RADX = 2,
-    DEFAULT_OBJECT_DO_RADAWAY = 3,
-    DEFAULT_OBJECT_DO_MORPHINE = 4,
-    DEFAULT_OBJECT_DO_PERK_PARALYSIS = 5,
-    DEFAULT_OBJECT_DO_PLAYER_FACTION = 6,
-    DEFAULT_OBJECT_DO_PERK_STRANGER_NPC = 7,
-    DEFAULT_OBJECT_DO_PERK_STRANGER_FACTION = 8,
-    DEFAULT_OBJECT_DO_DEFAULT_MUSIC = 9,
-    DEFAULT_OBJECT_DO_BATTLE_MUSIC = 10,
-    DEFAULT_OBJECT_DO_DEATH_MUSIC = 11,
-    DEFAULT_OBJECT_DO_SUCCESS_MUSIC = 12,
-    DEFAULT_OBJECT_DO_LEVELUP_MUSIC = 13,
-    DEFAULT_OBJECT_DO_PLAYERVOICE_MALE = 14,
-    DEFAULT_OBJECT_DO_PLAYERVOICE_MALE_CHILD = 15,
-    DEFAULT_OBJECT_DO_PLAYERVOICE_FEMALE = 16,
-    DEFAULT_OBJECT_DO_PLAYERVOICE_FEMALE_CHILD = 17,
-    DEFAULT_OBJECT_DO_RANDOM_FOOD = 18,
-    DEFAULT_OBJECT_DO_EVERY_ACTOR_ABILITY = 19,
-    DEFAULT_OBJECT_DO_DRUG_EXPIRE_IMAGE_SPACE = 20,
-    DEFAULT_OBJECT_DO_DOCTOR_BAG = 21,
-    DEFAULT_OBJECT_DO_PERK_FORTUNE_NPC = 22,
-    DEFAULT_OBJECT_DO_PERK_FORTUNE_FACTION = 23,
-    DEFAULT_OBJECT_DO_MELTDOWN_EXPLOSION = 24,
-    DEFAULT_OBJECT_DO_UNARMED_EFFECT_FORWARD = 25,
-    DEFAULT_OBJECT_DO_UNARMED_EFFECT_BACKWARD = 26,
-    DEFAULT_OBJECT_DO_UNARMED_EFFECT_LEFT = 27,
-    DEFAULT_OBJECT_DO_UNARMED_EFFECT_RIGHT = 28,
-    DEFAULT_OBJECT_DO_UNARMED_EFFECT_CROUCH = 29,
-    DEFAULT_OBJECT_DO_UNARMED_EFFECT_COUNTER = 30,
-    DEFAULT_OBJECT_DO_SPOTTER_EFFECT = 31,
-    DEFAULT_OBJECT_DO_ITEM_DETECTION_EFFECT = 32,
-    DEFAULT_OBJECT_DO_CATEYE_MOBILE_EFFECT = 33,
-    DEFAULT_OBJECT_DO_COUNT = 34
-};
-#pragma pack(push, 4)
-class BGSDefaultObjectManager : public TESForm
-{
-  public:
-    // base TESForm at +0x0, size 24
-    TESForm* m_apDefaultObjects[34];  // +0x18, 136 bytes
-    // BGSDefaultObjectManager* __cdecl BGSDefaultObjectManager::*()
-    // void __cdecl BGSDefaultObjectManager::*()
-    // void __cdecl BGSDefaultObjectManager::*()
-    // bool __cdecl BGSDefaultObjectManager::*(TESFile*)
-    // void __cdecl BGSDefaultObjectManager::*()
-    // void __cdecl BGSDefaultObjectManager::*()
-    // TESForm* __cdecl BGSDefaultObjectManager::*(DEFAULT_OBJECT)
-    // BGSDefaultObjectManager
-    // void __cdecl BGSDefaultObjectManager::*()
-    // BGSDefaultObjectManager& __cdecl BGSDefaultObjectManager::*(const BGSDefaultObjectManager&)
-    // void __cdecl BGSDefaultObjectManager::*()
-    void ResetFormData();
-    virtual void InitItem();
-    static BGSDefaultObjectManager* Instance();
-    bool IsFormInitialized() const;
-    static TESForm* GetDefaultObjectByIndex(DEFAULT_OBJECT index);
-    bool Load(TESFile* file);
-    BGSDefaultObjectManager();
-    static BGSDefaultObjectManager* ms_pSystemUtility;
-};
-#pragma pack(pop)
+#include "../../include/TESForm.h"
+#include "../../include/DEFAULT_OBJECT.h"
 FNV_STATIC_ASSERT(sizeof(BGSDefaultObjectManager) == 160);
 FNV_STATIC_ASSERT(offsetof(BGSDefaultObjectManager, m_apDefaultObjects) == 24);
 #endif

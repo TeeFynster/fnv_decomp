@@ -1,13 +1,9 @@
 // fallout/misc/saveload/bgssaveloaddefines.cpp: SaveGameSizeState (15 functions)
 
-#include "types_TESForm_GetFormType.h"
-enum SIZE_TYPE
-{
-    SIZE_TYPE_SIZE_CHAR = 0,
-    SIZE_TYPE_SIZE_SHORT = 1,
-    SIZE_TYPE_SIZE_INT = 2,
-    SIZE_TYPE_SIZE_COUNT = 3
-};
+#include "../../../../include/TESForm.h"
+#include "../../../../include/BGSSaveLoadGame.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/SIZE_TYPE.h"
 #include <string.h>
 
 void LogWarning(const char* message, ...);
@@ -108,12 +104,12 @@ bool GetCellAndWorldspaceForForm(TESForm* form, TESObjectCELL*& cell, TESWorldSp
     {
         return false;
     }
-    if (form->GetFormType() == 0x41)
+    if (static_cast<const TESForm*>(form)->GetFormType() == 0x41)
     {
         world = (TESWorldSpace*)form;
         return true;
     }
-    else if (form->GetFormType() == 0x39)
+    else if (static_cast<const TESForm*>(form)->GetFormType() == 0x39)
     {
         cell = (TESObjectCELL*)form;
         return true;
@@ -202,92 +198,6 @@ unsigned int ReadEncodedInteger(char* buffer, unsigned int& value)
     return type;
 }
 
-struct MemoryHeapStats;
-struct IMemoryHeap;
-struct IMemoryManagerFile;
-struct MemoryManagerRelatedType;
-struct MemoryManagerHelperType;
-struct MemoryManagerComponent;
-struct ScrapHeapBuffer;
-struct MemoryManagerSupportType;
-struct MemoryManager
-{
-    static MemoryManager* Instance();
-    void CreatePool(unsigned int, unsigned int, char*);
-    void* Allocate(unsigned int, char*, int, char*);
-    void* Allocate(unsigned int);
-    void* AllocatePhysical(unsigned int, unsigned long);
-    void* TryAndAllocate(unsigned int);
-    void* Reallocate(void*, unsigned int, char*, int, char*);
-    void* Reallocate(void*, unsigned int);
-    void Deallocate(void*);
-    void DeallocatePhysical(void*, unsigned long, unsigned long);
-    void* DoSystemAllocation(unsigned int, bool);
-    void DoSystemDeallocation(void*, bool);
-    MemoryManagerHelperType* GetContextTracker();
-    MemoryManagerComponent* GetUsageTracker();
-    ScrapHeapBuffer* GetGeneralAllocator();
-    void Memset(void*, int, unsigned int);
-    void Memcpy(void*, void*, unsigned int);
-    void CheckMemoryIntegrity(bool);
-    static void ResetHeap();
-    static void EnableDelayedFree();
-    static void DisableDelayedFree();
-    static void SetCheckMemOnFree(bool);
-    static bool QDelayedFreeEnabled();
-    static bool QCheckMemOnFree();
-    unsigned int Size(void*);
-    unsigned int GetNumHeaps();
-    unsigned int GetNumPhysicalHeaps();
-    bool GetHeapStats(unsigned int, bool, MemoryHeapStats*);
-    bool GetPhysicalHeapStats(unsigned int, bool, MemoryHeapStats*);
-    bool GetDefaultHeapStats(unsigned int, bool, MemoryHeapStats*);
-    int GetCalculatedMemoryUsed();
-    int GetReportedMemoryUsed();
-    int OutputDebugInfo(IMemoryManagerFile*, bool);
-    IMemoryHeap* GetHeapByIndex(unsigned int);
-    IMemoryHeap* GetHeapForPointer(void*);
-    IMemoryHeap* GetHeapForPhysicalPointer(void*);
-    IMemoryHeap* GetMemHeap(MemoryManagerSupportType*);
-    void Initialize();
-    void InitializeStandard();
-    void RegisterMemoryManager();
-    void InitializeHeapTracking();
-    void ShutdownHeapTracking();
-    void SetupDuplicatedPools();
-    void ClearDuplicatedPools();
-    unsigned int HandleAllocationFailure(IMemoryHeap*, int, bool*);
-    void DumpMemoryManagerInfo();
-    int OutputModuleInfoToFile(IMemoryManagerFile*);
-    int OutputPoolInfoToFile(IMemoryManagerFile*);
-    int OutputHeapInfoToFile(IMemoryManagerFile*, bool);
-    void InitializeTrackers();
-    void UpdateSystemMemoryUsage();
-    void* __vecDelDtor(unsigned int);
-    char m_cTrackerName[64];
-    bool bInitialized;
-    char _pad_41[3];
-    void* m_pMemoryTracker;
-    MemoryManagerRelatedType* m_pFirstModuleEntry;
-    MemoryManagerComponent* m_pMemoryManagerComponent;
-    char m_cModuleInfoBuffer[448];
-    unsigned short m_usHeapCount;
-    unsigned short m_usHeapCapacity;
-    IMemoryHeap** m_ppMemoryHeaps;
-    char m_cModulePath[264];
-    char m_cModuleName[16];
-    IMemoryHeap** m_ppHeaps;
-    bool m_bHeapAllocationEnabled;
-    bool m_bPoolAllocationEnabled;
-    char _pad_336[2];
-    unsigned int m_uiHeapCount;
-    unsigned int m_uiImageMetadata;
-    void* m_pImageBase;
-    unsigned long iImageSize;
-    bool m_bImageInfoValid;
-    char _pad_349[3];
-};
-typedef char _sizecheck_MemoryManager[sizeof(MemoryManager) == 844 ? 1 : -1];
 
 MemoryManager* __cdecl FUN_00401020(void);
 
@@ -346,10 +256,6 @@ void ForwardToShell(FUN_00846330_shell* apShell, int aiArg1, int aiArg2)
     apShell->WriteToFile(aiArg1, aiArg2);
 }
 
-struct BGSSaveLoadGame
-{
-    void FUN_0084ab00(const char* apMessage, char* varArgs);
-};
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 // @fnv 0x00845cc0
 void __cdecl FUN_00845cc0(const char* apMessage, ...)

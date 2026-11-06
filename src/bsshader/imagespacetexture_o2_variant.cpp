@@ -198,7 +198,7 @@ void __thiscall Holder::FUN_00ba38b0()
     _c = 0;
 }
 
-struct NiRenderer;
+class NiRenderer;
 
 extern NiRenderer* DAT_011f9508;
 

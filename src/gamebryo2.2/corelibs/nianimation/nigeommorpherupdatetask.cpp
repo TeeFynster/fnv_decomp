@@ -2,35 +2,53 @@
 // src/gamebryo2.2/corelibs/nianimation/nigeommorpherupdatetask.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/nigeommorpherupdatetask.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/NiGeomMorpherUpdateTask.h"
+// NiStreamLinkIDSet_nigeommorpherupdatetask: local type (was include/NiStreamLinkIDSet.h, which had no evidence of one real class); its methods are 0x00a311e0 NiTSet<NiScreenGeometryData::ScreenElement *,NiTMallocInterface<NiScreenGeometryData::ScreenElement *> >::Add, 0x00a543b0 NiTSet::Ptr::Add
+class Item;
+class NiGeomMorpherUpdateTask;
+class D3DRenderStateGroup;
+
+class NiStreamLinkIDSet_nigeommorpherupdatetask
+{
+public:
+    void* m_kPointA;
+    unsigned int m_uiItemCount;
+    unsigned int m_pRayCursor;
+
+    void Realloc(unsigned int);
+    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    unsigned int Find(Item* item);
+    int Find(unsigned int value);
+    void Add(Item* item);
+    void Add(NiGeomMorpherUpdateTask* pkTask);
+    void Add(D3DRenderStateGroup* p);
+    void AddUnique(Item* item);
+};
+
 extern "C"
 {
     extern const void* g_011f4100;
 }
 
 // @fnv 0x00a56c00
-const void* __cdecl FUN_00a56c00()
+const NiRTTI* NiGeomMorpherUpdateTask::GetRTTI() const
 {
-    return &g_011f4100;
+    return reinterpret_cast<const NiRTTI*>(&g_011f4100);
 }
 
-struct NiGeomMorpherUpdateTask;
 extern int DAT_011a9414;
 extern int DAT_011a941c;
 extern NiGeomMorpherUpdateTask** DAT_011a940c;
 extern int DAT_011f4180;
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
-struct FreeStore
-{
-    void FUN_00a56e60(int);
-};
 // @fnv 0x00a56f90
 NiGeomMorpherUpdateTask* __cdecl PopMorpherUpdateTask()
 {
     EnterCriticalSection((void*)&DAT_011f4180);
     if (DAT_011a9414 == 0)
     {
-        ((FreeStore*)&DAT_011a940c)->FUN_00a56e60(DAT_011a941c);
+        ((NiStreamLinkIDSet_nigeommorpherupdatetask*)&DAT_011a940c)->FUN_00a56e60(DAT_011a941c);
         DAT_011a941c *= 2;
     }
     NiGeomMorpherUpdateTask* pkTask = DAT_011a940c[0];
@@ -92,200 +110,120 @@ struct MorphController
     virtual void v41() = 0;
     virtual void MorphFunc() = 0;
 };
-struct BaseTask
-{
-    virtual void w00() = 0;
-    virtual void w01() = 0;
-    virtual void w02() = 0;
-    virtual void w03() = 0;
-    virtual void w04() = 0;
-    virtual void w05() = 0;
-    virtual void w06() = 0;
-    virtual void w07() = 0;
-    virtual void w08() = 0;
-    virtual void w09() = 0;
-    virtual void w10() = 0;
-    virtual void w11() = 0;
-    virtual void w12() = 0;
-    virtual void w13() = 0;
-    virtual void w14() = 0;
-    virtual void w15() = 0;
-    virtual void w16() = 0;
-    virtual void w17() = 0;
-    virtual void w18() = 0;
-    virtual void w19() = 0;
-    virtual void w20() = 0;
-    virtual void w21() = 0;
-    virtual void w22() = 0;
-    virtual void w23() = 0;
-    virtual void w24() = 0;
-    virtual void w25() = 0;
-    virtual void w26() = 0;
-    virtual void w27() = 0;
-    virtual void w28() = 0;
-    virtual void w29() = 0;
-    virtual void w30() = 0;
-    virtual void w31() = 0;
-    virtual void w32() = 0;
-    virtual void w33() = 0;
-    virtual void w34() = 0;
-    virtual void w35() = 0;
-    virtual void w36() = 0;
-    virtual void Tail() = 0;
-};
-struct NiGeomMorpherUpdateTask : BaseTask
-{
-    int _pad[2];
-    MorphController* m_pkMorphController;
-    FakeGeo* m_spReferencedObject;
-    void FUN_00a56bb0();
-};
-// If the global flag is clear and the geometry's reference count exceeds one, calls MorphFunc on the morph controller, then Tail.
+// If the global flag is clear and the geometry's reference count exceeds one, calls MorphFunc on the morph controller, then releases the task.
 // @fnv 0x00a56bb0
-void NiGeomMorpherUpdateTask::FUN_00a56bb0()
+void NiGeomMorpherUpdateTask::vf35()
 {
     if (!DAT_011f5b08 && m_spReferencedObject->m_ref > 1)
         m_pkMorphController->MorphFunc();
-    Tail();
+    vf37();
 }
 
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-    virtual void Unk_04();
-    int m_ref;
-};
 extern int(__stdcall* DAT_00fdf1c4)(void*);
 extern int DAT_01069674;
-struct S_00a56c10
-{
-    int _00;
-    int _04;
-    int _08;
-    NiRefObject* _0C;
-    NiRefObject* _10;
-    void ReleaseRefObjects();
-};
-// Releases the two NiRefObject pointers via DAT_00fdf1c4 and, when the refcount reaches zero, calls their Unk_04, then resets the vtable and destroys the base.
+
+// These helpers use the shared task layout. The unused EDX parameter keeps ECX
+// and the stack arguments in their original locations. The release call uses a
+// thiscall pointer so it passes only the original arguments.
+// Releases the two NiRefObject pointers via DAT_00fdf1c4 and, when the refcount reaches zero, calls their DeleteThis, then resets the vtable and destroys the base.
 // @fnv 0x00a56c10
-void S_00a56c10::ReleaseRefObjects()
+void __fastcall ReleaseMorpherRefObjects(NiGeomMorpherUpdateTask* task, void*)
 {
     int(__stdcall * f)(void*) = DAT_00fdf1c4;
-    NiRefObject* p = _10;
+    NiRefObject* p = reinterpret_cast<NiRefObject*>(task->m_spReferencedObject);
     if (p)
     {
-        if (f(&p->m_ref) == 0)
-            p->Unk_04();
+        if (f(&p->m_uiRefCount) == 0)
+            p->DeleteThis();
     }
-    p = _0C;
+    p = reinterpret_cast<NiRefObject*>(task->m_pkMorphController);
     if (p)
     {
-        if (f(&p->m_ref) == 0)
-            p->Unk_04();
+        if (f(&p->m_uiRefCount) == 0)
+            p->DeleteThis();
     }
-    *(void**)this = &DAT_01069674;
-    ((NiRefObject*)this)->NiRefObject::~NiRefObject();
+    *(void**)task = &DAT_01069674;
+    ((NiRefObject*)task)->NiRefObject::~NiRefObject();
 }
 
 extern int(__stdcall* DAT_00fdf1c0)(void*);
 
-struct S_00a56c60 : S_00a56c10
-{
-    void SetRefObjects(NiRefObject* nextFirst, NiRefObject* nextSecond);
-};
-
 // @fnv 0x00a56c60
-void S_00a56c60::SetRefObjects(NiRefObject* nextFirst, NiRefObject* nextSecond)
+void __fastcall SetMorpherRefObjects(NiGeomMorpherUpdateTask* task, void*, NiRefObject* nextFirst, NiRefObject* nextSecond)
 {
     int(__stdcall * decrement)(void*) = DAT_00fdf1c4;
-    NiRefObject* previous = _0C;
+    NiRefObject* previous = reinterpret_cast<NiRefObject*>(task->m_pkMorphController);
     if (previous != nextFirst)
     {
         if (previous != 0)
         {
-            if (decrement(&previous->m_ref) == 0)
-                previous->Unk_04();
+            if (decrement(&previous->m_uiRefCount) == 0)
+                previous->DeleteThis();
         }
-        _0C = nextFirst;
+        task->m_pkMorphController = reinterpret_cast<MorphController*>(nextFirst);
         if (nextFirst != 0)
-            DAT_00fdf1c0(&nextFirst->m_ref);
+            DAT_00fdf1c0(&nextFirst->m_uiRefCount);
     }
 
-    previous = _10;
+    previous = reinterpret_cast<NiRefObject*>(task->m_spReferencedObject);
     if (previous != nextSecond)
     {
         if (previous != 0)
         {
-            if (decrement(&previous->m_ref) == 0)
-                previous->Unk_04();
+            if (decrement(&previous->m_uiRefCount) == 0)
+                previous->DeleteThis();
         }
-        _10 = nextSecond;
+        task->m_spReferencedObject = reinterpret_cast<FakeGeo*>(nextSecond);
         if (nextSecond != 0)
-            DAT_00fdf1c0(&nextSecond->m_ref);
+            DAT_00fdf1c0(&nextSecond->m_uiRefCount);
     }
 }
 
 extern "C" void __cdecl FUN_00aa1460(void* apMemory, unsigned int aiSize);
 extern "C" void __cdecl FUN_00aa1490(void* apMemory, unsigned int aiSize);
 
-class NiObject_00a56d40
-{
-  public:
-    void FUN_00a5d3d0(void);
-};
-
-struct FUN_00a56d40_cls
-{
-    int m_vptr00;
-    int unk04;
-    int unk08;
-    NiRefObject* m_0c;
-    NiRefObject* m_10;
-
-    FUN_00a56d40_cls* Destroy(unsigned char acFlags);
-};
-
 // @fnv 0x00a56d40
-FUN_00a56d40_cls* FUN_00a56d40_cls::Destroy(unsigned char acFlags)
+NiGeomMorpherUpdateTask* __fastcall DestroyMorpherUpdateTask(NiGeomMorpherUpdateTask* task, void*, unsigned char acFlags)
 {
     if (acFlags & 2)
     {
-        char* base = (char*)this - 4;
+        char* base = (char*)task - 4;
         int i = *(int*)base;
-        FUN_00a56d40_cls* p = (FUN_00a56d40_cls*)((char*)this + i * 20);
+        NiGeomMorpherUpdateTask* p = (NiGeomMorpherUpdateTask*)((char*)task + i * sizeof(NiGeomMorpherUpdateTask));
         i = i - 1;
         if (i >= 0)
         {
             do
             {
-                p = (FUN_00a56d40_cls*)((char*)p - 20);
-                NiRefObject* a = p->m_10;
-                if (a != 0 && DAT_00fdf1c4(&a->m_ref) == 0)
+                p = (NiGeomMorpherUpdateTask*)((char*)p - sizeof(NiGeomMorpherUpdateTask));
+                NiRefObject* a = reinterpret_cast<NiRefObject*>(p->m_spReferencedObject);
+                if (a != 0 && DAT_00fdf1c4(&a->m_uiRefCount) == 0)
                 {
-                    a->Unk_04();
+                    a->DeleteThis();
                 }
-                NiRefObject* b = p->m_0c;
-                if (b != 0 && DAT_00fdf1c4(&b->m_ref) == 0)
+                NiRefObject* b = reinterpret_cast<NiRefObject*>(p->m_pkMorphController);
+                if (b != 0 && DAT_00fdf1c4(&b->m_uiRefCount) == 0)
                 {
-                    b->Unk_04();
+                    b->DeleteThis();
                 }
-                p->m_vptr00 = (int)&DAT_01069674;
-                ((NiObject_00a56d40*)p)->FUN_00a5d3d0();
+                *(void**)p = &DAT_01069674;
+                p->FUN_00a5d3d0();
             } while (--i >= 0);
         }
         if (acFlags & 1)
         {
-            FUN_00aa1490(base, 0x14);
+            FUN_00aa1490(base, sizeof(NiGeomMorpherUpdateTask));
         }
-        return (FUN_00a56d40_cls*)base;
+        return (NiGeomMorpherUpdateTask*)base;
     }
 
-    ((S_00a56c10*)this)->ReleaseRefObjects();
+    typedef void (__thiscall* ReleaseRefs)(NiGeomMorpherUpdateTask*);
+    reinterpret_cast<ReleaseRefs>(&ReleaseMorpherRefObjects)(task);
     if (acFlags & 1)
     {
-        FUN_00aa1460(this, 0x14);
+        FUN_00aa1460(task, sizeof(NiGeomMorpherUpdateTask));
     }
-    return this;
+    return task;
 }
 
 class A56DF0Heap
@@ -341,37 +279,32 @@ void ResetRegistry()
     DAT_011a941c = DAT_011a9420;
 }
 
-struct S_00a56f10;
-struct S_00a56f10_List
+struct MorpherTaskList
 {
-    void FindOrAdd(S_00a56f10** pItem);
-};
-struct S_00a56f10 : S_00a56c10
-{
-    bool ReleaseReferences();
+    void FindOrAdd(NiGeomMorpherUpdateTask** pItem);
 };
 
 // @fnv 0x00a56f10
-bool S_00a56f10::ReleaseReferences()
+bool NiGeomMorpherUpdateTask::vf37()
 {
     int(__stdcall * dec)(void*) = DAT_00fdf1c4;
-    NiRefObject* a = _0C;
+    NiRefObject* a = reinterpret_cast<NiRefObject*>(m_pkMorphController);
     if (a)
     {
-        if (!dec(&a->m_ref))
-            a->Unk_04();
-        _0C = 0;
+        if (!dec(&a->m_uiRefCount))
+            a->DeleteThis();
+        m_pkMorphController = 0;
     }
-    NiRefObject* b = _10;
+    NiRefObject* b = reinterpret_cast<NiRefObject*>(m_spReferencedObject);
     if (b)
     {
-        if (!dec(&b->m_ref))
-            b->Unk_04();
-        _10 = 0;
+        if (!dec(&b->m_uiRefCount))
+            b->DeleteThis();
+        m_spReferencedObject = 0;
     }
     EnterCriticalSection(&DAT_011f4180);
-    S_00a56f10* self = this;
-    reinterpret_cast<S_00a56f10_List*>(&DAT_011a940c)->FindOrAdd(&self);
+    NiGeomMorpherUpdateTask* self = this;
+    reinterpret_cast<MorpherTaskList*>(&DAT_011a940c)->FindOrAdd(&self);
     LeaveCriticalSection(&DAT_011f4180);
     return true;
 }
@@ -412,32 +345,21 @@ struct TaskBlock
     static void operator delete(void*, int, int);
 };
 
-class NiStreamLinkIDSet
+inline void NiStreamLinkIDSet_nigeommorpherupdatetask::Add(NiGeomMorpherUpdateTask* pkTask)
 {
-  public:
-    NiGeomMorpherUpdateTask** m_ppkFree;
-    unsigned int m_uiCapacity;
-    unsigned int m_uiSize;
-    TaskBlock* m_pkBlocks;
-
-    void Realloc(unsigned int uiNewCapacity);
-
-    void Add(NiGeomMorpherUpdateTask* pkTask)
-    {
-        if (m_uiSize == m_uiCapacity)
-            Realloc(m_uiCapacity > 0 ? m_uiCapacity * 2 : 1);
-        m_ppkFree[m_uiSize++] = pkTask;
-    }
-
-    void FUN_00a56e60(unsigned int ItemUpdateArray);
-};
+    if (m_pRayCursor == m_uiItemCount)
+        Realloc(m_uiItemCount > 0 ? m_uiItemCount * 2 : 1);
+    static_cast<NiGeomMorpherUpdateTask**>(m_kPointA)[m_pRayCursor++] = pkTask;
+}
 
 // @fnv 0x00a56e60
-void NiStreamLinkIDSet::FUN_00a56e60(unsigned int uiTaskCount)
+void NiStreamLinkIDSet_nigeommorpherupdatetask::FUN_00a56e60(unsigned int uiTaskCount)
 {
     TaskBlock* pkBlock = new TaskBlock(uiTaskCount);
     for (unsigned int i = 0; i < uiTaskCount; i++)
         Add(pkBlock->GetAt(i));
-    pkBlock->m_pkNext = m_pkBlocks;
-    m_pkBlocks = pkBlock;
+    // This task pool stores its block chain immediately after the shared set.
+    TaskBlock*& pkBlocks = reinterpret_cast<TaskBlock**>(this)[3];
+    pkBlock->m_pkNext = pkBlocks;
+    pkBlocks = pkBlock;
 }

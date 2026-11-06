@@ -2,6 +2,8 @@
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 #include "nid3dshaderprogramfactory_packet.h"
+#include "../../../../include/NiD3DShaderProgramFactory.h"
+#include "../../../../include/NiTStringPointerMap.h"
 struct Program;
 extern Program* DAT_0126fa10;
 Program* FUN_00e92eb0();
@@ -27,21 +29,6 @@ int __fastcall FUN_00e92fe0(Lst* l, int, Nd** pos);
 void FUN_00e93df0();
 extern "C" void __cdecl __Dummy_00b6fef0(void*, unsigned int);
 void __cdecl FUN_00e93e00();
-struct FUN_00e93f30_shell
-{
-    void* __thiscall DestroyShaderProgramFactory(unsigned int flags);
-};
-struct ShaderBufferRecord;
-struct NiTStringPointerMap_00e93060
-{
-    bool __thiscall GetAt(const char* key, ShaderBufferRecord*& out);
-};
-struct NiD3DShaderProgramFactory_00e93060
-{
-    int m_auiShapeKeys[6];
-    NiTStringPointerMap_00e93060* m_pShaderBufferMap;
-    ShaderBufferRecord* __thiscall FUN_00e93060(const char* pcShaderName);
-};
 struct P03MM
 {
     void* __thiscall Allocate(unsigned int size);
@@ -53,11 +40,7 @@ extern int DAT_010f0eb0;
 extern int DAT_010f0f50;
 void CreateCreatorMap();
 
-struct RecursiveSpinLock
-{
-    void __thiscall Lock(char const*);
-    void __thiscall Unlock();
-};
+#include "../../../../include/RecursiveSpinLock.h"
 extern RecursiveSpinLock g_011c5f80;
 template <class T> struct PoolAllocatorBase
 {

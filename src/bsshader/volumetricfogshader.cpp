@@ -27,16 +27,16 @@ void VolumetricFogShader::UpdateShaderConstants()
 {
     if (!m_spFirstShaderConstantMap.m_pObject)
     {
-        m_spFirstShaderConstantMap = new NiD3DShaderConstantMap(m_pShaderObject, 2);
-        m_spFirstShaderConstantMap->vfn_8(DAT_010babec, 0x10000007, 0, 0, 1, g_emptyTopicInfoPrompt, 16, 4, &m_data98,
+        m_spFirstShaderConstantMap = new NiD3DShaderConstantMap(m_pShaderObject, 2u);
+        m_spFirstShaderConstantMap->SetConstant(DAT_010babec, 0x10000007, 0, 0, 1, g_emptyTopicInfoPrompt, 16, 4, &m_data98,
                                           false);
     }
 
     if (!m_spSecondShaderConstantMap.m_pObject)
     {
-        m_spSecondShaderConstantMap = new NiD3DShaderConstantMap(m_pShaderObject, 0);
-        m_spSecondShaderConstantMap->vfn_68(DAT_010A1E50, 0x20000009, 0, g_emptyTopicInfoPrompt, 0, 0, 0, 0);
-        m_spSecondShaderConstantMap->vfn_8(DAT_010bb0ac, 0x10000007, 0, 4, 1, g_emptyTopicInfoPrompt, 16, 4, &m_data88,
+        m_spSecondShaderConstantMap = new NiD3DShaderConstantMap(m_pShaderObject, 0u);
+        m_spSecondShaderConstantMap->AddConstant8(DAT_010A1E50, 0x20000009, 0, g_emptyTopicInfoPrompt, 0, 0, 0, 0);
+        m_spSecondShaderConstantMap->SetConstant(DAT_010bb0ac, 0x10000007, 0, 4, 1, g_emptyTopicInfoPrompt, 16, 4, &m_data88,
                                            false);
     }
 }

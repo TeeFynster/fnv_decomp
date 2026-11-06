@@ -1,3 +1,13 @@
+// The normal is hkVector4: its rotation method is bound to 0x00c7f700 in other Havok units.
+#include "../../../../../../../include/hkVector4.h"
+// The four SIMD columns and relative-transform call at 0x00cb22f0 identify hkTransform.
+#include "../../../../../../../include/hkTransform.h"
+// The 32-byte endpoint pair is hkpMultiRayShape::Ray (m_kRayStart, m_kRayEnd).
+#include "../../../../../../../include/hkpMultiRayShape.h"
+
+// Havok's default transform constructor leaves its storage untouched.
+inline hkTransform::hkTransform() {}
+
 
 // src/havok/physics/collide/agent/miscagent/multirayconvex/hkpmultirayconvexagent_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/collide/agent/miscagent/multirayconvex/hkpmultirayconvexagent.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -162,30 +172,15 @@ static inline void S_00d374f0_Timer(const char* name) {
     }
 }
 
-// hkVector4 stand-in: 4 floats (an __m128 member would add a GS cookie)
-struct __declspec(align(16)) S_00d374f0_Vector4 {
-    float x, y, z, w;
-    __m128& q() { return reinterpret_cast<__m128&>(*this); }
-    const __m128& q() const { return reinterpret_cast<const __m128&>(*this); }
-};
-
-struct __declspec(align(16)) S_00d374f0_Transform {
-    S_00d374f0_Vector4 m_kColumn0;
-    S_00d374f0_Vector4 m_kColumn1;
-    S_00d374f0_Vector4 m_kColumn2;
-    S_00d374f0_Vector4 m_vTranslation;
-    void FUN_00cb22f0(const S_00d374f0_Transform& a, const S_00d374f0_Transform& b);
-};
-
-static __forceinline void S_00d374f0_SetTransformedPos(S_00d374f0_Vector4& out, const S_00d374f0_Transform& t, const S_00d374f0_Vector4& b)
+static __forceinline void S_00d374f0_SetTransformedPos(hkVector4& out, const hkTransform& t, const hkVector4& b)
 {
-    const __m128 xb = _mm_shuffle_ps(b.q(), b.q(), 0x00);
-    const __m128 yb = _mm_shuffle_ps(b.q(), b.q(), 0x55);
-    const __m128 zb = _mm_shuffle_ps(b.q(), b.q(), 0xaa);
-    const __m128 t0 = _mm_mul_ps(xb, t.m_kColumn0.q());
-    const __m128 t1 = _mm_mul_ps(yb, t.m_kColumn1.q());
-    const __m128 t2 = _mm_mul_ps(zb, t.m_kColumn2.q());
-    out.q() = _mm_add_ps(_mm_add_ps(t1, t0), _mm_add_ps(t2, t.m_vTranslation.q()));
+    const __m128 xb = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
+    const __m128 yb = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
+    const __m128 zb = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
+    const __m128 t0 = _mm_mul_ps(xb, t.m_kColumn0);
+    const __m128 t1 = _mm_mul_ps(yb, t.m_kColumn1);
+    const __m128 t2 = _mm_mul_ps(zb, t.m_kColumn2);
+    out.m_vComponents = _mm_add_ps(_mm_add_ps(t1, t0), _mm_add_ps(t2, t.m_vTranslation));
 }
 
 struct S_00d374f0_Bool {
@@ -195,15 +190,15 @@ struct S_00d374f0_Bool {
 };
 
 struct __declspec(align(16)) S_00d374f0_RayInput {
-    S_00d374f0_Vector4 m_vFrom;
-    S_00d374f0_Vector4 m_vTo;
+    hkVector4 m_vFrom;
+    hkVector4 m_vTo;
     unsigned int m_uiFilterInfo;
     const void* m_pRayShapeCollectionFilter;
     S_00d374f0_RayInput() : m_uiFilterInfo(0), m_pRayShapeCollectionFilter(0) {}
 };
 
 struct __declspec(align(16)) S_00d374f0_RayOutputBase {
-    S_00d374f0_Vector4 m_vHitNormal;
+    hkVector4 m_vHitNormal;
     float m_fHitFraction;
     int m_iExtraInfo;
     int unk18;
@@ -229,17 +224,12 @@ struct S_00d374f0_ConvexShape {
     virtual S_00d374f0_Bool RayCast(const S_00d374f0_RayInput& input, S_00d374f0_RayOutput& output) const;
 };
 
-struct S_00d374f0_Ray {
-    S_00d374f0_Vector4 m_kRayStart;
-    S_00d374f0_Vector4 m_kRayEnd;
-};
-
 struct S_00d374f0_MultiRayShape {
     int unk0;
     int unk4;
     int unk8;
     int unkC;
-    S_00d374f0_Ray* m_data;
+    hkpMultiRayShape::Ray* m_data;
     int m_iElementCount;
     int m_pRayCursor;
 };
@@ -247,7 +237,7 @@ struct S_00d374f0_MultiRayShape {
 struct S_00d374f0_CdBody {
     const void* m_pCollisionShape;
     unsigned int m_uiCollisionShapeKey;
-    const S_00d374f0_Transform* m_pMotionState;
+    const hkTransform* m_pMotionState;
     const S_00d374f0_CdBody* m_parent;
 };
 
@@ -265,11 +255,11 @@ void FUN_00d374f0(const S_00d374f0_CdBody& bodyA, const S_00d374f0_CdBody& bodyB
     const S_00d374f0_ConvexShape* convexB = (const S_00d374f0_ConvexShape*)bodyB.m_pCollisionShape;
 
     S_00d374f0_Collector* col = collector;
-    S_00d374f0_Transform bTa;
+    hkTransform bTa;
     bTa.FUN_00cb22f0(*bodyB.m_pMotionState, *bodyA.m_pMotionState);
 
     int nRays = msA->m_iElementCount;
-    const S_00d374f0_Ray* rayA = msA->m_data;
+    const hkpMultiRayShape::Ray* rayA = msA->m_data;
     S_00d374f0_RayInput rayInput;
     S_00d374f0_RayOutput rayResults;
     while (nRays-- && !col->m_fHitDistance)
@@ -309,14 +299,8 @@ inline void timer378(const char* tag) {
         timer->current = e + 1;
     }
 }
-struct V378 { union { __m128 v; struct { float x,y,z,w; }; }; };
-struct Transform378 {
-    __m128 x,y,z,t;
-    void __thiscall FUN_00cb22f0(void*, void*);
-};
-struct Segment378 { V378 from,to; };
-struct Ray378 { V378 from,to; unsigned filter; unsigned userData; };
-struct OutputBase378 { V378 normal; float fraction; int m_uiExtraInfo; };
+struct Ray378 { hkVector4 from,to; unsigned filter; unsigned userData; };
+struct OutputBase378 { hkVector4 normal; float fraction; int m_uiExtraInfo; };
 struct Output378 : OutputBase378 { unsigned shapeKeys[8]; int keyIndex; };
 struct Bool378 { char value; };
 struct Shape378 {
@@ -324,22 +308,20 @@ struct Shape378 {
     virtual void slot4(); virtual void slot5(); virtual void slot6(); virtual void slot7();
     virtual Bool378 RayCast(const Ray378&, Output378&) const;
     int field04,field08,field0c;
-    Segment378* rays;
+    hkpMultiRayShape::Ray* rays;
     int count;
     int field18;
     float radius;
 };
-struct Body378 { Shape378* shape; int other; Transform378* transform; };
+struct Body378 { Shape378* shape; int other; hkTransform* transform; };
 struct Contact378 {
-    V378 position;
-    V378 normal;
+    hkVector4 position;
+    hkVector4 normal;
     unsigned index;
     unsigned material;
     unsigned userData;
     unsigned other;
-    void __thiscall FUN_00c7f640(void*, void*);
 };
-struct Normal378 { __m128 v; void __thiscall FUN_00c7f700(void*, void*); };
 struct ContactBuffer378 { Contact378* current; int context; };
 struct ContactManager378 {
     virtual void slot0(); virtual void slot1(); virtual void slot2();
@@ -354,11 +336,11 @@ struct Agent378 {
     unsigned short* indices;
     void __thiscall FUN_00d378e0(Body378*, Body378*, void*, ContactBuffer378*);
 };
-inline __m128 transform378(const Transform378& t, __m128 p) {
-    return _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p,p,0x55),t.y),_mm_mul_ps(_mm_shuffle_ps(p,p,0),t.x)),
-                      _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p,p,0xaa),t.z),t.t));
+inline __m128 transform378(const hkTransform& t, __m128 p) {
+    return _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p,p,0x55),t.m_kColumn1),_mm_mul_ps(_mm_shuffle_ps(p,p,0),t.m_kColumn0)),
+                      _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p,p,0xaa),t.m_kColumn2),t.m_vTranslation));
 }
-struct Scratch378 { Ray378 ray; Transform378 relative; V378 position; };
+struct Scratch378 { Ray378 ray; hkTransform relative; hkVector4 position; };
 // @fnv 0x00d378e0
 void Agent378::FUN_00d378e0(Body378* a, Body378* b, void* input, ContactBuffer378* buffer) {
     timer378(DAT_010ceda8);
@@ -370,11 +352,11 @@ void Agent378::FUN_00d378e0(Body378* a, Body378* b, void* input, ContactBuffer37
     shapes.count = shapes.source->count;
     scratch.ray.filter = 0;
     scratch.ray.userData = 0;
-    Segment378* current = shapes.source->rays;
+    hkpMultiRayShape::Ray* current = shapes.source->rays;
     for (int i=0; i<shapes.count; ++current, ++i) {
         Output378 hit;
-        scratch.ray.from.v = transform378(scratch.relative,current->from.v);
-        scratch.ray.to.v = transform378(scratch.relative,current->to.v);
+        scratch.ray.from.v = transform378(scratch.relative,current->m_kRayStart.v);
+        scratch.ray.to.v = transform378(scratch.relative,current->m_kRayEnd.v);
         hit.fraction = 1.0f;
         hit.m_uiExtraInfo = -1;
         hit.shapeKeys[0] = -1;
@@ -390,9 +372,9 @@ void Agent378::FUN_00d378e0(Body378* a, Body378* b, void* input, ContactBuffer37
             Contact378* contact = buffer->current;
             __m128 fraction = _mm_set1_ps(hit.fraction);
             scratch.position.v = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0,fraction),scratch.ray.from.v),_mm_mul_ps(fraction,scratch.ray.to.v));
-            contact->FUN_00c7f640(b->transform,&scratch.position);
-            ((Normal378*)&contact->normal)->FUN_00c7f700(b->transform,&hit.normal);
-            contact->normal.w = (hit.fraction-1.0)*current->from.w+shapes.source->radius;
+            contact->position.FUN_00c7f640(*b->transform, scratch.position);
+            contact->normal.FUN_00c7f700(reinterpret_cast<const hkRotation*>(b->transform), &hit.normal);
+            contact->normal.w = (hit.fraction-1.0)*current->m_kRayStart.w+shapes.source->radius;
             if (indices[i] == 0xffff) {
                 unsigned short iContactPointId = manager->add(a,b,input,buffer,0,contact); indices[i] = iContactPointId;
             }

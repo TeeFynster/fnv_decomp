@@ -1,21 +1,20 @@
+#include "../../include/AutoMemHelper.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSMultiBound.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiStencilProperty.h"
 
 // src/fallout_shared/bgsautowater.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/bgsautowater.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiProperty
-{
-    virtual ~NiProperty();
-};
-struct NiStencilProperty : NiProperty
-{
-    virtual ~NiStencilProperty();
-    void* FUN_0049ed40(unsigned int);
-};
-extern "C" void __cdecl FUN_0049ed70(NiStencilProperty*);
 extern void __cdecl __Dummy_00b6fef0(void*, unsigned int);
 
 // @fnv 0x0049ed40
-void* NiStencilProperty::FUN_0049ed40(unsigned int flags)
+void* NiStencilProperty::DestroyAndFree(unsigned int flags)
 {
     this->NiStencilProperty::~NiStencilProperty();
     if (flags & 1)
@@ -39,12 +38,6 @@ void __thiscall FUN_0049ed90_shell::FUN_0049ed90(bool bAlpha)
     this->FUN_00633ba0(bAlpha, 1);
 }
 
-struct NiObjectNET
-{
-    void FUN_00439360(unsigned short, unsigned int, unsigned int);
-    void FUN_0049edb0(unsigned short argument0);
-};
-
 // Forwards the given texture slot to FUN_00439360 with flags 0xf000 and value 0xc.
 // @fnv 0x0049edb0
 void NiObjectNET::FUN_0049edb0(unsigned short argument0)
@@ -52,45 +45,23 @@ void NiObjectNET::FUN_0049edb0(unsigned short argument0)
     FUN_00439360(argument0, 0xf000, 0xc);
 }
 
-namespace fnv_0049ede0 {
-struct NiObjectNET
-{
-    void __thiscall FUN_00439360(unsigned short, unsigned int, unsigned int);
-};
-
-struct FUN_0049ede0_shell : NiObjectNET
-{
-    void FUN_0049ede0(unsigned short argument0);
-};
-
 // Calls FUN_00439360 with argument0, 0x380 and 7.
+struct AutoWaterStencilFlags : NiObjectNET
+{
+    void SetStencilFunction(unsigned short value);
+};
+
 // @fnv 0x0049ede0
-void FUN_0049ede0_shell::FUN_0049ede0(unsigned short argument0)
+void AutoWaterStencilFlags::SetStencilFunction(unsigned short argument0)
 {
     FUN_00439360(argument0, 0x380, 7);
 }
-}  // namespace fnv_0049ede0
-
-namespace fnv_0049ee10 {
-struct NiObjectNET
-{
-    void FUN_00439360(unsigned short, unsigned int, unsigned int);
-    void FUN_0049ee10(unsigned short argument0);
-};
 
 // @fnv 0x0049ee10
 void NiObjectNET::FUN_0049ee10(unsigned short ausValue)
 {
     FUN_00439360(ausValue, 0x70, 4);
 }
-}  // namespace fnv_0049ee10
-
-namespace fnv_0049ee30 {
-struct NiObjectNET
-{
-    void FUN_00439360(unsigned short a, unsigned int b, unsigned int c);
-    void FUN_0049ee30(unsigned short a);
-};
 
 // Calls FUN_00439360 with the given unsigned short and the constants 0xc00 and 0xa.
 // @fnv 0x0049ee30
@@ -98,7 +69,6 @@ void NiObjectNET::FUN_0049ee30(unsigned short a)
 {
     FUN_00439360(a, 0xc00, 0xa);
 }
-}  // namespace fnv_0049ee30
 
 struct TaskQueueInterface
 {
@@ -115,23 +85,13 @@ void TaskQueueInterface::SetEnabledFlag(bool enabled)
     SetTaskFlagDWord(enabled, 0x8000);
 }
 
-struct FUN_004392c0_shell
-{
-    void FUN_004392c0();
-};
-
 extern void* DAT_0101e07c;
 
-struct FUN_0049ed70_shell : NiStencilProperty
-{
-    void FUN_0049ed70();
-};
-
 // @fnv 0x0049ed70
-void FUN_0049ed70_shell::FUN_0049ed70()
+void NiStencilProperty::Destroy()
 {
     *reinterpret_cast<void**>(this) = &DAT_0101e07c;
-    reinterpret_cast<FUN_004392c0_shell*>(this)->FUN_004392c0();
+    DestroyBase();
 }
 
 // Clears the bits in flags at offset 0x18 and inserts value shifted by shift into them.
@@ -142,23 +102,11 @@ void NiObjectNET::FUN_00439360(unsigned short value, unsigned int uiMask, unsign
         (*(unsigned short*)((char*)this + 0x18) & ~(unsigned short)uiMask) | (value << (unsigned short)shift);
 }
 
-struct FUN_0049ee60_shell : TaskQueueInterface
-{
-    void FUN_0049ee60(bool enabled);
-};
-
 // @fnv 0x0049ee60
-void FUN_0049ee60_shell::FUN_0049ee60(bool enabled)
+void BSFadeNode::FUN_0049ee60(bool enabled)
 {
-    SetEnabledFlag(enabled);
+    reinterpret_cast<TaskQueueInterface*>(this)->SetEnabledFlag(enabled);
 }
-
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
 
 struct FUN_0049eea0_shell
 {
@@ -173,11 +121,17 @@ void FUN_0049eea0_shell::FUN_0049eea0(const NiPoint3& arPoint)
     m_kPoint = arPoint;
 }
 
-struct Vec2
+// These points are populated by game calls or raw copies. Avoid introducing
+// default/copy constructor calls in this unoptimized unit. Array-free storage
+// also preserves the original stack layout under /GS.
+template <unsigned int Size> struct UninitializedStorage
 {
-    float x;
-    float y;
-    Vec2(float px, float py);
+    unsigned int word;
+    UninitializedStorage<Size - sizeof(unsigned int)> remaining;
+};
+template <> struct UninitializedStorage<sizeof(unsigned int)>
+{
+    unsigned int word;
 };
 
 struct FUN_0049eed0_item
@@ -193,17 +147,18 @@ struct FUN_0049eed0_list
 
 struct FUN_0049eed0_target
 {
-    bool ContainsMatchingTriple(Vec2 v);
+    bool ContainsMatchingTriple(NiPoint2 v);
 };
 
-// Iterates the list's items, builds a Vec2 from each item's NiPoint3 x/y, and returns true if the target accepts any of them.
+// Iterates the list's items, builds a NiPoint2 from each item's NiPoint3 x/y, and returns true if the target accepts any of them.
 // @fnv 0x0049eed0
 bool AnyPointInListMatches(FUN_0049eed0_list* apList, FUN_0049eed0_target* apTarget)
 {
     for (int i8 = 0; i8 < apList->FUN_0059bb30(); i8++)
     {
-        NiPoint3 p2 = *apList->FUN_00559450(i8)->FUN_006a7af0();
-        Vec2 v(p2.x, p2.y);
+        UninitializedStorage<sizeof(NiPoint3)> p2Storage;
+        (*reinterpret_cast<NiPoint3*>(&p2Storage)) = *apList->FUN_00559450(i8)->FUN_006a7af0();
+        NiPoint2 v((*reinterpret_cast<NiPoint3*>(&p2Storage)).x, (*reinterpret_cast<NiPoint3*>(&p2Storage)).y);
         if (apTarget->ContainsMatchingTriple(v))
         {
             return true;
@@ -585,11 +540,6 @@ void BuildMeshBoundaryGeometry(MeshInput* pMeshInput)
     }
 }
 
-struct NiPoint2
-{
-    float x, y;
-    NiPoint2(float x, float y);
-};
 struct Pt
 {
     float x, y, z;
@@ -638,33 +588,7 @@ unsigned int __cdecl GetCellCornerFlags(Cell* cell, Pt point)
 }
 
 // Adapted from earlier contributor's unverified source; revised using official checker.
-struct NiMemObject
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-class NiFixedString
-{
-    void* m_00;
-
-  public:
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
-struct AutoMemHelper
-{
-    int m_00;
-    AutoMemHelper(int, bool, const char*, int);
-    ~AutoMemHelper();
-};
-struct FUN_00416870_t
-{
-    float x;
-    float y;
-    float z;
-    FUN_00416870_t* FUN_00416870(float, float, float);
-    void* FUN_0063c8a0(void*);
-};
+#include "../../include/NiMemObject.h"
 struct UpdData
 {
     float m_00;
@@ -691,7 +615,7 @@ struct BufObj
     float x;
     float y;
     float z;
-    FUN_00416870_t* FUN_00535b30();
+    NiPoint3* FUN_00535b30();
 };
 struct WaterForm
 {
@@ -958,139 +882,14 @@ struct FUN_00b6abb0 : NiMemObject
     int m_148;
     int m_14c;
 };
-struct FUN_0049ec80 : NiMemObject
+// This allocation uses the game's sized cleanup overload on constructor failure.
+// Hide the shared unsized overload only at this allocation site.
+struct AutoWaterFadeNode : BSFadeNode
 {
-    FUN_0049ec80();
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    void FUN_0049ee30(int);
+    AutoWaterFadeNode();
+    static void operator delete(void* memory, unsigned int size);
 };
-struct BSFadeNode : NiMemObject
-{
-    virtual void vslot00();
-    virtual void vslot01();
-    virtual void vslot02();
-    virtual void vslot03();
-    virtual void vslot04();
-    virtual void vslot05();
-    virtual void vslot06();
-    virtual void vslot07();
-    virtual void vslot08();
-    virtual void vslot09();
-    virtual void vslot0a();
-    virtual void vslot0b();
-    virtual void vslot0c();
-    virtual void vslot0d();
-    virtual void vslot0e();
-    virtual void vslot0f();
-    virtual void vslot10();
-    virtual void vslot11();
-    virtual void vslot12();
-    virtual void vslot13();
-    virtual void vslot14();
-    virtual void vslot15();
-    virtual void vslot16();
-    virtual void vslot17();
-    virtual void vslot18();
-    virtual void vslot19();
-    virtual void vslot1a();
-    virtual void vslot1b();
-    virtual void vslot1c();
-    virtual void vslot1d();
-    virtual void vslot1e();
-    virtual void vslot1f();
-    virtual void vslot20();
-    virtual void vslot21();
-    virtual void vslot22();
-    virtual void vslot23();
-    virtual void vslot24();
-    virtual void vslot25();
-    virtual void vslot26();
-    virtual void vslot27();
-    virtual void vslot28();
-    virtual void vslot29();
-    virtual void vslot2a();
-    virtual void vslot2b();
-    virtual void vslot2c();
-    virtual void vslot2d();
-    virtual void vslot2e();
-    virtual void vslot2f();
-    virtual void vslot30();
-    virtual void vslot31();
-    virtual void vslot32();
-    virtual void vslot33();
-    virtual void vslot34();
-    virtual void vslot35();
-    virtual void vslot36();
-    virtual void FUN_vtdc(void*, bool);
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-    int m_40;
-    int m_44;
-    int m_48;
-    int m_4c;
-    int m_50;
-    int m_54;
-    int m_58;
-    int m_5c;
-    int m_60;
-    int m_64;
-    int m_68;
-    int m_6c;
-    int m_70;
-    int m_74;
-    int m_78;
-    int m_7c;
-    int m_80;
-    int m_84;
-    int m_88;
-    int m_8c;
-    int m_90;
-    int m_94;
-    int m_98;
-    int m_9c;
-    int m_a0;
-    int m_a4;
-    int m_a8;
-    int m_ac;
-    int m_b0;
-    int m_b4;
-    int m_b8;
-    int m_bc;
-    int m_c0;
-    int m_c4;
-    int m_c8;
-    int m_cc;
-    int m_d0;
-    int m_d4;
-    int m_d8;
-    int m_dc;
-    int m_e0;
-    BSFadeNode();
-    void FUN_0049ee60(bool);
-    void FUN_00440460(const FUN_00416870_t&);
-    void FUN_00a59c60(UpdData*);
-};
+
 struct FUN_00c37ec0 : NiMemObject
 {
     virtual void vslot00();
@@ -1149,16 +948,7 @@ struct FUN_00c37ec0 : NiMemObject
     int m_18;
     int m_1c;
     int m_20;
-    void FUN_00439680(const FUN_00416870_t&);
-};
-struct BSMultiBound : NiMemObject
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    BSMultiBound();
-    void FUN_004addc0(void*);
+    void FUN_00439680(const NiPoint3&);
 };
 struct FUN_00c46970 : NiMemObject
 {
@@ -1274,15 +1064,20 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
     void* s;
     {
         void* i;
-        bool pForm;
-        FUN_00416870_t ptB;
+        // Preserve the original packing of the origin and its water-state flag.
+        struct
+        {
+            UninitializedStorage<sizeof(NiPoint3)> position;
+            unsigned char reserved0, reserved1, reserved2;
+            bool hasWaterForm;
+        } origin;
         {
             NodeObj* nodeX;
             if (0 != DAT_011c57b0)
             {
-                ptB.FUN_00416870(a0->FUN_00546fb0(0).FUN_00535b30()->x, a0->FUN_00546fb0(0).FUN_00535b30()->y,
+                (*reinterpret_cast<NiPoint3*>(&origin.position)).Set(a0->FUN_00546fb0(0).FUN_00535b30()->x, a0->FUN_00546fb0(0).FUN_00535b30()->y,
                                  a0->FUN_005471e0());
-                pForm = false;
+                origin.hasWaterForm = false;
                 s = DAT_011c57b0->FUN_00559450();
                 i = 0;
                 while (0 != s)
@@ -1294,9 +1089,9 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                         if (nodeX->FUN_0056c7f0() != 0 && nodeX->FUN_004a8a90() != 0)
                         {
                             {
-                                FUN_00416870_t n;
+                                UninitializedStorage<sizeof(NiPoint3)> nStorage;
                                 {
-                                    FUN_00416870_t pt44;
+                                    UninitializedStorage<sizeof(NiPoint3)> pt44Storage;
                                     {
                                         float minZ;
                                         {
@@ -1308,11 +1103,11 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                     {
                                                         UpdData res;
                                                         {
-                                                            FUN_00416870_t* verts;
+                                                            NiPoint3* verts;
                                                             {
                                                                 float val;
                                                                 {
-                                                                    FUN_0049ec80* minY;
+                                                                    NiStencilProperty* minY;
                                                                     {
                                                                         BSFadeNode* p80;
                                                                         {
@@ -1332,8 +1127,7 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                     {
                                                                                                         int b;
                                                                                                         {
-                                                                                                            FUN_00416870_t
-                                                                                                                oldNode;
+                                                                                                            UninitializedStorage<sizeof(NiPoint3)> oldNodeStorage;
                                                                                                             nodeX
                                                                                                                 ->FUN_0056c7f0()
                                                                                                                 ->AssignFixedString(
@@ -1357,7 +1151,7 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                                     ->FUN_0056c7f0(),
                                                                                                                 0, 0);
                                                                                                             minY =
-                                                                                                                new FUN_0049ec80;
+                                                                                                                new NiStencilProperty;
                                                                                                             minY->FUN_0049ee30(
                                                                                                                 3);
                                                                                                             nodeX
@@ -1368,18 +1162,18 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                                 a0->FUN_00547770()
                                                                                                                     ->FUN_00580130());
                                                                                                             p80 =
-                                                                                                                new BSFadeNode;
+                                                                                                                new AutoWaterFadeNode;
                                                                                                             p80->FUN_0049ee60(
                                                                                                                 true);
                                                                                                             p84->FUN_vt1cc(
                                                                                                                 p80,
                                                                                                                 true);
                                                                                                             p80->FUN_00440460(
-                                                                                                                ptB);
+                                                                                                                (*reinterpret_cast<NiPoint3*>(&origin.position)));
                                                                                                             ((FUN_0049eea0_shell*)
                                                                                                                  p84)
                                                                                                                 ->FUN_0049eea0(
-                                                                                                                    *(NiPoint3*)&ptB);
+                                                                                                                    (*reinterpret_cast<NiPoint3*>(&origin.position)));
                                                                                                             p7c =
                                                                                                                 new FUN_00c37ec0;
                                                                                                             val = 0.0f;
@@ -1392,7 +1186,7 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                                 nodeX
                                                                                                                     ->FUN_004a8a90();
                                                                                                             verts =
-                                                                                                                (FUN_00416870_t*)bufA
+                                                                                                                (NiPoint3*)bufA
                                                                                                                     ->FUN_0049ec60();
                                                                                                             for (
                                                                                                                 b = 0;
@@ -1401,56 +1195,56 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                                     ->FUN_00456650();
                                                                                                                 b++)
                                                                                                             {
-                                                                                                                oldNode = verts
+                                                                                                                (*reinterpret_cast<NiPoint3*>(&oldNodeStorage)) = verts
                                                                                                                     [b];
                                                                                                                 if (0 <
                                                                                                                     b)
                                                                                                                 {
                                                                                                                     val = FUN_0040ebd0(
                                                                                                                         val,
-                                                                                                                        oldNode
+                                                                                                                        (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .x);
                                                                                                                     maxY = FUN_0040ebd0(
                                                                                                                         maxY,
-                                                                                                                        oldNode
+                                                                                                                        (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .y);
                                                                                                                     n7c = FUN_0040ebd0(
                                                                                                                         n7c,
-                                                                                                                        oldNode
+                                                                                                                        (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .z);
                                                                                                                     minX = FUN_00404010(
                                                                                                                         minX,
-                                                                                                                        oldNode
+                                                                                                                        (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .x);
                                                                                                                     p50 = FUN_00404010(
                                                                                                                         p50,
-                                                                                                                        oldNode
+                                                                                                                        (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .y);
                                                                                                                     minZ = FUN_00404010(
                                                                                                                         minZ,
-                                                                                                                        oldNode
+                                                                                                                        (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .z);
                                                                                                                 }
                                                                                                                 else
                                                                                                                 {
                                                                                                                     minX =
-                                                                                                                        oldNode
+                                                                                                                        (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .x;
                                                                                                                     val =
                                                                                                                         minX;
                                                                                                                     p50 =
-                                                                                                                        oldNode
+                                                                                                                        (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .y;
                                                                                                                     maxY =
                                                                                                                         p50;
                                                                                                                     minZ =
-                                                                                                                        oldNode
+                                                                                                                        (*reinterpret_cast<NiPoint3*>(&oldNodeStorage))
                                                                                                                             .z;
                                                                                                                     n7c =
                                                                                                                         minZ;
                                                                                                                 }
                                                                                                             }
-                                                                                                            pt44.FUN_00416870(
+                                                                                                            (*reinterpret_cast<NiPoint3*>(&pt44Storage)).Set(
                                                                                                                 (float)std::abs((
                                                                                                                     float)((minX -
                                                                                                                             val) /
@@ -1463,19 +1257,19 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                                     float)((minZ -
                                                                                                                             n7c) /
                                                                                                                            2.0)));
-                                                                                                            n.FUN_00416870(
+                                                                                                            (*reinterpret_cast<NiPoint3*>(&nStorage)).Set(
                                                                                                                 minX -
-                                                                                                                    pt44.x,
+                                                                                                                    (*reinterpret_cast<NiPoint3*>(&pt44Storage)).x,
                                                                                                                 p50 -
-                                                                                                                    pt44.y,
+                                                                                                                    (*reinterpret_cast<NiPoint3*>(&pt44Storage)).y,
                                                                                                                 minZ -
-                                                                                                                    pt44.z);
-                                                                                                            n.FUN_0063c8a0(
-                                                                                                                &ptB);
+                                                                                                                    (*reinterpret_cast<NiPoint3*>(&pt44Storage)).z);
+                                                                                                            (*reinterpret_cast<NiPoint3*>(&nStorage)).FUN_0063c8a0(
+                                                                                                                (*reinterpret_cast<NiPoint3*>(&origin.position)));
                                                                                                             p7c->FUN_vtb8(
-                                                                                                                &n);
+                                                                                                                &(*reinterpret_cast<NiPoint3*>(&nStorage)));
                                                                                                             p7c->FUN_00439680(
-                                                                                                                pt44);
+                                                                                                                (*reinterpret_cast<NiPoint3*>(&pt44Storage)));
                                                                                                             p6c =
                                                                                                                 new BSMultiBound;
                                                                                                             p6c->FUN_004addc0(
@@ -1485,8 +1279,8 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                             oldNode2
                                                                                                                 ->FUN_00439920(
                                                                                                                     p6c);
-                                                                                                            p80->FUN_vtdc(
-                                                                                                                oldNode2,
+                                                                                                            p80->AttachChildInAvailableSlot(
+                                                                                                                reinterpret_cast<NiAVObject*>(oldNode2),
                                                                                                                 true);
                                                                                                             oldNode2->FUN_vtdc(
                                                                                                                 nodeX
@@ -1505,10 +1299,10 @@ void __cdecl CreateAutoWaterNode(ParamObj* a0)
                                                                                                             if (*DAT_011cc5a8
                                                                                                                         .FUN_00408d60() !=
                                                                                                                     0 &&
-                                                                                                                !pForm)
+                                                                                                                !origin.hasWaterForm)
                                                                                                             {
                                                                                                                 p84->FUN_0056c8f0();
-                                                                                                                pForm =
+                                                                                                                origin.hasWaterForm =
                                                                                                                     true;
                                                                                                             }
                                                                                                             delete nodeX;
@@ -1549,43 +1343,21 @@ extern float DAT_0106c288;
 extern double DAT_01012060;
 extern double DAT_01012070;
 
-struct S006b9a10_Pt
-{
-    float x, y, z;
-    void FUN_00439ef0(S006b9a10_Pt& out, const S006b9a10_Pt& src) const;
-    float DotProduct(S006b9a10_Pt& out) const;
-    S006b9a10_Pt* FUN_00439e90(S006b9a10_Pt& out, S006b9a10_Pt* src) const;
-};
-
 float __cdecl FUN_00408840(float v);
-S006b9a10_Pt* __cdecl FUN_004a3760(S006b9a10_Pt& tmp, float t, const S006b9a10_Pt& v1);
+NiPoint3 __cdecl FUN_004a3760(float t, const NiPoint3& point);
 
-__declspec(noinline) S006b9a10_Pt* __cdecl FUN_004a3760(S006b9a10_Pt& tmp, float t, const S006b9a10_Pt& v1)
-{
-    return &tmp;
-}
-
-__declspec(noinline) S006b9a10_Pt* S006b9a10_Pt::FUN_00439e90(S006b9a10_Pt& out, S006b9a10_Pt* src) const
-{
-    return src;
-}
-
-// Computes the intersection of the line through p0 and p1 with the plane defined by p2 and p3, writing the result to out.
+// Computes the intersection of the line through p0 and p1 with the plane defined by (*reinterpret_cast<NiPoint3*>(&p2Storage)) and p3, writing the result to out.
 // @fnv 0x006b9a10
-int __cdecl FUN_006b9a10(const S006b9a10_Pt& apStart, const S006b9a10_Pt& apEnd, const S006b9a10_Pt& apPlanePoint,
-                         const S006b9a10_Pt& apPlaneNormal, S006b9a10_Pt& out)
+int __cdecl FUN_006b9a10(const NiPoint3& apStart, const NiPoint3& apEnd, const NiPoint3& apPlanePoint,
+                         const NiPoint3& apPlaneNormal, NiPoint3& out)
 {
     float f3 = DAT_0106c288;
-    S006b9a10_Pt v1;
-    S006b9a10_Pt v6;
     float f2;
     float f28;
     float f6;
-    S006b9a10_Pt tmp5;
-    S006b9a10_Pt v7;
 
-    apEnd.FUN_00439ef0(v1, apStart);
-    apStart.FUN_00439ef0(v6, apPlanePoint);
+    NiPoint3 v1 = apEnd.FUN_00439ef0(apStart);
+    NiPoint3 v6 = apStart.FUN_00439ef0(apPlanePoint);
     f28 = apPlaneNormal.DotProduct(v1);
     f2 = -apPlaneNormal.DotProduct(v6);
     if (f3 > FUN_00408840(f28))
@@ -1604,17 +1376,13 @@ int __cdecl FUN_006b9a10(const S006b9a10_Pt& apStart, const S006b9a10_Pt& apEnd,
     {
         return 0;
     }
-    out = *apStart.FUN_00439e90(v7, FUN_004a3760(tmp5, f6, v1));
+    out = apStart.FUN_00439e90(FUN_004a3760(f6, v1));
     return 1;
 }
 
-struct MobileObjectCellAccess
+struct WaterPointerList
 {
-    bool FUN_004518e0() const;
-};
-struct NiTPointerListBase
-{
-    void RemoveAll();
+    void FUN_004ed900();
 };
 void BuildWaterSurfaces(MeshInput*);
 
@@ -1623,12 +1391,12 @@ void BuildWaterSurfaces(MeshInput*);
 void FUN_0049c860(MeshInput* apMeshInput)
 {
     AutoMemHelper context(29, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\BGSAutoWater.cpp", 83);
-    if (!apMeshInput || !reinterpret_cast<MobileObjectCellAccess*>(apMeshInput)->FUN_004518e0())
+    if (!apMeshInput || !reinterpret_cast<TESObjectCELL*>(apMeshInput)->HasWater())
         return;
     if (DAT_011c57ac)
         DAT_011c57ac->FUN_008454f0(true);
     if (DAT_011c57b0)
-        reinterpret_cast<NiTPointerListBase*>(DAT_011c57b0)->RemoveAll();
+        reinterpret_cast<WaterPointerList*>(DAT_011c57b0)->FUN_004ed900();
     BuildMeshBoundaryGeometry(apMeshInput);
     BuildWaterSurfaces(apMeshInput);
     CreateAutoWaterNode(reinterpret_cast<ParamObj*>(apMeshInput));

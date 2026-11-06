@@ -1,6 +1,11 @@
 // gamebryo2.2/corelibs/nianimation/niblendpoint3interpolator.cpp: NiBlendPoint3Interpolator, BlendPointShell (13 functions)
 
-#include "niblendpoint3interpolator_decls.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiBlendPoint3Interpolator.h"
+#include "../../../../include/StrArr.h"
+
+extern const float DAT_0109696c;
+extern const NiPoint3 DAT_011a9424;
 
 // @fnv 0x00a55b90
 bool NiBlendPoint3Interpolator::UpdateAccumulatedTransform(float fTime, NiObjectNET* pkTarget, NiPoint3& kValue)
@@ -11,7 +16,7 @@ bool NiBlendPoint3Interpolator::UpdateAccumulatedTransform(float fTime, NiObject
     if (fTime == DAT_0109696c)
         return false;
 
-    if (m_pSingleInterpolator->Update(fTime, pkTarget, m_kPoint3Value))
+    if (m_pSingleInterpolator->UpdatePoint3(fTime, pkTarget, m_kPoint3Value))
     {
         kValue = m_kPoint3Value;
         return true;
@@ -81,7 +86,6 @@ struct FUN_00a55ef0_shell : public NiBlendPoint3Interpolator
     void AppendPoint3Value(void*);
 };
 
-struct ActorCombatGroup;
 struct GlobalObjectO2_00a7b610
 {
     void* p;
@@ -96,36 +100,21 @@ struct ViewerPoint3
 {
     char* FUN_00a59af0(const char*);
 };
-struct ArrSizeHelper
-{
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, ActorCombatGroup*&);
-};
-struct StrArrView
-{
-    char pad[8];
-    unsigned short maxSize;
-    unsigned short count;
-    char pad2[2];
-    unsigned short growBy;
-};
-typedef NiTArray<ActorCombatGroup*, NiTMallocInterface<ActorCombatGroup*> > StrArray;
 // @fnv 0x00a55ef0
 void FUN_00a55ef0_shell::AppendPoint3Value(void* pkStrings)
 {
     ((ViewerBase*)this)->FUN_00a38080(pkStrings);
-    StrArray* arr = (StrArray*)pkStrings;
-    StrArrView* pArrayView = (StrArrView*)pkStrings;
-    ActorCombatGroup* pElement = (ActorCombatGroup*)FUN_00a7d330(g_011f406c);
-    unsigned int i = pArrayView->count;
-    if (i >= pArrayView->maxSize)
-        ((ArrSizeHelper*)arr)->SetSize(pArrayView->growBy + i);
-    ((ArrSizeHelper*)arr)->SetAt(i, pElement);
-    pElement = (ActorCombatGroup*)((ViewerPoint3*)((char*)this + 0x30))->FUN_00a59af0("m_kPoint3Value");
-    i = pArrayView->count;
-    if (i >= pArrayView->maxSize)
-        ((ArrSizeHelper*)arr)->SetSize(pArrayView->growBy + i);
-    ((ArrSizeHelper*)arr)->SetAt(i, pElement);
+    StrArr* arr = (StrArr*)pkStrings;
+    char* pElement = FUN_00a7d330(g_011f406c);
+    unsigned int i = arr->m_usSize;
+    if (i >= arr->m_usMaxSize)
+        arr->SetSize(arr->m_usGrowBy + i);
+    arr->SetAt(i, pElement);
+    pElement = ((ViewerPoint3*)((char*)this + 0x30))->FUN_00a59af0("m_kPoint3Value");
+    i = arr->m_usSize;
+    if (i >= arr->m_usMaxSize)
+        arr->SetSize(arr->m_usGrowBy + i);
+    arr->SetAt(i, pElement);
 }
 }  // namespace fnv_00a55ef0
 
@@ -137,10 +126,6 @@ bool __stdcall FUN_00a55a60(NiBlendPoint3Interpolator* p)
         reinterpret_cast<const unsigned char*>(*reinterpret_cast<const unsigned int*>(p)) + 0xb0))(p);
 }
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 void __fastcall FUN_00a36890(void*);
 extern int DAT_0109a49c;
 extern int _DAT_011a9424;
@@ -348,7 +333,7 @@ bool BlendPointShell::FUN_00a55c30(float time, NiObjectNET* target, NiPoint3& va
                 continue;
             }
             NiPoint3 tempPoint;
-            if (item.m_spControllerInterpolator->Update(updateTime, target, tempPoint))
+            if (item.m_spControllerInterpolator->UpdatePoint3(updateTime, target, tempPoint))
             {
                 float w = m_pInterpArray[i].m_fNormalizedWeight;
                 NiPoint3 scaledPoint;

@@ -3,18 +3,14 @@
 // with declarations corrected to what the original code does (tileimage_private.h: int strcat_s(char*, unsigned int, const char*); -> extern "C" int __cdecl strcat_s(char*, unsigned in). Move the function to its real unit once
 // that unit declares it this way.
 
-#include "tileimage_private_decl_tileimage.h"
-struct Interface
+#include "../../include/MemoryManager.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiTexture.h"
+#include "../../include/Setting.h"
+// Exe 0x00a06dd0: unit-local TileimageInterfaceView view used by this matched implementation.
+struct TileimageInterfaceView
 {
     static float __cdecl GetInterfaceFloat();
-};
-struct NiGlobalStringTable
-{
-    static char* __cdecl AddString(const char*);
-    static void DecRef(long* p)
-    {
-        InterlockedDecrement(p);
-    }
 };
 struct FileFinder;
 extern FileFinder* g_fileFinder;
@@ -26,68 +22,21 @@ struct FileFinder
         return g_fileFinder;
     }
 };
-extern char* EmptyFS;
 int _strcpy_s(char*, unsigned int, const char*);
 int _strcat_s(char*, unsigned int, const char*);
 namespace L {
-struct Setting
-{
-    void* vtbl;
-    char* m_pString;
-    char* GetString()
-    {
-        char* r;
-        if (this)
-            r = m_pString;
-        else
-            r = 0;
-        return r;
-    }
-};
-struct NiFixedString
-{
-    char* m_kHandle;
-    NiFixedString(const char* s)
-    {
-        if (s == 0)
-            m_kHandle = EmptyFS;
-        else
-            m_kHandle = NiGlobalStringTable::AddString(s);
-    }
-    ~NiFixedString()
-    {
-        if (m_kHandle == EmptyFS)
-            return;
-        NiGlobalStringTable::DecRef((long*)(m_kHandle - 8));
-    }
-};
-struct NiTexture
-{
-    virtual void S0();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 struct NiTexturePtr
 {
     NiTexture* m_pObject;
     NiTexturePtr(NiTexture* p = 0)
     {
         m_pObject = p;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiTexturePtr()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     bool operator==(const NiTexture* p) const
@@ -116,6 +65,7 @@ inline unsigned int BSStringCapacityMaximum(unsigned int a, unsigned int b)
 {
     return a > b ? a : b;
 }
+// local form of BSStringT<char>: 0x00a06dd0 needs inline construction/Set and trivial destruction; shared replacement changes bytes.
 template <class CharT> struct GameString
 {
     char* text;
@@ -182,10 +132,6 @@ template <class CharT> struct GameString
     }
 };
 typedef GameString<char> AtlasString;
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
 extern MemoryManager _g_memoryManager;
 struct AtlasRect
 {

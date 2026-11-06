@@ -1,3 +1,10 @@
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/BSAudio.h"
+#include "../../../../../../../include/NiPoint3.h"
+#include "../../../../../../../include/hkpContactListener.h"
+#include "../../../../../../../include/hkpEntityListener.h"
+#include "../../../../../../../include/hkpWorldPostSimulationListener.h"
+
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkptoicountviewer_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/utilities/visualdebugger/viewer/collide/hkptoicountviewer_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -63,30 +70,6 @@ class FUN_00ddccb0 : public PrimaryBase, public ProcessBase, public WorldListene
   public:
     FUN_00ddccb0(int);
 };
-class hkpContactListener
-{
-  public:
-    virtual void contact0();
-    virtual void contact1();
-    virtual void contact2();
-};
-class hkpWorldPostSimulationListener
-{
-  public:
-    virtual void post0();
-    virtual void post1();
-    virtual void post2();
-};
-class hkpEntityListener
-{
-  public:
-    virtual void entity0();
-    virtual void entity1();
-    virtual void entity2();
-    virtual void entity3();
-    virtual void entity4();
-    virtual void entity5();
-};
 struct CountArray
 {
     int* data;
@@ -95,11 +78,6 @@ struct CountArray
     CountArray() : data(0), size(0), capacity(-1)
     {}
     void EnsureCapacity(void*, int);
-};
-struct BSAudio
-{
-    int unk00, unk04, unk08, unk0C;
-    void* allocator;
 };
 BSAudio* FUN_00c85750();
 class FUN_00d67ce0 : public FUN_00ddccb0,
@@ -124,15 +102,14 @@ class FUN_00d67ce0 : public FUN_00ddccb0,
     virtual void contact0();
     virtual void contact1();
     virtual void contact2();
-    virtual void post0();
-    virtual void post1();
-    virtual void post2();
-    virtual void entity0();
-    virtual void entity1();
-    virtual void entity2();
-    virtual void entity3();
-    virtual void entity4();
-    virtual void entity5();
+    virtual ~FUN_00d67ce0() throw();
+    virtual void postSimulationCallback(hkpWorld* world);
+    virtual void EntityRemovalCallback(hkpEntity* entity);
+    virtual void EntityAddedCallback(hkpEntity* entity);
+    virtual void EntityRemovedCallback(hkpEntity* entity);
+    virtual void EntityShapeSetCallback(hkpEntity* entity);
+    virtual void entitySetMotionTypeCallback(hkpEntity* entity);
+    virtual void EntityDeletionCallback(hkpEntity* entity);
     CountArray counts;
     FUN_00d67ce0(int context);
 };
@@ -144,13 +121,7 @@ struct S_00d67e10_Registry
 extern S_00d67e10_Registry* g_00d67e10_registry;
 extern int g_00d67e10_toiCounterId;
 void RegisterToiCounter();
-struct BSAudio;
 __declspec(nothrow) BSAudio* FUN_00c85750();
-struct AudioHeap
-{
-    char pad[0x10];
-    void* heap;
-};
 struct ItemList
 {
     char pad[0x6c];
@@ -205,7 +176,7 @@ struct Member : MemberBase
     __declspec(nothrow) void Release(void* heap);
     ~Member()
     {
-        Release(((AudioHeap*)FUN_00c85750())->heap);
+        Release(FUN_00c85750()->pListener);
     }
 };
 struct FUN_00d67fa0 : Base0, Iface1, Iface2, Iface3
@@ -213,12 +184,6 @@ struct FUN_00d67fa0 : Base0, Iface1, Iface2, Iface3
     Member member;
     ~FUN_00d67fa0();
     virtual void p0();
-};
-struct Point3
-{
-    float x;
-    float y;
-    float z;
 };
 struct EntryListNode
 {
@@ -253,7 +218,7 @@ struct Query
     int unk04;
     int unk08;
     int unk0c;
-    Point3 direction;
+    NiPoint3 direction;
     int unk1c;
     Node* direct;
     int unk24;
@@ -345,18 +310,10 @@ struct SpawnedObject
     void FUN_00c91a20(void* listener) throw();
     void ClearValue(void* listener) throw();
 };
-struct Alloc
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void Grow(SpawnedObject** out, unsigned int size);
-};
-struct BSAudio;
 BSAudio* FUN_00c85750() throw();
 void __cdecl ResizeAudioStream(void* a, void* arr, unsigned int size) throw();
-struct Map
+// Exe 0x00d681e0: unit-local Map view; declarations and layout are preserved.
+struct HkptoicountviewerMapView
 {
     Entry* m_kPrimitiveElement;
     int m_iCapacityFlags;
@@ -400,12 +357,14 @@ struct Array
     void clear()
     {
         BSAudio* h = FUN_00c85750();
-        Alloc* al = (Alloc*)h->allocator;
+        hkMemoryAllocator* al = reinterpret_cast<hkMemoryAllocator*>(h->pListener);
         int cap = m_iCapacityState;
         m_iElementCount = 0;
         if ((cap & 0x80000000) == 0)
         {
-            al->Grow(m_data, (cap & 0x3fffffff) * 4);
+            // The shared declaration does not expose the virtual free slot.
+            (*reinterpret_cast<void (__thiscall***)(hkMemoryAllocator*, SpawnedObject**, unsigned int)>(al))[4](
+                al, m_data, (cap & 0x3fffffff) * 4);
         }
     }
 };
@@ -417,7 +376,7 @@ class FUN_00d67e30_cls
     unsigned int unk08;
     unsigned int unk0C;
     unsigned int unk10;
-    Map m_14;
+    HkptoicountviewerMapView m_14;
 
     void RemoveEntriesForObject(SpawnedObject* a1);
 };
@@ -467,21 +426,6 @@ struct FUN_00d67da0_cls
 
     void FUN_00d67da0();
 };
-struct AudioAllocator
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void Free(void* ptr, unsigned int count);
-};
-struct AudioCoreView
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    AudioAllocator* m_pThreadAllocator;
-};
 struct BSAudioString
 {
     char* m_data;
@@ -501,10 +445,12 @@ struct BSAudioString
 
     void Release()
     {
-        AudioAllocator* allocator = ((AudioCoreView*)FUN_00c85750())->m_pThreadAllocator;
+        hkMemoryAllocator* allocator = *reinterpret_cast<hkMemoryAllocator**>(&FUN_00c85750()->bSeekMusic);
         m_fRestLength = 0;
         if ((m_pRayCursor & 0x80000000) == 0)
-            allocator->Free(m_data, m_pRayCursor & 0x3fffffff);
+            // The shared declaration does not expose the virtual free slot.
+            (*reinterpret_cast<void (__thiscall***)(hkMemoryAllocator*, void*, unsigned int)>(allocator))[4](
+                allocator, m_data, m_pRayCursor & 0x3fffffff);
     }
 };
 struct BSAudioValue

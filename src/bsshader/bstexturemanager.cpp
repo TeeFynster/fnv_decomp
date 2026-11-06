@@ -1,23 +1,28 @@
+#include "../../include/NiTListItem.h"
+class NiParticles;
+#include "../../include/NiTArray.h"
 // bsshader/bstexturemanager.cpp: free functions (3 functions)
 
 #include "NiObject.h"
-
-// One 16-byte surface-tint record. The water system writes the tint of the
-// surface type it is rendering; the refraction imagespace effect reads the
-// default record (slot 0).
-struct WaterTintRecord
+#include "../../include/MapEntryCount.h"
+// WaterTintRecord_bstexturemanager: local type (was include/WaterTintRecord.h, which had no evidence of one real class); no method of it is bound to a named game function
+struct WaterTintRecord_bstexturemanager
 {
     float r;
     float g;
     float b;
     float a;
+
+    WaterTintRecord_bstexturemanager(float fR, float fG, float fB, float fA)
+        : r(fR), g(fG), b(fB), a(fA)
+    {}
 };
 
-extern WaterTintRecord g_waterTintRecords[];
+extern WaterTintRecord_bstexturemanager g_waterTintRecords[];
 
 // Stores the given tint record into the global water tint record array at the specified index.
 // @fnv 0x004e20c0
-void SetWaterTintRecord(int index, WaterTintRecord tint)
+void SetWaterTintRecord(int index, WaterTintRecord_bstexturemanager tint)
 {
     g_waterTintRecords[index] = tint;
 }
@@ -190,10 +195,10 @@ template <class T> class StubPtr
     {
         if (m_pObject != object)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = object;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -236,13 +241,7 @@ class StubCritSec
     }
 };
 
-template <class T> class StubListItem
-{
-  public:
-    StubListItem<T>* m_pkNext;
-    StubListItem<T>* m_pkPrev;
-    T m_element;
-};
+
 
 template <class T> class StubPoolAlloc
 {
@@ -271,32 +270,29 @@ template <class T> class StubPtrAlloc : public StubPoolAlloc<T>
     }
 };
 
-template <class A, class T> class StubListBaseBase
+template <class A, class T> class StubListBaseBase : public A
 {
   public:
-    StubListItem<T>* m_pkHead;
-    StubListItem<T>* m_pkTail;
-    struct MapEntryCount : public A
-    {
-        unsigned int m_uiCount;
-    } m_kItemCount;
+    NiTListItem<T>* m_pkHead;
+    NiTListItem<T>* m_pkTail;
+    MapEntryCount m_kItemCount;
     ~StubListBaseBase()
     {}
 };
 template <class A, class T> class StubPtrListBase : public StubListBaseBase<A, T>
 {
   public:
-    void DeleteItem(StubListItem<T>* pkItem)
+    void DeleteItem(NiTListItem<T>* pkItem)
     {
         pkItem->m_element = 0;
-        this->m_kItemCount.Deallocate(pkItem);
+        this->Deallocate(pkItem);
     }
     void RemoveAll()
     {
-        StubListItem<T>* pkCurr = this->m_pkHead;
+        NiTListItem<T>* pkCurr = this->m_pkHead;
         while (pkCurr)
         {
-            StubListItem<T>* pkDel = pkCurr;
+            NiTListItem<T>* pkDel = pkCurr;
             pkCurr = pkCurr->m_pkNext;
             DeleteItem(pkDel);
         }
@@ -314,26 +310,17 @@ template <class T> class StubPtrList : public StubPtrListBase<StubPtrAlloc<unsig
     }
 };
 
-template <class T> class StubArray
+template <class T, class TAlloc> inline NiTArray<T, TAlloc>::~NiTArray()
 {
-  public:
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    virtual ~StubArray()
-    {
         StubMallocIf<T>::Deallocate(m_pBase);
     }
-    void RemoveAll()
-    {
+template <class T, class TAlloc> inline void NiTArray<T, TAlloc>::RemoveAll()
+{
         for (unsigned short i = 0; i < m_usSize; i++)
             m_pBase[i] = 0;
         m_usSize = 0;
         m_usESize = 0;
     }
-};
 
 class StubBaseC5DB90
 {
@@ -392,7 +379,7 @@ class FUN_00c5db90 : public StubBaseC5DB90
     int unkc0;
     int unkc4;
     int unkc8;
-    StubArray<void*> m_kArray;
+    NiTArray<NiParticles*, NiTMallocInterface<NiParticles*> > m_kArray;
     virtual ~FUN_00c5db90();
 };
 

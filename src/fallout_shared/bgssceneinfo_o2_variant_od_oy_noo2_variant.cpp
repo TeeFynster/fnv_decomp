@@ -7,6 +7,8 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 // src/fallout_shared/bgssceneinfo.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/bgssceneinfo.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../include/Script.h"
+
 struct FUN_004a7cf0_shell
 {
     int m_0000;
@@ -31,10 +33,6 @@ struct FUN_004a7cf0_shell
 struct Flt
 {
     operator unsigned int() const;
-};
-struct Script
-{
-    int GetText();
 };
 struct FUN_004a8070_shell
 {
@@ -80,7 +78,8 @@ struct __declspec(align(16)) ChildBuffer
 
 struct Node;
 
-struct TileWorkList
+// SceneChildListView: unit-local view of the children interface Node::GetChildren returns (virtual GetFirst/GetNext/GetAt walked by 0x004a9240), not the shared TileWorkList
+struct SceneChildListView
 {
     virtual void vf00();
     virtual void vf04();
@@ -96,7 +95,7 @@ struct Node
     virtual void vf04();
     virtual void vf08();
     virtual void vf0c();
-    virtual TileWorkList* GetChildren();
+    virtual SceneChildListView* GetChildren();
 
     int FUN_0043b230();
 };
@@ -114,7 +113,7 @@ int __cdecl FUN_004a9240(Node* node)
         break;
     case 10: {
         Node* obj = node;
-        TileWorkList* list = obj->GetChildren();
+        SceneChildListView* list = obj->GetChildren();
         int index = list->GetFirst();
         while (index != -1)
         {
@@ -130,7 +129,7 @@ int __cdecl FUN_004a9240(Node* node)
     break;
     case 9: {
         Node* obj = node;
-        TileWorkList* list = obj->GetChildren();
+        SceneChildListView* list = obj->GetChildren();
         int index = list->GetFirst();
         while (index != -1)
         {
@@ -146,7 +145,7 @@ int __cdecl FUN_004a9240(Node* node)
     break;
     case 22: {
         Node* obj = node;
-        TileWorkList* list = obj->GetChildren();
+        SceneChildListView* list = obj->GetChildren();
         int index = list->GetFirst();
         while (index != -1)
         {
@@ -162,7 +161,7 @@ int __cdecl FUN_004a9240(Node* node)
     break;
     case 23: {
         Node* obj = node;
-        TileWorkList* list = obj->GetChildren();
+        SceneChildListView* list = obj->GetChildren();
         int index = list->GetFirst();
         while (index != -1)
         {

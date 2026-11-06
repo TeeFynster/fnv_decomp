@@ -1,3 +1,43 @@
+// ActorDeletionQueue_magicprojectile: local type (was include/ActorDeletionQueue.h, which had no evidence of one real class); its methods are 0x0096d450 ProcessLists::AddReference, 0x0096d470 ProcessLists::RemoveReference, 0x0096d490 ProcessLists::GetSystemTimeClock
+// PathfindQueueStorage_magicprojectile: local type (was include/PathfindQueueStorage.h, which had no evidence of one real class); its methods are 0x0096aaf0 ProcessArray::RemoveActor
+class MobileObject;
+
+class PathfindQueueStorage_magicprojectile
+{
+public:
+    void FUN_0096aaf0(MobileObject* apObject, int aeLevel);
+};
+
+class MobileObject;
+class ActorSV;
+struct ReferenceView;
+
+class ActorDeletionQueue_magicprojectile
+{
+public:
+    unsigned int pad;
+    PathfindQueueStorage_magicprojectile storage;
+    unsigned char unk05[3];
+
+    void FUN_0096d470(MobileObject*, int);
+    void FUN_0096d470(ActorSV*, int);
+    void FUN_0096d470(ReferenceView*, int);
+    float FUN_0096d490();
+    void FUN_0096d450(MobileObject*, int, bool, bool, bool);
+    void FUN_0096d450(ActorSV*, int, bool, bool, ActorSV*);
+};
+#include "../../../include/MagicProjectile.h"
+#include "../../../include/TESSaveLoadGame.h"
+#include "../../../include/HighProcess.h"
+#include "../../../include/MagicItem.h"
+#include "../../../include/MobileObject.h"
+#include "../../../include/GameTimerRecord.h"
+#include "../../../include/MagicCaster.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiFixedString.h"
+#include "../../../include/NiPoint3.h"
+
+extern ActorDeletionQueue_magicprojectile DAT_011e0e80;
 
 // src/fallout/magic/magicprojectile.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/magicprojectile.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -42,24 +82,19 @@ FUN_00806eb0::FUN_00806eb0(int aiArg, int aiValue)
     *(int*)((char*)this + 0x650) = aiValue;
 }
 
-struct TESSaveLoadGame
-{
-    unsigned char FUN_008df040();
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
-struct FUN_0081e830_shell
+struct MobileSaveRecord
 {
-    unsigned short GetSaveRecordSize(unsigned int a);
-    unsigned int __thiscall FUN_00931ff0(unsigned int);
+    unsigned int FUN_00931ff0(unsigned int);
 };
 
 // Computes a save record size: adds the result of FUN_00931ff0(a) plus 12, and 4 more each when the save version is at least 0x48 and 0x64.
 // @fnv 0x0081e830
-unsigned short FUN_0081e830_shell::GetSaveRecordSize(unsigned int a)
+unsigned short MagicProjectile::GetSaveRecordSize(unsigned int a)
 {
     unsigned short usSize = 0;
-    usSize += (unsigned short)FUN_00931ff0(a);
+    usSize += (unsigned short)reinterpret_cast<MobileSaveRecord*>(this)->FUN_00931ff0(a);
     usSize += 4;
     usSize += 4;
     usSize += 4;
@@ -82,38 +117,25 @@ struct FUN_00932070_shell
 {
     void SaveProcess(unsigned int);
 };
-struct FUN_00818be0_shell
-{
-    unsigned int FUN_00818be0();
-};
-struct FUN_0040a1e0_shell
-{
-    unsigned int FUN_0040a1e0();
-};
-struct FUN_0081e8c0_shell : FUN_00932070_shell
-{
-    void FUN_0081e8c0(unsigned int aiFlags);
-};
+// The shared MagicItem header does not yet declare its ID accessor.
+unsigned int __fastcall GetMagicItemID(MagicItem* item);
+
 // @fnv 0x0081e8c0
-void FUN_0081e8c0_shell::FUN_0081e8c0(unsigned int aiFlags)
+void MagicProjectile::FUN_0081e8c0(unsigned int aiFlags)
 {
-    SaveProcess(aiFlags);
-    unsigned int icasterID =
-        reinterpret_cast<FUN_00818be0_shell*>(*reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x94))
-            ->FUN_00818be0();
+    reinterpret_cast<FUN_00932070_shell*>(this)->SaveProcess(aiFlags);
+    unsigned int icasterID = m_magicCaster->GetCasterHandle();
     reinterpret_cast<FUN_00484d20_Class*>(this)->ForwardToSaveLoadGame(reinterpret_cast<int>(&icasterID), 4);
-    unsigned int ispellID =
-        reinterpret_cast<FUN_0040a1e0_shell*>(*reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x98))
-            ->FUN_0040a1e0();
+    unsigned int ispellID = GetMagicItemID(m_magicItem);
     reinterpret_cast<FUN_00484d20_Class*>(this)->ForwardToSaveLoadGame(reinterpret_cast<int>(&ispellID), 4);
     reinterpret_cast<PC7d*>(this)->FUN_00484ce0(
-        reinterpret_cast<unsigned int>(reinterpret_cast<unsigned char*>(this) + 0xa4), 4);
+        reinterpret_cast<unsigned int>(&unkA4), 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x48)
         reinterpret_cast<PC7d*>(this)->FUN_00484ce0(
-            reinterpret_cast<unsigned int>(reinterpret_cast<unsigned char*>(this) + 0x90), 4);
+            reinterpret_cast<unsigned int>(&unk90), 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x64)
         reinterpret_cast<PC7d*>(this)->FUN_00484ce0(
-            reinterpret_cast<unsigned int>(reinterpret_cast<unsigned char*>(this) + 0x8c), 4);
+            reinterpret_cast<unsigned int>(&unk8C), 4);
 }
 
 struct STR00
@@ -124,26 +146,27 @@ struct FUN_00484d40_Host
 {
     void FUN_00484d40(unsigned int*, int);
 };
-struct FUN_0081e980_shell
+
+struct MobileLoadRecord
 {
-    void __thiscall SetProcessLevel(unsigned int, unsigned int);
-    void __thiscall FUN_0081e980(unsigned int, unsigned int);
+    void SetProcessLevel(unsigned int, unsigned int);
 };
+
 // @fnv 0x0081e980
-void __thiscall FUN_0081e980_shell::FUN_0081e980(unsigned int a, unsigned int b)
+void __thiscall MagicProjectile::FUN_0081e980(unsigned int a, unsigned int b)
 {
-    SetProcessLevel(a, b);
+    reinterpret_cast<MobileLoadRecord*>(this)->SetProcessLevel(a, b);
     unsigned int icasterID;
     ((FUN_00484d40_Host*)this)->FUN_00484d40(&icasterID, 4);
-    *(unsigned int*)((char*)this + 0x94) = icasterID;
+    m_magicCaster = reinterpret_cast<MagicCaster*>(icasterID);
     unsigned int ispellID;
     ((FUN_00484d40_Host*)this)->FUN_00484d40(&ispellID, 4);
-    *(unsigned int*)((char*)this + 0x98) = ispellID;
-    ((STR00*)this)->FUN_00484d00((char*)this + 0xa4, 4);
+    m_magicItem = reinterpret_cast<MagicItem*>(ispellID);
+    ((STR00*)this)->FUN_00484d00(&unkA4, 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x48)
-        ((STR00*)this)->FUN_00484d00((char*)this + 0x90, 4);
+        ((STR00*)this)->FUN_00484d00(&unk90, 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x64)
-        ((STR00*)this)->FUN_00484d00((char*)this + 0x8c, 4);
+        ((STR00*)this)->FUN_00484d00(&unk8C, 4);
 }
 
 struct Form
@@ -152,7 +175,8 @@ struct Form
     virtual Form* FUN_00800004() = 0;
 };
 
-struct ArrSI
+// Exe 0x0081a960: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct MagicprojectileOffset08View
 {
     unsigned int GetFlags();
 };
@@ -172,14 +196,14 @@ struct S3c60
     FUN_0081aa80* m_pEntries;
 
     int GetArchetype();
-    bool AddAudioFormEntry(Form* pForm, ArrSI* pAudio);
+    bool AddAudioFormEntry(Form* pForm, MagicprojectileOffset08View* pAudio);
 };
 
-unsigned int __fastcall _ref_0084e3a0(ArrSI* pAudio);
+unsigned int __fastcall _ref_0084e3a0(MagicprojectileOffset08View* pAudio);
 void* __cdecl operator new(unsigned int);
 
 // @fnv 0x0081a960
-bool S3c60::AddAudioFormEntry(Form* pForm, ArrSI* pAudio)
+bool S3c60::AddAudioFormEntry(Form* pForm, MagicprojectileOffset08View* pAudio)
 {
     if (!pForm || !pAudio)
         return false;
@@ -203,17 +227,9 @@ bool S3c60::AddAudioFormEntry(Form* pForm, ArrSI* pAudio)
     return true;
 }
 
-struct NiFixedString
-{
-    NiFixedString(const char*);
-    ~NiFixedString();
-
-    char m_data[4];
-};
-
 struct Calendar;
 
-struct NiAVObject
+struct AreaDisplayObject
 {
     virtual void v000()
     {}
@@ -330,266 +346,27 @@ struct NiAVObject
     {}
     virtual void v057()
     {}
-    virtual void v058(NiAVObject*);
+    virtual void v058(AreaDisplayObject*);
 };
 
-struct Calendar : public NiAVObject
+struct Calendar : public AreaDisplayObject
 {
     Calendar* GetDaysPassed();
 };
 
-struct MagicProjectile
-{
-    virtual void v000()
-    {}
-    virtual void v001()
-    {}
-    virtual void v002()
-    {}
-    virtual void v003()
-    {}
-    virtual void v004()
-    {}
-    virtual void v005()
-    {}
-    virtual void v006()
-    {}
-    virtual void v007()
-    {}
-    virtual void v008()
-    {}
-    virtual void v009()
-    {}
-    virtual void v010()
-    {}
-    virtual void v011()
-    {}
-    virtual void v012()
-    {}
-    virtual void v013()
-    {}
-    virtual void v014()
-    {}
-    virtual void v015()
-    {}
-    virtual void v016()
-    {}
-    virtual void v017()
-    {}
-    virtual void v018()
-    {}
-    virtual void v019()
-    {}
-    virtual void v020()
-    {}
-    virtual void v021()
-    {}
-    virtual void v022()
-    {}
-    virtual void v023()
-    {}
-    virtual void v024()
-    {}
-    virtual void v025()
-    {}
-    virtual void v026()
-    {}
-    virtual void v027()
-    {}
-    virtual void v028()
-    {}
-    virtual void v029()
-    {}
-    virtual void v030()
-    {}
-    virtual void v031()
-    {}
-    virtual void v032()
-    {}
-    virtual void v033()
-    {}
-    virtual void v034()
-    {}
-    virtual void v035()
-    {}
-    virtual void v036()
-    {}
-    virtual void v037()
-    {}
-    virtual void v038()
-    {}
-    virtual void v039()
-    {}
-    virtual void v040()
-    {}
-    virtual void v041()
-    {}
-    virtual void v042()
-    {}
-    virtual void v043()
-    {}
-    virtual void v044()
-    {}
-    virtual void v045()
-    {}
-    virtual void v046()
-    {}
-    virtual void v047()
-    {}
-    virtual void v048()
-    {}
-    virtual void v049()
-    {}
-    virtual void v050()
-    {}
-    virtual void v051()
-    {}
-    virtual void v052()
-    {}
-    virtual void v053()
-    {}
-    virtual void v054()
-    {}
-    virtual void v055()
-    {}
-    virtual void v056()
-    {}
-    virtual void v057()
-    {}
-    virtual void v058()
-    {}
-    virtual void v059()
-    {}
-    virtual void v060()
-    {}
-    virtual void v061()
-    {}
-    virtual void v062()
-    {}
-    virtual void v063()
-    {}
-    virtual void v064()
-    {}
-    virtual void v065()
-    {}
-    virtual void v066()
-    {}
-    virtual void v067()
-    {}
-    virtual void v068()
-    {}
-    virtual void v069()
-    {}
-    virtual void v070()
-    {}
-    virtual void v071()
-    {}
-    virtual void v072()
-    {}
-    virtual void v073()
-    {}
-    virtual void v074()
-    {}
-    virtual void v075()
-    {}
-    virtual void v076()
-    {}
-    virtual void v077()
-    {}
-    virtual void v078()
-    {}
-    virtual void v079()
-    {}
-    virtual void v080()
-    {}
-    virtual void v081()
-    {}
-    virtual void v082()
-    {}
-    virtual void v083()
-    {}
-    virtual void v084()
-    {}
-    virtual void v085()
-    {}
-    virtual void v086()
-    {}
-    virtual void v087()
-    {}
-    virtual void v088()
-    {}
-    virtual void v089()
-    {}
-    virtual void v090()
-    {}
-    virtual void v091()
-    {}
-    virtual void v092()
-    {}
-    virtual void v093()
-    {}
-    virtual void v094()
-    {}
-    virtual void v095()
-    {}
-    virtual void v096()
-    {}
-    virtual void v097()
-    {}
-    virtual void v098()
-    {}
-    virtual void v099()
-    {}
-    virtual void v100()
-    {}
-    virtual void v101()
-    {}
-    virtual void v102()
-    {}
-    virtual void v103()
-    {}
-    virtual void v104()
-    {}
-    virtual void v105()
-    {}
-    virtual void v106()
-    {}
-    virtual void v107()
-    {}
-    virtual void v108()
-    {}
-    virtual void v109()
-    {}
-    virtual void v110()
-    {}
-    virtual void v111()
-    {}
-    virtual void v112()
-    {}
-    virtual void v113()
-    {}
-    virtual void v114()
-    {}
-    virtual void v115()
-    {}
-    virtual NiAVObject* v116();
-
-    void FUN_0081e730();
-};
-
-Calendar* NiAVObject::v039(const NiFixedString&)
+Calendar* AreaDisplayObject::v039(const NiFixedString&)
 {
     return 0;
 }
 
-void NiAVObject::v058(NiAVObject*)
+void AreaDisplayObject::v058(AreaDisplayObject*)
 {}
 
 // Gets the "MagicAreaDisplay" child node and, if its GetDaysPassed() returns a node, passes the child to that node's v058.
 // @fnv 0x0081e730
 void MagicProjectile::FUN_0081e730()
 {
-    NiAVObject* pAreaDisplay = v116() ? v116()->v039(NiFixedString("MagicAreaDisplay")) : 0;
+    AreaDisplayObject* pAreaDisplay = GetNiNode() ? reinterpret_cast<AreaDisplayObject*>(GetNiNode())->v039(NiFixedString("MagicAreaDisplay")) : 0;
 
     if (pAreaDisplay)
     {
@@ -601,58 +378,6 @@ void MagicProjectile::FUN_0081e730()
 }
 
 namespace fnv_0081ea40 {
-struct FUN_00932490_shell
-{
-    void SetProcessFlags(unsigned int, unsigned int);
-};
-
-struct MagicCaster
-{
-    static MagicCaster* __cdecl GetCasterByHandle(unsigned int);
-};
-
-struct EffectItem
-{
-};
-
-struct EffectItemList_shell
-{
-    EffectItem* FindCostliestEffectItem(int, int);
-};
-
-struct ES_0081c630
-{
-};
-
-struct MI_0081c630
-{
-    ES_0081c630* GetEffectSettingForRange(int);
-};
-
-struct MagicItem
-{
-    unsigned char m_ucUnknownByte[0x0c];
-    EffectItemList_shell m_effectItemList;
-
-    static MagicItem* __cdecl GetMagicItemByID(unsigned int);
-};
-
-struct MobileObject
-{
-    unsigned int GetCurrentProcessLevel();
-};
-
-struct ActorDeletionQueue
-{
-    void FUN_0096d470(MobileObject*, int);
-};
-
-struct Host096d450
-{
-    void FUN_0096d450(MobileObject*, int, bool, bool, MobileObject*);
-};
-
-struct MagicProjectile;
 
 struct SaveManager
 {
@@ -660,253 +385,13 @@ struct SaveManager
 };
 
 extern SaveManager* DAT_011de45c;
-extern int DAT_011e0e80;
 
-struct MagicProjectile
-{
-    virtual void v000()
-    {}
-    virtual void v001()
-    {}
-    virtual void v002()
-    {}
-    virtual void v003()
-    {}
-    virtual void v004()
-    {}
-    virtual void v005()
-    {}
-    virtual void v006()
-    {}
-    virtual void v007()
-    {}
-    virtual void v008()
-    {}
-    virtual void v009()
-    {}
-    virtual void v010()
-    {}
-    virtual void v011()
-    {}
-    virtual void v012()
-    {}
-    virtual void v013()
-    {}
-    virtual void v014()
-    {}
-    virtual void v015()
-    {}
-    virtual void v016()
-    {}
-    virtual void v017()
-    {}
-    virtual void v018()
-    {}
-    virtual void v019()
-    {}
-    virtual void v020()
-    {}
-    virtual void v021()
-    {}
-    virtual void v022()
-    {}
-    virtual void v023()
-    {}
-    virtual void v024()
-    {}
-    virtual void v025()
-    {}
-    virtual void v026()
-    {}
-    virtual void v027()
-    {}
-    virtual void v028()
-    {}
-    virtual void v029()
-    {}
-    virtual void v030()
-    {}
-    virtual void v031()
-    {}
-    virtual void v032()
-    {}
-    virtual void v033()
-    {}
-    virtual void v034()
-    {}
-    virtual void v035()
-    {}
-    virtual void v036()
-    {}
-    virtual void v037()
-    {}
-    virtual void v038()
-    {}
-    virtual void v039()
-    {}
-    virtual void v040()
-    {}
-    virtual void v041()
-    {}
-    virtual void v042()
-    {}
-    virtual void v043()
-    {}
-    virtual void v044()
-    {}
-    virtual void v045()
-    {}
-    virtual void v046()
-    {}
-    virtual void v047()
-    {}
-    virtual void v048()
-    {}
-    virtual void v049()
-    {}
-    virtual void v050()
-    {}
-    virtual void v051()
-    {}
-    virtual void v052()
-    {}
-    virtual void v053()
-    {}
-    virtual void v054()
-    {}
-    virtual void v055()
-    {}
-    virtual void v056()
-    {}
-    virtual void v057()
-    {}
-    virtual void v058()
-    {}
-    virtual void v059()
-    {}
-    virtual void v060()
-    {}
-    virtual void v061()
-    {}
-    virtual void v062()
-    {}
-    virtual void v063()
-    {}
-    virtual void v064()
-    {}
-    virtual void v065()
-    {}
-    virtual void v066()
-    {}
-    virtual void v067()
-    {}
-    virtual void v068()
-    {}
-    virtual void v069()
-    {}
-    virtual void v070()
-    {}
-    virtual void v071()
-    {}
-    virtual void v072()
-    {}
-    virtual void v073()
-    {}
-    virtual void v074()
-    {}
-    virtual void v075()
-    {}
-    virtual void v076()
-    {}
-    virtual void v077()
-    {}
-    virtual void v078()
-    {}
-    virtual void v079()
-    {}
-    virtual void v080()
-    {}
-    virtual void v081()
-    {}
-    virtual void v082()
-    {}
-    virtual void v083()
-    {}
-    virtual void v084()
-    {}
-    virtual void v085()
-    {}
-    virtual void v086()
-    {}
-    virtual void v087()
-    {}
-    virtual void v088()
-    {}
-    virtual void v089()
-    {}
-    virtual void v090()
-    {}
-    virtual void v091()
-    {}
-    virtual void v092()
-    {}
-    virtual void v093()
-    {}
-    virtual void v094()
-    {}
-    virtual void v095()
-    {}
-    virtual void v096()
-    {}
-    virtual void v097()
-    {}
-    virtual void v098()
-    {}
-    virtual void v099()
-    {}
-    virtual void v100()
-    {}
-    virtual void v101()
-    {}
-    virtual void v102()
-    {}
-    virtual void v103()
-    {}
-    virtual void v104()
-    {}
-    virtual void v105()
-    {}
-    virtual void v106()
-    {}
-    virtual void v107()
-    {}
-    virtual void v108()
-    {}
-    virtual void v109()
-    {}
-    virtual void v110()
-    {}
-    virtual void v111()
-    {}
-    virtual void v112()
-    {}
-    virtual void v113()
-    {}
-    virtual void v114(int)
-    {}
-
-    unsigned char m_ucUnknownByte[0x90];
-    MagicCaster* m_magicCaster;
-    MagicItem* m_magicItem;
-    EffectItem* m_effectItem;
-    ES_0081c630* m_avEffect;
-
-    void ResolveMagicReferences(unsigned int, unsigned int);
-};
+}  // namespace fnv_0081ea40
 
 // @fnv 0x0081ea40
 void MagicProjectile::ResolveMagicReferences(unsigned int aiFlags, unsigned int aiOldFlags)
 {
+    using namespace fnv_0081ea40;
     unsigned int ispellID;
     unsigned int icasterID;
 
@@ -916,26 +401,23 @@ void MagicProjectile::ResolveMagicReferences(unsigned int aiFlags, unsigned int 
     ispellID = reinterpret_cast<unsigned int>(m_magicItem);
     m_magicItem = MagicItem::GetMagicItemByID(ispellID);
 
-    m_effectItem = m_magicItem->m_effectItemList.FindCostliestEffectItem(2, 0);
-    m_avEffect = reinterpret_cast<MI_0081c630*>(m_magicItem)->GetEffectSettingForRange(0);
+    m_effectItem = m_magicItem->FindCostliestEffectItem(2, 0);
+    m_avEffect = m_magicItem->GetEffectSettingForRange(MagicSystem::SELF);
 
-    this->v114(0);
+    this->GenerateNiNode(false);
 
-    reinterpret_cast<FUN_00932490_shell*>(this)->SetProcessFlags(aiFlags, aiOldFlags);
+    reinterpret_cast<MobileObject*>(this)->SetProcessFlags(aiFlags, aiOldFlags);
 
-    reinterpret_cast<ActorDeletionQueue*>(&DAT_011e0e80)
-        ->FUN_0096d470(reinterpret_cast<MobileObject*>(this),
+    DAT_011e0e80.FUN_0096d470(reinterpret_cast<MobileObject*>(this),
                        static_cast<int>(reinterpret_cast<MobileObject*>(this)->GetCurrentProcessLevel()));
 
-    reinterpret_cast<Host096d450*>(&DAT_011e0e80)
-        ->FUN_0096d450(reinterpret_cast<MobileObject*>(this),
+    DAT_011e0e80.FUN_0096d450(reinterpret_cast<MobileObject*>(this),
                        static_cast<int>(reinterpret_cast<MobileObject*>(this)->GetCurrentProcessLevel()), false, false,
                        0);
 
     if (!m_magicCaster || !m_magicItem)
         DAT_011de45c->AddFormToList(this);
 }
-}  // namespace fnv_0081ea40
 
 struct EventData
 {
@@ -1025,347 +507,15 @@ bool Handler::FUN_00815480(Event* pEvent, int value, bool flag)
     return true;
 }
 
-struct HighProcess
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28c;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29c;
-    int unk2a0;
-    int unk2a4;
-    int unk2a8;
-    int unk2ac;
-    int unk2b0;
-    int unk2b4;
-    int unk2b8;
-    int unk2bc;
-    int unk2c0;
-    int unk2c4;
-    int unk2c8;
-    int unk2cc;
-    int unk2d0;
-    int unk2d4;
-    int unk2d8;
-    int unk2dc;
-    int unk2e0;
-    int unk2e4;
-    int unk2e8;
-    int unk2ec;
-    int unk2f0;
-    int unk2f4;
-    int unk2f8;
-    int unk2fc;
-    int unk300;
-    int unk304;
-    int unk308;
-    int unk30c;
-    int unk310;
-    int unk314;
-    int unk318;
-    int unk31c;
-    int unk320;
-    int unk324;
-    int unk328;
-    int unk32c;
-    int unk330;
-    int unk334;
-    int unk338;
-    int unk33c;
-    int unk340;
-    int unk344;
-    int unk348;
-    int unk34c;
-    int unk350;
-    int unk354;
-    int unk358;
-    int unk35c;
-    int unk360;
-    int unk364;
-    int unk368;
-    int unk36c;
-    int unk370;
-    int unk374;
-    int unk378;
-    int unk37c;
-    int unk380;
-    int unk384;
-    int unk388;
-    int unk38c;
-    int unk390;
-    int unk394;
-    int unk398;
-    int unk39c;
-    int unk3a0;
-    int unk3a4;
-    int unk3a8;
-    int unk3ac;
-    int unk3b0;
-    int unk3b4;
-    int unk3b8;
-    int unk3bc;
-    int unk3c0;
-    int unk3c4;
-    int unk3c8;
-    int unk3cc;
-    int unk3d0;
-    int unk3d4;
-    int unk3d8;
-    int unk3dc;
-    int unk3e0;
-    int unk3e4;
-    int unk3e8;
-    int unk3ec;
-    int unk3f0;
-    int unk3f4;
-    int unk3f8;
-    int unk3fc;
-    int unk400;
-    int unk404;
-    int unk408;
-    int unk40c;
-    int unk410;
-    int unk414;
-    int unk418;
-    int unk41c;
-    int unk420;
-    int unk424;
-    int unk428;
-    int unk42c;
-    int unk430;
-    int unk434;
-    int unk438;
-    int unk43c;
-    int unk440;
-    int unk444;
-    int unk448;
-    int unk44c;
-    int unk450;
-    int unk454;
-    int unk458;
-    int unk45c;
-    int unk460;
-    int unk464;
-    int unk468;
-    HighProcess();
-};
-struct PrimaryRef
-{
-    virtual void v();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-};
-struct SecondaryRef
-{
-    virtual void v();
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    HighProcess* process;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-};
-struct MobileObject : PrimaryRef, SecondaryRef
-{
-    MobileObject();
-    ~MobileObject();
-};
+// The shared MagicProjectile sound member adds destructor cleanup to this constructor.
+// Retain the original constructor layout until the shared definition supports it.
 struct FUN_0081dbb0 : MobileObject
 {
     float unk88, unk8c, unk90;
     int unk94, unk98, unk9c, unka0;
-    void FUN_0046a010(bool);
-    void* FUN_007af430();
-    void FUN_00575690(void*);
     FUN_0081dbb0();
 };
+
 // Initializes the object, zeroes its float and int fields, allocates a HighProcess, and calls FUN_00575690 with the result of FUN_007af430.
 // @fnv 0x0081dbb0
 FUN_0081dbb0::FUN_0081dbb0()
@@ -1378,7 +528,7 @@ FUN_0081dbb0::FUN_0081dbb0()
     unka0 = 0;
     unk88 = 0.0f;
     unk8c = 0.0f;
-    process = new HighProcess;
+    m_pBaseProcess = new HighProcess;
     FUN_00575690(FUN_007af430());
 }
 
@@ -1430,21 +580,13 @@ MarkerErrorObj* __cdecl GetMarkerErrorObj()
     return DAT_011dc774;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3(float fX, float fY, float fZ);
-};
 struct MADName
 {
     char* m_kHandle;
     MADName(const char* pcString);
     ~MADName();
 };
-struct NiMemObject
-{
-    static void* operator new(unsigned int uiSize);
-};
+#include "../../../include/NiMemObject.h"
 struct FUN_00a75650 : NiMemObject
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c,
@@ -1540,232 +682,26 @@ void MagicAreaOwner::CreateMagicAreaDisplay()
     }
 }
 
-struct ActorDeletionQueue
-{
-    float FUN_0096d490();
-};
-extern ActorDeletionQueue DAT_011e0e80;
 
-struct Interface
+// Exe 0x0081df60: unit-local Interface view; declarations and layout are preserved.
+struct MagicprojectileInterfaceView
 {
     float FUN_007014e0(int);
 };
-extern Interface* DAT_011d8804;
+extern MagicprojectileInterfaceView* DAT_011d8804;
 
 extern const double DAT_01012060;
 extern const double DAT_010290d0;
 
-struct Class_0081df60
-{
-    virtual void vf_000();
-    virtual void vf_001();
-    virtual void vf_002();
-    virtual void vf_003();
-    virtual void vf_004();
-    virtual void vf_005();
-    virtual void vf_006();
-    virtual void vf_007();
-    virtual void vf_008();
-    virtual void vf_009();
-    virtual void vf_00a();
-    virtual void vf_00b();
-    virtual void vf_00c();
-    virtual void vf_00d();
-    virtual void vf_00e();
-    virtual void vf_00f();
-    virtual void vf_010();
-    virtual void vf_011();
-    virtual void vf_012();
-    virtual void vf_013();
-    virtual void vf_014();
-    virtual void vf_015();
-    virtual void vf_016();
-    virtual void vf_017();
-    virtual void vf_018();
-    virtual void vf_019();
-    virtual void vf_01a();
-    virtual void vf_01b();
-    virtual void vf_01c();
-    virtual void vf_01d();
-    virtual void vf_01e();
-    virtual void vf_01f();
-    virtual void vf_020();
-    virtual void vf_021();
-    virtual void vf_022();
-    virtual void vf_023();
-    virtual void vf_024();
-    virtual void vf_025();
-    virtual void vf_026();
-    virtual void vf_027();
-    virtual void vf_028();
-    virtual void vf_029();
-    virtual void vf_02a();
-    virtual void vf_02b();
-    virtual void vf_02c();
-    virtual void vf_02d();
-    virtual void vf_02e();
-    virtual void vf_02f();
-    virtual void vf_030();
-    virtual void vf_031();
-    virtual void vf_032();
-    virtual void vf_033();
-    virtual void vf_034();
-    virtual void vf_035();
-    virtual void vf_036();
-    virtual void vf_037();
-    virtual void vf_038();
-    virtual void vf_039();
-    virtual void vf_03a();
-    virtual void vf_03b();
-    virtual void vf_03c();
-    virtual void vf_03d();
-    virtual void vf_03e();
-    virtual void vf_03f();
-    virtual void vf_040();
-    virtual void vf_041();
-    virtual void vf_042();
-    virtual void vf_043();
-    virtual void vf_044();
-    virtual void vf_045();
-    virtual void vf_046();
-    virtual void vf_047();
-    virtual void vf_048();
-    virtual void vf_049();
-    virtual void vf_04a();
-    virtual void vf_04b();
-    virtual void vf_04c();
-    virtual void vf_04d();
-    virtual void vf_04e();
-    virtual void vf_04f();
-    virtual void vf_050();
-    virtual void vf_051();
-    virtual void vf_052();
-    virtual void vf_053();
-    virtual void vf_054();
-    virtual void vf_055();
-    virtual void vf_056();
-    virtual void vf_057();
-    virtual void vf_058();
-    virtual void vf_059();
-    virtual void vf_05a();
-    virtual void vf_05b();
-    virtual void vf_05c();
-    virtual void vf_05d();
-    virtual void vf_05e();
-    virtual void vf_05f();
-    virtual void vf_060();
-    virtual void vf_061();
-    virtual void vf_062();
-    virtual void vf_063();
-    virtual void vf_064();
-    virtual void vf_065();
-    virtual void vf_066();
-    virtual void vf_067();
-    virtual void vf_068();
-    virtual void vf_069();
-    virtual void vf_06a();
-    virtual void vf_06b();
-    virtual void vf_06c();
-    virtual void vf_06d();
-    virtual void vf_06e();
-    virtual void vf_06f();
-    virtual void vf_070();
-    virtual void vf_071();
-    virtual void vf_072();
-    virtual void vf_073();
-    virtual void vf_074();
-    virtual void vf_075();
-    virtual void vf_076();
-    virtual void vf_077();
-    virtual void vf_078();
-    virtual void vf_079();
-    virtual void vf_07a();
-    virtual void vf_07b();
-    virtual void vf_07c();
-    virtual void vf_07d();
-    virtual void vf_07e();
-    virtual void vf_07f();
-    virtual void vf_080();
-    virtual void vf_081();
-    virtual void vf_082();
-    virtual void vf_083();
-    virtual void vf_084();
-    virtual void vf_085();
-    virtual void vf_086();
-    virtual void vf_087();
-    virtual void vf_088();
-    virtual void vf_089();
-    virtual void vf_08a();
-    virtual void vf_08b();
-    virtual void vf_08c();
-    virtual void vf_08d();
-    virtual void vf_08e();
-    virtual void vf_08f();
-    virtual void vf_090();
-    virtual void vf_091();
-    virtual void vf_092();
-    virtual void vf_093();
-    virtual void vf_094();
-    virtual void vf_095();
-    virtual void vf_096();
-    virtual void vf_097();
-    virtual void vf_098();
-    virtual void vf_099();
-    virtual void vf_09a();
-    virtual void vf_09b();
-    virtual void vf_09c();
-    virtual void vf_09d();
-    virtual void vf_09e();
-    virtual void vf_09f();
-    virtual void vf_0a0();
-    virtual void vf_0a1();
-    virtual void vf_0a2();
-    virtual void vf_0a3();
-    virtual void vf_0a4();
-    virtual void vf_0a5();
-    virtual void vf_0a6();
-    virtual void vf_0a7();
-    virtual void vf_0a8();
-    virtual void vf_0a9();
-    virtual void vf_0aa();
-    virtual void vf_0ab();
-    virtual void vf_0ac();
-    virtual void vf_0ad();
-    virtual void vf_0ae();
-    virtual void vf_0af();
-    virtual void vf_0b0();
-    virtual void vf_0b1();
-    virtual void vf_0b2();
-    virtual void vf_0b3();
-    virtual void vf_0b4();
-    virtual void vf_0b5();
-    virtual void vf_0b6();
-    virtual void vf_0b7();
-    virtual void vf_0b8();
-    virtual void vf_0b9();
-    virtual void vf_0ba();
-    virtual void vf_0bb();
-    virtual void vf_0bc();
-    virtual void vf_0bd();
-    virtual void vf_2f8(float dt);
-
-    char pad[0x90 - 4];
-    float unk90;
-    char pad2[0xa4 - 0x90 - 4];
-    float unka4;
-
-    void Update(int param_1);
-};
-
-// Computes clamped delta time from the global clock, accumulates it into unk90, and calls vf_2f8 when the interface check passes.
+// Computes clamped delta time from the global clock, accumulates it into unk90, and calls Update when the interface check passes.
 // @fnv 0x0081df60
-void Class_0081df60::Update(int param_1)
+void MagicProjectile::Process(int param_1)
 {
     float dt3;
     float time = DAT_011e0e80.FUN_0096d490();
-    dt3 = time - unka4;
+    dt3 = time - reinterpret_cast<float*>(this)[0xA4 / sizeof(float)];
 
-    if (unka4 > time || unka4 < 0.0)
+    if (reinterpret_cast<float*>(this)[0xA4 / sizeof(float)] > time || reinterpret_cast<float*>(this)[0xA4 / sizeof(float)] < 0.0)
     {
         dt3 = 0.0f;
         if (time > 0.0 && time < 0.30000001192092896)
@@ -1774,25 +710,14 @@ void Class_0081df60::Update(int param_1)
         }
     }
 
-    unka4 = time;
+    reinterpret_cast<float*>(this)[0xA4 / sizeof(float)] = time;
     if (DAT_011d8804->FUN_007014e0(1) > 0.0)
         return;
-    unk90 += dt3;
-    vf_2f8(dt3);
+    reinterpret_cast<float*>(this)[0x90 / sizeof(float)] += dt3;
+    Update(dt3);
 }
 
 namespace fnv_0081e040 {
-struct Vector3
-{
-    unsigned int x;
-    unsigned int y;
-    unsigned int z;
-};
-
-struct GameTimerRecord
-{
-    unsigned int GetTime() const;
-};
 
 struct S86a0
 {
@@ -1801,57 +726,50 @@ struct S86a0
 
 void* __cdecl operator new(unsigned int size);
 
-struct Host096d450
-{
-    void __thiscall FUN_0096d450(void* object, int a, bool b, bool c, void* d);
-};
-
-extern Host096d450 DAT_011e0e80;
-
 struct FUN_0080f810
 {
     unsigned char m_data[0xc4];
 
-    FUN_0080f810(void* a, int b, GameTimerRecord* c, unsigned int d, Vector3 e, Vector3 f, unsigned int g, unsigned int h);
+    FUN_0080f810(void* a, int b, GameTimerRecord* c, unsigned int d, NiPoint3 e, NiPoint3 f, unsigned int g, unsigned int h);
 };
 
 struct FUN_00811980
 {
     unsigned char m_data[0xd8];
 
-    FUN_00811980(void* a, int b, GameTimerRecord* c, unsigned int d, Vector3 e, Vector3 f);
+    FUN_00811980(void* a, int b, GameTimerRecord* c, unsigned int d, NiPoint3 e, NiPoint3 f);
 };
 
 struct FUN_00819360
 {
     unsigned char m_data[0xd0];
 
-    FUN_00819360(void* a, int b, GameTimerRecord* c, unsigned int d, Vector3 e, Vector3 f, unsigned int g, unsigned int h);
+    FUN_00819360(void* a, int b, GameTimerRecord* c, unsigned int d, NiPoint3 e, NiPoint3 f, unsigned int g, unsigned int h);
 };
 
 struct FUN_00822920
 {
     unsigned char m_data[0xa8];
 
-    FUN_00822920(void* a, int b, GameTimerRecord* c, unsigned int d, Vector3 e, Vector3 f);
+    FUN_00822920(void* a, int b, GameTimerRecord* c, unsigned int d, NiPoint3 e, NiPoint3 f);
 };
 
-FUN_0080f810::FUN_0080f810(void*, int, GameTimerRecord*, unsigned int, Vector3, Vector3, unsigned int, unsigned int)
+FUN_0080f810::FUN_0080f810(void*, int, GameTimerRecord*, unsigned int, NiPoint3, NiPoint3, unsigned int, unsigned int)
 {}
 
-FUN_00811980::FUN_00811980(void*, int, GameTimerRecord*, unsigned int, Vector3, Vector3)
+FUN_00811980::FUN_00811980(void*, int, GameTimerRecord*, unsigned int, NiPoint3, NiPoint3)
 {}
 
-FUN_00819360::FUN_00819360(void*, int, GameTimerRecord*, unsigned int, Vector3, Vector3, unsigned int, unsigned int)
+FUN_00819360::FUN_00819360(void*, int, GameTimerRecord*, unsigned int, NiPoint3, NiPoint3, unsigned int, unsigned int)
 {}
 
-FUN_00822920::FUN_00822920(void*, int, GameTimerRecord*, unsigned int, Vector3, Vector3)
+FUN_00822920::FUN_00822920(void*, int, GameTimerRecord*, unsigned int, NiPoint3, NiPoint3)
 {}
 
 // Constructs one of four class instances based on projectile->FUN_004086a0() and passes it to DAT_011e0e80.
 // @fnv 0x0081e040
 void __cdecl FUN_0081e040(void* a, unsigned int b, unsigned int c, int d, GameTimerRecord* timer, S86a0* projectile,
-                          Vector3 first, Vector3 second)
+                          NiPoint3 first, NiPoint3 second)
 {
     void* result = 0;
     unsigned int currentTime;
@@ -1878,6 +796,6 @@ void __cdecl FUN_0081e040(void* a, unsigned int b, unsigned int c, int d, GameTi
     }
 
     if (result)
-        DAT_011e0e80.FUN_0096d450(result, 0, 0, 0, 0);
+        DAT_011e0e80.FUN_0096d450(static_cast<MobileObject*>(result), 0, 0, 0, 0);
 }
 }  // namespace fnv_0081e040

@@ -1,6 +1,8 @@
+#include "../../include/NiTArray.h"
 // bsshader/bsshaderproperty.cpp: ShaderPassEntry, ShaderPassList, NiShadeProperty, ShaderPropertyRecord (23 functions)
 
 #include "bsshaderproperty_decls.h"
+#include "../../include/NiShadeProperty.h"
 
 // Initializes the shader property with geometry, pass, first-pass flag, light count, and copies the given lights into a newly allocated array.
 // @fnv 0x00ba8ec0
@@ -31,14 +33,14 @@ void BSShaderProperty::ShaderPassList::Add(NiGeometry* geometry, unsigned short 
                                            unsigned char numLights, ShadowSceneLight* light0, ShadowSceneLight* light1,
                                            ShadowSceneLight* light2, ShadowSceneLight* light3)
 {
-    if (iSize >= m_kRenderPasses.m_usESize)
+    if (m_uiCount >= m_kRenderPasses.m_usESize)
     {
-        m_kRenderPasses.Add(
+        reinterpret_cast<NiTObjectArray<ShaderPassEntry*>&>(m_kRenderPasses).Add(
             new ShaderPassEntry(geometry, passEnum, firstPass, numLights, light0, light1, light2, light3));
     }
     else
     {
-        ShaderPassEntry* pass = m_kRenderPasses.m_pBase[iSize];
+        ShaderPassEntry* pass = m_kRenderPasses.m_pBase[m_uiCount];
         pass->FUN_00ba8c50(numLights, light0, light1, light2, light3);
         pass->SetFirstPass(firstPass);
         pass->SetGeometry(geometry);
@@ -47,7 +49,7 @@ void BSShaderProperty::ShaderPassList::Add(NiGeometry* geometry, unsigned short 
         pass->m_ucLightIndex = 0;
         pass->m_ucPassIndex = 0;
     }
-    ++iSize;
+    ++m_uiCount;
 }
 
 struct FUN_00ba8ab0_shell : public BSShaderProperty
@@ -266,10 +268,6 @@ const char* __cdecl FUN_00ba8eb0()
 
 void __fastcall DestroyFogProperty(void*);
 void __cdecl _delete(void*, unsigned int);
-struct NiShadeProperty
-{
-    void* Destroy(unsigned int);
-};
 // Calls DestroyFogProperty on this, frees this with _delete when flags has bit 0 set, and returns this.
 // @fnv 0x00a81460
 void* NiShadeProperty::Destroy(unsigned int flags)
@@ -421,20 +419,11 @@ FUN_00ba8e50_cls* FUN_00ba8e50_cls::FUN_00ba8e50()
     return this;
 }
 
-class FUN_00ba8b80
-{
-  public:
-    virtual ~FUN_00ba8b80();
-    ShadowSceneLight** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    FUN_00ba8b80(unsigned int maxSize, unsigned short growBy);
-};
+typedef NiTArray<ShadowSceneLight*, NiTMallocInterface<ShadowSceneLight*> > FUN_00ba8b80;
+
 
 // @fnv 0x00ba8b80
-FUN_00ba8b80::FUN_00ba8b80(unsigned int maxSize, unsigned short growBy)
+template <> NiTArray<ShadowSceneLight*, NiTMallocInterface<ShadowSceneLight*> >::NiTArray(unsigned int maxSize, unsigned int growBy)
 {
     unsigned short n = (unsigned short)maxSize;
     m_usMaxSize = n;
@@ -453,7 +442,8 @@ FUN_00ba8b80::FUN_00ba8b80(unsigned int maxSize, unsigned short growBy)
 
 // Resizes the array to newSize: clears and shrinks entries above the new size, reallocates the base buffer, copies existing entries and zero-fills the rest.
 // @fnv 0x00ba8d30
-void NiTArray<BSShaderProperty::ShaderPassEntry*, NiTNewInterface<BSShaderProperty::ShaderPassEntry*> >::FUN_00ba8d30(
+template <>
+void NiTArray<BSShaderProperty::ShaderPassEntry*, NiTNewInterface<BSShaderProperty::ShaderPassEntry*> >::SetSize(
     unsigned int newSize)
 {
     if (newSize != m_usMaxSize)
@@ -868,7 +858,7 @@ BSShaderProperty::ShaderPassList* FUN_00bb73f0_shell::FUN_00bb73f0(int geometry,
     if (arg4 == 0xf)
     {
         ((FUN_00ba9820_shell*)this)->CreateSpawnedObjectIfMissing(1);
-        if (m_pRenderPassArray54->iSize == 0)
+        if (m_pRenderPassArray54->m_uiCount == 0)
         {
             m_pRenderPassArray54->Add((NiGeometry*)geometry, 0x237, true, 0, 0, 0, 0, 0);
             m_pRenderPassArray54->m_kRenderPasses.m_pBase[0]->m_ucLightIndex = 0;
@@ -879,7 +869,7 @@ BSShaderProperty::ShaderPassList* FUN_00bb73f0_shell::FUN_00bb73f0(int geometry,
     if (m_uiPass != pass)
     {
         ((FUN_00ba95e0_shell*)this)->FUN_00ba95e0(1);
-        m_pRenderPassArray3c->iSize = 0;
+        m_pRenderPassArray3c->m_uiCount = 0;
         m_pRenderPassArray3c->Add((NiGeometry*)geometry, 0x236, true, 0, 0, 0, 0, 0);
         m_pRenderPassArray3c->m_kRenderPasses.m_pBase[0]->m_ucLightIndex = 0xa;
         m_uiPass = pass;

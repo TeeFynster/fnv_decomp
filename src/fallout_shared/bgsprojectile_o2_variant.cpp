@@ -2,6 +2,23 @@
 // src/fallout_shared/bgsprojectile_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/bgsprojectile.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
+#include "../../include/BGSDestructibleObjectForm.h"
+#include "../../include/BGSExplosion.h"
+#include "../../include/BGSImpactData.h"
+#include "../../include/BGSPreloadable.h"
+#include "../../include/BGSProjectile.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/ProjectileProperties.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESChallenge.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESObjectACTI.h"
+#include "../../include/TESObjectLIGH.h"
+#include "../../include/TESObjectWEAP.h"
+#include "../../include/TESSound.h"
+
 #include "bgsprojectile_decls.h"
 
 // Adjustor thunk for FUN_004fe250: "sub ecx, 0x3c; jmp DestroyIfFlagged".

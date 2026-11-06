@@ -1,22 +1,38 @@
+#include "../../../include/Stack.h"
+#include "../../../include/SettingT.h"
+#include "../../../include/BSStringT.h"
+#include "../../../include/NiTListItem.h"
 // fallout/interface/interface.cpp: Interface, ConsoleManager, FileFinder, TESCreature and more (216 functions)
 
-#include "interface_rebase_packet.h"
+#include "../../../include/InterfaceManager.h"
+#include "../../../include/TESResponse.h"
+#include "../../../include/TESSaveLoadGame.h"
 
-class TESWorldSpace;
+InterfaceManager* FUN_004b7210();
+float FUN_00715da0();
+float FUN_00706e20();
+float FUN_00706e50();
+bool FUN_00707b50();
+unsigned int FUN_00702440();
+bool FUN_00705100();
+unsigned int FUN_00706f20();
+
+extern bool DAT_011d9514;
+extern bool DAT_011c70eb;
+
+class FOPipboyManager;
 class Menu;
 class TESForm;
 class TESObjectREFR;
 class NiControllerSequence;
+class TESWorldSpace;
 
-class BSSystemUtility
+// The shared Menu header only declares Interface::IsSaveLoadActive; this facade still needs its local API.
+// Exe 0x00707860: unit-local Interface view; declarations and layout are preserved.
+class InterfaceInterfaceView
 {
   public:
-    static int s_iUpdateEnabled;
-};
-
-class Interface
-{
-  public:
+    FOPipboyManager* GetPipboyManager();
     static const char* GetInterfaceName();
     static float GetFirstInterfaceFloat();
     static float UpdateInterfaceState();
@@ -24,8 +40,8 @@ class Interface
     static float GetFourthInterfaceFloat();
     static bool IsInterfaceOpen();
     static float GetInterfaceFloat();
-    static Tile* GetPrimaryInterfaceTile();
-    static Tile* GetSecondaryInterfaceTile();
+    static void* GetPrimaryInterfaceTile();
+    static void* GetSecondaryInterfaceTile();
     static NiNode* GetInterfaceNode();
     static bool IsAnyMenuOpen();
 
@@ -94,88 +110,211 @@ class Interface
     static bool PlayNifSounds(NiControllerSequence*);
     static Menu* GetMenuById(int);
     static void SetHUDVisible(bool);
-    static void SetTileFormattedText(Tile*, int, const char*, ...);
+    static void SetTileFormattedText(void*, int, const char*, ...);
 };
 
-#include "interface_rebase_closure.h"
+bool __cdecl FUN_00702680(InterfaceInterfaceView::enumMenus, unsigned int);
+
+// Keep this unit's template APIs alongside the shared game classes.
+#include "interface_rebase_layout_support.h"
+// Tile's dependencies already have checked declarations in this packet.
+#pragma include_alias("ShadowSceneLight.h", "../interface/interface_rebase_layout_support.h")
+#define FNV64_NIFIXEDSTRING_OWN_BODIES
+#include "../../../include/NiFixedString.h"
+#include "../../../include/Tile.h"
+typedef NiTListItem<Tile* > InterfaceTileListItem;
+#include "../../../include/Menu.h"
+// The shared scene-graph classes; their header's smart-pointer and list templates are kept apart
+// from the packet's own (interface_rebase_layout_support.h), which the rest of this unit uses.
+#include "../../../include/NiAVObject.h"
+#include "../../../include/BaseProcess.h"
+#include "../../../include/ActiveEffect.h"
+#include "../../../include/Actor.h"
+#include "../../../include/ActorBaseAttributes.h"
+#include "../../../include/ActorValueModifierList.h"
+#include "../../../include/ActorValueOwner.h"
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/BGSDestructibleObjectForm.h"
+#include "../../../include/BGSTouchSpellForm.h"
+#include "../../../include/BSAnimGroupSequence.h"
+#include "../../../include/BSFadeNode.h"
+#include "../../../include/BaseExtraList.h"
+#include "../../../include/BaseFormComponent.h"
+#include "../../../include/CachedValuesOwner.h"
+#include "../../../include/Character.h"
+#include "../../../include/ExtraDataList.h"
+#include "../../../include/FOPipboyManager.h"
+#include "../../../include/FORenderedMenu.h"
+#include "../../../include/FileEntryList.h"
+#include "../../../include/FileEntryListCollection.h"
+#include "../../../include/GameTimerRecord.h"
+#include "../../../include/HUDMainMenu.h"
+#include "../../../include/HotkeyWheelDisplay.h"
+#include "../../../include/LoadingMenu.h"
+#include "../../../include/MagicCaster.h"
+#include "../../../include/MagicTarget.h"
+#include "../../../include/MapEntryCount.h"
+#include "../../../include/MessageMenu.h"
+#include "../../../include/MobileObject.h"
+#include "../../../include/NiColor.h"
+#include "../../../include/NiControllerSequence.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiObject.h"
+#include "../../../include/NiRefObject.h"
+#include "../../../include/NiTListBase_NiTPointerAllocator_unsigned_int__Tile___.h"
+#include "../../../include/NiTListBase_NiTPointerAllocator_unsigned_int__Tile_____AntiBloatAllocator.h"
+#include "../../../include/NiTPointerAllocator_unsigned_int_.h"
+#include "../../../include/NiTPointerListBase_NiTPointerAllocator_unsigned_int__Tile___.h"
+#include "../../../include/NiTPointerList_Tile___.h"
+#include "../../../include/PackageList.h"
+#include "../../../include/PerkEntryConditionSet.h"
+#include "../../../include/PlacedObjectInfo.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/NiColorA.h"
+#include "../../../include/SETTING_VALUE.h"
+#include "../../../include/ShortPoint3.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/TESAIForm.h"
+#include "../../../include/TESActorBase.h"
+#include "../../../include/TESActorBaseData.h"
+#include "../../../include/TESAnimation.h"
+#include "../../../include/TESAttackDamageForm.h"
+#include "../../../include/TESAttributes.h"
+#include "../../../include/TESBoundAnimObject.h"
+#include "../../../include/TESBoundObject.h"
+#include "../../../include/TESBoundObject__BOUND_DATA.h"
+#include "../../../include/TESChildCell.h"
+#include "../../../include/TESContainer.h"
+#include "../../../include/TESCreature.h"
+#include "../../../include/TESDataHandler.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESFullName.h"
+#include "../../../include/TESHealthForm.h"
+#include "../../../include/TESModel.h"
+#include "../../../include/TESModelList.h"
+#include "../../../include/TESObject.h"
+#include "../../../include/TESObjectCELL.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESRecipe.h"
+#include "../../../include/TESScriptableForm.h"
+#include "../../../include/TESSpellList.h"
+#include "../../../include/TypedData.h"
+#include "interface_rebase_types_MenuManager.h"
+
+extern PlayerCharacter* g_thePlayer;
+#include "../../../include/BSSystemUtility.h"
+#include "../../../include/BSThread.h"
+#include "../../../include/BGSLoadGameBuffer.h"
+#include "../../../include/BGSMoviePlayer.h"
+#include "../../../include/BSStream.h"
+#include "../../../include/GO.h"
+#include "../../../include/GameSettingCollection.h"
+#include "../../../include/NiStream.h"
+#include "../../../include/OSGlobals.h"
+#include "../../../include/Setting.h"
+
+#include "../../../include/BSFaceGenNiNode.h"
+#include "../../../include/InventoryMenu.h"
+#include "../../../include/DialogMenu.h"
+// MapMenu's private array template is independent of the packet's array template.
+#include "../../../include/MapMenu.h"
+#include "../../../include/StartMenu.h"
+#include "../../../include/StatsMenu.h"
+#include "../../../include/ContainerMenu.h"
+#include "../../../include/INISettingCollection.h"
+#pragma include_alias("BSSimpleArray.h", "../interface/interface_rebase_layout_support.h")
+class BGSLoadFormBuffer;
+enum SEX;
+#include "../../../include/TESNPC.h"
+#include "../../../include/TESObjectARMO.h"
+#include "../../../include/SurgeryMenu.h"
+#include "../../../include/SleepWaitMenu.h"
+#include "../../../include/TESGlobal.h"
+#include "../../../include/TileRect.h"
+#include "../../../include/TileMenu.h"
+#include "../../../include/FORenderedTerminal.h"
+
+// These approved headers lack the getters; each uses only the this pointer in ECX.
+bool __fastcall IsSleepWaitMenuActive(SleepWaitMenu*);
+char __fastcall GetGlobalValueType(TESGlobal*);
 
 const char kMeshesFolder[] = "Meshes";
 
 // @fnv 0x00707860
-const char* Interface::GetInterfaceName()
+const char* InterfaceInterfaceView::GetInterfaceName()
 {
     return kMeshesFolder;
 }
 
 // @fnv 0x007043c0
-bool Interface::IsWorldSpaceEnabled(TESWorldSpace* apSpace)
+bool InterfaceInterfaceView::IsWorldSpaceEnabled(TESWorldSpace* apSpace)
 {
     (void)apSpace;
     return false;
 }
 
 // @fnv 0x00705ea0
-bool Interface::IsInterfaceActive()
+bool InterfaceInterfaceView::IsInterfaceActive()
 {
     return BSSystemUtility::s_iUpdateEnabled != 0;
 }
 
 // @fnv 0x00706df0
-float Interface::GetFirstInterfaceFloat()
+float InterfaceInterfaceView::GetFirstInterfaceFloat()
 {
     return FUN_00715da0();
 }
 
 // @fnv 0x00706e00
-float Interface::UpdateInterfaceState()
+float InterfaceInterfaceView::UpdateInterfaceState()
 {
     return InterfaceManager::UpdateInterfaceState();
 }
 
 // @fnv 0x00706e10
-float Interface::GetThirdInterfaceFloat()
+float InterfaceInterfaceView::GetThirdInterfaceFloat()
 {
     return FUN_00706e20();
 }
 
 // @fnv 0x00706e40
-float Interface::GetFourthInterfaceFloat()
+float InterfaceInterfaceView::GetFourthInterfaceFloat()
 {
     return FUN_00706e50();
 }
 
 // @fnv 0x00707b40
-bool Interface::IsInterfaceOpen()
+bool InterfaceInterfaceView::IsInterfaceOpen()
 {
     return FUN_00707b50();
 }
 
 // @fnv 0x00706e70
-float Interface::GetInterfaceFloat()
+float InterfaceInterfaceView::GetInterfaceFloat()
 {
-    return FUN_004b7210()->screenAspectRatio;
+    return FUN_004b7210()->fScreenAspectRatio;
 }
 
 // @fnv 0x00706cd0
-Tile* Interface::GetPrimaryInterfaceTile()
+void* InterfaceInterfaceView::GetPrimaryInterfaceTile()
 {
     return FUN_004b7210()->FUN_00586150();
 }
 
 // @fnv 0x00706cf0
-Tile* Interface::GetSecondaryInterfaceTile()
+void* InterfaceInterfaceView::GetSecondaryInterfaceTile()
 {
     return FUN_004b7210()->FUN_004fd400();
 }
 
 // @fnv 0x00706d30
-NiNode* Interface::GetInterfaceNode()
+NiNode* InterfaceInterfaceView::GetInterfaceNode()
 {
-    return reinterpret_cast<NiNode*>(reinterpret_cast<EffectSetting*>(FUN_004b7210())->GetCastSound());
+    return FUN_004b7210()->FUN_004fb070();
 }
 
 // @fnv 0x00706d70
-bool Interface::IsAnyMenuOpen()
+bool InterfaceInterfaceView::IsAnyMenuOpen()
 {
     return FUN_004b7210()->FUN_00706d90();
 }
@@ -208,7 +347,7 @@ bool FUN_00707b50()
 
 // Creates an AutoMemContext for the interface and calls InterfaceManager::Initialize with 1 and initializeRender.
 // @fnv 0x00702250
-void Interface::Init(bool initializeRender)
+void InterfaceInterfaceView::Init(bool initializeRender)
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_INTERFACE, true,
                            "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Interface\\Interface.cpp", 176u);
@@ -217,7 +356,7 @@ void Interface::Init(bool initializeRender)
 
 // Creates an AutoMemContext for the interface and calls InterfaceManager::Initialize with 2 and true.
 // @fnv 0x007022c0
-void Interface::RefreshInterfaceState()
+void InterfaceInterfaceView::RefreshInterfaceState()
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_INTERFACE, true,
                            "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Interface\\Interface.cpp", 189u);
@@ -225,45 +364,45 @@ void Interface::RefreshInterfaceState()
 }
 
 // @fnv 0x00705e00
-void Interface::SetQuestTarget(TESForm* location, bool flag)
+void InterfaceInterfaceView::SetQuestTarget(TESForm* location, bool flag)
 {
     MessageMenu::SetMessageMenuActive(true);
     LoadingMenu::Create(location, true, flag);
 }
 
 // @fnv 0x00704ad0
-bool Interface::IsPipBoyOpen()
+bool InterfaceInterfaceView::IsPipBoyOpen()
 {
-    return Menu::IsMenuVisible(eInventoryMenu);
+    return Menu::IsMenuVisible(static_cast<Interface::enumMenus>(eInventoryMenu));
 }
 
 // @fnv 0x00704df0
-bool Interface::GetStatsMenuVisible()
+bool InterfaceInterfaceView::GetStatsMenuVisible()
 {
-    return Menu::IsMenuVisible(eStatsMenu);
+    return Menu::IsMenuVisible(static_cast<Interface::enumMenus>(eStatsMenu));
 }
 
 // @fnv 0x00705e80
-bool Interface::IsGamePaused()
+bool InterfaceInterfaceView::IsGamePaused()
 {
-    return Menu::IsMenuVisible(eLoadingMenu);
+    return Menu::IsMenuVisible(static_cast<Interface::enumMenus>(eLoadingMenu));
 }
 
 // @fnv 0x00705000
-bool Interface::ContainerIsRecipe()
+bool InterfaceInterfaceView::ContainerIsRecipe()
 {
     return Tile::FindMenuById(eRecipeMenu) != 0;
 }
 
 // @fnv 0x00705020
-bool Interface::ContainerIsBarter()
+bool InterfaceInterfaceView::ContainerIsBarter()
 {
     return Tile::FindMenuById(eBarterMenu) != 0;
 }
 
 // If the player and its NiNode exist, forwards the target reference to HUDMainMenu with a false flag.
 // @fnv 0x00703860
-void Interface::SetLookAtReference(TESObjectREFR* target)
+void InterfaceInterfaceView::SetLookAtReference(TESObjectREFR* target)
 {
     if (g_thePlayer && g_thePlayer->GetNiNode())
         HUDMainMenu::SetCrosshairTarget(target, false);
@@ -290,7 +429,7 @@ bool ActiveEffect::IsDone() const
 // @fnv 0x007058c0
 LOD_MULT_TYPE BSFadeNode::GetLODMultType() const
 {
-    return eLODMultType;
+    return static_cast<LOD_MULT_TYPE>(eMultType);
 }
 
 // If initialized, culls the first three button objects and un-culls the object at index button - 1 when button is greater than zero.
@@ -322,7 +461,7 @@ Animation* PlayerCharacter::GetAnimation(bool firstPerson) const
 
 // Creates a TabButtonTemplate tile per label from the varargs list, sets its string/name/indices, then positions each tab by accumulated width.
 // @fnv 0x00707be0
-void Interface::SetTileFormattedText(Tile* parent, int firstID, const char* firstLabel, ...)
+void InterfaceInterfaceView::SetTileFormattedText(void* parent, int firstID, const char* firstLabel, ...)
 {
     BSStringT<char> buttonLabel;
     int count = 0;
@@ -331,11 +470,12 @@ void Interface::SetTileFormattedText(Tile* parent, int firstID, const char* firs
     va_start(labels, firstLabel);
     buttonLabel.Set(firstLabel, 0);
 
-    for (count = 0; buttonLabel.GetLength() > 0; ++count)
+    for (count = 0; buttonLabel.Length() > 0; ++count)
     {
-        Tile* pTab = parent->GetMenu()->CreateTileFromTemplate(parent, "TabButtonTemplate", 0);
-        pTab->SetString(0xfc4, buttonLabel.GetString(), true);
-        pTab->SetName(buttonLabel.GetString());
+        Tile* pTab = static_cast<Tile*>(parent)->GetMenu()->CreateTileFromTemplate(
+            static_cast<Tile*>(parent), "TabButtonTemplate", 0);
+        pTab->SetString(0xfc4, buttonLabel.String(), true);
+        pTab->SetName(buttonLabel.String());
         pTab->SetInt(0xfac, count);
         pTab->SetInt(0xfaa, firstID + count);
         Tile::UpdateAll(false);
@@ -345,17 +485,17 @@ void Interface::SetTileFormattedText(Tile* parent, int firstID, const char* firs
     va_end(labels);
 
     // Initial button position also supplies the uniform inter-button gap.
-    int iPosition = static_cast<int>((parent->GetFloat(0xfb1) - iTotalWidth) / (count + 1));
+    int iPosition = static_cast<int>((static_cast<Tile*>(parent)->GetFloat(0xfb1) - iTotalWidth) / (count + 1));
     // Accumulated left spacing is the current button coordinate.
     int iSpacing = iPosition;
-    parent->SetInt(Tile::GetTraitID("_LeftLineLength"), iPosition);
-    parent->SetInt(Tile::GetTraitID("_ButtonCount"), count);
+    static_cast<Tile*>(parent)->SetInt(Tile::GetTraitID("_LeftLineLength"), iPosition);
+    static_cast<Tile*>(parent)->SetInt(Tile::GetTraitID("_ButtonCount"), count);
 
     va_start(labels, firstLabel);
     buttonLabel.Set(firstLabel, 0);
-    while (buttonLabel.GetLength() > 0)
+    while (buttonLabel.Length() > 0)
     {
-        Tile* pTab = parent->GetNamedChild(buttonLabel.GetString());
+        Tile* pTab = static_cast<Tile*>(parent)->GetNamedChild(buttonLabel.String());
         pTab->SetInt(Tile::GetTraitID("_x"), iSpacing);
         iSpacing = static_cast<int>(pTab->GetFloat(0xfb1)) + iPosition + iSpacing;
         buttonLabel = va_arg(labels, const char*);
@@ -370,19 +510,19 @@ void Tile::SetName(const char* name)
 }
 
 // @fnv 0x00707970
-bool Interface::PlayNifSounds(NiControllerSequence* sequence)
+bool InterfaceInterfaceView::PlayNifSounds(NiControllerSequence* sequence)
 {
     return BSAnimGroupSequence::PlayAnimSounds(sequence, 0);
 }
 
 // @fnv 0x00707990
-Menu* Interface::GetMenuById(int menuClass)
+Menu* InterfaceInterfaceView::GetMenuById(int menuClass)
 {
     return MenuSystem::Instance(true)->GetMenuById(menuClass);
 }
 
 // @fnv 0x00709c40
-void Interface::SetHUDVisible(bool visible)
+void InterfaceInterfaceView::SetHUDVisible(bool visible)
 {
     HUDMainMenu::SetHUDVisible(visible);
 }
@@ -448,15 +588,11 @@ bool FUN_00702360()
     return false;
 }
 
-struct FUN_007023a0_shell : public InterfaceManager
-{
-    bool FUN_007023a0();
-};
 
 // @fnv 0x007023a0
-bool FUN_007023a0_shell::FUN_007023a0()
+bool InterfaceManager::FUN_007023a0()
 {
-    return *(int*)((char*)this + 0xc) != 1;
+    return uiCurrentMode != 1;
 }
 
 namespace fnv_007023c0 {
@@ -466,17 +602,12 @@ class Modifier
     unsigned char GetKey();
 };
 
-class InterfaceManager_GetEnterStackTop_Helper
-{
-  public:
-    int GetTopEnterStackEntry();
-};
 
 // @fnv 0x007023c0
 int FUN_007023c0()
 {
     if (FUN_004b7210() && reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey())
-        return reinterpret_cast<InterfaceManager_GetEnterStackTop_Helper*>(FUN_004b7210())->GetTopEnterStackEntry();
+        return reinterpret_cast<InterfaceManager*>(FUN_004b7210())->GetTopEnterStackEntry();
     return 0;
 }
 }  // namespace fnv_007023c0
@@ -503,28 +634,19 @@ class Modifier
     char GetKey();
 };
 
-struct InterfaceManager_EnterStackTop : InterfaceManager
-{
-    int GetTopEnterStackEntry();
-};
-
-struct Interface_Ext : Interface
-{
-    static bool IsMenuActive(Interface::enumMenus, unsigned int);
-};
 
 // @fnv 0x00702450
-bool __cdecl FUN_00702450(Interface::enumMenus aeMenuID)
+bool __cdecl FUN_00702450(InterfaceInterfaceView::enumMenus aeMenuID)
 {
     if (FUN_004b7210() && (unsigned char)((Modifier*)FUN_004b7210())->GetKey())
     {
-        int topid = ((InterfaceManager_EnterStackTop*)FUN_004b7210())->GetTopEnterStackEntry();
-        if (topid == Interface::eMainFour &&
-            (aeMenuID == Interface::eStatsMenu || aeMenuID == Interface::eInventoryMenu ||
-             aeMenuID == Interface::eRepairMenu || aeMenuID == Interface::eMapMenu ||
-             aeMenuID == Interface::eItemModMenu))
+        int topid = ((InterfaceManager*)FUN_004b7210())->GetTopEnterStackEntry();
+        if (topid == InterfaceInterfaceView::eMainFour &&
+            (aeMenuID == InterfaceInterfaceView::eStatsMenu || aeMenuID == InterfaceInterfaceView::eInventoryMenu ||
+             aeMenuID == InterfaceInterfaceView::eRepairMenu || aeMenuID == InterfaceInterfaceView::eMapMenu ||
+             aeMenuID == InterfaceInterfaceView::eItemModMenu))
         {
-            return Interface_Ext::IsMenuActive(aeMenuID, 0);
+            return ::FUN_00702680(aeMenuID, 0);
         }
         else
         {
@@ -542,16 +664,12 @@ class Modifier
     unsigned char GetKey();
 };
 
-struct InterfaceManager_GetEnterStack_shell : public InterfaceManager
-{
-    int GetMenuStackEntry(int);
-};
 
 // @fnv 0x00702640
 int FUN_00702640()
 {
     if (FUN_004b7210() && reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey())
-        return static_cast<InterfaceManager_GetEnterStack_shell*>(FUN_004b7210())->GetMenuStackEntry(0);
+        return static_cast<InterfaceManager*>(FUN_004b7210())->GetMenuStackEntry(0);
     return 0;
 }
 }  // namespace fnv_00702640
@@ -561,7 +679,7 @@ extern bool DAT_011f308f[];
 // @fnv 0x007027b0
 bool __cdecl FUN_007027b0(int aiMenuID)
 {
-    if (aiMenuID >= Interface::eFirstMenu && aiMenuID <= Interface::eLastMenu)
+    if (aiMenuID >= InterfaceInterfaceView::eFirstMenu && aiMenuID <= InterfaceInterfaceView::eLastMenu)
     {
         return DAT_011f308f[aiMenuID];
     }
@@ -632,19 +750,13 @@ class Modifier
     unsigned char GetKey();
 };
 
-class BGSMoviePlayer
-{
-  public:
-    bool FUN_00ec17c0();
-};
-
 extern BGSMoviePlayer* DAT_0126fac4;
 void __fastcall FUN_00713f00(InterfaceManager*);
 
 // @fnv 0x00702870
 void FUN_00702870()
 {
-    if (FUN_004b7210() && reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey() && !DAT_0126fac4->FUN_00ec17c0())
+    if (FUN_004b7210() && reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey() && !DAT_0126fac4->IsPlaying())
         FUN_00713f00(FUN_004b7210());
 }
 }  // namespace fnv_00702870
@@ -654,12 +766,6 @@ class Modifier
 {
   public:
     bool GetKey();
-};
-
-class BGSMoviePlayer
-{
-  public:
-    bool FUN_00ec17c0();
 };
 
 class TaskThreadManager
@@ -682,7 +788,7 @@ extern BGSMoviePlayer* DAT_0126fac4;
 void __cdecl RenderOrFallback(int aiArg1, int aiArg2)
 {
     bool bRendered = false;
-    if (FUN_004b7210() && ((Modifier*)FUN_004b7210())->GetKey() && !DAT_0126fac4->FUN_00ec17c0())
+    if (FUN_004b7210() && ((Modifier*)FUN_004b7210())->GetKey() && !DAT_0126fac4->IsPlaying())
     {
         ((IM_Stub*)FUN_004b7210())->RenderMenu(aiArg1, aiArg2);
         bRendered = true;
@@ -853,15 +959,9 @@ class Modifier
     unsigned char GetKey();
 };
 
-class InventoryMenu
-{
-  public:
-    static Tile* Create();
-};
-
 // Returns InventoryMenu::Create() when FUN_004b7210() is non-null and its GetKey() is nonzero, otherwise returns 0.
 // @fnv 0x007048c0
-Tile* CreateInventoryMenuIfModifierKey()
+void* CreateInventoryMenuIfModifierKey()
 {
     if (FUN_004b7210() && reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey())
         return InventoryMenu::Create();
@@ -895,12 +995,6 @@ class Modifier
     char GetKey();
 };
 
-class ContainerMenu
-{
-  public:
-    static void __cdecl Close();
-};
-
 // If FUN_004b7210 returns an object whose GetKey() is nonzero, calls ContainerMenu::Close().
 // @fnv 0x00704f50
 void FUN_00704f50()
@@ -920,10 +1014,7 @@ struct TimeGlobal
     void SetGlobalTimeMultiplier(float, bool);
 };
 extern TimeGlobal g_timeGlobal;
-struct DialogMenu
-{
-    static void* Create(void*, void*, void*);
-};
+
 // @fnv 0x00705070
 void* FUN_00705070(void* apArg1, void* apArg2, void* apArg3)
 {
@@ -961,12 +1052,6 @@ class Modifier
     char GetKey(void);
 };
 
-class StartMenu
-{
-  public:
-    static bool __cdecl Create(bool, bool);
-};
-
 // If FUN_004b7210() returns a non-null Modifier whose GetKey() is nonzero, calls StartMenu::Create(false, false).
 // @fnv 0x007053f0
 void FUN_007053f0()
@@ -999,17 +1084,13 @@ struct Modifier
 {
     bool GetKey();
 };
-struct TESNPC
-{
-    int FUN_00602170();
-};
 // If FUN_004b7210() returns a Modifier whose GetKey() is true, returns the TESNPC result of FUN_00602170(); otherwise returns 0.
 // @fnv 0x00705910
 int FUN_00705910()
 {
     if (FUN_004b7210() && reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey())
     {
-        return reinterpret_cast<TESNPC*>(FUN_004b7210())->FUN_00602170();
+        return reinterpret_cast<int>(reinterpret_cast<TESNPC*>(FUN_004b7210())->FUN_00602170());
     }
     else
     {
@@ -1023,17 +1104,13 @@ struct Modifier
 {
     bool GetKey();
 };
-struct TESNPC
-{
-    int FUN_00602170();
-};
-// If FUN_004b7210() returns a Modifier whose GetKey() is true, returns its FUN_00602170() result; otherwise returns 0.
+// If FUN_004b7210() returns a Modifier whose GetKey() is true, returns its Pipboy manager; otherwise returns 0.
 // @fnv 0x00705990
 int FUN_00705990()
 {
     if (FUN_004b7210() && reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey())
     {
-        return reinterpret_cast<TESNPC*>(FUN_004b7210())->FUN_00602170();
+        return reinterpret_cast<int>(reinterpret_cast<InterfaceInterfaceView*>(FUN_004b7210())->GetPipboyManager());
     }
     else
     {
@@ -1095,7 +1172,7 @@ class Modifier
 int GetLODMultTypeIfKeySet()
 {
     if (FUN_004b7210() && static_cast<unsigned char>(reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey()))
-        return reinterpret_cast<BSFadeNode*>(FUN_004b7210())->GetLODMultType();
+        return reinterpret_cast<const BSFadeNode*>(FUN_004b7210())->GetLODMultType();
     else
         return 0;
 }
@@ -1151,34 +1228,23 @@ void FUN_00705e30()
     MessageMenu::SetMessageMenuActive(false);
 }
 
-class MapMenu
-{
-  public:
-    void FUN_007069f0(unsigned char);
-};
+namespace fnv_007069d0 {
 extern MapMenu* DAT_011da368;
 
 // @fnv 0x007069d0
 void FUN_007069d0(unsigned char acPage)
 {
     if (DAT_011da368)
-        DAT_011da368->FUN_007069f0(acPage);
+        DAT_011da368->SetCurrentPage(acPage);
 }
 
-struct Dummy_007069f0
-{
-    virtual void v0() = 0;
-    virtual void v1() = 0;
-    virtual void v2() = 0;
-    virtual void v3(int, int) = 0;
-    void FUN_007069f0(int a1);
-};
+}  // namespace fnv_007069d0
 
-// Calls the virtual v3 with the argument offset by 0x20 and zero.
+// Calls HandleSelection with the argument offset by 0x20 and zero.
 // @fnv 0x007069f0
-void Dummy_007069f0::FUN_007069f0(int aiValue)
+void MapMenu::SetCurrentPage(int aiValue)
 {
-    this->v3(aiValue + 0x20, 0);
+    this->HandleSelection(aiValue + 0x20, 0);
 }
 
 void __cdecl SetInventoryTab(unsigned char);
@@ -1191,21 +1257,6 @@ void __cdecl FUN_00706a20(unsigned char acPage)
 
 int __cdecl MinInt(int, int);
 
-class InventoryMenu
-{
-  public:
-    char pad00[0x5c];
-    Tile* pTile5C;
-    char pad60[0x24];
-    int iTab84;
-    static InventoryMenu* ms_pInventoryMenu;
-    static int ms_iCurrentTabTileID;
-};
-
-struct Tile_Set_Helper : public Tile
-{
-    void Set(int, int);
-};
 
 // @fnv 0x00706a40
 void __cdecl SetInventoryTab(int aiTab)
@@ -1213,28 +1264,12 @@ void __cdecl SetInventoryTab(int aiTab)
     if (InventoryMenu::ms_pInventoryMenu)
     {
         aiTab = MinInt(aiTab, 4);
-        ((Tile_Set_Helper*)InventoryMenu::ms_pInventoryMenu->pTile5C)->Set(InventoryMenu::ms_iCurrentTabTileID, aiTab);
-        InventoryMenu::ms_pInventoryMenu->iTab84 = aiTab;
+        ((Tile*)InventoryMenu::ms_pInventoryMenu->m_pTiles[13])->Set(InventoryMenu::ms_iCurrentTabTileID, aiTab);
+        InventoryMenu::ms_pInventoryMenu->m_iCurrentTab = aiTab;
     }
 }
 
 namespace fnv_00706a90 {
-class StatsMenu
-{
-  public:
-    static void __cdecl UpdateStatusEffects();
-};
-class MapMenu
-{
-  public:
-    static void __cdecl SetMapPositionToPlayer();
-    static void __cdecl UpdateMapPosition();
-};
-class SurgeryMenu
-{
-  public:
-    static void __cdecl UpdatePerkEntries();
-};
 
 void __cdecl FUN_007dd710();
 void __cdecl UpdateStatsMenuLevelText();
@@ -1265,7 +1300,6 @@ struct blob12
     char b[12];
 };
 
-class MapMenu;
 extern MapMenu* DAT_011da368;
 
 // @fnv 0x00706ac0
@@ -1273,7 +1307,7 @@ void ClearMapMenuNote()
 {
     if (DAT_011da368 != 0)
     {
-        *(BGSNote**)((char*)DAT_011da368 + 0x90) = 0;
+        DAT_011da368->m_pSelectedNote = 0;
     }
 }
 
@@ -1315,13 +1349,6 @@ void FUN_00706cb0_shell::ResetFieldBC()
     *(int*)((char*)this + 0xbc) = 0;
 }
 
-class BSFaceGenAnimationData;
-class BSFaceGenNiNode
-{
-  public:
-    BSFaceGenAnimationData* GetAnimationData();
-};
-
 class NiAVObject_Attach : public NiAVObject
 {
   public:
@@ -1332,18 +1359,14 @@ class NiAVObject_Attach : public NiAVObject
 void AttachFaceGenAnimationData(NiAVObject* apObject)
 {
     reinterpret_cast<NiAVObject_Attach*>(apObject)->AttachProperty(
-        reinterpret_cast<NiObject*>(reinterpret_cast<BSFaceGenNiNode*>(FUN_004b7210())->GetAnimationData()));
+        reinterpret_cast<NiObject*>(reinterpret_cast<BSFaceGenNiNode*>(FUN_004b7210())->BSFaceGenNiNode::GetAnimationData()));
 }
 
-struct FUN_00706d90_shell : public InterfaceManager
-{
-    bool FUN_00706d90();
-};
 
 // @fnv 0x00706d90
-bool FUN_00706d90_shell::FUN_00706d90()
+bool InterfaceManager::FUN_00706d90()
 {
-    return *((bool*)((char*)this + 0xEC));
+    return *reinterpret_cast<bool*>(&byte0EC);
 }
 
 // @fnv 0x00706dd0
@@ -1503,15 +1526,11 @@ void FUN_00706fb0(int aiID)
     ((FUN_00714d90_struct*)FUN_004b7210())->PushMenuStackEntry(aiID);
 }
 
-struct InterfaceManager_PopFromEnterStack_helper
-{
-    int AddMenuStackEntry(int, bool);
-};
 
 // @fnv 0x00706fd0
 int __cdecl FUN_00706fd0(int aiID, bool abForceRemoval)
 {
-    return reinterpret_cast<InterfaceManager_PopFromEnterStack_helper*>(FUN_004b7210())
+    return reinterpret_cast<InterfaceManager*>(FUN_004b7210())
         ->AddMenuStackEntry(aiID, abForceRemoval);
 }
 
@@ -1526,15 +1545,15 @@ void __cdecl FUN_00706ff0(int a)
 }
 
 // @fnv 0x00707040
-Tile* FUN_00707040()
+void* FUN_00707040()
 {
     return *(Tile**)((char*)FUN_004b7210() + 0xcc);
 }
 
 // @fnv 0x00707050
-void FUN_00707050(Tile* apTile)
+void FUN_00707050(void* apTile)
 {
-    *(Tile**)((char*)FUN_004b7210() + 0xcc) = apTile;
+    *(Tile**)((char*)FUN_004b7210() + 0xcc) = static_cast<Tile*>(apTile);
 }
 
 // @fnv 0x00707070
@@ -1549,14 +1568,8 @@ void FUN_00707080(Menu* apMenu)
     *(Menu**)((char*)FUN_004b7210() + 0xd0) = apMenu;
 }
 
-class TESResponse
-{
-  public:
-    TESResponse* GetNext();
-};
-
 // @fnv 0x007070a0
-Tile* GetNextTile()
+void* GetNextTile()
 {
     return (Tile*)((TESResponse*)FUN_004b7210())->GetNext();
 }
@@ -1641,8 +1654,6 @@ bool FUN_007079f0_shell::FUN_007079f0()
 {
     return *((bool*)this + 0x168) || FUN_007178a0();
 }
-
-class FORenderedMenu;
 FORenderedMenu* __fastcall FUN_00707af0(InterfaceManager*);
 
 // @fnv 0x00707ad0
@@ -1656,7 +1667,7 @@ int __cdecl FUN_004dc200();
 // @fnv 0x00707b60
 float FUN_00707b60()
 {
-    static float s_val = Interface::GetFirstInterfaceFloat() / FUN_004dc200();
+    static float s_val = InterfaceInterfaceView::GetFirstInterfaceFloat() / FUN_004dc200();
     return s_val;
 }
 
@@ -1714,16 +1725,12 @@ bool __cdecl FUN_00709c00()
 }
 
 class TESRace;
-template <> class BSSimpleList<TESRace*>
-{
-  public:
-    int GetSize();
-};
+#include "../../../include/BSSimpleList.h"
 
 // @fnv 0x00726c40
 int __fastcall GetRaceCount(char* pThis)
 {
-    return ((BSSimpleList<TESRace*>*)(pThis + 4))->GetSize();
+    return ((BSSimpleList<TESRace*>*)(pThis + 4))->ItemsInList();
 }
 
 struct StrHelper
@@ -1742,19 +1749,14 @@ const char* StrOwner::FUN_007fa950()
     return s;
 }
 
-struct FUN_009373f0_shell : public InterfaceManager
-{
-    bool FUN_009373f0();
-};
 
 // @fnv 0x009373f0
-bool FUN_009373f0_shell::FUN_009373f0()
+bool InterfaceManager::FUN_009373f0()
 {
     return *reinterpret_cast<bool*>(this);
 }
 
 namespace fnv_00703e80 {
-struct InterfaceManager;
 struct Modifier
 {
     unsigned char GetKey();
@@ -1782,7 +1784,6 @@ bool ShowMessageBox(const char* aText, const char* apcIconFilename, const char* 
 }  // namespace fnv_00703e80
 
 namespace fnv_007053b0 {
-struct InterfaceManager;
 struct Modifier
 {
     unsigned char GetKey();
@@ -1802,7 +1803,6 @@ void FUN_007053b0()
 }  // namespace fnv_007053b0
 
 namespace fnv_00705b70 {
-struct InterfaceManager;
 struct Modifier
 {
     unsigned char GetKey();
@@ -1846,20 +1846,9 @@ void FUN_00705b70(char aiStatsTab, char aiInventoryTab, char aiMapTab, int aiWhi
 }
 }  // namespace fnv_00705b70
 
-struct InterfaceManager;
-class PlayerCharacter;
-struct MobileObject;
 struct DialogH
 {
     static bool IsInDialog();
-};
-struct MapMenuH
-{
-    static void StopMapMenuSounds();
-};
-struct StatsMenuH
-{
-    static void ClearPerks();
 };
 struct fnv_007aa480
 {
@@ -1902,16 +1891,15 @@ void ResetInterfaceState()
     FUN_007f6920();
     FUN_00706320(0);
     fnv_007aa480::ClearAllElements();
-    StatsMenuH::ClearPerks();
+    StatsMenu::ClearPerks();
     ClearMapMenuNote();
-    MapMenuH::StopMapMenuSounds();
+    MapMenu::StopMapMenuSounds();
     FUN_00706fd0(1, 1);
     ((Im7181*)FUN_004b7210())->SetRenderedMenu(0);
     *(int*)((char*)FUN_004b7210() + 0x4bc) = 0;
     ResetEntries((char*)FUN_004b7210() + 0x4d4);
 }
 
-struct InterfaceManager;
 struct NavMesh;
 struct S3de0
 {
@@ -1967,10 +1955,6 @@ struct Modifier
     unsigned char GetKey();
 };
 bool __cdecl FUN_00702680(int, unsigned int);
-struct InventoryMenuHelper
-{
-    static void UpdateItemList();
-};
 struct MenuHelper
 {
     void UpdateOption(int);
@@ -1986,11 +1970,11 @@ void FUN_00704af0()
     {
         if (reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey())
         {
-            if (Interface::IsPipBoyOpen())
+            if (InterfaceInterfaceView::IsPipBoyOpen())
             {
-                InventoryMenuHelper::UpdateItemList();
+                InventoryMenu::UpdateItemList();
             }
-            else if (Interface::GetStatsMenuVisible())
+            else if (InterfaceInterfaceView::GetStatsMenuVisible())
             {
                 reinterpret_cast<MenuHelper*>(reinterpret_cast<Tile*>(Tile::FindMenuById(0x3eb))->GetMenu())
                     ->UpdateOption(4);
@@ -2017,14 +2001,7 @@ struct Modifier
 {
     unsigned char GetKey();
 };
-struct BSS
-{
-    char* m_data;
-    unsigned short m_len;
-    unsigned short m_kMaximumCorner;
-    ~BSS();
-    operator const char*() const;
-};
+
 struct TaskQueueInterface
 {
     static void __cdecl CopyStringToBuffer(char*, unsigned int, const char*);
@@ -2038,7 +2015,7 @@ struct AttachMsg
 void __cdecl ShowRegionData(AttachMsg*);
 
 // @fnv 0x00705420
-void __cdecl FUN_00705420(int a, BSS name, bool flag)
+void __cdecl FUN_00705420(int a, ::BSStringT<char> name, bool flag)
 {
     if (FUN_004b7210())
     {
@@ -2075,40 +2052,30 @@ void FUN_00702330()
 }
 }  // namespace fnv_00702330
 
-class MenuFade : public Menu
-{
-  public:
-    unsigned int GetCurrentFadeState();
-};
 Tile* __cdecl FindMenuById(int);
 bool __cdecl FUN_00709c00();
-class InterfaceManagerPC
-{
-  public:
-    bool GetKey();
-};
 
 // @fnv 0x00702680
-bool __cdecl FUN_00702680(Interface::enumMenus aeMenuID, unsigned int abFadeStatesThatCountAsVisible)
+bool __cdecl FUN_00702680(InterfaceInterfaceView::enumMenus aeMenuID, unsigned int abFadeStatesThatCountAsVisible)
 {
     Tile* ptile;
 
-    if (FUN_004b7210() && ((InterfaceManagerPC*)FUN_004b7210())->GetKey())
+    if (FUN_004b7210() && ((InterfaceManager*)FUN_004b7210())->FUN_009373f0())
     {
-        if (aeMenuID == Interface::eMainFour)
-            return FUN_00709c00() && (FUN_00702680(Interface::eStatsMenu, abFadeStatesThatCountAsVisible) ||
-                                      FUN_00702680(Interface::eInventoryMenu, abFadeStatesThatCountAsVisible) ||
-                                      FUN_00702680(Interface::eRepairMenu, abFadeStatesThatCountAsVisible) ||
-                                      FUN_00702680(Interface::eItemModMenu, abFadeStatesThatCountAsVisible) ||
-                                      FUN_00702680(Interface::eMapMenu, abFadeStatesThatCountAsVisible));
+        if (aeMenuID == InterfaceInterfaceView::eMainFour)
+            return FUN_00709c00() && (FUN_00702680(InterfaceInterfaceView::eStatsMenu, abFadeStatesThatCountAsVisible) ||
+                                      FUN_00702680(InterfaceInterfaceView::eInventoryMenu, abFadeStatesThatCountAsVisible) ||
+                                      FUN_00702680(InterfaceInterfaceView::eRepairMenu, abFadeStatesThatCountAsVisible) ||
+                                      FUN_00702680(InterfaceInterfaceView::eItemModMenu, abFadeStatesThatCountAsVisible) ||
+                                      FUN_00702680(InterfaceInterfaceView::eMapMenu, abFadeStatesThatCountAsVisible));
         if (abFadeStatesThatCountAsVisible)
         {
             ptile = FindMenuById(aeMenuID);
             if (ptile && ptile->GetMenu() &&
-                !(((MenuFade*)ptile->GetMenu())->GetCurrentFadeState() & abFadeStatesThatCountAsVisible))
+                !(ptile->GetMenu()->GetVisibilityState() & abFadeStatesThatCountAsVisible))
                 return false;
         }
-        return Menu::IsMenuVisible(aeMenuID);
+        return Menu::IsMenuVisible(static_cast<Interface::enumMenus>(aeMenuID));
     }
     return false;
 }
@@ -2118,10 +2085,7 @@ struct Modifier
 {
     unsigned char GetKey();
 };
-struct BGSMoviePlayer
-{
-    bool FUN_00ec17c0();
-};
+
 extern BGSMoviePlayer* DAT_0126fac4;
 
 // If FUN_004b7210() returns non-null and its GetKey() is nonzero, calls FUN_00ec17c0() on DAT_0126fac4.
@@ -2129,7 +2093,7 @@ extern BGSMoviePlayer* DAT_0126fac4;
 void FUN_00702960()
 {
     if (FUN_004b7210() && reinterpret_cast<Modifier*>(FUN_004b7210())->GetKey())
-        DAT_0126fac4->FUN_00ec17c0();
+        DAT_0126fac4->IsPlaying();
 }
 }  // namespace fnv_00702960
 
@@ -2172,7 +2136,6 @@ class Modifier
     unsigned char GetKey();
 };
 
-class InterfaceManager;
 
 struct FUN_009b4440_holder
 {
@@ -2232,14 +2195,13 @@ void FUN_00704420(bool abSetTo)
 }
 }  // namespace fnv_00704420
 
-class MapMenu;
 extern MapMenu* DAT_011da368;
 
 // @fnv 0x00704450
 void FUN_00704450(char bShow)
 {
     if (DAT_011da368)
-        ((char*)DAT_011da368)[0x12c] = bShow;
+        reinterpret_cast<char&>(DAT_011da368->m_bNeedsMapUpdate) = bShow;
 }
 
 extern "C" void __cdecl FUN_0079b430(int);
@@ -2270,11 +2232,6 @@ void FUN_00704690(unsigned int arg)
 }
 }  // namespace fnv_00704690
 
-class ContainerMenu
-{
-  public:
-    void FUN_0075c280(int);
-};
 extern ContainerMenu* DAT_011d93f8;
 
 // @fnv 0x00704bc0
@@ -2326,7 +2283,6 @@ void FUN_00705040()
 }
 
 namespace fnv_00705050 {
-class ContainerMenu;
 extern ContainerMenu* DAT_011d93f8;
 
 // @fnv 0x00705050
@@ -2355,11 +2311,6 @@ class Modifier
   public:
     unsigned char GetKey();
 };
-class StartMenu
-{
-  public:
-    static bool Create(bool, bool);
-};
 
 // @fnv 0x00705800
 void FUN_00705800()
@@ -2385,11 +2336,7 @@ void FUN_00705830(int a1, int a2, unsigned char a3)
 }
 }  // namespace fnv_00705830
 
-struct GlobalObject_0045cfe0
-{
-    int* Int();
-};
-extern GlobalObject_0045cfe0 g_011c3ea4;
+extern Setting g_011c3ea4;
 extern int g_011d8950;
 extern int DAT_011d8960;
 
@@ -2499,7 +2446,6 @@ void FUN_00706270()
 }
 }  // namespace fnv_00706270
 
-class MapMenu;
 extern MapMenu* DAT_011da368;
 
 // Returns the value at offset 0x80 of DAT_011da368 minus 0x20, or 4 when DAT_011da368 is null.
@@ -2508,20 +2454,18 @@ char FUN_00706830()
 {
     int v;
     if (DAT_011da368)
-        v = ((int*)DAT_011da368)[0x80 / 4] - 0x20;
+        v = DAT_011da368->m_iMapDisplayMode - 0x20;
     else
         v = 4;
     return (char)v;
 }
 
-struct FUN_005e3fc0_shell
-{
-    unsigned int Get();
-};
+// Folded 0x005e3fc0 getter, used here on the UI singleton.
+unsigned int __fastcall GetInterfaceAuxiliaryNode(InterfaceManager*);
 // @fnv 0x00706d10
 unsigned int FUN_00706d10()
 {
-    return ((FUN_005e3fc0_shell*)FUN_004b7210())->Get();
+    return GetInterfaceAuxiliaryNode(FUN_004b7210());
 }
 
 void __cdecl FUN_00717280(int aiSoundIndex);
@@ -2540,38 +2484,21 @@ void __cdecl FUN_00706f90(int aiValue)
     RemoveNodeById(aiValue);
 }
 
-struct FUN_00709920_Class
-{
-    const char* FUN_00709920();
-};
 
 // @fnv 0x00709920
-const char* FUN_00709920_Class::FUN_00709920()
+const char* Tile::GetTypeName()
 {
     return "TILE";
 }
 
-class Tile;
-class TileRect
-{
-  public:
-    const char* FUN_00709970();
-};
-
 // @fnv 0x00709970
-const char* TileRect::FUN_00709970()
+const char* TileRect::GetTypeName()
 {
     return "RECT";
 }
 
-class TileMenu
-{
-  public:
-    const char* FUN_00709a50();
-};
-
 // @fnv 0x00709a50
-const char* TileMenu::FUN_00709a50()
+const char* __fastcall GetTileMenuTypeName(TileMenu* menu)
 {
     return "MENU";
 }
@@ -2649,14 +2576,12 @@ void __cdecl FUN_00703e10()
 }
 }  // namespace fnv_00703e10
 
-extern int _DAT_011da368;
-
 // @fnv 0x00704400
 char __cdecl FUN_00704400()
 {
-    if (_DAT_011da368 != 0)
+    if (DAT_011da368 != 0)
     {
-        return *(char*)(_DAT_011da368 + 0x12C);
+        return reinterpret_cast<char&>(DAT_011da368->m_bNeedsMapUpdate);
     }
     else
     {
@@ -2687,10 +2612,6 @@ extern "C" char __cdecl FUN_00705d10();
 extern "C" char __cdecl FUN_00705d50();
 extern "C" int __cdecl FUN_00705d90();
 
-struct TESSaveLoadGame
-{
-    void FUN_008579b0(void*, int);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 // Reads the inventory, stats, map and magic tab values plus the current main menu, clamps each tab to at least 1, and writes them to the save/load game.
@@ -2800,17 +2721,14 @@ struct Modifier
     char GetKey();
 };
 InterfaceManager* FUN_004b7210();
-struct FakeTile
-{
-    NiNode* FUN_0056c7f0();
-};
+
 // If the interface manager exists and its modifier key is set, culls or unculls the tile's scene node according to abVisible.
 // @fnv 0x00703810
 void FUN_00703810(bool abVisible)
 {
     if (FUN_004b7210() && (unsigned char)((Modifier*)FUN_004b7210())->GetKey())
     {
-        ((FakeTile*)FUN_004b7210()->FUN_00586150())->FUN_0056c7f0()->SetAppCulled(!abVisible);
+        ((Tile*)FUN_004b7210()->FUN_00586150())->FUN_0056c7f0()->SetAppCulled(!abVisible);
     }
 }
 }  // namespace fnv_00703810
@@ -2865,11 +2783,6 @@ int UnnamedClass_00705dd0::FUN_00705dd0()
     return (int)m_9c->GetFloat(0x1771);
 }
 
-struct FORenderedTerminal
-{
-    void FUN_007060d0();
-    void* DestroyIfFlagged(unsigned int);
-};
 // @fnv 0x007060a0
 void* FORenderedTerminal::DestroyIfFlagged(unsigned int flags)
 {
@@ -2904,58 +2817,16 @@ int FUN_00707010(int aiArg, float afArg1, float afArg2)
     return _FUN_004b7210(aiArg, afArg1, afArg2)->SetNodeAlpha();
 }
 
+class NiQuaternion;
+class hkVector4;
 namespace fnv_00706860 {
 struct SaveLoadFile;
-struct NiQuaternion;
-struct hkVector4;
-struct BGSLoadGameBuffer
-{
-    virtual unsigned char GetVersion();
-    virtual TESForm* GetForm();
-    virtual TESObjectREFR* GetReference();
-    virtual Actor* GetActor();
-    int Load(SaveLoadFile*, unsigned int);
-    int Load(SaveLoadFile*);
-    void ResetReadPosition();
-    void SetBuffer(char*, unsigned int, unsigned int);
-    char* GetCurrentBufferPointer();
-    bool ReadFormIdentifier(unsigned int*);
-    unsigned int ReadFormIdentifier();
-    void ReadTypedData(NiQuaternion*, unsigned int);
-    void ReadTypedData(hkVector4*, unsigned int);
-    void ReadTypedData(double*, unsigned int);
-    void ReadTypedData(NiPoint3*, unsigned int);
-    void ReadTypedData(float*, unsigned int);
-    void ReadTypedData(unsigned long*, unsigned int);
-    void ReadTypedData(long*, unsigned int);
-    void ReadTypedData(unsigned int*, unsigned int);
-    void ReadTypedData(int*, unsigned int);
-    void ReadTypedData(unsigned short*, unsigned int);
-    void ReadTypedData(short*, unsigned int);
-    void ReadTypedData(ThreeByThreeMatrix*, unsigned int);
-    void ReadTypedData(void*, unsigned int);
-    char* LoadString(char*);
-    int ReadElementCount();
-    void AdvanceBuffer(unsigned int);
-    void ReadElementData(void*, unsigned int, unsigned int);
-    void ReadDataBlock(void*, unsigned int);
-    void* __vecDelDtor(unsigned int);
-    char* pBuffer;
-    unsigned int iBufferSize;
-    unsigned int m_uiReadOffset;
-};
+
 typedef char _sizecheck_BGSLoadGameBuffer[sizeof(BGSLoadGameBuffer) == 16 ? 1 : -1];
 
 InterfaceManager* FUN_004b7210();
-struct Tile_Set_Helper
-{
-    void Set(int, int);
-};
-class StatsMenu
-{
-  public:
-    static void SetStatsPage(unsigned char);
-};
+
+
 void FUN_00706a20(unsigned char);
 void FUN_007069d0(unsigned char);
 void FUN_007a1820(float);
@@ -2983,7 +2854,7 @@ void LoadMenuState(BGSLoadGameBuffer* apLoadGameBuffer)
     apLoadGameBuffer->ReadDataBlock(&cstatsPage, 1);
     apLoadGameBuffer->ReadDataBlock(&cinventoryPage, 1);
     apLoadGameBuffer->ReadDataBlock(&cmapPage, 1);
-    reinterpret_cast<Tile_Set_Helper*>(FUN_004b7210()->FUN_00586150())->Set(0x1771, ifrontMostMenu);
+    reinterpret_cast<Tile*>(FUN_004b7210()->FUN_00586150())->Set(0x1771, ifrontMostMenu);
     StatsMenu::SetStatsPage(cstatsPage);
     FUN_00706a20(cinventoryPage);
     FUN_007069d0(cmapPage);
@@ -3012,25 +2883,14 @@ void LoadMenuState(BGSLoadGameBuffer* apLoadGameBuffer)
 }  // namespace fnv_00706860
 
 namespace fnv_00703610 {
-struct Tile_Set_Helper
-{
-    void Set(int, int);
-};
+
 class MenuPC : public Menu
 {
   public:
     void SetFadeState(int);
     Tile* GetTile();
 };
-class InterfaceManagerPC
-{
-  public:
-    bool GetKey();
-};
-struct PlayerCharacterPC
-{
-    static bool UpdatePlayerStatus();
-};
+
 struct Im7181
 {
     void SetRenderedMenu(int);
@@ -3049,41 +2909,41 @@ void __cdecl FUN_00703610()
     Tile* pmap;
     Tile* pitemmod;
 
-    if (FUN_004b7210() && ((InterfaceManagerPC*)FUN_004b7210())->GetKey())
+    if (FUN_004b7210() && ((InterfaceManager*)FUN_004b7210())->FUN_009373f0())
     {
         pim = FUN_004b7210();
-        pstat = (FindMenuById)(Interface::eStatsMenu);
-        pinv = (FindMenuById)(Interface::eInventoryMenu);
-        prepair = (FindMenuById)(Interface::eRepairMenu);
-        pitemmod = (FindMenuById)(Interface::eItemModMenu);
-        pmap = (FindMenuById)(Interface::eMapMenu);
+        pstat = (FindMenuById)(InterfaceInterfaceView::eStatsMenu);
+        pinv = (FindMenuById)(InterfaceInterfaceView::eInventoryMenu);
+        prepair = (FindMenuById)(InterfaceInterfaceView::eRepairMenu);
+        pitemmod = (FindMenuById)(InterfaceInterfaceView::eItemModMenu);
+        pmap = (FindMenuById)(InterfaceInterfaceView::eMapMenu);
         if (pstat)
         {
             ((MenuPC*)pstat->GetMenu())->SetFadeState(4);
-            ((Tile_Set_Helper*)((MenuPC*)pstat->GetMenu())->GetTile())->Set(0xfa3, 0);
+            ((Tile*)((MenuPC*)pstat->GetMenu())->GetTile())->Set(0xfa3, 0);
         }
         if (pinv)
         {
             ((MenuPC*)pinv->GetMenu())->SetFadeState(4);
-            ((Tile_Set_Helper*)((MenuPC*)pinv->GetMenu())->GetTile())->Set(0xfa3, 0);
+            ((Tile*)((MenuPC*)pinv->GetMenu())->GetTile())->Set(0xfa3, 0);
         }
         if (prepair)
         {
             ((MenuPC*)prepair->GetMenu())->SetFadeState(4);
-            ((Tile_Set_Helper*)((MenuPC*)prepair->GetMenu())->GetTile())->Set(0xfa3, 0);
+            ((Tile*)((MenuPC*)prepair->GetMenu())->GetTile())->Set(0xfa3, 0);
         }
         if (pitemmod)
         {
             ((MenuPC*)pitemmod->GetMenu())->SetFadeState(4);
-            ((Tile_Set_Helper*)((MenuPC*)pitemmod->GetMenu())->GetTile())->Set(0xfa3, 0);
+            ((Tile*)((MenuPC*)pitemmod->GetMenu())->GetTile())->Set(0xfa3, 0);
         }
         if (pmap)
         {
             ((MenuPC*)pmap->GetMenu())->SetFadeState(4);
-            ((Tile_Set_Helper*)((MenuPC*)pmap->GetMenu())->GetTile())->Set(0xfa3, 0);
+            ((Tile*)((MenuPC*)pmap->GetMenu())->GetTile())->Set(0xfa3, 0);
         }
         FUN_00704f50();
-        if (PlayerCharacterPC::UpdatePlayerStatus())
+        if (PlayerCharacter::UpdatePlayerStatus())
             CloseStartMenu(true);
         ((Im7181*)pim)->SetRenderedMenu(0);
     }
@@ -3097,21 +2957,6 @@ class Modifier
     unsigned char GetKey();
 };
 
-class BSThread
-{
-  public:
-    unsigned int GetThreadID();
-};
-
-struct InterfaceManagerStandIn
-{
-    int GetTopEnterStackEntry();
-};
-
-struct InterfaceStandIn
-{
-    static bool IsMenuActive(Interface::enumMenus, unsigned int);
-};
 
 void* __cdecl _FUN_004b7210();
 Menu* __cdecl FindMenuById(int);
@@ -3128,19 +2973,19 @@ bool FUN_007024e0()
         if (reinterpret_cast<Modifier*>(_FUN_004b7210())->GetKey())
         {
             ptile = 0;
-            topid = reinterpret_cast<InterfaceManagerStandIn*>(_FUN_004b7210())->GetTopEnterStackEntry();
+            topid = reinterpret_cast<InterfaceManager*>(_FUN_004b7210())->GetTopEnterStackEntry();
 
             if (topid == 1)
             {
-                if (InterfaceStandIn::IsMenuActive(static_cast<Interface::enumMenus>(0x3eb), 0))
+                if (::FUN_00702680(static_cast<InterfaceInterfaceView::enumMenus>(0x3eb), 0))
                     ptile = reinterpret_cast<Tile*>(FindMenuById(0x3eb));
-                else if (InterfaceStandIn::IsMenuActive(static_cast<Interface::enumMenus>(0x3ea), 0))
+                else if (::FUN_00702680(static_cast<InterfaceInterfaceView::enumMenus>(0x3ea), 0))
                     ptile = reinterpret_cast<Tile*>(FindMenuById(0x3ea));
-                else if (InterfaceStandIn::IsMenuActive(static_cast<Interface::enumMenus>(0x40b), 0))
+                else if (::FUN_00702680(static_cast<InterfaceInterfaceView::enumMenus>(0x40b), 0))
                     ptile = reinterpret_cast<Tile*>(FindMenuById(0x40b));
-                else if (InterfaceStandIn::IsMenuActive(static_cast<Interface::enumMenus>(0x425), 0))
+                else if (::FUN_00702680(static_cast<InterfaceInterfaceView::enumMenus>(0x425), 0))
                     ptile = reinterpret_cast<Tile*>(FindMenuById(0x425));
-                else if (InterfaceStandIn::IsMenuActive(static_cast<Interface::enumMenus>(0x3ff), 0))
+                else if (::FUN_00702680(static_cast<InterfaceInterfaceView::enumMenus>(0x3ff), 0))
                     ptile = reinterpret_cast<Tile*>(FindMenuById(0x3ff));
             }
             else
@@ -3166,37 +3011,13 @@ class Modifier
     unsigned char GetKey();
 };
 
-class ProxyPipboy : public FOPipboyManager
-{
-};
 
 class ProxyMgr
 {
   public:
-    ProxyPipboy* GetPipboyManager();
+    FOPipboyManager* GetPipboyManager();
 };
 
-class MapMenu
-{
-  public:
-    static void MenuDepthController();
-};
-
-struct InterfaceAccess
-{
-    static bool IsMenuActive(Interface::enumMenus menuID, unsigned int flags);
-};
-
-struct TileAccess
-{
-    void Set(int x, int y);
-};
-
-struct MenuAccess
-{
-    void LoadMenuData();
-    void UnloadMenuData();
-};
 
 struct PipboyAccess
 {
@@ -3239,41 +3060,41 @@ void __cdecl UpdatePipboyMapVisibility(bool abVisibility, bool abAnyVisibleState
         pmap = reinterpret_cast<Tile*>(FindMenuById(1023));
 
         bMapVisible =
-            InterfaceAccess::IsMenuActive(static_cast<Interface::enumMenus>(1023), abAnyVisibleState ? 11 : 0);
+            ::FUN_00702680(static_cast<InterfaceInterfaceView::enumMenus>(1023), abAnyVisibleState ? 11 : 0);
 
         if (abVisibility && !bMapVisible)
         {
             if (pstat != 0)
             {
-                reinterpret_cast<MenuAccess*>(pstat->GetMenu())->LoadMenuData();
+                reinterpret_cast<Menu*>(pstat->GetMenu())->LoadMenuData();
                 FUN_00704390();
             }
 
             if (prepair != 0)
             {
-                reinterpret_cast<MenuAccess*>(prepair->GetMenu())->LoadMenuData();
+                reinterpret_cast<Menu*>(prepair->GetMenu())->LoadMenuData();
                 ResetRepairMenu();
             }
 
             if (pitemmod != 0)
             {
-                reinterpret_cast<MenuAccess*>(pitemmod->GetMenu())->LoadMenuData();
+                reinterpret_cast<Menu*>(pitemmod->GetMenu())->LoadMenuData();
                 ResetItemModMenu();
             }
 
             if (pinv != 0)
-                reinterpret_cast<MenuAccess*>(pinv->GetMenu())->LoadMenuData();
+                reinterpret_cast<Menu*>(pinv->GetMenu())->LoadMenuData();
 
             if (pmap == 0)
                 pmap = FUN_00704140();
 
             if (pmap != 0)
             {
-                reinterpret_cast<TileAccess*>(FUN_004b7210()->FUN_00586150())->Set(6001, 1023);
+                reinterpret_cast<Tile*>(FUN_004b7210()->FUN_00586150())->Set(6001, 1023);
             }
 
             if (pmap != 0)
-                reinterpret_cast<MenuAccess*>(pmap->GetMenu())->UnloadMenuData();
+                reinterpret_cast<Menu*>(pmap->GetMenu())->UnloadMenuData();
 
             MapMenu::MenuDepthController();
         }
@@ -3281,7 +3102,7 @@ void __cdecl UpdatePipboyMapVisibility(bool abVisibility, bool abAnyVisibleState
         {
             if (pmap != 0)
             {
-                reinterpret_cast<MenuAccess*>(pmap->GetMenu())->LoadMenuData();
+                reinterpret_cast<Menu*>(pmap->GetMenu())->LoadMenuData();
                 reinterpret_cast<MenuVirtualAccess*>(pmap->GetMenu())->FUN_05(0, 0);
             }
         }
@@ -3309,12 +3130,6 @@ class Modifier
     unsigned char GetKey();
 };
 
-class SleepWaitMenu : public Menu
-{
-  public:
-    bool FUN_007c0580();
-};
-
 unsigned int __cdecl FUN_00705770();
 Menu* __cdecl FindMenuById(int);
 Modifier* __cdecl _FUN_004b7210();
@@ -3328,7 +3143,7 @@ bool FUN_007056f0()
     ptile = reinterpret_cast<Tile*>(FindMenuById(FUN_00705770()));
     pSleepWaitMenu = ptile ? static_cast<SleepWaitMenu*>(ptile->GetMenu()) : 0;
 
-    return _FUN_004b7210() && _FUN_004b7210()->GetKey() && pSleepWaitMenu && pSleepWaitMenu->FUN_007c0580();
+    return _FUN_004b7210() && _FUN_004b7210()->GetKey() && pSleepWaitMenu && IsSleepWaitMenuActive(pSleepWaitMenu);
 }
 }  // namespace fnv_007056f0
 
@@ -3358,49 +3173,8 @@ BSSimpleList<BGSPerk*>* FUN_00705950()
 }
 
 namespace fnv_007073d0 {
-struct Setting
-{
-};
 
-struct StartMenu : Setting
-{
-    const char* GetMenuTitle();
-};
-
-struct Setting_S : Setting
-{
-    float* Float();
-};
-
-struct GlobalObject_0045cf30 : Setting
-{
-    unsigned char* Bool();
-};
-
-struct GlobalObject_0045cfe0 : Setting
-{
-    int* Int();
-};
-
-struct GameSettingCollection
-{
-    static GameSettingCollection* Instance();
-    Setting* FUN_004f8a30(const char*);
-};
-
-template <class T> struct SettingCollectionList
-{
-    T* GetPtr(const char*);
-};
-
-struct INISettingCollection : SettingCollectionList<Setting>
-{
-};
-
-template <class T> struct SettingT
-{
-    static INISettingCollection* GetCollection();
-};
+using ::SettingT;
 
 struct TaskQueueInterface
 {
@@ -3441,28 +3215,29 @@ bool ResolveSettingString(const char* apString, char* apValueOut)
     if (!psetting)
     {
         strcat_s(xstr, 0x104, ":LANGUAGE");
-        psetting = SettingT<INISettingCollection>::GetCollection()->GetPtr(xstr);
+        // GetPtr takes the collection address; the shared empty base would adjust it.
+        psetting = reinterpret_cast<SettingCollectionList<Setting>*>(SettingT<INISettingCollection>::GetCollection())->GetPtr(xstr);
     }
 
     if (psetting)
     {
         if (xstr[0] == 's' || xstr[0] == 'S')
         {
-            ___insecure_strcpy(apValueOut, static_cast<StartMenu*>(psetting)->GetMenuTitle());
+            ___insecure_strcpy(apValueOut, psetting->String());
         }
         else if (xstr[0] == 'i' || xstr[0] == 'I')
         {
-            _sprintf(xstr, "%i", *static_cast<GlobalObject_0045cfe0*>(psetting)->Int());
+            _sprintf(xstr, "%i", *psetting->Int());
             ___insecure_strcpy(apValueOut, xstr);
         }
         else if (xstr[0] == 'f' || xstr[0] == 'F')
         {
-            _sprintf(xstr, "%i", *static_cast<Setting_S*>(psetting)->Float());
+            _sprintf(xstr, "%i", *psetting->Float());
             ___insecure_strcpy(apValueOut, xstr);
         }
         else if (xstr[0] == 'b' || xstr[0] == 'B')
         {
-            if (*static_cast<GlobalObject_0045cf30*>(psetting)->Bool() == 1)
+            if (*psetting->Bool() == 1)
                 ___insecure_strcpy(apValueOut, "&true;");
             else
                 ___insecure_strcpy(apValueOut, "&false;");
@@ -3488,29 +3263,16 @@ class Modifier
     unsigned char GetKey();
 };
 
-class GO
-{
-  public:
-    operator unsigned int() const;
-};
-
 class TL
 {
   public:
     void* GetNext(void*&);
 };
 
-class FUN_005e3fc0_shell
-{
-  public:
-    unsigned int Get();
-};
 
-class EffectSettingStub
-{
-  public:
-    void* GetBoltSound();
-};
+
+// Folded +0xac getter (0x004fd3c0) on the UI singleton returns its scene-node handle.
+NiAVObject* __fastcall GetCursorSceneNode(InterfaceManager*);
 
 void* _FUN_004b7210();
 void UpdateVisibility(void*, bool, bool, bool);
@@ -3530,7 +3292,7 @@ void FUN_00702c80(bool abFlag1, bool abFlag2)
 
             Tile* p2 = reinterpret_cast<InterfaceManager*>(_FUN_004b7210())->FUN_00586150();
             void* tile = reinterpret_cast<void*>(
-                reinterpret_cast<GO*>(reinterpret_cast<char*>(p2) + 4)->operator unsigned int());
+                reinterpret_cast<const GO*>(reinterpret_cast<char*>(p2) + 4)->operator unsigned int());
 
             while (tile)
             {
@@ -3542,29 +3304,29 @@ void FUN_00702c80(bool abFlag1, bool abFlag2)
 
             if (!abFlag1 && !abFlag2)
             {
-                if (reinterpret_cast<FUN_005e3fc0_shell*>(_FUN_004b7210())->Get())
+                if (GetInterfaceAuxiliaryNode(reinterpret_cast<InterfaceManager*>(_FUN_004b7210())))
                 {
-                    reinterpret_cast<NiAVObject*>(reinterpret_cast<FUN_005e3fc0_shell*>(_FUN_004b7210())->Get())
+                    reinterpret_cast<NiAVObject*>(GetInterfaceAuxiliaryNode(reinterpret_cast<InterfaceManager*>(_FUN_004b7210())))
                         ->SetAppCulled(false);
                 }
 
-                if (reinterpret_cast<EffectSettingStub*>(_FUN_004b7210())->GetBoltSound())
+                if (GetCursorSceneNode(reinterpret_cast<InterfaceManager*>(_FUN_004b7210())))
                 {
-                    reinterpret_cast<NiAVObject*>(reinterpret_cast<EffectSettingStub*>(_FUN_004b7210())->GetBoltSound())
+                    reinterpret_cast<NiAVObject*>(GetCursorSceneNode(reinterpret_cast<InterfaceManager*>(_FUN_004b7210())))
                         ->SetAppCulled(false);
                 }
             }
             else
             {
-                if (reinterpret_cast<FUN_005e3fc0_shell*>(_FUN_004b7210())->Get())
+                if (GetInterfaceAuxiliaryNode(reinterpret_cast<InterfaceManager*>(_FUN_004b7210())))
                 {
-                    reinterpret_cast<NiAVObject*>(reinterpret_cast<FUN_005e3fc0_shell*>(_FUN_004b7210())->Get())
+                    reinterpret_cast<NiAVObject*>(GetInterfaceAuxiliaryNode(reinterpret_cast<InterfaceManager*>(_FUN_004b7210())))
                         ->SetAppCulled(true);
                 }
 
-                if (reinterpret_cast<EffectSettingStub*>(_FUN_004b7210())->GetBoltSound())
+                if (GetCursorSceneNode(reinterpret_cast<InterfaceManager*>(_FUN_004b7210())))
                 {
-                    reinterpret_cast<NiAVObject*>(reinterpret_cast<EffectSettingStub*>(_FUN_004b7210())->GetBoltSound())
+                    reinterpret_cast<NiAVObject*>(GetCursorSceneNode(reinterpret_cast<InterfaceManager*>(_FUN_004b7210())))
                         ->SetAppCulled(true);
                 }
             }
@@ -3816,17 +3578,11 @@ class B706130Manager
     void SetRenderedMenu(B706130Pick* pkPick);
 };
 
-class B706130Setting
-{
-  public:
-    unsigned char* Bool();
-};
-
 B706130Manager* __cdecl B706130GetManager();
 B706130Tile* __cdecl CreateComputerMenu(int m_uiSoundID);
 void __cdecl B706130UpdateAllTiles(bool bForce);
 
-extern B706130Setting g_kB706130Setting;
+extern Setting g_kB706130Setting;
 
 // @fnv 0x00706130
 bool __cdecl FUN_00706130(int m_uiSoundID)
@@ -4325,11 +4081,7 @@ struct TileListAccess
     void* GetHeadPos() const;
     Tile*& GetNext(void*& _n);
 };
-struct VisibilityTile : Tile
-{
-    float FUN_00a011b0(int trait);
-    NiNode* FUN_0056c7f0();
-};
+
 struct VisibilityManager
 {
     unsigned int unk000;
@@ -4641,7 +4393,7 @@ struct VisibilityManager
 };
 
 // @fnv 0x00702990
-void UpdateVisibility(VisibilityTile* tile, bool show, bool alternate, bool queue)
+void UpdateVisibility(Tile* tile, bool show, bool alternate, bool queue)
 {
     if (!tile)
         return;
@@ -4658,7 +4410,7 @@ void UpdateVisibility(VisibilityTile* tile, bool show, bool alternate, bool queu
     void* _n = ((TileListAccess*)&tile->m_kChildTileList)->GetHeadPos();
     while (_n)
     {
-        VisibilityTile* _first = (VisibilityTile*)((TileListAccess*)&_node->m_kChildTileList)->GetNext(_n);
+        Tile* _first = (Tile*)((TileListAccess*)&_node->m_kChildTileList)->GetNext(_n);
         Tile* _child = _first->FUN_00a011b0(0xfaa) == 110.0 ? _first : 0;
         Tile* _second = _first->FUN_00a011b0(0xfaa) == 111.0 ? _first : 0;
         if (_child)
@@ -4683,69 +4435,69 @@ void UpdateVisibility(VisibilityTile* tile, bool show, bool alternate, bool queu
             else
                 _second->SetInt(0x1779, 0);
         }
-        if (_child && ((VisibilityTile*)_child)->FUN_0056c7f0())
-            ((VisibilityTile*)_child)
+        if (_child && ((Tile*)_child)->FUN_0056c7f0())
+            ((Tile*)_child)
                 ->FUN_0056c7f0()
-                ->SetAppCulled(((VisibilityTile*)_child)->FUN_00a011b0(0xfa3) == 0.0 ||
-                               ((VisibilityTile*)_child)->FUN_00a011b0(0x1779) == 0.0);
-        if (_second && ((VisibilityTile*)_second)->FUN_0056c7f0())
-            ((VisibilityTile*)_second)
+                ->SetAppCulled(((Tile*)_child)->FUN_00a011b0(0xfa3) == 0.0 ||
+                               ((Tile*)_child)->FUN_00a011b0(0x1779) == 0.0);
+        if (_second && ((Tile*)_second)->FUN_0056c7f0())
+            ((Tile*)_second)
                 ->FUN_0056c7f0()
-                ->SetAppCulled(show || ((VisibilityTile*)_second)->FUN_00a011b0(0xfa3) == 0.0 ||
-                               ((VisibilityTile*)_second)->FUN_00a011b0(0x1779) == 0.0);
+                ->SetAppCulled(show || ((Tile*)_second)->FUN_00a011b0(0xfa3) == 0.0 ||
+                               ((Tile*)_second)->FUN_00a011b0(0x1779) == 0.0);
     }
     if (tile->FUN_0056c7f0())
         tile->FUN_0056c7f0()->SetAppCulled(tile->FUN_00a011b0(0xfa3) == 0.0 || tile->FUN_00a011b0(0x1779) == 0.0);
 }
 
-struct NiNodeCull
-{
-    void SetAppCulled(bool abCulled);
-};
 
-struct TileChildList : NiTPointerList_Tile___
+// TileChildList_interface: local type (was include/TileChildList.h, which had no evidence of one real class); its methods are 0x00559450 NiPointer<PathingSolution>::operator->, 0x0057cbe0 NiTPointerListBase<NiTPointerAllocator<unsigned int>,Tile *>::GetNext, 0x00683520 NiTPointerListBase<NiTPointerAllocator<unsigned int>,Tile *>::GetPrev
+class Tile;
+class TileChildNode;
+class InterfaceLocalTile;
+
+class TileChildList_interface
 {
+public:
+    TileChildNode* m_pkHead;
+    TileChildNode* m_pkTail;
+    unsigned int m_uiCount;
+
     void* GetHeadPos();
+    TileChildNode* GetHeadPos() const { return m_pkHead; }
     Tile*& GetNext(void*& rkPos);
+    Tile*& GetNext(void*& kPos) const;
+    Tile*& GetNext(TileChildNode*& kPos) const;
+    InterfaceLocalTile*& GetPrev(void*& pos);
 };
 
-struct TileEx : Tile
-{
-    Tile* GetChildById(int aiID);
-    NiNodeCull* GetNode();
-};
-
-struct IMMenuOpen : InterfaceManager
-{
-    bool FUN_009373f0();
-};
 
 // If the menu is open, walks the root tile's children and culls each tile's node when its float at 0xfa3 or 0x1779 is zero.
 // @fnv 0x00702dd0
 void UpdateMenuTileVisibility()
 {
-    if (FUN_004b7210() && static_cast<IMMenuOpen*>(FUN_004b7210())->FUN_009373f0())
+    if (FUN_004b7210() && static_cast<InterfaceManager*>(FUN_004b7210())->FUN_009373f0())
     {
         Tile* pRoot4 = FUN_004b7210()->FUN_00586150();
-        void* pPosVal = static_cast<TileChildList*>(&pRoot4->m_kChildTileList)->GetHeadPos();
+        void* pPosVal = reinterpret_cast<TileChildList_interface*>(&pRoot4->m_kChildTileList)->GetHeadPos();
         while (pPosVal)
         {
-            TileEx* pTile2 =
-                static_cast<TileEx*>(static_cast<TileChildList*>(&pRoot4->m_kChildTileList)->GetNext(pPosVal));
-            TileEx* pChildA2 = static_cast<TileEx*>(pTile2->GetChildById(0x6e));
-            TileEx* pChildB5 = static_cast<TileEx*>(pTile2->GetChildById(0x6f));
+            Tile* pTile2 =
+                static_cast<Tile*>(reinterpret_cast<TileChildList_interface*>(&pRoot4->m_kChildTileList)->GetNext(pPosVal));
+            Tile* pChildA2 = static_cast<Tile*>(pTile2->GetChildById(0x6e));
+            Tile* pChildB5 = static_cast<Tile*>(pTile2->GetChildById(0x6f));
             pTile2->SetInt(0x1779, 1);
             if (pChildA2)
                 pChildA2->SetInt(0x1779, 1);
             if (pChildB5)
                 pChildB5->SetInt(0x1779, 1);
-            if (pTile2->GetNode())
-                pTile2->GetNode()->SetAppCulled(pTile2->GetFloat(0xfa3) == 0.0 || pTile2->GetFloat(0x1779) == 0.0);
-            if (pChildA2 && pChildA2->GetNode())
-                pChildA2->GetNode()->SetAppCulled(pChildA2->GetFloat(0xfa3) == 0.0 ||
+            if (pTile2->FUN_0056c7f0())
+                pTile2->FUN_0056c7f0()->SetAppCulled(pTile2->GetFloat(0xfa3) == 0.0 || pTile2->GetFloat(0x1779) == 0.0);
+            if (pChildA2 && pChildA2->FUN_0056c7f0())
+                pChildA2->FUN_0056c7f0()->SetAppCulled(pChildA2->GetFloat(0xfa3) == 0.0 ||
                                                   pChildA2->GetFloat(0x1779) == 0.0);
-            if (pChildB5 && pChildB5->GetNode())
-                pChildB5->GetNode()->SetAppCulled(pChildB5->GetFloat(0xfa3) == 0.0 ||
+            if (pChildB5 && pChildB5->FUN_0056c7f0())
+                pChildB5->FUN_0056c7f0()->SetAppCulled(pChildB5->GetFloat(0xfa3) == 0.0 ||
                                                   pChildB5->GetFloat(0x1779) == 0.0);
         }
     }
@@ -4757,9 +4509,9 @@ void __cdecl FUN_00703100()
 {
     if (FUN_004b7210() != 0)
     {
-        if (((FUN_009373f0_shell*)FUN_004b7210())->FUN_009373f0())
+        if (((InterfaceManager*)FUN_004b7210())->FUN_009373f0())
         {
-            ((unsigned char*)FUN_004b7210()->padding)[0xdd] = ((unsigned char*)FUN_004b7210()->padding)[0xdd] ? 0 : 1;
+            FUN_004b7210()->byte0DD = FUN_004b7210()->byte0DD ? 0 : 1;
         }
     }
 }
@@ -4774,7 +4526,7 @@ void __cdecl HandleMenuKeyInput(void)
 {
     if (FUN_004b7210() != 0)
     {
-        if (((InterfaceManagerPC*)FUN_004b7210())->GetKey())
+        if (((InterfaceManager*)FUN_004b7210())->FUN_009373f0())
         {
             InterfaceManager* iMenu = FUN_004b7210();
             int pManager = (int)iMenu->FUN_00586150()->GetFloat(0x1771);
@@ -4807,7 +4559,7 @@ bool __cdecl QueueMessage(int a1, int a2, int a3, int a4, int a5, int a6, int a7
 // @fnv 0x00703f10
 bool __cdecl FUN_00703f10(int a1, int a2, int a3, int a4, int a5, int a6, int a7, float x, float y, int a10, ...)
 {
-    if (FUN_004b7210() && ((FUN_009373f0_shell*)FUN_004b7210())->FUN_009373f0())
+    if (FUN_004b7210() && ((InterfaceManager*)FUN_004b7210())->FUN_009373f0())
     {
         bool result5;
         va_list args;
@@ -4820,29 +4572,13 @@ bool __cdecl FUN_00703f10(int a1, int a2, int a3, int a4, int a5, int a6, int a7
 }
 
 #include <stdarg.h>
-struct HWND__;
-struct WinPoint
-{
-    long x, y;
-};
-struct WinMessage
-{
-    HWND__* hwnd;
-    unsigned int message, wParam;
-    long lParam;
-    unsigned int time;
-    WinPoint pt;
-};
-extern "C" __declspec(dllimport) int __stdcall PeekMessageA(WinMessage*, HWND__*, unsigned int, unsigned int,
-                                                            unsigned int);
-extern "C" __declspec(dllimport) int __stdcall TranslateMessage(const WinMessage*);
-extern "C" __declspec(dllimport) long __stdcall DispatchMessageA(const WinMessage*);
+typedef MSG WinMessage;
 
 struct InterfaceControl
 {
     void FUN_007010e0(bool, bool);
 };
-extern Interface* DAT_011d8804;
+extern InterfaceInterfaceView* DAT_011d8804;
 bool __cdecl QueueMessage(const char*, int, int, int, void (*)(), int, int, int, va_list*, bool, int, int, float, float,
                           float);
 void __cdecl FUN_00403d30(void*, int, unsigned int);
@@ -4851,11 +4587,7 @@ class InputManager
   public:
     void FUN_00a23010();
 };
-class OSGlobals
-{
-  public:
-    InputManager* FUN_00877720();
-};
+
 extern OSGlobals* g_osGlobals;
 void FUN_007027e0();
 void FUN_00702810();
@@ -4868,7 +4600,7 @@ char __cdecl FUN_00704010(const char* text, int aiArg1, int aiArg2, int aiArg3, 
     DAT_0119f349 = -1;
     bool success = false;
     ((InterfaceControl*)DAT_011d8804)->FUN_007010e0(true, true);
-    if (FUN_004b7210() && ((FUN_009373f0_shell*)FUN_004b7210())->FUN_009373f0())
+    if (FUN_004b7210() && ((InterfaceManager*)FUN_004b7210())->FUN_009373f0())
     {
         va_list args;
         va_start(args, aiArg3);
@@ -4928,14 +4660,14 @@ struct InterfaceProxy
 // @fnv 0x00704c10
 void ShowStatsMenu(bool show, bool fades)
 {
-    if (FUN_004b7210() && ((FUN_009373f0_shell*)FUN_004b7210())->FUN_009373f0())
+    if (FUN_004b7210() && ((InterfaceManager*)FUN_004b7210())->FUN_009373f0())
     {
         TileProxy* stats = FUN_00a09030(1003);
         TileProxy* inv = FUN_00a09030(1002);
         TileProxy* repair2 = FUN_00a09030(1035);
         TileProxy* barterX = FUN_00a09030(1061);
         TileProxy* map3 = FUN_00a09030(1023);
-        bool visible2 = FUN_00702680(Interface::eStatsMenu, fades ? 11 : 0);
+        bool visible2 = FUN_00702680(InterfaceInterfaceView::eStatsMenu, fades ? 11 : 0);
         if (show && !visible2)
         {
             if (inv)
@@ -4976,12 +4708,6 @@ void ShowStatsMenu(bool show, bool fades)
     }
 }
 
-struct DecompScopeGuard
-{
-    int m_00;
-    DecompScopeGuard(int a, int b, const char* file, int line);
-    ~DecompScopeGuard();
-};
 
 struct DecompArg12
 {
@@ -5010,8 +4736,8 @@ extern unsigned int DAT_011d96c0;
 // @fnv 0x00705210
 bool __cdecl FUN_00705210(int aiArg1, DecompArg12 aArg12, DecompVec3 aVec3, int aiArg4, bool a5)
 {
-    DecompScopeGuard guard(13, 1, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Interface\\Interface.cpp", 0x8ec);
-    if (FUN_004b7210() && ((FUN_009373f0_shell*)FUN_004b7210())->FUN_009373f0() && DAT_011d96c0)
+    AutoMemContext guard(13, 1, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Interface\\Interface.cpp", 0x8ec);
+    if (FUN_004b7210() && ((InterfaceManager*)FUN_004b7210())->FUN_009373f0() && DAT_011d96c0)
     {
         ((DecompTarget*)DAT_011d96c0)->FUN_00774fd0(aiArg1, aArg12, aVec3, aiArg4, a5);
     }
@@ -5027,7 +4753,7 @@ struct FUN_0047ee30_shell : public InterfaceManager
 // @fnv 0x00705c70
 extern "C" char __cdecl GetInterfaceManagerResult()
 {
-    if (FUN_004b7210() && reinterpret_cast<FUN_009373f0_shell*>(FUN_004b7210())->FUN_009373f0())
+    if (FUN_004b7210() && reinterpret_cast<InterfaceManager*>(FUN_004b7210())->FUN_009373f0())
     {
         return reinterpret_cast<FUN_0047ee30_shell*>(FUN_004b7210())->GetAssistance();
     }
@@ -5038,15 +4764,11 @@ struct FloatValue
 {
     float GetFloat();
 };
-struct Data
+// InterfaceManager tutorial-seen flags: GetData 0x007187a0 = TutorialState::PackFlags, GetLength 0x00706810 (interfacemanager.cpp)
+struct TutorialState
 {
     int GetLength();
     void GetData(char*);
-};
-struct Root : InterfaceManager
-{
-    Data data;
-    FloatValue* GetValue(int);
 };
 struct Buffer
 {
@@ -5062,7 +4784,7 @@ void FUN_007066d0(Buffer* buffer)
 {
     char y[100];
     float text;
-    int length = (int)((Root*)FUN_004b7210())->GetValue(0x1771)->GetFloat();
+    int length = (int)FUN_004b7210()->FUN_00586150()->GetFloat(0x1771);
     char third = GetStatsMenuPage();
     unsigned char x = FUN_007824b0();
     char value = FUN_00706830();
@@ -5075,8 +4797,8 @@ void FUN_007066d0(Buffer* buffer)
     buffer->SaveData(&first, 4, 0);
     buffer->SaveData(&text, 4, 0);
     FUN_00403d30(y, 0, 100);
-    int second = ((Root*)FUN_004b7210())->data.GetLength();
-    ((Root*)FUN_004b7210())->data.GetData(y);
+    int second = FUN_004b7210()->kTutorialManager.GetSaveLoadSize();
+    reinterpret_cast<TutorialState*>(&FUN_004b7210()->kTutorialManager)->GetData(y);
     buffer->SaveData(&second, 4, 0);
     buffer->SaveData(y, second, 0);
 }
@@ -5092,27 +4814,6 @@ void FUN_00706db0(unsigned char ucValue)
     ((FUN_00703960_Class*)FUN_004b7210())->SetByteAtOffsetEC((char)ucValue);
 }
 
-class TESForm;
-class TESGlobal;
-class Setting;
-
-struct FUN_00401170_s
-{
-    int FUN_00401170();
-};
-
-class TESGlobal : public TESForm
-{
-  public:
-    char FUN_00529ea0();
-    float GetValue();
-};
-
-class Setting
-{
-  public:
-    const char* String();
-};
 
 extern Setting* DAT_0119b354[];
 extern Setting* DAT_0119b35c[];
@@ -5131,8 +4832,8 @@ bool __cdecl ResolveSettingString(const char* a1, char* a2);
 TESForm* __cdecl FUN_00483a00(const char* apName);
 
 int __cdecl sprintf_s(char* apBuffer, unsigned int auiBufferSize, const char* apFormat, ...);
-int __cdecl strcpy_s(char* apDest, unsigned int auiDestSize, const char* apSrc);
-int __cdecl _stricmp(const char* apStr1, const char* apStr2);
+int __cdecl CopyInterfaceString(char* apDest, unsigned int auiDestSize, const char* apSrc);
+int __cdecl CompareInterfaceStringsIgnoreCase(const char* apStr1, const char* apStr2);
 
 // @fnv 0x007070c0
 bool __cdecl FUN_007070c0(const char* apName, char* apBuffer, unsigned int auiBufferSize, bool abArg4)
@@ -5149,10 +4850,10 @@ bool __cdecl FUN_007070c0(const char* apName, char* apBuffer, unsigned int auiBu
         if (!bFound)
         {
             TESForm* pForm = FUN_00483a00(apName);
-            if (pForm && ((FUN_00401170_s*)pForm)->FUN_00401170() == 6)
+            if (pForm && ((TESForm*)pForm)->FUN_00401170() == 6)
             {
                 TESGlobal* pGlobalForm = (TESGlobal*)pForm;
-                if (pGlobalForm->FUN_00529ea0() == 'f')
+                if (GetGlobalValueType(pGlobalForm) == 'f')
                 {
                     sprintf_s(apBuffer, auiBufferSize, "%.2f", pGlobalForm->GetValue());
                 }
@@ -5163,29 +4864,29 @@ bool __cdecl FUN_007070c0(const char* apName, char* apBuffer, unsigned int auiBu
                 bFound = true;
             }
         }
-        if (!bFound && _stricmp(apName, "PCName") == 0)
+        if (!bFound && CompareInterfaceStringsIgnoreCase(apName, "PCName") == 0)
         {
-            strcpy_s(apBuffer, auiBufferSize, ((Player_StandIn*)g_thePlayer)->GetFullName());
+            CopyInterfaceString(apBuffer, auiBufferSize, ((Player_StandIn*)g_thePlayer)->GetFullName());
             bFound = true;
         }
-        if (!bFound && _stricmp(apName, "PCRace") == 0)
+        if (!bFound && CompareInterfaceStringsIgnoreCase(apName, "PCRace") == 0)
         {
-            strcpy_s(apBuffer, auiBufferSize, ((Player_StandIn*)g_thePlayer)->FUN_0087f6c0());
+            CopyInterfaceString(apBuffer, auiBufferSize, ((Player_StandIn*)g_thePlayer)->FUN_0087f6c0());
             bFound = true;
         }
-        if (!bFound && _stricmp(apName, "PCSex") == 0)
+        if (!bFound && CompareInterfaceStringsIgnoreCase(apName, "PCSex") == 0)
         {
-            strcpy_s(apBuffer, auiBufferSize, DAT_0119b354[((Player_StandIn*)g_thePlayer)->GetSex()]->String());
+            CopyInterfaceString(apBuffer, auiBufferSize, DAT_0119b354[((Player_StandIn*)g_thePlayer)->GetSex()]->String());
             bFound = true;
         }
-        if (!bFound && _stricmp(apName, "PCSexPronoun") == 0)
+        if (!bFound && CompareInterfaceStringsIgnoreCase(apName, "PCSexPronoun") == 0)
         {
-            strcpy_s(apBuffer, auiBufferSize, DAT_0119b364[((Player_StandIn*)g_thePlayer)->GetSex()]->String());
+            CopyInterfaceString(apBuffer, auiBufferSize, DAT_0119b364[((Player_StandIn*)g_thePlayer)->GetSex()]->String());
             bFound = true;
         }
-        if (!bFound && _stricmp(apName, "PCSexPossessive") == 0)
+        if (!bFound && CompareInterfaceStringsIgnoreCase(apName, "PCSexPossessive") == 0)
         {
-            strcpy_s(apBuffer, auiBufferSize, DAT_0119b35c[((Player_StandIn*)g_thePlayer)->GetSex()]->String());
+            CopyInterfaceString(apBuffer, auiBufferSize, DAT_0119b35c[((Player_StandIn*)g_thePlayer)->GetSex()]->String());
             bFound = true;
         }
         if (!bFound)
@@ -5196,324 +4897,6 @@ bool __cdecl FUN_007070c0(const char* apName, char* apBuffer, unsigned int auiBu
     return bFound;
 }
 
-class NiStream
-{
-  public:
-    virtual ~NiStream();
-    char fileName[260];
-    unsigned int unk108;
-    unsigned int unk10C;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11C;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12C;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13C;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14C;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    unsigned int unk15C;
-    unsigned int unk160;
-    unsigned int unk164;
-    unsigned int unk168;
-    unsigned int unk16C;
-    unsigned int unk170;
-    unsigned int unk174;
-    unsigned int unk178;
-    unsigned int unk17C;
-    unsigned int unk180;
-    unsigned int unk184;
-    unsigned int unk188;
-    unsigned int unk18C;
-    unsigned int unk190;
-    unsigned int unk194;
-    unsigned int unk198;
-    unsigned int unk19C;
-    unsigned int unk1A0;
-    unsigned int unk1A4;
-    unsigned int unk1A8;
-    unsigned int unk1AC;
-    unsigned int unk1B0;
-    unsigned int unk1B4;
-    unsigned int unk1B8;
-    unsigned int unk1BC;
-    unsigned int unk1C0;
-    unsigned int unk1C4;
-    unsigned int unk1C8;
-    unsigned int unk1CC;
-    unsigned int unk1D0;
-    unsigned int unk1D4;
-    unsigned int unk1D8;
-    unsigned int unk1DC;
-    unsigned int unk1E0;
-    unsigned int unk1E4;
-    unsigned int unk1E8;
-    unsigned int unk1EC;
-    unsigned int unk1F0;
-    unsigned int unk1F4;
-    unsigned int unk1F8;
-    unsigned int unk1FC;
-    unsigned int unk200;
-    unsigned int unk204;
-    unsigned int unk208;
-    unsigned int unk20C;
-    unsigned int unk210;
-    unsigned int unk214;
-    unsigned int unk218;
-    unsigned int unk21C;
-    unsigned int unk220;
-    unsigned int unk224;
-    unsigned int unk228;
-    unsigned int unk22C;
-    unsigned int unk230;
-    unsigned int unk234;
-    unsigned int unk238;
-    unsigned int unk23C;
-    unsigned int unk240;
-    unsigned int unk244;
-    unsigned int unk248;
-    unsigned int unk24C;
-    unsigned int unk250;
-    unsigned int unk254;
-    unsigned int unk258;
-    unsigned int unk25C;
-    unsigned int unk260;
-    unsigned int unk264;
-    unsigned int unk268;
-    unsigned int unk26C;
-    unsigned int unk270;
-    unsigned int unk274;
-    unsigned int unk278;
-    unsigned int unk27C;
-    unsigned int unk280;
-    unsigned int unk284;
-    unsigned int unk288;
-    unsigned int unk28C;
-    unsigned int unk290;
-    unsigned int unk294;
-    unsigned int unk298;
-    unsigned int unk29C;
-    unsigned int unk2A0;
-    unsigned int unk2A4;
-    unsigned int unk2A8;
-    unsigned int unk2AC;
-    unsigned int unk2B0;
-    unsigned int unk2B4;
-    unsigned int unk2B8;
-    unsigned int unk2BC;
-    unsigned int unk2C0;
-    unsigned int unk2C4;
-    unsigned int unk2C8;
-    unsigned int unk2CC;
-    unsigned int unk2D0;
-    unsigned int unk2D4;
-    unsigned int unk2D8;
-    unsigned int unk2DC;
-    unsigned int unk2E0;
-    unsigned int unk2E4;
-    unsigned int unk2E8;
-    unsigned int unk2EC;
-    unsigned int unk2F0;
-    unsigned int unk2F4;
-    unsigned int unk2F8;
-    unsigned int unk2FC;
-    unsigned int unk300;
-    unsigned int unk304;
-    unsigned int unk308;
-    unsigned int unk30C;
-    unsigned int unk310;
-    unsigned int unk314;
-    unsigned int unk318;
-    unsigned int unk31C;
-    unsigned int unk320;
-    unsigned int unk324;
-    unsigned int unk328;
-    unsigned int unk32C;
-    unsigned int unk330;
-    unsigned int unk334;
-    unsigned int unk338;
-    unsigned int unk33C;
-    unsigned int unk340;
-    unsigned int unk344;
-    unsigned int unk348;
-    unsigned int unk34C;
-    unsigned int unk350;
-    unsigned int unk354;
-    unsigned int unk358;
-    unsigned int unk35C;
-    unsigned int unk360;
-    unsigned int unk364;
-    unsigned int unk368;
-    unsigned int unk36C;
-    unsigned int unk370;
-    unsigned int unk374;
-    unsigned int unk378;
-    unsigned int unk37C;
-    unsigned int unk380;
-    unsigned int unk384;
-    unsigned int unk388;
-    unsigned int unk38C;
-    unsigned int unk390;
-    unsigned int unk394;
-    unsigned int unk398;
-    unsigned int unk39C;
-    unsigned int unk3A0;
-    unsigned int unk3A4;
-    unsigned int unk3A8;
-    unsigned int unk3AC;
-    unsigned int unk3B0;
-    unsigned int unk3B4;
-    unsigned int unk3B8;
-    unsigned int unk3BC;
-    unsigned int unk3C0;
-    unsigned int unk3C4;
-    unsigned int unk3C8;
-    unsigned int unk3CC;
-    unsigned int unk3D0;
-    unsigned int unk3D4;
-    unsigned int unk3D8;
-    unsigned int unk3DC;
-    unsigned int unk3E0;
-    unsigned int unk3E4;
-    unsigned int unk3E8;
-    unsigned int unk3EC;
-    unsigned int unk3F0;
-    unsigned int unk3F4;
-    unsigned int unk3F8;
-    unsigned int unk3FC;
-    unsigned int unk400;
-    unsigned int unk404;
-    unsigned int unk408;
-    unsigned int unk40C;
-    unsigned int unk410;
-    unsigned int unk414;
-    unsigned int unk418;
-    unsigned int unk41C;
-    unsigned int unk420;
-    unsigned int unk424;
-    unsigned int unk428;
-    unsigned int unk42C;
-    unsigned int unk430;
-    unsigned int unk434;
-    unsigned int unk438;
-    unsigned int unk43C;
-    unsigned int unk440;
-    unsigned int unk444;
-    unsigned int unk448;
-    unsigned int unk44C;
-    unsigned int unk450;
-    unsigned int unk454;
-    unsigned int unk458;
-    unsigned int unk45C;
-    unsigned int unk460;
-    unsigned int unk464;
-    unsigned int unk468;
-    unsigned int unk46C;
-    unsigned int unk470;
-    unsigned int unk474;
-    unsigned int unk478;
-    unsigned int unk47C;
-    unsigned int unk480;
-    unsigned int unk484;
-    unsigned int unk488;
-    unsigned int unk48C;
-    unsigned int unk490;
-    unsigned int unk494;
-    unsigned int unk498;
-    unsigned int unk49C;
-    unsigned int unk4A0;
-    unsigned int unk4A4;
-    unsigned int unk4A8;
-    unsigned int unk4AC;
-    unsigned int unk4B0;
-    unsigned int unk4B4;
-    unsigned int unk4B8;
-    unsigned int unk4BC;
-    unsigned int unk4C0;
-    unsigned int unk4C4;
-    unsigned int unk4C8;
-    unsigned int unk4CC;
-    unsigned int unk4D0;
-    unsigned int unk4D4;
-    unsigned int unk4D8;
-    unsigned int unk4DC;
-    unsigned int unk4E0;
-    unsigned int unk4E4;
-    unsigned int unk4E8;
-    unsigned int unk4EC;
-    unsigned int unk4F0;
-    unsigned int unk4F4;
-    unsigned int unk4F8;
-    unsigned int unk4FC;
-    unsigned int unk500;
-    unsigned int unk504;
-    unsigned int unk508;
-    unsigned int unk50C;
-    unsigned int unk510;
-    unsigned int unk514;
-    unsigned int unk518;
-    unsigned int unk51C;
-    unsigned int unk520;
-    unsigned int unk524;
-    unsigned int unk528;
-    unsigned int unk52C;
-    unsigned int unk530;
-    unsigned int unk534;
-    unsigned int unk538;
-    unsigned int unk53C;
-    unsigned int unk540;
-    unsigned int unk544;
-    unsigned int unk548;
-    unsigned int unk54C;
-    unsigned int unk550;
-    unsigned int unk554;
-    unsigned int unk558;
-    unsigned int unk55C;
-    unsigned int unk560;
-    unsigned int unk564;
-    unsigned int unk568;
-    unsigned int unk56C;
-    unsigned int unk570;
-    unsigned int unk574;
-    unsigned int unk578;
-    unsigned int unk57C;
-    unsigned int unk580;
-    unsigned int unk584;
-    unsigned int unk588;
-    unsigned int unk58C;
-    unsigned int unk590;
-    unsigned int unk594;
-    unsigned int unk598;
-    unsigned int unk59C;
-    unsigned int unk5A0;
-    unsigned int unk5A4;
-    unsigned int unk5A8;
-    unsigned int unk5AC;
-    unsigned int unk5B0;
-    unsigned int unk5B4;
-    unsigned int unk5B8;
-    unsigned int unk5BC;
-    unsigned int unk5C0;
-    unsigned int unk5C4;
-    unsigned int unk5C8;
-    bool FUN_00c3a8a0(const char*, bool);
-};
-class BSStream : public NiStream
-{
-  public:
-    BSStream();
-    virtual ~BSStream();
-};
 class Model
 {
   public:
@@ -5560,95 +4943,19 @@ NiNode* FUN_00707660(const char* path, bool* flag)
     return 0;
 }
 
-class B7AB690FullName
-{
-  public:
-    const char* GetName() const;
-};
+// The packet TESFullName declaration lacks the out-of-line name getter.
+const char* __fastcall GetNPCFullName(const TESFullName*);
 
-class TESNPC : public TESBoundObject
-{
-  public:
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    B7AB690FullName m_kFullName;
-};
 
-class B7AB690Player
-{
-  public:
-    TESBoundObject* GetObjectReference();
-};
-
-class B7AB690SettingString
-{
-  public:
-    const char* GetString();
-};
-
-extern B7AB690Player* g_pkB7AB690Player;
-extern B7AB690SettingString g_kB7AB690NamePrompt;
+extern PlayerCharacter* g_pkB7AB690Player;
+extern Setting g_kB7AB690NamePrompt;
 
 void __cdecl FUN_007ab7c0();
 void __cdecl B7AB690ShowTextEntry(const char* pcPrompt, const char* pcDefault, void(__cdecl* pfnCallback)(const char*));
 void __cdecl B7AB690OnNameEntered(const char* pcName);
 
-class B7AB690Menu
-{
-  public:
-    B7AB690Menu();
-    virtual ~B7AB690Menu();
 
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-};
-
-class FUN_007ab690_cls : public B7AB690Menu
+class FUN_007ab690_cls : public Menu
 {
   public:
     FUN_007ab690_cls();
@@ -5667,7 +4974,12 @@ FUN_007ab690_cls::FUN_007ab690_cls()
     if (m_pkNPC)
     {
         FUN_007ab7c0();
-        B7AB690ShowTextEntry(g_kB7AB690NamePrompt.GetString(), m_pkNPC->m_kFullName.GetName(), B7AB690OnNameEntered);
+        // Address the inherited name component without a nullable base-pointer conversion.
+        B7AB690ShowTextEntry(
+            g_kB7AB690NamePrompt.GetString(),
+            GetNPCFullName(reinterpret_cast<const TESFullName*>(
+                reinterpret_cast<const char*>(&m_pkNPC->m_kName) - offsetof(TESFullName, m_kName))),
+            B7AB690OnNameEntered);
     }
     else
     {
@@ -5679,16 +4991,10 @@ namespace fnv_008d66b0 {
 #include <string.h>
 #include <stdio.h>
 
-struct WobbleName : NiFixedString
-{
-    WobbleName(const char*);
-    ~WobbleName();
-    operator const char*() const;
-};
 struct WobbleNode : NiNode
 {
-    WobbleName& GetName();
-    void SetName(const WobbleName&);
+    NiFixedString& GetName();
+    void SetName(const NiFixedString&);
 };
 struct WobbleLoader : ModelLoader
 {
@@ -5702,7 +5008,6 @@ extern WobbleNode* DAT_011e0110[];
 extern char* DAT_011e00e0[];
 extern bool DAT_01185520;
 extern const char* DAT_011977a4[];
-unsigned int BSStringLength(const char*);
 int FUN_00406d30(char*, unsigned int, const char*);
 // Loads up to 12 weapon wobble NIF models from Meshes\Characters\WeaponWobbles, storing each node and a copy of its name, then sets DAT_01185520 to true.
 // @fnv 0x008d66b0
@@ -5724,17 +5029,13 @@ void LoadWeaponWobbleModels()
             unsigned int length = BSStringLength(DAT_011e0110[i]->GetName()) + 1;
             DAT_011e00e0[i] = new char[length];
             FUN_00406d30(DAT_011e00e0[i], length, DAT_011e0110[i]->GetName());
-            DAT_011e0110[i]->SetName(WobbleName(path));
+            DAT_011e0110[i]->SetName(NiFixedString(static_cast<const char*>(path)));
         }
     }
     DAT_01185520 = true;
 }
 }  // namespace fnv_008d66b0
 
-struct InterfaceManagerPCMine : InterfaceManager
-{
-    bool GetKey();
-};
 
 struct TESObjectREFRMine : TESObjectREFR
 {
@@ -5748,7 +5049,7 @@ int FUN_0075b310(TESObjectREFR* apRef, int aType);
 // @fnv 0x00704ed0
 int FUN_00704ed0(TESObjectREFR* apRef, int aType)
 {
-    if (FUN_004b7210() && ((InterfaceManagerPCMine*)FUN_004b7210())->GetKey())
+    if (FUN_004b7210() && ((InterfaceManager*)FUN_004b7210())->FUN_009373f0())
     {
         if (aType == 1)
         {
@@ -5979,13 +5280,10 @@ struct FUN_00705fe0 : BaseMenu
 FUN_00705fe0::FUN_00705fe0() : node(0)
 {}
 
-struct FUN_00709930
-{
-    virtual ~FUN_00709930();
-};
-// Destructor for FUN_00709930; performs no additional cleanup beyond the default body.
+
+// Destructor for Tile; performs no additional cleanup beyond the default body.
 // @fnv 0x00709930
-FUN_00709930::~FUN_00709930()
+Tile::~Tile()
 {}
 
 // Candidate for FUN_0079ffb0 (claim clm_f5183b6336444303ae13, 0x0079ffb0, 5190 bytes)
@@ -5993,7 +5291,6 @@ FUN_00709930::~FUN_00709930()
 // Builds on the packet's best prior attempt; corrected constructors, calls and local layout.
 // Packet flags: /MT /Od /Oy- /GS /EHsc /Gy /GF. Entry ABI: __cdecl, caller pops.
 
-extern "C" __declspec(dllimport) int __stdcall CreateDirectoryA(const char*, void*);
 
 namespace points {
 struct FUN_006815c0
@@ -6550,7 +5847,7 @@ struct Tile30
     void FUN_007a1400(int);
     void SetChangeFlag(int);
     void FUN_00700320(int, int);
-    void SetFloat(int, float, int);
+    void FUN_00a012d0(int, float, int);
 };
 
 // small local-object stand-ins (methods invoked with ecx = local)
@@ -6722,86 +6019,6 @@ struct Obj1C
 };
 
 // map-menu state global, fields at their offsets
-struct MapMenuR6
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    void* tile_30;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int field_84;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int field_e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int field_128;
-    unsigned char field_12c;
-    void UpdateLocalMap();
-};
 
 int __cdecl FUN_00556870(V3Maker*);
 // free helpers; conventions read from add esp evidence
@@ -6829,11 +6046,7 @@ struct ColorSource
 extern "C" ColorSource* __cdecl ColorSingleton();
 extern "C" void __fastcall FUN_00719060(void*); /* ecx = FUN_00718b60 result */
 extern "C" void __fastcall FUN_00a59c60(void*); /* ecx = FUN_0056c7f0 result */
-struct GObj
-{
-    int* FUN_0043d4d0();
-};
-extern GObj DAT_011c63cc; /* object at 0x11c63cc */
+extern Setting DAT_011c63cc; /* object at 0x11c63cc */
 
 // globals read/written here
 struct Position
@@ -6900,7 +6113,7 @@ void __cdecl FUN_0079ffb0(char param_1)
     int cellX17;
 
     if (DAT_011da368 == 0 ||
-        static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->FUN_0056c7f0() == 0 ||
+        reinterpret_cast<Tile30*>(DAT_011da368->m_pTiles[2])->FUN_0056c7f0() == 0 ||
         !FUN_007a1750())
         return;
 
@@ -6953,8 +6166,8 @@ void __cdecl FUN_0079ffb0(char param_1)
     if (cMenuOk4 == '\0')
         pMenu25->FUN_00450f90(1);
 
-    cellX17 = reinterpret_cast<MapMenuR6*>(DAT_011da368)->field_128 % *DAT_011c63cc.FUN_0043d4d0();
-    cellY10 = reinterpret_cast<MapMenuR6*>(DAT_011da368)->field_128 / *DAT_011c63cc.FUN_0043d4d0();
+    cellX17 = DAT_011da368->m_uiMapMarkerCount % *DAT_011c63cc.FUN_0043d4d0();
+    cellY10 = DAT_011da368->m_uiMapMarkerCount / *DAT_011c63cc.FUN_0043d4d0();
 
     Local12 local1415(0);
     pSub10 = 0;
@@ -6984,7 +6197,7 @@ void __cdecl FUN_0079ffb0(char param_1)
             static_cast<ChainObj*>(static_cast<void*>(FUN_0043c4b0()))->FUN_004a03c0();
             if (cellX17 == 0 && cellY10 == 0)
                 static_cast<ChainObj*>(pSub10)->CollectCellReferences(
-                    &reinterpret_cast<MapMenuR6*>(DAT_011da368)->field_e0);
+                    reinterpret_cast<unsigned int*>(&DAT_011da368->LocalMapMarkerList));
         }
     }
     else
@@ -7009,7 +6222,7 @@ void __cdecl FUN_0079ffb0(char param_1)
             static_cast<ChainObj*>(pSub10)->FUN_0054e640(&local1415);
             static_cast<ChainObj*>(static_cast<void*>(FUN_0043c4b0()))->FUN_004a03c0();
             static_cast<ChainObj*>(pSub10)->CollectCellReferences(
-                &reinterpret_cast<MapMenuR6*>(DAT_011da368)->field_e0);
+                reinterpret_cast<unsigned int*>(&DAT_011da368->LocalMapMarkerList));
         }
     }
 
@@ -7045,8 +6258,8 @@ void __cdecl FUN_0079ffb0(char param_1)
         p3925 = static_cast<C39*>(FUN_00653270(reinterpret_cast<unsigned int>(&DAT_011f4418),
                                                reinterpret_cast<ChainObj*>(local1415.FUN_00559450())->FUN_0059bb30()));
         FUN_00ee6dc2(pathB41, 3, p3925->v039(0));
-        reinterpret_cast<MapMenuR6*>(DAT_011da368)->field_128 =
-            reinterpret_cast<MapMenuR6*>(DAT_011da368)->field_128 + 1;
+        DAT_011da368->m_uiMapMarkerCount =
+            DAT_011da368->m_uiMapMarkerCount + 1;
         return;
     }
 
@@ -7079,7 +6292,7 @@ void __cdecl FUN_0079ffb0(char param_1)
             NiPt3 mk324(static_cast<float>(j17) * fStep27, static_cast<float>(i17) * fStep27, 0.0f);
             mk324.FUN_0063c8a0(reinterpret_cast<NiPt3*>(&base9c33));
             float hgt = FLT_0101e570;
-            if (reinterpret_cast<MapMenuR6*>(DAT_011da368)->field_12c != 0)
+            if (DAT_011da368->m_bNeedsMapUpdate != 0)
                 hgt = static_cast<float>(FUN_00556870(reinterpret_cast<V3Maker*>(&mk324)));
             static_cast<NiCol*>(pvC52)[idx19] = NiCol(1.0f, 1.0f, 1.0f, hgt / DBL_0101db80);
             idx19++;
@@ -7161,9 +6374,9 @@ void __cdecl FUN_0079ffb0(char param_1)
     pMesh14->FUN_00a5a040();
 
     static_cast<C55*>(reinterpret_cast<void*>(
-                          static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->FUN_0056c7f0()))
+                          reinterpret_cast<Tile30*>(DAT_011da368->m_pTiles[2])->FUN_0056c7f0()))
         ->v055(pMesh14, 1);
-    static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->FUN_007a1400(0x20);
+    reinterpret_cast<Tile30*>(DAT_011da368->m_pTiles[2])->FUN_007a1400(0x20);
 
     DAT_011ff3a8 = savedColor1;
     DAT_011ff103 = svByte10316;
@@ -7179,26 +6392,25 @@ void __cdecl FUN_0079ffb0(char param_1)
     if (cMenuOk4 == '\0')
         pMenu25->FUN_00450f90(0);
 
-    static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->SetChangeFlag(0x108);
-    static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->FUN_00700320(0xfcd, size27 * gridSize13);
-    static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->FUN_00700320(0xfce, size27 * gridSize13);
-    static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)
-        ->SetFloat(0xfb2, objB83.c.r * DBL_0101e568, 1);
-    static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)
-        ->SetFloat(0xfb3, objB83.c.g * DBL_0101e568, 1);
-    static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)
-        ->SetFloat(0xfb4, objB83.c.b * DBL_0101e568, 1);
+    reinterpret_cast<Tile30*>(DAT_011da368->m_pTiles[2])->SetChangeFlag(0x108);
+    reinterpret_cast<Tile30*>(DAT_011da368->m_pTiles[2])->FUN_00700320(0xfcd, size27 * gridSize13);
+    reinterpret_cast<Tile30*>(DAT_011da368->m_pTiles[2])->FUN_00700320(0xfce, size27 * gridSize13);
+    reinterpret_cast<Tile30*>(DAT_011da368->m_pTiles[2])
+        ->FUN_00a012d0(0xfb2, objB83.c.r * DBL_0101e568, 1);
+    reinterpret_cast<Tile30*>(DAT_011da368->m_pTiles[2])
+        ->FUN_00a012d0(0xfb3, objB83.c.g * DBL_0101e568, 1);
+    reinterpret_cast<Tile30*>(DAT_011da368->m_pTiles[2])
+        ->FUN_00a012d0(0xfb4, objB83.c.b * DBL_0101e568, 1);
     mk8c26.FUN_0043d410(0.0f, 0, 0);
     static_cast<ChainObj*>(
         reinterpret_cast<void*>(
-            static_cast<Tile30*>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30)->FUN_0056c7f0()))
+            reinterpret_cast<Tile30*>(DAT_011da368->m_pTiles[2])->FUN_0056c7f0()))
         ->FUN_00a59c60(&mk8c26);
-    reinterpret_cast<MapMenuR6*>(DAT_011da368)->field_128 = reinterpret_cast<MapMenuR6*>(DAT_011da368)->field_128 + 1;
+    DAT_011da368->m_uiMapMarkerCount = DAT_011da368->m_uiMapMarkerCount + 1;
     if (FUN_007a1750() == 0)
     {
-        if (reinterpret_cast<MapMenuR6*>(DAT_011da368)->field_84 ==
-            reinterpret_cast<unsigned int>(reinterpret_cast<MapMenuR6*>(DAT_011da368)->tile_30))
-            reinterpret_cast<MapMenuR6*>(DAT_011da368)->UpdateLocalMap();
+        if (DAT_011da368->m_pMapTile == DAT_011da368->m_pTiles[2])
+            DAT_011da368->UpdateLocalMap();
     }
 }
 
@@ -7316,16 +6528,6 @@ bool FUN_00705ec0(void* arg)
 }  // namespace fnv_00705ec0
 
 namespace fnv_007046f0 {
-struct MenuQ
-{
-    void FUN_00a1d910();
-    void FUN_00a1db20();
-};
-struct TileQ
-{
-    MenuQ* FUN_00a03c90();
-    void FUN_00700320(int, int);
-};
 struct PipboyQ
 {
     void FUN_007f8a80();
@@ -7337,9 +6539,9 @@ struct IMQ : InterfaceManager
     bool FUN_009373f0();
     PipboyQ* FUN_00704370();
 };
-TileQ* FUN_00a09030(int);
+Tile* FUN_00a09030(int);
 bool FUN_00702680(int, int);
-TileQ* FUN_007046c0();
+Tile* FUN_007046c0();
 void FUN_00704390();
 void FUN_00782470(int);
 
@@ -7349,11 +6551,11 @@ void FUN_007046f0(bool abShow, bool abInstant, bool abActivate)
 {
     if (FUN_004b7210() && ((IMQ*)FUN_004b7210())->FUN_009373f0())
     {
-        TileQ* m_pInventoryChangesValue = FUN_00a09030(0x3eb);
-        TileQ* pStats = FUN_00a09030(0x3ea);
-        TileQ* pMap = FUN_00a09030(0x40b);
-        TileQ* pRepair5 = FUN_00a09030(0x3ff);
-        TileQ* pMenu2 = FUN_00a09030(0x425);
+        Tile* m_pInventoryChangesValue = FUN_00a09030(0x3eb);
+        Tile* pStats = FUN_00a09030(0x3ea);
+        Tile* pMap = FUN_00a09030(0x40b);
+        Tile* pRepair5 = FUN_00a09030(0x3ff);
+        Tile* pMenu2 = FUN_00a09030(0x425);
         bool bVisible8 = FUN_00702680(0x425, abInstant ? 0xb : 0);
         if (abShow)
         {
@@ -7363,20 +6565,20 @@ void FUN_007046f0(bool abShow, bool abInstant, bool abActivate)
             {
                 if (m_pInventoryChangesValue)
                 {
-                    m_pInventoryChangesValue->FUN_00a03c90()->FUN_00a1d910();
+                    m_pInventoryChangesValue->FUN_00a03c90()->LoadMenuData();
                     FUN_00704390();
                 }
                 if (pRepair5)
-                    pRepair5->FUN_00a03c90()->FUN_00a1d910();
+                    pRepair5->FUN_00a03c90()->LoadMenuData();
                 if (pMap)
-                    pMap->FUN_00a03c90()->FUN_00a1d910();
+                    pMap->FUN_00a03c90()->LoadMenuData();
                 if (pMenu2)
-                    pMenu2->FUN_00a03c90()->FUN_00a1db20();
+                    pMenu2->FUN_00a03c90()->UnloadMenuData();
                 if (pStats)
-                    pStats->FUN_00a03c90()->FUN_00a1d910();
+                    pStats->FUN_00a03c90()->LoadMenuData();
             }
             if (pMenu2)
-                ((TileQ*)FUN_004b7210()->FUN_00586150())->FUN_00700320(0x1771, 0x425);
+                ((Tile*)FUN_004b7210()->FUN_00586150())->FUN_00700320(0x1771, 0x425);
             if (abActivate)
             {
                 ((IMQ*)FUN_004b7210())->FUN_00704370()->FUN_007f8a80();
@@ -7387,7 +6589,7 @@ void FUN_007046f0(bool abShow, bool abInstant, bool abActivate)
         }
         else if (!abShow && bVisible8 && pMenu2)
         {
-            pMenu2->FUN_00a03c90()->FUN_00a1d910();
+            pMenu2->FUN_00a03c90()->LoadMenuData();
         }
     }
 }
@@ -7397,326 +6599,16 @@ namespace s7094f0 {
 
 struct Lock
 {
-    void Wait(int iArg);
+    void FUN_0040fbf0(int iArg);
     void Leave();
 };
 
-struct InterfaceManagerView
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28c;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29c;
-    int unk2a0;
-    int unk2a4;
-    int unk2a8;
-    int unk2ac;
-    int unk2b0;
-    int unk2b4;
-    int unk2b8;
-    int unk2bc;
-    int unk2c0;
-    int unk2c4;
-    int unk2c8;
-    int unk2cc;
-    int unk2d0;
-    int unk2d4;
-    int unk2d8;
-    int unk2dc;
-    int unk2e0;
-    int unk2e4;
-    int unk2e8;
-    int unk2ec;
-    int unk2f0;
-    int unk2f4;
-    int unk2f8;
-    int unk2fc;
-    int unk300;
-    int unk304;
-    int unk308;
-    int unk30c;
-    int unk310;
-    int unk314;
-    int unk318;
-    int unk31c;
-    int unk320;
-    int unk324;
-    int unk328;
-    int unk32c;
-    int unk330;
-    int unk334;
-    int unk338;
-    int unk33c;
-    int unk340;
-    int unk344;
-    int unk348;
-    int unk34c;
-    int unk350;
-    int unk354;
-    int unk358;
-    int unk35c;
-    int unk360;
-    int unk364;
-    int unk368;
-    int unk36c;
-    int unk370;
-    int unk374;
-    int unk378;
-    int unk37c;
-    int unk380;
-    int unk384;
-    int unk388;
-    int unk38c;
-    int unk390;
-    int unk394;
-    int unk398;
-    int unk39c;
-    int unk3a0;
-    int unk3a4;
-    int unk3a8;
-    int unk3ac;
-    int unk3b0;
-    int unk3b4;
-    int unk3b8;
-    int unk3bc;
-    int unk3c0;
-    int unk3c4;
-    int unk3c8;
-    int unk3cc;
-    int unk3d0;
-    int unk3d4;
-    int unk3d8;
-    int unk3dc;
-    int unk3e0;
-    int unk3e4;
-    int unk3e8;
-    int unk3ec;
-    int unk3f0;
-    int unk3f4;
-    int unk3f8;
-    int unk3fc;
-    int unk400;
-    int unk404;
-    int unk408;
-    int unk40c;
-    int unk410;
-    int unk414;
-    int unk418;
-    int unk41c;
-    int unk420;
-    int unk424;
-    int unk428;
-    int unk42c;
-    int unk430;
-    int unk434;
-    int unk438;
-    int unk43c;
-    int unk440;
-    int unk444;
-    int unk448;
-    int unk44c;
-    int unk450;
-    int unk454;
-    int unk458;
-    int unk45c;
-    int unk460;
-    int unk464;
-    int unk468;
-    int unk46c;
-    int unk470;
-    int unk474;
-    int unk478;
-    int unk47c;
-    int unk480;
-    int unk484;
-    int unk488;
-    int unk48c;
-    int unk490;
-    int unk494;
-    int unk498;
-    int unk49c;
-    int unk4a0;
-    int unk4a4;
-    int unk4a8;
-    int unk4ac;
-    int unk4b0;
-    int unk4b4;
-    int unk4b8;
-    int m_iModalCount;
-
-    bool FUN_007023a0();
-    int FUN_00586150(int iArg);
-};
 
 struct NameMenu
 {
     NameMenu(int iArg0, int iArg1);
 
-    void FUN_00a087d0(int iTile);
+    void FUN_00a087d0(Tile* parent, Tile* replacedChild);
     void FUN_00707e10(const char* pcName);
     void FUN_00409480(struct NameTile* pkTile);
 
@@ -7767,7 +6659,7 @@ extern int DAT_011d8964;
 extern int DAT_011d8998;
 extern int DAT_011d899c;
 
-InterfaceManagerView* FUN_004b7210();
+InterfaceManager* FUN_004b7210();
 int FUN_00704ed0(TESObjectREFR* pkRef, int iArg);
 bool FUN_00705ec0(TESObjectREFR* pkRef);
 bool FUN_00706130(TESObjectREFR* pkRef);
@@ -7784,8 +6676,8 @@ static const char s_szPlayerNameEntryMenu[] = "Player Name Entry Menu";
 // @fnv 0x007094f0
 void FUN_007094f0()
 {
-    DAT_011d89c0.Wait(0);
-    if (DAT_011d8950 && (!FUN_004b7210()->m_iModalCount || DAT_011d8950 == 6 || DAT_011d8950 == 7))
+    DAT_011d89c0.FUN_0040fbf0(0);
+    if (DAT_011d8950 && (!FUN_004b7210()->uiPipboyMode || DAT_011d8950 == 6 || DAT_011d8950 == 7))
     {
         bool bPickResultFound = false;
         switch (DAT_011d8950)
@@ -7820,7 +6712,7 @@ void FUN_007094f0()
         case 9: {
             NameMenu* pkNameMenu = new NameMenu(0, 0);
             NameTile* pkTile = new NameTile;
-            pkNameMenu->FUN_00a087d0(FUN_004b7210()->FUN_00586150(0));
+            pkNameMenu->FUN_00a087d0(FUN_004b7210()->FUN_00586150(), 0);
             pkNameMenu->FUN_00707e10(s_szPlayerNameEntryMenu);
             pkTile->FUN_00a1dc70(pkNameMenu, 1);
             pkNameMenu->FUN_00409480(pkTile);
@@ -7833,7 +6725,7 @@ void FUN_007094f0()
             DAT_011d8954 = 0;
         }
     }
-    if (DAT_011d8998 && (!FUN_004b7210()->m_iModalCount || DAT_011d8998 == 6 || DAT_011d8998 == 7))
+    if (DAT_011d8998 && (!FUN_004b7210()->uiPipboyMode || DAT_011d8998 == 6 || DAT_011d8998 == 7))
     {
         bool bSuccess2 = false;
         switch (DAT_011d8998)
@@ -7852,7 +6744,6 @@ void FUN_007094f0()
 
 }
 
-struct DisplayTile;
 struct DisplayItem;
 struct DisplayForm;
 struct DisplayPlayer;
@@ -7860,7 +6751,7 @@ struct DisplayPlayer;
 struct DisplayList
 {
     void* FUN_00726070();
-    DisplayTile** FUN_00683520(void**);
+    Tile** FUN_00683520(void**);
     void** FUN_006815c0();
 };
 
@@ -7869,15 +6760,6 @@ struct DisplayName
     const char* FUN_00408da0();
 };
 
-struct DisplayTile
-{
-    int unk00;
-    DisplayList children;
-    float FUN_00a011b0(int);
-    void SetFloat(int, float, bool);
-    void FUN_00a01350(int, const char*, bool);
-    void FUN_00700320(int, int);
-};
 
 struct DisplayEffects
 {
@@ -8112,10 +6994,7 @@ struct DisplayProcess
     virtual DisplayItem* Ammo();
 };
 
-struct ActorValues
-{
-    int unk00;
-};
+#include "../../../include/ActorValues.h"
 
 struct DisplayPlayerPrefix
 {
@@ -8212,56 +7091,6 @@ struct DisplayPlayer : DisplayPlayerPrefix, ActorValues
 struct DisplayInventory
 {
     int FUN_004c8f30(DisplayForm*);
-};
-
-struct DisplaySetting
-{
-    const char* FUN_00403df0();
-    float* FUN_00403e20();
-};
-
-struct ArmorFlags
-{
-    bool FUN_004c0bd0();
-    bool FUN_00514450();
-};
-
-class TESObjectARMO : public TESBoundObject
-{
-  public:
-    int unk30;
-
-    int unk34;
-
-    int unk38;
-
-    int unk3c;
-
-    int unk40;
-
-    int unk44;
-
-    int unk48;
-
-    int unk4c;
-
-    int unk50;
-
-    int unk54;
-
-    int unk58;
-
-    int unk5c;
-
-    int unk60;
-
-    int unk64;
-
-    int unk68;
-
-    int unk6c;
-
-    ArmorFlags armorFlags;
 };
 
 struct DisplayDescription
@@ -8379,9 +7208,9 @@ struct EnchantForm : EnchantPrefix, DisplayEffects
     bool FUN_0040e210(int);
 };
 
-extern DisplaySetting *DAT_0118a644, *DAT_0118a648, *DAT_0118a640;
+extern Setting *DAT_0118a644, *DAT_0118a648, *DAT_0118a640;
 
-extern DisplaySetting DAT_011d4024, DAT_011c6478, DAT_011c64a8, DAT_011c3cb4, DAT_011d20c4, DAT_011d412c, DAT_011d2c7c,
+extern Setting DAT_011d4024, DAT_011c6478, DAT_011c64a8, DAT_011c3cb4, DAT_011d20c4, DAT_011d412c, DAT_011d2c7c,
     DAT_011d2aa8, DAT_011d26a0, DAT_011d4da4, DAT_011d4edc, DAT_011d330c;
 
 extern char DAT_0106ed20[], DAT_0106ed18[], DAT_0106ed0c[], DAT_0106ecfc[], DAT_01020764[], DAT_0106ecf4[],
@@ -8390,7 +7219,7 @@ extern char DAT_0106ed20[], DAT_0106ed18[], DAT_0106ed0c[], DAT_0106ecfc[], DAT_
 
 int FUN_00a01860(const char*);
 float FUN_0048ebc0(DisplayForm*, bool);
-DisplayTile* FUN_00a08b20(DisplayTile*, const char*);
+Tile* FUN_00a08b20(Tile*, const char*);
 
 unsigned int FUN_0044a670(const char*);
 void FUN_005e58f0(int, DisplayPlayer*, ...);
@@ -8411,7 +7240,7 @@ int FUN_00408b20(const char*, const char*);
 
 // Populates the inventory item detail panel tiles with type-specific stats, effects, and value labels.
 // @fnv 0x00707e30
-void FUN_00707e30(DisplayItem* item, DisplayTile* root)
+void FUN_00707e30(DisplayItem* item, Tile* root)
 {
 
     {
@@ -8430,19 +7259,19 @@ void FUN_00707e30(DisplayItem* item, DisplayTile* root)
         float weight =
             FUN_0048ebc0(item->FUN_0044ddc0(), reinterpret_cast<DisplayPlayer*>(g_thePlayer)->FUN_004d1360());
 
-        DisplayTile* tiles3[13];
+        Tile* tiles3[13];
         char worthBufTmp[16];
         char weightBuf[32];
 
         if (item && root)
         {
 
-            void* pos = root->children.FUN_00726070();
+            void* pos = reinterpret_cast<NiTPointerListBase<NiTPointerAllocator<unsigned int>, Tile*>*>(&root->m_kChildTileList)->GetHeadPos();
             int indexB = 0;
 
             while (pos && indexB < 13)
             {
-                tiles3[indexB] = *root->children.FUN_00683520(&pos);
+                tiles3[indexB] = reinterpret_cast<NiTPointerListBase<NiTPointerAllocator<unsigned int>, Tile*>*>(&root->m_kChildTileList)->GetNext(pos);
                 ++indexB;
             }
 
@@ -8452,12 +7281,12 @@ void FUN_00707e30(DisplayItem* item, DisplayTile* root)
                 ++indexB;
             }
 
-            DisplayTile* position = FUN_00a08b20(root, DAT_0106ed0c);
-            DisplayTile* reference8 = FUN_00a08b20(root, DAT_0106ecfc);
+            Tile* position = FUN_00a08b20(root, DAT_0106ed0c);
+            Tile* reference8 = FUN_00a08b20(root, DAT_0106ecfc);
 
-            position->SetFloat(0xfb0, reference8->FUN_00a011b0(0xfb0), true);
+            position->FUN_00a012d0(0xfb0, reference8->FUN_00a011b0(0xfb0), true);
 
-            position->SetFloat(0xfa2, reference8->FUN_00a011b0(0xfa2), true);
+            position->FUN_00a012d0(0xfa2, reference8->FUN_00a011b0(0xfa2), true);
 
             bool modified3 = item->FUN_004bd820();
 
@@ -8544,7 +7373,7 @@ void FUN_00707e30(DisplayItem* item, DisplayTile* root)
                     FUN_00406d00(weaponBuf4, 128, DAT_01020764, (int)FUN_004bd510(damage3, 1.0f));
 
                 tiles3[11]->FUN_00a01350(text3, weaponBuf4, true);
-                tiles3[4]->SetFloat(value, FUN_0040ebd0(conditionB, 1.0f), true);
+                tiles3[4]->FUN_00a012d0(value, FUN_0040ebd0(conditionB, 1.0f), true);
 
                 float reduction = 0.0f;
                 FUN_005e58f0(0x35, reinterpret_cast<DisplayPlayer*>(g_thePlayer), weapon, &reduction);
@@ -8609,9 +7438,9 @@ void FUN_00707e30(DisplayItem* item, DisplayTile* root)
 
                 if (armor)
                 {
-                    if (armor->armorFlags.FUN_004c0bd0())
+                    if (armor->GetIsHeavyArmor())
                         FUN_00406d30(armorBuf_, 128, DAT_0118a644->FUN_00403df0());
-                    else if (armor->armorFlags.FUN_00514450())
+                    else if (armor->GetIsMediumArmor())
                         FUN_00406d30(armorBuf_, 128, DAT_0118a648->FUN_00403df0());
                     else
                         FUN_00406d30(armorBuf_, 128, DAT_0118a640->FUN_00403df0());
@@ -8645,7 +7474,7 @@ void FUN_00707e30(DisplayItem* item, DisplayTile* root)
                     }
                 }
 
-                tiles3[4]->SetFloat(
+                tiles3[4]->FUN_00a012d0(
                     value,
                     FUN_0040ebd0(1.0f,
                                  item->FUN_004bcdb0(false) /
@@ -8803,44 +7632,45 @@ void FUN_00707e30(DisplayItem* item, DisplayTile* root)
                 tiles3[10]->FUN_00a01350(label3, DAT_011d330c.FUN_00403df0(), true);
             }
 
-            tiles3[0]->FUN_00700320(0xfa3, (maskB & 1) != 0);
+            tiles3[0]->FUN_00700320(0xfa3, (int)((maskB & 1) != 0));
 
-            tiles3[12]->FUN_00700320(0xfa3, (maskB & 4096) != 0);
+            tiles3[12]->FUN_00700320(0xfa3, (int)((maskB & 4096) != 0));
 
-            tiles3[1]->FUN_00700320(0xfa3, (maskB & 2) != 0);
+            tiles3[1]->FUN_00700320(0xfa3, (int)((maskB & 2) != 0));
 
-            tiles3[11]->FUN_00700320(0xfa3, (maskB & 2048) != 0);
+            tiles3[11]->FUN_00700320(0xfa3, (int)((maskB & 2048) != 0));
 
-            tiles3[2]->FUN_00700320(0xfa3, (maskB & 4) != 0);
+            tiles3[2]->FUN_00700320(0xfa3, (int)((maskB & 4) != 0));
 
-            tiles3[3]->FUN_00700320(0xfa3, (maskB & 8) != 0);
+            tiles3[3]->FUN_00700320(0xfa3, (int)((maskB & 8) != 0));
 
-            tiles3[4]->FUN_00700320(0xfa3, (maskB & 16) != 0);
+            tiles3[4]->FUN_00700320(0xfa3, (int)((maskB & 16) != 0));
 
-            tiles3[5]->FUN_00700320(0xfa3, (maskB & 32) != 0);
+            tiles3[5]->FUN_00700320(0xfa3, (int)((maskB & 32) != 0));
 
-            tiles3[6]->FUN_00700320(0xfa3, (maskB & 64) != 0);
+            tiles3[6]->FUN_00700320(0xfa3, (int)((maskB & 64) != 0));
 
-            tiles3[7]->FUN_00700320(0xfa3, (maskB & 128) != 0);
+            tiles3[7]->FUN_00700320(0xfa3, (int)((maskB & 128) != 0));
 
-            tiles3[8]->FUN_00700320(0xfa3, (maskB & 256) != 0);
+            tiles3[8]->FUN_00700320(0xfa3, (int)((maskB & 256) != 0));
 
-            tiles3[9]->FUN_00700320(0xfa3, (maskB & 512) != 0);
+            tiles3[9]->FUN_00700320(0xfa3, (int)((maskB & 512) != 0));
 
             if (tiles3[10])
             {
-                tiles3[10]->FUN_00700320(0xfa3, (maskB & 0x400) != 0);
-                tiles3[10]->SetFloat(0xfa9, 255.0f, true);
+                tiles3[10]->FUN_00700320(0xfa3, (int)((maskB & 0x400) != 0));
+                tiles3[10]->FUN_00a012d0(0xfa9, 255.0f, true);
             }
 
             width = root->FUN_00a011b0(0xfb0) / 2.0 - 20.0;
             if ((maskB & 0x10) || (maskB & 0x20))
                 width *= 2.0f;
 
-            tiles3[6]->SetFloat(0xfa2, width, true);
-            tiles3[7]->SetFloat(0xfa2, width, true);
-            tiles3[8]->SetFloat(0xfa2, width + modY4, true);
-            tiles3[9]->SetFloat(0xfa2, width + aModZ, true);
+            tiles3[6]->FUN_00a012d0(0xfa2, width, true);
+            tiles3[7]->FUN_00a012d0(0xfa2, width, true);
+            tiles3[8]->FUN_00a012d0(0xfa2, width + modY4, true);
+            tiles3[9]->FUN_00a012d0(0xfa2, width + aModZ, true);
         }
     }
 }
+

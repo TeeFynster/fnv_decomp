@@ -1,10 +1,11 @@
-// fallout/ai/creature_decls.h: declares Animation, CreatureAnimationAccess, CreatureProcessAccess, ActorValueOwner, Actor and more
+// fallout/ai/creature_decls.h: declares Animation, CreatureAnimationAccess, CreatureProcessAccess; Creature comes from include/
 #ifndef FNV_CREATURE_DECLS_H
 #define FNV_CREATURE_DECLS_H
 
 
 class BGSLoadFormBuffer;
 class InventoryStackRecord;
+// Views of a Creature through its vtable (slot 121: animation data) and of its BaseProcess (slot 82: weapon info).
 class Animation
 {
   public:
@@ -223,44 +224,8 @@ class CreatureProcessAccess
     virtual void pad81();
     virtual InventoryStackRecord* GetWeaponInfo(int, int);
 };
-enum ANIM_GROUP_ENUM
-{
-    kAnimGroupRun = 3
-};
+#include "../../../include/ANIM_GROUP_ENUM.h"
 
-class ActorValueOwner
-{
-  public:
-    virtual int GetBaseActorValue(unsigned int actorValue);
-    virtual float GetBaseActorValueFloat(unsigned int actorValue);
-    virtual int GetActorValue(unsigned int actorValue);
-    virtual float GetCurrentActorValue(unsigned int actorValue);
-};
-
-class Actor
-{
-  public:
-    virtual void LoadGame(BGSLoadFormBuffer* buffer);
-    unsigned short GetAnimGroup(ANIM_GROUP_ENUM, InventoryStackRecord*, bool, Animation*);
-    unsigned char m_pad04[0x64];
-    CreatureProcessAccess* pAnimData;
-    unsigned char m_pad6C[0x38];
-    ActorValueOwner actorValues;
-    unsigned char m_padA8[0x98];
-    unsigned int m_uiActorFlags;
-    unsigned char m_pad144[0x70];
-};
-
-class Creature : public Actor
-{
-  public:
-    virtual void LoadGame(BGSLoadFormBuffer* buffer);
-    virtual float CalculateRunSpeed();
-    virtual float GetAnimationSpeedMultiplier(ANIM_GROUP_ENUM group);
-    bool bRagDoll;
-    char _pdbpad_1b5[3];
-    float m_fFirstResetValue;
-    float m_fSecondValue;
-};
+#include "../../../include/Creature.h"
 
 #endif

@@ -29,14 +29,15 @@ struct ThisClass
 };
 
 #include <xmmintrin.h>
-struct __declspec(align(16)) Vector
+// local form of hkVector4: 0x00da98f0 needs its original assignment/copy type for store/shift scheduling (10 differing bytes with shared form).
+struct __declspec(align(16)) GskVectorPacketLocal_00da98f0
 {
     __m128 quad;
-    Vector()
+    GskVectorPacketLocal_00da98f0()
     {}
-    Vector(__m128 q) : quad(q)
+    GskVectorPacketLocal_00da98f0(__m128 q) : quad(q)
     {}
-    Vector& operator=(const Vector& rhs)
+    GskVectorPacketLocal_00da98f0& operator=(const GskVectorPacketLocal_00da98f0& rhs)
     {
         quad = rhs.quad;
         return *this;
@@ -44,21 +45,21 @@ struct __declspec(align(16)) Vector
 };
 struct __declspec(align(16)) SegmentClosestResult
 {
-    Vector pointA, pointB;
+    GskVectorPacketLocal_00da98f0 pointA, pointB;
     float distanceSquared;
 };
-extern void __cdecl FUN_00d22e40(const Vector*, const Vector*, const Vector*, const Vector*, SegmentClosestResult*);
+extern void __cdecl FUN_00d22e40(const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, SegmentClosestResult*);
 extern const signed char DAT_010cb440[];
 extern const float DAT_0104da48;
 struct Simplex
 {
     int countA, countB, unk08, unk0c;
-    Vector unk10;
-    Vector verticesA[4];
-    Vector unk60, unk70, unk80, unk90;
-    Vector verticesB[4];
-    Vector supportB[4];
-    int FUN_00da8500(const Vector*, const Vector*, int);
+    GskVectorPacketLocal_00da98f0 unk10;
+    GskVectorPacketLocal_00da98f0 verticesA[4];
+    GskVectorPacketLocal_00da98f0 unk60, unk70, unk80, unk90;
+    GskVectorPacketLocal_00da98f0 verticesB[4];
+    GskVectorPacketLocal_00da98f0 supportB[4];
+    int FUN_00da8500(const GskVectorPacketLocal_00da98f0*, const GskVectorPacketLocal_00da98f0*, int);
     void FUN_00da98f0();
 };
 // @fnv 0x00da98f0
@@ -96,8 +97,8 @@ void Simplex::FUN_00da98f0()
     {
         for (int j = 0; j < edgesB; ++j)
         {
-            Vector directionA = _mm_sub_ps(verticesA[DAT_010cb440[i + 2]].quad, verticesA[i].quad);
-            Vector directionB = _mm_sub_ps(verticesB[DAT_010cb440[j + 2]].quad, verticesB[j].quad);
+            GskVectorPacketLocal_00da98f0 directionA = _mm_sub_ps(verticesA[DAT_010cb440[i + 2]].quad, verticesA[i].quad);
+            GskVectorPacketLocal_00da98f0 directionB = _mm_sub_ps(verticesB[DAT_010cb440[j + 2]].quad, verticesB[j].quad);
             SegmentClosestResult result;
             FUN_00d22e40(&verticesA[i], &directionA, &verticesB[j], &directionB, &result);
             if (result.distanceSquared < bestDistance)

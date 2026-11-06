@@ -1,5 +1,5 @@
 // gamebryo2.2/corelibs/nicollision/nisphere.cpp: free functions (1 function)
-#include "nisphere_decls.h"
+#include "../../../../include/NiPlane.h"
 
 // Returns true when the plane comparison against other is not unequal, i.e. negates FUN_004390c0.
 // @fnv 0x00439090

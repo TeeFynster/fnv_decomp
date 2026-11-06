@@ -1,104 +1,54 @@
-// fallout_shared/teseyes.cpp: TESEyes, Holder (13 functions)
+// fallout_shared/teseyes.cpp: TESEyes (13 functions)
 
 #include <malloc.h>
-#include "TESForm.h"
+#include "../../include/TESEyes.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESNPC.h"
+#include "../../include/TESTexture.h"
 
-class TESFullName : public BaseFormComponent
-{
-  public:
-    BSStringT<char> m_kName;
-    TESFullName();
-};
-
-class TESTexture : public BaseFormComponent
-{
-  public:
-    BSStringT<char> FullNameComponent;
-    TESTexture();
-};
-
-class TESTextureLoader
-{
-  public:
-    static void ReadTextureData(TESTexture* texture, TESFile* file);
-};
-
-class TESEyes : public TESForm, public TESFullName, public TESTexture
-{
-  public:
-    char cFlags;
-    TESEyes();
-    void ResetFormData();
-    virtual bool Load(TESFile* file);
-};
 
 // @fnv 0x005fc050
 TESEyes::TESEyes()
 {
-    SetFormType(ENUM_FORM_ID_EYES_ID);
+    SetFormType((ENUM_FORM_ID)0xb);
     ResetFormData();
 }
 
-struct FUN_005fc4d0_shell
-{
-    char pad[0x30];
-    char cFlags;
-    bool IsFlagSet();
-};
 // @fnv 0x005fc4d0
-bool FUN_005fc4d0_shell::IsFlagSet()
+bool TESEyes::IsFlagSet()
 {
     return (cFlags & 1) ? true : false;
 }
 
-struct FUN_005fc4f0_shell
-{
-    void SetFlag(bool aFlag);
-};
-
 // Sets or clears bit 0 of the byte at offset 0x30 of this object according to aFlag.
 // @fnv 0x005fc4f0
-void FUN_005fc4f0_shell::SetFlag(bool aFlag)
+void TESEyes::SetFlag(bool aFlag)
 {
     if (aFlag)
-        ((char*)this)[0x30] |= 1;
+        cFlags |= 1;
     else
-        ((char*)this)[0x30] &= 0xfffffffe;
+        cFlags &= 0xfffffffe;
 }
 
-struct FUN_005fc530_shell
-{
-    char m[0x31];
-    bool IsNotFlag2Set();
-};
-
 // @fnv 0x005fc530
-bool FUN_005fc530_shell::IsNotFlag2Set()
+bool TESEyes::IsNotFlag2Set()
 {
-    if (m[0x30] & 2)
+    if (cFlags & 2)
         return false;
     return true;
 }
 
-struct FUN_005fc590_shell
-{
-    char pad[0x30];
-    char cFlags;
-    bool IsFlag4Clear();
-};
-
 // @fnv 0x005fc590
-bool FUN_005fc590_shell::IsFlag4Clear()
+bool TESEyes::IsFlag4Clear()
 {
     if (cFlags & 4)
         return false;
     return true;
 }
-
-struct FUN_005fc420_shell
-{
-    bool IsNotEqual(TESForm* apCompare);
-};
 
 struct FUN_005e79a0_t
 {
@@ -106,134 +56,69 @@ struct FUN_005e79a0_t
 };
 
 // @fnv 0x005fc420
-bool FUN_005fc420_shell::IsNotEqual(TESForm* apCompare)
+bool TESEyes::IsNotEqual(TESForm* apCompare)
 {
     TESEyes* pcomp = dynamic_cast<TESEyes*>(apCompare);
     if (pcomp == 0)
         return true;
     if (reinterpret_cast<FUN_005e79a0_t*>(this)->FUN_00485270(pcomp))
         return true;
-    if (reinterpret_cast<FUN_005fc4d0_shell*>(pcomp)->IsFlagSet() !=
-        reinterpret_cast<FUN_005fc4d0_shell*>(this)->IsFlagSet())
+    if (pcomp->IsFlagSet() !=
+        this->IsFlagSet())
         return true;
-    if (reinterpret_cast<FUN_005fc530_shell*>(pcomp)->IsNotFlag2Set() !=
-        reinterpret_cast<FUN_005fc530_shell*>(this)->IsNotFlag2Set())
+    if (pcomp->IsNotFlag2Set() !=
+        this->IsNotFlag2Set())
         return true;
-    if (reinterpret_cast<FUN_005fc590_shell*>(pcomp)->IsFlag4Clear() !=
-        reinterpret_cast<FUN_005fc590_shell*>(this)->IsFlag4Clear())
+    if (pcomp->IsFlag4Clear() !=
+        this->IsFlag4Clear())
         return true;
     return false;
 }
 
 void _Deallocate(void*);
-struct Holder
-{
-    void FUN_005fc120();
-    void* ReleaseIfFlagged(unsigned int);
-};
-// Calls FUN_005fc120, then deallocates this if bit 0 of flags is set, and returns this.
+// Calls Destroy, then deallocates this if bit 0 of flags is set, and returns this.
 // @fnv 0x005fc0f0
-void* Holder::ReleaseIfFlagged(unsigned int flags)
+void* TESEyes::ReleaseIfFlagged(unsigned int flags)
 {
-    FUN_005fc120();
+    Destroy();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-struct FUN_004855a0
-{
-    char _pad[0x18];
-    void M();
-};
-struct FUN_00485680
-{
-    void M();
-};
-struct S_00487010
-{
-    char _pad[0x0C];
-    void FUN_00487010();
-};
-struct FUN_0048e370_obj
-{
-    char _pad[0x0C];
-    void FUN_0048e370(unsigned int);
-};
 void __cdecl FUN_004858f0(unsigned int, unsigned char);
-struct FUN_005fc1d0_Obj : FUN_00485680, FUN_004855a0
-{
-    S_00487010 s;
-    FUN_0048e370_obj t;
-    char cFlags;
-    void FUN_005fc1d0();
-};
 // @fnv 0x005fc1d0
-void FUN_005fc1d0_Obj::FUN_005fc1d0()
+void TESEyes::SaveEyes()
 {
-    FUN_004855a0::M();
-    s.FUN_00487010();
-    t.FUN_0048e370(0x4E4F4349);
+    TESForm::FUN_004855a0();
+    TESFullName::FUN_00487010();
+    TESTexture::Save(0x4E4F4349);
     FUN_004858f0(0x41544144, cFlags);
-    FUN_00485680::M();
+    TESForm::FUN_00485680();
 }
 
 struct FUN_005e78f0_t
 {
     void FUN_004851b0(TESForm* apForm);
 };
-struct FUN_005fc550_shell
-{
-    void FUN_005fc550(bool flag);
-};
-struct FUN_005fc5b0_shell
-{
-    void FUN_005fc5b0(bool flag);
-};
-struct FUN_005fc3a0_shell
-{
-    void CopyFromEyes(TESForm* apCopy);
-};
 // @fnv 0x005fc3a0
-void FUN_005fc3a0_shell::CopyFromEyes(TESForm* apCopy)
+void TESEyes::CopyFromEyes(TESForm* apCopy)
 {
     TESEyes* eyes = dynamic_cast<TESEyes*>(apCopy);
     if (!eyes)
         return;
     ((FUN_005e78f0_t*)this)->FUN_004851b0(apCopy);
-    ((FUN_005fc4f0_shell*)this)->SetFlag(((FUN_005fc4d0_shell*)eyes)->IsFlagSet());
-    ((FUN_005fc550_shell*)this)->FUN_005fc550(((FUN_005fc530_shell*)eyes)->IsNotFlag2Set());
-    ((FUN_005fc5b0_shell*)this)->FUN_005fc5b0(((FUN_005fc590_shell*)eyes)->IsFlag4Clear());
+    this->SetFlag(eyes->IsFlagSet());
+    this->SetMale(eyes->IsNotFlag2Set());
+    this->SetFemale(eyes->IsFlag4Clear());
 }
 
-struct TESNPC;
-struct TESHairRaceResult;
-struct TESHairCanBeNPCData
-{
-    TESHairRaceResult* FUN_004ac110();
-};
 struct LH
 {
     bool IsInList(TESNPC*&);
 };
-struct TESDataHandler
-{
-    BSSimpleList<TESNPC*>* GetBGSRecipeCategoryList();
-};
-struct TESActorBase
-{
-    int GetSex();
-};
-struct TESNPC : public TESActorBase
-{
-    TESHairCanBeNPCData* FUN_004ac110();
-};
-struct FUN_005fc5f0_shell : public TESEyes
-{
-    bool CanBeNPC(TESNPC* npc);
-};
 // @fnv 0x005fc5f0
-bool FUN_005fc5f0_shell::CanBeNPC(TESNPC* npc)
+bool TESEyes::CanBeNPC(TESNPC* npc)
 {
     bool result = false;
     if (npc && npc->FUN_004ac110())
@@ -241,14 +126,14 @@ bool FUN_005fc5f0_shell::CanBeNPC(TESNPC* npc)
         TESNPC* race = (TESNPC*)this;
         if (((LH*)((TESDataHandler*)npc->FUN_004ac110())->GetBGSRecipeCategoryList())->IsInList(race))
         {
-            switch (npc->GetSex())
+            switch (npc->TESActorBase::GetSex())
             {
             case 0:
-                if (((FUN_005fc530_shell*)this)->IsNotFlag2Set())
+                if (this->IsNotFlag2Set())
                     result = true;
                 break;
             case 1:
-                if (((FUN_005fc590_shell*)this)->IsFlag4Clear())
+                if (this->IsFlag4Clear())
                     result = true;
                 break;
             }
@@ -257,59 +142,32 @@ bool FUN_005fc5f0_shell::CanBeNPC(TESNPC* npc)
     return result;
 }
 
-namespace fnv_005fc550 {
-struct FUN_005fc550_shell
-{
-    char pad[0x30];
-    char cFlags;
-    void FUN_005fc550(bool aFlag);
-};
-
 // Sets or clears bit 2 of cFlags depending on aFlag: clears it when aFlag is true, sets it otherwise.
 // @fnv 0x005fc550
-void FUN_005fc550_shell::FUN_005fc550(bool aFlag)
+void TESEyes::SetMale(bool aFlag)
 {
     if (aFlag)
         cFlags &= ~2;
     else
         cFlags |= 2;
 }
-}  // namespace fnv_005fc550
-
-namespace fnv_005fc5b0 {
-struct FUN_005fc5b0_shell
-{
-    char pad[0x30];
-    char cFlags;
-    void FUN_005fc5b0(bool aFlag);
-};
 
 // Clears bit 4 of cFlags when aFlag is true, otherwise sets bit 4.
 // @fnv 0x005fc5b0
-void FUN_005fc5b0_shell::FUN_005fc5b0(bool aFlag)
+void TESEyes::SetFemale(bool aFlag)
 {
     if (aFlag)
         cFlags &= ~4;
     else
         cFlags |= 4;
 }
-}  // namespace fnv_005fc5b0
-
-struct FUN_005fc220_shell : public TESEyes
-{
-    bool LoadEyes(TESFile*);
-};
-
-struct TESFileX
-{
-    int GetTESForm();
-};
 
 // Loads a TESEyes record from the file, handling EDID, OBND, FULL, ICON and DATA chunks, and returns false if the record type is not 0xb.
 // @fnv 0x005fc220
-bool FUN_005fc220_shell::LoadEyes(TESFile* apFile)
+bool TESEyes::Load(TESFile* apFile)
 {
-    if (((TESFileX*)apFile)->GetTESForm() != 0xb)
+    // GetTESForm (0x00472660): this caller compares the full EAX result; preserve its int return view.
+    if ((apFile->*reinterpret_cast<int (TESFile::*)()>(&TESFile::GetTESForm))() != 0xb)
         return false;
     LoadRecordHeader(apFile);
     int chunkid;
@@ -327,10 +185,10 @@ bool FUN_005fc220_shell::LoadEyes(TESFile* apFile)
             readOBNDSubRecord(apFile);
             break;
         case 0x4c4c5546:
-            TESFullNameLoader::LoadFullNameChunk(this, apFile);
+            TESFullName::LoadFullNameChunk(this, apFile);
             break;
         case 0x4e4f4349:
-            TESTextureLoader::ReadTextureData(this, apFile);
+            TESTexture::ReadTextureData(this, apFile);
             break;
         case 0x41544144:
             apFile->GetChunkData(&cFlags, 1);

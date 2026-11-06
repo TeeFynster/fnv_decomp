@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 
 // src/staging/blk_00e20000_od_o2_oy_gs_nood_nogs_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00e20000_od.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /Oy /GS- /EHsc /Gy (unit lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
@@ -6,35 +8,32 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-} __m128;
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_setzero_ps();
-    __m128 _mm_load_ss(const float*);
-    void _mm_store_ps(float*, __m128);
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_setzero_ps;
+using ::_mm_load_ss;
+using ::_mm_store_ps;
 }
 
 struct Invert6Vector
 {
     union
     {
-        __m128 quad;
+        LocalM128 quad;
         float component[4];
     };
     __forceinline void multiply(float factor)
     {
-        __m128 scalar = _mm_load_ss(&factor);
+        LocalM128 scalar = _mm_load_ss(&factor);
         quad = _mm_mul_ps(_mm_shuffle_ps(scalar, scalar, 0), quad);
     }
     __forceinline void addMultiple(float factor, const Invert6Vector& source)
     {
-        __m128 scalar = _mm_load_ss(&factor);
+        LocalM128 scalar = _mm_load_ss(&factor);
         quad = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(scalar, scalar, 0), source.quad), quad);
     }
 };

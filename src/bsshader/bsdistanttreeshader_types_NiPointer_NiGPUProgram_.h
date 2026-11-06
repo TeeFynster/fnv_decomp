@@ -2,7 +2,6 @@
 #ifndef FNV_NIPOINTER_NIGPUPROGRAM_H
 #define FNV_NIPOINTER_NIGPUPROGRAM_H
 
-#include "layout_support.h"
 class NiGPUProgram;
 #pragma pack(push, 4)
 class NiPointer_NiGPUProgram_

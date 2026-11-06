@@ -5,18 +5,36 @@
 
 // src/fallout/ai/mobileobject_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/ai/mobileobject.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
-class ExtraDismemberedLimbs;
-class bhkCharacterController;
-#include "../../../include/layout_support.h"
-#include "../../../include/Actor.h"
-#include "../../../include/BaseProcess.h"
-#include "mobileobject_private/mobileobject_types_TESPackage.h"
-#include "mobileobject_private/mobileobject_interface.h"
-#include "../../../include/BSAudio.h"
-#include "../../../include/SoundPlaybackHandle.h"
-extern TESDataHandler* g_dataHandler;
-#include "mobileobject_private/mobileobject_packet.h"
-bhkCharacterController* CopyCharacterControllerVector(bhkCharacterController* output, const NiPoint3& point);
+#include "../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../../include/Setting.h"
+#include "../../../include/hkVector4.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/bhkCollisionObject.h"
 struct UnkCallee
 {
     virtual void F0();
@@ -40,11 +58,6 @@ struct UnkHolder
     void FUN_00c72210();
 };
 
-struct bhkWorldObject;
-struct bhkCollisionObject
-{
-    bhkWorldObject* FUN_006fa820();
-};
 struct bhkRigidBody_shell
 {
     int FUN_00517630();
@@ -53,30 +66,18 @@ struct bhkRigidBody_shell
 };
 bhkCollisionObject* __cdecl FUN_0043b610(NiAVObject*);
 bool __cdecl FUN_00c8cce0(int*);
-struct FNV_ALIGN(16) bhkUnaryAction
+// LocalVec4_0062b930: 16-byte aligned vector stand-in for FUN_0062b930 (ctor 0x006815c0, set 0x004b4d50); it is not
+// bhkUnaryAction, whose constructor is 0x0056d410.
+struct __declspec(align(16)) LocalVec4_0062b930
 {
     char buf[16];
-    bhkUnaryAction();
+    LocalVec4_0062b930();
     void Set(float, float, float, float);
     void FUN_00553f70(void*);
 };
 struct Vec3Arg
 {
     float* FUN_00560d30(int);
-};
-class NiNode
-{
-  public:
-    unsigned int FUN_0043b480();
-    NiAVObject* FUN_0043b4a0(unsigned int);
-};
-class NiAVObject
-{
-  public:
-    virtual void v0();
-    virtual void v4();
-    virtual void v8();
-    virtual NiNode* IsSceneNode();
 };
 
 // @fnv 0x0062b930
@@ -93,7 +94,7 @@ void __cdecl FUN_0062b930(NiAVObject* apObject, Vec3Arg* apVec, bool abFlag)
                 int c = e->FUN_00517630();
                 if (FUN_00c8cce0(&c))
                 {
-                    bhkUnaryAction l;
+                    LocalVec4_0062b930 l;
                     l.Set(*apVec->FUN_00560d30(0), *apVec->FUN_00560d30(1), *apVec->FUN_00560d30(2), 0.0f);
                     if (!abFlag)
                     {
@@ -359,13 +360,6 @@ void xRef::FUN_009ae280()
 }
 
 #include <xmmintrin.h>
-class Point9BE
-{
-  public:
-    Point9BE();
-    Point9BE(float fX, float fY, float fZ);
-    float x, y, z;
-};
 
 class Matrix9BE
 {
@@ -375,14 +369,6 @@ class Matrix9BE
     float m20, m21, m22;
 };
 
-class hkVector4_9BE
-{
-  public:
-    hkVector4_9BE();
-    hkVector4_9BE(float fX, float fY, float fZ, float fW);
-    void Set(float fX, float fY, float fZ, float fW);
-    __m128 m_vComponents;
-};
 
 class Filter9BE
 {
@@ -392,12 +378,11 @@ class Filter9BE
     unsigned int m_uiBits;
 };
 
-class Node9BE;
 
 class Entity9BE
 {
   public:
-    void SetLinearVelocity(const hkVector4_9BE& kMotionVelocity);
+    void SetLinearVelocity(const hkVector4& kMotionVelocity);
 };
 
 class WorldObject9BE
@@ -407,31 +392,9 @@ class WorldObject9BE
     Entity9BE* GetEntity();
 };
 
-class CollisionObject9BE
-{
-  public:
-    WorldObject9BE* GetWorldObject();
-};
 
-class NiNode9BE;
 
-class Node9BE
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual NiNode9BE* IsSceneNode();
-    const Matrix9BE& GetRotate();
-};
 
-class NiNode9BE : public Node9BE
-{
-  public:
-    unsigned int GetArrayCount();
-    Node9BE* GetAt(unsigned int uiIndex);
-};
 
 class Shape9BE
 {
@@ -501,7 +464,7 @@ class World9BE
     virtual void v0c4();
     virtual void v0c8();
     virtual void v0cc();
-    virtual void HandleNode(Node9BE* pkNode, int iA, int iB, unsigned int uiFilterInfo, int iC);
+    virtual void HandleNode(NiAVObject* pkNode, int iA, int iB, unsigned int uiFilterInfo, int iC);
     bool IsActive();
 };
 
@@ -511,8 +474,8 @@ class ControllerInfo9BE
     ControllerInfo9BE(int iType);
     ~ControllerInfo9BE();
     void SetScale(float fScale);
-    void SetNode(Node9BE* pkNode);
-    void SetPosition(const Point9BE* pkPos);
+    void SetNode(NiAVObject* pkNode);
+    void SetPosition(const NiPoint3* pkPos);
     void SetWorld(World9BE* pkWorld);
     void SetHeight(float m_fGlyphExtent);
     void SetShape(Shape9BE* pkShape);
@@ -534,7 +497,7 @@ class ControllerInfo9BE
     __m128 m_qb0;
 };
 
-class Actor9BE;
+class ProjectilePhysicsReference;
 
 class Controller9BE
 {
@@ -594,17 +557,17 @@ class Controller9BE
     virtual void SetState(int iState);
     static void* operator new(unsigned int uiSize);
     static void operator delete(void* pvMem);
-    Controller9BE(ControllerInfo9BE& kInfo, Actor9BE* pkActor);
+    Controller9BE(ControllerInfo9BE& kInfo, ProjectilePhysicsReference* pkActor);
     void SetEnabled(bool bEnabled);
     void SetMode(int iMode);
-    void SetUp(const hkVector4_9BE& kUp);
-    void SetActor(Actor9BE* pkActor);
+    void SetUp(const hkVector4& kUp);
+    void SetActor(ProjectilePhysicsReference* pkActor);
     void SetFallDistance(float fDistance);
     World9BE* GetWorld();
     void SetWorld(World9BE* pkWorld);
-    Node9BE* GetNode();
-    void SetNode(Node9BE* pkNode);
-    void SetPosition(Point9BE& kPos);
+    NiAVObject* GetNode();
+    void SetNode(NiAVObject* pkNode);
+    void SetPosition(NiPoint3& kPos);
     Filter9BE GetFilter();
     unsigned int unk04;
     unsigned int unk08;
@@ -1329,7 +1292,7 @@ class Target9BE
     virtual void v1c4();
     virtual void v1c8();
     virtual void v1cc();
-    virtual Node9BE* Get3D();
+    virtual NiAVObject* Get3D();
     Filter9BE GetFilter();
     unsigned int unk04;
     unsigned int unk08;
@@ -1385,7 +1348,8 @@ class Base9BE
     float GetHeight();
 };
 
-class Actor9BE
+// Projectile physics view: +0xFC is a target reference (Projectile::WeaponHitData); Actor has a pointer list there.
+class ProjectilePhysicsReference
 {
   public:
     virtual void v000();
@@ -1504,7 +1468,7 @@ class Actor9BE
     virtual void v1c4();
     virtual void v1c8();
     virtual void v1cc();
-    virtual Node9BE* Get3D();
+    virtual NiAVObject* Get3D();
     virtual void v1d4();
     virtual void v1d8();
     virtual void v1dc();
@@ -1513,7 +1477,7 @@ class Actor9BE
     virtual void v1e8();
     virtual void v1ec();
     virtual void v1f0();
-    virtual const Point9BE* GetPos();
+    virtual const NiPoint3* GetPos();
     Controller9BE* GetController();
     Middle9BE* GetMiddle();
     bool IsFlagSet(int iFlag);
@@ -1585,36 +1549,31 @@ class Actor9BE
     Target9BE* m_pkTarget;
 };
 
-class Setting9BE
-{
-  public:
-    float* GetFloat();
-};
-extern Setting9BE g_kSettingA9BE;
-extern Setting9BE g_kSettingB9BE;
+extern Setting g_kSettingA9BE;
+extern Setting g_kSettingB9BE;
 extern const float g_fMaxFallDistance9BE;
 extern const float g_fMaxValue9BE;
 
-CollisionObject9BE* __cdecl FUN_004a8b00(Node9BE* pkNode);
-CollisionObject9BE* __cdecl FUN_004b5260(Node9BE* pkNode);
+bhkCollisionObject* __cdecl FUN_004a8b00(NiAVObject* pkNode);
+bhkCollisionObject* __cdecl FUN_004b5260(NiAVObject* pkNode);
 WorldObject9BE* __cdecl FUN_004b5a80(Entity9BE* pkEntity);
 bool __cdecl FUN_00525420();
 float __cdecl FUN_00716440();
-void __cdecl FUN_00a582f0(const Matrix9BE& kRot, const Point9BE& kIn, int iFlag, Point9BE& kA, Point9BE& kB);
-void __cdecl CopyBlock48(Node9BE* pkNode, int iFlag);
-void __cdecl FUN_00c6a0b0(Node9BE* pkNode, int iA, int iB, int iC);
-void __cdecl SetSelectionValue(Node9BE* pkNode, float fValue, int iA, int iB);
-void __cdecl ApplyCollisionObjectCount(Node9BE* pkNode, float fValue, int iA, int iB);
-void __cdecl FUN_00c6a350(Node9BE* pkNode, int iA, int iB, int iC, int iD);
-void __cdecl FUN_00c6a3d0(Node9BE* pkNode, unsigned int uiFilterInfo, int iA, int iB);
-void __cdecl TraverseObject(Node9BE* pkNode, int iA, int iB, int iC, int iD);
-void __cdecl FUN_00c69ee0(Node9BE* pkNode, int iA, int iB);
-void __cdecl FUN_00c69f50(Node9BE* pkNode, int iA, int iB);
+void __cdecl FUN_00a582f0(const Matrix9BE& kRot, const NiPoint3& kIn, int iFlag, NiPoint3& kA, NiPoint3& kB);
+void __cdecl CopyBlock48(NiAVObject* pkNode, int iFlag);
+void __cdecl FUN_00c6a0b0(NiAVObject* pkNode, int iA, int iB, int iC);
+void __cdecl SetSelectionValue(NiAVObject* pkNode, float fValue, int iA, int iB);
+void __cdecl ApplyCollisionObjectCount(NiAVObject* pkNode, float fValue, int iA, int iB);
+void __cdecl FUN_00c6a350(NiAVObject* pkNode, int iA, int iB, int iC, int iD);
+void __cdecl FUN_00c6a3d0(NiAVObject* pkNode, unsigned int uiFilterInfo, int iA, int iB);
+void __cdecl TraverseObject(NiAVObject* pkNode, int iA, int iB, int iC, int iD);
+void __cdecl FUN_00c69ee0(NiAVObject* pkNode, int iA, int iB);
+void __cdecl FUN_00c69f50(NiAVObject* pkNode, int iA, int iB);
 
 // @fnv 0x009be0a0
-void Actor9BE::FUN_009be0a0()
+void ProjectilePhysicsReference::FUN_009be0a0()
 {
-    Node9BE* pkNode = Get3D();
+    NiAVObject* pkNode = Get3D();
     if (!pkNode || !m_pkProcess || m_pkProcess->IsDead())
         return;
     Middle9BE* pkMiddle = GetMiddle();
@@ -1627,7 +1586,7 @@ void Actor9BE::FUN_009be0a0()
             FUN_00c6a350(pkNode, 4, 1, 0, 1);
             return;
         }
-        CollisionObject9BE* pkCollision = FUN_004a8b00(pkNode);
+        bhkCollisionObject* pkCollision = FUN_004a8b00(pkNode);
         WorldObject9BE* pkWorldObject = 0;
         Entity9BE* pkEntity = 0;
         if (IsFlagSet(4))
@@ -1652,8 +1611,8 @@ void Actor9BE::FUN_009be0a0()
                 }
                 else
                 {
-                    CollisionObject9BE* pkOwnerCollision = FUN_004b5260(GetOwner()->Get3D());
-                    WorldObject9BE* pkOwnerObject = pkOwnerCollision ? pkOwnerCollision->GetWorldObject() : 0;
+                    bhkCollisionObject* pkOwnerCollision = FUN_004b5260(GetOwner()->Get3D());
+                    WorldObject9BE* pkOwnerObject = pkOwnerCollision ? (WorldObject9BE*)pkOwnerCollision->FUN_006fa820() : 0;
                     if (pkOwnerObject)
                         FUN_00c6a3d0(pkNode, pkOwnerObject->GetFilter().GetGroup(), 1, 0);
                 }
@@ -1661,20 +1620,20 @@ void Actor9BE::FUN_009be0a0()
             pkWorld->HandleNode(pkNode, 1, 1, 0, 0);
             if (pkCollision)
             {
-                pkWorldObject = FUN_004b5a80(pkCollision->GetWorldObject()->GetEntity());
+                pkWorldObject = FUN_004b5a80(((WorldObject9BE*)pkCollision->FUN_006fa820())->GetEntity());
             }
-            else if (pkNode->IsSceneNode())
+            else if (pkNode->IsFadeNode())
             {
-                NiNode9BE* pkParent = (NiNode9BE*)pkNode;
-                if (pkParent->GetArrayCount())
+                NiNode* pkParent = (NiNode*)pkNode;
+                if (pkParent->FUN_00453470())
                 {
-                    for (unsigned int i = 0; i < pkParent->GetArrayCount(); i++)
+                    for (unsigned int i = 0; i < pkParent->FUN_00453470(); i++)
                     {
-                        Node9BE* pkChild = pkParent->GetAt(i);
+                        NiAVObject* pkChild = pkParent->FUN_0043b4a0(i);
                         pkCollision = FUN_004a8b00(pkChild);
                         if (pkCollision)
                         {
-                            pkWorldObject = FUN_004b5a80(pkCollision->GetWorldObject()->GetEntity());
+                            pkWorldObject = FUN_004b5a80(((WorldObject9BE*)pkCollision->FUN_006fa820())->GetEntity());
                             break;
                         }
                     }
@@ -1683,12 +1642,12 @@ void Actor9BE::FUN_009be0a0()
             if (pkWorldObject && GetBaseObject()->IsSmall())
             {
                 pkEntity = pkWorldObject->GetEntity();
-                Point9BE kIntersectionOffset(GetBaseObject()->GetX(), GetBaseObject()->GetY(), GetBaseObject()->GetZ());
-                Point9BE kMotionVelocity;
-                hkVector4_9BE kHkVelocity;
-                Matrix9BE kRot = Get3D()->GetRotate();
-                FUN_00a582f0(kRot, Point9BE(0.0f, 0.0f, 0.0f), 1, kIntersectionOffset, kMotionVelocity);
-                kHkVelocity.Set(kMotionVelocity.x, kMotionVelocity.y, kMotionVelocity.z, 0.0f);
+                NiPoint3 kIntersectionOffset(GetBaseObject()->GetX(), GetBaseObject()->GetY(), GetBaseObject()->GetZ());
+                NiPoint3 kMotionVelocity;
+                hkVector4 kHkVelocity;
+                Matrix9BE kRot = reinterpret_cast<const Matrix9BE&>(Get3D()->FUN_00461130());
+                FUN_00a582f0(kRot, NiPoint3(0.0f, 0.0f, 0.0f), 1, kIntersectionOffset, kMotionVelocity);
+                kHkVelocity.set(kMotionVelocity.x, kMotionVelocity.y, kMotionVelocity.z, 0.0f);
                 pkEntity->SetLinearVelocity(kHkVelocity);
             }
             return;
@@ -1720,7 +1679,7 @@ void Actor9BE::FUN_009be0a0()
             pkController = new Controller9BE(kInfo, this);
             pkController->SetEnabled(FUN_00525420());
             pkController->SetMode(1);
-            hkVector4_9BE kUp(-g_fMaxValue9BE, 0.0f, 0.0f, 0.0f);
+            hkVector4 kUp(-g_fMaxValue9BE, 0.0f, 0.0f, 0.0f);
             pkController->SetUp(kUp);
             m_pkProcess->SetController(pkController);
             pkController->SetActor(this);
@@ -1734,7 +1693,7 @@ void Actor9BE::FUN_009be0a0()
                 pkController->SetFallDistance(g_fMaxFallDistance9BE);
             World9BE* pkOldWorld = pkController->GetWorld();
             pkController->SetWorld(pkWorld);
-            Node9BE* pkOldNode = pkController->GetNode();
+            NiAVObject* pkOldNode = pkController->GetNode();
             bool bReset = true;
             if (pkOldNode != pkNode)
             {
@@ -1747,7 +1706,7 @@ void Actor9BE::FUN_009be0a0()
                 FUN_00c6a350(pkNode, 4, 1, 0, 1);
                 bReset = true;
             }
-            Point9BE kPos = *GetPos();
+            NiPoint3 kPos = *GetPos();
             if (pkOldWorld != pkWorld)
             {
                 if (pkOldWorld)

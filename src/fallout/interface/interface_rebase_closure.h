@@ -6,7 +6,6 @@
 #include "interface_rebase_types_Tile.h"
 #include "interface_rebase_Menu.h"
 #include "interface_rebase_PlayerCharacter.h"
-#include "interface_rebase_PC_NiAVObject.h"
 #include "interface_rebase_PC_NiNode.h"
 #include "interface_rebase_BSFadeNode.h"
 #include "interface_rebase_types_FOPipboyManager.h"
@@ -37,6 +36,6 @@ class AutoMemContext
 };
 FNV_STATIC_ASSERT(sizeof(MEM_CONTEXT) == 4);
 FNV_STATIC_ASSERT(sizeof(AutoMemContext) == 4);
-FNV_STATIC_ASSERT(offsetof(InterfaceManager, screenAspectRatio) == 0x4D0);
+FNV_STATIC_ASSERT(offsetof(InterfaceManager, fScreenAspectRatio) == 0x4D0);
 extern PlayerCharacter* g_thePlayer;
 #endif

@@ -1,5 +1,18 @@
 // fallout_shared/tesqueststage.cpp: PlayerQuestData, TESQuest, StageHolder (15 functions)
 
+#include "../../include/MemoryManager.h"
+#include "../../include/PerkEntryConditionSet.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/Script.h"
+#include "../../include/ScriptHeaderData.h"
+#include "../../include/ScriptReferencedObject.h"
+#include "../../include/ScriptVariableInfo.h"
+#include "../../include/TESAIForm.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESQuest.h"
+
 #include "tesqueststage_decls.h"
 #include <malloc.h>
 
@@ -28,7 +41,7 @@ bool PlayerQuestData::Load(TESFile* file)
         {
             char* data = static_cast<char*>(_alloca(file->GetChunkSize()));
             file->GetChunkData(data, 0x200);
-            DAT_011cb8ec->m_name.Set(data, 0);
+            DAT_011cb8ec->name.Set(data, 0);
         }
         break;
     case 0x52484353: {
@@ -49,7 +62,7 @@ bool PlayerQuestData::Load(TESFile* file)
         ScriptReferencedObject* object = new ScriptReferencedObject();
         unsigned int value;
         file->GetChunkData(&value);
-        object->m_iOwnerObjectOffset = value;
+        object->pForm = reinterpret_cast<TESForm*>(value);
         m_pScript.GetReferencedObjectList()->AddTail(object);
         break;
     }
@@ -57,7 +70,7 @@ bool PlayerQuestData::Load(TESFile* file)
         ScriptReferencedObject* object = new ScriptReferencedObject();
         unsigned int value;
         file->GetChunkData(&value);
-        object->m_uiFilterValue = value;
+        object->m_uiFormID = value;
         m_pScript.GetReferencedObjectList()->AddTail(object);
         break;
     }
@@ -143,9 +156,9 @@ void QuestStage::MarkDone(bool done)
             g_thePlayer->CompleteQuestObjective(reinterpret_cast<PlayerQuestData*>(this));
 
         Script* script = GetOffsetC();
-        if (FUN_005ac740() && script && reinterpret_cast<TESAIForm*>(script)->GetPackageList()->packages)
+        if (FUN_005ac740() && script && script->GetHeader()->dataSize)
         {
-            reinterpret_cast<TESAIForm*>(script)->GetPackageList()->m_ucPackageFlag = 0;
+            script->GetHeader()->m_bQuest = false;
             script->Run(g_thePlayer, g_thePlayer->FUN_005d43c0(false, true)->FUN_00418830());
         }
     }
@@ -182,7 +195,7 @@ void PlayerQuestData::InitItem(TESForm* form, QuestStage* stage)
     iErrorCount = Warning();
     BGSMessageWarningAuxiliary(iOldCount);
     if (iErrorCount)
-        Warning(DAT_0104ae98, stage->GetIndex(), form->GetEditorID(), form->GetDescription());
+        Warning(DAT_0104ae98, stage->GetIndex(), static_cast<const TESForm*>(form)->GetName(), form->GetDescription());
     m_pSharedOwner = dynamic_cast<TESQuest*>(form);
     auiFormId = m_nameIndex;
     if (auiFormId)
@@ -197,17 +210,18 @@ void PlayerQuestData::InitItem(TESForm* form, QuestStage* stage)
 
 void __fastcall ResetFlags(void* pThis);
 
-class RecursiveSpinLock
+// The 8-byte item list at quest stage +4 (a BSSimpleList: ctor 0x0096a2d0, dtor 0x0046ffb0 via FUN_0060f260).
+class QuestStageItemList
 {
   public:
-    RecursiveSpinLock();
+    QuestStageItemList();
 };
 
 // @fnv 0x0060f210
 void* __fastcall FUN_0060f210(char* pThis)
 {
     ResetFlags(pThis);
-    ((RecursiveSpinLock*)(pThis + 4))->RecursiveSpinLock::RecursiveSpinLock();
+    ((QuestStageItemList*)(pThis + 4))->QuestStageItemList::QuestStageItemList();
     return pThis;
 }
 
@@ -282,31 +296,11 @@ void StageHolder::FUN_0060f4a0(TESQuest* quest, bool done)
     }
 }
 
-struct CondS
-{
-    char p[8];
-    CondS();
-    ~CondS();
-};
-struct HdrS
-{
-    char p[0x10];
-    char flag;
-};
-struct ScriptS
-{
-    char p[0x54];
-    ScriptS();
-    ~ScriptS();
-    void FUN_00484ab0(int);
-    void NotifySaveLoadGameOfFormChange();
-    HdrS* GetHeader();
-};
 struct FUN_0060f520
 {
     char b0[4];
-    CondS cond;
-    ScriptS script;
+    PerkEntryConditionSet cond;
+    Script script;
     int v60;
     char v64;
     char v65;
@@ -321,9 +315,9 @@ FUN_0060f520::FUN_0060f520()
 {
     memset(this, 0, 1);
     v70 = 0;
-    script.FUN_00484ab0(0);
+    script.SetInitializationState(false);
     script.NotifySaveLoadGameOfFormChange();
-    script.GetHeader()->flag = 1;
+    script.GetHeader()->m_bQuest = true;
     v60 = 0;
     v68 = 0;
     v6c = 0;
@@ -404,49 +398,14 @@ class F5F0DecalData
     int unk00;
 };
 
-class F5F0EntryList
-{
-  public:
-    ~F5F0EntryList();
-    int unk00;
-    int unk04;
-};
-
-class F5F0EntryMap
-{
-  public:
-    ~F5F0EntryMap();
-    int unk00;
-    int unk04;
-    int unk08;
-};
-
 class FUN_0060f5f0
 {
   public:
     ~FUN_0060f5f0();
 
     int m_iArrayLength;
-    F5F0EntryList m_kEntries;
-    F5F0EntryMap m_kFormatEntries;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
+    PerkEntryConditionSet m_kConditions;
+    Script m_kScript;
     int unk60;
     int unk64;
     F5F0DecalData* m_pkDecalData;

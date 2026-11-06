@@ -1,3 +1,10 @@
+#include "../../../../include/Actor.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/BGSProjectile.h"
+#include "../../../../include/MissileProjectile.h"
+#include "../../../../include/bhkConstraint.h"
+#include "../../../../include/bhkHingeConstraint.h"
+#include "../../../../include/NiPoint3.h"
 
 // src/fallout/ai/combat/missileprojectile_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy /Oy- (unit src/fallout/ai/combat/missileprojectile_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -10,42 +17,9 @@
 extern int DAT_011c6278;
 int __cdecl FUN_009b7cb0();
 extern char const* const g_01268310_arg1;
-struct FUN_009ba4d0_shell
-{
-    char const* const* GetArg1Ptr();
-};
 extern "C" void __cdecl FUN_00c89640(void*);
 extern "C" void __cdecl __Dummy_00b6fef0(void*, unsigned int);
-struct bhkConstraint
-{
-    virtual ~bhkConstraint();
-    void* DestroyConstraint(unsigned int);
-};
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-};
-struct BeamProjectile
-{
-    void LoadProjectile(BGSLoadFormBuffer*);
-};
-struct MissileProjectile : BeamProjectile
-{
-    void FUN_009baad0(BGSLoadFormBuffer*);
-};
-struct BGSProjectile
-{
-    bool GetFlag(unsigned int) const;
-};
-struct FUN_009b7c90_shell : BGSProjectile
-{
-    bool FUN_009b7c90();
-};
 extern "C" void __cdecl _delete(void*, unsigned int);
-struct bhkHingeConstraint : bhkConstraint
-{
-    void* FUN_009ba520(unsigned int);
-};
 struct TlsBlock_t
 {
     int unk000;
@@ -522,6 +496,7 @@ struct V
     V* ApplyScaled(V* out, float f);
     V* FUN_00439ef0(V* out, const V* a);
     void FUN_004a0c10();
+    void FUN_0043d410(float x, int y, int z);
     V* FUN_00439e90(V* out, V* a);
     void FUN_0062aea0();
 };
@@ -573,13 +548,6 @@ struct Xform
     V* FUN_00524c40(V* out, V* b);
 };
 
-struct Vec3
-{
-    float x;
-    int y;
-    int z;
-    void FUN_0043d410(float a, int b, int c);
-};
 
 struct Str
 {
@@ -966,8 +934,6 @@ struct Obj
     virtual void v174();
     virtual float vf2bc(int a);
     Obj** FUN_006815c0();
-    bool FUN_00573090(int a);
-    Obj* FUN_005d43c0();
     Obj* FUN_0042e8c0();
     float FUN_008d01e0();
     Obj* FUN_00a5d2c0(Ctrl* c);
@@ -976,7 +942,7 @@ struct Obj
     void FUN_00440490(float f);
     unsigned int FUN_0043b480();
     Obj* FUN_0043b4a0(unsigned int i);
-    void FUN_00a59c60(Vec3* v);
+    void FUN_00a59c60(NiPoint3* v);
     Obj* FUN_004543c0();
     void FUN_00440460(void* a);
     void FUN_0043fa80(void* a);
@@ -1062,323 +1028,41 @@ Obj* FUN_004b5a80(int a);
 Obj* FUN_0056f930(int a);
 void FUN_0062b8d0(Obj* a, V* b, int c);
 
-struct Actor
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual Obj* vfc();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual Obj* vf9c(const Str& s);
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void vfb8(V* v);
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void vfc8(Big* b);
-    virtual void v051();
-    virtual void vfd0(Obj* a, int b, int c, int d, int e);
-    virtual void v053();
-    virtual void v054();
-    virtual void vfdc(Obj* a, int b);
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual bool vf100();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual Obj* vf1d0();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual V* vf1f4();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void vf2a4();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual float vf2bc(int a);
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    Sub unk88;
-    unsigned char unk8C;
-    unsigned char unk8D;
-    unsigned char unk8E;
-    unsigned char unk8F;
-    unsigned char unk90;
-    unsigned char unk91;
-    unsigned char unk92;
-    unsigned char unk93;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    float unk158;
-
-    void FUN_009b90b0();
-    Obj* FUN_008d6f30();
-    void FUN_00575830(V* v);
-    void UpdateNodeTransform(int a, int b);
-    float FUN_00931d70();
-    Obj* FUN_009306d0();
-    Obj* FUN_00874480();
-    float GetFirstLightParameter();
-    float FUN_00508070();
-    int FUN_008d8b80();
-    void SetWhich(int a);
-    void FUN_005de0a0(int a, int b);
-    float FUN_009669c0(V* out, float f);
-    V* FUN_009b7010(V* out);
-    void FUN_009bc8f0();
-    void HandleMissileImpact();
-};
 
 struct VRes
 {
     void FUN_0053d280();
 };
 
+}  // namespace fnv_009b90b0
+
 // @fnv 0x009b90b0
-void Actor::FUN_009b90b0()
+void MissileProjectile::FUN_009b90b0()
 {
+    using namespace fnv_009b90b0;
+    using fnv_009b90b0::Obj;
+    using fnv_009b90b0::V;
+    using fnv_009b90b0::Path;
     static float s_offset = *DAT_011ce1e8.FUN_00403e20();
     bool noMove = DAT_011ddf38->FUN_0042ce10();
-    if (!unk88.FUN_008256d0())
+    if (!kImpacts.IsEmpty())
     {
-        Obj* p24 = vf1d0();
+        Obj* p24 = ((Obj*)GetNiNode());
         Obj* p28 = p24->vfc();
-        Owner* owner = (Owner*)*unk88.FUN_006815c0();
-        unk158 = 10.0f;
-        if (unk150 == 4)
+        Owner* owner = (Owner*)kImpacts.GetItem();
+        fUnk158 = 10.0f;
+        if (uiImpactResult == 4)
         {
-            owner = (Owner*)(unk88.FUN_00726070() ? *unk88.FUN_00726070()->FUN_006815c0() : 0);
+            owner = (Owner*)(kImpacts.GetNext() ? kImpacts.GetNext()->GetItem() : 0);
         }
         if (owner && owner->unk00 && owner->unk00->vf100())
         {
             if (owner->unk28)
                 return;
             Obj* p34 = owner->unk00;
-            if (p34->FUN_00573090(owner->unk24))
+            if (reinterpret_cast<Actor*>(p34)->FUN_00573090(owner->unk24))
             {
-                Holder* p38 = (Holder*)p34->FUN_005d43c0()->FUN_0042e8c0();
+                Holder* p38 = (Holder*)reinterpret_cast<Obj*>(reinterpret_cast<Actor*>(p34)->FUN_005d43c0())->FUN_0042e8c0();
                 bool found = false;
                 for (unsigned int i = 0; i < p38->unk20.FUN_0044ddc0(); i++)
                 {
@@ -1394,7 +1078,7 @@ void Actor::FUN_009b90b0()
                     float f64 = p60->FUN_008d01e0();
                     if (p60 == 0)
                     {
-                        unk90 = 0;
+                        byte90 = 0;
                         return;
                     }
                     {
@@ -1415,10 +1099,10 @@ void Actor::FUN_009b90b0()
                                     FUN_004ade40(p88, p90, p88, 0);
                             }
                         }
-                        Vec3 v9c;
+                        V v9c;
                         v9c.FUN_0043d410(0.0f, 0, 0);
-                        p60->FUN_00a59c60(&v9c);
-                        Obj* pa0 = FUN_008d6f30()->FUN_004543c0();
+                        p60->FUN_00a59c60((NiPoint3*)&v9c);
+                        Obj* pa0 = ((Obj*)GetParentCell())->FUN_004543c0();
                         if (pa0)
                             pa0->vfd0(p60, 1, 0, 0, 1);
                         p60->FUN_00440460(&DAT_011f426c);
@@ -1427,9 +1111,9 @@ void Actor::FUN_009b90b0()
                         {
                             Xform xd4 = *p88->FUN_0043b4a0(0)->FUN_00461130();
                             if (!noMove)
-                                FUN_00575830(&owner->unk04);
-                            UpdateNodeTransform(0, 0);
-                            Vec3 ve0;
+                                SetLocationOnReference(*(NiPoint3*)&owner->unk04);
+                            FUN_009bf470(0, 0);
+                            V ve0;
                             ve0.FUN_0043d410(0.0f, 0, 0);
                             p28->vfb8((V*)&ve0);
                             Xform x114 = *p28->FUN_00461130();
@@ -1444,30 +1128,30 @@ void Actor::FUN_009b90b0()
                             p88->FUN_0043b4a0(0)->FUN_00440490(xd4.scale);
                         }
                         p28->vfdc(p60, 1);
-                        p60->AssignFixedString(FUN_009b7cb0());
+                        p60->AssignFixedString(fnv_009b90b0::FUN_009b7cb0());
                         FUN_00c69f50(p60, 1, 1);
                         FUN_00c6a350(p60, 4, 1, 1, 1);
-                        Vec3 v188;
+                        V v188;
                         v188.FUN_0043d410(0.0f, 0, 0);
-                        p28->FUN_00a59c60(&v188);
+                        p28->FUN_00a59c60((NiPoint3*)&v188);
                         bool blocked = false;
                         if (p60)
                         {
                             int p190 = 0;
-                            Obj* p194 = FUN_008d6f30()->FUN_004543c0();
+                            Obj* p194 = ((Obj*)GetParentCell())->FUN_004543c0();
                             Big big;
                             big.FUN_004a3c20();
                             V v25c;
                             v25c.FUN_006815c0();
                             V v268;
                             v268.FUN_006815c0();
-                            v25c = *vf1f4();
+                            v25c = *((V*)static_cast<const MobileObject*>(this)->GetPos());
                             V9 m28c;
                             m28c.FUN_006815c0();
-                            m28c.FUN_004a0c90(vf2bc(0));
+                            m28c.FUN_004a0c90(GetCurrentTargetDistance(false));
                             V9 m2b0;
                             m2b0.FUN_006815c0();
-                            m2b0.FUN_00524ac0(FUN_00931d70());
+                            m2b0.FUN_00524ac0(GetLooking());
                             V9 m2d4;
                             m28c = *m28c.FUN_0043f8d0(&m2d4, &m2b0);
                             m28c.FUN_00439f50(1, &v268);
@@ -1486,7 +1170,7 @@ void Actor::FUN_009b90b0()
                             }
                             if (p190)
                             {
-                                Obj* p628 = FUN_004b5260(vf1d0());
+                                Obj* p628 = FUN_004b5260(((Obj*)GetNiNode()));
                                 Obj* p630 = p628 ? p628->FUN_006fa820() : 0;
                                 Obj* p634 = FUN_004b5260((Obj*)p190);
                                 Obj* p63c = p634 ? p634->FUN_006fa820() : 0;
@@ -1501,12 +1185,12 @@ void Actor::FUN_009b90b0()
                                     n6d0.FUN_006815c0()->FUN_00cb2fc0();
                                     V v6dc;
                                     v6dc.FUN_006815c0();
-                                    vf1d0()->FUN_00461130()->rot.FUN_00439f50(1, &v6dc);
+                                    ((Obj*)GetNiNode())->FUN_00461130()->rot.FUN_00439f50(1, &v6dc);
                                     V5 v6f0;
                                     v6f0.FUN_006815c0();
                                     FUN_00553fc0(&v6f0, &v6dc);
                                     v6f0.FUN_0062aea0();
-                                    Xform x724 = *vf1d0()->FUN_00461130();
+                                    Xform x724 = *((Obj*)GetNiNode())->FUN_00461130();
                                     V v730;
                                     V v73c;
                                     V v748;
@@ -1518,21 +1202,21 @@ void Actor::FUN_009b90b0()
                                     path.FUN_009ba3d0(&n690, &n6d0, &v760.q, &v6f0);
                                     PathRef* ref = new PathRef(&path);
                                     p63c->FUN_00c8ef80(ref);
-                                    p63c->UpdateMatchingNodes(FUN_008d6f30()->FUN_004543c0());
-                                    Obj* p774 = FUN_008d6f30()->FUN_004543c0();
+                                    p63c->UpdateMatchingNodes(((Obj*)GetParentCell())->FUN_004543c0());
+                                    Obj* p774 = ((Obj*)GetParentCell())->FUN_004543c0();
                                     Big big2;
                                     big2.FUN_004a3c20();
                                     V v83c;
                                     v83c.FUN_006815c0();
                                     V v848;
                                     v848.FUN_006815c0();
-                                    v83c = *vf1f4();
+                                    v83c = *((V*)static_cast<const MobileObject*>(this)->GetPos());
                                     V9 m86c;
                                     m86c.FUN_006815c0();
-                                    m86c.FUN_004a0c90(vf2bc(0));
+                                    m86c.FUN_004a0c90(GetCurrentTargetDistance(false));
                                     V9 m890;
                                     m890.FUN_006815c0();
-                                    m890.FUN_00524ac0(FUN_00931d70());
+                                    m890.FUN_00524ac0(GetLooking());
                                     V9 m8b4;
                                     m86c = *m86c.FUN_0043f8d0(&m8b4, &m890);
                                     m86c.FUN_00439f50(1, &v848);
@@ -1540,17 +1224,17 @@ void Actor::FUN_009b90b0()
                                     Handle h;
                                     h.FUN_008c71b0(0);
                                     int t8bc;
-                                    if (FUN_009306d0())
+                                    if (((Obj*)GetPhysicsCharacterController()))
                                     {
-                                        h.val = FUN_009306d0()->FUN_0070c440(&t8bc)->val;
+                                        h.val = ((Obj*)GetPhysicsCharacterController())->FUN_0070c440(&t8bc)->val;
                                     }
                                     else
                                     {
                                         h.FUN_004a39f0(6);
                                         Obj* p8c0;
                                         int t8c4;
-                                        if (FUN_00874480() && (p8c0 = FUN_00874480(), p8c0->vf100()))
-                                            h.FUN_0059ce80(FUN_00874480()->FUN_00931ed0(&t8c4)->FUN_004a3a20());
+                                        if (((Obj*)FUN_00874480()) && (p8c0 = ((Obj*)FUN_00874480()), p8c0->vf100()))
+                                            h.FUN_0059ce80(((Obj*)FUN_00874480())->FUN_00931ed0(&t8c4)->FUN_004a3a20());
                                         else
                                             h.FUN_0059ce80(FUN_005dbe10());
                                     }
@@ -1561,7 +1245,7 @@ void Actor::FUN_009b90b0()
                                     big2.FUN_007f68a0(&v8e0);
                                     Res res2;
                                     big2.FUN_004a3fb0(&res2);
-                                    Obj* pc04 = FUN_008d6f30()->FUN_004543c0();
+                                    Obj* pc04 = ((Obj*)GetParentCell())->FUN_004543c0();
                                     pc04->vfc8(&big2);
                                     if (0)
                                     {
@@ -1600,33 +1284,33 @@ void Actor::FUN_009b90b0()
                         if (blocked)
                         {
                             if (FUN_008d8b80())
-                                SetWhich(0);
+                                FUN_008126e0(0);
                             FUN_00c69f50(p60, 1, 1);
                             FUN_00c6a350(p60, 4, 1, 1, 1);
-                            if (FUN_009306d0())
+                            if (((Obj*)GetPhysicsCharacterController()))
                             {
                                 int tcac;
-                                FUN_00c6a3d0(p60, FUN_009306d0()->FUN_0070c440(&tcac)->FUN_004a3a20(), 1, 1);
+                                FUN_00c6a3d0(p60, ((Obj*)GetPhysicsCharacterController())->FUN_0070c440(&tcac)->FUN_004a3a20(), 1, 1);
                                 if (!noMove)
                                 {
-                                    FUN_00575830(&owner->unk04);
+                                    SetLocationOnReference(*(NiPoint3*)&owner->unk04);
                                     V5 vcc0;
                                     vcc0.FUN_006815c0();
                                     FUN_004a3e00(&vcc0, &owner->unk04);
-                                    FUN_009306d0()->FUN_00c6e390(&vcc0);
+                                    ((Obj*)GetPhysicsCharacterController())->FUN_00c6e390(&vcc0);
                                 }
-                                UpdateNodeTransform(0, 0);
+                                FUN_009bf470(0, 0);
                             }
                             if (!noMove)
-                                unk90 = 0;
+                                byte90 = 0;
                         }
                         else
                         {
                             if (!noMove)
-                                FUN_00575830(&owner->unk04);
-                            UpdateNodeTransform(0, 0);
+                                SetLocationOnReference(*(NiPoint3*)&owner->unk04);
+                            FUN_009bf470(0, 0);
                             FUN_005de0a0(4, 1);
-                            vf2a4();
+                            Unk_A9();
                             FUN_00c69f50(p60, 1, 1);
                             int tcc4;
                             FUN_00c6a3d0(p28, p34->FUN_00931ed0(&tcc4)->FUN_004a3a20(), 1, 1);
@@ -1636,7 +1320,7 @@ void Actor::FUN_009b90b0()
                             {
                                 V vcdc;
                                 V vce8;
-                                ((VRes*)FUN_009b7010(&vce8)->ApplyScaled(&vcdc, FUN_009669c0(&vcd0, 2.0f)))
+                                ((VRes*)((V*)FUN_009b7010((NiPoint3*)&vce8))->ApplyScaled(&vcdc, FUN_009669c0((NiPoint3*)&vcd0, 2.0f)))
                                     ->FUN_0053d280();
                             }
                             FUN_0062b8d0(p28, &vcd0, 1);
@@ -1651,7 +1335,7 @@ void Actor::FUN_009b90b0()
             return;
         }
     }
-    unk150 = 4;
+    uiImpactResult = 4;
     HandleMissileImpact();
 }
-}  // namespace fnv_009b90b0
+

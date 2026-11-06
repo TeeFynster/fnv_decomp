@@ -3,16 +3,14 @@
 #define FNV_BGSADDONNODE_DECLS_H
 
 
-#include "TESForm.h"
+#include "layout_support.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESSound.h"
 
 class TESFormInitFlag
 {
   public:
     bool IsFormInitialized() const;
-};
-
-class TESSound : public TESForm
-{
 };
 
 class TESFileFormVersion

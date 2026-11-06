@@ -1,6 +1,9 @@
 // fallout_shared/pathfinding/pathmanager_ctxr_variant.cpp: free functions (1 function)
 
-#include "pathmanager_decls.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiUpdateData.h"
+#include "../../../include/PathingTaskData.h"
+
 class BSSpinLock_r006eae40
 {
   public:
@@ -22,10 +25,10 @@ struct ObjA
     ~ObjA();
 };
 
+// These two operations are not yet declared by the shared header.
 struct PathingTaskData_Ext : public PathingTaskData
 {
     int FUN_006ea350();
-    bool FUN_006ea490();
     void FUN_0060d4b0(int);
 };
 
@@ -88,105 +91,9 @@ struct TaskQueueInterface
     void FUN_0087ad50(void* p);
 };
 
-struct GlobalTargetObj
-{
-    virtual void Fill00();
-    virtual void Fill01();
-    virtual void Fill02();
-    virtual void Fill03();
-    virtual void Fill04();
-    virtual void Fill05();
-    virtual void Fill06();
-    virtual void Fill07();
-    virtual void Fill08();
-    virtual void Fill09();
-    virtual void Fill10();
-    virtual void Fill11();
-    virtual void Fill12();
-    virtual void Fill13();
-    virtual void Fill14();
-    virtual void Fill15();
-    virtual void Fill16();
-    virtual void Fill17();
-    virtual void Fill18();
-    virtual void Fill19();
-    virtual void Fill20();
-    virtual void Fill21();
-    virtual void Fill22();
-    virtual void Fill23();
-    virtual void Fill24();
-    virtual void Fill25();
-    virtual void Fill26();
-    virtual void Fill27();
-    virtual void Fill28();
-    virtual void Fill29();
-    virtual void Fill30();
-    virtual void Fill31();
-    virtual void Fill32();
-    virtual void Fill33();
-    virtual void Fill34();
-    virtual void Fill35();
-    virtual void Fill36();
-    virtual void Fill37();
-    virtual void Fill38();
-    virtual void Fill39();
-    virtual void Fill40();
-    virtual void Fill41();
-    virtual void Fill42();
-    virtual void Fill43();
-    virtual void Fill44();
-    virtual void Fill45();
-    virtual void Fill46();
-    virtual void Fill47();
-    virtual void Fill48();
-    virtual void Fill49();
-    virtual void Fill50();
-    virtual void Fill51();
-    virtual void Fill52();
-    virtual void Fill53();
-    virtual void Fill54();
-    virtual void NotifyDC(void* p, int a);
-    virtual void Fill56();
-    virtual void Fill57();
-    virtual void NotifyE8(void* p);
-};
-
-class NiNode;
-class GlobalObject_00633c90
-{
-  public:
-    GlobalTargetObj* operator->() const;
-    operator void*() const;
-    operator NiNode*() const;
-};
-extern GlobalObject_00633c90 g_011d6e5c;
+extern NiPointer<NiNode> g_011d6e5c;
 
 bool FUN_008c7aa0();
-
-struct NiUpdateData
-{
-    float m_uiCommandId;
-    bool m_kPointA;
-    bool m_kPointB;
-    short m_iThirdValue;
-    int m_iFourthElementInteger;
-    NiUpdateData(float f, bool a, bool b);
-};
-
-class NiNode
-{
-  public:
-    void Update(const NiUpdateData& ud);
-};
-
-template <> class NiPointer<NiNode>
-{
-  public:
-    NiNode* m_pObject;
-    NiPointer(NiNode* p = 0);
-    ~NiPointer();
-    operator NiNode*() const;
-};
 
 struct FUN_006eae40_shell
 {
@@ -1534,12 +1441,12 @@ void FUN_006eae40_shell::FUN_006eae40()
     void* pOut_b;
     while (!objA6.FUN_006ebde0())
     {
-        if (m_sub1480.TryGetNextEntry(&objA6, &pOut_b, &pFound_vv, 1) && pFound_vv->FUN_005dc980())
+        if (m_sub1480.TryGetNextEntry(&objA6, &pOut_b, &pFound_vv, 1) && pFound_vv->GetByteAtOffset64())
         {
             count_iagb += pFound_vv->FUN_006ea350();
             if ((unsigned int)count_iagb > 10)
                 break;
-            if (pFound_vv->FUN_006ea490())
+            if (pFound_vv->HasPendingMessages())
             {
                 pFound_vv->FUN_0060d4b0(0);
                 ObjC objC_oqluk;
@@ -1570,7 +1477,7 @@ void FUN_006eae40_shell::FUN_006eae40()
         }
         else
         {
-            g_011d6e5c->NotifyE8(spObj2);
+            g_011d6e5c->RemoveObject(spObj2);
         }
         bFlag_ad = true;
     }
@@ -1582,7 +1489,7 @@ void FUN_006eae40_shell::FUN_006eae40()
         }
         else
         {
-            g_011d6e5c->NotifyDC(spObj2, 1);
+            g_011d6e5c->AttachChildInAvailableSlot((NiAVObject*)(NiNode*)spObj2, true);
         }
         bFlag_ad = true;
     }
@@ -1594,7 +1501,7 @@ void FUN_006eae40_shell::FUN_006eae40()
         }
         else
         {
-            NiUpdateData ud(0.0f, false, false);
+            const NiUpdateData ud(0.0f, false, false);
             ((NiNode*)g_011d6e5c)->Update(ud);
         }
     }

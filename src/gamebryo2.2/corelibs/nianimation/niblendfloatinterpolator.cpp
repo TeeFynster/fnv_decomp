@@ -1,9 +1,17 @@
-// gamebryo2.2/corelibs/nianimation/niblendfloatinterpolator.cpp: NiBlendFloatInterpolator, NiBlendInterpolator, BlendFloatSource (12 functions)
+// gamebryo2.2/corelibs/nianimation/niblendfloatinterpolator.cpp: float blending (12 functions)
 
-#include "niblendfloatinterpolator_pre.h"
-#include "niblendfloatinterpolator_types_NiStream.h"
+#include "NiRefObject_inline.h"
+
+#include "../../../../include/BSStreamHeader.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiBlendFloatInterpolator.h"
+#include "../../../../include/NiBlendInterpolator.h"
+#include "../../../../include/NiInterpolator.h"
+#include "../../../../include/NiStream.h"
 #include "niblendfloatinterpolator_types_NiBlendFloatInterpolator.h"
-#include "NiObjectNET.h"
+
+extern float DAT_0109696c;
+extern float DAT_0109a918;
 
 // Updates the blend interpolator for the given time and target, delegating to single or multi-interpolator update paths and storing the last time.
 // @fnv 0x00a40810
@@ -24,14 +32,14 @@ bool NiBlendFloatInterpolator::Update(float time, NiObjectNET* target, float& va
 __forceinline void ReadFloat(NiBinaryStream* input, float* value)
 {
     unsigned int size = 4;
-    input->m_uiStreamFlags += input->m_pfnRead(input, value, 4, &size, 1);
+    input->m_uiAbsoluteCurrentPos += input->m_pfnRead(input, value, 4, &size, 1);
 }
 // Calls the base NiBlendInterpolator::LoadBinary, then reads a float from the stream into m_fFloatValue.
 // @fnv 0x00a40870
 void NiBlendFloatInterpolator::LoadBinary(NiStream& stream)
 {
     NiBlendInterpolator::LoadBinary(stream);
-    ReadFloat(stream.m_pUnderlyingStream, &m_fFloatValue);
+    ReadFloat(stream.m_pkIstr, &m_fFloatValue);
 }
 
 // @fnv 0x00a40640
@@ -41,7 +49,7 @@ bool NiBlendFloatInterpolator::UpdateAccumulatedTransform(float time, NiObjectNE
         time = m_fSingleInterpolatorTime;
     if (time == DAT_0109696c)
         return false;
-    if (m_pSingleInterpolator->vfn_09c(time, target, m_fFloatValue))
+    if (m_pSingleInterpolator->UpdateFloat(time, target, m_fFloatValue))
     {
         value = m_fFloatValue;
         return true;
@@ -77,7 +85,7 @@ bool NiBlendFloatInterpolator::UpdateSingleInterpolator(float time, NiObjectNET*
             float updateTime = time;
             if (!GetBlendUpdateTime(updateTime, item))
                 totalWeight -= item.m_fNormalizedWeight;
-            else if (interpolator->vfn_09c(updateTime, target, currentValue))
+            else if (interpolator->UpdateFloat(updateTime, target, currentValue))
             {
                 valid = true;
                 m_fFloatValue += m_pInterpArray[i].m_fNormalizedWeight * currentValue;
@@ -97,42 +105,20 @@ bool NiBlendFloatInterpolator::UpdateSingleInterpolator(float time, NiObjectNET*
     return true;
 }
 
-struct FUN_00a40560_shell : public NiBlendFloatInterpolator
-{
-    bool FUN_00a40560(NiInterpolator*);
-};
-
-struct Vtable_00a40560
-{
-    char pad[0xa8];
-    bool(__thiscall* fn)(void*);
-};
-
-// Calls the function pointer at offset 0xa8 in pkInterpolator's vtable and returns its bool result.
+// Returns whether the source interpolator supports float values.
 // @fnv 0x00a40560
-bool FUN_00a40560_shell::FUN_00a40560(NiInterpolator* pkInterpolator)
+bool __fastcall ControlsFloatInterpolator(NiBlendFloatInterpolator*, int, NiInterpolator* interpolator)
 {
-    return (**(Vtable_00a40560**)pkInterpolator).fn(pkInterpolator);
+    return interpolator->IsFloatValueSupported();
 }
 
-struct FUN_00a40520 : NiBlendInterpolator
-{
-    float m_fFloatValue;
-    FUN_00a40520(bool onlyUseHighestWeight, float weightThreshold, unsigned char arraySize);
-    virtual ~FUN_00a40520();
-};
-// Constructs the interpolator via NiBlendInterpolator and initializes m_fFloatValue from DAT_0109a918.
+// Constructs the blend interpolator and initializes its float value.
 // @fnv 0x00a40520
-FUN_00a40520::FUN_00a40520(bool onlyUseHighestWeight, float weightThreshold, unsigned char arraySize)
+NiBlendFloatInterpolator::NiBlendFloatInterpolator(bool onlyUseHighestWeight, float weightThreshold, unsigned char arraySize)
     : NiBlendInterpolator(onlyUseHighestWeight, weightThreshold, arraySize)
 {
     m_fFloatValue = DAT_0109a918;
 }
-
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 
 void __fastcall FUN_00a36890(void*);
 extern const void* vftable_NiBlendFloatInterpolator[];
@@ -140,7 +126,7 @@ extern const void* vftable_NiBlendFloatInterpolator[];
 // @fnv 0x00a40580
 void* __cdecl CreateNiBlendFloatInterpolator()
 {
-    void* pInterpolator = BSFadeNode::operator new(0x34);
+    void* pInterpolator = NiObject::operator new(0x34);
     if (pInterpolator)
     {
         FUN_00a36890(pInterpolator);
@@ -151,21 +137,14 @@ void* __cdecl CreateNiBlendFloatInterpolator()
     return 0;
 }
 
-struct M76Obj
-{
-    char pad[0x30];
-    float m_fFloatValue;
-    bool FUN_00a36fd0(M76Obj*);
-    bool IsFloatValueEqual(M76Obj*);
-};
-// Returns true if FUN_00a36fd0 succeeds and this object's m_fFloatValue equals the passed object's m_fFloatValue.
+// Compares the base interpolator and the float value.
 // @fnv 0x00a405b0
-bool M76Obj::IsFloatValueEqual(M76Obj* pkObject)
+bool __fastcall IsFloatValueEqual(NiBlendFloatInterpolator* self, int, NiObject* object)
 {
-    if (!FUN_00a36fd0(pkObject))
+    if (!self->NiBlendInterpolator::IsEqual(object))
         return false;
-    M76Obj* pkDest = pkObject;
-    if (m_fFloatValue != pkDest->m_fFloatValue)
+    NiBlendFloatInterpolator* destination = static_cast<NiBlendFloatInterpolator*>(object);
+    if (self->m_fFloatValue != destination->m_fFloatValue)
         return false;
     return true;
 }
@@ -181,34 +160,14 @@ void* __cdecl FUN_00a405e0()
     return &g_011f3e58;
 }
 
-namespace fnv_00a408b0 {
-struct M76Bin
-{
-    unsigned int pad0;
-    unsigned int position;
-    unsigned int pad1;
-    unsigned int(__cdecl* write)(M76Bin*, const void*, unsigned int, unsigned int*, unsigned int);
-};
-struct M76Stream
-{
-    char pad[0x250];
-    M76Bin* output;
-};
-struct M76Obj
-{
-    void FUN_00a37ec0(M76Stream*);
-    char pad[0x30 - 0];
-    void FUN_00a408b0(M76Stream*);
-};
 // @fnv 0x00a408b0
-void __fastcall FUN_00a408b0(M76Obj* self, int, M76Stream* stream)
+void __fastcall SaveFloatBinary(NiBlendFloatInterpolator* self, int, NiStream* stream)
 {
-    self->FUN_00a37ec0(stream);
-    M76Bin* __restrict out = stream->output;
+    self->NiBlendInterpolator::SaveBinary(*stream);
+    NiBinaryStream* __restrict out = stream->m_pkOstr;
     unsigned int size = 4;
-    out->position += out->write(out, reinterpret_cast<char*>(self) + 0x30, 4, &size, 1);
+    out->m_uiAbsoluteCurrentPos += out->m_pfnWrite(out, &self->m_fFloatValue, 4, &size, 1);
 }
-}  // namespace fnv_00a408b0
 
 namespace fnv_00a408f0 {
 struct M76Arr
@@ -229,12 +188,6 @@ struct M76Arr
         SetAt(index, item);
     }
 };
-struct M76Obj
-{
-    char pad[0x30];
-    float m_fFloatValue;
-    void FUN_00a38080(M76Arr*);
-};
 struct M76Glob
 {
     int pad;
@@ -242,11 +195,11 @@ struct M76Glob
 extern M76Glob* g_011f3e58;
 char* __cdecl FUN_00a7d330(M76Glob*);
 char* __cdecl FUN_00a7d550(const char*, float);
-// Calls FUN_00a38080 on self, then appends the result of FUN_00a7d330(g_011f3e58) and a formatted "m_fFloatValue" string to pkStrings.
+// Appends the base interpolator strings, type name, and formatted float value.
 // @fnv 0x00a408f0
-void __fastcall AppendFloatValueStrings(M76Obj* self, int, M76Arr* pkStrings)
+void __fastcall AppendFloatValueStrings(NiBlendFloatInterpolator* self, int, M76Arr* pkStrings)
 {
-    self->FUN_00a38080(pkStrings);
+    self->NiBlendInterpolator::AppendInterpolatorStrings(reinterpret_cast<StrArr*>(pkStrings));
     pkStrings->Add(FUN_00a7d330(g_011f3e58));
     pkStrings->Add(FUN_00a7d550("m_fFloatValue", self->m_fFloatValue));
 }
@@ -260,14 +213,9 @@ struct CopyMembersArguments
 };
 extern "C" void __fastcall FUN_00a37510(void* source, CopyMembersArguments args);
 
-struct BlendFloatSource : NiBlendFloatInterpolator
-{
-    NiBlendFloatInterpolator* __thiscall FUN_00a405f0(void* cloning);
-};
-
-// Allocates a NiBlendFloatInterpolator, initialises it, copies members from this via FUN_00a37510, and returns the clone.
+// Allocates and initializes a clone, then copies the base and float members.
 // @fnv 0x00a405f0
-NiBlendFloatInterpolator* BlendFloatSource::FUN_00a405f0(void* pCloningProcess)
+NiBlendFloatInterpolator* __fastcall CloneFloatInterpolator(NiBlendFloatInterpolator* self, int, void* pCloningProcess)
 {
     NiBlendFloatInterpolator* copy =
         static_cast<NiBlendFloatInterpolator*>(FUN_00aa13e0(sizeof(NiBlendFloatInterpolator)));
@@ -282,7 +230,7 @@ NiBlendFloatInterpolator* BlendFloatSource::FUN_00a405f0(void* pCloningProcess)
         copy = 0;
     }
     CopyMembersArguments args = {copy, pCloningProcess};
-    FUN_00a37510(this, args);
-    copy->m_fFloatValue = m_fFloatValue;
+    FUN_00a37510(self, args);
+    copy->m_fFloatValue = self->m_fFloatValue;
     return copy;
 }

@@ -1,16 +1,8 @@
-// fallout_shared/region system/tesregiondata_decls.h: declares TESForm, RegionDataEntry, TESRegionData
+// fallout_shared/region system/tesregiondata_decls.h: declares RegionDataEntry and ENUM_FORM_ID
 #ifndef TESREGIONDATA_DECLS_H
 #define TESREGIONDATA_DECLS_H
 
-enum ENUM_FORM_ID
-{
-    ENUM_FORM_ID_ZERO = 0
-};
-class TESForm
-{
-  public:
-    void SetFormType(ENUM_FORM_ID);
-};
+#include "../../../include/ENUM_FORM_ID.h"
 class RegionDataEntry
 {
   public:
@@ -18,16 +10,5 @@ class RegionDataEntry
     bool bOverride;
     unsigned char m_ucRegionPriority;
     unsigned char padding[2];
-};
-class TESRegionData
-{
-  public:
-    void** m_ppVirtualMethodTable;
-    bool bOverride;
-    bool m_bHasRegionData;
-    unsigned char m_ucRegionPriority;
-    unsigned char padding;
-    bool ApplyEntry(RegionDataEntry* data);
-    bool SetPriority(unsigned char priority);
 };
 #endif

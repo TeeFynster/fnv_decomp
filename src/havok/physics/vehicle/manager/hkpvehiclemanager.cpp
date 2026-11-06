@@ -1,3 +1,4 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/physics/vehicle/manager/hkpvehiclemanager.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/manager/hkpvehiclemanager.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -70,38 +71,26 @@ struct E426F0Object
     void RetainReference() const;
 };
 
-struct E426F0ObjectArray
+static __forceinline void E426F0ObjectArray_construct(E426F0Object** p, int n, E426F0Object* const& e)
 {
-    E426F0Object** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    static void construct(E426F0Object** p, int n, E426F0Object* const& e)
-    {
         for (int i = 0; i < n; i++)
             p[i] = e;
     }
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    void AddBack(E426F0Object* const& e)
-    {
+static __forceinline void E426F0ObjectArray_AddBack(hkArrayBase<E426F0Object*>& self, E426F0Object* const& e)
+{
         E426F0Allocator& alloc = FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&alloc, this, sizeof(E426F0Object*));
-        construct(m_data + m_iElementCount, 1, e);
-        m_iElementCount++;
+        if (self.m_iElementCount == self.getCapacity())
+            ResizeAudioStream(&alloc, (&self), sizeof(E426F0Object*));
+        E426F0ObjectArray_construct(self.m_data + self.m_iElementCount, 1, e);
+        self.m_iElementCount++;
     }
-};
 
 struct E426F0Container
 {
     int unk00;
     int unk04;
-    E426F0ObjectArray m_kTrackedObjects;
+    hkArrayBase<E426F0Object*> m_kTrackedObjects;
 
     void AddObject(E426F0Object* object);
 };
@@ -110,7 +99,7 @@ struct E426F0Container
 void E426F0Container::AddObject(E426F0Object* object)
 {
     object->RetainReference();
-    m_kTrackedObjects.AddBack(object);
+    E426F0ObjectArray_AddBack(m_kTrackedObjects, object);
 }
 
 namespace fnv_00e42740 {
@@ -151,21 +140,19 @@ class E42740ReferencedObject
     short m_sReferenceCount;
 };
 
-struct E42740ObjectArray
+static __forceinline void E42740ObjectArray_destroy(hkArrayBase<E42740ReferencedObject*>& self)
 {
-    E42740ReferencedObject** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    ~E42740ObjectArray()
-    {
         E42740Allocator& alloc = FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(E42740ReferencedObject*));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
+        self.m_iElementCount = 0;
+        if ((self.m_iCapacityState & 0x80000000) == 0)
+            alloc.ReturnMemory(self.m_data, (self.m_iCapacityState & 0x3fffffff) * sizeof(E42740ReferencedObject*));
+        self.m_data = 0;
+        self.m_iCapacityState = 0x80000000;
     }
+
+struct E42740ObjectArrayPolicy
+{
+    static __forceinline void destroy(hkArrayBase<E42740ReferencedObject*>& self) { E42740ObjectArray_destroy(self); }
 };
 
 class FUN_00e42740 : public E42740ReferencedObject
@@ -173,7 +160,7 @@ class FUN_00e42740 : public E42740ReferencedObject
   public:
     virtual ~FUN_00e42740() throw();
 
-    E42740ObjectArray m_kTrackedObjects;
+    hkArray<E42740ReferencedObject*, E42740ObjectArrayPolicy> m_kTrackedObjects;
 };
 
 // Destructor releases the reference held on each object in the array before the array is destroyed.
@@ -325,4 +312,10 @@ void FUN_00e427b0_cls::ProcessItems(ParamObj* p)
     {
         alloc->Free(buffer.m_data, (flags & 0x3fffffff) * 0x60);
     }
+}
+
+
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
+{
+    A::destroy(*this);
 }

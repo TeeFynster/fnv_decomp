@@ -1,9 +1,14 @@
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTPointerListBase.h"
+#include "../../include/NiTListItem.h"
 
 // src/fallout_shared/tesobjectcell_ob1_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /GF /Ob1 (unit src/fallout_shared/tesobjectcell.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
 #include "tesobjectcell_packet.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiRefObject.h"
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
 unsigned int FUN_0054f4c0();
@@ -34,39 +39,21 @@ __forceinline float ComputeAbs(const float& y)
     return context;
 }
 
-struct NiPoint3
+inline void NiPoint3::Set(float fX, float fY, float fZ)
 {
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    void Set(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    NiPoint3 operator-(float f) const
-    {
-        return NiPoint3(x - f, y - f, z - f);
-    }
-};
-struct NiPoint3Ex : NiPoint3
+    x = fX;
+    y = fY;
+    z = fZ;
+}
+
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& b) const
 {
-    NiPoint3Ex operator-(const NiPoint3& b) const
-    {
-        NiPoint3Ex result;
-        result.x = x - b.x;
-        result.y = y - b.y;
-        result.z = z - b.z;
-        return result;
-    }
-};
+    NiPoint3 result;
+    result.x = x - b.x;
+    result.y = y - b.y;
+    result.z = z - b.z;
+    return result;
+}
 
 struct FUN_004b4600_Class
 {
@@ -99,7 +86,7 @@ struct M_004b4500 : FUN_004b4600_Class
         return result;
     }
 };
-struct SphereInput : NiPoint3Ex
+struct SphereInput : NiPoint3
 {
     float radius;
 };
@@ -138,120 +125,87 @@ unsigned char BoxInput::FUN_00c34890(const SphereInput* sphere)
 extern int(__stdcall* DAT_00fdf1c0)(void*);
 extern int(__stdcall* DAT_00fdf1c4)(void*);
 
-struct NiRefObject
+inline void NiRefObject::IncRefCount()
 {
-    virtual void v0();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        DAT_00fdf1c0(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (!DAT_00fdf1c4(&m_uiRefCount))
-            DeleteThis();
-    }
-};
+    DAT_00fdf1c0(&m_uiRefCount);
+}
 
-template <class T> struct NiPointer
+inline void NiRefObject::DecRefCount()
+{
+    if (!DAT_00fdf1c4(&m_uiRefCount))
+        DeleteThis();
+}
+
+// Unit-local smart pointer and list shapes of the 0x00c5bfb0 cell reference list (NiPointer/NiTPointerList layout).
+template <class T> struct CellRefPointer
 {
     T* m_pObject;
-    NiPointer(T* pObject = 0)
+    CellRefPointer(T* pObject = 0)
     {
         m_pObject = pObject;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
-    NiPointer(const NiPointer& ptr)
+    CellRefPointer(const CellRefPointer& ptr)
     {
         m_pObject = ptr.m_pObject;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
-    ~NiPointer()
+    ~CellRefPointer()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
-    NiPointer& FUN_0066b0d0(T* pObject);
+    CellRefPointer& FUN_0066b0d0(T* pObject);
 };
 
-template <class T> struct NiTListItem
+
+
+typedef NiTListItem<CellRefPointer<NiRefObject> > CellRefItem;
+
+struct CellRefAllocator
 {
-    NiTListItem* m_pkNext;
-    NiTListItem* m_pkPrev;
-    T m_element;
+
+    void FUN_0045cee0(CellRefItem* pkItem);
 };
 
-typedef NiTListItem<NiPointer<NiRefObject> > Item;
-
-struct NiTPointerAllocator
+typedef NiTPointerListBase<CellRefAllocator, CellRefPointer<NiRefObject> > CellRefPointerList;
+template <> inline void NiTPointerListBase<CellRefAllocator, CellRefPointer<NiRefObject> >::DeleteItem(NiTListItem<CellRefPointer<NiRefObject> >* pkItem)
 {
-    unsigned int m_uiCount;
-    void FUN_0045cee0(Item* pkItem);
-};
-
-struct NiTPointerListBase
-{
-    Item* m_pkHead;
-    Item* m_pkTail;
-    NiTPointerAllocator m_kItemCount;
-    NiPointer<NiRefObject> FUN_00c5c160();
-    NiPointer<NiRefObject> FUN_00c5c290();
-    void DeleteItem(Item* pkItem)
-    {
         int unused[5];  // compiled-out debug locals of the inlined helper
         pkItem->m_element.FUN_0066b0d0(0);
         m_kItemCount.FUN_0045cee0(pkItem);
         m_kItemCount.m_uiCount--;
     }
-    NiPointer<NiRefObject> FUN_00c5bfb0(Item*& kPos);
-};
 
 // @fnv 0x00c5bfb0
-NiPointer<NiRefObject> NiTPointerListBase::FUN_00c5bfb0(Item*& kPos)
+template <> CellRefPointer<NiRefObject> NiTPointerListBase<CellRefAllocator, CellRefPointer<NiRefObject> >::RemovePos(void*& kPos)
 {
-    Item* pkNode = kPos;
+    CellRefItem* pkNode = (CellRefItem*)kPos;
     if (pkNode == m_pkHead)
     {
         kPos = pkNode->m_pkNext;
-        return FUN_00c5c160();
+        return RemoveHead();
     }
     if (pkNode == m_pkTail)
     {
         kPos = 0;
-        return FUN_00c5c290();
+        return RemoveTail();
     }
-    Item* pkPrev = pkNode->m_pkPrev;
-    Item* pkNext = pkNode->m_pkNext;
+    CellRefItem* pkPrev = pkNode->m_pkPrev;
+    CellRefItem* pkNext = pkNode->m_pkNext;
     kPos = pkNext;
     if (pkPrev)
         pkPrev->m_pkNext = pkNext;
     if (pkNext)
         pkNext->m_pkPrev = pkPrev;
-    NiPointer<NiRefObject> element = pkNode->m_element;
+    CellRefPointer<NiRefObject> element = pkNode->m_element;
     DeleteItem(pkNode);
     return element;
 }
 
 #include <windows.h>
-struct RefObj5b
-{
-    virtual void v00();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 
 extern CRITICAL_SECTION DAT_01203328;
 
@@ -263,12 +217,12 @@ template <class T> class SmartPtr5b
     SmartPtr5b(T* pObject = 0)
     {
         m_pObject = pObject;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~SmartPtr5b()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
 
@@ -276,10 +230,10 @@ template <class T> class SmartPtr5b
     {
         if (m_pObject != rhs.m_pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = rhs.m_pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -290,7 +244,7 @@ struct ListItem5b
 {
     ListItem5b* m_pNext;
     ListItem5b* m_pListObject;
-    SmartPtr5b<RefObj5b> m_element;
+    SmartPtr5b<NiRefObject> m_element;
 };
 
 struct Alloc5b
@@ -308,23 +262,23 @@ struct List5b
     {
         return m_pHead;
     }
-    RefObj5b* GetNext(ListItem5b*& pos) const
+    NiRefObject* GetNext(ListItem5b*& pos) const
     {
-        RefObj5b* const& e = pos->m_element.m_pObject;
+        NiRefObject* const& e = pos->m_element.m_pObject;
         pos = pos->m_pNext;
         return e;
     }
 
     void FUN_00b5a9a0(ListItem5b*);
 
-    void AddHead(const SmartPtr5b<RefObj5b>& element)
+    void AddHead(const SmartPtr5b<NiRefObject>& element)
     {
         ListItem5b* pkNode = m_kItemCount.FUN_0043a010();
         pkNode->m_element.FUN_006e5cc0(element);
         FUN_00b5a9a0(pkNode);
     }
 
-    SmartPtr5b<RefObj5b> FUN_00c5bfb0(ListItem5b*& pos);
+    SmartPtr5b<NiRefObject> RemovePos(ListItem5b*& pos);
 };
 
 struct Owner5b
@@ -351,11 +305,11 @@ struct Owner5b
     int unk4c;
     List5b m_list50;
     List5b m_list5c;
-    void FUN_00c5b1c0(RefObj5b* p);
+    void FUN_00c5b1c0(NiRefObject* p);
 };
 
 // @fnv 0x00c5b1c0
-void Owner5b::FUN_00c5b1c0(RefObj5b* p)
+void Owner5b::FUN_00c5b1c0(NiRefObject* p)
 {
     if (!p)
         return;
@@ -363,7 +317,7 @@ void Owner5b::FUN_00c5b1c0(RefObj5b* p)
     ListItem5b* pos = m_list50.GetHeadPos();
     while (pos)
     {
-        RefObj5b* cur = m_list50.GetNext(pos);
+        NiRefObject* cur = m_list50.GetNext(pos);
         if (cur == p)
             break;
     }
@@ -374,10 +328,10 @@ void Owner5b::FUN_00c5b1c0(RefObj5b* p)
         while (pos)
         {
             ListItem5b* saved2 = pos;
-            RefObj5b* cur = m_list5c.GetNext(pos);
+            NiRefObject* cur = m_list5c.GetNext(pos);
             if (cur == p)
             {
-                m_list5c.FUN_00c5bfb0(saved2);
+                m_list5c.RemovePos(saved2);
             }
         }
     }
@@ -387,36 +341,17 @@ void Owner5b::FUN_00c5b1c0(RefObj5b* p)
 namespace fnv_00c5b370 {
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void* cs);
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* p);
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* p);
 
-struct RefObject
-{
-    virtual ~RefObject();
-    virtual void DeleteThis();
-    long refCount;
-
-    inline void IncRefCount()
-    {
-        InterlockedIncrement(&refCount);
-    }
-    inline void DecRefCount()
-    {
-        if (InterlockedDecrement(&refCount) == 0)
-            DeleteThis();
-    }
-};
-
-template <class T> class NiPointer
+template <class T> class CellRefPointer
 {
   public:
     T* m_p;
-    inline NiPointer(T* p = 0) : m_p(p)
+    inline CellRefPointer(T* p = 0) : m_p(p)
     {
         if (m_p)
             m_p->IncRefCount();
     }
-    inline ~NiPointer()
+    inline ~CellRefPointer()
     {
         if (m_p)
             m_p->DecRefCount();
@@ -425,7 +360,7 @@ template <class T> class NiPointer
     {
         return m_p;
     }
-    inline NiPointer& operator=(const NiPointer& o)
+    inline CellRefPointer& operator=(const CellRefPointer& o)
     {
         if (m_p != o.m_p)
         {
@@ -443,7 +378,7 @@ struct ItemNode
 {
     ItemNode* next;
     ItemNode* prev;
-    NiPointer<RefObject> item;
+    CellRefPointer<NiRefObject> item;
 };
 
 struct NodePool
@@ -457,7 +392,7 @@ struct ItemList
     int unk04;
     NodePool pool;
     void FUN_00b5a9a0(ItemNode* node);
-    inline void AddTail(const NiPointer<RefObject>& ref)
+    inline void AddTail(const CellRefPointer<NiRefObject>& ref)
     {
         ItemNode* pNode = pool.FUN_0043a010();
         pNode->item = ref;
@@ -468,14 +403,14 @@ struct ItemList
 struct PendingList
 {
     ItemNode* head;
-    NiPointer<RefObject> FUN_00c5bfb0(ItemNode** iter);
+    CellRefPointer<NiRefObject> RemovePos(ItemNode** iter);
     inline ItemNode* GetHead() const
     {
         return head;
     }
-    inline NiPointer<RefObject>& GetNext(ItemNode*& iter)
+    inline CellRefPointer<NiRefObject>& GetNext(ItemNode*& iter)
     {
-        NiPointer<RefObject>& item = iter->item;
+        CellRefPointer<NiRefObject>& item = iter->item;
         iter = iter->next;
         return item;
     }
@@ -509,15 +444,15 @@ struct ItemQueue
     int unk54;
     int unk58;
     ItemList items;
-    void FUN_00c5b370(RefObject* obj);
+    void FUN_00c5b370(NiRefObject* obj);
 };
 
 // @fnv 0x00c5b370
-void ItemQueue::FUN_00c5b370(RefObject* obj)
+void ItemQueue::FUN_00c5b370(NiRefObject* obj)
 {
     EnterCriticalSection(&DAT_01203328);
     items.AddTail(obj);
-    RefObject* p;
+    NiRefObject* p;
     ItemNode* it;
     ItemNode* cur;
     it = pending.GetHead();
@@ -527,7 +462,7 @@ void ItemQueue::FUN_00c5b370(RefObject* obj)
         p = pending.GetNext(it);
         if (p == obj)
         {
-            pending.FUN_00c5bfb0(&cur);
+            pending.RemovePos(&cur);
             break;
         }
     }

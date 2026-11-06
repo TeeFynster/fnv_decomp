@@ -2,6 +2,10 @@
 // src/havok/common/base/container/string/hkstringptr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/container/string/hkstringptr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/hkOstream.h"
+#include "../../../../../../include/hkStreamWriter.h"
+#include "../../../../../../include/hkStringPtr.h"
+
 int __cdecl FUN_00cb10d0(const char* s);
 char* __cdecl AllocateWithHeader(void* alloc, int size);
 void __cdecl FUN_00cb1090(char* dst, const char* src);
@@ -16,16 +20,10 @@ char* __cdecl FUN_00cb1160(const char* aString, void* apAllocator)
 
 extern void* g_01268358;
 
-struct FUN_00cb0a60
-{
-    void* unk00;
-    FUN_00cb0a60();
-};
-
 // @fnv 0x00cb0a60
-FUN_00cb0a60::FUN_00cb0a60()
+hkStringPtr::hkStringPtr() throw()
 {
-    unk00 = g_01268358;
+    m_pcText = static_cast<const char*>(g_01268358);
 }
 
 int __cdecl FUN_00c856c0(int, int);
@@ -38,48 +36,31 @@ int __cdecl CallSwappedArgs(unsigned int arg0, unsigned int arg1)
 
 int __cdecl FUN_00cb10d0(const char* s);
 
-struct WriterCC0
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void Write(const char* s, int len);
-};
-
 // Writes the string s to w, or the literal "(null)" when s is null.
 // @fnv 0x00cc0080
-static __declspec(noinline) void FUN_00cc0080(WriterCC0* apWriter, const char* apString)
+static __declspec(noinline) void FUN_00cc0080(hkStreamWriter* apWriter, const char* apString)
 {
     if (apString)
-        apWriter->Write(apString, FUN_00cb10d0(apString));
+        apWriter->write(apString, FUN_00cb10d0(apString));
     else
-        apWriter->Write("(null)", 6);
+        apWriter->write("(null)", 6);
 }
 
 volatile int g_wcc0;
 volatile int g_scc0;
 void CallTarget_cc0080()
 {
-    WriterCC0* w = (WriterCC0*)g_wcc0;
+    hkStreamWriter* w = (hkStreamWriter*)g_wcc0;
     const char* s = (const char*)g_scc0;
     FUN_00cc0080(w, s);
     FUN_00cc0080(w, s);
 }
 
-struct SinkOwner
-{
-    virtual void v0();
-    void* unk04;
-    WriterCC0* writer;
-    SinkOwner* FUN_00cc01c0(const char* text);
-};
-
 // @fnv 0x00cc01c0
-SinkOwner* SinkOwner::FUN_00cc01c0(const char* text)
+__declspec(nothrow) hkOstream& hkOstream::FUN_00cc01c0(const char* text) throw()
 {
-    FUN_00cc0080(writer, text);
-    return this;
+    FUN_00cc0080(m_pStreamWriter, text);
+    return *this;
 }
 
 namespace fnv_00cb11b0 {

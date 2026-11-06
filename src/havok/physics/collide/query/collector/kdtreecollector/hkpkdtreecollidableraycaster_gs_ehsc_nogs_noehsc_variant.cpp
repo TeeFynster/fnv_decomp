@@ -5,6 +5,8 @@
 
 // src/havok/physics/collide/query/collector/kdtreecollector/hkpkdtreecollidableraycaster.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/query/collector/kdtreecollector/hkpkdtreecollidableraycaster.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../include/Vec4.h"
+
 struct FUN_00d97a10_Class
 {
     void FUN_00d97a10(float* p) const;
@@ -215,10 +217,6 @@ FUN_00d98360::FUN_00d98360()
 extern float DAT_01012054;
 extern float DAT_01012068;
 extern int DAT_010c92e0[4];
-struct Vec4
-{
-    __m128 q;
-};
 struct Mat4
 {
     __m128 r0;
@@ -288,7 +286,7 @@ struct DestEnt
 };
 struct __declspec(align(16)) PtsBlockF
 {
-    Vec4 v[6];
+    __m128 v[6];
     int t60;
     int t64;
     int t68;
@@ -328,8 +326,8 @@ static __forceinline Vec4 Xform(const Mat4& m, __m128 p)
     __m128 mx = _mm_mul_ps(r0, _mm_shuffle_ps(d, d, 0));
     __m128 my = _mm_mul_ps(r1, _mm_shuffle_ps(d, d, 0x55));
     __m128 mz = _mm_mul_ps(r2, _mm_shuffle_ps(d, d, 0xaa));
-    Vec4 result;
-    result.q = _mm_add_ps(_mm_add_ps(mx, my), mz);
+    __declspec(align(16)) Vec4 result;
+    *reinterpret_cast<__m128*>(&result) = _mm_add_ps(_mm_add_ps(mx, my), mz);
     return result;
 }
 static __forceinline __m128 Rotate(const Mat4& m, __m128 p)
@@ -344,11 +342,9 @@ struct __declspec(align(16)) ScalarColumn
 {
     float x, y, z, w;
 };
-static __forceinline Vec4 Column(const __m128& a, const __m128& b)
+static __forceinline __m128 Column(const __m128& a, const __m128& b)
 {
-    Vec4 r;
-    r.q = _mm_shuffle_ps(a, b, 0x88);
-    return r;
+    return _mm_shuffle_ps(a, b, 0x88);
 }
 struct ThisCls
 {
@@ -394,38 +390,38 @@ void ThisCls::FUN_00d97c90(Arg0* a0, __m128* a1)
         __declspec(align(16)) float maskF[4];
         _mm_store_ps(maskF, _mm_cmple_ps(_mm_setzero_ps(), valsV));
         {
-            pts.v[0].q = Xform(*mat, entries[0].a).q;
-            pts.v[3].q = Xform(*mat, entries[0].b).q;
-            pts.v[1].q = Xform(*mat, entries[1].a).q;
-            pts.v[4].q = Xform(*mat, entries[1].b).q;
-            __m128 t4 = Xform(*mat, entries[2].a).q;
-            pts.v[2].q = t4;
-            __m128 t5 = Xform(*mat, entries[2].b).q;
-            pts.v[5].q = t5;
-            __m128 t6 = Xform(*mat, entries[3].a).q;
-            __m128 t7 = Xform(*mat, entries[3].b).q;
-            __m128 t0 = pts.v[0].q;
-            const __m128& t1 = pts.v[3].q;
-            __m128 t2 = pts.v[1].q;
-            __m128 t3 = pts.v[4].q;
+            pts.v[0] = *reinterpret_cast<const __m128*>(&Xform(*mat, entries[0].a));
+            pts.v[3] = *reinterpret_cast<const __m128*>(&Xform(*mat, entries[0].b));
+            pts.v[1] = *reinterpret_cast<const __m128*>(&Xform(*mat, entries[1].a));
+            pts.v[4] = *reinterpret_cast<const __m128*>(&Xform(*mat, entries[1].b));
+            __m128 t4 = *reinterpret_cast<const __m128*>(&Xform(*mat, entries[2].a));
+            pts.v[2] = t4;
+            __m128 t5 = *reinterpret_cast<const __m128*>(&Xform(*mat, entries[2].b));
+            pts.v[5] = t5;
+            __m128 t6 = *reinterpret_cast<const __m128*>(&Xform(*mat, entries[3].a));
+            __m128 t7 = *reinterpret_cast<const __m128*>(&Xform(*mat, entries[3].b));
+            __m128 t0 = pts.v[0];
+            const __m128& t1 = pts.v[3];
+            __m128 t2 = pts.v[1];
+            __m128 t3 = pts.v[4];
             __m128 low02 = _mm_shuffle_ps(t0, t2, 0x44);
             _WriteBarrier();
-            __m128 high02 = _mm_shuffle_ps(_mm_load_ps(reinterpret_cast<const float*>(&pts.v[0].q)),
-                                           _mm_load_ps(reinterpret_cast<const float*>(&pts.v[1].q)), 0xee);
-            __m128 low46 = _mm_shuffle_ps(_mm_load_ps(reinterpret_cast<const float*>(&pts.v[2].q)), t6, 0x44);
+            __m128 high02 = _mm_shuffle_ps(_mm_load_ps(reinterpret_cast<const float*>(&pts.v[0])),
+                                           _mm_load_ps(reinterpret_cast<const float*>(&pts.v[1])), 0xee);
+            __m128 low46 = _mm_shuffle_ps(_mm_load_ps(reinterpret_cast<const float*>(&pts.v[2])), t6, 0x44);
             const __m128& firstColumn = _mm_shuffle_ps(low02, low46, 0x88);
             __m128 high46 = _mm_shuffle_ps(t4, t6, 0xee);
-            pts.v[1].q = _mm_shuffle_ps(low02, low46, 0xdd);
-            pts.v[2].q = _mm_shuffle_ps(high02, high46, 0x88);
+            pts.v[1] = _mm_shuffle_ps(low02, low46, 0xdd);
+            pts.v[2] = _mm_shuffle_ps(high02, high46, 0x88);
             __m128 low13 = _mm_shuffle_ps(t1, t3, 0x44);
-            __m128 high13 = _mm_shuffle_ps(_mm_load_ps(reinterpret_cast<const float*>(&pts.v[3].q)),
-                                           _mm_load_ps(reinterpret_cast<const float*>(&pts.v[4].q)), 0xee);
-            pts.v[0].q = firstColumn;
+            __m128 high13 = _mm_shuffle_ps(_mm_load_ps(reinterpret_cast<const float*>(&pts.v[3])),
+                                           _mm_load_ps(reinterpret_cast<const float*>(&pts.v[4])), 0xee);
+            pts.v[0] = firstColumn;
             __m128 low57 = _mm_shuffle_ps(t5, t7, 0x44);
             __m128 high57 = _mm_shuffle_ps(t5, t7, 0xee);
-            pts.v[3].q = _mm_shuffle_ps(low13, low57, 0x88);
-            pts.v[4].q = _mm_shuffle_ps(low13, low57, 0xdd);
-            pts.v[5].q = _mm_shuffle_ps(high13, high57, 0x88);
+            pts.v[3] = _mm_shuffle_ps(low13, low57, 0x88);
+            pts.v[4] = _mm_shuffle_ps(low13, low57, 0xdd);
+            pts.v[5] = _mm_shuffle_ps(high13, high57, 0x88);
             _WriteBarrier();
         }
         pts.t60 = entries[0].f24;

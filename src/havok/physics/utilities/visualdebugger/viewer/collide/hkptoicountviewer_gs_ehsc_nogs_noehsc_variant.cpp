@@ -465,20 +465,13 @@ struct FUN_00d67da0_cls
 
     void FUN_00d67da0();
 };
-struct AudioAllocator
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void Free(void* ptr, unsigned int count);
-};
+#include "../../../../../../../include/hkMemoryAllocator.h"
 struct AudioCoreView
 {
     int unk00;
     int unk04;
     int unk08;
-    AudioAllocator* m_pThreadAllocator;
+    hkMemoryAllocator* m_pThreadAllocator;
 };
 struct BSAudioString
 {
@@ -499,10 +492,10 @@ struct BSAudioString
 
     void Release()
     {
-        AudioAllocator* allocator = ((AudioCoreView*)FUN_00c85750())->m_pThreadAllocator;
+        hkMemoryAllocator* allocator = ((AudioCoreView*)FUN_00c85750())->m_pThreadAllocator;
         m_fRestLength = 0;
         if ((m_pRayCursor & 0x80000000) == 0)
-            allocator->Free(m_data, m_pRayCursor & 0x3fffffff);
+            allocator->bufFree(m_data, m_pRayCursor & 0x3fffffff);
     }
 };
 struct BSAudioValue

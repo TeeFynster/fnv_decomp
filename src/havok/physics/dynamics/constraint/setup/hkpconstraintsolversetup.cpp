@@ -1,53 +1,51 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/physics/dynamics/constraint/setup/hkpconstraintsolversetup.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/setup/hkpconstraintsolversetup.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct State
+// Exe 0x00d883c0 FUN_00d883c0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+
+extern "C" LocalM128 _mm_setzero_ps();
+
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkpEntity.h"
+#include "../../../../../../include/hkStepInfo.h"
+#include "../../../../../../include/hkpVelocityAccumulator.h"
+#include "../../../../../../include/hkpConstraintSolverResources.h"
+
+inline void hkVector4::setZero4()
 {
-    int unk00;
-    void* owner;
-    int unk08;
-    int eventCode;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    void* resetA;
-    int unk24;
-    void* desiredA;
-    void* currentA;
-    void* resetB;
-    int unk34;
-    void* desiredB;
-    void* currentB;
-    int callbackFlags;
-    int unk44;
-    volatile float* end;
-    volatile float* current;
-};
+    m_vComponents = _mm_setzero_ps();
+}
+
 void __cdecl FUN_00d8aac0(void* owner, void* current, int eventCode, int flags);
 // Optionally resets currentA/currentB to their reset values, zeroes the float range up to end, and notifies callbacks when current differs from desired.
 // @fnv 0x00d88340
-void __cdecl FUN_00d88340(State* state, int reset)
+void __cdecl FUN_00d88340(hkpConstraintSolverResources* state, int reset)
 {
     if (reset == 0)
     {
-        state->currentA = state->resetA;
-        state->currentB = state->resetB;
+        state->m_akBufferStates[0].m_pValues = state->m_akBufferStates[0].m_pRayStart;
+        state->m_akBufferStates[1].m_pValues = state->m_akBufferStates[1].m_pRayStart;
     }
-    volatile float* p = state->current;
-    while (p < state->end)
+    volatile float* p = reinterpret_cast<volatile float*>(state->m_akBufferStates[2].m_pValues);
+    while (p < reinterpret_cast<volatile float*>(state->m_akBufferStates[2].m_pTileTemplate))
     {
         *p = 0.0f;
         ++p;
     }
-    state->current = state->end;
-    if (state->currentA != state->desiredA)
-        FUN_00d8aac0(state->owner, state->currentA, state->eventCode, state->callbackFlags);
-    if (state->currentB != state->desiredB)
-        FUN_00d8aac0(state->owner, state->currentB, state->eventCode, state->callbackFlags);
-    state->currentA = state->desiredA;
-    state->currentB = state->desiredB;
+    state->m_akBufferStates[2].m_pValues = state->m_akBufferStates[2].m_pTileTemplate;
+    if (state->m_akBufferStates[0].m_pValues != state->m_akBufferStates[0].m_pTileTemplate)
+        FUN_00d8aac0(state->m_pSolverInfo, state->m_akBufferStates[0].m_pValues, reinterpret_cast<int>(state->m_pVelocityAccumulatorA), reinterpret_cast<int>(state->m_akBufferStates[2].m_pRayStart));
+    if (state->m_akBufferStates[1].m_pValues != state->m_akBufferStates[1].m_pTileTemplate)
+        FUN_00d8aac0(state->m_pSolverInfo, state->m_akBufferStates[1].m_pValues, reinterpret_cast<int>(state->m_pVelocityAccumulatorA), reinterpret_cast<int>(state->m_akBufferStates[2].m_pRayStart));
+    state->m_akBufferStates[0].m_pValues = state->m_akBufferStates[0].m_pTileTemplate;
+    state->m_akBufferStates[1].m_pValues = state->m_akBufferStates[1].m_pTileTemplate;
 }
 
 struct D88310Bool
@@ -60,21 +58,11 @@ struct D88310Bool
     }
 };
 
-struct D88310Stream
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    char* m_pTileTemplate;
-};
-
 // @fnv 0x00d88310
-D88310Bool __cdecl FUN_00d88310(const D88310Stream* stream, const void* unused, int numBlocks)
+D88310Bool __cdecl FUN_00d88310(const hkpConstraintSolverResources* stream, const void* unused, int numBlocks)
 {
-    int available = (int)(stream->m_kRayEnd - stream->m_pTileTemplate);
-    if (stream->m_pTileTemplate == stream->m_kRayStart)
+    int available = (int)(reinterpret_cast<char*>(stream->m_pVelocityAccumulatorB) - reinterpret_cast<char*>(stream->m_pVelocityAccumulatorC));
+    if (stream->m_pVelocityAccumulatorC == stream->m_pVelocityAccumulatorA)
         numBlocks++;
     if (numBlocks * 128 > available - 16)
         return false;
@@ -118,37 +106,14 @@ struct D88470Elem
     D88470Sub* sub;
 };
 
-struct D88470Obj
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    unsigned int limitA;
-    unsigned int initA;
-    int unk2c;
-    int unk30;
-    unsigned int limitB;
-    unsigned int initB;
-    int unk3c;
-    int unk40;
-    unsigned int limitSum;
-    unsigned int initSum;
-};
-
 // Accumulates amountA per element type and amountB*4 into totals, then returns true if the sums stay within obj's limitSum, limitA and limitB.
 // @fnv 0x00d88470
-D88310Bool __cdecl CheckTotalsWithinLimits(D88470Obj* obj, D88470Elem** begin, int count)
+D88310Bool __cdecl CheckTotalsWithinLimits(hkpConstraintSolverResources* obj, D88470Elem** begin, int count)
 {
     unsigned int totals[2];
-    totals[0] = obj->initA;
-    totals[1] = obj->initB;
-    unsigned int sum = obj->initSum;
+    totals[0] = reinterpret_cast<unsigned int>(obj->m_akBufferStates[0].m_pTileTemplate);
+    totals[1] = reinterpret_cast<unsigned int>(obj->m_akBufferStates[1].m_pTileTemplate);
+    unsigned int sum = reinterpret_cast<unsigned int>(obj->m_akBufferStates[2].m_pTileTemplate);
     unsigned int uiSum1 = 0;
     unsigned int uiSum2 = 0;
     D88470Elem** end = begin + count;
@@ -180,100 +145,26 @@ D88310Bool __cdecl CheckTotalsWithinLimits(D88470Obj* obj, D88470Elem** begin, i
         totals[uiTypeIndex] += s->amountA;
     }
     sum += uiSum1 + uiSum2;
-    if (sum <= obj->limitSum && totals[0] + 4 <= obj->limitA && totals[1] + 4 <= obj->limitB)
+    if (sum <= reinterpret_cast<unsigned int>(obj->m_akBufferStates[2].m_kRayEnd) && totals[0] + 4 <= reinterpret_cast<unsigned int>(obj->m_akBufferStates[0].m_kRayEnd) && totals[1] + 4 <= reinterpret_cast<unsigned int>(obj->m_akBufferStates[1].m_kRayEnd))
         return true;
     else
         return false;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
+// Local until include/ supplies hkpVelocityAccumulator (128-byte solver body).
+
+struct hkpSolverSumVelocities
 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
+    hkVector4 m_vLinearVelocity;
+    hkVector4 m_vAngularVelocity;
 };
 
-extern "C" __m128 _mm_setzero_ps();
-
-struct hkVector4D886
-{
-    __m128 m_vComponents;
-
-    hkVector4D886()
-    {}
-    hkVector4D886(const hkVector4D886& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void operator=(const hkVector4D886& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-};
-
-struct hkpVelocityAccumulatorD886
-{
-    unsigned char m_type;
-    unsigned char m_iValueAtOffset0C;
-    unsigned char unk02, unk03;
-    unsigned int m_uiDeactivationClass;
-    float m_fGravityFactor;
-    unsigned int unk0C;
-    hkVector4D886 m_vLinearVelocity;
-    hkVector4D886 m_vAngularVelocity;
-    hkVector4D886 m_vInverseInertiaAndMass;
-    hkVector4D886 m_vCenterOfMass;
-    hkVector4D886 m_scratch1;
-    hkVector4D886 m_scratch2;
-    hkVector4D886 m_scratch3;
-
-    void setFixed()
-    {
-        m_fGravityFactor = 0.0f;
-        m_type = 1;
-        m_vInverseInertiaAndMass.setZero4();
-        m_vLinearVelocity.setZero4();
-        m_vAngularVelocity.setZero4();
-        m_vCenterOfMass.setZero4();
-        m_scratch1.setZero4();
-        m_scratch2.setZero4();
-        m_scratch3.setZero4();
-    }
-};
-
-struct hkpSolverSumVelocitiesD886
-{
-    hkVector4D886 m_vLinearVelocity;
-    hkVector4D886 m_vAngularVelocity;
-};
-
-struct hkStepInfoD886;
-
-struct hkpEntityD886
-{
-    unsigned int unk00[41];
-    unsigned int m_uiFilterInfo;
-};
-
-struct hkpConstraintSolverResourcesD886
-{
-    const hkStepInfoD886* m_pStepInfo;
-    unsigned int unk04, unk08;
-    hkpVelocityAccumulatorD886* m_pVelocityAccumulatorA;
-    hkpVelocityAccumulatorD886* m_pVelocityAccumulatorB;
-    hkpVelocityAccumulatorD886* m_pVelocityAccumulatorC;
-    hkpSolverSumVelocitiesD886* m_sumVelocities;
-};
-
-hkpVelocityAccumulatorD886* __cdecl FUN_00d29830(const hkStepInfoD886* pkInfo, hkpEntityD886* const* ppkEntities,
+hkpVelocityAccumulator* __cdecl FUN_00d29830(const hkStepInfo* pkInfo, hkpEntity* const* ppkEntities,
                                                  unsigned int uiNumEntities, int iMotionOffset,
-                                                 hkpVelocityAccumulatorD886* pkAccumulatorsOut);
+                                                 hkpVelocityAccumulator* pkAccumulatorsOut);
 
 // @fnv 0x00d88670
-void __cdecl FUN_00d88670(hkpConstraintSolverResourcesD886& kResources, hkpEntityD886* const* ppkEntities,
+void __cdecl FUN_00d88670(hkpConstraintSolverResources& kResources, hkpEntity* const* ppkEntities,
                           unsigned int uiNumEntities)
 {
     if (!uiNumEntities)
@@ -283,10 +174,10 @@ void __cdecl FUN_00d88670(hkpConstraintSolverResourcesD886& kResources, hkpEntit
 
     if (kResources.m_pVelocityAccumulatorC == kResources.m_pVelocityAccumulatorA)
     {
-        hkpVelocityAccumulatorD886* pkFixed = kResources.m_pVelocityAccumulatorC;
+        hkpVelocityAccumulator* pkFixed = kResources.m_pVelocityAccumulatorC;
         pkFixed->setFixed();
         kResources.m_pVelocityAccumulatorC = pkFixed + 1;
-        hkpSolverSumVelocitiesD886* pkFixedSumVel = kResources.m_sumVelocities;
+        hkpSolverSumVelocities* pkFixedSumVel = kResources.m_sumVelocities;
         pkFixedSumVel->m_vAngularVelocity.setZero4();
         pkFixedSumVel->m_vLinearVelocity.setZero4();
     }
@@ -297,9 +188,9 @@ void __cdecl FUN_00d88670(hkpConstraintSolverResourcesD886& kResources, hkpEntit
                                          reinterpret_cast<unsigned int>(kResources.m_pVelocityAccumulatorA);
     }
 
-    hkpVelocityAccumulatorD886* pkAccumulator = kResources.m_pVelocityAccumulatorC;
-    hkpSolverSumVelocitiesD886* pkSumVel =
-        kResources.m_sumVelocities + ppkEntities[0]->m_uiFilterInfo / sizeof(hkpVelocityAccumulatorD886);
+    hkpVelocityAccumulator* pkAccumulator = kResources.m_pVelocityAccumulatorC;
+    hkpSolverSumVelocities* pkSumVel =
+        kResources.m_sumVelocities + ppkEntities[0]->m_uiFilterInfo / sizeof(hkpVelocityAccumulator);
     kResources.m_pVelocityAccumulatorC =
         FUN_00d29830(kResources.m_pStepInfo, ppkEntities, uiNumEntities, 0xe0, pkAccumulator);
 
@@ -351,107 +242,6 @@ template <typename T> struct S88_PadSpu
     }
 };
 
-struct S88_Transform
-{
-    hkVector4D886 c0, c1, c2, t;
-};
-
-struct S88_MotionState
-{
-    S88_Transform m_kMotionTransform;
-    const S88_Transform& getTransform() const
-    {
-        return m_kMotionTransform;
-    }
-};
-
-struct S88_Motion
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    S88_MotionState m_kMotionState;
-    const S88_MotionState* GetMotionState() const
-    {
-        return &m_kMotionState;
-    }
-};
-
-struct S88_Collidable
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    float m_fAllowedPenetrationDepth;
-};
-
-struct S88_Entity
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    S88_Collidable m_kCollidable;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    unsigned int m_uiFilterInfo;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    S88_Motion m_pMotionState;
-    S88_Motion* getMotion()
-    {
-        return &m_pMotionState;
-    }
-    const S88_Collidable* getCollidable() const
-    {
-        return &m_kCollidable;
-    }
-};
-
 struct S88_Atom
 {
     short m_type;
@@ -491,7 +281,7 @@ struct S88_ConstraintData
 struct S88_Internal
 {
     int unk00;
-    S88_Entity* m_kActorEntries[2];
+    hkpEntity* m_kActorEntries[2];
     S88_Atom* m_kBridgeAtoms;
     unsigned short m_iAtomsSize;
     unsigned char m_ucCallbackRequest;
@@ -564,10 +354,10 @@ struct S88_QueryIn
     int unk24;
     int unk28;
     int unk2C;
-    S88_PadSpu<const hkpVelocityAccumulatorD886*> m_pBodyA;
-    S88_PadSpu<const hkpVelocityAccumulatorD886*> m_pBodyB;
-    S88_PadSpu<const S88_Transform*> m_kBodyALocalFrame;
-    S88_PadSpu<const S88_Transform*> m_kBodyBLocalFrame;
+    S88_PadSpu<const hkpVelocityAccumulator*> m_pBodyA;
+    S88_PadSpu<const hkpVelocityAccumulator*> m_pBodyB;
+    S88_PadSpu<const hkTransform*> m_kBodyALocalFrame;
+    S88_PadSpu<const hkTransform*> m_kBodyBLocalFrame;
     int unk40;
     int unk44;
     int unk48;
@@ -591,35 +381,10 @@ struct S88_QueryOut
     S88_PadSpu<S88_Schema*> m_pQueryResultSchema;
 };
 
-struct S88_BufferState
-{
-    S88_Schema* m_pRayStart;
-    S88_Schema* m_kRayEnd;
-    S88_Schema* m_pTileTemplate;
-    S88_Schema* m_pValues;
-};
-
 struct S88_Backup
 {
-    hkVector4D886 m_kTranslationalVelocity;
-    hkVector4D886 m_kAngularVelocity;
-};
-
-struct S88_Resources
-{
-    void* m_pStepInfo;
-    void* m_pSolverInfo;
-    S88_QueryIn* m_pConstraintQueryIn;
-    hkpVelocityAccumulatorD886* m_pVelocityAccumulatorA;
-    hkpVelocityAccumulatorD886* m_pVelocityAccumulatorB;
-    hkpVelocityAccumulatorD886* m_pVelocityAccumulatorC;
-    S88_Backup* m_pBodyABackup;
-    S88_Backup* m_pBodyBBackup;
-    S88_BufferState m_akBufferStates[2];
-    char* m_pBufferA;
-    char* m_pBufferB;
-    char* m_pBufferC;
-    char* m_pBufferD;
+    hkVector4 m_kTranslationalVelocity;
+    hkVector4 m_kAngularVelocity;
 };
 
 struct S88_SchemaInfo
@@ -629,25 +394,15 @@ struct S88_SchemaInfo
     float m_fAllowedPenetrationDepth;
 };
 
-struct S88_Array
+static __forceinline S88_SchemaInfo& S88_Array_AllocatePair(hkArrayBase<S88_SchemaInfo>& self)
 {
-    S88_SchemaInfo* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    S88_SchemaInfo& AllocatePair()
-    {
         S88_Allocator& alloc = FUN_00c85750()->heap();
-        if (m_iElementCount == getCapacity())
+        if (self.m_iElementCount == self.getCapacity())
         {
-            ResizeAudioStream(alloc, this, sizeof(S88_SchemaInfo));
+            ResizeAudioStream(alloc, (&self), sizeof(S88_SchemaInfo));
         }
-        return m_data[m_iElementCount++];
+        return self.m_data[self.m_iElementCount++];
     }
-};
 
 template <typename T> inline T* S88_addByteOffset(T* base, long offset)
 {
@@ -676,50 +431,50 @@ inline void S88_buildJacobianFromAtoms(S88_Atom* atoms, int atomsSize, const S88
 }
 
 // @fnv 0x00d88760
-void __cdecl FUN_00d88760(S88_Resources& s, S88_Instance** constraints, int numConstraints, S88_Array& constraintStatus)
+void __cdecl FUN_00d88760(hkpConstraintSolverResources& s, S88_Instance** constraints, int numConstraints, hkArrayBase<S88_SchemaInfo>& constraintStatus)
 {
-    S88_QueryIn& in = *s.m_pConstraintQueryIn;
+    S88_QueryIn& in = *reinterpret_cast<S88_QueryIn*>(s.m_pConstraintQueryIn);
     S88_QueryOut out;
 
     for (S88_Instance **cp = constraints, **end = constraints + numConstraints; cp < end; cp++)
     {
         S88_Instance* instance = *cp;
         int prio = (instance->getPriority() == 5);
-        S88_Entity** entities = &instance->getInternal()->m_kActorEntries[0];
-        S88_Motion* motionA = entities[0]->getMotion();
-        S88_Motion* motionB = entities[1]->getMotion();
+        hkpEntity** entities = &instance->getInternal()->m_kActorEntries[0];
+        hkpMotion* motionA = &entities[0]->m_pMotionState;
+        hkpMotion* motionB = &entities[1]->m_pMotionState;
 
-        hkpVelocityAccumulatorD886* pAccumulatorA =
+        hkpVelocityAccumulator* pAccumulatorA =
             S88_addByteOffset(s.m_pVelocityAccumulatorA, entities[0]->m_uiFilterInfo);
-        hkpVelocityAccumulatorD886* pAccumulatorB =
+        hkpVelocityAccumulator* pAccumulatorB =
             S88_addByteOffset(s.m_pVelocityAccumulatorA, entities[1]->m_uiFilterInfo);
         in.m_pBodyA = pAccumulatorA;
         in.m_pBodyB = pAccumulatorB;
 
-        S88_Backup* backupA = &s.m_pBodyABackup[entities[0]->m_uiFilterInfo >> 7];
-        S88_Backup* backupB = &s.m_pBodyABackup[entities[1]->m_uiFilterInfo >> 7];
+        S88_Backup* backupA = &reinterpret_cast<S88_Backup*>(s.m_sumVelocities)[entities[0]->m_uiFilterInfo >> 7];
+        S88_Backup* backupB = &reinterpret_cast<S88_Backup*>(s.m_sumVelocities)[entities[1]->m_uiFilterInfo >> 7];
         pAccumulatorA->m_vCenterOfMass = backupA->m_kTranslationalVelocity;
         pAccumulatorA->m_scratch1 = backupA->m_kAngularVelocity;
         pAccumulatorB->m_vCenterOfMass = backupB->m_kTranslationalVelocity;
         pAccumulatorB->m_scratch1 = backupB->m_kAngularVelocity;
 
-        const S88_MotionState* pMotionStateA = motionA->GetMotionState();
-        const S88_MotionState* pMotionStateB = motionB->GetMotionState();
-        in.m_kBodyALocalFrame = &pMotionStateA->getTransform();
-        in.m_kBodyBLocalFrame = &pMotionStateB->getTransform();
+        const hkMotionState* pMotionStateA = &motionA->m_kMotionState;
+        const hkMotionState* pMotionStateB = &motionB->m_kMotionState;
+        in.m_kBodyALocalFrame = &pMotionStateA->m_kMotionTransform;
+        in.m_kBodyBLocalFrame = &pMotionStateB->m_kMotionTransform;
         in.m_pConstraintChainInstance = instance;
         in.m_pByteBuffer = instance->getRuntime();
         in.m_uiParameterA = (unsigned short)(entities[0]->m_uiFilterInfo >> 7);
         in.m_uiParameterB = (unsigned short)(entities[1]->m_uiFilterInfo >> 7);
         in.m_pUserData = instance->getRuntime();
 
-        S88_SchemaInfo& info = constraintStatus.AllocatePair();
+        S88_SchemaInfo& info = S88_Array_AllocatePair(constraintStatus);
         info.m_pHavokConstraint = instance;
-        info.m_pConstraintSchema = s.m_akBufferStates[prio].m_pTileTemplate;
-        info.m_fAllowedPenetrationDepth = S88_min2(entities[0]->getCollidable()->m_fAllowedPenetrationDepth,
-                                                   entities[1]->getCollidable()->m_fAllowedPenetrationDepth);
+        info.m_pConstraintSchema = reinterpret_cast<S88_Schema*>(s.m_akBufferStates[prio].m_pTileTemplate);
+        info.m_fAllowedPenetrationDepth = S88_min2(entities[0]->m_kCollidable.m_fAllowedPenetrationDepth,
+                                                   entities[1]->m_kCollidable.m_fAllowedPenetrationDepth);
 
-        out.m_pQueryResultSchema = s.m_akBufferStates[prio].m_pTileTemplate;
+        out.m_pQueryResultSchema = reinterpret_cast<S88_Schema*>(s.m_akBufferStates[prio].m_pTileTemplate);
 
         if (instance->getData()->getType() == 11)
         {
@@ -735,8 +490,8 @@ void __cdecl FUN_00d88760(S88_Resources& s, S88_Instance** constraints, int numC
         S88_buildJacobianFromAtoms(instance->m_pConstraintInternal->getAtoms(),
                                    instance->m_pConstraintInternal->getAtomsSize(), in, out);
 
-        s.m_akBufferStates[prio].m_pTileTemplate = out.m_pQueryResultSchema;
-        s.m_pBufferC += instance->m_pConstraintInternal->m_iSolverElementTemporaryCount * 4;
+        s.m_akBufferStates[prio].m_pTileTemplate = reinterpret_cast<char*>(out.m_pQueryResultSchema.val());
+        s.m_akBufferStates[2].m_pTileTemplate += instance->m_pConstraintInternal->m_iSolverElementTemporaryCount * 4;
 
         pAccumulatorA->m_vCenterOfMass.setZero4();
         pAccumulatorA->m_scratch1.setZero4();
@@ -748,31 +503,19 @@ void __cdecl FUN_00d88760(S88_Resources& s, S88_Instance** constraints, int numC
     *(int*)s.m_akBufferStates[1].m_pTileTemplate = 0;
 }
 
-struct S883_Vector4
-{
-    __m128 m_vComponents;
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline void operator=(const S883_Vector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-
+// local form of hkMatrix3: 0x00d883c0 needs inline setZero/accessors; shared form emits an out-of-line setZero call absent from exe.
 struct S883_Matrix3
 {
-    S883_Vector4 m_kColumn0;
-    S883_Vector4 m_kColumn1;
-    S883_Vector4 m_kColumn2;
-    __forceinline S883_Vector4& getColumn(int i)
+    hkVector4 m_kColumn0;
+    hkVector4 m_kColumn1;
+    hkVector4 m_kColumn2;
+    __forceinline hkVector4& getColumn(int i)
     {
         return (&m_kColumn0)[i];
     }
     __forceinline void setZero()
     {
-        S883_Vector4 zero;
+        hkVector4 zero;
         zero.setZero4();
         getColumn(0) = zero;
         getColumn(1) = zero;
@@ -789,13 +532,13 @@ struct S883_Accumulator
     unsigned int m_uiDeactivationClass;
     float m_fGravityFactor;
     unsigned int unk0c;
-    S883_Vector4 m_vLinearVelocity;
-    S883_Vector4 m_vAngularVelocity;
-    S883_Vector4 m_vInverseInertiaAndMass;
-    S883_Vector4 m_vCenterOfMass;
+    hkVector4 m_vLinearVelocity;
+    hkVector4 m_vAngularVelocity;
+    hkVector4 m_vInverseInertiaAndMass;
+    hkVector4 m_vCenterOfMass;
     S883_Matrix3 m_kCoreFromWorldMatrix;
 
-    __forceinline S883_Vector4& getCenterOfMassInWorld()
+    __forceinline hkVector4& getCenterOfMassInWorld()
     {
         return m_vCenterOfMass;
     }
@@ -815,16 +558,7 @@ struct S883_Accumulator
     }
 };
 
-struct S883_EntityArray
-{
-    void** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-};
+
 
 struct S883_Island
 {
@@ -846,8 +580,8 @@ struct S883_Island
     int unk3c;
     int unk40;
     int unk44;
-    S883_EntityArray m_kActorEntries;
-    __forceinline const S883_EntityArray& GetEntities() const
+    hkArrayBase<void*> m_kActorEntries;
+    __forceinline const hkArrayBase<void*>& GetEntities() const
     {
         return m_kActorEntries;
     }
@@ -992,7 +726,7 @@ static __forceinline char* S88b50_allocateStack(int n)
 struct S88b50_ConstraintInternal
 {
     S88_Instance* m_pHavokConstraint;
-    struct S88b50_Entity* m_kActorEntries[2];
+    hkpEntity* m_kActorEntries[2];
     S88_Atom* m_kBridgeAtoms;
     unsigned short m_iAtomsSize;
     unsigned char m_ucCallbackRequest;
@@ -1031,7 +765,11 @@ struct S88b50_SmallArray
         return m_data + m_iElementCount;
     }
 };
-// hkpEntity
+static inline const S88b50_SmallArray& S88b50_getConstraintMasters(const hkpEntity* entity)
+{
+    return reinterpret_cast<const S88b50_SmallArray&>(entity->m_eSmallArraySerializeOverrideType);
+}
+
 struct S88b50_PtrArray
 {
     void* m_data;
@@ -1046,7 +784,7 @@ struct S88b50_World
     short m_sReferenceCount;
     void* m_pSimulation;
     int unk0C;
-    hkVector4D886 m_kGravity;
+    hkVector4 m_kGravity;
     void* m_pFixedIsland;
     void* m_pFixedRigidBody;
     S88b50_PtrArray m_kActiveSimulationIslands;
@@ -1069,106 +807,13 @@ struct S88b50_World
         return m_pCollisionInput;
     }
 };
-// hkpCdBody
-struct S88b50_CdBody
+static __forceinline hkpEntity* S88b50_getEntityA(const S88_Instance* i)
 {
-    const void* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const S88b50_CdBody* m_parent;
-    const S88_Transform& getTransform() const
-    {
-        return *(const S88_Transform*)m_pMotionState;
-    }
-};
-// hkpLinkedCollidable
-struct S88b50_Collidable : S88b50_CdBody
-{
-    signed char m_iOwnerOffset;
-    unsigned char m_uiForceCollideOntoPpu;
-    unsigned short m_uiShapeSizeOnSpu;
-    unsigned int m_broadPhaseId;
-    signed char m_cBroadPhaseType;
-    signed char m_broadPhaseOwnerOffset;
-    signed char m_ucObjectQualityType;
-    unsigned int m_uiCollisionFilterData;
-    unsigned int m_bvMin0;
-    unsigned int m_bvMin1;
-    unsigned int m_bvMin2;
-    unsigned int m_bvExpansionMinAndShift;
-    unsigned int m_bvMax0;
-    unsigned int m_bvMax1;
-    unsigned int m_bvMax2;
-    unsigned int m_bvExpansionMaxAndPadding;
-    unsigned short m_bvNumChildShapeAabbs;
-    unsigned short m_bvCapacityChildShapeAabbs;
-    void* m_bvChildShapeAabbs;
-    void* m_bvChildShapeKeys;
-    float m_fAllowedPenetrationDepth;
-    S88b50_PtrArray m_kCollisionEntries;
-};
-// hkpEntity
-struct S88b50_Entity
-{
-    void* m_ppVirtualMethodTable;
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    S88b50_World* m_pOwningWorld;
-    unsigned int m_ulUserData;
-    S88b50_Collidable m_kCollidable;
-    unsigned int m_mtThreadId;
-    unsigned short m_mtMarkCount;
-    unsigned short m_mtMarkBitStack;
-    const char* m_name;
-    S88b50_PtrArray m_kProperties;
-    void* m_kNextStreamField;
-    void* m_pWorldObjectOwner;
-    signed char m_materialResponseType;
-    float m_materialFriction;
-    float m_materialRestitution;
-    void* m_pEntityUserData;
-    float m_fBulletSpread;
-    void* m_pShape;
-    unsigned int m_uiFilterInfo;
-    unsigned short m_usStorageIndex;
-    unsigned short m_usNextProcessCallbackDelay;
-    S88b50_SmallArray m_eSmallArraySerializeOverrideType;
-    S88b50_PtrArray m_kSlaveConstraints;
-    S88b50_PtrArray m_pByteBuffer;
-    void* m_pSimulationIsland;
-    signed char m_iAutoRemoveLevel;
-    unsigned char m_ucNumShapeKeysInContactPointProperties;
-    unsigned char m_ucResponseModifierFlags;
-    unsigned int m_uiUniqueId;
-    void* m_spuCallbackUtil;
-    unsigned short m_spuCallbackCapacity;
-    unsigned char m_spuCallbackEventFilter;
-    unsigned char m_spuCallbackUserFilter;
-    S88_Motion m_pMotionState;
-    S88_Motion* getMotion()
-    {
-        return &m_pMotionState;
-    }
-    const S88b50_SmallArray& getConstraintMasters() const
-    {
-        return m_eSmallArraySerializeOverrideType;
-    }
-    S88b50_World* getWorld() const
-    {
-        return m_pOwningWorld;
-    }
-    const S88b50_Collidable* getCollidable() const
-    {
-        return &m_kCollidable;
-    }
-};
-static __forceinline S88b50_Entity* S88b50_getEntityA(const S88_Instance* i)
-{
-    return (S88b50_Entity*)i->unk14;
+    return (hkpEntity*)i->unk14;
 }
-static __forceinline S88b50_Entity* S88b50_getEntityB(const S88_Instance* i)
+static __forceinline hkpEntity* S88b50_getEntityB(const S88_Instance* i)
 {
-    return (S88b50_Entity*)i->unk18;
+    return (hkpEntity*)i->unk18;
 }
 
 // hkpSimulationIsland
@@ -1289,34 +934,34 @@ template <typename T> inline T S88b50_max2(T x, T y)
     return x > y ? x : y;
 }
 
-int __cdecl FUN_00d8d030(const void* solverInfo, char* schemas, hkpVelocityAccumulatorD886* accum, char* elemTemps);
-void __cdecl FUN_00df0680(const void* solverInfo, char* elemTemps, char* schemas, hkpVelocityAccumulatorD886* accum);
-int __cdecl FUN_00d29bf0(const void* solverInfo, const hkStepInfoD886* stepInfo,
-                         const hkpVelocityAccumulatorD886* accums, S88b50_Entity* const* bodies, int numBodies,
+int __cdecl FUN_00d8d030(const void* solverInfo, char* schemas, hkpVelocityAccumulator* accum, char* elemTemps);
+void __cdecl FUN_00df0680(const void* solverInfo, char* elemTemps, char* schemas, hkpVelocityAccumulator* accum);
+int __cdecl FUN_00d29bf0(const void* solverInfo, const hkStepInfo* stepInfo,
+                         const hkpVelocityAccumulator* accums, hkpEntity* const* bodies, int numBodies,
                          int offset);
-void __cdecl FUN_00d1a330(const void* input, S88b50_Entity* const* bodies, int numBodies);
+void __cdecl FUN_00d1a330(const void* input, hkpEntity* const* bodies, int numBodies);
 void __cdecl FUN_00d01700(void* world, void* elems, int n);
 
 // hkMatrix3
 struct S88b50_Matrix3
 {
-    hkVector4D886 m_kColumn0;
-    hkVector4D886 m_kColumn1;
-    hkVector4D886 m_kColumn2;
-    hkVector4D886& getColumn(int i)
+    hkVector4 m_kColumn0;
+    hkVector4 m_kColumn1;
+    hkVector4 m_kColumn2;
+    hkVector4& getColumn(int i)
     {
         return (&m_kColumn0)[i];
     }
     void setZero()
     {
-        hkVector4D886 zero;
+        hkVector4 zero;
         zero.setZero4();
         getColumn(0) = zero;
         getColumn(1) = zero;
         getColumn(2) = zero;
     }
 };
-static __forceinline void S88b50_setFixed(hkpVelocityAccumulatorD886& a)
+static __forceinline void S88b50_setFixed(hkpVelocityAccumulator& a)
 {
     a.m_type = 1;
     a.m_fGravityFactor = 0.0f;
@@ -1327,8 +972,8 @@ static __forceinline void S88b50_setFixed(hkpVelocityAccumulatorD886& a)
     reinterpret_cast<S88b50_Matrix3&>(a.m_scratch1).setZero();
 }
 
-static __forceinline void S88b50_buildAccumulators(const hkStepInfoD886& info, S88b50_Entity* const* bodies,
-                                                   int numBodies, hkpVelocityAccumulatorD886* accumulators)
+static __forceinline void S88b50_buildAccumulators(const hkStepInfo& info, hkpEntity* const* bodies,
+                                                   int numBodies, hkpVelocityAccumulator* accumulators)
 {
     S88b50_setFixed(*accumulators);
     for (int i = 0; i < numBodies; i++)
@@ -1339,8 +984,8 @@ static __forceinline void S88b50_buildAccumulators(const hkStepInfoD886& info, S
             bodies[i]->m_uiFilterInfo = newVal;
         }
     }
-    hkpVelocityAccumulatorD886* accumEnd =
-        FUN_00d29830(&info, (hkpEntityD886* const*)bodies, numBodies, 0xe0, accumulators + 1);
+    hkpVelocityAccumulator* accumEnd =
+        FUN_00d29830(&info, bodies, numBodies, 0xe0, accumulators + 1);
     accumEnd->m_type = 3;
 }
 
@@ -1363,7 +1008,7 @@ template <int SIZE> inline void S88b50_forcePrefetch(const void* p)
 }
 
 static __forceinline void S88b50_buildJacobianElement(const S88b50_ConstraintInternal* c, S88_QueryIn& in,
-                                                      hkpVelocityAccumulatorD886* accusIn, S88_QueryOut& out)
+                                                      hkpVelocityAccumulator* accusIn, S88_QueryOut& out)
 {
     S88b50_forcePrefetch<256>(c->getAtoms());
     if (c->getAtomsSize() > 256)
@@ -1374,14 +1019,14 @@ static __forceinline void S88b50_buildJacobianElement(const S88b50_ConstraintInt
             S88b50_forcePrefetch<256>(S88_addByteOffset(c->getAtoms(), 512));
         }
     }
-    S88b50_Entity* rA = c->m_kActorEntries[0];
-    S88b50_Entity* rB = c->m_kActorEntries[1];
-    S88_Motion* mA = rA->getMotion();
-    S88_Motion* mB = rB->getMotion();
+    hkpEntity* rA = c->m_kActorEntries[0];
+    hkpEntity* rB = c->m_kActorEntries[1];
+    hkpMotion* mA = &rA->m_pMotionState;
+    hkpMotion* mB = &rB->m_pMotionState;
     in.m_pBodyA = S88_addByteOffset(accusIn, rA->m_uiFilterInfo);
     in.m_pBodyB = S88_addByteOffset(accusIn, rB->m_uiFilterInfo);
-    in.m_kBodyALocalFrame = &mA->GetMotionState()->getTransform();
-    in.m_kBodyBLocalFrame = &mB->GetMotionState()->getTransform();
+    in.m_kBodyALocalFrame = &mA->m_kMotionState.m_kMotionTransform;
+    in.m_kBodyBLocalFrame = &mB->m_kMotionState.m_kMotionTransform;
     in.m_pConstraintChainInstance = c->m_pHavokConstraint;
     in.m_pByteBuffer = c->m_pRuntime;
     in.m_uiParameterA = (unsigned short)(rA->m_uiFilterInfo >> 7);
@@ -1390,32 +1035,32 @@ static __forceinline void S88b50_buildJacobianElement(const S88b50_ConstraintInt
     S88_buildJacobianFromAtoms(c->getAtoms(), c->getAtomsSize(), in, out);
 }
 
-static __forceinline void S88b50_buildJacobianElements(S88_QueryIn& in, S88b50_Entity* const* bodies, int numBodies,
-                                                       hkpVelocityAccumulatorD886* accusIn, S88_Schema* schemaOut,
+static __forceinline void S88b50_buildJacobianElements(S88_QueryIn& in, hkpEntity* const* bodies, int numBodies,
+                                                       hkpVelocityAccumulator* accusIn, S88_Schema* schemaOut,
                                                        S88_Schema* schemaOutEnd, S88_Schema* schemaOutB)
 {
     S88_QueryOut out;
     out.m_pQueryResultSchema = schemaOut;
-    S88b50_Entity* const* e = bodies;
-    S88b50_Entity* const* eEnd = bodies + numBodies;
+    hkpEntity* const* e = bodies;
+    hkpEntity* const* eEnd = bodies + numBodies;
     S88b50_InplaceArray criticalConstraints;
     criticalConstraints.init();
     for (; e < eEnd; e++)
     {
-        const S88b50_ConstraintInternal* c = (*e)->getConstraintMasters().begin();
-        const S88b50_ConstraintInternal* cEnd = (*e)->getConstraintMasters().end();
+        const S88b50_ConstraintInternal* c = S88b50_getConstraintMasters(*e).begin();
+        const S88b50_ConstraintInternal* cEnd = S88b50_getConstraintMasters(*e).end();
         for (; c < cEnd; c++)
         {
             if (c->m_ucCallbackRequest & 0xd)
             {
                 in.m_pConstraintChainInstance = c->m_pHavokConstraint;
                 in.m_pByteBuffer = c->m_pRuntime;
-                S88b50_Entity* rA = S88b50_getEntityA(c->m_pHavokConstraint);
-                S88b50_Entity* rB = S88b50_getEntityB(c->m_pHavokConstraint);
+                hkpEntity* rA = S88b50_getEntityA(c->m_pHavokConstraint);
+                hkpEntity* rB = S88b50_getEntityB(c->m_pHavokConstraint);
                 in.m_pBodyA = S88_addByteOffset(accusIn, rA->m_uiFilterInfo);
                 in.m_pBodyB = S88_addByteOffset(accusIn, rB->m_uiFilterInfo);
-                in.m_kBodyALocalFrame = &rA->getCollidable()->getTransform();
-                in.m_kBodyBLocalFrame = &rB->getCollidable()->getTransform();
+                in.m_kBodyALocalFrame = &*(const hkTransform*)rA->m_kCollidable.m_pMotionState;
+                in.m_kBodyBLocalFrame = &*(const hkTransform*)rB->m_kCollidable.m_pMotionState;
                 if (c->m_ucCallbackRequest & 9)
                 {
                     S88_ConstraintData* data = c->m_pHavokConstraint->getDataRw();
@@ -1459,20 +1104,20 @@ static __forceinline void S88b50_buildJacobianElements(S88_QueryIn& in, S88b50_E
     criticalConstraints.destroy();
 }
 
-static __forceinline int S88b50_integrate2(const void* solverInfo, const hkStepInfoD886& stepInfo,
-                                           const hkpVelocityAccumulatorD886* accumulators, S88b50_Entity* const* bodies,
+static __forceinline int S88b50_integrate2(const void* solverInfo, const hkStepInfo& stepInfo,
+                                           const hkpVelocityAccumulator* accumulators, hkpEntity* const* bodies,
                                            int numBodies)
 {
     int numInactiveFrames = FUN_00d29bf0(solverInfo, &stepInfo, accumulators + 1, bodies, numBodies, 0xe0);
-    FUN_00d1a330(bodies[0]->getWorld()->getCollisionInput(), bodies, numBodies);
+    FUN_00d1a330(((S88b50_World*)bodies[0]->m_pOwningWorld)->getCollisionInput(), bodies, numBodies);
     return numInactiveFrames;
 }
 
 // Allocates solver buffers, builds velocity accumulators and Jacobian schemas, solves the constraint system, and integrates the island bodies.
 // @fnv 0x00d88b50
-int __cdecl FUN_00d88b50(const hkStepInfoD886& stepInfo, const void* solverInfo, S88_QueryIn& constraintQueryIn,
+int __cdecl FUN_00d88b50(const hkStepInfo& stepInfo, const void* solverInfo, S88_QueryIn& constraintQueryIn,
                          S88b50_Island& island, void* preallocatedBuffer, int preallocatedBufferSize,
-                         S88b50_Entity* const* bodies, int numBodies)
+                         hkpEntity* const* bodies, int numBodies)
 {
     int result = 0;
     char* scratch2 = 0;
@@ -1501,12 +1146,12 @@ int __cdecl FUN_00d88b50(const hkStepInfoD886& stepInfo, const void* solverInfo,
         bufferEnd = buffer + preallocatedBufferSize;
     }
 
-    hkpVelocityAccumulatorD886* accumulators;
+    hkpVelocityAccumulator* accumulators;
     char* schemas;
     char* schemasEnd;
     char* elemTemp;
 redoAll:
-    accumulators = (hkpVelocityAccumulatorD886*)buffer;
+    accumulators = (hkpVelocityAccumulator*)buffer;
     buffer += accumulatorSize;
     schemas = buffer;
     buffer += schemaSize;

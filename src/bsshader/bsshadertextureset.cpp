@@ -1,13 +1,16 @@
 // bsshader/bsshadertextureset.cpp: BipedAnim, BSShaderTextureSet (8 functions)
+#include "NiRefObject_inline.h"
 
-#include "bsshadertextureset_types_BIPED_BONE.h"
+#include "../../include/BIPED_BONE.h"
 #include "bsshadertextureset_types_BipedAnim.h"
-#include "bsshadertextureset_types_NiTexture.h"
-#include "bsshadertextureset_types_NiStream.h"
-#include "bsshadertextureset_stream.h"
+#include "../../include/NiTexture.h"
+#include "../../include/NiPointer.h"
 #include "bsshadertextureset_decls.h"
-#include "bsshadertextureset_types_BSShaderManager.h"
-#include "bsshadertextureset_types_BSShaderTextureSet.h"
+#include "../../include/BSShaderManager.h"
+#include "../../include/BSShaderTextureSet.h"
+#include "../../include/BSTextureSet.h"
+#include "../../include/NiBinaryStream.h"
+#include "../../include/NiStream.h"
 
 // @fnv 0x004ab230
 #pragma optimize("", off)
@@ -38,52 +41,39 @@ void BSShaderTextureSet::GetTexture(BSShaderProperty::TextureTypeEnum textureTyp
     }
 }
 
-struct FUN_00ba88d0_shell : public BSShaderTextureSet
-{
-    void LoadTextureSet(NiStream*);
-};
-
 // @fnv 0x00ba88d0
-void FUN_00ba88d0_shell::LoadTextureSet(NiStream* kStream)
+void BSShaderTextureSet::LoadBinary(NiStream& stream)
 {
-    BSTextureSet::LoadBinary(*kStream);
+    NiObject::LoadBinary(stream);
     int count = 0;
     char* pcstring = 0;
-    NiBinaryStream* pkStream = *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(kStream) + 0x24c);
+    NiBinaryStream* pkStream = stream.m_pkIstr;
     {
         unsigned int uiBytesRead = 4;
-        *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(pkStream) + 4) +=
-            (*reinterpret_cast<unsigned int(__cdecl**)(NiBinaryStream*, void*, unsigned int, unsigned int*,
-                                                       unsigned int)>(reinterpret_cast<char*>(pkStream) + 8))(
-                pkStream, &count, 4, &uiBytesRead, 1);
+        pkStream->m_uiAbsoluteCurrentPos += pkStream->m_pfnRead(pkStream, &count, 4, &uiBytesRead, 1);
     }
     for (int i = 0; i < count; ++i)
     {
-        kStream->ReadStreamString(pcstring);
+        stream.ReadStreamString(pcstring);
         if (i >= 0)
         {
-            reinterpret_cast<BSStringT<char>*>(reinterpret_cast<char*>(this) + 8)[i].Set(pcstring, 0);
+            reinterpret_cast<BSStringT<char>*>(names)[i].Set(pcstring, 0);
         }
         NiFree(pcstring);
         pcstring = 0;
     }
 }
 
-struct FUN_00ba89e0_shell : public BSShaderTextureSet
-{
-    void FUN_00ba89e0(int, char*);
-};
-
 // @fnv 0x00ba89e0
-void FUN_00ba89e0_shell::FUN_00ba89e0(int aiType, char* apFilename)
+void BSShaderTextureSet::SetTexture(BSShaderProperty::TextureTypeEnum aiType, const char* apFilename)
 {
-    reinterpret_cast<BSStringT<char>*>(reinterpret_cast<char*>(this) + 8)[aiType].Set(apFilename, 0);
+    reinterpret_cast<BSStringT<char>*>(names)[aiType].Set(apFilename, 0);
 }
 
 // @fnv 0x00ba87e0
-int __fastcall FUN_00ba87e0(int* self, int unused, int index)
+const char* BSShaderTextureSet::GetTexture(BSShaderProperty::TextureTypeEnum textureType)
 {
-    return self[index * 2 + 2];
+    return reinterpret_cast<BSStringT<char>*>(names)[textureType].pString;
 }
 
 void __cdecl _MyHelper00a5d2f0(int a);
@@ -104,24 +94,18 @@ void FUN_00a724d0()
 template <class T> inline void NiStreamSaveBinaryBA89(NiBinaryStream* pkStream, const T& value)
 {
     unsigned int uiSize = sizeof(T);
-    pkStream->m_uiStreamFlags += pkStream->m_pfnWrite(pkStream, &value, sizeof(T), &uiSize, 1);
+    pkStream->m_uiAbsoluteCurrentPos += pkStream->m_pfnWrite(pkStream, &value, sizeof(T), &uiSize, 1);
 }
 
-class BSShaderTextureSetBA89 : public BSShaderTextureSet
-{
-  public:
-    void FUN_00ba8970(NiStream& stream);
-};
-
-// Links the object into the stream, writes the texture count 6, and writes each of the six m_kTextureNames strings to the stream.
+// Links the object into the stream, writes the texture count 6, and writes each of the six texture name strings to the stream.
 // @fnv 0x00ba8970
-void BSShaderTextureSetBA89::FUN_00ba8970(NiStream& stream)
+void BSShaderTextureSet::SaveBinary(NiStream& stream)
 {
-    ((NiObjectCall*)this)->NiObjectCall::LinkObject(stream);
+    NiObject::SaveBinary(stream);
 
     unsigned int uiTextureCount = 6;
-    NiStreamSaveBinaryBA89(stream.m_pBackingStream, uiTextureCount);
+    NiStreamSaveBinaryBA89(stream.m_pkOstr, uiTextureCount);
 
     for (int i = 0; i < 6; i++)
-        stream.WriteStreamString(m_kTextureNames[i].pString);
+        stream.WriteStreamString(reinterpret_cast<BSStringT<char>*>(names)[i].pString);
 }

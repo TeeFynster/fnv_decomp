@@ -1,3 +1,4 @@
+#include "../../../../../../../include/hkVector4.h"
 
 // src/havok/physics/collide/query/collector/kdtreecollector/hkpkdtreecollidableraycaster_gs_nogs_variant.cpp - flag-variant unit created 2026-10-25 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/physics/collide/query/collector/kdtreecollector/hkpkdtreecollidableraycaster.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -152,25 +153,20 @@ struct Helper
     virtual bool* unk04(bool* const out, void* key, Ray* a1);
 };
 
-__declspec(align(16)) struct Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
+
 
 struct Frame
 {
     Frame() : k40(0), k44(0)
     {}
-    Vec4 r0;
-    Vec4 r1;
+    hkVector4 r0;
+    hkVector4 r1;
     int k40;
     int k44;
 };
 
-struct Pair
+// hkpWorldRayCastInput (Havok): m_from, m_to, m_enableShapeCollectionFilter +0x20, m_filterInfo +0x24
+struct WorldRayCastInput
 {
     __m128 v0;
     __m128 v1;
@@ -200,7 +196,7 @@ struct Hdr2
     Ray* m_50;
 };
 
-static __forceinline void Xform3(Vec4* out, const __m128& pt, const Mat4* M)
+static __forceinline void Xform3(hkVector4* out, const __m128& pt, const Mat4* M)
 {
     __m128 d = _mm_sub_ps(pt, M->r3);
     __m128 r0 = M->r0;
@@ -220,7 +216,7 @@ static __forceinline void Xform3(Vec4* out, const __m128& pt, const Mat4* M)
 struct Raycaster
 {
     int unk00;
-    Pair* m_04;
+    WorldRayCastInput* m_04;
     Helper* m_08;
     int m_0C;
     Hdr2* m_10;
@@ -238,7 +234,7 @@ bool* Raycaster::FUN_00d97a40(bool* const out, Ray* a1)
         bool flag;
         if (!m_08 || *m_08->unk04(&flag, m_04, a1))
         {
-            Pair* A = m_04;
+            WorldRayCastInput* A = m_04;
             Mat4* M = a1->m_08;
             Frame f;
             Xform3(&f.r0, A->v0, M);

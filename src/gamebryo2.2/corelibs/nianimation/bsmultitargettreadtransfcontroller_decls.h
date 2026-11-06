@@ -1,16 +1,9 @@
-// gamebryo2.2/corelibs/nianimation/bsmultitargettreadtransfcontroller_decls.h: declares TreadEntry, BSMultiTargetTreadTransfController
+// gamebryo2.2/corelibs/nianimation/bsmultitargettreadtransfcontroller_decls.h: declares TreadEntry
 class NiInterpolator;
-struct TreadEntry
+#include "../../../../include/BSMultiTargetTreadTransfController.h"
+class TreadEntry
 {
     char data[0x34];
-};
-class BSMultiTargetTreadTransfController
-{
-    char padding[0x34];
-    TreadEntry* entries;
-
-  public:
-    NiInterpolator* GetInterpolator(unsigned short index);
 };
 extern unsigned int DAT_011f36a0;
 extern char DAT_00a2d8a0;

@@ -1,21 +1,24 @@
+#include "../../../../include/BGSProjectile.h"
+#include "../../../../include/BSMultiBoundRoom.h"
+#include "../../../../include/GO.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiTransform.h"
+#include "../../../../include/NiUpdateData.h"
+#include "../../../../include/PathingRequest.h"
+#include "../../../../include/Projectile.h"
+#include "../../../../include/TESModel.h"
+#include "../../../../include/NiMatrix3.h"
+#include <string.h>
+
+#pragma intrinsic(memcpy)
 
 // src/fallout/ai/combat/muzzleflash.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/muzzleflash.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct BGSProjectile
-{
-    bool GetFlag(unsigned int) const;
-};
-
-struct FUN_009baf30_shell : BGSProjectile
-{
-    bool HasFlag8() const;
-};
-
 // @fnv 0x009baf30
-bool FUN_009baf30_shell::HasFlag8() const
+bool __fastcall HasProjectileFlag8(const BGSProjectile* projectile)
 {
-    return GetFlag(8);
+    return projectile->GetFlag(8);
 }
 
 void __cdecl Deallocate(void*);
@@ -34,26 +37,18 @@ void* FUN_009badc0_shell::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-struct BSMultiBoundRoom
-{
-    void* FUN_006ab360();
-};
 struct FUN_009baee0_owner
 {
     char _pad[0x14];
-    FUN_009baf30_shell* pItem;
+    BGSProjectile* pItem;
     void* FUN_009baee0();
 };
 // @fnv 0x009baee0
 void* FUN_009baee0_owner::FUN_009baee0()
 {
-    return (pItem && pItem->HasFlag8()) ? reinterpret_cast<BSMultiBoundRoom*>(pItem)->FUN_006ab360() : 0;
+    return (pItem && HasProjectileFlag8(pItem)) ? reinterpret_cast<BSMultiBoundRoom*>(pItem)->FUN_006ab360() : 0;
 }
 
-struct PathingRequest
-{
-    float FUN_00507e10();
-};
 extern double _gModifierZero;
 struct FUN_009bb690_shell
 {
@@ -79,22 +74,9 @@ void FUN_009bb690_shell::FUN_009bb690()
     }
 }
 
-class NiNode;
-template <class T> struct NiPointer
-{
-    T* pointer;
-    NiPointer(T*);
-    ~NiPointer();
-    NiPointer& operator=(T*);
-};
 struct ProjectileData
 {
     float FUN_00507e10();
-};
-struct Projectile
-{
-    ProjectileData* FUN_004181e0();
-    unsigned int FUN_00476c90();
 };
 struct FUN_009bacb0
 {
@@ -328,10 +310,6 @@ struct S_009bb080_Global
 {
     int FUN_0044ddc0();
 };
-struct S_009bb080_Path
-{
-    float FUN_00507e10();
-};
 extern S_009bb080_Global DAT_011f2250;
 extern double DAT_01012060;
 extern float DAT_0101e2bc;
@@ -344,7 +322,7 @@ struct S_009bb080
     float unk4, unk8;
     S_009bb080_Ptr unkc;
     int unk10;
-    S_009bb080_Path* unk14;
+    PathingRequest* unk14;
     void UpdateMuzzleFlash(S_009bb080_Base0*);
     void UpdateLightVisibility();
     void FUN_009bb080(float dt, S_009bb080_Base0* proj);
@@ -393,34 +371,6 @@ void S_009bb080::FUN_009bb080(float afDeltaTime, S_009bb080_Base0* proj)
     }
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3 FUN_004a0bd0();
-    NiPoint3& FUN_00439180(float);
-};
-struct ThreeByThreeMatrix
-{
-    float m[9];
-};
-struct NiTransform
-{
-    ThreeByThreeMatrix m_rot;
-    NiPoint3 m_trans;
-    float m_vScale;
-    NiTransform();
-    ThreeByThreeMatrix FUN_004768c0();
-    NiPoint3 FUN_004b4500(NiPoint3*);
-    NiTransform FUN_0062c250(NiTransform*);
-};
-struct NiUpdateData
-{
-    float m_00;
-    bool m_04;
-    bool m_05;
-    int m_08;
-    NiUpdateData(float, bool, bool);
-};
 struct AnimCls
 {
     float FUN_00453700();
@@ -757,17 +707,6 @@ struct PlayerCls
     virtual void v120();
     virtual void* v121();
 };
-struct NiAVObject
-{
-    void FUN_00440460(NiPoint3*);
-    void FUN_0043fa80(NiTransform*);
-    void FUN_00440490(float);
-    void FUN_00a59c60(NiUpdateData&);
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void* v3();
-};
 struct NiPtrC
 {
     NiAVObject* FUN_00559450();
@@ -828,13 +767,14 @@ void ThisCls::UpdateMuzzleFlash(ParamCls* apParam)
             NiTransform B;
             if (target2)
             {
-                B.m_rot = target2->FUN_00461130()->FUN_004768c0();
-                B.m_vScale = 1.0f / target2->FUN_00461130()->m_vScale;
-                B.m_trans = target2->FUN_00461130()->m_trans.FUN_004a0bd0();
-                B.m_trans = B.FUN_004b4500(&B.m_trans);
-                B.m_trans.FUN_00439180(B.m_vScale);
+                B.m_Rotate = target2->FUN_00461130()->FUN_004768c0();
+                B.m_fScale = 1.0f / target2->FUN_00461130()->m_fScale;
+                // Explicit copies preserve the original trivial-assignment code under /Od.
+                memcpy(&B.m_Translate, &target2->FUN_00461130()->m_Translate.FUN_004a0bd0(), sizeof(B.m_Translate));
+                memcpy(&B.m_Translate, &B.FUN_004b4500(&B.m_Translate), sizeof(B.m_Translate));
+                B.m_Translate.FUN_00439180(B.m_fScale);
             }
-            A_2 = B.FUN_0062c250(node2->FUN_00461130());
+            memcpy(&A_2, &B.FUN_0062c250(node2->FUN_00461130()), sizeof(A_2));
             _flag = true;
             if (!DAT_011dea3c->FUN_00524d10())
             {
@@ -847,7 +787,7 @@ void ThisCls::UpdateMuzzleFlash(ParamCls* apParam)
         }
         else
         {
-            A_2 = *node2->FUN_00461130();
+            memcpy(&A_2, node2->FUN_00461130(), sizeof(A_2));
             HolderCls* holder6 = (HolderCls*)apParam->FUN_008d6f30();
             target2 = holder6->FUN_005497a0();
         }
@@ -863,12 +803,12 @@ void ThisCls::UpdateMuzzleFlash(ParamCls* apParam)
                 {
                     FUN_004537b0()->QueueTaskWithTwoObjects(m_0c.FUN_00559450(), target2, 1, 0);
                 }
-                FUN_00b6bb30(m_0c.FUN_00559450()->v3(), 1.0f);
+                FUN_00b6bb30(m_0c.FUN_00559450()->IsSceneNode(), 1.0f);
             }
         }
-        m_0c.FUN_00559450()->FUN_00440460(&A_2.m_trans);
+        m_0c.FUN_00559450()->FUN_00440460(&A_2.m_Translate);
         m_0c.FUN_00559450()->FUN_0043fa80(&A_2);
-        m_0c.FUN_00559450()->FUN_00440490(A_2.m_vScale);
+        m_0c.FUN_00559450()->FUN_00440490(A_2.m_fScale);
         if (_flag)
         {
             if (!FUN_008c7aa0())
@@ -1458,22 +1398,6 @@ struct Calendar
 struct Flt
 {
     operator unsigned int();
-};
-struct GO
-{
-    void* p;
-    ~GO();
-    void operator=(void*);
-};
-struct TESModel
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual const char* GetModelFilePath();
-    unsigned int GetModelLength() const;
 };
 struct NodeX
 {

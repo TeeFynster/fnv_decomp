@@ -2,27 +2,17 @@
 // src/gamebryo2.2/corelibs/nisystem/nisearchpath.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nisystem/nisearchpath.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiSearchPath
-{
-    unsigned int m_uiSearchPathValue;
-    void FUN_00aa2500();
-};
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiSearchPath.h"
 
 // @fnv 0x00aa2500
 void NiSearchPath::FUN_00aa2500()
 {
-    *reinterpret_cast<unsigned int*>(reinterpret_cast<unsigned char*>(this) + 4) = 0;
+    m_uiSearchPathValue = 0;
 }
 
-namespace fnv_00aa2540 {
 extern void _fnv_StandardizeFilePath(char*);
 extern void _fnv_CopyFilePath(char*, int, const char*, int);
-
-struct NiSearchPath
-{
-    char m_acFilePathBuffer[260];
-    void SetPath(const char* pcFilePath);
-};
 
 // Copies pcFilePath into the buffer at offset 8 and standardizes it, or clears that buffer when pcFilePath is null or empty.
 // @fnv 0x00aa2540
@@ -30,15 +20,14 @@ void NiSearchPath::SetPath(const char* pcFilePath)
 {
     if (pcFilePath && *pcFilePath)
     {
-        _fnv_CopyFilePath((char*)this + 8, 0x104, pcFilePath, 0x103);
-        _fnv_StandardizeFilePath((char*)this + 8);
+        _fnv_CopyFilePath(m_acFilePathBuffer, 0x104, pcFilePath, 0x103);
+        _fnv_StandardizeFilePath(m_acFilePathBuffer);
     }
     else
     {
-        *(char*)((char*)this + 8) = 0;
+        m_acFilePathBuffer[0] = 0;
     }
 }
-}  // namespace fnv_00aa2540
 
 int _strcpy_s(char* dst, unsigned int size, const char* src);
 void _fnv_StandardizeFilePath(char* path);
@@ -69,17 +58,9 @@ struct FileNameComponents
         return m_acFolderPath;
     }
 };
-struct NiSearchPathS
-{
-    void* m_vtbl;
-    unsigned int m_uiSearchPathValue;
-    char m_acFilePathBuffer[260];
-    char m_acResolvedPath[260];
-    bool ResolveSearchPath(char* pcPath, unsigned int uiStringLen);
-};
 // Builds a full path from the stored path and search-path mode, writes it to pcPath, standardizes it, and advances the mode counter.
 // @fnv 0x00aa2580
-bool NiSearchPathS::ResolveSearchPath(char* pcOutPath, unsigned int uiOutLen)
+bool NiSearchPath::ResolveSearchPath(char* pcOutPath, unsigned int uiOutLen)
 {
     FileNameComponents kFullPath(m_acFilePathBuffer);
     switch (m_uiSearchPathValue)
@@ -117,19 +98,11 @@ bool NiSearchPathS::ResolveSearchPath(char* pcOutPath, unsigned int uiOutLen)
     return true;
 }
 
-struct MemoryManager
-{
-    void* Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
-struct FUN_00aa2510
+inline void NiSearchPath::operator delete(void* p)
 {
-    virtual ~FUN_00aa2510();
-    void operator delete(void* p)
-    {
-        g_memoryManager.Deallocate(p);
-    }
-};
+    g_memoryManager.Deallocate(p);
+}
 // @fnv 0x00aa2510
-FUN_00aa2510::~FUN_00aa2510()
+NiSearchPath::~NiSearchPath()
 {}

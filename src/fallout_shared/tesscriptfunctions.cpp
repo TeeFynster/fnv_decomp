@@ -1,86 +1,542 @@
+#include "../../include/SettingT.h"
+#include "../../include/FIGHT_REACTION.h"
 // fallout_shared/tesscriptfunctions.cpp: Script, ActorValue, TESActorBaseData, DelStandIn and more (979 functions)
-#include "tesscriptfunctions_layout_support.h"
+// Unit declarations retained here because the layout support header is shared with other units.
+#ifndef FNV_TESSCRIPTFUNCTIONS_LAYOUT_SUPPORT_H
+#define FNV_TESSCRIPTFUNCTIONS_LAYOUT_SUPPORT_H
+#include <stddef.h>
+#include "../../include/BSSoundHandle.h"
+#include "../../include/NiColorA.h"
+#include "../../include/NiPointer.h"
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+#ifdef _MSC_VER
+#define FNV_ALIGN(n) __declspec(align(n))
+#define FNV_FORCEINLINE __forceinline
+typedef __int64 FNVInt64;
+typedef unsigned __int64 FNVUInt64;
+#else
+#define FNV_ALIGN(n) __attribute__((aligned(n)))
+#define FNV_FORCEINLINE inline __attribute__((always_inline))
+typedef long long FNVInt64;
+typedef unsigned long long FNVUInt64;
+#endif
+FNV_STATIC_ASSERT(sizeof(void*) == 4);
+FNV_STATIC_ASSERT(sizeof(long) == 4);
+using ::SettingT;
+class FormFlagRecord;
+class ActiveEffect;
+class ActorMover;
+class ActorPackageContext;
+class ActorPackageData;
+class ActorValueInfo;
+class ActorValueOwner;
+class AlchemyItem;
+class AnimData;
+class AutoMemContext;
+class BGSEntryPointFunctionData;
+class BGSEntryPointFunctionDataActivateChoice;
+class BGSEntryPointFunctionDataLeveledList;
+class BGSEntryPointFunctionDataOneValue;
+class BGSEntryPointFunctionDataTwoValue;
+class BGSEntryPointPerkEntry;
+class BGSListForm;
+class BGSPerk;
+class BGSPerkEntry;
+class BGSQuestObjective;
+class BSAudio;
+class BSAudioListener;
+class BSAudioSyncTimer;
+class BSCacheDriveSystemUtility;
+class RecursiveLock;
+class BSDiscBootSystemUtility;
+class BSExtraData;
+class BSFaceGenKeyframe;
+class BSFile;
+class BSGameDataSystemUtility;
+class BSSaveDataSystemUtility;
+class BSSaveDataSystemUtility__SaveDataEntry;
+class BSSaveDataOperationEntry;
+class RecursiveSpinLock;
+class BSSysInfoSystemUtility;
+class BSThread;
+class GameTimerRecord;
+class BaseExtraList;
+class BaseFormComponent;
+class BipedAnim;
+class ExpressionEvaluator;
+class CachedValues;
+class CachedValuesOwner;
+class CombatGroupCollection;
+class CombatController;
+class CombatProcedure;
+class TimeoutTimer;
+class ContinuousBeamProjectile;
+class DialogueTopicData;
+class DialogueItem;
+class DialogueResponse;
+class ActorListEntry;
+class EffectSetting;
+class PerkEntryPointData;
+class ExpressionValue;
+class ExtraContainerChanges;
+class TESFileHeader;
+class FormRecordHeader;
+class TESFileGroup;
+class ModifierPointerList;
+class ReactionInfo;
+class GameSettingCollection;
+class GarbageCollector;
+class HUDMainMenu;
+class HUDMainMenu__MessageData;
+class HUDMainMenu__QuestObjective;
+class HUDMainMenu__RadiationUpdate;
+class HUDMainMenu__SubtitleData;
+class HUDMainMenu__XPUpdate;
+class MemoryHeapStats;
+class HotkeyWheelDisplay;
+class IMemoryHeap;
+class IMemoryManagerFile;
+class INFO_LINK_ELEMENT;
+class InventoryChanges;
+class InventoryMenu;
+class InventoryMenu__sPageState;
+class InventoryStackRecord;
+class ItemModMenu;
+class CellDataNode;
+class ListBox_ItemChange___;
+class ListBox_PerkRankData___;
+class ListBox_StatsMenu__StatusEffect___;
+class ListBox_TESReputation___;
+class ListBox_enum_ActorValue__Index_;
+class ListBox_enum_MiscStatManager__MiscStatID_;
+class ListBox_int_;
+class ListBoxBase;
+class ListBoxItem_ItemChange___;
+class ListBoxItem_PerkRankData___;
+class ListBoxItem_StatsMenu__StatusEffect___;
+class ListBoxItem_TESReputation___;
+class ListBoxItem_enum_ActorValue__Index_;
+class ListBoxItem_enum_MiscStatManager__MiscStatID_;
+class ListBoxItem_int_;
+class LowProcess;
+class MagicCaster;
+class MagicItem;
+class MagicEffectCollection;
+class MagicTarget;
+class MemoryManager;
+class MemoryPool;
+class MemoryPool__FreePoolBlock;
+class MessageMenu;
+class MiddleLowProcess;
+class MobileObject;
+class Modifier;
+class ActorValueModifierList;
+class NavMeshInfo;
+class NavMeshInfo_const;
+class NiControllerSequence;
+class NiExtraData;
+class NiFixedString;
+class NiMemObject;
+class NiNode;
+class NiObject;
+class NiObjectNET;
+class NiPoint3;
+class NiProperty;
+class NiRefObject;
+class NiTimeController;
+class PlacedObjectInfo;
+class OSGlobals;
+class OSInputGlobals;
+class OSSoundGlobals;
+class TargetDoorController;
+class PathingLocation;
+class PerkData;
+class PerkForm;
+class PlayerCharacter;
+class QuestData;
+class QuestDialogueInfo;
+class RepairMenu;
+class TESResponseList;
+class ScriptDefinition;
+class ScriptFunctionInfo;
+class ScriptHeaderData;
+class ScriptLocalVariable;
+class ScriptParameter;
+class ScriptReferencedObject;
+union SETTING_VALUE;
+class Script;
+class ScriptLocals;
+class ScriptRunner;
+class ScriptVariableInfo;
+class Setting;
+class MagicEffectContext;
+class SpellItem;
+class StatsMenu;
+class StatsMenu__HealingOption;
+class StatsMenu__NamedEffectsList;
+class StatsMenu__StatusEffect;
+class StatsMenu__StatusEffectList;
+class TESActorBase;
+class TESBitArrayFile;
+class TESBoundObject;
+class TESChildCell;
+class PerkEntryConditionSet;
+class TESConditionItem;
+class TESTopicInfoData;
+class TESDescription;
+class TESFaction;
+class TESFile;
+class TESForm;
+class TESFullName;
+class TESGlobal;
+class TESGrass;
+class TESHealthForm;
+class TESIcon;
+class TESLandTexture;
+class TESLevItem;
+class TESObject;
+class TESObjectCELL;
+class TESObjectREFR;
+class TESPackage;
+class TESQuest;
+class QuestStage;
+class RegionObjectEntry;
+class TESReactionForm;
+class TESRegionGrassObject;
+class TESRegionObjectBase;
+class TESResponse;
+class TESScriptableForm;
+class TESSound;
+class TESTexture;
+class TESTopic;
+class TESTopicInfo;
+class TESWorldSpace;
+class TopicInfoData;
+class Tile;
+class Tile__Action;
+class Tile__FloatAction;
+class Tile__TileTemplate;
+class TileMenu;
+class TopicInfoArray;
+class ValidBip01Names;
+class ZeroOverheadHeap;
+class _FILETIME;
+class _RTL_CRITICAL_SECTION;
+class _RTL_CRITICAL_SECTION___unnamed_type_Synchronization_;
+class _ULARGE_INTEGER;
+class _WIN32_FIND_DATAA;
+class bhkRagdollController;
+class bhkRagdollPenetrationUtil;
+class bool___cdecl__StatsMenu__HealingOption__;
+class bool___cdecl__char__;
+class bool___cdecl__const_char___char___unsigned_int___void___;
+class bool___cdecl__unsigned_int__char___unsigned_int___void___;
+class void___cdecl___;
+class void___cdecl__BSDiscBootSystemUtility__NOTIFICATION_TYPE_;
+class void___cdecl__BSSaveDataSystemUtility__RESULT_;
+class ScriptParameter;
+class ScriptCallbackContext;
+class CStringArgument;
+#ifdef _MSC_VER
+#define FNV_CDECL __cdecl
+#else
+#define FNV_CDECL
+#endif
+typedef bool(FNV_CDECL* FNVScriptExecuteFunction)(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*,
+                                                  Script*, ScriptLocals*, double&, unsigned int&);
+typedef bool(FNV_CDECL* FNVScriptCompileFunction)(const unsigned short, const ScriptParameter*, ScriptCallbackContext*,
+                                                  CStringArgument*);
+typedef bool(FNV_CDECL* FNVScriptConditionFunction)(TESObjectREFR*, void*, void*, double&);
+#include "../../include/BSSimpleList.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTNewInterface.h"
+#include "../../include/NiTArray.h"
+#include "../../include/NiTObjectArray.h"
+#include "../../include/NiTLargeArray.h"
+#include "../../include/NiTLargePrimitiveArray.h"
+typedef NiTObjectArray<TESObjectREFR*> FNVReferenceObjectArray;
+FNV_STATIC_ASSERT(sizeof(FNVReferenceObjectArray) == 16);
+FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_pBase) == 4);
+FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usMaxSize) == 8);
+FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usSize) == 10);
+FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usESize) == 12);
+FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usGrowBy) == 14);
+#include "../../include/BSSimpleArray.h"
+#include "../../include/BSStringT.h"
+#include "../../include/NiTMapItem.h"
+#include "../../include/Stack.h"
+class TESObjectCELL;
+class TESDataHandler;
+FNV_STATIC_ASSERT(sizeof(BSSimpleList<void*>) == 8);
+FNV_STATIC_ASSERT(sizeof(BSStringT<char>) == 8);
+FNV_STATIC_ASSERT(offsetof(BSStringT<char>, pString) == 0);
+FNV_STATIC_ASSERT(offsetof(BSStringT<char>, sLen) == 4);
+FNV_STATIC_ASSERT(offsetof(BSStringT<char>, sMaxLen) == 6);
+FNV_STATIC_ASSERT(sizeof(NiPointer<NiObject>) == 4);
+typedef NiTLargeArray<void*, NiTMallocInterface<void*> > FNVPointerArray;
+FNV_STATIC_ASSERT(sizeof(FNVPointerArray) == 24);
+FNV_STATIC_ASSERT(offsetof(FNVPointerArray, m_pBase) == 4);
+FNV_STATIC_ASSERT(offsetof(FNVPointerArray, m_uiSize) == 12);
+typedef BSSimpleArray<int, 1024> FNVSimpleArray;
+FNV_STATIC_ASSERT(sizeof(FNVSimpleArray) == 16);
+FNV_STATIC_ASSERT(offsetof(FNVSimpleArray, pBuffer) == 4);
+FNV_STATIC_ASSERT(offsetof(FNVSimpleArray, iSize) == 8);
+#ifdef _MSC_VER
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
+#else
+FNV_FORCEINLINE long InterlockedDecrement(volatile long* value)
+{
+    return __sync_sub_and_fetch(value, 1);
+}
+FNV_FORCEINLINE long InterlockedIncrement(volatile long* value)
+{
+    return __sync_add_and_fetch(value, 1);
+}
+#endif
+#include "../../include/NiTPointerAllocator.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTListBase.h"
+#include "../../include/NiTPointerListBase.h"
+typedef NiTListItem<void*> FNVPointerListItem;
+typedef NiTListBase<NiTPointerAllocator<unsigned int>, void*> FNVPointerListBase;
+FNV_STATIC_ASSERT(sizeof(FNVPointerListItem) == 12);
+FNV_STATIC_ASSERT(offsetof(FNVPointerListItem, m_pkNext) == 0);
+FNV_STATIC_ASSERT(offsetof(FNVPointerListItem, m_pkPrev) == 4);
+FNV_STATIC_ASSERT(offsetof(FNVPointerListItem, m_element) == 8);
+FNV_STATIC_ASSERT(sizeof(FNVPointerListBase) == 12);
+FNV_STATIC_ASSERT(offsetof(FNVPointerListBase, m_pkHead) == 0);
+FNV_STATIC_ASSERT(offsetof(FNVPointerListBase, m_pkTail) == 4);
+FNV_STATIC_ASSERT(offsetof(FNVPointerListBase, m_kItemCount) == 8);
+#include "../../include/ACTOR_CRITICAL_STAGE.h"
+#include "../../include/ACTOR_LIFE_STATE.h"
+#include "../../include/ANIM_GROUP_ENUM.h"
+#include "../../include/ActorValue.h"
+typedef ActorValue::Index ActorValue__Index;
+#include "../../include/BS_FACEGEN_MORPH_TYPE.h"
+#include "../../include/CACHEDRIVE_STATUS.h"
+#include "../../include/CHUNK_ID.h"
+#include "../../include/DIALOGUE_EMOTION.h"
+#include "../../include/DIALOGUE_TYPE.h"
+#include "../../include/ENUM_FORM_ID.h"
+#include "../../include/EXPRESSION_ERROR.h"
+#include "../../include/ExpressionOperator.h"
+#include "../../include/GAMEDATA_STATUS.h"
+#include "../../include/MEM_CONTEXT.h"
+#include "../../include/PACKAGE_OBJECT_TYPE.h"
+#include "../../include/PROCESS_TYPE.h"
+#include "../../include/SCRIPT_ERROR.h"
+#include "../../include/SCRIPT_OUTPUT.h"
+#include "../../include/SIT_SLEEP_STATE.h"
+#include "../../include/SPEECH_CHALLENGE_LEVEL.h"
+#include "../../include/TES_RETURN_CODE.h"
+#endif
+#include "../../include/BSSimpleArray.h"
+#include "../../include/NiMemObject.h"
+#include "../../include/ActorBaseAttributes.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/SETTING_VALUE.h"
+#define __vecDelDtor SharedVectorDeletingDestructor
+// Shared headers carry minimal template declarations; preserve the unit-local template APIs.
+#define _ULARGE_INTEGER Shared_ULARGE_INTEGER
+#define ULARGE_INTEGER SharedULARGE_INTEGER
+#define PCH SharedPCH
+#define GetProcessAffinityMask SharedGetProcessAffinityMask
+#define QueryPerformanceFrequency SharedQueryPerformanceFrequency
+#define QueryPerformanceCounter SharedQueryPerformanceCounter
 
+// These UI APIs do not use GetClass; isolate the inconsistent shared return declarations.
+#define GetClass SharedMenuGetClass
+#include "../../include/Menu.h"
+#undef GetClass
+#include "../../include/Mat3.h"
+#include "../../include/Actor.h"
+#include "../../include/BSFile.h"
+#include "../../include/CombatController.h"
+#include "../../include/FleePackage.h"
+#include "../../include/NiTriShape.h"
+#include "../../include/TESPackage.h"
+#include "../../include/TESSound.h"
+#include "../../include/BSAudioManager.h"
+#include "../../include/BGSSaveLoadManager.h"
+#include "../../include/ActorValueInfo.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSImpactDataSet.h"
+#include "../../include/FOPipboyManager.h"
+#include "../../include/HUDMainMenu.h"
+#include "../../include/ImageSpaceModifierInstanceDOF.h"
+#include "../../include/InventoryChanges.h"
+#include "../../include/MagicHitEffect.h"
+#include "../../include/NiControllerSequence.h"
+#include "../../include/ScriptLocals.h"
+#include "../../include/SkyObject.h"
+#include "../../include/TESClass.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESQuest.h"
+#include "../../include/TESValueForm.h"
+#include "../../include/BGSOpenCloseForm.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/BSShaderAccumulator.h"
+#include "../../include/ExtraContainerChanges.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/SeenData.h"
+#include "../../include/Setting.h"
+
+#include "../../include/TESContainer.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESFaction.h"
+#include "../../include/NiControllerManager.h"
+#include "../../include/BSSystemUtility.h"
+#include "../../include/TESObject.h"
+#include "../../include/NiTexturingProperty.h"
+#include "../../include/BSShaderNoLightingProperty.h"
+#include "../../include/ImageSpaceManager.h"
+#include "../../include/ImageSpaceModifierInstanceForm.h"
+#include "../../include/BSOcclusionPlane.h"
+#include "../../include/TESClimate.h"
+#include "../../include/TESWeather.h"
+#include "../../include/TES.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/BGSListForm.h"
+#include "../../include/BGSPerk.h"
+#include "../../include/Character.h"
+#include "../../include/TESCasino.h"
+#include "../../include/TESGlobal.h"
+#include "../../include/TESWorldSpace.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/TESIdleForm.h"
+#include "../../include/LowProcess.h"
+#include "../../include/MiddleLowProcess.h"
+#include "../../include/MiddleHighProcess.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/Projectile.h"
+#include "../../include/ActorValueOwner.h"
+#include "../../include/BGSQuestObjective.h"
+#include "../../include/BSAnimGroupSequence.h"
+#include "../../include/FileEntryList.h"
+#include "../../include/FontManager.h"
+#include "../../include/MagicCaster.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiProperty.h"
+#include "../../include/OSGlobals.h"
+#include "../../include/PathingLocation.h"
+#include "../../include/PathingRequest.h"
+#include "../../include/StartMenu.h"
+#include "../../include/Tile.h"
+#include "../../include/TutorialMenu.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/BSShaderManager.h"
+#include "../../include/ExtraLock.h"
+#include "../../include/FalloutRadio.h"
+#include "../../include/GameTimerRecord.h"
+#include "../../include/NiAdditionalGeometryData.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/RecursiveSpinLock.h"
+#include "../../include/BGSTalkingActivator.h"
+#include "../../include/BSAudio.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/GameSettingCollection.h"
+#include "../../include/INIPrefSettingCollection.h"
+#include "../../include/INISettingCollection.h"
+#include "../../include/MobileObject.h"
+#include "../../include/NiShadeProperty.h"
+#include "../../include/NiTexture.h"
+#include "../../include/SettingCollectionList.h"
+#include "../../include/Sky.h"
+#include "../../include/SpellItem.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESCaravanCard.h"
+#include "../../include/TESChallenge.h"
+#include "../../include/TESImageSpaceModifier.h"
+#include "../../include/TESNPC.h"
+#include "../../include/TESObjectBOOK.h"
+#include "../../include/TESObjectWEAP.h"
+#include "../../include/TESRecipe.h"
+#include "../../include/TESWaterForm.h"
+#include "../../include/bhkCharacterController.h"
+#include "../../include/bhkRagdollController.h"
+
+#undef _ULARGE_INTEGER
+#undef ULARGE_INTEGER
+#undef PCH
+#undef GetProcessAffinityMask
+#undef QueryPerformanceFrequency
+#undef QueryPerformanceCounter
+#undef __vecDelDtor
+typedef ::NiPoint3 SharedPoint3;
+typedef ::TESObjectCELL SharedCell;
+typedef ::TESModel SharedModel;
+typedef ::TESForm SharedForm;
+typedef ::TESObject SharedObject;
+// Script actions not yet declared by the shared Actor API.
+class ScriptActorActions : public Actor {
+public:
+    void FUN_0088b740(int, float);
+    void FUN_008b8f20(void*);
+    bool FUN_0087f4e0();
+    int FUN_004f8960();
+    void FUN_0087faa0();
+    void FUN_008ace50(bool);
+    void FUN_008bbf40(int, int, int, int, int, bool, bool, bool, bool);
+    void FUN_008bca90(bool);
+    void FUN_008a73e0(int, BSAnimGroupSequence*);
+    void FUN_008bd630(NiAVObject*, float);
+};
+
+// Additional script entry points are declared here without copying player layout.
+class ScriptPlayerActions : public PlayerCharacter {
+public:
+    void FUN_00969e90(int, int);
+    void FUN_005de9b0();
+    void FUN_00952c30(PlayerCharacter*);
+    bool FUN_0050d4a0();
+    void FUN_00950030();
+    unsigned char FUN_005c7870();
+};
 class ScriptParameter;
 class ScriptHeaderData;
-class TESForm
-{
-public:
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8();
-    virtual void V9();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual void V34();
-    virtual void V35();
-    virtual void V36();
-    virtual void V37();
-    virtual void V38();
-    virtual void V39();
-    virtual void V40();
-    virtual void V41();
-    virtual void V42();
-    virtual void V43();
-    virtual void V44();
-    virtual void V45();
-    virtual void V46();
-    virtual void V47();
-    virtual void V48();
-    virtual void V49();
-    virtual void SetAltered(bool);
-    virtual void SetQuestItem(bool set);
-    virtual void Unk_34(bool set);
-    virtual void Unk_35(bool set);
-    virtual void Unk_36(bool set);
-    virtual void Unk_37(void);
-    virtual void readOBNDSubRecord(TESFile* modInfo);
-    virtual bool IsActor_InEditor(void);
-    ENUM_FORM_ID GetFormType() const;
-    void SetDestroyed(bool);
-};
 
-enum OBJECT_ACTION
-{
-    OBJECT_ACTION_ONE = 1,
-    OBJECT_ACTION_TWO = 2
-};
 
-class TESObjectREFR : public TESForm
-{
-public:
-    void SetScale(float);
-    bool GetAction(OBJECT_ACTION);
-    void CloseReference(OBJECT_ACTION);
-};
+#include "../../include/OBJECT_ACTION.h"
+#include "../../include/ACTION_FLAGS.h"
+#include "../../include/ANIM_GROUP_SECTION.h"
+
 class BGSMusicType;
 class FalloutAudioMedia
 {
@@ -89,138 +545,15 @@ public:
     static void EndMediaUpdate();
     static void Update();
 };
-class ScriptLocals;
-class TESQuest
-{
-public:
-    bool IsStageComplete(unsigned char);
-    void SetEnabled(bool);
-};
-class Script;
 
-class Script
-{
-public:
-    static bool OnHitWithFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    ScriptHeaderData* GetHeader();
-    static bool StopQuestFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool ScriptEffectUpdateFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool SetAllyFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool SetDestroyedFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetCurrentTimeFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool SetScriptCondition(TESObjectREFR*, void*, void*, double&);
-    static bool GetSecondsPassedFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool EvaluateScriptResult(TESObjectREFR*, void*, void*, double&);
-    static bool GetDead(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool ResetScript(TESObjectREFR*, void*, void*, double&);
-    static bool GetItemCount(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool HandleScriptLocals(TESObjectREFR*, void*, void*, double&);
-    static bool GetSitting(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool ReadScriptArguments(TESObjectREFR*, void*, void*, double&);
-    static bool GetTalkedToPC(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool FindScriptVariable(TESObjectREFR*, void*, void*, double&);
-    static bool GetIsRaining(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool EvaluateWeatherCondition(TESObjectREFR*, void*, void*, double&);
-    static bool GetInCell(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool EvaluateCellMembership(TESObjectREFR*, void*, void*, double&);
-    static bool GetInFaction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetScriptOperand(TESObjectREFR*, void*, void*, double&);
-    static bool GetRandomPercent(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool EvaluateRandomPercentage(TESObjectREFR*, void*, void*, double&);
-    static bool GetLevel(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool EvaluateReferenceLevel(TESObjectREFR*, void*, void*, double&);
-    static void CheckFlagFunction(unsigned int, TESObjectREFR*, TESForm*, ScriptLocals*, double&);
-    static bool OnAddFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnSellFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnEquipFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnUnequipFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnFireFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnOpenFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnCloseFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnGrabFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnReleaseFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnDestructionStageChangeFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnHitFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnDeathFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnStartCombatFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnCombatEndFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnSayToDoneFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnPackageStartFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnPackageEndFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnPackageChangeFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnLoadFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnResetFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnMagicEffectHitFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnTriggerFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnTriggerEnterFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool OnTriggerLeaveFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
 
-// Insert these declaration-only additions in the existing Script public section.
-static bool IsIdlePlayingFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-static bool CheckIdlePlaying(TESObjectREFR*, void*, void*, double&);
-static bool IsTalkingFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-static bool CheckTalkingState(TESObjectREFR*, void*, void*, double&);
-static bool GetDayOfWeekFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-static bool ParseScript(TESObjectREFR*, void*, void*, double&);
-static bool IsPCSleepingFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-static bool IsPlayerAsleep(TESObjectREFR*, void*, void*, double&);
-static bool GetDestroyedFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-static bool HandleScriptOperation(TESObjectREFR*, void*, void*, double&);
-static bool HasBeenEatenFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-static bool GetScriptObject(TESObjectREFR*, void*, void*, double&);
-static bool GetUnconsciousFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-static bool ResolveScriptValue(TESObjectREFR*, void*, void*, double&);
-static bool IsInCombatFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-static bool GetScriptFunctionValue(TESObjectREFR*, void*, void*, double&);
-static bool IsInInteriorFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-static bool EvaluateReferenceQuery(TESObjectREFR*, void*, void*, double&);
+#include "../../include/Script.h"
+#include "../../include/ScriptVariableInfo.h"
+#include "../../include/NiCamera.h"
+#include "../../include/ProcessLists.h"
+#include "../../include/TESAnimGroup.h"
+#include "../../include/bhkRigidBody.h"
 
-    static bool EvaluateReferenceCondition(TESObjectREFR*, void*, void*, double&);
-    static bool CheckActorCondition(TESObjectREFR*, void*, void*, double&);
-    static bool EvaluateReferenceFlag(TESObjectREFR*, void*, void*, double&);
-    static bool EvaluateFirstReferenceOperand(TESObjectREFR*, void*, void*, double&);
-    static bool EvaluateSecondReferenceOperand(TESObjectREFR*, void*, void*, double&);
-    static bool ReadScriptOperand(TESObjectREFR*, void*, void*, double&);
-    static bool EvaluateReferenceScriptValue(TESObjectREFR*, void*, void*, double&);
-    static bool ResolveScriptReference(TESObjectREFR*, void*, void*, double&);
-    static bool CheckScriptCondition(TESObjectREFR*, void*, void*, double&);
-    static bool EvaluateSeventhReferenceOperand(TESObjectREFR*, void*, void*, double&);
-    static bool GetScriptParameter(TESObjectREFR*, void*, void*, double&);
-    static bool HandleScriptExpression(TESObjectREFR*, void*, void*, double&);
-    static bool GetScriptResult(TESObjectREFR*, void*, void*, double&);
-    static bool AdvanceScriptInstruction(TESObjectREFR*, void*, void*, double&);
-    static bool HandleScriptReference(TESObjectREFR*, void*, void*, double&);
-    static bool ExecuteScriptCommand(TESObjectREFR*, void*, void*, double&);
-    static bool EvaluateReferencePredicate(TESObjectREFR*, void*, void*, double&);
-    static bool HandleScriptEvent(TESObjectREFR*, void*, void*, double&);
-    static bool WriteScriptValue(TESObjectREFR*, void*, void*, double&);
-    static bool EvaluateReferenceProperty(TESObjectREFR*, void*, void*, double&);
-    static void SetReferenceScale(TESObjectREFR*, float);
-
-    static bool GetQuestCompleted(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetQuestRunning(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetStage(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetDeadCount(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetQuestCompletedStatus(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool InvokeScriptFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetQuestCompletionState(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetStageDone(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool ConvertScriptValue(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetInWorldspace(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetInSameCell(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetDetected(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetGlobalValue(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool IsCurrentFurnitureRef(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetIsID(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool EvaluateScriptExpression(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool GetPCMiscStat(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool HandleScriptVariable(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool ReadScriptReference(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool EvaluateParsedScriptFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool EvaluateScriptFunctionCall(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool EvaluateScriptCall(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-    static bool EvaluateScriptCallback(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
-};
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 
@@ -570,17 +903,15 @@ bool Script::EvaluateScriptCall(const ScriptParameter* parameters, const char* s
                      script, locals, &value))
         return false;
     if (thisObject) {
-        if (thisObject->GetAction(OBJECT_ACTION_TWO))
+        if (thisObject->GetAction(OBJECT_ACTION_OBJECT_ACTION_ACTIVATE))
             result = 1.0;
-        thisObject->CloseReference(OBJECT_ACTION_ONE);
-        thisObject->CloseReference(OBJECT_ACTION_TWO);
+        thisObject->CloseReference(OBJECT_ACTION_OBJECT_ACTION_USE_DEFAULT);
+        thisObject->CloseReference(OBJECT_ACTION_OBJECT_ACTION_ACTIVATE);
     }
     return true;
 }
 
 
-
-#include "tesscriptfunctions_TESActorBaseData.h"
 
 // @fnv 0x005c0db0
 bool Script::GetCurrentTimeFunction(const ScriptParameter* parameters, const char* scriptData,
@@ -691,7 +1022,7 @@ bool Script::OnAddFunction(const ScriptParameter* parameters, const char* script
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x1U, thisObject, form, locals, result);
+    CheckFlagFunction(0x1U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -704,7 +1035,7 @@ bool Script::OnSellFunction(const ScriptParameter* parameters, const char* scrip
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x4000U, thisObject, form, locals, result);
+    CheckFlagFunction(0x4000U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -717,7 +1048,7 @@ bool Script::OnEquipFunction(const ScriptParameter* parameters, const char* scri
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x2U, thisObject, form, locals, result);
+    CheckFlagFunction(0x2U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -730,7 +1061,7 @@ bool Script::OnUnequipFunction(const ScriptParameter* parameters, const char* sc
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x8U, thisObject, form, locals, result);
+    CheckFlagFunction(0x8U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -809,7 +1140,7 @@ bool Script::OnHitFunction(const ScriptParameter* parameters, const char* script
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x80U, thisObject, form, locals, result);
+    CheckFlagFunction(0x80U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -822,7 +1153,7 @@ bool Script::OnDeathFunction(const ScriptParameter* parameters, const char* scri
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x10U, thisObject, form, locals, result);
+    CheckFlagFunction(0x10U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -835,7 +1166,7 @@ bool Script::OnStartCombatFunction(const ScriptParameter* parameters, const char
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x8000U, thisObject, form, locals, result);
+    CheckFlagFunction(0x8000U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -856,7 +1187,7 @@ bool Script::OnSayToDoneFunction(const ScriptParameter* parameters, const char* 
     TESForm* form = 0;
     ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form);
-    CheckFlagFunction(0x40000U, thisObject, form, locals, result);
+    CheckFlagFunction(0x40000U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -869,7 +1200,7 @@ bool Script::OnPackageStartFunction(const ScriptParameter* parameters, const cha
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x200U, thisObject, form, locals, result);
+    CheckFlagFunction(0x200U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -882,7 +1213,7 @@ bool Script::OnPackageEndFunction(const ScriptParameter* parameters, const char*
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x400U, thisObject, form, locals, result);
+    CheckFlagFunction(0x400U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -895,7 +1226,7 @@ bool Script::OnPackageChangeFunction(const ScriptParameter* parameters, const ch
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x800U, thisObject, form, locals, result);
+    CheckFlagFunction(0x800U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -926,7 +1257,7 @@ bool Script::OnMagicEffectHitFunction(const ScriptParameter* parameters, const c
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x2000U, thisObject, form, locals, result);
+    CheckFlagFunction(0x2000U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -939,7 +1270,7 @@ bool Script::OnTriggerFunction(const ScriptParameter* parameters, const char* sc
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x10000000U, thisObject, form, locals, result);
+    CheckFlagFunction(0x10000000U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -952,7 +1283,7 @@ bool Script::OnTriggerEnterFunction(const ScriptParameter* parameters, const cha
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x20000000U, thisObject, form, locals, result);
+    CheckFlagFunction(0x20000000U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -965,7 +1296,7 @@ bool Script::OnTriggerLeaveFunction(const ScriptParameter* parameters, const cha
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    CheckFlagFunction(0x40000000U, thisObject, form, locals, result);
+    CheckFlagFunction(0x40000000U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     return true;
 }
 
@@ -1042,8 +1373,6 @@ bool Script::IsInInteriorFunction(const ScriptParameter* parameters, const char*
 }
 
 
-
-
 // @fnv 0x005cd8f0
 void TESActorBaseData::SetEssential(bool value)
 {
@@ -1056,16 +1385,8 @@ void TESActorBaseData::SetMatchesPCLevel(bool value)
     UpdateFlagBit(128, value, true);
 }
 
-#include "tesscriptfunctions_SCRIPT_HEADER.h"
 
-struct _FightReaction {
-    enum Type { NEUTRAL = 0, ENEMY = 1, ALLY = 2, FRIEND = 3, COUNT };
-};
-typedef _FightReaction::Type FIGHT_REACTION;
-class TESFaction {
-public:
-    void SetFactionFightReaction(TESFaction*, FIGHT_REACTION);
-};
+
 
 // @fnv 0x005c7220
 bool Script::StopQuestFunction(const ScriptParameter* parameters, const char* scriptData,
@@ -1143,10 +1464,6 @@ bool Script::SetDestroyedFunction(const ScriptParameter* parameters, const char*
     return true;
 }
 
-class BGSListForm : public TESForm {
-public:
-    BSSimpleList<TESForm*>* GetList();
-};
 
 // @fnv 0x005ca6e0
 bool Script::OnHitWithFunction(const ScriptParameter* parameters, const char* scriptData,
@@ -1158,8 +1475,8 @@ bool Script::OnHitWithFunction(const ScriptParameter* parameters, const char* sc
                      script, locals, &form))
         return false;
     if (form && form->GetFormType() == ENUM_FORM_ID_FLST_ID) {
-        BGSListForm* listForm = static_cast<BGSListForm*>(form);
-        BSSimpleList<TESForm*>* list = listForm->GetList();
+        BGSListForm* listForm = reinterpret_cast<BGSListForm*>(form);
+        BSSimpleList<TESForm*>* list = reinterpret_cast<BSSimpleList<TESForm*>*>(listForm->GetList());
         while (list && !list->IsEmpty()) {
             struct {
                 TESForm* object;
@@ -1170,12 +1487,12 @@ bool Script::OnHitWithFunction(const ScriptParameter* parameters, const char* sc
             current.object = 0;
             if (current.item->IsActor_InEditor())
                 current.object = current.item;
-            CheckFlagFunction(0x100U, thisObject, current.object, locals, result);
+            CheckFlagFunction(0x100U, thisObject, reinterpret_cast<SharedForm*>(current.object), locals, result);
             if (result != 0.0)
                 break;
         }
     } else {
-        CheckFlagFunction(0x100U, thisObject, form, locals, result);
+        CheckFlagFunction(0x100U, thisObject, reinterpret_cast<SharedForm*>(form), locals, result);
     }
     return true;
 }
@@ -1236,24 +1553,13 @@ bool __cdecl FUN_005b5950(const ScriptParameter* apParameters, const char* apCom
     return true;
 }
 
-class PlayerCharacter;
-class TESBoundObject;
+
 extern PlayerCharacter* pPlayer;
 void __cdecl _FNV_Warning(const char*, ...);
 TESObjectREFR* __fastcall FUN_00572e30(TESObjectREFR*);
 __declspec(thread) char _tls_pad_005b59f0[0x28c];
 __declspec(thread) unsigned int _tls_uActivateDepth;
 
-struct TESForm_acc : public TESForm
-{
-    bool GetDisabled();
-};
-
-struct TESObjectREFR_acc : public TESObjectREFR
-{
-    void PerformAction(OBJECT_ACTION);
-    bool Activate(TESObjectREFR*, bool, TESBoundObject*, int);
-};
 
 // @fnv 0x005b59f0
 bool __cdecl FUN_005b59f0(const ScriptParameter* apParameters, const char* apCompiledParams, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
@@ -1286,26 +1592,26 @@ bool __cdecl FUN_005b59f0(const ScriptParameter* apParameters, const char* apCom
             pTargRef = FUN_00572e30(apRefObject);
         }
 
-        if (pTargRef && !((TESForm_acc*)pTargRef)->GetDisabled())
+        if (pTargRef && !((SharedForm*)pTargRef)->GetDisabled())
         {
             if (iNormalActivate == 0)
             {
-                bool bwasdefault = apRefObject->GetAction(OBJECT_ACTION_ONE);
+                bool bwasdefault = apRefObject->GetAction(OBJECT_ACTION_OBJECT_ACTION_USE_DEFAULT);
                 if (!bwasdefault)
                 {
-                    ((TESObjectREFR_acc*)apRefObject)->PerformAction(OBJECT_ACTION_ONE);
+                    ((TESObjectREFR*)apRefObject)->PerformAction(OBJECT_ACTION_OBJECT_ACTION_USE_DEFAULT);
                 }
-                ((TESObjectREFR_acc*)apRefObject)->PerformAction(OBJECT_ACTION_TWO);
-                ((TESObjectREFR_acc*)apRefObject)->Activate(pTargRef, false, 0, 1);
-                apRefObject->CloseReference(OBJECT_ACTION_TWO);
+                ((TESObjectREFR*)apRefObject)->PerformAction(OBJECT_ACTION_OBJECT_ACTION_ACTIVATE);
+                ((TESObjectREFR*)apRefObject)->Activate(reinterpret_cast<TESObjectREFR*>(pTargRef), false, static_cast<TESBoundObject*>(0), 1);
+                apRefObject->CloseReference(OBJECT_ACTION_OBJECT_ACTION_ACTIVATE);
                 if (!bwasdefault)
                 {
-                    apRefObject->CloseReference(OBJECT_ACTION_ONE);
+                    apRefObject->CloseReference(OBJECT_ACTION_OBJECT_ACTION_USE_DEFAULT);
                 }
             }
             else
             {
-                ((TESObjectREFR_acc*)apRefObject)->Activate(pTargRef, false, 0, 1);
+                ((TESObjectREFR*)apRefObject)->Activate(reinterpret_cast<TESObjectREFR*>(pTargRef), false, static_cast<TESBoundObject*>(0), 1);
             }
         }
 
@@ -1325,200 +1631,20 @@ int __cdecl FUN_005b5e40()
 struct BSFogProperty;
 struct BSRenderedTexture;
 struct BSShader;
-struct BSShaderAccumulator;
+
 struct BSTextureManager;
-struct ImageSpaceManager;
-struct NiAVObject;
+
+
 struct NiAlphaProperty;
 struct NiColor;
-struct RgbaColor;
 struct NiGeometry;
-struct NiTexture;
-struct NiTexturingProperty;
+
 struct NiTriBasedGeom;
-struct NiTriShape;
+
 struct GraphicsRenderer;
 struct ShadowSceneNode;
 struct tagRECT;
 struct blob8 { char b[8]; };
-struct BSShaderManager {
-    static BSShader* GetGeometryShaderObject(int);
-    static void BuildTexturePath(char*, char*, char*, bool);
-    static void SetObjectTypeCallback(int*);
-    static unsigned int GetObjectType(NiAVObject*);
-    static void SetModelLoaderReleaseFileCallback(int*);
-    static bool ModelLoaderReleaseFile(char*);
-    static bool IsShaderManagerInitialized();
-    static void Free(bool);
-    static void Initialize();
-    static void Reinitialize();
-    static void RegisterStreamables();
-    static void* TexPercTag();
-    static void* CreateTangentSpaceSimple(NiGeometry*);
-    static void PatchVolumeMesh(NiTriShape*);
-    static char* LoadShaderFile(char*);
-    static int* GetShaderErrorCallback();
-    static void SetShaderErrorCallback(int*);
-    static void ReportError(char*, void*);
-    static void SetFileCreateCallback(int*);
-    static NiFile* GetFile(char*, int, unsigned int);
-    static void SetTimerFunc(int*);
-    static void UpdateTimers();
-    static float GetTimer(int);
-    static float GetTimer(bool);
-    static void SetDefaultShaderPath(char*);
-    static char* GetDefaultShaderPath();
-    static void SetDefaultShaderCachePath(char*);
-    static char* GetDefaultShaderCachePath();
-    static void SetShaderSupport(bool);
-    static bool GetShaderSupport();
-    static bool Is30TexEffectPass(unsigned int);
-    static bool IsOptPass(unsigned int);
-    static void SetCurrentPass(int, void*);
-    static int GetCurrentPass();
-    static void* GetCurrentRenderPass();
-    static char* GetRenderPassName(int);
-    static bool GetFirstPass();
-    static void SetSeparateAmbientLight(bool);
-    static bool GetSeparateAmbientLight();
-    static void SetSeparateSpecularColor(bool);
-    static bool GetVisibleShadowVolumes();
-    static void SetVisibleShadowVolumes(bool);
-    static bool GetSeparateSpecularColor();
-    static bool IsCellInterior();
-    static void SetInterior(bool);
-    static bool GetUseProjectedShadow();
-    static struct blob8 GetWindDirection();
-    static void SetWindDirection(struct blob8);
-    static float GetWindMagnitude();
-    static void SetWindMagnitude(float);
-    static NiTexture* GetProjectedShadowTexture();
-    static void SetProjectedShadowTexture(NiTexture*);
-    static NiTexture* GetProjectedShadowMaskTexture();
-    static void SetProjectedShadowMaskTexture(NiTexture*);
-    static void EnableShadows(bool);
-    static bool GetShadows();
-    static void SetShaderBasedRendering(bool);
-    static bool GetShaderBasedRendering();
-    static void SetObjectType(NiAVObject*);
-    static void SetObjectTypeRecurse(NiAVObject*, int);
-    static void UpdateObjectTypeRecurse(NiAVObject*, bool, bool);
-    static void SetObjectTypeRecursively(NiAVObject*, int, bool, bool);
-    static void SetGeometryObjectType(NiGeometry*, int, bool, bool);
-    static void SetEmittanceRecurse(NiAVObject*, void*);
-    static void SetExternalEmittanceRecurse(NiAVObject*, NiColor*);
-    static void CloneMaterialPropertyRecurse(NiAVObject*);
-    static void SetEnabledPasses(int);
-    static int GetEnabledPasses();
-    static void SetShaderRenderer(GraphicsRenderer*);
-    static GraphicsRenderer* GetRenderer();
-    static bool GetLiteBrite();
-    static void SetLiteBrite(bool);
-    static bool SingleLightingPass();
-    static void SetPointLight(bool);
-    static bool GetPointLight();
-    static NiTexture* GetNormalizationCubeMap();
-    static NiTexture* GetAnisotropicMap();
-    static NiTexture* GetDefaultNormalMap();
-    static NiTexture* GetDefaultErrorMap();
-    static NiTexture* GetDefaultGlossMap();
-    static NiTexture* GetDefaultHeightMap();
-    static NiTexture* GetMaskTextureSide();
-    static NiTexture* GetMaskTextureFloor();
-    static NiTexture* GetHideSecretMap();
-    static NiTexture* GetDefaultTexEffectMap();
-    static NiTexture* GetDebugTexMap();
-    static NiTexture* GetAttenuationXYMap();
-    static NiTexture* GetAttenuationZMap();
-    static NiTexture* GetNoiseMap();
-    static void SetUseNoiseMap(bool);
-    static void InitializeNoiseMap();
-    static void SetCurrentSceneGraph(unsigned char);
-    static unsigned char GetCurrentSceneGraph();
-    static void SetShadowSceneNode(int, ShadowSceneNode*);
-    static ShadowSceneNode* GetShadowSceneNode(int);
-    static void SetFogPropertyForIndex(int, BSFogProperty*);
-    static BSFogProperty* GetFogProperty(int);
-    static BSShader* GetBSShader(NiTriBasedGeom*);
-    static void GetTexture(char*, bool, void*, bool, bool);
-    static int GetSupportedShaderLevel(bool);
-    static char* GetRenderModeName();
-    static void SetShaderVersion(unsigned int, unsigned int, bool, char*, char*, int);
-    static char* GetPSTarget(bool);
-    static char* GetVSTarget();
-    static bool GetRenderSpecular();
-    static void EnableFullScreenScissor(unsigned int, unsigned int, unsigned int, unsigned int);
-    static void DisableFullScreenScissor();
-    static void SetRenderSpecular(bool);
-    static void SetRenderMode(unsigned int);
-    static unsigned int GetRenderMode();
-    static void SetDebugMode(int);
-    static int GetDebugMode();
-    static bool GetRenderFlag(unsigned int);
-    static void SetRenderFlag(unsigned int, bool);
-    static void RenderImageSpaceEffects(GraphicsRenderer*, BSRenderedTexture*, BSRenderedTexture*);
-    static void EnableImageSpaceEffects(bool);
-    static bool GetImageSpaceEffects();
-    static void EnableUseRefractionShader(bool);
-    static bool GetUseRefractionShader();
-    static bool IsRefractionEnabled();
-    static void SetTintMipMaps(bool);
-    static bool GetTintMipMaps();
-    static bool GetRenderDebugTexture();
-    static void RenderDebugTexture();
-    static void RenderFullWindowDebugTexture();
-    static void SetImageSpaceParameters(void*);
-    static int GetSelfIllumCount();
-    static void SetSelfIllumCount(int);
-    static void SetupShader();
-    static void GetScreenRect(tagRECT*);
-    static RgbaColor* GetLoadedRange();
-    static void SetSTBBColorConstants(void*);
-    static RgbaColor* GetSTBBColorConstants();
-    static BSTextureManager* TextureManagerPtr();
-    static void SetSceneDepthTexture(NiTexture*);
-    static BSRenderedTexture* GetSceneDepthRenderedTexture();
-    static NiTexture* GetSceneDepthMap();
-    static void ReturnSceneDepthTexture();
-    static bool CheckVelocityBuffer();
-    static BSRenderedTexture* GetVelocityBuffer();
-    static void ReturnVelocityBuffers();
-    static bool GetFullScreenMotionBlur();
-    static void SetFullScreenMotionBlurVATS(bool);
-    static void SetFullScreenMotionBlurIronSights(bool);
-    static void AddMotionBluredObject();
-    static void RemoveMotionBluredObject();
-    static void ResetMotionBluredObject();
-    static bool AreThereMotionBlurredObjects();
-    static BSShaderAccumulator* GetAccumulator();
-    static void SetAccumulator(BSShaderAccumulator*);
-    static BSShaderAccumulator* GetCurrentAccumulator();
-    static void SetCurrentAccumulator(BSShaderAccumulator*);
-    static ImageSpaceManager* GetImageSpaceManager();
-    static void SetAlphaRecurse(NiAVObject*, float);
-    static void ClearAllShaderPassStages();
-    static void SetFOV(float);
-    static void RegisterCompressingPackers();
-    static unsigned int CompressFloat4ToHalf4(void*);
-    static unsigned int CompressFloat3ToHalf4(void*);
-    static unsigned int CompressFloat2ToHalf2(void*);
-    static unsigned int UnsignedByteToUByteColor(void*);
-    static void SetUseHardDriveCache(bool);
-    static bool GetUseHardDriveCache();
-    static void SetShadowFilter(unsigned int);
-    static void SetWaterReflectionTexture(BSRenderedTexture*);
-    static BSRenderedTexture* QWaterReflectionTexture();
-    static bool IsWaterFogPass(unsigned int);
-    static bool IsSpecularPass(unsigned int);
-    static bool PrepareNiTribasedGeom_SKY(NiTriBasedGeom*, int, bool, bool, bool, NiTexturingProperty*, NiAlphaProperty*);
-    static NiFile* DefaultFileCreateFunc(char*, int, unsigned int);
-    static void UnIgnoreAllPasses();
-    static void SetMaxShadowMaps(int);
-    static BSShaderAccumulator* GetNextAvailableShadowMapAccumulator();
-    static void ResetNextAvailableShadowMapAccumulator();
-    void* __vecDelDtor(unsigned int);
-    char _pad_0[1];
-};
 typedef char _sizecheck_BSShaderManager[sizeof(BSShaderManager) == 1 ? 1 : -1];
 
 bool __cdecl FUN_004dc0a0();
@@ -1533,45 +1659,15 @@ struct S1a130 { char pad[0x21f]; bool a; bool b; void FUN_005ba130(bool e); };
 // @fnv 0x005ba130
 void S1a130::FUN_005ba130(bool e) { b = a && e; }
 
-namespace fnv_005bd5c0 {
-struct Font;
-struct NiNode;
-struct NiTriShape;
-struct blob8 { char b[8]; };
-struct blob12 { char b[12]; };
-struct FontManager {
-    static void Init();
-    static FontManager* Instance();
-    static void Free();
-    Font* GetFont(int);
-    int GetCharType(char);
-    struct blob8 CollectTo(char*, int*, int, int, int*, char*, bool);
-    void* PrepareFontText(void*, void*);
-    void* BuildFontTextData(void*, void*);
-    bool AddTextToNode(struct blob8, void*, NiNode*);
-    NiTriShape* BuildTextShape(struct blob8, struct blob12, int, int);
-    void UseNewFonts(bool);
-    struct blob12 GetFontManager(char*, int, float, int);
-    float GetFontPadding(int);
-    void* __vecDelDtor(unsigned int);
-    char pFont[32];
-    bool m_bUseNewFonts;
-    char _pad_21[3];
-};
-typedef char _sizecheck_FontManager[sizeof(FontManager) == 36 ? 1 : -1];
-struct FUN_005bd5c0_shell : public FontManager {
-    Font* FUN_005bd5c0(int);
-};
-
 // @fnv 0x005bd5c0
-Font* FUN_005bd5c0_shell::FUN_005bd5c0(int a)
+Font* FontManager::GetFont(int a)
 {
-    return reinterpret_cast<Font**>(pFont)[a];
+    return pFont[a];
 }
-}  // namespace fnv_005bd5c0
 
-struct MobileObject;
-struct MobileObjectProcessArray {
+
+// Call surface of MobileObjectProcessArray; the shared header cannot be read in this unit (its own layout_support template copies).
+struct MobileObjectProcessArrayApi {
     void Init();
     void AddActor(MobileObject*, int);
     void RemoveActor(MobileObject*, int);
@@ -1594,8 +1690,8 @@ struct MobileObjectProcessArray {
     char m_auiProcessTailIndices[16];
     char m_auiNextUpdateIndices[16];
 };
-typedef char _sizecheck_ProcessArray[sizeof(MobileObjectProcessArray) == 64 ? 1 : -1];
-struct FUN_005be5c0_shell : public MobileObjectProcessArray {
+typedef char _sizecheck_ProcessArray[sizeof(MobileObjectProcessArrayApi) == 64 ? 1 : -1];
+struct FUN_005be5c0_shell : public MobileObjectProcessArrayApi {
     unsigned int FUN_005be5c0(int);
 };
 
@@ -1622,24 +1718,10 @@ public:
     static TaskQueueInterface* __cdecl GetSingleton(void);
 };
 
-class TESSound {
-public:
-    unsigned int Deallocate(void);
-};
 
 class DataHandler {
 public:
     bool FormIDExists(unsigned int);
-};
-
-struct VTable_005c05f0 {
-    void* v[0x130 / 4];
-    const char* (__thiscall *GetEditorID)(void*);
-};
-
-struct Form_005c05f0 {
-    VTable_005c05f0* vtbl;
-    const char* Call130() { return vtbl->GetEditorID(this); }
 };
 
 extern DataHandler* g_dataHandler;
@@ -1671,14 +1753,14 @@ bool __cdecl FUN_005c05f0(const ScriptParameter* paramInfo, const char* scriptDa
     {
         if (tls_005c05f0.bConsoleEcho)
         {
-            DebugLog("%s cannot be moved.", ((Form_005c05f0*)thisObj)->vtbl->GetEditorID(thisObj));
+            DebugLog("%s cannot be moved.", reinterpret_cast<SharedForm*>(thisObj)->GetName());
         }
         if (!g_dataHandler->FormIDExists(((TESSound*)scriptObj)->Deallocate()))
         {
             _FNV_Warning("SCRIPTS: Script '%s' (%08X) is attempting to move reference '%s' (%08X), but it cannot be moved",
-                ((Form_005c05f0*)scriptObj)->vtbl->GetEditorID(scriptObj),
+                reinterpret_cast<SharedForm*>(scriptObj)->GetName(),
                 ((TESSound*)scriptObj)->Deallocate(),
-                ((Form_005c05f0*)thisObj)->vtbl->GetEditorID(thisObj),
+                reinterpret_cast<SharedForm*>(thisObj)->GetName(),
                 ((TESSound*)thisObj)->Deallocate());
         }
         return true;
@@ -1747,7 +1829,8 @@ unsigned int FUN_005c3bd0_shell::FUN_005c3bd0()
     return *((unsigned char*)FUN_005a8080(this) + 1);
 }
 
-class Interface
+// Exe 0x005c42a0: unit-local Interface view; declarations and layout are preserved.
+class TesscriptfunctionsInterfaceView
 {
 public:
     static bool __cdecl IsSaveLoadActive(void);
@@ -1758,7 +1841,7 @@ bool __cdecl FUN_005c42d0();
 // @fnv 0x005c42a0
 bool __cdecl FUN_005c42a0(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result, unsigned int& opcodeOffsetPtr)
 {
-    if (Interface::IsSaveLoadActive() || FUN_005c42d0())
+    if (TesscriptfunctionsInterfaceView::IsSaveLoadActive() || FUN_005c42d0())
         result = 0.0;
     else
         result = 1.0;
@@ -1786,8 +1869,8 @@ bool __cdecl FUN_005c4320(const ScriptParameter* paramInfo, const char* scriptDa
 }
 
 namespace fnv_005c7800 {
-struct PlayerCharacter005c7800 { unsigned char FUN_005c7870(); };
-extern PlayerCharacter005c7800* pPlayer;
+
+extern PlayerCharacter* pPlayer;
 void __cdecl DebugLog(const char*, ...);
 struct TlsBlock005c7800 { char pad[0x268]; unsigned char flag; };
 __declspec(thread) TlsBlock005c7800 g_tls005c7800;
@@ -1796,7 +1879,7 @@ bool __cdecl FUN_005c7800(const ScriptParameter* a, const char* b, TESObjectREFR
 {
     result = 0.0;
     if (pPlayer) {
-        result = (double)pPlayer->FUN_005c7870();
+        result = (double)reinterpret_cast<ScriptPlayerActions*>(pPlayer)->FUN_005c7870();
         if (g_tls005c7800.flag)
             DebugLog("GetChargenValue >> %i", (int)result);
     }
@@ -1810,11 +1893,6 @@ bool __fastcall FUN_005c7870(const char* pThis)
     return *(const bool*)(pThis + 0x75c);
 }
 
-class Actor : public TESObjectREFR
-{
-public:
-    void FUN_008a5e40(bool);
-};
 
 // @fnv 0x005c9670
 bool __cdecl FUN_005c9670(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result, unsigned int& opcodeOffsetPtr)
@@ -1874,7 +1952,7 @@ int __fastcall FUN_005cbb50(char* pThis)
 }
 
 struct PerkEntryConditionSet;
-struct TESFile;
+
 struct PathingPath;
 struct RegionObjectEntry {
     void Save();
@@ -1926,9 +2004,9 @@ bool __cdecl FUN_005cd870(const ScriptParameter* paramInfo, const char* scriptDa
 }
 
 namespace fnv_005cf490 {
-class PlayerCharacter;
+
 extern PlayerCharacter* pPlayer;
-struct TESSound { unsigned int Deallocate(); };
+
 extern __declspec(thread) bool g_tlsFlag;
 void __cdecl DebugLog(char const*, ...);
 void __cdecl _FNV_Warning(const char*);
@@ -1994,7 +2072,6 @@ void S1530::FUN_005d1530(bool e)
     e ? (f |= 2) : (f &= ~2);
 }
 
-struct BSAudio { void SetAudioProperty(unsigned int, unsigned int, unsigned int); };
 struct S5d { void FUN_005d1720(unsigned int a, unsigned int b); };
 // @fnv 0x005d1720
 void S5d::FUN_005d1720(unsigned int a, unsigned int b)
@@ -2021,29 +2098,6 @@ void* FUN_005d3d10_This::FUN_005d3d10()
     return pb ? FUN_00ca86c0(pb) : 0;
 }
 
-struct TESForm_Patch
-{
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8();
-    virtual void V9();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void SetAltered(bool);
-    void SetIgnoreFriendlyHits(bool);
-};
 
 // @fnv 0x005d3d50
 bool __cdecl FUN_005d3d50(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result, unsigned int& opcodeOffsetPtr)
@@ -2055,20 +2109,17 @@ bool __cdecl FUN_005d3d50(const ScriptParameter* paramInfo, const char* scriptDa
     }
     if (flag != -1)
     {
-        reinterpret_cast<TESForm_Patch*>(thisObj)->SetIgnoreFriendlyHits(flag != 0);
-        reinterpret_cast<TESForm_Patch*>(thisObj)->SetAltered(true);
+        reinterpret_cast<SharedForm*>(thisObj)->SetIgnoreFriendlyHits(flag != 0);
+        reinterpret_cast<SharedForm*>(thisObj)->MarkAsModified(1);
     }
     return true;
 }
 
-struct FUN_005d43e0_shell : public Script {
-    void* FUN_005d43e0();
-};
 
 // @fnv 0x005d43e0
-void* FUN_005d43e0_shell::FUN_005d43e0()
+BSSimpleList<ScriptVariableInfo*>* Script::GetVariableList()
 {
-    return (char*)this + 0x4c;
+    return &m_kVariableList;
 }
 
 bool __cdecl FUN_005a3bf0(TESObjectREFR*, void*, void*, double&);
@@ -2082,21 +2133,15 @@ bool __cdecl FUN_005d5330(const ScriptParameter* paramInfo, const char* scriptDa
     return FUN_005a3bf0(thisObj, arg, 0, result);
 }
 
-class TESObjectREFR_005d5390 : public TESObjectREFR
+class ScriptActorPackageActions : public TESObjectREFR
 {
 public:
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual bool V64();
+
     void FUN_008b8e20(void* arg1, int arg2);
 };
 
 // @fnv 0x005d5390
-bool __cdecl FUN_005d5390(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR_005d5390* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result, unsigned int& opcodeOffsetPtr)
+bool __cdecl FUN_005d5390(const ScriptParameter* paramInfo, const char* scriptData, ScriptActorPackageActions* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result, unsigned int& opcodeOffsetPtr)
 {
     void* arg1 = 0;
     int arg2 = -1;
@@ -2104,26 +2149,15 @@ bool __cdecl FUN_005d5390(const ScriptParameter* paramInfo, const char* scriptDa
     {
         return false;
     }
-    if (arg1 && thisObj->V64())
+    if (arg1 && thisObj->IsActor())
     {
-        TESObjectREFR_005d5390* actor = thisObj;
+        ScriptActorPackageActions* actor = thisObj;
         actor->FUN_008b8e20(arg1, arg2);
     }
     return true;
 }
 
-class Actor_005d5420 : public TESObjectREFR
-{
-public:
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual bool V64();
-    void FUN_008b8f20(void*);
-};
+
 
 // @fnv 0x005d5420
 bool __cdecl FUN_005d5420(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result, unsigned int& opcodeOffsetPtr)
@@ -2132,9 +2166,9 @@ bool __cdecl FUN_005d5420(const ScriptParameter* paramInfo, const char* scriptDa
     if (!ExtractArgs(paramInfo, scriptData, &opcodeOffsetPtr, thisObj, containingObj, scriptObj, locals, &pPackage))
         return false;
 
-    if (pPackage && ((Actor_005d5420*)thisObj)->V64())
+    if (pPackage && ((ScriptActorActions*)thisObj)->IsActor())
     {
-        Actor_005d5420* pActor = (Actor_005d5420*)thisObj;
+        ScriptActorActions* pActor = (ScriptActorActions*)thisObj;
         pActor->FUN_008b8f20(pPackage);
     }
 
@@ -2197,8 +2231,9 @@ float Sd4e0::FUN_005dd4e0(unsigned int i)
 }
 
 namespace fnv_005de0f0 {
-struct MobileObject;
-struct MobileObjectProcessArray {
+
+// Call surface of MobileObjectProcessArrayApi; the shared header cannot be read in this unit (its own layout_support template copies).
+struct MobileObjectProcessArrayApi {
     void Init();
     void AddActor(MobileObject*, int);
     void RemoveActor(MobileObject*, int);
@@ -2221,8 +2256,8 @@ struct MobileObjectProcessArray {
     char m_auiProcessTailIndices[16];
     char m_auiNextUpdateIndices[16];
 };
-typedef char _sizecheck_ProcessArray[sizeof(MobileObjectProcessArray) == 64 ? 1 : -1];
-struct FUN_005de0f0_shell : public MobileObjectProcessArray {
+typedef char _sizecheck_ProcessArray[sizeof(MobileObjectProcessArrayApi) == 64 ? 1 : -1];
+struct FUN_005de0f0_shell : public MobileObjectProcessArrayApi {
     unsigned int FUN_005de0f0(int);
 };
 
@@ -2239,80 +2274,18 @@ void __fastcall FUN_005de9b0(char* pThis)
     *reinterpret_cast<bool*>(pThis + 0xe38) = false;
 }
 
-struct NiPoint3;
 struct NiStream;
 struct blob48 { char b[48]; };
 struct blob64 { char b[64]; };
-struct ThreeByThreeMatrix {
-    void GetRow(unsigned int, float*);
-    void GetRow(unsigned int, float*, float*, float*);
-    void GetRow(unsigned int, NiPoint3*);
-    void SetRow(unsigned int, float*);
-    void SetRow(unsigned int, float, float, float);
-    void SetRow(unsigned int, void*);
-    void GetCol(unsigned int, float*);
-    void GetCol(unsigned int, float*, float*, float*);
-    void GetCol(unsigned int, NiPoint3*);
-    void SetCol(unsigned int, float*);
-    void SetCol(unsigned int, float, float, float);
-    void SetCol(unsigned int, void*);
-    float GetEntry(unsigned int, unsigned int);
-    void SetEntry(unsigned int, unsigned int, float);
-    void MakeZero();
-    void ResetToIdentity();
-    void MakeDiagonal(float, float, float);
-    void SetXRotation(float);
-    void SetYRotation(float);
-    void SetZRotation(float);
-    void MakeZRotationQ(float);
-    void MakeAxisAngleRotation(float, void*);
-    void MakeAxisAngleRotation(float, float, float, float);
-    bool Inverse(ThreeByThreeMatrix*);
-    struct blob48 Inverse();
-    struct blob48 Transpose();
-    void ToQuaternion(float*, float*, float*, float*);
-    bool ExtractEulerAnglesXYZ(float*, float*, float*);
-    bool ToEulerAnglesXZY(float*, float*, float*);
-    bool ToEulerAnglesYXZ(float*, float*, float*);
-    bool ToEulerAnglesYZX(float*, float*, float*);
-    bool ToEulerAnglesZXY(float*, float*, float*);
-    bool ToEulerAnglesZYX(float*, float*, float*);
-    void SetRotationFromEulerXYZ(float, float, float);
-    void FromEulerAnglesXZY(float, float, float);
-    void FromEulerAnglesYXZ(float, float, float);
-    void FromEulerAnglesYZX(float, float, float);
-    void SetRotationFromEulerZXY(float, float, float);
-    void SetRotationFromEulerZYX(float, float, float);
-    bool Reorthogonalize();
-    struct blob48 ComposeMatrices(void*);
-    struct blob48 Congruence(void*);
-    static void TransformPositions(void*, void*, unsigned int, void*, NiPoint3*);
-    static void TransformNormals(void*, unsigned int, void*, NiPoint3*);
-    static void TransformVerticesAndNormals(void*, void*, unsigned int, void*, NiPoint3*, void*, NiPoint3*);
-    void ApplyToVector(float*, NiPoint3*);
-    void LoadBinary(NiStream*);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    void Scale(float, float, float);
-    static struct blob64 XMLoadFloat3x4(float*);
-    static void XMStoreFloat3x4(float*, struct blob64);
-    bool Tridiagonal(float*, float*);
-    bool QLAlgorithm(float*, float*);
-    float Determinant();
-    char m_afEntries[48];
-};
-typedef char _sizecheck_NiMatrix3[sizeof(ThreeByThreeMatrix) == 48 ? 1 : -1];
-struct FUN_005df510_shell : public ThreeByThreeMatrix {
-    void FUN_005df510(unsigned int, float*);
-};
 
+typedef char _sizecheck_NiMatrix3[sizeof(NiMatrix3) == 36 ? 1 : -1];
 // @fnv 0x005df510
-void FUN_005df510_shell::FUN_005df510(unsigned int uiRow, float* pRow)
+void NiMatrix3::SetRow(unsigned int uiRow, const float* pRow)
 {
     typedef float Row[3];
-    reinterpret_cast<Row*>(m_afEntries)[uiRow][0] = pRow[0];
-    reinterpret_cast<Row*>(m_afEntries)[uiRow][1] = pRow[1];
-    reinterpret_cast<Row*>(m_afEntries)[uiRow][2] = pRow[2];
+    reinterpret_cast<Row*>(&m_pEntry[0][0])[uiRow][0] = pRow[0];
+    reinterpret_cast<Row*>(&m_pEntry[0][0])[uiRow][1] = pRow[1];
+    reinterpret_cast<Row*>(&m_pEntry[0][0])[uiRow][2] = pRow[2];
 }
 
 // @fnv 0x005df5b0
@@ -2343,12 +2316,13 @@ void __fastcall FUN_005e03d0(NiTArray_Layout* pThis)
 }
 
 class NavMeshInfo;
-template <>
-class BSSimpleArray<NavMeshInfo*, 1024>
+// The pointer-array specialization does not declare this entry point yet.
+class ScriptNavMeshInfoArray : public BSSimpleArray<NavMeshInfo*, 1024>
 {
 public:
     void FUN_006b3eb0(unsigned int, bool);
 };
+
 
 extern int DAT_0103d428;
 
@@ -2356,7 +2330,7 @@ extern int DAT_0103d428;
 void* __fastcall FUN_005e04c0(void* pThis)
 {
     *reinterpret_cast<int**>(pThis) = &DAT_0103d428;
-    reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(pThis)->FUN_006b3eb0(0, false);
+    reinterpret_cast<ScriptNavMeshInfoArray*>(pThis)->FUN_006b3eb0(0, false);
     return pThis;
 }
 
@@ -2404,8 +2378,9 @@ void* __fastcall FUN_00709840(void* pThis)
 }
 
 namespace fnv_00968670 {
-struct MobileObject;
-struct MobileObjectProcessArray {
+
+// Call surface of MobileObjectProcessArrayApi; the shared header cannot be read in this unit (its own layout_support template copies).
+struct MobileObjectProcessArrayApi {
     void Init();
     void AddActor(MobileObject*, int);
     void RemoveActor(MobileObject*, int);
@@ -2428,8 +2403,8 @@ struct MobileObjectProcessArray {
     char m_auiProcessTailIndices[16];
     char m_auiNextUpdateIndices[16];
 };
-typedef char _sizecheck_ProcessArray[sizeof(MobileObjectProcessArray) == 64 ? 1 : -1];
-struct FUN_00968670_shell : public MobileObjectProcessArray {
+typedef char _sizecheck_ProcessArray[sizeof(MobileObjectProcessArrayApi) == 64 ? 1 : -1];
+struct FUN_00968670_shell : public MobileObjectProcessArrayApi {
     MobileObject* FUN_00968670(unsigned int);
 };
 
@@ -2505,87 +2480,13 @@ bool __cdecl FUN_005ce360(const ScriptParameter* p, const char* s, TESObjectREFR
     return true;
 }
 
-struct NiAVObject;
-struct AnimationKey;
+
+struct NiAnimationKey;
 struct NiColorInterpolator;
 struct NiFloatInterpolator;
 struct AlphaColor;
 struct TimedFloatKey;
-struct TESFile;
-struct TESSound;
-struct TESImageSpaceModifier : public TESForm {
-    virtual void __vslot_10();
-    bool GetAnimatable();
-    float GetDuration();
-    void SetAnimatable(bool);
-    void SetDuration(float);
-    static void SetEnable(bool);
-    static bool GetEnable();
-    void Apply(float, float, NiAVObject*);
-    void EvaluateInterpolators(float, float);
-    bool IsExpired(float);
-    static void BlendModifiers(float, TESImageSpaceModifier*, TESImageSpaceModifier*, float, float, NiAVObject*, NiAVObject*);
-    bool RemoveFloatKey(NiFloatInterpolator*);
-    bool RemoveColorKey(NiColorInterpolator*);
-    void MakeFloatKeyDefault(NiFloatInterpolator*, float);
-    void MakeColorKeyDefault(NiColorInterpolator*);
-    virtual bool Load(TESFile*);
-    virtual void Save();
-    virtual void Copy(TESForm*);
-    virtual bool Compare(TESForm*);
-    virtual void ResetFormData();
-    virtual void InitItem();
-    virtual void ClearData();
-    void ResetInterpolators();
-    bool HasValidKeys();
-    bool AreKeysValid(AnimationKey*, unsigned int, unsigned char);
-    TESSound* GetIntroSound();
-    TESSound* GetOutroSound();
-    static void SetCurrentTime(float);
-    static float GetTickCount();
-    static void AdvanceCurrentTime(float);
-    void InitializeModifierData();
-    static void AllowGetHit(bool);
-    static TESImageSpaceModifier* GetGetHit();
-    static TESImageSpaceModifier* GetConcussionModifier();
-    static TESImageSpaceModifier* GetExplosionInFace();
-    static TESImageSpaceModifier* QDefault();
-    void __local_vftable_ctor_closure();
-    char _pad_4[20];
-    TESSound* pOutroSound;
-    TESSound* pIntroSound;
-    char Data[244];
-    char m_akFloatInterpolators[1008];
-    char m_kFloatInterpolatorOne[24];
-    char m_kFloatInterpolatorTwo[24];
-    char m_kColorInterpolatorOne[36];
-    char m_kColorInterpolatorTwo[36];
-    char m_kFloatInterpolatorNine[24];
-    char m_kFloatInterpolatorTen[24];
-    char m_kFloatInterpolatorEleven[24];
-    char m_kFloatInterpolatorThree[24];
-    char m_kFloatInterpolatorFour[24];
-    char m_kFloatInterpolatorFive[24];
-    char m_kFloatInterpolatorSix[24];
-    char m_kFloatInterpolatorSeven[24];
-    char m_kFloatInterpolatorEight[24];
-    char pEffectEntryTable[168];
-    TimedFloatKey* pSecondEffectEntries;
-    TimedFloatKey* pThirdEffectEntries;
-    AlphaColor* pFirstEffectRecordArray;
-    AlphaColor* pSecondEffectRecordArray;
-    TimedFloatKey* pTenthEffectEntries;
-    TimedFloatKey* pEleventhEffectEntries;
-    TimedFloatKey* pTwelfthEffectEntries;
-    TimedFloatKey* pFourthEffectEntries;
-    TimedFloatKey* pFifthEffectEntries;
-    TimedFloatKey* pSeventhEffectEntries;
-    TimedFloatKey* pEighthEffectEntries;
-    TimedFloatKey* pNinthEffectEntries;
-    TimedFloatKey* pSixthEffectEntries;
-    char strName[8];
-};
-typedef char _sizecheck_TESImageSpaceModifier[sizeof(TESImageSpaceModifier) == 1848 ? 1 : -1];
+
 
 extern bool DAT_0118abb1;
 extern TESImageSpaceModifier* DAT_011c9700;
@@ -2616,7 +2517,7 @@ void* DelStandIn::FUN_00709980(unsigned int flags)
 }
 }
 
-struct Tile { virtual ~Tile(); void Release(); };
+
 struct FUN_007099b0 : public Tile
 {
     virtual ~FUN_007099b0();
@@ -2659,29 +2560,17 @@ struct Arr {
 };
 
 class ActorCombatGroup;
-template <>
-class NiTArray<ActorCombatGroup*, NiTMallocInterface<ActorCombatGroup*> > {
-public:
-    void SetAt(unsigned int, ActorCombatGroup*&);
-};
 
-struct NiNode;
-struct FOPipboyManager {
-    void FUN_004dc540(NiNode*);
-};
 
-struct FUN_005b8fc0_shell {
-    void FUN_005b8fc0(NiNode* pkTexture);
-};
 
 // @fnv 0x005b8fc0
-void FUN_005b8fc0_shell::FUN_005b8fc0(NiNode* pkTexture) {
+void NiTexturingProperty::FUN_005b8fc0(void* pkTexture) {
     FUN_00a69dd0* pkBaseMap = (FUN_00a69dd0*)(*((Arr*)((char*)this + 0x1c))->GetAt(0));
     if (!pkBaseMap) {
         pkBaseMap = new FUN_00a69dd0;
-        ((NiTArray<ActorCombatGroup*, NiTMallocInterface<ActorCombatGroup*> >*)((char*)this + 0x1c))->SetAt(0, (ActorCombatGroup*&)pkBaseMap);
+        ((NiTArray<ActorCombatGroup*, ::NiTMallocInterface<ActorCombatGroup*> >*)((char*)this + 0x1c))->SetAt(0, (ActorCombatGroup*&)pkBaseMap);
     }
-    ((FOPipboyManager*)pkBaseMap)->FUN_004dc540(pkTexture);
+    ((FOPipboyManager*)pkBaseMap)->FUN_004dc540(static_cast<NiNode*>(pkTexture));
 }
 
 namespace fnv_005ce3e0 {
@@ -2693,21 +2582,6 @@ struct ScriptH {
     static void CopyIdentifierBitsToValue(const unsigned int&, double&);
 };
 
-struct TESContainer {
-    static bool IsValidContainerType(unsigned char);
-};
-
-struct StandIn_RefrPersist {
-    bool GetReferencePersistence();
-};
-
-struct TESObject {
-    TESObject* GetNext();
-};
-
-struct TESSound {
-    unsigned int Deallocate();
-};
 
 struct TLS_Data {
     char pad[0x268];
@@ -2720,7 +2594,7 @@ bool FUN_005ce3e0(const ScriptParameter* apParameters, const char* apCompiledPar
     afReturnValue = 0.0;
     unsigned int iid = 0;
     if (apRefObject) {
-        if (((StandIn_RefrPersist*)apRefObject)->GetReferencePersistence() || !TESContainer::IsValidContainerType(_FNV_GetFormType((TESForm*)((TESObject*)apRefObject)->GetNext()))) {
+        if (reinterpret_cast<TESObjectREFR*>(apRefObject)->GetReferencePersistence() || !TESContainer::IsValidContainerType(_FNV_GetFormType((TESForm*)((TESObject*)apRefObject)->GetNext()))) {
             iid = ((TESSound*)apRefObject)->Deallocate();
             ScriptH::CopyIdentifierBitsToValue(iid, afReturnValue);
         }
@@ -2733,7 +2607,7 @@ bool FUN_005ce3e0(const ScriptParameter* apParameters, const char* apCompiledPar
 }  // namespace fnv_005ce3e0
 
 void __cdecl DebugLog(const char*, ...);
-struct BGSQuestObjective { bool GetCompleted() const; };
+
 struct TESQuestObjectiveView { BGSQuestObjective* GetObjective(unsigned int); };
 struct ThreadFlags { char pad[0x268]; unsigned char bLogScripts; };
 __declspec(thread) ThreadFlags g_threadFlags;
@@ -2759,12 +2633,12 @@ bool __cdecl FUN_005d7e30(const ScriptParameter* apParameters, const char* apCom
     return true;
 }
 
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
 namespace fnv_005d7ef0 {
 struct FormFlagRecord;
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
 struct ScriptDefinition;
-struct TESFile;
+
 struct RegionObjectEntry;
 struct ScriptParameter {
     char* m_pTypeString;
@@ -2773,46 +2647,12 @@ struct ScriptParameter {
     char _pad_9[3];
 };
 typedef char _sizecheck_SCRIPT_PARAMETER[sizeof(ScriptParameter) == 12 ? 1 : -1];
-struct ScriptLocals {
-    void ClearActionFlags();
-    bool GetLocalData(TESForm*, unsigned int);
-    void ClearActionFlagsForForm(TESForm*);
-    bool CheckActionFlag(TESForm*, unsigned int);
-    FormFlagRecord* GetActionEntry(TESForm*, bool);
-    void Save(ScriptHeaderData*);
-    void ClearActionList();
-    void InitializeActionList();
-    void CopyActionListFrom(ScriptLocals*);
-    void* GetActionList();
-    void ResetFormData(Script*);
-    void SetVariable(unsigned int, double);
-    double GetVariable(unsigned int, Script*);
-    void* GetLocalList();
-    bool IsReferenceVariable(unsigned int);
-    unsigned short GetSaveSize();
-    void SaveGame(BGSSaveFormBuffer*);
-    void SaveGame();
-    void LoadGame(BGSLoadFormBuffer*);
-    void LoadGame();
-    void Revert(BGSLoadFormBuffer*);
-    void Revert();
-    static void ProcessPendingTasks();
-    void* __vecDelDtor(unsigned int);
-    Script* m_pOwnerScript;
-    char m_cActionFlags;
-    char _pad_5[3];
-    void* m_pLocalVariableList;
-    void* m_pVariableList;
-    ScriptDefinition* m_pExtendedLocals;
-};
+
 typedef char _sizecheck_ScriptLocals[sizeof(ScriptLocals) == 20 ? 1 : -1];
 
 void __cdecl DebugLog(const char*, ...);
 bool __cdecl ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 
-struct BGSQuestObjective {
-    bool GetDisplayed() const;
-};
 
 struct StandIn_Quest {
     BGSQuestObjective* GetObjective(unsigned int);
@@ -2927,11 +2767,6 @@ void FUN_005b6cb0_Class::FUN_005b6cb0()
     ((char*)this)[1] = 1;
 }
 
-class BGSSaveLoadGame
-{
-public:
-    void __thiscall FUN_00848e70(int, int);
-};
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
 // @fnv 0x005b6d20
@@ -3028,11 +2863,12 @@ bool FUN_005b9ed0()
     return true;
 }
 
-struct ProcessLists {
+// These globals at 0x01267c30/3c/48 hold individual byte flags; ProcessLists lives at 0x011e0e80.
+struct RuntimeByteFlag {
     unsigned char* GetLifeStateControlFlag();
 };
 
-extern ProcessLists g_01267c30;
+extern RuntimeByteFlag g_01267c30;
 
 // @fnv 0x005ba110
 void __cdecl FUN_005ba110(unsigned char value)
@@ -3052,10 +2888,6 @@ bool FUN_005ba180_Class::FUN_005ba180()
 }
 
 namespace fnv_005ba2d0 {
-struct ProcessLists
-{
-    char* GetLifeStateControlFlag(void);
-};
 
 struct GlobalObjectO2_0045cf30
 {
@@ -3072,9 +2904,6 @@ char FUN_005ba2d0()
 }  // namespace fnv_005ba2d0
 
 namespace fnv_005ba2f0 {
-struct ProcessLists {
-    unsigned char* GetLifeStateControlFlag();
-};
 
 struct GlobalObjectO2_0045cf30 {
     unsigned char* GetLifeStateControlFlag();
@@ -3102,11 +2931,8 @@ unsigned char FUN_005ba360::GetByte() const
 }
 
 namespace fnv_005ba4b0 {
-struct ProcessLists {
-    unsigned char* GetLifeStateControlFlag();
-};
 
-struct GlobalObjectO2_0045cf30 : ProcessLists {
+struct GlobalObjectO2_0045cf30 : RuntimeByteFlag {
     unsigned char b;
 };
 
@@ -3341,9 +3167,6 @@ bool __cdecl FUN_005bfd40()
     return true;
 }
 
-struct BGSImpactDataSet {
-    static BGSImpactDataSet* ms_pImpactDataSet;
-};
 
 // @fnv 0x005c02f0
 BGSImpactDataSet* FUN_005c02f0()
@@ -3412,9 +3235,6 @@ struct GlobalObject_0045cf30 {
     unsigned char* GetLifeStateControlFlag(void);
 };
 
-struct BGSSaveLoadManager {
-    void FUN_00851d30(void);
-};
 
 extern BGSSaveLoadManager* DAT_011de134;
 extern GlobalObject_0045cf30 g_011de29c;
@@ -3552,7 +3372,7 @@ bool FUN_005ca390(const ScriptParameter* pParams, const char* pName, TESObjectRE
     TESForm* pForm = 0;
     if (!ExtractArgs(pParams, pName, &uFlags, pSource, pTarget, pScript, pLocals, &pForm))
         return false;
-    Script::CheckFlagFunction(4, pSource, pForm, pLocals, fResult);
+    Script::CheckFlagFunction(4, pSource, reinterpret_cast<SharedForm*>(pForm), pLocals, fResult);
     return true;
 }
 
@@ -3678,9 +3498,7 @@ char FUN_005cf660()
     return 1;
 }
 
-struct HUDMainMenu {
-    unsigned char unk_205;
-};
+
 extern HUDMainMenu* g_pHudMainMenuInstance;
 
 // @fnv 0x005cfcb0
@@ -3698,24 +3516,15 @@ bool __cdecl FUN_005cfdb0(TESObjectREFR* p1, void* p2, TESObjectREFR* p3, void* 
     return FUN_005a2890(p3, 0, 0, p7);
 }
 
-struct FUN_005d0b80_Class
-{
-    void FUN_005d0b80(bool value);
-};
 
 // @fnv 0x005d0b80
-void FUN_005d0b80_Class::FUN_005d0b80(bool value)
+void FleePackage::FUN_005d0b80(int value)
 {
-    ((char*)this)[0x80] = value;
+    ((char*)this)[0x80] = static_cast<unsigned char>(value);
 }
 
-struct ABD_005f92d0 {
-    bool GetFlag(unsigned int) const;
-    bool FUN_005d2780();
-};
-
 // @fnv 0x005d2780
-bool ABD_005f92d0::FUN_005d2780()
+bool TESActorBaseData::GetNoRumors()
 {
     return GetFlag(0x2000);
 }
@@ -3729,8 +3538,8 @@ void __cdecl FUN_005d45c0()
         *(int*)((char*)DAT_011da368 + 0x128) = 0;
 }
 
-namespace fnv_005d45e0 {
 class MapMenu;
+namespace fnv_005d45e0 {
 extern MapMenu* DAT_011da368;
 void __cdecl FUN_0079ffb0(bool);
 
@@ -3782,14 +3591,15 @@ char __thiscall FUN_005d4ee0Class::FUN_005d4ee0()
 }
 
 namespace fnv_005d74d0 {
-struct Interface {
+// Exe 0x005d74d0: unit-local Interface view; declarations and layout are preserved.
+struct TesscriptfunctionsInterfaceView {
     static void __cdecl PrintDebugMessage(void);
 };
 
 // @fnv 0x005d74d0
 char __cdecl FUN_005d74d0()
 {
-    Interface::PrintDebugMessage();
+    TesscriptfunctionsInterfaceView::PrintDebugMessage();
     return 1;
 }
 }  // namespace fnv_005d74d0
@@ -3802,9 +3612,6 @@ void FUN_005d7930(unsigned char value)
     DAT_0118abb0 = value;
 }
 
-struct FalloutRadio {
-    static bool __cdecl Update(bool);
-};
 
 // @fnv 0x005d8280
 bool FUN_005d8280()
@@ -3921,7 +3728,7 @@ char __cdecl FUN_005db270()
 }
 
 namespace fnv_005db280 {
-class TESSound;
+
 extern TESSound* DAT_011dcfa8;
 
 // @fnv 0x005db280
@@ -3932,13 +3739,14 @@ void FUN_005db280()
 }  // namespace fnv_005db280
 
 namespace fnv_005db490 {
-class FOPipboyManager;
+
 
 struct FUN_005db4c0_struct {
     void FUN_005db4c0(bool);
 };
 
-class Interface {
+// Exe 0x005db490: unit-local Interface view; declarations and layout are preserved.
+class TesscriptfunctionsInterfaceView {
 public:
     static FOPipboyManager* __cdecl GetPipboyManagerInstance(void);
 };
@@ -3946,7 +3754,7 @@ public:
 // @fnv 0x005db490
 bool __cdecl FUN_005db490()
 {
-    FOPipboyManager* pipboy = Interface::GetPipboyManagerInstance();
+    FOPipboyManager* pipboy = TesscriptfunctionsInterfaceView::GetPipboyManagerInstance();
     if (pipboy)
     {
         ((FUN_005db4c0_struct*)pipboy)->FUN_005db4c0(true);
@@ -4008,9 +3816,6 @@ bool FUN_005dc090(const ScriptParameter* apParameters, const char* apCompiledPar
 }
 
 namespace fnv_005dc580 {
-struct FalloutRadio {
-    static bool __cdecl SetRadioEnabled(bool);
-};
 
 // @fnv 0x005dc580
 bool __cdecl FUN_005dc580()
@@ -4093,11 +3898,7 @@ void FUN_005de2c0(unsigned short value)
 }
 
 namespace fnv_005de350 {
-class HUDMainMenu
-{
-public:
-    void FUN_005de380();
-};
+
 
 extern HUDMainMenu* g_pHudMainMenuInstance;
 
@@ -4234,20 +4035,11 @@ char __cdecl FUN_005b7000()
     return 1;
 }
 
-struct Sky
-{
-    static Sky* __cdecl GetInstance();
-};
-
-struct MagicHitEffect
-{
-    void __thiscall ResetTargetPointer();
-};
 
 // @fnv 0x005b76d0
 char __cdecl FUN_005b76d0()
 {
-    reinterpret_cast<MagicHitEffect*>(Sky::GetInstance())->ResetTargetPointer();
+    reinterpret_cast<MagicHitEffect*>(Sky::GetInstance())->MagicHitEffect::ResetTargetPointer();
     return 1;
 }
 
@@ -4260,10 +4052,6 @@ struct CP_008c48d0 {
     int __thiscall GetPrevPath(void);
 };
 
-struct TES {
-    int __thiscall GetPrevPath(void);
-    int __thiscall FUN_00456cb0(int);
-};
 
 __declspec(thread) unsigned char g_tls_flag;
 
@@ -4296,7 +4084,7 @@ bool __cdecl FUN_005b9500()
 }
 
 struct M788 {
-    void RemoveAll();
+    void FUN_004ed900();
 };
 
 struct FUN_005bbc10_Class {
@@ -4307,7 +4095,7 @@ struct FUN_005bbc10_Class {
 // @fnv 0x005bbc10
 void FUN_005bbc10_Class::FUN_005bbc10()
 {
-    ((M788*)((char*)this + 8))->RemoveAll();
+    ((M788*)((char*)this + 8))->FUN_004ed900();
 }
 
 extern void __cdecl FUN_005a3e90(void*, int, int, void*);
@@ -4419,14 +4207,10 @@ bool __cdecl FUN_005cd630(const ScriptParameter* param, const char* name, TESObj
     return FUN_005a1e70(0, 0, 0, result);
 }
 
-struct FUN_005ce9d0 {
-    void SetFlag(unsigned char value);
-};
-
 // @fnv 0x005ce9d0
-void FUN_005ce9d0::SetFlag(unsigned char value)
+void Actor::FUN_005ce9d0(bool value)
 {
-    ((unsigned char*)this)[0x125] = value;
+    ActorReferenceData = value;
 }
 
 class PC7d;
@@ -4510,14 +4294,7 @@ bool __cdecl FUN_005d2610(int a1, int a2, double& afResult, int a4, int a5, int 
 }
 
 namespace fnv_005d2800 {
-struct TESImageSpaceModifier;
-struct NiAVObject;
-struct ImageSpaceModifierInstanceForm {
-    static ImageSpaceModifierInstanceForm* __cdecl Trigger(TESImageSpaceModifier*, float, NiAVObject*);
-};
-struct TESImageSpaceModifier {
-    static TESImageSpaceModifier* __cdecl GetGetHit(void);
-};
+
 
 // @fnv 0x005d2800
 bool __cdecl FUN_005d2800(const ScriptParameter* params, const char* funcName, TESObjectREFR* ref, TESObjectREFR* target, Script* script, ScriptLocals* locals, double& result, unsigned int& index)
@@ -4527,14 +4304,15 @@ bool __cdecl FUN_005d2800(const ScriptParameter* params, const char* funcName, T
     {
         return 0;
     }
-    ImageSpaceModifierInstanceForm::Trigger(TESImageSpaceModifier::GetGetHit(), scale, 0);
+    ImageSpaceModifierInstanceForm::Trigger((::TESImageSpaceModifier*)TESImageSpaceModifier::GetGetHit(), scale, 0);
     return 1;
 }
 }  // namespace fnv_005d2800
 
-struct ScriptLocalsX {
-    void* GetLocalData(void);
-    void FUN_005d3ce0(float f);
+// The 0x005d3c70 callback casts RTTI 0x012681c0 (bhkRigidBody) before calling 0x005d3ce0.
+struct RigidBodyTimeScaleAccess : public bhkRigidBody {
+    void* GetHavokBody();
+    void SetTimeScale(float f);
 };
 struct FUN_00ca88c0_T {
     void Method(float f);
@@ -4542,8 +4320,8 @@ struct FUN_00ca88c0_T {
 extern "C" void __cdecl FUN_00ca88c0(void*, float);
 
 // @fnv 0x005d3ce0
-void ScriptLocalsX::FUN_005d3ce0(float f) {
-    void* obj = this->GetLocalData();
+void RigidBodyTimeScaleAccess::SetTimeScale(float f) {
+    void* obj = this->GetHavokBody();
     if (obj)
         ((FUN_00ca88c0_T*)obj)->Method(f);
 }
@@ -4586,19 +4364,12 @@ void FUN_005d5610_Class::FUN_005d5610(unsigned char v) {
 }
 
 namespace fnv_005d7850 {
-class BSShaderAccumulator;
+
 
 struct FUN_005db4c0_struct {
     void FUN_005db4c0(bool);
 };
 
-struct BSShaderAccumulator {
-    void FUN_005db4c0(bool);
-};
-
-struct BSAudio {
-    BSShaderAccumulator* FUN_004e2190(void);
-};
 
 extern "C" void __cdecl DebugLog(const char*, ...);
 extern bool __fastcall FUN_0086f840(char*);
@@ -4630,18 +4401,19 @@ struct ScriptHelper
     static bool __cdecl GetActorSexConditionFunction(TESObjectREFR*, void*, void*, double&);
 };
 
+
 // @fnv 0x005d7940
 bool __cdecl FUN_005d7940(const ScriptParameter* apParameters, const char* apCompiledParams, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
 {
     ScriptHelper::GetActorSexConditionFunction(apRefObject, 0, 0, afReturnValue);
-    
+
+
     __declspec(thread) static bool bDebugLogFlag;
-    
     if (bDebugLogFlag)
     {
         DebugLog("IsMoving >> %0.0f", afReturnValue);
     }
-    
+
     return true;
 }
 }  // namespace fnv_005d7940
@@ -4692,18 +4464,17 @@ bool FUN_005daaa0(const ScriptParameter* apParams, const char* apSource, TESObje
 }
 
 namespace fnv_005dad70 {
-struct BGSTerrainManager {
+// Call surface of BGSTerrainManager; the shared header cannot be read in this unit (its own layout_support template copies).
+struct BGSTerrainManagerApi {
     void FUN_006fd060();
 };
 struct BGSSound {
-    BGSTerrainManager* GetWorldTerrainManager();
+    BGSTerrainManagerApi* GetWorldTerrainManager();
 };
 struct PC7d {
     void FUN_005dadd0(unsigned char);
 };
-struct TES {
-    BGSSound* GetHitSound();
-};
+
 
 extern PC7d* g_thePlayer;
 extern TES* g_TES;
@@ -4716,7 +4487,7 @@ char FUN_005dad70()
     {
         if (g_TES->GetHitSound()->GetWorldTerrainManager())
         {
-            g_TES->GetHitSound()->GetWorldTerrainManager()->FUN_006fd060();
+            ((BGSTerrainManagerApi*)g_TES->GetHitSound()->GetWorldTerrainManager())->FUN_006fd060();
         }
     }
     return 1;
@@ -4781,7 +4552,7 @@ FUN_005e0560::FUN_005e0560()
 
 namespace fnv_005b5cc0 {
 extern int DAT_011e0e80;
-struct SkyObject { void Update(int, int); };
+
 void __cdecl DebugLog(const char*);
 // @fnv 0x005b5cc0
 bool __cdecl FUN_005b5cc0()
@@ -4795,8 +4566,7 @@ bool __cdecl FUN_005b5cc0()
 namespace fnv_005b5cf0 {
 extern int DAT_011e0e80;
 extern void __cdecl DebugLog(const char*);
-struct Sky { int a; };
-struct SkyObject { void __thiscall Update(Sky*, int); };
+
 // @fnv 0x005b5cf0
 bool __cdecl FUN_005b5cf0()
 {
@@ -5440,7 +5210,7 @@ void __cdecl FUN_005d7c00(int a, int b, int c, int d, int e, int f, int g)
 
 namespace fnv_005d8570 {
 extern void* g_thePlayer;
-struct BSOcclusionPlane { int GetCullResult(); void FUN_005578f0(); };
+
 // @fnv 0x005d8570
 bool __cdecl FUN_005d8570()
 {
@@ -5580,12 +5350,6 @@ bool __cdecl FUN_005de900(TESObjectREFR* a, TESObjectREFR* b, TESObjectREFR* c, 
     return FUN_005a5f90(c, 0, 0, g);
 }
 
-struct TESChallenge {
-    char pad[0x70];
-    unsigned int nFlags;
-    void MarkForSave(void);
-    void FUN_005defe0(bool b);
-};
 
 // @fnv 0x005defe0
 void TESChallenge::FUN_005defe0(bool b)
@@ -5594,10 +5358,6 @@ void TESChallenge::FUN_005defe0(bool b)
     MarkForSave();
 }
 
-struct Setting {
-    Setting& FUN_00c33170(const char*);
-    Setting& FUN_005e0190(const char* name);
-};
 
 // @fnv 0x005e0190
 Setting& Setting::FUN_005e0190(const char* name)
@@ -5646,81 +5406,39 @@ int Str004b10a0::FUN_004b10a0()
     return (int)v;
 }
 
-struct Ref_S { float GetDistanceToReference(void*, bool, bool); };
-struct Script_0059bfa0 { static bool FUN_0059bfa0(TESObjectREFR*, void*, void*, double&); };
+
+// Script distance condition (0x0059bfa0); kept free because Script.h does not declare this static helper.
 __declspec(thread) bool g_bDebugLog;
 void __cdecl DebugLog(const char*, ...);
 // @fnv 0x0059bfa0
-bool Script_0059bfa0::FUN_0059bfa0(TESObjectREFR* pSource, void* pTarget, void* pUnused, double& distance)
+bool GetDistanceCondition(TESObjectREFR* pSource, void* pTarget, void* pUnused, double& distance)
 {
     void* pTarget2 = pTarget;
     if (pSource && pTarget2)
-        distance = ((Ref_S*)pSource)->GetDistanceToReference(pTarget2, true, false);
+        distance = pSource->GetDistanceToReference(static_cast<TESObjectREFR*>(pTarget2), true, false);
     if (g_bDebugLog)
         DebugLog("GetDistance >> %0.2f", distance);
     return true;
 }
 
 namespace fnv_005b78a0 {
-struct ThreeByThreeMatrix { float m00, m01, m02, m10, m11, m12, m20, m21, m22; };
-struct NiPoint3 { float x, y, z; NiPoint3(float fX, float fY, float fZ); };
-class NiUpdateData {
-public:
-    float fTime;
-    bool m_bUpdateEnabled;
-    bool bIsMultiThreaded;
-    unsigned int uiFlags;
-    NiUpdateData(float fTime, bool m_bUpdateEnabled, bool bIsMultiThreaded);
-};
-struct BSFadeNode { static void* operator new(unsigned int); static void operator delete(void*, unsigned int); };
-struct NiAVObject : BSFadeNode {
-    void SetLocalRotation(const ThreeByThreeMatrix& kRot);
-    void UpdateSceneObject();
-};
-class NiNode : public NiAVObject {
-public:
-    char pad[0xac];
-    NiNode(unsigned short usChildren);
-    void Update(const NiUpdateData& kData);
-};
-struct FUN_004a0c90_shell { void FUN_004a0c90(float fAngleDifference); };
-class SeenData {
-public:
-    virtual void v0();
-    virtual void AddToNode(NiNode* pNode, NiPoint3& kPos, bool bFlag);
-};
+
+
+
+
 struct FUN_00555bc0_shell { SeenData* FindSeenData(); };
 struct FUN_00555ad0_shell { float FUN_00555ad0(); };
 struct TESObjectCELL_Ext { bool IsInterior(); };
 struct CellH { int GetCellGridX(); int GetCellGridY(); };
 class GridCell { public: TESObjectCELL* pCell; };
-struct TES {
-    GridCell* FUN_00457050(int iX, int iY);
-    void FUN_00458e20(NiNode* pNode, float fTime);
-};
+
 struct GlobalObject_0045cfe0 { int* Int(); };
-struct BSOcclusionPlane {
-    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3(); virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7(); virtual void v8(); virtual void v9();
-    virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
-    virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39();
-    virtual void v40(); virtual void v41(); virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47(); virtual void v48(); virtual void v49();
-    virtual void v50(); virtual void v51(); virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55(); virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
-    virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63(); virtual void v64(); virtual void v65(); virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
-    virtual void v70(); virtual void v71(); virtual void v72(); virtual void v73(); virtual void v74(); virtual void v75(); virtual void v76(); virtual void v77(); virtual void v78(); virtual void v79();
-    virtual void v80(); virtual void v81(); virtual void v82(); virtual void v83(); virtual void v84(); virtual void v85(); virtual void v86(); virtual void v87(); virtual void v88(); virtual void v89();
-    virtual void v90(); virtual void v91(); virtual void v92(); virtual void v93(); virtual void v94(); virtual void v95(); virtual void v96(); virtual void v97(); virtual void v98(); virtual void v99();
-    virtual void v100(); virtual void v101(); virtual void v102(); virtual void v103(); virtual void v104(); virtual void v105(); virtual void v106(); virtual void v107(); virtual void v108(); virtual void v109();
-    virtual void v110(); virtual void v111(); virtual void v112(); virtual void v113(); virtual void v114(); virtual void v115(); virtual void v116(); virtual void v117(); virtual void v118(); virtual void v119();
-    virtual void v120(); virtual void v121(); virtual void v122(); virtual void v123(); virtual void v124();
-    virtual NiPoint3* GetPos();
-    int GetCullResult() const;
-};
+
 
 extern BSOcclusionPlane* g_thePlayer;
 extern TES* g_TES;
 extern GlobalObject_0045cfe0 g_011c63cc;
-extern ThreeByThreeMatrix DAT_011a9448;
+extern NiMatrix3 DAT_011a9448;
 extern double _gModifierZero;
 
 // @fnv 0x005b78a0
@@ -5734,14 +5452,16 @@ bool FUN_005b78a0(const ScriptParameter* paramInfo, const char* scriptData, TESO
             SeenData* pCellSeenData = reinterpret_cast<FUN_00555bc0_shell*>(pCell)->FindSeenData();
             if (pCellSeenData)
             {
-                NiPoint3 kPos(0.0f, 0.0f, g_thePlayer->GetPos()->z);
-                pCellSeenData->AddToNode(pNode, kPos, true);
+                NiPoint3 kPos(0.0f, 0.0f, ((const TESObjectREFR*)g_thePlayer)->GetPos()->z);
+                pCellSeenData->AddToNode((::NiNode*)pNode, (::NiPoint3&)kPos, true);
                 float fAngleDifference = -1.0 * reinterpret_cast<FUN_00555ad0_shell*>(pCell)->FUN_00555ad0();
                 if (fAngleDifference != _gModifierZero)
                 {
-                    ThreeByThreeMatrix kRot = DAT_011a9448;
-                    reinterpret_cast<FUN_004a0c90_shell*>(&kRot)->FUN_004a0c90(fAngleDifference);
-                    pNode->SetLocalRotation(kRot);
+                    // Preserve the original raw copy without calling a constructor under /Od.
+                    float kRot[sizeof(NiMatrix3) / sizeof(float)];
+                    *reinterpret_cast<NiMatrix3*>(kRot) = DAT_011a9448;
+                    reinterpret_cast<NiMatrix3*>(kRot)->MakeZRotation(fAngleDifference);
+                    pNode->SetLocalRotation(*reinterpret_cast<const NiMatrix3*>(kRot));
                 }
             }
         }
@@ -5751,19 +5471,19 @@ bool FUN_005b78a0(const ScriptParameter* paramInfo, const char* scriptData, TESO
             {
                 for (unsigned int j = 0; j < *g_011c63cc.Int(); j++)
                 {
-                    TESObjectCELL* pGridCell = g_TES->FUN_00457050(i, j)->pCell;
+                    TESObjectCELL* pGridCell = ((GridCell*)g_TES->FUN_00457050(i, j))->pCell;
                     SeenData* pGridSeenData = pGridCell ? reinterpret_cast<FUN_00555bc0_shell*>(pGridCell)->FindSeenData() : 0;
                     if (pGridSeenData)
                     {
-                        NiPoint3 kGridPos((float)(reinterpret_cast<CellH*>(pGridCell)->GetCellGridX() << 12), (float)(reinterpret_cast<CellH*>(pGridCell)->GetCellGridY() << 12), g_thePlayer->GetPos()->z);
-                        pGridSeenData->AddToNode(pNode, kGridPos, true);
+                        NiPoint3 kGridPos((float)(reinterpret_cast<CellH*>(pGridCell)->GetCellGridX() << 12), (float)(reinterpret_cast<CellH*>(pGridCell)->GetCellGridY() << 12), ((const TESObjectREFR*)g_thePlayer)->GetPos()->z);
+                        pGridSeenData->AddToNode((::NiNode*)pNode, (::NiPoint3&)kGridPos, true);
                     }
                 }
             }
         }
     }
     NiUpdateData kUpdateData(0.0f, false, false);
-    pNode->Update(kUpdateData);
+    pNode->Update(static_cast<const NiUpdateData&>(kUpdateData));
     pNode->UpdateSceneObject();
     g_TES->FUN_00458e20(pNode, 30.0f);
     return true;
@@ -5780,22 +5500,8 @@ MyVec005bb9b0& UnknownClass005bb9b0::FUN_005bb9b0(MyVec005bb9b0& akDest)
 }
 
 class TESObjectCELL;
-struct MagicCaster
-{
-    virtual void C0();
-    virtual void C1();
-    virtual void C2();
-    virtual bool CastMagicItem(TESForm*, bool, TESObjectREFR*, float, bool);
-    void RemoveCastingArt();
-};
-struct BSOcclusionPlane
-{
-    int GetCullResult() const;
-};
-struct TES
-{
-    bool IsCellBuffered(TESObjectCELL*, bool);
-};
+
+
 extern int g_TES;
 struct FUN_005c1fe0_Spell
 {
@@ -5807,113 +5513,7 @@ struct FUN_005c1fe0_Spell
     virtual void S5();
     virtual int GetSpellType();
 };
-struct FUN_005c1fe0_Ref
-{
-    virtual void R0();
-    virtual void R1();
-    virtual void R2();
-    virtual void R3();
-    virtual void R4();
-    virtual void R5();
-    virtual void R6();
-    virtual void R7();
-    virtual void R8();
-    virtual void R9();
-    virtual void R10();
-    virtual void R11();
-    virtual void R12();
-    virtual void R13();
-    virtual void R14();
-    virtual void R15();
-    virtual void R16();
-    virtual void R17();
-    virtual void R18();
-    virtual void R19();
-    virtual void R20();
-    virtual void R21();
-    virtual void R22();
-    virtual void R23();
-    virtual void R24();
-    virtual void R25();
-    virtual void R26();
-    virtual void R27();
-    virtual void R28();
-    virtual void R29();
-    virtual void R30();
-    virtual void R31();
-    virtual void R32();
-    virtual void R33();
-    virtual void R34();
-    virtual void R35();
-    virtual void R36();
-    virtual void R37();
-    virtual void R38();
-    virtual void R39();
-    virtual void R40();
-    virtual void R41();
-    virtual void R42();
-    virtual void R43();
-    virtual void R44();
-    virtual void R45();
-    virtual void R46();
-    virtual void R47();
-    virtual void R48();
-    virtual void R49();
-    virtual void R50();
-    virtual void R51();
-    virtual void R52();
-    virtual void R53();
-    virtual void R54();
-    virtual void R55();
-    virtual void R56();
-    virtual void R57();
-    virtual void R58();
-    virtual void R59();
-    virtual void R60();
-    virtual void R61();
-    virtual void R62();
-    virtual void R63();
-    virtual void R64();
-    virtual void R65();
-    virtual void R66();
-    virtual void R67();
-    virtual void R68();
-    virtual void R69();
-    virtual void R70();
-    virtual void R71();
-    virtual void R72();
-    virtual void R73();
-    virtual void R74();
-    virtual void R75();
-    virtual void R76();
-    virtual void R77();
-    virtual void R78();
-    virtual void R79();
-    virtual void R80();
-    virtual void R81();
-    virtual void R82();
-    virtual void R83();
-    virtual void R84();
-    virtual void R85();
-    virtual void R86();
-    virtual void R87();
-    virtual void R88();
-    virtual void R89();
-    virtual void R90();
-    virtual void R91();
-    virtual void R92();
-    virtual void R93();
-    virtual void R94();
-    virtual void R95();
-    virtual void R96();
-    virtual void R97();
-    virtual void R98();
-    virtual void R99();
-    virtual void R100();
-    virtual void R101();
-    virtual MagicCaster* GetMagicCaster();
-    virtual TESObjectREFR* GetMagicTarget();
-};
+
 // @fnv 0x005c1fe0
 bool FUN_005c1fe0(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* eventList, double& result, unsigned int& opcodeOffsetPtr)
 {
@@ -5923,12 +5523,13 @@ bool FUN_005c1fe0(const ScriptParameter* paramInfo, const char* scriptData, TESO
     if (thisObj) {
         if (!spell || spell->GetSpellType() == 4)
             return true;
-        MagicCaster* caster = ((FUN_005c1fe0_Ref*)thisObj)->GetMagicCaster();
-        TESObjectREFR* targetVal = ((FUN_005c1fe0_Ref*)thisObj)->GetMagicTarget();
+        MagicCaster* caster = thisObj->GetMagicCaster();
+        // The shared 0x67 slot has no typed magic-target return declaration.
+        TESObjectREFR* targetVal = reinterpret_cast<TESObjectREFR* (__thiscall*)(TESObjectREFR*)>((*reinterpret_cast<void***>(thisObj))[0x67])(thisObj);
         caster->RemoveCastingArt();
         TESObjectCELL* pCell8 = (TESObjectCELL*)((BSOcclusionPlane*)thisObj)->GetCullResult();
         if (pCell8 && ((TES*)g_TES)->IsCellBuffered(pCell8, true) && ((TES*)g_TES)->IsCellBuffered(pCell8, false))
-            caster->CastMagicItem((TESForm*)spell, false, targetVal, 1.0f, false);
+            caster->CastMagicItem((MagicItem*)spell, false, (MagicTarget*)targetVal, 1.0f, false);
     }
     return true;
 }
@@ -6056,39 +5657,15 @@ struct FUN_005cb8e0_Player {
 };
 extern FUN_005cb8e0_Player* g_thePlayer;
 void DebugLog(const char*, ...);
-struct Flt { operator unsigned int(); };
 struct SoundH { unsigned int Deallocate(); };
-struct TESObject { unsigned int GetNext(); };
-struct FUN_005cb8e0_FormVT : public TESForm {
-    virtual void X58();
-    virtual void X59();
-    virtual void X60();
-    virtual void X61();
-    virtual void X62();
-    virtual void X63();
-    virtual void X64();
-    virtual void X65();
-    virtual void X66();
-    virtual void X67();
-    virtual void X68();
-    virtual void X69();
-    virtual void X70();
-    virtual void X71();
-    virtual void X72();
-    virtual void X73();
-    virtual void X74();
-    virtual void X75();
-    virtual const char* GetName130();
-    virtual void X77();
-    virtual const char* GetName138();
-};
+
 
 // @fnv 0x005cb8e0
 bool FUN_005cb8e0(const ScriptParameter* apParameters, const char* apCompiledParams, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
 {
     if (g_thePlayer->FUN_005cbb50())
     {
-        DebugLog("Active quest: %s", ((FUN_005cb8e0_FormVT*)g_thePlayer->FUN_005cbb50())->GetName138());
+        DebugLog("Active quest: %s", g_thePlayer->FUN_005cbb50()->GetEditorName());
         BSSimpleListTESRaceSize* pActiveTargetList = g_thePlayer->GetCurrentQuestTargets();
         if (!pActiveTargetList)
             DebugLog("No current targets");
@@ -6107,14 +5684,14 @@ bool FUN_005cb8e0(const ScriptParameter* apParameters, const char* apCompiledPar
             if (ptargref && porigtargref)
             {
                 if (ptargref == porigtargref)
-                    cRefName.PrintfString("%s (%08X)", ((FUN_005cb8e0_FormVT*)porigtargref)->GetName130(), ((SoundH*)porigtargref)->Deallocate());
+                    cRefName.PrintfString("%s (%08X)", ((TESForm*)porigtargref)->GetName(), ((SoundH*)porigtargref)->Deallocate());
                 else
-                    cRefName.PrintfString("%s (%08X) (carrying %s (%08X))", ((FUN_005cb8e0_FormVT*)ptargref)->GetName130(), ((SoundH*)ptargref)->Deallocate(), ((FUN_005cb8e0_FormVT*)porigtargref)->GetName130(), ((SoundH*)porigtargref)->Deallocate());
+                    cRefName.PrintfString("%s (%08X) (carrying %s (%08X))", ((TESForm*)ptargref)->GetName(), ((SoundH*)ptargref)->Deallocate(), ((TESForm*)porigtargref)->GetName(), ((SoundH*)porigtargref)->Deallocate());
             }
             TESObjectREFR* ptrackingRef = pItem->FUN_005cbb70();
             if (ptrackingRef && ((TESForm*)((TESObject*)ptrackingRef)->GetNext())->GetFormType() == 0x1c)
-                cDoorName.PrintfString("%s (%08X)", ((FUN_005cb8e0_FormVT*)ptrackingRef)->GetName130(), ((SoundH*)ptrackingRef)->Deallocate());
-            DebugLog("Target %d:  Reference: %s, load door: %s", iTargetCount, ((Flt*)&cRefName)->operator unsigned int(), ((Flt*)&cDoorName)->operator unsigned int());
+                cDoorName.PrintfString("%s (%08X)", ((TESForm*)ptrackingRef)->GetName(), ((SoundH*)ptrackingRef)->Deallocate());
+            DebugLog("Target %d:  Reference: %s, load door: %s", iTargetCount, cRefName.String(), cDoorName.String());
             iTargetCount++;
         }
     }
@@ -6156,26 +5733,22 @@ bool FUN_005cde00(const ScriptParameter * a1, const char * a2, TESObjectREFR * a
 }
 }  // namespace fnv_005cde00
 
-namespace fnv_005d15d0 {
 class IOManager;
-struct BSAudio {
-    static BSAudio* GetSingleton();
-    bool FUN_005bb4d0();
-    void SetUseMultipleThreads(bool);
-};
+namespace fnv_005d15d0 {
 struct S5d {
     void FUN_005d1720(unsigned int, unsigned int);
 };
 struct S1740 {
     void FUN_005d1740(int);
 };
-struct MoviePlayerS {
+// 0x00ec2320 is the BSMovieThread playback entry, not a MoviePlayer method.
+struct MoviePlaybackThread {
     void FUN_00ec2320(char*, bool, int, int, int, bool, int, bool, bool);
 };
 void __fastcall FUN_00c3e310(IOManager*);
 void __fastcall FUN_00c3e340(IOManager*);
 extern IOManager* DAT_01202d98;
-extern MoviePlayerS* DAT_0126fac4;
+extern MoviePlaybackThread* DAT_0126fac4;
 
 // @fnv 0x005d15d0
 bool FUN_005d15d0(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* eventList, double& result, unsigned int& opcodeOffset)
@@ -6214,7 +5787,7 @@ namespace fnv_005d1920 {
 struct FNStub { const char* GetFullName() const; };
 struct FullNameEx { void SetFullName(const char*); };
 struct XActor { void* GetActorBase(); };
-struct TESObject { unsigned int GetNext(); };
+
 int __fastcall _FNV_GetFormType(void*);
 struct VRef { virtual void w00(); virtual void w01(); virtual void w02(); virtual void w03(); virtual void w04(); virtual void w05(); virtual void w06(); virtual void w07(); virtual void w08(); virtual void w09(); virtual void w10(); virtual void w11(); virtual void w12(); virtual void w13(); virtual void w14(); virtual void w15(); virtual void w16(); virtual void w17(); virtual void w18(); virtual void w19(); virtual void w20(); virtual void w21(); virtual void w22(); virtual void w23(); virtual void w24(); virtual void w25(); virtual void w26(); virtual void w27(); virtual void w28(); virtual void w29(); virtual void w30(); virtual void w31(); virtual void w32(); virtual void w33(); virtual void w34(); virtual void w35(); virtual void w36(); virtual void w37(); virtual void w38(); virtual void w39(); virtual void w40(); virtual void w41(); virtual void w42(); virtual void w43(); virtual void w44(); virtual void w45(); virtual void w46(); virtual void w47(); virtual void w48(); virtual void w49(); virtual void w50(); virtual void w51(); virtual void w52(); virtual void w53(); virtual void w54(); virtual void w55(); virtual void w56(); virtual void w57(); virtual void w58(); virtual void w59(); virtual void w60(); virtual void w61(); virtual void w62(); virtual void w63(); virtual bool IsActor(); };
 struct VBase { virtual void w00(); virtual void w01(); virtual void w02(); virtual void w03(); virtual void w04(); virtual void w05(); virtual void w06(); virtual void w07(); virtual void w08(); virtual void w09(); virtual void w10(); virtual void w11(); virtual void w12(); virtual void w13(); virtual void w14(); virtual void w15(); virtual void w16(); virtual void w17(); virtual void MarkChanged(unsigned int); };
@@ -6249,7 +5822,7 @@ bool __cdecl FUN_005d1920(const ScriptParameter* paramInfo, const char* scriptDa
 
 extern int DAT_011e0e80;
 extern TESObjectREFR* _g_thePlayer;
-struct MobileObject { const char* GetFullName(); };
+
 struct FUN_00974a50_shell { void FUN_00974a50(void*, void*); };
 void _DebugLog(const char*, ...);
 // @fnv 0x005d2130
@@ -6315,60 +5888,12 @@ struct MT
 public:
     void FUN_008255a0();
 };
-struct FakeRef : public TESObjectREFR
-{
-public:
-    virtual void F0();
-    virtual void F1();
-    virtual void F2();
-    virtual void F3();
-    virtual void F4();
-    virtual void F5();
-    virtual void F6();
-    virtual void F7();
-    virtual void F8();
-    virtual void F9();
-    virtual void F10();
-    virtual void F11();
-    virtual void F12();
-    virtual void F13();
-    virtual void F14();
-    virtual void F15();
-    virtual void F16();
-    virtual void F17();
-    virtual void F18();
-    virtual void F19();
-    virtual void F20();
-    virtual void F21();
-    virtual void F22();
-    virtual void F23();
-    virtual void F24();
-    virtual void F25();
-    virtual void F26();
-    virtual void F27();
-    virtual void F28();
-    virtual void F29();
-    virtual void F30();
-    virtual void F31();
-    virtual void F32();
-    virtual void F33();
-    virtual void F34();
-    virtual void F35();
-    virtual void F36();
-    virtual void F37();
-    virtual void F38();
-    virtual void F39();
-    virtual void F40();
-    virtual void F41();
-    virtual void F42();
-    virtual void F43();
-    virtual void F44();
-    virtual MT* F45();
-};
+
 // @fnv 0x005d7b50
 bool __cdecl FUN_005d7b50(const ScriptParameter* a1, const char* a2, TESObjectREFR* a3, TESObjectREFR* a4, Script* a5, ScriptLocals* a6, double& a7, unsigned int& a8)
 {
-    MT* tmp = ((FakeRef*)a3)->F45();
+    // Preserve the magic-target return signature without a local reference vtable.
+    MT* tmp = reinterpret_cast<MT* (__thiscall*)(TESObjectREFR*)>((*reinterpret_cast<void***>(a3))[0x67])(a3);
     if (tmp)
         tmp->FUN_008255a0();
     return true;
@@ -6407,7 +5932,7 @@ bool __cdecl FUN_005dc350(const ScriptParameter* parameters, const char* scriptD
     return true;
 }
 
-struct std { static float __cdecl abs(float); };
+namespace std { float __cdecl abs(float); }
 // @fnv 0x005dc480
 bool __cdecl FUN_005dc480(const ScriptParameter* parameters, const char* scriptData, TESObjectREFR* thisObject, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& opcodeOffset)
 {
@@ -6418,8 +5943,9 @@ bool __cdecl FUN_005dc480(const ScriptParameter* parameters, const char* scriptD
     return true;
 }
 
-struct BGSSaveLoadUI { void FUN_00a26120(char*); };
-BGSSaveLoadUI* FUN_00a25920();
+// Call surface of BGSSaveLoadUI; the shared header cannot be read in this unit (its own layout_support template copies).
+struct BGSSaveLoadUIApi { void FUN_00a26120(char*); };
+BGSSaveLoadUIApi* FUN_00a25920();
 // @fnv 0x005dda00
 bool FUN_005dda00(const ScriptParameter* parameters, const char* scriptData,
                   TESObjectREFR* thisObject, TESObjectREFR* container,
@@ -6463,15 +5989,15 @@ Holder* __thiscall Holder::FUN_005e0490(unsigned int a, unsigned int b)
 }
 
 namespace fnv_005b4a80 {
-struct FUN_004077c0_shell { bool FUN_004077c0(); };
-struct TESSound { unsigned int Deallocate(); };
+
+
 extern signed char DAT_0118c684;
 extern int DAT_011cac64;
 // @fnv 0x005b4a80
 bool FUN_005b4a80(const ScriptParameter* p1, const char* p2, TESObjectREFR* p3, TESObjectREFR* p4, Script* p5, ScriptLocals* p6, double& result, unsigned int& p7)
 {
     unsigned int id = 0;
-    if (p3 && !((FUN_004077c0_shell*)p3)->FUN_004077c0())
+    if (p3 && !((Actor*)p3)->FUN_004077c0())
         id = ((TESSound*)p3)->Deallocate();
     else if (p5)
         id = ((TESSound*)p5)->Deallocate();
@@ -6499,14 +6025,7 @@ extern const char* DAT_011a2ff8;
 struct TaskQueueInterface {
     static void __cdecl CopyStringToBuffer(char*, unsigned int, const char*);
 };
-struct INISettingCollection {
-    void FUN_005e0200(const char*);
-};
-struct INIPrefSettingCollection : INISettingCollection {
-};
-template <class T> struct SettingT {
-    static T* __cdecl GetCollection();
-};
+using ::SettingT;
 
 // @fnv 0x005b72f0
 bool __cdecl FUN_005b72f0(const ScriptParameter* apParameters, const char* apCompiledParams, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
@@ -6559,18 +6078,8 @@ bool __cdecl FUN_005b9070(const ScriptParameter* apParameters, const char* apCom
 namespace fnv_005bee90 {
 extern "C" double __cdecl atof(const char* str);
 
-struct Setting {
-    unsigned int FUN_004f8940();
-    Setting& FUN_005e0190(const char* value);
-};
-template <class T> struct SettingCollectionList {
-    T* GetPtr(const char* name);
-};
-struct INISettingCollection : SettingCollectionList<Setting> {};
-struct INIPrefSettingCollection : SettingCollectionList<Setting> {};
-template <class T> struct SettingT {
-    static T* __cdecl GetCollection();
-};
+
+using ::SettingT;
 struct S0042fa20 {
     S0042fa20* FUN_0045ce80(int value);
 };
@@ -6579,9 +6088,6 @@ struct GlobalObject_0045cf30 {
 };
 struct GlobalObject_0045cfe0 {
     int* Int();
-};
-struct Setting_S {
-    float* Float();
 };
 struct S_004ed780 {
     S_004ed780* FUN_004ed780(float value);
@@ -6600,9 +6106,9 @@ bool FUN_005bee90(const ScriptParameter* apParameters, const char* apCompiledPar
     if (!ExtractArgs(apParameters, apCompiledParams, &auiOffset, apRefObject, apContainer, apScript, apScriptLocals, settingName, settingValue))
         return false;
 
-    pIS = SettingT<INISettingCollection>::GetCollection()->GetPtr(settingName);
+    pIS = reinterpret_cast<SettingCollectionList<Setting>*>(SettingT<INISettingCollection>::GetCollection())->GetPtr(settingName);
     if (!pIS)
-        pIS = SettingT<INIPrefSettingCollection>::GetCollection()->GetPtr(settingName);
+        pIS = reinterpret_cast<SettingCollectionList<Setting>*>(SettingT<INIPrefSettingCollection>::GetCollection())->GetPtr(settingName);
 
     if (pIS)
     {
@@ -6621,7 +6127,7 @@ bool FUN_005bee90(const ScriptParameter* apParameters, const char* apCompiledPar
         case 5:
             ((S_004ed780*)pIS)->FUN_004ed780((float)atof(settingValue));
             if (bScriptConsoleEcho)
-                _DebugLog("INISetting %s >> %.2f", settingName, *((Setting_S*)pIS)->Float());
+                _DebugLog("INISetting %s >> %.2f", settingName, *((Setting*)pIS)->Float());
             break;
         case 6:
             pIS->FUN_005e0190(settingValue);
@@ -6674,132 +6180,13 @@ struct FUN_005c45e0_AV {
     virtual void v3();
     virtual FUN_005c45e0_AV* v10();
 };
-struct FUN_005c45e0_V {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual const char* v130();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual FUN_005c45e0_AV* v1d0();
-};
+
 
 struct RefH { bool GetDisabled(); };
-struct FUN_004077c0_shell { bool FUN_004077c0(); };
+
 struct FUN_0056aac0_t { TESObjectREFR* GetEnableParent(); };
-struct TESSound { unsigned int Deallocate(); };
-struct BGSCameraPath { int HasNameForWarning(); };
-struct MobileObject { const char* GetFullName(); };
+
+
 struct FUN_00705b10_Dummy { void Set(int); };
 struct FUN_00565090_shell { bool FUN_00565090(); };
 struct FUN_005650d0_s { void FUN_005650d0(bool); };
@@ -6812,25 +6199,25 @@ bool __cdecl FUN_005c45e0(const ::ScriptParameter* apParameters, const char* apC
     int iFade = 0;
     if (!ExtractArgs(apParameters, apCompiledParams, &auiOffset, apRefObject, apContainer, apScript, apScriptLocals, &iFade))
         return false;
-    if (apRefObject && !((RefH*)apRefObject)->GetDisabled() && !((FUN_004077c0_shell*)apRefObject)->FUN_004077c0()) {
+    if (apRefObject && !((RefH*)apRefObject)->GetDisabled() && !((Actor*)apRefObject)->FUN_004077c0()) {
         if (((FUN_0056aac0_t*)apRefObject)->GetEnableParent()) {
             if (apScript && ((TESSound*)apScript)->Deallocate()) {
                 _FNV_Warning("SCRIPTS: Disable is being called on reference %08X %s in script %08X %s even though it has an enable state parent.  This is not valid behavior and will be ignored.",
                     ((TESSound*)apRefObject)->Deallocate(),
-                    ((BGSCameraPath*)apRefObject)->HasNameForWarning() ? ((FUN_005c45e0_V*)apRefObject)->v130() : ((MobileObject*)apRefObject)->GetFullName(),
+                    ((BGSCameraPath*)apRefObject)->HasNameForWarning() ? static_cast<const TESForm*>(apRefObject)->GetName() : ((MobileObject*)apRefObject)->GetFullName(),
                     ((TESSound*)apScript)->Deallocate(),
-                    ((FUN_005c45e0_V*)apScript)->v130());
+                    static_cast<const TESForm*>(apScript)->GetName());
             } else {
                 _FNV_Warning("SCRIPTS: Disable is being called on reference %08X %s in a results script even though it has an enable state parent.  This is not valid behavior and will be ignored.",
                     ((TESSound*)apRefObject)->Deallocate(),
-                    ((BGSCameraPath*)apRefObject)->HasNameForWarning() ? ((FUN_005c45e0_V*)apRefObject)->v130() : ((MobileObject*)apRefObject)->GetFullName(),
+                    ((BGSCameraPath*)apRefObject)->HasNameForWarning() ? static_cast<const TESForm*>(apRefObject)->GetName() : ((MobileObject*)apRefObject)->GetFullName(),
                     ((TESSound*)apScript)->Deallocate(),
-                    ((FUN_005c45e0_V*)apScript)->v130());
+                    static_cast<const TESForm*>(apScript)->GetName());
             }
             return true;
         } else {
             if (iFade > 0) {
-                FUN_005c45e0_AV* pav = ((FUN_005c45e0_V*)apRefObject)->v1d0();
+                FUN_005c45e0_AV* pav = reinterpret_cast<FUN_005c45e0_AV*>(apRefObject->GetNiNode());
                 FUN_005c45e0_AV* pfade = pav ? pav->v10() : 0;
                 if (pfade)
                     ((FUN_00705b10_Dummy*)pfade)->Set(9);
@@ -6845,6 +6232,7 @@ bool __cdecl FUN_005c45e0(const ::ScriptParameter* apParameters, const char* apC
 }
 }  // namespace fnv_005c45e0
 
+class TESRace;
 namespace fnv_005c65a0 {
 struct TESNPC_S;
 struct FaceNode_S
@@ -6854,279 +6242,54 @@ struct FaceNode_S
     virtual void F2();
     virtual void* F3();
 };
-struct Actor_S
-{
-    virtual void A0();
-    virtual void A1();
-    virtual void A2();
-    virtual void A3();
-    virtual void A4();
-    virtual void A5();
-    virtual void A6();
-    virtual void A7();
-    virtual void A8();
-    virtual void A9();
-    virtual void A10();
-    virtual void A11();
-    virtual void A12();
-    virtual void A13();
-    virtual void A14();
-    virtual void A15();
-    virtual void A16();
-    virtual void A17();
-    virtual void A18();
-    virtual void A19();
-    virtual void A20();
-    virtual void A21();
-    virtual void A22();
-    virtual void A23();
-    virtual void A24();
-    virtual void A25();
-    virtual void A26();
-    virtual void A27();
-    virtual void A28();
-    virtual void A29();
-    virtual void A30();
-    virtual void A31();
-    virtual void A32();
-    virtual void A33();
-    virtual void A34();
-    virtual void A35();
-    virtual void A36();
-    virtual void A37();
-    virtual void A38();
-    virtual void A39();
-    virtual void A40();
-    virtual void A41();
-    virtual void A42();
-    virtual void A43();
-    virtual void A44();
-    virtual void A45();
-    virtual void A46();
-    virtual void A47();
-    virtual void A48();
-    virtual void A49();
-    virtual void A50();
-    virtual void A51();
-    virtual void A52();
-    virtual void A53();
-    virtual void A54();
-    virtual void A55();
-    virtual void A56();
-    virtual void A57();
-    virtual void A58();
-    virtual void A59();
-    virtual void A60();
-    virtual void A61();
-    virtual void A62();
-    virtual void A63();
-    virtual void A64();
-    virtual void A65();
-    virtual void A66();
-    virtual void A67();
-    virtual void A68();
-    virtual void A69();
-    virtual void A70();
-    virtual void A71();
-    virtual void A72();
-    virtual void A73();
-    virtual void A74();
-    virtual void A75();
-    virtual void A76();
-    virtual void A77();
-    virtual void A78();
-    virtual void A79();
-    virtual void A80();
-    virtual void A81();
-    virtual void A82();
-    virtual void A83();
-    virtual void A84();
-    virtual void A85();
-    virtual void A86();
-    virtual void A87();
-    virtual void A88();
-    virtual void A89();
-    virtual void A90();
-    virtual void A91();
-    virtual void A92();
-    virtual void A93();
-    virtual void A94();
-    virtual void A95();
-    virtual void A96();
-    virtual void A97();
-    virtual void A98();
-    virtual void A99();
-    virtual void A100();
-    virtual void A101();
-    virtual void A102();
-    virtual void A103();
-    virtual void A104();
-    virtual void A105();
-    virtual void A106();
-    virtual void A107();
-    virtual void A108();
-    virtual void A109();
-    virtual void A110();
-    virtual void A111();
-    virtual void A112();
-    virtual void A113();
-    virtual void A114();
-    virtual void A115();
-    virtual struct FaceNode_S* V116();
-    virtual void A117();
-    virtual void A118();
-    virtual void A119();
-    virtual void A120();
-    virtual void A121();
-    virtual void A122();
-    virtual void A123();
-    virtual void A124();
-    virtual void A125();
-    virtual void A126();
-    virtual void A127();
-    virtual void A128();
-    virtual void A129();
-    virtual void A130();
-    virtual void A131();
-    virtual void A132();
-    virtual void A133();
-    virtual bool IsActor();
-    virtual void A135();
-    virtual void A136();
-    virtual void A137();
-    virtual void A138();
-    virtual void A139();
-    virtual void A140();
-    virtual void A141();
-    virtual void A142();
-    virtual void A143();
-    virtual void A144();
-    virtual void A145();
-    virtual void A146();
-    virtual void A147();
-    virtual void A148();
-    virtual void A149();
-    virtual void A150();
-    virtual void A151();
-    virtual void A152();
-    virtual void A153();
-    virtual void A154();
-    virtual void A155();
-    virtual void A156();
-    virtual void A157();
-    virtual void A158();
-    virtual void A159();
-    virtual void A160();
-    virtual void A161();
-    virtual void A162();
-    virtual void A163();
-    virtual void A164();
-    virtual void A165();
-    virtual void A166();
-    virtual void A167();
-    virtual void A168();
-    virtual void A169();
-    virtual void A170();
-    virtual void A171();
-    virtual void A172();
-    virtual void A173();
-    virtual void A174();
-    virtual void A175();
-    virtual void A176();
-    virtual void A177();
-    virtual void A178();
-    virtual void A179();
-    virtual void A180();
-    virtual void A181();
-    virtual void A182();
-    virtual void A183();
-    virtual void A184();
-    virtual void A185();
-    virtual void A186();
-    virtual void A187();
-    virtual void A188();
-    virtual void A189();
-    virtual void A190();
-    virtual void A191();
-    virtual void A192();
-    virtual void A193();
-    virtual void A194();
-    virtual void A195();
-    virtual void A196();
-    virtual void A197();
-    virtual void A198();
-    virtual void A199();
-    virtual void A200();
-    virtual void A201();
-    virtual void A202();
-    virtual void A203();
-    virtual void A204();
-    virtual void A205();
-    virtual void A206();
-    virtual void A207();
-    virtual void A208();
-    virtual void A209();
-    virtual void A210();
-    virtual void A211();
-    virtual void A212();
-    virtual void A213();
-    virtual void A214();
-    virtual void A215();
-    virtual bool V216();
-};
-struct ActorV_S { int GetSex(); };
-struct TESObject { unsigned int GetNext(); };
-struct TESSound { unsigned int Deallocate(); };
-struct MobileObject { const char* GetFullName(); };
-struct Character { void Reset3D(); };
-struct TESActorBase { int GetSex(); };
-struct TESRace;
+
+
+
+
 struct FUN_004ac110_shell { TESRace* FUN_004ac110(); };
-struct TESNPC { void CopyActorBaseData(TESNPC*); };
 struct Arr { unsigned int* GetAt(int); };
-struct Flt { operator unsigned int(); };
 struct FUN_005e0560
 {
     int data[4];
     FUN_005e0560();
     ~FUN_005e0560();
 };
-extern Actor_S* _g_thePlayer;
+extern ::Actor* _g_thePlayer;
 extern const char* DAT_01199e8c[];
 extern __declspec(thread) bool g_bLogSexChange[0x269];
-void __cdecl _DebugLog(unsigned int);
+void __cdecl _DebugLog(const char*);
 void __cdecl FUN_00603280(TESRace*, int, FUN_005e0560*);
 
 // @fnv 0x005c65a0
 bool __cdecl FUN_005c65a0(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* eventList, double& result, unsigned int& opcodeOffsetPtr)
 {
     int iSex_2 = -1;
-    Actor_S* pTarget3;
+    ::Actor* pTarget3;
     unsigned int bResetHead = 0;
     if (!ExtractArgs(paramInfo, scriptData, &opcodeOffsetPtr, thisObj, containingObj, scriptObj, eventList, &iSex_2, &bResetHead))
         return false;
     pTarget3 = _g_thePlayer;
-    if (thisObj && ((Actor_S*)thisObj)->IsActor())
-        pTarget3 = (Actor_S*)thisObj;
+    if (thisObj && thisObj->IsCharacter())
+        pTarget3 = (::Actor*)thisObj;
     if (pTarget3)
     {
-        if (((ActorV_S*)pTarget3)->GetSex() == iSex_2)
+        if (((::Actor*)pTarget3)->GetSex() == iSex_2)
             return true;
         TESNPC* pNpc7 = (TESNPC*)((TESObject*)pTarget3)->GetNext();
         int aBFemale = 0;
-        FaceNode_S* pFaceNodeTmp = pTarget3->V116();
+        FaceNode_S* pFaceNodeTmp = reinterpret_cast<FaceNode_S*>(pTarget3->GetNiNode());
         void* pHead7 = 0;
         if (pFaceNodeTmp)
             pHead7 = pFaceNodeTmp->F3();
         if (iSex_2 == -1)
         {
-            if (((ActorV_S*)pTarget3)->GetSex() == 0)
+            if (((::Actor*)pTarget3)->GetSex() == 0)
                 aBFemale = 1;
         }
         else if (iSex_2 == 1)
             aBFemale = 1;
         ((TESActorBaseData*)((char*)pNpc7 + 0x30))->UpdateFlagBit(1, aBFemale == 1, true);
-        if (pTarget3->V216() && bResetHead)
+        if (pTarget3->IsPlayerRef() && bResetHead)
         {
             FUN_005e0560 list2;
             FUN_00603280(((FUN_004ac110_shell*)pNpc7)->FUN_004ac110(), ((TESActorBase*)pNpc7)->GetSex(), &list2);
@@ -7137,7 +6300,7 @@ bool __cdecl FUN_005c65a0(const ScriptParameter* paramInfo, const char* scriptDa
         {
             BSStringT<char> str;
             str.PrintfString("\"%s\" (%08x) is now %s", ((MobileObject*)pTarget3)->GetFullName(), ((TESSound*)pTarget3)->Deallocate(), DAT_01199e8c[aBFemale]);
-            _DebugLog(*(Flt*)&str);
+            _DebugLog(str.String());
         }
     }
     return true;
@@ -7145,7 +6308,6 @@ bool __cdecl FUN_005c65a0(const ScriptParameter* paramInfo, const char* scriptDa
 }  // namespace fnv_005c65a0
 
 struct FNStub { void* GetFullName(void); };
-struct FactionReactionHelper { FIGHT_REACTION GetFactionReaction(TESFaction*); };
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*,
     TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 extern void _DebugLog(const char*, ...);
@@ -7166,7 +6328,7 @@ bool __cdecl FUN_005c7fd0(const ScriptParameter* parameters, const char* scriptD
                      script, locals, &faction, &target))
         return false;
     if (faction && target)
-        result = (double)((FactionReactionHelper*)faction)->GetFactionReaction(target);
+        result = (double)faction->GetFactionReaction(target);
     if (gFactionReactionDebug[0x268])
         _DebugLog("%.20s reaction to %.20s is %.1f",
                   ((FNStub*)((char*)faction + 0x18))->GetFullName(),
@@ -7177,9 +6339,7 @@ bool __cdecl FUN_005c7fd0(const ScriptParameter* parameters, const char* scriptD
 struct TESFormInitFlag {
     static TESForm* LookupFormByEditorID(const char*);
 };
-struct BGSCameraPath {
-    virtual ~BGSCameraPath();
-};
+
 extern BGSCameraPath* DAT_01183028;
 extern int DAT_011f21c0;
 extern __declspec(thread) bool DAT_tls_0268;
@@ -7292,7 +6452,7 @@ extern DH* g_dataHandler;
 struct GlobalObject_0045cfe0 { int* Int(); };
 extern GlobalObject_0045cfe0 g_011c3ea4;
 struct TaskQueue5ccf50 { static TaskQueue5ccf50* __cdecl GetInstance(); };
-class Actor;
+
 void __cdecl FUN_0087a8b0(TaskQueue5ccf50*, int, Actor*, ...);
 bool __fastcall FUN_00572c80(TESObjectREFR*);
 void DebugLog(const char*, ...);
@@ -7331,8 +6491,7 @@ bool FUN_005ccf50(const ScriptParameter* paramInfo, const char* scriptData, TESO
 namespace fnv_005ced30 {
 struct FUN_00422aa0_shell { void FUN_00422aa0(); };
 struct XActor { FUN_00422aa0_shell* GetExtra() const; };
-struct TESObjectREFR_StandIn { bool Activate(TESObjectREFR*, bool, TESObjectREFR*, int); void FUN_00578a30(const char*); };
-struct BGSOpenCloseForm { enum OPEN_STATE { OPEN_STATE_CLOSED = 0, OPEN_STATE_OPENING = 1, OPEN_STATE_OPEN = 2, OPEN_STATE_CLOSING = 3, OPEN_STATE_OPEN_LOCKED = 4, OPEN_STATE_CLOSED_LOCKED = 5 }; static OPEN_STATE __cdecl GetOpenState(TESObjectREFR*); };
+
 // @fnv 0x005ced30
 bool __cdecl FUN_005ced30(const ScriptParameter* parameters, const char* scriptData, TESObjectREFR* thisObject, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& opcodeOffset)
 {
@@ -7341,13 +6500,13 @@ bool __cdecl FUN_005ced30(const ScriptParameter* parameters, const char* scriptD
         return false;
     if (thisObject) {
         if (formID) {
-            if (BGSOpenCloseForm::GetOpenState(thisObject) > BGSOpenCloseForm::OPEN_STATE_OPEN)
-                ((TESObjectREFR_StandIn*)thisObject)->Activate(0, false, 0, 1);
-            ((TESObjectREFR_StandIn*)thisObject)->FUN_00578a30("Open");
+            if (BGSOpenCloseForm::GetOpenState((TESObjectREFR*)thisObject) > BGSOpenCloseForm::OPEN_STATE_OPEN)
+                reinterpret_cast<TESObjectREFR*>(thisObject)->Activate(0, false, static_cast<TESObjectREFR*>(0), 1);
+            reinterpret_cast<TESObjectREFR*>(thisObject)->FUN_00578a30("Open");
         } else {
-            if (BGSOpenCloseForm::GetOpenState(thisObject) < BGSOpenCloseForm::OPEN_STATE_CLOSING)
-                ((TESObjectREFR_StandIn*)thisObject)->Activate(0, false, 0, 1);
-            ((TESObjectREFR_StandIn*)thisObject)->FUN_00578a30("Close");
+            if (BGSOpenCloseForm::GetOpenState((TESObjectREFR*)thisObject) < BGSOpenCloseForm::OPEN_STATE_CLOSING)
+                reinterpret_cast<TESObjectREFR*>(thisObject)->Activate(0, false, static_cast<TESObjectREFR*>(0), 1);
+            reinterpret_cast<TESObjectREFR*>(thisObject)->FUN_00578a30("Close");
         }
         ((FUN_00422aa0_shell*)((XActor*)thisObject)->GetExtra())->FUN_00422aa0();
     }
@@ -7356,282 +6515,9 @@ bool __cdecl FUN_005ced30(const ScriptParameter* parameters, const char* scriptD
 }  // namespace fnv_005ced30
 
 namespace fnv_005d0760 {
-class Actor : public TESObjectREFR {
-};
 
-struct VActor005d0760 {
-public:
-    virtual void a000();
-    virtual void a001();
-    virtual void a002();
-    virtual void a003();
-    virtual void a004();
-    virtual void a005();
-    virtual void a006();
-    virtual void a007();
-    virtual void a008();
-    virtual void a009();
-    virtual void a00a();
-    virtual void a00b();
-    virtual void a00c();
-    virtual void a00d();
-    virtual void a00e();
-    virtual void a00f();
-    virtual void a010();
-    virtual void a011();
-    virtual void a012();
-    virtual void a013();
-    virtual void a014();
-    virtual void a015();
-    virtual void a016();
-    virtual void a017();
-    virtual void a018();
-    virtual void a019();
-    virtual void a01a();
-    virtual void a01b();
-    virtual void a01c();
-    virtual void a01d();
-    virtual void a01e();
-    virtual void a01f();
-    virtual void a020();
-    virtual void a021();
-    virtual void a022();
-    virtual void a023();
-    virtual void a024();
-    virtual void a025();
-    virtual void a026();
-    virtual void a027();
-    virtual void a028();
-    virtual void a029();
-    virtual void a02a();
-    virtual void a02b();
-    virtual void a02c();
-    virtual void a02d();
-    virtual void a02e();
-    virtual void a02f();
-    virtual void a030();
-    virtual void a031();
-    virtual void a032();
-    virtual void a033();
-    virtual void a034();
-    virtual void a035();
-    virtual void a036();
-    virtual void a037();
-    virtual void a038();
-    virtual void a039();
-    virtual void a03a();
-    virtual void a03b();
-    virtual void a03c();
-    virtual void a03d();
-    virtual void a03e();
-    virtual void a03f();
-    virtual void a040();
-    virtual void a041();
-    virtual void a042();
-    virtual void a043();
-    virtual void a044();
-    virtual void a045();
-    virtual void a046();
-    virtual void a047();
-    virtual void a048();
-    virtual void a049();
-    virtual void a04a();
-    virtual void a04b();
-    virtual void a04c();
-    virtual void a04d();
-    virtual void a04e();
-    virtual void a04f();
-    virtual void a050();
-    virtual void a051();
-    virtual void a052();
-    virtual void a053();
-    virtual void a054();
-    virtual void a055();
-    virtual void a056();
-    virtual void a057();
-    virtual void a058();
-    virtual void a059();
-    virtual void a05a();
-    virtual void a05b();
-    virtual void a05c();
-    virtual void a05d();
-    virtual void a05e();
-    virtual void a05f();
-    virtual void a060();
-    virtual void a061();
-    virtual void a062();
-    virtual void a063();
-    virtual void a064();
-    virtual void a065();
-    virtual void a066();
-    virtual void a067();
-    virtual void a068();
-    virtual void a069();
-    virtual void a06a();
-    virtual void a06b();
-    virtual void a06c();
-    virtual void a06d();
-    virtual void a06e();
-    virtual void a06f();
-    virtual void a070();
-    virtual void a071();
-    virtual void a072();
-    virtual void a073();
-    virtual void a074();
-    virtual void a075();
-    virtual void a076();
-    virtual void a077();
-    virtual void a078();
-    virtual void a079();
-    virtual void a07a();
-    virtual void a07b();
-    virtual void a07c();
-    virtual void a07d();
-    virtual void a07e();
-    virtual void a07f();
-    virtual void a080();
-    virtual void a081();
-    virtual void a082();
-    virtual void a083();
-    virtual void a084();
-    virtual void a085();
-    virtual void a086();
-    virtual void a087();
-    virtual void a088();
-    virtual void a089();
-    virtual void a08a();
-    virtual void a08b();
-    virtual void a08c();
-    virtual void a08d();
-    virtual void a08e();
-    virtual void a08f();
-    virtual void a090();
-    virtual void a091();
-    virtual void a092();
-    virtual void a093();
-    virtual void a094();
-    virtual void a095();
-    virtual void a096();
-    virtual void a097();
-    virtual void a098();
-    virtual void a099();
-    virtual void a09a();
-    virtual void a09b();
-    virtual void a09c();
-    virtual void a09d();
-    virtual void a09e();
-    virtual void a09f();
-    virtual void a0a0();
-    virtual void a0a1();
-    virtual void a0a2();
-    virtual void a0a3();
-    virtual void a0a4();
-    virtual void a0a5();
-    virtual void a0a6();
-    virtual void a0a7();
-    virtual void a0a8();
-    virtual void a0a9();
-    virtual void a0aa();
-    virtual void a0ab();
-    virtual void a0ac();
-    virtual void a0ad();
-    virtual void a0ae();
-    virtual void a0af();
-    virtual void a0b0();
-    virtual void a0b1();
-    virtual void a0b2();
-    virtual void a0b3();
-    virtual void a0b4();
-    virtual void a0b5();
-    virtual void a0b6();
-    virtual void a0b7();
-    virtual void a0b8();
-    virtual void a0b9();
-    virtual void a0ba();
-    virtual void a0bb();
-    virtual void a0bc();
-    virtual void a0bd();
-    virtual void a0be();
-    virtual void a0bf();
-    virtual void a0c0();
-    virtual void a0c1();
-    virtual void a0c2();
-    virtual void a0c3();
-    virtual void a0c4();
-    virtual void a0c5();
-    virtual void a0c6();
-    virtual void a0c7();
-    virtual void a0c8();
-    virtual void a0c9();
-    virtual void a0ca();
-    virtual void a0cb();
-    virtual void a0cc();
-    virtual void a0cd();
-    virtual void a0ce();
-    virtual void a0cf();
-    virtual void a0d0();
-    virtual void a0d1();
-    virtual void a0d2();
-    virtual void a0d3();
-    virtual void a0d4();
-    virtual void a0d5();
-    virtual void a0d6();
-    virtual void a0d7();
-    virtual void a0d8();
-    virtual void a0d9();
-    virtual void a0da();
-    virtual void a0db();
-    virtual void a0dc();
-    virtual void a0dd();
-    virtual void a0de();
-    virtual void a0df();
-    virtual void a0e0();
-    virtual void a0e1();
-    virtual void a0e2();
-    virtual void a0e3();
-    virtual void a0e4();
-    virtual void a0e5();
-    virtual void a0e6();
-    virtual void a0e7();
-    virtual void a0e8();
-    virtual void a0e9();
-    virtual void a0ea();
-    virtual void a0eb();
-    virtual void a0ec();
-    virtual void a0ed();
-    virtual void a0ee();
-    virtual void a0ef();
-    virtual void a0f0();
-    virtual void a0f1();
-    virtual void a0f2();
-    virtual void a0f3();
-    virtual void a0f4();
-    virtual void a0f5();
-    virtual void a0f6();
-    virtual void a0f7();
-    virtual void a0f8();
-    virtual void a0f9();
-    virtual void a0fa();
-    virtual void a0fb();
-    virtual void a0fc();
-    virtual void a0fd();
-    virtual void a0fe();
-    virtual void a0ff();
-    virtual void a100();
-    virtual void a101();
-    virtual void a102();
-    virtual void a103();
-    virtual void a104();
-    virtual void a105();
-    virtual void a106();
-    virtual void a107();
-    virtual void a108();
-    virtual void a109();
-    virtual void a10a();
-    virtual void a10b();
-    virtual void a10c();
-    virtual void SetSlot434(bool);
-};
+
+
 struct VProc005d0760 {
 public:
     virtual void a000();
@@ -8092,9 +6978,9 @@ public:
     virtual void Slot71c(int);
 };
 struct TESLog005d0760 { void* GetLogDate(); };
-struct ActorState005d0760 { bool FUN_00437bd0(); };
+
 struct S_008ace10 { void FUN_008ace10(bool); };
-struct FUN_0087faa0_shell { void FUN_0087faa0(); };
+
 
 // @fnv 0x005d0760
 bool FUN_005d0760(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj,
@@ -8108,17 +6994,17 @@ bool FUN_005d0760(const ScriptParameter* paramInfo, const char* scriptData, TESO
         ::Actor* pActor = dynamic_cast< ::Actor*>(thisObj);
         if (pActor) {
             if (iFlag) {
-                ((VActor005d0760*)pActor)->SetSlot434(false);
-                if (!((ActorState005d0760*)pActor)->FUN_00437bd0() && ((TESLog005d0760*)pActor)->GetLogDate()) {
+                pActor->Unk_10D(0);
+                if (!pActor->FUN_00437bd0() && ((TESLog005d0760*)pActor)->GetLogDate()) {
                     ((VProc005d0760*)((TESLog005d0760*)pActor)->GetLogDate())->Slot614(0x800);
                     ((VProc005d0760*)((TESLog005d0760*)pActor)->GetLogDate())->Slot71c(0);
                 }
                 ((S_008ace10*)pActor)->FUN_008ace10(true);
-                ((FUN_0087faa0_shell*)pActor)->FUN_0087faa0();
+                ((ScriptActorActions*)pActor)->FUN_0087faa0();
                 if (((TESLog005d0760*)pActor)->GetLogDate())
                     ((VProc005d0760*)((TESLog005d0760*)pActor)->GetLogDate())->Slot338(-1.0f);
             } else {
-                if (((ActorState005d0760*)pActor)->FUN_00437bd0() && ((TESLog005d0760*)pActor)->GetLogDate()) {
+                if (pActor->FUN_00437bd0() && ((TESLog005d0760*)pActor)->GetLogDate()) {
                     ((VProc005d0760*)((TESLog005d0760*)pActor)->GetLogDate())->Slot614(0x800);
                     ((VProc005d0760*)((TESLog005d0760*)pActor)->GetLogDate())->Slot71c(0);
                 }
@@ -8162,7 +7048,7 @@ bool __cdecl FUN_005d1890(const ScriptParameter* parameters, const char* scriptD
 namespace fnv_005d3b90 {
 struct GlobalObject_0045cfe0 { int* Int(); };
 extern GlobalObject_0045cfe0 g_011c3ea4;
-struct Actor;
+
 struct TaskQueueInterface { static TaskQueueInterface* __cdecl GetInstance(); };
 void __cdecl FUN_0087a8b0(TaskQueueInterface*, int, Actor*, ...);
 void __cdecl FUN_005d3c20(TESObjectREFR*, float);
@@ -8190,7 +7076,7 @@ public:
     TESQuest** GetItem();
     TESQuestList* GetNext();
 };
-class DH : public TESDataHandler
+class DH
 {
 public:
     TESQuestList* GetTESQuestList();
@@ -8246,7 +7132,7 @@ bool __cdecl FUN_005d4870(const ScriptParameter* apParameters, const char* apCom
 }
 
 namespace fnv_005d4b90 {
-struct Actor;
+
 struct GlobalObject_0045cfe0 { int* Int(); };
 extern GlobalObject_0045cfe0 g_011c3ea4;
 struct TaskQueueInterface { static TaskQueueInterface* GetInstance(); };
@@ -8302,9 +7188,7 @@ bool __cdecl FUN_005d9170(const ScriptParameter* parameters, const char* scriptD
 }  // namespace fnv_005d9170
 
 namespace fnv_005d9670 {
-struct TESClass {
-    bool IsTagSkill(ActorValue::Index);
-};
+
 struct PC7d {
     TESClass* GetClass();
 };
@@ -8332,13 +7216,11 @@ bool FUN_005d9670(const ScriptParameter* parameters, const char* scriptData,
 }
 }  // namespace fnv_005d9670
 
-namespace fnv_005d9810 {
-class TESBoundObject;
-class TESWorldSpace;
-class RecipeCraftingInfo;
 class BGSPrimitive;
-class BGSEncounterZone;
-struct NiPoint3;
+struct BGSEncounterZone;
+namespace fnv_005d9810 {
+
+class RecipeCraftingInfo;
 struct ShellH;
 
 struct ItemVt {
@@ -8396,18 +7278,15 @@ struct FUN_008d43a0 { char m_data[0x1c0]; FUN_008d43a0(); };
 struct FUN_00567dd0_shell { void FUN_00567dd0(BGSEncounterZone* zone); };
 struct XActor { ShellH* GetExtra() const; };
 struct FUN_00421540_shell { void FUN_00421540(int); };
-struct BSOcclusionPlane { int GetCullResult() const; };
+
 struct Fn575690 { void FUN_00575690(void*); };
-struct FUN_0047cdb0_shell { bool FUN_0047cdb0(); };
-struct TESActorBaseDataX { void SetTemplateReference(TESObjectREFR*); };
 struct TESObjectCELL_Ext { bool IsInterior(); };
-struct ActorS { TESWorldSpace* GetParentWorldSpace(); };
-struct TESRecipe { RecipeCraftingInfo* GetData(); };
-struct TESObject { unsigned int GetNext(); };
+
+
 struct DH { TESObjectREFR* PlaceReferenceAtLocation(TESBoundObject*, const NiPoint3&, const NiPoint3&, TESObjectCELL*, TESWorldSpace*, TESObjectREFR*, BGSPrimitive*, void*); };
 extern DH* g_dataHandler;
-struct FUN_0046a010_shell { void FUN_0046a010(bool); };
-struct TESSound { unsigned int Deallocate(); };
+
+
 void CopyIdentifierBitsToValue(const unsigned int&, double&);
 
 // @fnv 0x005d9810
@@ -8458,15 +7337,15 @@ bool __cdecl FUN_005d9810(const ScriptParameter* apParameters, const char* apCom
             pplacedref->SetFlag(0x40000000);
             pplacedref->SetParentCell(((BSOcclusionPlane*)apRefObject)->GetCullResult());
             ((Fn575690*)pplacedref)->FUN_00575690(pbase);
-            if (((FUN_0047cdb0_shell*)((char*)pbase + 0x30))->FUN_0047cdb0())
-                ((TESActorBaseDataX*)((char*)pbase + 0x30))->SetTemplateReference((TESObjectREFR*)pplacedref);
+            if (((TESActorBaseData*)((char*)pbase + 0x30))->GetUsesLeveledTemplate())
+                ((TESActorBaseData*)((char*)pbase + 0x30))->SetTemplateReference((TESObjectREFR*)pplacedref);
             pint = (TESObjectCELL*)((BSOcclusionPlane*)apRefObject)->GetCullResult();
             if (pint && !((TESObjectCELL_Ext*)pint)->IsInterior())
                 pint = 0;
-            pworld = ((ActorS*)apRefObject)->GetParentWorldSpace();
+            pworld = ((Actor*)apRefObject)->GetParentWorldSpace();
             g_dataHandler->PlaceReferenceAtLocation((TESBoundObject*)((TESObject*)pplacedref)->GetNext(), *((RefVt*)apRefObject)->GetPos(),
                 *(NiPoint3*)((TESRecipe*)apRefObject)->GetData(), pint, pworld, (TESObjectREFR*)pplacedref, 0, 0);
-            ((FUN_0046a010_shell*)pplacedref)->FUN_0046a010(false);
+            ((Actor*)pplacedref)->FUN_0046a010(false);
             iid = ((TESSound*)pplacedref)->Deallocate();
             CopyIdentifierBitsToValue(iid, afReturnValue);
         }
@@ -8487,7 +7366,7 @@ struct FUN_004846e0_shell { void FUN_004846e0(bool); };
 struct FUN_004759a0_First;
 FUN_004759a0_First* __cdecl FUN_00475400(void*);
 struct FUN_00576100_Class { bool FUN_00576100(); };
-struct TESObject { unsigned int GetNext(); };
+
 
 // @fnv 0x005daae0
 bool FUN_005daae0(const ScriptParameter* parameters, const char* scriptData,
@@ -8535,10 +7414,7 @@ bool __cdecl FUN_005dc3b0(const ScriptParameter* parameters, const char* scriptD
 }
 
 namespace fnv_005de920 {
-struct PlayerCharacter : TESObjectREFR {
-    void FUN_00969e90(int, int);
-    void FUN_005de9b0();
-};
+
 extern PlayerCharacter* _g_thePlayer;
 void _FNV_Warning(const char*);
 
@@ -8553,9 +7429,9 @@ bool FUN_005de920(const ScriptParameter* parameters, const char* scriptData,
                      container, script, locals, &value))
         return false;
     if (_g_thePlayer && value >= 0 && value <= 1) {
-        _g_thePlayer->FUN_00969e90(value, 0);
+        reinterpret_cast<ScriptPlayerActions*>(_g_thePlayer)->FUN_00969e90(value, 0);
         if (value != 1)
-            _g_thePlayer->FUN_005de9b0();
+            reinterpret_cast<ScriptPlayerActions*>(_g_thePlayer)->FUN_005de9b0();
     } else {
         _FNV_Warning("Attempting to set hardcore on an invalid player!");
         return false;
@@ -8566,8 +7442,8 @@ bool FUN_005de920(const ScriptParameter* parameters, const char* scriptData,
 
 namespace fnv_005df930 {
 struct _Immortalize { static void* StandardLibrarySingletonObject(); };
-struct BSSystemUtility { void* QDLCUtility(); };
-struct PathingRequest { void* GetOrigin(); };
+
+
 struct BSSimpleListTESRaceSize { unsigned int GetSize(); };
 struct ContentMountRecord;
 extern "C" {
@@ -8585,9 +7461,9 @@ bool __cdecl FUN_005df930(const ScriptParameter* apParameters, const char* apScr
         return false;
     }
     BSSimpleListTESRaceSize* list =
-        static_cast<BSSimpleListTESRaceSize*>(
+        reinterpret_cast<BSSimpleListTESRaceSize*>(
             static_cast<PathingRequest*>(
-                static_cast<BSSystemUtility*>(_Immortalize::StandardLibrarySingletonObject())->QDLCUtility())
+                static_cast<const BSSystemUtility*>(_Immortalize::StandardLibrarySingletonObject())->QDLCUtility())
                 ->GetOrigin());
     if (list) {
         afResult = list->GetSize();
@@ -8601,10 +7477,10 @@ bool __cdecl FUN_005df930(const ScriptParameter* apParameters, const char* apScr
 }
 }  // namespace fnv_005df930
 
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
 namespace fnv_005dfa20 {
 struct FormFlagRecord;
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
 struct ScriptDefinition;
 struct ScriptParameter {
     char* m_pTypeString;
@@ -8613,38 +7489,7 @@ struct ScriptParameter {
     char _pad_9[3];
 };
 typedef char _sizecheck_SCRIPT_PARAMETER[sizeof(ScriptParameter) == 12 ? 1 : -1];
-struct ScriptLocals {
-    void ClearActionFlags();
-    bool GetLocalData(TESForm*, unsigned int);
-    void ClearActionFlagsForForm(TESForm*);
-    bool CheckActionFlag(TESForm*, unsigned int);
-    FormFlagRecord* GetActionEntry(TESForm*, bool);
-    void Save(ScriptHeaderData*);
-    void ClearActionList();
-    void InitializeActionList();
-    void CopyActionListFrom(ScriptLocals*);
-    void* GetActionList();
-    void ResetFormData(Script*);
-    void SetVariable(unsigned int, double);
-    double GetVariable(unsigned int, Script*);
-    void* GetLocalList();
-    bool IsReferenceVariable(unsigned int);
-    unsigned short GetSaveSize();
-    void SaveGame(BGSSaveFormBuffer*);
-    void SaveGame();
-    void LoadGame(BGSLoadFormBuffer*);
-    void LoadGame();
-    void Revert(BGSLoadFormBuffer*);
-    void Revert();
-    static void ProcessPendingTasks();
-    void* __vecDelDtor(unsigned int);
-    Script* m_pOwnerScript;
-    char m_cActionFlags;
-    char _pad_5[3];
-    void* m_pLocalVariableList;
-    void* m_pVariableList;
-    ScriptDefinition* m_pExtendedLocals;
-};
+
 typedef char _sizecheck_ScriptLocals[sizeof(ScriptLocals) == 20 ? 1 : -1];
 struct ContentMountRecord {
     bool IsMounted();
@@ -8666,13 +7511,13 @@ namespace std {
     class StandardLibrarySingletonObject;
     template<class T> T& _Immortalize();
 }
-struct PathingRequest;
-struct BSSystemUtility { PathingRequest* QDLCUtility(); };
+
+
 struct PkgListStub {
     ContentMountRecord** _ref_006815c0();
 };
 typedef BSSimpleList<ContentMountRecord*> PkgList;
-struct PathingRequest { PkgList* GetOrigin(); };
+
 struct FUN_00b008d0_StandIn { const wchar_t* FUN_00b008d0(); };
 struct FUN_00b008e0_class { const char* FUN_00b008e0(); };
 int _sprintf_s(char*, unsigned int, const char*, ...);
@@ -8690,7 +7535,7 @@ bool FUN_005dfa20(const ScriptParameter* apParameters, const char* apCompiledPar
         *afReturnValue = 0;
         return false;
     }
-    list = ((BSSystemUtility*)&std::_Immortalize<std::StandardLibrarySingletonObject>())->QDLCUtility()->GetOrigin();
+    list = reinterpret_cast<PkgList*>(((const BSSystemUtility*)&std::_Immortalize<std::StandardLibrarySingletonObject>())->QDLCUtility()->GetOrigin());
     _sprintf_s(tmp, 200, "Checking for DLC package '%s'", pName);
     while (list)
     {
@@ -8716,9 +7561,11 @@ bool FUN_005dfa20(const ScriptParameter* apParameters, const char* apCompiledPar
 namespace fnv_005b4550 {
 struct SettingString { char* GetString(); };
 struct FUN_005a9460_This { unsigned int FUN_005a9460(); };
-struct Interface { static bool __cdecl ShowButtonDialog(const char*, const char*, const char*, void (__cdecl*)(void), int, int, float, float, ...); };
-struct TESSaveLoadGame { unsigned int FUN_005a9460(); };
-extern TESSaveLoadGame* g_TESSaveLoadGame;
+// Exe 0x005b4550: unit-local Interface view; declarations and layout are preserved.
+struct TesscriptfunctionsInterfaceView { static bool __cdecl ShowButtonDialog(const char*, const char*, const char*, void (__cdecl*)(void), int, int, float, float, ...); };
+// Call surface of TESSaveLoadGame; the shared header cannot be read in this unit (its own layout_support template copies).
+struct TESSaveLoadGameApi { unsigned int FUN_005a9460(); };
+extern TESSaveLoadGameApi* g_TESSaveLoadGame;
 extern SettingString g_011d38b8;
 void __cdecl FUN_0095ee60();
 void __cdecl FUN_0095ee70();
@@ -8729,15 +7576,14 @@ bool FUN_005b4550(const ScriptParameter* params, const char* script, TESObjectRE
     if (!ExtractArgs(params, script, &time, form1, form2, scriptPtr, locals, buffer))
         return false;
     if (g_TESSaveLoadGame->FUN_005a9460())
-        Interface::ShowButtonDialog(buffer, 0, 0, FUN_0095ee60, 1, 0, 0.0f, 0.0f, g_011d38b8.GetString(), 0);
+        TesscriptfunctionsInterfaceView::ShowButtonDialog(buffer, 0, 0, FUN_0095ee60, 1, 0, 0.0f, 0.0f, g_011d38b8.GetString(), 0);
     else
-        Interface::ShowButtonDialog(buffer, 0, 0, FUN_0095ee70, 1, 0, 0.0f, 0.0f, g_011d38b8.GetString(), 0);
+        TesscriptfunctionsInterfaceView::ShowButtonDialog(buffer, 0, 0, FUN_0095ee70, 1, 0, 0.0f, 0.0f, g_011d38b8.GetString(), 0);
     return true;
 }
 }  // namespace fnv_005b4550
 
 namespace fnv_005b4b20 {
-struct Script_0059bfa0 { static bool FUN_0059bfa0(TESObjectREFR*, void*, void*, double&); };
 
 // @fnv 0x005b4b20
 bool FUN_005b4b20(const ScriptParameter* params, const char* scriptData, TESObjectREFR* thisObject, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& opcodeOffset)
@@ -8745,12 +7591,12 @@ bool FUN_005b4b20(const ScriptParameter* params, const char* scriptData, TESObje
     TESObjectREFR* target = 0;
     if (!ExtractArgs(params, scriptData, &opcodeOffset, thisObject, container, script, locals, &target))
         return false;
-    return Script_0059bfa0::FUN_0059bfa0(thisObject, target, 0, result);
+    return GetDistanceCondition(thisObject, target, 0, result);
 }
 }  // namespace fnv_005b4b20
 
 namespace fnv_005b5760 {
-struct TESObject { unsigned int GetNext(); };
+
 extern TESObject* _g_thePlayer;
 struct FUN_005a2e20 { static bool Call(TESObjectREFR*, void*, void*, double*); };
 // @fnv 0x005b5760
@@ -8858,10 +7704,7 @@ bool FUN_005b71b0(const ScriptParameter* p, const char* s, TESObjectREFR* a, TES
 }
 
 namespace fnv_005b7250 {
-struct BSOcclusionPlane
-{
-    int GetCullResult() const;
-};
+
 
 extern BSOcclusionPlane* _g_thePlayer;
 void _DebugLog(const char*);
@@ -8895,11 +7738,6 @@ bool FUN_005b7420()
 }
 
 namespace fnv_005b7660 {
-class Sky
-{
-public:
-    static Sky* GetInstance();
-};
 class FUN_0063d0e0
 {
 public:
@@ -8917,31 +7755,21 @@ bool FUN_005b7660(const ScriptParameter* parameters, const char* scriptData, TES
 }
 }  // namespace fnv_005b7660
 
-class TESImageSpaceModifier;
-class NiAVObject;
-struct ImageSpaceModifierInstanceForm
-{
-    TESImageSpaceModifier* modifier;
-    float strength;
-    static ImageSpaceModifierInstanceForm* Trigger(TESImageSpaceModifier*, float, NiAVObject*);
-};
+
 // @fnv 0x005b76f0
 bool FUN_005b76f0(const ScriptParameter* params, const char* scriptData, TESObjectREFR* thisObject, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& opcodeOffset)
 {
-    ImageSpaceModifierInstanceForm form;
+    struct { TESImageSpaceModifier* modifier; float strength; } form;
     form.modifier = 0;
     form.strength = 1.0;
     if (!ExtractArgs(params, scriptData, &opcodeOffset, thisObject, container, script, locals, &form.modifier, &form.strength))
         return false;
-    ImageSpaceModifierInstanceForm::Trigger(form.modifier, form.strength, 0);
+    ImageSpaceModifierInstanceForm::Trigger((::TESImageSpaceModifier*)form.modifier, form.strength, 0);
     return true;
 }
 
 namespace fnv_005b7760 {
-struct TESImageSpaceModifier;
-struct ImageSpaceModifierInstanceForm {
-    static void Stop(TESImageSpaceModifier*);
-};
+
 
 // @fnv 0x005b7760
 bool FUN_005b7760(const ScriptParameter* a, const char* b,
@@ -8952,7 +7780,7 @@ bool FUN_005b7760(const ScriptParameter* a, const char* b,
     float s = 1.0f;
     if (!ExtractArgs(a, b, &h, c, d, e, f, &m, &s))
         return false;
-    ImageSpaceModifierInstanceForm::Stop(m);
+    ImageSpaceModifierInstanceForm::Stop((::TESImageSpaceModifier*)m);
     return true;
 }
 }  // namespace fnv_005b7760
@@ -9001,7 +7829,6 @@ bool FUN_005b9400()
 }  // namespace fnv_005b9400
 
 namespace fnv_005b97f0 {
-struct NiAdditionalGeometryData { static void* __cdecl GetShadowSceneNodeForIndex(int); };
 unsigned int __cdecl FUN_0045c670();
 struct FUN_005b9870_This { void FUN_005b9870(); };
 extern "C" void __cdecl _DebugLog(const char*, ...);
@@ -9022,10 +7849,7 @@ bool FUN_005b97f0()
 }
 }  // namespace fnv_005b97f0
 
-struct ImageSpaceManager
-{
-    bool FUN_005b9f50(float);
-};
+
 ImageSpaceManager* FUN_004e3270();
 
 // @fnv 0x005b9ef0
@@ -9091,20 +7915,14 @@ bool __cdecl FUN_005ba6d0()
 }
 }  // namespace fnv_005ba6d0
 
-struct Setting_S {
-    float* Float();
-};
-struct GlobalObject_0044f440 {
-    float value;
-};
-extern GlobalObject_0044f440 g_011e090c;
+extern Setting g_011e090c;
 // @fnv 0x005bb870
 bool FUN_005bb870(const ScriptParameter* parameters, const char* scriptData, TESObjectREFR* thisObject, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& opcodeOffset)
 {
     float argument;
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container, script, locals, &argument))
         return false;
-    *reinterpret_cast<Setting_S*>(&g_011e090c)->Float() = argument;
+    *g_011e090c.Float() = argument;
     return true;
 }
 
@@ -9270,7 +8088,7 @@ bool FUN_005c7280(const ScriptParameter* parameters, const char* scriptData,
     return true;
 }
 
-struct TESWeather { int pad; };
+
 struct FUN_0059ebb0_stub { static bool __cdecl FUN_0059ebb0(TESObjectREFR*, TESWeather*, unsigned int, double&); };
 // @fnv 0x005c7430
 bool FUN_005c7430(const ScriptParameter* apParameters, const char* apCompiledParams, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
@@ -9295,7 +8113,7 @@ bool __cdecl FUN_005c74d0(const ScriptParameter* apParameters, const char* apCom
     FUN_0059ed30(apRefObject, reinterpret_cast<void*>(pactor), 0, afReturnValue);
 }
 
-class PlayerCharacter;
+
 bool __cdecl FUN_0059f180(PlayerCharacter*, void*, void*, double&);
 
 // @fnv 0x005c7730
@@ -9325,7 +8143,7 @@ bool __cdecl FUN_005c7950(const ScriptParameter* parameters, const char* scriptD
 }
 
 namespace fnv_005c7a30 {
-class PlayerCharacter;
+
 extern PlayerCharacter* _g_thePlayer;
 bool __cdecl FUN_0059f180(PlayerCharacter*, void*, void*, double&);
 // @fnv 0x005c7a30
@@ -9338,12 +8156,12 @@ bool FUN_005c7a30(const ScriptParameter* parameters, const char* scriptData,
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container,
                      script, locals, &form))
         return false;
-    return FUN_0059f180(_g_thePlayer, form, 0, result);
+    return fnv_005c7a30::FUN_0059f180(_g_thePlayer, form, 0, result);
 }
 }  // namespace fnv_005c7a30
 
 namespace fnv_005c7a90 {
-class PlayerCharacter;
+
 extern PlayerCharacter* _g_thePlayer;
 bool __cdecl FUN_0059f240(PlayerCharacter*, void*, void*, double&);
 // @fnv 0x005c7a90
@@ -9448,7 +8266,7 @@ bool FUN_005ca8d0(const ScriptParameter* parameters, const char* scriptData, TES
     unsigned int formID = 0;
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject, container, script, locals, &formID))
         return false;
-    Script::CheckFlagFunction(0x20, thisObject, reinterpret_cast<TESForm*>(formID), locals, result);
+    Script::CheckFlagFunction(0x20, thisObject, reinterpret_cast<SharedForm*>(formID), locals, result);
     return true;
 }
 
@@ -9528,7 +8346,7 @@ bool FUN_005ce260(const ScriptParameter* parameters, const char* scriptData,
 }
 
 namespace fnv_005ce5c0 {
-struct TESSound { unsigned int Deallocate(); };
+
 void __cdecl _DebugLog(const char*, ...);
 extern __declspec(thread) bool DebugLogEnabled;
 void __cdecl CopyIdentifierBitsToValue(unsigned int const&, double&);
@@ -9555,10 +8373,6 @@ struct FUN_00569b80_shell
     TESObjectREFR* GetLinkedRef();
 };
 
-struct TESSound
-{
-    unsigned int Deallocate();
-};
 
 struct FUN_005ce6b0_Script
 {
@@ -9908,7 +8722,7 @@ bool FUN_005d9500(const ScriptParameter* parameters, const char* scriptData,
 
 namespace fnv_005d9730 {
 struct FUN_0089f4e0_shell { TESObjectREFR* FUN_0089f4e0(); };
-struct TESSound { unsigned int Deallocate(); };
+
 extern TESObjectREFR* g_thePlayer;
 extern void _DebugLog(const char*, ...);
 __declspec(thread) bool g_bDebugLogEnabled;
@@ -9930,7 +8744,7 @@ bool FUN_005d9730(const ScriptParameter* apParameters, const char* apCompiledPar
 }
 }  // namespace fnv_005d9730
 
-struct FaceGenMatrix { ~FaceGenMatrix(); };
+
 void __cdecl _Deallocate(void*);
 void __stdcall FUN_0065ee50_Helper(void*, unsigned int, int, void (__cdecl*)(void));
 void __cdecl FUN_00449680(void);
@@ -9947,7 +8761,7 @@ void* __thiscall FUN_005d9ff0_Class::FUN_005d9ff0(unsigned int flags)
             _Deallocate((char*)this - 4);
         return (char*)this - 4;
     }
-    ((FaceGenMatrix*)this)->FaceGenMatrix::~FaceGenMatrix();
+    ((FaceGenMatrix<float>*)this)->FaceGenMatrix<float>::~FaceGenMatrix();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -9972,7 +8786,7 @@ bool __cdecl FUN_005da180(const ScriptParameter* parameters, const char* scriptD
     return true;
 }
 
-struct TutorialMenu { static void Create(unsigned int, unsigned int); };
+
 bool __cdecl FUN_005d4a40(void);
 
 // @fnv 0x005da630
@@ -10002,7 +8816,6 @@ bool FUN_005daa40(const ScriptParameter* parameters, const char* scriptData,
     FUN_005a5020(reference, target, 0, result);
 }
 
-class Menu;
 struct FUN_00758a80_shell { void FUN_00758a80(); };
 struct Tile_ { Menu* GetMenu(); };
 Menu* __cdecl FindMenuById(int);
@@ -10040,10 +8853,11 @@ bool FUN_005dc530()
 }  // namespace fnv_005dc530
 
 namespace fnv_005dd960 {
-struct BGSSaveLoadUI {
+// Call surface of BGSSaveLoadUIApi; the shared header cannot be read in this unit (its own layout_support template copies).
+struct BGSSaveLoadUIApi {
     bool FUN_00a26090(char*);
 };
-BGSSaveLoadUI* __cdecl FUN_00a25920(void);
+BGSSaveLoadUIApi* __cdecl FUN_00a25920(void);
 // @fnv 0x005dd960
 bool FUN_005dd960(const ScriptParameter* parameters, const char* scriptData, TESObjectREFR* thisObject, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& opcodeOffset)
 {
@@ -10108,13 +8922,9 @@ bool FUN_005de1d0(const ScriptParameter* params, const char* scriptData, TESObje
 }
 
 namespace fnv_005de2d0 {
-class TESWorldSpace;
-class ActorS
-{
-public:
-    TESWorldSpace* GetParentWorldSpace();
-};
-extern ActorS* _g_thePlayer;
+
+
+extern Actor* _g_thePlayer;
 void FUN_00709d20(int);
 // @fnv 0x005de2d0
 bool FUN_005de2d0(const ScriptParameter* parameters, const char* scriptData,
@@ -10122,11 +8932,11 @@ bool FUN_005de2d0(const ScriptParameter* parameters, const char* scriptData,
     Script* script, ScriptLocals* locals, double& result,
     unsigned int& opcodeOffset)
 {
-    ActorS* actor = 0;
+    Actor* actor = 0;
     if (!ExtractArgs(parameters, scriptData, &opcodeOffset, thisObject,
             container, script, locals, &actor))
         return false;
-    *(ActorS**)((char*)_g_thePlayer + 0x604) = actor;
+    *(Actor**)((char*)_g_thePlayer + 0x604) = actor;
     if (actor && actor->GetParentWorldSpace())
         FUN_00709d20((int)actor->GetParentWorldSpace());
     return true;
@@ -10237,15 +9047,7 @@ FUN_008783c0::FUN_008783c0(const char* path) : file(path, 1, 2, false)
 }
 
 namespace fnv_005b9540 {
-enum Sky__SKY_MODE { SKY_OFF = 0, SKY_ON = 1, SKY_AUTO = 2, SKY_DISABLED = 3 };
-class TES {
-public:
-    void* GetLogDate();
-};
-class Sky {
-public:
-    void SetMode(Sky__SKY_MODE);
-};
+
 struct FUN_00455400_cell {
     bool FUN_00454b10();
 };
@@ -10262,14 +9064,14 @@ bool FUN_005b9540()
     DAT_011cae45 ^= 1;
     if (g_TES) {
         if (DAT_011cae45)
-            reinterpret_cast<Sky*>(reinterpret_cast<TES*>(g_TES)->GetLogDate())->SetMode(SKY_OFF);
+            reinterpret_cast<Sky*>(reinterpret_cast<TES*>(g_TES)->GetLogDate())->SetMode(static_cast<::Sky::SKY_MODE>(Sky::SM_NONE));
         else if (reinterpret_cast<CP_008c48d0*>(g_TES)->GetPrevPath()) {
             if (reinterpret_cast<FUN_00455400_cell*>(reinterpret_cast<CP_008c48d0*>(g_TES)->GetPrevPath())->FUN_00454b10())
-                reinterpret_cast<Sky*>(reinterpret_cast<TES*>(g_TES)->GetLogDate())->SetMode(SKY_AUTO);
+                reinterpret_cast<Sky*>(reinterpret_cast<TES*>(g_TES)->GetLogDate())->SetMode(static_cast<::Sky::SKY_MODE>(Sky::SM_FAKEEXTERIOR));
             else
-                reinterpret_cast<Sky*>(reinterpret_cast<TES*>(g_TES)->GetLogDate())->SetMode(SKY_ON);
+                reinterpret_cast<Sky*>(reinterpret_cast<TES*>(g_TES)->GetLogDate())->SetMode(static_cast<::Sky::SKY_MODE>(Sky::SM_INTERIOR));
         } else
-            reinterpret_cast<Sky*>(reinterpret_cast<TES*>(g_TES)->GetLogDate())->SetMode(SKY_DISABLED);
+            reinterpret_cast<Sky*>(reinterpret_cast<TES*>(g_TES)->GetLogDate())->SetMode(static_cast<::Sky::SKY_MODE>(Sky::SM_FULL));
     }
     if (g_tls[0x268])
         _DebugLog("Sky -> %s", DAT_011cae45 ? "Off" : "On");
@@ -10279,9 +9081,9 @@ bool FUN_005b9540()
 
 extern int _data_011c16bc;
 int __cdecl _sscanf(const char*, const char*, ...);
-struct FUN_00485b60 { void* GetFile(int); };
 void __cdecl _ref_00485d50(unsigned int*, void*);
-struct NavMeshObstacleManager { static NavMeshObstacleManager* GetSingleton(); };
+// Call surface of NavMeshObstacleManager; the shared header cannot be read in this unit (its own layout_support template copies).
+struct NavMeshObstacleManagerApi { static NavMeshObstacleManagerApi* GetSingleton(); };
 struct FUN_006c1150_shell { void FUN_006c1150(int*); };
 
 // @fnv 0x005bd240
@@ -10294,19 +9096,18 @@ bool FUN_005bd240(const ScriptParameter* params, const char* script, TESObjectRE
     _sscanf(buffer, "%x", &id);
     if (id)
     {
-        if (owner && ((FUN_00485b60*)owner)->GetFile(-1))
-            _ref_00485d50(&id, ((FUN_00485b60*)owner)->GetFile(-1));
-        ((FUN_006c1150_shell*)NavMeshObstacleManager::GetSingleton())->FUN_006c1150((int*)id);
+        if (owner && ((TESForm*)owner)->GetFile(-1))
+            _ref_00485d50(&id, ((TESForm*)owner)->GetFile(-1));
+        ((FUN_006c1150_shell*)NavMeshObstacleManagerApi::GetSingleton())->FUN_006c1150((int*)id);
     }
     return true;
 }
 
 namespace fnv_005bd300 {
-struct FileX;
-struct FUN_00485b60 { FileX* GetFile(int); };
-struct NavMeshObstacleManager { static NavMeshObstacleManager* GetSingleton(); };
+// Call surface of NavMeshObstacleManagerApi; the shared header cannot be read in this unit (its own layout_support template copies).
+struct NavMeshObstacleManagerApi { static NavMeshObstacleManagerApi* GetSingleton(); };
 struct NavMeshObstacleHelper { void FUN_006c1130(int); };
-extern int _ref_00485d50(int*, FileX*);
+extern int _ref_00485d50(int*, TESFile*);
 extern int _sscanf(char*, const char*, ...);
 
 // @fnv 0x005bd300
@@ -10321,12 +9122,12 @@ bool FUN_005bd300(const ScriptParameter* parameters, const char* scriptData, TES
     {
         if (script)
         {
-            if (((FUN_00485b60*)script)->GetFile(-1))
+            if (((TESForm*)script)->GetFile(-1))
             {
-                _ref_00485d50(&formID, ((FUN_00485b60*)script)->GetFile(-1));
+                _ref_00485d50(&formID, ((TESForm*)script)->GetFile(-1));
             }
         }
-        ((NavMeshObstacleHelper*)NavMeshObstacleManager::GetSingleton())->FUN_006c1130(formID);
+        ((NavMeshObstacleHelper*)NavMeshObstacleManagerApi::GetSingleton())->FUN_006c1130(formID);
     }
     return true;
 }
@@ -10357,8 +9158,7 @@ bool FUN_005c81f0(const ScriptParameter* pParams, const char* pScriptData, TESOb
 }
 
 namespace fnv_005d5560 {
-struct GameTimerRecord { void SetGlobalTimeMultiplier(float, bool); };
-struct BSAudioManager { static BSAudioManager& GetRandomGenerator(); };
+
 struct FUN_005d5610_Class { void FUN_005d5610(unsigned char); };
 struct DebugLog { static void _DebugLog(const char* format, ...); };
 extern GameTimerRecord g_timeGlobal;
@@ -10380,10 +9180,7 @@ bool FUN_005d5560(const ScriptParameter* apParameters, const char* apCompiledPar
 }  // namespace fnv_005d5560
 
 namespace fnv_005d8660 {
-struct NiAVObject
-{
-    bool FUN_00456610();
-};
+
 struct LodObject : NiAVObject
 {
     void SetAppCulled(bool);
@@ -10395,10 +9192,6 @@ struct LightTarget
 struct VATS
 {
     NiAVObject* FUN_005d8710();
-};
-struct NiAdditionalGeometryData
-{
-    static NiAVObject* __cdecl GetShadowSceneNodeForIndex(int);
 };
 struct FUN_00b5ddb0_self
 {
@@ -10434,13 +9227,7 @@ namespace fnv_005db1b0 {
 struct Descriptor {
     const char* FUN_00511840();
 };
-struct TESSound : Descriptor {
-    const char* FUN_00511840();
-};
-struct BSAudio {
-    static BSAudio* GetSingleton();
-    void Precache(const char*, unsigned int, void*);
-};
+
 void FUN_005db260(TESSound*);
 
 // @fnv 0x005db1b0
@@ -10454,7 +9241,7 @@ bool FUN_005db1b0(const ScriptParameter* apScriptParameters, const char* apScrip
             BSAudio::GetSingleton()->Precache(SoundAssetTmp->FUN_00511840(), 0x20000121, SoundAssetTmp);
             BSAudio::GetSingleton()->Precache(SoundAssetTmp->FUN_00511840(), 0x20000121, SoundAssetTmp);
             BSAudio::GetSingleton()->Precache(SoundAssetTmp->FUN_00511840(), 0x20000121, SoundAssetTmp);
-            FUN_005db260(SoundAssetTmp);
+            fnv_005db1b0::FUN_005db260(SoundAssetTmp);
         }
     }
     return true;
@@ -10576,11 +9363,7 @@ bool FUN_005b5690(const ScriptParameter* scriptParameter, const char* formatStri
 }  // namespace fnv_005b5690
 
 namespace fnv_005b57e0 {
-class TESObject
-{
-public:
-    unsigned int GetNext();
-};
+
 
 class XActor
 {
@@ -10634,7 +9417,7 @@ bool FUN_005b57e0(const ScriptParameter* parameter, const char* functionName,
 
     if (formID == 0)
     {
-        formID = _g_thePlayer->GetNext();
+        formID = reinterpret_cast<unsigned int>(_g_thePlayer->GetNext());
     }
 
     if (object != 0)
@@ -10649,106 +9432,7 @@ bool FUN_005b57e0(const ScriptParameter* parameter, const char* functionName,
 }
 }  // namespace fnv_005b57e0
 
-struct FUN_005b58d0_REFR
-{
-    virtual void V0() {}
-    virtual void V1() {}
-    virtual void V2() {}
-    virtual void V3() {}
-    virtual void V4() {}
-    virtual void V5() {}
-    virtual void V6() {}
-    virtual void V7() {}
-    virtual void V8() {}
-    virtual void V9() {}
-    virtual void V10() {}
-    virtual void V11() {}
-    virtual void V12() {}
-    virtual void V13() {}
-    virtual void V14() {}
-    virtual void V15() {}
-    virtual void V16() {}
-    virtual void V17() {}
-    virtual void V18() {}
-    virtual void V19() {}
-    virtual void V20() {}
-    virtual void V21() {}
-    virtual void V22() {}
-    virtual void V23() {}
-    virtual void V24() {}
-    virtual void V25() {}
-    virtual void V26() {}
-    virtual void V27() {}
-    virtual void V28() {}
-    virtual void V29() {}
-    virtual void V30() {}
-    virtual void V31() {}
-    virtual void V32() {}
-    virtual void V33() {}
-    virtual void V34() {}
-    virtual void V35() {}
-    virtual void V36() {}
-    virtual void V37() {}
-    virtual void V38() {}
-    virtual void V39() {}
-    virtual void V40() {}
-    virtual void V41() {}
-    virtual void V42() {}
-    virtual void V43() {}
-    virtual void V44() {}
-    virtual void V45() {}
-    virtual void V46() {}
-    virtual void V47() {}
-    virtual void V48() {}
-    virtual void V49() {}
-    virtual void V50() {}
-    virtual void V51() {}
-    virtual void V52() {}
-    virtual void V53() {}
-    virtual void V54() {}
-    virtual void V55() {}
-    virtual void V56() {}
-    virtual void V57() {}
-    virtual void V58() {}
-    virtual void V59() {}
-    virtual void V60() {}
-    virtual void V61() {}
-    virtual void V62() {}
-    virtual void V63() {}
-    virtual void V64() {}
-    virtual void V65() {}
-    virtual void V66() {}
-    virtual void V67() {}
-    virtual void V68() {}
-    virtual void V69() {}
-    virtual void V70() {}
-    virtual void V71() {}
-    virtual void V72() {}
-    virtual void V73() {}
-    virtual void V74() {}
-    virtual void V75() {}
-    virtual void V76() {}
-    virtual void V77() {}
-    virtual void V78() {}
-    virtual void V79() {}
-    virtual void V80() {}
-    virtual void V81() {}
-    virtual void V82() {}
-    virtual void V83() {}
-    virtual void V84() {}
-    virtual void V85() {}
-    virtual void V86() {}
-    virtual void V87() {}
-    virtual void V88() {}
-    virtual void V89() {}
-    virtual void V90() {}
-    virtual void V91() {}
-    virtual void V92() {}
-    virtual void V93() {}
-    virtual void V94() {}
 
-    virtual void Action(int, int, int, int, int, int, int, int, int, int) {}
-};
 
 // @fnv 0x005b58d0
 bool FUN_005b58d0(const ScriptParameter *parameter, const char *name,
@@ -10765,8 +9449,8 @@ bool FUN_005b58d0(const ScriptParameter *parameter, const char *name,
             return false;
 
         if (reference)
-            ((FUN_005b58d0_REFR *)reference)->Action(
-                first, 0, second, 0, 1, 0, 0, 0, 1, 0);
+            reference->RemoveItem(
+                reinterpret_cast<TESForm*>(first), 0, second, 0, 1, 0, 0, 0, 1, 0);
     }
 
     return true;
@@ -10778,37 +9462,27 @@ public:
     void* GetPosition();
 };
 
-class FUN_005e01b0_shell : public TgtOps
+// The shared collection headers do not yet declare these reload helpers.
+class ScriptINISettingActions : public INISettingCollection
 {
 public:
+    void* GetPosition();
     bool FUN_005e01b0(char const*);
 };
 
-class INISettingCollection : public FUN_005e01b0_shell
-{
-};
 
-class INIPrefSettingCollection : public FUN_005e01b0_shell
-{
-};
-
-template <class T>
-class SettingT
-{
-public:
-    static T* __cdecl GetCollection();
-};
+using ::SettingT;
 
 // @fnv 0x005b6c50
 bool FUN_005b6c50()
 {
-    SettingT<INISettingCollection>::GetCollection()->FUN_005e01b0(
+    reinterpret_cast<ScriptINISettingActions*>(SettingT<INISettingCollection>::GetCollection())->FUN_005e01b0(
         static_cast<const char*>(
-            SettingT<INISettingCollection>::GetCollection()->GetPosition()));
+            reinterpret_cast<ScriptINISettingActions*>(SettingT<INISettingCollection>::GetCollection())->GetPosition()));
 
-    SettingT<INIPrefSettingCollection>::GetCollection()->FUN_005e01b0(
+    reinterpret_cast<ScriptINISettingActions*>(SettingT<INIPrefSettingCollection>::GetCollection())->FUN_005e01b0(
         static_cast<const char*>(
-            SettingT<INIPrefSettingCollection>::GetCollection()->GetPosition()));
+            reinterpret_cast<ScriptINISettingActions*>(SettingT<INIPrefSettingCollection>::GetCollection())->GetPosition()));
 
     return true;
 }
@@ -10818,17 +9492,14 @@ extern void* _g_thePlayer;
 extern void _DebugLog(const char*);
 int __cdecl FUN_00557dd0(int, int, int);
 
-struct TESObjectREFR_GetCullResult
-{
-    int GetCullResult() const;
-};
+
 
 // @fnv 0x005b72a0
 bool FUN_005b72a0(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&)
 {
-    if (((TESObjectREFR_GetCullResult*)_g_thePlayer)->GetCullResult())
+    if (reinterpret_cast<int>(reinterpret_cast<Actor*>(_g_thePlayer)->FUN_008d6f30()))
     {
-        FUN_00557dd0(((TESObjectREFR_GetCullResult*)_g_thePlayer)->GetCullResult(), 0, 0);
+        FUN_00557dd0(reinterpret_cast<int>(reinterpret_cast<Actor*>(_g_thePlayer)->FUN_008d6f30()), 0, 0);
         _DebugLog("RenderTestCell complete. Check warnings file for more info.");
     }
     else
@@ -10840,7 +9511,7 @@ bool FUN_005b72a0(const ScriptParameter*, const char*, TESObjectREFR*, TESObject
 }  // namespace fnv_005b72a0
 
 namespace fnv_005b7490 {
-class TESFile;
+
 
 class FileH
 {
@@ -10854,43 +9525,8 @@ public:
     bool FUN_004734d0(TESForm*);
 };
 
-class TESFile
-{
-public:
-    TESFile* GetParentTESFile();
-};
 
-class FUN_00485b60
-{
-public:
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8(TESFile*);
-    TESFile* GetFile(int);
-};
 
-class TESClimate : public FUN_00485b60
-{
-};
-
-class TESSound
-{
-public:
-    unsigned int Deallocate();
-};
-
-class Sky : public TESSound
-{
-public:
-    static Sky* GetInstance();
-    void SetCurrentClimate(TESClimate*, bool);
-};
 
 // @fnv 0x005b7490
 bool FUN_005b7490()
@@ -10906,8 +9542,8 @@ bool FUN_005b7490()
         reinterpret_cast<FileH*>(pfile)->OpenTESFile(0, 0);
         reinterpret_cast<FUN_004734d0_shell*>(pfile)->FUN_004734d0(
             reinterpret_cast<TESForm*>(pClimateData));
-        pClimateData->V6();
-        pClimateData->V8(pfile);
+        pClimateData->ClearData();
+        pClimateData->LoadForm(pfile);
         Sky::GetInstance()->SetCurrentClimate(pClimateData, 1);
     }
 
@@ -10916,11 +9552,9 @@ bool FUN_005b7490()
 }  // namespace fnv_005b7490
 
 namespace fnv_005b7520 {
-struct Sky { static Sky* GetInstance(); int GetAudioBackendData(); };
-struct TESFile { TESFile* GetParentTESFile(); bool OpenTESFile(int, bool); };
+
 struct FUN_004734d0_shell { bool FUN_004734d0(TESForm*); };
-struct TESWeather { virtual void V0(); virtual void V1(); virtual void V2(); virtual void V3(); virtual void V4(); virtual void V5(); virtual void V6(); virtual void V7(); virtual void V8(void*); virtual void V9(); virtual void V10(); virtual void V11(); virtual void V12(); virtual void V13(); virtual void V14(); virtual void V15(); virtual void V16(); virtual void V17(); virtual void V18(); virtual void V19(); virtual void V20(); virtual void V21(); virtual void V22(); virtual void V23(); virtual void V24(); virtual void V25(); virtual void V26(); virtual void V27(); virtual void V28(); virtual void V29(); virtual void V30(); virtual void V31(); virtual void V32(); virtual void V33(); virtual void V34(); virtual void V35(); virtual void V36(); virtual void V37(); virtual void V38(); virtual void V39(); virtual void V40(); virtual void V41(); virtual void V42(); virtual void V43(); virtual void V44(); virtual void V45(); virtual void V46(); virtual void V47(); virtual void V48(); virtual void V49(); };
-struct FUN_00485b60 { void* GetFile(int); };
+
 
 // @fnv 0x005b7520
 bool FUN_005b7520(const ScriptParameter* apParameters, const char* apCompiledParams, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
@@ -10928,29 +9562,23 @@ bool FUN_005b7520(const ScriptParameter* apParameters, const char* apCompiledPar
     TESFile* pfile;
     TESWeather* m_pWeatherObject;
     m_pWeatherObject = (TESWeather*)Sky::GetInstance()->GetAudioBackendData();
-    pfile = (TESFile*)((FUN_00485b60*)m_pWeatherObject)->GetFile(-1);
+    pfile = (TESFile*)((TESForm*)m_pWeatherObject)->GetFile(-1);
     if (pfile != 0)
     {
         pfile = pfile->GetParentTESFile();
         pfile->OpenTESFile(0, false);
         ((FUN_004734d0_shell*)pfile)->FUN_004734d0((TESForm*)m_pWeatherObject);
-        m_pWeatherObject->V6();
-        m_pWeatherObject->V8(pfile);
+        m_pWeatherObject->ClearData();
+        m_pWeatherObject->LoadForm(pfile);
     }
     return true;
 }
 }  // namespace fnv_005b7520
 
 namespace fnv_005b7820 {
-struct ScriptS
-{
-    void* GetHeader();
-};
+// 0x00500940 returns form data at +0x18 for ImageSpaceManager::FUN_00b8cb00, not script bytecode.
+struct ModifierParameterAccess { void* GetParameters(); };
 
-struct ImageSpaceManager
-{
-    void __thiscall FUN_00b8cb00(void*);
-};
 
 ImageSpaceManager* __cdecl FUN_004e3270(void);
 void __fastcall FUN_00b8b500(void*);
@@ -10961,14 +9589,14 @@ bool FUN_005b7820(const ScriptParameter* parameter, const char* name,
                   Script* script, ScriptLocals* locals,
                   double& result, unsigned int& value)
 {
-    ScriptS* scriptS = 0;
+    ModifierParameterAccess* parameters = 0;
 
     if (!ExtractArgs(parameter, name, &value, object1, object2, script, locals,
-                     &scriptS))
+                     &parameters))
         return false;
 
-    if (scriptS)
-        FUN_004e3270()->FUN_00b8cb00(scriptS->GetHeader());
+    if (parameters)
+        FUN_004e3270()->FUN_00b8cb00(parameters->GetParameters());
     else
         FUN_004e3270()->FUN_00b8cb00(0);
 
@@ -11006,15 +9634,9 @@ bool FUN_005b9ea0(
 }
 }  // namespace fnv_005b9ea0
 
-class NiPoint3
-{
-public:
-    float x;
-    float y;
-    float z;
 
-    void Set(float, float, float);
-};
+// Retained constructor-free coordinate API: shared constructors change 0x005ba5d0,
+// 0x005bb390, 0x005c9790 and 0x005dac80.
 
 class V00
 {
@@ -11155,7 +9777,6 @@ bool FUN_005ba5d0(const ScriptParameter* scriptParameter, const char* scriptName
     TESObjectREFR* reference, TESObjectREFR* reference2, Script* script,
     ScriptLocals* scriptLocals, double& result, unsigned int& optionalArg)
 {
-    NiPoint3 velocity;
     char axis;
     float value = 0.0f;
 
@@ -11165,7 +9786,7 @@ bool FUN_005ba5d0(const ScriptParameter* scriptParameter, const char* scriptName
 
     if (reference)
     {
-        velocity.Set(0.0f, 0.0f, 0.0f);
+        NiPoint3 velocity(0.0f, 0.0f, 0.0f);
 
         switch (axis)
         {
@@ -11192,33 +9813,17 @@ bool FUN_005ba5d0(const ScriptParameter* scriptParameter, const char* scriptName
 }
 
 namespace fnv_005bac90 {
-class ArrSI
+// Exe 0x005bac90: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+class TesscriptfunctionsOffset08View
 {
 public:
     unsigned int GetFlags(void);
 };
 
-class TESSound : public ArrSI
-{
-public:
-    unsigned int Deallocate(void);
-};
-
-class BSAudio : public TESSound
-{
-};
 
 extern BSAudio* g_osGlobals;
 
-class NiNode
-{
-};
 
-class NiAdditionalGeometryData
-{
-public:
-    static void* __cdecl GetShadowSceneNodeForIndex(int);
-};
 
 unsigned int __cdecl FUN_0045c670();
 void __cdecl FUN_004d78c0();
@@ -11243,69 +9848,7 @@ FUN_004d61b0::FUN_004d61b0(unsigned int, unsigned int, unsigned int, const char*
 {
 }
 
-class VirtualObject : public TESObjectREFR
-{
-public:
-    virtual void F0();
-    virtual void F1();
-    virtual void F2();
-    virtual void F3();
-    virtual void F4();
-    virtual void F5();
-    virtual void F6();
-    virtual void F7();
-    virtual void F8();
-    virtual void F9();
-    virtual void F10();
-    virtual void F11();
-    virtual void F12();
-    virtual void F13();
-    virtual void F14();
-    virtual void F15();
-    virtual void F16();
-    virtual void F17();
-    virtual void F18();
-    virtual void F19();
-    virtual void F20();
-    virtual void F21();
-    virtual void F22();
-    virtual void F23();
-    virtual void F24();
-    virtual void F25();
-    virtual void F26();
-    virtual void F27();
-    virtual void F28();
-    virtual void F29();
-    virtual void F30();
-    virtual void F31();
-    virtual void F32();
-    virtual void F33();
-    virtual void F34();
-    virtual void F35();
-    virtual void F36();
-    virtual void F37();
-    virtual void F38();
-    virtual void F39();
-    virtual void F40();
-    virtual void F41();
-    virtual void F42();
-    virtual void F43();
-    virtual void F44();
-    virtual void F45();
-    virtual void F46();
-    virtual void F47();
-    virtual void F48();
-    virtual void F49();
-    virtual void F50();
-    virtual void F51();
-    virtual void F52();
-    virtual void F53();
-    virtual void F54();
-    virtual void F55();
-    virtual void F56();
-    virtual void F57();
-    virtual unsigned int V116();
-};
+
 
 // @fnv 0x005bac90
 bool FUN_005bac90(const ScriptParameter*, const char*, TESObjectREFR* object)
@@ -11323,7 +9866,7 @@ bool FUN_005bac90(const ScriptParameter*, const char*, TESObjectREFR* object)
         0x258);
 
     if(object)
-        sceneGraph->FUN_004d65a0(reinterpret_cast<VirtualObject*>(object)->V116());
+        sceneGraph->FUN_004d65a0(reinterpret_cast<unsigned int>(object->GetNiNode()));
 
     sceneGraph->FUN_004d64c0(FUN_005bac60(), "Fallout Interface Scene Graph");
     sceneGraph->FUN_004d64c0(FUN_005bac70(), "Fallout Interface 3D Object Scene Graph");
@@ -11360,132 +9903,14 @@ class ShadowLightData : public FUN_00800e50_Class
 {
 };
 
-class Interface
+// Exe 0x005bb610: unit-local Interface view; declarations and layout are preserved.
+class TesscriptfunctionsInterfaceView
 {
 public:
     static ShadowLightData* GetVATSEffect();
 };
 
-struct FUN_005bb610_vtable
-{
-    virtual void V0() = 0;
-    virtual void V1() = 0;
-    virtual void V2() = 0;
-    virtual void V3() = 0;
-    virtual void V4() = 0;
-    virtual void V5() = 0;
-    virtual void V6() = 0;
-    virtual void V7() = 0;
-    virtual void V8() = 0;
-    virtual void V9() = 0;
-    virtual void V10() = 0;
-    virtual void V11() = 0;
-    virtual void V12() = 0;
-    virtual void V13() = 0;
-    virtual void V14() = 0;
-    virtual void V15() = 0;
-    virtual void V16() = 0;
-    virtual void V17() = 0;
-    virtual void V18() = 0;
-    virtual void V19() = 0;
-    virtual void V20() = 0;
-    virtual void V21() = 0;
-    virtual void V22() = 0;
-    virtual void V23() = 0;
-    virtual void V24() = 0;
-    virtual void V25() = 0;
-    virtual void V26() = 0;
-    virtual void V27() = 0;
-    virtual void V28() = 0;
-    virtual void V29() = 0;
-    virtual void V30() = 0;
-    virtual void V31() = 0;
-    virtual void V32() = 0;
-    virtual void V33() = 0;
-    virtual void V34() = 0;
-    virtual void V35() = 0;
-    virtual void V36() = 0;
-    virtual void V37() = 0;
-    virtual void V38() = 0;
-    virtual void V39() = 0;
-    virtual void V40() = 0;
-    virtual void V41() = 0;
-    virtual void V42() = 0;
-    virtual void V43() = 0;
-    virtual void V44() = 0;
-    virtual void V45() = 0;
-    virtual void V46() = 0;
-    virtual void V47() = 0;
-    virtual void V48() = 0;
-    virtual void V49() = 0;
-    virtual void V50() = 0;
-    virtual void V51() = 0;
-    virtual void V52() = 0;
-    virtual void V53() = 0;
-    virtual void V54() = 0;
-    virtual void V55() = 0;
-    virtual void V56() = 0;
-    virtual void V57() = 0;
-    virtual void V58() = 0;
-    virtual void V59() = 0;
-    virtual void V60() = 0;
-    virtual void V61() = 0;
-    virtual void V62() = 0;
-    virtual void V63() = 0;
-    virtual void V64() = 0;
-    virtual void V65() = 0;
-    virtual void V66() = 0;
-    virtual void V67() = 0;
-    virtual void V68() = 0;
-    virtual void V69() = 0;
-    virtual void V70() = 0;
-    virtual void V71() = 0;
-    virtual void V72() = 0;
-    virtual void V73() = 0;
-    virtual void V74() = 0;
-    virtual void V75() = 0;
-    virtual void V76() = 0;
-    virtual void V77() = 0;
-    virtual void V78() = 0;
-    virtual void V79() = 0;
-    virtual void V80() = 0;
-    virtual void V81() = 0;
-    virtual void V82() = 0;
-    virtual void V83() = 0;
-    virtual void V84() = 0;
-    virtual void V85() = 0;
-    virtual void V86() = 0;
-    virtual void V87() = 0;
-    virtual void V88() = 0;
-    virtual void V89() = 0;
-    virtual void V90() = 0;
-    virtual void V91() = 0;
-    virtual void V92() = 0;
-    virtual void V93() = 0;
-    virtual void V94() = 0;
-    virtual void V95() = 0;
-    virtual void V96() = 0;
-    virtual void V97() = 0;
-    virtual void V98() = 0;
-    virtual void V99() = 0;
-    virtual void V100() = 0;
-    virtual void V101() = 0;
-    virtual void V102() = 0;
-    virtual void V103() = 0;
-    virtual void V104() = 0;
-    virtual void V105() = 0;
-    virtual void V106() = 0;
-    virtual void V107() = 0;
-    virtual void V108() = 0;
-    virtual void V109() = 0;
-    virtual void V110() = 0;
-    virtual void V111() = 0;
-    virtual void V112() = 0;
-    virtual void V113() = 0;
-    virtual void V114() = 0;
-    virtual void V115() = 0;
-    virtual int V116() { return 0; }
-};
+
 
 // @fnv 0x005bb610
 bool FUN_005bb610(const ScriptParameter* parameter, const char* format,
@@ -11503,14 +9928,14 @@ bool FUN_005bb610(const ScriptParameter* parameter, const char* format,
                      script, locals, &iParam1, &iParam3, &enabled, &iParam2))
         return false;
 
-    if (reference && reinterpret_cast<FUN_005bb610_vtable*>(reference)->V116())
+    if (reference && reference->GetNiNode())
     {
-        Interface::GetVATSEffect()->FUN_00800d50(
+        TesscriptfunctionsInterfaceView::GetVATSEffect()->FUN_00800d50(
             reinterpret_cast<int>(reference));
-        Interface::GetVATSEffect()->FUN_00800e50(
+        TesscriptfunctionsInterfaceView::GetVATSEffect()->FUN_00800e50(
             reinterpret_cast<int>(reference));
         fParam = 1;
-        Interface::GetVATSEffect()->FUN_0044ac20(&fParam);
+        TesscriptfunctionsInterfaceView::GetVATSEffect()->FUN_0044ac20(&fParam);
     }
 
     return true;
@@ -11518,23 +9943,16 @@ bool FUN_005bb610(const ScriptParameter* parameter, const char* format,
 }  // namespace fnv_005bb610
 
 namespace fnv_005beb00 {
-struct Setting
-{
-    unsigned int FUN_004f8940();
-    Setting& FUN_005e0190(char const*);
-};
 
-struct Setting_S
-{
-    float* Float();
-};
+
 
 struct GlobalObject_0045cfe0
 {
     int* Int();
 };
 
-struct ArrSI
+// Exe 0x005beb00: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct TesscriptfunctionsOffset08View
 {
     unsigned int GetFlags();
 };
@@ -11549,20 +9967,6 @@ struct S_004ed780
     S_004ed780* FUN_004ed780(float);
 };
 
-struct StartMenu
-{
-    char const* GetMenuTitle();
-};
-
-struct FUN_004f8a30_shell2
-{
-    int FUN_004f8a30(int);
-};
-
-struct GameSettingCollection
-{
-    static GameSettingCollection* __cdecl Instance();
-};
 
 struct FUN_005beb00_TLS
 {
@@ -11589,9 +9993,7 @@ bool FUN_005beb00(const ScriptParameter* apParameters, const char* apCompiledPar
         apScript, apScriptLocals, settingName, settingValue))
         return false;
 
-    pGS = reinterpret_cast<Setting*>(
-        reinterpret_cast<FUN_004f8a30_shell2*>(GameSettingCollection::Instance())
-            ->FUN_004f8a30(reinterpret_cast<int>(settingName)));
+    pGS = GameSettingCollection::Instance()->FUN_004f8a30(settingName);
 
     if(pGS)
     {
@@ -11602,7 +10004,7 @@ bool FUN_005beb00(const ScriptParameter* apParameters, const char* apCompiledPar
                 FUN_00eca6d3(settingValue));
             if(FUN_005beb00_tls.debugLogEnabled)
                 _DebugLog("GameSetting %s >> %i",
-                    reinterpret_cast<ArrSI*>(pGS)->GetFlags(),
+                    reinterpret_cast<TesscriptfunctionsOffset08View*>(pGS)->GetFlags(),
                     *reinterpret_cast<GlobalObject_0045cfe0*>(pGS)->Int());
             break;
 
@@ -11611,15 +10013,15 @@ bool FUN_005beb00(const ScriptParameter* apParameters, const char* apCompiledPar
                 static_cast<float>(_atof(settingValue)));
             if(FUN_005beb00_tls.debugLogEnabled)
                 _DebugLog("GameSetting %s >> %.2f",
-                    reinterpret_cast<ArrSI*>(pGS)->GetFlags(),
-                    *reinterpret_cast<Setting_S*>(pGS)->Float());
+                    reinterpret_cast<TesscriptfunctionsOffset08View*>(pGS)->GetFlags(),
+                    *reinterpret_cast<Setting*>(pGS)->Float());
             break;
 
         case 6:
             pGS->FUN_005e0190(settingValue);
             if(FUN_005beb00_tls.debugLogEnabled)
-                _DebugLog("GameSetting %s >> '%s'",
-                    reinterpret_cast<ArrSI*>(pGS)->GetFlags(),
+                fnv_005beb00::_DebugLog("GameSetting %s >> '%s'",
+                    reinterpret_cast<TesscriptfunctionsOffset08View*>(pGS)->GetFlags(),
                     reinterpret_cast<StartMenu*>(pGS)->GetMenuTitle());
             break;
 
@@ -11638,46 +10040,12 @@ bool FUN_005beb00(const ScriptParameter* apParameters, const char* apCompiledPar
 }  // namespace fnv_005beb00
 
 namespace fnv_005becf0 {
-class Setting
-{
-public:
-    unsigned int FUN_004f8940();
-};
 
-template <class T>
-class SettingCollectionList
-{
-public:
-    Setting* GetPtr(const char*);
-};
 
-class INISettingCollection : public SettingCollectionList<Setting>
-{
-};
+using ::SettingT;
 
-class INIPrefSettingCollection : public SettingCollectionList<Setting>
-{
-};
+using ::SettingT;
 
-template <class T = INISettingCollection>
-class SettingT
-{
-public:
-    static INISettingCollection* __cdecl GetCollection();
-};
-
-template <>
-class SettingT<INIPrefSettingCollection>
-{
-public:
-    static INIPrefSettingCollection* __cdecl GetCollection();
-};
-
-class Setting_S : public Setting
-{
-public:
-    float* Float();
-};
 
 class GlobalObject_0045cf30 : public Setting
 {
@@ -11707,9 +10075,9 @@ bool __cdecl FUN_005becf0(const ScriptParameter* parameter, const char* name,
                      settingName))
         return false;
 
-    setting = SettingT<INISettingCollection>::GetCollection()->GetPtr(settingName);
+    setting = reinterpret_cast<SettingCollectionList<Setting>*>(SettingT<INISettingCollection>::GetCollection())->GetPtr(settingName);
     if (!setting)
-        setting = SettingT<INIPrefSettingCollection>::GetCollection()->GetPtr(settingName);
+        setting = reinterpret_cast<SettingCollectionList<Setting>*>(SettingT<INIPrefSettingCollection>::GetCollection())->GetPtr(settingName);
 
     if (setting) {
         switch (setting->FUN_004f8940()) {
@@ -11720,7 +10088,7 @@ bool __cdecl FUN_005becf0(const ScriptParameter* parameter, const char* name,
 
         case 5:
             _DebugLog("INISetting %s >> %.2f", settingName,
-                      static_cast<double>(*static_cast<Setting_S*>(setting)->Float()));
+                      static_cast<double>(*setting->Float()));
             break;
 
         case 6:
@@ -11746,11 +10114,6 @@ bool __cdecl FUN_005becf0(const ScriptParameter* parameter, const char* name,
 }  // namespace fnv_005becf0
 
 namespace fnv_005bf7b0 {
-class BSShaderManager
-{
-public:
-    static int __cdecl GetSupportedShaderLevel(bool);
-};
 
 int DAT_011f91d8;
 
@@ -11767,17 +10130,11 @@ unsigned char FUN_005bf7b0()
 }  // namespace fnv_005bf7b0
 
 namespace fnv_005bfaf0 {
-class Setting_S
-{
-public:
-    float* Float();
-};
 
-typedef Setting_S GlobalObject_0044f440;
 
-extern GlobalObject_0044f440 g_011db200;
-extern GlobalObject_0044f440 g_011db238;
-extern GlobalObject_0044f440 g_011db25c;
+extern Setting g_011db200;
+extern Setting g_011db238;
+extern Setting g_011db25c;
 
 class FUN_005bfbb0_Class
 {
@@ -11791,11 +10148,6 @@ public:
     void FUN_005bfbd0(float);
 };
 
-class EffectSetting
-{
-public:
-    void FUN_004ee4b0(float);
-};
 
 void* __cdecl FUN_00705950();
 
@@ -11829,11 +10181,7 @@ bool FUN_005bfaf0(const ScriptParameter* parameter, const char* name,
 }  // namespace fnv_005bfaf0
 
 namespace fnv_005c4940 {
-class TESObject
-{
-public:
-    unsigned int GetNext(void);
-};
+
 
 struct FUN_005c4940_FormTypeEntry
 {
@@ -11882,7 +10230,7 @@ bool __cdecl FUN_005c4940(
     if (!FUN_00ec6da0(
             DAT_01187004[
                 _FNV_GetFormType(
-                    reinterpret_cast<TESObject*>(apRefObject)->GetNext())].name,
+                    reinterpret_cast<unsigned int>(reinterpret_cast<TESObject*>(apRefObject)->GetNext()))].name,
             input))
     {
         afReturnValue = 1.0;
@@ -11899,11 +10247,7 @@ bool __cdecl FUN_005c4940(
 }  // namespace fnv_005c4940
 
 namespace fnv_005c5440 {
-class BGSSaveLoadManager
-{
-public:
-    void FUN_008503b0(const char*, int, bool);
-};
+
 
 extern void* DAT_011de134;
 
@@ -11935,10 +10279,6 @@ struct GlobalObject_0045cf30
     unsigned char* Bool();
 };
 
-struct ActorValueInfo
-{
-    bool SetScriptName(const char*);
-};
 
 extern GlobalObject_0045cf30 g_011de2b8;
 extern void* DAT_011de134;
@@ -12131,11 +10471,6 @@ public:
     TESForm* GetOwner(void);
 };
 
-class BSOcclusionPlane
-{
-public:
-    int GetCullResult(void) const;
-};
 
 extern BSOcclusionPlane* _g_thePlayer;
 
@@ -12169,7 +10504,6 @@ bool FUN_005cdfb0(const ScriptParameter* parameter, const char* name,
 }
 }  // namespace fnv_005cdfb0
 
-class TESFaction;
 
 bool __cdecl FUN_005a2290(TESObjectREFR*, TESFaction*, TESObjectREFR*, double*);
 
@@ -12186,7 +10520,7 @@ bool __cdecl FUN_005ce200(const ScriptParameter* apParameters, const char* apCom
 }
 
 namespace fnv_005cf1a0 {
-class TESCasino {};
+
 
 void __cdecl _FNV_Warning(const char*);
 void __cdecl FUN_007bbe20(TESCasino*, int, int, int, int);
@@ -12522,11 +10856,6 @@ bool FUN_005d4400(const ScriptParameter* apParameters,
 namespace fnv_005d4480 {
 extern int __tls_index;
 
-class MobileObject
-{
-public:
-    char const* GetFullName(void);
-};
 
 void _DebugLog(char const* format, ...);
 
@@ -12903,11 +11232,6 @@ struct VFinal : VDerived
     virtual void V269(bool) = 0;
 };
 
-struct FUN_008bbf40_StandIn
-{
-    void FUN_008bbf40(int, int, int, int, int, bool, bool, bool, bool);
-};
-
 // @fnv 0x005d7a30
 bool FUN_005d7a30(const ScriptParameter* parameter, const char* format,
                   TESObjectREFR* reference, TESObjectREFR* reference2,
@@ -12946,7 +11270,7 @@ bool FUN_005d7a30(const ScriptParameter* parameter, const char* format,
 
         reinterpret_cast<VFinal*>(object)->V269(false);
 
-        reinterpret_cast<FUN_008bbf40_StandIn*>(object)->FUN_008bbf40(
+        reinterpret_cast<ScriptActorActions*>(object)->FUN_008bbf40(
             d, i, b, a, e, static_cast<bool>(g), static_cast<bool>(c),
             static_cast<bool>(h), static_cast<bool>(f));
     }
@@ -12955,11 +11279,7 @@ bool FUN_005d7a30(const ScriptParameter* parameter, const char* format,
 }
 
 namespace fnv_005d90a0 {
-class TESSound
-{
-public:
-    unsigned int Deallocate();
-};
+
 
 extern TESSound* __cdecl FUN_005c4b30(TESObjectREFR*, int, int, int, int, float);
 extern void __cdecl CopyIdentifierBitsToValue(unsigned int const&, double&);
@@ -12997,79 +11317,6 @@ bool FUN_005d90a0(const ScriptParameter* parameter, const char* scriptName,
 }
 }  // namespace fnv_005d90a0
 
-struct FUN_005d9370_vtable
-{
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8();
-    virtual void V9();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual void V34();
-    virtual void V35();
-    virtual void V36();
-    virtual void V37();
-    virtual void V38();
-    virtual void V39();
-    virtual void V40();
-    virtual void V41();
-    virtual void V42();
-    virtual void V43();
-    virtual void V44();
-    virtual void V45();
-    virtual void V46();
-    virtual void V47();
-    virtual void V48();
-    virtual void V49();
-    virtual void V50();
-    virtual void V51();
-    virtual void V52();
-    virtual void V53();
-    virtual void V54();
-    virtual void V55();
-    virtual void V56();
-    virtual void V57();
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual bool V64();
-};
-
-struct FUN_008bca90_stand_in
-{
-    void FUN_008bca90(bool);
-};
 
 // @fnv 0x005d9370
 bool FUN_005d9370(const ScriptParameter* parameter, const char* functionName,
@@ -13084,10 +11331,10 @@ bool FUN_005d9370(const ScriptParameter* parameter, const char* functionName,
 
     if (reference != 0)
     {
-        if (reinterpret_cast<FUN_005d9370_vtable*>(reference)->V64())
+        if (reference->IsActor())
         {
             TESObjectREFR* object = reference;
-            reinterpret_cast<FUN_008bca90_stand_in*>(object)->FUN_008bca90(value != 0);
+            reinterpret_cast<ScriptActorActions*>(object)->FUN_008bca90(value != 0);
         }
     }
 
@@ -13135,14 +11382,7 @@ bool FUN_005da1e0(const ScriptParameter* param1, const char* param2, TESObjectRE
 }
 
 namespace fnv_005db110 {
-struct OSGlobals
-{
-    void* FUN_00877720();
-};
 
-struct BSAudio : public OSGlobals
-{
-};
 
 extern BSAudio* g_osGlobals;
 
@@ -13174,7 +11414,7 @@ bool FUN_005db110(const ScriptParameter* scriptParams, const char* formatString,
                      script, scriptLocals, &values.first, &values.second, &values.third))
         return false;
 
-    values.controls = static_cast<Controls*>(g_osGlobals->FUN_00877720());
+    values.controls = reinterpret_cast<Controls*>(g_osGlobals->FUN_00877720());
     if (values.controls)
     {
         values.controls->FUN_00a255b0(values.first, values.second,
@@ -13186,215 +11426,8 @@ bool FUN_005db110(const ScriptParameter* scriptParams, const char* formatString,
 }
 }  // namespace fnv_005db110
 
-struct FUN_005db3f0Base
-{
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8();
-    virtual void V9();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual void V34();
-    virtual void V35();
-    virtual void V36();
-    virtual void V37();
-    virtual void V38();
-    virtual void V39();
-    virtual void V40();
-    virtual void V41();
-    virtual void V42();
-    virtual void V43();
-    virtual void V44();
-    virtual void V45();
-    virtual void V46();
-    virtual void V47();
-    virtual void V48();
-    virtual void V49();
-    virtual void V50();
-    virtual void V51();
-    virtual void V52();
-    virtual void V53();
-    virtual void V54();
-    virtual void V55();
-    virtual void V56();
-    virtual void V57();
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-};
 
-struct FUN_005db3f0Dispatch : public FUN_005db3f0Base
-{
-    virtual bool Check();
 
-    virtual void V65();
-    virtual void V66();
-    virtual void V67();
-    virtual void V68();
-    virtual void V69();
-    virtual void V70();
-    virtual void V71();
-    virtual void V72();
-    virtual void V73();
-    virtual void V74();
-    virtual void V75();
-    virtual void V76();
-    virtual void V77();
-    virtual void V78();
-    virtual void V79();
-    virtual void V80();
-    virtual void V81();
-    virtual void V82();
-    virtual void V83();
-    virtual void V84();
-    virtual void V85();
-    virtual void V86();
-    virtual void V87();
-    virtual void V88();
-    virtual void V89();
-    virtual void V90();
-    virtual void V91();
-    virtual void V92();
-    virtual void V93();
-    virtual void V94();
-    virtual void V95();
-    virtual void V96();
-    virtual void V97();
-    virtual void V98();
-    virtual void V99();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual void V125();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
-    virtual void V144();
-    virtual void V145();
-    virtual void V146();
-    virtual void V147();
-    virtual void V148();
-    virtual void V149();
-    virtual void V150();
-    virtual void V151();
-    virtual void V152();
-    virtual void V153();
-    virtual void V154();
-    virtual void V155();
-    virtual void V156();
-    virtual void V157();
-    virtual void V158();
-    virtual void V159();
-    virtual void V160();
-    virtual void V161();
-    virtual void V162();
-    virtual void V163();
-    virtual void V164();
-    virtual void V165();
-    virtual void V166();
-    virtual void V167();
-    virtual void V168();
-    virtual void V169();
-    virtual void V170();
-    virtual void V171();
-    virtual void V172();
-    virtual void V173();
-    virtual void V174();
-    virtual void V175();
-    virtual void V176();
-    virtual void V177();
-    virtual void V178();
-    virtual void V179();
-    virtual void V180();
-    virtual void V181();
-    virtual void V182();
-    virtual void V183();
-    virtual void V184();
-    virtual void V185();
-    virtual void V186();
-    virtual void V187();
-    virtual void V188();
-    virtual void V189();
-    virtual void V190();
-    virtual void V191();
-    virtual void V192();
-    virtual void V193();
-    virtual void V194();
-    virtual void V195();
-    virtual void V196();
-    virtual void V197();
-    virtual void V198();
-
-    virtual void Set(bool);
-};
 
 // @fnv 0x005db3f0
 bool FUN_005db3f0(const ScriptParameter* param, const char* name,
@@ -13410,15 +11443,14 @@ bool FUN_005db3f0(const ScriptParameter* param, const char* name,
 
     if (ref1 != 0)
     {
-        if (reinterpret_cast<FUN_005db3f0Dispatch*>(ref1)->Check())
+        if (ref1->IsActor())
         {
-            FUN_005db3f0Dispatch* object =
-                reinterpret_cast<FUN_005db3f0Dispatch*>(ref1);
+            TESObjectREFR* object = ref1;
 
             if (result > 0)
-                object->Set(true);
+                reinterpret_cast<void (__thiscall*)(TESObjectREFR*, bool)>((*reinterpret_cast<void***>(object))[0xC7])(object, true);
             else
-                object->Set(false);
+                reinterpret_cast<void (__thiscall*)(TESObjectREFR*, bool)>((*reinterpret_cast<void***>(object))[0xC7])(object, false);
         }
     }
 
@@ -13437,21 +11469,13 @@ bool __cdecl FUN_005db600(const ScriptParameter* apParameters, const char* apCom
 }
 
 namespace fnv_005dc5e0 {
-class TESObject
-{
-public:
-    unsigned int GetNext();
-};
+
 
 struct FUN_00518030_shell
 {
     void FUN_00518030(bool);
 };
 
-struct PlayerCharacter
-{
-    void FUN_00952c30(PlayerCharacter*);
-};
 
 struct ScriptVirtualBase
 {
@@ -13558,13 +11582,13 @@ bool FUN_005dc5e0(const ScriptParameter* apParameters, const char* apCompiledPar
     if (apRefObject &&
         reinterpret_cast<TESObject*>(apRefObject)->GetNext() != 0 &&
         _FNV_GetFormType(
-            reinterpret_cast<TESObject*>(apRefObject)->GetNext()) == 0x1C)
+            reinterpret_cast<unsigned int>(reinterpret_cast<TESObject*>(apRefObject)->GetNext())) == 0x1C)
     {
         reinterpret_cast<FUN_00518030_shell*>(
             reinterpret_cast<TESObject*>(apRefObject)->GetNext()
         )->FUN_00518030(iflag != 0);
 
-        _g_thePlayer->FUN_00952c30(_g_thePlayer);
+        reinterpret_cast<ScriptPlayerActions*>(_g_thePlayer)->FUN_00952c30(_g_thePlayer);
     }
     else
     {
@@ -13578,213 +11602,8 @@ bool FUN_005dc5e0(const ScriptParameter* apParameters, const char* apCompiledPar
 }  // namespace fnv_005dc5e0
 
 namespace fnv_005de110 {
-class MobileObject
-{
-public:
-    virtual bool V0();
-    virtual bool V1();
-    virtual bool V2();
-    virtual bool V3();
-    virtual bool V4();
-    virtual bool V5();
-    virtual bool V6();
-    virtual bool V7();
-    virtual bool V8();
-    virtual bool V9();
-    virtual bool V10();
-    virtual bool V11();
-    virtual bool V12();
-    virtual bool V13();
-    virtual bool V14();
-    virtual bool V15();
-    virtual bool V16();
-    virtual bool V17();
-    virtual bool V18();
-    virtual bool V19();
-    virtual bool V20();
-    virtual bool V21();
-    virtual bool V22();
-    virtual bool V23();
-    virtual bool V24();
-    virtual bool V25();
-    virtual bool V26();
-    virtual bool V27();
-    virtual bool V28();
-    virtual bool V29();
-    virtual bool V30();
-    virtual bool V31();
-    virtual bool V32();
-    virtual bool V33();
-    virtual bool V34();
-    virtual bool V35();
-    virtual bool V36();
-    virtual bool V37();
-    virtual bool V38();
-    virtual bool V39();
-    virtual bool V40();
-    virtual bool V41();
-    virtual bool V42();
-    virtual bool V43();
-    virtual bool V44();
-    virtual bool V45();
-    virtual bool V46();
-    virtual bool V47();
-    virtual bool V48();
-    virtual bool V49();
-    virtual bool V50();
-    virtual bool V51();
-    virtual bool V52();
-    virtual bool V53();
-    virtual bool V54();
-    virtual bool V55();
-    virtual bool V56();
-    virtual bool V57();
-    virtual bool V58();
-    virtual bool V59();
-    virtual bool V60();
-    virtual bool V61();
-    virtual bool V62();
-    virtual bool V63();
-    virtual bool V64();
-    virtual bool V65();
-    virtual bool V66();
-    virtual bool V67();
-    virtual bool V68();
-    virtual bool V69();
-    virtual bool V70();
-    virtual bool V71();
-    virtual bool V72();
-    virtual bool V73();
-    virtual bool V74();
-    virtual bool V75();
-    virtual bool V76();
-    virtual bool V77();
-    virtual bool V78();
-    virtual bool V79();
-    virtual bool V80();
-    virtual bool V81();
-    virtual bool V82();
-    virtual bool V83();
-    virtual bool V84();
-    virtual bool V85();
-    virtual bool V86();
-    virtual bool V87();
-    virtual bool V88();
-    virtual bool V89();
-    virtual bool V90();
-    virtual bool V91();
-    virtual bool V92();
-    virtual bool V93();
-    virtual bool V94();
-    virtual bool V95();
-    virtual bool V96();
-    virtual bool V97();
-    virtual bool V98();
-    virtual bool V99();
-    virtual bool V100();
-    virtual bool V101();
-    virtual bool V102();
-    virtual bool V103();
-    virtual bool V104();
-    virtual bool V105();
-    virtual bool V106();
-    virtual bool V107();
-    virtual bool V108();
-    virtual bool V109();
-    virtual bool V110();
-    virtual bool V111();
-    virtual bool V112();
-    virtual bool V113();
-    virtual bool V114();
-    virtual bool V115();
-    virtual bool V116();
-    virtual bool V117();
-    virtual bool V118();
-    virtual bool V119();
-    virtual bool V120();
-    virtual bool V121();
-    virtual bool V122();
-    virtual bool V123();
-    virtual bool V124();
-    virtual bool V125();
-    virtual bool V126();
-    virtual bool V127();
-    virtual bool V128();
-    virtual bool V129();
-    virtual bool V130();
-    virtual bool V131();
-    virtual bool V132();
-    virtual bool V133();
-    virtual bool V134();
-    virtual bool V135();
-    virtual bool V136();
-    virtual bool V137();
-    virtual bool V138();
-    virtual bool V139();
-    virtual bool V140();
-    virtual bool V141();
-    virtual bool V142();
-    virtual bool V143();
-    virtual bool V144();
-    virtual bool V145();
-    virtual bool V146();
-    virtual bool V147();
-    virtual bool V148();
-    virtual bool V149();
-    virtual bool V150();
-    virtual bool V151();
-    virtual bool V152();
-    virtual bool V153();
-    virtual bool V154();
-    virtual bool V155();
-    virtual bool V156();
-    virtual bool V157();
-    virtual bool V158();
-    virtual bool V159();
-    virtual bool V160();
-    virtual bool V161();
-    virtual bool V162();
-    virtual bool V163();
-    virtual bool V164();
-    virtual bool V165();
-    virtual bool V166();
-    virtual bool V167();
-    virtual bool V168();
-    virtual bool V169();
-    virtual bool V170();
-    virtual bool V171();
-    virtual bool V172();
-    virtual bool V173();
-    virtual bool V174();
-    virtual bool V175();
-    virtual bool V176();
-    virtual bool V177();
-    virtual bool V178();
-    virtual bool V179();
-    virtual bool V180();
-    virtual bool V181();
-    virtual bool V182();
-    virtual bool V183();
-    virtual bool V184();
-    virtual bool V185();
-    virtual bool V186();
-    virtual bool V187();
-    virtual bool V188();
-    virtual bool V189();
-    virtual bool V190();
-    virtual bool V191();
-    virtual bool V192();
-    virtual bool V193();
-    virtual bool V194();
-    virtual bool V195();
-    virtual bool V196();
-    virtual bool V197();
-    virtual bool V198();
-    virtual bool V199();
-    virtual void V200(TESObjectREFR*, bool);
-};
-
-class MobileObjectProcessArray
+// Call surface of MobileObjectProcessArrayApi; the shared header cannot be read in this unit (its own layout_support template copies).
+class MobileObjectProcessArrayApi
 {
 public:
     unsigned int GetTail(PROCESS_TYPE) const;
@@ -13804,23 +11623,23 @@ extern TESObjectREFR* _g_thePlayer;
 bool FUN_005de110()
 {
     for (unsigned int i = 0;
-         i < static_cast<MobileObjectProcessArray*>(
+         i < static_cast<MobileObjectProcessArrayApi*>(
                  reinterpret_cast<TgtOps*>(&DAT_011e0e80)->GetPosition())
                  ->GetTail(PROCESS_TYPE(0));
          ++i)
     {
         MobileObject* p =
-            static_cast<MobileObjectProcessArray*>(
+            static_cast<MobileObjectProcessArrayApi*>(
                 reinterpret_cast<TgtOps*>(&DAT_011e0e80)->GetPosition())
                 ->GetItem(i);
         MobileObject* mine = 0;
 
-        if (p && p->V137())
+        if (p && p->IsProjectile())
         {
             mine = p;
 
-            if (mine && mine->V198())
-                mine->V200(_g_thePlayer, true);
+            if (mine && reinterpret_cast<bool (__thiscall*)(MobileObject*)>((*reinterpret_cast<void***>(mine))[198])(mine))
+                reinterpret_cast<void (__thiscall*)(MobileObject*, TESObjectREFR*, bool)>((*reinterpret_cast<void***>(mine))[200])(mine, _g_thePlayer, true);
         }
     }
 
@@ -13830,10 +11649,6 @@ bool FUN_005de110()
 
 class ContainerItemExtra;
 
-struct FileEntryList
-{
-    void Copy(TESForm*, unsigned short, unsigned short, TESForm*, ContainerItemExtra*);
-};
 
 // @fnv 0x005de670
 bool FUN_005de670(ScriptParameter* parameter, const char* name,
@@ -13863,7 +11678,7 @@ bool FUN_005de670(ScriptParameter* parameter, const char* name,
     {
         reinterpret_cast<FileEntryList*>(
             reinterpret_cast<unsigned char*>(textureIndex) + 0x30)
-            ->Copy(textureIndex, destinationForm.textureIndex, 1, sourceForm, 0);
+            ->Copy(reinterpret_cast<SharedForm*>(textureIndex), destinationForm.textureIndex, 1, reinterpret_cast<SharedForm*>(sourceForm), 0);
     }
 
     return true;
@@ -13881,10 +11696,6 @@ struct ContainerItemExtra
     void FUN_0040eb90(float);
 };
 
-struct FileEntryList
-{
-    void Copy(TESForm*, unsigned short, unsigned short, TESForm*, ContainerItemExtra*);
-};
 
 // @fnv 0x005de700
 bool FUN_005de700(const ScriptParameter* parameter, const char* functionName,
@@ -13913,11 +11724,11 @@ bool FUN_005de700(const ScriptParameter* parameter, const char* functionName,
 
         reinterpret_cast<FileEntryList*>(
             reinterpret_cast<unsigned char*>(itemID) + 0x30)->Copy(
-            itemID,
+            reinterpret_cast<SharedForm*>(itemID),
             static_cast<unsigned short>(chance),
             static_cast<unsigned short>(source),
-            textureID,
-            extra);
+            reinterpret_cast<SharedForm*>(textureID),
+            reinterpret_cast<::ContainerItemExtra*>(extra));
     }
 
     return true;
@@ -13925,86 +11736,10 @@ bool FUN_005de700(const ScriptParameter* parameter, const char* functionName,
 }  // namespace fnv_005de700
 
 namespace fnv_00977540 {
-class MobileObjectBase
-{
-public:
-    virtual void V0() = 0;
-    virtual void V1() = 0;
-    virtual void V2() = 0;
-    virtual void V3() = 0;
-    virtual void V4() = 0;
-    virtual void V5() = 0;
-    virtual void V6() = 0;
-    virtual void V7() = 0;
-    virtual void V8() = 0;
-    virtual void V9() = 0;
-    virtual void V10() = 0;
-    virtual void V11() = 0;
-    virtual void V12() = 0;
-    virtual void V13() = 0;
-    virtual void V14() = 0;
-    virtual void V15() = 0;
-    virtual void V16() = 0;
-    virtual void V17() = 0;
-    virtual void V18() = 0;
-    virtual void V19() = 0;
-    virtual void V20() = 0;
-    virtual void V21() = 0;
-    virtual void V22() = 0;
-    virtual void V23() = 0;
-    virtual void V24() = 0;
-    virtual void V25() = 0;
-    virtual void V26() = 0;
-    virtual void V27() = 0;
-    virtual void V28() = 0;
-    virtual void V29() = 0;
-    virtual void V30() = 0;
-    virtual void V31() = 0;
-    virtual void V32() = 0;
-    virtual void V33() = 0;
-    virtual void V34() = 0;
-    virtual void V35() = 0;
-    virtual void V36() = 0;
-    virtual void V37() = 0;
-    virtual void V38() = 0;
-    virtual void V39() = 0;
-    virtual void V40() = 0;
-    virtual void V41() = 0;
-    virtual void V42() = 0;
-    virtual void V43() = 0;
-    virtual void V44() = 0;
-    virtual void V45() = 0;
-    virtual void V46() = 0;
-    virtual void V47() = 0;
-    virtual void V48() = 0;
-    virtual void V49() = 0;
-    virtual void V50() = 0;
-    virtual void V51() = 0;
-    virtual void V52() = 0;
-    virtual void V53() = 0;
-    virtual void V54() = 0;
-    virtual void V55() = 0;
-    virtual void V56() = 0;
-    virtual void V57() = 0;
-    virtual void V58() = 0;
-    virtual void V59() = 0;
-    virtual void V60() = 0;
-    virtual void V61() = 0;
-    virtual void V62() = 0;
-    virtual void V63() = 0;
-};
 
-class MobileObject : public MobileObjectBase
-{
-public:
-    virtual bool IsDead() = 0;
 
-    void FUN_008c30a0()
-    {
-    }
-};
-
-class MobileObjectProcessArray
+// Call surface of MobileObjectProcessArrayApi; the shared header cannot be read in this unit (its own layout_support template copies).
+class MobileObjectProcessArrayApi
 {
 public:
     unsigned int GetTail(PROCESS_TYPE type) const
@@ -14029,7 +11764,7 @@ class ProcessManager
 {
 public:
     virtual void V0() = 0;
-    MobileObjectProcessArray processes;
+    MobileObjectProcessArrayApi processes;
 
     void FUN_00977540();
 };
@@ -14044,7 +11779,7 @@ void ProcessManager::FUN_00977540()
     {
         pProcess = processes.GetItem(i);
         MobileObject* pTarget = 0;
-        if (pProcess && pProcess->IsDead())
+        if (pProcess && pProcess->IsActor())
             pTarget = pProcess;
         if (pTarget)
             pTarget->FUN_008c30a0();
@@ -14057,7 +11792,7 @@ void ProcessManager::FUN_00977540()
         MobileObject* pTarget2 = 0;
         if (pProcess)
         {
-            if (pProcess->IsDead())
+            if (pProcess->IsActor())
                 pTarget2 = pProcess;
         }
         if (pTarget2)
@@ -14083,7 +11818,8 @@ public:
     void FUN_0044ac20(int const*);
 };
 
-class Interface
+// Exe 0x005bb6c0: unit-local Interface view; declarations and layout are preserved.
+class TesscriptfunctionsInterfaceView
 {
 public:
     static FUN_0044ac20_class* GetVATSEffect();
@@ -14231,10 +11967,10 @@ bool FUN_005bb6c0(const ScriptParameter* parameter, const char* name,
     if (referenceOne != 0 &&
         reinterpret_cast<VirtualOffsetBase*>(referenceOne)->DeactivateAllHighlights())
     {
-        Interface::GetVATSEffect()->FUN_00800ac0(0, 0, 0);
-        Interface::GetVATSEffect()->FUN_00800ed0();
+        TesscriptfunctionsInterfaceView::GetVATSEffect()->FUN_00800ac0(0, 0, 0);
+        TesscriptfunctionsInterfaceView::GetVATSEffect()->FUN_00800ed0();
         zero = 0;
-        Interface::GetVATSEffect()->FUN_0044ac20(&zero);
+        TesscriptfunctionsInterfaceView::GetVATSEffect()->FUN_0044ac20(&zero);
     }
 
     return true;
@@ -14351,7 +12087,7 @@ struct Form17 {
  virtual void slot66();
  virtual bool Rejects(Form17*);
 };
-struct Ref17 { Form17* FUN_007af430(); };
+
 struct Weapon17 { int FUN_00446390(); };
 struct Target17;
 struct Info17 {
@@ -14380,7 +12116,7 @@ struct Info17 {
 };
 struct Context17 {
  Form17* form; bool flag04,flag05,flag06,flag07;
- unsigned int unk08;Ref17* reference;void* other;Info17* info;
+ unsigned int unk08;TESObjectREFR* reference;void* other;Info17* info;
  unsigned int unk18,unk1c,unk20;bool flag24;
 };
 struct ContextStack17 {
@@ -14392,7 +12128,7 @@ Context17* FUN_007f5280();
 struct FormListData17 { bool FUN_005f65d0(Form17*const&); };
 struct FormList17 { FormListData17* FUN_00500940(); };
 extern void* DAT_011dea3c;
-float FUN_009a64d0(void*,Ref17*,int);
+float FUN_009a64d0(void*,TESObjectREFR*,int);
 bool FUN_00703d50();
 void FUN_00703c00(const char*,...);
 extern const char DAT_01034044[];
@@ -14418,7 +12154,7 @@ bool FUN_00594e40(void* unused,int value,void* parameter,double& result) {
     if(p->reference) {
      FormList17* a=(FormList17*)parameter;
      if(a) {
-      if(a->FUN_00500940()->FUN_005f65d0(p->reference->FUN_007af430())) result=1;
+      if(a->FUN_00500940()->FUN_005f65d0(reinterpret_cast<Form17*>(p->reference->FUN_007af430()))) result=1;
      }
     }
     break;
@@ -14449,7 +12185,7 @@ bool FUN_00594e40(void* unused,int value,void* parameter,double& result) {
    }
    case 2: {
     Form17* a=(Form17*)parameter;
-    if(a && p->reference && p->reference->FUN_007af430() && !a->Rejects(p->reference->FUN_007af430())) result=1;
+    if(a && p->reference && p->reference->FUN_007af430() && !a->Rejects(reinterpret_cast<Form17*>(p->reference->FUN_007af430()))) result=1;
     break;
    }
    case 5:
@@ -14501,9 +12237,7 @@ bool FUN_00594e40(void* unused,int value,void* parameter,double& result) {
 
 class ScriptParameter;
 class ScriptHeaderData;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 bool __cdecl ExtractArgs(const ScriptParameter*, const char*, unsigned int*,
     TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
@@ -14524,55 +12258,17 @@ bool __cdecl FUN_005b4b80(const ScriptParameter* parameters, const char* scriptD
 
 namespace fnv_005b5860 {
 class ScriptParameter;
-class Script;
-class ScriptLocals;
 
-class ExtendedREFR : public TESObjectREFR {
+
+class ScriptReferenceItemActions : public TESObjectREFR {
 public:
     void* FUN_007af430(int, int, int, int, int, int, int, int, int);
-    virtual void UnknownVirtual58() = 0;
-    virtual void UnknownVirtual59() = 0;
-    virtual void UnknownVirtual60() = 0;
-    virtual void UnknownVirtual61() = 0;
-    virtual void UnknownVirtual62() = 0;
-    virtual void UnknownVirtual63() = 0;
-    virtual void UnknownVirtual64() = 0;
-    virtual void UnknownVirtual65() = 0;
-    virtual void UnknownVirtual66() = 0;
-    virtual void UnknownVirtual67() = 0;
-    virtual void UnknownVirtual68() = 0;
-    virtual void UnknownVirtual69() = 0;
-    virtual void UnknownVirtual70() = 0;
-    virtual void UnknownVirtual71() = 0;
-    virtual void UnknownVirtual72() = 0;
-    virtual void UnknownVirtual73() = 0;
-    virtual void UnknownVirtual74() = 0;
-    virtual void UnknownVirtual75() = 0;
-    virtual void UnknownVirtual76() = 0;
-    virtual void UnknownVirtual77() = 0;
-    virtual void UnknownVirtual78() = 0;
-    virtual void UnknownVirtual79() = 0;
-    virtual void UnknownVirtual80() = 0;
-    virtual void UnknownVirtual81() = 0;
-    virtual void UnknownVirtual82() = 0;
-    virtual void UnknownVirtual83() = 0;
-    virtual void UnknownVirtual84() = 0;
-    virtual void UnknownVirtual85() = 0;
-    virtual void UnknownVirtual86() = 0;
-    virtual void UnknownVirtual87() = 0;
-    virtual void UnknownVirtual88() = 0;
-    virtual void UnknownVirtual89() = 0;
-    virtual void UnknownVirtual90() = 0;
-    virtual void UnknownVirtual91() = 0;
-    virtual void UnknownVirtual92() = 0;
-    virtual void UnknownVirtual93() = 0;
-    virtual void UnknownVirtual94() = 0;
-    virtual void ReceiveTarget(void*) = 0;
+
 };
 
 class RefManager {
 public:
-    void FUN_00952c30(ExtendedREFR*);
+    void FUN_00952c30(ScriptReferenceItemActions*);
 };
 
 extern RefManager* DAT_011dea3c;
@@ -14581,11 +12277,11 @@ void __cdecl FUN_00704af0();
 
 // @fnv 0x005b5860
 bool __cdecl FUN_005b5860(const ScriptParameter*, const char*,
-                           ExtendedREFR* source, ExtendedREFR* target,
+                           ScriptReferenceItemActions* source, ScriptReferenceItemActions* target,
                            Script*, ScriptLocals*, double&, unsigned int&)
 {
     if (source != 0 && target != 0) {
-        target->ReceiveTarget(source->FUN_007af430(0, 1, 0, 1, 0, 0, 0, 1, 0));
+        reinterpret_cast<void (__thiscall*)(TESObjectREFR*, void*)>((*reinterpret_cast<void***>(target))[0x5F])(target, source->FUN_007af430(0, 1, 0, 1, 0, 0, 0, 1, 0));
         DAT_011dea3c->FUN_00952c30(source);
         if (FUN_00702360()) {
             FUN_00704af0();
@@ -14606,7 +12302,6 @@ struct SpellMagicBase {
     virtual void V3(); virtual void V4(); virtual void V5();
     virtual int GetSpellType();
 };
-class SpellItem : public SpellFormBase, public SpellMagicBase {};
 struct SpellList {
     int FUN_005ae380();
     SpellItem** FUN_006815c0();
@@ -15694,28 +13389,14 @@ bool __cdecl FUN_005bb800(B5BB800ParamInfo* pkParamInfo, B5BB800ScriptData* pkSc
 namespace fnv_anon_005bbc50 {}
 using namespace fnv_anon_005bbc50;
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 void __cdecl DebugLog(const char*, ...);
 
-class NiPoint2
-{
-public:
-    float x;
-    float y;
-    NiPoint2(float afX, float afY);
-};
 
 class ImageSpaceModifierInstance;
 
-class ImageSpaceModifierInstanceDOF
-{
-public:
-    void FUN_005bbd60(bool);
-};
 
 void FUN_005293f0(ImageSpaceModifierInstanceDOF*);
 ImageSpaceModifierInstanceDOF* FUN_0052a440(float, float, float, float, float, NiPoint2*, float);
@@ -15759,9 +13440,7 @@ bool FUN_005bbc50(const ScriptParameter* apParameters, const char* apCompiledPar
 }
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 struct ToggleTarget {
     const char* __thiscall GetName() const;
@@ -15916,9 +13595,7 @@ bool __cdecl FUN_005bd3c0()
 }  // namespace fnv_005bd3c0
 
 struct ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 
@@ -16002,9 +13679,7 @@ bool __cdecl FUN_005bd8a0(int p1, int p2, int p3, int p4, int p5, int p6, int p7
 
 namespace fnv_005bd900 {
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern unsigned char __cdecl FUN_005accb0(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, int*);
 extern bool __cdecl FUN_0059c680(TESObjectREFR*, int, unsigned int, double*);
@@ -16767,21 +14442,12 @@ bool FUN_005be870(int a1, int a2, FUN_005be870_obj* obj)
 }
 }  // namespace fnv_005be870
 
-struct TreeStr {
-    char* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    TreeStr();
-    TreeStr(const TreeStr& other);
-    ~TreeStr();
-    int PrintfString(const char* format, ...);
-};
 
 extern float DAT_011f9480;
 extern float DAT_011f9484;
 
 bool FUN_005accb0(int a0, int a1, int a7, int a2, int a3, int a4, int a5, float* localTrees, float* lodTrees);
-void FUN_00703c80(TreeStr text);
+void FUN_00703c80(BSStringT<char> text);
 
 // @fnv 0x005bfbf0
 bool FUN_005bfbf0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -16792,7 +14458,7 @@ bool FUN_005bfbf0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7
         return false;
     float oldLod = DAT_011f9480;
     float oldLocal = DAT_011f9484;
-    TreeStr msg2;
+    BSStringT<char> msg2;
     msg2.PrintfString("Old values:   [ Local Trees: %f | LOD Trees: %f ]", oldLocal, oldLod);
     FUN_00703c80(msg2);
     DAT_011f9480 = lodTrees9;
@@ -16855,12 +14521,6 @@ bool __cdecl FUN_005c0960(int first, int second, int third, int fourth, int fift
     return FUN_0059c2d0(third, component, 0, seventh);
 }
 
-class C0B10Matrix3 {
-public:
-    C0B10Matrix3() {}
-
-    float m_afEntry[3][3];
-};
 
 class C0B10UpdateData {
 public:
@@ -16872,153 +14532,26 @@ public:
     int unk08;
 };
 
-class C0B10Node {
+
+void __cdecl FUN_00c6bd00(NiNode* pkNode, bool bValue);
+
+// These rotation actions are not exposed by the shared reference API.
+class ScriptReferenceRotationActions : public TESObjectREFR
+{
 public:
-    void SetLocalRotate(const C0B10Matrix3& kRotate);
-    void Update(const C0B10UpdateData& kData);
-};
-
-void __cdecl FUN_00c6bd00(C0B10Node* pkNode, bool bValue);
-
-class C0B10Ref {
-public:
-    virtual void vfn000();
-    virtual void vfn004();
-    virtual void vfn008();
-    virtual void vfn00C();
-    virtual void vfn010();
-    virtual void vfn014();
-    virtual void vfn018();
-    virtual void vfn01C();
-    virtual void vfn020();
-    virtual void vfn024();
-    virtual void vfn028();
-    virtual void vfn02C();
-    virtual void vfn030();
-    virtual void vfn034();
-    virtual void vfn038();
-    virtual void vfn03C();
-    virtual void vfn040();
-    virtual void vfn044();
-    virtual void vfn048();
-    virtual void vfn04C();
-    virtual void vfn050();
-    virtual void vfn054();
-    virtual void vfn058();
-    virtual void vfn05C();
-    virtual void vfn060();
-    virtual void vfn064();
-    virtual void vfn068();
-    virtual void vfn06C();
-    virtual void vfn070();
-    virtual void vfn074();
-    virtual void vfn078();
-    virtual void vfn07C();
-    virtual void vfn080();
-    virtual void vfn084();
-    virtual void vfn088();
-    virtual void vfn08C();
-    virtual void vfn090();
-    virtual void vfn094();
-    virtual void vfn098();
-    virtual void vfn09C();
-    virtual void vfn0A0();
-    virtual void vfn0A4();
-    virtual void vfn0A8();
-    virtual void vfn0AC();
-    virtual void vfn0B0();
-    virtual void vfn0B4();
-    virtual void vfn0B8();
-    virtual void vfn0BC();
-    virtual void vfn0C0();
-    virtual void vfn0C4();
-    virtual void vfn0C8();
-    virtual void vfn0CC();
-    virtual void vfn0D0();
-    virtual void vfn0D4();
-    virtual void vfn0D8();
-    virtual void vfn0DC();
-    virtual void vfn0E0();
-    virtual void vfn0E4();
-    virtual void vfn0E8();
-    virtual void vfn0EC();
-    virtual void vfn0F0();
-    virtual void vfn0F4();
-    virtual void vfn0F8();
-    virtual void vfn0FC();
-    virtual void vfn100();
-    virtual void vfn104();
-    virtual void vfn108();
-    virtual void vfn10C();
-    virtual void vfn110();
-    virtual void vfn114();
-    virtual void vfn118();
-    virtual void vfn11C();
-    virtual void vfn120();
-    virtual void vfn124();
-    virtual void vfn128();
-    virtual void vfn12C();
-    virtual void vfn130();
-    virtual void vfn134();
-    virtual void vfn138();
-    virtual void vfn13C();
-    virtual void vfn140();
-    virtual void vfn144();
-    virtual void vfn148();
-    virtual void vfn14C();
-    virtual void vfn150();
-    virtual void vfn154();
-    virtual void vfn158();
-    virtual void vfn15C();
-    virtual void vfn160();
-    virtual void vfn164();
-    virtual void vfn168();
-    virtual void vfn16C();
-    virtual void vfn170();
-    virtual void vfn174();
-    virtual void vfn178();
-    virtual void vfn17C();
-    virtual void vfn180();
-    virtual void vfn184();
-    virtual void vfn188();
-    virtual void vfn18C();
-    virtual void vfn190();
-    virtual void vfn194();
-    virtual void vfn198();
-    virtual void vfn19C();
-    virtual void vfn1A0();
-    virtual void vfn1A4();
-    virtual void vfn1A8();
-    virtual void vfn1AC();
-    virtual void vfn1B0();
-    virtual void vfn1B4();
-    virtual void vfn1B8();
-    virtual void vfn1BC();
-    virtual void vfn1C0();
-    virtual void vfn1C4();
-    virtual void vfn1C8();
-    virtual void vfn1CC();
-    virtual C0B10Node* Get3D();
-    virtual void vfn1D4();
-    virtual void vfn1D8();
-    virtual void vfn1DC();
-    virtual void vfn1E0();
-    virtual int IsDisabled();
-
-    void SetAngleX(float fAngleDifference);
     void SetAngleY(float fAngleDifference);
     void SetAngleZ(float fAngleDifference);
-    C0B10Matrix3 GetRotationMatrix();
+    NiMatrix3 GetRotationMatrix();
 };
 
 // @fnv 0x005c0b10
-void __cdecl FUN_005c0b10(C0B10Ref* pkRef, char cAxis, float fDegrees)
+void __cdecl FUN_005c0b10(ScriptReferenceRotationActions* pkRef, char cAxis, float fDegrees)
 {
     if (pkRef) {
         float fRadians = fDegrees * 0.01745329238474369;
         switch (cAxis) {
         case 'X':
-            pkRef->SetAngleX(fRadians);
+            pkRef->FUN_00575770(fRadians);
             break;
         case 'Y':
             pkRef->SetAngleY(fRadians);
@@ -17028,13 +14561,13 @@ void __cdecl FUN_005c0b10(C0B10Ref* pkRef, char cAxis, float fDegrees)
             break;
         }
 
-        C0B10Node* pkNode = pkRef->Get3D();
+        NiNode* pkNode = reinterpret_cast<NiNode*>(pkRef->GetNiNode());
         if (pkNode) {
-            pkNode->SetLocalRotate(pkRef->GetRotationMatrix());
+            pkNode->SetLocalRotation(pkRef->GetRotationMatrix());
             FUN_00c6bd00(pkNode, true);
-            if (!pkRef || !pkRef->IsDisabled()) {
+            if (!pkRef || !pkRef->GetAnimData()) {
                 C0B10UpdateData kData(0.0f, false, false);
-                pkNode->Update(kData);
+                pkNode->Update(reinterpret_cast<const NiUpdateData&>(kData));
             }
         }
     }
@@ -17045,191 +14578,43 @@ struct S_005c1710_Result
     void FUN_008eeaa0(int);
 };
 
-struct S_005c1710_Base01
-{
-    virtual void V000() = 0;
-    virtual void V001() = 0;
-    virtual void V002() = 0;
-    virtual void V003() = 0;
-    virtual void V004() = 0;
-    virtual void V005() = 0;
-    virtual void V006() = 0;
-    virtual void V007() = 0;
-    virtual void V008() = 0;
-    virtual void V009() = 0;
-};
 
-struct S_005c1710_Base02 : public S_005c1710_Base01
-{
-    virtual void V010() = 0;
-    virtual void V011() = 0;
-    virtual void V012() = 0;
-    virtual void V013() = 0;
-    virtual void V014() = 0;
-    virtual void V015() = 0;
-    virtual void V016() = 0;
-    virtual void V017() = 0;
-    virtual void V018() = 0;
-    virtual void V019() = 0;
-};
 
-struct S_005c1710_Base03 : public S_005c1710_Base02
-{
-    virtual void V020() = 0;
-    virtual void V021() = 0;
-    virtual void V022() = 0;
-    virtual void V023() = 0;
-    virtual void V024() = 0;
-    virtual void V025() = 0;
-    virtual void V026() = 0;
-    virtual void V027() = 0;
-    virtual void V028() = 0;
-    virtual void V029() = 0;
-};
 
-struct S_005c1710_Base04 : public S_005c1710_Base03
-{
-    virtual void V030() = 0;
-    virtual void V031() = 0;
-    virtual void V032() = 0;
-    virtual void V033() = 0;
-    virtual void V034() = 0;
-    virtual void V035() = 0;
-    virtual void V036() = 0;
-    virtual void V037() = 0;
-    virtual void V038() = 0;
-    virtual void V039() = 0;
-};
 
-struct S_005c1710_Base05 : public S_005c1710_Base04
-{
-    virtual void V040() = 0;
-    virtual void V041() = 0;
-    virtual void V042() = 0;
-    virtual void V043() = 0;
-    virtual void V044() = 0;
-    virtual void V045() = 0;
-    virtual void V046() = 0;
-    virtual void V047() = 0;
-    virtual void V048() = 0;
-    virtual void V049() = 0;
-};
 
-struct S_005c1710_Base06 : public S_005c1710_Base05
-{
-    virtual void V050() = 0;
-    virtual void V051() = 0;
-    virtual void V052() = 0;
-    virtual void V053() = 0;
-    virtual void V054() = 0;
-    virtual void V055() = 0;
-    virtual void V056() = 0;
-    virtual void V057() = 0;
-    virtual void V058() = 0;
-    virtual void V059() = 0;
-};
 
-struct S_005c1710_Base07 : public S_005c1710_Base06
-{
-    virtual void V060() = 0;
-    virtual void V061() = 0;
-    virtual void V062() = 0;
-    virtual void V063() = 0;
-    virtual void V064() = 0;
-    virtual void V065() = 0;
-    virtual void V066() = 0;
-    virtual void V067() = 0;
-    virtual void V068() = 0;
-    virtual void V069() = 0;
-};
 
-struct S_005c1710_Base08 : public S_005c1710_Base07
-{
-    virtual void V070() = 0;
-    virtual void V071() = 0;
-    virtual void V072() = 0;
-    virtual void V073() = 0;
-    virtual void V074() = 0;
-    virtual void V075() = 0;
-    virtual void V076() = 0;
-    virtual void V077() = 0;
-    virtual void V078() = 0;
-    virtual void V079() = 0;
-};
 
-struct S_005c1710_Base09 : public S_005c1710_Base08
-{
-    virtual void V080() = 0;
-    virtual void V081() = 0;
-    virtual void V082() = 0;
-    virtual void V083() = 0;
-    virtual void V084() = 0;
-    virtual void V085() = 0;
-    virtual void V086() = 0;
-    virtual void V087() = 0;
-    virtual void V088() = 0;
-    virtual void V089() = 0;
-};
 
-struct S_005c1710_Base10 : public S_005c1710_Base09
-{
-    virtual void V090() = 0;
-    virtual void V091() = 0;
-    virtual void V092() = 0;
-    virtual void V093() = 0;
-    virtual void V094() = 0;
-    virtual void V095() = 0;
-    virtual void V096() = 0;
-    virtual void V097() = 0;
-    virtual void V098() = 0;
-    virtual void V099() = 0;
-};
 
-struct S_005c1710_Base11 : public S_005c1710_Base10
-{
-    virtual void V100() = 0;
-    virtual void V101() = 0;
-    virtual void V102() = 0;
-    virtual void V103() = 0;
-    virtual void V104() = 0;
-    virtual void V105() = 0;
-    virtual void V106() = 0;
-    virtual void V107() = 0;
-    virtual void V108() = 0;
-    virtual void V109() = 0;
-};
 
-struct S_005c1710_Base12 : public S_005c1710_Base11
-{
-    virtual void V110() = 0;
-    virtual void V111() = 0;
-    virtual void V112() = 0;
-    virtual void V113() = 0;
-    virtual void V114() = 0;
-    virtual void V115() = 0;
-    virtual void V116() = 0;
-    virtual void V117() = 0;
-    virtual void V118() = 0;
-    virtual void V119() = 0;
-    virtual void V120() = 0;
-    virtual S_005c1710_Result* V121() = 0;
-};
 
-struct S_005c1710_Ref : public S_005c1710_Base12
-{
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // @fnv 0x005c1710
 bool __cdecl FUN_005c1710(
     void*,
     void*,
-    S_005c1710_Ref* apRefObject)
+    TESObjectREFR* apRefObject)
 {
     if (apRefObject != 0)
     {
-        if (apRefObject->V121() != 0)
+        if (reinterpret_cast<S_005c1710_Result*>(apRefObject->GetAnimData()) != 0)
         {
-            apRefObject->V121()->FUN_008eeaa0(0x14);
+            reinterpret_cast<S_005c1710_Result*>(apRefObject->GetAnimData())->FUN_008eeaa0(0x14);
         }
     }
 
@@ -17464,9 +14849,7 @@ bool __cdecl FUN_005c4a70(int a8, int a0c, int a10, int a14, int a18, int a1c, d
 }
 
 struct ScriptParameter;
-struct TESObjectREFR;
-struct Script;
-struct ScriptLocals;
+
 
 bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 void DebugLog(const char*, ...);
@@ -17694,9 +15077,7 @@ bool __cdecl FUN_005c6f50(void* pvParamInfo, void* pvScriptData, void* pvThisObj
 }
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern "C" bool __cdecl FUN_0059ec30(TESObjectREFR*, void*, void*, double&);
 
@@ -17785,9 +15166,7 @@ unsigned char __cdecl FUN_005c7c10(int a,int b,int c,int d,int e,int f,int g,int
 // Script command: extract one form argument and evaluate the condition on the calling reference.
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 class C7CA0Form;
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
@@ -17843,10 +15222,8 @@ bool __cdecl FUN_005c7e00(unsigned int p1, unsigned int p2, unsigned int p3, uns
 
 namespace fnv_005c7f10 {
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
-class TESForm;
+
+
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 struct CommandTarget {
     int FUN_004181e0();
@@ -17883,9 +15260,7 @@ bool __cdecl FUN_005c7f10(const ScriptParameter* parameters,
 }  // namespace fnv_005c7f10
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern unsigned char __cdecl FUN_005accb0(const ScriptParameter*, const char*, unsigned int, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, int*, int*, int*);
 
@@ -18067,9 +15442,7 @@ bool FUN_005cae30(void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, vo
 }
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 bool __cdecl FUN_005accb0(const ScriptParameter*, const char*, unsigned int&, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, unsigned int*, unsigned int*);
 bool __cdecl FUN_005a0f90(TESObjectREFR*, unsigned int, unsigned int, double&);
 
@@ -18108,163 +15481,38 @@ public:
     int unk08;
 };
 
-class B5CC970Node;
 
 class B5CC970AVObject {
 public:
     virtual void VFunc00();
     virtual void VFunc04();
     virtual void VFunc08();
-    virtual B5CC970Node* GetAsNiNode();
+    virtual NiNode* GetAsNiNode();
 };
 
-class B5CC970Node : public B5CC970AVObject {
-public:
-    void FUN_00a5a040();
-    void Update(const B5CC970UpdateData& kData);
-};
 
-class B5CC970Ref {
-public:
-    virtual void VFunc000();
-    virtual void VFunc004();
-    virtual void VFunc008();
-    virtual void VFunc00C();
-    virtual void VFunc010();
-    virtual void VFunc014();
-    virtual void VFunc018();
-    virtual void VFunc01C();
-    virtual void VFunc020();
-    virtual void VFunc024();
-    virtual void VFunc028();
-    virtual void VFunc02C();
-    virtual void VFunc030();
-    virtual void VFunc034();
-    virtual void VFunc038();
-    virtual void VFunc03C();
-    virtual void VFunc040();
-    virtual void VFunc044();
-    virtual void VFunc048();
-    virtual void VFunc04C();
-    virtual void VFunc050();
-    virtual void VFunc054();
-    virtual void VFunc058();
-    virtual void VFunc05C();
-    virtual void VFunc060();
-    virtual void VFunc064();
-    virtual void VFunc068();
-    virtual void VFunc06C();
-    virtual void VFunc070();
-    virtual void VFunc074();
-    virtual void VFunc078();
-    virtual void VFunc07C();
-    virtual void VFunc080();
-    virtual void VFunc084();
-    virtual void VFunc088();
-    virtual void VFunc08C();
-    virtual void VFunc090();
-    virtual void VFunc094();
-    virtual void VFunc098();
-    virtual void VFunc09C();
-    virtual void VFunc0A0();
-    virtual void VFunc0A4();
-    virtual void VFunc0A8();
-    virtual void VFunc0AC();
-    virtual void VFunc0B0();
-    virtual void VFunc0B4();
-    virtual void VFunc0B8();
-    virtual void VFunc0BC();
-    virtual void VFunc0C0();
-    virtual void VFunc0C4();
-    virtual void VFunc0C8();
-    virtual void VFunc0CC();
-    virtual void VFunc0D0();
-    virtual void VFunc0D4();
-    virtual void VFunc0D8();
-    virtual void VFunc0DC();
-    virtual void VFunc0E0();
-    virtual void VFunc0E4();
-    virtual void VFunc0E8();
-    virtual void VFunc0EC();
-    virtual void VFunc0F0();
-    virtual void VFunc0F4();
-    virtual void VFunc0F8();
-    virtual void VFunc0FC();
-    virtual void VFunc100();
-    virtual void VFunc104();
-    virtual void VFunc108();
-    virtual void VFunc10C();
-    virtual void VFunc110();
-    virtual void VFunc114();
-    virtual void VFunc118();
-    virtual void VFunc11C();
-    virtual void VFunc120();
-    virtual void VFunc124();
-    virtual void VFunc128();
-    virtual void VFunc12C();
-    virtual void VFunc130();
-    virtual void VFunc134();
-    virtual void VFunc138();
-    virtual void VFunc13C();
-    virtual void VFunc140();
-    virtual void VFunc144();
-    virtual void VFunc148();
-    virtual void VFunc14C();
-    virtual void VFunc150();
-    virtual void VFunc154();
-    virtual void VFunc158();
-    virtual void VFunc15C();
-    virtual void VFunc160();
-    virtual void VFunc164();
-    virtual void VFunc168();
-    virtual void VFunc16C();
-    virtual void VFunc170();
-    virtual void VFunc174();
-    virtual void VFunc178();
-    virtual void VFunc17C();
-    virtual void VFunc180();
-    virtual void VFunc184();
-    virtual void VFunc188();
-    virtual void VFunc18C();
-    virtual void VFunc190();
-    virtual void VFunc194();
-    virtual void VFunc198();
-    virtual void VFunc19C();
-    virtual void VFunc1A0();
-    virtual void VFunc1A4();
-    virtual void VFunc1A8();
-    virtual void VFunc1AC();
-    virtual void VFunc1B0();
-    virtual void VFunc1B4();
-    virtual void VFunc1B8();
-    virtual void VFunc1BC();
-    virtual void VFunc1C0();
-    virtual void VFunc1C4();
-    virtual void VFunc1C8();
-    virtual void VFunc1CC();
-    virtual B5CC970AVObject* Get3D();
-};
 
-bool __cdecl FUN_00577e20(B5CC970Node* pkNode);
+
+bool __cdecl FUN_00577e20(NiNode* pkNode);
 void __cdecl B5CC970DebugLog(const char* pcFormat, ...);
 
 extern __declspec(thread) bool g_bB5CC970ConsoleEcho;
 
 // @fnv 0x005cc970
-bool __cdecl FUN_005cc970(B5CC970ParamInfo* pkParamInfo, B5CC970ScriptData* pkScriptData, B5CC970Ref* pkThisObj,
-    B5CC970Ref* pkContainingObj, B5CC970Script* pkScript, B5CC970EventList* pkEventList, double* pdResult,
+bool __cdecl FUN_005cc970(B5CC970ParamInfo* pkParamInfo, B5CC970ScriptData* pkScriptData, TESObjectREFR* pkThisObj,
+    TESObjectREFR* pkContainingObj, B5CC970Script* pkScript, B5CC970EventList* pkEventList, double* pdResult,
     unsigned int* puiOpcodeOffset)
 {
-    if (pkThisObj && pkThisObj->Get3D()) {
-        B5CC970AVObject* pkRoot = pkThisObj->Get3D();
-        B5CC970Node* pkNode = 0;
+    if (pkThisObj && pkThisObj->GetNiNode()) {
+        B5CC970AVObject* pkRoot = reinterpret_cast<B5CC970AVObject*>(pkThisObj->GetNiNode());
+        NiNode* pkNode = 0;
         if (pkRoot)
             pkNode = pkRoot->GetAsNiNode();
         *pdResult = FUN_00577e20(pkNode);
         if (*pdResult != 0.0) {
             pkNode->FUN_00a5a040();
             B5CC970UpdateData kUpdateData(0.0f, true, false);
-            pkNode->Update(kUpdateData);
+            pkNode->Update(reinterpret_cast<const NiUpdateData&>(kUpdateData));
         }
         if (g_bB5CC970ConsoleEcho)
             B5CC970DebugLog("AddFlames >> %0.2f", *pdResult);
@@ -18421,120 +15669,7 @@ bool __cdecl FUN_005cca50(const void* parameters, const char* scriptData,
 }
 
 // FUN_005cd4b0 candidate v1
-class FUN_005cd4b0_cls {
-public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73(char* buf);
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual FUN_005cd4b0_cls* v110(int flag);
-};
+
 
 bool __cdecl FUN_005accb0(const ScriptParameter* apParameters, const char* apCompiledParams, unsigned int& auiOffset, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, char* buf);
 
@@ -18548,10 +15683,10 @@ bool __cdecl FUN_005cd4b0(const ScriptParameter* apParameters, const char* apCom
     }
     if (apRefObject != 0)
     {
-        FUN_005cd4b0_cls* obj = apRefObject ? ((FUN_005cd4b0_cls*)apRefObject)->v110(0) : 0;
+        void* obj = apRefObject ? reinterpret_cast<void* (__thiscall*)(TESObjectREFR*, int)>((*reinterpret_cast<void***>(apRefObject))[0x6E])(apRefObject, 0) : 0;
         if (obj != 0)
         {
-            obj->v73(buf);
+            reinterpret_cast<void (__thiscall*)(void*, char*)>((*reinterpret_cast<void***>(obj))[0x49])(obj, buf);
         }
     }
     return true;
@@ -19120,9 +16255,7 @@ bool FUN_005ceb50(B5CEB50ParamInfo* pkParamInfo, void* pvScriptData, B5CEB50Ref*
     return FUN_005a2590(pkThisObj, 0, 0, pdResult);
 }
 
-class ScriptParameter; class Script; class ScriptLocals;
-class TESBoundObject { public: virtual ~TESBoundObject(); };
-class BGSTalkingActivator : public TESBoundObject { public: class RefStub* GetTempRef(); };
+class ScriptParameter; class Script; 
 class RefStub {
 public:
     virtual void V00();
@@ -19192,11 +16325,7 @@ public:
     virtual bool V100();
     TESBoundObject* GetBaseObject();
 };
-class ActorStub : public RefStub {
-public:
-    bool IsTalkingActivator();
-    RefStub* GetTalkingActivatorRef();
-};
+
 extern RefStub* g_playerRef;
 bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, RefStub*, RefStub*, Script*, ScriptLocals*, ...);
 void __cdecl SayToHelper(RefStub*, RefStub*);
@@ -19207,19 +16336,19 @@ bool FUN_005ceeb0(const ScriptParameter* paramInfo, const char* scriptData, RefS
     RefStub* target = 0;
     ExtractArgs(paramInfo, scriptData, &opcodeOffsetPtr, thisObj, containingObj, scriptObj, eventList, &target);
     if (thisObj && thisObj != g_playerRef) {
-        ActorStub* pActor = 0;
+        MobileObject* pActor = 0;
         RefStub* m_pDialogueSpeaker = 0;
         if (thisObj->IsActor()) {
-            pActor = (ActorStub*)thisObj;
+            pActor = (MobileObject*)thisObj;
         } else {
             BGSTalkingActivator* activator = dynamic_cast<BGSTalkingActivator*>(thisObj->GetBaseObject());
             m_pDialogueSpeaker = activator ? activator->GetTempRef() : 0;
         }
         if (pActor) {
-            if (pActor->V100()) {
-                m_pDialogueSpeaker = pActor;
-            } else if (pActor->IsTalkingActivator()) {
-                m_pDialogueSpeaker = ((BGSTalkingActivator*)pActor->GetTalkingActivatorRef()->GetBaseObject())->GetTempRef();
+            if (pActor->IsActor()) {
+                m_pDialogueSpeaker = (RefStub*)pActor;
+            } else if (pActor->FUN_00574900()) {
+                m_pDialogueSpeaker = ((BGSTalkingActivator*)((Actor*)pActor)->FUN_005e3fa0()->GetBaseObject())->GetTempRef();
             }
         }
         if (m_pDialogueSpeaker) {
@@ -19234,18 +16363,15 @@ public:
     unsigned int GetFormType();
 };
 
-class B5CFCD0Ref {
-public:
-    B5CFCD0Form* GetBaseObject();
-};
 
-void __cdecl B5CFCD0ShowMenu(int iMenu, B5CFCD0Ref* pkRef, int iA, int iB, int iC, int iD);
+
+void __cdecl B5CFCD0ShowMenu(int iMenu, TESObjectREFR* pkRef, int iA, int iB, int iC, int iD);
 
 // @fnv 0x005cfcd0
-bool __cdecl FUN_005cfcd0(void* pvParamInfo, void* pvScriptData, B5CFCD0Ref* pkThisObj, void* pvContainingObj,
+bool __cdecl FUN_005cfcd0(void* pvParamInfo, void* pvScriptData, TESObjectREFR* pkThisObj, void* pvContainingObj,
     void* pvScript, void* pvEventList, double* pdResult, unsigned int* puiOpcodeOffset)
 {
-    if (pkThisObj && pkThisObj->GetBaseObject()->GetFormType() == 0x17)
+    if (pkThisObj && reinterpret_cast<B5CFCD0Form*>(pkThisObj->GetBaseObject())->GetFormType() == 0x17)
         B5CFCD0ShowMenu(2, pkThisObj, 0, 0, 1, 0);
     else
         B5CFCD0ShowMenu(2, 0, 0, 0, 1, 0);
@@ -19257,18 +16383,15 @@ public:
     unsigned int GetFormType();
 };
 
-class B5CFD20Ref {
-public:
-    B5CFD20Form* GetBaseObject();
-};
 
-void __cdecl B5CFD20ShowMenu(int iMenu, B5CFD20Ref* pkRef, int iA, int iB, int iC, int iD);
+
+void __cdecl B5CFD20ShowMenu(int iMenu, TESObjectREFR* pkRef, int iA, int iB, int iC, int iD);
 
 // @fnv 0x005cfd20
-bool __cdecl FUN_005cfd20(void* pvParamInfo, void* pvScriptData, B5CFD20Ref* pkThisObj, void* pvContainingObj,
+bool __cdecl FUN_005cfd20(void* pvParamInfo, void* pvScriptData, TESObjectREFR* pkThisObj, void* pvContainingObj,
     void* pvScript, void* pvEventList, double* pdResult, unsigned int* puiOpcodeOffset)
 {
-    if (pkThisObj && pkThisObj->GetBaseObject()->GetFormType() == 0x17)
+    if (pkThisObj && reinterpret_cast<B5CFD20Form*>(pkThisObj->GetBaseObject())->GetFormType() == 0x17)
         B5CFD20ShowMenu(3, pkThisObj, 0, 0, 1, 0);
     else
         B5CFD20ShowMenu(3, 0, 0, 0, 1, 0);
@@ -19624,9 +16747,7 @@ bool __cdecl FUN_005d11b0(unsigned int input, unsigned int actor, unsigned int f
 }  // namespace fnv_005d11b0
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 
@@ -20514,9 +17635,7 @@ bool FUN_005d23d0(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8
 }  // namespace fnv_005d23d0
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern "C" bool __cdecl FUN_005a3390(TESObjectREFR*, void*, void*, double&);
 
@@ -20559,20 +17678,8 @@ void __cdecl FUN_005d29d0()
 }
 
 namespace fnv_005d3780 {
-struct NiProperty;
-struct ImageSpaceEffectParam {
-    float r;
-    float g;
-    float b;
-    float a;
-    ImageSpaceEffectParam(float r, float g, float b, float a);
-};
-struct NiAVObject {
-    NiProperty* GetProperty(unsigned int type);
-};
-struct NiNode {
-    NiAVObject* GetChildAt(unsigned int index);
-};
+
+
 struct FogPropertyStandIn {
     int unk00;
     int unk04;
@@ -20612,134 +17719,13 @@ struct FogPropertyStandIn {
     int unk8C;
     int unk90;
     int unk94;
-    ImageSpaceEffectParam kColor;
+    NiColorA kColor;
 };
-class RefWith3D {
-public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v3a();
-    virtual void v3b();
-    virtual void v3c();
-    virtual void v3d();
-    virtual void v3e();
-    virtual void v3f();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v4a();
-    virtual void v4b();
-    virtual void v4c();
-    virtual void v4d();
-    virtual void v4e();
-    virtual void v4f();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v5a();
-    virtual void v5b();
-    virtual void v5c();
-    virtual void v5d();
-    virtual void v5e();
-    virtual void v5f();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v6a();
-    virtual void v6b();
-    virtual void v6c();
-    virtual void v6d();
-    virtual void v6e();
-    virtual void v6f();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual NiNode* Get3D();
-};
-class TESObjectREFR;
+
 class ScriptParameter;
-class Script;
-class ScriptLocals;
+
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
-extern ImageSpaceEffectParam g_DefaultColor;
+extern NiColorA g_DefaultColor;
 
 // @fnv 0x005d3780
 bool FUN_005d3780(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result, unsigned int& opcodeOffset)
@@ -20751,16 +17737,16 @@ bool FUN_005d3780(const ScriptParameter* paramInfo, const char* scriptData, TESO
         return false;
     FogPropertyStandIn* pProperty4 = 0;
     if (thisObj) {
-        NiNode* pNode = ((RefWith3D*)thisObj)->Get3D();
+        NiNode* pNode = reinterpret_cast<NiNode*>(thisObj->GetNiNode());
         NiAVObject* pChild = pNode->GetChildAt(0);
         NiProperty* pProp = pChild->GetProperty(3);
         pProperty4 = (FogPropertyStandIn*)pProp;
     }
     if (iRed7 >= 0 && iGreen_2 >= 0 && kIBlue >= 0 && iRed7 <= 255 && iGreen_2 <= 255 && kIBlue <= 255) {
         if (pProperty4)
-            pProperty4->kColor = ImageSpaceEffectParam((float)(iRed7 / 255.0), (float)(iGreen_2 / 255.0), (float)(kIBlue / 255.0), 1.0f);
+            pProperty4->kColor = NiColorA((float)(iRed7 / 255.0), (float)(iGreen_2 / 255.0), (float)(kIBlue / 255.0), 1.0f);
         else
-            g_DefaultColor = ImageSpaceEffectParam((float)(iRed7 / 255.0), (float)(iGreen_2 / 255.0), (float)(kIBlue / 255.0), 1.0f);
+            g_DefaultColor = NiColorA((float)(iRed7 / 255.0), (float)(iGreen_2 / 255.0), (float)(kIBlue / 255.0), 1.0f);
     }
     return true;
 }
@@ -20768,70 +17754,16 @@ bool FUN_005d3780(const ScriptParameter* paramInfo, const char* scriptData, TESO
 
 namespace fnv_005d3930 {
 class ScriptParameter;
-class Script;
-class ScriptLocals;
-class TESObjectREFR;
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 
-struct ImageSpaceEffectParam
-{
-    float r;
-    float g;
-    float b;
-    float a;
-    ImageSpaceEffectParam(float afR, float afG, float afB, float afA);
-};
 
-struct NiAVObject;
 
-struct NiProperty
-{
-    int unk00; int unk04; int unk08; int unk0C; int unk10; int unk14; int unk18; int unk1C;
-    int unk20; int unk24; int unk28; int unk2C; int unk30; int unk34; int unk38; int unk3C;
-    int unk40; int unk44; int unk48; int unk4C; int unk50; int unk54; int unk58; int unk5C;
-    int unk60; int unk64; int unk68; int unk6C; int unk70; int unk74; int unk78; int unk7C;
-    int unk80; int unk84; int unk88; int unk8C; int unk90; int unk94; int unk98; int unk9C;
-    int unkA0; int unkA4;
-    ImageSpaceEffectParam kColor;
-};
 
-struct NiAVObject
-{
-    NiProperty* GetProperty(unsigned int auiType);
-};
 
-struct NiNode
-{
-    NiAVObject* GetAt(unsigned int auiIndex);
-};
 
-struct RefVirtuals
-{
-    virtual void V0(); virtual void V1(); virtual void V2(); virtual void V3(); virtual void V4(); virtual void V5();
-    virtual void V6(); virtual void V7(); virtual void V8(); virtual void V9(); virtual void V10(); virtual void V11();
-    virtual void V12(); virtual void V13(); virtual void V14(); virtual void V15(); virtual void V16(); virtual void V17();
-    virtual void V18(); virtual void V19(); virtual void V20(); virtual void V21(); virtual void V22(); virtual void V23();
-    virtual void V24(); virtual void V25(); virtual void V26(); virtual void V27(); virtual void V28(); virtual void V29();
-    virtual void V30(); virtual void V31(); virtual void V32(); virtual void V33(); virtual void V34(); virtual void V35();
-    virtual void V36(); virtual void V37(); virtual void V38(); virtual void V39(); virtual void V40(); virtual void V41();
-    virtual void V42(); virtual void V43(); virtual void V44(); virtual void V45(); virtual void V46(); virtual void V47();
-    virtual void V48(); virtual void V49(); virtual void V50(); virtual void V51(); virtual void V52(); virtual void V53();
-    virtual void V54(); virtual void V55(); virtual void V56(); virtual void V57(); virtual void V58(); virtual void V59();
-    virtual void V60(); virtual void V61(); virtual void V62(); virtual void V63(); virtual void V64(); virtual void V65();
-    virtual void V66(); virtual void V67(); virtual void V68(); virtual void V69(); virtual void V70(); virtual void V71();
-    virtual void V72(); virtual void V73(); virtual void V74(); virtual void V75(); virtual void V76(); virtual void V77();
-    virtual void V78(); virtual void V79(); virtual void V80(); virtual void V81(); virtual void V82(); virtual void V83();
-    virtual void V84(); virtual void V85(); virtual void V86(); virtual void V87(); virtual void V88(); virtual void V89();
-    virtual void V90(); virtual void V91(); virtual void V92(); virtual void V93(); virtual void V94(); virtual void V95();
-    virtual void V96(); virtual void V97(); virtual void V98(); virtual void V99(); virtual void V100(); virtual void V101();
-    virtual void V102(); virtual void V103(); virtual void V104(); virtual void V105(); virtual void V106(); virtual void V107();
-    virtual void V108(); virtual void V109(); virtual void V110(); virtual void V111(); virtual void V112(); virtual void V113();
-    virtual void V114(); virtual void V115();
-    virtual NiNode* Get3D();
-};
-
-extern ImageSpaceEffectParam g_kDefaultImageSpaceColor;
+extern NiColorA g_kDefaultImageSpaceColor;
 
 // @fnv 0x005d3930
 bool FUN_005d3930(const ScriptParameter* parameters, const char* scriptData, TESObjectREFR* thisObject, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& opcodeOffset)
@@ -20847,7 +17779,7 @@ bool FUN_005d3930(const ScriptParameter* parameters, const char* scriptData, TES
     pProperty4 = 0;
     if (thisObject)
     {
-        NiNode* p3D = ((RefVirtuals*)thisObject)->Get3D();
+        NiNode* p3D = reinterpret_cast<NiNode*>(thisObject->GetNiNode());
         NiAVObject* pChild = p3D->GetAt(0);
         NiProperty* pProp = pChild->GetProperty(3);
         pProperty4 = pProp;
@@ -20856,9 +17788,9 @@ bool FUN_005d3930(const ScriptParameter* parameters, const char* scriptData, TES
     if (iRed7 >= 0 && iGreen_2 >= 0 && kIBlue >= 0 && iRed7 <= 255 && iGreen_2 <= 255 && kIBlue <= 255)
     {
         if (pProperty4)
-            pProperty4->kColor = ImageSpaceEffectParam(iRed7 / 255.0, iGreen_2 / 255.0, kIBlue / 255.0, 1.0f);
+            (*reinterpret_cast<NiColorA*>(reinterpret_cast<char*>(pProperty4) + 0xa8)) = NiColorA(iRed7 / 255.0, iGreen_2 / 255.0, kIBlue / 255.0, 1.0f);
         else
-            g_kDefaultImageSpaceColor = ImageSpaceEffectParam(iRed7 / 255.0, iGreen_2 / 255.0, kIBlue / 255.0, 1.0f);
+            g_kDefaultImageSpaceColor = NiColorA(iRed7 / 255.0, iGreen_2 / 255.0, kIBlue / 255.0, 1.0f);
     }
     return true;
 }
@@ -20896,131 +17828,12 @@ struct S_005d3c20_Local
     int unk18;
 };
 
-struct S_005d3c20_Foo
-{
-    virtual void V000() = 0;
-    virtual void V001() = 0;
-    virtual void V002() = 0;
-    virtual void V003() = 0;
-    virtual void V004() = 0;
-    virtual void V005() = 0;
-    virtual void V006() = 0;
-    virtual void V007() = 0;
-    virtual void V008() = 0;
-    virtual void V009() = 0;
-    virtual void V010() = 0;
-    virtual void V011() = 0;
-    virtual void V012() = 0;
-    virtual void V013() = 0;
-    virtual void V014() = 0;
-    virtual void V015() = 0;
-    virtual void V016() = 0;
-    virtual void V017() = 0;
-    virtual void V018() = 0;
-    virtual void V019() = 0;
-    virtual void V020() = 0;
-    virtual void V021() = 0;
-    virtual void V022() = 0;
-    virtual void V023() = 0;
-    virtual void V024() = 0;
-    virtual void V025() = 0;
-    virtual void V026() = 0;
-    virtual void V027() = 0;
-    virtual void V028() = 0;
-    virtual void V029() = 0;
-    virtual void V030() = 0;
-    virtual void V031() = 0;
-    virtual void V032() = 0;
-    virtual void V033() = 0;
-    virtual void V034() = 0;
-    virtual void V035() = 0;
-    virtual void V036() = 0;
-    virtual void V037() = 0;
-    virtual void V038() = 0;
-    virtual void V039() = 0;
-    virtual void V040() = 0;
-    virtual void V041() = 0;
-    virtual void V042() = 0;
-    virtual void V043() = 0;
-    virtual void V044() = 0;
-    virtual void V045() = 0;
-    virtual void V046() = 0;
-    virtual void V047() = 0;
-    virtual void V048() = 0;
-    virtual void V049() = 0;
-    virtual void V050() = 0;
-    virtual void V051() = 0;
-    virtual void V052() = 0;
-    virtual void V053() = 0;
-    virtual void V054() = 0;
-    virtual void V055() = 0;
-    virtual void V056() = 0;
-    virtual void V057() = 0;
-    virtual void V058() = 0;
-    virtual void V059() = 0;
-    virtual void V060() = 0;
-    virtual void V061() = 0;
-    virtual void V062() = 0;
-    virtual void V063() = 0;
-    virtual void V064() = 0;
-    virtual void V065() = 0;
-    virtual void V066() = 0;
-    virtual void V067() = 0;
-    virtual void V068() = 0;
-    virtual void V069() = 0;
-    virtual void V070() = 0;
-    virtual void V071() = 0;
-    virtual void V072() = 0;
-    virtual void V073() = 0;
-    virtual void V074() = 0;
-    virtual void V075() = 0;
-    virtual void V076() = 0;
-    virtual void V077() = 0;
-    virtual void V078() = 0;
-    virtual void V079() = 0;
-    virtual void V080() = 0;
-    virtual void V081() = 0;
-    virtual void V082() = 0;
-    virtual void V083() = 0;
-    virtual void V084() = 0;
-    virtual void V085() = 0;
-    virtual void V086() = 0;
-    virtual void V087() = 0;
-    virtual void V088() = 0;
-    virtual void V089() = 0;
-    virtual void V090() = 0;
-    virtual void V091() = 0;
-    virtual void V092() = 0;
-    virtual void V093() = 0;
-    virtual void V094() = 0;
-    virtual void V095() = 0;
-    virtual void V096() = 0;
-    virtual void V097() = 0;
-    virtual void V098() = 0;
-    virtual void V099() = 0;
-    virtual void V100() = 0;
-    virtual void V101() = 0;
-    virtual void V102() = 0;
-    virtual void V103() = 0;
-    virtual void V104() = 0;
-    virtual void V105() = 0;
-    virtual void V106() = 0;
-    virtual void V107() = 0;
-    virtual void V108() = 0;
-    virtual void V109() = 0;
-    virtual void V110() = 0;
-    virtual void V111() = 0;
-    virtual void V112() = 0;
-    virtual void V113() = 0;
-    virtual void V114() = 0;
-    virtual void V115() = 0;
-    virtual int FUN_005d3d00() = 0;
-};
+
 
 int __cdecl FUN_00c68ec0(int, S_005d3c20_Local*, S_005d3c70_Callback);
 
 // @fnv 0x005d3c20
-void __cdecl FUN_005d3c20(S_005d3c20_Foo* apObject, float afValue)
+void __cdecl FUN_005d3c20(TESObjectREFR* apObject, float afValue)
 {
     S_005d3c20_Local local;
 
@@ -21029,7 +17842,7 @@ void __cdecl FUN_005d3c20(S_005d3c20_Foo* apObject, float afValue)
     local.unk04 = 1;
     local.unk0c = afValue;
 
-    FUN_00c68ec0(apObject->FUN_005d3d00(), &local, FUN_005d3c70);
+    FUN_00c68ec0(reinterpret_cast<int>(apObject->GetNiNode()), &local, FUN_005d3c70);
 }
 
 struct FUN_005d3c70_Owner
@@ -21135,94 +17948,11 @@ unsigned char __cdecl FUN_005d4740(unsigned int first, unsigned int second, unsi
 }
 }  // namespace fnv_005d4740
 
-struct FUN_005d4c20_cls {
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81(float f, int i);
-};
+
 // @fnv 0x005d4c20
-void __cdecl FUN_005d4c20(FUN_005d4c20_cls* p, float f)
+void __cdecl FUN_005d4c20(TESObjectREFR* p, float f)
 {
-    p->v81(f, 1);
+    p->DamageObject(f, true);
 }
 
 struct SpecialActorState {
@@ -22121,278 +18851,13 @@ struct FormS;
 
 struct Pt3S { float x; float y; float z; };
 
-struct ActorS;
 
 struct ProcItem {
     FormS* FUN_0044ddc0();
 };
 
-struct BaseProcess {
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1c();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2c();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void vf38();
-    virtual void vf3c();
-    virtual void vf40();
-    virtual void vf44();
-    virtual void vf48();
-    virtual void vf4c();
-    virtual void vf50();
-    virtual void vf54();
-    virtual void vf58();
-    virtual void vf5c();
-    virtual void vf60();
-    virtual void vf64();
-    virtual void vf68();
-    virtual void vf6c();
-    virtual void vf70();
-    virtual void vf74();
-    virtual void vf78();
-    virtual void vf7c();
-    virtual void vf80();
-    virtual void vf84();
-    virtual void vf88();
-    virtual void vf8c();
-    virtual void vf90();
-    virtual void vf94();
-    virtual void vf98();
-    virtual void vf9c();
-    virtual void vfa0();
-    virtual void vfa4();
-    virtual void vfa8();
-    virtual void vfac();
-    virtual void vfb0();
-    virtual void vfb4();
-    virtual void vfb8();
-    virtual void vfbc();
-    virtual void vfc0();
-    virtual void vfc4();
-    virtual void vfc8();
-    virtual void vfcc();
-    virtual void vfd0();
-    virtual void vfd4();
-    virtual void vfd8();
-    virtual void vfdc();
-    virtual void vfe0();
-    virtual void vfe4();
-    virtual void vfe8();
-    virtual void vfec();
-    virtual void vff0();
-    virtual void vff4();
-    virtual void vff8();
-    virtual void vffc();
-    virtual void vf100();
-    virtual void vf104();
-    virtual void vf108();
-    virtual void vf10c();
-    virtual void vf110();
-    virtual void vf114();
-    virtual void vf118();
-    virtual void vf11c();
-    virtual void vf120();
-    virtual void vf124();
-    virtual void vf128();
-    virtual void vf12c();
-    virtual void vf130();
-    virtual void vf134();
-    virtual void vf138();
-    virtual void vf13c();
-    virtual void vf140();
-    virtual void vf144();
-    virtual ProcItem* GetItem();
-    virtual void vf14c();
-    virtual void vf150();
-    virtual void vf154();
-    virtual void vf158();
-    virtual void vf15c();
-    virtual void vf160();
-    virtual void vf164();
-    virtual void vf168();
-    virtual void vf16c();
-    virtual void vf170();
-    virtual void vf174();
-    virtual void vf178();
-    virtual void vf17c();
-    virtual void vf180();
-    virtual void vf184();
-    virtual void vf188();
-    virtual void vf18c();
-    virtual void vf190();
-    virtual void vf194();
-    virtual void vf198();
-    virtual void vf19c();
-    virtual void vf1a0();
-    virtual void vf1a4();
-    virtual void vf1a8();
-    virtual void vf1ac();
-    virtual void vf1b0();
-    virtual void vf1b4();
-    virtual void vf1b8();
-    virtual void vf1bc();
-    virtual void vf1c0();
-    virtual void vf1c4();
-    virtual void vf1c8();
-    virtual void vf1cc();
-    virtual void vf1d0();
-    virtual void vf1d4();
-    virtual void vf1d8();
-    virtual void vf1dc();
-    virtual void vf1e0();
-    virtual void vf1e4();
-    virtual void vf1e8();
-    virtual void vf1ec();
-    virtual void vf1f0();
-    virtual void vf1f4();
-    virtual void vf1f8();
-    virtual void vf1fc();
-    virtual void vf200();
-    virtual void vf204();
-    virtual void vf208();
-    virtual void vf20c();
-    virtual void vf210();
-    virtual void vf214();
-    virtual void vf218();
-    virtual void vf21c();
-    virtual void vf220();
-    virtual void vf224();
-    virtual void vf228();
-    virtual void vf22c();
-    virtual void vf230();
-    virtual void vf234();
-    virtual void vf238();
-    virtual void vf23c();
-    virtual void vf240();
-    virtual void vf244();
-    virtual void vf248();
-    virtual void vf24c();
-    virtual void vf250();
-    virtual void vf254();
-    virtual void vf258();
-    virtual void vf25c();
-    virtual void vf260();
-    virtual void vf264();
-    virtual void vf268();
-    virtual void vf26c();
-    virtual void vf270();
-    virtual void vf274();
-    virtual void vf278();
-    virtual void vf27c();
-    virtual void vf280();
-    virtual void vf284();
-    virtual void vf288();
-    virtual void vf28c();
-    virtual void vf290();
-    virtual void vf294();
-    virtual void vf298();
-    virtual void vf29c();
-    virtual void vf2a0();
-    virtual void vf2a4();
-    virtual void vf2a8();
-    virtual void vf2ac();
-    virtual void vf2b0();
-    virtual void vf2b4();
-    virtual void vf2b8();
-    virtual void vf2bc();
-    virtual void vf2c0();
-    virtual void vf2c4();
-    virtual void vf2c8();
-    virtual void vf2cc();
-    virtual void vf2d0();
-    virtual void vf2d4();
-    virtual void vf2d8();
-    virtual void vf2dc();
-    virtual void vf2e0();
-    virtual void vf2e4();
-    virtual void vf2e8();
-    virtual void vf2ec();
-    virtual void vf2f0();
-    virtual void vf2f4();
-    virtual void vf2f8();
-    virtual void vf2fc();
-    virtual void vf300();
-    virtual void vf304();
-    virtual void vf308();
-    virtual void vf30c();
-    virtual void vf310();
-    virtual void vf314();
-    virtual void vf318();
-    virtual void vf31c();
-    virtual void vf320();
-    virtual void vf324();
-    virtual void vf328();
-    virtual void vf32c();
-    virtual void vf330();
-    virtual void vf334();
-    virtual void vf338();
-    virtual void vf33c();
-    virtual void vf340();
-    virtual void vf344();
-    virtual void vf348();
-    virtual void vf34c();
-    virtual void vf350();
-    virtual void vf354();
-    virtual void vf358();
-    virtual void vf35c();
-    virtual void vf360();
-    virtual void vf364();
-    virtual void vf368();
-    virtual void vf36c();
-    virtual void vf370();
-    virtual void vf374();
-    virtual void vf378();
-    virtual void vf37c();
-    virtual void vf380();
-    virtual void vf384();
-    virtual void vf388();
-    virtual void vf38c();
-    virtual void vf390();
-    virtual void vf394();
-    virtual void vf398();
-    virtual void vf39c();
-    virtual void vf3a0();
-    virtual void vf3a4();
-    virtual void vf3a8();
-    virtual void vf3ac();
-    virtual void vf3b0();
-    virtual void vf3b4();
-    virtual void vf3b8();
-    virtual void vf3bc();
-    virtual void vf3c0();
-    virtual void vf3c4();
-    virtual void vf3c8();
-    virtual void vf3cc();
-    virtual void vf3d0();
-    virtual void vf3d4();
-    virtual void vf3d8();
-    virtual void vf3dc();
-    virtual void vf3e0();
-    virtual void vf3e4();
-    virtual void vf3e8();
-    virtual void vf3ec();
-    virtual void vf3f0();
-    virtual void vf3f4();
-    virtual void vf3f8();
-    virtual void vf3fc();
-    virtual void vf400();
-    virtual void vf404();
-    virtual void vf408();
-    virtual void vf40c();
-    virtual void vf410();
-    virtual void vf414();
-    virtual void PushActorAway(ActorS*, Pt3S);
-    int FUN_0045cd60();
-};
+// The shared process lacks this two-argument PushActorAway virtual interface.
+
 
 struct RefS {
     virtual void vf00();
@@ -22567,95 +19032,13 @@ struct AVOwnerS {
     int unk00;
 };
 
-struct ActorS : RefS, AVOwnerS {
-    BaseProcess* GetCurrentProcess();
-    void* FUN_007af430();
-};
 
-struct ScriptS {
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1c();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2c();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void vf38();
-    virtual void vf3c();
-    virtual void vf40();
-    virtual void vf44();
-    virtual void vf48();
-    virtual void vf4c();
-    virtual void vf50();
-    virtual void vf54();
-    virtual void vf58();
-    virtual void vf5c();
-    virtual void vf60();
-    virtual void vf64();
-    virtual void vf68();
-    virtual void vf6c();
-    virtual void vf70();
-    virtual void vf74();
-    virtual void vf78();
-    virtual void vf7c();
-    virtual void vf80();
-    virtual void vf84();
-    virtual void vf88();
-    virtual void vf8c();
-    virtual void vf90();
-    virtual void vf94();
-    virtual void vf98();
-    virtual void vf9c();
-    virtual void vfa0();
-    virtual void vfa4();
-    virtual void vfa8();
-    virtual void vfac();
-    virtual void vfb0();
-    virtual void vfb4();
-    virtual void vfb8();
-    virtual void vfbc();
-    virtual void vfc0();
-    virtual void vfc4();
-    virtual void vfc8();
-    virtual void vfcc();
-    virtual void vfd0();
-    virtual void vfd4();
-    virtual void vfd8();
-    virtual void vfdc();
-    virtual void vfe0();
-    virtual void vfe4();
-    virtual void vfe8();
-    virtual void vfec();
-    virtual void vff0();
-    virtual void vff4();
-    virtual void vff8();
-    virtual void vffc();
-    virtual void vf100();
-    virtual void vf104();
-    virtual void vf108();
-    virtual void vf10c();
-    virtual void vf110();
-    virtual void vf114();
-    virtual void vf118();
-    virtual void vf11c();
-    virtual void vf120();
-    virtual void vf124();
-    virtual void vf128();
-    virtual void vf12c();
-    virtual const char* GetName();
-};
+
 
 extern TESObjectREFR* _g_thePlayer;
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
-float __cdecl FUN_00646580(AVOwnerS*, int);
+float __cdecl FUN_00646580(ActorValueOwner*, int);
 void __cdecl FUN_005f5950(int, int, void*, FormS*, int, int, int);
 void __cdecl _FNV_Warning(const char*, ...);
 
@@ -22667,20 +19050,22 @@ bool __cdecl FUN_005d6b60(const ScriptParameter* apParameters, const char* apCom
     if (!ExtractArgs(apParameters, apCompiledParams, &auiOffset, apRefObject, apContainer, apScript, apScriptLocals, &pRef, &force))
         return false;
     if (pRef->IsActor()) {
-        ActorS* pActor5 = (ActorS*)pRef;
+        Actor* pActor5 = (Actor*)pRef;
         float fForce7 = FUN_00646580(pActor5, force);
         BaseProcess* pProcess4 = pActor5->GetCurrentProcess();
         if (pProcess4 && !pProcess4->FUN_0045cd60()) {
             BaseProcess* pHigh8 = pProcess4;
             if (apRefObject == _g_thePlayer) {
-                ProcItem* pItem = ((ActorS*)_g_thePlayer)->GetCurrentProcess()->GetItem();
+                ProcItem* pItem = reinterpret_cast<ProcItem*>(((Actor*)_g_thePlayer)->GetCurrentProcess()->GetActiveWeapon());
                 FormS* pForm = pItem ? pItem->FUN_0044ddc0() : 0;
                 FUN_005f5950(3, 1, pActor5->FUN_007af430(), pForm, 0xffff, 2, 0);
             }
-            pHigh8->PushActorAway(pActor5, *((RefS*)apRefObject)->GetPos(fForce7));
+            // This script call uses the original two-argument virtual interface.
+            typedef void (__thiscall *ScriptPushActorAway)(BaseProcess*, Actor*, NiPoint3);
+            ((ScriptPushActorAway)(*(void***)pHigh8)[0x418 / 4])(pHigh8, reinterpret_cast<Actor*>(pActor5), reinterpret_cast<const NiPoint3&>(*((RefS*)apRefObject)->GetPos(fForce7)));
         }
     } else if (apScript) {
-        _FNV_Warning("SCRIPTS: PushActorAway in script '%s' is attempting to push a non-actor reference.", ((ScriptS*)apScript)->GetName());
+        _FNV_Warning("SCRIPTS: PushActorAway in script '%s' is attempting to push a non-actor reference.", apScript->GetName());
     }
     return true;
 }
@@ -22740,9 +19125,7 @@ bool __cdecl FUN_005d73d0(int a1, int a2, int a3, int a4, int a5, int a6, int a7
 }
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 void __cdecl FUN_005accb0(const ScriptParameter*, const char*, unsigned int&, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, int*);
 extern "C" void __cdecl FUN_00705830(int, int, int);
@@ -22771,9 +19154,7 @@ bool __cdecl FUN_005d7540(int a1, int a2, int a3, int a4, int a5, int a6, int a7
 }
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 extern bool __cdecl FUN_005accb0(
     const ScriptParameter*, const char*, unsigned int&,
     TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*,
@@ -22919,9 +19300,7 @@ void __cdecl FUN_005d8300(const ScriptParameter* pParameters, const char* pScrip
 }
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 
@@ -23103,74 +19482,21 @@ bool __cdecl FUN_005d8bf0(const ScriptParameter* parameters, const char* compile
     return true;
 }
 
-class PlayerCharacter;
+
 extern PlayerCharacter* pPlayer;
 
-struct Reference_005d8e20 {
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8();
-    virtual void V9();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual void V34();
-    virtual void V35();
-    virtual void V36();
-    virtual void V37();
-    virtual void V38();
-    virtual void V39();
-    virtual void V40();
-    virtual void V41();
-    virtual void V42();
-    virtual void V43();
-    virtual void V44();
-    virtual void V45();
-    virtual void V46();
-    virtual void V47();
-    virtual void V48();
-    virtual void V49(bool abEnabled);
-    bool FUN_00440d80();
-    int FUN_00484e60(int);
-};
+
 
 struct ReferenceRemovalManager {
-    void FUN_005ae3d0(Reference_005d8e20**);
+    void FUN_005ae3d0(TESObjectREFR**);
 };
 extern ReferenceRemovalManager DAT_011cacb8;
 
 // @fnv 0x005d8e20
-bool __cdecl FUN_005d8e20(void* unused1, void* unused2, Reference_005d8e20* reference) {
+bool __cdecl FUN_005d8e20(void* unused1, void* unused2, TESObjectREFR* reference) {
     if (reference && !reference->FUN_00440d80() &&
         static_cast<void*>(reference) != static_cast<void*>(pPlayer)) {
-        reference->V49(true);
+        reference->MarkForDeletion(true);
         if (!reference->FUN_00484e60(0)) {
             DAT_011cacb8.FUN_005ae3d0(&reference);
         }
@@ -23313,8 +19639,7 @@ void __cdecl FUN_005da280(const ScriptParameter* apParameters, const char* apScr
 }
 
 class ScriptParameter;
-class Script;
-class ScriptLocals;
+
 
 struct RaceNode
 {
@@ -23322,24 +19647,11 @@ struct RaceNode
     RaceNode* GetPrevNode();
 };
 
-struct RaceNodeList
-{
-    RaceNode* GetFirstSceneObject();
-};
 
-struct TESNPCStub
+// TESNPC.h lacks SetRace (0x0060b240); this accessor adds that operation without duplicating the NPC layout.
+struct ActorRaceChangeAccess : public TESNPC
 {
-    int unk000; int unk004; int unk008; int unk00C; int unk010; int unk014; int unk018; int unk01C;
-    int unk020; int unk024; int unk028; int unk02C; int unk030; int unk034; int unk038; int unk03C;
-    int unk040; int unk044; int unk048; int unk04C; int unk050; int unk054; int unk058; int unk05C;
-    int unk060; int unk064; int unk068; int unk06C; int unk070; int unk074; int unk078; int unk07C;
-    int unk080; int unk084; int unk088; int unk08C; int unk090; int unk094; int unk098; int unk09C;
-    int unk0A0; int unk0A4; int unk0A8; int unk0AC; int unk0B0; int unk0B4; int unk0B8; int unk0BC;
-    int unk0C0; int unk0C4; int unk0C8; int unk0CC; int unk0D0; int unk0D4; int unk0D8; int unk0DC;
-    int unk0E0; int unk0E4; int unk0E8; int unk0EC; int unk0F0; int unk0F4; int unk0F8; int unk0FC;
-    int unk100; int unk104; int unk108;
-    RaceNodeList raceList;
-    void ApplyRaceNode(RaceNode* apNode, int aiFlag);
+    void ApplyRaceNode(RaceNode* race, int actor);
 };
 
 class ActorRefStub
@@ -23360,17 +19672,13 @@ public:
     virtual void V120(); virtual void V121(); virtual void V122(); virtual void V123(); virtual void V124(); virtual void V125(); virtual void V126(); virtual void V127(); virtual void V128(); virtual void V129();
     virtual void V130(); virtual void V131(); virtual void V132(); virtual void V133();
     virtual bool IsActor();
-    TESNPCStub* GetBaseNPC();
-};
-
-class CharacterStub : public ActorRefStub
-{
-public:
-    void Reset3D();
+    TESNPC* GetBaseNPC();
 };
 
 
-void __cdecl ResetNPCRaceData(TESNPCStub* apNPC);
+
+
+void __cdecl ResetNPCRaceData(TESNPC* apNPC);
 
 // @fnv 0x005da810
 bool FUN_005da810(const ScriptParameter* apParams, const char* apScriptData, TESObjectREFR* apThisObj, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apLocals, double& afResult, unsigned int& aiOpcodeOffset)
@@ -23380,10 +19688,10 @@ bool FUN_005da810(const ScriptParameter* apParams, const char* apScriptData, TES
         return false;
     if (pTarget3 && pTarget3->IsActor() && apThisObj && ((ActorRefStub*)apThisObj)->IsActor())
     {
-        TESNPCStub* _pThisNPC = ((ActorRefStub*)apThisObj)->GetBaseNPC();
-        TESNPCStub* pTargetNPC = pTarget3->GetBaseNPC();
-        RaceNode* pThisNode5 = _pThisNPC->raceList.GetFirstSceneObject();
-        RaceNode* kPTargetNode = pTargetNPC->raceList.GetFirstSceneObject();
+        TESNPC* _pThisNPC = ((ActorRefStub*)apThisObj)->GetBaseNPC();
+        TESNPC* pTargetNPC = pTarget3->GetBaseNPC();
+        RaceNode* pThisNode5 = reinterpret_cast<RaceNode*>(_pThisNPC->TESRaceForm::GetFormRace());
+        RaceNode* kPTargetNode = reinterpret_cast<RaceNode*>(pTargetNPC->TESRaceForm::GetFormRace());
         if (kPTargetNode != pThisNode5)
         {
             int iDepth7 = 0;
@@ -23400,8 +19708,8 @@ bool FUN_005da810(const ScriptParameter* apParams, const char* apScriptData, TES
                 iDepth7--;
             }
             ResetNPCRaceData(_pThisNPC);
-            _pThisNPC->ApplyRaceNode(kPTargetNode, 0);
-            CharacterStub* pCharacter = (CharacterStub*)apThisObj;
+            static_cast<ActorRaceChangeAccess*>(_pThisNPC)->ApplyRaceNode(kPTargetNode, 0);
+            Character* pCharacter = (Character*)apThisObj;
             pCharacter->Reset3D();
         }
     }
@@ -23466,144 +19774,12 @@ bool FUN_005dab90(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8
     return true;
 }
 
-struct FUN_005dac60_Obj {
-    virtual void V0() {}
-    virtual void V1() {}
-    virtual void V2() {}
-    virtual void V3() {}
-    virtual void V4() {}
-    virtual void V5() {}
-    virtual void V6() {}
-    virtual void V7() {}
-    virtual void V8() {}
-    virtual void V9() {}
-    virtual void V10() {}
-    virtual void V11() {}
-    virtual void V12() {}
-    virtual void V13() {}
-    virtual void V14() {}
-    virtual void V15() {}
-    virtual void V16() {}
-    virtual void V17() {}
-    virtual void V18() {}
-    virtual void V19() {}
-    virtual void V20() {}
-    virtual void V21() {}
-    virtual void V22() {}
-    virtual void V23() {}
-    virtual void V24() {}
-    virtual void V25() {}
-    virtual void V26() {}
-    virtual void V27() {}
-    virtual void V28() {}
-    virtual void V29() {}
-    virtual void V30() {}
-    virtual void V31() {}
-    virtual void V32() {}
-    virtual void V33() {}
-    virtual void V34() {}
-    virtual void V35() {}
-    virtual void V36() {}
-    virtual void V37() {}
-    virtual void V38() {}
-    virtual void V39() {}
-    virtual void V40() {}
-    virtual void V41() {}
-    virtual void V42() {}
-    virtual void V43() {}
-    virtual void V44() {}
-    virtual void V45() {}
-    virtual void V46() {}
-    virtual void V47() {}
-    virtual void V48() {}
-    virtual void V49() {}
-    virtual void V50() {}
-    virtual void V51() {}
-    virtual void V52() {}
-    virtual void V53() {}
-    virtual void V54() {}
-    virtual void V55() {}
-    virtual void V56() {}
-    virtual void V57() {}
-    virtual void V58() {}
-    virtual void V59() {}
-    virtual void V60() {}
-    virtual void V61() {}
-    virtual void V62() {}
-    virtual void V63() {}
-    virtual void V64() {}
-    virtual void V65() {}
-    virtual void V66() {}
-    virtual void V67() {}
-    virtual void V68() {}
-    virtual void V69() {}
-    virtual void V70() {}
-    virtual void V71() {}
-    virtual void V72() {}
-    virtual void V73() {}
-    virtual void V74() {}
-    virtual void V75() {}
-    virtual void V76() {}
-    virtual void V77() {}
-    virtual void V78() {}
-    virtual void V79() {}
-    virtual void V80() {}
-    virtual void V81() {}
-    virtual void V82() {}
-    virtual void V83() {}
-    virtual void V84() {}
-    virtual void V85() {}
-    virtual void V86() {}
-    virtual void V87() {}
-    virtual void V88() {}
-    virtual void V89() {}
-    virtual void V90() {}
-    virtual void V91() {}
-    virtual void V92() {}
-    virtual void V93() {}
-    virtual void V94() {}
-    virtual void V95() {}
-    virtual void V96() {}
-    virtual void V97() {}
-    virtual void V98() {}
-    virtual void V99() {}
-    virtual void V100() {}
-    virtual void V101() {}
-    virtual void V102() {}
-    virtual void V103() {}
-    virtual void V104() {}
-    virtual void V105() {}
-    virtual void V106() {}
-    virtual void V107() {}
-    virtual void V108() {}
-    virtual void V109() {}
-    virtual void V110() {}
-    virtual void V111() {}
-    virtual void V112() {}
-    virtual void V113() {}
-    virtual void V114() {}
-    virtual void V115() {}
-    virtual void V116() {}
-    virtual void V117() {}
-    virtual void V118() {}
-    virtual void V119() {}
-    virtual void V120() {}
-    virtual void V121() {}
-    virtual void V122() {}
-    virtual void V123() {}
-    virtual void V124() {}
-    virtual void V125() {}
-    virtual void V126() {}
-    virtual void V127() {}
-    virtual void V128() {}
-    virtual void V129() {}
-    virtual void V130(int) {}
-};
+
 
 // @fnv 0x005dac60
-bool __cdecl FUN_005dac60(int, int, FUN_005dac60_Obj* p) {
+bool __cdecl FUN_005dac60(int, int, TESObjectREFR* p) {
     if (p != 0) {
-        p->V130(0);
+        reinterpret_cast<void (__thiscall*)(TESObjectREFR*, int)>((*reinterpret_cast<void***>(p))[0x82])(p, 0);
     }
     return true;
 }
@@ -23965,87 +20141,20 @@ struct S_005ddae0_Proc {
     virtual void vfn_144();
     virtual S_005ddae0_List* vfn_148();
 };
-struct S_005ddae0_Ref {
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual void vfn_8();
-    virtual void vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual void vfn_8c();
-    virtual void vfn_90();
-    virtual void vfn_94();
-    virtual void vfn_98();
-    virtual void vfn_9c();
-    virtual void vfn_a0();
-    virtual void vfn_a4();
-    virtual void vfn_a8();
-    virtual void vfn_ac();
-    virtual void vfn_b0();
-    virtual void vfn_b4();
-    virtual void vfn_b8();
-    virtual void vfn_bc();
-    virtual void vfn_c0();
-    virtual void vfn_c4();
-    virtual void vfn_c8();
-    virtual void vfn_cc();
-    virtual void vfn_d0();
-    virtual void vfn_d4();
-    virtual void vfn_d8();
-    virtual void vfn_dc();
-    virtual void vfn_e0();
-    virtual void vfn_e4();
-    virtual void vfn_e8();
-    virtual void vfn_ec();
-    virtual void vfn_f0();
-    virtual void vfn_f4();
-    virtual void vfn_f8();
-    virtual void vfn_fc();
-    virtual bool vfn_100();
-    S_005ddae0_Proc* FUN_008d8520();
-};
 
-bool __cdecl FUN_005accb0(const ScriptParameter* param, const char* name, unsigned int* opcode, S_005ddae0_Ref* ref1, TESObjectREFR* ref2, Script* script, ScriptLocals* locals, int* a, int* b);
+
+bool __cdecl FUN_005accb0(const ScriptParameter* param, const char* name, unsigned int* opcode, TESObjectREFR* ref1, TESObjectREFR* ref2, Script* script, ScriptLocals* locals, int* a, int* b);
 
 // @fnv 0x005ddae0
-bool __cdecl FUN_005ddae0(const ScriptParameter* param, const char* name, S_005ddae0_Ref* ref1, TESObjectREFR* ref2, Script* script, ScriptLocals* locals, double& resultValue, unsigned int& opcode) {
+bool __cdecl FUN_005ddae0(const ScriptParameter* param, const char* name, TESObjectREFR* ref1, TESObjectREFR* ref2, Script* script, ScriptLocals* locals, double& resultValue, unsigned int& opcode) {
     int slot = 0;
     int result = 0;
     if (!FUN_005accb0(param, name, &opcode, ref1, ref2, script, locals, &result, &slot)) {
         return false;
     }
-    if (ref1->vfn_100() && slot > 0 && slot <= 3) {
-        S_005ddae0_Ref* actor = ref1;
-        S_005ddae0_List* list = actor->FUN_008d8520()->vfn_148();
+    if (ref1->IsActor() && slot > 0 && slot <= 3) {
+        TESObjectREFR* actor = ref1;
+        S_005ddae0_List* list = reinterpret_cast<S_005ddae0_Proc*>(static_cast<Actor*>(actor)->FUN_008d8520())->vfn_148();
         S_005ddae0_Target* target = *list->FUN_00559450()->FUN_006815c0();
         target->FUN_0042e380(1 << (slot - 1));
     }
@@ -24129,9 +20238,7 @@ bool FUN_005ddd10(int a1, int a2, int a3, int a4, int a5, int a6, int unk20, int
 // Script command: extract (form, index, value) and apply value to the form's index-th slot (index 0 or 1).
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 class ScriptValueTarget {
 public:
@@ -24274,12 +20381,7 @@ struct IdleNode {
 struct IdleManager {
     IdleNode* FUN_0043b5d0();
 };
-struct IdleHandle {
-    void* object;
-    IdleHandle(void*);
-    ~IdleHandle();
-    IdleAnimation* FUN_00559450();
-};
+
 extern IdleManager* DAT_011dea10;
 extern const char DAT_0103d174[];
 extern const char DAT_0103d158[];
@@ -24300,9 +20402,9 @@ bool __cdecl FUN_005de4a0(
 
     IdleNode* node = DAT_011dea10->FUN_0043b5d0();
     while (node != 0) {
-        IdleHandle handle(node->FUN_006815c0());
-        if (handle.FUN_00559450()) {
-            IdleAnimation* pCurrentAnimation = handle.FUN_00559450();
+        NiPointer<IdleAnimation> handle(*static_cast<NiPointer<IdleAnimation>*>(node->FUN_006815c0()));
+        if (handle.operator IdleAnimation*()) {
+            IdleAnimation* pCurrentAnimation = handle.operator IdleAnimation*();
             IdleForm* pBaseIdleForm = pCurrentAnimation->GetBase();
             if (pBaseIdleForm && pBaseIdleForm->FUN_00441110() == formID) {
                 result = 1.0;
@@ -24319,18 +20421,15 @@ bool __cdecl FUN_005de4a0(
 }
 }  // namespace fnv_005de4a0
 
+class TESObjectREFR;
+class Script;
 namespace fnv_005de9f0 {
-class ScriptParameter; class TESObjectREFR; class Script; class ScriptLocals;
+class ScriptParameter;   
 extern TESObjectREFR* _g_thePlayer;
 extern const char str_0103d21c[];
 void __cdecl FUN_005accb0(const ScriptParameter*, const char*, unsigned int&, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*);
 int __cdecl FUN_005b5e40();
-struct ActorValueOwner {
-    virtual float Unknown0(int);
-    virtual float Unknown1(int);
-    virtual float Unknown2(int);
-    virtual float GetActorValue(int);
-};
+
 struct PlayerActor {
     virtual void Unknown0();
     virtual void Unknown1();
@@ -24571,7 +20670,7 @@ struct PlayerActor {
 bool __cdecl FUN_005de9f0(const ScriptParameter* parameters, const char* scriptData, TESObjectREFR* reference, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& offset) {
     FUN_005accb0(parameters, scriptData, offset, reference, container, script, locals);
     if (_g_thePlayer) {
-        float currentValue = reinterpret_cast<ActorValueOwner*>(reinterpret_cast<char*>(_g_thePlayer) + 0xa4)->GetActorValue(0x18);
+        float currentValue = reinterpret_cast<ActorValueOwner*>(reinterpret_cast<char*>(_g_thePlayer) + 0xa4)->GetCurrentActorValue((ActorValue::Index)0x18);
         reinterpret_cast<PlayerActor*>(_g_thePlayer)->ChangeActorValue(0x18, -currentValue, 0);
     } else {
         (reinterpret_cast<int (__cdecl*)(const char*)>(FUN_005b5e40))(str_0103d21c);
@@ -24794,23 +20893,12 @@ void* __cdecl FUN_00ec43fb(TESObjectREFR* apRef, int aUnk1, const char* aStr1, c
 bool __fastcall FUN_008c1b30(void* apObj);
 void __cdecl FUN_00703c00(const char* apFmt, ...);
 
-class FUN_005dfc70_cls : public TESObjectREFR
-{
-public:
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual bool V64();
-};
 
 // @fnv 0x005dfc70
 bool __cdecl FUN_005dfc70(const ScriptParameter* apParameters, const char* apCompiledParams, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
 {
     afReturnValue = 0.0;
-    if (static_cast<FUN_005dfc70_cls*>(apRefObject)->V64()) {
+    if (apRefObject->IsActor()) {
         int iResult;
         void* pRef2 = FUN_00ec43fb(apRefObject, 0, &DAT_011841cc, &DAT_011846d4, 0);
         iResult = FUN_008c1b30(pRef2) ? 1 : 0;
@@ -24828,9 +20916,7 @@ bool __cdecl FUN_005dfc70(const ScriptParameter* apParameters, const char* apCom
 }  // namespace fnv_005dfc70
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 extern bool __cdecl ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 extern void __cdecl FUN_005f6110(unsigned int, unsigned int);
 // @fnv 0x005dfe30
@@ -24871,14 +20957,10 @@ struct RecFormTypeInfo {
     unsigned int chunk;
 };
 
-struct RecString {
-    bool Set(const char* str, unsigned int len);
-    operator const char*() const;
-};
 
 extern RecFormTypeInfo g_FormTypeInfoTable[];
 extern void* g_pLastResponseOwner;
-extern RecString g_ResponseText;
+extern BSStringT<char> g_ResponseText;
 
 struct ResponseOwner {
     int unk00;
@@ -24999,7 +21081,6 @@ void FUN_005b4940();
 void ShowMessageBox_Callback();
 bool __fastcall FUN_004077c0(const TESObjectREFR*);
 unsigned int __fastcall FUN_0084e3a0(void*);
-unsigned int __fastcall FUN_004048e0(const BSStringT<char>*);
 extern int DAT_011cac64;
 extern const char DAT_01020770[];
 extern const char DAT_0103934c[];
@@ -25048,7 +21129,7 @@ bool __cdecl FUN_005b4630(const ScriptParameter* parameters, const char* compile
     if (i->FUN_00590d00()) {
         ShowMessageBox(PrepareScriptMessage(p.String(), false), 0, i->fullName.FUN_00408da0(), ShowMessageBox_Callback, 0, 23, 0.0f, 0.0f,
             a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], 0);
-    } else if (FUN_004048e0(&p)) {
+    } else if (p.Length()) {
         QueueUIMessage(PrepareScriptMessage(p.String(), false), 0,
             i->FUN_0055b980() ? i->FUN_0055b980()->fullName.FUN_00408da0() : 0, 0,
             (float)i->FUN_00639b40(), false);
@@ -25167,45 +21248,6 @@ bool HelpersB::FUN_005b4be0(void* a, void* b, ObjB* c, unsigned* d, ObjB* e, voi
 }  // namespace fnv_005b4be0
 
 struct CmdRef : TESObjectREFR {
-    virtual void vx0E8();
-    virtual void vx0EC();
-    virtual void vx0F0();
-    virtual void vx0F4();
-    virtual void vx0F8();
-    virtual void vx0FC();
-    virtual void vx100();
-    virtual void vx104();
-    virtual void vx108();
-    virtual void vx10C();
-    virtual void vx110();
-    virtual void vx114();
-    virtual void vx118();
-    virtual void vx11C();
-    virtual void vx120();
-    virtual void vx124();
-    virtual void vx128();
-    virtual void vx12C();
-    virtual void vx130();
-    virtual void vx134();
-    virtual void vx138();
-    virtual void vx13C();
-    virtual void vx140();
-    virtual void vx144();
-    virtual void vx148();
-    virtual void vx14C();
-    virtual void vx150();
-    virtual void vx154();
-    virtual void vx158();
-    virtual void vx15C();
-    virtual void vx160();
-    virtual void vx164();
-    virtual void vx168();
-    virtual void vx16C();
-    virtual void vx170();
-    virtual void vx174();
-    virtual void vx178();
-    virtual void AddItem(TESForm* apItem, ExtraDataList* apExtra, int aiCount, int aiUnk1, int aiUnk2, int aiUnk3,
-                         int aiUnk4, int aiUnk5, int aiUnk6, int aiUnk7);
 
     TESForm* GetBaseObject();
     bool HasItem(TESForm* apItem);
@@ -25240,7 +21282,7 @@ bool __cdecl FUN_005b53d0(const ScriptParameter* apParamInfo, const char* apScri
             if (pChanges)
                 pExtraA = pChanges->GetExtraList(apThisObj->GetBaseObject(), 0);
         }
-        static_cast<CmdRef*>(apContainingObj)->AddItem(apThisObj->GetBaseObject(), pExtraA, 1, 0, 0, aISilent, 0, 0, 1, 0);
+        reinterpret_cast<void (__thiscall*)(TESObjectREFR*, TESForm*, ExtraDataList*, int, int, int, int, int, int, int, int)>((*reinterpret_cast<void***>(apContainingObj))[0x5F])(apContainingObj, apThisObj->GetBaseObject(), pExtraA, 1, 0, 0, aISilent, 0, 0, 1, 0);
         g_pCmdPlayer->OnItemTaken(apThisObj);
         if (apContainingObj == g_pCmdPlayer)
             CmdRefreshInventoryMenu();
@@ -25281,14 +21323,12 @@ bool __cdecl FUN_005b55a0(const ScriptParameter* args, const char* raw, TESObjec
 }
 }  // namespace fnv_005b55a0
 
+class MemoryManager;
 namespace fnv_005b5e60 {
 // Local scopes and identifiers preserve VC9 /Od stack allocation and GS array padding.
 struct FUN_008783c0 { unsigned int unk00,unk04,unk08,unk0c,unk10,unk14; FUN_008783c0(const char*); ~FUN_008783c0(); };
 class ScriptParameter;
-class Script;
-class ScriptLocals;
-class TESObjectREFR;
-class MemoryManager;
+
 struct ModelLoader;
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 int __cdecl FUN_00406d30(char*, unsigned int, const char*);
@@ -25317,35 +21357,7 @@ extern ModelLoader* g_pModelLoader;
 struct FUN_00aa47c0_Class { int __thiscall FUN_00aa47c0(int, int); };
 MemoryManager* __cdecl FUN_00401020();
 struct MLdr { void FUN_00443270(void*, int); };
-struct BSFile
-{
-    virtual ~BSFile();
-    BSFile(const char*, bool, unsigned int, bool);
-    bool FUN_00aff300(bool, bool);
-    void FUN_00affd10();
-    unsigned int FUN_00aff950(const char*, unsigned int);
-    char m_fileName[0x104];
-    int m_108;
-    int m_10c;
-    int m_110;
-    int m_114;
-    int m_118;
-    int m_11c;
-    int m_120;
-    int m_124;
-    int m_128;
-    int m_12c;
-    int m_130;
-    int m_134;
-    int m_138;
-    int m_13c;
-    int m_140;
-    int m_144;
-    int m_148;
-    int m_14c;
-    int m_150;
-    int m_154;
-};
+
 struct Elem5e60
 {
     Elem5e60();
@@ -25572,10 +21584,7 @@ bool __cdecl FUN_005b5e60(const ScriptParameter* apParameters, const char* apCom
 
 namespace fnv_005b6800 {
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
-int __cdecl FUN_00406f60(void* s, const char* format, ...);
+
 void* __cdecl _fnv_zlib_memset(void* dst, int value, unsigned int count);
 int __cdecl strcpy_s(char* dst, unsigned int size, const char* src);
 void __cdecl DebugLog(const char* format, ...);
@@ -25698,15 +21707,6 @@ struct RefVirt {
     virtual void Slot115();
     virtual int GetUse();
 };
-struct StrWork {
-    char* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    StrWork();
-    ~StrWork();
-    StrWork& operator+=(const char* text);
-    operator const char*();
-};
 struct Collector {
     int m_n0;
     int m_n1;
@@ -25740,17 +21740,17 @@ bool __cdecl FUN_005b6800(const ScriptParameter* apParameters, const char* apCom
         DebugLog("map written to file '%s'", buf);
     else
         DebugLog("FAILED to write to '%s'", buf);
-    StrWork str3;
+    BSStringT<char> str3;
     unsigned int totalSize;
     totalSize = coll.FUN_004aa890();
         if (totalSize > 0x100000) {
             totalSize = totalSize >> 20;
-            FUN_00406f60(&str3, "%d MB", totalSize);
+            str3.PrintfString("%d MB", totalSize);
         } else if (totalSize > 0x400) {
             totalSize = totalSize >> 10;
-            FUN_00406f60(&str3, "%d KB", totalSize);
+            str3.PrintfString("%d KB", totalSize);
         } else {
-            FUN_00406f60(&str3, "%d bytes", totalSize);
+            str3.PrintfString("%d bytes", totalSize);
         }
     str3 += " textures in use.";
     DebugLog((const char*)str3);
@@ -25794,9 +21794,7 @@ bool __cdecl FUN_005b6a30(const ScriptParameter* apParameters, const char* apCom
 }
 
 class ScriptParameter;
-class Script;
-class ScriptLocals;
-class TESObjectREFR;
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 void __cdecl DebugLog(const char*, ...);
@@ -26085,138 +22083,17 @@ bool FUN_005b7590(void* paramInfo, void* scriptData, void* thisObj, void* contai
 }  // namespace fnv_005b7590
 
 namespace fnv_005b7b40 {
-class NiPoint3 { public:
- float x,y,z;
- NiPoint3(); NiPoint3(float,float,float);
- NiPoint3 operator-(const NiPoint3&) const;
- NiPoint3& operator+=(const NiPoint3&);
-};
-class NiPoint2 { public: float x,y; NiPoint2(); NiPoint2(float,float); };
-class RgbaColor { public: float r,g,b,a; RgbaColor(); RgbaColor(float,float,float,float); };
-class NiMemObject { public: static void* operator new(unsigned int); static void operator delete(void*, unsigned int); };
-class NiAVObject : public NiMemObject { public:
- virtual void vf000();
- virtual void vf004();
- virtual void vf008();
- virtual void vf00c();
- virtual void vf010();
- virtual void vf014();
- virtual void vf018();
- virtual void vf01c();
- virtual void vf020();
- virtual void vf024();
- virtual void vf028();
- virtual void vf02c();
- virtual void vf030();
- virtual void vf034();
- virtual void vf038();
- virtual void vf03c();
- virtual void vf040();
- virtual void vf044();
- virtual void vf048();
- virtual void vf04c();
- virtual void vf050();
- virtual void vf054();
- virtual void vf058();
- virtual void vf05c();
- virtual void vf060();
- virtual void vf064();
- virtual void vf068();
- virtual void vf06c();
- virtual void vf070();
- virtual void vf074();
- virtual void vf078();
- virtual void vf07c();
- virtual void vf080();
- virtual void vf084();
- virtual void vf088();
- virtual void vf08c();
- virtual void vf090();
- virtual void vf094();
- virtual void vf098();
- virtual void vf09c();
- virtual void vf0a0();
- virtual void vf0a4();
- virtual void vf0a8();
- virtual void vf0ac();
- virtual void vf0b0();
- virtual void vf0b4();
- virtual void vf0b8();
- virtual void vf0bc();
- virtual void vf0c0();
- virtual void vf0c4();
- virtual void vf0c8();
- virtual void vf0cc();
- virtual void vf0d0();
- virtual void vf0d4();
- virtual void vf0d8();
- virtual void Attach(NiAVObject*,bool);
- int unk04;
- int unk08;
- int unk0C;
- int unk10;
- int unk14;
- int unk18;
- int unk1C;
- int unk20;
- int unk24;
- int unk28;
- int unk2C;
- int unk30;
- int unk34;
- int unk38;
- int unk3C;
- int unk40;
- int unk44;
- int unk48;
- int unk4C;
- int unk50;
- int unk54;
- int unk58;
- int unk5C;
- int unk60;
- int unk64;
- int unk68;
- int unk6C;
- int unk70;
- int unk74;
- int unk78;
- int unk7C;
- int unk80;
- int unk84;
- int unk88;
- int unk8C;
- int unk90;
- int unk94;
- int unk98;
- int unk9C;
- int unkA0;
- int unkA4;
- int unkA8;
- void FUN_00440460(const NiPoint3&);
- void FUN_004bc1f0(float,float,float);
- void FUN_00439410(void*);
- void FUN_0043fa80(const struct GridRotation&);
- void FUN_00a59c60(const struct GridEuler&);
- void FUN_00a5a040();
-};
-class NiNode : public NiAVObject { public: NiNode(unsigned short); };
-class NiTriShape : public NiAVObject { public:
- int unkAC,unkB0,unkB4,unkB8,unkBC,unkC0;
- NiTriShape(unsigned short,NiPoint3*,NiPoint3*,void*,NiPoint2*,unsigned short,unsigned int,unsigned short,unsigned short*);
-};
-class NiTexturingProperty : public NiMemObject { public:
- int unk00,unk04,unk08,unk0C,unk10,unk14,unk18,unk1C,unk20,unk24,unk28,unk2C;
- NiTexturingProperty();
- void FUN_005b8fc0(void*); void FUN_004f3200(int); void FUN_00533fb0(int);
-};
-class GridRegion { public: void* object; GridRegion(int); ~GridRegion(); void* FUN_00559450(); void FUN_0066b0d0(int); };
+
+
+
+
+
 class GridProcess { public:
  void FUN_00555b10(const NiPoint3*,NiPoint3*,bool);
  void* FUN_00556ef0(int,int,int);
- void FUN_0054e750(int,int,GridRegion*);
+ void FUN_0054e750(int,int,NiPointer<NiTexture>*);
  GridProcess* FUN_005875a0(int,int);
- void* FUN_00555bc0(); void FUN_0054e640(GridRegion*);
+ void* FUN_00555bc0(); void FUN_0054e640(NiPointer<NiTexture>*);
  double FUN_00555ad0();
 };
 class GridPlayer { public:
@@ -26356,11 +22233,11 @@ extern GridPlayer* DAT_011dea3c; extern GridScene* DAT_011dea10;
 extern GridSetting DAT_011c63cc;
 extern const double DAT_01020758,DAT_01011590,DAT_0101db80,DAT_01017a10;
 extern const float DAT_01016088,DAT_01016248,DAT_0102295c,DAT_01018f5c;
-extern NiPoint3 DAT_011f426c; extern RgbaColor DAT_011a9be0; extern GridRotation DAT_011a9448;
+extern NiPoint3 DAT_011f426c; extern NiColorA DAT_011a9be0; extern GridRotation DAT_011a9448;
 bool FUN_005accb0(int,int,int,int,int,int,int,int*);
 float FUN_00879d90(); int FUN_00406d90(float); int FUN_00556870(const NiPoint3*);
 void* FUN_00aa1070(unsigned int);
-NiAVObject* FUN_004b3570(NiPoint3,NiPoint3,NiPoint3,RgbaColor*,bool);
+NiAVObject* FUN_004b3570(NiPoint3,NiPoint3,NiPoint3,NiColorA*,bool);
 
 // @fnv 0x005b7b40
 bool FUN_005b7b40(int form,int flags,int option,int source,int destination,int quality,int unused,int mode)
@@ -26383,7 +22260,7 @@ bool FUN_005b7b40(int form,int flags,int option,int source,int destination,int q
  for(int tile=0;tile<cellTotal6;tile++) {
   unsigned int cellX2=tile % *DAT_011c63cc.FUN_0043d4d0();
   unsigned int cellY2=tile / *DAT_011c63cc.FUN_0043d4d0();
-  GridRegion region63(0);
+  NiPointer<NiTexture> region63(0);
   void* tileData13=0;
   GridProcess* process23=0;
   NiPoint3 origin=DAT_011f426c;
@@ -26413,7 +22290,7 @@ bool FUN_005b7b40(int form,int flags,int option,int source,int destination,int q
   NiPoint3* vertices15=new NiPoint3[meshCount2];
   NiPoint3* normals53=new NiPoint3[meshCount2];
   NiPoint2* uv21=new NiPoint2[meshCount2];
-  RgbaColor* colors=new RgbaColor[meshCount2];
+  NiColorA* colors=new NiColorA[meshCount2];
   unsigned short* indices=(unsigned short*)FUN_00aa1070(quadCount8*2*3*2);
   int vertex7=0;
   int row4,col10;
@@ -26429,7 +22306,7 @@ bool FUN_005b7b40(int form,int flags,int option,int source,int destination,int q
     NiPoint3 sample(col10*cellScale23,row4*cellScale23,0);
     sample+=origin;
     float shade=float(FUN_00556870(&sample));
-    colors[vertex7]=RgbaColor(float(shade/DAT_0101db80),float(shade/DAT_0101db80),float(shade/DAT_0101db80),0);
+    colors[vertex7]=NiColorA(float(shade/DAT_0101db80),float(shade/DAT_0101db80),float(shade/DAT_0101db80),0);
    } else colors[vertex7]=DAT_011a9be0;
    vertex7++;
   }
@@ -26454,13 +22331,13 @@ bool FUN_005b7b40(int form,int flags,int option,int source,int destination,int q
    }
   }
   NiTriShape* shape9=new NiTriShape((unsigned short)meshCount2,vertices15,normals53,colors,uv21,1,0,(unsigned short)(quadCount8*2),indices);
-  root28->Attach(shape9,1);
+  root28->AttachChildInAvailableSlot(shape9,1);
   shape9->FUN_004bc1f0(float(tileWidth12*int(cellX2)+tileWidth12/DAT_01011590-projectionWidth/DAT_01011590),float(tileWidth12*int(cellY2)+tileWidth12/DAT_01011590-projectionWidth/DAT_01011590),0);
-  if(region63.FUN_00559450()) {
+  if(region63.operator NiTexture*()) {
    NiTexturingProperty* regionNode=new NiTexturingProperty;
-   regionNode->FUN_005b8fc0(region63.FUN_00559450());
+   regionNode->FUN_005b8fc0(region63.operator NiTexture*());
    regionNode->FUN_004f3200(0); regionNode->FUN_00533fb0(2);
-   shape9->FUN_00439410(regionNode); region63.FUN_0066b0d0(0);
+   shape9->FUN_00439410(regionNode); region63.operator=(static_cast<NiTexture*>(0));
   }
  }
  NiPoint3 center23;
@@ -26484,15 +22361,15 @@ bool FUN_005b7b40(int form,int flags,int option,int source,int destination,int q
  NiPoint3 axisX5(0,DAT_01016088,1);
  NiPoint3 axisY22(DAT_01016248,DAT_0102295c,1);
  NiPoint3 axisZ22(DAT_0102295c,DAT_0102295c,1);
- NiAVObject* mapMesh=FUN_004b3570(axisX5,axisY22,axisZ22,&RgbaColor(1,0,0,0),1);
- mapMesh->FUN_00440460(cameraOffset38);
+ NiAVObject* mapMesh=FUN_004b3570(axisX5,axisY22,axisZ22,&NiColorA(1,0,0,0),1);
+ mapMesh->FUN_00440460(reinterpret_cast<const ::NiPoint3&>(cameraOffset38));
  GridRotation placement7=DAT_011a9448;
  placement7.FUN_004a0c90(float(DAT_011dea3c->FUN_008d6f30()->FUN_00555ad0()+DAT_011dea3c->FUN_00430830()->z));
- mapMesh->FUN_0043fa80(placement7);
- root28->Attach(mapMesh,1);
- root28->FUN_00440460(camera3);
+ mapMesh->FUN_0043fa80(reinterpret_cast<const ::GridRotation&>(placement7));
+ root28->AttachChildInAvailableSlot(mapMesh,1);
+ root28->FUN_00440460(reinterpret_cast<const ::NiPoint3&>(camera3));
  GridEuler pivot5(0,0,0);
- root28->FUN_00a59c60(pivot5); root28->FUN_00a5a040();
+ root28->FUN_00a59c60(reinterpret_cast<const ::GridEuler&>(pivot5)); root28->FUN_00a5a040();
  DAT_011dea10->FUN_00458e20(root28,DAT_01018f5c);
  return true;
 }
@@ -26542,353 +22419,8 @@ float __cdecl FUN_0040ebd0(float,float);
 float __cdecl FUN_00404010(float,float);
 bool __cdecl FUN_005accb0(const ScriptParameter*,const char*,unsigned int*,TESObjectREFR*,TESObjectREFR*,Script*,ScriptLocals*,float*);
 void __cdecl FUN_00b68770(void*,bool,float,bool,float,bool);
-struct Ref9950 {
- virtual void v0();
- virtual void v1();
- virtual void v2();
- virtual void v3();
- virtual void v4();
- virtual void v5();
- virtual void v6();
- virtual void v7();
- virtual void v8();
- virtual void v9();
- virtual void v10();
- virtual void v11();
- virtual void v12();
- virtual void v13();
- virtual void v14();
- virtual void v15();
- virtual void v16();
- virtual void v17();
- virtual void v18();
- virtual void v19();
- virtual void v20();
- virtual void v21();
- virtual void v22();
- virtual void v23();
- virtual void v24();
- virtual void v25();
- virtual void v26();
- virtual void v27();
- virtual void v28();
- virtual void v29();
- virtual void v30();
- virtual void v31();
- virtual void v32();
- virtual void v33();
- virtual void v34();
- virtual void v35();
- virtual void v36();
- virtual void v37();
- virtual void v38();
- virtual void v39();
- virtual void v40();
- virtual void v41();
- virtual void v42();
- virtual void v43();
- virtual void v44();
- virtual void v45();
- virtual void v46();
- virtual void v47();
- virtual void v48();
- virtual void v49();
- virtual void v50();
- virtual void v51();
- virtual void v52();
- virtual void v53();
- virtual void v54();
- virtual void v55();
- virtual void v56();
- virtual void v57();
- virtual void v58();
- virtual void v59();
- virtual void v60();
- virtual void v61();
- virtual void v62();
- virtual void v63();
- virtual void v64();
- virtual void v65();
- virtual void v66();
- virtual void v67();
- virtual void v68();
- virtual void v69();
- virtual void v70();
- virtual void v71();
- virtual void v72();
- virtual void v73();
- virtual void v74();
- virtual void v75();
- virtual void v76();
- virtual void v77();
- virtual void v78();
- virtual void v79();
- virtual void v80();
- virtual void v81();
- virtual void v82();
- virtual void v83();
- virtual void v84();
- virtual void v85();
- virtual void v86();
- virtual void v87();
- virtual void v88();
- virtual void v89();
- virtual void v90();
- virtual void v91();
- virtual void v92();
- virtual void v93();
- virtual void v94();
- virtual void v95();
- virtual void v96();
- virtual void v97();
- virtual void v98();
- virtual void v99();
- virtual void v100();
- virtual void v101();
- virtual void v102();
- virtual void v103();
- virtual void v104();
- virtual void v105();
- virtual void v106();
- virtual void v107();
- virtual void v108();
- virtual void v109();
- virtual void v110();
- virtual void v111();
- virtual void v112();
- virtual void v113();
- virtual void v114();
- virtual void v115();
- virtual void* GetNode();
-};
-struct Actor9950 {
- virtual void v0();
- virtual void v1();
- virtual void v2();
- virtual void v3();
- virtual void v4();
- virtual void v5();
- virtual void v6();
- virtual void v7();
- virtual void v8();
- virtual void v9();
- virtual void v10();
- virtual void v11();
- virtual void v12();
- virtual void v13();
- virtual void v14();
- virtual void v15();
- virtual void v16();
- virtual void v17();
- virtual void v18();
- virtual void v19();
- virtual void v20();
- virtual void v21();
- virtual void v22();
- virtual void v23();
- virtual void v24();
- virtual void v25();
- virtual void v26();
- virtual void v27();
- virtual void v28();
- virtual void v29();
- virtual void v30();
- virtual void v31();
- virtual void v32();
- virtual void v33();
- virtual void v34();
- virtual void v35();
- virtual void v36();
- virtual void v37();
- virtual void v38();
- virtual void v39();
- virtual void v40();
- virtual void v41();
- virtual void v42();
- virtual void v43();
- virtual void v44();
- virtual void v45();
- virtual void v46();
- virtual void v47();
- virtual void v48();
- virtual void v49();
- virtual void v50();
- virtual void v51();
- virtual void v52();
- virtual void v53();
- virtual void v54();
- virtual void v55();
- virtual void v56();
- virtual void v57();
- virtual void v58();
- virtual void v59();
- virtual void v60();
- virtual void v61();
- virtual void v62();
- virtual void v63();
- virtual void v64();
- virtual void v65();
- virtual void v66();
- virtual void v67();
- virtual void v68();
- virtual void v69();
- virtual void v70();
- virtual void v71();
- virtual void v72();
- virtual void v73();
- virtual void v74();
- virtual void v75();
- virtual void v76();
- virtual void v77();
- virtual void v78();
- virtual void v79();
- virtual void v80();
- virtual void v81();
- virtual void v82();
- virtual void v83();
- virtual void v84();
- virtual void v85();
- virtual void v86();
- virtual void v87();
- virtual void v88();
- virtual void v89();
- virtual void v90();
- virtual void v91();
- virtual void v92();
- virtual void v93();
- virtual void v94();
- virtual void v95();
- virtual void v96();
- virtual void v97();
- virtual void v98();
- virtual void v99();
- virtual void v100();
- virtual void v101();
- virtual void v102();
- virtual void v103();
- virtual void v104();
- virtual void v105();
- virtual void v106();
- virtual void v107();
- virtual void v108();
- virtual void v109();
- virtual void v110();
- virtual void v111();
- virtual void v112();
- virtual void v113();
- virtual void v114();
- virtual void v115();
- virtual void v116();
- virtual void v117();
- virtual void v118();
- virtual void v119();
- virtual void v120();
- virtual void v121();
- virtual void v122();
- virtual void v123();
- virtual void v124();
- virtual void v125();
- virtual void v126();
- virtual void v127();
- virtual void v128();
- virtual void v129();
- virtual void v130();
- virtual void v131();
- virtual void v132();
- virtual void v133();
- virtual void v134();
- virtual void v135();
- virtual void v136();
- virtual void v137();
- virtual void v138();
- virtual void v139();
- virtual void v140();
- virtual void v141();
- virtual void v142();
- virtual void v143();
- virtual void v144();
- virtual void v145();
- virtual void v146();
- virtual void v147();
- virtual void v148();
- virtual void v149();
- virtual void v150();
- virtual void v151();
- virtual void v152();
- virtual void v153();
- virtual void v154();
- virtual void v155();
- virtual void v156();
- virtual void v157();
- virtual void v158();
- virtual void v159();
- virtual void v160();
- virtual void v161();
- virtual void v162();
- virtual void v163();
- virtual void v164();
- virtual void v165();
- virtual void v166();
- virtual void v167();
- virtual void v168();
- virtual void v169();
- virtual void v170();
- virtual void v171();
- virtual void v172();
- virtual void v173();
- virtual void v174();
- virtual void v175();
- virtual void v176();
- virtual void v177();
- virtual void v178();
- virtual void v179();
- virtual void v180();
- virtual void v181();
- virtual void v182();
- virtual void v183();
- virtual void v184();
- virtual void v185();
- virtual void v186();
- virtual void v187();
- virtual void v188();
- virtual void v189();
- virtual void v190();
- virtual void v191();
- virtual void v192();
- virtual void v193();
- virtual void v194();
- virtual void v195();
- virtual void v196();
- virtual void v197();
- virtual void v198();
- virtual void v199();
- virtual void v200();
- virtual void v201();
- virtual void v202();
- virtual void v203();
- virtual void v204();
- virtual void v205();
- virtual void v206();
- virtual void v207();
- virtual void v208();
- virtual void v209();
- virtual void v210();
- virtual void v211();
- virtual void v212();
- virtual void v213();
- virtual void v214();
- virtual void v215();
- virtual void v216();
- virtual void v217();
- virtual void v218();
- virtual void v219();
- virtual void v220();
- virtual void v221();
- virtual void v222();
- virtual void v223();
- virtual void v224();
- virtual void AssignActorValue(bool,float);
-};
+
+
 // @fnv 0x005b9950
 bool __cdecl FUN_005b9950(const ScriptParameter* parameters,const char* scriptData,TESObjectREFR* reference,TESObjectREFR* container,Script* script,ScriptLocals* locals,double& result,unsigned int& offset) {
  if (FUN_005b9b00()) {
@@ -26898,9 +22430,9 @@ bool __cdecl FUN_005b9950(const ScriptParameter* parameters,const char* scriptDa
   enabled=FUN_00404010(FUN_0040ebd0(enabled,1.0f),0.0f);
   bool alpha=enabled>0.0;
   Actor* actor=dynamic_cast<Actor*>(reference);
-  if (actor) ((Actor9950*)actor)->AssignActorValue(alpha,enabled);
+  if (actor) actor->Unk_E1(alpha,enabled);
   else {
-   void* node=((Ref9950*)reference)->GetNode();
+   void* node=reference->GetNiNode();
    if (node) {
     FUN_00b68770(node,false,0.0f,false,0.0f,false);
     FUN_00b68770(node,false,0.0f,true,0.0f,false);
@@ -26913,68 +22445,7 @@ bool __cdecl FUN_005b9950(const ScriptParameter* parameters,const char* scriptDa
 }
 
 struct RefractionTarget;
-struct TESObjectREFR_5b9b40 : public TESObjectREFR {
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual RefractionTarget* GetRefractionTarget();
-    const char* GetFullName();
-};
+
 struct TLSData_005b9b40 {
     int unk000;
     int unk004;
@@ -27152,11 +22623,11 @@ bool __cdecl FUN_005b9b40(const ScriptParameter* paramInfo, const char* scriptDa
         if (!dynamic_cast<Actor*>(thisObj)) {
             fValue = FUN_00404010(FUN_0040ebd0(fValue, 1.0f), 0.0f);
             bool bEnable = fValue > DAT_01012060;
-            RefractionTarget* pTarget = static_cast<TESObjectREFR_5b9b40*>(thisObj)->GetRefractionTarget();
+            RefractionTarget* pTarget = reinterpret_cast<RefractionTarget*>(thisObj->GetNiNode());
             if (pTarget) {
                 FUN_00b68770(pTarget, bEnable, fValue, true, (float)iPeriod, false);
                 if (tls_005b9b40.bConsoleEcho)
-                    DebugLog("%s refraction fire has been set to %f, period of %d", static_cast<TESObjectREFR_5b9b40*>(thisObj)->GetFullName(), fValue, iPeriod);
+                    DebugLog("%s refraction fire has been set to %f, period of %d", thisObj->GetFullName(), fValue, iPeriod);
             }
         }
     }
@@ -27164,75 +22635,34 @@ bool __cdecl FUN_005b9b40(const ScriptParameter* paramInfo, const char* scriptDa
 }
 
 struct ScriptParameter;
-class Script;
-class ScriptLocals;
 
-struct NiColorA_5b9c90 {
-    float r;
-    float g;
-    float b;
-    float a;
-};
+
 
 struct Object3D_5b9c90;
 
-struct Ref_5b9c90 {
-    virtual void v000(); virtual void v004(); virtual void v008(); virtual void v00c();
-    virtual void v010(); virtual void v014(); virtual void v018(); virtual void v01c();
-    virtual void v020(); virtual void v024(); virtual void v028(); virtual void v02c();
-    virtual void v030(); virtual void v034(); virtual void v038(); virtual void v03c();
-    virtual void v040(); virtual void v044(); virtual void v048(); virtual void v04c();
-    virtual void v050(); virtual void v054(); virtual void v058(); virtual void v05c();
-    virtual void v060(); virtual void v064(); virtual void v068(); virtual void v06c();
-    virtual void v070(); virtual void v074(); virtual void v078(); virtual void v07c();
-    virtual void v080(); virtual void v084(); virtual void v088(); virtual void v08c();
-    virtual void v090(); virtual void v094(); virtual void v098(); virtual void v09c();
-    virtual void v0a0(); virtual void v0a4(); virtual void v0a8(); virtual void v0ac();
-    virtual void v0b0(); virtual void v0b4(); virtual void v0b8(); virtual void v0bc();
-    virtual void v0c0(); virtual void v0c4(); virtual void v0c8(); virtual void v0cc();
-    virtual void v0d0(); virtual void v0d4(); virtual void v0d8(); virtual void v0dc();
-    virtual void v0e0(); virtual void v0e4(); virtual void v0e8(); virtual void v0ec();
-    virtual void v0f0(); virtual void v0f4(); virtual void v0f8(); virtual void v0fc();
-    virtual void v100(); virtual void v104(); virtual void v108(); virtual void v10c();
-    virtual void v110(); virtual void v114(); virtual void v118(); virtual void v11c();
-    virtual void v120(); virtual void v124(); virtual void v128(); virtual void v12c();
-    virtual void v130(); virtual void v134(); virtual void v138(); virtual void v13c();
-    virtual void v140(); virtual void v144(); virtual void v148(); virtual void v14c();
-    virtual void v150(); virtual void v154(); virtual void v158(); virtual void v15c();
-    virtual void v160(); virtual void v164(); virtual void v168(); virtual void v16c();
-    virtual void v170(); virtual void v174(); virtual void v178(); virtual void v17c();
-    virtual void v180(); virtual void v184(); virtual void v188(); virtual void v18c();
-    virtual void v190(); virtual void v194(); virtual void v198(); virtual void v19c();
-    virtual void v1a0(); virtual void v1a4(); virtual void v1a8(); virtual void v1ac();
-    virtual void v1b0(); virtual void v1b4(); virtual void v1b8(); virtual void v1bc();
-    virtual void v1c0(); virtual void v1c4(); virtual void v1c8(); virtual void v1cc();
-    virtual Object3D_5b9c90* Get3D();
-};
 
-struct ColorSource_5b9c90 {
-    void GetColor(NiColorA_5b9c90* apOut, float afAlpha);
-};
 
-extern ColorSource_5b9c90 DAT_011a9be0;
+extern NiColorA DAT_011a9be0;
 extern float DAT_01012054;
 extern float DAT_010249d8;
 extern const double DAT_01023128;
 extern __declspec(thread) bool g_bConsoleEcho;
 
-bool ExtractArgs_5b9c90(const ScriptParameter*, const char*, unsigned int*, Ref_5b9c90*, Ref_5b9c90*, Script*, ScriptLocals*, ...);
+bool ExtractArgs_5b9c90(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 float FUN_0040ebd0(float, float);
 float FUN_00404010(float, float);
 float FUN_005b9e80(float);
-void __cdecl SetColor_5b9c90(Object3D_5b9c90*, NiColorA_5b9c90*);
+void __cdecl SetColor_5b9c90(Object3D_5b9c90*, NiColorA*);
 void __cdecl DebugLog(const char*, ...);
 
 // @fnv 0x005b9c90
-bool __cdecl FUN_005b9c90(const ScriptParameter* apParameters, const char* apCompiledParams, Ref_5b9c90* apRefObject, Ref_5b9c90* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
+bool __cdecl FUN_005b9c90(const ScriptParameter* apParameters, const char* apCompiledParams, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
 {
     if (apRefObject) {
-        NiColorA_5b9c90 color;
-        DAT_011a9be0.GetColor(&color, DAT_01012054);
-        if (!ExtractArgs_5b9c90(apParameters, apCompiledParams, &auiOffset, apRefObject, apContainer, apScript, apScriptLocals, &color.r, &color.g, &color.b, &color.a))
+        NiColorA color = DAT_011a9be0 * DAT_01012054;
+        if (!ExtractArgs_5b9c90(apParameters, apCompiledParams, &auiOffset, apRefObject, apContainer, apScript, apScriptLocals,
+                              &color.r, &color.g,
+                              &color.b, &color.a))
             return false;
         if (color.r != -1.0) {
             color.r = FUN_00404010(FUN_0040ebd0(color.r, DAT_010249d8), 0.0f);
@@ -27248,7 +22678,7 @@ bool __cdecl FUN_005b9c90(const ScriptParameter* apParameters, const char* apCom
         if (color.a != -1.0) {
             color.a = FUN_00404010(FUN_0040ebd0(color.a, 1.0f), 0.0f);
         }
-        Object3D_5b9c90* p3D = apRefObject->Get3D();
+        Object3D_5b9c90* p3D = reinterpret_cast<Object3D_5b9c90*>(apRefObject->GetNiNode());
         if (p3D)
             SetColor_5b9c90(p3D, &color);
     } else if (g_bConsoleEcho) {
@@ -27263,50 +22693,7 @@ struct FootIKProcess {
     void FUN_005ba130(unsigned int);
 };
 struct ReferenceView : TESObjectREFR {
-    virtual void slot58();
-    virtual void slot59();
-    virtual void slot60();
-    virtual void slot61();
-    virtual void slot62();
-    virtual void slot63();
-    virtual void slot64();
-    virtual void slot65();
-    virtual void slot66();
-    virtual void slot67();
-    virtual void slot68();
-    virtual void slot69();
-    virtual void slot70();
-    virtual void slot71();
-    virtual void slot72();
-    virtual void slot73();
-    virtual void slot74();
-    virtual void slot75();
-    virtual const char* GetName();
-    unsigned int field_04;
-    unsigned int field_08;
-    unsigned int field_0c;
-    unsigned int field_10;
-    unsigned int field_14;
-    unsigned int field_18;
-    unsigned int field_1c;
-    unsigned int field_20;
-    unsigned int field_24;
-    unsigned int field_28;
-    unsigned int field_2c;
-    unsigned int field_30;
-    unsigned int field_34;
-    unsigned int field_38;
-    unsigned int field_3c;
-    unsigned int field_40;
-    unsigned int field_44;
-    unsigned int field_48;
-    unsigned int field_4c;
-    unsigned int field_50;
-    unsigned int field_54;
-    unsigned int field_58;
-    unsigned int field_5c;
-    unsigned int field_60;
-    unsigned int field_64;
+
     unsigned int field_68;
     unsigned int field_6c;
     unsigned int field_70;
@@ -27351,52 +22738,7 @@ struct GrabIKController {
     void SetEnabled(bool abEnable);
 };
 
-struct GrabIKActorView {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    GrabIKController* pGrabIK;
-};
+
 
 struct GrabIKRefView {
     virtual void v000();
@@ -27487,12 +22829,12 @@ bool __cdecl FUN_005ba1a0(const ScriptParameter* paramInfo, const char* scriptDa
         if (tlsData.bConsoleEcho)
             FUN_00703c00("GrabIK %s", FUN_005ba2d0() ? "On" : "Off");
     } else {
-        GrabIKActorView* pActor = (GrabIKActorView*)dynamic_cast<Actor*>(thisObj);
-        if (pActor && pActor->pGrabIK) {
-            pActor->pGrabIK->SetEnabled(pActor->pGrabIK->IsEnabled() ^ true);
+        Actor* pActor = dynamic_cast<Actor*>(thisObj);
+        if (pActor && reinterpret_cast<GrabIKController*>(pActor->m_pRagdollController)) {
+            reinterpret_cast<GrabIKController*>(pActor->m_pRagdollController)->SetEnabled(reinterpret_cast<GrabIKController*>(pActor->m_pRagdollController)->IsEnabled() ^ true);
             if (tlsData.bConsoleEcho)
                 FUN_00703c00("GrabIK on REF %s %s", ((GrabIKRefView*)thisObj)->GetName(),
-                    pActor->pGrabIK->IsEnabled() ? "On" : "Off");
+                    reinterpret_cast<GrabIKController*>(pActor->m_pRagdollController)->IsEnabled() ? "On" : "Off");
         }
     }
     return true;
@@ -27501,73 +22843,8 @@ bool __cdecl FUN_005ba1a0(const ScriptParameter* paramInfo, const char* scriptDa
 void FUN_00703c00(const char*, ...);
 bool FUN_005ba4b0();
 struct LookIKState { bool FUN_005ba540(); void FUN_005ba4f0(unsigned char); };
-struct ActorLookLayout {
- int unk00;
- int unk04;
- int unk08;
- int unk0c;
- int unk10;
- int unk14;
- int unk18;
- int unk1c;
- int unk20;
- int unk24;
- int unk28;
- int unk2c;
- int unk30;
- int unk34;
- int unk38;
- int unk3c;
- int unk40;
- int unk44;
- int unk48;
- int unk4c;
- int unk50;
- int unk54;
- int unk58;
- int unk5c;
- int unk60;
- int unk64;
- int unk68;
- int unk6c;
- int unk70;
- int unk74;
- int unk78;
- int unk7c;
- int unk80;
- int unk84;
- int unk88;
- int unk8c;
- int unk90;
- int unk94;
- int unk98;
- int unk9c;
- int unka0;
- int unka4;
- int unka8;
- LookIKState* state;
-};
-struct LookReference : TESObjectREFR {
- virtual void Slot58();
- virtual void Slot59();
- virtual void Slot60();
- virtual void Slot61();
- virtual void Slot62();
- virtual void Slot63();
- virtual void Slot64();
- virtual void Slot65();
- virtual void Slot66();
- virtual void Slot67();
- virtual void Slot68();
- virtual void Slot69();
- virtual void Slot70();
- virtual void Slot71();
- virtual void Slot72();
- virtual void Slot73();
- virtual void Slot74();
- virtual void Slot75();
- virtual const char* Name();
-};
+
+
 struct LookTls {
  int unk000;
  int unk004;
@@ -27733,9 +23010,9 @@ bool FUN_005ba380(const ScriptParameter*,const char*,TESObjectREFR* reference,TE
   if (lookTls.console) FUN_00703c00("LookIK %s",FUN_005ba4b0()?"On":"Off");
  } else {
   Actor* actor = dynamic_cast<Actor*>(reference);
-  if (actor && ((ActorLookLayout*)actor)->state) {
-   ((ActorLookLayout*)actor)->state->FUN_005ba4f0(((ActorLookLayout*)actor)->state->FUN_005ba540() ^ 1);
-   if (lookTls.console) FUN_00703c00("LookIK on REF %s %s",((LookReference*)reference)->Name(),((ActorLookLayout*)actor)->state->FUN_005ba540()?"On":"Off");
+  if (actor && reinterpret_cast<LookIKState*>(actor->m_pRagdollController)) {
+   reinterpret_cast<LookIKState*>(actor->m_pRagdollController)->FUN_005ba4f0(reinterpret_cast<LookIKState*>(actor->m_pRagdollController)->FUN_005ba540() ^ 1);
+   if (lookTls.console) FUN_00703c00("LookIK on REF %s %s",((TESForm*)reference)->GetName(),reinterpret_cast<LookIKState*>(actor->m_pRagdollController)->FUN_005ba540()?"On":"Off");
   }
  }
  return true;
@@ -28120,10 +23397,7 @@ bool __cdecl FUN_005bade0(const ScriptParameter* params, const char* data, Diagn
     return true;
 }
 
-struct NiAVObject {
-    bool FUN_00456610();
-    void FUN_00450f90(bool hidden);
-};
+
 struct LODModel {
     NiAVObject* FUN_004ea9e0();
     NiAVObject* FUN_004ea9a0();
@@ -28189,6 +23463,7 @@ bool __cdecl FUN_005bb030(int parameters, int scriptData, int reference,
 }
 
 namespace fnv_005bb390 {
+
 struct WorkerTerrain { void FUN_006fca90(const NiPoint3&,int); };
 struct WorkerWorld { WorkerTerrain* FUN_00586170(); };
 struct WorkerTES { WorkerWorld* FUN_004fd3e0(); };
@@ -28366,56 +23641,7 @@ bool FUN_005bb8c0(int p1,int p2,int reference,int container,int script,int local
  return true;
 }
 
-struct ActorLayout {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    bool processingDisabled;
-};
+
 struct ScriptThreadState {
     int unk000;
     int unk004;
@@ -28574,7 +23800,7 @@ struct ScriptThreadState {
     bool consoleEcho;
 };
 extern __declspec(thread) ScriptThreadState scriptThreadState;
-struct ActorName { const char* GetFullName(); };
+
 void __cdecl DebugLog(const char*, ...);
 
 // @fnv 0x005bbec0
@@ -28583,67 +23809,18 @@ bool __cdecl FUN_005bbec0(void* parameters, const char* scriptData, TESObjectREF
     Actor* actor = 0;
     actor = dynamic_cast<Actor*>(target);
     if (actor) {
-        if (!((ActorLayout*)actor)->processingDisabled)
+        if (!actor->m_bFirstActorFlag)
             result = 1;
         else
             result = 0;
         if (scriptThreadState.consoleEcho)
-            DebugLog("%s processing is  %s", ((ActorName*)actor)->GetFullName(), ((ActorLayout*)actor)->processingDisabled ? "On" : "Off");
+            DebugLog("%s processing is  %s", actor->GetFullName(), actor->m_bFirstActorFlag ? "On" : "Off");
     }
     return true;
 }
 
-struct ActorProcessState {
- unsigned int unk00;
- unsigned int unk04;
- unsigned int unk08;
- unsigned int unk0C;
- unsigned int unk10;
- unsigned int unk14;
- unsigned int unk18;
- unsigned int unk1C;
- unsigned int unk20;
- unsigned int unk24;
- unsigned int unk28;
- unsigned int unk2C;
- unsigned int unk30;
- unsigned int unk34;
- unsigned int unk38;
- unsigned int unk3C;
- unsigned int unk40;
- unsigned int unk44;
- unsigned int unk48;
- unsigned int unk4C;
- unsigned int unk50;
- unsigned int unk54;
- unsigned int unk58;
- unsigned int unk5C;
- unsigned int unk60;
- unsigned int unk64;
- unsigned int unk68;
- unsigned int unk6C;
- unsigned int unk70;
- unsigned int unk74;
- unsigned int unk78;
- unsigned int unk7C;
- unsigned int unk80;
- unsigned int unk84;
- unsigned int unk88;
- unsigned int unk8C;
- unsigned int unk90;
- unsigned int unk94;
- unsigned int unk98;
- unsigned int unk9C;
- unsigned int unkA0;
- unsigned int unkA4;
- unsigned int unkA8;
- unsigned int unkAC;
- unsigned int unkB0;
- unsigned int unkB4;
- unsigned int unkB8;
- bool enabled;
-};
-struct ActorProcessCalls { void FUN_0087faa0(); const char* FUN_0055d520(); };
+
+
 struct ProcessReset { void FUN_00971ba0(); };
 extern bool DAT_011f1220;
 // @fnv 0x005bbf70
@@ -28652,9 +23829,9 @@ bool FUN_005bbf70(const ScriptParameter* params, const char* scriptData, TESObje
  if (!ExtractArgs(params,scriptData,&offset,ref,container,script,locals,&actor)) return false;
  if (!actor) actor = dynamic_cast<Actor*>(ref);
  if (actor) {
-  ((ActorProcessState*)actor)->enabled = !((ActorProcessState*)actor)->enabled;
-  ((ActorProcessCalls*)actor)->FUN_0087faa0();
-  if (tlsData.bConsoleEcho) DebugLog("%s processing is  %s",((ActorProcessCalls*)actor)->FUN_0055d520(),((ActorProcessState*)actor)->enabled ? "On" : "Off");
+  actor->m_bFirstActorFlag = !actor->m_bFirstActorFlag;
+  ((ScriptActorActions*)actor)->FUN_0087faa0();
+  if (tlsData.bConsoleEcho) DebugLog("%s processing is  %s",actor->FUN_0055d520(),actor->m_bFirstActorFlag ? "On" : "Off");
  } else {
   DAT_011f1220 = !DAT_011f1220;
   if (tlsData.bConsoleEcho) DebugLog("All AI Processing is  %s",DAT_011f1220 ? "On" : "Off");
@@ -28668,11 +23845,7 @@ public:
     TESObjectREFR* GetLinkedRef();
 };
 
-class RefShell5BC : public TESObjectREFR {
-public:
-    ExtraListShell5BC* GetExtraData();
-    const char* GetFullName();
-};
+
 
 extern const char g_pcLinkedRefFormat5BC[];
 extern const char g_pcNoLinkedRefFormat5BC[];
@@ -28685,23 +23858,25 @@ bool __cdecl FUN_005bc310(const ScriptParameter* paramInfo, const char* scriptDa
     Actor* pkActor = 0;
     pkActor = dynamic_cast<Actor*>(thisObj);
     if (pkActor) {
-        TESObjectREFR* pkLinked = static_cast<RefShell5BC*>(static_cast<TESObjectREFR*>(pkActor))->GetExtraData()->GetLinkedRef();
+        TESObjectREFR* pkLinked = reinterpret_cast<ExtraListShell5BC*>(pkActor->GetExtraData())->GetLinkedRef();
         if (tlsData.bConsoleEcho) {
             if (pkLinked)
-                DebugLog(g_pcLinkedRefFormat5BC, static_cast<RefShell5BC*>(static_cast<TESObjectREFR*>(pkActor))->GetFullName(),
-                    static_cast<RefShell5BC*>(pkLinked)->GetFullName());
+                DebugLog(g_pcLinkedRefFormat5BC, pkActor->GetFullName(),
+                    pkLinked->GetFullName());
             else
-                DebugLog(g_pcNoLinkedRefFormat5BC, static_cast<RefShell5BC*>(static_cast<TESObjectREFR*>(pkActor))->GetFullName());
+                DebugLog(g_pcNoLinkedRefFormat5BC, pkActor->GetFullName());
         }
     }
     return true;
 }
 
+class TESObjectREFR;
+class Script;
 namespace fnv_005bc3b0 {
 struct TlsData { char pad[0x268]; bool bDebug; char p2[3]; void* pTarget; };
 extern __declspec(thread) TlsData DAT_0126fd98;
 void FUN_00703c00(const char*, ...);
-class ScriptParameter; class TESObjectREFR; class Script; class ScriptLocals;
+class ScriptParameter;   
 class ProcMgr { public: void FUN_00971ba0(); };
 extern ProcMgr DAT_011e0e80;
 extern bool DAT_011f1228;
@@ -28736,27 +23911,9 @@ bool __cdecl FUN_005bc580()
     return true;
 }
 
-struct SpeakHandle
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    SpeakHandle();
-    ~SpeakHandle();
-};
 
-struct SpeakString
-{
-    char* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    SpeakString();
-    ~SpeakString();
-    operator const char*() const;
-};
 
 int __cdecl FUN_00406d30(char*, unsigned int, const char*);
-int __cdecl FUN_00406f60(SpeakString*, const char*, ...);
 
 struct SpeakProcess
 {
@@ -28961,94 +24118,9 @@ struct SpeakProcess
     virtual void SetSpeechDuration(float);
 };
 
-struct SpeakActor : public Actor
+struct SpeakActor : public TESObjectREFR
 {
-    virtual void A58();
-    virtual void A59();
-    virtual void A60();
-    virtual void A61();
-    virtual void A62();
-    virtual void A63();
-    virtual void A64();
-    virtual void A65();
-    virtual void A66();
-    virtual void A67();
-    virtual void A68();
-    virtual void A69();
-    virtual void A70();
-    virtual void A71();
-    virtual void A72();
-    virtual void A73();
-    virtual void A74();
-    virtual void A75();
-    virtual void A76();
-    virtual void A77();
-    virtual void A78();
-    virtual void A79();
-    virtual void A80();
-    virtual void A81();
-    virtual void A82();
-    virtual void A83();
-    virtual void A84();
-    virtual void A85();
-    virtual void A86();
-    virtual void A87();
-    virtual void A88();
-    virtual void A89();
-    virtual void A90();
-    virtual void A91();
-    virtual void A92();
-    virtual void A93();
-    virtual void A94();
-    virtual void A95();
-    virtual void A96();
-    virtual void A97();
-    virtual void A98();
-    virtual void A99();
-    virtual void A100();
-    virtual void A101();
-    virtual void A102();
-    virtual void A103();
-    virtual void A104();
-    virtual void A105();
-    virtual void A106();
-    virtual void A107();
-    virtual void A108();
-    virtual void A109();
-    virtual void A110();
-    virtual void A111();
-    virtual void A112();
-    virtual void A113();
-    virtual void A114();
-    virtual void A115();
-    virtual void A116();
-    virtual void A117();
-    virtual void A118();
-    virtual void A119();
-    virtual void A120();
-    virtual void A121();
-    virtual void A122();
-    virtual void A123();
-    virtual void A124();
-    virtual void A125();
-    virtual void A126();
-    virtual void A127();
-    virtual void A128();
-    virtual void A129();
-    virtual void A130();
-    virtual void A131();
-    virtual void A132();
-    virtual void A133();
-    virtual void A134();
-    virtual void A135();
-    virtual void A136();
-    virtual void A137();
-    virtual void A138();
-    virtual void A139();
-    virtual void A140();
-    virtual void A141();
-    virtual void A142();
-    virtual void A143();
+
     virtual void A144();
     virtual void A145();
     virtual void A146();
@@ -29066,7 +24138,7 @@ struct SpeakActor : public Actor
     virtual void A158();
     virtual void A159();
     virtual void A160();
-    virtual float Speak(const char*, SpeakHandle*, int, int, int, int, int, int, int, int, int, bool, bool);
+    virtual float Speak(const char*, BSSoundHandle*, int, int, int, int, int, int, int, int, int, bool, bool);
     SpeakProcess* FUN_008d8520();
     int FUN_00931850();
 };
@@ -29075,8 +24147,8 @@ struct SpeakActor : public Actor
 bool __cdecl FUN_005bc5f0(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* locals, double& result, unsigned int& opcodeOffsetPtr)
 {
     char* pName = 0;
-    SpeakHandle handle;
-    SpeakString str;
+    BSSoundHandle handle;
+    BSStringT<char> str;
     int emotion = 0;
     int value = 50;
     char voiceFile[512];
@@ -29094,7 +24166,7 @@ bool __cdecl FUN_005bc5f0(const ScriptParameter* paramInfo, const char* scriptDa
     if (!thisObj)
         return false;
 
-    actor = static_cast<SpeakActor*>(dynamic_cast<Actor*>(thisObj));
+    actor = reinterpret_cast<SpeakActor*>(dynamic_cast<Actor*>(thisObj));
     if (!actor || !actor->FUN_008d8520() || actor->FUN_00931850())
         return false;
 
@@ -29107,7 +24179,7 @@ bool __cdecl FUN_005bc5f0(const ScriptParameter* paramInfo, const char* scriptDa
     if (value > 100)
         value = 100;
 
-    FUN_00406f60(&str, "%s", pName);
+    str.PrintfString("%s", pName);
     fScaleMultiplier = actor->Speak(str, &handle, emotion, value, 0, 0, 0, 0, 0, 0, 0, true, true);
     actor->FUN_008d8520()->SetSpeaking(true);
     actor->FUN_008d8520()->SetSpeechDuration(fScaleMultiplier);
@@ -29282,8 +24354,7 @@ struct CommandForm {
     const char* FUN_0055d520();
 };
 bool FUN_005accb0(void*,void*,void*,void*,void*,void*,void*,CommandForm**);
-struct StrMem { char* type;unsigned short length,capacity;StrMem();~StrMem();operator const char*() const; };
-int FUN_00406f60(StrMem*,const char*,...);
+
 struct IntSetting { int* Int(); };
 extern IntSetting DAT_011f33c8;
 struct FontInfo { float FUN_005bd580(); };
@@ -29300,8 +24371,8 @@ bool FUN_005bd410(void* p1,void* p2,void* p3,void* p4,void* p5,void* p6,void* p7
     if(!FUN_005accb0(p1,p2,p8,p3,p4,p5,p6,&form)) return false;
     if(form) {
         switch(form->FUN_00401170()) { case 58: case 59: case 60: case 61: case 62: case 63: case 64: case 105: {
-            StrMem type;
-            FUN_00406f60(&type,"\"%s\" (%08x)",form->FUN_0055d520(),form->FUN_0084e3a0());
+            BSStringT<char> type;
+            type.PrintfString("\"%s\" (%08x)",form->FUN_0055d520(),form->FUN_0084e3a0());
             int height=(int)(FUN_005bd5b0()->FUN_005bd5c0(*DAT_011f33c8.Int()-1)->FUN_005bd580()+3.0);
             int text=height-5;
             CommandDebugText::Instance(true)->Print((const char*)type,640.0f,(float)text,2,-1,-1.0f,0,0);
@@ -29328,17 +24399,7 @@ bool __cdecl FUN_005bd5e0(int a,int b,int c,int d,int e,int f,int unusedArg,int 
 }
 }  // namespace fnv_005bd5e0
 
-struct ValueInterface_005bd960 {
-    virtual void V0();
-    virtual float GetBase(int);
-    virtual void V2();
-    virtual float Apply(int);
-    virtual float GetTemp(int);
-    virtual float GetDamage(int);
-    virtual float GetPerm(int);
-    virtual void V7();
-    virtual float GetExtra(int);
-};
+
 struct OtherActor_005bd960 {
     unsigned int unk000;
     unsigned int unk004;
@@ -29404,355 +24465,18 @@ struct OtherActor_005bd960 {
     unsigned int unk0f4;
     unsigned int unk0f8;
     unsigned int unk0fc;
-    ValueInterface_005bd960 values;
+    ActorValueOwner values;
 };
-struct Actor_005bd960 {
-    virtual void vm_000();
-    virtual void vm_001();
-    virtual void vm_002();
-    virtual void vm_003();
-    virtual void vm_004();
-    virtual void vm_005();
-    virtual void vm_006();
-    virtual void vm_007();
-    virtual void vm_008();
-    virtual void vm_009();
-    virtual void vm_010();
-    virtual void vm_011();
-    virtual void vm_012();
-    virtual void vm_013();
-    virtual void vm_014();
-    virtual void vm_015();
-    virtual void vm_016();
-    virtual void vm_017();
-    virtual void vm_018();
-    virtual void vm_019();
-    virtual void vm_020();
-    virtual void vm_021();
-    virtual void vm_022();
-    virtual void vm_023();
-    virtual void vm_024();
-    virtual void vm_025();
-    virtual void vm_026();
-    virtual void vm_027();
-    virtual void vm_028();
-    virtual void vm_029();
-    virtual void vm_030();
-    virtual void vm_031();
-    virtual void vm_032();
-    virtual void vm_033();
-    virtual void vm_034();
-    virtual void vm_035();
-    virtual void vm_036();
-    virtual void vm_037();
-    virtual void vm_038();
-    virtual void vm_039();
-    virtual void vm_040();
-    virtual void vm_041();
-    virtual void vm_042();
-    virtual void vm_043();
-    virtual void vm_044();
-    virtual void vm_045();
-    virtual void vm_046();
-    virtual void vm_047();
-    virtual void vm_048();
-    virtual void vm_049();
-    virtual void vm_050();
-    virtual void vm_051();
-    virtual void vm_052();
-    virtual void vm_053();
-    virtual void vm_054();
-    virtual void vm_055();
-    virtual void vm_056();
-    virtual void vm_057();
-    virtual void vm_058();
-    virtual void vm_059();
-    virtual void vm_060();
-    virtual void vm_061();
-    virtual void vm_062();
-    virtual void vm_063();
-    virtual bool IsActor();
-    virtual void vm_065();
-    virtual void vm_066();
-    virtual void vm_067();
-    virtual void vm_068();
-    virtual void vm_069();
-    virtual void vm_070();
-    virtual void vm_071();
-    virtual void vm_072();
-    virtual void vm_073();
-    virtual void vm_074();
-    virtual void vm_075();
-    virtual void vm_076();
-    virtual void vm_077();
-    virtual void vm_078();
-    virtual void vm_079();
-    virtual void vm_080();
-    virtual void vm_081();
-    virtual void vm_082();
-    virtual void vm_083();
-    virtual void vm_084();
-    virtual void vm_085();
-    virtual void vm_086();
-    virtual void vm_087();
-    virtual void vm_088();
-    virtual void vm_089();
-    virtual void vm_090();
-    virtual void vm_091();
-    virtual void vm_092();
-    virtual void vm_093();
-    virtual void vm_094();
-    virtual void vm_095();
-    virtual void vm_096();
-    virtual void vm_097();
-    virtual void vm_098();
-    virtual void vm_099();
-    virtual void vm_100();
-    virtual void vm_101();
-    virtual void vm_102();
-    virtual void vm_103();
-    virtual void vm_104();
-    virtual void vm_105();
-    virtual void vm_106();
-    virtual void vm_107();
-    virtual void vm_108();
-    virtual void vm_109();
-    virtual void vm_110();
-    virtual void vm_111();
-    virtual void vm_112();
-    virtual void vm_113();
-    virtual void vm_114();
-    virtual void vm_115();
-    virtual void vm_116();
-    virtual void vm_117();
-    virtual void vm_118();
-    virtual void vm_119();
-    virtual void vm_120();
-    virtual void vm_121();
-    virtual void vm_122();
-    virtual void vm_123();
-    virtual void vm_124();
-    virtual void vm_125();
-    virtual void vm_126();
-    virtual void vm_127();
-    virtual void vm_128();
-    virtual void vm_129();
-    virtual void vm_130();
-    virtual void vm_131();
-    virtual void vm_132();
-    virtual void vm_133();
-    virtual void vm_134();
-    virtual bool IsSpecial();
-    virtual void vm_136();
-    virtual void vm_137();
-    virtual void vm_138();
-    virtual void vm_139();
-    virtual void vm_140();
-    virtual void vm_141();
-    virtual void vm_142();
-    virtual void vm_143();
-    virtual void vm_144();
-    virtual void vm_145();
-    virtual void vm_146();
-    virtual void vm_147();
-    virtual void vm_148();
-    virtual void vm_149();
-    virtual void vm_150();
-    virtual void vm_151();
-    virtual void vm_152();
-    virtual void vm_153();
-    virtual void vm_154();
-    virtual void vm_155();
-    virtual void vm_156();
-    virtual void vm_157();
-    virtual void vm_158();
-    virtual void vm_159();
-    virtual void vm_160();
-    virtual void vm_161();
-    virtual void vm_162();
-    virtual void vm_163();
-    virtual void vm_164();
-    virtual void vm_165();
-    virtual void vm_166();
-    virtual void vm_167();
-    virtual void vm_168();
-    virtual void vm_169();
-    virtual void vm_170();
-    virtual void vm_171();
-    virtual void vm_172();
-    virtual void vm_173();
-    virtual void vm_174();
-    virtual void vm_175();
-    virtual void vm_176();
-    virtual void vm_177();
-    virtual void vm_178();
-    virtual void vm_179();
-    virtual void vm_180();
-    virtual void vm_181();
-    virtual void vm_182();
-    virtual void vm_183();
-    virtual void vm_184();
-    virtual void vm_185();
-    virtual void vm_186();
-    virtual void vm_187();
-    virtual void vm_188();
-    virtual void vm_189();
-    virtual void vm_190();
-    virtual void vm_191();
-    virtual void vm_192();
-    virtual void vm_193();
-    virtual void vm_194();
-    virtual void vm_195();
-    virtual void vm_196();
-    virtual void vm_197();
-    virtual void vm_198();
-    virtual void vm_199();
-    virtual void vm_200();
-    virtual void vm_201();
-    virtual void vm_202();
-    virtual void vm_203();
-    virtual void vm_204();
-    virtual void vm_205();
-    virtual void vm_206();
-    virtual void vm_207();
-    virtual void vm_208();
-    virtual void vm_209();
-    virtual void vm_210();
-    virtual void vm_211();
-    virtual void vm_212();
-    virtual void vm_213();
-    virtual void vm_214();
-    virtual void vm_215();
-    virtual bool IsActorDebug();
-    virtual void vm_217();
-    virtual void vm_218();
-    virtual void vm_219();
-    virtual void vm_220();
-    virtual void vm_221();
-    virtual void vm_222();
-    virtual void vm_223();
-    virtual void vm_224();
-    virtual void vm_225();
-    virtual void vm_226();
-    virtual void vm_227();
-    virtual void vm_228();
-    virtual void vm_229();
-    virtual void vm_230();
-    virtual void vm_231();
-    virtual void vm_232();
-    virtual void vm_233();
-    virtual void vm_234();
-    virtual void vm_235();
-    virtual void vm_236();
-    virtual void vm_237();
-    virtual void vm_238();
-    virtual void vm_239();
-    virtual void vm_240();
-    virtual void vm_241();
-    virtual void vm_242();
-    virtual void vm_243();
-    virtual void vm_244();
-    virtual void vm_245();
-    virtual void vm_246();
-    virtual void vm_247();
-    virtual void vm_248();
-    virtual void vm_249();
-    virtual void vm_250();
-    virtual void vm_251();
-    virtual void vm_252();
-    virtual void vm_253();
-    virtual void vm_254();
-    virtual void vm_255();
-    virtual void vm_256();
-    virtual void vm_257();
-    virtual void vm_258();
-    virtual void vm_259();
-    virtual void vm_260();
-    virtual void vm_261();
-    virtual void vm_262();
-    virtual void vm_263();
-    virtual void vm_264();
-    virtual void vm_265();
-    virtual void vm_266();
-    virtual void vm_267();
-    virtual void vm_268();
-    virtual void vm_269();
-    virtual void vm_270();
-    virtual void vm_271();
-    virtual void vm_272();
-    virtual void vm_273();
-    virtual void vm_274();
-    virtual void vm_275();
-    virtual void vm_276();
-    virtual void vm_277();
-    virtual void vm_278();
-    virtual void vm_279();
-    virtual void vm_280();
-    virtual void vm_281();
-    virtual void vm_282();
-    virtual void vm_283();
-    virtual void vm_284();
-    virtual void vm_285();
-    virtual void vm_286();
-    virtual void vm_287();
-    virtual void vm_288();
-    virtual void vm_289();
-    virtual void vm_290();
-    virtual float GetFloat(int, unsigned char*);
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    ValueInterface_005bd960 values;
-    unsigned int FUN_0055d520();
-    OtherActor_005bd960* FUN_004181e0();
-    bool FUN_0087f4e0();
-};
-extern bool __cdecl FUN_005accb0(const ScriptParameter*, const char*, unsigned int&, Actor_005bd960*, TESObjectREFR*, Script*, ScriptLocals*, int*);
+
+extern bool __cdecl FUN_005accb0(const ScriptParameter*, const char*, unsigned int&, Actor*, TESObjectREFR*, Script*, ScriptLocals*, int*);
 extern const char* __cdecl FUN_0066eac0(int);
-extern bool __cdecl FUN_0066ed60(ValueInterface_005bd960*, int, float*);
+extern bool __cdecl FUN_0066ed60(ActorValueOwner*, int, float*);
 extern bool __cdecl FUN_00406d70(int, unsigned int);
 void __cdecl DebugLog(const char*, ...);
 
 // @fnv 0x005bd960
 bool __cdecl FUN_005bd960(const ScriptParameter* paramInfo, const char* scriptData,
-                        Actor_005bd960* actor, TESObjectREFR* container,
+                        Actor* actor, TESObjectREFR* container,
                         Script* script, ScriptLocals* locals, double& result, unsigned int& offset)
 {
     int requestedValue2 = 0;
@@ -29760,27 +24484,28 @@ bool __cdecl FUN_005bd960(const ScriptParameter* paramInfo, const char* scriptDa
         return false;
     if (DAT_tls_0268 && actor && actor->IsActor() &&
         requestedValue2 >= 0 && requestedValue2 < 0x4d) {
-        Actor_005bd960* actorLocal = actor;
+        Actor* actorLocal = actor;
         int id4 = requestedValue2;
-        float initial_2 = actorLocal->values.GetBase(id4);
+        float initial_2 = actorLocal->GetBaseActorValueFloat((ActorValue::Index)id4);
         DebugLog("GetActorValueInfo: %s on %s", FUN_0066eac0(id4), actorLocal->FUN_0055d520());
-        DebugLog("...Current Value: %.2f Computed Base: %.2f ", actorLocal->values.Apply(id4), (double)initial_2);
-        float current4 = actorLocal->FUN_004181e0()->values.Apply(id4);
+        DebugLog("...Current Value: %.2f Computed Base: %.2f ", actorLocal->GetCurrentActorValue((ActorValue::Index)id4), (double)initial_2);
+        float current4 = reinterpret_cast<OtherActor_005bd960*>(actorLocal->FUN_004181e0())->values.GetCurrentActorValue((ActorValue::Index)id4);
         float delta = 0.0f;
-        bool hasDelta4 = FUN_0066ed60(actorLocal ? &actorLocal->values : 0, id4, &delta);
+        bool hasDelta4 = FUN_0066ed60(static_cast<ActorValueOwner*>(actorLocal), id4, &delta);
         unsigned char hasModifier = 0;
-        float modifier = actorLocal->GetFloat(id4, &hasModifier);
+        typedef float (__thiscall *ScriptGetActorValueModifier)(Actor*, int, unsigned char*);
+        float modifier = ((ScriptGetActorValueModifier)(*(void***)actorLocal)[0x48c / 4])(actorLocal, id4, &hasModifier);
         DebugLog("...Base Value components:");
         DebugLog("......Reference Base Value: %.2f %s", (double)current4,
-            actorLocal->FUN_0087f4e0() ? "(auto-calculated)" : (actorLocal->IsSpecial() ? "(creature)" : ""));
+            static_cast<ScriptActorActions*>(actorLocal)->FUN_0087f4e0() ? "(auto-calculated)" : (actorLocal->IsCreature() ? "(creature)" : ""));
         if (hasDelta4) {
             DebugLog("......Derived Value: %.2f %s", (double)delta,
-                ((!actorLocal->IsActorDebug() && !actorLocal->FUN_0087f4e0() && FUN_00406d70(id4, 0x80)) || actorLocal->IsSpecial()) ? "(Ignored)" : "");
+                ((!actorLocal->IsPlayerRef() && !static_cast<ScriptActorActions*>(actorLocal)->FUN_0087f4e0() && FUN_00406d70(id4, 0x80)) || actorLocal->IsCreature()) ? "(Ignored)" : "");
         }
         if (hasModifier) DebugLog("......SetAV override: %.2f", (double)modifier);
-        DebugLog("...Modifiers: Temp: %.2f Perm: %.2f Damage: %.2f", (double)actorLocal->values.GetTemp(id4), (double)actorLocal->values.GetPerm(id4), (double)actorLocal->values.GetDamage(id4));
-        if (actorLocal->IsActorDebug())
-            DebugLog("...Level-up Value: %.2f", (double)((Actor_005bd960*)_g_thePlayer)->values.GetExtra(id4));
+        DebugLog("...Modifiers: Temp: %.2f Perm: %.2f Damage: %.2f", (double)actorLocal->GetPermanentActorValueFloat((ActorValue::Index)id4), (double)actorLocal->GetDamageActorValue((ActorValue::Index)id4), (double)actorLocal->GetTemporaryActorValue((ActorValue::Index)id4));
+        if (actorLocal->IsPlayerRef())
+            DebugLog("...Level-up Value: %.2f", (double)((Actor*)_g_thePlayer)->GetPermanentActorValueAdjustment((ActorValue::Index)id4));
     }
     return true;
 }
@@ -29907,9 +24632,7 @@ namespace ActorValue {
     bool GetFlag(Index eAV, unsigned int uiFlag);
 }
 const char* FUN_0066eac0(ActorValue::Index eAV);   // the actor value's name
-struct FUN_0088b740_shell {
-    void FUN_0088b740(int iAV, float fValue);   // Actor: apply a script change to an actor value
-};
+
 
 // @fnv 0x005be080
 bool __cdecl FUN_005be080(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* eventList, double& result, unsigned int& opcodeOffsetPtr) {
@@ -29920,7 +24643,7 @@ bool __cdecl FUN_005be080(const ScriptParameter* paramInfo, const char* scriptDa
     Actor* pActor = dynamic_cast<Actor*>(thisObj);
     if (pActor) {
         if (!ActorValue::GetFlag(eAV, 0x4000)) {
-            ((FUN_0088b740_shell*)pActor)->FUN_0088b740(eAV, ActorValue::GetFlag(eAV, 0x200) ? -fValue : std::abs(fValue));
+            ((ScriptActorActions*)pActor)->FUN_0088b740(eAV, ActorValue::GetFlag(eAV, 0x200) ? -fValue : std::abs(fValue));
         } else if (tlsData.bConsoleEcho) {
             DebugLog("Actor Value '%s' cannot be modified in scripts or the console.", FUN_0066eac0(eAV));
         }
@@ -29929,15 +24652,8 @@ bool __cdecl FUN_005be080(const ScriptParameter* paramInfo, const char* scriptDa
 }
 
 class ScriptParameter;
-class Script;
-class ScriptLocals;
-class ActorValueOwner {
-public:
-    virtual void Method0();
-    virtual void Method1();
-    virtual void Method2();
-    virtual float GetValue(unsigned int actorValue);
-};
+
+
 extern bool __cdecl ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 extern bool __cdecl FUN_00406d70(unsigned int, unsigned int);
 extern const char* __cdecl FUN_0066eac0(unsigned int);
@@ -29954,7 +24670,7 @@ bool __cdecl FUN_005be190(const ScriptParameter* parameters, const char* compile
     Actor* pActor = dynamic_cast<Actor*>(reference);
     if (pActor) {
         if (!FUN_00406d70(actorValue, 0x4000)) {
-            float amount = (float)((double)newValue - (double)(reinterpret_cast<ActorValueOwner*>((char*)pActor + 0xa4))->GetValue(actorValue));
+            float amount = (float)((double)newValue - (double)(reinterpret_cast<ActorValueOwner*>((char*)pActor + 0xa4))->GetCurrentActorValue((ActorValue::Index)actorValue));
             ((ActorValueChange)(*(void***)pActor)[0x3a4 / 4])(pActor, actorValue, amount, 0);
         } else if (g_tls.bDebug) {
             FUN_00703c00(DAT_0103a310, FUN_0066eac0(actorValue));
@@ -30473,113 +25189,34 @@ bool __cdecl FUN_005be2a0(const ScriptParameter* paramInfo, const char* scriptDa
     return true;
 }
 
-class Actor5BE;
 
-class TESObjectREFR5BE {
-public:
-    virtual void unkv000();
-    virtual void unkv004();
-    virtual void unkv008();
-    virtual void unkv00C();
-    virtual void unkv010();
-    virtual void unkv014();
-    virtual void unkv018();
-    virtual void unkv01C();
-    virtual void unkv020();
-    virtual void unkv024();
-    virtual void unkv028();
-    virtual void unkv02C();
-    virtual void unkv030();
-    virtual void unkv034();
-    virtual void unkv038();
-    virtual void unkv03C();
-    virtual void unkv040();
-    virtual void unkv044();
-    virtual void unkv048();
-    virtual void unkv04C();
-    virtual void unkv050();
-    virtual void unkv054();
-    virtual void unkv058();
-    virtual void unkv05C();
-    virtual void unkv060();
-    virtual void unkv064();
-    virtual void unkv068();
-    virtual void unkv06C();
-    virtual void unkv070();
-    virtual void unkv074();
-    virtual void unkv078();
-    virtual void unkv07C();
-    virtual void unkv080();
-    virtual void unkv084();
-    virtual void unkv088();
-    virtual void unkv08C();
-    virtual void unkv090();
-    virtual void unkv094();
-    virtual void unkv098();
-    virtual void unkv09C();
-    virtual void unkv0A0();
-    virtual void unkv0A4();
-    virtual void unkv0A8();
-    virtual void unkv0AC();
-    virtual void unkv0B0();
-    virtual void unkv0B4();
-    virtual void unkv0B8();
-    virtual void unkv0BC();
-    virtual void unkv0C0();
-    virtual void unkv0C4();
-    virtual void unkv0C8();
-    virtual void unkv0CC();
-    virtual void unkv0D0();
-    virtual void unkv0D4();
-    virtual void unkv0D8();
-    virtual void unkv0DC();
-    virtual void unkv0E0();
-    virtual void unkv0E4();
-    virtual void unkv0E8();
-    virtual void unkv0EC();
-    virtual void unkv0F0();
-    virtual void unkv0F4();
-    virtual void unkv0F8();
-    virtual void unkv0FC();
-    virtual bool IsActor();
-};
 
-class Actor5BE : public TESObjectREFR5BE {
-public:
-    void Kill(Actor5BE* pkKiller, float afDamageAmount);
-};
 
-class ActorList5BE {
-public:
-    unsigned int GetCount(int iUnk);
-    TESObjectREFR5BE* GetAt(unsigned int uiIndex);
-};
 
-class ProcessLists5BE {
-public:
-    ActorList5BE* GetActorList();
-};
 
-extern ProcessLists5BE g_kProcessLists5BE;
+
+
+
+extern ProcessLists g_kProcessLists;
 
 bool __cdecl FUN_005accb0(void* pvParamInfo, void* pvScriptData, void* pvEventList, void* pvThisObj,
-    void* pvContainingObj, void* pvScript, int* piOffset, Actor5BE** ppkKiller);
+    void* pvContainingObj, void* pvScript, int* piOffset, Actor** ppkKiller);
 
 // @fnv 0x005be4f0
 bool __cdecl FUN_005be4f0(void* pvParamInfo, void* pvScriptData, void* pvThisObj, void* pvContainingObj,
     void* pvScript, int* piOffset, double* pdResult, void* pvEventList)
 {
-    Actor5BE* pkKiller = 0;
+    Actor* pkKiller = 0;
     if (!FUN_005accb0(pvParamInfo, pvScriptData, pvEventList, pvThisObj, pvContainingObj, pvScript, piOffset, &pkKiller))
         return false;
 
-    for (unsigned int i = 0; i < g_kProcessLists5BE.GetActorList()->GetCount(0); i++)
+    for (unsigned int i = 0; i < g_kProcessLists.GetProcessArray()->FUN_005be5c0(0); i++)
     {
-        TESObjectREFR5BE* pkRef = g_kProcessLists5BE.GetActorList()->GetAt(i);
+        TESObjectREFR* pkRef = g_kProcessLists.GetProcessArray()->FUN_00968670(i);
         int iUnused = 0;
         if (pkRef && pkRef->IsActor())
         {
-            Actor5BE* pkActor = (Actor5BE*)pkRef;
+            Actor* pkActor = (Actor*)pkRef;
             if (pkActor)
                 pkActor->Kill(pkKiller, 0.0f);
         }
@@ -30612,10 +25249,6 @@ struct GameSettingValue {
     const char* FUN_00403df0();
     const char* FUN_0044ddc0();
 };
-class GameSettingCollection {
-public:
-    GameSettingValue* FUN_004f8a30(const char*);
-};
 GameSettingCollection* GetGameSettingCollection();
 // @fnv 0x005be900
 bool FUN_005be900(const ScriptParameter* parameters, const char* scriptData,
@@ -30627,7 +25260,7 @@ bool FUN_005be900(const ScriptParameter* parameters, const char* scriptData,
     result = 0.0;
     if (!ExtractArgs(parameters,scriptData,&opcodeOffset,thisObject,container,script,locals,name))
         return false;
-    pSetting = GetGameSettingCollection()->FUN_004f8a30(name);
+    pSetting = reinterpret_cast<GameSettingValue*>(GetGameSettingCollection()->FUN_004f8a30(name));
     if (pSetting) {
         switch (pSetting->FUN_004f8940()) {
         case 3:
@@ -30657,11 +25290,14 @@ bool FUN_005be900(const ScriptParameter* parameters, const char* scriptData,
 }
 }  // namespace fnv_005be900
 
+class TESObjectREFR;
+class Script;
 namespace fnv_005bf8d0 {
-class ScriptParameter; class TESObjectREFR; class Script; class ScriptLocals;
+class ScriptParameter;   
 bool FUN_005accb0(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
-class MenuX { public: void FUN_005bf9a0(float, float); };
-class Mgr2 { public: MenuX* FUN_0043b230(); int FUN_005bf9c0(bool); };
+// 0x005bf9a0 is bound as the BSFogProperty fog-range helper in other units.
+class ScriptFogControls { public: void FUN_005bf9a0(float, float); };
+class Mgr2 { public: ScriptFogControls* FUN_0043b230(); int FUN_005bf9c0(bool); };
 class Mgr1 { public: Mgr2* FUN_007af430(); };
 class Player { public: Mgr1* FUN_008d8520(); };
 extern Player* DAT_011dea10;
@@ -30670,7 +25306,7 @@ bool FUN_005bf8d0(const ScriptParameter* paramInfo, const char* scriptData, TESO
 {
     int a = 0;
     int b = 0;
-    MenuX* fB;
+    ScriptFogControls* fB;
     if (!FUN_005accb0(paramInfo, scriptData, opcodeOffsetPtr, thisObj, containingObj, scriptObj, eventList, &a, &b))
         return false;
     fB = DAT_011dea10->FUN_008d8520()->FUN_007af430()->FUN_0043b230();
@@ -30684,27 +25320,11 @@ bool FUN_005bf8d0(const ScriptParameter* paramInfo, const char* scriptData, TESO
 }  // namespace fnv_005bf8d0
 
 void* FUN_0045c670();
-struct NiFrustumStandIn
-{
-    float m_fLeftBound;
-    float m_fRightBound;
-    float m_fTopBound;
-    float m_fBottomBound;
-    float m_fNearPlane;
-    float m_fFarPlane;
-    bool m_bOrthographic;
-};
 
-struct CameraStandIn
-{
-    const NiFrustumStandIn& GetViewFrustum() const;
-    void SetLODAdjust(float value);
-    void UpdateViewFrustum(const NiFrustumStandIn& frustum);
-};
 
 struct FaceGenNodeStandIn
 {
-    CameraStandIn* GetCamera();
+    NiCamera* GetCamera();
 };
 
 
@@ -30743,14 +25363,14 @@ bool __cdecl FUN_005bf9e0(void* paramInfo, void* scriptData, void* thisObj, void
     {
         fDistance6 = 163840.0f;
     }
-    CameraStandIn* pCamera5 = ((FaceGenNodeStandIn*)FUN_0045c670())->GetCamera();
+    NiCamera* pCamera5 = ((FaceGenNodeStandIn*)FUN_0045c670())->GetCamera();
     if (pCamera5)
     {
-        NiFrustumStandIn kFrustum = pCamera5->GetViewFrustum();
+        NiFrustum kFrustum = pCamera5->GetViewFrustum();
         if (fDistance6 != kFrustum.m_fFarPlane)
         {
             kFrustum.m_fFarPlane = fDistance6;
-            pCamera5->SetLODAdjust(fDistance6 / kFrustum.m_fNearPlane);
+            pCamera5->FUN_00507700(fDistance6 / kFrustum.m_fNearPlane);
             pCamera5->UpdateViewFrustum(kFrustum);
             ((TesStandIn5bf*)g_TES)->GetGrid()->GetLOD()->FUN_005bf9c0(bReset);
         }
@@ -31094,49 +25714,8 @@ bool FUN_005c0bf0(void* unusedA,void* unusedB,ScriptReference* reference) {
 
 namespace fnv_005c0df0 {
 struct ScriptParameter;
-struct ScriptLocals;
-struct BSAnimGroupSequence;
 
-struct NiRTTI {
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
 
-class NiFixedString {
-public:
-    NiFixedString(const char* apString);
-    ~NiFixedString();
-    operator const char*() const;
-    const char* m_kHandle;
-};
-
-class NiObject {
-public:
-    int unk00;
-};
-
-class NiControllerSequence {
-public:
-    NiFixedString& GetName();
-    void FUN_0098adb0(float afTime);
-};
-
-class NiControllerManager {
-public:
-    NiControllerSequence* FUN_0047a520(const NiFixedString& arName);
-    unsigned int FUN_00495d00();
-    NiControllerSequence* FUN_00495d20(unsigned int auiIndex);
-    void FUN_0047b220(NiControllerSequence* apSequence, float afEaseOut);
-    void FUN_0047aab0(NiControllerSequence* apSequence, int aiPriority, int abStartOver, float afWeight, float afEaseIn, NiControllerSequence* apTimeSync);
-    void FUN_0047aa40(bool abValue);
-};
-
-class NiNode {
-public:
-    void* FUN_0045bc00(int aiIndex);
-    NiNode* FUN_0043b4a0(int aiIndex);
-    NiObject* GetControllers();
-};
 
 class Obj3DHolder {
 public:
@@ -31301,12 +25880,7 @@ class RefV : public FormV {
 public:
 };
 
-class ActorX {
-public:
-    unsigned short FUN_00897910(int aiGroup, int a2, int a3, int a4);
-    void FUN_008a73e0(int aiAction, BSAnimGroupSequence* apSequence);
-    int FUN_008a7570();
-};
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 void __cdecl _FNV_Warning(const char*, ...);
@@ -31325,11 +25899,11 @@ bool __cdecl FUN_005c0df0(const ScriptParameter* apParameters, const char* apCom
         ((RefV*)apRefObject)->SetAltered(0x10000000);
         if (((RefV*)apRefObject)->GetAnimation() && ((RefV*)apRefObject)->IsActor()) {
             Actor* pActor = dynamic_cast<Actor*>(apRefObject);
-            ((RefV*)apRefObject)->GetAnimation()->PlayGroup(((ActorX*)pActor)->FUN_00897910(iGroup, 0, 0, 0), iFlags, -1, -1);
+            ((RefV*)apRefObject)->GetAnimation()->PlayGroup(pActor->FUN_00897910(iGroup, 0, 0, 0), iFlags, -1, -1);
             if (iGroup) {
-                ((ActorX*)pActor)->FUN_008a73e0(14, ((RefV*)apRefObject)->GetAnimation()->FUN_00491040(1));
-            } else if (((ActorX*)pActor)->FUN_008a7570() == 14) {
-                ((ActorX*)pActor)->FUN_008a73e0(-1, 0);
+                ((ScriptActorActions*)pActor)->FUN_008a73e0(14, ((RefV*)apRefObject)->GetAnimation()->FUN_00491040(1));
+            } else if (pActor->FUN_008a7570() == 14) {
+                ((ScriptActorActions*)pActor)->FUN_008a73e0(-1, 0);
             }
         } else if (iGroup != 0xff) {
             Obj3DHolder* pHolder = ((RefV*)apRefObject)->Get3DHolder();
@@ -31337,7 +25911,7 @@ bool __cdecl FUN_005c0df0(const ScriptParameter* apParameters, const char* apCom
             if (pHolder)
                 pNode = pHolder->Get3D();
             if (pNode && pNode->FUN_0045bc00(0)) {
-                NiObject* pControllers = pNode->FUN_0043b4a0(0)->GetControllers();
+                NiObject* pControllers = static_cast<NiNode*>(pNode->FUN_0043b4a0(0))->GetControllers();
                 NiControllerManager* pManager = NiDynamicCast(&DAT_011f36ac, pControllers);
                 if (!pManager) {
                     pControllers = pNode->GetControllers();
@@ -31348,7 +25922,7 @@ bool __cdecl FUN_005c0df0(const ScriptParameter* apParameters, const char* apCom
                     if (pSequence) {
                         for (unsigned int i = 0; i < pManager->FUN_00495d00(); i++) {
                             NiControllerSequence* pOther = pManager->FUN_00495d20(i);
-                            if (_stricmp(pOther->GetName(), DAT_011977d8[0].pName))
+                            if (fnv_005c0df0::_stricmp(pOther->GetName(), DAT_011977d8[0].pName))
                                 pManager->FUN_0047b220(pOther, 0.0f);
                         }
                         if (iFlags) {
@@ -31403,74 +25977,14 @@ NiFixedStr5c* GetAreaEffectSequenceName();
 extern const char* DAT_011977d8;
 extern float fMaxFloat5c;
 int _stricmp(const char*, const char*);
-struct RefName5c { unsigned int GetFormID(); const char* GetFullName(); };
-struct RefV5c : TESObjectREFR {
-    virtual void R58();
-    virtual void R59();
-    virtual void R60();
-    virtual void R61();
-    virtual void R62();
-    virtual void R63();
-    virtual void R64();
-    virtual void R65();
-    virtual void R66();
-    virtual void R67();
-    virtual void R68();
-    virtual void R69();
-    virtual void R70();
-    virtual void R71();
-    virtual void R72();
-    virtual void R73();
-    virtual void R74();
-    virtual void R75();
-    virtual void R76();
-    virtual void R77();
-    virtual void R78();
-    virtual void R79();
-    virtual void R80();
-    virtual void R81();
-    virtual void R82();
-    virtual void R83();
-    virtual void R84();
-    virtual void R85();
-    virtual void R86();
-    virtual void R87();
-    virtual void R88();
-    virtual void R89();
-    virtual void R90();
-    virtual void R91();
-    virtual void R92();
-    virtual void R93();
-    virtual void R94();
-    virtual void R95();
-    virtual void R96();
-    virtual void R97();
-    virtual void R98();
-    virtual void R99();
-    virtual void R100();
-    virtual void R101();
-    virtual void R102();
-    virtual void R103();
-    virtual void R104();
-    virtual void R105();
-    virtual void R106();
-    virtual void R107();
-    virtual void R108();
-    virtual void R109();
-    virtual void R110();
-    virtual void R111();
-    virtual void R112();
-    virtual void R113();
-    virtual void R114();
-    virtual void R115();
-    virtual AnimHolder5c* GetAnimHolder();
-};
+
+
 
 // @fnv 0x005c12a0
 bool __cdecl FUN_005c12a0(const ScriptParameter* apParameters, const char* apCompiledParams, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
 {
     if (apRefObject) {
-        AnimHolder5c* pHolder = ((RefV5c*)apRefObject)->GetAnimHolder();
+        AnimHolder5c* pHolder = reinterpret_cast<AnimHolder5c*>(apRefObject->GetNiNode());
         NiObj5c* p3D = 0;
         if (pHolder)
             p3D = pHolder->GetObject3D();
@@ -31489,20 +26003,20 @@ bool __cdecl FUN_005c12a0(const ScriptParameter* apParameters, const char* apCom
                 if (pForwardSequence) {
                     for (unsigned int i = 0; i < pMgr->GetSequenceCount(); i++) {
                         NiSeq5c* pOther = pMgr->GetSequenceAt(i);
-                        if (_stricmp(pOther->GetName(), DAT_011977d8))
+                        if (fnv_005c0df0::_stricmp(pOther->GetName(), DAT_011977d8))
                             pMgr->StopSequence(pOther, 0.0f);
                     }
                     pMgr->ActivateControllerSequence(pForwardSequence, 0, false, 1.0f, 0.0f, 0);
                     pForwardSequence->SetOffset(-fMaxFloat5c);
                     pMgr->SetActive(true);
                 } else {
-                    _FNV_Warning("ANIMATION: (PlayExplosion Error) Sequence '%s' not found for '%s' (%08X).", "SpecialIdle_AreaEffect", ((RefName5c*)apRefObject)->GetFullName(), ((RefName5c*)apRefObject)->GetFormID());
+                    _FNV_Warning("ANIMATION: (PlayExplosion Error) Sequence '%s' not found for '%s' (%08X).", "SpecialIdle_AreaEffect", apRefObject->GetFullName(), apRefObject->GetFormID());
                 }
             } else {
-                _FNV_Warning("ANIMATION: (PlayExplosion Error) No NiControllerManager found for '%s' (%08X).", ((RefName5c*)apRefObject)->GetFullName(), ((RefName5c*)apRefObject)->GetFormID());
+                _FNV_Warning("ANIMATION: (PlayExplosion Error) No NiControllerManager found for '%s' (%08X).", apRefObject->GetFullName(), apRefObject->GetFormID());
             }
         } else {
-            _FNV_Warning("ANIMATION: (PlayExplosion Error) No 3d or controllers found for '%s' (%08X).", ((RefName5c*)apRefObject)->GetFullName(), ((RefName5c*)apRefObject)->GetFormID());
+            _FNV_Warning("ANIMATION: (PlayExplosion Error) No 3d or controllers found for '%s' (%08X).", apRefObject->GetFullName(), apRefObject->GetFormID());
         }
         apRefObject->SetAltered(true);
     }
@@ -31510,68 +26024,17 @@ bool __cdecl FUN_005c12a0(const ScriptParameter* apParameters, const char* apCom
 }
 }  // namespace fnv_005c12a0
 
-class NiFixedString {
+
+
+
+
+
+
+// include/ has no Animation.h yet; retain the sequence-access declaration locally.
+class Animation {
 public:
-    const char* value;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
-struct AnimSequence5C14 {
-    int FUN_008041a0();
-};
-struct AnimManager5C14 {
-    unsigned int FUN_00495d00();
-    AnimSequence5C14* FUN_00495d20(unsigned int);
-    AnimSequence5C14* FUN_0047a520(const NiFixedString&);
-};
-struct Controller5C14 {
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8();
-    virtual void V9();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual AnimManager5C14* GetDebrisManager();
-};
-struct Scene5C14 {
-    Controller5C14* FUN_0043b230();
-};
-struct Model5C14 {
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual Scene5C14* GetScene();
-};
-struct Animation5C14 {
-    AnimSequence5C14* FUN_00491040(int);
+    BSAnimGroupSequence* FUN_00491040(int);
+    BSAnimGroupSequence* PlayGroup(unsigned short, ACTION_FLAGS, int, ANIM_GROUP_SECTION);
 };
 struct AnimGroupEntry5C14 {
     const char* name;
@@ -31587,7 +26050,7 @@ struct AnimGroupEntry5C14 {
 extern AnimGroupEntry5C14 DAT_011977d8[];
 
 // @fnv 0x005c14a0
-bool __cdecl FUN_005c14a0(int p0, int p1, C0B10Ref* ref, int p3, int p4, int p5, double& result, int p7)
+bool __cdecl FUN_005c14a0(int p0, int p1, ScriptReferenceRotationActions* ref, int p3, int p4, int p5, double& result, int p7)
 {
     int unused = 255;
     int group = 0;
@@ -31595,8 +26058,8 @@ bool __cdecl FUN_005c14a0(int p0, int p1, C0B10Ref* ref, int p3, int p4, int p5,
         return false;
     result = 0.0;
     if (ref) {
-        if (ref->IsDisabled()) {
-            Animation5C14* animation = (Animation5C14*)ref->IsDisabled();
+        if (ref->GetAnimData()) {
+            Animation* animation = (Animation*)ref->GetAnimData();
             if (unused == 255) {
                 for (int i = 0; i < 8; i++) {
                     if (animation->FUN_00491040(i))
@@ -31607,21 +26070,21 @@ bool __cdecl FUN_005c14a0(int p0, int p1, C0B10Ref* ref, int p3, int p4, int p5,
                     result = 1.0;
             }
         } else {
-            Model5C14* scene = (Model5C14*)ref->Get3D();
-            Scene5C14* model = scene ? scene->GetScene() : 0;
-            if (model && model->FUN_0043b230()) {
-                Controller5C14* manager = model->FUN_0043b230();
-                AnimManager5C14* controller = manager->GetDebrisManager();
+            NiNode* scene = (NiNode*)ref->GetNiNode();
+            NiNode* model = scene ? scene->IsSceneNode() : 0;
+            if (model && model->GetControllers()) {
+                NiTimeController* manager = static_cast<NiTimeController*>(model->GetControllers());
+                NiControllerManager* controller = manager->IsControllerManager();
                 if (controller) {
                     if (unused == 255) {
                         for (unsigned int j = 0; j < controller->FUN_00495d00(); j++) {
-                            AnimSequence5C14* sequence = controller->FUN_00495d20(j);
-                            if (sequence && sequence->FUN_008041a0())
+                            NiControllerSequence* sequence = controller->FUN_00495d20(j);
+                            if (sequence && sequence->GetState())
                                 result = 1.0;
                         }
                     } else {
-                        AnimSequence5C14* sequence = controller->FUN_0047a520(NiFixedString(DAT_011977d8[unused].name));
-                        if (sequence && sequence->FUN_008041a0())
+                        NiControllerSequence* sequence = controller->FUN_0047a520(NiFixedString(DAT_011977d8[unused].name));
+                        if (sequence && sequence->GetState())
                             result = 1.0;
                     }
                 }
@@ -31846,32 +26309,8 @@ struct CommandProcess {
     virtual void Start(CommandActor*, CommandActor*, int, int, int, int, int, bool, int, int, int, int, int);
     virtual void Finish(CommandActor*, CommandActor*);
 };
-struct CommandActorBody : Actor {
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
+struct CommandActorBody : TESObjectREFR {
+
     unsigned int unk68;
     unsigned int unk6c;
     unsigned int unk70;
@@ -31889,92 +26328,7 @@ struct CommandMagicTarget {
 };
 struct CommandValueOwner { unsigned int unk00; };
 struct CommandActor : CommandActorBody, CommandMagicTarget, CommandValueOwner {
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual void V64();
-    virtual void V65();
-    virtual void V66();
-    virtual void V67();
-    virtual void V68();
-    virtual void V69();
-    virtual void V70();
-    virtual void V71();
-    virtual void V72();
-    virtual void V73();
-    virtual void V74();
-    virtual void V75();
-    virtual void V76();
-    virtual void V77();
-    virtual void V78();
-    virtual void V79();
-    virtual void V80();
-    virtual void V81();
-    virtual void V82();
-    virtual void V83();
-    virtual void V84();
-    virtual void V85();
-    virtual void V86();
-    virtual void V87();
-    virtual void V88();
-    virtual void V89();
-    virtual void V90();
-    virtual void V91();
-    virtual void V92();
-    virtual void V93();
-    virtual void V94();
-    virtual void V95();
-    virtual void V96();
-    virtual void V97();
-    virtual void V98();
-    virtual void V99();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual void V125();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual bool IsDead(int);
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
+
     virtual void V144();
     virtual void V145();
     virtual void V146();
@@ -32118,8 +26472,8 @@ bool __cdecl FUN_005c1750(const ScriptParameter* parameters, const char* data,
     if (!ExtractArgs(parameters, data, &offset, self, container, script, locals, &target))
         return false;
     if (self) {
-        CommandActor* actor = static_cast<CommandActor*>(dynamic_cast<Actor*>(self));
-        if (actor && !actor->IsDead(0) && target && !target->IsDead(0)
+        CommandActor* actor = reinterpret_cast<CommandActor*>(dynamic_cast<Actor*>(self));
+        if (actor && !actor->HasHealth(0) && target && !target->HasHealth(0)
             && actor->FUN_008d8520() && target->FUN_008d8520()) {
             if (actor->FUN_009336c0() && target != DAT_011dea3c) {
                 FNV_Warning("COMBAT: %s is in conversation so will not go into combat. Do not put startcombat in the dialogue results", actor->FUN_0055d520());
@@ -32148,279 +26502,12 @@ bool __cdecl FUN_005c1750(const ScriptParameter* parameters, const char* data,
     return true;
 }
 
-struct SpellName5c1
-{
-    int* FUN_00408da0();
-};
 
-struct SpellItem5c1
-{
-    char pad00[0x18];
-    SpellName5c1 kFullName;
-};
 
-struct ActorV5c1
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual void v213();
-    virtual void v214();
-    virtual void v215();
-    virtual void v216();
-    virtual void v217();
-    virtual void v218();
-    virtual void v219();
-    virtual void v220();
-    virtual void v221();
-    virtual void v222();
-    virtual void v223();
-    virtual void v224();
-    virtual void v225();
-    virtual void v226();
-    virtual void v227();
-    virtual void v228();
-    virtual void v229();
-    virtual void v230();
-    virtual void v231();
-    virtual void v232();
-    virtual void v233();
-    virtual void v234();
-    virtual void v235();
-    virtual void v236();
-    virtual void v237();
-    virtual void v238();
-    virtual void v239();
-    virtual void v240();
-    virtual void v241();
-    virtual void v242();
-    virtual void v243();
-    virtual void v244();
-    virtual void v245();
-    virtual void v246();
-    virtual void v247();
-    virtual bool AddSpell(SpellItem5c1* pkSpell);
-};
 
-struct ActorName5c1
-{
-    char* FUN_0055d520();
-};
 
-struct String5c1
-{
-    const char* FUN_00559450() const;
-};
+
+
 
 class GlobalObject_0040c150
 {
@@ -32429,13 +26516,12 @@ public:
 };
 extern GlobalObject_0040c150 g_011d3654;
 extern const char g_011cba00_arg1[];
-int __cdecl FUN_00406f60(BSStringT<char>* pkString, const char* pcFormat, ...);
 bool __cdecl QueueUIMessage(const char* pcMessage, int iType, const char* pcIcon, const char* pcSound, float fDuration, bool bInstant);
 
 // @fnv 0x005c1d40
 bool __cdecl Cmd_AddSpell_Execute(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* eventList, double& result, unsigned int& opcodeOffsetPtr)
 {
-    SpellItem5c1* pkSpell = 0;
+    SpellItem* pkSpell = 0;
     if (!ExtractArgs(paramInfo, scriptData, &opcodeOffsetPtr, thisObj, containingObj, scriptObj, eventList, &pkSpell))
         return false;
     if (thisObj)
@@ -32443,42 +26529,33 @@ bool __cdecl Cmd_AddSpell_Execute(const ScriptParameter* paramInfo, const char* 
         Actor* pkActor = dynamic_cast<Actor*>(thisObj);
         if (pkActor)
         {
-            if (((ActorV5c1*)pkActor)->AddSpell(pkSpell))
+            typedef bool (__thiscall *ScriptAddSpell)(Actor*, SpellItem*);
+            if (((ScriptAddSpell)(*(void***)pkActor)[0x3e0 / 4])(pkActor, pkSpell))
             {
                 result = 1.0;
-                DebugLog("Actor Effect '%s' added to %s", pkSpell->kFullName.FUN_00408da0(), ((ActorName5c1*)pkActor)->FUN_0055d520());
-                if (pkActor == _g_thePlayer)
+                DebugLog("Actor Effect '%s' added to %s", pkSpell->FUN_00408da0(), pkActor->FUN_0055d520());
+                if (reinterpret_cast<void*>(pkActor) == _g_thePlayer)
                 {
                     BSStringT<char> kMessage;
-                    FUN_00406f60(&kMessage, "%s %s", pkSpell->kFullName.FUN_00408da0(), g_011d3654.FUN_00403df0());
+                    kMessage.PrintfString("%s %s", pkSpell->FUN_00408da0(), g_011d3654.FUN_00403df0());
                     BSStringT<char> kIcon;
-                    FUN_00406f60(&kIcon, "%s", g_011cba00_arg1);
-                    QueueUIMessage(((String5c1*)&kMessage)->FUN_00559450(), 0, ((String5c1*)&kIcon)->FUN_00559450(), 0, _DAT_010162c0, false);
+                    kIcon.PrintfString("%s", g_011cba00_arg1);
+                    QueueUIMessage(kMessage.String(), 0, kIcon.String(), 0, _DAT_010162c0, false);
                 }
             }
             else
             {
-                DebugLog("Actor Effect '%s' not added to %s", pkSpell->kFullName.FUN_00408da0(), ((ActorName5c1*)pkActor)->FUN_0055d520());
+                DebugLog("Actor Effect '%s' not added to %s", pkSpell->FUN_00408da0(), pkActor->FUN_0055d520());
             }
         }
     }
     return true;
 }
 
-struct CmdSoundHandle {
-    unsigned int uiSoundID;
-    unsigned int uiState;
-    unsigned int uiFlags;
-
-    CmdSoundHandle();
-    ~CmdSoundHandle();
-    CmdSoundHandle& operator=(const CmdSoundHandle& arOther);
-    bool Play(bool abUnk);
-};
 
 struct CmdAudio {
     static CmdAudio* __cdecl GetSingleton();
-    CmdSoundHandle GetSoundHandleByFormID(unsigned int auiFormID, unsigned int auiFlags);
+    BSSoundHandle GetSoundHandleByFormID(unsigned int auiFormID, unsigned int auiFlags);
 };
 
 struct CmdSound {
@@ -32494,7 +26571,7 @@ bool __cdecl FUN_005c21e0(void* apParamInfo, void* apScriptData, void* apThisObj
 {
     CmdSound* SoundAssetTmp = 0;
     int iAttenuate = 0;
-    CmdSoundHandle kHandle2;
+    BSSoundHandle kHandle2;
 
     if (CmdExtractArgs(apParamInfo, apScriptData, apOpcodeOffset, apThisObj, apContainingObj, apScript, apEventList,
                        &SoundAssetTmp, &iAttenuate)) {
@@ -32644,21 +26721,10 @@ struct SndForm {
     unsigned int GetFormIDStub();
 };
 
-struct IdentifierState {
-    int uiID;
-    int unk04;
-    int unk08;
-    IdentifierState();
-    ~IdentifierState();
-    void operator=(const IdentifierState& other);
-    bool SetPositionStub(float x, float y, float z);
-    void SetObjectStub(void* node);
-    bool PlayStub(bool loop);
-};
 
 struct SndAudio {
     static SndAudio* GetInstanceStub();
-    IdentifierState GetSoundHandleByFormIDStub(unsigned int formID, unsigned int flags);
+    BSSoundHandle GetSoundHandleByFormIDStub(unsigned int formID, unsigned int flags);
 };
 
 bool __cdecl ExtractArgsSnd(void* paramInfo, void* scriptData, unsigned int* opcodeOffsetPtr, SndRef* thisObj,
@@ -32670,14 +26736,14 @@ bool __cdecl FUN_005c22f0(void* paramInfo, void* scriptData, SndRef* thisObj, vo
 {
     bool bResult = false;
     SndForm* sound = 0;
-    IdentifierState handle2;
+    BSSoundHandle handle2;
     if (ExtractArgsSnd(paramInfo, scriptData, opcodeOffsetPtr, thisObj, containingObj, scriptObj, eventList, &sound)) {
         if (thisObj && thisObj->vfn_RefGetNode()) {
             handle2 = SndAudio::GetInstanceStub()->GetSoundHandleByFormIDStub(sound->GetFormIDStub(), 0x102);
             SndPoint3 pos = *thisObj->vfn_RefGetPos();
-            handle2.SetPositionStub(pos.x, pos.y, pos.z);
-            handle2.SetObjectStub(thisObj->vfn_RefGetNode());
-            handle2.PlayStub(false);
+            handle2.SetPosition(pos.x, pos.y, pos.z);
+            handle2.SetObjectToFollow(static_cast<NiAVObject*>(thisObj->vfn_RefGetNode()));
+            handle2.Play(false);
         }
         bResult = true;
     }
@@ -32697,83 +26763,6 @@ struct VarT {
     int unk18;
 };
 struct ScrS : public Script {
-    virtual void fv0();
-    virtual void fv1();
-    virtual void fv2();
-    virtual void fv3();
-    virtual void fv4();
-    virtual void fv5();
-    virtual void fv6();
-    virtual void fv7();
-    virtual void fv8();
-    virtual void fv9();
-    virtual void fv10();
-    virtual void fv11();
-    virtual void fv12();
-    virtual void fv13();
-    virtual void fv14();
-    virtual void fv15();
-    virtual void fv16();
-    virtual void fv17();
-    virtual void fv18();
-    virtual void fv19();
-    virtual void fv20();
-    virtual void fv21();
-    virtual void fv22();
-    virtual void fv23();
-    virtual void fv24();
-    virtual void fv25();
-    virtual void fv26();
-    virtual void fv27();
-    virtual void fv28();
-    virtual void fv29();
-    virtual void fv30();
-    virtual void fv31();
-    virtual void fv32();
-    virtual void fv33();
-    virtual void fv34();
-    virtual void fv35();
-    virtual void fv36();
-    virtual void fv37();
-    virtual void fv38();
-    virtual void fv39();
-    virtual void fv40();
-    virtual void fv41();
-    virtual void fv42();
-    virtual void fv43();
-    virtual void fv44();
-    virtual void fv45();
-    virtual void fv46();
-    virtual void fv47();
-    virtual void fv48();
-    virtual void fv49();
-    virtual void fv50();
-    virtual void fv51();
-    virtual void fv52();
-    virtual void fv53();
-    virtual void fv54();
-    virtual void fv55();
-    virtual void fv56();
-    virtual void fv57();
-    virtual void fv58();
-    virtual void fv59();
-    virtual void fv60();
-    virtual void fv61();
-    virtual void fv62();
-    virtual void fv63();
-    virtual void fv64();
-    virtual void fv65();
-    virtual void fv66();
-    virtual void fv67();
-    virtual void fv68();
-    virtual void fv69();
-    virtual void fv70();
-    virtual void fv71();
-    virtual void fv72();
-    virtual void fv73();
-    virtual void fv74();
-    virtual void fv75();
-    virtual const char* GetEditorID();
     void* FUN_005d43e0();
 };
 struct FUN_005673e0_shell {
@@ -32790,12 +26779,7 @@ struct FUN_004bde40_shell {
 struct ItemChangeShell {
     ScriptLocals* FUN_004bdea0();
 };
-class InventoryChanges {
-public:
-    static InventoryChanges* GetOrAddInventoryChanges(TESObjectREFR*);
-    int FUN_004c8fd0(int);
-    ItemChangeShell* FUN_004c94f0(int);
-};
+
 struct FUN_00529ea0_shell {
     unsigned char FUN_00529ea0();
 };
@@ -32890,7 +26874,7 @@ struct NodeS {
 struct DHS {
     NodeS* FUN_00461190();
 };
-class TESContainer;
+
 void __cdecl FUN_005acc90(unsigned int*, const double*);
 void __cdecl _DebugLog(const char*, ...);
 char* __fastcall _ref_00726070(void*);
@@ -32906,10 +26890,10 @@ bool __cdecl FUN_005c3450(const ScriptParameter* paramInfo, const char* scriptDa
         if (((FUN_005673e0_shell*)thisObj)->FUN_005673c0() != 0) {
             ScrS* script = ((FUN_005673e0_shell*)thisObj)->FUN_005673c0();
             ScriptLocals* locals = ((FUN_005673e0_shell*)thisObj)->FUN_005673e0();
-            if (((NodeS*)script->FUN_005d43e0())->_ref_008256d0()) {
-                _DebugLog("No variables in script %s", script->GetEditorID());
+            if (((NodeS*)script->GetVariableList())->_ref_008256d0()) {
+                _DebugLog("No variables in script %s", script->GetName());
             } else {
-                NodeS* node = (NodeS*)script->FUN_005d43e0();
+                NodeS* node = (NodeS*)script->GetVariableList();
                 while (locals != 0 && node != 0 && *node->_ref_006815c0() != 0) {
                     VarT* ip = (VarT*)*node->_ref_006815c0();
                     node = node->_ref_00726070();
@@ -32917,11 +26901,11 @@ bool __cdecl FUN_005c3450(const ScriptParameter* paramInfo, const char* scriptDa
                         unsigned int varId = 0;
                         double value = ((FUN_005a9140_shell*)locals)->FUN_005a9140(ip->unk00, 0);
                         FUN_005acc90(&varId, &value);
-                        _DebugLog("%s->%s = (%08X)", script->GetEditorID(), _ref_00726070(&ip->unk18), varId);
+                        _DebugLog("%s->%s = (%08X)", script->GetName(), _ref_00726070(&ip->unk18), varId);
                     } else if (ip->flag10) {
-                        _DebugLog("%s->%s = %d", script->GetEditorID(), _ref_00726070(&ip->unk18), (int)((FUN_005a9140_shell*)locals)->FUN_005a9140(ip->unk00, 0));
+                        _DebugLog("%s->%s = %d", script->GetName(), _ref_00726070(&ip->unk18), (int)((FUN_005a9140_shell*)locals)->FUN_005a9140(ip->unk00, 0));
                     } else {
-                        _DebugLog("%s->%s = %0.4f", script->GetEditorID(), _ref_00726070(&ip->unk18), ((FUN_005a9140_shell*)locals)->FUN_005a9140(ip->unk00, 0));
+                        _DebugLog("%s->%s = %0.4f", script->GetName(), _ref_00726070(&ip->unk18), ((FUN_005a9140_shell*)locals)->FUN_005a9140(ip->unk00, 0));
                     }
                 }
             }
@@ -32937,10 +26921,10 @@ bool __cdecl FUN_005c3450(const ScriptParameter* paramInfo, const char* scriptDa
                 if (item != 0 && ((FUN_004bde40_shell*)item)->FUN_004bde40() != 0) {
                     ScrS* script = ((FUN_004bde40_shell*)item)->FUN_004bde40();
                     ScriptLocals* locals = item->FUN_004bdea0();
-                    if (((NodeS*)script->FUN_005d43e0())->_ref_008256d0()) {
-                        _DebugLog("No variables in script %s", script->GetEditorID());
+                    if (((NodeS*)script->GetVariableList())->_ref_008256d0()) {
+                        _DebugLog("No variables in script %s", script->GetName());
                     } else {
-                        NodeS* node2 = (NodeS*)script->FUN_005d43e0();
+                        NodeS* node2 = (NodeS*)script->GetVariableList();
                         while (locals != 0 && node2 != 0 && *node2->_ref_006815c0() != 0) {
                             VarT* ip2 = (VarT*)*node2->_ref_006815c0();
                             node2 = node2->_ref_00726070();
@@ -32948,11 +26932,11 @@ bool __cdecl FUN_005c3450(const ScriptParameter* paramInfo, const char* scriptDa
                                 unsigned int varId = 0;
                                 double value = ((FUN_005a9140_shell*)locals)->FUN_005a9140(ip2->unk00, 0);
                                 FUN_005acc90(&varId, &value);
-                                _DebugLog("%s->%s = (%08X)", script->GetEditorID(), _ref_00726070(&ip2->unk18), varId);
+                                _DebugLog("%s->%s = (%08X)", script->GetName(), _ref_00726070(&ip2->unk18), varId);
                             } else if (ip2->flag10) {
-                                _DebugLog("%s->%s = %d", script->GetEditorID(), _ref_00726070(&ip2->unk18), (int)((FUN_005a9140_shell*)locals)->FUN_005a9140(ip2->unk00, 0));
+                                _DebugLog("%s->%s = %d", script->GetName(), _ref_00726070(&ip2->unk18), (int)((FUN_005a9140_shell*)locals)->FUN_005a9140(ip2->unk00, 0));
                             } else {
-                                _DebugLog("%s->%s = %0.4f", script->GetEditorID(), _ref_00726070(&ip2->unk18), ((FUN_005a9140_shell*)locals)->FUN_005a9140(ip2->unk00, 0));
+                                _DebugLog("%s->%s = %0.4f", script->GetName(), _ref_00726070(&ip2->unk18), ((FUN_005a9140_shell*)locals)->FUN_005a9140(ip2->unk00, 0));
                             }
                         }
                     }
@@ -32990,93 +26974,7 @@ bool __cdecl FUN_005c3450(const ScriptParameter* paramInfo, const char* scriptDa
 }
 
 struct QuestView;
-struct VarName { const char* FUN_00559450(); };
-struct VarView { unsigned int id; int unk04; int unk08; int unk0c; unsigned char type; int unk14; VarName name; };
-struct VarNode { VarView** FUN_006815c0(); VarNode* FUN_00726070(); bool FUN_008256d0(); };
-struct ScriptView {
-virtual void v0();
-virtual void v1();
-virtual void v2();
-virtual void v3();
-virtual void v4();
-virtual void v5();
-virtual void v6();
-virtual void v7();
-virtual void v8();
-virtual void v9();
-virtual void v10();
-virtual void v11();
-virtual void v12();
-virtual void v13();
-virtual void v14();
-virtual void v15();
-virtual void v16();
-virtual void v17();
-virtual void v18();
-virtual void v19();
-virtual void v20();
-virtual void v21();
-virtual void v22();
-virtual void v23();
-virtual void v24();
-virtual void v25();
-virtual void v26();
-virtual void v27();
-virtual void v28();
-virtual void v29();
-virtual void v30();
-virtual void v31();
-virtual void v32();
-virtual void v33();
-virtual void v34();
-virtual void v35();
-virtual void v36();
-virtual void v37();
-virtual void v38();
-virtual void v39();
-virtual void v40();
-virtual void v41();
-virtual void v42();
-virtual void v43();
-virtual void v44();
-virtual void v45();
-virtual void v46();
-virtual void v47();
-virtual void v48();
-virtual void v49();
-virtual void v50();
-virtual void v51();
-virtual void v52();
-virtual void v53();
-virtual void v54();
-virtual void v55();
-virtual void v56();
-virtual void v57();
-virtual void v58();
-virtual void v59();
-virtual void v60();
-virtual void v61();
-virtual void v62();
-virtual void v63();
-virtual void v64();
-virtual void v65();
-virtual void v66();
-virtual void v67();
-virtual void v68();
-virtual void v69();
-virtual void v70();
-virtual void v71();
-virtual void v72();
-virtual void v73();
-virtual void v74();
-virtual void v75();
-virtual const char* Name();
-virtual void v77();
-virtual const char* EditorName();
-VarNode* FUN_005d43e0();
-};
-struct ScriptLink { ScriptView* FUN_00726070(); };
-struct LocalsView { bool FUN_005a9480(unsigned int); double FUN_005a9140(unsigned int, ScriptView*); };
+struct ScriptLink { Script* FUN_00726070(); };
 struct QuestView {
 virtual void v0();
 virtual void v1();
@@ -33163,7 +27061,7 @@ int unk0c;
 int unk10;
 int unk14;
 ScriptLink script;
-LocalsView* FUN_0059e300();
+ScriptLocals* FUN_0059e300();
 bool FUN_00455620();
 int FUN_0060d700();
 unsigned int FUN_005c3bd0();
@@ -33178,24 +27076,24 @@ bool __cdecl FUN_005c3960(int a0,int a1,int a2,int a3,int a4,int a5,int a6,int a
     if (!ExtractQuest(a0,a1,a7,a2,a3,a4,a5,&quest)) return false;
     if (quest) {
         if (quest->script.FUN_00726070()) {
-            ScriptView* script = quest->script.FUN_00726070();
-            LocalsView* locals = quest->FUN_0059e300();
-            if (script->FUN_005d43e0()->FUN_008256d0()) {
+            Script* script = quest->script.FUN_00726070();
+            ScriptLocals* locals = quest->FUN_0059e300();
+            if (script->GetVariableList()->IsEmpty()) {
                 DebugLog("No script variables on quest %s", quest->EditorName());
             } else {
-                VarNode* node = script->FUN_005d43e0();
-                while (locals && node && *node->FUN_006815c0()) {
-                    VarView* var = *node->FUN_006815c0();
-                    node = node->FUN_00726070();
-                    if (locals->FUN_005a9480(var->id)) {
+                BSSimpleList<ScriptVariableInfo*>* node = script->GetVariableList();
+                while (locals && node && node->GetItem()) {
+                    ScriptVariableInfo* var = node->GetItem();
+                    node = node->GetNext();
+                    if (locals->IsReferenceVariable(var->data.uiID)) {
                         unsigned int reference = 0;
-                        double value = locals->FUN_005a9140(var->id,0);
+                        double value = locals->GetVariable(var->data.uiID,0);
                         FUN_005acc90(&reference,&value);
-                        DebugLog("%s->%s = (%08X)",script->Name(),var->name.FUN_00559450(),reference);
-                    } else if (var->type) {
-                        DebugLog("%s->%s = %d",script->Name(),var->name.FUN_00559450(),(int)locals->FUN_005a9140(var->id,0));
+                        DebugLog("%s->%s = (%08X)",script->GetName(),var->name.String(),reference);
+                    } else if (var->data.m_bIsString) {
+                        DebugLog("%s->%s = %d",script->GetName(),var->name.String(),(int)locals->GetVariable(var->data.uiID,0));
                     } else {
-                        DebugLog("%s->%s = %0.4f",script->Name(),var->name.FUN_00559450(),locals->FUN_005a9140(var->id,0));
+                        DebugLog("%s->%s = %0.4f",script->GetName(),var->name.String(),locals->GetVariable(var->data.uiID,0));
                     }
                 }
             }
@@ -33247,8 +27145,7 @@ bool FUN_005c3bf0()
 
 namespace fnv_005c3cf0 {
 class ScriptParameter;
-class Script;
-class ScriptLocals;
+
 
 void __cdecl DebugLog(const char*, ...);
 
@@ -33338,11 +27235,7 @@ public:
     IdleName* GetIdleForm();
 };
 
-class IdlePtr {
-public:
-    IdleHolder* m_pObject;
-    operator IdleHolder*() const;
-};
+
 
 class RefStub {
 public:
@@ -33427,17 +27320,13 @@ public:
     int unk118;
     int unk11C;
     int unk120;
-    IdlePtr spIdle;
-    IdlePtr spQueuedIdle;
+    NiPointer<IdleHolder> spIdle;
+    NiPointer<IdleHolder> spQueuedIdle;
     int GetCount();
     AnimSeq* GetControllerSequence(int aiSection);
     unsigned short GetGroupID(int aiSection);
 };
 
-class TESAnimGroupStub {
-public:
-    static int GetType(unsigned short);
-};
 int __cdecl GetGroupIdxA(unsigned short);
 int __cdecl GetGroupIdxB(unsigned short);
 
@@ -33463,601 +27352,11 @@ extern const char* g_groupNamesA[];
 extern const char* g_groupNamesB[];
 extern AnimGroupInfoStub g_animGroupInfo[];
 
-class BaseProcessStub {
-public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00C();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01C();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02C();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03C();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04C();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05C();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06C();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07C();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08C();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09C();
-    virtual void v0A0();
-    virtual void v0A4();
-    virtual void v0A8();
-    virtual void v0AC();
-    virtual void v0B0();
-    virtual void v0B4();
-    virtual void v0B8();
-    virtual void v0BC();
-    virtual void v0C0();
-    virtual void v0C4();
-    virtual void v0C8();
-    virtual void v0CC();
-    virtual void v0D0();
-    virtual void v0D4();
-    virtual void v0D8();
-    virtual void v0DC();
-    virtual void v0E0();
-    virtual void v0E4();
-    virtual void v0E8();
-    virtual void v0EC();
-    virtual void v0F0();
-    virtual void v0F4();
-    virtual void v0F8();
-    virtual void v0FC();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10C();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11C();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12C();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13C();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14C();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15C();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16C();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17C();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18C();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19C();
-    virtual void v1A0();
-    virtual void v1A4();
-    virtual void v1A8();
-    virtual void v1AC();
-    virtual void v1B0();
-    virtual void v1B4();
-    virtual void v1B8();
-    virtual void v1BC();
-    virtual void v1C0();
-    virtual void v1C4();
-    virtual void v1C8();
-    virtual void v1CC();
-    virtual void v1D0();
-    virtual void v1D4();
-    virtual void v1D8();
-    virtual void v1DC();
-    virtual void v1E0();
-    virtual void v1E4();
-    virtual void v1E8();
-    virtual void v1EC();
-    virtual void v1F0();
-    virtual void v1F4();
-    virtual void v1F8();
-    virtual void v1FC();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20C();
-    virtual void v210();
-    virtual void v214();
-    virtual void v218();
-    virtual void v21C();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual void v22C();
-    virtual void v230();
-    virtual void v234();
-    virtual void v238();
-    virtual void v23C();
-    virtual void v240();
-    virtual void v244();
-    virtual void v248();
-    virtual void v24C();
-    virtual void v250();
-    virtual void v254();
-    virtual void v258();
-    virtual void v25C();
-    virtual void v260();
-    virtual void v264();
-    virtual void v268();
-    virtual void v26C();
-    virtual void v270();
-    virtual void v274();
-    virtual void v278();
-    virtual void v27C();
-    virtual void v280();
-    virtual void v284();
-    virtual void v288();
-    virtual void v28C();
-    virtual void v290();
-    virtual void v294();
-    virtual void v298();
-    virtual void v29C();
-    virtual void v2A0();
-    virtual void v2A4();
-    virtual void v2A8();
-    virtual void v2AC();
-    virtual void v2B0();
-    virtual void v2B4();
-    virtual void v2B8();
-    virtual void v2BC();
-    virtual void v2C0();
-    virtual void v2C4();
-    virtual void v2C8();
-    virtual void v2CC();
-    virtual void v2D0();
-    virtual void v2D4();
-    virtual void v2D8();
-    virtual void v2DC();
-    virtual void v2E0();
-    virtual void v2E4();
-    virtual void v2E8();
-    virtual void v2EC();
-    virtual void v2F0();
-    virtual void v2F4();
-    virtual void v2F8();
-    virtual void v2FC();
-    virtual void v300();
-    virtual void v304();
-    virtual void v308();
-    virtual void v30C();
-    virtual void v310();
-    virtual void v314();
-    virtual void v318();
-    virtual void v31C();
-    virtual void v320();
-    virtual void v324();
-    virtual void v328();
-    virtual void v32C();
-    virtual void v330();
-    virtual void v334();
-    virtual void v338();
-    virtual void v33C();
-    virtual void v340();
-    virtual void v344();
-    virtual void v348();
-    virtual void v34C();
-    virtual void v350();
-    virtual void v354();
-    virtual void v358();
-    virtual void v35C();
-    virtual void v360();
-    virtual void v364();
-    virtual void v368();
-    virtual void v36C();
-    virtual void v370();
-    virtual void v374();
-    virtual void v378();
-    virtual void v37C();
-    virtual void v380();
-    virtual void v384();
-    virtual void v388();
-    virtual void v38C();
-    virtual void v390();
-    virtual void v394();
-    virtual void v398();
-    virtual void v39C();
-    virtual void v3A0();
-    virtual void v3A4();
-    virtual void v3A8();
-    virtual void v3AC();
-    virtual void v3B0();
-    virtual void v3B4();
-    virtual void v3B8();
-    virtual void v3BC();
-    virtual void v3C0();
-    virtual void v3C4();
-    virtual void v3C8();
-    virtual void v3CC();
-    virtual void v3D0();
-    virtual void v3D4();
-    virtual void v3D8();
-    virtual void v3DC();
-    virtual void v3E0();
-    virtual void v3E4();
-    virtual void v3E8();
-    virtual void v3EC();
-    virtual void v3F0();
-    virtual void v3F4();
-    virtual void v3F8();
-    virtual void v3FC();
-    virtual void v400();
-    virtual void v404();
-    virtual void v408();
-    virtual int GetStateA();
-    virtual void v410();
-    virtual void v414();
-    virtual void v418();
-    virtual void v41C();
-    virtual void v420();
-    virtual void v424();
-    virtual void v428();
-    virtual void v42C();
-    virtual void v430();
-    virtual void v434();
-    virtual void v438();
-    virtual void v43C();
-    virtual void v440();
-    virtual void v444();
-    virtual void v448();
-    virtual bool GetBoolA();
-    virtual void v450();
-    virtual bool GetBoolB();
-    virtual void v458();
-    virtual void v45C();
-    virtual void v460();
-    virtual void v464();
-    virtual void v468();
-    virtual void v46C();
-    virtual void v470();
-    virtual void v474();
-    virtual void v478();
-    virtual void v47C();
-    virtual void v480();
-    virtual void v484();
-    virtual void v488();
-    virtual void v48C();
-    virtual void v490();
-    virtual void v494();
-    virtual void v498();
-    virtual void v49C();
-    virtual void v4A0();
-    virtual void v4A4();
-    virtual void v4A8();
-    virtual void v4AC();
-    virtual void v4B0();
-    virtual void v4B4();
-    virtual void v4B8();
-    virtual int GetStateB();
-};
 
-class RefrEx : public TESObjectREFR {
-public:
-    virtual void v0E8();
-    virtual void v0EC();
-    virtual void v0F0();
-    virtual void v0F4();
-    virtual void v0F8();
-    virtual void v0FC();
-    virtual bool IsActorLike();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10C();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11C();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12C();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13C();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14C();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15C();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16C();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17C();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18C();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19C();
-    virtual void v1A0();
-    virtual void v1A4();
-    virtual void v1A8();
-    virtual void v1AC();
-    virtual void v1B0();
-    virtual void v1B4();
-    virtual void v1B8();
-    virtual void v1BC();
-    virtual void v1C0();
-    virtual void v1C4();
-    virtual void v1C8();
-    virtual void v1CC();
-    virtual void v1D0();
-    virtual void v1D4();
-    virtual void v1D8();
-    virtual void v1DC();
-    virtual void v1E0();
-    virtual Animation* GetAnimation();
-};
 
-class ActorEx : public Actor {
-public:
-    virtual void v0E8();
-    virtual void v0EC();
-    virtual void v0F0();
-    virtual void v0F4();
-    virtual void v0F8();
-    virtual void v0FC();
-    virtual bool IsActorLike2();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10C();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11C();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12C();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13C();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14C();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15C();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16C();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17C();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18C();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19C();
-    virtual void v1A0();
-    virtual void v1A4();
-    virtual void v1A8();
-    virtual void v1AC();
-    virtual void v1B0();
-    virtual void v1B4();
-    virtual void v1B8();
-    virtual void v1BC();
-    virtual void v1C0();
-    virtual void v1C4();
-    virtual void v1C8();
-    virtual void v1CC();
-    virtual void v1D0();
-    virtual void v1D4();
-    virtual void v1D8();
-    virtual void v1DC();
-    virtual void v1E0();
-    virtual Animation* GetAnimation2();
-    virtual void v1E8();
-    virtual void v1EC();
-    virtual void v1F0();
-    virtual void v1F4();
-    virtual void v1F8();
-    virtual void v1FC();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20C();
-    virtual void v210();
-    virtual void v214();
-    virtual void v218();
-    virtual void v21C();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual void v22C();
-    virtual void v230();
-    virtual void v234();
-    virtual void v238();
-    virtual void v23C();
-    virtual void v240();
-    virtual void v244();
-    virtual void v248();
-    virtual void v24C();
-    virtual void v250();
-    virtual void v254();
-    virtual void v258();
-    virtual void v25C();
-    virtual void v260();
-    virtual void v264();
-    virtual void v268();
-    virtual void v26C();
-    virtual void v270();
-    virtual void v274();
-    virtual void v278();
-    virtual void v27C();
-    virtual void v280();
-    virtual void v284();
-    virtual void v288();
-    virtual void v28C();
-    virtual void v290();
-    virtual void v294();
-    virtual void v298();
-    virtual void v29C();
-    virtual void v2A0();
-    virtual void v2A4();
-    virtual void v2A8();
-    virtual void v2AC();
-    virtual void v2B0();
-    virtual void v2B4();
-    virtual void v2B8();
-    virtual void v2BC();
-    virtual void v2C0();
-    virtual void v2C4();
-    virtual void v2C8();
-    virtual void v2CC();
-    virtual void v2D0();
-    virtual void v2D4();
-    virtual void v2D8();
-    virtual void v2DC();
-    virtual void v2E0();
-    virtual void v2E4();
-    virtual void v2E8();
-    virtual void v2EC();
-    virtual void v2F0();
-    virtual void v2F4();
-    virtual void v2F8();
-    virtual void v2FC();
-    virtual void v300();
-    virtual void v304();
-    virtual void v308();
-    virtual void v30C();
-    virtual void v310();
-    virtual void v314();
-    virtual void v318();
-    virtual void v31C();
-    virtual void v320();
-    virtual void v324();
-    virtual void v328();
-    virtual void v32C();
-    virtual void v330();
-    virtual void v334();
-    virtual void v338();
-    virtual void v33C();
-    virtual void v340();
-    virtual void v344();
-    virtual void v348();
-    virtual void v34C();
-    virtual void v350();
-    virtual void v354();
-    virtual void v358();
-    virtual void v35C();
-    virtual void v360();
-    virtual void v364();
-    virtual void v368();
-    virtual void v36C();
-    virtual void v370();
-    virtual void v374();
-    virtual void v378();
-    virtual void v37C();
-    virtual void v380();
-    virtual void v384();
-    virtual void v388();
-    virtual bool IsFlagged();
-    virtual void v390();
-    virtual void v394();
-    virtual void v398();
-    virtual void v39C();
-    virtual void v3A0();
-    virtual void v3A4();
-    virtual void v3A8();
-    virtual void v3AC();
-    virtual void v3B0();
-    virtual void v3B4();
-    virtual void v3B8();
-    virtual void v3BC();
-    virtual void v3C0();
-    virtual void v3C4();
-    virtual void v3C8();
-    virtual void v3CC();
-    virtual void v3D0();
-    virtual void v3D4();
-    virtual void v3D8();
-    virtual void v3DC();
-    virtual void v3E0();
-    virtual void v3E4();
-    virtual void v3E8();
-    virtual void v3EC();
-    virtual void v3F0();
-    virtual void v3F4();
-    virtual void v3F8();
-    virtual void v3FC();
-    virtual void v400();
-    virtual void v404();
-    virtual void v408();
-    virtual void v40C();
-    virtual void v410();
-    virtual void v414();
-    virtual void v418();
-    virtual void v41C();
-    virtual void v420();
-    virtual void v424();
-    virtual void v428();
-    virtual RefStub* GetTargetRef();
-    int GetValA();
-    BaseProcessStub* GetCurrentProcess();
-    int GetAnimAction();
-    int GetValC();
-    bool CheckD();
-    RefStub* GetOtherRef();
-};
+
+
+
 
 struct AnimationData2 {
 };
@@ -34065,25 +27364,25 @@ struct AnimationData2 {
 // @fnv 0x005c3cf0
 bool FUN_005c3cf0(const ScriptParameter* apParams, const char* apData, TESObjectREFR* apThis, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apLocals, double& afResult, unsigned int& auiOffset)
 {
-    if (apThis && ((RefrEx*)apThis)->GetAnimation() && ((RefrEx*)apThis)->IsActorLike()) {
-        ActorEx* pActor = (ActorEx*)dynamic_cast<Actor*>(apThis);
+    if (apThis && reinterpret_cast<Animation*>(apThis->GetAnimData()) && apThis->IsActor()) {
+        Actor* pActor = (Actor*)dynamic_cast<Actor*>(apThis);
         if (pActor) {
             DebugLog("--- Actor Variables -----------------------------");
-            if (pActor->GetValA() != -1)
-                DebugLog("Process Level: %s", g_tblA[pActor->GetValA()]);
-            DebugLog("Wants Weapon Drawn %d, Weapon Drawn %d", pActor->GetCurrentProcess()->GetBoolA(), pActor->GetCurrentProcess()->GetBoolB());
+            if (pActor->FUN_00931850() != -1)
+                DebugLog("Process Level: %s", g_tblA[pActor->FUN_00931850()]);
+            DebugLog("Wants Weapon Drawn %d, Weapon Drawn %d", pActor->GetCurrentProcess()->IsFirstActorFlagSet(), pActor->GetCurrentProcess()->IsAdditionalActorFlagSet());
             if (pActor->GetAnimAction() != -1)
                 DebugLog("Animation Action: %s", g_tblB[pActor->GetAnimAction()]);
-            DebugLog("Life State: %s", g_tblC[pActor->GetValC()]);
-            DebugLog("Sit/Sleep State: %s", g_tblD[pActor->GetCurrentProcess()->GetStateB()]);
-            DebugLog("Knock State: %s", g_tblE[pActor->GetCurrentProcess()->GetStateA()]);
-            DebugLog("Has RagDoll: %s", pActor->IsFlagged() ? "Yes" : "No");
-            if (pActor->CheckD() && pActor->GetTargetRef())
-                DebugLog("In Combat with \"%s\" (%08x)", pActor->GetTargetRef()->GetFullName(), pActor->GetTargetRef()->GetRefID());
-            if (pActor->GetOtherRef())
-                DebugLog("Current package target \"%s\" (%08x)", pActor->GetOtherRef()->GetFullName(), pActor->GetOtherRef()->GetRefID());
+            DebugLog("Life State: %s", g_tblC[((ScriptActorActions*)pActor)->FUN_004f8960()]);
+            DebugLog("Sit/Sleep State: %s", g_tblD[pActor->GetCurrentProcess()->GetSitSleepState()]);
+            DebugLog("Knock State: %s", g_tblE[pActor->GetCurrentProcess()->GetKnockedState()]);
+            DebugLog("Has RagDoll: %s", pActor->FUN_vt38c() ? "Yes" : "No");
+            if (pActor->FUN_00493bb0() && pActor->GetCombatTarget())
+                DebugLog("In Combat with \"%s\" (%08x)", pActor->GetCombatTarget()->GetFullName(), pActor->GetCombatTarget()->GetFormID());
+            if (pActor->GetCombatOpponent())
+                DebugLog("Current package target \"%s\" (%08x)", pActor->GetCombatOpponent()->GetFullName(), pActor->GetCombatOpponent()->GetFormID());
         }
-        Animation* pAnim = ((RefrEx*)apThis)->GetAnimation();
+        Animation* pAnim = reinterpret_cast<Animation*>(apThis->GetAnimData());
         if (pAnim) {
             DebugLog("--- Animation -------------------------------");
             DebugLog("Anims Loading: %d", pAnim->GetCount());
@@ -34091,7 +27390,7 @@ bool FUN_005c3cf0(const ScriptParameter* apParams, const char* apData, TESObject
                 AnimSeq* pForwardSequence = pAnim->GetControllerSequence(i);
                 if (pForwardSequence) {
                     unsigned short usGroup = pAnim->GetGroupID(i);
-                    DebugLog("%s -> %s/%s/%s", g_sectionNames[i], g_groupNamesA[GetGroupIdxB(usGroup)], g_groupNamesB[GetGroupIdxA(usGroup)], g_animGroupInfo[TESAnimGroupStub::GetType(usGroup)].name);
+                    DebugLog("%s -> %s/%s/%s", g_sectionNames[i], g_groupNamesA[GetGroupIdxB(usGroup)], g_groupNamesB[GetGroupIdxA(usGroup)], g_animGroupInfo[TESAnimGroup::GetType(usGroup)].name);
                 }
             }
             if (pAnim->spIdle)
@@ -34397,9 +27696,7 @@ bool __cdecl FUN_005c43d0(int a1, int a2, Ref* ref, int a4, Ref* scr, Extra* ex,
 }
 
 struct ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 float FUN_0040ebd0(float, float);
@@ -34452,192 +27749,9 @@ namespace fnv_005c5a70 {
 // Reconstruction based on another contributor's 2026-10-24 unverified checkpoint.
 extern void* DAT_011dea10;
 struct TextureAccessor { unsigned int FUN_007d6bb0(); };
-class NiFixedString { public: const char* value; operator const char*() const; };
-class NiTexture {
-public:
-    virtual void v0();
-    virtual void v1();
-    virtual NiPointer<NiTexture>* v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual char* v37();
-    virtual char* v38();
-    virtual NiFixedString* v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual const char* v76();
-    NiFixedString* FUN_00413f40();
-    TextureAccessor* FUN_0059bb30();
-    int FUN_0043c430();
-    int FUN_00726070();
-    NiTexture* FUN_0055b980();
-};
-template<> class NiPointer<NiTexture> {
-public:
-    NiTexture* object;
-    NiPointer();
-    ~NiPointer();
-    operator NiTexture*() const;
-    NiPointer& operator=(const NiPointer&);
-    NiPointer& operator=(NiTexture*);
-};
-class BSFile {
-public:
-    char internalbuf16[16];
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    unsigned int unk150;
-    unsigned int unk154;
 
-    BSFile(const char*,int,unsigned int,bool);
-    virtual ~BSFile();
-    void FUN_00aff300(int,int);
-    void FUN_00aff950(char*,unsigned int);
-    void FUN_00affd10();
-};
+
+
 struct UserInterface {
     void** vtable;
     NiTexture* FUN_005f36f0();
@@ -34709,11 +27823,11 @@ unsigned char __cdecl FUN_005c5a70(void* source, void* callback, void* third, vo
     if (!outPath[0]) {
         NiTexture* active=((UserInterface*)DAT_011dea10)->FUN_005f36f0();
         if (active) {
-            FUN_00406d00(outPath,512,&DAT_0103b258,&DAT_0103b268,active->v76());
+            FUN_00406d00(outPath,512,&DAT_0103b258,&DAT_0103b268,reinterpret_cast<SharedForm*>(active)->GetName());
         } else {
             NiTexture* queued=((UserInterface*)DAT_011dea10)->FUN_004fd3e0();
             if (queued) {
-                FUN_00406d00(outPath,512,&DAT_0103b248,&DAT_0103b268,queued->v76(),
+                FUN_00406d00(outPath,512,&DAT_0103b248,&DAT_0103b268,reinterpret_cast<SharedForm*>(queued)->GetName(),
                              ((UserInterface*)DAT_011dea10)->FUN_0059bb30(),((UserInterface*)DAT_011dea10)->FUN_0045cd60());
             } else {
                 FUN_00406d00(outPath,512,&DAT_0103b238,&DAT_0103b268);
@@ -34764,7 +27878,7 @@ unsigned char __cdecl FUN_005c5a70(void* source, void* callback, void* third, vo
             bool bUnnamed=false;
             if (FUN_0043b300(&DAT_011f444c,largest[i].operator NiTexture*())) {
                 NiTexture* pkTexture=largest[i].operator NiTexture*();
-                const char* label=pkTexture->v39()->operator const char*();
+                const char* label=pkTexture->GetPath().operator const char*();
                 if (!label || !label[0]) label=largest[i].operator NiTexture*()->FUN_00413f40()->operator const char*();
                 if (!label || !label[0]) FUN_00406d30(temp,0x104,&DAT_01039664);
                 else FUN_00406d30(temp,0x104,label);
@@ -34786,12 +27900,12 @@ unsigned char __cdecl FUN_005c5a70(void* source, void* callback, void* third, vo
                 else category=&DAT_01039568;
             }
             unsigned int count=FUN_005b5e40((void*)largest[i].operator NiTexture*());
-            unsigned int rawFormat=FUN_00e7bd20(largest[i].operator NiTexture*()->FUN_0059bb30()->FUN_007d6bb0());
+            unsigned int rawFormat=FUN_00e7bd20(reinterpret_cast<TextureAccessor*>(largest[i].operator NiTexture*()->FUN_0059bb30())->FUN_007d6bb0());
             unsigned int uiBits=FUN_00e7a9a0(rawFormat);
-            NiTexture* pkImage=largest[i].operator NiTexture*()->v2()->operator NiTexture*();
+            const char* pkImage=largest[i].operator NiTexture*()->GetRTTI()->GetName();
             FUN_00406d00(line,0x200,&DAT_0103952c,i+1,category,temp,
-                         largest[i].operator NiTexture*()->v37(),
-                         largest[i].operator NiTexture*()->v38(),
+                         largest[i].operator NiTexture*()->GetWidth(),
+                         largest[i].operator NiTexture*()->GetHeight(),
                          count>>10,uiBits,largest[i].operator NiTexture*()->FUN_00726070()-1,
                          largest[i].operator NiTexture*()->FUN_0043c430()==3?&DAT_01039564:&DAT_01039560,pkImage);
             FUN_005b5e40((void*)line);
@@ -34831,61 +27945,8 @@ bool __cdecl FUN_005c68a0(C5C68A0ParamInfo* paParams, C5C68A0ScriptData* pScript
 extern "C" float DAT_0103b2d0;
 
 
-
-struct FUN_005c6b60_ActorValueOwner
-
-{
-
-    virtual void Unknown00();
-
-    virtual void Unknown04();
-
-    virtual void Unknown08();
-
-    virtual float GetActorValue(int);
-
-    virtual void Unknown10();
-
-    virtual void Unknown14();
-
-    virtual void Unknown18();
-
-    virtual void Unknown1C();
-
-    virtual float GetBaseActorValue(int);
-
-};
-
-
-
-class FUN_005c6b60_Actor : public Actor
-
-{
-
-public:
-
-    virtual void Unknown58();
-
-    virtual void Unknown5C();
-
-    virtual void Unknown60();
-
-    virtual void Unknown64();
-
-    virtual void Unknown68();
-
-    virtual void Unknown6C();
-
-    virtual bool IsActor();
-
-    void FUN_0088b740(int, float);
-
-};
-
-
-
 // @fnv 0x005c6b60
-bool __cdecl FUN_005c6b60(void*, void*, FUN_005c6b60_Actor* actor)
+bool __cdecl FUN_005c6b60(void*, void*, Actor* actor)
 
 {
 
@@ -34893,31 +27954,31 @@ bool __cdecl FUN_005c6b60(void*, void*, FUN_005c6b60_Actor* actor)
 
     {
 
-        FUN_005c6b60_Actor* localActor2 = actor;
+        Actor* localActor2 = actor;
 
-        float current = ((FUN_005c6b60_ActorValueOwner*)((char*)localActor2 + 0xa4))->GetActorValue(16);
+        float current = ((ActorValueOwner*)((char*)localActor2 + 0xa4))->GetCurrentActorValue((ActorValue::Index)16);
 
-        float base = ((FUN_005c6b60_ActorValueOwner*)((char*)localActor2 + 0xa4))->GetBaseActorValue(16);
+        float base = ((ActorValueOwner*)((char*)localActor2 + 0xa4))->GetPermanentActorValueAdjustment((ActorValue::Index)16);
 
         float differenceVal = 0.0f;
 
         differenceVal = base - current;
 
-        localActor2->FUN_0088b740(16, differenceVal);
+        reinterpret_cast<ScriptActorActions*>(localActor2)->FUN_0088b740(16, differenceVal);
 
-        localActor2->FUN_0088b740(29, DAT_0103b2d0);
+        reinterpret_cast<ScriptActorActions*>(localActor2)->FUN_0088b740(29, DAT_0103b2d0);
 
-        localActor2->FUN_0088b740(30, DAT_0103b2d0);
+        reinterpret_cast<ScriptActorActions*>(localActor2)->FUN_0088b740(30, DAT_0103b2d0);
 
-        localActor2->FUN_0088b740(27, DAT_0103b2d0);
+        reinterpret_cast<ScriptActorActions*>(localActor2)->FUN_0088b740(27, DAT_0103b2d0);
 
-        localActor2->FUN_0088b740(28, DAT_0103b2d0);
+        reinterpret_cast<ScriptActorActions*>(localActor2)->FUN_0088b740(28, DAT_0103b2d0);
 
-        localActor2->FUN_0088b740(25, DAT_0103b2d0);
+        reinterpret_cast<ScriptActorActions*>(localActor2)->FUN_0088b740(25, DAT_0103b2d0);
 
-        localActor2->FUN_0088b740(26, DAT_0103b2d0);
+        reinterpret_cast<ScriptActorActions*>(localActor2)->FUN_0088b740(26, DAT_0103b2d0);
 
-        localActor2->FUN_0088b740(31, DAT_0103b2d0);
+        reinterpret_cast<ScriptActorActions*>(localActor2)->FUN_0088b740(31, DAT_0103b2d0);
 
     }
 
@@ -34972,8 +28033,10 @@ bool __cdecl FUN_005c7660(int a1, int a2, int a3, int a4, int a5, int a6, int un
     return true;
 }
 
+class TESObjectREFR;
+class Script;
 namespace fnv_005c7e60 {
-class ScriptParameter; class TESObjectREFR; class Script; class ScriptLocals;
+class ScriptParameter;   
 bool FUN_005accb0(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 extern char DAT_011846d4, DAT_011841cc;
 void* FUN_00ec43fb(void*, int, void*, void*, int);
@@ -34998,290 +28061,7 @@ bool FUN_005c7e60(const ScriptParameter* paramInfo, const char* scriptData, TESO
 }
 }  // namespace fnv_005c7e60
 
-class ActorVirtualAccess_005c8510 {
-public:
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8();
-    virtual void V9();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual void V34();
-    virtual void V35();
-    virtual void V36();
-    virtual void V37();
-    virtual void V38();
-    virtual void V39();
-    virtual void V40();
-    virtual void V41();
-    virtual void V42();
-    virtual void V43();
-    virtual void V44();
-    virtual void V45();
-    virtual void V46();
-    virtual void V47();
-    virtual void V48();
-    virtual void V49();
-    virtual void V50();
-    virtual void V51();
-    virtual void V52();
-    virtual void V53();
-    virtual void V54();
-    virtual void V55();
-    virtual void V56();
-    virtual void V57();
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual void V64();
-    virtual void V65();
-    virtual void V66();
-    virtual void V67();
-    virtual void V68();
-    virtual void V69();
-    virtual void V70();
-    virtual void V71();
-    virtual void V72();
-    virtual void V73();
-    virtual void V74();
-    virtual void V75();
-    virtual void V76();
-    virtual void V77();
-    virtual void V78();
-    virtual void V79();
-    virtual void V80();
-    virtual void V81();
-    virtual void V82();
-    virtual void V83();
-    virtual void V84();
-    virtual void V85();
-    virtual void V86();
-    virtual void V87();
-    virtual void V88();
-    virtual void V89();
-    virtual void V90();
-    virtual void V91();
-    virtual void V92();
-    virtual void V93();
-    virtual void V94();
-    virtual void V95();
-    virtual void V96();
-    virtual void V97();
-    virtual void V98();
-    virtual void V99();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual void V125();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
-    virtual void V144();
-    virtual void V145();
-    virtual void V146();
-    virtual void V147();
-    virtual void V148();
-    virtual void V149();
-    virtual void V150();
-    virtual void V151();
-    virtual void V152();
-    virtual void V153();
-    virtual void V154();
-    virtual void V155();
-    virtual void V156();
-    virtual void V157();
-    virtual void V158();
-    virtual void V159();
-    virtual void V160();
-    virtual void V161();
-    virtual void V162();
-    virtual void V163();
-    virtual void V164();
-    virtual void V165();
-    virtual void V166();
-    virtual void V167();
-    virtual void V168();
-    virtual void V169();
-    virtual void V170();
-    virtual void V171();
-    virtual void V172();
-    virtual void V173();
-    virtual void V174();
-    virtual void V175();
-    virtual void V176();
-    virtual void V177();
-    virtual void V178();
-    virtual void V179();
-    virtual void V180();
-    virtual void V181();
-    virtual void V182();
-    virtual void V183();
-    virtual void V184();
-    virtual void V185();
-    virtual void V186();
-    virtual void V187();
-    virtual void V188();
-    virtual void V189();
-    virtual void V190();
-    virtual void V191();
-    virtual void V192();
-    virtual void V193();
-    virtual void V194();
-    virtual void V195();
-    virtual void V196();
-    virtual void V197();
-    virtual void V198();
-    virtual void V199();
-    virtual void V200();
-    virtual void V201();
-    virtual void V202();
-    virtual void V203();
-    virtual void V204();
-    virtual void V205();
-    virtual void V206();
-    virtual void V207();
-    virtual void V208();
-    virtual void V209();
-    virtual void V210();
-    virtual void V211();
-    virtual void V212();
-    virtual void V213();
-    virtual void V214();
-    virtual void V215();
-    virtual void V216();
-    virtual void V217();
-    virtual void V218();
-    virtual void V219();
-    virtual void V220();
-    virtual void V221();
-    virtual void V222();
-    virtual void V223();
-    virtual void V224();
-    virtual void V225();
-    virtual void V226();
-    virtual void V227();
-    virtual void V228();
-    virtual void V229();
-    virtual void V230();
-    virtual void V231();
-    virtual void V232();
-    virtual void V233();
-    virtual void V234();
-    virtual void V235();
-    virtual void V236();
-    virtual void V237();
-    virtual void V238();
-    virtual void V239();
-    virtual void V240();
-    virtual void V241();
-    virtual void V242();
-    virtual void V243();
-    virtual void V244();
-    virtual void V245();
-    virtual void V246();
-    virtual void V247();
-    virtual void V248();
-    virtual void V249();
-    virtual void V250();
-    virtual void V251();
-    virtual void V252();
-    virtual void V253();
-    virtual void V254();
-    virtual void V255();
-    virtual void V256();
-    virtual void V257();
-    virtual void V258();
-    virtual void V259();
-    virtual void V260();
-    virtual void V261();
-    virtual void V262();
-    virtual void V263();
-    virtual void V264();
-    virtual void V265();
-    virtual void V266();
-    virtual void V267();
-    virtual void V268();
-    virtual void V269();
-    virtual void V270();
-    virtual void V271();
-    virtual void V272();
-    virtual void V273();
-    virtual void V274();
-    virtual void V275();
-    virtual void V276();
-    virtual void V277();
-    virtual void V278();
-    virtual void V279();
-    virtual void SetValue(void* target, float value);
-};
+
 extern bool __cdecl FUN_0059fdb0(TESObjectREFR*, void*, int, double&);
 // @fnv 0x005c8510
 bool __cdecl FUN_005c8510(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* ref, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& opcodeOffset) {
@@ -35290,7 +28070,9 @@ bool __cdecl FUN_005c8510(const ScriptParameter* paramInfo, const char* scriptDa
     if (!ExtractArgs(paramInfo, scriptData, &opcodeOffset, ref, container, script, locals, &target, &count)) return false;
     Actor* actor = dynamic_cast<Actor*>(ref);
     if (actor && target) {
-        reinterpret_cast<ActorVirtualAccess_005c8510*>(actor)->SetValue(target, (float)count);
+        // The shared slot lacks this script-specific parameter signature.
+        typedef void (__thiscall *ScriptSetValue)(Actor*, void*, float);
+        ((ScriptSetValue)(*(void***)actor)[0x460 / 4])(actor, target, (float)count);
         return FUN_0059fdb0(ref, target, 0, result);
     }
     return false;
@@ -35544,151 +28326,19 @@ bool __cdecl FUN_005c8740(int a,int b,Ref* source,int d,int e,int f,double* resu
 }
 }  // namespace fnv_005c8740
 
+namespace ScriptAnimation {
+struct ResultList {
+    unsigned int unk0, unk4, unk8;
+    ~ResultList();
+    void FUN_00ad8e60(void (*)(unsigned int), unsigned int);
+};
+}
+
 namespace ScriptIdle {
-struct Actor;struct Process;struct Idle;struct Event;struct Result {unsigned int unk0,unk4,unk8;~Result();void FUN_00ad8e60(void(*)(unsigned int),unsigned int);};
+using ::Actor;
+struct Process;struct Idle;struct Event;
 void FUN_005790f0(unsigned int);
-struct Actor {
-virtual void slot0();
-virtual void slot4();
-virtual void slot8();
-virtual void slotc();
-virtual void slot10();
-virtual void slot14();
-virtual void slot18();
-virtual void slot1c();
-virtual void slot20();
-virtual void slot24();
-virtual void slot28();
-virtual void slot2c();
-virtual void slot30();
-virtual void slot34();
-virtual void slot38();
-virtual void slot3c();
-virtual void slot40();
-virtual void slot44();
-virtual void slot48();
-virtual void slot4c();
-virtual void slot50();
-virtual void slot54();
-virtual void slot58();
-virtual void slot5c();
-virtual void slot60();
-virtual void slot64();
-virtual void slot68();
-virtual void slot6c();
-virtual void slot70();
-virtual void slot74();
-virtual void slot78();
-virtual void slot7c();
-virtual void slot80();
-virtual void slot84();
-virtual void slot88();
-virtual void slot8c();
-virtual void slot90();
-virtual void slot94();
-virtual void slot98();
-virtual void slot9c();
-virtual void slota0();
-virtual void slota4();
-virtual void slota8();
-virtual void slotac();
-virtual void slotb0();
-virtual void slotb4();
-virtual void slotb8();
-virtual void slotbc();
-virtual void slotc0();
-virtual void slotc4();
-virtual void slotc8();
-virtual void slotcc();
-virtual void slotd0();
-virtual void slotd4();
-virtual void slotd8();
-virtual void slotdc();
-virtual void slote0();
-virtual void slote4();
-virtual void slote8();
-virtual void slotec();
-virtual void slotf0();
-virtual void slotf4();
-virtual void slotf8();
-virtual bool IsReference();
-virtual bool IsActor();
-virtual void slot104();
-virtual void slot108();
-virtual void slot10c();
-virtual void slot110();
-virtual void slot114();
-virtual void slot118();
-virtual void slot11c();
-virtual void slot120();
-virtual void slot124();
-virtual void slot128();
-virtual void slot12c();
-virtual void slot130();
-virtual void slot134();
-virtual void slot138();
-virtual Result Play(Idle*,Actor*,int,int,int,int,bool);
-virtual void slot140();
-virtual void slot144();
-virtual void slot148();
-virtual void slot14c();
-virtual void slot150();
-virtual void slot154();
-virtual void slot158();
-virtual void slot15c();
-virtual void slot160();
-virtual void slot164();
-virtual void slot168();
-virtual void slot16c();
-virtual void slot170();
-virtual void slot174();
-virtual void slot178();
-virtual void slot17c();
-virtual void slot180();
-virtual void slot184();
-virtual void slot188();
-virtual void slot18c();
-virtual void slot190();
-virtual void slot194();
-virtual void slot198();
-virtual void slot19c();
-virtual void slot1a0();
-virtual void slot1a4();
-virtual void slot1a8();
-virtual void slot1ac();
-virtual void slot1b0();
-virtual void slot1b4();
-virtual void slot1b8();
-virtual void slot1bc();
-virtual void slot1c0();
-virtual void slot1c4();
-virtual void slot1c8();
-virtual void slot1cc();
-virtual int Ready();
-virtual void slot1d4();
-virtual void slot1d8();
-virtual void slot1dc();
-virtual void slot1e0();
-virtual void slot1e4();
-virtual void slot1e8();
-virtual void slot1ec();
-virtual void slot1f0();
-virtual void slot1f4();
-virtual void slot1f8();
-virtual void slot1fc();
-virtual void slot200();
-virtual void slot204();
-virtual void slot208();
-virtual void slot20c();
-virtual void slot210();
-virtual void slot214();
-virtual void slot218();
-virtual void slot21c();
-virtual void slot220();
-virtual void slot224();
-virtual void slot228();
-virtual bool Busy(int);
-void FUN_00934250();Process* FUN_008d8520();int FUN_00931850();void FUN_0057bd60(Actor*);bool FUN_0087f3d0();int FUN_004f8960();void* FUN_005d43c0();Actor* FUN_005e3fa0();void FUN_0057ad20(Idle*);void FUN_0057ace0(unsigned int);unsigned int FUN_0084e3a0();};
+
 struct Process {
 virtual void slot0();
 virtual void slot4();
@@ -36104,14 +28754,14 @@ bool FUN_005c9100(void* a,void* b,Actor* object,void* d,void* e,void* f,double* 
 if(!FUN_005accb0(a,b,h,object,d,e,f,&target,&idleSlot10,&flag,&optionSlot33))return false;
 if(flag>0)enabledSlot10=true;
 int savedSlot16=*DAT_011cd378.FUN_0043d4d0();DAT_011cd378.FUN_0045ce80(0x7fffffff);Actor* actor=0;if(object->IsActor())actor=object;
-if(actor && target){actor->FUN_00934250();if(actor->FUN_008d8520() && !actor->Busy(1) && target->FUN_008d8520()){
-actor->FUN_008d8520()->Reset(0);actor->FUN_008d8520()->Clear();
-if(!actor->FUN_00931850()){if(!optionSlot33){target->FUN_008d8520()->Flag(0);target->FUN_008d8520()->Target(actor);target->FUN_0057bd60(actor);}actor->FUN_008d8520()->Flag(0);actor->FUN_008d8520()->Target(target);}
-if(DAT_011dea3c->FUN_0094df60() || actor->FUN_008d8520()->FUN_0045cd60() || (actor->FUN_0087f3d0() && actor->FUN_004f8960()==6)){
+if(actor && target){actor->FUN_00934250();if(reinterpret_cast<Process*>(actor->FUN_008d8520()) && !actor->HasHealth(true) && reinterpret_cast<Process*>(target->FUN_008d8520())){
+reinterpret_cast<Process*>(actor->FUN_008d8520())->Reset(0);reinterpret_cast<Process*>(actor->FUN_008d8520())->Clear();
+if(!actor->FUN_00931850()){if(!optionSlot33){reinterpret_cast<Process*>(target->FUN_008d8520())->Flag(0);reinterpret_cast<Process*>(target->FUN_008d8520())->Target(actor);target->FUN_0057bd60(actor);}reinterpret_cast<Process*>(actor->FUN_008d8520())->Flag(0);reinterpret_cast<Process*>(actor->FUN_008d8520())->Target(target);}
+if(DAT_011dea3c->FUN_0094df60() || reinterpret_cast<Process*>(actor->FUN_008d8520())->FUN_0045cd60() || (actor->FUN_0087f3d0() && static_cast<ScriptActorActions*>(actor)->FUN_004f8960()==6)){
 Event* event=idleSlot10->FUN_0061b320(actor,target,0,0,1);if(event){event->FUN_0083c7b0();int old=event->FUN_0083c820();event->FUN_0083c850(0);event->FUN_0083c850(1);MarkBaseExtraListScriptEvent(idleSlot10,actor->FUN_005d43c0(),0x40000);delete event;}}
-else{actor->FUN_0057bd60(target);actor->FUN_008d8520()->Start(actor,idleSlot10,enabledSlot10,0,1,1);}
+else{actor->FUN_0057bd60(target);reinterpret_cast<Process*>(actor->FUN_008d8520())->Start(actor,idleSlot10,enabledSlot10,0,1,1);}
 }}
-else if(object && (object->Ready() || (object->IsReference() && object->FUN_005e3fa0()->Ready()))){object->FUN_0057ad20(idleSlot10);Event* event2Slot0=idleSlot10->FUN_0061b320(object,0,0,0,0);if(event2Slot0)object->FUN_0057ace0(event2Slot0->FUN_0084e3a0());Result outcomeSlot1=object->Play(idleSlot10,target,0,0,0,0,enabledSlot10);outcomeSlot1.FUN_00ad8e60(FUN_005790f0,object->FUN_0084e3a0());}
+else if(object && (object->GetNiNode() || (object->IsMobileObject() && object->FUN_005e3fa0()->GetNiNode()))){object->FUN_0057ad20(reinterpret_cast<ScriptAnimation::Idle*>(idleSlot10));Event* event2Slot0=idleSlot10->FUN_0061b320(object,0,0,0,0);if(event2Slot0)object->FUN_0057ace0(event2Slot0->FUN_0084e3a0());ScriptAnimation::ResultList outcomeSlot1=object->PlayIdle(reinterpret_cast<ScriptAnimation::Idle*>(idleSlot10),target,0,0,0,0,enabledSlot10);outcomeSlot1.FUN_00ad8e60(FUN_005790f0,object->FUN_0084e3a0());}
 DAT_011cd378.FUN_0045ce80(savedSlot16);return true;
 }
 }
@@ -36916,101 +29566,7 @@ bool FUN_005c9cf0(void* a1, void* a2, LineRef* pRef)
 // Reference object (3rd argument) is tested through vtable slot 0x168; on success the
 // object is passed to a non-virtual helper, and a second non-virtual call stores its
 // result. If nothing matched, the script result is 1.0; the result is 0.0 by default.
-class FUN_005ca470_obj
-{
-public:
-    virtual void V00();
-    virtual void V01();
-    virtual void V02();
-    virtual void V03();
-    virtual void V04();
-    virtual void V05();
-    virtual void V06();
-    virtual void V07();
-    virtual void V08();
-    virtual void V09();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual void V34();
-    virtual void V35();
-    virtual void V36();
-    virtual void V37();
-    virtual void V38();
-    virtual void V39();
-    virtual void V40();
-    virtual void V41();
-    virtual void V42();
-    virtual void V43();
-    virtual void V44();
-    virtual void V45();
-    virtual void V46();
-    virtual void V47();
-    virtual void V48();
-    virtual void V49();
-    virtual void V50();
-    virtual void V51();
-    virtual void V52();
-    virtual void V53();
-    virtual void V54();
-    virtual void V55();
-    virtual void V56();
-    virtual void V57();
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual void V64();
-    virtual void V65();
-    virtual void V66();
-    virtual void V67();
-    virtual void V68();
-    virtual void V69();
-    virtual void V70();
-    virtual void V71();
-    virtual void V72();
-    virtual void V73();
-    virtual void V74();
-    virtual void V75();
-    virtual void V76();
-    virtual void V77();
-    virtual void V78();
-    virtual void V79();
-    virtual void V80();
-    virtual void V81();
-    virtual void V82();
-    virtual void V83();
-    virtual void V84();
-    virtual void V85();
-    virtual void V86();
-    virtual void V87();
-    virtual void V88();
-    virtual void V89();
-    virtual FUN_005ca470_obj* V90();
-};
+
 
 class FUN_005ca470_helper
 {
@@ -37023,9 +29579,9 @@ bool __cdecl FUN_005ca470(const ScriptParameter* paramInfo, const char* scriptDa
 {
     result = 0.0;
     int found = 0;
-    if (((FUN_005ca470_obj*)thisObj)->V90()) {
-        if (((FUN_005ca4f0_shell*)((FUN_005ca470_obj*)thisObj)->V90())->FUN_005ca4f0()) {
-            found = ((FUN_005ca470_helper*)((FUN_005ca470_obj*)thisObj)->V90())->FUN_00559450();
+    if (reinterpret_cast<void* (__thiscall*)(TESObjectREFR*)>((*reinterpret_cast<void***>(thisObj))[0x5A])(thisObj)) {
+        if (((FUN_005ca4f0_shell*)reinterpret_cast<void* (__thiscall*)(TESObjectREFR*)>((*reinterpret_cast<void***>(thisObj))[0x5A])(thisObj))->FUN_005ca4f0()) {
+            found = ((FUN_005ca470_helper*)reinterpret_cast<void* (__thiscall*)(TESObjectREFR*)>((*reinterpret_cast<void***>(thisObj))[0x5A])(thisObj))->FUN_00559450();
         }
     }
     if (thisObj != 0 && found == 0) {
@@ -37034,10 +29590,9 @@ bool __cdecl FUN_005ca470(const ScriptParameter* paramInfo, const char* scriptDa
     return true;
 }
 
-class TESForm;
+
 class ScriptParameter;
-class Script;
-class ScriptLocals;
+
 
 struct IdleModel {
     virtual void m_000();
@@ -37148,10 +29703,7 @@ struct IdleRef {
     IdleForm* GetIdle();
 };
 
-template <class T> struct IdlePtr {
-    T* p;
-    operator T*() const;
-};
+
 
 struct AnimData {
     bool FUN_004985f0();
@@ -37231,8 +29783,8 @@ struct AnimHolder {
     int unk118;
     int unk11C;
     int unk120;
-    IdlePtr<IdleTarget> target;
-    IdlePtr<IdleRef> idleRef;
+    NiPointer<IdleTarget> target;
+    NiPointer<IdleRef> idleRef;
     bool FUN_004985f0();
 };
 
@@ -37695,131 +30247,7 @@ struct AIProcess {
     virtual void SetIdle(IdleForm*);
 };
 
-struct ActorV {
-    virtual void a_000();
-    virtual void a_004();
-    virtual void a_008();
-    virtual void a_00c();
-    virtual void a_010();
-    virtual void a_014();
-    virtual void a_018();
-    virtual void a_01c();
-    virtual void a_020();
-    virtual void a_024();
-    virtual void a_028();
-    virtual void a_02c();
-    virtual void a_030();
-    virtual void a_034();
-    virtual void a_038();
-    virtual void a_03c();
-    virtual void a_040();
-    virtual void a_044();
-    virtual void a_048();
-    virtual void a_04c();
-    virtual void a_050();
-    virtual void a_054();
-    virtual void a_058();
-    virtual void a_05c();
-    virtual void a_060();
-    virtual void a_064();
-    virtual void a_068();
-    virtual void a_06c();
-    virtual void a_070();
-    virtual void a_074();
-    virtual void a_078();
-    virtual void a_07c();
-    virtual void a_080();
-    virtual void a_084();
-    virtual void a_088();
-    virtual void a_08c();
-    virtual void a_090();
-    virtual void a_094();
-    virtual void a_098();
-    virtual void a_09c();
-    virtual void a_0a0();
-    virtual void a_0a4();
-    virtual void a_0a8();
-    virtual void a_0ac();
-    virtual void a_0b0();
-    virtual void a_0b4();
-    virtual void a_0b8();
-    virtual void a_0bc();
-    virtual void a_0c0();
-    virtual void a_0c4();
-    virtual void a_0c8();
-    virtual void a_0cc();
-    virtual void a_0d0();
-    virtual void a_0d4();
-    virtual void a_0d8();
-    virtual void a_0dc();
-    virtual void a_0e0();
-    virtual void a_0e4();
-    virtual void a_0e8();
-    virtual void a_0ec();
-    virtual void a_0f0();
-    virtual void a_0f4();
-    virtual void a_0f8();
-    virtual void a_0fc();
-    virtual void a_100();
-    virtual void a_104();
-    virtual void a_108();
-    virtual void a_10c();
-    virtual void a_110();
-    virtual void a_114();
-    virtual void a_118();
-    virtual void a_11c();
-    virtual void a_120();
-    virtual void a_124();
-    virtual void a_128();
-    virtual void a_12c();
-    virtual void a_130();
-    virtual void a_134();
-    virtual void a_138();
-    virtual void a_13c();
-    virtual void a_140();
-    virtual void a_144();
-    virtual void a_148();
-    virtual void a_14c();
-    virtual void a_150();
-    virtual void a_154();
-    virtual void a_158();
-    virtual void a_15c();
-    virtual void a_160();
-    virtual void a_164();
-    virtual void a_168();
-    virtual void a_16c();
-    virtual void a_170();
-    virtual void a_174();
-    virtual void a_178();
-    virtual void a_17c();
-    virtual void a_180();
-    virtual void a_184();
-    virtual void a_188();
-    virtual void a_18c();
-    virtual void a_190();
-    virtual void a_194();
-    virtual void a_198();
-    virtual void a_19c();
-    virtual void a_1a0();
-    virtual void a_1a4();
-    virtual void a_1a8();
-    virtual void a_1ac();
-    virtual void a_1b0();
-    virtual void a_1b4();
-    virtual void a_1b8();
-    virtual void a_1bc();
-    virtual void a_1c0();
-    virtual void a_1c4();
-    virtual void a_1c8();
-    virtual void a_1cc();
-    virtual void a_1d0();
-    virtual void a_1d4();
-    virtual void a_1d8();
-    virtual void a_1dc();
-    virtual void a_1e0();
-    virtual AnimHolder* GetAnimHolder();
-    AIProcess* GetCurrentProcess() const;
-};
+
 
 struct IdleManager {
     IdleForm* FUN_00600950(Actor* actor, int a);
@@ -37836,10 +30264,10 @@ void __cdecl DebugLog(const char*, ...);
 bool __cdecl FUN_005cb0c0(const ScriptParameter* parameters, const char* scriptData, TESObjectREFR* thisObject, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& opcodeOffset)
 {
     Actor* actor = dynamic_cast<Actor*>(thisObject);
-    if (actor && ((ActorV*)actor)->GetCurrentProcess()) {
-        IdleForm* idle = DAT_011cb6a0->FUN_00600950(actor, ((ActorV*)actor)->GetCurrentProcess()->GetValue128());
+    if (actor && reinterpret_cast<AIProcess*>(static_cast<const Actor*>(actor)->GetCurrentProcess())) {
+        IdleForm* idle = DAT_011cb6a0->FUN_00600950(actor, reinterpret_cast<AIProcess*>(static_cast<const Actor*>(actor)->GetCurrentProcess())->GetValue128());
         if (idle) {
-            AnimHolder* holder = ((ActorV*)actor)->GetAnimHolder();
+            AnimHolder* holder = reinterpret_cast<AnimHolder*>(actor->GetAnimData());
             if (!holder) {
                 return true;
             }
@@ -37856,9 +30284,9 @@ bool __cdecl FUN_005cb0c0(const ScriptParameter* parameters, const char* scriptD
                 }
             }
             if (!bPlay) {
-                if (((ActorV*)actor)->GetCurrentProcess()) {
-                    ((ActorV*)actor)->GetCurrentProcess()->SetIdle(idle);
-                    ((ActorV*)actor)->GetCurrentProcess()->SetFlag(0x80);
+                if (reinterpret_cast<AIProcess*>(static_cast<const Actor*>(actor)->GetCurrentProcess())) {
+                    reinterpret_cast<AIProcess*>(static_cast<const Actor*>(actor)->GetCurrentProcess())->SetIdle(idle);
+                    reinterpret_cast<AIProcess*>(static_cast<const Actor*>(actor)->GetCurrentProcess())->SetFlag(0x80);
                 }
                 if (g_bIdleDebug) {
                     DebugLog("Picked Idle '%s' (%08X) file: %s", idle->GetEditorID(), idle->GetFormID(), idle->model.GetModelFilePath());
@@ -37877,45 +30305,14 @@ struct IdleFileName {
     virtual void v10();
     virtual const char* GetName();
 };
-class TESIdleForm : public TESForm {
-public:
-    virtual void idleV3a();
-    virtual void idleV3b();
-    virtual void idleV3c();
-    virtual void idleV3d();
-    virtual void idleV3e();
-    virtual void idleV3f();
-    virtual void idleV40();
-    virtual void idleV41();
-    virtual void idleV42();
-    virtual void idleV43();
-    virtual void idleV44();
-    virtual void idleV45();
-    virtual void idleV46();
-    virtual void idleV47();
-    virtual void idleV48();
-    virtual void idleV49();
-    virtual void idleV4a();
-    virtual void idleV4b();
-    virtual const char* GetEditorID();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    IdleFileName file;
-    unsigned int FUN_0084e3a0();
-};
+
 struct IdleSequence {
     TESIdleForm* FUN_0055b980();
     unsigned int FUN_0084e3a0();
     IdleSequence* FUN_00490e40();
     unsigned int FUN_0059bb30();
 };
-struct IdleSequencePtr {
-    IdleSequence* value;
-    IdleSequence* FUN_00559450();
-};
+
 struct IdleState {
     unsigned int unk000;
     unsigned int unk004;
@@ -37990,272 +30387,12 @@ struct IdleState {
     unsigned int unk118;
     unsigned int unk11c;
     unsigned int unk120;
-    IdleSequencePtr sequence;
-    IdleSequencePtr current;
+    NiPointer<IdleSequence> sequence;
+    NiPointer<IdleSequence> current;
     bool FUN_004985f0();
 };
-struct IdleProcess : public BaseProcess {
-    virtual void processV41c();
-    virtual void processV420();
-    virtual void processV424();
-    virtual void processV428();
-    virtual void processV42c();
-    virtual void processV430();
-    virtual void processV434();
-    virtual void processV438();
-    virtual void processV43c();
-    virtual void processV440();
-    virtual void processV444();
-    virtual void processV448();
-    virtual void processV44c();
-    virtual void processV450();
-    virtual void processV454();
-    virtual void processV458();
-    virtual void processV45c();
-    virtual void processV460();
-    virtual void processV464();
-    virtual void processV468();
-    virtual void processV46c();
-    virtual void processV470();
-    virtual void processV474();
-    virtual void processV478();
-    virtual void processV47c();
-    virtual void processV480();
-    virtual void processV484();
-    virtual void processV488();
-    virtual void processV48c();
-    virtual void processV490();
-    virtual void processV494();
-    virtual void processV498();
-    virtual void processV49c();
-    virtual void processV4a0();
-    virtual void processV4a4();
-    virtual void processV4a8();
-    virtual void processV4ac();
-    virtual void processV4b0();
-    virtual void processV4b4();
-    virtual void processV4b8();
-    virtual void processV4bc();
-    virtual void processV4c0();
-    virtual void processV4c4();
-    virtual void processV4c8();
-    virtual void processV4cc();
-    virtual void processV4d0();
-    virtual void processV4d4();
-    virtual void processV4d8();
-    virtual void processV4dc();
-    virtual void processV4e0();
-    virtual void processV4e4();
-    virtual void processV4e8();
-    virtual void processV4ec();
-    virtual void processV4f0();
-    virtual void processV4f4();
-    virtual void processV4f8();
-    virtual void processV4fc();
-    virtual void processV500();
-    virtual void processV504();
-    virtual void processV508();
-    virtual void processV50c();
-    virtual void processV510();
-    virtual void processV514();
-    virtual void processV518();
-    virtual void processV51c();
-    virtual void processV520();
-    virtual void processV524();
-    virtual void processV528();
-    virtual void processV52c();
-    virtual void processV530();
-    virtual void processV534();
-    virtual void processV538();
-    virtual void processV53c();
-    virtual void processV540();
-    virtual void processV544();
-    virtual void processV548();
-    virtual void processV54c();
-    virtual void processV550();
-    virtual void processV554();
-    virtual void processV558();
-    virtual void processV55c();
-    virtual void processV560();
-    virtual void processV564();
-    virtual void processV568();
-    virtual void processV56c();
-    virtual void processV570();
-    virtual void processV574();
-    virtual void processV578();
-    virtual void processV57c();
-    virtual void processV580();
-    virtual void processV584();
-    virtual void processV588();
-    virtual void processV58c();
-    virtual void processV590();
-    virtual void processV594();
-    virtual void processV598();
-    virtual void processV59c();
-    virtual void processV5a0();
-    virtual void processV5a4();
-    virtual void processV5a8();
-    virtual void processV5ac();
-    virtual void processV5b0();
-    virtual void processV5b4();
-    virtual void processV5b8();
-    virtual void processV5bc();
-    virtual void processV5c0();
-    virtual void processV5c4();
-    virtual void processV5c8();
-    virtual void processV5cc();
-    virtual void processV5d0();
-    virtual void processV5d4();
-    virtual void processV5d8();
-    virtual void processV5dc();
-    virtual void processV5e0();
-    virtual void processV5e4();
-    virtual void processV5e8();
-    virtual void processV5ec();
-    virtual void processV5f0();
-    virtual void processV5f4();
-    virtual void processV5f8();
-    virtual void processV5fc();
-    virtual void processV600();
-    virtual void processV604();
-    virtual void processV608();
-    virtual void processV60c();
-    virtual void processV610();
-    virtual void PerformAction(unsigned int);
-    virtual void processV618();
-    virtual void processV61c();
-    virtual void processV620();
-    virtual void processV624();
-    virtual void processV628();
-    virtual void processV62c();
-    virtual void processV630();
-    virtual void processV634();
-    virtual void processV638();
-    virtual void processV63c();
-    virtual void processV640();
-    virtual void processV644();
-    virtual void processV648();
-    virtual void processV64c();
-    virtual void processV650();
-    virtual void processV654();
-    virtual void processV658();
-    virtual void processV65c();
-    virtual void processV660();
-    virtual void processV664();
-    virtual void processV668();
-    virtual void processV66c();
-    virtual void processV670();
-    virtual void processV674();
-    virtual void processV678();
-    virtual void processV67c();
-    virtual void processV680();
-    virtual void processV684();
-    virtual void processV688();
-    virtual void processV68c();
-    virtual void processV690();
-    virtual void processV694();
-    virtual void processV698();
-    virtual void processV69c();
-    virtual void processV6a0();
-    virtual void processV6a4();
-    virtual void processV6a8();
-    virtual void processV6ac();
-    virtual void processV6b0();
-    virtual void processV6b4();
-    virtual void processV6b8();
-    virtual void processV6bc();
-    virtual void processV6c0();
-    virtual void processV6c4();
-    virtual void processV6c8();
-    virtual void processV6cc();
-    virtual void processV6d0();
-    virtual void processV6d4();
-    virtual void processV6d8();
-    virtual void processV6dc();
-    virtual void processV6e0();
-    virtual void processV6e4();
-    virtual void processV6e8();
-    virtual void processV6ec();
-    virtual void processV6f0();
-    virtual void processV6f4();
-    virtual void processV6f8();
-    virtual void processV6fc();
-    virtual void processV700();
-    virtual void processV704();
-    virtual void processV708();
-    virtual void processV70c();
-    virtual void processV710();
-    virtual void processV714();
-    virtual void processV718();
-    virtual void PlayIdle(TESIdleForm*);
-};
-struct IdleActor : public Actor {
-    virtual void actorV0e8();
-    virtual void actorV0ec();
-    virtual void actorV0f0();
-    virtual void actorV0f4();
-    virtual void actorV0f8();
-    virtual void actorV0fc();
-    virtual void actorV100();
-    virtual void actorV104();
-    virtual void actorV108();
-    virtual void actorV10c();
-    virtual void actorV110();
-    virtual void actorV114();
-    virtual void actorV118();
-    virtual void actorV11c();
-    virtual void actorV120();
-    virtual void actorV124();
-    virtual void actorV128();
-    virtual void actorV12c();
-    virtual void actorV130();
-    virtual void actorV134();
-    virtual void actorV138();
-    virtual void actorV13c();
-    virtual void actorV140();
-    virtual void actorV144();
-    virtual void actorV148();
-    virtual void actorV14c();
-    virtual void actorV150();
-    virtual void actorV154();
-    virtual void actorV158();
-    virtual void actorV15c();
-    virtual void actorV160();
-    virtual void actorV164();
-    virtual void actorV168();
-    virtual void actorV16c();
-    virtual void actorV170();
-    virtual void actorV174();
-    virtual void actorV178();
-    virtual void actorV17c();
-    virtual void actorV180();
-    virtual void actorV184();
-    virtual void actorV188();
-    virtual void actorV18c();
-    virtual void actorV190();
-    virtual void actorV194();
-    virtual void actorV198();
-    virtual void actorV19c();
-    virtual void actorV1a0();
-    virtual void actorV1a4();
-    virtual void actorV1a8();
-    virtual void actorV1ac();
-    virtual void actorV1b0();
-    virtual void actorV1b4();
-    virtual void actorV1b8();
-    virtual void actorV1bc();
-    virtual void actorV1c0();
-    virtual void actorV1c4();
-    virtual void actorV1c8();
-    virtual void actorV1cc();
-    virtual void actorV1d0();
-    virtual void actorV1d4();
-    virtual void actorV1d8();
-    virtual void actorV1dc();
-    virtual void actorV1e0();
-    virtual IdleState* GetIdleState();
-    IdleProcess* FUN_008d8520();
-};
+
+
 TESForm* __cdecl FUN_00483a00(const char*);
 
 // @fnv 0x005cb2d0
@@ -38268,34 +30405,34 @@ bool __cdecl FUN_005cb2d0(const ScriptParameter* parameters, const char* scriptD
     if (!FUN_005accb0(parameters, scriptData, opcodeOffset, thisObject, container,
                      script, locals, editorID))
         return false;
-    if (actor && static_cast<IdleActor*>(actor)->FUN_008d8520()) {
+    if (actor && actor->MobileObject::FUN_008d8520()) {
         TESForm* form = FUN_00483a00(editorID);
         TESIdleForm* idle = dynamic_cast<TESIdleForm*>(form);
         if (idle) {
-            IdleState* state = static_cast<IdleActor*>(actor)->GetIdleState();
+            IdleState* state = reinterpret_cast<IdleState*>(actor->GetAnimData());
             if (!state)
                 return true;
             {
             bool busy = false;
             if (!state->FUN_004985f0())
                 busy = true;
-            if (state->current.FUN_00559450() &&
-                state->current.FUN_00559450()->FUN_0055b980() == idle)
+            if (state->current.operator IdleSequence*() &&
+                state->current.operator IdleSequence*()->FUN_0055b980() == idle)
                 return true;
-            if (busy && state->sequence.FUN_00559450()) {
-                if (state->sequence.FUN_00559450()->FUN_0084e3a0() != 3 ||
-                    (state->sequence.FUN_00559450()->FUN_00490e40() &&
-                     !state->sequence.FUN_00559450()->FUN_00490e40()->FUN_0059bb30()))
+            if (busy && state->sequence.operator IdleSequence*()) {
+                if (state->sequence.operator IdleSequence*()->FUN_0084e3a0() != 3 ||
+                    (state->sequence.operator IdleSequence*()->FUN_00490e40() &&
+                     !state->sequence.operator IdleSequence*()->FUN_00490e40()->FUN_0059bb30()))
                     busy = false;
             }
             if (!busy) {
-                if (static_cast<IdleActor*>(actor)->FUN_008d8520()) {
-                    static_cast<IdleActor*>(actor)->FUN_008d8520()->PlayIdle(idle);
-                    static_cast<IdleActor*>(actor)->FUN_008d8520()->PerformAction(0x80);
+                if (actor->MobileObject::FUN_008d8520()) {
+                    actor->MobileObject::FUN_008d8520()->SetIdleForm(idle);
+                    actor->MobileObject::FUN_008d8520()->AddPostAnimAction(static_cast<BaseProcess::PostAnimAction>(0x80));
                 }
                 if (g_DebugLogEnabled)
-                    _DebugLog("PlayIdle found '%s' (%08X) file: %s", idle->GetEditorID(),
-                              idle->FUN_0084e3a0(), idle->file.GetName());
+                    _DebugLog("PlayIdle found '%s' (%08X) file: %s", idle->GetName(),
+                              idle->FUN_0084e3a0(), reinterpret_cast<SharedModel*>(reinterpret_cast<char*>(idle) + 0x18)->GetModelFilePath());
             }
             }
         }
@@ -38306,9 +30443,7 @@ bool __cdecl FUN_005cb2d0(const ScriptParameter* parameters, const char* scriptD
 // Script command: extract one form argument and evaluate the condition on the calling reference.
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 class CB690Form;
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
@@ -38469,18 +30604,11 @@ struct LockExtraData {
     void FUN_00430a90(bool abLocked);
 };
 
-struct ExtraLock {
-    void FUN_0043a210(TESObjectREFR* apRef, bool abFlag);
-};
 
 struct LockDoorForm {
     void FUN_00501a80(TESObjectREFR* apRef, int aiLevel);
 };
 
-class BGSOpenCloseForm {
-public:
-    static bool SetOpenState(TESObjectREFR* apRef, bool abOpen, bool abSnap);
-};
 
 struct LockRefr : public TESObjectREFR {
     LockExtraData* GetLockData();
@@ -38534,7 +30662,7 @@ bool FUN_005cbf80(const ScriptParameter* parameters, const char* scriptData, Loc
         if (iAsOwner > 0) {
             ExtraLock* pExtra = thisObject->FindExtraLock();
             if (pExtra)
-                pExtra->FUN_0043a210(thisObject, false);
+                pExtra->FUN_0043a210(reinterpret_cast<TESObjectREFR*>(thisObject), false);
         }
         thisObject->SetAltered(true);
     }
@@ -39084,15 +31212,15 @@ void Owner::FUN_005cc7a0(unsigned char bFlag)
 
 namespace MoveReference {
 struct Reference; struct Process;
-struct Point { float x,y,z; };
+typedef NiPoint3 NiPoint3;
 struct Matrix { float m00,m01,m02,m10,m11,m12,m20,m21,m22; };
 struct Cell { bool FUN_00425fd0(); }; struct World;
 struct Update { float time; bool updateControllers; bool isMultiThreaded; short unk06; int unk08; Update(float,bool,bool); };
-struct SceneNode { void FUN_00440460(const Point&); void FUN_0043fa80(const Matrix&); void FUN_00a59c60(Update*); };
+struct SceneNode { void FUN_00440460(const NiPoint3&); void FUN_0043fa80(const Matrix&); void FUN_00a59c60(Update*); };
 void __cdecl FUN_00c6bd00(SceneNode*,int);
-struct Motion { void FUN_005620e0(Point*); };
+struct Motion { void FUN_005620e0(NiPoint3*); };
 struct MoveRequest {
- World* world; Cell* cell; Point position; float xRotation; float unk18; float zRotation;
+ World* world; Cell* cell; NiPoint3 position; float xRotation; float unk18; float zRotation;
  bool enabled; char unk21; short unk22; int unk24; int unk28; Reference* destination; int unk30;
  MoveRequest(); static void* operator new(unsigned int);
 };
@@ -39528,7 +31656,7 @@ virtual void v1e4();
 virtual void v1e8();
 virtual void v1ec();
 virtual void v1f0();
-virtual const Point& v1f4();
+virtual const NiPoint3& v1f4();
 virtual void v1f8();
 virtual void v1fc();
 virtual void v200();
@@ -39543,8 +31671,8 @@ virtual void v220();
 virtual void v224();
 virtual void v228();
 virtual bool v22c(int);
-Process* FUN_008d8520(); void FUN_0088d640(); Cell* FUN_008d6f30(); World* FUN_00575d70(); const Point& FUN_00430830();
-void FUN_0093be30(MoveRequest*); void FUN_00575830(Point*); void FUN_005757d0(float); void FUN_00575770(float); Matrix FUN_0056fa00();
+Process* FUN_008d8520(); void FUN_0088d640(); Cell* FUN_008d6f30(); World* FUN_00575d70(); const NiPoint3& FUN_00430830();
+void FUN_0093be30(MoveRequest*); void FUN_00575830(NiPoint3*); void FUN_005757d0(float); void FUN_00575770(float); Matrix FUN_0056fa00();
 Motion* FUN_009306d0(); void FUN_008b3ab0(); void FUN_008bcd20(); void FUN_008c4640(); void FUN_00952c30(Reference*);
 };
 extern Reference* DAT_011dea3c;
@@ -39568,8 +31696,8 @@ void __cdecl FUN_005ccb20(Reference* moved,Reference* destination,float dx,float
    }
    Cell* cellSlot7=destination->FUN_008d6f30();
    World* worldSlot0=destination->FUN_00575d70();
-   Point rotationSlot1=destination->FUN_00430830();
-   Point positionSlot4=destination->v1f4();
+   NiPoint3 rotationSlot1=destination->FUN_00430830();
+   NiPoint3 positionSlot4=destination->v1f4();
    positionSlot4.x+=dx;positionSlot4.y+=dy;positionSlot4.z+=dz;
    if(moved==DAT_011dea3c) {
      MoveRequest* request=new MoveRequest;
@@ -39705,9 +31833,7 @@ bool CmdCD::FUN_005cd0e0(void* p1, void* p2, RefCD* p3, RefCD* p4, RefCD* p5, vo
 }  // namespace fnv_005cd0e0
 
 class ScriptParameter;
-class Script;
-class ScriptLocals;
-class TESObjectREFR;
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 void __cdecl DebugLog(const char*, ...);
@@ -39758,23 +31884,6 @@ struct SpellMagicPart : public SpellFullNamePart
     int unk18;
 };
 
-class SpellFormBase : public TESForm
-{
-public:
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class SpellItem : public SpellFormBase, public SpellMagicPart
-{
-};
-
-class TESObjectBOOK : public TESForm
-{
-};
 
 struct PlayerSpellStub
 {
@@ -39797,7 +31906,7 @@ bool __cdecl FUN_005cd750(const ScriptParameter* apParameters, const char* apCom
         SpellItem* pSpell = dynamic_cast<SpellItem*>(pForm);
         TESObjectBOOK* pBookForm = dynamic_cast<TESObjectBOOK*>(pForm);
         if (!pBookForm)
-            g_pSpellPlayer->SetPlayerSpell(pSpell);
+            g_pSpellPlayer->SetPlayerSpell(reinterpret_cast<SpellMagicPart*>(static_cast<MagicItem*>(pSpell)));
         else
             g_pSpellPlayer->SetPlayerBook(pBookForm);
         if (g_bDebugLog)
@@ -39808,70 +31917,12 @@ bool __cdecl FUN_005cd750(const ScriptParameter* apParameters, const char* apCom
 
 namespace fnv_005cdc10 {
 class ScriptParameter;
-class Script;
-class ScriptLocals;
-class ExtraDataList;
 
-class TESPackage;
+
 class PackageExtraStub;
 
 
-class BaseProcess
-{
-public:
-    virtual void V000(); virtual void V001(); virtual void V002(); virtual void V003();
-    virtual void V004(); virtual void V005(); virtual void V006(); virtual void V007();
-    virtual void V008(); virtual void V009(); virtual void V010(); virtual void V011();
-    virtual void V012(); virtual void V013(); virtual void V014(); virtual void V015();
-    virtual void V016(); virtual void V017(); virtual void V018(); virtual void V019();
-    virtual void V020(); virtual void V021(); virtual void V022(); virtual void V023();
-    virtual void V024(); virtual void V025(); virtual void V026(); virtual void V027();
-    virtual void V028(); virtual void V029(); virtual void V030(); virtual void V031();
-    virtual void V032(); virtual void V033(); virtual void V034(); virtual void V035();
-    virtual void V036(); virtual void V037(); virtual void V038(); virtual void V039();
-    virtual void V040(); virtual void V041(); virtual void V042(); virtual void V043();
-    virtual void V044(); virtual void V045(); virtual void V046(); virtual void V047();
-    virtual void V048(); virtual void V049(); virtual void V050(); virtual void V051();
-    virtual void V052(); virtual void V053(); virtual void V054(); virtual void V055();
-    virtual void V056(); virtual void V057(); virtual void V058(); virtual void V059();
-    virtual void V060(); virtual void V061(); virtual void V062(); virtual void V063();
-    virtual void V064(); virtual void V065(); virtual void V066(); virtual void V067();
-    virtual void V068(); virtual void V069(); virtual void V070(); virtual void V071();
-    virtual void V072(); virtual void V073();
-    virtual TESObjectREFR* GetTarget();
-    virtual void V075(); virtual void V076(); virtual void V077(); virtual void V078();
-    virtual void V079(); virtual void V080(); virtual void V081(); virtual void V082();
-    virtual void V083(); virtual void V084(); virtual void V085(); virtual void V086();
-    virtual void V087(); virtual void V088(); virtual void V089(); virtual void V090();
-    virtual void V091(); virtual void V092(); virtual void V093(); virtual void V094();
-    virtual void V095(); virtual void V096(); virtual void V097(); virtual void V098();
-    virtual void V099(); virtual void V100(); virtual void V101(); virtual void V102();
-    virtual void V103(); virtual void V104(); virtual void V105(); virtual void V106();
-    virtual void V107(); virtual void V108(); virtual void V109(); virtual void V110();
-    virtual void V111(); virtual void V112(); virtual void V113(); virtual void V114();
-    virtual void V115(); virtual void V116(); virtual void V117(); virtual void V118();
-    virtual void V119(); virtual void V120(); virtual void V121(); virtual void V122();
-    virtual void V123(); virtual void V124(); virtual void V125(); virtual void V126();
-    virtual void V127(); virtual void V128(); virtual void V129(); virtual void V130();
-    virtual void V131(); virtual void V132(); virtual void V133(); virtual void V134();
-    virtual void V135(); virtual void V136(); virtual void V137(); virtual void V138();
-    virtual void V139(); virtual void V140(); virtual void V141(); virtual void V142();
-    virtual void V143(); virtual void V144(); virtual void V145(); virtual void V146();
-    virtual void V147(); virtual void V148(); virtual void V149(); virtual void V150();
-    virtual void V151(); virtual void V152(); virtual void V153(); virtual void V154();
-    virtual void V155(); virtual void V156(); virtual void V157(); virtual void V158();
-    virtual void V159(); virtual void V160();
-    virtual void SetPackageState(int state);
-};
 
-class ActorStub : public Actor
-{
-public:
-    TESPackage* GetCurrentPackageStub();
-    PackageExtraStub* GetPackageHolderStub();
-    BaseProcess* GetCurrentProcess();
-    const char* GetFullName();
-};
 
 class PackageExtraStub
 {
@@ -39879,32 +31930,6 @@ public:
     TESPackage* GetPackageStub();
 };
 
-class TESPackage
-{
-public:
-    virtual void V00(); virtual void V01(); virtual void V02(); virtual void V03();
-    virtual void V04(); virtual void V05(); virtual void V06(); virtual void V07();
-    virtual void V08(); virtual void V09(); virtual void V10(); virtual void V11();
-    virtual void V12(); virtual void V13(); virtual void V14(); virtual void V15();
-    virtual void V16(); virtual void V17(); virtual void V18(); virtual void V19();
-    virtual void V20(); virtual void V21(); virtual void V22(); virtual void V23();
-    virtual void V24(); virtual void V25(); virtual void V26(); virtual void V27();
-    virtual void V28(); virtual void V29(); virtual void V30(); virtual void V31();
-    virtual void V32(); virtual void V33(); virtual void V34(); virtual void V35();
-    virtual void V36(); virtual void V37(); virtual void V38(); virtual void V39();
-    virtual void V40(); virtual void V41(); virtual void V42(); virtual void V43();
-    virtual void V44(); virtual void V45(); virtual void V46(); virtual void V47();
-    virtual void V48(); virtual void V49(); virtual void V50(); virtual void V51();
-    virtual void V52(); virtual void V53(); virtual void V54(); virtual void V55();
-    virtual void V56(); virtual void V57(); virtual void V58(); virtual void V59();
-    virtual void V60(); virtual void V61(); virtual void V62(); virtual void V63();
-    virtual void V64(); virtual void V65(); virtual void V66(); virtual void V67();
-    virtual void V68(); virtual void V69(); virtual void V70(); virtual void V71();
-    virtual void V72(); virtual void V73(); virtual void V74(); virtual void V75();
-    virtual const char* GetEditorID();
-    int GetPackType();
-    void SetWaiting(bool);
-};
 
 class PlayerStub
 {
@@ -39941,15 +31966,15 @@ bool FUN_005cdc10(const ScriptParameter* paramInfo, const char* scriptData, TESO
     if (!ExtractArgs(paramInfo, scriptData, &opcodeOffsetPtr, thisObj, containingObj, scriptObj, locals, &pPackage))
         return false;
 
-    ActorStub* pActor_2 = (ActorStub*)dynamic_cast<Actor*>(thisObj);
+    Actor* pActor_2 = (Actor*)dynamic_cast<Actor*>(thisObj);
     if (pActor_2 && pPackage)
     {
-        if (pActor_2->GetCurrentPackageStub() == pPackage || pActor_2->GetPackageHolderStub()->GetPackageStub() == pPackage)
+        if (pActor_2->GetCurrentAIPackage() == pPackage || ((PackageExtraStub*)pActor_2->FUN_005d43c0())->GetPackageStub() == pPackage)
         {
             if (pPackage->GetPackType() == 2)
             {
                 pPackage->SetWaiting(false);
-                pActor_2->GetCurrentProcess()->SetPackageState(3);
+                pActor_2->GetCurrentProcess()->SetAnimationState(static_cast<unsigned int>(3));
             }
             else if (pPackage->GetPackType() == 7 || pPackage->GetPackType() == 1)
             {
@@ -39965,12 +31990,12 @@ bool FUN_005cdc10(const ScriptParameter* paramInfo, const char* scriptData, TESO
             }
             else
             {
-                FNV_Warning("PACKAGES: Package %s is not a follow or an escort. ", pPackage->GetEditorID());
+                FNV_Warning("PACKAGES: Package %s is not a follow or an escort. ", pPackage->GetName());
             }
         }
         else
         {
-            FNV_Warning("PACKAGES: Package %s is not  %s current package", pPackage->GetEditorID(), pActor_2->GetFullName());
+            FNV_Warning("PACKAGES: Package %s is not  %s current package", pPackage->GetName(), pActor_2->GetFullName());
         }
     }
     return true;
@@ -39992,9 +32017,7 @@ bool __cdecl FUN_005cdec0(int a0, int a1, int a2, int a3, int a4, int a5, int a6
 // Script command: extract a form and an on/off flag, then set the form's state accordingly.
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 class CE0C0Form {
 public:
@@ -40102,9 +32125,9 @@ bool __cdecl FUN_005ce910(const ScriptParameter* parameters, const char* scriptD
             return false;
         }
         if (value) {
-            ((FUN_005ce9d0*)actor)->SetFlag(1);
+            actor->FUN_005ce9d0(true);
         } else {
-            ((FUN_005ce9d0*)actor)->SetFlag(0);
+            actor->FUN_005ce9d0(false);
         }
         if (g_threadFlags.bLogScripts) {
             DebugLog("SetForceSneak >> %0.2f", value);
@@ -40379,26 +32402,26 @@ bool __cdecl FUN_005cfc50(int a1, int a2, int a3, int a4, int a5, int a6, int a7
 }  // namespace fnv_005cfc50
 
 struct ActorValueMethods { void** vtable; };
-struct ScriptEffectActor { ActorValueMethods* __thiscall FUN_008d8520(); };
+
 typedef int (__thiscall* ReadActorValue)(ActorValueMethods*);
-typedef void (__thiscall* ApplyActorValues)(TESObjectREFR_005d5390*, TESObjectREFR_005d5390*, int, int, int);
-bool __cdecl FUN_005accb0(const ScriptParameter*, const char*, unsigned int&, TESObjectREFR_005d5390*, TESObjectREFR*, Script*, ScriptLocals*, TESObjectREFR_005d5390**);
+typedef void (__thiscall* ApplyActorValues)(ScriptActorPackageActions*, ScriptActorPackageActions*, int, int, int);
+bool __cdecl FUN_005accb0(const ScriptParameter*, const char*, unsigned int&, ScriptActorPackageActions*, TESObjectREFR*, Script*, ScriptLocals*, ScriptActorPackageActions**);
 // @fnv 0x005cfdf0
 bool __cdecl FUN_005cfdf0(const ScriptParameter* parameters, const char* script,
-    TESObjectREFR_005d5390* target, TESObjectREFR* container, Script* scriptObject,
+    ScriptActorPackageActions* target, TESObjectREFR* container, Script* scriptObject,
     ScriptLocals* locals, double& result, unsigned int& offset) {
-    TESObjectREFR_005d5390* resolved = 0;
+    ScriptActorPackageActions* resolved = 0;
     if (!FUN_005accb0(parameters, script, offset, target, container,
                       scriptObject, locals, &resolved))
         return false;
-    if (target->V64() && resolved && resolved->V64()) {
-        ScriptEffectActor* actor = reinterpret_cast<ScriptEffectActor*>(target);
+    if (target->IsActor() && resolved && resolved->IsActor()) {
+        Actor* actor = reinterpret_cast<Actor*>(target);
         {
-            ActorValueMethods* first = actor->FUN_008d8520();
-            ActorValueMethods* third = actor->FUN_008d8520();
-            ActorValueMethods* second = actor->FUN_008d8520();
+            ActorValueMethods* first = reinterpret_cast<ActorValueMethods*>(actor->FUN_008d8520());
+            ActorValueMethods* third = reinterpret_cast<ActorValueMethods*>(actor->FUN_008d8520());
+            ActorValueMethods* second = reinterpret_cast<ActorValueMethods*>(actor->FUN_008d8520());
             reinterpret_cast<ApplyActorValues>((*(void***)resolved)[0x374 / 4])(
-                resolved, reinterpret_cast<TESObjectREFR_005d5390*>(actor),
+                resolved, reinterpret_cast<ScriptActorPackageActions*>(actor),
                 reinterpret_cast<ReadActorValue>(second->vtable[0x4c8 / 4])(second),
                 reinterpret_cast<ReadActorValue>(third->vtable[0x4d4 / 4])(third),
                 reinterpret_cast<ReadActorValue>(first->vtable[0x4d0 / 4])(first));
@@ -40407,12 +32430,6 @@ bool __cdecl FUN_005cfdf0(const ScriptParameter* parameters, const char* script,
     return true;
 }
 
-class AutoMemContext {
-public:
-    unsigned int previousContext;
-    AutoMemContext(MEM_CONTEXT, bool, const char*, int);
-    ~AutoMemContext();
-};
 class ShaderEffect {
 public:
     virtual ~ShaderEffect();
@@ -40844,9 +32861,7 @@ extern "C" bool __cdecl FUN_005d2910(void* first, void* second, void* condition,
 }  // namespace fnv_005d2910
 
 struct ScriptParameter;
-struct TESObjectREFR;
-struct Script;
-struct ScriptLocals;
+
 
 struct WaterObj {
     int unk00;
@@ -41212,90 +33227,9 @@ bool __cdecl FUN_005d2a80(const ScriptParameter* parameters, const char* scriptD
 }
 
 namespace fnv_005d35d0 {
-struct ImageSpaceEffectParam {
-    float fRed;
-    float fGreen;
-    float fBlue;
-    float fAlpha;
-    ImageSpaceEffectParam(float fR, float fG, float fB, float fA);
-};
-class NiProperty {
-public:
-    char pad00[0x88];
-    ImageSpaceEffectParam kColor;
-};
-class NiAVObject {
-public:
-    NiProperty* GetProperty(unsigned int uiType);
-};
-class NiNode {
-public:
-    NiAVObject* GetAt(unsigned int uiIndex);
-};
-// TESObjectREFR's virtuals past TESForm's, up to the one that returns the reference's 3D root
-class TESObjectREFR_005d35d0 : public TESObjectREFR {
-public:
-    virtual void Unk_3A();
-    virtual void Unk_3B();
-    virtual void Unk_3C();
-    virtual void Unk_3D();
-    virtual void Unk_3E();
-    virtual void Unk_3F();
-    virtual void Unk_40();
-    virtual void Unk_41();
-    virtual void Unk_42();
-    virtual void Unk_43();
-    virtual void Unk_44();
-    virtual void Unk_45();
-    virtual void Unk_46();
-    virtual void Unk_47();
-    virtual void Unk_48();
-    virtual void Unk_49();
-    virtual void Unk_4A();
-    virtual void Unk_4B();
-    virtual void Unk_4C();
-    virtual void Unk_4D();
-    virtual void Unk_4E();
-    virtual void Unk_4F();
-    virtual void Unk_50();
-    virtual void Unk_51();
-    virtual void Unk_52();
-    virtual void Unk_53();
-    virtual void Unk_54();
-    virtual void Unk_55();
-    virtual void Unk_56();
-    virtual void Unk_57();
-    virtual void Unk_58();
-    virtual void Unk_59();
-    virtual void Unk_5A();
-    virtual void Unk_5B();
-    virtual void Unk_5C();
-    virtual void Unk_5D();
-    virtual void Unk_5E();
-    virtual void Unk_5F();
-    virtual void Unk_60();
-    virtual void Unk_61();
-    virtual void Unk_62();
-    virtual void Unk_63();
-    virtual void Unk_64();
-    virtual void Unk_65();
-    virtual void Unk_66();
-    virtual void Unk_67();
-    virtual void Unk_68();
-    virtual void Unk_69();
-    virtual void Unk_6A();
-    virtual void Unk_6B();
-    virtual void Unk_6C();
-    virtual void Unk_6D();
-    virtual void Unk_6E();
-    virtual void Unk_6F();
-    virtual void Unk_70();
-    virtual void Unk_71();
-    virtual void Unk_72();
-    virtual void Unk_73();
-    virtual NiNode* Get3D();
-};
-extern ImageSpaceEffectParam DAT_011ff3b8;
+
+
+extern NiColorA DAT_011ff3b8;
 
 // @fnv 0x005d35d0
 bool FUN_005d35d0(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj,
@@ -41308,16 +33242,16 @@ bool FUN_005d35d0(const ScriptParameter* paramInfo, const char* scriptData, TESO
         return false;
     NiProperty* pMaterial = 0;
     if (thisObj) {
-        NiNode* pRoot = ((TESObjectREFR_005d35d0*)thisObj)->Get3D();
+        NiNode* pRoot = reinterpret_cast<NiNode*>(reinterpret_cast<TESObjectREFR*>(thisObj)->GetNiNode());
         NiAVObject* pChild = pRoot->GetAt(0);
         NiProperty* pMaterialProp = pChild->GetProperty(3);
         pMaterial = pMaterialProp;
     }
     if (iRed >= 0 && iG >= 0 && iB >= 0 && iRed <= 255 && iG <= 255 && iB <= 255) {
         if (pMaterial)
-            pMaterial->kColor = ImageSpaceEffectParam(iRed / 255.0, iG / 255.0, iB / 255.0, 1.0f);
+            (*reinterpret_cast<NiColorA*>(reinterpret_cast<char*>(pMaterial) + 0x88)) = NiColorA(iRed / 255.0, iG / 255.0, iB / 255.0, 1.0f);
         else
-            DAT_011ff3b8 = ImageSpaceEffectParam(iRed / 255.0, iG / 255.0, iB / 255.0, 1.0f);
+            DAT_011ff3b8 = NiColorA(iRed / 255.0, iG / 255.0, iB / 255.0, 1.0f);
     }
     return true;
 }
@@ -41339,7 +33273,6 @@ bool __cdecl FUN_005d4190(const ScriptParameter* apParameters, const char* apCom
     return true;
 }
 
-class TESQuest;
 
 struct QuestStageItem {
     void FUN_0060f4a0(TESQuest* quest, bool bPickResultFound);
@@ -42230,95 +34163,16 @@ namespace fnv_005d67f0 {
 struct CombatStrategy {
     const char* FUN_0098fdd0();
 };
-struct ActorCombatGroup {
+// Call surface of ActorCombatGroup; the shared header cannot be read in this unit (its own layout_support template copies).
+struct ActorCombatGroupApi {
     unsigned int FUN_00990890();
     void FUN_009862e0(CombatStrategy* strategy);
 };
-struct CombatController {
-    ActorCombatGroup* FUN_004fb070();
-};
-struct StrategyReference : TESObjectREFR_005d5390 {
+
+struct StrategyReference : ScriptActorPackageActions {
     int FUN_00474cb0();
     const char* FUN_0055d520();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual const char* GetStrategyReferenceName();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
+
     virtual void v144();
     virtual void v145();
     virtual void v146();
@@ -42455,9 +34309,9 @@ bool __cdecl FUN_005d67f0(const ScriptParameter* parameters, const char* compile
     FUN_004046f0(strategyName, "");
     if (!ExtractArgs(parameters, compiled, &offset, reference, container, script, locals, strategyName))
         return false;
-    if (!static_cast<StrategyReference*>(reference)->V64()) {
+    if (!static_cast<StrategyReference*>(reference)->IsActor()) {
         DebugLog("%s is not an actor", static_cast<StrategyReference*>(reference)->FUN_00474cb0()
-            ? static_cast<StrategyReference*>(reference)->GetStrategyReferenceName()
+            ? static_cast<StrategyReference*>(reference)->GetName()
             : static_cast<StrategyReference*>(reference)->FUN_0055d520());
         return true;
     }
@@ -42467,12 +34321,12 @@ bool __cdecl FUN_005d67f0(const ScriptParameter* parameters, const char* compile
     CombatController* controller = actor->GetCombatController();
     if (!controller) {
         DebugLog("%s is not in combat", static_cast<StrategyReference*>(reference)->FUN_00474cb0()
-            ? static_cast<StrategyReference*>(reference)->GetStrategyReferenceName()
+            ? static_cast<StrategyReference*>(reference)->GetName()
             : static_cast<StrategyReference*>(reference)->FUN_0055d520());
         return true;
     }
     {
-    ActorCombatGroup* group = controller->FUN_004fb070();
+    ActorCombatGroupApi* group = reinterpret_cast<ActorCombatGroupApi*>(controller->FUN_004fb070());
     if (group->FUN_00990890() < 2) {
         DebugLog("The combat group has only one member");
         return true;
@@ -42665,9 +34519,7 @@ bool FUN_005d6d40(const ScriptParameter* parameters,const char* data,InventoryDi
 // Script command: show the experience reward message for the given amount (first or third argument).
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 void __cdecl D7150ShowReward(int iType, int iAmount, unsigned char ucFlag, unsigned char ucShow);
@@ -42882,8 +34734,10 @@ bool FUN_005d7c20(const ScriptParameter* a, const char* b, TESObjectREFR* c, TES
 }
 }  // namespace fnv_005d7c20
 
+class TESObjectREFR;
+class Script;
 namespace fnv_005d7d30 {
-class ScriptParameter; class TESObjectREFR; class Script; class ScriptLocals;
+class ScriptParameter;   
 bool FUN_005accb0(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 void FUN_005b5e40(const char*, ...);
 class Objective { public: bool FUN_005a5e70(); void FUN_005ec5d0(bool); };
@@ -43003,13 +34857,6 @@ bool __cdecl FUN_005d8420(void* apParamInfo, void* apScriptData, void* apThisObj
 
 // Script command: set the global to 2 when the player has the given perk, else 1, then refresh.
 
-class BGSPerk : public TESForm {
-};
-
-class TESGlobal {
-public:
-    void SetValue(float fValue);
-};
 
 class D8B60Player {
 public:
@@ -43330,14 +35177,9 @@ bool FUN_005d8b60()
     return true;
 }
 
-class TESForm;
-class TESObjectREFR;
-class ExtraDataList;
 
-struct ActivateRef_5d8cf0
-{
+struct ScriptReferenceActivationActions : TESObjectREFR {
     void ActivateForm(TESForm* form);  // 0x572e10
-    void UpdateRef();                  // 0x565870
 };
 
 struct ActivateTls_5d8cf0
@@ -43385,11 +35227,11 @@ bool __cdecl FUN_005d8cf0(void* paramInfo, void* scriptData, TESObjectREFR* this
         DoCheckScriptRunnerAndRun(thisObj, (ExtraDataList*)FUN_005d43c0(thisObj));
         MarkBaseExtraListScriptEvent(form, (ExtraDataList*)FUN_005d43c0(thisObj), 0x20000000);
         MarkBaseExtraListScriptEvent(form, (ExtraDataList*)FUN_005d43c0(thisObj), 0x10000000);
-        ((ActivateRef_5d8cf0*)thisObj)->ActivateForm(form);
+        static_cast<ScriptReferenceActivationActions*>(thisObj)->ActivateForm(form);
         if (g_activateTls_5d8cf0.iActivateDepth < 5)
         {
             g_activateTls_5d8cf0.iActivateDepth++;
-            ((ActivateRef_5d8cf0*)thisObj)->UpdateRef();
+            thisObj->FUN_00565870();
             g_activateTls_5d8cf0.iActivateDepth--;
         }
     }
@@ -43400,46 +35242,17 @@ namespace fnv_005d8e80 {
 struct AddItemReference : TESObjectREFR {
     unsigned int FUN_00567e10(bool);
 };
-struct AddItemScript : TESForm {
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual void V64();
-    virtual void V65();
-    virtual void V66();
-    virtual void V67();
-    virtual void V68();
-    virtual void V69();
-    virtual void V70();
-    virtual void V71();
-    virtual void V72();
-    virtual void V73();
-    virtual void V74();
-    virtual void V75();
-    virtual const char* GetName();
-};
-struct TESContainer {
-    unsigned int flags;
-    TESForm* firstItem;
-    void* nextItem;
-    TESContainer();
-    ~TESContainer();
-    void AddObject(TESForm*, int, ContainerItemExtra*);
-    void FUN_00482090(float);
-    void FUN_004821a0(TESObjectREFR*, bool);
-};
+
+
 struct AddItemLeveledList {
     void FUN_00487f70(unsigned short, unsigned short, TESContainer*, bool);
 };
 struct AddItemLeveledForm : TESForm {
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
+
+    
+
+    
+
     unsigned int unk18;
     unsigned int unk1c;
     unsigned int unk20;
@@ -43484,7 +35297,7 @@ bool __cdecl FUN_005d8e80(const ScriptParameter* parameters, const char* compile
             leveled = static_cast<AddItemLeveledForm*>(form);
             break;
         case 0x55:
-            list = static_cast<BGSListForm*>(form);
+            list = reinterpret_cast<BGSListForm*>(form);
             break;
         default:
             if (form->IsActor_InEditor())
@@ -43494,18 +35307,18 @@ bool __cdecl FUN_005d8e80(const ScriptParameter* parameters, const char* compile
         if (leveled) {
             leveled->leveledList.FUN_00487f70((unsigned short)level, (unsigned short)count, &items, false);
         } else if (list && count) {
-            BSSimpleList<TESForm*>* node = list->GetList();
+            BSSimpleList<TESForm*>* node = reinterpret_cast<BSSimpleList<TESForm*>*>(list->GetList());
             while (node && !node->IsEmpty()) {
                 TESForm* entry = node->GetItem();
                 node = node->GetNext();
                 if (entry->IsActor_InEditor())
-                    items.AddObject(entry, count, 0);
+                    items.AddObject((SharedObject*)entry, count, 0);
             }
         } else if (object && count) {
-            items.AddObject(object, count, 0);
+            items.AddObject((SharedObject*)object, count, 0);
         } else {
             _FNV_Warning("SCRIPTS: AddItem in script '%s' failed to generate an item.",
-                reinterpret_cast<AddItemScript*>(script)->GetName());
+                static_cast<TESForm*>(script)->GetName());
         }
         items.FUN_00482090(condition);
         items.FUN_004821a0(reference, silent == 1);
@@ -43524,9 +35337,7 @@ bool __cdecl FUN_005d8e80(const ScriptParameter* parameters, const char* compile
 // Script command: extract one form and, when called on a reference, evaluate it against the reference.
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 class D92E0Form;
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
@@ -43546,9 +35357,7 @@ bool FUN_005d92e0(const ScriptParameter* apParameters, const char* apCompiledPar
 // Script command: extract one form argument and evaluate the condition on the calling reference.
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 class D97B0Form;
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
@@ -43580,34 +35389,6 @@ public:
     ~FUN_00449610();
 };
 
-class TESNPC : public TESBoundObject
-{
-public:
-    virtual void V01();
-    virtual void V02();
-    virtual void V03();
-    virtual void V04();
-    virtual void V05();
-    virtual void V06();
-    virtual void V07();
-    virtual void V08();
-    virtual void V09();
-    virtual void V0A();
-    virtual void V0B();
-    virtual void V0C();
-    virtual void V0D();
-    virtual void V0E();
-    virtual void V0F();
-    virtual void V10();
-    virtual void V11();
-    virtual void MarkModified(unsigned int flags);
-
-    int GetActorSex();
-    S9fb0* GetRaceData();
-    FUN_00449610* GetMorphData();
-    void SetMorphData(FUN_00449610* data);
-    void* GetFaceGen();
-};
 
 struct FaceGenArray
 {
@@ -43621,33 +35402,8 @@ struct FaceGenArray
     TESNPC*& GetAt(unsigned int index);
 };
 
-class Character
-{
-public:
-    void Reset3D();
-};
 
-struct FNV_TESObjectREFR : public TESObjectREFR
-{
-    TESBoundObject* GetObjectReference();
 
-    virtual void VF58(); virtual void VF59(); virtual void VF60(); virtual void VF61();
-    virtual void VF62(); virtual void VF63(); virtual void VF64(); virtual void VF65();
-    virtual void VF66(); virtual void VF67(); virtual void VF68(); virtual void VF69();
-    virtual void VF70(); virtual void VF71(); virtual void VF72(); virtual void VF73();
-    virtual void VF74(); virtual void VF75(); virtual void VF76(); virtual void VF77();
-    virtual void VF78(); virtual void VF79(); virtual void VF80(); virtual void VF81();
-    virtual void VF82(); virtual void VF83(); virtual void VF84(); virtual void VF85();
-    virtual void VF86(); virtual void VF87(); virtual void VF88(); virtual void VF89();
-    virtual void VF90(); virtual void VF91(); virtual void VF92(); virtual void VF93();
-    virtual void VF94(); virtual void VF95(); virtual void VF96(); virtual void VF97();
-    virtual void VF98(); virtual void VF99(); virtual void VF100(); virtual void VF101();
-    virtual void VF102(); virtual void VF103(); virtual void VF104(); virtual void VF105();
-    virtual void VF106(); virtual void VF107(); virtual void VF108(); virtual void VF109();
-    virtual void VF110(); virtual void VF111(); virtual void VF112(); virtual void VF113();
-    virtual void VF114(); virtual void VF115();
-    virtual int Unk_1D0();
-};
 
 void __cdecl FUN_00603280(void* race, int sex, FaceGenArray* outArr);
 void __cdecl FUN_00652e00(void* p1, void* p2, void* p3, int p4);
@@ -43665,8 +35421,8 @@ void __cdecl FUN_005d9bc0(TESObjectREFR* apTarget, TESObjectREFR* apSource, int 
         return;
 
     float fPercentB = (float)((double)aiPercent / 100.0);
-    TESNPC* pSourceNPCC = dynamic_cast<TESNPC*>(((FNV_TESObjectREFR*)apSource)->GetObjectReference());
-    TESNPC* pTargetNPC_ = dynamic_cast<TESNPC*>(((FNV_TESObjectREFR*)apTarget)->GetObjectReference());
+    TESNPC* pSourceNPCC = dynamic_cast<TESNPC*>(apSource->GetObjectReference());
+    TESNPC* pTargetNPC_ = dynamic_cast<TESNPC*>(apTarget->GetObjectReference());
     FUN_00449610 arr1_[4];
     FUN_00449610 arr2_[4];
     FaceGenArray faceArr;
@@ -43675,7 +35431,7 @@ void __cdecl FUN_005d9bc0(TESObjectREFR* apTarget, TESObjectREFR* apSource, int 
     if (faceArr.GetAt(0))
         DefaultNPCY = faceArr.GetAt(0);
 
-    FUN_00449610* pmorphsData = pTargetNPC_->GetMorphData();
+    FUN_00449610* pmorphsData = reinterpret_cast<FUN_00449610*>(pTargetNPC_->GetMorphData());
     if (pmorphsData)
     {
         delete[] pmorphsData;
@@ -43696,12 +35452,12 @@ void __cdecl FUN_005d9bc0(TESObjectREFR* apTarget, TESObjectREFR* apSource, int 
 
     pmorphsData = new FUN_00449610[4];
     FUN_006521f0(pmorphsData);
-    FUN_00652e00(pTargetNPC_->GetRaceData()->FUN_005d9fb0(0), arr1_, pmorphsData, 0);
+    FUN_00652e00(reinterpret_cast<S9fb0*>(pTargetNPC_->GetRaceData())->FUN_005d9fb0(0), arr1_, pmorphsData, 0);
     FUN_006529a0(fgTargetZ, pmorphsData, 0, 1);
-    pTargetNPC_->SetMorphData(pmorphsData);
-    pTargetNPC_->MarkModified(0x800);
+    pTargetNPC_->SetMorphData(reinterpret_cast<FaceGenMatrix<float> (*)[2]>(pmorphsData));
+    pTargetNPC_->MarkAsModified(0x800);
 
-    if (((FNV_TESObjectREFR*)apTarget)->Unk_1D0())
+    if (apTarget->GetNiNode())
     {
         Character* pChar3 = (Character*)apTarget;
         pChar3->Reset3D();
@@ -44062,9 +35818,7 @@ bool __cdecl FUN_005da2a0(const ScriptParameter* parameters, const char* scriptD
 }
 
 class ScriptParameter;
-class Script;
-class ScriptLocals;
-class TESObjectREFR;
+
 
 extern bool ExtractArgs(const ScriptParameter*, const char*, unsigned int*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, ...);
 
@@ -44248,87 +36002,20 @@ virtual void V61();
 virtual void V62();
 virtual void SetPosition(TESObjectREFR*, NiPoint3);
 };
-class TESObjectREFR_005dac80 : public TESObjectREFR { public:
-virtual void V58();
-virtual void V59();
-virtual void V60();
-virtual void V61();
-virtual void V62();
-virtual void V63();
-virtual bool CanMove();
-virtual void V65();
-virtual void V66();
-virtual void V67();
-virtual void V68();
-virtual void V69();
-virtual void V70();
-virtual void V71();
-virtual void V72();
-virtual void V73();
-virtual void V74();
-virtual void V75();
-virtual void V76();
-virtual void V77();
-virtual void V78();
-virtual void V79();
-virtual void V80();
-virtual void V81();
-virtual void V82();
-virtual void V83();
-virtual void V84();
-virtual void V85();
-virtual void V86();
-virtual void V87();
-virtual void V88();
-virtual void V89();
-virtual void V90();
-virtual void V91();
-virtual void V92();
-virtual void V93();
-virtual void V94();
-virtual void V95();
-virtual void V96();
-virtual void V97();
-virtual void V98();
-virtual void V99();
-virtual void V100();
-virtual void V101();
-virtual void V102();
-virtual void V103();
-virtual void V104();
-virtual void V105();
-virtual void V106();
-virtual void V107();
-virtual void V108();
-virtual void V109();
-virtual void V110();
-virtual void V111();
-virtual void V112();
-virtual void V113();
-virtual void V114();
-virtual void V115();
-virtual void V116();
-virtual void V117();
-virtual void V118();
-virtual void V119();
-virtual void V120();
-virtual void V121();
-virtual void V122();
-virtual void V123();
-virtual void V124();
-virtual const NiPoint3* GetPosition(unsigned int, unsigned int, TESObjectREFR*);
+class ScriptMovementActorActions : public TESObjectREFR { public:
+
 MovementNode* FUN_008d8520();
 };
 // @fnv 0x005dac80
-bool __cdecl FUN_005dac80(const ScriptParameter* parameters,const char* data,TESObjectREFR_005dac80* reference,TESObjectREFR* container,Script* script,ScriptLocals* locals,double& result,unsigned int& offset) {
+bool __cdecl FUN_005dac80(const ScriptParameter* parameters,const char* data,ScriptMovementActorActions* reference,TESObjectREFR* container,Script* script,ScriptLocals* locals,double& result,unsigned int& offset) {
 if (reference) {
-TESObjectREFR_005dac80* refObject=0;
+ScriptMovementActorActions* refObject=0;
 unsigned int value=0;
 unsigned int param2=3;
 if (!ExtractArgs(parameters,data,&offset,reference,container,script,locals,&refObject,&value,&param2)) return false;
-if (refObject && refObject->CanMove()) { TESObjectREFR_005dac80* selected=refObject; if (selected->FUN_008d8520()) {
+if (refObject && refObject->IsActor()) { ScriptMovementActorActions* selected=refObject; if (selected->FUN_008d8520()) {
 MovementNode* node=selected->FUN_008d8520();
-node->SetPosition(selected,*reference->GetPosition(value,param2,reference)); } }
+node->SetPosition(selected,*reinterpret_cast<const NiPoint3* (__thiscall*)(TESObjectREFR*, unsigned int, unsigned int, TESObjectREFR*)>((*reinterpret_cast<void***>(reference))[0x7D])(reference,value,param2,reference)); } }
 } return true; }
 
 struct WorkItem;
@@ -44813,268 +36500,23 @@ struct HealthProcess5da
     virtual HealthEntry5da* GetWeaponInfo();
 };
 
-struct HealthActor5da
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual bool IsActor();
-    virtual void w000();
-    virtual void w001();
-    virtual void w002();
-    virtual void w003();
-    virtual void w004();
-    virtual void w005();
-    virtual void w006();
-    virtual void w007();
-    virtual void w008();
-    virtual void w009();
-    virtual void w010();
-    virtual void w011();
-    virtual void w012();
-    virtual void w013();
-    virtual void w014();
-    virtual void w015();
-    virtual void w016();
-    virtual void w017();
-    virtual void w018();
-    virtual void w019();
-    virtual void w020();
-    virtual void w021();
-    virtual void w022();
-    virtual void w023();
-    virtual void w024();
-    virtual void w025();
-    virtual void w026();
-    virtual void w027();
-    virtual void w028();
-    virtual void w029();
-    virtual void w030();
-    virtual void w031();
-    virtual void w032();
-    virtual void w033();
-    virtual void w034();
-    virtual void w035();
-    virtual void w036();
-    virtual void w037();
-    virtual void w038();
-    virtual void w039();
-    virtual void w040();
-    virtual void w041();
-    virtual void w042();
-    virtual void w043();
-    virtual void w044();
-    virtual void w045();
-    virtual void w046();
-    virtual void w047();
-    virtual void w048();
-    virtual void w049();
-    virtual void w050();
-    virtual void w051();
-    virtual void w052();
-    virtual void w053();
-    virtual void w054();
-    virtual void w055();
-    virtual void w056();
-    virtual void w057();
-    virtual void w058();
-    virtual void w059();
-    virtual void w060();
-    virtual void w061();
-    virtual void w062();
-    virtual void w063();
-    virtual void w064();
-    virtual void w065();
-    virtual void w066();
-    virtual void w067();
-    virtual void w068();
-    virtual void w069();
-    virtual void w070();
-    virtual void w071();
-    virtual void w072();
-    virtual void w073();
-    virtual void w074();
-    virtual void w075();
-    virtual void w076();
-    virtual void w077();
-    virtual void w078();
-    virtual void w079();
-    virtual void w080();
-    virtual void w081();
-    virtual void w082();
-    virtual void w083();
-    virtual void w084();
-    virtual void w085();
-    virtual void w086();
-    virtual void w087();
-    virtual void w088();
-    virtual void w089();
-    virtual void w090();
-    virtual void w091();
-    virtual void w092();
-    virtual void w093();
-    virtual void w094();
-    virtual void w095();
-    virtual void w096();
-    virtual void w097();
-    virtual void w098();
-    virtual void w099();
-    virtual void w100();
-    virtual void w101();
-    virtual void w102();
-    virtual void w103();
-    virtual void w104();
-    virtual void w105();
-    virtual void w106();
-    virtual void w107();
-    virtual void w108();
-    virtual void w109();
-    virtual void w110();
-    virtual void w111();
-    virtual void w112();
-    virtual void w113();
-    virtual void w114();
-    virtual void w115();
-    virtual void w116();
-    virtual void w117();
-    virtual void w118();
-    virtual void w119();
-    virtual void w120();
-    virtual void w121();
-    virtual void w122();
-    virtual void w123();
-    virtual void w124();
-    virtual void w125();
-    virtual void w126();
-    virtual void w127();
-    virtual void w128();
-    virtual void w129();
-    virtual void w130();
-    virtual void w131();
-    virtual void w132();
-    virtual void w133();
-    virtual void w134();
-    virtual void w135();
-    virtual void w136();
-    virtual void w137();
-    virtual void w138();
-    virtual void w139();
-    virtual void w140();
-    virtual void w141();
-    virtual void w142();
-    virtual void w143();
-    virtual void w144();
-    virtual void w145();
-    virtual void w146();
-    virtual void w147();
-    virtual void w148();
-    virtual void w149();
-    virtual void w150();
-    virtual void w151();
-    virtual void w152();
-    virtual void w153();
-    virtual void w154();
-    virtual void w155();
-    virtual void w156();
-    virtual void w157();
-    virtual void w158();
-    virtual void w159();
-    virtual void w160();
-    virtual void w161();
-    virtual void w162();
-    virtual void w163();
-    virtual void w164();
-    virtual void w165();
-    virtual void w166();
-    virtual void w167();
-    virtual void w168();
-    virtual void w169();
-    virtual void w170();
-    virtual void w171();
-    virtual void w172();
-    virtual void w173();
-    virtual void w174();
-    virtual void w175();
-    virtual void w176();
-    virtual void DamageItem(HealthEntry5da* pkEntry, float afDamageAmount, bool bUpdate);
-    HealthProcess5da* FUN_008d8520();
-};
 
-HealthExtraList5da* __fastcall FUN_005d43c0(HealthActor5da* pkActor);
+
+HealthExtraList5da* __fastcall FUN_005d43c0(Actor* pkActor);
 
 // @fnv 0x005daf90
 bool __cdecl FUN_005daf90(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* eventList, double& result, unsigned int& opcodeOffsetPtr)
 {
+    typedef void (__thiscall *ScriptDamageItem)(Actor*, HealthEntry5da*, float, bool);
     float fNormalizedPosition = 1.0f;
     if (!ExtractArgs(paramInfo, scriptData, &opcodeOffsetPtr, thisObj, containingObj, scriptObj, eventList, &fNormalizedPosition))
         return false;
-    if (thisObj && ((HealthActor5da*)thisObj)->IsActor())
+    if (thisObj && ((Actor*)thisObj)->IsActor())
     {
-        HealthActor5da* pkActor = (HealthActor5da*)thisObj;
+        Actor* pkActor = (Actor*)thisObj;
         if (pkActor->FUN_008d8520())
         {
-            HealthEntry5da* pkEntry = pkActor->FUN_008d8520()->GetWeaponInfo();
+            HealthEntry5da* pkEntry = reinterpret_cast<HealthProcess5da*>(pkActor->FUN_008d8520())->GetWeaponInfo();
             if (pkEntry)
             {
                 fNormalizedPosition = pkEntry->FUN_004bcdb0(true) + fNormalizedPosition;
@@ -45087,7 +36529,7 @@ bool __cdecl FUN_005daf90(const ScriptParameter* paramInfo, const char* scriptDa
                 if (fDeltaCur > DAT_01012060)
                     pkEntry->FUN_004bd030(fNewHealthCur, FUN_005d43c0(pkActor)->FUN_00418520(pkEntry->FUN_00559450()->FUN_006815c0()), true);
                 else
-                    pkActor->DamageItem(pkEntry, -fDeltaCur, true);
+                    ((ScriptDamageItem)(*(void***)pkActor)[0x3c8 / 4])(pkActor, pkEntry, -fDeltaCur, true);
             }
         }
     }
@@ -45096,22 +36538,12 @@ bool __cdecl FUN_005daf90(const ScriptParameter* paramInfo, const char* scriptDa
 
 bool FUN_005accb0(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int* a7, int* a8, int* a9);
 
-struct ActorProcessStub {
+// The shared ragdoll layout lacks only this nonvirtual script control entry.
+struct ScriptRagdollControls : public bhkRagdollController {
     void SetFlags(bool a, bool b, bool c);
 };
 
-// Stand-in view of Actor with the fields this function reads.
-struct ActorView : public Actor {
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    int unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40;
-    int unk44, unk48, unk4c, unk50, unk54, unk58, unk5c, unk60;
-    int unk64, unk68, unk6c, unk70, unk74, unk78, unk7c, unk80;
-    int unk84, unk88, unk8c, unk90, unk94, unk98, unk9c, unka0;
-    int unka4, unka8;
-    ActorProcessStub* pProcess;
-    NiAVObject* GetRoot3D();
-    void UpdateRoot(NiAVObject* obj, float f);
-};
+
 
 // @fnv 0x005db290
 bool __cdecl FUN_005db290(int paramInfo, int scriptData, TESObjectREFR* thisObj, int containingObj, int scriptObj, int locals, double& result, int opcodeOffsetPtr)
@@ -45122,17 +36554,17 @@ bool __cdecl FUN_005db290(int paramInfo, int scriptData, TESObjectREFR* thisObj,
     if (!FUN_005accb0(paramInfo, scriptData, opcodeOffsetPtr, (int)thisObj, containingObj, scriptObj, locals, &c, &b, &a))
         return false;
     if (thisObj) {
-        ActorView* actor = (ActorView*)dynamic_cast<Actor*>(thisObj);
+        Actor* actor = dynamic_cast<Actor*>(thisObj);
         bool bB = c;
         bool bC = b;
         bool bA = a;
-        if (actor && actor->pProcess) {
-            NiAVObject* obj = actor->GetRoot3D();
+        if (actor && actor->m_pRagdollController) {
+            NiAVObject* obj = actor->FUN_0043fcd0();
             if (bB || bC || bA)
-                actor->UpdateRoot(obj, DAT_01016248);
+                ((ScriptActorActions*)actor)->FUN_008bd630(obj, DAT_01016248);
             else
-                actor->UpdateRoot(obj, 1.0f);
-            actor->pProcess->SetFlags(bB, bC, bA);
+                ((ScriptActorActions*)actor)->FUN_008bd630(obj, 1.0f);
+            ((ScriptRagdollControls*)actor->m_pRagdollController)->SetFlags(bB, bC, bA);
         }
     }
     return true;
@@ -45191,32 +36623,31 @@ struct DebugMember {int FUN_008d8520();bool FUN_005dc980();};
 struct DebugRecord {bool FUN_005dc960();bool FUN_009373f0();DebugMemberNode* FUN_00717e50();};
 struct DebugRecordNode {DebugRecord** FUN_006815c0();DebugRecordNode* FUN_00726070();};
 struct DebugReference {DebugRecordNode* FUN_005d43c0();};
-struct DebugStringOps {void FUN_00438390(const char*);void FUN_00404820(const char*);};
 extern const char DAT_0103d08c[],DAT_0103d088[],DAT_0103d07c[],DAT_01012630[],DAT_0103d078[];
 extern int __cdecl FUN_00406d00(char*,unsigned int,const char*,...);
 // @fnv 0x005dc730
 bool __cdecl FUN_005dc730(int p0,int p1,int p2,int p3,int p4,int p5,int p6,int p7) {
  int found=0;
  if(!FUN_005accb0(p0,p1,p7,p2,p3,p4,p5,&found))return false;
- TreeStr line5;
+ BSStringT<char> line5;
  char buffer2[32];
  if(g_threadFlags.bLogScripts) {
  DebugRecordNode* nodeB=((DebugReference*)found)->FUN_005d43c0();
  while(nodeB && *nodeB->FUN_006815c0()) {
  DebugRecord* record=*nodeB->FUN_006815c0();
  FUN_00406d00(buffer2,31,DAT_0103d08c,record->FUN_009373f0(),record->FUN_005dc960()?1:0);
- ((DebugStringOps*)&line5)->FUN_00438390(buffer2);
+ line5 = buffer2;
  if(record->FUN_00717e50() && record->FUN_00717e50()->FUN_00726070()) {
- ((DebugStringOps*)&line5)->FUN_00404820(DAT_0103d088);
+ line5 += DAT_0103d088;
  DebugMemberNode* members=record->FUN_00717e50();
  while(members && *members->FUN_006815c0()) {
  DebugMember* member=*members->FUN_006815c0();
  FUN_00406d00(buffer2,31,DAT_0103d07c,member->FUN_005dc980(),member->FUN_008d8520()?1:0);
- ((DebugStringOps*)&line5)->FUN_00404820(buffer2);
- if(members->FUN_00726070())((DebugStringOps*)&line5)->FUN_00404820(DAT_01012630);
+ line5 += buffer2;
+ if(members->FUN_00726070())line5 += DAT_01012630;
  members=members->FUN_00726070();
  }
- ((DebugStringOps*)&line5)->FUN_00404820(DAT_0103d078);
+ line5 += DAT_0103d078;
  }
  FUN_00703c80(line5);
  nodeB=nodeB->FUN_00726070();
@@ -45234,15 +36665,6 @@ struct xLog;
 struct xFace;
 struct xRef;
 
-struct DynamicString {
-    char* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    DynamicString();
-    DynamicString(const DynamicString& kOther);
-    ~DynamicString();
-    DynamicString& operator+=(const char* pText);
-};
 
 struct xUpdateData {
     float fTime;
@@ -45430,7 +36852,7 @@ extern "C" int __cdecl sprintf_s(char* buf, unsigned int size, const char* fmt, 
 extern "C" void* __cdecl memset(void* p, int v, unsigned int n);
 extern "C" void* __cdecl FUN_00ec61c0(void* p, int v, unsigned int n);
 void xDebugLog(const char* fmt, ...);
-void xConsolePrint(DynamicString kText);
+void xConsolePrint(BSStringT<char> kText);
 const char* __cdecl xExpressionName(int i);
 int xModifierName(int i);
 int __cdecl xPhonemeName(int i);
@@ -45455,7 +36877,7 @@ bool FUN_005dc9a0(const void* pParams, const char* pData, xRef* pThis, xRef* pCo
         if (pkFace) {
             if (!xStricmp(acMode, "expression")) {
                 if (iIndex == -1) {
-                    DynamicString kList;
+                    BSStringT<char> kList;
                     char acLine[512];
                     for (int i = 0; i < 15; i++) {
                         if (i == 14)
@@ -45470,7 +36892,7 @@ bool FUN_005dc9a0(const void* pParams, const char* pData, xRef* pThis, xRef* pCo
                 }
             } else if (!xStricmp(acMode, "phoneme")) {
                 if (iIndex == -1) {
-                    DynamicString kList;
+                    BSStringT<char> kList;
                     char acLine[512];
                     for (int i = 0; i < 16; i++) {
                         if (i == 15)
@@ -45493,7 +36915,7 @@ bool FUN_005dc9a0(const void* pParams, const char* pData, xRef* pThis, xRef* pCo
                 }
             } else if (!xStricmp(acMode, "modifier")) {
                 if (iIndex == -1) {
-                    DynamicString kList;
+                    BSStringT<char> kList;
                     char acLine[512];
                     for (int i = 0; i < 17; i++) {
                         if (i == 16)
@@ -45821,19 +37243,19 @@ bool __cdecl FUN_005deb10(const ScriptParameter* paramInfo, const char* scriptDa
     int arg = 0;
     ExtractArgs(paramInfo, scriptData, &opcodeOffsetPtr, thisObj, containingObj, scriptObj, eventList, &arg);
     if (thisObj) {
-        ActorStub* mobile = 0;
+        MobileObject* mobile = 0;
         RefStub* target2 = 0;
         if (thisObj->IsActor()) {
-            mobile = (ActorStub*)thisObj;
+            mobile = (MobileObject*)thisObj;
         } else {
             BGSTalkingActivator* act = dynamic_cast<BGSTalkingActivator*>(thisObj->GetBaseObject());
             target2 = act ? act->GetTempRef() : 0;
         }
         if (mobile) {
-            if (mobile->V100()) {
-                target2 = mobile;
-            } else if (mobile->IsTalkingActivator()) {
-                target2 = ((BGSTalkingActivator*)mobile->GetTalkingActivatorRef()->GetBaseObject())->GetTempRef();
+            if (mobile->IsActor()) {
+                target2 = (RefStub*)mobile;
+            } else if (mobile->FUN_00574900()) {
+                target2 = ((BGSTalkingActivator*)((Actor*)mobile)->FUN_005e3fa0()->GetBaseObject())->GetTempRef();
             }
         }
         if (target2) {
@@ -45845,11 +37267,10 @@ bool __cdecl FUN_005deb10(const ScriptParameter* paramInfo, const char* scriptDa
 
 namespace fnv_005ded40 {
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
 
-struct Data5de
+
+// 0x005ded40 uses a casino form ID at +0, winnings at +4 and a bet level at +8.
+struct CasinoBetRecord
 {
     unsigned int uiKey;
     int iAmount;
@@ -45858,7 +37279,7 @@ struct Data5de
 
 struct Node5de
 {
-    Data5de** FUN_006815c0();
+    CasinoBetRecord** FUN_006815c0();
     Node5de* FUN_00726070();
 };
 
@@ -45951,9 +37372,7 @@ bool __cdecl FUN_005deef0(int a1, int a2, int a3, int a4, int a5, int a6, double
 }
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern __declspec(thread) bool tls_bEchoConsole;
 void DebugLog(const char* fmt, ...);
@@ -45969,15 +37388,7 @@ bool FUN_005dfc10(const ScriptParameter* paramInfo, const char* scriptData, TESO
 }
 
 namespace fnv_005dfd30 {
-struct ScriptTargetForm : TESForm {
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual bool Validate();
-};
+
 
 struct ScriptResult {
     void FUN_008c1ac0(bool positive);
@@ -45985,11 +37396,11 @@ struct ScriptResult {
 
 extern bool __cdecl FUN_005accb0(
     unsigned int first, unsigned int second, unsigned int last,
-    ScriptTargetForm* form, unsigned int fourth, unsigned int fifth,
+    TESForm* form, unsigned int fourth, unsigned int fifth,
     unsigned int sixth, int* result);
 
 extern ScriptResult* __cdecl FUN_00ec43fb(
-    ScriptTargetForm* form, int zero, const void* a,
+    TESForm* form, int zero, const void* a,
     const void* b, int flags);
 
 extern void __cdecl FUN_00703c00(const void* value);
@@ -45999,7 +37410,7 @@ extern const int DAT_0103d31c;
 
 // @fnv 0x005dfd30
 bool __cdecl FUN_005dfd30(
-    unsigned int first, unsigned int second, ScriptTargetForm* form,
+    unsigned int first, unsigned int second, TESForm* form,
     unsigned int fourth, unsigned int fifth, unsigned int sixth,
     unsigned int seventh, unsigned int last)
 {
@@ -46007,7 +37418,7 @@ bool __cdecl FUN_005dfd30(
     if (!FUN_005accb0(first, second, last, form, fourth, fifth, sixth, &outcome))
         return false;
 
-    if (form->Validate()) {
+    if (form->IsActor()) {
         ScriptResult* result = FUN_00ec43fb(form, 0, &DAT_011841cc, &DAT_011846d4, 0);
         result->FUN_008c1ac0(outcome > 0);
     } else if (__tls_index[0x268]) {
@@ -46064,17 +37475,6 @@ bool FUN_005dfe90(const ScriptParameter* paParams, const char* apData, TESObject
 
 extern __declspec(thread) bool g_bDFF70ConsoleOutput;
 
-// The pack's TESForm declares only its first virtuals; these fill the table up to IsActor (slot 64).
-class DFF70Reference : public TESObjectREFR {
-public:
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual bool IsActor();
-};
 
 class DFF70Actor : public Actor {
 public:
@@ -46088,7 +37488,7 @@ bool FUN_005dff70(const ScriptParameter* apParameters, const char* apCompiledPar
     if (!ExtractArgs(apParameters, apCompiledParams, &auiOffset, apRefObject, apContainer, apScript, apScriptLocals, &iShow))
         return false;
 
-    if (static_cast<DFF70Reference*>(apRefObject)->IsActor()) {
+    if (apRefObject->IsActor()) {
         Actor* pkActor = dynamic_cast<Actor*>(apRefObject);
         static_cast<DFF70Actor*>(pkActor)->SetAlwaysShowSubtitles(iShow > 0);
     } else if (g_bDFF70ConsoleOutput) {
@@ -46117,29 +37517,22 @@ unsigned int* __thiscall FUN_005e0510_Class::FUN_005e0510() {
 }
 }  // namespace fnv_005e0510
 
-struct S_00703c80_Elem;
-struct S_00703c80_A {
-    int unk00;
-    int unk04;
-    ~S_00703c80_A();
-    S_00703c80_Elem* FUN_00559450();
-};
 struct S_00703c80_Ctx {
     bool FUN_009373f0();
 };
 struct S_00703c80_Mgr {
     bool FUN_004a4020();
-    void Print(S_00703c80_Elem* e, int* b);
+    void Print(const char* e, int* b);
 };
 S_00703c80_Mgr* __cdecl FUN_0071b160(int which);
 
 // @fnv 0x00703c80
-void __cdecl FUN_00703c80(S_00703c80_A a, int b)
+void __cdecl FUN_00703c80(BSStringT<char> a, int b)
 {
     if (FUN_004b7210() && ((S_00703c80_Ctx*)FUN_004b7210())->FUN_009373f0()) {
         if ((FUN_0071b160(0) && FUN_0071b160(1)->FUN_004a4020()) || FUN_005b6f70()) {
             int* p = &b;
-            FUN_0071b160(1)->Print(a.FUN_00559450(), p);
+            FUN_0071b160(1)->Print(a.String(), p);
             p = 0;
         }
     }
@@ -46432,19 +37825,7 @@ struct Process8d3f {
     virtual void Reset(Target8d3f*);
     virtual void Clear(unsigned int);
 };
-struct Menu8d3f {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void After();
-    virtual void Before();
-};
+
 struct Cell8d3f {
     void* FUN_0045cd60();
     void FUN_008854b0(float);
@@ -46452,7 +37833,7 @@ struct Cell8d3f {
 struct Queue8d3f { void FUN_0087b5c0(Target8d3f*); };
 bool __cdecl FUN_008c7aa0();
 Queue8d3f* __cdecl FUN_004537b0();
-Menu8d3f* __cdecl FUN_00705990();
+FOPipboyManager* __cdecl FUN_00705990();
 extern Target8d3f* DAT_011dea3c;
 struct Target8d3f {
     int unk00;
@@ -46493,13 +37874,13 @@ void Target8d3f::FUN_008d3fa0() {
         if (FUN_008c7aa0()) {
             FUN_004537b0()->FUN_0087b5c0(this);
         } else {
-            if (this == DAT_011dea3c) FUN_00705990()->Before();
+            if (this == DAT_011dea3c) FUN_00705990()->FUN_007fadf0();
             FUN_008d8520()->Clear(1);
             FUN_008d8520()->Clear(2);
             FUN_008d8520()->Clear(4);
             FUN_008d8520()->Clear(16);
             FUN_008d8520()->Reset(this);
-            if (this == DAT_011dea3c) FUN_00705990()->After();
+            if (this == DAT_011dea3c) FUN_00705990()->OnMenuOpen();
             if (!cell->FUN_0045cd60()) cell->FUN_008854b0(0.0f);
         }
     }
@@ -46513,7 +37894,7 @@ struct FNVWipResource;
 struct FNVWipAllocation;
 extern void* DAT_011dea3c;
 extern float DAT_01012054;
-class PlayerCharacter { public: virtual ~PlayerCharacter(); };
+
 extern unsigned char UNK_005790f0;
 FNVWipResource* __cdecl FUN_008d5910(unsigned int handle);
 void __cdecl MarkBaseExtraListScriptEvent(FNVWipResource* resource, void* value, unsigned int flags);
@@ -47438,7 +38819,6 @@ struct FixedName { const char* FUN_0043b1b0(); };
 struct NamedPart { FixedName& FUN_00413f40(); };
 struct PartLookup { NamedPart* FUN_0044ddc0(); };
 PartLookup* __cdecl FUN_004b5260(const char*);
-struct TargetString { const char* FUN_00559450(); };
 struct TargetRef {
 virtual void v0();
 virtual void v1();
@@ -47521,106 +38901,21 @@ int FUN_00474cb0();
 const char* FUN_0055d520();
 unsigned int FUN_0084e3a0();
 };
-struct ItemListContainer { TargetRef* ref; TargetString name; };
+struct ItemListContainer { TargetRef* ref; BSStringT<char> name; };
 struct TargetList { bool FUN_008256d0(); };
 struct HandlerAccess { bool FUN_00469860(unsigned int); };
 void __cdecl FUN_0040fbe0(const char*,...);
-struct Projectile {
-virtual void p0();
-virtual void p1();
-virtual void p2();
-virtual void p3();
-virtual void p4();
-virtual void p5();
-virtual void p6();
-virtual void p7();
-virtual void p8();
-virtual void p9();
-virtual void p10();
-virtual void p11();
-virtual void p12();
-virtual void p13();
-virtual void p14();
-virtual void p15();
-virtual void p16();
-virtual void p17();
-virtual void p18();
-virtual void p19();
-virtual void p20();
-virtual void p21();
-virtual void p22();
-virtual void p23();
-virtual void p24();
-virtual void p25();
-virtual void p26();
-virtual void p27();
-virtual void p28();
-virtual void p29();
-virtual void p30();
-virtual void p31();
-virtual void p32();
-virtual void p33();
-virtual void p34();
-virtual void p35();
-virtual void p36();
-virtual void p37();
-virtual void p38();
-virtual void p39();
-virtual void p40();
-virtual void p41();
-virtual void p42();
-virtual void p43();
-virtual void p44();
-virtual void p45();
-virtual void p46();
-virtual void p47();
-virtual void p48();
-virtual void Set(bool);
-unsigned int unk4;
-unsigned int unk8;
-unsigned int unkc;
-unsigned int unk10;
-unsigned int unk14;
-unsigned int unk18;
-unsigned int unk1c;
-unsigned int unk20;
-unsigned int unk24;
-unsigned int unk28;
-unsigned int unk2c;
-unsigned int unk30;
-unsigned int unk34;
-unsigned int unk38;
-unsigned int unk3c;
-unsigned int unk40;
-unsigned int unk44;
-unsigned int unk48;
-unsigned int unk4c;
-unsigned int unk50;
-unsigned int unk54;
-unsigned int unk58;
-unsigned int unk5c;
-unsigned int unk60;
-unsigned int unk64;
-unsigned int unk68;
-unsigned int unk6c;
-unsigned int unk70;
-unsigned int unk74;
-unsigned int unk78;
-unsigned int unk7c;
-unsigned int unk80;
-unsigned int unk84;
-TargetList list;
-ItemListContainer* FUN_008d8b80();
-int FUN_00401170();
-unsigned int FUN_0084e3a0();
-void FUN_00574400();
-void FUN_009bc8f0();
+
+class ScriptProjectile : public Projectile {
+public:
+    ItemListContainer* FUN_008d8b80();
+    void FUN_009bc8f0();
 };
 void __cdecl FUN_007f6a20(Projectile*);
 // @fnv 0x009bc8f0
-void Projectile::FUN_009bc8f0() {
- if(*((SettingAccess*)&g_011f20b8)->FUN_00408d60() && list.FUN_008256d0() && FUN_008d8b80()) {
-  PartLookup* part = FUN_004b5260(FUN_008d8b80()->name.FUN_00559450());
+void ScriptProjectile::FUN_009bc8f0() {
+ if(*((SettingAccess*)&g_011f20b8)->FUN_00408d60() && reinterpret_cast<TargetList*>(&kImpacts)->FUN_008256d0() && FUN_008d8b80()) {
+  PartLookup* part = FUN_004b5260(FUN_008d8b80()->name.String());
   NamedPart* reference = part ? part->FUN_0044ddc0() : 0;
   TargetRef* lookup = FUN_008d8b80()->ref;
   FUN_0040fbe0("Targetted VATS Projectile Result: %s","FAILURE");
@@ -47628,12 +38923,12 @@ void Projectile::FUN_009bc8f0() {
   FUN_0040fbe0("Target Part:	%s",reference ? reference->FUN_00413f40().FUN_0043b1b0() : "");
  }
  if(FUN_00401170()==62) FUN_007f6a20(this);
- if(((HandlerAccess*)g_dataHandler)->FUN_00469860(FUN_0084e3a0())) Set(true);
+ if(((HandlerAccess*)g_dataHandler)->FUN_00469860(FUN_0084e3a0())) MarkForDeletion(true);
  else FUN_00574400();
 }
 
 namespace fnv_005b6b50 {
-class TESWorldSpace;
+
 
 class TaskQueueInterface
 {
@@ -47717,22 +39012,6 @@ unsigned char __cdecl FUN_00456c70(void);
 
 void _DebugLog(const char* format, ...);
 
-class PlayerCharacter
-{
-public:
-    bool FUN_0050d4a0(void);
-};
-
-class MobileObject
-{
-public:
-    char const* GetFullName(void);
-};
-
-struct TESFormCollisionHelper
-{
-    void SetCollisionDisabled(bool set);
-};
 
 // @fnv 0x005b9640
 bool __cdecl FUN_005b9640(
@@ -47749,8 +39028,8 @@ bool __cdecl FUN_005b9640(
 
     if (apRefObject)
     {
-        bcol = !reinterpret_cast<PlayerCharacter*>(apRefObject)->FUN_0050d4a0();
-        reinterpret_cast<TESFormCollisionHelper*>(apRefObject)->SetCollisionDisabled(bcol);
+        bcol = !reinterpret_cast<ScriptPlayerActions*>(apRefObject)->FUN_0050d4a0();
+        static_cast<TESForm*>(apRefObject)->SetCollisionDisabled(bcol);
 
         if (g_TESThreadData.debug)
         {
@@ -47776,7 +39055,6 @@ bool __cdecl FUN_005b9640(
 }
 }  // namespace fnv_005b9640
 
-class Actor;
 
 extern bool DAT_011f1222;
 extern int DAT_011f1224;
@@ -47896,19 +39174,15 @@ bool __cdecl FUN_005ba7c0(
 namespace fnv_005bd780 {
 class LLD_Cell;
 
-class TESWorldSpace
+
+class ScriptWorldSpaceCellLookup : public TESWorldSpace
 {
 public:
-    TESObjectCELL* GetCellAtGridPosition(int x, int y);
+    TESObjectCELL* LookupExteriorCell(int x, int y);
 };
 
-class W_00585b30 : public TESWorldSpace
-{
-public:
-    TESObjectCELL* FUN_00585b30(int x, int y);
-};
-
-class TESQueuedCellManager
+// Call surface of TESQueuedCellManager; the shared header cannot be read in this unit (its own layout_support template copies).
+class TESQueuedCellManagerApi
 {
 public:
     void FUN_00528540();
@@ -47931,7 +39205,7 @@ public:
 };
 
 extern DH* g_dataHandler;
-extern TESQueuedCellManager* DAT_011c9618;
+extern TESQueuedCellManagerApi* DAT_011c9618;
 extern LLD_PlayerCharacter* _g_thePlayer;
 
 void _FUN_00703da0();
@@ -47975,7 +39249,7 @@ bool FUN_005bd780(const ScriptParameter* apParameters,
 
     pcell = pworld->GetCellAtGridPosition(ix, iy);
     if (!pcell)
-        pcell = reinterpret_cast<W_00585b30*>(pworld)->FUN_00585b30(ix, iy);
+        pcell = reinterpret_cast<ScriptWorldSpaceCellLookup*>(pworld)->LookupExteriorCell(ix, iy);
 
     if (!pcell)
         pcell = reinterpret_cast<TESObjectCELL*>(
@@ -47991,79 +39265,9 @@ bool FUN_005bd780(const ScriptParameter* apParameters,
 }
 }  // namespace fnv_005bd780
 
-struct TESObjectREFR_Dismembered
-{
-    bool IsLimbMissing(int);
-};
 
-struct TESObjectREFR_Virtual
-{
-    virtual void V0() {}
-    virtual void V1() {}
-    virtual void V2() {}
-    virtual void V3() {}
-    virtual void V4() {}
-    virtual void V5() {}
-    virtual void V6() {}
-    virtual void V7() {}
-    virtual void V8() {}
-    virtual void V9() {}
-    virtual void V10() {}
-    virtual void V11() {}
-    virtual void V12() {}
-    virtual void V13() {}
-    virtual void V14() {}
-    virtual void V15() {}
-    virtual void V16() {}
-    virtual void V17() {}
-    virtual void V18() {}
-    virtual void V19() {}
-    virtual void V20() {}
-    virtual void V21() {}
-    virtual void V22() {}
-    virtual void V23() {}
-    virtual void V24() {}
-    virtual void V25() {}
-    virtual void V26() {}
-    virtual void V27() {}
-    virtual void V28() {}
-    virtual void V29() {}
-    virtual void V30() {}
-    virtual void V31() {}
-    virtual void V32() {}
-    virtual void V33() {}
-    virtual void V34() {}
-    virtual void V35() {}
-    virtual void V36() {}
-    virtual void V37() {}
-    virtual void V38() {}
-    virtual void V39() {}
-    virtual void V40() {}
-    virtual void V41() {}
-    virtual void V42() {}
-    virtual void V43() {}
-    virtual void V44() {}
-    virtual void V45() {}
-    virtual void V46() {}
-    virtual void V47() {}
-    virtual void V48() {}
-    virtual void V49() {}
-    virtual void V50() {}
-    virtual void V51() {}
-    virtual void V52() {}
-    virtual void V53() {}
-    virtual void V54() {}
-    virtual void V55() {}
-    virtual void V56() {}
-    virtual void V57() {}
-    virtual void V58() {}
-    virtual void V59() {}
-    virtual void V60() {}
-    virtual void V61() {}
-    virtual void V62() {}
-    virtual void V63() {}
-    virtual bool V64() { return false; }
-};
+
+
 
 bool __cdecl FUN_005a3db0(TESObjectREFR*, void*, void*, double&);
 
@@ -48088,12 +39292,12 @@ bool FUN_005be760(const ScriptParameter* scriptParameter,
 
     if (end > 0)
     {
-        if (object && reinterpret_cast<TESObjectREFR_Virtual*>(object)->V64())
+        if (object && object->IsActor())
         {
             TESObjectREFR* dismemberedObject = object;
             for (int index = start; index <= end; ++index)
             {
-                if (reinterpret_cast<TESObjectREFR_Dismembered*>(dismemberedObject)->
+                if (reinterpret_cast<TESObjectREFR*>(dismemberedObject)->
                         IsLimbMissing(index))
                 {
                     result = 1.0;
@@ -48189,142 +39393,11 @@ bool FUN_005bfd50(
 }
 }  // namespace fnv_005bfd50
 
-enum ACTION_FLAGS { ACTION_FLAGS_NONE = 0 };
-enum ANIM_GROUP_SECTION { ANIM_GROUP_SECTION_NONE = 0 };
+#include "../../include/ACTION_FLAGS.h"
+#include "../../include/ANIM_GROUP_SECTION.h"
 
-class BSAnimGroupSequence {};
 
-struct Animation
-{
-    virtual void V0() {}
-    virtual void V1() {}
-    virtual void V2() {}
-    virtual void V3() {}
-    virtual void V4() {}
-    virtual void V5() {}
-    virtual void V6() {}
-    virtual void V7() {}
-    virtual void V8() {}
-    virtual void V9() {}
-    virtual void V10() {}
-    virtual void V11() {}
-    virtual void V12() {}
-    virtual void V13() {}
-    virtual void V14() {}
-    virtual void V15() {}
-    virtual void V16() {}
-    virtual void V17() {}
-    virtual void V18() {}
-    virtual void V19() {}
-    virtual void V20() {}
-    virtual void V21() {}
-    virtual void V22() {}
-    virtual void V23() {}
-    virtual void V24() {}
-    virtual void V25() {}
-    virtual void V26() {}
-    virtual void V27() {}
-    virtual void V28() {}
-    virtual void V29() {}
-    virtual void V30() {}
-    virtual void V31() {}
-    virtual void V32() {}
-    virtual void V33() {}
-    virtual void V34() {}
-    virtual void V35() {}
-    virtual void V36() {}
-    virtual void V37() {}
-    virtual void V38() {}
-    virtual void V39() {}
-    virtual void V40() {}
-    virtual void V41() {}
-    virtual void V42() {}
-    virtual void V43() {}
-    virtual void V44() {}
-    virtual void V45() {}
-    virtual void V46() {}
-    virtual void V47() {}
-    virtual void V48() {}
-    virtual void V49() {}
-    virtual void V50(int) {}
-    virtual void V51() {}
-    virtual void V52() {}
-    virtual void V53() {}
-    virtual void V54() {}
-    virtual void V55() {}
-    virtual void V56() {}
-    virtual void V57() {}
-    virtual void V58() {}
-    virtual void V59() {}
-    virtual void V60() {}
-    virtual void V61() {}
-    virtual void V62() {}
-    virtual void V63() {}
-    virtual void V64() {}
-    virtual void V65() {}
-    virtual void V66() {}
-    virtual void V67() {}
-    virtual void V68() {}
-    virtual void V69() {}
-    virtual void V70() {}
-    virtual void V71() {}
-    virtual void V72() {}
-    virtual void V73() {}
-    virtual void V74() {}
-    virtual void V75() {}
-    virtual void V76() {}
-    virtual void V77() {}
-    virtual void V78() {}
-    virtual void V79() {}
-    virtual void V80() {}
-    virtual void V81() {}
-    virtual void V82() {}
-    virtual void V83() {}
-    virtual void V84() {}
-    virtual void V85() {}
-    virtual void V86() {}
-    virtual void V87() {}
-    virtual void V88() {}
-    virtual void V89() {}
-    virtual void V90() {}
-    virtual void V91() {}
-    virtual void V92() {}
-    virtual void V93() {}
-    virtual void V94() {}
-    virtual void V95() {}
-    virtual void V96() {}
-    virtual void V97() {}
-    virtual void V98() {}
-    virtual void V99() {}
-    virtual void V100() {}
-    virtual void V101() {}
-    virtual void V102() {}
-    virtual void V103() {}
-    virtual void V104() {}
-    virtual void V105() {}
-    virtual void V106() {}
-    virtual void V107() {}
-    virtual void V108() {}
-    virtual void V109() {}
-    virtual void V110() {}
-    virtual void V111() {}
-    virtual void V112() {}
-    virtual void V113() {}
-    virtual void V114() {}
-    virtual void V115() {}
-    virtual void V116() {}
-    virtual void V117() {}
-    virtual void V118() {}
-    virtual void V119() {}
-    virtual void V120() {}
-    virtual Animation* V121() { return this; }
 
-    BSAnimGroupSequence* PlayGroup(
-        unsigned short,
-        ACTION_FLAGS,
-        int,
-        ANIM_GROUP_SECTION);
-};
 
 // @fnv 0x005c11f0
 bool FUN_005c11f0(
@@ -48356,14 +39429,14 @@ bool FUN_005c11f0(
 
     if (referenceOne)
     {
-        if (reinterpret_cast<Animation*>(referenceOne)->V121())
+        if (reinterpret_cast<Animation*>(referenceOne->GetAnimData()))
         {
-            reinterpret_cast<Animation*>(referenceOne)->V121()->PlayGroup(
+            reinterpret_cast<Animation*>(referenceOne->GetAnimData())->PlayGroup(
                 group,
                 static_cast<ACTION_FLAGS>(flags),
                 value2,
                 static_cast<ANIM_GROUP_SECTION>(-1));
-            reinterpret_cast<Animation*>(referenceOne)->V50(1);
+            referenceOne->SetAltered(true);
         }
     }
 
@@ -48371,12 +39444,6 @@ bool FUN_005c11f0(
 }
 
 namespace fnv_005c2500 {
-class BSAudio
-{
-public:
-    static BSAudio* __cdecl GetSingleton(void);
-    void __thiscall SetAudioProperty(unsigned int, unsigned int, unsigned int);
-};
 
 // @fnv 0x005c2500
 bool __cdecl FUN_005c2500(
@@ -48426,15 +39493,7 @@ public:
     void SetAppCulled(bool);
 };
 
-class NiAVObject : public LodObject
-{
-public:
-    bool FUN_00456610(void);
-};
 
-class NiNode : public NiAVObject
-{
-};
 
 struct FUN_005c4210Class
 {
@@ -48496,9 +39555,7 @@ bool FUN_005c40d0(
 }  // namespace fnv_005c40d0
 
 struct ScriptParameter;
-struct TESObjectREFR;
-struct Script;
-struct ScriptLocals;
+
 
 bool __cdecl FUN_0059d100(TESObjectREFR* reference, ScriptLocals* locals, void* unused, double& result);
 
@@ -48517,11 +39574,7 @@ bool __cdecl FUN_005c4900(
 }
 
 namespace fnv_005c54d0 {
-class BGSSaveLoadManager
-{
-public:
-    bool LoadGame(char const*, int, bool, bool);
-};
+
 
 extern void* DAT_011de134;
 
@@ -48677,9 +39730,6 @@ bool __cdecl FUN_005caf40(const ScriptParameter* apParameters,
 }
 
 
-
-
-
 struct FUN_00973460_Standin
 {
     bool FUN_00973460(Actor* actor);
@@ -48722,7 +39772,7 @@ bool FUN_005cda20(const ScriptParameter* apParameters,
 }
 
 namespace fnv_005cf040 {
-class TESCasino;
+
 
 extern TESObjectREFR* _g_thePlayer;
 
@@ -48837,93 +39887,6 @@ class B5CF3D0EventList;
 
 
 
-class TESCaravanCard : public TESBoundObject {
-public:
-    virtual ~TESCaravanCard();
-};
-
-class B5CF3D0Ref {
-public:
-    virtual void VFunc000();
-    virtual void VFunc004();
-    virtual void VFunc008();
-    virtual void VFunc00C();
-    virtual void VFunc010();
-    virtual void VFunc014();
-    virtual void VFunc018();
-    virtual void VFunc01C();
-    virtual void VFunc020();
-    virtual void VFunc024();
-    virtual void VFunc028();
-    virtual void VFunc02C();
-    virtual void VFunc030();
-    virtual void VFunc034();
-    virtual void VFunc038();
-    virtual void VFunc03C();
-    virtual void VFunc040();
-    virtual void VFunc044();
-    virtual void VFunc048();
-    virtual void VFunc04C();
-    virtual void VFunc050();
-    virtual void VFunc054();
-    virtual void VFunc058();
-    virtual void VFunc05C();
-    virtual void VFunc060();
-    virtual void VFunc064();
-    virtual void VFunc068();
-    virtual void VFunc06C();
-    virtual void VFunc070();
-    virtual void VFunc074();
-    virtual void VFunc078();
-    virtual void VFunc07C();
-    virtual void VFunc080();
-    virtual void VFunc084();
-    virtual void VFunc088();
-    virtual void VFunc08C();
-    virtual void VFunc090();
-    virtual void VFunc094();
-    virtual void VFunc098();
-    virtual void VFunc09C();
-    virtual void VFunc0A0();
-    virtual void VFunc0A4();
-    virtual void VFunc0A8();
-    virtual void VFunc0AC();
-    virtual void VFunc0B0();
-    virtual void VFunc0B4();
-    virtual void VFunc0B8();
-    virtual void VFunc0BC();
-    virtual void VFunc0C0();
-    virtual void VFunc0C4();
-    virtual void VFunc0C8();
-    virtual void VFunc0CC();
-    virtual void VFunc0D0();
-    virtual void VFunc0D4();
-    virtual void VFunc0D8();
-    virtual void VFunc0DC();
-    virtual void VFunc0E0();
-    virtual void VFunc0E4();
-    virtual void VFunc0E8();
-    virtual void VFunc0EC();
-    virtual void VFunc0F0();
-    virtual void VFunc0F4();
-    virtual void VFunc0F8();
-    virtual void VFunc0FC();
-    virtual void VFunc100();
-    virtual void VFunc104();
-    virtual void VFunc108();
-    virtual void VFunc10C();
-    virtual void VFunc110();
-    virtual void VFunc114();
-    virtual void VFunc118();
-    virtual void VFunc11C();
-    virtual void VFunc120();
-    virtual void VFunc124();
-    virtual void VFunc128();
-    virtual void VFunc12C();
-    virtual const char* GetEditorID();
-
-    TESBoundObject* GetObjectReference();
-};
 
 class B5CF3D0Player {
 public:
@@ -48933,13 +39896,13 @@ public:
 extern B5CF3D0Player* g_pkB5CF3D0Player;
 
 bool __cdecl B5CF3D0ExtractArgs(B5CF3D0ParamInfo* pkParamInfo, B5CF3D0ScriptData* pkScriptData,
-    unsigned int* puiOpcodeOffset, B5CF3D0Ref* pkThisObj, B5CF3D0Ref* pkContainingObj,
+    unsigned int* puiOpcodeOffset, TESObjectREFR* pkThisObj, TESObjectREFR* pkContainingObj,
     B5CF3D0Script* pkScript, B5CF3D0EventList* pkEventList, ...);
 void __cdecl B5CF3D0ConsolePrint(const char* pcFormat, ...);
 
 // @fnv 0x005cf3d0
-bool __cdecl FUN_005cf3d0(B5CF3D0ParamInfo* pkParamInfo, B5CF3D0ScriptData* pkScriptData, B5CF3D0Ref* pkThisObj,
-    B5CF3D0Ref* pkContainingObj, B5CF3D0Script* pkScript, B5CF3D0EventList* pkEventList, double* pdResult,
+bool __cdecl FUN_005cf3d0(B5CF3D0ParamInfo* pkParamInfo, B5CF3D0ScriptData* pkScriptData, TESObjectREFR* pkThisObj,
+    TESObjectREFR* pkContainingObj, B5CF3D0Script* pkScript, B5CF3D0EventList* pkEventList, double* pdResult,
     unsigned int* puiOpcodeOffset)
 {
     TESCaravanCard* pkCard = 0;
@@ -48950,7 +39913,7 @@ bool __cdecl FUN_005cf3d0(B5CF3D0ParamInfo* pkParamInfo, B5CF3D0ScriptData* pkSc
         if (pkCard)
             g_pkB5CF3D0Player->AddCard(pkCard);
         else
-            B5CF3D0ConsolePrint("%s is not a valid CaravanCard object", pkThisObj->GetEditorID());
+            B5CF3D0ConsolePrint("%s is not a valid CaravanCard object", static_cast<const TESForm*>(pkThisObj)->GetName());
     }
     return true;
 }
@@ -48973,403 +39936,10 @@ bool FUN_005cf5e0(const ScriptParameter* params, const char* scriptData, TESObje
 }
 
 namespace fnv_005d0060 {
-class BaseProcess {
-public:
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8();
-    virtual void V9();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual void V34();
-    virtual void V35();
-    virtual void V36();
-    virtual void V37();
-    virtual void V38();
-    virtual void V39();
-    virtual void V40();
-    virtual void V41();
-    virtual void V42();
-    virtual void V43();
-    virtual void V44();
-    virtual void V45();
-    virtual void V46();
-    virtual void V47();
-    virtual void V48();
-    virtual void V49();
-    virtual void V50();
-    virtual void V51();
-    virtual void V52();
-    virtual void V53();
-    virtual void V54();
-    virtual void V55();
-    virtual void V56();
-    virtual void V57();
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual void V64();
-    virtual void V65();
-    virtual void V66();
-    virtual void V67();
-    virtual void V68();
-    virtual void V69();
-    virtual void V70();
-    virtual void V71();
-    virtual void V72();
-    virtual void V73();
-    virtual void V74();
-    virtual void V75();
-    virtual void V76();
-    virtual void V77();
-    virtual void V78();
-    virtual void V79();
-    virtual void V80();
-    virtual void V81();
-    virtual void V82();
-    virtual void V83();
-    virtual void V84();
-    virtual void V85();
-    virtual void V86();
-    virtual void V87();
-    virtual void V88();
-    virtual void V89();
-    virtual void V90();
-    virtual void V91();
-    virtual void V92();
-    virtual void V93();
-    virtual void V94();
-    virtual void V95();
-    virtual void V96();
-    virtual void V97();
-    virtual void V98();
-    virtual void V99();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual void V125();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
-    virtual void V144();
-    virtual void V145();
-    virtual void V146();
-    virtual void V147();
-    virtual void V148();
-    virtual void V149();
-    virtual void V150();
-    virtual void V151();
-    virtual void V152();
-    virtual void V153();
-    virtual void V154();
-    virtual void V155();
-    virtual void V156();
-    virtual void V157();
-    virtual void V158();
-    virtual void V159();
-    virtual void V160();
-    virtual void V161();
-    virtual void V162();
-    virtual void V163();
-    virtual void V164();
-    virtual void V165();
-    virtual void V166();
-    virtual void V167();
-    virtual void V168();
-    virtual void V169();
-    virtual void V170();
-    virtual void V171();
-    virtual void V172();
-    virtual void V173();
-    virtual void V174();
-    virtual void V175();
-    virtual void V176();
-    virtual void V177();
-    virtual void V178();
-    virtual void V179();
-    virtual void V180();
-    virtual void V181();
-    virtual void V182();
-    virtual void V183();
-    virtual void V184();
-    virtual void V185();
-    virtual void V186();
-    virtual void V187();
-    virtual void V188();
-    virtual void V189();
-    virtual void V190();
-    virtual void V191();
-    virtual void V192();
-    virtual void V193();
-    virtual void V194();
-    virtual void V195();
-    virtual void V196();
-    virtual void V197();
-    virtual void V198();
-    virtual void V199();
-    virtual void V200();
-    virtual void V201();
-    virtual void V202();
-    virtual void V203();
-    virtual void V204();
-    virtual void V205();
-    virtual void V206();
-    virtual void V207();
-    virtual void V208();
-    virtual void V209();
-    virtual void V210();
-    virtual void V211();
-    virtual void V212();
-    virtual void V213();
-    virtual void V214();
-    virtual void V215();
-    virtual void V216();
-    virtual void V217();
-    virtual void V218();
-    virtual void V219();
-    virtual void V220();
-    virtual void V221();
-    virtual void V222();
-    virtual void V223();
-    virtual void V224();
-    virtual void V225();
-    virtual void V226();
-    virtual void V227();
-    virtual void V228();
-    virtual void V229();
-    virtual void V230();
-    virtual void V231();
-    virtual void V232();
-    virtual void V233();
-    virtual void V234();
-    virtual void V235();
-    virtual void V236();
-    virtual void V237();
-    virtual void V238();
-    virtual void V239();
-    virtual void V240();
-    virtual void V241();
-    virtual void V242();
-    virtual void V243();
-    virtual void V244();
-    virtual void V245();
-    virtual void V246();
-    virtual void V247();
-    virtual void V248();
-    virtual void V249();
-    virtual void V250();
-    virtual void V251();
-    virtual void V252();
-    virtual void V253();
-    virtual void V254();
-    virtual void V255();
-    virtual void V256();
-    virtual void V257();
-    virtual void V258();
-    virtual void V259();
-    virtual void V260();
-    virtual void V261();
-    virtual void V262();
-    virtual void V263();
-    virtual void V264();
-    virtual void V265();
-    virtual void V266();
-    virtual void V267();
-    virtual void V268();
-    virtual void V269();
-    virtual void V270();
-    virtual void V271();
-    virtual void V272();
-    virtual void V273();
-    virtual void V274();
-    virtual void V275();
-    virtual void V276();
-    virtual void V277();
-    virtual void V278();
-    virtual void V279();
-    virtual void V280();
-    virtual void V281();
-    virtual void V282();
-    virtual void V283();
-    virtual void V284();
-    virtual void V285();
-    virtual void V286();
-    virtual void V287();
-    virtual void V288();
-    virtual void V289();
-    virtual void V290();
-    virtual void V291();
-    virtual void V292();
-    virtual void V293();
-    virtual void V294();
-    virtual void V295();
-    virtual void V296();
-    virtual void V297();
-    virtual void V298();
-    virtual void V299();
-    virtual void V300();
-    virtual void V301();
-    virtual void V302();
-    virtual void V303();
-    virtual void V304();
-    virtual void V305();
-    virtual void V306();
-    virtual void V307();
-    virtual void V308();
-    virtual void V309();
-    virtual void V310();
-    virtual void V311();
-    virtual void V312();
-    virtual void V313();
-    virtual void V314();
-    virtual void V315();
-    virtual void V316();
-    virtual void V317();
-    virtual void V318();
-    virtual void V319();
-    virtual void V320();
-    virtual void V321();
-    virtual void V322();
-    virtual void V323();
-    virtual void V324();
-    virtual void V325();
-    virtual void V326();
-    virtual void V327();
-    virtual void V328();
-    virtual void V329();
-    virtual void V330();
-    virtual void V331();
-    virtual void V332();
-    virtual void V333();
-    virtual void V334();
-    virtual void V335();
-    virtual void V336();
-    virtual void V337();
-    virtual void V338();
-    virtual void V339();
-    virtual void V340();
-    virtual void V341();
-    virtual void V342();
-    virtual void V343();
-    virtual void V344();
-    virtual void V345();
-    virtual void V346();
-    virtual void V347();
-    virtual void V348();
-    virtual void V349();
-    virtual void V350();
-    virtual void V351();
-    virtual void Unk_580(int, int, int);
-};
 
-class FUN_0088c650_shell : public TESObjectREFR {
-public:
-    void EquipItem(TESForm*, int, ExtraDataList*, bool, bool, bool);
-};
-
-class Actor : public FUN_0088c650_shell {
-public:
-    virtual ~Actor();
-    BaseProcess* GetCurrentProcess() const;
-};
-
-class PlayerCharacter : public Actor {
-public:
-    void FUN_00950030();
-};
 
 extern PlayerCharacter* _g_thePlayer;
 
-class ScriptEx : public TESForm {
-public:
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual void V64();
-    virtual void V65();
-    virtual void V66();
-    virtual void V67();
-    virtual void V68();
-    virtual void V69();
-    virtual void V70();
-    virtual void V71();
-    virtual void V72();
-    virtual void V73();
-    virtual void V74();
-    virtual void V75();
-    virtual void V76();
-    virtual const char* GetEditorID();
-};
 
 class FUN_0041ab70_shell {
 public:
@@ -49381,11 +39951,6 @@ public:
     bool FUN_00418ab0(bool);
 };
 
-class ExtraContainerChanges;
-class ExtraDataList : public ExtraDataList_shell {
-public:
-    ExtraContainerChanges* FUN_00418520();
-};
 
 class EntryData {
 public:
@@ -49394,10 +39959,6 @@ public:
     BSSimpleList<ExtraDataList*>* extendData;
 };
 
-class ExtraContainerChanges {
-public:
-    EntryData* FUN_004d0650(TESForm*, int);
-};
 
 class GlobalObject_0040c150 {
 public:
@@ -49405,16 +39966,11 @@ public:
 };
 extern GlobalObject_0040c150 g_011d2a0c;
 
-class TESFullName {
-public:
-    static const char* GetFullName(TESForm*);
-};
 
 extern bool QueueUIMessage(const char*, int, const char*, const char*, float, bool);
 extern void FUN_00704af0();
 extern int DAT_011846d4, DAT_011841cc;
 extern void* __cdecl FNV_DynamicCast(void*, int, const void*, const void*, int);
-class StringReader { public: const char* FUN_00559450() const; };
 extern void FNV_Warning(const char*, ...);
 
 ExtraDataList* __fastcall FUN_005d43c0(TESObjectREFR*);
@@ -49449,11 +40005,11 @@ bool Cmd_EquipItem_Execute(
 
         if (pItem_2) {
             if (actor_) {
-                ExtraContainerChanges* pChanges = FUN_005d43c0(actor_)->FUN_00418520();
+                ExtraContainerChanges* pChanges = FUN_005d43c0(reinterpret_cast<TESObjectREFR*>(actor_))->FUN_00418520();
                 EntryData* _pEntry = 0;
                 bool bDoEquipVal = true;
                 if (pChanges) {
-                    _pEntry = pChanges->FUN_004d0650(pItem_2, 0);
+                    _pEntry = (EntryData*)pChanges->FUN_004d0650((SharedForm*)pItem_2, 0);
                     if (_pEntry) {
                         BSSimpleList<ExtraDataList*>* nodeB = _pEntry->FUN_00559450();
                         while (nodeB && nodeB->GetItem()) {
@@ -49470,27 +40026,25 @@ bool Cmd_EquipItem_Execute(
                 }
 
                 if (bDoEquipVal) {
-                    actor_->EquipItem(pItem_2, 1, 0, 1, bNoUnequipA, 1);
-                    if (actor_ == _g_thePlayer && !kISilent) {
+                    actor_->EquipItem(reinterpret_cast<SharedForm*>(pItem_2), 1, 0, 1, bNoUnequipA, 1);
+                    if (reinterpret_cast<void*>(actor_) == reinterpret_cast<void*>(_g_thePlayer) && !kISilent) {
                         BSStringT<char> str;
-                        str.PrintfString("%s %s.", TESFullName::GetFullName(pItem_2), g_011d2a0c.FUN_00403df0());
-                        QueueUIMessage(((StringReader*)&str)->FUN_00559450(), 0, "Interface\\Icons\\Message Icons\\glow_message_vaultboy_neutral.dds", 0, 2.0f, 0);
-                        _g_thePlayer->FUN_00950030();
-                        _g_thePlayer->GetCurrentProcess()->Unk_580(1, 0, 0);
+                        str.PrintfString("%s %s.", TESFullName::GetFullName((SharedForm*)pItem_2), g_011d2a0c.FUN_00403df0());
+                        QueueUIMessage(str.String(), 0, "Interface\\Icons\\Message Icons\\glow_message_vaultboy_neutral.dds", 0, 2.0f, 0);
+                        reinterpret_cast<ScriptPlayerActions*>(_g_thePlayer)->FUN_00950030();
+                        reinterpret_cast<BaseProcess*>(_g_thePlayer->GetCurrentProcess())->UpdateActorAppearance(1, 0, 0);
                         FUN_00704af0();
                     }
                 }
             }
         } else {
-            FNV_Warning("SCRIPTS: EquipItem in script '%s' failed to generate an item.", ((ScriptEx*)scriptObj)->GetEditorID());
+            FNV_Warning("SCRIPTS: EquipItem in script '%s' failed to generate an item.", static_cast<TESForm*>(scriptObj)->GetName());
         }
     }
     }
     return true;}
 }  // namespace fnv_005d0060
 
-struct FUN_0087faa0_shell { void FUN_0087faa0(); };
-struct FUN_008ace50_shell { void FUN_008ace50(bool); };
 
 // @fnv 0x005d0920
 bool FUN_005d0920(const ScriptParameter* parameters, const char* scriptData, TESObjectREFR* thisObject, TESObjectREFR* container, Script* script, ScriptLocals* locals, double& result, unsigned int& opcodeOffset)
@@ -49502,10 +40056,10 @@ bool FUN_005d0920(const ScriptParameter* parameters, const char* scriptData, TES
         Actor* actor = dynamic_cast<Actor*>(thisObject);
         if (actor) {
             if (formID) {
-                ((FUN_008ace50_shell*)actor)->FUN_008ace50(true);
-                ((FUN_0087faa0_shell*)actor)->FUN_0087faa0();
+                ((ScriptActorActions*)actor)->FUN_008ace50(true);
+                ((ScriptActorActions*)actor)->FUN_0087faa0();
             } else {
-                ((FUN_008ace50_shell*)actor)->FUN_008ace50(false);
+                ((ScriptActorActions*)actor)->FUN_008ace50(false);
             }
         }
     }
@@ -49513,20 +40067,14 @@ bool FUN_005d0920(const ScriptParameter* parameters, const char* scriptData, TES
 }
 
 float __fastcall FUN_005d10f0(char const*);
-struct bhkCharacterController {
-    float FUN_005d10f0();
-};
-struct S_00931f80 {
-    bhkCharacterController* GetPhysicsCharacterController();
-};
 
 // @fnv 0x005d10a0
 bool FUN_005d10a0(const ScriptParameter* a, const char* b, TESObjectREFR* c, TESObjectREFR* d, Script* e, ScriptLocals* f, double& g, unsigned int& h)
 {
     float result;
     Actor* actor = dynamic_cast<Actor*>(c);
-    if (actor && reinterpret_cast<S_00931f80*>(actor)->GetPhysicsCharacterController())
-        result = reinterpret_cast<S_00931f80*>(actor)->GetPhysicsCharacterController()->FUN_005d10f0();
+    if (actor && actor->GetPhysicsCharacterController())
+        result = actor->GetPhysicsCharacterController()->FUN_005d10f0();
     return true;
 }
 
@@ -49591,9 +40139,7 @@ bool __cdecl FUN_005d13e0(
 }  // namespace fnv_005d13e0
 
 struct ScriptParameter;
-class ScriptLocals;
-class Script;
-class TESObjectREFR;
+
 
 bool __cdecl FUN_005a2a50(TESObjectREFR*, void*, void*, double&);
 
@@ -49613,32 +40159,8 @@ bool __cdecl FUN_005d1870(
 }
 
 namespace fnv_005d21e0 {
-struct TESModel
-{
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual char const* V5();
-    unsigned int GetModelLength(void);
-};
 
-struct EffectSetting
-{
-    unsigned char unknown[0x18];
-    TESModel model;
-};
 
-struct MobileObject
-{
-    char const* GetFullName(void);
-};
-
-struct ProcessLists
-{
-    void AddMagicShaderHitEffect(TESObjectREFR*, char const*);
-};
 
 extern TESObjectREFR* _g_thePlayer;
 extern ProcessLists DAT_011e0e80;
@@ -49675,10 +40197,10 @@ bool FUN_005d21e0(
     if (!apRefObject)
         apRefObject = _g_thePlayer;
 
-    if (peffectSetting && peffectSetting->model.GetModelLength() > 0)
+    if (peffectSetting && reinterpret_cast<SharedModel*>(reinterpret_cast<char*>(peffectSetting) + 0x18)->GetModelLength() > 0)
         DAT_011e0e80.AddMagicShaderHitEffect(
             apRefObject,
-            peffectSetting->model.V5());
+            reinterpret_cast<SharedModel*>(reinterpret_cast<char*>(peffectSetting) + 0x18)->GetModelFilePath());
 
     if (DAT_tls[0x268])
     {
@@ -49743,9 +40265,7 @@ bool FUN_005d4660(const ScriptParameter* apParameters,
 
 namespace fnv_005d5230 {
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 extern bool ExtractArgs(
     const ScriptParameter* parameters,
@@ -49788,15 +40308,16 @@ bool __cdecl FUN_005d5230(
 }  // namespace fnv_005d5230
 
 template<int N>
-struct FUN_005d54a0_VTableChain;
+struct DispositionReferenceSlots;
 
 template<>
-struct FUN_005d54a0_VTableChain<0> : TESObjectREFR
+// The shared reference vtable supplies the slots before the actor extensions.
+struct DispositionReferenceSlots<85> : TESObjectREFR
 {
 };
 
 template<int N>
-struct FUN_005d54a0_VTableChain : FUN_005d54a0_VTableChain<N - 1>
+struct DispositionReferenceSlots : DispositionReferenceSlots<N - 1>
 {
     virtual int F(int (&)[N])
     {
@@ -49804,22 +40325,9 @@ struct FUN_005d54a0_VTableChain : FUN_005d54a0_VTableChain<N - 1>
     }
 };
 
-template<>
-struct FUN_005d54a0_VTableChain<6> : FUN_005d54a0_VTableChain<5>
-{
-    virtual int G6()
-    {
-        return 6;
-    }
-
-    virtual bool F100()
-    {
-        return false;
-    }
-};
 
 template<>
-struct FUN_005d54a0_VTableChain<152> : FUN_005d54a0_VTableChain<148>
+struct DispositionReferenceSlots<152> : DispositionReferenceSlots<148>
 {
     virtual int G152()
     {
@@ -49828,7 +40336,7 @@ struct FUN_005d54a0_VTableChain<152> : FUN_005d54a0_VTableChain<148>
 };
 
 template<>
-struct FUN_005d54a0_VTableChain<154> : FUN_005d54a0_VTableChain<152>
+struct DispositionReferenceSlots<154> : DispositionReferenceSlots<152>
 {
     virtual int G154()
     {
@@ -49837,7 +40345,7 @@ struct FUN_005d54a0_VTableChain<154> : FUN_005d54a0_VTableChain<152>
 };
 
 template<>
-struct FUN_005d54a0_VTableChain<155> : FUN_005d54a0_VTableChain<154>
+struct DispositionReferenceSlots<155> : DispositionReferenceSlots<154>
 {
     virtual int F344(TESObjectREFR* target, int value)
     {
@@ -49846,7 +40354,7 @@ struct FUN_005d54a0_VTableChain<155> : FUN_005d54a0_VTableChain<154>
 };
 
 template<>
-struct FUN_005d54a0_VTableChain<221> : FUN_005d54a0_VTableChain<220>
+struct DispositionReferenceSlots<221> : DispositionReferenceSlots<220>
 {
     virtual int G460a()
     {
@@ -49890,7 +40398,7 @@ bool FUN_005d54a0(const ScriptParameter* scriptParameter,
 {
     TESObjectREFR* uiDisposition = 0;
 
-    if (static_cast<FUN_005d54a0_VTableChain<221>*>(object)->F100())
+    if (object->IsActor())
         uiDisposition = object;
 
     TESObjectREFR* uiCurrentDisposition = 0;
@@ -49903,10 +40411,10 @@ bool FUN_005d54a0(const ScriptParameter* scriptParameter,
     if (uiCurrentDisposition && uiDisposition) {
         int pActor;
         int iDifference =
-            static_cast<FUN_005d54a0_VTableChain<221>*>(uiDisposition)->
+            static_cast<DispositionReferenceSlots<221>*>(uiDisposition)->
                 F344(uiCurrentDisposition, 0);
         pActor = pTarget - iDifference;
-        static_cast<FUN_005d54a0_VTableChain<221>*>(uiDisposition)->
+        static_cast<DispositionReferenceSlots<221>*>(uiDisposition)->
             F460(uiCurrentDisposition, static_cast<float>(pActor));
     }
 
@@ -49951,9 +40459,7 @@ bool __cdecl FUN_005d5780(const ScriptParameter* apParameters,
 }
 
 class ScriptParameter;
-class TESObjectREFR;
-class Script;
-class ScriptLocals;
+
 
 bool __cdecl FUN_005accb0(
     const ScriptParameter*, const char*, unsigned int*,
@@ -49996,11 +40502,6 @@ void __cdecl FUN_005d7be0(
 }
 
 namespace fnv_005d7fb0 {
-class FalloutRadio
-{
-public:
-    static bool __cdecl SetRadioEnabled(bool);
-};
 
 int __cdecl _stricmp(const char*, const char*);
 void __cdecl FUN_00832240(void*, bool);
@@ -50103,76 +40604,7 @@ bool FUN_005d87a0(
 }
 
 namespace fnv_005d9430 {
-class Actor
-{
-public:
-    virtual void V0() {}
-    virtual void V1() {}
-    virtual void V2() {}
-    virtual void V3() {}
-    virtual void V4() {}
-    virtual void V5() {}
-    virtual void V6() {}
-    virtual void V7() {}
-    virtual void V8() {}
-    virtual void V9() {}
-    virtual void V10() {}
-    virtual void V11() {}
-    virtual void V12() {}
-    virtual void V13() {}
-    virtual void V14() {}
-    virtual void V15() {}
-    virtual void V16() {}
-    virtual void V17() {}
-    virtual void V18() {}
-    virtual void V19() {}
-    virtual void V20() {}
-    virtual void V21() {}
-    virtual void V22() {}
-    virtual void V23() {}
-    virtual void V24() {}
-    virtual void V25() {}
-    virtual void V26() {}
-    virtual void V27() {}
-    virtual void V28() {}
-    virtual void V29() {}
-    virtual void V30() {}
-    virtual void V31() {}
-    virtual void V32() {}
-    virtual void V33() {}
-    virtual void V34() {}
-    virtual void V35() {}
-    virtual void V36() {}
-    virtual void V37() {}
-    virtual void V38() {}
-    virtual void V39() {}
-    virtual void V40() {}
-    virtual void V41() {}
-    virtual void V42() {}
-    virtual void V43() {}
-    virtual void V44() {}
-    virtual void V45() {}
-    virtual void V46() {}
-    virtual void V47() {}
-    virtual void V48() {}
-    virtual void V49() {}
-    virtual void V50() {}
-    virtual void V51() {}
-    virtual void V52() {}
-    virtual void V53() {}
-    virtual void V54() {}
-    virtual void V55() {}
-    virtual void V56() {}
-    virtual void V57() {}
-    virtual void V58() {}
-    virtual void V59() {}
-    virtual void V60() {}
-    virtual void V61() {}
-    virtual void V62() {}
-    virtual void V63() {}
-    virtual bool Check();
-    bool IsPlayerTeammate();
-};
+
 
 void __cdecl FUN_00709470(int, int, int, int, int, int);
 
@@ -50187,7 +40619,7 @@ bool __cdecl FUN_005d9430(
     double &result,
     unsigned int &reference)
 {
-    if (object != 0 && reinterpret_cast<Actor *>(object)->Check()) {
+    if (object != 0 && reinterpret_cast<Actor *>(object)->IsActor()) {
         Actor *actor = reinterpret_cast<Actor *>(object);
         unsigned int extractedResult = 0;
 
@@ -50217,7 +40649,7 @@ bool __cdecl FUN_005d9430(
 }  // namespace fnv_005d9430
 
 namespace fnv_005d9b20 {
-class Actor;
+
 
 class GlobalObject_0045cfe0
 {
@@ -50287,13 +40719,14 @@ bool __cdecl FUN_005d9b20(
 }  // namespace fnv_005d9b20
 
 namespace fnv_005dd870 {
-class BGSSaveLoadUI
+// Call surface of BGSSaveLoadUIApi; the shared header cannot be read in this unit (its own layout_support template copies).
+class BGSSaveLoadUIApi
 {
 public:
     bool FUN_00a26020(char const*);
 };
 
-BGSSaveLoadUI* __cdecl FUN_00a25920(void);
+BGSSaveLoadUIApi* __cdecl FUN_00a25920(void);
 
 extern "C" int __cdecl _sprintf_s(char*, size_t, const char*, ...);
 void __cdecl _DebugLog(char const*);
@@ -50346,17 +40779,7 @@ bool __cdecl FUN_005dd870(
 }  // namespace fnv_005dd870
 
 namespace fnv_005de840 {
-class TESWaterForm;
 
-struct FUN_00580680_Class
-{
-    virtual void __thiscall FUN_00580680(int);
-};
-
-struct TESWaterForm : public FUN_00580680_Class
-{
-    int __thiscall _FNV_GetFormType();
-};
 
 void __cdecl _FNV_Warning(const char* message);
 
@@ -50399,15 +40822,14 @@ bool FUN_005de840(const ScriptParameter* apParameters,
     }
 
     if (poldform && pnewform)
-        poldform->FUN_00580680_Class::FUN_00580680(reinterpret_cast<int>(pnewform));
+        poldform->FUN_00580680(reinterpret_cast<int>(pnewform));
 
     return true;
 }
 }  // namespace fnv_005de840
 
 class ScriptParameter;
-class Script;
-class ScriptLocals;
+
 struct PlayerMethods {
     void FUN_00969fa0();
 };
@@ -50439,7 +40861,6 @@ bool __cdecl FUN_005e0090(const ScriptParameter* parameters,
     return true;
 }
 
-class Script;
 
 struct ContainerCountStandIn
 {
@@ -50526,182 +40947,34 @@ bool __cdecl FUN_005ceb90(
     return true;
 }
 
+class NiSourceTexture;
 namespace fnv_005cf860 {
-class BSStringTChar {
-public:
-    char* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    BSStringTChar();
-    ~BSStringTChar();
-    BSStringTChar& operator=(const char*);
-    unsigned int GetLength() const;
-    operator const char*() const;
-};
+
+// SetTexture is absent from the shared virtual API; dispatch through its game slot.
+typedef void (__thiscall *SetTextureFunction)(NiShadeProperty*, int, int, void*);
+
 
 class GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f5ae0;
 extern GlobalObjectO2_00a7b610 g_011fa05c;
 
-class NiProperty {};
 
-class NiShadeProperty : public NiProperty {
-public:
-    int GetShaderType();
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8();
-    virtual void V9();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual void V34();
-    virtual void V35();
-    virtual void V36();
-    virtual void V37();
-    virtual void V38();
-    virtual void V39();
-    virtual void V40();
-    virtual void V41();
-    virtual void V42();
-    virtual void V43();
-    virtual void V44();
-    virtual void V45();
-    virtual void V46();
-    virtual void V47();
-    virtual void V48();
-    virtual void V49();
-    virtual void V50();
-    virtual void V51();
-    virtual void V52();
-    virtual void V53();
-    virtual void V54();
-    virtual void V55();
-    virtual void V56();
-    virtual void V57();
-    virtual void V58();
-    virtual void V59();
-    virtual void SetTexture(int, int, void*);
-};
+// SetTexture must dispatch through virtual slot 61 in 0x005cf860.
 
-class BSShaderNoLightingProperty : public NiProperty {
-public:
-    void FUN_00438230(void*);
-};
 
-class NiFixedString {
-public:
-    const char* m_kHandle;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
+// The shared class does not declare the texture setter; retain its external thiscall ABI.
+void SetNoLightingBaseTexture();
+typedef void (__thiscall *SetNoLightingBaseTextureFunction)(BSShaderNoLightingProperty*, NiTexture*);
 
-class NiAVObject {
-public:
-    NiProperty* GetProperty(unsigned int);
-};
 
-class NiNode {
-public:
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual void V7();
-    virtual void V8();
-    virtual void V9();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual void V34();
-    virtual void V35();
-    virtual void V36();
-    virtual void V37();
-    virtual void V38();
-    virtual NiAVObject* GetObjectByName(const NiFixedString*);
-};
 
-class REFR_Shell : public FakeRef {
-public:
-    virtual void Extra0();
-    virtual void Extra1();
-    virtual void Extra2();
-    virtual void Extra3();
-    virtual void Extra4();
-    virtual void Extra5();
-    virtual void Extra6();
-    virtual void Extra7();
-    virtual void Extra8();
-    virtual void Extra9();
-    virtual void Extra10();
-    virtual void Extra11();
-    virtual NiNode* GetNiNode();
-};
 
-class NiSourceTexture;
 
-class NiSourceTexturePtr {
-public:
-    NiSourceTexture* m_pObject;
-    NiSourceTexturePtr(NiSourceTexture* = 0);
-    ~NiSourceTexturePtr();
-    operator NiSourceTexture*() const;
-};
+
 
 class TES_Shell {
 public:
-    void CreateTextureImage(const char*, NiSourceTexturePtr&, bool, bool);
+    void CreateTextureImage(const char*, NiPointer<NiSourceTexture>&, bool, bool);
 };
 
 extern int g_TES;
@@ -50736,8 +41009,8 @@ bool __cdecl FUN_005cf860(
     unsigned int& arOpcodeOffset
 ) {
     TESObjectREFR* targetRef = 0;
-    BSStringTChar str3;
-    BSStringTChar _str2;
+    BSStringT<char> str3;
+    BSStringT<char> _str2;
 
     char buffer5[512];
     char formattedPath2[260];
@@ -50751,16 +41024,16 @@ bool __cdecl FUN_005cf860(
     str3 = buffer5;
     _str2 = buffer2;
 
-    if (str3.GetLength() <= 0 || _str2.GetLength() <= 0) {
+    if (str3.Length() <= 0 || _str2.Length() <= 0) {
         return false;
     }
 
     if (targetRef) {
-        NiNode* rootNode3 = ((REFR_Shell*)targetRef)->GetNiNode();
+        NiNode* rootNode3 = reinterpret_cast<NiNode*>(reinterpret_cast<TESObjectREFR*>(targetRef)->GetNiNode());
         if (rootNode3) {
-            NiAVObject* targetObjVal = rootNode3->GetObjectByName(&NiFixedString(buffer5));
+            NiAVObject* targetObjVal = static_cast<const NiNode*>(rootNode3)->GetObjectByName(NiFixedString((const char*)buffer5));
             if (targetObjVal) {
-                NiSourceTexturePtr spTexture = 0;
+                NiPointer<NiSourceTexture> spTexture = 0;
 
                 _sprintf_s(formattedPath2, 260, "Textures\\%s.dds", (const char*)_str2);
                 FUN_004b7240(formattedPath2, path2, 260);
@@ -50774,12 +41047,14 @@ bool __cdecl FUN_005cf860(
                     : 0;
 
                 if (shadeProp4) {
-                    shadeProp4->SetTexture(0, 0, (NiSourceTexture*)spTexture);
+                    (*reinterpret_cast<SetTextureFunction**>(shadeProp4))[0xF0 / sizeof(void*)](
+                        shadeProp4, 0, 0, (NiSourceTexture*)spTexture);
                 }
 
                 BSShaderNoLightingProperty* noLightingProp3 = (BSShaderNoLightingProperty*)FUN_00653270(&g_011fa05c, targetObjVal->GetProperty(FUN_00438220()));
                 if (noLightingProp3) {
-                    noLightingProp3->FUN_00438230((NiSourceTexture*)spTexture);
+                    reinterpret_cast<SetNoLightingBaseTextureFunction>(&SetNoLightingBaseTexture)(
+                        noLightingProp3, reinterpret_cast<NiTexture*>((NiSourceTexture*)spTexture));
                 }
             }
         }
@@ -50791,16 +41066,16 @@ bool __cdecl FUN_005cf860(
 
 namespace fnv_005bb9e0 {
 struct FX;
-struct Mat3 { float m[9]; Mat3(); void FUN_004a0c90(float); Mat3 FUN_0043f8d0(const Mat3&); };
+
 struct EffSrc { Mat3* FUN_00461130(); };
 struct EffSrc2 { EffSrc* FUN_006629f0(); };
 struct Mgr2 { void FUN_00c5ae70(FX*); };
 struct Mgr1 { Mgr2* FUN_00454b30(); void FUN_005bb9b0(MyVec005bb9b0&); };
 Mgr1* __cdecl FUN_00450b80(int);
 struct FX;
-struct FXPtr { FX* p; FXPtr(FX*); ~FXPtr(); operator FX*() const; };
-class NiMemObject { public: static void* __cdecl operator new(unsigned int); static void operator delete(void*, unsigned int); };
+
 struct FX : NiMemObject {
+    static void operator delete(void* memory, size_t size);
     void* vtbl; int refCount;
     MyVec005bb9b0 pos; float unk14; float unk18; Mat3 rot;
     int unk40; int unk44; int unk48; int unk4C; int unk50; int unk54; int unk58; int unk5C; int unk60; int unk64; int unk68; int unk6C; int unk70; int unk74; int unk78; int unk7C; int unk80; int unk84; int unk88; int unk8C; int unk90; int unk94; int unk98; int unk9C; int unkA0; int unkA4;
@@ -50826,28 +41101,25 @@ bool __cdecl FUN_005bb9e0(const ScriptParameter* params, const char* scriptData,
     Mat3 rot;
     rot.FUN_004a0c90(1.5707963f);
     mat4 = mat4.FUN_0043f8d0(rot);
-    FXPtr sp(new FX(_pos, _v, mat4));
+    NiPointer<FX> sp(new FX(_pos, _v, mat4));
     FUN_00450b80(0)->FUN_00454b30()->FUN_00c5ae70(sp);
     return true;
 }
 }  // namespace fnv_005bb9e0
 
+class TESObjectCELL;
 namespace fnv_005c25f0 {
 // Based on Worker3/Muse Wonder; recovered builder layout and path-check lifetimes.
 // Local names preserve VC9 stack-slot order.
 class ScriptParameter;
-class Script;
-class ScriptLocals;
-class TESObjectREFR;
-class TESObjectCELL;
-class TESWorldSpace;
+
+
 struct XActor;
-class NiPoint3 { public: float x, y, z; };
+
 class PtOp { public: NiPoint3 operator-(const NiPoint3&) const; };
 class Pt { public: float Length() const; };
 extern TESObjectREFR* DAT_011dea3c;
 extern void* DAT_011dea10;
-class TESForm_acc { public: bool GetDisabled(); };
 extern float DAT_01018f5c;
 extern double DAT_01012640;
 extern NiPoint3 DAT_011a9c30;
@@ -51011,31 +41283,21 @@ public:
     S006949d0 m_10;
     NiPoint3 start; NiPoint3 finish;
 };
-class PathBuilderDetailedPathInfos;
+class PathBuilderDetailedPathInfosApi;
 class S3e60;
-class PathingLocation
-{
-public:
-    PathingLocation(TESObjectREFR*);
-    PathingLocation(const PathingLocation&);
-    PathingLocation(const NiPoint3&, TESObjectCELL*, TESWorldSpace*);
-    ~PathingLocation();
-    NiPoint3 FUN_005c3420() const;
-    bool FUN_006dd6f0(int);
-    void* FUN_006dd540();
-    int m_00; int m_04; int m_08; int m_0c; int m_10; int m_14; int m_18; int m_1c; int m_20; int m_24;
-};
+
 struct FUN_00502670_stand
 {
     FUN_00502670_stand* FUN_00502670(XActor*);
     int m_00; int m_04; int m_08;
 };
 bool __cdecl FUN_006d4f70(PathingLocation*, PathingLocation*, FUN_006f48b0*, FUN_00502670_stand*, int);
-class PathBuilderDetailedPathInfos
+// Call surface of PathBuilderDetailedPathInfos; the shared header cannot be read in this unit (its own layout_support template copies).
+class PathBuilderDetailedPathInfosApi
 {
 public:
-    PathBuilderDetailedPathInfos();
-    ~PathBuilderDetailedPathInfos();
+    PathBuilderDetailedPathInfosApi();
+    ~PathBuilderDetailedPathInfosApi();
     int m_00; int m_04; int m_08; int m_0c;
 };
 class S3e60 { public: S3e60(); virtual ~S3e60(); int* FUN_00877a30(unsigned int); int FUN_0044ddc0(); int m_04; int m_08; int m_0c; };
@@ -51044,7 +41306,7 @@ class FUN_006b8340
 public:
     FUN_006b8340();
     virtual ~FUN_006b8340();
-    bool FUN_006b8c50(FUN_00502670_stand*, const NiPoint3&, void*, const NiPoint3&, void*, PathBuilderDetailedPathInfos*, S3e60*, int);
+    bool FUN_006b8c50(FUN_00502670_stand*, const NiPoint3&, void*, const NiPoint3&, void*, PathBuilderDetailedPathInfosApi*, S3e60*, int);
 
     int unk0004; int unk0008; int unk000c; int unk0010; int unk0014; int unk0018; int unk001c; int unk0020;
     int unk0024; int unk0028; int unk002c; int unk0030; int unk0034; int unk0038; int unk003c; int unk0040;
@@ -51308,15 +41570,7 @@ public:
     int unk2064; int unk2068; int unk206c; int unk2070; int unk2074; int unk2078; int unk207c; int unk2080;
     int unk2084; int unk2088; int unk208c; int unk2090; int unk2094; int unk2098;
 };
-class StrMem
-{
-public:
-    StrMem();
-    ~StrMem();
-    StrMem& operator+=(const char*);
-    int m_00; int m_04;
-};
-class StringReader { public: const char* FUN_00559450() const; };
+
 class ActivateObj { public: void FUN_00458e20(int, float); };
 class SpeedObj { public: float FUN_008a0b10(); };
 
@@ -51331,8 +41585,8 @@ bool __cdecl FUN_005c25f0(const ScriptParameter* apParameters, const char* apCom
     FUN_006f48b0 aBId;
     FUN_00502670_stand wrap8;
     wrap8.FUN_00502670((XActor*)DAT_011dea3c);
-    PathingLocation locA6((TESObjectREFR*)DAT_011dea3c);
-    PathingLocation aArr(apRefObject);
+    PathingLocation locA6(reinterpret_cast<TESObjectREFR*>(DAT_011dea3c));
+    PathingLocation aArr(reinterpret_cast<TESObjectREFR*>(apRefObject));
     if (FUN_006d4f70(&locA6, &aArr, &aBId, &wrap8, outA8 != 0))
     {
         unsigned int aD1x = 0;
@@ -51342,17 +41596,17 @@ bool __cdecl FUN_005c25f0(const ScriptParameter* apParameters, const char* apCom
                 _DebugLog("Worldspace %s (%08x)", ((PathRef*)aBId.FUN_006a1440(aD1x)->m_04)->EditorID(), ((PathRef*)aBId.FUN_006a1440(aD1x)->m_04)->FUN_0084e3a0());
             else
                 _DebugLog("Interior cell %s (%08x)", ((PathRef*)aBId.FUN_006a1440(aD1x)->m_08)->EditorID(), ((PathRef*)aBId.FUN_006a1440(aD1x)->m_08)->FUN_0084e3a0());
-            PathingLocation shell_(aD1x == 0 ? PathingLocation((TESObjectREFR*)DAT_011dea3c) : PathingLocation(aBId.m_10.GetAt(aD1x - 1).position, (TESObjectCELL*)aBId.FUN_006a1440(aD1x)->m_08, (TESWorldSpace*)aBId.FUN_006a1440(aD1x)->m_04));
-            PathingLocation goal4(*(NiPoint3*)((S00568fa0*)aBId.m_10.GetAt(aD1x).m_00)->FUN_00568fa0(), (TESObjectCELL*)aBId.FUN_006a1440(aD1x)->m_08, (TESWorldSpace*)aBId.FUN_006a1440(aD1x)->m_04);
+            PathingLocation shell_(aD1x == 0 ? PathingLocation(reinterpret_cast<TESObjectREFR*>(DAT_011dea3c)) : PathingLocation(aBId.m_10.GetAt(aD1x - 1).position, (SharedCell*)aBId.FUN_006a1440(aD1x)->m_08, (TESWorldSpace*)aBId.FUN_006a1440(aD1x)->m_04));
+            PathingLocation goal4(*(NiPoint3*)((S00568fa0*)aBId.m_10.GetAt(aD1x).m_00)->FUN_00568fa0(), (SharedCell*)aBId.FUN_006a1440(aD1x)->m_08, (TESWorldSpace*)aBId.FUN_006a1440(aD1x)->m_04);
             bool valid4 = true;
-            if (!shell_.FUN_006dd6f0(0)) valid4 = false;
-            else if (!goal4.FUN_006dd6f0(0)) valid4 = false;
+            if (!shell_.IsOnNavMesh(0)) valid4 = false;
+            else if (!goal4.IsOnNavMesh(0)) valid4 = false;
             else
             {
                 FUN_006b8340 aDy1;
-                PathBuilderDetailedPathInfos aB15;
+                PathBuilderDetailedPathInfosApi aB15;
                 S3e60 flags0;
-                if (!aDy1.FUN_006b8c50(&wrap8, shell_.FUN_005c3420(), shell_.FUN_006dd540(), goal4.FUN_005c3420(), goal4.FUN_006dd540(), &aB15, &flags0, outA8 != 0))
+                if (!aDy1.FUN_006b8c50(&wrap8, shell_.FUN_005c3420(), shell_.GetAssociatedNavMesh(), goal4.FUN_005c3420(), goal4.GetAssociatedNavMesh(), &aB15, &flags0, outA8 != 0))
                     valid4 = false;
                 else
                     for (unsigned int j = 0; j < (unsigned int)flags0.FUN_0044ddc0(); ++j)
@@ -51374,27 +41628,27 @@ bool __cdecl FUN_005c25f0(const ScriptParameter* apParameters, const char* apCom
             _DebugLog("Travel %f units", (double)travelTime8);
             TESObjectREFR* refr6 = (TESObjectREFR*)aBId.m_10.GetAt(aD1x).m_00;
             int aux3 = ((S00568e50*)refr6)->FUN_00568e50();
-            StrMem strBuf_;
+            BSStringT<char> strBuf_;
             if (((S00568e50*)refr6)->FUN_00569160() && ((S00568e50*)refr6)->FUN_00569160()->FUN_005021a0()) strBuf_ += "-Locked";
-            if (((TESForm_acc*)refr6)->GetDisabled() || ((TESForm_acc*)((S59450*)aux3)->FUN_00559450())->GetDisabled()) strBuf_ += "-Disabled";
+            if (((SharedForm*)refr6)->GetDisabled() || ((SharedForm*)((S59450*)aux3)->FUN_00559450())->GetDisabled()) strBuf_ += "-Disabled";
             if (((RefExt*)refr6)->FUN_007af430()->FUN_00518000() || ((RefExt*)((S59450*)aux3)->FUN_00559450())->FUN_007af430()->FUN_00518000()) strBuf_ += "-MinUse";
-            _DebugLog("Activate Door %s (%08x) (%s)", ((PathRef*)aBId.m_10.GetAt(aD1x).m_00)->EditorID(), ((PathRef*)aBId.m_10.GetAt(aD1x).m_00)->FUN_0084e3a0(), ((StringReader*)&strBuf_)->FUN_00559450());
+            _DebugLog("Activate Door %s (%08x) (%s)", ((PathRef*)aBId.m_10.GetAt(aD1x).m_00)->EditorID(), ((PathRef*)aBId.m_10.GetAt(aD1x).m_00)->FUN_0084e3a0(), strBuf_.String());
         }
             if (aBId.FUN_006a1440(aD1x)->m_00)
                 _DebugLog("Worldspace %s (%08x)", ((PathRef*)aBId.FUN_006a1440(aD1x)->m_04)->EditorID(), ((PathRef*)aBId.FUN_006a1440(aD1x)->m_04)->FUN_0084e3a0());
             else
                 _DebugLog("Interior cell %s (%08x)", ((PathRef*)aBId.FUN_006a1440(aD1x)->m_08)->EditorID(), ((PathRef*)aBId.FUN_006a1440(aD1x)->m_08)->FUN_0084e3a0());
-            PathingLocation aCur(aD1x == 0 ? PathingLocation((TESObjectREFR*)DAT_011dea3c) : PathingLocation(aBId.m_10.GetAt(aD1x - 1).position, (TESObjectCELL*)aBId.FUN_006a1440(aD1x)->m_08, (TESWorldSpace*)aBId.FUN_006a1440(aD1x)->m_04));
-            PathingLocation aAng(apRefObject);
+            PathingLocation aCur(aD1x == 0 ? PathingLocation(reinterpret_cast<TESObjectREFR*>(DAT_011dea3c)) : PathingLocation(aBId.m_10.GetAt(aD1x - 1).position, (SharedCell*)aBId.FUN_006a1440(aD1x)->m_08, (TESWorldSpace*)aBId.FUN_006a1440(aD1x)->m_04));
+            PathingLocation aAng(reinterpret_cast<TESObjectREFR*>(apRefObject));
             bool aB10 = true;
-            if (!aCur.FUN_006dd6f0(0)) aB10 = false;
-            else if (!aAng.FUN_006dd6f0(0)) aB10 = false;
+            if (!aCur.IsOnNavMesh(0)) aB10 = false;
+            else if (!aAng.IsOnNavMesh(0)) aB10 = false;
             else
             {
                 FUN_006b8340 aFD1;
-                PathBuilderDetailedPathInfos aB49;
+                PathBuilderDetailedPathInfosApi aB49;
                 S3e60 aBB4;
-                if (!aFD1.FUN_006b8c50(&wrap8, aCur.FUN_005c3420(), aCur.FUN_006dd540(), aAng.FUN_005c3420(), aAng.FUN_006dd540(), &aB49, &aBB4, outA8 != 0))
+                if (!aFD1.FUN_006b8c50(&wrap8, aCur.FUN_005c3420(), aCur.GetAssociatedNavMesh(), aAng.FUN_005c3420(), aAng.GetAssociatedNavMesh(), &aB49, &aBB4, outA8 != 0))
                     aB10 = false;
             }
             if (!aB10)
@@ -51701,9 +41955,7 @@ bool FUN_005bfe90(const ScriptParameter* parameters,const char* data,DecalRefere
 }  // namespace fnv_005bfe90
 
 struct ScriptParameter;
-struct TESObjectREFR;
-struct Script;
-struct ScriptLocals;
+
 struct QuestEffect;
 struct FormIterator;
 struct SelectedEntry;
@@ -51877,11 +42129,6 @@ bool __cdecl FUN_005bf130(
     return true;
 }
 
-class TESObjectWEAP
-{
-public:
-    void Fire(TESObjectREFR* pkRef);
-};
 
 class ScriptV5da
 {
@@ -51936,7 +42183,7 @@ bool FUN_005da570(const ScriptParameter* paramInfo, const char* scriptData, TESO
             if (FUN_008c7aa0())
                 ((TaskQueue5da*)FUN_004537b0())->FUN_0087aa40(pkWeapon, thisObj);
             else
-                pkWeapon->Fire(thisObj);
+                pkWeapon->Fire(reinterpret_cast<TESObjectREFR*>(thisObj));
         }
         else
         {
@@ -52001,266 +42248,17 @@ bool FUN_005c09c0(const ScriptParameter* p1, const char* p2, TESObjectREFR* a3, 
 }
 }  // namespace fnv_005c09c0
 
-class TESPackage;
+
 class MovementTargetD09 {
 public:
     int FUN_004030b0(int iArg);
     void FUN_008d0600(int iValue);
 };
-class BaseProcessD09 {
-public:
-    virtual void P0();
-    virtual void P1();
-    virtual void P2();
-    virtual void P3();
-    virtual void P4();
-    virtual void P5();
-    virtual void P6();
-    virtual void P7();
-    virtual void P8();
-    virtual void P9();
-    virtual void P10();
-    virtual void P11();
-    virtual void P12();
-    virtual void P13();
-    virtual void P14();
-    virtual void P15();
-    virtual void P16();
-    virtual void P17();
-    virtual void P18();
-    virtual void P19();
-    virtual void P20();
-    virtual void P21();
-    virtual void P22();
-    virtual void P23();
-    virtual void P24();
-    virtual void P25();
-    virtual void P26();
-    virtual void P27();
-    virtual void P28();
-    virtual void P29();
-    virtual void P30();
-    virtual void P31();
-    virtual void P32();
-    virtual void P33();
-    virtual void P34();
-    virtual void P35();
-    virtual void P36();
-    virtual void P37();
-    virtual void P38();
-    virtual void P39();
-    virtual void P40();
-    virtual void P41();
-    virtual void P42();
-    virtual void P43();
-    virtual void P44();
-    virtual void P45();
-    virtual void P46();
-    virtual void P47();
-    virtual void P48();
-    virtual void P49();
-    virtual void P50();
-    virtual void P51();
-    virtual void P52();
-    virtual void P53();
-    virtual void P54();
-    virtual void P55();
-    virtual void P56();
-    virtual void P57();
-    virtual void P58();
-    virtual void P59();
-    virtual void P60();
-    virtual void P61();
-    virtual void P62();
-    virtual void P63();
-    virtual void P64();
-    virtual void P65();
-    virtual void P66();
-    virtual void P67();
-    virtual void P68();
-    virtual void P69();
-    virtual void P70();
-    virtual void P71();
-    virtual void P72();
-    virtual void P73();
-    virtual void P74();
-    virtual void P75();
-    virtual void P76();
-    virtual void P77();
-    virtual void P78();
-    virtual void P79();
-    virtual void P80();
-    virtual void P81();
-    virtual void P82();
-    virtual void P83();
-    virtual void P84();
-    virtual void P85();
-    virtual void P86();
-    virtual void P87();
-    virtual void P88();
-    virtual void P89();
-    virtual void P90();
-    virtual void P91();
-    virtual void P92();
-    virtual void P93();
-    virtual void P94();
-    virtual void P95();
-    virtual void P96();
-    virtual void P97();
-    virtual void P98();
-    virtual void P99();
-    virtual void P100();
-    virtual void P101();
-    virtual void P102();
-    virtual void P103();
-    virtual void P104();
-    virtual void P105();
-    virtual void P106();
-    virtual void P107();
-    virtual void P108();
-    virtual void P109();
-    virtual void P110();
-    virtual void P111();
-    virtual void P112();
-    virtual void P113();
-    virtual void P114();
-    virtual void P115();
-    virtual void P116();
-    virtual void P117();
-    virtual void P118();
-    virtual void P119();
-    virtual void P120();
-    virtual void P121();
-    virtual void P122();
-    virtual void P123();
-    virtual void P124();
-    virtual void P125();
-    virtual void P126();
-    virtual void P127();
-    virtual void P128();
-    virtual void P129();
-    virtual void P130();
-    virtual void P131();
-    virtual void P132();
-    virtual void P133();
-    virtual void P134();
-    virtual void P135();
-    virtual void P136();
-    virtual void P137();
-    virtual void P138();
-    virtual void P139();
-    virtual void P140();
-    virtual void P141();
-    virtual void P142();
-    virtual void P143();
-    virtual void P144();
-    virtual void P145();
-    virtual void P146();
-    virtual void P147();
-    virtual void P148();
-    virtual void P149();
-    virtual void P150();
-    virtual void P151();
-    virtual void P152();
-    virtual void P153();
-    virtual void P154();
-    virtual void P155();
-    virtual void P156();
-    virtual void P157();
-    virtual void P158();
-    virtual TESPackage* GetCurrentPackage();
-};
-__if_not_exists(Actor::Actor) {
-class Actor : public TESObjectREFR {};
-}
+
+
 class ActorAccessD09 : public TESObjectREFR {
 public:
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual void V64();
-    virtual void V65();
-    virtual void V66();
-    virtual void V67();
-    virtual void V68();
-    virtual void V69();
-    virtual void V70();
-    virtual void V71();
-    virtual void V72();
-    virtual void V73();
-    virtual void V74();
-    virtual void V75();
-    virtual void V76();
-    virtual void V77();
-    virtual void V78();
-    virtual void V79();
-    virtual void V80();
-    virtual void V81();
-    virtual void V82();
-    virtual void V83();
-    virtual void V84();
-    virtual void V85();
-    virtual void V86();
-    virtual void V87();
-    virtual void V88();
-    virtual void V89();
-    virtual void V90();
-    virtual void V91();
-    virtual void V92();
-    virtual void V93();
-    virtual void V94();
-    virtual void V95();
-    virtual void V96();
-    virtual void V97();
-    virtual void V98();
-    virtual void V99();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual void V125();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
+
     virtual void V144();
     virtual void V145();
     virtual void V146();
@@ -52384,20 +42382,16 @@ public:
     virtual void V264();
     virtual void V265();
     virtual MovementTargetD09* GetMovementTargetD09();
-    BaseProcessD09* FUN_008d8520();
+    BaseProcess* FUN_008d8520();
 };
-class PackageTargetD09 {
+// 0x0067f3c0/410 are LocationDescriptor reference/cell setters, not package-target methods.
+class PackageLocationAccess {
 public:
     void FUN_0067f3c0(TESForm* pkForm);
     void FUN_0067f410(TESForm* pkForm);
 };
-class TESPackage : public TESForm {
-};
-class FleePackage : public TESPackage {
-public:
-    PackageTargetD09* FUN_0055b980();
-    void FUN_005d0b80(int iArg);
-};
+
+
 // @fnv 0x005d09e0
 bool FUN_005d09e0(const ScriptParameter* paramInfo, const char* scriptData, TESObjectREFR* thisObj,
     TESObjectREFR* containingObj, Script* scriptObj, ScriptLocals* eventList, double& result, unsigned int& opcodeOffset)
@@ -52414,9 +42408,9 @@ bool FUN_005d09e0(const ScriptParameter* paramInfo, const char* scriptData, TESO
             MovementTargetD09* pkTarget = pkActor->GetMovementTargetD09();
             if (pkTarget) {
                 pkTarget->FUN_008d0600(pkTarget->FUN_004030b0(0));
-                FleePackage* pkPackage = dynamic_cast<FleePackage*>(pkActor->FUN_008d8520()->GetCurrentPackage());
+                FleePackage* pkPackage = dynamic_cast<FleePackage*>(static_cast<const BaseProcess*>(pkActor->FUN_008d8520())->GetOneTimePackage());
                 if (pkPackage) {
-                    PackageTargetD09* pkPackageTarget = pkPackage->FUN_0055b980();
+                    PackageLocationAccess* pkPackageTarget = reinterpret_cast<PackageLocationAccess*>(pkPackage->FUN_0055b980());
                     if (pkCurrentObject) {
                         pkPackageTarget->FUN_0067f3c0(pkCurrentObject);
                         pkPackage->FUN_005d0b80(0);
@@ -52434,16 +42428,12 @@ bool FUN_005d09e0(const ScriptParameter* paramInfo, const char* scriptData, TESO
 }
 
 namespace fnv_005d26b0 {
-class ExtraDataListX
+// Shared ExtraDataList supplies the layout; rumor override methods are not declared there yet.
+class ScriptRumorOverrides : public ExtraDataList
 {
 public:
     void FUN_004216b0();
     void FUN_00421600(bool);
-};
-class NoRumorsBaseDataAccess : public TESActorBaseData
-{
-public:
-    bool FUN_005d2780();
 };
 class NoRumorsBaseAccess
 {
@@ -52460,36 +42450,14 @@ public:
     int unk24;
     int unk28;
     int unk2c;
-    NoRumorsBaseDataAccess baseData;
+    TESActorBaseData baseData;
 };
-class TESFormChanges
-{
-public:
-    virtual void Unk00();
-    virtual void Unk01();
-    virtual void Unk02();
-    virtual void Unk03();
-    virtual void Unk04();
-    virtual void Unk05();
-    virtual void Unk06();
-    virtual void Unk07();
-    virtual void Unk08();
-    virtual void Unk09();
-    virtual void Unk10();
-    virtual void Unk11();
-    virtual void Unk12();
-    virtual void Unk13();
-    virtual void Unk14();
-    virtual void Unk15();
-    virtual void Unk16();
-    virtual void Unk17();
-    virtual void MarkAsModified(unsigned int changeFlags);
-};
+
 class NoRumorsActorAccess
 {
 public:
     NoRumorsBaseAccess* FUN_004181e0();
-    ExtraDataListX* FUN_005d43c0();
+    ScriptRumorOverrides* FUN_005d43c0();
 };
 
 extern char DAT_011846d4;
@@ -52507,11 +42475,11 @@ bool FUN_005d26b0(const ScriptParameter* paramInfo, const char* scriptData, TESO
         bool set = false;
         if (value)
             set = true;
-        if (set == actor->FUN_004181e0()->baseData.FUN_005d2780())
+        if (set == actor->FUN_004181e0()->baseData.GetNoRumors())
             actor->FUN_005d43c0()->FUN_004216b0();
         else
             actor->FUN_005d43c0()->FUN_00421600(set);
-        ((TESFormChanges*)actor)->MarkAsModified(0x80000000);
+        ((TESForm*)actor)->MarkAsModified(0x80000000);
     }
     return true;
 }
@@ -52889,222 +42857,8 @@ public:
     virtual void V5b8(float);
 };
 
-__if_not_exists(Actor::Actor) {
-class Actor : public TESObjectREFR {};
-}
 
-class RefractionActorAccess : public TESObjectREFR {
-public:
-    virtual void V_58();
-    virtual void V_59();
-    virtual void V_60();
-    virtual void V_61();
-    virtual void V_62();
-    virtual void V_63();
-    virtual void V_64();
-    virtual void V_65();
-    virtual void V_66();
-    virtual void V_67();
-    virtual void V_68();
-    virtual void V_69();
-    virtual void V_70();
-    virtual void V_71();
-    virtual void V_72();
-    virtual void V_73();
-    virtual void V_74();
-    virtual void V_75();
-    virtual void V_76();
-    virtual void V_77();
-    virtual void V_78();
-    virtual void V_79();
-    virtual void V_80();
-    virtual void V_81();
-    virtual void V_82();
-    virtual void V_83();
-    virtual void V_84();
-    virtual void V_85();
-    virtual void V_86();
-    virtual void V_87();
-    virtual void V_88();
-    virtual void V_89();
-    virtual void V_90();
-    virtual void V_91();
-    virtual void V_92();
-    virtual void V_93();
-    virtual void V_94();
-    virtual void V_95();
-    virtual void V_96();
-    virtual void V_97();
-    virtual void V_98();
-    virtual void V_99();
-    virtual void V_100();
-    virtual void V_101();
-    virtual void V_102();
-    virtual void V_103();
-    virtual void V_104();
-    virtual void V_105();
-    virtual void V_106();
-    virtual void V_107();
-    virtual void V_108();
-    virtual void V_109();
-    virtual void V_110();
-    virtual void V_111();
-    virtual void V_112();
-    virtual void V_113();
-    virtual void V_114();
-    virtual void V_115();
-    virtual void V_116();
-    virtual void V_117();
-    virtual void V_118();
-    virtual void V_119();
-    virtual void V_120();
-    virtual void V_121();
-    virtual void V_122();
-    virtual void V_123();
-    virtual void V_124();
-    virtual void V_125();
-    virtual void V_126();
-    virtual void V_127();
-    virtual void V_128();
-    virtual void V_129();
-    virtual void V_130();
-    virtual void V_131();
-    virtual void V_132();
-    virtual void V_133();
-    virtual void V_134();
-    virtual void V_135();
-    virtual void V_136();
-    virtual void V_137();
-    virtual void V_138();
-    virtual void V_139();
-    virtual void V_140();
-    virtual void V_141();
-    virtual void V_142();
-    virtual void V_143();
-    virtual void V_144();
-    virtual void V_145();
-    virtual void V_146();
-    virtual void V_147();
-    virtual void V_148();
-    virtual void V_149();
-    virtual void V_150();
-    virtual void V_151();
-    virtual void V_152();
-    virtual void V_153();
-    virtual void V_154();
-    virtual void V_155();
-    virtual void V_156();
-    virtual void V_157();
-    virtual void V_158();
-    virtual void V_159();
-    virtual void V_160();
-    virtual void V_161();
-    virtual void V_162();
-    virtual void V_163();
-    virtual void V_164();
-    virtual void V_165();
-    virtual void V_166();
-    virtual void V_167();
-    virtual void V_168();
-    virtual void V_169();
-    virtual void V_170();
-    virtual void V_171();
-    virtual void V_172();
-    virtual void V_173();
-    virtual void V_174();
-    virtual void V_175();
-    virtual void V_176();
-    virtual void V_177();
-    virtual void V_178();
-    virtual void V_179();
-    virtual void V_180();
-    virtual void V_181();
-    virtual void V_182();
-    virtual void V_183();
-    virtual void V_184();
-    virtual void V_185();
-    virtual void V_186();
-    virtual void V_187();
-    virtual void V_188();
-    virtual void V_189();
-    virtual void V_190();
-    virtual void V_191();
-    virtual void V_192();
-    virtual void V_193();
-    virtual void V_194();
-    virtual void V_195();
-    virtual void V_196();
-    virtual void V_197();
-    virtual void V_198();
-    virtual void V_199();
-    virtual void V_200();
-    virtual void V_201();
-    virtual void V_202();
-    virtual void V_203();
-    virtual void V_204();
-    virtual void V_205();
-    virtual void V_206();
-    virtual void V_207();
-    virtual void V_208();
-    virtual void V_209();
-    virtual void V_210();
-    virtual void V_211();
-    virtual void V_212();
-    virtual void V_213();
-    virtual void V_214();
-    virtual void V_215();
-    virtual void V_216();
-    virtual void V_217();
-    virtual void V_218();
-    virtual void V_219();
-    virtual void V_220();
-    virtual void V_221();
-    virtual void V_222();
-    virtual void V_223();
-    virtual void V_224();
-    virtual void V384(int, float);
-    virtual void V_226();
-    virtual void V_227();
-    virtual void V_228();
-    virtual void V_229();
-    virtual void V_230();
-    virtual void V_231();
-    virtual void V_232();
-    virtual void V_233();
-    virtual void V_234();
-    virtual void V_235();
-    virtual void V_236();
-    virtual void V_237();
-    virtual void V_238();
-    virtual void V_239();
-    virtual void V_240();
-    virtual void V_241();
-    virtual void V_242();
-    virtual void V_243();
-    virtual void V_244();
-    virtual void V_245();
-    virtual void V_246();
-    virtual void V_247();
-    virtual void V_248();
-    virtual void V_249();
-    virtual void V_250();
-    virtual void V_251();
-    virtual void V_252();
-    virtual void V_253();
-    virtual void V_254();
-    virtual void V_255();
-    virtual void V_256();
-    virtual void V_257();
-    virtual void V_258();
-    virtual void V_259();
-    virtual void V_260();
-    virtual void V_261();
-    virtual void V_262();
-    virtual void V41c(float);
 
-    ScriptProcessView* FUN_008d8520();
-    void FUN_008c4640();
-};
 
 class RefractionNameAccess {
 public:
@@ -53125,7 +42879,7 @@ void DebugLog(const char*, ...);
 
 // @fnv 0x005d3f10
 bool FUN_005d3f10(const ScriptParameter* paramInfo, const char* arg2, TESObjectREFR* thisObj, TESObjectREFR* containingObj, Script* script, ScriptLocals* scriptLocals, double& result, unsigned int& opcodeOffsetPtr) {
-    RefractionActorAccess* actor;
+    Actor* actor;
     float fRefraction;
     fRefraction = 0.0f;
     {
@@ -53144,9 +42898,9 @@ bool FUN_005d3f10(const ScriptParameter* paramInfo, const char* arg2, TESObjectR
 
     fRefraction = FUN_00404010(FUN_0040ebd0(fRefraction, 10.0f), 0.0f);
 
-    actor = (RefractionActorAccess*)dynamic_cast<Actor*>(thisObj);
+    actor = (Actor*)dynamic_cast<Actor*>(thisObj);
     if (actor && actor->FUN_008d8520()) {
-        r = actor->FUN_008d8520();
+        r = reinterpret_cast<ScriptProcessView*>(actor->FUN_008d8520());
         r->V5b8(fRefraction);
 
         if (FUN_005b9b00()) {
@@ -53154,17 +42908,17 @@ bool FUN_005d3f10(const ScriptParameter* paramInfo, const char* arg2, TESObjectR
             f1c = 0.0f;
             f1c = FUN_0040ebd0(1.0f, FUN_00404010(0.0f, f1c));
 
-            if (cnt > 0.0 && actor == (RefractionActorAccess*)g_thePlayer) {
-                actor->V41c(1.0f);
-                actor->V384(1, DAT_0107a214);
+            if (cnt > 0.0 && actor == (Actor*)g_thePlayer) {
+                actor->SetAlpha(1.0f);
+                actor->Unk_E1(true, DAT_0107a214);
             } else if (f1c > 0.0) {
-                actor->V41c(1.0f);
+                actor->SetAlpha(1.0f);
                 f10 = FUN_004b3ab0(FUN_0040df70(), FUN_0040df50(), 0.0f, 1.0f, 1.0 - (f1c / 100.0));
-                actor->V384(1, f10);
+                actor->Unk_E1(true, f10);
             } else if (fRefraction > 0.0) {
-                actor->V384(1, fRefraction);
+                actor->Unk_E1(true, fRefraction);
             } else {
-                actor->V384(0, 0.0f);
+                actor->Unk_E1(false, 0.0f);
                 actor->FUN_008c4640();
             }
         }
@@ -53178,18 +42932,7 @@ bool FUN_005d3f10(const ScriptParameter* paramInfo, const char* arg2, TESObjectR
     return true;}
 }  // namespace fnv_005d3f10
 
-__if_not_exists(Actor::Actor) {
-class Actor : public TESObjectREFR {};
-}
-__if_not_exists(TESBoundObject::TESBoundObject) {
-class TESBoundObject {
-public:
-    virtual void vfn_00();
-};
-}
-__if_not_exists(TESNPC::TESNPC) {
-class TESNPC : public TESBoundObject {};
-}
+
 struct ClassChangeRefAccess {
     TESBoundObject* __thiscall FUN_007af430();
 };
@@ -53224,9 +42967,7 @@ public:
     void FUN_006777b0(TESObjectREFR*);
     void FUN_00674e00(bool);
 };
-__if_not_exists(NiPoint3::z) {
-class NiPoint3 { public: float x, y, z; };
-}
+
 class ProcessSV {
 public:
     virtual void V0();
@@ -53597,92 +43338,7 @@ public:
 };
 class ActorSV : public TESObjectREFR {
 public:
-    virtual void V58();
-    virtual void V59();
-    virtual void V60();
-    virtual void V61();
-    virtual void V62();
-    virtual void V63();
-    virtual void V64();
-    virtual void V65();
-    virtual void V66();
-    virtual void V67();
-    virtual void V68();
-    virtual void V69();
-    virtual void V70();
-    virtual void V71();
-    virtual void V72();
-    virtual void V73();
-    virtual void V74();
-    virtual void V75();
-    virtual void V76();
-    virtual void V77();
-    virtual void V78();
-    virtual void V79();
-    virtual void V80();
-    virtual void V81();
-    virtual void V82();
-    virtual void V83();
-    virtual void V84();
-    virtual void V85();
-    virtual void V86();
-    virtual void V87();
-    virtual void V88();
-    virtual void V89();
-    virtual void V90();
-    virtual void V91();
-    virtual void V92();
-    virtual void V93();
-    virtual void V94();
-    virtual void V95();
-    virtual void V96();
-    virtual void V97();
-    virtual void V98();
-    virtual void V99();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual NiPoint3* GetPosition();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
+
     virtual void V144();
     virtual void V145();
     virtual void V146();
@@ -53741,7 +43397,8 @@ public:
 };
 class Calendar { public: float FUN_00867da0(); };
 extern Calendar g_calendar;
-class ActorDeletionQueue {
+// Call surface of ActorDeletionQueue; the shared header cannot be read in this unit (its own layout_support template copies).
+class ActorDeletionQueueApi {
 public:
     void FUN_0096d470(ActorSV*, int);
     void FUN_0096d450(ActorSV*, int, bool, bool, ActorSV*);
@@ -53772,14 +43429,14 @@ bool FUN_005cc4f0(const ScriptParameter* params, const char* data,
         if (package->FUN_009611e0() == -1)
             package->FUN_006777b0(actor->FUN_00569b80());
         actor->FUN_0056ae10(actor->FUN_00575d70(), actor->FUN_008d6f30(),
-            actor->GetPosition(), actor->FUN_00430830().z);
+            static_cast<const TESObjectREFR*>(actor)->GetPos(), actor->FUN_00430830().z);
         package->FUN_00674e00(true);
         actor->ApplyPackage(package, false, false);
         if (actor->GetProcess() && actor->GetProcess()->FUN_0045cd60()) {
             actor->GetProcess()->FUN_00693d50(g_calendar.FUN_00867da0() - 1.0);
             if (actor->GetProcess()->FUN_0045cd60() == 1) {
-                ((ActorDeletionQueue*)&DAT_011e0e80)->FUN_0096d470(actor, actor->GetProcess()->FUN_0045cd60());
-                ((ActorDeletionQueue*)&DAT_011e0e80)->FUN_0096d450(actor, actor->GetProcess()->FUN_0045cd60(), false, false, 0);
+                ((ActorDeletionQueueApi*)&DAT_011e0e80)->FUN_0096d470(actor, actor->GetProcess()->FUN_0045cd60());
+                ((ActorDeletionQueueApi*)&DAT_011e0e80)->FUN_0096d450(actor, actor->GetProcess()->FUN_0045cd60(), false, false, 0);
             }
         } else if (actor == (ActorSV*)g_thePlayer) {
             ((ActorSV*)g_thePlayer)->FUN_005cc7a0(true);
@@ -53802,7 +43459,7 @@ bool FUN_005d47e0(const ScriptParameter* paramInfo, const char* scriptData, TESO
         return false;
     Actor* pkActor = dynamic_cast<Actor*>(thisObj);
     if (pkForm && pkActor)
-        pkForm->FUN_008c0ec0(pkActor, _FNV_GetObjectReference(pkActor), -1);
+        pkForm->FUN_008c0ec0(pkActor, _FNV_GetObjectReference(reinterpret_cast<TESObjectREFR*>(pkActor)), -1);
     return true;
 }
 
@@ -53868,12 +43525,6 @@ bool FUN_005d0d30(int p0, int p1, int p2, int p3, int p4, int p5, int p6, int p7
     return true;
 }
 
-class RecursiveSpinLock
-{
-public:
-    void Lock(char const*);
-    void Unlock();
-};
 
 extern RecursiveSpinLock DAT_011f11a0;
 
@@ -53883,159 +43534,8 @@ public:
     int GetReferenceType();
 };
 
-__if_not_exists(Actor::Actor)
-{
-    class Actor : public TESObjectREFR {};
-}
 
-class ResurrectionActorAccess : public TESObjectREFR
-{
-public:
-    virtual void A000() {}
-    virtual void A001() {}
-    virtual void A002() {}
-    virtual void A003() {}
-    virtual void A004() {}
-    virtual void A005() {}
-    virtual void A006() {}
-    virtual void A007() {}
-    virtual void A008() {}
-    virtual void A009() {}
-    virtual void A010() {}
-    virtual void A011() {}
-    virtual void A012() {}
-    virtual void A013() {}
-    virtual void A014() {}
-    virtual void A015() {}
-    virtual void A016() {}
-    virtual void A017() {}
-    virtual void A018() {}
-    virtual void A019() {}
-    virtual void A020() {}
-    virtual void A021() {}
-    virtual void A022() {}
-    virtual void A023() {}
-    virtual void A024() {}
-    virtual void A025() {}
-    virtual void A026() {}
-    virtual void A027() {}
-    virtual void A028() {}
-    virtual void A029() {}
-    virtual void A030() {}
-    virtual void A031() {}
-    virtual void A032() {}
-    virtual void A033() {}
-    virtual void A034() {}
-    virtual void A035() {}
-    virtual void A036() {}
-    virtual void A037() {}
-    virtual void A038() {}
-    virtual void A039() {}
-    virtual void A040() {}
-    virtual void A041() {}
-    virtual void A042() {}
-    virtual void A043() {}
-    virtual void A044() {}
-    virtual void A045() {}
-    virtual void A046() {}
-    virtual void A047() {}
-    virtual void A048() {}
-    virtual void A049() {}
-    virtual void A050() {}
-    virtual void A051() {}
-    virtual void A052() {}
-    virtual void A053() {}
-    virtual void A054() {}
-    virtual void A055() {}
-    virtual void A056() {}
-    virtual void A057() {}
-    virtual void A058() {}
-    virtual void A059() {}
-    virtual void A060() {}
-    virtual void A061() {}
-    virtual void A062() {}
-    virtual void A063() {}
-    virtual void A064() {}
-    virtual void A065() {}
-    virtual void A066() {}
-    virtual void A067() {}
-    virtual void A068() {}
-    virtual void A069() {}
-    virtual void A070() {}
-    virtual void A071() {}
-    virtual void A072() {}
-    virtual void A073() {}
-    virtual void A074() {}
-    virtual void A075() {}
-    virtual void A076() {}
-    virtual void A077() {}
-    virtual void A078() {}
-    virtual void A079() {}
-    virtual void A080() {}
-    virtual void A081() {}
-    virtual void A082() {}
-    virtual void A083() {}
-    virtual void A084() {}
-    virtual void A085() {}
-    virtual void A086() {}
-    virtual void A087() {}
-    virtual void A088() {}
-    virtual void A089() {}
-    virtual void A090() {}
-    virtual void A091() {}
-    virtual void A092() {}
-    virtual void A093() {}
-    virtual void A094() {}
-    virtual void A095() {}
-    virtual void A096() {}
-    virtual void A097() {}
-    virtual void A098() {}
-    virtual void A099() {}
-    virtual void A100() {}
-    virtual void A101() {}
-    virtual void A102() {}
-    virtual void A103() {}
-    virtual void A104() {}
-    virtual void A105() {}
-    virtual void A106() {}
-    virtual void A107() {}
-    virtual void A108() {}
-    virtual void A109() {}
-    virtual void A110() {}
-    virtual void A111() {}
-    virtual void A112() {}
-    virtual void A113() {}
-    virtual void A114() {}
-    virtual void A115() {}
-    virtual void A116() {}
-    virtual void A117() {}
-    virtual void A118() {}
-    virtual void A119() {}
-    virtual void A120() {}
-    virtual void A121() {}
-    virtual void A122() {}
-    virtual void A123() {}
-    virtual void A124() {}
-    virtual void A125() {}
-    virtual void A126() {}
-    virtual void A127() {}
-    virtual void A128() {}
-    virtual void A129() {}
-    virtual void A130() {}
-    virtual void A131() {}
-    virtual void A132() {}
-    virtual void A133() {}
-    virtual void A134() {}
-    virtual void A135() {}
-    virtual void A136() {}
-    virtual void A137() {}
-    virtual void A138() {}
-    virtual void A139() {}
-    virtual void A140() {}
-    virtual void A141() {}
-    virtual void A142() {}
-    virtual void Resurrect(bool, bool, bool) {}
-};
+
 
 // @fnv 0x005be5e0
 bool FUN_005be5e0(const ScriptParameter* scriptParameter,
@@ -54058,7 +43558,7 @@ bool FUN_005be5e0(const ScriptParameter* scriptParameter,
     {
         DAT_011f11a0.Lock(0);
         bool randomAnim = reinterpret_cast<P09H*>(actor)->GetReferenceType() != 0;
-        reinterpret_cast<ResurrectionActorAccess*>(actor)->Resurrect(true, randomAnim, arg == 1);
+        actor->Resurrect(true, randomAnim, arg == 1);
         DAT_011f11a0.Unlock();
     }
 
@@ -54107,7 +43607,7 @@ bool FUN_005cc120(const ScriptParameter* apParameters, const char* apCompiledPar
     return true;
 }
 
-struct MiddleHighProcess { bool ResetAlertState(); };
+
 void __cdecl _DebugLog(const char*, ...);
 extern "C" __declspec(thread) unsigned char g_tlsFlags[0x269];
 
@@ -54116,23 +43616,15 @@ bool FUN_005ce730(const ScriptParameter* apParameters, const char* apCompiledPar
 {
     afReturnValue = 0.0;
     Actor* pActor = dynamic_cast<Actor*>(apRefObject);
-    if (pActor && ((MiddleHighProcess*)pActor)->ResetAlertState())
+    if (pActor && ((MiddleHighProcess*)pActor)->MiddleHighProcess::ResetAlertState())
         afReturnValue = 1.0;
     if (g_tlsFlags[0x268])
         _DebugLog("GetForceRun >> %0.2f", afReturnValue);
     return true;
 }
 
-__if_not_exists(Actor::Actor)
-{
-    class Actor : public TESObjectREFR {};
-}
 
-class GhostActorAccess
-{
-public:
-    void FUN_008acf10(bool set);
-};
+
 
 struct GhostCommandTLS
 {
@@ -54324,7 +43816,7 @@ bool FUN_005cffb0(
     Actor* pactor = dynamic_cast<Actor*>(apRefObject);
 
     if (pactor)
-        ((GhostActorAccess*)pactor)->FUN_008acf10(ivalue > 0);
+        pactor->FUN_008acf10(ivalue > 0);
 
     if (ghostCommandTLS.enabled)
         _DebugLog("SetGhost >> %d", ivalue);
@@ -54392,10 +43884,7 @@ bool __cdecl FUN_005d95d0(
 
 namespace fnv_005dfba0 {
 extern int g_TES;
-class TES {
-public:
-    void RefreshWorldState(int, int, int);
-};
+
 
 // @fnv 0x005dfba0
 bool FUN_005dfba0(const ScriptParameter* parameters, const char* scriptData,
@@ -54419,7 +43908,7 @@ bool FUN_005dfba0(const ScriptParameter* parameters, const char* scriptData,
 }  // namespace fnv_005dfba0
 
 class PackageTargetFormAccess { public: unsigned int FUN_0084e3a0(); };
-class PackageTargetActorAccess { public: TESObjectREFR* FUN_00881650(); };
+
 extern "C" void __cdecl FUN_005acc70(const unsigned int&, double&);
 extern "C" int DAT_011846d4;
 extern "C" int DAT_011841cc;
@@ -54430,13 +43919,13 @@ extern "C" __declspec(thread) bool _DebugLogEnabled;
 // @fnv 0x005ce520
 bool FUN_005ce520(const ScriptParameter* apParameters, const char* apCompiledParams, TESObjectREFR* apRefObject, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
 {
-    PackageTargetActorAccess* pActor;
+    Actor* pActor;
     unsigned int iid;
     afReturnValue = 0.0;
-    pActor = (PackageTargetActorAccess*)_FNV_DynamicCast(apRefObject, 0, &DAT_011841cc, &DAT_011846d4, 0);
+    pActor = (Actor*)_FNV_DynamicCast(apRefObject, 0, &DAT_011841cc, &DAT_011846d4, 0);
     iid = 0;
     if (pActor) {
-        TESObjectREFR* pTarget = pActor->FUN_00881650();
+        TESObjectREFR* pTarget = reinterpret_cast<TESObjectREFR*>(pActor->FUN_00881650());
         if (pTarget) {
             iid = ((PackageTargetFormAccess*)pTarget)->FUN_0084e3a0();
             FUN_005acc70(iid, afReturnValue);
@@ -54447,14 +43936,8 @@ bool FUN_005ce520(const ScriptParameter* apParameters, const char* apCompiledPar
     return true;
 }
 
-__if_not_exists(Actor::Actor) {
-    class Actor : public TESObjectREFR {};
-}
 
-class PackageDurationActorAccess {
-public:
-    BaseProcess* FUN_008d8520() const;
-};
+
 
 class PackageDurationProcessAccess {
 public:
@@ -54963,8 +44446,8 @@ bool FUN_005d1ab0(const ScriptParameter* apParameters, const char* apCompiledPar
         return false;
     }
     if (pActor) {
-        if (((PackageDurationActorAccess*)pActor)->FUN_008d8520()) {
-            BaseProcess* pProcess = ((PackageDurationActorAccess*)pActor)->FUN_008d8520();
+        if (((MobileObject*)pActor)->FUN_008d8520()) {
+            BaseProcess* pProcess = ((MobileObject*)pActor)->FUN_008d8520();
             ((PackageDurationProcessAccess*)pProcess)->SetDuration(fDuration);
         }
         if (g_packageDurationTLS.bScriptDebugLog) {
@@ -55001,8 +44484,8 @@ extern "C" bool __cdecl FUN_005cdad0(const ::ScriptParameter* apParameters, cons
     ::TESObjectREFR* apRefObject, ::TESObjectREFR* apContainer, ::Script* apScript,
     ::ScriptLocals* apScriptLocals, double& afReturnValue, unsigned int& auiOffset)
 {
-    ::fnv_005cdc10::ActorStub* pActor;
-    ::fnv_005cdc10::TESPackage* pPackage = 0;
+    ::Actor* pActor;
+    ::TESPackage* pPackage = 0;
 
     if (!::ExtractArgs(apParameters, apCompiledParams, &auiOffset, apRefObject,
         apContainer, apScript, apScriptLocals, &pPackage))
@@ -55010,17 +44493,17 @@ extern "C" bool __cdecl FUN_005cdad0(const ::ScriptParameter* apParameters, cons
         return false;
     }
 
-    pActor = reinterpret_cast<::fnv_005cdc10::ActorStub*>(dynamic_cast< ::Actor*>(apRefObject));
+    pActor = reinterpret_cast<::Actor*>(dynamic_cast< ::Actor*>(apRefObject));
 
     if (pActor && pPackage)
     {
-        if (pActor->GetCurrentPackageStub() == pPackage ||
-            pActor->GetPackageHolderStub()->GetPackageStub() == pPackage)
+        if (pActor->GetCurrentAIPackage() == pPackage ||
+            ((::fnv_005cdc10::PackageExtraStub*)pActor->FUN_005d43c0())->GetPackageStub() == pPackage)
         {
             if (pPackage->GetPackType() == 2)
             {
                 pPackage->SetWaiting(true);
-                pActor->GetCurrentProcess()->SetPackageState(2);
+                pActor->GetCurrentProcess()->SetAnimationState(static_cast<unsigned int>(2));
             }
             else if (pPackage->GetPackType() == 7 || pPackage->GetPackType() == 1)
             {
@@ -55029,13 +44512,13 @@ extern "C" bool __cdecl FUN_005cdad0(const ::ScriptParameter* apParameters, cons
             else
             {
                 ::_FNV_Warning("PACKAGES: Package %s is not a follow or an escort. ",
-                    pPackage->GetEditorID());
+                    pPackage->GetName());
             }
         }
         else
         {
             ::_FNV_Warning("PACKAGES: Package %s is not  %s current package",
-                pPackage->GetEditorID(), pActor->GetFullName());
+                pPackage->GetName(), pActor->GetFullName());
         }
     }
 
@@ -55078,7 +44561,7 @@ struct SetLevelBaseDataView {
 };
 class SetLevelBaseView : public ::TESForm {
 public:
-    int unk04; int unk08; int unk0C; int unk10; int unk14; int unk18; int unk1C;
+         int unk18; int unk1C;
     int unk20; int unk24; int unk28; int unk2C;
     SetLevelBaseDataView baseData;
 };
@@ -55093,92 +44576,7 @@ public:
 };
 class SetLevelActorView : public ::TESObjectREFR {
 public:
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual void v214();
-    virtual bool v218();
-    virtual void v21c();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual void v22c();
-    virtual void v230();
-    virtual void v234();
-    virtual void v238();
-    virtual void v23c();
+
     virtual void v240();
     virtual void v244();
     virtual void v248();
@@ -55317,7 +44715,7 @@ extern "C" bool __cdecl FUN_005d0e30(const ::ScriptParameter* params, const char
                 else if (pCreature)
                     pCreature->FUN_005f9e00(actor, true, true, true);
             }
-            if (actor->v218()) {
+            if (actor->IsCharacter()) {
                 SetLevelNPCView* npc2 = reinterpret_cast<SetLevelNPCView*>(dynamic_cast<::TESNPC*>(actor->FUN_007af430()));
                 if (npc2)
                     npc2->FUN_00603be0(false);
@@ -55339,7 +44737,7 @@ bool __cdecl FUN_005d1340(const ::ScriptParameter* parameters, const char* compi
     pactor = dynamic_cast<::Actor*>(reference);
     if (pactor)
     {
-        pweapon = reinterpret_cast<::HealthActor5da*>(pactor)->FUN_008d8520()->GetWeaponInfo();
+        pweapon = reinterpret_cast<::HealthProcess5da*>(pactor->FUN_008d8520())->GetWeaponInfo();
         if (pweapon)
             ::DebugLog("%.2f/100.0", pweapon->FUN_004bcdb0(false));
         else
@@ -55353,7 +44751,7 @@ bool __cdecl FUN_005d1340(const ::ScriptParameter* parameters, const char* compi
 }
 
 class type_info;
-struct TESValueForm { void SetFormValue(unsigned int); };
+
 void FUN_00730690(bool);
 // @fnv 0x005d3e30
 bool FUN_005d3e30(const ::ScriptParameter* apParameters, const char* apCompiledParams, ::TESObjectREFR* apRefObject, ::TESObjectREFR* apContainer, ::Script* apScript, ::ScriptLocals* apScriptLocals, double* afReturnValue, unsigned int* auiOffset)
@@ -55489,7 +44887,6 @@ bool FUN_005cf250(const ScriptParameter* apParams, const char* apData, TESObject
 }
 
 using ::Actor;
-using ::S_00931f80;
 
 struct CC_00931f80
 {
@@ -55506,7 +44903,7 @@ bool __cdecl FUN_005bddb0(const ScriptParameter* pParams, const char* pName, TES
     Actor* pActor = dynamic_cast<Actor*>(pSource);
     if (pActor)
     {
-        CC_00931f80* pCC = (CC_00931f80*)((S_00931f80*)pActor)->GetPhysicsCharacterController();
+        CC_00931f80* pCC = (CC_00931f80*)pActor->GetPhysicsCharacterController();
         if (pCC)
             pCC->FUN_00c708a0(fValue);
     }
@@ -55526,7 +44923,7 @@ extern "C" bool __cdecl FUN_005b9260(const ::ScriptParameter* parameters, const 
         ::Actor* actor = dynamic_cast<::Actor*>(thisObject);
         if (actor)
         {
-            ControllerModeCalls* controller = (ControllerModeCalls*)((::S_00931f80*)actor)->GetPhysicsCharacterController();
+            ControllerModeCalls* controller = (ControllerModeCalls*)actor->GetPhysicsCharacterController();
             if (controller)
             {
                 int value = controller->FUN_005b92e0();
@@ -55859,265 +45256,15 @@ extern "C" bool __cdecl FUN_005cc7c0(const ::ScriptParameter* apParameters, cons
     return true;
 }
 
-class SetAVActorVt50_005bde40
-{
-public:
-    virtual void V0() = 0;
-    virtual void V1() = 0;
-    virtual void V2() = 0;
-    virtual void V3() = 0;
-    virtual void V4() = 0;
-    virtual void V5() = 0;
-    virtual void V6() = 0;
-    virtual void V7() = 0;
-    virtual void V8() = 0;
-    virtual void V9() = 0;
-    virtual void V10() = 0;
-    virtual void V11() = 0;
-    virtual void V12() = 0;
-    virtual void V13() = 0;
-    virtual void V14() = 0;
-    virtual void V15() = 0;
-    virtual void V16() = 0;
-    virtual void V17() = 0;
-    virtual void V18() = 0;
-    virtual void V19() = 0;
-    virtual void V20() = 0;
-    virtual void V21() = 0;
-    virtual void V22() = 0;
-    virtual void V23() = 0;
-    virtual void V24() = 0;
-    virtual void V25() = 0;
-    virtual void V26() = 0;
-    virtual void V27() = 0;
-    virtual void V28() = 0;
-    virtual void V29() = 0;
-    virtual void V30() = 0;
-    virtual void V31() = 0;
-    virtual void V32() = 0;
-    virtual void V33() = 0;
-    virtual void V34() = 0;
-    virtual void V35() = 0;
-    virtual void V36() = 0;
-    virtual void V37() = 0;
-    virtual void V38() = 0;
-    virtual void V39() = 0;
-    virtual void V40() = 0;
-    virtual void V41() = 0;
-    virtual void V42() = 0;
-    virtual void V43() = 0;
-    virtual void V44() = 0;
-    virtual void V45() = 0;
-    virtual void V46() = 0;
-    virtual void V47() = 0;
-    virtual void V48() = 0;
-    virtual void V49() = 0;
-};
 
-class SetAVActorVt100_005bde40 : public SetAVActorVt50_005bde40
-{
-public:
-    virtual void V50() = 0;
-    virtual void V51() = 0;
-    virtual void V52() = 0;
-    virtual void V53() = 0;
-    virtual void V54() = 0;
-    virtual void V55() = 0;
-    virtual void V56() = 0;
-    virtual void V57() = 0;
-    virtual void V58() = 0;
-    virtual void V59() = 0;
-    virtual void V60() = 0;
-    virtual void V61() = 0;
-    virtual void V62() = 0;
-    virtual void V63() = 0;
-    virtual void V64() = 0;
-    virtual void V65() = 0;
-    virtual void V66() = 0;
-    virtual void V67() = 0;
-    virtual void V68() = 0;
-    virtual void V69() = 0;
-    virtual void V70() = 0;
-    virtual void V71() = 0;
-    virtual void V72() = 0;
-    virtual void V73() = 0;
-    virtual void V74() = 0;
-    virtual void V75() = 0;
-    virtual void V76() = 0;
-    virtual void V77() = 0;
-    virtual void V78() = 0;
-    virtual void V79() = 0;
-    virtual void V80() = 0;
-    virtual void V81() = 0;
-    virtual void V82() = 0;
-    virtual void V83() = 0;
-    virtual void V84() = 0;
-    virtual void V85() = 0;
-    virtual void V86() = 0;
-    virtual void V87() = 0;
-    virtual void V88() = 0;
-    virtual void V89() = 0;
-    virtual void V90() = 0;
-    virtual void V91() = 0;
-    virtual void V92() = 0;
-    virtual void V93() = 0;
-    virtual void V94() = 0;
-    virtual void V95() = 0;
-    virtual void V96() = 0;
-    virtual void V97() = 0;
-    virtual void V98() = 0;
-    virtual void V99() = 0;
-};
 
-class SetAVActorVt150_005bde40 : public SetAVActorVt100_005bde40
-{
-public:
-    virtual void V100() = 0;
-    virtual void V101() = 0;
-    virtual void V102() = 0;
-    virtual void V103() = 0;
-    virtual void V104() = 0;
-    virtual void V105() = 0;
-    virtual void V106() = 0;
-    virtual void V107() = 0;
-    virtual void V108() = 0;
-    virtual void V109() = 0;
-    virtual void V110() = 0;
-    virtual void V111() = 0;
-    virtual void V112() = 0;
-    virtual void V113() = 0;
-    virtual void V114() = 0;
-    virtual void V115() = 0;
-    virtual void V116() = 0;
-    virtual void V117() = 0;
-    virtual void V118() = 0;
-    virtual void V119() = 0;
-    virtual void V120() = 0;
-    virtual void V121() = 0;
-    virtual void V122() = 0;
-    virtual void V123() = 0;
-    virtual void V124() = 0;
-    virtual void V125() = 0;
-    virtual void V126() = 0;
-    virtual void V127() = 0;
-    virtual void V128() = 0;
-    virtual void V129() = 0;
-    virtual void V130() = 0;
-    virtual void V131() = 0;
-    virtual void V132() = 0;
-    virtual void V133() = 0;
-    virtual void V134() = 0;
-    virtual void V135() = 0;
-    virtual void V136() = 0;
-    virtual void V137() = 0;
-    virtual void V138() = 0;
-    virtual void V139() = 0;
-    virtual void V140() = 0;
-    virtual void V141() = 0;
-    virtual void V142() = 0;
-    virtual void V143() = 0;
-    virtual void V144() = 0;
-    virtual void V145() = 0;
-    virtual void V146() = 0;
-    virtual void V147() = 0;
-    virtual void V148() = 0;
-    virtual void V149() = 0;
-};
 
-class SetAVActorVt200_005bde40 : public SetAVActorVt150_005bde40
-{
-public:
-    virtual void V150() = 0;
-    virtual void V151() = 0;
-    virtual void V152() = 0;
-    virtual void V153() = 0;
-    virtual void V154() = 0;
-    virtual void V155() = 0;
-    virtual void V156() = 0;
-    virtual void V157() = 0;
-    virtual void V158() = 0;
-    virtual void V159() = 0;
-    virtual void V160() = 0;
-    virtual void V161() = 0;
-    virtual void V162() = 0;
-    virtual void V163() = 0;
-    virtual void V164() = 0;
-    virtual void V165() = 0;
-    virtual void V166() = 0;
-    virtual void V167() = 0;
-    virtual void V168() = 0;
-    virtual void V169() = 0;
-    virtual void V170() = 0;
-    virtual void V171() = 0;
-    virtual void V172() = 0;
-    virtual void V173() = 0;
-    virtual void V174() = 0;
-    virtual void V175() = 0;
-    virtual void V176() = 0;
-    virtual void V177() = 0;
-    virtual void V178() = 0;
-    virtual void V179() = 0;
-    virtual void V180() = 0;
-    virtual void V181() = 0;
-    virtual void V182() = 0;
-    virtual void V183() = 0;
-    virtual void V184() = 0;
-    virtual void V185() = 0;
-    virtual void V186() = 0;
-    virtual void V187() = 0;
-    virtual void V188() = 0;
-    virtual void V189() = 0;
-    virtual void V190() = 0;
-    virtual void V191() = 0;
-    virtual void V192() = 0;
-    virtual void V193() = 0;
-    virtual void V194() = 0;
-    virtual void V195() = 0;
-    virtual void V196() = 0;
-    virtual void V197() = 0;
-    virtual void V198() = 0;
-    virtual void V199() = 0;
-};
 
-class SetAVActor_005bde40 : public SetAVActorVt200_005bde40
-{
-public:
-    virtual void V200() = 0;
-    virtual void V201() = 0;
-    virtual void V202() = 0;
-    virtual void V203() = 0;
-    virtual void V204() = 0;
-    virtual void V205() = 0;
-    virtual void V206() = 0;
-    virtual void V207() = 0;
-    virtual void V208() = 0;
-    virtual void V209() = 0;
-    virtual void V210() = 0;
-    virtual void V211() = 0;
-    virtual void V212() = 0;
-    virtual void V213() = 0;
-    virtual void V214() = 0;
-    virtual void V215() = 0;
-    virtual void V216() = 0;
-    virtual void V217() = 0;
-    virtual void V218() = 0;
-    virtual void V219() = 0;
-    virtual void V220() = 0;
-    virtual void V221() = 0;
-    virtual void V222() = 0;
-    virtual void V223() = 0;
-    virtual void V224() = 0;
-    virtual void V225() = 0;
-    virtual void V226() = 0;
-    virtual void V227() = 0;
-    virtual void V228() = 0;
-    virtual void V229() = 0;
-    virtual void V230() = 0;
-    virtual void V231() = 0;
-    virtual void V232() = 0;
-    virtual void V233() = 0;
-    virtual void V234(unsigned int, unsigned int, unsigned int) = 0;
-};
+
+
+
+
+
 
 // @fnv 0x005bde40
 bool FUN_005bde40(
@@ -56132,7 +45279,7 @@ bool FUN_005bde40(
 {
     unsigned int actorValue = 0;
     unsigned int value = 0;
-    SetAVActor_005bde40* pActor;
+    ::Actor* pActor;
 
     if (!::ExtractArgs(
             parameter,
@@ -56146,13 +45293,15 @@ bool FUN_005bde40(
             &value))
         return false;
 
-    pActor = (SetAVActor_005bde40*)dynamic_cast<::Actor*>(objectReference);
+    pActor = dynamic_cast<::Actor*>(objectReference);
 
     if (pActor)
     {
         if (!::ActorValue::GetFlag(actorValue, 0x4000))
         {
-            pActor->V234(actorValue, value, 0);
+            // Forward the extracted value's bits through the ForceActorValue slot.
+            typedef void (__thiscall *ScriptActorValueSetter)(::Actor*, unsigned int, unsigned int, unsigned int);
+            ((ScriptActorValueSetter)(*(void***)pActor)[0x3a8 / 4])(pActor, actorValue, value, 0);
         }
         else if (::__tls_array[0x268])
         {
@@ -56165,7 +45314,7 @@ bool FUN_005bde40(
     return true;
 }
 
-struct Pt3_005c0740 { float x, y, z; };
+
 struct UpdData_005c0740 {
     float fTime;
     bool b1;
@@ -56173,149 +45322,18 @@ struct UpdData_005c0740 {
     int iFlags;
     UpdData_005c0740(float, bool, bool);
 };
-struct Node_005c0740 {
-    void Update(const UpdData_005c0740&);
-    void FUN_00440460(const Pt3_005c0740*);
-};
 void FUN_00c6bd00(NiNode*, bool);
-struct Ref_005c0740 { void SetLocationOnReference(const Pt3_005c0740&); };
+
 struct Ctl_005c0740 { void FUN_005620e0(void*); };
 struct Mob_005c0740 { Ctl_005c0740* GetPhysicsCharacterController(); };
-struct RefV_005c0740 {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual NiNode* Get3D();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual Pt3_005c0740* GetPos();
-};
+
 
 // @fnv 0x005c0740
 extern "C" void __cdecl FUN_005c0740(::TESObjectREFR* apRef, char acAxis, float afValue)
 {
     if (apRef)
     {
-        Pt3_005c0740 pos = *((RefV_005c0740*)apRef)->GetPos();
+        NiPoint3 pos = *static_cast<const TESObjectREFR*>(apRef)->GetPos();
         switch (acAxis)
         {
         case 'X':
@@ -56328,7 +45346,7 @@ extern "C" void __cdecl FUN_005c0740(::TESObjectREFR* apRef, char acAxis, float 
             pos.z = afValue;
             break;
         }
-        ((Ref_005c0740*)apRef)->SetLocationOnReference(pos);
+        apRef->SetLocationOnReference(pos);
         NiNode* pNode;
         ::MobileObject* pMobile = dynamic_cast<::MobileObject*>(apRef);
         if (pMobile)
@@ -56337,13 +45355,13 @@ extern "C" void __cdecl FUN_005c0740(::TESObjectREFR* apRef, char acAxis, float 
             if (pController && !((::FUN_005c0860Class*)pController)->FUN_005c0860())
                 pController->FUN_005620e0(&pos);
         }
-        pNode = ((RefV_005c0740*)apRef)->Get3D();
+        pNode = apRef->GetNiNode();
         if (pNode)
         {
-            ((Node_005c0740*)pNode)->FUN_00440460(&pos);
+            pNode->FUN_00440460(&pos);
             (FUN_00c6bd00)(pNode, true);
             UpdData_005c0740 updateData(0.0f, false, false);
-            ((Node_005c0740*)pNode)->Update(updateData);
+            pNode->Update(reinterpret_cast<const NiUpdateData&>(updateData));
         }
     }
 }

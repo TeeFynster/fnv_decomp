@@ -369,7 +369,8 @@ void Owner::FUN_00ca4f80(Sink* sink)
 }
 
 namespace fnv_00ca5010 {
-struct Interface
+// Exe 0x00ca5010: unit-local Interface view; declarations and layout are preserved.
+struct CellmoppInterfaceView
 {
     virtual void slot00() = 0;
     virtual void slot04() = 0;
@@ -377,12 +378,12 @@ struct Interface
     virtual void slot0C() = 0;
     virtual void* GetObject() = 0;
 };
-typedef void(__thiscall* FinishObject)(Interface*);
+typedef void(__thiscall* FinishObject)(CellmoppInterfaceView*);
 struct Owner
 {
     int unk00;
     int unk04;
-    Interface* unk08;
+    CellmoppInterfaceView* unk08;
     void FUN_00ca5010();
 };
 // @fnv 0x00ca5010
@@ -390,7 +391,7 @@ void Owner::FUN_00ca5010()
 {
     if (this == 0)
         return;
-    Interface* input = unk08;
+    CellmoppInterfaceView* input = unk08;
     if (input == 0)
         return;
     void* raw = input->GetObject();
@@ -399,7 +400,7 @@ void Owner::FUN_00ca5010()
     char* base = (char*)raw - 0x10;
     if (base == 0)
         return;
-    Interface* object = *(Interface**)(base + 8);
+    CellmoppInterfaceView* object = *(CellmoppInterfaceView**)(base + 8);
     if (object == 0)
         return;
     FinishObject finish = (FinishObject)(*(void***)object)[54];

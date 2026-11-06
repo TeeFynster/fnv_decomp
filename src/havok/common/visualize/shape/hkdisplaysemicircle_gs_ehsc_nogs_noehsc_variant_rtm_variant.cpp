@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 // src/havok/common/visualize/shape/hkdisplaysemicircle_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/visualize/shape/hkdisplaysemicircle_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -9,41 +11,35 @@
 
 __if_not_exists(__m128)
 {
-    union __declspec(intrin_type) __declspec(align(16)) __m128
-    {
-        struct
-        {
-            float lane0, lane1, lane2, lane3;
-        };
-    };
+    typedef ::__m128 LocalM128;
 }
 __if_not_exists(_mm_add_ps)
 {
-    extern "C" __m128 _mm_add_ps(__m128, __m128);
+using ::_mm_add_ps;
 }
 __if_not_exists(_mm_sub_ps)
 {
-    extern "C" __m128 _mm_sub_ps(__m128, __m128);
+using ::_mm_sub_ps;
 }
 __if_not_exists(_mm_mul_ps)
 {
-    extern "C" __m128 _mm_mul_ps(__m128, __m128);
+using ::_mm_mul_ps;
 }
 __if_not_exists(_mm_load_ss)
 {
-    extern "C" __m128 _mm_load_ss(const float*);
+using ::_mm_load_ss;
 }
 __if_not_exists(_mm_load_ps)
 {
-    extern "C" __m128 _mm_load_ps(const float*);
+using ::_mm_load_ps;
 }
 __if_not_exists(_mm_shuffle_ps)
 {
-    extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
+using ::_mm_shuffle_ps;
 }
 __if_not_exists(_mm_store_ps)
 {
-    extern "C" void _mm_store_ps(float*, __m128);
+using ::_mm_store_ps;
 }
 __if_not_exists(_ReadWriteBarrier)
 {
@@ -63,7 +59,7 @@ struct Vec_de4af0
 {
     union
     {
-        __m128 v;
+        LocalM128 v;
         struct
         {
             float m_f00, m_f04, m_f08, m_f0C;
@@ -87,7 +83,7 @@ struct Vec_de4af0
 // Three-column rotation used by the transform helpers.
 struct Frame_de4af0
 {
-    __m128 column0, column1, column2;
+    LocalM128 column0, column1, column2;
     void FUN_00cb2e30(void* p, float t);
 };
 // Output array: data pointer, element count, capacity.
@@ -161,7 +157,7 @@ void ArcSamples_de4af0::FUN_00de4af0(VecArr_de4af0* arr)
         }
         FUN_00c908c0(alloc, arr, newCap, 0x10);
     }
-    __m128 initial = x.v;
+    LocalM128 initial = x.v;
     arr->m_iArrayLength = n;
     arr->m_pData[0].v = initial;
     int i = 0;

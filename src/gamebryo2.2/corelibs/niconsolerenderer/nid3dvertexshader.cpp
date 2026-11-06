@@ -1,50 +1,35 @@
+#include "../../../../include/NiShaderConstantMapEntry.h"
+#include "../../../../include/NiD3DVertexShader.h"
+
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct FUN_00e69970_Class
+struct ShaderRendererDataReleaser
 {
     void ClearShader(void* owner);
 };
-struct FUN_00e89ac0_Class
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    void FUN_00e89ac0();
-};
 // @fnv 0x00e89ac0
-void FUN_00e89ac0_Class::FUN_00e89ac0()
+void NiD3DVertexShader::UnloadShader()
 {
-    if (unk34 != 0)
+    if (m_pD3DPixelShader != 0)
     {
-        ((FUN_00e69970_Class*)unk24)->ClearShader(this);
+        ((ShaderRendererDataReleaser*)m_pShaderObject)->ClearShader(this);
     }
 }
 
-extern void __cdecl FUN_00e92ee0(int value);
+extern void __cdecl FUN_00e92ee0(NiD3DVertexShader* pkShader);
 
 // @fnv 0x00e89ad0
-void __fastcall FUN_00e89ad0(int value)
+void NiD3DVertexShader::BuildVertexShader()
 {
-    FUN_00e92ee0(value);
+    FUN_00e92ee0(this);
 }
 
 extern "C" void* __cdecl memmove(void* pvDest, const void* pvSrc, unsigned int uiSize);
 
 extern int g_aiE89C70ConstantTypes[];
 
-class CE89C70Device
+class VertexConstantDevice
 {
   public:
     virtual void __stdcall Fn000();
@@ -145,7 +130,7 @@ class CE89C70Device
                                                     unsigned int uiVector4fCount);
 };
 
-struct CE89C70Renderer
+struct VertexConstantDeviceStorage
 {
     int unk0000;
     int unk0004;
@@ -1233,47 +1218,14 @@ struct CE89C70Renderer
     int unk10EC;
     int unk10F0;
     int unk10F4;
-    CE89C70Device* m_pkDevice;
+    VertexConstantDevice* m_pkDevice;
 };
 
-struct CE89C70ShaderConstant
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    unsigned int m_uiValue1;
-    int unk18;
-    unsigned int m_uiValueAt1C;
-    int unk20;
-    int unk24;
-    unsigned int m_uiValue5;
-    int unk2C;
-    char* m_pcData;
-};
-
-class CE89C70ShaderProgram
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    CE89C70Renderer* m_pOwnerShader;
-
-    bool SetShaderConstantF(CE89C70ShaderConstant* pkConstant, const float* pVector4, unsigned int uiNumEntries,
-                            unsigned int uiRegisterCount, const unsigned short* pusIndices);
-};
-
+// The shared class has no declarations for the vertex constant-upload overrides yet.
+// Keep their bodies as functions on the real shader, with ECX carrying the shader as in a member call.
 // @fnv 0x00e89c70
-bool CE89C70ShaderProgram::SetShaderConstantF(CE89C70ShaderConstant* pkConstant, const float* afData,
+bool __fastcall SetVertexShaderConstantArray(NiD3DVertexShader* pkShader, void*,
+                                              NiShaderConstantMapEntry* pkConstant, const float* afData,
                                               unsigned int uiNumEntries, unsigned int uiRegisterCount,
                                               const unsigned short* pusIndices)
 {
@@ -1281,18 +1233,18 @@ bool CE89C70ShaderProgram::SetShaderConstantF(CE89C70ShaderConstant* pkConstant,
     if (iType != 8 && iType != 9)
         return false;
 
-    unsigned int uiRegister = pkConstant->m_uiValueAt1C;
+    unsigned int uiRegister = pkConstant->m_uiValue3;
     for (unsigned int i = 0; i < uiNumEntries; i++)
     {
         unsigned short usIndex = pusIndices[i];
-        if ((pkConstant->m_uiValue1 & 0xf0000000) == 0x20000000 && pkConstant->m_pcData)
+        if ((pkConstant->m_uiValue1 & 0xf0000000) == 0x20000000 && pkConstant->m_pConstantData)
         {
-            memmove(pkConstant->m_pcData + i * uiRegisterCount * 16, afData + usIndex * uiRegisterCount * 4,
+            memmove((char*)pkConstant->m_pConstantData + i * uiRegisterCount * 16, afData + usIndex * uiRegisterCount * 4,
                     pkConstant->m_uiValue5);
         }
         else
         {
-            CE89C70Renderer* pkRenderer = m_pOwnerShader;
+            VertexConstantDeviceStorage* pkRenderer = (VertexConstantDeviceStorage*)pkShader->m_pRenderState;
             pkRenderer->m_pkDevice->SetVertexShaderConstantF(uiRegister, afData + usIndex * uiRegisterCount * 4,
                                                              uiRegisterCount);
         }
@@ -1415,24 +1367,8 @@ struct IDirect3DDevice9
 extern int DAT_011f5fc4[];
 void* __cdecl FUN_00ec44d0(void* dst, const void* src, unsigned int count);
 
-struct NiShaderConstantMapEntry
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    unsigned int m_uiValue1;
-    int unk18;
-    unsigned int m_uiValue3;
-    unsigned int m_uiValue4;
-    int unk24;
-    unsigned int m_uiValue5;
-    int unk2c;
-    void* m_pConstantData;
-};
-
-struct NiD3DRenderer : CE89C70Renderer
+// This is the constant-upload state at shader offset 0x28: its device is at 0x10f8, not NiDX9Renderer offset 0x288.
+struct VertexConstantUploader : VertexConstantDeviceStorage
 {
     bool UploadB(unsigned int reg, const int* src, unsigned int count)
     {
@@ -1453,25 +1389,10 @@ struct NiD3DRenderer : CE89C70Renderer
     }
 };
 
-struct NiD3DShaderProgramLike
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    NiD3DRenderer* m_pShaderObject;
-    bool UploadConstants(NiShaderConstantMapEntry* pkEntry, const void* pvDataSource, unsigned int uiRegisterCount);
-};
-
-// Uses the entry flags to copy data into m_pConstantData or upload it through m_pShaderObject.
+// Uses the entry flags to copy data into m_pConstantData or upload it through the shader render state.
 // @fnv 0x00e89ba0
-bool NiD3DShaderProgramLike::UploadConstants(NiShaderConstantMapEntry* pkEntry, const void* pvDataSource,
+bool __fastcall SetVertexShaderConstant(NiD3DVertexShader* pkShader, void*,
+                                             NiShaderConstantMapEntry* pkEntry, const void* pvDataSource,
                                              unsigned int uiRegisterCount)
 {
     if (!pvDataSource)
@@ -1490,8 +1411,8 @@ bool NiD3DShaderProgramLike::UploadConstants(NiShaderConstantMapEntry* pkEntry, 
         return true;
     }
     if (eType == 1)
-        return m_pShaderObject->UploadB(pkEntry->m_uiValue3, (const int*)pvDataSource, uiRegisterCount);
+        return ((VertexConstantUploader*)pkShader->m_pRenderState)->UploadB(pkEntry->m_uiValue3, (const int*)pvDataSource, uiRegisterCount);
     if (eType == 3)
-        return m_pShaderObject->UploadI(pkEntry->m_uiValue3, (const int*)pvDataSource, uiRegisterCount);
-    return m_pShaderObject->UploadF(pkEntry->m_uiValue3, (const float*)pvDataSource, uiRegisterCount);
+        return ((VertexConstantUploader*)pkShader->m_pRenderState)->UploadI(pkEntry->m_uiValue3, (const int*)pvDataSource, uiRegisterCount);
+    return ((VertexConstantUploader*)pkShader->m_pRenderState)->UploadF(pkEntry->m_uiValue3, (const float*)pvDataSource, uiRegisterCount);
 }

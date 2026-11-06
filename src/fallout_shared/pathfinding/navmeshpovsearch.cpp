@@ -1,14 +1,87 @@
 // fallout_shared/pathfinding/navmeshpovsearch.cpp: NavMeshBounds, CircularArc, NavMeshPOVSearch, AngleSinCosArc_Helper and more (37 functions)
 
-#include "navmeshpovsearch_decls.h"
-// Copies min, max, parents and triangles from this NavMeshBounds into dest.
+#include "../../../include/BSStringT.h"
+#include "../../../include/NavMeshPOVSearch.h"
+#include "../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../../include/NavMeshBounds.h"
+#include "../../../include/NiBound.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NavMeshEdgeData.h"
+#include "../../../include/NavMeshPtr.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/Setting.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/Pair.h"
+
+class SineCosine
+{
+  public:
+    float fCos, fSin;
+    SineCosine operator-(const SineCosine&) const;
+    bool FUN_006a06f0(const SineCosine&) const;
+};
+class CircularArc
+{
+  public:
+    SineCosine start, end;
+    int direction;
+    bool FUN_006a0660(const SineCosine&) const;
+};
+class Sphere
+{
+  public:
+    NiPoint3 Center;
+    float fRadius;
+    Sphere(const NiPoint3& aCenter, float afRadius);
+};
+class SphereTangent
+{
+  public:
+    ANGLE_DIRECTION direction;
+    SineCosine start, end;
+};
+class SphereTangents
+{
+  public:
+    int count;
+    SphereTangent tangents[2];
+};
+float FUN_004019b0(float);
+
+// Copies min, max, vertices and triangles from this NavMeshBounds into dest.
 // @fnv 0x0069cc80
 void NavMeshBounds::CopyTo(NavMeshBounds* dest)
 {
     dest->min = min;
     dest->max = max;
-    parents.CopyTo<1024>(&dest->parents);
-    triangles.CopyRecordsTo(&dest->triangles);
+    vertices.CopyTo<1024>(&dest->vertices);
+    triangles.CopyTo<1024>(&dest->triangles);
 }
 // Picks start/end by direction, computes the span and the angle relative to the first endpoint, and tests the relative angle against the span.
 // @fnv 0x006a0660
@@ -55,13 +128,13 @@ int NavMeshPOVSearch::FindSphereTangents(const Sphere& aSphereA, const Sphere& a
         float inverse = FUN_004019b0(r2 - distance);
         if (direction == 0)
         {
-            aTangents.tangents[sumSquared].direction = CLOCKWISE;
+            aTangents.tangents[sumSquared].direction = ANGLE_DIRECTION_AD_CCW;
             aTangents.tangents[sumSquared].start.fCos = (difference * r1.x + r1.y * inverse) * tangent;
             aTangents.tangents[sumSquared].start.fSin = (difference * r1.y - r1.x * inverse) * tangent;
         }
         else
         {
-            aTangents.tangents[sumSquared].direction = COUNTERCLOCKWISE;
+            aTangents.tangents[sumSquared].direction = ANGLE_DIRECTION_AD_CW;
             aTangents.tangents[sumSquared].start.fCos = (difference * r1.x - r1.y * inverse) * tangent;
             aTangents.tangents[sumSquared].start.fSin = (difference * r1.y + r1.x * inverse) * tangent;
         }
@@ -77,13 +150,13 @@ int NavMeshPOVSearch::FindSphereTangents(const Sphere& aSphereA, const Sphere& a
         float tangent2 = FUN_004019b0(r2 - differenceSquared);
         if (direction == 0)
         {
-            aTangents.tangents[sumSquared].direction = COUNTERCLOCKWISE;
+            aTangents.tangents[sumSquared].direction = ANGLE_DIRECTION_AD_CW;
             aTangents.tangents[sumSquared].start.fCos = (sum * r1.x + r1.y * tangent2) * inverse2;
             aTangents.tangents[sumSquared].start.fSin = (sum * r1.y - r1.x * tangent2) * inverse2;
         }
         else
         {
-            aTangents.tangents[sumSquared].direction = CLOCKWISE;
+            aTangents.tangents[sumSquared].direction = ANGLE_DIRECTION_AD_CCW;
             aTangents.tangents[sumSquared].start.fCos = (sum * r1.x - r1.y * tangent2) * inverse2;
             aTangents.tangents[sumSquared].start.fSin = (sum * r1.y + r1.x * tangent2) * inverse2;
         }
@@ -158,11 +231,6 @@ FakePoint3 FUN_0069e0c0_shell::MakePointOnCircle(float afRadius)
 }
 }
 
-template <typename T> struct BSStringT
-{
-    operator const char*() const;
-};
-
 struct _Dummy_0069e390
 {
     char _pad[0x94];
@@ -181,13 +249,6 @@ float __fastcall GetFloatAtOffset68(const char* pThis)
 {
     return *(const float*)(pThis + 0x68);
 }
-
-class NiBound
-{
-  public:
-    NiBound();
-    char _pad[12];
-};
 
 void __fastcall _ref_006815c0(void*);
 
@@ -275,10 +336,6 @@ void* __thiscall Dummy_006a0870::Construct()
     return this;
 }
 
-struct P6a0e50
-{
-    float x, y, z;
-};
 struct Hh6a0e50
 {
     void NavMeshEdgeData(const void*);
@@ -286,7 +343,7 @@ struct Hh6a0e50
 struct E6a0e50
 {
     char base[12];
-    P6a0e50 loc;
+    NiPoint3 loc;
     E6a0e50* FUN_006a0e50(const E6a0e50* o);
 };
 // @fnv 0x006a0e50
@@ -406,13 +463,6 @@ bool This_006a08a0::IsTypeFour(const SeqObj* apNode)
     return apNode->GetName().m_pAvoidNode->eType == 4;
 }
 
-struct NavMeshEdgeData
-{
-    int a;
-    int b;
-    int c;
-    NavMeshEdgeData(NavMeshEdgeData const&);
-};
 struct S12
 {
     int a;
@@ -2874,12 +2924,6 @@ class FUN_0069e200_cls : public Base_69e200
 FUN_0069e200_cls::~FUN_0069e200_cls()
 {}
 
-struct Pt3
-{
-    float x, y, z;
-    Pt3 operator-(const Pt3& o) const;
-    float Len() const;
-};
 
 struct NavObj;
 
@@ -2891,7 +2935,7 @@ struct ObjArr
 struct NavObj
 {
     int type;
-    Pt3 pos;
+    NiPoint3 pos;
     float radius;
     int unk14;
     int unk18;
@@ -2917,7 +2961,7 @@ struct OuterArr
     InnerArr* GetAt(unsigned int idx);
 };
 
-bool FUN_006bab00(const Pt3& center, float radius, const Pt3& a, const Pt3& b);
+bool FUN_006bab00(const NiPoint3& center, float radius, const NiPoint3& a, const NiPoint3& b);
 
 extern float fCostType5;
 extern float fCostOther;
@@ -3185,11 +3229,11 @@ struct NavOwner
     int unk2040, unk2044, unk2048, unk204C, unk2050, unk2054, unk2058, unk205C;
     int unk2060, unk2064;
     OuterArr groups;
-    float ComputePathCost(NavObj* apSelf, const Pt3& aStart, const Pt3& aEnd, NavObj* apIgnore);
+    float ComputePathCost(NavObj* apSelf, const NiPoint3& aStart, const NiPoint3& aEnd, NavObj* apIgnore);
 };
 
 // @fnv 0x006a0ac0
-float NavOwner::ComputePathCost(NavObj* apSelf, const Pt3& aStart, const Pt3& aEnd, NavObj* apIgnore)
+float NavOwner::ComputePathCost(NavObj* apSelf, const NiPoint3& aStart, const NiPoint3& aEnd, NavObj* apIgnore)
 {
     for (unsigned int i = 0; i < groups.GetCount(); i++)
     {
@@ -3321,26 +3365,6 @@ void __cdecl FUN_006a1330(const char* pcPath, int iParamA, int iParamB)
 void* FormHeap_Allocate(unsigned int uiSize);
 void FormHeap_Free(void* pvMem);
 
-class NiPoint369E
-{
-  public:
-    float x;
-    float y;
-    float z;
-
-    static const NiPoint369E ZERO;
-};
-
-class Vec69E
-{
-  public:
-    Vec69E();
-
-    float x;
-    float y;
-    float z;
-};
-
 class Helper69E
 {
   public:
@@ -3364,27 +3388,21 @@ class FUN_0069e2c0
     FUN_0069e2c0();
 
     int m_iIndex;
-    NiPoint369E m_kPathOffset;
+    NiPoint3 m_kPathOffset;
     float m_fValue;
-    Vec69E m_kA;
-    Vec69E m_kB;
+    NiPoint3 m_kA;
+    NiPoint3 m_kB;
     float m_fScale;
     Helper69E* m_pkHelper;
 };
 
 // Initializes the index to -1, the point to ZERO, the value to 0.0f and the scale to 1.0f, then allocates a Helper69E for m_pkHelper.
 // @fnv 0x0069e2c0
-FUN_0069e2c0::FUN_0069e2c0() : m_iIndex(-1), m_kPathOffset(NiPoint369E::ZERO), m_fValue(0.0f), m_fScale(1.0f)
+FUN_0069e2c0::FUN_0069e2c0() : m_iIndex(-1), m_kPathOffset(NiPoint3::ZERO), m_fValue(0.0f), m_fScale(1.0f)
 {
     m_pkHelper = new Helper69E;
 }
 
-struct Vec
-{
-    float x, y, z;
-    Vec operator-(const Vec&) const;
-    float FUN_004a7290() const;
-};
 struct Ed
 {
     unsigned short value;
@@ -3408,15 +3426,15 @@ struct Words
 };
 struct VertPair
 {
-    Vec* start;
-    Vec* end;
+    NiPoint3* start;
+    NiPoint3* end;
 };
 struct Mesh
 {
     unsigned int CollectTrianglePOVs(unsigned short, Words*);
     unsigned int FUN_0069a940(unsigned short, Words*);
     bool FUN_0069a9d0(unsigned short, EdgePair*);
-    const Vec& FUN_0068f0a0(unsigned short);
+    const NiPoint3& FUN_0068f0a0(unsigned short);
     Tri* FUN_005582f0(unsigned short);
     void FUN_0068f040(VertPair*, unsigned short, int);
 };
@@ -3461,9 +3479,9 @@ struct Groups
 struct Record
 {
     int type;
-    Vec position;
+    NiPoint3 position;
     float radius;
-    Vec directionA, directionB;
+    NiPoint3 directionA, directionB;
     float cost;
     Records* links;
     unsigned short index, unused;
@@ -3473,11 +3491,6 @@ struct Record
 struct Request
 {
     float GetFloatAtOffset68();
-};
-struct Pair
-{
-    unsigned int group, index;
-    Pair(unsigned int, unsigned int);
 };
 bool __cdecl CallMethodOnObject(const Pair&, const Pair&);
 struct Pairs
@@ -5687,8 +5700,8 @@ bool Owner::BuildGroups(Input* input, Groups* output)
     }
     for (int remove = removalsTmp.Count() - 1; remove >= 0; remove--)
     {
-        delete groups.At(removalsTmp.At(remove)->group)->At(removalsTmp.At(remove)->index);
-        groups.At(removalsTmp.At(remove)->group)->Remove(removalsTmp.At(remove)->index, true);
+        delete groups.At(removalsTmp.At(remove)->a)->At(removalsTmp.At(remove)->b);
+        groups.At(removalsTmp.At(remove)->a)->Remove(removalsTmp.At(remove)->b, true);
     }
     return true;
 }
@@ -5798,14 +5811,6 @@ struct P072Outer
     P072Inner* FUN_00558dd0(unsigned int);
 };
 class NavMesh;
-class NavMeshPtr
-{
-  public:
-    NavMesh* object;
-    NavMeshPtr();
-    ~NavMeshPtr();
-    NavMesh* FUN_00559450();
-};
 struct P072Location
 {
     bool FUN_006dd640(NavMeshPtr&, unsigned short&);
@@ -8084,21 +8089,14 @@ bool P072Search::FindNeighborNodes(P072Node* pInputNode, P072List* pOutputList)
     return true;
 }
 
-struct P3
-{
-    float x, y, z;
-    P3 operator-(const P3& o) const;
-    float Length() const;
-};
 
 struct Pos4
 {
     int unk00;
-    P3 pos04;
+    NiPoint3 pos04;
 };
 
 struct Edge6a08d0;
-struct Sphere6a08d0;
 
 struct Ctx6a08d0 : SpawnedBase_b7454
 {
@@ -8112,7 +8110,7 @@ struct Ctx6a08d0 : SpawnedBase_b7454
     int unk2074;
     int unk2078;
     Pos4* unk207c;
-    void SetEdgeFromSphere(Edge6a08d0* a1, Sphere6a08d0* a2, int a3, int a4);
+    void SetEdgeFromSphere(Edge6a08d0* a1, NavObj* a2, int a3, int a4);
 };
 
 struct Edge6a08d0
@@ -8122,29 +8120,17 @@ struct Edge6a08d0
     S12& GetName();
 };
 
-struct Sphere6a08d0
-{
-    int unk00;
-    P3 center04;
-    float fRadius10;
-};
-
+// This is a NavObj: type at 0, position at 4 and radius at 0x10; Sphere has its center at 0.
 // Stores the sphere pointer and two ints into the edge's name and sets f04 to 0.75 times the distance from the sphere center to unk207c's position.
 // @fnv 0x006a08d0
-void Ctx6a08d0::SetEdgeFromSphere(Edge6a08d0* a1, Sphere6a08d0* pSphere, int a3, int a4)
+void Ctx6a08d0::SetEdgeFromSphere(Edge6a08d0* a1, NavObj* pSphere, int a3, int a4)
 {
     a1->GetName().a = (int)pSphere;
     a1->GetName().b = a3;
     a1->GetName().c = a4;
-    a1->f04 = (pSphere->center04 - unk207c->pos04).Length() * 0.75;
+    a1->f04 = ((const NiPoint3&)pSphere->pos - unk207c->pos04).Length() * 0.75;
 }
 
-class Point
-{
-  public:
-    float x, y, z;
-    Point operator+(const Point&) const;
-};
 class Angle
 {
   public:
@@ -8153,7 +8139,7 @@ class Angle
     Angle(const Angle&);
     Angle& operator=(const Angle&);
     Angle operator+(const Angle&) const;
-    Point GetPoint(float);
+    NiPoint3 GetPoint(float);
 };
 struct Arc
 {
@@ -8163,20 +8149,20 @@ struct Arc
 };
 struct Ball
 {
-    Point center;
+    NiPoint3 center;
     float radius;
 };
 struct Edge
 {
     int a, b, triangle;
-    Point point;
+    NiPoint3 point;
     Edge();
     Edge(const Edge&);
     Edge& operator=(const Edge&);
 };
 struct Search
 {
-    bool Test(Edge&, const Point&, Edge&);
+    bool Test(Edge&, const NiPoint3&, Edge&);
     bool TraceArcOnBall(const Edge&, const Ball&, Arc, Edge&);
 };
 // @fnv 0x006a0c50
@@ -8185,7 +8171,7 @@ bool Search::TraceArcOnBall(const Edge& aStartEdge, const Ball& ball, Arc arc, E
     Angle edge(arc.direction == 0 ? 0.2617993950843811f : -0.2617993950843811f);
     Angle last(arc.start);
     Angle step = last + edge;
-    Point current = ball.center + last.GetPoint(ball.radius);
+    NiPoint3 current = ball.center + last.GetPoint(ball.radius);
     Edge nextAngle(aStartEdge);
     Edge point;
     unsigned hit = 0;
@@ -8210,7 +8196,7 @@ bool Search::TraceArcOnBall(const Edge& aStartEdge, const Ball& ball, Arc arc, E
         aOutputEdge = point;
         return false;
     }
-    Point count = ball.center + arc.end.GetPoint(ball.radius);
+    NiPoint3 count = ball.center + arc.end.GetPoint(ball.radius);
     nextAngle.triangle = -1;
     if (!Test(nextAngle, count, point))
     {
@@ -8222,16 +8208,6 @@ bool Search::TraceArcOnBall(const Edge& aStartEdge, const Ball& ball, Arc arc, E
 }
 
 namespace fnv_006a0ef0 {
-struct Vec
-{
-    float x, y, z;
-    Vec();
-    Vec operator-(const Vec&) const;
-    Vec operator+(const Vec&) const;
-    Vec operator*(float) const;
-    Vec& operator+=(const Vec&);
-    void FUN_004a0c10();
-};
 struct Mesh;
 struct Handle
 {
@@ -8246,21 +8222,23 @@ struct Handle
 struct Start
 {
     Handle handle;
-    Vec position;
+    NiPoint3 position;
 };
 struct Hit
 {
     Mesh* mesh;
     int edge;
-    Vec position;
+    NiPoint3 position;
 };
-struct Bound
+// Edge handle on the neighbouring navmesh filled by MatchNavMesh (0x0068f670): same mesh/triangle/flags/edge
+// layout as Handle; its empty ctor folds to 0x006240d0. Not the shared sphere Bound.
+struct NeighborEdgeHandle
 {
     Mesh* mesh;
     unsigned short triangle;
     unsigned short flags;
     int edge;
-    Bound();
+    NeighborEdgeHandle();
 };
 struct EdgeInfo
 {
@@ -8272,22 +8250,22 @@ struct Triangle
 };
 struct Vertices
 {
-    Vec* first;
-    Vec* second;
+    NiPoint3* first;
+    NiPoint3* second;
 };
 struct Mesh
 {
-    Hit FindEdgeIntersection(unsigned short, int, const Vec&, const Vec&);
-    bool MatchNavMesh(const Handle&, Bound&);
+    Hit FindEdgeIntersection(unsigned short, int, const NiPoint3&, const NiPoint3&);
+    bool MatchNavMesh(const Handle&, NeighborEdgeHandle&);
     Triangle* FUN_005582f0(unsigned short);
     EdgeInfo* FUN_0068f230(unsigned short, int);
     Vertices FUN_0068f040(unsigned short, int);
 };
 struct PathResult
 {
-    PathResult(const Handle&, const Vec&);
+    PathResult(const Handle&, const NiPoint3&);
     Handle handle;
-    Vec position;
+    NiPoint3 position;
 };
 struct Output
 {
@@ -8297,12 +8275,8 @@ struct Request
 {
     float GetFloatAtOffset68();
 };
-struct Setting
-{
-    float* FUN_00403e20();
-};
 extern Setting DAT_011d6ef0;
-Vec FUN_006ba550(const Vec&, const Vec&, const Vec&, const Vec&);
+NiPoint3 FUN_006ba550(const NiPoint3&, const NiPoint3&, const NiPoint3&, const NiPoint3&);
 struct Walker
 {
     int unk0000;
@@ -10386,16 +10360,16 @@ struct Walker
     int unk2078;
     int unk207c;
     Request* request;
-    bool FindPath(const Start*, const Vec&, Output*);
+    bool FindPath(const Start*, const NiPoint3&, Output*);
 };
 // @fnv 0x006a0ef0
-bool Walker::FindPath(const Start* start, const Vec& target, Output* output)
+bool Walker::FindPath(const Start* start, const NiPoint3& target, Output* output)
 {
-    Vec origin6 = start->position;
-    Vec destination5 = target;
-    Vec direction = destination5 - origin6;
+    NiPoint3 origin6 = start->position;
+    NiPoint3 destination5 = target;
+    NiPoint3 direction = destination5 - origin6;
     direction.FUN_004a0c10();
-    Vec current = origin6;
+    NiPoint3 current = origin6;
     Handle handle8;
     handle8.FUN_006c4350(start->handle);
     while (true)
@@ -10410,7 +10384,7 @@ bool Walker::FindPath(const Start* start, const Vec& target, Output* output)
         {
             Handle edge7;
             edge7.FUN_0069a6c0(handle8.mesh, handle8.triangle, hit2.edge);
-            Bound next;
+            NeighborEdgeHandle next;
             bool kPass4 = edge7.mesh->MatchNavMesh(edge7, next);
             if (kPass4)
             {
@@ -10426,7 +10400,7 @@ bool Walker::FindPath(const Start* start, const Vec& target, Output* output)
                 if (handle8.mesh != next.mesh)
                 {
                     Vertices vertices3 = next.mesh->FUN_0068f040(next.triangle, next.edge);
-                    Vec midpointA = (*vertices3.first + *vertices3.second) * 0.5f;
+                    NiPoint3 midpointA = (*vertices3.first + *vertices3.second) * 0.5f;
                     current = FUN_006ba550(*vertices3.first, *vertices3.second, hit2.position, destination5);
                     current += (midpointA - current) * 0.01f;
                 }
@@ -10503,17 +10477,10 @@ void __cdecl FUN_006a1180(const ArcPoint3& akCenter, float afRadius, const ArcAn
 }
 
 namespace fnv_006a0940 {
-struct Vec3
-{
-    float x, y, z;
-    Vec3 operator+(const Vec3& o) const;
-    Vec3 operator-(const Vec3& o) const;
-    float Length() const;
-};
 struct ArcAngle
 {
     float fCos, fSin;
-    Vec3 PointAt(float afRadius);
+    NiPoint3 PointAt(float afRadius);
 };
 struct ArcStandIn
 {
@@ -10521,13 +10488,8 @@ struct ArcStandIn
     ArcAngle end;
     int direction;
 };
-struct SphereStandIn
-{
-    Vec3 Center;
-    float fRadius;
-    SphereStandIn(const Pt3& aCenter, float afRadius);
-};
-bool __cdecl ArcBlockedBySphere(const SphereStandIn& aSelf, const ArcStandIn& aArc, const SphereStandIn& aOther);
+// Sphere constructor 0x006a04b0 is also bound by pathsmootherpov_decl_variant; center at 0, radius at 0xC.
+bool __cdecl ArcBlockedBySphere(const Sphere& aSelf, const ArcStandIn& aArc, const Sphere& aOther);
 
 struct NavOwnerArc : NavOwner
 {
@@ -10538,8 +10500,8 @@ struct NavOwnerArc : NavOwner
 // @fnv 0x006a0940
 float NavOwnerArc::FUN_006a0940(NavObj* apSelf, ArcStandIn aArc, NavObj* apIgnore)
 {
-    SphereStandIn kSelf(apSelf->pos, apSelf->radius);
-    Vec3 kPoint = kSelf.Center + aArc.start.PointAt(kSelf.fRadius);
+    Sphere kSelf((const NiPoint3&)apSelf->pos, apSelf->radius);
+    NiPoint3 kPoint = kSelf.Center + aArc.start.PointAt(kSelf.fRadius);
     for (unsigned int i_ = 0; i_ < groups.GetCount(); i_++)
     {
         for (unsigned int j2 = 0; j2 < groups.GetAt(i_)->GetCount(); j2++)
@@ -10551,8 +10513,8 @@ float NavOwnerArc::FUN_006a0940(NavObj* apSelf, ArcStandIn aArc, NavObj* apIgnor
                 continue;
             if (pObj->pList->Find(apSelf, 0, CompareObj) != -1)
                 continue;
-            SphereStandIn kOther4(pObj->pos, pObj->radius);
-            if ((kOther4.Center - kPoint).Length() < kOther4.fRadius * kOther4.fRadius)
+            Sphere kOther4((const NiPoint3&)pObj->pos, pObj->radius);
+            if ((kOther4.Center - kPoint).FUN_004a7290() < kOther4.fRadius * kOther4.fRadius)
                 continue;
             if (!ArcBlockedBySphere(kSelf, aArc, kOther4))
             {

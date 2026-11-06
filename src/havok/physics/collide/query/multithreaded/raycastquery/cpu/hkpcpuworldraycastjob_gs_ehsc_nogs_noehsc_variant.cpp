@@ -5,6 +5,9 @@
 
 // src/havok/physics/collide/query/multithreaded/raycastquery/cpu/hkpcpuworldraycastjob.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/query/multithreaded/raycastquery/cpu/hkpcpuworldraycastjob.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+
 struct ValueHolder
 {
     int unk00;
@@ -73,21 +76,7 @@ struct FUN_00df8db0_cls
     float GetResult(ParamBlock* apParam);
 };
 extern int DAT_0101e594;
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00df8960_cls
 {
     int m_vptr;
@@ -272,7 +261,8 @@ struct Local
     unsigned int m_18;
     unsigned int m_1c;
 };
-struct Interface
+// Exe 0x00df8df0: unit-local Interface view; declarations and layout are preserved.
+struct HkpcpuworldraycastjobInterfaceView
 {
     virtual void v00();
     virtual void v04();
@@ -299,7 +289,7 @@ struct Interface
     virtual void v58();
     virtual void v5c(void* a, Output* b, unsigned int c);
 };
-void __cdecl FUN_00df89b0(Interface* iface, Source* src, Output* out, Spawned* spawned);
+void __cdecl FUN_00df89b0(HkpcpuworldraycastjobInterfaceView* iface, Source* src, Output* out, Spawned* spawned);
 
 #include <xmmintrin.h>
 namespace fnv_00df8df0 {
@@ -326,15 +316,9 @@ struct Allocator
     virtual void v0c();
     virtual void Free(void*, int) throw();
 };
-struct Pool
+static __forceinline hkMemoryRouter* pool()
 {
-    unsigned char* cursor;
-    int unk04, unk08, unk0c;
-    Allocator* allocator;
-};
-static __forceinline Pool* pool()
-{
-    return (Pool*)FUN_00c85750();
+    return FUN_00c85750();
 }
 void __cdecl FUN_00c908c0(Allocator*, void*, int, int) throw();
 void __cdecl FUN_00e2c8a0(void*, void*, void*, int, void*, void*, int) throw();
@@ -424,13 +408,13 @@ struct VertexBuffer
         data = 0;
         count = 0;
         capacity = 0x80000000;
-        Pool* p = pool();
-        OutputVertex* memory = (OutputVertex*)p->cursor;
-        p->cursor = (unsigned char*)memory + ((n * 32 + 127) & ~127);
+        hkMemoryRouter* p = pool();
+        OutputVertex* memory = (OutputVertex*)p->m_stack.m_next.m_storage;
+        p->m_stack.m_next.m_storage = (void*)((int)((unsigned char*)memory + ((n * 32 + 127) & ~127)));
         data = memory;
         capacity = n | 0x80000000;
         storage = memory;
-        Allocator* a = *(Allocator* volatile*)&pool()->allocator;
+        Allocator* a = *(Allocator* volatile*)&pool()->m_heap;
         int old = capacity & 0x3fffffff;
         if (old < n)
         {
@@ -445,8 +429,8 @@ struct VertexBuffer
         OutputVertex* saved = storage;
         if (saved == data)
             count = 0;
-        pool()->cursor = (unsigned char*)saved;
-        Allocator* a = *(Allocator* volatile*)&pool()->allocator;
+        pool()->m_stack.m_next.m_storage = (void*)((int)saved);
+        Allocator* a = *(Allocator* volatile*)&pool()->m_heap;
         count = 0;
         if ((capacity & 0x80000000u) == 0)
             a->Free(data, (capacity & 0x3fffffff) * 32);
@@ -606,9 +590,9 @@ void __cdecl FUN_00df8df0(void* result, MeshRequest* request)
         fields[1].Init();
         fields[2].Init();
         fields[3].Init();
-        Pool* p = pool();
-        iteration.destination = p->cursor;
-        p->cursor = iteration.destination + 128;
+        hkMemoryRouter* p = pool();
+        iteration.destination = (unsigned char*)p->m_stack.m_next.m_storage;
+        p->m_stack.m_next.m_storage = (void*)((int)(iteration.destination + 128));
         if (count > 0)
         {
             Vertex* v = querySource;
@@ -647,7 +631,7 @@ void __cdecl FUN_00df8df0(void* result, MeshRequest* request)
         } while (queryRemaining-- != 1);
         FUN_00e2c8a0(request->passA, vertices.data, querySource, queryType, fields, iteration.destination, count);
         FUN_00e2cc30(request->passB, vertices.data, querySource, queryType, fields, iteration.destination, count);
-        pool()->cursor = iteration.destination;
+        pool()->m_stack.m_next.m_storage = (void*)((int)iteration.destination);
         Field* end = fields + 4;
         int remaining = 3;
         do

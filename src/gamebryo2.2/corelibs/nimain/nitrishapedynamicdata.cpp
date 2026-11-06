@@ -2,6 +2,8 @@
 // src/gamebryo2.2/corelibs/nimain/nitrishapedynamicdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nitrishapedynamicdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/NiTriShapeData.h"
+
 struct NiTriShapeDynamicData
 {
     unsigned short m_usActiveVertices;
@@ -41,10 +43,6 @@ void __thiscall NiTriShapeDynamicData::FUN_00a81820(unsigned short usActiveTrian
 }
 }  // namespace fnv_00a81820
 
-struct NiTriShapeData
-{
-    bool FUN_00a7b7e0(const NiTriShapeData*);
-};
 struct NiTriShapeDynamicDataShell : NiTriShapeData
 {
     unsigned short m_usActiveVertices;

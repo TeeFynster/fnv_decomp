@@ -2,7 +2,7 @@
 #ifndef FNV_TILE_REFVALUEACTION_H
 #define FNV_TILE_REFVALUEACTION_H
 
-#include "layout_support.h"
+#include <stddef.h>
 #include "Tile__Action.h"
 class Tile__RefValueAction;
 class Tile__Value;
@@ -19,6 +19,6 @@ class Tile__RefValueAction : public Tile__Action
     // Tile::RefValueAction& __cdecl Tile::RefValueAction::*(const Tile::RefValueAction&)
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(Tile__RefValueAction) == 16);
-FNV_STATIC_ASSERT(offsetof(Tile__RefValueAction, m_pReferencedValue) == 12);
+typedef char Tile_RefValueAction_size_check[(sizeof(Tile__RefValueAction) == 16) ? 1 : -1];
+typedef char Tile_RefValueAction_value_offset_check[(offsetof(Tile__RefValueAction, m_pReferencedValue) == 12) ? 1 : -1];
 #endif

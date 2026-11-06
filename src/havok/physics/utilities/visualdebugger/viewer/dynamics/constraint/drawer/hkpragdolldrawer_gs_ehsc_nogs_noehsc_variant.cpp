@@ -6,30 +6,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <math.h>
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float lanes[4];
-} __m128;
-extern "C"
-{
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_setzero_ps();
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_load_ps1(const float*);
-    void _mm_store_ps(float*, __m128);
-}
+#include "../../../../../../../../../include/Vec4.h"
 
 class ScalarLane
 {
@@ -51,90 +28,65 @@ class ScalarLane
         return _mm_shuffle_ps(value, value, 0);
     }
 };
-struct RotationColumns;
-struct Buf40;
-class Vec4
+__forceinline __m128& Vec4::getQuad()
 {
-    __m128 data;
-
-  public:
-    __forceinline Vec4()
-    {}
-    __forceinline Vec4(const __m128& q) : data(q)
-    {}
-    __forceinline Vec4(const Vec4& q) : data(q.data)
-    {}
-    __forceinline void operator=(const Vec4& q)
-    {
-        data = q.data;
-    }
-    __forceinline void operator=(const __m128& q)
-    {
-        data = q;
-    }
-    operator __m128() const
-    {
-        return data;
-    }
-    __forceinline __m128& getQuad()
-    {
-        return data;
-    }
-    __forceinline const __m128& getQuad() const
-    {
-        return data;
-    }
-    __forceinline void setCross(const Vec4& a, const Vec4& b)
-    {
-        __m128 p = _mm_mul_ps(_mm_shuffle_ps(a.data, a.data, 0xc9), _mm_shuffle_ps(b.data, b.data, 0xd2));
-        __m128 n = _mm_mul_ps(_mm_shuffle_ps(a.data, a.data, 0xd2), _mm_shuffle_ps(b.data, b.data, 0xc9));
-        data = _mm_sub_ps(p, n);
-    }
-    __forceinline void orderedCross(const Vec4& left, const Vec4& right)
-    {
-        __m128 a = left.data, b = right.data;
-        __m128 a2 = _mm_shuffle_ps(a, a, 0xd2);
-        __m128 a1 = _mm_shuffle_ps(a, a, 0xc9);
-        __m128 b1 = _mm_shuffle_ps(b, b, 0xc9);
-        b1 = _mm_mul_ps(b1, a2);
-        __m128 b2 = _mm_shuffle_ps(b, b, 0xd2);
-        b2 = _mm_mul_ps(b2, a1);
-        data = _mm_sub_ps(b2, b1);
-    }
-    __forceinline ScalarLane dot3(const Vec4& a) const
-    {
-        __m128 p = _mm_mul_ps(data, a.data);
-        __m128 xysum = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
-        return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), xysum);
-    }
-    __forceinline ScalarLane inverseLength3() const
-    {
-        const __m128 half = _mm_set_ss(0.5f);
-        const __m128 three = _mm_set_ss(3.0f);
-        const __m128 zero = _mm_set_ss(0.0f);
-        const __m128 squared = dot3(*this).getQuad();
-        const __m128 equal = _mm_cmpeq_ss(squared, zero);
-        const __m128 estimate = _mm_rsqrt_ss(squared);
-        const __m128 refined = _mm_mul_ss(_mm_mul_ss(half, estimate),
-                                          _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(squared, estimate), estimate)));
-        return _mm_andnot_ps(equal, refined);
-    }
-    __forceinline void normalize3()
-    {
-        __m128 scale = inverseLength3().broadcast();
-        data = _mm_mul_ps(scale, data);
-    }
-    void __thiscall FUN_00c7f640(const Buf40*, const void*);
-    void __thiscall FUN_00c7f700(const RotationColumns& rotation, const Vec4& value);
-};
+    return *reinterpret_cast<__m128*>(this);
+}
+__forceinline const __m128& Vec4::getQuad() const
+{
+    return *reinterpret_cast<const __m128*>(this);
+}
+__forceinline void Vec4::setCross(const Vec4& a, const Vec4& b)
+{
+    __m128 p = _mm_mul_ps(_mm_shuffle_ps(a.getQuad(), a.getQuad(), 0xc9), _mm_shuffle_ps(b.getQuad(), b.getQuad(), 0xd2));
+    __m128 n = _mm_mul_ps(_mm_shuffle_ps(a.getQuad(), a.getQuad(), 0xd2), _mm_shuffle_ps(b.getQuad(), b.getQuad(), 0xc9));
+    getQuad() = _mm_sub_ps(p, n);
+}
+__forceinline void Vec4::orderedCross(const Vec4& left, const Vec4& right)
+{
+    __m128 a = left.getQuad(), b = right.getQuad();
+    __m128 a2 = _mm_shuffle_ps(a, a, 0xd2);
+    __m128 a1 = _mm_shuffle_ps(a, a, 0xc9);
+    __m128 b1 = _mm_shuffle_ps(b, b, 0xc9);
+    b1 = _mm_mul_ps(b1, a2);
+    __m128 b2 = _mm_shuffle_ps(b, b, 0xd2);
+    b2 = _mm_mul_ps(b2, a1);
+    getQuad() = _mm_sub_ps(b2, b1);
+}
+__forceinline ScalarLane Vec4::dot3(const Vec4& a) const
+{
+    __m128 p = _mm_mul_ps(getQuad(), a.getQuad());
+    __m128 xysum = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), xysum);
+}
+__forceinline ScalarLane Vec4::inverseLength3() const
+{
+    const __m128 half = _mm_set_ss(0.5f);
+    const __m128 three = _mm_set_ss(3.0f);
+    const __m128 zero = _mm_set_ss(0.0f);
+    const __m128 squared = Vec4::dot3(*this).getQuad();
+    const __m128 equal = _mm_cmpeq_ss(squared, zero);
+    const __m128 estimate = _mm_rsqrt_ss(squared);
+    const __m128 refined = _mm_mul_ss(_mm_mul_ss(half, estimate),
+                                      _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(squared, estimate), estimate)));
+    return _mm_andnot_ps(equal, refined);
+}
+__forceinline void Vec4::normalize3()
+{
+    __m128 scale = Vec4::inverseLength3().broadcast();
+    getQuad() = _mm_mul_ps(scale, getQuad());
+}
 struct Buf40
 {
-    Vec4 a;
-    Vec4 b;
-    Vec4 c;
-    Vec4 d;
+    Vec4::Aligned a;
+    Vec4::Aligned b;
+    Vec4::Aligned c;
+    Vec4::Aligned d;
+    __forceinline Buf40()
+        : a(Vec4::Uninitialized), b(Vec4::Uninitialized), c(Vec4::Uninitialized), d(Vec4::Uninitialized)
+    {}
 };
-typedef Vec4 Sub40;
+typedef Vec4::Aligned Sub40;
 
 struct SubC0
 {
@@ -162,19 +114,19 @@ struct DisplayBase
 };
 struct SubReg : DisplayBase
 {
-    Vec4 start, axis;
+    Vec4::Aligned start, axis;
     int count;
     float angle, height;
     void __thiscall FUN_00de5370(float, float, int, Vec4*, void*);
 };
 struct Sub280 : DisplayBase
 {
-    Vec4 normal, center, perpendicular, extent;
+    Vec4::Aligned normal, center, perpendicular, extent;
     void __thiscall SetFromVectors(Vec4*, Vec4*, void*, Vec4*);
 };
 struct MatrixColumns
 {
-    Vec4 first, second, third;
+    Vec4::Aligned first, second, third;
     __forceinline const Vec4& getColumn(int i) const
     {
         return (&first)[i];
@@ -268,13 +220,13 @@ struct P2Vtbl
 };
 struct DrawBasis
 {
-    Vec4 t60;
-    Vec4 t70;
-    Vec4 t80;
-    Vec4 t90;
-    Vec4 bufA0;
-    Vec4 tb0;
-    Vec4 tc0;
+    Vec4::Aligned t60;
+    Vec4::Aligned t70;
+    Vec4::Aligned t80;
+    Vec4::Aligned t90;
+    Vec4::Aligned bufA0;
+    Vec4::Aligned tb0;
+    Vec4::Aligned tc0;
 };
 
 struct RendererRef
@@ -306,7 +258,7 @@ struct DrawerBase
     float f14;
     int f18;
     float f1c;
-    Vec4 bodyA, bodyB;
+    Vec4::Aligned bodyA, bodyB;
     Sub40 m40;
     Sub40 m50;
     RotationColumns m60, m90;
@@ -349,16 +301,16 @@ void __thiscall This::FUN_00de59f0(P1* p1, P2Vtbl* p2, int p3, int p4)
     FUN_00de44c0(p3, p4);
     const RotationColumns& localA = mat->rotationA;
     const RotationColumns& localB = mat->rotationB;
-    Vec4 t80;
+    Vec4::Aligned t80(Vec4::Uninitialized);
     t80.FUN_00c7f700(reinterpret_cast<const RotationColumns&>(m90), localB.getColumn(0));
     const Vec4* matrixColumn60 = &localB.getColumn(1);
-    Vec4 t70;
+    Vec4::Aligned t70(Vec4::Uninitialized);
     t70.setCross(localB.getColumn(0), localB.getColumn(1));
     t70.normalize3();
     t70.FUN_00c7f700(reinterpret_cast<const RotationColumns&>(m90), t70);
-    Vec4 t60;
+    Vec4::Aligned t60(Vec4::Uninitialized);
     t60.FUN_00c7f700(reinterpret_cast<const RotationColumns&>(m90), *matrixColumn60);
-    Vec4 tb0;
+    Vec4::Aligned tb0(Vec4::Uninitialized);
     {
         __m128 a = localA.getColumn(1).getQuad();
         __m128 b = localA.getColumn(0).getQuad();
@@ -372,16 +324,16 @@ void __thiscall This::FUN_00de59f0(P1* p1, P2Vtbl* p2, int p3, int p4)
     }
 
     tb0.normalize3();
-    Vec4 t90;
+    Vec4::Aligned t90(Vec4::Uninitialized);
     t90.FUN_00c7f700(reinterpret_cast<const RotationColumns&>(m60), tb0);
-    Vec4 tc0;
+    Vec4::Aligned tc0(Vec4::Uninitialized);
     tc0.FUN_00c7f700(reinterpret_cast<const RotationColumns&>(m60), localA.getColumn(0));
     float prod1 = f1c * f0c;
     mC0.FUN_00e10d50(&receivers.m50, &t80, &t70, 0xff008000, prod1, p3, p4);
     mC0.FUN_00e10d50(&m40, &tc0, &t90, FUN_00cabb00(0xff, 0xff, 0, 0xff), f1c * f0c, p3, p4);
     void* subD0 = &mD0;
     mD0.FUN_00de5370(mat->fa0, f1c * f10, f18, &t80, &receivers.m50);
-    Vec4 bufA0;
+    Vec4::Aligned bufA0(Vec4::Uninitialized);
     float prod2 = f14 * f1c;
     bufA0.getQuad() = _mm_load_ps1(&prod2);
     void* sub280 = &m280;
@@ -464,3 +416,4 @@ void __thiscall This::FUN_00de59f0(P1* p1, P2Vtbl* p2, int p3, int p4)
         vec1.cap = (int)0x80000000;
     }
 }
+

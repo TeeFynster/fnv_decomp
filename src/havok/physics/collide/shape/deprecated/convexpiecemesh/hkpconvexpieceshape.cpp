@@ -1,6 +1,12 @@
 // havok/physics/collide/shape/deprecated/convexpiecemesh/hkpconvexpieceshape.cpp: AdjDerived (12 functions)
 
 #include "fnv_asm_helpers.h"
+#define FNV_VEC4_SIMD
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkTransform.h"
 // src/havok/physics/collide/shape/deprecated/convexpiecemesh/hkpconvexpieceshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/deprecated/convexpiecemesh/hkpconvexpieceshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -58,21 +64,7 @@ void FUN_00e60690_owner::DispatchToInner(int index,int value) { unk0c->inner.run
 extern int DAT_010c6fb0;
 extern int DAT_0102e388;
 
-struct AudioAllocator {
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct FUN_00e60c30_cls {
     int m_vptr;
@@ -94,9 +86,9 @@ FUN_00e60c30_cls* FUN_00e60c30_cls::Destroy(unsigned char acFlags)
     m_p14 = (void*)&DAT_010c6fb0;
     m_vptr = (int)&DAT_0102e388;
     if (acFlags & 1) {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(this, m_uSize);
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        pAllocator->blockFree(this, m_uSize);
     }
     return this;
 }
@@ -126,12 +118,6 @@ void FUN_00e606c0_cls::Copy(__m128* apDst)
     *apDst = *m_pSrc;
 }
 
-struct E606E0Vector4 {
-    __m128 m_vComponents;
-
-    void operator=(const E606E0Vector4& v) { m_vComponents = v.m_vComponents; }
-};
-
 struct E606E0Shape {
     int unk00;
     int unk04;
@@ -139,27 +125,23 @@ struct E606E0Shape {
     int unk0C;
     float m_fSphereRadius;
     int unk14;
-    E606E0Vector4* m_kVertices;
+    Vec4* m_kVertices;
     int m_iStridedVertexCount;
 
-    E606E0Vector4* CopyVerticesWithRadius(E606E0Vector4* vertices) const;
+    Vec4* CopyVerticesWithRadius(Vec4* vertices) const;
 };
 
 // @fnv 0x00e606e0
-E606E0Vector4* E606E0Shape::CopyVerticesWithRadius(E606E0Vector4* apDestVertices) const
+Vec4* E606E0Shape::CopyVerticesWithRadius(Vec4* apDestVertices) const
 {
-    E606E0Vector4* pDest = apDestVertices;
+    Vec4* pDest = apDestVertices;
     for (int i = 0; i < m_iStridedVertexCount; i++) {
-        *pDest = m_kVertices[i];
+        pDest->m_vComponents = m_kVertices[i].m_vComponents;
         pDest->m_vComponents.m128_f32[3] = m_fSphereRadius;
         pDest++;
     }
     return apDestVertices;
 }
-
-struct __declspec(align(16)) Vec4 {
-    __m128 v;
-};
 
 struct Mat {
     Vec4 rows[8];
@@ -214,14 +196,7 @@ void FUN_00e60730_cls::FUN_00e60730(const unsigned short* apIndices, int aiCount
     }
 }
 
-struct Transform_e608 {
-    __m128 m_kColumn0;
-    __m128 m_kColumn1;
-    __m128 m_kColumn2;
-    __m128 m_vTranslation;
-};
-
-inline __m128 TransformedPos_e608(const Transform_e608& a, const __m128& b)
+inline __m128 TransformedPos_e608(const hkTransform& a, const __m128& b)
 {
     const __m128 xb = _mm_shuffle_ps(b, b, 0x00);
     const __m128 yb = _mm_shuffle_ps(b, b, 0x55);
@@ -245,12 +220,12 @@ public:
     __m128* m_kVertices;
     int m_iStridedVertexCount;
 
-    void FUN_00e60800(const Transform_e608& kLocalToWorld, float fTolerance, Aabb_e608& kOut) const;
+    void FUN_00e60800(const hkTransform& kLocalToWorld, float fTolerance, Aabb_e608& kOut) const;
 };
 
 // Computes the world-space AABB of the shape's vertices via kLocalToWorld, then expands it by m_fSphereRadius plus fTolerance into kOut.
 // @fnv 0x00e60800
-void Shape_e608::FUN_00e60800(const Transform_e608& kLocalToWorld, float fTolerance, Aabb_e608& kOut) const
+void Shape_e608::FUN_00e60800(const hkTransform& kLocalToWorld, float fTolerance, Aabb_e608& kOut) const
 {
     kOut.m_kMinimumCorner = _mm_set1_ps(3.40282e+38f);
     kOut.m_kMaximumCorner = _mm_set1_ps(-3.40282e+38f);
@@ -268,30 +243,18 @@ void Shape_e608::FUN_00e60800(const Transform_e608& kLocalToWorld, float fTolera
 extern "C" void _ReadWriteBarrier(void);
 extern "C" unsigned __int64 __rdtsc(void);
 #include <windows.h>
+#include "../../../../../../../include/hkBool.h"
 extern DWORD hkMonitorStreamTls;
 
-struct S_00e609c0_TimerCommand {
-    const char* m_pCommandName;
-    unsigned int m_uiStartTicks;
-    unsigned int m_uiEndTicks;
-};
-
-struct S_00e609c0_MonitorStream {
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    char* m_pRayCursor;
-    char* m_pCurrentCommand;
-};
-
 static inline void S_00e609c0_Timer(const char* name, int& t) {
-    S_00e609c0_MonitorStream* s = (S_00e609c0_MonitorStream*)TlsGetValue(hkMonitorStreamTls);
-    if (s->m_kRayEnd < s->m_pCurrentCommand) {
-        S_00e609c0_TimerCommand* h = (S_00e609c0_TimerCommand*)s->m_kRayEnd;
-        h->m_pCommandName = name;
+    hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(hkMonitorStreamTls);
+    if (s->m_end.m_storage < s->m_capacityMinus16.m_storage) {
+        hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)s->m_end.val();
+        h->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         t = (int)__rdtsc();
-        h->m_uiStartTicks = *(volatile unsigned int*)&t;
-        s->m_kRayEnd = (char*)(h + 1);
+        h->m_time0 = *(volatile unsigned int*)&t;
+        s->m_end.m_storage = (char*)(h + 1);
     }
 }
 
@@ -416,45 +379,45 @@ S_00e609c0_Bool S_00e609c0_ConvexPieceShape::FUN_00e609c0(const S_00e609c0_RayIn
 
 extern unsigned int DAT_0126835c;
 
-struct StringCursor {
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    char* m_pRayCursor;
-    char* m_pFreeList;
+inline hkMonitorStream& hkMonitorStream::getInstance()
+{
+    return *(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+}
 
-    static inline StringCursor& GetMonitorStream() {
-        return *(StringCursor*)TlsGetValue(DAT_0126835c);
-    }
-
-    inline void timerBegin(const char* name) {
-        char* cur = m_kRayEnd;
-        if (cur < m_pFreeList) {
-            *(const char**)cur = name;
-            _ReadWriteBarrier();
-            volatile unsigned int t = (unsigned int)__rdtsc();
-            *(unsigned int*)(cur + 4) = t;
-            cur += 12;
-            m_kRayEnd = cur;
-        }
-    }
-
-    inline void timerEnd(const char* name) {
-        char* cur = m_kRayEnd;
-        if (cur < m_pFreeList) {
-            *(const char**)cur = name;
-            _ReadWriteBarrier();
-            volatile unsigned int t = (unsigned int)__rdtsc();
-            *(unsigned int*)(cur + 4) = t;
-            cur += 12;
-            m_kRayEnd = cur;
-        }
-    }
+// The original's timer helpers (expansions of Havok's timer macros), kept as members of a unit-local view so the
+// inlined code keeps its shape.
+struct StringCursor_hkpconvexpieceshape : hkMonitorStream
+{
+    void timerBegin(const char* name);
+    void timerBegin(const char* name1, const char* name2);
+    void timerEnd(const char* name);
 };
+inline void StringCursor_hkpconvexpieceshape::timerBegin(const char* name)
+{
+    char* cur = m_end.m_storage;
+    if (cur < m_capacityMinus16.m_storage) {
+        *(const char**)cur = name;
+        _ReadWriteBarrier();
+        volatile unsigned int t = (unsigned int)__rdtsc();
+        *(unsigned int*)(cur + 4) = t;
+        cur += 12;
+        m_end.m_storage = cur;
+    }
+}
 
-struct hkBool {
-    char m_cBooleanValue;
-    operator bool() const { return m_cBooleanValue != 0; }
-};
+inline void StringCursor_hkpconvexpieceshape::timerEnd(const char* name)
+{
+    char* cur = m_end.m_storage;
+    if (cur < m_capacityMinus16.m_storage) {
+        *(const char**)cur = name;
+        _ReadWriteBarrier();
+        volatile unsigned int t = (unsigned int)__rdtsc();
+        *(unsigned int*)(cur + 4) = t;
+        cur += 12;
+        m_end.m_storage = cur;
+    }
+}
+
 
 struct BodyA {
     int unk00; int unk04; int unk08; int unk0c;
@@ -522,7 +485,7 @@ struct FUN_00e60b00_cls {
 // For each key passing bodyA's filter, gets the child shape and calls its func24 with bodyA, a CdBody built from bodyB, and input, between profiler timers.
 // @fnv 0x00e60b00
 void FUN_00e60b00_cls::ProcessCollisionShapes(const BodyA* bodyA, const BodyB* bodyB, void* input) {
-    StringCursor::GetMonitorStream().timerBegin("TtrcConvxPiece");
+    static_cast<StringCursor_hkpconvexpieceshape&>(hkMonitorStream::getInstance()).timerBegin("TtrcConvxPiece");
 
     for (int i = 0; i < this->m_uiItemCount; ++i) {
         if (bodyA->m_iFilter) {
@@ -541,7 +504,7 @@ void FUN_00e60b00_cls::ProcessCollisionShapes(const BodyA* bodyA, const BodyB* b
         child->func24(bodyA, &body, input);
     }
 
-    StringCursor::GetMonitorStream().timerEnd("Et");
+    static_cast<StringCursor_hkpconvexpieceshape&>(hkMonitorStream::getInstance()).timerEnd("Et");
 }
 
 // sub ecx,0x14; jmp Destroy == MSVC adjustor thunk (Derived overrides a virtual both bases declare).

@@ -1,3 +1,10 @@
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiBSBoneLODController.h"
+#include "../../../../include/NiControllerManager.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiStream.h"
 
 // src/gamebryo2.2/corelibs/nianimation/nibonelodcontroller_od_variant_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/gamebryo2.2/corelibs/nianimation/nibonelodcontroller_od_variant.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -25,30 +32,10 @@ struct Unknown_00c536a0
     bool FUN_00a6d0f0(int);
     bool FUN_00c536a0(int);
 };
-struct NiStream
-{
-};
-struct NiObject
-{
-    virtual void LinkObject(NiStream&);
-};
-struct NiBSBoneLODController : NiObject
-{
-    void* m_34;
-    void FUN_00c52960(void*);
-    void FUN_00c53ab0(NiStream& s);
-};
 extern GlobalObjectO2_00a7b610 g_012031b8;
 struct FUN_00c53e00_shell
 {
     GlobalObjectO2_00a7b610* __thiscall FUN_00c53e00();
-};
-class NiControllerManager
-{
-  public:
-    char _pad[0x34];
-    int m34;
-    int m38;
 };
 class CloningProcess
 {
@@ -59,8 +46,8 @@ class CloneableObj
     char _pad[0x34];
     int m34;
     int m38;
-    void FUN_00a6cfe0(NiControllerManager*, CloningProcess*);
-    void FUN_00c533f0(NiControllerManager*, CloningProcess*);
+    void FUN_00a6cfe0(NiBSBoneLODController*, CloningProcess*);
+    void FUN_00c533f0(NiBSBoneLODController*, CloningProcess*);
 };
 void operator delete(void*, unsigned int);
 struct S_00c53e10
@@ -294,11 +281,7 @@ FUN_00c53e40::~FUN_00c53e40()
     ClearGroups();
 }
 
-struct PoolW
-{
-    void* FUN_00aa3e40(unsigned int n);
-};
-extern PoolW DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 void* FUN_00aa1070(unsigned int n);
 struct ArrW
 {
@@ -488,27 +471,8 @@ bool FUN_00c53af0::IsEqual(FUN_00c53af0* pkObj)
 void* __cdecl NiMalloc(unsigned int uiSize);
 void __cdecl NiFree(void* pvMem);
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int uiSize);
-    void Deallocate(void* pvMem);
-};
 extern MemoryManager g_kMemoryManager;
 
-struct NiBinaryStream
-{
-    typedef unsigned int (*ReadFunc)(NiBinaryStream* pkThis, void* pvBuffer, unsigned int uiBytes,
-                                     unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    void BinaryRead(void* pvBuffer, unsigned int uiBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents)
-    {
-        m_uiStreamFlags += m_pfnRead(this, pvBuffer, uiBytes, puiComponentSizes, uiNumComponents);
-    }
-
-    void* m_pvVtbl;
-    unsigned int m_uiStreamFlags;
-    ReadFunc m_pfnRead;
-};
 
 template <class T> inline void NiBinaryStreamLoad(NiBinaryStream& kStream, T* pValue, unsigned int uiNumEls)
 {
@@ -697,9 +661,13 @@ void __cdecl FUN_00a26df0(NiStreamLoader* pkStream, void* pvValue);
 
 class BoneLODController;
 
-class NiMemObject
+#include "../../../../include/NiMemObject.h"
+
+class BoneLODControllerArray : public NiMemObject
 {
   public:
+    // 0x00c53870 allocates the set with an inline call to the memory manager (0x00aa3e40), not through
+    // NiMemObject::operator new (0x00aa13e0), so the class keeps its own inline allocator.
     static void* operator new(unsigned int uiSize)
     {
         return g_kMemoryManager.Allocate(uiSize);
@@ -708,11 +676,6 @@ class NiMemObject
     {
         g_kMemoryManager.Deallocate(pvMem);
     }
-};
-
-class BoneLODControllerArray : public NiMemObject
-{
-  public:
     BoneLODControllerArray(unsigned int uiInitialSize = 0)
     {
         if (uiInitialSize > 0)
@@ -877,32 +840,28 @@ struct Manager_c53360
     Allocator_c53360* allocator;
 };
 extern Manager_c53360* DAT_011f6080;
-class NiMemObject
+class FUN_00c53d70 : public NiBSBoneLODController
 {
   public:
+    // NiMemObject::operator new (0x00aa13e0) as an inline-declared body: 0x00c53360 calls it out of line but its
+    // frame keeps the slots of the inline candidate's two locals.
     static void* operator new(unsigned int size)
     {
         unsigned int requested = size ? size : 1;
         unsigned int alignment = 4;
         return DAT_011f6080->allocator->Allocate(requested, alignment, 1, true, 0, -1, 0);
     }
-    static void operator delete(void* ptr);
-};
-class FUN_00c53d70 : public NiControllerManager, public NiMemObject
-{
-  public:
-    int unk3C, unk40, unk44, unk48;
     FUN_00c53d70();
 };
 class CloneOwner_c53360 : public CloneableObj
 {
   public:
-    NiControllerManager* FUN_00c53360(CloningProcess* process);
+    NiBSBoneLODController* FUN_00c53360(CloningProcess* process);
 };
 // @fnv 0x00c53360
-NiControllerManager* CloneOwner_c53360::FUN_00c53360(CloningProcess* process)
+NiBSBoneLODController* CloneOwner_c53360::FUN_00c53360(CloningProcess* process)
 {
-    NiControllerManager* result = new FUN_00c53d70;
+    NiBSBoneLODController* result = new FUN_00c53d70;
     this->FUN_00c533f0(result, process);
     return result;
 }

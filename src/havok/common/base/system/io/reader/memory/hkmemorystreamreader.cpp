@@ -2,6 +2,15 @@
 // src/havok/common/base/system/io/reader/memory/hkmemorystreamreader.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/system/io/reader/memory/hkmemorystreamreader.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../../include/hkBool.h"
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+
+// hkMemoryRouter is the shared router layout: TLS accessor 0x00c85750, heap at +0x10.
+
+
 struct FUN_00e059e0
 {
     int m_00;
@@ -42,24 +51,7 @@ unsigned char* __thiscall hkMemoryStreamReader::IsSupported(unsigned char* suppo
     return supported;
 }
 
-struct FUN_00e05bf0Manager
-{
-// @fnv 0x00e05bf0
-    virtual void FUN_00e05bf0_0()
-    {}
-    virtual void FUN_00e05bf0_1()
-    {}
-    virtual void FUN_00e05bf0_2(hkMemoryStreamReader* object, unsigned short value)
-    {}
-};
-
-struct FUN_00e05bf0Router
-{
-    unsigned char m_00[0x10];
-    FUN_00e05bf0Manager* m_10;
-};
-
-FUN_00e05bf0Router* __cdecl _D1A0E0GetMemoryRouter();
+hkMemoryRouter* __cdecl _D1A0E0GetMemoryRouter();
 
 struct FUN_00e05bf0Class : hkMemoryStreamReader
 {
@@ -73,8 +65,8 @@ hkMemoryStreamReader* __thiscall FUN_00e05bf0Class::FUN_00e05bf0(int flags)
 
     if (flags & 1)
     {
-        FUN_00e05bf0Router* router = _D1A0E0GetMemoryRouter();
-        router->m_10->FUN_00e05bf0_2(this, (unsigned short)m_04);
+        hkMemoryRouter* router = _D1A0E0GetMemoryRouter();
+        router->heap().blockFree(this, (unsigned short)m_04);
     }
 
     return this;
@@ -106,16 +98,8 @@ unsigned char* __stdcall FUN_00e05a00(unsigned char* supported)
     return supported;
 }
 
-struct hkBoolE059
-{
-    char m_cBooleanValue;
-    hkBoolE059(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-};
-
-class hkObjectE059
+// The stream's end/current integers are at +0x0c/+0x10; this is a stream state view.
+class MemoryStreamEndState
 {
   public:
     int unk00;
@@ -124,11 +108,11 @@ class hkObjectE059
     int m_iEnd;
     int m_iCurrent;
 
-    hkBoolE059 IsNotAtEnd() const;
+    hkBool IsNotAtEnd() const;
 };
 
 // @fnv 0x00e059a0
-hkBoolE059 hkObjectE059::IsNotAtEnd() const
+hkBool MemoryStreamEndState::IsNotAtEnd() const
 {
     return m_iEnd != m_iCurrent + 1;
 }
@@ -254,43 +238,13 @@ int __thiscall FUN_00e05af0_Obj::ReadBytes(int aiByteCount)
     return 0;
 }
 
-class hkMemoryAllocatorE05B;
-
-struct hkMemoryRouterE05B
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorE05B* m_pStreamAllocator;
-
-    hkMemoryAllocatorE05B& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
 namespace hkRouterE05B {
-extern "C" hkMemoryRouterE05B& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
-void* __cdecl AllocateWithHeader(hkMemoryAllocatorE05B& kAlloc, int iNumBytes) throw();
+void* __cdecl AllocateWithHeader(hkMemoryAllocator& kAlloc, int iNumBytes) throw();
 void __cdecl FUN_00cb1260(void* pvDst, const void* pvSrc, int iNumBytes) throw();
 
-class hkRefObjE05B
-{
-  public:
-    virtual ~hkRefObjE05B() throw()
-    {}
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    hkRefObjE05B() throw()
-    {
-        m_sReferenceCount = 1;
-    }
-};
-
-class FUN_00e05b40 : public hkRefObjE05B
+class FUN_00e05b40 : public hkReferencedObject
 {
   public:
     void* m_data;
@@ -323,39 +277,17 @@ FUN_00e05b40::FUN_00e05b40(void* data, int size, int external) throw()
 }
 
 namespace fnv_00e05bb0 {
-struct hkMemoryRouterE05B
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pStreamAllocator;
-};
-
-extern "C" hkMemoryRouterE05B* __cdecl FUN_00c85750() throw();
-void __cdecl FUN_00c856c0(void* pAllocator, void* p) throw();
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750() throw();
+void __cdecl FUN_00c856c0(hkMemoryAllocator* pAllocator, void* p) throw();
 
 inline void hkDeallocateE05B(void* p)
 {
-    hkMemoryRouterE05B* r = FUN_00c85750();
-    FUN_00c856c0(r->m_pStreamAllocator, p);
+    hkMemoryRouter* r = FUN_00c85750();
+    FUN_00c856c0(r->m_heap, p);
 }
 
-class hkBaseObjectE05B
-{
-  public:
-    virtual ~hkBaseObjectE05B()
-    {}
-};
-
-class hkReferencedObjectE05B : public hkBaseObjectE05B
-{
-  public:
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-
-class hkObjE05B : public hkReferencedObjectE05B
+// The data pointer at +0x08 and ownership flag at +0x18 belong to the memory stream.
+class MemoryStreamStorage : public hkReferencedObject
 {
   public:
     void* m_data;
@@ -364,7 +296,7 @@ class hkObjE05B : public hkReferencedObjectE05B
     int unk14;
     int m_iValueAfterFlags;
 
-    virtual ~hkObjE05B()
+    virtual ~MemoryStreamStorage() throw()
     {
         if (m_iValueAfterFlags == 0 || m_iValueAfterFlags == 1)
             hkDeallocateE05B(m_data);
@@ -374,8 +306,8 @@ class hkObjE05B : public hkReferencedObjectE05B
 };
 
 // @fnv 0x00e05bb0
-void hkObjE05B::FUN_00e05bb0()
+void MemoryStreamStorage::FUN_00e05bb0()
 {
-    this->hkObjE05B::~hkObjE05B();
+    this->MemoryStreamStorage::~MemoryStreamStorage();
 }
 }  // namespace fnv_00e05bb0

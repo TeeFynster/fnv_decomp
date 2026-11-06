@@ -1,6 +1,9 @@
 // speedtree/librandom_source/robertdavies_random.cpp: Random, PosGen, Normal (30 functions)
 
-#include "robertdavies_random_types_Normal.h"
+#include "../../../include/Random.h"
+#include "../../../include/Normal.h"
+#include "../../../include/PosGen.h"
+#include "../../../include/SymGen.h"
 #include <stdexcept>
 
 extern "C" double __cdecl fabs(double);
@@ -101,20 +104,15 @@ complete:
     xi = symmetric ? count * runtimeInitializationDouble2 : count;
 }
 
-struct FUN_00b43390_shell
-{
-    float FUN_00b43390(float);
-};
-
 // @fnv 0x00b43390
-float FUN_00b43390_shell::FUN_00b43390(float)
+float Random::Density(float) const
 {
     return 0.0f;
 }
 
 // Stores value as RandomSeed, then fills randomSamples with 128 values from Random::Raw().
 // @fnv 0x00b435f0
-void SeedRandomSamples(long alSeed)
+void Random::SetLong(long alSeed)
 {
     int i;
     RandomSeed = (double)alSeed;
@@ -124,49 +122,23 @@ void SeedRandomSamples(long alSeed)
     }
 }
 
-struct FUN_00b43bc0_shell
-{
-    float* __thiscall FUN_00b43bc0(float* p);
-};
-
 // Sets the first float and the following int of the given buffer to zero and returns the buffer.
 // @fnv 0x00b43bc0
-float* __thiscall FUN_00b43bc0_shell::FUN_00b43bc0(float* afBuffer)
+FloatIntPair* Normal::vf04(FloatIntPair* afBuffer)
 {
-    *reinterpret_cast<int*>(afBuffer + 1) = 0;
-    *afBuffer = 0.0f;
+    *reinterpret_cast<int*>(reinterpret_cast<float*>(afBuffer) + 1) = 0;
+    *reinterpret_cast<float*>(afBuffer) = 0.0f;
     return afBuffer;
 }
 
 extern "C" void __cdecl Deallocate(void*);
 
-struct GlobalObject_00b43ae0
-{
-    virtual ~GlobalObject_00b43ae0();
-    void* FUN_00b43c20(unsigned int flags);
-};
-
-// Runs the destructor, frees this via Deallocate when flags has bit 0 set, and returns this.
-// @fnv 0x00b43c20
-void* GlobalObject_00b43ae0::FUN_00b43c20(unsigned int flags)
-{
-    GlobalObject_00b43ae0::~GlobalObject_00b43ae0();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
-
-struct FUN_00b43bf0_shell
-{
-    float* __thiscall FUN_00b43bf0(float* p);
-};
-
 // Stores 0 in the int at p+1 and 1.0f at p[0], then returns p.
 // @fnv 0x00b43bf0
-float* __thiscall FUN_00b43bf0_shell::FUN_00b43bf0(float* p)
+FloatIntPair* Normal::vf05(FloatIntPair* p)
 {
-    *(int*)(p + 1) = 0;
-    p[0] = 1.0f;
+    *(int*)(reinterpret_cast<float*>(p) + 1) = 0;
+    reinterpret_cast<float*>(p)[0] = 1.0f;
     return p;
 }
 
@@ -188,14 +160,9 @@ void* __thiscall Dummy44a3a0::DestroyIfFlagged(unsigned int flags)
 
 extern "C" void __cdecl FUN_00b43480(int);
 
-struct FUN_00b433a0_shell : Random
-{
-    float GetRandomSample();
-};
-
 // Throws if RandomSeed is zero, picks an index from Random::Raw()*128, refills that sample slot with a new raw value and returns the old sample.
 // @fnv 0x00b433a0
-float FUN_00b433a0_shell::GetRandomSample()
+float Random::Next()
 {
     if (RandomSeed == 0.0)
         throw std::logic_error("Random number generator not initialised");
@@ -207,29 +174,22 @@ float FUN_00b433a0_shell::GetRandomSample()
     return f;
 }
 
-struct FUN_00b43490_shell
-{
-    void ThrowIllegalCombination(int a, int b, int c);
-};
 // Throws a std::logic_error with the message "Newran: illegal combination".
 // @fnv 0x00b43490
-void FUN_00b43490_shell::ThrowIllegalCombination(int a, int b, int c)
+void Random::vf08(int a, int b, int c)
 {
     throw std::logic_error("Newran: illegal combination");
 }
 
-struct MyER
+class FloatIntPair
 {
+public:
     float f;
     int i;
 };
-struct Holder43680
-{
-    MyER* __thiscall InitMyER(MyER* p);
-};
 // Sets p->i to 4 and p->f to 0.0f, then returns p.
 // @fnv 0x00b43680
-MyER* __thiscall Holder43680::InitMyER(MyER* pValue)
+FloatIntPair* PosGen::vf04(FloatIntPair* pValue)
 {
     int v = 4;
     pValue->i = v;
@@ -237,47 +197,18 @@ MyER* __thiscall Holder43680::InitMyER(MyER* pValue)
     return pValue;
 }
 
-struct FUN_00b43c50_shell
-{
-    void __thiscall FUN_00b436b0();
-    void __thiscall FUN_00b43c50();
-};
+// Apply after constructor definitions: construction needs SymGen's vtable,
+// but teardown delegates to PosGen without installing it again.
+class __declspec(novtable) SymGen;
 
 // @fnv 0x00b43c50
-void __thiscall FUN_00b43c50_shell::FUN_00b43c50()
-{
-    FUN_00b436b0();
-}
+inline SymGen::~SymGen()
+{}
 
-void _Deallocate(void*);
-struct FUN_00b43c70_shell
-{
-    void __thiscall FUN_00b436b0();
-    void* __thiscall FUN_00b43c70(unsigned int flags);
-};
-// Calls FUN_00b436b0, then deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x00b43c70
-void* __thiscall FUN_00b43c70_shell::FUN_00b43c70(unsigned int flags)
-{
-    FUN_00b436b0();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-extern "C" void __cdecl Deallocate(void*);
 inline Random::~Random()
 {}
-struct FUN_00b436b0 : Random
-{
-    float xi;
-    float* sx;
-    float* m_pYValues;
-    bool NotReady;
-    virtual ~FUN_00b436b0();
-};
 // @fnv 0x00b436b0
-FUN_00b436b0::~FUN_00b436b0()
+PosGen::~PosGen()
 {
     if (!NotReady)
     {
@@ -288,14 +219,8 @@ FUN_00b436b0::~FUN_00b436b0()
     }
 }
 
-struct FUN_00b43910_cls : PosGen
-{
-    float GetRandomSample();
-    float FUN_00b43910();
-};
-
 // @fnv 0x00b43910
-float FUN_00b43910_cls::FUN_00b43910()
+float PosGen::Next()
 {
     int idx3;
     float zTmp;
@@ -309,23 +234,17 @@ float FUN_00b43910_cls::FUN_00b43910()
     }
     do
     {
-        r = GetRandomSample();
+        r = Random::Next();
         idx3 = (int)(r * xi);
         lo5 = sx[idx3];
-        y3 = (float)((double)(sx[idx3 + 1] - lo5) * GetRandomSample() + lo5);
-        zTmp = m_pYValues[idx3] * GetRandomSample();
+        y3 = (float)((double)(sx[idx3 + 1] - lo5) * Random::Next() + lo5);
+        zTmp = m_pYValues[idx3] * Random::Next();
     } while (zTmp >= m_pYValues[idx3 + 1] && zTmp >= Density(y3));
     return y3;
 }
 
-struct FUN_00b439e0_cls : PosGen
-{
-    float GetRandomSample();
-    float FUN_00b439e0();
-};
-
 // @fnv 0x00b439e0
-float FUN_00b439e0_cls::FUN_00b439e0()
+float SymGen::Next()
 {
     int idx3;
     float zTmp;
@@ -340,7 +259,7 @@ float FUN_00b439e0_cls::FUN_00b439e0()
     do
     {
         aA = 1.0f;
-        fSample = GetRandomSample();
+        fSample = Random::Next();
         if (fSample > 0.5)
         {
             aA = -1.0f;
@@ -348,36 +267,19 @@ float FUN_00b439e0_cls::FUN_00b439e0()
         }
         idx3 = (int)(fSample * xi);
         float fLow = sx[idx3];
-        y3 = (float)((double)(sx[idx3 + 1] - fLow) * GetRandomSample() + fLow);
-        zTmp = m_pYValues[idx3] * GetRandomSample();
+        y3 = (float)((double)(sx[idx3 + 1] - fLow) * Random::Next() + fLow);
+        zTmp = m_pYValues[idx3] * Random::Next();
     } while (zTmp >= m_pYValues[idx3 + 1] && zTmp >= Density(y3));
     return aA * y3;
 }
 
-extern int g_liveObjectCount;
-
-struct ObjectBase_00b436b0
-{
-    virtual ~ObjectBase_00b436b0() throw();
-};
-
-struct FUN_00b43ca0_cls : ObjectBase_00b436b0
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    unsigned char m_flag10;
-
-    virtual ~FUN_00b43ca0_cls() throw();
-};
-
-// Decrements g_liveObjectCount and sets m_flag10 when the count does not reach zero.
+// Retains the shared sampling buffers while another Normal instance remains.
 // @fnv 0x00b43ca0
-FUN_00b43ca0_cls::~FUN_00b43ca0_cls() throw()
+Normal::~Normal()
 {
-    if (--g_liveObjectCount != 0)
+    if (--randomInitCount != 0)
     {
-        m_flag10 = 1;
+        NotReady = true;
     }
 }
 

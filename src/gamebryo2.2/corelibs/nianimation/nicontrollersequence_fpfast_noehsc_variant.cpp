@@ -1,3 +1,9 @@
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiControllerSequence.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiStream.h"
 
 // src/gamebryo2.2/corelibs/nianimation/nicontrollersequence_fpfast_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /Gy /fp:fast (unit src/gamebryo2.2/corelibs/nianimation/nicontrollersequence.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -10,10 +16,6 @@ const char* const* __cdecl FUN_00a31730();
 struct BaseH
 {
     virtual ~BaseH();
-};
-struct NiControllerSequence : BaseH
-{
-    void* FUN_00a35820(unsigned int);
 };
 extern "C" void __cdecl __Dummy_00b6fef0(void*, unsigned int);
 struct FUN_00a30580_shell
@@ -30,43 +32,6 @@ extern int DAT_01096620;
 struct FUN_00a34450_shell
 {
     void* __thiscall FUN_00a34450(unsigned int);
-};
-struct NiBinaryStream
-{
-    void* m_vtbl;
-    unsigned int m_uiStreamFlags;
-    void* m_pfnRead;
-    unsigned int(__cdecl* m_pfnWrite)(NiBinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-    void Write(const void* pv, unsigned int uiBytes)
-    {
-        unsigned int uiComponentSize = uiBytes;
-        m_uiStreamFlags += m_pfnWrite(this, pv, uiBytes, &uiComponentSize, 1);
-    }
-};
-struct NiStream
-{
-    virtual void V00();
-    virtual void V01();
-    virtual void V02();
-    virtual void V03();
-    virtual void V04();
-    virtual void V05();
-    virtual void V06();
-    virtual void V07();
-    virtual void V08();
-    virtual void V09();
-    virtual void V10();
-    virtual void V11();
-    virtual void SaveLinkID(const void* pkObject);
-    void SerializeString(char const*);
-    unsigned char m_auiShapeKeys[0x24c];
-    NiBinaryStream* m_pBackingStream;
-};
-struct NiObject
-{
-    void* m_vtbl;
-    unsigned int m_uiRefCount;
-    void LinkObject(NiStream&);
 };
 struct SeqInterpArrayItem
 {
@@ -137,10 +102,6 @@ void* __cdecl FUN_00a326c0();
 extern char DAT_01096584;
 extern void* _EmptyFS;
 extern int(__stdcall* DAT_00fdf1c4)(void*);
-struct NiRefObject
-{
-    ~NiRefObject();
-};
 struct FUN_00a31500_shell
 {
     void __thiscall FUN_00a31500(int);
@@ -375,18 +336,6 @@ struct FUN_00a30cc0_cls
 
     unsigned char Equals(FUN_00a30cc0_cls* other);
 };
-struct StreamView
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8(char*&);
-};
 struct RefView
 {
     virtual void v0();
@@ -410,13 +359,13 @@ struct RefView
     virtual void v18();
     virtual void v19();
     virtual void v20();
-    virtual bool v21(StreamView&);
+    virtual bool v21(NiStream&);
 };
 struct ObjectView
 {
     int vtable;
     int refs;
-    bool FUN_00a5d2f0(StreamView&);
+    bool FUN_00a5d2f0(NiStream&);
 };
 struct ItemView
 {
@@ -462,7 +411,7 @@ struct SequenceView : ObjectView
     int unk68;
     RefView** notes;
     unsigned short noteCount;
-    bool FUN_00a30ea0(StreamView&);
+    bool FUN_00a30ea0(NiStream&);
 };
 __declspec(dllimport) long __stdcall InterlockedIncrement(long* p);
 __declspec(dllimport) long __stdcall InterlockedDecrement(long* p);
@@ -945,171 +894,6 @@ class A1400StringGroup
 
     A1400StringGroup& FUN_00a31400(const A1400StringGroup& kOther);
 };
-struct IStreamA33a50
-{
-    void* m_vtbl;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(IStreamA33a50*, void*, unsigned int, unsigned int*, unsigned int);
-    void Read(void* pv, unsigned int uiBytes)
-    {
-        unsigned int uiComponentSize = uiBytes;
-        m_uiStreamFlags += m_pfnRead(this, pv, uiBytes, &uiComponentSize, 1);
-    }
-};
-struct StreamA33a50
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    unsigned int m_uiNifVersion;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    IStreamA33a50* m_pUnderlyingStream;
-    void ReadFixedString(char*& kString);
-    unsigned int ReadLinkIDA33a50();
-    void ReadStringTableEntry(char*& kString);
-};
 struct IDTagA33a50
 {
     char* m_kAVObjectName;
@@ -1117,7 +901,7 @@ struct IDTagA33a50
     char* m_kCtlrType;
     char* m_kCtlrID;
     char* m_kInterpolatorID;
-    void ReadFromStream(StreamA33a50& kStream, unsigned int& uiPaletteLink);
+    void ReadFromStream(NiStream& kStream, unsigned int& uiPaletteLink);
 };
 struct AnimationSequence;
 struct UpdateActiveArray
@@ -1252,65 +1036,6 @@ struct NiItem
     unsigned int m8;
     unsigned int mc;
 };
-struct NiSequenceSource
-{
-    unsigned int unk00;
-    unsigned int type04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    unsigned int unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
-    unsigned int unkc4;
-    unsigned int unkc8;
-    unsigned int unkcc;
-    unsigned int unkd0;
-    unsigned int unkd4;
-    unsigned int versionD8;
-    RefObject* __thiscall FUN_00a63430();
-};
 struct SequenceLink : NiObject
 {
     unsigned int unk08;
@@ -1340,7 +1065,7 @@ struct SequenceLink : NiObject
     unsigned int unk68;
     NiPointerRef* objects6c;
     unsigned short count70;
-    void __thiscall LinkSequenceSource(NiSequenceSource*);
+    void __thiscall LinkSequenceSource(NiStream*);
 };
 extern int(__stdcall* DAT_00fdf1c0)(void*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
@@ -1349,33 +1074,6 @@ struct A33950RefObject
     virtual void Unused();
     virtual void Release();
     volatile long refCount;
-};
-struct A33950BinaryInput
-{
-    void* vtable;
-    unsigned int position;
-    unsigned int(__cdecl* readFn)(A33950BinaryInput*, void*, unsigned int, unsigned int*, unsigned int);
-    void Read(void* destination, unsigned int bytes)
-    {
-        unsigned int componentSize = bytes;
-        position += readFn(this, destination, bytes, &componentSize, 1);
-    }
-};
-struct A33950Stream
-{
-    A33950RefObject* FUN_00a64620();
-    unsigned int& Version()
-    {
-        return *(unsigned int*)((char*)this + 0xd8);
-    }
-    unsigned int& Count()
-    {
-        return *(unsigned int*)((char*)this + 4);
-    }
-    A33950BinaryInput* Input()
-    {
-        return *(A33950BinaryInput**)((char*)this + 0x24c);
-    }
 };
 struct A33950Object
 {
@@ -1387,7 +1085,7 @@ struct A33950Object
     unsigned char unk0b;
     unsigned char unk0c;
     unsigned char flag0d;
-    void LoadFromStream(A33950Stream* stream);
+    void LoadFromStream(NiStream* stream);
 };
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
 struct FUN_00a344f0_cls
@@ -1405,10 +1103,6 @@ struct FUN_00a350d0_seq : SeqA34f20
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* addend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* addend);
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int uiSize);
-};
 extern MemoryManager _g_memoryManager;
 
 extern int DAT_0109b220;

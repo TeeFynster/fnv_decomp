@@ -8,9 +8,9 @@
 // function's body the same way the original translation unit did.
 //
 // Compiler: MSVC9 SP1 15.00.30729.01, flags /Od /Oy- /GS /EHsc /Gy
-#include "BSAnimGroupSequence.h"
-
-const NiRTTI BSAnimGroupSequence::ms_kRTTI;
+#include "../../include/BSAnimGroupSequence.h"
+#include "../../include/NiControllerSequence.h"
+#include "../../include/NiRTTI.h"
 
 // @fnv 0x0049bb10
 const NiRTTI* BSAnimGroupSequence::GetRTTI() const

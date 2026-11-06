@@ -1,11 +1,12 @@
 // fallout_shared/tesgrass.cpp: TESGrass, TESGrass__GRASS_DATA (36 functions)
 
 #include "tesgrass_decls.h"
+#include "../../include/PathingRequest.h"
 #include <malloc.h>
 
 // Checks the form type is 0x24, clears Data, loads the record header and iterates chunks (EDID, OBND, MODL/MODT, DATA) until none remain, returning true.
 // @fnv 0x00509f80
-bool TESGrass::Load(TESFile* file)
+bool TESGrass::LoadForm(TESFile* file)
 {
     unsigned char formType = file->GetTESForm();
     if (formType != 0x24)
@@ -271,10 +272,6 @@ struct FUN_00508140_shell
 {
     void __thiscall FUN_00508140(float a, float b, float c, unsigned char d);
 };
-struct PathingRequest
-{
-    float GetSmoothingRandomness();
-};
 struct FUN_005082b0_shell
 {
     void __thiscall UpdateEnvelope(float a, float b, float c, unsigned char d, float e, float f, float g, float h,
@@ -285,7 +282,7 @@ void __thiscall FUN_00508140_shell::FUN_00508140(float a, float b, float c, unsi
 {
     reinterpret_cast<FUN_005082b0_shell*>(this)->UpdateEnvelope(
         a, b, c, d, reinterpret_cast<FUN_009d1b50_shell*>(this)->GetField54Float(),
-        reinterpret_cast<TESGrass*>(this)->GetLowestAllowedSlope(),
+        reinterpret_cast<TESGrass*>(this)->TESGrass::GetLowestAllowedSlope(),
         reinterpret_cast<FUN_005081b0_shell*>(this)->GetFloatAtOffset58(),
         reinterpret_cast<PathingRequest*>(this)->GetSmoothingRandomness(),
         reinterpret_cast<FUN_009cdac0_shell*>(this)->GetField60Float());
@@ -713,7 +710,7 @@ struct BaseComparison
     bool FUN_00485270(::TESForm*);
 };
 
-class VirtualView : public ::TESGrass
+class VirtualView : public ::TESForm  // the TESForm vtable (78 slots) followed by the TESGrass slots this comparison calls
 {
   public:
     virtual void UnknownVirtual138();

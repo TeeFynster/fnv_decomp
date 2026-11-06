@@ -1,3 +1,121 @@
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkAabb.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+// local form of hkVector4: 0x00e19d60 needs its original packet form (compiled function extent differs: 2255 vs 2612).
+
+
+#if !defined(FNV_FOURFLOATVECTOR_NO_SSE)
+#include <xmmintrin.h>
+#else
+union __m128;
+#endif
+
+class SimdReal;
+class SimdScalar;
+class ScalarValue;
+class Transform;
+class NiPoint3;
+
+#pragma pack(push, 4)
+
+class PacketCallLocal_00e19d60
+{
+public:
+#if defined(FNV_FOURFLOATVECTOR_NO_SSE)
+    union Components
+    {
+        float m128_f32[4];
+        unsigned __int64 m128_u64[2];
+        signed char m128_i8[16];
+        short m128_i16[8];
+        int m128_i32[4];
+        __int64 m128_i64[2];
+        unsigned char m128_u8[16];
+        unsigned short m128_u16[8];
+        unsigned int m128_u32[4];
+    };
+#else
+    typedef __declspec(align(4)) __m128 Components;
+#endif
+
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+        Components m_vComponents;
+        Components m;
+        float f[4];
+        Components values;
+        Components q;
+        Components value;
+        Components quad;
+        float elements[4];
+        float m_fComponents[4];
+    };
+
+    PacketCallLocal_00e19d60();
+    PacketCallLocal_00e19d60(float x, float y, float z, float w);
+    PacketCallLocal_00e19d60(const __m128& vector);
+
+    PacketCallLocal_00e19d60* FUN_005532a0(float x, float y, float z, float w);
+    void FUN_004a3f10(PacketCallLocal_00e19d60* vector);
+    void __thiscall FUN_004b4db0(const PacketCallLocal_00e19d60* vector);
+    PacketCallLocal_00e19d60& FUN_00e531a0(int parameter);
+    PacketCallLocal_00e19d60 FUN_00e53260(int parameter);
+    void FUN_005611c0();
+
+    void operator=(const PacketCallLocal_00e19d60& vector);
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    float& component(int index);
+    float& At(int index);
+    const float& At(int index) const;
+
+    __m128 length3() const;
+    float getW() const;
+    ScalarValue Dot(const PacketCallLocal_00e19d60& vector) const;
+    ScalarValue LengthSq() const;
+    ScalarValue Length() const;
+    ScalarValue InverseLength() const;
+    void Normalize();
+    bool NormalizeNonzero();
+    void Mul(const ScalarValue& scalar);
+    void Add(const PacketCallLocal_00e19d60& vector);
+    void Sub(const PacketCallLocal_00e19d60& vector);
+    void Cross(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b);
+
+    void setAbs4(const PacketCallLocal_00e19d60& vector);
+    void setMul4(const SimdReal& scalar, const PacketCallLocal_00e19d60& vector);
+    void addMul4(const SimdReal& scalar, const PacketCallLocal_00e19d60& vector);
+    void setAddMul4(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, const SimdReal& scalar);
+    SimdReal getSimdAt3() const;
+    SimdReal lengthSquared3() const;
+    void setXYZ_W(__m128 xyz, __m128 w);
+    void setSqrtInverse4(const PacketCallLocal_00e19d60& vector);
+    void setAddMul(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, const SimdScalar& scalar);
+    void addMul(const float& scalar, const PacketCallLocal_00e19d60& vector);
+    void transformed(const Transform& transform, const PacketCallLocal_00e19d60& vector);
+    void addScaled(const PacketCallLocal_00e19d60& base, const PacketCallLocal_00e19d60& direction, float amount);
+    void* AddVector(void*, NiPoint3*, void*, float);
+    void* AddVector(void*, void*);
+    void* ScaleSwizzled();
+};
+
+#pragma pack(pop)
+
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/Vec4.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkgpMesh_IConvexOverlap.h"
+
 // src/havok/common/internal/geometryprocessing/mesh/hkgpmesh_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/geometryprocessing/mesh/hkgpmesh_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS- /EHs-c- /Gy (unit lists /MT /O2 /GS- /EHs-c- /Gy). Declarations copied from that unit's skeleton.
 
@@ -31,72 +149,6 @@ void __cdecl FUN_00e23a10();
 struct FUN_00e24a80_Class
 {
     void __thiscall FUN_00e24a80();
-};
-struct Subobject
-{
-    virtual void Release(unsigned int flags);
-};
-struct FUN_00e114c0_Class
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    Subobject* unkE4;
-    void ReleaseSubobject();
 };
 struct __declspec(align(16)) S_00e120e0_Vec
 {
@@ -196,23 +248,10 @@ struct Allocator
     virtual void v0c();
     __declspec(nothrow) virtual void freeBlock(void*, int);
 };
-struct Router
-{
-    int unk00, unk04, unk08, unk0c;
-    Allocator* heap;
-    Allocator& getHeap()
-    {
-        return *heap;
-    }
-};
-__declspec(nothrow) Router& __cdecl FUN_00c85750();
-struct FourFloatVector
-{
-    float x, y, z, w;
-};
+__declspec(nothrow) hkMemoryRouter& __cdecl FUN_00c85750();
 struct VectorArray
 {
-    FourFloatVector* data;
+    PacketCallLocal_00e19d60* data;
     int size;
     int capacity;
     VectorArray() : data(0), size(0), capacity(0x80000000)
@@ -245,9 +284,9 @@ struct FUN_00d76ca0
     }
     static void* operator new(unsigned int bytes)
     {
-        return allocate(FUN_00c85750().getHeap(), bytes);
+        return allocate(reinterpret_cast<Allocator&>(FUN_00c85750().heap()), bytes);
     }
-    __declspec(nothrow) void FUN_00d771c0(FourFloatVector*, int, const Options&);
+    __declspec(nothrow) void FUN_00d771c0(PacketCallLocal_00e19d60*, int, const Options&);
     __declspec(nothrow) int FUN_00d74e10();
 };
 struct Hull
@@ -579,57 +618,6 @@ struct This
     Manager* FUN_00e23530();
     void PushFront(Node* volatile source);
 };
-struct S_00e25f00_Alloc
-{
-    virtual ~S_00e25f00_Alloc();
-    virtual void* AllocateMemoryBlock(int n);
-    virtual void ReleaseBlock(void* p, int n);
-    virtual void* AllocateBufferWithSize(int& n);
-    virtual void ReturnMemory(void* p, int n);
-};
-struct S_00e25f00_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00e25f00_Alloc* m_pStreamAllocator;
-    S_00e25f00_Alloc& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    static S_00e25f00_Router& GetMonitorStream();
-};
-template <typename T> struct S_00e25f00_Array
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline ~S_00e25f00_Array() throw()
-    {
-        _clearAndDeallocate(S_00e25f00_Router::GetMonitorStream().heap());
-    }
-
-    static __forceinline void destruct(T* p, int n) throw()
-    {
-        for (int i = 0; i < n; i++)
-            p[i].~T();
-    }
-    __forceinline void clear() throw()
-    {
-        destruct(m_data, m_iElementCount);
-        m_iElementCount = 0;
-    }
-    __forceinline void _clearAndDeallocate(S_00e25f00_Alloc& alloc) throw()
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
 struct S_00e25f00_Elem
 {
     int unk0;
@@ -638,7 +626,7 @@ struct S_00e25f00_Elem
 };
 struct S_00e25f00
 {
-    S_00e25f00_Array<S_00e25f00_Array<S_00e25f00_Elem> > m_arrays;
+    hkArray<hkArray<S_00e25f00_Elem> > m_arrays;
     int unkC;
     S_00e25f00* FUN_00e25f00(unsigned int flags);
 };
@@ -682,79 +670,6 @@ struct E25FB0Mesh
     void FUN_00e25cd0(E25FB0Edge* edge, const int* data);
     void ProcessItems(E25FB0Edge edge, const E25FB0Item* items);
 };
-// ---------------------------------------------------------------------------
-// hkgpMesh::IConvexOverlap - accessor for the hull the overlap was built for.
-//
-// The object is the Havok side of a convex hull overlap query.  It starts with
-// its virtual table, keeps the list of hull vertices at offset 0x14 and the
-// hkgpConvexHull the overlap belongs to at offset 0xe4.  The function simply
-// hands that hull back to the caller.
-// ---------------------------------------------------------------------------
-// The hull the overlap was built from (defined in the game side code).
-struct hkgpConvexHull;
-struct hkgpMesh_IConvexOverlap
-{
-    void** vftable;  // 0x00
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    void* pVertexList;  // 0x14  linked list of the hull vertices
-    int unk18;          // 0x18  number of vertices of the hull
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    void* pVertexList2;  // 0x2c
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    hkgpConvexHull* pConvexHull;  // 0xe4  the hull this overlap belongs to
-
-    hkgpConvexHull* FUN_00e114a0();
-};
 struct DataBlock_00e118e0
 {
     unsigned int unk00;
@@ -791,9 +706,10 @@ struct E12160Triangle
     E12160Vertex* m_kVertices[3];
 };
 bool __cdecl TriangleHasVertexAtPoint(const E12160Triangle* triangle, const float* point);
-struct ListNode
+// Exe 0x00e19d60: unit-local ListNode view; declarations and layout are preserved.
+struct HkgpmeshListNodeView
 {
-    ListNode* m_pNext;
+    HkgpmeshListNodeView* m_pNext;
     int unk04;
     int unk08;
     int unk0c;
@@ -821,7 +737,7 @@ struct FUN_00e12230_cls
     int unk20;
     int unk24;
     int unk28;
-    ListNode* m_pHead;
+    HkgpmeshListNodeView* m_pHead;
 
     void ReplaceValueInList(int oldValue, int newValue);
 };
@@ -2039,22 +1955,6 @@ class CC0280Writer
 
     CC0280Writer& WriteInt(int iValue);
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 struct BSAudio;
 namespace fnvc_adapt {
 BSAudio* __cdecl FUN_00c85750();
@@ -2141,26 +2041,12 @@ struct FUN_00e18a50_cls
 };
 // Havok ray/plane-triangle cast step: intersect the cast ray with the triangle's plane, test the hit point
 // against the triangle, and keep the closest hit fraction.
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-} __m128;
-extern "C" __m128 _mm_load_ps(const float* p);
-extern "C" void _mm_store_ps(float* p, __m128 a);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_sub_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_div_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
 extern __m128 DAT_010c7160;
 // constant vector (zero)
 extern float DAT_010c8440;
 // point-in-triangle tolerance (-FLT_EPSILON)
-typedef __m128 SimdReal;
-static inline float ToReal(SimdReal v)
+typedef __m128 MeshSimdReal;
+static inline float ToReal(MeshSimdReal v)
 {
     float f;
     _mm_store_ss(&f, v);
@@ -2206,12 +2092,12 @@ struct CastBody
     CastTri* m_tri;
 };
 bool __cdecl FUN_00dea6b0(const Vec4f* pkPoint, const Vec4f& kA, const Vec4f& kB, const Vec4f& kC, float fTolerance);
-static inline SimdReal Dot3(__m128 a, __m128 b)
+static inline MeshSimdReal Dot3(__m128 a, __m128 b)
 {
     const __m128 m = _mm_mul_ps(a, b);
     return _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m));
 }
-static inline SimdReal Dot4xyz1(__m128 a, __m128 b)
+static inline MeshSimdReal Dot4xyz1(__m128 a, __m128 b)
 {
     const __m128 m = _mm_mul_ps(a, b);
     const __m128 zw = _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_shuffle_ps(a, a, 0xff));
@@ -2284,22 +2170,13 @@ struct S_00e11910_Cls
     char FUN_00e11710(float* a, float* b, float* c, S_Vec* out, int normalize);
     char FUN_00e11910(S_00e11910_Src* self);
 };
-struct E11B00Vector4
-{
-    __m128 m_vComponents;
-
-    void mul4(const E11B00Vector4& v)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
-    }
-};
 struct E11B00Vertex
 {
     E11B00Vertex* m_next;
     int unk04;
     int unk08;
     int unk0C;
-    E11B00Vector4 m_vContactPosition;
+    PacketCallLocal_00e19d60 m_vContactPosition;
 };
 struct E11B00Hull
 {
@@ -2312,25 +2189,12 @@ struct E11B00Hull
 
     void updateFaces();
     static void updateStatistics();
-    void FUN_00e11b00(const E11B00Vector4& scale);
-};
-__declspec(align(16)) struct S_00e12260_Vector4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-    S_00e12260_Vector4()
-    {}
-    void operator=(const S_00e12260_Vector4& v)
-    {
-        reinterpret_cast<__m128&>(*this) = reinterpret_cast<const __m128&>(v);
-    }
+    void FUN_00e11b00(const PacketCallLocal_00e19d60& scale);
 };
 struct S_00e12260_Aabb
 {
-    S_00e12260_Vector4 m_kMinimumCorner;
-    S_00e12260_Vector4 m_kMaximumCorner;
+    PacketCallLocal_00e19d60 m_kMinimumCorner;
+    PacketCallLocal_00e19d60 m_kMaximumCorner;
 };
 struct S_00e12260_CollectorBase
 {
@@ -2341,8 +2205,8 @@ struct S_00e12260_CollectorBase
 };
 struct S_00e12260_Collector : S_00e12260_CollectorBase
 {
-    S_00e12260_Vector4 m_verts[3];
-    S_00e12260_Collector(const S_00e12260_Vector4& a, const S_00e12260_Vector4& b, const S_00e12260_Vector4& c)
+    PacketCallLocal_00e19d60 m_verts[3];
+    S_00e12260_Collector(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, const PacketCallLocal_00e19d60& c)
     {
         m_uiItemCount = 0;
         m_verts[0] = a;
@@ -2351,7 +2215,7 @@ struct S_00e12260_Collector : S_00e12260_CollectorBase
     }
     virtual void AddHit(int hit);
 };
-void FUN_00cbeb70(const S_00e12260_Vector4* verts, int numVerts, S_00e12260_Aabb& aabbOut);
+void FUN_00cbeb70(const PacketCallLocal_00e19d60* verts, int numVerts, S_00e12260_Aabb& aabbOut);
 void FUN_00d1d570(void* tree, const S_00e12260_Aabb& aabb, S_00e12260_Collector* collector);
 struct S_00e12260
 {
@@ -2372,7 +2236,7 @@ struct S_00e12260
     int unk38;
     int unk3C;
     int unk40;
-    int FUN_00e12260(const S_00e12260_Vector4& a, const S_00e12260_Vector4& b, const S_00e12260_Vector4& c);
+    int FUN_00e12260(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, const PacketCallLocal_00e19d60& c);
 };
 struct S_00e13660_Res
 {
@@ -2497,10 +2361,6 @@ static __forceinline float Scalar(__m128 value)
     _mm_store_ss(&result, value);
     return result;
 }
-struct Vec4
-{
-    __m128 m_vComponents;
-};
 struct __declspec(align(16)) Float4
 {
     float x;
@@ -2603,7 +2463,6 @@ struct FUN_00e22f90_cls
     ArrAB<PoolBlockAB*> m_kBlocks;
     void FUN_00e22f90(PoolItemAB* item);
 };
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
 extern int DAT_010eade0;
 struct FUN_00e121c0_probe
 {
@@ -2687,69 +2546,9 @@ struct EdgeMesh
 
     bool UnbindEdgePair(S_00e13910_Edge a, S_00e13910_Edge b);
 };
-class hkMemoryAllocatorE15
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void* AllocateBufferWithSize(int& iReqNumBytesInOut);
-    virtual void ReturnMemory(void* pvData, int iNumBytes);
-};
-struct hkMemoryRouterE15
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorE15* m_pStreamAllocator;
-};
-hkMemoryRouterE15* __cdecl GetMemoryRouterE15() throw();
-void __cdecl ReserveMoreE15(hkMemoryAllocatorE15* pkHeap, void* pkArray, int iElemSize);
-template <typename T> inline void ConstructWithCopyE15(T* pDst, int iCount, const T& kItem)
-{
-    for (int i = 0; i < iCount; ++i)
-        pDst[i] = kItem;
-}
-template <typename T> struct hkArrayE15
-{
-    hkArrayE15() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    ~hkArrayE15()
-    {
-        hkMemoryRouterE15* pkRouter = GetMemoryRouterE15();
-        hkMemoryAllocatorE15* pkHeap = pkRouter->m_pStreamAllocator;
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            pkHeap->ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-    }
-    void AddBack(const T& kItem)
-    {
-        hkMemoryRouterE15* pkRouter = GetMemoryRouterE15();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ReserveMoreE15(pkRouter->m_pStreamAllocator, this, sizeof(T));
-        ConstructWithCopyE15(m_data + m_iElementCount, 1, kItem);
-        m_iElementCount++;
-    }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-struct __declspec(align(16)) hkVector4E15
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct hkAabbE15
-{
-    hkVector4E15 m_kMinimumCorner;
-    hkVector4E15 m_kMaximumCorner;
-};
 struct TriangleE15
 {
-    hkVector4E15 m_kVertices[3];
+    PacketCallLocal_00e19d60 m_kVertices[3];
 };
 struct VertexE15
 {
@@ -2757,7 +2556,7 @@ struct VertexE15
     int unk04;
     int unk08;
     int unk0C;
-    hkVector4E15 m_vContactPosition;
+    PacketCallLocal_00e19d60 m_vContactPosition;
 };
 struct TriangleEntryE15
 {
@@ -2765,23 +2564,23 @@ struct TriangleEntryE15
     int unk04;
     VertexE15* m_pkVertices[3];
 };
-void __cdecl CalcAabbE15(const hkVector4E15* pkPoints, int iNumPoints, hkAabbE15& kAabbOut);
+void __cdecl CalcAabbE15(const PacketCallLocal_00e19d60* pkPoints, int iNumPoints, hkAabb& kAabbOut);
 int __cdecl TrianglesOverlapE15(const TriangleE15* pkA, const TriangleE15* pkB);
 class AabbCollectorE15
 {
   public:
     virtual void AddHit(TriangleEntryE15* pkEntry);
-    hkArrayE15<TriangleEntryE15*> m_kHits;
+    hkArray<TriangleEntryE15*> m_kHits;
 };
 struct BroadPhaseE15
 {
 };
-void __cdecl QueryAabbE15(BroadPhaseE15* pkBroadPhase, const hkAabbE15& kAabb, AabbCollectorE15* pkCollector);
+void __cdecl QueryAabbE15(BroadPhaseE15* pkBroadPhase, const hkAabb& kAabb, AabbCollectorE15* pkCollector);
 class TriangleQueryE15
 {
   public:
-    void FUN_00e15220(const hkVector4E15& kA, const hkVector4E15& kB, const hkVector4E15& kC,
-                      hkArrayE15<TriangleEntryE15*>* pkOverlapsOut) throw();
+    void FUN_00e15220(const PacketCallLocal_00e19d60& kA, const PacketCallLocal_00e19d60& kB, const PacketCallLocal_00e19d60& kC,
+                      hkArray<TriangleEntryE15*>* pkOverlapsOut) throw();
     int unk00;
     int unk04;
     int unk08;
@@ -2799,10 +2598,6 @@ class TriangleQueryE15
     int unk38;
     int unk3C;
     BroadPhaseE15 m_kBroadPhase;
-};
-struct hkVector4
-{
-    __m128 v;
 };
 struct FUN_00e21d40_cls
 {
@@ -2872,25 +2667,7 @@ struct T27Cls
 };
 extern const char str_010d365c[];
 extern const char str_010d35f0[];
-struct GpIntArray
-{
-    int* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline void _clearAndDeallocate(Allocator& a)
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            a.freeBlock(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(int));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    __forceinline void ClearAndRelease()
-    {
-        _clearAndDeallocate(FUN_00c85750().getHeap());
-    }
-};
+typedef hkArray<int> GpIntArray;
 struct GpPoolItem
 {
     GpIntArray m_ppData;
@@ -2907,7 +2684,7 @@ struct GpPool
 
     static void operator delete(void* p, unsigned int size)
     {
-        ((BlockAllocAB*)&FUN_00c85750().getHeap())->ReleaseBlock(p, size);
+        ((BlockAllocAB*)&reinterpret_cast<Allocator&>(FUN_00c85750().heap()))->ReleaseBlock(p, size);
     }
 };
 struct GpPoolAllocator
@@ -2918,26 +2695,7 @@ struct GpPoolAllocator
 };
 
 #include <math.h>
-namespace S00e19d60_SIMD {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_sub_ss(__m128, __m128);
-extern "C" __m128 _mm_mul_ss(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" __m128 _mm_rsqrt_ss(__m128);
-extern "C" __m128 _mm_cmpeq_ss(__m128, __m128);
-extern "C" __m128 _mm_andnot_ps(__m128, __m128);
-extern "C" __m128 _mm_set_ss(float);
-}
-typedef S00e19d60_SIMD::__m128 S00e19d60_Quad;
+typedef __m128 S00e19d60_Quad;
 extern S00e19d60_Quad DAT_010ec7f0;
 
 struct S00e19d60_SimdReal
@@ -2947,17 +2705,17 @@ struct S00e19d60_SimdReal
     {}
     __forceinline S00e19d60_SimdReal(float x)
     {
-        m_vValue = S00e19d60_SIMD::_mm_load_ss(&x);
+        m_vValue = _mm_load_ss(&x);
     }
     __forceinline operator float() const
     {
         float s;
-        S00e19d60_SIMD::_mm_store_ss(&s, m_vValue);
+        _mm_store_ss(&s, m_vValue);
         return s;
     }
     __forceinline S00e19d60_Quad broadcast() const
     {
-        return S00e19d60_SIMD::_mm_shuffle_ps(m_vValue, m_vValue, 0);
+        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
     }
     __forceinline const S00e19d60_Quad& getQuad() const
     {
@@ -2966,11 +2724,11 @@ struct S00e19d60_SimdReal
 };
 __forceinline S00e19d60_SimdReal operator+(const S00e19d60_SimdReal& r, const S00e19d60_SimdReal& s)
 {
-    return S00e19d60_SIMD::_mm_add_ss(r.getQuad(), s.getQuad());
+    return _mm_add_ss(r.getQuad(), s.getQuad());
 }
 __forceinline S00e19d60_SimdReal operator-(const S00e19d60_SimdReal& r)
 {
-    return S00e19d60_SIMD::_mm_sub_ss(reinterpret_cast<const S00e19d60_Quad&>(::DAT_010c7160), r.getQuad());
+    return _mm_sub_ss(reinterpret_cast<const S00e19d60_Quad&>(::DAT_010c7160), r.getQuad());
 }
 
 struct S00e19d60_Bool
@@ -2984,88 +2742,90 @@ struct S00e19d60_Bool
     }
 };
 
-struct S00e19d60_Vec4
+// Vector operations absent from the shared declaration stay as local inline helpers.
+inline PacketCallLocal_00e19d60::PacketCallLocal_00e19d60()
+{}
+inline float& PacketCallLocal_00e19d60::operator()(int a)
 {
-    S00e19d60_Quad m_vComponents;
-    __forceinline S00e19d60_Vec4()
-    {}
-    __forceinline float& operator()(int a)
+    return reinterpret_cast<float*>(&m_vComponents)[a];
+}
+static __forceinline void MeshVector_setSub4(PacketCallLocal_00e19d60& self, const PacketCallLocal_00e19d60& v0, const PacketCallLocal_00e19d60& v1)
+{
+    self.m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
+}
+static __forceinline void MeshVector_setCross(PacketCallLocal_00e19d60& self, const PacketCallLocal_00e19d60& v0, const PacketCallLocal_00e19d60& v1)
+{
+    S00e19d60_Quad cross0;
+    cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
+                                        _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
+    S00e19d60_Quad cross1;
+    cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
+                                        _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
+    self.m_vComponents = _mm_sub_ps(cross0, cross1);
+}
+static __forceinline void MeshVector_setInterpolate4(PacketCallLocal_00e19d60& self, const PacketCallLocal_00e19d60& v0, const PacketCallLocal_00e19d60& v1, const S00e19d60_SimdReal& _t)
+{
+    S00e19d60_Quad t = _t.broadcast();
+    S00e19d60_Quad s = _mm_sub_ps(DAT_010ec7f0, t);
+    self.m_vComponents = _mm_add_ps(_mm_mul_ps(s, v0.m_vComponents),
+                                               _mm_mul_ps(t, v1.m_vComponents));
+}
+static __forceinline S00e19d60_SimdReal MeshVector_dot3(const PacketCallLocal_00e19d60& self, const PacketCallLocal_00e19d60& a)
+{
+    S00e19d60_Quad x2 = _mm_mul_ps(self.m_vComponents, a.m_vComponents);
+    S00e19d60_Quad xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
+}
+static __forceinline S00e19d60_SimdReal MeshVector_lengthSquared3(const PacketCallLocal_00e19d60& self)
+{
+    return MeshVector_dot3(self, self);
+}
+static __forceinline S00e19d60_SimdReal MeshVector_lengthInverse3(const PacketCallLocal_00e19d60& kV)
+{
+    const S00e19d60_Quad kHalf = _mm_set_ss(0.5f);
+    const S00e19d60_Quad kThree = _mm_set_ss(3.0f);
+    const S00e19d60_Quad kZero = _mm_set_ss(0.0f);
+    const S00e19d60_Quad kLenSq = MeshVector_dot3(kV, kV).getQuad();
+    const S00e19d60_Quad kLenIsZero = _mm_cmpeq_ss(kLenSq, kZero);
+    const S00e19d60_Quad kEstimate = _mm_rsqrt_ss(kLenSq);
+    const S00e19d60_Quad kNewtonStep = _mm_mul_ss(
+        _mm_mul_ss(kHalf, kEstimate),
+        _mm_sub_ss(kThree,
+                                   _mm_mul_ss(_mm_mul_ss(kLenSq, kEstimate), kEstimate)));
+    return _mm_andnot_ps(kLenIsZero, kNewtonStep);
+}
+static __forceinline void MeshVector_normalize3(PacketCallLocal_00e19d60& self)
+{
+    S00e19d60_Quad lenInv = MeshVector_lengthInverse3(self).broadcast();
+    self.m_vComponents = _mm_mul_ps(lenInv, self.m_vComponents);
+}
+static __forceinline S00e19d60_SimdReal MeshVector_distanceToSquared3(const PacketCallLocal_00e19d60& self, const PacketCallLocal_00e19d60& p)
+{
+    PacketCallLocal_00e19d60 d;
+    MeshVector_setSub4(d, self, p);
+    return MeshVector_lengthSquared3(d);
+}
+static __forceinline S00e19d60_SimdReal MeshVector_getSimdAt(const PacketCallLocal_00e19d60& self, int i)
+{
+    switch (i)
     {
-        return reinterpret_cast<float*>(&m_vComponents)[a];
+    case 0:
+        return self.m_vComponents;
+    case 1:
+        return _mm_shuffle_ps(self.m_vComponents, self.m_vComponents, 0x55);
+    case 2:
+        return _mm_shuffle_ps(self.m_vComponents, self.m_vComponents, 0xaa);
+    case 3:
+    default:
+        return _mm_shuffle_ps(self.m_vComponents, self.m_vComponents, 0xff);
     }
-    __forceinline void setSub4(const S00e19d60_Vec4& v0, const S00e19d60_Vec4& v1)
-    {
-        m_vComponents = S00e19d60_SIMD::_mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    __forceinline void setCross(const S00e19d60_Vec4& v0, const S00e19d60_Vec4& v1)
-    {
-        S00e19d60_Quad cross0;
-        cross0 = S00e19d60_SIMD::_mm_mul_ps(S00e19d60_SIMD::_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
-                                            S00e19d60_SIMD::_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
-        S00e19d60_Quad cross1;
-        cross1 = S00e19d60_SIMD::_mm_mul_ps(S00e19d60_SIMD::_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
-                                            S00e19d60_SIMD::_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
-        m_vComponents = S00e19d60_SIMD::_mm_sub_ps(cross0, cross1);
-    }
-    __forceinline void setInterpolate4(const S00e19d60_Vec4& v0, const S00e19d60_Vec4& v1, const S00e19d60_SimdReal& _t)
-    {
-        S00e19d60_Quad t = _t.broadcast();
-        S00e19d60_Quad s = S00e19d60_SIMD::_mm_sub_ps(DAT_010ec7f0, t);
-        m_vComponents = S00e19d60_SIMD::_mm_add_ps(S00e19d60_SIMD::_mm_mul_ps(s, v0.m_vComponents),
-                                                   S00e19d60_SIMD::_mm_mul_ps(t, v1.m_vComponents));
-    }
-    __forceinline S00e19d60_SimdReal dot3(const S00e19d60_Vec4& a) const
-    {
-        S00e19d60_Quad x2 = S00e19d60_SIMD::_mm_mul_ps(m_vComponents, a.m_vComponents);
-        S00e19d60_Quad xySum = S00e19d60_SIMD::_mm_add_ss(S00e19d60_SIMD::_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return S00e19d60_SIMD::_mm_add_ss(S00e19d60_SIMD::_mm_shuffle_ps(x2, x2, 0xaa), xySum);
-    }
-    __forceinline S00e19d60_SimdReal lengthSquared3() const
-    {
-        return this->dot3(*this);
-    }
-    __forceinline S00e19d60_SimdReal lengthInverse3() const
-    {
-        const S00e19d60_Quad half = S00e19d60_SIMD::_mm_set_ss(0.5f);
-        const S00e19d60_Quad three = S00e19d60_SIMD::_mm_set_ss(3.0f);
-        const S00e19d60_Quad zero = S00e19d60_SIMD::_mm_set_ss(0.0f);
-        const S00e19d60_Quad len2 = this->dot3(*this).getQuad();
-        const S00e19d60_Quad len2EqualsZero = S00e19d60_SIMD::_mm_cmpeq_ss(len2, zero);
-        const S00e19d60_Quad approx = S00e19d60_SIMD::_mm_rsqrt_ss(len2);
-        const S00e19d60_Quad refined = S00e19d60_SIMD::_mm_mul_ss(
-            S00e19d60_SIMD::_mm_mul_ss(half, approx),
-            S00e19d60_SIMD::_mm_sub_ss(three,
-                                       S00e19d60_SIMD::_mm_mul_ss(S00e19d60_SIMD::_mm_mul_ss(len2, approx), approx)));
-        return S00e19d60_SIMD::_mm_andnot_ps(len2EqualsZero, refined);
-    }
-    __forceinline void normalize3()
-    {
-        S00e19d60_Quad lenInv = lengthInverse3().broadcast();
-        m_vComponents = S00e19d60_SIMD::_mm_mul_ps(lenInv, m_vComponents);
-    }
-    __forceinline S00e19d60_SimdReal distanceToSquared3(const S00e19d60_Vec4& p) const
-    {
-        S00e19d60_Vec4 d;
-        d.setSub4(*this, p);
-        return d.lengthSquared3();
-    }
-    __forceinline S00e19d60_SimdReal getSimdAt(int i) const
-    {
-        switch (i)
-        {
-        case 0:
-            return m_vComponents;
-        case 1:
-            return S00e19d60_SIMD::_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55);
-        case 2:
-            return S00e19d60_SIMD::_mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa);
-        case 3:
-        default:
-            return S00e19d60_SIMD::_mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
-        }
-    }
-    S00e19d60_Bool FUN_00c7f520(float eps) const;
+}
+// Preserve the original ECX vector and stack-passed return buffer and epsilon.
+struct MeshVectorBoolResult
+{
+    S00e19d60_Bool* value;
 };
+S00e19d60_Bool* __fastcall MeshVectorIsNormalized(const PacketCallLocal_00e19d60* vector, MeshVectorBoolResult result, float eps);
 
 struct S00e19d60_Vertex
 {
@@ -3073,7 +2833,7 @@ struct S00e19d60_Vertex
     S00e19d60_Vertex* m_pSecondNode;
     int unk08;
     int unk0c;
-    S00e19d60_Vec4 m_vContactPosition;
+    PacketCallLocal_00e19d60 m_vContactPosition;
 };
 
 struct S00e19d60_Triangle
@@ -3085,7 +2845,7 @@ struct S00e19d60_Triangle
     {
         return m_kVertices[i];
     }
-    __forceinline S00e19d60_Vec4& position(int i)
+    __forceinline PacketCallLocal_00e19d60& position(int i)
     {
         return vertex(i)->m_vContactPosition;
     }
@@ -3139,13 +2899,13 @@ static __forceinline ::ErrorReporter& S00e19d60_getError()
     return *::DAT_01268360;
 }
 
-float __cdecl FUN_00dea450(const S00e19d60_Vec4& a, const S00e19d60_Vec4& b, const S00e19d60_Vec4& c,
-                           const S00e19d60_Vec4& d, float& s, float& t);
-float __cdecl FUN_00de94b0(const S00e19d60_Vec4& p, const S00e19d60_Vec4& a, const S00e19d60_Vec4& b, float& t);
+float __cdecl FUN_00dea450(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, const PacketCallLocal_00e19d60& c,
+                           const PacketCallLocal_00e19d60& d, float& s, float& t);
+float __cdecl FUN_00de94b0(const PacketCallLocal_00e19d60& p, const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b, float& t);
 
-static __forceinline float S00e19d60_distanceToPlane(const S00e19d60_Vec4& plane, const S00e19d60_Vec4& x)
+static __forceinline float S00e19d60_distanceToPlane(const PacketCallLocal_00e19d60& plane, const PacketCallLocal_00e19d60& x)
 {
-    return plane.dot3(x) + plane.getSimdAt(3);
+    return MeshVector_dot3(plane, x) + MeshVector_getSimdAt(plane, 3);
 }
 static __forceinline float S00e19d60_fabs(float r)
 {
@@ -3155,31 +2915,31 @@ static __forceinline float S00e19d60_snap(float x, float eps)
 {
     return S00e19d60_fabs(x) <= eps ? 0.0f : x;
 }
-static __forceinline S00e19d60_Vec4 S00e19d60_crossOffset(const S00e19d60_Vec4& o, const S00e19d60_Vec4& a,
-                                                          const S00e19d60_Vec4& b)
+static __forceinline PacketCallLocal_00e19d60 S00e19d60_crossOffset(const PacketCallLocal_00e19d60& o, const PacketCallLocal_00e19d60& a,
+                                                          const PacketCallLocal_00e19d60& b)
 {
-    S00e19d60_Vec4 oa;
-    oa.setSub4(a, o);
-    S00e19d60_Vec4 ob;
-    ob.setSub4(b, o);
-    S00e19d60_Vec4 ret;
-    ret.setCross(oa, ob);
+    PacketCallLocal_00e19d60 oa;
+    MeshVector_setSub4(oa, a, o);
+    PacketCallLocal_00e19d60 ob;
+    MeshVector_setSub4(ob, b, o);
+    PacketCallLocal_00e19d60 ret;
+    MeshVector_setCross(ret, oa, ob);
     return ret;
 }
-static __forceinline S00e19d60_Vec4 S00e19d60_planeEquation(const S00e19d60_Vec4& a, const S00e19d60_Vec4& b,
-                                                            const S00e19d60_Vec4& c, bool normalized)
+static __forceinline PacketCallLocal_00e19d60 S00e19d60_planeEquation(const PacketCallLocal_00e19d60& a, const PacketCallLocal_00e19d60& b,
+                                                            const PacketCallLocal_00e19d60& c, bool normalized)
 {
-    S00e19d60_Vec4 eq = S00e19d60_crossOffset(a, b, c);
+    PacketCallLocal_00e19d60 eq = S00e19d60_crossOffset(a, b, c);
     if (normalized)
-        eq.normalize3();
-    eq(3) = -eq.dot3(a);
+        MeshVector_normalize3(eq);
+    eq(3) = -MeshVector_dot3(eq, a);
     return eq;
 }
 
 struct S00e19d60_Mesh
 {
-    S00e19d60_Edge FUN_00e191a0(S00e19d60_Edge e, const S00e19d60_Vec4& p, bool b);
-    void FUN_00e19200(S00e19d60_Triangle* t, const S00e19d60_Vec4& p, bool b);
+    S00e19d60_Edge FUN_00e191a0(S00e19d60_Edge e, const PacketCallLocal_00e19d60& p, bool b);
+    void FUN_00e19200(S00e19d60_Triangle* t, const PacketCallLocal_00e19d60& p, bool b);
     static bool __cdecl FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Triangle* triA, S00e19d60_Mesh* meshB,
                                      S00e19d60_Triangle* triB, float minDistance);
 };
@@ -3194,13 +2954,13 @@ bool __cdecl S00e19d60_Mesh::FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Trian
     for (int i = 0; i < 3; ++i)
     {
         S00e19d60_Edge edgeA(triA, i);
-        S00e19d60_Vec4 a0 = edgeA.start()->m_vContactPosition;
-        S00e19d60_Vec4 a1 = edgeA.end()->m_vContactPosition;
+        PacketCallLocal_00e19d60 a0 = edgeA.start()->m_vContactPosition;
+        PacketCallLocal_00e19d60 a1 = edgeA.end()->m_vContactPosition;
         for (int j = 0; j < 3; ++j)
         {
             S00e19d60_Edge edgeB(triB, j);
-            S00e19d60_Vec4 b0 = edgeB.start()->m_vContactPosition;
-            S00e19d60_Vec4 b1 = edgeB.end()->m_vContactPosition;
+            PacketCallLocal_00e19d60 b0 = edgeB.start()->m_vContactPosition;
+            PacketCallLocal_00e19d60 b1 = edgeB.end()->m_vContactPosition;
             float u, v;
             const float d = FUN_00dea450(a0, a1, b0, b1, u, v);
             if (d < minDistance)
@@ -3208,15 +2968,15 @@ bool __cdecl S00e19d60_Mesh::FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Trian
                 bool clipA = true;
                 bool clipB = true;
                 bool result = false;
-                S00e19d60_Vec4 x;
-                x.setInterpolate4(a0, a1, u);
-                if (a0.distanceToSquared3(x) <= sqDistance)
+                PacketCallLocal_00e19d60 x;
+                MeshVector_setInterpolate4(x, a0, a1, u);
+                if (MeshVector_distanceToSquared3(a0, x) <= sqDistance)
                     clipA = false;
-                if (a1.distanceToSquared3(x) <= sqDistance)
+                if (MeshVector_distanceToSquared3(a1, x) <= sqDistance)
                     clipA = false;
-                if (b0.distanceToSquared3(x) <= sqDistance)
+                if (MeshVector_distanceToSquared3(b0, x) <= sqDistance)
                     clipB = false;
-                if (b1.distanceToSquared3(x) <= sqDistance)
+                if (MeshVector_distanceToSquared3(b1, x) <= sqDistance)
                     clipB = false;
                 if (clipA && clipB)
                 {
@@ -3240,16 +3000,16 @@ bool __cdecl S00e19d60_Mesh::FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Trian
         const int j = 1 - i;
         for (int k = 0; k < 3; ++k)
         {
-            const S00e19d60_Vec4& p = triangles[i]->position(k);
+            const PacketCallLocal_00e19d60& p = triangles[i]->position(k);
             for (int l = 0; l < 3; ++l)
             {
                 S00e19d60_Edge e(triangles[j], l);
-                S00e19d60_Vec4 a = e.start()->m_vContactPosition;
-                S00e19d60_Vec4 b = e.end()->m_vContactPosition;
+                PacketCallLocal_00e19d60 a = e.start()->m_vContactPosition;
+                PacketCallLocal_00e19d60 b = e.end()->m_vContactPosition;
                 float t = 1;
-                if (p.distanceToSquared3(a) < sqDistance)
+                if (MeshVector_distanceToSquared3(p, a) < sqDistance)
                     continue;
-                if (p.distanceToSquared3(b) < sqDistance)
+                if (MeshVector_distanceToSquared3(p, b) < sqDistance)
                     continue;
                 if (FUN_00de94b0(p, a, b, t) < sqDistance)
                 {
@@ -3270,23 +3030,25 @@ bool __cdecl S00e19d60_Mesh::FUN_00e19d60(S00e19d60_Mesh* meshA, S00e19d60_Trian
     for (int i = 0; i < 2; ++i)
     {
         const int j = 1 - i;
-        S00e19d60_Vec4 vertices[3] = {triangles[i]->position(0), triangles[i]->position(1), triangles[i]->position(2)};
-        S00e19d60_Vec4 plane = S00e19d60_planeEquation(vertices[0], vertices[1], vertices[2], true);
-        if (plane.FUN_00c7f520(0.0001f))
+        PacketCallLocal_00e19d60 vertices[3] = {triangles[i]->position(0), triangles[i]->position(1), triangles[i]->position(2)};
+        PacketCallLocal_00e19d60 plane = S00e19d60_planeEquation(vertices[0], vertices[1], vertices[2], true);
+        S00e19d60_Bool normalized;
+        MeshVectorBoolResult normalizedResult = {&normalized};
+        if (*MeshVectorIsNormalized(&plane, normalizedResult, 0.0001f))
         {
             for (int k = 0; k < 3; ++k)
             {
                 S00e19d60_Edge e(triangles[j], k);
-                S00e19d60_Vec4 a = e.start()->m_vContactPosition;
-                S00e19d60_Vec4 b = e.end()->m_vContactPosition;
+                PacketCallLocal_00e19d60 a = e.start()->m_vContactPosition;
+                PacketCallLocal_00e19d60 b = e.end()->m_vContactPosition;
                 const float da = S00e19d60_snap(S00e19d60_distanceToPlane(plane, a), minDistance);
                 const float db = S00e19d60_snap(S00e19d60_distanceToPlane(plane, b), minDistance);
                 if (da * db < 0.0)
                 {
                     const float t = da / (da - db);
-                    S00e19d60_Vec4 x;
-                    x.setInterpolate4(a, b, t);
-                    if (x.distanceToSquared3(a) > sqDistance && x.distanceToSquared3(b) > sqDistance &&
+                    PacketCallLocal_00e19d60 x;
+                    MeshVector_setInterpolate4(x, a, b, t);
+                    if (MeshVector_distanceToSquared3(x, a) > sqDistance && MeshVector_distanceToSquared3(x, b) > sqDistance &&
                         ::FUN_00dea6b0((const ::Vec4f*)&x, (const ::Vec4f&)vertices[0], (const ::Vec4f&)vertices[1],
                                        (const ::Vec4f&)vertices[2], -1.1920929e-07f))
                     {

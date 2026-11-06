@@ -2,7 +2,13 @@
 // src/staging/blk_00ae0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include <stddef.h>
+
+#pragma pack(push, 4)
+#include "../../include/MemoryManager.h"
+#include "../../include/BSAudio.h"
+#include "../../include/BSFile.h"
+#include "../../include/NiPoint3.h"
 
 extern int DAT_010a42b4;
 void* __cdecl _fnv_zlib_memset(void* p, int c, unsigned int n);
@@ -57,10 +63,8 @@ long __cdecl FUN_00aea180(void* stream, long offset, int whence, int iWhenceArg)
 }
 
 extern int DAT_010a39d8;
-struct FUN_00ad7000_stub
-{
-    void FUN_00ad7000();
-};
+// The shared BSAudio header does not declare its non-virtual destructor.
+void DestroyBSAudio();
 struct FUN_00aea210_Class
 {
     void* vtbl;
@@ -70,7 +74,7 @@ struct FUN_00aea210_Class
 void FUN_00aea210_Class::FUN_00aea210()
 {
     *reinterpret_cast<int**>(this) = &DAT_010a39d8;
-    reinterpret_cast<FUN_00ad7000_stub*>(this)->FUN_00ad7000();
+    reinterpret_cast<void (__thiscall*)(BSAudio*)>(&DestroyBSAudio)(reinterpret_cast<BSAudio*>(this));
 }
 
 struct FUN_00aea890_Class
@@ -272,7 +276,6 @@ void FUN_00afd960_Class::FUN_00afd960()
     SwapByteQuadWords((char*)this + 4, 1);
 }
 
-struct NiFile;
 struct FileFinder
 {
     static NiFile* __cdecl GetFile(const char*, int, unsigned int, unsigned int);
@@ -285,10 +288,6 @@ void __cdecl FUN_00afdf00(const char* apPath, int b, unsigned int c)
 }
 
 extern int DAT_010a39d8;
-struct FUN_00ad6f40_Class
-{
-    void FUN_00ad6f40();
-};
 struct FUN_00aea1b0_Class
 {
     void* vtbl;
@@ -328,10 +327,6 @@ FUN_00aea730_Class* FUN_00aea730_Class::FUN_00aea730(int aiValue)
     return this;
 }
 
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00aeaa80_Class
 {
@@ -361,10 +356,6 @@ void __thiscall FUN_00aefcf0_Class::FUN_00aefcf0(float a, float b, float c)
 }
 
 namespace fnv_00af1cc0 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager _g_memoryManager;
 struct FUN_00af1cc0_Class
 {
@@ -398,11 +389,6 @@ void* FUN_00af1d20_Class::FUN_00af1d20()
     return this;
 }
 
-struct BSFile
-{
-    void __thiscall Close();
-    virtual ~BSFile();
-};
 // If f is non-null, calls Close on it, deletes it, and returns 0; otherwise returns -1.
 // @fnv 0x00af2230
 int __cdecl CloseAndDeleteFile(BSFile* apFile)
@@ -612,11 +598,6 @@ void* __thiscall FUN_00afd8b0_Class::FUN_00afd8b0()
     return this;
 }
 
-struct BSAudio
-{
-    char pad[0x38];
-    void* pAudio;
-};
 extern BSAudio* DAT_011f6d98;
 
 struct FUN_00af1ba0_Class
@@ -631,11 +612,12 @@ bool FUN_00af1ba0_Class::EnsureAudio()
     if (pAudio)
         return true;
     BSAudio* audioA = DAT_011f6d98;
-    void* p4 = audioA->pAudio;
+    // The backend pointer is not yet exposed by the shared header.
+    void* p4 = *reinterpret_cast<void**>(reinterpret_cast<char*>(audioA) + 0x38);
     if (p4)
     {
         BSAudio* audio2 = DAT_011f6d98;
-        void* p2 = audio2->pAudio;
+        void* p2 = *reinterpret_cast<void**>(reinterpret_cast<char*>(audio2) + 0x38);
         pAudio = p2;
         return true;
     }
@@ -1376,12 +1358,6 @@ void __thiscall FUN_00aea9d0_Obj::NotifyListenerValue(float value)
     }
 }
 
-struct S_00aeaa10_P3
-{
-    float x;
-    float y;
-    float z;
-};
 struct S_00aeaa10_Obj
 {
     virtual void vf0();
@@ -1414,18 +1390,18 @@ struct S_00aeaa10_Cls
     int unk1c;
     int unk20;
     int unk24;
-    S_00aeaa10_P3 pos;
+    NiPoint3 pos;
     int unk34;
     int unk38;
     int unk3c;
     int unk40;
     int unk44;
     S_00aeaa10_Obj* obj;
-    void FUN_00aeaa10(const S_00aeaa10_P3* p);
+    void FUN_00aeaa10(const NiPoint3* p);
 };
 // Copies the given position into pos and, if obj is set, forwards its x, y, z to obj->FUN_x40 with true.
 // @fnv 0x00aeaa10
-void S_00aeaa10_Cls::FUN_00aeaa10(const S_00aeaa10_P3* pPos)
+void S_00aeaa10_Cls::FUN_00aeaa10(const NiPoint3* pPos)
 {
     pos = *pPos;
     if (obj)
@@ -1440,14 +1416,6 @@ struct MMStub
     void* __thiscall Allocate(unsigned int size);
 };
 extern MMStub g_mmStub;
-class NiPoint3
-{
-  public:
-    float x;
-    float y;
-    float z;
-};
-extern const NiPoint3 NiPoint3_ZERO;
 
 struct Stub1A4
 {
@@ -1598,7 +1566,8 @@ struct FUN_00aeae10 : public FUN_00ae9360_Base
     unsigned short unk212;
     unsigned short unk214;
     unsigned short unk216;
-    NiPoint3 unk218;
+    // Raw storage avoids the shared default constructor in this unoptimized unit.
+    float unk218[sizeof(NiPoint3) / sizeof(float)];
     char unk224;
     int unk228;
     int unk22C;
@@ -1606,7 +1575,7 @@ struct FUN_00aeae10 : public FUN_00ae9360_Base
     virtual ~FUN_00aeae10();
 };
 
-// Initialises the object's fields to zero, sets unk218 to NiPoint3_ZERO, allocates 0x12 bytes into unk1A4.pBuf and sets the unk20C..unk214 values.
+// Initialises the object's fields to zero, sets unk218 to NiPoint3::ZERO, allocates 0x12 bytes into unk1A4.pBuf and sets the unk20C..unk214 values.
 // @fnv 0x00aeae10
 FUN_00aeae10::FUN_00aeae10()
 {
@@ -1620,7 +1589,7 @@ FUN_00aeae10::FUN_00aeae10()
     unk204 = 0;
     unk208 = 0;
     unk224 = 0;
-    unk218 = NiPoint3_ZERO;
+    reinterpret_cast<NiPoint3&>(unk218) = NiPoint3::ZERO;
     _fnv_zlib_memset(&unk1A4, 0, sizeof(Stub1A4));
     void* p = g_mmStub.Allocate(0x12);
     unk1A4.pBuf = p;
@@ -4919,13 +4888,6 @@ struct FUN_00aee580_stream
     char* pData1C;
     char* pData20;
 };
-struct FUN_00aee580_audio
-{
-    int pad[5];
-    unsigned int ulFadeStartTimeTick;
-    int pad18;
-    unsigned int uiFlags;
-};
 struct FUN_00aee580_cls
 {
     virtual void v00();
@@ -4971,9 +4933,9 @@ bool FUN_00aee580_cls::UpdateStreamBuffer(int aiUnused)
 {
     unsigned int uiBegin;
     unsigned int ulFadeStartTimeTick;
-    FUN_00aee580_audio* pAudioTime;
-    FUN_00aee580_audio* pAudio2Cur;
-    FUN_00aee580_audio* pAudioMgr;
+    BSAudio* pAudioTime;
+    BSAudio* pAudio2Cur;
+    BSAudio* pAudioMgr;
     bool bPlayingCur;
     int iNewPosition;
     unsigned int dwPos;
@@ -5118,13 +5080,13 @@ bool FUN_00aee580_cls::UpdateStreamBuffer(int aiUnused)
         else if (v04() && (bool)(uiFlags08 & (unsigned int)&DAT_01000000 ? 1 : 0))
         {
             if (!(bool)(uiFlags10 & 0x100000 ? 1 : 0) &&
-                (bool)((pAudioMgr = (FUN_00aee580_audio*)DAT_011f6d98)->uiFlags & 1 ? 1 : 0))
+                (bool)((pAudioMgr = DAT_011f6d98)->SynchTimer.iFlags & 1 ? 1 : 0))
             {
                 uiFlags10 = 1 ? (uiFlags10 | 0x100000) : (uiFlags10 & ~0x100000);
                 v34();
             }
             else if ((bool)(uiFlags10 & 0x100000 ? 1 : 0) &&
-                     !(bool)((pAudio2Cur = (FUN_00aee580_audio*)DAT_011f6d98)->uiFlags & 1 ? 1 : 0))
+                     !(bool)((pAudio2Cur = DAT_011f6d98)->SynchTimer.iFlags & 1 ? 1 : 0))
             {
                 uiFlags10 = 0 ? (uiFlags10 | 0x100000) : (uiFlags10 & ~0x100000);
                 v30(0);
@@ -5139,8 +5101,8 @@ bool FUN_00aee580_cls::UpdateStreamBuffer(int aiUnused)
                 pBuffer->GetFormat(&kFormat, sizeof(kFormat), 0);
                 iRate = *(unsigned int*)&kFormat.nAvgBytesPerSecLo / 1000.0;
                 uiPlayedMs = dwPos / (*(unsigned int*)&kFormat.nAvgBytesPerSecLo / 1000.0);
-                pAudioTime = (FUN_00aee580_audio*)DAT_011f6d98;
-                ulFadeStartTimeTick = pAudioTime->ulFadeStartTimeTick;
+                pAudioTime = DAT_011f6d98;
+                ulFadeStartTimeTick = pAudioTime->SynchTimer.m_uiValueAt00;
                 uiBegin = m_uiState;
                 uiElapsedValue = ulFadeStartTimeTick - uiBegin;
                 iError = 0;
@@ -5267,12 +5229,6 @@ struct xAudioSettings
     unsigned int adwRest[15];
 };
 
-struct xAudio
-{
-    char _pad0[0x40];
-    xAudioSettings m_kSettings;
-};
-
 struct xMemoryManager
 {
     void* Allocate(unsigned int uiSize);
@@ -5295,7 +5251,7 @@ extern xGuid xg_kGuid2D;
 extern xGuid xg_kGuid3D;
 struct xAudioPtr
 {
-    xAudio* p;
+    BSAudio* p;
 };
 extern xAudioPtr xg_kAudio;
 extern xMemoryManager xg_kMemoryManager;
@@ -5476,7 +5432,7 @@ bool xGameSound::FUN_00aeb270()
     else
     {
         m_uiDescFlags = 0x30010;
-        qjXCGmG = xAudioPtr(xg_kAudio).p->m_kSettings;
+        qjXCGmG = *reinterpret_cast<const xAudioSettings*>(reinterpret_cast<const char*>(xAudioPtr(xg_kAudio).p) + 0x40);
         if (qjXCGmG.dwHardware)
             m_kAlgorithm = xg_kGuid3D;
         else
@@ -6075,26 +6031,6 @@ struct AudioMemory
     void* __thiscall FUN_00aa3e40(U32 size);
 };
 
-struct AudioOptionsSource
-{
-    U32 unk00;
-    U32 unk04;
-    U32 unk08;
-    U32 unk0c;
-    U32 unk10;
-    U32 unk14;
-    U32 unk18;
-    U32 unk1c;
-    U32 unk20;
-    U32 unk24;
-    U32 unk28;
-    U32 unk2c;
-    U32 unk30;
-    U32 unk34;
-    U32 unk38;
-    U32 unk3c;
-    AudioConfig options;
-};
 
 extern AudioMemory DAT_011f6238;
 
@@ -6467,7 +6403,7 @@ void __thiscall AudioBuffer::FUN_00af0630(AudioBuffer* apSource, bool notify)
                 U32 copySize_2;
                 const void* copySrc7;
                 void* copyDst7;
-                AudioOptionsSource* audioNodeVal;
+                BSAudio* audioNodeVal;
                 U32 flags_2;
                 U32 flags56;
                 U32 flags40;
@@ -6542,8 +6478,8 @@ void __thiscall AudioBuffer::FUN_00af0630(AudioBuffer* apSource, bool notify)
                     m_algo = DAT_01093f04;
                 else
                 {
-                    audioNodeVal = (AudioOptionsSource*)DAT_011f6d98;
-                    options = audioNodeVal->options;
+                    audioNodeVal = DAT_011f6d98;
+                    options = *reinterpret_cast<const AudioConfig*>(reinterpret_cast<const char*>(audioNodeVal) + 0x40);
                     if (options.m_20 != 0)
                         m_algo = DAT_01100fe4;
                     else
@@ -6826,7 +6762,8 @@ struct FUN_00aeac20 : Worker114::FUN_00ae9360_Base
     unsigned short unk212;
     unsigned short unk214;
     unsigned short unk216;
-    NiPoint3 position218;
+    // Raw storage avoids the shared default constructor in this unoptimized unit.
+    float position218[sizeof(NiPoint3) / sizeof(float)];
     unsigned char flag224;
     unsigned int unk228, unk22c;
     FUN_00aeac20(const char* name);
@@ -6853,7 +6790,7 @@ FUN_00aeac20::FUN_00aeac20(const char* name)
     unk204 = 0;
     unk208 = 0;
     flag224 = 0;
-    position218 = NiPoint3_ZERO;
+    reinterpret_cast<NiPoint3&>(position218) = NiPoint3::ZERO;
     _fnv_zlib_memset(&unk1a4, 0, 0x24);
     void* allocation = reinterpret_cast<Allocate114*>(&g_memoryManager)->FUN_00aa3e40(0x12);
     unk1b4 = reinterpret_cast<unsigned int>(allocation);

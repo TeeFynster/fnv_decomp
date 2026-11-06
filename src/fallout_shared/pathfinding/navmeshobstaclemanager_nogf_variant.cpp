@@ -3,7 +3,6 @@
 // say /MT /Od /Oy- /GS /EHsc /Gy (unit src/fallout_shared/pathfinding/navmeshobstaclemanager.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions to their real
 // unit once identified.
 
-#include "navmeshobstaclemanager_decls.h"
 
 #include <xmmintrin.h>
 struct V3

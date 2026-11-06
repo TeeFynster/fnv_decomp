@@ -1,83 +1,44 @@
+#include "../../../include/OSGlobals.h"
+#include "../../../include/TESDataHandler.h"
+#include "../../../include/AILinearTaskThread.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/TESEnchantableForm.h"
+#include "../../../include/hkMemoryAllocator.h"
+#include "../../../include/hkMemorySystem.h"
 // fallout/ai/ailineartaskthread.cpp: AILinearTaskThread, Thr (3 functions)
 
-class GlobalObject_008c71b0
+struct Flag
 {
     int value;
 
   public:
-    GlobalObject_008c71b0(int);
-    GlobalObject_008c71b0(const GlobalObject_008c71b0&);
+    Flag(int);
+    Flag(const Flag&);
 };
-class hkMemoryAllocator
-{
-  public:
-    virtual void vfn_0();
-    virtual void* vfn_4(int);
-};
-class OSGlobals
-{
-  public:
-    unsigned int GetUptimeMilliseconds();
-};
-enum MagicSystem__CastingType
-{
-    CastingType0
-};
-class TESEnchantableForm
-{
-  public:
-    void SetCastingType(MagicSystem__CastingType);
-};
-class InterfaceManager
+// 0x008c6ff0 passes ThreadMemory; folded helper 0x00984f60 stores its allocator at +0x18.
+class RouterAllocatorView_008c6ff0
 {
   public:
     void FUN_00984f60(unsigned int);
 };
 class BGSPerkEntry;
-template <class T> class BSSimpleList
-{
-  public:
-    T& GetItem();
-};
-class hkMemorySystem
-{
-  public:
-    static hkMemorySystem* GetMonitorStream();
-    void GetMonitorStream(void*, int);
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual void vfn_8();
-    virtual void vfn_c(void*, const char*, GlobalObject_008c71b0);
-};
+#include "../../../include/BSSimpleList.h"
 class PointerCallback
 {
   public:
     static void HandlePointer(void*);
 };
-class TESDataHandler
-{
-  public:
-    void BuildCompiledFileList();
-};
 extern TESDataHandler* g_dataHandler;
-class AILinearTaskThread
-{
-  public:
-    char padding[0x50];
-    char memoryRouter[0x24];
-    void* memory;
-    void StartTaskThread();
-};
 // @fnv 0x008c6ff0
 void AILinearTaskThread::StartTaskThread()
 {
-    hkMemorySystem::GetMonitorStream()->vfn_c(memoryRouter, "AILinearTaskThread", GlobalObject_008c71b0(1));
-    PointerCallback::HandlePointer(memoryRouter);
-    ((TESEnchantableForm*)memoryRouter)
-        ->SetCastingType((MagicSystem__CastingType)((OSGlobals*)memoryRouter)->GetUptimeMilliseconds());
-    ((InterfaceManager*)memoryRouter)->FUN_00984f60(((OSGlobals*)memoryRouter)->GetUptimeMilliseconds());
-    memory = ((hkMemoryAllocator*)((OSGlobals*)memoryRouter)->GetUptimeMilliseconds())->vfn_4(0x32000);
-    ((hkMemorySystem*)&((BSSimpleList<BGSPerkEntry*>*)memoryRouter)->GetItem())->GetMonitorStream(memory, 0x32000);
+    hkMemorySystem::GetMonitorStream()->InitializeThreadRouter(&ThreadMemory, "AILinearTaskThread", Flag(1));
+    PointerCallback::HandlePointer(&ThreadMemory);
+    ((TESEnchantableForm*)&ThreadMemory)
+        ->SetCastingType((MagicSystem__CastingType)((OSGlobals*)&ThreadMemory)->GetUptimeMilliseconds());
+    ((RouterAllocatorView_008c6ff0*)&ThreadMemory)->FUN_00984f60(((OSGlobals*)&ThreadMemory)->GetUptimeMilliseconds());
+    m_pTaskMemory = ((hkMemoryAllocator*)((OSGlobals*)&ThreadMemory)->GetUptimeMilliseconds())->blockAlloc(0x32000);
+    ((hkMemorySystem*)&((BSSimpleList<BGSPerkEntry*>*)&ThreadMemory)->GetItem())->GetMonitorStream(m_pTaskMemory, 0x32000);
     g_dataHandler->BuildCompiledFileList();
 }
 
@@ -107,9 +68,10 @@ struct Fin
 {
     void Done();
 };
-struct Router
+// 0x006815c0 returns this (folded identity, ReturnThis); here it is called on the thread's router with two
+// zero arguments.
+struct ReturnThis_6815c0
 {
-    Alloc* GetAlloc();
     Fin* Next(int a, int b);
 };
 struct HkSys
@@ -118,23 +80,22 @@ struct HkSys
     virtual void v4();
     virtual void v8();
     virtual void vc();
-    virtual void v10(Router* r, GlobalObject_008c71b0 g);
+    virtual void v10(hkMemoryRouter* r, Flag g);
 };
 void hkInit();
 HkSys* hkGet();
 struct Thr
 {
     char padding[0x50];
-    Router memoryRouter;
-    char pad2[0x20];
+    hkMemoryRouter memoryRouter;
     void* memory;
     void InitMemory();
 };
 // @fnv 0x008c7110
 void Thr::InitMemory()
 {
-    memoryRouter.GetAlloc()->v8(memory, 0x32000);
+    memoryRouter.heap().blockFree(memory, 0x32000);
     hkInit();
-    hkGet()->v10(&memoryRouter, GlobalObject_008c71b0(1));
-    memoryRouter.Next(0, 0)->Done();
+    hkGet()->v10(&memoryRouter, Flag(1));
+    reinterpret_cast<ReturnThis_6815c0*>(&memoryRouter)->Next(0, 0)->Done();
 }

@@ -2,7 +2,26 @@
 // src/staging/blk_00540000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/Setting.h"
+#include "../../include/Sky.h"
+#include "../../include/TESObject.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESTopicInfo.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/AnimIdle.h"
+#include "../../include/BSFaceGenModelExtraData.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/GO.h"
+#include "../../include/IntSeenData.h"
+#include "../../include/SeenData.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/NiTMallocInterface.h"
 
 struct FUN_00540700_Class
 {
@@ -55,10 +74,6 @@ void TaskQueueInterface::SetTaskFlag(bool enabled)
     SetTaskFlagDWord(enabled, 0x200000);
 }
 
-struct GO
-{
-    void* operator=(void*);
-};
 
 struct FUN_00549610_Class
 {
@@ -651,10 +666,6 @@ void FUN_00541cd0()
 }
 
 bool __cdecl FUN_0040eb10(float a, float b, float c);
-struct Sky
-{
-    float GetFieldCC();
-};
 struct DoorH
 {
     Sky* GetParentWorldSpace();
@@ -696,14 +707,6 @@ void FUN_00551100(int v)
     DAT_011c7a60 = v;
 }
 
-struct ArrSI
-{
-    unsigned int GetFlags();
-};
-struct TESObjectREFR
-{
-    void SetFlags(unsigned int);
-};
 struct FUN_005516f0_Class
 {
     void SetFlag400(bool set);
@@ -712,7 +715,7 @@ struct FUN_005516f0_Class
 // @fnv 0x005516f0
 void FUN_005516f0_Class::SetFlag400(bool set)
 {
-    unsigned int flags = ((ArrSI*)this)->GetFlags();
+    unsigned int flags = ((TESObjectREFR*)this)->GetFlags();
     if (set)
         flags |= 0x400;
     else
@@ -720,10 +723,6 @@ void FUN_005516f0_Class::SetFlag400(bool set)
     ((TESObjectREFR*)this)->SetFlags(flags);
 }
 
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 MemoryManager* __cdecl FUN_00401020(void);
 // If a is non-null, backs up by the size byte stored before it and deallocates the resulting block through the memory manager.
 // @fnv 0x00553380
@@ -809,12 +808,6 @@ void __cdecl CallIfPresent()
 }
 }  // namespace fnv_00554780
 
-struct ExtraDataList
-{
-    void* GetRoomId();
-    void __thiscall FUN_00554960(bool);
-    bool __thiscall FUN_00554910();
-};
 bool __fastcall FUN_004bae00(char const*);
 // @fnv 0x00554910
 bool __thiscall ExtraDataList::FUN_00554910()
@@ -835,10 +828,6 @@ struct FUN_00421a40_class
 {
     float GetExtraFloatValue();
 };
-struct TESTopicInfo
-{
-    FUN_00421a40_class* GetPrompt();
-};
 struct TESObjectCELL_Ext : public TESObjectCELL
 {
     bool IsInterior();
@@ -850,7 +839,7 @@ float TESObjectCELL_Ext::FUN_00555ad0()
 {
     float result = 0.0f;
     if (IsInterior())
-        result = ((FUN_00421a40_class*)((TESTopicInfo*)this)->GetPrompt())->GetExtraFloatValue();
+        result = ((FUN_00421a40_class*)&((TESTopicInfo*)this)->GetPrompt())->GetExtraFloatValue();
     return result;
 }
 
@@ -1020,20 +1009,6 @@ void* __thiscall FUN_00559df0::FUN_00559e20(unsigned int flags)
     return this;
 }
 
-struct AnimIdle
-{
-    unsigned int m_uiRefCount;
-    void* m_pObject;
-    void IncRefCount();
-    unsigned int DecRefCount();
-};
-struct BSFaceGenModelExtraData
-{
-    unsigned int m_uiRefCount;
-    void* m_pObject;
-    void IncRefCount();
-    unsigned int DecRefCount();
-};
 struct FUN_0055a0c0
 {
     NiPointer<AnimIdle> a;
@@ -1042,7 +1017,7 @@ struct FUN_0055a0c0
     FUN_0055a0c0(int);
 };
 // @fnv 0x0055a0c0
-FUN_0055a0c0::FUN_0055a0c0(int)
+FUN_0055a0c0::FUN_0055a0c0(int) : a(0), b(0)
 {
     c = 0;
 }
@@ -1171,10 +1146,6 @@ void __thiscall FUN_0055a040_Class::FUN_0055a040(FUN_0055a240_Obj* a)
 }
 
 struct ActorCombatGroup;
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short size);
-};
 extern int $SG6448;
 
 struct FUN_00540b00_Class
@@ -1197,32 +1168,15 @@ FUN_00540b00_Class::FUN_00540b00_Class(unsigned short ausSize, unsigned short y)
     a = 0;
     c = 0;
     if (w8 > 0)
-        p = NiTMallocInterface_0096afc0::Allocate(w8);
+        p = NiTMallocInterface<ActorCombatGroup*>::Allocate(w8);
     else
         p = 0;
 }
 
 struct TESObjectCONT;
 extern TESObjectCONT* DAT_011c3f40;
-struct BGSPerkEntry;
-struct BSSimpleList_551110
-{
-    BGSPerkEntry** GetItem();
-    BSSimpleList_551110* GetNext();
-};
-struct FUN_009604f0_shell
-{
-    BSSimpleList_551110* FUN_009604f0();
-};
-struct TESObject
-{
-    TESObjectCONT* GetNext();
-};
 struct FUN_00551110_Cell : public TESObjectCELL
 {
-    BSSimpleList_551110* FUN_009604f0();
-    void CellRefLockEnter();
-    void CellRefLockLeave();
     BGSPerkEntry* FUN_00551110();
 };
 // Locks cell refs, walks the list from FUN_009604f0 and returns the first entry whose GetNext equals DAT_011c3f40, then unlocks.
@@ -1231,11 +1185,11 @@ BGSPerkEntry* FUN_00551110_Cell::FUN_00551110()
 {
     BGSPerkEntry* result2 = 0;
     CellRefLockEnter();
-    BSSimpleList_551110* list = FUN_009604f0();
+    BSSimpleList<BGSPerkEntry*>* list = FUN_009604f0();
     while (list)
     {
-        BGSPerkEntry* entry = *list->GetItem();
-        if (entry && reinterpret_cast<TESObject*>(entry)->GetNext() == DAT_011c3f40)
+        BGSPerkEntry* entry = list->GetItem();
+        if (entry && reinterpret_cast<TESObject*>(entry)->GetNext() == reinterpret_cast<TESObject*>(DAT_011c3f40))
         {
             result2 = entry;
             break;
@@ -1262,11 +1216,6 @@ char* __cdecl FUN_00553320(unsigned char count, unsigned int size)
 }
 
 namespace fnv_00559ad0 {
-struct ActorCombatGroup;
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short);
-};
 extern int DAT_0102f3b8;
 struct FUN_00559ad0_Class
 {
@@ -1288,7 +1237,7 @@ FUN_00559ad0_Class::FUN_00559ad0_Class(unsigned short ausCount, unsigned short b
     m0a = 0;
     m0c = 0;
     if (count > 0)
-        p = NiTMallocInterface_0096afc0::Allocate(count);
+        p = NiTMallocInterface<ActorCombatGroup*>::Allocate(count);
     else
         p = 0;
 }
@@ -1345,14 +1294,6 @@ struct RefObj_5405a0
     unsigned int DecRefCount();
 };
 
-struct NiPoint2
-{
-    float x;
-    float y;
-    NiPoint2();
-    NiPoint2(float fx, float fy);
-};
-
 struct Entry_5405a0
 {
     int unk00;
@@ -1396,7 +1337,7 @@ struct FUN_005405a0
 };
 
 // @fnv 0x005405a0
-FUN_005405a0::FUN_005405a0()
+FUN_005405a0::FUN_005405a0() : spObject14(0), spObject94(0)
 {
     unk00 = 0;
     unk04 = 0;
@@ -1459,6 +1400,7 @@ struct C540BC0Allocator;
 
 void C540BC0Reserve(C540BC0Allocator& kAlloc, void* apvArray, int iNumElements, int iSizeElem);
 
+// local form of hkArrayBase: 0x00540bc0 needs an out-of-line capacity call at 0x0062a100 under /Od; the shared inline reserve/capacity split changes bytes.
 class C540BC0Array
 {
   public:
@@ -2038,12 +1980,6 @@ void FUN_005512f0_shell::FUN_005512f0(ItemRef* dest)
 }
 
 namespace CellLighting {
-struct Vec3
-{
-    float x, y, z;
-    Vec3();
-    Vec3(float, float, float);
-};
 struct Vec2
 {
     float x, y;
@@ -2051,10 +1987,6 @@ struct Vec2
 };
 void* FUN_00403d30(void*, int, unsigned int);
 int FUN_00406d90(float);
-struct Setting
-{
-    const float* FUN_00403e20();
-};
 extern Setting DAT_011ca094;
 struct LightData
 {
@@ -2069,7 +2001,7 @@ struct LightData
     int unk20;
     static void* operator new(unsigned int);
     LightData();
-    bool HasEnoughSeenPoints(const Vec3*, const Vec3*);
+    bool HasEnoughSeenPoints(const NiPoint3*, const NiPoint3*);
 };
 struct Extras
 {
@@ -2098,7 +2030,7 @@ struct Cell
     virtual void MarkChanged(unsigned int);
     bool FUN_00425fd0();
     float FUN_00555ad0();
-    void FUN_00555b10(const Vec3*, Vec3*, bool);
+    void FUN_00555b10(const NiPoint3*, NiPoint3*, bool);
     LightData* FUN_00556ef0(int, int, bool);
     bool IsFlagSet();
     LightData* FUN_00555bc0();
@@ -2107,18 +2039,19 @@ struct Cell
     int FUN_00544c30();
     void FUN_00555be0();
     void FUN_00544440(bool);
-    void UpdateLightingAtPoint(const Vec3*);
+    void UpdateLightingAtPoint(const NiPoint3*);
 };
 // @fnv 0x00555f60
-void Cell::UpdateLightingAtPoint(const Vec3* apPoint)
+void Cell::UpdateLightingAtPoint(const NiPoint3* apPoint)
 {
+    // NiPoint3 assignment preserves the original bitwise copies under /Od.
     if (FUN_00425fd0())
     {
-        Vec3 point = *apPoint;
+        NiPoint3 point = *apPoint;
         if (FUN_00555ad0() != 0.0)
         {
             FUN_00555b10(apPoint, &point, true);
-            Vec3 centers3[9];
+            NiPoint3 centers3[9];
             LightData* lights[9];
             FUN_00403d30(lights, 0, 36);
             FUN_00403d30(centers3, 0, 108);
@@ -2130,7 +2063,7 @@ void Cell::UpdateLightingAtPoint(const Vec3* apPoint)
                 for (int dy = -1; dy <= 1; dy++)
                 {
                     lights[count3] = FUN_00556ef0(x + dx, y + dy, true);
-                    centers3[count3] = Vec3(((x + dx) << 12) + 2048, ((y + dy) << 12) + 2048, point.z);
+                    reinterpret_cast<NiPoint3&>(centers3[count3]) = (const NiPoint3&)NiPoint3(((x + dx) << 12) + 2048, ((y + dy) << 12) + 2048, point.z);
                     count3++;
                 }
             }
@@ -2144,14 +2077,14 @@ void Cell::UpdateLightingAtPoint(const Vec3* apPoint)
         }
         else
         {
-            Vec3 centers2[4];
+            NiPoint3 centers2[4];
             LightData* lights2[4];
             FUN_00403d30(lights2, 0, 16);
             FUN_00403d30(centers2, 0, 48);
             int x2 = (FUN_00406d90(point.x) - 2048) >> 12;
             int y2 = (FUN_00406d90(point.y) - 2048) >> 12;
             lights2[0] = FUN_00556ef0(x2, y2, true);
-            centers2[0] = Vec3((x2 << 12) + 2048, (y2 << 12) + 2048, point.z);
+            reinterpret_cast<NiPoint3&>(centers2[0]) = (const NiPoint3&)NiPoint3((x2 << 12) + 2048, (y2 << 12) + 2048, point.z);
             Vec2 lowerA((x2 << 12) + 2048, (y2 << 12) + 2048);
             Vec2 upper2(((x2 + 4096) << 12) + 2048, ((y2 + 4096) << 12) + 2048);
             int dx2 = 0;
@@ -2167,19 +2100,19 @@ void Cell::UpdateLightingAtPoint(const Vec3* apPoint)
             int count9 = 1;
             if (dx2)
             {
-                centers2[count9] = Vec3(((x2 + dx2) << 12) + 2048, (y2 << 12) + 2048, point.z);
+                reinterpret_cast<NiPoint3&>(centers2[count9]) = (const NiPoint3&)NiPoint3(((x2 + dx2) << 12) + 2048, (y2 << 12) + 2048, point.z);
                 lights2[count9] = FUN_00556ef0(x2 + dx2, y2, true);
                 count9++;
             }
             if (dy2)
             {
-                centers2[count9] = Vec3((x2 << 12) + 2048, ((y2 + dy2) << 12) + 2048, point.z);
+                reinterpret_cast<NiPoint3&>(centers2[count9]) = (const NiPoint3&)NiPoint3((x2 << 12) + 2048, ((y2 + dy2) << 12) + 2048, point.z);
                 lights2[count9] = FUN_00556ef0(x2, y2 + dy2, true);
                 count9++;
             }
             if (dx2 && dy2)
             {
-                centers2[count9] = Vec3(((x2 + dx2) << 12) + 2048, ((y2 + dy2) << 12) + 2048, point.z);
+                reinterpret_cast<NiPoint3&>(centers2[count9]) = (const NiPoint3&)NiPoint3(((x2 + dx2) << 12) + 2048, ((y2 + dy2) << 12) + 2048, point.z);
                 lights2[count9] = FUN_00556ef0(x2 + dx2, y2 + dy2, true);
                 count9++;
             }
@@ -2203,7 +2136,7 @@ void Cell::UpdateLightingAtPoint(const Vec3* apPoint)
             GetExtraDataList()->FUN_00421940(light);
             MarkChanged(0x80000000);
         }
-        Vec3 center2(FUN_00544c30() << 12, FUN_00544c60() << 12, apPoint->z);
+        NiPoint3 center2(FUN_00544c30() << 12, FUN_00544c60() << 12, apPoint->z);
         bool changed = light->HasEnoughSeenPoints(apPoint, &center2);
         if (changed)
         {
@@ -2214,18 +2147,6 @@ void Cell::UpdateLightingAtPoint(const Vec3* apPoint)
 }
 }
 
-struct SeenData
-{
-    virtual void v00();
-    unsigned int field_04, field_08, field_0c, field_10, field_14, field_18, field_1c, field_20;
-};
-struct IntSeenData : SeenData
-{
-    signed char field_24, field_25;
-    unsigned short field_26;
-    IntSeenData* field_28;
-    IntSeenData(unsigned char, unsigned char);
-};
 void* __cdecl operator new(unsigned int);
 void __cdecl operator delete(void*);
 struct Result556ef0
@@ -2331,207 +2252,6 @@ FUN_00559eb0::FUN_00559eb0(int aiCount)
 class GlobalObject_00a7b610;
 extern GlobalObject_00a7b610 g_01202828;
 
-class NiAVObject
-{
-  public:
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual int v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual bool v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188(bool flag);
-};
-
-class NiNode : public NiAVObject
-{
-  public:
-    unsigned int FUN_0043b480();
-    NiAVObject* FUN_0043b4a0(unsigned int index);
-};
-
 struct FUN_0054a050_shell
 {
     NiNode* FUN_0054a050();
@@ -2542,7 +2262,6 @@ struct FUN_00456fc0_cls
     NiNode* FUN_00456fc0(int kind);
 };
 
-NiAVObject* __cdecl FUN_0056f930(NiAVObject* p);
 bool __cdecl FUN_0045bad0(GlobalObject_00a7b610* g, NiAVObject* p);
 
 // @fnv 0x00554a20
@@ -2553,10 +2272,11 @@ void ExtraStandin::SetFlagOnChildren(bool flag)
     while (count--)
     {
         NiAVObject* child = node7->FUN_0043b4a0(count);
-        NiAVObject* obj2 = FUN_0056f930(child);
+        TESObjectREFR* obj2 = TESObjectREFR::GetReferenceFromNiAVObject(child);
         if (obj2 != 0)
         {
-            obj2->v188(flag);
+            // The reference virtual at 0x2F0 takes bool; its shared declaration lacks that argument.
+            reinterpret_cast<void (__thiscall*)(TESObjectREFR*, bool)>((*reinterpret_cast<void***>(obj2))[188])(obj2, flag);
         }
     }
     NiNode* list3 = reinterpret_cast<FUN_00456fc0_cls*>(this)->FUN_00456fc0(7);
@@ -2565,7 +2285,7 @@ void ExtraStandin::SetFlagOnChildren(bool flag)
         NiAVObject* itemB = list3->FUN_0043b4a0(i3);
         if (itemB != 0)
         {
-            if (!(itemB->v005() || FUN_0045bad0(&g_01202828, itemB)))
+            if (!(itemB->IsMultiBoundNode() || FUN_0045bad0(&g_01202828, itemB)))
             {
                 continue;
             }
@@ -2575,11 +2295,11 @@ void ExtraStandin::SetFlagOnChildren(bool flag)
                 itemB = _sub->FUN_0043b4a0(j6);
                 if (itemB != 0)
                 {
-                    NiAVObject* oX = FUN_0056f930(itemB);
-                    if (oX->v064())
+                    TESObjectREFR* oX = TESObjectREFR::GetReferenceFromNiAVObject(itemB);
+                    if (oX->IsActor())
                     {
-                        NiAVObject* o2 = oX;
-                        o2->v188(flag);
+                        TESObjectREFR* o2 = oX;
+                        reinterpret_cast<void (__thiscall*)(TESObjectREFR*, bool)>((*reinterpret_cast<void***>(o2))[188])(o2, flag);
                     }
                 }
             }

@@ -1,7 +1,10 @@
+#include "../../include/BSStringT.h"
 
 // tesobjectrefr_ctx2_variant.cpp: context variant of src/fallout_shared/tesobjectrefr.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
 #include "tesobjectrefr_decls.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESForm.h"
 GarbageCollectorUpdateState* FUN_00446ef0();
 void* FUN_0056a8c0();
 void FUN_005743f0();
@@ -62,30 +65,13 @@ struct DataLoad
     bool Contains(unsigned int);
 };
 
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
 extern SaveLoadState* g_BGSSaveLoadGame;
 extern DataLoad* g_dataHandler;
-class TESBoundObject : public TESForm
-{
-  public:
-    unsigned int ID();
-};
 void ResolveID(unsigned int*, LoadFile*);
 TESForm* LookupForm(unsigned int);
 void WarnLoad(const char*, ...);
-struct StringLoad
-{
-    char* text;
-    unsigned short length, capacity;
-    StringLoad();
-    ~StringLoad();
-    operator const char*() const;
-};
-int FormatLoad(StringLoad*, const char*, ...);
+
+int FormatLoad(BSStringT<char>*, const char*, ...);
 struct RefLoad
 {
     virtual void v000();
@@ -357,7 +343,7 @@ bool RefLoad::FUN_0055af90(LoadFile* file)
         ScriptLoad* script = patrolTmp->Script();
         if (script && !script->Info()->unk08 && script->Text() && !script->Compiled())
         {
-            StringLoad warning;
+            BSStringT<char> warning;
             FormatLoad(&warning, "Patrol point event script for point %s has text but has not been compiled.",
                        EditorID());
             WarnLoad(warning);

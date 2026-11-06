@@ -1,3 +1,10 @@
+#include "../../../include/BSAudio.h"
+#include "../../../include/BSFile.h"
+#include "../../../include/NiBinaryStream.h"
+#include "../../../include/MessageHandler.h"
+#include "../../../include/HavokError.h"
+#include "../../../include/hkBool.h"
+#include "../../../include/hkFileSystem.h"
 
 // src/havok/unplaced/havokstream.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/havokstream.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -18,11 +25,6 @@ void FUN_0056d6c0_class::FUN_0056d6c0()
     B1::~B1();
 }
 
-struct hkFileSystem
-{
-    unsigned char* m_base;
-    int FUN_00624e70(const char*, void*);
-};
 // @fnv 0x00624e70
 int hkFileSystem::FUN_00624e70(const char*, void*)
 {
@@ -33,33 +35,19 @@ struct FUN_006264d0
 {
     void __thiscall FUN_006264d1();
 };
-struct HavokError
-{
-    void __thiscall FUN_00625650();
-};
 // @fnv 0x00625650
 void __thiscall HavokError::FUN_00625650()
 {
     ((FUN_006264d0*)((char*)this + 0x14))->FUN_006264d1();
 }
 
-namespace fnv_00625a80 {
 extern "C" void __cdecl _FNV_Warning(int, const char*);
-struct MessageHandler
-{
-    static MessageHandler& Handler();
-};
-struct HavokError
-{
-    void FUN_00625a80(const char* str);
-};
 // @fnv 0x00625a80
 void HavokError::FUN_00625a80(const char* pcMessage)
 {
     MessageHandler::Handler();
     _FNV_Warning(4, pcMessage);
 }
-}  // namespace fnv_00625a80
 
 struct FUN_00625bd0_class
 {
@@ -128,10 +116,6 @@ FUN_00626000_Class* FUN_00626000_Class::FUN_00626000(int)
     return this;
 }
 
-struct NiBinaryStream
-{
-    unsigned int Read(void* buffer, unsigned int size);
-};
 
 struct FUN_00626100_shell
 {
@@ -148,10 +132,6 @@ unsigned int FUN_00626100_shell::ReadFromStream(void* buffer, unsigned int size)
     return m_stream->Read(buffer, size);
 }
 
-struct BSFile
-{
-    void FUN_00473180(const void*, unsigned int);
-};
 
 struct FUN_00626320
 {
@@ -167,10 +147,6 @@ void FUN_00626320::Method(const void* data, unsigned int size)
     file->FUN_00473180(data, size);
 }
 
-struct BSAudio
-{
-    void* GetAudioBackendData();
-};
 extern "C" BSAudio* __cdecl FUN_00c85750();
 void __cdecl FUN_00c856c0(void* a, void* b);
 // @fnv 0x00626760
@@ -180,10 +156,6 @@ void __cdecl FUN_00626760(void* a)
     FUN_00c856c0(p->GetAudioBackendData(), a);
 }
 
-struct FUN_005609f0_shell
-{
-    bool FUN_005609f0();
-};
 struct FUN_006264b0_Class
 {
     void FUN_006264b0(int);
@@ -192,16 +164,17 @@ struct FUN_00626470_Class
 {
     void FUN_00626470(int, int);
 };
+// HavokError: shared header lacks the SetErrorCodeEnabled override used here.
 struct FUN_006255d0_class
 {
     char pad[0x14];
     void FUN_006255d0(int a, int b);
 };
-// Calls FUN_005609f0 on b; if true forwards a to FUN_006264b0 at this+0x14, otherwise calls FUN_00626470 with a and 1.
+// Converts the hkBool stored in b; if true forwards a to FUN_006264b0 at this+0x14, otherwise calls FUN_00626470 with a and 1.
 // @fnv 0x006255d0
 void FUN_006255d0_class::FUN_006255d0(int a, int b)
 {
-    if (((FUN_005609f0_shell*)&b)->FUN_005609f0())
+    if (reinterpret_cast<const hkBool*>(&b)->operator bool())
         ((FUN_006264b0_Class*)((char*)this + 0x14))->FUN_006264b0(a);
     else
         ((FUN_00626470_Class*)((char*)this + 0x14))->FUN_00626470(a, 1);
@@ -278,13 +251,12 @@ struct FUN_00626420_shell
     char* p;
     int aiLine;
 };
-struct FUN_00625e70_class
+struct ErrorFileList
 {
     char* __thiscall FUN_00626420(FUN_00626420_shell*);
-    void FUN_00625e70(const char* apFile, int aiLine);
 };
 // @fnv 0x00625e70
-void FUN_00625e70_class::FUN_00625e70(const char* apFile, int aiLine)
+void HavokError::FUN_00625e70(const char* apFile, int aiLine)
 {
     char pfile[128];
     char pext[32];
@@ -293,7 +265,7 @@ void FUN_00625e70_class::FUN_00625e70(const char* apFile, int aiLine)
     strcat_s(pfile, 128, pext);
     ap.p = FUN_00cb1410(pfile);
     ap.aiLine = aiLine;
-    ((FUN_00625e70_class*)((char*)this + 8))->FUN_00626420(&ap);
+    ((ErrorFileList*)((char*)this + 8))->FUN_00626420(&ap);
 }
 
 struct $SG2686
@@ -330,44 +302,24 @@ FUN_00626280_shell::~FUN_00626280_shell()
 }
 
 void __cdecl FNV_Warning(int, const char*, const char*, int, const char*, const char*);
-struct MessageHandler
-{
-    static MessageHandler& Handler();
-    void vprintf(const char*, ...);
-};
-struct FUN_006259b0_shell
-{
-    void ReportWarning(const char*, int, const char*, const char*, int);
-};
 // @fnv 0x006259b0
-void FUN_006259b0_shell::ReportWarning(const char* apWhat, int aiID, const char* apDescription, const char* apFile,
+void HavokError::ReportWarning(const char* apWhat, int aiID, const char* apDescription, const char* apFile,
                                        int aiLine)
 {
     MessageHandler::Handler();
     FNV_Warning(0, "%s:%d: %s : %s'", apFile, aiLine, apWhat, apDescription);
 }
 
-namespace fnv_00625a40 {
-struct MessageHandler
-{
-    static MessageHandler& Handler();
-};
-void __cdecl _FNV_Warning(int, const char*, const char*, int, const char*, const char*);
-struct FUN_00625a40_shell : HavokError
-{
-    void __thiscall ReportError(const char* apWhat, int aiID, const char* apDescription, const char* apFile,
-                                int aiLine);
-};
 // Reports a Havok error by calling _FNV_Warning with the file, line, description and what text.
 // @fnv 0x00625a40
-void __thiscall FUN_00625a40_shell::ReportError(const char* apDescription, int aiID, const char* apWhat,
+void __thiscall HavokError::ReportError(const char* apDescription, int aiID, const char* apWhat,
                                                 const char* apFile, int aiLine)
 {
     MessageHandler::Handler();
-    _FNV_Warning(2, "%s:%d: %s : %s'", apFile, aiLine, apDescription, apWhat);
+    FNV_Warning(2, "%s:%d: %s : %s'", apFile, aiLine, apDescription, apWhat);
 }
-}  // namespace fnv_00625a40
 
+// HavokError: retain the deleting-destructor stand-in until its member layout is shared.
 struct FUN_00625b40_class : HavokError
 {
     virtual ~FUN_00625b40_class();
@@ -646,13 +598,9 @@ int C626340Dispatcher::DispatchToHandler(int iA, int iB)
     return iResult;
 }
 
-struct FUN_00625a00_shell
-{
-    void WarnWithLocation(const char* message, int unused, const char* type, const char* file, int line);
-};
 // Calls MessageHandler::Handler, then logs a warning with file, line, message and type via FNV_Warning.
 // @fnv 0x00625a00
-void FUN_00625a00_shell::WarnWithLocation(const char* message, int unused, const char* type, const char* file, int line)
+void HavokError::WarnWithLocation(const char* message, int unused, const char* type, const char* file, int line)
 {
     MessageHandler::Handler();
     FNV_Warning(1, "%s:%d: %s : %s'", file, line, message, type);
@@ -700,6 +648,7 @@ class C624F90Handler
 
 extern const char g_ac624F90EventName[];
 
+// HavokError: shared header lacks this constructor and its handler/event members.
 class FUN_00624f90 : public C624F90Base
 {
   public:
@@ -777,6 +726,7 @@ struct FUN_00626490_Class
     int FUN_00626490(int a, int b);
 };
 
+// HavokError: shared header lacks the isEnabled override used here.
 struct FUN_00625610_Class
 {
     char unk00[0x14];
@@ -792,11 +742,7 @@ CalleeObj* FUN_00625610_Class::FUN_00625610(CalleeObj* obj, int b)
     return obj;
 }
 
-struct hkBool6256 : FUN_005609f0_shell
-{
-    char m_cValue;
-};
-
+// HavokError: shared header lacks FUN_00625c50 and the typed virtual isEnabled declaration.
 struct ErrorHandler6256
 {
     virtual void V0();
@@ -804,7 +750,7 @@ struct ErrorHandler6256
     virtual void V2();
     virtual void V3();
     virtual void V4();
-    virtual hkBool6256 IsEnabled(int aiSoundId);
+    virtual hkBool IsEnabled(int aiSoundId);
     virtual void V6();
     virtual void V7();
     virtual void V8();
@@ -826,7 +772,7 @@ int ErrorHandler6256::ReportMessage(int iType, int iMessageId, const char* pcMes
         if (!FUN_00625c50(pcFile, iLine))
             return 0;
     }
-    else if (!IsEnabled(iMessageId).FUN_005609f0())
+    else if (!IsEnabled(iMessageId).operator bool())
         return 0;
     switch (iType)
     {
@@ -868,6 +814,7 @@ struct FUN_00622570
     int m_iValue;
 };
 
+// HavokError: shared header lacks the SDK path member and typed virtual Raise declaration.
 struct ErrorHandler6257
 {
     virtual void V0();
@@ -928,13 +875,9 @@ void ErrorHandler6257::FUN_00625790(const char* pcPrefix, int aiSoundId, const c
 
 const char* __cdecl FUN_00cb1150(const char*, int);
 
-struct FUN_00625aa0_shell
-{
-    const char* FUN_00625aa0(const char* apPath);
-};
 
 // @fnv 0x00625aa0
-const char* FUN_00625aa0_shell::FUN_00625aa0(const char* apPath)
+const char* HavokError::FUN_00625aa0(const char* apPath)
 {
     const char* pSeparators = "/\\";
     for (int iIndex = 0; iIndex < 2; ++iIndex)
@@ -988,6 +931,7 @@ struct FileList625c
     FileEntry625c* FUN_00626660(int iIndex);
 };
 
+// HavokError: shared header lacks FUN_00625c50 and the file-list member.
 struct FileFilter625c
 {
     int unk00;
@@ -1018,9 +962,6 @@ bool FileFilter625c::FUN_00625c50(const char* pcPath, int iValue)
 }
 
 namespace fnv_00625d60 {
-int __cdecl CompareStringsCaseInsensitive(const char* pcA, const char* pcB);
-void __cdecl FUN_00626760(void* pvMem);
-
 struct FileEntry625c
 {
     const char* m_pcName;
@@ -1034,35 +975,27 @@ struct FileList625c
     void RemoveAt(int iIndex);
 };
 
-struct FileFilter625c
-{
-    int unk00;
-    int unk04;
-    FileList625c m_kList;
-
-    void RemoveEntryByPathAndValue(const char* pcPath, int iValue);
-};
+}  // namespace fnv_00625d60
 
 // Builds a name from the path and extension, then removes the first list entry whose name matches and whose value equals iValue.
 // @fnv 0x00625d60
-void FileFilter625c::RemoveEntryByPathAndValue(const char* pcPath, int iValue)
+void HavokError::RemoveEntryByPathAndValue(const char* pcPath, int iValue)
 {
     char acExtBuf[32];
     char acName[128];
     FUN_00462d40(pcPath, 0, 0, 0, 0, acName, 0x80, acExtBuf, 0x20);
     strcat_s(acName, 0x80, acExtBuf);
-    for (int i3 = 0; i3 < m_kList.FUN_00726070(); i3++)
+    for (int i3 = 0; i3 < ((fnv_00625d60::FileList625c*)((char*)this + 8))->FUN_00726070(); i3++)
     {
-        FileEntry625c kEntry = *m_kList.FUN_00626660(i3);
+        fnv_00625d60::FileEntry625c kEntry = *((fnv_00625d60::FileList625c*)((char*)this + 8))->FUN_00626660(i3);
         if (!CompareStringsCaseInsensitive(acName, kEntry.m_pcName) && iValue == kEntry.m_iValue)
         {
             FUN_00626760((void*)kEntry.m_pcName);
-            m_kList.RemoveAt(i3);
+            ((fnv_00625d60::FileList625c*)((char*)this + 8))->RemoveAt(i3);
             break;
         }
     }
 }
-}  // namespace fnv_00625d60
 
 // Representative of the native reference-counted stream base subobject.
 struct StreamBase
@@ -1118,6 +1051,7 @@ class FUN_00625bd0
     int unk00;
 };
 
+// HavokError: shared header lacks FUN_00625bf0 and the members requiring destruction.
 class FUN_00625b40 : public FUN_0056d6c0
 {
   public:

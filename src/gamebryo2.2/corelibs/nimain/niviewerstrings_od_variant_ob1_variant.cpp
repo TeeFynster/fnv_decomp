@@ -8,6 +8,8 @@
 // src/gamebryo2.2/corelibs/nimain/niviewerstrings.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/niviewerstrings.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/NiFixedString.h"
+
 void* __cdecl NiMalloc(unsigned int);
 void __cdecl NiFree(void*);
 
@@ -111,14 +113,10 @@ char* __cdecl FUN_00a7d510(const char* label, unsigned int value);
 char* __cdecl FUN_00a7d490(const char* label, unsigned short value);
 char* __cdecl FUN_00a7d5a0(const char* label, void* value);
 
-struct NiFixedString
+inline NiFixedString::operator const char*() const
 {
-    const char* m_kHandle;
-    operator const char*() const
-    {
-        return m_kHandle;
-    }
-};
+    return m_kHandle;
+}
 
 struct NamedObject
 {

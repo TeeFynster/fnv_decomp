@@ -1,50 +1,10 @@
-// fallout_shared/pathfinding/pathmanager_decls.h: declares QueuedMessage, ActorPathingMessageQueue, NiMemObject, PathingSolution, Pathing and more
+#include "../../../include/Pathing.h"
+#include "../../../include/RecursiveSpinLock.h"
+// fallout_shared/pathfinding/pathmanager_decls.h: unit-specific path manager declarations
+
 
 class WaitableObject;
 class PathingRequest;
-class ActorPathingMessageQueue;
-class PathingSolution;
-
-template <class T> class NiPointer;
-
-template <> class NiPointer<WaitableObject>
-{
-  public:
-    WaitableObject* m_pObject;
-    NiPointer<WaitableObject>& operator=(const NiPointer<WaitableObject>&);
-};
-
-template <> class NiPointer<PathingRequest>
-{
-  public:
-    PathingRequest* m_pObject;
-    NiPointer();
-    NiPointer(const NiPointer<PathingRequest>&);
-    ~NiPointer();
-    operator PathingRequest*() const;
-};
-
-template <> class NiPointer<ActorPathingMessageQueue>
-{
-  public:
-    ActorPathingMessageQueue* m_pObject;
-    NiPointer();
-    NiPointer(const NiPointer<ActorPathingMessageQueue>&);
-    ~NiPointer();
-    operator ActorPathingMessageQueue*() const;
-};
-
-template <> class NiPointer<PathingSolution>
-{
-  public:
-    PathingSolution* m_pObject;
-    NiPointer();
-    NiPointer(PathingSolution*);
-    NiPointer(const NiPointer<PathingSolution>&);
-    ~NiPointer();
-    operator PathingSolution*() const;
-    NiPointer<PathingSolution>& operator=(PathingSolution*);
-};
 
 enum PATHING_MESSAGE_TYPE
 {
@@ -53,71 +13,30 @@ enum PATHING_MESSAGE_TYPE
     PATHING_MESSAGE_TYPE_PMT_ERROR = 1
 };
 
-class QueuedMessage
+class ActorPathingMessage
 {
   public:
     int m_eMessageType;
     NiPointer<WaitableObject> m_pPathingSolution;
-    QueuedMessage(PATHING_MESSAGE_TYPE type, const NiPointer<PathingSolution>& solution);
-    ~QueuedMessage();
-    QueuedMessage& operator=(const QueuedMessage&);
+    ActorPathingMessage(PATHING_MESSAGE_TYPE type, const NiPointer<PathingSolution>& solution);
+    ~ActorPathingMessage();
+    ActorPathingMessage& operator=(const ActorPathingMessage&);
 };
 
-class ActorPathingMessageQueue
-{
-  public:
-    virtual ~ActorPathingMessageQueue();
-    virtual bool Push(const QueuedMessage& msg);
-};
 
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int size);
-    static void operator delete(void* p, unsigned int);
-};
+#include "../../../include/NiMemObject.h"
 
-class PathingSolution : public NiMemObject
-{
-  public:
-    char pad[0x44];
-    PathingSolution();
-};
 
-class Pathing
-{
-  public:
-    static bool BuildPath(PathingRequest* pRequest, PathingSolution* m_pOutputSolution);
-};
 
-class RecursiveSpinLock
-{
-  public:
-    void Lock(const char*);
-    void Unlock();
-};
+
 
 class ParentSpaceNode;
-template <class T, int N> class BSSimpleArray
-{
-  public:
-    unsigned int GetSize();
-};
+#include "../../../include/BSSimpleArray.h"
 
-class TESObjectREFR
-{
-  public:
-    int pad;
-    int state;
-};
 
 template <class T> class NiTNewInterface;
 
-template <class T, class Allocator> class NiTArray
-{
-  public:
-    T& GetAt(unsigned int);
-};
+#include "../../../include/NiTArray.h"
 
 struct Struct_004b0680
 {
@@ -127,22 +46,6 @@ struct Struct_004b0680
     ~Struct_004b0680();
 };
 
-class PathingTaskData
-{
-  public:
-    int pad00;
-    bool bFlag04;
-    char pad05[0x13];
-    NiPointer<PathingRequest> m_pPathingRequest;
-    NiPointer<PathingSolution> m_pPathingSolution;
-    char pad20[0x40];
-    NiPointer<ActorPathingMessageQueue> spQueue;
-
-    bool HasPendingMessages();
-    void Process();
-    void FUN_006ea330();
-    bool FUN_005dc980();
-};
 
 class PerformanceMeasurement;
 class PerformanceTimerManager
@@ -151,18 +54,8 @@ class PerformanceTimerManager
     PerformanceMeasurement* Register(char*, char*, bool, bool);
 };
 
-enum MEM_CONTEXT
-{
-    MEM_CONTEXT_DEFAULT = 0x2d
-};
+#include "../../../include/MEM_CONTEXT.h"
 
-class AutoMemContext
-{
-  public:
-    int m_eMemoryContext;
-    AutoMemContext(MEM_CONTEXT context, bool track, const char* file, int line);
-    ~AutoMemContext();
-};
 
 class PathManagerImpl
 {
@@ -178,26 +71,9 @@ class PathManagerImpl
     void DispatchPathingMessage(const Struct_004b0680& item);
 };
 
-union SETTING_VALUE
-{
-    bool b;
-    int i;
-    float f;
-    char* s;
-};
-
 class INISettingCollection;
 
-template <class T> class SettingT
-{
-  public:
-    SETTING_VALUE* Bool();
-};
-
-class GlobalObject_0045cf30 : public SettingT<INISettingCollection>
-{
-};
-extern GlobalObject_0045cf30 g_011d77cc;
+extern SettingT<INISettingCollection> g_011d77cc;
 
 struct DummyTimer
 {

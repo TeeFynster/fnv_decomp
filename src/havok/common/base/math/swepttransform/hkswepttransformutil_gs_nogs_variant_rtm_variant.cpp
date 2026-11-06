@@ -1,6 +1,22 @@
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
 // src/havok/common/base/math/swepttransform/hkswepttransformutil_gs_nogs_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/base/math/swepttransform/hkswepttransformutil_gs_nogs_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
+
+#include "../../../../../../include/V4.h"
+#include "../../../../../../include/hkQuaternion.h"
+#include "../../../../../../include/hkVector4.h"
+
+inline void hkVector4::set(__m128 v)
+{
+    m_vComponents = v;
+}
+
+inline void hkVector4::sub4(const hkVector4& v)
+{
+    m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents);
+}
 
 // src/havok/common/base/math/swepttransform/hkswepttransformutil_gs_nogs_variant.cpp - flag-variant unit created 2026-10-29 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/common/base/math/swepttransform/hkswepttransformutil.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -429,10 +445,6 @@ int __cdecl LoadIntArray(S_00cf10f0_Stream* kStream, S_00cf10f0_Arr4* arr);
 int __cdecl FUN_00cf1f80(int, int, int);
 int __cdecl FUN_00cf2160(unsigned int arg0, unsigned int arg1);
 #include <xmmintrin.h>
-struct F4
-{
-    float x, y, z, w;
-};
 struct Obj
 {
     __m128 m00;
@@ -454,8 +466,8 @@ struct Obj
 };
 struct Calc
 {
-    __declspec(align(16)) F4 res;
-    void __thiscall mul(Obj* o, F4* v);
+    __declspec(align(16)) hkVector4 res;
+    void __thiscall mul(Obj* o, hkVector4* v);
 };
 extern const __m128 g_mask;
 void ApplyDelta(__m128* a, Obj* b);
@@ -482,10 +494,6 @@ __forceinline void normalize4(__m128& q)
     nr = _mm_andnot_ps(eq, nr);
     q = _mm_mul_ps(q, _mm_shuffle_ps(nr, nr, 0));
 }
-struct V4
-{
-    __m128 q;
-};
 struct FUN_008cd6a0_Class
 {
     V4 col0;
@@ -508,19 +516,12 @@ __forceinline void interpolate(__m128& dst, __m128 a, __m128 b, float w)
 }
 void __cdecl UpdateRotationInterpolation(float time, FUN_008cd6a0_Class* self);
 void FUN_00cf1480(float a, float b, int* c);
-struct __declspec(align(16)) MotionVec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
 struct __declspec(align(16)) MotionMat4
 {
-    MotionVec4 c0;
-    MotionVec4 c1;
-    MotionVec4 c2;
-    MotionVec4 c3;
+    hkVector4 c0;
+    hkVector4 c1;
+    hkVector4 c2;
+    hkVector4 c3;
 };
 class MotionRotSet_cls
 {
@@ -530,12 +531,12 @@ class MotionRotSet_cls
 struct __declspec(align(16)) MotionState_cls
 {
     MotionMat4 m_kMotionTransform;  // +0x00
-    MotionVec4 m_com0;              // +0x40
-    MotionVec4 m_com1;              // +0x50
-    MotionVec4 m_rot0;              // +0x60
-    MotionVec4 m_rot1;              // +0x70
-    MotionVec4 m_comLocal;          // +0x80
-    MotionVec4 m_kDeltaAngle;       // +0x90
+    hkVector4 m_com0;              // +0x40
+    hkVector4 m_com1;              // +0x50
+    hkVector4 m_rot0;              // +0x60
+    hkVector4 m_rot1;              // +0x70
+    hkVector4 m_comLocal;          // +0x80
+    hkVector4 m_kDeltaAngle;       // +0x90
 };
 void SetMotionState(const MotionMat4* transform, MotionState_cls* ms);
 struct TransformData
@@ -588,38 +589,6 @@ void __cdecl FUN_00cf1f80(const __m128& first, const __m128& second, Obj_t* obj)
 
 extern double DAT_01012070;
 
-struct __declspec(align(16)) hkVector4L
-{
-    float x, y, z, w;
-    float GetW() const
-    {
-        return w;
-    }
-    __m128 Vector4f() const
-    {
-        return _mm_load_ps(&x);
-    }
-    void SetQuad(__m128 v)
-    {
-        _mm_store_ps(&x, v);
-    }
-};
-struct __declspec(align(16)) hkTranslationL
-{
-    __m128 m_vComponents;
-    __m128 Vector4f() const
-    {
-        return m_vComponents;
-    }
-    void SetQuad(__m128 v)
-    {
-        m_vComponents = v;
-    }
-    void Sub4(__m128 v)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, v);
-    }
-};
 struct __declspec(align(16)) hkQuaternionL
 {
     float m_uiX, m_uiY, m_uiZ, m_w;
@@ -632,24 +601,17 @@ struct __declspec(align(16)) hkQuaternionL
         _mm_store_ps(&m_uiX, v);
     }
 };
-struct LocalRotation
-{
-    hkVector4L m_kColumn0, m_kColumn1, m_kColumn2;
-    void Set(void* p)
-    {
-        reinterpret_cast<FUN_008cd6a0_Class*>(this)->FUN_00cb2d90(p);
-    }
-};
+
+#include "../../../../../../include/hkRotation.h"
+
 struct hkTransformL
 {
-    LocalRotation m_rotation;
-    hkTranslationL m_vTranslation;
+    hkRotation m_rotation;
+    hkVector4 m_vTranslation;
 };
-struct hkSweptTransformL
-{
-    hkVector4L m_vCenterOfMass0, m_vCenterOfMass1;
-    hkVector4L m_qRotation0, m_qRotation1, m_vCenterOfMassLocal;
-};
+
+#include "../../../../../../include/hkSweptTransform.h"
+
 
 static inline __m128 SumSquares(__m128 v)
 {
@@ -668,11 +630,11 @@ static inline __m128 InvNorm(__m128 s)
 }
 
 // @fnv 0x00cf1510
-void __cdecl FUN_00cf1510(const hkSweptTransformL& sweptTrans, float t, hkTransformL& transformOut)
+void __cdecl FUN_00cf1510(const hkSweptTransform& sweptTrans, float t, hkTransformL& transformOut)
 {
-    const float r = (t - sweptTrans.m_vCenterOfMass0.GetW()) * sweptTrans.m_vCenterOfMass1.GetW();
-    const __m128 r0 = sweptTrans.m_qRotation0.Vector4f();
-    const __m128 r1 = sweptTrans.m_qRotation1.Vector4f();
+    const float r = (t - sweptTrans.m_vCenterOfMass0.w) * sweptTrans.m_vCenterOfMass1.w;
+    const __m128 r0 = _mm_load_ps(reinterpret_cast<const float*>(&sweptTrans.m_qRotation0));
+    const __m128 r1 = _mm_load_ps(reinterpret_cast<const float*>(&sweptTrans.m_qRotation1));
     __m128 sum = _mm_add_ps(r1, r0);
     float len2;
     _mm_store_ss(&len2, SumSquares(sum));
@@ -699,21 +661,25 @@ void __cdecl FUN_00cf1510(const hkSweptTransformL& sweptTrans, float t, hkTransf
     }
     __m128 norm = InvNorm(SumSquares(q));
     quat.Set(_mm_mul_ps(_mm_shuffle_ps(norm, norm, 0), q));
-    transformOut.m_rotation.Set(&quat);
+    transformOut.m_rotation.FUN_00cb2d90(reinterpret_cast<const hkQuaternion&>(quat));
     __m128 u4 = _mm_load_ss(&r);
     u4 = _mm_shuffle_ps(u4, u4, 0);
-    __m128 a = sweptTrans.m_vCenterOfMass0.Vector4f();
-    __m128 b = sweptTrans.m_vCenterOfMass1.Vector4f();
-    transformOut.m_vTranslation.SetQuad(
+    __m128 a = _mm_load_ps(&sweptTrans.m_vCenterOfMass0.x);
+    __m128 b = _mm_load_ps(&sweptTrans.m_vCenterOfMass1.x);
+    transformOut.m_vTranslation.set(
         _mm_add_ps(_mm_mul_ps(_mm_sub_ps(_mm_load_ps(DAT_010ec7f0), u4), a), _mm_mul_ps(b, u4)));
-    __m128 local = sweptTrans.m_vCenterOfMassLocal.Vector4f();
-    __m128 shift = _mm_mul_ps(_mm_shuffle_ps(local, local, 0x55), transformOut.m_rotation.m_kColumn1.Vector4f());
+    __m128 local = _mm_load_ps(&sweptTrans.m_vCenterOfMassLocal.x);
+    __m128 shift = _mm_mul_ps(_mm_shuffle_ps(local, local, 0x55), _mm_load_ps(&transformOut.m_rotation.m_kColumn1.x));
     shift =
-        _mm_add_ps(shift, _mm_mul_ps(_mm_shuffle_ps(local, local, 0), transformOut.m_rotation.m_kColumn0.Vector4f()));
+        _mm_add_ps(shift, _mm_mul_ps(_mm_shuffle_ps(local, local, 0), _mm_load_ps(&transformOut.m_rotation.m_kColumn0.x)));
     shift = _mm_add_ps(shift,
-                       _mm_mul_ps(_mm_shuffle_ps(local, local, 0xaa), transformOut.m_rotation.m_kColumn2.Vector4f()));
-    transformOut.m_vTranslation.Sub4(shift);
+                       _mm_mul_ps(_mm_shuffle_ps(local, local, 0xaa), _mm_load_ps(&transformOut.m_rotation.m_kColumn2.x)));
+    transformOut.m_vTranslation.sub4(*reinterpret_cast<const hkVector4*>(&shift));
 }
+#include "../../../../../../include/hkRotation.h"
+
+#include "../../../../../../include/hkSweptTransform.h"
+
 
 #include <xmmintrin.h>
 namespace fnv_00cf1710 {
@@ -727,39 +693,7 @@ extern float DAT_01016248;   // 0.5f
 extern float DAT_01011d78;   // 0.0f
 extern float DAT_01017718;   // 3.0f
 
-struct __declspec(align(16)) hkVector4L
-{
-    float x, y, z, w;
-    float GetW() const
-    {
-        return w;
-    }
-    __m128 Vector4f() const
-    {
-        return _mm_load_ps(&x);
-    }
-    void SetQuad(__m128 v)
-    {
-        _mm_store_ps(&x, v);
-    }
-};
 
-struct __declspec(align(16)) hkTranslationL
-{
-    __m128 m_vComponents;
-    __m128 Vector4f() const
-    {
-        return m_vComponents;
-    }
-    void SetQuad(__m128 v)
-    {
-        m_vComponents = v;
-    }
-    void Sub4(__m128 v)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, v);
-    }
-};
 static inline __m128 LengthSquared4(__m128 v)
 {
     const __m128 sq = _mm_mul_ps(v, v);
@@ -794,43 +728,27 @@ struct __declspec(align(16)) hkQuaternionL
         _mm_store_ps(&m_uiX, v);
     }
 };
-struct LocalRotation
-{
-    hkVector4L m_kColumn0;
-    hkVector4L m_kColumn1;
-    hkVector4L m_kColumn2;
-    void Set(void* p)
-    {
-        reinterpret_cast<FUN_008cd6a0_Class*>(this)->FUN_00cb2d90(p);
-    }
-};
+
 struct hkTransformL
 {
-    LocalRotation m_rotation;
-    hkTranslationL m_vTranslation;
-};
-struct hkSweptTransformL
-{
-    hkVector4L m_vCenterOfMass0;
-    hkVector4L m_vCenterOfMass1;
-    hkVector4L m_qRotation0;
-    hkVector4L m_qRotation1;
-    hkVector4L m_vCenterOfMassLocal;
+    hkRotation m_rotation;
+    hkVector4 m_vTranslation;
 };
 
+
 // @fnv 0x00cf1710
-void __cdecl FUN_00cf1710(const hkSweptTransformL& sweptTrans, float t, float deltaTimeAddon,
+void __cdecl FUN_00cf1710(const hkSweptTransform& sweptTrans, float t, float deltaTimeAddon,
                           hkTransformL& transformOut)
 {
-    const __m128 r0 = sweptTrans.m_qRotation0.Vector4f();
-    const __m128 r1 = sweptTrans.m_qRotation1.Vector4f();
-    const float s = t - sweptTrans.m_vCenterOfMass0.GetW();
+    const __m128 r0 = _mm_load_ps(reinterpret_cast<const float*>(&sweptTrans.m_qRotation0));
+    const __m128 r1 = _mm_load_ps(reinterpret_cast<const float*>(&sweptTrans.m_qRotation1));
+    const float s = t - sweptTrans.m_vCenterOfMass0.w;
     __m128 sum = r1;
     sum = _mm_add_ps(sum, r0);
     const float u = s + deltaTimeAddon;
     float len2;
     _mm_store_ss(&len2, LengthSquared4(sum));
-    const float r = u * sweptTrans.m_vCenterOfMass1.GetW();
+    const float r = u * sweptTrans.m_vCenterOfMass1.w;
 
     hkQuaternionL quat;
     quat.Set(sum);
@@ -861,54 +779,48 @@ void __cdecl FUN_00cf1710(const hkSweptTransformL& sweptTrans, float t, float de
 
     const __m128 invNorm = SqrtInverse(LengthSquared4(rot));
     quat.Set(_mm_mul_ps(_mm_shuffle_ps(invNorm, invNorm, 0), rot));
-    transformOut.m_rotation.Set(&quat);
+    transformOut.m_rotation.FUN_00cb2d90(reinterpret_cast<const hkQuaternion&>(quat));
 
-    transformOut.m_vTranslation.SetQuad(
-        Interpolate4(sweptTrans.m_vCenterOfMass0.Vector4f(), sweptTrans.m_vCenterOfMass1.Vector4f(), r));
+    transformOut.m_vTranslation.set(
+        Interpolate4(_mm_load_ps(&sweptTrans.m_vCenterOfMass0.x), _mm_load_ps(&sweptTrans.m_vCenterOfMass1.x), r));
 
     __m128 shift;
-    const __m128 local = sweptTrans.m_vCenterOfMassLocal.Vector4f();
-    shift = _mm_mul_ps(_mm_shuffle_ps(local, local, 0x55), transformOut.m_rotation.m_kColumn1.Vector4f());
+    const __m128 local = _mm_load_ps(&sweptTrans.m_vCenterOfMassLocal.x);
+    shift = _mm_mul_ps(_mm_shuffle_ps(local, local, 0x55), _mm_load_ps(&transformOut.m_rotation.m_kColumn1.x));
     shift = _mm_add_ps(shift,
-                       _mm_mul_ps(_mm_shuffle_ps(local, local, 0x00), transformOut.m_rotation.m_kColumn0.Vector4f()));
+                       _mm_mul_ps(_mm_shuffle_ps(local, local, 0x00), _mm_load_ps(&transformOut.m_rotation.m_kColumn0.x)));
     shift = _mm_add_ps(shift,
-                       _mm_mul_ps(_mm_shuffle_ps(local, local, 0xaa), transformOut.m_rotation.m_kColumn2.Vector4f()));
-    transformOut.m_vTranslation.Sub4(shift);
+                       _mm_mul_ps(_mm_shuffle_ps(local, local, 0xaa), _mm_load_ps(&transformOut.m_rotation.m_kColumn2.x)));
+    transformOut.m_vTranslation.sub4(*reinterpret_cast<const hkVector4*>(&shift));
 }
 }  // namespace fnv_00cf1710
 
-class hkVector4
-{
-  public:
-    __m128 m_vComponents;
-    void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    float& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    void setMul4(float r, const hkVector4& a)
-    {
-        __m128 t = _mm_load_ss(&r);
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(t, t, 0), a.m_vComponents);
-    }
-};
 
-class hkQuaternion
+inline void hkVector4::operator=(const hkVector4& v)
 {
-  public:
-    hkVector4 m_vec;
-    void operator=(const hkQuaternion& q)
-    {
-        m_vec = q.m_vec;
-    }
-};
+    m_vComponents = v.m_vComponents;
+}
+
+inline float& hkVector4::operator()(int i)
+{
+    return m_vComponents.m128_f32[i];
+}
+
+inline void hkVector4::setZero4()
+{
+    m_vComponents = _mm_setzero_ps();
+}
+
+inline void hkVector4::setMul4(float r, const hkVector4& a)
+{
+    __m128 t = _mm_load_ss(&r);
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(t, t, 0), a.m_vComponents);
+}
+
+inline void hkQuaternion::operator=(const hkQuaternion& q)
+{
+    *reinterpret_cast<hkVector4*>(this) = *reinterpret_cast<const hkVector4*>(&q);
+}
 
 struct TimeInterval
 {
@@ -918,14 +830,9 @@ struct TimeInterval
     float m_fInverseDeltaTime;
 };
 
-struct SweptTransform
-{
-    hkVector4 m_vCenterOfMass0;
-    hkVector4 m_vCenterOfMass1;
-    hkQuaternion m_qRotation0;
-    hkQuaternion m_qRotation1;
-    hkVector4 m_vCenterOfMassLocal;
-};
+
+#include "../../../../../../include/hkSweptTransform.h"
+
 
 struct MotionState
 {
@@ -933,7 +840,7 @@ struct MotionState
     hkVector4 m_rot1;
     hkVector4 m_rot2;
     hkVector4 m_vTranslation;
-    SweptTransform m_kSweptTransform;
+    hkSweptTransform m_kSweptTransform;
     hkVector4 m_kDeltaAngle;
     void SetRotation(const hkQuaternion* p)
     {
@@ -955,15 +862,11 @@ struct __declspec(align(16)) Quat
     void FUN_00c74c90(hkVector4* out);
 };
 
-struct __declspec(align(16)) TempVec
-{
-    float x, y, z, w;
-};
 
 // @fnv 0x00cf2180
 void __cdecl FUN_00cf2180(const TimeInterval& info, const hkVector4& pos1, const hkQuaternion& rot1, MotionState& ms)
 {
-    SweptTransform& st = ms.m_kSweptTransform;
+    hkSweptTransform& st = ms.m_kSweptTransform;
     st.m_vCenterOfMass0 = st.m_vCenterOfMass1;
     st.m_qRotation0 = st.m_qRotation1;
     st.m_vCenterOfMass1 = pos1;
@@ -976,9 +879,9 @@ void __cdecl FUN_00cf2180(const TimeInterval& info, const hkVector4& pos1, const
     Bool8 ok;
     if (diff.FUN_00ce1500(&ok)->b != 0)
     {
-        TempVec t;
-        diff.FUN_00c74c90((hkVector4*)&t);
-        axis = *(hkVector4*)&t;
+        hkVector4 t;
+        diff.FUN_00c74c90(&t);
+        axis = t;
     }
     else
     {

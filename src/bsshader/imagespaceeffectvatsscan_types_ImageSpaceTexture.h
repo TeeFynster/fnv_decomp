@@ -7,29 +7,7 @@
 #include "layout_support.h"
 class NiTexture;
 class ImageSpaceTexture;
-#ifndef FNV_NITEXTURINGPROPERTY_FILTERMODE_DEFINED
-#define FNV_NITEXTURINGPROPERTY_FILTERMODE_DEFINED
-enum NiTexturingProperty__FilterMode
-{
-    NiTexturingProperty__FilterMode_FILTER_NEAREST = 0,
-    NiTexturingProperty__FilterMode_FILTER_BILERP = 1,
-    NiTexturingProperty__FilterMode_FILTER_TRILERP = 2,
-    NiTexturingProperty__FilterMode_FILTER_NEAREST_MIPNEAREST = 3,
-    NiTexturingProperty__FilterMode_FILTER_NEAREST_MIPLERP = 4,
-    NiTexturingProperty__FilterMode_FILTER_BILERP_MIPNEAREST = 5,
-    NiTexturingProperty__FilterMode_FILTER_ANISO = 6,
-    NiTexturingProperty__FilterMode_FILTER_MAGLERP_MINANISO = 7,
-    NiTexturingProperty__FilterMode_FILTER_MAX_MODES = 8
-};
-#endif
-enum NiTexturingProperty__ClampMode
-{
-    NiTexturingProperty__ClampMode_CLAMP_S_CLAMP_T = 0,
-    NiTexturingProperty__ClampMode_CLAMP_S_WRAP_T = 1,
-    NiTexturingProperty__ClampMode_WRAP_S_CLAMP_T = 2,
-    NiTexturingProperty__ClampMode_WRAP_S_WRAP_T = 3,
-    NiTexturingProperty__ClampMode_CLAMP_MAX_MODES = 4
-};
+#include "../../include/NiTexturingProperty.h"
 #pragma pack(push, 4)
 class ImageSpaceTexture
 {
@@ -39,8 +17,8 @@ class ImageSpaceTexture
     bool m_bTextureFlag3;  // +0x2, 1 bytes
     unsigned char layoutPadding3[1];
     NiPointer<NiObject> pTexture;                          // +0x4, 4 bytes
-    NiTexturingProperty__FilterMode m_eTextureFilterMode;  // +0x8, 4 bytes
-    NiTexturingProperty__ClampMode m_eClampMode;           // +0xC, 4 bytes
+    NiTexturingProperty::FilterMode m_eTextureFilterMode;  // +0x8, 4 bytes
+    NiTexturingProperty::ClampMode m_eClampMode;           // +0xC, 4 bytes
     static void* operator new(unsigned int size)
     {
         return g_memoryManager.Allocate(size);
@@ -51,8 +29,8 @@ class ImageSpaceTexture
         m_bTextureFlag2 = false;
         m_bTextureFlag3 = false;
         pTexture.m_pObject = 0;
-        m_eTextureFilterMode = (NiTexturingProperty__FilterMode)0;
-        m_eClampMode = (NiTexturingProperty__ClampMode)0;
+        m_eTextureFilterMode = (NiTexturingProperty::FilterMode)0;
+        m_eClampMode = (NiTexturingProperty::ClampMode)0;
     }
     void SetTexture(NiTexture* texture);
     // ImageSpaceTexture

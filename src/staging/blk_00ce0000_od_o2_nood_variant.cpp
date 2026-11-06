@@ -1,3 +1,11 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 
 // src/staging/blk_00ce0000_od_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_moves.py: the bytes and the matched neighbours of these functions
 // say /MT /O2 /GS /EHsc /Gy (unit src/staging/blk_00ce0000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions to their real
@@ -6,6 +14,22 @@
 // src/staging/blk_00ce0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkReferencedObject.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkMemoryAllocator.h"
+// Keep the original intrinsic lane definition: the CRT byte-array lanes make
+// this compiler insert /GS checks into otherwise unchanged vector operations.
+// Exe 0x00ce2d10 FUN_00ce2d10: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
+#include "../../include/hkVector4.h"
+#include "../../include/hkArray.h"
+extern "C" LocalM128 _mm_min_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_max_ps(LocalM128, LocalM128);
 
 struct __declspec(align(16)) SortElem16
 {
@@ -57,45 +81,41 @@ begin:
     }
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" __m128 _mm_unpackhi_ps(__m128, __m128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
 
 struct QuaternionVector
 {
-    __m128 value;
+    LocalM128 value;
     __declspec(noinline) void FUN_00c66320(const QuaternionVector* left, const QuaternionVector* right)
     {
-        __m128 a = left->value;
-        __m128 b = right->value;
-        __m128 cross = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(b, b, 0xd2), _mm_shuffle_ps(a, a, 0xc9)),
+        LocalM128 a = left->value;
+        LocalM128 b = right->value;
+        LocalM128 cross = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(b, b, 0xd2), _mm_shuffle_ps(a, a, 0xc9)),
                                   _mm_mul_ps(_mm_shuffle_ps(b, b, 0xc9), _mm_shuffle_ps(a, a, 0xd2)));
-        __m128 imag = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(b, b, 0xff), a),
+        LocalM128 imag = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(b, b, 0xff), a),
                                  _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(a, a, 0xff), b), cross));
-        __m128 prod = _mm_mul_ps(b, a);
-        __m128 dot = _mm_add_ss(_mm_shuffle_ps(prod, prod, 0xaa), _mm_add_ss(_mm_shuffle_ps(prod, prod, 0x55), prod));
-        __m128 real = _mm_sub_ps(prod, _mm_shuffle_ps(dot, dot, 0));
+        LocalM128 prod = _mm_mul_ps(b, a);
+        LocalM128 dot = _mm_add_ss(_mm_shuffle_ps(prod, prod, 0xaa), _mm_add_ss(_mm_shuffle_ps(prod, prod, 0x55), prod));
+        LocalM128 real = _mm_sub_ps(prod, _mm_shuffle_ps(dot, dot, 0));
         value = _mm_shuffle_ps(imag, _mm_unpackhi_ps(imag, real), 0xc4);
     }
 };
-struct Transform
+// hkQsTransform layout (translation, quaternion, scale) over this unit's __m128/QuaternionVector stand-ins.
+struct PoseQsTransform
 {
-    __m128 translation;
+    LocalM128 translation;
     QuaternionVector rotation;
-    __m128 scale;
+    LocalM128 scale;
 };
-extern const __m128 DAT_010c71e0;
+extern const LocalM128 DAT_010c71e0;
 struct Par_00ce2d10
 {
-    __m128 translation;
+    LocalM128 translation;
     QuaternionVector rotation;
 };
 
@@ -119,25 +139,25 @@ template <class T> struct PointerParam
     }
 };
 // @fnv 0x00ce2d10
-void __cdecl FUN_00ce2d10(const Transform* parents, PointerParam<const Transform> local, const short* indices,
-                          int count, Transform* output)
+void __cdecl FUN_00ce2d10(const PoseQsTransform* parents, PointerParam<const PoseQsTransform> local, const short* indices,
+                          int count, PoseQsTransform* output)
 {
     if (!indices)
     {
         for (int i = 0; i < count; ++i)
         {
-            const Transform& l = local[i];
-            const Transform& p = parents[i];
-            __m128 v = l.translation;
-            __m128 q = p.rotation.value;
-            __m128 t1 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xd2), _mm_shuffle_ps(q, q, 0xc9));
-            __m128 t2 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xc9), _mm_shuffle_ps(q, q, 0xd2));
-            __m128 cross = _mm_sub_ps(t1, t2);
-            __m128 w = _mm_shuffle_ps(q, q, 0xff);
-            __m128 product = _mm_mul_ps(v, q);
-            __m128 s55 = _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product);
-            __m128 dot = _mm_add_ss(_mm_shuffle_ps(product, product, 0xaa), s55);
-            __m128 rotated =
+            const PoseQsTransform& l = local[i];
+            const PoseQsTransform& p = parents[i];
+            LocalM128 v = l.translation;
+            LocalM128 q = p.rotation.value;
+            LocalM128 t1 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xd2), _mm_shuffle_ps(q, q, 0xc9));
+            LocalM128 t2 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xc9), _mm_shuffle_ps(q, q, 0xd2));
+            LocalM128 cross = _mm_sub_ps(t1, t2);
+            LocalM128 w = _mm_shuffle_ps(q, q, 0xff);
+            LocalM128 product = _mm_mul_ps(v, q);
+            LocalM128 s55 = _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product);
+            LocalM128 dot = _mm_add_ss(_mm_shuffle_ps(product, product, 0xaa), s55);
+            LocalM128 rotated =
                 _mm_add_ps(_mm_mul_ps(cross, w), _mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(w, w), DAT_010c71e0), v),
                                                             _mm_mul_ps(_mm_shuffle_ps(dot, dot, 0), q)));
             output[i].translation = _mm_add_ps(_mm_add_ps(rotated, rotated), p.translation);
@@ -150,26 +170,26 @@ void __cdecl FUN_00ce2d10(const Transform* parents, PointerParam<const Transform
         int i = 0;
         if (i >= count)
             return;
-        const Transform* source = local.p;
+        const PoseQsTransform* source = local.p;
         do
         {
             short index = indices[i];
             if (index >= 0)
             {
-                Transform parent;
+                PoseQsTransform parent;
                 parent.rotation.value = parents[index].rotation.value;
                 parent.scale = parents[index].scale;
                 parent.translation = parents[index].translation;
-                __m128 v = source->translation;
-                __m128 q = parent.rotation.value;
-                __m128 t1 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xd2), _mm_shuffle_ps(q, q, 0xc9));
-                __m128 t2 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xc9), _mm_shuffle_ps(q, q, 0xd2));
-                __m128 cross = _mm_sub_ps(t1, t2);
-                __m128 w = _mm_shuffle_ps(q, q, 0xff);
-                __m128 product = _mm_mul_ps(v, q);
-                __m128 s55 = _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product);
-                __m128 dot = _mm_add_ss(_mm_shuffle_ps(product, product, 0xaa), s55);
-                __m128 rotated = _mm_add_ps(_mm_mul_ps(cross, w),
+                LocalM128 v = source->translation;
+                LocalM128 q = parent.rotation.value;
+                LocalM128 t1 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xd2), _mm_shuffle_ps(q, q, 0xc9));
+                LocalM128 t2 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xc9), _mm_shuffle_ps(q, q, 0xd2));
+                LocalM128 cross = _mm_sub_ps(t1, t2);
+                LocalM128 w = _mm_shuffle_ps(q, q, 0xff);
+                LocalM128 product = _mm_mul_ps(v, q);
+                LocalM128 s55 = _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product);
+                LocalM128 dot = _mm_add_ss(_mm_shuffle_ps(product, product, 0xaa), s55);
+                LocalM128 rotated = _mm_add_ps(_mm_mul_ps(cross, w),
                                             _mm_add_ps(_mm_mul_ps(_mm_add_ps(_mm_mul_ps(w, w), DAT_010c71e0), v),
                                                        _mm_mul_ps(_mm_shuffle_ps(dot, dot, 0), q)));
                 output[index].translation = _mm_add_ps(_mm_add_ps(rotated, rotated), parent.translation);
@@ -189,7 +209,7 @@ void __cdecl FUN_00ce2d10(const Transform* parents, PointerParam<const Transform
 struct Cls
 {
     unsigned short m0, m2, m4, m6;
-    __m128 v10, v20, v30, v40, v50, v60;
+    LocalM128 v10, v20, v30, v40, v50, v60;
     Cls* FUN_00ce4a50(Cls* src);
 };
 
@@ -260,13 +280,22 @@ void __cdecl FUN_00cf8510(SortRec* a, int low, int high, SortCmp cmp)
     }
 }
 
-namespace fnv_00cfac20 {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
+
+
+
+inline void hkVector4::setMin4(const hkVector4& a, const hkVector4& b)
 {
-    float m128_f32[4];
-} __m128;
-extern "C" __m128 _mm_min_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_max_ps(__m128 a, __m128 b);
+    m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
+}
+
+inline void hkVector4::setMax4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents);
+}
+
+namespace fnv_00cfac20 {
+extern "C" LocalM128 _mm_min_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_max_ps(LocalM128 a, LocalM128 b);
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern "C" unsigned __int64 __rdtsc(void);
 extern "C" void _ReadWriteBarrier(void);
@@ -274,29 +303,17 @@ extern unsigned int DAT_0126835c;
 extern char DAT_010cc678[];
 extern char DAT_010c41f8[];
 void* __cdecl FUN_00c85750(void);
-struct S00cfac20_Vec
-{
-    __m128 q;
-    void setMin4(const S00cfac20_Vec& a, const S00cfac20_Vec& b)
-    {
-        q = _mm_min_ps(a.q, b.q);
-    }
-    void setMax4(const S00cfac20_Vec& a, const S00cfac20_Vec& b)
-    {
-        q = _mm_max_ps(a.q, b.q);
-    }
-};
 struct S00cfac20_Ray
 {
-    S00cfac20_Vec from;
-    S00cfac20_Vec to;
-    S00cfac20_Vec extra;
+    hkVector4 from;
+    hkVector4 to;
+    hkVector4 extra;
 };
 struct S00cfac20_Aabb
 {
-    S00cfac20_Vec mn;
-    S00cfac20_Vec mx;
-    void includePoint(const S00cfac20_Vec& p)
+    hkVector4 mn;
+    hkVector4 mx;
+    void includePoint(const hkVector4& p)
     {
         mn.setMin4(mn, p);
         mx.setMax4(mx, p);
@@ -339,20 +356,16 @@ struct S00cfac20_Mon
     int unk08;
     char* end;
 };
-struct S00cfac20_Stack
+static inline char* S00cfac20_alloc(hkMemoryRouter* stack, int size)
 {
-    char* cur;
-    char* alloc(int size)
-    {
-        char* r = cur;
-        cur = r + ((size + 0x7f) & ~0x7f);
-        return r;
-    }
-    void release(char* p)
-    {
-        cur = p;
-    }
-};
+    char* r = reinterpret_cast<char*>(stack->m_stack.m_next.m_storage);
+    stack->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(r + ((size + 0x7f) & ~0x7f)));
+    return r;
+}
+static inline void S00cfac20_release(hkMemoryRouter* stack, char* p)
+{
+    stack->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(p));
+}
 struct S00cfac20_Grp
 {
     void RecordAndDispatch(S00cfac20_Builder* b, S00cfac20_Ray* ray, void* ctx, void* mem, char* out);
@@ -374,9 +387,9 @@ static inline void S00cfac20_timer(const char* name)
 }
 static __forceinline void S00cfac20_calcAabb(const S00cfac20_Ray* rays, int count, S00cfac20_Aabb& aabb)
 {
-    S00cfac20_Vec mn;
+    hkVector4 mn;
     mn.setMin4(rays->from, rays->to);
-    aabb.mn.q = mn.q;
+    aabb.mn.m_vComponents = mn.m_vComponents;
     aabb.mx.setMax4(rays->from, rays->to);
     const S00cfac20_Ray* p = rays + 1;
     int i = count - 2;
@@ -390,7 +403,7 @@ static __forceinline void S00cfac20_calcAabb(const S00cfac20_Ray* rays, int coun
             aabb.mx.setMax4(aabb.mx, p->from);
             ++p;
         } while (--i >= 0);
-        aabb.mn.q = mn.q;
+        aabb.mn.m_vComponents = mn.m_vComponents;
     }
 }
 // @fnv 0x00cfac20
@@ -413,7 +426,7 @@ void S00cfac20_Grp::FUN_00cfac20(S00cfac20_Builder* b, S00cfac20_Ray* rays, int 
     }
     S00cfac20_Aabb aabb;
     S00cfac20_calcAabb(rays, count, aabb);
-    char* mem = ((S00cfac20_Stack*)FUN_00c85750())->alloc(b->GetLogicalSize());
+    char* mem = S00cfac20_alloc(static_cast<hkMemoryRouter*>(FUN_00c85750()), b->GetLogicalSize());
     b->init(&aabb, mem);
     S00cfac20_Ray* r = rays;
     dst = out;
@@ -422,7 +435,7 @@ void S00cfac20_Grp::FUN_00cfac20(S00cfac20_Builder* b, S00cfac20_Ray* rays, int 
         RecordAndDispatch(b, r++, ctx, mem, dst);
         dst += 0x60;
     }
-    ((S00cfac20_Stack*)FUN_00c85750())->release(mem);
+    S00cfac20_release(static_cast<hkMemoryRouter*>(FUN_00c85750()), mem);
     {
         S00cfac20_Mon* mon = (S00cfac20_Mon*)TlsGetValue(DAT_0126835c);
         char* p = mon->cur;
@@ -446,28 +459,6 @@ inline void* __cdecl operator new(unsigned int, void* p) throw()
     return p;
 }
 
-struct hkVector4
-{
-    __m128 m_vComponents;
-
-    __forceinline hkVector4()
-    {}
-    __forceinline hkVector4(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-
-struct hkReferencedObject
-{
-    void FUN_00c90510();
-    void FUN_00c905b0();
-};
-
 template <class T> struct ReferenceCountedPointer
 {
     T* m_pRetainedObject;
@@ -475,54 +466,32 @@ template <class T> struct ReferenceCountedPointer
     __forceinline void operator=(const ReferenceCountedPointer& rp)
     {
         if (rp.m_pRetainedObject)
-            rp.m_pRetainedObject->FUN_00c90510();
+            rp.m_pRetainedObject->addReference();
         if (m_pRetainedObject)
-            m_pRetainedObject->FUN_00c905b0();
+            m_pRetainedObject->removeReference();
         m_pRetainedObject = rp.m_pRetainedObject;
     }
 };
 
-struct hkMemoryAllocator
+template <typename T> __forceinline T* hkMemoryAllocator::_bufAlloc(int& reqNumInOut)
 {
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
+    int n = reqNumInOut * sizeof(T);
+    void* p = bufAlloc(n);
+    reqNumInOut = n / int(sizeof(T));
+    return static_cast<T*>(p);
+}
 
-    template <typename T> __forceinline T* _bufAlloc(int& reqNumInOut)
-    {
-        int n = reqNumInOut * sizeof(T);
-        void* p = AllocateBufferWithSize(n);
-        reqNumInOut = n / int(sizeof(T));
-        return static_cast<T*>(p);
-    }
-
-    template <typename T> __forceinline void _bufFree(void* p, int numElem)
-    {
-        ReturnMemory(p, numElem * sizeof(T));
-    }
-};
-
-struct NineIntegerRecord
+template <typename T> __forceinline void hkMemoryAllocator::_bufFree(void* p, int numElem)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* m_pStreamAllocator;
-
-    __forceinline hkMemoryAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
+    bufFree(p, numElem * sizeof(T));
+}
 
 void* __cdecl FUN_00c85750();
 
+
 __forceinline hkMemoryAllocator& containerHeap()
 {
-    return static_cast<NineIntegerRecord*>(FUN_00c85750())->heap();
+    return static_cast<hkMemoryRouter*>(FUN_00c85750())->heap();
 }
 
 void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* array, int reqCapacity, int sizeElem);
@@ -563,72 +532,60 @@ template <typename T> __forceinline void hkCopy2(T* dst, const T* src, int n)
     }
 }
 
-template <typename T> struct hkArray
+// hkArray<T>::operator= (hkArray.inl): copyFromArray(AllocatorType().get(this), a, hkIsPodType<T>::type()).
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    enum
-    {
-        CAPACITY_MASK = 0x3fffffff,
-        DONT_DEALLOCATE_FLAG = 0x80000000
-    };
-
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & CAPACITY_MASK;
-    }
-
-    __forceinline void GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
-    {
-        const int capacity = getCapacity();
-        if (capacity < n)
-        {
-            int cap2 = 2 * capacity;
-            int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(alloc, this, newSize, sizeof(T));
-        }
-    }
-
-    __forceinline void _copyFromArrayClass(hkMemoryAllocator& alloc, const hkArray& a)
-    {
-        int oldSize = m_iElementCount;
-        int newSize = a.GetLogicalSize();
-        int copiedSize = newSize > oldSize ? oldSize : newSize;
-
-        GrowArrayCapacity(alloc, newSize);
-        hkCopy(m_data, a.m_data, copiedSize);
-        hkConstructWithArray(m_data + copiedSize, newSize - copiedSize, a.m_data + copiedSize);
-        m_iElementCount = newSize;
-    }
-
-    __forceinline hkArray& operator=(const hkArray& a)
-    {
-        _copyFromArrayClass(containerHeap(), a);
-        return *this;
-    }
-
-    __forceinline void _copyFromArrayPod(hkMemoryAllocator& alloc, const hkArray& a)
-    {
-        if (getCapacity() < a.GetLogicalSize())
-        {
-            if ((m_iCapacityState & DONT_DEALLOCATE_FLAG) == 0)
-            {
-                alloc._bufFree<T>(m_data, getCapacity());
-            }
-            int n = a.GetLogicalSize();
-            m_data = alloc._bufAlloc<T>(n);
-            m_iCapacityState = n;
-        }
-        m_iElementCount = a.GetLogicalSize();
-        hkCopy(m_data, a.m_data, m_iElementCount);
-    }
+    return containerHeap();
+}
+// Specialization of the shared IsPodType trait for the unsigned-short array element; no separate local trait.
+template <> struct IsPodType<hkUint16> : public hkTypeIsPod   // hkTypeTraits.h HK_DEFINE_AS_POD_TYPE(hkUint16)
+{
 };
+template <typename T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
+{
+    const int capacity = getCapacity();
+    if (capacity < n)
+    {
+        int cap2 = 2 * capacity;
+        int newSize = (n < cap2) ? cap2 : n;
+        FUN_00c908c0(alloc, this, newSize, sizeof(T));
+    }
+}
+template <typename T>
+__forceinline hkArrayBase<T>& hkArrayBase<T>::copyFromArray(hkMemoryAllocator& kHeap, const hkArrayBase<T>& kSrc, hkTypeIsClass)
+{
+    int iWas = m_iElementCount;
+    int iNow = kSrc.getSize();
+    int iShared = iNow > iWas ? iWas : iNow;
+
+    GrowArrayCapacity(kHeap, iNow);
+    hkCopy(m_data, kSrc.m_data, iShared);
+    hkConstructWithArray(m_data + iShared, iNow - iShared, kSrc.m_data + iShared);
+    m_iElementCount = iNow;
+    return *this;
+}
+template <typename T>
+__forceinline hkArrayBase<T>& hkArrayBase<T>::copyFromArray(hkMemoryAllocator& kHeap, const hkArrayBase<T>& kSrc, hkTypeIsPod)
+{
+    if (getCapacity() < kSrc.getSize())
+    {
+        if ((m_iCapacityState & DONT_DEALLOCATE_FLAG) == 0)
+        {
+            kHeap._bufFree<T>(m_data, getCapacity());
+        }
+        int iCount = kSrc.getSize();
+        m_data = kHeap._bufAlloc<T>(iCount);
+        m_iCapacityState = iCount;
+    }
+    m_iElementCount = kSrc.getSize();
+    hkCopy(m_data, kSrc.m_data, m_iElementCount);
+    return *this;
+}
+template <typename T, typename A> __forceinline hkArray<T, A>& hkArray<T, A>::operator=(const hkArray<T, A>& a)
+{
+    this->copyFromArray(AllocatorType().get(this), a, typename IsPodType<T>::type());
+    return *this;
+}
 
 struct VectorTriple
 {
@@ -675,7 +632,7 @@ ShapeData& ShapeData::FUN_00ce4ae0(const ShapeData& other)
     m_kSecondReferencedObject = other.m_kSecondReferencedObject;
     m_kVertices = other.m_kVertices;
     m_faces = other.m_faces;
-    m_ppIndices._copyFromArrayPod(containerHeap(), other.m_ppIndices);
+    m_ppIndices = other.m_ppIndices;
     m_kMinimumCorner = other.m_kMinimumCorner;
     m_kMaximumCorner = other.m_kMaximumCorner;
     m_kCenterPosition = other.m_kCenterPosition;

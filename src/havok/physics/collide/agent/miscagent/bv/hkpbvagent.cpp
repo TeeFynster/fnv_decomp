@@ -1,6 +1,37 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 
 // src/havok/physics/collide/agent/miscagent/bv/hkpbvagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/miscagent/bv/hkpbvagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#define FNV_VEC4_SCALAR
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/Contact228.h"
+#include "../../../../../../../include/hkpCdPointCollector.h"
+#include "../../../../../../../include/hkpSimpleClosestContactCollector.h"
+
+inline void* operator new(unsigned int, void* p)
+{
+    return p;
+}
+
+extern float DAT_0104da48;
+
+inline hkpCdPointCollector::hkpCdPointCollector()
+{}
+
+inline hkpCdPointCollector::~hkpCdPointCollector()
+{}
+
+inline hkpSimpleClosestContactCollector::hkpSimpleClosestContactCollector()
+{
+    contact.distance = DAT_0104da48;
+    m_fEarlyOutDistance = DAT_0104da48;
+    m_bOk = 0;
+}
+
+inline hkpSimpleClosestContactCollector::~hkpSimpleClosestContactCollector()
+{}
 
 struct FUN_00d452a0_vtbl
 {
@@ -768,25 +799,21 @@ void S00d454c0_Owner::FUN_00d454c0(CdBody* bodyA, CdBody* bodyB, S00d454c0_Input
     TimerMark(DAT_01076f38);
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
+using ::_mm_shuffle_ps;
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
+using ::_mm_xor_ps;
 }
 
-extern __m128 DAT_010c4c00;
+extern LocalM128 DAT_010c4c00;
 
 struct SimplexVertex
 {
-    __m128 m_kPointA;
-    __m128 m_kPointB;
+    LocalM128 m_kPointA;
+    LocalM128 m_kPointB;
     int unk20;
     int unk24;
     int unk28;
@@ -810,7 +837,7 @@ struct Simplex
     int unk3014;
     int unk3018;
     int unk301C;
-    __m128 m_vHitNormal;
+    LocalM128 m_vHitNormal;
     float m_fClosestPointDistanceSquared;
     int unk3034;
     int unk3038;
@@ -840,14 +867,14 @@ void Agent::FUN_00d46220(int a, int b, int c, Simplex* apSimplex)
     AgentBase::FUN_00d454c0(b, a, c, apSimplex);
     for (; pVertex < apSimplex->m_kRayEnd; pVertex++)
     {
-        const __m128* pb = &pVertex->m_kPointB;
-        __m128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
+        const LocalM128* pb = &pVertex->m_kPointB;
+        LocalM128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
         pVertex->m_kPointA = _mm_add_ps(_mm_mul_ps(w, pVertex->m_kPointB), pVertex->m_kPointA);
         pVertex->m_kPointB = _mm_xor_ps(pVertex->m_kPointB, DAT_010c4c00);
     }
     if (oldDistance != apSimplex->m_fClosestPointDistanceSquared)
     {
-        __m128* n = &apSimplex->m_vHitNormal;
+        LocalM128* n = &apSimplex->m_vHitNormal;
         *n = _mm_xor_ps(*n, DAT_010c4c00);
         {
             unsigned char t = apSimplex->m_dims.m_ucLowNibble;
@@ -871,26 +898,6 @@ void Agent::FUN_00d46220(int a, int b, int c, Simplex* apSimplex)
         }
     }
 }
-
-extern char DAT_010cebe0;
-
-struct __declspec(align(16)) D45800Collector
-{
-    void* m_vtbl;
-    float m_fEarlyOutDistance;
-    bool m_bHasHit;
-    int pad0c;
-    float m_vContactPosition[4];
-    float m_vHitNormal[3];
-    float m_fClosestPointDistanceSquared;
-    D45800Collector()
-    {
-        m_vtbl = &DAT_010cebe0;
-        m_fClosestPointDistanceSquared = DAT_0104da48;
-        m_fEarlyOutDistance = DAT_0104da48;
-        m_bHasHit = false;
-    }
-};
 
 static inline CollideFn D45800Get(CollisionInput* input, BvShape* a, unsigned int typeB)
 {
@@ -943,9 +950,13 @@ void __cdecl FUN_00d45800(CdBody* bodyA, CdBody* bodyB, CollisionInput* input, v
     tmp.m_key = 0xffffffff;
     unsigned int typeB = bodyB->m_pCollisionShape->m_type;
     CollideFn5 fn = (CollideFn5)D45800Get(input, tmp.m_pCollisionShape, typeB);
-    D45800Collector coll;
+    struct CollectorStorage
+    {
+        Vector228 first, second, third;
+    } collectorStorage;
+    hkpSimpleClosestContactCollector& coll = *::new (&collectorStorage) hkpSimpleClosestContactCollector;
     fn(&tmp, bodyB, input, &coll, &coll);
-    if (coll.m_bHasHit)
+    if (coll.m_bOk)
     {
         D458Mark(DAT_010cec4c, ticks);
         tmp.m_pCollisionShape = bvShape->m_pContainedShape;
@@ -957,45 +968,35 @@ void __cdecl FUN_00d45800(CdBody* bodyA, CdBody* bodyB, CollisionInput* input, v
 }
 
 extern float DAT_0104da48;
-extern const __m128 DAT_010c44d0;
+extern const LocalM128 DAT_010c44d0;
 extern unsigned int DAT_010ce80c;
-
-struct __declspec(align(16)) Key_d2e9
-{
-    unsigned int m_k0;
-    unsigned int m_k1;
-    unsigned int m_k2;
-    unsigned int m_k3;
-};
 
 struct Input_d2e9
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
     int unk28, unk2c, unk30, unk34, unk38, unk3c, unk40, unk44, unk48, unk4c;
-    union
-    {
-        __m128 m_vComponents;
-        Key_d2e9 m_key;
-    };
+    Vec4::Aligned m_key;
     int unk60, unk64, unk68, unk6c;
 };
 
 struct Record_d2e9
 {
+    Record_d2e9() : m_key(Vec4::Uninitialized) {}
     const unsigned int* m_vtbl;
     float m_fScalar;
-    Key_d2e9 m_key;
+    Vec4::Aligned m_key;
     int m_uiFilterValue;
 };
 
 void __cdecl FUN_00d45800(int a1, int a2, Input_d2e9* input, Record_d2e9* rec, Record_d2e9* optRec);
 
-// Copies input, XORs its m_vComponents with DAT_010c44d0, builds a Record_d2e9 with a4, and calls FUN_00d45800 with a second record when a5 is non-zero.
+// Copies input, XORs its m_key with DAT_010c44d0, builds a Record_d2e9 with a4, and calls FUN_00d45800 with a second record when a5 is non-zero.
 // @fnv 0x00d46090
 void __cdecl FUN_00d46090(int a2, int a1, const Input_d2e9* input, int a4, int a5)
 {
     Input_d2e9 local = *input;
-    local.m_vComponents = _mm_xor_ps(input->m_vComponents, DAT_010c44d0);
+    *reinterpret_cast<LocalM128*>(&local.m_key) =
+        _mm_xor_ps(*reinterpret_cast<const LocalM128*>(&input->m_key), DAT_010c44d0);
 
     Record_d2e9 rec;
     rec.m_vtbl = &DAT_010ce80c;
@@ -1068,26 +1069,18 @@ struct S_00d45970_BvShape : S_00d45970_Shape
     const S_00d45970_Shape* m_pContainedShape;
 };
 
-struct S_00d45970_CdBody
-{
-    const S_00d45970_Shape* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const S_00d45970_CdBody* m_parent;
-    S_00d45970_CdBody(const S_00d45970_CdBody* parent) : m_parent(parent)
-    {
-        m_pMotionState = parent->m_pMotionState;
-    }
-    void SetCollisionShapeAndKey(const S_00d45970_Shape* s, unsigned int key)
-    {
-        m_pCollisionShape = s;
-        m_uiCollisionShapeKey = key;
-    }
-};
+
+#include "../../../../../../../include/hkpCdBody.h"
+
+inline hkpCdBody::hkpCdBody(const hkpCdBody* parent) : m_parent(parent) { m_pMotionState = parent->m_pMotionState; }
+inline const hkpShape* hkpCdBody::getShape() const { return m_pCollisionShape; }
+inline void hkpCdBody::SetCollisionShapeAndKey(const hkpShape* shape, unsigned int key) { m_pCollisionShape = shape; m_uiCollisionShapeKey = key; }
+
+
 
 struct S_00d45970_CollectorBase
 {
-    virtual void AddCdBodyPair(const S_00d45970_CdBody&, const S_00d45970_CdBody&);
+    virtual void AddCdBodyPair(const hkpCdBody&, const hkpCdBody&);
     virtual void reset();
 };
 
@@ -1098,7 +1091,7 @@ struct S_00d45970_FlagCollector : S_00d45970_CollectorBase
     {
         m_bHit = false;
     }
-    virtual void AddCdBodyPair(const S_00d45970_CdBody&, const S_00d45970_CdBody&);
+    virtual void AddCdBodyPair(const hkpCdBody&, const hkpCdBody&);
     virtual void reset();
 };
 
@@ -1106,7 +1099,7 @@ struct S_00d45970_Agent;
 struct S_00d45970_Input;
 struct S_00d45970_ContactMgr;
 
-typedef S_00d45970_Agent*(__cdecl* S_00d45970_CreateFunc)(const S_00d45970_CdBody&, const S_00d45970_CdBody&,
+typedef S_00d45970_Agent*(__cdecl* S_00d45970_CreateFunc)(const hkpCdBody&, const hkpCdBody&,
                                                           const S_00d45970_Input&, S_00d45970_ContactMgr*);
 
 struct S_00d45970_Funcs
@@ -1135,7 +1128,7 @@ struct S_00d45970_Dispatcher
     {
         return predictive ? m_agent3TypeMap[typeA][typeB] : m_agent2TypeMap[typeA][typeB];
     }
-    S_00d45970_Agent* getNewCollisionAgent(const S_00d45970_CdBody& bodyA, const S_00d45970_CdBody& bodyB,
+    S_00d45970_Agent* getNewCollisionAgent(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                                            const S_00d45970_Input& input, S_00d45970_ContactMgr* mgr) const;
 };
 
@@ -1149,13 +1142,13 @@ struct S_00d45970_Input
     unsigned int m_bCreatePredictiveAgents;
 };
 
-__forceinline S_00d45970_Agent* S_00d45970_Dispatcher::getNewCollisionAgent(const S_00d45970_CdBody& bodyA,
-                                                                            const S_00d45970_CdBody& bodyB,
+__forceinline S_00d45970_Agent* S_00d45970_Dispatcher::getNewCollisionAgent(const hkpCdBody& bodyA,
+                                                                            const hkpCdBody& bodyB,
                                                                             const S_00d45970_Input& input,
                                                                             S_00d45970_ContactMgr* mgr) const
 {
-    int typeA = bodyA.m_pCollisionShape->m_type;
-    int typeB = bodyB.m_pCollisionShape->m_type;
+    int typeA = reinterpret_cast<const S_00d45970_Shape*>(bodyA.m_pCollisionShape)->m_type;
+    int typeB = reinterpret_cast<const S_00d45970_Shape*>(bodyB.m_pCollisionShape)->m_type;
     int idx = getAgentType(typeA, typeB, input.m_bCreatePredictiveAgents);
     S_00d45970_CreateFunc f = m_agent2Funcs[idx].m_pCreateFunc;
     return f(bodyA, bodyB, input, mgr);
@@ -1169,7 +1162,7 @@ struct S_00d45970_Agent
     virtual void v1();
     virtual void v2();
     virtual void v3();
-    virtual void getPenetrations(const S_00d45970_CdBody& bodyA, const S_00d45970_CdBody& bodyB,
+    virtual void getPenetrations(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                                  const S_00d45970_Input& input, S_00d45970_CollectorBase& collector);
 };
 
@@ -1180,7 +1173,7 @@ struct S_00d45970_BvAgentBase
     virtual void v0();
     virtual void v1();
     virtual void v2();
-    virtual void getPenetrations(const S_00d45970_CdBody& bodyA, const S_00d45970_CdBody& bodyB,
+    virtual void getPenetrations(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                                  const S_00d45970_Input& input, S_00d45970_CollectorBase& collector);
 };
 
@@ -1192,13 +1185,13 @@ struct S_00d45970_BvAgent
     S_00d45970_BvAgentBase* m_pBoundingVolumeAgent;
     S_00d45970_Agent* m_pAgent;
 
-    void GetPenetrations(const S_00d45970_CdBody& bodyA, const S_00d45970_CdBody& bodyB, const S_00d45970_Input& input,
+    void GetPenetrations(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const S_00d45970_Input& input,
                          S_00d45970_CollectorBase& result);
 };
 
 // Checks bounding volume overlap, then dispatches to the contained shape agent to collect penetrations into result.
 // @fnv 0x00d45970
-void S_00d45970_BvAgent::GetPenetrations(const S_00d45970_CdBody& bodyA, const S_00d45970_CdBody& bodyB,
+void S_00d45970_BvAgent::GetPenetrations(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                                          const S_00d45970_Input& input, S_00d45970_CollectorBase& result)
 {
     {
@@ -1217,8 +1210,8 @@ void S_00d45970_BvAgent::GetPenetrations(const S_00d45970_CdBody& bodyA, const S
     {
         const S_00d45970_BvShape* bvShape = (const S_00d45970_BvShape*)bodyA.m_pCollisionShape;
 
-        S_00d45970_CdBody newBodyA(&bodyA);
-        newBodyA.SetCollisionShapeAndKey(bvShape->m_pBvShapeReference, 0xffffffff);
+        hkpCdBody newBodyA(&bodyA);
+        newBodyA.SetCollisionShapeAndKey(reinterpret_cast<const hkpShape*>(bvShape->m_pBvShapeReference), 0xffffffff);
 
         S_00d45970_FlagCollector checker;
         m_pBoundingVolumeAgent->getPenetrations(newBodyA, bodyB, input, checker);
@@ -1236,7 +1229,7 @@ void S_00d45970_BvAgent::GetPenetrations(const S_00d45970_CdBody& bodyA, const S
                     mStream.m_kRayEnd = (char*)(h + 1);
                 }
             }
-            newBodyA.SetCollisionShapeAndKey(bvShape->m_pContainedShape, 0);
+            newBodyA.SetCollisionShapeAndKey(reinterpret_cast<const hkpShape*>(bvShape->m_pContainedShape), 0);
             if (!m_pAgent)
             {
                 m_pAgent =
@@ -1309,26 +1302,13 @@ struct S_00d45c50_BvShape : S_00d45c50_Shape
     const S_00d45c50_Shape* m_pContainedShape;
 };
 
-struct S_00d45c50_CdBody
-{
-    const S_00d45c50_Shape* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const S_00d45c50_CdBody* m_parent;
-    S_00d45c50_CdBody(const S_00d45c50_CdBody* parent) : m_parent(parent)
-    {
-        m_pMotionState = parent->m_pMotionState;
-    }
-    void SetCollisionShapeAndKey(const S_00d45c50_Shape* s, unsigned int key)
-    {
-        m_pCollisionShape = s;
-        m_uiCollisionShapeKey = key;
-    }
-};
+
+#include "../../../../../../../include/hkpCdBody.h"
+
 
 struct S_00d45c50_CollectorBase
 {
-    virtual void AddCdBodyPair(const S_00d45c50_CdBody&, const S_00d45c50_CdBody&);
+    virtual void AddCdBodyPair(const hkpCdBody&, const hkpCdBody&);
     virtual void reset();
 };
 
@@ -1339,7 +1319,7 @@ struct S_00d45c50_FlagCollector : S_00d45c50_CollectorBase
     {
         m_bHit = false;
     }
-    virtual void AddCdBodyPair(const S_00d45c50_CdBody&, const S_00d45c50_CdBody&);
+    virtual void AddCdBodyPair(const hkpCdBody&, const hkpCdBody&);
     virtual void reset();
 };
 
@@ -1347,7 +1327,7 @@ struct S_00d45c50_Agent;
 struct S_00d45c50_Input;
 struct S_00d45c50_ContactMgr;
 
-typedef S_00d45c50_Agent*(__cdecl* S_00d45c50_CreateFunc)(const S_00d45c50_CdBody&, const S_00d45c50_CdBody&,
+typedef S_00d45c50_Agent*(__cdecl* S_00d45c50_CreateFunc)(const hkpCdBody&, const hkpCdBody&,
                                                           const S_00d45c50_Input&, S_00d45c50_ContactMgr*);
 
 struct S_00d45c50_Funcs
@@ -1376,7 +1356,7 @@ struct S_00d45c50_Dispatcher
     {
         return predictive ? m_agent3TypeMap[typeA][typeB] : m_agent2TypeMap[typeA][typeB];
     }
-    S_00d45c50_Agent* getNewCollisionAgent(const S_00d45c50_CdBody& bodyA, const S_00d45c50_CdBody& bodyB,
+    S_00d45c50_Agent* getNewCollisionAgent(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                                            const S_00d45c50_Input& input, S_00d45c50_ContactMgr* mgr) const;
 };
 
@@ -1390,13 +1370,13 @@ struct S_00d45c50_Input
     unsigned int m_bCreatePredictiveAgents;
 };
 
-__forceinline S_00d45c50_Agent* S_00d45c50_Dispatcher::getNewCollisionAgent(const S_00d45c50_CdBody& bodyA,
-                                                                            const S_00d45c50_CdBody& bodyB,
+__forceinline S_00d45c50_Agent* S_00d45c50_Dispatcher::getNewCollisionAgent(const hkpCdBody& bodyA,
+                                                                            const hkpCdBody& bodyB,
                                                                             const S_00d45c50_Input& input,
                                                                             S_00d45c50_ContactMgr* mgr) const
 {
-    int typeA = bodyA.m_pCollisionShape->m_type;
-    int typeB = bodyB.m_pCollisionShape->m_type;
+    int typeA = reinterpret_cast<const S_00d45c50_Shape*>(bodyA.m_pCollisionShape)->m_type;
+    int typeB = reinterpret_cast<const S_00d45c50_Shape*>(bodyB.m_pCollisionShape)->m_type;
     int idx = getAgentType(typeA, typeB, input.m_bCreatePredictiveAgents);
     S_00d45c50_CreateFunc f = m_agent2Funcs[idx].m_pCreateFunc;
     return f(bodyA, bodyB, input, mgr);
@@ -1409,7 +1389,7 @@ struct S_00d45c50_Agent
     virtual void v0();
     virtual void v1();
     virtual void v2();
-    virtual void ProcessAgent(const S_00d45c50_CdBody& bodyA, const S_00d45c50_CdBody& bodyB,
+    virtual void ProcessAgent(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                                   const S_00d45c50_Input& input, S_00d45c50_Output& result);
 };
 
@@ -1420,7 +1400,7 @@ struct S_00d45c50_BvAgentBase
     virtual void v0();
     virtual void v1();
     virtual void v2();
-    virtual void getPenetrations(const S_00d45c50_CdBody& bodyA, const S_00d45c50_CdBody& bodyB,
+    virtual void getPenetrations(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                                  const S_00d45c50_Input& input, S_00d45c50_CollectorBase& collector);
 };
 
@@ -1432,13 +1412,13 @@ struct S_00d45c50_BvAgent
     S_00d45c50_BvAgentBase* m_pBoundingVolumeAgent;
     S_00d45c50_Agent* m_pAgent;
 
-    void FUN_00d45c50(const S_00d45c50_CdBody& bodyA, const S_00d45c50_CdBody& bodyB, const S_00d45c50_Input& input,
+    void FUN_00d45c50(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const S_00d45c50_Input& input,
                       S_00d45c50_Output& result);
 };
 
 // Checks bounding volume penetration between two collision bodies and, on hit, dispatches the contained-shape collision agent to fill the output result.
 // @fnv 0x00d45c50
-void S_00d45c50_BvAgent::FUN_00d45c50(const S_00d45c50_CdBody& bodyA, const S_00d45c50_CdBody& bodyB,
+void S_00d45c50_BvAgent::FUN_00d45c50(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
                                       const S_00d45c50_Input& input, S_00d45c50_Output& result)
 {
     {
@@ -1457,8 +1437,8 @@ void S_00d45c50_BvAgent::FUN_00d45c50(const S_00d45c50_CdBody& bodyA, const S_00
     {
         const S_00d45c50_BvShape* bvShape = (const S_00d45c50_BvShape*)bodyA.m_pCollisionShape;
 
-        S_00d45c50_CdBody newBodyA(&bodyA);
-        newBodyA.SetCollisionShapeAndKey(bvShape->m_pBvShapeReference, 0xffffffff);
+        hkpCdBody newBodyA(&bodyA);
+        newBodyA.SetCollisionShapeAndKey(reinterpret_cast<const hkpShape*>(bvShape->m_pBvShapeReference), 0xffffffff);
 
         S_00d45c50_FlagCollector checker;
         m_pBoundingVolumeAgent->getPenetrations(newBodyA, bodyB, input, checker);
@@ -1476,7 +1456,7 @@ void S_00d45c50_BvAgent::FUN_00d45c50(const S_00d45c50_CdBody& bodyA, const S_00
                     mStream.m_kRayEnd = (char*)(h + 1);
                 }
             }
-            newBodyA.SetCollisionShapeAndKey(bvShape->m_pContainedShape, 0);
+            newBodyA.SetCollisionShapeAndKey(reinterpret_cast<const hkpShape*>(bvShape->m_pContainedShape), 0);
             if (!m_pAgent)
             {
                 m_pAgent =
@@ -1549,26 +1529,13 @@ struct S_00d45dd0_BvShape : S_00d45dd0_Shape
     const S_00d45dd0_Shape* m_pContainedShape;
 };
 
-struct S_00d45dd0_CdBody
-{
-    const S_00d45dd0_Shape* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const S_00d45dd0_CdBody* m_parent;
-    S_00d45dd0_CdBody(const S_00d45dd0_CdBody* parent) : m_parent(parent)
-    {
-        m_pMotionState = parent->m_pMotionState;
-    }
-    void SetCollisionShapeAndKey(const S_00d45dd0_Shape* s, unsigned int key)
-    {
-        m_pCollisionShape = s;
-        m_uiCollisionShapeKey = key;
-    }
-};
+
+#include "../../../../../../../include/hkpCdBody.h"
+
 
 struct S_00d45dd0_CollectorBase
 {
-    virtual void AddCdBodyPair(const S_00d45dd0_CdBody&, const S_00d45dd0_CdBody&);
+    virtual void AddCdBodyPair(const hkpCdBody&, const hkpCdBody&);
     virtual void reset();
 };
 
@@ -1579,13 +1546,13 @@ struct S_00d45dd0_FlagCollector : S_00d45dd0_CollectorBase
     {
         m_bHit = false;
     }
-    virtual void AddCdBodyPair(const S_00d45dd0_CdBody&, const S_00d45dd0_CdBody&);
+    virtual void AddCdBodyPair(const hkpCdBody&, const hkpCdBody&);
     virtual void reset();
 };
 
 struct S_00d45dd0_Input;
 
-typedef void(__cdecl* S_00d45dd0_PenFunc)(const S_00d45dd0_CdBody&, const S_00d45dd0_CdBody&, const S_00d45dd0_Input&,
+typedef void(__cdecl* S_00d45dd0_PenFunc)(const hkpCdBody&, const hkpCdBody&, const S_00d45dd0_Input&,
                                           S_00d45dd0_CollectorBase&);
 
 struct S_00d45dd0_Funcs
@@ -1720,7 +1687,7 @@ struct S_00d45dd0_Input
 
 // Checks BvShape containment for bodyA against bodyB, then queries penetrations on the contained shape if a hit is found.
 // @fnv 0x00d45dd0
-void __cdecl FUN_00d45dd0(const S_00d45dd0_CdBody& bodyA, const S_00d45dd0_CdBody& bodyB, const S_00d45dd0_Input& input,
+void __cdecl FUN_00d45dd0(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const S_00d45dd0_Input& input,
                           S_00d45dd0_CollectorBase& result)
 {
     {
@@ -1739,12 +1706,12 @@ void __cdecl FUN_00d45dd0(const S_00d45dd0_CdBody& bodyA, const S_00d45dd0_CdBod
     {
         const S_00d45dd0_BvShape* bvShape = (const S_00d45dd0_BvShape*)bodyA.m_pCollisionShape;
 
-        S_00d45dd0_CdBody newBodyA(&bodyA);
-        newBodyA.SetCollisionShapeAndKey(bvShape->m_pBvShapeReference, 0xffffffff);
+        hkpCdBody newBodyA(&bodyA);
+        newBodyA.SetCollisionShapeAndKey(reinterpret_cast<const hkpShape*>(bvShape->m_pBvShapeReference), 0xffffffff);
 
-        int typeB = bodyB.m_pCollisionShape->m_type;
+        int typeB = reinterpret_cast<const S_00d45dd0_Shape*>(bodyB.m_pCollisionShape)->m_type;
         S_00d45dd0_PenFunc f =
-            input.m_pCollisionDispatcher->getPenetrationsFunc(newBodyA.m_pCollisionShape->m_type, typeB);
+            input.m_pCollisionDispatcher->getPenetrationsFunc(reinterpret_cast<const S_00d45dd0_Shape*>(newBodyA.m_pCollisionShape)->m_type, typeB);
         S_00d45dd0_FlagCollector checker;
         f(newBodyA, bodyB, input, checker);
 
@@ -1761,8 +1728,8 @@ void __cdecl FUN_00d45dd0(const S_00d45dd0_CdBody& bodyA, const S_00d45dd0_CdBod
                     mStream.m_kRayEnd = (char*)(h + 1);
                 }
             }
-            newBodyA.SetCollisionShapeAndKey(bvShape->m_pContainedShape, 0);
-            input.m_pCollisionDispatcher->getPenetrationsFunc(newBodyA.m_pCollisionShape->m_type,
+            newBodyA.SetCollisionShapeAndKey(reinterpret_cast<const hkpShape*>(bvShape->m_pContainedShape), 0);
+            input.m_pCollisionDispatcher->getPenetrationsFunc(reinterpret_cast<const S_00d45dd0_Shape*>(newBodyA.m_pCollisionShape)->m_type,
                                                               typeB)(newBodyA, bodyB, input, result);
         }
     }
@@ -1780,14 +1747,6 @@ void __cdecl FUN_00d45dd0(const S_00d45dd0_CdBody& bodyA, const S_00d45dd0_CdBod
     }
 }
 
-inline void* operator new(unsigned int, void* p)
-{
-    return p;
-}
-struct __declspec(align(16)) Vector228
-{
-    float x, y, z, w;
-};
 extern "C" void _ReadWriteBarrier(void);
 
 extern DWORD DAT_0126835c;
@@ -1825,44 +1784,6 @@ struct BvRes
     DWORD m_04;
     DWORD m_08;
     BvA* m_parent;
-};
-
-struct Contact228
-{
-    Vector228 normal;
-    union
-    {
-        Vector228 position;
-        struct
-        {
-            float px, py, pz, distance;
-        };
-    };
-};
-class hkpCdPointCollector
-{
-  public:
-    virtual ~hkpCdPointCollector()
-    {}
-    virtual void addContactPoint(const Contact228& point) = 0;
-    virtual void reset();
-    float m_fLimit;
-};
-class hkpSimpleClosestContactCollector : public hkpCdPointCollector
-{
-  public:
-    unsigned char m_bOk;
-    Contact228 contact;
-    hkpSimpleClosestContactCollector()
-    {
-        contact.distance = DAT_0104da48;
-        m_fLimit = DAT_0104da48;
-        m_bOk = 0;
-    }
-    virtual ~hkpSimpleClosestContactCollector()
-    {}
-    virtual void addContactPoint(const Contact228& point);
-    virtual void reset();
 };
 
 struct BvAVtbl
@@ -1968,7 +1889,7 @@ void Agent228::CheckBvShape(BvA* a1, BvB* a2, BvC* a3, DWORD a4, DWORD a5)
     {
         Vector228 first, second, third;
     } collectorStorage;
-    hkpSimpleClosestContactCollector& collector = *new (&collectorStorage) hkpSimpleClosestContactCollector;
+    hkpSimpleClosestContactCollector& collector = *::new (&collectorStorage) hkpSimpleClosestContactCollector;
 
     m_0c->v5(&r, a2, a3, &collector, &collector);
 
@@ -2072,17 +1993,9 @@ void* __cdecl FUN_00d45f30(int a1, int a2, int a3, int a4)
 }
 }  // namespace fnv_00d45f30
 
-extern "C" void _mm_store_ps(float*, __m128);
+using ::_mm_store_ps;
 
 extern float DAT_0104da48;
-
-struct __declspec(align(16)) Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
 
 struct __declspec(align(16)) Block
 {
@@ -2106,7 +2019,7 @@ struct __declspec(align(16)) Block
     int unk44;
     int unk48;
     int unk4c;
-    Vec4 m_vec;
+    Vec4::Aligned m_vec;
     int unk60;
     int unk64;
     int unk68;
@@ -2115,9 +2028,10 @@ struct __declspec(align(16)) Block
 
 struct __declspec(align(16)) Event
 {
+    Event() : m_vec(Vec4::Uninitialized) {}
     const void* vtbl;
     float m_fHitFraction;
-    Vec4 m_vec;
+    Vec4::Aligned m_vec;
     int m_kCollisionBody;
 };
 
@@ -2140,7 +2054,7 @@ void Owner::FUN_00d46340(int a1, int a2, const Block* p, int a4, int a5)
     Block blk = *p;
     ev.m_vec = p->m_vec;
     ev.m_kCollisionBody = a4;
-    _mm_store_ps((float*)&blk.m_vec, _mm_xor_ps(*(const __m128*)&p->m_vec, DAT_010c44d0));
+    _mm_store_ps((float*)&blk.m_vec, _mm_xor_ps(*(const LocalM128*)&p->m_vec, DAT_010c44d0));
     ev.vtbl = &DAT_010ce80c;
 
     Event ctx;

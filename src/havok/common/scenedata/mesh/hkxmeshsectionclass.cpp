@@ -2,25 +2,10 @@
 // src/havok/common/scenedata/mesh/hkxmeshsectionclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/mesh/hkxmeshsectionclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 extern int DAT_0102e388;
 
@@ -48,8 +33,8 @@ struct FUN_00e01f70_cls
 // @fnv 0x00e01f70
 void FUN_00e01f70_cls::Destroy()
 {
-    AudioHolder* pHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     FreeableItem** ppItems = m_ppData1c;
     int iCount = m_iCount20;
     for (int i = 0; i < iCount; ++i)
@@ -64,7 +49,10 @@ void FUN_00e01f70_cls::Destroy()
     unsigned int uCapBits = m_uCapBits24;
     if ((uCapBits & 0x80000000u) == 0)
     {
-        pAllocator->FreeArray(m_ppData1c, (uCapBits & 0x3fffffffu) * 4);
+        // Preserve the allocator's original virtual FreeArray slot.
+        reinterpret_cast<void (__thiscall*)(hkMemoryAllocator*, void*, unsigned int)>(
+            (*reinterpret_cast<void***>(pAllocator))[4])(
+                pAllocator, m_ppData1c, (uCapBits & 0x3fffffffu) * 4);
     }
     m_ppData1c = 0;
     *(volatile unsigned int*)&m_uCapBits24 = 0x80000000u;
@@ -77,7 +65,7 @@ void FUN_00e01f70_cls::Destroy()
     m_pObj18 = 0;
 
     pHolder = FUN_00c85750();
-    pAllocator = pHolder->m_pAllocator;
+    pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     ppItems = m_ppData0c;
     iCount = m_iCount10;
     for (int j = 0; j < iCount; ++j)
@@ -92,7 +80,9 @@ void FUN_00e01f70_cls::Destroy()
     uCapBits = m_uCapBits14;
     if ((uCapBits & 0x80000000u) == 0)
     {
-        pAllocator->FreeArray(m_ppData0c, (uCapBits & 0x3fffffffu) * 4);
+        reinterpret_cast<void (__thiscall*)(hkMemoryAllocator*, void*, unsigned int)>(
+            (*reinterpret_cast<void***>(pAllocator))[4])(
+                pAllocator, m_ppData0c, (uCapBits & 0x3fffffffu) * 4);
     }
     m_ppData0c = 0;
     *(volatile unsigned int*)&m_uCapBits14 = 0x80000000u;
@@ -107,23 +97,7 @@ void FUN_00e01f70_cls::Destroy()
 }
 
 namespace fnv_00e02090 {
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize);
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct FUN_00e02090
 {
@@ -133,10 +107,12 @@ struct FUN_00e02090
     virtual ~FUN_00e02090();
     static void operator delete(void* apMemory)
     {
-        AudioHolder* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = FUN_00c85750();
         unsigned int uiSize = ((FUN_00e02090*)apMemory)->m_u04;
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(apMemory, uiSize);
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        // Preserve the allocator's original virtual Free slot.
+        reinterpret_cast<void (__thiscall*)(hkMemoryAllocator*, void*, unsigned int)>(
+            (*reinterpret_cast<void***>(pAllocator))[2])(pAllocator, apMemory, uiSize);
     }
 };
 

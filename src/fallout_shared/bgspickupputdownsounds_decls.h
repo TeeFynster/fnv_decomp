@@ -1,22 +1,9 @@
-// fallout_shared/bgspickupputdownsounds_decls.h: declares TESIcon, TESSound, BGSCameraPath
+// fallout_shared/bgspickupputdownsounds_decls.h: external helpers
 #ifndef FNV_BGSPICKUPDOWNSOUNDS_DECLS_H
 #define FNV_BGSPICKUPDOWNSOUNDS_DECLS_H
 
-#include "TESForm.h"
-#include "TESTexture.h"
-class TESIcon : public TESTexture
-{
-  public:
-    TESIcon();
-};
-class TESSound : public TESForm
-{
-};
-class BGSCameraPath
-{
-  public:
-    int HasNameForWarning();
-};
+#include "layout_support.h"
+#include "../../include/TESForm.h"
 TESForm* GetFormByID(unsigned int formID);
 int Warning(const char* format, ...);
 #endif

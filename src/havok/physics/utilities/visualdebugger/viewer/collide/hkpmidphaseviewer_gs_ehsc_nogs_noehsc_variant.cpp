@@ -5,372 +5,24 @@
 
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkpmidphaseviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/collide/hkpmidphaseviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct FullObject;
-struct Receiver;
-struct HeadPart {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-};
-struct FirstBase {
-    int unk00;
-    int unk04;
-    void FUN_00d6a250(Receiver* apReceiver);
-};
-struct SecondBase {
-    int unk00;
-};
-struct FullObject : HeadPart, FirstBase, SecondBase {
-};
-typedef char _check_offsets[sizeof(FullObject) == 0x2c ? 1 : -1];
-struct Receiver {
-    void ClearValue(SecondBase* apObject);
-};
-struct hkMemoryAllocator
-{
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytes);
-    virtual void ReturnMemory(void* p, int numBytes) throw();
-};
-struct NineIntegerRecord
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* m_pStreamAllocator;
-    hkMemoryAllocator& heap() { return *m_pStreamAllocator; }
-};
-NineIntegerRecord* FUN_00c85750() throw();
-struct S_00d6a750_Element
-{
-    virtual ~S_00d6a750_Element() throw();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-};
+#define FNV_VEC4_SIMD
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkAabb.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkpMidphaseViewer.h"
+#include "../../../../../../../include/hkpShape.h"
+
+inline hkAabb::hkAabb() {}
+
+
+hkMemoryRouter* FUN_00c85750() throw();
+
 template <class T> __forceinline void hkArrayUtil_destruct(T* t, int n)
 {
     for (int i = 0; i < n; i++)
         t[i].~T();
 }
-template <class T> struct hkArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline ~hkArray() throw() { _clearAndDeallocate(FUN_00c85750()->heap()); }
-    __forceinline void clear()
-    {
-        hkArrayUtil_destruct(m_data, m_iElementCount);
-        m_iElementCount = 0;
-    }
-    __forceinline void _clearAndDeallocate(hkMemoryAllocator& alloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
-struct S_00d6a750_Base0
-{
-    virtual ~S_00d6a750_Base0();
-    int unk04;
-};
-struct S_00d6a750_Base1
-{
-    virtual void v00();
-    int b1_unk0C;
-    int b1_unk10;
-    int b1_unk14;
-    int b1_unk18;
-    int b1_unk1C;
-};
-struct S_00d6a750_Listener;
-struct S_00d6a750_Source
-{
-    void ClearValue(S_00d6a750_Listener* m_pAudioListener) throw();
-};
-struct S_00d6a750_Owner
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    S_00d6a750_Source** m_ppSources;
-    int m_iNumSources;
-};
-struct S_00d6a750_Base2
-{
-    virtual void v00();
-    S_00d6a750_Owner* m_pSharedOwner;
-};
-struct S_00d6a750_Listener
-{
-    virtual ~S_00d6a750_Listener() throw() {}
-};
-struct FUN_00d6a750 : S_00d6a750_Base0, S_00d6a750_Base1, S_00d6a750_Base2, S_00d6a750_Listener
-{
-    hkArray<S_00d6a750_Element> m_elements;
-    ~FUN_00d6a750();
-};
-struct Registry_00dd9380 {
-    void* Register(const char* name, void (*fn)());
-};
-extern Registry_00dd9380* DAT_01269cd0;
-extern char DAT_010d22e0[];
-extern void* DAT_01269024;
-void FUN_00d6a810();
-void FUN_00d6a850();
-struct Target {
-    int Handle(void* apValue);
-};
-struct FUN_00d6a220_cls {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-
-    int HandleWithSelfOffset(Target* apTarget);
-};
-struct S_d6a280_Elem;
-struct S_d6a280_Owner {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    S_d6a280_Elem** m_items;
-    int m_uiItemCount;
-};
-struct S_d6a280_P0 {
-    virtual void a0();
-    int unk04;
-};
-struct S_d6a280_P8 {
-    virtual void a8();
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-};
-struct S_d6a280_P20 {
-    virtual void a20();
-    S_d6a280_Owner* m_24;
-};
-struct FUN_00ddccb0 : S_d6a280_P0, S_d6a280_P8, S_d6a280_P20 {
-    FUN_00ddccb0(int a);
-};
-struct S_d6a280_Arr {
-    void* m_data;
-    int m_iElementCount;
-    unsigned int m_cap;
-    __forceinline S_d6a280_Arr() : m_data(0), m_iElementCount(0), m_cap(0x80000000u) {}
-};
-struct S_d6a280_Mx {
-    virtual void m0();
-    __forceinline S_d6a280_Mx() {}
-};
-struct S_d6a280_Elem {
-    void FUN_00c93920(S_d6a280_Mx* m);
-};
-struct FUN_00d6a280 : FUN_00ddccb0, S_d6a280_Mx {
-    S_d6a280_Arr m_aiIndexedValues;
-    virtual void m0();
-    virtual void a0();
-    virtual void a8();
-    virtual void a20();
-    FUN_00d6a280(int a);
-};
-// this -= 0x20; jmp target  ==  MSVC adjustor thunk: Derived overrides a virtual that both of its bases
-// declare, so the second base's vtable gets a thunk that moves `this` back by the first base's size (0x20).
-struct PrimaryBase
-{
-    virtual void FUN_00d6a880();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-};
-struct SecondaryBase
-{
-    virtual void FUN_00d6a880();
-};
-struct Derived : PrimaryBase, SecondaryBase
-{
-    Derived();
-// @fnv 0x00d6a880
-    virtual void FUN_00d6a880();
-};
-Derived::Derived()
-{
-}
-// Adjustor thunk for a secondary base.
-//
-// The original code is exactly:
-//     00d6a890  83 e9 08        sub ecx, 8
-//     00d6a893  e9 18 00 00 00  jmp 00d6a8b0
-//
-// which is the MSVC 2008 "virtual adjustor thunk" that MSVC emits for the
-// per-base vftable of a derived class that re-declares a virtual function of
-// one of its secondary bases: the thunk converts the 'this' pointer of the
-// derived object into the 'this' pointer of the base subobject (which lives
-// 8 bytes into the object) and tail-jumps to the derived implementation.
-//
-// The derived implementation is only DECLARED here, so the jump target stays
-// an undefined external and the linker/checker resolves it from the original
-// image.
-struct AdjustorPrimaryBase {
-    int m_00;                                  // +0x04
-    AdjustorPrimaryBase();
-    virtual void FUN_00d6a890(int flag);
-};
-struct AdjustorSecondaryBase {
-    AdjustorSecondaryBase();
-    virtual void FUN_00d6a890(int flag);
-};
-struct AdjustorDerived : public AdjustorPrimaryBase,
-                          public AdjustorSecondaryBase {
-    AdjustorDerived();
-// @fnv 0x00d6a890
-    virtual void FUN_00d6a890(int flag);
-};
-AdjustorPrimaryBase::AdjustorPrimaryBase() : m_00(0) {}
-AdjustorSecondaryBase::AdjustorSecondaryBase() {}
-AdjustorDerived::AdjustorDerived() {}
-// ---------------------------------------------------------------------------
-// 0x00d6a8a0 - MSVC 2008 adjustor thunk for a *secondary* base.
-//
-// The original code is
-//     00d6a8a0  83 e9 28        sub ecx, 0x28
-//     00d6a8a3  e9 08 00 00 00  jmp 0x00d6a8b0
-//
-// The thunk belongs to the vtable of a secondary base which hkpMidphaseViewer
-// overrides.  The secondary base subobject lives 0x28 bytes into the complete
-// object, so the thunk first moves `this` back to the start of the object and
-// then tail-jumps to the overriding implementation (0x00d6a8b0).
-//
-// The overriding implementation is only DECLARED here, so the jmp target stays
-// an unresolved external and the checker can resolve the relocation from the
-// original's own bytes.  The thunk's own mangled name carries the tag, which
-// satisfies the canary.
-// ---------------------------------------------------------------------------
-// Primary base: it is the first base of the derived class and it is exactly
-// 0x28 bytes long, which is what puts the secondary base at offset 0x28.
-struct hkpShape {
-    hkpShape();
-    virtual void FUN_00d6a8a0();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-};
-// Secondary base: it starts at offset 0x28 of the derived object.
-struct hkpMidphaseViewerBase {
-    hkpMidphaseViewerBase();
-// @fnv 0x00d6a8a0
-    virtual void FUN_00d6a8a0();
-};
-struct hkpMidphaseViewer : public hkpShape, public hkpMidphaseViewerBase {
-    hkpMidphaseViewer();
-    virtual void FUN_00d6a8a0();   // declared, never defined
-};
-hkpMidphaseViewer::hkpMidphaseViewer() : hkpShape(), hkpMidphaseViewerBase() { }
 
 #include <xmmintrin.h>
 struct EventStamp {
@@ -413,14 +65,10 @@ static __forceinline void TimerMark(char* marker)
 }
 
 void __cdecl FUN_00c908c0(hkMemoryAllocator* alloc, void* arr, int newSize, int elemSize);
-struct __declspec(align(16)) Vec4 {
-    float x, y, z, w;
-};
 struct __declspec(align(16)) UInt4 {
     unsigned x, y, z, w;
 };
 static __forceinline void SetVec(Vec4& v,float x,float y,float z,float w) { *(__m128*)&v=_mm_setr_ps(x,y,z,w); }
-struct Bounds { Vec4 min; Vec4 max; };
 struct QuantizedBounds { UInt4 min; UInt4 max; };
 struct Elem80 {
     virtual ~Elem80();
@@ -516,7 +164,7 @@ static __forceinline Elem80** AllocatePointers(hkMemoryAllocator& alloc, int& co
 {
     if (count) {
         int bytes = count * 4;
-        Elem80** result = (Elem80**)alloc.AllocateBufferWithSize(bytes);
+        Elem80** result = (Elem80**)alloc.bufAlloc(bytes);
         count = bytes / 4;
         return result;
     }
@@ -576,25 +224,25 @@ void Self::FUN_00d6a2f0(Param* apParam)
                             if ((unsigned short)k < node->m_uiItemCount) {
                                 do {
                                     float* mat = apParam->m_matrix + 8;
-                                    Bounds bounds;
+                                    __declspec(align(16)) hkAabb bounds;
                                     QuantizedBounds quantized;
                                     Decode(list,quantized);
                                     float f0 = (float)quantized.min.x;
                                     float f1 = (float)quantized.min.y;
                                     float f2 = (float)quantized.min.z;
-                                    *(__m128*)&bounds.min = _mm_setr_ps(f0,f1,f2,0.0f);
+                                    *(__m128*)&bounds.m_kMinimumCorner.x = _mm_setr_ps(f0,f1,f2,0.0f);
                                     float f3 = (float)quantized.max.x;
                                     float f4 = (float)quantized.max.y;
                                     float f5 = (float)quantized.max.z;
-                                    SetVec(bounds.max,f3,f4,f5,0.0f);
+                                    SetVec(*reinterpret_cast<Vec4*>(&bounds.m_kMaximumCorner.x),f3,f4,f5,0.0f);
                                     __m128 row1 = _mm_load_ps(mat + 8);
                                     __m128 t = _mm_shuffle_ps(row1, _mm_unpackhi_ps(row1, DAT_010c7170), 0xc4);
                                     __m128 r = _mm_rcp_ps(t);
                                     __m128 inv = _mm_sub_ps(_mm_add_ps(r, r), _mm_mul_ps(_mm_mul_ps(r, t), r));
-                                    *(__m128*)&bounds.min = _mm_mul_ps(*(__m128*)&bounds.min, inv);
-                                    *(__m128*)&bounds.max = _mm_mul_ps(*(__m128*)&bounds.max, inv);
-                                    *(__m128*)&bounds.min = _mm_sub_ps(*(__m128*)&bounds.min, _mm_load_ps(mat));
-                                    *(__m128*)&bounds.max = _mm_sub_ps(*(__m128*)&bounds.max, _mm_load_ps(mat));
+                                    *(__m128*)&bounds.m_kMinimumCorner.x = _mm_mul_ps(*(__m128*)&bounds.m_kMinimumCorner.x, inv);
+                                    *(__m128*)&bounds.m_kMaximumCorner.x = _mm_mul_ps(*(__m128*)&bounds.m_kMaximumCorner.x, inv);
+                                    *(__m128*)&bounds.m_kMinimumCorner.x = _mm_sub_ps(*(__m128*)&bounds.m_kMinimumCorner.x, _mm_load_ps(mat));
+                                    *(__m128*)&bounds.m_kMaximumCorner.x = _mm_sub_ps(*(__m128*)&bounds.m_kMaximumCorner.x, _mm_load_ps(mat));
                                     hkMemoryAllocator& alloc = FUN_00c85750()->heap();
                                     ElemArray* output = &m_aiIndexedValues;
                                     int oldSize = output->m_iElementCount;
@@ -607,7 +255,8 @@ void Self::FUN_00d6a2f0(Param* apParam)
                                     Elem80* elem = &output->m_data[output->m_iElementCount];
                                     if (elem) elem->FUN_00de1210();
                                     output->m_iElementCount++;
-                                    output->m_data[oldSize].FUN_00de1170(bounds.min, bounds.max);
+                                    output->m_data[oldSize].FUN_00de1170(*reinterpret_cast<const Vec4*>(&bounds.m_kMinimumCorner.x),
+                                                                      *reinterpret_cast<const Vec4*>(&bounds.m_kMaximumCorner.x));
                                     k++;
                                     list++;
                                 } while (k < node->m_uiItemCount);
@@ -651,6 +300,6 @@ void Self::FUN_00d6a2f0(Param* apParam)
     hkMemoryAllocator& cleanupAlloc = FUN_00c85750()->heap();
     indices.m_iElementCount = 0;
     if ((indices.m_iCapacityState & 0x80000000u) == 0)
-        cleanupAlloc.ReturnMemory(indices.m_data, (indices.m_iCapacityState & 0x3fffffff) * 4);
+        cleanupAlloc.bufFree(indices.m_data, (indices.m_iCapacityState & 0x3fffffff) * 4);
     return;
 }

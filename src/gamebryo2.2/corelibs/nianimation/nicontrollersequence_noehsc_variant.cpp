@@ -1,3 +1,41 @@
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiControllerSequence.h"
+#include "../../../../include/NiObject.h"
+// NiRefObj_nicontrollersequence_noehsc_variant: local type (was include/NiRefObj.h, which had no evidence of one real class); no method of it is bound to a named game function
+#include <windows.h>
+
+class NiRefObj_nicontrollersequence_noehsc_variant
+{
+public:
+    unsigned int unk00;
+    union
+    {
+        unsigned int m_uiRefCount;
+        long m_iObjectReferenceCount;
+        long m_ref;
+    };
+
+    ~NiRefObj_nicontrollersequence_noehsc_variant();
+    void vfn_00();
+    void v00();
+    void v04();
+    void v0();
+    void DeleteThis() throw();
+
+    void IncRefCount() throw()
+    {
+        InterlockedIncrement((volatile long*)&m_uiRefCount);
+    }
+
+    void DecRefCount() throw()
+    {
+        if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
+            DeleteThis();
+    }
+};
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiStream.h"
 
 // src/gamebryo2.2/corelibs/nianimation/nicontrollersequence_noehsc_variant.cpp - flag-variant unit created 2026-10-25 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /Gy (unit src/gamebryo2.2/corelibs/nianimation/nicontrollersequence.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -10,10 +48,6 @@ const char* const* __cdecl FUN_00a31730();
 struct BaseH
 {
     virtual ~BaseH();
-};
-struct NiControllerSequence : BaseH
-{
-    void* FUN_00a35820(unsigned int);
 };
 extern "C" void __cdecl __Dummy_00b6fef0(void*, unsigned int);
 struct FUN_00a30580_shell
@@ -30,43 +64,6 @@ extern int DAT_01096620;
 struct FUN_00a34450_shell
 {
     void* __thiscall FUN_00a34450(unsigned int);
-};
-struct NiBinaryStream
-{
-    void* m_vtbl;
-    unsigned int m_uiStreamFlags;
-    void* m_pfnRead;
-    unsigned int(__cdecl* m_pfnWrite)(NiBinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-    void Write(const void* pv, unsigned int uiBytes)
-    {
-        unsigned int uiComponentSize = uiBytes;
-        m_uiStreamFlags += m_pfnWrite(this, pv, uiBytes, &uiComponentSize, 1);
-    }
-};
-struct NiStream
-{
-    virtual void V00();
-    virtual void V01();
-    virtual void V02();
-    virtual void V03();
-    virtual void V04();
-    virtual void V05();
-    virtual void V06();
-    virtual void V07();
-    virtual void V08();
-    virtual void V09();
-    virtual void V10();
-    virtual void V11();
-    virtual void SaveLinkID(const void* pkObject);
-    void SerializeString(char const*);
-    unsigned char m_auiShapeKeys[0x24c];
-    NiBinaryStream* m_pBackingStream;
-};
-struct NiObject
-{
-    void* m_vtbl;
-    unsigned int m_uiRefCount;
-    void LinkObject(NiStream&);
 };
 struct SeqInterpArrayItem
 {
@@ -137,10 +134,6 @@ void* __cdecl FUN_00a326c0();
 extern char DAT_01096584;
 extern void* _EmptyFS;
 extern int(__stdcall* DAT_00fdf1c4)(void*);
-struct NiRefObject
-{
-    ~NiRefObject();
-};
 struct FUN_00a31500_shell
 {
     void __thiscall FUN_00a31500(int);
@@ -375,18 +368,6 @@ struct FUN_00a30cc0_cls
 
     unsigned char Equals(FUN_00a30cc0_cls* other);
 };
-struct StreamView
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8(char*&);
-};
 struct RefView
 {
     virtual void v0();
@@ -410,13 +391,13 @@ struct RefView
     virtual void v18();
     virtual void v19();
     virtual void v20();
-    virtual bool v21(StreamView&);
+    virtual bool v21(NiStream&);
 };
 struct ObjectView
 {
     int vtable;
     int refs;
-    bool FUN_00a5d2f0(StreamView&);
+    bool FUN_00a5d2f0(NiStream&);
 };
 struct ItemView
 {
@@ -462,7 +443,7 @@ struct SequenceView : ObjectView
     int unk68;
     RefView** notes;
     unsigned short noteCount;
-    bool FUN_00a30ea0(StreamView&);
+    bool FUN_00a30ea0(NiStream&);
 };
 __declspec(dllimport) long __stdcall InterlockedIncrement(long* p);
 __declspec(dllimport) long __stdcall InterlockedDecrement(long* p);
@@ -945,171 +926,6 @@ class A1400StringGroup
 
     A1400StringGroup& FUN_00a31400(const A1400StringGroup& kOther);
 };
-struct IStreamA33a50
-{
-    void* m_vtbl;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(IStreamA33a50*, void*, unsigned int, unsigned int*, unsigned int);
-    void Read(void* pv, unsigned int uiBytes)
-    {
-        unsigned int uiComponentSize = uiBytes;
-        m_uiStreamFlags += m_pfnRead(this, pv, uiBytes, &uiComponentSize, 1);
-    }
-};
-struct StreamA33a50
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    unsigned int m_uiNifVersion;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    IStreamA33a50* m_pUnderlyingStream;
-    void ReadFixedString(char*& kString);
-    unsigned int ReadLinkIDA33a50();
-    void ReadStringTableEntry(char*& kString);
-};
 struct IDTagA33a50
 {
     char* m_kAVObjectName;
@@ -1117,7 +933,7 @@ struct IDTagA33a50
     char* m_kCtlrType;
     char* m_kCtlrID;
     char* m_kInterpolatorID;
-    void ReadFromStream(StreamA33a50& kStream, unsigned int& uiPaletteLink);
+    void ReadFromStream(NiStream& kStream, unsigned int& uiPaletteLink);
 };
 struct AnimationSequence;
 struct UpdateActiveArray
@@ -1350,33 +1166,6 @@ struct A33950RefObject
     virtual void Release();
     volatile long refCount;
 };
-struct A33950BinaryInput
-{
-    void* vtable;
-    unsigned int position;
-    unsigned int(__cdecl* readFn)(A33950BinaryInput*, void*, unsigned int, unsigned int*, unsigned int);
-    void Read(void* destination, unsigned int bytes)
-    {
-        unsigned int componentSize = bytes;
-        position += readFn(this, destination, bytes, &componentSize, 1);
-    }
-};
-struct A33950Stream
-{
-    A33950RefObject* FUN_00a64620();
-    unsigned int& Version()
-    {
-        return *(unsigned int*)((char*)this + 0xd8);
-    }
-    unsigned int& Count()
-    {
-        return *(unsigned int*)((char*)this + 4);
-    }
-    A33950BinaryInput* Input()
-    {
-        return *(A33950BinaryInput**)((char*)this + 0x24c);
-    }
-};
 struct A33950Object
 {
     A33950RefObject* first;
@@ -1387,7 +1176,7 @@ struct A33950Object
     unsigned char unk0b;
     unsigned char unk0c;
     unsigned char flag0d;
-    void LoadFromStream(A33950Stream* stream);
+    void LoadFromStream(NiStream* stream);
 };
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
 struct FUN_00a344f0_cls
@@ -1402,10 +1191,6 @@ struct FUN_00a350d0_seq : SeqA34f20
                       float fTargetWeight, SeqA34f20* pkPartner);
 };
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
 extern MemoryManager _g_memoryManager;
 struct CloneObject : RefObj
 {
@@ -1590,29 +1375,13 @@ void CloneSequence::FUN_00a33570(CloneSequence* dest, void* context)
 
 namespace fnv_00a32330 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* addend);
-struct MemoryManager
-{
-    void* Allocate(unsigned int uiSize);
-    void Deallocate(void* pvMem);
-};
 extern MemoryManager _g_memoryManager;
 
-struct NiRefObj
-{
-    virtual ~NiRefObj();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 
 struct InterpArrayItem
 {
-    NiRefObj* m_spControllerInterpolator;
-    NiRefObj* m_pkInterpCtlr;
+    NiRefObj_nicontrollersequence_noehsc_variant* m_spControllerInterpolator;
+    NiRefObj_nicontrollersequence_noehsc_variant* m_pkInterpCtlr;
     void* m_pkBlendInterpolator;
     unsigned char m_ucBlendIndex;
     unsigned char m_ucArrayItemID;
@@ -1711,7 +1480,6 @@ bool SequenceArrays::FUN_00a32330()
 }
 }  // namespace fnv_00a32330
 
-struct Stream71;
 struct Memory71
 {
     void* FUN_00aa3e40(unsigned int);
@@ -1734,7 +1502,7 @@ struct Interp71 : Array71
     Interp71() throw();
     ~Interp71()
     {}
-    void LoadFromStream(Stream71&);
+    void LoadFromStream(NiStream&);
 };
 extern int(__stdcall* DAT_00fdf1c0)(void*);
 struct String71
@@ -1767,7 +1535,7 @@ struct Tag71 : Array71
     Tag71() throw();
     ~Tag71()
     {}
-    void ReadFromStream(Stream71&, unsigned int&);
+    void ReadFromStream(NiStream&, unsigned int&);
 };
 struct Ref71
 {
@@ -1795,172 +1563,26 @@ struct Smart71 : Array71
         return *this;
     }
 };
-struct Binary71
+// Cursor +4 and reader +8 identify the former IStreamA33a50/A33950BinaryInput/Binary71 views as NiBinaryStream.
+inline unsigned int NiBinaryStream::Read(void* destination, unsigned int bytes)
 {
-    void* vtbl;
-    unsigned int pos;
-    unsigned int(__cdecl* read)(Binary71*, void*, unsigned int, unsigned int*, unsigned int);
-    void Read(void* dest, unsigned int bytes)
-    {
-        unsigned int component = bytes;
-        pos += read(this, dest, bytes, &component, 1);
-    }
-};
-struct Stream71
+    unsigned int componentSize = bytes;
+    unsigned int bytesRead = m_pfnRead(this, destination, bytes, &componentSize, 1);
+    m_uiAbsoluteCurrentPos += bytesRead;
+    return bytesRead;
+}
+
+// NiStream exposes the NIF version and input stream in its shared layout.
+inline unsigned int NiStream::GetFileVersion() const
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    unsigned int unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
-    unsigned int unkc4;
-    unsigned int unkc8;
-    unsigned int unkcc;
-    unsigned int unkd0;
-    unsigned int unkd4;
-    unsigned int version;
-    unsigned int unkdc;
-    unsigned int unke0;
-    unsigned int unke4;
-    unsigned int unke8;
-    unsigned int unkec;
-    unsigned int unkf0;
-    unsigned int unkf4;
-    unsigned int unkf8;
-    unsigned int unkfc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    unsigned int unk15c;
-    unsigned int unk160;
-    unsigned int unk164;
-    unsigned int unk168;
-    unsigned int unk16c;
-    unsigned int unk170;
-    unsigned int unk174;
-    unsigned int unk178;
-    unsigned int unk17c;
-    unsigned int unk180;
-    unsigned int unk184;
-    unsigned int unk188;
-    unsigned int unk18c;
-    unsigned int unk190;
-    unsigned int unk194;
-    unsigned int unk198;
-    unsigned int unk19c;
-    unsigned int unk1a0;
-    unsigned int unk1a4;
-    unsigned int unk1a8;
-    unsigned int unk1ac;
-    unsigned int unk1b0;
-    unsigned int unk1b4;
-    unsigned int unk1b8;
-    unsigned int unk1bc;
-    unsigned int unk1c0;
-    unsigned int unk1c4;
-    unsigned int unk1c8;
-    unsigned int unk1cc;
-    unsigned int unk1d0;
-    unsigned int unk1d4;
-    unsigned int unk1d8;
-    unsigned int unk1dc;
-    unsigned int unk1e0;
-    unsigned int unk1e4;
-    unsigned int unk1e8;
-    unsigned int unk1ec;
-    unsigned int unk1f0;
-    unsigned int unk1f4;
-    unsigned int unk1f8;
-    unsigned int unk1fc;
-    unsigned int unk200;
-    unsigned int unk204;
-    unsigned int unk208;
-    unsigned int unk20c;
-    unsigned int unk210;
-    unsigned int unk214;
-    unsigned int unk218;
-    unsigned int unk21c;
-    unsigned int unk220;
-    unsigned int unk224;
-    unsigned int unk228;
-    unsigned int unk22c;
-    unsigned int unk230;
-    unsigned int unk234;
-    unsigned int unk238;
-    unsigned int unk23c;
-    unsigned int unk240;
-    unsigned int unk244;
-    unsigned int unk248;
-    Binary71* input;
-    void FUN_00a64ea0(String71&);
-    void FUN_00a64df0(String71&);
-    void FUN_00a645b0();
-    Ref71* FUN_00a64620();
-};
+    return m_uiNifFileVersion;
+}
+
+inline NiBinaryStream* NiStream::GetBinaryStream()
+{
+    return m_pkIstr;
+}
+
 struct Sequence71
 {
     void* vtbl;
@@ -1982,38 +1604,38 @@ struct Sequence71
     int unk68;
     Smart71* notes;
     unsigned short noteCount;
-    void ReadGroup(Stream71&);
-    void FUN_00a33e40(Stream71&);
+    void ReadGroup(NiStream&);
+    void FUN_00a33e40(NiStream&);
 };
 // @fnv 0x00a33e40
-void Sequence71::FUN_00a33e40(Stream71& stream)
+void Sequence71::FUN_00a33e40(NiStream& stream)
 {
     ReadGroup(stream);
-    if (stream.version < 0x0a010068)
+    if (stream.GetFileVersion() < 0x0a010068)
     {
-        stream.FUN_00a64ea0(name);
-        stream.FUN_00a64ea0(root);
+        stream.ReadFixedString(reinterpret_cast<NiFixedString&>(name));
+        stream.ReadFixedString(reinterpret_cast<NiFixedString&>(root));
         stream.FUN_00a645b0();
-        stream.input->Read(&count, 4);
+        stream.GetBinaryStream()->Read(&count, 4);
         grow = 12;
         interpolators = new Interp71[count];
         tags = new Tag71[count];
         for (unsigned int index = 0; index < count; ++index)
         {
             String71 objectName;
-            stream.FUN_00a64ea0(objectName);
+            stream.ReadFixedString(reinterpret_cast<NiFixedString&>(objectName));
             tags[index].object = objectName;
             stream.FUN_00a645b0();
             objectName.Release();
         }
         return;
     }
-    if (stream.version < 0x14010001)
-        stream.FUN_00a64ea0(name);
+    if (stream.GetFileVersion() < 0x14010001)
+        stream.ReadFixedString(reinterpret_cast<NiFixedString&>(name));
     else
-        stream.FUN_00a64df0(name);
-    stream.input->Read(&count, 4);
-    stream.input->Read(&grow, 4);
+        stream.ReadStringTableEntry(reinterpret_cast<NiFixedString&>(name));
+    stream.GetBinaryStream()->Read(&count, 4);
+    stream.GetBinaryStream()->Read(&grow, 4);
     interpolators = new Interp71[count];
     tags = new Tag71[count];
     {
@@ -2024,40 +1646,40 @@ void Sequence71::FUN_00a33e40(Stream71& stream)
             tags[index].ReadFromStream(stream, needsConversion);
         }
     }
-    stream.input->Read(&weight, 4);
+    stream.GetBinaryStream()->Read(&weight, 4);
     stream.FUN_00a645b0();
     {
         int cycleValue;
-        stream.input->Read(&cycleValue, 4);
+        stream.GetBinaryStream()->Read(&cycleValue, 4);
         cycle = cycleValue;
     }
-    stream.input->Read(&frequency, 4);
-    if (stream.version < 0x0a030001)
+    stream.GetBinaryStream()->Read(&frequency, 4);
+    if (stream.GetFileVersion() < 0x0a030001)
     {
         float phase;
-        stream.input->Read(&phase, 4);
+        stream.GetBinaryStream()->Read(&phase, 4);
     }
-    stream.input->Read(&begin, 4);
-    stream.input->Read(&end, 4);
-    if (stream.version < 0x0a01006b)
+    stream.GetBinaryStream()->Read(&begin, 4);
+    stream.GetBinaryStream()->Read(&end, 4);
+    if (stream.GetFileVersion() < 0x0a01006b)
     {
         bool backward;
-        stream.input->Read(&backward, 1);
+        stream.GetBinaryStream()->Read(&backward, 1);
     }
     stream.FUN_00a645b0();
-    if (stream.version < 0x14010001)
-        stream.FUN_00a64ea0(root);
+    if (stream.GetFileVersion() < 0x14010001)
+        stream.ReadFixedString(reinterpret_cast<NiFixedString&>(root));
     else
-        stream.FUN_00a64df0(root);
-    if (stream.version >= 0x0a010071 && stream.version < 0x14010001)
-        oldNotes = stream.FUN_00a64620();
+        stream.ReadStringTableEntry(reinterpret_cast<NiFixedString&>(root));
+    if (stream.GetFileVersion() >= 0x0a010071 && stream.GetFileVersion() < 0x14010001)
+        oldNotes = reinterpret_cast<Ref71*>(stream.DeserializeObject());
     else
         oldNotes = 0;
-    if (stream.unk04 > 21 && stream.unk04 < 29)
+    if (stream.m_kHeader.m_uiVersion > 21 && stream.m_kHeader.m_uiVersion < 29)
         stream.FUN_00a645b0();
-    if (stream.unk04 > 28)
+    if (stream.m_kHeader.m_uiVersion > 28)
     {
-        stream.input->Read(&noteCount, 2);
+        stream.GetBinaryStream()->Read(&noteCount, 2);
         if (noteCount > 0)
             notes = new Smart71[noteCount];
         for (unsigned short index = 0; index < noteCount; ++index)

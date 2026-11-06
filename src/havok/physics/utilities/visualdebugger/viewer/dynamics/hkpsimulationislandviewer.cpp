@@ -2,6 +2,8 @@
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/hkpsimulationislandviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/hkpsimulationislandviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkArray.h"
+
 struct Base0
 {
     char pad[0x20];
@@ -318,14 +320,6 @@ void FUN_00d651c0()
     DAT_01268fdc = DAT_01269cd0->Register(str_010d19d0, RegisterCallback);
 }
 
-template <typename T> struct hkArrayD64A
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    hkArrayD64A() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
 class hkListenerD64A
 {
   public:
@@ -380,8 +374,8 @@ class FUN_00d64a50 : public FUN_00ddccb0, public hkListenerD64A
   public:
     FlagD64A m_flagA;
     FlagD64A m_flagB;
-    hkArrayD64A<void*> m_arrayA;
-    hkArrayD64A<void*> m_arrayB;
+    hkArray<void*> m_arrayA;
+    hkArray<void*> m_arrayB;
     FUN_00d64a50(void* pkInfo) throw();
     virtual ~FUN_00d64a50() throw();
 };

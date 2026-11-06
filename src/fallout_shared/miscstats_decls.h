@@ -1,15 +1,10 @@
-// fallout_shared/miscstats_decls.h: declares MiscStatManager, MiscStatEntry, ChallengeManager, Menu, Tile and more
+// fallout_shared/miscstats_decls.h: misc stat data and challenge declarations
 #ifndef MISCSTATS_DECLS_H
 #define MISCSTATS_DECLS_H
 
-class MiscStatManager
+enum
 {
-  public:
-    enum MiscStat
-    {
-        MS_COUNT = 43
-    };
-    static void AddMiscStat(MiscStat id, int delta);
+    MS_COUNT = 43
 };
 struct MiscStatEntry
 {
@@ -20,28 +15,11 @@ extern "C" MiscStatEntry* DAT_011c6d50[43];
 int FUN_004d5e00();
 int Warning(const char*, ...);
 class TESForm;
-enum CHALLENGE_TYPE
-{
-    CHALLENGE_MISCSTAT = 11
-};
+#include "../../include/CHALLENGE_TYPE.h"
 class ChallengeManager
 {
   public:
     static bool UpdateChallengeProgress(CHALLENGE_TYPE, int, TESForm*, TESForm*, unsigned short, unsigned short,
                                         unsigned short);
-};
-class Menu
-{
-};
-class Tile
-{
-  public:
-    static Tile* FindMenuById(int);
-    Menu* GetMenu();
-};
-class StatsMenu : public Menu
-{
-  public:
-    void RefreshMiscStat(MiscStatManager::MiscStat);
 };
 #endif

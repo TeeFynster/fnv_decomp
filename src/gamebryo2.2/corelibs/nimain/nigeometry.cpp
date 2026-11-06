@@ -1,6 +1,196 @@
-// gamebryo2.2/corelibs/nimain/nigeometry.cpp: NiGeometry, NiAVObject, GeomStub, ViewerGeometry and more (23 functions)
+#include "../../../../include/NiTStringPointerMap.h"
+// gamebryo2.2/corelibs/nimain/nigeometry.cpp: NiGeometry, NiAVObject and dependencies (23 functions)
 
-#include "nigeometry_decls.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiCullingProcess.h"
+#include "../../../../include/NiGeometry.h"
+#include "../../../../include/NiGeometryData.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiBound.h"
+#include "../../../../include/NiCollisionObject.h"
+#include "../../../../include/NiD3DShaderInterface.h"
+#include "../../../../include/NiD3DShaderProgram.h"
+#include "../../../../include/NiPropertyState.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/NiTransform.h"
+#include "../../../../include/NonActorMagicCaster.h"
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiRenderer.h"
+#include "../../../../include/NiFixedString.h"
+#include "../../../../include/NiObjectNET.h"
+#include "../../../../include/NiProperty.h"
+#include "../../../../include/NiScreenLODData.h"
+#include "../../../../include/NiTexture.h"
+
+#include <new>
+
+
+inline const char* NiRTTI::GetName() const { return m_pcName; }
+inline bool NiRTTI::IsExactly(const NiRTTI* type) const { return this == type; }
+inline NiBound::NiBound() {}
+inline NiBound::NiBound(const NiBound& b) : m_kCenter(b.m_kCenter), radiusBits(b.radiusBits) {}
+inline void NiBound::SetCenterAndRadius(const NiPoint3& point, float value)
+{
+    m_kCenter = point;
+    m_fRadius = value;
+}
+inline bool NiD3DShaderInterface::IsExactKindOf(const NiRTTI* type)
+{
+    return GetRTTI()->IsExactly(type);
+}
+inline bool NiGeometry::GetFlag19() const { return (m_uFlags >> 19) & 1; }
+inline bool NiGeometry::GetFlag13() const { return (m_uFlags >> 13) & 1; }
+
+
+// The remaining declarations describe dependencies specific to this unit.
+
+class CloningProcess;
+template <class T> void ReadBinaryValue(NiStream& stream, T& value);
+template <> void ReadBinaryValue<unsigned int>(NiStream& stream, unsigned int& value);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* value);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* value);
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0) {}
+template <class T> inline NiPointer<T>::NiPointer(T* pkNew) : m_pObject(pkNew)
+{
+    if (pkNew)
+        InterlockedIncrement((long volatile*)&pkNew->m_uiRefCount);
+}
+template <class T> inline NiPointer<T>::operator T*() const { return m_pObject; }
+template <class T> inline T* NiPointer<T>::operator->() const { return m_pObject; }
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    T* old = m_pObject;
+    if (old != pkNew)
+    {
+        if (old && InterlockedDecrement((long volatile*)&old->m_uiRefCount) == 0)
+            old->DeleteThis();
+        m_pObject = pkNew;
+        if (pkNew)
+            InterlockedIncrement((long volatile*)&pkNew->m_uiRefCount);
+    }
+    return *this;
+}
+class NiPropertyNode
+{
+  public:
+    NiPropertyNode* m_pkNext;
+    unsigned int m_uiPad;
+    NiPointer<NiProperty> m_pkProperty;
+    static NiPointer<NiProperty>& GetNext(NiPropertyNode*& pos)
+    {
+        NiPointer<NiProperty>& value = pos->m_pkProperty;
+        pos = pos->m_pkNext;
+        return value;
+    }
+};
+extern unsigned int DAT_011f42a4;
+extern unsigned int DAT_011f42a0;
+#include "../../../../include/RecursiveSpinLock.h"
+#include "../../../../include/NiTStringPointerMap.h"
+class ShaderBufferRecord;
+class CloningProcess
+{
+  public:
+    NiTStringPointerMap<ShaderBufferRecord*>* m_pCloneMap;
+};
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+#pragma intrinsic(memcpy)
+extern NiBound DAT_011f4288;
+inline const NiBound& NiGeometry::GetBoundingVolume() const
+{
+    if (m_kWorldBound) return *(NiBound*)m_kWorldBound;
+    return DAT_011f4288;
+}
+inline const NiBound& __fastcall PreviousBound(NiBound* b)
+{
+    return b ? *b : DAT_011f4288;
+}
+inline bool BoundFlag(unsigned int bits, unsigned int shift)
+{
+    return (bits >> shift) & 1;
+}
+inline NiBound CopyWorldBound(NiBound* b)
+{
+    return b ? *b : DAT_011f4288;
+}
+extern MemoryManager g_memoryManager;
+class NiLODNode;
+template <> NiPointer<NiAVObject>& NiPointer<NiAVObject>::operator=(NiAVObject*);
+inline NiD3DShaderInterface* CreateGeometryShader()
+{
+    NiD3DShaderInterface* shader = 0;
+    void* memory = NiMemObject::operator new(sizeof(NiShader));
+    if (memory)
+        shader = ::new (memory) NiD3DShaderInterface;
+    return shader;
+}
+inline bool& TestGeometryShaderType(NiD3DShaderInterface* object, const NiRTTI* type, bool& result)
+{
+    result = (unsigned char)(object->GetRTTI() == type) & 255;
+    return result;
+}
+inline bool NiIsExactKindOf(const NiRTTI* type, NiD3DShaderInterface* object)
+{
+    return object ? object->IsExactKindOf(type) : false;
+}
+extern NiRTTI DAT_011f5d08;
+class MagicItem;
+class NiController
+{
+  public:
+    virtual void vfn_00();
+    virtual void vfn_04();
+    virtual void vfn_08();
+    virtual void vfn_0c();
+    virtual void vfn_10();
+    virtual void vfn_14();
+    virtual void vfn_18();
+    virtual void vfn_1c();
+    virtual void vfn_20();
+    virtual void vfn_24();
+    virtual void vfn_28();
+    virtual void vfn_2c();
+    virtual void vfn_30();
+    virtual void vfn_34();
+    virtual void vfn_38();
+    virtual void vfn_3c();
+    virtual void vfn_40();
+    virtual void vfn_44();
+    virtual void vfn_48();
+    virtual void vfn_4c();
+    virtual void vfn_50();
+    virtual void vfn_54();
+    virtual void vfn_58();
+    virtual void vfn_5c();
+    virtual void vfn_60();
+    virtual void vfn_64();
+    virtual void vfn_68();
+    virtual void vfn_6c();
+    virtual void vfn_70();
+    virtual void vfn_74();
+    virtual void vfn_78();
+    virtual void vfn_7c();
+    virtual void vfn_80();
+    virtual void vfn_84();
+    virtual void vfn_88();
+    virtual void vfn_8c();
+    virtual void vfn_90();
+    virtual void vfn_94();
+    virtual void vfn_98();
+    virtual void vfn_9c();
+    virtual void vfn_a0();
+    virtual void vfn_a4();
+    virtual void Update();
+    char pad[0x2c];
+    NiController* next;
+};
+struct NiGeometryProperties
+{
+    char pad[12];
+    NiPropertyState* state;
+};
 
 // @fnv 0x00a89ab0
 NiGeometry* NiGeometry::CopyMemberData()
@@ -27,8 +217,8 @@ void NiGeometry::OnVisible(NiCullingProcess& process)
 void NiGeometry::LinkObject(NiStream& stream)
 {
     NiAVObject::LinkObject(stream);
-    m_spGeometryData = (NiGeometryData*)stream.GetLoadedObject();
-    m_spSkinningInstance = stream.GetLoadedObject();
+    m_spModelData = (NiGeometryData*)stream.GetLoadedObject();
+    *(NiPointer<NiObject>*)&m_spSkinInstance = stream.GetLoadedObject();
 }
 
 // @fnv 0x00a80680
@@ -54,9 +244,9 @@ void NiGeometry::ReplaceModelData(NiGeometryData* data)
             state.flag2 = 0;
             state.flag3 = 0;
             state.flag4 = 0;
-            m_spCollisionObject->Unk24(&state);
+            m_spCollisionObject->Unk_24(*(NiUpdateData*)&state);
         }
-        m_spGeometryData = data;
+        m_spModelData = data;
     }
 }
 
@@ -72,30 +262,30 @@ void NiGeometry::UpdatePropertiesDownwardPass(NiPropertyState* state)
     {
         NiProperty* property = NiPropertyNode::GetNext(node);
         if (property && property->GetType() <= 7)
-            ((NiPropertyState*)((char*)this + 0x9c))->m_kProperties[property->GetType()] = property;
+            (*(NiPointer<NiProperty>*)&((NiPropertyState*)((char*)this + 0x9c))->m_aspProps[property->GetType()]) = property;
     }
     if (--DAT_011f42a4 == 0)
         DAT_011f42a0 = 0;
-    FinalUpdate(true);
+    SetMaterialNeedsUpdate(true);
 }
 
 // @fnv 0x00a5ac90
 void NiAVObject::FUN_00a5ac90(NiAVObject* dest, CloningProcess& process)
 {
     ((NiObjectNET*)this)->CopyMemberData((NiObjectNET*)dest, process);
-    *(unsigned int*)((char*)dest + 0x30) = *(unsigned int*)((char*)this + 0x30) | 0x80000;
-    *(NiTransform*)((char*)dest + 0x34) = *(NiTransform*)((char*)this + 0x34);
-    if (*(unsigned int*)((char*)this + 0x2c))
-        FUN_00a5abe0(dest, (char*)this + 0x24, process);
+    dest->m_uFlags = m_uFlags | 0x80000;
+    dest->m_kLocal = m_kLocal;
+    if (m_kPropertyList.m_kItemCount.m_uiCount)
+        FUN_00a5abe0(dest, &m_kPropertyList, process);
     if (m_spCollisionObject)
-        dest->AssignCollisionObject(m_spCollisionObject->Clone(process));
+        dest->AssignCollisionObject((NiCollisionObject*)m_spCollisionObject->MakeClone(process));
 }
 
-// Copies the previous world bound, and if flags 19/13 conditions or a zero radius apply, allocates or updates m_worldBound and refreshes the flag bit 22.
+// Copies the previous world bound, and if flags 19/13 conditions or a zero radius apply, allocates or updates m_kWorldBound and refreshes the flag bit 22.
 // @fnv 0x00a80710
 void NiGeometry::UpdateWorldBound()
 {
-    NiBound* world = m_worldBound;
+    NiBound* world = (NiBound*)m_kWorldBound;
     const NiBound& current = PreviousBound(world);
     NiBound previous;
     unsigned int* dst = (unsigned int*)&previous;
@@ -104,30 +294,30 @@ void NiGeometry::UpdateWorldBound()
     dst[1] = src[1];
     dst[2] = src[2];
     dst[3] = src[3];
-    unsigned int& flags = m_flags;
-    if (!(GetFlag19() && !GetFlag13()) && previous.radius != 0.0f)
+    unsigned int& flags = m_uFlags;
+    if (!(GetFlag19() && !GetFlag13()) && previous.m_fRadius != 0.0f)
         return;
     {
         if (!world)
         {
             NiBound* allocated = (NiBound*)g_memoryManager.Allocate(16);
-            SetWorldBound(allocated);
-            m_worldBound->SetCenterAndRadius(NiPoint3::ZERO, 0.0f);
+            SetObjectBound(allocated);
+            ((NiBound*)m_kWorldBound)->SetCenterAndRadius(NiPoint3::ZERO, 0.0f);
         }
-        if (m_spSkinningInstance)
+        if (m_spSkinInstance)
         {
-            ((NiScreenLODData*)m_spSkinningInstance.m_pObject)->UpdateScreenBound((NiLODNode*)m_worldBound);
-            m_worldBound->TransformPoint(*(NiTransform*)((char*)this + 0x68));
+            ((NiScreenLODData*)m_spSkinInstance.m_pObject)->UpdateScreenBound((NiLODNode*)m_kWorldBound);
+            ((NiBound*)m_kWorldBound)->TransformPoint(m_kWorld);
         }
         else
         {
-            m_worldBound->Update(*(NiBound*)((char*)m_spGeometryData.m_pObject + 0x10),
-                                 *(NiTransform*)((char*)this + 0x68));
+            ((NiBound*)m_kWorldBound)->Update(m_spModelData.m_pObject->m_kBound,
+                                 m_kWorld);
         }
         unsigned int savedFlags = flags;
         if ((unsigned char)(savedFlags >> 22) & 1)
         {
-            if (m_worldBound->FUN_00a92660(previous))
+            if (((NiBound*)m_kWorldBound)->FUN_00a92660(previous))
                 savedFlags |= 0x400000;
             else
                 savedFlags &= ~0x400000;
@@ -144,37 +334,40 @@ void NiGeometry::ProcessClone(CloningProcess& process)
     ShaderBufferRecord* clone = 0;
     process.m_pCloneMap->GetAt((const char*)this, clone);
     NiGeometry* geometryClone = (NiGeometry*)clone;
-    if (m_spSkinningInstance)
+    if (m_spSkinInstance)
     {
-        if (process.m_pCloneMap->GetAt((const char*)m_spSkinningInstance.m_pObject, clone))
-            *(NiPointer<NiAVObject>*)&geometryClone->m_spSkinningInstance = (NiAVObject*)clone;
+        if (process.m_pCloneMap->GetAt((const char*)m_spSkinInstance.m_pObject, clone))
+            *(NiPointer<NiAVObject>*)&geometryClone->m_spSkinInstance = (NiAVObject*)clone;
         else
         {
-            *(NiPointer<NiAVObject>*)&geometryClone->m_spSkinningInstance =
-                (NiAVObject*)m_spSkinningInstance.m_pObject->Clone(process);
-            m_spSkinningInstance.m_pObject->ProcessClone(process);
+            *(NiPointer<NiAVObject>*)&geometryClone->m_spSkinInstance =
+                (NiAVObject*)((NiObject*)m_spSkinInstance.m_pObject)->MakeClone(process);
+            ((NiObject*)m_spSkinInstance.m_pObject)->ProcessClone(process);
         }
     }
     NiD3DShaderInterface* shader = 0;
-    if ((unsigned int)m_shader != (unsigned int)shader)
+    if ((unsigned int)m_spShader != (unsigned int)shader)
     {
-        unsigned char exactType = NiIsExactKindOf(&DAT_011f5d08, m_shader);
+        unsigned char exactType = NiIsExactKindOf(&DAT_011f5d08, (NiD3DShaderInterface*)m_spShader);
         if (exactType != (unsigned char)(unsigned int)shader)
         {
-            void* memory = NiMemObject::operator new(sizeof(NiD3DShaderInterface));
+            // The original allocation is the size of NiShader (0x14).
+            void* memory = NiMemObject::operator new(sizeof(NiShader));
             if ((unsigned int)memory != (unsigned int)shader)
-                shader = new (memory) NiD3DShaderInterface;
-            ((NiAVObject*)shader)->SetName(((NiTexture*)m_shader)->GetFilename());
-            ((NonActorMagicCaster*)shader)
-                ->SetSelectedMagicItem((MagicItem*)((NiD3DShaderProgram*)m_shader)->GetName());
-            geometryClone->m_shader = shader;
+                shader = ::new (memory) NiD3DShaderInterface;
+            ((NiAVObject*)shader)->SetName(((NiTexture*)m_spShader)->GetFilename());
+            // The call uses the MagicCaster subobject address. Compensate for
+            // the shared class's secondary-base adjustment before the direct call.
+            ((NonActorMagicCaster*)((char*)shader - sizeof(BSExtraData)))
+                ->NonActorMagicCaster::SetSelectedMagicItem((MagicItem*)((NiD3DShaderProgram*)m_spShader)->NiD3DShaderProgram::GetName());
+            geometryClone->m_spShader = shader;
         }
         else
         {
-            geometryClone->m_shader = m_shader;
-            m_shader->Attach(geometryClone);
+            geometryClone->m_spShader = m_spShader;
+            m_spShader->SetupGeometry(geometryClone);
             ((RecursiveSpinLock*)0x011f42a0)->Lock((const char*)shader);
-            geometryClone->ApplyPropertyState(*(NiPropertyState*)((char*)this + 0x9c));
+            geometryClone->UpdatePropertiesDownwardPass((NiPropertyState*)((char*)this + 0x9c));
             if (--DAT_011f42a4 == 0)
                 DAT_011f42a0 = (unsigned int)shader;
         }
@@ -184,14 +377,9 @@ void NiGeometry::ProcessClone(CloningProcess& process)
 struct NiAccumulator;
 struct NiD3DShaderDeclaration;
 struct NiDynamicEffectState;
-struct NiRenderer;
 struct NiShader;
 struct NiTriShape;
 struct NiTriStrips;
-struct FUN_00a80610_shell : public NiGeometry
-{
-    void FUN_00a80610(NiRenderer*);
-};
 
 struct DummyController
 {
@@ -206,9 +394,9 @@ struct DummyController
 
 // Stores a pointer to this object's offset 0x9c into the renderer and, if the controller at this+0xc exists, runs its pre-display iterate.
 // @fnv 0x00a80610
-void FUN_00a80610_shell::FUN_00a80610(NiRenderer* pkRenderer)
+void NiGeometry::RenderImmediate(NiRenderer* pkRenderer)
 {
-    *(void**)((char*)pkRenderer + 0xc) = (char*)this + 0x9c;
+    pkRenderer->m_pkCurrProp = (NiPropertyState*)((char*)this + 0x9c);
     DummyController* pkController = *(DummyController**)((char*)this + 0xc);
     if (pkController)
         pkController->OnPreDisplayIterate();
@@ -216,28 +404,23 @@ void FUN_00a80610_shell::FUN_00a80610(NiRenderer* pkRenderer)
 
 struct BSStripParticleSystem;
 struct NiAccumulator;
-struct RgbaColor;
+struct NiColorA;
 struct NiD3DShaderDeclaration;
 struct NiDynamicEffectState;
 struct NiPSysModifier;
 struct NiParticleSystem;
 struct NiParticles;
 struct NiQuaternion;
-struct NiRenderer;
 struct NiShader;
 struct NiTriShape;
 struct NiTriStrips;
 struct NiUpdateData;
-struct FUN_00a80650_shell : public NiGeometry
-{
-    void FUN_00a80650(NiRenderer*);
-};
 
 // Stores a pointer to this+0x9C in the renderer and calls the virtual at offset 0xA8 on each node in the linked list at this+0x0C.
 // @fnv 0x00a80650
-void FUN_00a80650_shell::FUN_00a80650(NiRenderer* pkRenderer)
+void NiGeometry::RenderWithRenderer(NiRenderer* pkRenderer)
 {
-    *(char**)((char*)pkRenderer + 0x0C) = (char*)this + 0x9C;
+    pkRenderer->m_pkCurrProp = (NiPropertyState*)((char*)this + 0x9C);
     void* pNode = *(void**)((char*)this + 0x0C);
     while (pNode)
     {
@@ -247,42 +430,68 @@ void FUN_00a80650_shell::FUN_00a80650(NiRenderer* pkRenderer)
 }
 
 struct BSResizableTriShape;
-struct NiRenderer;
 struct NiTriBasedGeom;
 struct NiTriShape;
 struct blob16
 {
     char b[16];
 };
-struct FUN_00a808f0_shell : public NiGeometry
-{
-    void UpdateSelectiveUpdateFlags(bool*, bool, bool*);
-};
 
-struct FUN_00a5a450_helper
-{
-    void FUN_00a5a450(bool* bSelectiveUpdate, bool bSelectiveUpdateTransforms, bool* bRigid);
-};
 
 // Calls FUN_00a5a450, then if the field at offset 0xbc is nonzero sets flags 4 and 2 at 0x30, sets *bSelectiveUpdate true and *bRigid false.
 // @fnv 0x00a808f0
-void FUN_00a808f0_shell::UpdateSelectiveUpdateFlags(bool* bSelectiveUpdate, bool bSelectiveUpdateTransforms,
-                                                    bool* bRigid)
+void NiGeometry::SetSelectiveUpdateFlags(bool& bSelectiveUpdate, bool bSelectiveUpdateTransforms,
+                                                    bool& bRigid)
 {
-    ((FUN_00a5a450_helper*)this)->FUN_00a5a450(bSelectiveUpdate, bSelectiveUpdateTransforms, bRigid);
+    NiAVObject::SetSelectiveUpdateFlags(bSelectiveUpdate, bSelectiveUpdateTransforms, bRigid);
     if (*(int*)((char*)this + 0xbc) != 0)
     {
         *(unsigned int*)((char*)this + 0x30) |= 4;
-        *bSelectiveUpdate = true;
+        bSelectiveUpdate = true;
         *(unsigned int*)((char*)this + 0x30) |= 2;
-        *bRigid = false;
+        bRigid = false;
     }
 }
 
+class BSPackedAdditionalGeometryData;
+class BSResizableTriShape;
+class Ni2DBuffer;
+class NiAccumulator;
+class NiColorA;
+class NiD3DGeometryGroupManager;
+class NiD3DPixelShader;
+class NiD3DShaderDeclaration;
+class NiD3DVertexShader;
+class NiDepthStencilBuffer;
+class NiDynamicEffect;
+class NiDynamicGeometryGroup;
+class NiGeometryBufferData;
+class NiLines;
+class NiMaterialProperty;
+class NiPalette;
+class NiParticles;
+class NiParticlesData;
+class NiPixelData;
+class NiPixelFormat;
+class NiPoint2;
+class NiRenderTargetGroup;
+class NiRenderedCubeMap;
+class NiRenderedTexture;
+class NiScreenTexture;
+class NiShader;
+class NiSkinData;
+class NiSkinInstance;
+class NiSkinPartition;
+class NiSourceCubeMap;
+class NiSourceTexture;
+class NiTimeController;
+class NiTriBasedGeom;
+class NiTriShape;
+class NiTriStrips;
+class NiUnsharedGeometryGroup;
+class NiUpdateData;
 namespace fnv_00a80930 {
 struct FourComponentFloatVector;
-struct BSPackedAdditionalGeometryData;
-struct BSResizableTriShape;
 struct GeometryDeviceType;
 struct Direct3DDeviceInterface;
 struct COMBaseInterface;
@@ -293,50 +502,14 @@ struct Direct3D9RenderSystem;
 struct COMUnknownInterface;
 struct RenderableGeometry;
 struct Direct3D;
-struct Ni2DBuffer;
-struct NiAccumulator;
-struct RgbaColor;
-struct NiD3DGeometryGroupManager;
-struct NiD3DPixelShader;
-struct NiD3DShaderDeclaration;
-struct NiD3DVertexShader;
-struct NiDepthStencilBuffer;
-struct NiDynamicEffect;
 struct NiDynamicEffectState;
-struct NiDynamicGeometryGroup;
 struct GeometryObject;
 struct NiFragmentMaterial;
-struct NiGeometryBufferData;
 struct GeometryVertexData;
 struct GeometryContainer;
 struct GeometryBufferView;
-struct NiLines;
 struct LevelOfDetailNode;
-struct NiMaterialProperty;
-struct NiPalette;
-struct NiParticles;
-struct NiParticlesData;
-struct NiPixelData;
-struct NiPixelFormat;
-struct NiPoint2;
-struct NiRenderTargetGroup;
-struct NiRenderedCubeMap;
-struct NiRenderedTexture;
-struct NiRenderer;
 struct RendererSupportType;
-struct NiScreenTexture;
-struct NiShader;
-struct NiSkinData;
-struct NiSkinInstance;
-struct NiSkinPartition;
-struct NiSourceCubeMap;
-struct NiSourceTexture;
-struct NiTimeController;
-struct NiTriBasedGeom;
-struct NiTriShape;
-struct NiTriStrips;
-struct NiUnsharedGeometryGroup;
-struct NiUpdateData;
 struct NiVBChip;
 struct VertexBufferRelatedType;
 struct IndexBufferManager;
@@ -366,10 +539,6 @@ struct blob12
 struct blob16
 {
     char b[16];
-};
-struct FUN_00a80930_shell : public NiGeometry
-{
-    void FUN_00a80930(bool);
 };
 
 struct TimeCtrlView
@@ -418,69 +587,19 @@ struct TimeCtrlView
     char pad[0x2c];
     TimeCtrlView* next;
 };
-struct RendererView
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual unsigned int GetFlags();
-};
 struct SkinView
 {
     char pad[0xc];
     void* partition;
 };
-struct ConsStub
-{
-    void SetDataConsistency(int);
-};
-struct NiRenderer
-{
-    static RendererView* ms_pRenderer;
-};
 // Scans the controller list and skin partition, then passes a consistency flag (0x4000 or 0) to the object at offset 0xb8.
 // @fnv 0x00a80930
-void FUN_00a80930_shell::FUN_00a80930(bool bTool)
+} // namespace fnv_00a80930
+
+void NiGeometry::CalculateConsistency(bool bTool)
 {
     int eConsistency = 0x4000;
-    TimeCtrlView* pkController = *(TimeCtrlView**)((char*)this + 0xc);
+    fnv_00a80930::TimeCtrlView* pkController = *(fnv_00a80930::TimeCtrlView**)((char*)this + 0xc);
     while (pkController)
     {
         if (pkController->IsTargetCtrl())
@@ -490,7 +609,7 @@ void FUN_00a80930_shell::FUN_00a80930(bool bTool)
         }
         pkController = pkController->next;
     }
-    SkinView* pkSkin = *(SkinView**)((char*)this + 0xbc);
+    fnv_00a80930::SkinView* pkSkin = *(fnv_00a80930::SkinView**)((char*)this + 0xbc);
     if (pkSkin)
     {
         if (bTool)
@@ -504,324 +623,69 @@ void FUN_00a80930_shell::FUN_00a80930(bool bTool)
         }
         else
         {
-            RendererView* pkRenderer = NiRenderer::ms_pRenderer;
-            if (pkRenderer && !(pkRenderer->GetFlags() & 2))
+            NiRenderer* pkRenderer = NiRenderer::ms_pRenderer;
+            if (pkRenderer && !((*(unsigned int(__thiscall**)(NiRenderer*))(*(char**)pkRenderer + 0xa0))(pkRenderer) & 2))
                 eConsistency = 0;
         }
     }
-    ((ConsStub*)*(void**)((char*)this + 0xb8))->SetDataConsistency(eConsistency);
+    m_spModelData.m_pObject->SetDataConsistency(eConsistency);
 }
-}  // namespace fnv_00a80930
 
-struct RegObj
-{
-    virtual void a00();
-    virtual void a01();
-    virtual void a02();
-    virtual void a03();
-    virtual void a04();
-    virtual void a05();
-    virtual void a06();
-    virtual void a07();
-    virtual void a08();
-    virtual void a09();
-    virtual void a10();
-    virtual void a11();
-    virtual void a12();
-    virtual void a13();
-    virtual void a14();
-    virtual void a15();
-    virtual void a16();
-    virtual void a17();
-    virtual void a18();
-    virtual void a19();
-    virtual void a20();
-    virtual void vReg(NiStream&);
-};
-struct FUN_00a80430_Holder
-{
-    bool FUN_00a59f00(NiStream&);
-    bool FUN_00a80430(NiStream&);
-};
-// Calls FUN_00a59f00 on kStream, then invokes vReg on the RegObj at offset 0xb8 and, if present, the one at 0xbc; returns false if the first call fails.
+
+// Registers the model data and skin instance after registering the geometry.
 // @fnv 0x00a80430
-bool FUN_00a80430_Holder::FUN_00a80430(NiStream& kStream)
+bool NiGeometry::RegisterStreamables(NiStream& kStream)
 {
     if (!FUN_00a59f00(kStream))
         return false;
-    (*(RegObj**)((char*)this + 0xb8))->vReg(kStream);
-    RegObj* pSecondRegObj = *(RegObj**)((char*)this + 0xbc);
+    m_spModelData.m_pObject->RegisterStreamables(kStream);
+    NiObject* pSecondRegObj = (NiObject*)m_spSkinInstance.m_pObject;
     if (pSecondRegObj)
-        pSecondRegObj->vReg(kStream);
+        pSecondRegObj->RegisterStreamables(kStream);
     return true;
 }
 
-struct FUN_00a80530_shell : public NiGeometry
-{
-    void* FUN_00a80530();
-};
 
 extern const char* const g_011f4a48_arg1;
 
 // @fnv 0x00a80530
-void* FUN_00a80530_shell::FUN_00a80530()
+const NiRTTI* NiGeometry::GetRTTI() const
 {
-    return (void*)&g_011f4a48_arg1;
+    return (const NiRTTI*)&g_011f4a48_arg1;
 }
 
-struct NiRenderer
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void UnkF0(void*);
-    virtual void w61();
-    virtual void w62();
-    virtual void w63();
-    virtual void Unk100(void*);
-    virtual void Unk104(void*);
-};
-struct BaseStub
-{
-    void FUN_00a59e50(NiRenderer*);
-};
-struct GeomStub : BaseStub
-{
-    void FUN_00a809b0(NiRenderer*);
-};
 // @fnv 0x00a809b0
-void GeomStub::FUN_00a809b0(NiRenderer* pkRenderer)
+void NiGeometry::PurgeRendererData(NiRenderer* pkRenderer)
 {
-    BaseStub::FUN_00a59e50(pkRenderer);
-    pkRenderer->UnkF0(*(void**)((char*)this + 0xb8));
+    NiAVObject::PurgeRendererData(pkRenderer);
+    (*(void(__thiscall**)(NiRenderer*, void*))(*(char**)pkRenderer + 0xf0))(
+        pkRenderer, *(void**)((char*)this + 0xb8));
     void* p = *(void**)((char*)this + 0xbc);
     if (p)
     {
-        pkRenderer->Unk104(p);
-        pkRenderer->Unk100(*(void**)((char*)*(void**)((char*)this + 0xbc) + 0xc));
+        (*(void(__thiscall**)(NiRenderer*, void*))(*(char**)pkRenderer + 0x104))(pkRenderer, p);
+        (*(void(__thiscall**)(NiRenderer*, void*))(*(char**)pkRenderer + 0x100))(
+            pkRenderer, *(void**)((char*)*(void**)((char*)this + 0xbc) + 0xc));
     }
 }
 
-namespace fnv_00a7ff60 {
-struct BSResizableTriShape;
-struct NiRenderer;
-struct NiTriBasedGeom;
-struct NiTriShape;
-struct blob16
-{
-    char b[16];
-};
-struct FUN_00a7ff60_shell : public NiGeometry
-{
-    void FUN_00a7ff60();
-};
-
-// stand-in for the object stored at this+0xb8 (NiGeometryData-like), virtual slot 0xa0
-struct FUN_00a7ff60_data
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void CalculateNormals();
-};
-
 // @fnv 0x00a7ff60
-void FUN_00a7ff60_shell::FUN_00a7ff60()
+
+void NiGeometry::CalculateNormals()
 {
-    ((FUN_00a7ff60_data*)(*(void**)((char*)this + 0xb8)))->CalculateNormals();
+    m_spModelData.m_pObject->vf40();
 }
-}  // namespace fnv_00a7ff60
 
-struct S_00a80470_Data;
-
-struct S_00a80470_Controller
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual bool FUN_00a805c0(S_00a80470_Controller*);
-};
-
-struct S_00a80470_Data
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    S_00a80470_Controller* unkB8;
-    S_00a80470_Controller* unkBC;
-};
-
-struct S_00a80470_Owner : public S_00a80470_Data
-{
-    bool FUN_00a5a260(S_00a80470_Data*);
-    bool FUN_00a80470(S_00a80470_Data*);
-};
 
 // @fnv 0x00a80470
-bool S_00a80470_Owner::FUN_00a80470(S_00a80470_Data* apData)
+bool NiGeometry::IsEqual(NiObject* object) const
 {
-    if (!FUN_00a5a260(apData))
+    NiGeometry* apData = (NiGeometry*)object;
+    if (!const_cast<NiGeometry*>(this)->FUN_00a5a260(apData))  // NiAVObject::IsEqual
         return false;
 
-    S_00a80470_Controller* thisBC = this->unkBC;
-    S_00a80470_Controller* argBC = apData->unkBC;
+    const NiObject* thisBC = (const NiObject*)m_spSkinInstance.m_pObject;
+    const NiObject* argBC = (const NiObject*)apData->m_spSkinInstance.m_pObject;
 
     bool argIsNull = (argBC == 0);
     bool bThisBCNull = (thisBC == 0);
@@ -830,13 +694,13 @@ bool S_00a80470_Owner::FUN_00a80470(S_00a80470_Data* apData)
 
     if (thisBC != 0)
     {
-        if (!thisBC->FUN_00a805c0(argBC))
+        if (!thisBC->IsEqual((NiObject*)argBC))
             return false;
     }
 
-    S_00a80470_Controller* pThisB8 = this->unkB8;
-    S_00a80470_Controller* other = apData->unkB8;
-    bool bResult = pThisB8->FUN_00a805c0(other);
+    const NiObject* pThisB8 = (const NiObject*)m_spModelData.m_pObject;
+    const NiObject* other = (const NiObject*)apData->m_spModelData.m_pObject;
+    bool bResult = pThisB8->IsEqual((NiObject*)other);
     return bResult;
 }
 
@@ -860,14 +724,6 @@ struct ViewerStrings
         FUN_0096ae90(index, text);
     }
 };
-struct NamedRTTI
-{
-    const char* name;
-    const char* GetName() const
-    {
-        return name;
-    }
-};
 struct SkinPartition
 {
     unsigned int unk00;
@@ -883,21 +739,17 @@ struct SkinInstanceInfo : NiObject
     unsigned int unk08;
     SkinPartition* partition;
 };
-struct ViewerGeometry : NiGeometry
-{
-    void FUN_00a5ad00(ViewerStrings*);
-    void FUN_00a80e70(ViewerStrings*);
-};
 // @fnv 0x00a80e70
-void ViewerGeometry::FUN_00a80e70(ViewerStrings* strings)
+void NiGeometry::GetViewerStrings(NiViewerStringsArray* array)
 {
+    ViewerStrings* strings = (ViewerStrings*)array;
     FUN_00a5ad00(strings);
     strings->Add(FUN_00a7d330(DAT_011f4acc));
-    strings->Add(FUN_00a7d5a0("GeomData", static_cast<NiGeometryData*>(m_spGeometryData)));
-    NiD3DShaderInterface* shader = m_shader;
+    strings->Add(FUN_00a7d5a0("GeomData", static_cast<NiGeometryData*>(m_spModelData)));
+    NiD3DShaderInterface* shader = (NiD3DShaderInterface*)m_spShader;
     if (shader)
-        strings->Add(FUN_00a7d5e0("shader", reinterpret_cast<NamedRTTI*>(shader->GetRTTI())->GetName()));
-    SkinInstanceInfo* skin = static_cast<SkinInstanceInfo*>(m_spSkinningInstance.m_pObject);
+        strings->Add(FUN_00a7d5e0("shader", shader->GetRTTI()->GetName()));
+    SkinInstanceInfo* skin = reinterpret_cast<SkinInstanceInfo*>(m_spSkinInstance.m_pObject);
     if (skin && skin->partition)
         strings->Add(FUN_00a7d510("skin partitions", skin->partition->GetCount()));
 }
@@ -1105,14 +957,11 @@ struct GeomStream
     GeomBinaryStream* m_pUnderlyingStream;
 };
 
-struct FUN_00a80bf0_shell : public NiGeometry
-{
-    void FUN_00a80bf0(GeomStream& kStream);
-};
 
 // @fnv 0x00a80bf0
-void FUN_00a80bf0_shell::FUN_00a80bf0(GeomStream& kStream)
+void NiGeometry::LoadBinary(NiStream& stream)
 {
+    GeomStream& kStream = (GeomStream&)stream;
     NiAVObject::LoadBinary((NiStream&)kStream);
 
     kStream.ResetStreamState();
@@ -1155,257 +1004,34 @@ void FUN_00a80bf0_shell::FUN_00a80bf0(GeomStream& kStream)
     }
 }
 
-struct ReaderStub
+inline unsigned int NiBinaryStream::BinaryWrite(const void* buffer, unsigned int bytes,
+                                               unsigned int* componentSizes, unsigned int componentCount)
 {
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiPosition;
-    unsigned int unk08;
-    int(__cdecl* m_pRead)(ReaderStub*, void*, unsigned int, unsigned int*, unsigned int);
-    template <class T> void LoadValue(T& value)
-    {
-        unsigned int uiElem = sizeof(T);
-        m_uiPosition += m_pRead(this, &value, sizeof(T), &uiElem, 1);
-    }
-};
-class StreamStub
-{
-  public:
-    virtual void Slot00();
-    virtual void Slot04();
-    virtual void Slot08();
-    virtual void Slot0C();
-    virtual void Slot10();
-    virtual void Slot14();
-    virtual void Slot18();
-    virtual void Slot1C();
-    virtual void Slot20();
-    virtual void Slot24();
-    virtual void Slot28();
-    virtual void Slot2C();
-    virtual void vfn_30(void* value);
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    ReaderStub* m_pkReader;
-};
-class GeometryStub
-{
-  public:
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    void* m_spGeometryData;
-    void* m_spSkinningInstance;
-    void SaveBinary(StreamStub& stream);
-    void FUN_00a80db0(StreamStub& stream);
-};
-template <class T> void LoadStreamValue(StreamStub& stream, T& value)
-{
-    ReaderStub* reader = stream.m_pkReader;
-    unsigned int uiElem = sizeof(T);
-    reader->m_uiPosition += reader->m_pRead(reader, &value, uiElem, &uiElem, 1);
+    unsigned int bytesWritten = m_pfnWrite(this, buffer, bytes, componentSizes, componentCount);
+    m_uiAbsoluteCurrentPos += bytesWritten;
+    return bytesWritten;
 }
-// @fnv 0x00a80db0
-void GeometryStub::FUN_00a80db0(StreamStub& stream)
+
+template <class T> inline void SaveBinaryValue(NiBinaryStream* stream, T& value)
 {
-    SaveBinary(stream);
-    stream.vfn_30(m_spGeometryData);
-    stream.vfn_30(m_spSkinningInstance);
+    unsigned int componentSize = sizeof(T);
+    stream->BinaryWrite(&value, sizeof(T), &componentSize, 1);
+}
+
+// @fnv 0x00a80db0
+void NiGeometry::SaveBinary(NiStream& stream)
+{
+    NiAVObject::SaveBinary(stream);
+    stream.SaveLinkID(m_spModelData.m_pObject);
+    stream.SaveLinkID((NiObject*)m_spSkinInstance.m_pObject);
     unsigned int uiData0 = 0;
-    stream.m_pkReader->LoadValue(uiData0);
+    SaveBinaryValue(stream.m_pkOstr, uiData0);
     {
         unsigned int uiData1 = 0;
-        stream.m_pkReader->LoadValue(uiData1);
+        SaveBinaryValue(stream.m_pkOstr, uiData1);
     }
     unsigned char ucData2 = 0;
-    stream.m_pkReader->LoadValue(ucData2);
+    SaveBinaryValue(stream.m_pkOstr, ucData2);
 }
 
 class NiObjectNET_stub
@@ -1421,80 +1047,10 @@ void NiObjectNET_stub::FUN_00a7fdc0(int a1)
     FUN_00a5c6a0(a1);
 }
 
-class GeometryBase804e0
-{
-  public:
-    GeometryBase804e0() throw();
-    virtual void Slot00();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-};
-class PropertyState804e0
-{
-  public:
-    PropertyState804e0() throw();
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-};
-class FUN_00a804e0 : public GeometryBase804e0
-{
-  public:
-    FUN_00a804e0(NiGeometryData* data);
-    PropertyState804e0 m_propertyState;
-    NiGeometryData* m_modelData;
-    NiObject* m_skinInstance;
-    NiD3DShaderInterface* m_shader;
-};
-
-// Constructor that stores the NiGeometryData pointer, increments its reference count if non-null, and nulls m_skinInstance and m_shader.
 // @fnv 0x00a804e0
-FUN_00a804e0::FUN_00a804e0(NiGeometryData* apModelData) : m_modelData(apModelData)
+NiGeometry::NiGeometry(NiGeometryData* apModelData) : m_spModelData(apModelData)
 {
-    if (apModelData)
-        InterlockedIncrement((long volatile*)&apModelData->m_uiRefCount);
-    m_skinInstance = 0;
-    m_shader = 0;
+    m_spShader = 0;
 }
 
 struct WideProduct
@@ -1529,12 +1085,12 @@ struct S00a7ff70_P3
         return S00a7ff70_P3(inv * x, inv * y, inv * z);
     }
 };
-struct ThreeByThreeMatrix
+struct GeometryMatrix
 {
     float m_afEntries[3][3];
-    ThreeByThreeMatrix FUN_0043f8d0(const ThreeByThreeMatrix& o) const;
-    ThreeByThreeMatrix FUN_00a588a0(const ThreeByThreeMatrix& o) const;
-    bool FUN_004b46a0(ThreeByThreeMatrix& inv) const;
+    GeometryMatrix FUN_0043f8d0(const GeometryMatrix& o) const;
+    GeometryMatrix FUN_00a588a0(const GeometryMatrix& o) const;
+    bool FUN_004b46a0(GeometryMatrix& inv) const;
     S00a7ff70_P3 operator*(const S00a7ff70_P3& p) const
     {
         return S00a7ff70_P3(m_afEntries[0][0] * p.x + m_afEntries[0][1] * p.y + m_afEntries[0][2] * p.z,
@@ -1548,119 +1104,26 @@ struct ThreeByThreeMatrix
                             WideProduct(m_afEntries[2][0], p.x) + m_afEntries[2][1] * p.y + m_afEntries[2][2] * p.z);
     }
 };
-inline S00a7ff70_P3 operator*(const S00a7ff70_P3& p, const ThreeByThreeMatrix& m)
+inline S00a7ff70_P3 operator*(const S00a7ff70_P3& p, const GeometryMatrix& m)
 {
     return S00a7ff70_P3(m.m_afEntries[0][0] * p.x + m.m_afEntries[1][0] * p.y + m.m_afEntries[2][0] * p.z,
                         m.m_afEntries[0][1] * p.x + m.m_afEntries[1][1] * p.y + m.m_afEntries[2][1] * p.z,
                         m.m_afEntries[0][2] * p.x + m.m_afEntries[1][2] * p.y + m.m_afEntries[2][2] * p.z);
 }
-__declspec(noinline) ThreeByThreeMatrix ThreeByThreeMatrix::FUN_0043f8d0(const ThreeByThreeMatrix& o) const
-{
-    ThreeByThreeMatrix result;
-    result.m_afEntries[0][0] = m_afEntries[0][0] * o.m_afEntries[0][0] + m_afEntries[0][1] * o.m_afEntries[1][0] +
-                               m_afEntries[0][2] * o.m_afEntries[2][0];
-    result.m_afEntries[0][1] = m_afEntries[0][0] * o.m_afEntries[0][1] + m_afEntries[0][1] * o.m_afEntries[1][1] +
-                               m_afEntries[0][2] * o.m_afEntries[2][1];
-    result.m_afEntries[0][2] = m_afEntries[0][0] * o.m_afEntries[0][2] + m_afEntries[0][1] * o.m_afEntries[1][2] +
-                               m_afEntries[0][2] * o.m_afEntries[2][2];
-    result.m_afEntries[1][0] = m_afEntries[1][0] * o.m_afEntries[0][0] + m_afEntries[1][1] * o.m_afEntries[1][0] +
-                               m_afEntries[1][2] * o.m_afEntries[2][0];
-    result.m_afEntries[1][1] = m_afEntries[1][0] * o.m_afEntries[0][1] + m_afEntries[1][1] * o.m_afEntries[1][1] +
-                               m_afEntries[1][2] * o.m_afEntries[2][1];
-    result.m_afEntries[1][2] = m_afEntries[1][0] * o.m_afEntries[0][2] + m_afEntries[1][1] * o.m_afEntries[1][2] +
-                               m_afEntries[1][2] * o.m_afEntries[2][2];
-    result.m_afEntries[2][0] = m_afEntries[2][0] * o.m_afEntries[0][0] + m_afEntries[2][1] * o.m_afEntries[1][0] +
-                               m_afEntries[2][2] * o.m_afEntries[2][0];
-    result.m_afEntries[2][1] = m_afEntries[2][0] * o.m_afEntries[0][1] + m_afEntries[2][1] * o.m_afEntries[1][1] +
-                               m_afEntries[2][2] * o.m_afEntries[2][1];
-    result.m_afEntries[2][2] = m_afEntries[2][0] * o.m_afEntries[0][2] + m_afEntries[2][1] * o.m_afEntries[1][2] +
-                               m_afEntries[2][2] * o.m_afEntries[2][2];
-    return result;
-}
-
-struct S00a7ff70_Xf
-{
-    ThreeByThreeMatrix m_kOrientation;
-    S00a7ff70_P3 m_kTranslation;
-    float m_fScale;
-};
-struct S00a7ff70_Sub
-{
-    int unk00;
-    void ComputeBoundingSphere(unsigned int count, S00a7ff70_P3* verts);
-};
-struct S00a7ff70_Data
-{
-    virtual void Slot00();
-    virtual void Slot01();
-    virtual void Slot02();
-    virtual void Slot03();
-    virtual void Slot04();
-    virtual void Slot05();
-    virtual void Slot06();
-    virtual void Slot07();
-    virtual void Slot08();
-    virtual void Slot09();
-    virtual void Slot10();
-    virtual void Slot11();
-    virtual void Slot12();
-    virtual void Slot13();
-    virtual void Slot14();
-    virtual void Slot15();
-    virtual void Slot16();
-    virtual void Slot17();
-    virtual void Slot18();
-    virtual void Slot19();
-    virtual void Slot20();
-    virtual void Slot21();
-    virtual void Slot22();
-    virtual void Slot23();
-    virtual void Slot24();
-    virtual void Slot25();
-    virtual void Slot26();
-    virtual void Slot27();
-    virtual void Slot28();
-    virtual void Slot29();
-    virtual void Slot30();
-    virtual void Slot31();
-    virtual void Slot32();
-    virtual void Slot33();
-    virtual void Slot34();
-    virtual void Slot35();
-    virtual unsigned short GetActiveVertexQuantity();
-    int unk04;
-    int unk08;
-    int unk0c;
-    S00a7ff70_Sub m_sub;
-    int unk14;
-    int unk18;
-    int unk1c;
-    S00a7ff70_P3* m_pkVertex;
-    S00a7ff70_P3* m_pkNormal;
-};
-struct S00a7ff70_Geom : NiAVObject
-{
-    S00a7ff70_Data* m_spGeometryData;
-    const S00a7ff70_Xf& Local() const
-    {
-        return *(const S00a7ff70_Xf*)&m_kLocalTransform;
-    }
-    void FUN_00a7ff70(const ThreeByThreeMatrix& kMat, const S00a7ff70_P3& kTrn, bool bOnLeft);
-};
-// Updates vertex and normal arrays using kMat and kTrn, with a different calculation when bOnLeft is true, then calls FUN_00a7ee30.
+// Updates the vertices, normals, and model bound using the supplied transform.
 // @fnv 0x00a7ff70
-void S00a7ff70_Geom::FUN_00a7ff70(const ThreeByThreeMatrix& kMat, const S00a7ff70_P3& kTrn, bool bOnLeft)
+void NiGeometry::ApplyTransform(const NiMatrix3& rotation, const NiPoint3& position, bool bOnLeft)
 {
-    unsigned short usVertices = m_spGeometryData->GetActiveVertexQuantity();
-    S00a7ff70_P3* pkVertex = m_spGeometryData->m_pkVertex;
-    S00a7ff70_P3* pkNormal = m_spGeometryData->m_pkNormal;
+    unsigned short usVertices = m_spModelData.m_pObject->GetVertexCount();
+    S00a7ff70_P3* pkVertex = (S00a7ff70_P3*)m_spModelData.m_pObject->m_pkVertex;
+    S00a7ff70_P3* pkNormal = (S00a7ff70_P3*)m_spModelData.m_pObject->m_pkNormal;
     unsigned short i;
     if (bOnLeft)
     {
-        const ThreeByThreeMatrix& kRot = Local().m_kOrientation.FUN_00a588a0(kMat.FUN_0043f8d0(Local().m_kOrientation));
+        const GeometryMatrix& kRot = ((const GeometryMatrix&)m_kLocal.m_Rotate).FUN_00a588a0((*(const GeometryMatrix*)&rotation).FUN_0043f8d0((const GeometryMatrix&)m_kLocal.m_Rotate));
         S00a7ff70_P3 kTrans =
-            ((kTrn + kMat * Local().m_kTranslation - Local().m_kTranslation) * Local().m_kOrientation) /
-            Local().m_fScale;
+            (((*(const S00a7ff70_P3*)&position) + (*(const GeometryMatrix*)&rotation) * (*(const S00a7ff70_P3*)&m_kLocal.m_Translate) - (*(const S00a7ff70_P3*)&m_kLocal.m_Translate)) * (const GeometryMatrix&)m_kLocal.m_Rotate) /
+            m_kLocal.m_fScale;
         if (pkVertex)
         {
             for (i = 0; i < usVertices; i++)
@@ -1668,7 +1131,7 @@ void S00a7ff70_Geom::FUN_00a7ff70(const ThreeByThreeMatrix& kMat, const S00a7ff7
         }
         if (pkNormal)
         {
-            ThreeByThreeMatrix kInv;
+            GeometryMatrix kInv;
             kRot.FUN_004b46a0(kInv);
             for (i = 0; i < usVertices; i++)
                 pkNormal[i] = pkNormal[i] * kInv;
@@ -1679,15 +1142,15 @@ void S00a7ff70_Geom::FUN_00a7ff70(const ThreeByThreeMatrix& kMat, const S00a7ff7
         if (pkVertex)
         {
             for (i = 0; i < usVertices; i++)
-                pkVertex[i] = kMat * pkVertex[i] + kTrn;
+                pkVertex[i] = (*(const GeometryMatrix*)&rotation) * pkVertex[i] + (*(const S00a7ff70_P3*)&position);
         }
         if (pkNormal)
         {
-            ThreeByThreeMatrix kInv;
-            kMat.FUN_004b46a0(kInv);
+            GeometryMatrix kInv;
+            (*(const GeometryMatrix*)&rotation).FUN_004b46a0(kInv);
             for (i = 0; i < usVertices; i++)
                 pkNormal[i] = pkNormal[i] * kInv;
         }
     }
-    m_spGeometryData->m_sub.ComputeBoundingSphere(usVertices, pkVertex);
+    m_spModelData.m_pObject->m_kBound.ComputeBoundingSphere(usVertices, (const NiPoint3*)pkVertex);
 }

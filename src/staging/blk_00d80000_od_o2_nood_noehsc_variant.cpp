@@ -7,67 +7,34 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
 
-struct hkMemoryAllocatorS
-{
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void* BufRealloc(void* pOld, int oldNumBytes, int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-    template <class T> void _bufFree(void* p, int numElem)
-    {
-        ReturnMemory(p, numElem * sizeof(T));
-    }
-};
+#include "../../include/hkArray.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkMemoryRouter.h"
 
-struct hkMemoryRouterS;
-hkMemoryRouterS* FUN_00c85750();
-struct hkMemoryRouterS
-{
-    static hkMemoryRouterS& GetMonitorStream()
-    {
-        return *FUN_00c85750();
-    }
-    hkMemoryAllocatorS& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorS* m_pStreamAllocator;
-};
+// hkMemoryRouter: 0x00c85750 returns the shared hkMemoryRouter, with heap at +0x10.
 
-hkMemoryRouterS* FUN_00c85750();
-
-template <class T> struct hkArrayS
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    hkArrayS() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    int getCapacity() const
+    return hkMemoryRouter::getInstance().heap();
+}
+
+template <class T> __forceinline void hkMemoryAllocator::_bufFree(void* p, int numElem)
+{
+    bufFree(p, numElem * sizeof(T));
+}
+
+template <class T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
+{
+    if ((m_iCapacityState & 0x80000000) == 0)
     {
-        return m_iCapacityState & 0x3fffffff;
+        alloc._bufFree<T>(m_data, getCapacity());
     }
-    void clear()
-    {
-        m_iElementCount = 0;
-    }
-    void _clearAndDeallocate(hkMemoryAllocatorS& alloc)
-    {
-        if ((m_iCapacityState & 0x80000000) == 0)
-        {
-            alloc._bufFree<T>(m_data, getCapacity());
-        }
-    }
-    ~hkArrayS()
-    {
-        _clearAndDeallocate(hkMemoryRouterS::GetMonitorStream().heap());
-    }
-};
+}
+
+template <class T, class Allocator> __forceinline hkArray<T, Allocator>::~hkArray()
+{
+    this->_clearAndDeallocate(Allocator().get(this));
+}
 
 struct __declspec(align(16)) QueryCollector
 {
@@ -85,7 +52,7 @@ struct __declspec(align(16)) QueryCollector
     int unk50;
     int unk54;
     int unk58;
-    hkArrayS<void*> m_kHits;
+    hkArray<void*> m_kHits;
     int unk68;
     int unk6C;
     int unk70;

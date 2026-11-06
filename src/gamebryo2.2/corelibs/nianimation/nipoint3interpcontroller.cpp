@@ -1,19 +1,13 @@
 
 // gamebryo2.2/corelibs/nianimation/nipoint3interpcontroller.cpp: free functions (6 functions)
+#include "../../../../include/NiBoolInterpController.h"
+#include "../../../../include/NiKeyBasedInterpolator.h"
+#include "../../../../include/NiPoint3Interpolator.h"
+#include "../../../../include/NiRTTI.h"
 #include "nipoint3interpcontroller_decls.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiObject.h"
 
-struct BSFadeNode
-{
-    static void* operator new(unsigned int);
-};
-struct NiPoint3
-{
-    float x, y, z;
-};
-struct NiPoint3InterpolatorStandIn
-{
-    NiPoint3InterpolatorStandIn* FUN_00a49650(NiPoint3 v);
-};
 typedef void(__thiscall* GetPoint3Fn)(void*, NiPoint3*);
 
 // @fnv 0x00a57c20
@@ -22,9 +16,8 @@ void* __fastcall FUN_00a57c20(void* self, int, unsigned short usIndex)
     NiPoint3 kValue;
     (*(GetPoint3Fn**)self)[0xec / 4](self, &kValue);
     void* pMemory = BSFadeNode::operator new(0x20);
-    NiPoint3InterpolatorStandIn* pInterpolator = (NiPoint3InterpolatorStandIn*)pMemory;
-    if (pInterpolator)
-        return pInterpolator->FUN_00a49650(kValue);
+    if (pMemory)
+        return new (pMemory) NiPoint3Interpolator(kValue);
     return 0;
 }
 
@@ -36,30 +29,15 @@ const char* const* FUN_00a57ca0()
 }
 
 namespace fnv_00a57cb0 {
-class NiRTTI;
-struct GlobalObjectO2_00a7b610;
-extern GlobalObjectO2_00a7b610 g_011f3f70;
-struct NiPoint3
-{
-    float x, y, z;
-};
-class NiObject
-{
-  public:
-    NiObject* DynamicCast(const NiRTTI*) const;
-};
-struct NiPoint3InterpolatorStandIn
-{
-    void FUN_00a494b0(NiPoint3 v);
-};
+extern const NiRTTI g_011f3f70;
 typedef void(__thiscall* GetPoint3Fn)(void*, NiPoint3*);
 
 // Casts pkInterp to a NiPoint3 interpolator, reads a NiPoint3 from self via a virtual call, and passes it to the interpolator.
 // @fnv 0x00a57cb0
 void __fastcall FUN_00a57cb0(void* self, int, NiObject* pkInterp, int)
 {
-    NiPoint3InterpolatorStandIn* pkPoint3Interp =
-        !pkInterp ? 0 : (NiPoint3InterpolatorStandIn*)pkInterp->DynamicCast((const NiRTTI*)&g_011f3f70);
+    NiPoint3Interpolator* pkPoint3Interp =
+        !pkInterp ? 0 : (NiPoint3Interpolator*)pkInterp->DynamicCast(&g_011f3f70);
     NiPoint3 kValue;
     (*(GetPoint3Fn**)self)[0xec / 4](self, &kValue);
     pkPoint3Interp->FUN_00a494b0(kValue);
@@ -67,14 +45,8 @@ void __fastcall FUN_00a57cb0(void* self, int, NiObject* pkInterp, int)
 }  // namespace fnv_00a57cb0
 
 struct ActorCombatGroup;
-template <class T> struct NiTMallocInterface
-{
-};
-template <class T, class A> struct NiTArray
-{
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, T&);
-};
+#include "../../../../include/NiTMallocInterface.h"
+#include "../../../../include/NiTArray.h"
 typedef NiTArray<ActorCombatGroup*, NiTMallocInterface<ActorCombatGroup*> > CombatGroupArray;
 extern const char* const g_011f3f88_arg1;
 void __stdcall FUN_00a390a0(CombatGroupArray* a);

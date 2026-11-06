@@ -2,6 +2,10 @@
 // src/havok/common/base/system/io/reader/buffered/hkbufferedstreamreader.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/system/io/reader/buffered/hkbufferedstreamreader.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../../include/MemoryManager.h"
+#include "../../../../../../../../include/hkBool.h"
+#include "../../../../../../../../include/hkReferencedObject.h"
+
 struct FUN_00d2bb20_cls
 {
     int m_00;
@@ -49,10 +53,6 @@ int FUN_00d2bb40_cls::FUN_00d2bb40()
 
 extern int DAT_0102e388;
 extern int DAT_010ce688;
-struct hkReferencedObject
-{
-    void removeReference();
-};
 struct hkBufferedStreamReader
 {
     int* m_pVTable;
@@ -204,14 +204,6 @@ int __fastcall FUN_00d2bb60(FUN_00d2bb60_cls* self, int unused, int value)
     return value;
 }
 
-struct MemoryManager
-{
-    void* m_00;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    void* m_10;
-};
 MemoryManager* FUN_00c85750();
 void* FUN_00c85620(void*, void*, unsigned int);
 struct FUN_00d2bbd0_cls
@@ -227,7 +219,7 @@ struct FUN_00d2bbd0_cls
 // @fnv 0x00d2bbd0
 FUN_00d2bbd0_cls* FUN_00d2bbd0_cls::Init(int p)
 {
-    void* a = (MemoryManager*)FUN_00c85750()->m_10;
+    void* a = FUN_00c85750()->allocator;
     m_00 = FUN_00c85620(a, (void*)p, 0x40);
     m_04 = 0;
     m_08 = 0;
@@ -237,50 +229,49 @@ FUN_00d2bbd0_cls* FUN_00d2bbd0_cls::Init(int p)
     return this;
 }
 
-struct hkBoolD2B9
-{
-    char m_cBooleanValue;
-};
-
-class hkStreamWriterD2B9
+// Reader interface: 0x00d2b990 fills the buffer via slot 4, matching the read slot used at 0x00cb14f0.
+class BufferedReaderSource
 {
   public:
-    virtual ~hkStreamWriterD2B9() throw();
+    virtual ~BufferedReaderSource() throw();
     virtual void V1() throw();
     virtual void V2() throw();
-    virtual hkBoolD2B9 IsStreamValid() const throw();
-    virtual int write(const void* pvBuf, int iNumBytes) throw();
+    virtual hkBool IsStreamValid() const throw();
+    virtual int read(void* pvBuf, int iNumBytes) throw();
 };
 
-class hkBufferedStreamWriterD2B9
+// Reader buffer: refill at 0x00d2b990 calls compaction at 0x00d2b900; the writer flush is at 0x00d27210.
+class BufferedReaderBuffer
 {
   public:
     int unk00;
     int unk04;
-    hkStreamWriterD2B9* m_stream;
+    BufferedReaderSource* m_stream;
     char* m_buf;
-    int m_bufOffset;
-    int m_writePos;
+    int m_readPos;
+    int m_bufferedBytes;
     int m_bufSize;
+    int m_markPos;
+    int m_markLimit;
 
-    void FUN_00d2b900() throw();
-    int Flush();
+    void CompactBuffer() throw();
+    int RefillBuffer();
 };
 
 // @fnv 0x00d2b990
-int hkBufferedStreamWriterD2B9::Flush()
+int BufferedReaderBuffer::RefillBuffer()
 {
     if (!m_stream->IsStreamValid().m_cBooleanValue)
         return 1;
-    FUN_00d2b900();
-    int iNumBytes = m_bufSize - m_writePos;
+    CompactBuffer();
+    int iNumBytes = m_bufSize - m_bufferedBytes;
     int iTotal = 0;
     while (iTotal < iNumBytes)
     {
-        int iBytesWritten = m_stream->write(m_buf + m_bufOffset, iNumBytes);
-        m_writePos += iBytesWritten;
-        iTotal += iBytesWritten;
-        if (iBytesWritten != iNumBytes)
+        int iBytesRead = m_stream->read(m_buf + m_readPos, iNumBytes);
+        m_bufferedBytes += iBytesRead;
+        iTotal += iBytesRead;
+        if (iBytesRead != iNumBytes)
             return iTotal == 0;
     }
     return 0;
@@ -292,12 +283,6 @@ struct Reader
     virtual void v1();
     virtual void v2();
     virtual unsigned char* v3(unsigned char*);
-};
-struct hkBool
-{
-    unsigned char m_cBooleanValue;
-    hkBool(bool v) : m_cBooleanValue(v)
-    {}
 };
 struct Stream
 {
@@ -393,47 +378,32 @@ void hkTrackerD2BB::Reset(int flags)
 }
 
 extern "C" void __cdecl FUN_00cb1270(void*, const void*, int);
-class BufWriterMarkD2B9
-{
-  public:
-    int unk00;
-    int unk04;
-    hkStreamWriterD2B9* m_stream;
-    char* m_buf;
-    int m_bufOffset;
-    int m_writePos;
-    int m_bufSize;
-    int m_iReadPos;
-    int m_markLimit;
-    void FUN_00d2b900() throw();
-    int Flush();
-};
 // @fnv 0x00d2b900
-void BufWriterMarkD2B9::FUN_00d2b900() throw()
+void BufferedReaderBuffer::CompactBuffer() throw()
 {
-    if (m_iReadPos < 0)
+    if (m_markPos < 0)
     {
-        m_bufOffset = 0;
-        m_writePos = 0;
+        m_readPos = 0;
+        m_bufferedBytes = 0;
         return;
     }
-    if (m_bufOffset - m_iReadPos > m_markLimit)
+    if (m_readPos - m_markPos > m_markLimit)
     {
-        m_bufOffset = 0;
-        m_writePos = 0;
-        m_iReadPos = -1;
+        m_readPos = 0;
+        m_bufferedBytes = 0;
+        m_markPos = -1;
         m_markLimit = -1;
         return;
     }
-    if (m_iReadPos > 0)
+    if (m_markPos > 0)
     {
-        int dataSize = m_bufOffset - m_iReadPos;
+        int dataSize = m_readPos - m_markPos;
         int remainder = dataSize % 512;
         int padBytes = (remainder != 0) ? (512 - remainder) : 0;
-        FUN_00cb1270(m_buf + padBytes, m_buf + m_iReadPos, dataSize);
-        m_iReadPos = padBytes;
-        m_bufOffset = ((dataSize / 512) + (remainder != 0 ? 1 : 0)) * 512;
-        m_writePos = m_bufOffset;
+        FUN_00cb1270(m_buf + padBytes, m_buf + m_markPos, dataSize);
+        m_markPos = padBytes;
+        m_readPos = ((dataSize / 512) + (remainder != 0 ? 1 : 0)) * 512;
+        m_bufferedBytes = m_readPos;
     }
 }
 
@@ -488,7 +458,7 @@ hkBufferedStreamReader* BufferedReaderDeletionView::FUN_00d2bca0(unsigned int fl
     {
         MemoryManager* router = FUN_00c85750();
         unsigned short size = static_cast<unsigned short>(m_uiStandInValue);
-        static_cast<BufferedReaderHeap*>(router->m_10)->ReleaseBlock(this, size);
+        static_cast<BufferedReaderHeap*>(router->allocator)->ReleaseBlock(this, size);
     }
     return this;
 }
@@ -500,5 +470,5 @@ __declspec(noinline) void hkBufferedStreamReader::FUN_00d2bc10()
 {
     void* buffer = m_pVTable;
     MemoryManager* memory = FUN_00c85750();
-    FUN_00c85660(memory->m_10, buffer);
+    FUN_00c85660(memory->allocator, buffer);
 }

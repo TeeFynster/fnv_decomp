@@ -19,7 +19,7 @@ class BGSVoiceType;
 class BSFileEntry;
 class TypedData;
 class InventoryItemEntry;
-class CreatureSoundCollection;
+class CreatureSounds;
 class CollisionComponent;
 class FactionReaction;
 class MagicItemForm;
@@ -863,7 +863,7 @@ class TESCreature : public TESActorBase, public TESAttackDamageForm, public TESM
     union
     {                                                // overlapping CodeView storage
         TESCreature* m_pCreature;                    // +0x128, 4 bytes
-        CreatureSoundCollection* m_pCreatureSounds;  // +0x128, 4 bytes
+        CreatureSounds* m_pCreatureSounds;  // +0x128, 4 bytes
     };
     TypedData Data;                  // +0x12C, 4 bytes
     unsigned char m_ucCreatureType;  // +0x130, 1 bytes
@@ -935,8 +935,8 @@ class TESCreature : public TESActorBase, public TESAttackDamageForm, public TESM
     // bool __cdecl TESCreature::*()
     // TESCreature* __cdecl TESCreature::*()
     // void __cdecl TESCreature::*(TESCreature*)
-    // CreatureSoundCollection* __cdecl TESCreature::*()
-    // CreatureSoundCollection* __cdecl TESCreature::*()
+    // CreatureSounds* __cdecl TESCreature::*()
+    // CreatureSounds* __cdecl TESCreature::*()
     // const char* __cdecl TESCreature::*(CREATURE_SOUND_TYPE)
     // TESSound* __cdecl TESCreature::*(CREATURE_SOUND_TYPE)
     // TESCombatStyle* __cdecl TESCreature::*()

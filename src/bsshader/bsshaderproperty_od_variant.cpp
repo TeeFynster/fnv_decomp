@@ -4,11 +4,7 @@
 
 #include "bsshaderproperty_decls.h"
 
-struct RecursiveSpinLock
-{
-    void Lock(const char*);
-    void Unlock();
-};
+#include "../../include/RecursiveSpinLock.h"
 extern RecursiveSpinLock g_011c5f80;
 struct PoolMemoryAllocator
 {

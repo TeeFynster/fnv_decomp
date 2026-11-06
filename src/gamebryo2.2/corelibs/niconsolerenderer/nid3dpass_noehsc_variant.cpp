@@ -1,7 +1,13 @@
 
 // to their real unit once identified.
 
-#include "nid3dpass_types_NiD3DPass.h"
+#include "layout_support.h"
+class NiD3DPass;
+class NiD3DPixelShader;
+class D3DRenderStateGroup;
+class NiD3DShaderConstantMap;
+class BeamStage;
+class NiD3DVertexShader;
 #include "nid3dpass_types_NiTArray_NiPointer_NiD3DTextureStage__NiTNewInterface_NiPointer_NiD3DTextureStage_____.h"
 #include "nid3dpass_decls.h"
 

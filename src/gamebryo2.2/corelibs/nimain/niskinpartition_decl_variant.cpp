@@ -3,7 +3,10 @@
 // with declarations corrected to what the original code does (unit: __declspec(nothrow) void FUN_00a839d0(unsigned int,SkinItems -> __declspec(nothrow) void FUN_00a839d0(SkinItems*) throw();). Move the function to its real unit once
 // that unit declares it this way.
 
-#include "niskinpartition_decls.h"
+#include "../../../../include/NiAccumulator.h"
+#include "../../../../include/NiSkinPartition.h"
+#include "../../../../include/NiRenderer.h"
+#include "../../../../include/Pair.h"
 const void* g_011f5b1c;
 const void* __cdecl FUN_00a820d0();
 void __stdcall FUN_00a82600(int a, int b, float c);
@@ -13,14 +16,6 @@ struct Holder
     unsigned int m_u4;
     unsigned int m_uiCount;
     bool ContainsSortedSubset(const Holder* pkOther);
-};
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-};
-struct NiRenderer
-{
-    static NiRenderer* ms_pRenderer;
 };
 extern int DAT_0109e47c;
 struct P03MM
@@ -40,10 +35,7 @@ struct NiTAbstractPoolAllocator_unsigned_int
     struct LinkedListEntry* ms_pFreeList;
     struct RecursiveSpinLock* ms_kPoolState;
 };
-struct RecursiveSpinLock
-{
-    void __thiscall Lock(const char*);
-};
+#include "../../../../include/RecursiveSpinLock.h"
 extern RecursiveSpinLock g_011c5f80;
 extern unsigned int DAT_011c5f84;
 extern NiTAbstractPoolAllocator_unsigned_int NiTAbstractPoolAllocator_unsigned_int_instance;
@@ -697,20 +689,21 @@ struct MergeItems
     }
 };
 
+// Selection fields are initialized explicitly at each restart.
+inline Pair::Pair() throw()
+{}
+
 // @fnv 0x00a839d0
 void __stdcall FUN_00a839d0(unsigned char threshold, MergeItems* items)
 {
     // One equivalence id per bounded skin set; 50 entries inferred from the frame.
     int cls[50];
-    struct Pair
-    {
-        unsigned int first, second;
-    } sel;
+    Pair sel;
     long best;
     unsigned int i, j, k, ids;
 restart:
-    sel.first = 0;
-    sel.second = 0;
+    sel.a = 0;
+    sel.b = 0;
     best = -1;
     for (i = 0; i < items->count; ++i)
     {
@@ -727,25 +720,25 @@ restart:
                 score = -1;
             if (score > best)
             {
-                sel.first = i;
-                sel.second = j;
+                sel.a = i;
+                sel.b = j;
                 best = score;
             }
         }
     }
     if (best < 0)
         goto group;
-    items->items[sel.first]->Merge(items->items[sel.second]);
-    if (items->items[sel.first]->key != items->items[sel.second]->key)
+    items->items[sel.a]->Merge(items->items[sel.b]);
+    if (items->items[sel.a]->key != items->items[sel.b]->key)
     {
-        items->items[sel.second]->Merge(items->items[sel.first]);
+        items->items[sel.b]->Merge(items->items[sel.a]);
         goto restart;
     }
-    delete items->items[sel.second];
+    delete items->items[sel.b];
     --items->count;
-    items->items[sel.second] = items->items[items->count];
+    items->items[sel.b] = items->items[items->count];
     {
-        MergeSet* a = items->items[sel.first];
+        MergeSet* a = items->items[sel.a];
         for (k = 0; k < items->count;)
         {
             MergeSet* e = items->items[k];

@@ -1,21 +1,271 @@
-// fallout/ai/middlehighprocess.cpp: MiddleHighProcess, FurnitureProcess, MiddleHighProcessStandIn, ActorPackage_GetTarget_Helper and more (180 functions)
+#include "../../../include/TESSaveLoadGame.h"
+#include "../../../include/SETTING_VALUE.h"
+// fallout/ai/middlehighprocess.cpp: MiddleHighProcess, FurnitureProcess, ActorPackage_GetTarget_Helper and more (180 functions)
 
+// Reuse the checked layouts alongside the generated actor declarations.
+// Dependencies already supplied by generated headers use include_alias.
+// include/TESFile.h needs the Windows types before layout_support.h stubs them.
+#include "../../../include/ANIM_GROUP_WEAPON_ENUM.h"
+#define WIN32_LEAN_AND_MEAN
+#define NOGDI
+#include <windows.h>
+#include "../../../include/NiMemObject.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/Setting.h"
+#include "../../../include/PackageTargetRecord.h"
+// ProcessTarget_middlehighprocess: local type (was include/ProcessTarget.h, which had no evidence of one real class); its methods are 0x008d0430 BaseProcess::GetCurrentPackageInstanceData, 0x0091ab30 MiddleHighProcess::GetTargetForPackage, 0x0091ae00 MiddleHighProcess::SetTargetData, 0x009611e0 NiAVObject::GetParent
+class Actor;
+class PackageRuntime;
+class PackageTargetData;
+class TargetOwner;
+class TESObjectREFR;
+class TESPackage;
+
+namespace shared_types
+{
+    class TESPackage;
+}
+
+class ProcessTarget_middlehighprocess
+{
+public:
+    TESObjectREFR* FUN_0091ae00(Actor*, shared_types::TESPackage*, PackageTargetData*);
+    TESObjectREFR* FUN_0091ae00(Actor*, TESPackage*, PackageTargetData*);
+    PackageRuntime* FUN_008d0430();
+    TESObjectREFR* FUN_0091ab30(Actor*, shared_types::TESPackage*);
+    TESObjectREFR* FUN_0091ab30(Actor*, TESPackage*);
+    TargetOwner* GetOwner();
+};
 #include "middlehighprocess_decls.h"
+#include "../../../include/Actor.h"
+#include "../../../include/ExtraDataList.h"
+#include "PointStorage.h"
+// The generated layout support already supplies this template.
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../../include/NiRefObject.h"
+#pragma include_alias("NiPoint3.h", "../../../include/NiPoint3.h")
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiPoint3.h"
+// In-class bodies of the former NiPoint3_ext stand-in.
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x - kRhs.x, y - kRhs.y, z - kRhs.z);
+}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x + kRhs.x, y + kRhs.y, z + kRhs.z);
+}
+inline float NiPoint3::operator*(const NiPoint3& point) const
+{
+    return x * point.x + y * point.y + z * point.z;
+}
+inline NiPoint3 operator*(float scalar, const NiPoint3& point)
+{
+    return NiPoint3(scalar * point.x, scalar * point.y, scalar * point.z);
+}
+#include "../../../include/NiMatrix3.h"
+#pragma include_alias("TESForm.h", "../../../include/TESForm.h")
+#pragma include_alias("TESFile.h", "../../../include/TESFile.h")
+#pragma include_alias("BaseFormComponent.h", "../../../include/BaseFormComponent.h")
+#pragma include_alias("MagicTarget.h", "../../../include/MagicTarget.h")
+#pragma include_alias("NiRefObject.h", "../../../include/NiRefObject.h")
+#pragma include_alias("TESFullName.h", "../../../include/TESFullName.h")
+#include "../../../include/BGSSaveLoadGame.h"
+#include "../../../include/GO.h"
+#include "../../../include/InventoryStackRecord.h"
+#include "../../../include/NiUpdateData.h"
+// Isolate shared animation dependencies from the generated layout-support templates.
+using ::NiPoint3;
+using ::NiUpdateData;
+using ::NiPointer;
+#include "../../../include/NiControllerManager.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiNode.h"
+
+#include "../../../include/PackageAction.h"
+#include "../../../include/PackageList.h"
+
+#include "../../../include/Script.h"
+#include "../../../include/TESBipedModelForm.h"
+#include "../../../include/TESIdleForm.h"
+
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/TESBoundObject.h"
+
+#pragma include_alias("NiPoint3.h", "../../../include/NiPoint3.h")
+#include "../../../include/MemoryManager.h"
+#include "../../../include/PathingLocation.h"
+namespace fnv_0091eb20 {
+// include/BaseFormComponent.h is the shared header, already read globally
+using ::BaseFormComponent;
+using ::TESChildCell;
+#include "../../../include/BaseFormComponent.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESChildCell.h"
+#include "../../../include/TESObjectREFR.h"
+}
+
+#include "../../../include/NiPoint3.h"
+
+#pragma include_alias("TESForm.h", "../../../include/TESForm.h")
+#pragma include_alias("TESFile.h", "../../../include/TESFile.h")
+#include "../../../include/TESTopicInfo.h"
+
+namespace fnv_00923960 {
+using fnv_0091eb20::BaseFormComponent;
+using fnv_0091eb20::TESChildCell;
+}
+
+#include "../../../include/TESFullName.h"
+#pragma include_alias("BaseFormComponent.h", "../../../include/BaseFormComponent.h")
+#include "../../../include/TESModel.h"
+#pragma include_alias("TESFullName.h", "../../../include/TESFullName.h")
+namespace fnv_0092b830 {
+using ::TESForm;
+using ::TESModel;
+using ::TESFullName;
+#include "../../../include/BGSBodyPart.h"
+#include "../../../include/BGSPreloadable.h"
+#include "../../../include/BGSBodyPartData.h"
+}
+
+#pragma include_alias("NiRefObject.h", "../../../include/NiRefObject.h")
+namespace fnv_00923020 {
+using ::ANIM_GROUP_ENUM;
+#include "../../../include/TESAnimGroup.h"
+}
+
+#include "../../../include/InventoryChanges.h"
+
+namespace fnv_009293b0 {
+#include "../../../include/SL.h"
+}
+
+namespace fnv_00915ae0 {
+#include "../../../include/BSTaskManager.h"
+#include "../../../include/IOManager.h"
+}
+
+namespace fnv_0091e830 {
+}
+
+#include "../../../include/PackageTime.h"
+enum PTYPE;
+
+// Shared process declarations have their own enums and layout-support dependencies.
+using ::NiPoint3;
+// ActorPackageContext is the shared global class; its forward declarations stay in this namespace.
+using ::ActorPackageContext;
+class TESPackage;
+class ActorPackageData;
+// BaseProcess is the shared global class: its overrides here name the global TESObjectREFR and Animation
+using ::TESObjectREFR;
+using ::Animation;
+using ::ActiveEffect;
+using ::Actor;
+using ::ActorCombatGroup;
+using ::ArrowProjectile;
+using ::BGSLoadFormBuffer;
+using ::BSAnimGroupSequence;
+using ::BSBound;
+using ::BSFaceGenAnimationData;
+using ::BSFaceGenNiNode;
+using ::BSShaderPPLightingProperty;
+using ::BipedAnim;
+using ::BooleanFloatQuery;
+using ::DetectionEvent;
+using ::DetectionViewData;
+using ::DialogueItem;
+using ::InventoryStackRecord;
+using ::KFModel;
+using ::LipSyncAnimation;
+using ::MagicCaster;
+using ::MagicItem;
+using ::MobileObject;
+using ::MuzzleFlash;
+using ::PathingAvoidNodeArray;
+using ::SpellItem;
+using ::TESActorBase;
+using ::TESEffectShader;
+using ::TESIdleForm;
+using ::TESObjectWEAP;
+using ::TESTopic;
+using ::bhkCharacterController;
+class TESPackageData;
+class BGSSaveFormBuffer;
+using ::MagicTarget;
+using ::BSStringT;
+using ::BSSimpleList;
+using ::NiPointer;
+using ::NiRefObject;
+#include "../../../include/MiddleHighProcess.h"
+#include "../../../include/HighProcess.h"
+#pragma include_alias("Actor.h", "../../../include/Actor.h")
+#pragma include_alias("BSSimpleArray.h", "../../../include/layout_support.h")
+// PathingRequest is the shared global class (the shared TESObjectREFR names it)
+#include "../../../include/PathingRequest.h"
+#include "../../../include/PathingRequestClosePoint.h"
+namespace shared_types {
+using ::PathingRequest;
+using ::PathingRequestClosePoint;
+using ::NiPoint3;
+using ::NiPoint3;
+using ::NiPoint3;
+using ::NiRefObject;
+using ::NiUpdateData;
+using ::TESForm;
+using ::TESFullName;
+using ::BaseFormComponent;
+using ::TESModel;
+using ::TESBipedModelForm;
+using ::Script;
+using ::TESIdleForm;
+using ::MagicTarget;
+using ::Actor;
+using ::BSStringT;
+using ::BSSimpleList;
+using ::BSSimpleArray;
+enum SOUND_LEVEL;
+using fnv_0092b830::BGSPreloadable;
+using ::PathingLocation;
+using ::InventoryChanges;
+using ::PackageAction;
+using ::PackageTime;
+using ::NiPointer;
+using ::NiMatrix3;
+using ::TESObject;
+using ::TESBoundObject;
+using ::TESWaterForm;
+#include "../../../include/MagicItem.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/QueuedFile.h"
+#include "../../../include/TESCreature.h"
+#include "../../../include/TESFurniture.h"
+#include "../../../include/TESNPC.h"
+#include "../../../include/TESObjectARMO.h"
+#include "../../../include/TESObjectWEAP.h"
+#include "../../../include/BGSProjectile.h"
+#include "../../../include/TESPackage.h"
+#include "../../../include/bhkCharacterController.h"
+}
+
 
 // @fnv 0x00460ff0
-FurnitureMark* MiddleHighProcess::GetFurnitureMarkerData()
+FurnitureMark* MiddleHighProcess::GetFurnitureMarkerData() const
 {
-    return &FurnitureMarker;
+    return const_cast<FurnitureMark*>(&FurnitureMarker);
 }
 
 // @fnv 0x00915d00
-bool MiddleHighProcess::IsFirstActorFlagSet()
+bool MiddleHighProcess::IsFirstActorFlagSet() const
 {
     return m_bFirstActorFlag;
 }
 
 // @fnv 0x00915d40
-bool MiddleHighProcess::IsAdditionalActorFlagSet()
+bool MiddleHighProcess::IsAdditionalActorFlagSet() const
 {
     return m_bAdditionalActorFlag;
 }
@@ -70,11 +320,11 @@ bool MiddleHighProcess::FUN_0044b130()
 }
 
 // @fnv 0x00922af0
-NiNode* MiddleHighProcess::GetActorRootNode(BipedAnim* apBipedAnim)
+::NiNode* MiddleHighProcess::GetActorRootNode(BipedAnim* apBipedAnim) const
 {
     if (apBipedAnim == 0)
         return m_pActorNode;
-    return apBipedAnim->GetBoneNode(BIPED_BONE_WEAPON);
+    return apBipedAnim->GetBoneNode(BIPED_BONE_BIPED_BONE_WEAPON);
 }
 
 // Sets the active flag and ORs the weapon, body and loading flags into their respective members.
@@ -97,39 +347,7 @@ struct BGSLoadFormBuffer;
 struct BGSSaveFormBuffer;
 struct TESForm;
 struct TESObjectREFR;
-struct PackageTargetRecord
-{
-    int GetTargetKind();
-    TESForm* GetTargetForm();
-    int GetTargetObjectType();
-    int GetTargValue();
-    float GetTargAcquireRadius();
-    void SetTargetKind(int);
-    void SetTargetObjectReference(TESObjectREFR*);
-    void SetTargObject(TESForm*);
-    void SetTargObjectType(int);
-    void SetTargValue(int);
-    void SetTargAcquireRadius(float);
-    bool GetIsValidTarget(TESForm*);
-    void Copy(PackageTargetRecord*);
-    bool Compare(PackageTargetRecord*);
-    void Save(int);
-    void InitItem(TESForm*);
-    unsigned short GetSaveSize();
-    void SaveGame(BGSSaveFormBuffer*);
-    void SaveGame();
-    void LoadGame(BGSLoadFormBuffer*);
-    void LoadGame();
-    void InitLoadGame(BGSLoadFormBuffer*);
-    void InitLoadGame();
-    TESObjectREFR* GetReferenceTarget();
-    void* __vecDelDtor(unsigned int);
-    unsigned char m_uiTargetType;
-    char _pad_1[3];
-    int eObjType;
-    int iValue;
-    float m_fTargetValue;
-};
+
 typedef char _sizecheck_PackageTarget[sizeof(PackageTargetRecord) == 16 ? 1 : -1];
 struct FUN_006801a0_shell : public PackageTargetRecord
 {
@@ -175,10 +393,6 @@ FUN_006f74f0_cls* FUN_006f74f0_cls::FUN_006f74f0(ObjA* pObject)
     return this;
 }
 
-struct BGSSaveLoadGame
-{
-    bool FUN_0042ce10();
-};
 struct DH
 {
     bool FUN_004226e0();
@@ -261,7 +475,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct CHUNK;
 struct CellMopp;
 struct GameFormRecord;
@@ -273,22 +486,16 @@ struct FormRecordHeader;
 struct TESFileGroup;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct InventoryChanges;
-struct InventoryStackRecord;
 struct CellDataNode;
 struct MapMarkerData;
 struct MobileObject;
 struct Point3Offset;
-struct NiAVObject;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
@@ -297,31 +504,23 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESContainer;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESObjectREFR;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESSound;
 struct TESTopic;
-struct TESTopicInfo;
 struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct blob4
 {
@@ -369,8 +568,6 @@ struct DetectionViewData;
 struct DialogueItem;
 struct DetectionParameters;
 struct GuardActorPackageData;
-struct HighProcess;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
@@ -378,18 +575,12 @@ struct DetectionEventData;
 struct MuzzleFlash;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
-struct NiControllerManager;
-struct NiNode;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
 struct TESActorBase;
-struct TESBoundObject;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESTopic;
 struct bhkSimpleShapePhantom;
 struct blob12
@@ -398,120 +589,65 @@ struct blob12
 };
 struct FUN_0091e830_shell : public MiddleHighProcess
 {
-    void FUN_0091e830(NiControllerManager*, NiNode*);
+    void FUN_0091e830(::NiControllerManager*, ::NiNode*);
 };
 
 extern const char* DAT_01188b78;
-extern NiNode* DAT_011e0410;
-struct PlayerCharacter;
-extern PlayerCharacter* pPlayer;
-bool __cdecl HandleUnparentedObjectNode(NiNode*);
+extern ::NiNode* DAT_011e0410;
+extern shared_types::PlayerCharacter* pPlayer;
+bool __cdecl HandleUnparentedObjectNode(::NiNode*);
 
-struct NiFixedString
-{
-    char* m_kHandle;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
-
-struct NiAVObjectPalette
-{
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    virtual void vfn_0c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual NiNode* FindAVObject(const NiFixedString& kName);
-};
-
-struct NiControllerManager
-{
-    NiAVObjectPalette* GetStringAtOffset();
-};
 
 struct Animation
 {
-    NiControllerManager* FUN_00496940();
-    NiNode* GetControllerSequence();
+    ::NiControllerManager* FUN_00496940();
+    ::NiNode* GetControllerSequence();
 };
 
-struct PlayerCharacter
-{
-    Animation* GetAnimation(bool);
-};
+
 
 struct SceneObjectLookup
 {
-    static NiAVObject* __cdecl GetObjectByName(NiAVObject*, const char*);
+    static ::NiAVObject* __cdecl GetObjectByName(::NiAVObject*, const char*);
 };
 
 // @fnv 0x0091e830
-void FUN_0091e830_shell::FUN_0091e830(NiControllerManager* apManager, NiNode* ap3D)
+void FUN_0091e830_shell::FUN_0091e830(::NiControllerManager* apManager, ::NiNode* ap3D)
 {
     int ibone = 1;
     bool b1stPerson = false;
 
     if (apManager)
     {
-        if (pPlayer->GetAnimation(true) && apManager == pPlayer->GetAnimation(true)->FUN_00496940())
+        if (pPlayer->GetAnimation(true) && apManager == ((Animation*)pPlayer->GetAnimation(true))->FUN_00496940())
         {
             b1stPerson = true;
-            DAT_011e0410 = apManager->GetStringAtOffset()->FindAVObject(NiFixedString(DAT_01188b78));
+            DAT_011e0410 = reinterpret_cast<::NiNode*>(apManager->GetStringAtOffset()->FindAVObject(NiFixedString(DAT_01188b78)));
         }
         else
         {
-            *(NiNode**)((char*)this + 0x12c) =
-                apManager->GetStringAtOffset()->FindAVObject(NiFixedString(DAT_01188b78));
+            *(::NiNode**)((char*)this + 0x12c) =
+                reinterpret_cast<::NiNode*>(apManager->GetStringAtOffset()->FindAVObject(NiFixedString(DAT_01188b78)));
         }
     }
     else if (ap3D)
     {
-        if (pPlayer->GetAnimation(true) && ap3D == pPlayer->GetAnimation(true)->GetControllerSequence())
+        if (pPlayer->GetAnimation(true) && ap3D == ((Animation*)pPlayer->GetAnimation(true))->GetControllerSequence())
         {
             b1stPerson = true;
-            DAT_011e0410 = (NiNode*)SceneObjectLookup::GetObjectByName((NiAVObject*)ap3D, DAT_01188b78);
+            DAT_011e0410 = (::NiNode*)SceneObjectLookup::GetObjectByName((::NiAVObject*)ap3D, DAT_01188b78);
         }
         else
         {
-            *(NiNode**)((char*)this + 0x12c) =
-                (NiNode*)SceneObjectLookup::GetObjectByName((NiAVObject*)ap3D, DAT_01188b78);
+            *(::NiNode**)((char*)this + 0x12c) =
+                (::NiNode*)SceneObjectLookup::GetObjectByName((::NiAVObject*)ap3D, DAT_01188b78);
         }
     }
 
     if (b1stPerson)
         HandleUnparentedObjectNode(DAT_011e0410);
     else
-        HandleUnparentedObjectNode(*(NiNode**)((char*)this + 0x12c));
+        HandleUnparentedObjectNode(*(::NiNode**)((char*)this + 0x12c));
 }
 }  // namespace fnv_0091e830
 
@@ -534,9 +670,7 @@ struct DetectionParameters;
 struct ExtraDataList;
 struct ExtraLeveledItem;
 struct GuardActorPackageData;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
@@ -544,20 +678,14 @@ struct DetectionEventData;
 struct MuzzleFlash;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
-struct NiNode;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
-struct TESBoundObject;
 struct TESForm;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESTopic;
 struct bhkSimpleShapePhantom;
 struct blob12
@@ -569,10 +697,6 @@ struct FUN_0091e9f0_shell : public MiddleHighProcess
     bool FUN_0091e9f0(InventoryStackRecord*);
 };
 
-struct InventoryStackRecord
-{
-    ~InventoryStackRecord();
-};
 
 // Deletes the object stored at offset 0x118, replaces it with apammo, and returns true.
 // @fnv 0x0091e9f0
@@ -606,7 +730,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -625,9 +748,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -636,24 +757,19 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
 struct LocationDescriptor;
 struct DurationData;
-struct PackageTargetRecord;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
@@ -661,27 +777,19 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESCombatStyle;
 struct PerkEntryConditionSet;
 struct TESContainer;
 struct TESEscortPackageData;
 struct TESFile;
-struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
-struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESPackageData;
 struct TESPatrolPackageData;
 struct TESSound;
@@ -715,24 +823,9 @@ struct FUN_0091eb20_shell : public MiddleHighProcess
     void FUN_0091eb20();
 };
 
-struct TESForm
-{
-    bool IsDeleted() const;
-};
 
-struct TESObjectREFR : public TESForm
-{
-};
 
-struct PackageTargetRecord
-{
-    TESObjectREFR* GetReferenceTarget();
-};
 
-struct TESPackage
-{
-    PackageTargetRecord* GetTarget();
-};
 
 struct MiddleHighProcess_VTableHelper
 {
@@ -895,7 +988,7 @@ struct MiddleHighProcess_VTableHelper
     virtual void v156();
     virtual void v157();
     virtual void v158();
-    virtual TESPackage* GetPackage_27c();
+    virtual shared_types::TESPackage* GetPackage_27c();
 
     char pad04[0x3c];
     TESObjectREFR* pTarget40;
@@ -905,11 +998,11 @@ struct MiddleHighProcess_VTableHelper
 // @fnv 0x0091eb20
 void FUN_0091eb20_shell::FUN_0091eb20()
 {
-    TESPackage* pTargetPackage = ((MiddleHighProcess_VTableHelper*)this)->GetPackage_27c();
-    if (pTargetPackage && pTargetPackage->GetTarget() && pTargetPackage->GetTarget()->GetReferenceTarget())
+    shared_types::TESPackage* pTargetPackage = ((MiddleHighProcess_VTableHelper*)this)->GetPackage_27c();
+    if (pTargetPackage && pTargetPackage->GetTarget() && ((PackageTargetRecord*)pTargetPackage->GetTarget())->GetReferenceTarget())
     {
-        TESObjectREFR* pref = pTargetPackage->GetTarget()->GetReferenceTarget();
-        if (!pref->IsDeleted() && ((MiddleHighProcess_VTableHelper*)this)->pTarget40 &&
+        TESObjectREFR* pref = (TESObjectREFR*)((PackageTargetRecord*)pTargetPackage->GetTarget())->GetReferenceTarget();
+        if (!static_cast<const TESForm*>(pref)->IsDeleted() && ((MiddleHighProcess_VTableHelper*)this)->pTarget40 &&
             pref != ((MiddleHighProcess_VTableHelper*)this)->pTarget40)
         {
             ((MiddleHighProcess_VTableHelper*)this)->SetTarget_12c(pref);
@@ -940,7 +1033,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -960,9 +1052,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -971,24 +1061,19 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
 struct LocationDescriptor;
 struct DurationData;
-struct PackageTargetRecord;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
@@ -996,11 +1081,9 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESCombatStyle;
 struct PerkEntryConditionSet;
 struct TESContainer;
@@ -1008,15 +1091,11 @@ struct TESEscortPackageData;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESPackageData;
 struct TESPatrolPackageData;
 struct TESSound;
@@ -1027,7 +1106,6 @@ struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct bhkSimpleShapePhantom;
 struct blob4
@@ -1052,21 +1130,18 @@ struct blob48
 };
 struct FUN_0091ebb0_shell : public MiddleHighProcess
 {
-    void FUN_0091ebb0(TESPackage*, MobileObject*);
+    void FUN_0091ebb0(shared_types::TESPackage*, MobileObject*);
 };
 
-struct TESPackage
-{
-    TESObjectREFR* GetResolvedTargetReference(MobileObject*);
-};
+
 
 struct ActorPackage_ext
 {
-    void SetPackageAndTarget(TESPackage*, TESObjectREFR*);
+    void SetPackageAndTarget(shared_types::TESPackage*, TESObjectREFR*);
 };
 
 // @fnv 0x0091ebb0
-void FUN_0091ebb0_shell::FUN_0091ebb0(TESPackage* apPack, MobileObject* apActor)
+void FUN_0091ebb0_shell::FUN_0091ebb0(shared_types::TESPackage* apPack, MobileObject* apActor)
 {
     if (apPack == 0)
     {
@@ -1075,7 +1150,7 @@ void FUN_0091ebb0_shell::FUN_0091ebb0(TESPackage* apPack, MobileObject* apActor)
     }
     else
     {
-        TESObjectREFR* ptarget = apPack->GetResolvedTargetReference(apActor);
+        TESObjectREFR* ptarget = (TESObjectREFR*)apPack->GetResolvedTargetReference((shared_types::MobileObject*)apActor);
         ((ActorPackage_ext*)((char*)this + 0xe4))->SetPackageAndTarget(apPack, ptarget);
     }
     (*(void(__thiscall**)(MiddleHighProcess*))(*(int*)this + 0x4a0))(this);
@@ -1097,8 +1172,6 @@ struct DetectionViewData;
 struct DialogueItem;
 struct DetectionParameters;
 struct GuardActorPackageData;
-struct HighProcess;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
@@ -1106,17 +1179,12 @@ struct DetectionEventData;
 struct MuzzleFlash;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
-struct NiNode;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
 struct TESActorBase;
-struct TESBoundObject;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESTopic;
 struct bhkSimpleShapePhantom;
 struct blob12
@@ -1173,8 +1241,6 @@ struct DetectionViewData;
 struct DialogueItem;
 struct DetectionParameters;
 struct GuardActorPackageData;
-struct HighProcess;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
@@ -1182,17 +1248,12 @@ struct DetectionEventData;
 struct MuzzleFlash;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
-struct NiNode;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
 struct TESActorBase;
-struct TESBoundObject;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESTopic;
 struct bhkSimpleShapePhantom;
 struct blob12
@@ -1240,8 +1301,6 @@ struct DetectionViewData;
 struct DialogueItem;
 struct DetectionParameters;
 struct GuardActorPackageData;
-struct HighProcess;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
@@ -1249,17 +1308,12 @@ struct DetectionEventData;
 struct MuzzleFlash;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
-struct NiNode;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
 struct TESActorBase;
-struct TESBoundObject;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESTopic;
 struct bhkSimpleShapePhantom;
 struct blob12
@@ -1294,8 +1348,6 @@ struct DetectionViewData;
 struct DialogueItem;
 struct DetectionParameters;
 struct GuardActorPackageData;
-struct HighProcess;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
@@ -1303,17 +1355,12 @@ struct DetectionEventData;
 struct MuzzleFlash;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
-struct NiNode;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
 struct TESActorBase;
-struct TESBoundObject;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESTopic;
 struct bhkSimpleShapePhantom;
 struct blob12
@@ -1361,8 +1408,6 @@ struct DetectionViewData;
 struct DialogueItem;
 struct DetectionParameters;
 struct GuardActorPackageData;
-struct HighProcess;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
@@ -1370,17 +1415,12 @@ struct DetectionEventData;
 struct MuzzleFlash;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
-struct NiNode;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
 struct TESActorBase;
-struct TESBoundObject;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESTopic;
 struct bhkSimpleShapePhantom;
 struct blob12
@@ -1389,7 +1429,7 @@ struct blob12
 };
 struct FUN_0091eec0_shell : public MiddleHighProcess
 {
-    TESPackage* FUN_0091eec0();
+    shared_types::TESPackage* FUN_0091eec0();
 };
 
 struct Vtbl_0091eec0
@@ -1525,7 +1565,7 @@ struct Vtbl_0091eec0
     virtual void v200();
     virtual void v204();
     virtual void v208();
-    virtual TESPackage* v20c();
+    virtual shared_types::TESPackage* v20c();
     virtual void v210();
     virtual void v214();
     virtual void v218();
@@ -1533,11 +1573,11 @@ struct Vtbl_0091eec0
     virtual void v220();
     virtual void v224();
     virtual void v228();
-    virtual TESPackage* v22c();
+    virtual shared_types::TESPackage* v22c();
 };
 
 // @fnv 0x0091eec0
-TESPackage* FUN_0091eec0_shell::FUN_0091eec0()
+shared_types::TESPackage* FUN_0091eec0_shell::FUN_0091eec0()
 {
     if (reinterpret_cast<Vtbl_0091eec0*>(this)->v20c())
     {
@@ -1571,8 +1611,6 @@ struct FormRecordHeader;
 struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
-struct HighProcess;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
@@ -1581,26 +1619,19 @@ struct MuzzleFlash;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct NiColor;
-struct NiNode;
 struct LocationDescriptor;
 struct DurationData;
-struct PackageTargetRecord;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
-struct Script;
 struct TESActorBase;
-struct TESBoundObject;
 struct TESCombatStyle;
 struct PerkEntryConditionSet;
 struct TESEscortPackageData;
 struct TESFile;
 struct TESForm;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESPackageData;
 struct TESPatrolPackageData;
 struct TESTopic;
@@ -1631,8 +1662,8 @@ struct Calendar
 // @fnv 0x0091ef10
 void FUN_0091ef10_shell::FUN_0091ef10(int aiValue)
 {
-    TESPackage* pTargetPackage =
-        reinterpret_cast<TESPackage*(__thiscall*)(void*)>((*reinterpret_cast<void***>(this))[0x27c / 4])(this);
+    shared_types::TESPackage* pTargetPackage =
+        reinterpret_cast<shared_types::TESPackage*(__thiscall*)(void*)>((*reinterpret_cast<void***>(this))[0x27c / 4])(this);
     if (reinterpret_cast<int(__thiscall*)(void*)>((*reinterpret_cast<void***>(this))[0x20c / 4])(this) != 0)
     {
         reinterpret_cast<void(__thiscall*)(void*, int)>((*reinterpret_cast<void***>(this))[0x218 / 4])(this, aiValue);
@@ -1659,12 +1690,8 @@ struct BGSSaveFormBuffer;
 struct BSAnimGroupSequence;
 struct FindData;
 struct KFModel;
-struct NiAVObject;
-struct NiControllerManager;
 struct NiControllerSequence;
-struct NiNode;
 struct TESAnimGroup;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct Animation
 {
@@ -1672,18 +1699,18 @@ struct Animation
     unsigned char GetField(unsigned char, unsigned char);
     void SetBit(bool, unsigned char);
     bool GetBit(unsigned char);
-    NiNode* GetAnimNode();
-    NiNode* GetAccumRoot();
+    ::NiNode* GetAnimNode();
+    ::NiNode* GetAccumRoot();
     void* GetAnimSequenceMap();
-    float GetSmallestHavokBlendValue(NiNode*);
-    NiControllerManager* GetControllerManager();
-    void RemoveObject(NiAVObject*);
+    float GetSmallestHavokBlendValue(::NiNode*);
+    ::NiControllerManager* GetControllerManager();
+    void RemoveObject(::NiAVObject*);
     float GetTime();
     float GetTime(NiControllerSequence*);
     void SetTime(float);
-    static void SetLipTime(float, NiControllerManager*, NiControllerSequence*);
+    static void SetLipTime(float, ::NiControllerManager*, NiControllerSequence*);
     void SetLipTime(float);
-    bool Init(void*, NiNode*, TESObjectREFR*, bool);
+    bool Init(void*, ::NiNode*, TESObjectREFR*, bool);
     void SetAnimationName(void*, char*);
     void SetAnimationOwner(void*);
     void QueueReloadAnim(unsigned short);
@@ -1693,7 +1720,7 @@ struct Animation
     void SetReloadState(bool);
     void BlendOut(int, bool);
     static float GetDuration(NiControllerSequence*);
-    static float GetDuration(NiNode*, float*, float*);
+    static float GetDuration(::NiNode*, float*, float*);
     float GetDuration();
     void SetLookingDir(float);
     void SkipUpdate(int);
@@ -1707,7 +1734,7 @@ struct Animation
     void ClearGroup(int, float);
     unsigned short GetQueuedGroup(int);
     void ClearBlendInterps();
-    static void ClearBlendInterpsCallback(NiAVObject*);
+    static void ClearBlendInterpsCallback(::NiAVObject*);
     void SetAnimationGroup(TESAnimGroup*);
     short GetGroupSection(unsigned short);
     void UpdateBipOnly(float, NiPoint3*, bool);
@@ -1728,8 +1755,8 @@ struct Animation
     BSAnimGroupSequence* GetFirstActiveSequence();
     BSAnimGroupSequence* GetNextActiveSequence(BSAnimGroupSequence*);
     void SetCurrentSequence(int, BSAnimGroupSequence*);
-    void VerifyUniqueControllerPriorities(NiNode*);
-    static bool StripAllBSKeyframeControllers(NiAVObject*);
+    void VerifyUniqueControllerPriorities(::NiNode*);
+    static bool StripAllBSKeyframeControllers(::NiAVObject*);
     bool SwapSequences(int);
     char GetNextNoteKey(float*);
     int FindNoteKey(int, char*, float*);
@@ -1756,11 +1783,11 @@ struct Animation
     void SpecialIdleFree(bool, bool);
     BSAnimGroupSequence* GetPlayingSequence();
     void ShutdownAllAnimIdles();
-    static NiNode* FindKeyframeNode(NiNode*);
-    static bool RemoveKeyframeControllers(NiAVObject*);
+    static ::NiNode* FindKeyframeNode(::NiNode*);
+    static bool RemoveKeyframeControllers(::NiAVObject*);
     char GetSkipNextBlend();
     void SkipNextBlend();
-    void SetHavokChaseBone(NiAVObject*);
+    void SetHavokChaseBone(::NiAVObject*);
     TESIdleForm* GetSpecialIdleForm();
     BSAnimGroupSequence* GetSpecialIdleSequence();
     unsigned short GetSaveSize(TESObjectREFR*);
@@ -1784,8 +1811,8 @@ struct Animation
     BSAnimGroupSequence* GetAnimationSequence(BSAnimGroupSequence*, unsigned short, int);
     BSAnimGroupSequence* GetAnimationSequence(unsigned short, int);
     void AssignControllerManager(void*);
-    static void FindHighestPriorityCallback(NiAVObject*, FindData*);
-    BSAnimGroupSequence* GetHighestPriority(NiAVObject*);
+    static void FindHighestPriorityCallback(::NiAVObject*, FindData*);
+    BSAnimGroupSequence* GetHighestPriority(::NiAVObject*);
     bool GetMoved();
     void SetMoved(bool);
     bool GetDelayUpdateScenegraph();
@@ -1795,7 +1822,7 @@ struct Animation
     char _pad_1[3];
     TESObjectREFR* m_pAttachedReference;
     char m_acHeaderData[4];
-    NiNode* m_pObjectNode;
+    ::NiNode* m_pObjectNode;
     NiPoint3 m_kNodeTranslation;
     NiPoint3 m_kRootTranslation;
     char m_acNodeName[32];
@@ -1871,7 +1898,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -1890,9 +1916,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -1901,18 +1925,14 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
@@ -1923,24 +1943,18 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESContainer;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESSound;
 struct TESTopic;
 struct TESTopicInfo;
@@ -1971,35 +1985,27 @@ struct FUN_00920fd0_shell : public MiddleHighProcess
     bool FUN_00920fd0(TESObjectREFR*, unsigned int);
 };
 
-struct TESObject
-{
-    TESObject* GetNext(void);
-};
 
-struct TESFurniture
-{
-    static bool __cdecl IsFurnitureSleepMarker(unsigned int);
-    static bool __cdecl IsFurnitureSitMarker(unsigned int);
-};
 
-int __cdecl CountCollisionObjects(NiAVObject*, bool, bool, bool);
+
+int __cdecl CountCollisionObjects(::NiAVObject*, bool, bool, bool);
 
 // @fnv 0x00920fd0
 bool FUN_00920fd0_shell::FUN_00920fd0(TESObjectREFR* apFurnitureRef, unsigned int aiFurnitureNUm)
 {
     bool bdisableCharController = false;
     bool bsit = apFurnitureRef
-                    ? ((TESFurniture*)((TESObject*)apFurnitureRef)->GetNext())->IsFurnitureSitMarker(aiFurnitureNUm)
+                    ? ((shared_types::TESFurniture*)((shared_types::TESObject*)apFurnitureRef)->GetNext())->IsFurnitureSitMarker(aiFurnitureNUm)
                     : false;
     bool bSleepMarker =
         apFurnitureRef
-            ? ((TESFurniture*)((TESObject*)apFurnitureRef)->GetNext())->IsFurnitureSleepMarker(aiFurnitureNUm)
+            ? ((shared_types::TESFurniture*)((shared_types::TESObject*)apFurnitureRef)->GetNext())->IsFurnitureSleepMarker(aiFurnitureNUm)
             : false;
     if (bsit || bSleepMarker)
     {
         bdisableCharController =
             CountCollisionObjects(
-                (*(NiAVObject * (__thiscall**)(TESObjectREFR*))(*(int*)apFurnitureRef + 0x1d0))(apFurnitureRef), false,
+                (*(::NiAVObject * (__thiscall**)(TESObjectREFR*))(*(int*)apFurnitureRef + 0x1d0))(apFurnitureRef), false,
                 false, false) > 0;
     }
     return bdisableCharController;
@@ -2021,8 +2027,6 @@ struct DetectionViewData;
 struct DialogueItem;
 struct DetectionParameters;
 struct GuardActorPackageData;
-struct HighProcess;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
@@ -2030,17 +2034,12 @@ struct DetectionEventData;
 struct MuzzleFlash;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
-struct NiNode;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
 struct TESActorBase;
-struct TESBoundObject;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESTopic;
 struct bhkSimpleShapePhantom;
 struct blob12
@@ -2181,10 +2180,10 @@ struct TESObjectREFR_vfn1d0
     virtual void v71();
     virtual void v72();
     virtual void v73();
-    virtual NiNode* v74();
+    virtual ::NiNode* v74();
 };
 
-NiAVObject* __cdecl FUN_00c54400(NiNode*);
+::NiAVObject* __cdecl FUN_00c54400(::NiNode*);
 
 // If the reference and its furniture marker data exist, returns the marker entry at the offset 0x144 index via FUN_005094b0, otherwise 0.
 // @fnv 0x00921080
@@ -2225,7 +2224,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -2245,9 +2243,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -2256,18 +2252,14 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
@@ -2279,24 +2271,18 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESContainer;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESSound;
 struct TESTopic;
 struct TESTopicInfo;
@@ -2304,7 +2290,6 @@ struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct bhkSimpleShapePhantom;
 struct blob4
@@ -2372,8 +2357,6 @@ struct Actor;
 struct ActorValueStore;
 struct AnimIdle;
 struct Animation;
-struct BGSBodyPart;
-struct BGSBodyPartData;
 struct BGSDebris;
 struct BGSExplosion;
 struct BGSImpactDataSet;
@@ -2394,33 +2377,23 @@ struct FormRecordHeader;
 struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
-struct HighProcess;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
 struct DetectionEventData;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct NiColor;
-struct NiNode;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
-struct QueuedFile;
 struct TESActorBase;
-struct TESBoundObject;
 struct TESFile;
-struct TESForm;
-struct TESIdleForm;
 struct TESModel;
 struct TESModelTextureSwap;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct FileEntryList;
 struct TESTopic;
 struct bhkSimpleShapePhantom;
@@ -2434,51 +2407,36 @@ struct blob12
 };
 struct FUN_0092b830_shell : public MiddleHighProcess
 {
-    void InitBodyPartNodes(NiNode*, BGSBodyPartData*);
+    void InitBodyPartNodes(::NiNode*, BGSBodyPartData*);
 };
 
-class ThreeByThreeMatrix;
 
-class NiAVObject
+
+
+// Exe 0x0092b830: unit-local Interface view; declarations and layout are preserved.
+class MiddlehighprocessInterfaceView
 {
   public:
-    ThreeByThreeMatrix const& GetRotate(void) const;
-};
-
-class BGSBodyPart
-{
-  public:
-    int GetLimb(void);
-};
-
-class Interface
-{
-  public:
-    NiNode* GetRoot(void);
+    ::NiNode* GetRoot(void);
 };
 
 class Model
 {
   public:
-    NiNode* GetObject3D(void);
+    ::NiNode* GetObject3D(void);
 };
 
 class SceneObjectLookup
 {
   public:
-    static NiAVObject* __cdecl GetObjectByName(NiAVObject*, char const*);
-};
-
-struct BGSBodyPartData
-{
-    BGSBodyPart* GetValueByIndex(int limb);
+    static ::NiAVObject* __cdecl GetObjectByName(::NiAVObject*, char const*);
 };
 
 // Looks up each body part's node by name under apNode and stores it in the limb array, then stores the head and torso nodes.
 // @fnv 0x0092b830
-void FUN_0092b830_shell::InitBodyPartNodes(NiNode* apNode, BGSBodyPartData* apBodyPartData)
+void FUN_0092b830_shell::InitBodyPartNodes(::NiNode* apNode, BGSBodyPartData* apBodyPartData)
 {
-    BGSBodyPart** parray = (BGSBodyPart**)&((NiAVObject*)apBodyPartData)->GetRotate();
+    BGSBodyPart** parray = (BGSBodyPart**)&((::NiAVObject*)apBodyPartData)->GetRotate();
     BGSBodyPart* pheadPart;
     BGSBodyPart* ptorsoPart;
     for (int i = 0; i < 15; i++)
@@ -2486,21 +2444,21 @@ void FUN_0092b830_shell::InitBodyPartNodes(NiNode* apNode, BGSBodyPartData* apBo
         if (parray[i] == 0)
             continue;
         BGSBodyPart* pbp = parray[i];
-        const char* pname = (const char*)((Interface*)pbp)->GetRoot();
-        NiNode* plimbRoot = pname ? (NiNode*)SceneObjectLookup::GetObjectByName((NiAVObject*)apNode, pname) : 0;
-        ((NiNode**)((char*)this + 0x1dc))[pbp->GetLimb()] = plimbRoot;
+        const char* pname = (const char*)((MiddlehighprocessInterfaceView*)pbp)->GetRoot();
+        ::NiNode* plimbRoot = pname ? (::NiNode*)SceneObjectLookup::GetObjectByName((::NiAVObject*)apNode, pname) : 0;
+        ((::NiNode**)((char*)this + 0x1dc))[pbp->GetLimb()] = plimbRoot;
     }
     pheadPart = apBodyPartData ? apBodyPartData->GetValueByIndex(1) : 0;
     if (pheadPart && ((Model*)pheadPart)->GetObject3D())
     {
-        *(NiAVObject**)((char*)this + 0x218) =
-            SceneObjectLookup::GetObjectByName((NiAVObject*)apNode, (const char*)((Model*)pheadPart)->GetObject3D());
+        *(::NiAVObject**)((char*)this + 0x218) =
+            SceneObjectLookup::GetObjectByName((::NiAVObject*)apNode, (const char*)((Model*)pheadPart)->GetObject3D());
     }
     ptorsoPart = apBodyPartData ? apBodyPartData->GetValueByIndex(0) : 0;
     if (ptorsoPart && ((Model*)ptorsoPart)->GetObject3D())
     {
-        *(NiAVObject**)((char*)this + 0x21c) =
-            SceneObjectLookup::GetObjectByName((NiAVObject*)apNode, (const char*)((Model*)ptorsoPart)->GetObject3D());
+        *(::NiAVObject**)((char*)this + 0x21c) =
+            SceneObjectLookup::GetObjectByName((::NiAVObject*)apNode, (const char*)((Model*)ptorsoPart)->GetObject3D());
     }
 }
 }  // namespace fnv_0092b830
@@ -2527,7 +2485,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -2547,9 +2504,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -2558,24 +2513,19 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
 struct LocationDescriptor;
 struct DurationData;
-struct PackageTargetRecord;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
@@ -2583,11 +2533,9 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESCombatStyle;
 struct PerkEntryConditionSet;
 struct TESContainer;
@@ -2595,15 +2543,11 @@ struct TESEscortPackageData;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESPackageData;
 struct TESPatrolPackageData;
 struct TESSound;
@@ -2614,7 +2558,6 @@ struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct bhkSimpleShapePhantom;
 struct blob4
@@ -2652,9 +2595,9 @@ struct Calendar
 // @fnv 0x0092bf80
 bool FUN_0092bf80_shell::FUN_0092bf80(Actor* apActor)
 {
-    typedef TESPackage*(__thiscall * GetPkgFn)(void*);
+    typedef shared_types::TESPackage*(__thiscall * GetPkgFn)(void*);
     typedef int(__thiscall * GetProcIdxFn)(void*);
-    TESPackage* pPackage = (*reinterpret_cast<GetPkgFn*>((*reinterpret_cast<int*>(this)) + 0x27c))(this);
+    shared_types::TESPackage* pPackage = (*reinterpret_cast<GetPkgFn*>((*reinterpret_cast<int*>(this)) + 0x27c))(this);
     if (!pPackage)
         return true;
     if (reinterpret_cast<Calendar*>(pPackage)->GetDaysPassed() != -1 &&
@@ -2666,10 +2609,6 @@ bool FUN_0092bf80_shell::FUN_0092bf80(Actor* apActor)
 }  // namespace fnv_0092bf80
 
 namespace fnv_0092c680 {
-struct BGSSaveLoadGame
-{
-    bool FUN_0042ce10();
-};
 struct DH
 {
     bool FUN_004226e0();
@@ -2712,41 +2651,24 @@ void FUN_0092c680_cls::FUN_0092c680()
 }
 }  // namespace fnv_0092c680
 
-struct AVOwnerIf
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual double V0c(int av);
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual double V20(int av);
-};
-struct ExtraDataListX
-{
-    bool FUN_00418a80() const;
-};
-struct ActorX
-{
-    char pad[0xa4];
-    AVOwnerIf avOwner;
-    const ExtraDataListX* GetExtra() const;
-};
+// 0x00418a80 is the extra-data predicate; its ECX-only ABI needs no local class.
+bool __fastcall FUN_00418a80(const ExtraDataList*);
+
 struct FUN_0092c720_cls
 {
     void FUN_008acf70(unsigned int flag, bool v);
-    void UpdateActorFlags(ActorX* actor);
+    void UpdateActorFlags(Actor* actor);
 };
 // @fnv 0x0092c720
-void FUN_0092c720_cls::UpdateActorFlags(ActorX* actor)
+void FUN_0092c720_cls::UpdateActorFlags(Actor* actor)
 {
-    bool a = actor->avOwner.V0c(0x10) < actor->avOwner.V20(0x10);
-    bool b = actor->avOwner.V0c(0x16) < actor->avOwner.V20(0x16);
+    bool a = actor->GetCurrentActorValue(static_cast<ActorValue::Index>(0x10)) <
+             actor->GetPermanentActorValueAdjustment(static_cast<ActorValue::Index>(0x10));
+    bool b = actor->GetCurrentActorValue(static_cast<ActorValue::Index>(0x16)) <
+             actor->GetPermanentActorValueAdjustment(static_cast<ActorValue::Index>(0x16));
     FUN_008acf70(0x20000000, a);
     FUN_008acf70(0x40000000, b);
-    FUN_008acf70(0x10000000, actor->GetExtra()->FUN_00418a80());
+    FUN_008acf70(0x10000000, FUN_00418a80(actor->GetExtra()));
 }
 
 struct ObjB
@@ -2789,8 +2711,6 @@ struct DialogueItem;
 struct DetectionParameters;
 struct ExtraDataList;
 struct GuardActorPackageData;
-struct HighProcess;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
 struct MobileObject;
@@ -2798,17 +2718,12 @@ struct DetectionEventData;
 struct MuzzleFlash;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
-struct NiNode;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
 struct TESActorBase;
-struct TESBoundObject;
-struct TESIdleForm;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESTopic;
 struct bhkSimpleShapePhantom;
 struct blob12
@@ -2836,10 +2751,7 @@ struct QueuedItemList
     PaddedFloatRecord** _ref_006815c0();
     void _ref_0063f7b0();
 };
-struct IOManager
-{
-    void RunQueuedTask(unsigned int, int);
-};
+
 extern IOManager* DAT_01202d98;
 // @fnv 0x00915ae0
 void FUN_00915ae0_shell::ClearQueuedItems()
@@ -2882,7 +2794,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -2902,9 +2813,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -2913,18 +2822,14 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
@@ -2936,24 +2841,18 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESContainer;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESSound;
 struct TESTopic;
 struct TESTopicInfo;
@@ -2961,7 +2860,6 @@ struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct bhkSimpleShapePhantom;
 struct blob4
@@ -3024,15 +2922,7 @@ void FUN_009287e0_shell::FUN_009287e0(Actor* apActor)
 }
 }  // namespace fnv_009287e0
 
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
 
 MemoryManager* __cdecl FUN_00401020(void);
 
@@ -3048,20 +2938,17 @@ struct QueuedItemList
     QueuedItemList* _ref_00726070();
 };
 
-struct MiddleHighProcessQ
-{
-    bool HasMatchingQueuedItem(TESBoundObject* apObject, ExtraDataList* apExtra, bool abEquipped);
-};
+
 
 // Walks the queued-item list at this+0x230 and returns true if an entry matches apObject, apExtra and abEquipped.
 // @fnv 0x009157e0
-bool MiddleHighProcessQ::HasMatchingQueuedItem(TESBoundObject* apObject, ExtraDataList* apExtra, bool abEquipped)
+bool ::MiddleHighProcess::HasMatchingQueuedItem(TESBoundObject* apObject, ExtraDataList* apExtra, bool abEquipped)
 {
     bool bFound = false;
     QueuedItemList* pCurrentElementNext = *(QueuedItemList**)((char*)this + 0x230);
     while (pCurrentElementNext && *pCurrentElementNext->_ref_006815c0() && !bFound)
     {
-        PaddedFloatRecord* pitem = *pCurrentElementNext->_ref_006815c0();
+        ::PaddedFloatRecord* pitem = *pCurrentElementNext->_ref_006815c0();
         if (pitem && *((bool*)pitem + 0xc) == abEquipped && *(TESBoundObject**)pitem == apObject &&
             apExtra == *((ExtraDataList**)pitem + 1))
             bFound = true;
@@ -3071,10 +2958,6 @@ bool MiddleHighProcessQ::HasMatchingQueuedItem(TESBoundObject* apObject, ExtraDa
 }
 
 namespace fnv_00915e50 {
-struct BGSSaveLoadGame
-{
-    bool FUN_0042ce10();
-};
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 struct TESObjectREFRHelper
 {
@@ -3093,9 +2976,9 @@ void MiddleHighProcessF::SetFurnitureMarker(TESObjectREFR* apRef, unsigned char 
     m_ucFurnitureMarkerIndex = aiindex;
     if (apMarker)
     {
-        *((unsigned char*)this + 0x156) = apMarker->m_ucFlags;
-        *(NiPoint3*)((char*)this + 0x148) = apMarker->Position;
-        *(unsigned short*)((char*)this + 0x154) = apMarker->m_usMarkerId;
+        *((unsigned char*)this + 0x156) = apMarker->cMarkerType;
+        *(NiPoint3*)((char*)this + 0x148) = *(NiPoint3*)&apMarker->fX;
+        *(unsigned short*)((char*)this + 0x154) = apMarker->usHeading;
         if (m_pFurnitureReference && !g_BGSSaveLoadGame->FUN_0042ce10())
             ((TESObjectREFRHelper*)m_pFurnitureReference)->SetMarkerState(aiindex, true);
     }
@@ -3151,7 +3034,7 @@ void FUN_00921350_shell::UpdateFurnitureAlignment(Actor* apActor)
         baligned = true;
     }
     if (baligned)
-        AddPostAnimAction(4);
+        AddPostAnimAction(BaseProcess::_PostAnimAction::SIT_SLEEP);
 }
 
 struct DummyFlags
@@ -3178,15 +3061,12 @@ void T_::ForwardToMember(int param)
     ((T_*)((char*)this + 0x450))->FUN_004a3f10((void*)param);
 }
 
-struct StandIn_00929220
-{
-    void FUN_00929220(int value);
-};
+
 
 // @fnv 0x00929220
-void StandIn_00929220::FUN_00929220(int value)
+void shared_types::PlayerCharacter::FUN_00929220(MagicShaderHitEffect* value)
 {
-    *(int*)((char*)this + 0x6a4) = value;
+    *(MagicShaderHitEffect**)((char*)this + 0x6a4) = value;
 }
 
 struct FUN_00929240_Class
@@ -3266,7 +3146,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -3286,9 +3165,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -3297,18 +3174,14 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
@@ -3320,24 +3193,18 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESContainer;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESSound;
 struct TESTopic;
 struct TESTopicInfo;
@@ -3345,7 +3212,6 @@ struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct bhkSimpleShapePhantom;
 struct blob4
@@ -3409,12 +3275,9 @@ struct TESObjectREFR_GetFlags_Helper
     unsigned int CallGetFlags();
 };
 extern TESObjectREFR_GetFlags_Helper DAT_011f2250;
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting733;
-extern Setting_S originalRuntimeFloatSetting734;
+
+extern Setting originalRuntimeFloatSetting733;
+extern Setting originalRuntimeFloatSetting734;
 
 // @fnv 0x0092c120
 void FUN_0092c120_shell::UpdateHideLimbNodes(Actor* apActor, float afDeltaTime)
@@ -3489,17 +3352,14 @@ struct FUN_009b4d90
     void FUN_009b4ec0(FUN_009b4d90* apData);
 };
 
-struct MiddleHighProcessS : MiddleHighProcess
-{
-    void FUN_0092c400(FUN_009b4d90* apData);
-};
+
 
 // @fnv 0x0092c400
-void MiddleHighProcessS::FUN_0092c400(FUN_009b4d90* apData)
+void ::MiddleHighProcess::FUN_0092c400(BooleanFloatQuery* apData)
 {
-    if (!*(FUN_009b4d90**)((char*)this + 0x240))
-        *(FUN_009b4d90**)((char*)this + 0x240) = new FUN_009b4d90;
-    (*(FUN_009b4d90**)((char*)this + 0x240))->FUN_009b4ec0(apData);
+    if (!m_pData)
+        m_pData = reinterpret_cast<BooleanFloatQuery*>(new FUN_009b4d90);
+    reinterpret_cast<FUN_009b4d90*>(m_pData)->FUN_009b4ec0(reinterpret_cast<FUN_009b4d90*>(apData));
 }
 
 namespace fnv_0092c4a0 {
@@ -3651,11 +3511,6 @@ void* Unk147::FUN_00914ab0(unsigned int flags)
     return this;
 }
 
-struct GO
-{
-    int x;
-    ~GO();
-};
 extern int _data_011c16bc;
 struct FUN_00914ae0
 {
@@ -3693,15 +3548,10 @@ void Thunk0091f100::FUN_0091f100(class Actor* apActor)
     ((void(__thiscall*)(Thunk0091f100*, class Actor*, int))(*(void***)this)[498])(this, apActor, 0);
 }
 
-struct MiddleHighProcessStandIn
-{
-    char _pad[0x12C];
-    void* m_pActorNode;
-    void* FUN_00922b20(void* apBiped);
-};
+
 // Returns the stored pointer when apBiped is null, otherwise returns null.
 // @fnv 0x00922b20
-void* MiddleHighProcessStandIn::FUN_00922b20(void* apBiped)
+void* ::MiddleHighProcess::FUN_00922b20(void* apBiped)
 {
     if (apBiped == 0)
         return m_pActorNode;
@@ -3790,20 +3640,8 @@ void MidHighStub::SetLipsynchAnim(LipSyncAnimation* apCreatureLipsynchAnim)
 }
 
 namespace fnv_0091efe0 {
-struct PackageTargetRecord
-{
-    int GetTargetKind();
-    TESForm* GetTargetForm();
-    int GetTargetObjectType();
-};
-struct TESPackage
-{
-    PackageTargetRecord* GetTarget();
-};
-struct TESObject
-{
-    unsigned int GetNext();
-};
+
+
 struct TESObjectREFR_GetFlags_Helper
 {
     unsigned int CallGetFlags();
@@ -3973,7 +3811,7 @@ struct FUN_0091efe0_shell
     virtual void v156();
     virtual void v157();
     virtual ActorPackageContext* GetCurrentActorPackage();
-    virtual TESPackage* GetCurrentPackage();
+    virtual shared_types::TESPackage* GetCurrentPackage();
     bool ProcessPackageTarget(FUN_00891db0_shell* apActor, int ainumb);
 };
 
@@ -3982,12 +3820,12 @@ struct FUN_0091efe0_shell
 bool FUN_0091efe0_shell::ProcessPackageTarget(FUN_00891db0_shell* apActor, int ainumb)
 {
     PackageTargetRecord* ptarg;
-    TESPackage* pTargetPackage = 0;
+    shared_types::TESPackage* pTargetPackage = 0;
     int etype;
     bool bdone;
 
-    pTargetPackage = GetCurrentPackage();
-    ptarg = pTargetPackage->GetTarget();
+    pTargetPackage = (shared_types::TESPackage*)GetCurrentPackage();
+    ptarg = (PackageTargetRecord*)pTargetPackage->GetTarget();
     if (!ptarg)
         return false;
     etype = ptarg->GetTargetKind();
@@ -4001,7 +3839,7 @@ bool FUN_0091efe0_shell::ProcessPackageTarget(FUN_00891db0_shell* apActor, int a
             TESObjectREFR* pref;
             pref = (TESObjectREFR*)((TESObjectREFR_GetFlags_Helper*)pactorPack)->CallGetFlags();
             if (pref)
-                bdone = apActor->FUN_00891db0((void*)((TESObject*)pref)->GetNext(), 0, 1, pref->GetFormID(),
+                bdone = apActor->FUN_00891db0((void*)((shared_types::TESObject*)pref)->GetNext(), 0, 1, pref->GetFormID(),
                                               (char*)this + 0x108);
         }
     }
@@ -4038,7 +3876,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -4058,9 +3895,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -4069,19 +3904,15 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiFormArray;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
@@ -4093,26 +3924,20 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct PerkEntryConditionSet;
 struct TESContainer;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
 struct TESModelTextureSwap;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESSound;
 struct FileEntryList;
 struct TESTopic;
@@ -4121,7 +3946,6 @@ struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct bhkSimpleShapePhantom;
 struct blob4
@@ -4149,10 +3973,6 @@ struct FUN_00921120_shell : public MiddleHighProcess
     bool FUN_00921120(Actor*);
 };
 
-struct TESIdleForm
-{
-    int GetFlagsMasked();
-};
 struct Animation
 {
     void FUN_00498030(TESIdleForm*, Actor*, int);
@@ -4286,14 +4106,9 @@ struct ActorV_00921120
     virtual void v78();
     virtual Animation* GetAnimation();
 };
-struct PlayerCharacter
-{
-    bool FUN_004eaf60();
-    void FUN_005c4210(unsigned char);
-    Animation* GetAnimation(bool);
-};
+
 extern IdleAnimationManager* DAT_011cb6a0;
-extern PlayerCharacter* g_thePlayer;
+extern shared_types::PlayerCharacter* g_thePlayer;
 
 // @fnv 0x00921120
 bool FUN_00921120_shell::FUN_00921120(Actor* apActor)
@@ -4302,7 +4117,7 @@ bool FUN_00921120_shell::FUN_00921120(Actor* apActor)
         DAT_011cb6a0->FindIdleFormForObject((TESObjectREFR*)apActor, *(TESObjectREFR**)((char*)this + 0x140));
     Animation* panim;
     if ((void*)apActor == (void*)g_thePlayer)
-        panim = g_thePlayer->GetAnimation(!g_thePlayer->FUN_004eaf60());
+        panim = (Animation*)g_thePlayer->GetAnimation(!g_thePlayer->FUN_004eaf60());
     else
         panim = ((ActorV_00921120*)apActor)->GetAnimation();
     if (!pidle || !panim)
@@ -4310,26 +4125,18 @@ bool FUN_00921120_shell::FUN_00921120(Actor* apActor)
     panim->FUN_00498030(pidle, apActor, pidle->GetFlagsMasked());
     if ((void*)apActor == (void*)g_thePlayer && g_thePlayer->FUN_004eaf60())
     {
-        g_thePlayer->FUN_005c4210(0);
+        g_thePlayer->FUN_005c4210((unsigned char)0);
         pidle = DAT_011cb6a0->FindIdleFormForObject((TESObjectREFR*)apActor, *(TESObjectREFR**)((char*)this + 0x140));
-        if (pidle && (panim = g_thePlayer->GetAnimation(true)) != 0)
+        if (pidle && (panim = (Animation*)g_thePlayer->GetAnimation(true)) != 0)
             panim->FUN_00498030(pidle, apActor, pidle->GetFlagsMasked());
-        g_thePlayer->FUN_005c4210(1);
+        g_thePlayer->FUN_005c4210((unsigned char)1);
     }
     return true;
 }
 }  // namespace fnv_00921120
 
 namespace fnv_00922960 {
-struct TESFurniture
-{
-    bool GetCanSitOn();
-    bool GetCanSleepOn();
-};
-struct TESObject
-{
-    unsigned int GetNext();
-};
+
 struct RefH
 {
     bool FUN_00568680();
@@ -4363,7 +4170,7 @@ extern bool DAT_011e040c;
 bool FUN_00922960(TESObjectREFR* apRef, long aiFilterData)
 {
     Actor* pActor = (Actor*)aiFilterData;
-    TESFurniture* pFurniture;
+    shared_types::TESFurniture* pFurniture;
     if (!pActor)
         return false;
     if (!apRef || apRef->IsDeleted() || apRef->IsTemporary() || apRef->GetDisabled() ||
@@ -4377,7 +4184,7 @@ bool FUN_00922960(TESObjectREFR* apRef, long aiFilterData)
         return false;
     if (((FUN_00575ca0_s*)apRef)->FUN_00575ca0() != ((FUN_00575ca0_s*)pActor)->FUN_00575ca0())
         return false;
-    pFurniture = (TESFurniture*)((TESObject*)apRef)->GetNext();
+    pFurniture = (shared_types::TESFurniture*)((shared_types::TESObject*)apRef)->GetNext();
     if (DAT_011e040c && pFurniture->GetCanSitOn())
         ((G2*)&g_011e0424)->AddHead((int*)&apRef);
     else if (!DAT_011e040c && pFurniture->GetCanSleepOn())
@@ -4690,10 +4497,7 @@ bool FUN_00929820_shell::FUN_00929820(Actor* actor)
     return result;
 }
 
-struct TESObjectWEAP
-{
-    int GetWeaponType();
-};
+
 struct Crime
 {
     TESObjectREFR* GetTarget();
@@ -4715,7 +4519,7 @@ void FUN_0091e780_s::UpdateWeaponTypeFlags()
         pcurrentWeapon = (*(Crime**)((char*)this + 0x114))->GetTarget();
         if (pcurrentWeapon)
         {
-            switch (((TESObjectWEAP*)pcurrentWeapon)->GetWeaponType())
+            switch (((shared_types::TESObjectWEAP*)pcurrentWeapon)->GetWeaponType())
             {
             case 10:
                 ((char*)this)[0x124] = 1;
@@ -4754,7 +4558,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -4774,9 +4577,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -4785,24 +4586,19 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
 struct LocationDescriptor;
 struct DurationData;
-struct PackageTargetRecord;
 struct PathingAvoidNodeArray;
 struct PathingLocation;
 struct Projectile;
@@ -4810,11 +4606,9 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESCombatStyle;
 struct PerkEntryConditionSet;
 struct TESContainer;
@@ -4822,15 +4616,11 @@ struct TESEscortPackageData;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESPackageData;
 struct TESPatrolPackageData;
 struct TESSound;
@@ -4841,7 +4631,6 @@ struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct bhkSimpleShapePhantom;
 struct blob4
@@ -5040,7 +4829,7 @@ struct ProcessVtbl
     virtual void p156();
     virtual void p157();
     virtual void p158();
-    virtual TESPackage* V27C();
+    virtual shared_types::TESPackage* V27C();
     virtual int V280();
     virtual void V284(int);
     virtual void p162();
@@ -5241,7 +5030,7 @@ struct ProcessVtbl
     virtual void p357();
     virtual void p358();
     virtual void p359();
-    virtual void V5A0(MobileObject*, TESPackage*);
+    virtual void V5A0(MobileObject*, shared_types::TESPackage*);
     virtual bool V5A4();
     virtual void V5A8(bool);
     virtual void p363();
@@ -5410,7 +5199,7 @@ struct ProcessVtbl
 // @fnv 0x0091ecf0
 void FUN_0091ecf0_shell::UpdatePackageSchedule(MobileObject* apActor, int aiScheduleIndex)
 {
-    TESPackage* pTargetPackage = ((ProcessVtbl*)this)->V27C();
+    shared_types::TESPackage* pTargetPackage = ((ProcessVtbl*)this)->V27C();
     ((ProcessVtbl*)this)->V828(false);
     if (((ProcessVtbl*)this)->V20C())
     {
@@ -5463,7 +5252,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -5483,9 +5271,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -5494,18 +5280,14 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
@@ -5517,26 +5299,19 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESContainer;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObject;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESFormList;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESSound;
 struct TESTopic;
 struct TESTopicInfo;
@@ -5545,7 +5320,6 @@ struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct bhkSimpleShapePhantom;
 struct blob4
@@ -5573,18 +5347,6 @@ struct FUN_00923020_shell : public MiddleHighProcess
     void UpdateWeaponAnimation(Actor*);
 };
 
-enum ANIM_GROUP_WEAPON_ENUM
-{
-    ANIM_GROUP_WEAPON_NONE = 0
-};
-struct TESObjectWEAP
-{
-    int GetWeaponType() const;
-};
-struct ItemChange_S
-{
-    TESObjectWEAP* FUN_0044ddc0();
-};
 struct FUN_00493830_shell
 {
     bool FUN_00493830();
@@ -5592,13 +5354,10 @@ struct FUN_00493830_shell
 struct Animation
 {
     bool IsGroupQueued(unsigned short);
-    NiControllerManager* FUN_00496940();
+    ::NiControllerManager* FUN_00496940();
     void FUN_00490400(BSSimpleList<char const*>*);
 };
-struct TESAnimGroup
-{
-    static unsigned short __cdecl AnimGroup(int, ANIM_GROUP_WEAPON_ENUM, int, bool);
-};
+
 struct GM_008b2010
 {
     char const* GetModelFilePath();
@@ -5608,11 +5367,7 @@ struct ModelLoader
     BSSimpleList<char const*>* GetModelFileList(char const*, bool, bool, int);
 };
 extern ModelLoader* g_modelLoader;
-struct Actor_S
-{
-    bool FUN_005722c0(bool);
-    void FUN_00571b50();
-};
+
 struct MHP_S
 {
     void UpdateWeaponDrawnAnimation(bool, ValidBip01Names*, AnimData*, Actor*);
@@ -5767,13 +5522,14 @@ struct MHPActorView_923020
 void FUN_00923020_shell::UpdateWeaponAnimation(Actor* apActor)
 {
     ANIM_GROUP_WEAPON_ENUM eWeaponGroup;
-    TESObjectWEAP* apWeapon;
+    shared_types::TESObjectWEAP* apWeapon;
     BSSimpleList<char const*>* pfileList;
     if (*(bool*)((char*)this + 0xe2) && ((MHPActorView_923020*)apActor)->GetNiNode())
     {
-        if (*(Animation**)((char*)this + 0x1c0) && *(ItemChange_S**)((char*)this + 0x114))
+        if (*(Animation**)((char*)this + 0x1c0) && *(InventoryStackRecord**)((char*)this + 0x114))
         {
-            apWeapon = (*(ItemChange_S**)((char*)this + 0x114))->FUN_0044ddc0();
+            apWeapon = reinterpret_cast<shared_types::TESObjectWEAP*>(
+                (*(InventoryStackRecord**)((char*)this + 0x114))->GetObject());
             eWeaponGroup = DAT_0118a838[apWeapon->GetWeaponType()];
             if (!(*(FUN_00493830_shell**)((char*)this + 0x1c0))->FUN_00493830() &&
                 (*(Animation**)((char*)this + 0x1c0))->FUN_00496940() &&
@@ -5788,8 +5544,8 @@ void FUN_00923020_shell::UpdateWeaponAnimation(Actor* apActor)
         }
         if (*(Animation**)((char*)this + 0x1c0) && (*(FUN_00493830_shell**)((char*)this + 0x1c0))->FUN_00493830())
             return;
-        if (((Actor_S*)apActor)->FUN_005722c0(false))
-            ((Actor_S*)apActor)->FUN_00571b50();
+        if (reinterpret_cast<::Actor*>(apActor)->FUN_005722c0(0))
+            reinterpret_cast<::Actor*>(apActor)->FUN_00571b50();
         else
             ((MHP_S*)this)
                 ->UpdateWeaponDrawnAnimation(*(bool*)((char*)this + 0x135),
@@ -5819,7 +5575,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct CHUNK;
 struct CellMopp;
 struct GameFormRecord;
@@ -5833,22 +5588,17 @@ struct FindData;
 struct HWND__;
 struct BooleanIntegerAccessor;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct MapMarkerData;
 struct MobileObject;
 struct Point3Offset;
-struct NiAVObject;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
@@ -5857,24 +5607,18 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
 struct TESAnimGroup;
-struct TESBoundObject;
 struct TESContainer;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESObjectREFR;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESSound;
 struct TESTopic;
 struct TESTopicInfo;
@@ -5882,7 +5626,6 @@ struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct blob4
 {
@@ -5910,18 +5653,18 @@ struct Animation
     unsigned char GetField(unsigned char, unsigned char);
     void SetBit(bool, unsigned char);
     bool GetBit(unsigned char);
-    NiNode* GetAnimNode();
-    NiNode* GetAccumRoot();
+    ::NiNode* GetAnimNode();
+    ::NiNode* GetAccumRoot();
     void* GetAnimSequenceMap();
-    float GetSmallestHavokBlendValue(NiNode*);
-    NiControllerManager* GetControllerManager();
-    void RemoveObject(NiAVObject*);
+    float GetSmallestHavokBlendValue(::NiNode*);
+    ::NiControllerManager* GetControllerManager();
+    void RemoveObject(::NiAVObject*);
     float GetTime();
     float GetTime(NiControllerSequence*);
     void SetTime(float);
-    static void SetLipTime(float, NiControllerManager*, NiControllerSequence*);
+    static void SetLipTime(float, ::NiControllerManager*, NiControllerSequence*);
     void SetLipTime(float);
-    bool Init(void*, NiNode*, TESObjectREFR*, bool);
+    bool Init(void*, ::NiNode*, TESObjectREFR*, bool);
     void SetAnimationName(void*, char*);
     void SetAnimationOwner(void*);
     void QueueReloadAnim(unsigned short);
@@ -5931,7 +5674,7 @@ struct Animation
     void SetReloadState(bool);
     void BlendOut(int, bool);
     static float GetDuration(NiControllerSequence*);
-    static float GetDuration(NiNode*, float*, float*);
+    static float GetDuration(::NiNode*, float*, float*);
     float GetDuration();
     void SetLookingDir(float);
     void SkipUpdate(int);
@@ -5945,7 +5688,7 @@ struct Animation
     void ClearGroup(int, float);
     unsigned short GetQueuedGroup(int);
     void ClearBlendInterps();
-    static void ClearBlendInterpsCallback(NiAVObject*);
+    static void ClearBlendInterpsCallback(::NiAVObject*);
     void SetAnimationGroup(TESAnimGroup*);
     short GetGroupSection(unsigned short);
     void UpdateBipOnly(float, NiPoint3*, bool);
@@ -5966,8 +5709,8 @@ struct Animation
     BSAnimGroupSequence* GetFirstActiveSequence();
     BSAnimGroupSequence* GetNextActiveSequence(BSAnimGroupSequence*);
     void SetCurrentSequence(int, BSAnimGroupSequence*);
-    void VerifyUniqueControllerPriorities(NiNode*);
-    static bool StripAllBSKeyframeControllers(NiAVObject*);
+    void VerifyUniqueControllerPriorities(::NiNode*);
+    static bool StripAllBSKeyframeControllers(::NiAVObject*);
     bool SwapSequences(int);
     char GetNextNoteKey(float*);
     int FindNoteKey(int, char*, float*);
@@ -5994,11 +5737,11 @@ struct Animation
     void SpecialIdleFree(bool, bool);
     BSAnimGroupSequence* GetPlayingSequence();
     void ShutdownAllAnimIdles();
-    static NiNode* FindKeyframeNode(NiNode*);
-    static bool RemoveKeyframeControllers(NiAVObject*);
+    static ::NiNode* FindKeyframeNode(::NiNode*);
+    static bool RemoveKeyframeControllers(::NiAVObject*);
     char GetSkipNextBlend();
     void SkipNextBlend();
-    void SetHavokChaseBone(NiAVObject*);
+    void SetHavokChaseBone(::NiAVObject*);
     TESIdleForm* GetSpecialIdleForm();
     BSAnimGroupSequence* GetSpecialIdleSequence();
     unsigned short GetSaveSize(TESObjectREFR*);
@@ -6022,8 +5765,8 @@ struct Animation
     BSAnimGroupSequence* GetAnimationSequence(BSAnimGroupSequence*, unsigned short, int);
     BSAnimGroupSequence* GetAnimationSequence(unsigned short, int);
     void AssignControllerManager(void*);
-    static void FindHighestPriorityCallback(NiAVObject*, FindData*);
-    BSAnimGroupSequence* GetHighestPriority(NiAVObject*);
+    static void FindHighestPriorityCallback(::NiAVObject*, FindData*);
+    BSAnimGroupSequence* GetHighestPriority(::NiAVObject*);
     bool GetMoved();
     void SetMoved(bool);
     bool GetDelayUpdateScenegraph();
@@ -6033,7 +5776,7 @@ struct Animation
     char _pad_1[3];
     TESObjectREFR* m_pAttachedReference;
     char m_acHeaderData[4];
-    NiNode* m_pObjectNode;
+    ::NiNode* m_pObjectNode;
     NiPoint3 m_kNodeTranslation;
     NiPoint3 m_kRootTranslation;
     char m_acNodeName[32];
@@ -6067,18 +5810,9 @@ struct Animation
     char m_acTrailingData[8];
 };
 typedef char _sizecheck_Animation[sizeof(Animation) == 316 ? 1 : -1];
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
+
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
-struct TESChildCell
-{
-    virtual TESObjectCELL* GetSaveParentCell();
-};
+
 typedef char _sizecheck_TESChildCell[sizeof(TESChildCell) == 4 ? 1 : -1];
 struct FUN_00923960_shell : public MiddleHighProcess
 {
@@ -6087,7 +5821,7 @@ struct FUN_00923960_shell : public MiddleHighProcess
 
 struct FUN_00496940_t
 {
-    NiControllerManager* FUN_00496940();
+    ::NiControllerManager* FUN_00496940();
 };
 struct FUN_00491040_t
 {
@@ -6097,10 +5831,7 @@ struct FUN_0048f7f0_t
 {
     TESAnimGroup* FUN_0048f7f0() const;
 };
-struct TESAnimGroupX
-{
-    unsigned int GetType();
-};
+
 struct FUN_00897910_t
 {
     unsigned short FUN_00897910(ANIM_GROUP_ENUM, InventoryStackRecord*, bool, Animation*);
@@ -6109,7 +5840,7 @@ struct FUN_00671d10_t
 {
     const char* FUN_00671d10();
 };
-NiAVObject* __cdecl FUN_004aae30(NiAVObject*, char const*);
+::NiAVObject* __cdecl FUN_004aae30(::NiAVObject*, char const*);
 struct FUN_00413f40_t
 {
     NiFixedString& FUN_00413f40();
@@ -6117,10 +5848,6 @@ struct FUN_00413f40_t
 struct NiFixedStr
 {
     operator char const*() const;
-};
-struct FUN_004be2d0_t
-{
-    unsigned char const* GetTargetFullName();
 };
 struct FUN_00508100_shell
 {
@@ -6238,7 +5965,7 @@ struct ProcV
     virtual void v85();
     virtual void v86();
     virtual void v87();
-    virtual void v88(InventoryStackRecord*, NiNode*, int);
+    virtual void v88(InventoryStackRecord*, ::NiNode*, int);
     virtual void v89();
     virtual void v90();
     virtual void v91();
@@ -6250,7 +5977,7 @@ struct ProcV
     virtual void v97();
     virtual void v98();
     virtual void v99();
-    virtual NiNode* v100(BipedAnim*);
+    virtual ::NiNode* v100(BipedAnim*);
     virtual void v101();
     virtual void v102();
     virtual void v103();
@@ -6521,7 +6248,7 @@ struct RefV
     virtual void v113();
     virtual void v114();
     virtual void v115();
-    virtual NiNode* v116();
+    virtual ::NiNode* v116();
 };
 struct NodeV
 {
@@ -6580,14 +6307,14 @@ struct NodeV
     virtual void v52();
     virtual void v53();
     virtual void v54();
-    virtual void v55(NiNode*, bool);
+    virtual void v55(::NiNode*, bool);
 };
 
 // Plays the draw/holster animation group on the actor, updates the animation, and reparents the weapon bone to the sequence's parent node.
 // @fnv 0x00923960
 void FUN_00923960_shell::UpdateWeaponDrawnAnimation(bool abDrawn, BipedAnim* apBiped, Animation* apAnim, Actor* apActor)
 {
-    NiNode* pweaponBone;
+    ::NiNode* pweaponBone;
     ANIM_GROUP_ENUM egroup;
     BSAnimGroupSequence* pseq;
     unsigned short sgroup;
@@ -6597,11 +6324,11 @@ void FUN_00923960_shell::UpdateWeaponDrawnAnimation(bool abDrawn, BipedAnim* apB
         pweaponBone = ((ProcV*)this)->v100(apBiped);
         pseq = ((FUN_00491040_t*)apAnim)->FUN_00491040(4);
         egroup = abDrawn ? (ANIM_GROUP_ENUM)0x18 : (ANIM_GROUP_ENUM)0x17;
-        if (pseq && (DAT_011977e4[((TESAnimGroupX*)((FUN_0048f7f0_t*)pseq)->FUN_0048f7f0())->GetType()][0] == 8 ||
-                     DAT_011977e4[((TESAnimGroupX*)((FUN_0048f7f0_t*)pseq)->FUN_0048f7f0())->GetType()][0] == 7))
+        if (pseq && (DAT_011977e4[((fnv_00923020::TESAnimGroup*)((FUN_0048f7f0_t*)pseq)->FUN_0048f7f0())->GetType()][0] == 8 ||
+                     DAT_011977e4[((fnv_00923020::TESAnimGroup*)((FUN_0048f7f0_t*)pseq)->FUN_0048f7f0())->GetType()][0] == 7))
             return;
-        if (!pseq || (((TESAnimGroupX*)((FUN_0048f7f0_t*)pseq)->FUN_0048f7f0())->GetType() != 0x18 &&
-                      ((TESAnimGroupX*)((FUN_0048f7f0_t*)pseq)->FUN_0048f7f0())->GetType() != 0x19))
+        if (!pseq || (((fnv_00923020::TESAnimGroup*)((FUN_0048f7f0_t*)pseq)->FUN_0048f7f0())->GetType() != 0x18 &&
+                      ((fnv_00923020::TESAnimGroup*)((FUN_0048f7f0_t*)pseq)->FUN_0048f7f0())->GetType() != 0x19))
         {
             sgroup = ((FUN_00897910_t*)apActor)
                          ->FUN_00897910(egroup, (*(InventoryStackRecord**)((char*)this + 0x114)),
@@ -6615,15 +6342,15 @@ void FUN_00923960_shell::UpdateWeaponDrawnAnimation(bool abDrawn, BipedAnim* apB
         }
         if (pseq)
         {
-            NiNode* pnewParent;
-            NiNode* p3d;
+            ::NiNode* pnewParent;
+            ::NiNode* p3d;
             if (((FUN_005722c0_t*)apActor)->FUN_005722c0(0))
             {
                 ((FUN_0098adb0_shell*)pseq)->FUN_0098adb0(((FUN_00508100_shell*)pseq)->FUN_00508100());
                 apAnim->Update((TESObjectREFR*)apActor, 0.0f, ((FUN_00508100_shell*)pseq)->FUN_00508100());
                 apAnim->UpdateMovement((TESObjectREFR*)apActor);
             }
-            p3d = (NiNode*)(apBiped ? (unsigned int)*(Flt*)apBiped : 0);
+            p3d = (::NiNode*)(apBiped ? (unsigned int)*(Flt*)apBiped : 0);
             if (!p3d)
                 p3d = ((RefV*)apActor)->v116();
             if (p3d && !pweaponBone && (*(InventoryStackRecord**)((char*)this + 0x114)))
@@ -6631,8 +6358,8 @@ void FUN_00923960_shell::UpdateWeaponDrawnAnimation(bool abDrawn, BipedAnim* apB
                 ((ProcV*)this)->v88((*(InventoryStackRecord**)((char*)this + 0x114)), p3d, 0);
                 pweaponBone = ((ProcV*)this)->v100(apBiped);
             }
-            pnewParent = (NiNode*)FUN_004aae30(
-                (NiAVObject*)p3d, ((FUN_00671d10_t*)((FUN_0048f7f0_t*)pseq)->FUN_0048f7f0())->FUN_00671d10());
+            pnewParent = (::NiNode*)FUN_004aae30(
+                (::NiAVObject*)p3d, ((FUN_00671d10_t*)((FUN_0048f7f0_t*)pseq)->FUN_0048f7f0())->FUN_00671d10());
             if (pnewParent)
             {
                 ((NodeV*)pnewParent)->v55(pweaponBone, true);
@@ -6650,7 +6377,7 @@ void FUN_00923960_shell::UpdateWeaponDrawnAnimation(bool abDrawn, BipedAnim* apB
                 "AI: Missing %s animation for '%s' (%08X) weapon '%s'.", abDrawn ? g_011d3cdc_arg1 : "Holster",
                 ((RefV*)apActor)->v76(), ((::TESForm*)apActor)->GetFormID(),
                 (*(InventoryStackRecord**)((char*)this + 0x114))
-                    ? (const char*)((FUN_004be2d0_t*)(*(InventoryStackRecord**)((char*)this + 0x114)))->GetTargetFullName()
+                    ? (const char*)(*(InventoryStackRecord**)((char*)this + 0x114))->GetFullName()
                     : $SG7836);
         }
     }
@@ -6658,12 +6385,6 @@ void FUN_00923960_shell::UpdateWeaponDrawnAnimation(bool abDrawn, BipedAnim* apB
 }  // namespace fnv_00923960
 
 namespace fnv_0092c0c0 {
-struct GO
-{
-    int a;
-    GO(int);
-    ~GO();
-};
 struct FUN_0092c0c0
 {
     int x;
@@ -6717,14 +6438,6 @@ struct LH
     bool IsInList(int&);
 };
 
-struct SL
-{
-    void* m_p0;
-    void* m_p1;
-
-    SL();
-};
-
 struct FUN_009293b0_StandIn
 {
     char m_ucUnknownByte[0x1ac];
@@ -6761,23 +6474,10 @@ class Crime
     TESObjectREFR* GetTarget();
 };
 
-class InventoryStackRecord : public Crime
-{
-  public:
-    bool SetEquipmentState(int);
-};
 
-class TESObjectWEAP : public TESObjectREFR
-{
-  public:
-    bool GetIsAutomaticWeapon();
-};
 
-class TESCreature
-{
-  public:
-    float FUN_00821640();
-};
+
+
 
 class FUN_00646020_shell
 {
@@ -6785,46 +6485,38 @@ class FUN_00646020_shell
     float FUN_00646020(bool);
 };
 
-struct MiddleHighProcessStandIn
-{
-    char pad0000[0x114];
-    InventoryStackRecord* pWeapon;
-    InventoryStackRecord* pAmmo;
-    char pad011c[0x1d4 - 0x11c];
-    float fShotsPerSecond;
 
-  public:
-    void UpdateShotsPerSecond(bool);
-};
+
+}  // namespace fnv_00929d40
 
 // Sets fShotsPerSecond to the reciprocal of the weapon's rate when it is automatic and shooting is started, otherwise zero.
 // @fnv 0x00929d40
-void MiddleHighProcessStandIn::UpdateShotsPerSecond(bool abStartShooting)
+void ::MiddleHighProcess::UpdateShotsPerSecond(bool abStartShooting)
 {
-    TESObjectWEAP* pweapon;
+    shared_types::TESObjectWEAP* pweapon;
     float pSPS;
 
     if (pWeapon == 0 || pAmmo == 0)
     {
-        fShotsPerSecond = 0.0f;
+        m_fAnimationSpeed = 0.0f;
     }
     else
     {
-        pweapon = reinterpret_cast<TESObjectWEAP*>(pWeapon->GetTarget());
+        pweapon = reinterpret_cast<shared_types::TESObjectWEAP*>(pWeapon->GetObject());
 
         if (pweapon->GetIsAutomaticWeapon() && abStartShooting)
         {
-            pSPS = reinterpret_cast<TESCreature*>(pweapon)->FUN_00821640() *
-                   reinterpret_cast<FUN_00646020_shell*>(pweapon)->FUN_00646020(pWeapon->SetEquipmentState(8));
-            fShotsPerSecond = 1.0f / pSPS;
+            pSPS = reinterpret_cast<shared_types::TESCreature*>(pweapon)->FUN_00821640() *
+                   reinterpret_cast<fnv_00929d40::FUN_00646020_shell*>(pweapon)->FUN_00646020(pWeapon->SetEquipmentState(8));
+            m_fAnimationSpeed = 1.0f / pSPS;
         }
         else
         {
-            fShotsPerSecond = 0.0f;
+            m_fAnimationSpeed = 0.0f;
         }
     }
 }
-}  // namespace fnv_00929d40
+
 
 // FUN_009139b0 : clears a 0x14-byte state block, resets a sub-object and returns this.
 struct Member14_b5364
@@ -7606,7 +7298,7 @@ struct VirtSrc
     virtual BSShaderPPLightingProperty* v317();
     virtual BSShaderPPLightingProperty* v318();
 };
-void* __cdecl memcpy(void*, const void*, unsigned int);
+using ::memcpy;  // <windows.h> (for include/TESFile.h) declares it
 
 struct Shell914 : public MiddleHighProcess
 {
@@ -7743,27 +7435,9 @@ void Shell914::FUN_00914c60(MiddleHighProcess* apSource)
 }
 }  // namespace fnv_00914c60
 
-class TESBoundObject
-{
-  public:
-    virtual void Unused();
-};
-class TESNPC
-{
-  public:
-    void FUN_006047c0(Actor*, bool, bool, bool, bool);
-};
-class TESCreature
-{
-  public:
-    void FUN_005f9e00(Actor*, bool, bool, bool);
-};
-class TESPackage
-{
-  public:
-    int FUN_0041ca90();
-    bool FUN_00441b00();
-};
+
+
+
 struct ProcessUpdate : MiddleHighProcess
 {
     void FUN_00915bc0(Actor*, bool, bool);
@@ -7771,9 +7445,9 @@ struct ProcessUpdate : MiddleHighProcess
 // @fnv 0x00915bc0
 void ProcessUpdate::FUN_00915bc0(Actor* actor, bool advance, bool force)
 {
-    TESNPC* i = dynamic_cast<TESNPC*>(actor->GetObjectReference());
-    TESCreature* s = dynamic_cast<TESCreature*>(actor->GetObjectReference());
-    TESPackage* h = GetCurrentPackage();
+    shared_types::TESNPC* i = dynamic_cast<shared_types::TESNPC*>(actor->GetObjectReference());
+    shared_types::TESCreature* s = dynamic_cast<shared_types::TESCreature*>(actor->GetObjectReference());
+    shared_types::TESPackage* h = (shared_types::TESPackage*)GetCurrentPackage();
     bool p = true;
     bool a = true;
     if (h)
@@ -7799,7 +7473,7 @@ void ProcessUpdate::FUN_00915bc0(Actor* actor, bool advance, bool force)
     }
     if (actor && actor->GetProcess())
     {
-        actor->GetProcess()->ResetActorModel(1);
+        actor->GetProcess()->ResetActorModel((RESET_3D_FLAGS)1);
     }
     if (advance)
     {
@@ -7905,7 +7579,7 @@ extern float DAT_01012054;
 extern double DAT_01012070;
 extern float DAT_0101786c;
 
-typedef bool(__thiscall* PackageFilter)(TESPackage*, Actor*, Actor*, int, float, int);
+typedef bool(__thiscall* PackageFilter)(shared_types::TESPackage*, Actor*, Actor*, int, float, int);
 typedef ControllerCalls*(__thiscall* ControllerForTarget)(Actor*, Actor*);
 typedef void(__thiscall* ImmediateAction)(Actor*, Actor*, int, int, int, int, int, float, float);
 typedef void(__thiscall* ProcessAction)(Actor*, Actor*, int, bool, bool, bool, int, bool, int);
@@ -7925,7 +7599,7 @@ bool FUN_00916880_shell::TryStartCombatAction(Actor* actor, Actor* target, bool 
 {
     if (HasCombatStarted())
         return false;
-    TESPackage* pkg = GetCurrentPackage();
+    shared_types::TESPackage* pkg = (shared_types::TESPackage*)GetCurrentPackage();
     if (!deferAction && pkg && reinterpret_cast<PackageCalls*>(pkg)->FUN_0041ca90() == 9 &&
         !reinterpret_cast<PackageFilter>((*reinterpret_cast<void***>(pkg))[0x140 / 4])(pkg, target, actor, 0,
                                                                                        DAT_01012054, 0))
@@ -7981,10 +7655,10 @@ bool FUN_00916880_shell::TryStartCombatAction(Actor* actor, Actor* target, bool 
                 return false;
         }
 
-        ResetMovementState();
-        TESPackage* runningPackage = GetOneTimePackage();
+        ClearMovementStopped();
+        shared_types::TESPackage* runningPackage = (shared_types::TESPackage*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
         if (runningPackage && reinterpret_cast<PackageCalls*>(runningPackage)->FUN_00678610())
-            runningPackage = reinterpret_cast<TESPackage*>(
+            runningPackage = reinterpret_cast<shared_types::TESPackage*>(
                 reinterpret_cast<ProcessToken*>(reinterpret_cast<ActorCalls*>(actor)->FUN_005d43c0())->FUN_0041cb10());
 
         if (target && runningPackage && reinterpret_cast<PackageCalls*>(runningPackage)->HasFlag400000() &&
@@ -8047,7 +7721,7 @@ class FUN_009180b0_cls
 // @fnv 0x009180b0
 unsigned char FUN_009180b0_cls::FUN_009180b0(Actor* self, NiPoint3 kPosition, unsigned int a4, unsigned int a5)
 {
-    if (self->Unk_85() == 4 || self->Unk_85() == 9)
+    if (self->GetSitSleepState() == 4 || self->GetSitSleepState() == 9)
     {
         self->Unk_106();
         return 0;
@@ -8073,30 +7747,7 @@ struct TargetReference : TESObjectREFR
 };
 struct TargetProcess : MiddleHighProcess
 {
-    virtual void unkSlot493();
-    virtual void unkSlot494();
-    virtual void unkSlot495();
-    virtual void unkSlot496();
-    virtual void unkSlot497();
-    virtual void unkSlot498();
-    virtual void unkSlot499();
-    virtual void unkSlot500();
-    virtual void unkSlot501();
-    virtual void unkSlot502();
-    virtual void unkSlot503();
-    virtual void unkSlot504();
-    virtual void unkSlot505();
-    virtual void unkSlot506();
-    virtual void unkSlot507();
-    virtual void unkSlot508();
-    virtual void unkSlot509();
-    virtual void unkSlot510();
-    virtual void unkSlot511();
-    virtual void unkSlot512();
-    virtual void unkSlot513();
-    virtual void unkSlot514();
-    virtual void unkSlot515();
-    virtual TESObjectREFR* ResolveTarget(Actor*, TESPackage*);
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
     bool FUN_0091aca0(Actor* actor);
 };
 // @fnv 0x0091aca0
@@ -8104,10 +7755,10 @@ bool TargetProcess::FUN_0091aca0(Actor* actor)
 {
     SetTarget(0);
     PackageForTarget* package = 0;
-    package = (PackageForTarget*)GetOneTimePackage();
+    package = (PackageForTarget*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
     if (!package || (!package->FUN_00671d10() && package->FUN_0041ca90() != 12 && package->FUN_0041ca90() != 13))
         return false;
-    SetTarget(ResolveTarget(actor, (TESPackage*)package));
+    SetTarget(vfn_810(actor, reinterpret_cast<TESPackage*>(package)));
     if (pTarget)
     {
         if (((TargetReference*)pTarget)->FUN_00576d30())
@@ -8120,7 +7771,7 @@ bool TargetProcess::FUN_0091aca0(Actor* actor)
             if (((TargetReference*)pTarget)->FUN_005d43c0()->FUN_0041c8d0())
                 SetTarget(((TargetReference*)pTarget)->FUN_005d43c0()->FUN_0041c8d0());
         }
-        m_kPackageTargetPosition = *pTarget->GetPos();
+        m_kPackageTargetPosition = *static_cast<const ::TESObjectREFR*>(pTarget)->GetPos();
         ((TargetReference*)pTarget)->FUN_00564db0(true);
         return true;
     }
@@ -8181,20 +7832,14 @@ bool FUN_0091d790_shell::FUN_0091d790(ActorInventoryAccess* actor)
 //   0091efd7  pop  ebp
 //   0091efd8  ret  4
 
-// Stand-in for the actor the argument points at.
-struct Actor0091efc0
-{
-    void StopMoving();
-};
-
 // Stand-in for the class that owns StopActorMoving.
 struct FUN_0091efc0_owner
 {
-    void StopActorMoving(Actor0091efc0* apActor);
+    void StopActorMoving(Actor* apActor);
 };
 
 // @fnv 0x0091efc0
-void FUN_0091efc0_owner::StopActorMoving(Actor0091efc0* apActor)
+void FUN_0091efc0_owner::StopActorMoving(Actor* apActor)
 {
     if (apActor)
     {
@@ -8633,7 +8278,7 @@ struct SSHighData
 struct SSTaskQueue
 {
     static SSTaskQueue* GetSingleton();
-    void SendEvent(NiAVObject* node, bool a, bool b, bool c);
+    void SendEvent(::NiAVObject* node, bool a, bool b, bool c);
 };
 struct SSFurnRef
 {
@@ -8761,7 +8406,7 @@ struct SSActor
     virtual void V71();
     virtual void V72();
     virtual void V73();
-    virtual NiAVObject* GetNiNode();
+    virtual ::NiAVObject* GetNiNode();
     virtual void V75();
     virtual void V76();
     virtual void V77();
@@ -8837,7 +8482,7 @@ struct SSActor
     void SetCurrentSitSleepState(int state);
 };
 bool FUN_008c7aa0();
-void FUN_00c69fc0(NiAVObject* node, bool a, bool b, bool c);
+void FUN_00c69fc0(::NiAVObject* node, bool a, bool b, bool c);
 extern SSActor* g_thePlayer;
 
 struct SSProcess : public MiddleHighProcess
@@ -8848,7 +8493,7 @@ struct SSProcess : public MiddleHighProcess
 // @fnv 0x00920d00
 void SSProcess::UpdateSitSleepState(SSActor* actor, int state, TESObjectREFR* furniture, unsigned char index)
 {
-    NiAVObject* node7 = actor ? actor->GetNiNode() : 0;
+    ::NiAVObject* node7 = actor ? actor->GetNiNode() : 0;
     if (node7 && actor != g_thePlayer)
     {
         bool wasSleeping2 = m_ucFurnitureInteractionState == 9 || m_ucFurnitureInteractionState == 4;
@@ -8902,26 +8547,16 @@ void SSProcess::UpdateSitSleepState(SSActor* actor, int state, TESObjectREFR* fu
 }
 
 struct FUN_00921250_Item;
-struct FUN_00921250_Node;
-struct FUN_00921250_Mgr
-{
-    bool FUN_004eaf60();
-    void FUN_005c4210(int);
-    FUN_00921250_Item* FUN_00950a60(int);
-};
+
 struct FUN_00921250_Svc
 {
-    FUN_00921250_Node* FUN_00600950(void* a, int b);
-};
-struct FUN_00921250_Node
-{
-    int GetFlagsMasked();
+    TESIdleForm* FUN_00600950(void* a, int b);
 };
 struct FUN_00921250_Item
 {
     void FUN_00498030(void* a, void* b, int c);
 };
-extern FUN_00921250_Mgr* g_pMgr;
+extern shared_types::PlayerCharacter* g_pMgr;
 extern FUN_00921250_Svc* g_pSvc;
 class FUN_00921250_cls
 {
@@ -9325,14 +8960,14 @@ bool FUN_00921250_cls::ProcessNode(void* arg)
     {
         if (r)
         {
-            g_pMgr->FUN_005c4210(0);
+            g_pMgr->FUN_005c4210((unsigned char)0);
         }
         this->vCall(arg, 1, this->m_f140, this->m_f144);
-        FUN_00921250_Node* pNode = g_pSvc->FUN_00600950(arg, this->m_f140);
+        TESIdleForm* pNode = g_pSvc->FUN_00600950(arg, this->m_f140);
         this->vCall(arg, 4, this->m_f140, this->m_f144);
         if (pNode != 0)
         {
-            FUN_00921250_Item* pItem = g_pMgr->FUN_00950a60(1);
+            FUN_00921250_Item* pItem = (FUN_00921250_Item*)g_pMgr->GetAnimation(true);
             if (pItem != 0)
             {
                 pItem->FUN_00498030(pNode, arg, pNode->GetFlagsMasked());
@@ -9340,26 +8975,24 @@ bool FUN_00921250_cls::ProcessNode(void* arg)
         }
         if (r)
         {
-            g_pMgr->FUN_005c4210(1);
+            g_pMgr->FUN_005c4210((unsigned char)1);
         }
     }
     return true;
 }
 
-struct BipedAnimStandIn
-{
-    void FUN_0088d640();
-};
+// 0x0088d640 updates Actor animation state (actor.cpp), not a BipedAnim.
+void __fastcall FUN_0088d640(Actor*);
 
 struct FUN_00922ad0_owner
 {
-    void FUN_00922ad0(BipedAnimStandIn* apBiped);
+    void FUN_00922ad0(Actor* apActor);
 };
 
 // @fnv 0x00922ad0
-void FUN_00922ad0_owner::FUN_00922ad0(BipedAnimStandIn* apBiped)
+void FUN_00922ad0_owner::FUN_00922ad0(Actor* apActor)
 {
-    apBiped->FUN_0088d640();
+    FUN_0088d640(apActor);
 }
 
 struct FUN_00922b40_cls
@@ -10182,7 +9815,7 @@ void ResetProcess::ResetForActor(ResetActor* actor)
     SetAnimationComplete(false);
     SetCurrentMovementComplete(true);
     SetTarget(0);
-    ResetMovementState();
+    ClearMovementStopped();
     FUN_00914b40();
     SetFlag40(0);
     m_pSecondMagicItem = 0;
@@ -10209,7 +9842,7 @@ void ResetProcess::ResetForActor(ResetActor* actor)
     ((RefListClear*)&m_kSecondaryReferenceList)->FUN_00470470();
     ((RefListClear*)&m_kReferenceList68)->FUN_00470470();
     m_pReference40 = 0;
-    if (!actor->Unk_85() && GetFurnitureReference())
+    if (!actor->GetSitSleepState() && GetFurnitureReference())
         ProcessFurniture(actor);
     SetProcessActive(true);
 }
@@ -10328,7 +9961,7 @@ int FUN_00923e40_cls::RunScheduledAction(Actor* actor, RefX* ref, bool flag)
             if (listA.Has())
             {
                 unsigned int idB = ((ActX*)actor)->F8d6f30();
-                NiPoint3 pos4 = *actor->GetPos();
+                NiPoint3 pos4 = *static_cast<const ::TESObjectREFR*>(actor)->GetPos();
                 int k = s->Kind();
                 if (k == 4)
                 {
@@ -10343,7 +9976,7 @@ int FUN_00923e40_cls::RunScheduledAction(Actor* actor, RefX* ref, bool flag)
                 float f2 = 0.0f;
                 if (!ref || !ref->F6728a0(actor, &f2))
                     f2 = *DAT_011cdebc.Get();
-                DAT_011c3f2c->Run(idB, &pos4, f2, actor->GetPos(), f2, FUN_0090e660, actor);
+                DAT_011c3f2c->Run(idB, &pos4, f2, static_cast<const ::TESObjectREFR*>(actor)->GetPos(), f2, FUN_0090e660, actor);
                 f8c = 0;
                 f88 = 0;
                 ListB* l = &listB;
@@ -12360,12 +11993,13 @@ struct ArrowListRemoveHelper
 {
     void FUN_00905330(ArrowProjectile* const& projectile);
 };
-struct MiddleHighProcess_00929470 : MiddleHighProcess
+// 0x00929470 is MiddleHighProcess::RemoveArrowProjectile; retain only the missing declaration on the shared layout.
+struct ArrowProjectileRemoval : ::MiddleHighProcess
 {
     void RemoveArrowProjectile(ArrowProjectile* projectile);
 };
 // @fnv 0x00929470
-void MiddleHighProcess_00929470::RemoveArrowProjectile(ArrowProjectile* projectile)
+void ArrowProjectileRemoval::RemoveArrowProjectile(ArrowProjectile* projectile)
 {
     if (!projectile || !m_pArrowProjectileList)
         return;
@@ -12374,37 +12008,13 @@ void MiddleHighProcess_00929470::RemoveArrowProjectile(ArrowProjectile* projecti
 
 struct S_0092adb0_Data
 {
-    bool InitPatrolPackage(Actor* actor, TESPackage* package);
+    bool InitPatrolPackage(Actor* actor, shared_types::TESPackage* package);
 };
-struct S_0092adb0_Proc : public MiddleHighProcess
+// S_0092adb0_Proc's own virtual calls: slots 520 on of the MiddleHighProcess vtable as this view declares them
+struct S_0092adb0_ProcSlots : MiddleLowProcess
 {
-    virtual void unk493();
-    virtual void unk494();
-    virtual void unk495();
-    virtual void unk496();
-    virtual void unk497();
-    virtual void unk498();
-    virtual void unk499();
-    virtual void unk500();
-    virtual void unk501();
-    virtual void unk502();
-    virtual void unk503();
-    virtual void unk504();
-    virtual void unk505();
-    virtual void unk506();
-    virtual void unk507();
-    virtual void unk508();
-    virtual void unk509();
-    virtual void unk510();
-    virtual void unk511();
-    virtual void unk512();
-    virtual void unk513();
-    virtual void unk514();
-    virtual void unk515();
-    virtual void unk516();
-    virtual void unk517();
-    virtual void unk518();
-    virtual void unk519();
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // shared MiddleHighProcess slots 520..539 (include/MiddleHighProcess.h vfn_820..vfn_86c)
     virtual void unk520();
     virtual void unk521();
     virtual void unk522();
@@ -12420,17 +12030,20 @@ struct S_0092adb0_Proc : public MiddleHighProcess
     virtual void unk532();
     virtual void unk533();
     virtual void unk534(Actor* actor, S_0092adb0_Data* data);
+};
+struct S_0092adb0_Proc : public MiddleHighProcess
+{
     bool CheckPackageAndRun(Actor* actor, S_0092adb0_Data* data);
 };
 // @fnv 0x0092adb0
 bool S_0092adb0_Proc::CheckPackageAndRun(Actor* actor, S_0092adb0_Data* data)
 {
-    if (!data->InitPatrolPackage(actor, GetCurrentPackage()))
+    if (!data->InitPatrolPackage(actor, (shared_types::TESPackage*)GetCurrentPackage()))
     {
-        SetAnimationState(-1);
+        SetAnimationState(0xFFFFFFFFu);
         return false;
     }
-    unk534(actor, data);
+    ((S_0092adb0_ProcSlots*)this)->unk534(actor, data);
     return true;
 }
 
@@ -12583,60 +12196,10 @@ struct PackageX
 {
     unsigned int GetRadius(ActorY*);
 };
-struct PathReq
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    PathReq();
-    ~PathReq();
-    void SetFlag(bool);
-    void SetAngle(float);
-};
 struct ActorY
 {
-    void PathToLocation(PathReq*, int, int, void*, float, int);
-    void SetPathingRequestAvoidNodes(PathReq*);
+    void PathToLocation(PathingRequest*, int, int, void*, float, int);
+    void SetPathingRequestAvoidNodes(PathingRequest*);
     bool FUN_008b3bb0();
 };
 struct TargetX
@@ -13202,7 +12765,7 @@ void ProcX::FUN_0092ae20(ActorY* apActor, TargetX* apTarget)
     }
     SetTarget(pRef8);
     float fRadius3 = FUN_006e25d0();
-    PackageX* pPackage = GetOneTimePackage();
+    PackageX* pPackage = (PackageX*)GetOneTimePackage();
     if (pPackage)
     {
         fRadius3 = FUN_00404010(fRadius3, (float)pPackage->GetRadius(apActor));
@@ -13213,12 +12776,12 @@ void ProcX::FUN_0092ae20(ActorY* apActor, TargetX* apTarget)
     {
         fRadius3 = 10.0f;
     }
-    PathReq kRequest4;
+    PathingRequest kRequest4;
     apActor->PathToLocation(&kRequest4, pRef8->V1F4(), pRef8->GetCull(), FUN_00575d70(pRef8), fRadius3, 0);
-    kRequest4.SetFlag(false);
+    kRequest4.SetUseSoft(false);
     if (bIsType5 || pBase2 == DAT_011ca248)
     {
-        kRequest4.SetAngle(pRef8->GetAngle().z);
+        kRequest4.SetTargetAngle(pRef8->GetAngle().z);
     }
     apActor->SetPathingRequestAvoidNodes(&kRequest4);
     apTarget->unk04 = 1;
@@ -13439,7 +13002,7 @@ struct FUN_0092b460_cls
     FUN_0092b460_cls* GetTargetFromOffset();
     FUN_0092b460_cls* FUN_008d8520();
     FUN_0092b460_cls* FUN_008d0430();
-    void Run(FUN_0092b460_cls* a, int b, int c, int d);
+    void FUN_005ac1e0(FUN_0092b460_cls* a, int b, int c, int d);
     void FUN_0092b460(FUN_0092b460_cls* a1, FUN_0092b460_cls* a2);
 };
 
@@ -13471,7 +13034,7 @@ void FUN_0092b460_cls::FUN_0092b460(FUN_0092b460_cls* a1, FUN_0092b460_cls* a2)
         c5 = q->FUN_008d0430();
         if (c5 != 0)
         {
-            c5->Run(a1, 0, 0, 0);
+            c5->FUN_005ac1e0(a1, 0, 0, 0);
         }
     }
 }
@@ -13833,27 +13396,27 @@ void FUN_0092bf20_cls::FUN_0092bf20(FUN_008b3d30_s* p)
     this->m_e1 = 0;
 }
 
-template <> NiPointer<NiNode>& NiPointer<NiNode>::operator=(NiNode*);
+template <> NiPointer<::NiNode>& NiPointer<::NiNode>::operator=(::NiNode*);
 
 class MiddleHighProcess__DeferredHideLimb
 {
   public:
     float fTime;
     int iLimbIndex;
-    NiPointer<NiNode> spLimbNode;
-    NiPointer<NiNode> spReplacementNode;
+    NiPointer<::NiNode> spLimbNode;
+    NiPointer<::NiNode> spReplacementNode;
     bool m_bHideLimb;
     MiddleHighProcess__DeferredHideLimb();
 };
 
 struct FUN_0092bff0_shell : public MiddleHighProcess
 {
-    void QueueDeferredHideLimb(int aiLimbIndex, NiNode* apLimbNode, NiNode* apReplacementNode, bool abExplosion);
+    void QueueDeferredHideLimb(int aiLimbIndex, ::NiNode* apLimbNode, ::NiNode* apReplacementNode, bool abExplosion);
 };
 
 // Allocates a deferred hide-limb entry, stores the time, explosion flag, limb index and both nodes, then adds it to the head of the list.
 // @fnv 0x0092bff0
-void FUN_0092bff0_shell::QueueDeferredHideLimb(int aiLimbIndex, NiNode* apLimbNode, NiNode* apReplacementNode,
+void FUN_0092bff0_shell::QueueDeferredHideLimb(int aiLimbIndex, ::NiNode* apLimbNode, ::NiNode* apReplacementNode,
                                                bool abExplosion)
 {
     MiddleHighProcess__DeferredHideLimb* pDeferredHideLimb = new MiddleHighProcess__DeferredHideLimb();
@@ -14295,76 +13858,6 @@ void CFActor::CopyFromActor(CFActor* apSource)
 
 #include <stdio.h>
 
-class PathingLocation
-{
-  public:
-    PathingLocation(const NiPoint3&, TESObjectCELL*);
-    ~PathingLocation();
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-};
-class PathingRequestClosePoint
-{
-  public:
-    PathingRequestClosePoint();
-    virtual ~PathingRequestClosePoint();
-    void SetOrigin(const PathingLocation&);
-    void FUN_00507610(float);
-    void FUN_006e5ee0(float);
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9C;
-    unsigned int unkA0;
-    unsigned int unkA4;
-    unsigned int unkA8;
-    unsigned int unkAC;
-    unsigned int unkB0;
-    unsigned int unkB4;
-};
 struct WanderPackage
 {
     int GetProcedureType();
@@ -14392,8 +13885,8 @@ bool WanderProcess::WanderToPoint(WanderActor* actor, int unused)
 {
     if (!actor->GetParentCell())
         return false;
-    TESPackage* e = 0;
-    e = GetOneTimePackage();
+    shared_types::TESPackage* e = 0;
+    e = (shared_types::TESPackage*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
     if (!e)
         return false;
     if (((WanderPackage*)e)->GetProcedureType() != 1)
@@ -14407,7 +13900,7 @@ bool WanderProcess::WanderToPoint(WanderActor* actor, int unused)
     j.FUN_00507610(32.0f);
     j.FUN_006e5ee0((float)((WanderPackage*)e)->FUN_00676280(actor));
     GetObjectPosition(&j, &c);
-    if (actor->Unk_85())
+    if (actor->GetSitSleepState())
         UpdateActorInteraction(actor);
     actor->FUN_008b3690(&c, actor->GetParentCell(), actor->FUN_00575d70(), 100.0f, 0);
     if (FUN_00703180() == actor)
@@ -14996,7 +14489,7 @@ class PaddedFloatRecord
 struct QueueActor
 {
     int FUN_008a7570();
-    TESObjectWEAP* FUN_008a1710();
+    shared_types::TESObjectWEAP* FUN_008a1710();
     bool FUN_00894cc0(bool);
     void FUN_0088c830(QueueObject*, int, ExtraDataList*, bool, bool, bool);
     bool FUN_0088d7d0(QueueObject*, int, ExtraDataList*, bool, bool, bool);
@@ -15036,11 +14529,11 @@ void QueueProcess::ProcessQueuedItems(QueueActor* actor)
                 if (actor->FUN_008a7570() == 7 && !actor->FUN_008a1710())
                     actor->FUN_00894cc0(false);
                 actor->FUN_0088c830(h->object, h->count, h->extra, h->equipFlag1, h->equipFlag2, h->flag3);
-                TESObjectWEAP* e = 0;
+                shared_types::TESObjectWEAP* e = 0;
                 bool k = false;
                 if (h->object->FUN_00401170() == 40)
                 {
-                    e = (TESObjectWEAP*)h->object;
+                    e = (shared_types::TESObjectWEAP*)h->object;
                     if (e->GetWeaponType() == 10 || e->GetWeaponType() == 11 || e->GetWeaponType() == 12 ||
                         e->GetWeaponType() == 13)
                     {
@@ -15053,7 +14546,7 @@ void QueueProcess::ProcessQueuedItems(QueueActor* actor)
             else
             {
                 actor->FUN_0088d7d0(h->object, h->count, h->extra, h->unequipFlag1, h->unequipFlag2, h->flag3);
-                QueueAnimation* animation = (QueueAnimation*)GetAnimation();
+                QueueAnimation* animation = (QueueAnimation*)((BaseProcess*)this)->GetAnimation();
                 if (animation && !animation->FUN_00494710(FUN_005f2370(0, 1, 24, false)))
                 {
                     void* model = g_modelLoader->FUN_00447330(actor->FUN_005715d0(), true, false, true);
@@ -15372,37 +14865,16 @@ extern P114Clock DAT_011de7b8;
 extern TESBoundObject* DAT_011ca244;
 extern TESBoundObject* DAT_011ca248;
 P114Global* __cdecl FUN_004839c0(unsigned int);
-struct P114Process : MiddleHighProcess
+// P114Process's own virtual calls: slots 520 on of the MiddleHighProcess vtable as this view declares them
+struct P114ProcessSlots : MiddleLowProcess
 {
-    virtual void slot493();
-    virtual void slot494();
-    virtual void slot495();
-    virtual void slot496();
-    virtual void slot497();
-    virtual void slot498();
-    virtual void slot499();
-    virtual void slot500();
-    virtual void slot501();
-    virtual void slot502();
-    virtual void slot503();
-    virtual void slot504();
-    virtual void slot505();
-    virtual void slot506();
-    virtual void slot507();
-    virtual void slot508();
-    virtual void slot509();
-    virtual void slot510();
-    virtual void slot511();
-    virtual void slot512();
-    virtual void slot513();
-    virtual void slot514();
-    virtual void slot515();
-    virtual void slot516();
-    virtual void slot517();
-    virtual void slot518();
-    virtual void slot519();
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // shared MiddleHighProcess slots 520..539 (include/MiddleHighProcess.h vfn_820..vfn_86c)
     virtual void slot520();
     virtual bool Move(Actor*, P114Point, void*, void*);
+};
+struct P114Process : MiddleHighProcess
+{
     float FUN_007df1f0();
     void FUN_00916df0(Actor* actor);
 };
@@ -15410,7 +14882,7 @@ struct P114Process : MiddleHighProcess
 void P114Process::FUN_00916df0(Actor* actor)
 {
     P114Package* i = 0;
-    i = (P114Package*)GetOneTimePackage();
+    i = (P114Package*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
     if (!pTarget)
         FindPackageTarget(actor);
     P114RefOps* eb = ((P114ActorOps*)actor)->FUN_008a2d40();
@@ -15430,11 +14902,11 @@ void P114Process::FUN_00916df0(Actor* actor)
         P114Package* l = (P114Package*)e->GetCurrentAIProcess()->GetCurrentPackage();
         if (pTarget != DAT_011dea3c && (!l || (l->FUN_0041ca90() != 1 && !l->FUN_00674d40())))
         {
-            SetAnimationState(0);
+            SetAnimationState(0u);
             return;
         }
     }
-    P114Point a = ((P114Point*)actor->GetPos())->FUN_00439ef0(*(P114Point*)actor->GetPos());
+    P114Point a = ((P114Point*)static_cast<const ::TESObjectREFR*>(actor)->GetPos())->FUN_00439ef0(*(P114Point*)static_cast<const ::TESObjectREFR*>(actor)->GetPos());
     float p = 0.0f;
     TESObjectREFR* f = 0;
     P114Point h;
@@ -15443,7 +14915,7 @@ void P114Process::FUN_00916df0(Actor* actor)
     s.FUN_006815c0();
     if (cf)
     {
-        a = ((P114Point*)actor->GetPos())->FUN_00439ef0(*(P114Point*)pTarget->GetPos());
+        a = ((P114Point*)static_cast<const ::TESObjectREFR*>(actor)->GetPos())->FUN_00439ef0(*(P114Point*)static_cast<const ::TESObjectREFR*>(pTarget)->GetPos());
         f = pTarget;
         p = 0.0f;
         int count = i->FUN_00671d10()->FUN_0044ddc0();
@@ -15489,7 +14961,7 @@ void P114Process::FUN_00916df0(Actor* actor)
                             location2 = m_pReference40;
                         if (location2 && (((P114RefOps*)location2)->FUN_007af430() == DAT_011ca244 ||
                                           ((P114RefOps*)location2)->FUN_007af430() == DAT_011ca248))
-                            locationPos = (P114Point*)location2->GetPos();
+                            locationPos = (P114Point*)static_cast<const ::TESObjectREFR*>(location2)->GetPos();
                     }
                     ((P114ActorView*)actor)
                         ->SetDestination(item2->FUN_0044ddc0(), c, i->FUN_00672930(), locationPos, 0);
@@ -15502,17 +14974,17 @@ void P114Process::FUN_00916df0(Actor* actor)
         {
             SetProcessTarget(actor, 1);
             Actor* other2 = (Actor*)pTarget;
-            if (other2->GetCurrentAIProcess()->GetOneTimePackage())
+            if (static_cast<const BaseProcess*>(other2->GetCurrentAIProcess())->GetOneTimePackage())
             {
                 other2->GetCurrentAIProcess()->SetProcessTarget(actor, 1);
-                if (((P114Package*)other2->GetCurrentAIProcess()->GetOneTimePackage())->FUN_00674d40())
+                if (((P114Package*)static_cast<const BaseProcess*>(other2->GetCurrentAIProcess())->GetOneTimePackage())->FUN_00674d40())
                 {
-                    P114Package* running = (P114Package*)other2->GetCurrentAIProcess()->GetOneTimePackage();
+                    P114Package* running = (P114Package*)static_cast<const BaseProcess*>(other2->GetCurrentAIProcess())->GetOneTimePackage();
                     delete (TESForm*)running;
                     other2->GetCurrentAIProcess()->StopPackage();
                     if (((P114ActorOps*)other2)->FUN_008b3bb0())
                         ((P114ActorOps*)other2)->FUN_0087faa0();
-                    CanProcessActor(actor, false);
+                    CheckForNewPackage(actor, false);
                     return;
                 }
             }
@@ -15523,8 +14995,8 @@ void P114Process::FUN_00916df0(Actor* actor)
     }
     if (cf)
     {
-        h = ((P114Point*)actor->GetPos())->FUN_00439ef0(i->FUN_00675de0(actor));
-        s = ((P114Point*)f->GetPos())->FUN_00439ef0(i->FUN_00675de0(actor));
+        h = ((P114Point*)static_cast<const ::TESObjectREFR*>(actor)->GetPos())->FUN_00439ef0(i->FUN_00675de0(actor));
+        s = ((P114Point*)static_cast<const ::TESObjectREFR*>(f)->GetPos())->FUN_00439ef0(i->FUN_00675de0(actor));
         if (((p < a.FUN_00457990() && h.FUN_00457990() <= s.FUN_00457990()) ||
              (f != DAT_011dea3c && ((MobileObject*)f)->GetCurrentPackage() &&
               ((P114Package*)((MobileObject*)f)->GetCurrentPackage())->FUN_00678610())) &&
@@ -15536,7 +15008,7 @@ void P114Process::FUN_00916df0(Actor* actor)
         }
     }
     if (((P114ActorOps*)actor)->FUN_008b3bb0() && (!cf || p >= a.FUN_00457990()) &&
-        !Move(actor, i->FUN_00675de0(actor), i->FUN_00675c20(actor), i->FUN_00675a50(actor)))
+        !((P114ProcessSlots*)this)->Move(actor, i->FUN_00675de0(actor), i->FUN_00675c20(actor), i->FUN_00675a50(actor)))
         return;
     if (!((P114ActorOps*)actor)->FUN_008b3bb0())
     {
@@ -16362,12 +15834,7 @@ extern GlobalObject_0044fae0 g_011e043c;
 unsigned int DialogueRandom();
 struct FurnitureProcess : MiddleHighProcess
 {
-    virtual void Slot493();
-    virtual void Slot494();
-    virtual void Slot495();
-    virtual void Slot496();
-    virtual void Slot497();
-    virtual void UseFurniture(Actor*, bool);
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
     void FUN_00922670(Actor*, bool, int);
     void FUN_0092c680();
     void FUN_00917a70(FurnitureActorAccess* actor, int elapsed);
@@ -16375,17 +15842,17 @@ struct FurnitureProcess : MiddleHighProcess
 // @fnv 0x00917a70
 void FurnitureProcess::FUN_00917a70(FurnitureActorAccess* actor, int elapsed)
 {
-    TESPackage* package = 0;
-    package = GetOneTimePackage();
+    shared_types::TESPackage* package = 0;
+    package = (shared_types::TESPackage*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
     InventoryLookup* inventory = actor->FUN_00891d30();
-    if (IsMovementComplete())
+    if (static_cast<const BaseProcess*>(this)->IsMovementComplete())
     {
-        StartIdleAnimation(actor, 0, 2, true, false, true);
+        StartIdleAnimation(actor, 0, ::_AnimationIdlePlayType::AUTO, true, false, true);
         return;
     }
-    if (actor->IsCharacter() && !actor->Unk_85() && !m_pFurnitureReference && m_kSecondaryReferenceList.IsEmpty())
+    if (actor->IsCharacter() && !actor->GetSitSleepState() && !m_pFurnitureReference && m_kSecondaryReferenceList.IsEmpty())
         FUN_00922670(actor, true, elapsed);
-    if (actor->IsCharacter() && actor->Unk_85() != 4)
+    if (actor->IsCharacter() && actor->GetSitSleepState() != 4)
     {
         if (!m_pFurnitureReference && ((FurnitureListAccess*)&m_kSecondaryReferenceList)->FUN_005ae380() &&
             g_011e043c.FUN_0044b130())
@@ -16413,11 +15880,11 @@ void FurnitureProcess::FUN_00917a70(FurnitureActorAccess* actor, int elapsed)
         }
         SetTarget(m_pFurnitureReference);
         if (m_pFurnitureReference)
-            UseFurniture(actor, false);
+            ProcessActivate(actor, false);
         if (((FUN_00915ef0_shell*)this)->FUN_00915ef0(actor))
             ProcessFurniture(actor);
     }
-    if ((actor->IsCharacter() && actor->Unk_85() == 4) ||
+    if ((actor->IsCharacter() && actor->GetSitSleepState() == 4) ||
         (!m_pFurnitureReference && m_kSecondaryReferenceList.IsEmpty()))
     {
         void* item = 0;
@@ -16430,7 +15897,7 @@ void FurnitureProcess::FUN_00917a70(FurnitureActorAccess* actor, int elapsed)
         SetAnimationComplete(true);
         m_kSecondaryReferenceList.RemoveAll();
     }
-    StartIdleAnimation(actor, 0, 2, true, false, true);
+    StartIdleAnimation(actor, 0, ::_AnimationIdlePlayType::AUTO, true, false, true);
     if (actor->GetVtbl20Result() & 0x400)
     {
         actor->FUN_00884f80();
@@ -16439,17 +15906,8 @@ void FurnitureProcess::FUN_00917a70(FurnitureActorAccess* actor, int elapsed)
 }
 }  // namespace fnv_00917a70
 
-class MagicItem
-{
-  public:
-    virtual ~MagicItem();
-};
-struct P3
-{
-    float x;
-    float y;
-    float z;
-};
+
+
 struct FormCls
 {
     virtual void u0000();
@@ -16555,14 +16013,6 @@ struct Cont
     int unk10;
     int unk14;
     int f18;
-};
-struct TESIdleForm
-{
-    void* FUN_0067f390();
-};
-struct Script
-{
-    TESIdleForm* GetText();
 };
 struct ObjC
 {
@@ -16936,7 +16386,7 @@ struct Pkg
     void* FUN_00672f20();
     unsigned int FUN_006758a0(P0* a);
     void* FUN_006757e0(P0* a);
-    P3 FUN_00675830(P0* a);
+    NiPoint3 FUN_00675830(P0* a);
     int FUN_00672930();
     bool FUN_00678d00();
 };
@@ -16954,7 +16404,7 @@ struct P2B
 };
 struct DH46
 {
-    void FUN_0046f280(void* a1, P3* a2, float a3, void* a4, float a5, void* a6, P0* a7);
+    void FUN_0046f280(void* a1, NiPoint3* a2, float a3, void* a4, float a5, void* a6, P0* a7);
 };
 struct SetCls
 {
@@ -17772,7 +17222,7 @@ void* ThisCls::FUN_0091ae00(P0* apActor, Pkg* apPackage, P2* arg2)
                 }
                 else
                 {
-                    linked = ((Script*)pB)->GetText()->FUN_0067f390();
+                    linked = ((TESIdleForm*)((Script*)pB)->GetText())->FUN_0067f390();
                 }
                 if (0 != arg2)
                 {
@@ -17820,11 +17270,10 @@ void* ThisCls::FUN_0091ae00(P0* apActor, Pkg* apPackage, P2* arg2)
                         unsigned char j;
                         CellCls* tmp40;
                         int flagFF;
-                        P3 x;
                         ok = 1;
                         j = 1;
                         tmp40 = apActor->FUN_008d6f30();
-                        x = *(P3*)apActor->V1f4();
+                        NiPoint3 x = *(NiPoint3*)apActor->V1f4();
                         flagFF = ((P2B*)arg2)->FUN_00519b00();
                         if (flagFF == 1)
                         {
@@ -17897,7 +17346,7 @@ void* ThisCls::FUN_0091ae00(P0* apActor, Pkg* apPackage, P2* arg2)
                                 break;
                             case 0: {
                                 void* z;
-                                z = dynamic_cast<MagicItem*>((TESForm*)arg2->FUN_00680050());
+                                z = dynamic_cast<shared_types::MagicItem*>((TESForm*)arg2->FUN_00680050());
                                 if (!!z)
                                     f164 = z;
                                 j = 0;
@@ -18085,10 +17534,6 @@ struct LocationDescriptor
 {
     PackageTargetRef* FUN_0067f390();
 };
-struct PackageList
-{
-    int FUN_00726070();
-};
 struct RunningPackage
 {
     virtual void slot0();
@@ -18179,21 +17624,6 @@ struct RunningPackage
     LocationDescriptor* FUN_0055b980();
     bool FUN_00670f90();
     PackageList* FUN_0041d8a0();
-};
-struct PackageAction
-{
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void Finish();
-    int FUN_0045cd60();
 };
 struct PackageActor
 {
@@ -19209,7 +18639,7 @@ void PackageProcess::UpdatePackage(MobileObject* object, float delta)
         }
     }
     if (!actor_->FUN_008b3bf0())
-        ((PackageActor*)object)->FUN_008d8520()->Finish();
+        reinterpret_cast<BaseProcess*>(((PackageActor*)object)->FUN_008d8520())->ResetPackageState();
 }
 }  // namespace fnv_0091bc60
 
@@ -19250,13 +18680,16 @@ struct SettingFloatAccess
 };
 extern SettingIntAccess DAT_011cdad0;
 extern SettingFloatAccess DAT_011cd950;
-struct FollowProcess : TargetProcess
+// FollowProcess's own virtual calls: slots 520 on of the MiddleHighProcess vtable as this view declares them
+struct FollowProcessSlots : MiddleLowProcess
 {
-    virtual void FollowSlot517();
-    virtual void FollowSlot518();
-    virtual void FollowSlot519();
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // shared MiddleHighProcess slots 520..539 (include/MiddleHighProcess.h vfn_820..vfn_86c)
     virtual void FollowSlot520();
     virtual bool UpdateDestination(Actor*, NiPoint3, TESObjectCELL*, TESWorldSpace*);
+};
+struct FollowProcess : TargetProcess
+{
     bool FUN_0091d3c0(Actor* actor, float elapsed, bool advance);
 };
 // Updates the follow package target: validates the package, refreshes the destination when the target moved or is too far, and handles run-once packages.
@@ -19264,7 +18697,7 @@ struct FollowProcess : TargetProcess
 bool FollowProcess::FUN_0091d3c0(Actor* actor, float elapsed, bool advance)
 {
     PackageAccess* pPackage = 0;
-    pPackage = (PackageAccess*)GetOneTimePackage();
+    pPackage = (PackageAccess*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
     if (pPackage && pPackage->FUN_008a6290())
     {
         if (!((PlayerPackageAccess*)DAT_011dea3c)->HasExtraFollowerForm(actor))
@@ -19282,7 +18715,7 @@ bool FollowProcess::FUN_0091d3c0(Actor* actor, float elapsed, bool advance)
     {
         FindPackageTarget(actor);
         if (pTarget)
-            m_kPackageTargetPosition = *pTarget->GetPos();
+            m_kPackageTargetPosition = *static_cast<const ::TESObjectREFR*>(pTarget)->GetPos();
     }
     if (!pTarget)
     {
@@ -19308,7 +18741,7 @@ bool FollowProcess::FUN_0091d3c0(Actor* actor, float elapsed, bool advance)
                     StopRunOncePackage();
                 else
                     StopPackage();
-                CanProcessActor(actor, false);
+                CheckForNewPackage(actor, false);
                 return false;
             }
             if (!((ReferenceAccess*)actor)->FUN_008b3bb0())
@@ -19317,14 +18750,14 @@ bool FollowProcess::FUN_0091d3c0(Actor* actor, float elapsed, bool advance)
     }
     else
     {
-        float displacement = (m_kPackageTargetPosition - *pTarget->GetPos()).Length();
+        float displacement = (m_kPackageTargetPosition - *static_cast<const ::TESObjectREFR*>(pTarget)->GetPos()).Length();
         if (displacement > *DAT_011cd950.FUN_00403e20() ||
             (distance > fRadius && ((ReferenceAccess*)actor)->FUN_008b3bb0()))
         {
-            if (!UpdateDestination(actor, *pTarget->GetPos(), pTarget->GetParentCell(),
+            if (!((FollowProcessSlots*)this)->UpdateDestination(actor, *static_cast<const ::TESObjectREFR*>(pTarget)->GetPos(), pTarget->GetParentCell(),
                                    ((ReferenceAccess*)pTarget)->FUN_00575d70()))
                 return true;
-            m_kPackageTargetPosition = *pTarget->GetPos();
+            m_kPackageTargetPosition = *static_cast<const ::TESObjectREFR*>(pTarget)->GetPos();
         }
     }
     distance = ((ReferenceAccess*)actor)->FUN_005723b0(target, 0, 0);
@@ -19346,7 +18779,7 @@ struct ActivationReference : TESObjectREFR
     void* FUN_00568e50();
     const NiPoint3& FUN_00568fa0();
     bool FUN_00440d80();
-    bool Activate(Actor*, bool, TESBoundObject*, int);
+    bool FUN_00573170(Actor*, bool, TESBoundObject*, int);
 };
 struct ActivationPlayer : Actor
 {
@@ -19376,10 +18809,7 @@ struct ActivationPlayer : Actor
     bool IsSleepingOrResting();
     void FUN_005c1a00(bool, int);
 };
-struct NiPoint3_ext : NiPoint3
-{
-    NiPoint3_ext();
-};
+
 struct ActivationProcess : MiddleHighProcess
 {
     bool CheckActivationTarget(Actor* actor);
@@ -19388,7 +18818,7 @@ struct ActivationProcess : MiddleHighProcess
 // @fnv 0x0091d810
 bool ActivationProcess::CheckActivationTarget(Actor* actor)
 {
-    TESPackage* package = GetOneTimePackage();
+    shared_types::TESPackage* package = (shared_types::TESPackage*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
     if (!pTarget)
         FindPackageTarget(actor);
     if (!pTarget || ((ActivationReference*)pTarget)->FUN_00440d80())
@@ -19401,22 +18831,22 @@ bool ActivationProcess::CheckActivationTarget(Actor* actor)
         bool closeEnough = false;
         if (targetData)
         {
-            NiPoint3 delta = ((ActivationReference*)pTarget)->FUN_00568fa0() - *actor->GetPos();
+            NiPoint3 delta = ((ActivationReference*)pTarget)->FUN_00568fa0() - *static_cast<const ::TESObjectREFR*>(actor)->GetPos();
             if (delta.Length() <= 128.0)
                 closeEnough = true;
         }
         else
         {
-            closeEnough = ((ActivationPackage*)GetCurrentPackage())->IsNear(actor, 0);
+            closeEnough = ((ActivationPackage*)(shared_types::TESPackage*)GetCurrentPackage())->IsNear(actor, 0);
         }
         if (!closeEnough)
         {
-            if (actor->Unk_85())
+            if (actor->GetSitSleepState())
                 UpdateActorInteraction(actor);
-            NiPoint3_ext location;
+            NiPoint3 location;
             void* data = ((ActivationReference*)pTarget)->FUN_00568e50();
             if (!data)
-                (NiPoint3&)location = *pTarget->GetPos();
+                (NiPoint3&)location = *static_cast<const ::TESObjectREFR*>(pTarget)->GetPos();
             else
                 (NiPoint3&)location = ((ActivationReference*)pTarget)->FUN_00568fa0();
         }
@@ -19432,7 +18862,7 @@ bool ActivationProcess::CheckActivationTarget(Actor* actor)
             else if (!pTarget->IsActor())
             {
                 SetProcessConditionMet(true);
-                ((ActivationReference*)pTarget)->Activate(actor, false, 0, 1);
+                ((ActivationReference*)pTarget)->FUN_00573170(actor, false, 0, 1);
                 SetProcessTarget(actor, 1);
                 return true;
             }
@@ -20353,11 +19783,7 @@ void CrimeProcess::FUN_0091ded0(CrimeActor* actor)
     }
 }
 
-struct PackageTargetView
-{
-    int FUN_00680080();
-    void* FUN_00680020();
-};
+
 struct PackageView
 {
     virtual void slot0();
@@ -20440,7 +19866,7 @@ struct PackageView
     virtual void slot77();
     virtual void slot78();
     virtual bool Test(Actor*, int, float, int);
-    PackageTargetView* FUN_00671d10();
+    ::PackageTargetRecord* FUN_00671d10();
     int FUN_00672930();
     int FUN_0041ca90();
     int FUN_009611e0();
@@ -21172,8 +20598,8 @@ void ProcessView::FUN_0091f130(RefView* actor)
     int count = 1;
     if (package2->FUN_00671d10())
         count = package2->FUN_00672930();
-    PackageTargetView* data7 = package2->FUN_00671d10();
-    if (package2->FUN_0041ca90() == 0 && data7 && (data7->FUN_00680080() == 19 || data7->FUN_00680080() == 20))
+    ::PackageTargetRecord* data7 = package2->FUN_00671d10();
+    if (package2->FUN_0041ca90() == 0 && data7 && (data7->GetTargetObjectType() == 19 || data7->GetTargetObjectType() == 20))
     {
         SetTargetMode(actor, 1);
         if (GetIndex() > 1)
@@ -21190,13 +20616,13 @@ void ProcessView::FUN_0091f130(RefView* actor)
                 Advance(actor, 1);
                 if (actor->IsNPC())
                 {
-                    TESNPC* npc2 = dynamic_cast<TESNPC*>(actor->FUN_007af430());
+                    shared_types::TESNPC* npc2 = dynamic_cast<shared_types::TESNPC*>(actor->FUN_007af430());
                     if (npc2)
                         npc2->FUN_006047c0((Actor*)actor, 1, 1, 0, 1);
                 }
                 else
                 {
-                    TESCreature* creature = dynamic_cast<TESCreature*>(actor->FUN_007af430());
+                    shared_types::TESCreature* creature = dynamic_cast<shared_types::TESCreature*>(actor->FUN_007af430());
                     if (creature)
                         creature->FUN_005f9e00((Actor*)actor, 1, 1, 1);
                 }
@@ -21256,7 +20682,7 @@ void ProcessView::FUN_0091f130(RefView* actor)
         }
         else
         {
-            if (package2->FUN_00671d10() && package2->FUN_00671d10()->FUN_00680020() == target)
+            if (package2->FUN_00671d10() && package2->FUN_00671d10()->GetReferenceTarget() == reinterpret_cast<::TESObjectREFR*>(target))
                 SetTargetMode(actor, 1);
             else
             {
@@ -21300,12 +20726,7 @@ struct Proc;
 struct Actor;
 struct Component;
 struct Task;
-struct Vec3
-{
-    float x, y, z;
-    void FUN_00439ef0();
-    float FUN_00457990();
-};
+
 struct TaskObject
 {
     virtual void unused000();
@@ -21375,7 +20796,7 @@ struct TaskObject
     virtual unsigned char Ready();
     int FUN_007af430();
     TESForm* FUN_00567790();
-    void Activate(Actor*, int, int, int);
+    void FUN_00573170(Actor*, int, int, int);
 };
 struct Task
 {
@@ -21514,7 +20935,7 @@ struct ActorAdapter
     virtual void unused122();
     virtual void unused123();
     virtual void unused124();
-    virtual Vec3* Position();
+    virtual NiPoint3* Position();
     bool FUN_008b3bb0();
     void FUN_008924e0(Actor*, int);
 };
@@ -21645,12 +21066,12 @@ struct Component
     virtual void unused122();
     virtual void unused123();
     virtual void unused124();
-    virtual Vec3* Position();
+    virtual NiPoint3* Position();
     bool FUN_00440d80();
     bool FUN_00440da0();
     int FUN_00568e50();
-    Vec3* FUN_00568fa0(void*, const Vec3*);
-    Vec3* Relative(int, int);
+    NiPoint3* FUN_00568fa0(void*, const NiPoint3*);
+    NiPoint3* Relative(int, int);
     int FUN_00575d70();
     int FUN_008d6f30();
 };
@@ -21661,7 +21082,7 @@ struct Timer
 struct GlobalSettings
 {
     float FUN_00867da0();
-    void* FUN_00970a20(TESNPC*, int);
+    void* FUN_00970a20(shared_types::TESNPC*, int);
 };
 extern GlobalSettings DAT_011de7b8;
 extern GlobalSettings DAT_011e0e80;
@@ -21714,9 +21135,9 @@ typedef void(__thiscall* ProcessActorFlag)(Proc*, Actor*, int);
 typedef void(__thiscall* ProcessTask)(Proc*, void*);
 typedef Actor*(__thiscall* GetActor)(Proc*);
 typedef unsigned char(__thiscall* CheckActor)(Actor*, Actor*, int);
-typedef Vec3*(__thiscall* GetComponentVector)(Component*);
-typedef bool(__thiscall* Transfer)(Proc*, Actor*, Vec3, int, int);
-typedef bool(__thiscall* TransferShort)(Proc*, Actor*, Vec3);
+typedef NiPoint3*(__thiscall* GetComponentVector)(Component*);
+typedef bool(__thiscall* Transfer)(Proc*, Actor*, NiPoint3, int, int);
+typedef bool(__thiscall* TransferShort)(Proc*, Actor*, NiPoint3);
 typedef void(__thiscall* ActorDoWork)(Component*, int, int, int, int, int, Actor*, int, int, int, int);
 typedef unsigned char(__thiscall* TaskReady)(TaskObject*);
 
@@ -21745,9 +21166,9 @@ void Proc::ProcessActorInteraction(Actor* target)
         unsigned char permitted = 0;
         if (interacting != 0)
         {
-            Vec3 local;
-            component40->FUN_00568fa0(&local, ((ActorAdapter*)target)->Position())->FUN_00439ef0();
-            if (local.FUN_00457990() <= DAT_0102e430)
+            PointStorage local;
+            component40->FUN_00568fa0(&reinterpret_cast<NiPoint3&>(local), ((ActorAdapter*)target)->Position())->FUN_00439ef0();
+            if (((NiPoint3*)&local)->FUN_00457990() <= DAT_0102e430)
                 permitted = 1;
         }
         else
@@ -21793,10 +21214,10 @@ void Proc::ProcessActorInteraction(Actor* target)
                 Component* created = 0;
                 if (!task64->owner->Ready())
                 {
-                    TESNPC* r = dynamic_cast<TESNPC*>(task64->owner->FUN_00567790());
+                    shared_types::TESNPC* r = dynamic_cast<shared_types::TESNPC*>(task64->owner->FUN_00567790());
                     if (r != 0)
                         created = (Component*)DAT_011e0e80.FUN_00970a20(r, 0);
-                    task64->owner->Activate(target, 0, task64->formId, 1);
+                    task64->owner->FUN_00573170(target, 0, task64->formId, 1);
                 }
                 else
                 {
@@ -21854,24 +21275,19 @@ struct ActivateActor : TESObjectREFR
     virtual void Slot270();
     virtual void Slot274();
     virtual void Slot278();
-    virtual void SetPackage(TESPackage*);
-    bool Activate(TESObjectREFR*, bool, TESBoundObject*, int);
+    virtual void SetPackage(shared_types::TESPackage*);
+    bool FUN_00573170(TESObjectREFR*, bool, TESBoundObject*, int);
 };
 struct ActivateProcess : MiddleHighProcess
 {
-    virtual void Slot7b4();
-    virtual void Slot7b8();
-    virtual void Slot7bc();
-    virtual void Slot7c0();
-    virtual void Slot7c4();
-    virtual void ProcessOtherTarget(Actor*, bool);
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
     bool ActivatePackageTarget(Actor* actor);
 };
 // Resolves the actor's current package and either assigns it, activates the package target, or redirects the process to another target.
 // @fnv 0x0091fb30
 bool ActivateProcess::ActivatePackageTarget(Actor* actor)
 {
-    TESPackage* q = GetOneTimePackage();
+    shared_types::TESPackage* q = (shared_types::TESPackage*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
     if (q->FUN_0041ca90() != 28)
     {
         FindPackageTarget(actor);
@@ -21884,7 +21300,7 @@ bool ActivateProcess::ActivatePackageTarget(Actor* actor)
         SetProcessTarget(actor, 3);
         return false;
     }
-    PackageAccess* eb = (PackageAccess*)GetOneTimePackage();
+    PackageAccess* eb = (PackageAccess*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
     TESObjectREFR* p = eb->FUN_008d80e0();
     TESObjectREFR* cf = eb->FUN_009ee040();
     if (!eb->GetByteAtBD() && eb->FUN_00672dd0())
@@ -21908,7 +21324,7 @@ bool ActivateProcess::ActivatePackageTarget(Actor* actor)
         {
             if (p == DAT_011dea3c)
             {
-                ((ActivateActor*)actor)->Activate(p, false, 0, 1);
+                ((ActivateActor*)actor)->FUN_00573170(p, false, 0, 1);
             }
             else
             {
@@ -21919,7 +21335,7 @@ bool ActivateProcess::ActivatePackageTarget(Actor* actor)
     }
     if (actor != p)
     {
-        ProcessOtherTarget(actor, true);
+        ProcessActivate(actor, true);
     }
     else
     {
@@ -21933,16 +21349,7 @@ namespace fnv_00920150 {
 struct ActorStand;
 struct Node;
 struct Process;
-class B006815c0
-{
-  public:
-    float x, y, z;
-    B006815c0();
-    B006815c0 FUN_004a0bd0() const;
-    B006815c0 FUN_0053d280(float) const;
-    B006815c0 FUN_00439ef0(B006815c0&);
-    void FUN_00439180(float);
-};
+
 struct Active
 {
     void UpdateRagDoll(int);
@@ -21951,7 +21358,7 @@ struct Active
 struct Node
 {
     Node* FUN_0045bc00(int);
-    B006815c0& FUN_0045bb80();
+    NiPoint3& FUN_0045bb80();
     Active* FUN_0043b4a0(int);
 };
 struct Anim
@@ -22110,7 +21517,7 @@ struct Process
     List unk124, unk128;
     void FUN_00496080(int, float);
     void FUN_00496280();
-    void GetMovement(B006815c0*, ActorStand*, int, int);
+    void GetMovement(NiPoint3*, ActorStand*, int, int);
     Node* FUN_0084e3a0();
     void FUN_00497ca0(void*, int);
     bool FUN_004981f0();
@@ -22383,7 +21790,7 @@ void __cdecl FUN_00c6a350(Node*, int, int, int, int);
 void __cdecl ApplyHavokOperation(Node*, int);
 void __cdecl ApplyHavokOperation(Node*, int, int);
 void __cdecl AddTimedEntry(ActorStand*, int);
-void __cdecl FUN_00c9b670(Node*, B006815c0*, int, float, int);
+void __cdecl FUN_00c9b670(Node*, NiPoint3*, int, float, int);
 float __cdecl FUN_00c82580(Node*);
 void __cdecl FUN_005b5e40(const char*, ...);
 const char* __cdecl FUN_008a30f0();
@@ -22392,7 +21799,7 @@ NiFixedString* __cdecl FUN_00920b70();
 Node* __cdecl FUN_004ade00(Node*, NiFixedString*);
 const char* __cdecl FUN_005a07f0();
 bool __cdecl FUN_00c6b7b0(Node*, int);
-float __cdecl GetDirectionAngle(B006815c0*);
+float __cdecl GetDirectionAngle(NiPoint3*);
 void __cdecl FUN_00c9bdf0(Node*, float);
 struct Flag
 {
@@ -23226,9 +22633,9 @@ void Target::UpdateKnockedDownState(ActorStand* actor)
             if (actor->FUN_00566950())
                 AddTimedEntry(actor, 0);
             unk13c = 4;
-            B006815c0 velocity;
+            NiPoint3 velocity;
             idx->GetMovement(&velocity, actor, 1, 0);
-            velocity = velocity.FUN_004a0bd0().FUN_0053d280(DAT_011f6394.FUN_0084d030() * 50.0);
+            reinterpret_cast<NiPoint3&>(velocity) = reinterpret_cast<const NiPoint3&>(velocity.Neg().FUN_0053d280(DAT_011f6394.FUN_0084d030() * 50.0));
             if (actor->unkac)
             {
                 actor->unkac->FUN_00c7ba10(0);
@@ -23333,7 +22740,7 @@ void Target::UpdateKnockedDownState(ActorStand* actor)
                     point = FUN_004ade00(root, FUN_00920b70());
                 if (point)
                 {
-                    B006815c0 knocked = point->FUN_0045bb80().FUN_00439ef0(root->FUN_0045bb80());
+                    NiPoint3 knocked = point->FUN_0045bb80().FUN_00439ef0(root->FUN_0045bb80());
                     if (!v28c()->unk410.FUN_008a5170())
                     {
                         Node* getupAnim = actor->FUN_00571530(skeletonNode, FUN_005a07f0());
@@ -23450,180 +22857,38 @@ struct Node920b80
     void FUN_00450f90(bool);
 };
 
-struct Actor920b80
-{
-    virtual void a000();
-    virtual void a004();
-    virtual void a008();
-    virtual void a00c();
-    virtual void a010();
-    virtual void a014();
-    virtual void a018();
-    virtual void a01c();
-    virtual void a020();
-    virtual void a024();
-    virtual void a028();
-    virtual void a02c();
-    virtual void a030();
-    virtual void a034();
-    virtual void a038();
-    virtual void a03c();
-    virtual void a040();
-    virtual void a044();
-    virtual void a048();
-    virtual void Reset3D(int);
-    virtual void a050();
-    virtual void a054();
-    virtual void a058();
-    virtual void a05c();
-    virtual void a060();
-    virtual void a064();
-    virtual void a068();
-    virtual void a06c();
-    virtual void a070();
-    virtual void a074();
-    virtual void a078();
-    virtual void a07c();
-    virtual void a080();
-    virtual void a084();
-    virtual void a088();
-    virtual void a08c();
-    virtual void a090();
-    virtual void a094();
-    virtual void a098();
-    virtual void a09c();
-    virtual void a0a0();
-    virtual void a0a4();
-    virtual void a0a8();
-    virtual void a0ac();
-    virtual void a0b0();
-    virtual void a0b4();
-    virtual void a0b8();
-    virtual void a0bc();
-    virtual void a0c0();
-    virtual void a0c4();
-    virtual void a0c8();
-    virtual void a0cc();
-    virtual void a0d0();
-    virtual void a0d4();
-    virtual void a0d8();
-    virtual void a0dc();
-    virtual void a0e0();
-    virtual void a0e4();
-    virtual void a0e8();
-    virtual void a0ec();
-    virtual void a0f0();
-    virtual void a0f4();
-    virtual void a0f8();
-    virtual void a0fc();
-    virtual void a100();
-    virtual void a104();
-    virtual void a108();
-    virtual void a10c();
-    virtual void a110();
-    virtual void a114();
-    virtual void a118();
-    virtual void a11c();
-    virtual void a120();
-    virtual void a124();
-    virtual void a128();
-    virtual void a12c();
-    virtual void a130();
-    virtual void a134();
-    virtual void a138();
-    virtual void a13c();
-    virtual void a140();
-    virtual void a144();
-    virtual void a148();
-    virtual void a14c();
-    virtual void a150();
-    virtual void a154();
-    virtual void a158();
-    virtual void a15c();
-    virtual void a160();
-    virtual void a164();
-    virtual void a168();
-    virtual void a16c();
-    virtual void a170();
-    virtual void a174();
-    virtual void a178();
-    virtual void a17c();
-    virtual void a180();
-    virtual void a184();
-    virtual void a188();
-    virtual void a18c();
-    virtual void a190();
-    virtual void a194();
-    virtual void a198();
-    virtual void a19c();
-    virtual void a1a0();
-    virtual void a1a4();
-    virtual void a1a8();
-    virtual void a1ac();
-    virtual void a1b0();
-    virtual void a1b4();
-    virtual void a1b8();
-    virtual void a1bc();
-    virtual void a1c0();
-    virtual void a1c4();
-    virtual void a1c8();
-    virtual void a1cc();
-    virtual void a1d0();
-    virtual void a1d4();
-    virtual void a1d8();
-    virtual void a1dc();
-    virtual void a1e0();
-    virtual void a1e4();
-    virtual void a1e8();
-    virtual void a1ec();
-    virtual void a1f0();
-    virtual void a1f4();
-    virtual void a1f8();
-    virtual void a1fc();
-    virtual void a200();
-    virtual void a204();
-    virtual void a208();
-    virtual void a20c();
-    virtual void a210();
-    virtual void a214();
-    virtual void a218();
-    virtual void a21c();
-    virtual void a220();
-    virtual void a224();
-    virtual void a228();
-    virtual void a22c();
-    virtual void a230();
-    virtual bool IsDead141();
-    float GetFatigue();
-    Node920b80* Get3DSimple();
-    Extra920b80* FUN_005d43c0(bool);
-    Face920b80* FUN_008adcb0();
-};
+
 
 void __cdecl ApplyHavokOperation(Node920b80*, bool, bool);
 void __cdecl FUN_00c9bdf0(Node920b80*, float);
-extern Actor920b80* g_thePlayer;
+// The original 0x005D43C0 call passes false; Actor.h only exposes the zero-argument overload.
+class RagdollExtraAccess : public ::Actor
+{
+public:
+    Extra920b80* FUN_005d43c0(bool);
+};
+extern ::Actor* g_thePlayer;
 extern Node920b80* g_pPlayer1stNode;
 
 struct FUN_00920b80_shell : public MiddleHighProcess
 {
-    void ResetWeaponState(Actor920b80* apActor);
+    void ResetWeaponState(::Actor* apActor);
 };
 
 // If the process is active and the actor is alive with non-negative fatigue, resets its 3D, blink and weapon nodes, then clears the active flag.
 // @fnv 0x00920b80
-void FUN_00920b80_shell::ResetWeaponState(Actor920b80* apActor)
+void FUN_00920b80_shell::ResetWeaponState(::Actor* apActor)
 {
     if (!m_cCharacterControllerState)
         return;
-    if (apActor->GetFatigue() < 0.0 || apActor->IsDead141())
+    if (apActor->GetFatigue() < 0.0 || apActor->GetIsParalyzed())
         return;
-    Node920b80* pActorRootNode = apActor->Get3DSimple();
+    Node920b80* pActorRootNode = reinterpret_cast<Node920b80*>(apActor->Get3DSimple());
     ApplyHavokOperation(pActorRootNode, false, true);
     FUN_00c9bdf0(pActorRootNode, 1.0f);
-    apActor->FUN_005d43c0(false)->UpdateRagDoll();
-    apActor->Reset3D(4);
-    Face920b80* p3DTmp = apActor->FUN_008adcb0();
+    reinterpret_cast<RagdollExtraAccess*>(apActor)->FUN_005d43c0(false)->UpdateRagDoll();
+    apActor->MarkAsUnmodified(4);
+    Face920b80* p3DTmp = reinterpret_cast<Face920b80*>(apActor->GetActorFaceGenData());
     if (p3DTmp)
         p3DTmp->SetupBlink(0, 0);
     m_cCharacterControllerState = 0;
@@ -24114,43 +23379,17 @@ struct P130Package
     int FUN_0041ca90();
     int FUN_009611e0();
 };
-class HighProcess : public MiddleHighProcess
-{
-};
+
 void FUN_00771700(int);
 bool FUN_005094f0(int);
 bool FUN_00509510(int);
 void FNV_Warning(const char*, ...);
 extern const NiPoint3 pathingrequestZero;
-struct P130Process : public MiddleHighProcess
+// P130Process's own virtual calls: slots 520 on of the MiddleHighProcess vtable as this view declares them
+struct P130ProcessSlots : MiddleLowProcess
 {
-    virtual void v493();
-    virtual void v494();
-    virtual void v495();
-    virtual void v496();
-    virtual void v497();
-    virtual void v498();
-    virtual void v499();
-    virtual void v500();
-    virtual void v501();
-    virtual void v502();
-    virtual void v503();
-    virtual void v504();
-    virtual void v505();
-    virtual void v506();
-    virtual void v507();
-    virtual void v508();
-    virtual void v509();
-    virtual void v510();
-    virtual void v511();
-    virtual void v512();
-    virtual void v513();
-    virtual void v514();
-    virtual void v515();
-    virtual void v516();
-    virtual void v517();
-    virtual void v518();
-    virtual void v519();
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // shared MiddleHighProcess slots 520..539 (include/MiddleHighProcess.h vfn_820..vfn_86c)
     virtual void v520();
     virtual void v521();
     virtual void v522();
@@ -24162,16 +23401,19 @@ struct P130Process : public MiddleHighProcess
     virtual void v528();
     virtual void v529();
     virtual void StartIdle(P130Actor*, int, int);
+};
+struct P130Process : public MiddleHighProcess
+{
     bool FUN_009213e0(P130Actor* actor);
 };
 // @fnv 0x009213e0
 bool P130Process::FUN_009213e0(P130Actor* actor)
 {
-    P130Package* anim = (P130Package*)GetOneTimePackage();
+    P130Package* anim = (P130Package*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
     if ((!m_pFurnitureReference || !((P130Ref*)m_pFurnitureReference)->GetNumericValue()) &&
         (!anim || anim->FUN_0041ca90() != 37))
         return false;
-    if (IsAdditionalActorFlagSet() && !IsCurrentlyAlerted())
+    if (((BaseProcess*)this)->IsAdditionalActorFlagSet() && !static_cast<const BaseProcess*>(this)->IsCurrentlyAlerted())
     {
         actor->FUN_008a6840(0);
         return true;
@@ -24198,8 +23440,8 @@ bool P130Process::FUN_009213e0(P130Actor* actor)
     }
     if (!m_ucFurnitureInteractionState)
     {
-        HighProcess* high = dynamic_cast<HighProcess*>((MiddleHighProcess*)this);
-        if (high && (high->GetSelectedIdleForm() || actor->HasAnyFlag() || package->FUN_00498f80() ||
+        ::HighProcess* high = dynamic_cast<::HighProcess*>((MiddleHighProcess*)this);
+        if (high && (((MiddleHighProcess*)high)->GetSelectedIdleForm() || actor->HasAnyFlag() || package->FUN_00498f80() ||
                      package->IsFlaggedAsTwo()))
         {
             high->SetIdleForm(0);
@@ -24208,8 +23450,8 @@ bool P130Process::FUN_009213e0(P130Actor* actor)
         }
         if (actor->IsPlayer())
             FUN_00771700(10);
-        if (isBed && !GetCurrentPackage())
-            StartIdle(actor, 0, 0);
+        if (isBed && !(shared_types::TESPackage*)GetCurrentPackage())
+            ((P130ProcessSlots*)this)->StartIdle(actor, 0, 0);
         if (actor->FUN_004997b0())
             actor->FUN_00884f80();
         actor->ForwardToVtSlot(0x400);
@@ -24236,8 +23478,8 @@ bool P130Process::FUN_009213e0(P130Actor* actor)
                     m_ucFurnitureMarkerIndex);
         }
         SetIdleAnimation(0, 0);
-        SetProcessState(0x2000);
-        SetProcessState(0x10);
+        SetProcessState(BaseProcess::_PostAnimAction::IDLE_LOADED);
+        SetProcessState(BaseProcess::_PostAnimAction::PLAY_IDLE);
         if (isBed)
             SetFurnitureState((Actor*)actor, (SIT_SLEEP_STATE)7, m_pFurnitureReference, m_ucFurnitureMarkerIndex);
         else
@@ -24307,7 +23549,7 @@ bool P130Process::FUN_009213e0(P130Actor* actor)
                 actor->FUN_008a73e0(-1, false);
                 if (anim)
                 {
-                    int procedure = DAT_011a3ff0[anim->FUN_009611e0()][GetPackageInfoValue()];
+                    int procedure = DAT_011a3ff0[anim->FUN_009611e0()][static_cast<const BaseProcess*>(this)->GetPackageInfoValue()];
                     if (procedure != 44)
                         SetProcessTarget((MobileObject*)actor, 1);
                 }
@@ -24867,7 +24109,7 @@ struct FurnitureProcess
     virtual void slot156();
     virtual void slot157();
     virtual void slot158();
-    virtual TESPackage* package();
+    virtual shared_types::TESPackage* package();
     virtual void slot160();
     virtual void slot161();
     virtual void end(RefAccess*, int);
@@ -25252,18 +24494,18 @@ bool FurnitureProcess::FUN_00921e80(RefAccess* actor)
                 {
                     bool kEquip = true;
                     bool weapon2 = true;
-                    TESPackage* pkg = package();
+                    shared_types::TESPackage* pkg = package();
                     if (pkg && pkg->FUN_00441b00())
                         weapon2 = false;
                     if (actor->npc())
                     {
-                        TESNPC* npc = dynamic_cast<TESNPC*>((TESBoundObject*)actor->base());
+                        shared_types::TESNPC* npc = dynamic_cast<shared_types::TESNPC*>((TESBoundObject*)actor->base());
                         if (npc)
                             npc->FUN_006047c0((Actor*)actor, kEquip, weapon2, false, true);
                     }
                     else
                     {
-                        TESCreature* creature = dynamic_cast<TESCreature*>((TESBoundObject*)actor->base());
+                        shared_types::TESCreature* creature = dynamic_cast<shared_types::TESCreature*>((TESBoundObject*)actor->base());
                         if (creature)
                             creature->FUN_005f9e00((Actor*)actor, kEquip, weapon2, true);
                     }
@@ -25435,26 +24677,15 @@ struct EquipAnim
     EquipSequence* FUN_00491040(int);
     void FUN_004994f0(int, int);
 };
-struct FUN_0041a250
+// These operations read and write the actor's extra-data list, not the sound handle.
+struct EquipExtraData
 {
-    unsigned int id, flags;
-    void* data;
-    FUN_0041a250();
-    ~FUN_0041a250();
-    void FUN_004189c0(FUN_0041a250*);
-    bool FUN_00ad8ce0();
-    void FUN_00418900(const FUN_0041a250&);
-    void FUN_004f15a0(int);
-    void FUN_00ad8f20(EquipNode*);
-    void SetPositionFromArray(void*);
-    bool FUN_00ad8930();
-    void FUN_00ad8830(int);
-    void FUN_00ad88f0();
-    void FUN_0041a3e0(const FUN_0041a250&);
+    void GetWeaponIdleSound(BSSoundHandle*);
+    void SetWeaponIdleSound(const BSSoundHandle&);
 };
 struct EquipAudio
 {
-    FUN_0041a250 FUN_00ad7480(const char*, unsigned int, EquipDescriptor*);
+    BSSoundHandle FUN_00ad7480(const char*, unsigned int, EquipDescriptor*);
 };
 struct EquipActor
 {
@@ -25588,7 +24819,7 @@ struct EquipActor
     unsigned short FUN_00897910(unsigned int, EquipEntry*, bool, EquipAnim*, int, int, int);
     EquipAnim* FUN_00950a60(int);
     void GetWeaponObject();
-    FUN_0041a250* FUN_005d43c0();
+    EquipExtraData* FUN_005d43c0();
     bool FUN_00524d10();
     void FUN_00884f80();
 };
@@ -26192,41 +25423,36 @@ void EquipProcess::UpdateEquipVisuals(bool draw, EquipRef* reference, EquipAnim*
         weapon6 = entry->FUN_0044ddc0();
     if (weapon6 && weapon6->FUN_00522500() && weapon6->FUN_00522500()->FUN_00511840())
     {
-        FUN_0041a250 sound;
-        actor->FUN_005d43c0()->FUN_004189c0(&sound);
-        if (!sound.FUN_00ad8ce0())
+        BSSoundHandle sound;
+        actor->FUN_005d43c0()->GetWeaponIdleSound(&sound);
+        if (!sound.IsValid())
         {
             unsigned int flags22 = GetFlagMask(weapon6->FUN_00522500()->CopyBig().name);
             unsigned int extra36 = actor == DAT_011dea3c ? 0x240000 : 0;
             extra36 ^= DAT_011dea3c->FUN_00524d10() ? 0x40000 : 0;
-            sound.FUN_00418900(FUN_00453a70()->FUN_00ad7480(weapon6->FUN_00522500()->FUN_00511840(),
+            sound.operator=(FUN_00453a70()->FUN_00ad7480(weapon6->FUN_00522500()->FUN_00511840(),
                                                             flags22 | 2 | extra36, weapon6->FUN_00522500()));
-            sound.FUN_004f15a0(1);
-            sound.FUN_00ad8f20(actor->Get3D());
-            sound.SetPositionFromArray(actor->GetPosition());
+            sound.SetAssumeSuccess(true);
+            sound.SetObjectToFollow(reinterpret_cast<::NiAVObject*>(actor->Get3D()));
+            sound.SetPosition(*static_cast<const ::NiPoint3*>(actor->GetPosition()));
         }
-        if (draw && !sound.FUN_00ad8930())
-            sound.FUN_00ad8830(0);
-        else if (!draw && sound.FUN_00ad8930())
-            sound.FUN_00ad88f0();
-        actor->FUN_005d43c0()->FUN_0041a3e0(sound);
+        if (draw && !sound.IsPlaying())
+            sound.Play(false);
+        else if (!draw && sound.IsPlaying())
+            sound.Stop();
+        actor->FUN_005d43c0()->SetWeaponIdleSound(sound);
     }
     actor->FUN_00884f80();
 }
 }  // namespace fnv_009231d0
 
-struct ItemChangeStub;
 struct EquipListStub
 {
-    ItemChangeStub* FindItem(int aiType, int aiUnk);
+    InventoryStackRecord* FindItem(int aiType, int aiUnk);
 };
 struct ExtraListStub
 {
     EquipListStub* GetEquipList();
-};
-struct ItemChangeStub
-{
-    TESForm* GetObject();
 };
 struct RefStub
 {
@@ -26236,18 +25462,15 @@ struct RefStub
     void Update3DParts();
     void SetAmmoForm(TESForm* apForm);
 };
-struct ActorStub
-{
-    void ClearWeaponState(int aiUnk);
-};
 
-struct MiddleHighProcess_00924100 : MiddleHighProcess
+// 0x00924100 is MiddleHighProcess::ResetWeaponAndAmmo; retain only the missing declaration on the shared layout.
+struct WeaponInventoryReset : ::MiddleHighProcess
 {
     void ResetWeaponAndAmmo(MobileObject* apRef);
 };
 
 // @fnv 0x00924100
-void MiddleHighProcess_00924100::ResetWeaponAndAmmo(MobileObject* apRef)
+void WeaponInventoryReset::ResetWeaponAndAmmo(MobileObject* apRef)
 {
     Actor* pActor3 = dynamic_cast<Actor*>(apRef);
     if (!pActor3)
@@ -26255,15 +25478,15 @@ void MiddleHighProcess_00924100::ResetWeaponAndAmmo(MobileObject* apRef)
     EquipListStub* pList = ((RefStub*)apRef)->GetExtraList()->GetEquipList();
     if (pList)
     {
-        ((ActorStub*)pActor3)->ClearWeaponState(0);
-        ItemChangeStub* pItem = pList->FindItem(5, 0);
-        SetCurrentArmor((InventoryStackRecord*)pItem, 0, false);
+        pActor3->FUN_008b0b00(0);
+        InventoryStackRecord* pItem = pList->FindItem(5, 0);
+        SetCurrentArmor(pItem, 0, false);
         ((RefStub*)apRef)->ResetWeaponModel();
         if (pWeapon)
-            ((RefStub*)apRef)->SetWeaponForm(((ItemChangeStub*)pWeapon)->GetObject());
+            ((RefStub*)apRef)->SetWeaponForm(pWeapon->GetObject());
         ((RefStub*)apRef)->Update3DParts();
         if (pAmmo)
-            ((RefStub*)apRef)->SetAmmoForm(((ItemChangeStub*)pAmmo)->GetObject());
+            ((RefStub*)apRef)->SetAmmoForm(pAmmo->GetObject());
         ((RefStub*)apRef)->SetAmmoForm(0);
         ((RefStub*)apRef)->Update3DParts();
         Actor* pActor4 = dynamic_cast<Actor*>(apRef);
@@ -26684,14 +25907,11 @@ struct FUN_008c64d0_target
     void FUN_008c64d0(unsigned int, unsigned int);
 };
 
-struct TESSaveLoadGame
-{
-    unsigned char FUN_008df040();
-};
+
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 TESForm* FUN_004839c0(unsigned int);
-MagicItem* FUN_0040a250(unsigned int);
+shared_types::MagicItem* FUN_0040a250(unsigned int);
 MagicTarget* FUN_00825550(unsigned int);
 void FUN_008060e0(BSSimpleList<ActiveEffect*>*, BGSLoadFormBuffer*);
 
@@ -26712,13 +25932,13 @@ void TargetClass::ResolveFormPointers(unsigned int param1, unsigned int param2, 
     Actor* pActor2;
     Actor* commandingActor;
     TESObjectREFR* currentFurniture5;
-    MagicItem* currentSpell4;
+    shared_types::MagicItem* currentSpell4;
     MagicTarget* desiredTarget_;
     BSSimpleList<TESObjectREFR*>* pNode;
     BSSimpleList<TESObjectREFR*>* pPrev5;
     TESObjectREFR* itemB;
     TESObjectREFR* resolved6;
-    MagicItem* pSpellA;
+    shared_types::MagicItem* pSpellA;
     TESObjectREFR* tempX;
 
     pActor2 = dynamic_cast<Actor*>(pMobileObject);
@@ -26741,10 +25961,10 @@ void TargetClass::ResolveFormPointers(unsigned int param1, unsigned int param2, 
         this->m_pFurnitureReference = dynamic_cast<TESObjectREFR*>(FUN_004839c0((unsigned int)currentFurniture5));
     }
 
-    currentSpell4 = this->m_pFirstMagicItem;
+    currentSpell4 = (shared_types::MagicItem*)this->m_pFirstMagicItem;
     if (currentSpell4)
     {
-        this->m_pFirstMagicItem = FUN_0040a250((unsigned int)currentSpell4);
+        this->m_pFirstMagicItem = (::MagicItem*)FUN_0040a250((unsigned int)currentSpell4);
     }
 
     desiredTarget_ = this->m_pMagicTarget;
@@ -26792,10 +26012,10 @@ void TargetClass::ResolveFormPointers(unsigned int param1, unsigned int param2, 
 
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x71)
     {
-        pSpellA = this->m_pSecondMagicItem;
+        pSpellA = (shared_types::MagicItem*)this->m_pSecondMagicItem;
         if (pSpellA)
         {
-            this->m_pSecondMagicItem = FUN_0040a250((unsigned int)pSpellA);
+            this->m_pSecondMagicItem = (::MagicItem*)FUN_0040a250((unsigned int)pSpellA);
         }
     }
 }
@@ -27713,13 +26933,6 @@ struct P124Point
     P124Point();
     P124Point operator+(const P124Point&) const;
 };
-struct P124Matrix
-{
-    P124Matrix();
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    void FUN_004a0c90(float);
-    P124Point FUN_004b4500(const P124Point*);
-};
 struct P124Marker
 {
     P124Point position;
@@ -27855,7 +27068,7 @@ struct P124Furniture
     virtual void v113();
     virtual void v114();
     virtual void v115();
-    virtual NiNode* GetNode();
+    virtual ::NiNode* GetNode();
     virtual void v117();
     virtual void v118();
     virtual void v119();
@@ -27866,7 +27079,7 @@ struct P124Furniture
     virtual void v124();
     virtual P124Point* GetPosition();
     P124Base* FUN_007af430();
-    P124Matrix FUN_0056fa00();
+    NiMatrix3 FUN_0056fa00();
     const P124Point& FUN_00430830();
 };
 struct P124Controller
@@ -28053,7 +27266,7 @@ struct P124Actor
     virtual void v175();
     virtual void v176();
     virtual void SetAngle(float);
-    float GetScale();
+    float FUN_00567400();
     void FUN_00931d30(float);
     P124Controller* FUN_009306d0();
 };
@@ -28068,9 +27281,9 @@ struct P124Model
 {
     P124Marker& FUN_005094d0(unsigned int);
 };
-P124Model* FUN_00c54400(NiNode*);
+P124Model* FUN_00c54400(::NiNode*);
 void FUN_00806b50(P124Input*, Animation*);
-void FUN_00a582f0(const P124Matrix*, P124Point*, bool, P124Point*, P124Point*);
+void FUN_00a582f0(const NiMatrix3*, P124Point*, bool, P124Point*, P124Point*);
 struct P124Package
 {
     void FUN_008c6b20(P124Input*);
@@ -28141,10 +27354,10 @@ void P124Process::UpdateFurnitureAnimation(P124Input* input)
             ((P124Marker*)&FurnitureMarker)
                 ->FUN_00c54550(rotation.FUN_00568650() + ((P124Furniture*)m_pFurnitureReference)->FUN_00430830().z);
             P124Point previousState =
-                base->FUN_00509920(((P124Marker*)&FurnitureMarker)->FUN_005094b0(), actor->GetScale());
-            P124Matrix transformed;
-            transformed.FUN_004a0c90(((P124Marker*)&FurnitureMarker)->FUN_00568650());
-            previousState = transformed.FUN_004b4500(&previousState);
+                base->FUN_00509920(((P124Marker*)&FurnitureMarker)->FUN_005094b0(), actor->FUN_00567400());
+            NiMatrix3 transformed;
+            transformed.MakeZRotation(((P124Marker*)&FurnitureMarker)->FUN_00568650());
+            previousState = *reinterpret_cast<P124Point*>(&transformed.operator*(reinterpret_cast<const NiPoint3&>(previousState)));
             actor->SetPosition(&(((P124Marker*)&FurnitureMarker)->FUN_006815c0() + previousState));
             unsigned char offset = m_ucFurnitureInteractionState;
             m_ucFurnitureInteractionState = 0;
@@ -28804,18 +28017,18 @@ struct TimerStub
 {
     float GetMovementDelta();
 };
-struct SettingStub
+
+// VATS is the singleton at 0x011F2250; methods 0x009C8CC0/0x009C8D60 are bound as VATS in other units.
+// Retained: include/VATS.h does not exist.
+class VATS
 {
-    float* Float();
-};
-struct VATSStub
-{
-    float GetPlayerTimeMult();
-    float GetTargetTimeMult();
+public:
+    float GetModeTimeMultiplier();
+    float GetUpdateTimeScale();
 };
 extern TimerStub g_timerStub;
-extern SettingStub g_settingStub;
-extern VATSStub g_vatsStub;
+extern Setting g_settingStub;
+extern VATS g_vatsStub;
 extern Actor* g_playerStub;
 extern Actor* g_vatsTargetStub;
 extern double g_zeroStub;
@@ -28835,12 +28048,12 @@ unsigned char AutoFireProcess::UpdateAutoFire(Actor* apActor)
     if (!pWeap->IsAutomatic())
         return 0;
     float fDelta4 = g_timerStub.GetMovementDelta() * *g_settingStub.Float();
-    float fAnimMult6 = GetAnimation() ? ((AnimStub*)GetAnimation())->GetSpeedMult() : 1.0f;
+    float fAnimMult6 = ((BaseProcess*)this)->GetAnimation() ? ((AnimStub*)((BaseProcess*)this)->GetAnimation())->GetSpeedMult() : 1.0f;
     if (apActor == g_playerStub)
-        m_fAnimationSpeed -= g_vatsStub.GetPlayerTimeMult() * fDelta4 * fAnimMult6;
+        m_fAnimationSpeed -= g_vatsStub.GetModeTimeMultiplier() * fDelta4 * fAnimMult6;
     else if (apActor == g_vatsTargetStub)
         m_fAnimationSpeed -=
-            g_timerStub.GetMovementDelta() * *g_settingStub.Float() * fAnimMult6 * g_vatsStub.GetTargetTimeMult();
+            g_timerStub.GetMovementDelta() * *g_settingStub.Float() * fAnimMult6 * g_vatsStub.GetUpdateTimeScale();
     else
         m_fAnimationSpeed -= g_timerStub.GetMovementDelta() * *g_settingStub.Float() * fAnimMult6;
     float fRate = pWeap->GetFireRate() * pWeap->GetRateMult(((WeapEntryStub*)pWeapon)->HasModFlag(8));
@@ -28871,10 +28084,6 @@ struct Twin_00639b40
     char* GetEntryPoint();
 };
 class TESActorBase;
-struct TESTopicInfo
-{
-    TESActorBase* GetSpeaker();
-};
 class NiTriBasedGeom;
 struct FUN_00559450_h
 {
@@ -28892,36 +28101,6 @@ struct Pt9
     float z;
     float FUN_004a7290();
     void FUN_00439ef0();
-};
-struct RequestLocation9
-{
-    void* vtable;
-    NiPoint3 position;
-    void* field10;
-    void* field14;
-    void* field18;
-    unsigned int field1c;
-    unsigned int field20;
-    unsigned int field24;
-};
-struct PathingRequest
-{
-    virtual ~PathingRequest();
-    unsigned int refCount;
-    unsigned int field08;
-    RequestLocation9 start;
-    RequestLocation9 destination;
-    NiPoint3 direction;
-    float field68, field6c, field70, radius, field78;
-    NiPoint3 field7c;
-    float field88, field8c, field90;
-    void* field94;
-    bool field98, field99, field9a, field9b, field9c, field9d, field9e, field9f;
-    bool fielda0, fielda1, fielda2, fielda3, fielda4;
-    unsigned int fielda8;
-    bool fieldac;
-    PathingRequest();
-    void SetUseSoft(bool);
 };
 struct Field1909
 {
@@ -28994,35 +28173,11 @@ bool __cdecl HasPathingSolution(void*);
 extern float DAT_010231d0;
 extern float DAT_01012054;
 extern double DAT_01012060;
-struct Proc9 : MiddleHighProcess
+// Proc9's own virtual calls: slots 520 on of the MiddleHighProcess vtable as this view declares them
+struct Proc9Slots : MiddleLowProcess
 {
-    virtual void v493();
-    virtual void v494();
-    virtual void vt7bc(Actor9*, void*);
-    virtual void v496();
-    virtual void v497();
-    virtual void v498();
-    virtual void v499();
-    virtual void v500();
-    virtual void v501();
-    virtual void v502();
-    virtual void v503();
-    virtual void v504();
-    virtual void v505();
-    virtual void v506();
-    virtual void v507();
-    virtual void v508();
-    virtual void v509();
-    virtual void v510();
-    virtual void v511();
-    virtual void v512();
-    virtual void v513();
-    virtual void v514();
-    virtual void v515();
-    virtual void v516();
-    virtual void v517();
-    virtual void v518();
-    virtual void v519();
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // shared MiddleHighProcess slots 520..539 (include/MiddleHighProcess.h vfn_820..vfn_86c)
     virtual void v520();
     virtual void v521();
     virtual void v522();
@@ -29042,6 +28197,9 @@ struct Proc9 : MiddleHighProcess
     virtual void v536();
     virtual void v537();
     virtual void vt868(Actor9*, void*);
+};
+struct Proc9 : MiddleHighProcess
+{
     ObjA9* FUN_008d0430();
     void UpdatePackageState(Actor9* arg);
 };
@@ -29118,7 +28276,7 @@ void Proc9::UpdatePackageState(Actor9* apActor)
                 offsetTmp = f20 + f18;
                 if (same4 && f20 >= DAT_01012060)
                 {
-                    NiPoint3 pt = *cur->GetPos() - location3->FUN_005c3420();
+                    NiPoint3 pt = *static_cast<const ::TESObjectREFR*>(cur)->GetPos() - location3->FUN_005c3420();
                     z1 = (((Pt9*)&pt)->FUN_004a7290() > offsetTmp * offsetTmp);
                 }
             }
@@ -29126,12 +28284,12 @@ void Proc9::UpdatePackageState(Actor9* apActor)
     join:
         if (z1)
         {
-            float f54 = (float)((ObjPkg9*)this->GetOneTimePackage())->FUN_00676280(apActor);
+            float f54 = (float)((ObjPkg9*)static_cast<const BaseProcess*>(this)->GetOneTimePackage())->FUN_00676280(apActor);
             f54 = FUN_00404010(f54, FUN_006e25d0());
             PathingRequest req;
             if (cur != 0)
             {
-                apActor->PathToLocation(&req, *cur->GetPos(), cur->FUN_008d6f30(), cur->FUN_00575d70(), f54, 0);
+                apActor->PathToLocation(&req, *static_cast<const ::TESObjectREFR*>(cur)->GetPos(), cur->FUN_008d6f30(), cur->FUN_00575d70(), f54, 0);
             }
             else
             {
@@ -29151,7 +28309,7 @@ void Proc9::UpdatePackageState(Actor9* apActor)
         flag->FUN_009f3af0(apActor, w->FUN_0055b980());
         // fallthrough
     case 1: {
-        if ((int)apActor->Unk_85() == 9 || (int)apActor->Unk_85() == 4)
+        if ((int)apActor->GetSitSleepState() == 9 || (int)apActor->GetSitSleepState() == 4)
         {
             apActor->Unk_106();
         }
@@ -29165,19 +28323,19 @@ void Proc9::UpdatePackageState(Actor9* apActor)
         switch (flag->FUN_0044ddc0())
         {
         case 0:
-            if ((int)apActor->Unk_85() >= 1 && (int)apActor->Unk_85() <= 4)
+            if ((int)apActor->GetSitSleepState() >= 1 && (int)apActor->GetSitSleepState() <= 4)
             {
                 flag->m_04 = 3;
             }
             break;
         case 1:
-            if ((int)apActor->Unk_85() >= 6 && (int)apActor->Unk_85() <= 9)
+            if ((int)apActor->GetSitSleepState() >= 6 && (int)apActor->GetSitSleepState() <= 9)
             {
                 flag->m_04 = 3;
             }
             break;
         case 2:
-            if ((int)apActor->Unk_85() >= 1 && (int)apActor->Unk_85() <= 4)
+            if ((int)apActor->GetSitSleepState() >= 1 && (int)apActor->GetSitSleepState() <= 4)
             {
                 flag->m_04 = 3;
             }
@@ -29204,10 +28362,10 @@ void Proc9::UpdatePackageState(Actor9* apActor)
                 ObjC9* obj114 = flag->FUN_0044edb0();
                 if (obj114 != 0)
                 {
-                    float f118 = (float)((ObjPkg9*)this->GetOneTimePackage())->FUN_00676280(apActor);
+                    float f118 = (float)((ObjPkg9*)static_cast<const BaseProcess*>(this)->GetOneTimePackage())->FUN_00676280(apActor);
                     f118 = FUN_00404010(f118, FUN_006e25d0());
                     PathingRequest req2;
-                    apActor->PathToLocation(&req2, *obj114->GetPos(), obj114->FUN_008d6f30(), obj114->FUN_00575d70(),
+                    apActor->PathToLocation(&req2, *static_cast<const ::TESObjectREFR*>(obj114)->GetPos(), obj114->FUN_008d6f30(), obj114->FUN_00575d70(),
                                             f118, 0);
                     req2.SetUseSoft(false);
                     apActor->SetPathingRequestAvoidNodes(&req2);
@@ -29227,26 +28385,26 @@ void Proc9::UpdatePackageState(Actor9* apActor)
                 switch (flag->FUN_0044ddc0())
                 {
                 case 0:
-                    chk = this->vt844(apActor, obj110);
+                    chk = ((Proc9Slots*)this)->vt844(apActor, obj110);
                     break;
                 case 1:
-                    chk = this->vt844(apActor, obj110);
+                    chk = ((Proc9Slots*)this)->vt844(apActor, obj110);
                     break;
                 case 2:
-                    this->vt7bc(apActor, flag->FUN_0044edb0());
+                    this->ProcessEat(reinterpret_cast<Actor*>(apActor), reinterpret_cast<TESForm*>(flag->FUN_0044edb0()));
                     break;
                 case 3:
-                    this->vt84c(apActor, 0, DAT_01012054);
+                    ((Proc9Slots*)this)->vt84c(apActor, 0, DAT_01012054);
                     break;
                 case 5:
-                    if (this->vt850(apActor, obj110))
+                    if (((Proc9Slots*)this)->vt850(apActor, obj110))
                     {
                         flag->SelectSandboxActivity(apActor, (ObjB9*)this->GetCurrentPackage());
                         flag->m_04 = 2;
                     }
                     break;
                 case 4:
-                    this->vt868(apActor, obj110);
+                    ((Proc9Slots*)this)->vt868(apActor, obj110);
                     break;
                 default:
                     chk = false;
@@ -29346,12 +28504,7 @@ struct FurnitureActorAccess
 };
 struct FurnitureProcess : MiddleHighProcess
 {
-    virtual void unused493();
-    virtual void unused494();
-    virtual void unused495();
-    virtual void unused496();
-    virtual void unused497();
-    virtual void BeginFurniture(Actor*, int);
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
     void FUN_0092c680();
     bool TryUseFurniture(Actor* actor, TESObjectREFR* furniture);
 };
@@ -29359,14 +28512,14 @@ struct FurnitureProcess : MiddleHighProcess
 // @fnv 0x0092a9b0
 bool FurnitureProcess::TryUseFurniture(Actor* actor, TESObjectREFR* furniture)
 {
-    TESPackage* package = GetOneTimePackage();
+    shared_types::TESPackage* package = (shared_types::TESPackage*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
     if (!furniture || !static_cast<FurnitureReference*>(furniture)->FUN_00568680())
         return false;
     if (m_pFurnitureReference != furniture)
     {
-        if (actor->Unk_85())
+        if (actor->GetSitSleepState())
         {
-            if (actor->Unk_85() == 4 || actor->Unk_85() == 9)
+            if (actor->GetSitSleepState() == 4 || actor->GetSitSleepState() == 9)
                 actor->Unk_106();
             return true;
         }
@@ -29382,13 +28535,13 @@ bool FurnitureProcess::TryUseFurniture(Actor* actor, TESObjectREFR* furniture)
     // The base-object predicate selects the chair state rather than the bed state.
     bool base = reinterpret_cast<FurnitureBase*>(chair)->FUN_005093f0();
     int state = base ? 4 : 9;
-    if (actor->Unk_85() != state && actor->IsCharacter())
+    if (actor->GetSitSleepState() != state && actor->IsCharacter())
     {
         if (!pTarget)
             SetTarget(m_pFurnitureReference);
-        BeginFurniture(actor, 0);
+        ProcessActivate(actor, false);
     }
-    if (actor->Unk_85() == state)
+    if (actor->GetSitSleepState() == state)
         SetAnimationComplete(true);
     if (static_cast<FUN_00915ef0_shell*>(static_cast<MiddleHighProcess*>(this))->FUN_00915ef0(actor))
     {
@@ -29400,7 +28553,7 @@ bool FurnitureProcess::TryUseFurniture(Actor* actor, TESObjectREFR* furniture)
         SetProcessTarget(actor, 1);
         return false;
     }
-    if (actor->Unk_85() == 9)
+    if (actor->GetSitSleepState() == 9)
     {
         SleepController* controller = reinterpret_cast<FurnitureActorAccess*>(actor)->FUN_008adcb0();
         if (controller && !controller->IsActive())
@@ -29678,35 +28831,11 @@ extern TESBoundObject* DAT_011ca248;
 float FUN_006e25d0();
 float FUN_00404010(float, float);
 double FUN_00408860(float);
-struct B570ProcessCalls : MiddleHighProcess
+// B570ProcessCalls's own virtual calls: slots 520 on of the MiddleHighProcess vtable as this view declares them
+struct B570ProcessCallsSlots : MiddleLowProcess
 {
-    virtual void unknown493();
-    virtual void unknown494();
-    virtual void unknown495();
-    virtual void unknown496();
-    virtual void unknown497();
-    virtual void unknown498();
-    virtual void unknown499();
-    virtual void unknown500();
-    virtual void unknown501();
-    virtual void unknown502();
-    virtual void unknown503();
-    virtual void unknown504();
-    virtual void unknown505();
-    virtual void unknown506();
-    virtual void unknown507();
-    virtual void unknown508();
-    virtual void unknown509();
-    virtual void unknown510();
-    virtual void unknown511();
-    virtual void unknown512();
-    virtual void unknown513();
-    virtual void unknown514();
-    virtual void unknown515();
-    virtual void unknown516();
-    virtual void unknown517();
-    virtual void unknown518();
-    virtual void unknown519();
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // shared MiddleHighProcess slots 520..539 (include/MiddleHighProcess.h vfn_820..vfn_86c)
     virtual void unknown520();
     virtual void unknown521();
     virtual void unknown522();
@@ -29726,6 +28855,9 @@ struct B570ProcessCalls : MiddleHighProcess
     virtual void unknown536();
     virtual void unknown537();
     virtual void UpdateActiveEffects(Actor*, TESObjectREFR*);
+};
+struct B570ProcessCalls : MiddleHighProcess
+{
     void UpdateTargetTracking(B570ActorCalls* actor, B570TargetData* data);
 };
 // @fnv 0x0092b570
@@ -29736,18 +28868,18 @@ void B570ProcessCalls::UpdateTargetTracking(B570ActorCalls* actor, B570TargetDat
     {
         if (data->AdvancePatrolIndex(1))
         {
-            FinishTarget(actor, data);
+            ((B570ProcessCallsSlots*)this)->FinishTarget(actor, data);
             return;
         }
         else
         {
-            SetAnimationState(-1);
+            SetAnimationState(0xFFFFFFFFu);
             return;
         }
     }
     if (actor->FUN_008b3bb0())
     {
-        NiPoint3 delta = *actor->GetPos() - *target->GetPos();
+        NiPoint3 delta = *static_cast<const ::TESObjectREFR*>(actor)->GetPos() - *static_cast<const ::TESObjectREFR*>(target)->GetPos();
         float distance = ((B570PointCalls*)&delta)->GetSquaredXYLength();
         float radius = 32.0f;
         if (((B570FormCalls*)target->GetObjectReference())->FUN_00401170() == 48)
@@ -29758,14 +28890,14 @@ void B570ProcessCalls::UpdateTargetTracking(B570ActorCalls* actor, B570TargetDat
         {
             if (target->GetObjectReference() == DAT_011ca248)
                 radius = FUN_006e25d0();
-            TESPackage* package = GetCurrentPackage();
+            shared_types::TESPackage* package = (shared_types::TESPackage*)GetCurrentPackage();
             if (package)
                 radius = FUN_00404010(radius, (float)((B570PackageCalls*)package)->FUN_00676280(actor));
         }
         radius *= radius;
         if (distance > radius || FUN_00408860(delta.z) > 180.0)
         {
-            FinishTarget(actor, data);
+            ((B570ProcessCallsSlots*)this)->FinishTarget(actor, data);
             return;
         }
     }
@@ -29776,7 +28908,7 @@ void B570ProcessCalls::UpdateTargetTracking(B570ActorCalls* actor, B570TargetDat
     {
         int type = ((B570FormCalls*)target->GetObjectReference())->FUN_00401170();
         if (type == 48)
-            UpdateActiveEffects(actor, target);
+            ((B570ProcessCallsSlots*)this)->UpdateActiveEffects(actor, target);
     }
     data->elapsed += DAT_011f6394.FUN_0084d030();
     if (data->elapsed >= duration)
@@ -29787,7 +28919,7 @@ void B570ProcessCalls::UpdateTargetTracking(B570ActorCalls* actor, B570TargetDat
             if (!data->AdvancePatrolIndex(1))
                 SetProcessTarget(actor, 1);
             else
-                FinishTarget(actor, data);
+                ((B570ProcessCallsSlots*)this)->FinishTarget(actor, data);
         }
     }
 }
@@ -29798,11 +28930,6 @@ struct WeaponObjStub
     int GetWeaponSkillIndex();
 };
 
-struct InventoryStackRecord
-{
-    WeaponObjStub* GetWeaponObj();
-    float GetWeaponConditionHealth(bool abBase);
-};
 
 float RoundScaledValue(float afValue);
 
@@ -29826,7 +28953,7 @@ int MHP_0092b9e0_Owner::FUN_0092b9e0(Actor* apActor)
 
     if (pObj2 != 0 && pObj2->IsWeaponFlag())
         fPercent3 =
-            GetCurrentActorValue(apActor->GetActorBase(), (ActorValue__Index)pObj2->GetWeaponSkillIndex(), apActor);
+            GetActorValueF(apActor->GetActorBase(), (ActorValue::Index)pObj2->GetWeaponSkillIndex(), apActor);
 
     iResult = (int)RoundScaledValue((double)fPercent3 * 0.1f);
 
@@ -29840,50 +28967,13 @@ struct ArmorForm : TESForm
 {
     int FUN_00401170();
 };
-struct TESBipedModelForm
-{
-    bool FUN_00480d30();
-    bool IsPowerArmor();
-    bool FUN_00480af0(int, bool, bool);
-    bool GetIsHeavyArmor() const;
-};
-struct TESObjectARMO : ArmorForm
-{
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    TESBipedModelForm bipedModel;
-};
+
 struct InventoryItem
 {
     ArmorForm* GetObject();
     bool FUN_004bddd0(bool);
 };
-class InventoryChanges
-{
-  public:
-    BSSimpleList<InventoryItem*>* items;
-    static InventoryChanges* GetOrAddInventoryChanges(TESObjectREFR*);
-};
+
 struct ArmorActor : Actor
 {
     Animation* FUN_008b70d0();
@@ -29903,26 +28993,26 @@ void ArmorProcess::UpdatePowerArmorState(ArmorActor* actor)
     m_bFifthWeaponFlag = false;
     m_bSixthWeaponFlag = false;
     m_bSeventhWeaponFlag = false;
-    InventoryChanges* changes = InventoryChanges::GetOrAddInventoryChanges(actor);
-    BSSimpleList<InventoryItem*>* node = changes->items;
+    InventoryChanges* changes = InventoryChanges::GetOrAddInventoryChanges(static_cast<TESObjectREFR*>(actor));
+    BSSimpleList<InventoryItem*>* node = reinterpret_cast<BSSimpleList<InventoryItem*>*>(changes->m_pEntryList);
     while (node && !node->IsEmpty() && !(m_bFifthWeaponFlag && m_bSixthWeaponFlag && m_bSeventhWeaponFlag))
     {
         InventoryItem* item = node->GetItem();
         ArmorForm* form = item->GetObject();
         if (item->FUN_004bddd0(false) && form->FUN_00401170() == 0x18)
         {
-            TESObjectARMO* armor = static_cast<TESObjectARMO*>(form);
-            if (armor->bipedModel.FUN_00480d30())
+            shared_types::TESObjectARMO* armor = reinterpret_cast<shared_types::TESObjectARMO*>(form);
+            if (armor->TESBipedModelForm::FUN_00480d30())
                 m_bSeventhWeaponFlag = true;
-            if (armor->bipedModel.IsPowerArmor())
+            if (armor->TESBipedModelForm::IsPowerArmor())
             {
-                if (armor->bipedModel.FUN_00480af0(1, false, false) || armor->bipedModel.FUN_00480af0(0, false, false))
+                if (armor->TESBipedModelForm::HasBipedModel(1, false, false) || armor->TESBipedModelForm::HasBipedModel(0, false, false))
                     m_bSixthWeaponFlag = true;
                 else
                     m_bFifthWeaponFlag = true;
             }
-            if (armor->bipedModel.GetIsHeavyArmor() && !armor->bipedModel.FUN_00480af0(1, false, false) &&
-                !armor->bipedModel.FUN_00480af0(0, false, false))
+            if (armor->TESBipedModelForm::GetIsHeavyArmor() && !armor->TESBipedModelForm::HasBipedModel(1, false, false) &&
+                !armor->TESBipedModelForm::HasBipedModel(0, false, false))
                 m_bFourthWeaponFlag = true;
         }
         node = node->GetNext();
@@ -29945,13 +29035,7 @@ struct FormChangeFlags
     unsigned int changeFlags;
 };
 
-class TESSaveLoadGame
-{
-  public:
-    bool FUN_00862110();
-    unsigned char FUN_008df040();
-    SaveLoadEntry* FUN_004fd3e0();
-};
+
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct GlobalObject_0045cf30
@@ -30065,7 +29149,7 @@ unsigned short MiddleHighProcess_Shell::FUN_00924220(unsigned int a2, MobileObje
 
     if (*g_011de4e8.Bool())
     {
-        SaveLoadEntry* pSaveEntry = g_TESSaveLoadGame->FUN_004fd3e0();
+        SaveLoadEntry* pSaveEntry = static_cast<SaveLoadEntry*>(g_TESSaveLoadGame->FUN_004fd3e0());
         if (pSaveEntry)
         {
             TESForm* pForm = FUN_004839c0(pSaveEntry->formID);
@@ -30102,40 +29186,23 @@ class FUN_008579e0_shell
     void FUN_008579e0(void* dst, unsigned int size);
 };
 
-class TESSaveLoadGame : public FUN_008579e0_shell
-{
-  public:
-    bool FUN_00862110();
-    void* FUN_004fd3c0();
-    unsigned char FUN_008df040();
-    unsigned int FUN_00825c00();
-    void FUN_00857aa0(unsigned int* dst, int size);
-    void FUN_00857bd0(unsigned int size);
-};
+
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
-class PlayerCharacter
-{
-  public:
-    bool FUN_004eaf60();
-};
-extern PlayerCharacter* _g_thePlayer;
 
-class NiAVObject
-{
-  public:
-    NiAVObject* FUN_0045bc00(int);
-};
+extern shared_types::PlayerCharacter* _g_thePlayer;
+
+
 
 struct TESObjectREFRExt : TESObjectREFR
 {
-    NiAVObject* Get3DSimple();
+    ::NiAVObject* Get3DSimple();
 };
 
 struct ActorExt : Actor
 {
     void FUN_008b0b00(int);
-    void FUN_008b0bd0(NiAVObject*);
+    void FUN_008b0bd0(::NiAVObject*);
 };
 
 struct ActorPackageExt : ActorPackageContext
@@ -30237,10 +29304,10 @@ void TargetProcess::LoadFromSave(unsigned int a1, unsigned int a2, MobileObject*
     {
         this->ApplyProcessLevelChange(a3);
         ((ActorExt*)Dir)->FUN_008b0b00(0);
-        NiAVObject* p3D = ((TESObjectREFRExt*)a3)->Get3DSimple();
+        ::NiAVObject* p3D = ((TESObjectREFRExt*)a3)->Get3DSimple();
         if (p3D)
         {
-            NiAVObject* pNode;
+            ::NiAVObject* pNode;
             pNode = p3D;
             if (a3 == (MobileObject*)_g_thePlayer && !_g_thePlayer->FUN_004eaf60())
             {
@@ -30321,7 +29388,7 @@ void TargetProcess::LoadFromSave(unsigned int a1, unsigned int a2, MobileObject*
 
     unsigned int ProjectedLoc;
     g_TESSaveLoadGame->FUN_00857aa0(&ProjectedLoc, 4);
-    this->m_pFirstMagicItem = (MagicItem*)ProjectedLoc;
+    this->m_pFirstMagicItem = (::MagicItem*)ProjectedLoc;
 
     unsigned int aAction2;
     g_TESSaveLoadGame->FUN_00857aa0(&aAction2, 4);
@@ -30370,7 +29437,7 @@ void TargetProcess::LoadFromSave(unsigned int a1, unsigned int a2, MobileObject*
     {
         unsigned int uPackageSpell;
         g_TESSaveLoadGame->FUN_00857aa0(&uPackageSpell, 4);
-        this->m_pSecondMagicItem = (MagicItem*)uPackageSpell;
+        this->m_pSecondMagicItem = (::MagicItem*)uPackageSpell;
     }
 
     if (g_TESSaveLoadGame->FUN_00862110())
@@ -31704,7 +30771,7 @@ struct ActRef
     void* FUN_008d6f30();
     void* FUN_00575d70();
     bool FUN_005686b0(ActPoint* apPos, int a2, int a3, ActPoint* apOut, int* apMarker, int a6);
-    bool Activate(ActActor* apActor, int aiActivate, void* apItem, int a4);
+    bool FUN_00573170(ActActor* apActor, int aiActivate, void* apItem, int a4);
     void FUN_00565870();
 };
 
@@ -32478,7 +31545,7 @@ bool ActProcess::FUN_00915f10(ActActor* apActor, bool abActivate)
         {
             if (!apActor->FUN_008b3bb0())
                 FUN_vt294(apActor);
-            if (GetCurrentPackage()->FUN_0041ca90() == 0x1c && FUN_00915ef0(apActor))
+            if (((shared_types::TESPackage*)GetCurrentPackage())->FUN_0041ca90() == 0x1c && FUN_00915ef0(apActor))
             {
                 apActor->FUN_vt288();
                 return false;
@@ -32516,9 +31583,9 @@ bool ActProcess::FUN_00915f10(ActActor* apActor, bool abActivate)
                     }
                     else if (m_pDetectionData60)
                     {
-                        pTarget->Activate(apActor, 1, m_pDetectionData60->pItem, 1);
+                        pTarget->FUN_00573170(apActor, 1, m_pDetectionData60->pItem, 1);
                     }
-                    else if (!pTarget->IsActor() && !pTarget->Activate(apActor, 1, 0, 1) &&
+                    else if (!pTarget->IsActor() && !pTarget->FUN_00573170(apActor, 1, 0, 1) &&
                              pPackage->FUN_0067efd0())
                     {
                         SetProcessTarget(apActor, -1);
@@ -32557,11 +31624,11 @@ bool ActProcess::FUN_00915f10(ActActor* apActor, bool abActivate)
                     }
                     else if (m_pDetectionData60)
                     {
-                        pTarget->Activate(apActor, 0, m_pDetectionData60->pItem, 1);
+                        pTarget->FUN_00573170(apActor, 0, m_pDetectionData60->pItem, 1);
                     }
                     else
                     {
-                        pTarget->Activate(apActor, 0, 0, 1);
+                        pTarget->FUN_00573170(apActor, 0, 0, 1);
                     }
                 }
                 if (pUsed)
@@ -32596,15 +31663,8 @@ struct Pt
     float Length() const;
 };
 
-union SETTING_VALUE
-{
-    int i;
-    float f;
-};
-struct Setting_S
-{
-    float f;
-};
+
+
 
 struct ActShell
 {
@@ -32636,10 +31696,7 @@ struct SettingInt
 {
     SETTING_VALUE* FUN_0043d4d0();
 };
-struct FloatSetting
-{
-    Setting_S* FUN_00403e20();
-};
+
 struct HourObj
 {
     float FUN_00867da0();
@@ -32867,7 +31924,7 @@ struct V1f4
 
 extern "C" Actor* g_thePlayer;
 extern "C" SettingInt DAT_011cdad0;
-extern "C" FloatSetting DAT_011cd950;
+extern "C" ::Setting DAT_011cd950;
 extern "C" HourObj DAT_011de7b8;
 extern "C" float DAT_01012054;
 extern "C" double DAT_01012640;
@@ -33444,7 +32501,7 @@ void MidProc::FUN_00918ee0(Actor* apActor, bool abArg2, int aiArg3, int aiArg4)
     float fDist = ((ActShell*)apActor)->FUN_005723b0(this->pTarget, 0, 0);
     (void)((RefShell*)apActor)->FUN_00575d70();
     (void)((RefShell*)this->pTarget)->FUN_00575d70();
-    float fValue = pPkg->GetPackageResult(apActor, false);
+    float fValue = pPkg->GetPackageResult((::Actor*)apActor, false);
     pDetected = this->pTarget;
 
     if (this->pTarget == 0 ||
@@ -33470,7 +32527,7 @@ void MidProc::FUN_00918ee0(Actor* apActor, bool abArg2, int aiArg3, int aiArg4)
     else
     {
         float fLen = (this->m_kPackageTargetPosition - *((V1f4*)this->pTarget)->v1f4()).Length();
-        if (fLen > DAT_011cd950.FUN_00403e20()->f || (fDist > fValue && ((ActShell*)apActor)->FUN_008b3bb0()))
+        if (fLen > *DAT_011cd950.FUN_00403e20() || (fDist > fValue && ((ActShell*)apActor)->FUN_008b3bb0()))
         {
             if (0)
             {
@@ -33558,7 +32615,7 @@ struct Filter91
 };
 struct Pen91
 {
-    void apply(NiNode*, int);
+    void apply(::NiNode*, int);
 };
 struct Ref91
 {
@@ -33568,7 +32625,7 @@ struct Ref91
     bool valid();
     Body91* body();
     void prepare();
-    NiNode* node();
+    ::NiNode* node();
     Filter91* filter(int*);
     void* weapon();
 };
@@ -33588,7 +32645,7 @@ struct Setting91
 extern Setting91 settingA91, settingB91, settingC91;
 struct Player91
 {
-    NiNode* GetNode(bool);
+    ::NiNode* GetNode(bool);
 };
 extern Player91* player91;
 struct Update91
@@ -33602,9 +32659,9 @@ struct Node91
     void Update(const Update91&);
 };
 extern bool FUN_008c7aa0();
-extern void FUN_00c6a350(NiNode*, int, bool, bool, bool);
+extern void FUN_00c6a350(::NiNode*, int, bool, bool, bool);
 extern void FUN_004a3e00(void*, const Point91&);
-extern void impulse91(NiNode*, const Aligned91*, float, int);
+extern void impulse91(::NiNode*, const Aligned91*, float, int);
 // Applies a force impulse to an actor's physics body or animation node based on game settings and ragdoll state.
 // @fnv 0x0091fee0
 void SelfFull91::FUN_0091fee0(Ref91* actor, Point91 point, float force)
@@ -33634,7 +32691,7 @@ void SelfFull91::FUN_0091fee0(Ref91* actor, Point91 point, float force)
                 actor->prepare();
             *((unsigned char*)this + 0x13c) = 2;
             ((Self91*)this)->v028();
-            NiNode* node;
+            ::NiNode* node;
             if (actor == (Ref91*)player91)
                 node = player91->GetNode(false);
             else
@@ -33660,14 +32717,9 @@ void SelfFull91::FUN_0091fee0(Ref91* actor, Point91 point, float force)
 
 namespace fnv_00926690 {
 namespace load926 {
-struct Vec3
-{
-    float x;
-    float y;
-    float z;
-    Vec3();
-};
-struct Vector4f
+
+// Exe 0x00926690: unit-local Vector4f view; declarations and layout are preserved.
+struct MiddlehighprocessVector4fView
 {
     int a;
     int b;
@@ -34002,8 +33054,8 @@ struct Proc
     int unk4e4;
     int unk4e8;
     int unk4ec;
-    Vector4f m4f0;
-    Vector4f m500;
+    MiddlehighprocessVector4fView m4f0;
+    MiddlehighprocessVector4fView m500;
     int unk510;
     int unk514;
     int unk518;
@@ -34024,8 +33076,8 @@ struct Proc
     int unk554;
     int m558;
     void FUN_008e2680(int state);
-    void FUN_005620e0(Vec3* pos);
-    void FUN_00926980(Vec3* v);
+    void FUN_005620e0(NiPoint3* pos);
+    void FUN_00926980(NiPoint3* v);
     bool FUN_0088b0c0();
     bool FUN_009269f0();
 };
@@ -34484,7 +33536,7 @@ struct Self
     virtual void s_132();
     virtual void s_133();
     virtual void s_134();
-    virtual Vec3* Get4d4();
+    virtual NiPoint3* Get4d4();
     void FUN_00926690(Ref* actor);
 };
 }
@@ -34510,7 +33562,7 @@ void Self::FUN_00926690(Ref* actor)
         pProcessTmp->m410.FUN_00629670(iFlags, 1);
         if ((iFlags & 0x800) && DAT_011de45c->FUN_008df040() >= 0x23)
         {
-            Vec3 kPos;
+            NiPoint3 kPos;
             DAT_011de45c->FUN_008579e0(&kPos, 0xc);
             if (Get4bc() && Get4d4())
             {
@@ -34521,7 +33573,7 @@ void Self::FUN_00926690(Ref* actor)
                 }
                 if (pRef5 == 0)
                 {
-                    kPos = *Get4d4();
+                    reinterpret_cast<NiPoint3&>(kPos) = *reinterpret_cast<NiPoint3*>(Get4d4());
                 }
             }
             pProcessTmp->FUN_005620e0(&kPos);
@@ -34532,7 +33584,7 @@ void Self::FUN_00926690(Ref* actor)
         }
         DAT_011de45c->FUN_008579e0(&pProcessTmp->m4f0, 0x10);
         DAT_011de45c->FUN_008579e0(&pProcessTmp->m500, 0x10);
-        Vec3 kVel_;
+        NiPoint3 kVel_;
         DAT_011de45c->FUN_008579e0(&kVel_, 0xc);
         pProcessTmp->FUN_00926980(&kVel_);
         if (actor->Is100())
@@ -36592,7 +35644,7 @@ struct ProcedureActor : Actor
 
     void FUN_008a8f60();
 
-    TESPackage* FUN_009344a0();
+    shared_types::TESPackage* FUN_009344a0();
 
     float FUN_005723b0(TESObjectREFR*, int, int);
 
@@ -36622,86 +35674,91 @@ void FUN_00703180();
 
 unsigned char UpdateEffectShaderOnActor(Actor*, unsigned char);
 
-void MarkBaseExtraListScriptEvent(TESPackage*, void*, int);
+void MarkBaseExtraListScriptEvent(shared_types::TESPackage*, void*, int);
 
+// ProcedureProcess's own virtual calls: slots 520 on of the MiddleHighProcess vtable as this view declares them
+struct ProcedureProcessSlots : MiddleLowProcess
+{
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // slots 493..519 are LowProcess's and MiddleLowProcess's own virtuals (include/LowProcess.h, MiddleLowProcess.h)
+    // shared MiddleHighProcess slots 520..539 (include/MiddleHighProcess.h vfn_820..vfn_86c)
+    virtual void ReservedSlot520();
+    virtual void ReservedSlot521();
+    virtual void ReservedSlot522();
+    virtual void Procedure82C();
+    virtual void ReservedSlot524();
+    virtual void ReservedSlot525();
+    virtual void ReservedSlot526();
+    virtual void Procedure83C(Actor*);
+    virtual void Procedure840(Actor*);
+    virtual void ReservedSlot529();
+    virtual void Procedure848(Actor*, bool, bool);
+};
 struct ProcedureProcess : MiddleHighProcess
 {
 
-    virtual void Procedure7B4(Actor*);
 
-    virtual void ReservedSlot494();
 
-    virtual void Procedure7BC(Actor*, bool);
 
-    virtual void ReservedSlot496();
 
-    virtual void Procedure7C4(Actor*);
 
-    virtual void Procedure7C8(Actor*, bool);
 
-    virtual void Procedure7CC(Actor*);
 
-    virtual void Procedure7D0(Actor*);
 
-    virtual void Procedure7D4(Actor*);
 
-    virtual void Procedure7D8(Actor*);
 
-    virtual void Procedure7DC(Actor*);
 
-    virtual void Procedure7E0(Actor*);
 
-    virtual void Procedure7E4(Actor*);
 
-    virtual void Procedure7E8(Actor*);
 
-    virtual void ReservedSlot507();
 
-    virtual void ReservedSlot508();
 
-    virtual void ReservedSlot509();
 
-    virtual void ReservedSlot510();
 
-    virtual void Procedure7FC(Actor*);
 
-    virtual void Procedure800(Actor*);
 
-    virtual void ReservedSlot513();
 
-    virtual void Procedure808(Actor*);
 
-    virtual void ReservedSlot515();
 
-    virtual void ReservedSlot516();
 
-    virtual void ReservedSlot517();
 
-    virtual void ReservedSlot518();
 
-    virtual void ReservedSlot519();
 
-    virtual void ReservedSlot520();
 
-    virtual void ReservedSlot521();
 
-    virtual void ReservedSlot522();
 
-    virtual void Procedure82C();
 
-    virtual void ReservedSlot524();
 
-    virtual void ReservedSlot525();
 
-    virtual void ReservedSlot526();
 
-    virtual void Procedure83C(Actor*);
 
-    virtual void Procedure840(Actor*);
 
-    virtual void ReservedSlot529();
 
-    virtual void Procedure848(Actor*, bool, bool);
 
     void FUN_00919f60(ProcedureActor* object);
 };
@@ -36730,7 +35787,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
     DAT_011e0460.FUN_00483710();
 
-    TESPackage* p = 0;
+    shared_types::TESPackage* p = 0;
 
     if (!apActor)
         return;
@@ -36747,24 +35804,24 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
     ProcedureActor* h;
 
-    if (h = apActor->IsActor() ? apActor : 0)
+    if (h = static_cast<TESObjectREFR*>(apActor)->IsActor() ? apActor : 0)
     {
 
         if (m_bCombatStateFlag)
 
             reinterpret_cast<unsigned char&>(m_bCombatStateFlag) = UpdateEffectShaderOnActor(h, m_bCombatStateFlag);
 
-        bool a = CanProcessActor(h, false);
+        bool a = CheckForNewPackage(h, false);
 
-        p = GetOneTimePackage();
+        p = (shared_types::TESPackage*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
 
         if (a || (!p && !h->FUN_008b3bb0()))
 
             UpdateCurrentPackage(h);
 
-        p = GetOneTimePackage();
+        p = (shared_types::TESPackage*)static_cast<const BaseProcess*>(this)->GetOneTimePackage();
 
-        Procedure82C();
+        ((ProcedureProcessSlots*)this)->Procedure82C();
 
         if (a)
         {
@@ -36779,7 +35836,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
             !((PackageProcedureAccess*)p)->FUN_008a6290())
         {
 
-            switch (DAT_011a3ff0[((PackageProcedureAccess*)p)->FUN_009611e0()][GetPackageInfoValue()])
+            switch (DAT_011a3ff0[((PackageProcedureAccess*)p)->FUN_009611e0()][static_cast<const BaseProcess*>(this)->GetPackageInfoValue()])
             {
 
             case 0:
@@ -36795,7 +35852,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure7E8(h);
+                ProcessAvoidRadiation(h);
 
                 break;
             }
@@ -36811,7 +35868,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
                     break;
                 }
 
-                Procedure7C8(h, true);
+                ProcessActivate(h, true);
 
                 break;
             }
@@ -36829,7 +35886,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure7FC(h);
+                ProcessPatrol(h);
 
                 break;
             }
@@ -36838,7 +35895,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure7E0(h);
+                vfn_7e0(h);
 
                 break;
             }
@@ -36847,7 +35904,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure7D4(h);
+                ProcessAmbushWait(h);
 
                 break;
             }
@@ -36856,7 +35913,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure800(h);
+                vfn_800(h);
 
                 break;
             }
@@ -36867,7 +35924,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure808(h);
+                ProcessNotify(h);
 
                 break;
             }
@@ -36876,7 +35933,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure848(h, true, false);
+                ((ProcedureProcessSlots*)this)->Procedure848(h, true, false);
 
                 break;
             }
@@ -36885,7 +35942,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure7E4(h);
+                ProcessFleeNonCombat(h);
 
                 break;
             }
@@ -36900,7 +35957,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
                     break;
                 }
 
-                Procedure7D0(h);
+                ProcessAcquire(h);
 
                 break;
             }
@@ -36909,7 +35966,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure7D8(h);
+                ProcessUseItemAt(h);
 
                 break;
             }
@@ -36918,7 +35975,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure7DC(h);
+                ProcessUseWeapon(h);
 
                 break;
             }
@@ -36933,7 +35990,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
                     break;
                 }
 
-                Procedure7CC(h);
+                ProcessAccompany(h);
 
                 break;
             }
@@ -36955,7 +36012,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
                 }
 
                 if (pTarget != DAT_011dea3c)
-                    SetPackageForActor(h, p, true);
+                    SetPackageForActor(h, (::TESPackage*)p, true);
 
                 SetProcessTarget(h, 1);
 
@@ -36984,7 +36041,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
                     if (((PackageProcedureAccess*)h->FUN_009344a0())->FUN_0041ca90() == 1)
                     {
 
-                        float i = (float)((PackageProcedureAccess*)GetCurrentPackage())->FUN_00671d10()->FUN_0044ddc0();
+                        float i = (float)((PackageProcedureAccess*)(shared_types::TESPackage*)GetCurrentPackage())->FUN_00671d10()->FUN_0044ddc0();
 
                         if (i >= h->FUN_005723b0(pTarget, 0, 0))
                             SetProcessTarget(h, 1);
@@ -37028,7 +36085,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
                 CanDetectActor(h);
 
-                if (!h->Unk_85())
+                if (!h->GetSitSleepState())
                     SetProcessTarget(h, 1);
 
                 break;
@@ -37038,7 +36095,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure7C8(h, false);
+                ProcessActivate(h, false);
 
                 break;
             }
@@ -37058,7 +36115,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure7BC(h, false);
+                ProcessEat(h, 0);
 
                 break;
             }
@@ -37088,7 +36145,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
                     break;
                 }
 
-                Procedure7B4(h);
+                vfn_7b4(h);
 
                 break;
             }
@@ -37097,7 +36154,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure83C(h);
+                ((ProcedureProcessSlots*)this)->Procedure83C(h);
 
                 break;
             }
@@ -37106,7 +36163,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure840(h);
+                ((ProcedureProcessSlots*)this)->Procedure840(h);
 
                 break;
             }
@@ -37115,7 +36172,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                Procedure7C4(h);
+                ProcessAlarm(h);
 
                 break;
             }
@@ -37152,14 +36209,14 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
             {
 
-                if (!IsProcessActivityActive() && !((PackageProcedureAccess*)p)->FUN_00674d40() &&
+                if (!static_cast<const BaseProcess*>(this)->IsProcessActivityActive() && !((PackageProcedureAccess*)p)->FUN_00674d40() &&
 
                     ((PackageProcedureAccess*)p)->FUN_00678610())
                 {
 
                     MarkBaseExtraListScriptEvent(p, h->FUN_005d43c0(), 0x400);
 
-                    OnPackageEnd(h, p);
+                    OnPackageEnd(h, (::TESPackage*)p);
 
                     SetProcessModeEnabled(true);
                 }
@@ -37183,7 +36240,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
                             StopPackage();
 
-                            CanProcessActor(h, true);
+                            CheckForNewPackage(h, true);
                         }
                     }
 
@@ -37212,7 +36269,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
 
                 if (p && ((PackageProcedureAccess*)p)->FUN_00670f90())
 
-                    h->Unk_A3(p, DAT_011de7b8.FUN_00867d60());
+                    h->vfn_28c((::TESPackage*)p, DAT_011de7b8.FUN_00867d60());  // old Unk_A3, slot 0xA3
 
                 FUN_00703180();
 
@@ -37224,7 +36281,7 @@ void ProcedureProcess::FUN_00919f60(ProcedureActor* apActor)
                     if (GetRunOncePackage())
                         StopRunOncePackage();
 
-                    else if (((PackageProcedureAccess*)GetCurrentPackage())->FUN_00674d40())
+                    else if (((PackageProcedureAccess*)(shared_types::TESPackage*)GetCurrentPackage())->FUN_00674d40())
                     {
 
                         StopPackage();
@@ -37292,14 +36349,7 @@ class QueuedFileAccess
     int result;
     QueuedFileAccess(int);
 };
-class MemContextAccess
-{
-    int saved;
 
-  public:
-    MemContextAccess(int, bool, const char*, int);
-    ~MemContextAccess();
-};
 extern char DAT_010898c0[];
 extern int DAT_0118a838[];
 extern int DAT_011e0410;
@@ -37328,14 +36378,14 @@ class ItemChangeAccess
 class AnimAccess
 {
   public:
-    NiNode* FUN_005585e0();
-    NiControllerManager* FUN_00496940();
+    ::NiNode* FUN_005585e0();
+    ::NiControllerManager* FUN_00496940();
 };
 class PlayerAccess
 {
   public:
     Animation* FUN_00950a60(bool);
-    NiNode* FUN_00950bb0(bool);
+    ::NiNode* FUN_00950bb0(bool);
     BaseProcess* FUN_008d8520();
     void SetByteAtOffset1F8(char);
 };
@@ -37346,7 +36396,7 @@ class AudioAccess
 };
 AudioAccess* FUN_00453a70();
 
-void FUN_008d6a80(const char*, NiNode*);
+void FUN_008d6a80(const char*, ::NiNode*);
 class WeaponPreloadAccess
 {
   public:
@@ -37361,14 +36411,14 @@ class CloneAccess
 class WeaponProcess : public MiddleHighProcess
 {
   public:
-    bool FUN_0091e100(InventoryStackRecord*, NiNode*, bool);
+    bool FUN_0091e100(InventoryStackRecord*, ::NiNode*, bool);
     void UpdateWeaponTypeFlags();
 };
 // Updates the stored weapon and invokes routines for animation nodes, sound entries, queued file data, and actor state.
 // @fnv 0x0091e100
-bool WeaponProcess::FUN_0091e100(InventoryStackRecord* weapon, NiNode* node, bool force)
+bool WeaponProcess::FUN_0091e100(InventoryStackRecord* weapon, ::NiNode* node, bool force)
 {
-    MemContextAccess context(0x32, true, DAT_010898c0, 0x10b1);
+    AutoMemContext context(static_cast<MEM_CONTEXT>(0x32), true, DAT_010898c0, 0x10b1);
     if (pWeapon != weapon || (weapon && force))
     {
         if (pWeapon && ((ItemChangeAccess*)pWeapon)->FUN_0044ddc0() && pCurrentAnimation)
@@ -37439,24 +36489,20 @@ bool WeaponProcess::FUN_0091e100(InventoryStackRecord* weapon, NiNode* node, boo
     else
     {
         if (((AnimAccess*)pCurrentAnimation)->FUN_005585e0())
-            SetAnimationControllerManager(((AnimAccess*)pCurrentAnimation)->FUN_00496940(),
-                              ((AnimAccess*)pCurrentAnimation)->FUN_005585e0());
+            SetAnimationControllerManager(reinterpret_cast<::NiControllerManager*>(((AnimAccess*)pCurrentAnimation)->FUN_00496940()),
+                              (::NiNode*)((AnimAccess*)pCurrentAnimation)->FUN_005585e0());
         else
-            SetAnimationControllerManager(0, node);
+            SetAnimationControllerManager(0, (::NiNode*)node);
         if (pCurrentAnimation == ((PlayerAccess*)DAT_011dea3c)->FUN_00950a60(false))
-            SetAnimationControllerManager(((AnimAccess*)((PlayerAccess*)DAT_011dea3c)->FUN_00950a60(true))->FUN_00496940(),
-                              ((AnimAccess*)((PlayerAccess*)DAT_011dea3c)->FUN_00950a60(true))->FUN_005585e0());
+            SetAnimationControllerManager(reinterpret_cast<::NiControllerManager*>(((AnimAccess*)((PlayerAccess*)DAT_011dea3c)->FUN_00950a60(true))->FUN_00496940()),
+                              (::NiNode*)((AnimAccess*)((PlayerAccess*)DAT_011dea3c)->FUN_00950a60(true))->FUN_005585e0());
     }
     SetKnockdownStage(-1);
     return true;
 }
 
 namespace fnv_00928d90 {
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-};
+using ::NiMemObject;
 class FUN_0081f580 : public NiMemObject
 {
   public:
@@ -37548,14 +36594,8 @@ struct ShaderManager
     void FUN_00973fd0(FUN_0081f580*);
 };
 extern ShaderManager DAT_011e0e80;
-class PlayerCharacter : public Actor
-{
-  public:
-    int FUN_00490f80();
-    FUN_0081f580* GetField6A4();
-    void FUN_00929220(FUN_0081f580*);
-};
-extern PlayerCharacter* pPlayer;
+
+extern shared_types::PlayerCharacter* pPlayer;
 struct ShaderItemChange
 {
     unsigned int FUN_0044ddc0();
@@ -37609,7 +36649,7 @@ void ShaderProcess::FUN_00928d90(Actor* actor)
         if (actor->GetProcess() && actor->GetProcess()->GetActiveWeapon())
         {
             ShaderEnchantment* enchantment =
-                FUN_004be330(reinterpret_cast<ShaderItemChange*>(GetActiveWeapon())->FUN_0044ddc0());
+                FUN_004be330(reinterpret_cast<ShaderItemChange*>(((BaseProcess*)this)->GetActiveWeapon())->FUN_0044ddc0());
             if (enchantment)
             {
                 if (enchantment->cost.GetCost(actor) <= FUN_004bd350(actor->GetProcess()->GetActiveWeapon()))
@@ -37643,7 +36683,7 @@ void ShaderProcess::FUN_00928d90(Actor* actor)
         if (actor == pPlayer && pPlayer->FUN_00490f80())
         {
             TESEffectShader* shader = GetCurrentEffectShader();
-            FUN_0081f580* pPlayerShader = pPlayer->GetField6A4();
+            FUN_0081f580* pPlayerShader = (FUN_0081f580*)pPlayer->GetField6A4();
             if (shader)
             {
                 if (pPlayerShader && pPlayerShader->FUN_00671d10() != shader)
@@ -37655,7 +36695,7 @@ void ShaderProcess::FUN_00928d90(Actor* actor)
                 {
                     pPlayerShader = new FUN_0081f580(pPlayer, shader, -1.0f);
                     pPlayerShader->FUN_00929260(1);
-                    pPlayer->FUN_00929220(pPlayerShader);
+                    pPlayer->FUN_00929220((shared_types::MagicShaderHitEffect*)pPlayerShader);
                     if (!a)
                         pPlayerShader->FUN_00929240(100.0f);
                 }
@@ -37664,13 +36704,13 @@ void ShaderProcess::FUN_00928d90(Actor* actor)
             {
                 delete pPlayerShader;
                 pPlayerShader = 0;
-                pPlayer->FUN_00929220(pPlayerShader);
+                pPlayer->FUN_00929220((shared_types::MagicShaderHitEffect*)pPlayerShader);
             }
             if (pPlayerShader && !pPlayerShader->Update())
             {
                 delete pPlayerShader;
                 pPlayerShader = 0;
-                pPlayer->FUN_00929220(pPlayerShader);
+                pPlayer->FUN_00929220((shared_types::MagicShaderHitEffect*)pPlayerShader);
             }
         }
     }
@@ -37704,7 +36744,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseFormComponent;
 struct CHUNK;
 struct CellMopp;
@@ -37725,9 +36764,7 @@ struct TESFileGroup;
 struct GuardActorPackageData;
 struct HWND__;
 struct BooleanIntegerAccessor;
-struct HighProcess;
 struct InventoryChanges;
-struct InventoryStackRecord;
 struct KFModel;
 struct CellDataNode;
 struct LipSyncAnimation;
@@ -37736,18 +36773,14 @@ struct MobileObject;
 struct DetectionEventData;
 struct Point3Offset;
 struct MuzzleFlash;
-struct NiAVObject;
 struct NiBSBoneLODController;
 struct NiBillboardNode;
 struct AnimationInterpolator;
 struct NiColor;
-struct NiControllerManager;
 struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
@@ -37759,26 +36792,19 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
-struct TESBoundObject;
 struct TESContainer;
 struct TESFile;
 struct TESForm;
 struct TESGlobal;
-struct TESIdleForm;
 struct TESModel;
-struct TESObject;
-struct TESObjectARMO;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
 struct TESFormList;
 struct TESObjectREFR;
 struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESSound;
 struct TESTopic;
 struct TESTopicInfo;
@@ -37787,7 +36813,6 @@ struct TESWorldSpace;
 struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
 struct bhkNiCollisionObject;
 struct bhkSimpleShapePhantom;
 struct blob4
@@ -37815,18 +36840,13 @@ struct FUN_0092bd00_shell : public MiddleHighProcess
     void FUN_0092bd00(Actor*);
 };
 
-class QueuedFile
-{
-  public:
-    bool FUN_0043caa0();
-};
-class NiNode;
+
 class Model
 {
   public:
     void IncRefCount();
     void DecRefCount();
-    NiNode* GetObject3D();
+    ::NiNode* GetObject3D();
 };
 class ProjectileCloneLoader
 {
@@ -37837,51 +36857,24 @@ __if_not_exists(g_modelLoader)
 {
     extern ProjectileCloneLoader* g_modelLoader;
 }
-struct ProjectileModel
+
+
+// 0x004FE080 is BGSProjectile::GetProjectileCloneCount; only this missing method is declared locally.
+struct ProjectileCloneSource : shared_types::BGSProjectile
 {
-    virtual void Slot0();
-    virtual void Slot1();
-    virtual void Slot2();
-    virtual void Slot3();
-    virtual void Slot4();
-    virtual const char* GetModelPath();
-};
-struct ProjectileView
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    ProjectileModel model;
     int GetProjectileCloneCount(void* weapon);
 };
 struct WeaponView
 {
-    ProjectileView* GetOrFallback(Actor*);
-};
-class InventoryStackRecord
-{
-  public:
-    void* FUN_0044ddc0();
+    ProjectileCloneSource* GetOrFallback(Actor*);
 };
 class ActorSupportClass
 {
   public:
-    NiNode* node;
+    ::NiNode* node;
     int count;
     int used;
-    ActorSupportClass(NiNode*, int);
+    ActorSupportClass(::NiNode*, int);
 };
 class ProjectileCloneAssignment
 {
@@ -37894,22 +36887,23 @@ class ProjectileCloneAssignment
 void FUN_0092bd00_shell::FUN_0092bd00(Actor* actor)
 {
     if (!m_pWeaponData && m_pQueuedWeaponFile &&
-        reinterpret_cast<QueuedFile*>(m_pQueuedWeaponFile.operator->())->FUN_0043caa0())
+        reinterpret_cast<shared_types::QueuedFile*>(m_pQueuedWeaponFile.operator->())->FUN_0043caa0())
     {
-        ::InventoryStackRecord* ammo = GetActiveWeapon();       // Weapon inventory entry; names preserve MSVC9 stack order.
-        ::InventoryStackRecord* weaponItem = GetCurrentAmmo();  // Ammo inventory entry.
+        ::InventoryStackRecord* ammo = ((BaseProcess*)this)->GetActiveWeapon();       // Weapon inventory entry; names preserve MSVC9 stack order.
+        ::InventoryStackRecord* weaponItem = ((BaseProcess*)this)->GetCurrentAmmo();  // Ammo inventory entry.
         // Resolve the weapon and ammunition objects from their inventory entries.
         WeaponView* pAmmoView =
-            ammo ? static_cast<WeaponView*>(reinterpret_cast<InventoryStackRecord*>(GetActiveWeapon())->FUN_0044ddc0()) : 0;
-        void* weapon = weaponItem ? reinterpret_cast<InventoryStackRecord*>(GetCurrentAmmo())->FUN_0044ddc0() : 0;
+            ammo ? reinterpret_cast<WeaponView*>(reinterpret_cast<InventoryStackRecord*>(((BaseProcess*)this)->GetActiveWeapon())->FUN_0044ddc0()) : 0;
+        void* weapon = weaponItem ? reinterpret_cast<InventoryStackRecord*>(((BaseProcess*)this)->GetCurrentAmmo())->FUN_0044ddc0() : 0;
         if (pAmmoView && weapon && pAmmoView->GetOrFallback(actor))
         {
             int cloneCount = pAmmoView->GetOrFallback(actor)->GetProjectileCloneCount(pAmmoView);
             if (cloneCount > 0)
             {
-                NiPointer<Model> model;
+                NiPointer<Model> model(0);  // Gamebryo's NiPointer(T* = 0)
                 reinterpret_cast<ProjectileCloneLoader*>(g_modelLoader)
-                    ->FUN_004472a0(pAmmoView->GetOrFallback(actor)->model.GetModelPath(), &model);
+                    ->FUN_004472a0(reinterpret_cast<::TESModel*>(reinterpret_cast<char*>(pAmmoView->GetOrFallback(actor)) +
+                                                  sizeof(::TESBoundObject) + sizeof(::TESFullName))->GetModelFilePath(), &model);
                 if (model && model->GetObject3D())
                 {
                     reinterpret_cast<ProjectileCloneAssignment*>(&m_pWeaponData)
@@ -37921,25 +36915,9 @@ void FUN_0092bd00_shell::FUN_0092bd00(Actor* actor)
 }
 }  // namespace fnv_0092bd00
 
-class NiUpdateData
-{
-  public:
-    float fTime;
-    unsigned int unk4;
-    unsigned int unk8;
-    NiUpdateData(float, bool, bool);
-};
 
-class NiAVObject
-{
-  public:
-    virtual ~NiAVObject();
-    void Update(const NiUpdateData&);
-};
 
-class NiNode : public NiAVObject
-{
-};
+
 
 class S_006815c0
 {
@@ -37947,64 +36925,28 @@ class S_006815c0
     void* _ref_006815c0();
 };
 
-class ThreeByThreeMatrix : public S_006815c0
-{
-  public:
-    float m00;
-    float m01;
-    float m02;
-    float m10;
-    float m11;
-    float m12;
-    float m20;
-    float m21;
-    float m22;
-    void FUN_004a0c90(float);
-    NiPoint3 FUN_004b4500(const NiPoint3*) const;
-};
+
+
+
 
 using ::TESBoundObject;
-__if_not_exists(TESBoundObject::TESBoundObject)
-{
-    class TESBoundObject : public TESForm
-    {
-    };
-}
 
-class TESFurniture : public TESBoundObject
-{
-  public:
-    NiPoint3 FUN_00509920(unsigned int, float);
-    float GetFurnitureHeading(unsigned int);
-};
+
 
 struct TESObjectREFRExt : public TESObjectREFR
 {
-    NiAVObject* Get3DSimple();
+    ::NiAVObject* Get3DSimple();
     void FUN_00568020(unsigned int, bool);
-    ThreeByThreeMatrix FUN_0056fa00();
+    NiMatrix3 FUN_0056fa00();
     ::NiNode* GetNiNode();
     NiPoint3* GetPos() const;
 };
 
-class bhkCharacterController
-{
-  public:
-    void FUN_005620e0(void*);
-};
 
-class PlayerCharacter : public Actor
-{
-  public:
-    Animation* GetAnimation(bool);
-    BipedAnim* GetBipedAnim(bool);
-    NiNode* GetNode(bool);
-    bool FUN_004eaf60();
-    void FUN_00950110(bool);
-    void FUN_005098c0();
-};
 
-extern PlayerCharacter* _g_thePlayer;
+
+
+extern shared_types::PlayerCharacter* _g_thePlayer;
 
 class FinishLoadSaveGameView
 {
@@ -38029,27 +36971,19 @@ struct LocalMarker : public S_006815c0
     void FUN_00c54550(float);
 };
 
-class FurnitureNodeStandIn : public NiAVObject
+class FurnitureNodeStandIn : public ::NiAVObject
 {
   public:
     unsigned int FUN_00509490();
     LocalMarker* FUN_005094d0(unsigned char);
 };
 
-class ActorStandIn : public Actor
-{
-  public:
-    void FUN_00931d30(float);
-    float GetScale();
-    bhkCharacterController* GetPhysicsCharacterController();
-};
-
 namespace FinishLoadCalls {
-NiAVObject* FUN_00c54400(::NiNode*);
+::NiAVObject* FUN_00c54400(::NiNode*);
 }
-void FUN_00a582f0(const ThreeByThreeMatrix&, NiPoint3*, int, const NiPoint3*, const NiPoint3*);
-void FUN_00c69fc0(NiAVObject*, bool, bool, bool);
-void FUN_00c6a350(NiAVObject*, bool, bool, bool, bool);
+void FUN_00a582f0(const NiMatrix3&, NiPoint3*, int, const NiPoint3*, const NiPoint3*);
+void FUN_00c69fc0(::NiAVObject*, bool, bool, bool);
+void FUN_00c6a350(::NiAVObject*, bool, bool, bool, bool);
 void FUN_00806130(void*, Actor*);
 
 class ObjectWithVFuncD8
@@ -38240,7 +37174,7 @@ void FinishInitLoadProcessView::FUN_00925700(unsigned int a1, unsigned int a2, M
 {
     BaseProcess::FinishLoadGameTES(a1, a2, apMobileObject);
 
-    ActorStandIn* actor = (ActorStandIn*)dynamic_cast<Actor*>(apMobileObject);
+    Actor* actor = dynamic_cast<Actor*>(apMobileObject);
     ObjectWithVFuncD8* pUnk4 = (ObjectWithVFuncD8*)((ObjectWithVFunc1b8*)apMobileObject)->FUN_001b8(0);
     if (pUnk4 && this->m_cCharacterControllerState)
     {
@@ -38260,16 +37194,16 @@ void FinishInitLoadProcessView::FUN_00925700(unsigned int a1, unsigned int a2, M
 
     if (actor)
     {
-        if (actor == (ActorStandIn*)_g_thePlayer)
+        if (actor == (Actor*)_g_thePlayer)
         {
-            PlayAnimation(this->m_bAdditionalActorFlag, _g_thePlayer->GetBipedAnim(true),
+            PlayAnimation(this->m_bAdditionalActorFlag, (::BipedAnim*)_g_thePlayer->GetBipedAnim(true),
                           _g_thePlayer->GetAnimation(true), (Actor*)_g_thePlayer);
-            PlayAnimation(this->m_bAdditionalActorFlag, _g_thePlayer->GetBipedAnim(false),
+            PlayAnimation(this->m_bAdditionalActorFlag, (::BipedAnim*)_g_thePlayer->GetBipedAnim(false),
                           _g_thePlayer->GetAnimation(false), (Actor*)_g_thePlayer);
         }
         else
         {
-            if (GetActorRootNode((BipedAnim*)actor->GetValidBip01Names()))
+            if (((BaseProcess*)this)->GetActorRootNode((BipedAnim*)actor->GetValidBip01Names()))
             {
                 PlayAnimation(this->m_bAdditionalActorFlag, (BipedAnim*)actor->GetValidBip01Names(),
                               (Animation*)actor->GetAnimData(), (Actor*)actor);
@@ -38277,22 +37211,22 @@ void FinishInitLoadProcessView::FUN_00925700(unsigned int a1, unsigned int a2, M
         }
     }
 
-    NiAVObject* node;
+    ::NiAVObject* node;
     if (apMobileObject == (MobileObject*)_g_thePlayer)
     {
-        node = (NiAVObject*)_g_thePlayer->GetNode(false);
+        node = (::NiAVObject*)_g_thePlayer->GetNode(false);
     }
     else
     {
         node = ((TESObjectREFRExt*)apMobileObject)->Get3DSimple();
     }
 
-    if (actor && ((TESObjectREFRExt*)actor)->Get3DSimple() && this->m_pFurnitureReference && !actor->Unk_8B(false))
+    if (actor && ((TESObjectREFRExt*)actor)->Get3DSimple() && this->m_pFurnitureReference && !actor->HasHealth(false))
     {
         bool bValidFurniture = true;
         if (actor->GetParentCell() == this->m_pFurnitureReference->GetParentCell())
         {
-            TESFurniture* ref = dynamic_cast<TESFurniture*>(this->m_pFurnitureReference->GetObjectReference());
+            shared_types::TESFurniture* ref = dynamic_cast<shared_types::TESFurniture*>(this->m_pFurnitureReference->GetObjectReference());
             FurnitureNodeStandIn* furnNode = 0;
             if (ref)
             {
@@ -38330,7 +37264,7 @@ void FinishInitLoadProcessView::FUN_00925700(unsigned int a1, unsigned int a2, M
                 {
                     ((TESObjectREFRExt*)this->m_pFurnitureReference)
                         ->FUN_00568020(this->m_ucFurnitureMarkerIndex, true);
-                    if (actor == (ActorStandIn*)_g_thePlayer)
+                    if (actor == (Actor*)_g_thePlayer)
                     {
                         IsFurnitureMarkerValid((Actor*)_g_thePlayer);
                         _g_thePlayer->FUN_00950110(_g_thePlayer->FUN_004eaf60());
@@ -38351,7 +37285,6 @@ void FinishInitLoadProcessView::FUN_00925700(unsigned int a1, unsigned int a2, M
                         LocalMarker l = *furnNode->FUN_005094d0(this->m_ucFurnitureMarkerIndex);
                         NiPoint3 j = *(NiPoint3*)((S_006815c0*)&l)->_ref_006815c0();
                         NiPoint3 b;
-                        ((S_006815c0*)&b)->_ref_006815c0();
 
                         FUN_00a582f0(((TESObjectREFRExt*)this->m_pFurnitureReference)->FUN_0056fa00(),
                                      ((TESObjectREFRExt*)this->m_pFurnitureReference)->GetPos(), 1, &j, &b);
@@ -38362,26 +37295,25 @@ void FinishInitLoadProcessView::FUN_00925700(unsigned int a1, unsigned int a2, M
                     }
 
                     NiPoint3 eb =
-                        ref->FUN_00509920(((LocalMarker*)&this->FurnitureMarker)->FUN_005094b0(), actor->GetScale());
-                    ThreeByThreeMatrix p;
-                    ((S_006815c0*)&p)->_ref_006815c0();
-                    p.FUN_004a0c90(((LocalMarker*)&this->FurnitureMarker)->FUN_00568650());
-                    eb = p.FUN_004b4500(&eb);
-                    actor->Unk_AA(*(NiPoint3*)((LocalMarker*)&this->FurnitureMarker)->_ref_006815c0() + eb);
+                        ref->FUN_00509920(((LocalMarker*)&this->FurnitureMarker)->FUN_005094b0(), actor->FUN_00567400());
+                    NiMatrix3 p;
+                    p.MakeZRotation(((LocalMarker*)&this->FurnitureMarker)->FUN_00568650());
+                    eb = p.operator*(eb);
+                    actor->SetPos(&(NiPoint3&)(*(NiPoint3*)((LocalMarker*)&this->FurnitureMarker)->_ref_006815c0() + eb));  // old Unk_AA, slot 0xAA
 
                     char i = this->m_ucFurnitureInteractionState;
                     this->m_ucFurnitureInteractionState = 0;
-                    if (actor != (ActorStandIn*)_g_thePlayer)
+                    if (actor != (Actor*)_g_thePlayer)
                     {
                         actor->SetFurnitureHeading(((LocalMarker*)&this->FurnitureMarker)->FUN_00568650());
-                        actor->FUN_00931d30(ref->GetFurnitureHeading(((LocalMarker*)&this->FurnitureMarker)->FUN_005094b0()));
+                        actor->AdvanceMovement(ref->GetFurnitureHeading(((LocalMarker*)&this->FurnitureMarker)->FUN_005094b0()));
                     }
                     this->m_ucFurnitureInteractionState = i;
 
                     if (actor->GetPhysicsCharacterController())
                     {
-                        actor->GetPhysicsCharacterController()->FUN_005620e0(
-                            ((LocalMarker*)&this->FurnitureMarker)->_ref_006815c0());
+                        reinterpret_cast<shared_types::bhkCharacterController*>(actor->GetPhysicsCharacterController())
+                            ->FUN_005620e0(((LocalMarker*)&this->FurnitureMarker)->_ref_006815c0());
                     }
                 }
             }
@@ -38395,7 +37327,7 @@ void FinishInitLoadProcessView::FUN_00925700(unsigned int a1, unsigned int a2, M
         {
             this->m_pFurnitureReference = 0;
             this->m_ucFurnitureInteractionState = 0;
-            if (actor == (ActorStandIn*)_g_thePlayer)
+            if (actor == (Actor*)_g_thePlayer)
             {
                 _g_thePlayer->FUN_005098c0();
             }
@@ -38412,7 +37344,7 @@ void FinishInitLoadProcessView::FUN_00925700(unsigned int a1, unsigned int a2, M
     if (actor && this->m_ucFurnitureInteractionState && !this->m_pFurnitureReference)
     {
         this->m_ucFurnitureInteractionState = 0;
-        if (actor == (ActorStandIn*)_g_thePlayer)
+        if (actor == (Actor*)_g_thePlayer)
         {
             _g_thePlayer->FUN_005098c0();
         }
@@ -38449,11 +37381,10 @@ using ::SIT_SLEEP_STATE;
 using ::TESObjectREFR;
 
 class Animation;
-struct NiAVObject;
 namespace FurnitureDecls {
-extern "C" NiAVObject* __cdecl FUN_00c54400(NiNode*);
+extern "C" ::NiAVObject* __cdecl FUN_00c54400(::NiNode*);
 }
-int __fastcall FUN_00509490(NiAVObject*);
+unsigned int __fastcall FUN_00509490(::NiAVObject*);
 
 struct Cls140
 {
@@ -38573,218 +37504,17 @@ struct Cls140
     virtual void v113();
     virtual void v114();
     virtual void v115();
-    virtual NiNode* v116();
+    virtual ::NiNode* v116();
 };
 
-struct ActorStandIn
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void SetLookingTarget(float);
-};
 
-struct ActorEx : Actor
-{
-    void FUN_00931fb0(bool);
-};
 
-class PlayerCharacter : public Actor
-{
-  public:
-    bool FUN_004eaf60();
-    Animation* GetAnimation(bool);
-    void FUN_005c4210(bool);
-};
 
-extern PlayerCharacter* g_thePlayer;
 
-class TESIdleForm
-{
-  public:
-    int GetFlagsMasked();
-};
+
+
+extern shared_types::PlayerCharacter* g_thePlayer;
+
 
 class Animation
 {
@@ -38813,271 +37543,7 @@ struct Helper_00629670
     void FUN_00629670(int, bool);
 };
 
-class bhkCharacterController
-{
-  public:
-    int unk_0000;
-    int unk_0004;
-    int unk_0008;
-    int unk_000c;
-    int unk_0010;
-    int unk_0014;
-    int unk_0018;
-    int unk_001c;
-    int unk_0020;
-    int unk_0024;
-    int unk_0028;
-    int unk_002c;
-    int unk_0030;
-    int unk_0034;
-    int unk_0038;
-    int unk_003c;
-    int unk_0040;
-    int unk_0044;
-    int unk_0048;
-    int unk_004c;
-    int unk_0050;
-    int unk_0054;
-    int unk_0058;
-    int unk_005c;
-    int unk_0060;
-    int unk_0064;
-    int unk_0068;
-    int unk_006c;
-    int unk_0070;
-    int unk_0074;
-    int unk_0078;
-    int unk_007c;
-    int unk_0080;
-    int unk_0084;
-    int unk_0088;
-    int unk_008c;
-    int unk_0090;
-    int unk_0094;
-    int unk_0098;
-    int unk_009c;
-    int unk_00a0;
-    int unk_00a4;
-    int unk_00a8;
-    int unk_00ac;
-    int unk_00b0;
-    int unk_00b4;
-    int unk_00b8;
-    int unk_00bc;
-    int unk_00c0;
-    int unk_00c4;
-    int unk_00c8;
-    int unk_00cc;
-    int unk_00d0;
-    int unk_00d4;
-    int unk_00d8;
-    int unk_00dc;
-    int unk_00e0;
-    int unk_00e4;
-    int unk_00e8;
-    int unk_00ec;
-    int unk_00f0;
-    int unk_00f4;
-    int unk_00f8;
-    int unk_00fc;
-    int unk_0100;
-    int unk_0104;
-    int unk_0108;
-    int unk_010c;
-    int unk_0110;
-    int unk_0114;
-    int unk_0118;
-    int unk_011c;
-    int unk_0120;
-    int unk_0124;
-    int unk_0128;
-    int unk_012c;
-    int unk_0130;
-    int unk_0134;
-    int unk_0138;
-    int unk_013c;
-    int unk_0140;
-    int unk_0144;
-    int unk_0148;
-    int unk_014c;
-    int unk_0150;
-    int unk_0154;
-    int unk_0158;
-    int unk_015c;
-    int unk_0160;
-    int unk_0164;
-    int unk_0168;
-    int unk_016c;
-    int unk_0170;
-    int unk_0174;
-    int unk_0178;
-    int unk_017c;
-    int unk_0180;
-    int unk_0184;
-    int unk_0188;
-    int unk_018c;
-    int unk_0190;
-    int unk_0194;
-    int unk_0198;
-    int unk_019c;
-    int unk_01a0;
-    int unk_01a4;
-    int unk_01a8;
-    int unk_01ac;
-    int unk_01b0;
-    int unk_01b4;
-    int unk_01b8;
-    int unk_01bc;
-    int unk_01c0;
-    int unk_01c4;
-    int unk_01c8;
-    int unk_01cc;
-    int unk_01d0;
-    int unk_01d4;
-    int unk_01d8;
-    int unk_01dc;
-    int unk_01e0;
-    int unk_01e4;
-    int unk_01e8;
-    int unk_01ec;
-    int unk_01f0;
-    int unk_01f4;
-    int unk_01f8;
-    int unk_01fc;
-    int unk_0200;
-    int unk_0204;
-    int unk_0208;
-    int unk_020c;
-    int unk_0210;
-    int unk_0214;
-    int unk_0218;
-    int unk_021c;
-    int unk_0220;
-    int unk_0224;
-    int unk_0228;
-    int unk_022c;
-    int unk_0230;
-    int unk_0234;
-    int unk_0238;
-    int unk_023c;
-    int unk_0240;
-    int unk_0244;
-    int unk_0248;
-    int unk_024c;
-    int unk_0250;
-    int unk_0254;
-    int unk_0258;
-    int unk_025c;
-    int unk_0260;
-    int unk_0264;
-    int unk_0268;
-    int unk_026c;
-    int unk_0270;
-    int unk_0274;
-    int unk_0278;
-    int unk_027c;
-    int unk_0280;
-    int unk_0284;
-    int unk_0288;
-    int unk_028c;
-    int unk_0290;
-    int unk_0294;
-    int unk_0298;
-    int unk_029c;
-    int unk_02a0;
-    int unk_02a4;
-    int unk_02a8;
-    int unk_02ac;
-    int unk_02b0;
-    int unk_02b4;
-    int unk_02b8;
-    int unk_02bc;
-    int unk_02c0;
-    int unk_02c4;
-    int unk_02c8;
-    int unk_02cc;
-    int unk_02d0;
-    int unk_02d4;
-    int unk_02d8;
-    int unk_02dc;
-    int unk_02e0;
-    int unk_02e4;
-    int unk_02e8;
-    int unk_02ec;
-    int unk_02f0;
-    int unk_02f4;
-    int unk_02f8;
-    int unk_02fc;
-    int unk_0300;
-    int unk_0304;
-    int unk_0308;
-    int unk_030c;
-    int unk_0310;
-    int unk_0314;
-    int unk_0318;
-    int unk_031c;
-    int unk_0320;
-    int unk_0324;
-    int unk_0328;
-    int unk_032c;
-    int unk_0330;
-    int unk_0334;
-    int unk_0338;
-    int unk_033c;
-    int unk_0340;
-    int unk_0344;
-    int unk_0348;
-    int unk_034c;
-    int unk_0350;
-    int unk_0354;
-    int unk_0358;
-    int unk_035c;
-    int unk_0360;
-    int unk_0364;
-    int unk_0368;
-    int unk_036c;
-    int unk_0370;
-    int unk_0374;
-    int unk_0378;
-    int unk_037c;
-    int unk_0380;
-    int unk_0384;
-    int unk_0388;
-    int unk_038c;
-    int unk_0390;
-    int unk_0394;
-    int unk_0398;
-    int unk_039c;
-    int unk_03a0;
-    int unk_03a4;
-    int unk_03a8;
-    int unk_03ac;
-    int unk_03b0;
-    int unk_03b4;
-    int unk_03b8;
-    int unk_03bc;
-    int unk_03c0;
-    int unk_03c4;
-    int unk_03c8;
-    int unk_03cc;
-    int unk_03d0;
-    int unk_03d4;
-    int unk_03d8;
-    int unk_03dc;
-    int unk_03e0;
-    int unk_03e4;
-    int unk_03e8;
-    int unk_03ec;
-    int unk_03f0;
-    int unk_03f4;
-    int unk_03f8;
-    int unk_03fc;
-    int unk_0400;
-    int unk_0404;
-    int unk_0408;
-    int unk_040c;
-    Helper_00629670 sub410;
-};
+
 
 class MiddleHighProcessExt : public MiddleHighProcess
 {
@@ -39091,7 +37557,7 @@ void MiddleHighProcessExt::FUN_00928510(Actor* apActor, Animation* apAnimation)
     if (m_pFurnitureReference)
     {
         ::TESBoundObject* boundObj = m_pFurnitureReference->GetObjectReference();
-        NiAVObject* pNiAVObject = FurnitureDecls::FUN_00c54400(((Cls140*)m_pFurnitureReference)->v116());
+        ::NiAVObject* pNiAVObject = FurnitureDecls::FUN_00c54400(((Cls140*)m_pFurnitureReference)->v116());
         if (!pNiAVObject || (unsigned int)m_ucFurnitureMarkerIndex >= (unsigned int)FUN_00509490(pNiAVObject))
         {
             ProcessFurniture(apActor);
@@ -39124,7 +37590,7 @@ void MiddleHighProcessExt::FUN_00928510(Actor* apActor, Animation* apAnimation)
                 if (apActor == g_thePlayer)
                 {
                     b3 = g_thePlayer->FUN_004eaf60();
-                    if (apAnimation != g_thePlayer->GetAnimation(!b3))
+                    if (apAnimation != (Animation*)g_thePlayer->GetAnimation(!b3))
                     {
                         g_thePlayer->FUN_005c4210(!b3);
                     }
@@ -39142,23 +37608,24 @@ void MiddleHighProcessExt::FUN_00928510(Actor* apActor, Animation* apAnimation)
             m_ucFurnitureInteractionState = savedState;
             bool bShouldDisable =
                 IsFurnitureType(m_pFurnitureReference, ((FUN_005094b0_shell*)&FurnitureMarker)->FUN_005094b0());
-            bhkCharacterController* pCharacterController = (bhkCharacterController*)GetPhysicsCharacterController();
+            shared_types::bhkCharacterController* pCharacterController = (shared_types::bhkCharacterController*)((BaseProcess*)this)->GetPhysicsCharacterController();
             if (bShouldDisable && m_ucFurnitureInteractionState)
             {
-                ((ActorStandIn*)apActor)->SetLookingTarget(0.1f);
-                ((ActorEx*)apActor)->FUN_00931fb0(true);
+                // Original slot 0x2E0 takes a float; shared MobileObject::Unk_B8 currently has no parameters.
+                reinterpret_cast<void (__thiscall*)(::Actor*, float)>((*reinterpret_cast<void***>(apActor))[0xB8])(apActor, 0.1f);
+                apActor->SetChaseMode(true);
                 if (pCharacterController)
                 {
-                    pCharacterController->sub410.FUN_00629670(0x8000000, true);
+                    ((shared_types::bhkCharacterController::ControllerState*)((char*)pCharacterController + 0x410))->FUN_00629670(0x8000000, true);
                 }
             }
             else
             {
-                ((ActorStandIn*)apActor)->SetLookingTarget(0.0f);
-                ((ActorEx*)apActor)->FUN_00931fb0(false);
+                reinterpret_cast<void (__thiscall*)(::Actor*, float)>((*reinterpret_cast<void***>(apActor))[0xB8])(apActor, 0.0f);
+                apActor->SetChaseMode(false);
                 if (pCharacterController)
                 {
-                    pCharacterController->sub410.FUN_00629670(0x8000000, false);
+                    ((shared_types::bhkCharacterController::ControllerState*)((char*)pCharacterController + 0x410))->FUN_00629670(0x8000000, false);
                 }
             }
             apActor->SetCurrentSitSleepState((SIT_SLEEP_STATE)m_ucFurnitureInteractionState);
@@ -39166,14 +37633,6 @@ void MiddleHighProcessExt::FUN_00928510(Actor* apActor, Animation* apAnimation)
     }
 }
 }
-
-class AutoMemContext
-{
-  public:
-    AutoMemContext(MEM_CONTEXT aeContext, bool abPush, const char* apFile, int aiLine);
-    ~AutoMemContext();
-    int iPrevContext;
-};
 
 class QueuedItemSV
 {
@@ -39230,19 +37689,9 @@ void FUN_00915950_shell::FUN_00915950(Actor* apActor, bool abEquip, TESBoundObje
 }
 
 namespace fnv_00919320 {
-__if_not_exists(TESBoundObject::TESBoundObject)
+__if_not_exists(shared_types::TESFurniture::TESFurniture)
 {
-    class TESBoundObject
-    {
-      public:
-        virtual void Type();
-    };
-}
-__if_not_exists(TESFurniture::TESFurniture)
-{
-    class TESFurniture : public TESBoundObject
-    {
-    };
+
 }
 struct Actor70;
 struct Object70;
@@ -39257,13 +37706,6 @@ struct Vec70
     float FUN_00457990();
 };
 
-struct Matrix70
-{
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    Matrix70();
-    void FUN_004a0c90(float);
-    Vec70 FUN_004b4500(const Vec70&);
-};
 
 struct Object70
 {
@@ -40719,7 +39161,7 @@ struct Actor70
     void* FUN_00575d70();
     void UnequipItem(int);
     bool FUN_0094df60();
-    float GetScale();
+    float FUN_00567400();
     void FUN_00931d30(float);
     Actor70* FUN_008d8520();
     Actor70* FUN_008adcb0();
@@ -40850,7 +39292,7 @@ void Actor70::FUN_00919320(Actor70* actor, bool checkReach, bool finish, int act
                 {
 
                     Furniture70* base2 =
-                        (Furniture70*)dynamic_cast<TESFurniture*>((TESBoundObject*)objectRef19->FUN_007af430());
+                        (Furniture70*)dynamic_cast<shared_types::TESFurniture*>((TESBoundObject*)objectRef19->FUN_007af430());
 
                     Object70* furnitureRef7 = Furniture();
 
@@ -40858,13 +39300,13 @@ void Actor70::FUN_00919320(Actor70* actor, bool checkReach, bool finish, int act
 
                     Vec70 offset33;
 
-                    base2->FUN_00509920(&offset33, furnitureRef7->FUN_005094b0(), actor->GetScale());
+                    base2->FUN_00509920(&offset33, furnitureRef7->FUN_005094b0(), actor->FUN_00567400());
 
-                    Matrix70 rotation4;
+                    NiMatrix3 rotation4;
 
-                    rotation4.FUN_004a0c90(furnitureRef7->FUN_00568650());
+                    rotation4.MakeZRotation(furnitureRef7->FUN_00568650());
 
-                    offset33 = rotation4.FUN_004b4500(offset33);
+                    offset33 = *reinterpret_cast<Vec70*>(&rotation4.operator*(*reinterpret_cast<const NiPoint3*>(&offset33)));
 
                     objectRef19->FUN_00568020(marker, 1);
 
@@ -41019,13 +39461,9 @@ namespace queued_item_load913 {
 using ::TESBoundObject;
 using ::TESForm;
 
-struct InventoryChangesView
-{
-    void* GetExtraValueAtPosition(TESBoundObject* obj, int iIndex);
-};
 struct ExtraDataView
 {
-    InventoryChangesView* FUN_00418520();
+    InventoryChanges* FUN_00418520();
 };
 struct ReferenceView
 {
@@ -41066,10 +39504,10 @@ void ItemLoadState913e80::FUN_00913e80(BufferView* buffer)
     buffer->FUN_00864980(&iIndex, 4);
     if (iIndex != -1)
     {
-        InventoryChangesView* holder = ref ? ref->FUN_005d43c0()->FUN_00418520() : 0;
+        InventoryChanges* holder = ref ? ref->FUN_005d43c0()->FUN_00418520() : 0;
         if (holder)
         {
-            entry = holder->GetExtraValueAtPosition(object, iIndex);
+            entry = holder->GetExtraDataListFromIndexForItem(object, iIndex);
         }
     }
     buffer->FUN_00864980(&unk08, 4);
@@ -41438,7 +39876,7 @@ using ::Actor;
 using ::LowProcess;
 using ::MiddleHighProcess;
 using ::TESBoundObject;
-using ::TESNPC;
+using shared_types::TESNPC;
 using ::TESCreature;
 using ::TESPackage;
 
@@ -41505,7 +39943,7 @@ bool PackageProcessView::FUN_00917df0(Actor* pActor, bool bArg2)
         return false;
     }
 
-    switch (pActor->Unk_85())
+    switch (pActor->GetSitSleepState())
     {
 
     case 0:
@@ -41531,7 +39969,7 @@ bool PackageProcessView::FUN_00917df0(Actor* pActor, bool bArg2)
 
     bool bResultTmp = false;
 
-    TESPackage* pPackage7 = (TESPackage*)pActor->GetCurrentPackage();
+    shared_types::TESPackage* pPackage7 = (shared_types::TESPackage*)pActor->GetCurrentPackage();
 
     bool bUnequipWeapon = false;
 
@@ -41547,7 +39985,7 @@ bool PackageProcessView::FUN_00917df0(Actor* pActor, bool bArg2)
         }
     }
 
-    if (bArg2 || !GetCurrentPackage() || m_iValueB4 != (int)fGameHour)
+    if (bArg2 || !(shared_types::TESPackage*)GetCurrentPackage() || m_iValueB4 != (int)fGameHour)
     {
 
         bResultTmp = ((PackageLowProcessView*)this)->FUN_0090a1a0(pActor, bArg2);
@@ -41581,11 +40019,11 @@ bool PackageProcessView::FUN_00917df0(Actor* pActor, bool bArg2)
         if (bUnequipWeapon)
         {
 
-            TESNPC* pNPC2 = dynamic_cast<TESNPC*>(pActor->GetObjectReference());
+            shared_types::TESNPC* pNPC2 = dynamic_cast<shared_types::TESNPC*>(pActor->GetObjectReference());
 
-            TESCreature* pCreature7 = dynamic_cast<TESCreature*>(pActor->GetObjectReference());
+            shared_types::TESCreature* pCreature7 = dynamic_cast<shared_types::TESCreature*>(pActor->GetObjectReference());
 
-            TESPackage* pCurPkg = (TESPackage*)GetCurrentPackage();
+            shared_types::TESPackage* pCurPkg = (shared_types::TESPackage*)(shared_types::TESPackage*)GetCurrentPackage();
 
             bool bFlag1 = true;
 
@@ -41616,7 +40054,7 @@ bool PackageProcessView::FUN_00917df0(Actor* pActor, bool bArg2)
 }
 
 using ::TESBoundObject;
-using ::TESNPC;
+using shared_types::TESNPC;
 using ::TESCreature;
 
 namespace ProcessUseItem {
@@ -42383,17 +40821,17 @@ bool UseProcess::FUN_0091c810(UseRef* apActor)
                     }
                     bool bUpdateA = true;
                     bool bUpdateB = true;
-                    if (GetCurrentPackage() && GetCurrentPackage()->FUN_00441b00())
+                    if ((shared_types::TESPackage*)GetCurrentPackage() && ((shared_types::TESPackage*)GetCurrentPackage())->FUN_00441b00())
                         bUpdateB = false;
                     if (apActor->FUN_vt218())
                     {
-                        TESNPC* pNPC = dynamic_cast<TESNPC*>(apActor->FUN_007af430());
+                        shared_types::TESNPC* pNPC = dynamic_cast<shared_types::TESNPC*>(apActor->FUN_007af430());
                         if (pNPC)
                             pNPC->FUN_006047c0((::Actor*)apActor, bUpdateA, bUpdateB, 0, 1);
                     }
                     else
                     {
-                        TESCreature* pCreature = dynamic_cast<TESCreature*>(apActor->FUN_007af430());
+                        shared_types::TESCreature* pCreature = dynamic_cast<shared_types::TESCreature*>(apActor->FUN_007af430());
                         if (pCreature)
                             pCreature->FUN_005f9e00((::Actor*)apActor, bUpdateA, bUpdateB, 1);
                     }
@@ -42427,7 +40865,7 @@ bool UseProcess::FUN_0091c810(UseRef* apActor)
             FUN_vt294(apActor);
         return false;
     }
-    iMinDistanceNum = (int)GetCurrentPackage()->GetPackageResult(apActor, false);
+    iMinDistanceNum = (int)((shared_types::TESPackage*)GetCurrentPackage())->GetPackageResult((::Actor*)apActor, false);
     if (pTarget && pTarget->IsActor())
     {
         if (apActor->FUN_005723b0(pTarget, 0, 0) < iMinDistanceNum)
@@ -42443,13 +40881,13 @@ struct PackageTargetData
 {
     TESObjectREFR* FUN_00680020();
 };
-struct PackageMethods : TESPackage
+struct PackageMethods : shared_types::TESPackage
 {
     PackageTargetData* FUN_00671d10();
     bool FUN_00678ec0(Actor*);
     TESObjectREFR* FUN_006780e0(Actor*, int);
 };
-struct SpecificPackage : TESPackage
+struct SpecificPackage : shared_types::TESPackage
 {
     TESObjectREFR* FUN_008d80e0();
 };
@@ -42457,20 +40895,14 @@ struct PackageRuntime
 {
     TESObjectREFR* FUN_009f3390();
 };
-TESObjectREFR* FUN_009f2d40(Actor*, TESPackage*);
-struct ProcessTarget : MiddleHighProcess
-{
-    TESObjectREFR* FUN_0091ae00(Actor*, TESPackage*, PackageTargetData*);
-    PackageRuntime* FUN_008d0430();
-    TESObjectREFR* FUN_0091ab30(Actor*, TESPackage*);
-};
+TESObjectREFR* FUN_009f2d40(Actor*, shared_types::TESPackage*);
 // Selects the target reference for a package on a process by dispatching on the package type and returning the chosen TESObjectREFR.
 // @fnv 0x0091ab30
-TESObjectREFR* ProcessTarget::FUN_0091ab30(Actor* actor, TESPackage* package)
+TESObjectREFR* ProcessTarget_middlehighprocess::FUN_0091ab30(Actor* actor, shared_types::TESPackage* package)
 {
     TESObjectREFR* h = 0;
     bool p = false;
-    if (package == GetCurrentPackage())
+    if (package == (shared_types::TESPackage*)reinterpret_cast<MiddleHighProcess*>(this)->GetCurrentPackage())
         p = true;
     switch (package->FUN_0041ca90())
     {
@@ -42502,7 +40934,7 @@ TESObjectREFR* ProcessTarget::FUN_0091ab30(Actor* actor, TESPackage* package)
             if (k)
                 h = k->FUN_009f3390();
         }
-        if (!pTarget)
+        if (!reinterpret_cast<MiddleHighProcess*>(this)->pTarget)
             h = FUN_009f2d40(actor, package);
         break;
     default:
@@ -42512,270 +40944,7 @@ TESObjectREFR* ProcessTarget::FUN_0091ab30(Actor* actor, TESPackage* package)
     return h;
 }
 
-struct S00926350_CharController
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28C;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29C;
-    int unk2A0;
-    int unk2A4;
-    int unk2A8;
-    int unk2AC;
-    int unk2B0;
-    int unk2B4;
-    int unk2B8;
-    int unk2BC;
-    int unk2C0;
-    int unk2C4;
-    int unk2C8;
-    int unk2CC;
-    int unk2D0;
-    int unk2D4;
-    int unk2D8;
-    int unk2DC;
-    int unk2E0;
-    int unk2E4;
-    int unk2E8;
-    int unk2EC;
-    int unk2F0;
-    int unk2F4;
-    int unk2F8;
-    int unk2FC;
-    int unk300;
-    int unk304;
-    int unk308;
-    int unk30C;
-    int unk310;
-    int unk314;
-    int unk318;
-    int unk31C;
-    int unk320;
-    int unk324;
-    int unk328;
-    int unk32C;
-    int unk330;
-    int unk334;
-    int unk338;
-    int unk33C;
-    int unk340;
-    int unk344;
-    int unk348;
-    int unk34C;
-    int unk350;
-    int unk354;
-    int unk358;
-    int unk35C;
-    int unk360;
-    int unk364;
-    int unk368;
-    int unk36C;
-    int unk370;
-    int unk374;
-    int unk378;
-    int unk37C;
-    int unk380;
-    int unk384;
-    int unk388;
-    int unk38C;
-    int unk390;
-    int unk394;
-    int unk398;
-    int unk39C;
-    int unk3A0;
-    int unk3A4;
-    int unk3A8;
-    int unk3AC;
-    int unk3B0;
-    int unk3B4;
-    int unk3B8;
-    int unk3BC;
-    int unk3C0;
-    int unk3C4;
-    int unk3C8;
-    int unk3CC;
-    int unk3D0;
-    int unk3D4;
-    int unk3D8;
-    int unk3DC;
-    int unk3E0;
-    int unk3E4;
-    int unk3E8;
-    int unk3EC;
-    int unk3F0;
-    int unk3F4;
-    int unk3F8;
-    int unk3FC;
-    int unk400;
-    int unk404;
-    int unk408;
-    int unk40C;
-    DummyFlags flags;
-};
+
 struct S00926350_SaveLoadGame
 {
     unsigned char FUN_008df040();
@@ -42789,19 +40958,19 @@ struct S00926350_Target926350 : MiddleHighProcess
 unsigned short S00926350_Target926350::FUN_00926350(Actor* actor)
 {
     unsigned short controller = 0;
-    S00926350_CharController* size = (S00926350_CharController*)((BaseProcess*)this)->GetPhysicsCharacterController();
-    if (size && !actor->Unk_8B(false))
+    shared_types::bhkCharacterController* size = (shared_types::bhkCharacterController*)((BaseProcess*)this)->GetPhysicsCharacterController();
+    if (size && !actor->HasHealth(false))
     {
         controller += 4;
         controller += 4;
-        int flags = size->flags.FUN_00621270(-1);
+        int flags = ((DummyFlags*)((char*)size + 0x410))->FUN_00621270(-1);
         controller += 4;
         if (flags & 0x800)
             controller += 12;
         controller += 16;
         controller += 16;
         controller += 12;
-        if (actor->IsActor())
+        if (static_cast<TESObjectREFR*>(actor)->IsActor())
         {
             controller += 4;
             controller += 4;

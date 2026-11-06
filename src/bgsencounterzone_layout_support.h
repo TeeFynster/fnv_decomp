@@ -54,7 +54,7 @@ class BSGameDataSystemUtility;
 class BSSaveDataSystemUtility;
 class BSSaveDataSystemUtility__SaveDataEntry;
 class BSSaveDataOperationEntry;
-class SoundPlaybackHandle;
+class BSSoundHandle;
 class RecursiveSpinLock;
 class BSSysInfoSystemUtility;
 class BSThread;
@@ -251,54 +251,14 @@ typedef bool(FNV_CDECL* FNVScriptExecuteFunction)(const ScriptParameter*, const 
 typedef bool(FNV_CDECL* FNVScriptCompileFunction)(const unsigned short, const ScriptParameter*, ScriptCallbackContext*,
                                                   CStringArgument*);
 typedef bool(FNV_CDECL* FNVScriptConditionFunction)(TESObjectREFR*, void*, void*, double&);
-class NiFile
-{
-  public:
-    enum OpenMode
-    {
-        READ_ONLY = 0,
-        WRITE_ONLY = 1,
-        APPEND_ONLY = 2
-    };
-};
-template <class T> class BSSimpleList
-{
-  public:
-    T m_item;
-    BSSimpleList<T>* m_pkNext;
-    BSSimpleList();
-    BSSimpleList(T& item);
-    ~BSSimpleList();
-    T& GetItem();
-    BSSimpleList<T>* GetNext();
-    bool IsEmpty();
-    void AddTail(T& item);
-    void AddHead(T& item);
-    void RemoveHead();
-    void RemoveAll();
-};
-template <class T> class NiTMallocInterface
-{
-};
-template <class T> class NiTNewInterface
-{
-};
-template <class T, class Allocator> class NiTArray
-{
-  public:
-    virtual ~NiTArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    unsigned int GetSize();
-    T& GetAt(unsigned int index);
-    T RemoveAtAndFill(unsigned int index);
-};
-template <class T> class NiTObjectArray : public NiTArray<T, NiTNewInterface<T> >
-{
-};
+#include "../include/NiFile.h"
+#include "../include/BSSimpleList.h"
+#include "../include/NiTMallocInterface.h"
+#include "../include/NiTNewInterface.h"
+#include "../include/NiTArray.h"
+#include "../include/NiTObjectArray.h"
+#include "../include/NiTLargeArray.h"
+#include "../include/NiTLargePrimitiveArray.h"
 typedef NiTObjectArray<TESObjectREFR*> FNVReferenceObjectArray;
 FNV_STATIC_ASSERT(sizeof(FNVReferenceObjectArray) == 16);
 FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_pBase) == 4);
@@ -306,56 +266,17 @@ FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usMaxSize) == 8);
 FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usSize) == 10);
 FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usESize) == 12);
 FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usGrowBy) == 14);
-template <class T, class Allocator> class NiTLargeArray
-{
-  public:
-    void** m_ppVirtualMethodTable;
-    T* m_pBase;
-    unsigned int m_uiMaxSize;
-    unsigned int m_uiSize;
-    unsigned int m_uiESize;
-    unsigned int m_uiGrowBy;
-    unsigned int GetSize();
-    T& GetAt(unsigned int index);
-    unsigned int Add(T& item);
-};
-template <class T> class NiTLargePrimitiveArray : public NiTLargeArray<T, NiTMallocInterface<T> >
-{
-};
-template <class T, unsigned int Growth> class BSSimpleArray
-{
-  public:
-    void** m_ppVirtualMethodTable;
-    T* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-    unsigned int GetSize();
-    T& GetAt(int index);
-};
-template <class T> class BSStringT
-{
-  public:
-    T* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    BSStringT();
-    ~BSStringT();
-    const T* String();
-    int PrintfString(const char* format, ...);
-    bool Set(const T* text, unsigned int length);
-    void Init();
-    unsigned int MaxLength();
-    void SetLength(unsigned int length);
-    void SetMaxLength(unsigned int length);
-    BSStringT<T>& operator=(const T* text);
-};
+#include "../include/BSSimpleArray.h"
+#include "../include/BSStringT.h"
+// a unit that still renames NiPointer by a macro gets the old copy under that name (to go once none does)
+#ifdef NiPointer
 template <class T> class NiPointer
 {
   public:
     T* m_pObject;
     ~NiPointer()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     NiPointer<T>& operator=(T* object)
@@ -364,34 +285,22 @@ template <class T> class NiPointer
         {
             if (object)
                 object->IncRefCount();
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = object;
         }
         return *this;
     }
 };
-template <class K, class V> class NiTMapItem
-{
-  public:
-    NiTMapItem<K, V>* m_pkNext;
-    K m_key;
-    V m_val;
-};
-template <class K, class V> class NiTPointerMap
-{
-  public:
-    void** m_ppVirtualMethodTable;
-    unsigned int m_uiHashSize;
-    NiTMapItem<K, V>** m_ppkHashTable;
-    struct MapEntryCount
-    {
-        unsigned int m_uiCount;
-    } m_kItemCount;
-    NiTPointerMap(unsigned int hashSize);
-    bool GetAt(K key, V& result) const;
-    void SetAt(K key, V value);
-};
+#else
+// layout_support.h used to define NiPointer with its Gamebryo bodies in the class
+#ifndef FNV64_NIPOINTER_INLINE_BODIES
+#define FNV64_NIPOINTER_INLINE_BODIES
+#endif
+#include "../include/NiPointer.h"
+#endif
+#include "../include/NiTMapItem.h"
+#include "../include/NiTPointerMap.h"
 template <class T, unsigned int Capacity> class Stack
 {
   public:
@@ -415,7 +324,7 @@ FNV_STATIC_ASSERT(sizeof(BSStringT<char>) == 8);
 FNV_STATIC_ASSERT(offsetof(BSStringT<char>, pString) == 0);
 FNV_STATIC_ASSERT(offsetof(BSStringT<char>, sLen) == 4);
 FNV_STATIC_ASSERT(offsetof(BSStringT<char>, sMaxLen) == 6);
-FNV_STATIC_ASSERT(sizeof(NiPointer<void>) == 4);
+FNV_STATIC_ASSERT(sizeof(NiPointer<NiRefObject>) == 4);
 typedef NiTLargeArray<void*, NiTMallocInterface<void*> > FNVPointerArray;
 FNV_STATIC_ASSERT(sizeof(FNVPointerArray) == 24);
 FNV_STATIC_ASSERT(offsetof(FNVPointerArray, m_pBase) == 4);
@@ -442,49 +351,10 @@ FNV_FORCEINLINE long InterlockedIncrement(volatile long* value)
     return __sync_add_and_fetch(value, 1);
 }
 #endif
-template <class T> class PoolAllocatorBase
-{
-  public:
-    struct LinkedListEntry
-    {
-        LinkedListEntry* m_pkNext;
-        void* m_pUserData;
-        T m_element;
-    };
-    static LinkedListEntry* ms_pFreeList;
-    static RecursiveSpinLock ms_kPoolState;
-};
-template <class T> class NiTPointerAllocator : public PoolAllocatorBase<T>
-{
-  public:
-    void Deallocate(void* pointer);
-};
-template <class T> class NiTListItem
-{
-  public:
-    NiTListItem<T>* m_pkNext;
-    NiTListItem<T>* m_pkPrev;
-    T m_element;
-};
-template <class Allocator, class T> class NiTListBase
-{
-  public:
-    NiTListItem<T>* m_pkHead;
-    NiTListItem<T>* m_pkTail;
-    struct MapEntryCount : public Allocator
-    {
-        unsigned int m_uiCount;
-    } m_kItemCount;
-};
-template <class Allocator, class T> class NiTPointerListBase : public NiTListBase<Allocator, T>
-{
-  public:
-    void RemoveAll();
-    T RemoveHead();
-    T RemoveTail();
-    T RemovePos(void*& position);
-    void DeleteItem(NiTListItem<T>* item);
-};
+#include "../include/NiTPointerAllocator.h"
+#include "../include/NiTListItem.h"
+#include "../include/NiTListBase.h"
+#include "../include/NiTPointerListBase.h"
 typedef NiTListItem<void*> FNVPointerListItem;
 typedef NiTListBase<NiTPointerAllocator<unsigned int>, void*> FNVPointerListBase;
 FNV_STATIC_ASSERT(sizeof(FNVPointerListItem) == 12);
@@ -910,13 +780,7 @@ enum BSSaveDataSystemUtility__RESULT_FAILED_REASON
     BSSaveDataSystemUtility__RESULT_FAILED_REASON_RESULT_FAILED_REASON_DATA_CORRUPT = 2,
     BSSaveDataSystemUtility__RESULT_FAILED_REASON_RESULT_FAILED_REASON_UNKNOWN = 3,
 };
-enum BSSoundHandle__ASSUMED_STATE
-{
-    BSSoundHandle__ASSUMED_STATE_ASSUMED_STATE_INITIALIZED = 0,
-    BSSoundHandle__ASSUMED_STATE_ASSUMED_STATE_PLAYING = 1,
-    BSSoundHandle__ASSUMED_STATE_ASSUMED_STATE_STOPPED = 2,
-    BSSoundHandle__ASSUMED_STATE_ASSUMED_STATE_PAUSED = 3,
-};
+#include "../include/BSSoundHandle.h"
 enum BSSysInfoSystemUtility__LANGUAGE
 {
     BSSysInfoSystemUtility__LANGUAGE_LANGUAGE_JAPANESE = 0,

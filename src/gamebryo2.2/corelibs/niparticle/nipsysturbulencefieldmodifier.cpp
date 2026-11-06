@@ -1,6 +1,74 @@
+#include "../../../../include/NiTArray.h"
 
 // src/gamebryo2.2/corelibs/niparticle/nipsysturbulencefieldmodifier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysturbulencefieldmodifier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiPSysData.h"
+#include "../../../../include/NiPSysFieldModifier.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiTransform.h"
+#include "../../../../include/NiMatrix3.h"
+#include <string.h>
+
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& point) const
+{
+    return NiPoint3(x - point.x, y - point.y, z - point.z);
+}
+
+inline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+
+inline float NiPoint3::SqrLength()
+{
+    return x * x + y * y + z * z;
+}
+
+inline float NiPoint3::SqrLength() const
+{
+    return x * x + y * y + z * z;
+}
+
+inline NiTransform::NiTransform()
+{}
+
+inline const NiTransform& NiAVObject::GetWorldTransform() const
+{
+    return m_kWorld;
+}
+
+inline NiPoint3* NiPSysData::GetVertices() const
+{
+    return m_pkVertex;
+}
+
+inline unsigned short NiPSysData::GetShaderParticleCount() const
+{
+    return m_usActive;
+}
+
+inline Point3ParameterData* NiPSysData::GetParticleInfo()
+{
+    return m_pkParticleInfo;
+}
+
+struct Point3ParameterData
+{
+    NiPoint3 m_kValue;
+    float unk0c;
+    float unk10;
+    float unk14;
+    unsigned short unk18;
+    unsigned short unk1a;
+};
 
 extern const void* const g_01202698;
 
@@ -10,28 +78,46 @@ const void* __cdecl FUN_00c273c0()
     return &g_01202698;
 }
 
-struct NiObject
+struct C27A30RTTI;
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-    char _pad;
-};
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
+    return SetAtGrow(m_usSize, element);
+}
 
-struct NiPSysFieldModifier
-{
-    char _pad[0x30];
-    bool __thiscall FUN_00c32060(NiObject* pkObject);
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > C27A30StringArray;
 
 struct NiPSysTurbulenceFieldModifier : NiPSysFieldModifier
 {
     float m_fFrequency;
+    float m_fFieldMagnitude;
+    float m_fFieldDistance;
     bool __thiscall FUN_00c27390(NiObject* pkObject);
+    static C27A30RTTI ms_kRTTI;
+    void FieldViewerStrings(C27A30StringArray* pkStrings);
+    void FUN_00c27a30(C27A30StringArray* pkStrings);
+    void __thiscall ReadFloatAndComputeInverse(void* object);
+    void FUN_00c274c0(float fTime, NiPSysData* pkData);
+    void __thiscall UpdateTurbulence(float fTime, NiPSysData* pkData);
+    void __thiscall ApplyRandomOffset(float fTime, NiPSysData* pkData);
+
+    float ReadScalar() const
+    {
+        return m_fInfluence;
+    }
 };
 
 // @fnv 0x00c27390
 bool __thiscall NiPSysTurbulenceFieldModifier::FUN_00c27390(NiObject* pkObject)
 {
     NiPSysTurbulenceFieldModifier* pkDest;
-    if (!NiPSysFieldModifier::FUN_00c32060(pkObject))
+    if (!NiPSysFieldModifier::IsEqual(pkObject))
         return false;
     pkDest = (NiPSysTurbulenceFieldModifier*)pkObject;
     if (pkDest->m_fFrequency != m_fFrequency)
@@ -43,48 +129,26 @@ struct CloningProcess
 {
     void* m_pCloneMap;
 };
-struct NiPSysParticle
-{
-    void FUN_00c32020(NiPSysParticle*, CloningProcess*);
-};
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
-struct FUN_00c31ff0
-{
-    FUN_00c31ff0();
-};
 extern float DAT_01015f5c;
 extern float DAT_01022958;
 extern double DAT_01032980;
 extern int DAT_010be774;
-struct NiPSysFieldModifier_00c27670
-{
-    int* _vtable;
-    char _pad[0x2c];
-    float m_fFrequency;
-    float m_fFieldMagnitude;
-    float m_fFieldDistance;
-    NiPSysFieldModifier_00c27670();
-    void FUN_00c32020(NiPSysParticle*, CloningProcess*);
-};
 // @fnv 0x00c27670
-NiPSysFieldModifier_00c27670* __fastcall CloneFieldModifier(NiPSysFieldModifier_00c27670* self, int,
+NiPSysTurbulenceFieldModifier* __fastcall CloneFieldModifier(NiPSysTurbulenceFieldModifier* self, int,
                                                             CloningProcess* kCloning)
 {
-    NiPSysFieldModifier_00c27670* pkObject = (NiPSysFieldModifier_00c27670*)BSFadeNode::operator new(0x3c);
+    NiPSysTurbulenceFieldModifier* pkObject = (NiPSysTurbulenceFieldModifier*)BSFadeNode::operator new(0x3c);
     if (pkObject)
     {
-        ((FUN_00c31ff0*)pkObject)->FUN_00c31ff0::FUN_00c31ff0();
+        pkObject->NiPSysFieldModifier::NiPSysFieldModifier();
         pkObject->m_fFrequency = 0.0f;
-        pkObject->_vtable = &DAT_010be774;
+        *(int**)pkObject = &DAT_010be774;
         pkObject->m_fFieldDistance = DAT_01015f5c;
         pkObject->m_fFieldMagnitude = DAT_01022958;
     }
     else
         pkObject = 0;
-    ((NiPSysParticle*)self)->FUN_00c32020((NiPSysParticle*)pkObject, kCloning);
+    self->NiPSysFieldModifier::CopyMemberData(pkObject, *kCloning);
     pkObject->m_fFrequency = self->m_fFrequency;
     if (pkObject->m_fFrequency < DAT_01032980)
         pkObject->m_fFieldMagnitude = DAT_01022958;
@@ -104,67 +168,16 @@ struct C27A30RTTI
     }
 };
 
-struct C27A30StringArray
-{
-    virtual ~C27A30StringArray();
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char*& element);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char*& element)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
-    }
-
-    unsigned int Add(char*& element)
-    {
-        return SetAtGrow(m_usSize, element);
-    }
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > C27A30StringArray;
 
 extern "C" char* __cdecl FUN_00a7d330(const char* pcText);
 char* __cdecl FUN_00a7d550(const char* pcPrefix, float fValue);
 
-struct C27A30Base
-{
-    void FUN_00c322b0(C27A30StringArray* pkStrings);
-};
-
-struct C27A30Object : C27A30Base
-{
-    static C27A30RTTI ms_kRTTI;
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    float m_fFrequency;
-
-    void FUN_00c27a30(C27A30StringArray* pkStrings);
-};
-
 // Appends the RTTI name and a formatted "Frequency" string for m_fFrequency to pkStrings after calling the base handler.
 // @fnv 0x00c27a30
-void C27A30Object::FUN_00c27a30(C27A30StringArray* pkStrings)
+void NiPSysTurbulenceFieldModifier::FUN_00c27a30(C27A30StringArray* pkStrings)
 {
-    C27A30Base::FUN_00c322b0(pkStrings);
+    FieldViewerStrings(pkStrings);
     char* pcString = FUN_00a7d330(ms_kRTTI.GetName());
     pkStrings->Add(pcString);
     pcString = FUN_00a7d550("Frequency", m_fFrequency);
@@ -186,25 +199,17 @@ struct FieldReadState
 };
 extern double DAT_01032980;
 extern float DAT_01022958;
-struct FUN_00c27700_class
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14;
-    int unk18, unk1c, unk20, unk24, unk28, unk2c;
-    float m_uiFilterValue, m_inverse;
-    void __thiscall LoadFromStream(void* object);
-    void __thiscall ReadFloatAndComputeInverse(void* object);
-};
 // Reads a float from the stream at object+0x24c and stores its reciprocal, or a fallback constant when the value is below DAT_01032980.
 // @fnv 0x00c27700
-void __thiscall FUN_00c27700_class::ReadFloatAndComputeInverse(void* object)
+void __thiscall NiPSysTurbulenceFieldModifier::ReadFloatAndComputeInverse(void* object)
 {
-    LoadFromStream(object);
+    NiPSysFieldModifier::LoadBinary(*static_cast<NiStream*>(object));
     FieldReadState* stream = *(FieldReadState**)((char*)object + 0x24c);
-    stream->ReadFloat(&m_uiFilterValue);
-    if (m_uiFilterValue < DAT_01032980)
-        m_inverse = DAT_01022958;
+    stream->ReadFloat(&m_fFrequency);
+    if (m_fFrequency < DAT_01032980)
+        m_fFieldMagnitude = DAT_01022958;
     else
-        m_inverse = 1.0f / m_uiFilterValue;
+        m_fFieldMagnitude = 1.0f / m_fFrequency;
 }
 
 // FUN_00c274c0: NiPSysTurbulenceFieldModifier::Update - random velocity kick
@@ -212,182 +217,41 @@ void __thiscall FUN_00c27700_class::ReadFloatAndComputeInverse(void* object)
 int __cdecl FUN_00ecadb8();
 extern double DAT_01029790;
 
-struct TPoint3
-{
-    float x, y, z;
-
-    TPoint3()
-    {}
-    TPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-
-    TPoint3 operator-(const TPoint3& kPt) const
-    {
-        return TPoint3(x - kPt.x, y - kPt.y, z - kPt.z);
-    }
-    TPoint3 operator*(float fScalar) const
-    {
-        return TPoint3(fScalar * x, fScalar * y, fScalar * z);
-    }
-    TPoint3& operator+=(const TPoint3& kPt)
-    {
-        x += kPt.x;
-        y += kPt.y;
-        z += kPt.z;
-        return *this;
-    }
-    float SqrLength() const
-    {
-        return x * x + y * y + z * z;
-    }
-};
-
-struct TMatrix3
-{
-    float m_afEntries[3][3];
-};
-
-struct NiTransform
-{
-    TMatrix3 m_kOrientation;
-    TPoint3 m_kTranslation;
-    float m_fScale;
-
-    void FUN_004b4880(NiTransform& kDest) const;
-    NiTransform operator*(const NiTransform& kXform) const;
-};
-
-struct TAVObject
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    NiTransform m_kWorldSpaceTransform;
-};
-
-struct TParticleInfo
-{
-    TPoint3 m_kValue;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-};
-
-struct TPSysData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    TPoint3* m_pkVertex;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    unsigned short m_usVertices;
-    unsigned short unk52;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    TParticleInfo* m_pkParticleInfo;
-
-    TPoint3* GetVertices() const
-    {
-        return m_pkVertex;
-    }
-    TParticleInfo* GetParticleInfo() const
-    {
-        return m_pkParticleInfo;
-    }
-};
-
 inline float SymmetricRandom()
 {
     return (float)(2.0 * FUN_00ecadb8() / DAT_01029790 - 1.0);
 }
 
-struct TTurbulenceModifier
-{
-    void* m_pVtbl;
-    int m_iRefCount;
-    int m_kName;
-    unsigned int m_uiUpdateOrder;
-    TAVObject* m_pkTarget;
-    bool m_bModifierActive;
-    TAVObject* m_pkFieldObject;
-    float m_fInfluence;
-    float m_fFieldAttenuation;
-    bool m_bEnableMaxDistance;
-    float m_fDistanceLimit;
-    float m_fFieldStrength;
-
-    void FUN_00c274c0(float fTime, TPSysData* pkData);
-};
-
 // Applies a random offset scaled by m_fInfluence to particle values whose squared distance from the transformed field position is at most m_fFieldStrength.
 // @fnv 0x00c274c0
-void TTurbulenceModifier::FUN_00c274c0(float fTime, TPSysData* pkData)
+void NiPSysTurbulenceFieldModifier::FUN_00c274c0(float fTime, NiPSysData* pkData)
 {
-    NiTransform kFieldXform = m_pkFieldObject->m_kWorldSpaceTransform;
+    NiTransform kFieldXform;
+    memcpy(&kFieldXform, &m_spFieldObject->m_kWorld, sizeof(kFieldXform));
     NiTransform kInvPSys;
     {
-        NiTransform kPSysXform = m_pkTarget->m_kWorldSpaceTransform;
+        NiTransform kPSysXform;
+        memcpy(&kPSysXform, &((NiAVObject*)m_pkTarget)->m_kWorld, sizeof(kPSysXform));
         kPSysXform.FUN_004b4880(kInvPSys);
     }
 
     {
         NiTransform kFieldToPSys = kInvPSys * kFieldXform;
-        for (unsigned short i = 0; i < pkData->m_usVertices; i++)
+        for (unsigned short i = 0; i < pkData->m_usActive; i++)
         {
-            TParticleInfo* pkInfo = &pkData->GetParticleInfo()[i];
-            TPoint3 kPos = pkData->GetVertices()[i];
-            TPoint3 kDiff = kPos - kFieldToPSys.m_kTranslation;
+            Point3ParameterData* pkInfo = &pkData->GetParticleInfo()[i];
+            NiPoint3 kPos = pkData->GetVertices()[i];
+            NiPoint3 kDiff = kPos - kFieldToPSys.m_Translate;
             if (kDiff.SqrLength() <= m_fFieldStrength)
             {
-                TPoint3 kRand;
+                NiPoint3 kRand;
                 kRand.x = SymmetricRandom();
                 kRand.y = SymmetricRandom();
                 kRand.z = SymmetricRandom();
-                pkInfo->m_kValue += kRand * m_fInfluence;
+                NiPoint3 kOffset = kRand * m_fInfluence;
+                pkInfo->m_kValue.x = pkInfo->m_kValue.x + kOffset.x;
+                pkInfo->m_kValue.y = pkInfo->m_kValue.y + kOffset.y;
+                pkInfo->m_kValue.z = pkInfo->m_kValue.z + kOffset.z;
             }
         }
     }
@@ -396,159 +260,10 @@ void TTurbulenceModifier::FUN_00c274c0(float fTime, TPSysData* pkData)
 #include <math.h>
 extern "C" int __cdecl rand();
 
-struct NiPoint3
+inline float NiPoint3::Length()
 {
-    float x;
-    float y;
-    float z;
-
-    NiPoint3()
-    {}
-    NiPoint3(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {}
-
-    void operator*=(float f)
-    {
-        x *= f;
-        y *= f;
-        z *= f;
-    }
-    NiPoint3 operator-(const TPoint3& pt) const
-    {
-        return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
-    }
-    float Length() const;
-    void operator+=(const NiPoint3& pt)
-    {
-        x += pt.x;
-        y += pt.y;
-        z += pt.z;
-    }
-};
-
-struct NiAVObject
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    NiTransform m_kWorldSpaceTransform;
-
-    const NiTransform& GetWorldTransform() const
-    {
-        return m_kWorldSpaceTransform;
-    }
-};
-
-struct ParticleInfo
-{
-    NiPoint3 m_kValue;
-    float unk0c;
-    float unk10;
-    float unk14;
-    unsigned short unk18;
-    unsigned short unk1a;
-};
-
-struct NiPSysData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    NiPoint3* m_pkPositions;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    unsigned short m_usNumParticles;
-    unsigned short unk52;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    ParticleInfo* m_pkParticleInfo;
-
-    unsigned short GetShaderParticleCount() const
-    {
-        return m_usNumParticles;
-    }
-    ParticleInfo* GetParticleInfo() const
-    {
-        return m_pkParticleInfo;
-    }
-    NiPoint3* GetVertices() const
-    {
-        return m_pkPositions;
-    }
-};
-
-struct NiPSysTurbulenceFieldModifierDerived
-{
-    void* _vtable;
-    int unk04;
-    int unk08;
-    int unk0c;
-    NiAVObject* m_pkTarget;
-    int unk14;
-    NiAVObject* m_spFieldObject;
-    float m_fInfluence;
-    float m_fFieldAttenuation;
-    bool m_bEnableMaxDistance;
-    char unk25;
-    char unk26;
-    char unk27;
-    float m_fDistanceLimit;
-    int unk2c;
-    float m_fFrequency;
-    float m_fFieldMagnitude;
-    float m_fFieldDistance;
-
-    float ReadScalar() const
-    {
-        return m_fInfluence;
-    }
-
-    void __thiscall ApplyRandomOffset(float fTime, NiPSysData* pkData);
-    void __thiscall FUN_00c274c0(float fTime, NiPSysData* pkData);
-    void __thiscall UpdateTurbulence(float fTime, NiPSysData* pkData);
-};
+    return sqrtf(x * x + y * y + z * z);
+}
 
 inline float NiPoint3::Length() const
 {
@@ -557,7 +272,7 @@ inline float NiPoint3::Length() const
 
 // Applies random turbulence offsets to particle values based on distance from the field object, scaling by influence and attenuation.
 // @fnv 0x00c277b0
-void __thiscall NiPSysTurbulenceFieldModifierDerived::UpdateTurbulence(float fTime, NiPSysData* pkData)
+void __thiscall NiPSysTurbulenceFieldModifier::UpdateTurbulence(float fTime, NiPSysData* pkData)
 {
     if (fTime >= m_fFieldDistance && fTime < m_fFieldDistance + m_fFieldMagnitude)
         return;
@@ -576,10 +291,12 @@ void __thiscall NiPSysTurbulenceFieldModifierDerived::UpdateTurbulence(float fTi
     }
     else
     {
-        NiTransform kField = m_spFieldObject->GetWorldTransform();
+        NiTransform kField;
+        memcpy(&kField, &m_spFieldObject->GetWorldTransform(), sizeof(kField));
         NiTransform kInv;
         {
-            NiTransform kTarget = m_pkTarget->GetWorldTransform();
+            NiTransform kTarget;
+            memcpy(&kTarget, &((NiAVObject*)m_pkTarget)->GetWorldTransform(), sizeof(kTarget));
             kTarget.FUN_004b4880(kInv);
         }
         {
@@ -587,9 +304,9 @@ void __thiscall NiPSysTurbulenceFieldModifierDerived::UpdateTurbulence(float fTi
 
             for (unsigned short i = 0; i < pkData->GetShaderParticleCount(); ++i)
             {
-                ParticleInfo* pkInfo = &pkData->GetParticleInfo()[i];
+                Point3ParameterData* pkInfo = &pkData->GetParticleInfo()[i];
                 NiPoint3 kPt = pkData->GetVertices()[i];
-                NiPoint3 kDiff = kPt - kPos.m_kTranslation;
+                NiPoint3 kDiff = kPt - kPos.m_Translate;
 
                 float fDist = kDiff.Length();
 
@@ -617,94 +334,14 @@ inline float C273D0SymmetricRandom()
     return (float)(rand() * 2.0 / g_C273D0RandMax - 1.0);
 }
 
-struct C273D0Point3
-{
-    float x;
-    float y;
-    float z;
-
-    C273D0Point3()
-    {}
-    C273D0Point3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    C273D0Point3 operator*(float f) const
-    {
-        return C273D0Point3(x * f, y * f, z * f);
-    }
-    C273D0Point3& operator+=(const C273D0Point3& pt)
-    {
-        x += pt.x;
-        y += pt.y;
-        z += pt.z;
-        return *this;
-    }
-};
-
-struct C273D0ParticleInfo
-{
-    C273D0Point3 m_kValue;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-};
-
-struct C273D0ParticleData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    unsigned short m_usNumParticles;
-    unsigned short unk52;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    C273D0ParticleInfo* m_pkParticleInfo;
-};
-
-struct C273D0Modifier
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    float m_fInfluence;
-
-    void ApplyRandomOffset(float fTime, C273D0ParticleData* pkData);
-};
-
 // Adds a random 3D offset scaled by m_fInfluence to each particle's m_kValue in pkData.
 // @fnv 0x00c273d0
-void C273D0Modifier::ApplyRandomOffset(float fTime, C273D0ParticleData* pkData)
+void NiPSysTurbulenceFieldModifier::ApplyRandomOffset(float fTime, NiPSysData* pkData)
 {
-    for (unsigned short us = 0; us < pkData->m_usNumParticles; us++)
+    for (unsigned short us = 0; us < pkData->m_usActive; us++)
     {
-        C273D0ParticleInfo* pkInfo = &pkData->m_pkParticleInfo[us];
-        C273D0Point3 kWorldPosition;
+        Point3ParameterData* pkInfo = &pkData->m_pkParticleInfo[us];
+        NiPoint3 kWorldPosition;
         kWorldPosition.x = C273D0SymmetricRandom();
         kWorldPosition.y = C273D0SymmetricRandom();
         kWorldPosition.z = C273D0SymmetricRandom();

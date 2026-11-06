@@ -1,6 +1,20 @@
 // fallout_shared/pathfinding/navmeshrender.cpp: NavMeshObstacleManager, ObstacleTask, NavRenderX, RenderTask and more (12 functions)
 
+#include "../../../include/NiPointer.h"
+#include "../../../include/NavMesh.h"
+#include "../../../include/NavMeshPtr.h"
 #include "navmeshrender_decls.h"
+// Keep the shared scene graph's dependency templates separate from layout_support.h.
+#include "../../../include/NiTArray.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/BSShaderNoLightingProperty.h"
+
+#include "../../../include/GO.h"
+#include "../../../include/NiUpdateData.h"
+#include "../../../include/TES.h"
+#include "../../../include/TESWorldSpace.h"
+#include "../../../include/NavMeshTriangle.h"
 
 // The PC spans supplied for this unit are obstacle-management methods. The
 // legacy PaddedBooleanState labels disagree with their member layouts and lifetimes.
@@ -14,7 +28,7 @@ void NavMeshObstacleManager::ProcessActivatedObstacles()
     {
         bhkRigidBody* body;
         m_kActivatedRigidBodies.FUN_006c6030(body);
-        NiPointer<ObstacleData> obstacle;
+        NiPointer<ObstacleData> obstacle(0);
         if (RigidBodyObstacleLookup.GetAt(body, obstacle))
         {
             if (m_kActiveObstacles.Contains(obstacle))
@@ -27,6 +41,7 @@ void NavMeshObstacleManager::ProcessActivatedObstacles()
 // Stores the obstacle pointer, task type and navmesh pointer into the object's fields.
 // @fnv 0x006c7d70
 ObstacleTask::ObstacleTask(const NiPointer<ObstacleData>& obstacle, OBSTACLE_TASK_TYPE type, const NavMeshPtr& navMesh)
+    : m_spRegisteredObstacle(0)
 {
     m_spRegisteredObstacle = obstacle;
     eType = type;
@@ -48,66 +63,6 @@ void* __fastcall FUN_0049f1c0(int** pThis)
     return pThis;
 }
 
-struct NavMeshTriangle
-{
-    void Clear();
-    bool HasEdgeExtraInfo();
-    bool IsPreferred();
-    void TogglePreferred();
-    bool IsWaterTriangle();
-    void ToggleWater();
-    bool IsNoLargeCreature();
-    void ToggleNoLargeCreature();
-    void GetVerts(unsigned short*, unsigned short*, unsigned short*);
-    void GetTris(unsigned short*, unsigned short*, unsigned short*);
-    void SetVerts(unsigned short, unsigned short, unsigned short);
-    void SetTris(unsigned short, unsigned short, unsigned short);
-    bool GetFlag(int);
-    void SetFlag(int);
-    void ClearFlag(int);
-    unsigned int GetTriangleFlags();
-    void SetTriangleFlags(unsigned int);
-    unsigned short GetVert(unsigned int);
-    void SetVert(unsigned int, unsigned short);
-    unsigned short GetTri(unsigned int);
-    void SetTri(unsigned int, unsigned short);
-    bool EdgeHasExtraInfo(int);
-    unsigned short GetEdgeExtraInfoValue(int);
-    void SetEdgeExtraInfo(int, unsigned short);
-    void ClearEdgeExtraInfo(int);
-    bool HasDoorPortal();
-    bool IsEdgeConnected(int);
-    unsigned short GetTriOrExtraInfo(int);
-    void SetTriOrExtraInfo(int, unsigned short);
-    unsigned short GetObjectCount();
-    void SetObjectCount(unsigned short);
-    void ClearObjectCount();
-    static bool HasCover(unsigned int);
-    bool HasCover();
-    bool HasCoverEdge0();
-    bool HasCoverEdge1();
-    static bool HasCoverOrWallFlags(unsigned int);
-    bool HasCoverOrWallFlags();
-    bool HasCoverOrWallEdge0();
-    bool HasCoverOrWallEdge1();
-    bool IsWall(unsigned short);
-    bool IsEdgeOpen(unsigned short);
-    unsigned short GetEdgeCover(unsigned short);
-    bool GetEdgeSides(unsigned short, bool*, bool*);
-    static void GetEdgeCoverData(unsigned int, unsigned short, unsigned short*, bool*, bool*);
-    void GetEdgeCoverData(unsigned short, unsigned short*, bool*, bool*);
-    void ClearCover();
-    static void SetEdgeCover(unsigned int*, unsigned short, unsigned short, bool, bool);
-    void SetEdgeCover(unsigned short, unsigned short, bool, bool);
-    int Rotate(int);
-    bool ConvertCoverEdgeFormat();
-    static unsigned int GetCoverLevel(float, bool, bool);
-    static float GetCoverHeight(unsigned int);
-    void Endian();
-    char Vertices[6];
-    char Triangles[6];
-    unsigned int m_uiTriangleFlags;
-};
 typedef char _sizecheck_NavMeshTriangle[sizeof(NavMeshTriangle) == 16 ? 1 : -1];
 struct FUN_006a5ec0_shell : public NavMeshTriangle
 {
@@ -167,36 +122,9 @@ float ScaleClampedValue(unsigned int auiValue)
     return auiValue * runtimeInitializationFloat369;
 }
 
-struct NiUpdateData
-{
-    unsigned int value0;
-    unsigned int value1;
-    unsigned int value2;
 
-    NiUpdateData(float, bool, bool);
-};
 
-struct NiNode
-{
-    void Update(const NiUpdateData&);
-    void FUN_004def90();
-};
-
-struct NiAVObject : public NiNode
-{
-    void UpdateSceneObject();
-};
-
-struct GO
-{
-    operator unsigned int() const;
-};
-
-struct GlobalObject_00633c90 : public GO
-{
-};
-
-extern GlobalObject_00633c90 g_011d6e5c;
+extern GO g_011d6e5c;
 
 struct PaddedBooleanState
 {
@@ -211,18 +139,18 @@ void PaddedBooleanState::FUN_006a36e0(bool abDraw)
 {
     if (abDraw)
     {
-        reinterpret_cast<NiAVObject*>(g_011d6e5c.operator unsigned int())->UpdateSceneObject();
+        reinterpret_cast<NiAVObject*>(static_cast<const GO&>(g_011d6e5c).operator unsigned int())->UpdateSceneObject();
 
         NiUpdateData UpdateData(0.0f, false, false);
-        reinterpret_cast<NiNode*>(g_011d6e5c.operator unsigned int())->Update(UpdateData);
+        reinterpret_cast<NiNode*>(static_cast<const GO&>(g_011d6e5c).operator unsigned int())->Update(UpdateData);
     }
     else
     {
-        reinterpret_cast<NiNode*>(g_011d6e5c.operator unsigned int())->FUN_004def90();
-        reinterpret_cast<NiAVObject*>(g_011d6e5c.operator unsigned int())->UpdateSceneObject();
+        reinterpret_cast<NiNode*>(static_cast<const GO&>(g_011d6e5c).operator unsigned int())->FUN_004def90();
+        reinterpret_cast<NiAVObject*>(static_cast<const GO&>(g_011d6e5c).operator unsigned int())->UpdateSceneObject();
 
         NiUpdateData UpdateData(0.0f, false, false);
-        reinterpret_cast<NiNode*>(g_011d6e5c.operator unsigned int())->Update(UpdateData);
+        reinterpret_cast<NiNode*>(static_cast<const GO&>(g_011d6e5c).operator unsigned int())->Update(UpdateData);
 
         reinterpret_cast<NiTPointerMap<NiNode*, NiNode*>*>(reinterpret_cast<char*>(this) + 0x200)->RemoveAll();
     }
@@ -240,16 +168,6 @@ struct CellH
 struct DoorH
 {
     void* GetParentWorldSpace();
-};
-
-struct TESWorldSpace
-{
-    TESObjectCELL* GetCellAtGridPosition(int x, int y);
-};
-
-struct TES
-{
-    TESObjectCELL* GetDetailedActorPathHandler();
 };
 
 struct GlobalObject_0045cfe0
@@ -331,179 +249,23 @@ struct ColorX
     ColorX();
     ColorX(float afR, float afG, float afB, float afA);
 };
-struct UpdateDataX
-{
-    float fTime;
-    bool m_bUpdateEnabled;
-    bool bIsMultiThreaded;
-    short sPad;
-    int iActionIndex;
-    UpdateDataX(float afTime, bool abUpdateControllers, bool abIsMultiThreaded);
-};
-struct FixedStrX
+struct FixedText
 {
     const char* pString;
-    FixedStrX(const char* apString);
-    ~FixedStrX();
+    FixedText(const char* apString);
+    ~FixedText();
 };
-struct AVObjX;
-struct ObjX
+// NiNode's shared allocation interface selects unsized constructor-failure
+// cleanup. Retain this local node definition until that interface is supported.
+struct NodeX : public NiAVObject
 {
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void AttachChildInAvailableSlot(AVObjX* apChild, bool abFirstAvail);
-    static void* operator new(unsigned int auiSize);
-    static void operator delete(void* apMem, unsigned int);
+    NiTObjectArray<NiPointer<NiAVObject> > m_kChildren;
+    NodeX(unsigned short children);
+    static void operator delete(void* memory, size_t size);
 };
-struct AVObjX : public ObjX
+struct LinesX : public NiAVObject
 {
-    void AttachProperty(AVObjX* apProperty);
-    void GetTransformScale(const Pt3PodX* apPos);
-    void SetName(const FixedStrX& arName);
-    void SetAlphaBlending(bool abBlend);
-    void SetFlags(int aiFlags, int aiArg);
-};
-struct NodeX : public AVObjX
-{
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    NodeX(unsigned short ausChildren);
-    void Update(const UpdateDataX& arData);
-    void UpdateSceneObject();
-};
-struct LinesX : public AVObjX
-{
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
+    static void operator delete(void* memory, size_t size);
     unsigned int unk09c;
     unsigned int unk0a0;
     unsigned int unk0a4;
@@ -516,46 +278,9 @@ struct LinesX : public AVObjX
     unsigned int unk0c0;
     LinesX(unsigned short ausVerts, Pt3X* apVerts, ColorX* apColors, int a, int b, int c, bool* apFlags);
 };
-struct TriShapeX : public AVObjX
+struct TriShapeX : public NiAVObject
 {
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
+    static void operator delete(void* memory, size_t size);
     unsigned int unk09c;
     unsigned int unk0a0;
     unsigned int unk0a4;
@@ -569,59 +294,11 @@ struct TriShapeX : public AVObjX
     TriShapeX(unsigned short ausVerts, Pt3X* apVerts, Pt3X* apNormals, ColorX* apColors, void* apUV,
               unsigned short ausUV, int aiFlags, unsigned short ausTris, unsigned short* apusList);
 };
-struct PropX : public AVObjX
+struct AlphaX : public NiObjectNET
 {
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    PropX();
-};
-struct AlphaX : public AVObjX
-{
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
     unsigned int unk018;
     AlphaX();
-};
-template <class T> struct SpX
-{
-    T* m_pObject;
-    SpX(T* apObject);
-    SpX(const SpX& arPtr);
-    ~SpX();
-    void operator=(T* apObject);
-    operator T*() const;
+    void SetAlphaBlending(bool blend);
 };
 struct Pt3ArrX
 {
@@ -657,26 +334,17 @@ struct NavTriX
     bool EdgeHasExtraInfo(int aiEdge);
     void GetEdgeCoverData(unsigned short ausEdge, unsigned short* apusCover, bool* apbLeft, bool* apbRight);
 };
-struct SphereX
+// NavMesh::FUN_00691640 returns AvoidSphere; 0x004a7bd0/0x006815c0 match its radius/center accessors in pathsmootherpov.cpp.
+class AvoidSphere
 {
+public:
     float GetRadius() const;
-    Pt3PodX* GetNavMeshData();
-};
-struct NavMeshX;
-struct NavMeshPtrX
-{
-    NavMeshX* m_pObject;
-    NavMeshPtrX();
-    NavMeshPtrX(const NavMeshPtrX& arPtr);
-    ~NavMeshPtrX();
-    NavMeshPtrX& operator=(const NavMeshPtrX& arPtr);
-    operator NavMeshX*() const;
-    bool Equals(const NavMeshPtrX& arPtr);
+    const NiPoint3& FUN_006815c0();
 };
 struct NavInfoX
 {
     bool IsLoaded() const;
-    void GetMesh(NavMeshPtrX& arMesh);
+    void GetMesh(NavMeshPtr& arMesh);
 };
 struct EdgeInfoX
 {
@@ -684,30 +352,13 @@ struct EdgeInfoX
     NavInfoX* pTarget;
     unsigned short usTri;
 };
-struct NavMeshX
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    Pt3ArrX kVerts;
-    unsigned int GetTriCount();
-    unsigned int GetVertCount();
-    bool IsDisabled();
-    NavTriX* GetTriangle(unsigned short ausTri);
-    EdgeInfoX* GetEdgeInfo(unsigned short ausTri, int aiEdge);
-    unsigned int GetSphereCount();
-    SphereX& GetSphere(unsigned int auiIndex);
-};
+// Shared NavMesh lacks these two /Od accessor declarations; their ECX-only ABI
+// is preserved by the free fastcall declarations (0x00990a60 and 0x00440da0).
+unsigned int __fastcall NavMeshGetArrayFlags(NavMesh*);
+bool __fastcall NavMeshIsDisabled(NavMesh*);
 struct NavArrX
 {
-    NavMeshPtrX GetAt(unsigned int auiIndex);
+    NavMeshPtr GetAt(unsigned int auiIndex);
 };
 struct CellX
 {
@@ -715,8 +366,8 @@ struct CellX
 };
 struct CellMapX
 {
-    bool GetAt(CellX* apCell, SpX<NodeX>& arNode);
-    void SetAt(CellX* apCell, SpX<NodeX> aspNode);
+    bool GetAt(CellX* apCell, NiPointer<NodeX>& arNode);
+    void SetAt(CellX* apCell, NiPointer<NodeX> aspNode);
 };
 struct NavRenderX
 {
@@ -740,7 +391,7 @@ struct NavRenderX
     unsigned int unk044;
     unsigned int unk048;
     unsigned int unk04c;
-    SpX<AVObjX> spWireframe;
+    NiPointer<NiObject> spWireframe;
     unsigned int unk054;
     unsigned int unk058;
     unsigned int unk05c;
@@ -757,7 +408,7 @@ struct NavRenderX
     unsigned int unk088;
     unsigned int unk08c;
     unsigned int unk090;
-    SpX<AVObjX> spVertexColor;
+    NiPointer<NiObject> spVertexColor;
     unsigned int unk098;
     unsigned int unk09c;
     unsigned int unk0a0;
@@ -799,7 +450,7 @@ struct NavRenderX
     unsigned int unk1dc;
     unsigned int unk1e0;
     unsigned int unk1e4;
-    SpX<AVObjX> spZBuffer;
+    NiPointer<NiObject> spZBuffer;
     unsigned int unk1ec;
     unsigned int unk1f0;
     unsigned int unk1f4;
@@ -812,13 +463,13 @@ struct NavRenderX
 unsigned int __fastcall xGetNavMeshCount(NavArrX* apArray);
 void* __cdecl xNiMalloc(unsigned int auiSize);
 float __cdecl xGetCoverHeight(unsigned int auiCover);
-AVObjX* __cdecl xMakeLine(Pt3X& arA, Pt3X& arB, float afA, float afB, float afHeight, float afOffset, ColorX& arColor,
+NiAVObject* __cdecl xMakeLine(Pt3X& arA, Pt3X& arB, float afA, float afB, float afHeight, float afOffset, ColorX& arColor,
                           int aiArg);
-AVObjX* __cdecl xMakeSphere(float afRadius, int aiSlices, int aiStacks, ColorX* apColor);
+NiAVObject* __cdecl xMakeSphere(float afRadius, int aiSlices, int aiStacks, ColorX* apColor);
 void __cdecl xUpdateNode(NodeX* apNode);
 void __cdecl xPrepareNode(NodeX* apNode, int a, int b);
 extern "C" void* __cdecl memcpy(void* apDst, const void* apSrc, unsigned int auiSize);
-extern SpX<NodeX> xspNavRoot;
+extern NiPointer<NodeX> xspNavRoot;
 extern bool xbShowPortals;
 extern bool xbShowCover;
 extern float xfCoverWidth, xfCoverScale, xfCoverOffset, xfCoverWidth2;
@@ -834,18 +485,18 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
     if (!qfTOqo)
         return;
     qQMZREG = xGetNavMeshCount(qfTOqo);
-    SpX<NodeX> qAhbO(0);
+    NiPointer<NodeX> qAhbO(0);
     if (!kMap.GetAt(apCell, qAhbO))
     {
         qAhbO = new NodeX(qQMZREG * 2);
-        ((NodeX*)xspNavRoot)->AttachChildInAvailableSlot(qAhbO, true);
+        reinterpret_cast<NiNode*>(static_cast<NodeX*>(xspNavRoot))->AttachChildInAvailableSlot(static_cast<NiAVObject*>(static_cast<NodeX*>(qAhbO)), true);
         kMap.SetAt(apCell, qAhbO);
     }
     else
     {
         return;
     }
-    NavMeshPtrX qsSDDgz;
+    NavMeshPtr qsSDDgz;
     for (unsigned int qbfQdhM = 0; qbfQdhM < qQMZREG; qbfQdhM++)
     {
         unsigned int qXMUYT;
@@ -863,18 +514,18 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
         Pt3X* qbXcw;
         unsigned int qBCzzXA;
         qsSDDgz = qfTOqo->GetAt(qbfQdhM);
-        qMBds = ((NavMeshX*)qsSDDgz)->GetTriCount();
-        qBCzzXA = ((NavMeshX*)qsSDDgz)->GetVertCount();
+        qMBds = static_cast<NavMesh*>(qsSDDgz)->FUN_00558200();
+        qBCzzXA = NavMeshGetArrayFlags(static_cast<NavMesh*>(qsSDDgz));
         if (!qMBds)
             continue;
-        qfCsmZ = ((NavMeshX*)qsSDDgz)->IsDisabled();
+        qfCsmZ = NavMeshIsDisabled(static_cast<NavMesh*>(qsSDDgz));
         Pt3ArrX qkJsUdT(qBCzzXA);
         ColorArrX qrEZrs(qBCzzXA);
         if (qfCsmZ)
         {
             for (unsigned int qAXSCg = 0; qAXSCg < qBCzzXA; qAXSCg++)
             {
-                qkJsUdT.GetAt(qAXSCg) = ((NavMeshX*)qsSDDgz)->kVerts.GetAt(qAXSCg);
+                qkJsUdT.GetAt(qAXSCg) = reinterpret_cast<Pt3X&>(static_cast<NavMesh*>(qsSDDgz)->Vertices.GetAt(qAXSCg));
                 qrEZrs.GetAt(qAXSCg) = aColors[10];
             }
         }
@@ -882,7 +533,7 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
         {
             for (unsigned int qBLsiu = 0; qBLsiu < qBCzzXA; qBLsiu++)
             {
-                qkJsUdT.GetAt(qBLsiu) = ((NavMeshX*)qsSDDgz)->kVerts.GetAt(qBLsiu);
+                qkJsUdT.GetAt(qBLsiu) = reinterpret_cast<Pt3X&>(static_cast<NavMesh*>(qsSDDgz)->Vertices.GetAt(qBLsiu));
                 qrEZrs.GetAt(qBLsiu) = aColors[0];
             }
         }
@@ -900,7 +551,7 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
         qArxcFu = 0;
         for (unsigned int qrUCJDN = 0; qrUCJDN < qMBds; qrUCJDN++)
         {
-            NavTriX* qidnYUK = ((NavMeshX*)qsSDDgz)->GetTriangle(qrUCJDN);
+            NavTriX* qidnYUK = reinterpret_cast<NavTriX*>(static_cast<NavMesh*>(qsSDDgz)->GetTriangle(qrUCJDN));
             if (qidnYUK->GetFlag(0x20))
                 continue;
             unsigned short qxWmVch[3];
@@ -955,30 +606,30 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
                 bool qZNIZJV = qidnYUK->EdgeHasExtraInfo(qOFvKuu);
                 if (xbShowPortals && qpydTG[qOFvKuu] != 0xffff)
                 {
-                    NavMeshPtrX qfpzU(qsSDDgz);
+                    NavMeshPtr qfpzU(qsSDDgz);
                     NavTriX* qYdAnhh = 0;
                     bool qoPB = false;
                     unsigned short qQGWBE = 0xffff;
                     if (qZNIZJV)
                     {
-                        EdgeInfoX* qXSF = ((NavMeshX*)qsSDDgz)->GetEdgeInfo(qrUCJDN, qOFvKuu);
+                        EdgeInfoX* qXSF = reinterpret_cast<EdgeInfoX*>(static_cast<NavMesh*>(qsSDDgz)->GetEdgeInfo(qrUCJDN, qOFvKuu));
                         if (qXSF && qXSF->pTarget && qXSF->pTarget->IsLoaded())
                         {
                             qXSF->pTarget->GetMesh(qfpzU);
                             unsigned int qgqKr = qXSF->usTri;
-                            qYdAnhh = ((NavMeshX*)qfpzU)->GetTriangle(qgqKr);
+                            qYdAnhh = reinterpret_cast<NavTriX*>(static_cast<NavMesh*>(qfpzU)->GetTriangle(qgqKr));
                             unsigned short qGTHx[3];
                             qYdAnhh->GetTris(&qGTHx[0], &qGTHx[1], &qGTHx[2]);
                             for (int qBMjHz = 0; qBMjHz < 3; qBMjHz++)
                             {
                                 if (qYdAnhh->EdgeHasExtraInfo(qBMjHz))
                                 {
-                                    EdgeInfoX* qoqcoe = ((NavMeshX*)qfpzU)->GetEdgeInfo(qgqKr, qBMjHz);
+                                    EdgeInfoX* qoqcoe = reinterpret_cast<EdgeInfoX*>(static_cast<NavMesh*>(qfpzU)->GetEdgeInfo(qgqKr, qBMjHz));
                                     if (qoqcoe)
                                     {
-                                        NavMeshPtrX qVCM;
+                                        NavMeshPtr qVCM;
                                         qoqcoe->pTarget->GetMesh(qVCM);
-                                        if (qVCM.Equals(qsSDDgz) && qoqcoe->usTri == qrUCJDN)
+                                        if (qVCM == qsSDDgz && qoqcoe->usTri == qrUCJDN)
                                         {
                                             qoPB = true;
                                             qQGWBE = qBMjHz;
@@ -990,7 +641,7 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
                     }
                     else
                     {
-                        qYdAnhh = ((NavMeshX*)qsSDDgz)->GetTriangle(qpydTG[qOFvKuu]);
+                        qYdAnhh = reinterpret_cast<NavTriX*>(static_cast<NavMesh*>(qsSDDgz)->GetTriangle(qpydTG[qOFvKuu]));
                         unsigned short qRBAdC[3];
                         qYdAnhh->GetTris(&qRBAdC[0], &qRBAdC[1], &qRBAdC[2]);
                         for (int qQirx = 0; qQirx < 3; qQirx++)
@@ -1007,9 +658,9 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
                         unsigned int qdmSnI = qArxcFu + 1;
                         unsigned short qSuoDt = qxWmVch[qOFvKuu];
                         unsigned short qbGYp = qxWmVch[(qOFvKuu + 1) % 3];
-                        Pt3X qzzQr = ((NavMeshX*)qsSDDgz)->kVerts.GetAt(qSuoDt);
-                        Pt3X qsAu = ((NavMeshX*)qsSDDgz)->kVerts.GetAt(qbGYp);
-                        Pt3X qArJcY = ((NavMeshX*)qsSDDgz)->kVerts.GetAt(qxWmVch[(qOFvKuu + 2) % 3]);
+                        Pt3X qzzQr = reinterpret_cast<Pt3X&>(static_cast<NavMesh*>(qsSDDgz)->Vertices.GetAt(qSuoDt));
+                        Pt3X qsAu = reinterpret_cast<Pt3X&>(static_cast<NavMesh*>(qsSDDgz)->Vertices.GetAt(qbGYp));
+                        Pt3X qArJcY = reinterpret_cast<Pt3X&>(static_cast<NavMesh*>(qsSDDgz)->Vertices.GetAt(qxWmVch[(qOFvKuu + 2) % 3]));
                         float qnuVZg = 0.37f;
                         float qqtISP = 0.33f;
                         float qdbVTq = 0.3f;
@@ -1019,9 +670,9 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
                         if (false && qQGWBE > 2)
                         {
                         }  // release build: index assert compiled out
-                        Pt3X qyFp = ((NavMeshX*)qfpzU)->kVerts.GetAt(qhxpxJd[qQGWBE]);
-                        Pt3X qVar = ((NavMeshX*)qfpzU)->kVerts.GetAt(qhxpxJd[(qQGWBE + 1) % 3]);
-                        Pt3X qOqnE = ((NavMeshX*)qfpzU)->kVerts.GetAt(qhxpxJd[(qQGWBE + 2) % 3]);
+                        Pt3X qyFp = reinterpret_cast<Pt3X&>(static_cast<NavMesh*>(qfpzU)->Vertices.GetAt(qhxpxJd[qQGWBE]));
+                        Pt3X qVar = reinterpret_cast<Pt3X&>(static_cast<NavMesh*>(qfpzU)->Vertices.GetAt(qhxpxJd[(qQGWBE + 1) % 3]));
+                        Pt3X qOqnE = reinterpret_cast<Pt3X&>(static_cast<NavMesh*>(qfpzU)->Vertices.GetAt(qhxpxJd[(qQGWBE + 2) % 3]));
                         Pt3X qkbsJ = qyFp * qnuVZg + qVar * qqtISP + qOqnE * qdbVTq;
                         qZWI.GetAt(qArxcFu) = qHVMR;
                         qZWI.GetAt(qdmSnI) = qkbsJ;
@@ -1034,8 +685,8 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
                 }
                 if (qpydTG[qOFvKuu] > qrUCJDN || qZNIZJV)
                 {
-                    qDdzMIp.GetAt(qpia) = ((NavMeshX*)qsSDDgz)->kVerts.GetAt(qxWmVch[qOFvKuu]);
-                    qDdzMIp.GetAt(qxDeKK) = ((NavMeshX*)qsSDDgz)->kVerts.GetAt(qxWmVch[(qOFvKuu + 1) % 3]);
+                    qDdzMIp.GetAt(qpia) = reinterpret_cast<Pt3X&>(static_cast<NavMesh*>(qsSDDgz)->Vertices.GetAt(qxWmVch[qOFvKuu]));
+                    qDdzMIp.GetAt(qxDeKK) = reinterpret_cast<Pt3X&>(static_cast<NavMesh*>(qsSDDgz)->Vertices.GetAt(qxWmVch[(qOFvKuu + 1) % 3]));
                     qHXYKT.GetAt(qpia) = true;
                     qHXYKT.GetAt(qxDeKK) = false;
                     if (qpydTG[qOFvKuu] != 0xffff)
@@ -1084,9 +735,9 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
                         if (xbShowCover && qXGDO > 1u)
                         {
                             float qObI = xGetCoverHeight(qXGDO);
-                            AVObjX* qYePyBl = xMakeLine(qDdzMIp.GetAt(qpia), qDdzMIp.GetAt(qxDeKK), xfCoverWidth,
+                            NiAVObject* qYePyBl = xMakeLine(qDdzMIp.GetAt(qpia), qDdzMIp.GetAt(qxDeKK), xfCoverWidth,
                                                         xfCoverWidth, qObI, 0.0f, qGfbX.GetAt(qpia), 0);
-                            ((NodeX*)qAhbO)->AttachChildInAvailableSlot(qYePyBl, true);
+                            reinterpret_cast<NiNode*>(static_cast<NodeX*>(qAhbO))->AttachChildInAvailableSlot(qYePyBl, true);
                             Pt3X qZgNzZy = qDdzMIp.GetAt(qpia) - qDdzMIp.GetAt(qxDeKK);
                             qZgNzZy.Unitize();
                             qZgNzZy *= xfCoverScale;
@@ -1094,17 +745,17 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
                             {
                                 Pt3X qqrLNms = qDdzMIp.GetAt(qxDeKK) - qZgNzZy;
                                 Pt3X qYvz = qDdzMIp.GetAt(qxDeKK) + qZgNzZy;
-                                AVObjX* qrBzVM = xMakeLine(qqrLNms, qYvz, xfCoverWidth2, xfCoverWidth2,
+                                NiAVObject* qrBzVM = xMakeLine(qqrLNms, qYvz, xfCoverWidth2, xfCoverWidth2,
                                                            qObI + xfCoverOffset, 0.0f, aColors[10], 0);
-                                ((NodeX*)qAhbO)->AttachChildInAvailableSlot(qrBzVM, true);
+                                reinterpret_cast<NiNode*>(static_cast<NodeX*>(qAhbO))->AttachChildInAvailableSlot(qrBzVM, true);
                             }
                             if (qtOMjSX)
                             {
                                 Pt3X qCVSV = qDdzMIp.GetAt(qpia) - qZgNzZy;
                                 Pt3X qOPw = qDdzMIp.GetAt(qpia) + qZgNzZy;
-                                AVObjX* qjThF = xMakeLine(qCVSV, qOPw, xfCoverWidth2, xfCoverWidth2,
+                                NiAVObject* qjThF = xMakeLine(qCVSV, qOPw, xfCoverWidth2, xfCoverWidth2,
                                                           qObI + xfCoverOffset, 0.0f, aColors[10], 0);
-                                ((NodeX*)qAhbO)->AttachChildInAvailableSlot(qjThF, true);
+                                reinterpret_cast<NiNode*>(static_cast<NodeX*>(qAhbO))->AttachChildInAvailableSlot(qjThF, true);
                             }
                         }
                     }
@@ -1118,14 +769,14 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
         memcpy(qbXcw, &qDdzMIp.GetAt(0), qpia * sizeof(Pt3X));
         memcpy(qJDuOZ, &qGfbX.GetAt(0), qpia * sizeof(ColorX));
         memcpy(qxQHW, &qHXYKT.GetAt(0), qpia);
-        SpX<AVObjX> qrzAir(new LinesX(qpia, qbXcw, qJDuOZ, 0, 0, 0, qxQHW));
-        SpX<AVObjX> qdqWL(new PropX());
-        ((AVObjX*)qdqWL)->SetFlags(0x20, 0);
-        ((AVObjX*)qrzAir)->AttachProperty(qdqWL);
-        ((AVObjX*)qrzAir)->AttachProperty(spWireframe);
-        ((AVObjX*)qrzAir)->AttachProperty(spZBuffer);
-        ((AVObjX*)qrzAir)->GetTransformScale(Pt3PodX().Set(0.0f, 0.0f, 1.0f));
-        SpX<AVObjX> qvyWyw(0);
+        NiPointer<NiAVObject> qrzAir(new LinesX(qpia, qbXcw, qJDuOZ, 0, 0, 0, qxQHW));
+        NiPointer<BSShaderNoLightingProperty> qdqWL(new BSShaderNoLightingProperty());
+        ((BSShaderNoLightingProperty*)qdqWL)->SetFlag(0x20, false);
+        ((NiAVObject*)qrzAir)->AttachProperty(qdqWL);
+        ((NiAVObject*)qrzAir)->AttachProperty(spWireframe);
+        ((NiAVObject*)qrzAir)->AttachProperty(spZBuffer);
+        ((NiAVObject*)qrzAir)->FUN_00440460(reinterpret_cast<NiPoint3*>(Pt3PodX().Set(0.0f, 0.0f, 1.0f)));
+        NiPointer<NiAVObject> qvyWyw(0);
         if (qArxcFu > 0)
         {
             Pt3X* qOHwfb = new Pt3X[qArxcFu];
@@ -1135,116 +786,53 @@ void NavRenderX::FUN_006a37a0(CellX* apCell, bool abUpdate)
             memcpy(qkPflib, &qpqRa.GetAt(0), qArxcFu * sizeof(ColorX));
             memcpy(qEXZLB, &qrKBG.GetAt(0), qArxcFu);
             qvyWyw = new LinesX(qArxcFu, qOHwfb, qkPflib, 0, 0, 0, qEXZLB);
-            qdqWL = new PropX();
-            ((AVObjX*)qdqWL)->SetFlags(0x20, 0);
-            ((AVObjX*)qvyWyw)->AttachProperty(qdqWL);
-            ((AVObjX*)qvyWyw)->AttachProperty(spZBuffer);
-            ((AVObjX*)qvyWyw)->GetTransformScale(Pt3PodX().Set(0.0f, 0.0f, 3.0f));
+            qdqWL = new BSShaderNoLightingProperty();
+            ((BSShaderNoLightingProperty*)qdqWL)->SetFlag(0x20, false);
+            ((NiAVObject*)qvyWyw)->AttachProperty(qdqWL);
+            ((NiAVObject*)qvyWyw)->AttachProperty(spZBuffer);
+            ((NiAVObject*)qvyWyw)->FUN_00440460(reinterpret_cast<NiPoint3*>(Pt3PodX().Set(0.0f, 0.0f, 3.0f)));
         }
         qFffvLe = new Pt3X[qXMUYT];
         qZAdkzg = new ColorX[qXMUYT];
         memcpy(qFffvLe, &qkJsUdT.GetAt(0), qXMUYT * sizeof(Pt3X));
         memcpy(qZAdkzg, &qrEZrs.GetAt(0), qXMUYT * sizeof(ColorX));
-        SpX<AVObjX> qpTd(new TriShapeX(qXMUYT, qFffvLe, 0, qZAdkzg, 0, 0, 0, qMBds, qaGEwZ));
-        ((AVObjX*)qpTd)->SetName(FixedStrX("NavMesh Triangles"));
-        SpX<AVObjX> qSVM(new PropX());
-        ((AVObjX*)qSVM)->SetFlags(0x20, 0);
-        ((AVObjX*)qpTd)->AttachProperty(spVertexColor);
-        ((AVObjX*)qpTd)->AttachProperty(spZBuffer);
-        ((AVObjX*)qpTd)->AttachProperty(qSVM);
-        ((AVObjX*)qpTd)->GetTransformScale(Pt3PodX().Set(0.0f, 0.0f, 1.0f));
-        for (unsigned int qMFd = 0; qMFd < ((NavMeshX*)qsSDDgz)->GetSphereCount(); qMFd++)
+        NiPointer<NiAVObject> qpTd(new TriShapeX(qXMUYT, qFffvLe, 0, qZAdkzg, 0, 0, 0, qMBds, qaGEwZ));
+        ((NiAVObject*)qpTd)->SetName(FixedText("NavMesh Triangles"));
+        NiPointer<BSShaderNoLightingProperty> qSVM(new BSShaderNoLightingProperty());
+        ((BSShaderNoLightingProperty*)qSVM)->SetFlag(0x20, false);
+        ((NiAVObject*)qpTd)->AttachProperty(spVertexColor);
+        ((NiAVObject*)qpTd)->AttachProperty(spZBuffer);
+        ((NiAVObject*)qpTd)->AttachProperty(qSVM);
+        ((NiAVObject*)qpTd)->FUN_00440460(reinterpret_cast<NiPoint3*>(Pt3PodX().Set(0.0f, 0.0f, 1.0f)));
+        for (unsigned int qMFd = 0; qMFd < static_cast<NavMesh*>(qsSDDgz)->FUN_00691620(); qMFd++)
         {
-            SphereX* qsCroYH = &((NavMeshX*)qsSDDgz)->GetSphere(qMFd);
+            AvoidSphere* qsCroYH = &static_cast<NavMesh*>(qsSDDgz)->FUN_00691640(qMFd);
             ColorX qODE(0.25f, 0.0f, 0.0f, 0.5f);
-            SpX<AVObjX> qFwpo(xMakeSphere(qsCroYH->GetRadius(), 10, 10, &qODE));
-            SpX<AVObjX> qmgeiw(new AlphaX());
-            ((AVObjX*)qmgeiw)->SetAlphaBlending(true);
-            ((AVObjX*)qFwpo)->AttachProperty(qmgeiw);
-            ((AVObjX*)qFwpo)->GetTransformScale(qsCroYH->GetNavMeshData());
-            ((NodeX*)qAhbO)->AttachChildInAvailableSlot(qFwpo, true);
+            NiPointer<NiAVObject> qFwpo(xMakeSphere(qsCroYH->GetRadius(), 10, 10, &qODE));
+            NiPointer<AlphaX> qmgeiw(new AlphaX());
+            ((AlphaX*)qmgeiw)->SetAlphaBlending(true);
+            ((NiAVObject*)qFwpo)->AttachProperty(qmgeiw);
+            ((NiAVObject*)qFwpo)->FUN_00440460(const_cast<NiPoint3*>(&qsCroYH->FUN_006815c0()));
+            reinterpret_cast<NiNode*>(static_cast<NodeX*>(qAhbO))->AttachChildInAvailableSlot(qFwpo, true);
         }
-        ((NodeX*)qAhbO)->AttachChildInAvailableSlot(qrzAir, true);
-        ((NodeX*)qAhbO)->AttachChildInAvailableSlot(qpTd, true);
+        reinterpret_cast<NiNode*>(static_cast<NodeX*>(qAhbO))->AttachChildInAvailableSlot(qrzAir, true);
+        reinterpret_cast<NiNode*>(static_cast<NodeX*>(qAhbO))->AttachChildInAvailableSlot(qpTd, true);
         if (qArxcFu > 0)
-            ((NodeX*)qAhbO)->AttachChildInAvailableSlot(qvyWyw, true);
+            reinterpret_cast<NiNode*>(static_cast<NodeX*>(qAhbO))->AttachChildInAvailableSlot(qvyWyw, true);
         xUpdateNode(qAhbO);
         xPrepareNode(qAhbO, 0, 0);
     }
     if (abUpdate)
     {
-        UpdateDataX qBQkjNg(0.0f, false, false);
+        NiUpdateData qBQkjNg(0.0f, false, false);
         ((NodeX*)xspNavRoot)->Update(qBQkjNg);
         ((NodeX*)xspNavRoot)->UpdateSceneObject();
     }
 }
 
-struct WorldObject : public NiAVObject
-{
-    virtual void DeleteThis();
-    virtual void GetRTTI();
-    virtual void AsNode();
-    virtual void AsSwitchNode();
-    virtual void AsFadeNode();
-    virtual void AsMultiBoundNode();
-    virtual void AsGeometry();
-    virtual void AsTriStrips();
-    virtual void AsTriShape();
-    virtual void AsSegmentedTriShape();
-    virtual void AsSubIndexTriShape();
-    virtual void AsDynamicTriShape();
-    virtual void AsNiGeometry();
-    virtual void AsNiTriBasedGeom();
-    virtual void AsNiTriShape();
-    virtual void AsParticlesGeom();
-    virtual void AsLinesGeom();
-    virtual void AsCollisionObject();
-    virtual void AsBlendCollisionObject();
-    virtual void AsAttachmentCollisionObject();
-    virtual void AsRigidBody();
-    virtual void AsLimitedHingeConstraint();
-    virtual void MakeClone();
-    virtual void LoadBinary();
-    virtual void LinkObject();
-    virtual void RegisterStreamables();
-    virtual void SaveBinary();
-    virtual void IsEqual();
-    virtual void ProcessClone();
-    virtual void PostLinkObject();
-    virtual void StreamCanSkip();
-    virtual void GetStreamableRTTI();
-    virtual void GetBlockAllocationSize();
-    virtual void GetGroup();
-    virtual void SetGroup();
-    virtual void AsControllerManager();
-    virtual void UpdateControllers();
-    virtual void PerformOperation();
-    virtual void AttachProperty();
-    virtual void SetMaterialNeedsUpdate();
-    virtual void SetDefaultMaterialNeedsUpdateFlag();
-    virtual void GetObjectByName();
-    virtual void SetSelectiveUpdateFlags();
-    virtual void UpdateDownwardPass();
-    virtual void UpdateSelectedDownwardPass();
-    virtual void UpdateRigidDownwardPass();
-    virtual void UpdateWorldBound();
-    virtual void UpdateWorldData();
-    virtual void UpdateTransformAndBounds();
-    virtual void PreAttachUpdate();
-    virtual void CompleteAttachUpdate();
-    virtual void OnVisible();
-    virtual void UpdateWorldTransform();
-    virtual void UpdateEffects();
-    virtual void CalculateWorldBound();
-    virtual void PropagateControllers();
-    virtual void GetWorldTransform();
-    virtual void GetLocalTransform();
-    virtual void AttachChildInAvailableSlot(WorldObject* child);
-};
 struct WorldPointer : public GO
 {
-    WorldObject* object;
-    WorldPointer(WorldObject* object = 0);
+    WorldPointer(NiAVObject* object = 0);
     ~WorldPointer();
 };
 struct QueryQueue
@@ -1262,11 +850,11 @@ void RenderTask::UpdateChildByKey(int key)
     WorldPointer child(0);
     if (reinterpret_cast<QueryQueue*>(reinterpret_cast<char*>(this) + 0x200)->FUN_006c62d0(key, &child))
     {
-        reinterpret_cast<WorldObject*>(static_cast<unsigned int>(g_011d6e5c))
-            ->AttachChildInAvailableSlot(reinterpret_cast<WorldObject*>(static_cast<unsigned int>(child)));
+        reinterpret_cast<NiNode*>(static_cast<unsigned int>(static_cast<const GO&>(g_011d6e5c)))
+            ->RemoveObject(reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(static_cast<const GO&>(child))));
         NiUpdateData updateData(0.0f, false, false);
-        reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(g_011d6e5c))->Update(updateData);
-        reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(g_011d6e5c))->UpdateSceneObject();
+        reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(static_cast<const GO&>(g_011d6e5c)))->Update(updateData);
+        reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(static_cast<const GO&>(g_011d6e5c)))->UpdateSceneObject();
         reinterpret_cast<QueryQueue*>(reinterpret_cast<char*>(this) + 0x200)->RemoveKey(key);
     }
 }
@@ -1339,3 +927,4 @@ int NavRenderStub::GetNavTriColor(NavTriStub* pNavTri)
     }
     return iColorCode;
 }
+

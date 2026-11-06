@@ -16,34 +16,8 @@ class MediaSet;
 class MediaLocationController;
 class NiNode;
 class TESSound;
-template <class T> class BSSimpleList
-{
-  public:
-    T m_item;
-    BSSimpleList<T>* m_pkNext;
-    BSSimpleList();
-    ~BSSimpleList();
-    T& GetItem();
-    BSSimpleList<T>* GetNext();
-    bool IsEmpty();
-    void RemoveAll();
-    void RemoveHead();
-    void Remove(const T& item);
-    void AddTail(const T& item);
-    void AddHead(T& item);
-    void SetItem(const T& item);
-};
-template <class T> class BSStringT
-{
-  public:
-    T* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    BSStringT();
-    ~BSStringT();
-    bool Set(const T* text, unsigned int length);
-    const T* String();
-};
+#include "../../../include/BSSimpleList.h"
+#include "../../../include/BSStringT.h"
 FNV_STATIC_ASSERT(sizeof(BSSimpleList<void*>) == 8);
 FNV_STATIC_ASSERT(sizeof(BSStringT<char>) == 8);
 #endif

@@ -7,32 +7,15 @@
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
 
-#include <xmmintrin.h>
-struct NiPoint3B09
-{
-    float x, y, z;
-    NiPoint3B09();
-    NiPoint3B09(float fX, float fY, float fZ);
-    NiPoint3B09 operator-(const NiPoint3B09& kPt) const;
-    NiPoint3B09 operator*(float fScalar) const;
-    float& operator[](int i);
-    void Unitize();
-};
-struct hkVector4B09
-{
-    __m128 m_vComponents;
-    hkVector4B09();
-};
-void __cdecl FUN_00458620(NiPoint3B09* pDest, const hkVector4B09* pSrc);
-struct SettingB09
-{
-    float* GetFloat();
-};
-extern SettingB09 g_kSettingE70;
-extern SettingB09 g_kSettingDBC;
-extern SettingB09 g_kSettingC9C;
-extern SettingB09 g_kSettingF64;
-extern SettingB09 g_kSetting2EC;
+#include "../../include/NiPoint3.h"
+#include "../../include/Setting.h"
+#include "../../include/hkVector4.h"
+void __cdecl FUN_00458620(NiPoint3* pDest, const hkVector4* pSrc);
+extern Setting g_kSettingE70;
+extern Setting g_kSettingDBC;
+extern Setting g_kSettingC9C;
+extern Setting g_kSettingF64;
+extern Setting g_kSetting2EC;
 struct HandleB09
 {
     int m_iValue;
@@ -109,11 +92,11 @@ struct RefB09
     virtual void SetFlagE4(int iValue);
     virtual void vr03a();
     virtual void vr03b();
-    virtual hkVector4B09* GetPosF0(hkVector4B09* pOut);
+    virtual hkVector4* GetPosF0(hkVector4* pOut);
     HandleB09* FUN_0043b4f0(HandleB09* pOut);
     void* FUN_004ae750();
-    void FUN_009b0bf0(const NiPoint3B09& kImpulse);
-    void FUN_009b0c90(const NiPoint3B09& kImpulse);
+    void FUN_009b0bf0(const NiPoint3& kImpulse);
+    void FUN_009b0c90(const NiPoint3& kImpulse);
 };
 FormB09* __cdecl FUN_004b5a20(void* pBase);
 void* __cdecl FUN_0056f930(void* pForm);
@@ -247,12 +230,14 @@ struct OwnerB09
     virtual void vo07a();
     virtual void vo07b();
     virtual void vo07c();
-    virtual NiPoint3B09* GetPos1F4();
+    virtual NiPoint3* GetPos1F4();
     ProcessB09* FUN_004181e0();
     void* FUN_009ad610();
     void FUN_009b0920(RefB09* pRef);
 };
 
+// Shared vector unions need strict GS checking to retain the original stack cookies.
+#pragma strict_gs_check(push, on)
 // @fnv 0x009b0920
 void OwnerB09::FUN_009b0920(RefB09* pRef)
 {
@@ -261,10 +246,10 @@ void OwnerB09::FUN_009b0920(RefB09* pRef)
         float fForce = FUN_004181e0()->FUN_009b0bd0();
         if (fForce > 0.0)
         {
-            hkVector4B09 kPos;
-            NiPoint3B09 kRefPos;
+            hkVector4 kPos;
+            NiPoint3 kRefPos;
             FUN_00458620(&kRefPos, pRef->GetPosF0(&kPos));
-            NiPoint3B09 kWorldPosition = kRefPos - *GetPos1F4();
+            NiPoint3 kWorldPosition = kRefPos - *GetPos1F4();
             kWorldPosition.Unitize();
             HandleB09 kHandle;
             if (pRef->FUN_0043b4f0(&kHandle)->FUN_00624070())
@@ -288,18 +273,13 @@ void OwnerB09::FUN_009b0920(RefB09* pRef)
             if (!bMatched)
                 fForce = FUN_0040ebd0(fForce, *g_kSettingC9C.GetFloat());
             pRef->FUN_009b0bf0(kWorldPosition * fForce * *g_kSettingF64.GetFloat());
-            NiPoint3B09 kRandom(FUN_00476b70(-1.0f, 1.0f), FUN_00476b70(-1.0f, 1.0f), FUN_00476b70(-1.0f, 1.0f));
+            NiPoint3 kRandom(FUN_00476b70(-1.0f, 1.0f), FUN_00476b70(-1.0f, 1.0f), FUN_00476b70(-1.0f, 1.0f));
             pRef->FUN_009b0c90(kRandom * fForce * *g_kSetting2EC.GetFloat());
         }
     }
 }
 
-struct S009b0bf0_Box
-{
-    __m128 q;
-    S009b0bf0_Box();
-};
-int __cdecl FUN_004a3e00(S009b0bf0_Box*, int);
+int __cdecl FUN_004a3e00(hkVector4*, int);
 struct S009b0bf0_Obj
 {
     void FUN_009b0c50(int);
@@ -308,28 +288,25 @@ struct S009b0bf0_Obj
 // @fnv 0x009b0bf0
 void S009b0bf0_Obj::FUN_009b0bf0(int a0)
 {
-    S009b0bf0_Box box;
+    hkVector4 box;
     FUN_009b0c50(FUN_004a3e00(&box, a0));
 }
 
-struct __declspec(align(16)) hkVec4S_9b0c90
-{
-    __m128 m_vComponents;
-    hkVec4S_9b0c90();
-};
-hkVec4S_9b0c90& FUN_004a3e00(hkVec4S_9b0c90& out, const NiPoint3& in);
+hkVector4& FUN_004a3e00(hkVector4& out, const NiPoint3& in);
 struct S_009b0c90
 {
     int unk00;
-    void FUN_009b0cf0(const hkVec4S_9b0c90& v);
+    void FUN_009b0cf0(const hkVector4& v);
     void FUN_009b0c90(const NiPoint3& p);
 };
 // @fnv 0x009b0c90
 void S_009b0c90::FUN_009b0c90(const NiPoint3& p)
 {
-    hkVec4S_9b0c90 v;
+    hkVector4 v;
     FUN_009b0cf0(FUN_004a3e00(v, p));
 }
+
+#pragma strict_gs_check(pop)
 
 typedef __m128 ContactVector369;
 // A 112-byte root contact: two vectors and each root body / shape-key path.

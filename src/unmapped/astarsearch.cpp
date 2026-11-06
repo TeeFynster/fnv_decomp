@@ -1,6 +1,8 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/CombatTargetTimestamp.h"
+
 struct AlphaColor
 {
     void FUN_0052ce20(float);
@@ -15,16 +17,10 @@ void FUN_006a7d30_shell::FUN_006a7d30(float afValue)
     ((AlphaColor*)((char*)this + 0x1ff4))->FUN_0052ce20(afValue);
 }
 
-struct CombatTargetTimestamp
-{
-    float fTime;
-    float __thiscall FUN_006a7f50() const;
-};
-
 // @fnv 0x006a7f50
-float __thiscall CombatTargetTimestamp::FUN_006a7f50() const
+float __fastcall FUN_006a7f50(const CombatTargetTimestamp* timestamp)
 {
-    return fTime;
+    return timestamp->fTimeStamp;
 }
 
 extern int DAT_0106b660;

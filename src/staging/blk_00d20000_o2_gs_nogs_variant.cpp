@@ -6,7 +6,118 @@
 // src/staging/blk_00d20000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-extern "C" void* __cdecl fopen(const char*, const char*);
+#include "../../include/Transform.h"
+// local form of hkVector4: 0x00d39390 needs original packet construction (shared extent 968 vs 1199).
+
+
+#if !defined(FNV_FOURFLOATVECTOR_NO_SSE)
+#include <xmmintrin.h>
+#else
+union __m128;
+#endif
+
+class SimdReal;
+class SimdScalar;
+class ScalarValue;
+class Transform;
+class NiPoint3;
+
+#pragma pack(push, 4)
+
+class Agent3PacketCallLocal_00d39390
+{
+public:
+#if defined(FNV_FOURFLOATVECTOR_NO_SSE)
+    union Components
+    {
+        float m128_f32[4];
+        unsigned __int64 m128_u64[2];
+        signed char m128_i8[16];
+        short m128_i16[8];
+        int m128_i32[4];
+        __int64 m128_i64[2];
+        unsigned char m128_u8[16];
+        unsigned short m128_u16[8];
+        unsigned int m128_u32[4];
+    };
+#else
+    typedef __declspec(align(4)) __m128 Components;
+#endif
+
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+        Components m_vComponents;
+        Components m;
+        float f[4];
+        Components values;
+        Components q;
+        Components value;
+        Components quad;
+        float elements[4];
+        float m_fComponents[4];
+    };
+
+    Agent3PacketCallLocal_00d39390();
+    Agent3PacketCallLocal_00d39390(float x, float y, float z, float w);
+    Agent3PacketCallLocal_00d39390(const __m128& vector);
+
+    Agent3PacketCallLocal_00d39390* FUN_005532a0(float x, float y, float z, float w);
+    void FUN_004a3f10(Agent3PacketCallLocal_00d39390* vector);
+    void __thiscall FUN_004b4db0(const Agent3PacketCallLocal_00d39390* vector);
+    Agent3PacketCallLocal_00d39390& FUN_00e531a0(int parameter);
+    Agent3PacketCallLocal_00d39390 FUN_00e53260(int parameter);
+    void FUN_005611c0();
+
+    void operator=(const Agent3PacketCallLocal_00d39390& vector);
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    float& component(int index);
+    float& At(int index);
+    const float& At(int index) const;
+
+    __m128 length3() const;
+    float getW() const;
+    ScalarValue Dot(const Agent3PacketCallLocal_00d39390& vector) const;
+    ScalarValue LengthSq() const;
+    ScalarValue Length() const;
+    ScalarValue InverseLength() const;
+    void Normalize();
+    bool NormalizeNonzero();
+    void Mul(const ScalarValue& scalar);
+    void Add(const Agent3PacketCallLocal_00d39390& vector);
+    void Sub(const Agent3PacketCallLocal_00d39390& vector);
+    void Cross(const Agent3PacketCallLocal_00d39390& a, const Agent3PacketCallLocal_00d39390& b);
+
+    void setAbs4(const Agent3PacketCallLocal_00d39390& vector);
+    void setMul4(const SimdReal& scalar, const Agent3PacketCallLocal_00d39390& vector);
+    void addMul4(const SimdReal& scalar, const Agent3PacketCallLocal_00d39390& vector);
+    void setAddMul4(const Agent3PacketCallLocal_00d39390& a, const Agent3PacketCallLocal_00d39390& b, const SimdReal& scalar);
+    SimdReal getSimdAt3() const;
+    SimdReal lengthSquared3() const;
+    void setXYZ_W(__m128 xyz, __m128 w);
+    void setSqrtInverse4(const Agent3PacketCallLocal_00d39390& vector);
+    void setAddMul(const Agent3PacketCallLocal_00d39390& a, const Agent3PacketCallLocal_00d39390& b, const SimdScalar& scalar);
+    void addMul(const float& scalar, const Agent3PacketCallLocal_00d39390& vector);
+    void transformed(const Transform& transform, const Agent3PacketCallLocal_00d39390& vector);
+    void addScaled(const Agent3PacketCallLocal_00d39390& base, const Agent3PacketCallLocal_00d39390& direction, float amount);
+    void* AddVector(void*, NiPoint3*, void*, float);
+    void* AddVector(void*, void*);
+    void* ScaleSwizzled();
+};
+
+#pragma pack(pop)
+
+#include "../../include/hkArray.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkMemoryRouter.h"
+#include <stdio.h>
 struct FUN_00d2be30
 {
     int m_iWordAt00;
@@ -74,37 +185,6 @@ struct FUN_00d27f50_Obj {
     void __thiscall Insert(int a, int b, int c);
     void __thiscall FUN_00d27f50(int param_1, int param_2);
 };
-struct FUN_00d27f70 {
-    int** m_ppIndices;
-    int m_iIndexCount;
-
-    FUN_00d27f70(int** indices, int numIndices);
-};
-struct FUN_00d27ff0_class {int** values; void __thiscall UnionFindMerge(int first, int second);};
-struct D28030FixedArray {
-    int* m_data;
-    int m_iElementCount;
-
-    int& operator[](int i) { return m_data[i]; }
-};
-struct D28030UnionFind {
-    D28030FixedArray& m_pParentArray;
-
-    __forceinline int _findRootOfNode(int i)
-    {
-        int root = i;
-        while (m_pParentArray[root] >= 0)
-            root = m_pParentArray[root];
-        while (m_pParentArray[i] >= 0) {
-            int j = m_pParentArray[i];
-            m_pParentArray[i] = root;
-            i = j;
-        }
-        return i;
-    }
-
-    void Union(int i, int j);
-};
 struct LinkedIndexArray { int** entries; int count; void FUN_00d280e0(); };
 inline void* __cdecl operator new(unsigned int, void* p) { return p; }
 struct IndexBuffer { int* data; int size; unsigned capacityFlags; };
@@ -113,62 +193,28 @@ struct AllocationManager { int unk00; int unk04; int unk08; int unk0C; void* all
 AllocationManager* __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void*, IndexBuffer*, int);
 struct IndexRemapper { IndexStorage* entries; int length; void FUN_00d280e0(); void RemapIndices(IndexBuffer*); };
-struct hkMemAllocStub
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void* AllocateBufferWithSize(int& sizeInOut);
-    virtual void ReturnMemory(void* p, int size);
-
-    int* bufAllocInts(int& n)
-    {
-        int s = n * 4;
-        void* p = AllocateBufferWithSize(s);
-        n = s / 4;
-        return (int*)p;
-    }
-};
-struct hkMemCtxStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkMemAllocStub* alloc;
-    void* mem;
-
-    hkMemAllocStub& temp() { return *alloc; }
-    void* heap() { return mem; }
-};
-hkMemCtxStub* GetMemCtx();
 void ArrayReserveImpl(void* mem, void* arr, int numElem, int elemSize);
-struct IntArrayStub
+static __forceinline void IntArrayStub_reserveWith(hkArrayBase<int>& self, void* mem, int n)
 {
-    int* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    void reserveWith(void* mem, int n)
-    {
-        int cap = m_iCapacityState & 0x3fffffff;
+        int cap = self.m_iCapacityState & 0x3fffffff;
         if (cap < n)
         {
             int cap2 = cap * 2;
-            ArrayReserveImpl(mem, this, n < cap2 ? cap2 : n, 4);
+            ArrayReserveImpl(mem, (&self), n < cap2 ? cap2 : n, 4);
         }
     }
-    void setSizeWith(void* mem, int n)
-    {
-        reserveWith(mem, n);
-        m_iElementCount = n;
+
+static __forceinline void IntArrayStub_setSizeWith(hkArrayBase<int>& self, void* mem, int n)
+{
+        IntArrayStub_reserveWith(self, mem, n);
+        self.m_iElementCount = n;
     }
-};
 struct KeyArrayStub
 {
-    IntArrayStub* m_keys;
+    hkArrayBase<int>* m_keys;
     int m_iElementCount;
 
-    void BuildKeyOffsets(IntArrayStub* counts, IntArrayStub* out);
+    void BuildKeyOffsets(hkArrayBase<int>* counts, hkArrayBase<int>* out);
 };
 typedef void (__cdecl *D2F2C0Func)();
 struct D2F2C0AgentFuncs {
@@ -325,21 +371,6 @@ public:
     virtual void ResetAgent(unsigned short id, void* pkInfo);
 };
 D3FE10Entry* __cdecl ResetEntryAgents(D3FE10Header* pkHeader, D3FE10Entry* pkEntry, D3FE10Manager* pkManager, void* pkInfo);
-template <class T> class hkArrayD27 {
-public:
-    T& operator[](int i) { return m_data[i]; }
-    const T& operator[](int i) const { return m_data[i]; }
-
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-class hkUnionFindD27 {
-public:
-    int FindRoot(int i);
-
-    hkArrayD27<int>& m_pParentArray;
-};
 extern int DAT_010ce81c;
 struct SpawnedBuf { void* m_iWordAt00; unsigned char m_iWordAt04; int m_8; };
 struct Wrapper {
@@ -726,23 +757,7 @@ extern int DAT_0102e388;
 struct Foo00d24660 {
     void FUN_00d24660();
 };
-class hkMemoryAllocatorD262 {
-public:
-    virtual ~hkMemoryAllocatorD262() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-struct hkMemoryRouterD262 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorD262* m_pStreamAllocator;
-    hkMemoryAllocatorD262& heap() { return *m_pStreamAllocator; }
-};
-namespace hkRouterD262 {
-    extern "C" hkMemoryRouterD262& __cdecl FUN_00c85750() throw();
-}
+// Shared router for the allocator context returned by 0x00c85750.
 class FUN_00d496d0 {
 public:
     virtual void V0() throw();
@@ -753,7 +768,7 @@ public:
 
     static void operator delete(void* p) throw()
     {
-        hkRouterD262::FUN_00c85750().heap().ReleaseBlock(p, static_cast<FUN_00d496d0*>(p)->m_usMemSizeAndFlags);
+        hkMemoryRouter::getInstance().heap().blockFree(p, static_cast<FUN_00d496d0*>(p)->m_usMemSizeAndFlags);
     }
 
     FUN_00d496d0* FUN_00d262e0(unsigned int uiFlags) throw();
@@ -887,9 +902,7 @@ void caller_d284f0()
 }
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
-struct FourFloatVector { __m128 value; };
-struct Transform { FourFloatVector x,y,z,translation; };
-struct Contact { FourFloatVector position,normal; unsigned int id,unk24,unk28,unk2c; };
+struct Contact { Agent3PacketCallLocal_00d39390 position,normal; unsigned int id,unk24,unk28,unk2c; };
 struct Shape;
 struct Body { Shape* shape; void* unk04; Transform* transform; __forceinline Shape* GetShape() const {return shape;} __forceinline const Transform& GetTransform() const {return *transform;} };
 struct Header { unsigned short flags; unsigned char count; };
@@ -907,14 +920,15 @@ struct ShapeBase {
  virtual void slot4();virtual void slot5();virtual void slot6();virtual void slot7();
  virtual void slot8();virtual void slot9();virtual void slot10();virtual void slot11();
  virtual void slot12();virtual void slot13();virtual void slot14();virtual void slot15();
- virtual int Process(unsigned short*,unsigned char&,FourFloatVector&,const Transform&,const Shape*,const Transform&,FourFloatVector&);
+ virtual int Process(unsigned short*,unsigned char&,Agent3PacketCallLocal_00d39390&,const Transform&,const Shape*,const Transform&,Agent3PacketCallLocal_00d39390&);
  unsigned int unk04,unk08,unk0c; float radius; unsigned int unk14,unk18,unk1c;
 };
 struct Shape : ShapeBase {
- FourFloatVector vertices[3];
+ Agent3PacketCallLocal_00d39390 vertices[3];
 };
 struct Threshold {float unk00,unk04,distance;};
-struct Pair {Body* a;Body* b;void* unk08;Threshold* threshold;Manager* manager;};
+// hkpAgent3ProcessInput (Havok hkpAgent3.h): bodyA, bodyB, overrideBodyA, input, contactMgr
+struct Agent3ProcessInput {Body* a;Body* b;void* unk08;Threshold* threshold;Manager* manager;};
 struct DeferredEntry {Contact* contact; Header* header;unsigned short* ids;};
 struct Deferred { DeferredEntry* next; Contact** references; DeferredEntry* begin;DeferredEntry* end;};
 struct Context {
@@ -958,10 +972,10 @@ extern char DAT_010ceeec[];
 extern char DAT_010c41f8[];
 extern float DAT_0104da48;
 struct ContactTag {unsigned char count,unk01,metadata,unk03;unsigned int unk04;};
-struct ContactPair {FourFloatVector position,normal;};
-void FUN_00cd6520(FourFloatVector*,float,FourFloatVector*,float,void*,float,int,ContactPair*,ContactTag*);
-__forceinline void TransformPoints(const Transform& matrix, const FourFloatVector* in, int n, FourFloatVector* out) {
- FourFloatVector c0=matrix.x, c1=matrix.y, c2=matrix.z, c3=matrix.translation;
+struct ContactPair {Agent3PacketCallLocal_00d39390 position,normal;};
+void FUN_00cd6520(Agent3PacketCallLocal_00d39390*,float,Agent3PacketCallLocal_00d39390*,float,void*,float,int,ContactPair*,ContactTag*);
+__forceinline void TransformPoints(const Transform& matrix, const Agent3PacketCallLocal_00d39390* in, int n, Agent3PacketCallLocal_00d39390* out) {
+ Agent3PacketCallLocal_00d39390 c0=*reinterpret_cast<const Agent3PacketCallLocal_00d39390*>(&matrix.r[0]), c1=*reinterpret_cast<const Agent3PacketCallLocal_00d39390*>(&matrix.r[1]), c2=*reinterpret_cast<const Agent3PacketCallLocal_00d39390*>(&matrix.r[2]), c3=*reinterpret_cast<const Agent3PacketCallLocal_00d39390*>(&matrix.r[3]);
  for(int i=n-1;i>=0;--i) {
   __m128 v=in[i].value;
   __m128 sy=_mm_shuffle_ps(v,v,0x55);
@@ -971,9 +985,9 @@ __forceinline void TransformPoints(const Transform& matrix, const FourFloatVecto
  }
 }
 __forceinline unsigned short AddContact(Manager* m,Body* a,Body* b,Threshold* in,Context* out,ContactPair* cp){return m->Add(*a,*b,*in,*out,0,*cp);}
-struct ContactWorkspace {FourFloatVector pointsA[2];FourFloatVector pointsB[3];ContactPair contacts[3];};
+struct ContactWorkspace {Agent3PacketCallLocal_00d39390 pointsA[2];Agent3PacketCallLocal_00d39390 pointsB[3];ContactPair contacts[3];};
 // @fnv 0x00d39390
-unsigned short* FUN_00d39390(Pair* pair,Header* header,unsigned short* ids,FourFloatVector* normal,Context* context) {
+unsigned short* FUN_00d39390(Agent3ProcessInput* pair,Header* header,unsigned short* ids,Agent3PacketCallLocal_00d39390* normal,Context* context) {
  unsigned int count;
  ProfileState* profile=(ProfileState*)TlsGetValue(DAT_0126835c);
  ProfileSample* event=profile->next;
@@ -990,9 +1004,13 @@ unsigned short* FUN_00d39390(Pair* pair,Header* header,unsigned short* ids,FourF
  count=0;
  Shape* shapeA=pair->a->GetShape();
  Shape* shapeB=pair->b->GetShape();
- FourFloatVector endPoints[2];
- FourFloatVector triVertices[3];
- ContactPair points[3];
+ // These output buffers are filled before use; reserve storage without constructing vectors.
+ __m128 endPointStorage[2];
+ __m128 triVertexStorage[3];
+ __m128 contactStorage[6];
+ Agent3PacketCallLocal_00d39390 (&endPoints)[2]=reinterpret_cast<Agent3PacketCallLocal_00d39390 (&)[2]>(endPointStorage);
+ Agent3PacketCallLocal_00d39390 (&triVertices)[3]=reinterpret_cast<Agent3PacketCallLocal_00d39390 (&)[3]>(triVertexStorage);
+ ContactPair (&points)[3]=reinterpret_cast<ContactPair (&)[3]>(contactStorage);
  TransformPoints(pair->a->GetTransform(),shapeA->vertices,2,endPoints);
  
  TransformPoints(pair->b->GetTransform(),shapeB->vertices,3,triVertices);
@@ -1000,7 +1018,7 @@ unsigned short* FUN_00d39390(Pair* pair,Header* header,unsigned short* ids,FourF
  ContactTag tags[3];
  FUN_00cd6520(endPoints,shapeA->radius,triVertices,shapeB->radius,ids+4,3.40282e+38f,1,points,tags);
  int closest=points[0].normal.value.m128_f32[3] < points[1].normal.value.m128_f32[3] ? 0 : 1;
- int k=0; FourFloatVector* cp=&points[0].normal;
+ int k=0; Agent3PacketCallLocal_00d39390* cp=&points[0].normal;
  for(;k<3;++k, cp+=2) {
    unsigned short id=ids[k];
    if((*cp).value.m128_f32[3] < pair->threshold->distance) {
@@ -1016,7 +1034,7 @@ unsigned short* FUN_00d39390(Pair* pair,Header* header,unsigned short* ids,FourF
      }
      unsigned char quality=tags[k].count;
      if(quality>0) {
-       FourFloatVector scratch=(*cp);
+       Agent3PacketCallLocal_00d39390 scratch=(*cp);
        int result=shapeB->Process((unsigned short*)&tags[k].metadata,quality,*(cp-1),pair->b->GetTransform(),shapeA,pair->a->GetTransform(),scratch);
        if(!result) {
          if(id!=0xffff) {

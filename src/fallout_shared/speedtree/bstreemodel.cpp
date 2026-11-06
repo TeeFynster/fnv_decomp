@@ -1,13 +1,31 @@
+#include "../../../include/NiPointer.h"
+#include "../../../include/BSStringT.h"
+// the shared NiTArray first: NiNode.h then takes it (its own copy is only for units without one)
+#include "../../../include/NiMemObject.h"
+#include "../../../include/NiTArray.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiGeometry.h"
+#include "../../../include/Setting.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TES.h"
+#include "../../../include/BSMultiBoundSphere.h"
+#include "../../../include/BSShaderTextureSet.h"
+#include "../../../include/BSStream.h"
+#include "../../../include/NiStream.h"
+#include "../../../include/TESModel.h"
+#include "../../../include/BSTreeModel.h"
+#include "../../../include/NiPoint2.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/TESObjectTREE.h"
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/NP.h"
+#include "../../../include/NiTexture.h"
+#include "../../../include/bhkCollisionObject.h"
+#include "../../../include/NiAlphaProperty.h"
 
 // src/fallout_shared/speedtree/bstreemodel.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/speedtree/bstreemodel.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-
-struct BSTreeModel
-{
-    virtual ~BSTreeModel();
-    void* DestroyAndFree(unsigned int flags);
-    static void operator delete(void* p, unsigned int flags);
-};
 
 // Runs the destructor and, when bit 0 of flags is set, frees the object with operator delete, then returns this.
 // @fnv 0x006667d0
@@ -19,6 +37,7 @@ void* BSTreeModel::DestroyAndFree(unsigned int flags)
     return this;
 }
 
+// BSTreeModel.h still lacks the state/LOD methods and geometry fields used by the remaining model views.
 struct FUN_00666f00_shell
 {
     int m_04;
@@ -32,27 +51,16 @@ bool FUN_00666f00_shell::FUN_00666f00()
     return *(int*)(this + 1) == 2;
 }
 
-struct GlobalObject_0044f440
-{
-    struct
-    {
-        float f;
-    }* Float();
-};
-extern GlobalObject_0044f440 g_011d5d14;
+extern Setting g_011d5d14;
 
 // @fnv 0x00666f20
 float FUN_00666f20()
 {
-    return g_011d5d14.Float()->f;
+    return *g_011d5d14.Float();
 }
 
 namespace fnv_00666f40 {
-struct GlobalObject_0044f440
-{
-    float* Float();
-};
-extern GlobalObject_0044f440 g_011d5db8;
+extern Setting g_011d5db8;
 
 // @fnv 0x00666f40
 float FUN_00666f40()
@@ -62,32 +70,17 @@ float FUN_00666f40()
 }  // namespace fnv_00666f40
 
 namespace fnv_00666f60 {
-struct Setting_S
-{
-    float f;
-};
-
-struct GlobalObject_0044f440
-{
-    Setting_S* Float();
-};
-
-extern GlobalObject_0044f440 g_011d5d24;
+extern Setting g_011d5d24;
 
 // @fnv 0x00666f60
 float FUN_00666f60()
 {
-    return g_011d5d24.Float()->f;
+    return *g_011d5d24.Float();
 }
 }  // namespace fnv_00666f60
 
 namespace fnv_00666f80 {
-struct GlobalObject_0044f440
-{
-    float* Float();
-};
-
-GlobalObject_0044f440 g_011d5c9c;
+extern Setting g_011d5c9c;
 
 // @fnv 0x00666f80
 float FUN_00666f80()
@@ -126,17 +119,10 @@ void FUN_006694c0_shell::SetPad5(float value)
     fPad5 = value;
 }
 
-namespace fnv_00669990 {
 struct CSpeedTreeRT
 {
-    unsigned short __thiscall GetLowWordAtOffset0x78();
-};
-
-struct BSTreeModel
-{
-    unsigned char m_auiShapeKeys[0x0c];
-    CSpeedTreeRT* m_pTreeRuntime;
-    unsigned short __thiscall FUN_00669990();
+    unsigned short GetLowWordAtOffset0x78();
+    unsigned short GetUnsignedShortValue();
 };
 
 // @fnv 0x00669990
@@ -144,12 +130,6 @@ unsigned short BSTreeModel::FUN_00669990()
 {
     return m_pTreeRuntime ? m_pTreeRuntime->GetLowWordAtOffset0x78() : 0;
 }
-}  // namespace fnv_00669990
-
-struct CSpeedTreeRT
-{
-    unsigned short GetUnsignedShortValue();
-};
 
 struct FUN_006699d0_shell
 {
@@ -194,12 +174,12 @@ void FUN_0066a630_shell::ConvertFloatToUInt()
     m_flt.operator unsigned int();
 }
 
-GlobalObject_0044f440 g_011d5c80;
+extern Setting g_011d5c80;
 
 // @fnv 0x00666fa0
 float FUN_00666fa0()
 {
-    return g_011d5c80.Float()->f;
+    return *g_011d5c80.Float();
 }
 
 struct S_00666910
@@ -218,18 +198,7 @@ void* S_00666910::FUN_00666910(unsigned int flags)
     return this;
 }
 
-struct NiAlphaProperty
-{
-    char m_auiShapeKeys[0x1c];
-    NiAlphaProperty();
-    ~NiAlphaProperty();
-    void FUN_0049ed90(bool);
-    void SetFlag512(bool);
-    void SetFlags(unsigned short);
-    void FUN_0094db80(unsigned char);
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
+// The shared unsized operator delete changes the constructor-failure unwind at 0x00f001c0.
 // @fnv 0x006698f0
 NiAlphaProperty* FUN_006698f0()
 {
@@ -246,11 +215,7 @@ struct RefBase
     virtual ~RefBase();
     unsigned int m_uiRefCount;
 };
-struct NiPtr
-{
-    void* m_pObject;
-    ~NiPtr();
-};
+
 struct TreeData
 {
     ~TreeData();
@@ -259,17 +224,17 @@ struct FUN_00666800 : RefBase
 {
     int unk08;
     TreeData* pData;
-    NiPtr spNode10;
+    ::NiPointer< ::NiObject> spNode10;
     int unk14;
     int unk18;
-    NiPtr spNode1C;
-    NiPtr spNode20;
+    ::NiPointer< ::NiObject> spNode1C;
+    ::NiPointer< ::NiObject> spNode20;
     int unk24;
     int unk28;
-    NiPtr spNode2C;
-    NiPtr spNode30;
-    NiPtr spNode34;
-    NiPtr spNode38;
+    ::NiPointer< ::NiObject> spNode2C;
+    ::NiPointer< ::NiObject> spNode30;
+    ::NiPointer< ::NiObject> spNode34;
+    ::NiPointer< ::NiObject> spNode38;
     virtual ~FUN_00666800();
     void ReleaseData();
 };
@@ -285,18 +250,6 @@ FUN_00666800::~FUN_00666800()
     }
 }
 
-struct Point3X
-{
-    float x, y, z;
-    Point3X();
-    Point3X(float afX, float afY, float afZ);
-};
-struct Point2X
-{
-    float x, y;
-    Point2X();
-    Point2X(float afX, float afY);
-};
 struct ColorAX
 {
     float r, g, b, a;
@@ -318,7 +271,7 @@ struct LeafDataX : public MemObjX
 struct StripsDataX : public MemObjX
 {
     char _pad[0x50];
-    StripsDataX(unsigned int a1, Point3X* a2, Point3X* a3, unsigned int a4, Point2X* a5, unsigned int a6,
+    StripsDataX(unsigned int a1, NiPoint3* a2, NiPoint3* a3, unsigned int a4, NiPoint2* a5, unsigned int a6,
                 unsigned int a7, unsigned int a8, unsigned int a9, unsigned short* a10, unsigned short* a11);
     void FUN_00a67050(unsigned int auiFlags);
     void SetByteAtOffset38(unsigned char aucFlags);
@@ -383,7 +336,7 @@ struct UIntArrayX
     unsigned int* GetAt(unsigned int auiIndex);
 };
 
-extern const Point3X xDAT_011a9484;
+extern const NiPoint3 xDAT_011a9484;
 extern "C" int xIsNaN(double adValue);
 extern "C" void* xNiMalloc(unsigned int auiSize);
 extern "C" void* xmemcpy(void* apDst, const void* apSrc, unsigned int auiSize);
@@ -452,10 +405,10 @@ void TreeModelX::FUN_00667470()
     }
     if (qpqRa.pTangents && qpqRa.pBinormals)
     {
-        Point3X* qxQHW = (Point3X*)qpqRa.pNormals;
+        NiPoint3* qxQHW = (NiPoint3*)qpqRa.pNormals;
         for (int qJDuOZ = 0; qJDuOZ < qSVM; qJDuOZ++)
         {
-            Point3X qpia = qxQHW[qJDuOZ];
+            NiPoint3 qpia = qxQHW[qJDuOZ];
             if (xIsNaN(qpia.x) || xIsNaN(qpia.y) || xIsNaN(qpia.z))
             {
                 qxQHW[qJDuOZ] = xDAT_011a9484;
@@ -500,22 +453,22 @@ void TreeModelX::FUN_00667470()
                 }
             }
         }
-        Point3X* qArJcY = new Point3X[qEMUOs.GetSize()];
-        Point2X* qYTC = new Point2X[qEMUOs.GetSize()];
-        Point3X* qIpA = 0;
-        Point3X* qMBds = 0;
-        Point3X* qqtISP = 0;
+        NiPoint3* qArJcY = new NiPoint3[qEMUOs.GetSize()];
+        NiPoint2* qYTC = new NiPoint2[qEMUOs.GetSize()];
+        NiPoint3* qIpA = 0;
+        NiPoint3* qMBds = 0;
+        NiPoint3* qqtISP = 0;
         bool qdKdHaf;
         if (qpqRa.pTangents && qpqRa.pBinormals)
         {
-            qIpA = new Point3X[qEMUOs.GetSize() * 3];
+            qIpA = new NiPoint3[qEMUOs.GetSize() * 3];
             qqtISP = qIpA + qEMUOs.GetSize();
             qMBds = qIpA + qEMUOs.GetSize() * 2;
             qdKdHaf = true;
         }
         else
         {
-            qIpA = new Point3X[qEMUOs.GetSize()];
+            qIpA = new NiPoint3[qEMUOs.GetSize()];
             qdKdHaf = false;
         }
         for (qrEZrs = 0; qrEZrs < qEMUOs.GetSize(); qrEZrs++)
@@ -526,13 +479,13 @@ void TreeModelX::FUN_00667470()
             int qUfv = qxDeKK * 3 + 2;
             int qOqnE = qxDeKK * 2;
             int qAXSCg = qxDeKK * 2 + 1;
-            qArJcY[qrEZrs] = Point3X(qpqRa.pCoords[qYePyBl], qpqRa.pCoords[qAvPUtC], qpqRa.pCoords[qUfv]);
-            qIpA[qrEZrs] = Point3X(qpqRa.pNormals[qYePyBl], qpqRa.pNormals[qAvPUtC], qpqRa.pNormals[qUfv]);
-            qYTC[qrEZrs] = Point2X(qpqRa.pTexCoords[qOqnE], qpqRa.pTexCoords[qAXSCg]);
+            qArJcY[qrEZrs] = NiPoint3(qpqRa.pCoords[qYePyBl], qpqRa.pCoords[qAvPUtC], qpqRa.pCoords[qUfv]);
+            qIpA[qrEZrs] = NiPoint3(qpqRa.pNormals[qYePyBl], qpqRa.pNormals[qAvPUtC], qpqRa.pNormals[qUfv]);
+            qYTC[qrEZrs] = NiPoint2(qpqRa.pTexCoords[qOqnE], qpqRa.pTexCoords[qAXSCg]);
             if (qdKdHaf)
             {
-                qMBds[qrEZrs] = Point3X(qpqRa.pTangents[qYePyBl], qpqRa.pTangents[qAvPUtC], qpqRa.pTangents[qUfv]);
-                qqtISP[qrEZrs] = Point3X(qpqRa.pBinormals[qYePyBl], qpqRa.pBinormals[qAvPUtC], qpqRa.pBinormals[qUfv]);
+                qMBds[qrEZrs] = NiPoint3(qpqRa.pTangents[qYePyBl], qpqRa.pTangents[qAvPUtC], qpqRa.pTangents[qUfv]);
+                qqtISP[qrEZrs] = NiPoint3(qpqRa.pBinormals[qYePyBl], qpqRa.pBinormals[qAvPUtC], qpqRa.pBinormals[qUfv]);
             }
         }
         ColorAX* qXMUYT = new ColorAX[qEMUOs.GetSize()];
@@ -571,12 +524,6 @@ void ModelHolder_b5531::FUN_006694e0()
 }
 
 namespace fnv_00669500 {
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
 
 struct SavedState
 {
@@ -675,36 +622,15 @@ struct TreeData
     void SetAlpha(float value);
 };
 
-struct BSStr
-{
-    operator const char*() const;
-};
 
-struct NiTexture
-{
-    void SetFlag4000(unsigned int flags);
-    void SetApply(unsigned int value);
-    void SetFilter(unsigned int value);
-};
 
-template <class T> struct NiPtr
-{
-    T* m_pObject;
-    NiPtr(T* p);
-    ~NiPtr();
-    operator T*() const;
-    NiPtr& operator=(T* p);
-};
+using ::NiPointer;
 
 struct NiProp
 {
     int unk00;
 };
 
-struct NiAlphaProp
-{
-    int unk00;
-};
 
 struct TreeGeom
 {
@@ -712,11 +638,7 @@ struct TreeGeom
     void* GetSkin();
 };
 
-struct NiNodeX
-{
-    void AttachProperty(void* prop);
-    TreeGeom* GetFirstGeom();
-};
+// 0x004030b0 is NiGeometry::GetGeometryShaderObject (shader at 0xC0), not a NiNode child accessor.
 
 struct TexturingProp
 {
@@ -983,18 +905,18 @@ struct Renderer
     virtual void ve0();
     virtual void ve4();
     virtual void ve8();
-    virtual void PrecacheGeometry(NiNodeX* node, int a, int b, void* skin);
+    virtual void PrecacheGeometry(NiGeometry* node, int a, int b, void* skin);
     void PerformPrecache();
 };
 
 Renderer* GetRenderer();
-NiAlphaProp* CreateAlphaProp();
+NiAlphaProperty* CreateAlphaProp();
 void* GetShaderDefault();
-void __cdecl UpdateNode(NiNodeX* node, int a, int b);
+void __cdecl UpdateNode(NiGeometry* node, int a, int b);
 
 struct LoaderX
 {
-    void LoadTexture(int a, NiPtr<NiTexture>* out);
+    void LoadTexture(int a, NiPointer<NiTexture>* out);
 };
 
 struct TreeModelX
@@ -1006,13 +928,13 @@ struct TreeModelX
     int unk10;
     int unk14;
     int unk18;
-    NiPtr<NiNodeX> m_pController;
+    NiPointer<NiGeometry> m_pController;
     int unk20;
     int unk24;
     int unk28;
     int unk2c;
     int unk30;
-    BSStr name;
+    ::BSStringT<char> name;
     bool FUN_00666f00();
     void FUN_00669500(LoaderX* loader);
 };
@@ -1022,14 +944,15 @@ struct TreeModelX
 void TreeModelX::FUN_00669500(LoaderX* loader)
 {
     LocalCamera camera;
-    NiPoint3 origin_2;
-    origin_2.x = 0.0f;
-    origin_2.y = 0.0f;
-    origin_2.z = 0.0f;
-    NiPoint3 dir5;
-    dir5.x = 0.0f;
-    dir5.y = -1.0f;
-    dir5.z = 0.0f;
+    // These raw camera-state vectors must not run the shared point default constructor.
+    float origin_2[3];
+    origin_2[0] = 0.0f;
+    origin_2[1] = 0.0f;
+    origin_2[2] = 0.0f;
+    float dir5[3];
+    dir5[0] = 0.0f;
+    dir5[1] = -1.0f;
+    dir5[2] = 0.0f;
     if (!unk0c || FUN_00666f00() || !loader)
         return;
     SavedState saveA2;
@@ -1037,24 +960,24 @@ void TreeModelX::FUN_00669500(LoaderX* loader)
     SaveState(&saveA2, &saveB);
     RestoreState((SavedState*)&origin_2, (SavedState*)&dir5);
     unk0c->SetAlpha(0.0f);
-    NiPtr<NiTexture> spTexA(0);
+    NiPointer<NiTexture> spTexA(0);
     loader->LoadTexture(0, &spTexA);
     ((NiTexture*)spTexA)->SetFlag4000(0x4000);
     ((NiTexture*)spTexA)->SetApply(0x11);
     ((NiTexture*)spTexA)->SetFilter(1);
-    m_pController = (NiNodeX*)new TexturingProp(spTexA);
-    NiPtr<NiAlphaProp> spAlpha_2(CreateAlphaProp());
+    m_pController = (NiGeometry*)new TexturingProp(spTexA);
+    NiPointer<NiAlphaProperty> spAlpha_2(CreateAlphaProp());
     if (spAlpha_2)
-        ((NiNodeX*)m_pController)->AttachProperty(spAlpha_2);
+        ((NiGeometry*)m_pController)->AttachProperty((NiAlphaProperty*)spAlpha_2);
     ShaderPropV* shader = new ShaderPropV();
-    ((NiNodeX*)m_pController)->AttachProperty(shader);
+    ((NiGeometry*)m_pController)->AttachProperty((NiObject*)shader);
     shader->SetName("STBB", name);
     shader->Set100(0, GetShaderDefault());
     shader->SetE4(0);
     shader->SetFlag(0xd, true);
     shader->SetFlag(0x16, true);
     UpdateNode(m_pController, 0, 0);
-    TreeGeom* first2 = ((NiNodeX*)m_pController)->GetFirstGeom();
+    TreeGeom* first2 = (TreeGeom*)((NiGeometry*)m_pController)->GetGeometryShaderObject();
     TreeGeom* geom = !first2 ? 0 : ((first2->GetType() >= 1 && first2->GetType() <= 5) ? first2 : 0);
     if (geom)
     {
@@ -1072,30 +995,20 @@ struct GlobalObject_0044fae0
 };
 extern GlobalObject_0044fae0 g_011d5df8;
 extern unsigned char treeCloneActive;
-struct AutoMemContext
-{
-    int previous;
-    AutoMemContext(int, bool, const char*, int);
-    ~AutoMemContext();
-};
 struct TreeCloneProcess
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
     TreeCloneProcess(float);
     ~TreeCloneProcess();
 };
-struct NiNode
-{
-    NiNode* Clone();
-    NiNode* CloneWithProcess(TreeCloneProcess*);
-};
-template <class T> struct NiPointer
+
+template <class T> struct TreeModelPointer
 {
     T* object;
-    NiPointer();
-    ~NiPointer();
-    NiPointer& operator=(const NiPointer&);
-    NiPointer& operator=(T*);
+    TreeModelPointer();
+    ~TreeModelPointer();
+    TreeModelPointer& operator=(const TreeModelPointer&);
+    TreeModelPointer& operator=(T*);
     operator T*();
     static void* operator new[](unsigned int);
     static void operator delete[](void*);
@@ -1109,15 +1022,15 @@ struct TreeCloneView
     unsigned int unk00, unk04;
     int initialized;
     TreeRuntimeCopy* runtime;
-    NiPointer<TreeCloneView> source;
-    NiPointer<NiNode>* branchGeometry;
-    NiPointer<NiNode>* leafGeometry;
-    NiPointer<NiNode> billboard;
-    NiPointer<NiNode> unk20;
-    NiPointer<NiNode>* branchNodes;
-    NiPointer<NiNode>* leafNodes;
-    NiPointer<NiNode> unk2c, unk30, unk34;
-    NiPointer<NiNode> collision;
+    TreeModelPointer<TreeCloneView> source;
+    TreeModelPointer<NiNode>* branchGeometry;
+    TreeModelPointer<NiNode>* leafGeometry;
+    TreeModelPointer<NiNode> billboard;
+    TreeModelPointer<NiNode> unk20;
+    TreeModelPointer<NiNode>* branchNodes;
+    TreeModelPointer<NiNode>* leafNodes;
+    TreeModelPointer<NiNode> unk2c, unk30, unk34;
+    TreeModelPointer<NiNode> collision;
     float unk3c;
     unsigned int unk40, unk44;
     float unk48, unk4c;
@@ -1164,8 +1077,8 @@ bool TreeCloneView::CloneFromModel(TreeCloneView* model)
     unsigned short count4 = FUN_00669990();
     if (count4 > 0 && model->branchGeometry && model->branchNodes)
     {
-        branchGeometry = new NiPointer<NiNode>[count4];
-        branchNodes = new NiPointer<NiNode>[count4];
+        branchGeometry = new TreeModelPointer<NiNode>[count4];
+        branchNodes = new TreeModelPointer<NiNode>[count4];
         for (index = 0; index < count4; ++index)
         {
             branchGeometry[index] = model->branchGeometry[index];
@@ -1178,8 +1091,8 @@ bool TreeCloneView::CloneFromModel(TreeCloneView* model)
     count4 = FUN_006699d0();
     if (count4 > 0 && model->leafGeometry && model->leafNodes)
     {
-        leafGeometry = new NiPointer<NiNode>[count4];
-        leafNodes = new NiPointer<NiNode>[count4];
+        leafGeometry = new TreeModelPointer<NiNode>[count4];
+        leafNodes = new TreeModelPointer<NiNode>[count4];
         for (index = 0; index < count4; ++index)
         {
             leafGeometry[index] = model->leafGeometry[index];
@@ -1201,14 +1114,8 @@ bool TreeCloneView::CloneFromModel(TreeCloneView* model)
 
 namespace fnv_0066ac40 {
 extern const char treePrefix[];
-struct AutoMemContext
-{
-    int previous;
-    AutoMemContext(int, bool, const char*, int);
-    ~AutoMemContext();
-};
-int strcpy_s(char*, unsigned int, const char*);
-int strcat_s(char*, unsigned int, const char*);
+int CopyTreeString(char*, unsigned int, const char*);
+int AppendTreeString(char*, unsigned int, const char*);
 void FUN_005b5e40(const char*, ...);
 float FUN_0066b0b0();
 float FUN_006655c0();
@@ -1342,8 +1249,8 @@ bool TreeModelLoader::FUN_0066ac40(TreeModelInput* model, int seed)
         AutoMemContext context4(
             31, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\SpeedTree\\BSTreeModel.cpp", 1139);
         char szPath[260];
-        strcpy_s(szPath, 260, treePrefix);
-        strcat_s(szPath, 260, model->name.Name());
+        CopyTreeString(szPath, 260, treePrefix);
+        AppendTreeString(szPath, 260, model->name.Name());
         CSpeedTreeRT_Load* pTree = new CSpeedTreeRT_Load;
         if (pTree->FUN_00b05420(szPath))
         {
@@ -1447,8 +1354,8 @@ FUN_00666650::FUN_00666650() : a(0), b(0), c(0), d(0), e(0), f(0), g(0)
     unk4c = 0.0f;
 }
 
-int strcpy_s(char* apDst, unsigned int auiSize, const char* apSrc);
-int strcat_s(char* apDst, unsigned int auiSize, const char* apSrc);
+int CopyTreeString(char* apDst, unsigned int auiSize, const char* apSrc);
+int AppendTreeString(char* apDst, unsigned int auiSize, const char* apSrc);
 template <class T> unsigned int BSStringLength(const T* apString);
 
 class FileFinder
@@ -1464,51 +1371,10 @@ class FileFinder
 struct NiRTTI;
 extern const NiRTTI DAT_011f4280;
 
-class NiAVObject;
 NiAVObject* NiDynamicCast(const NiRTTI* apRTTI, NiAVObject* apObject);
 
 struct bhkWorldObject;
-struct bhkCollisionObject
-{
-    bhkWorldObject* FUN_006fa820();
-};
 bhkCollisionObject* FUN_004a8b00(NiNode* apNode);
-
-class NiStream
-{
-  public:
-    int m_kNextStreamField[0x5cc / 4];
-    virtual ~NiStream();
-    bool FUN_00c3a8a0(const char* apPath, bool abFlag);
-    int GetRefAt21C();
-    NiAVObject* GetStringAt(unsigned int auiIndex);
-};
-
-class BSStream : public NiStream
-{
-  public:
-    BSStream();
-    virtual ~BSStream();
-};
-
-class TESModel
-{
-  public:
-    virtual ~TESModel();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual const char* GetModelFileName();
-};
-
-class TESObjectTREE
-{
-  public:
-    char pad[0x30];
-    TESModel kModel;
-    bool FUN_0051d250();
-};
 
 NiNode* __cdecl FUN_00c81380(float afArg, float afArgCur);
 
@@ -1540,19 +1406,19 @@ void FUN_00667190_shell::LoadTreeCollision(TESObjectTREE* apTree)
     collision = 0;
 
     ModelName kModelName;
-    strcpy_s(kModelName.acName, 0x104, apTree->kModel.GetModelFileName());
+    CopyTreeString(kModelName.acName, 0x104, apTree->GetModelFilePath());
     int iLengthValue = BSStringLength(kModelName.acName);
     if (iLengthValue > 4)
         kModelName.acName[iLengthValue - 4] = 0;
 
     BSStream kStream;
     char acPath[0x104];
-    strcpy_s(acPath, 0x104, "Data\\Meshes\\Trees");
-    strcat_s(acPath, 0x104, kModelName.acName);
-    strcat_s(acPath, 0x104, ".NIF");
-    if (FileFinder::Exist(acPath, 0, 6, 1) && kStream.FUN_00c3a8a0(acPath, false) && kStream.GetRefAt21C() == 1)
+    CopyTreeString(acPath, 0x104, "Data\\Meshes\\Trees");
+    AppendTreeString(acPath, 0x104, kModelName.acName);
+    AppendTreeString(acPath, 0x104, ".NIF");
+    if (FileFinder::Exist(acPath, 0, 6, 1) && kStream.FUN_00c3a8a0(acPath, false) && kStream.NiStream::GetRefAt21C() == 1)
     {
-        NiAVObject* pObject = kStream.GetStringAt(0);
+        NiAVObject* pObject = kStream.NiStream::GetStringAt(0);
         NiNode* kNode = (NiNode*)NiDynamicCast(&DAT_011f4280, pObject);
         bhkCollisionObject* pCollisionObjectCur = FUN_004a8b00(kNode);
         bhkWorldObject* pWorldObject = pCollisionObjectCur ? pCollisionObjectCur->FUN_006fa820() : 0;
@@ -2057,12 +1923,6 @@ Tree* Model::CreateTree(float scale)
 }
 }
 
-struct NP
-{
-    void* object;
-    NP(int);
-    ~NP();
-};
 struct FUN_00b02e20
 {
     const char* branchMaps[2];
@@ -2073,54 +1933,6 @@ struct FUN_00b02e20
     const char* shadowMap;
     FUN_00b02e20();
     ~FUN_00b02e20();
-};
-struct NiMemObject
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-struct BSShaderTextureSet : NiMemObject
-{
-    virtual void slot00();
-    virtual void slot01();
-    virtual void slot02();
-    virtual void slot03();
-    virtual void slot04();
-    virtual void slot05();
-    virtual void slot06();
-    virtual void slot07();
-    virtual void slot08();
-    virtual void slot09();
-    virtual void slot0a();
-    virtual void slot0b();
-    virtual void slot0c();
-    virtual void slot0d();
-    virtual void slot0e();
-    virtual void slot0f();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot1a();
-    virtual void slot1b();
-    virtual void slot1c();
-    virtual void slot1d();
-    virtual void slot1e();
-    virtual void slot1f();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void SetTexture(unsigned int, const char*);
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34;
-    BSShaderTextureSet();
 };
 struct TexturePtr
 {
@@ -2291,16 +2103,13 @@ struct TreeTarget
     bool FUN_00666f00();
     void ApplyInput(TreeInput*);
 };
-struct TES
-{
-    void FUN_004568c0(const char*, SourcePtr*, bool, bool);
-};
+
 extern TES* g_TES;
 float FUN_00666f40();
 float FUN_00666f60();
 float FUN_00666f80();
-int strcpy_s(char*, unsigned int, const char*);
-int strcat_s(char*, unsigned int, const char*);
+int CopyTreeString(char*, unsigned int, const char*);
+int AppendTreeString(char*, unsigned int, const char*);
 unsigned int FUN_0044a670(const char*);
 void FUN_00b4f5e0(char*, const char*, const char*, bool);
 // @fnv 0x00666940
@@ -2345,22 +2154,22 @@ void TreeTarget::ApplyInput(TreeInput* input)
         char normalPathA[260];
         unsigned int length2 = 0;
         runtime->FUN_00b0d040(&mapBank5);
-        strcpy_s(branchPath, 260, "Textures\\Trees\\Branches\\");
-        strcat_s(branchPath, 260, mapBank5.branchMaps[0]);
+        CopyTreeString(branchPath, 260, "Textures\\Trees\\Branches\\");
+        AppendTreeString(branchPath, 260, mapBank5.branchMaps[0]);
         length2 = FUN_0044a670(branchPath);
         branchPath[length2 - 3] = 'd';
         branchPath[length2 - 2] = 'd';
         branchPath[length2 - 1] = 's';
         FUN_00b4f5e0(normalPathA, branchPath, "_n", true);
         branches.FUN_0066b0d0(new BSShaderTextureSet);
-        branches.FUN_00559450()->SetTexture(0, branchPath);
-        branches.FUN_00559450()->SetTexture(1, normalPathA);
+        branches.FUN_00559450()->SetTexture(BSShaderProperty::TEXTYPE_DIFFUSE, branchPath);
+        branches.FUN_00559450()->SetTexture(BSShaderProperty::TEXTYPE_NORMAL, normalPathA);
     }
     if (!leaves.FUN_00559450() && input->leafName.FUN_0048cee0())
     {
         char leafPath[260];
-        strcpy_s(leafPath, 260, "Textures\\Trees\\Leaves\\");
-        strcat_s(leafPath, 260, input->leafName.FUN_00408da0());
+        CopyTreeString(leafPath, 260, "Textures\\Trees\\Leaves\\");
+        AppendTreeString(leafPath, 260, input->leafName.FUN_00408da0());
         g_TES->FUN_004568c0(leafPath, &leaves, true, false);
     }
     if (!billboards.FUN_00559450())
@@ -2368,7 +2177,7 @@ void TreeTarget::ApplyInput(TreeInput* input)
         char billboardPath[260];
         input->BuildBillboardTexturePath(billboardPath);
         billboards.FUN_0066b0d0(new BSShaderTextureSet);
-        billboards.FUN_00559450()->SetTexture(0, billboardPath);
+        billboards.FUN_00559450()->SetTexture(BSShaderProperty::TEXTYPE_DIFFUSE, billboardPath);
     }
 }
 
@@ -2430,51 +2239,14 @@ void Owner226::ClearArrays()
     ref38.FUN_0066b0d0(0);
 }
 
-namespace fnv_00668500 {
 class NiGPUProgram;
-struct NiMemObject
-{
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pMem, unsigned int);
-};
-class NiAVObject : public NiMemObject
+namespace fnv_00668500 {
+using ::NiMemObject;
+// These virtuals belong to the leaf shader property, rather than the scene object.
+// Keep its unshared interface here; NiObject supplies the common virtual slots.
+class LeafShaderProperty : public NiObject
 {
   public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
     virtual void v08c();
     virtual void v090();
     virtual void v094();
@@ -2502,17 +2274,14 @@ class NiAVObject : public NiMemObject
     virtual void v0ec();
     virtual void v0f0();
     virtual NiGPUProgram* GetProgram(int);
-    void FUN_00a67050(unsigned int uiFlags);
-    void SetByteAtOffset38(unsigned int uiFlags);
-    void FUN_004410f0(unsigned int uiFlags);
 };
-template <> struct NiPointer<NiAVObject>
+template <> struct TreeModelPointer<NiAVObject>
 {
     NiAVObject* m_pObject;
-    NiPointer();
-    NiPointer(NiAVObject* pObject);
-    ~NiPointer();
-    NiPointer& operator=(NiAVObject* pObject);
+    TreeModelPointer();
+    TreeModelPointer(NiAVObject* pObject);
+    ~TreeModelPointer();
+    TreeModelPointer& operator=(NiAVObject* pObject);
     operator NiAVObject*() const;
     NiAVObject* operator->() const;
 };
@@ -2520,17 +2289,6 @@ class NiGPUProgramOwner
 {
   public:
     void SetProgram(NiGPUProgram* pProgram);
-};
-struct NiPoint2
-{
-    float x, y;
-    NiPoint2();
-    NiPoint2(float fX, float fY);
-};
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3();
 };
 struct FUN_00414430
 {
@@ -2542,11 +2300,7 @@ void* NiMalloc(unsigned int uiSize);
 int FUN_00408b20(const char* pA, const char* pB);
 unsigned int __fastcall FUN_0044edb0(void* pTree);
 void __fastcall FUN_00804cb0(void* pObject, float fValue);
-class TESObjectREFR
-{
-  public:
-    float GetScale();
-};
+
 struct FUN_00792760_shell
 {
     float FUN_00792760();
@@ -2559,11 +2313,7 @@ struct FUN_00621b20_Class
 {
     void FUN_00621b20(float fValue);
 };
-class BSMultiBoundSphere
-{
-  public:
-    void FUN_00819a50(float fValue);
-};
+
 struct FUN_00b029f0
 {
     int m_aiPad00[0x84 / 4];
@@ -2600,24 +2350,24 @@ struct SpeedTreeRT
     void FUN_00b0ab20(FUN_00b029f0* m_pShaderGeometry, unsigned int uiBits, short sBranch, short sFrond, short sLeaf);
     void FUN_00b088b0();
 };
-struct FUN_00bb3950 : public NiAVObject
+struct FUN_00bb3950 : public NiMemObject
 {
-    int m_kNextStreamField[7];
+    int m_kNextStreamField[8];
     FUN_00bb3950();
 };
-struct FUN_00bb33c0 : public NiAVObject
+struct FUN_00bb33c0 : public NiMemObject
 {
-    int m_kNextStreamField[3];
+    int m_kNextStreamField[4];
     FUN_00bb33c0();
 };
-struct FUN_00bb3ba0 : public NiAVObject
+struct FUN_00bb3ba0 : public NiMemObject
 {
-    int m_kNextStreamField[0x8c / 4];
+    int m_kNextStreamField[36];
     FUN_00bb3ba0(unsigned short usLod, NiAVObject* pData, NiAVObject* pMaterial);
 };
-struct FUN_00a7b630 : public NiAVObject
+struct FUN_00a7b630 : public NiMemObject
 {
-    int m_kNextStreamField[0x54 / 4];
+    int m_kNextStreamField[22];
     FUN_00a7b630(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, void* pkColor, NiPoint2* pkTexture,
                  unsigned short usNumTextureSets, int eNBTMethod, unsigned short usTriangles,
                  unsigned short* pusTriList);
@@ -2748,13 +2498,13 @@ class TreeLeafModel
     int m_aiPad00[3];
     SpeedTreeRT* m_pLeafTreeRuntime;
     int m_aiPad10[2];
-    NiPointer<NiAVObject>* m_pspLeafGeometry;
+    TreeModelPointer<NiAVObject>* m_pspLeafGeometry;
     int m_iPad1C;
-    NiPointer<NiAVObject> m_spLeafMaterial;
+    TreeModelPointer<NiAVObject> m_spLeafMaterial;
     int m_iPad24;
-    NiPointer<NiAVObject>* m_pspLeafShaders;
+    TreeModelPointer<NiAVObject>* m_pspLeafShaders;
     int m_iPad2C;
-    NiPointer<NiAVObject> m_spLeafTexture;
+    TreeModelPointer<NiAVObject> m_spLeafTexture;
     int m_aiPad34[2];
     float m_fLeafScale;
     unsigned short FUN_006699d0();
@@ -2784,7 +2534,7 @@ void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
     unsigned short usNumNames;
     unsigned short usBaseVert;
     unsigned short usCornerIndex;
-    NiPointer<NiAVObject> spWindData = 0;
+    TreeModelPointer<NiAVObject> spWindData = 0;
     unsigned short usI;
     bool bMultiTexture = false;
     unsigned short usCard;
@@ -2824,15 +2574,15 @@ void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
         }
     }
 
-    m_pspLeafGeometry = new NiPointer<NiAVObject>[usLevels];
-    m_pspLeafShaders = new NiPointer<NiAVObject>[usLevels];
+    m_pspLeafGeometry = new TreeModelPointer<NiAVObject>[usLevels];
+    m_pspLeafShaders = new TreeModelPointer<NiAVObject>[usLevels];
     for (usI = 0; usI < usLevels; usI++)
     {
         m_pspLeafGeometry[usI] = 0;
         m_pspLeafShaders[usI] = 0;
     }
 
-    m_spLeafMaterial = new FUN_00bb3950;
+    m_spLeafMaterial = (NiAVObject*)new FUN_00bb3950;
     ((FUN_0063f790_shell*)(NiAVObject*)m_spLeafMaterial)->FUN_0063f790(m_fLeafScale);
     if (m_pLeafTreeRuntime && FUN_0044edb0(m_pLeafTreeRuntime))
     {
@@ -2907,12 +2657,12 @@ void TreeLeafModel::FUN_00668500(TreeLeafRef* pRef)
         }
 
         m_pspLeafGeometry[usI] =
-            new FUN_00a7b630(usVertCount, pkVertex, pkNorm, 0, pkUVCoords, 1, 0, usLeafCount * 2, pusTris);
-        spWindData = new FUN_00bb33c0;
+            (NiAVObject*)new FUN_00a7b630(usVertCount, pkVertex, pkNorm, 0, pkUVCoords, 1, 0, usLeafCount * 2, pusTris);
+        spWindData = (NiAVObject*)new FUN_00bb33c0;
         ((FUN_006684d0_shell*)(NiAVObject*)spWindData)->FUN_006684d0((int)pkAttributes, usVertCount);
-        m_pspLeafShaders[usI] = new FUN_00bb3ba0(usI, spWindData, m_spLeafMaterial);
-        m_pspLeafShaders[usI]->SetMaterial(m_spLeafTexture);
-        ((NiGPUProgramOwner*)(NiAVObject*)m_pspLeafGeometry[usI])->SetProgram(m_pspLeafShaders[usI]->GetProgram(0));
+        m_pspLeafShaders[usI] = (NiAVObject*)new FUN_00bb3ba0(usI, spWindData, m_spLeafMaterial);
+        ((LeafShaderProperty*)m_pspLeafShaders[usI].operator->())->SetMaterial(m_spLeafTexture);
+        ((NiGPUProgramOwner*)(NiAVObject*)m_pspLeafGeometry[usI])->SetProgram(((LeafShaderProperty*)m_pspLeafShaders[usI].operator->())->GetProgram(0));
         ((NiAVObject*)m_pspLeafGeometry[usI])->FUN_00a67050(0x4000);
         ((NiAVObject*)m_pspLeafGeometry[usI])->SetByteAtOffset38(0x11);
         ((NiAVObject*)m_pspLeafGeometry[usI])->FUN_004410f0(1);
@@ -3112,7 +2862,7 @@ struct TreeCallback
     virtual void SetLeafLod(unsigned short, unsigned char);
     virtual void SetBranchLod(unsigned short, unsigned char);
     virtual void SetTopAlpha(unsigned char);
-    Point3X* FUN_0045bb80();
+    NiPoint3* FUN_0045bb80();
 };
 unsigned char __cdecl FUN_0054ee20();
 unsigned char __cdecl FUN_005b9790();
@@ -3135,7 +2885,7 @@ void TreeActor::UpdateTreeLod(TreeCallback* pCallback)
     unsigned char visible;
     short leaf;
     {
-        Point3X worldPos;
+        NiPoint3 worldPos;
         void* pNode = 0;
         short levelCount;
         if (!pCallback || !pCallback->IsReady())

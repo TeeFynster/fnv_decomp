@@ -2,24 +2,32 @@
 // src/fallout/ai/combat/combatgroupstrategy.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatgroupstrategy.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct ArrSI
+#include "../../../../include/Actor.h"
+#include "../../../../include/NiPoint4.h"
+#include "../../../../include/CombatController.h"
+#include "../../../../include/ActorCombatGroup.h"
+#include "../../../../include/CombatGroupStrategy.h"
+#include "../../../../include/CombatGroupStrategyAmbush.h"
+
+#include "../../../../include/CombatGroupStrategyAdvance.h"
+#include "../../../../include/CombatGroupStrategyFallBack.h"
+#include "../../../../include/CombatGroupStrategyFlank.h"
+
+// Exe 0x00990890: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct CombatgroupstrategyOffset08View
 {
     unsigned int GetFlags();
 };
 
-struct FUN_00990890_shell
-{
-    unsigned int FUN_00990890();
-};
-
 // @fnv 0x00990890
-unsigned int FUN_00990890_shell::FUN_00990890()
+unsigned int ActorCombatGroup::FUN_00990890()
 {
-    return reinterpret_cast<ArrSI*>(this + 0x18)->GetFlags();
+    return reinterpret_cast<CombatgroupstrategyOffset08View*>(reinterpret_cast<char*>(this) + 0x18)->GetFlags();
 }
 
 namespace fnv_00990a60 {
-struct ArrSI
+// Exe 0x00990a60: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct CombatgroupstrategyOffset08View
 {
     unsigned int GetFlags();
 };
@@ -32,7 +40,7 @@ struct FUN_00990a60_shell
 // @fnv 0x00990a60
 unsigned int FUN_00990a60_shell::GetArrFlags()
 {
-    return ((ArrSI*)(this + 0x28))->GetFlags();
+    return ((CombatgroupstrategyOffset08View*)(this + 0x28))->GetFlags();
 }
 }  // namespace fnv_00990a60
 
@@ -71,24 +79,13 @@ void __thiscall FUN_00990aa0_shell::FUN_00990aa0(int state)
     ((FUN_00844160_shell*)((char*)this + 0x18))->FUN_00844160(state);
 }
 
-struct ActorCombatGroup
-{
-    unsigned int GetCount(void);
-    void SetElementValue(int i, int a2);
-};
-
 struct MarkerStruct
 {
 };
 
-struct CombatGroupStrategyFallBack
-{
-    void FUN_00990bd0(ActorCombatGroup* apGroup, MarkerStruct* apGroupData);
-};
-
 // Iterates over every member of the group and calls SetElementValue with index i and value 2.
 // @fnv 0x00990bd0
-void CombatGroupStrategyFallBack::FUN_00990bd0(ActorCombatGroup* apGroup, MarkerStruct* apGroupData)
+void CombatGroupStrategyFallBack::vf01(ActorCombatGroup* apGroup, MarkerStruct* apGroupData)
 {
     unsigned int i = 0;
     for (; i < apGroup->GetCount(); i++)
@@ -97,26 +94,14 @@ void CombatGroupStrategyFallBack::FUN_00990bd0(ActorCombatGroup* apGroup, Marker
     }
 }
 
-namespace fnv_00990d30 {
-struct ActorCombatGroup
-{
-    void* GetActorAtIndex(int);
-};
-
-struct CombatGroupStrategyAmbush
-{
-    bool FUN_00990d30(ActorCombatGroup*);
-};
-
 // Returns true if apGroup's lookup for index 3 returns a non-null value, otherwise false.
 // @fnv 0x00990d30
-bool CombatGroupStrategyAmbush::FUN_00990d30(ActorCombatGroup* apGroup)
+bool CombatGroupStrategyAmbush::vf02(ActorCombatGroup* apGroup)
 {
     if (apGroup->GetActorAtIndex(3) == 0)
         return false;
     return true;
 }
-}  // namespace fnv_00990d30
 
 struct FUN_00990480_shell
 {
@@ -176,12 +161,8 @@ struct GroupOps
 {
     bool __thiscall FUN_0098a470(int, float);
 };
-struct DummyFallback
-{
-    bool __thiscall FUN_00990b70(ActorCombatGroup* apGroup, MarkerStruct* apGroupData);
-};
 // @fnv 0x00990b70
-bool __thiscall DummyFallback::FUN_00990b70(ActorCombatGroup* apGroup, MarkerStruct* apGroupData)
+bool CombatGroupStrategyFallBack::CanFlank(MarkerStruct* apGroup, ActorCombatGroup* apGroupData)
 {
     if (((DataOps*)apGroupData)->_ref_00726070() < 2)
         return false;
@@ -192,30 +173,17 @@ bool __thiscall DummyFallback::FUN_00990b70(ActorCombatGroup* apGroup, MarkerStr
     return true;
 }
 
-struct HolderFor410
-{
-    int __thiscall FindByValue(int);
-};
-struct TargetClass
-{
-    bool __thiscall FUN_00990c10(struct ActorCombatGroup*);
-};
 // Calls FindByValue with 2 on the group and returns true if it succeeds, otherwise false.
 // @fnv 0x00990c10
-bool TargetClass::FUN_00990c10(struct ActorCombatGroup* apGroup)
+bool CombatGroupStrategyFallBack::vf02(ActorCombatGroup* apGroup)
 {
-    if (!((HolderFor410*)apGroup)->FindByValue(2))
+    if (!apGroup->GetActorAtIndex(2))
         return false;
     return true;
 }
 
-struct CombatGroupStrategyAmbush
-{
-    void __thiscall FUN_00990cb0(ActorCombatGroup* apGroup, MarkerStruct* apGroupData);
-};
-
 // @fnv 0x00990cb0
-void __thiscall CombatGroupStrategyAmbush::FUN_00990cb0(ActorCombatGroup* apGroup, MarkerStruct* apGroupData)
+void __thiscall CombatGroupStrategyAmbush::vf01(ActorCombatGroup* apGroup, MarkerStruct* apGroupData)
 {
     unsigned int i;
     unsigned int i2;
@@ -235,17 +203,13 @@ struct IntPair
     int _0;
     int _4;
 };
-struct CombatGroupStrategyAdvance
-{
-    void __thiscall FUN_00990e70(ActorCombatGroup* apGroup, MarkerStruct* apGroupData);
-};
 struct FUN_00990aa0_helper
 {
     IntPair* __thiscall FUN_00990aa0(int);
 };
 // Iterates the group data's members and calls SetElementValue on the group with each member's _4 value and 4.
 // @fnv 0x00990e70
-void __thiscall CombatGroupStrategyAdvance::FUN_00990e70(ActorCombatGroup* apGroup, MarkerStruct* apGroupData)
+void __thiscall CombatGroupStrategyAdvance::vf01(ActorCombatGroup* apGroup, MarkerStruct* apGroupData)
 {
     int i;
     IntPair* pmember;
@@ -256,24 +220,14 @@ void __thiscall CombatGroupStrategyAdvance::FUN_00990e70(ActorCombatGroup* apGro
     }
 }
 
-namespace fnv_00990ec0 {
-struct FUN_0098a410_cls
-{
-    int __thiscall FindByValue(int);
-};
-struct CombatGroupStrategyAdvance
-{
-    bool __thiscall FUN_00990ec0(ActorCombatGroup* apGroup);
-};
 // Calls FindByValue with 4 on apGroup and returns true if the result is nonzero, false otherwise.
 // @fnv 0x00990ec0
-bool __thiscall CombatGroupStrategyAdvance::FUN_00990ec0(ActorCombatGroup* apGroup)
+bool __thiscall CombatGroupStrategyAdvance::vf02(ActorCombatGroup* apGroup)
 {
-    if (((FUN_0098a410_cls*)apGroup)->FindByValue(4) == 0)
+    if (apGroup->GetActorAtIndex(4) == 0)
         return false;
     return true;
 }
-}  // namespace fnv_00990ec0
 
 struct TaskQueueInterface
 {
@@ -332,13 +286,8 @@ struct FUN_00990640_shell
     void __thiscall SortMembersByTargetDistance();
 };
 
-struct FUN_00990930_shell
-{
-    void __thiscall FUN_00990930(ActorCombatGroup* apGroup, MarkerStruct* apGroupData);
-};
-
 // @fnv 0x00990930
-void FUN_00990930_shell::FUN_00990930(ActorCombatGroup* apGroup, MarkerStruct* apGroupData)
+void CombatGroupStrategyFlank::vf01(ActorCombatGroup* apGroup, MarkerStruct* apGroupData)
 {
     unsigned int irangedMemberCount;
     unsigned int itotalMemberCount;
@@ -393,286 +342,12 @@ struct MemberController
 {
     CombatMemberState* FUN_00586150();
 };
-struct CombatMemberActor
-{
-    virtual void Reserved0();
-    virtual void Reserved1();
-    virtual void Reserved2();
-    virtual void Reserved3();
-    virtual void Reserved4();
-    virtual void Reserved5();
-    virtual void Reserved6();
-    virtual void Reserved7();
-    virtual void Reserved8();
-    virtual void Reserved9();
-    virtual void Reserved10();
-    virtual void Reserved11();
-    virtual void Reserved12();
-    virtual void Reserved13();
-    virtual void Reserved14();
-    virtual void Reserved15();
-    virtual void Reserved16();
-    virtual void Reserved17();
-    virtual void Reserved18();
-    virtual void Reserved19();
-    virtual void Reserved20();
-    virtual void Reserved21();
-    virtual void Reserved22();
-    virtual void Reserved23();
-    virtual void Reserved24();
-    virtual void Reserved25();
-    virtual void Reserved26();
-    virtual void Reserved27();
-    virtual void Reserved28();
-    virtual void Reserved29();
-    virtual void Reserved30();
-    virtual void Reserved31();
-    virtual void Reserved32();
-    virtual void Reserved33();
-    virtual void Reserved34();
-    virtual void Reserved35();
-    virtual void Reserved36();
-    virtual void Reserved37();
-    virtual void Reserved38();
-    virtual void Reserved39();
-    virtual void Reserved40();
-    virtual void Reserved41();
-    virtual void Reserved42();
-    virtual void Reserved43();
-    virtual void Reserved44();
-    virtual void Reserved45();
-    virtual void Reserved46();
-    virtual void Reserved47();
-    virtual void Reserved48();
-    virtual void Reserved49();
-    virtual void Reserved50();
-    virtual void Reserved51();
-    virtual void Reserved52();
-    virtual void Reserved53();
-    virtual void Reserved54();
-    virtual void Reserved55();
-    virtual void Reserved56();
-    virtual void Reserved57();
-    virtual void Reserved58();
-    virtual void Reserved59();
-    virtual void Reserved60();
-    virtual void Reserved61();
-    virtual void Reserved62();
-    virtual void Reserved63();
-    virtual void Reserved64();
-    virtual void Reserved65();
-    virtual void Reserved66();
-    virtual void Reserved67();
-    virtual void Reserved68();
-    virtual void Reserved69();
-    virtual void Reserved70();
-    virtual void Reserved71();
-    virtual void Reserved72();
-    virtual void Reserved73();
-    virtual void Reserved74();
-    virtual void Reserved75();
-    virtual void Reserved76();
-    virtual void Reserved77();
-    virtual void Reserved78();
-    virtual void Reserved79();
-    virtual void Reserved80();
-    virtual void Reserved81();
-    virtual void Reserved82();
-    virtual void Reserved83();
-    virtual void Reserved84();
-    virtual void Reserved85();
-    virtual void Reserved86();
-    virtual void Reserved87();
-    virtual void Reserved88();
-    virtual void Reserved89();
-    virtual void Reserved90();
-    virtual void Reserved91();
-    virtual void Reserved92();
-    virtual void Reserved93();
-    virtual void Reserved94();
-    virtual void Reserved95();
-    virtual void Reserved96();
-    virtual void Reserved97();
-    virtual void Reserved98();
-    virtual void Reserved99();
-    virtual void Reserved100();
-    virtual void Reserved101();
-    virtual void Reserved102();
-    virtual void Reserved103();
-    virtual void Reserved104();
-    virtual void Reserved105();
-    virtual void Reserved106();
-    virtual void Reserved107();
-    virtual void Reserved108();
-    virtual void Reserved109();
-    virtual void Reserved110();
-    virtual void Reserved111();
-    virtual void Reserved112();
-    virtual void Reserved113();
-    virtual void Reserved114();
-    virtual void Reserved115();
-    virtual void Reserved116();
-    virtual void Reserved117();
-    virtual void Reserved118();
-    virtual void Reserved119();
-    virtual void Reserved120();
-    virtual void Reserved121();
-    virtual void Reserved122();
-    virtual void Reserved123();
-    virtual void Reserved124();
-    virtual void Reserved125();
-    virtual void Reserved126();
-    virtual void Reserved127();
-    virtual void Reserved128();
-    virtual void Reserved129();
-    virtual void Reserved130();
-    virtual void Reserved131();
-    virtual void Reserved132();
-    virtual void Reserved133();
-    virtual void Reserved134();
-    virtual void Reserved135();
-    virtual void Reserved136();
-    virtual void Reserved137();
-    virtual void Reserved138();
-    virtual void Reserved139();
-    virtual void Reserved140();
-    virtual void Reserved141();
-    virtual void Reserved142();
-    virtual void Reserved143();
-    virtual void Reserved144();
-    virtual void Reserved145();
-    virtual void Reserved146();
-    virtual void Reserved147();
-    virtual void Reserved148();
-    virtual void Reserved149();
-    virtual void Reserved150();
-    virtual void Reserved151();
-    virtual void Reserved152();
-    virtual void Reserved153();
-    virtual void Reserved154();
-    virtual void Reserved155();
-    virtual void Reserved156();
-    virtual void Reserved157();
-    virtual void Reserved158();
-    virtual void Reserved159();
-    virtual void Reserved160();
-    virtual void Reserved161();
-    virtual void Reserved162();
-    virtual void Reserved163();
-    virtual void Reserved164();
-    virtual void Reserved165();
-    virtual void Reserved166();
-    virtual void Reserved167();
-    virtual void Reserved168();
-    virtual void Reserved169();
-    virtual void Reserved170();
-    virtual void Reserved171();
-    virtual void Reserved172();
-    virtual void Reserved173();
-    virtual void Reserved174();
-    virtual void Reserved175();
-    virtual void Reserved176();
-    virtual void Reserved177();
-    virtual void Reserved178();
-    virtual void Reserved179();
-    virtual void Reserved180();
-    virtual void Reserved181();
-    virtual void Reserved182();
-    virtual void Reserved183();
-    virtual void Reserved184();
-    virtual void Reserved185();
-    virtual void Reserved186();
-    virtual void Reserved187();
-    virtual void Reserved188();
-    virtual void Reserved189();
-    virtual void Reserved190();
-    virtual void Reserved191();
-    virtual void Reserved192();
-    virtual void Reserved193();
-    virtual void Reserved194();
-    virtual void Reserved195();
-    virtual void Reserved196();
-    virtual void Reserved197();
-    virtual void Reserved198();
-    virtual void Reserved199();
-    virtual void Reserved200();
-    virtual void Reserved201();
-    virtual void Reserved202();
-    virtual void Reserved203();
-    virtual void Reserved204();
-    virtual void Reserved205();
-    virtual void Reserved206();
-    virtual void Reserved207();
-    virtual void Reserved208();
-    virtual void Reserved209();
-    virtual void Reserved210();
-    virtual void Reserved211();
-    virtual void Reserved212();
-    virtual void Reserved213();
-    virtual void Reserved214();
-    virtual void Reserved215();
-    virtual void Reserved216();
-    virtual void Reserved217();
-    virtual void Reserved218();
-    virtual void Reserved219();
-    virtual void Reserved220();
-    virtual void Reserved221();
-    virtual void Reserved222();
-    virtual void Reserved223();
-    virtual void Reserved224();
-    virtual void Reserved225();
-    virtual void Reserved226();
-    virtual void Reserved227();
-    virtual void Reserved228();
-    virtual void Reserved229();
-    virtual void Reserved230();
-    virtual void Reserved231();
-    virtual void Reserved232();
-    virtual void Reserved233();
-    virtual void Reserved234();
-    virtual void Reserved235();
-    virtual void Reserved236();
-    virtual void Reserved237();
-    virtual void Reserved238();
-    virtual void Reserved239();
-    virtual void Reserved240();
-    virtual void Reserved241();
-    virtual void Reserved242();
-    virtual void Reserved243();
-    virtual void Reserved244();
-    virtual void Reserved245();
-    virtual void Reserved246();
-    virtual void Reserved247();
-    virtual void Reserved248();
-    virtual void Reserved249();
-    virtual void Reserved250();
-    virtual void Reserved251();
-    virtual void Reserved252();
-    virtual void Reserved253();
-    virtual void Reserved254();
-    virtual void Reserved255();
-    virtual void Reserved256();
-    virtual void Reserved257();
-    virtual void Reserved258();
-    virtual void Reserved259();
-    virtual void Reserved260();
-    virtual void Reserved261();
-    virtual void Reserved262();
-    virtual void Reserved263();
-    virtual void Reserved264();
-    virtual void Reserved265();
-    virtual MemberController* GetController();
-};
-struct GroupMembers
-{
-    unsigned int FUN_00990890();
-    CombatMemberActor* GetIntAt(unsigned int);
-};
+
 struct IndexedMember
 {
-    CombatMemberActor* member;
+    Actor* member;
     unsigned int index;
-    IndexedMember(CombatMemberActor*, unsigned int);
+    IndexedMember(Actor*, unsigned int);
 };
 struct IndexedMemberArray
 {
@@ -684,7 +359,7 @@ struct IndexedMemberArray
 };
 struct FUN_00990320
 {
-    GroupMembers* group;
+    ActorCombatGroup* group;
     unsigned int activeCount;
     int intersectionCount;
     int minimum;
@@ -692,17 +367,17 @@ struct FUN_00990320
     float strength;
     IndexedMemberArray normalMembers;
     IndexedMemberArray specialMembers;
-    FUN_00990320(GroupMembers*);
+    FUN_00990320(ActorCombatGroup*);
 };
 // @fnv 0x00990320
-FUN_00990320::FUN_00990320(GroupMembers* pGroup)
+FUN_00990320::FUN_00990320(ActorCombatGroup* pGroup)
     : group(pGroup), activeCount(0), intersectionCount(-1), minimum(0x7fffffff), maximum(0x80000000), strength(0.0f)
 {
     unsigned int count = pGroup->FUN_00990890();
     for (unsigned int index = 0; index < count; ++index)
     {
-        CombatMemberActor* aActor = pGroup->GetIntAt(index);
-        CombatMemberState* state = aActor->GetController()->FUN_00586150();
+        Actor* aActor = reinterpret_cast<Actor*>(pGroup->GetIntAt(index));
+        CombatMemberState* state = reinterpret_cast<MemberController*>(aActor->GetCombatController())->FUN_00586150();
         if (!state->GetByteAtOffset())
         {
             ++activeCount;
@@ -718,11 +393,6 @@ extern const float g_011dadbc_arg1;
 struct ContNode;
 ContNode* __fastcall FUN_00726070(ContNode* node);
 
-struct CombatGroupStrategyFlank
-{
-    virtual bool CanFlank(MarkerStruct* apGroupData, ActorCombatGroup* apGroup);
-};
-
 // @fnv 0x009908b0
 bool CombatGroupStrategyFlank::CanFlank(MarkerStruct* apGroupData, ActorCombatGroup* apGroup)
 {
@@ -730,7 +400,7 @@ bool CombatGroupStrategyFlank::CanFlank(MarkerStruct* apGroupData, ActorCombatGr
     {
         return false;
     }
-    if ((int)reinterpret_cast<FUN_00990890_shell*>(apGroup)->FUN_00990890() < 1)
+    if ((int)apGroup->FUN_00990890() < 1)
     {
         return false;
     }
@@ -749,10 +419,6 @@ bool CombatGroupStrategyFlank::CanFlank(MarkerStruct* apGroupData, ActorCombatGr
     return true;
 }
 
-struct NiPoint4
-{
-    float x, y, z, w;
-};
 struct CombatGroupMember
 {
     int FUN_00575650(NiPoint4*, float, int);
@@ -764,12 +430,8 @@ struct CombatGroupMethods
     CombatGroupMember* GetIntAt(unsigned);
     int FindRefInRadius(int);
 };
-struct CombatGroupStrategy
-{
-    bool FUN_00990ac0(ActorCombatGroup*);
-};
 // @fnv 0x00990ac0
-bool CombatGroupStrategy::FUN_00990ac0(ActorCombatGroup* group)
+bool CombatGroupStrategy::CheckGroup(ActorCombatGroup* group)
 {
     bool bFound = false;
     unsigned count = group->GetCount();
@@ -792,11 +454,6 @@ bool CombatGroupStrategy::FUN_00990ac0(ActorCombatGroup* group)
 
 extern const float DAT_01034294;
 
-struct FUN_00990c40_cls
-{
-    bool FUN_00990c40(int a1, int a2);
-};
-
 struct FUN_00990c40_arg2
 {
     int _ref_00726070();
@@ -810,7 +467,7 @@ struct FUN_00990c40_arg1
 };
 
 // @fnv 0x00990c40
-bool FUN_00990c40_cls::FUN_00990c40(int a1, int a2)
+bool CombatGroupStrategyAmbush::CanFlank(MarkerStruct* a1, ActorCombatGroup* a2)
 {
     if (((FUN_00990c40_arg2*)a2)->_ref_00726070() < 2)
     {
@@ -838,442 +495,39 @@ struct Vec990d60
     double FUN_004a7290();
 };
 extern const double DAT_0101ece0;
-struct Target990d60
-{
-    virtual void unknown_slot_000();
-    virtual void unknown_slot_001();
-    virtual void unknown_slot_002();
-    virtual void unknown_slot_003();
-    virtual void unknown_slot_004();
-    virtual void unknown_slot_005();
-    virtual void unknown_slot_006();
-    virtual void unknown_slot_007();
-    virtual void unknown_slot_008();
-    virtual void unknown_slot_009();
-    virtual void unknown_slot_010();
-    virtual void unknown_slot_011();
-    virtual void unknown_slot_012();
-    virtual void unknown_slot_013();
-    virtual void unknown_slot_014();
-    virtual void unknown_slot_015();
-    virtual void unknown_slot_016();
-    virtual void unknown_slot_017();
-    virtual void unknown_slot_018();
-    virtual void unknown_slot_019();
-    virtual void unknown_slot_020();
-    virtual void unknown_slot_021();
-    virtual void unknown_slot_022();
-    virtual void unknown_slot_023();
-    virtual void unknown_slot_024();
-    virtual void unknown_slot_025();
-    virtual void unknown_slot_026();
-    virtual void unknown_slot_027();
-    virtual void unknown_slot_028();
-    virtual void unknown_slot_029();
-    virtual void unknown_slot_030();
-    virtual void unknown_slot_031();
-    virtual void unknown_slot_032();
-    virtual void unknown_slot_033();
-    virtual void unknown_slot_034();
-    virtual void unknown_slot_035();
-    virtual void unknown_slot_036();
-    virtual void unknown_slot_037();
-    virtual void unknown_slot_038();
-    virtual void unknown_slot_039();
-    virtual void unknown_slot_040();
-    virtual void unknown_slot_041();
-    virtual void unknown_slot_042();
-    virtual void unknown_slot_043();
-    virtual void unknown_slot_044();
-    virtual void unknown_slot_045();
-    virtual void unknown_slot_046();
-    virtual void unknown_slot_047();
-    virtual void unknown_slot_048();
-    virtual void unknown_slot_049();
-    virtual void unknown_slot_050();
-    virtual void unknown_slot_051();
-    virtual void unknown_slot_052();
-    virtual void unknown_slot_053();
-    virtual void unknown_slot_054();
-    virtual void unknown_slot_055();
-    virtual void unknown_slot_056();
-    virtual void unknown_slot_057();
-    virtual void unknown_slot_058();
-    virtual void unknown_slot_059();
-    virtual void unknown_slot_060();
-    virtual void unknown_slot_061();
-    virtual void unknown_slot_062();
-    virtual void unknown_slot_063();
-    virtual void unknown_slot_064();
-    virtual void unknown_slot_065();
-    virtual void unknown_slot_066();
-    virtual void unknown_slot_067();
-    virtual void unknown_slot_068();
-    virtual void unknown_slot_069();
-    virtual void unknown_slot_070();
-    virtual void unknown_slot_071();
-    virtual void unknown_slot_072();
-    virtual void unknown_slot_073();
-    virtual void unknown_slot_074();
-    virtual void unknown_slot_075();
-    virtual void unknown_slot_076();
-    virtual void unknown_slot_077();
-    virtual void unknown_slot_078();
-    virtual void unknown_slot_079();
-    virtual void unknown_slot_080();
-    virtual void unknown_slot_081();
-    virtual void unknown_slot_082();
-    virtual void unknown_slot_083();
-    virtual void unknown_slot_084();
-    virtual void unknown_slot_085();
-    virtual void unknown_slot_086();
-    virtual void unknown_slot_087();
-    virtual void unknown_slot_088();
-    virtual void unknown_slot_089();
-    virtual void unknown_slot_090();
-    virtual void unknown_slot_091();
-    virtual void unknown_slot_092();
-    virtual void unknown_slot_093();
-    virtual void unknown_slot_094();
-    virtual void unknown_slot_095();
-    virtual void unknown_slot_096();
-    virtual void unknown_slot_097();
-    virtual void unknown_slot_098();
-    virtual void unknown_slot_099();
-    virtual void unknown_slot_100();
-    virtual void unknown_slot_101();
-    virtual void unknown_slot_102();
-    virtual void unknown_slot_103();
-    virtual void unknown_slot_104();
-    virtual void unknown_slot_105();
-    virtual void unknown_slot_106();
-    virtual void unknown_slot_107();
-    virtual void unknown_slot_108();
-    virtual void unknown_slot_109();
-    virtual void unknown_slot_110();
-    virtual void unknown_slot_111();
-    virtual void unknown_slot_112();
-    virtual void unknown_slot_113();
-    virtual void unknown_slot_114();
-    virtual void unknown_slot_115();
-    virtual void unknown_slot_116();
-    virtual void unknown_slot_117();
-    virtual void unknown_slot_118();
-    virtual void unknown_slot_119();
-    virtual void unknown_slot_120();
-    virtual void unknown_slot_121();
-    virtual void unknown_slot_122();
-    virtual void unknown_slot_123();
-    virtual void unknown_slot_124();
-    virtual Vec990d60* GetTargetValue();
-};
-struct Handle990d60
-{
-    Target990d60* FUN_004030b0();
-};
-struct Actor990d60
-{
-    virtual void unknown_slot_000();
-    virtual void unknown_slot_001();
-    virtual void unknown_slot_002();
-    virtual void unknown_slot_003();
-    virtual void unknown_slot_004();
-    virtual void unknown_slot_005();
-    virtual void unknown_slot_006();
-    virtual void unknown_slot_007();
-    virtual void unknown_slot_008();
-    virtual void unknown_slot_009();
-    virtual void unknown_slot_010();
-    virtual void unknown_slot_011();
-    virtual void unknown_slot_012();
-    virtual void unknown_slot_013();
-    virtual void unknown_slot_014();
-    virtual void unknown_slot_015();
-    virtual void unknown_slot_016();
-    virtual void unknown_slot_017();
-    virtual void unknown_slot_018();
-    virtual void unknown_slot_019();
-    virtual void unknown_slot_020();
-    virtual void unknown_slot_021();
-    virtual void unknown_slot_022();
-    virtual void unknown_slot_023();
-    virtual void unknown_slot_024();
-    virtual void unknown_slot_025();
-    virtual void unknown_slot_026();
-    virtual void unknown_slot_027();
-    virtual void unknown_slot_028();
-    virtual void unknown_slot_029();
-    virtual void unknown_slot_030();
-    virtual void unknown_slot_031();
-    virtual void unknown_slot_032();
-    virtual void unknown_slot_033();
-    virtual void unknown_slot_034();
-    virtual void unknown_slot_035();
-    virtual void unknown_slot_036();
-    virtual void unknown_slot_037();
-    virtual void unknown_slot_038();
-    virtual void unknown_slot_039();
-    virtual void unknown_slot_040();
-    virtual void unknown_slot_041();
-    virtual void unknown_slot_042();
-    virtual void unknown_slot_043();
-    virtual void unknown_slot_044();
-    virtual void unknown_slot_045();
-    virtual void unknown_slot_046();
-    virtual void unknown_slot_047();
-    virtual void unknown_slot_048();
-    virtual void unknown_slot_049();
-    virtual void unknown_slot_050();
-    virtual void unknown_slot_051();
-    virtual void unknown_slot_052();
-    virtual void unknown_slot_053();
-    virtual void unknown_slot_054();
-    virtual void unknown_slot_055();
-    virtual void unknown_slot_056();
-    virtual void unknown_slot_057();
-    virtual void unknown_slot_058();
-    virtual void unknown_slot_059();
-    virtual void unknown_slot_060();
-    virtual void unknown_slot_061();
-    virtual void unknown_slot_062();
-    virtual void unknown_slot_063();
-    virtual void unknown_slot_064();
-    virtual void unknown_slot_065();
-    virtual void unknown_slot_066();
-    virtual void unknown_slot_067();
-    virtual void unknown_slot_068();
-    virtual void unknown_slot_069();
-    virtual void unknown_slot_070();
-    virtual void unknown_slot_071();
-    virtual void unknown_slot_072();
-    virtual void unknown_slot_073();
-    virtual void unknown_slot_074();
-    virtual void unknown_slot_075();
-    virtual void unknown_slot_076();
-    virtual void unknown_slot_077();
-    virtual void unknown_slot_078();
-    virtual void unknown_slot_079();
-    virtual void unknown_slot_080();
-    virtual void unknown_slot_081();
-    virtual void unknown_slot_082();
-    virtual void unknown_slot_083();
-    virtual void unknown_slot_084();
-    virtual void unknown_slot_085();
-    virtual void unknown_slot_086();
-    virtual void unknown_slot_087();
-    virtual void unknown_slot_088();
-    virtual void unknown_slot_089();
-    virtual void unknown_slot_090();
-    virtual void unknown_slot_091();
-    virtual void unknown_slot_092();
-    virtual void unknown_slot_093();
-    virtual void unknown_slot_094();
-    virtual void unknown_slot_095();
-    virtual void unknown_slot_096();
-    virtual void unknown_slot_097();
-    virtual void unknown_slot_098();
-    virtual void unknown_slot_099();
-    virtual void unknown_slot_100();
-    virtual void unknown_slot_101();
-    virtual void unknown_slot_102();
-    virtual void unknown_slot_103();
-    virtual void unknown_slot_104();
-    virtual void unknown_slot_105();
-    virtual void unknown_slot_106();
-    virtual void unknown_slot_107();
-    virtual void unknown_slot_108();
-    virtual void unknown_slot_109();
-    virtual void unknown_slot_110();
-    virtual void unknown_slot_111();
-    virtual void unknown_slot_112();
-    virtual void unknown_slot_113();
-    virtual void unknown_slot_114();
-    virtual void unknown_slot_115();
-    virtual void unknown_slot_116();
-    virtual void unknown_slot_117();
-    virtual void unknown_slot_118();
-    virtual void unknown_slot_119();
-    virtual void unknown_slot_120();
-    virtual void unknown_slot_121();
-    virtual void unknown_slot_122();
-    virtual void unknown_slot_123();
-    virtual void unknown_slot_124();
-    virtual Vec990d60* GetTargetValue();
-    virtual void unknown_slot_126();
-    virtual void unknown_slot_127();
-    virtual void unknown_slot_128();
-    virtual void unknown_slot_129();
-    virtual void unknown_slot_130();
-    virtual void unknown_slot_131();
-    virtual void unknown_slot_132();
-    virtual void unknown_slot_133();
-    virtual void unknown_slot_134();
-    virtual void unknown_slot_135();
-    virtual void unknown_slot_136();
-    virtual void unknown_slot_137();
-    virtual void unknown_slot_138();
-    virtual void unknown_slot_139();
-    virtual void unknown_slot_140();
-    virtual void unknown_slot_141();
-    virtual void unknown_slot_142();
-    virtual void unknown_slot_143();
-    virtual void unknown_slot_144();
-    virtual void unknown_slot_145();
-    virtual void unknown_slot_146();
-    virtual void unknown_slot_147();
-    virtual void unknown_slot_148();
-    virtual void unknown_slot_149();
-    virtual void unknown_slot_150();
-    virtual void unknown_slot_151();
-    virtual void unknown_slot_152();
-    virtual void unknown_slot_153();
-    virtual void unknown_slot_154();
-    virtual void unknown_slot_155();
-    virtual void unknown_slot_156();
-    virtual void unknown_slot_157();
-    virtual void unknown_slot_158();
-    virtual void unknown_slot_159();
-    virtual void unknown_slot_160();
-    virtual void unknown_slot_161();
-    virtual void unknown_slot_162();
-    virtual void unknown_slot_163();
-    virtual void unknown_slot_164();
-    virtual void unknown_slot_165();
-    virtual void unknown_slot_166();
-    virtual void unknown_slot_167();
-    virtual void unknown_slot_168();
-    virtual void unknown_slot_169();
-    virtual void unknown_slot_170();
-    virtual void unknown_slot_171();
-    virtual void unknown_slot_172();
-    virtual void unknown_slot_173();
-    virtual void unknown_slot_174();
-    virtual void unknown_slot_175();
-    virtual void unknown_slot_176();
-    virtual void unknown_slot_177();
-    virtual void unknown_slot_178();
-    virtual void unknown_slot_179();
-    virtual void unknown_slot_180();
-    virtual void unknown_slot_181();
-    virtual void unknown_slot_182();
-    virtual void unknown_slot_183();
-    virtual void unknown_slot_184();
-    virtual void unknown_slot_185();
-    virtual void unknown_slot_186();
-    virtual void unknown_slot_187();
-    virtual void unknown_slot_188();
-    virtual void unknown_slot_189();
-    virtual void unknown_slot_190();
-    virtual void unknown_slot_191();
-    virtual void unknown_slot_192();
-    virtual void unknown_slot_193();
-    virtual void unknown_slot_194();
-    virtual void unknown_slot_195();
-    virtual void unknown_slot_196();
-    virtual void unknown_slot_197();
-    virtual void unknown_slot_198();
-    virtual void unknown_slot_199();
-    virtual void unknown_slot_200();
-    virtual void unknown_slot_201();
-    virtual void unknown_slot_202();
-    virtual void unknown_slot_203();
-    virtual void unknown_slot_204();
-    virtual void unknown_slot_205();
-    virtual void unknown_slot_206();
-    virtual void unknown_slot_207();
-    virtual void unknown_slot_208();
-    virtual void unknown_slot_209();
-    virtual void unknown_slot_210();
-    virtual void unknown_slot_211();
-    virtual void unknown_slot_212();
-    virtual void unknown_slot_213();
-    virtual void unknown_slot_214();
-    virtual void unknown_slot_215();
-    virtual void unknown_slot_216();
-    virtual void unknown_slot_217();
-    virtual void unknown_slot_218();
-    virtual void unknown_slot_219();
-    virtual void unknown_slot_220();
-    virtual void unknown_slot_221();
-    virtual void unknown_slot_222();
-    virtual void unknown_slot_223();
-    virtual void unknown_slot_224();
-    virtual void unknown_slot_225();
-    virtual void unknown_slot_226();
-    virtual void unknown_slot_227();
-    virtual void unknown_slot_228();
-    virtual void unknown_slot_229();
-    virtual void unknown_slot_230();
-    virtual void unknown_slot_231();
-    virtual void unknown_slot_232();
-    virtual void unknown_slot_233();
-    virtual void unknown_slot_234();
-    virtual void unknown_slot_235();
-    virtual void unknown_slot_236();
-    virtual void unknown_slot_237();
-    virtual void unknown_slot_238();
-    virtual void unknown_slot_239();
-    virtual void unknown_slot_240();
-    virtual void unknown_slot_241();
-    virtual void unknown_slot_242();
-    virtual void unknown_slot_243();
-    virtual void unknown_slot_244();
-    virtual void unknown_slot_245();
-    virtual void unknown_slot_246();
-    virtual void unknown_slot_247();
-    virtual void unknown_slot_248();
-    virtual void unknown_slot_249();
-    virtual void unknown_slot_250();
-    virtual void unknown_slot_251();
-    virtual void unknown_slot_252();
-    virtual void unknown_slot_253();
-    virtual void unknown_slot_254();
-    virtual void unknown_slot_255();
-    virtual void unknown_slot_256();
-    virtual void unknown_slot_257();
-    virtual void unknown_slot_258();
-    virtual void unknown_slot_259();
-    virtual void unknown_slot_260();
-    virtual void unknown_slot_261();
-    virtual void unknown_slot_262();
-    virtual void unknown_slot_263();
-    virtual void unknown_slot_264();
-    virtual void unknown_slot_265();
-    virtual Handle990d60* GetTargetHandle();
-};
+
+
+
 struct Member990d60
 {
-    Actor990d60* actor;
+    Actor* actor;
 };
-struct Data990d60
+// Strategy member queries bind to 0x00990890/0x00990540/0x00990AA0, unlike include/Data.h.
+struct StrategyMemberQueries
 {
     int FUN_00990890();
     int FUN_00990540();
     Member990d60* FUN_00990aa0(unsigned int);
 };
 extern const float DAT_01034294;
-struct Strategy990d60
-{
-    bool IsGroupTargetsSpread(GroupOps* group, Data990d60* data);
-};
 // @fnv 0x00990d60
-bool Strategy990d60::IsGroupTargetsSpread(GroupOps* pGroupOps, Data990d60* data)
+bool CombatGroupStrategyAdvance::CanFlank(MarkerStruct* apGroup, ActorCombatGroup* apGroupData)
 {
-    if (data->FUN_00990890() < 2)
+    if (((StrategyMemberQueries*)apGroupData)->FUN_00990890() < 2)
         return false;
-    if (!pGroupOps->FUN_0098a470(1, DAT_01034294))
+    if (!((GroupOps*)apGroup)->FUN_0098a470(1, DAT_01034294))
         return false;
-    if (data->FUN_00990540() <= 0)
+    if (((StrategyMemberQueries*)apGroupData)->FUN_00990540() <= 0)
         return false;
-    unsigned int count = data->FUN_00990890();
+    unsigned int count = ((StrategyMemberQueries*)apGroupData)->FUN_00990890();
     for (unsigned int index = 0; index < count; ++index)
     {
-        Member990d60* member9 = data->FUN_00990aa0(index);
-        Handle990d60* handle5 = member9->actor->GetTargetHandle();
-        Target990d60* target8 = handle5->FUN_004030b0();
+        Member990d60* member9 = ((StrategyMemberQueries*)apGroupData)->FUN_00990aa0(index);
+        CombatController* handle5 = member9->actor->GetCombatController();
+        const TESObjectREFR* target8 = reinterpret_cast<const TESObjectREFR*>(handle5->FUN_004030b0());
         if (target8)
         {
-            Vec990d60 delta = member9->actor->GetTargetValue()->FUN_00439ef0(target8->GetTargetValue());
+            Vec990d60 delta = reinterpret_cast<Vec990d60*>(static_cast<const TESObjectREFR*>(member9->actor)->GetPos())->FUN_00439ef0(reinterpret_cast<Vec990d60*>(target8->GetPos()));
             if (delta.FUN_004a7290() < DAT_0101ece0)
                 return false;
         }
@@ -1296,7 +550,7 @@ struct MemberList990640
 };
 struct Strategy990640
 {
-    GroupMembers* group;
+    ActorCombatGroup* group;
     unsigned int activeCount;
     int intersectionCount;
     int minimum;
@@ -1317,7 +571,7 @@ void Strategy990640::SortMembersByTargetDistance()
     for (unsigned int memberIndex = 0; memberIndex < i; ++memberIndex)
     {
         Member990d60* member = normalMembers.FUN_00844160(memberIndex);
-        a[memberIndex] = *member->actor->GetTargetValue();
+        a[memberIndex] = *reinterpret_cast<Vec990d60*>(static_cast<const TESObjectREFR*>(member->actor)->GetPos());
         ((Centroid990640*)&p)->FUN_0063c8a0(&a[memberIndex]);
     }
     ((Centroid990640*)&p)->ScaleByInverse((float)i);

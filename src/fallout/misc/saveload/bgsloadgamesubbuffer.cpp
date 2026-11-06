@@ -1,5 +1,23 @@
 // fallout/misc/saveload/bgsloadgamesubbuffer.cpp: BGSLoadGameSubBuffer, LoadGameSubBufferQueue, SubBufferMap, Holder and more (20 functions)
 
+#include "../../../../include/ActorPackageContext.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/BGSLoadGameBuffer.h"
+#include "../../../../include/BGSLoadGameSubBuffer.h"
+#include "../../../../include/BGSReconstructFormsInAllFilesMap.h"
+#include "../../../../include/ExtraDataList.h"
+#include "../../../../include/MiddleHighProcess.h"
+#include "../../../../include/MobileObject.h"
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/TESRecipe.h"
+#include "../../../../include/BGSSaveGameBuffer.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/DummyPointerMap.h"
+#include "../../../../include/NiTPointerMap.h"
+#include "../../../../include/LockFreeMap.h"
+#include "../../../../include/NiPointer.h"
+
 #include "bgsloadgamesubbuffer_types_QUEUED_SUB_BUFFER_TYPE.h"
 #include "bgsloadgamesubbuffer_types_BGSSaveLoadQueuedSubBufferMap.h"
 #include "bgsloadgamesubbuffer_decls.h"
@@ -7,6 +25,18 @@
 extern unsigned int __cdecl GetEncodedIntegerSize(unsigned int value);
 extern void __cdecl WriteEncodedInteger(char* destination, unsigned int value);
 extern "C" void* __cdecl memcpy(void* destination, const void* source, unsigned int size);
+
+struct FUN_008659c0_Buffer;
+
+// The shared reference layout is used throughout. These non-virtual save/load
+// entry points are not declared by TESObjectREFR.h yet; this adapter adds no data.
+class ReferenceSubBufferAccess : public TESObjectREFR
+{
+public:
+    void LoadHavokData(BGSLoadFormBuffer* buffer);
+    void SaveAnimation(void* buffer);
+    void SaveHavokData(FUN_008659c0_Buffer* buffer);
+};
 
 typedef LockFreeMap<TESObjectREFR*, BSTreeNode*>::ThreadSafeHashTableNode QueuedHashListNode;
 typedef LockFreeMap<TESObjectREFR*, BSTreeNode*>::ThreadSafePointer<QueuedHashListNode> QueuedMarkedPointer;
@@ -30,8 +60,7 @@ void BGSLoadGameSubBuffer::LoadGame(BGSLoadGameBuffer* buffer)
                     cursor = new char[total];
                     reinterpret_cast<QuantityData*>(this)->SetQuantity((unsigned int)cursor);
                     byteDestination = cursor;
-                    typedef unsigned char(__thiscall * ReadByte)(BGSLoadGameBuffer*);
-                    *byteDestination = ((ReadByte)buffer->m_ppVirtualMethodTable[0])(buffer);
+                    *byteDestination = buffer->GetVersion();
                     cursor++;
                     WriteEncodedInteger(cursor, value);
                     cursor += size;
@@ -51,12 +80,11 @@ void LoadGameSubBufferQueue::ProcessSubBuffer(QUEUED_SUB_BUFFER_TYPE type, BGSLo
     {
         QueuedMarkedPointer subBuffer;
         reinterpret_cast<BGSLoadGameSubBuffer*>(&subBuffer)->LoadGame(reinterpret_cast<BGSLoadGameBuffer*>(buffer));
-        if (!(TESForm*)subBuffer)
+        if (!(TESForm*)reinterpret_cast<NiPointer<TESForm>&>(subBuffer))
             return;
-        typedef TESForm*(__thiscall * GetForm)(BGSLoadFormBuffer*);
-        key = form ? form : ((GetForm)buffer->m_ppVirtualMethodTable[1])(buffer);
+        key = form ? form : buffer->GetForm();
         reinterpret_cast<NiTPointerMap<unsigned int, TESObjectREFR*>*>(&m_kSubBuffersByType[type])
-            ->SetAt((unsigned int)key, reinterpret_cast<TESObjectREFR*>(subBuffer.m_pObject));
+            ->SetAt((unsigned int)key, reinterpret_cast<TESObjectREFR*>(const_cast<QueuedHashListNode*>(subBuffer.pPointer)));
     }
 }
 
@@ -102,16 +130,14 @@ void BGSLoadGameSubBuffer::RestoreAnimation(TESForm* form)
         if (form->GetIsReference())
         {
             TESForm* reference = form;
-            typedef bool(__thiscall * IsActor)(TESForm*);
-            if (((IsActor)(*reinterpret_cast<void***>(reference))[0x40])(reference))
+            if (reference->IsActor())
             {
                 Animation* animation = 0;
                 if (reference == g_thePlayer)
                     animation = g_thePlayer->GetAnimation(firstPerson);
                 else
                 {
-                    typedef Animation*(__thiscall * GetAnimation)(TESForm*);
-                    animation = ((GetAnimation)(*reinterpret_cast<void***>(reference))[0x79])(reference);
+                    animation = reinterpret_cast<Animation*>(static_cast<TESObjectREFR*>(reference)->GetAnimData());
                 }
                 if (animation)
                     animation->Load(loadBuffer);
@@ -152,8 +178,7 @@ void LoadGameSubBufferQueue::ProcessQueuedSubBuffers(QUEUED_SUB_BUFFER_TYPE eSub
                         {
                             reference = reinterpret_cast<TESObjectREFR*>(form);
                             load = reinterpret_cast<unsigned int>(reference->Get3DSimple()) != 0;
-                            typedef bool(__thiscall * IsActor)(TESObjectREFR*);
-                            if (((IsActor)(*reinterpret_cast<void***>(reference))[0x40])(reference))
+                            if (reference->IsActor())
                                 actor = reference;
                         }
                         if (load)
@@ -180,7 +205,7 @@ void LoadGameSubBufferQueue::ProcessQueuedSubBuffers(QUEUED_SUB_BUFFER_TYPE eSub
                                     reinterpret_cast<BGSLoadGameSubBuffer*>(&subBuffer)->FUN_00435b20();
                                 else if (reference)
                                     reference->GetExtraData()->SetSavedAnimation(
-                                        reinterpret_cast<char*>((TESForm*)subBuffer));
+                                        reinterpret_cast<char*>((TESForm*)reinterpret_cast<NiPointer<TESForm>&>(subBuffer)));
                                 break;
                             case 1:
                                 reinterpret_cast<BGSLoadGameSubBuffer*>(&subBuffer)->FUN_00435b20();
@@ -188,7 +213,7 @@ void LoadGameSubBufferQueue::ProcessQueuedSubBuffers(QUEUED_SUB_BUFFER_TYPE eSub
                             case 2:
                                 if (reference)
                                     reference->GetExtraData()->SetSavedHavokData(
-                                        reinterpret_cast<char*>((TESForm*)subBuffer));
+                                        reinterpret_cast<char*>((TESForm*)reinterpret_cast<NiPointer<TESForm>&>(subBuffer)));
                                 break;
                             }
                         }
@@ -213,7 +238,7 @@ void BGSLoadGameSubBuffer::ReadAnimationState(TESForm* form)
             if (mobile->GetPhysicsCharacterController())
             {
                 MiddleHighProcess* process = reinterpret_cast<MiddleHighProcess*>(
-                    reinterpret_cast<MiddleHighProcess*>(mobile)->GetObjectToAcquire());
+                    mobile->FUN_008d8520());
                 TargetDoorController* saved = reinterpret_cast<TargetDoorController*>(process);
                 reinterpret_cast<MiddleHighProcess*>(saved)->ReadAnimationState(loadBuffer);
             }
@@ -303,10 +328,6 @@ void SubBufferMap::GetNextEntry(void*& apPosition, TESForm*& key, SubBufferValue
     }
 }
 
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&) const;
-};
 struct Holder
 {
     void FUN_0085efc0(DummyPointerMap*, unsigned int, unsigned short);
@@ -318,24 +339,14 @@ void Holder::FUN_0085f010(TESForm* apParentForm, unsigned short aeType)
 {
     unsigned int uiExistingValue;
     unsigned int formID = apParentForm->GetFormID();
-    if ((*(DummyPointerMap**)((char*)this + 0x58))->GetAt(formID, uiExistingValue))
+    if ((*(const DummyPointerMap**)((char*)this + 0x58))->GetAt(formID, uiExistingValue))
         formID = 0;
     FUN_0085efc0(*(DummyPointerMap**)((char*)this + 0x58), formID, aeType);
 }
 
-struct BGSSaveGameBuffer
-{
-    void FUN_00865f60(unsigned int);
-    void WriteAtOffset(void*, unsigned int, unsigned int);
-};
-struct FakeBGSLoadGameSubBuffer
-{
-    char* pBuffer;
-    void WriteToSaveGameBuffer(BGSSaveGameBuffer* apSaveGameBuffer);
-};
 // Reads a size from the buffer, writes it to the save game buffer, then writes the following data of that size.
 // @fnv 0x00865510
-void FakeBGSLoadGameSubBuffer::WriteToSaveGameBuffer(BGSSaveGameBuffer* apSaveGameBuffer)
+void BGSLoadGameSubBuffer::SaveGame(BGSSaveGameBuffer* apSaveGameBuffer)
 {
     char* padvancedBuffer;
     unsigned int isize;
@@ -377,23 +388,15 @@ void* Dummy00865690::DestroyAndFreeIfFlagged(unsigned int flags)
     return this;
 }
 
-struct TESObjectREFR_Havok : public TESForm
-{
-    void LoadHavokData(BGSLoadFormBuffer*);
-};
-struct FUN_00864d80_shell : public BGSLoadGameSubBuffer
-{
-    void LoadQueuedHavokData(TESForm* form);
-};
 // Loads queued havok data into the form if it is a reference, otherwise logs an error, then deletes the load buffer.
 // @fnv 0x00864d80
-void FUN_00864d80_shell::LoadQueuedHavokData(TESForm* form)
+void BGSLoadGameSubBuffer::LoadHavokData(TESForm* form)
 {
     BGSLoadFormBuffer* buffer = CreateFormBuffer(form);
     if (form->GetIsReference())
     {
         TESForm* reference = form;
-        reinterpret_cast<TESObjectREFR_Havok*>(reference)->LoadHavokData(buffer);
+        reinterpret_cast<ReferenceSubBufferAccess*>(reference)->LoadHavokData(buffer);
     }
     else
         LogWarning("SAVELOAD: Form '%s' %08X with queued havok data is not a reference", form->GetName(),
@@ -431,24 +434,16 @@ struct VersionByte
     unsigned char cVersion;
 };
 
-struct BGSSaveFormBuffer : public BSSimpleList<TESForm*>
-{
-    unsigned char GetVersion();
-};
+// The legacy save-form declarations below use pointer-sized fields to preserve
+// the original form-saving callers' /GS stack layout.
 
 unsigned char BGSSaveFormBuffer::GetVersion()
 {
     return 0;
 }
 
-struct FUN_00865120_shell
-{
-    char* pBuffer;
-    void FUN_00865120(BGSSaveFormBuffer* apSaveGameBuffer);
-};
-
 // @fnv 0x00865120
-void FUN_00865120_shell::FUN_00865120(BGSSaveFormBuffer* apSaveGameBuffer)
+void BGSLoadGameSubBuffer::RenderCopyData(BGSSaveFormBuffer* apSaveGameBuffer)
 {
     char* pbuffer;
     unsigned int isize;
@@ -480,8 +475,6 @@ void FUN_00865120_shell::FUN_00865120(BGSSaveFormBuffer* apSaveGameBuffer)
 
 // Destructor of the per-type save-game sub-buffer table: release every buffer in the three maps,
 // empty them, then destroy the maps.
-
-class TESForm;
 
 struct QueuedSubBufferValue
 {
@@ -542,97 +535,6 @@ class F4F20Param
     int m_iValue;
 };
 
-class F4F20Ref
-{
-  public:
-    virtual void Unk000();
-    virtual void Unk004();
-    virtual void Unk008();
-    virtual void Unk00C();
-    virtual void Unk010();
-    virtual void Unk014();
-    virtual void Unk018();
-    virtual void Unk01C();
-    virtual void Unk020();
-    virtual void Unk024();
-    virtual void Unk028();
-    virtual void Unk02C();
-    virtual void Unk030();
-    virtual void Unk034();
-    virtual void Unk038();
-    virtual void Unk03C();
-    virtual void Unk040();
-    virtual void Unk044();
-    virtual void Unk048();
-    virtual void Unk04C();
-    virtual void Unk050();
-    virtual void Unk054();
-    virtual void Unk058();
-    virtual void Unk05C();
-    virtual void Unk060();
-    virtual void Unk064();
-    virtual void Unk068();
-    virtual void Unk06C();
-    virtual void Unk070();
-    virtual void Unk074();
-    virtual void Unk078();
-    virtual void Unk07C();
-    virtual void Unk080();
-    virtual void Unk084();
-    virtual void Unk088();
-    virtual void Unk08C();
-    virtual void Unk090();
-    virtual void Unk094();
-    virtual void Unk098();
-    virtual void Unk09C();
-    virtual void Unk0A0();
-    virtual void Unk0A4();
-    virtual void Unk0A8();
-    virtual void Unk0AC();
-    virtual void Unk0B0();
-    virtual void Unk0B4();
-    virtual void Unk0B8();
-    virtual void Unk0BC();
-    virtual void Unk0C0();
-    virtual void Unk0C4();
-    virtual void Unk0C8();
-    virtual void Unk0CC();
-    virtual void Unk0D0();
-    virtual void Unk0D4();
-    virtual void Unk0D8();
-    virtual void Unk0DC();
-    virtual void Unk0E0();
-    virtual void Unk0E4();
-    virtual void Unk0E8();
-    virtual void Unk0EC();
-    virtual bool GetBoolAt0F0();
-    virtual void Unk0F4();
-    virtual void Unk0F8();
-    virtual void Unk0FC();
-    virtual void Unk100();
-    virtual void Unk104();
-    virtual void Unk108();
-    virtual void Unk10C();
-    virtual void Unk110();
-    virtual void Unk114();
-    virtual void Unk118();
-    virtual void Unk11C();
-    virtual void Unk120();
-    virtual void Unk124();
-    virtual void Unk128();
-    virtual void Unk12C();
-    virtual const char* GetName();
-
-    int GetFormType();
-    unsigned int GetFormID();
-};
-
-class F4F20Actor : public F4F20Ref
-{
-  public:
-    void AddResponse(void* pvResponse);
-};
-
 class F4F20Response
 {
   public:
@@ -649,7 +551,7 @@ class F4F20Response
     F4F20Response();
     ~F4F20Response();
     void Init(unsigned int auiFormId, F4F20Param kParam, int iFormType, int iCount);
-    void SetSpeaker(F4F20Ref* pkSpeaker);
+    void SetSpeaker(TESForm* pkSpeaker);
 };
 
 class F4F20Counter
@@ -662,24 +564,17 @@ extern F4F20Counter* g_pF4F20Counter;
 
 void __cdecl F4F20Log(const char* pcFormat, ...);
 
-class F4F20Queue
-{
-  public:
-    void Push(F4F20Response* pkResponse);
-    void QueueResponseForRef(F4F20Ref* pkRef);
-};
-
 // @fnv 0x00864f20
-void F4F20Queue::QueueResponseForRef(F4F20Ref* pkRef)
+void BGSLoadGameSubBuffer::SaveAnimation(TESForm* pkRef)
 {
-    if (pkRef->GetBoolAt0F0())
+    if (pkRef->GetIsReference())
     {
-        F4F20Actor* pkActor = static_cast<F4F20Actor*>(pkRef);
+        ReferenceSubBufferAccess* pkActor = static_cast<ReferenceSubBufferAccess*>(pkRef);
         F4F20Response kResponse;
         kResponse.Init(pkRef->GetFormID(), F4F20Param(4), pkRef->GetFormType(), g_pF4F20Counter->GetCount());
         kResponse.SetSpeaker(pkRef);
-        pkActor->AddResponse(&kResponse);
-        Push(&kResponse);
+        pkActor->SaveAnimation(&kResponse);
+        RenderCopyData(reinterpret_cast<BGSSaveFormBuffer*>(&kResponse));
     }
     else
     {
@@ -716,30 +611,19 @@ struct FUN_008659c0_Buffer
     void InitFormEntry(unsigned int formID, FUN_008c71b0 flags, TESBoundObject* base, void* context);
     void FUN_0050f9c0(TESForm* form);
 };
-struct ReferenceSaveAccess : TESObjectREFR
-{
-    TESBoundObject* FUN_00401170();
-    void FUN_00562de0(FUN_008659c0_Buffer* buffer);
-};
-struct SubBufferSaveShell
-{
-    char* pBuffer;
-    void FUN_00865120(FUN_008659c0_Buffer* buffer);
-    void FUN_00865020(TESForm* form);
-};
 // Saves a reference form to a sub-buffer, or logs a warning if the form is not a reference.
 // @fnv 0x00865020
-void SubBufferSaveShell::FUN_00865020(TESForm* form)
+void BGSLoadGameSubBuffer::SaveFormState(TESForm* form)
 {
     if (form->GetIsReference())
     {
-        ReferenceSaveAccess* ref = static_cast<ReferenceSaveAccess*>(form);
+        ReferenceSubBufferAccess* ref = static_cast<ReferenceSubBufferAccess*>(form);
         FUN_008659c0_Buffer buffer;
-        buffer.InitFormEntry(form->GetFormID(), FUN_008c71b0(4), static_cast<ReferenceSaveAccess*>(form)->FUN_00401170(),
+        buffer.InitFormEntry(form->GetFormID(), FUN_008c71b0(4), reinterpret_cast<TESBoundObject*>(form->FUN_00401170()),
                             DAT_011de134->GetConstant27());
         buffer.FUN_0050f9c0(form);
-        ref->FUN_00562de0(&buffer);
-        FUN_00865120(&buffer);
+        ref->SaveHavokData(&buffer);
+        RenderCopyData(reinterpret_cast<BGSSaveFormBuffer*>(&buffer));
     }
     else
     {

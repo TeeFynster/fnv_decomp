@@ -1,6 +1,26 @@
 // The class header lives in include/; a plain "BGSEntryPointFunction.h" resolves to this folder's
 // bgsentrypointfunction.h (case-insensitive lookup), which declares a different class.
 #include "../../include/BGSEntryPointFunction.h"
+// layout_support.h already supplies the list template used by the shared headers.
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/TESForm.h"
+#include "../../include/TESSound.h"
+#include "../../include/Script.h"
+#include "../../include/TESChallenge.h"
+#include "../../include/TESLevItem.h"
+#include "../../include/BGSEntryPointFunctionData.h"
+#include "../../include/BGSEntryPointFunctionDataLeveledList.h"
+#include "../../include/BGSEntryPointFunctionDataOneValue.h"
+#include "../../include/BGSEntryPointFunctionDataTwoValue.h"
+#include "../../include/BGSEntryPointFunctionDataActivateChoice.h"
+
+// Script.h supplies the layout; only these two operations are absent there.
+class EntryPointScriptOperations : public Script
+{
+  public:
+    void SaveHeader();
+    bool IsDifferentFrom(EntryPointScriptOperations* other);
+};
 
 // @fnv 0x005e5b30
 unsigned char BGSEntryPointFunction::GetArgumentCount(ENTRY_POINT_FUNCTION_TYPE type)
@@ -20,28 +40,21 @@ void BGSEntryPointFunction::ApplyFunction(ENTRY_POINT_FUNCTION function, TESObje
     }
 }
 
-class EntryPointValueSource
-{
-  public:
-    float ReadValueA();
-    float ReadValueB();
-};
-
 bool ValidateEntryFunctionArgs(int aiFunctionType, int aiDataType, int aiArg1, int aiArg2, unsigned char aucArgCount,
-                               float** apapValues, EntryPointValueSource* apSource);
+                               float** apapValues, BGSEntryPointFunctionDataTwoValue* apSource);
 
 float RandomFloat(float afMin, float afMax);
 
 // Validates arguments, then adds a random float between the source's two values to the first value in apapValues.
 // @fnv 0x005e5d80
 void FUN_005e5d80(int aiArg1, int aiArg2, unsigned char aucArgCount, float** apapValues,
-                  EntryPointValueSource* apSource)
+                  BGSEntryPointFunctionDataTwoValue* apSource)
 {
     if (!ValidateEntryFunctionArgs(0, 2, aiArg1, aiArg2, aucArgCount, apapValues, apSource))
         return;
 
     float* pfValue = *apapValues;
-    EntryPointValueSource* pSource = apSource;
+    BGSEntryPointFunctionDataTwoValue* pSource = apSource;
 
     *pfValue += RandomFloat(pSource->ReadValueA(), pSource->ReadValueB());
 }
@@ -101,71 +114,48 @@ class E5DF0Actor
     E5DF0Counter m_kCounter;
 };
 
-class E5DF0Modifier
-{
-  public:
-    float FUN_006b9130();
-    float FUN_00488d50();
-};
-
 bool FUN_005e5b80(int iUnused, int iType, E5DF0Actor* pkActor, void* pvTarget, bool bFlag, float** ppfResult,
-                  E5DF0Modifier* pkModifier);
+                  BGSEntryPointFunctionDataTwoValue* pkModifier);
 
-// Calls FUN_005e5b80 to validate the modifier, then adds the product of the counter value and FUN_006b9130 to the result.
+// Validates the modifier, then adds the counter value times ReadValueA to the result.
 // @fnv 0x005e5df0
-void FUN_005e5df0(E5DF0Actor* pkActor, void* pvTarget, bool bFlag, float** ppfResult, E5DF0Modifier* pkModifier)
+void FUN_005e5df0(E5DF0Actor* pkActor, void* pvTarget, bool bFlag, float** ppfResult, BGSEntryPointFunctionDataTwoValue* pkModifier)
 {
     if (!FUN_005e5b80(0, 2, pkActor, pvTarget, bFlag, ppfResult, pkModifier))
         return;
 
     float* pfOut3 = *ppfResult;
-    E5DF0Modifier* pkMod = pkModifier;
+    BGSEntryPointFunctionDataTwoValue* pkMod = pkModifier;
     E5DF0Actor* pkSource = pkActor;
-    float fSecondFunctionValue = pkMod->FUN_006b9130();
-    unsigned int uiIndex3 = (unsigned int)pkMod->FUN_00488d50();
+    float fSecondFunctionValue = pkMod->ReadValueA();
+    unsigned int uiIndex3 = (unsigned int)pkMod->ReadValueB();
     *pfOut3 += pkSource->m_kCounter.GetCount(uiIndex3) * fSecondFunctionValue;
 }
 
 unsigned int BSStringLength(const char* text);
 extern "C" char* __cdecl fnv_strcpy(char* dst, const char* src);
 
-struct StringOwner
-{
-    void* m_pVtbl;
-    char* m_pText;
-};
-
-struct FUN_005e6c60_shell
-{
-    void FUN_005e6c60(const char* text);
-};
-
-// Frees the current m_pText buffer, then allocates a new one and copies text into it if text is non-null.
+// Replaces choiceText with an allocated copy of text, or zero when text is null.
 // @fnv 0x005e6c60
-void FUN_005e6c60_shell::FUN_005e6c60(const char* text)
+void BGSEntryPointFunctionDataActivateChoice::FUN_005e6c60(const char* text)
 {
-    delete[] ((StringOwner*)this)->m_pText;
-    ((StringOwner*)this)->m_pText = 0;
+    delete[] choiceText;
+    choiceText = 0;
 
     if (text)
     {
-        ((StringOwner*)this)->m_pText = new char[BSStringLength(text) + 1];
-        fnv_strcpy(((StringOwner*)this)->m_pText, text);
+        choiceText = new char[BSStringLength(text) + 1];
+        fnv_strcpy(choiceText, text);
     }
 }
 
-class EntryPointSingleValueSource
-{
-  public:
-    float FUN_006b9130();
-};
 bool __cdecl FUN_005e5b80(int, int, void*, void*, unsigned char, void*, void*);
 // Calls FUN_005e5b80 to validate arguments, then writes the result of a5->FUN_006b9130() into the float pointed to by *a4.
 // @fnv 0x005e5c70
 void __cdecl FUN_005e5c70(void* apArg1, void* apArg2, unsigned char a3, float** ppValue,
-                          EntryPointSingleValueSource* apSource)
+                          BGSEntryPointFunctionDataOneValue* apSource)
 {
-    EntryPointSingleValueSource* pSource;
+    BGSEntryPointFunctionDataOneValue* pSource;
     if (!FUN_005e5b80(0, 1, apArg1, apArg2, a3, ppValue, apSource))
         return;
     {
@@ -180,13 +170,10 @@ namespace std {
 float __cdecl abs(float);
 }
 
-bool ValidateEntryFunctionArgs(int aiFunctionType, int aiDataType, int aiArg1, int aiArg2, unsigned char aucArgCount,
-                               float** apapValues, EntryPointValueSource* apSource);
-
 // Validates entry function arguments, then sets the first value in apapValues to its absolute value.
 // @fnv 0x005e5ea0
 void __cdecl FUN_005e5ea0(int aiArg1, int aiArg2, unsigned char aucArgCount, float** apapValues,
-                          EntryPointValueSource* apSource)
+                          BGSEntryPointFunctionDataTwoValue* apSource)
 {
     float* pfValue;
     if (!ValidateEntryFunctionArgs(0, 0, aiArg1, aiArg2, aucArgCount, apapValues, apSource))
@@ -195,13 +182,9 @@ void __cdecl FUN_005e5ea0(int aiArg1, int aiArg2, unsigned char aucArgCount, flo
     *pfValue = std::abs(*pfValue);
 }
 
-class EntryPointValueSource;
-
-bool ValidateEntryFunctionArgs(int, int, int, int, unsigned char, float**, EntryPointValueSource*);
-
 // @fnv 0x005e5ef0
 void FUN_005e5ef0(int aiArg1, int aiArg2, unsigned char aucArgCount, float** apapValues,
-                  EntryPointValueSource* apSource)
+                  BGSEntryPointFunctionDataTwoValue* apSource)
 {
     if (!ValidateEntryFunctionArgs(0, 0, aiArg1, aiArg2, aucArgCount, apapValues, apSource))
         return;
@@ -211,89 +194,46 @@ void FUN_005e5ef0(int aiArg1, int aiArg2, unsigned char aucArgCount, float** apa
 }
 
 void __cdecl _Deallocate(void*);
-struct Dummy
+
+// @fnv 0x005e6490
+void BGSEntryPointFunctionDataTwoValue::FUN_005e6490()
 {
-    void FUN_005e6470();
-    void* FUN_005e6440(unsigned int);
-};
-// Calls FUN_005e6470, then calls _Deallocate on this when the low bit of flags is set, and returns this.
-// @fnv 0x005e6440
-void* Dummy::FUN_005e6440(unsigned int flags)
+    BGSEntryPointFunctionData::~BGSEntryPointFunctionData();
+}
+
+// @fnv 0x005e64e0
+void* BGSEntryPointFunctionDataTwoValue::FUN_005e64e0(unsigned int flags)
 {
-    FUN_005e6470();
+    FUN_005e6490();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-struct FUN_005e6490_shell
+// @fnv 0x005e65d0
+void* BGSEntryPointFunctionDataActivateChoice::FUN_005e65d0(unsigned int flags)
 {
-    void FUN_005e6470();
-    void FUN_005e6490();
-};
-
-// @fnv 0x005e6490
-void FUN_005e6490_shell::FUN_005e6490()
-{
-    FUN_005e6470();
+    FUN_005e6600();
+    if (flags & 1)
+        _Deallocate(this);
+    return this;
 }
 
-struct FUN_005e6420
-{
-    int m0;
-    FUN_005e6420();
-};
-extern int DAT_01046300;
-struct FUN_005e64b0 : FUN_005e6420
-{
-    float f4;
-    float f8;
-    FUN_005e64b0();
-};
 // @fnv 0x005e64b0
-FUN_005e64b0::FUN_005e64b0()
+BGSEntryPointFunctionDataTwoValue::BGSEntryPointFunctionDataTwoValue()
 {
-    m0 = (int)&DAT_01046300;
-    f4 = 0.0f;
-    f8 = 0.0f;
+    EntryPointTwoValueFunctionData = 0.0f;
+    fSecondFunctionValue = 0.0f;
 }
 
-struct FUN_005e63f0
-{
-    FUN_005e63f0();
-    ~FUN_005e63f0();
-    unsigned int vtable;
-    float value;
-};
-void* __cdecl operator new(unsigned int);
-void __cdecl operator delete(void*);
-struct OneValueDuplicateEntry
-{
-    unsigned int vtable;
-    float value;
-    FUN_005e63f0* FUN_005e6670();
-};
-// Allocates a new FUN_005e63f0, copies the value field into it, and returns the pointer.
+// Allocates a one-value copy.
 // @fnv 0x005e6670
-FUN_005e63f0* OneValueDuplicateEntry::FUN_005e6670()
+BGSEntryPointFunctionDataOneValue* BGSEntryPointFunctionDataOneValue::FUN_005e6670()
 {
-    FUN_005e63f0* pduplicate = new FUN_005e63f0;
-    pduplicate->value = value;
+    BGSEntryPointFunctionDataOneValue* pduplicate = new BGSEntryPointFunctionDataOneValue;
+    pduplicate->fValue = fValue;
     return pduplicate;
 }
-
-class BGSEntryPointFunctionData
-{
-  public:
-    virtual ~BGSEntryPointFunctionData();
-};
-
-class BGSEntryPointFunctionDataOneValue : public BGSEntryPointFunctionData
-{
-  public:
-    float fValue;
-    bool FUN_005e6700(BGSEntryPointFunctionData* apCompare);
-};
 
 // Returns true if apCompare is not a BGSEntryPointFunctionDataOneValue or its fValue differs from this object's fValue.
 // @fnv 0x005e6700
@@ -308,42 +248,15 @@ bool BGSEntryPointFunctionDataOneValue::FUN_005e6700(BGSEntryPointFunctionData* 
     return false;
 }
 
-namespace fnv_005e67f0 {
-
-struct FUN_005e64b0
-{
-    char base[4];
-    float EntryPointTwoValueFunctionData;
-    float fSecondFunctionValue;
-    FUN_005e64b0();
-};
-
-struct FUN_005e67f0_shell : FUN_005e64b0
-{
-    FUN_005e64b0* FUN_005e67f0();
-};
-
-// Allocates a new FUN_005e64b0, copies EntryPointTwoValueFunctionData and fSecondFunctionValue into it, and returns the pointer.
+// Allocates a two-value copy.
 // @fnv 0x005e67f0
-FUN_005e64b0* FUN_005e67f0_shell::FUN_005e67f0()
+BGSEntryPointFunctionDataTwoValue* BGSEntryPointFunctionDataTwoValue::FUN_005e67f0()
 {
-    FUN_005e64b0* pduplicate = new FUN_005e64b0;
+    BGSEntryPointFunctionDataTwoValue* pduplicate = new BGSEntryPointFunctionDataTwoValue;
     pduplicate->EntryPointTwoValueFunctionData = EntryPointTwoValueFunctionData;
     pduplicate->fSecondFunctionValue = fSecondFunctionValue;
     return pduplicate;
 }
-}  // namespace fnv_005e67f0
-
-extern int DAT_01197440;
-extern int DAT_01197468;
-
-class BGSEntryPointFunctionDataTwoValue : public BGSEntryPointFunctionData
-{
-  public:
-    float EntryPointTwoValueFunctionData;
-    float fSecondFunctionValue;
-    bool FUN_005e6890(BGSEntryPointFunctionData* apCompare);
-};
 
 // Returns true if the dynamic_cast to BGSEntryPointFunctionDataTwoValue fails or if either float field differs from apCompare.
 // @fnv 0x005e6890
@@ -359,52 +272,27 @@ bool BGSEntryPointFunctionDataTwoValue::FUN_005e6890(BGSEntryPointFunctionData* 
     return false;
 }
 
-struct FUN_005e6510
-{
-    void* m_vtbl;
-    int m_uiFilterValue;
-    FUN_005e6510();
-};
-struct FUN_005e69d0_shell
-{
-    void* m_vtbl;
-    int m_uiFilterValue;
-    FUN_005e6510* FUN_005e69d0();
-};
 // @fnv 0x005e69d0
-FUN_005e6510* FUN_005e69d0_shell::FUN_005e69d0()
+BGSEntryPointFunctionDataLeveledList* BGSEntryPointFunctionDataLeveledList::FUN_005e69d0()
 {
-    FUN_005e6510* pduplicate = new FUN_005e6510;
-    pduplicate->m_uiFilterValue = m_uiFilterValue;
+    BGSEntryPointFunctionDataLeveledList* pduplicate = new BGSEntryPointFunctionDataLeveledList;
+    pduplicate->pLeveledList = pLeveledList;
     return pduplicate;
 }
 
 unsigned int __cdecl _FUN_00485910(unsigned int, unsigned int);
-struct TESSound
-{
-    unsigned int Deallocate();
-};
-struct FUN_005e6ab0_StandIn
-{
-    int f0;
-    TESSound* pLeveledList;
-    void FUN_005e6250();
-    void FUN_005e6ab0();
-};
+
 // @fnv 0x005e6ab0
-void FUN_005e6ab0_StandIn::FUN_005e6ab0()
+void BGSEntryPointFunctionDataLeveledList::FUN_005e6ab0()
 {
-    FUN_005e6250();
+    BGSEntryPointFunctionData::Save();
     unsigned int ileveledListID = 0;
     if (pLeveledList != 0)
     {
-        ileveledListID = pLeveledList->Deallocate();
+        ileveledListID = pLeveledList->FUN_0084e3a0();
         _FUN_00485910(0x44465045, ileveledListID);
     }
 }
-
-struct BGSEntryPointFunctionData;
-struct TESLevItem;
 
 template <int Value> struct EndianSizeTag
 {
@@ -416,15 +304,10 @@ struct TESFile_s
     void _ref_00472890(void*, unsigned int);
     bool GetChunkData();
 };
-struct FUN_005e6b00_cls
-{
-    int pad;
-    int value;
-    bool FUN_005e6b00(TESFile_s* apFile);
-};
-// Reads a 4-byte leveled list ID into value, byte-swapping it when GetChunkData returns true.
+
+// Reads a leveled list ID, byte-swapping it when GetChunkData returns true.
 // @fnv 0x005e6b00
-bool FUN_005e6b00_cls::FUN_005e6b00(TESFile_s* apFile)
+bool BGSEntryPointFunctionDataLeveledList::FUN_005e6b00(TESFile_s* apFile)
 {
     unsigned int isize = apFile->_ref_00401660();
     if (isize != 4)
@@ -433,92 +316,55 @@ bool FUN_005e6b00_cls::FUN_005e6b00(TESFile_s* apFile)
     apFile->_ref_00472890(&ileveledListID, 0);
     if (apFile->GetChunkData())
         BSEndian((int*)&ileveledListID, EndianSizeTag<4>());
-    value = ileveledListID;
+    pLeveledList = reinterpret_cast<TESLevItem*>(ileveledListID);
     return true;
 }
-
-struct FUN_005abe00_shell
-{
-    void FUN_005abe00();
-};
-
-struct FUN_00413f40_shell
-{
-    FUN_005abe00_shell* FUN_00413f40();
-};
 
 unsigned int __cdecl _strlen(const char*);
 unsigned int __cdecl _BSStringLength(const char*);
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
 void __cdecl FUN_00485950(unsigned int, unsigned int);
 
-struct FUN_005e6e50_obj
-{
-    int unk00;
-    char* m_kChoiceText;
-    void FUN_005e6250();
-    void FUN_005e6e50();
-};
-
 // @fnv 0x005e6e50
-void FUN_005e6e50_obj::FUN_005e6e50()
+void BGSEntryPointFunctionDataActivateChoice::FUN_005e6e50()
 {
-    FUN_005e6250();
+    BGSEntryPointFunctionData::Save();
     unsigned int z = 0;
-    if (m_kChoiceText && _strlen(m_kChoiceText))
-        FUN_004856f0(0x32465045, m_kChoiceText, _BSStringLength(m_kChoiceText) + 1);
-    FUN_00485950(0x33465045, *(unsigned short*)((char*)this + 0x5c));
-    reinterpret_cast<FUN_00413f40_shell*>(this)->FUN_00413f40()->FUN_005abe00();
+    if (choiceText && _strlen(choiceText))
+        FUN_004856f0(0x32465045, choiceText, _BSStringLength(choiceText) + 1);
+    FUN_00485950(0x33465045, flags);
+    FUN_00413f40()->SaveHeader();
 }
-
-bool ValidateEntryFunctionArgs(int aiFunctionType, int aiDataType, int aiArg1, int aiArg2, unsigned char aucArgCount,
-                               float** apapValues, EntryPointValueSource* apSource);
 
 // Validates the arguments, then adds the return value of FUN_006b9130 to the first pointed-to float.
 // @fnv 0x005e5cc0
 void FUN_005e5cc0(int aiArg1, int aiArg2, unsigned char aucArgCount, float** apapValues,
-                  EntryPointValueSource* apSource)
+                  BGSEntryPointFunctionDataTwoValue* apSource)
 {
-    EntryPointSingleValueSource* pSource;
+    BGSEntryPointFunctionDataOneValue* pSource;
     if (!ValidateEntryFunctionArgs(0, 1, aiArg1, aiArg2, aucArgCount, apapValues, apSource))
         return;
 
     {
         float* pfValue;
         pfValue = *apapValues;
-        pSource = reinterpret_cast<EntryPointSingleValueSource*>(apSource);
+        pSource = reinterpret_cast<BGSEntryPointFunctionDataOneValue*>(apSource);
         *pfValue += pSource->FUN_006b9130();
     }
 }
 
-struct FUN_005e6470_shell
-{
-    void __thiscall FUN_005e6470();
-};
-
 // @fnv 0x005e6470
-void __thiscall FUN_005e6470_shell::FUN_005e6470()
+BGSEntryPointFunctionData::~BGSEntryPointFunctionData()
 {
-    *(const char**)this = "@d^";
 }
-
-class OneValueSaveEntry
-{
-  public:
-    void* vtable;
-    float value;
-
-    void FUN_005e6250();
-    void FUN_005e6760();
-};
 
 void __cdecl FUN_00485910(unsigned int chunkID, float value);
 
 // @fnv 0x005e6760
-void OneValueSaveEntry::FUN_005e6760()
+void BGSEntryPointFunctionDataOneValue::FUN_005e6760()
 {
-    FUN_005e6250();
-    FUN_00485910(0x44465045, value);
+    BGSEntryPointFunctionData::Save();
+    FUN_00485910(0x44465045, fValue);
 }
 
 class ActionPointCostSetting
@@ -539,12 +385,11 @@ float FUN_0066dc70(int aiAction)
     return cost;
 }
 
-struct EntryFunctionDataView
-{
-    virtual ~EntryFunctionDataView();
-    virtual unsigned int GetType();
-};
 int Warning(const char*, ...);
+
+// This call site consumes the full EAX result from virtual slot one. Calling the
+// shared unsigned-char GetType declaration would insert extra zero extensions.
+typedef unsigned int (__thiscall *EntryPointDataTypeCall)(BGSEntryPointFunctionData*);
 
 // Checks the function type, argument count, non-null arguments, and, when present, data type; warns and returns false on mismatches.
 // @fnv 0x005e5b80
@@ -575,12 +420,15 @@ bool FUN_005e5b80(int aeExpectedFunctionType, unsigned char acExpectedFunctionDa
             return false;
         }
     }
-    EntryFunctionDataView* pfunctionData = (EntryFunctionDataView*)apData;
-    if (pfunctionData && pfunctionData->GetType() != acExpectedFunctionData)
+    BGSEntryPointFunctionData* pfunctionData = (BGSEntryPointFunctionData*)apData;
+    if (pfunctionData &&
+        reinterpret_cast<EntryPointDataTypeCall*>(*reinterpret_cast<void***>(pfunctionData))[1](pfunctionData) !=
+            acExpectedFunctionData)
     {
         Warning(
             "DEFAULT: Invalid function data type %i passed to BGSEntryPointFunction::CheckFunctionArguments.  Expected %i.",
-            pfunctionData->GetType(), acExpectedFunctionData);
+            reinterpret_cast<EntryPointDataTypeCall*>(*reinterpret_cast<void***>(pfunctionData))[1](pfunctionData),
+            acExpectedFunctionData);
         return false;
     }
     return true;
@@ -588,17 +436,8 @@ bool FUN_005e5b80(int aeExpectedFunctionType, unsigned char acExpectedFunctionDa
 
 void __cdecl FUN_004858f0(unsigned int, unsigned char);
 
-class EntryPointFunctionDataStartView
-{
-  public:
-    virtual ~EntryPointFunctionDataStartView();
-    virtual unsigned char GetType();
-
-    void FUN_005e6250();
-};
-
 // @fnv 0x005e6250
-void EntryPointFunctionDataStartView::FUN_005e6250()
+void BGSEntryPointFunctionData::Save()
 {
     unsigned char type = GetType();
     FUN_004858f0(0x54465045, type);
@@ -612,61 +451,21 @@ struct EntryPointFloatPair
 };
 bool FUN_00401500();
 void FUN_00485990(unsigned int, void*, int);
-class EntryPointTwoValueSave
-{
-  public:
-    void FUN_005e6250();
-    void FUN_005e6900();
-};
+
 // Copies two float fields into a local pair, conditionally byte-swaps it, and passes its address and size to a helper.
 // @fnv 0x005e6900
-void EntryPointTwoValueSave::FUN_005e6900()
+void BGSEntryPointFunctionDataTwoValue::FUN_005e6900()
 {
-    FUN_005e6250();
+    BGSEntryPointFunctionData::Save();
     EntryPointFloatPair data;
-    data.EntryPointTwoValueFunctionData =
-        reinterpret_cast<BGSEntryPointFunctionDataTwoValue*>(this)->EntryPointTwoValueFunctionData;
-    data.fSecondFunctionValue = reinterpret_cast<BGSEntryPointFunctionDataTwoValue*>(this)->fSecondFunctionValue;
+    data.EntryPointTwoValueFunctionData = EntryPointTwoValueFunctionData;
+    data.fSecondFunctionValue = fSecondFunctionValue;
     if (FUN_00401500())
         data.FUN_00462230();
     FUN_00485990(0x44465045, &data, 8);
     if (FUN_00401500())
         data.FUN_00462230();
 }
-
-namespace fnv_005e64e0 {
-extern "C" void __cdecl _Deallocate(void*);
-
-struct EntryPointDataBase_5e6490
-{
-    void __thiscall Destroy_5e6490();
-};
-
-void __thiscall EntryPointDataBase_5e6490::Destroy_5e6490()
-{}
-
-struct EntryPointData_5e64e0
-{
-    void* __thiscall FUN_005e64e0(unsigned int flags);
-};
-
-// Calls the base class destructor, deallocates this object if the low bit of flags is set, and returns this.
-// @fnv 0x005e64e0
-void* __thiscall EntryPointData_5e64e0::FUN_005e64e0(unsigned int flags)
-{
-    ((EntryPointDataBase_5e6490*)this)->Destroy_5e6490();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-}  // namespace fnv_005e64e0
-
-class BGSEntryPointFunctionDataLeveledList : public BGSEntryPointFunctionData
-{
-  public:
-    TESLevItem* pLeveledList;
-    bool FUN_005e6a60(BGSEntryPointFunctionData* apCompare);
-};
 
 // Returns true if the cast to BGSEntryPointFunctionDataLeveledList fails or if pLeveledList differs from the other entry's pLeveledList, otherwise false.
 // @fnv 0x005e6a60
@@ -680,23 +479,9 @@ bool BGSEntryPointFunctionDataLeveledList::FUN_005e6a60(BGSEntryPointFunctionDat
     return false;
 }
 
-struct Script
-{
-    void Run(void*, bool, bool, bool);
-};
-
-struct NiFixedStr : Script
-{
-};
-
 struct SeqObj
 {
-    NiFixedStr& GetName();
-};
-
-struct TESChallenge : SeqObj
-{
-    bool GetStartsLocked();
+    Script& GetName();
 };
 
 struct G2
@@ -725,9 +510,9 @@ void __cdecl FUN_005e61b0(void* arg1, void* arg2, bool arg3, FUN_005e61b0_Local*
 
     if (pChallenge && pList)
     {
-        if (pList->GetStartsLocked())
+        if (static_cast<unsigned char>(pList->GetStartsLocked()))
         {
-            NiFixedStr* pName = &pList->SeqObj::GetName();
+            Script* pName = &reinterpret_cast<SeqObj*>(pList)->GetName();
             if (pName)
                 pName->Script::Run(pLocals, 0, 0, 0);
         }
@@ -738,171 +523,53 @@ void __cdecl FUN_005e61b0(void* arg1, void* arg2, bool arg3, FUN_005e61b0_Local*
     }
 }
 
-struct Place_5e65d0
-{
-    void FUN_005e6600();
-    void* FUN_005e65d0(unsigned int);
-};
-void _Deallocate(void*);
-// @fnv 0x005e65d0
-void* Place_5e65d0::FUN_005e65d0(unsigned int flags)
-{
-    FUN_005e6600();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-namespace fnv_005e6790 {
-template <int Value> struct EndianSizeTag
-{
-};
-void __cdecl BSEndian(int*, EndianSizeTag<4>);
-struct TESFile_s
-{
-    unsigned int _ref_00401660();
-    void _ref_00472890(void*, unsigned int);
-    bool GetChunkData();
-};
-struct FUN_005e6790_cls
-{
-    int pad;
-    int value;
-    bool FUN_005e6790(TESFile_s* apFile);
-};
-// Reads a 4-byte chunk from apFile into value, converting endianness if GetChunkData succeeds, and returns false if the chunk size is not 4.
+// Reads fValue and converts its endianness; rejects chunks whose size is not four.
 // @fnv 0x005e6790
-bool FUN_005e6790_cls::FUN_005e6790(TESFile_s* apFile)
+bool BGSEntryPointFunctionDataOneValue::FUN_005e6790(TESFile* apFile)
 {
-    unsigned int isize = apFile->_ref_00401660();
+    unsigned int isize = reinterpret_cast<TESFile_s*>(apFile)->_ref_00401660();
     if (isize != 4)
         return false;
-    apFile->_ref_00472890(&value, 0);
-    if (apFile->GetChunkData())
-        BSEndian(&value, EndianSizeTag<4>());
+    reinterpret_cast<TESFile_s*>(apFile)->_ref_00472890(&fValue, 0);
+    if (reinterpret_cast<TESFile_s*>(apFile)->GetChunkData())
+        BSEndian((int*)&fValue, EndianSizeTag<4>());
     return true;
 }
-}  // namespace fnv_005e6790
 
-namespace fnv_005e6cd0 {
-void* __cdecl operator new(unsigned int);
-
-struct Script
-{
-    void CopyScriptContents(Script*);
-};
-
-struct NiFixedStr : Script
-{
-};
-
-struct SeqObj
-{
-    NiFixedStr& GetName();
-};
-
-struct BGSEntryPointFunctionData : SeqObj
-{
-    int baseData;
-};
-
-struct FUN_005e6540 : BGSEntryPointFunctionData
-{
-    char* m_kChoiceText;
-    unsigned char padding[0x54];
-    unsigned short value;
-
-    FUN_005e6540();
-    void FUN_005e6c60(char*);
-};
-
-struct FUN_005e6cd0_shell : FUN_005e6540
-{
-    BGSEntryPointFunctionData* FUN_005e6cd0();
-};
-
-// Creates a new FUN_005e6540, copies m_kChoiceText, script contents, and value from this, and returns it.
+// Copies the activation choice label, script, and flags.
 // @fnv 0x005e6cd0
-BGSEntryPointFunctionData* FUN_005e6cd0_shell::FUN_005e6cd0()
+BGSEntryPointFunctionData* BGSEntryPointFunctionDataActivateChoice::FUN_005e6cd0()
 {
-    FUN_005e6540* pduplicate = new FUN_005e6540();
+    BGSEntryPointFunctionDataActivateChoice* pduplicate = new BGSEntryPointFunctionDataActivateChoice();
 
-    pduplicate->FUN_005e6c60(this->m_kChoiceText);
+    pduplicate->FUN_005e6c60(this->choiceText);
     pduplicate->GetName().CopyScriptContents(&this->GetName());
-    pduplicate->value = this->value;
+    pduplicate->flags = this->flags;
 
     return pduplicate;
 }
-}  // namespace fnv_005e6cd0
-
-class BGSEntryPointFunctionDataActivateChoice : public BGSEntryPointFunctionData
-{
-  public:
-    const char* choiceText;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned short flags;
-};
-
-class ActivateChoiceForm
-{
-  public:
-    bool FUN_005ab240(ActivateChoiceForm* other);
-};
-
-struct ActivationChoiceLabelView
-{
-    void* vtable;
-    const char* text;
-};
-
-class ActivateChoiceCompare : public BGSEntryPointFunctionDataActivateChoice
-{
-  public:
-    ActivateChoiceForm* FUN_00413f40();
-    bool FUN_005e6d80(BGSEntryPointFunctionData* other);
-};
 
 int __cdecl FUN_00408b20(const char* lhs, const char* rhs);
 
 // Returns true if the cast fails, a label comparison is nonzero, the form comparison returns true, or flags differ.
 // @fnv 0x005e6d80
-bool ActivateChoiceCompare::FUN_005e6d80(BGSEntryPointFunctionData* other)
+bool BGSEntryPointFunctionDataActivateChoice::FUN_005e6d80(BGSEntryPointFunctionData* other)
 {
-    ActivateChoiceCompare* pOtherChoice =
-        reinterpret_cast<ActivateChoiceCompare*>(dynamic_cast<BGSEntryPointFunctionDataActivateChoice*>(other));
+    BGSEntryPointFunctionDataActivateChoice* pOtherChoice =
+        dynamic_cast<BGSEntryPointFunctionDataActivateChoice*>(other);
     if (pOtherChoice == 0)
         return true;
-    if ((reinterpret_cast<ActivationChoiceLabelView*>(this)->text != 0 &&
-         reinterpret_cast<ActivationChoiceLabelView*>(pOtherChoice)->text == 0) ||
-        (reinterpret_cast<ActivationChoiceLabelView*>(this)->text == 0 &&
-         reinterpret_cast<ActivationChoiceLabelView*>(pOtherChoice)->text != 0))
+    if ((choiceText != 0 &&
+         pOtherChoice->choiceText == 0) ||
+        (choiceText == 0 &&
+         pOtherChoice->choiceText != 0))
         return true;
-    if (reinterpret_cast<ActivationChoiceLabelView*>(this)->text != 0 &&
-        reinterpret_cast<ActivationChoiceLabelView*>(pOtherChoice)->text != 0 &&
-        FUN_00408b20(reinterpret_cast<ActivationChoiceLabelView*>(this)->text,
-                     reinterpret_cast<ActivationChoiceLabelView*>(pOtherChoice)->text))
+    if (choiceText != 0 &&
+        pOtherChoice->choiceText != 0 &&
+        FUN_00408b20(choiceText,
+                     pOtherChoice->choiceText))
         return true;
-    if (FUN_00413f40()->FUN_005ab240(pOtherChoice->FUN_00413f40()))
+    if (FUN_00413f40()->IsDifferentFrom(pOtherChoice->FUN_00413f40()))
         return true;
     if (flags != pOtherChoice->flags)
         return true;
@@ -992,20 +659,6 @@ class ActivationChoiceFormView
     unsigned int FUN_0084e3a0();
 };
 
-class ActivationChoiceScript
-{
-  public:
-    void FUN_005ab400(TESForm* form);
-};
-
-class ActivationChoiceInitializer : public BGSEntryPointFunctionData
-{
-  public:
-    char* choiceLabel;
-    ActivationChoiceScript resultScript;
-    void FUN_005e7230(TESForm* form);
-};
-
 extern char str_010463f0[];
 
 int __cdecl FUN_0046e8a0();
@@ -1015,12 +668,12 @@ void __cdecl FUN_005b5e40(const char* message, const char* name, unsigned int fo
 
 // Calls resultScript with form, then logs a message when the subsequent count returned by FUN_0046e8a0 is nonzero.
 // @fnv 0x005e7230
-void ActivationChoiceInitializer::FUN_005e7230(TESForm* form)
+void BGSEntryPointFunctionDataActivateChoice::InitItem(TESForm* form)
 {
     int savedWarnings = FUN_0046e8a0();
     FUN_0043b2b0(true);
     FUN_004fffe0(0);
-    resultScript.FUN_005ab400(form);
+    resultScript.InitItem(form);
     FUN_0043b2b0(false);
 
     int newWarnings = FUN_0046e8a0();
@@ -1046,122 +699,27 @@ struct EntryPointTwoValueChunk_5e6970
     void FUN_00462230();
 };
 
-struct FUN_005e6970_cls
-{
-    void* vtable;
-    float valueA;
-    float valueB;
+} // namespace fnv_005e6970
 
-    bool FUN_005e6970(TESFile_s* apFile);
-};
-
-// Reads an 8-byte chunk from apFile, optionally applies FUN_00462230, then copies its two floats into valueA and valueB.
+// Reads the two floats, converting their endianness when required.
 // @fnv 0x005e6970
-bool FUN_005e6970_cls::FUN_005e6970(TESFile_s* apFile)
+bool BGSEntryPointFunctionDataTwoValue::FUN_005e6970(TESFile* apFile)
 {
-    EntryPointTwoValueChunk_5e6970 data;
-    unsigned int size = apFile->_ref_00401660();
+    fnv_005e6970::EntryPointTwoValueChunk_5e6970 data;
+    unsigned int size = reinterpret_cast<fnv_005e6970::TESFile_s*>(apFile)->_ref_00401660();
     if (size != 8)
         return false;
-    apFile->_ref_00472890(&data, size);
-    if (apFile->_ref_00401680())
+    reinterpret_cast<fnv_005e6970::TESFile_s*>(apFile)->_ref_00472890(&data, size);
+    if (reinterpret_cast<fnv_005e6970::TESFile_s*>(apFile)->_ref_00401680())
         data.FUN_00462230();
-    valueA = data.valueA;
-    valueB = data.valueB;
+    EntryPointTwoValueFunctionData = data.valueA;
+    fSecondFunctionValue = data.valueB;
     return true;
 }
-}
-
-class TESForm
-{
-  public:
-    virtual void Unk000();
-    virtual void Unk004();
-    virtual void Unk008();
-    virtual void Unk00C();
-    virtual void Unk010();
-    virtual void Unk014();
-    virtual void Unk018();
-    virtual void Unk01C();
-    virtual void Unk020();
-    virtual void Unk024();
-    virtual void Unk028();
-    virtual void Unk02C();
-    virtual void Unk030();
-    virtual void Unk034();
-    virtual void Unk038();
-    virtual void Unk03C();
-    virtual void Unk040();
-    virtual void Unk044();
-    virtual void Unk048();
-    virtual void Unk04C();
-    virtual void Unk050();
-    virtual void Unk054();
-    virtual void Unk058();
-    virtual void Unk05C();
-    virtual void Unk060();
-    virtual void Unk064();
-    virtual void Unk068();
-    virtual void Unk06C();
-    virtual void Unk070();
-    virtual void Unk074();
-    virtual void Unk078();
-    virtual void Unk07C();
-    virtual void Unk080();
-    virtual void Unk084();
-    virtual void Unk088();
-    virtual void Unk08C();
-    virtual void Unk090();
-    virtual void Unk094();
-    virtual void Unk098();
-    virtual void Unk09C();
-    virtual void Unk0A0();
-    virtual void Unk0A4();
-    virtual void Unk0A8();
-    virtual void Unk0AC();
-    virtual void Unk0B0();
-    virtual void Unk0B4();
-    virtual void Unk0B8();
-    virtual void Unk0BC();
-    virtual void Unk0C0();
-    virtual void Unk0C4();
-    virtual void Unk0C8();
-    virtual void Unk0CC();
-    virtual void Unk0D0();
-    virtual void Unk0D4();
-    virtual void Unk0D8();
-    virtual void Unk0DC();
-    virtual void Unk0E0();
-    virtual void Unk0E4();
-    virtual void Unk0E8();
-    virtual void Unk0EC();
-    virtual void Unk0F0();
-    virtual void Unk0F4();
-    virtual void Unk0F8();
-    virtual void Unk0FC();
-    virtual void Unk100();
-    virtual void Unk104();
-    virtual void Unk108();
-    virtual void Unk10C();
-    virtual void Unk110();
-    virtual void Unk114();
-    virtual void Unk118();
-    virtual void Unk11C();
-    virtual void Unk120();
-    virtual void Unk124();
-    virtual void Unk128();
-    virtual void Unk12C();
-    virtual const char* GetName();
-    TESFile* FUN_00484e60(int);
-    unsigned int FUN_0084e3a0();
-};
 
 void FUN_00485d50(unsigned int&, TESFile*);
 TESForm* FUN_004839c0(unsigned int);
 
-struct TESLevItem : TESForm
-{
-};
 class EntryPointOwnerView : public TESForm
 {
   public:
@@ -1169,23 +727,16 @@ class EntryPointOwnerView : public TESForm
 };
 int Warning(const char*, ...);
 
-struct LevListData
-{
-    int unk00;
-    TESLevItem* pLevItem;
-    void FUN_005e6b70(TESForm* apOwner);
-};
-
-// Resolves pLevItem's numeric value to a TESLevItem and warns if the resolved form is not one.
+// Resolves pLeveledList's numeric value to a TESLevItem and warns if the resolved form is not one.
 // @fnv 0x005e6b70
-void LevListData::FUN_005e6b70(TESForm* apOwner)
+void BGSEntryPointFunctionDataLeveledList::FUN_005e6b70(TESForm* apOwner)
 {
-    if (pLevItem)
+    if (pLeveledList)
     {
-        unsigned int itempint = (unsigned int)pLevItem;
+        unsigned int itempint = (unsigned int)pLeveledList;
         FUN_00485d50(itempint, apOwner->FUN_00484e60(-1));
-        pLevItem = dynamic_cast<TESLevItem*>(FUN_004839c0(itempint));
-        if (!pLevItem)
+        pLeveledList = dynamic_cast<TESLevItem*>(FUN_004839c0(itempint));
+        if (!pLeveledList)
         {
             if (static_cast<EntryPointOwnerView*>(apOwner)->FUN_00474cb0())
                 Warning("MASTERFILE: Unable to find leveled list (%08X) on owner object \"%s\".", itempint,
@@ -1197,63 +748,10 @@ void LevListData::FUN_005e6b70(TESForm* apOwner)
     }
 }
 
-struct FUN_005e6420_SV
-{
-    FUN_005e6420_SV();
-    ~FUN_005e6420_SV();
-    virtual void V1();
-};
-
-struct TESForm_SV
-{
-    virtual ~TESForm_SV();
-    unsigned char m_ucFormType;
-    unsigned int m_uiFormFlags;
-    unsigned int iFormID;
-    BSSimpleList<void*> kMods;
-};
-
-class ChoiceDataInitialization
-{
-  public:
-    void FUN_005e6c30();
-};
-
-class Script_SV : public TESForm_SV
-{
-  public:
-    Script_SV();
-    virtual ~Script_SV();
-
-    unsigned int variableCount;
-    unsigned int referenceCount;
-    unsigned int compiledSize;
-    unsigned int lastVariableID;
-    bool isQuestScript;
-    bool isMagicEffectScript;
-    bool isCompiled;
-    char* sourceText;
-    char* compiledData;
-    float profilerTime;
-    float questDelay;
-    float secondsBuffer;
-    TESForm* ownerQuest;
-    BSSimpleList<void*> referencedObjects;
-    BSSimpleList<void*> variables;
-};
-
-struct FUN_005e6540 : FUN_005e6420_SV
-{
-    char* label;
-    Script_SV m_script;
-    unsigned short flags;
-
-    FUN_005e6540();
-};
-
-// Initializes label and flags to zero, default-constructs m_script, then calls FUN_005e6c30.
+// Initializes the label, script, and flags, then initializes the choice data.
 // @fnv 0x005e6540
-FUN_005e6540::FUN_005e6540() : FUN_005e6420_SV(), label(0), m_script(), flags(0)
+BGSEntryPointFunctionDataActivateChoice::BGSEntryPointFunctionDataActivateChoice()
+    : BGSEntryPointFunctionData(), choiceText(0), resultScript(), flags(0)
 {
-    reinterpret_cast<ChoiceDataInitialization*>(this)->FUN_005e6c30();
+    FUN_005e6c30();
 }

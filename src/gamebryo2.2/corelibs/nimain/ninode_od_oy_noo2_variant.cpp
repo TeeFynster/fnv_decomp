@@ -3,6 +3,15 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy (unit src/gamebryo2.2/corelibs/nimain/ninode.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiBound.h"
+#include "../../../../include/NiNode.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPointLight.h"
+#include "../../../../include/NiPropertyState.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiTStringPointerMap.h"
+#include "../../../../include/NiUpdateData.h"
 #include "ninode_packet_decls.h"
 #pragma optimize("", off)
 #pragma optimize("", on)

@@ -2,23 +2,23 @@
 #ifndef FNV_NICLONINGPROCESS_H
 #define FNV_NICLONINGPROCESS_H
 
-#include "layout_support.h"
+#include <stddef.h>
+#ifndef FNV_STATIC_ASSERT
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+#endif
+template <class K, class V> class NiTPointerMap;
 #include "NiObject.h"
-#include "layout_support.h"
 class CloningProcess;
-enum NiObjectNET__CopyType
-{
-    NiObjectNET__CopyType_COPY_NONE = 0,
-    NiObjectNET__CopyType_COPY_EXACT = 1,
-    NiObjectNET__CopyType_COPY_UNIQUE = 2
-};
+#include "../../../../include/NiObjectNET.h"
 #pragma pack(push, 4)
 class CloningProcess
 {
   public:
     NiTPointerMap<NiObject*, NiObject*>* m_pCloneMap;  // +0x0, 4 bytes
     NiTPointerMap<NiObject*, bool>* m_pProcessMap;     // +0x4, 4 bytes
-    NiObjectNET__CopyType m_eCloneCopyMode;            // +0x8, 4 bytes
+    NiObjectNET::CopyType m_eCloneCopyMode;            // +0x8, 4 bytes
     char m_bExactType;                                 // +0xC, 1 bytes
     unsigned char layoutPaddingD[3];
     // void __cdecl CloningProcess::*(unsigned int)

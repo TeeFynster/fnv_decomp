@@ -1,12 +1,17 @@
 // fallout_shared/extradatacell.cpp: ExtraNorthRotation, ExtraCell3D, ExtraHavok, ExtraCellImpactSwap and more (28 functions)
 
-#include "extradatacell_decls.h"
+#include "../../include/ExtraCell3D.h"
+#include "../../include/ExtraCellAcousticSpace.h"
+#include "../../include/ExtraNorthRotation.h"
+#include "../../include/ExtraCellImpactSwap.h"
+#include "../../include/ExtraCellImageSpace.h"
+#include "../../include/ExtraHavok.h"
+
 // Constructs an ExtraNorthRotation, setting its vtable and initializing its float value to 0.0f.
 // @fnv 0x0040f680
 ExtraNorthRotation::ExtraNorthRotation() : BSExtraData(0x43)
 {
-    m_ppVirtualMethodTable = ExtraNorthRotation_vtable;
-    m_fNorthRotation = 0.0f;
+    fNorthRotation = 0.0f;
 }
 
 struct BE
@@ -33,21 +38,10 @@ FUN_0040ef00_shell::FUN_0040ef00_shell(void* aField) : BE(4)
     pField = aField;
 }
 
-extern void* DAT_01014240;
-
-struct FUN_0040efd0_shell : BE
-{
-    void* pad1;
-    void* pad2;
-    void* pField;
-    FUN_0040efd0_shell(void* aField);
-};
-
 // @fnv 0x0040efd0
-FUN_0040efd0_shell::FUN_0040efd0_shell(void* aField) : BE(0x81)
+ExtraCellAcousticSpace::ExtraCellAcousticSpace(BGSAcousticSpace* aField) : BSExtraData(0x81)
 {
-    *reinterpret_cast<void**>(this) = &DAT_01014240;
-    pField = aField;
+    m_pPathingCell = aField;
 }
 
 extern void* DAT_0101424c;
@@ -107,26 +101,6 @@ FUN_0040f590_shell::FUN_0040f590_shell() : BE(5)
     pField = 0;
 }
 
-struct ExtraCell3D
-{
-    void FUN_0040ed30();
-    void* FUN_0040ed00(unsigned int);
-};
-// Calls FUN_0040ed30 on this, deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x0040ed00
-void* ExtraCell3D::FUN_0040ed00(unsigned int flags)
-{
-    this->FUN_0040ed30();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct ExtraHavok
-{
-    void FUN_0040ee70();
-    void* FUN_0040ee40(unsigned int);
-};
 // Calls FUN_0040ee70, then deallocates this if bit 0 of flags is set, and returns this.
 // @fnv 0x0040ee40
 void* ExtraHavok::FUN_0040ee40(unsigned int flags)
@@ -154,11 +128,6 @@ FUN_0040ef30::FUN_0040ef30(BGSMusicType* aMusic) : BE(7)
     pField = aMusic;
 }
 
-struct ExtraCellImpactSwap
-{
-    void FUN_0040f210();
-    void* FUN_0040f1e0(unsigned int flags);
-};
 // @fnv 0x0040f1e0
 void* ExtraCellImpactSwap::FUN_0040f1e0(unsigned int flags)
 {
@@ -198,22 +167,11 @@ FUN_0040f410::FUN_0040f410() : BE(9)
     pField = 0;
 }
 
-extern int DAT_01014258;
-
-struct FUN_0040f110_shell : BE
-{
-    void* pad1;
-    void* pad2;
-    void* pField;
-    FUN_0040f110_shell(void* aField);
-};
-
-// Initialises the object with vtable DAT_01014258 and stores aField in pField.
+// Initializes the image-space extra data and stores its image-space pointer.
 // @fnv 0x0040f110
-FUN_0040f110_shell::FUN_0040f110_shell(void* aField) : BE(0x59)
+ExtraCellImageSpace::ExtraCellImageSpace(void* aField) : BSExtraData(0x59)
 {
-    *(void**)this = &DAT_01014258;
-    pField = aField;
+    m_pImageSpace = aField;
 }
 
 struct FUN_0040f1b0_shell : BE
@@ -233,93 +191,25 @@ FUN_0040f1b0_shell::FUN_0040f1b0_shell() : BE(0x8c)
     pField = 0;
 }
 
-// Destructor: drop the held pathing reference before the member and base destructors run.
-
-class ED30PathingRef
-{
-  public:
-    ~ED30PathingRef();
-    void Reset(void* pvObject);
-    void* m_pvObject;
-};
-
-class ED30Base
-{
-  public:
-    virtual ~ED30Base();
-    int unk04;
-    int unk08;
-};
-
-class FUN_0040ed30 : public ED30Base
-{
-  public:
-    virtual ~FUN_0040ed30();
-    ED30PathingRef m_kSolution;
-};
-
-// Destructor that resets the pathing solution reference by calling Reset with a null object pointer.
+// Drop the held cell node before the member and base destructors run.
 // @fnv 0x0040ed30
-FUN_0040ed30::~FUN_0040ed30()
+ExtraCell3D::~ExtraCell3D()
 {
-    m_kSolution.Reset(0);
+    m_pController = static_cast<NiCell3DNode*>(0);
 }
 
-extern void* DAT_0101421c;
-
-struct CleanupBase
-{
-    ~CleanupBase();
-};
-
-struct FUN_00633c90
-{
-    FUN_00633c90(unsigned int value);
-    ~FUN_00633c90();
-    void FUN_0066b0d0(void* value);
-    void* value;
-};
-
-struct FUN_0040eda0 : BSExtraData, CleanupBase
-{
-    FUN_00633c90 first;
-    FUN_00633c90 second;
-    FUN_0040eda0(void* value);
-};
-
-// Constructs a BSExtraData with two value holders, storing the given value in the first and null in the second.
+// Constructs the Havok extra data with its world pointer and an empty Mopp reference.
 // @fnv 0x0040eda0
-FUN_0040eda0::FUN_0040eda0(void* value) : BSExtraData(1), first((m_ppVirtualMethodTable = (void**)&DAT_0101421c, 0)), second(0)
+ExtraHavok::ExtraHavok(bhkWorld* value) : BSExtraData(1), first(0), spMopp(0)
 {
     first.FUN_0066b0d0(value);
-    second.FUN_0066b0d0(0);
+    spMopp.FUN_0066b0d0(0);
 }
 
-struct FUN_0040ecb0
-{
-    virtual ~FUN_0040ecb0();
-    unsigned char m_ucExtraDataType;
-    unsigned char pad05;
-    unsigned char pad06;
-    unsigned char pad07;
-    FUN_0040ecb0* pNext;
-};
-struct FUN_0045cec0
-{
-    void* pObject;
-    void FUN_0066b0d0(unsigned int);
-    ~FUN_0045cec0();
-};
-struct FUN_0040ee70 : FUN_0040ecb0
-{
-    FUN_0045cec0 first;
-    FUN_0045cec0 second;
-    virtual ~FUN_0040ee70();
-};
 // @fnv 0x0040ee70
-FUN_0040ee70::~FUN_0040ee70()
+ExtraHavok::~ExtraHavok()
 {
-    second.FUN_0066b0d0(0);
+    spMopp.FUN_0066b0d0(0);
     first.FUN_0066b0d0(0);
 }
 
@@ -527,22 +417,16 @@ bool ExtraMusicTypeShell::FUN_0040ef60(BSExtraData* apOther)
     return false;
 }
 
-struct BGSAcousticSpace;
 extern int DAT_01183ba8;
-struct ExtraCellAcousticSpace : BSExtraData
-{
-    BGSAcousticSpace* m_pPathingCell;
-    bool FUN_0040f000(BSExtraData* apCompare);
-};
 // Compares this ExtraCellAcousticSpace against apCompare, returning true if the cast target is null, the base differs, or the acoustic space pointer differs.
 // @fnv 0x0040f000
-bool ExtraCellAcousticSpace::FUN_0040f000(BSExtraData* apCompare)
+bool ExtraCellAcousticSpace::Compare(BSExtraData* apCompare)
 {
     ExtraCellAcousticSpace* pComp =
         static_cast<ExtraCellAcousticSpace*>(FUN_00ec43fb(apCompare, 0, &DAT_01183b2c, &DAT_01183ba8, 0));
     if (!pComp)
         return true;
-    if (reinterpret_cast<FUN_0040f3a0_cls*>(this)->IsDifferentFrom(apCompare))
+    if (BSExtraData::Compare(apCompare))
         return true;
     if (pComp->m_pPathingCell != m_pPathingCell)
         return true;
@@ -612,16 +496,10 @@ bool CellImpactCompare::FUN_0040f2d0(BSExtraData* apCompare)
 }
 
 extern int DAT_01183bf0;
-struct ExtraCellImageSpace : BSExtraData
-{
-    void* m_pImageSpace;
-    bool FUN_0040f140(BSExtraData* extra);
-    bool IsDifferentFrom(BSExtraData* extra);
-};
 
 // Returns true if the cast fails, FUN_0040f700(extra) returns true, or the image-space pointers differ; otherwise false.
 // @fnv 0x0040f140
-bool ExtraCellImageSpace::FUN_0040f140(BSExtraData* extra)
+bool ExtraCellImageSpace::Compare(BSExtraData* extra)
 {
     ExtraCellImageSpace* cast =
         static_cast<ExtraCellImageSpace*>(FUN_00ec43fb(extra, 0, &DAT_01183b2c, &DAT_01183bf0, 0));

@@ -4,6 +4,7 @@
 
 
 #include "layout_support.h"
+#include "../../../include/ActorValueModifierList.h"
 
 #pragma pack(push, 4)
 class Modifier
@@ -30,28 +31,6 @@ class ModifierPointerList
     ~ModifierPointerList();
 };
 
-class ActorValueModifierList : public BSSimpleList<Modifier*>
-{
-  public:
-    bool m_bAllowZeroValueModifiers;
-    unsigned char padding[3];
-    ModifierPointerList* m_ppModifiedActorValues;
-
-    Modifier* GetModifierItem(char key);
-    float GetActorValueModifierAmount(char key, bool& found);
-    float GetActorValueModifierAmount(char key);
-    enum ClampStyle
-    {
-        ClampNone = 0
-    };
-    void ModifyModifier(char key, float delta, ClampStyle clamp);
-    static float ModifyAndClamp(float value, float delta, ClampStyle clamp);
-    void EraseModifier(Modifier* modifier);
-    void CopyModifierListFrom(ActorValueModifierList* other);
-    void AppendModifier(Modifier* modifier);
-    void RemoveAllModifiers();
-    void AddFastModifier(char key, Modifier* modifier);
-};
 #pragma pack(pop)
 
 void __cdecl operator delete(void* memory);

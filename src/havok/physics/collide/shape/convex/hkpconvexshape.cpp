@@ -2,7 +2,12 @@
 // src/havok/physics/collide/shape/convex/hkpconvexshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/hkpconvexshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpConvexShape.h"
+#define FNV_VEC4_SIMD
+#include "../../../../../../include/Vec4.h"
+#include "../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../include/hkpShape.h"
+#include "../../../../../../include/hkpConvexShape.h"
+#include "../../../../../../include/hkpSingleShapeContainer.h"
 
 // @fnv 0x00c9e1e0
 int __stdcall FUN_00c9e1e0(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
@@ -10,107 +15,50 @@ int __stdcall FUN_00c9e1e0(int a1, int a2, int a3, int a4, int a5, int a6, int a
     return 2;
 }
 
-struct FUN_00d1df70
-{
-    void FUN_00c90510() throw();
-    void removeReference() throw();
-};
+// Inline Havok constructors used by this unit's convex transform base constructor.
 
-class hkReferencedObjectC9E3
-{
-  public:
-    hkReferencedObjectC9E3() : m_sReferenceCount(1)
-    {}
-    virtual ~hkReferencedObjectC9E3() throw();
-    hkUint16 m_usMemSizeAndFlags;
-    hkInt16 m_sReferenceCount;
-};
 
-class hkpShapeC9E3 : public hkReferencedObjectC9E3
-{
-  public:
-    hkpShapeC9E3(int iType) : m_ulUserData(0), m_type(iType)
-    {}
-    hkUlong m_ulUserData;
-    int m_type;
-};
+template <typename ENUM, typename STORAGE>
+inline hkEnum<ENUM, STORAGE>::hkEnum() {}
 
-class hkpConvexShapeC9E3 : public hkpShapeC9E3
+inline hkpShape::hkpShape() { m_ulUserData = 0; }
+
+inline hkpConvexShape::hkpConvexShape(int type, float radius)
+{
+    m_fSphereRadius = radius;
+    *reinterpret_cast<unsigned int*>(&m_type) = type;
+}
+
+inline hkpSingleShapeContainer::hkpSingleShapeContainer(hkpShape* child, int ref)
+    : m_pContainedShape(child)
+{
+    if (ref == 1)
+        child->addReference();
+}
+
+class FUN_00c9e340 : public hkpConvexShape
 {
   public:
-    hkpConvexShapeC9E3(int iType, hkReal fRadius) : hkpShapeC9E3(iType)
-    {
-        m_fSphereRadius = fRadius;
-    }
-    hkReal m_fSphereRadius;
-};
+    hkpSingleShapeContainer m_pContainedShape;
 
-class hkpShapeContainerC9E3
-{
-  public:
-    virtual ~hkpShapeContainerC9E3() throw()
-    {}
-};
-
-class hkpSingleShapeContainerC9E3 : public hkpShapeContainerC9E3
-{
-  public:
-    hkpSingleShapeContainerC9E3(FUN_00d1df70* pkChild, int iRef) : m_pContainedShape(pkChild)
-    {
-        if (iRef == 1)
-            m_pContainedShape->FUN_00c90510();
-    }
-    virtual ~hkpSingleShapeContainerC9E3() throw();
-    FUN_00d1df70* m_pContainedShape;
-};
-
-class FUN_00c9e340 : public hkpConvexShapeC9E3
-{
-  public:
-    hkpSingleShapeContainerC9E3 m_pContainedShape;
-
-    FUN_00c9e340(int iType, hkReal fRadius, FUN_00d1df70* pkChild, int iRef) throw();
+    FUN_00c9e340(int iType, hkReal fRadius, hkpShape* pkChild, int iRef) throw();
     virtual ~FUN_00c9e340() throw();
 };
 
 // @fnv 0x00c9e340
-FUN_00c9e340::FUN_00c9e340(int iShapeType, hkReal fRadius, FUN_00d1df70* pkChild, int iRef) throw()
-    : hkpConvexShapeC9E3(iShapeType, fRadius), m_pContainedShape(pkChild, iRef)
+FUN_00c9e340::FUN_00c9e340(int iShapeType, hkReal fRadius, hkpShape* pkChild, int iRef) throw()
+    : hkpConvexShape(iShapeType, fRadius), m_pContainedShape(pkChild, iRef)
 {}
 
 #include <xmmintrin.h>
-struct S00c9e1f0_Obj
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0C();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1C();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2C();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void method(int arg, float* out);
-
-    float unk04;
-    float unk08;
-    float unk0C;
-    float m_10;
-
-    float GetDotProductOffset(int arg);
-};
-
-// Calls method(arg, buf), then returns m_10 plus the 3-component dot product of the vector at arg and buf.
+// The shared convex shape lacks this projection override; keep its body as a helper.
+// The unused register parameter preserves the original member-call ABI without a stand-in class.
 // @fnv 0x00c9e1f0
-float S00c9e1f0_Obj::GetDotProductOffset(int arg)
+float __fastcall ConvexMaximumProjection(const hkpConvexShape* shape, void*, int arg)
 {
     __declspec(align(16)) float buf[4];
-    method(arg, buf);
+    shape->GetSupportVertex(*reinterpret_cast<const hkVector4*>(arg),
+                            *reinterpret_cast<Vector4WithInt24W*>(buf));
 
     __m128 v = _mm_load_ps(reinterpret_cast<const float*>(arg));
     __m128 w = _mm_load_ps(buf);
@@ -124,15 +72,11 @@ float S00c9e1f0_Obj::GetDotProductOffset(int arg)
 
     float dot;
     _mm_store_ss(&dot, s2);
-    return m_10 + dot;
+    return shape->m_fSphereRadius + dot;
 }
 
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
-};
-
-struct Mat3
+// hkRotation layout (three Vec4 columns).
+struct ConvexRotation
 {
     Vec4 c0, c1, c2;
 };
@@ -159,7 +103,7 @@ struct P2
 {
     int unk0;
     int unk1;
-    Mat3* m;
+    ConvexRotation* m;
 };
 
 struct Cb;
@@ -213,7 +157,7 @@ void FN::FUN_00c9e2a0(int p1, int p2, Cb* apCb)
         __m128 v = _mm_load_ps(&out.v.x);
         int p2Value = p2;
         P2* pP2 = (P2*)p2Value;
-        Mat3* m = pP2->m;
+        ConvexRotation* m = pP2->m;
         VTable* vt = apCb->vt;
         void(__thiscall * fn)(Cb*, P2*, Vec4*) = vt->fn;
 

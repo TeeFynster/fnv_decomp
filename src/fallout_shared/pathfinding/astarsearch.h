@@ -10,7 +10,6 @@ inline BSWin32TaskletManager& GetTaskletManager()
     return s_TaskletManager;
 }
 
-template <>
 // @fnv 0x006a7e00
 CREATE_ASTARNODE_RESULT AStarSearch<NavMeshTriangleReference, NavMeshTriangleEdgeReference>::CreateOrUpdateNode(
     unsigned int uiKey, float m_fPathingCostCur, AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>*& pNodeOut)
@@ -63,7 +62,6 @@ CREATE_ASTARNODE_RESULT AStarSearch<NavMeshTriangleReference, NavMeshTriangleEdg
     return CREATE_ASTARNODE_RESULT_ASTAR_CREATED_NEW_NODE;
 }
 
-template <>
 // @fnv 0x006b8fe0
 CREATE_ASTARNODE_RESULT AStarSearch<AStarNodeData*, AStarNodeLink*>::CreateOrUpdateNode(
     unsigned int uiKey, float m_fPathingCostCur, AStarNode<AStarNodeData*, AStarNodeLink*>*& pNodeOut)
@@ -116,12 +114,11 @@ CREATE_ASTARNODE_RESULT AStarSearch<AStarNodeData*, AStarNodeLink*>::CreateOrUpd
     return CREATE_ASTARNODE_RESULT_ASTAR_CREATED_NEW_NODE;
 }
 
-template <class BoundingVolumeNode, class TLink>
 // @fnv 0x006a7c90
-AStarNode<BoundingVolumeNode, TLink>* AStarSearch<BoundingVolumeNode, TLink>::FindOrCreateSearchNode(
-    unsigned int uiKey, const BoundingVolumeNode& ObjectResolver, float m_fCost)
+AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* AStarSearch<NavMeshTriangleReference, NavMeshTriangleEdgeReference>::FindOrCreateSearchNode(
+    unsigned int uiKey, const NavMeshTriangleReference& ObjectResolver, float m_fCost)
 {
-    AStarNode<BoundingVolumeNode, TLink>* pNode;
+    AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* pNode;
     switch (((NavMeshSearch*)this)->CreateOrUpdateNode(uiKey, 0.0f, pNode))
     {
     case CREATE_ASTARNODE_RESULT_ASTAR_CREATED_NEW_NODE:
@@ -139,14 +136,13 @@ AStarNode<BoundingVolumeNode, TLink>* AStarSearch<BoundingVolumeNode, TLink>::Fi
     }
 }
 
-template <class BoundingVolumeNode, class TLink>
 // @fnv 0x006a8010
-AStarNode<BoundingVolumeNode, TLink>* AStarSearch<BoundingVolumeNode, TLink>::ComputePath()
+AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* AStarSearch<NavMeshTriangleReference, NavMeshTriangleEdgeReference>::ComputePath()
 {
-    AStarNode<BoundingVolumeNode, TLink>* pCurNode;
-    AStarConnectionArray<BoundingVolumeNode, TLink> ConnectionArray;
+    AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* pCurNode;
+    AStarConnectionArray<NavMeshTriangleReference, NavMeshTriangleEdgeReference> ConnectionArray;
     unsigned int uiCounter;
-    AStarNode<BoundingVolumeNode, TLink>* i;
+    AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* i;
     unsigned int pSavedLastNode;
     i = m_pCurrentNode;
     m_pCurrentNode = AStarBucketQueue.Pop();
@@ -189,14 +185,13 @@ AStarNode<BoundingVolumeNode, TLink>* AStarSearch<BoundingVolumeNode, TLink>::Co
     return NULL;
 }
 
-template <class BoundingVolumeNode, class TLink>
 // @fnv 0x006a7d60
-bool AStarSearch<BoundingVolumeNode, TLink>::Search(unsigned int uiParam1, unsigned int uiParam2, bool bUseBestNode)
+bool AStarSearch<NavMeshTriangleReference, NavMeshTriangleEdgeReference>::Search(unsigned int uiParam1, unsigned int uiParam2, bool bUseBestNode)
 {
-    AStarNode<BoundingVolumeNode, TLink>* pNode;
+    AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* pNode;
     bool bSuccess;
-    AStarNode<BoundingVolumeNode, TLink>* pOutNode;
-    m_bUseBestNode = GetTaskletManager().TryRunAsTasklet(gm_GetCurrentThreadId());
+    AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* pOutNode;
+    m_bUseBestNode = GetTaskletManager().IsTaskletThread(gm_GetCurrentThreadId());
     pNode = ComputePath();
     if (pNode)
     {
@@ -218,13 +213,4 @@ bool AStarSearch<BoundingVolumeNode, TLink>::Search(unsigned int uiParam1, unsig
     return bSuccess;
 }
 
-template AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* AStarSearch<
-    NavMeshTriangleReference, NavMeshTriangleEdgeReference>::FindOrCreateSearchNode(unsigned int,
-                                                                                    const NavMeshTriangleReference&,
-                                                                                    float);
-template bool AStarSearch<NavMeshTriangleReference, NavMeshTriangleEdgeReference>::Search(unsigned int, unsigned int,
-                                                                                          bool);
-
-template AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference>* AStarSearch<
-    NavMeshTriangleReference, NavMeshTriangleEdgeReference>::ComputePath();
 #endif

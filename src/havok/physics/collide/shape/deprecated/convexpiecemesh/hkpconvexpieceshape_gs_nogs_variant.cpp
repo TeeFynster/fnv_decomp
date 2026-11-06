@@ -1,3 +1,19 @@
+#include "../../../../../../../include/hkArray.h"
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkVector4.h"
+#include "../../../../../../../include/hkSimdReal.h"
+#include "../../../../../../../include/hkAabb.h"
+#include "../../../../../../../include/hkSphere.h"
+#include "../../../../../../../include/hkOstream.h"
+#include "../../../../../../../include/hkError.h"
+#include "../../../../../../../include/hkpConvexShape.h"
+#include "../../../../../../../include/hkpShapeCollection.h"
+#include "../../../../../../../include/hkpShapeContainer.h"
 
 // src/havok/physics/collide/shape/deprecated/convexpiecemesh/hkpconvexpieceshape_gs_nogs_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/physics/collide/shape/deprecated/convexpiecemesh/hkpconvexpieceshape.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,138 +21,15 @@
 
 // src/havok/physics/collide/shape/deprecated/convexpiecemesh/hkpconvexpieceshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/deprecated/convexpiecemesh/hkpconvexpieceshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-extern int DAT_010c6fb0;
-extern int DAT_010ece2c;
-extern int DAT_010ece08;
-struct FUN_00e607c0
-{
-    void* m_p00;           // +0x00
-    short m_s04;           // +0x04
-    short m_s06;           // +0x06
-    int m_i08;             // +0x08
-    int m_i0C;             // +0x0c
-    float m_f10;           // +0x10
-    void* volatile m_p14;  // +0x14
-
-    FUN_00e607c0(float arg);
-};
-struct FUN_00e60680_class
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int capacity;
-    int __thiscall GetNextIndex(int index);
-};
-struct InnerDispatch
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void run(int, int);
-};
-struct Dispatch
-{
-    int x0, x4, x8, xc;
-    InnerDispatch inner;
-};
-struct FUN_00e60690_owner
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    Dispatch* unk0c;
-    int* unk10;
-    void DispatchToInner(int index, int value);
-};
-extern int DAT_010c6fb0;
-extern int DAT_0102e388;
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
-struct FUN_00e60c30_cls
-{
-    int m_vptr;
-    unsigned short m_uSize;
-    unsigned short m_u06;
-    int unk08;
-    int unk0c;
-    int unk10;
-    void* volatile m_p14;
-
-    FUN_00e60c30_cls* Destroy(unsigned char acFlags);
-    static void operator delete(void* apMemory) throw();
-};
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 #include <xmmintrin.h>
 extern float DAT_0104e148;
-
-struct __declspec(align(16)) FNV_V4
-{
-    float x;
-    float y;
-    float z;
-    int w;
-};
 
 union __declspec(align(16)) ShapeBuffer338
 {
     __m128 alignment;
     char bytes[512];
-};
-
-struct FNV_Res
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void calc(__m128* a, __m128* out);
-};
-
-struct FNV_Inner
-{
-    virtual void i00();
-    virtual void i04();
-    virtual void i08();
-    virtual void i0c();
-    virtual void i10();
-    virtual FNV_Res* run(int index, ShapeBuffer338* out);
-};
-
-struct FNV_Disp
-{
-    int d00;
-    int d04;
-    int d08;
-    int d0c;
-    FNV_Inner inner;
 };
 
 struct FNV_Owner
@@ -149,24 +42,25 @@ struct FNV_Owner
     int u14;
     int u18;
     int u1c;
-    FNV_Disp* p20;
+    hkpShapeCollection* p20;
     int* p24;
     int n28;
-    void FUN_00e608d0(FNV_V4* pA, FNV_V4* pOut);
+    void FUN_00e608d0(hkVector4* pA, hkVector4* pOut);
 };
 
 // @fnv 0x00e608d0
-void FNV_Owner::FUN_00e608d0(FNV_V4* pA, FNV_V4* pOut)
+void FNV_Owner::FUN_00e608d0(hkVector4* pA, hkVector4* pOut)
 {
     ShapeBuffer338 big;
-    FNV_V4 buf;
+    hkVector4 buf;
     float dot;
     float best = DAT_0104e148;
     int idx = 0;
     for (int i = 0; i < n28; i++)
     {
-        FNV_Res* r = p20->inner.run(p24[i], &big);
-        r->calc((__m128*)pA, (__m128*)&buf);
+        const hkpConvexShape* r = static_cast<const hkpConvexShape*>(
+            p20->GetShapeForKey(p24[i], reinterpret_cast<hkpShapeBuffer&>(big)));
+        r->GetSupportVertex(*pA, reinterpret_cast<Vector4WithInt24W&>(buf));
         __m128 prod = _mm_mul_ps(*(const __m128*)pA, *(const __m128*)&buf);
         __m128 s1 = _mm_add_ss(_mm_shuffle_ps(prod, prod, 0x55), prod);
         float d;
@@ -174,12 +68,12 @@ void FNV_Owner::FUN_00e608d0(FNV_V4* pA, FNV_V4* pOut)
         if (d > best)
         {
             best = d;
-            int t = buf.w & 0xc0ffffff;
+            int t = buf.m_vComponents.m128_i32[3] & 0xc0ffffff;
             idx = t / 16 + i * 3;
             *(__m128*)pOut = *(const __m128*)&buf;
         }
     }
-    pOut->w = idx | 0x3f000000;
+    pOut->m_vComponents.m128_i32[3] = idx | 0x3f000000;
 }
 
 extern "C" void __debugbreak();
@@ -191,93 +85,82 @@ inline void* operator new(unsigned int, void* p)
     return p;
 }
 
-class S5fb50_SimdReal
-{
-  public:
-    S5fb50_SimdReal(const __m128& x) : m_vValue(x)
-    {}
-    operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
 
-  private:
-    __m128 m_vValue;
-};
-
-// hkVector4
-class S5fb50_Vector4
+inline void hkVector4::operator=(const hkVector4& v)
 {
-  public:
-    __m128 m_vComponents;
-    inline void operator=(const S5fb50_Vector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    inline void setAdd4(const S5fb50_Vector4& v0, const S5fb50_Vector4& v1)
-    {
-        m_vComponents = _mm_add_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    inline void sub4(const S5fb50_Vector4& v)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents);
-    }
-    inline void setSub4(const S5fb50_Vector4& v0, const S5fb50_Vector4& v1)
-    {
-        m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    inline void setAbs4(const S5fb50_Vector4& v)
-    {
-        m_vComponents = _mm_and_ps(v.m_vComponents, *(const __m128*)&DAT_01017d10);
-    }
-    inline void setMin4(const S5fb50_Vector4& a, const S5fb50_Vector4& b)
-    {
-        m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
-    }
-    inline S5fb50_SimdReal dot3(const S5fb50_Vector4& a) const
-    {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2)), xySum);
-    }
-    inline S5fb50_SimdReal lengthSquared3() const
-    {
-        return this->dot3(*this);
-    }
-    inline float& operator()(int a)
-    {
-        return reinterpret_cast<float*>(&m_vComponents)[a];
-    }
-    inline const float& operator()(int a) const
-    {
-        return reinterpret_cast<const float*>(&m_vComponents)[a];
-    }
-};
+    m_vComponents = v.m_vComponents;
+}
 
-// hkSphere
-class S5fb50_Sphere
+inline void hkVector4::setAdd4(const hkVector4& v0, const hkVector4& v1)
 {
-  public:
-    inline float getRadius() const
-    {
-        return m_pos(3);
-    }
-    inline const S5fb50_Vector4& getPosition() const
-    {
-        return m_pos;
-    }
-    S5fb50_Vector4 m_pos;
-};
+    m_vComponents = _mm_add_ps(v0.m_vComponents, v1.m_vComponents);
+}
 
-// hkAabb
-class S5fb50_Aabb
+inline void hkVector4::sub4(const hkVector4& v)
 {
-  public:
-    S5fb50_Vector4 m_kMinimumCorner;
-    S5fb50_Vector4 m_kMaximumCorner;
-};
+    m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents);
+}
+
+inline void hkVector4::setSub4(const hkVector4& v0, const hkVector4& v1)
+{
+    m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
+}
+
+inline void hkVector4::setAbs4(const hkVector4& v)
+{
+    m_vComponents = _mm_and_ps(v.m_vComponents, *(const __m128*)&DAT_01017d10);
+}
+
+inline void hkVector4::setMin4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
+}
+
+inline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x)
+{}
+
+inline hkSimdReal::operator float() const
+{
+    float fLane;
+    _mm_store_ss(&fLane, m_vValue);
+    return fLane;
+}
+
+inline hkSimdReal hkVector4::dot3(const hkVector4& kRhs) const
+{
+    __m128 vProd = _mm_mul_ps(m_vComponents, kRhs.m_vComponents);
+    __m128 vSum01 = _mm_add_ss(_mm_shuffle_ps(vProd, vProd, _MM_SHUFFLE(1, 1, 1, 1)), vProd);
+    return _mm_add_ss(_mm_shuffle_ps(vProd, vProd, _MM_SHUFFLE(2, 2, 2, 2)), vSum01);
+}
+
+inline hkSimdReal hkVector4::lengthSquared3() const
+{
+    return this->dot3(*this);
+}
+
+inline float& hkVector4::operator()(int a)
+{
+    return reinterpret_cast<float*>(&m_vComponents)[a];
+}
+
+inline const float& hkVector4::operator()(int a) const
+{
+    return reinterpret_cast<const float*>(&m_vComponents)[a];
+}
+
+// The shared sphere exposes its storage; retain the query accessors in this unit.
+inline const hkVector4& getSpherePosition(const hkSphere& sphere)
+{
+    return reinterpret_cast<const hkVector4&>(sphere.m_pos);
+}
+
+inline float getSphereRadius(const hkSphere& sphere)
+{
+    return getSpherePosition(sphere)(3);
+}
+
+inline hkAabb::hkAabb()
+{}
 
 class S5fb50_PrimitiveInfo
 {
@@ -285,30 +168,25 @@ class S5fb50_PrimitiveInfo
     unsigned int ID;
 };
 
-struct S5fb50_Array
+static __forceinline S5fb50_PrimitiveInfo& S5fb50_Array__expandOne(hkArrayBase<S5fb50_PrimitiveInfo>& self, hkMemoryRouter* router);
+
+static __forceinline S5fb50_PrimitiveInfo& S5fb50_Array_AllocatePair(hkArrayBase<S5fb50_PrimitiveInfo>& self);
+
+static __forceinline S5fb50_PrimitiveInfo& S5fb50_Array__expandOne(hkArrayBase<S5fb50_PrimitiveInfo>& self, hkMemoryRouter* router)
 {
-    S5fb50_PrimitiveInfo* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    inline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    inline S5fb50_PrimitiveInfo& _expandOne(AudioHolder* router)
-    {
-        if (m_iElementCount == getCapacity())
+        if (self.m_iElementCount == self.getCapacity())
         {
-            ResizeAudioStream(router->m_pAllocator, this, sizeof(S5fb50_PrimitiveInfo));
+            ResizeAudioStream(router->m_heap, (&self), sizeof(S5fb50_PrimitiveInfo));
         }
         for (int i = 0; i < 1; i++)
-            ::new (m_data + m_iElementCount + i) S5fb50_PrimitiveInfo;
-        return m_data[m_iElementCount++];
+            ::new (self.m_data + self.m_iElementCount + i) S5fb50_PrimitiveInfo;
+        return self.m_data[self.m_iElementCount++];
     }
-    inline S5fb50_PrimitiveInfo& AllocatePair()
-    {
-        return _expandOne(FUN_00c85750());
+
+static __forceinline S5fb50_PrimitiveInfo& S5fb50_Array_AllocatePair(hkArrayBase<S5fb50_PrimitiveInfo>& self)
+{
+        return S5fb50_Array__expandOne(self, FUN_00c85750());
     }
-};
 
 struct S5fb50_Query
 {
@@ -318,29 +196,10 @@ struct S5fb50_Query
     int m_iIndex;
 };
 
-// hkErrStream
-struct S5fb50_ErrStream
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void FUN_00cb1600(void* buf, int bufSize);
-    void FUN_00cc01c0(const char* s);
-    void FUN_00cc00e0();
-};
-struct S5fb50_Error
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual int message(int id, unsigned int msgId, const char* desc, const char* file, int line);
-};
-extern S5fb50_Error* DAT_01268360;
-
 class S5fb50_MoppVm
 {
   public:
-    S5fb50_Array* m_pPrimitiveInfoArray;
+    hkArrayBase<S5fb50_PrimitiveInfo>* m_pPrimitiveInfoArray;
     int unk04;
     int unk08;
     int unk0c;
@@ -351,35 +210,35 @@ class S5fb50_MoppVm
     }
     inline void AddHit(unsigned int key, const unsigned int properties[1])
     {
-        m_pPrimitiveInfoArray->AllocatePair().ID = key;
+        S5fb50_Array_AllocatePair((*(m_pPrimitiveInfoArray))).ID = key;
     }
 };
 
 class S5fb50_SphereQueryObject : public S5fb50_MoppVm
 {
   public:
-    S5fb50_Sphere m_pSphere;
+    hkSphere m_pSphere;
     void FUN_00e66600(const S5fb50_Query* query, const unsigned char* PC);
     void FUN_00e66290(const S5fb50_Query* query, const unsigned char* PC);
-    __forceinline int checkCollision(const S5fb50_Aabb& aabb, const S5fb50_Query* query, const unsigned char* PC)
+    __forceinline int checkCollision(const hkAabb& aabb, const S5fb50_Query* query, const unsigned char* PC)
     {
-        S5fb50_Vector4 center;
+        hkVector4 center;
         center.setAdd4(aabb.m_kMinimumCorner, aabb.m_kMaximumCorner);
-        S5fb50_Vector4 extent;
+        hkVector4 extent;
         extent.setSub4(aabb.m_kMaximumCorner, aabb.m_kMinimumCorner);
-        center.sub4(m_pSphere.getPosition());
+        center.sub4(getSpherePosition(m_pSphere));
         center.setAbs4(center);
-        S5fb50_Vector4 nearest;
+        hkVector4 nearest;
         nearest.setMin4(center, extent);
-        S5fb50_Vector4 diff;
+        hkVector4 diff;
         diff.setSub4(nearest, center);
         float distance = diff.lengthSquared3();
-        float radius2 = m_pSphere.getRadius() * m_pSphere.getRadius();
+        float radius2 = getSphereRadius(m_pSphere) * getSphereRadius(m_pSphere);
         if (distance > radius2)
         {
             return 0;
         }
-        S5fb50_Vector4 farthest;
+        hkVector4 farthest;
         farthest.setAdd4(center, extent);
         if (farthest.lengthSquared3() < radius2)
         {
@@ -394,7 +253,7 @@ class S5fb50_SphereQueryObject : public S5fb50_MoppVm
 class S5fb50_FloatAabbVm : public S5fb50_MoppVm
 {
   public:
-    struct TempAabb : public S5fb50_Aabb
+    struct TempAabb : public hkAabb
     {
         TempAabb()
         {}
@@ -774,11 +633,13 @@ void S5fb50_FloatAabbVm::FUN_00e5fb50(const S5fb50_Query* query, const unsigned 
             do
             {
                 char buf[512];
-                S5fb50_ErrStream ostr;
+                // Keep the original explicit stream lifetime without automatic unwinding.
+                void* streamStorage[sizeof(hkOstream) / sizeof(void*)];
+                hkOstream& ostr = *reinterpret_cast<hkOstream*>(streamStorage);
                 ostr.FUN_00cb1600(buf, sizeof(buf));
                 ostr.FUN_00cc01c0(
                     "Unknown command - This mopp data has been corrupted (check for memory trashing), or an hkpMoppBvTreeShape has been pointed at invalid mopp data.\n");
-                if (DAT_01268360->message(
+                if (hkError::s_instance->message(
                         3, 0x1298fedd, buf,
                         "d:\\build\\20091222_000100_AiAnBeClDePh\\Source\\Physics/Internal/Collide/Mopp/Machine/hkpMoppUsingFloatAabbVirtualMachine.inl",
                         301))

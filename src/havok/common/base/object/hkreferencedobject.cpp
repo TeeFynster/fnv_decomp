@@ -2,37 +2,29 @@
 // src/havok/common/base/object/hkreferencedobject.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/object/hkreferencedobject.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkReferencedObject.h"
-
-struct FUN_00c903b0_class
-{
-    void** m_pVTable;
-    short m_uiObjectFlags;
-    short m_uCount;
-    void ReleaseReference();
-};
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkReferencedObjectLock.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/NiStream.h"
+#include "../../../../../include/NiBinaryStream.h"
 
 // @fnv 0x00c903b0
-void FUN_00c903b0_class::ReleaseReference()
+__declspec(noinline) void __fastcall ReleaseUnserializedReference(hkReferencedObject* object)
 {
-    if (m_uiObjectFlags)
+    if (object->m_usMemSizeAndFlags)
     {
-        --m_uCount;
-        if (!m_uCount)
-            ((void(__thiscall*)(void*, int))m_pVTable[0])(this, 1);
+        --object->m_sReferenceCount;
+        if (!object->m_sReferenceCount)
+            ((void(__thiscall*)(void*, int))(*(void***)object)[0])(object, 1);
     }
 }
 
-struct FUN_00c903a0_class
-{
-    void FUN_00c903a0();
-};
-
 // @fnv 0x00c903a0
-void FUN_00c903a0_class::FUN_00c903a0()
+__declspec(noinline) void __fastcall AddUnserializedReference(hkReferencedObject* object)
 {
-    if ((*(short*)((char*)this + 4)) != 0)
-        (*(short*)((char*)this + 6))++;
+    if (object->m_usMemSizeAndFlags)
+        object->m_sReferenceCount++;
 }
 
 extern int DAT_012681d4;
@@ -82,19 +74,13 @@ struct FUN_00cdf6e0_class
     void SetReferencedObject(hkReferencedObject* pObject);
 };
 
-struct FUN_00cdf6e0_Ref : hkReferencedObject
-{
-    void RetainReference();
-    void removeReference();
-};
-
 // @fnv 0x00cdf6e0
 void FUN_00cdf6e0_class::SetReferencedObject(hkReferencedObject* pObject)
 {
-    FUN_00cdf6e0_Ref* pNewRef = (FUN_00cdf6e0_Ref*)pObject;
+    hkReferencedObject* pNewRef = pObject;
     if (pNewRef)
-        pNewRef->RetainReference();
-    FUN_00cdf6e0_Ref* pOldRef = (FUN_00cdf6e0_Ref*)m_pObject;
+        pNewRef->addReference();
+    hkReferencedObject* pOldRef = m_pObject;
     if (pOldRef)
         pOldRef->removeReference();
     m_pObject = pObject;
@@ -456,64 +442,42 @@ void Owner_9bf0::FUN_00c89bf0(Object_9bf0* apObject)
     m_object = apObject;
 }
 
-struct Obj
+namespace hkRouterC904 {
+// Shared router layout: the heap allocator used by 0x00c85750 is at +0x10.
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+}
+
+
+inline void* hkReferencedObject::operator new(std::size_t nbytes)
 {
-    int a;
-    unsigned short w;
-    void Init();
-};
-struct Alloc
-{
-    virtual ~Alloc();
-    virtual Obj* Allocate(unsigned n);
-};
-struct Mgr
-{
-    char pad[0x10];
-    Alloc* m_alloc;
-    Obj* New(unsigned n)
-    {
-        return m_alloc->Allocate(n);
-    }
-};
-Mgr* FUN_00c85750();
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(hkRouterC904::FUN_00c85750().heap().blockAlloc(nbytes));
+    b->m_usMemSizeAndFlags = (unsigned short)nbytes;
+    return b;
+}
+
 // @fnv 0x00c903e0
 void CreateAndInitObj()
 {
-    Obj* o = FUN_00c85750()->New(0x30);
-    o->w = 0x30;
-    o->Init();
+    new hkReferencedObjectLock();
 }
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long index);
 extern "C" __declspec(dllimport) int __stdcall TlsSetValue(unsigned long index, void* value);
-extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* section);
 extern int DAT_012681d4;
 extern int DAT_012681d8;
-
-struct FUN_00c90490_state
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int m_0c;
-    int unk10;
-    int unk14;
-    int unk18;
-};
 
 // Increments the TLS-guarded counter if the TLS slot holds the sentinel, otherwise enters the critical section, resets the counter to 1 and sets the TLS slot.
 // @fnv 0x00c90490
 void __cdecl EnterTlsGuard()
 {
-    FUN_00c90490_state* st = reinterpret_cast<FUN_00c90490_state*>(DAT_012681d4);
+    hkReferencedObjectLock* st = reinterpret_cast<hkReferencedObjectLock*>(DAT_012681d4);
     if ((int)TlsGetValue(DAT_012681d8) == 0x23df4554)
     {
-        st->m_0c++;
+        st->m_lLockCount++;
         return;
     }
-    EnterCriticalSection(&st->unk18);
-    st->m_0c = 1;
+    EnterCriticalSection(&st->m_kCriticalSection);
+    st->m_lLockCount = 1;
     TlsSetValue(DAT_012681d8, (void*)0x23df4554);
 }
 
@@ -521,38 +485,9 @@ extern int DAT_012681d4;
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 extern "C" __declspec(dllimport) int __stdcall TlsSetValue(unsigned long dwTlsIndex, void* pvValue);
-extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* pkSection);
-extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void* pkSection);
-
-struct hkCriticalSectionDataC905
-{
-    void* m_debugInfo;
-    long m_lLockCount;
-    long m_recursionCount;
-    void* m_owningThread;
-    void* m_lockSemaphore;
-    unsigned long m_spinCount;
-};
-
-struct hkReferencedObjectLockC905
-{
-    int unk00;
-    int unk04;
-    int m_multiThreaded;
-    int m_lLockCount;
-    int unk10;
-    int unk14;
-    hkCriticalSectionDataC905 m_kCriticalSection;
-};
-
-class hkReferencedObjectC905 : public hkReferencedObject
-{
-  public:
-    void FUN_00c905b0();
-};
 
 // @fnv 0x00c905b0
-void hkReferencedObjectC905::FUN_00c905b0()
+void hkReferencedObject::removeReference() const
 {
     if (m_usMemSizeAndFlags != 0)
     {
@@ -562,7 +497,7 @@ void hkReferencedObjectC905::FUN_00c905b0()
             delete this;
             return;
         }
-        hkReferencedObjectLockC905* pkLock = reinterpret_cast<hkReferencedObjectLockC905*>(DAT_012681d4);
+        hkReferencedObjectLock* pkLock = reinterpret_cast<hkReferencedObjectLock*>(DAT_012681d4);
         const unsigned long& kTls = reinterpret_cast<const unsigned long*>(&DAT_012681d4)[1];
         if (pkLock->m_multiThreaded == 1 && TlsGetValue(kTls) != reinterpret_cast<void*>(0x23df4554))
         {
@@ -980,97 +915,32 @@ void __thiscall Obj_00c89b60::FUN_00c89b60(Ref_00c89b60* apReference)
     m_pReference = apReference;
 }
 
-class hkMemoryAllocatorC904
-{
-  public:
-    virtual ~hkMemoryAllocatorC904() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterC904
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorC904* m_pStreamAllocator;
-
-    hkMemoryAllocatorC904& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-namespace hkRouterC904 {
-extern "C" hkMemoryRouterC904& __cdecl FUN_00c85750() throw();
-}
-
-class hkRefObjC904
-{
-  public:
-    virtual ~hkRefObjC904();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    hkRefObjC904()
-    {
-        m_sReferenceCount = 1;
-    }
-
-    static void* operator new(unsigned int nbytes)
-    {
-        hkRefObjC904* b = static_cast<hkRefObjC904*>(hkRouterC904::FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
-        b->m_usMemSizeAndFlags = (unsigned short)nbytes;
-        return b;
-    }
-    static void operator delete(void* p);
-};
-
-class FUN_00c90830 : public hkRefObjC904
-{
-  public:
-    FUN_00c90830() throw();
-    void ReleaseReference() throw();
-
-    int m_08;
-    int unk0C[9];
-};
-
 namespace hkSingletonC904 {
-extern FUN_00c90830* DAT_012681d4;
+extern hkReferencedObjectLock* DAT_012681d4;
 }
 
-static inline void replaceInstanceC904(FUN_00c90830* p)
+static inline void replaceInstanceC904(hkReferencedObjectLock* p)
 {
     if (hkSingletonC904::DAT_012681d4)
-        hkSingletonC904::DAT_012681d4->ReleaseReference();
+        ReleaseUnserializedReference(hkSingletonC904::DAT_012681d4);
     hkSingletonC904::DAT_012681d4 = p;
 }
 
-// Stores value into m_08 of the singleton, creating a FUN_00c90830 instance first if DAT_012681d4 is null.
+// Sets the singleton lock mode, creating the lock first if DAT_012681d4 is null.
 // @fnv 0x00c90420
 void __cdecl FUN_00c90420(int value)
 {
     if (!hkSingletonC904::DAT_012681d4)
     {
-        FUN_00c90830* p = new FUN_00c90830();
-        p->m_08 = value;
+        hkReferencedObjectLock* p = new hkReferencedObjectLock();
+        p->m_multiThreaded = value;
         replaceInstanceC904(p);
     }
     else
     {
-        hkSingletonC904::DAT_012681d4->m_08 = value;
+        hkSingletonC904::DAT_012681d4->m_multiThreaded = value;
     }
 }
-
-struct FUN_00c90510_class
-{
-    void** m_pVTable;
-    short m_uiObjectFlags;
-    short m_uCount;
-    void FUN_00c90510();
-};
 
 extern int DAT_012681d4;
 extern int DAT_012681d8;
@@ -1080,9 +950,9 @@ extern void(__stdcall* DAT_00fdf05c)(void*);
 extern void(__stdcall* DAT_00fdf100)(void*);
 
 // @fnv 0x00c90510
-void FUN_00c90510_class::FUN_00c90510()
+void hkReferencedObject::addReference() const
 {
-    if (!m_uiObjectFlags)
+    if (!m_usMemSizeAndFlags)
         return;
 
     int* state = (int*)DAT_012681d4;
@@ -1110,7 +980,7 @@ void FUN_00c90510_class::FUN_00c90510()
                 setValue(DAT_012681d8, 0x23df4554);
             }
 
-            m_uCount += one;
+            m_sReferenceCount += one;
             --state[3];
 
             if (state[3] <= 0)
@@ -1123,7 +993,7 @@ void FUN_00c90510_class::FUN_00c90510()
         }
     }
 
-    m_uCount += one;
+    m_sReferenceCount += one;
 }
 
 namespace fnv_00cc49b0 {
@@ -1202,56 +1072,28 @@ void FUN_00cc49b0_class::FUN_00cc49b0(FUN_00c90510_class* apOwner)
 }
 }  // namespace fnv_00cc49b0
 
-class NiBinaryStreamCC4
+// Inline stream operations used by this unit accompany the shared declarations.
+inline NiBinaryStream* NiStream::GetBinaryStream()
 {
-  public:
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(NiBinaryStreamCC4*, void*, unsigned int, unsigned int*, unsigned int);
+    return *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(this) + 0x24c);
+}
 
-    template <class T> void Read(T& value)
-    {
-        unsigned int uiSize = sizeof(T);
-        m_uiStreamFlags += m_pfnRead(this, &value, sizeof(T), &uiSize, 1);
-    }
-};
-
-struct NiStream
+template <class T> inline void NiBinaryStream::Read(T& value)
 {
-    int unk000, unk004, unk008, unk00C, unk010, unk014, unk018, unk01C, unk020, unk024, unk028, unk02C;
-    int unk030, unk034, unk038, unk03C, unk040, unk044, unk048, unk04C, unk050, unk054, unk058, unk05C;
-    int unk060, unk064, unk068, unk06C, unk070, unk074, unk078, unk07C, unk080, unk084, unk088, unk08C;
-    int unk090, unk094, unk098, unk09C, unk0A0, unk0A4, unk0A8, unk0AC, unk0B0, unk0B4, unk0B8, unk0BC;
-    int unk0C0, unk0C4, unk0C8, unk0CC, unk0D0, unk0D4, unk0D8, unk0DC, unk0E0, unk0E4, unk0E8, unk0EC;
-    int unk0F0, unk0F4, unk0F8, unk0FC, unk100, unk104, unk108, unk10C, unk110, unk114, unk118, unk11C;
-    int unk120, unk124, unk128, unk12C, unk130, unk134, unk138, unk13C, unk140, unk144, unk148, unk14C;
-    int unk150, unk154, unk158, unk15C, unk160, unk164, unk168, unk16C, unk170, unk174, unk178, unk17C;
-    int unk180, unk184, unk188, unk18C, unk190, unk194, unk198, unk19C, unk1A0, unk1A4, unk1A8, unk1AC;
-    int unk1B0, unk1B4, unk1B8, unk1BC, unk1C0, unk1C4, unk1C8, unk1CC, unk1D0, unk1D4, unk1D8, unk1DC;
-    int unk1E0, unk1E4, unk1E8, unk1EC, unk1F0, unk1F4, unk1F8, unk1FC, unk200, unk204, unk208, unk20C;
-    int unk210, unk214, unk218, unk21C, unk220, unk224, unk228, unk22C, unk230, unk234, unk238, unk23C;
-    int unk240, unk244, unk248;
-    NiBinaryStreamCC4* m_pUnderlyingStream;
-};
+    unsigned int uiSize = sizeof(T);
+    unsigned int& position = *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4);
+    position += (*reinterpret_cast<ReadFunction*>(reinterpret_cast<char*>(this) + 8))(this, &value, sizeof(T), &uiSize, 1);
+}
 
-class hkRefCC4
-{
-  public:
-    void FUN_00c905b0() throw();
-};
-
-class hkShapeCC4 : public hkRefCC4
-{
-};
-
-class hkpWorldObjectCC4
+// Stream state has layer/flags at +0x20/+0x24, unlike hkpWorldObject's collidable at +0x10.
+class WorldObjectStreamState
 {
   public:
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
     int m_iLayer;
     unsigned char m_ucFlags;
 
-    void FUN_00cc49b0(hkShapeCC4* pkShape) throw();
+    void FUN_00cc49b0(hkReferencedObject* pkShape) throw();
 };
 
 class FUN_00d53200_class
@@ -1261,27 +1103,28 @@ class FUN_00d53200_class
     void FUN_00c8a230(NiStream& kStream);
 };
 
-hkShapeCC4* __cdecl FUN_00cf4af0(NiStream& kStream) throw();
+hkReferencedObject* __cdecl FUN_00cf4af0(NiStream& kStream) throw();
 
-class bhkWorldObjectCC4 : public FUN_00d53200_class
+// This loader's state pointer is at +0x4; bhkWorldObject's inherited Havok pointer is at +0x8.
+class WorldObjectStreamLoader : public FUN_00d53200_class
 {
   public:
-    hkpWorldObjectCC4* m_pPointer;
+    WorldObjectStreamState* m_pPointer;
 
     void FUN_00cc4e10(NiStream& kStream);
 };
 
 // Reads a shape, attaches it to the hkpWorldObject, and deserializes its layer and flags from the stream.
 // @fnv 0x00cc4e10
-void bhkWorldObjectCC4::FUN_00cc4e10(NiStream& kStream)
+void WorldObjectStreamLoader::FUN_00cc4e10(NiStream& kStream)
 {
     FUN_00c8a230(kStream);
-    hkpWorldObjectCC4* pkObject = m_pPointer;
-    hkShapeCC4* pkShape = FUN_00cf4af0(kStream);
+    WorldObjectStreamState* pkObject = m_pPointer;
+    hkReferencedObject* pkShape = FUN_00cf4af0(kStream);
     pkObject->FUN_00cc49b0(pkShape);
-    pkShape->FUN_00c905b0();
-    kStream.m_pUnderlyingStream->Read(pkObject->m_iLayer);
-    kStream.m_pUnderlyingStream->Read(pkObject->m_ucFlags);
+    pkShape->removeReference();
+    kStream.GetBinaryStream()->Read(pkObject->m_iLayer);
+    kStream.GetBinaryStream()->Read(pkObject->m_ucFlags);
 }
 
 struct RcObject
@@ -1514,15 +1357,11 @@ void S00e3eba0_class::ReplaceObject(hkReferencedObject* oldObject, hkReferencedO
         m_items[i]->ReplaceObject(oldObject, apNewObject);
 }
 
-struct BatchReleaseObjectC907 : FUN_00c903b0_class
-{
-    void ReleaseReference();
-};
 // Calls FUN_00c903b0 for each strided item, acquiring the critical section when multi-threaded mode is enabled and TLS lacks the marker.
 // @fnv 0x00c90740
 void __cdecl FUN_00c90740(void* items, int count, int stride)
 {
-    hkReferencedObjectLockC905* guard = (hkReferencedObjectLockC905*)DAT_012681d4;
+    hkReferencedObjectLock* guard = (hkReferencedObjectLock*)DAT_012681d4;
     if (guard->m_multiThreaded != 0 && TlsGetValue(DAT_012681d8) != (void*)0x23df4554)
     {
         if (TlsGetValue(DAT_012681d8) == (void*)0x23df4554)
@@ -1538,7 +1377,7 @@ void __cdecl FUN_00c90740(void* items, int count, int stride)
             char* item = (char*)items;
             do
             {
-                (*((BatchReleaseObjectC907**)item))->ReleaseReference();
+                ReleaseUnserializedReference(*((hkReferencedObject**)item));
                 item += stride;
             } while (--count);
         }
@@ -1557,29 +1396,18 @@ void __cdecl FUN_00c90740(void* items, int count, int stride)
             char* item = (char*)items;
             do
             {
-                (*((BatchReleaseObjectC907**)item))->ReleaseReference();
+                ReleaseUnserializedReference(*((hkReferencedObject**)item));
                 item += step;
             } while (--remaining);
         }
     }
 }
 
-struct ReferenceIncrementC906 : hkReferencedObject
-{
-    __declspec(noinline) void FUN_00c903a0();
-};
-
-void ReferenceIncrementC906::FUN_00c903a0()
-{
-    if (m_usMemSizeAndFlags)
-        ++m_sReferenceCount;
-}
-
 // Calls FUN_00c903a0 on each object, acquiring the critical section when multi-threaded mode is enabled and TLS lacks the marker.
 // @fnv 0x00c90670
 void __cdecl FUN_00c90670(const void* objects, int numObjects, int stride)
 {
-    hkReferencedObjectLockC905* lock = (hkReferencedObjectLockC905*)DAT_012681d4;
+    hkReferencedObjectLock* lock = (hkReferencedObjectLock*)DAT_012681d4;
     if (lock->m_multiThreaded && (unsigned int)TlsGetValue(DAT_012681d8) != 0x23df4554)
     {
         if ((unsigned int)TlsGetValue(DAT_012681d8) == 0x23df4554)
@@ -1594,7 +1422,7 @@ void __cdecl FUN_00c90670(const void* objects, int numObjects, int stride)
         }
         for (int i = 0; i < numObjects; ++i)
         {
-            (*(ReferenceIncrementC906**)objects)->FUN_00c903a0();
+            AddUnserializedReference(*(hkReferencedObject**)objects);
             objects = (const char*)objects + stride;
         }
         --lock->m_lLockCount;
@@ -1608,7 +1436,7 @@ void __cdecl FUN_00c90670(const void* objects, int numObjects, int stride)
     {
         for (int i = 0; i < numObjects; ++i)
         {
-            (*(ReferenceIncrementC906**)objects)->FUN_00c903a0();
+            AddUnserializedReference(*(hkReferencedObject**)objects);
             objects = (const char*)objects + stride;
         }
     }
@@ -1618,7 +1446,7 @@ void __cdecl FUN_00c90670(const void* objects, int numObjects, int stride)
 // @fnv 0x00c904e0
 void __cdecl FUN_00c904e0()
 {
-    hkReferencedObjectLockC905* lock = reinterpret_cast<hkReferencedObjectLockC905*>(DAT_012681d4);
+    hkReferencedObjectLock* lock = reinterpret_cast<hkReferencedObjectLock*>(DAT_012681d4);
     lock->m_lLockCount = lock->m_lLockCount - 1;
     if (lock->m_lLockCount <= 0)
     {

@@ -1,20 +1,60 @@
-// Source layout: BGSEntryPointFunctionDataActivateChoice. PC corrections are in generate_headers.py.
-#ifndef FNV_BGSENTRYPOINTFUNCTIONDATAACTIVATECHOICE_H
-#define FNV_BGSENTRYPOINTFUNCTIONDATAACTIVATECHOICE_H
+#pragma once
 
-#include "layout_support.h"
 #include "BGSEntryPointFunctionData.h"
-#pragma pack(push, 4)
+#include "Script.h"
+
+class EntryPointScriptOperations;
+
 class BGSEntryPointFunctionDataActivateChoice : public BGSEntryPointFunctionData
 {
-  public:
-    BSStringT<char> m_kChoiceText;  // +0x4
-    Script* m_pChoiceScript;        // +0xC
-    unsigned int cFlags;            // +0x10
+public:
+    BGSEntryPointFunctionDataActivateChoice();
+    virtual ~BGSEntryPointFunctionDataActivateChoice();
+    virtual void InitItem(TESForm* form);
+
+    char* choiceText;
+    union
+    {
+        struct
+        {
+            Script resultScript;
+        };
+        struct
+        {
+            unsigned int unk08;
+            unsigned int unk0C;
+            unsigned int unk10;
+            unsigned int unk14;
+            unsigned int unk18;
+            unsigned int unk1C;
+            unsigned int unk20;
+            unsigned int unk24;
+            unsigned int unk28;
+            unsigned int unk2C;
+            unsigned int unk30;
+            unsigned int unk34;
+            unsigned int unk38;
+            unsigned int unk3C;
+            unsigned int unk40;
+            unsigned int unk44;
+            unsigned int unk48;
+            unsigned int unk4C;
+            unsigned int unk50;
+            unsigned int unk54;
+            unsigned int unk58;
+        };
+    };
+    unsigned short flags;
+    unsigned short unk5E;
+
+    void InitializeComponent();
+    void FUN_005e6c30();
+    void FUN_005e6c60(const char* text);
+    BGSEntryPointFunctionData* FUN_005e6cd0();
+    bool FUN_005e6d80(BGSEntryPointFunctionData* other);
+    void FUN_005e6e50();
+    void FUN_005e6600();
+    void* FUN_005e65d0(unsigned int flags);
+    EntryPointScriptOperations* FUN_00413f40();
+    Script& GetName();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BGSEntryPointFunctionDataActivateChoice) == 0x14);
-FNV_STATIC_ASSERT(offsetof(BGSEntryPointFunctionDataActivateChoice, m_kChoiceText) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BGSEntryPointFunctionDataActivateChoice, m_pChoiceScript) == 0xC);
-FNV_STATIC_ASSERT(offsetof(BGSEntryPointFunctionDataActivateChoice, cFlags) == 0x10);
-#endif

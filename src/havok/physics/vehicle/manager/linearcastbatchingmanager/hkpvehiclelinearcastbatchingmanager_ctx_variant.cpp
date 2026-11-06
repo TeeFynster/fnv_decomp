@@ -4,6 +4,8 @@
 // src/havok/physics/vehicle/manager/linearcastbatchingmanager/hkpvehiclelinearcastbatchingmanager.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/manager/linearcastbatchingmanager/hkpvehiclelinearcastbatchingmanager.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 #include "havok/hkpVehicleLinearCastBatchingManager.h"
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkMonitorStream.h"
 struct FUN_00e42fe0
 {
     int __thiscall GetCount();
@@ -51,19 +53,6 @@ extern "C" unsigned __int64 __rdtsc(void);
 typedef unsigned long DWORD;
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern DWORD DAT_0126835c;
-struct ProfRec
-{
-	const char *m_pName;
-	DWORD m_iTick;
-	DWORD unk08;
-};
-struct ProfBuf
-{
-	DWORD unk00;
-	ProfRec *m_pCur;
-	DWORD unk08;
-	ProfRec *m_pRecordEnd;
-};
 struct AllocV;
 struct CharacterBufferState
 {
@@ -153,28 +142,28 @@ struct Vehicle433
 };
 static __forceinline void S00e43320_timerB(const char *name, volatile DWORD &tick)
 {
-	ProfBuf *pBuf = (ProfBuf *)TlsGetValue(DAT_0126835c);
-	ProfRec *pRec = pBuf->m_pCur;
-	if (pRec < pBuf->m_pRecordEnd)
+	hkMonitorStream *pBuf = (hkMonitorStream *)TlsGetValue(DAT_0126835c);
+	hkMonitorStream::TimerCommand *pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+	if (reinterpret_cast<char*>(pRec) < pBuf->m_capacityMinus16.m_storage)
 	{
-		pRec->m_pName = name;
+		pRec->m_commandAndMonitor = name;
 		_ReadWriteBarrier();
 		tick = (DWORD)__rdtsc();
-		pRec->m_iTick = tick;
-		pBuf->m_pCur = pRec + 1;
+		pRec->m_time0 = tick;
+		pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
 	}
 }
 static __forceinline void S00e43320_timer(const char *name)
 {
-	ProfBuf *pBuf = (ProfBuf *)TlsGetValue(DAT_0126835c);
-	ProfRec *pRec = pBuf->m_pCur;
-	if (pRec < pBuf->m_pRecordEnd)
+	hkMonitorStream *pBuf = (hkMonitorStream *)TlsGetValue(DAT_0126835c);
+	hkMonitorStream::TimerCommand *pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+	if (reinterpret_cast<char*>(pRec) < pBuf->m_capacityMinus16.m_storage)
 	{
-		pRec->m_pName = name;
+		pRec->m_commandAndMonitor = name;
 		_ReadWriteBarrier();
 		volatile DWORD tick = (DWORD)__rdtsc();
-		pRec->m_iTick = tick;
-		pBuf->m_pCur = pRec + 1;
+		pRec->m_time0 = tick;
+		pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
 	}
 }
 struct Slot433
@@ -280,14 +269,6 @@ struct E430B0Out
 };
 
 struct E430B0Hdr { int numTasks; int unk04; int unk08; int unk0c; };
-
-struct E430B0Mon
-{
-	void* start;
-	char* end;
-	void* capacity;
-	char* limit;
-};
 
 struct E430B0VehicleData
 {
@@ -446,19 +427,19 @@ struct E430B0Mgr
 	int __thiscall FUN_00e430b0(E430B0World* world, int filterSize, int numJobs, FUN_00d04b90_class* jobQueue, void* semaphore, void* buffer);
 };
 
-static inline void E430B0Timer(E430B0Mon* mon, const char* name)
+static inline void E430B0Timer(hkMonitorStream* mon, const char* name)
 {
-	char* cur = mon->end;
-	if (cur < mon->limit)
+	hkMonitorStream::TimerCommand* cur = reinterpret_cast<hkMonitorStream::TimerCommand*>(mon->m_end.m_storage);
+	if (reinterpret_cast<char*>(cur) < mon->m_capacityMinus16.m_storage)
 	{
-		*(const char**)cur = name;
+		cur->m_commandAndMonitor = name;
 		unsigned int stamp;
 		__asm {
 		    rdtsc
 		    mov dword ptr[stamp], eax
 		}
-		*(unsigned int*)(cur + 4) = stamp;
-		mon->end = cur + 12;
+		cur->m_time0 = stamp;
+		mon->m_end.m_storage = reinterpret_cast<char*>(cur + 1);
 	}
 }
 
@@ -466,7 +447,7 @@ static inline void E430B0Timer(E430B0Mon* mon, const char* name)
 int __thiscall E430B0Mgr::FUN_00e430b0(E430B0World* world, int filterSize, int numJobs, FUN_00d04b90_class* jobQueue, void* semaphore, void* buffer)
 {
 
-	E430B0Timer((E430B0Mon*)TlsGetValue(DAT_0126835c), "TtBuildAndAddLinearCastJobs");
+	E430B0Timer((hkMonitorStream*)TlsGetValue(DAT_0126835c), "TtBuildAndAddLinearCastJobs");
 
 	void* filter = world->collisionFilter;
 	int vehicleCount = count;
@@ -475,7 +456,7 @@ int __thiscall E430B0Mgr::FUN_00e430b0(E430B0World* world, int filterSize, int n
 	((FUN_00e43060*)this)->DoWork((int)buffer, numJobs, (int*)&batch);
 
 	int total = 0;
-	E430B0Timer((E430B0Mon*)TlsGetValue(DAT_0126835c), "TtBuildCommands");
+	E430B0Timer((hkMonitorStream*)TlsGetValue(DAT_0126835c), "TtBuildCommands");
 
 	E430B0Coll* collidable = batch.collidable;
 	E430B0Cmd* command = batch.command;
@@ -490,7 +471,7 @@ int __thiscall E430B0Mgr::FUN_00e430b0(E430B0World* world, int filterSize, int n
 		output += n;
 	}
 
-	E430B0Timer((E430B0Mon*)TlsGetValue(DAT_0126835c), "Et");
+	E430B0Timer((hkMonitorStream*)TlsGetValue(DAT_0126835c), "Et");
 
 	if (numJobs >= total)
 	{
@@ -511,6 +492,6 @@ int __thiscall E430B0Mgr::FUN_00e430b0(E430B0World* world, int filterSize, int n
 		header++;
 	}
 
-	E430B0Timer((E430B0Mon*)TlsGetValue(DAT_0126835c), "Et");
+	E430B0Timer((hkMonitorStream*)TlsGetValue(DAT_0126835c), "Et");
 	return numJobs;
 }

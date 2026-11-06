@@ -1,6 +1,15 @@
 // bgscamerapathmanager.cpp: CameraPathManager (8 functions)
 
+#include "../include/BSStringT.h"
+#include "../include/NiTMallocInterface.h"
 #include "CameraPathManager.h"
+#include "../include/BGSCameraPath.h"
+#include "../include/CameraShotData.h"
+#include "../include/NiFormArray.h"
+#include "../include/TESForm.h"
+#include "../include/NiFile.h"
+
+#include "../include/TESFile.h"
 void* __cdecl operator new(unsigned int);
 
 // Constructs a NiTPrimitiveArray<BGSCameraPath*> by forwarding maxSize and growBy to the NiTArray base constructor.
@@ -57,37 +66,23 @@ void CameraPathManager::UpdateCameraPaths()
     m_kCameraPathList.Compact();
 }
 
-struct NiFormArray_008b2010
-{
-    TESForm* GetFormAt(unsigned int i);
-};
-struct TESFile
-{
-    const char* GetName();
-};
 struct FUN_0058b510_shell
 {
     TESFile* FUN_0058b510(unsigned int a, unsigned int b);
 };
-struct FUN_0058b470_shell
-{
-    bool IsFlag80Set();
-};
+// This flag-check entry point is not declared by the shared TESFile header.
+bool __fastcall IsTESFileFlag80Set(TESFile* file);
 bool __fastcall _ref_008256d0(const char* s);
-struct FUN_0058bb50_shell : NiFormArray
-{
-    TESFile* FUN_0058bb50(unsigned int arg1, unsigned int arg2);
-};
 // @fnv 0x0058bb50
-TESFile* FUN_0058bb50_shell::FUN_0058bb50(unsigned int arg1, unsigned int arg2)
+TESFile* CameraPathManager::FUN_0058bb50(unsigned int arg1, unsigned int arg2)
 {
     TESFile* pFile = 0;
     if (arg1)
     {
-        unsigned int count = reinterpret_cast<TESForm*>(this)->GetFormID();
+        unsigned int count = m_kCameraPathArray.GetSize();
         for (unsigned int i = 0; i < count; ++i)
         {
-            TESForm* form = reinterpret_cast<NiFormArray_008b2010*>(this)->GetFormAt(i);
+            TESForm* form = m_kCameraPathArray.GetFormAt(i);
             if (form)
                 pFile = reinterpret_cast<FUN_0058b510_shell*>(form)->FUN_0058b510(arg1, arg2);
             if (pFile)
@@ -96,7 +91,7 @@ TESFile* FUN_0058bb50_shell::FUN_0058bb50(unsigned int arg1, unsigned int arg2)
     }
     if (pFile)
     {
-        if (reinterpret_cast<FUN_0058b470_shell*>(pFile)->IsFlag80Set())
+        if (IsTESFileFlag80Set(pFile))
         {
             if (!_ref_008256d0(pFile->GetName()))
                 pFile = 0;
@@ -107,10 +102,7 @@ TESFile* FUN_0058bb50_shell::FUN_0058bb50(unsigned int arg1, unsigned int arg2)
 
 extern int DAT_01032748;
 struct ActorCombatGroup;
-template <> struct NiTMallocInterface<ActorCombatGroup*>
-{
-    static void __cdecl Deallocate(ActorCombatGroup** p);
-};
+#include "../include/NiTMallocInterface.h"
 struct FUN_0058bc00_obj
 {
     void* vtbl;
@@ -140,19 +132,14 @@ struct FUN_00863db0_class
     void ClearItems();
 };
 
-struct FUN_0058ba40_shell : public CameraPathManager
-{
-    void DestroyCameraPaths();
-};
-
 // @fnv 0x0058ba40
-void FUN_0058ba40_shell::DestroyCameraPaths()
+void CameraPathManager::DestroyCameraPaths()
 {
-    unsigned int count = reinterpret_cast<TESForm*>(this)->GetFormID();
+    unsigned int count = m_kCameraPathArray.GetSize();
     for (unsigned int index = 0; index < count; ++index)
     {
         BGSCameraPath* path =
-            dynamic_cast<BGSCameraPath*>(reinterpret_cast<NiFormArray_008b2010*>(this)->GetFormAt(index));
+            dynamic_cast<BGSCameraPath*>(m_kCameraPathArray.GetFormAt(index));
         delete path;
     }
 

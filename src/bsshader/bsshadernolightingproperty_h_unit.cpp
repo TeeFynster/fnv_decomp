@@ -1,9 +1,8 @@
-
 // Header unit for bsshadernolightingproperty.h.
-// No @fnv markers here; the covered getter is defined and marked in the
-// header. This translation unit only forces the covered COMDAT to be
+// The covered getter is defined in the shared header. This translation
+// unit only forces the covered COMDAT to be
 // emitted so its bytes can be compared against the original.
-#include "bsshadernolightingproperty.h"
+#include "../../include/BSShaderNoLightingProperty.h"
 
 void BSShaderNoLightingProperty_UnitReference()
 {

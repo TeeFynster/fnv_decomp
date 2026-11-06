@@ -1,6 +1,11 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTPointerListBase.h"
+
 void __cdecl operator delete(void*);
 
 struct FUN_004edb30_t
@@ -21,10 +26,6 @@ void* __thiscall FUN_004edb30_t::FUN_004edd50(unsigned int flags)
 
 extern int DAT_010232b4;
 
-struct NiTMallocInterface
-{
-    static void __cdecl Deallocate(void**);
-};
 
 struct NiPointerListBase
 {
@@ -37,7 +38,7 @@ struct NiPointerListBase
 void __thiscall NiPointerListBase::FUN_004edc60()
 {
     p = &DAT_010232b4;
-    NiTMallocInterface::Deallocate((void**)q);
+    NiTMallocInterface<void*>::Deallocate((void**)q);
 }
 
 void __cdecl operator delete(void*);
@@ -59,13 +60,9 @@ void* __thiscall FUN_004edc90_t::FUN_004edc90(int a, int b)
     return this;
 }
 
+class ActorCombatGroup;
 namespace fnv_004edcc0 {
 void __cdecl operator delete(void*);
-struct ActorCombatGroup;
-struct NiTMallocInterface
-{
-    static void __cdecl Deallocate(ActorCombatGroup**);
-};
 extern int DAT_010232c4;
 struct FUN_004edcc0_t
 {
@@ -77,7 +74,7 @@ struct FUN_004edcc0_t
 void __thiscall FUN_004edcc0_t::InitAndDeallocate()
 {
     m = &DAT_010232c4;
-    NiTMallocInterface::Deallocate(*(ActorCombatGroup***)(this + 1));
+    NiTMallocInterface<ActorCombatGroup*>::Deallocate(*(ActorCombatGroup***)(this + 1));
 }
 }  // namespace fnv_004edcc0
 
@@ -145,32 +142,20 @@ void __thiscall FUN_004edc30_t::ClearAndFreeMap()
 }
 }  // namespace fnv_004edc30
 
-struct Script;
-struct NiTListItem
-{
-    NiTListItem* m_pNext;
-    void* m_pkElement;
-};
-struct NiTPointerListBase
-{
-    NiTListItem* m_pkHead;
-    NiTListItem* m_pkTail;
-    int m_uiCount;
-    void DeleteItem(NiTListItem*);
-    void RemoveAll();
-};
-// Walks the list from m_pkHead, deleting each item via DeleteItem, then resets m_uiCount, m_pkHead and m_pkTail.
+class Script;
+// Walks the list from m_pkHead, deleting each item via DeleteItem, then resets the count, head and tail.
 // @fnv 0x004ed900
-void NiTPointerListBase::RemoveAll()
+template <>
+void NiTPointerListBase<NiTPointerAllocator<unsigned int>, Script*>::RemoveAll() // src: GAMEBRYO_SRC
 {
-    NiTListItem* pkCurr = m_pkHead;
+    NiTListItem<Script*>* pkCurr = m_pkHead;
     while (pkCurr)
     {
-        NiTListItem* pkDel = pkCurr;
-        pkCurr = pkCurr->m_pNext;
+        NiTListItem<Script*>* pkDel = pkCurr;
+        pkCurr = pkCurr->m_pkNext; // src: GAMEBRYO_SRC
         DeleteItem(pkDel);
     }
-    m_uiCount = 0;
+    m_kItemCount.m_uiCount = 0; // src: GAMEBRYO_SRC
     m_pkHead = 0;
     m_pkTail = 0;
 }
@@ -336,24 +321,20 @@ void* __thiscall FUN_004ebb50_shell::FUN_004ede40(unsigned int flags)
 }
 }  // namespace fnv_004ede40
 
-struct NiTMapItem;
-struct NiTPointerMap
-{
-    void NewItem(NiTMapItem*);
-};
 struct NodePoolView
 {
-    NiTMapItem* AddHead();
+    NiTMapItem<unsigned int, void*>* AddHead();
 };
 struct FUN_00ae8bf0_t
 {
     void AddItem(const void* element);
+    void NewItem(NiTMapItem<unsigned int, void*>* node); // links the node in; not a NiTPointerMap member
 };
 // Allocates a map node from the pool at offset 8, stores the element's first pointer in it, and inserts the node into the map.
 // @fnv 0x00ae8bf0
 void FUN_00ae8bf0_t::AddItem(const void* element)
 {
-    NiTMapItem* node;
+    NiTMapItem<unsigned int, void*>* node;
     {
         int a;
         int b;
@@ -365,7 +346,7 @@ void FUN_00ae8bf0_t::AddItem(const void* element)
         node = ((NodePoolView*)((char*)this + 8))->AddHead();
     }
     ((void**)node)[2] = *(void**)element;
-    ((NiTPointerMap*)this)->NewItem(node);
+    NewItem(node);
 }
 
 struct FUN_004edd20_shell
@@ -424,39 +405,22 @@ FUN_004edad0::~FUN_004edad0()
 }
 }  // namespace fnv_004edad0
 
-struct S_00ae8370_Node
-{
-    S_00ae8370_Node* unk00;
-    int unk04;
-    int unk08;
-};
-struct S_00ae8370_Alloc
-{
-    int unk00;
-    void FUN_0045cee0(S_00ae8370_Node* node);
-};
-struct S_00ae8370_List
-{
-    S_00ae8370_Node* unk00;
-    int unk04;
-    S_00ae8370_Alloc unk08;
-    void FUN_00ae8370();
-};
 // @fnv 0x00ae8370
-void S_00ae8370_List::FUN_00ae8370()
+template <>
+void NiTPointerListBase<NiTPointerAllocator<unsigned int>, void*>::RemoveAll() // src: GAMEBRYO_SRC
 {
-    S_00ae8370_Node* pos = unk00;
+    NiTListItem<void*>* pos = m_pkHead;
     while (pos)
     {
-        S_00ae8370_Node* cur = pos;
+        NiTListItem<void*>* cur = pos;
         unsigned int pad[3];
-        pos = pos->unk00;
-        cur->unk08 = 0;
-        unk08.FUN_0045cee0(cur);
+        pos = pos->m_pkNext; // src: GAMEBRYO_SRC
+        cur->m_element = 0; // src: GAMEBRYO_SRC
+        m_kItemCount.Deallocate(cur); // src: GAMEBRYO_SRC
     }
-    unk08.unk00 = 0;
-    unk00 = 0;
-    unk04 = 0;
+    m_kItemCount.m_uiCount = 0; // src: GAMEBRYO_SRC
+    m_pkHead = 0;
+    m_pkTail = 0;
 }
 
 extern int DAT_01023274;

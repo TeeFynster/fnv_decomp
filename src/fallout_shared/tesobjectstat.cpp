@@ -1,8 +1,9 @@
 // fallout_shared/tesobjectstat.cpp: TESObjectSTAT, TESGlobal, Standin, StatCopy (9 functions)
 
 #include "tesobjectstat_load.h"
-#include "tesobjectstat_global.h"
-#include "tesobjectstat_types_TESObjectSTAT.h"
+#include "../../include/TESGlobal.h"
+#include "../../include/TESObjectSTAT.h"
+#include "../../include/TESSound.h"
 
 // Initializes a TESGlobal: sets cType to 's', fValue to 0.0f, and the form type to 6.
 // @fnv 0x005a6320
@@ -150,12 +151,6 @@ bool FUN_005e79a0_t::FUN_0051b650(TESForm* form)
         return true;
     return false;
 }
-
-struct TESSound : public TESForm
-{
-    virtual ~TESSound()
-    {}
-};
 
 extern char str_0102bbb0[];
 

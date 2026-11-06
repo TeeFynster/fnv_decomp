@@ -1,3 +1,18 @@
+#include "../../../include/NiTArray.h"
+#include "../../../include/hkVector4.h"
+#include "../../../include/hkMemoryAllocator.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/BSFadeNode.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiTransform.h"
+#include "../../../include/BSTreeNode.h"
+#include "../../../include/NiCollisionObject.h"
+#include "../../../include/NiRTTI.h"
+#include "../../../include/NiStream.h"
+#include "../../../include/StrArr.h"
+#include "../../../include/NiPoint3.h"
 
 // src/fallout_shared/speedtree/bstreenode_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy /GF /Oy- (unit src/fallout_shared/speedtree/bstreenode_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
@@ -18,14 +33,6 @@ struct FUN_0066b5b0_shell
     const NiRTTI* __thiscall GetNiRTTI();
 };
 struct NiAVObject;
-struct NiNode
-{
-    NiAVObject* __thiscall GetAt(unsigned int);
-};
-struct BSTreeNode : NiNode
-{
-    NiAVObject* __thiscall GetFirstChild();
-};
 struct NiCullingProcess;
 extern "C" unsigned char __cdecl FUN_0054ee20();
 struct DummyNode
@@ -40,9 +47,6 @@ struct FUN_00c6c290_holder
 struct FUN_0066d410_shell : public FUN_00c6c290_holder
 {
     void FUN_0066d410();
-};
-struct NiRTTI
-{
 };
 extern const NiRTTI g_012683d0;
 struct FUN_0066d430_shell
@@ -78,10 +82,6 @@ GlobalObjectO2_00a7b610 g_012681b4;
 struct FUN_0066d610_shell
 {
     GlobalObjectO2_00a7b610* GetGlobalObject();
-};
-struct bhkCapsuleShape
-{
-    unsigned int __thiscall FUN_0066d730() const;
 };
 struct FUN_0066da50_t
 {
@@ -304,18 +304,6 @@ struct S00cb7750
 };
 void* __fastcall FUN_00c6b910(void*);
 extern int DAT_01066b94;
-struct BSFadeNode
-{
-    void* vf;
-    char pad[16];
-    static void* __cdecl operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    BSFadeNode()
-    {
-        FUN_00c6b910(this);
-        vf = (void*)&DAT_01066b94;
-    }
-};
 BSFadeNode* FUN_00c87fc0();
 struct Middle
 {
@@ -329,15 +317,6 @@ struct This
     int unk04;
     Middle* middle;
     void FUN_00c84e20(unsigned int* output);
-};
-struct NiStream
-{
-    int unk00;
-    unsigned int version;
-};
-struct NiCollisionObject
-{
-    void LinkObject(NiStream&);
 };
 struct LegacyLinker : NiCollisionObject
 {
@@ -459,33 +438,6 @@ struct C8CA60Owner
     void FUN_00c8c410(C8CA60Child* pkChild);
     C8CA60Child* FUN_00c8ca60(bool* pbCreated);
 };
-struct StrArr
-{
-    void* unk00;
-    char** data;
-    unsigned short capacity, size, live, growBy;
-    void FUN_0096ad30(unsigned int);
-    void FUN_0096ae90(unsigned int, char* const&);
-    void append(char* const& text)
-    {
-        unsigned int index = size;
-        if (index >= capacity)
-            FUN_0096ad30(index + growBy);
-        FUN_0096ae90(index, text);
-    }
-};
-struct NiPoint3
-{
-    float x, y, z;
-    char* FUN_00a59af0(const char*);
-};
-struct NiTransform
-{
-    float rotation[9];
-    NiPoint3 translate;
-    float scale;
-    char* ToString(const char*);
-};
 struct NativeTransform
 {
     float rotation[12];
@@ -497,19 +449,6 @@ extern NativeTransform DAT_01268370;
 char* __cdecl FUN_00a7d330(void*);
 extern unsigned int DAT_0126fd98;
 extern __declspec(thread) unsigned int currentTask;
-struct AutoMemContext
-{
-    unsigned int ePreviousContext;
-    AutoMemContext()
-    {
-        ePreviousContext = currentTask;
-        currentTask = 16;
-    }
-    ~AutoMemContext()
-    {
-        currentTask = ePreviousContext;
-    }
-};
 struct Component
 {
     virtual void v00();
@@ -583,32 +522,19 @@ struct CB7800RTTI
         return m_pcName;
     }
 };
-struct CB7800StringArray
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-    virtual ~CB7800StringArray();
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
+    return SetAtGrow(m_usSize, element);
+}
 
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char*& element);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char*& element)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
-    }
-
-    unsigned int Add(char*& element)
-    {
-        return SetAtGrow(m_usSize, element);
-    }
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > CB7800StringArray;
 extern "C" char* __cdecl FUN_00a7d330(const char* pcText);
 extern __declspec(thread) int g_CB7800AllocTag;
 struct CB7800AllocTagScope
@@ -742,13 +668,7 @@ struct S_00cb79d0
     S_00cb79d0_C* FUN_00cb79d0(int arg);
 };
 void SwapByteQuadWords(void* buffer, int words);
-struct Vector3
-{
-    float x;
-    float y;
-    float z;
-};
-void __cdecl FUN_00cf0930(void* buffer, int bytes, Vector3* vector);
+void __cdecl FUN_00cf0930(void* buffer, int bytes, NiPoint3* vector);
 struct TlsBlock_t
 {
     int unk000;
@@ -962,31 +882,7 @@ struct BC882C0AllocTagScope
         g_iC882C0AllocTag = m_iSaved;
     }
 };
-class BC882C0StringArray
-{
-  public:
-    virtual ~BC882C0StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > BC882C0StringArray;
 extern const char* g_pcC882C0Name;
 char* __cdecl FUN_00a7d330(const char* pcString);
 class FUN_00c882c0_cls
@@ -1478,7 +1374,7 @@ struct FUN_00cb7790_state
 {
     unsigned int owner;
     unsigned int depth;
-    void __thiscall Wait(int);
+    void __thiscall FUN_0040fbf0(int);
 };
 extern FUN_00cb7790_state DAT_01267b80;
 struct FUN_00cb7790_class
@@ -1717,22 +1613,6 @@ struct A1Owner
     unsigned int unk1E0;
     unsigned char m1E4;
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 struct Triple
 {
     unsigned int m00;
@@ -1760,12 +1640,12 @@ struct TmpGuard
     }
     ~TmpGuard()
     {
-        AudioHolder* pHolder = reinterpret_cast<AudioHolder*>(FUN_00c85750());
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         m1 = 0;
         if ((m2 & 0x80000000u) == 0)
         {
-            pAllocator->Free((void*)m0, (m2 & 0x3fffffffu) * 16u);
+            pAllocator->blockFree((void*)m0, (m2 & 0x3fffffffu) * 16u);
         }
     }
 };
@@ -1822,14 +1702,14 @@ struct FUN_00cb8010_cls
     void __thiscall FUN_00cb8010(A1Owner* a1);
 };
 
-#include <xmmintrin.h>
-class hkVector4_66C
+
+// Scalar collision-info storage: 0x004b4db0 extracts SIMD lanes; 0x004b4ff0 sets floats (hkVector4 uses 0x004a3f10/0x004b4d50).
+class __declspec(align(16)) CollisionShapePoint
 {
   public:
-    hkVector4_66C(float fX, float fY, float fZ, float fW);
-    void Assign(const hkVector4_66C& kOther);
+    void Assign(const hkVector4& kOther);
     void Set(float fX, float fY, float fZ, float fW);
-    __m128 m_vComponents;
+    float x, y, z, w;
 };
 
 class Filter66C
@@ -1874,7 +1754,7 @@ class TransformShapeInfo66C
     __m128 m_q10;
     __m128 m_q20;
     __m128 m_q30;
-    hkVector4_66C m_kTranslation;
+    CollisionShapePoint m_kTranslation;
 };
 
 class CapsuleInfo66C
@@ -1885,14 +1765,14 @@ class CapsuleInfo66C
     float m_fBoundRadius;
     int unk08;
     int unk0c;
-    hkVector4_66C m_kVertexA;
-    hkVector4_66C m_kVertexB;
+    CollisionShapePoint m_kVertexA;
+    CollisionShapePoint m_kVertexB;
 };
 
 class SphereArray66C
 {
   public:
-    void PushBack(const hkVector4_66C& kSphere);
+    void PushBack(const hkVector4& kSphere);
     void* m_pResource;
     int m_uiLogicalSize;
     int m_iCapacity;
@@ -1929,7 +1809,7 @@ class SphereShape66C : public Shape66C
 class BoxShape66C : public Shape66C
 {
   public:
-    BoxShape66C(const hkVector4_66C& m_kPoint2);
+    BoxShape66C(const hkVector4& m_kPoint2);
 };
 
 class TransformShape66C : public Shape66C
@@ -1978,7 +1858,8 @@ class Object66C
     unsigned int unk10;
 };
 
-class Bounds66C
+// Collision-volume provider: GetCount/GetBound bind to SpeedTreeRT 0x00b0a260/0x00b0a2a0, not the 32-byte Bounds type.
+class SpeedTreeCollisionVolumes
 {
   public:
     unsigned int GetCount();
@@ -2066,11 +1947,11 @@ class Tree66C
     virtual void v100();
     virtual void v104();
     virtual void* GetOwner();
-    void FUN_0066cb40(Bounds66C* pkBounds, float fScale);
+    void FUN_0066cb40(SpeedTreeCollisionVolumes* pkBounds, float fScale);
 };
 
 // @fnv 0x0066cb40
-void Tree66C::FUN_0066cb40(Bounds66C* pkBounds, float fScale)
+void Tree66C::FUN_0066cb40(SpeedTreeCollisionVolumes* pkBounds, float fScale)
 {
     if (g_kHavok66C.IsEnabled(1))
     {
@@ -2096,7 +1977,7 @@ void Tree66C::FUN_0066cb40(Bounds66C* pkBounds, float fScale)
             {
             case 0: {
                 TransformShapeInfo66C kTransform;
-                hkVector4_66C kIntersectionOffset(afCenter[0], afCenter[1], afCenter[2], 0.0f);
+                hkVector4 kIntersectionOffset(afCenter[0], afCenter[1], afCenter[2], 0.0f);
                 kTransform.m_kTranslation.Assign(kIntersectionOffset);
                 SphereShape66C* pkSphere = new SphereShape66C(afSize[0], 0);
                 kTransform.m_pvChild = pkSphere->GetShape();
@@ -2117,8 +1998,8 @@ void Tree66C::FUN_0066cb40(Bounds66C* pkBounds, float fScale)
                 TransformShapeInfo66C kTransform;
                 for (int i = 0; i < 3; i++)
                     afSize[i] *= 0.5;
-                hkVector4_66C kIntersectionOffset(afCenter[0], afCenter[1], afCenter[2] + afSize[2], 0.0f);
-                hkVector4_66C m_kPoint2(afSize[0], afSize[1], afSize[2], 0.0f);
+                hkVector4 kIntersectionOffset(afCenter[0], afCenter[1], afCenter[2] + afSize[2], 0.0f);
+                hkVector4 m_kPoint2(afSize[0], afSize[1], afSize[2], 0.0f);
                 kTransform.m_kTranslation.Assign(kIntersectionOffset);
                 BoxShape66C* pkBox = new BoxShape66C(m_kPoint2);
                 kTransform.m_pvChild = pkBox->GetShape();
@@ -2143,7 +2024,7 @@ void Tree66C::FUN_0066cb40(Bounds66C* pkBounds, float fScale)
                     afCenter[1] = FUN_004a3e90(afCenter[1]) * fHavokScale;
                     afCenter[2] = FUN_004a3e90(afCenter[2]) * fHavokScale;
                     afSize[0] = FUN_004a3e90(afSize[0]) * fHavokScale;
-                    hkVector4_66C kSphere(afCenter[0], afCenter[1], afCenter[2], afSize[0]);
+                    hkVector4 kSphere(afCenter[0], afCenter[1], afCenter[2], afSize[0]);
                     kSpheres.m_kSpheres.PushBack(kSphere);
                 }
                 else

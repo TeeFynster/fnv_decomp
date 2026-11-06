@@ -2,6 +2,8 @@
 // src/gamebryo2.2/corelibs/nianimation/bsgrabiknote.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/bsgrabiknote.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/BSFadeNode.h"
+
 extern "C" void* g_011f3ef0;
 
 // @fnv 0x00a44350
@@ -53,37 +55,42 @@ bool FUN_00a44310_shell::Equals(const void* pOther)
 
 extern int DAT_01097d34;
 
-struct BSFadeNode
+struct ViewerStrings;
+
+struct ArmNoteBase
 {
-    static void* operator new(unsigned int size);
     void* m_ppVirtualMethodTable;
-    int m_auiShapeKeys;
-    int m_flags;
-    float m_f1;
-    int m_pAuxiliaryObject;
-    float m_f2;
-    int m_pad3;
-    void __thiscall _Call_a5d3a0();
+    unsigned int m_uiRefCount;
+    unsigned int m_eType;
+    float m_fTime;
+    void BaseGetViewerStrings(ViewerStrings* pkStrings);
+};
+
+struct BSGrabIKNote : ArmNoteBase
+{
+    unsigned int m_eArm;
+    float m_fGain;
+    unsigned int m_eAnimationState;
+    void* Clone(CloningProcess* process);
+    void FUN_00a44650(ViewerStrings* pkStrings);
 };
 
 // @fnv 0x00a44380
 void* __cdecl FUN_00a44380()
 {
-    BSFadeNode* node = static_cast<BSFadeNode*>(BSFadeNode::operator new(28));
+    BSGrabIKNote* node = static_cast<BSGrabIKNote*>(BSFadeNode::operator new(28));
     if (node)
     {
-        node->_Call_a5d3a0();
-        node->m_f1 = 0.0f;
-        node->m_flags = 1;
-        node->m_f2 = 0.0f;
+        reinterpret_cast<BSFadeNode*>(node)->_Call_a5d3a0();
+        node->m_fTime = 0.0f;
+        node->m_eType = 1;
+        node->m_fGain = 0.0f;
         node->m_ppVirtualMethodTable = &DAT_01097d34;
-        node->m_pad3 = 0;
+        node->m_eAnimationState = 0;
         return node;
     }
     return 0;
 }
-
-struct NiStream;
 
 struct BSAnimNote_shell
 {
@@ -101,27 +108,22 @@ bool FUN_00a43f10_shell::FUN_00a43f10(NiStream& arStream)
     return BSAnimNote_shell::FUN_00a84c70(arStream);
 }
 
-struct CloningProcess;
 struct FUN_00a44850_holder
 {
     void CopyMembersStreamAndFields(FUN_00a44850_holder*, CloningProcess*);
 };
-struct FUN_00a443c0_shell : BSFadeNode
-{
-    void* FUN_00a443c0(CloningProcess* process);
-};
 // @fnv 0x00a443c0
-void* FUN_00a443c0_shell::FUN_00a443c0(CloningProcess* process)
+void* BSGrabIKNote::Clone(CloningProcess* process)
 {
-    FUN_00a443c0_shell* node = new FUN_00a443c0_shell;
+    BSGrabIKNote* node = static_cast<BSGrabIKNote*>(BSFadeNode::operator new(28));
     if (node)
     {
-        node->_Call_a5d3a0();
-        node->m_f1 = 0.0f;
-        node->m_flags = 1;
-        node->m_f2 = 0.0f;
+        reinterpret_cast<BSFadeNode*>(node)->_Call_a5d3a0();
+        node->m_fTime = 0.0f;
+        node->m_eType = 1;
+        node->m_fGain = 0.0f;
         node->m_ppVirtualMethodTable = (void*)&DAT_01097d34;
-        node->m_pad3 = 0;
+        node->m_eAnimationState = 0;
     }
     else
         node = 0;
@@ -396,26 +398,9 @@ struct ViewerStrings
     }
 };
 
-struct ArmNoteBase
-{
-    void* m_ppVirtualMethodTable;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    void BaseGetViewerStrings(ViewerStrings* pkStrings);
-};
-
-struct ArmNote : ArmNoteBase
-{
-    unsigned int m_eArm;
-    float m_fGain;
-    unsigned int m_eAnimationState;
-    void FUN_00a44650(ViewerStrings* pkStrings);
-};
-
 // Appends the arm, gain and state viewer strings to pkStrings after the base viewer strings.
 // @fnv 0x00a44650
-void ArmNote::FUN_00a44650(ViewerStrings* pkStrings)
+void BSGrabIKNote::FUN_00a44650(ViewerStrings* pkStrings)
 {
     BaseGetViewerStrings(pkStrings);
     switch (m_eArm)

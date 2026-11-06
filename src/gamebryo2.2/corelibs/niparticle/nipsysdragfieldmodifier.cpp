@@ -1,3 +1,12 @@
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiPSysFieldModifier.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiTransform.h"
+
+
+// Preserve the original uninitialized rotation without invoking its default constructor.
+__forceinline NiTransform::NiTransform() : m_Rotate(m_Rotate)
+{}
 
 // src/gamebryo2.2/corelibs/niparticle/nipsysdragfieldmodifier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysdragfieldmodifier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -34,34 +43,21 @@ void* __thiscall FUN_00c2c810_shell::FUN_00c2c810(int arg)
     return p;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-};
 extern NiPoint3 _NiPoint3_ZERO;
 extern int DAT_010bff2c;
-struct NiObject
-{
-    virtual ~NiObject();
-};
 struct CloningProcess
 {
     NiObject* operator()(NiObject*);
-};
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-    virtual ~BSFadeNode();
-};
-struct NiPSysFieldModifier : BSFadeNode
-{
-    void __thiscall FUN_00c31ff0();
-    void __thiscall FUN_00c32020(NiPSysFieldModifier*, CloningProcess&);
 };
 struct NiPSysDragFieldModifier : NiPSysFieldModifier
 {
     NiPSysFieldModifier* __thiscall FUN_00c2c8d0(CloningProcess&);
 };
+inline void* operator new(unsigned int, void* p)
+{
+    return p;
+}
+
 // Allocates and initialises a NiPSysDragFieldModifier clone, copies the byte at offset 0x30 and the NiPoint3 at offset 0x34 from this, and returns it.
 // @fnv 0x00c2c8d0
 NiPSysFieldModifier* __thiscall NiPSysDragFieldModifier::FUN_00c2c8d0(CloningProcess& process)
@@ -69,7 +65,7 @@ NiPSysFieldModifier* __thiscall NiPSysDragFieldModifier::FUN_00c2c8d0(CloningPro
     NiPSysFieldModifier* clone = static_cast<NiPSysFieldModifier*>(BSFadeNode::operator new(0x40));
     if (clone)
     {
-        clone->FUN_00c31ff0();
+        ::new (clone) NiPSysFieldModifier;
         *(void**)clone = &DAT_010bff2c;
         *(unsigned char*)((char*)clone + 0x30) = 0;
         *(NiPoint3*)((char*)clone + 0x34) = _NiPoint3_ZERO;
@@ -78,7 +74,7 @@ NiPSysFieldModifier* __thiscall NiPSysDragFieldModifier::FUN_00c2c8d0(CloningPro
     {
         clone = 0;
     }
-    FUN_00c32020(clone, process);
+    CopyMemberData(clone, process);
     *(unsigned char*)((char*)clone + 0x30) = *(unsigned char*)((char*)this + 0x30);
     *(NiPoint3*)((char*)clone + 0x34) = *(NiPoint3*)((char*)this + 0x34);
     return clone;
@@ -345,18 +341,6 @@ void __thiscall FNVObject195::FUN_00c2cec0(FNVArray195* pArray)
     array->FUN_0096ae90(uiIndex, &value);
 }
 
-struct ThreeByThreeMatrix
-{
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-};
-struct NiTransform
-{
-    ThreeByThreeMatrix m_kOrientation;
-    NiPoint3 m_kTranslation;
-    float m_fScale;
-    void Invert(NiTransform& kDest) const;
-    NiTransform operator*(const NiTransform& xform) const;
-};
 struct AVStandIn
 {
     int unk00;
@@ -448,16 +432,18 @@ struct FieldModStandIn
 // @fnv 0x00c2c950
 void FieldModStandIn::ApplyFieldModToParticles(float fTime, PSysDataStandIn* pkData)
 {
-    NiTransform kField = m_pkFieldObject->m_kWorldSpaceTransform;
+    NiTransform kField;
+    kField = m_pkFieldObject->m_kWorldSpaceTransform;
     NiTransform kInv;
     NiPoint3 kFieldOrigin;
     {
-        NiTransform kSys = m_pkSystem->m_kWorldSpaceTransform;
-        kSys.Invert(kInv);
+        NiTransform kSys;
+        kSys = m_pkSystem->m_kWorldSpaceTransform;
+        kSys.FUN_004b4880(kInv);
     }
     {
         NiTransform kXform = kInv * kField;
-        kFieldOrigin = kXform.m_kTranslation;
+        kFieldOrigin = kXform.m_Translate;
     }
     for (unsigned short i = 0; i < pkData->m_usActiveVertices; i++)
     {
@@ -491,23 +477,14 @@ void FieldModStandIn::ApplyFieldModToParticles(float fTime, PSysDataStandIn* pkD
 
 extern "C" double __cdecl sqrt(double);
 
-inline void* operator new(unsigned int, void* p)
-{
-    return p;
-}
-
 struct NiPoint3Helper : NiPoint3
 {
     bool __thiscall FUN_00439090(const NiPoint3& kPt) const;
     void __thiscall FUN_004a0c10();
 };
 
-struct NiTransformHelper : NiTransform
-{
-    NiPoint3 __thiscall FUN_004b4500(const NiPoint3& kPt) const;
-};
 
-inline NiPoint3 operator-(const NiPoint3& a, const NiPoint3& b)
+inline NiPoint3 SubtractPoint(const NiPoint3& a, const NiPoint3& b)
 {
     NiPoint3 res;
     res.x = a.x - b.x;
@@ -569,10 +546,12 @@ void __thiscall DragModifier::FUN_00c2cb20(float fTime, BoundDataBlock* pkData)
         return;
     }
 
-    NiTransform r = m_spFieldObject->m_kWorldSpaceTransform;
+    NiTransform r;
+    r = m_spFieldObject->m_kWorldSpaceTransform;
     NiTransform kInvTargetWorld;
-    NiTransform kFieldWorld = m_pkTarget->m_kWorldSpaceTransform;
-    kFieldWorld.Invert(kInvTargetWorld);
+    NiTransform kFieldWorld;
+    kFieldWorld = m_pkTarget->m_kWorldSpaceTransform;
+    kFieldWorld.FUN_004b4880(kInvTargetWorld);
     new (&kFieldWorld) NiTransform(kInvTargetWorld * r);
 
     NiPoint3 kMotionVelocity;
@@ -583,7 +562,7 @@ void __thiscall DragModifier::FUN_00c2cb20(float fTime, BoundDataBlock* pkData)
     {
         if (((NiPoint3Helper*)&m_kLightVector)->FUN_00439090(_NiPoint3_ZERO))
         {
-            kSub = ((NiTransformHelper*)&kFieldWorld)->FUN_004b4500(m_kLightVector);
+            kSub = kFieldWorld.FUN_004b4500(&m_kLightVector);
             CopyPoint(b, kSub);
             ((NiPoint3Helper*)&b)->FUN_004a0c10();
         }
@@ -602,7 +581,7 @@ void __thiscall DragModifier::FUN_00c2cb20(float fTime, BoundDataBlock* pkData)
         dst.x = positions[i].x;
         dst.y = positions[i].y;
         dst.z = positions[i].z;
-        NiPoint3 res = kPos - kFieldWorld.m_kTranslation;
+        NiPoint3 res = SubtractPoint(kPos, kFieldWorld.m_Translate);
 
         float fDistSq = res.x * res.x + res.y * res.y + res.z * res.z;
         double distanceResult = (float)sqrt(fDistSq);

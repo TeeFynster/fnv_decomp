@@ -1,3 +1,7 @@
+#include "../../include/NiTListBase.h"
+#include "../../include/NiTListBase.h"
+class NiTPointerAllocator_unsigned_int_;
+class BGSDecalEmitter;
 // Names of nested/template specializations use the canonical generator identifier mapping.
 #ifndef FNV_BGSDECALMANAGER_H
 #define FNV_BGSDECALMANAGER_H
@@ -9,9 +13,9 @@ class BSRenderedTexture;
 class BSShaderAccumulator;
 class NiCamera;
 class NiTAbstractPoolAllocator_unsigned_int_;
-class NiTListBase_NiTPointerAllocator_unsigned_int__BGSDecalEmitter___;
+typedef NiTListBase<NiTPointerAllocator_unsigned_int_, BGSDecalEmitter* > NiTListBase_NiTPointerAllocator_unsigned_int__BGSDecalEmitter___;
 class NiTListBase_NiTPointerAllocator_unsigned_int__BGSDecalEmitter_____AntiBloatAllocator;
-class NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal___;
+typedef NiTListBase<NiTPointerAllocator_unsigned_int_, DecalNiPointer<BSTempEffectSimpleDecal> > NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal___;
 class NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal_____AntiBloatAllocator;
 class NiTListItem_BGSDecalEmitter___;
 class NiTListItem_NiPointer_BSTempEffectSimpleDecal___;
@@ -27,21 +31,13 @@ class NiTAbstractPoolAllocator_unsigned_int_
 };
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTAbstractPoolAllocator_unsigned_int_) == 1);
-#pragma pack(push, 4)
-class NiTPointerAllocator_unsigned_int_ : public NiTAbstractPoolAllocator_unsigned_int_
-{
-  public:
-    // void* __cdecl NiTPointerAllocator<unsigned int>::*()
-    // void __cdecl NiTPointerAllocator<unsigned int>::*(void*)
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiTPointerAllocator_unsigned_int_) == 1);
+#include "../../include/NiTPointerAllocator_unsigned_int_.h"
 #pragma pack(push, 4)
 class NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal_____AntiBloatAllocator
     : public NiTPointerAllocator_unsigned_int_
 {
   public:
-    // base NiTPointerAllocator<unsigned int> at +0x0, size 1
+    // base DecalNiTPointerAllocator<unsigned int> at +0x0, size 1
     unsigned int m_uiCount;  // +0x0, 4 bytes
 };
 #pragma pack(pop)
@@ -52,30 +48,7 @@ FNV_STATIC_ASSERT(
     offsetof(NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal_____AntiBloatAllocator,
              m_uiCount) == 0);
 #pragma pack(push, 4)
-class NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal___
-{
-  public:
-    NiTListItem_NiPointer_BSTempEffectSimpleDecal___* m_pkHead;  // +0x0, 4 bytes
-    NiTListItem_NiPointer_BSTempEffectSimpleDecal___* m_pkTail;  // +0x4, 4 bytes
-    NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal_____AntiBloatAllocator
-        m_kItemCount;  // +0x8, 4 bytes
-    // unsigned int __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // bool __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*)
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*)
-    // void __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*, void*)
-    // void __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*, void*)
-    // NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >
-    // void __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // void __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(NiTListItem<NiPointer<BSTempEffectSimpleDecal> >*)
-    // void __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(NiTListItem<NiPointer<BSTempEffectSimpleDecal> >*)
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*, NiTListItem<NiPointer<BSTempEffectSimpleDecal> >*)
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*, NiTListItem<NiPointer<BSTempEffectSimpleDecal> >*)
-    // NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >& __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(const NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >&)
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(unsigned int)
-};
+
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal___) == 12);
 FNV_STATIC_ASSERT(offsetof(NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal___,
@@ -89,29 +62,29 @@ class NiTPointerListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffec
     : public NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal___
 {
   public:
-    // base NiTListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> > at +0x0, size 12
-    // void __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // void __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(const NiPointer<BSTempEffectSimpleDecal>&)
-    // void __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(const NiPointer<BSTempEffectSimpleDecal>&)
-    // void* __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*, const NiPointer<BSTempEffectSimpleDecal>&)
-    // void* __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*, const NiPointer<BSTempEffectSimpleDecal>&)
-    // const NiPointer<BSTempEffectSimpleDecal>& __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // const NiPointer<BSTempEffectSimpleDecal>& __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // const NiPointer<BSTempEffectSimpleDecal>& __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*)
-    // const NiPointer<BSTempEffectSimpleDecal>& __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*&)
-    // const NiPointer<BSTempEffectSimpleDecal>& __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*&)
-    // NiPointer<BSTempEffectSimpleDecal> __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // NiPointer<BSTempEffectSimpleDecal> __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // NiPointer<BSTempEffectSimpleDecal> __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(const NiPointer<BSTempEffectSimpleDecal>&)
-    // NiPointer<BSTempEffectSimpleDecal> __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(void*&)
-    // void* __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(const NiPointer<BSTempEffectSimpleDecal>&, void*)
-    // void __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // void __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(int __cdecl (void*, void*)*)
-    // NiTListItem<NiPointer<BSTempEffectSimpleDecal> >* __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*()
-    // void __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(NiTListItem<NiPointer<BSTempEffectSimpleDecal> >*)
-    // NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >
-    // NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >& __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(const NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >&)
-    // void* __cdecl NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> >::*(unsigned int)
+    // base NiTListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> > at +0x0, size 12
+    // void __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*()
+    // void __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(const DecalNiPointer<BSTempEffectSimpleDecal>&)
+    // void __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(const DecalNiPointer<BSTempEffectSimpleDecal>&)
+    // void* __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(void*, const DecalNiPointer<BSTempEffectSimpleDecal>&)
+    // void* __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(void*, const DecalNiPointer<BSTempEffectSimpleDecal>&)
+    // const DecalNiPointer<BSTempEffectSimpleDecal>& __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*()
+    // const DecalNiPointer<BSTempEffectSimpleDecal>& __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*()
+    // const DecalNiPointer<BSTempEffectSimpleDecal>& __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(void*)
+    // const DecalNiPointer<BSTempEffectSimpleDecal>& __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(void*&)
+    // const DecalNiPointer<BSTempEffectSimpleDecal>& __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(void*&)
+    // DecalNiPointer<BSTempEffectSimpleDecal> __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*()
+    // DecalNiPointer<BSTempEffectSimpleDecal> __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*()
+    // DecalNiPointer<BSTempEffectSimpleDecal> __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(const DecalNiPointer<BSTempEffectSimpleDecal>&)
+    // DecalNiPointer<BSTempEffectSimpleDecal> __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(void*&)
+    // void* __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(const DecalNiPointer<BSTempEffectSimpleDecal>&, void*)
+    // void __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*()
+    // void __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(int __cdecl (void*, void*)*)
+    // NiTListItem<DecalNiPointer<BSTempEffectSimpleDecal> >* __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*()
+    // void __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(NiTListItem<DecalNiPointer<BSTempEffectSimpleDecal> >*)
+    // DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >
+    // DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >& __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(const DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >&)
+    // void* __cdecl DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> >::*(unsigned int)
 };
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTPointerListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal___) ==
@@ -121,11 +94,11 @@ class NiTPointerList_NiPointer_BSTempEffectSimpleDecal___
     : public NiTPointerListBase_NiTPointerAllocator_unsigned_int__NiPointer_BSTempEffectSimpleDecal___
 {
   public:
-    // base NiTPointerListBase<NiTPointerAllocator<unsigned int>,NiPointer<BSTempEffectSimpleDecal> > at +0x0, size 12
-    // NiTPointerList<NiPointer<BSTempEffectSimpleDecal> >
-    // void __cdecl NiTPointerList<NiPointer<BSTempEffectSimpleDecal> >::*()
-    // NiTPointerList<NiPointer<BSTempEffectSimpleDecal> >& __cdecl NiTPointerList<NiPointer<BSTempEffectSimpleDecal> >::*(const NiTPointerList<NiPointer<BSTempEffectSimpleDecal> >&)
-    // void* __cdecl NiTPointerList<NiPointer<BSTempEffectSimpleDecal> >::*(unsigned int)
+    // base DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>,DecalNiPointer<BSTempEffectSimpleDecal> > at +0x0, size 12
+    // NiTPointerList<DecalNiPointer<BSTempEffectSimpleDecal> >
+    // void __cdecl NiTPointerList<DecalNiPointer<BSTempEffectSimpleDecal> >::*()
+    // NiTPointerList<DecalNiPointer<BSTempEffectSimpleDecal> >& __cdecl NiTPointerList<DecalNiPointer<BSTempEffectSimpleDecal> >::*(const NiTPointerList<DecalNiPointer<BSTempEffectSimpleDecal> >&)
+    // void* __cdecl NiTPointerList<DecalNiPointer<BSTempEffectSimpleDecal> >::*(unsigned int)
 };
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTPointerList_NiPointer_BSTempEffectSimpleDecal___) == 12);
@@ -134,7 +107,7 @@ class NiTListBase_NiTPointerAllocator_unsigned_int__BGSDecalEmitter_____AntiBloa
     : public NiTPointerAllocator_unsigned_int_
 {
   public:
-    // base NiTPointerAllocator<unsigned int> at +0x0, size 1
+    // base DecalNiTPointerAllocator<unsigned int> at +0x0, size 1
     unsigned int m_uiCount;  // +0x0, 4 bytes
 };
 #pragma pack(pop)
@@ -142,13 +115,7 @@ FNV_STATIC_ASSERT(sizeof(NiTListBase_NiTPointerAllocator_unsigned_int__BGSDecalE
 FNV_STATIC_ASSERT(offsetof(NiTListBase_NiTPointerAllocator_unsigned_int__BGSDecalEmitter_____AntiBloatAllocator,
                            m_uiCount) == 0);
 #pragma pack(push, 4)
-class NiTListBase_NiTPointerAllocator_unsigned_int__BGSDecalEmitter___
-{
-  public:
-    NiTListItem_BGSDecalEmitter___* m_pkHead;                                                           // +0x0, 4 bytes
-    NiTListItem_BGSDecalEmitter___* m_pkTail;                                                           // +0x4, 4 bytes
-    NiTListBase_NiTPointerAllocator_unsigned_int__BGSDecalEmitter_____AntiBloatAllocator m_kItemCount;  // +0x8, 4 bytes
-};
+
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTListBase_NiTPointerAllocator_unsigned_int__BGSDecalEmitter___) == 12);
 FNV_STATIC_ASSERT(offsetof(NiTListBase_NiTPointerAllocator_unsigned_int__BGSDecalEmitter___, m_pkHead) == 0);
@@ -173,13 +140,13 @@ FNV_STATIC_ASSERT(sizeof(NiTPointerList_BGSDecalEmitter___) == 12);
 class BGSDecalManager
 {
   public:
-    NiPointer<BSRenderedTexture> m_pDecalRenderTexture;  // +0x0, 4 bytes
+    DecalNiPointer<BSRenderedTexture> m_pDecalRenderTexture;  // +0x0, 4 bytes
     bool m_bDecalRenderingEnabled;                       // +0x4, 1 bytes
     unsigned char layoutPadding5[3];
     NiTPointerList_NiPointer_BSTempEffectSimpleDecal___ m_kSimpleDecalList;  // +0x8, 12 bytes
     NiTPointerList_BGSDecalEmitter___ BGSDecalEmitterList;                   // +0x14, 12 bytes
-    NiPointer<BSShaderAccumulator> m_spShaderAccumulator;                    // +0x20, 4 bytes
-    NiPointer<NiCamera> m_pDecalCamera;                                      // +0x24, 4 bytes
+    DecalNiPointer<BSShaderAccumulator> m_spShaderAccumulator;                    // +0x20, 4 bytes
+    DecalNiPointer<NiCamera> m_pDecalCamera;                                      // +0x24, 4 bytes
     void RenderDecals();
     void RemoveDecal(BSTempEffectSimpleDecal*);
     // void __cdecl BGSDecalManager::*()

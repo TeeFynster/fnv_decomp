@@ -1,35 +1,27 @@
 // src/gamebryo2.2/corelibs/nicollision/niboxcapsuleintersector.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/niboxcapsuleintersector.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct Vector3
+#include "../../../../include/NiPoint3.h"
+// The former Vector3 stand-in defined this constructor inline in its class.
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
 {
-    float x, y, z;
-    Vector3()
-    {}
-    Vector3(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {}
-    Vector3 operator*(float s) const
-    {
-        return Vector3(x * s, y * s, z * s);
-    }
-    Vector3& operator+=(const Vector3& pt)
-    {
-        x += pt.x;
-        y += pt.y;
-        z += pt.z;
-        return *this;
-    }
-};
+}
+
+inline NiPoint3 NiPoint3::operator*(float s) const
+{
+    return NiPoint3(x * s, y * s, z * s);
+}
+
 
 struct Struct60
 {
-    Vector3 pos;
+    NiPoint3 pos;
     int unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C, unk30, unk34, unk38;
 };
 
 struct Struct24
 {
-    Vector3 min;
+    NiPoint3 min;
     int unk0C, unk10, unk14;
 };
 
@@ -57,14 +49,14 @@ struct TestClass
     int unk48;
     int unk4c;
 
-    float FUN_00eb38f0(const Vector3& a1, const Vector3& a2, float a3);
+    float FUN_00eb38f0(const NiPoint3& a1, const NiPoint3& a2, float a3);
 };
 
 // Scales both points by a3, offsets copies of unk38->data and unk3c->bounds, calls sub_eb50f0 and returns its result times unk40 minus 1.0.
 // @fnv 0x00eb38f0
-float TestClass::FUN_00eb38f0(const Vector3& a1, const Vector3& a2, float afScale)
+float TestClass::FUN_00eb38f0(const NiPoint3& a1, const NiPoint3& a2, float afScale)
 {
-    Vector3 vOffset = a1 * afScale;
+    NiPoint3 vOffset = a1 * afScale;
 
     Struct60 dataCopy = unk38->data;
     dataCopy.pos += vOffset;
@@ -78,33 +70,28 @@ float TestClass::FUN_00eb38f0(const Vector3& a1, const Vector3& a2, float afScal
     return sub_eb50f0(&boundsCopy, &dataCopy, &res, &unk44, &unk48, &unk4c) * unk40 - 1.0;
 }
 
-struct V3
-{
-    float x, y, z;
-};
-
 struct Inner
 {
     float pad0;
-    V3 a, b, c, d;
+    NiPoint3 a, b, c, d;
     float lx, ly, lz;
-    V3* Compute(const V3* p, int sx, int sy, int sz, V3 diff);
+    NiPoint3* Compute(const NiPoint3* p, int sx, int sy, int sz, NiPoint3 diff);
 };
 
 struct FUN_00eb3a00_cls
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
     float s0;
-    V3 pos;
-    V3 out;
+    NiPoint3 pos;
+    NiPoint3 out;
     Inner* volatile in;
     int unk3c, unk40;
     float k0, k1, k2;
 
-    void FUN_00eb3a00(const V3* a, const V3* b);
+    void FUN_00eb3a00(const NiPoint3* a, const NiPoint3* b);
 };
 
-inline void Accumulate(V3& result, const V3& v)
+inline void Accumulate(NiPoint3& result, const NiPoint3& v)
 {
     float x = v.x;
     result.x += x;
@@ -113,7 +100,7 @@ inline void Accumulate(V3& result, const V3& v)
     result.z = z + v.z;
 }
 
-inline void Scale(V3& result, const V3& v, float s)
+inline void Scale(NiPoint3& result, const NiPoint3& v, float s)
 {
     result.x = s * v.x;
     result.y = s * v.y;
@@ -122,20 +109,20 @@ inline void Scale(V3& result, const V3& v, float s)
 
 // Sets pos from *a scaled by s0 plus in->a, b, c, and d weighted by k0, k1, and k2, then stores in->Compute's result in out.
 // @fnv 0x00eb3a00
-void FUN_00eb3a00_cls::FUN_00eb3a00(const V3* a, const V3* b)
+void FUN_00eb3a00_cls::FUN_00eb3a00(const NiPoint3* a, const NiPoint3* b)
 {
-    V3 t;
+    NiPoint3 t;
     Scale(t, *a, s0);
-    const V3* base = &in->a;
-    V3 r;
+    const NiPoint3* base = &in->a;
+    NiPoint3 r;
     r.x = base->x + t.x;
     r.y = base->y + t.y;
     r.z = base->z + t.z;
-    V3& vPosition = pos;
+    NiPoint3& vPosition = pos;
     vPosition = r;
 
     float s = k0;
-    const V3* axis = &in->b;
+    const NiPoint3* axis = &in->b;
     Scale(t, *axis, s);
     Inner* p;
     Accumulate(pos, t);

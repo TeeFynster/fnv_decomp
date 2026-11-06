@@ -1,16 +1,17 @@
 // fallout_shared/medialocationcontroller.cpp: MediaLocationController, MediaSetEntry, FormStub_cls, MLCFullName_cls and more (25 functions)
 
+#include "layout_support.h"
+#include "../../include/TESClimate.h"
+#include "../../include/TESDataHandler.h"
+// Use the shared form bases in the remaining unit-local headers.
+#define FNV_BASEFORMCOMPONENT_H
+#define FNV_TESFORM_H
 #include "medialocationcontroller_update_decls.h"
 #include "medialocationcontroller.h"
 #include "mediaset.h"
 
 unsigned int __cdecl GetRandomNumberInRange(int aiMin, int aiMax);
 int __cdecl Warning(const char* apFormat, ...);
-class TESDataHandler
-{
-  public:
-    TESFaction* GetFactionByFormID(unsigned int auiFormID);
-};
 extern TESDataHandler* g_dataHandler;
 
 // @fnv 0x005974f0
@@ -45,7 +46,7 @@ void MediaLocationController::ClearData()
 }
 
 // @fnv 0x005977d0
-MediaSet::MediaSetEntry::MediaSetEntry()
+MediaSetEntry::MediaSetEntry()
 {
     Name.Set(0, 0);
     Attenuation = -12.0f;
@@ -107,7 +108,7 @@ void MediaLocationController::ProcessMediaSetList(BSSimpleList<MediaSet*>* apLis
 }
 
 // @fnv 0x005963d0
-bool MediaLocationController::Load(TESFile* apFile)
+bool MediaLocationController::LoadForm(TESFile* apFile)
 {
     unsigned int auiFormId = 0;
     LoadRecordHeader(apFile);
@@ -265,14 +266,14 @@ bool MediaLocationController::Update(bool abInCombat)
         m_pMediaSet = 0;
     }
     g = pFaction ? pFaction->GetFactionReaction(static_cast<TESFaction*>(
-                       BGSDefaultObjectManager::GetDefaultObjectByIndex(DEFAULT_OBJECT_PLAYER_FACTION)))
+                       BGSDefaultObjectManager::GetDefaultObjectByIndex(DEFAULT_OBJECT_DO_PLAYER_FACTION)))
                  : FIGHT_REACTION_FIGHT_REACTION_NEUTRAL;
     l = g_thePlayer->GetMusicMarkerReference();
     e = false;
     k = l->m_pMarkerReference->GetRadius();
     k *= k;
-    NiPoint3 q = *l->m_pMarkerReference->GetPos();  // marker position
-    NiPoint3 p = q - *g_thePlayer->GetPos();        // marker-to-player difference
+    NiPoint3 q = *static_cast<const TESObjectREFR*>(l->m_pMarkerReference)->GetPos();  // marker position
+    NiPoint3 p = q - *static_cast<const TESObjectREFR*>(g_thePlayer)->GetPos();        // marker-to-player difference
     r = p.GetSquaredXYLength();
     d = 1000.0f;
     if (r <= k)
@@ -447,11 +448,6 @@ bool FUN_00595e80_shell::FUN_00595e80()
 
 extern float DAT_011ca9e8;
 
-struct TESClimate
-{
-    unsigned char FUN_00595f10(int);
-};
-
 // @fnv 0x00595ea0
 float __fastcall FUN_00595ea0(char* apThis)
 {
@@ -463,40 +459,32 @@ float __fastcall FUN_00595ea0(char* apThis)
     return DAT_011ca9e8;
 }
 
-struct FUN_00595f10_cls
-{
-    unsigned char pad[0x50];
-    unsigned char arr[4];
-    unsigned char get(int idx);
-};
-
-// Returns arr[idx] when idx is in [0,4), otherwise returns 0.
+// Returns the indexed time setting when the index is in [0,4), otherwise returns 0.
 // @fnv 0x00595f10
-unsigned char FUN_00595f10_cls::get(int aiIndex)
+unsigned char TESClimate::FUN_00595f10(int aiIndex)
 {
-    return (aiIndex < 4 && aiIndex >= 0) ? arr[aiIndex] : 0;
+    return (aiIndex < 4 && aiIndex >= 0) ? m_ucTimeSettings[aiIndex] : 0;
 }
 
-namespace fnv_00595f50 {
-struct Atmosphere;
-struct BGSLoadGameBuffer;
-struct BGSSaveGameBuffer;
-struct BSFogProperty;
-struct BSMultiBoundNode;
-struct Clouds;
-struct ImageSpaceModifierInstanceForm;
-struct Moon;
-struct NiColor;
-struct NiDirectionalLight;
-struct NiFogProperty;
-struct NiNode;
-struct Precipitation;
-struct Sky;
-struct SkyTextureManager;
-struct Stars;
-struct Sun;
-struct TESClimate;
+class Atmosphere;
+class BGSLoadGameBuffer;
+class BGSSaveGameBuffer;
+class BSMultiBoundNode;
+class Clouds;
+class ImageSpaceModifierInstanceForm;
+class Moon;
+class NiColor;
+class NiDirectionalLight;
+class NiFogProperty;
+class NiNode;
+class Precipitation;
+class Sky;
+class SkyTextureManager;
+class Stars;
+class Sun;
 struct TESWeather;
+namespace fnv_00595f50 {
+struct BSFogProperty;
 struct blob12
 {
     char b[12];
@@ -507,11 +495,6 @@ struct blob16
 };
 
 extern float DAT_011ca9ec;
-
-struct TESClimate
-{
-    unsigned char FUN_00595f10(int a1);
-};
 
 // @fnv 0x00595f50
 float __fastcall FUN_00595f50(Sky* pThis)
@@ -528,11 +511,6 @@ float __fastcall FUN_00595f50(Sky* pThis)
 namespace fnv_00595fc0 {
 extern float DAT_011ca9f0;
 
-struct TESClimate
-{
-    unsigned char FUN_00595f10(int a1);
-};
-
 // If the 0x400 flag is set and a TESClimate is present, stores its value for index 2 divided by 6.0 in DAT_011ca9f0 and clears the flag; returns DAT_011ca9f0.
 // @fnv 0x00595fc0
 float __fastcall FUN_00595fc0(char* pThis)
@@ -546,16 +524,12 @@ float __fastcall FUN_00595fc0(char* pThis)
 }
 }  // namespace fnv_00595fc0
 
-struct Inner
-{
-    unsigned char FUN_00595f10(int a);
-};
 extern double DAT_01034208;
 extern float DAT_011ca9f4;
 struct FUN_00596030_cls
 {
     int pad0[3];
-    Inner* inner;
+    TESClimate* inner;
     char pad1[0x118 - 0x10];
     unsigned int flags;
     float FUN_00596030();

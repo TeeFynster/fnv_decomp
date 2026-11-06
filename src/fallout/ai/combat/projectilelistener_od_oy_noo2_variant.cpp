@@ -6,22 +6,12 @@
 // src/fallout/ai/combat/projectilelistener.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/projectilelistener.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include <xmmintrin.h>
-class hkVector4_9C64
-{
-  public:
-    __m128 m_vComponents;
-};
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/hkVector4.h"
 
-class Point9C64
-{
-  public:
-    Point9C64();
-    Point9C64 operator+(const Point9C64& kPt) const;
-    Point9C64 operator*(float fScalar) const;
-    void Unitize();
-    float x, y, z;
-};
+// Point arithmetic binds to NiPoint3: + 0x00439e90, * 0x0045bb20, Unitize 0x004a0c10.
+
 
 class Matrix9C64
 {
@@ -30,7 +20,7 @@ class Matrix9C64
     void SetZRotation(float fAngleDifference);
     void SetXRotation(float fAngleDifference);
     Matrix9C64 operator*(const Matrix9C64& kMat) const;
-    void GetCol(unsigned int uiCol, Point9C64& kCol) const;
+    void GetCol(unsigned int uiCol, NiPoint3& kCol) const;
     float m00, m01, m02;
     float m10, m11, m12;
     float m20, m21, m22;
@@ -41,7 +31,7 @@ class RayHit9C64
   public:
     RayHit9C64();
     RayHit9C64(const RayHit9C64& kOther);
-    hkVector4_9C64 m_kPlaneNormal;
+    hkVector4 m_kPlaneNormal;
     float m_fHitFraction;
     int m_iExtraInfo;
     int unk18;
@@ -88,12 +78,12 @@ class PickData9C64
 {
   public:
     PickData9C64();
-    void SetFrom(const Point9C64& kFrom);
-    void SetTo(const Point9C64& kTo);
+    void SetFrom(const NiPoint3& kFrom);
+    void SetTo(const NiPoint3& kTo);
     void SetCollector(AllRayHits9C64* pkCollector);
     AllRayHits9C64* GetCollector();
-    hkVector4_9C64 m_kFrom;
-    hkVector4_9C64 m_kTo;
+    hkVector4 m_kFrom;
+    hkVector4 m_kTo;
     int m_iEnableShapeCollectionFilter;
     unsigned int m_uiFilterInfo;
     int unk28;
@@ -425,7 +415,7 @@ class Owner9C64
     virtual void v1e8();
     virtual void v1ec();
     virtual void v1f0();
-    virtual const Point9C64* GetPos();
+    virtual const NiPoint3* GetPos();
     virtual void v1f8();
     virtual void v1fc();
     virtual void v200();
@@ -503,7 +493,7 @@ class Owner9C64
     virtual void v320();
     virtual void v324();
     virtual void v328();
-    virtual void Notify(Ref9C64* pkRef, Point9C64* pkPoint, Point9C64* pkNormal, void* pvObject, unsigned int uiData,
+    virtual void Notify(Ref9C64* pkRef, NiPoint3* pkPoint, NiPoint3* pkNormal, void* pvObject, unsigned int uiData,
                         int iType);
     float GetLooking() const;
     Form9C64* GetForm();
@@ -512,10 +502,10 @@ class Owner9C64
 class Event9C64
 {
   public:
-    const hkVector4_9C64& GetPosition();
-    const hkVector4_9C64& GetPlaneNormal();
-    hkVector4_9C64 m_kPathOffset;
-    hkVector4_9C64 m_kPlaneNormal;
+    const hkVector4& GetPosition();
+    const hkVector4& GetPlaneNormal();
+    hkVector4 m_kPathOffset;
+    hkVector4 m_kPlaneNormal;
     unsigned int unk20;
     unsigned int unk24;
     unsigned int unk28;
@@ -530,20 +520,15 @@ class Event9C64
     unsigned int m_uiData;
 };
 
-class NiRTTI9C64
-{
-  public:
-    const char* m_pcName;
-};
-extern NiRTTI9C64 g_kRTTI9C64;
+extern NiRTTI g_kRTTI9C64;
 
 Ref9C64* __cdecl GetReferenceFromObject(void* pvObject);
-Point9C64& __cdecl FUN_00458620(Point9C64& kOut, const hkVector4_9C64& kIn);
-Point9C64& __cdecl FUN_004a3970(Point9C64& kOut, const hkVector4_9C64& kIn);
+NiPoint3& __cdecl FUN_00458620(NiPoint3& kOut, const hkVector4& kIn);
+NiPoint3& __cdecl FUN_004a3970(NiPoint3& kOut, const hkVector4& kIn);
 void* __cdecl FUN_004b5950(const void* pvObject);
 WorldObject9C64* __cdecl FUN_004b5a80(void* pvEntry);
 bool __cdecl MarkBaseExtraListScriptEvent(void* pvForm, ExtraList9C64* pkExtra, unsigned int uiFlag);
-bool __cdecl FUN_0043b300(NiRTTI9C64* pkRTTI, WorldObject9C64* pkObject);
+bool __cdecl FUN_0043b300(NiRTTI* pkRTTI, WorldObject9C64* pkObject);
 CollisionObject9C64* __cdecl FUN_004b5260(Node9C64* pkNode);
 bool __cdecl FUN_009c5ba0(PickData9C64* pkPick, Node9C64* pkNode, bool bCheckMotion, bool bUpdate);
 
@@ -698,6 +683,8 @@ class Listener9C64
     Owner9C64* m_pkOwnerManager;
 };
 
+// Preserve the original /GS stack protection with the shared vector union.
+#pragma strict_gs_check(push, on)
 // @fnv 0x009c6490
 void Listener9C64::FUN_009c6490(void* pvUnused, Event9C64* pkEvent)
 {
@@ -705,9 +692,9 @@ void Listener9C64::FUN_009c6490(void* pvUnused, Event9C64* pkEvent)
     if (!pkOwner)
         return;
     Ref9C64* pkRef = GetReferenceFromObject(pkEvent->m_pvObject);
-    Point9C64 kPoint;
+    NiPoint3 kPoint;
     FUN_00458620(kPoint, pkEvent->GetPosition());
-    Point9C64 kNormal;
+    NiPoint3 kNormal;
     FUN_004a3970(kNormal, pkEvent->GetPlaneNormal());
     void* pvObject = pkEvent->m_pvObject;
     unsigned int uiData = pkEvent->m_uiData;
@@ -731,9 +718,9 @@ void Listener9C64::FUN_009c6490(void* pvUnused, Event9C64* pkEvent)
         if (pkRefObject && (pkRefObject->GetFilter().IsFlagSet() || !pkRefObject->IsFixed()))
         {
             PickData9C64 kPick;
-            Point9C64 kFrom;
-            Point9C64 kRay;
-            Point9C64 kForward;
+            NiPoint3 kFrom;
+            NiPoint3 kRay;
+            NiPoint3 kForward;
             kFrom = *pkOwner->GetPos();
             Matrix9C64 kRot;
             kRot.SetZRotation(pkOwner->GetCurrentTargetDistance(0));
@@ -752,7 +739,7 @@ void Listener9C64::FUN_009c6490(void* pvUnused, Event9C64* pkEvent)
             {
                 bBlocked = false;
                 RayHit9C64 kHit(kPick.GetCollector()->GetHits()->GetAt(0));
-                Point9C64 kIntersectionOffset = kRay * kHit.m_fHitFraction;
+                NiPoint3 kIntersectionOffset = kRay * kHit.m_fHitFraction;
                 kPoint = kFrom + kIntersectionOffset;
                 FUN_004a3970(kNormal, kHit.m_kPlaneNormal);
                 pvObject = kHit.m_pvRootCollidable;
@@ -765,3 +752,5 @@ void Listener9C64::FUN_009c6490(void* pvUnused, Event9C64* pkEvent)
     if (!bBlocked)
         pkOwner->Notify(pkRef, &kPoint, &kNormal, pvObject, uiData, 0x24);
 }
+
+#pragma strict_gs_check(pop)

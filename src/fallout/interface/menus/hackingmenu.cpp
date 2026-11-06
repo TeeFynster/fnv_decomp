@@ -1,4 +1,33 @@
+#include "../../../../include/HackingMenu.h"
+#include "../../../../include/SL.h"
+#include "../../../../include/BSStringT.h"
+#include "../../../../include/FORenderedTerminal.h"
+#include "../../../../include/BSAudio.h"
+#include "../../../../include/BSSoundHandle.h"
+#include "../../../../include/Tile.h"
+#include "../../../../include/InterfaceManager.h"
 
+struct HackTile
+{
+    const char* GetString(int);
+    void Set(int, const char*, bool);
+    bool ContainsTrait(int);
+};
+struct HackEntry
+{
+    int unk00;
+    int unk04;
+    int unk08;
+    int unk0c;
+    int unk10;
+    int unk14;
+    int unk18;
+    int unk1c;
+    int unk20;
+    int unk24;
+    int unk28;
+    HackTile* tile;
+};
 // src/fallout/interface/menus/hackingmenu.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/interface/menus/hackingmenu.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -18,10 +47,6 @@ void FUN_006ffe80_shell::FUN_006ffe80(int aiFirst, int aiSecond)
     this->b = aiSecond;
 }
 
-struct HackingMenu
-{
-    int __thiscall FUN_00765870();
-};
 
 // @fnv 0x00765870
 int __thiscall HackingMenu::FUN_00765870()
@@ -30,46 +55,39 @@ int __thiscall HackingMenu::FUN_00765870()
 }
 
 namespace fnv_00765880 {
-struct Tile;
 
-struct HackingMenu
-{
-    unsigned char m_00[0x10c];
-    Tile* m_pTiles[32];
-    void SetTile(int aiID, Tile* apTile);
-};
 
 // Stores apTile into the tile slot array at index aiID when aiID is in [0, 8).
+} // namespace fnv_00765880
+
 // @fnv 0x00765880
 void HackingMenu::SetTile(int aiID, Tile* apTile)
 {
+    using namespace fnv_00765880;
     if (aiID >= 0 && aiID < 8)
     {
         m_pTiles[aiID] = apTile;
     }
 }
-}  // namespace fnv_00765880
+
 
 namespace fnv_007658b0 {
 void __cdecl _Deallocate(void* p);
 
-struct HackingMenu
-{
-    HackingMenu();
-    ~HackingMenu();
-    void* Destroy(unsigned int flags);
-};
 
 // Calls the HackingMenu destructor and, when bit 0 of flags is set, deallocates this; returns this.
+} // namespace fnv_007658b0
+
 // @fnv 0x007658b0
 void* HackingMenu::Destroy(unsigned int flags)
 {
+    using namespace fnv_007658b0;
     HackingMenu::~HackingMenu();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
-}  // namespace fnv_007658b0
+
 
 // @fnv 0x00766a40
 int __cdecl FUN_00766a40()
@@ -78,35 +96,29 @@ int __cdecl FUN_00766a40()
 }
 
 namespace fnv_00767ff0 {
-struct HackingMenu
-{
-    HackingMenu();
-    void ClearTilePayloadPair();
-    void FUN_00767ff0(int, void*);
-    // ...
-    bool m_bHackingInProgress;
-    void* coordinate;
-};
+
+} // namespace fnv_00767ff0
 
 // @fnv 0x00767ff0
 void HackingMenu::FUN_00767ff0(int aiID, void* apTarget)
 {
+    using namespace fnv_00767ff0;
     ClearTilePayloadPair();
     ((char*)this)[0x1d8] = 0;
     *(int*)((char*)this + 0x1c0) = 0;
 }
-}  // namespace fnv_00767ff0
+
 
 struct WeatherEntry;
 
-struct BSSimpleList
+struct WeatherEntryList
 {
     void __thiscall Sort(int(__cdecl*)(WeatherEntry*, WeatherEntry*));
 };
 
 int __cdecl FUN_0076b2e0(WeatherEntry*, WeatherEntry*);
 
-struct FUN_007687b0_shell : BSSimpleList
+struct FUN_007687b0_shell : WeatherEntryList
 {
     void SortWeatherEntries();
 };
@@ -132,11 +144,6 @@ unsigned int __cdecl FUN_0076b2e0()
     return FUN_005a00a0(2) * 2 - 1;
 }
 
-struct InterfaceManager
-{
-    static float __cdecl UpdateInterfaceState();
-    int FUN_00747d00();
-};
 
 // @fnv 0x00747d00
 int __thiscall InterfaceManager::FUN_00747d00()
@@ -146,17 +153,11 @@ int __thiscall InterfaceManager::FUN_00747d00()
 
 unsigned int __cdecl gm_GetTickCount();
 
-struct HackingMenu;
 
-struct FUN_0076a510_shell : HackingMenu
-{
-    void __thiscall FUN_0076a510();
-    void __thiscall FUN_0076a540();
-};
 
 // Calls FUN_0076a540 when gm_GetTickCount() exceeds the tick value stored at this+0x1d0.
 // @fnv 0x0076a510
-void __thiscall FUN_0076a510_shell::FUN_0076a510()
+void __thiscall HackingMenu::FUN_0076a510()
 {
     if (gm_GetTickCount() > *(unsigned int*)((char*)this + 0x1d0))
     {
@@ -164,19 +165,15 @@ void __thiscall FUN_0076a510_shell::FUN_0076a510()
     }
 }
 
-struct StrMem
+// 0x00726c90 constructs the BSStringT base, then initializes the animation state at 0x006ffe10.
+struct HackingTextAnimation : BSStringT<char>
 {
-    StrMem();
-    ~StrMem();
-    void __thiscall FUN_006ffe10();
-};
-struct FUN_00726c90 : StrMem
-{
-    FUN_00726c90();
+    HackingTextAnimation();
+    void FUN_006ffe10();
 };
 // Constructs the object by calling FUN_006ffe10.
 // @fnv 0x00726c90
-FUN_00726c90::FUN_00726c90()
+HackingTextAnimation::HackingTextAnimation()
 {
     FUN_006ffe10();
 }
@@ -213,13 +210,9 @@ void* __thiscall FUN_0076b560_shell::FUN_00765b50(unsigned int flags)
 }
 
 void __cdecl UpdateD766AA0Menu();
-struct FUN_00767b80_shell
-{
-    bool __thiscall HandleButton10(int, float);
-};
 // If aiButton is 10, stores 4 at offset 0x1c4, calls UpdateD766AA0Menu and returns true; otherwise returns false.
 // @fnv 0x00767b80
-bool __thiscall FUN_00767b80_shell::HandleButton10(int aiButton, float afValue)
+bool __thiscall HackingMenu::HandleMenuInput(int aiButton, float afValue)
 {
     if (aiButton == 10)
     {
@@ -271,13 +264,9 @@ void __thiscall FUN_00768920_shell::FUN_00768920(void* n)
 
 unsigned int __cdecl FUN_0042f5a0(unsigned int, unsigned int);
 unsigned int __cdecl BSStringLength(const char*);
-struct FUN_00768a10_shell : HackingMenu
-{
-    unsigned int __thiscall CountMatchingChars(const char* a, const char* b);
-};
 // Returns 0 if either string is null, otherwise counts positions up to the shorter length where the two strings have equal characters.
 // @fnv 0x00768a10
-unsigned int __thiscall FUN_00768a10_shell::CountMatchingChars(const char* pcStringA, const char* pcStringB)
+unsigned int __thiscall HackingMenu::CountMatchingChars(const char* pcStringA, const char* pcStringB)
 {
     if (!pcStringA || !pcStringB)
         return 0;
@@ -348,6 +337,8 @@ struct STR_0076b200
 {
     void* f0;
     unsigned int f4;
+    STR_0076b200();   // 0x0096a2d0 (zeroes both words)
+    ~STR_0076b200();  // 0x00702220 (frees f0)
     void FUN_00768920(unsigned int);
     STR_0076b200* AssignFrom(STR_0076b200*);
 };
@@ -402,28 +393,12 @@ void __thiscall FUN_0076b2a0_shell::FreeAll()
 }
 }  // namespace fnv_0076b2a0
 
-struct Tile
-{
-    void __thiscall Set(int, int);
-};
-struct FUN_00759f20_holder
-{
-    void __thiscall AssignString(int);
-};
-struct FUN_00768020_holder
-{
-    char _pad0[0xE0];
-    FUN_00759f20_holder _anim;
-    char _pad1[0x114 - 0xE0 - 1];
-    Tile* _tile;
-    void __thiscall FUN_00768020();
-};
 // @fnv 0x00768020
-void __thiscall FUN_00768020_holder::FUN_00768020()
+void __thiscall HackingMenu::FUN_00768020()
 {
-    _anim.AssignString(0);
-    _tile->Set(0x1005, -1);
-    _tile->Set(0x1008, -1);
+    anim.AssignString(0);
+    m_pTiles[2]->Set(0x1005, -1);
+    m_pTiles[2]->Set(0x1008, -1);
 }
 
 int __cdecl FUN_004dc1f0(void);
@@ -442,14 +417,10 @@ float __thiscall MyHack::FUN_007697f0()
     return (float)(f4AC * 1280.0 / FUN_004dc1f0() * f4D0);
 }
 
-struct FUN_00768970_shell
-{
-    void __thiscall FormatHexWord(unsigned short v, char* dst);
-};
 
 // Writes "0x" followed by the four hex digits of v (most significant first) into dst and null-terminates it.
 // @fnv 0x00768970
-void __thiscall FUN_00768970_shell::FormatHexWord(unsigned short ausValue, char* pDest)
+void __thiscall HackingMenu::FormatHexWord(unsigned short ausValue, char* pDest)
 {
     __memcpy(pDest, "0x", 2);
     for (int i = 0; i < 4; i++)
@@ -471,30 +442,18 @@ struct TileHelper
     bool __thiscall ContainsTrait(int value);
 };
 
-struct FUN_00767bb0_entry
-{
-    unsigned char _pad[0x2c];
-    TGF* value;
-};
 
-struct FUN_00767bb0_shell
-{
-    unsigned char _pad[0x28];
-    FUN_00767bb0_entry* entries[46];
-
-    TGF* __thiscall FUN_00767bb0(unsigned int a, unsigned int b);
-};
 
 // Scans 46 entries for one whose value is non-null, passes a check, and whose floats at 0xfac and 0x1004 equal a and b; returns that value or null.
 // @fnv 0x00767bb0
-TGF* __thiscall FUN_00767bb0_shell::FUN_00767bb0(unsigned int a, unsigned int b)
+Tile* __thiscall HackingMenu::FUN_00767bb0(int iColumn, int iNewRow)
 {
     for (unsigned int i = 0; i < 46; ++i)
     {
-        if (entries[i]->value != 0 && reinterpret_cast<TileHelper*>(entries[i]->value)->ContainsTrait(0xfaf) &&
-            entries[i]->value->GetFloat(0xfac) == a && entries[i]->value->GetFloat(0x1004) == b)
+        if (reinterpret_cast<TGF*>(entries[i]->tile) != 0 && reinterpret_cast<TileHelper*>(reinterpret_cast<TGF*>(entries[i]->tile))->ContainsTrait(0xfaf) &&
+            reinterpret_cast<TGF*>(entries[i]->tile)->GetFloat(0xfac) == static_cast<unsigned int>(iColumn) && reinterpret_cast<TGF*>(entries[i]->tile)->GetFloat(0x1004) == static_cast<unsigned int>(iNewRow))
         {
-            return entries[i]->value;
+            return reinterpret_cast<Tile*>(entries[i]->tile);
         }
     }
 
@@ -502,24 +461,6 @@ TGF* __thiscall FUN_00767bb0_shell::FUN_00767bb0(unsigned int a, unsigned int b)
 }
 
 void* __cdecl operator new(unsigned int);
-
-struct FUN_00702220
-{
-    void* pData;
-    unsigned int ItemUpdateArray;
-    ~FUN_00702220();
-};
-
-struct SL : public FUN_00702220
-{
-    SL();
-};
-
-FUN_00702220::~FUN_00702220()
-{}
-
-SL::SL()
-{}
 
 struct FUN_00768810
 {
@@ -529,14 +470,14 @@ struct FUN_00768810
     FUN_00768810(unsigned int aiSize);
 };
 
-// Stores aiSize, allocates an SL array of that size, and initializes each element via FUN_00768920(uiSize).
+// Stores aiSize, allocates an STR_0076b200 array of that size, and initializes each element via FUN_00768920(uiSize).
 // @fnv 0x00768810
 FUN_00768810::FUN_00768810(unsigned int aiSize)
 {
     unsigned int i;
 
     uiSize = aiSize;
-    pItems = reinterpret_cast<STR_0076b200*>(new SL[aiSize]);
+    pItems = new STR_0076b200[aiSize];
 
     for (i = 0; i < uiSize; ++i)
         pItems[i].FUN_00768920(uiSize);
@@ -578,42 +519,15 @@ void* FUN_007021b0_cls::DestroyOrFree(unsigned int flags)
     return this;
 }
 
-class NiNode;
-
-class TileD766
-{
-  public:
-    NiNode* FUN_0056c7f0();
-    void SetInt(int m_uiSoundID, int iValue);
-};
-
 class TileNU
 {
   public:
     void Set(int m_uiSoundID, float fValue, bool bPropagate);
 };
 
-class FORenderedMenu
-{
-  public:
-    virtual ~FORenderedMenu();
-};
-
-class FORenderedTerminal : public FORenderedMenu
-{
-  public:
-    void FUN_007ffaf0();
-};
-
-class BSAudio
-{
-  public:
-    NiNode* GetSynchTime();
-};
-
 class InterfaceManager;
 
-class FUN_00766aa0_Menu
+class MenuCloseOperation
 {
   public:
     TileNU* GetTile();
@@ -625,7 +539,7 @@ void __cdecl FUN_007ffe40();
 unsigned int __cdecl gm_GetTickCount();
 
 extern const float runtimeFloatSettingDefault987;
-extern FUN_00766aa0_Menu* g_pkD766AA0Menu;
+extern MenuCloseOperation* g_pkD766AA0Menu;
 extern InterfaceManager* g_pkD766AA0InterfaceManager;
 extern unsigned int g_uiD766AA0CloseTime;
 
@@ -638,15 +552,15 @@ void __cdecl UpdateD766AA0Menu()
         g_pkD766AA0Menu->GetTile()->Set(0xfc1, runtimeFloatSettingDefault987, true);
         if (FUN_00707af0(g_pkD766AA0InterfaceManager))
         {
-            if (((BSAudio*)FUN_00707af0(g_pkD766AA0InterfaceManager))->GetSynchTime() ==
-                ((TileD766*)g_pkD766AA0Menu->GetTile())->FUN_0056c7f0())
+            if (FUN_00707af0(g_pkD766AA0InterfaceManager)->GetSceneNode() ==
+                ((Tile*)g_pkD766AA0Menu->GetTile())->FUN_0056c7f0())
             {
                 FORenderedTerminal* pkTerminal =
                     dynamic_cast<FORenderedTerminal*>(FUN_00707af0(g_pkD766AA0InterfaceManager));
                 pkTerminal->FUN_007ffaf0();
             }
         }
-        ((TileD766*)g_pkD766AA0Menu->GetTile())->SetInt(0x1772, 1);
+        ((Tile*)g_pkD766AA0Menu->GetTile())->SetInt(0x1772, 1);
         g_pkD766AA0Menu->FUN_00a1d910();
         g_uiD766AA0CloseTime = gm_GetTickCount() + 8000;
     }
@@ -656,9 +570,13 @@ extern int DAT_010729c8;
 struct ValueRow
 {
     float __thiscall FUN_00a011b0(unsigned int key, unsigned int mode);
-    void __thiscall SetFloat(unsigned int key, float value);
+    void __thiscall FUN_00a012d0(unsigned int key, float value);
     void __thiscall FUN_00715c60(unsigned int key, unsigned int value);
     void __thiscall FUN_00a01350(unsigned int key, unsigned int value, unsigned int mode);
+};
+struct MenuRowFactory
+{
+    ValueRow* FUN_00a1ddb0(void*, int*, unsigned int);
 };
 struct EntryListNode
 {
@@ -666,14 +584,9 @@ struct EntryListNode
     ValueRow** __thiscall FUN_0057cbe0(int* iterator);
     void __thiscall FUN_004ed8c0(ValueRow** item);
 };
-struct FUN_00767ef0_shell
-{
-    ValueRow* __thiscall FUN_00a1ddb0(void* owner, int* descriptor, unsigned int mode);
-    void __thiscall AddValueRows(unsigned int count, const unsigned int* values);
-};
 // Adds count to the 0xfac value of each existing row, then creates count new rows with descending 0xfac values and the given values at 0xfc4, appending each.
 // @fnv 0x00767ef0
-void __thiscall FUN_00767ef0_shell::AddValueRows(unsigned int count, const unsigned int* puiValues)
+void __thiscall HackingMenu::AddValueRows(unsigned int count, const unsigned int* puiValues)
 {
     ValueRow* item;
     {
@@ -681,12 +594,12 @@ void __thiscall FUN_00767ef0_shell::AddValueRows(unsigned int count, const unsig
         while (iterator != 0)
         {
             item = *(((EntryListNode*)((char*)this + 0x168))->FUN_0057cbe0(&iterator));
-            item->SetFloat(0xfac, item->FUN_00a011b0(0xfac, 1) + float(count));
+            item->FUN_00a012d0(0xfac, item->FUN_00a011b0(0xfac, 1) + float(count));
         }
     }
     for (unsigned int index = 0; index < count; ++index)
     {
-        item = FUN_00a1ddb0(*(void**)((char*)this + 0x118), &DAT_010729c8, 0);
+        item = reinterpret_cast<MenuRowFactory*>(this)->FUN_00a1ddb0(*(void**)((char*)this + 0x118), &DAT_010729c8, 0);
         item->FUN_00715c60(0xfac, count - index - 1);
         item->FUN_00a01350(0xfc4, puiValues[index], 1);
         ((EntryListNode*)((char*)this + 0x168))->FUN_004ed8c0(&item);
@@ -783,22 +696,16 @@ struct GameRoot
 
 extern GameRoot* g_pGame;
 
-struct FUN_00769700_cls
-{
-    unsigned char _pad0[0x1cc];
-    int m_1cc;
-    int GetScaledValue();
-};
 
 // Calls UnkCallA/UnkCallB, picks m_1cc or a game value as result, then returns -1 if result is outside [a,b] or (result-a)/17.
 // @fnv 0x00769700
-int FUN_00769700_cls::GetScaledValue()
+int HackingMenu::GetScaledValue()
 {
     int result = 0;
     UnkCallA();
     if (UnkCallB())
     {
-        result = m_1cc;
+        result = m_iCursorIndex;
     }
     else
     {
@@ -820,151 +727,25 @@ struct TileV
     void __thiscall SetInt(int id, int value);
 };
 
-struct SoundHandleV
-{
-    bool __thiscall Play(bool loop);
-};
 
-struct HackingMenuV
-{
-    int unk00;
-    TileV* tile04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    int unkF0;
-    int unkF4;
-    int unkF8;
-    int unkFC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    TileV* tile120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    SoundHandleV sound150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    unsigned int amount1B8;
-    int unk1BC;
-    int unk1C0;
-    int state1C4;
-    int unk1C8;
-    int unk1CC;
-    unsigned int nextTick1D0;
-
-    void FUN_0076a3f0();
-};
 
 // @fnv 0x0076a3f0
-void HackingMenuV::FUN_0076a3f0()
+void HackingMenu::FUN_0076a3f0()
 {
-    if (gm_GetTickCount() > nextTick1D0)
+    if (gm_GetTickCount() > reinterpret_cast<unsigned int&>(unk1d0))
     {
         const unsigned int delay = 50;
-        tile04->SetFloat(0x1005,
-                         tile04->GetFloat(0x1005) +
-                             amount1B8 * (nextTick1D0 ? (gm_GetTickCount() - nextTick1D0) / delay + 1 : 1),
+        reinterpret_cast<TileV*>(pMenu)->SetFloat(0x1005,
+                         reinterpret_cast<TileV*>(pMenu)->GetFloat(0x1005) +
+                             static_cast<unsigned int>(unk1b8) * (reinterpret_cast<unsigned int&>(unk1d0) ? (gm_GetTickCount() - reinterpret_cast<unsigned int&>(unk1d0)) / delay + 1 : 1),
                          true);
-        nextTick1D0 = gm_GetTickCount() + delay;
-        sound150.Play(false);
+        reinterpret_cast<unsigned int&>(unk1d0) = gm_GetTickCount() + delay;
+        reinterpret_cast<BSSoundHandle&>(sounds[3]).Play(false);
     }
-    if (tile120->GetWidth() + tile120->GetFloat(0xfb0) < _gModifierZero)
+    if (reinterpret_cast<TileV*>(m_pTiles[5])->GetWidth() + reinterpret_cast<TileV*>(m_pTiles[5])->GetFloat(0xfb0) < _gModifierZero)
     {
-        tile04->SetInt(0x1006, 1);
-        state1C4 = 4;
+        reinterpret_cast<TileV*>(pMenu)->SetInt(0x1006, 1);
+        m_iStage = 4;
     }
 }
 
@@ -974,13 +755,9 @@ int __cdecl FUN_00ec7690(int, int);
 int __cdecl FUN_00ec86e1(int);
 void __cdecl FUN_00401460(int, const char*, int);
 
-struct FUN_0076a670_cls
-{
-    void FUN_0076a670(int a1, const char* s);
-};
 
 // @fnv 0x0076a670
-void FUN_0076a670_cls::FUN_0076a670(int a1, const char* pcSource)
+void HackingMenu::FUN_0076a670(int a1, const char* pcSource)
 {
     int idx = 1;
     int r6 = FUN_00ec7690(DAT_011a0104, pcSource[0]);
@@ -1022,22 +799,21 @@ struct Resources
     float __thiscall FUN_00a011b0(int id);
     Fade* __thiscall FindTraitValue(int id);
 };
+struct MenuWidgetLookup
+{
+    struct Widget* FUN_00726070(int);
+};
 struct Widget
 {
     bool __thiscall IsTraitNonZero();
 };
-struct HackingMenuDecomp : HackingMenu
-{
-    Widget* __thiscall FUN_00726070(int id);
-    void __thiscall UpdateFade();
-};
 // Toggles the fade at offset 0x1d4 between 0 and 1 on a timer, creating it from resource 0xfa3 when absent, unless menu state 4 with widget 0x1006 is active.
 // @fnv 0x0076a9d0
-void HackingMenuDecomp::UpdateFade()
+void HackingMenu::UpdateFade()
 {
     static float delay = (*reinterpret_cast<Resources**>(reinterpret_cast<char*>(this) + 0x11c))
                              ->FUN_00a011b0(FUN_00a00940(&str_01072108, -1));
-    if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x1c4) == 4 && FUN_00726070(0x1006)->IsTraitNonZero())
+    if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x1c4) == 4 && reinterpret_cast<MenuWidgetLookup*>(this)->FUN_00726070(0x1006)->IsTraitNonZero())
     {
         return;
     }
@@ -1069,103 +845,26 @@ struct Node
 };
 extern int __cdecl FUN_0044a670(Node* node);
 extern int __cdecl FUN_00ec62c0();
-struct Menu0076ab40
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    Node* active;
-    Node* root;
-    void __thiscall UpdateActiveNodeProperty();
-};
 // @fnv 0x0076ab40
-void Menu0076ab40::UpdateActiveNodeProperty()
+void HackingMenu::UpdateActiveNodeProperty()
 {
     Node* selected;
     int total;
     {
         int multiplier = 0;
         total = 0;
-        if (root->IsTraitNonZero(0xfa3))
+        if (reinterpret_cast<Node*>(m_pTiles[5])->IsTraitNonZero(0xfa3))
         {
-            selected = root->FUN_00a011f0(0xfc4);
+            selected = reinterpret_cast<Node*>(m_pTiles[5])->FUN_00a011f0(0xfc4);
             if (selected)
                 multiplier = FUN_0044a670(selected);
         }
-        for (Node* current = root; current && current != active->FUN_0045cd60(); current = current->FUN_0045cd60())
+        for (Node* current = reinterpret_cast<Node*>(m_pTiles[5]); current && current != reinterpret_cast<Node*>(m_pTiles[4])->FUN_0045cd60(); current = current->FUN_0045cd60())
         {
             current->FUN_00a011b0(0xfa1);
             total += FUN_00ec62c0();
         }
-        active->FUN_00700320(0xfa1, multiplier * 17 + total);
+        reinterpret_cast<Node*>(m_pTiles[4])->FUN_00700320(0xfa1, multiplier * 17 + total);
     }
 }
 
@@ -1182,7 +881,7 @@ struct FUN_00a1ddb0_owner
     FUN_00a1ddb0_res* __thiscall FUN_00a1ddb0(char* base, char const* name, void* f0);
 };
 
-extern FUN_00a1ddb0_owner* DAT_011d95b8;
+extern HackingMenu* DAT_011d95b8;
 
 struct FUN_0044ddc0_sub
 {
@@ -1190,37 +889,19 @@ struct FUN_0044ddc0_sub
     void __thiscall FUN_004ed8c0(FUN_00a1ddb0_res** pp);
 };
 
-class FUN_004037b0_tmp
-{
-  public:
-    int m_00;
-    int m_04;
-    FUN_004037b0_tmp();
-    ~FUN_004037b0_tmp();
-    int __thiscall FUN_00559450();
-};
 
-void __cdecl FUN_00406f60(void* dest, char const* fmt, ...);
 
-struct FUN_0076ad50_cls
-{
-    unsigned char _pad0[0x110];
-    char* m110;
-    unsigned char _pad1[0x174 - 0x110 - 4];
-    FUN_0044ddc0_sub m174;
-    void BuildHackingGuessTemplate();
-};
 
 // @fnv 0x0076ad50
-void FUN_0076ad50_cls::BuildHackingGuessTemplate()
+void HackingMenu::BuildHackingGuessTemplate()
 {
-    FUN_00a1ddb0_res* p = DAT_011d95b8->FUN_00a1ddb0(m110, "hacking_guess_template", 0);
-    p->FUN_00715c60(0xfac, m174.FUN_0044ddc0());
-    m174.FUN_004ed8c0(&p);
+    FUN_00a1ddb0_res* p = reinterpret_cast<FUN_00a1ddb0_owner*>(DAT_011d95b8)->FUN_00a1ddb0(reinterpret_cast<char*>(m_pTiles[1]), "hacking_guess_template", 0);
+    p->FUN_00715c60(0xfac, (*reinterpret_cast<FUN_0044ddc0_sub*>(&list174)).FUN_0044ddc0());
+    (*reinterpret_cast<FUN_0044ddc0_sub*>(&list174)).FUN_004ed8c0(&p);
     {
-        FUN_004037b0_tmp nameBuf;
-        FUN_00406f60(&nameBuf, "%s_%d", p->FUN_00700300(), m174.FUN_0044ddc0());
-        p->FUN_00707e10(nameBuf.FUN_00559450());
+        BSStringT<char> nameBuf;
+        nameBuf.PrintfString("%s_%d", p->FUN_00700300(), (*reinterpret_cast<FUN_0044ddc0_sub*>(&list174)).FUN_0044ddc0());
+        p->FUN_00707e10((int)nameBuf.String());
     }
 }
 
@@ -1293,249 +974,51 @@ ElemArray* ElemArray::CopyFrom(ElemArray* src)
     return this;
 }
 
-struct MenuBase
-{
-    MenuBase();
-    virtual ~MenuBase();
-    int unk4;
-    int unk8;
-    int unkC;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-};
-struct AnimState
-{
-    AnimState();
-    ~AnimState();
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-};
-struct Sound
-{
-    int id;
-    int state;
-    int flags;
-    Sound();
-    ~Sound();
-    Sound& operator=(const Sound&);
-};
-struct ListState
-{
-    int a;
-    int b;
-    int c;
-    ListState();
-    ~ListState();
-};
-struct PairState
-{
-    int a;
-    int b;
-    PairState();
-    ~PairState();
-};
 struct AudioManager
 {
     static AudioManager* Get();
-    Sound GetSoundByEditorID(const char*, int);
+    BSSoundHandle GetSoundByEditorID(const char*, int);
 };
 void* __cdecl FUN_00403d30(void*, int, unsigned int);
-struct FUN_007654f0 : MenuBase
-{
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    AnimState anim;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    Sound sounds[5];
-    ListState list168;
-    ListState list174;
-    PairState pair180;
-    ListState list188;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    char unk1D8;
-    char unk1D9;
-    char unk1DA;
-    FUN_007654f0();
-    virtual ~FUN_007654f0();
-};
 static const char scrollSound[] = "UIHackingCharScroll";
 // @fnv 0x007654f0
-FUN_007654f0::FUN_007654f0()
+HackingMenu::HackingMenu()
 {
-    unk1B4 = 0;
-    unk1B8 = 30;
-    FUN_00403d30(&unk10C, 0, 32);
-    unk19C = 0;
-    unk1A4 = 0;
-    unk1A0 = 0;
-    unk1AC = 0;
-    unk1A8 = 0;
-    unk1CC = 0;
-    unk1B0 = 0;
-    unk1C4 = 0;
-    unk1BC = -1;
-    unk1C8 = 0;
-    unk1C0 = 0;
-    unk1DA = 0;
-    unk1D9 = 0;
-    unk1D8 = 0;
-    unk1D0 = 0;
-    unk1D4 = 0;
+    unk1b4 = 0;
+    unk1b8 = 30;
+    FUN_00403d30(&unk10c, 0, 32);
+    unk19c = 0;
+    unk1a4 = 0;
+    unk1a0 = 0;
+    unk1ac = 0;
+    unk1a8 = 0;
+    m_iCursorIndex = 0;
+    unk1b0 = 0;
+    m_iStage = 0;
+    unk1bc = -1;
+    m_pkCursorTile = 0;
+    unk1c0 = 0;
+    unk1d9[1] = 0;
+    unk1d9[0] = 0;
+    m_bBlink = 0;
+    unk1d0 = 0;
+    unk1d4 = 0;
     AudioManager* audio = AudioManager::Get();
-    sounds[0] = audio->GetSoundByEditorID("UIHackingFanHumLP", 49);
-    sounds[1] = audio->GetSoundByEditorID("UIHackingPassGood", 33);
-    sounds[2] = audio->GetSoundByEditorID("UIHackingPassBad", 33);
-    sounds[3] = audio->GetSoundByEditorID(scrollSound, 33);
-    sounds[4] = audio->GetSoundByEditorID("UIHackingCharEnter", 33);
-    FUN_00403d30(&unk28, 0, 184);
+    reinterpret_cast<BSSoundHandle&>(sounds[0]) = audio->GetSoundByEditorID("UIHackingFanHumLP", 49);
+    reinterpret_cast<BSSoundHandle&>(sounds[1]) = audio->GetSoundByEditorID("UIHackingPassGood", 33);
+    reinterpret_cast<BSSoundHandle&>(sounds[2]) = audio->GetSoundByEditorID("UIHackingPassBad", 33);
+    reinterpret_cast<BSSoundHandle&>(sounds[3]) = audio->GetSoundByEditorID(scrollSound, 33);
+    reinterpret_cast<BSSoundHandle&>(sounds[4]) = audio->GetSoundByEditorID("UIHackingCharEnter", 33);
+    FUN_00403d30(&unk028, 0, 184);
 }
 
 struct ScriptObj
 {
     virtual int Call0(int);
 };
-struct ListM
-{
-    int f00;
-    int f04;
-    int f08;
-    ~ListM();
-    bool FUN_0076b610();
-    ScriptObj* RemoveHead();
-};
 struct EntObj
 {
     void* FUN_00765b50(unsigned int);
-};
-struct ObjE0
-{
-    int f00;
-    int f04;
-    int f08;
-    int f0c;
-    int f10;
-    int f14;
-    int f18;
-    int f1c;
-    int f20;
-    int f24;
-    int f28;
-    int f2c;
-    int f30;
-    int f34;
-    int f38;
-    int f3c;
-    int f40;
-    int f44;
-    int f48;
-    ~ObjE0();
-};
-struct SndX
-{
-    void Stop();
-    void FUN_00ad8d10();
-};
-struct BSSoundHandleEx : SndX
-{
-    int f00;
-    int f04;
-    int f08;
-    ~BSSoundHandleEx();
-};
-struct SubM
-{
-    int f00;
-    int f04;
-    int f08;
-    int f0c;
-    int f10;
-    int f14;
-    int f18;
-    int f1c;
-    int f20;
-    int f24;
-    void RemoveAll();
-    ~SubM();
 };
 struct SettingValue
 {
@@ -1550,39 +1033,13 @@ struct SysColorMgr
     static SysColorMgr* __stdcall GetSingleton(int, char*);
     void ApplyToChild();
 };
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-};
 unsigned int __cdecl gm_GetTickCount();
 void __cdecl FormHeap_Free(void*);
 extern SettingColl DAT_011d0b90;
 extern unsigned int DAT_011d95c0;
 extern char DAT_011d9674;
-struct FUN_007658e0 : Menu_007a8b10
-{
-    int f04;
-    int f08;
-    int f0c;
-    int f10;
-    int f14;
-    int f18;
-    int f1c;
-    int f20;
-    int f24;
-    EntObj* entries[46];
-    ObjE0 mE0;
-    BSSoundHandleEx snd[5];
-    ListM list1;
-    ListM list2;
-    FUN_00765810 m180;
-    int f184;
-    SubM m188;
-    void* ptr1B0;
-    ~FUN_007658e0();
-};
 // @fnv 0x007658e0
-FUN_007658e0::~FUN_007658e0()
+HackingMenu::~HackingMenu()
 {
     ScriptObj* head7;
     ScriptObj* objTmp;
@@ -1592,59 +1049,38 @@ FUN_007658e0::~FUN_007658e0()
     EntObj* entCopy2;
     int i8;
     unsigned int jB;
-    while (!list1.FUN_0076b610())
+    while (!list168.FUN_0076b610())
     {
-        head7 = list1.RemoveHead();
+        head7 = list168.RemoveHead();
         objTmp = head7;
         objTmp ? objTmp->Call0(1) : 0;
     }
-    while (!list2.FUN_0076b610())
+    while (!list174.FUN_0076b610())
     {
-        head4 = list2.RemoveHead();
+        head4 = list174.RemoveHead();
         obj2 = head4;
         obj2 ? obj2->Call0(1) : 0;
     }
-    m188.RemoveAll();
+    list188.FUN_004ed900();
     DAT_011d95c0 = gm_GetTickCount() + DAT_011d0b90.FUN_0043d4d0()->v;
-    m180.FreeAll();
-    void* ptrTmp = ptr1B0;
+    pair180.FreeAll();
+    void* ptrTmp = reinterpret_cast<void*>(unk1b0);
     FormHeap_Free(ptrTmp);
     DAT_011d95b8 = 0;
     for (i8 = 0; i8 < 5; i8++)
     {
-        snd[i8].Stop();
-        snd[i8].FUN_00ad8d10();
+        reinterpret_cast<BSSoundHandle&>(sounds[i8]).Stop();
+        reinterpret_cast<BSSoundHandle&>(sounds[i8]).Clear();
     }
     for (jB = 0; jB < 46; jB++)
     {
-        ent2 = entries[jB];
+        ent2 = reinterpret_cast<EntObj**>(entries)[jB];
         entCopy2 = ent2;
         entCopy2 ? entCopy2->FUN_00765b50(1) : 0;
     }
     SysColorMgr::GetSingleton(3, &DAT_011d9674)->ApplyToChild();
 }
 
-struct HackTile
-{
-    const char* GetString(int);
-    void Set(int, const char*, bool);
-    bool ContainsTrait(int);
-};
-struct HackEntry
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    HackTile* tile;
-};
 struct HackList
 {
     char* data;
@@ -1654,77 +1090,9 @@ struct HackList
     void Remove(char**);
 };
 int __cdecl FUN_00408b20(const char*, const char*);
-struct HackMenu
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    HackEntry* entries[46];
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-
-    HackList words;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    const char* selected;
-    int unk1a0;
-    int unk1a4;
-    unsigned int count;
-    unsigned int dotCount;
-    unsigned int* positions;
-    void RemoveRandomWord();
-};
 // Picks a random word matching selected, fills its menu tile with dots up to dotCount, shifts positions, frees the word and decrements count.
 // @fnv 0x0076a730
-void HackMenu::RemoveRandomWord()
+void HackingMenu::RemoveRandomWord()
 {
     unsigned int index;
     unsigned int iter;
@@ -1735,43 +1103,43 @@ void HackMenu::RemoveRandomWord()
     char text[20];
     do
     {
-        index = FUN_005a00a0(count);
+        index = FUN_005a00a0(reinterpret_cast<unsigned int&>(unk1a8));
         iter = index;
-        word = &words;
+        word = &(*reinterpret_cast<HackList*>(&pair180));
         while (iter--)
             word = word->Next();
-    } while (!FUN_00408b20(*word->Get(), selected));
+    } while (!FUN_00408b20(*word->Get(), reinterpret_cast<const char*>(unk19c)));
     aRow = 4;
-    for (position3 = positions[index]; position3 > 12; position3 -= 12)
+    for (position3 = reinterpret_cast<unsigned int*>(unk1b0)[index]; position3 > 12; position3 -= 12)
         ++aRow;
     tile_2 = entries[aRow]->tile;
     ++aRow;
     __memcpy(text, tile_2->GetString(0xfc4), 20);
-    for (iter = 0; iter < dotCount && position3 < 12; ++iter)
+    for (iter = 0; iter < static_cast<unsigned int>(unk1ac) && position3 < 12; ++iter)
     {
         text[position3 + 7] = '.';
         ++position3;
     }
     tile_2->Set(0xfc4, text, true);
-    if (entries[aRow] && entries[aRow]->tile && entries[aRow]->tile->ContainsTrait(0xfaf) && iter < dotCount)
+    if (entries[aRow] && entries[aRow]->tile && entries[aRow]->tile->ContainsTrait(0xfaf) && iter < static_cast<unsigned int>(unk1ac))
     {
         position3 = 0;
         tile_2 = entries[aRow]->tile;
         __memcpy(text, tile_2->GetString(0xfc4), 20);
-        while (iter++ < dotCount)
+        while (iter++ < static_cast<unsigned int>(unk1ac))
         {
             text[position3 + 7] = '.';
             ++position3;
         }
         tile_2->Set(0xfc4, text, true);
     }
-    for (; index < count - 1; ++index)
-        positions[index] = positions[index + 1];
-    positions[index] = 0x198;
+    for (; index < reinterpret_cast<unsigned int&>(unk1a8) - 1; ++index)
+        reinterpret_cast<unsigned int*>(unk1b0)[index] = reinterpret_cast<unsigned int*>(unk1b0)[index + 1];
+    reinterpret_cast<unsigned int*>(unk1b0)[index] = 0x198;
     char* deleted = *word->Get();
     FormHeap_Free(deleted);
-    words.Remove(word->Get());
-    --count;
+    (*reinterpret_cast<HackList*>(&pair180)).Remove(word->Get());
+    --reinterpret_cast<unsigned int&>(unk1a8);
 }
 
 namespace fnv_0076ac10 {
@@ -1785,120 +1153,32 @@ struct HTile
     void __thiscall Set(int id, int value);
 };
 
-struct HackEntry
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    HTile* tile;
-};
 
-struct HackMenuStub
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    HTile* tile11C;
-    void __thiscall PositionTileFromEntry(HackEntry* entry);
-};
 
 // Computes x/y from the entry's tile string length and float values plus ancestor tiles, then sets them on tile11C.
+} // namespace fnv_0076ac10
+
 // @fnv 0x0076ac10
-void HackMenuStub::PositionTileFromEntry(HackEntry* entry)
+void HackingMenu::PositionTileFromEntry(HackEntry* entry)
 {
-    if (!entry || !entry->tile)
+    using namespace fnv_0076ac10;
+    if (!entry || !reinterpret_cast<fnv_0076ac10::HTile*>(entry->tile))
         return;
-    const char* text = entry->tile->GetString(0xfc4);
-    int len4 = (text && *text != ' ') ? BSStringLength(text) : 0;
-    int x8 = entry->tile->GetFloatValue(0xfa1) + len4 * 0x11;
-    int y = entry->tile->GetFloatValue(0xfa2);
+    const char* text = reinterpret_cast<fnv_0076ac10::HTile*>(entry->tile)->GetString(0xfc4);
+    int len4 = (text && *text != ' ') ? fnv_0076ac10::BSStringLength(text) : 0;
+    int x8 = reinterpret_cast<fnv_0076ac10::HTile*>(entry->tile)->GetFloatValue(0xfa1) + len4 * 0x11;
+    int y = reinterpret_cast<fnv_0076ac10::HTile*>(entry->tile)->GetFloatValue(0xfa2);
     HTile* parent;
-    for (parent = entry->tile->GetParentTile(); parent && parent != tile11C->GetParentTile();
+    for (parent = reinterpret_cast<fnv_0076ac10::HTile*>(entry->tile)->GetParentTile(); parent && parent != reinterpret_cast<fnv_0076ac10::HTile*>(m_pTiles[4])->GetParentTile();
          parent = parent->GetParentTile())
     {
         x8 += (int)parent->GetFloatValue(0xfa1);
         y += (int)parent->GetFloatValue(0xfa2);
     }
-    tile11C->Set(0xfa1, x8);
-    tile11C->Set(0xfa2, y);
+    reinterpret_cast<fnv_0076ac10::HTile*>(m_pTiles[4])->Set(0xfa1, x8);
+    reinterpret_cast<fnv_0076ac10::HTile*>(m_pTiles[4])->Set(0xfa2, y);
 }
-}  // namespace fnv_0076ac10
+
 
 struct FUN_00759eb0
 {
@@ -1935,78 +1215,6 @@ struct ConstructorTile : FUN_00a1ddb0_res
     void __thiscall FUN_00700320(unsigned int, int);
     void __thiscall FUN_00a01350(unsigned int, const char*, bool);
 };
-struct ConstructorMenu : FUN_00a1ddb0_owner
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    char* root;
-    TileValue* __thiscall FUN_00726070();
-};
 extern const char DAT_0107293c[];
 extern const char DAT_010692d0[];
 struct FUN_0076b300 : FUN_00759eb0
@@ -2032,21 +1240,21 @@ FUN_0076b300::FUN_0076b300(const char* name, char* parent, const char* path, int
     {
         unsigned int randomValue = counts[kind] > 1 ? FUN_004bd510(1000.0 / counts[kind], 1.0f) : 1000.0f;
         SetCapacity(randomValue);
-        tile = static_cast<ConstructorTile*>(DAT_011d95b8->FUN_00a1ddb0(parent, path, 0));
+        tile = static_cast<ConstructorTile*>(reinterpret_cast<FUN_00a1ddb0_owner*>(DAT_011d95b8)->FUN_00a1ddb0(parent, path, 0));
         if (tile)
         {
             FUN_006ffe80(tile->FUN_00a00f30(0xfc4), tile->FindTraitValue(0xfa3));
             if (kind == 1)
             {
                 label = static_cast<ConstructorTile*>(
-                    DAT_011d95b8->FUN_00a1ddb0(static_cast<ConstructorMenu*>(DAT_011d95b8)->root, DAT_0107293c, 0));
+                    reinterpret_cast<FUN_00a1ddb0_owner*>(DAT_011d95b8)->FUN_00a1ddb0(reinterpret_cast<char*>(DAT_011d95b8->m_pTiles[0]), DAT_0107293c, 0));
                 label->FUN_00a01350(0xfc4, DAT_010692d0, true);
             }
             if (value >= 0)
             {
                 tile->FUN_00700320(0xfa2, value);
                 int width =
-                    static_cast<int>(static_cast<ConstructorMenu*>(DAT_011d95b8)->FUN_00726070()->FUN_00a011b0(0x1007));
+                    static_cast<int>(reinterpret_cast<TileValue*>(DAT_011d95b8->FUN_00726070())->FUN_00a011b0(0x1007));
                 if (label)
                 {
                     label->FUN_00700320(0xfa1, width);
@@ -2076,21 +1284,11 @@ extern char str_010729e8[];
 unsigned int __cdecl gm_GetTickCount();
 void __cdecl UpdateD766AA0Menu();
 
-struct PathStorage
-{
-    StrMem str;
-    void* ownedBuffer;
-};
 struct FUN_00680890 : FUN_00765810
 {
     void* m_item;
     void* m_next;
     FUN_00680890();
-};
-struct StrMemMethods : StrMem
-{
-    void __thiscall FUN_00438390(const char*);
-    const char* __thiscall Get();
 };
 struct WordsView : FUN_00765810
 {
@@ -2125,14 +1323,9 @@ struct MatrixWrapper : FUN_007687d0
 {
     MatrixWrapper(unsigned int);
 };
-struct FUN_00768070_shell : FUN_00768a10_shell
-{
-    unsigned int __thiscall FUN_00769520(FUN_007687d0*);
-    void __thiscall SelectWordSet(unsigned int);
-};
 
 // @fnv 0x00768070
-void __thiscall FUN_00768070_shell::SelectWordSet(unsigned int requestedCount)
+void __thiscall HackingMenu::SelectWordSet(unsigned int requestedCount)
 {
     unsigned int attacker;
     int ahead;
@@ -2142,7 +1335,7 @@ void __thiscall FUN_00768070_shell::SelectWordSet(unsigned int requestedCount)
     WordsView* currentNode;
     int row;
     char* chosen;
-    PathStorage dataFileName;
+    BSStringT<char> dataFileName;
     FileObj* openedFile = 0;
     struct FUN_00680890 available;
     unsigned int startTicks = gm_GetTickCount();
@@ -2153,11 +1346,11 @@ void __thiscall FUN_00768070_shell::SelectWordSet(unsigned int requestedCount)
     ahead = 0;
     if (*(unsigned int*)((char*)this + 0x1ac) == 0)
         return;
-    ((StrMemMethods*)&dataFileName.str)->FUN_00438390(str_01072a34);
-    openedFile = (FileObj*)FUN_00afdf20(((StrMemMethods*)&dataFileName.str)->Get(), 0, 0x4000, 0x100);
+    dataFileName = str_01072a34;
+    openedFile = (FileObj*)FUN_00afdf20(dataFileName.String(), 0, 0x4000, 0x100);
     if (!openedFile || !openedFile->FUN_20(0, 0))
     {
-        FUN_005b5e40(0x12, str_01072a00, ((StrMemMethods*)&dataFileName.str)->Get());
+        FUN_005b5e40(0x12, str_01072a00, dataFileName.String());
         UpdateD766AA0Menu();
         return;
     }
@@ -2262,20 +1455,11 @@ void __thiscall FUN_00768070_shell::SelectWordSet(unsigned int requestedCount)
         }
         ++row;
     }
-    *(void**)((char*)this + 0x1a0) = (void*)this->FUN_00769520(&bonus);
+    *(void**)((char*)this + 0x1a0) = (void*)reinterpret_cast<Context*>(this)->FUN_00769520(&bonus);
     *(void**)((char*)this + 0x1a0) = (void*)BSStringCapacityMaximum(4, *(unsigned int*)((char*)this + 0x1a0));
     *(void**)((char*)this + 0x1a4) = *(void**)((char*)this + 0x1a0);
 }
 
-struct Text83
-{
-    char* data;
-    unsigned short length, capacity;
-    Text83();
-    ~Text83();
-    const char* FUN_00559450();
-    unsigned int FUN_004048e0();
-};
 struct Setting83
 {
     const char* FUN_00403df0();
@@ -2285,7 +1469,7 @@ extern Setting83 DAT_011d2e20, DAT_011d33cc, DAT_011d430c;
 struct Tile83
 {
     float FUN_00a011b0(int, int);
-    void SetFloat(int, float);
+    void FUN_00a012d0(int, float);
     int FUN_00a00f30(int);
     void FUN_00715c60(int, int);
     float GetTotalFloat();
@@ -2312,7 +1496,6 @@ struct Node83
     void FUN_006ecd40(int);
 };
 void* FUN_00403d30(void*, int, unsigned int);
-void __cdecl FUN_00406f60(Text83*, const char*, ...);
 unsigned int FUN_0044a670(const char*);
 void* FUN_00401460(void*, const void*, unsigned int);
 void __cdecl FUN_005b5e40(const char*, ...);
@@ -2321,98 +1504,22 @@ bool FUN_004b71d0();
 void operator delete(void*);
 void* operator new[](unsigned int);
 void operator delete[](void*);
-struct Hack83
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    Entry83* entries[46];
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    Tile83* tile10c;
-    Tile83* tile110;
-    Tile83* tile114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    Node83 words;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    char* password;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int* positions;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    Tile83* tile1c8;
-    int unk1cc;
-    void BuildHackingPasswordFile();
-    void BuildHackingGuessTemplate();
-    void FormatHexWord(unsigned short, char*);
-};
 // Clears the entry list, rebuilds the intro entries, generates a random password buffer from the word list, and creates one entry per 12-character chunk.
 // @fnv 0x00768aa0
-void Hack83::BuildHackingPasswordFile()
+void HackingMenu::BuildHackingPasswordFile()
 {
-    for (unsigned int i = 0; i < 46 && entries[i]; i++)
-        delete entries[i];
-    FUN_00403d30(entries, 0, 184);
-    Text83 text24x17;
-    FUN_00406f60(&text24x17, "%d %s", unk1a0, DAT_011d2e20.FUN_00403df0());
-    entries[0] = new Entry83(DAT_011d33cc.FUN_004c69f0(), tile110, "hacking_intro_template", unk1b4, 0);
-    entries[1] = new Entry83(DAT_011d430c.FUN_004c69f0(), tile110, "hacking_intro_template", unk1b4 + unk1b8, 0);
-    entries[2] = new Entry83(text24x17.FUN_00559450(), tile110, "hacking_intro_template", unk1b4 + unk1b8 * 3, 0);
-    tile110->SetFloat(4101, entries[2]->tile->FUN_00a011b0(4001, 1) + text24x17.FUN_004048e0() * 17);
-    tile110->SetFloat(4102, entries[2]->tile->FUN_00a011b0(4002, 1));
-    entries[3] = new Entry83;
-    entries[3]->FUN_006ffe80(0, tile110->FUN_00a00f30(4100));
+    for (unsigned int i = 0; i < 46 && reinterpret_cast<Entry83**>(entries)[i]; i++)
+        delete reinterpret_cast<Entry83**>(entries)[i];
+    FUN_00403d30(reinterpret_cast<Entry83**>(entries), 0, 184);
+    BSStringT<char> text24x17;
+    text24x17.PrintfString("%d %s", unk1a0, DAT_011d2e20.FUN_00403df0());
+    reinterpret_cast<Entry83**>(entries)[0] = new Entry83(DAT_011d33cc.FUN_004c69f0(), reinterpret_cast<Tile83*>(m_pTiles[1]), "hacking_intro_template", unk1b4, 0);
+    reinterpret_cast<Entry83**>(entries)[1] = new Entry83(DAT_011d430c.FUN_004c69f0(), reinterpret_cast<Tile83*>(m_pTiles[1]), "hacking_intro_template", unk1b4 + unk1b8, 0);
+    reinterpret_cast<Entry83**>(entries)[2] = new Entry83(text24x17.String(), reinterpret_cast<Tile83*>(m_pTiles[1]), "hacking_intro_template", unk1b4 + unk1b8 * 3, 0);
+    reinterpret_cast<Tile83*>(m_pTiles[1])->FUN_00a012d0(4101, reinterpret_cast<Entry83**>(entries)[2]->tile->FUN_00a011b0(4001, 1) + text24x17.Length() * 17);
+    reinterpret_cast<Tile83*>(m_pTiles[1])->FUN_00a012d0(4102, reinterpret_cast<Entry83**>(entries)[2]->tile->FUN_00a011b0(4002, 1));
+    reinterpret_cast<Entry83**>(entries)[3] = new Entry83;
+    reinterpret_cast<Entry83**>(entries)[3]->FUN_006ffe80(0, reinterpret_cast<Tile83*>(m_pTiles[1])->FUN_00a00f30(4100));
     int entryIndex7x39 = 4;
     for (unsigned int i = 0; i < (unsigned int)unk1a4; i++)
         BuildHackingGuessTemplate();
@@ -2422,15 +1529,15 @@ void Hack83::BuildHackingPasswordFile()
     char bufferx3[409];
     if (!unk1a8)
         return;
-    delete[] positions;
-    positions = new int[unk1a8];
+    delete[] reinterpret_cast<int*&>(unk1b0);
+    reinterpret_cast<int*&>(unk1b0) = new int[unk1a8];
     unsigned int attempts8x10 = 0;
     while (true)
     {
         for (unsigned int fill18 = 0; fill18 < 408; fill18++)
             bufferx3[fill18] = "!@#$%^*()_+=-`[]{}|;':,./<>?\\\""[FUN_005a00a0(alphabetSize17x2)];
         bufferx3[408] = 0;
-        Node83* node15 = &words;
+        Node83* node15 = &(*reinterpret_cast<Node83*>(&pair180));
         int wordIndex4 = 0;
         unsigned int failures12 = 0;
         while (node15 && *node15->FUN_006815c0() && failures12 < 100)
@@ -2442,7 +1549,7 @@ void Hack83::BuildHackingPasswordFile()
             if (free16)
             {
                 FUN_00401460(bufferx3 + position4, *node15->FUN_006815c0(), unk1ac);
-                positions[wordIndex4] = position4;
+                reinterpret_cast<int*&>(unk1b0)[wordIndex4] = position4;
                 wordIndex4++;
                 node15 = node15->FUN_00726070();
                 failures12 = 0;
@@ -2461,15 +1568,15 @@ void Hack83::BuildHackingPasswordFile()
                     "MENUS: Unable to construct complete password file for hacking minigame.  Continuing with fewer words.");
                 while (*node15->FUN_006815c0())
                 {
-                    if (password == *node15->FUN_006815c0())
-                        password = *node15->FUN_006815c0();
+                    if (reinterpret_cast<char*&>(unk19c) == *node15->FUN_006815c0())
+                        reinterpret_cast<char*&>(unk19c) = *node15->FUN_006815c0();
                     delete[] *node15->FUN_006815c0();
                     node15->FUN_0063f7b0();
                     unk1a8--;
-                    positions[wordIndex4] = 408;
+                    reinterpret_cast<int*&>(unk1b0)[wordIndex4] = 408;
                     wordIndex4++;
                 }
-                for (Node83* walk = &words; walk; walk = walk->FUN_00726070())
+                for (Node83* walk = &(*reinterpret_cast<Node83*>(&pair180)); walk; walk = walk->FUN_00726070())
                     if (walk->FUN_00726070() == node15)
                         walk->FUN_006ecd40(0);
             }
@@ -2491,16 +1598,16 @@ void Hack83::BuildHackingPasswordFile()
         }
         char address[8];
         FormatHexWord((unsigned short)current28x7, address);
-        FUN_00406f60(&text24x17, "%s %s", address, current28x7);
-        entries[entryIndex7x39] =
-            new Entry83(text24x17.FUN_00559450(), tile114, "hacking_password_file_template", -1, 2);
-        entries[entryIndex7x39]->tile->FUN_00715c60(4012, row104x2);
-        entries[entryIndex7x39]->tile->FUN_00715c60(4100, column9x68);
+        text24x17.PrintfString("%s %s", address, current28x7);
+        reinterpret_cast<Entry83**>(entries)[entryIndex7x39] =
+            new Entry83(text24x17.String(), reinterpret_cast<Tile83*>(m_pTiles[2]), "hacking_password_file_template", -1, 2);
+        reinterpret_cast<Entry83**>(entries)[entryIndex7x39]->tile->FUN_00715c60(4012, row104x2);
+        reinterpret_cast<Entry83**>(entries)[entryIndex7x39]->tile->FUN_00715c60(4100, column9x68);
         FUN_004b7210();
         if (FUN_004b71d0() && !row104x2 && !column9x68)
         {
-            tile1c8 = entries[entryIndex7x39]->tile;
-            unk1cc = (int)(tile1c8->GetTotalFloat() + 119.0);
+            reinterpret_cast<Tile83*&>(m_pkCursorTile) = reinterpret_cast<Entry83**>(entries)[entryIndex7x39]->tile;
+            m_iCursorIndex = (int)(reinterpret_cast<Tile83*&>(m_pkCursorTile)->GetTotalFloat() + 119.0);
         }
         row104x2++;
         if (row104x2 == 17)
@@ -2513,23 +1620,13 @@ void Hack83::BuildHackingPasswordFile()
             current28x7[12] = backup;
         current28x7 += 12;
     }
-    tile10c->FUN_00700320(4003, 0);
-    unk1c4 = 1;
+    reinterpret_cast<Tile83*>(m_pTiles[0])->FUN_00700320(4003, 0);
+    m_iStage = 1;
 }
 
 namespace s767610 {
 
-struct Tile
-{
-    float FUN_00a011b0(unsigned int uiValue);
-    const char* FUN_00a011f0(unsigned int uiValue);
-    float GetTotalFloat();
-};
 
-struct InterfaceManager
-{
-    static bool FUN_004b71d0();
-};
 
 InterfaceManager* FUN_004b7210();
 bool FUN_00702450(int iMenuID);
@@ -2593,150 +1690,22 @@ struct HackingState
 
 extern HackingState* DAT_011d95bc;
 
-class HackingMenu
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void HandleClick(int m_uiSoundID, int iUnk);
-
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int m_iStage;
-    Tile* m_pkCursorTile;
-    int m_iCursorIndex;
-    int unk1d0;
-    int unk1d4;
-    bool m_bBlink;
-
-    int GetScaledValue();
-    Tile* FUN_00767bb0(int iColumn, int iNewRow);
-    bool HandleKey(int iKey, int iUnused);
-};
 
 // Handles key input for the hacking menu, moving the cursor tile or triggering a click based on the current stage and key code.
+} // namespace s767610
+
 // @fnv 0x00767610
 bool HackingMenu::HandleKey(int iKey, int iUnused)
 {
-    if (!FUN_004b7210()->FUN_004b71d0())
+    using namespace s767610;
+    if (!s767610::FUN_004b7210()->FUN_004b71d0())
         return false;
-    if (FUN_00702450(0x41f))
+    if (s767610::FUN_00702450(0x41f))
     {
-        DAT_011d95bc->m_pkSelected = m_pkCursorTile;
+        s767610::DAT_011d95bc->m_pkSelected = m_pkCursorTile;
         if (m_iStage < 2 && iKey == 9)
         {
-            HandleClick(-1, 0);
+            HandleSelection(-1, 0);
             return true;
         }
         else if (m_iStage == 2)
@@ -2746,11 +1715,11 @@ bool HackingMenu::HandleKey(int iKey, int iUnused)
             case 4: {
                 int iSavedIndex = m_iCursorIndex;
                 bool bWord = (m_pkCursorTile && m_pkCursorTile->FUN_00a011f0(0xfc4))
-                                 ? (FUN_00ec86e1(m_pkCursorTile->FUN_00a011f0(0xfc4)[GetScaledValue()]) ? 1 : 0)
+                                 ? (s767610::FUN_00ec86e1(m_pkCursorTile->FUN_00a011f0(0xfc4)[GetScaledValue()]) ? 1 : 0)
                                  : 0;
                 m_iCursorIndex -= 0x11;
                 while (bWord && GetScaledValue() >= 7 &&
-                       FUN_00ec86e1(m_pkCursorTile->FUN_00a011f0(0xfc4)[GetScaledValue()]))
+                       s767610::FUN_00ec86e1(m_pkCursorTile->FUN_00a011f0(0xfc4)[GetScaledValue()]))
                     m_iCursorIndex -= 0x11;
                 if (GetScaledValue() < 7)
                 {
@@ -2785,11 +1754,11 @@ bool HackingMenu::HandleKey(int iKey, int iUnused)
             case 3: {
                 int iSavedIndex = m_iCursorIndex;
                 bool bWord = (m_pkCursorTile && m_pkCursorTile->FUN_00a011f0(0xfc4))
-                                 ? (FUN_00ec86e1(m_pkCursorTile->FUN_00a011f0(0xfc4)[GetScaledValue()]) ? 1 : 0)
+                                 ? (s767610::FUN_00ec86e1(m_pkCursorTile->FUN_00a011f0(0xfc4)[GetScaledValue()]) ? 1 : 0)
                                  : 0;
                 m_iCursorIndex += 0x11;
                 while (bWord && GetScaledValue() != -1 &&
-                       FUN_00ec86e1(m_pkCursorTile->FUN_00a011f0(0xfc4)[GetScaledValue()]))
+                       s767610::FUN_00ec86e1(m_pkCursorTile->FUN_00a011f0(0xfc4)[GetScaledValue()]))
                     m_iCursorIndex += 0x11;
                 if (GetScaledValue() == -1)
                 {
@@ -2846,7 +1815,7 @@ bool HackingMenu::HandleKey(int iKey, int iUnused)
     return false;
 }
 
-}
+
 
 bool __cdecl FUN_00702450(int);
 struct Sub4D4
@@ -3166,12 +2135,6 @@ struct Mgr4B7210
     int unk4D0;
     Sub4D4 m4D4;
 };
-struct Tile120
-{
-    Tile120* __thiscall FUN_0045cd60();
-    float __thiscall FUN_00a011b0(int);
-    void __thiscall FUN_00700320(int, int);
-};
 struct Global11d95bc
 {
     int unk00;
@@ -3225,24 +2188,9 @@ struct Global11d95bc
     int unkC0;
     int unkC4;
     int unkC8;
-    Tile120* mCC;
+    Tile* mCC;
 };
 extern Global11d95bc* DAT_011d95bc;
-struct SubE0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    void __thiscall FUN_006ffea0();
-};
 struct Entry28
 {
     int unk00;
@@ -3260,108 +2208,26 @@ struct Entry28
     bool __thiscall FUN_00759d80();
     void __thiscall FUN_006ffea0();
 };
-struct Snd150
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    bool __thiscall FUN_00ad8830(bool);
-};
 
-struct DummyClass
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    Entry28* entries[46];
-    SubE0 mE0;
-    int unk10C;
-    int unk110;
-    Tile120* m114;
-    int unk118;
-    Tile120* m11C;
-    Tile120* m120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    Snd150 m150;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int m1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    Tile120* unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    char unk1D8;
-    char unk1D9;
-    unsigned char unk1DA;
-    void __thiscall UpdateFade();
-    void __thiscall FUN_00769830();
-    void __thiscall PositionTileFromEntry(Entry28*);
-    void __thiscall UpdateActiveNodeProperty();
-    void __thiscall UpdateHighlight();
-    void __thiscall FUN_0076a3f0();
-    void __thiscall FUN_0076a510();
-    void __thiscall FUN_00767c90();
-};
 
 // Updates tile state based on unk1C4, handling fade, entry positioning, and active node property updates.
 // @fnv 0x00767c90
-void DummyClass::FUN_00767c90()
+void HackingMenu::UpdateDialog()
 {
     unsigned int bbb;
     int j;
-    if (unk24 != 1 || !FUN_00702450(FUN_00766a40()) ||
-        (unk1DA && !((Mgr4B7210*)FUN_004b7210())->m4D4.FUN_00718840(0x13)))
+    if (m_eFadeState != 1 || !FUN_00702450(FUN_00766a40()) ||
+        (unk1d9[1] && !((Mgr4B7210*)FUN_004b7210())->m4D4.FUN_00718840(0x13)))
     {
         return;
     }
     if ((FUN_004b7210(), FUN_004b71d0()))
     {
-        DAT_011d95bc->mCC = unk1C8;
+        DAT_011d95bc->mCC = m_pkCursorTile;
     }
-    mE0.FUN_006ffea0();
+    anim.FUN_006ffea0();
     UpdateFade();
-    switch (unk1C4)
+    switch (m_iStage)
     {
     case 0:
         FUN_00769830();
@@ -3369,33 +2235,33 @@ void DummyClass::FUN_00767c90()
     case 1:
         for (bbb = 0; bbb < 46; ++bbb)
         {
-            if (entries[bbb] && !entries[bbb]->FUN_00759d80())
+            if (reinterpret_cast<Entry28**>(entries)[bbb] && !reinterpret_cast<Entry28**>(entries)[bbb]->FUN_00759d80())
             {
-                m150.FUN_00ad8830(false);
-                entries[bbb]->FUN_006ffea0();
-                PositionTileFromEntry(entries[bbb]);
+                reinterpret_cast<BSSoundHandle&>(sounds[3]).Play(false);
+                reinterpret_cast<Entry28**>(entries)[bbb]->FUN_006ffea0();
+                PositionTileFromEntry(reinterpret_cast<Entry28**>(entries)[bbb]);
                 break;
             }
         }
         if (bbb == 46)
         {
-            Tile120* i;
+            Tile* i;
             j = 0;
-            for (i = m120; i && i != m11C->FUN_0045cd60(); i = i->FUN_0045cd60())
+            for (i = m_pTiles[5]; i && i != m_pTiles[4]->FUN_0045cd60(); i = i->FUN_0045cd60())
             {
                 j += (int)i->FUN_00a011b0(0xfa2);
             }
-            m11C->FUN_00700320(0xfa2, j);
-            unk1C4 = 2;
+            m_pTiles[4]->FUN_00700320(0xfa2, j);
+            m_iStage = 2;
         }
         break;
     case 2:
         UpdateActiveNodeProperty();
-        if (m1A0 == 1)
+        if (unk1a0 == 1)
         {
-            entries[1]->FUN_006ffea0();
+            reinterpret_cast<Entry28**>(entries)[1]->FUN_006ffea0();
         }
-        if (DAT_011d95bc->mCC && DAT_011d95bc->mCC->FUN_0045cd60() == m114)
+        if (DAT_011d95bc->mCC && DAT_011d95bc->mCC->FUN_0045cd60() == m_pTiles[2])
         {
             UpdateHighlight();
         }
@@ -3406,7 +2272,7 @@ void DummyClass::FUN_00767c90()
         break;
     case 4:
         UpdateActiveNodeProperty();
-        if (m1A0 && unk24 != 2)
+        if (unk1a0 && m_eFadeState != 2)
         {
             FUN_0076a510();
         }
@@ -3416,21 +2282,6 @@ void DummyClass::FUN_00767c90()
 
 namespace H769769 {
 
-struct H769Sound
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    void FUN_00ad8870();
-    ~H769Sound();
-};
-struct H769Player
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    void FUN_00ad8830(int a);
-};
 struct H769TileV
 {
     void FUN_00700320(int id, int value);
@@ -3455,88 +2306,9 @@ struct H769Line
     bool FUN_00759d80();
     void FUN_006ffea0();
 };
-struct H769Menu
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    H769Line* pLines[14];
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    H769Player kFailSound;
-    H769Player kSuccessSound;
-    void PositionTileFromEntry(H769Line* line);
-    void BuildHackingPasswordFile();
-    void FUN_00769830();
-};
 struct H769Audio
 {
-    H769Sound ResolveAudioHandle(const char* name, int flags, unsigned int delay, int a);
+    BSSoundHandle ResolveAudioHandle(const char* name, int flags);
 };
 H769Audio* FUN_00ad9060();
 }
@@ -3545,7 +2317,7 @@ extern unsigned int DAT_011d969c;
 extern int DAT_011d9694;
 
 // @fnv 0x00769830
-void H769Menu::FUN_00769830()
+void HackingMenu::FUN_00769830()
 {
     int i;
 
@@ -3553,26 +2325,26 @@ void H769Menu::FUN_00769830()
     {
         if (FUN_00457fe0() > DAT_011d95c0)
         {
-            pLines[0]->pText->FUN_00700320(0xfa3, 0);
+            reinterpret_cast<H769Line**>(entries)[0]->pText->FUN_00700320(0xfa3, 0);
         }
         else
         {
-            pLines[0]->pText->FUN_00700320(0xfa3, 1);
+            reinterpret_cast<H769Line**>(entries)[0]->pText->FUN_00700320(0xfa3, 1);
         }
-        if (pLines[i] && !pLines[i]->FUN_00759d80())
+        if (reinterpret_cast<H769Line**>(entries)[i] && !reinterpret_cast<H769Line**>(entries)[i]->FUN_00759d80())
         {
-            if (pLines[i]->kArgumentPosition)
+            if (reinterpret_cast<H769Line**>(entries)[i]->kArgumentPosition)
             {
-                if (!pLines[i]->kArgumentPosition->IsTraitNonZero(0xfa3))
+                if (!reinterpret_cast<H769Line**>(entries)[i]->kArgumentPosition->IsTraitNonZero(0xfa3))
                 {
-                    pLines[i]->kArgumentPosition->FUN_00700320(0xfa3, 1);
+                    reinterpret_cast<H769Line**>(entries)[i]->kArgumentPosition->FUN_00700320(0xfa3, 1);
                     DAT_011d969c = FUN_00457fe0() + 1000;
                 }
                 if (FUN_00457fe0() > DAT_011d969c)
                 {
-                    unsigned int uiStart4 = FUN_0044a670(pLines[i]->pText->FUN_00a011f0(0xfc4));
-                    pLines[i]->FUN_006ffea0();
-                    unsigned int uiEnd = FUN_0044a670(pLines[i]->pText->FUN_00a011f0(0xfc4));
+                    unsigned int uiStart4 = FUN_0044a670(reinterpret_cast<H769Line**>(entries)[i]->pText->FUN_00a011f0(0xfc4));
+                    reinterpret_cast<H769Line**>(entries)[i]->FUN_006ffea0();
+                    unsigned int uiEnd = FUN_0044a670(reinterpret_cast<H769Line**>(entries)[i]->pText->FUN_00a011f0(0xfc4));
                     for (unsigned int j6 = 0; j6 < uiEnd - uiStart4; j6++)
                     {
                         static int s_iTypeTime =
@@ -3580,21 +2352,21 @@ void H769Menu::FUN_00769830()
                                       ? FUN_004bd510((float)(1000.0 / *DAT_011d4e4c.FUN_0043d4d0()), 1.0f)
                                       : 1000.0f);
                         unsigned int uiDelay = j6 * s_iTypeTime / (uiEnd - uiStart4);
-                        FUN_00ad9060()->ResolveAudioHandle("UIHackingCharSingle", 0x121, uiDelay, 0).FUN_00ad8870();
+                        FUN_00ad9060()->ResolveAudioHandle("UIHackingCharSingle", 0x121).PlayAfter(uiDelay, 0);
                     }
-                    if (pLines[i]->FUN_00759d80())
+                    if (reinterpret_cast<H769Line**>(entries)[i]->FUN_00759d80())
                     {
-                        kSuccessSound.FUN_00ad8830(0);
+                        reinterpret_cast<BSSoundHandle&>(sounds[4]).Play(0);
                         DAT_011d969c = FUN_00457fe0() + 500;
                     }
                 }
             }
             else if (FUN_00457fe0() > DAT_011d969c)
             {
-                pLines[i]->FUN_006ffea0();
-                kFailSound.FUN_00ad8830(0);
+                reinterpret_cast<H769Line**>(entries)[i]->FUN_006ffea0();
+                reinterpret_cast<BSSoundHandle&>(sounds[3]).Play(0);
             }
-            PositionTileFromEntry(pLines[i]);
+            PositionTileFromEntry(reinterpret_cast<HackEntry*>(entries[i]));
             break;
         }
     }
@@ -3605,7 +2377,6 @@ void H769Menu::FUN_00769830()
 }
 
 // FUN_0076a540 - HackingMenu: open a hacking terminal menu tile.
-// Adapted to the current pack (HackingMenu is fieldless; shell types by address).
 extern char DAT_01072b00;
 void __cdecl FNV_Warning(const char* format);
 
@@ -3618,71 +2389,6 @@ struct TilePX
     MenuPX* FUN_00a03c90();
     NiNode* FUN_0056c7f0();
 };
-struct FTerminalPX : FORenderedTerminal
-{
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkB0;
-    unsigned int unkB4;
-    unsigned int unkB8;
-    unsigned int unkBc;
-    unsigned int unkC0;
-    unsigned int unkC4;
-    unsigned int unkC8;
-    unsigned int unkCc;
-    unsigned int unkD0;
-    unsigned int unkD4;
-    unsigned int unkD8;
-    unsigned int unkDc;
-    unsigned int unkE0;
-    unsigned int unkE4;
-    unsigned int unkE8;
-    unsigned int unkEC;
-    FTerminalPX();
-    void FUN_00984f60(TilePX* item);
-    void FUN_00705fc0(NiNode* node);
-};
 struct TileStatics
 {
     static void UpdateAll(bool propagate);
@@ -3691,12 +2397,12 @@ struct TileStatics
 TilePX* __cdecl CreateComputerMenu(const char* path);
 FORenderedMenu* __cdecl FUN_00707ad0();
 
-// Creates a computer menu tile, updates tile statics, and attaches it to a rendered terminal, creating a new FTerminalPX if none exists.
+// Creates a computer menu tile, updates tile statics, and attaches it to a rendered terminal, creating a new FORenderedTerminal if none exists.
 // @fnv 0x0076a540
-void FUN_0076a510_shell::FUN_0076a540()
+void HackingMenu::FUN_0076a540()
 {
     (*(Tile**)((char*)this + 4))->Set(0x1772, 1);
-    ((FUN_00766aa0_Menu*)this)->FUN_00a1d910();
+    ((MenuCloseOperation*)this)->FUN_00a1d910();
     if (*(int*)((char*)this + 0x194))
     {
         TilePX* pTile = CreateComputerMenu(*(const char**)((char*)this + 0x198));
@@ -3706,10 +2412,10 @@ void FUN_0076a510_shell::FUN_0076a540()
         if (!r)
         {
             FNV_Warning(&DAT_01072b00);
-            r = new FTerminalPX;
+            r = new FORenderedTerminal;
         }
-        ((FTerminalPX*)r)->FUN_00984f60(pTile);
-        ((FTerminalPX*)r)->FUN_00705fc0(pTile->FUN_0056c7f0());
+        r->FUN_00984f60(pTile);
+        r->FUN_00705fc0(pTile->FUN_0056c7f0());
     }
 }
 
@@ -3749,7 +2455,6 @@ G7Grid G7Grid::FUN_0076af90(const unsigned char* order, unsigned char size)
 }
 
 namespace fnv_00765b80 {
-struct Menu84;
 struct Tile84;
 struct Ref84;
 struct Base84
@@ -4153,9 +2858,9 @@ extern Interface84* DAT_011d95bc;
 struct Tile84
 {
     Tile84* FUN_00a01b00();
-    Menu84* FUN_00a03c90();
+    HackingMenu* FUN_00a03c90();
     float FUN_00a011b0(int);
-    void SetFloat(int, float, int);
+    void FUN_00a012d0(int, float, int);
     void FUN_00a01350(int, const char*, int);
     void FUN_00700320(int, int);
     int FindTraitValue(int);
@@ -4174,107 +2879,8 @@ struct Text84
     void FUN_006ffe80(int, int);
     void SetCapacity(unsigned int);
 };
-struct Scroll84
-{
-    void FUN_00ad8830(int);
-};
-struct Menu84
-{
-    virtual ~Menu84();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual int Type();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    Entry84* entries[46];
-    Text84 text;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    Tile84* tile10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    Tile84* tile11c;
-    Tile84* tile120;
-    Tile84* tile124;
-    Tile84* tile128;
-    Scroll84 scroll;
-    unsigned char unk12d, unk12e, unk12f;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    Base84* terminal;
-    Ref84* reference;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    unsigned char unk1d8, unk1d9;
-    bool key;
-    unsigned char unk1db;
-    void FUN_00a1dc70(Tile84*, int);
-    bool HasAllSlots(int*);
-    void SelectWordSet(unsigned int);
-    void FUN_00a1dc20(int);
-    void* FUN_00726070();
-};
-extern Menu84* DAT_011d95b8;
-Menu84* FUN_00a09030(int);
+extern HackingMenu* DAT_011d95b8;
+HackingMenu* FUN_00a09030(int);
 Interface84* FUN_004b7210();
 float FUN_00a01530();
 extern unsigned int DAT_0119f27c, DAT_0119f280;
@@ -4311,7 +2917,7 @@ extern Setting84 DAT_011d2130;
 // @fnv 0x00765b80
 Tile84* FUN_00765b80(Ref84* reference)
 {
-    Menu84* old40 = FUN_00a09030(FUN_00766a40());
+    HackingMenu* old40 = FUN_00a09030(FUN_00766a40());
     if (old40)
         delete old40;
     DAT_011d95bc = FUN_004b7210();
@@ -4323,10 +2929,10 @@ Tile84* FUN_00765b80(Ref84* reference)
     DAT_0119f27c = *DAT_011d42d0.FUN_0043d4d0();
     DAT_0119f280 = *DAT_011d2934.FUN_0043d4d0();
     Tile84* tile4 = DAT_011d95bc->FUN_00586150("Data\\Menus\\hacking_menu.xml")->FUN_00a01b00();
-    Menu84* menu24 = tile4->FUN_00a03c90();
-    if (menu24 && menu24->Type() == FUN_00766a40())
+    HackingMenu* menu24 = tile4->FUN_00a03c90();
+    if (menu24 && menu24->GetClass() == FUN_00766a40())
     {
-        menu24->FUN_00a1dc70(tile4, 0);
+        menu24->FUN_00a1dc70(reinterpret_cast<TileMenu*>(tile4), 0);
         DAT_011d95b8 = menu24;
         int missing1;
         if (!DAT_011d95b8->HasAllSlots(&missing1))
@@ -4335,30 +2941,30 @@ Tile84* FUN_00765b80(Ref84* reference)
             return 0;
         }
         if (tile4->FUN_00a011b0(4007) == 6006.0 || tile4->FUN_00a011b0(4007) == 102.0)
-            tile4->SetFloat(4013, screen13, 1);
-        DAT_011d95b8->tile124->FUN_00a01350(4036, DAT_011d31bc.FUN_00403df0(), 1);
-        DAT_011d95b8->tile128->FUN_00a01350(4036, DAT_011d30e4.FUN_00403df0(), 1);
+            tile4->FUN_00a012d0(4013, screen13, 1);
+        reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[6])->FUN_00a01350(4036, DAT_011d31bc.FUN_00403df0(), 1);
+        reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[7])->FUN_00a01350(4036, DAT_011d30e4.FUN_00403df0(), 1);
         Base84* base14 = reference ? reference->FUN_007af430() : 0;
         if (base14 && DAT_011dea3c->GetTerminalAccessResult(reference) == 2)
         {
             tile4->FUN_00700320(4102, 1);
-            DAT_011d95b8->unk1c4 = 4;
-            DAT_011d95b8->tile11c->FUN_00700320(4003, 0);
+            DAT_011d95b8->m_iStage = 4;
+            reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[4])->FUN_00700320(4003, 0);
         }
         else
         {
-            DAT_011d95b8->terminal = base14;
-            DAT_011d95b8->reference = reference;
+            reinterpret_cast<Base84*&>(DAT_011d95b8->unk194) = base14;
+            reinterpret_cast<Ref84*&>(DAT_011d95b8->unk198) = reference;
             DAT_011d95b8->unk1ac =
-                DAT_011d95b8->terminal ? DAT_011d95b8->terminal->FUN_00501270(DAT_011d95b8->reference) : 12;
+                reinterpret_cast<Base84*&>(DAT_011d95b8->unk194) ? reinterpret_cast<Base84*&>(DAT_011d95b8->unk194)->FUN_00501270(reinterpret_cast<Ref84*&>(DAT_011d95b8->unk198)) : 12;
             DAT_011d95b8->unk1ac = FUN_0042f5a0(12, DAT_011d95b8->unk1ac);
-            DAT_011d95b8->key = DAT_011d95bc->keys.FUN_00718630(19, FUN_00766a40(), 512);
+            DAT_011d95b8->unk1d9[1] = DAT_011d95bc->keys.FUN_00718630(19, FUN_00766a40(), 512);
             float skill5 = DAT_011dea3c->values.FUN_0066ef50(40);
             FUN_005e58f0(30, DAT_011dea3c, &skill5);
             unsigned int maximum12 = FUN_0042f5a0(20, *DAT_011d3318.FUN_0043d4d0());
             unsigned int minimum17 = FUN_0042f5a0(maximum12, *DAT_011d3c4c.FUN_0043d4d0());
             float difficulty4 =
-                FUN_0040ebd0(100.0f, FUN_00404010(0.0f, DAT_011d95b8->terminal->FUN_005017a0(reference)));
+                FUN_0040ebd0(100.0f, FUN_00404010(0.0f, reinterpret_cast<Base84*&>(DAT_011d95b8->unk194)->FUN_005017a0(reference)));
             float delta2 = FUN_00404010(0.0f, skill5 - difficulty4);
             float denominator55 = 100.0 - difficulty4;
             float fraction41 = denominator55 != 0.0 ? 1.0f - delta2 / denominator55 : 0.5;
@@ -4367,41 +2973,41 @@ Tile84* FUN_00765b80(Ref84* reference)
                 count7 = 20;
             DAT_011d95b8->SelectWordSet(count7);
             tile4->FUN_00a01350(4100, ">", 1);
-            DAT_011d95b8->text.FUN_006ffe80(DAT_011d95b8->tile120->FUN_00a00f30(4036),
-                                            DAT_011d95b8->tile120->FindTraitValue(4003));
+            (*reinterpret_cast<Text84*>(&DAT_011d95b8->anim)).FUN_006ffe80(reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[5])->FUN_00a00f30(4036),
+                                            reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[5])->FindTraitValue(4003));
             if (*DAT_011d4e4c.FUN_0043d4d0() > 0)
-                DAT_011d95b8->text.SetCapacity((unsigned int)FUN_004bd510(1000.0 / *DAT_011d4e4c.FUN_0043d4d0(), 1.0f));
+                (*reinterpret_cast<Text84*>(&DAT_011d95b8->anim)).SetCapacity((unsigned int)FUN_004bd510(1000.0 / *DAT_011d4e4c.FUN_0043d4d0(), 1.0f));
             const char* name9 = "hacking_intro_template";
-            DAT_011d95b8->entries[0] =
-                new Entry84(DAT_011d3f58.FUN_004c69f0(), DAT_011d95b8->tile10c, name9, DAT_011d95b8->unk1b4, 0);
-            DAT_011d95b8->entries[1] = new Entry84(DAT_011d3a38.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[0] =
+                new Entry84(DAT_011d3f58.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9, DAT_011d95b8->unk1b4, 0);
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[1] = new Entry84(DAT_011d3a38.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                    DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 2, 0);
-            DAT_011d95b8->entries[2] = new Entry84(DAT_011d3c64.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[2] = new Entry84(DAT_011d3c64.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                    DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 4, 1);
-            DAT_011d95b8->entries[3] = new Entry84(DAT_011d4c00.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[3] = new Entry84(DAT_011d4c00.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                    DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 6, 0);
-            DAT_011d95b8->entries[4] = new Entry84(DAT_011d4d5c.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[4] = new Entry84(DAT_011d4d5c.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                    DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 8, 1);
-            DAT_011d95b8->entries[5] = new Entry84(DAT_011d3030.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[5] = new Entry84(DAT_011d3030.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                    DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 9, 1);
-            DAT_011d95b8->entries[6] = new Entry84(DAT_011d4b94.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[6] = new Entry84(DAT_011d4b94.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                    DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 11, 0);
-            DAT_011d95b8->entries[7] = new Entry84(DAT_011d1f44.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[7] = new Entry84(DAT_011d1f44.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                    DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 12, 0);
-            DAT_011d95b8->entries[8] = new Entry84(DAT_011d1d9c.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[8] = new Entry84(DAT_011d1d9c.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                    DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 13, 0);
-            DAT_011d95b8->entries[9] = new Entry84(DAT_011d306c.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[9] = new Entry84(DAT_011d306c.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                    DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 14, 0);
-            DAT_011d95b8->entries[10] = new Entry84(DAT_011d484c.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[10] = new Entry84(DAT_011d484c.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                     DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 15, 0);
-            DAT_011d95b8->entries[11] = new Entry84(DAT_011d4f18.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[11] = new Entry84(DAT_011d4f18.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                     DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 16, 0);
-            DAT_011d95b8->entries[12] = new Entry84(DAT_011d4690.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[12] = new Entry84(DAT_011d4690.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                     DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 17, 0);
-            DAT_011d95b8->entries[13] = new Entry84(DAT_011d2130.FUN_004c69f0(), DAT_011d95b8->tile10c, name9,
+            reinterpret_cast<Entry84**>(DAT_011d95b8->entries)[13] = new Entry84(DAT_011d2130.FUN_004c69f0(), reinterpret_cast<Tile84*>(DAT_011d95b8->m_pTiles[0]), name9,
                                                     DAT_011d95b8->unk1b4 + DAT_011d95b8->unk1b8 * 19, 1);
         }
-        DAT_011d95b8->scroll.FUN_00ad8830(0);
+        reinterpret_cast<BSSoundHandle&>(DAT_011d95b8->sounds[0]).Play(0);
         menu24->FUN_00a1dc20(0);
         return tile4;
     }
@@ -4421,21 +3027,6 @@ struct HackTile
     float Float(int);
     void SetText(const char*);
     void Enable(bool);
-};
-struct HackSound
-{
-    unsigned int id;
-    int a, b;
-    bool Play(bool);
-    void Fade(int, int);
-};
-struct HackString
-{
-    char* data;
-    unsigned short length, capacity;
-    HackString();
-    ~HackString();
-    operator const char*() const;
 };
 struct HackSetting
 {
@@ -4773,165 +3364,98 @@ bool FUN_004b71d0();
 unsigned int gm_GetTickCount();
 int FUN_00ec86e1(int);
 unsigned int BSStringLength(const char*);
-void FUN_00406f60(void*, const char*, ...);
 extern "C" unsigned int __cdecl FUN_005a00a0(unsigned int);
 void SuccessRef(HackRef*, bool);
 void FailRef(HackRef*, bool);
 int FUN_006705b0(int, int);
 void Finish(int);
-struct HackMenu
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    HackTile* tiles[46];
-    HackTile text;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    HackTile* buttons[8];
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    HackSound success;
-    HackSound fail;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    HackSound select;
-    unsigned int unk168;
-    unsigned int unk16c;
-    unsigned int unk170;
-    HackList list;
-    unsigned int unk180;
-    unsigned int unk184;
-    HackNumberList used;
-    HackTarget* target;
-    HackRef* ref;
-    const char* password;
-    unsigned int attempts;
-    unsigned int maxAttempts;
-    int mode;
-    unsigned int answer;
-    unsigned int unk1b0;
-    unsigned int unk1b4;
-    unsigned int unk1b8;
-    unsigned int unk1bc;
-    unsigned int unk1c0;
-    int state;
-    HackTile* selected;
-    unsigned int unk1cc;
-    unsigned int deadline;
-    unsigned int unk1d4;
-    bool changed;
-    bool special;
-    void Reset();
-    unsigned int Compare(const char*, const char*);
-    void Special();
-    unsigned int BaseIndex();
-    void Fill();
-    void Display(unsigned int, const char**);
-    void Update();
-    void FUN_00766b80(int index, HackTile* tile);
-};
 // Handles a tile click by comparing the entered word to the password, updating the display, and triggering success or failure outcomes based on the match result.
+} // namespace fnv_00766b80
+
 // @fnv 0x00766b80
-void HackMenu::FUN_00766b80(int aiButtonIndex, HackTile* tile)
+void HackingMenu::HandleSelection(int aiButtonIndex, Tile* tile)
 {
-    FUN_004b7210();
-    if (FUN_004b71d0())
-        tile = selected;
+    using namespace fnv_00766b80;
+    fnv_00766b80::FUN_004b7210();
+    if (fnv_00766b80::FUN_004b71d0())
+        tile = m_pkCursorTile;
     if (!tile && aiButtonIndex >= 0 && aiButtonIndex < 8)
-        tile = buttons[aiButtonIndex];
-    if (state == 0)
+        tile = m_pTiles[aiButtonIndex];
+    if (m_iStage == 0)
     {
-        if (gm_GetTickCount() > DAT_011d95c0)
-            Reset();
+        if (fnv_00766b80::gm_GetTickCount() > fnv_00766b80::DAT_011d95c0)
+            BuildHackingPasswordFile();
         return;
     }
-    else if (state == 1)
+    else if (m_iStage == 1)
     {
         for (unsigned int iter = 0; iter < 46; iter++)
-            if (tiles[iter])
-                tiles[iter]->Refresh();
+            if (reinterpret_cast<fnv_00766b80::HackTile**>(entries)[iter])
+                reinterpret_cast<fnv_00766b80::HackTile**>(entries)[iter]->Refresh();
     }
-    else if (state == 2 && tile && tile->Parent() == buttons[2])
+    else if (m_iStage == 2 && tile && reinterpret_cast<fnv_00766b80::HackTile*>(tile)->Parent() == reinterpret_cast<fnv_00766b80::HackTile**>(m_pTiles)[2])
     {
-        text.Refresh();
-        const char* word = text.Text();
+        (*reinterpret_cast<fnv_00766b80::HackTile*>(&anim)).Refresh();
+        const char* word = (*reinterpret_cast<fnv_00766b80::HackTile*>(&anim)).Text();
         if (word && *word)
         {
-            select.Play(false);
-            unsigned int matched = Compare(word, password);
-            if (!FUN_00ec86e1(*word) && BSStringLength(word) > 1)
+            reinterpret_cast<BSSoundHandle&>(sounds[4]).Play(false);
+            unsigned int matched = CountMatchingChars(word, reinterpret_cast<const char*>(unk19c));
+            if (!fnv_00766b80::FUN_00ec86e1(*word) && fnv_00766b80::BSStringLength(word) > 1)
             {
-                HackString c[3];
+                BSStringT<char> c[3];
                 unsigned int j;
-                FUN_00406f60(&c[0], "%s%s", ">", word);
-                if (mode == 1)
+                c[0].PrintfString("%s%s", ">", word);
+                if (unk1a8 == 1)
                 {
-                    FUN_00406f60(&c[1], "%s%s", ">", g_011d26dc.String());
+                    c[1].PrintfString("%s%s", ">", g_011d26dc.String());
                     j = 2;
                 }
-                else if (special || FUN_005a00a0(4))
+                else if (unk1d9[0] || fnv_00766b80::FUN_005a00a0(4))
                 {
-                    Special();
-                    used.Add(12 * (unsigned int)(tile->Float(0x1004) * 17.0 + tile->Float(0xfac)) + BaseIndex() - 7);
-                    FUN_00406f60(&c[1], "%s%s", ">", g_011d1e78.String());
+                    RemoveRandomWord();
+                    (*reinterpret_cast<HackNumberList*>(&list188)).Add(12 * (unsigned int)(reinterpret_cast<fnv_00766b80::HackTile*>(tile)->Float(0x1004) * 17.0 + reinterpret_cast<fnv_00766b80::HackTile*>(tile)->Float(0xfac)) + GetScaledValue() - 7);
+                    c[1].PrintfString("%s%s", ">", g_011d1e78.String());
                     j = 2;
                 }
                 else
                 {
-                    if (attempts == 1)
+                    if (reinterpret_cast<unsigned int&>(unk1a0) == 1)
                     {
-                        tiles[1]->SetText(g_011d430c.GetString());
-                        tiles[1]->Enable(false);
-                        tiles[1]->Refresh();
+                        reinterpret_cast<fnv_00766b80::HackTile**>(entries)[1]->SetText(g_011d430c.GetString());
+                        reinterpret_cast<fnv_00766b80::HackTile**>(entries)[1]->Enable(false);
+                        reinterpret_cast<fnv_00766b80::HackTile**>(entries)[1]->Refresh();
                     }
-                    FUN_00406f60(&c[1], "%s%s", ">", g_011d47e0.String());
-                    FUN_00406f60(&c[2], "%s%s", ">", g_011d4f6c.String());
-                    attempts = maxAttempts;
-                    special = true;
-                    used.Add(12 * (unsigned int)(tile->Float(0x1004) * 17.0 + tile->Float(0xfac)) + BaseIndex() - 7);
-                    while (list.Count() < maxAttempts)
-                        Fill();
+                    c[1].PrintfString("%s%s", ">", g_011d47e0.String());
+                    c[2].PrintfString("%s%s", ">", g_011d4f6c.String());
+                    reinterpret_cast<unsigned int&>(unk1a0) = static_cast<unsigned int>(unk1a4);
+                    unk1d9[0] = true;
+                    (*reinterpret_cast<HackNumberList*>(&list188)).Add(12 * (unsigned int)(reinterpret_cast<fnv_00766b80::HackTile*>(tile)->Float(0x1004) * 17.0 + reinterpret_cast<fnv_00766b80::HackTile*>(tile)->Float(0xfac)) + GetScaledValue() - 7);
+                    while ((*reinterpret_cast<fnv_00766b80::HackList*>(&list174)).Count() < static_cast<unsigned int>(unk1a4))
+                        BuildHackingGuessTemplate();
                     j = 3;
                 }
                 const char* e[3] = {c[0], c[1], c[2]};
-                Display(j, e);
+                AddValueRows(j, reinterpret_cast<const unsigned int*>(e));
             }
-            else if (matched == answer)
+            else if (matched == static_cast<unsigned int>(unk1ac))
             {
-                HackString c[5];
-                FUN_00406f60(&c[0], "%s%s", ">", word);
-                FUN_00406f60(&c[1], "%s%s", ">", g_011d2604.String());
-                FUN_00406f60(&c[2], "%s%s", ">", g_011d3444.String());
-                FUN_00406f60(&c[3], "%s%s", ">", g_011d4858.String());
-                FUN_00406f60(&c[4], "%s%s", ">", g_011d4ae0.String());
+                BSStringT<char> c[5];
+                c[0].PrintfString("%s%s", ">", word);
+                c[1].PrintfString("%s%s", ">", g_011d2604.String());
+                c[2].PrintfString("%s%s", ">", g_011d3444.String());
+                c[3].PrintfString("%s%s", ">", g_011d4858.String());
+                c[4].PrintfString("%s%s", ">", g_011d4ae0.String());
                 const char* e[5] = {c[0], c[1], c[2], c[3], c[4]};
-                Display(5, e);
-                success.Fade(250, 0);
-                deadline = gm_GetTickCount() + 3000;
-                state = 4;
-                if (target)
+                AddValueRows(5, reinterpret_cast<const unsigned int*>(e));
+                reinterpret_cast<BSSoundHandle&>(sounds[1]).PlayAfter(250, 0);
+                reinterpret_cast<unsigned int&>(unk1d0) = fnv_00766b80::gm_GetTickCount() + 3000;
+                m_iStage = 4;
+                if (reinterpret_cast<HackTarget*>(unk194))
                 {
-                    SuccessRef(ref, true);
-                    g_thePlayer->Reward(FUN_006705b0(2, target->Difficulty(ref)));
-                    HackForm* owner = ref->Owner();
+                    SuccessRef(reinterpret_cast<HackRef*>(unk198), true);
+                    g_thePlayer->Reward(FUN_006705b0(2, reinterpret_cast<HackTarget*>(unk194)->Difficulty(reinterpret_cast<HackRef*>(unk198))));
+                    HackForm* owner = reinterpret_cast<HackRef*>(unk198)->Owner();
                     if (owner)
                     {
                         int zero = 0;
@@ -4943,49 +3467,49 @@ void HackMenu::FUN_00766b80(int aiButtonIndex, HackTile* tile)
                         {
                             HackForm* npc = owner;
                         }
-                        g_thePlayer->Crime(ref, owner, -1);
+                        g_thePlayer->Crime(reinterpret_cast<HackRef*>(unk198), owner, -1);
                     }
                 }
                 Finish(5);
             }
             else
             {
-                HackString lines3[4];
-                FUN_00406f60(&lines3[0], "%s%s", ">", word);
-                FUN_00406f60(&lines3[1], "%s%s", ">", g_011d26dc.String());
-                --attempts;
-                if (attempts)
+                BSStringT<char> lines3[4];
+                lines3[0].PrintfString("%s%s", ">", word);
+                lines3[1].PrintfString("%s%s", ">", g_011d26dc.String());
+                --reinterpret_cast<unsigned int&>(unk1a0);
+                if (reinterpret_cast<unsigned int&>(unk1a0))
                 {
-                    FUN_00406f60(&lines3[2], "%s%d/%d %s.", ">", matched, answer, g_011d2b2c.String());
+                    lines3[2].PrintfString("%s%d/%d %s.", ">", matched, static_cast<unsigned int>(unk1ac), g_011d2b2c.String());
                     const char* values3[3] = {lines3[0], lines3[1], lines3[2]};
-                    Display(3, values3);
-                    if (attempts == 1)
+                    AddValueRows(3, reinterpret_cast<const unsigned int*>(values3));
+                    if (reinterpret_cast<unsigned int&>(unk1a0) == 1)
                     {
-                        tiles[1]->SetText(g_011d1f74.GetString());
-                        tiles[1]->Refresh();
-                        tiles[1]->Enable(true);
+                        reinterpret_cast<fnv_00766b80::HackTile**>(entries)[1]->SetText(g_011d1f74.GetString());
+                        reinterpret_cast<fnv_00766b80::HackTile**>(entries)[1]->Refresh();
+                        reinterpret_cast<fnv_00766b80::HackTile**>(entries)[1]->Enable(true);
                     }
                 }
                 else
                 {
-                    FUN_00406f60(&lines3[2], "%s%s", ">", g_011d3144.String());
-                    FUN_00406f60(&lines3[3], "%s", g_011d339c.String());
+                    lines3[2].PrintfString("%s%s", ">", g_011d3144.String());
+                    lines3[3].PrintfString("%s", g_011d339c.String());
                     const char* values4[4] = {lines3[0], lines3[1], lines3[2], lines3[3]};
-                    Display(4, values4);
-                    state = 3;
-                    if (target)
-                        FailRef(ref, true);
+                    AddValueRows(4, reinterpret_cast<const unsigned int*>(values4));
+                    m_iStage = 3;
+                    if (reinterpret_cast<HackTarget*>(unk194))
+                        FailRef(reinterpret_cast<HackRef*>(unk198), true);
                 }
-                fail.Fade(250, 0);
-                delete list.RemoveTail();
+                reinterpret_cast<BSSoundHandle&>(sounds[2]).PlayAfter(250, 0);
+                delete (*reinterpret_cast<fnv_00766b80::HackList*>(&list174)).RemoveTail();
             }
-            HackString status;
-            FUN_00406f60(&status, "%d %s", attempts, g_011d2e20.String());
-            tiles[2]->SetText(status);
-            tiles[2]->Refresh();
-            Update();
-            changed = true;
+            BSStringT<char> status;
+            status.PrintfString("%d %s", reinterpret_cast<unsigned int&>(unk1a0), g_011d2e20.String());
+            reinterpret_cast<fnv_00766b80::HackTile**>(entries)[2]->SetText(status);
+            reinterpret_cast<fnv_00766b80::HackTile**>(entries)[2]->Refresh();
+            FUN_00768020();
+            m_bBlink = true;
         }
     }
 }
-}  // namespace fnv_00766b80
+

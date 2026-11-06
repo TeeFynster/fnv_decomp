@@ -4,7 +4,7 @@
 
 #include "layout_support.h"
 #include "tesfaction_form.h"
-#include "TESFullName.h"
+#include "../../include/TESFullName.h"
 #include "TESReactionForm.h"
 #include "layout_support.h"
 class FactionSaveData;

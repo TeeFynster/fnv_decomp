@@ -1,6 +1,19 @@
-// fallout/ai/character.cpp: Character, Self, XObj, ActorBF and more (36 functions)
+// fallout/ai/character.cpp: Character, Self, XObj, PackageAssignment and more (36 functions)
 
+#include "../../../include/BGSLoadFormBuffer.h"
+#include "../../../include/TESBoundObject.h"
+#include "../../../include/Character.h"
+#include "../../../include/Actor.h"
+#include "../../../include/MobileObject.h"
 #include "character_decls.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/ENUM_FORM_ID.h"
+#include "../../../include/BGSSaveFormBuffer.h"
+#include "../../../include/BGSTalkingActivator.h"
+#include "../../../include/SETTING_VALUE.h"
+#include "../../../include/Setting.h"
+#include "../../../include/bhkCharacterController.h"
 
 // @fnv 0x008d1e70
 bool __fastcall Character_GetTrespassing(Character* self)
@@ -81,16 +94,16 @@ void Character::LoadGame(BGSLoadFormBuffer* buffer)
     reinterpret_cast<CharacterActorCalls*>(this)->LoadGame(buffer);
     if (buffer->GetVersion() < 9)
     {
-        buffer->ReadTypedData(&oldData.byte, 1);
-        buffer->ReadTypedData(&oldData.word, 4);
+        buffer->ReadTypedData(static_cast<void*>(&oldData.byte), 1u);
+        buffer->ReadTypedData(static_cast<void*>(&oldData.word), 4u);
     }
-    buffer->ReadTypedData(&m_bTrespassing, 1);
-    buffer->ReadTypedData(&m_bActorGuard, 1);
+    buffer->ReadTypedData(static_cast<void*>(&m_bTrespassing), 1u);
+    buffer->ReadTypedData(static_cast<void*>(&m_bActorGuard), 1u);
     if (buffer->GetVersion() < 9)
     {
-        buffer->ReadTypedData(&newData.byte, 1);
-        buffer->ReadTypedData(&newData.word1, 4);
-        buffer->ReadTypedData(&newData.word2, 4);
+        buffer->ReadTypedData(static_cast<void*>(&newData.byte), 1u);
+        buffer->ReadTypedData(static_cast<void*>(&newData.word1), 4u);
+        buffer->ReadTypedData(static_cast<void*>(&newData.word2), 4u);
     }
 }
 
@@ -98,45 +111,6 @@ void Character::LoadGame(BGSLoadFormBuffer* buffer)
 void __fastcall FUN_008d1e90(Character* this_ptr, float value)
 {
     *(float*)((char*)this_ptr + 0x1c4) = value;
-}
-
-struct FUN_008d34b0_shell : public Character
-{
-    void FUN_008d34b0(BGSLoadFormBuffer*);
-};
-
-// @fnv 0x008d34b0
-void FUN_008d34b0_shell::FUN_008d34b0(BGSLoadFormBuffer* apLoadGameBuffer)
-{
-    ((CharacterActorCalls*)this)->InitLoadGame(apLoadGameBuffer);
-}
-
-struct FUN_008d34d0_shell : public Character
-{
-    void FUN_008d34d0(BGSLoadFormBuffer*);
-};
-
-// @fnv 0x008d34d0
-void FUN_008d34d0_shell::FUN_008d34d0(BGSLoadFormBuffer* apLoadGameBuffer)
-{
-    ((CharacterActorCalls*)this)->ApplyLoadBuffer(apLoadGameBuffer);
-}
-
-struct FUN_008d34f0_shell : public Character
-{
-    void RevertAndResetFields(BGSLoadFormBuffer*);
-};
-
-// Calls Revert on the character, then sets three floats at offsets 0x1b8/0x1bc/0x1c4 to -1.0 and clears bytes at 0x1c0/0x1c1.
-// @fnv 0x008d34f0
-void FUN_008d34f0_shell::RevertAndResetFields(BGSLoadFormBuffer* apLoadGameBuffer)
-{
-    ((CharacterActorCalls*)this)->Revert(apLoadGameBuffer);
-    ((float*)((char*)this + 0x1b8))[0] = -1.0f;
-    ((float*)((char*)this + 0x1bc))[0] = -1.0f;
-    ((float*)((char*)this + 0x1c4))[0] = -1.0f;
-    ((unsigned char*)((char*)this + 0x1c0))[0] = 0;
-    ((unsigned char*)((char*)this + 0x1c1))[0] = 0;
 }
 
 extern double _gModifierZero;
@@ -158,16 +132,6 @@ NiPoint3 FUN_008b3b30_shell::FUN_008b3b30(float f)
         return *GetAddTopicList();
     }
     return (*(FUN_009dcc80_target**)((char*)this + 0x190))->GetVec(f);
-}
-
-struct FUN_008d1e70_t
-{
-    unsigned char GetByteAtOffset1C0();
-};
-// @fnv 0x008d1e70
-unsigned char FUN_008d1e70_t::GetByteAtOffset1C0()
-{
-    return *((unsigned char*)this + 0x1c0);
 }
 
 void __cdecl _Deallocate(void*);
@@ -241,10 +205,7 @@ void FUN_008d3310_shell::FUN_008d3310(unsigned int aiFlags, unsigned int aiCurre
     FUN_008a9940(aiFlags, aiCurrentFlags);
 }
 
-struct TESSaveLoadGame
-{
-    bool FUN_0055f5b0();
-};
+#include "../../../include/TESSaveLoadGame.h"
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 struct FUN_008d3330_shell : public Character
 {
@@ -274,10 +235,6 @@ void FUN_008d3380_shell::FUN_008d3380(unsigned int a, unsigned int b)
     FUN_008aa4c0(a, b);
 }
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-};
 struct FUN_008d33a0_shell : public Character
 {
     void FUN_008aaf40(BGSSaveFormBuffer*);
@@ -346,15 +303,6 @@ MediaLocationController* FUN_009698a0_shell::GetMediaLocationController()
     return 0;
 }
 
-struct BGSTalkingActivator
-{
-    TESObjectREFR* GetTempRef() const;
-};
-
-struct TESObject
-{
-    BGSTalkingActivator* GetNext();
-};
 
 struct ExtraDataList_Accessor
 {
@@ -450,7 +398,7 @@ struct FUN_008b1910_shell
 // @fnv 0x008b1910
 TESObjectREFR* FUN_008b1910_shell::FUN_008b1910(TESObjectREFR* apRefr, TESObjectREFR*& apOutRefr)
 {
-    BGSTalkingActivator* m_pLinkedReference = ((TESObject*)apRefr)->GetNext();
+    BGSTalkingActivator* m_pLinkedReference = (BGSTalkingActivator*)((TESObject*)apRefr)->GetNext();
     ((ExtraDataList_Accessor*)apRefr->GetExtraData())->FUN_0042e060(m_pLinkedReference, apRefr);
     apRefr->MarkAsModified(0x80000000);
     void* extra9 = ((ExtraDataList_Accessor*)apRefr->GetExtraData())->FUN_0042e110();
@@ -458,9 +406,9 @@ TESObjectREFR* FUN_008b1910_shell::FUN_008b1910(TESObjectREFR* apRefr, TESObject
     {
         apRefr = *(TESObjectREFR**)((char*)extra9 + 0xc);
         apOutRefr = *(TESObjectREFR**)((char*)extra9 + 0xc);
-        if (m_pLinkedReference->GetTempRef())
+        if (static_cast<const BGSTalkingActivator*>(m_pLinkedReference)->GetTempRef())
         {
-            apRefr = m_pLinkedReference->GetTempRef();
+            apRefr = static_cast<const BGSTalkingActivator*>(m_pLinkedReference)->GetTempRef();
         }
     }
     (*(Slot12cHolder**)((char*)this + 0x68))->Method12c(apRefr);
@@ -472,26 +420,6 @@ struct TopicH
     NiPoint3* GetAddTopicList();
 };
 
-struct bhkCharacterController
-{
-    void FUN_0066ca00(void*);
-};
-struct MobileObject_Standin
-{
-    bhkCharacterController* GetPhysicsCharacterController();
-};
-
-struct HolderFUN
-{
-    void FUN_0066ca00(void*);
-};
-
-struct Point3 : public NiPoint3
-{
-    Point3 operator*(float) const;
-    Point3& operator+=(const Point3&);
-};
-
 struct FUN_00968690_shell : public Character
 {
     NiPoint3 FUN_00968690(float f);
@@ -500,20 +428,16 @@ struct FUN_00968690_shell : public Character
 // @fnv 0x00968690
 NiPoint3 FUN_00968690_shell::FUN_00968690(float f)
 {
-    Point3 kPos = *(Point3*)((TopicH*)this)->GetAddTopicList();
-    Point3 kMotionVelocity;
-    if (f > 0.0 && ((MobileObject_Standin*)this)->GetPhysicsCharacterController())
+    NiPoint3 kPos = *(NiPoint3*)((TopicH*)this)->GetAddTopicList();
+    NiPoint3 kMotionVelocity;
+    if (f > 0.0 && GetPhysicsCharacterController())
     {
-        ((MobileObject_Standin*)this)->GetPhysicsCharacterController()->FUN_0066ca00(&kMotionVelocity);
-        kPos += kMotionVelocity * f;
+        GetPhysicsCharacterController()->FUN_0066ca00(&kMotionVelocity);
+        kPos += reinterpret_cast<const NiPoint3&>(kMotionVelocity) * f;
     }
-    return kPos;
+    return reinterpret_cast<const NiPoint3&>(kPos);
 }
 
-struct SoundPlaybackHandle
-{
-    void SetFormType(int formType);
-};
 
 struct FUN_0087d4a0
 {
@@ -548,7 +472,7 @@ FUN_008d1f40_t::FUN_008d1f40_t(bool abadd) : FUN_0087d4a0(abadd)
     *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0xA4) = reinterpret_cast<int>(&DAT_010869a4);
     *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0xA8) = reinterpret_cast<int>(&DAT_0108695c);
 
-    reinterpret_cast<SoundPlaybackHandle*>(this)->SetFormType(0x3B);
+    reinterpret_cast<TESForm*>(this)->SetFormType(static_cast<ENUM_FORM_ID>(0x3B));
 
     *reinterpret_cast<BipedAnim**>(reinterpret_cast<char*>(this) + 0x1B4) = 0;
 
@@ -822,24 +746,6 @@ void FUN_00573150_shell::CallLastVirtualMethod()
     v122();
 }
 
-struct Str
-{
-    void* a;
-    int b;
-    int c;
-    Str();
-    Str(const Str&);
-    ~Str();
-    Str& operator=(const Str&);
-    const char* CStr();
-    Str& Fn7480();
-    void SetPos(float, float, float);
-    void SetRate(int);
-    void SetObj(void*);
-    void Set8830(int);
-    void Set8e60(void(__cdecl*)(unsigned int, int), unsigned int);
-    int Get8b30();
-};
 struct Named
 {
     const char* CStr();
@@ -874,30 +780,22 @@ struct Arg
 };
 struct Mgr
 {
-    void Add(const char*, void (*)(), unsigned int);
+    void Add(unsigned int, void (*)(), unsigned int);
 };
 Mgr* GetMgr();
 struct Audio
 {
-    Str GetHandle(const char*, int, int);
+    BSSoundHandle GetHandle(const char*, int, int);
 };
 Audio* GetAudio();
-struct Setting
-{
-    float* Get();
-};
-struct BoolSetting
-{
-    bool* Get();
-};
 extern Setting DAT_011e060c;
-extern BoolSetting DAT_011d8928;
+extern Setting DAT_011d8928;
 extern const double DAT_01017a40;
 void Callback();
 
 void __cdecl CB3(unsigned int, int);
 void __cdecl FmtStr(char*, int, const char*);
-void __cdecl Spawn(const char*, Str, NiPoint3, int, int);
+void __cdecl Spawn(const char*, BSSoundHandle, NiPoint3, int, int);
 struct Inner
 {
     virtual void v0();
@@ -1192,7 +1090,7 @@ struct Inner
     virtual void v289();
     virtual void v290();
     virtual void v291();
-    virtual void Play(int, Str);
+    virtual void Play(int, BSSoundHandle);
 };
 struct Self
 {
@@ -1331,16 +1229,16 @@ struct Self
     void Fn7ad20(Arg*);
     void Fn7ace0(Obj*);
     unsigned int GetID();
-    Str MakeStr(Obj*, int, int, int);
+    BSSoundHandle MakeStr(Obj*, int, int, int);
     bool Check();
-    Str PlaySoundOnObject(Arg* arg, int p2, bool p3, bool p4, int p5, bool p6);
+    BSSoundHandle PlaySoundOnObject(Arg* arg, int p2, bool p3, bool p4, int p5, bool p6);
 };
 
 // Creates a Proc from arg, registers a callback or builds an audio handle from the sub-object's name, plays it, and optionally spawns it.
 // @fnv 0x008a1bd0
-Str Self::PlaySoundOnObject(Arg* arg, int p2, bool p3, bool abSkipSpawn, int aiUnused, bool abWithCallback)
+BSSoundHandle Self::PlaySoundOnObject(Arg* arg, int p2, bool p3, bool abSkipSpawn, int aiUnused, bool abWithCallback)
 {
-    Str result;
+    BSSoundHandle result;
     Proc* proc = arg->Create(this, p2, 0, 0, 0);
     float fResult = 0.0f;
     Fn4250();
@@ -1362,9 +1260,9 @@ Str Self::PlaySoundOnObject(Arg* arg, int p2, bool p3, bool abSkipSpawn, int aiU
             if (obj->GetObj() && flag7f)
             {
                 Obj* tmp = obj->GetObj()->GetObj2();
-                Str target = MakeStr(tmp, 0, 0x40000102, 1);
+                BSSoundHandle target = MakeStr(tmp, 0, 0x40000102, 1);
                 Mgr* mgr = GetMgr();
-                mgr->Add(target.CStr(), Callback, GetID());
+                mgr->Add(target.GetID(), Callback, GetID());
                 flag7f = false;
                 bPending = false;
             }
@@ -1385,28 +1283,28 @@ Str Self::PlaySoundOnObject(Arg* arg, int p2, bool p3, bool abSkipSpawn, int aiU
                     if (!p3)
                     {
                         NiPoint3 pos = *GetPos();
-                        result.SetPos(pos.x, pos.y, pos.z);
-                        result.SetObj(Get1d0());
+                        result.SetPosition(pos.x, pos.y, pos.z);
+                        result.SetObjectToFollow(reinterpret_cast<NiAVObject*>(Get1d0()));
                     }
                     else
                     {
-                        result.SetRate((int)(*DAT_011e060c.Get() * DAT_01017a40));
+                        result.SetStaticAttenuation(static_cast<unsigned short>((int)(*DAT_011e060c.GetFloat() * DAT_01017a40)));
                     }
-                    result.Set8830(0);
+                    result.Play(false);
                     if (abWithCallback)
                     {
-                        result.Set8e60(CB3, GetID());
+                        result.SetCompletionCallback(reinterpret_cast<BSSoundHandle::CompletionCallback>(CB3), reinterpret_cast<void*>(GetID()));
                     }
                     flag80 = false;
                     inner->Play(0, result);
-                    fResult = (float)result.Get8b30();
+                    fResult = (float)result.GetDuration();
                 }
                 else if (sub && abWithCallback)
                 {
                     CB3(GetID(), 1);
                 }
             }
-            if (*DAT_011d8928.Get() || Check())
+            if (*DAT_011d8928.Bool() || Check())
             {
                 if (!abSkipSpawn)
                 {
@@ -2948,30 +2846,21 @@ struct GlobalBF
     void FUN_00966e00();
 };
 extern "C" char DAT_011dea3c;
-struct ActorBF0 : SlotsBF<162, EmptyBF>
+// Actor.h lacks this package-assignment method; inherit its checked layout without duplicating it.
+struct PackageAssignment : Actor
 {
-    virtual void stop();
-};
-struct ActorBF : SlotsBF<26, ActorBF0>
-{
-    virtual void apply(PackBF*, int, bool);
-    char pad[0x64];
-    OtherBF* other;
-    bool FUN_00493bb0();
-    ProcBF* FUN_008d8520();
-    TargetBF* FUN_009344a0();
     void FUN_008bf7b0(void*, int);
 };
 // @fnv 0x008bf7b0
-void ActorBF::FUN_008bf7b0(void* arg, int unused)
+void PackageAssignment::FUN_008bf7b0(void* arg, int unused)
 {
     if (FUN_00493bb0())
         return;
-    other->reset();
-    FUN_008d8520()->set(true);
-    void* old3 = FUN_008d8520()->get();
-    if (FUN_009344a0() && FUN_009344a0()->FUN_00678610())
-        stop();
+    ((OtherBF*)m_pBaseProcess)->reset();
+    ((ProcBF*)GetProcess())->set(true);
+    void* old3 = ((ProcBF*)GetProcess())->get();
+    if (FUN_009344a0() && ((TargetBF*)FUN_009344a0())->FUN_00678610())
+        Unk_A2();
     PackBF* pack = (PackBF*)CreatePackageByType(0x22);
     pack->SetPackageType(0x22);
     pack->FUN_00826b40(true);
@@ -2987,9 +2876,10 @@ void ActorBF::FUN_008bf7b0(void* arg, int unused)
     pack->FUN_00671d10()->FUN_006800b0(0);
     pack->FUN_00671d10()->FUN_00680110(arg);
     pack->FUN_00671d10()->FUN_00403550(0);
-    FUN_008d8520()->clear();
-    FUN_008d8520()->update(this);
-    apply(pack, 0, true);
+    ((ProcBF*)GetProcess())->clear();
+    ((ProcBF*)GetProcess())->update(this);
+    // Slot 0x2f4 takes a package and two flags; the shared Unk_BD declaration lacks its arguments.
+    ((XObj*)this)->Finish((XAObj*)pack, 0, 1);
     (*(GlobalBF**)&DAT_011dea3c)->FUN_00966e00();
 }
 
@@ -3661,87 +3551,8 @@ void AssignedCharacter::FUN_008d2a80(AssignedArgument* argument)
     argument->EnableActionResourceIfLowState();
 }
 
-struct FormStandin
-{
-    virtual ~FormStandin();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    bool IsTemporary() const;
-};
-struct ChildCellStandin
-{
-    virtual void* GetPersistentCell();
-};
-struct RefStandin : public FormStandin, public ChildCellStandin
-{
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    virtual void Set3D(void* apNode, bool abUnloadArt);
-};
-struct MagicCasterStandin
-{
-    virtual void CastSpell();
-    int unk04;
-    int unk08;
-};
-struct MagicTargetStandin
-{
-    virtual void AddEffectToTarget();
-    int unk04;
-    int unk08;
-    int unk0C;
-};
-struct ValueOwnerStandin
-{
-    virtual int GetBaseActorValue();
-};
-struct CachedOwnerStandin
-{
-    virtual float GetRadius();
-};
-struct ActorStandin : public RefStandin,
-                      public MagicCasterStandin,
-                      public MagicTargetStandin,
-                      public ValueOwnerStandin,
-                      public CachedOwnerStandin
-{
-    virtual ~ActorStandin();
-};
-struct FUN_008d2060 : public ActorStandin
-{
-    virtual ~FUN_008d2060();
-};
-
 // @fnv 0x008d2060
-FUN_008d2060::~FUN_008d2060()
+Character::~Character()
 {
     if (!IsTemporary())
         Set3D(0, false);

@@ -1,3 +1,15 @@
+#ifndef _INCLUDED_MM2
+// Exe 0x00d5c1a0 _FUN_00d5c1a0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#endif
+#define FNV_VEC4_NO_SSE
+#define FNV_VEC4_SIMD
+#include "../../../../../include/Vec4.h"
+
 // src/havok/common/internal/convexhull/hkgeometryutility_ehsc_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/convexhull/hkgeometryutility_ehsc_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -60,16 +72,9 @@ struct FUN_00d5a630_ctxB
 };
 extern float DAT_0106ea1c;
 void __cdecl FUN_00d5a630(void* a1, int a2, int a3);
-struct S_00d5a6b0_Elem
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
 struct S_00d5a6b0_Array
 {
-    S_00d5a6b0_Elem* m_data;
+    Vec4* m_data;
     int m_iElementCount;
 };
 void SubtractFromW(S_00d5a6b0_Array* pArray, float val);
@@ -95,17 +100,10 @@ struct D5C110MemoryRouter
     }
 };
 extern "C" D5C110MemoryRouter& __cdecl FUN_00c85750();
-struct D5C110Vector4
-{
-    float m_uiX;
-    float m_uiY;
-    float m_uiZ;
-    float m_w;
-};
 // hkArray<hkVector4> without a destructor (Havok was built without EH): explicit cleanup.
 struct D5C110VertexArray
 {
-    D5C110Vector4* m_data;
+    Vec4* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
@@ -117,7 +115,7 @@ struct D5C110VertexArray
         D5C110Allocator& alloc = FUN_00c85750().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(D5C110Vector4));
+            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(Vec4));
     }
 };
 struct D5C110StridedVertices
@@ -148,14 +146,7 @@ struct S00d5ad60_cls
 };
 static unsigned char FUN_00d5ad60(S00d5ad60_cls* self, float* other, float threshold);
 #ifndef _INCLUDED_MM2
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-#endif
-#ifndef _INCLUDED_MM2
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 #endif
 extern float DAT_01011d78;
 static int FUN_00d5ad90(const float* pVec, float fTol);
@@ -166,41 +157,19 @@ struct S00d5c060_Src
     int m_uiItemCount;
     int m_iElementIndex;
 };
-struct S00d5c060_Vec3
-{
-    float m_uiX;
-    float m_uiY;
-    float m_uiZ;
-    unsigned int unk0C;
-};
-struct __declspec(align(16)) S00d5c060_Result
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-};
 char* __cdecl AllocateWithHeader(D5C110Allocator* alloc, int size);
 char* __cdecl FUN_00c856c0(D5C110Allocator* owner, char* data);
-void __cdecl FUN_00d5beb0(S00d5c060_Result* self, char* data, int count, int flags, float scale);
-S00d5c060_Result FUN_00d5c060(const S00d5c060_Src* src, float scale);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" float _mm_cvtss_f32(__m128);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" __m128 _mm_sqrt_ss(__m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
+void __cdecl FUN_00d5beb0(Vec4* self, char* data, int count, int flags, float scale);
+Vec4 FUN_00d5c060(const S00d5c060_Src* src, float scale);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" float _mm_cvtss_f32(LocalM128);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" LocalM128 _mm_sqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
 extern const float DAT_01012054;
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
-};
-struct MyPoint
-{
-    __m128 v;
-};
 static __declspec(noinline) Vec4* FUN_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, float t)
 {
     res->x = 0.0f;
@@ -225,76 +194,40 @@ static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Ve
     res->w = a.y;
     return res;
 }
-__m128* __cdecl FUN_00d5beb0(__m128* out, MyPoint* pts, int count, int depth, float t);
+LocalM128* __cdecl FUN_00d5beb0(LocalM128* out, Vec4* pts, int count, int depth, float t);
 
 namespace MeanCovIntrinsics {
 extern "C"
 {
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_load_ps(const float*);
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_load_ss(const float*);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_load_ps(const float*);
+    void _mm_store_ps(float*, LocalM128);
+    LocalM128 _mm_load_ss(const float*);
 }
 }
-struct MeanCovObbVec
+inline LocalM128& Vec4::getQuad()
 {
-    __m128 q;
-    float& operator[](int i)
-    {
-        return ((float*)this)[i];
-    }
-    const float& operator[](int i) const
-    {
-        return ((const float*)this)[i];
-    }
-    float get(int i) const
-    {
-        return ((const float*)this)[i];
-    }
-    const float& ref(int i) const
-    {
-        return ((const float*)&q)[i];
-    }
-    __forceinline void setAdd(const MeanCovObbVec& x, const MeanCovObbVec& y)
-    {
-        q = MeanCovIntrinsics::_mm_add_ps(x.q, y.q);
-    }
-    __forceinline void addL(const MeanCovObbVec& x)
-    {
-        MeanCovIntrinsics::_mm_store_ps(
-            (float*)this, MeanCovIntrinsics::_mm_add_ps(x.q, MeanCovIntrinsics::_mm_load_ps((const float*)this)));
-    }
-    __forceinline void addR(const MeanCovObbVec& x)
-    {
-        MeanCovIntrinsics::_mm_store_ps(
-            (float*)this, MeanCovIntrinsics::_mm_add_ps(MeanCovIntrinsics::_mm_load_ps((const float*)this), x.q));
-    }
-    inline void addLi(const MeanCovObbVec& x)
-    {
-        MeanCovIntrinsics::_mm_store_ps(
-            (float*)this, MeanCovIntrinsics::_mm_add_ps(x.q, MeanCovIntrinsics::_mm_load_ps((const float*)this)));
-    }
-    __forceinline void addV(__m128 x)
-    {
-        MeanCovIntrinsics::_mm_store_ps(
-            (float*)this, MeanCovIntrinsics::_mm_add_ps(x, MeanCovIntrinsics::_mm_load_ps((const float*)this)));
-    }
-    __forceinline void setAddS(const MeanCovObbVec& x, const MeanCovObbVec& y)
-    {
-        MeanCovIntrinsics::_mm_store_ps((float*)this, MeanCovIntrinsics::_mm_add_ps(x.q, y.q));
-    }
-    __forceinline void set(float x, float y, float z, float w)
-    {
-        q = _mm_setr_ps(x, y, z, w);
-    }
-    __forceinline void load(const float* p)
-    {
-        set(p[0], p[1], p[2], 0.0f);
-    }
-};
+    return *(LocalM128*)this;
+}
+inline float& Vec4::operator()(int i)
+{
+    return ((float*)this)[i];
+}
+static inline float MeanCovGet(const LocalM128& value, int i)
+{
+    return ((const float*)&value)[i];
+}
+static __forceinline void MeanCovLoad(LocalM128& out, const float* p)
+{
+    out = _mm_setr_ps(p[0], p[1], p[2], 0.0f);
+}
+static inline float& MeanCovAt(LocalM128& value, int i)
+{
+    return ((float*)&value)[i];
+}
 struct MeanCovObbRot
 {
-    MeanCovObbVec c0, c1, c2;
+    Vec4 c0, c1, c2;
     float& at(int row, int col)
     {
         return ((float*)this)[col * 4 + row];
@@ -390,93 +323,93 @@ template <class T, class Heap = MeanCovArrayHeap> class MeanCovTypedArray : publ
         MeanCovArrayBase<T>::release(Heap().get(this));
     }
 };
-typedef MeanCovTypedArray<MeanCovObbVec> MeanCovObbArr;
+typedef MeanCovTypedArray<Vec4> MeanCovObbArr;
 struct MeanCovObbRandom
 {
     int seed0, seed1;
-    void NextFloat4(MeanCovObbVec& out);
+    void NextFloat4(Vec4& out);
 };
 void __cdecl FUN_00c908c0(void*, void*, int, int);
-static __forceinline __m128 MeanCovsplat(float x)
+static __forceinline LocalM128 MeanCovsplat(float x)
 {
-    __m128 r = MeanCovIntrinsics::_mm_load_ss(&x);
+    LocalM128 r = MeanCovIntrinsics::_mm_load_ss(&x);
     return _mm_shuffle_ps(r, r, 0);
 }
-static __forceinline float MeanCovarea(__m128 e0, __m128 e1)
+static __forceinline float MeanCovarea(LocalM128 e0, LocalM128 e1)
 {
-    __m128 t0 = _mm_shuffle_ps(e0, e0, 0xd2);
-    __m128 t1 = _mm_shuffle_ps(e1, e1, 0xc9);
-    __m128 p1 = _mm_mul_ps(t1, t0);
-    __m128 u0 = _mm_shuffle_ps(e0, e0, 0xc9);
-    __m128 u1 = _mm_shuffle_ps(e1, e1, 0xd2);
-    __m128 cross = _mm_sub_ps(_mm_mul_ps(u1, u0), p1);
-    __m128 sq = _mm_mul_ps(cross, cross);
-    __m128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
-    __m128 root = _mm_sqrt_ss(sum);
+    LocalM128 t0 = _mm_shuffle_ps(e0, e0, 0xd2);
+    LocalM128 t1 = _mm_shuffle_ps(e1, e1, 0xc9);
+    LocalM128 p1 = _mm_mul_ps(t1, t0);
+    LocalM128 u0 = _mm_shuffle_ps(e0, e0, 0xc9);
+    LocalM128 u1 = _mm_shuffle_ps(e1, e1, 0xd2);
+    LocalM128 cross = _mm_sub_ps(_mm_mul_ps(u1, u0), p1);
+    LocalM128 sq = _mm_mul_ps(cross, cross);
+    LocalM128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
+    LocalM128 root = _mm_sqrt_ss(sum);
     float len;
     _mm_store_ss(&len, root);
     return len * 0.5;
 }
 // @fnv 0x00d5c1a0
 extern "C" __declspec(noinline) void __cdecl FUN_00d5c1a0(const void* vertices, int count, MeanCovObbStride stride,
-                                                          MeanCovObbRot* covariance, MeanCovObbVec* center,
+                                                          MeanCovObbRot* covariance, Vec4* center,
                                                           MeanCovObbFlag perturb)
 {
     int j, k;
     int n = count / 3;
     float totalArea = 0;
-    MeanCovObbVec zero;
-    zero.q = _mm_setzero_ps();
-    MeanCovObbVec weighted;
-    weighted.q = _mm_setzero_ps();
+    LocalM128 zero;
+    zero = _mm_setzero_ps();
+    LocalM128 weighted;
+    weighted = _mm_setzero_ps();
     MeanCovObbArr centroids;
-    MeanCovObbVec* all = centroids.expandBy(n);
-    covariance->c0.q = zero.q;
-    covariance->c1.q = zero.q;
-    covariance->c2.q = zero.q;
+    Vec4* all = centroids.expandBy(n);
+    covariance->c0.getQuad() = zero;
+    covariance->c1.getQuad() = zero;
+    covariance->c2.getQuad() = zero;
     const char* p = (const char*)vertices;
     for (int t = 0; t < n; t++)
     {
-        MeanCovObbVec* centroid = &all[t];
-        MeanCovObbVec a, b, c;
-        a.load((const float*)p);
+        Vec4* centroid = &all[t];
+        LocalM128 a, b, c;
+        MeanCovLoad(a, (const float*)p);
         p += stride.v;
-        b.load((const float*)p);
+        MeanCovLoad(b, (const float*)p);
         p += stride.v;
-        c.load((const float*)p);
+        MeanCovLoad(c, (const float*)p);
         p += stride.v;
-        __m128 av = a.q;
-        __m128 bv = b.q;
+        LocalM128 av = a;
+        LocalM128 bv = b;
         float triangleArea;
         if (perturb.c)
         {
             MeanCovObbRandom random;
             random.seed0 = count;
             random.seed1 = count;
-            MeanCovObbVec delta;
-            random.NextFloat4(delta);
-            MeanCovObbVec moved;
-            moved.q = _mm_sub_ps(MeanCovIntrinsics::_mm_add_ps(_mm_mul_ps(MeanCovsplat(0.01f), delta.q), av), bv);
-            MeanCovObbVec edge;
-            edge.q = _mm_sub_ps(av, c.q);
-            triangleArea = MeanCovarea(moved.q, edge.q);
+            LocalM128 delta;
+            random.NextFloat4((Vec4&)delta);
+            LocalM128 moved;
+            moved = _mm_sub_ps(MeanCovIntrinsics::_mm_add_ps(_mm_mul_ps(MeanCovsplat(0.01f), delta), av), bv);
+            LocalM128 edge;
+            edge = _mm_sub_ps(av, c);
+            triangleArea = MeanCovarea(moved, edge);
         }
         else
         {
-            MeanCovObbVec moved;
-            moved.q = _mm_sub_ps(av, bv);
-            MeanCovObbVec edge;
-            edge.q = _mm_sub_ps(av, c.q);
-            triangleArea = MeanCovarea(moved.q, edge.q);
+            LocalM128 moved;
+            moved = _mm_sub_ps(av, bv);
+            LocalM128 edge;
+            edge = _mm_sub_ps(av, c);
+            triangleArea = MeanCovarea(moved, edge);
         }
         if (triangleArea > 0)
         {
             totalArea += triangleArea;
-            centroid->q = _mm_mul_ps(MeanCovIntrinsics::_mm_add_ps(MeanCovIntrinsics::_mm_add_ps(bv, av), c.q),
+            centroid->getQuad() = _mm_mul_ps(MeanCovIntrinsics::_mm_add_ps(MeanCovIntrinsics::_mm_add_ps(bv, av), c),
                                      MeanCovsplat(1.0f / 3.0f));
             {
-                __m128 sa = MeanCovsplat(triangleArea);
-                weighted.q = MeanCovIntrinsics::_mm_add_ps(_mm_mul_ps(sa, centroid->q), weighted.q);
+                LocalM128 sa = MeanCovsplat(triangleArea);
+                weighted = MeanCovIntrinsics::_mm_add_ps(_mm_mul_ps(sa, centroid->getQuad()), weighted);
             }
             const float* cj = (const float*)centroid;
             for (int j = 0; j < 3; j++, cj++)
@@ -484,16 +417,16 @@ extern "C" __declspec(noinline) void __cdecl FUN_00d5c1a0(const void* vertices, 
                 for (int k = 0; k < 3; k++)
                 {
                     covariance->at(j, k) +=
-                        (9.0 * all[t][j] * all[t][k] + a[j] * a[k] + b.get(k) * b[j] + c.get(k) * c[j]) * triangleArea;
+                        (9.0 * all[t](j) * all[t](k) + MeanCovAt(a, j) * MeanCovAt(a, k) + MeanCovGet(b, k) * MeanCovAt(b, j) + MeanCovGet(c, k) * MeanCovAt(c, j)) * triangleArea;
                 }
             }
         }
         else
         {
-            centroid->q = MeanCovIntrinsics::_mm_add_ps(bv, av);
-            MeanCovIntrinsics::_mm_store_ps((float*)&all[t], MeanCovIntrinsics::_mm_add_ps(c.q, all[t].q));
+            centroid->getQuad() = MeanCovIntrinsics::_mm_add_ps(bv, av);
+            MeanCovIntrinsics::_mm_store_ps((float*)&all[t], MeanCovIntrinsics::_mm_add_ps(c, all[t].getQuad()));
             {
-                __m128 s3 = MeanCovsplat(1.0f / 3.0f);
+                LocalM128 s3 = MeanCovsplat(1.0f / 3.0f);
                 MeanCovIntrinsics::_mm_store_ps((float*)centroid,
                                                 _mm_mul_ps(s3, MeanCovIntrinsics::_mm_load_ps((const float*)centroid)));
             }
@@ -501,32 +434,32 @@ extern "C" __declspec(noinline) void __cdecl FUN_00d5c1a0(const void* vertices, 
             {
                 for (int k = 0; k < 3; k++)
                 {
-                    covariance->at(j, k) += b.get(k) * b[j] + a[j] * a[k] + c[k] * c[j];
+                    covariance->at(j, k) += MeanCovGet(b, k) * MeanCovAt(b, j) + MeanCovAt(a, j) * MeanCovAt(a, k) + MeanCovAt(c, k) * MeanCovAt(c, j);
                 }
             }
         }
     }
     if (totalArea <= 0)
     {
-        center->q = zero.q;
-        covariance->c0.q = zero.q;
-        covariance->c1.q = zero.q;
-        covariance->c2.q = zero.q;
-        covariance->c0[0] = 1;
-        covariance->c1[1] = 1;
-        covariance->c2[2] = 1;
+        center->getQuad() = zero;
+        covariance->c0.getQuad() = zero;
+        covariance->c1.getQuad() = zero;
+        covariance->c2.getQuad() = zero;
+        covariance->c0(0) = 1;
+        covariance->c1(1) = 1;
+        covariance->c2(2) = 1;
     }
     else
     {
         float inv = 1.0f / totalArea;
-        weighted.q = _mm_mul_ps(MeanCovsplat(inv), weighted.q);
+        weighted = _mm_mul_ps(MeanCovsplat(inv), weighted);
         for (j = 0; j < 3; j++)
         {
             for (k = 0; k < 3; k++)
             {
-                covariance->at(j, k) = covariance->at(j, k) / 12.0 - (weighted[j] * weighted[k]) * totalArea;
+                covariance->at(j, k) = covariance->at(j, k) / 12.0 - (MeanCovAt(weighted, j) * MeanCovAt(weighted, k)) * totalArea;
             }
         }
-        center->q = weighted.q;
+        center->getQuad() = weighted;
     }
 }

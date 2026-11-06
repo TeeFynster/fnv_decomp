@@ -2,7 +2,11 @@
 // src/havok/physics/dynamics/constraint/chain/ragdolllimits/hkpragdolllimitsdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/chain/ragdolllimits/hkpragdolllimitsdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpRagdollLimitsData.h"
+#include "../../../../../../../include/hkpConstraintData.h"
+#include "../../../../../../../include/hkpTwistLimitConstraintAtom.h"
+#include "../../../../../../../include/hkpConeLimitConstraintAtom.h"
+typedef unsigned short hkUint16;
+typedef unsigned int hkUint32;
 
 extern "C" void __cdecl FUN_00d21a60(void* p, unsigned int x, unsigned int y);
 
@@ -45,14 +49,8 @@ extern float DAT_01017d00;
 extern double DAT_01024108;
 extern double DAT_0101ff40;
 
-struct FUN_00d4f170_Rotation
-{
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
+#include "../../../../../../../include/hkRotation.h"
 
-    char* __thiscall IsOrthonormal(char* out, float tolerance);
-};
 
 struct FUN_00d4f170_Rotations
 {
@@ -61,8 +59,8 @@ struct FUN_00d4f170_Rotations
     hkUint32 unk14;
     hkUint32 unk18;
     hkUint32 unk1C;
-    FUN_00d4f170_Rotation m_kRotationA;
-    FUN_00d4f170_Rotation m_kRotationB;
+    hkRotation m_kRotationA;
+    hkRotation m_kRotationB;
 };
 
 struct S00d4f170_StandIn : public hkpConstraintData

@@ -1,3 +1,9 @@
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
+#include "../../../../../../../include/hkArrayBase.h"
 
 // src/havok/physics/collide/shape/heightfield/compressedsampledheightfield/hkpcompressedsampledheightfieldshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/heightfield/compressedsampledheightfield/hkpcompressedsampledheightfieldshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -13,29 +19,27 @@ int __stdcall FUN_00e49510(int a, int b)
     return r + 0x80;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_andnot_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ss(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_sub_ss(__m128, __m128);
-extern "C" __m128 _mm_rsqrt_ss(__m128);
-extern "C" __m128 _mm_cmpeq_ss(__m128, __m128);
-extern "C" __m128 _mm_set_ss(float);
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" void _mm_store_ps(float*, __m128);
+// Exe 0x00e49530 Collide: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_rsqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_set_ss(float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" void _mm_store_ps(float*, LocalM128);
 
 struct HfVec_e49530
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     __forceinline void set(float a, float b, float c, float d)
     {
         m_vComponents = _mm_setr_ps(a, b, c, d);
@@ -62,19 +66,19 @@ struct HfVec_e49530
     }
     __forceinline float dot3(const HfVec_e49530& a) const
     {
-        __m128 t = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(t, t, 0xaa), _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t));
+        LocalM128 t = _mm_mul_ps(m_vComponents, a.m_vComponents);
+        LocalM128 s = _mm_add_ss(_mm_shuffle_ps(t, t, 0xaa), _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t));
         float r;
         _mm_store_ss(&r, s);
         return r;
     }
     __forceinline void normalize3()
     {
-        __m128 t = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 len2 = _mm_add_ss(_mm_shuffle_ps(t, t, 0xaa), _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t));
-        __m128 r = _mm_rsqrt_ss(len2);
-        __m128 eq = _mm_cmpeq_ss(len2, _mm_set_ss(0.0f));
-        __m128 f = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), r),
+        LocalM128 t = _mm_mul_ps(m_vComponents, m_vComponents);
+        LocalM128 len2 = _mm_add_ss(_mm_shuffle_ps(t, t, 0xaa), _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t));
+        LocalM128 r = _mm_rsqrt_ss(len2);
+        LocalM128 eq = _mm_cmpeq_ss(len2, _mm_set_ss(0.0f));
+        LocalM128 f = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), r),
                               _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(len2, r), r)));
         f = _mm_andnot_ps(eq, f);
         m_vComponents = _mm_mul_ps(_mm_shuffle_ps(f, f, 0), m_vComponents);
@@ -96,10 +100,7 @@ struct HfInput_e49530
     HfVec_e49530* m_kSpheres;
     int m_iSphereCount;
 };
-struct HfBool_e49530
-{
-    char m_cBooleanValue;
-};
+typedef hkBool HfBool_e49530;
 
 static inline const HfVec_e49530& HfQ_e49530(const hkVector4& v)
 {
@@ -286,7 +287,7 @@ class HfSrc_e499 : public hkpSampledHeightFieldShape
     virtual void v11();
     virtual void v12();
     virtual float GetHeightAtGridPoint(int x, int z) const;
-    virtual void IsTriangleWindingFlipped(hkBoolR_e499* out) const;
+    virtual hkBool IsTriangleWindingFlipped() const;
 };
 
 struct Alloc_e499;
@@ -296,47 +297,40 @@ struct Holder_e499
     Alloc_e499* m_alloc;
 };
 
-struct Arr16_e499
+static __forceinline void Arr16_e499_GrowArrayCapacity(hkArrayBase<hkUint16>& self, Alloc_e499& a, int n)
 {
-    hkUint16* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void GrowArrayCapacity(Alloc_e499& a, int n)
-    {
-        int cap = getCapacity();
+        int cap = self.getCapacity();
         if (cap < n)
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&a, this, newSize, sizeof(hkUint16));
+            FUN_00c908c0(&a, (&self), newSize, sizeof(hkUint16));
         }
     }
-    void _setSize(Alloc_e499& a, int n)
-    {
-        GrowArrayCapacity(a, n);
-        m_iElementCount = n;
+
+static __forceinline void Arr16_e499__setSize(hkArrayBase<hkUint16>& self, Alloc_e499& a, int n)
+{
+        Arr16_e499_GrowArrayCapacity(self, a, n);
+        self.m_iElementCount = n;
     }
-    __forceinline void reserve(int n)
-    {
+
+static __forceinline void Arr16_e499_reserve(hkArrayBase<hkUint16>& self, int n)
+{
         Holder_e499* h = (Holder_e499*)FUN_00c85750();
         Alloc_e499* alloc = h->m_alloc;
-        int c = m_iCapacityState & 0x3fffffff;
+        int c = self.m_iCapacityState & 0x3fffffff;
         if (c < n)
         {
             c = c * 2;
-            FUN_00c908c0(alloc, this, n < c ? c : n, 2);
+            FUN_00c908c0(alloc, (&self), n < c ? c : n, 2);
         }
     }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        reserve(n);
-        m_iElementCount = n;
+
+static __forceinline void Arr16_e499_SetSizeAndGrow(hkArrayBase<hkUint16>& self, int n)
+{
+        Arr16_e499_reserve(self, n);
+        self.m_iElementCount = n;
     }
-};
 
 class Compressed_e499 : public hkpCompressedSampledHeightFieldShape
 {
@@ -350,9 +344,9 @@ Compressed_e499* Compressed_e499::FUN_00e499d0(const HfSrc_e499* apSourceHeightF
 {
     m_sReferenceCount = 1;
     m_ulUserData = 0;
-    m_type = 0xd;
+    m_type = (hkpShapeType)0xd;
     *(int**)this = &DAT_010e901c;
-    Arr16_e499& st = (Arr16_e499&)m_kStorage;
+    hkArrayBase<hkUint16>& st = (hkArrayBase<hkUint16>&)m_kStorage;
     st.m_data = 0;
     st.m_iElementCount = 0;
     st.m_iCapacityState = 0x80000000;
@@ -360,17 +354,16 @@ Compressed_e499* Compressed_e499::FUN_00e499d0(const HfSrc_e499* apSourceHeightF
     m_iXResolution = apSourceHeightField->m_iXResolution;
     m_iZResolution = apSourceHeightField->m_iZResolution;
     {
-        hkBoolR_e499 flip;
-        apSourceHeightField->IsTriangleWindingFlipped(&flip);
-        m_bFlipTriangleOrder = flip;
+        hkBool flip = apSourceHeightField->IsTriangleWindingFlipped();
+        m_bFlipTriangleOrder.m_cBooleanValue = flip.m_cBooleanValue;
     }
     m_fHeightScale = apSourceHeightField->m_fHeightScale;
-    *(__m128*)&m_kHeightScaleVector = *(const __m128*)&apSourceHeightField->m_kHeightScaleVector;
-    *(__m128*)&m_kInverseScale = *(const __m128*)&apSourceHeightField->m_kInverseScale;
-    *(__m128*)&m_kOffset = *(const __m128*)&apSourceHeightField->m_kOffset;
-    *(__m128*)&SetCenterPosition = *(const __m128*)&apSourceHeightField->SetCenterPosition;
+    *(LocalM128*)&m_kHeightScaleVector = *(const LocalM128*)&apSourceHeightField->m_kHeightScaleVector;
+    *(LocalM128*)&m_kInverseScale = *(const LocalM128*)&apSourceHeightField->m_kInverseScale;
+    *(LocalM128*)&m_kOffset = *(const LocalM128*)&apSourceHeightField->m_kOffset;
+    *(LocalM128*)&SetCenterPosition = *(const LocalM128*)&apSourceHeightField->SetCenterPosition;
 
-    st.SetSizeAndGrow(m_iXResolution * m_iZResolution);
+    Arr16_e499_SetSizeAndGrow(st, m_iXResolution * m_iZResolution);
 
     float fMinHeight = 3.40282e+38f;
     float maxv = -3.40282e+38f;

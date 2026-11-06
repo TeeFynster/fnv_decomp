@@ -1,61 +1,20 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern "C" void __cdecl _delete(void* p, unsigned int flags);
+#include "../../../../include/NiD3DShaderDeclaration.h"
+#include "../../../../include/NiVBBlock.h"
 
-struct FUN_00e7a1e0_shell
-{
-    void* FUN_00e78be0();
-    void* DestroyIfFlagged(unsigned int flags);
-};
+extern "C" void __cdecl _delete(void* p, unsigned int flags);
 
 // Calls FUN_00e78be0, then deletes this with size 0x2c when flags has bit 0 set, and returns this.
 // @fnv 0x00e7a1e0
-void* FUN_00e7a1e0_shell::DestroyIfFlagged(unsigned int flags)
+void* __fastcall DestroyIfFlagged(NiD3DShaderDeclaration* self, void*, unsigned int flags)
 {
-    FUN_00e78be0();
+    self->NiD3DShaderDeclaration::~NiD3DShaderDeclaration();
     if (flags & 1)
-        _delete(this, 0x2c);
-    return this;
+        _delete(self, 0x2c);
+    return self;
 }
-
-struct DynamicArrayChip
-{
-    void* vftable;
-    unsigned int* m_30;
-    unsigned short unk34;
-    unsigned short m_36;
-    unsigned short m_38;
-    unsigned short unk3A;
-
-    void RemoveAll(unsigned int zero)
-    {
-        for (unsigned short i = 0; i < m_36; ++i)
-            m_30[i] = zero;
-        m_36 = 0;
-        m_38 = 0;
-    }
-};
-
-struct NiVBBlock
-{
-    unsigned int m_00;
-    unsigned int m_04;
-    unsigned int m_08;
-    unsigned int m_0c;
-    unsigned int m_10;
-    unsigned int m_14;
-    unsigned int m_18;
-    unsigned int m_1c;
-    unsigned int m_20;
-    unsigned int m_24;
-    unsigned int m_28;
-    DynamicArrayChip m_chips;
-    unsigned int m_3c;
-    unsigned int m_40;
-
-    void FUN_00e942d0();
-};
 
 // @fnv 0x00e942d0
 void NiVBBlock::FUN_00e942d0()

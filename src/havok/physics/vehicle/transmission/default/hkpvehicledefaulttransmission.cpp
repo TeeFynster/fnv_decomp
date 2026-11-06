@@ -2,7 +2,7 @@
 // src/havok/physics/vehicle/transmission/default/hkpvehicledefaulttransmission.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/transmission/default/hkpvehicledefaulttransmission.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpVehicleDefaultTransmission.h"
+#include "../../../../../../include/hkBool.h"
 
 struct FUN_00e43d00_arg1
 {
@@ -185,15 +185,6 @@ void FUN_00e43ea0_Class::FUN_00e43ea0(float afDelta, int aiUnused, FUN_00e43ea0_
     }
 }
 
-struct hkBoolE43C
-{
-    char m_cBooleanValue;
-    hkBoolE43C(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-
 struct ObjAE43C
 {
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
@@ -212,7 +203,7 @@ struct ObjBE43C
 
 // Returns true if pkA is enabled and pkB's level is not positive, otherwise false.
 // @fnv 0x00e43c00
-hkBoolE43C __stdcall FUN_00e43c00(ObjAE43C* pkA, ObjBE43C* pkB)
+hkBool __stdcall FUN_00e43c00(ObjAE43C* pkA, ObjBE43C* pkB)
 {
     if (!pkA->m_bEnableState)
         return false;

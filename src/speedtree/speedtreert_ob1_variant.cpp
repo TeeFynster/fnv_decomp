@@ -1,3 +1,170 @@
+#include "../../include/MemoryManager.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3; this unit defines inline bodies for both NiPoint3 and the stand-in in different forms (constructor/temporary, operand order), so one NiPoint3 cannot carry both.
+#include "../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+#include "../../include/CVec3.h"
+
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+#pragma intrinsic(memcpy)
+
+inline LocalVec3::LocalVec3()
+{
+    z = 0.0f;
+    y = 0.0f;
+    x = 0.0f;
+}
+
+inline LocalVec3 LocalVec3::operator-() const
+{
+    return LocalVec3(-x, -y, -z);
+}
+
+inline LocalVec3::LocalVec3(float a, float b, float c)
+{
+    x = a;
+    y = b;
+    z = c;
+}
+
+inline float& LocalVec3::operator[](int i)
+{
+    return (&x)[i];
+}
+
+inline const float& CVec3::operator[](int i) const
+{
+    return (&x)[i];
+}
+
+inline CVec3::CVec3(float fx, float fy, float afDepth)
+{
+    x = fx;
+    y = fy;
+    z = afDepth;
+}
+
 
 // src/speedtree/speedtreert_ob1_variant.cpp - flag-variant unit created 2026-10-25 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/speedtree/speedtreert.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -358,10 +525,6 @@ struct FUN_00b02d40_class
     void* m_38;
     void __thiscall ClearFields();
 };
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00b02e80
 {
@@ -380,12 +543,6 @@ extern int DAT_011f8ea4;
 extern int DAT_011f8eac;
 extern int DAT_011f8eb0;
 extern int DAT_011f8eb4;
-struct Vector3D
-{
-    float x;
-    float y;
-    float z;
-};
 void __cdecl FUN_00b06b70(float* pPosition, float* pDirection);
 struct FUN_00b08480_shell
 {
@@ -476,11 +633,7 @@ struct FUN_00b09f70_Class
     void FUN_00b09f70();
     void _Tidy(bool, unsigned int);
 };
-struct P03MM
-{
-    void* Allocate(unsigned int size);
-};
-extern P03MM _g_memoryManager;
+extern MemoryManager _g_memoryManager;
 unsigned int _strlen(const char* s);
 char* DuplicateString(const char* pOrig);
 extern unsigned char DAT_011f8b79;
@@ -642,26 +795,17 @@ struct TreeC4
     int data;
     void FillSpeedTreeOutput(OutC4* out);
 };
-struct V3cdd0
-{
-    float x, y, z;
-    float FUN_00b04d40(const V3cdd0* o);
-};
 struct P8
 {
     int c0, b, fB, d, e, f, g, h;
 };
-struct R0cff0
-{
-    void ScaleSwizzled();
-};
 struct S0cf90
 {
-    R0cff0* AddVector(V3cdd0* fDist, V3cdd0* dst, V3cdd0* fB, float f);
+    LocalVec3* AddVector(LocalVec3* fDist, LocalVec3* dst, LocalVec3* fB, float f);
 };
 struct T3ea10
 {
-    void FUN_00b3ea10(void* c0, V3cdd0 fB, float b0, void* p);
+    void FUN_00b3ea10(void* c0, LocalVec3 fB, float b0, void* p);
 };
 struct B0cdd0
 {
@@ -824,21 +968,6 @@ struct It : FUN_00b10430
         return &FUN_00b0ebb0();
     }
 };
-struct Vec3
-{
-    float v[3];
-    inline Vec3(float a, float b, float c)
-    {
-        v[0] = a;
-        v[1] = b;
-        v[2] = c;
-    }
-    inline float& operator[](int i)
-    {
-        return v[i];
-    }
-    Vec3 FUN_00b05000(const Mat& m);
-};
 inline void Dead3()
 {
     int d0;
@@ -867,8 +996,8 @@ void Cont::FUN_00b04db0(const Mat& m)
 {
     for (It it = Begin(); it != End(); it.FUN_00b0eb30())
     {
-        Vec3 pos(it->x, it->y, it->z);
-        pos = pos.FUN_00b05000(m);
+        LocalVec3 pos(it->x, it->y, it->z);
+        memcpy(&pos, &pos.FUN_00b05000(m), sizeof(pos));
         it.FUN_00b0ebb0().x = pos[0];
         it.FUN_00b0ebb0().y = pos[1];
         it.FUN_00b0ebb0().z = pos[2];
@@ -1120,12 +1249,7 @@ float* FUN_00b0b830_Class::FUN_00b0b830()
     return m_vec.empty() ? 0 : &m_vec[0];
 }
 
-struct MemoryManagerAllocHelper
-{
-    void* Allocate(unsigned int n);
-    void Deallocate(void* p);
-};
-extern MemoryManagerAllocHelper DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 inline void* operator new(unsigned int n)
 {
     return DAT_011f6238.Allocate(n);
@@ -1856,12 +1980,7 @@ struct StringB05210 : public StringValB05210
 };
 StringB05210 __cdecl FUN_00b18860(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
-struct MemoryManagerB05210
-{
-    void* Allocate(unsigned int uiSize);
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerB05210 g_kMemoryB05210;
+extern MemoryManager g_kMemoryB05210;
 struct SpeedTreeRTB05210
 {
     static void* operator new(unsigned int uiSize)
@@ -2696,11 +2815,7 @@ bool Tree59::FUN_00b059e0(int p1, int p2)
 }
 }  // namespace fnv_00b059e0
 
-struct MemoryManagerB061E0
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerB061E0 g_kMemoryB061E0;
+extern MemoryManager g_kMemoryB061E0;
 struct ProxyB061E0
 {
     void* m_pkContainer;
@@ -2747,7 +2862,7 @@ struct AuxBaseB061E0
     ProxyB061E0* m_pkAux;
     AllocatorB061E0<ProxyB061E0> m_kAlAux;
 };
-struct VectorValB061E0 : public AuxBaseB061E0
+struct CharBufferStorage : public AuxBaseB061E0
 {
     AllocatorB061E0<char> m_kAlval;
     char* m_pcFirst;
@@ -2769,9 +2884,10 @@ struct VectorValB061E0 : public AuxBaseB061E0
         m_pcEnd = 0;
     }
 };
-struct VectorB061E0 : public VectorValB061E0
+// STL-style char container: allocator/proxy state and three buffer pointers, unlike SIMD Vector.
+struct OwnedCharBuffer : public CharBufferStorage
 {
-    ~VectorB061E0()
+    ~OwnedCharBuffer()
     {
         Tidy();
     }
@@ -2780,7 +2896,7 @@ struct FUN_00b061e0
 {
     ~FUN_00b061e0();
     int unk00;
-    VectorB061E0 m_kBuffer;
+    OwnedCharBuffer m_kBuffer;
 };
 
 // @fnv 0x00b061e0
@@ -5044,13 +5160,7 @@ class ExceptionB07
     virtual const char* what() const;
 };
 
-class MemoryManagerB07
-{
-  public:
-    void* Allocate(unsigned int uiSize);
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerB07 g_kMemoryManagerB07;
+extern MemoryManager g_kMemoryManagerB07;
 
 inline void* operator new[](unsigned int uiSize)
 {
@@ -5959,13 +6069,7 @@ class ExceptionB07
     virtual const char* what() const;
 };
 
-class MemoryManagerB08
-{
-  public:
-    void* Allocate(unsigned int uiSize);
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerB08 g_kMemoryManagerB08;
+extern MemoryManager g_kMemoryManagerB08;
 
 class BranchGeometryB08
 {
@@ -5998,7 +6102,8 @@ class LodB08
 stdb07::string __cdecl FUN_00b18860(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcError);
 
-class CSpeedTreeRTB08
+// Local CSpeedTreeRT definition retained: include/CSpeedTreeRT.h is not available.
+class CSpeedTreeRT
 {
   public:
     void FUN_00b088d0();
@@ -6012,7 +6117,7 @@ class CSpeedTreeRTB08
 };
 
 // @fnv 0x00b088d0
-void CSpeedTreeRTB08::FUN_00b088d0()
+void CSpeedTreeRT::FUN_00b088d0()
 {
     try
     {
@@ -7705,11 +7810,7 @@ struct StringB0A7A0 : public StringValB0A7A0
 };
 StringB0A7A0 __cdecl FUN_00b18860(const char* pcFormat, ...);
 void __cdecl AssignString(const char* pcMessage);
-struct MemoryManagerB0A7A0
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerB0A7A0 g_kMemoryB0A7A0;
+extern MemoryManager g_kMemoryB0A7A0;
 struct FrondGeometryB0A7A0
 {
     ~FrondGeometryB0A7A0();
@@ -8111,7 +8212,8 @@ short FUN_00b0a9a0_Tree::FUN_00b0a9a0(short m_sIndex)
 }  // namespace fnv_00b0a9a0
 
 void __cdecl FUN_00ec7c56();
-template <class T> struct VectorB0AA20
+// STL-style checked array: three pointers after allocator state; elements include nested strip arrays.
+template <class T> struct CheckedLodArray
 {
     void* m_pkProxy;
     int m_iAux;
@@ -8156,7 +8258,7 @@ struct SpeedTreeRTB0AA20
     int unk34;
     int unk38;
     int unk3C;
-    VectorB0AA20<VectorB0AA20<short> > m_vLodStrips;
+    CheckedLodArray<CheckedLodArray<short> > m_vLodStrips;
     const short* FUN_00b0aa20(short nLod) const;
 };
 
@@ -8544,19 +8646,20 @@ void S0b::FUN_00b0b1d0(I0b* pArg, short sLod)
 }
 
 void __cdecl InvalidParameterNoInfoB530();
-struct AuxB530;
-class ContainerBaseAuxAllocB530
+struct GeometryArrayProxy;
+class GeometryArrayAllocatorState
 {
   public:
-    AuxB530* m_pkMyownedaux;
+    GeometryArrayProxy* m_pkMyownedaux;
     int m_iAlaux;
 };
-class VectorValB530 : public ContainerBaseAuxAllocB530
+class GeometryArrayStorage : public GeometryArrayAllocatorState
 {
   public:
     int m_iAlval;
 };
-template <class T> class VectorB530 : public VectorValB530
+// STL-style checked geometry array: allocator state plus begin/end/capacity pointers, not four SIMD floats.
+template <class T> class CheckedGeometryArray : public GeometryArrayStorage
 {
   public:
     unsigned int size() const
@@ -8618,7 +8721,7 @@ class FUN_00b0b530_Tree
     int unk7C;
     int unk80;
     int unk84;
-    VectorB530<float> m_kValues;
+    CheckedGeometryArray<float> m_kValues;
 };
 
 // @fnv 0x00b0b530
@@ -8627,43 +8730,6 @@ float* FUN_00b0b530_Tree::FUN_00b0b530()
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
 
-void __cdecl InvalidParameterNoInfoB5B0();
-struct AuxB5B0;
-class ContainerBaseAuxAllocB5B0
-{
-  public:
-    AuxB5B0* m_pkMyownedaux;
-    int m_iAlaux;
-};
-class VectorValB5B0 : public ContainerBaseAuxAllocB5B0
-{
-  public:
-    int m_iAlval;
-};
-template <class T> class VectorB5B0 : public VectorValB5B0
-{
-  public:
-    unsigned int size() const
-    {
-        return (unsigned int)(m_pMylast - m_pMyfirst);
-    }
-    bool empty() const
-    {
-        return (size() == 0);
-    }
-    T& operator[](unsigned int uiPos)
-    {
-        if (!(uiPos < size()))
-            InvalidParameterNoInfoB5B0();
-        do
-        {
-        } while (0);
-        return *(m_pMyfirst + uiPos);
-    }
-    T* m_pMyfirst;
-    T* m_pMylast;
-    T* m_pMyend;
-};
 class FUN_00b0b5b0_Tree
 {
   public:
@@ -8714,7 +8780,7 @@ class FUN_00b0b5b0_Tree
     int unkAC;
     int unkB0;
     int unkB4;
-    VectorB5B0<float> m_kValues;
+    CheckedGeometryArray<float> m_kValues;
 };
 
 // @fnv 0x00b0b5b0
@@ -8723,43 +8789,6 @@ float* FUN_00b0b5b0_Tree::FUN_00b0b5b0()
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
 
-void __cdecl InvalidParameterNoInfoB630();
-struct AuxB630;
-class ContainerBaseAuxAllocB630
-{
-  public:
-    AuxB630* m_pkMyownedaux;
-    int m_iAlaux;
-};
-class VectorValB630 : public ContainerBaseAuxAllocB630
-{
-  public:
-    int m_iAlval;
-};
-template <class T> class VectorB630 : public VectorValB630
-{
-  public:
-    unsigned int size() const
-    {
-        return (unsigned int)(m_pMylast - m_pMyfirst);
-    }
-    bool empty() const
-    {
-        return (size() == 0);
-    }
-    T& operator[](unsigned int uiPos)
-    {
-        if (!(uiPos < size()))
-            InvalidParameterNoInfoB630();
-        do
-        {
-        } while (0);
-        return *(m_pMyfirst + uiPos);
-    }
-    T* m_pMyfirst;
-    T* m_pMylast;
-    T* m_pMyend;
-};
 class FUN_00b0b630_Tree
 {
   public:
@@ -8816,7 +8845,7 @@ class FUN_00b0b630_Tree
     int unkC4;
     int unkC8;
     int unkCC;
-    VectorB630<float> m_kValues;
+    CheckedGeometryArray<float> m_kValues;
 };
 
 // @fnv 0x00b0b630
@@ -8825,43 +8854,6 @@ float* FUN_00b0b630_Tree::FUN_00b0b630()
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
 
-void __cdecl InvalidParameterNoInfoB6B0();
-struct AuxB6B0;
-class ContainerBaseAuxAllocB6B0
-{
-  public:
-    AuxB6B0* m_pkMyownedaux;
-    int m_iAlaux;
-};
-class VectorValB6B0 : public ContainerBaseAuxAllocB6B0
-{
-  public:
-    int m_iAlval;
-};
-template <class T> class VectorB6B0 : public VectorValB6B0
-{
-  public:
-    unsigned int size() const
-    {
-        return (unsigned int)(m_pMylast - m_pMyfirst);
-    }
-    bool empty() const
-    {
-        return (size() == 0);
-    }
-    T& operator[](unsigned int uiPos)
-    {
-        if (!(uiPos < size()))
-            InvalidParameterNoInfoB6B0();
-        do
-        {
-        } while (0);
-        return *(m_pMyfirst + uiPos);
-    }
-    T* m_pMyfirst;
-    T* m_pMylast;
-    T* m_pMyend;
-};
 class FUN_00b0b6b0_Tree
 {
   public:
@@ -8924,7 +8916,7 @@ class FUN_00b0b6b0_Tree
     int unkDC;
     int unkE0;
     int unkE4;
-    VectorB6B0<float> m_kValues;
+    CheckedGeometryArray<float> m_kValues;
 };
 
 // @fnv 0x00b0b6b0
@@ -8933,43 +8925,6 @@ float* FUN_00b0b6b0_Tree::FUN_00b0b6b0()
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
 
-void __cdecl InvalidParameterNoInfoB730();
-struct AuxB730;
-class ContainerBaseAuxAllocB730
-{
-  public:
-    AuxB730* m_pkMyownedaux;
-    int m_iAlaux;
-};
-class VectorValB730 : public ContainerBaseAuxAllocB730
-{
-  public:
-    int m_iAlval;
-};
-template <class T> class VectorB730 : public VectorValB730
-{
-  public:
-    unsigned int size() const
-    {
-        return (unsigned int)(m_pMylast - m_pMyfirst);
-    }
-    bool empty() const
-    {
-        return (size() == 0);
-    }
-    T& operator[](unsigned int uiPos)
-    {
-        if (!(uiPos < size()))
-            InvalidParameterNoInfoB730();
-        do
-        {
-        } while (0);
-        return *(m_pMyfirst + uiPos);
-    }
-    T* m_pMyfirst;
-    T* m_pMylast;
-    T* m_pMyend;
-};
 class FUN_00b0b730_Tree
 {
   public:
@@ -9038,7 +8993,7 @@ class FUN_00b0b730_Tree
     int unkF4;
     int unkF8;
     int unkFC;
-    VectorB730<float> m_kValues;
+    CheckedGeometryArray<float> m_kValues;
 };
 
 // @fnv 0x00b0b730
@@ -9047,43 +9002,6 @@ float* FUN_00b0b730_Tree::FUN_00b0b730()
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
 
-void __cdecl InvalidParameterNoInfoB7B0();
-struct AuxB7B0;
-class ContainerBaseAuxAllocB7B0
-{
-  public:
-    AuxB7B0* m_pkMyownedaux;
-    int m_iAlaux;
-};
-class VectorValB7B0 : public ContainerBaseAuxAllocB7B0
-{
-  public:
-    int m_iAlval;
-};
-template <class T> class VectorB7B0 : public VectorValB7B0
-{
-  public:
-    unsigned int size() const
-    {
-        return (unsigned int)(m_pMylast - m_pMyfirst);
-    }
-    bool empty() const
-    {
-        return (size() == 0);
-    }
-    T& operator[](unsigned int uiPos)
-    {
-        if (!(uiPos < size()))
-            InvalidParameterNoInfoB7B0();
-        do
-        {
-        } while (0);
-        return *(m_pMyfirst + uiPos);
-    }
-    T* m_pMyfirst;
-    T* m_pMylast;
-    T* m_pMyend;
-};
 class FUN_00b0b7b0_Tree
 {
   public:
@@ -9170,7 +9088,7 @@ class FUN_00b0b7b0_Tree
     int unk13C;
     int unk140;
     int unk144;
-    VectorB7B0<float> m_kValues;
+    CheckedGeometryArray<float> m_kValues;
 };
 
 // @fnv 0x00b0b7b0
@@ -9179,43 +9097,6 @@ float* FUN_00b0b7b0_Tree::FUN_00b0b7b0()
     return m_kValues.empty() ? 0 : &m_kValues[0];
 }
 
-void __cdecl InvalidParameterNoInfoB8B0();
-struct AuxB8B0;
-class ContainerBaseAuxAllocB8B0
-{
-  public:
-    AuxB8B0* m_pkMyownedaux;
-    int m_iAlaux;
-};
-class VectorValB8B0 : public ContainerBaseAuxAllocB8B0
-{
-  public:
-    int m_iAlval;
-};
-template <class T> class VectorB8B0 : public VectorValB8B0
-{
-  public:
-    unsigned int size() const
-    {
-        return (unsigned int)(m_pMylast - m_pMyfirst);
-    }
-    bool empty() const
-    {
-        return (size() == 0);
-    }
-    T& operator[](unsigned int uiPos)
-    {
-        if (!(uiPos < size()))
-            InvalidParameterNoInfoB8B0();
-        do
-        {
-        } while (0);
-        return *(m_pMyfirst + uiPos);
-    }
-    T* m_pMyfirst;
-    T* m_pMylast;
-    T* m_pMyend;
-};
 class FUN_00b0b8b0_Tree
 {
   public:
@@ -9314,7 +9195,7 @@ class FUN_00b0b8b0_Tree
     int unk16C;
     int unk170;
     int unk174;
-    VectorB8B0<unsigned char> m_kValues;
+    CheckedGeometryArray<unsigned char> m_kValues;
 };
 
 // @fnv 0x00b0b8b0
@@ -9389,28 +9270,28 @@ void TreeRuntime::FUN_00b0bc00(TreeOutput* output, short forcedLod)
     unsigned short index_;
     unsigned short count4;
     float angle5;
-    Vector3D pos1;
+    float pos1[3];
     unsigned short count2;
-    Vector3D position;
-    Vector3D pos2;
+    float position[3];
+    float pos2[3];
     float angleVal;
 
     count4 = FUN_00b08710();
     count2 = count4 + (DAT_011f8b78 != 0);
-    position.z = 0.0f;
-    position.y = 0.0f;
-    position.x = 0.0f;
-    pos2.z = 0.0f;
-    pos2.y = 0.0f;
-    pos2.x = 0.0f;
-    pos1.z = 0.0f;
-    pos1.y = 0.0f;
-    pos1.x = 0.0f;
-    position = *reinterpret_cast<const Vector3D*>(&DAT_011f8e9c);
-    pos2 = *reinterpret_cast<const Vector3D*>(&DAT_011f8eac);
-    pos1.x = pos2.x;
-    pos1.y = pos2.y;
-    pos1.z = pos2.z;
+    position[2] = 0.0f;
+    position[1] = 0.0f;
+    position[0] = 0.0f;
+    pos2[2] = 0.0f;
+    pos2[1] = 0.0f;
+    pos2[0] = 0.0f;
+    pos1[2] = 0.0f;
+    pos1[1] = 0.0f;
+    pos1[0] = 0.0f;
+    *reinterpret_cast<CVec3*>(position) = *reinterpret_cast<const CVec3*>(&DAT_011f8e9c);
+    *reinterpret_cast<CVec3*>(pos2) = *reinterpret_cast<const CVec3*>(&DAT_011f8eac);
+    pos1[0] = pos2[0];
+    pos1[1] = pos2[1];
+    pos1[2] = pos2[2];
     posTmp = reinterpret_cast<float*>(&pos1)[IndexOne()];
     result7 = reinterpret_cast<float*>(&pos1)[IndexZero()];
     angle7 = (double)(float)atan2((double)posTmp, (double)result7);
@@ -9473,31 +9354,7 @@ void TreeRuntime::FUN_00b0bc00(TreeOutput* output, short forcedLod)
 }
 
 extern float DAT_01023cd8;
-struct R0c
-{
-    float x, y, z;
-};
-struct V0c
-{
-    float x, y, z;
-    V0c()
-    {
-        z = 0.0f;
-        y = 0.0f;
-        x = 0.0f;
-    }
-    V0c(float a, float b, float c)
-    {
-        x = a;
-        y = b;
-        z = c;
-    }
-    V0c operator-() const
-    {
-        return V0c(-x, -y, -z);
-    }
-};
-float __cdecl FUN_00b0c470(V0c* v);
+float __cdecl FUN_00b0c470(const float* v);
 inline void Dead6()
 {
     int d0;
@@ -9559,13 +9416,13 @@ void T0c::FUN_00b0c050(O0c* pOut, unsigned int uiFlags)
     if (pOut->bActive && m_usPassCountLocal)
     {
         float fScale2 = (pOut->fWeight - ucMin) / (255.0 - ucMin);
-        V0c vA3;
-        V0c vB9;
-        vA3 = *(V0c*)&DAT_011f8e9c;
-        vB9 = *(V0c*)&DAT_011f8eac;
-        vB9 = -vB9;
+        LocalVec3 vA3;
+        LocalVec3 vB9;
+        memcpy(&vA3, &DAT_011f8e9c, sizeof(vA3));
+        memcpy(&vB9, &DAT_011f8eac, sizeof(vB9));
+        memcpy(&vB9, &(-vB9), sizeof(vB9));
         Dead6();
-        float fAngleTmp = FUN_00b0c470(&vB9);
+        float fAngleTmp = FUN_00b0c470(&vB9.x);
         if (fAngleTmp < 0.0)
             fAngleTmp += 360.0;
         float fW3 = -1.0f;
@@ -9620,30 +9477,21 @@ void T0c::FUN_00b0c050(O0c* pOut, unsigned int uiFlags)
 
 extern const double DAT_010a4d90;
 
-struct S00b0c470_Vec
-{
-    float v[3];
-
-    float Get(int i) const
-    {
-        return v[i];
-    }
-};
 
 // @fnv 0x00b0c470
 float __cdecl FUN_00b0c470(const float* p)
 {
-    S00b0c470_Vec local_z;
-    local_z.v[2] = 0.0f;
-    local_z.v[1] = 0.0f;
-    local_z.v[0] = 0.0f;
+    float local_z[3];
+    local_z[2] = 0.0f;
+    local_z[1] = 0.0f;
+    local_z[0] = 0.0f;
 
-    local_z.v[0] = p[0];
-    local_z.v[1] = p[1];
-    local_z.v[2] = p[2];
+    local_z[0] = p[0];
+    local_z[1] = p[1];
+    local_z[2] = p[2];
 
-    float y = local_z.Get(1);
-    float x = local_z.Get(0);
+    float y = (*reinterpret_cast<const CVec3*>(local_z))[1];
+    float x = (*reinterpret_cast<const CVec3*>(local_z))[0];
 
     float result = (float)atan2((double)y, (double)x);
     float copy = result;
@@ -9654,24 +9502,10 @@ float __cdecl FUN_00b0c470(const float* p)
     }
 }
 
-struct Vec3C780
-{
-    float x;
-    float y;
-    float z;
-    Vec3C780()
-    {}
-    Vec3C780(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    const float& operator[](int i) const
-    {
-        return (&x)[i];
-    }
-};
-extern const Vec3C780 g_akBasisC780[4];
+extern const CVec3 g_akBasisC780[4];
 struct FrameC780
 {
-    Vec3C780 m_akRows[4];
+    CVec3 m_akRows[4];
     bool m_bBuilt;
     bool IsBuilt() const
     {
@@ -9685,7 +9519,7 @@ FrameC780* FrameC780::FUN_00b0c780(float fScale, float m_fProjectionDepth)
 {
     if (!IsBuilt())
     {
-        Vec3C780 kScale(fScale, fScale, m_fProjectionDepth);
+        CVec3 kScale(fScale, fScale, m_fProjectionDepth);
         m_akRows[0].x = kScale.x * g_akBasisC780[0][0];
         m_akRows[0].y = kScale.y * g_akBasisC780[0][1];
         m_akRows[0].z = kScale.z * g_akBasisC780[0][2];
@@ -14029,10 +13863,6 @@ struct TreeGeomQ
     }
 };
 
-struct MM
-{
-    void __thiscall FUN_00aa4060(void* object);
-};
 
 struct EmbeddedTex
 {
@@ -14040,7 +13870,7 @@ struct EmbeddedTex
     TreeString value;
     void operator delete(void* p)
     {
-        ((MM*)&DAT_011f6238)->FUN_00aa4060(p);
+        ((MemoryManager*)&DAT_011f6238)->Deallocate(p);
     }
 };
 
@@ -14102,16 +13932,6 @@ inline void __cdecl AssignString(const char* s)
 }
 
 namespace st {
-struct Vector3D
-{
-    float x, y, z;
-    Vector3D(float fx, float fy, float afDepth)
-    {
-        x = fx;
-        y = fy;
-        z = afDepth;
-    }
-};
 struct TreeEngine
 {
     int unk00;
@@ -14177,7 +13997,7 @@ struct TreeEngine
 };
 struct LightingEngine
 {
-    void FUN_00b2a210(const Vector3D& center, int a, unsigned short n);
+    void FUN_00b2a210(const CVec3& center, int a, unsigned short n);
 };
 struct CSpeedTreeRT
 {
@@ -14198,7 +14018,7 @@ void CSpeedTreeRT::FUN_00b08cc0()
     {
         float box2[6];
         FUN_00b08c80(box2);
-        Vector3D center5((box2[0] + box2[3]) * 0.5, (box2[1] + box2[4]) * 0.5, (box2[2] + box2[5]) * 0.5);
+        CVec3 center5((box2[0] + box2[3]) * 0.5, (box2[1] + box2[4]) * 0.5, (box2[2] + box2[5]) * 0.5);
         a = m_pFirstPointer->m_ec;
         m_pLighting->FUN_00b2a210(center5, a, FUN_00b08710());
     }
@@ -14655,32 +14475,23 @@ struct IdvException
     virtual const char* what() const;
 };
 extern int DAT_011f8b7c;
-struct Vec3Q
-{
-    float x, y, z;
-    Vec3Q()
-    {
-        z = 0.0f;
-        y = 0.0f;
-        x = 0.0f;
-    }
-};
+
 struct InnerQ
 {
     int i0;
-    Vec3Q v;
+    LocalVec3 v;
 };
 struct FUN_00b036d0;
 struct WrapQ
 {
-    static void* operator new(unsigned int n, MemoryManagerAllocHelper& h)
+    static void* operator new(unsigned int n, MemoryManager& h)
     {
         return h.Allocate(n);
     }
-    static void operator delete(void*, MemoryManagerAllocHelper&)
+    static void operator delete(void*, MemoryManager&)
     {}
     FUN_00b036d0* pTree;
-    Vec3Q kPos;
+    LocalVec3 kPos;
     float fScale;
     WrapQ() : pTree(0)
     {
@@ -14751,7 +14562,7 @@ FUN_00b036d0::FUN_00b036d0(FUN_00b036d0* pNewInstance)
         *m30 = *m30 + 1;
         m34 = new (DAT_011f6238) WrapQ;
         m34->pTree = pNewInstance;
-        m34->kPos = pNewInstance->m00->v;
+        memcpy(&m34->kPos, &pNewInstance->m00->v, sizeof(m34->kPos));
         m34->fScale = pNewInstance->FUN_00b08440();
         DAT_011f8b7c++;
     }
@@ -14924,12 +14735,7 @@ class ExceptionB07
     virtual const char* what() const;
 };
 
-class MemoryManagerD04
-{
-  public:
-    void* Allocate(unsigned int uiSize);
-};
-extern MemoryManagerD04 g_kMemoryManagerD04;
+extern MemoryManager g_kMemoryManagerD04;
 
 inline void* operator new[](unsigned int uiSize)
 {
@@ -14946,7 +14752,8 @@ struct SLeafTextureD04
     char m_acPad2[0x54 - 0x30];
 };
 
-struct SFrondTextureD04
+// Local 0x2c-byte frond texture definition retained: include/SFrondTexture.h is not available.
+struct SFrondTexture
 {
     stdb07::string m_kLeafTextureFilename;
     char m_acPad[0x2c - 0x1c];
@@ -14960,7 +14767,7 @@ class FrondsD04
         return m_kFrondTextures[uiIndex].m_kLeafTextureFilename.c_str();
     }
     char m_acPad[0x50];
-    stdb07::vector<SFrondTextureD04> m_kFrondTextures;
+    stdb07::vector<SFrondTexture> m_kFrondTextures;
 };
 
 class TreeD04
@@ -14997,7 +14804,8 @@ struct STexturesD04
     const char* m_pSelfShadowTextureFilename;
 };
 
-class CSpeedTreeRTD04
+// Local CSpeedTreeRT definition retained: include/CSpeedTreeRT.h is not available.
+class CSpeedTreeRT
 {
   public:
     void FUN_00b0d040(STexturesD04& sTextures);
@@ -15010,7 +14818,7 @@ class CSpeedTreeRTD04
 };
 
 // @fnv 0x00b0d040
-void CSpeedTreeRTD04::FUN_00b0d040(STexturesD04& sTextures)
+void CSpeedTreeRT::FUN_00b0d040(STexturesD04& sTextures)
 {
     try
     {

@@ -1,11 +1,16 @@
 // fallout/interface/hotkeyswheel.cpp: Wheel, HotkeyWheelUpdate, HWShell (9 functions)
 
 #include "hotkeyswheel_decls.h"
+#include "../../../include/Tile.h"
+#include "../../../include/Setting.h"
+#include "../../../include/TESBoundObject.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/ActorValueOwner.h" // the player's ActorValueOwner at +0xa4 (slots 2 and 7)
 
 // @fnv 0x00701740
 bool HotkeyWheelDisplay::GetVisible()
 {
-    return reinterpret_cast<Tile*>(m_pWheelTile)->ContainsTrait(0xFA3);
+    return m_pWheelTile->ContainsTrait(0xFA3);
 }
 
 // @fnv 0x00701760
@@ -14,10 +19,10 @@ void HotkeyWheelDisplay::SetVisible(bool visible)
     if (visible)
     {
         RefreshHotkeyWheel();
-        reinterpret_cast<Tile*>(m_pWheelTile)->Set(0xFA3, 1);
+        m_pWheelTile->Set(0xFA3, 1);
     }
     else
-        reinterpret_cast<Tile*>(m_pWheelTile)->Set(0xFA3, 0);
+        m_pWheelTile->Set(0xFA3, 0);
 }
 
 // @fnv 0x00701610
@@ -34,18 +39,18 @@ void HotkeyWheelDisplay::Initialize(Tile* parent)
     for (int i = 0; i < 8; ++i)
     {
         itemName.PrintfString(DAT_0106ea94, i);
-        m_ppHotkeySlotTiles[i] = reinterpret_cast<Tile*>(m_pWheelTile)->GetNamedChild(itemName.String());
+        m_ppHotkeySlotTiles[i] = m_pWheelTile->GetNamedChild(itemName.String());
     }
 
     m_iTileValueIdAtOffset2C = GetTileValueID(DAT_0106ea84, -1);
     m_iTileValueIdAtOffset30 = GetTileValueID(DAT_0106ea74, -1);
     m_bHasHotkeySelection = false;
-    reinterpret_cast<Tile*>(m_pWheelTile)->Set(m_iTileValueIdAtOffset2C, 0xffffffff);
-    reinterpret_cast<Tile*>(m_pWheelTile)->Set(m_iTileValueIdAtOffset30, g_emptyTopicInfoPrompt, true);
+    m_pWheelTile->Set(m_iTileValueIdAtOffset2C, -1);
+    m_pWheelTile->Set(m_iTileValueIdAtOffset30, g_emptyTopicInfoPrompt, true);
 }
 
 // @fnv 0x00a24660
-int HotkeyWheelDisplay::SetHotkeyItem(int key, int state)
+int InputManager::FUN_00a24660(int key, int state)
 {
     if (key < 28)
     {
@@ -104,21 +109,10 @@ int HotkeyWheelDisplay::SetHotkeyItem(int key, int state)
 
 extern char DAT_01011584;
 
-struct S_00701e00_Owner
-{
-    void FUN_00700320(int value, int index);
-    void FUN_00a01350(int value, void* data, int flag);
-};
-
-struct S_00701e00_Item
-{
-    void* FUN_00a011f0(int value);
-};
-
 struct S_00701e00_Class
 {
-    S_00701e00_Owner* unk00;
-    S_00701e00_Item* unk04[7];
+    Tile* unk00;
+    Tile* unk04[7];
     void* unk20;
     unsigned char unk24;
     int unk28;
@@ -134,7 +128,7 @@ void S_00701e00_Class::FUN_00701e00(int index)
 {
     unk00->FUN_00700320(unk2c, index);
 
-    unk00->FUN_00a01350(unk30, (index >= 0 && index != 1) ? unk04[index]->FUN_00a011f0(0xfc4) : (void*)&DAT_01011584,
+    unk00->FUN_00a01350(unk30, (index >= 0 && index != 1) ? unk04[index]->FUN_00a011f0(0xfc4) : &DAT_01011584,
                         1);
 
     if (index >= 0)
@@ -165,13 +159,14 @@ struct Form
     int FUN_00401170();
     bool FUN_004c0bf0();
 };
-struct Data
+// InventoryChanges EntryData::extendData list (BSSimpleList<ExtraDataList*>): FUN_00559450 returns field 0, FUN_006815c0 = GetItem
+struct EntryExtendList
 {
     void** FUN_006815c0();
 };
 struct Entry
 {
-    Data* FUN_00559450();
+    EntryExtendList* FUN_00559450();
     Form* FUN_0044ddc0();
     int FUN_00726070();
     bool FUN_004bddd0(bool);
@@ -537,17 +532,6 @@ struct Process
     virtual void v57c();
     virtual void v580(int, int, int);
 };
-struct ActorValues
-{
-    virtual int v00();
-    virtual int v04();
-    virtual int v08(int);
-    virtual int v0c();
-    virtual int v10();
-    virtual int v14();
-    virtual int v18();
-    virtual int v1c(int);
-};
 struct Player
 {
     virtual void v000();
@@ -801,10 +785,6 @@ struct Player
 extern Player* DAT_011dea3c;
 Inventory* __cdecl FUN_004bf220(Player*);
 Form* __cdecl FUN_0058db10(int);
-struct Setting
-{
-    const char* FUN_004c69f0();
-};
 extern Setting DAT_011d2af0;
 extern float DAT_010162c0;
 bool __cdecl DispatchMessageToSink(const char*, int, const char*, const char*, float, bool);
@@ -827,8 +807,8 @@ void Wheel::FUN_00701e80()
         return;
     if (DAT_011dea3c->FUN_008a7570() != -1 && entry5->FUN_0044ddc0()->FUN_00401170() == 0x28)
         return;
-    if (entry5->FUN_0044ddc0() == FUN_0058db10(0) && ((ActorValues*)((char*)DAT_011dea3c + 0xa4))->v08(0x10) ==
-                                                         ((ActorValues*)((char*)DAT_011dea3c + 0xa4))->v1c(0x10))
+    if (entry5->FUN_0044ddc0() == FUN_0058db10(0) && ((ActorValueOwner*)((char*)DAT_011dea3c + 0xa4))->GetActorValue((ActorValue::Index)0x10) ==
+                                                         ((ActorValueOwner*)((char*)DAT_011dea3c + 0xa4))->GetPermanentActorValue((ActorValue::Index)0x10))
     {
         DispatchMessageToSink(DAT_011d2af0.FUN_004c69f0(), 0, 0, 0, DAT_010162c0, false);
         return;
@@ -848,20 +828,6 @@ void Wheel::FUN_00701e80()
     target ? target->FUN_004459e0(true) : 0;
 }
 
-class HotkeyStringCalls
-{
-  public:
-    BSStringT<char>& FUN_00438390(const char*);
-    BSStringT<char>& FUN_00404820(const char*);
-};
-
-class TESForm
-{
-};
-class TESBoundObject : public TESForm
-{
-};
-
 class InventoryItem
 {
   public:
@@ -874,23 +840,12 @@ class InventoryItem
 class TESObjectREFR;
 extern TESObjectREFR* _g_thePlayer;
 
-class InventoryChanges
-{
-  public:
-    static InventoryChanges* GetOrAddInventoryChanges(TESObjectREFR*);
-    InventoryItem** CollectEntriesByRank(int, int);
-};
+#include "../../../include/InventoryChanges.h"
 
-namespace BGSEquipType {
-enum EQUIP_TYPE
-{
-};
-EQUIP_TYPE GetEquipType(TESForm*);
-}
+#include "../../../include/BGSEquipType.h"
 
 const char* GetMenuIconName(int);
 int FUN_00a01860(const char*);
-int __cdecl FUN_00406f60(void*, const char*, ...);
 
 static const char str_InterfaceIcons[] = "Interface\\Icons\\";
 static const char str_HotKeyIcon[] = "_HotKeyIcon";
@@ -918,18 +873,17 @@ void HotkeyWheelUpdate::FUN_007017b0()
             InventoryItem* item3 = items7[i];
             if (item3)
             {
-                reinterpret_cast<HotkeyStringCalls&>(str3).FUN_00438390(str_InterfaceIcons);
-                reinterpret_cast<HotkeyStringCalls&>(str3).FUN_00404820(
-                    GetMenuIconName(BGSEquipType::GetEquipType(item3->GetObject())));
+                str3 = str_InterfaceIcons;
+                str3 += GetMenuIconName(BGSEquipType::GetEquipType(item3->GetObject()));
                 this->m_ppHotkeySlotTiles[i]->Set(FUN_00a01860(str_HotKeyIcon), str3.String(), true);
                 this->m_ppHotkeySlotTiles[i]->Set(FUN_00a01860(str_HotKeyAssigned), 1);
                 if (item3->FUN_00726070() > 1)
                 {
-                    FUN_00406f60(&str3, str_FormatCount, item3->GetTargetFullName(), item3->FUN_00726070());
+                    str3.PrintfString(str_FormatCount, item3->GetTargetFullName(), item3->FUN_00726070());
                 }
                 else
                 {
-                    reinterpret_cast<HotkeyStringCalls&>(str3).FUN_00438390(item3->GetTargetFullName());
+                    str3 = item3->GetTargetFullName();
                 }
                 this->m_ppHotkeySlotTiles[i]->Set(0xfc4, str3.String(), true);
             }
@@ -948,11 +902,6 @@ void HotkeyWheelUpdate::FUN_007017b0()
         delete items7;
     }
 }
-
-struct TileCall
-{
-    float FUN_00a011b0(int index);
-};
 
 struct TimeGlobal
 {
@@ -1017,7 +966,7 @@ int HWShell::FUN_00701bd0(int index)
             else if (bD_)
                 result5 = 4;
         }
-        int cur = (int)((TileCall*)this->m_pWheelTile)->FUN_00a011b0(this->m_iTileValueIdAtOffset2C);
+        int cur = (int)this->m_pWheelTile->FUN_00a011b0(this->m_iTileValueIdAtOffset2C);
         if (result5 != cur)
         {
             if (result5 != DAT_0119f33c)

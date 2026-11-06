@@ -1,40 +1,88 @@
+#include "../../../../include/ProcessLists.h"
 // fallout/misc/saveload/bgssaveloadglobaldata.cpp: SaveGameLoader (23 functions)
 
-#include "bgssaveloadglobaldata_packet.h"
-class BGSLoadGameBuffer;
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/CombatManager.h"
+#include "../../../../include/BSPortal.h"
+#include "../../../../include/ImageSpaceModifierInstanceForm.h"
+#include "../../../../include/TES.h"
+#include "../../../../include/TESWorldSpace.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/TESGlobal.h"
+#include "../../../../include/TESDataHandler.h"
+#include "../../../../include/NiTimeController.h"
+#include "../../../../include/FalloutRadio.h"
+#include "../../../../include/BGSSaveLoadGame.h"
+#include "../../../../include/BGSReconstructFormsInAllFilesMap.h"
+#include "../../../../include/BGSLoadGameBuffer.h"
+#include "../../../../include/ImageSpaceModifierInstance.h"
+#include "../../../../include/ImageSpaceModifierInstanceDOF.h"
+#include "../../../../include/Sky.h"
+#include "../../../../include/TESImageSpaceModifier.h"
+
+// This routine is absent from the shared reconstruct-map interface.
+extern "C" void ReconstructGlobal();
+// Additional cell helpers absent from the shared interfaces; preserve their thiscall ABI.
+extern "C" void WorldSpaceIsFlag8Set();
+extern "C" void WorldSpaceContainsPoint();
+extern "C" void WorldSpaceCreateCell();
+extern "C" void DataHandlerGetOrCreateCell();
+extern "C" void DataHandlerCreateCell();
+
+class NiAVObject;
+class NiTexture;
+class NiNode;
+class BGSPerkEntry;
+extern TES* g_TES;
+class ScreenSplatter
+{
+  public:
+    static void Clear();
+};
+class ScreenCustomSplatter
+{
+  public:
+    static void Clear();
+};
+BSPortal* FUN_0045a190();
+// Exe 0x0084d160: unit-local Interface view; declarations and layout are preserved.
+class BgssaveloadglobaldataInterfaceView
+{
+  public:
+    static void ApplyLoadBuffer(BGSLoadGameBuffer*);
+    static void Revert(BGSLoadGameBuffer*);
+    static void LoadGame(BGSLoadGameBuffer*);
+    static void PrintDebugMessage(BGSLoadGameBuffer*);
+};
+
+extern float DAT_011c3c08;
+
+class GlobalObject_0096d020
+{
+};
+extern GlobalObject_0096d020 g_011e0e80;
+void FUN_004d60c0(BGSLoadGameBuffer*);
+void ResetRadioGlobals(BGSLoadGameBuffer*);
+class MagicItem;
+
+void FUN_0084cd40(BGSLoadGameBuffer*);
+void ReadSavedSettings(BGSLoadGameBuffer*);
+void FUN_008368b0(BGSLoadGameBuffer*);
+class SoundPlaybackManager
+{
+  public:
+    static void LoadGame(BGSLoadGameBuffer*);
+};
+
+#include "../../../../include/NiBound.h"
+#include "../../../../include/MagicCaster.h"
+#include "../../../../include/ActorCause.h"
 class TESObjectCELL;
 
-class ProcessLists
-{
-  public:
-    void InitLoadGame(BGSLoadGameBuffer* buffer);
-    void Revert(BGSLoadGameBuffer*);
-};
 
-class TESWorldSpace
-{
-  public:
-    TESObjectCELL* LookupCellByEditorID(const char* editorID);
-};
 
 extern TESWorldSpace* BGSSaveLoadGlobalDataWorldspacePtr;
 
-class ActorCause
-{
-  public:
-    static void SaveActorCauses(BGSLoadGameBuffer* buffer);
-    static void LoadReferencesFromBuffer(BGSLoadGameBuffer*);
-    static void ClearActorCauseList(BGSLoadGameBuffer*);
-};
-
-class FalloutRadio
-{
-  public:
-    static void InitLoadGame(BGSLoadGameBuffer* buffer);
-    static void ApplyLoadBuffer(BGSLoadGameBuffer*);
-    void Revert(BGSLoadGameBuffer*);
-    void LoadGame(BGSLoadGameBuffer*);
-};
 
 class SaveGameLoader
 {
@@ -51,7 +99,6 @@ class SaveGameLoader
 
 void __cdecl LogWarning(const char* format, ...);
 extern "C" void fnv_call_975af0();
-extern "C" void fnv_call_993600();
 extern "C" void fnv_call_66e810();
 extern "C" void fnv_call_836af0();
 extern "C" void fnv_call_845cc0();
@@ -62,7 +109,7 @@ void SaveGameLoader::UnloadGameData()
     ScreenSplatter::Clear();
     ScreenCustomSplatter::Clear();
     FUN_0045a190()->BSPortal::~BSPortal();
-    BSSimpleList<NiPointer<ImageSpaceModifierInstance> >* node = g_TES->FUN_0043b5d0();
+    BSSimpleList<NiPointer<ImageSpaceModifierInstance> >* node = (BSSimpleList<NiPointer<ImageSpaceModifierInstance> >*)g_TES->FUN_0043b5d0();
     while (node)
     {
         ImageSpaceModifierInstance* effect =
@@ -72,7 +119,7 @@ void SaveGameLoader::UnloadGameData()
         if (effect && !effect->IsFlagSet())
         {
             NiPointer<NiAVObject> ref((NiAVObject*)effect);
-            node->Remove(ref);
+            ((BSSimpleList<NiPointer<NiAVObject> >*)node)->Remove(ref);
             continue;
         }
         else
@@ -103,7 +150,7 @@ bool SaveGameLoader::LoadFormType(unsigned int type, BGSLoadGameBuffer* buffer)
         ((CombatManager*)BGSSaveLoadGlobalDataWorldspacePtr)->ApplyLoadBuffer(buffer);
         return true;
     case 6:
-        Interface::ApplyLoadBuffer(buffer);
+        BgssaveloadglobaldataInterfaceView::ApplyLoadBuffer(buffer);
         return true;
     case 7:
         return false;
@@ -177,7 +224,7 @@ bool SaveGameLoader::LoadFormRange(unsigned int type, BGSLoadGameBuffer* buffer,
         ((CombatManager*)BGSSaveLoadGlobalDataWorldspacePtr)->FUN_00993800(buffer);
         return true;
     case 6:
-        Interface::Revert(buffer);
+        BgssaveloadglobaldataInterfaceView::Revert(buffer);
         return true;
     case 7:
         UnloadGameData();
@@ -194,7 +241,7 @@ bool SaveGameLoader::LoadFormRange(unsigned int type, BGSLoadGameBuffer* buffer,
         ResetRadioGlobals(buffer);
         return true;
     case 11:
-        Interface::PrintDebugMessage(buffer);
+        BgssaveloadglobaldataInterfaceView::PrintDebugMessage(buffer);
         return true;
     case 1000:
         ((ProcessLists*)&g_011e0e80)->Revert(buffer);
@@ -227,7 +274,7 @@ bool SaveGameLoader::LoadGlobalDataRange(unsigned int type, BGSLoadGameBuffer* b
         ((CombatManager*)BGSSaveLoadGlobalDataWorldspacePtr)->LoadGame(buffer);
         return true;
     case 6:
-        Interface::LoadGame(buffer);
+        BgssaveloadglobaldataInterfaceView::LoadGame(buffer);
         return true;
     case 7:
         LoadEffects(buffer);
@@ -259,20 +306,14 @@ bool SaveGameLoader::LoadGlobalDataRange(unsigned int type, BGSLoadGameBuffer* b
 extern int _data_011c16bc;
 class SaveLoadFile;
 void __cdecl ReadFileIntoBuffer(SaveLoadFile*, unsigned int*, unsigned int);
-struct LGB : BGSLoadGameBuffer
-{
-    void ReadAndVerifySize(SaveLoadFile*);
-    int pad[3];
-    ~LGB()
-    {}
-};
+
 // Reads count entries from file, each a type followed by a buffer, and loads each global data range.
 // @fnv 0x0084bc20
 void __cdecl LoadGlobalDataRanges(SaveLoadFile* file, unsigned int count)
 {
     for (unsigned int i = 0; i < count; ++i)
     {
-        LGB buffer;
+        BGSLoadGameBuffer buffer;
         {
             unsigned int type = 0;
             ReadFileIntoBuffer(file, &type, 4);
@@ -282,33 +323,19 @@ void __cdecl LoadGlobalDataRanges(SaveLoadFile* file, unsigned int count)
     }
 }
 
-namespace Local {
-class BGSLoadGameBuffer
-{
-  public:
-    BGSLoadGameBuffer();
-    ~BGSLoadGameBuffer();
-    int pad[4];
-};
-}
-
 // @fnv 0x0084bfb0
 void __cdecl FUN_0084bfb0(unsigned int start, unsigned int end)
 {
-    Local::BGSLoadGameBuffer buffer;
+    BGSLoadGameBuffer buffer;
     for (unsigned int i = start; i < end; ++i)
     {
-        SaveGameLoader::LoadGlobalDataType(i, reinterpret_cast< ::BGSLoadGameBuffer*>(&buffer));
+        SaveGameLoader::LoadGlobalDataType(i, &buffer);
     }
 }
 
 struct G975
 {
     void fnv_call_975af0(BGSLoadGameBuffer*);
-};
-struct W993
-{
-    void fnv_call_993600(BGSLoadGameBuffer*);
 };
 // @fnv 0x0084c030
 bool __cdecl FUN_0084c030(unsigned int type, BGSLoadGameBuffer* buffer)
@@ -325,7 +352,7 @@ bool __cdecl FUN_0084c030(unsigned int type, BGSLoadGameBuffer* buffer)
         ((G975*)&g_011e0e80)->fnv_call_975af0(buffer);
         return true;
     case 5:
-        ((W993*)BGSSaveLoadGlobalDataWorldspacePtr)->fnv_call_993600(buffer);
+        ((CombatManager*)BGSSaveLoadGlobalDataWorldspacePtr)->FUN_00993600(buffer);
         return true;
     case 6:
         return false;
@@ -352,16 +379,11 @@ bool __cdecl FUN_0084c030(unsigned int type, BGSLoadGameBuffer* buffer)
 }
 
 namespace fnv_0084c110 {
-struct LGB : BGSLoadGameBuffer
-{
-    int pad[3];
-    ~LGB()
-    {}
-};
+
 // @fnv 0x0084c110
 void __cdecl FUN_0084c110(unsigned int aiStart, unsigned int aiEnd)
 {
-    LGB loadGameBuffer;
+    BGSLoadGameBuffer loadGameBuffer;
     for (unsigned int i = aiStart; i < aiEnd; ++i)
         SaveGameLoader::LoadFormType(i, &loadGameBuffer);
 }
@@ -369,7 +391,6 @@ void __cdecl FUN_0084c110(unsigned int aiStart, unsigned int aiEnd)
 
 struct Actor;
 struct BGSLoadFormBuffer;
-struct BGSReconstructFormsInAllFilesMap;
 struct BGSSaveLoadChangesMap;
 struct SaveLoadFile;
 struct FormIDConverter;
@@ -378,178 +399,48 @@ struct LoadGameSubBufferQueue;
 struct BGSSaveLoadReferencesMap;
 struct IDebugText;
 struct TESObjectCELL;
-struct TESObjectREFR;
 struct blob4
 {
     char b[4];
 };
-struct BGSSaveLoadGame
-{
-    static void Create();
-    static void Destroy();
-    void ApplyFormChanges(BGSSaveLoadChangesMap*, FormIDConverter*);
-    void LoadCellChanges(bool);
-    void LoadForm(TESForm*);
-    void SetFormLoaded(TESForm*, bool);
-    bool ShouldUnloadForm(TESForm*);
-    void FormReconstructionMap(TESObjectCELL*);
-    bool ContainsReference(unsigned int);
-    bool ShouldSaveForm(TESForm*, bool);
-    void NotifyFormIDChanged(TESForm*, struct blob4, bool);
-    bool HasFormChangeFlags(TESForm*, struct blob4);
-    bool GetOldChange(TESForm*, struct blob4);
-    bool IsFormChanged(TESForm*);
-    void ClearFormChangeFlags(TESForm*, struct blob4);
-    void HasFormChanges(TESForm*);
-    void ClearAllForms();
-    void CleanupExpiredData();
-    void ProcessSubBuffer(int, BGSLoadFormBuffer*, TESForm*);
-    void ClearForm(TESForm*);
-    void ClearFormID(unsigned int);
-    void DeleteForm(TESForm*);
-    void ChangeFormID(unsigned int, unsigned int);
-    unsigned int GetNewFormID(unsigned int);
-    bool IsFormIDRemapped(unsigned int);
-    void AreStringsEqual(char*, char*);
-    void DisplayReferenceDebugText(TESObjectREFR*, IDebugText*);
-    void DisplayCellDebugText(TESObjectREFR*, IDebugText*);
-    FormIDConverter* GetFormIDMap();
-    FormIDConverter* GetWorldspaceFormIDMap();
-    SaveLoadChangeHistory* GetHistory();
-    BGSReconstructFormsInAllFilesMap* GetReconstructFormsMap();
-    unsigned char GetConvertedFileIndex(unsigned char);
-    unsigned char GetReverseConvertedFileIndex(unsigned char);
-    unsigned char GetLoadState();
-    bool SetGlobalAllowChanges(bool);
-    bool GetGlobalAllowChanges();
-    void SetDeferInitForms(bool);
-    bool GetDeferInitForms();
-    void SetSaveGameLoading(bool);
-    bool GetSaveGameLoading();
-    void SetSaveGameSaving(bool);
-    bool GetSaveGameSaving();
-    void SetInitingForms(bool);
-    bool GetInitingForms();
-    void SetPositioningPlayerCharacter(bool);
-    bool GetPositioningPlayerCharacter();
-    void SetPlayerLocationInvalid(bool);
-    bool GetPlayerLocationInvalid();
-    void SetSaveLoadFailed(bool);
-    bool GetSaveLoadFailed();
-    bool SetThreadAllowChanges(bool);
-    bool GetThreadAllowChanges();
-    void SetLoadingMovedRefs(bool);
-    bool GetLoadingMovedRefs();
-    void SetReconstructingForms(bool);
-    bool GetReconstructingForms();
-    bool GetAllowChanges();
-    void SaveGame(SaveLoadFile*);
-    bool LoadGame(SaveLoadFile*, bool);
-    void PrepareLoadGame(SaveLoadFile*);
-    bool IsValidSaveGame(SaveLoadFile*);
-    unsigned int LoadFormRecord(SaveLoadFile*, BGSLoadFormBuffer*, FormIDConverter*);
-    bool FindFormByID(TESForm**, struct blob4, bool);
-    void InitializePackageLocations(Actor*);
-    void CancelInitPackageLocations(Actor*);
-    void ClearFormChanges();
-    BGSSaveLoadChangesMap* GetChangesMap();
-    void* __vecDelDtor(unsigned int);
-    BGSSaveLoadChangesMap* m_pFormChangesMap;
-    BGSSaveLoadChangesMap* m_pSecondChangesMap;
-    FormIDConverter* m_pSecondSaveLoadData;
-    FormIDConverter* m_pSaveLoadData;
-    BGSSaveLoadReferencesMap* m_pReferencesMap;
-    LoadGameSubBufferQueue* m_pSaveLoadMap;
-    void* m_pAuxiliaryData;
-    SaveLoadChangeHistory* m_pNoteHandler;
-    BGSReconstructFormsInAllFilesMap* m_pFormReconstructionMap;
-    char LoadFormBufferArray[16];
-    char m_acTextBuffer[16];
-    char m_acFirstTextBuffer[255];
-    char m_acSecondTextBuffer[255];
-    char _pad_242[2];
-    unsigned int m_uiInitializationFlags;
-    unsigned char m_ucSaveLoadState;
-    char _pad_249[3];
-};
+
 typedef char _sizecheck_BGSSaveLoadGame[sizeof(BGSSaveLoadGame) == 588 ? 1 : -1];
-struct FUN_0084cc40_shell : public BGSSaveLoadGame
-{
-    void FUN_0084cc40(bool);
-};
 
 // Sets or clears bit 0x40 in the flags field according to abValue.
 // @fnv 0x0084cc40
-void FUN_0084cc40_shell::FUN_0084cc40(bool abValue)
+void BGSSaveLoadGame::FUN_0084cc40(bool abValue)
 {
     if (abValue)
-        m_uiInitializationFlags |= 0x40;
+        iGlobalFlags |= 0x40;
     else
-        m_uiInitializationFlags &= ~0x40;
+        iGlobalFlags &= ~0x40;
 }
-
-struct FUN_0084d050_shell : public ImageSpaceModifierInstance
-{
-    bool IsFlagSet();
-};
 
 // @fnv 0x0084d050
-bool FUN_0084d050_shell::IsFlagSet()
+bool ImageSpaceModifierInstance::IsFlagSet()
 {
-    return (*(unsigned int*)((char*)this + 0x18) & 1) ? true : false;
+    return (iFlags & 1) ? true : false;
 }
-
-class FUN_0084c580_shell
-{
-  public:
-    unsigned int field208;
-    unsigned int __thiscall GetField208();
-};
 
 // @fnv 0x0084c580
-unsigned int __thiscall FUN_0084c580_shell::GetField208()
+unsigned int __fastcall GetDataHandlerField208(TESDataHandler* handler)
 {
-    return *(unsigned int*)((char*)this + 0x208);
+    return *(unsigned int*)((char*)handler + 0x208);
 }
 
-class TESGlobal : public TESForm
-{
-  public:
-    bool IsConstantGlobal();
-    float GetValue();
-};
-
-struct GlobalListNode
-{
-    TESGlobal*& FUN_006815c0();
-    GlobalListNode* FUN_00726070();
-};
-
-struct TESDataHandler
-{
-    GlobalListNode* GetTESGlobalList();
-};
-
-struct BGSSaveFormBuffer
-{
-    void SerializeFormData(void* apForm, int aiFlags);
-    void SaveData(void* apData, int aiSize, int aiFlags);
-    unsigned int FUN_00865f20();
-    void FUN_00865ff0(int aiCount, unsigned int auiPos);
-};
 
 extern TESDataHandler* g_dataHandler;
 
 // @fnv 0x0084cc90
 void FUN_0084cc90(BGSSaveFormBuffer* apBuffer)
 {
-    GlobalListNode* pList = g_dataHandler->GetTESGlobalList();
+    BSSimpleList<TESGlobal*>* pList = g_dataHandler->GetTESGlobalList();
     int iCount = 0;
     unsigned int uiStart = apBuffer->FUN_00865f20();
-    GlobalListNode* pIter = pList;
+    BSSimpleList<TESGlobal*>* pIter = pList;
     while (pIter)
     {
-        TESGlobal* pGlobalForm = pIter->FUN_006815c0();
+        TESGlobal* pGlobalForm = pIter->GetItem();
         if (pGlobalForm && !pGlobalForm->IsConstantGlobal())
         {
             apBuffer->SerializeFormData(pGlobalForm, 0);
@@ -557,7 +448,7 @@ void FUN_0084cc90(BGSSaveFormBuffer* apBuffer)
             apBuffer->SaveData(&fValue, 4, 0);
             ++iCount;
         }
-        pIter = pIter->FUN_00726070();
+        pIter = pIter->GetNext();
     }
     apBuffer->FUN_00865ff0(iCount, uiStart);
 }
@@ -629,12 +520,6 @@ void FUN_00866200_owner::FUN_00866200(SaveLoadFile* apFile, unsigned int auiForm
 }  // namespace fnv_00866200
 
 namespace fnv_00975840 {
-struct BGSSaveFormBuffer
-{
-    void SaveData(void* apData, int aiSize, int aiFlags);
-    unsigned int FUN_00865f20();
-    void FUN_00865ff0(int aiCount, unsigned int auiPos);
-};
 
 struct SavedItem
 {
@@ -679,15 +564,9 @@ void FUN_00975840_owner::FUN_00975840(BGSSaveFormBuffer* apBuffer)
 }
 }  // namespace fnv_00975840
 
-struct FUN_0084cbf0_shell
-{
-    unsigned int flags;
-    void SetFlag20(bool set);
-};
-
 // Sets or clears bit 0x20 in the flags word at offset 0x244 based on the set argument.
 // @fnv 0x0084cbf0
-void FUN_0084cbf0_shell::SetFlag20(bool set)
+void BGSSaveLoadGame::SetPositioningPlayerCharacter(bool set)
 {
     if (set)
         ((unsigned int*)((char*)this + 0x244))[0] |= 0x20;
@@ -696,33 +575,10 @@ void FUN_0084cbf0_shell::SetFlag20(bool set)
 }
 
 namespace fnv_0084ced0 {
-class TESGlobal;
-struct BGSReconstructFormsInAllFilesMap
-{
-  public:
-    void FUN_00843630(TESGlobal*, int);
-};
-struct BGSSaveLoadGame
-{
-  public:
-    BGSReconstructFormsInAllFilesMap* _FNV_GetObjectReference();
-};
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
-class TESDataHandler
-{
-  public:
-    BSSimpleList<TESGlobal*>* GetTESGlobalList();
-};
-struct DH : public TESDataHandler
-{
-};
-extern DH* g_dataHandler;
-struct ListStub
-{
-  public:
-    TESGlobal** _ref_006815c0();
-    ListStub* _ref_00726070();
-};
+
+extern TESDataHandler* g_dataHandler;
+
 // Iterates the data handler's TESGlobal list and calls FUN_00843630 on each global through the save-load reconstruct map.
 // @fnv 0x0084ced0
 void ReconstructAllGlobals()
@@ -734,9 +590,9 @@ void ReconstructAllGlobals()
     while (pGlobalList)
     {
         TESGlobal* pglobal;
-        pglobal = *((ListStub*)pGlobalList)->_ref_006815c0();
-        pReconstructMap->FUN_00843630(pglobal, 0);
-        pGlobalList = (BSSimpleList<TESGlobal*>*)((ListStub*)pGlobalList)->_ref_00726070();
+        pglobal = pGlobalList->GetItem();
+        ((void (__thiscall*)(BGSReconstructFormsInAllFilesMap*, TESGlobal*, int))ReconstructGlobal)(pReconstructMap, pglobal, 0);
+        pGlobalList = pGlobalList->GetNext();
     }
 }
 }  // namespace fnv_0084ced0
@@ -772,138 +628,7 @@ struct LLD_FullNameLen
     unsigned int GetModelLength();
 };
 class LLD_Cell;
-class TESObjectREFR : public TESForm
-{
-  public:
-    virtual void vfn_01();
-    virtual void vfn_02();
-    virtual void vfn_03();
-    virtual void vfn_04();
-    virtual void vfn_05();
-    virtual void vfn_06();
-    virtual void vfn_07();
-    virtual void vfn_08();
-    virtual void vfn_09();
-    virtual void vfn_0a();
-    virtual void vfn_0b();
-    virtual void vfn_0c();
-    virtual void vfn_0d();
-    virtual void vfn_0e();
-    virtual void vfn_0f();
-    virtual void vfn_10();
-    virtual void vfn_11();
-    virtual void vfn_12();
-    virtual void vfn_13();
-    virtual void vfn_14();
-    virtual void vfn_15();
-    virtual void vfn_16();
-    virtual void vfn_17();
-    virtual void vfn_18();
-    virtual void vfn_19();
-    virtual void vfn_1a();
-    virtual void vfn_1b();
-    virtual void vfn_1c();
-    virtual void vfn_1d();
-    virtual void vfn_1e();
-    virtual void vfn_1f();
-    virtual void vfn_20();
-    virtual void vfn_21();
-    virtual void vfn_22();
-    virtual void vfn_23();
-    virtual void vfn_24();
-    virtual void vfn_25();
-    virtual void vfn_26();
-    virtual void vfn_27();
-    virtual void vfn_28();
-    virtual void vfn_29();
-    virtual void vfn_2a();
-    virtual void vfn_2b();
-    virtual void vfn_2c();
-    virtual void vfn_2d();
-    virtual void vfn_2e();
-    virtual void vfn_2f();
-    virtual void vfn_30();
-    virtual void vfn_31();
-    virtual void vfn_32();
-    virtual void vfn_33();
-    virtual void vfn_34();
-    virtual void vfn_35();
-    virtual void vfn_36();
-    virtual void vfn_37();
-    virtual void vfn_38();
-    virtual void vfn_39();
-    virtual void vfn_3a();
-    virtual void vfn_3b();
-    virtual void vfn_3c();
-    virtual void vfn_3d();
-    virtual void vfn_3e();
-    virtual void vfn_3f();
-    virtual void vfn_40();
-    virtual void vfn_41();
-    virtual void vfn_42();
-    virtual void vfn_43();
-    virtual void vfn_44();
-    virtual void vfn_45();
-    virtual void vfn_46();
-    virtual void vfn_47();
-    virtual void vfn_48();
-    virtual void vfn_49();
-    virtual void vfn_4a();
-    virtual void vfn_4b();
-    virtual void vfn_4c();
-    virtual void vfn_4d();
-    virtual void vfn_4e();
-    virtual void vfn_4f();
-    virtual void vfn_50();
-    virtual void vfn_51();
-    virtual void vfn_52();
-    virtual void vfn_53();
-    virtual void vfn_54();
-    virtual void vfn_55();
-    virtual void vfn_56();
-    virtual void vfn_57();
-    virtual void vfn_58();
-    virtual void vfn_59();
-    virtual void vfn_5a();
-    virtual void vfn_5b();
-    virtual void vfn_5c();
-    virtual void vfn_5d();
-    virtual void vfn_5e();
-    virtual void vfn_5f();
-    virtual void vfn_60();
-    virtual void vfn_61();
-    virtual void vfn_62();
-    virtual void vfn_63();
-    virtual void vfn_64();
-    virtual void vfn_65();
-    virtual void vfn_66();
-    virtual void vfn_67();
-    virtual void vfn_68();
-    virtual void vfn_69();
-    virtual void vfn_6a();
-    virtual void vfn_6b();
-    virtual void vfn_6c();
-    virtual void vfn_6d();
-    virtual void vfn_6e();
-    virtual void vfn_6f();
-    virtual void vfn_70();
-    virtual void vfn_71();
-    virtual void vfn_72();
-    virtual void vfn_73();
-    virtual void vfn_74();
-    virtual void vfn_75();
-    virtual void vfn_76();
-    virtual void vfn_77();
-    virtual void vfn_78();
-    virtual void vfn_79();
-    virtual void vfn_7a();
-    virtual void vfn_7b();
-    virtual void vfn_7c();
-    virtual const LLD_Point3& GetPos() const;
-    LLD_Cell* GetParentCell();
-    const LLD_Point3& GetAngle() const;
-    TESWorldSpace* GetParentWorldSpace() const;
-};
+
 class LLD_Quest : public TESForm
 {
   public:
@@ -923,36 +648,10 @@ class LLD_Cell
     NiNode* FUN_00545cb0();
     void RemoveReference(TESObjectREFR*);
 };
-struct LLD_WorldSpaceHelper
-{
-    bool IsFlag8Set();
-    bool ContainsPoint(LLD_Point3*);
-    LLD_Cell* GetCellAtGridPosition(int, int);
-    LLD_Cell* FUN_00585b30(int, int);
-};
-struct LLD_TESHelper
-{
-    void AssignWorldSpace(TESWorldSpace*);
-    void SetCurrentGridX(int);
-    void SetCurrentGridY(int);
-    int FindCellAtPosition(const LLD_Point3*, bool);
-    void RefreshWorldState(int, TESForm*, int);
-    void FUN_00454450(LLD_Point3*);
-    void FUN_004539a0(bool, int);
-};
-class LLD_DataHandler
-{
-  public:
-    BSSimpleList<LLD_Quest*>* GetTESQuestList();
-    LLD_Cell* GetOrCreateCell(int, int, TESWorldSpace*, bool);
-    LLD_Cell* FUN_00461330(int, int, int, TESWorldSpace*);
-};
-class LLD_SaveLoadGame
-{
-  public:
-    void SetFlag20(bool);
-    void FUN_0084cc40(bool);
-};
+
+// This TES cell helper is absent from the shared interface; preserve its thiscall ABI.
+extern "C" void TESUpdateCellPosition();
+
 class LLD_LoadingMenu
 {
   public:
@@ -967,9 +666,7 @@ void __cdecl FUN_00868d70(int);
 void __cdecl FUN_00c459d0(int);
 class PlayerCharacter;
 extern PlayerCharacter* g_thePlayer;
-class TESDataHandler;
 extern TESDataHandler* g_dataHandler;
-class BGSSaveLoadGame;
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
 // @fnv 0x0084c5a0
@@ -997,21 +694,21 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
         if (FNV_GetFormType(plocation) == 0x39)
         {
             LLD_Cell* pcell = (LLD_Cell*)plocation;
-            if (((LLD_PlayerCharacter*)g_thePlayer)->GetParentCell() != pcell)
+            if (((LLD_PlayerCharacter*)g_thePlayer)->GetParentCell() != (TESObjectCELL*)pcell)
                 ((LLD_PlayerCharacter*)g_thePlayer)
                     ->FUN_0093c200(playerLocation, ((LLD_PlayerCharacter*)g_thePlayer)->GetAngle(), pcell, false);
             if (ptesWorldSpace)
-                ((LLD_TESHelper*)g_TES)->AssignWorldSpace(ptesWorldSpace);
-            ((LLD_TESHelper*)g_TES)->SetCurrentGridX(icurrentGridX);
-            ((LLD_TESHelper*)g_TES)->SetCurrentGridY(icurrentGridY);
+                g_TES->AssignWorldSpace(ptesWorldSpace);
+            g_TES->SetCurrentGridX(icurrentGridX);
+            g_TES->SetCurrentGridY(icurrentGridY);
         }
         else if (FNV_GetFormType(plocation) == 0x41)
         {
             if (ptesWorldSpace)
-                ((LLD_TESHelper*)g_TES)->AssignWorldSpace(ptesWorldSpace);
+                g_TES->AssignWorldSpace(ptesWorldSpace);
             TESWorldSpace* pworld = (TESWorldSpace*)plocation;
-            if (((LLD_WorldSpaceHelper*)pworld)->IsFlag8Set() && g_011e08e0.Bool()->b &&
-                !((LLD_WorldSpaceHelper*)pworld)->ContainsPoint(&playerLocation))
+            if (((bool (__thiscall*)(TESWorldSpace*))WorldSpaceIsFlag8Set)(pworld) && g_011e08e0.Bool()->b &&
+                !((bool (__thiscall*)(TESWorldSpace*, LLD_Point3*))WorldSpaceContainsPoint)(pworld, &playerLocation))
                 bvalidPlayerLocation = false;
             if (bvalidPlayerLocation)
             {
@@ -1022,26 +719,24 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
                 centerGridLocation.x = (float)(icurrentGridX << 12);
                 centerGridLocation.y = (float)(icurrentGridY << 12);
                 centerGridLocation.z = 0.0f;
-                ((LLD_TESHelper*)g_TES)->FindCellAtPosition(&centerGridLocation, false);
-                ((LLD_TESHelper*)g_TES)->RefreshWorldState(1, plocation, 0);
+                g_TES->FindCellAtPosition((const NiPoint3*)&centerGridLocation, false);
+                g_TES->RefreshWorldState(1, plocation, 0);
                 icellX = TruncateFloatToInt(playerLocation.x) >> 12;
                 icellY = TruncateFloatToInt(playerLocation.y) >> 12;
-                pcell = ((LLD_DataHandler*)g_dataHandler)->GetOrCreateCell(icellX, icellY, pworld, false);
+                pcell = ((LLD_Cell* (__thiscall*)(TESDataHandler*, int, int, TESWorldSpace*, bool))DataHandlerGetOrCreateCell)(g_dataHandler, icellX, icellY, pworld, false);
                 if (!pcell || !pcell->FUN_00545cb0())
                 {
                     if (((LLD_PlayerCharacter*)g_thePlayer)->GetParentCell())
-                        ((LLD_PlayerCharacter*)g_thePlayer)
-                            ->GetParentCell()
-                            ->RemoveReference((LLD_PlayerCharacter*)g_thePlayer);
-                    ((LLD_TESHelper*)g_TES)->FUN_00454450(&centerGridLocation);
-                    pcell = ((LLD_DataHandler*)g_dataHandler)->GetOrCreateCell(icellX, icellY, pworld, true);
+                        ((LLD_Cell*)((LLD_PlayerCharacter*)g_thePlayer)->GetParentCell())->RemoveReference((LLD_PlayerCharacter*)g_thePlayer);
+                    ((void (__thiscall*)(TES*, LLD_Point3*))TESUpdateCellPosition)(g_TES, &centerGridLocation);
+                    pcell = ((LLD_Cell* (__thiscall*)(TESDataHandler*, int, int, TESWorldSpace*, bool))DataHandlerGetOrCreateCell)(g_dataHandler, icellX, icellY, pworld, true);
                 }
                 if (pcell)
                 {
-                    ((LLD_SaveLoadGame*)g_BGSSaveLoadGame)->SetFlag20(true);
+                    g_BGSSaveLoadGame->SetPositioningPlayerCharacter(true);
                     ((LLD_PlayerCharacter*)g_thePlayer)
                         ->FUN_0093c200(playerLocation, ((LLD_PlayerCharacter*)g_thePlayer)->GetAngle(), pcell, false);
-                    ((LLD_SaveLoadGame*)g_BGSSaveLoadGame)->SetFlag20(false);
+                    g_BGSSaveLoadGame->SetPositioningPlayerCharacter(false);
                 }
                 else
                     bvalidPlayerLocation = false;
@@ -1057,8 +752,8 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
     {
         unsigned int isafeMarkerID;
         TESObjectREFR* pref;
-        ((LLD_SaveLoadGame*)g_BGSSaveLoadGame)->FUN_0084cc40(true);
-        BSSimpleList<LLD_Quest*>* pIter = ((LLD_DataHandler*)g_dataHandler)->GetTESQuestList();
+        g_BGSSaveLoadGame->FUN_0084cc40(true);
+        BSSimpleList<LLD_Quest*>* pIter = (BSSimpleList<LLD_Quest*>*)g_dataHandler->GetTESQuestList();
         while (pIter && pIter->GetItem())
         {
             FUN_0084cbd0("Quest %s (%08x) compared to Patch04Debug\n",
@@ -1077,9 +772,9 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
         pref = dynamic_cast<TESObjectREFR*>(TESForm::GetFormByID(isafeMarkerID));
         if (pref)
         {
-            LLD_Point3 loc = pref->GetPos();
+            LLD_Point3 loc = *(const LLD_Point3*)static_cast<const TESObjectREFR*>(pref)->GetPos();
             LLD_Point3 angle = pref->GetAngle();
-            LLD_Cell* pcell = pref->GetParentCell();
+            LLD_Cell* pcell = (LLD_Cell*)pref->GetParentCell();
             TESWorldSpace* pworld = pref->GetParentWorldSpace();
             bvalidPlayerLocation = true;
             if (pworld)
@@ -1094,85 +789,47 @@ void LoadPlayerLocation(BGSLoadGameBuffer* apLoadGameBuffer)
             TESWorldSpace* pworld = dynamic_cast<TESWorldSpace*>(TESForm::GetFormByID(0xda726));
             if (pworld)
             {
-                LLD_Cell* pcell = ((LLD_WorldSpaceHelper*)pworld)->GetCellAtGridPosition(-18, 0);
+                LLD_Cell* pcell = (LLD_Cell*)pworld->GetCellAtGridPosition(-18, 0);
                 if (!pcell)
-                    pcell = ((LLD_WorldSpaceHelper*)pworld)->FUN_00585b30(-18, 0);
+                    pcell = ((LLD_Cell* (__thiscall*)(TESWorldSpace*, int, int))WorldSpaceCreateCell)(pworld, -18, 0);
                 if (!pcell)
-                    pcell = ((LLD_WorldSpaceHelper*)pworld)->GetCellAtGridPosition(0, 0);
+                    pcell = (LLD_Cell*)pworld->GetCellAtGridPosition(0, 0);
                 if (!pcell)
-                    pcell = ((LLD_WorldSpaceHelper*)pworld)->FUN_00585b30(0, 0);
+                    pcell = ((LLD_Cell* (__thiscall*)(TESWorldSpace*, int, int))WorldSpaceCreateCell)(pworld, 0, 0);
                 if (!pcell)
-                    pcell = ((LLD_DataHandler*)g_dataHandler)->FUN_00461330(0, 0, 0, pworld);
+                    pcell = ((LLD_Cell* (__thiscall*)(TESDataHandler*, int, int, int, TESWorldSpace*))DataHandlerCreateCell)(g_dataHandler, 0, 0, 0, pworld);
                 if (pcell)
                     ((LLD_PlayerCharacter*)g_thePlayer)->FUN_0093db60(0, pcell);
             }
         }
     }
 
-    ((LLD_TESHelper*)g_TES)->FUN_004539a0(true, 0);
+    g_TES->FUN_004539a0(true, 0);
     FUN_00868d70(0);
     FUN_00c459d0(0);
 }
 
-class B84C490Form;
+void __cdecl SaveLoadScreenData(BGSSaveFormBuffer* pkBuffer);
 
-struct B84C490Point3
-{
-    float x;
-    float y;
-    float z;
-};
-
-class B84C490SaveBuffer
-{
-  public:
-    void SaveData(void* pvData, int iSize, int iFlags);
-    void SerializeFormData(B84C490Form* pkForm, int iFlags);
-};
-
-class B84C490DataHandler
-{
-  public:
-    unsigned int GetField208();
-};
-
-class B84C490TES
-{
-  public:
-    B84C490Form* GetParentWorldSpace();
-    unsigned int GetGridX();
-    int GetGridY();
-};
-
-class B84C490Player
-{
-  public:
-    B84C490Form* GetParentCell();
-    const B84C490Point3* GetPos();
-};
-
-B84C490Form* __fastcall FUN_00575d70(B84C490Player* pkRef);
-void __cdecl SaveLoadScreenData(B84C490SaveBuffer* pkBuffer);
-
-extern B84C490DataHandler* g_pkB84C490DataHandler;
-extern B84C490TES* g_pkB84C490TES;
-extern B84C490Player* g_pkB84C490Player;
+extern TESDataHandler* g_pkB84C490DataHandler;
+extern TES* g_pkB84C490TES;
+extern TESObjectREFR* g_pkB84C490Player;
 
 // @fnv 0x0084c490
-void __cdecl SavePlayerLocation(B84C490SaveBuffer* pkBuffer)
+void __cdecl SavePlayerLocation(BGSSaveFormBuffer* pkBuffer)
 {
-    unsigned int ItemUpdateArray = g_pkB84C490DataHandler->GetField208();
+    unsigned int ItemUpdateArray = GetDataHandlerField208(g_pkB84C490DataHandler);
     pkBuffer->SaveData(&ItemUpdateArray, 4, 0);
     pkBuffer->SerializeFormData(g_pkB84C490TES->GetParentWorldSpace(), 0);
-    unsigned int uiGridX = g_pkB84C490TES->GetGridX();
-    int iGridY = g_pkB84C490TES->GetGridY();
+    unsigned int uiGridX = g_pkB84C490TES->GetCurrentGridX();
+    int iGridY = g_pkB84C490TES->GetCurrentGridY();
     pkBuffer->SaveData(&uiGridX, 4, 0);
     pkBuffer->SaveData(&iGridY, 4, 0);
-    B84C490Form* pkWorldSpace2 = FUN_00575d70(g_pkB84C490Player);
+    TESForm* pkWorldSpace2 = (TESForm*)g_pkB84C490Player->GetParentWorldSpace();
     if (!pkWorldSpace2)
-        pkWorldSpace2 = g_pkB84C490Player->GetParentCell();
+        pkWorldSpace2 = (TESForm*)g_pkB84C490Player->GetParentCell();
     pkBuffer->SerializeFormData(pkWorldSpace2, 0);
-    B84C490Point3 kPos = *g_pkB84C490Player->GetPos();
+    LLD_Point3 kPos = *(const LLD_Point3*)g_pkB84C490Player->GetPos();
     pkBuffer->SaveData(&kPos, 12, 0);
     SaveLoadScreenData(pkBuffer);
 }
@@ -1185,24 +842,13 @@ void __cdecl SaveE6D0Items(BGSSaveFormBuffer*);
 void __cdecl FUN_008366e0(BGSSaveFormBuffer*);
 void __cdecl FUN_0082ec40(BGSSaveFormBuffer*);
 void __cdecl FUN_00845cc0(const char*, ...);
-struct TES84
-{
-    void SaveGridState(BGSSaveFormBuffer*);
-};
 struct Manager84
 {
     void FUN_00975840(BGSSaveFormBuffer*);
     void FUN_004534f0(BGSSaveFormBuffer*);
 };
-struct World84
-{
-    void FUN_009932d0(BGSSaveFormBuffer*);
-};
-struct Sky84
-{
-    void FUN_0063eb70(BGSSaveFormBuffer*);
-};
-Sky84* __cdecl FUN_0046dd00();
+// Sky saving is absent from the shared interface; preserve the thiscall ABI.
+extern "C" void SaveSkyGame();
 // Dispatches saving of global data to a handler based on the type id, logging an error and returning false for unknown types.
 // @fnv 0x0084bcd0
 bool __cdecl FUN_0084bcd0(unsigned int type, BGSSaveFormBuffer* buffer)
@@ -1213,7 +859,7 @@ bool __cdecl FUN_0084bcd0(unsigned int type, BGSSaveFormBuffer* buffer)
         SavePlayerLocation(buffer);
         return true;
     case 2:
-        ((TES84*)g_TES)->SaveGridState(buffer);
+        g_TES->SaveGame(buffer);
         return true;
     case 3:
         FUN_0084cc90(buffer);
@@ -1222,7 +868,7 @@ bool __cdecl FUN_0084bcd0(unsigned int type, BGSSaveFormBuffer* buffer)
         ((Manager84*)&g_011e0e80)->FUN_00975840(buffer);
         return true;
     case 5:
-        ((World84*)BGSSaveLoadGlobalDataWorldspacePtr)->FUN_009932d0(buffer);
+        ((CombatManager*)BGSSaveLoadGlobalDataWorldspacePtr)->SaveGame(buffer);
         return true;
     case 6:
         FUN_007066d0(buffer);
@@ -1234,7 +880,7 @@ bool __cdecl FUN_0084bcd0(unsigned int type, BGSSaveFormBuffer* buffer)
         SaveMiscStats(buffer);
         return true;
     case 8:
-        FUN_0046dd00()->FUN_0063eb70(buffer);
+        ((void (__thiscall*)(Sky*, BGSSaveFormBuffer*))SaveSkyGame)(Sky::GetInstance(), buffer);
         return true;
     case 9:
         SaveE6D0Items(buffer);
@@ -1253,12 +899,6 @@ bool __cdecl FUN_0084bcd0(unsigned int type, BGSSaveFormBuffer* buffer)
         return false;
     }
 }
-
-struct TESGlobalEx : public TESGlobal
-{
-    bool IsConstant() const;
-    void SetValue(float value);
-};
 
 struct SaveLoadChangeHistory
 {
@@ -1284,13 +924,13 @@ void FUN_0084cd40(BGSLoadGameBuffer* pLoadBuffer)
 {
     SaveLoadChangeHistory* history5 = g_BGSSaveLoadGame->GetHistory();
     GlobalSeenMap unchanged2(37);
-    GlobalListNode* node2 = g_dataHandler->GetTESGlobalList();
+    BSSimpleList<TESGlobal*>* node2 = g_dataHandler->GetTESGlobalList();
     while (node2)
     {
-        TESGlobal* globalVal = node2->FUN_006815c0();
+        TESGlobal* globalVal = node2->GetItem();
         if (globalVal)
             unchanged2.SetAt(globalVal, true);
-        node2 = node2->FUN_00726070();
+        node2 = node2->GetNext();
     }
     {
         unsigned int count8 = pLoadBuffer->ReadElementCount();
@@ -1302,8 +942,8 @@ void FUN_0084cd40(BGSLoadGameBuffer* pLoadBuffer)
             pLoadBuffer->ReadDataBlock(&value9, 4);
             if (loaded)
             {
-                if (!static_cast<TESGlobalEx*>(loaded)->IsConstant())
-                    static_cast<TESGlobalEx*>(loaded)->SetValue(value9);
+                if (!loaded->IsConstantGlobal())
+                    loaded->SetValue(value9);
                 unchanged2.RemoveAt(loaded);
             }
         }
@@ -1314,35 +954,14 @@ void FUN_0084cd40(BGSLoadGameBuffer* pLoadBuffer)
         TESGlobal* key3 = 0;
         bool seen4 = false;
         unchanged2.GetNext(pos2, key3, seen4);
-        if (!static_cast<TESGlobalEx*>(key3)->IsConstant())
+        if (!key3->IsConstantGlobal())
             history5->AddGlobal(key3, 0);
     }
 }
 
-struct NiBound
-{
-    float FUN_0084d030();
-};
-
-struct NiTimeController
-{
-    int FUN_00441110();
-};
-
-struct FUN_00865df0_buf
-{
-    void FUN_00865df0(void* apForm, int aiFlags);
-};
-
-struct FUN_00529990_Class
-{
-    static double GetTime();
-};
-
-struct FUN_0047c860_Class
-{
-    double __thiscall FUN_0047c860();
-};
+// These double-returning time helpers are absent from the shared interfaces.
+extern "C" double __cdecl GetImageSpaceModifierSaveTime();
+extern "C" void GetImageSpaceModifierStartTime();
 
 // @fnv 0x0084cf30
 void __cdecl SaveImageSpaceModifierInstances(int pBuffer)
@@ -1357,20 +976,22 @@ void __cdecl SaveImageSpaceModifierInstances(int pBuffer)
 
     v3 = 0;
     aV11 = ((BGSSaveFormBuffer*)pBuffer)->FUN_00865f20();
-    i6 = g_TES->FUN_0043b5d0();
+    i6 = (BSSimpleList<NiPointer<ImageSpaceModifierInstance> >*)g_TES->FUN_0043b5d0();
     while (i6 != 0)
     {
         v8_2 = i6->GetItem().operator->();
         if (v8_2 != 0 && !v8_2->IsFlagSet())
         {
-            v2 = (void*)(*(int(__thiscall**)(int))(*(int*)v8_2 + 148))((int)v8_2);
+            v2 = v8_2->GetInstanceForm();
             if (v2 != 0)
             {
                 aV6 = ((NiBound*)v2)->FUN_0084d030();
                 ((BGSSaveFormBuffer*)pBuffer)->SaveData(&aV6, 4, 0);
-                v5 = (float)(FUN_00529990_Class::GetTime() - ((FUN_0047c860_Class*)v2)->FUN_0047c860());
+                v5 = (float)(GetImageSpaceModifierSaveTime() -
+                    ((double (__thiscall*)(ImageSpaceModifierInstanceForm*))GetImageSpaceModifierStartTime)(
+                        (ImageSpaceModifierInstanceForm*)v2));
                 ((BGSSaveFormBuffer*)pBuffer)->SaveData(&v5, 4, 0);
-                ((FUN_00865df0_buf*)pBuffer)->FUN_00865df0((void*)((NiTimeController*)v2)->FUN_00441110(), 0);
+                ((BGSSaveFormBuffer*)pBuffer)->FUN_00865df0((void*)((NiTimeController*)v2)->FUN_00441110(), 0);
                 ++v3;
             }
         }

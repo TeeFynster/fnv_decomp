@@ -1,42 +1,9 @@
-// Names of nested/template specializations use the canonical generator identifier mapping.
-#ifndef FNV_MAGICMODELHITEFFECT_H
-#define FNV_MAGICMODELHITEFFECT_H
+#pragma once
 
-#include "layout_support.h"
-#include "NiObject.h"
-#include "magichiteffect_classes.h"
-#include "TESObjectREFR.h"
-#include "layout_support.h"
-class BGSLoadGameSubBuffer;
-class BSTempEffect;
-class MagicHitEffect;
-class MagicModelHitEffect;
-class NiAVObject;
-// BSTempEffect and MagicHitEffect: magichiteffect_classes.h (shared by the magic hit-effect units).
-#pragma pack(push, 4)
-class BGSLoadGameSubBuffer
-{
-  public:
-    char* pBuffer;  // +0x0, 4 bytes
-    // BGSLoadGameSubBuffer
-    // void __cdecl BGSLoadGameSubBuffer::*(char*)
-    // void __cdecl BGSLoadGameSubBuffer::*()
-    // void __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(BGSSaveGameBuffer*)
-    // void __cdecl BGSLoadGameSubBuffer::*(BGSLoadGameBuffer*)
-    // char* __cdecl BGSLoadGameSubBuffer::*()
-    // BGSLoadFormBuffer* __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(BGSSaveFormBuffer*)
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BGSLoadGameSubBuffer) == 4);
-FNV_STATIC_ASSERT(offsetof(BGSLoadGameSubBuffer, pBuffer) == 0);
-#pragma pack(push, 4)
-// MagicModelHitEffect: PC vftable 57 slots (same as MagicHitEffect); the overrides below are the slots whose PC
+#include "../../../include/MagicHitEffect.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/BGSLoadGameSubBuffer.h"
+
 class MagicModelHitEffect : public MagicHitEffect
 {
   public:
@@ -65,12 +32,3 @@ class MagicModelHitEffect : public MagicHitEffect
     NiPointer<NiAVObject> m_spTargetObject;     // +0x34, 4 bytes
     BGSLoadGameSubBuffer m_kLoadGameSubBuffer;  // +0x38, 4 bytes
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(MagicModelHitEffect) == 60);
-FNV_STATIC_ASSERT(offsetof(MagicModelHitEffect, m_bFirstPerson) == 40);
-FNV_STATIC_ASSERT(offsetof(MagicModelHitEffect, b3rdPerson) == 41);
-FNV_STATIC_ASSERT(offsetof(MagicModelHitEffect, pFilename) == 44);
-FNV_STATIC_ASSERT(offsetof(MagicModelHitEffect, spRetainedObject) == 48);
-FNV_STATIC_ASSERT(offsetof(MagicModelHitEffect, m_spTargetObject) == 52);
-FNV_STATIC_ASSERT(offsetof(MagicModelHitEffect, m_kLoadGameSubBuffer) == 56);
-#endif

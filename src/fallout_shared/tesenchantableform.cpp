@@ -1,7 +1,12 @@
 // fallout_shared/tesenchantableform.cpp: TESEnchantableForm (7 functions)
 
-#include "tesenchantableform_amount.h"
-#include "tesenchantableform_decls.h"
+#include "../../include/TESEnchantableForm.h"
+#include "../../include/EnchantmentItem.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/TESForm.h"
+
+TESForm* GetFormByID(unsigned int formID);
+int Warning(const char* format, ...);
 
 // @fnv 0x004830a0
 TESEnchantableForm::TESEnchantableForm()
@@ -54,16 +59,8 @@ void TESEnchantableForm::SetFormEnchantmentAmount(unsigned short amount)
 void __cdecl FUN_00485910(unsigned int a, unsigned int b);
 void __cdecl FUN_00485950(unsigned int a, unsigned int b);
 
-struct FUN_0047bd70_shell
-{
-    void* vtable;
-    TESForm* m_pEnchantment;
-    unsigned short m_usEnchantmentAmount;
-    void FUN_0047bd70();
-};
-
 // @fnv 0x0047bd70
-void FUN_0047bd70_shell::FUN_0047bd70()
+void TESEnchantableForm::Save()
 {
     unsigned int tempint;
     if (m_pEnchantment != 0)
@@ -77,131 +74,38 @@ void FUN_0047bd70_shell::FUN_0047bd70()
     }
 }
 
-struct ExplosionEffectSettings;
-struct BGSImpactData;
-struct BGSImpactDataSet;
-struct BGSTextureSet;
-struct BipedAnim;
-struct NiAVObject;
-struct NiPoint3;
-struct QueuedFile;
-struct TESBoundObject;
-struct TESImageSpaceModifier;
-struct TESModel;
-struct TESModelTextureSwap;
-struct TESObject;
-struct TESObjectLIGH;
-struct TESFormList;
-struct TESObjectREFR;
-struct TESSound;
-struct FileEntryList;
-struct TESWaterForm;
-struct blob12
-{
-    char b[12];
-};
-struct TESFullName : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetFullNameLength(TESForm*);
-    unsigned int GetFullNameLength();
-    static char* GetFullName(TESForm*);
-    char* GetFullName();
-    void SetFullName(char*);
-    static void LoadFullNameChunk(TESFullName*, TESFile*);
-    void* GetFullNameString();
-    void* __vecDelDtor(unsigned int);
-    char m_kName[8];
-};
-typedef char _sizecheck_TESFullName[sizeof(TESFullName) == 12 ? 1 : -1];
-struct BGSPreloadable : public BaseFormComponent
-{
-    virtual void QueueResourceLoad(int, QueuedFile*);
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
-typedef char _sizecheck_BGSPreloadable[sizeof(BGSPreloadable) == 4 ? 1 : -1];
-struct TESImageSpaceModifiableForm : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    void InitItem(TESForm*);
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    TESImageSpaceModifier* GetFormImageSpaceModifying();
-    void SetFormImageSpaceModifying(TESImageSpaceModifier*);
-    TESImageSpaceModifier* m_pImageSpaceModifier;
-};
-typedef char _sizecheck_TESImageSpaceModifiableForm[sizeof(TESImageSpaceModifiableForm) == 8 ? 1 : -1];
-struct FUN_004830d0_shell : public TESEnchantableForm
-{
-    void FUN_004830d0();
-};
-
 // Clears the enchantment form's fields, setting the casting type to 4 and zeroing the other two members.
 // @fnv 0x004830d0
-void FUN_004830d0_shell::FUN_004830d0()
+void TESEnchantableForm::InitializeComponent()
 {
     m_pEnchantment = 0;
     m_usEnchantmentAmount = 0;
-    m_eCastingType = (MagicSystemCastingType)4;
+    m_eCastingType = MagicSystem__CastingType_CASTING_COUNT;
 }
 
-struct TESActorBaseData
-{
-    unsigned short GetFatigue() const;
-};
 
-struct TESFormList
-{
-    void* GetFirst();
-};
-
-struct FUN_00483190_shell : public TESEnchantableForm
-{
-    bool FUN_00483190(BaseFormComponent* component);
-};
-
-// Compares the enchantable form against component by first entry and fatigue, returning true when they differ or the cast fails.
+// Returns true when the cast fails or the enchantment or enchantment amount differs.
 // @fnv 0x00483190
-bool FUN_00483190_shell::FUN_00483190(BaseFormComponent* component)
+bool TESEnchantableForm::IsEqualToBase(BaseFormComponent* component)
 {
     TESEnchantableForm* other = dynamic_cast<TESEnchantableForm*>(component);
     if (!other)
         return true;
-    if (reinterpret_cast<TESFormList*>(this)->GetFirst() != reinterpret_cast<TESFormList*>(other)->GetFirst())
+    if (GetEnchantment() != other->GetEnchantment())
         return true;
-    if (reinterpret_cast<TESActorBaseData*>(this)->GetFatigue() !=
-        reinterpret_cast<TESActorBaseData*>(other)->GetFatigue())
+    if (GetFormEnchantmentAmount() != other->GetFormEnchantmentAmount())
         return true;
     return false;
 }
 
-struct Enchantable_483100 : public TESEnchantableForm
-{
-    virtual int GetCastingType4();
-    EnchantmentItem* GetFormEnchantment();
-    unsigned short GetFormEnchantmentAmount();
-    void SetFormEnchantment(EnchantmentItem*);
-    void SetCastingType(int);
-    void CopyEnchantmentFrom(BaseFormComponent* apComponent);
-};
-
 // Casts apComponent to TESEnchantableForm and copies its enchantment, enchantment amount and casting type onto this form.
 // @fnv 0x00483100
-void Enchantable_483100::CopyEnchantmentFrom(BaseFormComponent* apComponent)
+void TESEnchantableForm::BaseFormRecord(BaseFormComponent* apComponent)
 {
     TESEnchantableForm* pForm = dynamic_cast<TESEnchantableForm*>(apComponent);
     if (!pForm)
         return;
-    SetFormEnchantment(((Enchantable_483100*)pForm)->GetFormEnchantment());
-    SetFormEnchantmentAmount(((Enchantable_483100*)pForm)->GetFormEnchantmentAmount());
-    SetCastingType(((Enchantable_483100*)pForm)->GetCastingType4());
+    SetFormEnchanting(pForm->GetEnchantment());
+    SetFormEnchantmentAmount(pForm->GetFormEnchantmentAmount());
+    SetCastingType(pForm->GetCastingType());
 }

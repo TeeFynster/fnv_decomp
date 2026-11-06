@@ -1,6 +1,11 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 
 // src/havok/physics/collide/agent/convexagent/spherebox/hkpsphereboxagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/spherebox/hkpsphereboxagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkpSymmetricAgentFlipCollector.h"
 
 extern void __cdecl FUN_00d3c440(int a, int b, int c, int d);
 // @fnv 0x00d3c590
@@ -52,20 +57,18 @@ void __cdecl FUN_00d3cef0(Registry* registry)
 }
 
 extern float DAT_0104da48;
+extern unsigned char DAT_010ce7fc;
 extern void __cdecl FUN_00d3cc00(void*, void*, int, void*);
-struct hkpSymmetricAgentFlipCollector
-{
-    virtual void unk00();
-    float unk04;
-    int unk08;
-};
 // Builds a hkpSymmetricAgentFlipCollector from DAT_0104da48 and arg4, then calls FUN_00d3cc00 with arg2, arg1, arg3 and the collector.
 // @fnv 0x00d3d040
 void __cdecl FlipAndDispatchCollector(void* arg1, void* arg2, int arg3, int arg4)
 {
-    hkpSymmetricAgentFlipCollector local;
-    local.unk04 = DAT_0104da48;
-    local.unk08 = arg4;
+    // The original initializes stack storage directly, without collector lifetime calls.
+    void* storage[sizeof(hkpSymmetricAgentFlipCollector) / sizeof(void*)];
+    hkpSymmetricAgentFlipCollector& local = *(hkpSymmetricAgentFlipCollector*)storage;
+    *(void**)&local = &DAT_010ce7fc;
+    local.m_fEarlyOutDistance = DAT_0104da48;
+    local.unk08 = (void*)arg4;
     FUN_00d3cc00(arg2, arg1, arg3, &local);
 }
 
@@ -96,15 +99,6 @@ void S_00d3c3c0_Obj::FUN_00d3c3c0(int arg)
     v00(1);
 }
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pAllocator;
-};
-
 struct ObjAllocator
 {
     virtual void unk00();
@@ -122,13 +116,13 @@ struct SmallRecord
 
 extern char DAT_010cf018[];
 
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 
 // @fnv 0x00d3c400
 void __cdecl FUN_00d3c400(int aiUnused1, int aiUnused2, int aiUnused3, int d)
 {
-    AllocHolder* pAllocHolder = FUN_00c85750();
-    ObjAllocator* allocator = (ObjAllocator*)pAllocHolder->m_pAllocator;
+    hkMemoryRouter* pAllocHolder = FUN_00c85750();
+    ObjAllocator* allocator = (ObjAllocator*)pAllocHolder->m_heap;
     SmallRecord* pRecord = (SmallRecord*)allocator->Alloc(0x10);
     pRecord->m_w04 = 0x10;
     pRecord->m_w06 = 1;
@@ -192,49 +186,40 @@ void __cdecl FUN_00d3cfc0(int aiArg1, int aiArg2, int aiArg3, int a4)
     FUN_00d3c440(aiArg2, aiArg1, aiArg3, (int)&local);
 }
 
-struct CpuCallData
-{
-    void* descriptor;
-    float bound;
-    unsigned int value;
-};
 extern float DAT_0104da48;
 extern unsigned char DAT_010ce7fc;
 struct CpuObject
 {
-    void FUN_00d3c910(void*, void*, unsigned int, CpuCallData*);
+    void FUN_00d3c910(void*, void*, unsigned int, hkpSymmetricAgentFlipCollector*);
     void FUN_00d3d000(void*, void*, unsigned int, unsigned int);
 };
-// Builds a CpuCallData from fourth, DAT_0104da48 and DAT_010ce7fc, then forwards second, first, third and the data to FUN_00d3c910.
+// Builds a hkpSymmetricAgentFlipCollector from fourth, DAT_0104da48 and DAT_010ce7fc, then forwards second, first, third and the collector to FUN_00d3c910.
 // @fnv 0x00d3d000
 void CpuObject::FUN_00d3d000(void* first, void* second, unsigned int third, unsigned int fourth)
 {
-    CpuCallData callData;
-    callData.value = fourth;
-    callData.bound = DAT_0104da48;
-    callData.descriptor = &DAT_010ce7fc;
+    void* storage[sizeof(hkpSymmetricAgentFlipCollector) / sizeof(void*)];
+    hkpSymmetricAgentFlipCollector& callData = *(hkpSymmetricAgentFlipCollector*)storage;
+    callData.unk08 = (void*)fourth;
+    callData.m_fEarlyOutDistance = DAT_0104da48;
+    *(void**)&callData = &DAT_010ce7fc;
     FUN_00d3c910(second, first, third, &callData);
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
+using ::_mm_shuffle_ps;
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
+using ::_mm_xor_ps;
 }
 
-extern __m128 DAT_010c4c00;
+extern LocalM128 DAT_010c4c00;
 
 struct SimplexVertex
 {
-    __m128 m_kPointA;
-    __m128 m_kPointB;
+    LocalM128 m_kPointA;
+    LocalM128 m_kPointB;
     int unk20;
     int unk24;
     int unk28;
@@ -258,7 +243,7 @@ struct Simplex
     int unk3014;
     int unk3018;
     int unk301C;
-    __m128 m_vHitNormal;
+    LocalM128 m_vHitNormal;
     float m_fClosestPointDistanceSquared;
     int unk3034;
     int unk3038;
@@ -287,14 +272,14 @@ void Agent::FUN_00d3d080(int a, int b, int c, Simplex* s)
     AgentBase::FUN_00d3c5b0(b, a, c, s);
     for (; v < s->m_kRayEnd; v++)
     {
-        const __m128* pb = &v->m_kPointB;
-        __m128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
+        const LocalM128* pb = &v->m_kPointB;
+        LocalM128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
         v->m_kPointA = _mm_add_ps(_mm_mul_ps(w, v->m_kPointB), v->m_kPointA);
         v->m_kPointB = _mm_xor_ps(v->m_kPointB, DAT_010c4c00);
     }
     if (oldDistance != s->m_fClosestPointDistanceSquared)
     {
-        __m128* n = &s->m_vHitNormal;
+        LocalM128* n = &s->m_vHitNormal;
         *n = _mm_xor_ps(*n, DAT_010c4c00);
         {
             unsigned char t = s->m_dims.m_ucLowNibble;

@@ -1,13 +1,13 @@
 // fallout/misc/saveload/bgssaveloadchangesmap.cpp: BGSSaveLoadChangesMap, CombatTargetMap, FormChangeRecord, DelStandIn (17 functions)
 
+#include "../../../../include/CombatTargetMap.h"
 #include "bgssaveloadchangesmap_decls.h"
 #include <new>
 
 // @fnv 0x00845550
-BGSSaveLoadChangesMap::BGSSaveLoadChangesMap()
+// the base map constructor 0x00845b30 with 0x13af buckets, then the vftable 0x0107ed68
+BGSSaveLoadChangesMap::BGSSaveLoadChangesMap() : NiTPointerMap<unsigned int, FormChangeRecord*>(0x13AF)
 {
-    FUN_00845b30(0x13AF);
-    *(void**)this = (void*)0x0107ED68;
 }
 
 // Looks up the actor in the map and returns its array of combat targets, or null if not present.
@@ -186,7 +186,8 @@ struct NavMeshVertexMap
     void* GetFirstPos();
 };
 namespace p07 {
-template <class K, class V> struct NiTPointerMap
+// NiTPointerMapView: unit-local view (declares only what p07 calls), not the shared NiTPointerMap; renamed so no local type keeps the shared name
+template <class K, class V> struct NiTPointerMapView
 {
     void GetNext(void*& pos, K& key, V& val);
     void RemoveAll();
@@ -201,10 +202,10 @@ void FUN_00845610_shell::DeleteAllChanges()
     {
         FormChangeRecord* pchanges = 0;
         unsigned int iformID = 0;
-        ((p07::NiTPointerMap<unsigned int, void*>*)this)->GetNext(it, iformID, (void*&)pchanges);
+        ((p07::NiTPointerMapView<unsigned int, void*>*)this)->GetNext(it, iformID, (void*&)pchanges);
         delete pchanges;
     }
-    ((p07::NiTPointerMap<unsigned int, unsigned int>*)this)->RemoveAll();
+    ((p07::NiTPointerMapView<unsigned int, unsigned int>*)this)->RemoveAll();
 }
 
 namespace fnv_00845760 {
@@ -235,16 +236,11 @@ CF845 S845::FUN_00845760(unsigned int aiFormID)
 
 int __fastcall FUN_00559450(int*);
 
-struct FUN_00845960_shell : CombatTargetMap
-{
-    void SetCombatTargetQuantity(unsigned int formID, unsigned int quantity, unsigned int extra);
-};
-
 // Looks up or creates a per-form entry in the map, sets its quantity from FUN_00559450(quantity) and stores extra at offset 4.
 // @fnv 0x00845960
-void FUN_00845960_shell::SetCombatTargetQuantity(unsigned int formID, unsigned int quantity, unsigned int extra)
+void BGSSaveLoadChangesMap::SetCombatTargetQuantity(unsigned int formID, unsigned int quantity, unsigned int extra)
 {
-    BSSimpleArray<Actor*, 1024>* array = GetTargetsForActor((Actor*)formID);
+    BSSimpleArray<Actor*, 1024>* array = ((CombatTargetMap*)this)->GetTargetsForActor((Actor*)formID);
     if (!array)
     {
         array = (BSSimpleArray<Actor*, 1024>*)new FormChangeRecord;
@@ -280,6 +276,12 @@ FUN_00845b90_shell* FUN_00845b90_shell::InitArray(int aiCount)
     return this;
 }
 
+// the 16-byte base of the destructor shell below (unit-local; was in the local BGSSaveLoadChangesMap copy)
+class BGSSaveLoadChangesMapBase
+{
+  public:
+    unsigned int layout[4];
+};
 struct FUN_00845b60 : BGSSaveLoadChangesMapBase
 {
     virtual ~FUN_00845b60();

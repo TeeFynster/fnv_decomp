@@ -1,6 +1,7 @@
 // bscore/memoryheap.cpp: MemoryHeap, FakeHeap (17 functions)
 
 #include "memoryheap_decls.h"
+#include "../../include/MemoryManager.h"
 
 // @fnv 0x00aa7be0
 unsigned int MemoryHeap::Size(const void* pointer, unsigned int)
@@ -27,7 +28,7 @@ void MemoryHeap::Deallocate(void* apMemory, unsigned int)
 unsigned int MemoryHeap::CommitRange(void* base, unsigned int offset, unsigned int size)
 {
     void* address = (char*)base + offset;
-    size = (size + m_uiHeapGrowthEnabled) & ~(m_uiHeapGrowthEnabled - 1);
+    size = (size + iPageSize) & ~(iPageSize - 1);
     if (!(bool)(VirtualAlloc(address, size, 0x1000, 4) ? 1 : 0))
         size = 0;
     return size;
@@ -148,10 +149,6 @@ void FUN_00aa7d60_cls::FUN_00aa7d60(FUN_00aa7d60_blk* pBlock)
     }
 }
 
-struct MemoryManager
-{
-    void _DeallocateAlias(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FakeHeap
 {

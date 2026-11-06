@@ -2,6 +2,8 @@
 // src/havok/common/internal/kdtree/hkkdtree.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/kdtree/hkkdtree.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../include/hkArray.h"
+
 struct Entry
 {
     unsigned short unk00;
@@ -116,11 +118,8 @@ struct D97770Interval
     {}
 };
 
-struct D97770IntervalArray
-{
-    D97770Interval* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+struct D97770IntervalArrayLocalForm : hkArrayBase<D97770Interval>
+{ // local form of hkArrayBase: 0x00d97770 needs the member reserve/construct split; shared specialization with free growth helper differs in 13 bytes of 149. Storage uses the shared base.
 
     int getCapacity() const
     {
@@ -155,7 +154,7 @@ struct D97770IntervalArray
 };
 
 // @fnv 0x00d97770
-void D97770IntervalArray::FUN_00d97770(int minSize)
+void D97770IntervalArrayLocalForm::FUN_00d97770(int minSize)
 {
     int n = (minSize > 2) ? minSize : 2;
     if (m_iElementCount < n)
@@ -309,23 +308,23 @@ struct Cinfo_d978
     __m128 m_kMaximumCorner;
 };
 
-template <class T> struct hkArray_d978
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    void SetSizeAndGrow(int n)
+    return reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap());
+}
+
+// The former array's helper at 0x00c908c0 is hkArrayUtil::_reserve in other units.
+template <class T>
+__forceinline void hkArrayBase<T>::_setSize(hkMemoryAllocator& heap, int n)
+{
+    int cap = m_iCapacityState & 0x3fffffff;
+    if (cap < n)
     {
-        D97770Allocator& heap = FUN_00c85750().heap();
-        int cap = m_iCapacityState & 0x3fffffff;
-        if (cap < n)
-        {
-            int cap2 = 2 * cap;
-            FUN_00c908c0(&heap, this, n < cap2 ? cap2 : n, sizeof(T));
-        }
-        m_iElementCount = n;
+        int cap2 = 2 * cap;
+        hkArrayUtil::_reserve(heap, this, n < cap2 ? cap2 : n, sizeof(T));
     }
-};
+    m_iElementCount = n;
+}
 
 struct Node_d978
 {
@@ -339,7 +338,7 @@ struct Tree_d978
     int m_numObjects;
     int m_iNodeCount;
     int m_numSplits;
-    hkArray_d978<Node_d978> m_kNodeCollection;
+    hkArray<Node_d978> m_kNodeCollection;
     int unk28, unk2C;
     __m128 m_kMinimumCorner;
     __m128 m_kMaximumCorner;
@@ -360,5 +359,5 @@ void Tree_d978::FUN_00d978d0(const Cinfo_d978& cinfo)
     m_numSplits = perSplit;
     FUN_00d97770(m_iNodeCount + perSplit);
     m_numObjects = cinfo.m_numObjects;
-    m_kNodeCollection.SetSizeAndGrow(m_numObjects);
+    m_kNodeCollection.setSize(m_numObjects);
 }

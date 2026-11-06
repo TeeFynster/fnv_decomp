@@ -30,9 +30,9 @@ class BGSSaveLoadManager
     bool m_bLoadOperationPending;  // +0x25, 1 bytes
     bool m_bLoadingGame;           // +0x26, 1 bytes
     unsigned char layoutPadding27[1];
-    void(__cdecl* LoadDataResultCallback)(BSSaveDataSystemUtility__RESULT,
+    void(__cdecl* LoadDataResultCallback)(BSSaveDataSystemUtility::RESULT,
                                           BSSaveDataOperationEntry*&);  // +0x28, 4 bytes
-    void(__cdecl* m_pfnSaveResultCallback)(BSSaveDataSystemUtility__RESULT,
+    void(__cdecl* m_pfnSaveResultCallback)(BSSaveDataSystemUtility::RESULT,
                                            BSSaveDataOperationEntry*&);  // +0x2C, 4 bytes
     // void __cdecl BGSSaveLoadManager::*()
     // void __cdecl BGSSaveLoadManager::*()

@@ -1,3 +1,5 @@
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkArray.h"
 // src/havok/common/serialize/data/hkdataobject_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/serialize/data/hkdataobject.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -62,7 +64,8 @@ struct Wrapper
     Target* target;
     void FUN_00dba6f0();
 };
-struct Interface
+// Exe 0x00dbacd0: unit-local Interface view; declarations and layout are preserved.
+struct HkdataobjectInterfaceView
 {
     virtual void f0();
     virtual void f1();
@@ -77,7 +80,7 @@ struct Interface
 };
 struct FUN_00dba730_cls
 {
-    Interface* ptr;
+    HkdataobjectInterfaceView* ptr;
     void FUN_00dba730();
 };
 struct FUN_00dba740_Target
@@ -1497,32 +1500,7 @@ struct DB8000_Ref
     void FUN_00dba760(void* p);
     void FUN_00dba7f0();
 };
-struct DB8000_PtrArray
-{
-    void** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    void init()
-    {
-        m_data = 0;
-        m_iElementCount = 0;
-        m_iCapacityState = 0x80000000;
-    }
-
-    void ClearAndRelease()
-    {
-        DB8000_Alloc& alloc = ((DB8000_Router*)FUN_00c85750())->heap();
-        int cap = m_iCapacityState;
-        m_iElementCount = 0;
-        if ((cap & 0x80000000) == 0)
-        {
-            alloc.ReleaseBlock(m_data, (cap & 0x3fffffff) * 4);
-        }
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
+typedef hkArray<void*> DB8000_PtrArray;
 struct DB8000_Out
 {
     const char* m_name;
@@ -1542,7 +1520,7 @@ struct DB8000_Out
         m_unk08 = 0;
     }
 
-    void ClearAndRelease()
+    void clearAndDeallocate()
     {
         DB8000_Alloc& alloc = ((DB8000_Router*)FUN_00c85750())->heap();
         int cap = m_iCapacityState;
@@ -1577,12 +1555,7 @@ struct DB8000_Item
     DB8000_Op* m_pOperations;
     int m_numOps;
 };
-struct DB8000_ItemArray
-{
-    DB8000_Item** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+typedef hkArrayBase<DB8000_Item*> DB8000_ItemArray;
 extern int __cdecl FUN_00cb0fa0(const char* a, const char* b);
 struct DB8000_Self
 {

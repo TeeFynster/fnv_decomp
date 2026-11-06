@@ -1,3 +1,5 @@
+#include "../../include/BSStringT.h"
+#include "../../include/NiColorA.h"
 
 // src/staging/blk_007e0000_od_rtti_variant.cpp - RTTI variant unit created 2026-10-24 by rtti_variants.py for paused functions whose original code needs
 // polymorphic classes (Menu, Tile). The skeleton of src/staging/blk_007e0000_od.cpp with those classes made polymorphic; move the functions to
@@ -58,11 +60,8 @@ struct NavMeshPtr
 {
     void* FUN_00458b50();
 };
-struct BSStr
-{
-    bool Set(const char*, unsigned int);
-};
-extern BSStr g_011daed8;
+
+extern ::BSStringT<char> g_011daed8;
 void __cdecl FUN_007e65b0();
 struct FUN_007e66a0_cls
 {
@@ -351,14 +350,6 @@ class FUN_007f7790_cls
     B7F7790Object* m_pPointer;
 };
 class NiColor;
-struct ImageSpaceEffectParam
-{
-    float unk00;
-    float unk04;
-    float unk08;
-    float unk0C;
-    ImageSpaceEffectParam(float a, float b, float c, float d);
-};
 struct Dummy_00718c90;
 struct SystemColorManager
 {
@@ -367,8 +358,8 @@ struct SystemColorManager
 Dummy_00718c90* __cdecl FUN_00718b60();
 struct PipboyStub : FOPipboyManager
 {
-    void SetQuad(ImageSpaceEffectParam* p);
-    void FUN_007f7fb0(ImageSpaceEffectParam* p);
+    void SetQuad(NiColorA* p);
+    void FUN_007f7fb0(NiColorA* p);
     void FUN_007f7f40();
 };
 struct FUN_007f7fb0_Value
@@ -398,25 +389,11 @@ struct FUN_007f7fe0_cls
     Quad4 m_q;
     void __thiscall SetQuad(const Quad4* src);
 };
-struct SoundPlaybackHandle
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    SoundPlaybackHandle();
-    SoundPlaybackHandle& operator=(const SoundPlaybackHandle&);
-    ~SoundPlaybackHandle();
-};
-struct BSSoundHandleEx
-{
-    SoundPlaybackHandle base;
-    ~BSSoundHandleEx();
-    bool Play(bool);
-};
+#include "../../include/BSSoundHandle.h"
 struct BSAudio
 {
     static BSAudio* GetSingleton();
-    BSSoundHandleEx GetSoundHandleByEditorID(const char*, unsigned int);
+    BSSoundHandle GetSoundHandleByEditorID(const char*, unsigned int);
 };
 struct GlobalObject_0044f440
 {
@@ -1154,7 +1131,7 @@ struct RemoveTile
 {
     virtual void* Destroy(unsigned int);
     float FUN_00a011b0(int);
-    void SetFloat(int, float, bool);
+    void FUN_00a012d0(int, float, bool);
 };
 struct RemoveOwned
 {

@@ -1,6 +1,39 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 
 // src/havok/physics/collide/agent/convexagent/spheretriangle/hkpspheretriangleagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/spheretriangle/hkpspheretriangleagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+// Keep the unit's intrinsic declaration: the CRT's extra byte-array members
+// change the original compiler's /GS parameter handling.
+#ifndef _INCLUDED_MM2
+#define _INCLUDED_MM2
+// Exe 0x00d3d2a0 FUN_00d3d2a0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C"
+{
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+}
+#endif
+
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkThreadMemory.h"
+#include "../../../../../../../include/hkVector4q.h"
+
 
 struct D3DD50CollectorBase
 {
@@ -95,18 +128,10 @@ struct hkMemory
     virtual void* allocateChunk(int size);
 };
 
-struct hkThreadMemory
+inline void* hkThreadMemory::allocateChunk(int size) throw()
 {
-    char pad[0x10];
-    hkMemory* m_pMemoryAllocator;
-
-    void* allocateChunk(int size)
-    {
-        return m_pMemoryAllocator->allocateChunk(size);
-    }
-};
-
-extern "C" hkThreadMemory* __cdecl FUN_00c85750();
+    return m_pMemoryAllocator->allocateChunk(size);
+}
 extern "C" void __cdecl FUN_00cd7160(void* src, void* dst);
 extern "C" const void* DAT_010cf060;
 extern "C" const void* DAT_010cf09c;
@@ -135,7 +160,7 @@ struct TargetAgent
 // @fnv 0x00d3d240
 void* __cdecl CreateTargetAgent(void* bodyA, void* bodyB, void* input, void* mgr)
 {
-    TargetAgent* agent = (TargetAgent*)FUN_00c85750()->allocateChunk(0x20);
+    TargetAgent* agent = (TargetAgent*)hkThreadMemory::GetMonitorStream()->allocateChunk(0x20);
     agent->TargetAgent::TargetAgent(bodyA, mgr);
     return agent;
 }
@@ -169,40 +194,25 @@ void __thiscall D3DD10Object::FUN_00d3dd10(unsigned int p0, unsigned int p1, uns
     this->FUN_00d3d2a0(p1, p0, p2, &data);
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
+__forceinline void hkVector4q::setBroadcast3(const hkVector4q& v)
 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
+    m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
 }
 
-struct hkVector4q
+__forceinline void hkVector4q::addMul4(const hkVector4q& a, const hkVector4q& b)
 {
-    __m128 m_vComponents;
+    m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents));
+}
 
-    __forceinline void setBroadcast3(const hkVector4q& v)
-    {
-        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
-    }
-    __forceinline void addMul4(const hkVector4q& a, const hkVector4q& b)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents));
-    }
-    __forceinline void xor4(const hkVector4q& b)
-    {
-        m_vComponents = _mm_xor_ps(m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setXor4(const hkVector4q& a, const hkVector4q& b)
-    {
-        m_vComponents = _mm_xor_ps(a.m_vComponents, b.m_vComponents);
-    }
-};
+__forceinline void hkVector4q::xor4(const hkVector4q& b)
+{
+    m_vComponents = _mm_xor_ps(m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4q::setXor4(const hkVector4q& a, const hkVector4q& b)
+{
+    m_vComponents = _mm_xor_ps(a.m_vComponents, b.m_vComponents);
+}
 
 template <typename T> __forceinline void hkSwap(T& a, T& b)
 {
@@ -321,24 +331,19 @@ extern "C"
 {
     unsigned __int64 __rdtsc();
     void _ReadWriteBarrier();
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    void _mm_store_ps(float*, __m128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
+    void _mm_store_ps(float*, LocalM128);
 }
 
 extern "C" DWORD DAT_0126835c;
 
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
-};
-
 struct Res
 {
-    Vec4 pt;
+    hkVector4q pt;
     float d;
 };
 
@@ -351,27 +356,14 @@ struct Arg3S
     float f10;
 };
 
-struct ProfRec
-{
-    const char* name;
-    unsigned int tsc;
-    unsigned int unk08;
-};
 
-struct ProfBuf
-{
-    unsigned int unk00;
-    ProfRec* cur;
-    unsigned int unk08;
-    ProfRec* end;
-};
 
 struct XForm
 {
-    __m128 r0;
-    __m128 r1;
-    __m128 r2;
-    __m128 t;
+    LocalM128 r0;
+    LocalM128 r1;
+    LocalM128 r2;
+    LocalM128 t;
 };
 
 struct BodyB
@@ -400,7 +392,7 @@ struct Sink
     virtual void unk04(BodyHolderB& a, BodyHolderB& b);
 };
 
-extern void __cdecl FUN_00cd7850(Vec4* v, void* tri, float* f, Res* out, void* flag);
+extern void __cdecl FUN_00cd7850(hkVector4q* v, void* tri, float* f, Res* out, void* flag);
 
 // non-POD 1-dword wrapper params: block the entry-enregister pass so the
 // params are read lazily from their incoming arg slots (see e2fbc0)
@@ -432,34 +424,34 @@ void SphereTriAgent::FUN_00d3d2a0(BodyHolderB* apBodyA, BodyHolderB* apBodyB, in
 {
     volatile unsigned int lo;
     {
-        ProfBuf* pProfBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-        ProfRec* pProfRec = pProfBuf->cur;
-        if (pProfRec < pProfBuf->end)
+        hkMonitorStream* pProfBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        hkMonitorStream::TimerCommand* pProfRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pProfBuf->m_end.m_storage);
+        if (reinterpret_cast<char*>(pProfRec) < pProfBuf->m_capacityMinus16.m_storage)
         {
-            pProfRec->name = "TtSphereTri";
+            pProfRec->m_commandAndMonitor = "TtSphereTri";
             _ReadWriteBarrier();
             lo = (unsigned int)__rdtsc();
-            pProfRec->tsc = lo;
-            pProfBuf->cur = pProfRec + 1;
+            pProfRec->m_time0 = lo;
+            pProfBuf->m_end.m_storage = reinterpret_cast<char*>(pProfRec + 1);
         }
     }
     BodyB* shapeA = apBodyA->obj;
-    __m128 vTransA = apBodyA->xf->t;
+    LocalM128 vTransA = apBodyA->xf->t;
     BodyB* shapeB = apBodyB->obj;
     XForm* pXFormB = apBodyB->xf;
-    __m128 d = _mm_sub_ps(vTransA, pXFormB->t);
-    __m128 r0 = pXFormB->r0, r1 = pXFormB->r1, r2 = pXFormB->r2;
-    __m128 tmpLo = _mm_unpacklo_ps(r0, r1);
-    __m128 tmpThird = _mm_shuffle_ps(_mm_unpackhi_ps(r0, r1), r2, 0xe4);
+    LocalM128 d = _mm_sub_ps(vTransA, pXFormB->t);
+    LocalM128 r0 = pXFormB->r0, r1 = pXFormB->r1, r2 = pXFormB->r2;
+    LocalM128 tmpLo = _mm_unpacklo_ps(r0, r1);
+    LocalM128 tmpThird = _mm_shuffle_ps(_mm_unpackhi_ps(r0, r1), r2, 0xe4);
     r0 = _mm_movelh_ps(tmpLo, r2);
     r1 = _mm_shuffle_ps(_mm_movehl_ps(r0, tmpLo), r2, 0xd4);
     r2 = tmpThird;
-    __m128 p0 = _mm_mul_ps(r0, _mm_shuffle_ps(d, d, 0));
-    __m128 p1 = _mm_mul_ps(r1, _mm_shuffle_ps(d, d, 0x55));
-    __m128 p2 = _mm_mul_ps(r2, _mm_shuffle_ps(d, d, 0xaa));
-    __m128 v = _mm_add_ps(_mm_add_ps(p0, p1), p2);
-    Vec4 vv;
-    _mm_store_ps(&vv.x, v);
+    LocalM128 p0 = _mm_mul_ps(r0, _mm_shuffle_ps(d, d, 0));
+    LocalM128 p1 = _mm_mul_ps(r1, _mm_shuffle_ps(d, d, 0x55));
+    LocalM128 p2 = _mm_mul_ps(r2, _mm_shuffle_ps(d, d, 0xaa));
+    LocalM128 v = _mm_add_ps(_mm_add_ps(p0, p1), p2);
+    hkVector4q vv;
+    _mm_store_ps(&vv.m_vComponents.m128_f32[0], v);
     Res out;
     FUN_00cd7850(&vv, &shapeB->unk20, &unk10, &out, 0);
     float dist = shapeB->unk10 + shapeA->unk10;
@@ -468,15 +460,15 @@ void SphereTriAgent::FUN_00d3d2a0(BodyHolderB* apBodyA, BodyHolderB* apBodyB, in
         sink->unk04(*apBodyA, *apBodyB);
     }
     {
-        ProfBuf* pProfBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-        ProfRec* pProfRec = pProfBuf->cur;
-        if (pProfRec < pProfBuf->end)
+        hkMonitorStream* pProfBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        hkMonitorStream::TimerCommand* pProfRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pProfBuf->m_end.m_storage);
+        if (reinterpret_cast<char*>(pProfRec) < pProfBuf->m_capacityMinus16.m_storage)
         {
-            pProfRec->name = "Et";
+            pProfRec->m_commandAndMonitor = "Et";
             _ReadWriteBarrier();
             lo = (unsigned int)__rdtsc();
-            pProfRec->tsc = lo;
-            pProfBuf->cur = pProfRec + 1;
+            pProfRec->m_time0 = lo;
+            pProfBuf->m_end.m_storage = reinterpret_cast<char*>(pProfRec + 1);
         }
     }
 }
@@ -488,26 +480,9 @@ extern DWORD DAT_0126835c;
 extern char DAT_010cf0d4[];  // "TtSphereTri"
 extern char DAT_010c41f8[];  // "Et"
 
-struct S_00d3d3e0_Entry
-{
-    const char* name;
-    unsigned time;
-    int unk08;
-};
-struct S_00d3d3e0_Hdr
-{
-    int unk00;
-    S_00d3d3e0_Entry* cur;
-    int unk08;
-    S_00d3d3e0_Entry* end;
-};
-struct __declspec(align(16)) S_00d3d3e0_V4
-{
-    float x, y, z, w;
-};
 struct S_00d3d3e0_Mat
 {
-    S_00d3d3e0_V4 r0, r1, r2, t;
+    hkVector4q r0, r1, r2, t;
 };
 struct S_00d3d3e0_Shape
 {
@@ -544,8 +519,8 @@ struct __declspec(align(16)) S_00d3d3e0_Out
     float f10;
 };
 
-void __cdecl FUN_00cd7160(void* a, S_00d3d3e0_V4* out);
-void __cdecl FUN_00cd7850(S_00d3d3e0_V4* a, void* b, S_00d3d3e0_V4* c, S_00d3d3e0_Out* d, bool* e);
+void __cdecl FUN_00cd7160(void* a, hkVector4q* out);
+void __cdecl FUN_00cd7850(hkVector4q* a, void* b, hkVector4q* c, S_00d3d3e0_Out* d, bool* e);
 
 struct S_00d3d3e0_P1P
 {
@@ -575,56 +550,56 @@ struct S_00d3d3e0_P3P
 // @fnv 0x00d3d3e0
 void FUN_00d3d3e0(S_00d3d3e0_P1P a1, S_00d3d3e0_P2P a2, int unused, S_00d3d3e0_P3P a3)
 {
-    S_00d3d3e0_Hdr* h = (S_00d3d3e0_Hdr*)TlsGetValue(DAT_0126835c);
-    if (h->cur < h->end)
+    hkMonitorStream* h = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (h->m_end.m_storage < h->m_capacityMinus16.m_storage)
     {
-        S_00d3d3e0_Entry* e = h->cur;
-        e->name = DAT_010cf0d4;
+        hkMonitorStream::TimerCommand* e = reinterpret_cast<hkMonitorStream::TimerCommand*>(h->m_end.m_storage);
+        e->m_commandAndMonitor = DAT_010cf0d4;
         _ReadWriteBarrier();
         volatile unsigned t = (unsigned)__rdtsc();
-        e->time = t;
-        h->cur = e + 1;
+        e->m_time0 = t;
+        h->m_end.m_storage = reinterpret_cast<char*>(e + 1);
     }
     S_00d3d3e0_P1* p1 = a1.val();
     S_00d3d3e0_Shape* shape = p1->shape;
     S_00d3d3e0_Obj* obj = a2.val()->obj;
-    S_00d3d3e0_V4 q;
+    hkVector4q q;
     FUN_00cd7160(&obj->unk20, &q);
     S_00d3d3e0_Mat* m2 = a2.val()->mat;
     S_00d3d3e0_Mat* m1 = p1->mat;
-    __m128 d = _mm_sub_ps(*(__m128*)&m1->t, *(__m128*)&m2->t);
-    __m128 c0 = *(__m128*)&m2->r0;
-    __m128 c1 = *(__m128*)&m2->r1;
-    __m128 c2 = *(__m128*)&m2->r2;
+    LocalM128 d = _mm_sub_ps(*(LocalM128*)&m1->t, *(LocalM128*)&m2->t);
+    LocalM128 c0 = *(LocalM128*)&m2->r0;
+    LocalM128 c1 = *(LocalM128*)&m2->r1;
+    LocalM128 c2 = *(LocalM128*)&m2->r2;
     {
-        __m128 tmp0 = _mm_unpacklo_ps(c0, c1);
-        __m128 tmp1 = _mm_unpackhi_ps(c0, c1);
+        LocalM128 tmp0 = _mm_unpacklo_ps(c0, c1);
+        LocalM128 tmp1 = _mm_unpackhi_ps(c0, c1);
         c0 = _mm_movelh_ps(tmp0, c2);
         c1 = _mm_shuffle_ps(_mm_movehl_ps(c0, tmp0), c2, 0xd4);
         c2 = _mm_shuffle_ps(tmp1, c2, 0xe4);
     }
-    const __m128 b0 = _mm_shuffle_ps(d, d, 0x00);
-    const __m128 t0 = _mm_mul_ps(c0, b0);
-    const __m128 b1 = _mm_shuffle_ps(d, d, 0x55);
-    const __m128 t1 = _mm_mul_ps(c1, b1);
-    const __m128 b2 = _mm_shuffle_ps(d, d, 0xaa);
-    const __m128 t2 = _mm_mul_ps(c2, b2);
-    S_00d3d3e0_V4 v;
-    *(__m128*)&v = _mm_add_ps(_mm_add_ps(t0, t1), t2);
+    const LocalM128 b0 = _mm_shuffle_ps(d, d, 0x00);
+    const LocalM128 t0 = _mm_mul_ps(c0, b0);
+    const LocalM128 b1 = _mm_shuffle_ps(d, d, 0x55);
+    const LocalM128 t1 = _mm_mul_ps(c1, b1);
+    const LocalM128 b2 = _mm_shuffle_ps(d, d, 0xaa);
+    const LocalM128 t2 = _mm_mul_ps(c2, b2);
+    hkVector4q v;
+    *(LocalM128*)&v = _mm_add_ps(_mm_add_ps(t0, t1), t2);
     S_00d3d3e0_Out out;
     FUN_00cd7850(&v, &obj->unk20, &q, &out, 0);
     float sum = shape->f10 + obj->f10;
     if (out.f10 < sum)
         a3.val()->v1(p1, a2.val());
-    h = (S_00d3d3e0_Hdr*)TlsGetValue(DAT_0126835c);
-    if (h->cur < h->end)
+    h = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (h->m_end.m_storage < h->m_capacityMinus16.m_storage)
     {
-        S_00d3d3e0_Entry* e = h->cur;
-        e->name = DAT_010c41f8;
+        hkMonitorStream::TimerCommand* e = reinterpret_cast<hkMonitorStream::TimerCommand*>(h->m_end.m_storage);
+        e->m_commandAndMonitor = DAT_010c41f8;
         _ReadWriteBarrier();
         volatile unsigned t = (unsigned)__rdtsc();
-        e->time = t;
-        h->cur = e + 1;
+        e->m_time0 = t;
+        h->m_end.m_storage = reinterpret_cast<char*>(e + 1);
     }
 }
 

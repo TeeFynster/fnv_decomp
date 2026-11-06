@@ -1,3 +1,10 @@
+#include "../../../../../../../../include/hkArray.h"
+#include "../../../../../../../../include/hkVector4.h"
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/Pair.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/NiPoint3.h"
 // src/havok/physics/internal/collide/mopp/builder/assembler/hkpmoppdefaultassembler_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/internal/collide/mopp/builder/assembler/hkpmoppdefaultassembler.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -352,15 +359,6 @@ struct Allocator
     virtual void* unk04(void* p);
     virtual void __thiscall ReleaseBlock(void* p, unsigned short size);
 };
-struct Router
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    Allocator* allocator;
-};
-extern "C" Router* __cdecl FUN_00c85750();
 struct FUN_00e09640_class
 {
     virtual void unknownVirtual();
@@ -613,15 +611,9 @@ struct S_00e06e00_Cls
     int FUN_00e06e00(S_00e06e00_A0* a, S_00e06e00_A1* b, S_00e06e00_A2* c);
     void WriteOp(int idx, S_00e06e00_Item* item);
 };
-struct Vec3
-{
-    float x;
-    float y;
-    float z;
-};
 extern const double g_thresholdA;
 extern const double g_thresholdB;
-int __stdcall ClassifyVec3Region(const Vec3* pVec);
+int __stdcall ClassifyVec3Region(const NiPoint3* pVec);
 struct S_00e07070_Pair
 {
     int unk00;
@@ -824,22 +816,6 @@ struct S_00e07da0_Tree
     int ClassifyVec3Region(void* p);
     void FUN_00e07880(S_00e07da0_Node* node, S_00e07da0_Region* region, int* lo, int* hi);
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 struct BSAudio;
 extern int DAT_010ea5dc;
 extern int DAT_0102e388;
@@ -1032,11 +1008,6 @@ struct Arg1Flags
     unsigned char unk00[0x3b];
     unsigned char m_3b[3];
 };
-struct Pair
-{
-    int m_ucLowNibble;
-    int m_ucHighNibble;
-};
 struct Arg2Layout
 {
     int unk00;
@@ -1177,11 +1148,7 @@ struct FUN_00e07b90_bounds
 {
     float unk00, unk04, unk08, minimumX, maximumX, minimumY, maximumY, minimumZ, maximumZ;
 };
-struct FUN_00e07b90_vector
-{
-    float x, y, z, w;
-};
-void __stdcall FUN_00e07b90(const FUN_00e07b90_bounds* bounds, FUN_00e07b90_vector* result);
+void __stdcall FUN_00e07b90(const FUN_00e07b90_bounds* bounds, hkVector4* result);
 struct S_00e07d60_Info
 {
     float x;
@@ -1223,19 +1190,6 @@ struct S_00e07d60
 };
 namespace e083 {
 struct Alloc;
-struct Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkc;
-    Alloc* unk10;
-};
-struct Pair
-{
-    int a;
-    int b;
-};
 struct PairArray
 {
     Pair* m_data;
@@ -1261,54 +1215,36 @@ struct BvAllocator
 void __cdecl ResizeAudioStream(void*, void*, int);
 inline BvAllocator& GetHeap()
 {
-    return *(BvAllocator*)FUN_00c85750()->allocator;
+    return *(BvAllocator*)hkMemoryRouter::getInstance().m_heap;
 }
-struct BvHeapRouter
+template <class T>
+static __forceinline void BvArray_clear(hkArrayBase<T>& self)
 {
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    BvAllocator* allocator;
-};
-inline BvHeapRouter* GetBvRouter()
-{
-    return (BvHeapRouter*)FUN_00c85750();
-}
-template <class T> struct BvArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+        for (int i = 0; i < self.m_iElementCount; ++i)
+            self.m_data[i].~T();
+        self.m_iElementCount = 0;
+    }
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
+template <class T>
+static __forceinline void BvArray_ClearAndRelease(hkArrayBase<T>& self, BvAllocator& alloc)
+{
+        BvArray_clear(self);
+        if ((self.m_iCapacityState & 0x80000000u) == 0)
+            alloc.ReleaseBlock(self.m_data, self.getCapacity() * sizeof(T));
+        self.m_data = 0;
+        self.m_iCapacityState = 0x80000000;
     }
-    void clear()
-    {
-        for (int i = 0; i < m_iElementCount; ++i)
-            m_data[i].~T();
-        m_iElementCount = 0;
-    }
-    void ClearAndRelease(BvAllocator& alloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000u) == 0)
-            alloc.ReleaseBlock(m_data, getCapacity() * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    void AddBack(Router& router, const T& t)
-    {
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(router.allocator, this, sizeof(T));
-        T* p = m_data + m_iElementCount;
+
+template <class T>
+static __forceinline void BvArray_AddBack(hkArrayBase<T>& self, hkMemoryRouter& router, const T& t)
+{
+        if (self.m_iElementCount == self.getCapacity())
+            ResizeAudioStream((Allocator*)router.m_heap, (&self), sizeof(T));
+        T* p = self.m_data + self.m_iElementCount;
         for (int i = 0; i < 1; i++)
             p[i] = t;
-        m_iElementCount++;
+        self.m_iElementCount++;
     }
-};
 struct BvFixup
 {
     int offset;
@@ -1322,7 +1258,7 @@ struct FUN_00e065f0
     int m_pRayCursor;
     int m_offset;
     unsigned char* m_data;
-    BvArray<BvFixup> m_buffer;
+    hkArrayBase<BvFixup> m_buffer;
 
     void FillWithPattern(int);
     void FUN_00e06480();
@@ -1330,7 +1266,7 @@ struct FUN_00e065f0
     void Destroy();
     void* operator new(unsigned int n)
     {
-        FUN_00e065f0* p = static_cast<FUN_00e065f0*>(GetBvRouter()->allocator->AllocateMemoryBlock(n));
+        FUN_00e065f0* p = static_cast<FUN_00e065f0*>(((BvAllocator*)hkMemoryRouter::getInstance().m_heap)->AllocateMemoryBlock(n));
         p->m_usMemSizeAndFlags = (unsigned short)n;
         return p;
     }
@@ -1409,7 +1345,7 @@ struct BvRange
 };
 void __stdcall FUN_00e07c50(struct BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack);
 void* __cdecl FUN_00cb1260(void*, const void*, int);
-static void FUN_00e08320(BvArray<BvFixup>* destination, BvArray<BvFixup>* source, int adjustment)
+static void FUN_00e08320(hkArrayBase<BvFixup>* destination, hkArrayBase<BvFixup>* source, int adjustment)
 {
     for (int i = 0; i < source->m_iElementCount; ++i)
     {
@@ -1422,7 +1358,7 @@ static void FUN_00e08320(BvArray<BvFixup>* destination, BvArray<BvFixup>* source
         out->offset = source->m_data[i].offset + adjustment;
     }
 }
-static int FUN_00e08380(BvTree* tree, FUN_00e065f0* source, BvArray<int>* refs, FUN_00e065f0* destination);
+static int FUN_00e08380(BvTree* tree, FUN_00e065f0* source, hkArrayBase<int>* refs, FUN_00e065f0* destination);
 struct BvBuilder
 {
     int unk00;
@@ -1443,7 +1379,7 @@ struct BvBuilder
     void FUN_00e08470(BvNode* node);
     void FUN_00e07510(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, BvRange* range);
     void FUN_00e07ca0(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, BvRange* range);
-    void FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth, BvArray<int>* refs);
+    void FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth, hkArrayBase<int>* refs);
 };
 inline void* operator new(unsigned int, void* p)
 {
@@ -1462,15 +1398,6 @@ struct P154Allocator
     virtual void v0c();
     virtual void Free(void*, unsigned);
 };
-struct P154System
-{
-    int unk00, unk04, unk08, unk0c;
-    P154Allocator* allocator;
-};
-struct P154Memory
-{
-    static P154System* FUN_00c85750();
-};
 void __cdecl ResizeAudioStream(P154Allocator*, void*, int);
 struct P154Array
 {
@@ -1482,22 +1409,22 @@ struct P154Array
     void Search(P154Allocator*, int, int*, int);
     void append(const int& v)
     {
-        P154System* s = P154Memory::FUN_00c85750();
+        hkMemoryRouter* s = (&hkMemoryRouter::getInstance());
         if (count == int(capacity & 0x3fffffff))
-            ResizeAudioStream(s->allocator, this, 4);
+            ResizeAudioStream((P154Allocator*)s->m_heap, this, 4);
         constructCopy(data + count, 1, v);
         ++count;
     }
     void insert(int* src, int pos, int n)
     {
-        P154System* r = P154Memory::FUN_00c85750();
-        P154Allocator* a = r->allocator;
+        hkMemoryRouter* r = (&hkMemoryRouter::getInstance());
+        P154Allocator* a = (P154Allocator*)r->m_heap;
         Search(a, pos, src, n);
     }
     void clear()
     {
-        P154System* r = P154Memory::FUN_00c85750();
-        P154Allocator* a = r->allocator;
+        hkMemoryRouter* r = (&hkMemoryRouter::getInstance());
+        P154Allocator* a = (P154Allocator*)r->m_heap;
         count = 0;
         if (!(capacity & 0x80000000))
             a->Free(data, (capacity & 0x3fffffff) * 4);
@@ -1516,9 +1443,9 @@ struct P154PairArray
     unsigned capacity;
     P154Pair& grow()
     {
-        P154System* s = P154Memory::FUN_00c85750();
+        hkMemoryRouter* s = (&hkMemoryRouter::getInstance());
         if (count == int(capacity & 0x3fffffff))
-            ResizeAudioStream(s->allocator, this, 8);
+            ResizeAudioStream((P154Allocator*)s->m_heap, this, 8);
         for (int i = 0; i < 1; ++i)
             new (data + count + i) P154Pair;
         return data[count++];
@@ -1600,8 +1527,8 @@ struct P154Tree
 struct CodeCopySource : FUN_00e065f0
 {
 };
-static int FUN_00e08380(BvTree* tree, CodeCopySource* source, BvArray<int>* refs, FUN_00e065f0* destination);
-int copy_code_caller(BvTree* tree, CodeCopySource* source, BvArray<int>* refs, FUN_00e065f0* destination);
+static int FUN_00e08380(BvTree* tree, CodeCopySource* source, hkArrayBase<int>* refs, FUN_00e065f0* destination);
+int copy_code_caller(BvTree* tree, CodeCopySource* source, hkArrayBase<int>* refs, FUN_00e065f0* destination);
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 struct ObjectWriter
 {
@@ -1659,15 +1586,15 @@ template <typename T> struct MyArray
     }
     __forceinline ~MyArray() throw()
     {
-        AudioHolder* holder = (AudioHolder*)FUN_00c85750();
-        AudioAllocator* alloc = holder->m_pAllocator;
+        hkMemoryRouter* holder = (hkMemoryRouter*)(&hkMemoryRouter::get());
+        hkMemoryAllocator* alloc = holder->m_pAllocator;
         m_iElementCount = 0;
         if (!(m_iCapacityState & 0x80000000))
             alloc->FreeArray(m_data, (m_iCapacityState & 0x3fffffff) * 4);
     }
     __forceinline void ClearAndRelease() throw()
     {
-        AudioAllocator* alloc = ((AudioHolder*)FUN_00c85750())->m_pAllocator;
+        hkMemoryAllocator* alloc = ((hkMemoryRouter*)(&hkMemoryRouter::get()))->m_pAllocator;
         int cap = m_iCapacityState;
         m_iElementCount = 0;
         if (!(cap & 0x80000000))
@@ -1770,26 +1697,27 @@ struct Tree : public FUN_00e09640_class
 typedef void(__thiscall* Vf18Fn)(Tree*, S_00e07da0_Node*, void*) throw();
 
 namespace E078Intrinsics {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00e07880 FUN_00e07880: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_setr_ps(float, float, float, float);
-    __m128 _mm_set_ps(float, float, float, float);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    void _mm_store_ss(float*, __m128);
-    float _mm_cvtss_f32(__m128);
-    __m128 _mm_load_ss(const float*);
+    LocalM128 _mm_setr_ps(float, float, float, float);
+    LocalM128 _mm_set_ps(float, float, float, float);
+    LocalM128 _mm_set_ps1(float);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    void _mm_store_ss(float*, LocalM128);
+    float _mm_cvtss_f32(LocalM128);
+    LocalM128 _mm_load_ss(const float*);
 }
 }
-typedef E078Intrinsics::__m128 E078Quad;
 
+typedef E078Intrinsics::LocalM128 E078Quad;
 typedef float hkReal;
 
 struct ScalarLane
@@ -1805,40 +1733,32 @@ struct ScalarLane
     }
 };
 
-struct hkVector4
-{
-    E078Quad m_vComponents;
 
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void set(hkReal x, hkReal y, hkReal z, hkReal w)
-    {
-        m_vComponents = E078Intrinsics::_mm_setr_ps(x, y, z, w);
-    }
-    __forceinline void mul4(const ScalarLane& s)
-    {
-        m_vComponents = E078Intrinsics::_mm_mul_ps(s.splat(), m_vComponents);
-    }
-    __forceinline void add4(const hkVector4& v)
-    {
-        m_vComponents = E078Intrinsics::_mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void add4(const E078Quad& v)
-    {
-        m_vComponents = E078Intrinsics::_mm_add_ps(m_vComponents, v);
-    }
-    __forceinline hkReal dot3(const hkVector4& v) const
-    {
-        E078Quad x2 = E078Intrinsics::_mm_mul_ps(m_vComponents, v.m_vComponents);
-        E078Quad xy = E078Intrinsics::_mm_add_ss(E078Intrinsics::_mm_shuffle_ps(x2, x2, 0x55), x2);
-        E078Quad xyz = E078Intrinsics::_mm_add_ss(E078Intrinsics::_mm_shuffle_ps(x2, x2, 0xaa), xy);
-        float out;
-        E078Intrinsics::_mm_store_ss(&out, xyz);
-        return out;
-    }
-};
+__forceinline void hkVector4::set(hkReal x, hkReal y, hkReal z, hkReal w)
+{
+    reinterpret_cast<E078Quad&>(m_vComponents) = E078Intrinsics::_mm_setr_ps(x, y, z, w);
+}
+
+__forceinline void hkVector4::mul4(const ScalarLane& s)
+{
+    reinterpret_cast<E078Quad&>(m_vComponents) = E078Intrinsics::_mm_mul_ps(s.splat(), reinterpret_cast<const E078Quad&>(m_vComponents));
+}
+
+__forceinline void hkVector4::add4(const __m128& v)
+{
+    reinterpret_cast<E078Quad&>(m_vComponents) = E078Intrinsics::_mm_add_ps(reinterpret_cast<const E078Quad&>(m_vComponents), reinterpret_cast<const E078Quad&>(v));
+}
+
+__forceinline hkReal hkVector4::dot3scalar(const hkVector4& v) const
+{
+    E078Quad x2 = E078Intrinsics::_mm_mul_ps(reinterpret_cast<const E078Quad&>(m_vComponents),
+                                         reinterpret_cast<const E078Quad&>(v.m_vComponents));
+    E078Quad xy = E078Intrinsics::_mm_add_ss(E078Intrinsics::_mm_shuffle_ps(x2, x2, 0x55), x2);
+    E078Quad xyz = E078Intrinsics::_mm_add_ss(E078Intrinsics::_mm_shuffle_ps(x2, x2, 0xaa), xy);
+    float out;
+    E078Intrinsics::_mm_store_ss(&out, xyz);
+    return out;
+}
 
 struct hkVector4Unaligned
 {
@@ -1988,9 +1908,9 @@ void KdQuantizer::FUN_00e07880(const QuantNode* node, const KdRegion* region, in
 
     hkVector4 p;
     p.set((hkReal)region->m_offset[0], (hkReal)region->m_offset[1], (hkReal)region->m_offset[2], 0.0f);
-    p.mul4(1.0f / scale);
-    p.add4(origin.m_q);
-    double d = p.dot3(*node->m_vHitNormal);
+    p.mul4(ScalarLane(1.0f / scale));
+    p.add4(reinterpret_cast<const __m128&>(origin.m_q));
+    double d = p.dot3scalar(*node->m_vHitNormal);
 
     hkReal cellSize = (hkReal)(1 << region->m_iIndex);
     double lo = (minDist - d) * m_vRayOrigins.w / cellSize;

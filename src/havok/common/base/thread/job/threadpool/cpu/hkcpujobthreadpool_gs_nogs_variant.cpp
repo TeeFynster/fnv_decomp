@@ -1,3 +1,5 @@
+#include "../../../../../../../../include/hkBool.h"
+
 
 // src/havok/common/base/thread/job/threadpool/cpu/hkcpujobthreadpool_gs_nogs_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/common/base/thread/job/threadpool/cpu/hkcpujobthreadpool.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -87,15 +89,6 @@ class hkObjd2d3b0 : public FUN_00d2cf00
         return reinterpret_cast<const unsigned short*>(this)[2];
     }
 };
-struct hkBoolD2CD
-{
-    char m_cBooleanValue;
-    hkBoolD2CD& operator=(bool b)
-    {
-        m_cBooleanValue = (char)b;
-        return *this;
-    }
-};
 class ElemD2CD
 {
   public:
@@ -112,7 +105,7 @@ class OwnerD2CD
     int unk12C;
     int m_iCapacityFlags;
     int unk134[2];
-    hkBoolD2CD m_13C;
+    hkBool m_13C;
 
     void FUN_00d2cde0(int value, int unused);
 };

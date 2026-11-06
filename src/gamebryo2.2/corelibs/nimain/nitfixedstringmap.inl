@@ -5,7 +5,7 @@ template<>
 // @fnv 0x00a8f770
 void NiAVObjectFixedStringMap::GetNext(void*& pos, NiFixedString& key, NiAVObject*& value) const
 {
-    Item* item = static_cast<Item*>(pos);
+    EntryType* item = static_cast<EntryType*>(pos);
     char* handle = item->m_key.m_kHandle;
     if (key.m_kHandle != handle)
     {
@@ -36,21 +36,21 @@ void NiAVObjectFixedStringMap::GetNext(void*& pos, NiFixedString& key, NiAVObjec
 
 template<>
 // @fnv 0x00a6e980
-void NiCharFixedStringMap::SetAt(NiFixedString& key, const char* value)
+void NiCharFixedStringMap::SetAt(const NiFixedString& key, const char* value)
 {
     unsigned int hash = reinterpret_cast<unsigned int>(key.m_kHandle) % m_uiHashSize;
-    Item* item = m_ppkHashTable[hash];
+    EntryType* item = m_ppkHashTable[hash];
     while (item)
     {
         if (key.m_kHandle == item->m_key.m_kHandle)
         {
-            AssignSharedPtr(item, key, value);
+            SetValue(item, key, value);
             return;
         }
         item = item->m_pkNext;
     }
     item = NewItem();
-    AssignSharedPtr(item, key, value);
+    SetValue(item, key, value);
     item->m_pkNext = m_ppkHashTable[hash];
     m_ppkHashTable[hash] = item;
     ++m_kItemCount.m_uiCount;
@@ -64,7 +64,7 @@ void NiAVObjectFixedStringMap::RemoveAll()
     {
         while (m_ppkHashTable[hash])
         {
-            Item* item = m_ppkHashTable[hash];
+            EntryType* item = m_ppkHashTable[hash];
             m_ppkHashTable[hash] = item->m_pkNext;
             DeleteItem(item);
         }

@@ -2,82 +2,98 @@
 // src/havok/common/visualize/shape/hkdisplayplane.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/shape/hkdisplayplane.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Preserve the intrinsic representation used by this unit's original compiler.
+#define _INCLUDED_MM2
+// Exe 0x00de4e20 FUN_00de4e20: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef struct __declspec(intrin_type) __declspec(align(16)) {
     float x, y, z, w;
-};
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 _mm_setzero_ps(void);
+
+#define FNV_VEC4_SIMD
+#include "../../../../../include/Vec4.h"
+
 struct Float4
 {
     float x, y, z, w;
 };
-struct Vec4_de4e20
+inline void Vec4::setCross(const Vec4& a, const Vec4& b)
 {
-    __m128 q;
-    void setCross(const Vec4_de4e20& a, const Vec4_de4e20& b)
-    {
-        __m128 t0 = _mm_shuffle_ps(a.q, a.q, 0xc9);
-        __m128 t1 = _mm_shuffle_ps(b.q, b.q, 0xd2);
-        __m128 t2 = _mm_shuffle_ps(a.q, a.q, 0xd2);
-        __m128 t3 = _mm_shuffle_ps(b.q, b.q, 0xc9);
-        q = _mm_sub_ps(_mm_mul_ps(t0, t1), _mm_mul_ps(t2, t3));
-    }
-    void SetProduct(const Vec4_de4e20& a, const Vec4_de4e20& b)
-    {
-        q = _mm_mul_ps(a.q, b.q);
-    }
-    void mul(const Vec4_de4e20& b)
-    {
-        q = _mm_mul_ps(q, b.q);
-    }
-    void set(const Vec4_de4e20& b)
-    {
-        q = b.q;
-    }
+    LocalM128 t0 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9);
+    LocalM128 t1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2);
+    LocalM128 t2 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2);
+    LocalM128 t3 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9);
+    m_vComponents = _mm_sub_ps(_mm_mul_ps(t0, t1), _mm_mul_ps(t2, t3));
+}
 
-    void add(const Vec4_de4e20& o)
-    {
-        q = _mm_add_ps(q, o.q);
-    }
-    void sub(const Vec4_de4e20& o)
-    {
-        q = _mm_sub_ps(q, o.q);
-    }
-};
+inline void Vec4::mul4(const Vec4& b)
+{
+    m_vComponents = _mm_mul_ps(m_vComponents, b.m_vComponents);
+}
+
+__forceinline void Vec4::operator=(const Vec4& b)
+{
+    m_vComponents = b.m_vComponents;
+}
+
+inline void Vec4::add4(const Vec4& b)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, b.m_vComponents);
+}
+
+inline void Vec4::sub4(const Vec4& b)
+{
+    m_vComponents = _mm_sub_ps(m_vComponents, b.m_vComponents);
+}
+
+inline void Vec4::setZero4()
+{
+    m_vComponents = _mm_setzero_ps();
+}
+
+// The shared class has no set(const Vec4&); retain the reference copy inline here.
+inline void copyVector(Vec4& dst, const Vec4& src)
+{
+    dst.m_vComponents = src.m_vComponents;
+}
+
 struct Cls_00de4e20
 {
-    __m128 unk00, unk10, unk20, unk30, unk40, unk50;
-    Vec4_de4e20 m_kPointA;
-    Vec4_de4e20 m_p;
-    Vec4_de4e20 m_kPointB;
-    Vec4_de4e20 m_q;
-    void __thiscall FUN_00de4e20(Vec4_de4e20* out);
+    LocalM128 unk00, unk10, unk20, unk30, unk40, unk50;
+    Vec4 m_kPointA;
+    Vec4 m_p;
+    Vec4 m_kPointB;
+    Vec4 m_q;
+    void __thiscall FUN_00de4e20(Vec4* out);
 };
 // @fnv 0x00de4e20
-void __thiscall Cls_00de4e20::FUN_00de4e20(Vec4_de4e20* out)
+void __thiscall Cls_00de4e20::FUN_00de4e20(Vec4* out)
 {
-    Vec4_de4e20 cross;
+    Vec4 cross;
     cross.setCross(m_kPointA, m_kPointB);
-    out[0].set(m_p);
-    out[1].set(m_p);
-    out[2].set(m_p);
-    out[3].set(m_p);
-    Vec4_de4e20 t0 = cross, t1;
-    t1.q = m_kPointB.q;
-    t0.mul(m_q);
-    t1.mul(m_q);
-    out[0].add(t0);
-    out[0].add(t1);
-    out[1].add(t0);
-    out[1].sub(t1);
-    out[2].sub(t0);
-    out[2].add(t1);
-    out[3].sub(t0);
-    out[3].sub(t1);
+    copyVector(out[0], m_p);
+    copyVector(out[1], m_p);
+    copyVector(out[2], m_p);
+    copyVector(out[3], m_p);
+    Vec4 t0 = cross, t1;
+    t1.m_vComponents = m_kPointB.m_vComponents;
+    t0.mul4(m_q);
+    t1.mul4(m_q);
+    out[0].add4(t0);
+    out[0].add4(t1);
+    out[1].add4(t0);
+    out[1].sub4(t1);
+    out[2].sub4(t0);
+    out[2].add4(t1);
+    out[3].sub4(t0);
+    out[3].sub4(t1);
 }
 
 struct MatrixOwner
@@ -106,15 +122,15 @@ struct MatrixOwner
     int unk54;
     int unk58;
     int unk5C;
-    __m128 unk60;
-    __m128 unk70;
-    __m128 unk80;
-    __m128 unk90;
-    void __thiscall SetFromVectors(const __m128*, const __m128*, const __m128*, const __m128*);
+    LocalM128 unk60;
+    LocalM128 unk70;
+    LocalM128 unk80;
+    LocalM128 unk90;
+    void __thiscall SetFromVectors(const LocalM128*, const LocalM128*, const LocalM128*, const LocalM128*);
 };
 // Stores *a, *c, *b and *d into unk60, unk70, unk80 and unk90 respectively.
 // @fnv 0x00de4ee0
-void __thiscall MatrixOwner::SetFromVectors(const __m128* a, const __m128* b, const __m128* c, const __m128* d)
+void __thiscall MatrixOwner::SetFromVectors(const LocalM128* a, const LocalM128* b, const LocalM128* c, const LocalM128* d)
 {
     unk60 = *a;
     unk70 = *c;
@@ -162,22 +178,22 @@ void FUN_00de5050_cls::FUN_00de5050(VecBuf* s, unsigned int a2)
     s->m_uiItemCount = 12;
     this->Fill(&tmp);
 
-    __m128 v0 = _mm_load_ps((float*)&tmp.m_00);
-    __m128 v1 = _mm_load_ps((float*)&tmp.m_10);
-    __m128 v2 = _mm_load_ps((float*)&tmp.m_20);
-    *(__m128*)(s->m_data + 0x00) = v0;
-    __m128 v3 = _mm_load_ps((float*)&tmp.m_30);
-    *(__m128*)(s->m_data + 0x10) = v1;
-    *(__m128*)(s->m_data + 0x20) = v1;
-    *(__m128*)(s->m_data + 0x30) = v2;
-    *(__m128*)(s->m_data + 0x40) = v2;
-    *(__m128*)(s->m_data + 0x50) = v3;
-    *(__m128*)(s->m_data + 0x60) = v3;
-    *(__m128*)(s->m_data + 0x70) = v0;
-    *(__m128*)(s->m_data + 0x80) = v0;
-    *(__m128*)(s->m_data + 0x90) = v2;
-    *(__m128*)(s->m_data + 0xa0) = v1;
-    *(__m128*)(s->m_data + 0xb0) = v3;
+    LocalM128 v0 = _mm_load_ps((float*)&tmp.m_00);
+    LocalM128 v1 = _mm_load_ps((float*)&tmp.m_10);
+    LocalM128 v2 = _mm_load_ps((float*)&tmp.m_20);
+    *(LocalM128*)(s->m_data + 0x00) = v0;
+    LocalM128 v3 = _mm_load_ps((float*)&tmp.m_30);
+    *(LocalM128*)(s->m_data + 0x10) = v1;
+    *(LocalM128*)(s->m_data + 0x20) = v1;
+    *(LocalM128*)(s->m_data + 0x30) = v2;
+    *(LocalM128*)(s->m_data + 0x40) = v2;
+    *(LocalM128*)(s->m_data + 0x50) = v3;
+    *(LocalM128*)(s->m_data + 0x60) = v3;
+    *(LocalM128*)(s->m_data + 0x70) = v0;
+    *(LocalM128*)(s->m_data + 0x80) = v0;
+    *(LocalM128*)(s->m_data + 0x90) = v2;
+    *(LocalM128*)(s->m_data + 0xa0) = v1;
+    *(LocalM128*)(s->m_data + 0xb0) = v3;
 }
 
 struct S_00de5110_Heap
@@ -202,13 +218,13 @@ struct S_00de5110_Router
 S_00de5110_Router& FUN_00c85750() throw();
 void FUN_00c908c0(S_00de5110_Heap& alloc, void* array, int numElements, int sizeElem) throw();
 
-template <typename T> struct S_00de5110_Array
-{
+template <typename T> struct S_00de5110_ArrayLocalForm
+{ // local form of hkArray: 0x00de5110 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    S_00de5110_Array() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
+    S_00de5110_ArrayLocalForm() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {}
 
     int getCapacity() const throw()
@@ -256,15 +272,6 @@ template <typename T> struct S_00de5110_Array
     }
 };
 
-struct __declspec(align(16)) S_00de5110_Vector4
-{
-    float x, y, z, w;
-    void operator=(const S_00de5110_Vector4& v) throw()
-    {
-        reinterpret_cast<__m128&>(*this) = reinterpret_cast<const __m128&>(v);
-    }
-};
-
 struct S_00de5110_Triangle
 {
     int m_kPointA;
@@ -282,8 +289,8 @@ struct S_00de5110_Triangle
 
 struct S_00de5110_Geometry
 {
-    S_00de5110_Array<S_00de5110_Vector4> m_kVertices;
-    S_00de5110_Array<S_00de5110_Triangle> m_uiTriangleCount;
+    S_00de5110_ArrayLocalForm<Vec4> m_kVertices;
+    S_00de5110_ArrayLocalForm<S_00de5110_Triangle> m_uiTriangleCount;
 
     S_00de5110_Geometry() throw()
     {}
@@ -325,9 +332,9 @@ struct S_00de5110_Pyramid
     int unk64;
     int unk68;
     int unk6C;
-    S_00de5110_Vector4 m_apex;
+    Vec4 m_apex;
 
-    void FUN_00de4e20(S_00de5110_Vector4* verts);
+    void FUN_00de4e20(Vec4* verts);
     void BuildPyramidGeometry();
 };
 
@@ -345,12 +352,9 @@ void S_00de5110_Pyramid::BuildPyramidGeometry()
     m_pSourceGeometry->m_uiTriangleCount.expandBy(1)->set(3, 4, 1);
 }
 
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_setzero_ps(void);
-
 union Vec4f
 {
-    __m128 v;
+    LocalM128 v;
     struct
     {
         float x;
@@ -417,24 +421,12 @@ FUN_00de4f20_cls* FUN_00de4f20_cls::FUN_00de4f20(const Vec4i* p0, const Vec4i* p
     return this;
 }
 
-// Today's unit (hkdisplayplane.cpp) defines __m128 and its intrinsics itself;
-// declare the one the matched code needs that the unit does not have.
-extern "C" __m128 _mm_setzero_ps(void);
-
-struct S_00de4ff0_Vec4
-{
-    __m128 m_vComponents;
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-};
-
+// local form of hkRotation: 0x00de4ff0 needs implicit construction and inline setIdentity; shared form emits an out-of-line rotation ctor absent from exe.
 struct S_00de4ff0_Rotation
 {
-    S_00de4ff0_Vec4 m_kColumn0;
-    S_00de4ff0_Vec4 m_kColumn1;
-    S_00de4ff0_Vec4 m_kColumn2;
+    Vec4 m_kColumn0;
+    Vec4 m_kColumn1;
+    Vec4 m_kColumn2;
 
     __forceinline float& operator()(int r, int c)
     {
@@ -462,7 +454,7 @@ struct S_00de4ff0_Rotation
 struct S_00de4ff0_Transform
 {
     S_00de4ff0_Rotation m_rotation;
-    S_00de4ff0_Vec4 m_vTranslation;
+    Vec4 m_vTranslation;
 
     __forceinline void setIdentity()
     {
@@ -490,10 +482,10 @@ struct __declspec(novtable) S_00de4ff0_Base : S_00de4ff0_RefObj
     int unk54;
     int unk58;
     int unk5C;
-    S_00de4ff0_Vec4 m_vec60;
-    S_00de4ff0_Vec4 m_vec70;
-    S_00de4ff0_Vec4 m_vec80;
-    S_00de4ff0_Vec4 m_vec90;
+    Vec4 m_vec60;
+    Vec4 m_vec70;
+    Vec4 m_vec80;
+    Vec4 m_vec90;
 
     __forceinline S_00de4ff0_Base() throw() : m_field08(0), m_field50(7)
     {

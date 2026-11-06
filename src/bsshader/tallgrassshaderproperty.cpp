@@ -1,6 +1,13 @@
+#include "../../include/BSStringT.h"
 // bsshader/tallgrassshaderproperty.cpp: TallGrassShaderProperty, Holder, PointerMap (9 functions)
 
 #include "tallgrassshaderproperty_decls.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/NiNode.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiVBSet.h"
 #pragma optimize("", off)
 // @fnv 0x0057ce60
 unsigned long TallGrassShaderProperty::GetCacheIdentifier()
@@ -41,7 +48,7 @@ void TallGrassShaderProperty::ClearCaches()
     ClearCacheData();
     void* initial = GetGeometryCacheMap()->GetFirstPos();
     void* pos = initial;
-    NiPointerCachedGeometry value;
+    NiPointer<GeometryCacheEntry> value;
     const char* key;
     if (GetGeometryCacheMap()->GetCount() > 0)
     {
@@ -53,13 +60,13 @@ void TallGrassShaderProperty::ClearCaches()
                 GeometryCacheEntry* geometry = value;
                 if (geometry && !geometry->owned)
                 {
-                    geometry->geometry.Reset();
+                    geometry->geometry = 0;
                     TallGrassFree(geometry->data);
                     geometry->data = 0;
-                    geometry->field14.Reset();
-                    geometry->field1c.Reset();
-                    geometry->field18.Reset();
-                    geometry->field20.Reset();
+                    geometry->field14 = 0;
+                    geometry->field1c = 0;
+                    geometry->field18 = 0;
+                    geometry->field20 = 0;
                 }
             } while (pos);
         }
@@ -67,14 +74,7 @@ void TallGrassShaderProperty::ClearCaches()
     }
 }
 
-struct BSStr
-{
-    bool Set(char const*, unsigned int);
-};
-struct NiStream
-{
-    void ReadStreamString(char*&);
-};
+
 struct Helper
 {
     void FUN_00b70260(NiStream&);
@@ -83,7 +83,7 @@ void _NiFreeAlias(void*);
 struct Holder
 {
     char _pad[0x88];
-    BSStr mStr;
+    ::BSStringT<char> mStr;
     void ReadStringFromStream(NiStream&);
 };
 // Reads a string from the stream, stores it into mStr, then frees the temporary buffer.
@@ -97,26 +97,19 @@ void Holder::ReadStringFromStream(NiStream& stream)
     _NiFreeAlias(pBuffer);
 }
 
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
 extern unsigned int DAT_011f9ef4;
 extern __declspec(thread) int g_tlsMemContext;
 
-struct AutoMemContext
+inline AutoMemContext::AutoMemContext(int aiContext)
 {
-    int iPrevContext;
-    AutoMemContext(int aiContext)
-    {
-        iPrevContext = g_tlsMemContext;
-        g_tlsMemContext = aiContext;
-    }
-    ~AutoMemContext()
-    {
-        g_tlsMemContext = iPrevContext;
-    }
-};
+    m_eMemoryContext = (MEM_CONTEXT)g_tlsMemContext;
+    g_tlsMemContext = aiContext;
+}
+
+inline AutoMemContext::~AutoMemContext()
+{
+    g_tlsMemContext = m_eMemoryContext;
+}
 
 struct IntegerDataBlock
 {
@@ -129,15 +122,9 @@ struct IntegerDataBlock
     int m_18;
     int m_1c;
 };
-struct GeometryCacheEntry;
-template <class T> class NiPointer;
-struct NiGPUProgram;
-template <> class NiPointer<NiGPUProgram>
-{
-  public:
-    NiGPUProgram* m_pObject;
-    NiPointer<NiGPUProgram>& operator=(NiGPUProgram*);
-};
+typedef TallGrassShaderProperty::GeometryCacheEntry GeometryCacheEntry;
+// This assignment is an out-of-line call in GetOrCreateGrassGroup (0x00b62bd0).
+template <> NiPointer<GeometryCacheEntry>& NiPointer<GeometryCacheEntry>::operator=(GeometryCacheEntry*);
 
 struct TallGrassGroup_Node
 {
@@ -163,7 +150,7 @@ struct FUN_00b617f0
     IntegerDataBlock m_kIntegerDataBlock;
     FUN_00b58570_Class m_kNode;
     int m_28;
-    NiPointer<NiGPUProgram> m_spCachedGeometry;
+    NiPointer<GeometryCacheEntry> m_spCachedGeometry;
     unsigned int m_30;
     unsigned int m_34;
     unsigned int m_38;
@@ -171,7 +158,7 @@ struct FUN_00b617f0
     FUN_00b617f0();
     static void* operator new(unsigned int s)
     {
-        return ((P03MM*)&g_memoryManager)->Allocate(s);
+        return g_memoryManager.Allocate(s);
     }
     static void operator delete(void* p)
     {
@@ -179,65 +166,6 @@ struct FUN_00b617f0
     }
 };
 
-struct NiNodeStub
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void AttachChildInAvailableSlot(void* child, bool firstAvail);
-};
 
 struct FUN_00bd8f90
 {
@@ -267,7 +195,7 @@ struct FUN_00bd8f90
     }
     static void* operator new(unsigned int s)
     {
-        return ((P03MM*)&g_memoryManager)->Allocate(s);
+        return g_memoryManager.Allocate(s);
     }
     static void operator delete(void* p)
     {
@@ -279,21 +207,18 @@ struct FUN_00bd8ae0 : FUN_00bd8f90
     FUN_00bd8ae0(GeometryCacheEntry* geom, int x, int y, int z);
 };
 
-struct NiTStringPointerMap_00e93020
-{
-    __declspec(noalias) bool GetAt(void* key, void*& val);
-};
-struct NiVBSet
-{
-    void Create(unsigned int key, void* val);
-};
+// The 0x00b61170 cache is keyed by unsigned-long grass IDs; its lookup at 0x00a53c30 is NiTMapBase::GetAt.
+template <> __declspec(noalias) bool NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned long,
+    TallGrassShaderProperty::TallGrassCacheData*>::GetAt(unsigned long,
+    TallGrassShaderProperty::TallGrassCacheData*&) const;
+
 GeometryCacheEntry* __cdecl FUN_00b61980(IntegerDataBlock* p);
 void* __cdecl _memmove(void*, const void*, unsigned int);
 
 // Looks up a cached grass group for the cell, creating and attaching a new one to the node when none has remaining capacity, and returns its remaining count.
 // @fnv 0x00b62bd0
 unsigned short __cdecl GetOrCreateGrassGroup(IntegerDataBlock* apGrassParam, int aiCellX, int aiCellY,
-                                             FUN_00bd8f90** apGrassGroup, NiNodeStub* apGrassNode)
+                                             FUN_00bd8f90** apGrassGroup, NiNode* apGrassNode)
 {
     FUN_00b58570_Class* pCurrentElementNext;
     AutoMemContext tempMemContext(0x1c);
@@ -306,11 +231,11 @@ unsigned short __cdecl GetOrCreateGrassGroup(IntegerDataBlock* apGrassParam, int
     if (!pcachedGeom)
         return 0;
     pGrassCache = 0;
-    if (!((NiTStringPointerMap_00e93020*)TallGrassShaderProperty::GetCacheDataMap())
-             ->GetAt((void*)apGrassParam->m_iWordAt04, (void*&)pGrassCache))
+    if (!TallGrassShaderProperty::GetCacheDataMap()->GetAt(apGrassParam->m_iWordAt04,
+             reinterpret_cast<TallGrassShaderProperty::TallGrassCacheData*&>(pGrassCache)))
     {
         pGrassCache = new FUN_00b617f0();
-        pGrassCache->m_spCachedGeometry = (NiGPUProgram*)pcachedGeom;
+        pGrassCache->m_spCachedGeometry = pcachedGeom;
         _memmove(pGrassCache, apGrassParam, 0x20);
         ((NiVBSet*)TallGrassShaderProperty::GetCacheDataMap())->Create(apGrassParam->m_iWordAt04, pGrassCache);
     }
@@ -333,18 +258,12 @@ unsigned short __cdecl GetOrCreateGrassGroup(IntegerDataBlock* apGrassParam, int
         ++DAT_011f9ef4;
         (*apGrassGroup)->CopySettings(apGrassParam);
         pCurrentElementNext->FUN_00b58570(apGrassGroup);
-        apGrassNode->AttachChildInAvailableSlot((*apGrassGroup)->m_pSecondObject, true);
+        apGrassNode->AttachChildInAvailableSlot(static_cast<NiAVObject*>((*apGrassGroup)->m_pSecondObject), true);
     }
     return (*apGrassGroup)->GetRemaining();
 }
 
-struct BSFadeNode
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*);
-    BSFadeNode();
-};
-struct FUN_00b60f50 : BSFadeNode
+struct TallGrassShaderPropertyInstance
 {
     int m_iWordAt00;
     int m_iWordAt04;
@@ -384,58 +303,29 @@ struct FUN_00b60f50 : BSFadeNode
     int m_8c;
     int m_90;
     int m_94;
-    FUN_00b60f50();
+    TallGrassShaderPropertyInstance();
+    // This property uses the same allocator as BSFadeNode, but has its own layout.
+    static void* operator new(unsigned int size)
+    {
+        return BSFadeNode::operator new(size);
+    }
+    static void operator delete(void* pointer, unsigned int size)
+    {
+        BSFadeNode::operator delete(pointer, size);
+    }
 };
-// Allocates and constructs a new FUN_00b60f50 instance, returning the new object.
+// Allocates and constructs a new tall grass shader property instance.
 // @fnv 0x00b60f50
-FUN_00b60f50* FUN_00b60f50_Create()
+TallGrassShaderPropertyInstance* FUN_00b60f50_Create()
 {
-    return new FUN_00b60f50;
+    return new TallGrassShaderPropertyInstance;
 }
 
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
-struct MapObject
-{
-    virtual void slot0();
-    virtual void DeleteThis();
-    volatile long refs;
-    void DecRef()
-    {
-        if (InterlockedDecrement(&refs) == 0)
-            DeleteThis();
-    }
-};
-struct MapPointer
-{
-    MapObject* pointer;
-    MapPointer(const MapPointer& other) : pointer(other.pointer)
-    {
-        if (pointer)
-            InterlockedIncrement(&pointer->refs);
-    }
-    ~MapPointer()
-    {
-        if (pointer)
-            pointer->DecRef();
-    }
-    MapPointer& operator=(const MapPointer& other)
-    {
-        if (pointer != other.pointer)
-        {
-            if (pointer)
-                pointer->DecRef();
-            pointer = other.pointer;
-            if (pointer)
-                InterlockedIncrement(&pointer->refs);
-        }
-        return *this;
-    }
-};
 struct MapEntry
 {
     MapEntry* next;
     const char* key;
-    MapPointer value;
+    NiPointer<NiRefObject> value;
 };
 struct MapPool
 {
@@ -447,15 +337,15 @@ struct PointerMap
     virtual void slot0();
     virtual unsigned int Hash(const char*);
     virtual bool Equal(const char*, const char*);
-    virtual void SetValue(MapEntry*, const char*, MapPointer);
+    virtual void SetValue(MapEntry*, const char*, NiPointer<NiRefObject>);
     unsigned int hashSize;
     MapEntry** buckets;
     MapPool allocator;
     bool preserveKey;
-    void FUN_00b61010(const char* key, MapPointer value);
+    void FUN_00b61010(const char* key, NiPointer<NiRefObject> value);
 };
 // @fnv 0x00b61010
-void PointerMap::FUN_00b61010(const char* key, MapPointer value)
+void PointerMap::FUN_00b61010(const char* key, NiPointer<NiRefObject> value)
 {
     unsigned int hash = Hash(key);
     MapEntry* entry = buckets[hash];
@@ -511,7 +401,8 @@ struct GrassGroupStub
 int __cdecl PackFloatPairToInt(float* apPos);
 void __cdecl FUN_00ecada6(int aiSeed);
 int __cdecl FUN_00ecadb8();
-NiTStringPointerMap_00e93020* __cdecl GetArrayHolder();
+NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned long,
+    TallGrassShaderProperty::TallGrassCacheData*>* __cdecl GetArrayHolder();
 
 inline float FloorF(float f)
 {
@@ -523,7 +414,7 @@ inline float FloorF(float f)
 
 // Adds entries using supplied positions and scales, derives a fourth instance value from parameters and random values, then creates a vertex buffer set.
 // @fnv 0x00b62de0
-void __cdecl PopulateGrassInstances(void* apKey, int aiCellX, int aiCellY, NiNodeStub* apGrassNode,
+void __cdecl PopulateGrassInstances(void* apKey, int aiCellX, int aiCellY, NiNode* apGrassNode,
                                     GrassParamF* apParam, float (*apPositions)[3], float* apScales,
                                     unsigned short auiCount)
 {
@@ -564,10 +455,11 @@ void __cdecl PopulateGrassInstances(void* apKey, int aiCellX, int aiCellY, NiNod
         pGroup->UpdateBounds();
     }
 
-    apGrassNode->v47();
+    apGrassNode->UpdateWorldBound();
 
     GrassGroupStub* pGroup = 0;
-    GetArrayHolder()->GetAt((void*)apParam->m_iWordAt04, (void*&)pGroup);
+    GetArrayHolder()->GetAt(apParam->m_iWordAt04,
+        reinterpret_cast<TallGrassShaderProperty::TallGrassCacheData*&>(pGroup));
     pGroup->kVBSet.Create((unsigned int)apKey, apKey);
 }
 

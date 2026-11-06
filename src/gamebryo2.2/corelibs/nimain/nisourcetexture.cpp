@@ -1,38 +1,39 @@
 // gamebryo2.2/corelibs/nimain/nisourcetexture.cpp: NiSourceTexture (2 functions)
 
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiPixelData.h"
+#include "../../../../include/NiRenderer.h"
+#include "../../../../include/NiTexture.h"
+
 #include "nisourcetexture_decls.h"
 #include "nisourcetexture_types_NiSourceTexture.h"
-
-class NiPixelData : public NiObject
-{
-};
 
 // Releases the app pixel data object: decrements its ref count, deletes it when the count reaches zero, and clears the pointer.
 // @fnv 0x00a60910
 void NiSourceTexture::DestroyAppPixelData()
 {
-    NiPixelData* pAppPixelData = m_spAppPixelData.m_pObject;
+    NiPixelData* pAppPixelData = m_spSrcPixelData.m_pObject;
     if (pAppPixelData)
     {
         if (InterlockedDecrement(reinterpret_cast<volatile long*>(&pAppPixelData->m_uiRefCount)) == 0)
             pAppPixelData->DeleteThis();
-        m_spAppPixelData.m_pObject = 0;
+        m_spSrcPixelData.m_pObject = 0;
     }
 }
 
 // @fnv 0x00a5fd70
-NiSourceTexture* NiSourceTexture::Create(const NiFixedString& name, NiTexture__FormatPrefs& prefs,
+NiSourceTexture* NiSourceTexture::Create(const NiFixedString& name, NiTexture::TextureFormatPreferences& prefs,
                                          bool loadDirectToRendererHint, bool srcRendererDataIsPersistent)
 {
     NiSourceTexture* texture = new NiSourceTexture;
-    texture->m_kTextureFormatPreferences.m_ePreferredPixelLayout = prefs.m_ePreferredPixelLayout;
-    texture->m_kTextureFormatPreferences.m_eAlphaFormat = prefs.m_eAlphaFormat;
-    texture->m_kTextureFormatPreferences.m_eMipFlag = prefs.m_eMipFlag;
-    texture->m_bLoadDirectToRenderer = loadDirectToRendererHint;
-    texture->m_bKeepRendererDataPersistent = srcRendererDataIsPersistent;
+    texture->m_kFormatPrefs.m_ePreferredPixelLayout = prefs.m_ePreferredPixelLayout;
+    texture->m_kFormatPrefs.m_eAlphaFormat = prefs.m_eAlphaFormat;
+    texture->m_kFormatPrefs.m_eMipFlag = prefs.m_eMipFlag;
+    texture->m_bLoadDirectToRendererHint = loadDirectToRendererHint;
+    texture->m_bSrcRendererDataIsPersistent = srcRendererDataIsPersistent;
 
     char* newHandle = name.m_kHandle;
-    NiFixedString* filename = &texture->m_pcCacheFileName;
+    NiFixedString* filename = &texture->m_kFilename;
     if (filename->m_kHandle != newHandle)
     {
         if (newHandle != EmptyFS.m_kHandle)
@@ -42,7 +43,7 @@ NiSourceTexture* NiSourceTexture::Create(const NiFixedString& name, NiTexture__F
         filename->m_kHandle = newHandle;
     }
     FUN_00a57500(filename);
-    FUN_00a76960(filename, &texture->m_kDeviceFilename);
+    FUN_00a76960(filename, &texture->m_kPlatformFilename);
 
     if (DAT_011a9594 && !reinterpret_cast<NiSourceTextureVCall*>(texture)->vfn_0ac())
     {

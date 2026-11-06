@@ -1,18 +1,61 @@
-#ifndef FNV_ITEMCHANGE_H
-#define FNV_ITEMCHANGE_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+template <class T> class BSSimpleList;
+class Actor;
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
+class TESObjectREFR;
+class ExtraDataList;
+class ScriptLocals;
+class TESBoundObject;
+class TESObjectWEAP;
+class WeaponObjStub;
+
 class InventoryStackRecord
 {
-  public:
-    BSSimpleList<ExtraDataList*>* m_pExtraDataLists;  // +0x0
-    int m_iCountChange;                               // +0x4
-    TESBoundObject* m_pItemObject;                    // +0x8
+public:
+    BSSimpleList<ExtraDataList*>* m_pExtraDataLists;
+    int m_iCountChange;
+    TESBoundObject* m_pItemObject;
+
+    InventoryStackRecord();
+    InventoryStackRecord(TESBoundObject* apType, int aiCount);
+    ~InventoryStackRecord();
+
+    float GetArmorDamageThreshold(Actor* actor);
+    float GetConditionPercent(bool percentage);
+    static float GetConditionPercent(float health);
+    bool SetEquipmentState(int effect, float& value);
+    bool SetEquipmentState(int effect);
+    bool SetEquipmentState(unsigned char effect);
+    bool SetEquipmentState(unsigned char effect, float& value);
+    static float __cdecl RoundToNearestStep(float value, float maximum);
+    TESBoundObject* GetObject();
+    void* Destroy(unsigned int flags);
+    void* FUN_004459e0(unsigned int flags);
+    unsigned char GetWeaponCategory();
+    int GetIndex();
+    WeaponObjStub* GetWeaponObj();
+    float GetWeaponConditionHealth(bool abBase);
+    unsigned char const* __thiscall GetFullName();
+    TESObjectWEAP* GetFlags();
+    TESBoundObject* FUN_0044ddc0();
+    bool FUN_004bddd0(bool abUnk);
+    BSSimpleList<ExtraDataList*>* FUN_00559450();
+    int FUN_00726070();
+    void ClearExtraDataList();
+    int CountAndPruneEntries();
+    int FUN_004bc8f0(bool abWornIgnore);
+    int FUN_004bc980();
+    void InitLoadGame(BGSLoadFormBuffer* buffer);
+    bool HasPerkEntry();
+    bool HasApplicablePerkEntry();
+    ScriptLocals* GetScriptLocalData();
+
+    void SetPerkExtra(void* extra);
+    void SavePerkList(BGSSaveFormBuffer* buffer);
+    InventoryStackRecord* CopyFrom(InventoryStackRecord* other);
+    void SetExtraListFlag(bool abNew, bool abFlag, bool abDelete);
+    void CopyFirstExtraList(void* extra);
+    const char* GetIconFilename(TESObjectREFR* reference);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(InventoryStackRecord) == 0xC);
-FNV_STATIC_ASSERT(offsetof(InventoryStackRecord, m_pExtraDataLists) == 0x0);
-FNV_STATIC_ASSERT(offsetof(InventoryStackRecord, m_iCountChange) == 0x4);
-FNV_STATIC_ASSERT(offsetof(InventoryStackRecord, m_pItemObject) == 0x8);
-#endif

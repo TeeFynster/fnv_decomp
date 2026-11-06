@@ -1,3 +1,6 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
+#include "../../include/hkArray.h"
 
 // src/staging/blk_00d80000_od_o2_nood_variant_gs_nogs_variant.cpp - flag-variant unit created 2026-10-30 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/staging/blk_00d80000_od_o2_nood_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -9,10 +12,7 @@
 // src/staging/blk_00d80000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
+typedef ::__m128 LocalM128;
 struct BaseD85
 {
     int unk00;
@@ -59,9 +59,9 @@ struct ObjD85 : BaseD85
     char unk92;
     short unk94;
     short unk96;
-    __m128 unka0;
-    __m128 unkb0;
-    __m128 unkc0;
+    LocalM128 unka0;
+    LocalM128 unkb0;
+    LocalM128 unkc0;
     int unkd0;
     int unkd4;
     int unkd8;
@@ -91,14 +91,14 @@ struct ObjD85 : BaseD85
 struct __declspec(align(16)) StandinClass
 {
     unsigned short unk00;
-    __m128 value10;
-    __m128 value20;
-    __m128 value30;
-    __m128 value40;
-    __m128 value50;
-    __m128 value60;
-    __m128 value70;
-    __m128 value80;
+    LocalM128 value10;
+    LocalM128 value20;
+    LocalM128 value30;
+    LocalM128 value40;
+    LocalM128 value50;
+    LocalM128 value60;
+    LocalM128 value70;
+    LocalM128 value80;
     StandinClass& FUN_00d85300(const StandinClass* source);
 };
 
@@ -110,7 +110,7 @@ struct __declspec(align(16)) S00d9db60_ProjectedEntry
     unsigned short m_usSecondVectorPadding;
     __forceinline void operator=(const S00d9db60_ProjectedEntry& other)
     {
-        *(__m128*)this = *(const __m128*)&other;
+        *(LocalM128*)this = *(const LocalM128*)&other;
     }
     __forceinline void reset()
     {
@@ -163,54 +163,50 @@ struct S00d9db60_HeapAllocator
     }
 };
 
-template <typename T> struct S00d9db60_Array
+template <class T>
+static __forceinline void S00d9db60_Array_clear(hkArrayBase<T>& self);
+
+template <class T>
+static __forceinline void S00d9db60_Array_ClearAndRelease(hkArrayBase<T>& self);
+
+template <class T>
+static __forceinline void S00d9db60_Array_init(hkArrayBase<T>& self, int n);
+
+template <class T>
+static __forceinline void S00d9db60_Array_clear(hkArrayBase<T>& self)
 {
-    enum
-    {
-        DONT_DEALLOCATE_FLAG = 0x80000000,
-        CAPACITY_MASK = 0x3fffffff
-    };
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline S00d9db60_Array(int n) : m_data(0), m_iElementCount(0), m_iCapacityState(DONT_DEALLOCATE_FLAG)
-    {
-        S00d9db60_Allocator& a = S00d9db60_HeapAllocator().get(this);
+        self.m_iElementCount = 0;
+    }
+
+template <class T>
+static __forceinline void S00d9db60_Array_ClearAndRelease(hkArrayBase<T>& self)
+{
+        S00d9db60_Allocator& alloc = S00d9db60_HeapAllocator().get((&self));
+        S00d9db60_Array_clear(self);
+        if ((self.m_iCapacityState & hkArrayBase<T>::DONT_DEALLOCATE_FLAG) == 0)
+            alloc._bufFree<T>(self.m_data, self.getCapacity());
+        self.m_data = 0;
+        self.m_iCapacityState = hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
+    }
+
+template <class T>
+static __forceinline void S00d9db60_Array_init(hkArrayBase<T>& self, int n)
+{
+self.m_data = 0;
+self.m_iElementCount = 0;
+self.m_iCapacityState = hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
+        S00d9db60_Allocator& a = S00d9db60_HeapAllocator().get((&self));
         T* p = n ? a._bufAlloc<T>(n) : 0;
-        int cap = n ? n : DONT_DEALLOCATE_FLAG;
-        setOwnedData(p, n, cap);
+        int cap = n ? n : hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
+        self.setOwnedData(p, n, cap);
     }
-    __forceinline void setOwnedData(T* ptr, int size, int capacity)
-    {
-        m_data = ptr;
-        m_iElementCount = size;
-        m_iCapacityState = capacity;
-    }
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & CAPACITY_MASK;
-    }
-    __forceinline void clear()
-    {
-        m_iElementCount = 0;
-    }
-    __forceinline void ClearAndRelease()
-    {
-        S00d9db60_Allocator& alloc = S00d9db60_HeapAllocator().get(this);
-        clear();
-        if ((m_iCapacityState & DONT_DEALLOCATE_FLAG) == 0)
-            alloc._bufFree<T>(m_data, getCapacity());
-        m_data = 0;
-        m_iCapacityState = DONT_DEALLOCATE_FLAG;
-    }
-    __forceinline T* begin()
-    {
-        return m_data;
-    }
-    __forceinline int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
+
+struct S00d9db60_ArrayPolicy
+{
+    template <class T>
+    static __forceinline void destroy(hkArrayBase<T>& self) { }
+    template <class T>
+    static __forceinline void init(hkArrayBase<T>& self, int n) { S00d9db60_Array_init(self, n); }
 };
 
 struct S00d9db60_Node
@@ -220,13 +216,13 @@ struct S00d9db60_Node
 
 struct S00d9db60_KdTree
 {
-    S00d9db60_Array<S00d9db60_Node> m_kNodeCollection;
+    hkArray<S00d9db60_Node, S00d9db60_ArrayPolicy> m_kNodeCollection;
     int m_iNumNodes;
     int m_iNumPrimitives;
     int m_iNumProjectedEntries;
     int m_iNumReservedEmptyNodes;
-    S00d9db60_Array<S00d9db60_ProjectedEntry> m_kProjectedEntries;
-    __forceinline S00d9db60_Array<S00d9db60_Node>& getNodes()
+    hkArray<S00d9db60_ProjectedEntry, S00d9db60_ArrayPolicy> m_kProjectedEntries;
+    __forceinline hkArray<S00d9db60_Node, S00d9db60_ArrayPolicy>& getNodes()
     {
         return m_kNodeCollection;
     }
@@ -263,11 +259,11 @@ struct S00d9db60_TreeStream
     S00d9db60_Node* m_pTreeNode;
 };
 
-extern const __m128 DAT_012684d0;
+extern const LocalM128 DAT_012684d0;
 
 struct S00d9db60_Comparison
 {
-    __m128 m_uiMask;
+    LocalM128 m_uiMask;
     __forceinline void setXYZ()
     {
         m_uiMask = DAT_012684d0;
@@ -280,7 +276,7 @@ struct S00d9db60_SparseWriter
     {
         BUFFER_SIZE = 16
     };
-    __m128 m_kVectorBuffer[BUFFER_SIZE];
+    LocalM128 m_kVectorBuffer[BUFFER_SIZE];
     int m_uiEdgeIndex;
     void FUN_00df3110();  // constructor
     void FUN_00df3160();  // flush, from the inline destructor
@@ -315,8 +311,8 @@ void __cdecl FUN_00d9db60(S00d9db60_Mediator& mediator, S00d9db60_KdTree* tree)
 {
     S00d9db60_Node* root = tree->getRoot();
 
-    S00d9db60_Array<S00d9db60_ProjectedEntry> entriesA(mediator.GetNumEntries());
-    S00d9db60_Array<S00d9db60_ProjectedEntry> entriesB(mediator.GetNumEntries());
+    hkArray<S00d9db60_ProjectedEntry, S00d9db60_ArrayPolicy> entriesA(mediator.GetNumEntries());
+    hkArray<S00d9db60_ProjectedEntry, S00d9db60_ArrayPolicy> entriesB(mediator.GetNumEntries());
 
     S00d9db60_WorkingSet buffers;
     buffers.m_pProjectedEntryBegin = entriesA.begin();
@@ -333,8 +329,8 @@ void __cdecl FUN_00d9db60(S00d9db60_Mediator& mediator, S00d9db60_KdTree* tree)
         MixChannels(buffers, tree->m_kNodeCollection.begin(), tree->getProjectedEntries(),
                     tree->m_kNodeCollection.GetLogicalSize(), mediator.GetNumEntries(), numReservedEmptyNodes,
                     tree->m_iNumNodes);
-        entriesB.ClearAndRelease();
-        entriesA.ClearAndRelease();
+        S00d9db60_Array_ClearAndRelease(entriesB);
+        S00d9db60_Array_ClearAndRelease(entriesA);
         return;
     }
 
@@ -389,6 +385,18 @@ void __cdecl FUN_00d9db60(S00d9db60_Mediator& mediator, S00d9db60_KdTree* tree)
     }
 
     FUN_00d9d950(tree, mediator.GetNumEntries(), subTreeDepths, numPrimitivesPerSubTree);
-    entriesB.ClearAndRelease();
-    entriesA.ClearAndRelease();
+    S00d9db60_Array_ClearAndRelease(entriesB);
+    S00d9db60_Array_ClearAndRelease(entriesA);
+}
+
+
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
+{
+    __if_exists(A::destroy) { A::destroy(*this); }
+    __if_not_exists(A::destroy) { clearAndDeallocate(); }
+}
+
+template <class T, class A> __forceinline hkArray<T, A>::hkArray(int n)
+{
+    A::init(*this, n);
 }

@@ -1,6 +1,7 @@
 // gamebryo2.2/corelibs/niconsolerenderer/niconsolerenderstate.cpp: ShaderPassRenderer, RenderState (3 functions)
 
 #include "niconsolerenderstate_decls.h"
+#include "../../../../include/NiD3DDefaultShader.h"
 
 // @fnv 0x00e69460
 unsigned int ShaderPassRenderer::Create(unsigned int useEx)

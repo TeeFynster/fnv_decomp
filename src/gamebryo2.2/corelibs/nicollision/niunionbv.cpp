@@ -14,69 +14,14 @@
 // bytes, with m_uiProgramCodeSize at offset 20.
 //
 
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiGPUProgram.h"
+#include "../../../../include/NiD3DShaderProgram.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiBoundingVolume.h"
+
 typedef unsigned int NiUInt32;
-
-class NiMemObject
-{
-};
-
-class NiRefObject : public NiMemObject
-{
-  public:
-    NiRefObject() : m_uiRefCount(0)
-    {}
-
-    virtual ~NiRefObject()
-    {}
-
-    virtual void DeleteThis()
-    {
-        delete this;
-    }
-
-  protected:
-    NiUInt32 m_uiRefCount;
-};
-
-class NiGPUProgram : public NiRefObject
-{
-  public:
-    enum ProgramType
-    {
-        PROGRAMTYPE_INVALID,
-        PROGRAMTYPE_VERTEX,
-        PROGRAMTYPE_PIXEL
-    };
-
-    ProgramType GetProgramType()
-    {
-        return m_iProgramType;
-    }
-
-  protected:
-    ProgramType m_iProgramType;
-};
-
-class NiD3DShaderProgramCreator;
-class Direct3DDeviceInterface;
-class NiD3DRenderer;
-class NiD3DRenderState;
-
-class NiD3DShaderProgram : public NiGPUProgram
-{
-  public:
-    NiUInt32 GetCodeSize() const;
-
-  protected:
-    char* m_pcProgramName;
-    char* m_pcProfile;
-    NiUInt32 m_uiProgramCodeSize;
-    void* m_pProgramCode;
-    NiD3DShaderProgramCreator* m_pCreator;
-    Direct3DDeviceInterface* m_pD3DDevice;
-    NiD3DRenderer* m_pShaderObject;
-    NiD3DRenderState* m_pRenderState;
-};
 
 // @fnv 0x0DBBC10
 NiUInt32 NiD3DShaderProgram::GetCodeSize() const
@@ -84,11 +29,6 @@ NiUInt32 NiD3DShaderProgram::GetCodeSize() const
     return m_uiProgramCodeSize;
 }
 
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
-typedef P03MM MemoryManager;
 extern MemoryManager g_memoryManager;
 struct S
 {
@@ -119,20 +59,12 @@ int FUN_00e9ecc0()
 }
 
 #pragma optimize("gty", on)
-class S00e9e860_Item
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void Delete(unsigned char acFlags);
-};
-
 class S00e9e860_Obj
 {
   public:
     int unk00;
     int unk04;
-    S00e9e860_Item** m_ppItems;
+    NiBoundingVolume** m_ppItems;
     unsigned short unk0c;
     unsigned short m_uCount;
     unsigned short m_u10;
@@ -149,10 +81,10 @@ void S00e9e860_Obj::FUN_00e9e860()
         {
             do
             {
-                S00e9e860_Item* p = m_ppItems[iIndex];
+                NiBoundingVolume* p = m_ppItems[iIndex];
                 if (p != 0)
                 {
-                    p->Delete(1);
+                    delete p;
                 }
             } while (++iIndex < m_uCount);
         }

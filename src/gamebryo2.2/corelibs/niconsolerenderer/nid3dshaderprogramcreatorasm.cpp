@@ -1,65 +1,26 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct GeometryRelatedType;
-struct NiD3DPixelShader
-{
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual GeometryRelatedType* f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32(void*);
-};
-struct NiD3DShaderProgramCreatorAsm
-{
-    void* FUN_00e988d0(GeometryRelatedType*);
-    bool FUN_00e97940(NiD3DPixelShader* pkPixelShader);
-};
-// Gets the shader handle from pkPixelShader, retrieves its code, and if both exist passes the code to pkPixelShader->f32 and returns true.
+#include "../../../../include/NiD3DShaderProgramCreatorAsm.h"
+#include "../../../../include/NiD3DVertexShader.h"
+#include "../../../../include/NiD3DPixelShader.h"
+
+// Gets the shader code, creates its handle, and stores the handle on the pixel shader.
 // @fnv 0x00e97940
-bool NiD3DShaderProgramCreatorAsm::FUN_00e97940(NiD3DPixelShader* pkPixelShader)
+bool NiD3DShaderProgramCreatorAsm::Recreate(NiD3DPixelShader* pkPixelShader)
 {
     GeometryRelatedType* hShader;
     void* pvCode;
-    hShader = pkPixelShader->f25();
+    hShader = static_cast<GeometryRelatedType*>(pkPixelShader->GetCode());
     if (!hShader)
         return false;
-    pvCode = FUN_00e988d0(hShader);
+    pvCode = CreateHandle(hShader);
     if (!pvCode)
         return false;
-    pkPixelShader->f32(pvCode);
+    pkPixelShader->SetD3DPixelShader(static_cast<GeometryRelatedType*>(pvCode));
     return true;
 }
 
-struct GeometryRelatedType;
 struct PixelShaderInterface
 {
     virtual void Slot00();
@@ -123,76 +84,13 @@ extern void* DAT_0126fa2c;
 
 int FUN_00aa0020(int, int, const char*, long);
 
-struct NiD3DShaderProgramStub
+inline NiD3DVertexShader::NiD3DVertexShader(void* pkRenderer) : NiD3DShaderProgram(pkRenderer, 0)
 {
-    NiD3DShaderProgramStub(void* pkRenderer, int eType) throw();
-    virtual ~NiD3DShaderProgramStub();
-    static void* operator new(unsigned int uiSize);
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-};
-
-struct NiD3DVertexShader : NiD3DShaderProgramStub
-{
-    NiD3DVertexShader(void* pkRenderer) : NiD3DShaderProgramStub(pkRenderer, 0)
-    {
-        m_bIsInitialized = false;
-        m_uiShaderUsage = 0;
-        m_pD3DPixelShader = 0;
-        m_pD3DVertexShader = 0;
-    }
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void SetName(const char* pcName);
-    virtual void v22();
-    virtual void SetFileName(const char* pcFileName);
-    virtual void v24();
-    virtual void v25();
-    virtual void SetProgramCode(unsigned int uiSize, void* pvCode);
-    virtual void v27();
-    virtual void SetCreator(void* pkCreator);
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void SetShaderUsage(unsigned int uiUsage);
-    virtual void v33();
-    virtual void SetD3DPixelShader(void* hShader);
-    virtual void v35();
-    virtual void SetVertexDeclaration(void* hDecl);
-    virtual void v37();
-    virtual void SetSoftwareVertexProcessing(bool bSoftwareVP);
-
-    bool m_bIsInitialized;
-    unsigned int m_uiShaderUsage;
-    void* m_pD3DPixelShader;
-    void* m_pD3DVertexShader;
-};
+    m_bIsInitialized = false;
+    m_uiShaderUsage = 0;
+    m_pD3DPixelShader = 0;
+    m_pD3DVertexShader = 0;
+}
 
 struct VertexShaderCreatorAsm
 {
@@ -241,10 +139,10 @@ NiD3DVertexShader* VertexShaderCreatorAsm::FUN_00e97980(const char* pcFileName, 
         return 0;
     }
 
-    pkVertexShader->SetName(pcShaderName);
-    pkVertexShader->SetFileName(pcFileName);
+    pkVertexShader->SetName(const_cast<char*>(pcShaderName));
+    pkVertexShader->SetShaderProfile(const_cast<char*>(pcFileName));
     pkVertexShader->SetProgramCode(uiCodeSize, pvCode);
-    pkVertexShader->SetCreator(this);
+    pkVertexShader->SetCreator(reinterpret_cast<NiD3DShaderProgramCreator*>(this));
     pkVertexShader->SetD3DPixelShader(hShader);
     pkVertexShader->SetShaderUsage(uiUsage);
     pkVertexShader->SetVertexDeclaration(hDecl);
@@ -252,74 +150,13 @@ NiD3DVertexShader* VertexShaderCreatorAsm::FUN_00e97980(const char* pcFileName, 
     return pkVertexShader;
 }
 
-namespace fnv_00e97c60 {
-struct GeometryRelatedType;
-struct ShaderCreatorAsmStub;
+inline NiD3DPixelShader::NiD3DPixelShader(NiD3DRenderer* pkRenderer)
+    : NiD3DShaderProgram(pkRenderer, 2), m_pD3DPixelShader(0)
+{}
 
+namespace fnv_00e97c60 {
 extern void* DAT_0126fa2c;
 int FUN_00aa0020(int, int, const char*, long);
-
-struct NiMemObjectStub
-{
-    static void* operator new(unsigned int uiSize);
-};
-
-struct NiD3DShaderProgramStub : NiMemObjectStub
-{
-    NiD3DShaderProgramStub(void* pkRenderer, int eType) throw();
-    virtual ~NiD3DShaderProgramStub();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void SetName(const char* pcName);
-    virtual void f22();
-    virtual void SetFileName(const char* pcFileName);
-    virtual void f24();
-    virtual void f25();
-    virtual void SetProgramCode(unsigned int uiSize, void* pvCode);
-    virtual void f27();
-    virtual void SetCreator(ShaderCreatorAsmStub* pkCreator);
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void SetD3DPixelShader(GeometryRelatedType* hShader);
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-};
-
-struct NiD3DPixelShaderStub : NiD3DShaderProgramStub
-{
-    NiD3DPixelShaderStub(void* pkRenderer) throw() : NiD3DShaderProgramStub(pkRenderer, 2), m_pD3DPixelShader(0)
-    {}
-    virtual ~NiD3DPixelShaderStub();
-    GeometryRelatedType* m_pD3DPixelShader;
-};
 
 struct ShaderCreatorAsmStub
 {
@@ -336,17 +173,17 @@ struct ShaderCreatorAsmStub
                                 int iFlags);
 
     GeometryRelatedType* CreateHandle(void* pvCode);
-    NiD3DPixelShaderStub* FUN_00e97c60(const char* pcFileName, const char* pcShaderName, const char* pcEntryPoint,
+    NiD3DPixelShader* FUN_00e97c60(const char* pcFileName, const char* pcShaderName, const char* pcEntryPoint,
                                        const char* pcShaderTarget, int iFlags);
 };
 
-// Creates a NiD3DPixelShaderStub, loads its shader code, creates the handle, sets name/file/code/creator/handle, and returns it or 0 on failure.
+// Creates a NiD3DPixelShader, loads its shader code, creates the handle, sets name/file/code/creator/handle, and returns it or 0 on failure.
 // @fnv 0x00e97c60
-NiD3DPixelShaderStub* ShaderCreatorAsmStub::FUN_00e97c60(const char* pcFileName, const char* pcShaderName,
+NiD3DPixelShader* ShaderCreatorAsmStub::FUN_00e97c60(const char* pcFileName, const char* pcShaderName,
                                                          const char* pcEntryPoint, const char* pcShaderTarget,
                                                          int iFlags)
 {
-    NiD3DPixelShaderStub* pkShader = new NiD3DPixelShaderStub(DAT_0126fa2c);
+    NiD3DPixelShader* pkShader = new NiD3DPixelShader(static_cast<NiD3DRenderer*>(DAT_0126fa2c));
     if (!pkShader)
         return 0;
 
@@ -368,10 +205,10 @@ NiD3DPixelShaderStub* ShaderCreatorAsmStub::FUN_00e97c60(const char* pcFileName,
         return 0;
     }
 
-    pkShader->SetName(pcShaderName);
-    pkShader->SetFileName(pcFileName);
+    pkShader->SetName(const_cast<char*>(pcShaderName));
+    pkShader->SetShaderProfile(const_cast<char*>(pcFileName));
     pkShader->SetProgramCode(uiCodeSize, pvCode);
-    pkShader->SetCreator(this);
+    pkShader->SetCreator(reinterpret_cast<NiD3DShaderProgramCreator*>(this));
     pkShader->SetD3DPixelShader(hShader);
     return pkShader;
 }
@@ -379,55 +216,6 @@ NiD3DPixelShaderStub* ShaderCreatorAsmStub::FUN_00e97c60(const char* pcFileName,
 
 extern void* DAT_0126fa2c;
 int FUN_00aa0020(int, int, const char*, long);
-struct NiMemObject
-{
-    static void* operator new(unsigned int) throw();
-};
-struct PixelBase : NiMemObject
-{
-    PixelBase(void*, int) throw();
-    virtual void destroy(int);
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21(void*);
-    virtual void f22();
-    virtual void f23(int);
-    virtual void f24();
-    virtual void f25();
-    virtual void f26(void*, void*);
-    virtual void f27();
-    virtual void f28(void*);
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32(void*);
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28;
-};
-struct Pixel : PixelBase
-{
-    int unk2c;
-    Pixel() throw() : PixelBase(DAT_0126fa2c, 2), unk2c(0)
-    {}
-    virtual void destroy(int);
-};
 struct Creator
 {
     virtual void f00();
@@ -441,12 +229,12 @@ struct Creator
     virtual void f08();
     virtual void f09();
     virtual bool compile(void*, void*, GeometryRelatedType**, void**, void**, void**, int);
-    Pixel* FUN_00e97d80(void*, void*, void*, int, int, int);
+    NiD3DPixelShader* FUN_00e97d80(void*, void*, void*, int, int, int);
 };
 // @fnv 0x00e97d80
-Pixel* Creator::FUN_00e97d80(void* a, void* b, void* apShaderName, int d, int e, int f)
+NiD3DPixelShader* Creator::FUN_00e97d80(void* a, void* b, void* apShaderName, int d, int e, int f)
 {
-    Pixel* shader = new Pixel;
+    NiD3DPixelShader* shader = new NiD3DPixelShader(static_cast<NiD3DRenderer*>(DAT_0126fa2c));
     if (!shader)
         return 0;
     GeometryRelatedType* first;
@@ -456,21 +244,21 @@ Pixel* Creator::FUN_00e97d80(void* a, void* b, void* apShaderName, int d, int e,
     void* fourth = 0;
     if (!compile(a, b, &first, &second, &fourth, &third, f))
     {
-        shader->destroy(1);
+        delete shader;
         return 0;
     }
-    void* pShaderHandle = reinterpret_cast<NiD3DShaderProgramCreatorAsm*>(this)->FUN_00e988d0(first);
+    void* pShaderHandle = reinterpret_cast<NiD3DShaderProgramCreatorAsm*>(this)->CreateHandle(first);
     if (!pShaderHandle)
     {
         FUN_00aa0020(1, f, "Failed CreatePixelShader call on %s\n", (long)apShaderName);
-        shader->destroy(1);
+        delete shader;
         return 0;
     }
-    shader->f21(apShaderName);
-    shader->f23(0);
-    shader->f26(second, first);
-    shader->f28(this);
-    shader->f32(pShaderHandle);
+    shader->SetName(static_cast<char*>(apShaderName));
+    shader->SetShaderProfile(0);
+    shader->SetProgramCode(reinterpret_cast<unsigned int>(second), first);
+    shader->SetCreator(reinterpret_cast<NiD3DShaderProgramCreator*>(this));
+    shader->SetD3DPixelShader(static_cast<GeometryRelatedType*>(pShaderHandle));
     return shader;
 }
 
@@ -528,10 +316,10 @@ NiD3DVertexShader* VertexShaderCreatorHLSL::FUN_00e97af0(const char* pcFileName,
         return 0;
     }
 
-    pkVertexShader->SetName(pcShaderName);
-    pkVertexShader->SetFileName(0);
+    pkVertexShader->SetName(const_cast<char*>(pcShaderName));
+    pkVertexShader->SetShaderProfile(0);
     pkVertexShader->SetProgramCode(uiCodeSize, pvCode);
-    pkVertexShader->SetCreator(this);
+    pkVertexShader->SetCreator(reinterpret_cast<NiD3DShaderProgramCreator*>(this));
     pkVertexShader->SetD3DPixelShader(hShader);
     pkVertexShader->SetShaderUsage(uiUsage);
     pkVertexShader->SetVertexDeclaration(hDecl);

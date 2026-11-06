@@ -1,13 +1,5 @@
-// fallout_shared/combatformulas_decls.h: declares TESObjectARMO, CombatDamageCalculator
+#pragma once
 
-#include "combatformulas_form.h"
-#include "combatformulas_item.h"
-#include "combatformulas_health.h"
-class TESObjectARMO : public TESForm
-{
-  public:
-    float GetDamageThreshold();
-};
 class CombatDamageCalculator
 {
   public:

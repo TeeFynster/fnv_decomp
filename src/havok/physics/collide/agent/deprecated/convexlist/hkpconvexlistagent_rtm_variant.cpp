@@ -1,41 +1,55 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 // src/havok/physics/collide/agent/deprecated/convexlist/hkpconvexlistagent_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/agent/deprecated/convexlist/hkpconvexlistagent.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
 // src/havok/physics/collide/agent/deprecated/convexlist/hkpconvexlistagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/deprecated/convexlist/hkpconvexlistagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+// Preserve the float-only compiler intrinsic type: VC9's byte-array views
+// of __m128 would add /GS instrumentation to the original SIMD stack locals.
+#define _INCLUDED_MM2
+// Exe 0x00d33f40 FUN_00d33f40: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+
+#include <windows.h>
+#define FNV_VEC4_NO_SSE
+#define FNV_VEC4_SIMD
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/hkpCollisionAgent.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkpCdBody.h"
+#include "../../../../../../../include/hkpCdPointCollector.h"
+#include "../../../../../../../include/hkpFlagCdBodyPairCollector.h"
+#include "../../../../../../../include/hkpSimpleClosestContactCollector.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/RootContactPoint.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkContactPoint.h"
+#include "../../../../../../../include/hkVector4.h"
+#include "../../../../../../../include/hkpClosestCdPointCollector.h"
+#include "../../../../../../../include/hkpCollisionDispatcher.h"
+#include "../../../../../../../include/hkpConvexListAgent.h"
+#include "../../../../../../../include/hkpConvexListShape.h"
+#include "../../../../../../../include/hkpGskfAgent.h"
+
 extern "C" void __cdecl FUN_00da3510(void*, void*);
-struct hkpConvexListAgent
-{
-    void __thiscall RemovePoint(int a);
-    void __thiscall FUN_00d33770(int a);
-};
 extern "C" void __cdecl FUN_00d339d0(int, int, int, int);
-struct FUN_00d33b70_cls
-{
-    void __thiscall FUN_00d33b70(int a, int b, int c, int d);
-};
 extern "C"
 {
     void __cdecl FUN_00d33b90(void* a, void* b, void* c, void* d);
 }
-struct FUN_00d33c80_class
-{
-    void __thiscall FUN_00d33c80(void* a, void* b, void* c, void* d);
-};
-struct hkpCollisionDispatcher
-{
-    struct CollisionAgentFunctionTable
-    {
-        void* pfnA;
-        void* pfnB;
-        void* pfnC;
-        void* pfnD;
-        char b1;
-        char b2;
-    };
-    void __thiscall FUN_00cfbbe0(CollisionAgentFunctionTable* a, int b, int c);
-};
 extern void* __cdecl CreateConvexListAgent();
 extern void* __cdecl InitSpawnedBuffer();
 extern void* __cdecl FUN_00d34970();
@@ -46,34 +60,9 @@ extern void* __cdecl _FUN_00d339d0();
 extern void* __cdecl FUN_00d33ca0();
 extern void* __cdecl FUN_00d34510();
 void __cdecl RegisterConvexListAgentCollisionFuncs(hkpConvexListAgent* self);
-struct FUN_00d337f0_self
-{
-    void __thiscall FUN_00dacb20(int a);
-    void __thiscall FUN_00d337f0(int a);
-};
-struct hkpGskfAgent
-{
-    void __thiscall AddPotential(int a);
-};
-struct FUN_00d33810_cls : hkpGskfAgent
-{
-    void __thiscall FUN_00d33810(int a);
-};
 extern void __cdecl FUN_00d97250(void*, void*, void*);
-struct FUN_00d33740_cls
-{
-    void __thiscall FUN_00d33740(int a, int b);
-};
 void __cdecl FUN_00da42b0(void*, int, int, int);
-struct FUN_00d33850_cls
-{
-    void __thiscall FUN_00d33850(int a);
-};
 void* __stdcall FUN_00d33da0(void* a, void* b, void* c, void* d, void* e);
-struct hkpSimpleClosestContactCollector
-{
-    void Reset();
-};
 struct D338e0Agent
 {
     virtual void vf00();
@@ -105,193 +94,14 @@ struct D338e0Local
     int field18;
     int field1C;
 };
-struct D338e0Owner
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    unsigned char unk84;
-
-    void __thiscall FUN_00d338e0(int param1, int param2, int param3, int param4);
-};
 extern "C" void __cdecl FUN_00da48e0(int*, D338e0Local*);
 inline void D338e0Dispatch(D338e0Local* local, int* ownerField, int result)
 {
     local->field0C = result;
     FUN_00da48e0(ownerField, local);
 }
-struct hkAllocatorD33D
-{
-    virtual void V0() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-};
-struct hkMemoryRouterD33D
-{
-    void* m_apvUnk00[4];
-    hkAllocatorD33D* m_pkHeap;
-    hkAllocatorD33D& heap()
-    {
-        return *m_pkHeap;
-    }
-};
-extern "C" hkMemoryRouterD33D* __cdecl FUN_00c85750() throw();
-struct hkpCdBodyD33D;
-struct hkpContactMgrD33D;
-struct hkpCollisionInputD33D;
-class hkpConvexListFilterD33D
-{
-  public:
-    virtual ~hkpConvexListFilterD33D() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual int ShouldBodiesCollide(const hkpCdBodyD33D& kBodyA, const hkpCdBodyD33D& kBodyB,
-                                    const hkpCollisionInputD33D& kInput) const throw();
-};
-struct hkpCollisionInputD33D
-{
-    int m_aiUnk00[4];
-    hkpConvexListFilterD33D* m_pConvexListCollisionFilter;
-};
-class hkpCollisionAgentD33D
-{
-  public:
-    virtual ~hkpCollisionAgentD33D() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    static __forceinline void* operator new(unsigned int uiSize) throw()
-    {
-        hkpCollisionAgentD33D* p = (hkpCollisionAgentD33D*)FUN_00c85750()->heap().AllocateMemoryBlock(uiSize);
-        p->m_usMemSizeAndFlags = (unsigned short)uiSize;
-        return p;
-    }
-    static void operator delete(void* p) throw();
-};
-class FUN_00d33940 : public hkpCollisionAgentD33D
-{
-  public:
-    FUN_00d33940(const hkpCdBodyD33D& kBodyA, const hkpCdBodyD33D& kBodyB, const hkpCollisionInputD33D& kInput,
-                 hkpContactMgrD33D* pkMgr) throw();
-    char m_acUnk08[0x88];
-};
-class hkpSymmetricConvexListAgentD33D : public FUN_00d33940
-{
-  public:
-    __forceinline hkpSymmetricConvexListAgentD33D(const hkpCdBodyD33D& kBodyA, const hkpCdBodyD33D& kBodyB,
-                                                  const hkpCollisionInputD33D& kInput, hkpContactMgrD33D* pkMgr) throw()
-        : FUN_00d33940(kBodyB, kBodyA, kInput, pkMgr)
-    {}
-    virtual ~hkpSymmetricConvexListAgentD33D() throw();
-};
-class FUN_00d440f0 : public hkpCollisionAgentD33D
-{
-  public:
-    FUN_00d440f0(const hkpCdBodyD33D& kBodyA, const hkpCdBodyD33D& kBodyB, const hkpCollisionInputD33D& kInput,
-                 hkpContactMgrD33D* pkMgr) throw();
-    char m_acUnk08[0x30];
-};
-class FUN_00dacbd0 : public hkpCollisionAgentD33D
-{
-  public:
-    FUN_00dacbd0(const hkpCdBodyD33D& kBodyA, const hkpCdBodyD33D& kBodyB, hkpContactMgrD33D* pkMgr) throw();
-    char m_acUnk08[0x78];
-};
-class hkpPredGskfAgentD33D : public FUN_00dacbd0
-{
-  public:
-    __forceinline hkpPredGskfAgentD33D(const hkpCdBodyD33D& kBodyA, const hkpCdBodyD33D& kBodyB,
-                                       hkpContactMgrD33D* pkMgr) throw()
-        : FUN_00dacbd0(kBodyA, kBodyB, pkMgr)
-    {}
-    virtual ~hkpPredGskfAgentD33D() throw();
-};
-hkpCollisionAgentD33D* __cdecl CreateConvexListAgent(const hkpCdBodyD33D& kBodyA, const hkpCdBodyD33D& kBodyB,
-                                                     const hkpCollisionInputD33D& kInput,
-                                                     hkpContactMgrD33D* pkMgr) throw();
 void __cdecl ReleaseAllEntries(void* out, void* src, void* arg);
 void InitBlockPool(void* p);
-struct hkArrayD33E
-{
-    void* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArrayD33E() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    static void* operator new(unsigned int, void* p) throw()
-    {
-        return p;
-    }
-};
-struct hkObjD33E
-{
-    int unk00;
-    int unk04;
-    void* m_pObservedSource;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    hkArrayD33E m_ppData;
-    float m_3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    char m_84;
-    char unk85;
-    short m_86;
-
-    void FUN_00d33ef0(void* arg);
-};
 class hkCollectorBaseD347
 {
   public:
@@ -323,17 +133,6 @@ struct hkMemberD337
     int unk00;
 };
 void __cdecl FUN_00da35f0(hkMemberD337* member, float a, float b, int c);
-class hkObjD337
-{
-  public:
-    int unk00[12];
-    hkMemberD337 m_30;
-    int unk34[20];
-    bool m_84;
-
-    void SetValueIfExpected(float a, float b, int c);
-    void SetValue(float a, float b, int c);
-};
 // @fnv 0x00d33890
 extern void __cdecl ReleaseAllEntries(void*, int, void*);
 struct ContactAgent
@@ -411,71 +210,10 @@ struct S00d33940_Sub
 {
     void FUN_00dafcd0(int a, int b, S00d33940_Out* c);
 };
-struct S00d33940_Base
-{
-    int vt;
-    void FUN_00dacbd0(int* a, int* b, void* d);
-};
-struct S00d33940_Obj : S00d33940_Base
-{
-    int unk04;
-    int unk08;
-    S00d33940_Sub unk0c;
-    char unk0d;
-    char unk0e;
-    char unk0f;
-    int unk10;
-    int unk14;
-    float unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    float unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    unsigned char unk84;
-    unsigned char unk85;
-    S00d33940_Obj* FUN_00d33940(int* a, int* b, int* c, void* d);
-};
 extern "C" unsigned __int64 __rdtsc(void);
-#include <windows.h>
 extern "C" void _ReadWriteBarrier(void);
 extern DWORD DAT_0126835c;
 extern char DAT_010cebd0;
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-    const char* m_pName2;
-};
-struct ProfBuf
-{
-    DWORD unk00;
-    char* m_pCur;
-    DWORD unk08;
-    char* m_pRecordEnd;
-};
 struct HitCollector
 {
     void* m_vtbl;
@@ -487,16 +225,16 @@ void __cdecl FUN_00d34790(void* a, void* b, void* c, void* d);
 extern "C" void __cdecl FUN_00d33b90(void* a, void* b, void* c, void* d)
 {
     volatile DWORD tick;
-    ProfBuf* pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+    hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
     {
-        ProfRec* pRec = (ProfRec*)pBuf->m_pCur;
-        pRec->m_pName = "LtCvxList";
-        pRec->m_pName2 = "StcheckHull";
+        hkMonitorStream::TimerCommand* pRec = (hkMonitorStream::TimerCommand*)pBuf->m_end.m_storage;
+        pRec->m_commandAndMonitor = "LtCvxList";
+        reinterpret_cast<hkMonitorStream::TimerBeginListCommand*>(pRec)->m_nameOfFirstSplit = "StcheckHull";
         _ReadWriteBarrier();
         tick = (DWORD)__rdtsc();
-        pRec->m_iTick = tick;
-        pBuf->m_pCur = (char*)pRec + 0x10;
+        pRec->m_time0 = tick;
+        pBuf->m_end.m_storage = reinterpret_cast<char*>((hkMonitorStream::TimerCommand*)((char*)pRec + 0x10));
     }
 
     HitCollector col;
@@ -505,28 +243,28 @@ extern "C" void __cdecl FUN_00d33b90(void* a, void* b, void* c, void* d)
     TestGsk(a, b, c, &col);
     if (col.m_bHit)
     {
-        pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-        if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+        pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
         {
-            ProfRec* pRec = (ProfRec*)pBuf->m_pCur;
-            pRec->m_pName = "Stchildren";
+            hkMonitorStream::TimerCommand* pRec = (hkMonitorStream::TimerCommand*)pBuf->m_end.m_storage;
+            pRec->m_commandAndMonitor = "Stchildren";
             _ReadWriteBarrier();
             tick = (DWORD)__rdtsc();
-            pRec->m_iTick = tick;
-            pBuf->m_pCur = (char*)pRec + 0xc;
+            pRec->m_time0 = tick;
+            pBuf->m_end.m_storage = reinterpret_cast<char*>((hkMonitorStream::TimerCommand*)((char*)pRec + 0xc));
         }
         FUN_00d34790(a, b, c, d);
     }
 
-    pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+    pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
     {
-        ProfRec* pRec = (ProfRec*)pBuf->m_pCur;
-        pRec->m_pName = "lt";
+        hkMonitorStream::TimerCommand* pRec = (hkMonitorStream::TimerCommand*)pBuf->m_end.m_storage;
+        pRec->m_commandAndMonitor = "lt";
         _ReadWriteBarrier();
         tick = (DWORD)__rdtsc();
-        pRec->m_iTick = tick;
-        pBuf->m_pCur = (char*)pRec + 0xc;
+        pRec->m_time0 = tick;
+        pBuf->m_end.m_storage = reinterpret_cast<char*>((hkMonitorStream::TimerCommand*)((char*)pRec + 0xc));
     }
 }
 extern "C" void _ReadWriteBarrier(void);
@@ -540,125 +278,26 @@ extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTls
 extern "C" int __cdecl TestGsk(const void* a, const void* b, const void* c, void* d);
 extern "C" void __cdecl FUN_00dac450(const void* a, const void* b, const void* c, void* d);
 extern "C" void __cdecl QueryClosestPoints(const void* a, const void* b, const void* c, void* d);
-struct StringCursor
-{
-    int unk00;
-    char* m_commandPointer;
-    int unk08;
-    char* m_endCommandPointer;
-};
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-} __m128;
-struct hkVector4
-{
-    __m128 m_vComponents;
-    hkVector4& operator=(const hkVector4& other)
-    {
-        m_vComponents = other.m_vComponents;
-        return *this;
-    }
-};
-struct hkContactPoint
-{
-    hkVector4 m_vContactPosition;
-    hkVector4 m_vSeparatingNormal;
-    float getDistance() const
-    {
-        return m_vSeparatingNormal.m_vComponents.m128_f32[3];
-    }
-    hkContactPoint& operator=(const hkContactPoint& other)
-    {
-        m_vContactPosition = other.m_vContactPosition;
-        m_vSeparatingNormal = other.m_vSeparatingNormal;
-        return *this;
-    }
-};
-struct RootContactPoint
-{
-    hkContactPoint m_kPoint;
-    const void* m_pRootCollidableA;
-    unsigned int m_uiShapeKeyA;
-    const void* m_pRootCollidableB;
-    unsigned int m_uiShapeKeyB;
-};
-struct hkpFlagCdBodyPairCollector
-{
-    const void* vtbl;
-    bool m_flag;
-    hkpFlagCdBodyPairCollector() : vtbl(&DAT_010cebd0), m_flag(false)
-    {}
-    bool DidHit() const
-    {
-        return m_flag;
-    }
-};
-struct hkpClosestCdPointCollector
-{
-    const void* vtbl;
-    float m_fEarlyOutDistance;
-    int unk08;
-    int unk0C;
-    RootContactPoint m_kHitPoint;
-    RootContactPoint m_unweldedHitPoint;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-
-    hkpClosestCdPointCollector()
-    {
-        m_kHitPoint.m_kPoint.m_vSeparatingNormal.m_vComponents.m128_f32[3] = DAT_0104da48;
-        m_fEarlyOutDistance = DAT_0104da48;
-        vtbl = &DAT_010c476c;
-        m_kHitPoint.m_pRootCollidableA = 0;
-    }
-
-    bool DidHit() const
-    {
-        return m_kHitPoint.m_pRootCollidableA != 0;
-    }
-};
-struct hkpCdBody
-{
-    const void* m_pCollisionShape;
-};
-struct hkpConvexListShape
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    float m_minDistanceToUseConvexHull;
-};
 struct ContactPointPair
 {
     hkContactPoint m_kPoint;
     const void* m_pBodyA;
     const void* m_pBodyB;
 };
-struct hkpCdPointCollector
-{
-    virtual void unk00() = 0;
-    virtual void AddCdPoint(const ContactPointPair& point) = 0;
-};
 // @fnv 0x00d339d0
 extern "C" void __cdecl FUN_00d339d0(int a1, int a2, int a3, int a4)
 {
     {
-        StringCursor* pForm = (StringCursor*)TlsGetValue(DAT_0126835c);
-        char* p = pForm->m_commandPointer;
-        if (p < pForm->m_endCommandPointer)
+        hkMonitorStream* pForm = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        char* p = pForm->m_end.m_storage;
+        if (p < pForm->m_capacityMinus16.m_storage)
         {
             *(const char**)p = "LtCvxList";
             *(const char**)(p + 12) = "StcheckHull";
             _ReadWriteBarrier();
             volatile unsigned int t = (unsigned int)__rdtsc();
             *(unsigned int*)(p + 4) = t;
-            pForm->m_commandPointer = p + 16;
+            pForm->m_end.m_storage = p + 16;
         }
     }
 
@@ -666,9 +305,9 @@ extern "C" void __cdecl FUN_00d339d0(int a1, int a2, int a3, int a4)
     TestGsk((const void*)a1, (const void*)a2, (const void*)a3, &flagCollector);
     if (flagCollector.DidHit())
     {
-        StringCursor* pForm = (StringCursor*)TlsGetValue(DAT_0126835c);
-        char* p = pForm->m_commandPointer;
-        if (p < pForm->m_endCommandPointer)
+        hkMonitorStream* pForm = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        char* p = pForm->m_end.m_storage;
+        if (p < pForm->m_capacityMinus16.m_storage)
         {
             *(const char**)p = "Stchildren";
             _ReadWriteBarrier();
@@ -676,7 +315,7 @@ extern "C" void __cdecl FUN_00d339d0(int a1, int a2, int a3, int a4)
             // Keep this timer read separate from the child-path timer read.
             _ReadWriteBarrier();
             *(unsigned int*)(p + 4) = t;
-            pForm->m_commandPointer = p + 12;
+            pForm->m_end.m_storage = p + 12;
         }
         QueryClosestPoints((const void*)a1, (const void*)a2, (const void*)a3, (hkpCdPointCollector*)a4);
     }
@@ -698,29 +337,29 @@ extern "C" void __cdecl FUN_00d339d0(int a1, int a2, int a3, int a4)
             ((hkpCdPointCollector*)a4)->AddCdPoint(point);
             goto timer_end;
         }
-        StringCursor* pForm = (StringCursor*)TlsGetValue(DAT_0126835c);
-        char* p = pForm->m_commandPointer;
-        if (p < pForm->m_endCommandPointer)
+        hkMonitorStream* pForm = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        char* p = pForm->m_end.m_storage;
+        if (p < pForm->m_capacityMinus16.m_storage)
         {
             *(const char**)p = str_010cec28;
             _ReadWriteBarrier();
             volatile unsigned int t = (unsigned int)__rdtsc();
             *(unsigned int*)(p + 4) = t;
-            pForm->m_commandPointer = p + 12;
+            pForm->m_end.m_storage = p + 12;
         }
         QueryClosestPoints((const void*)a1, (const void*)a2, (const void*)a3, (hkpCdPointCollector*)a4);
     }
 
 timer_end: {
-    StringCursor* pForm = (StringCursor*)TlsGetValue(DAT_0126835c);
-    char* p = pForm->m_commandPointer;
-    if (p < pForm->m_endCommandPointer)
+    hkMonitorStream* pForm = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* p = pForm->m_end.m_storage;
+    if (p < pForm->m_capacityMinus16.m_storage)
     {
         *(const char**)p = str_01076f38;
         _ReadWriteBarrier();
         volatile unsigned int t = (unsigned int)__rdtsc();
         *(unsigned int*)(p + 4) = t;
-        pForm->m_commandPointer = p + 12;
+        pForm->m_end.m_storage = p + 12;
     }
 }
 }
@@ -737,21 +376,21 @@ static __forceinline void* profileBuffer(const ProfileIndex& index)
 }
 extern "C"
 {
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_sqrt_ss(__m128);
-    void _mm_store_ss(float*, __m128);
-    __m128 _mm_load_ss(const float*);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_sqrt_ss(LocalM128);
+    void _mm_store_ss(float*, LocalM128);
+    LocalM128 _mm_load_ss(const float*);
 }
-static __forceinline __m128 Splat(const float& f)
+static __forceinline LocalM128 Splat(const float& f)
 {
-    __m128 r = _mm_load_ss(&f);
+    LocalM128 r = _mm_load_ss(&f);
     return _mm_shuffle_ps(r, r, 0);
 }
-static __forceinline float ParseFloatValue(__m128 v)
+static __forceinline float ParseFloatValue(LocalM128 v)
 {
     float f;
     _mm_store_ss(&f, v);
@@ -761,14 +400,6 @@ static __forceinline float ParseFloatValue(__m128 v)
 extern void* DAT_010ceb44;
 extern const char str_010ceb84[], str_010ceb7c[], str_010ceb70[], str_010ceca0[], str_01076f38[];
 
-union Vec4
-{
-    __m128 quad;
-    struct
-    {
-        float x, y, z, w;
-    };
-};
 struct L16
 {
     Vec4 v;
@@ -953,26 +584,6 @@ struct Big
     int p60, p64, p68, p6c;
     Vec4 vec;
 };
-struct D33ProfBuf
-{
-    int unkp00;
-    char* cursor;
-    int unkp08;
-    char* end;
-};
-struct Rec16
-{
-    const char* name;
-    unsigned int tick;
-    void* unk;
-    const char* name2;
-};
-struct Rec12
-{
-    const char* name;
-    unsigned int tick;
-    void* unk;
-};
 
 void FUN_00d33670(void* a);
 void FUN_00d33600(void* a, void* b, void* c, void* d);
@@ -989,10 +600,6 @@ struct AddressValue
 };
 void FUN_00da4aa0(void* a, const void* b, AddressValue wrapped, void* d, void* e);
 void ReleaseAllEntries(void* a, void* b, void* c);
-struct ScratchArena
-{
-    int* cursor;
-};
 
 typedef void(__thiscall* Ws70Fn)(void*, const void*);
 typedef void(__thiscall* Ws00Fn)(void*, const void*, const void*, const void*, void*);
@@ -1061,12 +668,12 @@ struct Agent
 
 __forceinline void projectDistance(Vec4& normal, const Vec4& vec)
 {
-    __m128 p = _mm_mul_ps(normal.quad, vec.quad);
-    __m128 v = vec.quad;
-    __m128 s3 = _mm_shuffle_ps(v, v, 0xff);
-    __m128 s2 = _mm_shuffle_ps(p, p, 0xaa);
-    __m128 s1 = _mm_shuffle_ps(p, p, 0x55);
-    __m128 rr = _mm_add_ps(_mm_add_ss(s2, s3), _mm_add_ss(s1, p));
+    LocalM128 p = _mm_mul_ps(normal.m_vComponents, vec.m_vComponents);
+    LocalM128 v = vec.m_vComponents;
+    LocalM128 s3 = _mm_shuffle_ps(v, v, 0xff);
+    LocalM128 s2 = _mm_shuffle_ps(p, p, 0xaa);
+    LocalM128 s1 = _mm_shuffle_ps(p, p, 0x55);
+    LocalM128 rr = _mm_add_ps(_mm_add_ss(s2, s3), _mm_add_ss(s1, p));
     float dot;
     _mm_store_ss(&dot, rr);
     normal.w -= dot;
@@ -1081,7 +688,7 @@ struct ScalarScratch
     union
     {
         float dt;
-        D33ProfBuf* volatile monitor;
+        hkMonitorStream* volatile monitor;
         float minimum;
     } first;
     union
@@ -1105,13 +712,13 @@ __forceinline void calculateMotion(const Obj& oa, const Obj& ob, ScalarScratch& 
 {
     scratch.a.factor = scratch.first.dt * oa.m_50.w;
     scratch.b.factor = scratch.first.dt * ob.m_50.w;
-    __m128 scaleA = Splat(scratch.a.factor);
-    __m128 scaleB = Splat(scratch.b.factor);
-    __m128 vc = ob.m_40.quad;
-    __m128 vd = ob.m_50.quad;
-    __m128 va = oa.m_40.quad;
-    __m128 vb = oa.m_50.quad;
-    vec.quad = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(vd, vc), scaleB), _mm_mul_ps(_mm_sub_ps(va, vb), scaleA));
+    LocalM128 scaleA = Splat(scratch.a.factor);
+    LocalM128 scaleB = Splat(scratch.b.factor);
+    LocalM128 vc = ob.m_40.m_vComponents;
+    LocalM128 vd = ob.m_50.m_vComponents;
+    LocalM128 va = oa.m_40.m_vComponents;
+    LocalM128 vb = oa.m_50.m_vComponents;
+    vec.m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(vd, vc), scaleB), _mm_mul_ps(_mm_sub_ps(va, vb), scaleA));
     vec.w = oa.m_9c * scratch.a.factor * oa.m_a0 + ob.m_9c * scratch.b.factor * ob.m_a0;
 }
 
@@ -1123,20 +730,21 @@ __forceinline void Agent::streamCollision(const Shape& a, const Shape& b, const 
     big.a = &a;
     big.b = &b;
     big.agent08 = m_08;
-    __m128 motion = vec.quad;
+    LocalM128 motion = vec.m_vComponents;
     big.c = &c;
-    big.vec.quad = motion;
+    big.vec.m_vComponents = motion;
     big.co.FUN_00cb22f0(a.m_08, b.m_08);
     int count = bHead->count;
-    ScratchArena* pool = (ScratchArena*)FUN_00c85750();
-    int* arr = pool->cursor;
-    pool->cursor = (int*)((unsigned int)arr + (((unsigned int)(count * 4 + 4) + 0x7f) & ~0x7f));
+    // The shared router accessor is bound to 0x00c85750; its first slot holds the scratch cursor.
+    hkMemoryRouter* pool = (&hkMemoryRouter::getInstance());
+    int* arr = (int*)pool->m_stack.m_next.m_storage;
+    pool->m_stack.m_next.m_storage = (int*)((unsigned int)arr + (((unsigned int)(count * 4 + 4) + 0x7f) & ~0x7f));
     for (int i = 0; i < count; i++)
         arr[i] = i;
     arr[count] = -1;
     FUN_00da4aa0(&streaming(), &big, AddressValue(&bHead->unk14), arr, &d);
-    ScratchArena* pool2 = (ScratchArena*)FUN_00c85750();
-    pool2->cursor = arr;
+    hkMemoryRouter* pool2 = (&hkMemoryRouter::getInstance());
+    pool2->m_stack.m_next.m_storage = arr;
 }
 __forceinline void Agent::processCached(const Shape& a, const Shape& b, const Arg3& c, Arg4& d, const Vec4& vec,
                                         Workspace& ws, StackObj& so, ScalarScratch& scratch, bool& retry)
@@ -1152,17 +760,17 @@ __forceinline void Agent::processCached(const Shape& a, const Shape& b, const Ar
         }
     }
     {
-        D33ProfBuf* pBuf;
-        pBuf = (D33ProfBuf*)TlsGetValue(DAT_0126835c);
+        hkMonitorStream* pBuf;
+        pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
         scratch.first.monitor = pBuf;
-        Rec12* pRec = (Rec12*)pBuf->cursor;
-        if (pRec < (Rec12*)pBuf->end)
+        hkMonitorStream::TimerCommand* pRec = (hkMonitorStream::TimerCommand*)pBuf->m_end.m_storage;
+        if (pRec < (hkMonitorStream::TimerCommand*)pBuf->m_capacityMinus16.m_storage)
         {
-            pRec->name = str_010ceca0;
+            pRec->m_commandAndMonitor = str_010ceca0;
             _ReadWriteBarrier();
             scratch.a.stamp = (unsigned int)__rdtsc();
-            pRec->tick = scratch.a.stamp;
-            scratch.first.monitor->cursor = (char*)(pRec + 1);
+            pRec->m_time0 = scratch.a.stamp;
+            scratch.first.monitor->m_end.m_storage = reinterpret_cast<char*>((hkMonitorStream::TimerCommand*)(pRec + 1));
         }
         so.kind = 2;
         so.m_06s = 1;
@@ -1222,16 +830,16 @@ void __thiscall Agent::FUN_00d33f40(const Shape& a, const Shape& b, const Arg3& 
     } temp;
 
     {
-        D33ProfBuf* pBuf;
-        Rec16* pRec = (Rec16*)(pBuf = (D33ProfBuf*)TlsGetValue(DAT_0126835c))->cursor;
-        if (pRec < (Rec16*)pBuf->end)
+        hkMonitorStream* pBuf;
+        hkMonitorStream::TimerBeginListCommand* pRec = (hkMonitorStream::TimerBeginListCommand*)(pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c))->m_end.m_storage;
+        if (pRec < (hkMonitorStream::TimerBeginListCommand*)pBuf->m_capacityMinus16.m_storage)
         {
-            pRec->name = str_010ceb84;
-            pRec->name2 = str_010ceb7c;
+            pRec->m_commandAndMonitor = str_010ceb84;
+            pRec->m_nameOfFirstSplit = str_010ceb7c;
             _ReadWriteBarrier();
             scratch.a.stamp = (unsigned int)__rdtsc();
-            pRec->tick = scratch.a.stamp;
-            pBuf->cursor = (char*)(pRec + 1);
+            pRec->m_time0 = scratch.a.stamp;
+            pBuf->m_end.m_storage = reinterpret_cast<char*>((hkMonitorStream::TimerCommand*)(pRec + 1));
         }
     }
     scratch.last.shape = b.m_00;
@@ -1241,17 +849,17 @@ void __thiscall Agent::FUN_00d33f40(const Shape& a, const Shape& b, const Arg3& 
     if (m_84 != 0)
         goto project;
 stream: {
-    D33ProfBuf* pBuf;
-    pBuf = (D33ProfBuf*)TlsGetValue(DAT_0126835c);
+    hkMonitorStream* pBuf;
+    pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
     scratch.first.monitor = pBuf;
-    Rec12* pRec = (Rec12*)pBuf->cursor;
-    if (pRec < (Rec12*)pBuf->end)
+    hkMonitorStream::TimerCommand* pRec = (hkMonitorStream::TimerCommand*)pBuf->m_end.m_storage;
+    if (pRec < (hkMonitorStream::TimerCommand*)pBuf->m_capacityMinus16.m_storage)
     {
-        pRec->name = str_010ceb70;
+        pRec->m_commandAndMonitor = str_010ceb70;
         _ReadWriteBarrier();
         scratch.b.stamp = (unsigned int)__rdtsc();
-        pRec->tick = scratch.b.stamp;
-        scratch.first.monitor->cursor = (char*)(pRec + 1);
+        pRec->m_time0 = scratch.b.stamp;
+        scratch.first.monitor->m_end.m_storage = reinterpret_cast<char*>((hkMonitorStream::TimerCommand*)(pRec + 1));
     }
     short oc = m_86;
     m_86 = (short)(oc - 1);
@@ -1287,13 +895,13 @@ project: {
 }
 // Streaming path: reduce cached distance by motion length, then visit all shape keys.
 sqrtpath: {
-    __m128 vv = vec.quad;
-    __m128 sq = _mm_mul_ps(vv, vv);
-    __m128 sh1 = _mm_shuffle_ps(sq, sq, 0x55);
-    __m128 s1 = _mm_add_ss(sh1, sq);
-    __m128 sh2 = _mm_shuffle_ps(sq, sq, 0xaa);
-    __m128 s2 = _mm_add_ss(sh2, s1);
-    __m128 len = _mm_sqrt_ss(s2);
+    LocalM128 vv = vec.m_vComponents;
+    LocalM128 sq = _mm_mul_ps(vv, vv);
+    LocalM128 sh1 = _mm_shuffle_ps(sq, sq, 0x55);
+    LocalM128 s1 = _mm_add_ss(sh1, sq);
+    LocalM128 sh2 = _mm_shuffle_ps(sq, sq, 0xaa);
+    LocalM128 s2 = _mm_add_ss(sh2, s1);
+    LocalM128 len = _mm_sqrt_ss(s2);
     _mm_store_ss(&scratch.radius, len);
     streaming().distance -= scratch.radius;
     streamCollision(a, b, c, d, vec, scratch.last.shape);
@@ -1301,16 +909,16 @@ sqrtpath: {
 tail:
     m_85 = 1;
     {
-        D33ProfBuf* pBuf;
+        hkMonitorStream* pBuf;
         unsigned long index = DAT_0126835c;
-        Rec12* pRec = (Rec12*)(pBuf = (D33ProfBuf*)profileBuffer(ProfileIndex(index)))->cursor;
-        if (pRec < (Rec12*)pBuf->end)
+        hkMonitorStream::TimerCommand* pRec = (hkMonitorStream::TimerCommand*)(pBuf = (hkMonitorStream*)profileBuffer(ProfileIndex(index)))->m_end.m_storage;
+        if (pRec < (hkMonitorStream::TimerCommand*)pBuf->m_capacityMinus16.m_storage)
         {
-            pRec->name = str_01076f38;
+            pRec->m_commandAndMonitor = str_01076f38;
             _ReadWriteBarrier();
             scratch.last.stamp = (unsigned int)__rdtsc();
-            pRec->tick = scratch.last.stamp;
-            pBuf->cursor = (char*)(pRec + 1);
+            pRec->m_time0 = scratch.last.stamp;
+            pBuf->m_end.m_storage = reinterpret_cast<char*>((hkMonitorStream::TimerCommand*)(pRec + 1));
         }
     }
 }

@@ -2,7 +2,39 @@
 // src/staging/blk_00460000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include <stddef.h>
+#include <windows.h>
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSListForm.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/Setting.h"
+#include "../../include/NiFile.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/MagicTarget.h"
+#include "../../include/TESFullName.h"
+
+#include "../../include/MemoryManager.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/BGSDestructibleObjectForm.h"
+#include "../../include/BGSEncounterZone.h"
+#include "../../include/BGSImpactDataSet.h"
+#include "../../include/BSFile.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/NavMesh.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiObject.h"
+#include "../../include/PathingRequest.h"
+#include "../../include/TESAttackDamageForm.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObject.h"
+
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTLargePrimitiveArray.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/DFALL.h"
+
+typedef NiTLargeArray<void*, NiTMallocInterface<void*> > FNVPointerArray;
 
 struct FUN_004600f0_class
 {
@@ -70,11 +102,6 @@ void __thiscall FUN_00464f40_class::FUN_00464f40()
     FUN_00470110();
 }
 
-struct NavMesh
-{
-    void FUN_0042fd70(int);
-    NavMesh* FUN_00464ff0(int);
-};
 
 // @fnv 0x00464ff0
 NavMesh* NavMesh::FUN_00464ff0(int a)
@@ -338,10 +365,6 @@ void* __cdecl AllocateProduct(unsigned int auiUnused, unsigned int b, unsigned i
 }
 
 namespace fnv_00474480 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 MemoryManager* __cdecl FUN_00401020(void);
 // @fnv 0x00474480
 void __cdecl FUN_00474480(void* apUnused, void* apBlock)
@@ -352,15 +375,11 @@ void __cdecl FUN_00474480(void* apUnused, void* apBlock)
 
 struct ActorCombatGroup;
 
-struct NiTMallocInterface_StandIn
-{
-    static void __cdecl Deallocate(ActorCombatGroup*);
-};
 
 struct FUN_00474760_This
 {
     const char* p;
-    ActorCombatGroup* q;
+    ActorCombatGroup** q;
     void __thiscall FUN_00474760();
 };
 
@@ -368,45 +387,33 @@ struct FUN_00474760_This
 void __thiscall FUN_00474760_This::FUN_00474760()
 {
     p = " HG";
-    NiTMallocInterface_StandIn::Deallocate(q);
+    NiTMallocInterface<ActorCombatGroup*>::Deallocate(q);
 }
 
-extern "C" void* DAT_0101a3b8;
-struct BFC_s
-{
-    BFC_s();
-};
 struct FUN_008c6060_shell
 {
     void FUN_008c6060();
 };
-struct FUN_004748f0 : BFC_s
+struct FUN_004748f0 : BaseFormComponent
 {
-    void* vtbl;
     FUN_004748f0();
 };
 // Sets the vtable pointer to DAT_0101a3b8 and then calls FUN_008c6060 on this object.
 // @fnv 0x004748f0
 FUN_004748f0::FUN_004748f0()
 {
-    vtbl = &DAT_0101a3b8;
     ((FUN_008c6060_shell*)this)->FUN_008c6060();
 }
 
 namespace fnv_004750b0 {
-extern "C" void* DAT_0101a644;
 
-struct BFC_s
-{
-    BFC_s();
-};
 
 struct FUN_00475100_shell
 {
     void SetClipRounds();
 };
 
-struct FUN_004750b0 : BFC_s
+struct FUN_004750b0 : BaseFormComponent
 {
     FUN_004750b0();
 };
@@ -415,7 +422,6 @@ struct FUN_004750b0 : BFC_s
 // @fnv 0x004750b0
 FUN_004750b0::FUN_004750b0()
 {
-    *reinterpret_cast<void**>(this) = &DAT_0101a644;
     reinterpret_cast<FUN_00475100_shell*>(this)->SetClipRounds();
 }
 }  // namespace fnv_004750b0
@@ -595,32 +601,20 @@ void __thiscall FUN_0047ebd0_Class::FUN_0047ebd0(bool value)
     FUN_005fc970(0x20, value);
 }
 
-struct FUN_0047ff50_class
-{
-    void FUN_0047ff50(unsigned short value);
-};
 
 // @fnv 0x0047ff50
-void FUN_0047ff50_class::FUN_0047ff50(unsigned short value)
+void TESAttackDamageForm::SetAttackDamage(unsigned short value)
 {
-    *(unsigned short*)((char*)this + 4) = value;
+    m_usAttackDamage = value;
 }
 
 extern "C" void __cdecl NiFreeAlias(void*);
-extern void* DAT_0101a364;
-
-struct FUN_00474630 : public NiTPointerMap<int, int>
-{
-    void FUN_00474631();
-};
-
-// Sets the vtable pointer, removes all entries from the map, and frees the pointer stored at offset 8.
 // @fnv 0x00474630
-void FUN_00474630::FUN_00474631()
+template <>
+NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, TESFile*>::~NiTMapBase()
 {
-    *(void**)this = &DAT_0101a364;
     RemoveAll();
-    NiFreeAlias(*(void**)((char*)this + 8));
+    NiFreeAlias(m_ppkHashTable);
 }
 
 namespace fnv_00474730 {
@@ -649,7 +643,10 @@ void FUN_00474730_Map::FUN_00474730()
 extern "C" void __cdecl _NiFreeAlias(void*);
 extern int DAT_0101a91c;
 
-struct FUN_004792c0_Class : NiTPointerMap<int, int>
+class TESObjectREFR;
+
+struct FUN_004792c0_Class
+    : NiTMapBase<DFALL<NiTMapItem<TESObjectREFR*, unsigned int> >, TESObjectREFR*, unsigned int>
 {
     void __thiscall FUN_004792c0();
 };
@@ -777,20 +774,7 @@ void* __thiscall FUN_004746d0_Class::FUN_00474530(unsigned int flags)
     return this;
 }
 
-struct FUN_004747c0_Class : public FUN_00474630
-{
-    void* __thiscall FUN_004747c0(unsigned int flags);
-};
-
-// Calls FUN_00474631, then deletes this object if bit 0 of flags is set, and returns this.
-// @fnv 0x004747c0
-void* __thiscall FUN_004747c0_Class::FUN_004747c0(unsigned int flags)
-{
-    FUN_00474631();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
+// Scalar deleting destructor 0x004747c0 is emitted for the shared map base.
 
 void __cdecl Deallocate(void*);
 void FUN_00474730();
@@ -809,11 +793,11 @@ void* FUN_004747f0_class::FUN_004747f0(unsigned int flags)
     return this;
 }
 
+void __cdecl Deallocate(void*);
 struct FUN_00473f00_class
 {
     void __thiscall ForwardToHolder();
 };
-void __cdecl Deallocate(void*);
 struct FUN_00474850_class : public FUN_00473f00_class
 {
     void* __thiscall FUN_00474850(unsigned int flags);
@@ -843,24 +827,6 @@ void* __thiscall FUN_004752e0_Class::FUN_004752e0(unsigned int flags)
     return this;
 }
 
-void __cdecl Deallocate(void*);
-struct FUN_00479140_class
-{
-    void __thiscall FUN_00479140();
-};
-struct FUN_00479160_class
-{
-    void* __thiscall FUN_00479160(unsigned int flags);
-};
-// @fnv 0x00479160
-void* __thiscall FUN_00479160_class::FUN_00479160(unsigned int flags)
-{
-    ((FUN_00479140_class*)this)->FUN_00479140();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
-
 struct FUN_004792f0_Class : FUN_004792c0_Class
 {
     void* __thiscall FUN_004792f0(unsigned int flags);
@@ -875,10 +841,6 @@ void* __thiscall FUN_004792f0_Class::FUN_004792f0(unsigned int flags)
     return this;
 }
 
-struct BGSImpactDataSet
-{
-    static BGSImpactDataSet* ms_pImpactDataSet;
-};
 BGSImpactDataSet* BGSImpactDataSet::ms_pImpactDataSet;
 
 // @fnv 0x00460160
@@ -887,10 +849,6 @@ void FUN_00460160()
     BGSImpactDataSet::ms_pImpactDataSet = 0;
 }
 
-struct BGSEncounterZone
-{
-    static BGSEncounterZone* ms_pDefaultEncounterZone;
-};
 // @fnv 0x00460190
 void __cdecl FUN_00460190()
 {
@@ -964,10 +922,6 @@ void __thiscall FUN_0046e8e0_This::FUN_0046e8e0(KFModel* a, int b, int c, int d,
 
 extern int DAT_01019a14;
 // @fnv 0x0046ffd0
-template <> struct NiTMallocInterface<void*>
-{
-    static void __cdecl Deallocate(void**);
-};
 void __thiscall FUN_0045d930_class::FUN_0046ffd0()
 {
     *(void**)this = (void*)&DAT_01019a14;
@@ -1021,16 +975,6 @@ void* memset(void*, int, unsigned int);
 extern int DAT_010a2480;
 extern unsigned int DAT_01187014;
 
-struct BSFile
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void Seek(int, int);
-    unsigned int Read(void*, unsigned int);
-};
 struct MyForm
 {
     unsigned int uiID;
@@ -1079,44 +1023,21 @@ void FUN_00471e60_shell::LoadFormAndUpdateFlag()
         bFlag = true;
 }
 
-void __cdecl _Deallocate(void*);
-struct FUN_00474500_Class
-{
-    void __thiscall FUN_004745d0();
-    void* __thiscall FUN_00474500(unsigned int flags);
-};
-// @fnv 0x00474500
-void* __thiscall FUN_00474500_Class::FUN_00474500(unsigned int flags)
-{
-    FUN_004745d0();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
+// Scalar deleting destructor 0x00474500 is emitted for NiTPointerMap<unsigned int, TESFile*>.
 
-namespace fnv_00474560 {
 void* __cdecl NiMalloc(unsigned int);
-void __cdecl memset(void* p, int v, unsigned int n);
-struct FUN_00474560_class
-{
-    void* vtbl;
-    unsigned int m_iElementCount;
-    void* m_data;
-    unsigned int m_uiItemCount;
-    FUN_00474560_class(unsigned int size);
-};
-// Sets the vtable, stores size and zeroes a newly allocated buffer of size*4 bytes.
+void* __cdecl memset(void* p, int value, unsigned int size);
+
 // @fnv 0x00474560
-FUN_00474560_class::FUN_00474560_class(unsigned int size)
+template <>
+NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, TESFile*>::NiTMapBase(unsigned int size)
 {
-    vtbl = &DAT_0101a364;
-    m_iElementCount = size;
-    m_uiItemCount = 0;
-    unsigned int n = m_iElementCount << 2;
-    m_data = NiMalloc(n);
-    memset(m_data, 0, m_iElementCount << 2);
+    m_uiHashSize = size;
+    m_kItemCount.m_uiCount = 0;
+    unsigned int n = m_uiHashSize << 2;
+    m_ppkHashTable = static_cast<NiTMapItem<unsigned int, TESFile*>**>(NiMalloc(n));
+    memset(m_ppkHashTable, 0, m_uiHashSize << 2);
 }
-}  // namespace fnv_00474560
 
 extern int DAT_0101a384;
 void* __cdecl _NiMalloc(unsigned int);
@@ -1174,10 +1095,6 @@ void* __thiscall FUN_00474820_Class::FUN_00474820(unsigned int flags)
     return this;
 }
 
-struct TESForm
-{
-    unsigned int GetFormType();
-};
 struct FUN_00474a00_shell
 {
     void* p;
@@ -1192,12 +1109,6 @@ void* FUN_00474a00_shell::GetAmmoForm()
 }
 
 namespace fnv_00474a40 {
-struct TESForm
-{
-    unsigned int vtbl;
-    unsigned int formID;
-    int FNV_GetFormType();
-};
 struct FUN_00474a40_shell
 {
     unsigned int vtbl;
@@ -1301,23 +1212,11 @@ FUN_00478f70_s* FUN_00478f70_s::FUN_00478f70()
     return this;
 }
 
-struct AX
-{
-    void __thiscall FUN_006b3eb0(unsigned int, unsigned int);
-};
-extern int vftable__ShadowSceneArray;
-struct S
-{
-    void* vf;
-    S* __thiscall ConstructShadowSceneArray();
-};
-// Sets the vtable to vftable__ShadowSceneArray, calls FUN_006b3eb0 with 0, 0, and returns this.
 // @fnv 0x00479110
-S* __thiscall S::ConstructShadowSceneArray()
+template <>
+BSSimpleArray<NiNode*>::BSSimpleArray()
 {
-    vf = (void*)&vftable__ShadowSceneArray;
-    ((AX*)this)->FUN_006b3eb0(0, 0);
-    return this;
+    _InitialSetup(0, 0);
 }
 
 void* __cdecl _NiMalloc(unsigned int);
@@ -1351,28 +1250,20 @@ bool __thiscall FUN_0047b470_This::FUN_0047b470()
             ((unsigned char)((FUN_00573eb0_Class*)this)->FUN_0047b4b0() == 0));
 }
 
-struct Actor;
-struct LH
-{
-    bool IsInList(Actor*&);
-};
-struct ScriptS
-{
-    LH* GetHeader();
-};
+// 0x00474a40 selects form type 0x55 (FLST); 0x00500940 returns its form list at +0x18.
 struct FUN_0047ba80_This
 {
     int _0;
-    ScriptS* m4;
+    BGSListForm* m4;
     bool __thiscall IsActorInList(Actor* actor);
 };
-// Returns true if m4 is set and its header reports actor as being in the list; otherwise returns false.
+// Returns true if m4 is set and its form list contains actor; otherwise returns false.
 // @fnv 0x0047ba80
 bool __thiscall FUN_0047ba80_This::IsActorInList(Actor* actor)
 {
     bool flag = false;
     if (m4 != 0)
-        flag = m4->GetHeader()->IsInList(actor);
+        flag = reinterpret_cast<BSSimpleList<Actor*>*>(m4->GetList())->IsInList(actor);
     return flag;
 }
 
@@ -1400,64 +1291,47 @@ struct BSSimpleListTESRaceSize
     int GetSize();
     BSSimpleList<TESForm*>* GetNext();
 };
-struct TESObject
-{
-    unsigned int GetNext();
-};
 struct FUN_00474a00
 {
     TESForm* GetForm();
 };
 struct FUN_00474a40
 {
-    ScriptS* GetScript();
+    BGSListForm* GetListForm();
 };
 struct FUN_00474920_shell
 {
     TESForm* GetFormOrScriptForm();
 };
-// Returns GetForm() if present, otherwise a TESForm from the script's header list at index GetNext(), or the header's first item when the index is out of range.
+// Returns GetForm() if present, otherwise an indexed form from the ammo list, or its first item when the index is out of range.
 // @fnv 0x00474920
 TESForm* FUN_00474920_shell::GetFormOrScriptForm()
 {
     TESForm* result = 0;
     if (((FUN_00474a00*)this)->GetForm())
         result = ((FUN_00474a00*)this)->GetForm();
-    else if (((FUN_00474a40*)this)->GetScript())
+    else if (((FUN_00474a40*)this)->GetListForm())
     {
-        unsigned int count = ((TESObject*)((FUN_00474a40*)this)->GetScript())->GetNext();
-        if (((BSSimpleListTESRaceSize*)((FUN_00474a40*)this)->GetScript()->GetHeader())->GetSize() > count)
+        unsigned int count = (unsigned int)((TESObject*)((FUN_00474a40*)this)->GetListForm())->GetNext();
+        if (((BSSimpleListTESRaceSize*)((FUN_00474a40*)this)->GetListForm()->GetList())->GetSize() > count)
         {
-            BSSimpleList<TESForm*>* node = (BSSimpleList<TESForm*>*)((FUN_00474a40*)this)->GetScript()->GetHeader();
+            BSSimpleList<TESForm*>* node = (BSSimpleList<TESForm*>*)((FUN_00474a40*)this)->GetListForm()->GetList();
             for (unsigned int i = 0; i < count; ++i)
                 node = node->GetNext();
             result = node->GetItem();
         }
         else
         {
-            result = ((BSSimpleList<TESForm*>*)((FUN_00474a40*)this)->GetScript()->GetHeader())->GetItem();
+            result = ((BSSimpleList<TESForm*>*)((FUN_00474a40*)this)->GetListForm()->GetList())->GetItem();
         }
     }
     return result;
 }
 
 struct GlobalObject_00a7b610;
-struct NiAVObject;
-struct NiNode
-{
-    unsigned int GetNumChildren();
-    NiAVObject* GetAt(unsigned int);
-};
 struct FUN_00476ec0_Class
 {
     void FUN_00c455a0(unsigned char);
-};
-struct NiObject
-{
-    virtual ~NiObject();
-    virtual void v1();
-    virtual void v2();
-    virtual NiNode* GetAsNode();
 };
 bool __cdecl FUN_0043b300(GlobalObject_00a7b610*, NiAVObject*);
 extern GlobalObject_00a7b610 g_01202e8c;
@@ -1473,7 +1347,7 @@ void __cdecl FUN_00476ec0(NiAVObject* object, int flag)
         FUN_00476ec0_Class* p = (FUN_00476ec0_Class*)object;
         p->FUN_00c455a0((unsigned char)flag);
     }
-    NiNode* node = ((NiObject*)object)->GetAsNode();
+    NiNode* node = ((NiObject*)object)->IsSceneNode();
     if (node)
         for (unsigned int i = 0; i < node->GetNumChildren(); ++i)
             FUN_00476ec0(node->GetAt(i), flag);
@@ -1505,10 +1379,6 @@ void FUN_00462e10_Class::SetFlags(signed char mask, bool set)
     set ? m_flags |= mask : m_flags &= ~mask;
 }
 
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short);
-};
 struct FUN_004704e0
 {
     void* vtbl;
@@ -1529,16 +1399,12 @@ FUN_004704e0::FUN_004704e0(unsigned short ausCount, unsigned short y)
     c = 0;
     d = 0;
     if (a > 0)
-        p = NiTMallocInterface_0096afc0::Allocate(a);
+        p = NiTMallocInterface<ActorCombatGroup*>::Allocate(a);
     else
         p = 0;
 }
 
 namespace fnv_00470550 {
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short);
-};
 extern int DAT_01019a24;
 struct FUN_00470550_t
 {
@@ -1559,17 +1425,13 @@ FUN_00470550_t::FUN_00470550_t(unsigned short ausCapacity, unsigned short y)
     b = 0;
     c = 0;
     if (a > 0)
-        p = NiTMallocInterface_0096afc0::Allocate(a);
+        p = NiTMallocInterface<ActorCombatGroup*>::Allocate(a);
     else
         p = 0;
 }
 }  // namespace fnv_00470550
 
 namespace fnv_00474880 {
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short);
-};
 void* $SG6264;
 struct FUN_00474880
 {
@@ -1590,7 +1452,7 @@ FUN_00474880::FUN_00474880(unsigned short x, unsigned short y)
     b = 0;
     c = 0;
     if (a > 0)
-        p = NiTMallocInterface_0096afc0::Allocate(a);
+        p = NiTMallocInterface<ActorCombatGroup*>::Allocate(a);
     else
         p = 0;
 }
@@ -1617,12 +1479,12 @@ void FUN_00478570_holder::EnsureB2_4fe()
 
 struct FUN_0047bac0_NPC : TESForm
 {
-    unsigned char m_npc[0x15c];
+    unsigned char m_npc[0x144];
     void* biped;
 };
 struct FUN_0047bac0_ARMO : TESForm
 {
-    unsigned char m_armor[0xbc];
+    unsigned char m_armor[0xa4];
     void* biped;
 };
 // Returns a pointer to the biped field of the given form if it is armor (type 0x28) or an NPC (type 0x18), otherwise null.
@@ -1649,27 +1511,14 @@ void* GetBipedPointer(TESForm* form)
     return result;
 }
 
-struct BaseFormComponent
-{
-    virtual ~BaseFormComponent();
-};
-struct TESAttackDamageForm : public BaseFormComponent
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual unsigned short GetDamage();
-    void FUN_0047ff50(unsigned short value);
-    void FUN_0047fe30(BaseFormComponent* apCopyFC);
-};
-// Casts apCopyFC to TESAttackDamageForm and, if the cast succeeds, copies its damage value via FUN_0047ff50.
+// Casts apCopyFC to TESAttackDamageForm and, if the cast succeeds, copies its damage value via SetAttackDamage.
 // @fnv 0x0047fe30
-void TESAttackDamageForm::FUN_0047fe30(BaseFormComponent* apCopyFC)
+void TESAttackDamageForm::BaseFormRecord(BaseFormComponent* apCopyFC)
 {
     TESAttackDamageForm* pCopy = dynamic_cast<TESAttackDamageForm*>(apCopyFC);
     if (!pCopy)
         return;
-    FUN_0047ff50(pCopy->GetDamage());
+    SetAttackDamage(pCopy->GetAttackDamage());
 }
 
 struct FUN_0046eb20_Class
@@ -1711,7 +1560,7 @@ extern int DAT_01019a24;
 void __thiscall FUN_0045d950_Class::FUN_00470070()
 {
     *(int*)this = (int)&DAT_01019a24;
-    NiTMallocInterface_StandIn::Deallocate(*(ActorCombatGroup**)((char*)this + 4));
+    NiTMallocInterface<ActorCombatGroup*>::Deallocate(*(ActorCombatGroup***)((char*)this + 4));
 }
 
 extern int DAT_0101a644;
@@ -1728,16 +1577,11 @@ struct FUN_004750e0 : Date
 FUN_004750e0::~FUN_004750e0()
 {}
 
-struct BSSimpleArrayActor
-{
-    void __thiscall Clear(bool);
-};
-
 // @fnv 0x00479140
-void __thiscall FUN_00479140_class::FUN_00479140()
+template <>
+BSSimpleArray<NiNode*>::~BSSimpleArray()
 {
-    *(int*)this = (int)&vftable__ShadowSceneArray;
-    ((BSSimpleArrayActor*)this)->Clear(true);
+    Clear(true);
 }
 
 struct FUN_0047bcf0_class
@@ -1828,25 +1672,11 @@ Twin_008d0360* __cdecl FUN_00471f70()
     return g_011f6078;
 }
 
-class Base_b9207
-{
-  public:
-    virtual ~Base_b9207();
-    unsigned int unk04;
-    unsigned int unk08;
-};
-
-class FUN_004745d0 : public Base_b9207
-{
-  public:
-    virtual ~FUN_004745d0();
-    void DoCleanup();
-};
-
 // @fnv 0x004745d0
-FUN_004745d0::~FUN_004745d0()
+template <>
+NiTPointerMap<unsigned int, TESFile*>::~NiTPointerMap()
 {
-    DoCleanup();
+    RemoveAll();
 }
 
 struct FUN_00475220_member
@@ -1989,7 +1819,7 @@ struct NodeChildren
 };
 struct Context
 {
-    float GetScale();
+    float FUN_00567400();
     int FUN_008d6f30(int value);
 };
 struct Receiver
@@ -2013,7 +1843,7 @@ int Walk::WalkTree(Node* node, Receiver* receiver, unsigned int mode, Context* c
         Node* typed = node;
         if (typed->FUN_00c455a0((unsigned char)mode))
         {
-            receiver->FUN_004fa6f0(context->FUN_008d6f30(typed->FUN_0045bb80(extra, context->GetScale())));
+            receiver->FUN_004fa6f0(context->FUN_008d6f30(typed->FUN_0045bb80(extra, context->FUN_00567400())));
             count++;
         }
     }
@@ -2507,42 +2337,15 @@ FUN_00479260_Map::~FUN_00479260_Map()
     RemoveAll();
 }
 
-class BGSChangeFlags47E
-{
-  public:
-    BGSChangeFlags47E(unsigned int uiFlags);
-    bool Test(unsigned int uiMask);
-
-    unsigned int m_uiValue1;
-};
-
-class BGSLoadFormBuffer47E
-{
-  public:
-    BGSChangeFlags47E GetChangeFlags();
-    void ReadTypedData(void* pvData, unsigned int uiSize);
-};
-
-class TESActorBaseData47E
-{
-  public:
-    bool GetFlagBit(int iBit);
-    void SetFlagBits(int iUnk, bool bValue, int iUnk2);
-    void FUN_0047ea70(BGSLoadFormBuffer47E* pkBuffer);
-
-    int unk00;
-    int m_iFlags;
-};
-
-// If the buffer's change flags include bit 2, saves flag bit 1, reads 0x18 bytes into m_iFlags, then restores flag bit 1.
+// If the buffer's change flags include bit 2, saves flag bit 1, reads the actor attributes, then restores flag bit 1.
 // @fnv 0x0047ea70
-void TESActorBaseData47E::FUN_0047ea70(BGSLoadFormBuffer47E* pkBuffer)
+void TESActorBaseData::FUN_0047ea70(BGSLoadFormBuffer* pkBuffer)
 {
-    if (pkBuffer->GetChangeFlags().Test(2))
+    if (pkBuffer->GetChangeFlags().ContainsAnyFlags(2))
     {
         bool bFlag = GetFlagBit(1);
-        pkBuffer->ReadTypedData(&m_iFlags, 0x18);
-        SetFlagBits(1, bFlag, 1);
+        pkBuffer->ReadTypedData(&actorData.m_uiActorFlags, 0x18u);
+        UpdateFlagBit(1, bFlag, true);
     }
 }
 
@@ -2593,25 +2396,17 @@ void FUN_0047ead0_cls::FUN_0047ead0(int mode)
     }
 }
 
-struct FUN_0047fe80_class : BaseFormComponent
-{
-    virtual void FUN_0047fe80_v1();
-    virtual void FUN_0047fe80_v2();
-    virtual void FUN_0047fe80_v3();
-    virtual unsigned short GetAttackDamage();
-    bool __thiscall IsAttackDamageDifferent(BaseFormComponent* other);
-};
 
 // Casts other to TESAttackDamageForm; returns true if the cast fails or the attack damage values differ, otherwise false.
 // @fnv 0x0047fe80
-bool __thiscall FUN_0047fe80_class::IsAttackDamageDifferent(BaseFormComponent* other)
+bool __thiscall TESAttackDamageForm::IsEqualToBase(BaseFormComponent* other)
 {
     TESAttackDamageForm* form = dynamic_cast<TESAttackDamageForm*>(other);
     if (form == 0)
     {
         return true;
     }
-    if (GetAttackDamage() != reinterpret_cast<FUN_0047fe80_class*>(form)->GetAttackDamage())
+    if (GetAttackDamage() != form->GetAttackDamage())
     {
         return true;
     }
@@ -2623,11 +2418,6 @@ extern const float DAT_01012054;
 struct Standin77900
 {
     float FUN_00477900();
-};
-class PathingRequest
-{
-  public:
-    float FUN_006a78f0() const;
 };
 struct FUN_00477a50_Entry
 {
@@ -2685,7 +2475,7 @@ struct CopyStage
     ~CopyStage();
     void FUN_00478fd0(const CopyStage*);
 };
-struct DestructionData
+struct CollisionComponent
 {
     unsigned int health;
     unsigned char count;
@@ -2694,75 +2484,53 @@ struct DestructionData
     CopyStage** stages;
     unsigned int unk0c;
     unsigned int unk10;
-    DestructionData();
-    ~DestructionData();
-};
-class BGSDestructibleObjectForm : public BaseFormComponent
-{
-  public:
-    DestructionData* data;
-    DestructionData* FUN_00726070();
-    CopyStage** AllocateSpawnedItemArray(unsigned int count);
-    void FUN_004786e0(BaseFormComponent* source);
+    CollisionComponent();
+    ~CollisionComponent();
 };
 // Copies destruction data from another BGSDestructibleObjectForm, freeing old stages and cloning each stage, or clears data if the source has none.
 // @fnv 0x004786e0
-void BGSDestructibleObjectForm::FUN_004786e0(BaseFormComponent* source)
+void BGSDestructibleObjectForm::BaseFormRecord(BaseFormComponent* source)
 {
     BGSDestructibleObjectForm* pOther = dynamic_cast<BGSDestructibleObjectForm*>(source);
     if (!pOther)
         return;
-    DestructionData* pSourceData = pOther->FUN_00726070();
+    CollisionComponent* pSourceData = pOther->GetData();
     if (pSourceData)
     {
-        if (!data)
-            data = new DestructionData;
+        if (!pData)
+            pData = new CollisionComponent;
         else
         {
-            for (unsigned int index = 0; index < data->count; ++index)
-                delete data->stages[index];
-            delete[] data->stages;
-            data->stages = 0;
+            for (unsigned int index = 0; index < pData->count; ++index)
+                delete pData->stages[index];
+            delete[] pData->stages;
+            pData->stages = 0;
         }
-        data->flags = pSourceData->flags;
-        data->health = pSourceData->health;
-        data->count = pSourceData->count;
-        if (data->count)
+        pData->flags = pSourceData->flags;
+        pData->health = pSourceData->health;
+        pData->count = pSourceData->count;
+        if (pData->count)
         {
-            data->stages = AllocateSpawnedItemArray(data->count);
-            for (unsigned int stageIndex = 0; stageIndex < data->count; ++stageIndex)
-                data->stages[stageIndex]->FUN_00478fd0(pSourceData->stages[stageIndex]);
+            pData->stages = reinterpret_cast<CopyStage**>(AllocateSpawnedItemArray(pData->count));
+            for (unsigned int stageIndex = 0; stageIndex < pData->count; ++stageIndex)
+                pData->stages[stageIndex]->FUN_00478fd0(pSourceData->stages[stageIndex]);
         }
     }
     else
     {
-        delete data;
-        data = 0;
+        delete pData;
+        pData = 0;
     }
 }
 
-struct NiFixedString_47ab40
-{
-    operator const char*() const;
-};
 struct NamedObject_47ab40
 {
-    NiFixedString_47ab40& GetName();
+    NiFixedString& GetName();
 };
-union SETTING_VALUE_47ab40
-{
-    bool b;
-    int i;
-};
-struct Setting_47ab40
-{
-    SETTING_VALUE_47ab40* Bool();
-};
-extern Setting_47ab40 g_011c4c64;
+extern Setting g_011c4c64;
 int FUN_00ec6da0(const char*, const char*);
 bool FUN_008c7aa0();
 
-struct NiNode_47ab40;
 struct World_47ab40
 {
     virtual void v00();
@@ -2817,7 +2585,7 @@ struct World_47ab40
     virtual void v31();
     virtual void v32();
     virtual void v33();
-    virtual void AddObject(NiNode_47ab40* node, bool a, bool b, int c, int d);
+    virtual void AddObject(NiNode* node, bool a, bool b, int c, int d);
 };
 struct Cell_47ab40;
 World_47ab40* __fastcall FUN_004543c0(Cell_47ab40* cell);
@@ -2825,7 +2593,7 @@ World_47ab40* __fastcall FUN_004543c0(Cell_47ab40* cell);
 struct TaskQueue_47ab40
 {
     static TaskQueue_47ab40* GetInstance();
-    void HandlerRegistration(NiNode_47ab40* node);
+    void HandlerRegistration(NiNode* node);
 };
 
 struct Ref_47ab40
@@ -2946,7 +2714,7 @@ struct Ref_47ab40
     virtual void v071();
     virtual void v072();
     virtual void v073();
-    virtual NiNode_47ab40* Get3D();
+    virtual NiNode* Get3D();
     Cell_47ab40* GetParentCell();
 };
 
@@ -2958,9 +2726,9 @@ bool FUN_0047ab40(Ref_47ab40* ref, NamedObject_47ab40* obj)
     {
         if (!FUN_00ec6da0(obj->GetName(), "Open") || !FUN_00ec6da0(obj->GetName(), "Close"))
             result = true;
-        if (!g_011c4c64.Bool()->b && result && !g_011c4c64.Bool()->b)
+        if (!*g_011c4c64.Bool() && result && !*g_011c4c64.Bool())
         {
-            NiNode_47ab40* node = ref->Get3D();
+            NiNode* node = ref->Get3D();
             if (node)
             {
                 if (FUN_008c7aa0())
@@ -2980,29 +2748,8 @@ bool FUN_0047ab40(Ref_47ab40* ref, NamedObject_47ab40* obj)
     return result;
 }
 
-class NiUpdateData
-{
-  public:
-    float time;
-    unsigned int flags;
-    bool multithread;
-    NiUpdateData(float, bool, bool);
-};
 
-class NN_00605d70
-{
-  public:
-    void Update(const NiUpdateData&);
-};
 
-template <> class NiPointer<NiNode>
-{
-  public:
-    NiNode* m_pObject;
-    NiPointer(NiNode* object);
-    ~NiPointer();
-    operator NiNode*() const;
-};
 
 FUN_0047b470_This* __cdecl FUN_00c802d0(NiNode*);
 void __cdecl SetFlagRecursive(int, void*);
@@ -3141,7 +2888,7 @@ void __cdecl FUN_0047b360(RefWithGetNiNode* apRef)
             SetFlagRecursive(0, spNode7);
         }
         NiUpdateData kData(0.0f, false, false);
-        ((NN_00605d70*)(NiNode*)spNode7)->Update(kData);
+        ((NiNode*)spNode7)->Update(static_cast<const NiUpdateData&>(kData));
         if (bFlag3)
         {
             SetFlagRecursive(bFlag3, spNode7);
@@ -3437,15 +3184,7 @@ struct xList
     void Remove(xFile* const&);
     bool IsInList(xFile*&);
 };
-struct xBSFile
-{
-    xBSFile(const char*, int, unsigned int, bool);
-    ~xBSFile();
-    bool Ok();
-    unsigned int Read(void*, unsigned int);
-    int m_auiShapeKeys[0x56];
-};
-bool __fastcall xIsOpen(xBSFile*);
+bool __fastcall xIsOpen(BSFile*);
 struct FUN_004624b0_cls
 {
     bool FUN_004624b0(const char*);
@@ -3522,10 +3261,10 @@ bool FUN_004624b0_cls::FUN_004624b0(const char* DIR)
                         xRelease(qdqWL);
                         xSplitPath(qvyWyw.cFileName, 0, 0, 0, 0, qrKBG, 0x104, qbXcw, 0x10);
                         xSprintf(qArxcFu, 0x104, "%s%s.NAM", qxQHW, qrKBG);
-                        xBSFile qZAdkzg(qArxcFu, 0, 0x100, true);
-                        if (qZAdkzg.Ok() && xIsOpen(&qZAdkzg))
+                        BSFile qZAdkzg(qArxcFu, 0, 0x100, true);
+                        if (qZAdkzg.Write() && xIsOpen(&qZAdkzg))
                         {
-                            qBCzzXA = qZAdkzg.Read(qsTDDg, 0x100);
+                            qBCzzXA = qZAdkzg.NiBinaryStream::Read(qsTDDg, 0x100);
                             qsTDDg[qBCzzXA] = 0;
                             qdqWL->SetNames(qsTDDg);
                             qdqWL->F471d00(true);
@@ -3690,14 +3429,6 @@ struct DPointer
     DPointer(DNode*);
     ~DPointer();
     operator DNode*() const;
-};
-struct DArray
-{
-    unsigned int unk00, unk04, unk08, unk0c;
-    DArray();
-    ~DArray();
-    unsigned int Size();
-    DNode*& At(int);
 };
 struct DActorValues
 {
@@ -3993,7 +3724,7 @@ struct Destruction
     ImpactDecalInfo* data;
     unsigned int GetTotal(DRef*);
     DStage* GetStage(unsigned int);
-    void CollectNodes(DNode*, DArray*);
+    void CollectNodes(DNode*, BSSimpleArray<NiNode*>*);
     void Clear();
     int SpawnDebris(DNode*, void*, unsigned int, DRef*, unsigned int);
     int SpawnEffect(DNode*, void*, unsigned int, DRef*);
@@ -4090,11 +3821,11 @@ void Destruction::FUN_00475b20(DRef* ref, float damage, unsigned int flags)
         {
             if (z)
             {
-                DArray branch;
+                BSSimpleArray<NiNode*> branch;
                 DTransform j;
                 CollectNodes(ref->GetNode(), &branch);
-                if (branch.Size())
-                    j = branch.At(0)->Transform();
+                if (branch.GetSize())
+                    j = ((DNode*)branch.GetAt(0))->Transform();
                 bool total;
                 total = false;
                 if ((void*)data->string)
@@ -4122,20 +3853,20 @@ void Destruction::FUN_00475b20(DRef* ref, float damage, unsigned int flags)
                     health = s ? s->AsFade() : 0;
                     if (health)
                         health->ResetFade();
-                    if (branch.Size())
+                    if (branch.GetSize())
                     {
-                        DArray bound;
+                        BSSimpleArray<NiNode*> bound;
                         CollectNodes(q, &bound);
-                        if (bound.Size())
+                        if (bound.GetSize())
                         {
-                            DTransform found = bound.At(0)->Transform();
+                            DTransform found = ((DNode*)bound.GetAt(0))->Transform();
                             DMatrix i = found.InverseRotation();
                             DMatrix changes = j.rotation;
                             DMatrix newNodes = ref->GetRotation();
                             DMatrix res = changes * i * newNodes;
                             ref->SetRotation(res);
                             ref->Update();
-                            found = bound.At(0)->Transform();
+                            found = ((DNode*)bound.GetAt(0))->Transform();
                             DPoint pForm = j.translation - found.translation;
                             pForm += ref->GetPosition();
                             ref->SetLocation(pForm);
@@ -5045,14 +4776,14 @@ struct FUN_004726b0_class
     int unk254;
     int unk258;
 
-    int __thiscall GetNextChunk();
+    int __thiscall FUN_004726b0();
 };
 
 unsigned char __fastcall ReadChunkHeader(TESFile* file);
 
 // If unk258 is zero, calls ReadChunkHeader and returns 0 if that fails; otherwise returns unk258.
 // @fnv 0x004726b0
-int FUN_004726b0_class::GetNextChunk()
+int FUN_004726b0_class::FUN_004726b0()
 {
     if (this->unk258 == 0 && !ReadChunkHeader(reinterpret_cast<TESFile*>(this)))
     {
@@ -5108,64 +4839,59 @@ struct DestructionStage
     unsigned int debris;
     DestructionExtra* extra;
 };
-class DestructibleComparison : public BGSDestructibleObjectForm
-{
-  public:
-    bool FUN_00478900(BaseFormComponent* other);
-};
 // Compares destruction data of two destructible forms and returns true if their health, flags, count, or any destruction stage field differs.
 // @fnv 0x00478900
-bool DestructibleComparison::FUN_00478900(BaseFormComponent* other)
+bool BGSDestructibleObjectForm::IsEqualToBase(BaseFormComponent* other)
 {
     BGSDestructibleObjectForm* form4 = dynamic_cast<BGSDestructibleObjectForm*>(other);
     if (!form4)
         return true;
-    DestructionData* rhs3 = form4->FUN_00726070();
-    if (!rhs3 || !data)
+    CollisionComponent* rhs3 = form4->GetData();
+    if (!rhs3 || !pData)
     {
-        if (!rhs3 && !data)
+        if (!rhs3 && !pData)
             return false;
         else
             return true;
     }
-    if (data->health != rhs3->health)
+    if (pData->health != rhs3->health)
         return true;
-    if (data->flags != rhs3->flags)
+    if (pData->flags != rhs3->flags)
         return true;
-    if (data->count != rhs3->count)
+    if (pData->count != rhs3->count)
         return true;
-    for (unsigned int i = 0; i < data->count; ++i)
+    for (unsigned int i = 0; i < pData->count; ++i)
     {
-        if (reinterpret_cast<DestructionStage*>(data->stages[i])->index !=
+        if (reinterpret_cast<DestructionStage*>(pData->stages[i])->index !=
             reinterpret_cast<DestructionStage*>(rhs3->stages[i])->index)
             return true;
-        if (reinterpret_cast<DestructionStage*>(data->stages[i])->flags !=
+        if (reinterpret_cast<DestructionStage*>(pData->stages[i])->flags !=
             reinterpret_cast<DestructionStage*>(rhs3->stages[i])->flags)
             return true;
-        if (reinterpret_cast<DestructionStage*>(data->stages[i])->health !=
+        if (reinterpret_cast<DestructionStage*>(pData->stages[i])->health !=
             reinterpret_cast<DestructionStage*>(rhs3->stages[i])->health)
             return true;
-        if (reinterpret_cast<DestructionStage*>(data->stages[i])->damageStage !=
+        if (reinterpret_cast<DestructionStage*>(pData->stages[i])->damageStage !=
             reinterpret_cast<DestructionStage*>(rhs3->stages[i])->damageStage)
             return true;
-        if (reinterpret_cast<DestructionStage*>(data->stages[i])->selfDamage !=
+        if (reinterpret_cast<DestructionStage*>(pData->stages[i])->selfDamage !=
             reinterpret_cast<DestructionStage*>(rhs3->stages[i])->selfDamage)
             return true;
-        if (reinterpret_cast<DestructionStage*>(data->stages[i])->explosion !=
+        if (reinterpret_cast<DestructionStage*>(pData->stages[i])->explosion !=
             reinterpret_cast<DestructionStage*>(rhs3->stages[i])->explosion)
             return true;
         if (reinterpret_cast<DestructionStage*>(rhs3->stages[i])->debris !=
             reinterpret_cast<DestructionStage*>(rhs3->stages[i])->debris)
             return true;
-        if ((reinterpret_cast<DestructionStage*>(data->stages[i])->extra &&
+        if ((reinterpret_cast<DestructionStage*>(pData->stages[i])->extra &&
              !reinterpret_cast<DestructionStage*>(rhs3->stages[i])->extra) ||
-            (!reinterpret_cast<DestructionStage*>(data->stages[i])->extra &&
+            (!reinterpret_cast<DestructionStage*>(pData->stages[i])->extra &&
              reinterpret_cast<DestructionStage*>(rhs3->stages[i])->extra))
             return true;
-        if (reinterpret_cast<DestructionStage*>(data->stages[i])->extra &&
+        if (reinterpret_cast<DestructionStage*>(pData->stages[i])->extra &&
             reinterpret_cast<DestructionStage*>(rhs3->stages[i])->extra)
         {
-            if (reinterpret_cast<DestructionStage*>(data->stages[i])
+            if (reinterpret_cast<DestructionStage*>(pData->stages[i])
                     ->extra->Differs(reinterpret_cast<DestructionStage*>(rhs3->stages[i])->extra))
                 return true;
         }
@@ -5176,6 +4902,6 @@ bool DestructibleComparison::FUN_00478900(BaseFormComponent* other)
 // @fnv 0x00470110
 void __thiscall FUN_00464f40_class::FUN_00470110()
 {
-    reinterpret_cast<FNVPointerArray*>(this)->m_ppVirtualMethodTable = reinterpret_cast<void**>(&DAT_01019a34);
+    *reinterpret_cast<void***>(this) = reinterpret_cast<void**>(&DAT_01019a34);
     NiTMallocInterface<void*>::Deallocate(reinterpret_cast<FNVPointerArray*>(this)->m_pBase);
 }

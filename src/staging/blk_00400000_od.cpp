@@ -3,6 +3,21 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#define FNV64_BSSIMPLELIST_DEFINED  // layout_support.h supplies BSSimpleList.
+#include "../../include/BaseFormComponent.h"
+#include "../../include/SL.h"
+#include "../../include/TESBipedModelForm.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObject.h"
+#include "../../include/TESEnchantableForm.h"
+#include "../../include/BGSDehydrationStage.h"
+#include "../../include/BSExtraData.h"
+#include "../../include/BaseExtraList.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/EffectItem.h"
+#include "../../include/EffectItemList.h"
+#include "../../include/RecursiveSpinLock.h"
 
 extern int $SG3295;
 
@@ -138,16 +153,10 @@ void* __thiscall FUN_00405600_class::FUN_00405600(int param_2)
     return this;
 }
 
-struct EffectSetting
-{
-    bool IsFlagSet(unsigned int);
-    void FUN_00405e60();
-};
-
 // @fnv 0x00405e60
-void EffectSetting::FUN_00405e60()
+void __fastcall FUN_00405e60(EffectSetting* effect)
 {
-    IsFlagSet(0x400000);
+    effect->IsFlagSet(0x400000);
 }
 
 struct FUN_00407860_class
@@ -256,27 +265,16 @@ float FUN_0040ebd0(float a, float b)
     return result;
 }
 
-extern int DAT_010142ac;
-
-struct BE
-{
-    int* pv;
-    int pad;
-    int mExtra;
-    BE(unsigned char);
-};
-
-struct FUN_0040f6b0 : BE
+struct FUN_0040f6b0 : BSExtraData
 {
     int* pBound;
     FUN_0040f6b0();
 };
 
-// Initializes the base with 0x0b, points pv at DAT_010142ac and clears pBound.
+// Initializes the extra-data base with type 0x0b and clears pBound.
 // @fnv 0x0040f6b0
-FUN_0040f6b0::FUN_0040f6b0() : BE(0x0b)
+FUN_0040f6b0::FUN_0040f6b0() : BSExtraData(0x0b)
 {
-    pv = &DAT_010142ac;
     pBound = 0;
 }
 
@@ -317,36 +315,18 @@ void __thiscall FUN_004181c0_class::SetIndexedValue(int index, int value)
     *(int*)((char*)this + 0xec + index * 4) = value;
 }
 
-struct BSExtraData;
-struct BaseExtraList
-{
-    BSExtraData* GetExtraData(unsigned char);
-    BSExtraData* FUN_00418200();
-};
 // @fnv 0x00418200
-BSExtraData* BaseExtraList::FUN_00418200()
+BSExtraData* __fastcall FUN_00418200(BaseExtraList* extras)
 {
-    BSExtraData* result = GetExtraData(0x2d);
+    BSExtraData* result = extras->GetExtraData(0x2d);
     return result;
 }
 
-namespace fnv_0041af30 {
-struct BaseExtraList
-{
-    void RemoveExtra(unsigned char);
-};
-
-struct FUN_0041af30_shell : BaseExtraList
-{
-    void FUN_0041af30();
-};
-
 // @fnv 0x0041af30
-void FUN_0041af30_shell::FUN_0041af30()
+void __fastcall FUN_0041af30(BaseExtraList* extras)
 {
-    RemoveExtra(0x3f);
+    extras->RemoveExtra(static_cast<unsigned char>(0x3f));
 }
-}  // namespace fnv_0041af30
 
 struct GlobalObject_0040c150
 {
@@ -412,12 +392,6 @@ void* FUN_004053d0_class::FUN_004053d0(unsigned int flags)
     return this;
 }
 
-namespace fnv_0040ecd0 {
-struct BSExtraData
-{
-    virtual ~BSExtraData();
-    void* __thiscall FUN_0040ecd0(unsigned int flags);
-};
 // Calls the BSExtraData destructor and, when flags has bit 0 set, frees this; returns this.
 // @fnv 0x0040ecd0
 void* BSExtraData::FUN_0040ecd0(unsigned int flags)
@@ -427,7 +401,6 @@ void* BSExtraData::FUN_0040ecd0(unsigned int flags)
         operator delete(this);
     return this;
 }
-}  // namespace fnv_0040ecd0
 
 struct FUN_00401270_Class
 {
@@ -560,33 +533,13 @@ FUN_00405630_s* __thiscall FUN_00405630_s::Init(int count)
     return this;
 }
 
-struct SL
-{
-    int m1;
-    int m2;
-    SL();
-};
-extern int DAT_01012508;
-struct FUN_004056a0
-{
-    int vf;
-    SL lst;
-    int hostile;
-    FUN_004056a0();
-};
-// Sets the object's vtable pointer to DAT_01012508 and initializes hostile to 0.
 // @fnv 0x004056a0
-FUN_004056a0::FUN_004056a0()
+EffectItemList::EffectItemList()
 {
-    *(int*)this = (int)&DAT_01012508;
-    hostile = 0;
+    m_iEffectCount = 0;
 }
 
 namespace fnv_00406db0 {
-struct SL
-{
-    SL();
-};
 struct FUN_00406db0
 {
     const char* f0;
@@ -712,23 +665,18 @@ void* __thiscall Holder0040e9f0::GetValueIfFormType42()
     return 0;
 }
 
-struct Interface
+// Exe 0x0040fba0: unit-local Interface view; declarations and layout are preserved.
+struct BlkInterfaceView
 {
     static void __cdecl PrintDebugMessage();
-};
-struct RecursiveSpinLock
-{
-    unsigned int* pCount;
-    unsigned int count;
-    void __thiscall Leave();
 };
 // @fnv 0x0040fba0
 void __thiscall RecursiveSpinLock::Leave()
 {
-    Interface::PrintDebugMessage();
-    --count;
-    if (count == 0)
-        pCount = 0;
+    BlkInterfaceView::PrintDebugMessage();
+    --m_uiRecursionCount;
+    if (m_uiRecursionCount == 0)
+        m_uiOwningThreadID = 0;
 }
 
 struct FUN_00413f60_Data
@@ -765,26 +713,17 @@ void __thiscall FUN_004141e0_class::FUN_004141e0()
     BSEndian((unsigned char*)this + 4, EndianSizeTag<10>());
 }
 
-extern int DAT_010151c0;
-struct FUN_0041fcd0 : BE
+struct FUN_0041fcd0 : BSExtraData
 {
     FUN_0041fcd0();
 };
 // @fnv 0x0041fcd0
-FUN_0041fcd0::FUN_0041fcd0() : BE(0x6f)
+FUN_0041fcd0::FUN_0041fcd0() : BSExtraData(0x6f)
 {
-    *(int**)this = &DAT_010151c0;
 }
 
-struct ScriptS
-{
-    void* GetHeader();
-};
-
-struct BGSDehydrationStage : ScriptS
-{
-    static BGSDehydrationStage** __cdecl AllocateStageArray(unsigned int count);
-};
+// The shared stage class does not yet declare this out-of-line data accessor.
+DehydrationStageData* __fastcall GetDehydrationStageData(BGSDehydrationStage* stage);
 
 extern int _DAT_011c3180;
 extern BGSDehydrationStage** _DAT_011c3184;
@@ -807,7 +746,7 @@ void FUN_004016a0(BGSDehydrationStage* apNewStage)
 
     for (index = 0; index < (unsigned int)_DAT_011c3180; ++index)
     {
-        if (*(unsigned int*)apNewStage->GetHeader() > *(unsigned int*)_DAT_011c3184[index]->GetHeader() && !insertedB)
+        if (GetDehydrationStageData(apNewStage)->m_uiStageIndex > GetDehydrationStageData(_DAT_011c3184[index])->m_uiStageIndex && !insertedB)
         {
             newStages5[destinationVal] = apNewStage;
             ++destinationVal;
@@ -847,10 +786,6 @@ FUN_0040a1c0_Class::~FUN_0040a1c0_Class()
 
 namespace fnv_00411ea0 {
 int DAT_01014458;
-struct BSExtraData
-{
-    virtual ~BSExtraData();
-};
 struct FUN_00411ea0 : BSExtraData
 {
     ~FUN_00411ea0();
@@ -860,16 +795,10 @@ FUN_00411ea0::~FUN_00411ea0()
 {}
 }  // namespace fnv_00411ea0
 
-struct BaseExtraList_0041af50
-{
-    void __thiscall RemoveExtra(unsigned char);
-    void __thiscall FUN_0041af50();
-};
-
 // @fnv 0x0041af50
-void __thiscall BaseExtraList_0041af50::FUN_0041af50()
+void __fastcall FUN_0041af50(BaseExtraList* extras)
 {
-    RemoveExtra(0xd);
+    extras->RemoveExtra(static_cast<unsigned char>(0xd));
 }
 
 // FUN_00408b50 : a one-line function - globalvalue
@@ -924,81 +853,47 @@ FUN_00405250::~FUN_00405250()
     }
 }
 
-struct Setting405c
+// The shared list lacks this filtered magnitude/duration total (0x00405c00).
+struct EffectListMagnitudeQuery : EffectItemList
 {
-    int FUN_00810fd0();
-    bool HasFlag2();
-    int FUN_00586150();
-    bool FUN_00403e60(unsigned int uiFlag);
-};
-
-struct Item405c
-{
-    Setting405c* FUN_00825c00();
-    int FUN_0084e3a0();
-    int FUN_004044d0();
-    int FUN_00404390();
-};
-
-struct ListNode405c
-{
-    Item405c* m_pkItem;
-    ListNode405c* m_pkNext;
-    Item405c** FUN_006815c0();
-    ListNode405c* FUN_00726070();
-};
-
-struct ListBase405c
-{
-    void* m_pvVtbl;
-};
-
-struct EffectList405c : public ListBase405c, public ListNode405c
-{
-    float FUN_00405c00(int iArchetype, int m_eRange, int m_eAssociatedActorValue);
+    float GetTotalMagnitude(int iArchetype, int m_eRange, int m_eAssociatedActorValue);
 };
 
 // @fnv 0x00405c00
-float EffectList405c::FUN_00405c00(int iArchetype, int m_eRange, int m_eAssociatedActorValue)
+float EffectListMagnitudeQuery::GetTotalMagnitude(int iArchetype, int m_eRange, int m_eAssociatedActorValue)
 {
     float fTotal = 0.0f;
-    EffectList405c* pkList = this;
+    EffectListMagnitudeQuery* pkList = this;
     while (pkList)
     {
-        Item405c* pkItem = *pkList->FUN_006815c0();
+        EffectItem* pkItem = pkList->GetItem();
         if (pkItem)
         {
-            Setting405c* pkSetting = pkItem->FUN_00825c00();
-            if (pkSetting->FUN_00810fd0() == iArchetype &&
-                (m_eAssociatedActorValue == 0x4D || !pkSetting->HasFlag2() || pkSetting->FUN_00586150() == m_eAssociatedActorValue) &&
-                (m_eRange == 3 || pkItem->FUN_0084e3a0() == m_eRange))
+            EffectSetting* pkSetting = pkItem->GetEffectSetting();
+            if (pkSetting->GetArchetype() == iArchetype &&
+                (m_eAssociatedActorValue == 0x4D || !pkSetting->HasFlag2() || pkSetting->GetAssociatedActorValue() == m_eAssociatedActorValue) &&
+                (m_eRange == 3 || pkItem->GetRange() == m_eRange))
             {
                 float m_fElapsedTime =
-                    pkItem->FUN_00404390() * (pkItem->FUN_004044d0() > 0 ? pkItem->FUN_004044d0() : 1);
+                    pkItem->GetMagnitude() * (pkItem->GetDuration() > 0 ? pkItem->GetDuration() : 1);
                 if (!pkSetting->FUN_00403e60(4))
                     fTotal += m_fElapsedTime;
                 else
                     fTotal -= m_fElapsedTime;
             }
         }
-        pkList = static_cast<EffectList405c*>(pkList->FUN_00726070());
+        pkList = static_cast<EffectListMagnitudeQuery*>(pkList->GetNext());
     }
     return fTotal;
 }
 
-class TESForm
-{
-  public:
-    virtual ~TESForm();  // polymorphic: its RTTI is used (rtti_fix.py)
-  public:
-    void SetFormType(ENUM_FORM_ID eType);
-};
 
-template <> class BSSimpleList<TESForm*>
+// local form of BSSimpleList: 0x004010b0 needs an explicit ctor call without implicit destructor EH states (shared form: 120 bytes, exe: 116).
+class FormListConstruction_004010b0
 {
   public:
     TESForm* m_item;
-    BSSimpleList<TESForm*>* m_pkNext;
+    FormListConstruction_004010b0* m_pkNext;
 
     void FUN_004019f0();
 };
@@ -1024,7 +919,7 @@ class FUN_004010b0 : public FUN_00483370
 
     void FUN_00401b20();
 
-    BSSimpleList<TESForm*> m_kList;
+    FormListConstruction_004010b0 m_kList;
 };
 
 // Constructor that initializes m_kList, sets the form type to ENUM_FORM_ID_DEHY_ID, and calls FUN_00401b20.
@@ -1091,100 +986,69 @@ FUN_00405310::~FUN_00405310()
 }
 }  // namespace fnv_00405310
 
-struct EffectSetting4056
+// Save (0x004040b0) is absent from the shared header; inherit its checked layout.
+struct EffectSaveOperation : EffectItem
 {
-    unsigned int FUN_0084e3a0();
-};
-
-struct EffectItem4056
-{
-    EffectSetting4056* FUN_00825c00();
-    void FUN_004040b0();
+    void Save();
 };
 
 void __cdecl FUN_00485910(unsigned int uiType, unsigned int auiFormId);
 
-struct EffectItemNode4056
+// Save (0x004056d0) is absent from the shared header; no local layout or vtable copy.
+struct EffectListSaveOperation : EffectItemList
 {
-    EffectItem4056* m_item;
-    EffectItemNode4056* m_pkNext;
-
-    EffectItem4056*& FUN_006815c0();
-    EffectItemNode4056* FUN_00726070();
-};
-
-struct EffectItemListBase4056
-{
-    virtual ~EffectItemListBase4056();
-};
-
-struct EffectItemList4056 : public EffectItemListBase4056, public EffectItemNode4056
-{
-    void FUN_004056d0();
+    void Save();
 };
 
 // @fnv 0x004056d0
-void EffectItemList4056::FUN_004056d0()
+void EffectListSaveOperation::Save()
 {
-    EffectItemList4056* pkList = this;
+    EffectListSaveOperation* pkList = this;
     while (pkList)
     {
-        EffectItem4056* pkItem = pkList->FUN_006815c0();
+        EffectItem* pkItem = pkList->GetItem();
         if (pkItem)
         {
-            unsigned int auiFormId = pkItem->FUN_00825c00()->FUN_0084e3a0();
+            unsigned int auiFormId = pkItem->GetEffectSetting()->FUN_0084e3a0();
             FUN_00485910(0x44494645, auiFormId);
-            pkItem->FUN_004040b0();
+            static_cast<EffectSaveOperation*>(pkItem)->Save();
         }
-        pkList = static_cast<EffectItemList4056*>(pkList->FUN_00726070());
+        pkList = static_cast<EffectListSaveOperation*>(pkList->GetNext());
     }
 }
 
-struct ItmQ
+// The shared list lacks this script/non-detrimental query (0x00405e80).
+struct EffectListScriptQuery : EffectItemList
 {
-    int GetScriptFromEffectSetting();
-    bool FUN_00405e40();
+    bool HasScriptEffect(int iType);
 };
-struct LstQ
-{
-    int unk00;
-    bool FUN_008256d0();
-    ItmQ** FUN_006815c0();
-    LstQ* FUN_00726070();
-};
-struct BasQ
-{
-    int unk00;
-};
-struct NodQ : BasQ, LstQ
-{
-    bool FUN_00405e80(int iType);
-};
-// Returns true if some node's item has GetScriptFromEffectSetting equal to iType and FUN_00405e40 false; false at once if FUN_008256d0 is true.
+// Returns true for a matching script on a non-detrimental effect; false for an empty list.
 // @fnv 0x00405e80
-bool NodQ::FUN_00405e80(int iType)
+bool EffectListScriptQuery::HasScriptEffect(int iType)
 {
-    NodQ* pNode_aqd = this;
-    if (pNode_aqd->FUN_008256d0())
+    EffectListScriptQuery* pNode_aqd = this;
+    if (pNode_aqd->IsEmpty())
         return false;
     bool bFound_jw = false;
     while (pNode_aqd && !bFound_jw)
     {
-        ItmQ* pItem = *pNode_aqd->FUN_006815c0();
-        if (pItem && pItem->GetScriptFromEffectSetting() == iType && !pItem->FUN_00405e40())
+        EffectItem* pItem = pNode_aqd->GetItem();
+        if (pItem && reinterpret_cast<int>(pItem->GetScript()) == iType && !pItem->IsDetrimental())
             bFound_jw = true;
-        pNode_aqd = static_cast<NodQ*>(pNode_aqd->FUN_00726070());
+        pNode_aqd = static_cast<EffectListScriptQuery*>(pNode_aqd->GetNext());
     }
     return bFound_jw;
 }
 
 class PathingSolution;
 
-template <class T> class PathingRef
-{
-  public:
-    void Reset(void* p);
-};
+// Exe 0x0066b0d0 / 0x0045cec0: shared retain/release and destructor; scene references use an erased NiRefObject pointee.
+#include "../../include/NiRefObject.h"
+#include "../../include/NiPointer.h"
+template <> NiPointer<NiRefObject>::NiPointer() FNV64_NIPOINTER_EXCEPTION_SPEC;
+template <> NiPointer<NiRefObject>::~NiPointer() FNV64_NIPOINTER_EXCEPTION_SPEC;
+template <> NiPointer<NiRefObject>& NiPointer<NiRefObject>::operator=(NiRefObject*) FNV64_NIPOINTER_EXCEPTION_SPEC;
+
 
 class FUN_00633c90
 {
@@ -1194,16 +1058,7 @@ class FUN_00633c90
     ~FUN_00633c90();
 };
 
-class FUN_0040ec80
-{
-  public:
-    int unk04;
-    int unk08;
-    FUN_0040ec80(unsigned char flag);
-    virtual ~FUN_0040ec80();
-};
-
-class FUN_0040ec00 : public FUN_0040ec80
+class FUN_0040ec00 : public BSExtraData
 {
   public:
     FUN_00633c90 m_ref;
@@ -1212,40 +1067,17 @@ class FUN_0040ec00 : public FUN_0040ec80
     virtual ~FUN_0040ec00();
 };
 
-// Constructs the base with 2 and m_ref with 0, then calls Reset(0) on m_ref viewed as PathingRef<PathingSolution>.
+// Constructs the base with 2 and m_ref with 0, then calls Reset(0) on m_ref viewed as NiPointer<NiRefObject>.
 // @fnv 0x0040ec00
-FUN_0040ec00::FUN_0040ec00() : FUN_0040ec80(2), m_ref(0)
+FUN_0040ec00::FUN_0040ec00() : BSExtraData(2), m_ref(0)
 {
-    reinterpret_cast<PathingRef<PathingSolution>*>(&m_ref)->Reset(0);
+    reinterpret_cast<NiPointer<NiRefObject>*>(&m_ref)->operator=(static_cast<NiRefObject*>(0));
 }
 
 class TESFormV
 {
   public:
     virtual ~TESFormV();
-};
-class TESObject : public TESFormV
-{
-};
-class TESBoundObject : public TESObject
-{
-  public:
-    int GetFormType() const;
-};
-class BaseFormComponent
-{
-  public:
-    virtual ~BaseFormComponent();
-};
-class TESEnchantableForm : public BaseFormComponent
-{
-};
-class TESBipedModelForm : public BaseFormComponent
-{
-  public:
-    virtual ~TESBipedModelForm();  // polymorphic: its RTTI is used (rtti_fix.py)
-  public:
-    bool FUN_0047c850();
 };
 struct ItemExtraList
 {
@@ -1298,7 +1130,7 @@ bool __cdecl FUN_00409720(TESBoundObject* object, ItemExtraList* extra, EffectSe
 // @fnv 0x00405370
 void __thiscall FUN_00405370_Class::FUN_00405370()
 {
-    reinterpret_cast<NiTPointerMap<const char*, Setting*>*>(this)->m_ppVirtualMethodTable = &DAT_01012278;
+    *reinterpret_cast<void**>(this) = &DAT_01012278;  // the vftable pointer
     reinterpret_cast<NiTPointerMap<const char*, Setting*>*>(this)->RemoveAll();
     FUN_00aa10f0(reinterpret_cast<NiTPointerMap<const char*, Setting*>*>(this)->m_ppkHashTable);
 }
@@ -1317,10 +1149,8 @@ void* StringMapDeletingEntry::FUN_00405400(unsigned int flags)
     return this;
 }
 
-struct AssociatedForm40df
-{
-    TESForm* __thiscall FUN_005f5f80();
-};
+// The shared effect class does not yet declare its associated-form accessor.
+TESForm* __fastcall GetEffectAssociatedForm(EffectSetting* effect);
 
 struct FUN_00480ad0_shell
 {
@@ -1328,15 +1158,15 @@ struct FUN_00480ad0_shell
 };
 
 // @fnv 0x0040dfa0
-bool __cdecl FUN_0040dfa0(Item405c* timer1, Item405c* timer2)
+bool __cdecl FUN_0040dfa0(EffectItem* timer1, EffectItem* timer2)
 {
     if (timer1 == 0 || timer2 == 0)
         return false;
 
-    if (timer1->FUN_00825c00()->FUN_00403e60(0x20000) && timer2->FUN_00825c00()->FUN_00403e60(0x20000))
+    if (timer1->GetEffectSetting()->FUN_00403e60(0x20000) && timer2->GetEffectSetting()->FUN_00403e60(0x20000))
     {
-        TESForm* interval1 = reinterpret_cast<AssociatedForm40df*>(timer1->FUN_00825c00())->FUN_005f5f80();
-        TESForm* interval2 = reinterpret_cast<AssociatedForm40df*>(timer2->FUN_00825c00())->FUN_005f5f80();
+        TESForm* interval1 = GetEffectAssociatedForm(timer1->GetEffectSetting());
+        TESForm* interval2 = GetEffectAssociatedForm(timer2->GetEffectSetting());
 
         TESBipedModelForm* result2 = dynamic_cast<TESBipedModelForm*>(interval1);
         TESBipedModelForm* result1 = dynamic_cast<TESBipedModelForm*>(interval2);
@@ -1348,7 +1178,7 @@ bool __cdecl FUN_0040dfa0(Item405c* timer1, Item405c* timer2)
         }
     }
 
-    if (timer1->FUN_00825c00()->FUN_00403e60(0x10000) && timer2->FUN_00825c00()->FUN_00403e60(0x10000))
+    if (timer1->GetEffectSetting()->FUN_00403e60(0x10000) && timer2->GetEffectSetting()->FUN_00403e60(0x10000))
         return true;
 
     return false;

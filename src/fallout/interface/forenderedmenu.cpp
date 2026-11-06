@@ -1,13 +1,128 @@
-// fallout/interface/forenderedmenu.cpp: FORenderedMenu, MenuStub, FOPipboyManager, HOLDER and more (44 functions)
+// fallout/interface/forenderedmenu.cpp: FORenderedMenu, FOPipboyManager and related menus (44 functions)
 
-#include "forenderedmenu_decls.h"
+#include "../../../include/FORenderedMenu.h"
+#include "../../../include/FOPipboyManager.h"
+#include "../../../include/BSAudio.h"
+#include "../../../include/BSShaderAccumulator.h"
+#include "../../../include/BSShaderManager.h"
+#include "../../../include/NiGeometry.h"
+#include "../../../include/NiUpdateData.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/BGSBodyPart.h"
+#include "../../../include/GO.h"
+#include "../../../include/ImageSpaceModifierInstanceForm.h"
+#include "../../../include/Menu.h"
+// PodPoint3: unit-local copy of the former shared stand-in Point3. Same layout as NiPoint3 but constructor-free (an aggregate under VC9): with NiPoint3, 0x007fd6c0 does not match (POD construction/return; NiPoint3's user constructors change the code).
+#include <stddef.h>
+class PodPoint3
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    // Legacy compilers require an aggregate for brace initialization.
+#if !defined(_MSC_VER) || _MSC_VER >= 1800
+    PodPoint3()
+    {}
+    PodPoint3(float fX, float fY, float fZ)
+        : x(fX), y(fY), z(fZ)
+    {}
+#endif
+
+    PodPoint3 operator+(const PodPoint3& other) const;
+    PodPoint3 operator-(const PodPoint3& other) const;
+    PodPoint3 operator-() const;
+    PodPoint3 operator*(float scalar) const;
+    float operator*(const PodPoint3& other) const;
+    PodPoint3& operator+=(const PodPoint3& other);
+    friend PodPoint3 operator*(float scalar, const PodPoint3& point);
+
+    float DotPart(float value, const PodPoint3& point) const;
+    float DotProduct(const PodPoint3& point) const;
+    double DotProduct(const PodPoint3& point);
+    float Length() const;
+
+    PodPoint3& FUN_00439180(float scalar);
+    PodPoint3 FUN_00439e90(const PodPoint3& shift) const;
+    PodPoint3* FUN_00439e90(PodPoint3* output, const PodPoint3* other) const;
+    PodPoint3 FUN_00439ef0(const PodPoint3& other) const;
+    void FUN_00439ef0();
+    PodPoint3 FUN_004b3800(const PodPoint3& axis) const;
+    void FUN_004a0c10();
+    float FUN_00457910();
+    float FUN_00457990() const;
+    double FUN_004a7290();
+    PodPoint3* FUN_006815c0();
+    PodPoint3* FUN_00416870(float x, float y, float z);
+    void FUN_0043d410(float x, int y, int z);
+    char* FUN_00a59af0(const char* text);
+
+    static void* operator new[](size_t size);
+    static void operator delete[](void* memory);
+    static const PodPoint3 ZERO;
+};
+#include "../../../include/Setting.h"
+#include "../../../include/TESImageSpaceModifier.h"
+#include "../../../include/Tile.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiPointLight.h"
+#include "../../../include/ExtraDataList.h"
+#include "../../../include/NP.h"
+#include "../../../include/NiProperty.h"
+#include "../../../include/NiAlphaProperty.h"
+#include "../../../include/ShadowSceneNode.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiBound.h"
+#include "../../../include/NiRenderer.h"
+#include "../../../include/Ni2DBuffer.h"
+
+// Unit-specific declarations; shared dependencies are included above.
+
+#include <stddef.h>
+
+typedef char FNV_ASSERT_menu_root_offset[(offsetof(FORenderedMenu, m_pRenderedMenuObject) == 0x14) ? 1 : -1];
+typedef char FNV_ASSERT_burst_active_offset[(offsetof(FORenderedMenu, m_bBurstActive) == 0x4D) ? 1 : -1];
+typedef char FNV_ASSERT_burst_duration_offset[(offsetof(FORenderedMenu, fBurstDuration) == 0x54) ? 1 : -1];
+
+typedef char FNV_ASSERT_sound_handle_size[(sizeof(BSSoundHandle) == 12) ? 1 : -1];
+
+// BSAudio still declares the legacy return type; expose the checked handle type here.
+class RenderedMenuAudio : public BSAudio
+{
+public:
+    BSSoundHandle GetSoundHandleByEditorID(const char* editorID, unsigned int flags);
+};
+
+class TimeGlobal
+{
+  public:
+    unsigned int GetTimeStamp();
+};
+
+extern TimeGlobal g_timeGlobal;
+extern bool g_burstSoundEnabled;
+bool __cdecl RandomBoolean(float chance);
+
+ShadowSceneNode* FUN_00450b80(unsigned int);
+struct NiRTTI;
+extern NiRTTI DAT_011f4a98;
+NiAVObject* NiDynamicCast(const NiRTTI*, NiAVObject*);
+int Warning(const char*, ...);
+extern Setting DAT_011db44c;
+extern Setting DAT_011db470;
+extern Setting DAT_011db3d8;
+
+unsigned int FUN_00438220();
+unsigned int FUN_004af350();
+extern NiColor DAT_011f4998;
 
 const char kRenderedMenuBurstSound[] = "UIPipBoyStatic";
 
 // @fnv 0x0063d040
-void FORenderedMenu::GetCurrentTimeMilliseconds()
+unsigned int FORenderedMenu::GetCurrentTimeMilliseconds()
 {
-    m_pRenderedMenuObject.operator NiAVObject*();
+    return (unsigned int)m_pRenderedMenuObject.operator NiAVObject*();
 }
 
 // Enables the burst, stores duration and intensity, records the start timestamp, and optionally plays the burst sound.
@@ -22,8 +137,8 @@ void FORenderedMenu::StartBurst(float duration, float intensity, float soundChan
 
     if (g_burstSoundEnabled && RandomBoolean(soundChance))
     {
-        SoundPlaybackHandle soundHandle;
-        soundHandle = BSAudio::GetSingleton()->GetSoundHandleByEditorID(kRenderedMenuBurstSound, 0x121);
+        BSSoundHandle soundHandle;
+        soundHandle = static_cast<RenderedMenuAudio*>(BSAudio::GetSingleton())->GetSoundHandleByEditorID(kRenderedMenuBurstSound, 0x121);
         soundHandle.Play(false);
     }
 }
@@ -38,18 +153,20 @@ bool FORenderedMenu::CreateMenuLight(const char* nodeName, ShadowSceneNode* shad
     {
         FUN_007fc6f0();
         NiNode* pNode;
-        NiAVObject* pObject = GetMenuRoot()->GetObjectByName(NiFixedString(nodeName));
+        NiAVObject* pObject = GetMenuRoot()->GetObjectByName(NiFixedString((const char*)nodeName));
         pNode = 0;
         if (pObject)
-            pNode = pObject->GetAsNiNode();
+            pNode = pObject->IsSceneNode();
         if (pNode)
         {
             m_pMenuLight = new NiPointLight;
-            NiPoint3 kTranslate = pNode->FUN_0043c490();
-            m_pMenuLight->FUN_00440460(kTranslate);
+            // Keep this copy trivial: the shared NiPoint3 copy constructor is out of line.
+            struct MenuLightPosition { float x, y, z; };
+            MenuLightPosition kTranslate = *(MenuLightPosition*)&pNode->FUN_0043c490();
+            m_pMenuLight->FUN_00440460(*(const NiPoint3*)&kTranslate);
             pResolvedShadowNode->GetShadowSceneLight((NiLight*)(NiPointLight*)m_pMenuLight, true);
             m_pSecondaryMenuObject = pResolvedShadowNode;
-            pNode->GetParent()->AddObject(m_pMenuLight, true);
+            pNode->GetParent()->AttachChildInAvailableSlot((NiAVObject*)(NiPointLight*)m_pMenuLight, true);
             NiUpdateData kData(0.0f, false, false);
             m_pMenuBackgroundScreenGeometry->Update(kData);
             m_pMenuLight->SetAppCulled(true);
@@ -79,7 +196,7 @@ bool FORenderedMenu::CreateMenuLight(const char* nodeName, ShadowSceneNode* shad
 // @fnv 0x007fc150
 void FORenderedMenu::OnMenuOpen()
 {
-    m_pMenuLightNode = new BSShaderAccumulator(BSShaderManager::Interface, 1, 0x2f7);
+    m_pMenuLightNode = new BSShaderAccumulator(BSShaderManager::BRCM_NO_GROUPS, 1, 0x2f7);
     m_pMenuLightNode->FUN_004a1040(10);
     NiTexture* pTexture = 0;
     NiPointer<NiTexture> kTexture(0);
@@ -88,8 +205,8 @@ void FORenderedMenu::OnMenuOpen()
     if (!pTexture)
         Warning("MENUS: Default renderedmenu texture NOT FOUND.  Rendered menu may not work.");
     SetDefaultTexture(pTexture);
-    fBlurRadius = DAT_011db44c.Float()->f;
-    fBlurIntensity = DAT_011db470.Float()->f;
+    fBlurRadius = *DAT_011db44c.Float();
+    fBlurIntensity = *DAT_011db470.Float();
     BSShaderManager::GetTexture(DAT_011db3d8.String(), true, m_pMenuLightShadowNode, false, false);
     bInitialized = true;
 }
@@ -107,7 +224,7 @@ void FOPipboyManager::FUN_007fc2d0(NiAVObject* object)
             alpha->FUN_0049ed90(false);
             alpha->FUN_00439340(6);
             alpha->FUN_00439390(0);
-            object->AttachProperty(alpha);
+            object->AttachProperty((NiObject*)alpha);
         }
     }
     material = ((NiGeometry*)object)->GetProperty(FUN_004af350());
@@ -124,51 +241,15 @@ void FORenderedMenu::SetDefaultTexture(NiTexture* texture)
     m_pDefaultTexture = texture;
 }
 
-struct NP
-{
-    ~NP();
-    void* p;
-};
-struct FUN_007fad10
-{
-    virtual ~FUN_007fad10();
-    NP np04;
-    NP np08;
-    NP np0c;
-    NP np10;
-    NP np14;
-    char pad18[4];
-    NP np1c;
-    char pad20[4];
-    NP np24;
-    char pad28[0x94];
-    NP npbc;
-    char pad_c0[0x14];
-    NP npd4;
-    void FUN_007fadf0();
-};
 // @fnv 0x007fad10
-FUN_007fad10::~FUN_007fad10()
+FORenderedMenu::~FORenderedMenu()
 {
-    FUN_007fadf0();
+    FORenderedMenu::FUN_007fadf0();
 }
-
-struct FUN_007fc6f0_shell : public FORenderedMenu
-{
-    void FUN_007fc6f0();
-};
 
 struct Flt
 {
     operator unsigned int() const;
-};
-struct NP_0081c630
-{
-    NP_0081c630& operator=(void*);
-};
-struct ExtraDataList
-{
-    void Set3DObject(NiAVObject*);
 };
 struct LightNodeV
 {
@@ -233,19 +314,19 @@ struct LightNodeV
     virtual void AttachLight(unsigned int);
 };
 // @fnv 0x007fc6f0
-void FUN_007fc6f0_shell::FUN_007fc6f0()
+void FORenderedMenu::FUN_007fc6f0()
 {
-    if (*reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x1c))
+    if (m_pMenuLight)
     {
-        if (reinterpret_cast<FORenderedMenu*>(this)->GetMenuRoot()->GetAsNiNode())
+        if (GetMenuRoot()->IsSceneNode())
         {
-            reinterpret_cast<LightNodeV*>(reinterpret_cast<FORenderedMenu*>(this)->GetMenuRoot()->GetAsNiNode())
-                ->AttachLight(*reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x1c));
+            reinterpret_cast<LightNodeV*>(GetMenuRoot()->IsSceneNode())
+                ->AttachLight((unsigned int)m_pMenuLight.operator NiPointLight*());
         }
-        (*reinterpret_cast<ExtraDataList**>(reinterpret_cast<char*>(this) + 0x20))
+        reinterpret_cast<ExtraDataList*>(m_pSecondaryMenuObject)
             ->Set3DObject(reinterpret_cast<NiAVObject*>(
-                (unsigned int)*reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x1c)));
-        *reinterpret_cast<NP_0081c630*>(reinterpret_cast<char*>(this) + 0x1c) = 0;
+                (unsigned int)(unsigned int)m_pMenuLight.operator NiPointLight*()));
+        m_pMenuLight = 0;
     }
 }
 
@@ -257,24 +338,19 @@ void FUN_007f8160(char value)
     DAT_0118abb1 = value;
 }
 
-struct FUN_007fadf0_shell : public FORenderedMenu
-{
-    void FUN_007fadf0();
-};
-
 // Calls the base FORenderedMenu function, then zeroes several fields at offsets 4 through 0xd4 and a byte at 0x28.
 // @fnv 0x007fadf0
-void FUN_007fadf0_shell::FUN_007fadf0()
+void FORenderedMenu::FUN_007fadf0()
 {
-    reinterpret_cast<FORenderedMenu*>(this)->FUN_007fc6f0();
-    reinterpret_cast<NP_0081c630*>(reinterpret_cast<char*>(this) + 4)->operator=(0);
-    reinterpret_cast<NP_0081c630*>(reinterpret_cast<char*>(this) + 0x14)->operator=(0);
-    reinterpret_cast<NP_0081c630*>(reinterpret_cast<char*>(this) + 0xc)->operator=(0);
-    reinterpret_cast<NP_0081c630*>(reinterpret_cast<char*>(this) + 0x10)->operator=(0);
-    reinterpret_cast<NP_0081c630*>(reinterpret_cast<char*>(this) + 0x1c)->operator=(0);
-    reinterpret_cast<NP_0081c630*>(reinterpret_cast<char*>(this) + 0x24)->operator=(0);
-    reinterpret_cast<NP_0081c630*>(reinterpret_cast<char*>(this) + 0xd4)->operator=(0);
-    *reinterpret_cast<char*>(reinterpret_cast<char*>(this) + 0x28) = 0;
+    FUN_007fc6f0();
+    m_pMenuBackgroundScreenGeometry = 0;
+    m_pRenderedMenuObject = 0;
+    m_pScreenGeometry = 0;
+    m_pDefaultTexture = 0;
+    m_pMenuLight = 0;
+    m_pMenuLightParameters = 0;
+    m_pMenuLightNode = 0;
+    bInitialized = 0;
 }
 
 // @fnv 0x007faef0
@@ -291,120 +367,75 @@ char* FUN_007fdf30()
     return DAT_011f35cc;
 }
 
-struct FUN_0087d6c0_shell
-{
-    float __thiscall FUN_0087d6c0();
-};
-
 // @fnv 0x0087d6c0
-float __thiscall FUN_0087d6c0_shell::FUN_0087d6c0()
+float __thiscall FORenderedMenu::FUN_0087d6c0()
 {
     return 1.0f;
 }
 
 extern Flt g_011db63c;
 float __fastcall GetFieldB4Float(char*);
-struct FUN_00706060_shell
-{
-    float FUN_00706060();
-};
 // Returns the float from GetFieldB4Float at g_011db63c if that pointer is non-null, otherwise returns 1.0f.
 // @fnv 0x00706060
-float FUN_00706060_shell::FUN_00706060()
+float __fastcall GetRenderedMenuFieldB4(FORenderedMenu*)
 {
     return (unsigned int)g_011db63c ? GetFieldB4Float((char*)(unsigned int)g_011db63c) : 1.0f;
 }
 
 void __cdecl _Deallocate(void*);
-struct HOLDER
-{
-    void* __thiscall DestroyHolder(unsigned int);
-};
 // Runs the destructor on this object, frees it with _Deallocate when flags has bit 0 set, and returns this.
 // @fnv 0x007face0
-void* __thiscall HOLDER::DestroyHolder(unsigned int flags)
+void* __fastcall DestroyRenderedMenu(FORenderedMenu* menu, void*, unsigned int flags)
 {
-    ((FUN_007fad10*)this)->FUN_007fad10::~FUN_007fad10();
+    menu->FORenderedMenu::~FORenderedMenu();
     if (flags & 1)
-        _Deallocate(this);
-    return this;
+        _Deallocate(menu);
+    return menu;
 }
 
-struct MenuStub
-{
-    char _p00[0x1c];
-    Flt unk1c;
-    char _p1d[0x30];
-    bool b4d;
-    char _p4e[0x12];
-    bool b60;
-    char _p61[0x58];
-    bool bB9;
-    void ResetMenuState();
-    void FUN_007fae70(int);
-};
-// Clears the bB9, b4d and b60 flags, culls the object at unk1c if set, and calls FUN_007fae70(0).
+// Clears menu visibility and transient effects, culls the menu light, and clears the screen texture.
 // @fnv 0x007fb0b0
-void MenuStub::ResetMenuState()
+void FORenderedMenu::ResetMenuState()
 {
-    bB9 = 0;
-    b4d = 0;
-    b60 = 0;
-    if (unk1c)
-        ((NiAVObject*)(unsigned int)unk1c)->SetAppCulled(true);
+    m_bMenuLightCreated = 0;
+    m_bBurstActive = 0;
+    m_bBurstSoundPlayed = 0;
+    if (m_pMenuLight)
+        ((NiAVObject*)(NiPointLight*)m_pMenuLight)->SetAppCulled(true);
     FUN_007fae70(0);
 }
 
-struct S007fb100
-{
-    char _0[0x95];
-    unsigned char b95;
-    char _96[2];
-    float f98;
-    float f9c;
-    void FUN_007fb100();
-};
-// Sets b95 to 1, stores the current global timestamp in f98, and resets f9c to 0.0f.
+// Starts distortion at the current global timestamp.
 // @fnv 0x007fb100
-void S007fb100::FUN_007fb100()
+void __fastcall StartRenderedMenuDistort(FORenderedMenu* menu)
 {
-    b95 = 1;
-    f98 = (float)g_timeGlobal.GetTimeStamp();
-    f9c = 0.0f;
+    menu->m_bShudderActive = 1;
+    menu->m_fDistortHorizontalScale = (float)g_timeGlobal.GetTimeStamp();
+    menu->m_fDistortVerticalScale = 0.0f;
 }
 
-struct FUN_007fb250_owner
-{
-    void FUN_007fb250(float afDuration, float afIntensity);
-};
 // @fnv 0x007fb250
-void FUN_007fb250_owner::FUN_007fb250(float afDuration, float afIntensity)
+void __fastcall StartRenderedMenuShudder(FORenderedMenu* menu, float afDuration, float afIntensity)
 {
-    *(bool*)((char*)this + 0x60) = true;
-    *(float*)((char*)this + 0x68) = afDuration;
-    *(float*)((char*)this + 0x6c) = afIntensity * (double)0.0001f;
-    *(float*)((char*)this + 0x64) = (float)g_timeGlobal.GetTimeStamp();
-    *(float*)((char*)this + 0x70) = 0.0f;
+    menu->m_bBurstSoundPlayed = true;
+    menu->m_fShudderDuration = afDuration;
+    menu->m_fShudderFrequency = afIntensity * (double)0.0001f;
+    menu->m_fShudderIntensity = (float)g_timeGlobal.GetTimeStamp();
+    menu->m_fVerticalHoldDuration = 0.0f;
 }
 
-namespace fnv_007fb420 {
-struct MenuStub
-{
-    void FUN_007fb420(float afTime);
-};
 // @fnv 0x007fb420
-void MenuStub::FUN_007fb420(float afTime)
+void FORenderedMenu::FUN_007fb420(float afTime)
 {
-    float fintensityValue = afTime - *(float*)((char*)this + 0x50);
-    if (fintensityValue > *(float*)((char*)this + 0x54))
-        *(bool*)((char*)this + 0x4D) = 0;
+    float fintensityValue = afTime - m_fBurstElapsedTime;
+    if (fintensityValue > fBurstDuration)
+        m_bBurstActive = 0;
     else
     {
-        float fRemaining = 1.0F - fintensityValue / *(float*)((char*)this + 0x54);
-        *(float*)((char*)this + 0x5C) = *(float*)((char*)this + 0x58) * fRemaining;
+        float fRemaining = 1.0F - fintensityValue / fBurstDuration;
+        m_fBurstSoundChance = m_fBurstIntensity * fRemaining;
     }
 }
-}  // namespace fnv_007fb420
 
 struct HackLight
 {
@@ -426,7 +457,7 @@ void MyMenu::FUN_007ffdb0()
     }
 }
 
-struct Interface
+struct RenderedMenuInterface
 {
     NiNode* GetRoot();
     NiNode* FUN_007fa970();
@@ -434,7 +465,7 @@ struct Interface
 };
 // Sets the app-culled flag on both the root node and the node returned by FUN_007fa970, if both exist.
 // @fnv 0x007fa8d0
-void __thiscall Interface::FUN_007fa8d0(bool abCulled)
+void __thiscall RenderedMenuInterface::FUN_007fa8d0(bool abCulled)
 {
     if (!GetRoot() || !FUN_007fa970())
         return;
@@ -451,93 +482,59 @@ void __thiscall Interface::FUN_007fa8d0(bool abCulled)
 }
 
 namespace fnv_007fb040 {
-struct Menu;
-struct Tile
+// Exe 0x007fb040: unit-local ForenderedmenuInterfaceView view used by this matched implementation.
+struct ForenderedmenuInterfaceView
 {
-    Menu* GetMenu();
+    static void* GetPrimaryInterfaceTile();
 };
-struct Menu
-{
-    void FUN_00867a20();
-};
-struct Interface
-{
-    static Tile* GetPrimaryInterfaceTile();
-};
-struct FUN_00a079d0_shell
+// Tile.h does not yet declare the rendered-menu child update entry point.
+struct RenderedMenuTile : Tile
 {
     void UpdateTileChildren();
 };
-struct FUN_007fb040_shell : public MenuStub
-{
-    void FUN_007fb040();
-};
+}  // namespace fnv_007fb040
+
 // @fnv 0x007fb040
-void FUN_007fb040_shell::FUN_007fb040()
+void FORenderedMenu::FUN_007fb040()
 {
+    using namespace fnv_007fb040;
     if (reinterpret_cast<NiAVObject*>(this)->GetParent())
         reinterpret_cast<Menu*>(reinterpret_cast<Tile*>(reinterpret_cast<NiAVObject*>(this)->GetParent())->GetMenu())
             ->FUN_00867a20();
-    ((FUN_00a079d0_shell*)Interface::GetPrimaryInterfaceTile())->UpdateTileChildren();
-    if (unk1c.operator unsigned int())
-        reinterpret_cast<NiAVObject*>(unk1c.operator unsigned int())->SetAppCulled(false);
-    bB9 = true;
+    ((RenderedMenuTile*)fnv_007fb040::ForenderedmenuInterfaceView::GetPrimaryInterfaceTile())->UpdateTileChildren();
+    if (m_pMenuLight.operator NiPointLight*())
+        reinterpret_cast<NiAVObject*>(m_pMenuLight.operator NiPointLight*())->SetAppCulled(false);
+    m_bMenuLightCreated = true;
 }
-}  // namespace fnv_007fb040
 
-struct Tile
-{
-    NiNode* FUN_0056c7f0();
-};
-struct Menu;
 Menu* __cdecl FindMenuById(int id);
-struct FUN_007fc8d0_shell : public FORenderedMenu
-{
-    void FUN_007fc8d0();
-};
+// This visibility entry point is not declared by the shared header yet.
 // Looks up three tiles by id and, for each enabled flag at offsets 0xd2/0xd0/0xd1, un-culls that tile's node.
 // @fnv 0x007fc8d0
-void FUN_007fc8d0_shell::FUN_007fc8d0()
+void __fastcall RestoreRenderedMenuVisibility(FORenderedMenu* menu)
 {
     Tile* pquantity2 = (Tile*)FindMenuById(0x3e9);
     Tile* pmessage = (Tile*)FindMenuById(0x3f8);
     Tile* ptutorial = (Tile*)FindMenuById(0x423);
-    if (*(unsigned char*)((char*)this + 0xd2))
+    if (menu->m_bMenuLightAttached)
         pquantity2->FUN_0056c7f0()->SetAppCulled(false);
-    if (*(unsigned char*)((char*)this + 0xd0))
+    if (menu->m_bMenuLightVisible)
         pmessage->FUN_0056c7f0()->SetAppCulled(false);
-    if (*(unsigned char*)((char*)this + 0xd1))
+    if (menu->m_bMenuLightShadowed)
         ptutorial->FUN_0056c7f0()->SetAppCulled(false);
 }
 
-struct S_007fb2b0
-{
-    char pad00[0x74];
-    unsigned char b74;
-    char pad75[3];
-    float f78;
-    float f7c;
-    float f80;
-    float f84;
-    float f88;
-    void FUN_007fb2b0(float, float, float);
-};
-// Sets b74 to 1, stores x, y, z into f7c, f80, f84, records the global timestamp in f78 and clears f88.
+// Starts vertical hold with the supplied parameters and current global timestamp.
 // @fnv 0x007fb2b0
-void S_007fb2b0::FUN_007fb2b0(float x, float y, float z)
+void __fastcall StartRenderedMenuVerticalHold(FORenderedMenu* menu, float x, float y, float z)
 {
-    b74 = 1;
-    f7c = x;
-    f80 = y;
-    f84 = z;
-    f78 = (float)g_timeGlobal.GetTimeStamp();
-    f88 = 0.0f;
+    menu->m_bVerticalHoldActive = 1;
+    menu->m_fVerticalHoldRate = x;
+    menu->m_fVerticalHoldChance = y;
+    menu->m_fShudderChance = z;
+    menu->m_fVerticalHoldSpeed = (float)g_timeGlobal.GetTimeStamp();
+    menu->m_fPulseRadiusIntensity = 0.0f;
 }
-
-struct GO
-{
-    void __thiscall operator=(void*);
-};
 
 struct FUN_007fbeb0_shell
 {
@@ -552,109 +549,75 @@ struct FUN_007fbeb0_shell
 void __thiscall FUN_007fbeb0_shell::SetValueAndAssign(char value, void* ptr)
 {
     ((char*)this + 0x1fc)[0] = value;
-    ((GO*)this + 0x1f8)->operator=(ptr);
+    ((GO*)((char*)this + 0x1f8))->operator=(ptr);
 }
 
-namespace fnv_007fdf10 {
-struct GO
+// The shared header has no accumulator setter declaration.
+struct RenderedMenuAccumulatorAccess : FORenderedMenu
 {
-    GO& operator=(void*);
-};
-
-struct FUN_007fdf10_shell
-{
-    char pad_d4[0xd4];
-    GO go_d4;
-    void SetGo(void*);
+    void SetGo(void* apValue);
 };
 
 // @fnv 0x007fdf10
-void FUN_007fdf10_shell::SetGo(void* apValue)
+void RenderedMenuAccumulatorAccess::SetGo(void* apValue)
 {
-    go_d4 = apValue;
+    *reinterpret_cast<GO*>(&m_pMenuLightNode) = apValue;
 }
-}  // namespace fnv_007fdf10
 
 float __cdecl FUN_004e44d0(float);
-struct FUN_007fb3a0_shell
-{
-    void FUN_007fb3a0(float afTime);
-};
 // @fnv 0x007fb3a0
-void FUN_007fb3a0_shell::FUN_007fb3a0(float afTime)
+void FORenderedMenu::FUN_007fb3a0(float afTime)
 {
-    float fdelta = afTime - *(float*)((char*)this + 0x78);
-    if (fdelta > *(float*)((char*)this + 0x7c))
+    float fdelta = afTime - m_fVerticalHoldSpeed;
+    if (fdelta > m_fVerticalHoldRate)
     {
-        *(unsigned char*)((char*)this + 0x74) = 0;
+        m_bVerticalHoldActive = 0;
     }
     else
     {
-        float fRemainder = 1.0f - (fdelta / *(float*)((char*)this + 0x7c));
-        *(float*)((char*)this + 0x88) =
-            FUN_004e44d0(fdelta * *(float*)((char*)this + 0x84)) * *(float*)((char*)this + 0x80) * fRemainder;
+        float fRemainder = 1.0f - (fdelta / m_fVerticalHoldRate);
+        m_fPulseRadiusIntensity =
+            FUN_004e44d0(fdelta * m_fShudderChance) * m_fVerticalHoldChance * fRemainder;
     }
 }
 
 float __cdecl ApplyNoise(float);
-struct GlobalObject_0044f440 : SettingT_GameSettingCollection_
-{
-};
-extern GlobalObject_0044f440 g_011db3a4;
-extern GlobalObject_0044f440 g_011db408;
-extern GlobalObject_0044f440 g_011db424;
-
-struct FUN_007fb530_shell
-{
-    void FUN_007fb530(float afDuration);
-};
+extern Setting g_011db3a4;
+extern Setting g_011db408;
+extern Setting g_011db424;
 
 // @fnv 0x007fb530
-void FUN_007fb530_shell::FUN_007fb530(float afDuration)
+void FORenderedMenu::FUN_007fb530(float afDuration)
 {
-    float f04 = ApplyNoise(afDuration * g_011db408.Float()->f) * 2.0f;
-    *(float*)((char*)this + 0x8c) = f04 * g_011db3a4.Float()->f;
-    *(float*)((char*)this + 0x90) = f04 * g_011db424.Float()->f;
+    float f04 = ApplyNoise(afDuration * *g_011db408.Float()) * 2.0f;
+    m_fPulseBrightenIntensity = f04 * *g_011db3a4.Float();
+    m_fPulseRate = f04 * *g_011db424.Float();
 }
 
-struct FUN_007f8010_shell : public FORenderedMenu
+// These transition entry points are not declared by FOPipboyManager.h yet.
+// Use the shared layout and keep only the missing method declarations here.
+struct PipboyMenuTransitions : FOPipboyManager
 {
-    bool GetInitialized();
     void FUN_007f7f40();
-    void FUN_007fb040();
-    void FUN_007f8010();
-};
-
-struct SndX
-{
-    void Stop();
-    void PausePlayback();
-};
-
-struct TESImageSpaceModifier
-{
-    static TESImageSpaceModifier* __cdecl GetGetHit();
-};
-
-struct ImageSpaceModifierInstanceForm
-{
-    static void __cdecl Stop(TESImageSpaceModifier*);
+    void FUN_007fa010(unsigned int);
+    void OpenPipboyMenu();
+    void ClosePipboyMenu();
 };
 
 void __cdecl FUN_00702c80(bool, bool);
 void __cdecl FUN_004de8c0(float);
 
 extern char DAT_011d890a;
-extern GlobalObject_0044f440 g_011db43c;
-extern GlobalObject_0044f440 g_011db480;
+extern Setting g_011db43c;
+extern Setting g_011db480;
 
 // @fnv 0x007f8010
-void FUN_007f8010_shell::FUN_007f8010()
+void PipboyMenuTransitions::OpenPipboyMenu()
 {
     if (!GetInitialized())
         return;
 
-    reinterpret_cast<Interface*>(this)->FUN_007fa8d0(false);
+    reinterpret_cast<RenderedMenuInterface*>(this)->FUN_007fa8d0(false);
     FUN_007f7f40();
 
     DAT_011d890a = 1;
@@ -662,16 +625,14 @@ void FUN_007f8010_shell::FUN_007f8010()
 
     FUN_00702c80(true, true);
 
-    reinterpret_cast<SndX*>(reinterpret_cast<char*>(this) + 0x154)->Stop();
-    reinterpret_cast<SndX*>(reinterpret_cast<char*>(this) + 0x154)->PausePlayback();
+    reinterpret_cast<BSSoundHandle&>(m_kPipBoyLightData).Stop();
+    reinterpret_cast<BSSoundHandle&>(m_kPipBoyLightData).Release();
 
-    reinterpret_cast<SoundPlaybackHandle*>(reinterpret_cast<char*>(this) + 0x154)
-        ->
-        operator=(BSAudio::GetSingleton()->GetSoundHandleByEditorID("UIPipBoyHumLP", 0x31));
+    reinterpret_cast<BSSoundHandle&>(m_kPipBoyLightData) = static_cast<RenderedMenuAudio*>(BSAudio::GetSingleton())->GetSoundHandleByEditorID("UIPipBoyHumLP", 0x31);
 
-    reinterpret_cast<SoundPlaybackHandle*>(reinterpret_cast<char*>(this) + 0x154)->Play(false);
+    reinterpret_cast<BSSoundHandle&>(m_kPipBoyLightData).Play(false);
 
-    StartBurst(g_011db480.Float()->f, g_011db43c.Float()->f, 0.5f);
+    StartBurst(*g_011db480.Float(), *g_011db43c.Float(), 0.5f);
 
     FUN_007fb040();
 
@@ -682,21 +643,21 @@ void FUN_007f8010_shell::FUN_007f8010()
 }
 
 // @fnv 0x007fae70
-void MenuStub::FUN_007fae70(int apTexture)
+void FORenderedMenu::FUN_007fae70(int apTexture)
 {
     NiProperty* pnlp;
 
-    if (reinterpret_cast<unsigned char*>(this)[0x28] == 0)
+    if (!bInitialized)
         return;
 
-    if (reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 4)->operator unsigned int() == 0)
+    if ((unsigned int)m_pMenuBackgroundScreenGeometry.operator NiGeometry*() == 0)
     {
         Warning("MESHES: Trying to clear a rendered menu screen but the screen trishape is NULL.");
         return;
     }
 
     pnlp = reinterpret_cast<NiGeometry*>(
-               reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 4)->operator unsigned int())
+               (unsigned int)m_pMenuBackgroundScreenGeometry.operator NiGeometry*())
                ->GetProperty(FUN_00438220());
 
     if (apTexture != 0)
@@ -706,7 +667,7 @@ void MenuStub::FUN_007fae70(int apTexture)
     else
     {
         pnlp->FUN_00438230(reinterpret_cast<NiTexture*>(
-            reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x10)->operator unsigned int()));
+            (unsigned int)m_pDefaultTexture.operator NiTexture*()));
     }
 }
 
@@ -717,54 +678,9 @@ struct FUN_007079f0_shell
 
 FUN_007079f0_shell* _FUN_004b7210();
 
-struct FUN_007faf10_shell
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e(float);
-    virtual void v0f(float);
-    virtual void v10(float);
-    virtual void v11(float);
-    virtual void v12(float);
-    virtual void v13(float);
-
-    char pad04[0x34];
-    float fScreenLightBaseIntensity;
-    float m_fFlicker;
-    float fBlurRadius;
-    float fBlurIntensity;
-    float m_fScanlineScale;
-    bool m_bDoScanlines;
-    bool m_bBurstActive;
-    char pad4e[0x12];
-    bool m_bBurstSoundPlayed;
-    char pad61[0x13];
-    bool m_bVerticalHoldActive;
-    char pad75[0x20];
-    bool m_bShudderActive;
-    char pad96[0x0e];
-    float m_fDistortTimeRemaining;
-    char pada8[0x10];
-    bool m_bMenuLightEnabled;
-
-    bool UpdateScreenEffect();
-};
-
 // Reads the global time stamp, updates the menu-open state, and drives the screen effect's virtual update methods when the menu is or was open.
 // @fnv 0x007faf10
-bool FUN_007faf10_shell::UpdateScreenEffect()
+bool FORenderedMenu::UpdateScreenEffect()
 {
     bool bmenuOpenPreviousUpdate;
     float fappTime;
@@ -777,27 +693,27 @@ bool FUN_007faf10_shell::UpdateScreenEffect()
     if (!m_bMenuLightEnabled && !bmenuOpenPreviousUpdate)
         return false;
 
-    v12(fappTime);
+    UpdateNodePosition(fappTime);
 
     if (m_bBurstActive)
-        v0e(fappTime);
+        FUN_007fb420(fappTime);
 
     if (m_bBurstSoundPlayed)
-        v0f(fappTime);
+        FUN_007fb480(fappTime);
 
     if (m_bVerticalHoldActive)
-        v10(fappTime);
+        FUN_007fb3a0(fappTime);
 
-    v11(fappTime);
+    FUN_007fb530(fappTime);
 
     if (m_bShudderActive)
     {
-        v13(fappTime);
+        UpdateDistortTimer(fappTime);
     }
     else
     {
         if (fappTime > m_fDistortTimeRemaining)
-            reinterpret_cast<S007fb100*>(this)->FUN_007fb100();
+            StartRenderedMenuDistort(this);
     }
 
     return true;
@@ -808,13 +724,8 @@ struct FUN_00456630_helper : NiAVObject
     bool FUN_00456610();
 };
 
-struct FUN_007fc790_shell : public FORenderedMenu
-{
-    void UpdateMenuVisibility();
-};
-
 // @fnv 0x007fc790
-void FUN_007fc790_shell::UpdateMenuVisibility()
+void __fastcall HideRenderedMenuTiles(FORenderedMenu* menu)
 {
     Tile* pMenu;
 
@@ -823,85 +734,42 @@ void FUN_007fc790_shell::UpdateMenuVisibility()
         Tile* m_pTerminal = (Tile*)FindMenuById(0x3f8);
         pMenu = (Tile*)FindMenuById(0x423);
 
-        ((unsigned char*)this)[0xd2] =
+        menu->m_bMenuLightAttached =
             pOtherMenu ? !((FUN_00456630_helper*)pOtherMenu->FUN_0056c7f0())->FUN_00456610() : 0;
 
-        ((unsigned char*)this)[0xd0] =
+        menu->m_bMenuLightVisible =
             m_pTerminal ? !((FUN_00456630_helper*)m_pTerminal->FUN_0056c7f0())->FUN_00456610() : 0;
 
-        ((unsigned char*)this)[0xd1] = pMenu ? !((FUN_00456630_helper*)pMenu->FUN_0056c7f0())->FUN_00456610() : 0;
+        menu->m_bMenuLightShadowed = pMenu ? !((FUN_00456630_helper*)pMenu->FUN_0056c7f0())->FUN_00456610() : 0;
 
-        if (((unsigned char*)this)[0xd2])
+        if (menu->m_bMenuLightAttached)
             pOtherMenu->FUN_0056c7f0()->SetAppCulled(true);
 
-        if (((unsigned char*)this)[0xd0])
+        if (menu->m_bMenuLightVisible)
             m_pTerminal->FUN_0056c7f0()->SetAppCulled(true);
 
-        if (((unsigned char*)this)[0xd1])
+        if (menu->m_bMenuLightShadowed)
             pMenu->FUN_0056c7f0()->SetAppCulled(true);
     }
 }
 
-struct SettingIntCollection_
-{
-    int* Int();
-};
-extern SettingIntCollection_ DAT_011db4f8;
-extern SettingT_GameSettingCollection_ DAT_011db520;
+extern Setting DAT_011db4f8;
+extern Setting DAT_011db520;
 extern const double DAT_01012070;
 
 int FUN_00ecadb8();
 
-struct DistortMenuView : public FORenderedMenu
-{
-    void UpdateDistortTimer(float dt);
-};
-
 // @fnv 0x007fb310
-void DistortMenuView::UpdateDistortTimer(float dt)
+void FORenderedMenu::UpdateDistortTimer(float dt)
 {
     float t = dt - m_fDistortHorizontalScale;
     m_fDistortVerticalScale = t / fDistortDuration;
-    if (DAT_011db520.Float()->f + DAT_01012070 < m_fDistortVerticalScale)
+    if (*DAT_011db520.Float() + DAT_01012070 < m_fDistortVerticalScale)
     {
         m_bShudderActive = 0;
         m_fDistortTimeRemaining = (float)(FUN_00ecadb8() % *DAT_011db4f8.Int()) + dt;
     }
 }
-
-struct FUN_007fb480_Class
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned char unk60;
-    float f64;
-    float f68;
-    float f6c;
-    float f70;
-    void __thiscall FUN_007fb480(float a);
-};
 
 extern float DAT_010181bc;
 extern float DAT_0101b2d0;
@@ -909,20 +777,20 @@ float __cdecl FUN_00404040(float);
 void __fastcall FUN_007fb2b0(void*, float, float, float);
 
 // @fnv 0x007fb480
-void FUN_007fb480_Class::FUN_007fb480(float a)
+void FORenderedMenu::FUN_007fb480(float a)
 {
-    float d = a - f64;
-    if (d > f68)
+    float d = a - m_fShudderIntensity;
+    if (d > m_fShudderDuration)
     {
-        unk60 = 0;
+        m_bBurstSoundPlayed = 0;
         FUN_007fb2b0(this, DAT_0101b2d0, DAT_010181bc, DAT_010181bc);
     }
     else
     {
-        f70 = d * f6c;
-        if ((double)f70 >= 1.0 || (double)f70 < 0.0)
+        m_fVerticalHoldDuration = d * m_fShudderFrequency;
+        if ((double)m_fVerticalHoldDuration >= 1.0 || (double)m_fVerticalHoldDuration < 0.0)
         {
-            f70 = f70 - FUN_00404040(f70);
+            m_fVerticalHoldDuration = m_fVerticalHoldDuration - FUN_00404040(m_fVerticalHoldDuration);
         }
     }
 }
@@ -930,11 +798,6 @@ void FUN_007fb480_Class::FUN_007fb480(float a)
 struct FloatMatrix3
 {
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-};
-struct Point3
-{
-    float x, y, z;
-    Point3(float, float, float);
 };
 struct Rect4
 {
@@ -947,16 +810,11 @@ struct Frustum
     bool ortho;
     Frustum(bool);
 };
-struct BoundView
-{
-    float FUN_0084d030() const;
-};
 struct NodeView : NiNode
 {
     void FUN_0043fa80(const void*);
     FloatMatrix3& FUN_006a9540();
-    BoundView& FUN_0043d450();
-    Tile* FUN_009611e0();
+    void* FUN_009611e0();
     bool FUN_00456610();
     void FUN_006404b0(float, float, float, float);
     void FUN_004bc1f0(float, float, float);
@@ -965,20 +823,15 @@ struct CameraView : NiAVObject
 {
     void FUN_00712e60(const Rect4&);
     void FUN_00733fd0(float);
-    void SetLookAt(const Point3&, const Point3&);
+    void SetLookAt(const PodPoint3&, const PodPoint3&);
     void FUN_00507700(float);
     void FUN_00a6faf0(const Frustum&);
 };
-struct MenuView
+// Menu.h lacks these two rendered-menu controller entry points.
+struct RenderedMenuController : Menu
 {
     void SetGo(NiNode*);
-    void FUN_007b1970(float, bool);
-    void UpdateProgress(float, bool);
     int FUN_007dcc00();
-};
-struct TileView
-{
-    MenuView* FUN_00a03c90();
 };
 struct AnimView
 {
@@ -1596,7 +1449,8 @@ struct EngineView
 {
     void FUN_00871dc0();
 };
-struct ControlsView
+// 0x00a253d0 resets all 28 input controls via 0x00a25410; this is the input manager.
+struct InputControlState
 {
     void FUN_00a253d0();
 };
@@ -1604,88 +1458,21 @@ struct LoaderView
 {
     NiNode* LoadModel(const char*, int, bool, bool, bool, bool);
 };
-struct SettingView
-{
-    float& FUN_00403e20();
-};
 struct SceneView : NiNode
 {
     void FUN_00b5ca70(NiNode*, float);
 };
-struct RendererView
+// 0x0045c670 returns the world scene graph; its slot 0x100 returns the far plane (BSSceneGraph::vf64 is untyped).
+struct WorldSceneDistanceSource : NiNode
 {
-    virtual void unkV00();
-    virtual void unkV01();
-    virtual void unkV02();
-    virtual void unkV03();
-    virtual void unkV04();
-    virtual void unkV05();
-    virtual void unkV06();
-    virtual void unkV07();
-    virtual void unkV08();
-    virtual void unkV09();
-    virtual void unkV0A();
-    virtual void unkV0B();
-    virtual void unkV0C();
-    virtual void unkV0D();
-    virtual void unkV0E();
-    virtual void unkV0F();
-    virtual void unkV10();
-    virtual void unkV11();
-    virtual void unkV12();
-    virtual void unkV13();
-    virtual void unkV14();
-    virtual void unkV15();
-    virtual void unkV16();
-    virtual void unkV17();
-    virtual void unkV18();
-    virtual void unkV19();
-    virtual void unkV1A();
-    virtual void unkV1B();
-    virtual void unkV1C();
-    virtual void unkV1D();
-    virtual void unkV1E();
-    virtual void unkV1F();
-    virtual void unkV20();
-    virtual void unkV21();
-    virtual void unkV22();
-    virtual void unkV23();
-    virtual void unkV24();
-    virtual void unkV25();
-    virtual void unkV26();
-    virtual void unkV27();
-    virtual void unkV28();
-    virtual void unkV29();
-    virtual void unkV2A();
-    virtual void unkV2B();
-    virtual void unkV2C();
-    virtual void unkV2D();
-    virtual void unkV2E();
-    virtual void unkV2F();
-    virtual void unkV30();
-    virtual void unkV31();
-    virtual void unkV32();
-    virtual void unkV33();
-    virtual void unkV34();
-    virtual void unkV35();
-    virtual void unkV36();
-    virtual void unkV37();
-    virtual void unkV38();
-    virtual void unkV39();
-    virtual void unkV3A();
-    virtual void unkV3B();
-    virtual void unkV3C();
-    virtual void unkV3D();
-    virtual void unkV3E();
-    virtual void unkV3F();
-    virtual float GetScalarValue();
+    virtual float GetFarPlane();
 };
-RendererView* __cdecl FUN_0045c670();
+WorldSceneDistanceSource* __cdecl FUN_0045c670();
 extern EngineView* DAT_011dea0c;
 extern PlayerView* DAT_011dea3c;
 extern LoaderView* DAT_011c3b3c;
 extern bool DAT_011ad884;
-extern SettingView DAT_01203144, DAT_01203150, DAT_011db5ec;
+extern Setting DAT_01203144, DAT_01203150, DAT_011db5ec;
 extern int DAT_011a9448;
 float __cdecl FUN_0057dd70(float);
 struct FUN_007fd6c0_Class
@@ -1757,17 +1544,17 @@ struct FUN_007fd6c0_Class
     NiPointer<NiNode> scene;
     NiPointer<CameraView> camera;
     NiPointer<NodeView> light;
-    NiPointer<Tile> savedTile;
+    NP savedTile;
     NiPoint3 savedPosition;
     FloatMatrix3 savedRotation;
     NiPoint3 savedHead;
     bool savedCull;
     bool IsUnk28Set();
     NiAVObject* FUN_005585e0();
-    TileView* FUN_009611e0();
+    void* FUN_009611e0();
     NiAVObject* FUN_006838b0();
-    void FUN_007fb040();
     void UpdateSlotSelection(int);
+    void FUN_007fb040();
     void UpdatePlayerFaceScene();
 };
 // @fnv 0x007fd6c0
@@ -1780,12 +1567,12 @@ void FUN_007fd6c0_Class::UpdatePlayerFaceScene()
     NiAVObject* frustum = FUN_005585e0();
     NiUpdateData viewport(0.0f, false, false);
     frustum->Update(viewport);
-    MenuView* radius = FUN_009611e0()->FUN_00a03c90();
+    RenderedMenuController* radius = (RenderedMenuController*)((Tile*)FUN_009611e0())->FUN_00a03c90();
     if (FUN_006838b0())
         FUN_006838b0()->SetAppCulled(false);
     FUN_007fb040();
-    ((NiNode*)FUN_00450b80(1))->AddObject(FUN_005585e0(), true);
-    ((ControlsView*)FUN_007fdf30())->FUN_00a253d0();
+    ((NiNode*)FUN_00450b80(1))->AttachChildInAvailableSlot(FUN_005585e0(), true);
+    ((InputControlState*)FUN_007fdf30())->FUN_00a253d0();
     DAT_011dea3c->FUN_008d8520()->SetState(DAT_011dea3c, 0);
     DAT_011dea3c->FUN_00884f80();
     DAT_011dea3c->ForwardToVtSlot(0x400);
@@ -1796,17 +1583,17 @@ void FUN_007fd6c0_Class::UpdatePlayerFaceScene()
     root = DAT_011dea3c->FUN_00950bb0(false);
     savedPosition = root->FUN_0043c490();
     savedRotation = root->FUN_006a9540();
-    savedHead = root->GetObjectByName(NiFixedString("Bip01"))->FUN_0043c490();
+    savedHead = ((NiAVObject*)(NodeView*)root)->GetObjectByName(NiFixedString("Bip01"))->FUN_0043c490();
     savedTile = root->FUN_009611e0();
     savedCull = root->FUN_00456610();
     scene = (NiNode*)new NewScene(0);
-    ((NiNode*)FUN_00450b80(3))->AddObject(scene, true);
+    ((NiNode*)FUN_00450b80(3))->AttachChildInAvailableSlot((NiAVObject*)(NiNode*)scene, true);
     light = (NodeView*)DAT_011c3b3c->LoadModel("Meshes\\Terminals\\PlayerFaceLights01.NIF", 0, true, false, false,
                                                   false);
-    scene->AddObject(root, true);
-    scene->AddObject(light, true);
-    float menu = root->FUN_0043d450().FUN_0084d030() * 3.0;
-    ((SceneView*)FUN_00450b80(3))->FUN_00b5ca70(light->GetAsNiNode(), menu);
+    scene->AttachChildInAvailableSlot((NiAVObject*)(NodeView*)root, true);
+    scene->AttachChildInAvailableSlot((NiAVObject*)(NodeView*)light, true);
+    float menu = root->NiAVObject::FUN_0043d450().FUN_0084d030() * 3.0;
+    ((SceneView*)FUN_00450b80(3))->FUN_00b5ca70(light->IsSceneNode(), menu);
     ((NodeView*)(NiNode*)scene)->FUN_006404b0(3.1415927410125732f, 0.0f, 0.0f, 1.0f);
     root->FUN_004bc1f0(0.0f, -5.0f, 0.0f);
     root->FUN_0043fa80(&DAT_011a9448);
@@ -1817,13 +1604,15 @@ void FUN_007fd6c0_Class::UpdatePlayerFaceScene()
     Rect4 up(0.0f, 1.0f, 1.0f, 0.0f);
     camera->FUN_00712e60(up);
     camera->FUN_00733fd0(1.0f);
-    Point3 rootUpdate(0.0f, 1.0f, 0.0f);
-    camera->SetLookAt(rootUpdate, Point3(0.0f, 0.0f, 1.0f));
+    PodPoint3 rootUpdate;
+    rootUpdate.FUN_00416870(0.0f, 1.0f, 0.0f);
+    // NiPoint3 supplies the same initializer for an expression temporary.
+    camera->SetLookAt(rootUpdate, reinterpret_cast<const PodPoint3&>(NiPoint3(0.0f, 0.0f, 1.0f)));
     Frustum RootUpdate(false);
-    RootUpdate.farPlane = FUN_0045c670()->GetScalarValue();
-    RootUpdate.nearPlane = DAT_01203144.FUN_00403e20();
+    RootUpdate.farPlane = FUN_0045c670()->GetFarPlane();
+    RootUpdate.nearPlane = *DAT_01203144.FUN_00403e20();
     camera->FUN_00507700(RootUpdate.farPlane / RootUpdate.nearPlane);
-    float angle = (DAT_01203150.FUN_00403e20() * 0.01745329238474369) * DAT_011db5ec.FUN_00403e20();
+    float angle = (*DAT_01203150.FUN_00403e20() * 0.01745329238474369) * *DAT_011db5ec.FUN_00403e20();
     RootUpdate.left = -FUN_0057dd70(angle);
     RootUpdate.right = FUN_0057dd70(angle);
     RootUpdate.bottom = -FUN_0057dd70(angle);
@@ -1915,66 +1704,6 @@ struct FUN_007ff650_g
 extern FUN_007ff650_g DAT_011db63c;
 extern float DAT_01017130;
 
-struct FUN_007ff650_sn
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37(FUN_007ff650_p*, unsigned int);
-};
-
 struct FUN_007ff650_cls : public FORenderedMenu
 {
     int unkD8;
@@ -1986,7 +1715,6 @@ struct FUN_007ff650_cls : public FORenderedMenu
 
     FUN_007ff650_p* FUN_005585e0();
     FUN_007ff650_q* FUN_006838b0();
-    void FUN_007fb040();
     void FUN_007ff650();
 };
 
@@ -1997,7 +1725,7 @@ void FUN_007ff650_cls::FUN_007ff650()
 {
     FUN_007ff650_h local2;
     FUN_007ff650_p* a = this->FUN_005585e0();
-    ((FUN_007ff650_sn*)FUN_00450b80(1))->v37(this->FUN_005585e0(), 1);
+    FUN_00450b80(1)->AttachChildInAvailableSlot((NiAVObject*)this->FUN_005585e0(), true);
     local2.FUN_0043d410(0.0f, 0, 0);
     a->FUN_00a59c60(&local2);
     if (this->FUN_006838b0() != 0)
@@ -2020,17 +1748,14 @@ struct Obj82
     bool FUN_00456610();
     void FUN_00450f90(bool);
 };
-struct Tile82
+// Menu.h lacks this tile-link accessor.
+struct MenuTileLink : Menu
 {
-    Obj82* FUN_0056c7f0();
-};
-struct Menu82
-{
-    Tile82* FUN_00a03d40();
+    void* FUN_00a03d40();
 };
 struct Manager82
 {
-    Menu82* FUN_00726070();
+    MenuTileLink* FUN_00726070();
 };
 extern Manager82* DAT_011d96c0;
 struct Rect82
@@ -2065,7 +1790,7 @@ struct Interface82
     bool FUN_00644640();
     Obj82* FUN_005e3fc0();
     Scene82* FUN_007fa950();
-    Tile82* FUN_0045cd60();
+    void* FUN_0045cd60();
 };
 struct Target82
 {
@@ -2089,141 +1814,13 @@ struct ObjectPointer82
     void* value;
     Obj82* FUN_00559450();
 };
-struct Renderer82
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void SetRect(const Rect82&);
-    virtual void v44();
-    virtual void GetRect(Rect82&);
-    void SetFromCamera(Camera82*);
-};
-struct Rendered82
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void Finish();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void Render(Target82*, void*, void*);
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    ObjectPointer82 root;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    bool initialized, scaled, partial;
-    unsigned char unk2b;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    Rect82 color;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    ObjectPointer82 accumulator;
-    void UpdateMenuVisibility();
-    void FUN_007fc8d0();
-    void FUN_007fba00(void*, void*, Target82*);
-};
-Renderer82* FUN_0043c4b0();
+NiRenderer* FUN_0043c4b0();
 Interface82* FUN_004b7210();
 TargetManager82* __stdcall FUN_004a0ea0(void*);
 bool FUN_004e9510();
 void FUN_00b6b8d0(void*, void*);
 Obj82* FUN_00706d10();
-Rendered82* FUN_00705990();
+FORenderedMenu* FUN_00705990();
 void FUN_00b6bee0(Camera82*, Obj82*, Accumulator82*);
 void FUN_00b6c0d0(Camera82*, Obj82*, int);
 void FUN_00b6b790();
@@ -2234,22 +1831,22 @@ struct Partial82
 Partial82* FUN_004e3270();
 // Renders the scene through the accumulator with a temporary orthographic frustum, restoring UI visibility, rect and camera state afterwards.
 // @fnv 0x007fba00
-void Rendered82::FUN_007fba00(void* pRenderArg1, void* pRenderArg2, Target82* pSuppliedTarget)
+void FORenderedMenu::FUN_007fba00(void* pRenderArg1, void* pRenderArg2, Target82* pSuppliedTarget)
 {
-    if (!initialized)
+    if (!bInitialized)
         return;
-    if (!root.FUN_00559450())
+    if (!((ObjectPointer82*)&m_pRenderedMenuObject)->FUN_00559450())
         return;
-    Renderer82* renderer5 = FUN_0043c4b0();
+    NiRenderer* renderer5 = FUN_0043c4b0();
     Interface82* interface23 = FUN_004b7210();
     if (interface23->FUN_00644640())
         interface23->FUN_005e3fc0()->FUN_00450f90(true);
     Scene82* scene3 = interface23->FUN_007fa950();
     Accumulator82* render4 = scene3->FUN_008d80e0();
-    render4->FUN_004a0fd0(accumulator.FUN_00559450());
+    render4->FUN_004a0fd0(((ObjectPointer82*)&m_pMenuLightNode)->FUN_00559450());
     Rect82 rect2(0.0f, 0.0f, 0.0f, 0.0f);
-    renderer5->GetRect(rect2);
-    renderer5->SetRect(color);
+    renderer5->GetBackgroundColor(reinterpret_cast<NiVector4*>(&rect2));
+    renderer5->SetBackgroundColor(reinterpret_cast<NiVector4*>(&BackgroundColor));
     Camera82* camera23 = scene3->FUN_006629f0();
     Pointer82 target31(0);
     if (!pSuppliedTarget)
@@ -2271,63 +1868,51 @@ void Rendered82::FUN_007fba00(void* pRenderArg1, void* pRenderArg2, Target82* pS
     frustum12.nearPlane = 0.0f;
     frustum12.farPlane = 10000.0f;
     camera23->FUN_00a6faf0(frustum12);
-    renderer5->SetFromCamera(camera23);
-    Tile82* tile16 = interface23->FUN_0045cd60();
+    renderer5->SetCurrentCamera(reinterpret_cast<NiCamera*>(camera23));
+    Tile* tile16 = (Tile*)interface23->FUN_0045cd60();
     bool oldTile23 = false;
     if (tile16)
     {
-        oldTile23 = tile16->FUN_0056c7f0()->FUN_00456610();
-        tile16->FUN_0056c7f0()->FUN_00450f90(true);
+        oldTile23 = ((NiAVObject*)tile16->FUN_0056c7f0())->FUN_00456610();
+        ((NiAVObject*)tile16->FUN_0056c7f0())->FUN_00450f90(true);
     }
     Obj82* object4 = FUN_00706d10();
     bool oldObject25 = object4 ? object4->FUN_00456610() : false;
     if (object4)
         object4->FUN_00450f90(true);
-    Menu82* menu1 = DAT_011d96c0->FUN_00726070();
-    bool oldMenu21 = menu1->FUN_00a03d40()->FUN_0056c7f0()->FUN_00456610();
-    menu1->FUN_00a03d40()->FUN_0056c7f0()->FUN_00450f90(true);
+    MenuTileLink* menu1 = DAT_011d96c0->FUN_00726070();
+    bool oldMenu21 = ((NiAVObject*)((Tile*)menu1->FUN_00a03d40())->FUN_0056c7f0())->FUN_00456610();
+    ((NiAVObject*)((Tile*)menu1->FUN_00a03d40())->FUN_0056c7f0())->FUN_00450f90(true);
     if (this != FUN_00705990())
-        root.FUN_00559450()->FUN_00450f90(false);
-    UpdateMenuVisibility();
+        ((ObjectPointer82*)&m_pRenderedMenuObject)->FUN_00559450()->FUN_00450f90(false);
+    HideRenderedMenuTiles(this);
     render4->FUN_00c4f270(1);
-    FUN_00b6bee0(scene3->FUN_006629f0(), root.FUN_00559450(), render4);
-    FUN_00b6c0d0(scene3->FUN_006629f0(), accumulator.FUN_00559450(), 0);
+    FUN_00b6bee0(scene3->FUN_006629f0(), ((ObjectPointer82*)&m_pRenderedMenuObject)->FUN_00559450(), render4);
+    FUN_00b6c0d0(scene3->FUN_006629f0(), ((ObjectPointer82*)&m_pMenuLightNode)->FUN_00559450(), 0);
     render4->FUN_00c4f2d0();
-    FUN_007fc8d0();
+    RestoreRenderedMenuVisibility(this);
     render4->FUN_004a0fd0(0);
     if (this != FUN_00705990())
-        root.FUN_00559450()->FUN_00450f90(true);
-    menu1->FUN_00a03d40()->FUN_0056c7f0()->FUN_00450f90(oldMenu21);
+        ((ObjectPointer82*)&m_pRenderedMenuObject)->FUN_00559450()->FUN_00450f90(true);
+    ((NiAVObject*)((Tile*)menu1->FUN_00a03d40())->FUN_0056c7f0())->FUN_00450f90(oldMenu21);
     if (tile16)
-        tile16->FUN_0056c7f0()->FUN_00450f90(oldTile23);
+        ((NiAVObject*)tile16->FUN_0056c7f0())->FUN_00450f90(oldTile23);
     if (object4)
         object4->FUN_00450f90(oldObject25);
     FUN_00b6b790();
-    Render(target31.FUN_00559450(), pRenderArg1, pRenderArg2);
+    FUN_007fbee0((Arg*)target31.FUN_00559450(), pRenderArg1, (int)pRenderArg2);
     if (!pSuppliedTarget)
         FUN_004a0ea0(target31.FUN_00559450())->FUN_00b6da10();
-    renderer5->SetRect(rect2);
+    renderer5->SetBackgroundColor(reinterpret_cast<NiVector4*>(&rect2));
     camera23->FUN_00a6faf0(saved14);
-    if (partial)
+    if (m_bEnableFlicker)
         FUN_004e3270()->SetValueAndAssign(0, 0);
-    Finish();
+    vf4();
     if (interface23->FUN_00644640())
         interface23->FUN_005e3fc0()->FUN_00450f90(false);
 }
 
-struct FUN_00483710
-{
-    int a, b, c;
-    bool FUN_00ad8830(bool loop);
-    ~FUN_00483710();
-};
 namespace n7f8 {
-typedef ::FUN_00483710 Snd;
-struct Audio
-{
-    Snd FUN_00ad7550(const char* name, unsigned int flags);
-};
-Audio* __cdecl FUN_00453a70();
 struct Anim
 {
     bool FUN_004985f0();
@@ -2474,29 +2059,15 @@ struct Player
     Anim* FUN_00950a60(bool b);
     unsigned short FUN_00897910(int a, int b, int c, int d);
 };
-struct SndX
-{
-    void FUN_00ad88f0();
-    void FUN_00ad8d10();
-};
 void __cdecl UpdateMenuTileVisibility();
 void __cdecl FUN_007f8160(char c);
 extern bool DAT_011db378;
-struct Mgr
-{
-    char pad[0x154];
-    SndX m_154;
-    void FUN_007fa8d0(bool flag);
-    bool IsUnk28Set();
-    void FUN_007fa010(unsigned int b);
-    void ResetMenuState();
-    void FUN_007f8170();
-};
 }
 // @fnv 0x007f8170
-void n7f8::Mgr::FUN_007f8170()
+void PipboyMenuTransitions::ClosePipboyMenu()
 {
-    FUN_007fa8d0(((Player*)DAT_011dea3c)->FUN_008c51c0());
+    using namespace n7f8;
+    reinterpret_cast<RenderedMenuInterface*>(this)->FUN_007fa8d0(((Player*)DAT_011dea3c)->FUN_008c51c0());
     Anim* anim = ((Player*)DAT_011dea3c)->FUN_00950a60(true);
     if (anim)
     {
@@ -2511,22 +2082,15 @@ void n7f8::Mgr::FUN_007f8170()
     }
     if (!IsUnk28Set())
         return;
-    FUN_00453a70()->FUN_00ad7550("UIPipBoyAccessDown", 0x121).FUN_00ad8830(false);
-    m_154.FUN_00ad88f0();
-    m_154.FUN_00ad8d10();
+    static_cast<RenderedMenuAudio*>(BSAudio::GetSingleton())->GetSoundHandleByEditorID("UIPipBoyAccessDown", 0x121).Play(false);
+    reinterpret_cast<BSSoundHandle&>(m_kPipBoyLightData).Stop();
+    reinterpret_cast<BSSoundHandle&>(m_kPipBoyLightData).Release();
     FUN_007fa010(0);
     UpdateMenuTileVisibility();
     ResetMenuState();
     DAT_011db378 = false;
-    FUN_007f8160(1);
+    n7f8::FUN_007f8160(1);
 }
-
-class FUN_006815c0
-{
-  public:
-    FUN_006815c0();
-    float x, y, z;
-};
 
 struct Input7fb7
 {
@@ -2541,7 +2105,7 @@ struct Point2_7fb7
 
 struct Camera7fb7
 {
-    bool MapScreenToRay(int iX, int iY, FUN_006815c0& kSource, FUN_006815c0& kWorldPosition, void* pkViewport);
+    bool MapScreenToRay(int iX, int iY, PodPoint3& kSource, PodPoint3& kWorldPosition, void* pkViewport);
 };
 
 struct View7fb7
@@ -2569,102 +2133,40 @@ class GlobalObject_00e98f20
     void FUN_00705fc0(NiGeometry* pkTarget);
     void FUN_006ecd40(int iSortType);
     void SetByteAtOffset30(int iFrontOnly);
-    bool FUN_00e98e20(const FUN_006815c0& kSource, const FUN_006815c0& kWorldPosition, bool bAppend);
+    bool FUN_00e98e20(const PodPoint3& kSource, const PodPoint3& kWorldPosition, bool bAppend);
     Results7fb7* FUN_00500940();
     int m_kNextStreamField[13];
 };
 
-struct Target7fb7
-{
-    unsigned int FUN_0084e3a0();
-};
 
-struct Renderer7fb7
-{
-    virtual void V000();
-    virtual void V001();
-    virtual void V002();
-    virtual void V003();
-    virtual void V004();
-    virtual void V005();
-    virtual void V006();
-    virtual void V007();
-    virtual void V008();
-    virtual void V009();
-    virtual void V010();
-    virtual void V011();
-    virtual void V012();
-    virtual void V013();
-    virtual void V014();
-    virtual void V015();
-    virtual void V016();
-    virtual void V017();
-    virtual void V018();
-    virtual void V019();
-    virtual void V020();
-    virtual void V021();
-    virtual void V022();
-    virtual void V023();
-    virtual void V024();
-    virtual void V025();
-    virtual void V026();
-    virtual void V027();
-    virtual void V028();
-    virtual void V029();
-    virtual void V030();
-    virtual void V031();
-    virtual void V032();
-    virtual void V033();
-    virtual void V034();
-    virtual void V035();
-    virtual void V036();
-    virtual void V037();
-    virtual void V038();
-    virtual void V039();
-    virtual void V040();
-    virtual void V041();
-    virtual void V042();
-    virtual void V043();
-    virtual void V044();
-    virtual void V045();
-    virtual void V046();
-    virtual void V047();
-    virtual void V048();
-    virtual void V049();
-    virtual void V050();
-    virtual void V051();
-    virtual void V052();
-    virtual Target7fb7* GetDefaultTarget();
-};
 
 struct Calls7fb7
 {
     static Input7fb7* __cdecl FUN_004b7210();
     static View7fb7* __cdecl FUN_0045c670();
-    static Renderer7fb7* __cdecl FUN_0043c4b0();
+    static NiRenderer* __cdecl FUN_0043c4b0();
     static bool __cdecl FUN_00702680(int iMenu, int iUnused);
 };
 
-struct RenderedMenu7fb7 : public FORenderedMenu
-{
-    Camera7fb7* FUN_008b6200();
-    bool FUN_007fb790(void* pkUnused, float* pfX, float* pfY);
-};
+// The shared header does not declare this camera accessor yet.
+Camera7fb7* __fastcall GetRenderedMenuCamera(FORenderedMenu* menu);
 
 // @fnv 0x007fb790
-bool RenderedMenu7fb7::FUN_007fb790(void* pkUnused, float* pfX, float* pfY)
+bool FORenderedMenu::FUN_007fb790(void* pkUnused, float* pfX, float* pfY)
 {
     bool bResult = false;
     m_pRenderedMenuObject->SetAppCulled(false);
     Input7fb7* pkInput = Calls7fb7::FUN_004b7210();
     if (!m_pMenuBackgroundScreenGeometry)
         return false;
-    FUN_006815c0 kSource;
-    FUN_006815c0 kWorldPosition;
+    PodPoint3 kSource;
+    kSource.FUN_006815c0();
+    PodPoint3 kWorldPosition;
+    kWorldPosition.FUN_006815c0();
     GlobalObject_00e98f20 kPickObj(0, 8);
     Camera7fb7* pkCamera3D;
-    if (FUN_008b6200())
-        pkCamera3D = FUN_008b6200();
+    if (GetRenderedMenuCamera(this))
+        pkCamera3D = GetRenderedMenuCamera(this);
     else
         pkCamera3D = Calls7fb7::FUN_0045c670()->FUN_006629f0();
     kPickObj.SetByteAtOffset17(1);
@@ -2686,7 +2188,7 @@ bool RenderedMenu7fb7::FUN_007fb790(void* pkUnused, float* pfX, float* pfY)
                 kUV.y *= 0.64999997615814209;
                 kUV.y += 0.34000000357627869;
             }
-            float m_fGlyphExtent = (float)Calls7fb7::FUN_0043c4b0()->GetDefaultTarget()->FUN_0084e3a0();
+            float m_fGlyphExtent = (float)Calls7fb7::FUN_0043c4b0()->GetDefaultBackBuffer()->GetHeight();
             float m_fGlyphWidthInPixels = m_fGlyphExtent * 1.3333330154418945;
             *pfX = kUV.x * m_fGlyphWidthInPixels;
             *pfY = kUV.y * m_fGlyphExtent;
@@ -2696,6 +2198,12 @@ bool RenderedMenu7fb7::FUN_007fb790(void* pkUnused, float* pfX, float* pfY)
     return bResult;
 }
 
+class Arg
+{
+public:
+    void* FUN_004bc320(int);
+};
+
 namespace recon7fbee0 {
 extern "C" char DAT_011ae5e8, DAT_011ae5ec, DAT_011ae5f0, DAT_011ae5f4, DAT_011ae5f8;
 extern "C" char DAT_012007e8, DAT_012007ec, DAT_012007f0, DAT_012007f4, DAT_012007f8;
@@ -2704,18 +2212,6 @@ struct Ptr
 {
     Ptr& FUN_006e5cc0(const Ptr&);
     void FUN_0066b0d0(void*);
-};
-struct Arg
-{
-    void* FUN_004bc320(int);
-};
-struct Obj
-{
-    float FUN_00a011b0(int);
-};
-struct Setting
-{
-    float* FUN_00403e20();
 };
 struct Node
 {
@@ -2736,66 +2232,39 @@ struct Four
 {
     int a, b, c, d;
 };
-struct Menu
-{
-    char p0[0xc];
-    Node node;
-    char p0d[0xb];
-    Obj* obj;
-    char p1c[0xe];
-    bool active;
-    char p2b[0x15];
-    float f40, f44, f48;
-    char p4c;
-    bool b4d;
-    char p4e[0xe];
-    float f5c;
-    bool b60;
-    char p61[0xf];
-    float f70;
-    bool b74;
-    char p75[0x13];
-    float f88, f8c, f90;
-    char p94;
-    bool b95;
-    char p96[6];
-    float f9c;
-    char pa0[0x1c];
-    Ptr ptr;
-    char pbd[3];
-    Four four;
-    void FUN_007fbee0(Arg*, void*, int);
-};
+}
+
 // @fnv 0x007fbee0
-void Menu::FUN_007fbee0(Arg* a, void* pData, int iValue)
+void FORenderedMenu::FUN_007fbee0(Arg* a, void* pData, int iValue)
 {
-    void* pUnused = FUN_004b7210();
-    *(float*)&DAT_011ae5e8 = f40;
-    *(float*)&DAT_011ae5ec = f44;
-    *(float*)&DAT_011ae5f0 = f48;
+    using namespace recon7fbee0;
+    void* pUnused = recon7fbee0::FUN_004b7210();
+    *(float*)&DAT_011ae5e8 = fBlurRadius;
+    *(float*)&DAT_011ae5ec = fBlurIntensity;
+    *(float*)&DAT_011ae5f0 = m_fScanlineScale;
     *(float*)&DAT_012007e8 = 0.0f;
-    ((Ptr*)&DAT_01200810)->FUN_006e5cc0(ptr);
+    ((Ptr*)&DAT_01200810)->FUN_006e5cc0(*(Ptr*)&m_pMenuLightShadowNode);
     ((Ptr*)&DAT_01200818)->FUN_0066b0d0(a->FUN_004bc320(0));
-    if (this == FUN_00705990())
-        *(float*)&DAT_011ae5f4 = FUN_00717860();
+    if (this == recon7fbee0::FUN_00705990())
+        *(float*)&DAT_011ae5f4 = recon7fbee0::FUN_00717860();
     else
-        *(float*)&DAT_011ae5f4 = obj->FUN_00a011b0(0xfb0);
-    if (b4d)
+        *(float*)&DAT_011ae5f4 = m_pFourthMenuObject->FUN_00a011b0(0xfb0);
+    if (m_bBurstActive)
     {
-        *(float*)&DAT_011ae5ec *= 1.0f + f5c;
-        *(float*)&DAT_011ae5e8 *= 1.0f + f5c;
+        *(float*)&DAT_011ae5ec *= 1.0f + m_fBurstSoundChance;
+        *(float*)&DAT_011ae5e8 *= 1.0f + m_fBurstSoundChance;
     }
-    if (b60)
-        *(float*)&DAT_012007e8 = FUN_00717860() * f70;
-    if (b74)
-        *(float*)&DAT_012007e8 += FUN_00717860() * f88;
-    *(float*)&DAT_011ae5ec += f8c;
-    *(float*)&DAT_011ae5e8 += f90;
-    if (b95)
+    if (m_bBurstSoundPlayed)
+        *(float*)&DAT_012007e8 = recon7fbee0::FUN_00717860() * m_fVerticalHoldDuration;
+    if (m_bVerticalHoldActive)
+        *(float*)&DAT_012007e8 += recon7fbee0::FUN_00717860() * m_fPulseRadiusIntensity;
+    *(float*)&DAT_011ae5ec += m_fPulseBrightenIntensity;
+    *(float*)&DAT_011ae5e8 += m_fPulseRate;
+    if (m_bShudderActive)
     {
-        *(float*)&DAT_012007f0 = *((Setting*)&DAT_011db520)->FUN_00403e20();
+        *(float*)&DAT_012007f0 = *((Setting*)&recon7fbee0::DAT_011db520)->FUN_00403e20();
         *(float*)&DAT_011ae5f8 = *((Setting*)&DAT_011db464)->FUN_00403e20();
-        *(float*)&DAT_012007f4 = f9c;
+        *(float*)&DAT_012007f4 = m_fDistortVerticalScale;
         DAT_012007f8 = 1;
     }
     else
@@ -2804,15 +2273,14 @@ void Menu::FUN_007fbee0(Arg* a, void* pData, int iValue)
         *(float*)&DAT_011ae5f8 = 0.0f;
         *(float*)&DAT_012007f4 = -1.0f;
     }
-    *(Four*)&DAT_01200800 = four;
-    if (active && !node.FUN_00559450())
-        FUN_004e3270()->FUN_00b8c3b0(FUN_00717860(), FUN_00717860(), &node);
-    if (active)
-        FUN_004e3270()->SetValueAndAssign(1, node.FUN_00559450());
+    *(Four*)&DAT_01200800 = *(Four*)&m_kMenuLightColor;
+    if (m_bEnableFlicker && !((Node*)&m_pScreenGeometry)->FUN_00559450())
+        recon7fbee0::FUN_004e3270()->FUN_00b8c3b0(recon7fbee0::FUN_00717860(), recon7fbee0::FUN_00717860(), (Node*)&m_pScreenGeometry);
+    if (m_bEnableFlicker)
+        recon7fbee0::FUN_004e3270()->SetValueAndAssign(1, ((Node*)&m_pScreenGeometry)->FUN_00559450());
     *(int*)&DAT_012007ec = iValue;
-    FUN_004e3270()->FUN_00b97550(10, FUN_0043c4b0(), a, pData, 0, 1);
+    recon7fbee0::FUN_004e3270()->FUN_00b97550(10, recon7fbee0::FUN_0043c4b0(), a, pData, 0, 1);
     ((Ptr*)&DAT_01200818)->FUN_0066b0d0(0);
-}
 }
 
 extern "C" char DAT_0101e460;
@@ -2932,7 +2400,7 @@ void Owner007f::FUN_007fdf40()
     r100.FUN_0066b0d0(0);
     ((Node007f*)FUN_00450b80(1))->v3a(FUN_005585e0());
     r10C.FUN_00559450()->v37(rFC.FUN_00559450(), true);
-    rFC.FUN_00559450()->v27(NiFixedString(&DAT_0101e460))->FUN_00440460(p140);
+    rFC.FUN_00559450()->v27(NiFixedString((const char*)&DAT_0101e460))->FUN_00440460(p140);
     rFC.FUN_00559450()->FUN_0043fa80(p11C);
     rFC.FUN_00559450()->FUN_00440460(p110);
     rFC.FUN_00559450()->FUN_00450f90(b14C);
@@ -2945,91 +2413,21 @@ void Owner007f::FUN_007fdf40()
     r108.FUN_0066b0d0(0);
 }
 
-struct NiAVObjectS;
-struct BGSBodyPart
-{
-    NiAVObjectS* GetPartName();
-};
-struct NiAVObjectS : NiAVObject
-{
-    void FUN_00450f90(bool);
-};
-struct SSNVt
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v3a(NiAVObject*);
-};
 struct FUN_007ff740_shell : public FORenderedMenu
 {
+    NiAVObject* FUN_006838b0();
     void UpdateBodyPart();
 };
-// If GetPartName returns an object, calls FUN_00450f90(true) and Update on it, then calls v3a with the menu root and resets menu state.
+// If the rendered-menu scene getter returns an object, calls FUN_00450f90(true) and Update on it, then calls v3a with the menu root and resets menu state.
 // @fnv 0x007ff740
 void FUN_007ff740_shell::UpdateBodyPart()
 {
-    if (((BGSBodyPart*)this)->GetPartName())
+    if (FUN_006838b0())
     {
-        ((BGSBodyPart*)this)->GetPartName()->FUN_00450f90(true);
+        FUN_006838b0()->FUN_00450f90(true);
         NiUpdateData upd(0.0f, false, false);
-        ((BGSBodyPart*)this)->GetPartName()->Update(upd);
+        FUN_006838b0()->Update(upd);
     }
-    ((SSNVt*)FUN_00450b80(1))->v3a(this->GetMenuRoot());
-    ((MenuStub*)this)->ResetMenuState();
+    FUN_00450b80(1)->RemoveObject(this->GetMenuRoot());
+    ResetMenuState();
 }

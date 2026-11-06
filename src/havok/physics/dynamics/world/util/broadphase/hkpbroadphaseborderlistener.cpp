@@ -2,6 +2,8 @@
 // src/havok/physics/dynamics/world/util/broadphase/hkpbroadphaseborderlistener.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/util/broadphase/hkpbroadphaseborderlistener.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/Pair.h"
+
 struct S_00cf6f10_Node
 {
     int unk00;
@@ -11,12 +13,6 @@ struct S_00cf6f10_Node
     int unk08;
     int unk0C;
     signed char off10;
-};
-
-struct S_00cf6f10_Rec
-{
-    S_00cf6f10_Node* first;
-    S_00cf6f10_Node* second;
 };
 
 struct S_00cf6f10_Obj
@@ -34,10 +30,10 @@ struct S_00cf6f10_Obj
 };
 
 // @fnv 0x00cf6f10
-int __stdcall FUN_00cf6f10(S_00cf6f10_Rec* pRec)
+int __stdcall FUN_00cf6f10(Pair* pRec)
 {
-    S_00cf6f10_Node* a = pRec->first;
-    if (a->type == 3 && pRec->second->type == 3)
+    S_00cf6f10_Node* a = (S_00cf6f10_Node*)pRec->a;
+    if (a->type == 3 && ((S_00cf6f10_Node*)pRec->b)->type == 3)
     {
     }
     else
@@ -45,17 +41,17 @@ int __stdcall FUN_00cf6f10(S_00cf6f10_Rec* pRec)
         if (a->type == 3)
         {
             S_00cf6f10_Node* pFirstBase = (S_00cf6f10_Node*)((char*)a + a->off);
-            S_00cf6f10_Node* pSecond = pRec->second;
+            S_00cf6f10_Node* pSecond = (S_00cf6f10_Node*)pRec->b;
             void* pSecondBase = (char*)pSecond + pSecond->off;
             S_00cf6f10_Obj* y = (S_00cf6f10_Obj*)((char*)pFirstBase + pFirstBase->off10);
             y->v24(pSecondBase);
         }
-        S_00cf6f10_Node* b = pRec->second;
+        S_00cf6f10_Node* b = (S_00cf6f10_Node*)pRec->b;
         if (b->type == 3)
         {
             S_00cf6f10_Node* pSecondBase2 = (S_00cf6f10_Node*)((char*)b + b->off);
             S_00cf6f10_Obj* y = (S_00cf6f10_Obj*)((char*)pSecondBase2 + pSecondBase2->off10);
-            S_00cf6f10_Node* pFirst2 = pRec->first;
+            S_00cf6f10_Node* pFirst2 = (S_00cf6f10_Node*)pRec->a;
             return y->v24((char*)pFirst2 + pFirst2->off);
         }
     }
@@ -79,11 +75,6 @@ struct Sh
     char type;
     signed char off;
 };
-struct Pair
-{
-    Sh* a;
-    Sh* b;
-};
 static inline char* Base(Sh* s)
 {
     return (char*)s + s->off;
@@ -96,17 +87,17 @@ static inline Disp* GetDisp(Sh* s)
 // @fnv 0x00cf6ea0
 void __stdcall DispatchPairByType(Pair* p)
 {
-    if (p->a->type == 3 && p->b->type == 3)
+    if (((Sh*)p->a)->type == 3 && ((Sh*)p->b)->type == 3)
         return;
-    if (p->a->type == 3)
+    if (((Sh*)p->a)->type == 3)
     {
-        char* ob = Base(p->b);
-        GetDisp(p->a)->v7(ob);
+        char* ob = Base((Sh*)p->b);
+        GetDisp((Sh*)p->a)->v7(ob);
     }
-    if (p->b->type == 3)
+    if (((Sh*)p->b)->type == 3)
     {
-        Disp* d = GetDisp(p->b);
-        d->v7(Base(p->a));
+        Disp* d = GetDisp((Sh*)p->b);
+        d->v7(Base((Sh*)p->a));
     }
 }
 }

@@ -1,5 +1,41 @@
+#include "NiRefObject_inline.h"
 
-#include "nipsysspawnmodifier_decls.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiPSysBoundUpdateModifier.h"
+#include "../../../../include/NiPSysModifier.h"
+#include "../../../../include/NiPSysSpawnModifier.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/StrArr.h"
+#include "../../../../include/Mat3.h"
+#include "../../../../include/NiPoint3.h"
+
+__forceinline unsigned int NiBinaryStream::BinaryRead(void* buffer, unsigned int bytes,
+                                                     unsigned int* sizes, unsigned int count)
+{
+    unsigned int read = m_pfnRead(this, buffer, bytes, sizes, count);
+    m_uiAbsoluteCurrentPos += read;
+    return read;
+}
+
+__forceinline unsigned int NiBinaryStream::BinaryWrite(const void* buffer, unsigned int bytes,
+                                                      unsigned int* sizes, unsigned int count)
+{
+    unsigned int written = m_pfnWrite(this, buffer, bytes, sizes, count);
+    m_uiAbsoluteCurrentPos += written;
+    return written;
+}
+
+template <class T>
+__forceinline void NiBinaryStreamLoad(NiBinaryStream& stream, T* value, unsigned int count = 1)
+{
+    unsigned int size = sizeof(T);
+    stream.BinaryRead(value, sizeof(T) * count, &size, 1);
+}
+
+template <class T> __forceinline void ReadBinaryValue(NiStream& stream, T& value)
+{
+    NiBinaryStreamLoad(*stream.m_pkIstr, &value, 1);
+}
 
 // Calls the base NiPSysModifier::LoadBinary, then loads eight values from kStream via a helper.
 // @fnv 0x00c247f0
@@ -23,7 +59,7 @@ void NiPSysBoundUpdateModifier::LinkObject(NiStream& kStream)
 }
 
 // @fnv 0x00c2d6e0
-bool NiPSysBoundUpdateModifier::IsEqual(NiObject* pkObject)
+bool NiPSysBoundUpdateModifier::IsEqual(NiObject* pkObject) const
 {
     if (!NiPSysModifier::IsEqual(pkObject))
         return false;
@@ -49,82 +85,35 @@ const NiRTTI* __cdecl FUN_00c23ce0()
 extern "C" void __cdecl __Dummy_00b6fef0(void*, int);
 void __cdecl FUN_00c31750();
 
-struct FUN_00c23cf0_shell
-{
-    FUN_00c23cf0_shell* __thiscall FUN_00c23cf0(int param);
-};
-
+// The shared spawn header does not declare these entry points yet. The unused
+// second register argument keeps the original thiscall ABI without a stand-in class.
 // @fnv 0x00c23cf0
-FUN_00c23cf0_shell* __thiscall FUN_00c23cf0_shell::FUN_00c23cf0(int param)
+NiPSysSpawnModifier* __fastcall DestroySpawnModifier(NiPSysSpawnModifier* modifier, void*, int param)
 {
     FUN_00c31750();
     if (param & 1)
-        __Dummy_00b6fef0(this, 0x34);
-    return this;
+        __Dummy_00b6fef0(modifier, 0x34);
+    return modifier;
 }
 
-struct FUN_00c23b70_shell : NiObject
-{
-    bool __thiscall IsEqual(NiObject*) const;
-    char pad[0x18 - sizeof(NiObject)];
-    unsigned short m_usSpawnGenerationCount;
-    float m_fSpawnPercentage;
-    unsigned short m_usMinimumParticlesToSpawn;
-    unsigned short m_usMaximumParticlesToSpawn;
-    float m_fSpawnedSpeedChaos;
-    float m_fSpawnDirectionChaos;
-    float m_fYValue;
-    float m_fLifeSpanVariation;
-    bool __thiscall FUN_00c23b70(NiObject* pkObject);
-};
 // Compares this object with pkObject: checks IsEqual and that eight stored values match, returning true only if all are equal.
 // @fnv 0x00c23b70
-bool __thiscall FUN_00c23b70_shell::FUN_00c23b70(NiObject* pkObject)
+bool __fastcall SpawnModifiersEqual(const NiPSysSpawnModifier* modifier, void*, NiObject* pkObject)
 {
-    FUN_00c23b70_shell* pkDest = static_cast<FUN_00c23b70_shell*>(pkObject);
-    if (IsEqual(pkObject) && pkDest->m_usSpawnGenerationCount == m_usSpawnGenerationCount &&
-        pkDest->m_fSpawnPercentage == m_fSpawnPercentage &&
-        pkDest->m_usMinimumParticlesToSpawn == m_usMinimumParticlesToSpawn &&
-        pkDest->m_usMaximumParticlesToSpawn == m_usMaximumParticlesToSpawn &&
-        pkDest->m_fSpawnedSpeedChaos == m_fSpawnedSpeedChaos &&
-        pkDest->m_fSpawnDirectionChaos == m_fSpawnDirectionChaos && pkDest->m_fYValue == m_fYValue &&
-        pkDest->m_fLifeSpanVariation == m_fLifeSpanVariation)
+    NiPSysSpawnModifier* pkDest = static_cast<NiPSysSpawnModifier*>(pkObject);
+    if (modifier->NiPSysModifier::IsEqual(pkObject) && pkDest->m_usSpawnGenerationCount == modifier->m_usSpawnGenerationCount &&
+        pkDest->m_fSpawnPercentage == modifier->m_fSpawnPercentage &&
+        pkDest->m_usMinimumParticlesToSpawn == modifier->m_usMinimumParticlesToSpawn &&
+        pkDest->m_usMaximumParticlesToSpawn == modifier->m_usMaximumParticlesToSpawn &&
+        pkDest->m_fSpawnedSpeedChaos == modifier->m_fSpawnedSpeedChaos &&
+        pkDest->m_fSpawnDirectionChaos == modifier->m_fSpawnDirectionChaos && pkDest->m_fYValue == modifier->m_fYValue &&
+        pkDest->m_fLifeSpanVariation == modifier->m_fLifeSpanVariation)
         return true;
     return false;
 }
 
-struct StrArr
-{
-    unsigned char pad[8];
-    unsigned short m_usCapacity;
-    unsigned short m_usSize;
-    unsigned short m_usReserved;
-    unsigned short m_usGrowth;
-
-    void __thiscall SetSize(unsigned int size);
-    void __thiscall SetAt(unsigned int index, char*& value);
-};
-
-struct Base00c319e0
-{
-    unsigned char pad[0x18];
-
-    void __thiscall FUN_00c319e0(StrArr* strings);
-};
-
-struct FUN_00c24a50_shell : Base00c319e0
-{
-    unsigned short m_usSpawnGenerationCount;
-    float m_fSpawnPercentage;
-    unsigned short m_usMinimumParticlesToSpawn;
-    unsigned short m_usMaximumParticlesToSpawn;
-    float m_fSpawnedSpeedChaos;
-    float m_fSpawnDirectionChaos;
-    float m_fYValue;
-    float m_fLifeSpanVariation;
-
-    void __thiscall AppendSpawnSettingsStrings(StrArr* strings);
-};
+// NiPSysModifier's viewer-string entry point is not declared by its shared header.
+void __cdecl FUN_00c319e0();
 
 char* __cdecl _FUN_00a7d330(void* value);
 char* __cdecl FUN_00a7d490(char const* name, unsigned short value);
@@ -132,79 +121,80 @@ char* __cdecl FUN_00a7d550(char const* name, float value);
 
 // Appends formatted spawn-setting name/value strings to the StrArr, growing it when full.
 // @fnv 0x00c24a50
-void __thiscall FUN_00c24a50_shell::AppendSpawnSettingsStrings(StrArr* strings)
+void __fastcall AppendSpawnSettingsStrings(NiPSysSpawnModifier* modifier, void*, StrArr* strings)
 {
-    Base00c319e0::FUN_00c319e0(strings);
+    typedef void (__thiscall* ViewerStrings)(NiPSysModifier*, StrArr*);
+    reinterpret_cast<ViewerStrings>(&FUN_00c319e0)(modifier, strings);
 
     {
         char* value = _FUN_00a7d330(*reinterpret_cast<void* const*>(&g_01202550));
         unsigned int index = strings->m_usSize;
-        if (index >= strings->m_usCapacity)
-            strings->SetSize(index + strings->m_usGrowth);
+        if (index >= strings->m_usMaxSize)
+            strings->SetSize(index + strings->m_usGrowBy);
         strings->SetAt(index, value);
     }
 
     {
-        char* value = FUN_00a7d490("Num Spawn Generations", m_usSpawnGenerationCount);
+        char* value = FUN_00a7d490("Num Spawn Generations", modifier->m_usSpawnGenerationCount);
         unsigned int index = strings->m_usSize;
-        if (index >= strings->m_usCapacity)
-            strings->SetSize(index + strings->m_usGrowth);
+        if (index >= strings->m_usMaxSize)
+            strings->SetSize(index + strings->m_usGrowBy);
         strings->SetAt(index, value);
     }
 
     {
-        char* value = FUN_00a7d550("Percentage Spawned", m_fSpawnPercentage);
+        char* value = FUN_00a7d550("Percentage Spawned", modifier->m_fSpawnPercentage);
         unsigned int index = strings->m_usSize;
-        if (index >= strings->m_usCapacity)
-            strings->SetSize(index + strings->m_usGrowth);
+        if (index >= strings->m_usMaxSize)
+            strings->SetSize(index + strings->m_usGrowBy);
         strings->SetAt(index, value);
     }
 
     {
-        char* value = FUN_00a7d490("Min Num to Spawn", m_usMinimumParticlesToSpawn);
+        char* value = FUN_00a7d490("Min Num to Spawn", modifier->m_usMinimumParticlesToSpawn);
         unsigned int index = strings->m_usSize;
-        if (index >= strings->m_usCapacity)
-            strings->SetSize(index + strings->m_usGrowth);
+        if (index >= strings->m_usMaxSize)
+            strings->SetSize(index + strings->m_usGrowBy);
         strings->SetAt(index, value);
     }
 
     {
-        char* value = FUN_00a7d490("Max Num to Spawn", m_usMaximumParticlesToSpawn);
+        char* value = FUN_00a7d490("Max Num to Spawn", modifier->m_usMaximumParticlesToSpawn);
         unsigned int index = strings->m_usSize;
-        if (index >= strings->m_usCapacity)
-            strings->SetSize(index + strings->m_usGrowth);
+        if (index >= strings->m_usMaxSize)
+            strings->SetSize(index + strings->m_usGrowBy);
         strings->SetAt(index, value);
     }
 
     {
-        char* value = FUN_00a7d550("Spawn Speed Chaos", m_fSpawnedSpeedChaos);
+        char* value = FUN_00a7d550("Spawn Speed Chaos", modifier->m_fSpawnedSpeedChaos);
         unsigned int index = strings->m_usSize;
-        if (index >= strings->m_usCapacity)
-            strings->SetSize(index + strings->m_usGrowth);
+        if (index >= strings->m_usMaxSize)
+            strings->SetSize(index + strings->m_usGrowBy);
         strings->SetAt(index, value);
     }
 
     {
-        char* value = FUN_00a7d550("Spawn Dir Chaos", m_fSpawnDirectionChaos);
+        char* value = FUN_00a7d550("Spawn Dir Chaos", modifier->m_fSpawnDirectionChaos);
         unsigned int index = strings->m_usSize;
-        if (index >= strings->m_usCapacity)
-            strings->SetSize(index + strings->m_usGrowth);
+        if (index >= strings->m_usMaxSize)
+            strings->SetSize(index + strings->m_usGrowBy);
         strings->SetAt(index, value);
     }
 
     {
-        char* value = FUN_00a7d550("Life Span", m_fYValue);
+        char* value = FUN_00a7d550("Life Span", modifier->m_fYValue);
         unsigned int index = strings->m_usSize;
-        if (index >= strings->m_usCapacity)
-            strings->SetSize(index + strings->m_usGrowth);
+        if (index >= strings->m_usMaxSize)
+            strings->SetSize(index + strings->m_usGrowBy);
         strings->SetAt(index, value);
     }
 
     {
-        char* value = FUN_00a7d550("Life Span Variation", m_fLifeSpanVariation);
+        char* value = FUN_00a7d550("Life Span Variation", modifier->m_fLifeSpanVariation);
         unsigned int index = strings->m_usSize;
-        if (index >= strings->m_usCapacity)
-            strings->SetSize(index + strings->m_usGrowth);
+        if (index >= strings->m_usMaxSize)
+            strings->SetSize(index + strings->m_usGrowBy);
         strings->SetAt(index, value);
     }
 }
@@ -212,149 +202,98 @@ void __thiscall FUN_00c24a50_shell::AppendSpawnSettingsStrings(StrArr* strings)
 void* __cdecl FUN_00aa13e0(unsigned int size);
 extern int DAT_010be124;
 
-struct FUN_00c23d10_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    short m_18;
-    short unk1A;
-    float m_1C;
-    short m_20;
-    short m_22;
-    float m_24;
-    float m_28;
-    float m_2C;
-    float m_30;
-
-    void FUN_00c31720();
-    void FUN_00c31780(FUN_00c23d10_cls* pDst, int a1);
-    FUN_00c23d10_cls* Clone(int a1);
-};
-
 // @fnv 0x00c23d10
-FUN_00c23d10_cls* FUN_00c23d10_cls::Clone(int aiArg)
+NiPSysSpawnModifier* __fastcall CloneSpawnModifier(NiPSysSpawnModifier* modifier, void*, CloningProcess& process)
 {
-    FUN_00c23d10_cls* pkNew = (FUN_00c23d10_cls*)FUN_00aa13e0(0x34);
+    NiPSysSpawnModifier* pkNew = (NiPSysSpawnModifier*)FUN_00aa13e0(0x34);
     if (pkNew != 0)
     {
-        pkNew->FUN_00c31720();
-        pkNew->m_1C = 1.0f;
-        pkNew->m_24 = 0.0f;
-        pkNew->m_28 = 0.0f;
+        pkNew->NiPSysModifier::NiPSysModifier();
+        pkNew->m_fSpawnPercentage = 1.0f;
+        pkNew->m_fSpawnedSpeedChaos = 0.0f;
+        pkNew->m_fSpawnDirectionChaos = 0.0f;
         *(int*)pkNew = (int)&DAT_010be124;
-        pkNew->m_2C = 0.0f;
-        pkNew->m_18 = 1;
-        pkNew->m_30 = 0.0f;
-        pkNew->m_20 = 1;
-        pkNew->m_22 = 1;
+        pkNew->m_fYValue = 0.0f;
+        pkNew->m_usSpawnGenerationCount = 1;
+        pkNew->m_fLifeSpanVariation = 0.0f;
+        pkNew->m_usMinimumParticlesToSpawn = 1;
+        pkNew->m_usMaximumParticlesToSpawn = 1;
     }
     else
     {
         pkNew = 0;
     }
-    this->FUN_00c31780(pkNew, aiArg);
-    pkNew->m_18 = this->m_18;
-    pkNew->m_1C = this->m_1C;
-    pkNew->m_20 = this->m_20;
-    pkNew->m_22 = this->m_22;
-    pkNew->m_24 = this->m_24;
-    pkNew->m_28 = this->m_28;
-    pkNew->m_2C = this->m_2C;
-    pkNew->m_30 = this->m_30;
+    modifier->NiPSysModifier::CopyMemberData(pkNew, process);
+    pkNew->m_usSpawnGenerationCount = modifier->m_usSpawnGenerationCount;
+    pkNew->m_fSpawnPercentage = modifier->m_fSpawnPercentage;
+    pkNew->m_usMinimumParticlesToSpawn = modifier->m_usMinimumParticlesToSpawn;
+    pkNew->m_usMaximumParticlesToSpawn = modifier->m_usMaximumParticlesToSpawn;
+    pkNew->m_fSpawnedSpeedChaos = modifier->m_fSpawnedSpeedChaos;
+    pkNew->m_fSpawnDirectionChaos = modifier->m_fSpawnDirectionChaos;
+    pkNew->m_fYValue = modifier->m_fYValue;
+    pkNew->m_fLifeSpanVariation = modifier->m_fLifeSpanVariation;
     return pkNew;
 }
 
-struct SaveBinaryStream
-{
-    void** unk00;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(SaveBinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int(__cdecl* m_pfnWrite)(SaveBinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-
-    __forceinline unsigned int BinaryWrite(const void* buffer, unsigned int bytes, unsigned int* sizes,
-                                           unsigned int count)
-    {
-        unsigned int written = m_pfnWrite(this, buffer, bytes, sizes, count);
-        m_uiStreamFlags += written;
-        return written;
-    }
-};
-
-struct SaveStream : NiStream
-{
-    SaveBinaryStream* m_pBackingStream;
-};
-
-template <class T> __forceinline void BinaryStreamSave(SaveBinaryStream& stream, const T* value, unsigned int count = 1)
+template <class T> __forceinline void BinaryStreamSave(NiBinaryStream& stream, const T* value, unsigned int count = 1)
 {
     unsigned int size = sizeof(T);
     stream.BinaryWrite(value, sizeof(T) * count, &size, 1);
 }
 
-template <class T> __forceinline void StreamSaveBinary(SaveStream& stream, const T& value)
+template <class T> __forceinline void StreamSaveBinary(NiStream& stream, const T& value)
 {
-    BinaryStreamSave(*stream.m_pBackingStream, &value, 1);
+    BinaryStreamSave(*stream.m_pkOstr, &value, 1);
 }
 
-struct SpawnModifier : NiPSysSpawnModifier
-{
-    void __thiscall FUN_00c31950(SaveStream& stream);
-    void __thiscall FUN_00c24920(SaveStream& stream);
-};
-
-// Saves the SpawnModifier fields to the stream after calling the base class save routine.
+// Saves the spawn modifier fields after calling the base class save routine.
 // @fnv 0x00c24920
-void SpawnModifier::FUN_00c24920(SaveStream& stream)
+void __fastcall SaveSpawnModifier(NiPSysSpawnModifier* modifier, void*, NiStream& stream)
 {
-    FUN_00c31950(stream);
-    StreamSaveBinary(stream, m_usSpawnGenerationCount);
-    StreamSaveBinary(stream, m_fSpawnPercentage);
-    StreamSaveBinary(stream, m_usMinimumParticlesToSpawn);
-    StreamSaveBinary(stream, m_usMaximumParticlesToSpawn);
-    StreamSaveBinary(stream, m_fSpawnedSpeedChaos);
-    StreamSaveBinary(stream, m_fSpawnDirectionChaos);
-    StreamSaveBinary(stream, m_fYValue);
-    StreamSaveBinary(stream, m_fLifeSpanVariation);
+    modifier->NiPSysModifier::SaveBinary(stream);
+    StreamSaveBinary(stream, modifier->m_usSpawnGenerationCount);
+    StreamSaveBinary(stream, modifier->m_fSpawnPercentage);
+    StreamSaveBinary(stream, modifier->m_usMinimumParticlesToSpawn);
+    StreamSaveBinary(stream, modifier->m_usMaximumParticlesToSpawn);
+    StreamSaveBinary(stream, modifier->m_fSpawnedSpeedChaos);
+    StreamSaveBinary(stream, modifier->m_fSpawnDirectionChaos);
+    StreamSaveBinary(stream, modifier->m_fYValue);
+    StreamSaveBinary(stream, modifier->m_fLifeSpanVariation);
 }
 
 #include <string.h>
-struct FUN_00c23c00_shell
-{
-    void __thiscall AddDelta(float*, float*);
-};
-
-// Copies 9 floats from the object into fTimeSinceScaleStart, then adds each element of fDelta2 to the corresponding element.
+// Adds the corresponding elements of two matrices.
 // @fnv 0x00c23c00
-void FUN_00c23c00_shell::AddDelta(float* afOut, float* afDelta)
+__declspec(noinline) Mat3 Mat3::operator+(const Mat3& other) const
 {
-    memcpy(afOut, (float*)this, 9 * sizeof(float));
-    afOut[0] += afDelta[0];
-    afOut[1] += afDelta[1];
-    afOut[2] += afDelta[2];
-    afOut[3] += afDelta[3];
-    afOut[4] += afDelta[4];
-    afOut[5] += afDelta[5];
-    afOut[6] += afDelta[6];
-    afOut[7] += afDelta[7];
-    afOut[8] += afDelta[8];
+    Mat3 result = *this;
+    result.m00 += other.m00;
+    result.m01 += other.m01;
+    result.m02 += other.m02;
+    result.m10 += other.m10;
+    result.m11 += other.m11;
+    result.m12 += other.m12;
+    result.m20 += other.m20;
+    result.m21 += other.m21;
+    result.m22 += other.m22;
+    return result;
 }
 
-struct FUN_00c23c70_shell
-{
-    void SubtractFrom(float* dst, const float* sub);
-};
-
-// Copies the 36-byte object into dst, then subtracts each element of sub from the first 9 floats in dst.
+// Subtracts the corresponding elements of two matrices.
 // @fnv 0x00c23c70
-void FUN_00c23c70_shell::SubtractFrom(float* dst, const float* sub)
+__declspec(noinline) Mat3 Mat3::operator-(const Mat3& other) const
 {
-    memcpy(dst, this, 36);
-    for (int i = 0; i < 9; ++i)
-        dst[i] -= sub[i];
+    Mat3 result = *this;
+    result.m00 -= other.m00;
+    result.m01 -= other.m01;
+    result.m02 -= other.m02;
+    result.m10 -= other.m10;
+    result.m11 -= other.m11;
+    result.m12 -= other.m12;
+    result.m20 -= other.m20;
+    result.m21 -= other.m21;
+    result.m22 -= other.m22;
+    return result;
 }
 
 #include <stdlib.h>
@@ -455,93 +394,28 @@ struct ParticleSystemX
     PSysDataX* m_spGeometryData;
 };
 
-class SpawnModifierX
-{
-  public:
-    virtual ~SpawnModifierX();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c();
-    virtual void v90();
-    virtual void v94();
-    virtual void v98();
-    virtual void v9c();
-    virtual void va0();
-    virtual void va4();
-    virtual void UpdateSpawning(float afTime, float fTime, unsigned short usOldIndex, ParticleSystemX* pkSystem);
-
-    unsigned int m_uiRefCount;
-    int m_kName;
-    unsigned int m_uiUpdateOrder;
-    ParticleSystemX* m_pkTarget;
-    bool m_bModifierActive;
-    char unk15;
-    short unk16;
-    unsigned short m_usSpawnGenerationCount;
-    float m_fSpawnPercentage;
-    unsigned short m_usMinimumParticlesToSpawn;
-    unsigned short m_usMaximumParticlesToSpawn;
-    float m_fSpawnedSpeedChaos;
-    float m_fSpawnDirectionChaos;
-    float m_fYValue;
-    float m_fLifeSpanVariation;
-
-    void FUN_00c23db0(float afTime, float fTime, unsigned short usOldIndex, ParticleSystemX* pkSystem);
-};
-
 inline float RandomFloat0To1()
 {
     return (float)(rand() / (double)RAND_MAX);
 }
 
 // @fnv 0x00c23db0
-void SpawnModifierX::FUN_00c23db0(float afTime, float fTime, unsigned short usOldIndex, ParticleSystemX* pkSystem)
+void __fastcall SpawnParticles(NiPSysSpawnModifier* modifier, void*, float afTime, float fTime,
+                               unsigned short usOldIndex, ParticleSystemX* pkSystem)
 {
     PSysDataX* pkData = pkSystem->m_spGeometryData;
-    if (pkData->m_pkParticleInfo[usOldIndex].m_usFirstValue < m_usSpawnGenerationCount &&
-        !(RandomFloat0To1() > m_fSpawnPercentage))
+    if (pkData->m_pkParticleInfo[usOldIndex].m_usFirstValue < modifier->m_usSpawnGenerationCount &&
+        !(RandomFloat0To1() > modifier->m_fSpawnPercentage))
     {
-        float fNumToSpawn = (m_usMaximumParticlesToSpawn - m_usMinimumParticlesToSpawn) * RandomFloat0To1();
+        float fNumToSpawn = (modifier->m_usMaximumParticlesToSpawn - modifier->m_usMinimumParticlesToSpawn) * RandomFloat0To1();
         unsigned short usExtra = (unsigned short)fNumToSpawn;
         if (fmod(fNumToSpawn, 1.0f) > 0.5f)
             usExtra++;
-        unsigned short usNumToSpawn = m_usMinimumParticlesToSpawn + usExtra;
+        unsigned short usNumToSpawn = modifier->m_usMinimumParticlesToSpawn + usExtra;
         if (usNumToSpawn == 0)
             usNumToSpawn = 1;
         for (unsigned short us = 0; us < usNumToSpawn; us++)
-            UpdateSpawning(afTime, fTime, usOldIndex, pkSystem);
+            modifier->UpdateSpawning(afTime, fTime, usOldIndex, pkSystem);
     }
 }
 
@@ -559,63 +433,33 @@ extern "C" const float DAT_011f52e0[];
 extern "C" const float DAT_011f4ae0[];
 extern "C" const unsigned short DAT_010be248;
 
-struct Pt3
+
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ)
 {
-    float x, y, z;
-    Pt3()
-    {}
-    Pt3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    Pt3 operator-() const
-    {
-        return Pt3(-x, -y, -z);
-    }
-};
+    x = fX;
+    y = fY;
+    z = fZ;
+}
+
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
 
 struct ColA
 {
     float r, g, b, a;
 };
 
-struct Mat3
-{
-    float m[3][3];
-    static const Mat3 IDENTITY;
-    Mat3()
-    {}
-    Mat3(const Pt3& c0, const Pt3& c1, const Pt3& c2);
-    Mat3 operator*(float f) const;
-    Mat3 operator+(const Mat3& o) const;
-    Mat3 operator-(const Mat3& o) const;
-    Mat3 operator*(const Mat3& o) const;
-};
+inline Mat3::Mat3()
+{}
 
 __declspec(noinline) Mat3 Mat3::operator*(float f) const
 {
     Mat3 result;
     for (int row = 0; row < 3; ++row)
         for (int col = 0; col < 3; ++col)
-            result.m[row][col] = m[row][col] * f;
-    return result;
-}
-__declspec(noinline) Mat3 Mat3::operator+(const Mat3 & o) const
-{
-    Mat3 result;
-    for (int row = 0; row < 3; ++row)
-        for (int col = 0; col < 3; ++col)
-            result.m[row][col] = m[row][col] + o.m[row][col];
-    return result;
-}
-__declspec(noinline) Mat3 Mat3::operator-(const Mat3 & o) const
-{
-    Mat3 result;
-    for (int row = 0; row < 3; ++row)
-        for (int col = 0; col < 3; ++col)
-            result.m[row][col] = m[row][col] - o.m[row][col];
+            (&result.m00)[row * 3 + col] = (&m00)[row * 3 + col] * f;
     return result;
 }
 __declspec(noinline) Mat3 Mat3::operator*(const Mat3 & o) const
@@ -623,22 +467,22 @@ __declspec(noinline) Mat3 Mat3::operator*(const Mat3 & o) const
     Mat3 result;
     for (int row = 0; row < 3; ++row)
         for (int col = 0; col < 3; ++col)
-            result.m[row][col] = m[row][0] * o.m[0][col] + m[row][1] * o.m[1][col] + m[row][2] * o.m[2][col];
+            (&result.m00)[row * 3 + col] = (&m00)[row * 3 + 0] * (&o.m00)[0 * 3 + col] + (&m00)[row * 3 + 1] * (&o.m00)[1 * 3 + col] + (&m00)[row * 3 + 2] * (&o.m00)[2 * 3 + col];
     return result;
 }
 
 struct Xform
 {
     Mat3 m_kOrientation;
-    Pt3 m_kTranslation;
+    NiPoint3 m_kTranslation;
     float m_fScale;
-    Pt3 operator*(const Pt3& p) const;
+    NiPoint3 operator*(const NiPoint3& p) const;
     void Invert(Xform& dst) const;
 };
 
 struct PInfo
 {
-    Pt3 m_kValue;
+    NiPoint3 m_kValue;
     float m_fXValue;
     float m_fYValue;
     float m_fZValue;
@@ -692,7 +536,7 @@ struct PSysData
     virtual void v41();
     virtual unsigned short GetParticleVertexCount();
     int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
-    Pt3* m_pkVertex;
+    NiPoint3* m_pkVertex;
     int unk24;
     ColA* m_pkColor;
     int unk2C, unk30, unk34, unk38, unk3C, unk40, unk44, unk48;
@@ -701,7 +545,7 @@ struct PSysData
     float* m_pfSizes;
     int unk58;
     float* m_pfRotationAngles;
-    Pt3* m_pkRotationAxes;
+    NiPoint3* m_pkRotationAxes;
     int unk64, unk68, unk6C;
     PInfo* m_pkParticleInfo;
     float* m_pfRotationSpeeds;
@@ -753,27 +597,28 @@ static inline void FastSinCos(float f, float& sine, float& cosine)
     cosine = DAT_011f4ae0[index];
 }
 
-static inline Pt3 MulMV(Mat3 m, const Pt3& p)
+static inline NiPoint3 MulMV(Mat3 m, const NiPoint3& p)
 {
-    Pt3 r;
-    r.x = m.m[0][0] * p.x + m.m[0][1] * p.y + m.m[0][2] * p.z;
-    r.y = m.m[1][0] * p.x + m.m[1][1] * p.y + m.m[1][2] * p.z;
-    r.z = m.m[2][0] * p.x + m.m[2][1] * p.y + m.m[2][2] * p.z;
+    NiPoint3 r;
+    r.x = m.m00 * p.x + m.m01 * p.y + m.m02 * p.z;
+    r.y = m.m10 * p.x + m.m11 * p.y + m.m12 * p.z;
+    // Preserve the original x87 intermediate precision and evaluation order.
+    r.z = m.m20 * p.x + (double)(m.m21 * p.y) + m.m22 * p.z;
     return r;
 }
 
-static inline Pt3 InverseMulMV(Mat3 m, const Pt3& p)
+static inline NiPoint3 InverseMulMV(Mat3 m, const NiPoint3& p)
 {
-    Pt3 r;
-    r.x = (double)(m.m[0][0] * p.x) + m.m[0][1] * p.y + m.m[0][2] * p.z;
-    r.y = (double)(m.m[1][0] * p.x) + m.m[1][1] * p.y + m.m[1][2] * p.z;
-    r.z = (double)(m.m[2][0] * p.x) + m.m[2][1] * p.y + m.m[2][2] * p.z;
+    NiPoint3 r;
+    r.x = (double)(m.m00 * p.x) + m.m01 * p.y + m.m02 * p.z;
+    r.y = (double)(m.m10 * p.x) + m.m11 * p.y + m.m12 * p.z;
+    r.z = (double)(m.m20 * p.x) + m.m21 * p.y + m.m22 * p.z;
     return r;
 }
 
-__declspec(noinline) Pt3 Xform::operator*(const Pt3 & p) const
+__declspec(noinline) NiPoint3 Xform::operator*(const NiPoint3 & p) const
 {
-    Pt3 result = MulMV(m_kOrientation, p);
+    NiPoint3 result = MulMV(m_kOrientation, p);
     result.x = result.x * m_fScale + m_kTranslation.x;
     result.y = result.y * m_fScale + m_kTranslation.y;
     result.z = result.z * m_fScale + m_kTranslation.z;
@@ -800,34 +645,31 @@ struct LocalPoint
     float z;
 };
 
-struct SpawnWorker : NiPSysSpawnModifier
-{
-    void FUN_00c23ee0(float afTime, float fTimeDelta, unsigned short usOldIndex, PSys* pkOldPSystem);
-};
-
 // @fnv 0x00c23ee0
-void SpawnWorker::FUN_00c23ee0(float afTime, float fTimeDelta, unsigned short usOldIndex, PSys* pkOldPSystem)
+void NiPSysSpawnModifier::UpdateSpawning(float afTime, float fTimeDelta, unsigned short usOldIndex,
+                                        ParticleSystemX* pkOldSystem)
 {
-    Pt3 kMotionVelocity;
+    PSys* pkOldPSystem = reinterpret_cast<PSys*>(pkOldSystem);
+    NiPoint3 kMotionVelocity;
     (void)kMotionVelocity.x;
     PSysData* pkOldData = pkOldPSystem->m_spGeometryData;
     PInfo* pkOldInfo = &pkOldData->m_pkParticleInfo[usOldIndex];
-    Pt3* pkOldVerts = pkOldData->m_pkVertex;
+    NiPoint3* pkOldVerts = pkOldData->m_pkVertex;
     ColA* pkOldColors = pkOldData->m_pkColor;
     float* pfOldRadii = pkOldData->m_pfRadii;
     float* pfOldSizes = pkOldData->m_pfSizes;
     float* pfOldRotAngles = pkOldData->m_pfRotationAngles;
-    Pt3* pkOldRotAxes = pkOldData->m_pkRotationAxes;
+    NiPoint3* pkOldRotAxes = pkOldData->m_pkRotationAxes;
     float* pfOldRotSpeeds = pkOldData->m_pfRotationSpeeds;
 
-    Pt3 kPosition = pkOldVerts[usOldIndex];
+    NiPoint3 kPosition = pkOldVerts[usOldIndex];
     kMotionVelocity = pkOldInfo->m_kValue;
 
     PSys* pkTarget = (PSys*)m_pkTarget;
     if (pkOldPSystem != pkTarget)
     {
         Xform kOldWorld = pkOldPSystem->m_kWorldSpaceTransform;
-        (void)kOldWorld.m_kOrientation.m[0][0];
+        (void)kOldWorld.m_kOrientation.m00;
         kPosition = kOldWorld * kPosition;
         kMotionVelocity = MulMV(kOldWorld.m_kOrientation, kMotionVelocity);
         Xform kTargetWorld = pkTarget->m_kWorldSpaceTransform;
@@ -843,12 +685,12 @@ void SpawnWorker::FUN_00c23ee0(float afTime, float fTimeDelta, unsigned short us
 
     float fPreviousTime = afTime - fTimeDelta;
     PInfo* pkNewInfo = &pkData->m_pkParticleInfo[usNewIndex];
-    Pt3* pkNewVerts = pkData->m_pkVertex;
+    NiPoint3* pkNewVerts = pkData->m_pkVertex;
     ColA* pkNewColors = pkData->m_pkColor;
     float* pfNewRadii = pkData->m_pfRadii;
     float* pfNewSizes = pkData->m_pfSizes;
     float* pfNewRotAngles = pkData->m_pfRotationAngles;
-    Pt3* pkNewRotAxes = pkData->m_pkRotationAxes;
+    NiPoint3* pkNewRotAxes = pkData->m_pkRotationAxes;
     float* pfNewRotSpeeds = pkData->m_pfRotationSpeeds;
 
     float fLenSq = (double)(kMotionVelocity.x * kMotionVelocity.x + kMotionVelocity.y * kMotionVelocity.y +
@@ -865,7 +707,7 @@ void SpawnWorker::FUN_00c23ee0(float afTime, float fTimeDelta, unsigned short us
     float fPlanar = fRand * DAT_011aeb34;
     float fSinPlanar, fCosPlanar;
     FastSinCos(fPlanar, fSinPlanar, fCosPlanar);
-    Pt3 kWorldPosition;
+    NiPoint3 kWorldPosition;
     kWorldPosition.x = fSinDecl * fCosPlanar;
     kWorldPosition.y = fSinDecl * fSinPlanar;
     kWorldPosition.z = fCosDecl;
@@ -873,18 +715,18 @@ void SpawnWorker::FUN_00c23ee0(float afTime, float fTimeDelta, unsigned short us
     Mat3 kRot = Mat3::IDENTITY;
 
     {
-        Pt3 kNeg = -kMotionVelocity;
+        NiPoint3 kNeg = -kMotionVelocity;
         Mat3 kSkew;
-        kSkew.m[0][0] = 0.0f;
-        kSkew.m[1][0] = 0.0f;
-        kSkew.m[0][1] = 0.0f;
-        kSkew.m[1][1] = 0.0f;
-        kSkew.m[2][0] = kMotionVelocity.x;
-        kSkew.m[2][1] = kMotionVelocity.y;
-        kSkew.m[0][2] = kNeg.x;
-        kSkew.m[1][2] = kNeg.y;
-        kSkew.m[2][2] = 0.0f;
-        Pt3 kAxis(kMotionVelocity.y, -kMotionVelocity.x, 0.0f);
+        kSkew.m00 = 0.0f;
+        kSkew.m10 = 0.0f;
+        kSkew.m01 = 0.0f;
+        kSkew.m11 = 0.0f;
+        kSkew.m20 = kMotionVelocity.x;
+        kSkew.m21 = kMotionVelocity.y;
+        kSkew.m02 = kNeg.x;
+        kSkew.m12 = kNeg.y;
+        kSkew.m22 = 0.0f;
+        NiPoint3 kAxis(kMotionVelocity.y, -kMotionVelocity.x, 0.0f);
 
         LocalPoint kCross;
         kCross.x = kWorldPosition.y * kMotionVelocity.z - kWorldPosition.z * kMotionVelocity.y;
@@ -908,20 +750,20 @@ void SpawnWorker::FUN_00c23ee0(float afTime, float fTimeDelta, unsigned short us
         }
         else if (kMotionVelocity.z < kAxis.z)
         {
-            kRot = Mat3(Pt3(DAT_01012054, 0.0f, 0.0f), Pt3(0.0f, DAT_01012054, 0.0f), Pt3(0.0f, 0.0f, DAT_01012054));
+            kRot = Mat3(NiPoint3(DAT_01012054, 0.0f, 0.0f), NiPoint3(0.0f, DAT_01012054, 0.0f), NiPoint3(0.0f, 0.0f, DAT_01012054));
         }
     }
 
     Mat3 kScaled;
-    kScaled.m[0][0] = kRot.m[0][0] * fSpeed;
-    kScaled.m[0][1] = kRot.m[0][1] * fSpeed;
-    kScaled.m[0][2] = kRot.m[0][2] * fSpeed;
-    kScaled.m[1][0] = kRot.m[1][0] * fSpeed;
-    kScaled.m[1][1] = kRot.m[1][1] * fSpeed;
-    kScaled.m[1][2] = kRot.m[1][2] * fSpeed;
-    kScaled.m[2][0] = kRot.m[2][0] * fSpeed;
-    kScaled.m[2][1] = kRot.m[2][1] * fSpeed;
-    kScaled.m[2][2] = kRot.m[2][2] * fSpeed;
+    kScaled.m00 = kRot.m00 * fSpeed;
+    kScaled.m01 = kRot.m01 * fSpeed;
+    kScaled.m02 = kRot.m02 * fSpeed;
+    kScaled.m10 = kRot.m10 * fSpeed;
+    kScaled.m11 = kRot.m11 * fSpeed;
+    kScaled.m12 = kRot.m12 * fSpeed;
+    kScaled.m20 = kRot.m20 * fSpeed;
+    kScaled.m21 = kRot.m21 * fSpeed;
+    kScaled.m22 = kRot.m22 * fSpeed;
     kWorldPosition = MulMV(kScaled, kWorldPosition);
     pkNewInfo->m_kValue = kWorldPosition;
     pkNewInfo->m_fXValue = fPreviousTime;

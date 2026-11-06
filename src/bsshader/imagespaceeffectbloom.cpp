@@ -3,7 +3,7 @@
 #include "imagespaceeffectbloom_decls.h"
 
 // @fnv 0x00c03410
-void BloomImageSpaceEffect::Setup(ImageSpaceManager* manager, ImageSpaceEffectParam* param)
+void BloomImageSpaceEffect::Setup(ImageSpaceManager* manager, BloomEffectParamLocalForm* param)
 {
     SetTextureArrayCount(2);
     pTextures.SetSize(3);

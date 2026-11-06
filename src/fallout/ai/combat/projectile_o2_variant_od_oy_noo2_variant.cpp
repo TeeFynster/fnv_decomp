@@ -5,7 +5,8 @@
 
 // src/fallout/ai/combat/projectile_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/ai/combat/projectile.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
-#include "projectile_decls.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/hkVector4.h"
 
 #include <xmmintrin.h>
 class NiPoint3PB
@@ -33,15 +34,6 @@ class hkSimdRealPB
   public:
     hkSimdRealPB(float fValue);
     __m128 m_vValue;
-};
-
-class hkVector4PB
-{
-  public:
-    hkVector4PB(float fX, float fY, float fZ, float fW);
-    void SetFrom(const void* pvSource);
-    void Mul4(const hkSimdRealPB& kScale);
-    __m128 m_vComponents;
 };
 
 class NodePB
@@ -104,7 +96,7 @@ class BodyPB
 {
   public:
     BodyPB* GetMotion();
-    void ApplyImpulse(float fTimeSinceScaleStart, const hkVector4PB& kImpulse);
+    void ApplyImpulse(float fTimeSinceScaleStart, const hkVector4& kImpulse);
 };
 
 class HavokWorldPB
@@ -420,10 +412,10 @@ void ProjPB::FUN_009becc0(float fUnused)
             {
                 pkMotion = pkBody->GetMotion();
                 HavokWorldPB* pkWorld = GetParentCell()->GetWorld();
-                hkVector4PB kImpulse(0.0f, 0.0f, -30.0f, 0.0f);
-                kImpulse.SetFrom(pkWorld->GetGravity());
+                hkVector4 kImpulse(0.0f, 0.0f, -30.0f, 0.0f);
+                kImpulse = *(const hkVector4*)pkWorld->GetGravity();
                 hkSimdRealPB kScale(2.0f);
-                kImpulse.Mul4(kScale);
+                kImpulse.FUN_00627920((const hkSimdReal&)kScale);
                 pkMotion->ApplyImpulse(fTimeSinceScaleStart, kImpulse);
             }
         }
@@ -1639,20 +1631,8 @@ bool RefP9::FUN_009c03f0()
     return bHitDetected;
 }
 
-class hkVector4
-{
-  public:
-    hkVector4();
-    hkVector4 FUN_00630b40() const;                       // returns a derived vector by value
-    float FUN_004586d0() const;                           // length
-    void FUN_0062aea0();                                  // normalize
-    void FUN_00627920(const class FUN_005dbf20& kScale);  // mul
-
-    __m128 m_vComponents;
-};
-
 class FUN_005dbf20
-{  // simd real
+{
   public:
     FUN_005dbf20(float fValue);
     __m128 m_vValue;
@@ -1759,7 +1739,7 @@ void ImpulseSource::FUN_009c2e80(NiPoint3 kPoint, NiPoint3 kDirection, void* pvT
                 if (kImpulse.FUN_00630b40().FUN_004586d0() > 0.0)
                     kImpulse.FUN_0062aea0();
                 FUN_005dbf20 kScale(fForce);
-                kImpulse.FUN_00627920(kScale);
+                kImpulse.FUN_00627920((const hkSimdReal&)kScale);
                 pkLock->FUN_00483710();
                 pkBody->FUN_004ae750()->ApplyVirtualCall(kImpulse, kPosition);
                 pkLock->FUN_00483710();
@@ -1778,19 +1758,12 @@ class hkTransform9C
     __m128 m_akCols[4];
 };
 
-class hkVector49C
-{
-  public:
-    void SetTransformedPos(const hkTransform9C& kXform, const void* pvPos);
-    __m128 m_vComponents;
-};
-
 class hkAabb9C
 {
   public:
     hkAabb9C();
-    hkVector49C m_kMin;
-    hkVector49C m_kMax;
+    hkVector4 m_kMin;
+    hkVector4 m_kMax;
     __m128 m_kExtra;
 };
 
@@ -2008,8 +1981,8 @@ bool __cdecl FUN_009c5ba0(World9C* pkWorld, NiAVObject9C* pkObject, bool bCheckM
                 }
                 hkAabb9C kAabb;
                 hkAabbOut9C kOut;
-                kAabb.m_kMin.SetTransformedPos(kXform, pkWorld->GetMin());
-                kAabb.m_kMax.SetTransformedPos(kXform, pkWorld->GetMax());
+                kAabb.m_kMin.SetTransformedPosition((const hkTransform&)kXform, *(const hkVector4*)pkWorld->GetMin());
+                kAabb.m_kMax.SetTransformedPosition((const hkTransform&)kXform, *(const hkVector4*)pkWorld->GetMax());
                 pkBody->GetMotion()->CalcAabb(kAabb, kOut);
                 if (kOut.GetResult().IsSet())
                 {

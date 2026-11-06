@@ -1,3 +1,4 @@
+#include "../../../../../../../../../include/hkArrayBase.h"
 
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkpragdolllimitsdrawer_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkpragdolllimitsdrawer.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -7,6 +8,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <xmmintrin.h>
+#include "../../../../../../../../../include/Vec4.h"
 #include <math.h>
 struct Renderer;
 
@@ -15,26 +17,15 @@ extern const float DAT_01017718;
 extern float DAT_01016248;
 extern double DAT_01030f38;
 extern float DAT_010c44d0;
-struct Vec4
-{
-    union
-    {
-        __m128 q;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-};
 __forceinline __m128 cross0(const Vec4& b, const Vec4& a)
 {
-    return _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xd2), _mm_shuffle_ps(b.q, b.q, 0xc9)),
-                      _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xc9), _mm_shuffle_ps(b.q, b.q, 0xd2)));
+    return _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(reinterpret_cast<const __m128&>(a), reinterpret_cast<const __m128&>(a), 0xd2), _mm_shuffle_ps(reinterpret_cast<const __m128&>(b), reinterpret_cast<const __m128&>(b), 0xc9)),
+                      _mm_mul_ps(_mm_shuffle_ps(reinterpret_cast<const __m128&>(a), reinterpret_cast<const __m128&>(a), 0xc9), _mm_shuffle_ps(reinterpret_cast<const __m128&>(b), reinterpret_cast<const __m128&>(b), 0xd2)));
 }
 __forceinline void cross1(__m128& dst, const Vec4& b, const Vec4& a)
 {
-    dst = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xd2), _mm_shuffle_ps(b.q, b.q, 0xc9)),
-                     _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xc9), _mm_shuffle_ps(b.q, b.q, 0xd2)));
+    dst = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(reinterpret_cast<const __m128&>(a), reinterpret_cast<const __m128&>(a), 0xd2), _mm_shuffle_ps(reinterpret_cast<const __m128&>(b), reinterpret_cast<const __m128&>(b), 0xc9)),
+                     _mm_mul_ps(_mm_shuffle_ps(reinterpret_cast<const __m128&>(a), reinterpret_cast<const __m128&>(a), 0xc9), _mm_shuffle_ps(reinterpret_cast<const __m128&>(b), reinterpret_cast<const __m128&>(b), 0xd2)));
 }
 struct SourceView
 {
@@ -93,29 +84,15 @@ struct SubC0
     void FUN_00e10a10(Renderer* a);
     void FUN_00e10d50(void* a, void* b, void* c, int d, float e, int a2, int a3);
 };
-struct Arr
-{
-    void* data;
-    int size;
-    int cap;
-};
+
 struct CharacterBufferState
 {
     int u00, u04, u08, u0c;
     void* owner;
 };
 extern CharacterBufferState* FUN_00c85750();
-extern void FUN_00c908c0(void* owner, Arr* arr, int newCap, int stride);
+extern void FUN_00c908c0(void* owner, hkArrayBase<void*>* arr, int newCap, int stride);
 extern int PackBytesBigEndian(int a, int b, int c, int d);
-struct Obj50
-{
-    void FUN_00c7f640(void* a, void* b);
-};
-struct VecObj
-{
-    Vec4 v;
-    void FUN_00c7f700(void* a, void* b);
-};
 struct Renderer
 {
     virtual void slot0();
@@ -132,7 +109,7 @@ struct Renderer
     virtual void slot11();
     virtual void slot12();
     virtual void slot13();
-    virtual void draw(Arr*, int color, int a2, int a3);
+    virtual void draw(hkArrayBase<void*>*, int color, int a2, int a3);
 };
 struct Cls
 {
@@ -308,20 +285,20 @@ struct Big
 {
     float m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, ma, mb, mc, md, me, mf;
 };
-struct Geometry
+struct __declspec(align(16)) Geometry
 {
-    VecObj v60;
-    Vec4 out70;
-    VecObj v80, v48;
-    Vec4 scaleVector, outB0;
-    VecObj v30;
+    __m128 v60;
+    __m128 out70;
+    __m128 v80, v48;
+    __m128 scaleVector, outB0;
+    __m128 v30;
     Big tD0, t110;
 };
 __forceinline void prepareAxes(Cls* self, SourceView* src, Geometry& geometry)
 {
     Vec4* columnBase1 = src->rows50;
     Vec4* columnBase2 = src->rows10;
-    ((VecObj*)&geometry.v80)->FUN_00c7f700(&self->unk90, &src->rows50[src->indexEF]);
+    ((Vec4*)&geometry.v80)->FUN_00c7f700(&self->unk90, src->rows50[src->indexEF]);
 
     {
         __m128 zeroRaw, threeRaw, halfRaw;
@@ -345,9 +322,9 @@ __forceinline void prepareAxes(Cls* self, SourceView* src, Geometry& geometry)
             prod5 = _mm_andnot_ps(isZero, prod5);
             prod5 = _mm_shuffle_ps(prod5, prod5, 0);
             _mm_store_ps((float*)&geometry.out70, _mm_mul_ps(prod5, cr));
-            ((VecObj*)&geometry.out70)->FUN_00c7f700(&self->unk90, &geometry.out70);
+            ((Vec4*)&geometry.out70)->FUN_00c7f700(&self->unk90, *(Vec4*)&geometry.out70);
         }
-        ((VecObj*)&geometry.v60)->FUN_00c7f700(&self->unk90, (Vec4*)((unsigned int)columnBase1 + (src->index118 << 4)));
+        ((Vec4*)&geometry.v60)->FUN_00c7f700(&self->unk90, *(Vec4*)((unsigned int)columnBase1 + (src->index118 << 4)));
         // Transform the second normalized cross product.
         {
             int offset117 = src->index117 << 4;
@@ -366,23 +343,23 @@ __forceinline void prepareAxes(Cls* self, SourceView* src, Geometry& geometry)
             prod5 = _mm_andnot_ps(isZero, prod5);
             prod5 = _mm_shuffle_ps(prod5, prod5, 0);
             _mm_store_ps((float*)&geometry.outB0, _mm_mul_ps(prod5, cr));
-            ((VecObj*)&geometry.v48)->FUN_00c7f700(&self->unk60, &geometry.outB0);
+            ((Vec4*)&geometry.v48)->FUN_00c7f700(&self->unk60, *(Vec4*)&geometry.outB0);
         }
     }
-    ((VecObj*)&geometry.v30)->FUN_00c7f700(&self->unk60, (Vec4*)((unsigned int)columnBase2 + (src->indexEF << 4)));
+    ((Vec4*)&geometry.v30)->FUN_00c7f700(&self->unk60, *(Vec4*)((unsigned int)columnBase2 + (src->indexEF << 4)));
 }
 __forceinline void drawGroups(Cls* self, Renderer* a1, int a2, int a3, Cls* objectD0, Cls* object160, Cls* object280)
 {
-    __declspec(align(16)) Arr zeroArray, halfArray, threeArray;
-    zeroArray.data = 0;
-    zeroArray.size = 0;
-    zeroArray.cap = (int)0x80000000;
-    halfArray.data = 0;
-    halfArray.size = 0;
-    halfArray.cap = (int)0x80000000;
-    threeArray.data = 0;
-    threeArray.size = 0;
-    threeArray.cap = (int)0x80000000;
+    __declspec(align(16)) hkArrayBase<void*> zeroArray, halfArray, threeArray;
+    zeroArray.m_data = 0;
+    zeroArray.m_iElementCount = 0;
+    zeroArray.m_iCapacityState = (int)0x80000000;
+    halfArray.m_data = 0;
+    halfArray.m_iElementCount = 0;
+    halfArray.m_iCapacityState = (int)0x80000000;
+    threeArray.m_data = 0;
+    threeArray.m_iElementCount = 0;
+    threeArray.m_iCapacityState = (int)0x80000000;
     {
         CharacterBufferState* ar;
         int cap;
@@ -390,7 +367,7 @@ __forceinline void drawGroups(Cls* self, Renderer* a1, int a2, int a3, Cls* obje
         ar = FUN_00c85750();
         owner = ar->owner;
         int nc;
-        cap = zeroArray.cap & 0x3fffffff;
+        cap = zeroArray.m_iCapacityState & 0x3fffffff;
         if (cap < 1)
         {
             nc = cap * 2;
@@ -398,7 +375,7 @@ __forceinline void drawGroups(Cls* self, Renderer* a1, int a2, int a3, Cls* obje
                 nc = 1;
             FUN_00c908c0(owner, &zeroArray, nc, 4);
         }
-        zeroArray.size = 1;
+        zeroArray.m_iElementCount = 1;
     }
     {
         CharacterBufferState* ar;
@@ -407,7 +384,7 @@ __forceinline void drawGroups(Cls* self, Renderer* a1, int a2, int a3, Cls* obje
         ar = FUN_00c85750();
         owner = ar->owner;
         int nc;
-        cap = threeArray.cap & 0x3fffffff;
+        cap = threeArray.m_iCapacityState & 0x3fffffff;
         if (cap < 1)
         {
             nc = cap * 2;
@@ -415,7 +392,7 @@ __forceinline void drawGroups(Cls* self, Renderer* a1, int a2, int a3, Cls* obje
                 nc = 1;
             FUN_00c908c0(owner, &threeArray, nc, 4);
         }
-        threeArray.size = 1;
+        threeArray.m_iElementCount = 1;
     }
     {
         CharacterBufferState* ar;
@@ -424,7 +401,7 @@ __forceinline void drawGroups(Cls* self, Renderer* a1, int a2, int a3, Cls* obje
         ar = FUN_00c85750();
         owner = ar->owner;
         int nc;
-        cap = halfArray.cap & 0x3fffffff;
+        cap = halfArray.m_iCapacityState & 0x3fffffff;
         if (cap < 2)
         {
             nc = cap * 2;
@@ -432,12 +409,12 @@ __forceinline void drawGroups(Cls* self, Renderer* a1, int a2, int a3, Cls* obje
                 nc = 2;
             FUN_00c908c0(owner, &halfArray, nc, 4);
         }
-        halfArray.size = 2;
+        halfArray.m_iElementCount = 2;
     }
-    ((void**)zeroArray.data)[0] = objectD0;
-    ((void**)halfArray.data)[0] = object160;
-    ((void**)halfArray.data)[1] = &self->unk1f0;
-    ((void**)threeArray.data)[0] = object280;
+    ((void**)zeroArray.m_data)[0] = objectD0;
+    ((void**)halfArray.m_data)[0] = object160;
+    ((void**)halfArray.m_data)[1] = &self->unk1f0;
+    ((void**)threeArray.m_data)[0] = object280;
     a1->draw(&zeroArray, 0xffffff00, a2, a3);
     a1->draw(&halfArray, 0xffff0000, a2, a3);
     a1->draw(&threeArray, PackBytesBigEndian(0xff, 0, 0xff, 0xff), a2, a3);
@@ -445,38 +422,38 @@ __forceinline void drawGroups(Cls* self, Renderer* a1, int a2, int a3, Cls* obje
     {
         CharacterBufferState* ar = FUN_00c85750();
         void* ow = ar->owner;
-        threeArray.size = 0;
-        if (!(threeArray.cap & (int)0x80000000))
+        threeArray.m_iElementCount = 0;
+        if (!(threeArray.m_iCapacityState & (int)0x80000000))
         {
             void** ovt = *(void***)ow;
-            ((void(__thiscall*)(void*, void*, int))ovt[4])(ow, threeArray.data, (threeArray.cap & 0x3fffffff) * 4);
+            ((void(__thiscall*)(void*, void*, int))ovt[4])(ow, threeArray.m_data, (threeArray.m_iCapacityState & 0x3fffffff) * 4);
         }
-        threeArray.data = 0;
-        threeArray.cap = (int)0x80000000;
+        threeArray.m_data = 0;
+        threeArray.m_iCapacityState = (int)0x80000000;
     }
     {
         CharacterBufferState* ar = FUN_00c85750();
         void* ow = ar->owner;
-        halfArray.size = 0;
-        if (!(halfArray.cap & (int)0x80000000))
+        halfArray.m_iElementCount = 0;
+        if (!(halfArray.m_iCapacityState & (int)0x80000000))
         {
             void** ovt = *(void***)ow;
-            ((void(__thiscall*)(void*, void*, int))ovt[4])(ow, halfArray.data, (halfArray.cap & 0x3fffffff) * 4);
+            ((void(__thiscall*)(void*, void*, int))ovt[4])(ow, halfArray.m_data, (halfArray.m_iCapacityState & 0x3fffffff) * 4);
         }
-        halfArray.data = 0;
-        halfArray.cap = (int)0x80000000;
+        halfArray.m_data = 0;
+        halfArray.m_iCapacityState = (int)0x80000000;
     }
     {
         CharacterBufferState* ar = FUN_00c85750();
         void* ow = ar->owner;
-        zeroArray.size = 0;
-        if (!(zeroArray.cap & (int)0x80000000))
+        zeroArray.m_iElementCount = 0;
+        if (!(zeroArray.m_iCapacityState & (int)0x80000000))
         {
             void** ovt = *(void***)ow;
-            ((void(__thiscall*)(void*, void*, int))ovt[4])(ow, zeroArray.data, (zeroArray.cap & 0x3fffffff) * 4);
+            ((void(__thiscall*)(void*, void*, int))ovt[4])(ow, zeroArray.m_data, (zeroArray.m_iCapacityState & 0x3fffffff) * 4);
         }
-        zeroArray.data = 0;
-        zeroArray.cap = (int)0x80000000;
+        zeroArray.m_data = 0;
+        zeroArray.m_iCapacityState = (int)0x80000000;
     }
 }
 // @fnv 0x00de6730
@@ -492,9 +469,9 @@ void Cls::FUN_00de6730(Input* a0, Renderer* a1, int a2, int a3)
 
     ((SubC0*)&unkc0)->FUN_00e10a10(a1);
     FUN_00de47e0(a0, &geometry.tD0, &geometry.t110);
-    Obj50* object50 = (Obj50*)(&unk50);
-    object50->FUN_00c7f640(&geometry.tD0, &srcHome->body.rows50[3]);
-    ((Obj50*)(&unk40))->FUN_00c7f640(&geometry.t110, &srcHome->body.rows10[3]);
+    Vec4* object50 = (Vec4*)(&unk50);
+    object50->FUN_00c7f640((const Buf40*)&geometry.tD0, &srcHome->body.rows50[3]);
+    ((Vec4*)(&unk40))->FUN_00c7f640((const Buf40*)&geometry.t110, &srcHome->body.rows10[3]);
     FUN_00de44c0(a2, a3);
 
     SourceView* src = &srcHome->body;
@@ -513,7 +490,7 @@ void Cls::FUN_00de6730(Input* a0, Renderer* a1, int a2, int a3)
     ((Cls*)arcs.objectD0)->FUN_00de5370(srcHome->body.u10c, prod3, (int)self18, &geometry.v80, object50);
     Cls* object280 = (Cls*)&unk280;
     float n = f14 * f1c;
-    geometry.scaleVector.q = _mm_set1_ps(n);
+    geometry.scaleVector = _mm_set1_ps(n);
     ((Cls*)object280)->SetFromVectors(&geometry.v60, &geometry.out70, object50, &geometry.scaleVector);
     arcs.object160 = (Cls*)&unk160;
     float scale = f1c * f10;
@@ -521,7 +498,7 @@ void Cls::FUN_00de6730(Input* a0, Renderer* a1, int a2, int a3)
     ((Cls*)arcs.object160)
         ->FUN_00de5370((float)(DAT_01030f38 - fabs(src->angle120)), scale, p18, &geometry.v60, object50);
     float prod6 = f1c * f10;
-    _mm_store_ps((float*)&geometry.v60.v, _mm_xor_ps(_mm_load_ps((float*)&geometry.v60.v), _mm_load_ps(&DAT_010c44d0)));
+    _mm_store_ps((float*)&geometry.v60, _mm_xor_ps(_mm_load_ps((float*)&geometry.v60), _mm_load_ps(&DAT_010c44d0)));
     ((Cls*)(&unk1f0))->FUN_00de5370((float)(DAT_01030f38 - fabs(savedAngle)), prod6, p18, &geometry.v60, object50);
     drawGroups(this, a1, a2, a3, arcs.objectD0, arcs.object160, object280);
 }

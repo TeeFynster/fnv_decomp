@@ -2,11 +2,7 @@
 // src/havok/physics/collide/agent3/machine/1n/hkpagent1nmachineprocess.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent3/machine/1n/hkpagent1nmachineprocess.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct Pair
-{
-    int a;
-    int b;
-};
+#include "../../../../../../../include/Pair.h"
 
 struct Out
 {
@@ -377,14 +373,9 @@ void d4970_caller(void)
 }
 
 extern "C" void _ReadWriteBarrier();
-struct DaPair
-{
-    void* a;
-    void* b;
-};
 struct DaSub
 {
-    DaPair pair;
+    Pair pair;
     void* unk08;
 };
 struct DaShape
@@ -421,7 +412,7 @@ struct DaSource
 };
 struct DaDest
 {
-    DaPair pair;
+    Pair pair;
     void* unk08;
     DaSub* unk0c;
 };
@@ -464,8 +455,8 @@ static __declspec(noinline) void FUN_00da49b0(DaDest* dest, DaSource* source, vo
     result->unk04 = node;
     result->unk10 = source->unk10;
     result->unk0c = source->unk0c;
-    void* b = source->unk00->pair.b;
-    void* a = source->unk00->pair.a;
+    int b = source->unk00->pair.b;
+    int a = source->unk00->pair.a;
     dest->pair.a = a;
     dest->pair.b = b;
     dest->unk0c = source->unk00;

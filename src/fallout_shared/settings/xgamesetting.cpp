@@ -1,6 +1,9 @@
 // fallout_shared/settings/xgamesetting.cpp: GameSettingCollection, StrArr (9 functions)
 
 #include "xgamesetting_decls.h"
+#include "../../../include/GameSettingCollection.h"
+#include "../../../include/NiTPrimitiveArray.h"
+#include "../../../include/StrArr.h"
 
 // Reads a DATA chunk from the current TESFile and stores its payload into the setting according to the setting's type.
 // @fnv 0x004f8860
@@ -54,31 +57,21 @@ bool GameSettingCollection::Close()
     return true;
 }
 
-struct S_0060ba10
-{
-    char pad[0xa];
-    unsigned short s;
-    void FUN_0060bd90(unsigned short, int);
-    void FUN_0096a610(int a);
-};
 // @fnv 0x0096a610
-void S_0060ba10::FUN_0096a610(int a)
+void StrArr::AddFirstEmpty(char*& element)
 {
-    FUN_0060bd90(s, a);
+    SetAtGrow(m_usSize, element);
 }
 
-struct FUN_004f8980_shell
-{
-    virtual bool __thiscall FUN_004f8980(bool);
-};
-
 // @fnv 0x004f8980
-bool __thiscall FUN_004f8980_shell::FUN_004f8980(bool)
+bool GameSettingCollection::Open(bool)
 {
-    return *(int*)((char*)this + 0x108) != 0;
+    return pFile != 0;
 }
 
 void __cdecl _Deallocate(void*);
+// Retained: the shared setting-collection headers do not declare the destruction
+// helpers at 0x00404b40/0x00404b70 needed to compile this matching body.
 struct S00404b40
 {
     void FUN_00404b70();
@@ -94,23 +87,21 @@ void* S00404b40::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-struct NiTPrimitiveArray_unsigned_int_
-{
-    unsigned int AddFirstEmpty(unsigned int const&);
-};
 char* _FUN_00a7d330(char const*);
 char* __cdecl FUN_00a7d510(char const*, unsigned int);
+// Retained: SettingCollectionMap and GameSettingCollection do not yet declare
+// the viewer-string helpers at 0x00404fd0 and 0x004f8800, respectively.
 struct Base00404fd0
 {
-    unsigned int FUN_00404fd0(NiTPrimitiveArray_unsigned_int_*);
+    unsigned int FUN_00404fd0(NiTPrimitiveArray<unsigned int>*);
 };
 struct Holder004f8800 : Base00404fd0
 {
-    unsigned int AddGameSettingsStrings(NiTPrimitiveArray_unsigned_int_*);
+    unsigned int AddGameSettingsStrings(NiTPrimitiveArray<unsigned int>*);
 };
 // Adds "GameSettings" and "Total GameSettings" strings to apStrings and returns the count from FUN_00404fd0.
 // @fnv 0x004f8800
-unsigned int Holder004f8800::AddGameSettingsStrings(NiTPrimitiveArray_unsigned_int_* apStrings)
+unsigned int Holder004f8800::AddGameSettingsStrings(NiTPrimitiveArray<unsigned int>* apStrings)
 {
     unsigned int I;
     apStrings->AddFirstEmpty((unsigned int)_FUN_00a7d330("GameSettings"));
@@ -119,17 +110,6 @@ unsigned int Holder004f8800::AddGameSettingsStrings(NiTPrimitiveArray_unsigned_i
     return I;
 }
 
-struct StrArr
-{
-    unsigned char _pad0[8];
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short _pad1;
-    unsigned short m_usGrowBy;
-    void SetAt(unsigned int, char*&);
-    void FUN_00c4c920(unsigned int);
-    unsigned int FUN_00c4c8d0(char*&);
-};
 struct Pad12
 {
     int a;
@@ -138,7 +118,7 @@ struct Pad12
 };
 // Appends element to the array, growing it by m_usGrowBy if full, and returns the index it was stored at.
 // @fnv 0x00c4c8d0
-unsigned int StrArr::FUN_00c4c8d0(char*& element)
+unsigned int StrArr::Add(char*& element)
 {
     Pad12 pad;
     {

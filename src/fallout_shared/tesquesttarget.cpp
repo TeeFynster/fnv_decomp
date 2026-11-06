@@ -47,7 +47,7 @@ void QuestStage::Load(TESFile* file)
 TESObjectREFR* RegionObjectEntry::GetReference(bool resolveDeleted)
 {
     TESObjectREFR* reference = m_pReference;
-    if (reference && reference->IsDeleted() && resolveDeleted)
+    if (reference && reference->TESForm::IsDeleted() && resolveDeleted)
     {
         TESObjectREFR* replacement = reference->GetExtraData()->GetReplacementReference();
         if (replacement)
@@ -56,23 +56,11 @@ TESObjectREFR* RegionObjectEntry::GetReference(bool resolveDeleted)
     return reference;
 }
 
-struct CondS
-{
-    void* pHead;
-    void* pTail;
-    CondS();
-    ~CondS();
-};
-struct PathingPath
-{
-    char _pad[0x10];
-    PathingPath();
-};
-
+#include "../../include/PathingPath.h"
 struct FUN_0060ff70
 {
     unsigned char cFlags;
-    CondS m_kInfoConditions;
+    PerkEntryConditionSet m_kInfoConditions;
     void* m_pReference;
     PathingPath m_auiData;
     FUN_0060ff70();
@@ -85,12 +73,6 @@ FUN_0060ff70::FUN_0060ff70()
     cFlags = 0;
 }
 
-struct FUN_006808b0
-{
-    void* pHead;
-    void* pTail;
-    ~FUN_006808b0();
-};
 struct TeleportPathHelper
 {
     char _pad[0x10];
@@ -99,7 +81,7 @@ struct TeleportPathHelper
 struct FUN_0060ffe0
 {
     unsigned char cFlags;
-    FUN_006808b0 mCond;
+    PerkEntryConditionSet mCond;
     void* m_pReference;
     TeleportPathHelper mPath;
     ~FUN_0060ffe0();

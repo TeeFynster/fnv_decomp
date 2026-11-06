@@ -1,29 +1,33 @@
-// gamebryo2.2/corelibs/nianimation/nibsplinebasisdata.cpp: NiBSplineBasisData, SplineOwner (10 functions)
+// gamebryo2.2/corelibs/nianimation/nibsplinebasisdata.cpp: NiBSplineBasisData (10 functions)
 
-#include "nibsplinebasisdata_decls.h"
+#include "../../../../include/NiBSplineBasisData.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiStream.h"
+
+template <class T> inline void NiBinaryStream::ReadScalar(T& value)
+{
+    unsigned int componentSize = sizeof(T);
+    unsigned int bytesRead = m_pfnRead(this, &value, sizeof(T), &componentSize, 1);
+    m_uiAbsoluteCurrentPos += bytesRead;
+}
 
 // Calls the base NiObject::LoadBinary, then reads a scalar from the stream into the basis data's field.
 // @fnv 0x00a52c10
 void NiBSplineBasisData::LoadBinary(NiStream& stream)
 {
     NiObject::LoadBinary(stream);
-    stream.m_pUnderlyingStream->ReadScalar(m_kBSplineBasis.m_iNumControlPoints);
+    stream.m_pkIstr->ReadScalar(m_kBSplineBasis.m_iNumControlPoints);
 }
 
-struct FUN_00a52bb0_shell : public NiBSplineBasisData
-{
-    bool FUN_00a52bb0(NiObject*);
-};
-
-bool __stdcall IsSameAs(NiObject* pkObject);
-
 // @fnv 0x00a52bb0
-bool FUN_00a52bb0_shell::FUN_00a52bb0(NiObject* pkObject)
+bool __fastcall IsBSplineBasisDataEqual(NiBSplineBasisData* pkThis, void*, NiObject* pkObject)
 {
-    if (!IsSameAs(pkObject))
+    if (!pkThis->NiObject::IsSameAs(pkObject))
         return false;
 
-    return *(int*)((char*)pkObject + 8) == *(int*)((char*)this + 8);
+    return static_cast<NiBSplineBasisData*>(pkObject)->m_kBSplineBasis.m_iNumControlPoints ==
+           pkThis->m_kBSplineBasis.m_iNumControlPoints;
 }
 
 extern int DAT_01099f24;
@@ -53,8 +57,8 @@ GlobalObjectO2_00a7b610* FUN_00a52af0()
     return &g_011f403c;
 }
 
+class ActorCombatGroup;
 namespace fnv_00a52c90 {
-struct ActorCombatGroup;
 extern int g_011f403c;
 void __stdcall AppendCameraPathEntries(void*);
 ActorCombatGroup* __cdecl FUN_00a7d330(int);
@@ -119,134 +123,56 @@ FUN_00a51ab0_cls* FUN_00a51ab0_cls::FUN_00a51ab0(int a1, int a2, int a3)
     return this;
 }
 
-extern float DAT_01012054;
 void* __cdecl FUN_00aa13e0(unsigned int uiSize);
 
-class SplineBase
+inline void* operator new(unsigned int, void* pMemory) throw()
 {
-  public:
-    SplineBase() throw();
-    virtual ~SplineBase() throw();
-    unsigned int unk04;
-};
+    return pMemory;
+}
 
-struct SplineBlock
+// Construct in separately allocated storage so constructor failure has no delete cleanup.
+inline NiBSplineBasisData* AllocateBSplineBasisData()
 {
-    unsigned int m_00;
-    unsigned int m_04;
-    unsigned int m_08;
-    unsigned int m_0c;
-    unsigned int m_10;
-    float m_14;
-    unsigned int m_18;
-    unsigned int m_1c;
-};
-
-class SplineObj : public SplineBase
-{
-  public:
-    SplineObj()
+    void* pMemory = FUN_00aa13e0(sizeof(NiBSplineBasisData));
+    if (pMemory)
     {
-        *(volatile float*)&m_08.m_14 = -1.0f;
-        m_08.m_00 = 0;
-        m_08.m_18 = 0;
-        m_08.m_1c = 3;
+        NiBSplineBasisData* pResult = ::new (pMemory) NiBSplineBasisData;
+        *(volatile float*)&pResult->m_kBSplineBasis.m_fLastTime = -1.0f;
+        pResult->m_kBSplineBasis.m_iNumControlPoints = 0;
+        pResult->m_kBSplineBasis.m_iMinControlPoint = 0;
+        pResult->m_kBSplineBasis.m_iMaxControlPoint = 3;
+        return pResult;
     }
-    virtual ~SplineObj() throw();
-    static void* operator new(unsigned int n) throw()
-    {
-        return FUN_00aa13e0(n);
-    }
-    SplineBlock m_08;
-};
-
-struct SplineOwner
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    SplineBlock m_08;
-    void CreateVertexBufferSet(SplineObj* pObj, unsigned char flags);
-    SplineObj* CreateSplineObj(unsigned char flags);
-};
+    return 0;
+}
 
 // @fnv 0x00a52b00
-SplineObj* SplineOwner::CreateSplineObj(unsigned char flags)
+NiBSplineBasisData* __fastcall CloneBSplineBasisData(NiBSplineBasisData* pkThis, void*, CloningProcess& cloning)
 {
-    SplineObj* pResult = new SplineObj;
-    CreateVertexBufferSet(pResult, flags);
-    pResult->m_08 = m_08;
+    NiBSplineBasisData* pResult = AllocateBSplineBasisData();
+    pkThis->CreateVertexBufferSet(pResult, cloning);
+    pResult->m_kBSplineBasis = pkThis->m_kBSplineBasis;
     return pResult;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int uiSize);
-
-class NiSplineBase
-{
-  public:
-    NiSplineBase();
-    virtual ~NiSplineBase();
-    static void* operator new(unsigned int uiSize)
-    {
-        return FUN_00aa13e0(uiSize);
-    }
-    static void operator delete(void*)
-    {}
-    unsigned int m_uiRefCount;
-};
-
-template <class T, int Degree> class NiBSplineBasisT
-{
-  public:
-    NiBSplineBasisT() : m_iNumControlPoints(0), m_fLastTime(-1.0f), m_iMinControlPoint(0), m_iMaxControlPoint(3)
-    {}
-    int m_iNumControlPoints;
-    T m_afWeights[Degree + 1];
-    T m_fLastTime;
-    int m_iMinControlPoint;
-    int m_iMaxControlPoint;
-};
-
-class NiSplineImpl : public NiSplineBase
-{
-  public:
-    NiSplineImpl() throw()
-    {}
-    virtual ~NiSplineImpl();
-    NiBSplineBasisT<float, 3> m_kBasis;
-};
-
-// Allocates and constructs a NiSplineImpl via its operator new and returns the new object.
 // @fnv 0x00a52b60
-NiSplineImpl* CreateNiSplineImpl()
+NiBSplineBasisData* CreateNiBSplineBasisData()
 {
-    return new NiSplineImpl;
+    return AllocateBSplineBasisData();
 }
 
-class NiStreamSave : public NiStream
-{
-  public:
-    NiBinaryStream* m_pBackingStream;
-};
 template <class T> inline void WriteScalar(NiBinaryStream* pkOstr, const T& value)
 {
     unsigned int componentSize = sizeof(T);
     unsigned int bytesWritten = pkOstr->m_pfnWrite(pkOstr, &value, sizeof(T), &componentSize, 1);
-    pkOstr->m_uiStreamFlags += bytesWritten;
+    pkOstr->m_uiAbsoluteCurrentPos += bytesWritten;
 }
-class FUN_00a52c50_BasisData : public NiObject
-{
-  public:
-    BSplineBasis<float, 3> m_kBSplineBasis;
-    void SaveBinaryBase(NiStream& stream);
-    void FUN_00a52c50(NiStream& stream);
-};
-
 // Saves the base NiObject data and the BSplineBasis control point count to the given NiStream.
 // @fnv 0x00a52c50
-void FUN_00a52c50_BasisData::FUN_00a52c50(NiStream& stream)
+void __fastcall SaveBSplineBasisData(NiBSplineBasisData* pkThis, void*, NiStream& stream)
 {
-    SaveBinaryBase(stream);
-    WriteScalar(static_cast<NiStreamSave&>(stream).m_pBackingStream, m_kBSplineBasis.m_iNumControlPoints);
+    pkThis->NiObject::SaveBinary(stream);
+    WriteScalar(stream.m_pkOstr, pkThis->m_kBSplineBasis.m_iNumControlPoints);
 }
 
 extern int DAT_0109a2a4;

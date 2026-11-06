@@ -6,6 +6,12 @@
 // src/staging/blk_00560000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/NiTransform.h"
+#include "../../include/NiPoint3.h"
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#include "../../include/hkVector4.h"
+#include <string.h>
+#pragma intrinsic(memcpy)
 
 class LocalBlock20;
 class FUN_00577110_slot;
@@ -46,12 +52,6 @@ struct __declspec(align(16)) FUN_0056ded0
     unsigned char transformData[64];
     FUN_0056ded0();
 };
-struct NiTransform
-{
-    float rotation[9];
-    float translation[3];
-    float scale;
-};
 FUN_0056ded0& __cdecl FUN_0056df80(FUN_0056ded0& destination, const NiTransform& source);
 struct FUN_0056df20_Class
 {
@@ -66,42 +66,8 @@ void FUN_0056df20_Class::FUN_0056df20(const NiTransform& src)
     FUN_0056e050(&FUN_0056df80(local, src));
 }
 
-#include <xmmintrin.h>
-class hkVector4_56D
-{
-  public:
-    hkVector4_56D();
-    hkVector4_56D& operator=(const hkVector4_56D& kOther);
-    __m128 m_vComponents;
-};
+extern const NiMatrix3 g_kIdentity56D;
 
-class Point56D
-{
-  public:
-    Point56D();
-    Point56D operator+(const Point56D& kPt) const;
-    Point56D operator*(float fScalar) const;
-    float x, y, z;
-};
-
-class Matrix56D
-{
-  public:
-    bool operator==(const Matrix56D& kMat) const;
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
-};
-extern const Matrix56D g_kIdentity56D;
-
-class Transform56D
-{
-  public:
-    Transform56D();
-    Matrix56D m_kRotate;
-    Point56D m_kTranslate;
-    float m_fScale;
-};
 
 class Color56D
 {
@@ -133,7 +99,7 @@ class Shape56D
 class BoxShape56D : public Shape56D
 {
   public:
-    BoxShape56D(const hkVector4_56D& m_kPoint2);
+    BoxShape56D(const hkVector4& m_kPoint2);
 };
 
 class SphereShape56D : public Shape56D
@@ -146,10 +112,10 @@ class MotionInfo56D
 {
   public:
     MotionInfo56D();
-    hkVector4_56D m_kA;
-    hkVector4_56D m_kB;
-    hkVector4_56D m_kC;
-    hkVector4_56D m_kCubicCoefficient;
+    hkVector4 m_kA;
+    hkVector4 m_kB;
+    hkVector4 m_kC;
+    hkVector4 m_kCubicCoefficient;
 };
 
 class BoxBodyCinfo56D
@@ -165,8 +131,8 @@ class BoxBodyCinfo56D
     int unk14;
     int unk18;
     int unk1c;
-    hkVector4_56D m_kMin;
-    hkVector4_56D m_kMax;
+    hkVector4 m_kMin;
+    hkVector4 m_kMax;
 };
 
 class BodyCinfo56D
@@ -178,11 +144,11 @@ class BodyCinfo56D
     void* m_pvShape;
     MotionType56D m_kMotion;
     int unk0c;
-    hkVector4_56D m_kPathOffset;
-    hkVector4_56D m_kRotationMatrix;
-    hkVector4_56D m_kLinearVelocity;
-    hkVector4_56D m_kAngularVelocity;
-    hkVector4_56D m_kInertia;
+    hkVector4 m_kPathOffset;
+    hkVector4 m_kRotationMatrix;
+    hkVector4 m_kLinearVelocity;
+    hkVector4 m_kAngularVelocity;
+    hkVector4 m_kInertia;
 };
 
 class BoxBody56D
@@ -205,7 +171,7 @@ class Body56D
     static void* operator new(unsigned int uiSize);
     static void operator delete(void* pvMem, unsigned int);
     Body56D(BodyCinfo56D& kInfo);
-    void SetTransform(const Transform56D& kXform);
+    void SetTransform(const NiTransform& kXform);
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -275,11 +241,12 @@ class Loaded56D
     Holder56D m_kHolder;
 };
 
-class Bound56D
+// GetBound (0x0041fbe0) returns primitive data; GetExtents (0x00413fc0) returns its radii, unlike Bound's sphere layout.
+class PrimitiveCollisionSource
 {
   public:
     int GetType();
-    Point56D GetExtents();
+    NiPoint3 GetExtents();
 };
 
 class Layer56D
@@ -291,7 +258,7 @@ class Layer56D
 class ExtraList56D
 {
   public:
-    Bound56D* GetBound();
+    PrimitiveCollisionSource* GetBound();
     Layer56D* GetLayerData();
 };
 
@@ -307,7 +274,7 @@ class Middle56D
     World56D* GetWorld();
 };
 
-void __cdecl FUN_004a3e00(hkVector4_56D& kOut, const Point56D& kIn);
+void __cdecl FUN_004a3e00(hkVector4& kOut, const NiPoint3& kIn);
 float __cdecl FUN_004a3e90(float fValue);
 
 class Ref56D
@@ -438,11 +405,11 @@ class Ref56D
     virtual void v1e8();
     virtual void v1ec();
     virtual void v1f0();
-    virtual const Point56D* GetPos();
+    virtual const NiPoint3* GetPos();
     ExtraList56D* GetExtraData();
     Middle56D* GetMiddle();
     void SetScale(float fScale);
-    Matrix56D GetRotation();
+    NiMatrix3 GetRotation();
     void FUN_0056d7e0();
     unsigned int unk04;
     unsigned int unk08;
@@ -471,35 +438,37 @@ class Ref56D
     Loaded56D* m_pkLoaded;
 };
 
+// The shared SIMD union needs the same stack protection as the original vector storage.
+#pragma strict_gs_check(push, on)
 // @fnv 0x0056d7e0
 void Ref56D::FUN_0056d7e0()
 {
-    Bound56D* pkBound = GetExtraData()->GetBound();
+    PrimitiveCollisionSource* pkBound = GetExtraData()->GetBound();
     World56D* pkWorld = GetMiddle() ? GetMiddle()->GetWorld() : 0;
     if (pkWorld)
     {
         Shape56D* pkShape = 0;
         MotionInfo56D kUnused;
-        hkVector4_56D m_kPoint2;
+        hkVector4 m_kPoint2;
         SetScale(1.0f);
         Get3D()->SetScale(1.0f);
         Color56D kColor(0.0f, 0, 0);
         Get3D()->SetColor(kColor);
-        Transform56D kXform;
-        kXform.m_kRotate = GetRotation();
-        kXform.m_kTranslate = *GetPos();
+        NiTransform kXform;
+        kXform.m_Rotate = GetRotation();
+        kXform.m_Translate = *GetPos();
         kXform.m_fScale = 1.0f;
         Layer56D* pkLayer = GetExtraData()->GetLayerData();
         unsigned int uiLayer = pkLayer ? pkLayer->GetLayer() : 0x16;
-        if (uiLayer != 0x17 && pkBound->GetType() == 1 && kXform.m_kRotate == g_kIdentity56D)
+        if (uiLayer != 0x17 && pkBound->GetType() == 1 && kXform.m_Rotate == g_kIdentity56D)
         {
             BoxBodyCinfo56D kInfo;
-            hkVector4_56D kVec;
-            Point56D kPt;
-            kPt = pkBound->GetExtents() + kXform.m_kTranslate;
+            hkVector4 kVec;
+            NiPoint3 kPt;
+            kPt = pkBound->GetExtents() + kXform.m_Translate;
             FUN_004a3e00(kVec, kPt);
             kInfo.m_kMax = kVec;
-            kPt = pkBound->GetExtents() * -1.0f + kXform.m_kTranslate;
+            kPt = pkBound->GetExtents() * -1.0f + kXform.m_Translate;
             FUN_004a3e00(kVec, kPt);
             kInfo.m_kMin = kVec;
             kInfo.m_kMotion.Set(2);
@@ -536,17 +505,13 @@ void Ref56D::FUN_0056d7e0()
     }
 }
 
+#pragma strict_gs_check(pop)
+
 struct UpdateData264
 {
     float time;
     bool updateControllers, isMultiThreaded, flags6, flags7, flags8;
     UpdateData264(float, bool, bool);
-};
-struct Transform264
-{
-    float rotation[9];
-    float translation[3];
-    float scale;
 };
 struct HavokTransform264
 {
@@ -555,7 +520,7 @@ struct HavokTransform264
     HavokTransform264();
     void FUN_00577070();
 };
-void __cdecl FUN_0056df80(HavokTransform264*, const Transform264*);
+void __cdecl FUN_0056df80(HavokTransform264*, const NiTransform*);
 struct NativeA264
 {
     void FUN_00ca4120(const HavokTransform264&);
@@ -642,7 +607,7 @@ struct Scene264
     virtual void slot2c();
     virtual void slot2d();
     virtual void Update(UpdateData264&);
-    const Transform264& FUN_00461130();
+    const NiTransform& FUN_00461130();
 };
 Collision264* __cdecl FUN_0043b610(Scene264*);
 bool __cdecl FUN_0043b300(const void*, const void*);
@@ -658,10 +623,12 @@ void Owner264::FUN_00576d50(Scene264* scene)
         return;
     UpdateData264 update(0.0f, true, false);
     scene->Update(update);
-    Transform264 transform = scene->FUN_00461130();
+    // Preserve the original raw transform copy without invoking member copy constructors.
+    unsigned char transform[sizeof(NiTransform)];
+    memcpy(transform, &scene->FUN_00461130(), sizeof(transform));
     HavokTransform264 converted;
     converted.FUN_00577070();
-    FUN_0056df80(&converted, &transform);
+    FUN_0056df80(&converted, reinterpret_cast<const NiTransform*>(transform));
     Collision264* collision = FUN_0043b610(scene);
     World264* world = collision ? collision->FUN_006fa820() : 0;
     Shape264* shape = world ? world->FUN_004ae6a0() : 0;

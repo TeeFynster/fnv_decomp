@@ -2,6 +2,11 @@
 // src/fallout/ai/middlehighprocess_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/fallout/ai/middlehighprocess.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
+#include "layout_support.h"
+#include "../../../include/TESClass.h"
+// The process declarations must reuse the shared form base classes.
+#define FNV_BASEFORMCOMPONENT_H
+#define FNV_TESFORM_H
 #include "middlehighprocess_decls.h"
 bool IsValidSandboxProcedure(int aiProcedure);
 
@@ -124,8 +129,8 @@ void SearchFurnitureProcess::FUN_00922670(::Actor* actor, bool flag, ::TESObject
 {
     DAT_011e040c = flag;
     ::TESObjectCELL* a = actor->GetParentCell();
-    ::NiPoint3 p = *actor->GetPos();
-    FurniturePackage* f = reinterpret_cast<FurniturePackage*>(GetOneTimePackage());
+    ::NiPoint3 p = *static_cast<const ::TESObjectREFR*>(actor)->GetPos();
+    FurniturePackage* f = reinterpret_cast<FurniturePackage*>(static_cast<const ::BaseProcess*>(this)->GetOneTimePackage());  // virtual slot 0x9F (the const declaration)
     if (!f || !actor)
         return;
     FurnitureLocation* s = f->FUN_0055b980();
@@ -146,7 +151,7 @@ void SearchFurnitureProcess::FUN_00922670(::Actor* actor, bool flag, ::TESObject
     }
     if (target)
     {
-        ::NiPoint3* targetPosition = target->GetPos();
+        ::NiPoint3* targetPosition = static_cast<const ::TESObjectREFR*>(target)->GetPos();
         reinterpret_cast<FurnitureSearchManager*>(DAT_011c3f2c)
             ->FUN_0046f280(target->GetParentCell(), *targetPosition, i, *targetPosition, i, FUN_00922960, actor);
     }
@@ -195,26 +200,7 @@ void SearchFurnitureProcess::FUN_00922670(::Actor* actor, bool flag, ::TESObject
 
 }
 
-class TESClass
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-};
-
-template <> class BSSimpleList<TESClass*>
-{
-  public:
-    TESClass*& GetItem();
-    BSSimpleList<TESClass*>* GetNext();
-    void SetItem(TESClass*& item);
-    int GetSize();
-};
+#include "../../../include/BSSimpleList.h"
 
 struct Holder91b580
 {
@@ -252,7 +238,7 @@ void Holder91b580::FUN_0091b580()
     BSSimpleList<TESClass*>* pInner3 = 0;
     if (pOuter)
     {
-        int iCount2 = pOuter->GetSize();
+        int iCount2 = pOuter->ItemsInList();
         bool bSwapped3 = true;
         TESClass* itemA;
         TESClass* itemB;
@@ -264,7 +250,9 @@ void Holder91b580::FUN_0091b580()
             {
                 itemA = pOuter->GetItem();
                 itemB = pInner3->GetItem();
-                if (itemA->unk18 > itemB->unk18)
+                // Preserve the signed comparison of the word at the full-name component.
+                if (reinterpret_cast<const int*>(itemA)[sizeof(TESForm) / sizeof(int)] >
+                    reinterpret_cast<const int*>(itemB)[sizeof(TESForm) / sizeof(int)])
                 {
                     pOuter->SetItem(itemB);
                     pInner3->SetItem(itemA);

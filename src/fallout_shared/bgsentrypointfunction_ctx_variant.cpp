@@ -2,30 +2,17 @@
 // bgsentrypointfunction_ctx_variant.cpp: context variant of src/fallout_shared/bgsentrypointfunction.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
 #include "BGSEntryPointFunction.h"
+// Retain the support types already supplied by this unit's legacy headers.
+#include "../fallout_shared/layout_support.h"
+#pragma include_alias("TESForm.h", "../../include/TESForm.h")
+#pragma include_alias("BaseFormComponent.h", "../fallout_shared/BaseFormComponent.h")
+#pragma include_alias("BSSimpleList.h", "../fallout_shared/layout_support.h")
+#include "../../include/Script.h"
+#include "../../include/ScriptVariableInfo.h"
 
 extern "C" void* __cdecl memset(void* dest, int c, size_t count);
 
-class ScriptVariableInfo
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    BSStringT<char> name;
-
-    ScriptVariableInfo();
-};
-
 extern ScriptVariableInfo* DAT_011cb0fc;
-
-class FUN_005e2a20_shell
-{
-  public:
-    void FUN_005e2a20(TESFile* file);
-};
 
 class FUN_00500910
 {
@@ -35,30 +22,6 @@ class FUN_00500910
     unsigned int variableOrIndex;
 
     FUN_00500910();
-};
-
-class ScriptHeader
-{
-  public:
-    void ByteSwap();
-};
-
-class FUN_005d43e0_shell
-{
-  public:
-    void* FUN_005d43e0();
-};
-
-class FUN_005d43c0_
-{
-  public:
-    void* FUN_005d43c0();
-};
-
-class FUN_005aae70_shell
-{
-  public:
-    void FUN_005aae70(unsigned int, char*);
 };
 
 class FUN_00472840_impl
@@ -71,12 +34,6 @@ class FUN_005e6c60_shell
 {
   public:
     void FUN_005e6c60(void* data);
-};
-
-class Script : public TESForm
-{
-  public:
-    ScriptHeader* GetHeader();
 };
 
 class ActivateChoice : public BGSEntryPointFunctionDataActivateChoice
@@ -104,9 +61,8 @@ bool ActivateChoice::FUN_005e6ee0(TESFile* file)
         if (file->GetChunkID() == 0x44534c53)
         {
             DAT_011cb0fc = new ScriptVariableInfo();
-            reinterpret_cast<FUN_005e2a20_shell*>(DAT_011cb0fc)->FUN_005e2a20(file);
-            reinterpret_cast<BSSimpleList<Actor*>*>(reinterpret_cast<FUN_005d43e0_shell*>(formStorage)->FUN_005d43e0())
-                ->AddTail(reinterpret_cast<Actor*&>(DAT_011cb0fc));
+            DAT_011cb0fc->Load(file);
+            (&resultScript)->GetVariableList()->AddTail(DAT_011cb0fc);
         }
         else if (DAT_011cb0fc)
         {
@@ -117,10 +73,10 @@ bool ActivateChoice::FUN_005e6ee0(TESFile* file)
         break;
 
     case 0x52484353:  // 'SCHR'
-        file->GetChunkData(reinterpret_cast<Script*>(formStorage)->GetHeader(), 0);
+        file->GetChunkData((&resultScript)->GetHeader(), 0);
         if (file->IsEndianConversionRequired())
         {
-            reinterpret_cast<Script*>(formStorage)->GetHeader()->ByteSwap();
+            (&resultScript)->GetHeader()->Endian();
         }
         break;
 
@@ -129,23 +85,23 @@ bool ActivateChoice::FUN_005e6ee0(TESFile* file)
         scdaData = _alloca(scdaSize4);
         memset(scdaData, 0, scdaSize4);
         file->GetChunkData(scdaData, 0);
-        reinterpret_cast<FUN_005aae70_shell*>(formStorage)->FUN_005aae70(scdaSize4, reinterpret_cast<char*>(scdaData));
+        (&resultScript)->SetScriptData(scdaSize4, reinterpret_cast<char*>(scdaData));
         break;
 
     case 0x4f524353:  // 'SCRO'
         scroObjVal = new FUN_00500910();
         file->GetChunkData(&scroRefID2);
         scroObjVal->formID = scroRefID2;
-        reinterpret_cast<BSSimpleList<Actor*>*>(reinterpret_cast<FUN_005d43c0_*>(formStorage)->FUN_005d43c0())
-            ->AddTail(reinterpret_cast<Actor*&>(scroObjVal));
+        (&resultScript)->GetReferencedObjectList()
+            ->AddTail(reinterpret_cast<ScriptReferencedObject*&>(scroObjVal));
         break;
 
     case 0x56524353:  // 'SCRV'
         _scrvObj = new FUN_00500910();
         file->GetChunkData(&scrvRefID3);
         _scrvObj->variableOrIndex = scrvRefID3;
-        reinterpret_cast<BSSimpleList<Actor*>*>(reinterpret_cast<FUN_005d43c0_*>(formStorage)->FUN_005d43c0())
-            ->AddTail(reinterpret_cast<Actor*&>(_scrvObj));
+        (&resultScript)->GetReferencedObjectList()
+            ->AddTail(reinterpret_cast<ScriptReferencedObject*&>(_scrvObj));
         break;
 
     case 0x32465045:  // 'EPF2'

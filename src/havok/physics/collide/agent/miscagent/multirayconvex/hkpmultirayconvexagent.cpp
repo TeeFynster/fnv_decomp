@@ -2,6 +2,8 @@
 // src/havok/physics/collide/agent/miscagent/multirayconvex/hkpmultirayconvexagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/miscagent/multirayconvex/hkpmultirayconvexagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkMemoryRouter.h"
+
 void FUN_00d374f0(int a, int b, int c, int d);
 
 struct FUN_00d37690_Class
@@ -142,21 +144,7 @@ void FUN_00d378a0(int aiArg1, int aiArg2, int aiArg3, int aiId)
 
 struct D376B0Allocator;
 
-struct D376B0MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    D376B0Allocator* m_pStreamAllocator;
-
-    D376B0Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" D376B0MemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 void __cdecl FUN_00c908c0(D376B0Allocator* alloc, void* array, int numElements, int sizeElem);
 
 class D376B0ReferencedObject
@@ -188,7 +176,7 @@ struct D376B0IndexArray
 
     void SetSizeAndGrow(int n)
     {
-        D376B0Allocator& alloc = FUN_00c85750().heap();
+        D376B0Allocator& alloc = *(D376B0Allocator*)(&FUN_00c85750().heap());
         const int cap = getCapacity();
         if (cap < n)
         {
@@ -258,22 +246,13 @@ struct S_00d37740_Interface
     virtual S_00d376b0_Class* FUN_00d37740_Method(int a) = 0;
 };
 
-struct S_00d37740_Object
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00d37740_Interface* unk10;
-};
-
-S_00d37740_Object* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 
 // @fnv 0x00d37740
 void FUN_00d37740(int aiArg1, int aiArg2, int aiArg3, int aiArg4)
 {
-    S_00d37740_Object* obj = FUN_00c85750();
-    S_00d376b0_Class* result = obj->unk10->FUN_00d37740_Method(0x20);
+    hkMemoryRouter* obj = FUN_00c85750();
+    S_00d376b0_Class* result = ((S_00d37740_Interface*)(&obj->heap()))->FUN_00d37740_Method(0x20);
 
     result->unk04 = 0x20;
     result->FUN_00d376b0(aiArg1, aiArg2, aiArg3, aiArg4);
@@ -292,16 +271,7 @@ struct Allocator
     virtual void Free(void* p);
 };
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    Allocator* m_pAllocator;
-};
-
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 
 struct SpawnedObject
 {
@@ -319,8 +289,8 @@ struct FUN_00d376b0_cls
 // @fnv 0x00d37780
 void* FUN_00d37780_impl(int aiArg1, int aiArg2, int aiArg3, int aiArg4)
 {
-    AllocHolder* pAllocHolder = FUN_00c85750();
-    Allocator* alloc = pAllocHolder->m_pAllocator;
+    hkMemoryRouter* pAllocHolder = FUN_00c85750();
+    Allocator* alloc = (Allocator*)(&pAllocHolder->heap());
     SpawnedObject* obj = (SpawnedObject*)alloc->Alloc(0x20);
     obj->m_iElementCount = 0x20;
     ((FUN_00d376b0_cls*)obj)->FUN_00d376b0(aiArg2, aiArg1, aiArg3, aiArg4);

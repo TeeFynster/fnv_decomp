@@ -1,6 +1,27 @@
-// fallout/interface/menus/surgerymenu.cpp: SurgeryMenu, AnimOwner, MenuX, PainMenu and more (31 functions)
+// fallout/interface/menus/surgerymenu.cpp: SurgeryMenu, AnimOwner, SurgeryFrameOperations, PainMenu and more (31 functions)
 
+#include "../../../../include/NiControllerManager.h"
+#include "../../../../include/NiControllerSequence.h"
+#include "../../../../include/NiNode.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/NiTimeController.h"
+#include "../../../../include/NiUpdateData.h"
+#include "../../../../include/ActorValueOwner.h"
+#include "../../../../include/InterfaceManager.h"
+#include "../../../../include/NiPick.h"
+#include "../../../../include/SurgeryMenu.h"
 #include "surgerymenu_decls.h"
+#include "../../../../include/Tile.h"
+#include "../../../../include/BGSTextureSet.h"
+#include "../../../../include/NiFixedString.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/BSSoundHandle.h"
+#include "../../../../include/BSAudio.h"
+#include "../../../../include/NiAdditionalGeometryData.h"
+#include "../../../../include/NiGeometry.h"
+#include "../../../../include/NiPoint2.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/GO.h"
 // @fnv 0x007e5890
 void SurgeryMenu::UpdatePerkEntries()
 {
@@ -143,160 +164,6 @@ int PointInPolygon(double pgon[][2], int numverts, double point[2])
     return inside_flag;
 }
 
-struct GO
-{
-    operator unsigned int() const;
-    void operator=(void*);
-};
-
-template <class T> struct NiPointer : public GO
-{
-    using GO::operator=;
-};
-
-struct NiAdditionalGeometryData
-{
-    static void* __cdecl GetShadowSceneNodeForIndex(int);
-};
-
-struct NiAVObject
-{
-    virtual void v00()
-    {}
-    virtual void v01()
-    {}
-    virtual void v02()
-    {}
-    virtual void v03()
-    {}
-    virtual void v04()
-    {}
-    virtual void v05()
-    {}
-    virtual void v06()
-    {}
-    virtual void v07()
-    {}
-    virtual void v08()
-    {}
-    virtual void v09()
-    {}
-    virtual void v10()
-    {}
-    virtual void v11()
-    {}
-    virtual void v12()
-    {}
-    virtual void v13()
-    {}
-    virtual void v14()
-    {}
-    virtual void v15()
-    {}
-    virtual void v16()
-    {}
-    virtual void v17()
-    {}
-    virtual void v18()
-    {}
-    virtual void v19()
-    {}
-    virtual void v20()
-    {}
-    virtual void v21()
-    {}
-    virtual void v22()
-    {}
-    virtual void v23()
-    {}
-    virtual void v24()
-    {}
-    virtual void v25()
-    {}
-    virtual void v26()
-    {}
-    virtual void v27()
-    {}
-    virtual void v28()
-    {}
-    virtual void v29()
-    {}
-    virtual void v30()
-    {}
-    virtual void v31()
-    {}
-    virtual void v32()
-    {}
-    virtual void v33()
-    {}
-    virtual void v34()
-    {}
-    virtual void v35()
-    {}
-    virtual void v36()
-    {}
-    virtual void v37()
-    {}
-    virtual void v38()
-    {}
-    virtual void v39()
-    {}
-    virtual void v40()
-    {}
-    virtual void v41()
-    {}
-    virtual void v42()
-    {}
-    virtual void v43()
-    {}
-    virtual void v44()
-    {}
-    virtual void v45()
-    {}
-    virtual void v46()
-    {}
-    virtual void v47()
-    {}
-    virtual void v48()
-    {}
-    virtual void v49()
-    {}
-    virtual void v50()
-    {}
-    virtual void v51()
-    {}
-    virtual void v52()
-    {}
-    virtual void v53()
-    {}
-    virtual void v54()
-    {}
-    virtual void v55()
-    {}
-    virtual void v56()
-    {}
-    virtual void v57()
-    {}
-    virtual void v58(unsigned int)
-    {}
-
-    void RemoveProperty(unsigned int);
-    void UpdateSceneObject();
-};
-
-struct NiNode : public NiAVObject
-{
-};
-
-struct FUN_00b5ddb0_self : public NiAVObject
-{
-    void FUN_00b5d180();
-};
-
-struct NiGeometry : public FUN_00b5ddb0_self
-{
-};
-
 struct FUN_00950c20_self
 {
     int FUN_00950c20(int);
@@ -304,22 +171,22 @@ struct FUN_00950c20_self
 
 int __cdecl FUN_005d9660(void);
 
-NiPointer<NiNode> g_011dadb4;
-NiPointer<NiNode> g_011dade8;
-NiPointer<NiNode> g_011dae5c;
+GO g_011dadb4;
+GO g_011dade8;
+GO g_011dae5c;
 FUN_00950c20_self* _g_thePlayer;
 
 // @fnv 0x007e5170
 void FUN_007e5170()
 {
-    NiGeometry* pSourceGeometry = static_cast<NiGeometry*>(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1));
-    pSourceGeometry->v58(g_011dade8.operator unsigned int());
+    ShadowSceneNode* pSourceGeometry = static_cast<ShadowSceneNode*>(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1));
+    pSourceGeometry->RemoveObject(reinterpret_cast<NiAVObject*>(g_011dade8.operator unsigned int()));
 
-    NiGeometry* pScar2 = static_cast<NiGeometry*>(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(3));
-    pScar2->v58(g_011dae5c.operator unsigned int());
+    ShadowSceneNode* pScar2 = static_cast<ShadowSceneNode*>(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(3));
+    pScar2->RemoveObject(reinterpret_cast<NiAVObject*>(g_011dae5c.operator unsigned int()));
 
-    static_cast<NiGeometry*>(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1))->FUN_00b5d180();
-    static_cast<NiGeometry*>(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(3))->FUN_00b5d180();
+    static_cast<ShadowSceneNode*>(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1))->FUN_00b5d180();
+    static_cast<ShadowSceneNode*>(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(3))->FUN_00b5d180();
 
     _g_thePlayer->FUN_00950c20(0);
 
@@ -465,87 +332,13 @@ void FUN_007e5780_shell::ProcessNodeChain()
     res08 = ((Helper_011dada4*)DAT_011dada4)->GetTierFromPercent(((Player_shell*)_g_thePlayer)->sub.v8(), pArg4);
 }
 
-struct NiFixedStringS
-{
-    NiFixedStringS(const char* s);
-    ~NiFixedStringS();
-    int str;
-};
-struct NiUpdateDataS
-{
-    NiUpdateDataS(float t, bool a, bool b);
-    float time;
-    bool b1;
-    bool b2;
-    int flags;
-};
-struct NiRTTIS
-{
-    int name;
-    int base;
-};
-struct NiControllerSequenceS
-{
-    void Update(float t, bool b);
-};
-struct NiTimeControllerS
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void Update(NiUpdateDataS& data);
-    NiTimeControllerS* GetNext() const;
-};
-struct NiControllerManagerS : NiTimeControllerS
-{
-    NiControllerSequenceS* FindSequenceByName(const NiFixedStringS& name);
-};
-struct NiNodeS
-{
-    NiTimeControllerS* GetControllers() const;
-    void Update(NiUpdateDataS& data);
-};
 struct TimeGlobalS
 {
     float GetMovementDelta();
 };
 extern TimeGlobalS g_timeGlobal;
-extern NiRTTIS DAT_011f36bc;
-void* NiDynamicCastS(const NiRTTIS* rtti, NiTimeControllerS* obj);
+extern NiRTTI DAT_011f36bc;
+void* NiDynamicCast(const NiRTTI* rtti, NiTimeController* obj);
 
 struct AnimOwner
 {
@@ -605,7 +398,7 @@ struct AnimOwner
     int unkD4;
     int unkD8;
     int unkDC;
-    NiNodeS* node;
+    NiNode* node;
     int unkE4;
     int unkE8;
     float time;
@@ -616,21 +409,21 @@ struct AnimOwner
 // @fnv 0x007e5a90
 void AnimOwner::UpdateAnimation()
 {
-    NiTimeControllerS* ctrl = node->GetControllers();
+    NiTimeController* ctrl = static_cast<NiTimeController*>(node->GetControllers());
     if (ctrl)
     {
-        NiControllerManagerS* mgr = (NiControllerManagerS*)ctrl;
-        NiControllerSequenceS* seq = 0;
+        NiControllerManager* mgr = (NiControllerManager*)ctrl;
+        NiControllerSequence* seq = 0;
         switch (direction)
         {
         case 1:
-            seq = mgr->FindSequenceByName(NiFixedStringS("Forward"));
+            seq = mgr->FindSequenceByName(NiFixedString("Forward"));
             break;
         case 2:
-            seq = mgr->FindSequenceByName(NiFixedStringS("Right"));
+            seq = mgr->FindSequenceByName(NiFixedString("Right"));
             break;
         case 3:
-            seq = mgr->FindSequenceByName(NiFixedStringS("Left"));
+            seq = mgr->FindSequenceByName(NiFixedString("Left"));
             break;
         }
         time += g_timeGlobal.GetMovementDelta();
@@ -639,54 +432,23 @@ void AnimOwner::UpdateAnimation()
             seq->Update(time, true);
             for (; ctrl; ctrl = ctrl->GetNext())
             {
-                void* match = NiDynamicCastS(&DAT_011f36bc, ctrl);
+                void* match = NiDynamicCast(&DAT_011f36bc, ctrl);
                 if (match)
                 {
-                    NiUpdateDataS data(time, false, false);
+                    NiUpdateData data(time, false, false);
                     ctrl->Update(data);
                     break;
                 }
             }
         }
     }
-    NiUpdateDataS updateData(0.0f, false, false);
+    NiUpdateData updateData(0.0f, false, false);
     node->Update(updateData);
 }
-
-class Tile
-{
-  public:
-    void SetInt(int trait, int val);
-};
 
 int __cdecl FUN_007e1970();
 Tile* __cdecl FUN_00a09030(int);
 
-struct BSSoundHandleEx
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    BSSoundHandleEx();
-    ~BSSoundHandleEx();
-    bool Play(bool);
-    void Copy(const void*);
-};
-
-struct BSAudio
-{
-    static BSAudio* __cdecl GetSingleton();
-    BSSoundHandleEx GetSoundHandleByEditorID(const char* name, unsigned int flags);
-};
-
-struct SndX
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    void Stop();
-    void Release();
-};
 
 struct SurgeryMenuType
 {
@@ -727,18 +489,13 @@ struct SurgeryMenuType
     int unk88;
     int unk8C;
     int unk90;
-    SndX sound94;
-    SndX soundA0;
+    BSSoundHandle sound94;
+    BSSoundHandle soundA0;
     void FUN_00a1d910();
 };
 
 void __cdecl RefreshEntryByID(int);
 
-class InterfaceManager
-{
-  public:
-    Tile* GetParent();
-};
 
 // Closes the surgery menu: plays the UISurgeryExit sound, sets tile traits, stops and releases the menu's two sounds, and updates the parent tile.
 // @fnv 0x007e1980
@@ -750,8 +507,8 @@ void CloseSurgeryMenu()
 
     if (DAT_011dada4)
     {
-        BSSoundHandleEx sound7;
-        sound7.Copy(&BSAudio::GetSingleton()->GetSoundHandleByEditorID("UISurgeryExit", 0x121));
+        BSSoundHandle sound7;
+        sound7 = reinterpret_cast<const BSSoundHandle&>(BSAudio::GetSingleton()->FUN_00ad7550("UISurgeryExit", 0x121));
         sound7.Play(false);
         pTile->SetInt(0x1772, 1);
         ((SurgeryMenuType*)DAT_011dada4)->FUN_00a1d910();
@@ -771,13 +528,6 @@ void CloseSurgeryMenu()
     ((SurgeryMenuType*)DAT_011dada4)->soundA0.Release();
 }
 
-struct UiTile
-{
-    void SetInt(int, int);
-    float Read(int);
-    void SetFloat(int, float, bool);
-    void SetText(int, const char*, bool);
-};
 struct InputX
 {
     int Key(int, int);
@@ -787,14 +537,7 @@ struct OsX
     InputX* Controls();
 };
 extern OsX* g_osGlobals;
-struct InterfaceX
-{
-    bool Mode();
-    int MouseX();
-    int MouseY();
-    UiTile* Root();
-};
-InterfaceX* GetInterfaceX();
+InterfaceManager* GetSurgeryInterfaceManager();
 bool FUN_004b71d0();
 bool IsMenu(int);
 int FUN_00a01860(const char*);
@@ -807,25 +550,6 @@ struct ClockX
 };
 extern ClockX clockX;
 extern int DAT_011dad9c;
-struct SoundX
-{
-    int id;
-    int unk04;
-    int unk08;
-    bool Playing();
-    void Stop();
-};
-struct ActorValuesX
-{
-    virtual void v0();
-    virtual void v4();
-    virtual int Current(int);
-    virtual void vC();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual int Maximum(int);
-};
 struct PlayerX
 {
     int unk00;
@@ -869,67 +593,23 @@ struct PlayerX
     int unk98;
     int unk9c;
     int unka0;
-    ActorValuesX values;
+    ActorValueOwner values;
 };
 extern PlayerX* playerX;
 int PrintText(char*, unsigned int, const char*, ...);
-struct MenuX
+// Method-only bridge for surgery operations absent from SurgeryMenu.h; all storage is the shared SurgeryMenu layout.
+struct SurgeryFrameOperations : SurgeryMenu
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    UiTile* tile44;
-    UiTile* tile48;
-    int unk4c;
-    int unk50;
-    UiTile* tile54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    float value74;
-    float value78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    char unk90;
-    bool dragging;
-    short unk92;
-    SoundX sound94;
-    SoundX sounda0;
-    float valueac;
-    unsigned int lastTime;
-
-    UiTile* GetTile();
     void Prepare();
     void Active(bool);
     void Drag();
     bool Hit();
     void Update();
-    void FUN_007e23c0();
+    void UpdateFrame();
 };
-// Updates the menu's top-menu flag, drag position, decay of valueac over time, sounds, and the value text from the player's actor value 16.
+// Updates the menu's top-menu flag, drag position, decay of unkAC over time, sounds, and the value text from the player's actor value 16.
 // @fnv 0x007e23c0
-void MenuX::FUN_007e23c0()
+void SurgeryFrameOperations::UpdateFrame()
 {
     char text[256];
     if (!IsMenu(0x41e))
@@ -943,13 +623,13 @@ void MenuX::FUN_007e23c0()
     }
     Prepare();
     bool idle3 = false;
-    GetInterfaceX();
+    GetSurgeryInterfaceManager();
     if (FUN_004b71d0())
     {
         if (Button(9, 1) == 2)
         {
-            value74 = tile44->Read(0xfa1);
-            value78 = tile44->Read(0xfa2);
+            unk74.x = tiles[6]->Read(0xfa1);
+            unk74.y = tiles[6]->Read(0xfa2);
         }
         if (Button(9, 1) == 0)
         {
@@ -964,25 +644,25 @@ void MenuX::FUN_007e23c0()
         InputX* input = g_osGlobals->Controls();
         if (input->Key(4, 1))
         {
-            InterfaceX* manager3 = GetInterfaceX();
-            value74 = (float)manager3->MouseX();
-            value78 = (float)manager3->MouseY();
+            InterfaceManager* manager3 = GetSurgeryInterfaceManager();
+            unk74.x = (float)manager3->FUN_00747d00();
+            unk74.y = (float)manager3->FUN_0073b020();
         }
         bool hit = Hit();
         if (hit)
-            GetInterfaceX()->Root()->SetInt(0xfa9, 0);
+            GetSurgeryInterfaceManager()->GetParent()->SetInt(0xfa9, 0);
         else
-            GetInterfaceX()->Root()->SetInt(0xfa9, 255);
+            GetSurgeryInterfaceManager()->GetParent()->SetInt(0xfa9, 255);
         bool held4 = false;
-        if ((input->Key(4, 0) && dragging) || (input->Key(4, 1) && hit))
+        if ((input->Key(4, 0) && unk91) || (input->Key(4, 1) && hit))
         {
             held4 = true;
-            dragging = true;
+            unk91 = true;
         }
         else
         {
             held4 = false;
-            dragging = false;
+            unk91 = false;
         }
         if (held4)
         {
@@ -995,21 +675,21 @@ void MenuX::FUN_007e23c0()
     if (idle3 == true)
     {
         float rate = ScaleByConstant(1.0f);
-        valueac -= ((clockX.Now() - lastTime) / 1000.0) * rate;
-        if (ScaleLimbWoundPercent(GetTile()->Read(DAT_011dad9c) / 100.0) * 100.0 > valueac)
-            valueac = ScaleLimbWoundPercent(GetTile()->Read(DAT_011dad9c) / 100.0) * 100.0;
-        lastTime = clockX.Now();
-        unk8c = lastTime;
+        unkAC -= ((clockX.Now() - static_cast<unsigned int>(unkB0)) / 1000.0) * rate;
+        if (ScaleLimbWoundPercent(GetTile()->Read(DAT_011dad9c) / 100.0) * 100.0 > unkAC)
+            unkAC = ScaleLimbWoundPercent(GetTile()->Read(DAT_011dad9c) / 100.0) * 100.0;
+        unkB0 = clockX.Now();
+        unk8C = unkB0;
         Active(false);
-        if (sound94.Playing())
+        if (sound94.IsPlaying())
             sound94.Stop();
-        if (sounda0.Playing())
-            sounda0.Stop();
+        if (soundA0.IsPlaying())
+            soundA0.Stop();
     }
     Update();
-    tile54->SetFloat(0x1004, valueac / 100.0, true);
-    PrintText(text, 256, "%i/%i", playerX->values.Current(16), playerX->values.Maximum(16));
-    tile48->SetText(FUN_00a01860("_Value"), text, true);
+    tiles[10]->SetFloat(0x1004, unkAC / 100.0, true);
+    PrintText(text, 256, "%i/%i", playerX->values.GetActorValue((ActorValue::Index)16), playerX->values.GetPermanentActorValue((ActorValue::Index)16));
+    tiles[7]->SetString(FUN_00a01860("_Value"), text, true);
 }
 
 extern const char DAT_0106ed18[];
@@ -1017,21 +697,7 @@ extern const char DAT_01077674[];
 extern const char DAT_010776a8[];
 extern const char DAT_010776b8[];
 extern const char DAT_01077698[];
-struct PainSound
-{
-    int id;
-    int state;
-    int flags;
-    PainSound();
-    ~PainSound();
-    void FUN_00418900(const PainSound&);
-    bool FUN_00ad8830(bool);
-};
-struct PainAudio
-{
-    PainSound FUN_00ad7550(const char*, unsigned int);
-};
-PainAudio* FUN_00453a70();
+
 struct PainTimer
 {
     unsigned int FUN_00825c00();
@@ -1326,10 +992,6 @@ struct PainPlayer
     void FUN_0088b740(int, float);
 };
 extern PainPlayer* g_thePlayer;
-struct PainTile
-{
-    void FUN_00a01350(int, const char*, bool);
-};
 float ScaleByConstant(float);
 unsigned int GetRandomNumberInRange(int, int);
 float LinearInterpolate(float, float, float, float, float);
@@ -1357,7 +1019,7 @@ struct PainMenu
     int unk44;
     int unk48;
     int unk4c;
-    PainTile* tile;
+    Tile* tile;
     int unk54;
     int unk58;
     int unk5c;
@@ -1405,21 +1067,21 @@ void PainMenu::FUN_007e28b0()
     {
         if (z < 60.0 && pain > 60.0)
         {
-            PainSound painSound;
-            painSound.FUN_00418900(FUN_00453a70()->FUN_00ad7550(DAT_010776b8, 0x121));
-            painSound.FUN_00ad8830(false);
+            BSSoundHandle painSound;
+            painSound = reinterpret_cast<const BSSoundHandle&>(BSAudio::FUN_00453a70()->FUN_00ad7550(DAT_010776b8, 0x121));
+            painSound.Play(false);
         }
         else if (z < 85.0 && pain > 85.0)
         {
-            PainSound painSound;
-            painSound.FUN_00418900(FUN_00453a70()->FUN_00ad7550(DAT_010776a8, 0x121));
-            painSound.FUN_00ad8830(false);
+            BSSoundHandle painSound;
+            painSound = reinterpret_cast<const BSSoundHandle&>(BSAudio::FUN_00453a70()->FUN_00ad7550(DAT_010776a8, 0x121));
+            painSound.Play(false);
         }
         else if (z < 100.0 && pain == 100.0)
         {
-            PainSound painSound;
-            painSound.FUN_00418900(FUN_00453a70()->FUN_00ad7550(DAT_01077698, 0x121));
-            painSound.FUN_00ad8830(false);
+            BSSoundHandle painSound;
+            painSound = reinterpret_cast<const BSSoundHandle&>(BSAudio::FUN_00453a70()->FUN_00ad7550(DAT_01077698, 0x121));
+            painSound.Play(false);
         }
     }
     last = DAT_011f6394.FUN_00825c00();
@@ -1436,15 +1098,6 @@ void PainMenu::FUN_007e28b0()
     tile->FUN_00a01350(FUN_00a01860(DAT_0106ed18), time, true);
 }
 
-struct ScreenPoint
-{
-    float x, y;
-    ScreenPoint();
-};
-struct Position3
-{
-    float x, y, z;
-};
 struct UpdateArgs
 {
     float time;
@@ -1504,17 +1157,10 @@ struct ClockValue
     unsigned FUN_00825c00();
 };
 
-struct AudioHandle
-{
-    int id, a, b;
-    bool FUN_00ad8930();
-    bool FUN_00ad8830(bool);
-    void FUN_00ad88f0();
-};
 struct SceneNode
 {
     void FUN_00a59c60(UpdateArgs&);
-    Position3& FUN_0043c490();
+    NiPoint3& FUN_0043c490();
     void FUN_004bc1f0(float, float, float);
 };
 struct ScenePtr
@@ -1613,18 +1259,18 @@ struct SurgeryView
     int unk68;
     int unk6c;
     int unk70;
-    ScreenPoint mouse;
+    NiPoint2 mouse;
     int unk7c, unk80, unk84;
     unsigned hitTime, lastTime;
     int unk90;
-    AudioHandle idleSound, activeSound;
+    BSSoundHandle idleSound, activeSound;
     float amount;
     int unkb0, unkb4, unkb8, unkbc, unkc0, unkc4;
     ScenePtr nodes[8];
     int enabled;
     WoundData* Wounds();
     int GetIndex(int);
-    void PlaceSurgeryDecal(ScreenPoint, bool);
+    void PlaceSurgeryDecal(NiPoint2, bool);
     struct ValueOwner
     {
         float FUN_00a011b0(int);
@@ -1645,7 +1291,7 @@ float SurgeryView::UpdateWoundInteraction()
     if (p->list->FUN_005ae380() > 1)
     {
         unsigned a = p->list->FUN_005ae380() * 2;
-        ScreenPoint s;
+        NiPoint2 s;
         s = mouse;
         s.x /= FUN_00715d40();
         s.y /= FUN_00715da0();
@@ -1653,8 +1299,8 @@ float SurgeryView::UpdateWoundInteraction()
         WoundNode* i = p->list;
         while (i && !i->FUN_008256d0())
         {
-            ScreenPoint q;
-            ScreenPoint ba;
+            NiPoint2 q;
+            NiPoint2 ba;
             ((Projection*)((ProjectionPtr&)g_011dadb4))
                 ->ProjectToScreen(((HitValue*)*(*i->FUN_006815c0())->bHitDetected->FUN_006815c0())->FUN_0045bb80(),
                                   &q.x, &q.y, 0.00001f);
@@ -1673,8 +1319,8 @@ float SurgeryView::UpdateWoundInteraction()
             f[1] = s.y;
             if (i->FUN_00726070())
             {
-                ScreenPoint k;
-                ScreenPoint l;
+                NiPoint2 k;
+                NiPoint2 l;
                 ((Projection*)((ProjectionPtr&)g_011dadb4))
                     ->ProjectToScreen(((HitValue*)*(*i->FUN_00726070()->FUN_006815c0())->bHitDetected->FUN_006815c0())
                                           ->FUN_0045bb80(),
@@ -1699,8 +1345,8 @@ float SurgeryView::UpdateWoundInteraction()
             hitTime = ((ClockValue&)g_timeGlobal).FUN_00825c00();
         if (h)
         {
-            if (!activeSound.FUN_00ad8930())
-                activeSound.FUN_00ad8830(false);
+            if (!activeSound.IsPlaying())
+                activeSound.Play(false);
             if (hitTime > 0)
             {
                 if (((ClockValue&)g_timeGlobal).FUN_00825c00() - hitTime >
@@ -1740,10 +1386,10 @@ float SurgeryView::UpdateWoundInteraction()
         else
         {
             PlaceSurgeryDecal(s, false);
-            if (!idleSound.FUN_00ad8930())
-                idleSound.FUN_00ad8830(false);
-            if (activeSound.FUN_00ad8930())
-                activeSound.FUN_00ad88f0();
+            if (!idleSound.IsPlaying())
+                idleSound.Play(false);
+            if (activeSound.IsPlaying())
+                activeSound.Stop();
             hitTime = 0;
         }
     }
@@ -1753,10 +1399,10 @@ float SurgeryView::UpdateWoundInteraction()
         float l, e, j;
         ComputeInjuryEffectScalars(&l, &e, &j, FUN_00726070()->FUN_00a011b0(g_011dad9c) / 100.0f, amount / 100.0f,
                                    ((PlayerView*)_g_thePlayer)->values.Get(37));
-        ScreenPoint c;
+        NiPoint2 c;
         c.x = ApplyNoise((float)(((ClockValue&)g_timeGlobal).FUN_00825c00() * 0.0002500000118743628));
         c.y = ApplyNoise((float)((((ClockValue&)g_timeGlobal).FUN_00825c00() + 12345) * 0.0002500000118743628));
-        Position3 k = ((SceneNode*)nodes[GetIndex(p->index)])->FUN_0043c490();
+        NiPoint3 k = ((SceneNode*)nodes[GetIndex(p->index)])->FUN_0043c490();
         ((SceneNode*)nodes[GetIndex(p->index)])->FUN_004bc1f0(c.x, c.y, 1.0f);
         UpdateArgs ba(0.0f, false, false);
         ((SceneNode*)nodes[GetIndex(p->index)])->FUN_00a59c60(ba);
@@ -1946,7 +1592,7 @@ struct FaceRootS
     virtual void r36();
     virtual void r37();
     virtual void r38();
-    virtual FaceNodeS* GetObjectByName(const NiFixedStringS& name);
+    virtual FaceNodeS* GetObjectByName(const NiFixedString& name);
 };
 struct TimeStubS
 {
@@ -2008,28 +1654,11 @@ void FaceOwnerS::UpdateFaceGenNode()
     if (!g_011dae5c)
         return;
     FaceCtrlS* ctrl =
-        ((FaceRootS*)(unsigned int)g_011dae5c)->GetObjectByName(NiFixedStringS("BSFaceGenNiNodeSkinned"))->GetCtrl();
+        ((FaceRootS*)(unsigned int)g_011dae5c)->GetObjectByName(NiFixedString("BSFaceGenNiNodeSkinned"))->GetCtrl();
     ctrl->SetValue(13, LinearInterpolate(0.0f, 1.0f, 0.0f, 100.0f, fAC));
-    NiUpdateDataS data(((TimeStubS*)&g_timeGlobal)->GetTicks() / 1000.0, true, false);
-    ((NiNodeS*)(unsigned int)g_011dae5c)->Update(data);
+    NiUpdateData data(((TimeStubS*)&g_timeGlobal)->GetTicks() / 1000.0, true, false);
+    ((NiNode*)(unsigned int)g_011dae5c)->Update(data);
 }
-
-class NiFixedString
-{
-  public:
-    NiFixedString(const char* apString);
-    ~NiFixedString();
-    const char* m_kHandle;
-};
-
-class FUN_006815c0
-{
-  public:
-    float x, y;
-    FUN_006815c0();
-    FUN_006815c0 Subtract(const FUN_006815c0& arPoint) const;
-    float FUN_00589850();
-};
 
 struct FUN_007e4540_root
 {
@@ -2114,8 +1743,8 @@ bool FUN_007e4540_shell::FUN_007e4540()
     int iRadiusTmp;
     if (pNewObj && pEdge8)
     {
-        FUN_006815c0 kIntersectionOffset;
-        FUN_006815c0 kTmpEdge;
+        NiPoint2 kIntersectionOffset;
+        NiPoint2 kTmpEdge;
         ((FUN_00a6fc50_cam*)((SurgeryHolder*)&g_011dadb4)->FUN_00559450())
             ->ProjectToScreen(FUN_0045bb80(pNewObj), &kIntersectionOffset.x, &kIntersectionOffset.y, 1e-5f);
         ((FUN_00a6fc50_cam*)((SurgeryHolder*)&g_011dadb4)->FUN_00559450())
@@ -2136,21 +1765,12 @@ bool FUN_007e4540_shell::FUN_007e4540()
     }
 
     FUN_00747d00_im* pInterface6 = (FUN_00747d00_im*)FUN_004b7210();
-    FUN_006815c0 kDeltaCur;
+    NiPoint2 kDeltaCur;
     kDeltaCur.x = pInterface6->FUN_00747d00() - iX;
     kDeltaCur.y = pInterface6->FUN_0073b020() - iY;
     return kDeltaCur.FUN_00589850() <= iRadiusTmp;
 }
 
-struct NiPoint3S;
-struct NiPoint2S
-{
-    float x;
-    float y;
-    NiPoint2S();
-    NiPoint2S operator-(const NiPoint2S& rhs) const;
-    float Length();
-};
 struct MenuHolderS
 {
     int unk00;
@@ -2182,11 +1802,11 @@ struct MenuHolderS
     int unk68;
     int unk6C;
     int unk70;
-    NiPoint2S cursor;
+    NiPoint2 cursor;
 };
 struct RefS
 {
-    NiPoint3S* GetPos();
+    NiPoint3* GetPos();
 };
 struct ProjNodeS
 {
@@ -2205,7 +1825,7 @@ struct ProjOwnerS
 };
 struct CameraS
 {
-    void WorldToScreen(NiPoint3S* pos, float* x, float* y, float eps);
+    void WorldToScreen(NiPoint3* pos, float* x, float* y, float eps);
 };
 float GetScreenWidthS();
 float GetScreenHeightS();
@@ -2217,8 +1837,8 @@ int __cdecl CompareProjectedListsToCursor(ProjOwnerS* a, ProjOwnerS* pOwnerB)
     if (!DAT_011dada4)
         return 0;
     float fBestDist = 3.402823466e+38F;
-    NiPoint2S screenPos;
-    NiPoint2S cursor = ((MenuHolderS*)DAT_011dada4)->cursor;
+    NiPoint2 screenPos;
+    NiPoint2 cursor = ((MenuHolderS*)DAT_011dada4)->cursor;
     cursor.x = cursor.x / GetScreenWidthS();
     cursor.y = cursor.y / GetScreenHeightS();
     ProjListS* pNode = a->list;
@@ -2307,15 +1927,8 @@ struct LimbWoundData
 {
     LimbListNode* list;
 };
-struct TileS
-{
-    void Set(int id, float value, bool propagate);
-    void Set(int id, const char* value, bool propagate);
-};
+#include "../../../../include/ActorValue.h"
 namespace ActorValue {
-enum Index
-{
-};
 const char* GetActorValueName(Index av);
 }
 int FUN_00a01860(const char* name);
@@ -2342,7 +1955,7 @@ struct SurgeryLimbMenu
     int unk40;
     int unk44;
     int unk48;
-    TileS* tile4C;
+    Tile* tile4C;
     int unk50;
     int unk54;
     int unk58;
@@ -2351,7 +1964,7 @@ struct SurgeryLimbMenu
     int unk64;
     int unk68;
     int unk6C;
-    TileS* tile70;
+    Tile* tile70;
     int unk74;
     int unk78;
     int unk7C;
@@ -2478,12 +2091,6 @@ struct DataF
     PtrBox m_aiIndexedValues[8];
     void* m_e8;
 };
-struct NiFixedString
-{
-    NiFixedString(const char*);
-    ~NiFixedString();
-    int m_str;
-};
 struct HostF
 {
     int GetIndex(int);
@@ -2502,21 +2109,6 @@ void __thiscall HostF::FUN_007e5ee0(int a1, int a2)
 }
 }  // namespace fnv_007e5ee0
 
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-    NiPoint3(float, float, float);
-};
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
-class BGSTextureSet : public TESForm
-{
-};
 extern TESForm* __cdecl FUN_00483a00(const char*);
 extern const char DAT_010777e0[], DAT_010777d0[];
 extern NiPoint3 DAT_011f426c;
@@ -2528,21 +2120,7 @@ struct PickRecord
 {
     SceneObject* FUN_00968670();
 };
-class NiPick
-{
-  public:
-    unsigned int pickType, sortType, intersectType, coordinateType;
-    unsigned char frontOnly, returnNormals, returnTextures, returnColors;
-    void* root;
-    unsigned int resultVtable, resultData, resultCapacity, resultSize, resultGrow, resultCount;
-    unsigned char flags30, flags31, flags32, flags33;
-    NiPick(int, int);
-    ~NiPick();
-    void SetByteAtOffset17(int);
-    void FUN_00705fc0(void*);
-    bool FUN_00e98e20(NiPoint3*, NiPoint3*, int);
-    PickRecord* FUN_00500940(unsigned int);
-};
+
 struct RayCamera
 {
     void MapScreenToRay(int, int, NiPoint3*, NiPoint3*, int);
@@ -2696,19 +2274,6 @@ void SurgeryDecals::PlaceSurgeryDecal(float afScreenX, float afScreenY, bool goo
     FUN_0049fef0()->AddGeometryDecal(&infoB, true, true);
 }
 
-struct NiPoint2
-{
-    float x, y;
-    NiPoint2();
-    float FUN_00589850() const;
-    float NormalizeXY();
-    NiPoint2& Scale(float);
-    NiPoint2 Subtract(const NiPoint2&) const;
-};
-struct ScenePoint
-{
-    float x, y, z;
-};
 struct CursorNode
 {
     virtual void v00();
@@ -2751,19 +2316,15 @@ struct CursorNode
     virtual void v37();
     virtual void v38();
     virtual CursorNode* Find(const NiFixedString&);
-    const ScenePoint& FUN_0045bb80();
+    const NiPoint3& FUN_0045bb80();
 };
 struct CursorCamera
 {
-    bool ProjectToScreen(const ScenePoint&, float*, float*, float);
+    bool ProjectToScreen(const NiPoint3&, float*, float*, float);
 };
 CursorCamera* __fastcall FUN_00559450(GO*);
 float __cdecl FUN_00715d40();
 float __cdecl FUN_00715da0();
-struct CursorTile
-{
-    void SetFloat(int, float, bool);
-};
 struct CursorMenu
 {
     int unk00;
@@ -2783,7 +2344,7 @@ struct CursorMenu
     int unk38;
     int unk3C;
     int unk40;
-    CursorTile* tile;
+    Tile* tile;
     int unk48;
     int unk4C;
     int unk50;
@@ -2860,8 +2421,8 @@ void CursorMenu::UpdateTilePositions(int x, int y)
         originY.NormalizeXY();
         originY.Scale((float)originX);
     }
-    tile->SetFloat(4001, edge + originY.x, true);
-    tile->SetFloat(4002, offset + originY.y, true);
+    tile->FUN_00a012d0(4001, edge + originY.x, true);
+    tile->FUN_00a012d0(4002, offset + originY.y, true);
 }
 
 struct SeqHolder
@@ -2886,11 +2447,11 @@ void WoundUpdater::UpdateWounds(float delta)
             ->FUN_00a328b0(((SeqHolder*)(*node2->_ref_006815c0())->_00)->FUN_00508100() * delta, true);
         node2 = node2->_ref_00726070();
     }
-    NiUpdateDataS data3(0.0f, true, false);
-    ((NiNodeS*)((SurgeryHolder&)g_011dade8).FUN_00559450())->Update(data3);
+    NiUpdateData data3(0.0f, true, false);
+    ((NiNode*)((SurgeryHolder&)g_011dade8).FUN_00559450())->Update(data3);
 }
 
-extern NiRTTIS DAT_011f36ac;
+extern NiRTTI DAT_011f36ac;
 
 class DirectionSequence
 {
@@ -2911,7 +2472,7 @@ class DirectionManager
 class DirectionRoot
 {
   public:
-    DirectionManager* FUN_00a5c570(const NiRTTIS* pkRTTI);  // GetController
+    DirectionManager* FUN_00a5c570(const NiRTTI* pkRTTI);  // GetController
 };
 
 struct DirectionSceneOwner
@@ -3181,13 +2742,6 @@ struct EventEntry
     int FUN_00726070();
     void* FUN_0044ddc0();
     ~EventEntry();
-};
-struct EventTile
-{
-    float FUN_00a011b0(int);
-    void SetFloat(int, float, bool);
-    void FUN_00700320(int, int);
-    void FUN_00a01350(int, const char*, bool);
 };
 struct EventValues
 {
@@ -3535,7 +3089,7 @@ struct EventMenu
     int unk40;
     int unk44;
     int unk48;
-    EventTile* label;
+    Tile* label;
     int unk50;
     int unk54;
     int unk58;
@@ -3544,7 +3098,7 @@ struct EventMenu
     int unk64;
     int unk68;
     int unk6c;
-    EventTile* gauge;
+    Tile* gauge;
     int unk74;
     int unk78;
     int unk7c;
@@ -3567,7 +3121,7 @@ struct EventMenu
     int limb;
     int unkc4;
     EventScene nodes[8];
-    EventTile* FUN_00726070();
+    Tile* FUN_00726070();
     int FUN_00720010(int);
     void SetDirection(int);
     void FUN_007e5ee0(int, int);
@@ -3610,7 +3164,7 @@ void EventMenu::OnButtonClick(int button, int arg)
                             if (((EventMenu*)DAT_011dada4)->entry &&
                                 ((EventMenu*)DAT_011dada4)->entry->FUN_00726070() > 0)
                             {
-                                FUN_00726070()->SetFloat(stimpak, FUN_00726070()->FUN_00a011b0(stimpak) - 1.0,
+                                FUN_00726070()->FUN_00a012d0(stimpak, FUN_00726070()->FUN_00a011b0(stimpak) - 1.0,
                                                              true);
                                 ((EventPlayer*)_g_thePlayer)
                                     ->EquipItem(
@@ -3627,7 +3181,7 @@ void EventMenu::OnButtonClick(int button, int arg)
                             if (FUN_00726070()->FUN_00a011b0(morphine) > 0.0)
                             {
                                 EventEntry* item = ((EventPlayer*)_g_thePlayer)->FUN_00576260(FUN_0058db10(4), 0);
-                                FUN_00726070()->SetFloat(morphine, FUN_00726070()->FUN_00a011b0(morphine) - 1.0,
+                                FUN_00726070()->FUN_00a012d0(morphine, FUN_00726070()->FUN_00a011b0(morphine) - 1.0,
                                                              true);
                                 ((EventPlayer*)_g_thePlayer)
                                     ->EquipItem(FUN_0058db10(4), item->FUN_00726070(),
@@ -3636,7 +3190,7 @@ void EventMenu::OnButtonClick(int button, int arg)
                                 delete item;
                                 amount -= 25.0;
                                 if (FUN_00726070()->FUN_00a011b0(DAT_011dad9c) >= 25.0)
-                                    FUN_00726070()->SetFloat(
+                                    FUN_00726070()->FUN_00a012d0(
                                         DAT_011dad9c, FUN_00726070()->FUN_00a011b0(DAT_011dad9c) - 25.0, true);
                                 else
                                     FUN_00726070()->FUN_00700320(DAT_011dad9c, 0);
@@ -3668,7 +3222,7 @@ void EventMenu::OnButtonClick(int button, int arg)
                                 break;
                             }
                             amount = ScaleLimbWoundPercent(((EventPlayer*)_g_thePlayer)->values.Damage(limb));
-                            gauge->SetFloat(FUN_00a01860("_Value"),
+                            gauge->FUN_00a012d0(FUN_00a01860("_Value"),
                                                 ((EventPlayer*)_g_thePlayer)->values.Damage(limb) / 100.0, true);
                             label->FUN_00a01350(0xfc4, ActorValue::GetActorValueName((ActorValue::Index)limb), true);
                             FUN_007e5ee0(iOldLimb, limb);
@@ -3700,7 +3254,7 @@ void EventMenu::OnButtonClick(int button, int arg)
                                 break;
                             }
                             amount = ScaleLimbWoundPercent(((EventPlayer*)_g_thePlayer)->values.Damage(limb));
-                            gauge->SetFloat(FUN_00a01860("_Value"),
+                            gauge->FUN_00a012d0(FUN_00a01860("_Value"),
                                                 ((EventPlayer*)_g_thePlayer)->values.Damage(limb) / 100.0, true);
                             label->FUN_00a01350(0xfc4, ActorValue::GetActorValueName((ActorValue::Index)limb), true);
                             FUN_007e5ee0(old2, limb);
@@ -3759,8 +3313,8 @@ struct BoneManager
 };
 struct BoneHost
 {
-    BoneManager* FUN_00a5c570(const NiRTTIS*);
-    void FUN_00a59c60(NiUpdateDataS&);
+    BoneManager* FUN_00a5c570(const NiRTTI*);
+    void FUN_00a59c60(NiUpdateData&);
 };
 struct BoneEntry;
 struct BoneNode
@@ -3959,8 +3513,8 @@ void __cdecl UpdateBoneWounds(BoneHost* host)
                     }
                 }
             }
-            NiPoint2S p;
-            NiPoint2S pointB_;
+            NiPoint2 p;
+            NiPoint2 pointB_;
             if (entry24)
                 currentItem->list->FUN_005ae3d0(entry24);
         }
@@ -4009,7 +3563,7 @@ void __cdecl UpdateBoneWounds(BoneHost* host)
         }
         wound9->dirty = 0;
     }
-    NiUpdateDataS update2(0.0f, true, false);
+    NiUpdateData update2(0.0f, true, false);
     host->FUN_00a59c60(update2);
 }
 
@@ -4071,7 +3625,7 @@ struct BipRoot
     virtual void v037();
     virtual void v038();
     virtual BipAVObject* v039(const NiFixedString& arName);
-    void FUN_00a59c60(NiUpdateDataS&);
+    void FUN_00a59c60(NiUpdateData&);
 };
 
 struct BipPointer
@@ -4090,7 +3644,7 @@ void __cdecl FUN_007e4fe0(float a, float b, float c)
             ->v039(NiFixedString("Bip01"))
             ->FUN_004bc1f0(-*g_011dae6c.Float(), *g_011dadf0.Float() - b, *g_011dae28.Float() - a);
         DAT_011dae5c.FUN_00559450()->v039(NiFixedString("Bip01"))->FUN_00440490(*g_011dadfc.Float() * (double)c);
-        NiUpdateDataS kData(0.0f, false, false);
+        NiUpdateData kData(0.0f, false, false);
         DAT_011dae5c.FUN_00559450()->FUN_00a59c60(kData);
     }
 }

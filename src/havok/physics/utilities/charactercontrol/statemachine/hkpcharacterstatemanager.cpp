@@ -2,11 +2,7 @@
 // src/havok/physics/utilities/charactercontrol/statemachine/hkpcharacterstatemanager.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/charactercontrol/statemachine/hkpcharacterstatemanager.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkReferencedObject
-{
-    void RetainReference();
-    void removeReference();
-};
+#include "../../../../../../include/hkReferencedObject.h"
 
 struct hkpCharacterStateManager
 {
@@ -18,7 +14,7 @@ struct hkpCharacterStateManager
 // @fnv 0x00cbc4e0
 void hkpCharacterStateManager::FUN_00cbc4e0(hkReferencedObject* object, int index)
 {
-    object->RetainReference();
+    object->addReference();
     if (m_states[index])
         m_states[index]->removeReference();
     m_states[index] = object;
@@ -26,11 +22,6 @@ void hkpCharacterStateManager::FUN_00cbc4e0(hkReferencedObject* object, int inde
 
 extern int DAT_010c9194;
 extern int _DAT_0102e388;
-
-struct DDCC60World
-{
-    void removeReference();
-};
 
 struct FUN_00cbc4a0
 {
@@ -51,7 +42,7 @@ FUN_00cbc4a0::~FUN_00cbc4a0()
         hkReferencedObject* state = m_states[i];
         if (state)
         {
-            reinterpret_cast<DDCC60World*>(state)->removeReference();
+            state->removeReference();
             m_states[i] = 0;
         }
     }
@@ -59,7 +50,8 @@ FUN_00cbc4a0::~FUN_00cbc4a0()
     m_ppVirtualMethodTable = reinterpret_cast<int*>(&_DAT_0102e388);
 }
 
-struct hkpCharacterStateView
+// 0x00cbc510 is the manager lookup bound by hkpcharactercontext.cpp: a pointer table at +0x08, not a character state.
+struct CharacterStateSlotTable
 {
     int m_auiShapeKeys[2];
     hkReferencedObject* m_states[32];
@@ -67,7 +59,7 @@ struct hkpCharacterStateView
 };
 
 // @fnv 0x00cbc510
-hkReferencedObject* hkpCharacterStateView::FUN_00cbc510(int index)
+hkReferencedObject* CharacterStateSlotTable::FUN_00cbc510(int index)
 {
     return m_states[index];
 }

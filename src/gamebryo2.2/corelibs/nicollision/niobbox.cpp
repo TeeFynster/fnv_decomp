@@ -2,44 +2,69 @@
 // src/gamebryo2.2/corelibs/nicollision/niobbox.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/niobbox.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiPoint3
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiOBBRoot.h"
+#include "../../../../include/NiTransform.h"
+
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& p) const
 {
-    float x;
-    float y;
-    float z;
+    return NiPoint3(x + p.x, y + p.y, z + p.z);
+}
 
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    NiPoint3 operator+(const NiPoint3& p) const
-    {
-        return NiPoint3(x + p.x, y + p.y, z + p.z);
-    }
-    friend NiPoint3 operator*(float s, const NiPoint3& p)
-    {
-        return NiPoint3(s * p.x, s * p.y, s * p.z);
-    }
-};
-
-struct ThreeByThreeMatrix
+inline float NiPoint3::Xvalue() const
 {
-    float m_afEntries[3][3];
+    return x;
+}
 
-    NiPoint3 operator*(const NiPoint3& p) const
-    {
-        return NiPoint3(m_afEntries[0][0] * p.x + m_afEntries[0][1] * p.y + m_afEntries[0][2] * p.z,
-                        m_afEntries[1][0] * p.x + m_afEntries[1][1] * p.y + m_afEntries[1][2] * p.z,
-                        m_afEntries[2][0] * p.x + m_afEntries[2][1] * p.y + m_afEntries[2][2] * p.z);
-    }
-};
-
-struct NiTransform
+inline const float& NiPoint3::Xref() const
 {
-    ThreeByThreeMatrix m_kOrientation;
-    NiPoint3 m_kTranslation;
-    float m_fScale;
-};
+    return x;
+}
+
+inline const float& NiPoint3::Zref() const
+{
+    return z;
+}
+
+inline const float& NiPoint3::operator[](int i) const
+{
+    if (i == 0)
+        return x;
+    if (i == 1)
+        return y;
+    return z;
+}
+
+inline float NiPoint3::operator*(const NiPoint3& kV) const
+{
+    return x * kV.x + y * kV.y + z * kV.z;
+}
+
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kV) const
+{
+    return NiPoint3(x - kV.x, y - kV.y, z - kV.z);
+}
+
+inline NiPoint3 NiPoint3::Cross(const NiPoint3& r) const
+{
+    return NiPoint3(y * r.z - z * r.y, z * r.x - x * r.z, x * r.y - y * r.x);
+}
+
+inline NiPoint3 operator*(float s, const NiPoint3& p)
+{
+    return NiPoint3(s * p.x, s * p.y, s * p.z);
+}
+
+// M * v: each output coordinate is one matrix row dotted with v (x, y, z terms in that order)
+#define M3_ROW_DOT_V(i) m_pEntry[i][0] * kV.x + m_pEntry[i][1] * kV.y + m_pEntry[i][2] * kV.z
+inline NiPoint3 NiMatrix3::operator*(const NiPoint3& kV) const
+{
+    return NiPoint3(M3_ROW_DOT_V(0), M3_ROW_DOT_V(1), M3_ROW_DOT_V(2));
+}
+#undef M3_ROW_DOT_V
 
 struct S_00eba480
 {
@@ -57,25 +82,16 @@ struct S_00eba480
 // @fnv 0x00eba480
 void S_00eba480::UpdateWorldBounds(const NiTransform& kXform)
 {
-    m_kWorldCenter = kXform.m_fScale * (kXform.m_kOrientation * m_kCenter) + kXform.m_kTranslation;
-    m_akWorldAxis[0] = kXform.m_kOrientation * m_akAxes[0];
-    m_akWorldAxis[1] = kXform.m_kOrientation * m_akAxes[1];
-    m_akWorldAxis[2] = kXform.m_kOrientation * m_akAxes[2];
+    m_kWorldCenter = kXform.m_fScale * (kXform.m_Rotate * m_kCenter) + kXform.m_Translate;
+    m_akWorldAxis[0] = kXform.m_Rotate * m_akAxes[0];
+    m_akWorldAxis[1] = kXform.m_Rotate * m_akAxes[1];
+    m_akWorldAxis[2] = kXform.m_Rotate * m_akAxes[2];
     m_afWorldExtent[0] = m_afExtents[0] * kXform.m_fScale;
     m_afWorldExtent[1] = m_afExtents[1] * kXform.m_fScale;
     m_afWorldExtent[2] = m_afExtents[2] * kXform.m_fScale;
 }
 
 extern double DAT_01032980;
-
-struct S_00ebf4a0_Vec3
-{
-    float x;
-    float y;
-    float z;
-
-    void FUN_004a0c10();
-};
 
 struct S_00ebf4a0_Class
 {
@@ -94,21 +110,21 @@ struct S_00ebf4a0_Class
     int unk30;
     int unk34;
     int unk38;
-    S_00ebf4a0_Vec3 unk3C;
-    S_00ebf4a0_Vec3 unk48;
-    S_00ebf4a0_Vec3 unk54;
-    S_00ebf4a0_Vec3 unk60;
+    NiPoint3 unk3C;
+    NiPoint3 unk48;
+    NiPoint3 unk54;
+    NiPoint3 unk60;
     float unk6C;
     float unk70;
     float unk74;
 
-    void ProjectOntoAxes(const S_00ebf4a0_Vec3* in, S_00ebf4a0_Vec3* out);
+    void ProjectOntoAxes(const NiPoint3* in, NiPoint3* out);
 };
 
 // @fnv 0x00ebf4a0
-void S_00ebf4a0_Class::ProjectOntoAxes(const S_00ebf4a0_Vec3* in, S_00ebf4a0_Vec3* out)
+void S_00ebf4a0_Class::ProjectOntoAxes(const NiPoint3* in, NiPoint3* out)
 {
-    S_00ebf4a0_Vec3 norm;
+    NiPoint3 norm;
     norm.x = unk6C;
     norm.y = unk70;
     norm.z = unk74;
@@ -147,76 +163,31 @@ void S_00ebf4a0_Class::ProjectOntoAxes(const S_00ebf4a0_Vec3* in, S_00ebf4a0_Vec
 }
 
 #include <math.h>
-struct NiPoint3_ext
-{
-    float x;
-    float y;
-    float z;
-
-    NiPoint3_ext()
-    {}
-    NiPoint3_ext(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    NiPoint3_ext operator+(const NiPoint3_ext& kPt) const
-    {
-        return NiPoint3_ext(x + kPt.x, y + kPt.y, z + kPt.z);
-    }
-    NiPoint3_ext operator-(const NiPoint3_ext& kPt) const
-    {
-        return NiPoint3_ext(x - kPt.x, y - kPt.y, z - kPt.z);
-    }
-    float operator*(const NiPoint3_ext& kPt) const
-    {
-        return x * kPt.x + y * kPt.y + z * kPt.z;
-    }
-    friend NiPoint3_ext operator*(float fScalar, const NiPoint3_ext& kPt)
-    {
-        return NiPoint3_ext(fScalar * kPt.x, fScalar * kPt.y, fScalar * kPt.z);
-    }
-};
 
 inline float NiAbs(float fValue)
 {
     return float(fabs(fValue));
 }
 
-struct NiOBBRoot
-{
-    int unk00;
-    float m_fTimeStep;
-    int unk08;
-    int unk0C;
-    NiPoint3_ext m_kValue;
-
-    float GetDeltaTime() const
-    {
-        return m_fTimeStep;
-    }
-    const NiPoint3_ext& GetSourceVelocity() const
-    {
-        return m_kValue;
-    }
-};
-
 struct NiOBB
 {
-    NiPoint3_ext m_kCenter;
-    NiPoint3_ext m_akBasis[3];
+    NiPoint3 m_kCenter;
+    NiPoint3 m_akBasis[3];
     float m_afExtents[3];
-    NiPoint3_ext m_kWorldCenter;
-    NiPoint3_ext m_akWorldBasis[3];
+    NiPoint3 m_kWorldCenter;
+    NiPoint3 m_akWorldBasis[3];
     float m_afWorldExtent[3];
     NiOBBRoot* m_pkTreeNode;
 
-    int FUN_00ebc2a0(const NiOBB& kBox, float& rfTime, NiPoint3_ext& rkPoint);
+    int FUN_00ebc2a0(const NiOBB& kBox, float& rfTime, NiPoint3& rkPoint);
 };
 
 // Tests swept OBB collision against kBox, writing the earliest collision time to rfTime and the contact point to rkPoint, returning 1 on hit or 0 on miss.
 // @fnv 0x00ebc2a0
-int NiOBB::FUN_00ebc2a0(const NiOBB& kBox, float& rfHitTime, NiPoint3_ext& rkHitPoint)
+int NiOBB::FUN_00ebc2a0(const NiOBB& kBox, float& rfHitTime, NiPoint3& rkHitPoint)
 {
-    const NiPoint3_ext* pkA = m_akWorldBasis;
-    const NiPoint3_ext* pkB = kBox.m_akWorldBasis;
+    const NiPoint3* pkA = m_akWorldBasis;
+    const NiPoint3* pkB = kBox.m_akWorldBasis;
     const float* pfExtentsA = m_afWorldExtent;
     const float* pfExtentsB = kBox.m_afWorldExtent;
 
@@ -224,8 +195,8 @@ int NiOBB::FUN_00ebc2a0(const NiOBB& kBox, float& rfHitTime, NiPoint3_ext& rkHit
     float aafDotProducts[3][3];
     float afD0[3], afD1[3];
 
-    NiPoint3_ext kDiff = kBox.m_kWorldCenter - m_kWorldCenter;
-    NiPoint3_ext kVel = kBox.m_pkTreeNode->GetSourceVelocity() - m_pkTreeNode->GetSourceVelocity();
+    NiPoint3 kDiff = kBox.m_kWorldCenter - m_kWorldCenter;
+    NiPoint3 kVel = kBox.m_pkTreeNode->GetSourceVelocity() - m_pkTreeNode->GetSourceVelocity();
     float fTimeStep = m_pkTreeNode->GetDeltaTime();
 
     int iType = 0, iSide = 0;
@@ -702,9 +673,9 @@ int NiOBB::FUN_00ebc2a0(const NiOBB& kBox, float& rfHitTime, NiPoint3_ext& rkHit
     int i, j;
     float afX[3], afY[3], fProjA, fProjB, fDenom, fTmp;
 
-    NiPoint3_ext kDTW;
-    const NiPoint3_ext& kV0 = m_pkTreeNode->GetSourceVelocity();
-    const NiPoint3_ext& kV1 = kBox.m_pkTreeNode->GetSourceVelocity();
+    NiPoint3 kDTW;
+    const NiPoint3& kV0 = m_pkTreeNode->GetSourceVelocity();
+    const NiPoint3& kV1 = kBox.m_pkTreeNode->GetSourceVelocity();
 
     switch (iType)
     {
@@ -1135,11 +1106,6 @@ int NiOBB::FUN_00ebc2a0(const NiOBB& kBox, float& rfHitTime, NiPoint3_ext& rkHit
 extern float DAT_01015f5c;
 extern float DAT_01016970;
 
-struct S_00ebf610_Pt3
-{
-    float x, y, z;
-};
-
 static inline float S_00ebf610_Abs(float f)
 {
     return (float)fabs(f);
@@ -1162,15 +1128,15 @@ struct S_00ebf610_Box
     int unk30;
     int unk34;
     int unk38;
-    S_00ebf610_Pt3 m_kCenterPosition;
-    S_00ebf610_Pt3 m_kAxisEndPoints[3];
+    NiPoint3 m_kCenterPosition;
+    NiPoint3 m_kAxisEndPoints[3];
     float m_fExtents[3];
-    int IntersectRay(const S_00ebf610_Pt3& origin, const S_00ebf610_Pt3& dir);
+    int IntersectRay(const NiPoint3& origin, const NiPoint3& dir);
 };
 
 // Tests whether a ray from origin along dir intersects this oriented box, returning 1 on hit and 0 on miss.
 // @fnv 0x00ebf610
-int S_00ebf610_Box::IntersectRay(const S_00ebf610_Pt3& origin, const S_00ebf610_Pt3& dir)
+int S_00ebf610_Box::IntersectRay(const NiPoint3& origin, const NiPoint3& dir)
 {
     float fNearT = DAT_01015f5c;
     float fFarT = DAT_01016970;
@@ -1178,13 +1144,13 @@ int S_00ebf610_Box::IntersectRay(const S_00ebf610_Pt3& origin, const S_00ebf610_
     afExtents[0] = S_00ebf610_Abs(m_fExtents[0]);
     afExtents[1] = S_00ebf610_Abs(m_fExtents[1]);
     afExtents[2] = S_00ebf610_Abs(m_fExtents[2]);
-    S_00ebf610_Pt3 kDelta;
+    NiPoint3 kDelta;
     kDelta.x = m_kCenterPosition.x - origin.x;
     kDelta.y = m_kCenterPosition.y - origin.y;
     kDelta.z = m_kCenterPosition.z - origin.z;
     for (int i = 0; i < 3; i++)
     {
-        const S_00ebf610_Pt3& kAxis = m_kAxisEndPoints[i];
+        const NiPoint3& kAxis = m_kAxisEndPoints[i];
         const float* pfAxis = &m_kAxisEndPoints[i].x;
         float p = kDelta.x * pfAxis[0] + kDelta.y * pfAxis[1] + kDelta.z * pfAxis[2];
         float q = dir.x * m_kAxisEndPoints[i].x + dir.y * kAxis.y + dir.z * kAxis.z;
@@ -1220,56 +1186,7 @@ static float magnitude(float v)
 {
     return (float)fabs(v);
 }
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    float Xvalue() const
-    {
-        return x;
-    }
-    const float& Xref() const
-    {
-        return x;
-    }
-    const float& Zref() const
-    {
-        return z;
-    }
-    const float& operator[](int i) const
-    {
-        if (i == 0)
-            return x;
-        if (i == 1)
-            return y;
-        return z;
-    }
 
-    NiPoint3()
-    {}
-    NiPoint3(float a, float b, float c)
-    {
-        x = a;
-        y = b;
-        z = c;
-    }
-    NiPoint3 operator-(const NiPoint3& r) const
-    {
-        return NiPoint3(x - r.x, y - r.y, z - r.z);
-    }
-    float operator*(const NiPoint3& r) const
-    {
-        return x * r.x + y * r.y + z * r.z;
-    }
-    NiPoint3 Cross(const NiPoint3& r) const
-    {
-        return NiPoint3(y * r.z - z * r.y, z * r.x - x * r.z, x * r.y - y * r.x);
-    }
-    float Dot(const NiPoint3& r) const
-    {
-        return x * r.x + y * r.y + z * r.z;
-    }
-};
 extern "C" void _ReadWriteBarrier(void);
 static float orderedDot(const NiPoint3& l, const NiPoint3& r)
 {
@@ -1295,21 +1212,6 @@ static float val(float v)
     return v;
 }
 
-struct RootE
-{
-    int unk00;
-    float timestep;
-    int unk08, unk0c;
-    NiPoint3 velocity;
-    const NiPoint3& Velocity() const
-    {
-        return velocity;
-    }
-    float Time() const
-    {
-        return timestep;
-    }
-};
 struct BoxE
 {
     NiPoint3 localCenter;
@@ -1322,14 +1224,14 @@ struct BoxE
     {
         return extents;
     }
-    RootE* root;
+    NiOBBRoot* root;
     float Extent(int i) const
     {
         return extents[i];
     }
     int FUN_00eba680(const BoxE& other);
 };
-// Performs a swept OBB vs OBB collision test using relative motion over root->Time(), returning 1 if the boxes intersect during the sweep.
+// Performs a swept OBB vs OBB collision test using relative motion over root->GetDeltaTime(), returning 1 if the boxes intersect during the sweep.
 // @fnv 0x00eba680
 int BoxE::FUN_00eba680(const BoxE& other)
 {
@@ -1340,8 +1242,9 @@ int BoxE::FUN_00eba680(const BoxE& other)
     float fOwnRadius, fOtherRadius, fTotalRadius, start, end;
     float c[3][3], fStartProj[3], fEndProj[3];
     NiPoint3 vDelta = other.center - center;
-    NiPoint3 vMotion = other.root->Velocity() - root->Velocity();
-    float step = root->Time();
+    NiPoint3 vMotion = reinterpret_cast<const NiPoint3&>(other.root->GetSourceVelocity()) -
+                      reinterpret_cast<const NiPoint3&>(root->GetSourceVelocity());
+    float step = root->GetDeltaTime();
 
     c[0][0] = a[0] * b[0];
     c[0][1] = a[0] * b[1];

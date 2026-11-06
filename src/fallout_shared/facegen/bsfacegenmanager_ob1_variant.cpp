@@ -3,6 +3,7 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /GF /Ob1 (unit src/fallout_shared/facegen/bsfacegenmanager.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
+#include "../../../include/BSFaceGenManager.h"
 #include "bsfacegenmanager_decls.h"
 
 static __forceinline void DeadQ1()

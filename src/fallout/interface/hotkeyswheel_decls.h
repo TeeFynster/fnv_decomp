@@ -1,46 +1,26 @@
-// fallout/interface/hotkeyswheel_decls.h: declares Tile
+// fallout/interface/hotkeyswheel_decls.h: hotkey wheel declarations
 #ifndef HOTKEYSWHEEL_DECLS_H
 #define HOTKEYSWHEEL_DECLS_H
 
-class Tile
+#include "../../../include/BSStringT.h"
+
+#include "../../../include/Tile.h"
+
+#include "../../../include/HotkeyWheelDisplay.h"
+
+// InputManager (no shared definition; OSGlobals.h names it): 0x00a24660 is its control-state query, reading the key
+// maps at +0x1b94 (keyboard, 2 devices) and +0x1be8 (controller) and the flags at +0x1b92 -- not a HotkeyWheelDisplay method
+class InputManager
 {
   public:
-    bool ContainsTrait(int);
-    void Set(int, int);
-    void Set(int, const char*, bool);
-    Tile* GetNamedChild(const char*);
-};
-class HotkeyWheelDisplay
-{
-  public:
-    Tile* m_pWheelTile;
-    Tile* m_ppHotkeySlotTiles[8];
-    bool m_bHasHotkeySelection;
-    unsigned char pad[3];
-    int m_iTileValueIdAtOffset28, m_iTileValueIdAtOffset2C, m_iTileValueIdAtOffset30;
-    bool GetVisible();
-    void SetVisible(bool);
-    void RefreshHotkeyWheel();
-    void Initialize(Tile*);
-    char inputPadding[0x1b92 - 0x34];
+    char layoutPadding0[0x1b92];
     unsigned short flags;
     unsigned char keyboard[3][28];
     unsigned char controller[28];
-    int SetHotkeyItem(int, int);
+    int FUN_00a24660(int key, int state);
     int FUN_00a24560(int, int, int);
     int HandleHotkeyInput(int, int);
     int FUN_00a23e10(int, int);
-};
-template <class T> class BSStringT
-{
-    T* data;
-    unsigned short length, capacity;
-
-  public:
-    BSStringT();
-    ~BSStringT();
-    int __cdecl PrintfString(const char*, ...);
-    const char* String();
 };
 int __cdecl GetTileValueID(const char*, int);
 int __cdecl Warning(const char*, ...);

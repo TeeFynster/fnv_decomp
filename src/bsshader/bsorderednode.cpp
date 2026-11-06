@@ -1,15 +1,63 @@
 // bsshader/bsorderednode.cpp: BSOrderedNode, NiBound (6 functions)
 
-#include "bsorderednode_decls.h"
-// Calls NiNode::LoadBinary, loads bound from the stream, and reads staticBound when stream.version > 23, otherwise sets it to true.
+#include "../../include/NiBinaryStream.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiCullingProcess.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTransform.h"
+
+// The legacy declarations header defines NiSphere again, so retain its other declarations here.
+// These loaders use different callback slots in their original stream layouts.
+inline unsigned int NiBinaryStream::Read(void* buffer, unsigned int bytes)
+{
+    unsigned int size = 1;
+    unsigned int result = (*reinterpret_cast<NIBINARYSTREAM_READFN*>(reinterpret_cast<char*>(this) + 8))(
+        this, buffer, bytes, &size, 1);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4) += result;
+    return result;
+}
+
+inline unsigned int NiBinaryStream::BinaryRead(void* buffer, unsigned int bytes)
+{
+    unsigned int size = 1;
+    unsigned int result = (*reinterpret_cast<NIBINARYSTREAM_READFN*>(reinterpret_cast<char*>(this) + 12))(
+        this, buffer, bytes, &size, 1);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4) += result;
+    return result;
+}
+// Preserve the field offsets used by the two original loaders.
+inline unsigned int NiStream::version()
+{
+    return *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4);
+}
+
+inline NiBinaryStream* NiStream::GetBinaryStream()
+{
+    return *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(this) + 0x24c);
+}
+
+inline NiBinaryStream& NiStream::Istr()
+{
+    return **reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(this) + 0x250);
+}
+
+class BSOrderedNode : public NiNode
+{
+  public:
+    NiSphere bound;
+    bool staticBound;
+    void LoadBinary(NiStream&);
+};
+// Calls NiNode::LoadBinary, loads bound from the stream, and reads staticBound when stream.version() > 23, otherwise sets it to true.
 // @fnv 0x00bc2e80
 void BSOrderedNode::LoadBinary(NiStream& stream)
 {
     NiNode::LoadBinary(stream);
     bound.LoadBinary(stream);
-    if (stream.version > 23)
+    if (stream.version() > 23)
     {
-        stream.input->Read(&staticBound, 1);
+        stream.GetBinaryStream()->Read(&staticBound, 1);
     }
     else
     {
@@ -17,18 +65,11 @@ void BSOrderedNode::LoadBinary(NiStream& stream)
     }
 }
 
-struct NiBound
+inline bool NiBound::operator==(const NiBound& b) const
 {
-    float c0;
-    float c1;
-    float c2;
-    float c3;
-    bool operator==(const NiBound& b) const
-    {
-        return c0 == b.c0 && c1 == b.c1 && c2 == b.c2 && c3 == b.c3;
-    }
-    bool FUN_00a926b0(const NiBound& b);
-};
+    return m_kCenter.x == b.m_kCenter.x && m_kCenter.y == b.m_kCenter.y &&
+           m_kCenter.z == b.m_kCenter.z && m_fRadius == b.m_fRadius;
+}
 // Returns true when this NiBound differs from b, i.e. the negation of operator==.
 // @fnv 0x00a926b0
 bool NiBound::FUN_00a926b0(const NiBound& b)
@@ -47,68 +88,12 @@ bool NiBound::FUN_00a926b0(const NiBound& b)
 // accumulator is closed.
 // ---------------------------------------------------------------------------
 
-// The centre of a bound.
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-
-// The bound of a node.  The pack's NiBound is a flat structure of four
-// floats, so the centre is overlaid on it.
-union NiBoundOverlay
-{
-    NiBound bound;
-    NiPoint3 centre;
-};
-
-// The fields of a bound sphere.  The pack's NiSphere only gives its size, so
-// the fields are overlaid on it.
-struct NiSphereFields
-{
-    float x;
-    float y;
-    float z;
-    float radius;
-};
-
-// The bound sphere of a node.
-union BoundSphere
-{
-    NiSphere sphere;
-    NiSphereFields fields;
-};
-
-// The transform of a node: a 3x3 matrix, a pointer and the uniform scale
-// that is applied to the radii of the node's bound.
-class NiTransform
-{
-  public:
-    float m00, m01, m02;     // +0x00
-    float m10, m11, m12;     // +0x0c
-    float m20, m21, m22;     // +0x18
-    void* unk24;             // +0x24
-    unsigned char unk28[8];  // +0x28
-    float scale;             // +0x30
-    void FUN_00524c40(NiPoint3* centre, const NiSphere* sphere);
-};
-
 // The accumulator of the culling process.
 class DummyAccum
 {
   public:
     void RenderBound(NiBound& bound, int flag);
     void DispatchBatchRenderer();
-};
-
-// The culling process; the accumulator it collects the bounds in sits at
-// the end of it.
-class NiCullingProcess
-{
-  public:
-    unsigned char unk00[0xc4];  // +0x00
-    DummyAccum* pAccumulator;   // +0xc4
 };
 
 // The node the culling code works on.  Its layout is the one of a
@@ -122,29 +107,32 @@ class DummyNode
     unsigned char unk24[0x44];  // +0x24
     NiTransform xform;          // +0x68
     unsigned char unk9c[0x10];  // +0x9c
-    BoundSphere bound;          // +0xac
+    NiSphere bound;             // +0xac
     bool staticBound;           // +0xbc
     void FUN_00a5dbe0(NiCullingProcess* culling);
     void UpdateCullingBound(NiCullingProcess* culling);
 };
 
 // The bound a node without a bound of its own is given.
-NiBound g_defaultBound;
+extern NiBound g_defaultBound;
 
 // @fnv 0x00bc2d70
 void DummyNode::UpdateCullingBound(NiCullingProcess* culling)
 {
-    DummyAccum* accum = culling->pAccumulator;
+    // The extended culling process stores its accumulator beyond the shared base.
+    DummyAccum* accum = *reinterpret_cast<DummyAccum**>(reinterpret_cast<char*>(culling) + 0xc4);
 
     if (staticBound)
     {
         NiPoint3 centre;
-        xform.FUN_00524c40(&centre, &bound.sphere);
+        xform.FUN_00524c40(&centre, &bound);
 
-        NiBoundOverlay out;
-        out.centre = centre;
-        out.bound.c3 = bound.fields.radius * xform.scale;
-        accum->RenderBound(out.bound, 0);
+        // The original fills this storage without calling the NiBound constructor.
+        NiSphere storage;
+        NiBound& out = *reinterpret_cast<NiBound*>(&storage);
+        out.m_kCenter = centre;
+        out.m_fRadius = bound.r * xform.m_fScale;
+        accum->RenderBound(out, 0);
     }
     else
     {
@@ -194,42 +182,9 @@ SpawnedObject* FUN_00bc2e00_cls::CreateSpawnedObject(void* arg)
     return obj;
 }
 
-typedef unsigned int(__cdecl* BinaryReadFn)(NiBinaryStream*, void*, unsigned int, const unsigned int*, unsigned int);
-
-struct LoadBoundSphere
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-
-    void FUN_00eb5410(NiStream& aStream);
-};
-
-struct LoadBinaryStreamView
-{
-    void* vtable;
-    unsigned int position;
-    unsigned int unk08;
-    BinaryReadFn readFn;
-
-    unsigned int Read(void* buffer, unsigned int bytes)
-    {
-        unsigned int size = 1;
-        unsigned int result = readFn((NiBinaryStream*)this, buffer, bytes, &size, 1);
-        position += result;
-        return result;
-    }
-};
-
-struct LoadStreamView : NiStream
-{
-    LoadBinaryStreamView* m_pInput;
-};
-
 struct FUN_00bc2ee0_cls : NiNode
 {
-    LoadBoundSphere bound;
+    NiBound bound;
     bool staticBound;
 
     void FUN_00a5e880(NiStream& aStream);
@@ -241,10 +196,9 @@ struct FUN_00bc2ee0_cls : NiNode
 void FUN_00bc2ee0_cls::LoadBoundSphereAndStaticBound(NiStream& aStream)
 {
     FUN_00a5e880(aStream);
-    bound.FUN_00eb5410(aStream);
+    bound.LoadBinary(aStream);
 
-    LoadStreamView& view = (LoadStreamView&)aStream;
-    view.m_pInput->Read(&staticBound, 1);
+    aStream.Istr().BinaryRead(static_cast<void*>(&staticBound), 1);
 }
 
 struct S_00bc2f30_Arr
@@ -257,25 +211,6 @@ struct S_00bc2f30_Arr
     unsigned short growBy;
     void FUN_0096ad30(unsigned int);
     void FUN_0096ae90(unsigned int, char*&);
-};
-struct S_00bc2f30_Vec
-{
-    int x;
-    int y;
-    int z;
-};
-struct S_00bc2f30_Bound
-{
-    int x;
-    int y;
-    int z;
-    float w;
-    char* FUN_00a7fb20(const char* name);
-};
-struct S_00bc2f30_Xf
-{
-    int xf0;
-    void FUN_00524c40(S_00bc2f30_Vec* out, void* in);
 };
 struct S_00bc2f30_Base
 {
@@ -312,27 +247,12 @@ struct S_00bc2f30_Cls : S_00bc2f30_Base
     int unk5C;
     int unk60;
     int unk64;
-    S_00bc2f30_Xf m68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    float m98;
+    NiTransform m68;
     int unk9C;
     int unkA0;
     int unkA4;
     int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    float mB8;
+    NiBound mAC;
     unsigned char mBC;
     void AppendAlphaSortBound(S_00bc2f30_Arr* a);
 };
@@ -349,12 +269,12 @@ void S_00bc2f30_Cls::AppendAlphaSortBound(S_00bc2f30_Arr* a)
     FUN_00a5ea70(a);
     S_00bc2f30_Add(a, FUN_00a7d330(DAT_01201f84));
     S_00bc2f30_Add(a, FUN_00a7d370("bHasStaticBound", mBC));
-    S_00bc2f30_Vec sortVec;
-    m68.FUN_00524c40(&sortVec, &unkAC);
-    S_00bc2f30_Bound b;
-    b.w = mB8 * m98;
-    b.x = sortVec.x;
-    b.y = sortVec.y;
-    b.z = sortVec.z;
+    NiPoint3 sortVec;
+    m68.FUN_00524c40(&sortVec, reinterpret_cast<const NiSphere*>(&mAC));
+    // The original fills this storage without calling the NiBound constructor.
+    NiSphere storage;
+    NiBound& b = *reinterpret_cast<NiBound*>(&storage);
+    b.m_fRadius = mAC.m_fRadius * m68.m_fScale;
+    b.m_kCenter = sortVec;
     S_00bc2f30_Add(a, b.FUN_00a7fb20("Alpha Sort Bound"));
 }

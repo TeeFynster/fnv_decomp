@@ -1,31 +1,18 @@
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiFixedString.h"
+#include "../../../../include/NiExtraData.h"
+#include "../../../../include/NiStringExtraData.h"
+#include "../../../../include/NiStream.h"
 
 // src/gamebryo2.2/corelibs/nimain/nistringextradata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nistringextradata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-class NiStream
-{
-  public:
-    void SerializeString(const char* str);
-};
-
-class NiExtraData
-{
-  public:
-    void SaveBinary(NiStream& stream);
-};
-
-class NiStringExtraData : public NiExtraData
-{
-  public:
-    char m_kStringBuffer[1];
-    void FUN_00a74200(NiStream& stream);
-};
 
 // @fnv 0x00a74200
 void NiStringExtraData::FUN_00a74200(NiStream& stream)
 {
     NiExtraData::SaveBinary(stream);
-    stream.SerializeString(m_kStringBuffer + 0xc);
+    stream.SerializeString(m_kStringBuffer);
 }
 
 extern "C" void* DAT_011f4a38;
@@ -37,14 +24,6 @@ void* __cdecl FUN_00a74220()
     return &DAT_011f4a38;
 }
 
-struct NiExtraDataHelper
-{
-    void FUN_00a7b2e0();
-};
-struct BSFadeNode
-{
-    void* operator new(unsigned int);
-};
 extern "C" int EmptyFS;
 extern "C" void* DAT_0109d39c;
 // @fnv 0x00a74230
@@ -53,47 +32,34 @@ void* __cdecl FUN_00a74230()
     void* p = BSFadeNode::operator new(0x10);
     if (p)
     {
-        ((NiExtraDataHelper*)p)->FUN_00a7b2e0();
+        static_cast<NiExtraData*>(p)->FUN_00a7b2e0();
         *(void**)p = &DAT_0109d39c;
-        *(int*)((char*)p + 0xc) = EmptyFS;
+        static_cast<NiStringExtraData*>(p)->m_p = reinterpret_cast<char*>(EmptyFS);
         return p;
     }
     return 0;
 }
 
+// Standalone implementations cover members absent from the shared headers.
+// The unused EDX argument preserves the original ECX/stack calling convention.
 namespace fnv_00a74260 {
-struct NiFixedString
-{
-    char m_kStringBuffer[1];
-};
 struct NiStreamHelper
 {
     void ReadFixedString(NiFixedString&);
     void ReadStringTableEntry(NiFixedString&);
 };
-struct NiExtraDataHelper
-{
-    void LoadBinary(NiStream&);
-};
-struct NiStringExtraDataShell : NiStringExtraData
-{
-    void FUN_00a74260(NiStream& stream);
-};
 // @fnv 0x00a74260
-void NiStringExtraDataShell::FUN_00a74260(NiStream& stream)
+void __fastcall NiStringExtraData_LoadBinary(NiStringExtraData* self, void*, NiStream& stream)
 {
-    ((NiExtraDataHelper*)this)->LoadBinary(stream);
+    self->NiExtraData::LoadBinary(stream);
     if (*(unsigned int*)((char*)&stream + 0xd8) < 0x14010001)
-        ((NiStreamHelper*)&stream)->ReadFixedString(*(NiFixedString*)((char*)this + 0xc));
+        ((NiStreamHelper*)&stream)->ReadFixedString(*reinterpret_cast<NiFixedString*>(&self->m_p));
     else
-        ((NiStreamHelper*)&stream)->ReadStringTableEntry(*(NiFixedString*)((char*)this + 0xc));
+        ((NiStreamHelper*)&stream)->ReadStringTableEntry(*reinterpret_cast<NiFixedString*>(&self->m_p));
 }
 }  // namespace fnv_00a74260
 
-struct FUN_00a7b290_shell
-{
-    bool FUN_00a7b290(NiStream&);
-};
+extern "C" bool FUN_00a7b290();
 struct VHack
 {
     virtual void v0();
@@ -106,38 +72,24 @@ struct VHack
     virtual void v7();
     virtual void v8(const char*);
 };
-struct FUN_00a741d0_shell : NiStringExtraData
-{
-    bool LoadStringExtraData(NiStream&);
-};
 // @fnv 0x00a741d0
-bool FUN_00a741d0_shell::LoadStringExtraData(NiStream& stream)
+bool __fastcall NiStringExtraData_RegisterStreamables(NiStringExtraData* self, void*, NiStream& stream)
 {
-    if (!((FUN_00a7b290_shell*)this)->FUN_00a7b290(stream))
+    if (!reinterpret_cast<bool (__thiscall*)(NiExtraData*, NiStream&)>(&FUN_00a7b290)(self, stream))
         return false;
-    ((VHack*)&stream)->v8((char*)this + 12);
+    ((VHack*)&stream)->v8(self->m_kStringBuffer);
     return true;
 }
 
-struct S_00a742a0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-
-    unsigned char Equals(S_00a742a0* pOther);
-};
-
 // @fnv 0x00a742a0
-unsigned char S_00a742a0::Equals(S_00a742a0* pOther)
+unsigned char __fastcall NiStringExtraData_Equals(NiStringExtraData* self, void*, NiStringExtraData* pOther)
 {
     if (pOther == 0)
     {
         return 0;
     }
 
-    return this->unk0c == pOther->unk0c;
+    return self->m_p == pOther->m_p;
 }
 
 extern "C" void* DAT_0109d39c;
@@ -145,34 +97,22 @@ extern "C" void* DAT_0109b220;
 extern "C" __declspec(dllimport) void __stdcall FUN_00fdf1c4_import(void* apMemory);
 void __cdecl FUN_00aa1460(void* apMemory, unsigned int auiSize);
 
-struct FUN_00a742c0_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    char* m_pData;
-
-    void FUN_00a7b300();
-
-    FUN_00a742c0_cls* Destroy(unsigned int acFlags);
-};
-
 // Resets the vtable pointer, frees the data buffer if it is not the default, calls FUN_00a7b300, and optionally deallocates the object.
 // @fnv 0x00a742c0
-FUN_00a742c0_cls* FUN_00a742c0_cls::Destroy(unsigned int acFlags)
+NiStringExtraData* __fastcall NiStringExtraData_Destroy(NiStringExtraData* self, void*, unsigned int acFlags)
 {
-    *(volatile int*)&unk00 = (int)&DAT_0109d39c;
-    char* pData = *(char* volatile*)&m_pData;
+    *reinterpret_cast<volatile int*>(self) = (int)&DAT_0109d39c;
+    char* pData = *(char* volatile*)&self->m_p;
     if (pData != (char*)DAT_0109b220)
     {
         FUN_00fdf1c4_import(pData - 8);
     }
-    FUN_00a7b300();
+    self->FUN_00a7b300();
     if (acFlags & 1)
     {
-        FUN_00aa1460(this, 0x10);
+        FUN_00aa1460(self, 0x10);
     }
-    return this;
+    return self;
 }
 
 namespace fnv_00a74300 {
@@ -182,44 +122,33 @@ extern "C" void* DAT_0109d39c;
 extern "C" void(__stdcall* DAT_00fdf1c0)(void*);
 extern "C" void(__stdcall* DAT_00fdf1c4)(void*);
 
-struct FUN_00a74300_cls
-{
-    void* vptr;
-    int unk04;
-    int unk08;
-    char* m_0c;
-
-    void* CreateCopy(int arg);
-    void FUN_00a7b330(FUN_00a74300_cls* obj, int arg);
-};
-
 // @fnv 0x00a74300
-void* FUN_00a74300_cls::CreateCopy(int arg)
+void* __fastcall NiStringExtraData_CreateCopy(NiStringExtraData* self, void*, int arg)
 {
-    FUN_00a74300_cls* esi = (FUN_00a74300_cls*)FUN_00aa13e0(0x10);
+    NiStringExtraData* esi = (NiStringExtraData*)FUN_00aa13e0(0x10);
     if (esi != 0)
     {
-        reinterpret_cast<NiExtraDataHelper*>(esi)->FUN_00a7b2e0();
-        esi->vptr = (void*)&DAT_0109d39c;
-        esi->m_0c = DAT_0109b220;
+        esi->FUN_00a7b2e0();
+        *reinterpret_cast<void**>(esi) = (void*)&DAT_0109d39c;
+        esi->m_p = DAT_0109b220;
     }
     else
     {
         esi = 0;
     }
-    FUN_00a7b330(esi, arg);
-    char* edi = m_0c;
-    if (esi->m_0c != edi)
+    self->FUN_00a7b330(esi, reinterpret_cast<void*>(arg));
+    char* edi = self->m_p;
+    if (esi->m_p != edi)
     {
         if (edi != DAT_0109b220)
         {
             DAT_00fdf1c0(edi - 8);
         }
-        if (esi->m_0c != DAT_0109b220)
+        if (esi->m_p != DAT_0109b220)
         {
-            DAT_00fdf1c4(esi->m_0c - 8);
+            DAT_00fdf1c4(esi->m_p - 8);
         }
-        esi->m_0c = edi;
+        esi->m_p = edi;
     }
     return esi;
 }
@@ -249,17 +178,13 @@ struct NiStrTable
 extern "C" char* __cdecl FUN_00a7d330(char* s);
 extern "C" char* __cdecl FUN_00a7d5e0(const char* key, char* value);
 
-struct FUN_00a74380_shell : NiStringExtraData
-{
-    void FUN_00a7b580(NiStream& stream);
-    void FUN_00a74380(NiStream& stream);
-};
+extern "C" void FUN_00a7b580();
 
 // @fnv 0x00a74380
-void FUN_00a74380_shell::FUN_00a74380(NiStream& stream)
+void __fastcall NiStringExtraData_GetViewerStrings(NiStringExtraData* self, void*, NiStream& stream)
 {
-    FUN_00a7b580(stream);
+    reinterpret_cast<void (__thiscall*)(NiExtraData*, NiStream&)>(&FUN_00a7b580)(self, stream);
     reinterpret_cast<NiStrTable&>(stream).Add(FUN_00a7d330((char*)DAT_011f4a38));
-    char* s = *(char**)((char*)this + 0x0c);
+    char* s = self->m_p;
     reinterpret_cast<NiStrTable&>(stream).Add(FUN_00a7d5e0("m_kString", s));
 }

@@ -1,3 +1,4 @@
+#include "../../../include/NiTListItem.h"
 
 //
 // fallout_shared/tempeffects/bstempeffectdebris.cpp
@@ -8,6 +9,7 @@
 //
 
 #include "bstempeffectdebris.h"
+#include "../../../include/BSFaceGenKeyframe.h"
 
 // @fnv 0x00619b40
 bool BSTempEffectDebris::ShouldDelete(void)
@@ -238,12 +240,7 @@ void __cdecl RemoveMenuEntry(B83330Item* pkItem)
     }
 }
 
-struct C683550Item
-{
-    C683550Item* m_pkNext;
-    C683550Item* m_pkPrev;
-    void* m_element;
-};
+typedef NiTListItem<void* > C683550Item;
 
 typedef void* C683550Iterator;
 
@@ -669,94 +666,7 @@ struct FaceGenForm
     virtual void* GetForm();
 };
 
-class BSFaceGenKeyframe
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual FaceGenForm* vf98();
-
-    double GetTime();
-    double FUN_00621b00();
-    bool FUN_006828a0(float fArg);
-    bool FUN_006830a0(float fArg);
-
-    unsigned int unk04;
-    float unk08;
-    float unk0C;
-    int unk10;
-    int unk14;
-    void* unk18;
-    void* unk1C;
-    unsigned char byte20;
-    unsigned char byte21;
-};
-
 void __cdecl FUN_00b6bb30(void* pForm, float fValue);
-
-// @fnv 0x006830a0
-bool BSFaceGenKeyframe::FUN_006830a0(float fArg)
-{
-    bool result5 = FUN_006828a0(fArg);
-    if (byte21)
-    {
-        result5 = false;
-    }
-    if (result5)
-    {
-        float delta8 = GetTime() - FUN_00621b00();
-        if (delta8 >= _gModifierZero)
-        {
-            if (delta8 <= *g_011cfbfc.Float())
-            {
-                FaceGenForm* obj2 = vf98();
-                void* b = obj2 ? obj2->GetForm() : 0;
-                if (b)
-                {
-                    float v_ = delta8 / *g_011cfbfc.Float();
-                    FUN_00b6bb30(b, v_);
-                }
-            }
-        }
-    }
-    return result5;
-}
 
 struct WorldObj;
 struct WorldNode
@@ -954,6 +864,34 @@ struct FUN_00683190_shell
     WorldCell* FUN_0084e3a0();
     void AttachCollisionObject(WorldActor* pkActor);
 };
+// @fnv 0x006830a0
+bool BSFaceGenKeyframe::FUN_006830a0(float fArg)
+{
+    bool result5 = FUN_006828a0(fArg);
+    if (reinterpret_cast<BSTempEffectDebris*>(this)->bForceDelete)
+    {
+        result5 = false;
+    }
+    if (result5)
+    {
+        float delta8 = GetTime() - FUN_00621b00();
+        if (delta8 >= _gModifierZero)
+        {
+            if (delta8 <= *g_011cfbfc.Float())
+            {
+                FaceGenForm* obj2 = reinterpret_cast<FaceGenForm*>(reinterpret_cast<FUN_00683190_shell*>(this)->Get3D());
+                void* b = obj2 ? obj2->GetForm() : 0;
+                if (b)
+                {
+                    float v_ = delta8 / *g_011cfbfc.Float();
+                    FUN_00b6bb30(b, v_);
+                }
+            }
+        }
+    }
+    return result5;
+}
+
 // Resolves the object from the 3D node (via fade or child nodes), then adds it to the cell's havok world with the actor's collision filter.
 // @fnv 0x00683190
 void FUN_00683190_shell::AttachCollisionObject(WorldActor* pkActor)

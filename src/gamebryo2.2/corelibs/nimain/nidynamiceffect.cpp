@@ -1,18 +1,56 @@
-// gamebryo2.2/corelibs/nimain/nidynamiceffect.cpp: EffectObject, FNVEffect (7 functions)
+// gamebryo2.2/corelibs/nimain/nidynamiceffect.cpp: NiDynamicEffect (7 functions)
 
+#include "../../../../include/NiDynamicEffect.h"
+#include "../../../../include/NiTListItem.h"
+#include "../../../../include/BSStreamHeader.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/BSShaderLightingProperty.h"
 #include "nidynamiceffect_decls.h"
+#include "../../../../include/StrArr.h"
+
+// Exe 0x00a69070 uses NiTPointerList nodes (next, prev, value) and head/tail/count.
+static inline NiTPointerList<NiNode*>& EffectNodes(NiTPointerList<NiNode*>& nodes)
+{
+    return nodes;
+}
+static inline const NiTPointerList<NiNode*>& EffectNodes(const NiTPointerList<NiNode*>& nodes)
+{
+    return nodes;
+}
+
+static inline void InitializeEffectNodes(NiTPointerList<NiNode*>& nodes)
+{
+    EffectNodes(nodes).m_kItemCount.m_uiCount = 0;
+    EffectNodes(nodes).m_pkHead = 0;
+    EffectNodes(nodes).m_pkTail = 0;
+}
+
+inline unsigned int NiBinaryStream::Read(void* data, unsigned int size)
+{
+    unsigned int componentSizes[1] = {size};
+    return BinaryRead(data, size, componentSizes, 1);
+}
+
+inline unsigned int NiBinaryStream::BinaryRead(void* data, unsigned int size, unsigned int* componentSizes,
+                                              unsigned int components)
+{
+    unsigned int read = m_pfnRead(this, data, size, componentSizes, components);
+    m_uiAbsoluteCurrentPos += read;
+    return read;
+}
 
 // @fnv 0x00a68ea0
 void NiDynamicEffect::LoadBinary(NiStream& stream)
 {
     NiAVObject::LoadBinary(stream);
-    if (stream.m_uiNifVersion >= 0x0a010066)
+    if (stream.m_uiNifFileVersion >= 0x0a010066)
     {
         unsigned char on;
         ReadBinaryValue(stream, on);
-        m_bEffectEnabled = on != 0;
+        switchState = on != 0;
     }
-    if (stream.m_uiNifVersion < 0x04010000)
+    if (stream.m_uiNifFileVersion < 0x04010000)
     {
         int count;
         ReadBinaryValue(stream, count);
@@ -22,7 +60,7 @@ void NiDynamicEffect::LoadBinary(NiStream& stream)
             ReadBinaryValue(stream, linkID);
         }
     }
-    if (stream.m_uiNifVersion >= 0x0a00010e)
+    if (stream.m_uiNifFileVersion >= 0x0a00010e)
         stream.ReadUnsignedInteger();
 }
 
@@ -30,7 +68,7 @@ void NiDynamicEffect::LoadBinary(NiStream& stream)
 void NiDynamicEffect::LinkObject(NiStream& stream)
 {
     NiAVObject::LinkObject(stream);
-    if (stream.m_uiNifVersion >= 0x0a00010e)
+    if (stream.m_uiNifFileVersion >= 0x0a00010e)
     {
         unsigned int count = stream.GetLinkID();
         while (count--)
@@ -41,13 +79,13 @@ void NiDynamicEffect::LinkObject(NiStream& stream)
                 NiTListItem<NiNode*>* item = NiDynamicEffectNewListItem();
                 item->m_element = node;
                 item->m_pkPrev = 0;
-                item->m_pkNext = m_kAffectedNodes.m_pkHead;
-                if (m_kAffectedNodes.m_pkHead)
-                    m_kAffectedNodes.m_pkHead->m_pkPrev = item;
+                item->m_pkNext = EffectNodes(unaffectedNodes).m_pkHead;
+                if (EffectNodes(unaffectedNodes).m_pkHead)
+                    EffectNodes(unaffectedNodes).m_pkHead->m_pkPrev = item;
                 else
-                    m_kAffectedNodes.m_pkTail = item;
-                ++m_kAffectedNodes.m_kItemCount.m_uiCount;
-                m_kAffectedNodes.m_pkHead = item;
+                    EffectNodes(unaffectedNodes).m_pkTail = item;
+                ++EffectNodes(unaffectedNodes).m_kItemCount.m_uiCount;
+                EffectNodes(unaffectedNodes).m_pkHead = item;
             }
         }
     }
@@ -55,145 +93,111 @@ void NiDynamicEffect::LinkObject(NiStream& stream)
 
 // @fnv 0x00a69320
 NiDynamicEffect::NiDynamicEffect()
-    : m_bEffectEnabled(true), m_ucEffectCategory(0xff), m_uiEffectPushCount(0), m_uiRevID(1)
+    : switchState(true), effectType(0xff), pushCount(0), revID(1)
 {
-    m_iIndex = InterlockedIncrement(&DAT_011a9b58);
+    InitializeEffectNodes(shadowGenerator);
+    InitializeEffectNodes(unaffectedNodes);
+    iIndex = InterlockedIncrement(&DAT_011a9b58);
 }
 
 void __fastcall FUN_00a5a390(void*);
 void __fastcall FUN_00a68e30(void*);
-struct BSShaderLightingProperty
-{
-    void ClearLights();
-};
 void __cdecl _delete(void*, unsigned int);
 
 extern const void* vftable_NiDynamicEffect;
 
-struct FUN_00a69390_shell : public NiDynamicEffect
-{
-    void* __thiscall DestroyNiDynamicEffect(unsigned int flags);
-};
-
+// The scalar deleting destructor takes its flags on the stack and this in ECX.
+// A free fastcall helper preserves that ABI without a stand-in derived class.
 // @fnv 0x00a69390
-void* __thiscall FUN_00a69390_shell::DestroyNiDynamicEffect(unsigned int flags)
+void* __fastcall DestroyNiDynamicEffect(NiDynamicEffect* effect, void*, unsigned int flags)
 {
-    *reinterpret_cast<void**>(this) = &vftable_NiDynamicEffect;
-    FUN_00a68e30(this);
-    reinterpret_cast<BSShaderLightingProperty*>(reinterpret_cast<char*>(this) + 0xb8)->ClearLights();
-    reinterpret_cast<BSShaderLightingProperty*>(reinterpret_cast<char*>(this) + 0xac)->ClearLights();
-    FUN_00a5a390(this);
+    *reinterpret_cast<void**>(effect) = &vftable_NiDynamicEffect;
+    FUN_00a68e30(effect);
+    reinterpret_cast<BSShaderLightingProperty*>(&effect->unaffectedNodes)->ClearLights();
+    reinterpret_cast<BSShaderLightingProperty*>(&effect->shadowGenerator)->ClearLights();
+    FUN_00a5a390(effect);
     if (flags & 1)
-        _delete(this, 0xc4);
-    return this;
+        _delete(effect, 0xc4);
+    return effect;
 }
 
-struct StrArr
+inline unsigned int StrArr::Add(char* const& element)
 {
-    void* m_vtbl;
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char* const&);
-    unsigned int Add(char* const& element)
+    unsigned int uiIndex = m_usSize;
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+inline void StrArr::SetAtInline(unsigned int uiIndex, char* element)
+{
+    if (uiIndex >= m_usSize)
     {
-        unsigned int uiIndex = m_usSize;
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
+        m_usSize = (unsigned short)(uiIndex + 1);
+        if (element)
+            m_usESize++;
     }
-    void SetAtInline(unsigned int uiIndex, char* element)
+    else
     {
-        if (uiIndex >= m_usSize)
+        if (element)
         {
-            m_usSize = (unsigned short)(uiIndex + 1);
-            if (element)
+            if (m_pBase[uiIndex] == 0)
                 m_usESize++;
         }
         else
         {
-            if (element)
-            {
-                if (m_pBase[uiIndex] == 0)
-                    m_usESize++;
-            }
-            else
-            {
-                if (m_pBase[uiIndex] != 0)
-                    m_usESize--;
-            }
+            if (m_pBase[uiIndex] != 0)
+                m_usESize--;
         }
-        m_pBase[uiIndex] = element;
     }
-    unsigned int AddInline(char* element)
-    {
-        unsigned int uiIndex = m_usSize;
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAtInline(uiIndex, element);
-        return uiIndex;
-    }
-};
-struct FUN_00a5ea70_t
+    m_pBase[uiIndex] = element;
+}
+inline unsigned int StrArr::AddInline(char* element)
 {
-    void FUN_00a5ad00(StrArr*);
+    unsigned int uiIndex = m_usSize;
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAtInline(uiIndex, element);
+    return uiIndex;
+}
+
+// These NiAVObject entry points retain the signatures used by this unit.
+struct NiAVObjectEffectMethods
+{
+    void AppendEffectProperties(StrArr*);
+    bool IsEqual(NiObject*) const;
 };
 int NiSprintf(char*, unsigned int, const char*, ...);
 char* FUN_00a7d330(const char*);
 char* __cdecl FUN_00a7d5a0(const char*, void*);
 extern const char* const g_011f4a28_arg1;
-struct NiNode;
-struct Zx3ListNode
+static inline NiNode* GetNext(NiTListItem<NiNode*>*& node)
 {
-    Zx3ListNode* m_pkNext;
-    Zx3ListNode* m_pkPrev;
-    NiNode* m_element;
-};
-inline NiNode* Zx3GetNext(Zx3ListNode*& kPos)
-{
-    NiNode*& element = kPos->m_element;
-    kPos = kPos->m_pkNext;
+    NiNode*& element = node->m_element;
+    node = node->m_pkNext;
     return element;
 }
-struct Zx3Effect : public NiAVObject
-{
-    bool m_bEffectEnabled;
-    unsigned char m_ucEffectCategory;
-    int m_iIndex;
-    unsigned int m_uiEffectPushCount;
-    unsigned int m_uiRevID;
-    Zx3ListNode* m_pkAffectedHead;
-    Zx3ListNode* m_pkAffectedTail;
-    int m_uiAffectedCount;
-    Zx3ListNode* m_pkUnaffectedHead;
-    void FUN_00a69140(StrArr* pkStrings);
-};
-
 // @fnv 0x00a69140
-void Zx3Effect::FUN_00a69140(StrArr* pkStrings)
+void NiDynamicEffect::AppendEffectProperties(StrArr* pkStrings)
 {
-    ((FUN_00a5ea70_t*)this)->FUN_00a5ad00(pkStrings);
-    pkStrings->Add(FUN_00a7d330(g_011f4a28_arg1));
-    if (m_uiAffectedCount)
+    reinterpret_cast<NiAVObjectEffectMethods*>(this)->AppendEffectProperties(pkStrings);
+    (pkStrings->*static_cast<unsigned int (StrArr::*)(char* const&)>(&StrArr::Add))(FUN_00a7d330(g_011f4a28_arg1));
+    if (EffectNodes(shadowGenerator).m_kItemCount.m_uiCount)
     {
-        Zx3ListNode* kPos = m_pkAffectedHead;
+        NiTListItem<NiNode*>* kPos = EffectNodes(shadowGenerator).m_pkHead;
         int i = 0;
         while (kPos)
         {
-            NiNode* pkNode = Zx3GetNext(kPos);
+            NiNode* pkNode = GetNext(kPos);
             char acPrefix[64];
             NiSprintf(acPrefix, 64, "affected node[%d]", i);
             pkStrings->AddInline(FUN_00a7d5a0(acPrefix, pkNode));
             i++;
         }
-        kPos = m_pkUnaffectedHead;
+        kPos = EffectNodes(unaffectedNodes).m_pkHead;
         while (kPos)
         {
-            NiNode* pkNode = Zx3GetNext(kPos);
+            NiNode* pkNode = GetNext(kPos);
             char acPrefix[64];
             NiSprintf(acPrefix, 64, "unaffected node[%d]", i);
             pkStrings->AddInline(FUN_00a7d5a0(acPrefix, pkNode));
@@ -202,36 +206,31 @@ void Zx3Effect::FUN_00a69140(StrArr* pkStrings)
     }
 }
 
-struct EffectObject : NiDynamicEffect
-{
-    void __thiscall FUN_00a5a900(NiStream* stream);
-    void __thiscall SaveToStream(NiStream* stream);
-};
 static __forceinline unsigned int WriteBytes(NiBinaryStream* output, const void* bytes, unsigned int length)
 {
     unsigned int componentLength = length;
     unsigned int written = output->m_pfnWrite(output, bytes, length, &componentLength, 1);
-    output->m_uiStreamFlags += written;
+    output->m_uiAbsoluteCurrentPos += written;
     return written;
 }
-typedef void(__thiscall* SaveLinkedObject)(NiStream*, NiNode*);
 static __forceinline void WriteLinkedObject(NiStream* stream, NiNode*& object)
 {
-    ((SaveLinkedObject*)stream->m_ppVirtualMethodTable)[12](stream, object);
+    stream->SaveLinkID(reinterpret_cast<const NiObject*>(object));
 }
 // @fnv 0x00a68f80
-void __thiscall EffectObject::SaveToStream(NiStream* stream)
+void NiDynamicEffect::SaveBinary(NiStream& streamRef)
 {
-    FUN_00a5a900(stream);
-    unsigned char enabled = m_bEffectEnabled;
-    NiBinaryStream* output = stream->m_pBackingStream;
+    NiStream* stream = &streamRef;
+    NiAVObject::SaveBinary(streamRef);
+    unsigned char enabled = switchState;
+    NiBinaryStream* output = stream->m_pkOstr;
     WriteBytes(output, &enabled, 1);
-    int objectCount = m_kAffectedNodes.m_kItemCount.m_uiCount;
-    output = stream->m_pBackingStream;
+    int objectCount = EffectNodes(unaffectedNodes).m_kItemCount.m_uiCount;
+    output = stream->m_pkOstr;
     WriteBytes(output, &objectCount, 4);
     if (objectCount > 0)
     {
-        NiTListItem<NiNode*>* node = m_kAffectedNodes.m_pkTail;
+        NiTListItem<NiNode*>* node = EffectNodes(unaffectedNodes).m_pkTail;
         while (node)
         {
             NiNode*& element = node->m_element;
@@ -241,30 +240,19 @@ void __thiscall EffectObject::SaveToStream(NiStream* stream)
     }
 }
 
-static inline NiNode* GetNext(NiTListItem<NiNode*>*& node)
-{
-    NiNode*& element = node->m_element;
-    node = node->m_pkNext;
-    return element;
-}
-class FNVEffect : public NiDynamicEffect
-{
-  public:
-    bool __thiscall FUN_00a5a260(FNVEffect* other);
-    bool __thiscall FUN_00a68d80(FNVEffect* other);
-};
 // Returns false if counts differ or paired entries differ in nullness; otherwise returns true if FUN_00a5a260 succeeds.
 // @fnv 0x00a68d80
-bool __thiscall FNVEffect::FUN_00a68d80(FNVEffect* other)
+bool NiDynamicEffect::IsEqual(NiObject* object) const
 {
-    if (!FUN_00a5a260(other))
+    const NiDynamicEffect* other = static_cast<NiDynamicEffect*>(object);
+    if (!reinterpret_cast<const NiAVObjectEffectMethods*>(this)->IsEqual(object))
         return false;
-    if (m_kEffectTargetNodes.m_kItemCount.m_uiCount != other->m_kEffectTargetNodes.m_kItemCount.m_uiCount)
+    if (EffectNodes(shadowGenerator).m_kItemCount.m_uiCount != EffectNodes(other->shadowGenerator).m_kItemCount.m_uiCount)
         return false;
-    if (m_kEffectTargetNodes.m_kItemCount.m_uiCount > 0)
+    if (EffectNodes(shadowGenerator).m_kItemCount.m_uiCount > 0)
     {
-        NiTListItem<NiNode*>* left = m_kEffectTargetNodes.m_pkHead;
-        NiTListItem<NiNode*>* right = other->m_kEffectTargetNodes.m_pkHead;
+        NiTListItem<NiNode*>* left = EffectNodes(shadowGenerator).m_pkHead;
+        NiTListItem<NiNode*>* right = EffectNodes(other->shadowGenerator).m_pkHead;
         while (left)
         {
             NiNode* pLeftNode = GetNext(left);
@@ -275,12 +263,12 @@ bool __thiscall FNVEffect::FUN_00a68d80(FNVEffect* other)
                 return false;
         }
     }
-    if (m_kAffectedNodes.m_kItemCount.m_uiCount != other->m_kAffectedNodes.m_kItemCount.m_uiCount)
+    if (EffectNodes(unaffectedNodes).m_kItemCount.m_uiCount != EffectNodes(other->unaffectedNodes).m_kItemCount.m_uiCount)
         return false;
-    if (m_kAffectedNodes.m_kItemCount.m_uiCount > 0)
+    if (EffectNodes(unaffectedNodes).m_kItemCount.m_uiCount > 0)
     {
-        NiTListItem<NiNode*>* left = m_kAffectedNodes.m_pkHead;
-        NiTListItem<NiNode*>* right = other->m_kAffectedNodes.m_pkHead;
+        NiTListItem<NiNode*>* left = EffectNodes(unaffectedNodes).m_pkHead;
+        NiTListItem<NiNode*>* right = EffectNodes(other->unaffectedNodes).m_pkHead;
         while (left)
         {
             NiNode* pLeftNode = GetNext(left);

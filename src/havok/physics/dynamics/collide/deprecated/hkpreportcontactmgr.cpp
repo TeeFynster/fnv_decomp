@@ -1,6 +1,73 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
 
 // src/havok/physics/dynamics/collide/deprecated/hkpreportcontactmgr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/collide/deprecated/hkpreportcontactmgr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+// Exe 0x00cfc5f0 processContactPoint: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    struct
+    {
+        float x, y, z, w;
+    };
+    struct
+    {
+        unsigned __int64 low, high;
+    };
+} __m128, LocalM128;
+
+extern "C"
+{
+    LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+    void _mm_store_ss(float* p, LocalM128 a);
+}
+
+// The intrinsic type is already defined; retain its buffer-free layout for MSVC /GS.
+#define _INCLUDED_MM2
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkContactPoint.h"
+#include "../../../../../../include/hkpRigidBody.h"
+
+
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4::add4(const hkVector4& a)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
+}
+
+__forceinline void hkVector4::setCross(const hkVector4& a, const hkVector4& b)
+{
+    const LocalM128 a1 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9);
+    const LocalM128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2);
+    const LocalM128 a2 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2);
+    const LocalM128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9);
+    m_vComponents = _mm_sub_ps(_mm_mul_ps(a1, b1), _mm_mul_ps(a2, b2));
+}
+
+__forceinline float hkVector4::dot3scalar(const hkVector4& a) const
+{
+    const LocalM128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    const LocalM128 r = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2));
+    float s;
+    _mm_store_ss(&s, r);
+    return s;
+}
+
+#include "../../../../../../include/hkpSimpleConstraintContactMgr.h"
+
+inline const hkVector4& hkContactPoint::getNormal() const
+{
+    return m_vSeparatingNormal;
+}
 
 extern "C" void* DAT_010cc8bc;
 
@@ -491,131 +558,6 @@ void S_Cfca40_Factory::CreateElement(S_Cfca40_AdjustedSource* apFirstSource, S_C
     pElement->FUN_00cfc5a0(m_iValueAtOffset0C, firstData, secondData);
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    struct
-    {
-        float x, y, z, w;
-    };
-    struct
-    {
-        unsigned __int64 low, high;
-    };
-};
-
-extern "C"
-{
-    __m128 _mm_add_ps(__m128 a, __m128 b);
-    __m128 _mm_sub_ps(__m128 a, __m128 b);
-    __m128 _mm_mul_ps(__m128 a, __m128 b);
-    __m128 _mm_add_ss(__m128 a, __m128 b);
-    __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-    void _mm_store_ss(float* p, __m128 a);
-}
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void add4(const hkVector4& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void setCross(const hkVector4& a, const hkVector4& b)
-    {
-        const __m128 a1 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9);
-        const __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2);
-        const __m128 a2 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2);
-        const __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9);
-        m_vComponents = _mm_sub_ps(_mm_mul_ps(a1, b1), _mm_mul_ps(a2, b2));
-    }
-    __forceinline float dot3(const hkVector4& a) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        const __m128 r = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2));
-        float s;
-        _mm_store_ss(&s, r);
-        return s;
-    }
-};
-
-struct hkContactPoint
-{
-    hkVector4 m_vContactPosition;
-    hkVector4 m_vSeparatingNormal;
-
-    const hkVector4& getPosition() const
-    {
-        return m_vContactPosition;
-    }
-    const hkVector4& getNormal() const
-    {
-        return m_vSeparatingNormal;
-    }
-};
-
-struct hkpRigidBody
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    hkVector4 unk010;
-    hkVector4 unk020;
-    hkVector4 unk030;
-    hkVector4 unk040;
-    hkVector4 unk050;
-    hkVector4 unk060;
-    hkVector4 unk070;
-    hkVector4 unk080;
-    hkVector4 unk090;
-    hkVector4 unk0A0;
-    hkVector4 unk0B0;
-    hkVector4 unk0C0;
-    hkVector4 unk0D0;
-    hkVector4 unk0E0;
-    hkVector4 unk0F0;
-    hkVector4 unk100;
-    hkVector4 unk110;
-    hkVector4 unk120;
-    hkVector4 unk130;
-    hkVector4 m_centerOfMassWorld;  // 0x140
-    hkVector4 unk150;
-    hkVector4 unk160;
-    hkVector4 unk170;
-    hkVector4 unk180;
-    hkVector4 unk190;
-    hkVector4 unk1A0;
-    hkVector4 m_kTranslationalVelocity;  // 0x1b0
-    hkVector4 m_kAngularVelocity;        // 0x1c0
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    unsigned short m_contactListenersSize;  // 0x204
-
-    __forceinline void getPointVelocity(const hkVector4& p, hkVector4& vecOut) const
-    {
-        hkVector4 relPos;
-        relPos.setSub4(p, m_centerOfMassWorld);
-        vecOut.setCross(m_kAngularVelocity, relPos);
-        vecOut.add4(m_kTranslationalVelocity);
-    }
-};
-
 struct hkpCdBody;
 struct GskAgentInput;
 struct ConvexFeaturePairCache;
@@ -625,8 +567,6 @@ struct WorldOperationEntry
     int unk00;
     void* m_pConstraintOwner;
 };
-
-struct hkpSimpleConstraintContactMgr;
 
 struct ContactPointProcessingData
 {
@@ -654,29 +594,11 @@ struct hkpWorld;
 void FUN_00d01850(hkpWorld* world, ContactPointProcessingData& event);
 void FUN_00d00110(hkpRigidBody* entity, ContactPointProcessingData& event);
 
-struct hkpSimpleConstraintContactMgr
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0C();
-    virtual void vf10();
-    virtual void removeContactPoint(unsigned int id, void* constraintOwner);
 
-    int unk04;
-    int unk08;
-    hkpWorld* m_pOwningWorld;
-    hkpRigidBody* m_pEntityA;
-    hkpRigidBody* m_pEntityB;
-    unsigned short m_nextProcessCollideDelay;
-
-    unsigned int FUN_00cfc5f0(const hkpCdBody& a, const hkpCdBody& b, const GskAgentInput& input,
-                              WorldOperationEntry& output, const ConvexFeaturePairCache* contactCache, hkContactPoint& cp);
-};
 
 // Computes projected velocity at the contact point, dispatches a ContactPointProcessingData event, and removes the contact point if the result code is 1.
 // @fnv 0x00cfc5f0
-unsigned int hkpSimpleConstraintContactMgr::FUN_00cfc5f0(const hkpCdBody& a, const hkpCdBody& b,
+unsigned int hkpSimpleConstraintContactMgr::processContactPoint(const hkpCdBody& a, const hkpCdBody& b,
                                                          const GskAgentInput& input, WorldOperationEntry& output,
                                                          const ConvexFeaturePairCache* contactCache, hkContactPoint& cp)
 {
@@ -685,42 +607,42 @@ unsigned int hkpSimpleConstraintContactMgr::FUN_00cfc5f0(const hkpCdBody& a, con
 
     float fProjectedVelocity;
     {
-        __m128 point = cp.m_vContactPosition.m_vComponents;
-        __m128 comA = rbA->m_centerOfMassWorld.m_vComponents;
-        __m128 offsetA = _mm_sub_ps(point, comA);
-        __m128 angularA = rbA->m_kAngularVelocity.m_vComponents;
-        __m128 angularB = rbB->m_centerOfMassWorld.m_vComponents;
-        __m128 offsetB = _mm_sub_ps(point, angularB);
-        angularB = rbB->m_kAngularVelocity.m_vComponents;
-        __m128 firstB = _mm_shuffle_ps(offsetB, offsetB, 0xc9);
-        __m128 secondB = _mm_shuffle_ps(angularB, angularB, 0xd2);
-        __m128 thirdB = _mm_shuffle_ps(offsetB, offsetB, 0xd2);
-        __m128 fourthB = _mm_shuffle_ps(angularB, angularB, 0xc9);
+        LocalM128 point = cp.m_vContactPosition.m_vComponents;
+        LocalM128 comA = rbA->m_pMotionState.m_kMotionState.m_kSweptTransform.m_vCenterOfMass1.m_vComponents;
+        LocalM128 offsetA = _mm_sub_ps(point, comA);
+        LocalM128 angularA = rbA->m_pMotionState.m_kAngularVelocity.m_vComponents;
+        LocalM128 angularB = rbB->m_pMotionState.m_kMotionState.m_kSweptTransform.m_vCenterOfMass1.m_vComponents;
+        LocalM128 offsetB = _mm_sub_ps(point, angularB);
+        angularB = rbB->m_pMotionState.m_kAngularVelocity.m_vComponents;
+        LocalM128 firstB = _mm_shuffle_ps(offsetB, offsetB, 0xc9);
+        LocalM128 secondB = _mm_shuffle_ps(angularB, angularB, 0xd2);
+        LocalM128 thirdB = _mm_shuffle_ps(offsetB, offsetB, 0xd2);
+        LocalM128 fourthB = _mm_shuffle_ps(angularB, angularB, 0xc9);
         firstB = _mm_mul_ps(firstB, secondB);
         thirdB = _mm_mul_ps(thirdB, fourthB);
         hkVector4 vVelocityB;
-        vVelocityB.m_vComponents = _mm_add_ps(_mm_sub_ps(thirdB, firstB), rbB->m_kTranslationalVelocity.m_vComponents);
-        __m128 firstA = _mm_shuffle_ps(angularA, angularA, 0xc9);
-        __m128 secondA = _mm_shuffle_ps(offsetA, offsetA, 0xd2);
-        __m128 thirdA = _mm_shuffle_ps(angularA, angularA, 0xd2);
-        __m128 fourthA = _mm_shuffle_ps(offsetA, offsetA, 0xc9);
+        vVelocityB.m_vComponents = _mm_add_ps(_mm_sub_ps(thirdB, firstB), rbB->m_pMotionState.m_kTranslationalVelocity.m_vComponents);
+        LocalM128 firstA = _mm_shuffle_ps(angularA, angularA, 0xc9);
+        LocalM128 secondA = _mm_shuffle_ps(offsetA, offsetA, 0xd2);
+        LocalM128 thirdA = _mm_shuffle_ps(angularA, angularA, 0xd2);
+        LocalM128 fourthA = _mm_shuffle_ps(offsetA, offsetA, 0xc9);
         firstA = _mm_mul_ps(firstA, secondA);
         thirdA = _mm_mul_ps(thirdA, fourthA);
         hkVector4 vVelocityA;
-        vVelocityA.m_vComponents = _mm_add_ps(_mm_sub_ps(firstA, thirdA), rbA->m_kTranslationalVelocity.m_vComponents);
+        vVelocityA.m_vComponents = _mm_add_ps(_mm_sub_ps(firstA, thirdA), rbA->m_pMotionState.m_kTranslationalVelocity.m_vComponents);
         hkVector4 vDeltaVelocity;
         vDeltaVelocity.setSub4(vVelocityB, vVelocityA);
-        fProjectedVelocity = vDeltaVelocity.dot3(cp.getNormal());
+        fProjectedVelocity = vDeltaVelocity.dot3scalar(cp.getNormal());
     }
 
     ContactPointProcessingData event(0, this, &input, &output, &a, &b, &cp, contactCache, 0, fProjectedVelocity);
     FUN_00d01850(m_pOwningWorld, event);
 
-    if (rbA->m_contactListenersSize != 0)
+    if (rbA->m_kContactListeners.m_iElementCount != 0)
     {
         FUN_00d00110(rbA, event);
     }
-    if (rbB->m_contactListenersSize != 0)
+    if (rbB->m_kContactListeners.m_iElementCount != 0)
     {
         FUN_00d00110(rbB, event);
     }

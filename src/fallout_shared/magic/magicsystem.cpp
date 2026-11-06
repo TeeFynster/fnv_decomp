@@ -1,6 +1,7 @@
 // fallout_shared/magic/magicsystem.cpp: MagicSystem (2 functions)
 
 #include "magicsystem_decls.h"
+#include "../../../include/Setting.h"
 
 // @fnv 0x0040ca50
 void MagicSystem::InitializeMagicSystem()
@@ -243,20 +244,10 @@ void MagicSystem::InitializeMagicSystem()
     EffectSettingCollection::InitializeEffectSettings();
 }
 
-struct Setting_S
-{
-    struct Setting_Value* Float();
-};
-
-struct Setting_Value
-{
-    float f;
-};
-
-Setting_S originalRuntimeFloatSetting9;
+extern Setting originalRuntimeFloatSetting9;
 
 // @fnv 0x0040df70
 float GetOriginalRuntimeFloatSetting9()
 {
-    return originalRuntimeFloatSetting9.Float()->f;
+    return *originalRuntimeFloatSetting9.Float();
 }

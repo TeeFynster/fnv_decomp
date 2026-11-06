@@ -8,32 +8,26 @@
 #include "../../include/layout_support.h"
 
 #include <xmmintrin.h>
+#include "../../include/hkVector4.h"
+#include "../../include/hkQuaternion.h"
 extern __declspec(align(16)) const unsigned int DAT_010c44d0[4];
 
-struct hkVector4
-{
-    __m128 m_vComponents;
-};
-
-struct hkQuaternion
-{
-    hkVector4 m_vec;
-    void FUN_00d6bec0(const hkQuaternion& q, hkVector4& out) const;
-};
 
 // @fnv 0x00d6bec0
 void hkQuaternion::FUN_00d6bec0(const hkQuaternion& q, hkVector4& out) const
 {
-    out.m_vComponents = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(q.m_vec.m_vComponents, q.m_vec.m_vComponents, 0xd2),
-                                              _mm_shuffle_ps(m_vec.m_vComponents, m_vec.m_vComponents, 0xc9)),
-                                   _mm_mul_ps(_mm_shuffle_ps(q.m_vec.m_vComponents, q.m_vec.m_vComponents, 0xc9),
-                                              _mm_shuffle_ps(m_vec.m_vComponents, m_vec.m_vComponents, 0xd2)));
-    __m128 w = _mm_shuffle_ps(q.m_vec.m_vComponents, q.m_vec.m_vComponents, 0xff);
-    out.m_vComponents = _mm_sub_ps(out.m_vComponents, _mm_mul_ps(_mm_shuffle_ps(w, w, 0), m_vec.m_vComponents));
-    __m128 tw = _mm_shuffle_ps(m_vec.m_vComponents, m_vec.m_vComponents, 0xff);
-    out.m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(tw, tw, 0), q.m_vec.m_vComponents), out.m_vComponents);
+    const __m128& qVec = *reinterpret_cast<const __m128*>(&q);
+    const __m128& vec = *reinterpret_cast<const __m128*>(this);
+    out.m_vComponents = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(qVec, qVec, 0xd2),
+                                              _mm_shuffle_ps(vec, vec, 0xc9)),
+                                   _mm_mul_ps(_mm_shuffle_ps(qVec, qVec, 0xc9),
+                                              _mm_shuffle_ps(vec, vec, 0xd2)));
+    __m128 w = _mm_shuffle_ps(qVec, qVec, 0xff);
+    out.m_vComponents = _mm_sub_ps(out.m_vComponents, _mm_mul_ps(_mm_shuffle_ps(w, w, 0), vec));
+    __m128 tw = _mm_shuffle_ps(vec, vec, 0xff);
+    out.m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(tw, tw, 0), qVec), out.m_vComponents);
     out.m_vComponents = _mm_add_ps(out.m_vComponents, out.m_vComponents);
-    __m128 d = _mm_mul_ps(q.m_vec.m_vComponents, m_vec.m_vComponents);
+    __m128 d = _mm_mul_ps(qVec, vec);
     d = _mm_add_ps(_mm_shuffle_ps(d, d, 0x4e), d);
     d = _mm_add_ps(_mm_shuffle_ps(d, d, 0xb1), d);
     if (_mm_movemask_ps(d) & 1)

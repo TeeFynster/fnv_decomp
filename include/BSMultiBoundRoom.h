@@ -1,0 +1,9 @@
+#pragma once
+
+#include "BSMultiBoundNode.h"
+
+class BSMultiBoundRoom : public BSMultiBoundNode
+{
+public:
+    void* FUN_006ab360();
+};

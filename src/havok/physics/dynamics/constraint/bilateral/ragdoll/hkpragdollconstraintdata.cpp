@@ -2,7 +2,90 @@
 // src/havok/physics/dynamics/constraint/bilateral/ragdoll/hkpragdollconstraintdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/bilateral/ragdoll/hkpragdollconstraintdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpRagdollConstraintData.h"
+// Keep the original float-only intrinsic type: the CRT union adds byte arrays
+// that make this compiler insert stack security checks into SIMD-only routines.
+// Exe 0x00cdeae0 setInWorldSpace: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+
+#define _INCLUDED_MM2
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/hkRotation.h"
+#include "../../../../../../../include/hkMatrix3.h"
+#include "../../../../../../../include/hkVector4.h"
+#include "../../../../../../../include/hkTransform.h"
+#include "../../../../../../../include/hkpConstraintAtom.h"
+#include "../../../../../../../include/hkpConstraintData.h"
+#include "../../../../../../../include/hkpSetLocalTransformsConstraintAtom.h"
+#include "../../../../../../../include/hkpAngFrictionConstraintAtom.h"
+#include "../../../../../../../include/hkpBallSocketConstraintAtom.h"
+#include "../../../../../../../include/hkpRagdollConstraintDataAtoms.h"
+#include "../../../../../../../include/hkpRagdollConstraintData.h"
+#include "../../../../../../../include/hkpLimitedHingeConstraintDataAtoms.h"
+#include "../../../../../../../include/hkUFloat8.h"
+
+extern "C"
+{
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
+    LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+    LocalM128 _mm_setzero_ps(void);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_rsqrt_ss(LocalM128);
+    LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+    LocalM128 _mm_set_ss(float);
+}
+
+__forceinline LocalM128& Vec4::getQuad()
+{
+    return *reinterpret_cast<LocalM128*>(this);
+}
+
+__forceinline const LocalM128& Vec4::getQuad() const
+{
+    return *reinterpret_cast<const LocalM128*>(this);
+}
+
+extern "C" void _mm_store_ps(float*, LocalM128);
+
+__forceinline void Vec4::setZero4()
+{
+    _mm_store_ps(&x, _mm_setzero_ps());
+}
+
+// The shared ragdoll declaration lacks setInWorldSpace/setInBodySpace and the frame getters.
+// Keep this declaration until those methods are available in the approved header.
+
+__forceinline hkpConstraintAtom::hkpConstraintAtom(FinishingFlag) {}
+__forceinline hkpConstraintData::hkpConstraintData() throw() { m_ulUserData = 0; }
+__forceinline hkpConstraintData::~hkpConstraintData() throw() {}
+__forceinline hkTransform::hkTransform() {}
+__forceinline void hkRotation::setIdentity()
+{
+    _mm_store_ps(&m_kColumn0.x, _mm_setzero_ps());
+    _mm_store_ps(&m_kColumn1.x, _mm_setzero_ps());
+    _mm_store_ps(&m_kColumn2.x, _mm_setzero_ps());
+    m_kColumn0.x = 1.0f;
+    m_kColumn1.y = 1.0f;
+    m_kColumn2.z = 1.0f;
+}
+__forceinline void hkTransform::setIdentity()
+{
+    m_rotation.setIdentity();
+    _mm_store_ps(reinterpret_cast<float*>(&m_vTranslation), _mm_setzero_ps());
+}
 
 // @fnv 0x00cde9d0
 void __stdcall FUN_00cde9d0(int* apUnused, int* apiOut)
@@ -11,155 +94,41 @@ void __stdcall FUN_00cde9d0(int* apUnused, int* apiOut)
     apiOut[0] = 0x80;
 }
 
-struct FUN_00cde980_cls
-{
-    void __thiscall FUN_00cde980(int a);
-};
 // @fnv 0x00cde980
-void __thiscall FUN_00cde980_cls::FUN_00cde980(int aiBitIndex)
+void __thiscall hkpRagdollConstraintData::vf05(int aiBitIndex)
 {
-    *(char*)((char*)this + 0x13a) = (char)(1 << aiBitIndex);
+    m_kBridgeAtoms.m_kBallSocket.m_ucBodiesToNotify = (char)(1 << aiBitIndex);
 }
 
-struct FUN_00cde960_cls
-{
-    void __thiscall FUN_00cde960(float a);
-};
 // @fnv 0x00cde960
-void __thiscall FUN_00cde960_cls::FUN_00cde960(float a)
+void __thiscall hkpRagdollConstraintData::vf03(float a)
 {
-    *(float*)((char*)this + 0x13c) = a;
+    m_kBridgeAtoms.m_kBallSocket.m_usFlags = a;
 }
 
 void* __cdecl FUN_00d21a60(void* a, int b, int c);
-struct FUN_00cde9b0_cls
-{
-    char* FUN_00cde9b0(int a);
-};
+
 // @fnv 0x00cde9b0
-char* FUN_00cde9b0_cls::FUN_00cde9b0(int aiIndex)
+char* hkpRagdollConstraintData::vf15(int aiIndex)
 {
-    return (char*)FUN_00d21a60((char*)this + 0x10, 0x130, aiIndex);
+    return (char*)FUN_00d21a60(&m_kBridgeAtoms, sizeof(m_kBridgeAtoms), aiIndex);
 }
 
-extern int DAT_010cb71c;
-extern int _DAT_0102e388;
-
-struct DDCC60World
-{
-    void __thiscall removeReference(void);
-};
-
-struct FUN_00cdf1f0
-{
-    void* m_ppVirtualMethodTable;          // +0x00
-    char pad[0xdc];          // +0x04 .. +0xdf
-    DDCC60World* m_refs[3];  // +0xe0
-    ~FUN_00cdf1f0();
-};
-
 // @fnv 0x00cdf1f0
-FUN_00cdf1f0::~FUN_00cdf1f0()
+hkpRagdollConstraintData::~hkpRagdollConstraintData() throw()
 {
-    m_ppVirtualMethodTable = &DAT_010cb71c;
     for (int i = 0; i < 3; ++i)
     {
-        DDCC60World* p = m_refs[i];
+        hkReferencedObject* p = reinterpret_cast<hkReferencedObject*>(m_kBridgeAtoms.m_kMotor.m_ppMotors[i]);
         if (p)
             p->removeReference();
     }
-    m_ppVirtualMethodTable = &_DAT_0102e388;
 }
 
-struct FUN_00cde970_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    int unkF0;
-    int unkF4;
-    int unkF8;
-    int unkFC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    float m_13c;
-    float FUN_00cde970();
-};
-
 // @fnv 0x00cde970
-float FUN_00cde970_cls::FUN_00cde970()
+float hkpRagdollConstraintData::vf04()
 {
-    return m_13c;
+    return m_kBridgeAtoms.m_kBallSocket.m_usFlags;
 }
 
 // FUN_00cde9a0
@@ -172,13 +141,9 @@ float FUN_00cde970_cls::FUN_00cde970()
 // inside m_kBridgeAtoms the hkpBallSocketConstraintAtom sits at +0x128, so its
 // hkUint8 m_ucBodiesToNotify member is at +0x13a of the complete object.
 // The getter returns that byte shifted right by one bit.
-struct RagdollBodiesToNotify : public hkpRagdollConstraintData
-{
-    int __thiscall FUN_00cde9a0();
-};
 
 // @fnv 0x00cde9a0
-int RagdollBodiesToNotify::FUN_00cde9a0()
+int hkpRagdollConstraintData::vf06()
 {
     return m_kBridgeAtoms.m_kBallSocket.m_ucBodiesToNotify >> 1;
 }
@@ -189,45 +154,13 @@ int __cdecl FUN_00cdead0()
     return 7;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-struct __declspec(align(16)) FUN_00cdf190_Vec
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct FUN_00cdf190_Out
-{
-    FUN_00cdf190_Vec a;
-    FUN_00cdf190_Vec b;
-    FUN_00cdf190_Vec c;
-};
-struct FUN_00cdf190_Class
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    FUN_00cdf190_Vec v20;
-    FUN_00cdf190_Vec v30;
-    FUN_00cdf190_Vec v40;
-    void CopyVectorsToOut(FUN_00cdf190_Out* out);
-};
-// Copies the three 16-byte vectors v20, v30 and v40 into the output's a, b and c fields.
+// Copies body A's constraint frame into the output rotation.
 // @fnv 0x00cdf190
-void FUN_00cdf190_Class::CopyVectorsToOut(FUN_00cdf190_Out* out)
+void hkpRagdollConstraintData::getConstraintFrameA(hkRotation* out)
 {
-    *(__m128*)&out->a = *(const __m128*)&v20;
-    *(__m128*)&out->b = *(const __m128*)&v30;
-    *(__m128*)&out->c = *(const __m128*)&v40;
+    out->m_kColumn0.m_vComponents = m_kBridgeAtoms.m_kTransforms.m_kBodyALocalFrame.m_kColumn0;
+    out->m_kColumn1.m_vComponents = m_kBridgeAtoms.m_kTransforms.m_kBodyALocalFrame.m_kColumn1;
+    out->m_kColumn2.m_vComponents = m_kBridgeAtoms.m_kTransforms.m_kBodyALocalFrame.m_kColumn2;
 }
 
 struct FnvCpu_FUN_00cdf530_CpuAllocator
@@ -245,233 +178,36 @@ struct FnvCpu_FUN_00cdf530_CpuAllocatorHolder
     FnvCpu_FUN_00cdf530_CpuAllocator* allocator;
 };
 FnvCpu_FUN_00cdf530_CpuAllocatorHolder* __cdecl FUN_00c85750();
-struct FnvCpu_FUN_00cdf530_CpuObject
+__forceinline void hkReferencedObject::operator delete(void* block)
 {
-    unsigned int unk00;
-    unsigned short size;
-    void FUN_00cdf1f0();
-    FnvCpu_FUN_00cdf530_CpuObject* FUN_00cdf530(unsigned int flags);
-};
-// @fnv 0x00cdf530
-FnvCpu_FUN_00cdf530_CpuObject* FnvCpu_FUN_00cdf530_CpuObject::FUN_00cdf530(unsigned int flags)
-{
-    FUN_00cdf1f0();
-    if (flags & 1)
-    {
-        FnvCpu_FUN_00cdf530_CpuAllocatorHolder* holder = FUN_00c85750();
-        holder->allocator->Invoke(this, size);
-    }
-    return this;
+    FnvCpu_FUN_00cdf530_CpuAllocatorHolder* holder = FUN_00c85750();
+    holder->allocator->Invoke(block, static_cast<hkReferencedObject*>(block)->m_usMemSizeAndFlags);
 }
 
-struct Cdf1c0_vec48
-{
-    __m128 a;
-    __m128 b;
-    __m128 c;
-};
-
-class Cdf1c0_cls
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    Cdf1c0_vec48 m60;
-    Cdf1c0_vec48 m70;
-    Cdf1c0_vec48 m80;
-    void GetM60(Cdf1c0_vec48* out);
-};
-
-// Copies the m60 vector from the Cdf1c0_cls instance into the out parameter.
+// Copies body B's constraint frame into the output rotation.
 // @fnv 0x00cdf1c0
-void Cdf1c0_cls::GetM60(Cdf1c0_vec48* out)
+void hkpRagdollConstraintData::getConstraintFrameB(hkRotation* out)
 {
-    out->a = m60.a;
-    out->b = m60.b;
-    out->c = m60.c;
+    out->m_kColumn0.m_vComponents = m_kBridgeAtoms.m_kTransforms.m_kBodyBLocalFrame.m_kColumn0;
+    out->m_kColumn1.m_vComponents = m_kBridgeAtoms.m_kTransforms.m_kBodyBLocalFrame.m_kColumn1;
+    out->m_kColumn2.m_vComponents = m_kBridgeAtoms.m_kTransforms.m_kBodyBLocalFrame.m_kColumn2;
 }
 
-extern "C" __m128 _mm_setzero_ps(void);
-
-struct hkVector4B90
-{
-    __m128 m_vComponents;
-
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline float& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-};
-
-struct hkRotationB90
-{
-    hkVector4B90 m_kColumn0, m_kColumn1, m_kColumn2;
-
-    __forceinline void setIdentity()
-    {
-        m_kColumn0.setZero4();
-        m_kColumn1.setZero4();
-        m_kColumn2.setZero4();
-        m_kColumn0(0) = 1.0f;
-        m_kColumn1(1) = 1.0f;
-        m_kColumn2(2) = 1.0f;
-    }
-};
-
-struct hkTransformB90
-{
-    hkRotationB90 m_rotation;
-    hkVector4B90 m_vTranslation;
-
-    __forceinline void setIdentity()
-    {
-        m_rotation.setIdentity();
-        m_vTranslation.setZero4();
-    }
-};
-
-struct hkBoolB90
-{
-    char m_cBooleanValue;
-    __forceinline hkBoolB90& operator=(bool b)
-    {
-        m_cBooleanValue = (char)b;
-        return *this;
-    }
-};
-
-struct hkpConstraintAtomB90
-{
-    unsigned short m_type;
-};
-
-struct hkpSetLocalTransformsConstraintAtomB90 : public hkpConstraintAtomB90
-{
-    unsigned short unk02;
-    int unk04, unk08, unk0C;
-    hkTransformB90 m_kBodyALocalFrame;
-    hkTransformB90 m_kBodyBLocalFrame;
-};
-
-struct hkpAngMotorConstraintAtomB90 : public hkpConstraintAtomB90
-{
-    hkBoolB90 m_bLimitEnabled;
-    unsigned char m_ucMotorAxis;
-    short m_iInitializedOffset;
-    short m_iPreviousTargetAngleOffset;
-    short m_iCorrespondingAngLimitSolverResultOffset;
-    float m_fTargetAngle;
-    void* m_pMotor;
-};
-
-struct hkpAngFrictionConstraintAtomB90 : public hkpConstraintAtomB90
-{
-    unsigned char m_bLimitEnabled;
-    unsigned char m_ucFirstFrictionAxis;
-    unsigned char m_ucNumFrictionAxes;
-    float m_fMaxFrictionTorque;
-};
-
-struct hkpAngLimitConstraintAtomB90 : public hkpConstraintAtomB90
-{
-    unsigned char m_bLimitEnabled;
-    unsigned char m_ucLimitAxis;
-    float m_fMinAngle;
-    float m_fMaxAngle;
-    float m_fAngularLimitsTauFactor;
-};
-
-struct hkp2dAngConstraintAtomB90 : public hkpConstraintAtomB90
-{
-    unsigned char m_ucFreeRotationAxis;
-};
-
-struct hkpBallSocketConstraintAtomB90 : public hkpConstraintAtomB90
-{
-    unsigned char m_ucBodiesToNotify;
-    unsigned char unk03;
-    float m_usFlags;
-};
-
-class __declspec(align(16)) FUN_00cb9170
+// LocalhkpLimitedHingeConstraintData: its constructor 0x00cb9090 is throw() and stores into named atom fields;
+// include/hkpLimitedHingeConstraintData.h declares the constructor without throw() over a pad0[0xD0] atom block.
+class LocalhkpLimitedHingeConstraintData : public hkpConstraintData
 {
   public:
-    FUN_00cb9170() throw();
-
-    hkpSetLocalTransformsConstraintAtomB90 m_kTransforms;
-    hkpAngMotorConstraintAtomB90 m_kAngularMotor;
-    hkpAngFrictionConstraintAtomB90 m_kFriction;
-    hkpAngLimitConstraintAtomB90 m_kAngularLimit;
-    hkp2dAngConstraintAtomB90 m_kTwoDimensionalAngular;
-    hkpBallSocketConstraintAtomB90 m_kBallSocket;
-};
-
-class hkReferencedObjectB90
-{
-  public:
-    hkReferencedObjectB90() throw()
-    {
-        m_sReferenceCount = 1;
-    }
-    virtual ~hkReferencedObjectB90() throw()
-    {}
-
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-
-class hkpConstraintDataB90 : public hkReferencedObjectB90
-{
-  public:
-    hkpConstraintDataB90() throw()
-    {
-        m_ulUserData = 0;
-    }
-    virtual ~hkpConstraintDataB90() throw()
-    {}
-
-    unsigned long m_ulUserData;
-};
-
-class FUN_00cb9090 : public hkpConstraintDataB90
-{
-  public:
-    FUN_00cb9090() throw();
-    virtual ~FUN_00cb9090() throw();
+    LocalhkpLimitedHingeConstraintData() throw();
+    virtual ~LocalhkpLimitedHingeConstraintData() throw();
 
     int unk0C;
-    FUN_00cb9170 m_kBridgeAtoms;
+    hkpLimitedHingeConstraintDataAtoms m_kBridgeAtoms;
 };
 
 // Initializes m_kBridgeAtoms with identity transforms, default angular limits, friction, motor, and 2D angular constraint values.
 // @fnv 0x00cb9090
-FUN_00cb9090::FUN_00cb9090() throw()
+LocalhkpLimitedHingeConstraintData::LocalhkpLimitedHingeConstraintData() throw()
 {
     m_kBridgeAtoms.m_kTransforms.m_kBodyALocalFrame.setIdentity();
     m_kBridgeAtoms.m_kTransforms.m_kBodyBLocalFrame.setIdentity();
@@ -496,105 +232,44 @@ FUN_00cb9090::FUN_00cb9090() throw()
     m_kBridgeAtoms.m_kAngularMotor.m_ucMotorAxis = 0;
 }
 
-extern "C"
+static __forceinline void hkNormalize3(hkVector4& v)
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_setzero_ps(void);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_set_ss(float);
-}
-
-union hkVector4q
-{
-    __m128 m_vComponents;
-    hkVector4 m_vec;
-
-    __forceinline hkReal& operator()(int i)
-    {
-        return reinterpret_cast<hkReal*>(&m_vComponents)[i];
-    }
-    __forceinline const hkReal& operator()(int i) const
-    {
-        return reinterpret_cast<const hkReal*>(&m_vComponents)[i];
-    }
-};
-
-struct hkVector4Out : public hkVector4
-{
-    void SetTransformedPosition(const hkTransform& t, const hkVector4& v);
-};
-
-static __forceinline void hkNormalize3(hkVector4q& v)
-{
-    __m128 p = _mm_mul_ps(v.m_vComponents, v.m_vComponents);
-    __m128 len2 = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    LocalM128 p = _mm_mul_ps(v.m_vComponents, v.m_vComponents);
+    LocalM128 len2 = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
     len2 = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), len2);
-    __m128 e = _mm_rsqrt_ss(len2);
-    __m128 r =
+    LocalM128 e = _mm_rsqrt_ss(len2);
+    LocalM128 r =
         _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e), _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(len2, e), e)));
     r = _mm_andnot_ps(_mm_cmpeq_ss(len2, _mm_set_ss(0.0f)), r);
     v.m_vComponents = _mm_mul_ps(_mm_shuffle_ps(r, r, 0), v.m_vComponents);
 }
 
-static __forceinline void hkSetCross(hkVector4q& out, const hkVector4q& v0, const hkVector4q& v1)
+static __forceinline void hkSetCross(hkVector4& out, const hkVector4& v0, const hkVector4& v1)
 {
-    __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
+    LocalM128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
                                _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
-    __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
+    LocalM128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
                                _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
     out.m_vComponents = _mm_sub_ps(cross0, cross1);
 }
 
-struct hkMatrix3q
+__forceinline hkMatrix3::hkMatrix3() {}
+__forceinline hkVector4& hkMatrix3::getColumn(int i) { return reinterpret_cast<hkVector4*>(this)[i]; }
+__forceinline const hkVector4& hkMatrix3::getColumn(int i) const { return reinterpret_cast<const hkVector4*>(this)[i]; }
+__forceinline void hkMatrix3::operator=(const hkMatrix3& m)
 {
-    hkVector4q m_col[3];
+    m_kColumn0.m_vComponents = m.m_kColumn0.m_vComponents;
+    m_kColumn1.m_vComponents = m.m_kColumn1.m_vComponents;
+    m_kColumn2.m_vComponents = m.m_kColumn2.m_vComponents;
+}
 
-    __forceinline void operator=(const hkMatrix3q& m)
-    {
-        m_col[0].m_vComponents = m.m_col[0].m_vComponents;
-        m_col[1].m_vComponents = m.m_col[1].m_vComponents;
-        m_col[2].m_vComponents = m.m_col[2].m_vComponents;
-    }
-};
-
-struct hkRagdollTransformsq
+static __forceinline void hkSetTransposeMul(hkMatrix3& out, const hkMatrix3& a, const hkMatrix3& b)
 {
-    hkUint16 m_type;
-    hkUint16 unk02;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMatrix3q m_kRotationA;
-    hkVector4 m_kTranslationA;
-    hkMatrix3q m_kRotationB;
-    hkVector4 m_kTranslationB;
-    hkUint16 m_motorType;
-    hkUint16 unk82;
-    int unk84;
-    int unk88;
-    int unk8C;
-    hkMatrix3q m_kMotorAxes;
-};
-
-static __forceinline void hkSetTransposeMul(hkMatrix3q& out, const hkMatrix3q& a, const hkMatrix3q& b)
-{
-    __m128 c0 = a.m_col[0].m_vComponents;
-    __m128 c1 = a.m_col[1].m_vComponents;
-    __m128 c2 = a.m_col[2].m_vComponents;
-    __m128 tmp = _mm_unpacklo_ps(c0, c1);
-    __m128 ctmp = _mm_unpackhi_ps(c0, c1);
+    LocalM128 c0 = a.getColumn(0).m_vComponents;
+    LocalM128 c1 = a.getColumn(1).m_vComponents;
+    LocalM128 c2 = a.getColumn(2).m_vComponents;
+    LocalM128 tmp = _mm_unpacklo_ps(c0, c1);
+    LocalM128 ctmp = _mm_unpackhi_ps(c0, c1);
     c0 = _mm_movelh_ps(tmp, c2);
     c1 = _mm_movehl_ps(c0, tmp);
     c1 = _mm_shuffle_ps(c1, c2, 0xd4);
@@ -602,431 +277,158 @@ static __forceinline void hkSetTransposeMul(hkMatrix3q& out, const hkMatrix3q& a
 
     for (int i = 0; i < 3; i++)
     {
-        const __m128 v = b.m_col[i].m_vComponents;
-        __m128 b0 = _mm_shuffle_ps(v, v, 0x00);
-        __m128 b1 = _mm_shuffle_ps(v, v, 0x55);
-        __m128 b2 = _mm_shuffle_ps(v, v, 0xaa);
-        out.m_col[i].m_vComponents = _mm_add_ps(_mm_add_ps(_mm_mul_ps(b0, c0), _mm_mul_ps(b1, c1)), _mm_mul_ps(b2, c2));
+        const LocalM128 v = b.getColumn(i).m_vComponents;
+        LocalM128 b0 = _mm_shuffle_ps(v, v, 0x00);
+        LocalM128 b1 = _mm_shuffle_ps(v, v, 0x55);
+        LocalM128 b2 = _mm_shuffle_ps(v, v, 0xaa);
+        out.getColumn(i).m_vComponents = _mm_add_ps(_mm_add_ps(_mm_mul_ps(b0, c0), _mm_mul_ps(b1, c1)), _mm_mul_ps(b2, c2));
     }
 }
-
-struct hkpRagdollConstraintDataEx : public hkpRagdollConstraintData
-{
-    void FUN_00cdeae0(const hkTransform& bodyATransform, const hkTransform& bodyBTransform, const hkVector4& pivot,
-                      const hkVector4& twistAxisW, const hkVector4& planeAxisW);
-};
 
 // Builds a constraint basis from twist and plane axes, then stores rotated and translated transforms into the ragdoll bridge atom data.
 // @fnv 0x00cdeae0
-void hkpRagdollConstraintDataEx::FUN_00cdeae0(const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
+void hkpRagdollConstraintData::setInWorldSpace(const hkTransform& bodyATransform, const hkTransform& bodyBTransform,
                                               const hkVector4& pivot, const hkVector4& twistAxisW,
                                               const hkVector4& planeAxisW)
 {
-    hkMatrix3q baseConstraint;
-    baseConstraint.m_col[0].m_vComponents = reinterpret_cast<const hkVector4q&>(twistAxisW).m_vComponents;
-    hkNormalize3(baseConstraint.m_col[0]);
-    baseConstraint.m_col[1].m_vComponents = reinterpret_cast<const hkVector4q&>(planeAxisW).m_vComponents;
-    hkNormalize3(baseConstraint.m_col[1]);
-    hkSetCross(baseConstraint.m_col[2], baseConstraint.m_col[0], baseConstraint.m_col[1]);
+    hkMatrix3 baseConstraint;
+    baseConstraint.getColumn(0).m_vComponents = twistAxisW.m_vComponents;
+    hkNormalize3(baseConstraint.getColumn(0));
+    baseConstraint.getColumn(1).m_vComponents = planeAxisW.m_vComponents;
+    hkNormalize3(baseConstraint.getColumn(1));
+    hkSetCross(baseConstraint.getColumn(2), baseConstraint.getColumn(0), baseConstraint.getColumn(1));
 
-    hkRagdollTransformsq& t = *reinterpret_cast<hkRagdollTransformsq*>(&m_kBridgeAtoms);
+    hkpSetLocalTransformsConstraintAtom& t = m_kBridgeAtoms.m_kTransforms;
 
-    hkSetTransposeMul(t.m_kRotationA, reinterpret_cast<const hkMatrix3q&>(bodyATransform.m_rotation), baseConstraint);
-    hkSetTransposeMul(t.m_kRotationB, reinterpret_cast<const hkMatrix3q&>(bodyBTransform.m_rotation), baseConstraint);
+    hkSetTransposeMul(reinterpret_cast<hkMatrix3&>(t.m_kBodyALocalFrame.m_rotation), reinterpret_cast<const hkMatrix3&>(bodyATransform.m_rotation), baseConstraint);
+    hkSetTransposeMul(reinterpret_cast<hkMatrix3&>(t.m_kBodyBLocalFrame.m_rotation), reinterpret_cast<const hkMatrix3&>(bodyBTransform.m_rotation), baseConstraint);
 
-    static_cast<hkVector4Out&>(t.m_kTranslationA).SetTransformedPosition(bodyATransform, pivot);
-    static_cast<hkVector4Out&>(t.m_kTranslationB).SetTransformedPosition(bodyBTransform, pivot);
+    t.m_kBodyALocalFrame.position.SetTransformedPosition(bodyATransform, pivot);
+    t.m_kBodyBLocalFrame.position.SetTransformedPosition(bodyBTransform, pivot);
 
-    t.m_kMotorAxes = t.m_kRotationB;
+    reinterpret_cast<hkMatrix3&>(m_kBridgeAtoms.m_kMotor.m_kMotorAxes) = reinterpret_cast<hkMatrix3&>(t.m_kBodyBLocalFrame.m_rotation);
 }
 
-extern "C" __m128 _mm_add_ss(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_add_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_sub_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_mul_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_shuffle_ps(__m128 _A, __m128 _B, unsigned int _Imm8);
-
-extern const __m128 DAT_010c71e0;
+extern const LocalM128 DAT_010c71e0;
 
 struct Quat
 {
-    __m128 m_vec;
-    void FUN_00cb2450(const __m128* axis, float angle);
+    LocalM128 m_vec;
+    void FUN_00cb2450(const LocalM128* axis, float angle);
 };
 
-struct Vec4
+__forceinline void Vec4::setCross(const Vec4& a, const Vec4& b)
 {
-    __m128 m_vComponents;
-    __forceinline void setCross(const Vec4& a, const Vec4& b)
-    {
-        __m128 c0 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9),
-                               _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2));
-        __m128 c1 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2),
-                               _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(c0, c1);
-    }
-    __forceinline void setBroadcast3(const Vec4& v)
-    {
-        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
-    }
-    __forceinline void setMul4(const Vec4& a, const Vec4& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void add4(const Vec4& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void addMul4(__m128 s, const Vec4& b)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(_mm_shuffle_ps(s, s, 0), b.m_vComponents));
-    }
-    __forceinline void addMul4(const Vec4& a, const Vec4& b)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents));
-    }
-    __forceinline void setAdd4(const Vec4& a, const Vec4& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline __m128 dot3(const Vec4& a) const
-    {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2));
-    }
-    __forceinline void SetRotatedDirection(const Quat& quat, const Vec4& direction)
-    {
-        const Vec4& imag = *(const Vec4*)&quat.m_vec;
-        Vec4 qreal;
-        qreal.setBroadcast3(imag);
-        Vec4 q2minus1;
-        q2minus1.setMul4(qreal, qreal);
-        q2minus1.add4(*(const Vec4*)&DAT_010c71e0);
-        Vec4 ret;
-        ret.setMul4(direction, q2minus1);
-        __m128 imagDotDir = imag.dot3(direction);
-        ret.addMul4(imagDotDir, imag);
-        Vec4 imagCrossDir;
-        imagCrossDir.setCross(imag, direction);
-        ret.addMul4(imagCrossDir, qreal);
-        setAdd4(ret, ret);
-    }
-};
-
-struct FUN_00cdef90_cls
+    LocalM128 c0 = _mm_mul_ps(_mm_shuffle_ps(a.getQuad(), a.getQuad(), 0xc9),
+                           _mm_shuffle_ps(b.getQuad(), b.getQuad(), 0xd2));
+    LocalM128 c1 = _mm_mul_ps(_mm_shuffle_ps(a.getQuad(), a.getQuad(), 0xd2),
+                           _mm_shuffle_ps(b.getQuad(), b.getQuad(), 0xc9));
+    getQuad() = _mm_sub_ps(c0, c1);
+}
+__forceinline void Vec4::SetRotatedDirection(const Quat& quat, const Vec4& direction)
 {
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0C;
-    void* unk10;
-    void* unk14;
-    void* unk18;
-    void* unk1C;
-    void* unk20;
-    void* unk24;
-    void* unk28;
-    void* unk2C;
-    void* unk30;
-    void* unk34;
-    void* unk38;
-    void* unk3C;
-    void* unk40;
-    void* unk44;
-    void* unk48;
-    void* unk4C;
-    void* unk50;
-    void* unk54;
-    void* unk58;
-    void* unk5C;
-    Vec4 m_dir;
-    Vec4 m_kAxisEndPoints;
-    Vec4 m_kStartPerpendicular;
-    void* unk90;
-    void* unk94;
-    void* unk98;
-    void* unk9C;
-    void* unkA0;
-    void* unkA4;
-    void* unkA8;
-    void* unkAC;
-    void* unkB0;
-    void* unkB4;
-    void* unkB8;
-    void* unkBC;
-    void* unkC0;
-    void* unkC4;
-    void* unkC8;
-    void* unkCC;
-    void* unkD0;
-    void* unkD4;
-    void* unkD8;
-    void* unkDC;
-    void* unkE0;
-    void* unkE4;
-    void* unkE8;
-    void* unkEC;
-    void* unkF0;
-    void* unkF4;
-    void* unkF8;
-    void* unkFC;
-    void* unk100;
-    void* unk104;
-    void* unk108;
-    void* unk10C;
-    void* unk110;
-    void* unk114;
-    void* unk118;
-    float m_halfRange;
-    void FUN_00cdef90(float a, float b);
-};
+    const LocalM128& imag = quat.m_vec;
+    LocalM128 qreal = _mm_shuffle_ps(imag, imag, 0xff);
+    LocalM128 q2minus1 = _mm_mul_ps(qreal, qreal);
+    q2minus1 = _mm_add_ps(q2minus1, DAT_010c71e0);
+    LocalM128 ret = _mm_mul_ps(direction.getQuad(), q2minus1);
+    LocalM128 product = _mm_mul_ps(imag, direction.getQuad());
+    LocalM128 imagDotDir = _mm_add_ss(_mm_shuffle_ps(product, product, 0xaa),
+                                  _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product));
+    ret = _mm_add_ps(ret, _mm_mul_ps(_mm_shuffle_ps(imagDotDir, imagDotDir, 0), imag));
+    LocalM128 c0 = _mm_mul_ps(_mm_shuffle_ps(imag, imag, 0xc9),
+                          _mm_shuffle_ps(direction.getQuad(), direction.getQuad(), 0xd2));
+    LocalM128 c1 = _mm_mul_ps(_mm_shuffle_ps(imag, imag, 0xd2),
+                          _mm_shuffle_ps(direction.getQuad(), direction.getQuad(), 0xc9));
+    LocalM128 imagCrossDir = _mm_sub_ps(c0, c1);
+    ret = _mm_add_ps(ret, _mm_mul_ps(imagCrossDir, qreal));
+    getQuad() = _mm_add_ps(ret, ret);
+}
 
 // Rotates m_dir about m_kAxisEndPoints by minus the midpoint of a and b, sets m_kStartPerpendicular to their cross, and stores (b - a) / 2 in m_halfRange.
 // @fnv 0x00cdef90
-void FUN_00cdef90_cls::FUN_00cdef90(float afStart, float afEnd)
+void hkpRagdollConstraintData::setPlaneAngularLimit(float afStart, float afEnd)
 {
+    Vec4& m_dir = reinterpret_cast<Vec4&>(m_kBridgeAtoms.m_kTransforms.m_kBodyBLocalFrame.m_kColumn0);
+    Vec4& m_kAxisEndPoints = reinterpret_cast<Vec4&>(m_kBridgeAtoms.m_kTransforms.m_kBodyBLocalFrame.m_kColumn1);
+    float& m_halfRange = m_kBridgeAtoms.m_kConeLimit.m_fMaxAngle;
     float center = (afStart + afEnd) * 0.5;
     Quat q;
-    q.FUN_00cb2450(&m_kAxisEndPoints.m_vComponents, -center);
+    q.FUN_00cb2450(&m_kAxisEndPoints.getQuad(), -center);
     m_dir.SetRotatedDirection(q, m_dir);
-    Vec4* perp = &m_kStartPerpendicular;
-    perp->setCross(m_dir, m_kAxisEndPoints);
+    // Access through the byte view preserves the original post-rotation reload.
+    const unsigned int frameBOffset = offsetof(hkpRagdollConstraintData, m_kBridgeAtoms)
+        + offsetof(hkpRagdollConstraintDataAtoms, m_kTransforms)
+        + offsetof(hkpSetLocalTransformsConstraintAtom, m_kBodyBLocalFrame);
+    Vec4* perp = reinterpret_cast<Vec4*>(reinterpret_cast<char*>(this) + frameBOffset + 0x20);
+    perp->setCross(*reinterpret_cast<const Vec4*>(reinterpret_cast<const char*>(this) + frameBOffset), m_kAxisEndPoints);
     m_halfRange = (afEnd - afStart) * 0.5;
 }
 
-namespace fnv_00cb9170 {
-struct FUN_00ca9360_sub
-{
-    void FUN_00ca9360(float*);
-};
-
-struct FUN_00cb9170
-{
-    unsigned short m_00;
-    unsigned short m_02;
-    unsigned short m_04;
-    unsigned short m_06;
-    unsigned short m_08;
-    unsigned short m_0a;
-    unsigned short m_0c;
-    unsigned short m_0e;
-    unsigned short m_10;
-    unsigned short m_12;
-    unsigned short m_14;
-    unsigned short m_16;
-    unsigned short m_18;
-    unsigned short m_1a;
-    unsigned short m_1c;
-    unsigned short m_1e;
-    unsigned short m_20;
-    unsigned short m_22;
-    unsigned short m_24;
-    unsigned short m_26;
-    unsigned short m_28;
-    unsigned short m_2a;
-    unsigned short m_2c;
-    unsigned short m_2e;
-    unsigned short m_30;
-    unsigned short m_32;
-    unsigned short m_34;
-    unsigned short m_36;
-    unsigned short m_38;
-    unsigned short m_3a;
-    unsigned short m_3c;
-    unsigned short m_3e;
-    unsigned short m_40;
-    unsigned short m_42;
-    unsigned short m_44;
-    unsigned short m_46;
-    unsigned short m_48;
-    unsigned short m_4a;
-    unsigned short m_4c;
-    unsigned short m_4e;
-    unsigned short m_50;
-    unsigned short m_52;
-    unsigned short m_54;
-    unsigned short m_56;
-    unsigned short m_58;
-    unsigned short m_5a;
-    unsigned short m_5c;
-    unsigned short m_5e;
-    unsigned short m_60;
-    unsigned short m_62;
-    unsigned short m_64;
-    unsigned short m_66;
-    unsigned short m_68;
-    unsigned short m_6a;
-    unsigned short m_6c;
-    unsigned short m_6e;
-    unsigned short m_70;
-    unsigned short m_72;
-    unsigned short m_74;
-    unsigned short m_76;
-    unsigned short m_78;
-    unsigned short m_7a;
-    unsigned short m_7c;
-    unsigned short m_7e;
-    unsigned short m_80;
-    unsigned short m_82;
-    unsigned short m_84;
-    unsigned short m_86;
-    unsigned short m_88;
-    unsigned short m_8a;
-    unsigned short m_8c;
-    unsigned short m_8e;
-    volatile unsigned short m_90;
-    volatile unsigned char m_92;
-    unsigned char m_93;
-    volatile unsigned short m_94;
-    volatile unsigned short m_96;
-    unsigned char m_98;
-    unsigned char m_99;
-    unsigned char m_9a;
-    unsigned char m_9b;
-    unsigned char m_9c;
-    unsigned char m_9d;
-    unsigned char m_9e;
-    unsigned char m_9f;
-    unsigned char m_a0;
-    unsigned char m_a1;
-    unsigned char m_a2;
-    unsigned char m_a3;
-    volatile unsigned short m_a4;
-    volatile unsigned char m_a6;
-    unsigned char m_a7;
-    volatile unsigned char m_a8;
-    unsigned char m_a9;
-    unsigned char m_aa;
-    unsigned char m_ab;
-    unsigned char m_ac;
-    unsigned char m_ad;
-    unsigned char m_ae;
-    unsigned char m_af;
-    volatile unsigned short m_b0;
-    volatile unsigned char m_b2;
-    unsigned char m_b3;
-    unsigned char m_b4;
-    unsigned char m_b5;
-    unsigned char m_b6;
-    unsigned char m_b7;
-    unsigned char m_b8;
-    unsigned char m_b9;
-    unsigned char m_ba;
-    unsigned char m_bb;
-    unsigned char m_bc;
-    unsigned char m_bd;
-    unsigned char m_be;
-    unsigned char m_bf;
-    volatile unsigned short m_c0;
-    unsigned char m_c2;
-    unsigned char m_c3;
-    volatile unsigned short m_c4;
-    unsigned char m_c6;
-    FUN_00ca9360_sub m_c7;
-    float m_fC8;
-    FUN_00cb9170();
-};
+// 00ca9360 is also bound as hkUFloat8::FUN_00ca9360 in hkprigidbody's recipe.
 extern "C" float DAT_0104da48;
-// Initializes the FUN_00cb9170 object by setting default values for its fields and calling FUN_00ca9360 with a float pointer.
+
 // @fnv 0x00cb9170
-FUN_00cb9170::FUN_00cb9170()
+__declspec(noinline) hkpLimitedHingeConstraintDataAtoms::hkpLimitedHingeConstraintDataAtoms() throw()
 {
     float f = 1.0f;
-    m_00 = 2;
-    m_90 = 0x12;
-    m_92 = 1;
-    m_94 = 0;
-    m_96 = 0;
-    m_a6 = 1;
-    m_a8 = 1;
-    m_a4 = 0x11;
-    m_b0 = 0xe;
-    m_b2 = 1;
-    volatile unsigned short* limit = &m_c0;
+    m_kTransforms.m_type = 2;
+    static_cast<volatile unsigned short&>(m_kAngularMotor.m_type) = 0x12;
+    static_cast<volatile char&>(m_kAngularMotor.m_bLimitEnabled.m_cBooleanValue) = 1;
+    static_cast<volatile short&>(m_kAngularMotor.m_iInitializedOffset) = 0;
+    static_cast<volatile short&>(m_kAngularMotor.m_iPreviousTargetAngleOffset) = 0;
+    static_cast<volatile unsigned char&>(m_kFriction.m_bLimitEnabled) = 1;
+    static_cast<volatile unsigned char&>(m_kFriction.m_ucNumFrictionAxes) = 1;
+    static_cast<volatile unsigned short&>(m_kFriction.m_type) = 0x11;
+    static_cast<volatile unsigned short&>(m_kAngularLimit.m_type) = 0xe;
+    static_cast<volatile unsigned char&>(m_kAngularLimit.m_bLimitEnabled) = 1;
+    volatile unsigned short* limit = &m_kTwoDimensionalAngular.m_type;
     *limit = 0xc;
-    m_c4 = 5;
-    m_c6 = 0;
-    m_c7.FUN_00ca9360(&f);
-    m_fC8 = DAT_0104da48;
+    static_cast<volatile unsigned short&>(m_kBallSocket.m_type) = 5;
+    m_kBallSocket.m_ucBodiesToNotify = 0;
+    reinterpret_cast<hkUFloat8&>(m_kBallSocket.m_solvingMethod).FUN_00ca9360(&f);
+    m_kBallSocket.m_usFlags = DAT_0104da48;
 }
-}  // namespace fnv_00cb9170
-
-struct RagdollRotation3q
-{
-    hkVector4q m_kColumn0;
-    hkVector4q m_kColumn1;
-    hkVector4q m_kColumn2;
-};
-
-struct RagdollTransformq
-{
-    RagdollRotation3q m_rotation;
-    hkVector4q m_vTranslation;
-};
-
-struct RagdollLayout
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    RagdollTransformq m_kBodyALocalFrame;
-    RagdollTransformq m_kBodyBLocalFrame;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    RagdollRotation3q m_kMotorAxes;
-};
 
 // out = a x b, with the operands passed as (b, a)
-static __forceinline void hkSetCrossReversed(hkVector4q& out, const hkVector4q& b, const hkVector4q& a)
+static __forceinline void hkSetCrossReversed(hkVector4& out, const hkVector4& b, const hkVector4& a)
 {
-    __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9),
+    LocalM128 cross1 = _mm_mul_ps(_mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9),
                                _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2));
-    __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2),
+    LocalM128 cross0 = _mm_mul_ps(_mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2),
                                _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9));
     out.m_vComponents = _mm_sub_ps(cross0, cross1);
 }
-struct hkpRagdollConstraintDataBodySpace : public hkpRagdollConstraintData
-{
-    void FUN_00cded30(const hkVector4& pivotA, const hkVector4& pivotB, const hkVector4& planeAxisA,
-                      const hkVector4& planeAxisB, const hkVector4& twistAxisA, const hkVector4& twistAxisB);
-};
 
 // Stores normalized twist and plane axes, their cross product and the pivot for each body, then copies body B's rotation into the motor axes.
 // @fnv 0x00cded30
-void hkpRagdollConstraintDataBodySpace::FUN_00cded30(const hkVector4& pivotA, const hkVector4& pivotB,
+void hkpRagdollConstraintData::setInBodySpace(const hkVector4& pivotA, const hkVector4& pivotB,
                                                      const hkVector4& planeAxisA, const hkVector4& planeAxisB,
                                                      const hkVector4& twistAxisA, const hkVector4& twistAxisB)
 {
-    RagdollLayout& layout = *reinterpret_cast<RagdollLayout*>(this);
+    hkpSetLocalTransformsConstraintAtom& layout = m_kBridgeAtoms.m_kTransforms;
 
-    hkVector4q& twistA = layout.m_kBodyALocalFrame.m_rotation.m_kColumn0;
-    twistA.m_vComponents = reinterpret_cast<const hkVector4q&>(twistAxisA).m_vComponents;
+    hkVector4& twistA = layout.m_kBodyALocalFrame.m_rotation.m_kColumn0;
+    twistA.m_vComponents = twistAxisA.m_vComponents;
     hkNormalize3(twistA);
     layout.m_kBodyALocalFrame.m_rotation.m_kColumn1.m_vComponents =
-        reinterpret_cast<const hkVector4q&>(planeAxisA).m_vComponents;
+        planeAxisA.m_vComponents;
     hkNormalize3(layout.m_kBodyALocalFrame.m_rotation.m_kColumn1);
     hkSetCross(layout.m_kBodyALocalFrame.m_rotation.m_kColumn2, layout.m_kBodyALocalFrame.m_rotation.m_kColumn0,
                layout.m_kBodyALocalFrame.m_rotation.m_kColumn1);
-    layout.m_kBodyALocalFrame.m_vTranslation.m_vComponents = reinterpret_cast<const hkVector4q&>(pivotA).m_vComponents;
+    layout.m_kBodyALocalFrame.m_vTranslation = pivotA.m_vComponents;
 
-    hkVector4q& twistB = layout.m_kBodyBLocalFrame.m_rotation.m_kColumn0;
-    twistB.m_vComponents = reinterpret_cast<const hkVector4q&>(twistAxisB).m_vComponents;
+    hkVector4& twistB = layout.m_kBodyBLocalFrame.m_rotation.m_kColumn0;
+    twistB.m_vComponents = twistAxisB.m_vComponents;
     hkNormalize3(twistB);
     layout.m_kBodyBLocalFrame.m_rotation.m_kColumn1.m_vComponents =
-        reinterpret_cast<const hkVector4q&>(planeAxisB).m_vComponents;
+        planeAxisB.m_vComponents;
     hkNormalize3(layout.m_kBodyBLocalFrame.m_rotation.m_kColumn1);
     hkSetCrossReversed(layout.m_kBodyBLocalFrame.m_rotation.m_kColumn2, layout.m_kBodyBLocalFrame.m_rotation.m_kColumn1,
                        layout.m_kBodyBLocalFrame.m_rotation.m_kColumn0);
-    layout.m_kBodyBLocalFrame.m_vTranslation.m_vComponents = reinterpret_cast<const hkVector4q&>(pivotB).m_vComponents;
+    layout.m_kBodyBLocalFrame.m_vTranslation = pivotB.m_vComponents;
 
-    layout.m_kMotorAxes.m_kColumn0.m_vComponents = layout.m_kBodyBLocalFrame.m_rotation.m_kColumn0.m_vComponents;
-    layout.m_kMotorAxes.m_kColumn1.m_vComponents = layout.m_kBodyBLocalFrame.m_rotation.m_kColumn1.m_vComponents;
-    layout.m_kMotorAxes.m_kColumn2.m_vComponents = layout.m_kBodyBLocalFrame.m_rotation.m_kColumn2.m_vComponents;
+    m_kBridgeAtoms.m_kMotor.m_kMotorAxes.m_kColumn0.m_vComponents = layout.m_kBodyBLocalFrame.m_rotation.m_kColumn0.m_vComponents;
+    m_kBridgeAtoms.m_kMotor.m_kMotorAxes.m_kColumn1.m_vComponents = layout.m_kBodyBLocalFrame.m_rotation.m_kColumn1.m_vComponents;
+    m_kBridgeAtoms.m_kMotor.m_kMotorAxes.m_kColumn2.m_vComponents = layout.m_kBodyBLocalFrame.m_rotation.m_kColumn2.m_vComponents;
 }

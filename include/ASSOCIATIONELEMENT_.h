@@ -1,0 +1,25 @@
+#pragma once
+
+#include "HKEY__.h"
+
+enum ASSOCCLASS
+{
+    ASSOCCLASS_SHELL_KEY = 0,
+    ASSOCCLASS_PROGID_KEY,
+    ASSOCCLASS_PROGID_STR,
+    ASSOCCLASS_CLSID_KEY,
+    ASSOCCLASS_CLSID_STR,
+    ASSOCCLASS_APP_KEY,
+    ASSOCCLASS_APP_STR,
+    ASSOCCLASS_SYSTEM_STR,
+    ASSOCCLASS_FOLDER,
+    ASSOCCLASS_STAR
+};
+
+class ASSOCIATIONELEMENT_
+{
+public:
+    ASSOCCLASS ac;
+    HKEY__* hkClass;
+    const wchar_t* pszClass;
+};

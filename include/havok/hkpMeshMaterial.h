@@ -1,15 +1,4 @@
-// include/havok/hkpMeshMaterial.h - generated from the Havok 7.1 reflection data in the PC exe (gen_havok_headers.py, 2026-10-17).
-// Reflected members at their exact offsets; unreflected bytes are padding. Size 0x4.
-#ifndef FNV_HAVOK_HKPMESHMATERIAL_H
-#define FNV_HAVOK_HKPMESHMATERIAL_H
-
+// Legacy include path; the shared class lives in include/hkpMeshMaterial.h.
+#pragma once
 #include "hkBase.h"
-#pragma pack(push, 1)
-class hkpMeshMaterial
-{
-  public:
-    hkUint32 m_uiFilterInfo;  // +0x0
-};
-#pragma pack(pop)
-typedef char fnv_hk_size_hkpMeshMaterial[(sizeof(hkpMeshMaterial) == 0x4) ? 1 : -1];
-#endif
+#include "../hkpMeshMaterial.h"

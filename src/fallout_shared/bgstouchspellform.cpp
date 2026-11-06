@@ -1,6 +1,16 @@
 // fallout_shared/bgstouchspellform.cpp: BGSTouchSpellForm (6 functions)
 
-#include "bgstouchspellform.h"
+#include "layout_support.h"
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESEnchantableForm.h"
+#include "../../include/TESRaceForm.h"
+
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSTouchSpellForm.h"
+#include "../../include/EnchantmentItem.h"
+#include "../../include/MagicItem.h"
+#include "../../include/MagicItemForm.h"
 #include "bgstouchspellform_decls.h"
 
 // @fnv 0x0047bd40
@@ -44,7 +54,7 @@ void BGSTouchSpellForm::InitItem(TESForm* owner)
         }
 
         EnchantmentItem* formID =
-            m_pMagicItem ? (m_pMagicItem->GetMagicType() == 6 ? (EnchantmentItem*)m_pMagicItem : 0) : 0;
+            m_pMagicItem ? (m_pMagicItem->GetSpellType() == 6 ? (EnchantmentItem*)m_pMagicItem : 0) : 0;
 
         if (formID && owner && !formID->FUN_004094f0(owner))
         {
@@ -68,65 +78,30 @@ BGSTouchSpellForm* __fastcall FUN_0047bd10(BGSTouchSpellForm* pThis)
     return pThis;
 }
 
-struct FUN_0047bdd0_shell : public BGSTouchSpellForm
-{
-    void FUN_0047bdd0(BaseFormComponent*);
-};
-
-struct TESRaceForm
-{
-    void Initialize(unsigned int);
-};
-struct TESEnchantableForm
-{
-    void SetFormEnchantmentAmount(unsigned short);
-};
-struct TESActorBaseData
-{
-    unsigned short GetFatigue() const;
-};
-unsigned int __fastcall _ref_00726070(void*);
 // @fnv 0x0047bdd0
-void FUN_0047bdd0_shell::FUN_0047bdd0(BaseFormComponent* apCopyFC)
+void BGSTouchSpellForm::BaseFormRecord(BaseFormComponent* apCopyFC)
 {
     BGSTouchSpellForm* pCopy = dynamic_cast<BGSTouchSpellForm*>(apCopyFC);
     if (!pCopy)
         return;
-    ((TESRaceForm*)this)->Initialize(_ref_00726070(pCopy));
-    ((TESEnchantableForm*)this)->SetFormEnchantmentAmount(((TESActorBaseData*)pCopy)->GetFatigue());
+    ((TESRaceForm*)this)->Initialize((unsigned int)((TESEnchantableForm*)pCopy)->FUN_00726070());
+    ((TESEnchantableForm*)this)->SetFormEnchantmentAmount(((const TESActorBaseData*)pCopy)->TESActorBaseData::GetFatigue());
 }
 
-namespace fnv_0047be30 {
-struct TESActorBaseData
-{
-    unsigned short GetFatigue() const;
-};
-
-struct _ref_00726070_shell
-{
-    void* _ref_00726070();
-};
-
-struct FUN_0047be30_shell : BGSTouchSpellForm
-{
-    bool IsDifferentFrom(BaseFormComponent* apCompareFC);
-};
-
 // @fnv 0x0047be30
-bool FUN_0047be30_shell::IsDifferentFrom(BaseFormComponent* apCompareFC)
+bool BGSTouchSpellForm::IsEqualToBase(BaseFormComponent* apCompareFC)
 {
     BGSTouchSpellForm* pCompare = dynamic_cast<BGSTouchSpellForm*>(apCompareFC);
     if (!pCompare)
         return true;
-    if (reinterpret_cast<_ref_00726070_shell*>(this)->_ref_00726070() !=
-        reinterpret_cast<_ref_00726070_shell*>(pCompare)->_ref_00726070())
+    if (reinterpret_cast<TESEnchantableForm*>(this)->FUN_00726070() !=
+        reinterpret_cast<TESEnchantableForm*>(pCompare)->FUN_00726070())
         return true;
-    if (reinterpret_cast<TESActorBaseData const*>(this)->GetFatigue() !=
-        reinterpret_cast<TESActorBaseData const*>(pCompare)->GetFatigue())
+    if (reinterpret_cast<TESActorBaseData const*>(this)->TESActorBaseData::GetFatigue() !=
+        reinterpret_cast<TESActorBaseData const*>(pCompare)->TESActorBaseData::GetFatigue())
         return true;
     return false;
 }
-}  // namespace fnv_0047be30
 
 class C47AAF0Player
 {

@@ -1,3 +1,9 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
 
 // src/staging/blk_00c60000_od_o2_gf_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_moves.py: the bytes and the matched neighbours of these functions
 // say /MT /O2 /GS /EHsc /Gy /GF (unit src/staging/blk_00c60000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions to their real
@@ -5,20 +11,28 @@
 
 // src/staging/blk_00c60000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/hkVector4.h"
+#include "../../include/BSDecalPlacementVectorExtraData.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiPSysModifier.h"
+#include "../../include/NiColorA.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiBinaryExtraData.h"
+#include "../../include/NiPSysCylinderEmitter.h"
+#include "../../include/NiPSysVolumeEmitter.h"
+#include "../../include/NiPSysPositionModifier.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPSysData.h"
+#include "../../include/BSPSysSimpleColorModifier.h"
+#include "../../include/NiTArray.h"
 extern "C" void* g_01204388;
 struct FUN_00c600f0_Class
 {
     void* __thiscall FUN_00c600f0();
-};
-struct NiStream;
-struct NiPSysModifier
-{
-    virtual void LinkObject(NiStream&);
-};
-struct BSPSysSimpleColorModifier : public NiPSysModifier
-{
-    void FUN_00c60910(NiStream& stream);
 };
 struct FUN_00c60930_class
 {
@@ -72,12 +86,6 @@ struct FUN_00c614e0_Class
     char FUN_00a998e0(int arg);
     char FUN_00c614e0(int arg);
 };
-struct NiFixedString;
-struct NiAVObject
-{
-    void SetName(NiFixedString const&);
-    void FUN_00c61610();
-};
 extern NiFixedString* DAT_012043a0;
 extern "C" void* g_012043a4;
 struct FUN_00c61810_class
@@ -88,19 +96,6 @@ struct FUN_00c61820_class
 {
     void* FUN_00c61820(int);
 };
-struct NiStream;
-struct NiPSysVolumeEmitter
-{
-    void LoadBinary(NiStream&);
-    void LoadBinaryFromStream(NiStream* stream);
-};
-struct NiStream;
-struct NiObject
-{
-    void FUN_00c62140();
-    void LinkObject(NiStream&);
-    void FUN_00c61f30(NiStream& stream);
-};
 struct FUN_00c61f60_class
 {
     void __thiscall FUN_00c2f4f0(int);
@@ -110,12 +105,6 @@ struct FUN_00c61f80_cls
 {
     void FUN_00c31b60(void* apParam);
     void FUN_00c61f80(void* apParam);
-};
-struct NiAVObject;
-struct NiPSysCylinderEmitter
-{
-    bool FUN_00c31b80(NiAVObject*);
-    bool FUN_00c61fa0(NiAVObject*);
 };
 struct FUN_00c627e0_Class
 {
@@ -143,14 +132,6 @@ struct FUN_00c63aa0_class
 };
 void __cdecl FUN_00c63c30(int, int);
 void __cdecl CallWithSameArgumentTwice(int a);
-struct NiBinaryExtraData
-{
-    void LinkObject(void*);
-};
-struct BSDecalPlacementVectorExtraData : NiBinaryExtraData
-{
-    void LinkToObject(void*);
-};
 struct FUN_00c644d0_Class
 {
     unsigned char Equals(const char*);
@@ -161,24 +142,13 @@ struct FUN_00c64600_Class
 {
     void* __thiscall GetGlobalPointer();
 };
-struct NiStream;
-struct NiObjectBase
-{
-    bool RegisterStreamables(NiStream&);
-};
-struct FUN_00c64b70 : NiObjectBase
+struct FUN_00c64b70 : NiObject
 {
     bool RegisterStreamables(NiStream& stream);
 };
 struct FUN_00c64fc0_class
 {
     int __thiscall GetThisAddress(int);
-};
-struct NiStream;
-struct NiExtraData
-{
-    void LinkObject(NiStream& stream);
-    void FUN_00c65160(NiStream& stream);
 };
 struct C00c541e0
 {
@@ -192,10 +162,9 @@ struct FUN_00c657e0_class
 };
 extern "C" void NiFreeAlias(void*);
 extern int DAT_010c377c;
-struct NiTPointerList_00c62890
+// 0x00c62890 is the NiTArray<NiPointer<NiAVObject>, NiTMallocInterface<NiPointer<NiAVObject> > > destructor in blk_00c60000_od.cpp's overlay.
+struct AVObjectArrayDestructorEntry : NiTArray<NiPointer<NiAVObject>, NiTMallocInterface<NiPointer<NiAVObject> > >
 {
-    void* m_pObjectItem;
-    void* m_pNext;
     void FUN_00c62890();
 };
 extern "C" void NiFreeAlias(void*);
@@ -219,10 +188,6 @@ struct FUN_00c613a0_Class
     void operator delete(void* p, unsigned int size);
 };
 extern "C" void NiFree(void*);
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00c63210_Class
 {
@@ -239,11 +204,6 @@ struct FUN_00c632f0_class
     void* __thiscall FUN_00c632f0(unsigned int flags);
 };
 void __cdecl operator delete(void*, int);
-struct CloningProcess;
-struct NiPSysModifierCopy : NiPSysModifier
-{
-    void CopyMemberData(NiPSysModifier* dst, CloningProcess& proc);
-};
 struct FUN_00c63840_Class : NiPSysModifier
 {
     void __thiscall CopyModifierWithValue(NiPSysModifier* dst, CloningProcess* proc);
@@ -251,11 +211,7 @@ struct FUN_00c63840_Class : NiPSysModifier
 struct SStream;
 struct SObj;
 void __cdecl CallAnimCallback(SStream*, SObj*);
-struct NiPSysModifier_00c31950
-{
-    void __thiscall FUN_00c31950(void*);
-};
-struct FUN_00c63970_class : NiPSysModifier_00c31950
+struct FUN_00c63970_class : NiPSysModifier
 {
     void __thiscall FUN_00c63970(void* stream);
 };
@@ -279,11 +235,6 @@ struct FUN_00c64c30_Class
     bool __thiscall FUN_00c64c30(int a);
 };
 extern int DAT_010c3384;
-struct NiPSysPositionModifier
-{
-    NiPSysPositionModifier();
-    ~NiPSysPositionModifier();
-};
 struct FUN_00c60240 : NiPSysPositionModifier
 {
     int m_vt;
@@ -292,21 +243,12 @@ struct FUN_00c60240 : NiPSysPositionModifier
     float m_w[4];
     FUN_00c60240();
 };
-struct NiStream;
-struct RgbaColor
-{
-    void SaveBinary(NiStream&);
-};
-struct FUN_00c60950_class : NiPSysModifier_00c31950
+struct FUN_00c60950_class : NiPSysModifier
 {
     void FUN_00c60950(NiStream* stream);
 };
 int _sprintf_s(char*, unsigned int, const char*, ...);
 size_t _strlen(const char*);
-struct P03MM
-{
-    void* __thiscall Allocate(unsigned int);
-};
 struct FUN_00c62090_Class
 {
     char* __thiscall BuildAttachTypeString(const char* name, int type);
@@ -315,14 +257,6 @@ extern GlobalObject_00a7b610 g_012043b0;
 struct FUN_00c63320_Class
 {
     GlobalObject_00a7b610* __thiscall FUN_00c63320();
-};
-struct NiStream
-{
-    void SerializeString(const char* s);
-};
-struct NiExtraDataSaveHelper
-{
-    void SaveBinary(NiStream& s);
 };
 struct FUN_00c65210_class
 {
@@ -366,13 +300,7 @@ struct FUN_00c63260_class
     unsigned short m_uiY;
     FUN_00c63260_class(unsigned short x, unsigned short y);
 };
-struct NiPoint3_ZERO
-{
-    int x;
-    int y;
-    int z;
-};
-extern NiPoint3_ZERO _NiPoint3_ZERO;
+extern NiPoint3 _NiPoint3_ZERO;
 extern int _DAT_011f4270;
 extern int _DAT_011f4274;
 extern int DAT_010c37fc;
@@ -382,10 +310,6 @@ struct FUN_00c63330 : NiPSysPositionModifier
 };
 int strcpy_s(char* dst, unsigned int size, const char* src);
 size_t strlen(const char*);
-struct MemoryManagerAllocHelper
-{
-    void* Allocate(unsigned int);
-};
 struct FUN_00c64780_Class
 {
     void* m_iWordAt00;
@@ -399,27 +323,16 @@ struct FUN_00c65710_Class
     void* m_iWordAt04;
     void* __thiscall FUN_00c65710(unsigned int flags);
 };
-struct IsEqualHelper
-{
-    bool __thiscall IsEqual(NiObject* arg);
-};
 struct FUN_00c60000_Class
 {
     bool __thiscall IsEqualWithFloat(void* arg);
 };
-struct FUN_00c60700_Group
-{
-    unsigned int value00;
-    unsigned int value04;
-    unsigned int value08;
-    unsigned int value0c;
-};
 struct FUN_00c60700_Data
 {
     unsigned char padding[0x18];
-    FUN_00c60700_Group group00;
-    FUN_00c60700_Group group10;
-    FUN_00c60700_Group group20;
+    NiColorA group00;
+    NiColorA group10;
+    NiColorA group20;
     float value30;
     float value34;
     float value38;
@@ -427,19 +340,11 @@ struct FUN_00c60700_Data
     float value40;
     float value44;
 };
-struct FUN_00c60700_Class : NiPSysModifierCopy
+struct FUN_00c60700_Class : NiPSysModifier
 {
     void FUN_00c60700(NiPSysModifier* dst, CloningProcess& proc);
 };
 template <class T> void __cdecl ReadBinaryValue(NiStream& stream, T& value);
-struct NiPSysModifierLoadBinary_StandIn
-{
-    void LoadBinary(NiStream& stream);
-};
-struct NiColorALoadBinary_StandIn
-{
-    void LoadBinary(NiStream& stream);
-};
 struct FUN_00c60850_Class : public NiPSysModifier
 {
     void FUN_00c60850(NiStream& stream);
@@ -447,10 +352,6 @@ struct FUN_00c60850_Class : public NiPSysModifier
 struct MyIsEqual
 {
     bool __thiscall FUN_00c31830(NiObject*);
-};
-struct FUN_004a4cc0_shell
-{
-    bool __thiscall FUN_004a4cc0(void*);
 };
 struct FUN_00c60a10_Class
 {
@@ -500,11 +401,7 @@ struct FUN_00c61ba0_class : FUN_00c62390_class
     void ForwardToBase(void* a, void* b, void* c);
 };
 template <class T> void ReadBinaryValue(NiStream&, T&);
-struct NiPSysModifierStub
-{
-    virtual void LoadBinary(NiStream&);
-};
-struct FUN_00c63900_class : NiPSysModifierStub
+struct FUN_00c63900_class : NiPSysModifier
 {
     void LoadModifierData(NiStream& stream);
 };
@@ -790,17 +687,11 @@ class FUN_00c634b0_cls
     XSub30 m_30;
     void FUN_00c634b0(XObj70* a1, unsigned short idx);
 };
-struct NiPoint3_c
-{
-    unsigned int x;
-    unsigned int y;
-    unsigned int z;
-};
-extern NiPoint3_c NiPoint3_ZERO;
+extern NiPoint3 NiPoint3_ZERO;
 struct FUN_00c63780_c
 {
     int pad[9];
-    NiPoint3_c v;
+    NiPoint3 v;
     void ResetVector();
 };
 void* __cdecl FUN_00aa13e0(unsigned int size);
@@ -932,13 +823,6 @@ struct FUN_00c65180_Class
 
     unsigned char __thiscall VisitEntries(FUN_00c65180_VTable* p);
 };
-struct MyColorA
-{
-    float r;
-    float g;
-    float b;
-    float a;
-};
 struct Point3ParameterData
 {
     float unk00;
@@ -949,102 +833,18 @@ struct Point3ParameterData
     float unk14;
     float unk18;
 };
-struct NiPSysData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    MyColorA* m_pkParticleColors;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    unsigned short m_usNumParticles;
-    short pad52;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    Point3ParameterData* m_pkParticleInfo;
-};
-struct BSPSysSimpleColorModifierCand
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    MyColorA m_kColor1;
-    MyColorA m_kColor2;
-    MyColorA m_kColor3;
-    float m_fFadeInPercent;
-    float m_fFadeOutPercent;
-    float m_fColor1End;
-    float m_fColor2Start;
-    float m_fColor2End;
-    float m_fColor3Start;
-
-    void UpdateParticleColors(float fTime, NiPSysData* pkData);
-};
-class NiObjectC60
+// The blk_00c60000_od.cpp overlay binds this clone constructor to the simple-color modifier constructor at 0x00c60240.
+class SimpleColorModifierClone : public BSPSysSimpleColorModifier
 {
   public:
-    NiObjectC60();
-    virtual ~NiObjectC60();
-
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem);
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
+    SimpleColorModifierClone();
 };
-class NiCloningProcessC60;
-class NiOwnerC60
+// CloneObject 0x00c60670 copies the simple-color modifier via CopyMemberData 0x00c60700 in the same overlay.
+class SimpleColorModifierCloner : public BSPSysSimpleColorModifier
 {
   public:
-    void CopyMemberData(NiObjectC60* pkDest, NiCloningProcessC60& kCloning);
-    NiObjectC60* CloneObject(NiCloningProcessC60& kCloning);
-};
-struct NiTPrimitiveArray_unsigned_int_
-{
-    unsigned int AddFirstEmpty(const unsigned int& value);
+    void CopyMemberData(SimpleColorModifierClone* pkDest, CloningProcess& kCloning);
+    SimpleColorModifierClone* CloneObject(CloningProcess& kCloning);
 };
 struct FUN_00c615a0_class
 {
@@ -1052,8 +852,8 @@ struct FUN_00c615a0_class
     int unk04;
     int unk08;
     unsigned int unk0c;
-    void FUN_00a99b20(NiTPrimitiveArray_unsigned_int_* values);
-    void AppendGlobalAndFormatValues(NiTPrimitiveArray_unsigned_int_* values);
+    void FUN_00a99b20(NiTPrimitiveArray<unsigned int>* values);
+    void AppendGlobalAndFormatValues(NiTPrimitiveArray<unsigned int>* values);
 };
 extern "C" void* g_012043a4;
 extern const char str_0109df4c[];
@@ -1073,43 +873,27 @@ struct C639a0Cls : MyIsEqual
 
 #include <xmmintrin.h>
 extern float DAT_01011d78;
-struct Vector
+__forceinline void hkVector4::normalize()
 {
-    __m128 value;
-    void FUN_00c74ac0(const Vector*, const Vector*);
-    float GetAngle();
-    void FUN_00c74c90(Vector*);
-    void FUN_00cb2450(const Vector*, float);
-    inline void FUN_00c66320(const Vector*, const Vector*);
-    inline void FUN_005611c0();
-    Vector()
-    {}
-    __forceinline void operator=(const Vector& v)
-    {
-        value = v.value;
-    }
-    __forceinline void normalize()
-    {
-        __m128 squared = _mm_mul_ps(value, value);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(squared, squared, 0x55), squared);
-        sum = _mm_add_ss(_mm_shuffle_ps(squared, squared, 0xaa), sum);
-        __m128 estimate = _mm_rsqrt_ss(sum);
-        __m128 correction = _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(sum, estimate), estimate));
-        __m128 inverse = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), estimate), correction);
-        inverse = _mm_andnot_ps(_mm_cmpeq_ss(sum, _mm_set_ss(DAT_01011d78)), inverse);
-        value = _mm_mul_ps(_mm_shuffle_ps(inverse, inverse, 0), value);
-    }
-};
+    __m128 squared = _mm_mul_ps(m_vComponents, m_vComponents);
+    __m128 sum = _mm_add_ss(_mm_shuffle_ps(squared, squared, 0x55), squared);
+    sum = _mm_add_ss(_mm_shuffle_ps(squared, squared, 0xaa), sum);
+    __m128 estimate = _mm_rsqrt_ss(sum);
+    __m128 correction = _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(sum, estimate), estimate));
+    __m128 inverse = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), estimate), correction);
+    inverse = _mm_andnot_ps(_mm_cmpeq_ss(sum, _mm_set_ss(DAT_01011d78)), inverse);
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(inverse, inverse, 0), m_vComponents);
+}
 struct InputRef
 {
-    const Vector* p;
-    InputRef(const Vector* q) : p(q)
+    const hkVector4* p;
+    InputRef(const hkVector4* q) : p(q)
     {}
-    operator const Vector*() const
+    operator const hkVector4*() const
     {
         return p;
     }
-    const Vector* operator->() const
+    const hkVector4* operator->() const
     {
         return p;
     }
@@ -1117,7 +901,7 @@ struct InputRef
 struct TargetVector
 {
     unsigned int unk00, unk04, unk08, unk0c;
-    Vector vector;
+    hkVector4 vector;
 };
 struct Holder
 {
@@ -1129,7 +913,7 @@ struct Entry
     short index;
     short unk06;
     unsigned int unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
-    Vector position;
+    hkVector4 position;
     unsigned int unk40, unk44, unk48, unk4c;
 };
 extern float DAT_01017d00, DAT_01267d30, DAT_01267d24, DAT_01011d78;
@@ -1202,41 +986,46 @@ struct Constraint
     Entry entries[1];
     float FUN_00c755e0(unsigned int, InputRef);
 };
+// The shared SIMD union does not trigger MSVC's default GS heuristic.
+// Preserve the original function's stack cookie.
+#pragma strict_gs_check(on)
 // @fnv 0x00c755e0
 float Constraint::FUN_00c755e0(unsigned int index, InputRef input)
 {
     float distance = 0.0f;
-    __m128 oldPosition = entries[index].position.value;
-    __m128 newPosition = input->value;
+    __m128 oldPosition = entries[index].position.m_vComponents;
+    __m128 newPosition = input->m_vComponents;
     __m128 difference = _mm_and_ps(_mm_sub_ps(newPosition, oldPosition), DAT_01017d10);
     __m128 epsilon;
     epsilon = _mm_set1_ps(DAT_01017d00);
     if ((_mm_movemask_ps(_mm_cmple_ps(difference, epsilon)) & 7) != 7)
     {
-        Vector delta;
+        hkVector4 delta;
         delta.FUN_00c74ac0(input, &entries[index].position);
         distance = delta.GetAngle();
         float limit = enabled ? DAT_01267d30 : DAT_01267d24;
         if (distance > limit * DAT_01023128)
         {
             distance = (float)(limit * DAT_01023128);
-            Vector axis;
+            hkVector4 axis;
             delta.FUN_00c74c90(&axis);
             axis.normalize();
             delta.FUN_00cb2450(&axis, distance);
         }
         {
-            Vector result;
+            hkVector4 result;
             result.FUN_00c66320(&delta, &entries[index].position);
             result.FUN_005611c0();
             TargetVector* target = entries[index].holder->FUN_00cda8e0(entries[index].index);
-            __m128 updated = result.value;
-            target->vector.value = updated;
-            entries[index].position.value = updated;
+            __m128 updated = result.m_vComponents;
+            target->vector.m_vComponents = updated;
+            entries[index].position.m_vComponents = updated;
         }
     }
     return distance;
 }
+
+#pragma strict_gs_check(off)
 
 static __forceinline __m128 cross3(__m128 a, __m128 b)
 {
@@ -1254,23 +1043,23 @@ static __forceinline __m128 blendXYZW(__m128 a, __m128 b)
 {
     return _mm_shuffle_ps(a, _mm_unpackhi_ps(a, b), 0xc4);
 }
-inline void Vector::FUN_00c66320(const Vector* a, const Vector* b)
+inline void hkVector4::FUN_00c66320(const hkVector4* a, const hkVector4* b)
 {
-    __m128 xyz = cross3(a->value, b->value);
-    xyz = _mm_add_ps(xyz, _mm_mul_ps(_mm_shuffle_ps(a->value, a->value, 0xff), b->value));
-    xyz = _mm_add_ps(xyz, _mm_mul_ps(_mm_shuffle_ps(b->value, b->value, 0xff), a->value));
-    __m128 p = _mm_mul_ps(a->value, b->value);
+    __m128 xyz = cross3(a->m_vComponents, b->m_vComponents);
+    xyz = _mm_add_ps(xyz, _mm_mul_ps(_mm_shuffle_ps(a->m_vComponents, a->m_vComponents, 0xff), b->m_vComponents));
+    xyz = _mm_add_ps(xyz, _mm_mul_ps(_mm_shuffle_ps(b->m_vComponents, b->m_vComponents, 0xff), a->m_vComponents));
+    __m128 p = _mm_mul_ps(a->m_vComponents, b->m_vComponents);
     __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
     s = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
     __m128 w = _mm_sub_ps(p, _mm_shuffle_ps(s, s, 0));
-    value = blendXYZW(xyz, w);
+    m_vComponents = blendXYZW(xyz, w);
 }
-inline void Vector::FUN_005611c0()
+inline void hkVector4::FUN_005611c0()
 {
-    __m128 s = dot4(value, value);
+    __m128 s = ::dot4(m_vComponents, m_vComponents);
     __m128 e = _mm_rsqrt_ss(s);
     __m128 correction = _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(s, e), e));
     __m128 inverse = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e), correction);
     inverse = _mm_andnot_ps(_mm_cmpeq_ss(s, _mm_set_ss(0.0f)), inverse);
-    value = _mm_mul_ps(_mm_shuffle_ps(inverse, inverse, 0), value);
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(inverse, inverse, 0), m_vComponents);
 }

@@ -2,6 +2,13 @@
 // src/unmapped/debugtextparticlesystem.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/debug/debugtextpages/debugtextparticlesystem.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkReferencedObject.h"
+#include "../../include/hkAabb.h"
+#define HKSTRINGPTR_THROWING_DEFAULT_CONSTRUCTOR
+#include "../../include/hkStringPtr.h"
+#include "../../include/hkaSkeleton.h"
+
 extern "C" void* g_012682bc;
 
 // @fnv 0x00ca34b0
@@ -117,33 +124,15 @@ struct MemoryAllocator
     virtual void* allocateBuffer(int& bytes);
     virtual void freeBuffer(void* buffer, int bytes);
 };
-struct MemoryRouter
-{
-    int unk00, unk04, unk08, unk0C;
-    MemoryAllocator* heapPointer;
-    __forceinline MemoryAllocator& heap()
-    {
-        return *heapPointer;
-    }
-};
-extern "C" MemoryRouter& FUN_00c85750();
+extern "C" hkMemoryRouter& FUN_00c85750();
 extern "C" void __cdecl FUN_00c908c0(MemoryAllocator*, void*, int, int);
 const char* __cdecl FUN_00cb1410(const char*);
 extern "C" void FUN_00ec8d5f(char*, unsigned int, const char*, unsigned int);
-struct hkStringPtr
+inline hkStringPtr::~hkStringPtr() throw()
 {
-    const char* text;
-    hkStringPtr();
+    FUN_00cb0c00();
+}
 
-    void FUN_00cb0a60();
-    void FUN_00cb0c00();
-    ~hkStringPtr()
-    {
-        FUN_00cb0c00();
-    }
-    void operator=(const char*);
-    void FUN_00cb0c30(const hkStringPtr*);
-};
 struct HavokBool
 {
     char value;
@@ -332,19 +321,20 @@ __forceinline void ShapeVector::setRotated(const Rotation& quaternion, const Sha
     result.addMul(qreal, cross);
     setAdd(result, result);
 }
-struct Transform
+// hkQsTransform (0x00ce5070 = hkQsTransform::setFromTransform; reference pose element) over this unit's ShapeVector/Rotation stand-ins.
+struct SkeletonQsTransform
 {
     ShapeVector translation;
     Rotation rotation;
     ShapeVector scale;
-    void FUN_00ce5070(const Transform*);
+    void FUN_00ce5070(const SkeletonQsTransform*);
     __forceinline void setIdentity()
     {
         translation.value = _mm_setzero_ps();
         rotation.value.value = DAT_010c71b0;
         scale.value = _mm_load1_ps(&DAT_01012068);
     }
-    __forceinline void SetConjugate(const Transform& source)
+    __forceinline void SetConjugate(const SkeletonQsTransform& source)
     {
         translation.setRotated(source.rotation, source.translation, true);
         translation.value = _mm_xor_ps(translation.value, DAT_010c44d0);
@@ -355,7 +345,7 @@ struct Transform
             _mm_sub_ps(_mm_add_ps(reciprocal, reciprocal), _mm_mul_ps(_mm_mul_ps(reciprocal, mixed), reciprocal));
         scale.value = _mm_and_ps(reciprocal, DAT_010c4c10);
     }
-    __forceinline void SetProduct(const Transform& a, const Transform& b)
+    __forceinline void SetProduct(const SkeletonQsTransform& a, const SkeletonQsTransform& b)
     {
         ShapeVector translated;
         translated.setRotated(a.rotation, b.translation, false);
@@ -395,13 +385,13 @@ template <class T> static __forceinline void arrayDestruct(T* p, int count)
 template <class T> static __forceinline void arrayConstruct(T* p, int count)
 {
     for (int i = 0; i < count; ++i)
-        new (p + i) T;
+        ::new (p + i) T;
 }
 struct ContainerHeapAllocator
 {
     __forceinline MemoryAllocator& get(const void*) const
     {
-        return FUN_00c85750().heap();
+        return ((MemoryAllocator&)FUN_00c85750().heap());
     }
 };
 template <class T> struct HavokArrayBase
@@ -476,7 +466,7 @@ static __forceinline void destroyBones(BoneName* bones, int count)
 static __forceinline void constructBones(BoneName* bones, int count)
 {
     for (int i = 0; i < count; ++i)
-        new (bones + i) BoneName;
+        ::new (bones + i) BoneName;
 }
 static __forceinline void resizeBones(HavokArray<BoneName>& bones, int count)
 {
@@ -485,48 +475,31 @@ static __forceinline void resizeBones(HavokArray<BoneName>& bones, int count)
     constructBones(bones.data + bones.size, count - bones.size);
     bones.size = count;
 }
-struct hkReferencedObject
-{
-    unsigned short memorySize, referenceCount;
-    __forceinline hkReferencedObject() : referenceCount(1)
-    {}
-    virtual ~hkReferencedObject()
-    {}
-    virtual const void* GetClassType() const;
-    virtual void CalcContentStatistics(void*, const void*) const;
-};
 typedef hkReferencedObject RigBase;
-struct hkaSkeleton : RigBase
+__forceinline void* __cdecl hkaSkeleton::operator new(unsigned int n)
 {
-    hkStringPtr name;
-    HavokArray<short> parents;
-    HavokArray<BoneName> names;
-    HavokArray<Transform> transforms;
-    HavokArray<int> slots;
-    HavokArray<int> extras;
-    static __forceinline void* __cdecl operator new(unsigned int n)
-    {
-        RigBase* memory = (RigBase*)FUN_00c85750().heap().allocate(n);
-        memory->memorySize = (unsigned short)n;
-        return memory;
-    }
-    __forceinline hkaSkeleton() : RigBase(), name(), parents(), names(), transforms(), slots(), extras()
-    {}
-    virtual ~hkaSkeleton();
-    static void __cdecl operator delete(void*);
-    __forceinline HavokArray<short>& getParents()
-    {
-        return parents;
-    }
-    __forceinline HavokArray<Transform>& getPose()
-    {
-        return transforms;
-    }
-    __forceinline HavokArray<BoneName>& getBones()
-    {
-        return names;
-    }
-};
+    RigBase* memory = (RigBase*)((MemoryAllocator&)FUN_00c85750().heap()).allocate(n);
+    memory->m_usMemSizeAndFlags = (unsigned short)n;
+    return memory;
+}
+__forceinline HavokArray<short>& hkaSkeleton::getParents()
+{
+    return reinterpret_cast<HavokArray<short>&>(m_kParentIndices);
+}
+__forceinline hkArray<hkQsTransform>& hkaSkeleton::getPose()
+{
+    return m_kReferencePose;
+}
+// this unit's array and hkQsTransform layouts over the reference pose
+typedef HavokArray<SkeletonQsTransform> PoseArray;
+__forceinline HavokArray<BoneName>& hkaSkeleton::getBones()
+{
+    return reinterpret_cast<HavokArray<BoneName>&>(m_kBones);
+}
+// hkArray() for each skeleton member: the shared hkArray's own constructor.
+__forceinline hkaSkeleton::hkaSkeleton()
+{
+}
 typedef hkaSkeleton Rig;
 struct Shape
 {
@@ -557,7 +530,7 @@ struct SceneNode
     int unk90, unk94, unk98, unk9C, unkA0, unkA4, unkA8, unkAC;
     int unkB0, unkB4, unkB8, unkBC, unkC0, unkC4, unkC8, unkCC;
     int unkD0, unkD4, unkD8, unkDC, unkE0, unkE4, unkE8, unkEC;
-    Transform transform;
+    SkeletonQsTransform transform;
 };
 struct NodeList
 {
@@ -606,11 +579,11 @@ struct IndexArrayBase
 };
 struct IndexArray : IndexArrayBase
 {
-    __forceinline IndexArray(int count) : IndexArrayBase(IndexArrayBase::allocate(FUN_00c85750().heap(), count))
+    __forceinline IndexArray(int count) : IndexArrayBase(IndexArrayBase::allocate(((MemoryAllocator&)FUN_00c85750().heap()), count))
     {}
     __forceinline ~IndexArray()
     {
-        MemoryAllocator* heap = &FUN_00c85750().heap();
+        MemoryAllocator* heap = &((MemoryAllocator&)FUN_00c85750().heap());
         if ((capacity & 0x80000000u) == 0)
             heap->freeBuffer(data, (capacity & 0x3fffffff) * 4);
     }
@@ -637,7 +610,7 @@ Rig* __stdcall BuildRigFromNodes(NodeList* nodes, NodeList* sorted, AttachmentLi
     unsigned long baseCount;
     {
         HavokArray<short>& parentArray = rig->getParents();
-        HavokArray<Transform>& poseArray = rig->getPose();
+        PoseArray& poseArray = (PoseArray&)rig->getPose();
         int nodeCount = nodes->size;
         int attachmentCount = attachments->size;
         int totalCount = attachmentCount + nodeCount;
@@ -663,7 +636,7 @@ Rig* __stdcall BuildRigFromNodes(NodeList* nodes, NodeList* sorted, AttachmentLi
                         break;
                     }
             }
-            rig->parents.data[i] = (short)parentIndex;
+            rig->getParents().data[i] = (short)parentIndex;
             SceneNode* node = nodes->data[i];
             for (unsigned int j = 0; j < attachments->size; ++j)
                 if (node == attachments->data[j]->node)
@@ -671,20 +644,20 @@ Rig* __stdcall BuildRigFromNodes(NodeList* nodes, NodeList* sorted, AttachmentLi
             if (0 <= parentIndex)
             {
                 SceneNode* parent = nodes->data[parentIndex];
-                Transform childTransform, parentTransform;
+                SkeletonQsTransform childTransform, parentTransform;
                 childTransform.FUN_00ce5070(&node->transform);
                 parentTransform.FUN_00ce5070(&parent->transform);
-                Transform& outTransform = rig->transforms.data[i];
-                Transform inverse;
+                SkeletonQsTransform& outTransform = ((PoseArray&)rig->getPose()).data[i];
+                SkeletonQsTransform inverse;
                 inverse.SetConjugate(parentTransform);
                 outTransform.SetProduct(inverse, childTransform);
             }
             else
-                rig->transforms.data[i].FUN_00ce5070(&node->transform);
+                ((PoseArray&)rig->getPose()).data[i].FUN_00ce5070(&node->transform);
             const char* text = (const char*)(node->taggedName & ~1u);
             if (text)
             {
-                hkStringPtr& boneName = rig->names.data[i];
+                hkStringPtr& boneName = rig->getBones().data[i];
                 boneName = FUN_00cb1410(text);
             }
             else
@@ -695,9 +668,9 @@ Rig* __stdcall BuildRigFromNodes(NodeList* nodes, NodeList* sorted, AttachmentLi
                     stream.FUN_00cc01c0(DAT_010c7384);
                     DAT_01268360->report(1, 0xabbacc14, buffer, DAT_010c7338, 721);
                 }
-                rig->names.data[i] = (const char*)0;
+                rig->getBones().data[i] = (const char*)0;
             }
-            rig->names.data[i].locked = 0 != i;
+            rig->getBones().data[i].locked = 0 != i;
         } while (++i < nodes->size);
     for (unsigned int i = 0; i < attachments->size; ++i)
     {
@@ -735,18 +708,18 @@ Rig* __stdcall BuildRigFromNodes(NodeList* nodes, NodeList* sorted, AttachmentLi
                 strcpy_s(name, 40, DAT_010c30bc);
             strcat_s(name, 45, DAT_010c732c);
             unsigned long index = i + baseCount;
-            hkStringPtr& boneName = rig->names.data[index];
+            hkStringPtr& boneName = rig->getBones().data[index];
             boneName = FUN_00cb1410(name);
-            rig->names.data[index].locked = true;
-            rig->parents.data[index] = (short)parentIndex;
-            rig->transforms.data[index].setIdentity();
-            rig->transforms.data[index].translation = position;
+            rig->getBones().data[index].locked = true;
+            rig->getParents().data[index] = (short)parentIndex;
+            ((PoseArray&)rig->getPose()).data[index].setIdentity();
+            ((PoseArray&)rig->getPose()).data[index].translation = position;
         }
     }
-    if (!rig->names.isEmpty())
-        rig->name.FUN_00cb0c30(rig->names.data);
+    if (!rig->getBones().isEmpty())
+        rig->m_name.FUN_00cb0c30(rig->getBones().data);
     else
-        rig->name = (const char*)0;
+        rig->m_name = (const char*)0;
     return rig;
 }
 
@@ -770,12 +743,6 @@ struct VecTable
     void* unk00;
     void*(__thiscall* allocate)(void*, unsigned int);
     void(__thiscall* free)(void*, void*);
-};
-struct Context
-{
-    char* cursor;
-    unsigned unk04, unk08, unk0c;
-    Provider* provider;
 };
 struct CountedObject
 {
@@ -1139,10 +1106,6 @@ struct Float4
         value = _mm_set1_ps(f);
     }
 };
-struct Bounds
-{
-    Float4 low, high;
-};
 struct SourceVec
 {
     void* vtbl;
@@ -1163,9 +1126,6 @@ struct PointerVec
     ~PointerVec();
     void CopyTo(Storage*);
 };
-namespace fnvc_adapt {
-Context* __cdecl FUN_00c85750();
-}
 struct Bool8;
 template <class T> struct ArrayCore
 {
@@ -1244,9 +1204,6 @@ struct AllocatorExtended : Allocator
 {
     void* FUN_00aa3e40(unsigned int bytes);
 };
-namespace fnvc_adapt {
-Context* __cdecl FUN_00c85750();
-}
 void* __cdecl FUN_00aa13e0(unsigned int size);
 enum PreparationResult
 {
@@ -1287,8 +1244,8 @@ struct Array8
     {}
     __forceinline ~Array8()
     {
-        Context* ctx = (Context*)fnvc_adapt::FUN_00c85750();
-        Provider* allocator = ctx->provider;
+        hkMemoryRouter* ctx = (&hkMemoryRouter::getInstance());
+        Provider* allocator = ((Provider*)ctx->m_heap);
         count = 0;
         if ((mask & 0x80000000u) == 0)
             free8(allocator, data, mask & 0x3fffffff);
@@ -1381,8 +1338,8 @@ struct FUN_00d1fa50
     void ResetEntries();
     static __forceinline void* operator new(unsigned int size)
     {
-        Context* alloc = (Context*)fnvc_adapt::FUN_00c85750();
-        FUN_00d1fa50* p = (FUN_00d1fa50*)alloc->provider->vtbl->allocate(alloc->provider, size);
+        hkMemoryRouter* alloc = (&hkMemoryRouter::getInstance());
+        FUN_00d1fa50* p = (FUN_00d1fa50*)((Provider*)alloc->m_heap)->vtbl->allocate(((Provider*)alloc->m_heap), size);
         p->size = (unsigned short)size;
         return p;
     }
@@ -1431,7 +1388,7 @@ struct Bool8
 };
 static __forceinline char** counters()
 {
-    return &fnvc_adapt::FUN_00c85750()->cursor;
+    return (char**)&(&hkMemoryRouter::getInstance())->m_stack.m_next.m_storage;
 }
 template <class T> static __forceinline void release_stack(T* memory)
 {
@@ -1439,8 +1396,8 @@ template <class T> static __forceinline void release_stack(T* memory)
 }
 template <class T> __forceinline TempArray<T>::~TempArray()
 {
-    Context* context = (Context*)fnvc_adapt::FUN_00c85750();
-    this->release(*context->provider);
+    hkMemoryRouter* context = (&hkMemoryRouter::getInstance());
+    this->release(*((Provider*)context->m_heap));
 }
 template <class T> __forceinline LocalArray<T>::LocalArray(int capacity)
 {
@@ -1522,10 +1479,10 @@ static __forceinline void add_pointer(PointerVec& vec, Item* const& ptr)
     ++vec.size;
     vec.data[vec.size - 1] = ptr;
 }
-static __forceinline void update_min_max(Float4& low, Float4& high, const Bounds& in)
+static __forceinline void update_min_max(Float4& low, Float4& high, const hkAabb& in)
 {
-    high.value = _mm_max_ps(high.value, in.high.value);
-    low.value = _mm_min_ps(low.value, in.low.value);
+    high.value = _mm_max_ps(high.value, reinterpret_cast<const Float4&>(in.m_kMaximumCorner.x).value);
+    low.value = _mm_min_ps(low.value, reinterpret_cast<const Float4&>(in.m_kMinimumCorner.x).value);
 }
 static __forceinline int countOf(Collection* c)
 {
@@ -1639,7 +1596,8 @@ bool Manager::FUN_00ca2ad0(void* source, unsigned int flags)
                     maxv.splat(DAT_0104e148);
                     Float4 minv;
                     minv.splat(DAT_0104da48);
-                    Bounds box;
+                    Float4 boxStorage[sizeof(hkAabb) / sizeof(Float4)];
+                    hkAabb& box = reinterpret_cast<hkAabb&>(boxStorage);
                     for (work = 0; work < (int)left.count; ++work)
                     {
                         SectionInfo* section = &((Section*)left.data[work])->info;
@@ -1650,12 +1608,12 @@ bool Manager::FUN_00ca2ad0(void* source, unsigned int flags)
                             update_min_max(minv, maxv, box);
                         }
                     }
-                    box.low = minv;
-                    box.high = maxv;
+                    reinterpret_cast<Float4&>(box.m_kMinimumCorner.x) = minv;
+                    reinterpret_cast<Float4&>(box.m_kMaximumCorner.x) = maxv;
                     SceneRecord record;
                     setResource(record, option);
-                    record.minimum = box.low;
-                    record.maximum = box.high;
+                    record.minimum = reinterpret_cast<const Float4&>(box.m_kMinimumCorner.x);
+                    record.maximum = reinterpret_cast<const Float4&>(box.m_kMaximumCorner.x);
                     entry->bounding = new FUN_0056e550(&record);
                     Inner* attachObj = (Inner*)((Collection*)entry->collection)->nodes[0];
                     if (attachObj && attachObj->context)

@@ -3,6 +3,21 @@
 // with declarations corrected to what the original code does (pathsmootherpov_decls.h: PathSmootherPOVSearch += bool FindPath(const NavMeshEdgePoint& edge, const NiPoint3& point, NavMeshEdgePoint& location, float& cost);). Move the function to its real unit once
 // that unit declares it this way.
 
+#include "../../../include/NavMesh.h"
+#include "../../../include/NavMeshEdgeData.h"
+#include "../../../include/NavMeshEdgePoint.h"
+#include "../../../include/NavMeshEdgeVertexPair.h"
+#include "../../../include/NavMeshPOVSearch.h"
+#include "../../../include/NavMeshTriangleEdgeReference.h"
+#include "../../../include/NavMeshTriangleReference.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/PathSmootherPOVAvoidanceNode.h"
+#include "../../../include/PathSmootherPOVSearch.h"
+#include "../../../include/PathingLocation.h"
+#include "../../../include/PathingRequest.h"
+#include "../../../include/PathingSolution.h"
+#include "../../../include/TES.h"
+
 #include "pathsmootherpov_decls_decl_pathsmootherpov.h"
 // MSVC9 allocates these locals by identifier as well as scope.
 // Semantic aliases preserve the verified stack layout while keeping the body readable.
@@ -62,7 +77,7 @@
 // @fnv 0x006b23d0
 bool PathSmootherPOVSearch::FUN_006b23d0(const NavMeshEdgePoint& edge, Sphere& sphere, CircularArc arc)
 {
-    float firstRadius1 = arc.Direction == AD_CCW ? sphere.Radius - pRequest->GetFloatAtOffset68() * 0.9f
+    float firstRadius1 = arc.Direction == ANGLE_DIRECTION_AD_CCW ? sphere.Radius - pRequest->GetFloatAtOffset68() * 0.9f
                                                  : sphere.Radius + pRequest->GetFloatAtOffset68() * 0.9f;
     NiPoint3 firstDirection0 = arc.Start.MakePointOnCircle(firstRadius1);
     NavMeshEdgePoint firstLocation6;
@@ -74,7 +89,7 @@ bool PathSmootherPOVSearch::FUN_006b23d0(const NavMeshEdgePoint& edge, Sphere& s
     if (!FUN_006b1e50(firstLocation6, firstSphere2, arc, &firstExit15))
         return false;
 
-    float secondRadius1 = arc.Direction == AD_CCW ? sphere.Radius + pRequest->GetFloatAtOffset68() * 0.9f
+    float secondRadius1 = arc.Direction == ANGLE_DIRECTION_AD_CCW ? sphere.Radius + pRequest->GetFloatAtOffset68() * 0.9f
                                                   : sphere.Radius - pRequest->GetFloatAtOffset68() * 0.9f;
     NiPoint3 secondDirection2 = arc.Start.MakePointOnCircle(secondRadius1);
     NavMeshEdgePoint secondLocation2;

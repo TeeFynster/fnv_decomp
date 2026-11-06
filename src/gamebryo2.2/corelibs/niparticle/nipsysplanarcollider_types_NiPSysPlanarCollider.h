@@ -9,7 +9,7 @@
 class NiStream;
 class NiAVObject;
 class CloningProcess;
-class ThreeByThreeMatrix;
+class NiMatrix3_Xbox360;
 class NiPSysCollider;
 class NiPSysColliderManager;
 class NiPSysPlanarCollider;
@@ -58,23 +58,8 @@ class NiPSysCollider : public NiObject
     // NiPSysCollider& __cdecl NiPSysCollider::*(const NiPSysCollider&)
     // void __cdecl NiPSysCollider::*()
     void CreateVertexBufferSet(NiPSysCollider*, CloningProcess&);
-    virtual void vfn_08();
-    virtual void vfn_0c();
-    virtual void vfn_10();
+    // the other slots are the shared NiObject virtuals; Clone is NiObject::MakeClone (0x48)
     virtual void LoadBinary(NiStream&);
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual NiPSysCollider* Clone(CloningProcess&);
 };
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiPSysCollider) == 44);
@@ -172,7 +157,9 @@ FNV_STATIC_ASSERT(sizeof(NiPoint4) == 16);
 FNV_STATIC_ASSERT(offsetof(NiPoint4, m_kComponents) == 0);
 FNV_STATIC_ASSERT(offsetof(NiPoint4, m_afExtents) == 0);
 #pragma pack(push, 4)
-class ThreeByThreeMatrix
+// Xbox 360 layout of Gamebryo's NiMatrix3 (Fallout_Release_Beta.pdb: size 0x30, m_pEntry = three NiPoint4 rows) from this
+// CodeView dump; the PC game's NiMatrix3 is include/NiMatrix3.h (float[3][3], 36 bytes).
+class NiMatrix3_Xbox360
 {
   public:
     NiPoint4 m_afEntries[3];  // +0x0, 48 bytes
@@ -184,13 +171,13 @@ class ThreeByThreeMatrix
     // Inverse
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(ThreeByThreeMatrix) == 48);
-FNV_STATIC_ASSERT(offsetof(ThreeByThreeMatrix, m_afEntries) == 0);
+FNV_STATIC_ASSERT(sizeof(NiMatrix3_Xbox360) == 48);
+FNV_STATIC_ASSERT(offsetof(NiMatrix3_Xbox360, m_afEntries) == 0);
 #pragma pack(push, 4)
 class NiTransform
 {
   public:
-    ThreeByThreeMatrix m_kOrientation;  // +0x0, 48 bytes
+    NiMatrix3_Xbox360 m_kOrientation;  // +0x0, 48 bytes
     NiPoint3 m_kTranslation;   // +0x30, 12 bytes
     float m_fScale;            // +0x3C, 4 bytes
     // void __cdecl NiTransform::*()
@@ -223,7 +210,7 @@ class NiPSysPlanarCollider : public NiPSysCollider
     NiPlane m_kHalfSpacePlane;       // +0x58, 16 bytes
     NiPoint3 m_kPathOffset;          // +0x68, 12 bytes
     unsigned char layoutPadding74[12];
-    ThreeByThreeMatrix m_kRotationMatrix;     // +0x80, 48 bytes
+    NiMatrix3_Xbox360 m_kRotationMatrix;     // +0x80, 48 bytes
     NiTransform m_kFirstTransform;   // +0xB0, 64 bytes
     NiTransform m_kSecondTransform;  // +0xF0, 64 bytes
     virtual void LoadBinary(NiStream&);

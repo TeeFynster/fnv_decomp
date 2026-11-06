@@ -1,23 +1,15 @@
 // fallout_shared/region system/tesregionpointlist.cpp: RegionPointList, TESObjectCELL, PointList (14 functions)
 
-class TESFile;
+#include "../../../include/BSThread.h"
+#include "../../../include/NiPoint2.h"
 
-template <class T> class BSSimpleList
-{
-  public:
-    T m_item;
-    BSSimpleList<T>* m_pkNext;
-    ~BSSimpleList();
-    void AddHead(T& item);
-};
 
-class NiPoint2
-{
-  public:
-    float x;
-    float y;
-    NiPoint2();
-};
+#include "../../../include/BSSimpleList.h"
+
+#include "../../../include/TESFile.h"
+#include "../../../include/TESObjectCELL.h"
+#include "../../../include/TESRegionList.h"
+#include "tesregionpointlist_cell.h"
 
 class RegionPoint
 {
@@ -30,16 +22,6 @@ class RegionPoint
 
 struct TESRegionPointList__ScaleResult
 {
-};
-
-class TESFile
-{
-  public:
-    unsigned int GetChunkID();
-    unsigned int GetChunkSize();
-    bool GetChunkData(void* apBuffer, unsigned int auSize);
-    bool IsEndianConversionRequired();
-    const char* GetFilename();
 };
 
 int Warning(const char* apFormat, ...);
@@ -139,18 +121,17 @@ void TESRegionPointList_Delete(RegionPointList* pointList)
     delete pointList;
 }
 
-#include "tesregionpointlist_cell.h"
 // @fnv 0x00547110
 TESRegionList* TESObjectCELL::GetRegionList(bool create)
 {
     TESRegionList* result = 0;
     if (IsCellInterior())
         return 0;
-    result = extraData.FUN_0041bce0();
+    result = reinterpret_cast<TESRegionPointList_CellExtraList*>(formData + 4)->FUN_0041bce0();
     if (!result && create)
     {
         result = new TESRegionList(0);
-        extraData.SetRegionList(result);
+        reinterpret_cast<TESRegionPointList_CellExtraList*>(formData + 4)->SetRegionList(result);
     }
     return result;
 }
@@ -158,12 +139,6 @@ TESRegionList* TESObjectCELL::GetRegionList(bool create)
 struct FUN_004f7dd0_shell : public RegionPointList
 {
     void FUN_004f7dd0();
-};
-
-class BSThread
-{
-  public:
-    unsigned int GetThreadID();
 };
 
 RegionPoint*& __fastcall _ref_006815c0(void* pThis);
@@ -197,10 +172,6 @@ struct FUN_004f81e0_shell : public RegionPointList
     bool FUN_004f81e0(bool);
 };
 
-struct BSThread
-{
-    unsigned int GetThreadID();
-};
 struct FUN_004f8220_stub
 {
     bool FUN_004f8220(bool);

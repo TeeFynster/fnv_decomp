@@ -2,6 +2,8 @@
 // src/fallout_shared/region system/tesregiongrassobjectlist.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/region system/tesregiongrassobjectlist.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../include/Actor.h"
+
 extern "C" void __cdecl Deallocate(void*);
 struct FUN_004f5df0_shell
 {
@@ -32,11 +34,6 @@ FUN_004f5e20::~FUN_004f5e20()
 {
     ClearList();
 }
-
-struct Actor
-{
-    void* p;
-};
 
 struct LH
 {

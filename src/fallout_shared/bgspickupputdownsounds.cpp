@@ -1,7 +1,32 @@
 // fallout_shared/bgspickupputdownsounds.cpp: TESIcon, BGSPickupPutdownSounds (8 functions)
 
+#include "layout_support.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSClipRoundsForm.h"
+#include "../../include/BGSPickupPutdownSounds.h"
+#include "../../include/TESIcon.h"
+#include "../../include/TESSound.h"
+#include "../../include/BGSEquipType.h"
+// CombatNode_bgspickupputdownsounds: local type (was include/CombatNode.h, which had no evidence of one real class); its methods are 0x00505c00 TESCombatStyle::GetPowerAttackF, 0x00505c20 TESCombatStyle::GetPowerAttackB, 0x005524b0 TESCombatStyle::GetPowerAttackChance, 0x006a9560 TESCombatStyle::GetPowerAttackL
+class CombatNode_bgspickupputdownsounds
+{
+public:
+    unsigned int FUN_00726070();
+    signed char GetByteAtOffset8C();
+    bool HasCombatFlag(int);
+    signed char FUN_0073cb80();
+    signed char FUN_00505c00();
+    signed char GetByteAtOffset9A();
+    signed char GetByteAtOffset9B();
+    signed char FUN_009e8670();
+};
+#include "../../include/TESFullName.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESRaceForm.h"
+#include "../../include/TESScriptableForm.h"
+#include "../../include/TESWeightForm.h"
+
 #include "bgspickupputdownsounds_decls.h"
-#include "bgspickupputdownsounds_types_BGSPickupPutdownSounds.h"
 
 // @fnv 0x00402c20
 TESIcon::TESIcon() : TESTexture()
@@ -79,153 +104,39 @@ void* __fastcall FUN_0047b4f0(BaseFormComponent* apComponent)
     return apComponent;
 }
 
-struct BGSMenuIcon;
-struct BGSMessageIcon;
-struct BGSTextureSet;
-struct BipedAnim;
-struct NiAVObject;
-struct NiPoint3;
-struct Script;
-struct TESBoundObject;
-struct TESModel;
-struct TESModelTextureSwap;
-struct TESObject;
-struct TESFormList;
-struct TESObjectREFR;
-struct FileEntryList;
-struct TESWaterForm;
-struct DistantTreeTextureInfo;
-struct blob12
-{
-    char b[12];
-};
-struct BGSClipRoundsForm : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static int GetClipRounds(TESForm*);
-    int GetClipRounds();
-    void SetFormClipRounds(int);
-    void* __vecDelDtor(unsigned int);
-    unsigned char m_ucClipRounds;
-    char _pad_5[3];
-};
-typedef char _sizecheck_BGSClipRoundsForm[sizeof(BGSClipRoundsForm) == 8 ? 1 : -1];
-struct TESFullName : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetFullNameLength(TESForm*);
-    unsigned int GetFullNameLength();
-    static char* GetFullName(TESForm*);
-    char* GetFullName();
-    void SetFullName(char*);
-    static void LoadFullNameChunk(TESFullName*, TESFile*);
-    void* GetFullNameString();
-    void* __vecDelDtor(unsigned int);
-    char m_kName[8];
-};
-typedef char _sizecheck_TESFullName[sizeof(TESFullName) == 12 ? 1 : -1];
-struct TESScriptableForm : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    void InitItem(TESForm*);
-    static Script* GetScriptForForm(TESForm*);
-    Script* GetScriptForForm();
-    static char* GetFormScriptEditorID(TESForm*);
-    char* GetFormScriptEditorID();
-    static void SetFormScript(TESForm*, Script*);
-    void SetFormScript(Script*);
-    Script* m_pFormScript;
-    bool m_bHasScript;
-    char _pad_9[3];
-};
-typedef char _sizecheck_TESScriptableForm[sizeof(TESScriptableForm) == 12 ? 1 : -1];
-struct TESWeightForm : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static float GetWeightForForm(TESForm*, bool);
-    float GetWeightForForm();
-    void SetFormWeight(float);
-    void* __vecDelDtor(unsigned int);
-    float fWeight;
-};
-typedef char _sizecheck_TESWeightForm[sizeof(TESWeightForm) == 8 ? 1 : -1];
-struct BGSEquipType : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static int GetEquipType(TESForm*);
-    int GetEquipType();
-    void SetEquipType(int);
-    static BGSMenuIcon* GetEquipTypeIcon(int);
-    static char* GetEquipTypeName(int);
-    static void GenerateDefaultMenuIcons();
-    int m_eEquipType;
-};
-typedef char _sizecheck_BGSEquipType[sizeof(BGSEquipType) == 8 ? 1 : -1];
-struct FUN_0047b540_shell : public BGSClipRoundsForm
-{
-    void FUN_0047b540();
-};
-
 // @fnv 0x0047b540
-void FUN_0047b540_shell::FUN_0047b540()
+void __fastcall FUN_0047b540(void* pThis)
 {
-    *(int*)((char*)this + 4) = 0;
-    *(int*)((char*)this + 8) = 0;
+    *(int*)((char*)pThis + 4) = 0;
+    *(int*)((char*)pThis + 8) = 0;
 }
 
-struct TESObjectREFR
+// Aggregate parameters stay on the stack under __fastcall, preserving the
+// component argument's original calling convention for these free functions.
+struct PickupPutdownComponentArgument
 {
-    void SetFlags(unsigned int);
+    BaseFormComponent* component;
 };
-struct TESRaceForm
-{
-    void Initialize(unsigned int);
-};
-struct ArrSI
+
+// Exe 0x0047b5d0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BgspickupputdownsoundsOffset08View
 {
     unsigned int GetFlags();
 };
-struct CombatNode
-{
-    unsigned int FUN_00726070();
-};
-struct FUN_0047b5d0_cls
-{
-    void FUN_0047b5d0(BaseFormComponent* component);
-};
-// If component casts to BGSPickupPutdownSounds, initializes this as TESRaceForm from its FUN_00726070 result and sets TESObjectREFR flags from its GetFlags.
+// Copies pickup and putdown sound references when the component has the matching type.
 // @fnv 0x0047b5d0
-void FUN_0047b5d0_cls::FUN_0047b5d0(BaseFormComponent* component)
+void __fastcall CopyPickupPutdownSounds(BGSPickupPutdownSounds* sounds, PickupPutdownComponentArgument argument)
 {
-    BGSPickupPutdownSounds* source = dynamic_cast<BGSPickupPutdownSounds*>(component);
+    BGSPickupPutdownSounds* source = dynamic_cast<BGSPickupPutdownSounds*>(argument.component);
     if (!source)
         return;
-    ((TESRaceForm*)this)->Initialize(((CombatNode*)source)->FUN_00726070());
-    ((TESObjectREFR*)this)->SetFlags(((ArrSI*)source)->GetFlags());
+    ((TESRaceForm*)sounds)->Initialize(((CombatNode_bgspickupputdownsounds*)source)->FUN_00726070());
+    ((TESObjectREFR*)sounds)->SetFlags(((BgspickupputdownsoundsOffset08View*)source)->GetFlags());
 }
 
 namespace fnv_0047b560 {
-struct ArrSI
+// Exe 0x0047b560: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BgspickupputdownsoundsOffset08View
 {
     unsigned int GetFlags();
 };
@@ -234,47 +145,38 @@ struct ItemList
     void* GetItem();
 };
 extern "C" void __cdecl FUN_00485910(int, int);
-struct FUN_0047b560_shell : public TESForm
-{
-    void LogFormIDs();
-};
 // @fnv 0x0047b560
-void FUN_0047b560_shell::LogFormIDs()
+void __fastcall LogFormIDs(BGSPickupPutdownSounds* sounds)
 {
-    if (((ItemList*)this)->GetItem())
+    if (((ItemList*)sounds)->GetItem())
     {
-        unsigned int id = ((TESForm*)((ItemList*)this)->GetItem())->GetFormID();
+        unsigned int id = ((TESForm*)((ItemList*)sounds)->GetItem())->GetFormID();
         FUN_00485910(0x4d414e59, id);
     }
-    if (((ArrSI*)this)->GetFlags())
+    if (((BgspickupputdownsoundsOffset08View*)sounds)->GetFlags())
     {
-        unsigned int id = ((TESForm*)((ArrSI*)this)->GetFlags())->GetFormID();
+        unsigned int id = ((TESForm*)((BgspickupputdownsoundsOffset08View*)sounds)->GetFlags())->GetFormID();
         FUN_00485910(0x4d414e5a, id);
     }
 }
 }  // namespace fnv_0047b560
 
 namespace fnv_0047b630 {
-struct ArrSI
+// Exe 0x0047b630: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BgspickupputdownsoundsOffset08View
 {
     unsigned int GetFlags();
 };
 
-struct FUN_0047b630_shell
-{
-    unsigned int FUN_00726070();
-    bool IsSamePickupPutdownSounds(BaseFormComponent* component);
-};
-
-// Casts component to BGSPickupPutdownSounds and returns false only if its FUN_00726070 result and GetFlags both match this object's.
+// Returns false only when the component has the matching type and both sound references match.
 // @fnv 0x0047b630
-bool FUN_0047b630_shell::IsSamePickupPutdownSounds(BaseFormComponent* component)
+bool __fastcall IsSamePickupPutdownSounds(BGSPickupPutdownSounds* sounds, PickupPutdownComponentArgument argument)
 {
-    BGSPickupPutdownSounds* pickup = dynamic_cast<BGSPickupPutdownSounds*>(component);
+    BGSPickupPutdownSounds* pickup = dynamic_cast<BGSPickupPutdownSounds*>(argument.component);
     if (pickup == 0)
         return true;
-    if (FUN_00726070() != reinterpret_cast<FUN_0047b630_shell*>(pickup)->FUN_00726070() ||
-        reinterpret_cast<ArrSI*>(this)->GetFlags() != reinterpret_cast<ArrSI*>(pickup)->GetFlags())
+    if (reinterpret_cast<CombatNode_bgspickupputdownsounds*>(sounds)->FUN_00726070() != reinterpret_cast<CombatNode_bgspickupputdownsounds*>(pickup)->FUN_00726070() ||
+        reinterpret_cast<BgspickupputdownsoundsOffset08View*>(sounds)->GetFlags() != reinterpret_cast<BgspickupputdownsoundsOffset08View*>(pickup)->GetFlags())
         return true;
     return false;
 }
@@ -282,14 +184,9 @@ bool FUN_0047b630_shell::IsSamePickupPutdownSounds(BaseFormComponent* component)
 
 extern int DAT_0101abd8;
 
-struct FUN_0047b520_shell : TESForm
-{
-    void FUN_0047b520();
-};
-
 // @fnv 0x0047b520
-void FUN_0047b520_shell::FUN_0047b520()
+void __fastcall FreePickupPutdownSounds(BGSPickupPutdownSounds* sounds)
 {
-    *(int**)this = &DAT_0101abd8;
-    TESForm::ClearData();
+    *(int**)sounds = &DAT_0101abd8;
+    reinterpret_cast<TESForm*>(sounds)->TESForm::ClearData();
 }

@@ -2,10 +2,17 @@
 
 #include "../../../include/layout_support.h"
 #include "../../../include/Actor.h"
-#include "MiddleLowProcess.h"
+#include "../../../include/MiddleLowProcess.h"
+#include "../../../include/Setting.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/BGSChangeFlags.h"
+#include "../../../include/BGSLoadFormBuffer.h"
+#include "../../../include/FormChangeMask.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/TESSaveLoadGame.h"
 
 // @fnv 0x008d80e0
-int MiddleLowProcess::GetProcessInteger()
+int MiddleLowProcess::GetProcessInteger() const
 {
     return m_iValueB4;
 }
@@ -46,7 +53,6 @@ struct ActorPackageData;
 struct Animation;
 struct ArrowProjectile;
 struct BGSBodyPartData;
-struct BGSLoadFormBuffer;
 struct BGSSaveFormBuffer;
 struct BGSVoiceType;
 struct BSAnimGroupSequence;
@@ -93,7 +99,6 @@ struct TESContainer;
 struct TESEffectShader;
 struct TESFaction;
 struct TESFile;
-struct TESForm;
 struct TESIdleForm;
 struct TESLevItem;
 struct TESLevSpell;
@@ -147,106 +152,11 @@ float FUN_0092ce00_shell::GetActorValueWithModifiers(TESActorBase* apActorBase, 
 }
 
 namespace fnv_0092eaa0 {
-struct Actor;
-struct SaveLoadFile;
-struct ThreeByThreeMatrix;
-struct NiPoint3;
-struct NiQuaternion;
-struct TESForm;
-struct TESObjectREFR;
-struct hkVector4;
-struct blob4
-{
-    char b[4];
-};
-struct BGSLoadGameBuffer
-{
-    virtual unsigned char GetVersion();
-    virtual TESForm* GetForm();
-    virtual TESObjectREFR* GetReference();
-    virtual Actor* GetActor();
-    int Load(SaveLoadFile*, unsigned int);
-    int Load(SaveLoadFile*);
-    void ResetReadPosition();
-    void SetBuffer(char*, unsigned int, unsigned int);
-    char* GetCurrentBufferPointer();
-    bool ReadFormIdentifier(unsigned int*);
-    unsigned int ReadFormIdentifier();
-    void ReadTypedData(NiQuaternion*, unsigned int);
-    void ReadTypedData(hkVector4*, unsigned int);
-    void ReadTypedData(double*, unsigned int);
-    void ReadTypedData(NiPoint3*, unsigned int);
-    void ReadTypedData(float*, unsigned int);
-    void ReadTypedData(unsigned long*, unsigned int);
-    void ReadTypedData(long*, unsigned int);
-    void ReadTypedData(unsigned int*, unsigned int);
-    void ReadTypedData(int*, unsigned int);
-    void ReadTypedData(unsigned short*, unsigned int);
-    void ReadTypedData(short*, unsigned int);
-    void ReadTypedData(ThreeByThreeMatrix*, unsigned int);
-    void ReadTypedData(void*, unsigned int);
-    char* LoadString(char*);
-    int ReadElementCount();
-    void AdvanceBuffer(unsigned int);
-    void ReadElementData(void*, unsigned int, unsigned int);
-    void ReadDataBlock(void*, unsigned int);
-    void* __vecDelDtor(unsigned int);
-    char* pBuffer;
-    unsigned int iBufferSize;
-    unsigned int m_uiReadOffset;
-};
 typedef char _sizecheck_BGSLoadGameBuffer[sizeof(BGSLoadGameBuffer) == 16 ? 1 : -1];
-struct BGSLoadFormBuffer : public BGSLoadGameBuffer
-{
-    int LoadHeader(SaveLoadFile*);
-    int ReadFormData(SaveLoadFile*);
-    void SkipData(SaveLoadFile*, unsigned int);
-    unsigned int GetFormID();
-    void SetForm(TESForm*);
-    virtual TESForm* GetForm();
-    virtual TESObjectREFR* GetReference();
-    virtual Actor* GetActor();
-    int GetFormType();
-    struct blob4 GetChangeFlags();
-    void SetChangeFlags(struct blob4);
-    struct blob4 GetOldChangeFlags();
-    void SetOldChangeFlags(struct blob4);
-    void SetVersion(unsigned char);
-    virtual unsigned char GetVersion();
-    void SetSkipForm(bool);
-    bool GetSkipForm();
-    void SetFormPending(bool);
-    bool GetFormPending();
-    void SetRevertOnly(bool);
-    bool GetRevertOnly();
-    void SetReconstructedForm(bool);
-    bool GetReconstructedForm();
-    void SetCellChanged(bool);
-    bool GetCellChanged();
-    void* __vecDelDtor(unsigned int);
-    unsigned int iFormID;
-    char Header[9];
-    char _pad_1d[3];
-    unsigned int iSize;
-    TESForm* pForm;
-    unsigned int iFlags;
-    char m_cReservedBytes[4];
-};
 typedef char _sizecheck_BGSLoadFormBuffer[sizeof(BGSLoadFormBuffer) == 48 ? 1 : -1];
 struct FUN_0092eaa0_shell : public MiddleLowProcess
 {
     void FUN_0092eaa0(BGSLoadFormBuffer*);
-};
-
-struct BGSChangeFlagsCall
-{
-    char b[4];
-    bool CheckFlag(unsigned int) const;
-};
-
-struct BGSLoadFormBufferCall
-{
-    BGSChangeFlagsCall GetChangeFlags();
 };
 
 struct LowProcessCall
@@ -263,8 +173,8 @@ struct ModifierListCall
 void FUN_0092eaa0_shell::FUN_0092eaa0(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     reinterpret_cast<LowProcessCall*>(this)->LoadGame(apLoadGameBuffer);
-    apLoadGameBuffer->ReadTypedData(reinterpret_cast<void*>(&m_iValueB4), 4);
-    if (reinterpret_cast<BGSLoadFormBufferCall*>(apLoadGameBuffer)->GetChangeFlags().CheckFlag(0x100000))
+    static_cast<BGSLoadGameBuffer*>(apLoadGameBuffer)->ReadTypedData(reinterpret_cast<void*>(&m_iValueB4), 4);
+    if (apLoadGameBuffer->GetChangeFlags()(0x100000))
     {
         reinterpret_cast<ModifierListCall*>(&m_kProcessModifierList)->LoadGame(apLoadGameBuffer);
     }
@@ -272,106 +182,11 @@ void FUN_0092eaa0_shell::FUN_0092eaa0(BGSLoadFormBuffer* apLoadGameBuffer)
 }  // namespace fnv_0092eaa0
 
 namespace fnv_0092eb00 {
-struct Actor;
-struct SaveLoadFile;
-struct ThreeByThreeMatrix;
-struct NiPoint3;
-struct NiQuaternion;
-struct TESForm;
-struct TESObjectREFR;
-struct hkVector4;
-struct blob4
-{
-    char b[4];
-};
-struct BGSLoadGameBuffer
-{
-    virtual unsigned char GetVersion();
-    virtual TESForm* GetForm();
-    virtual TESObjectREFR* GetReference();
-    virtual Actor* GetActor();
-    int Load(SaveLoadFile*, unsigned int);
-    int Load(SaveLoadFile*);
-    void ResetReadPosition();
-    void SetBuffer(char*, unsigned int, unsigned int);
-    char* GetCurrentBufferPointer();
-    bool ReadFormIdentifier(unsigned int*);
-    unsigned int ReadFormIdentifier();
-    void ReadTypedData(NiQuaternion*, unsigned int);
-    void ReadTypedData(hkVector4*, unsigned int);
-    void ReadTypedData(double*, unsigned int);
-    void ReadTypedData(NiPoint3*, unsigned int);
-    void ReadTypedData(float*, unsigned int);
-    void ReadTypedData(unsigned long*, unsigned int);
-    void ReadTypedData(long*, unsigned int);
-    void ReadTypedData(unsigned int*, unsigned int);
-    void ReadTypedData(int*, unsigned int);
-    void ReadTypedData(unsigned short*, unsigned int);
-    void ReadTypedData(short*, unsigned int);
-    void ReadTypedData(ThreeByThreeMatrix*, unsigned int);
-    void ReadTypedData(void*, unsigned int);
-    char* LoadString(char*);
-    int ReadElementCount();
-    void AdvanceBuffer(unsigned int);
-    void ReadElementData(void*, unsigned int, unsigned int);
-    void ReadDataBlock(void*, unsigned int);
-    void* __vecDelDtor(unsigned int);
-    char* pBuffer;
-    unsigned int iBufferSize;
-    unsigned int m_uiReadOffset;
-};
 typedef char _sizecheck_BGSLoadGameBuffer[sizeof(BGSLoadGameBuffer) == 16 ? 1 : -1];
-struct BGSLoadFormBuffer : public BGSLoadGameBuffer
-{
-    int LoadHeader(SaveLoadFile*);
-    int ReadFormData(SaveLoadFile*);
-    void SkipData(SaveLoadFile*, unsigned int);
-    unsigned int GetFormID();
-    void SetForm(TESForm*);
-    virtual TESForm* GetForm();
-    virtual TESObjectREFR* GetReference();
-    virtual Actor* GetActor();
-    int GetFormType();
-    struct blob4 GetChangeFlags();
-    void SetChangeFlags(struct blob4);
-    struct blob4 GetOldChangeFlags();
-    void SetOldChangeFlags(struct blob4);
-    void SetVersion(unsigned char);
-    virtual unsigned char GetVersion();
-    void SetSkipForm(bool);
-    bool GetSkipForm();
-    void SetFormPending(bool);
-    bool GetFormPending();
-    void SetRevertOnly(bool);
-    bool GetRevertOnly();
-    void SetReconstructedForm(bool);
-    bool GetReconstructedForm();
-    void SetCellChanged(bool);
-    bool GetCellChanged();
-    void* __vecDelDtor(unsigned int);
-    unsigned int iFormID;
-    char Header[9];
-    char _pad_1d[3];
-    unsigned int iSize;
-    TESForm* pForm;
-    unsigned int iFlags;
-    char m_cReservedBytes[4];
-};
 typedef char _sizecheck_BGSLoadFormBuffer[sizeof(BGSLoadFormBuffer) == 48 ? 1 : -1];
 struct FUN_0092eb00_shell : public MiddleLowProcess
 {
     void FUN_0092eb00(BGSLoadFormBuffer*);
-};
-
-struct BGSChangeFlags_helper
-{
-    int flags;
-    operator bool() const;
-};
-
-struct BGSLoadFormBuffer_helper
-{
-    BGSChangeFlags_helper GetOldChangeFlags(unsigned int);
 };
 
 struct LowProcess_helper
@@ -388,7 +203,7 @@ struct ModifierList_helper
 void FUN_0092eb00_shell::FUN_0092eb00(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     reinterpret_cast<LowProcess_helper*>(this)->Revert(apLoadGameBuffer);
-    if (reinterpret_cast<BGSLoadFormBuffer_helper*>(apLoadGameBuffer)->GetOldChangeFlags(0x100000))
+    if (apLoadGameBuffer->GetOldChangeFlags()(0x100000))
         reinterpret_cast<ModifierList_helper*>(reinterpret_cast<char*>(this) + 0xb8)->FUN_00937d50(apLoadGameBuffer);
 }
 }  // namespace fnv_0092eb00
@@ -552,18 +367,13 @@ struct FUN_0092cd90_shell : LowProcess
 int FUN_0092cd90_shell::GetActorValue(TESActorBase* apActorBase, ActorValue__Index index, Actor* actorPtr)
 {
     if (P09AV::GetFlag((int)index, 0x100))
-        return BaseProcess::GetActorValue(apActorBase, index, actorPtr);
-    return BaseProcess::GetActorValue(apActorBase, index, actorPtr) +
+        return BaseProcess::GetActorValueI(apActorBase, (ActorValue::Index)index, actorPtr);
+    return BaseProcess::GetActorValueI(apActorBase, (ActorValue::Index)index, actorPtr) +
            (int)(float)((ML_0092ce00*)((char*)this + 0xB8))->GetActorValueModifierAmount((char)index);
 }
 }  // namespace fnv_0092cd90
 
-struct Setting_S
-{
-    float* Float();
-};
-
-extern Setting_S originalRuntimeFloatSetting236;
+extern Setting originalRuntimeSetting236;
 
 struct FUN_0092cc90_shell
 {
@@ -573,24 +383,24 @@ struct FUN_0092cc90_shell
 // @fnv 0x0092cc90
 bool FUN_0092cc90_shell::FUN_0092cc90(Actor* apActor, float afTimeDelta)
 {
-    int iCount = (int)(*originalRuntimeFloatSetting236.Float() * 4.0);
+    int iCount = (int)(*originalRuntimeSetting236.Float() * 4.0);
     Actor* ptarget = 0;
 
     while (iCount)
     {
-        if (apActor->Unk_8B(false))
+        if (apActor->HasHealth(false))
             break;
 
         apActor->Unk_10E();
 
         ptarget = dynamic_cast<Actor*>(*(TESObjectREFR**)((char*)this + 0x40));
-        if (ptarget && !ptarget->Unk_8B(false))
+        if (ptarget && !ptarget->HasHealth(false))
             ptarget->Unk_10E();
 
         --iCount;
     }
 
-    if (ptarget && !ptarget->Unk_8B(false))
+    if (ptarget && !ptarget->HasHealth(false))
         ptarget->GetProcess()->ResetPackageState();
 
     return false;
@@ -627,20 +437,10 @@ void FUN_0092cf30_shell::FUN_0092cf30(Actor* apActor, int aiWhich, float afValue
 }
 }  // namespace fnv_0092cf30
 
-struct GlobalObject_0045cf30
-{
-    unsigned char* Bool();
-};
-
-struct Interface
+// Exe 0x0092e420: unit-local MiddlelowprocessInterfaceView view used by this matched implementation.
+struct MiddlelowprocessInterfaceView
 {
     static void __cdecl PrintDebugMessage(const char*, ...);
-};
-
-struct TESSaveLoadGame
-{
-    bool FUN_00862110();
-    void* GetHitSound();
 };
 
 struct HitSoundData_0092e420
@@ -649,7 +449,7 @@ struct HitSoundData_0092e420
     unsigned char pad;
 };
 
-extern GlobalObject_0045cf30 g_011de4e8;
+extern Setting g_011de4e8;
 extern TESSaveLoadGame* DAT_011de45c;
 
 TESForm* _GetFormByNumericID(unsigned int);
@@ -701,7 +501,7 @@ unsigned short FUN_0092e420_shell::FUN_0092e420(unsigned int flags, int value)
         {
             form = _GetFormByNumericID(hitSound->formID);
 
-            Interface::PrintDebugMessage(
+            MiddlelowprocessInterfaceView::PrintDebugMessage(
                 "GetSaveSize(): %-5i for form %08X %s with flags %08X ending at line %i in file %s",
                 usSize - usInitialSize, hitSound->formID, form->GetName(),
                 *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(hitSound) + 5), 0x263,
@@ -709,7 +509,7 @@ unsigned short FUN_0092e420_shell::FUN_0092e420(unsigned int flags, int value)
         }
         else
         {
-            Interface::PrintDebugMessage("GetSaveSize(): %-5i ending at line %i in file %s", usSize - usInitialSize,
+            MiddlelowprocessInterfaceView::PrintDebugMessage("GetSaveSize(): %-5i ending at line %i in file %s", usSize - usInitialSize,
                                          0x263,
                                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\ai\\MiddleLowProcess.cpp");
         }
@@ -763,87 +563,6 @@ bool FUN_0092cfd0_shell::FUN_0092cfd0(int packageType, bool forced)
     return result;
 }
 
-struct TESForm_92e560
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual const char* GetEditorID();
-};
-
 struct FormFlags_92e560
 {
     unsigned char b0;
@@ -859,116 +578,52 @@ struct SaveFormData_92e560
     FormFlags_92e560 flags;
 };
 
-struct SaveLoadGame_92e560
-{
-    bool IsDebugBlocks();
-    unsigned int GetOffset();
-    SaveFormData_92e560* GetCurrentForm();
-    void WriteData(void* apData, int aiSize);
-};
-
-struct SettingBool_92e560
-{
-    unsigned char* Bool();
-};
-
-struct SaveSizePart_92e560
+// ActorValueModifierList lacks the no-argument save method bound at 0x009378d0.
+struct ModifierSaveCall
 {
     void SaveGame();
 };
 
-struct LowProcessBase_92e560
+// The shared process layout is complete; its MiddleLowProcess save override is not declared yet.
+struct ProcessSave : MiddleLowProcess
 {
-    void SaveGame(unsigned int auiFlags, int aiArg);
+    void SaveGameTES(unsigned int auiFlags, MobileObject* apObject);
 };
 
-struct MiddleLowProcess_92e560 : LowProcessBase_92e560
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    SaveSizePart_92e560 unkB8;
-
-    void FUN_0092e560(unsigned int auiFlags, int aiArg);
-};
-
-extern SaveLoadGame_92e560* g_TESSaveLoadGame;
-extern SettingBool_92e560 g_bSaveDebug_92e560;
-TESForm_92e560* __cdecl LookupFormByID_92e560(unsigned int auiFormID);
+extern TESSaveLoadGame* g_TESSaveLoadGame;
+extern Setting g_bSaveDebug_92e560;
+TESForm* __cdecl LookupFormByID_92e560(unsigned int auiFormID);
 void __cdecl DebugPrintf_92e560(const char* apFmt, ...);
 void __cdecl SaveWarning_92e560(const char* apFmt, ...);
 
 // @fnv 0x0092e560
-void MiddleLowProcess_92e560::FUN_0092e560(unsigned int auiFlags, int aiArg)
+void ProcessSave::SaveGameTES(unsigned int auiFlags, MobileObject* apObject)
 {
-    LowProcessBase_92e560::SaveGame(auiFlags, aiArg);
+    LowProcess::SaveGameTES(auiFlags, apObject);
     unsigned short usBlockSize = 0;
     unsigned short* pBlockSize3 = 0;
-    unsigned int _uiStart = g_TESSaveLoadGame->GetOffset();
+    unsigned int _uiStart = g_TESSaveLoadGame->FUN_00825c00();
     if (*g_bSaveDebug_92e560.Bool())
-        _uiStart = g_TESSaveLoadGame->GetOffset();
-    if (g_TESSaveLoadGame->IsDebugBlocks())
+        _uiStart = g_TESSaveLoadGame->FUN_00825c00();
+    if (g_TESSaveLoadGame->FUN_00862110())
     {
         unsigned int uiMarker6 = 0x424c4f4b;
-        g_TESSaveLoadGame->WriteData(&uiMarker6, 4);
-        pBlockSize3 = (unsigned short*)g_TESSaveLoadGame->GetOffset();
-        g_TESSaveLoadGame->WriteData(&usBlockSize, 2);
+        g_TESSaveLoadGame->FUN_008579b0(&uiMarker6, 4);
+        pBlockSize3 = (unsigned short*)g_TESSaveLoadGame->FUN_00825c00();
+        g_TESSaveLoadGame->FUN_008579b0(&usBlockSize, 2);
     }
-    g_TESSaveLoadGame->WriteData(&unkB4, 4);
+    g_TESSaveLoadGame->FUN_008579b0(&m_iValueB4, 4);
     if (auiFlags & 0x100000)
-        unkB8.SaveGame();
+        reinterpret_cast<ModifierSaveCall*>(&m_kProcessModifierList)->SaveGame();
     if (*g_bSaveDebug_92e560.Bool())
     {
-        unsigned int uiEnd4 = g_TESSaveLoadGame->GetOffset();
-        SaveFormData_92e560* pFormData3 = g_TESSaveLoadGame->GetCurrentForm();
+        unsigned int uiEnd4 = g_TESSaveLoadGame->FUN_00825c00();
+        SaveFormData_92e560* pFormData3 = static_cast<SaveFormData_92e560*>(g_TESSaveLoadGame->GetHitSound());
         if (pFormData3)
         {
-            TESForm_92e560* pForm = LookupFormByID_92e560(pFormData3->formID);
+            TESForm* pForm = LookupFormByID_92e560(pFormData3->formID);
             DebugPrintf_92e560("SaveGame(): %-5i for form %08X %s with flags %08X ending at line %i in file %s",
-                               uiEnd4 - _uiStart, pFormData3->formID, pForm->GetEditorID(), pFormData3->flags, 634,
+                               uiEnd4 - _uiStart, pFormData3->formID, pForm->GetName(), pFormData3->flags, 634,
                                "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\ai\\MiddleLowProcess.cpp");
         }
         else
@@ -977,9 +632,9 @@ void MiddleLowProcess_92e560::FUN_0092e560(unsigned int auiFlags, int aiArg)
                                "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\ai\\MiddleLowProcess.cpp");
         }
     }
-    if (g_TESSaveLoadGame->IsDebugBlocks())
+    if (g_TESSaveLoadGame->FUN_00862110())
     {
-        unsigned int uiCur2 = g_TESSaveLoadGame->GetOffset();
+        unsigned int uiCur2 = g_TESSaveLoadGame->FUN_00825c00();
         unsigned int uiBase2 = (unsigned int)pBlockSize3;
         if (uiCur2 > uiBase2 + 0xffff)
             SaveWarning_92e560("SAVELOAD: Save Game Block in file %s on line %i is greater than maximum short size",
@@ -988,13 +643,9 @@ void MiddleLowProcess_92e560::FUN_0092e560(unsigned int auiFlags, int aiArg)
     }
 }
 
-struct BGSChangeFlags_s
-{
-    bool Test(unsigned int mask);
-};
 struct FUN_00865e50_shell
 {
-    BGSChangeFlags_s* FUN_00428110(unsigned int* out);
+    BGSChangeFlags* FUN_00428110(unsigned int* out);
     void FUN_00865e50(void* buf, unsigned int size, int flags);
 };
 struct TemporaryModifiers_shell
@@ -1021,7 +672,6 @@ void FUN_0092ea30_shell::LoadFromStream(FUN_00865e50_shell* a)
 }
 
 namespace fnv_0092e730 {
-extern "C" char DAT_011de45c;
 extern "C" char DAT_0108a3f0;
 extern "C" char DAT_01015718;
 extern "C" char DAT_010156a8;
@@ -1036,94 +686,6 @@ struct Record92
     char value[4];
     unsigned char kind;
 };
-struct Virtual92
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual unsigned v76();
-};
-struct Save92
-{
-    bool FUN_00862110();
-    void FUN_008579e0(void*, unsigned);
-    Record92* FUN_004fd3c0();
-    unsigned char FUN_008df040();
-    unsigned FUN_00825c00();
-};
 struct Base92
 {
     void FUN_0090fd80(unsigned, unsigned, unsigned);
@@ -1132,7 +694,7 @@ struct Sub92
 {
     void LoadModifiers();
 };
-Virtual92* __cdecl FUN_004839c0(unsigned);
+TESForm* __cdecl FUN_004839c0(unsigned);
 void __cdecl FUN_005b5e40(const char*, ...);
 struct Target92
 {
@@ -1148,45 +710,45 @@ void Target92::FUN_0092e730(unsigned flags, unsigned arg2, unsigned arg3)
     ((Base92*)this)->FUN_0090fd80(flags, arg2, arg3);
     unsigned short a = 0;
     unsigned b = 0;
-    if ((*(Save92**)&DAT_011de45c)->FUN_00862110())
+    if (::DAT_011de45c->FUN_00862110())
     {
         unsigned uiMagic;
-        (*(Save92**)&DAT_011de45c)->FUN_008579e0(&uiMagic, 4);
+        ::DAT_011de45c->FUN_008579e0(&uiMagic, 4);
         if (uiMagic != 0x424c4f4b)
         {
-            Record92* pRecord = (*(Save92**)&DAT_011de45c)->FUN_004fd3c0();
+            Record92* pRecord = static_cast<Record92*>(::DAT_011de45c->FUN_004fd3c0());
             if (pRecord)
             {
-                Virtual92* pVirtual = FUN_004839c0(pRecord->id);
-                FUN_005b5e40(&DAT_01015718, &DAT_0108a3f0, 0x287, pRecord->id, pVirtual->v76(), pRecord->kind,
+                TESForm* pVirtual = FUN_004839c0(pRecord->id);
+                FUN_005b5e40(&DAT_01015718, &DAT_0108a3f0, 0x287, pRecord->id, pVirtual->GetName(), pRecord->kind,
                              *(unsigned*)pRecord->value);
             }
             else
             {
-                FUN_005b5e40(&DAT_010156a8, &DAT_0108a3f0, 0x287, (*(Save92**)&DAT_011de45c)->FUN_008df040());
+                FUN_005b5e40(&DAT_010156a8, &DAT_0108a3f0, 0x287, ::DAT_011de45c->FUN_008df040());
             }
         }
-        b = (*(Save92**)&DAT_011de45c)->FUN_00825c00();
-        (*(Save92**)&DAT_011de45c)->FUN_008579e0(&a, 2);
+        b = ::DAT_011de45c->FUN_00825c00();
+        ::DAT_011de45c->FUN_008579e0(&a, 2);
     }
-    (*(Save92**)&DAT_011de45c)->FUN_008579e0(&field, 4);
+    ::DAT_011de45c->FUN_008579e0(&field, 4);
     if (flags & 0x100000)
         sub.LoadModifiers();
-    if ((*(Save92**)&DAT_011de45c)->FUN_00862110())
+    if (::DAT_011de45c->FUN_00862110())
     {
-        unsigned uiNewPos = (*(Save92**)&DAT_011de45c)->FUN_00825c00();
-        Record92* pRecord2 = (*(Save92**)&DAT_011de45c)->FUN_004fd3c0();
+        unsigned uiNewPos = ::DAT_011de45c->FUN_00825c00();
+        Record92* pRecord2 = static_cast<Record92*>(::DAT_011de45c->FUN_004fd3c0());
         if (pRecord2)
         {
-            Virtual92* pVirtual2 = FUN_004839c0(pRecord2->id);
+            TESForm* pVirtual2 = FUN_004839c0(pRecord2->id);
             if (uiNewPos > b + a)
             {
-                FUN_005b5e40(&DAT_01015588, uiNewPos - (b + a), &DAT_0108a3f0, 0x290, pRecord2->id, pVirtual2->v76(),
+                FUN_005b5e40(&DAT_01015588, uiNewPos - (b + a), &DAT_0108a3f0, 0x290, pRecord2->id, pVirtual2->GetName(),
                              pRecord2->kind, *(unsigned*)pRecord2->value);
             }
             else if (uiNewPos < b + a)
             {
-                FUN_005b5e40(&DAT_01015500, (b + a) - uiNewPos, &DAT_0108a3f0, 0x290, pRecord2->id, pVirtual2->v76(),
+                FUN_005b5e40(&DAT_01015500, (b + a) - uiNewPos, &DAT_0108a3f0, 0x290, pRecord2->id, pVirtual2->GetName(),
                              pRecord2->kind, *(unsigned*)pRecord2->value);
             }
         }
@@ -1195,12 +757,12 @@ void Target92::FUN_0092e730(unsigned flags, unsigned arg2, unsigned arg3)
             if (uiNewPos > b + a)
             {
                 FUN_005b5e40(&DAT_010154a0, uiNewPos - (b + a), &DAT_0108a3f0, 0x290,
-                             (*(Save92**)&DAT_011de45c)->FUN_008df040());
+                             ::DAT_011de45c->FUN_008df040());
             }
             else if (uiNewPos < b + a)
             {
                 FUN_005b5e40(&DAT_01015440, (b + a) - uiNewPos, &DAT_0108a3f0, 0x290,
-                             (*(Save92**)&DAT_011de45c)->FUN_008df040());
+                             ::DAT_011de45c->FUN_008df040());
             }
         }
     }
@@ -1277,12 +839,6 @@ void Owner0092cec0::FUN_0092cec0(int aiUnused, int aiIndex, float afValue)
 }
 
 namespace fnv_0092d050 {
-struct Pt3
-{
-    float x;
-    float y;
-    float z;
-};
 struct Ref;
 struct Pkg;
 struct Ext;
@@ -1313,7 +869,7 @@ struct Ext
 {
     int unk00;
     int GetRace();
-    Pt3* GetPos();
+    NiPoint3* GetPos();
 };
 
 struct ProcData
@@ -1764,7 +1320,7 @@ struct Ref
     virtual void r_160();
     virtual void r_164();
     virtual void r_168();
-    virtual Pt3 GetPos();
+    virtual NiPoint3 GetPos();
     virtual void r_170();
     virtual void r_174();
     virtual void r_178();
@@ -1854,7 +1410,7 @@ struct Ref
     void ClearState();
     BaseObj* GetBase();
     bool IsBusy();
-    void ApplyThing(const Pt3& p, int a, int b);
+    void ApplyThing(const NiPoint3& p, int a, int b);
     Owner* GetOwner();
     void Reset(int a);
     const char* GetName();
@@ -1957,7 +1513,7 @@ struct Pkg
     int GetProcType();
     int GetA(Ref* r, float f, int b);
     int GetB(Ref* r);
-    Pt3 GetC(Ref* r);
+    NiPoint3 GetC(Ref* r);
     bool FlagA();
     bool FlagB();
     int GetLocationPointer();
@@ -1979,16 +1535,6 @@ struct Lock
     void Enter();
 };
 
-struct IntSetting
-{
-    int* Get();
-};
-
-struct FloatSetting
-{
-    float* Get();
-};
-
 struct Queue
 {
     void Add(Owner* o, int b, int c, void (*fn)(), Ref* r);
@@ -2006,9 +1552,9 @@ extern double DAT_01011590;
 extern Queue* DAT_011c3f2c;
 extern int DAT_011ca248;
 extern Ref* DAT_011dea3c;
-extern IntSetting DAT_011cdad0;
-extern FloatSetting DAT_011cdbac;
-extern FloatSetting DAT_011cd82c;
+extern Setting DAT_011cdad0;
+extern Setting DAT_011cdbac;
+extern Setting DAT_011cd82c;
 extern int DAT_0119bcb0[];
 
 Spell* FUN_004839c0(int id);
@@ -2779,7 +2325,7 @@ void ProcStandIn::FUN_0092d050(Ref* apRef)
                     }
                     else if (pPkg->IsDone())
                     {
-                        if (!DAT_011dea3c->HasMember(pActor) && DAT_011dea3c->CountMembers() < *DAT_011cdad0.Get())
+                        if (!DAT_011dea3c->HasMember(pActor) && DAT_011dea3c->CountMembers() < *DAT_011cdad0.Int())
                         {
                             pPkg->MarkDone(0);
                         }
@@ -2804,11 +2350,11 @@ void ProcStandIn::FUN_0092d050(Ref* apRef)
                             }
                             if (fDist == DAT_01012060 && pActor->GetOwner() != 0 && pActor->GetOwner()->IsSet())
                             {
-                                fDist = *DAT_011cdbac.Get();
+                                fDist = *DAT_011cdbac.Float();
                             }
                             else if (fDist == DAT_01012060)
                             {
-                                fDist = *DAT_011cd82c.Get();
+                                fDist = *DAT_011cd82c.Float();
                             }
                             if (pActor->GetDistance(m_pFlagTarget, 0, 0) <= fDist / DAT_01011590)
                             {

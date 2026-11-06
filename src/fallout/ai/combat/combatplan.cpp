@@ -1,3 +1,4 @@
+#include "../../../../include/CombatPlan.h"
 
 // src/fallout/ai/combat/combatplan.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatplan.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -7,10 +8,6 @@ struct FUN_00994860_obj
     bool __thiscall ContainsValue(int);
 };
 
-struct CombatPlan
-{
-    bool __thiscall FUN_00981940(int aiAction);
-};
 
 // Returns the result of ContainsValue(aiAction) on the object at offset 0xa0, or false if that pointer is null.
 // @fnv 0x00981940

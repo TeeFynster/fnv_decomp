@@ -7,57 +7,51 @@
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 // src/gamebryo2.2/corelibs/niparticle/nipsysradialfieldmodifier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysradialfieldmodifier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../include/NiTransform.h"
+#include <string.h>
+
 extern "C" void* g_012026b0;
 void* __cdecl FUN_00c285c0();
 
-struct NiPoint3
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ)
 {
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    NiPoint3 operator-(const NiPoint3& pt) const
-    {
-        return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
-    }
-    NiPoint3 operator*(float fScalar) const
-    {
-        return NiPoint3(fScalar * x, fScalar * y, fScalar * z);
-    }
-    float SqrLength() const
-    {
-        return x * x + y * y + z * z;
-    }
-    void AddZTo(float& dst) const
-    {
-        dst = z + dst;
-    }
-    NiPoint3& operator+=(const NiPoint3& pt)
-    {
-        x += pt.x;
-        y += pt.y;
-        pt.AddZTo(z);
-        return *this;
-    }
-};
+    x = fX;
+    y = fY;
+    z = fZ;
+}
+
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& pt) const
+{
+    return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
+}
+
+inline NiPoint3 NiPoint3::operator*(float fScalar) const
+{
+    return NiPoint3(fScalar * x, fScalar * y, fScalar * z);
+}
+
+inline float NiPoint3::SqrLength() const
+{
+    return x * x + y * y + z * z;
+}
+
+inline void AddComponent(float& dst, float value)
+{
+    dst += value;
+}
+
+inline NiPoint3& AccumulatePoint(NiPoint3& dst, const NiPoint3& pt)
+{
+    dst.x += pt.x;
+    AddComponent(dst.y, pt.y);
+    dst.z += pt.z;
+    return dst;
+}
 
 inline NiPoint3 ScalePoint(float s, float x, const NiPoint3& d)
 {
     return NiPoint3(s * x, d.y * s, s * d.z);
 }
-struct NiTransform
-{
-    float rotation[3][3];
-    NiPoint3 translation;
-    float scale;
-    void FUN_004b4880(NiTransform& result) const;
-    NiTransform operator*(const NiTransform& rhs) const;
-};
 
 struct SceneObject
 {
@@ -123,10 +117,17 @@ void RadialField::FUN_00c287a0(float time, ParticleSystem* system)
         Update(time, system);
         return;
     }
-    NiTransform sourceTransform = source->world;
-    NiTransform inverse;
+    // These transforms are filled by bulk copies or the inverse operation.
+    // Keep their storage uninitialized, as in the original, without invoking constructors.
+    float sourceTransformStorage[sizeof(NiTransform) / sizeof(float)];
+    NiTransform& sourceTransform = *reinterpret_cast<NiTransform*>(sourceTransformStorage);
+    memcpy(&sourceTransform, &source->world, sizeof(sourceTransform));
+    float inverseStorage[sizeof(NiTransform) / sizeof(float)];
+    NiTransform& inverse = *reinterpret_cast<NiTransform*>(inverseStorage);
     {
-        NiTransform targetTransform = target->world;
+        float targetTransformStorage[sizeof(NiTransform) / sizeof(float)];
+        NiTransform& targetTransform = *reinterpret_cast<NiTransform*>(targetTransformStorage);
+        memcpy(&targetTransform, &target->world, sizeof(targetTransform));
         targetTransform.FUN_004b4880(inverse);
     }
     {
@@ -139,8 +140,8 @@ void RadialField::FUN_00c287a0(float time, ParticleSystem* system)
             if (deltaTime == 0.0f)
                 continue;
             NiPoint3 position = system->positions[i];
-            NiPoint3 difference = position - fieldToSystem.translation;
-            float distanceSquared = difference.SqrLength();
+            NiPoint3 difference = position - fieldToSystem.m_Translate;
+            float distanceSquared = static_cast<const NiPoint3&>(difference).SqrLength();
             if (useRadius && !(radiusSquared >= distanceSquared))
                 continue;
             NiPoint3 change;
@@ -155,7 +156,7 @@ void RadialField::FUN_00c287a0(float time, ParticleSystem* system)
                 float scale = deltaTime * strength;
                 change = difference * scale;
             }
-            particle.velocity += change;
+            AccumulatePoint(particle.velocity, change);
         }
     }
 }

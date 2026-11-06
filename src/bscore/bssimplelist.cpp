@@ -1,6 +1,20 @@
 // bscore/bssimplelist.cpp: TargetClass, ObsList, GList, ActList and more (39 functions)
 
-#include "InventoryStackRecord.h"
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "../../include/NiPointer.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/InventoryStackRecord.h"
+#include "../../include/CombatTargetTimestamp.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/SL.h"
+#include "../../include/Script.h"
+#include "../../include/StrMem.h"
+#include "../../include/TESTexture.h"
+#include "../../include/TopicInfoArray.h"
+
+
+class ActorValueInfo;
+namespace ActorValue { enum Index; }
 
 // Reusable definitions from bscore/bssimplelist.inl. Explicit pointer-list
 // instantiations below select the original linker-folded bodies.
@@ -137,10 +151,20 @@ FUN_004818b0::FUN_004818b0()
     c = 0;
 }
 
-struct NiNode;
-struct EqHelper
+class NiNode;
+
+// These lifecycle operations are supplied by the game's out-of-line helpers.
+template <> NiPointer<NiNode>::~NiPointer();
+template <> NiPointer<NiNode>::NiPointer(const NiPointer<NiNode>&);
+template <> NiPointer<NiNode>& NiPointer<NiNode>::operator=(const NiPointer<NiNode>&);
+template <> NiPointer<NiNode>& NiPointer<NiNode>::operator=(NiNode*);
+
+// NiPointer.h does not yet declare the raw-pointer inequality overload. Keep
+// just that operation here, inheriting the shared pointer layout and operations.
+struct NodePointerWithRawComparison : NiPointer<NiNode>
 {
-    bool operator==(NiNode*) const;
+    using NiPointer<NiNode>::operator=;
+    bool operator!=(NiNode*) const;
 };
 struct ObsList
 {
@@ -152,17 +176,11 @@ struct ObsList
 // @fnv 0x004a4460
 bool ObsList::FUN_004a4460()
 {
-    return (m_pkNext == 0 && *reinterpret_cast<EqHelper*>(this) == 0) ? 1 : 0;
+    return (m_pkNext == 0 && *reinterpret_cast<NiPointer<NiNode>*>(this) == 0) ? 1 : 0;
 }
 
 void* __cdecl operator new(unsigned int);
 
-struct SL
-{
-    char pad[8];
-    SL();
-    ~SL();
-};
 struct B006815c0
 {
     float x;
@@ -264,21 +282,6 @@ FUN_004f7680::FUN_004f7680(bool abOwnsPointMemory)
     m_pScaleResult = 0;
 }
 
-struct StrMem
-{
-    char pad[8];
-    StrMem();
-    ~StrMem();
-};
-struct ScriptS
-{
-    char pad[84];
-    ScriptS();
-    ~ScriptS();
-    void FUN_00484ab0(int);
-    void NotifySaveLoadGameOfFormChange();
-    void* GetHeader();
-};
 struct CondS
 {
     char pad[8];
@@ -289,7 +292,7 @@ struct FUN_00500960
 {
     StrMem ResponseText;
     StrMem m_kMenuText;
-    ScriptS m_kScript;
+    Script m_kScript;
     CondS Conditions;
     void* m_pNote;
     void* m_pTerminal;
@@ -316,7 +319,7 @@ FUN_00500910::FUN_00500910()
 // @fnv 0x00500960
 FUN_00500960::FUN_00500960()
 {
-    m_kScript.FUN_00484ab0(0);
+    m_kScript.SetInitializationState(false);
     m_kScript.NotifySaveLoadGameOfFormChange();
     ((char*)m_kScript.GetHeader())[0x10] = 0;
     m_pNote = 0;
@@ -342,16 +345,6 @@ FUN_00513d60::FUN_00513d60()
 
 void* __cdecl operator new(unsigned int);
 
-struct _FUN_0052aa80_shell
-{
-    bool operator!=(int) const;
-};
-
-struct Helper62d0 : public _FUN_0052aa80_shell
-{
-    void* operator=(void const*);
-};
-
 struct FUN_006317f0
 {
     char pad[8];
@@ -360,7 +353,7 @@ struct FUN_006317f0
 
 struct TargetClass
 {
-    Helper62d0 m_item;
+    NodePointerWithRawComparison m_item;
     TargetClass* m_pkNext;
 
     void FUN_0052a9b0(const NiPointer<NiNode>& item);
@@ -383,7 +376,7 @@ void TargetClass::FUN_0052a9b0(const NiPointer<NiNode>& item)
     }
     else
     {
-        pkCur->m_item = &item;
+        pkCur->m_item = item;
     }
 }
 
@@ -457,11 +450,6 @@ bool RefList::FUN_005f65d0(void** item)
     return pNode != 0;
 }
 
-struct TESTexture
-{
-    char b[8];
-    TESTexture();
-};
 struct FUN_005fcf10
 {
     StrMem a;
@@ -473,12 +461,6 @@ struct FUN_005fcf10
 FUN_005fcf10::FUN_005fcf10()
 {}
 
-struct TopicInfoArray
-{
-    char b[0x18];
-    TopicInfoArray();
-    ~TopicInfoArray();
-};
 struct Dummy_0061bf20
 {
     char b[0x10];
@@ -506,16 +488,6 @@ FUN_00619740::FUN_00619740()
 namespace fnv_00631540 {
 void* __cdecl operator new(unsigned int);
 
-struct _FUN_0052aa80_shell
-{
-    bool operator!=(int) const;
-};
-
-struct Helper62d0 : public _FUN_0052aa80_shell
-{
-    void* operator=(void const*);
-};
-
 struct FUN_006317f0
 {
     char pad[8];
@@ -524,7 +496,7 @@ struct FUN_006317f0
 
 struct TargetClass
 {
-    Helper62d0 m_item;
+    NodePointerWithRawComparison m_item;
     TargetClass* m_pkNext;
 
     void FUN_00631540(const NiPointer<NiNode>& item);
@@ -541,34 +513,26 @@ void TargetClass::FUN_00631540(const NiPointer<NiNode>& item)
         TargetClass* pkTmp = (TargetClass*)new FUN_006317f0(this);
         pkTmp->m_pkNext = m_pkNext;
         m_pkNext = pkTmp;
-        m_item = &item;
+        m_item = item;
     }
     else
     {
-        m_item = &item;
+        m_item = item;
     }
 }
 }  // namespace fnv_00631540
 
-struct NodeValue
-{
-    void* value;
-    bool operator==(void*) const;
-    bool operator!=(const NodeValue&) const;
-    NodeValue& operator=(const NodeValue&);
-    NodeValue& operator=(void*);
-};
 struct ListReader
 {
-    NodeValue item;
+    NiPointer<NiNode> item;
     ListReader* next;
     ~ListReader();
     bool IsEmpty();
-    void FUN_00631620(const NodeValue& value);
+    void FUN_00631620(const NiPointer<NiNode>& value);
 };
 // Removes the node whose item equals value; if it is the only node, clears item.
 // @fnv 0x00631620
-void ListReader::FUN_00631620(const NodeValue& value)
+void ListReader::FUN_00631620(const NiPointer<NiNode>& value)
 {
     if (value == 0 || IsEmpty())
         return;
@@ -605,18 +569,13 @@ void ListReader::FUN_00631620(const NodeValue& value)
 }
 
 namespace fnv_006317f0 {
-struct SpObst
-{
-    void* obj;
-    SpObst(unsigned int*);
-};
-struct FUN_006317f0 : SpObst
+struct FUN_006317f0 : NiPointer<NiNode>
 {
     void* next;
-    FUN_006317f0(unsigned int*);
+    FUN_006317f0(const NiPointer<NiNode>&);
 };
 // @fnv 0x006317f0
-FUN_006317f0::FUN_006317f0(unsigned int* p) : SpObst(p)
+FUN_006317f0::FUN_006317f0(const NiPointer<NiNode>& p) : NiPointer<NiNode>(p)
 {
     next = 0;
 }
@@ -629,17 +588,7 @@ struct B006815c0
     B006815c0();
 };
 
-struct NiPoint3
-{
-    float x, y, z;
-    static const NiPoint3 ZERO;
-};
 
-struct CombatTargetTimestamp
-{
-    float fTime;
-    CombatTargetTimestamp(float);
-};
 
 CombatTargetTimestamp* __fastcall FUN_004300a0(CombatTargetTimestamp*);
 extern float DAT_010673a0;

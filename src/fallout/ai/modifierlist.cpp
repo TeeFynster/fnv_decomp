@@ -1,6 +1,10 @@
 // fallout/ai/modifierlist.cpp: ModifierListCalc (21 functions)
 
 #include "modifierlist_decls.h"
+#include "../../../include/ActorValueModifierList.h"
+#include "../../../include/ActorValueInfo.h"
+#include "../../../include/GameTimerRecord.h"
+#include "../../../include/TESSaveLoadGame.h"
 
 extern "C" int gModifierListIndex[];
 extern "C" const double gModifierZero;
@@ -163,12 +167,8 @@ int** __fastcall FUN_00937d70(int** apArrayOut)
     return apArrayOut;
 }
 
-struct FUN_009375e0_shell : public ActorValueModifierList
-{
-    void FUN_009375e0(char key, float value);
-};
 // @fnv 0x009375e0
-void FUN_009375e0_shell::FUN_009375e0(char key, float value)
+void ActorValueModifierList::FUN_009375e0(char key, float value)
 {
     Modifier* modifier = GetModifierItem(key);
     if (!modifier)
@@ -212,13 +212,8 @@ float __cdecl ClampSumByMode(float afValueA, float afValueB, int aiMode)
     return result;
 }
 
-struct FUN_00937b30_shell : ActorValueModifierList
-{
-    void FUN_00937b30();
-};
-
 // @fnv 0x00937b30
-void FUN_00937b30_shell::FUN_00937b30()
+void ActorValueModifierList::Revert()
 {
     RemoveAllModifiers();
 }
@@ -252,10 +247,6 @@ void* Unk3713::ReleaseIfFlagged(unsigned int flags)
     return this;
 }
 
-struct TESSaveLoadGame
-{
-    void FUN_008579b0(void* a, int b);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 struct Host37870
 {
@@ -274,17 +265,9 @@ bool Host37870::FUN_00937870(Modifier* apModifier)
 }
 
 namespace fnv_009379c0 {
-struct TESSaveLoadGame
-{
-    void ReadTypedData(void*, unsigned int);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
-struct FUN_009379c0_shell : ActorValueModifierList
-{
-    void LoadModifiers();
-};
 // @fnv 0x009379c0
-void FUN_009379c0_shell::LoadModifiers()
+void __fastcall LoadModifiers(ActorValueModifierList* list)
 {
     unsigned short count;
     g_TESSaveLoadGame->ReadTypedData(&count, 2);
@@ -296,7 +279,7 @@ void FUN_009379c0_shell::LoadModifiers()
         g_TESSaveLoadGame->ReadTypedData(&key, 1);
         g_TESSaveLoadGame->ReadTypedData(&value, 4);
         modifier = new Modifier(key, value);
-        AppendModifier(modifier);
+        list->AppendModifier(modifier);
     }
 }
 }  // namespace fnv_009379c0
@@ -309,15 +292,6 @@ struct BSSimpleList_helper
     Modifier** _ref_006815c0();
 };
 
-struct GameTimerRecord
-{
-    unsigned int GetTime() const;
-};
-
-struct TESSaveLoadGame : GameTimerRecord
-{
-    void FUN_008579b0(void*, int);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct Host37870
@@ -327,33 +301,28 @@ struct Host37870
 
 extern int DAT_011e0750;
 
-struct FUN_009378d0_shell : Host37870
-{
-    void CountModifiers();
-};
-
 // @fnv 0x009378d0
-void FUN_009378d0_shell::CountModifiers()
+void __fastcall CountModifiers(ActorValueModifierList* list)
 {
     unsigned short icount = 0;
-    unsigned short* pusCount = (unsigned short*)g_TESSaveLoadGame->GetTime();
+    unsigned short* pusCount = (unsigned short*)((const GameTimerRecord*)g_TESSaveLoadGame)->GetTime();
     g_TESSaveLoadGame->FUN_008579b0(&icount, 2);
 
-    BSSimpleList<Modifier*>* pmodlist = (BSSimpleList<Modifier*>*)this;
+    BSSimpleList<Modifier*>* pmodlist = (BSSimpleList<Modifier*>*)list;
     while (pmodlist && *((BSSimpleList_helper*)pmodlist)->_ref_006815c0())
     {
         Modifier* pmod = *((BSSimpleList_helper*)pmodlist)->_ref_006815c0();
-        if (FUN_00937870(pmod))
+        if (((Host37870*)list)->FUN_00937870(pmod))
             icount++;
         pmodlist = pmodlist->GetNext();
     }
 
-    int ifastCount = *(void**)((char*)this + 0xc) ? DAT_011e0750 : 0;
+    int ifastCount = list->m_ppModifiedActorValues ? DAT_011e0750 : 0;
     if (ifastCount)
     {
         for (int i = 0; i < ifastCount; i++)
         {
-            FUN_00937870((*(Modifier***)*(void**)((char*)this + 0xc))[i]);
+            ((Host37870*)list)->FUN_00937870((Modifier*)list->m_ppModifiedActorValues->m_ppModifiers[i]);
             icount++;
         }
     }
@@ -449,49 +418,18 @@ unsigned short ModifierListCalc::FUN_00937ab0()
     return total;
 }
 
-class ActorValueInfo
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    unsigned int uiFlags;
-};
 namespace ActorValue {
 ActorValueInfo* GetActorValueInfo(Index aeActorValueIndex);
 }
 
-class FUN_00937400_ModifierList : public BSSimpleList<Modifier*>
-{
-  public:
-    bool m_bAllowZeroValueModifiers;
-    ModifierPointerList* m_ppModifiedActorValues;
-
-    void FUN_00937400(Modifier* modifier);
-};
-
 // Removes a modifier from the list, or from m_ppModifiedActorValues when the actor value is flagged and tracked there.
 // @fnv 0x00937400
-void FUN_00937400_ModifierList::FUN_00937400(Modifier* modifier)
+void ActorValueModifierList::EraseModifier(Modifier* modifier)
 {
     if (!modifier)
         return;
     ActorValueInfo* pkInfo = ActorValue::GetActorValueInfo((ActorValue::Index)modifier->GetKey());
-    if (pkInfo && (pkInfo->uiFlags & 1) && m_ppModifiedActorValues)
+    if (pkInfo && (pkInfo->uFlags & 1) && m_ppModifiedActorValues)
     {
         m_ppModifiedActorValues->RemoveModifier(modifier->GetKey());
         return;

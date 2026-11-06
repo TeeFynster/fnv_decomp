@@ -2,6 +2,11 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 #include "mtrenderingsystem_decls.h"
+#include "../../include/BSLinearTaskThread.h"
+#include "../../include/BSThread.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/BSCullingProcess.h"
 #pragma optimize("gty", on)
 #pragma optimize("", off)
 #pragma optimize("gty", on)
@@ -100,41 +105,83 @@ extern "C" void __fastcall FUN_00ba3130(ThreadStages* system, void*, int threadI
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* lpAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* lpAddend);
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int size);
-    void Free(void* p);
-};
 extern MemoryManager _g_memoryManager;
+
+// Preserve the original inlined reference operations with the shared layout.
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+
+inline void BSCullingProcess::SetAccumulator(NiRefObject* accumulator)
+{
+    if (accumulator)
+    {
+        m_acRendererDataA.m_pObject = reinterpret_cast<NiAccumulator*>(accumulator);
+        accumulator->IncRefCount();
+    }
+}
+
+inline void BSCullingProcess::SetCullMode(unsigned int mode)
+{
+    unk90 = mode;
+}
+
+inline void BSCullingProcess::SetCompoundFrustum(TaskArg1* frustum)
+{
+    unkC0 = reinterpret_cast<int>(frustum);
+}
+
+// The shared base does not declare its original visible-set constructor.
+// Keep that native initialization and scoped cleanup without duplicating its layout.
+class CullingBaseInitialization
+{
+  public:
+    void Initialize(NiVisibleArray*);
+};
+extern "C" const void* DAT_0101e2ec;
+
+class CullingProcessScope
+{
+    unsigned int storage[sizeof(BSCullingProcess) / sizeof(unsigned int)];
+
+  public:
+    __forceinline CullingProcessScope()
+    {
+        BSCullingProcess& culling = Get();
+        reinterpret_cast<CullingBaseInitialization*>(&culling)->Initialize(0);
+        *reinterpret_cast<const void**>(&culling) = &DAT_0101e2ec;
+        culling.unk90 = 0;
+        culling.unkBc = 0;
+        culling.unkC0 = 0;
+        culling.m_acRendererDataA.m_pObject = 0;
+    }
+
+    __forceinline ~CullingProcessScope()
+    {
+        Get().FUN_004a0f60();
+    }
+
+    __forceinline BSCullingProcess& Get()
+    {
+        return *reinterpret_cast<BSCullingProcess*>(storage);
+    }
+};
 
 namespace AccumTaskDetail {
 
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
-        {
-            DeleteThis();
-        }
-    }
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
-    }
-};
-
-template <class T> class NiPointer
+// Unit-local view of NiPointer for the code in namespace AccumTaskDetail: built on the shared NiPointer, that code does not compile or does not match.
+template <class T> class NiPointer_AccumTaskDetail
 {
   public:
     T* m_pObject;
 
-    __forceinline NiPointer& operator=(T* pObject)
+    __forceinline NiPointer_AccumTaskDetail& operator=(T* pObject)
     {
         if (m_pObject != pObject)
         {
@@ -214,117 +261,17 @@ class TaskArg1
     void FUN_00c477f0(Class0xa4* obj);
 };
 
-extern "C" const void* DAT_0101e2ec;
-
-struct NiVisibleArray;
-class FUN_00a69400
-{
-  public:
-    const void* vtable;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-
-    FUN_00a69400(NiVisibleArray* pArray = 0);
-};
-
-class BSCullingProcess : public FUN_00a69400
-{
-  public:
-    unsigned int cullMode;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    void* field_bc;
-    void* field_c0;
-    void* field_c4;
-
-    BSCullingProcess(NiVisibleArray* pkVisibleSet = 0) : FUN_00a69400(pkVisibleSet)
-    {
-        vtable = &DAT_0101e2ec;
-        cullMode = 0;
-        field_bc = 0;
-        field_c0 = 0;
-        field_c4 = 0;
-    }
-
-    void FUN_004a0f60();
-
-    void SetAccumulator(NiRefObject* accumulator)
-    {
-        if (accumulator)
-        {
-            field_c4 = accumulator;
-            accumulator->IncRefCount();
-        }
-    }
-
-    void SetCullMode(unsigned int mode)
-    {
-        cullMode = mode;
-    }
-
-    void SetCompoundFrustum(TaskArg1* frustum)
-    {
-        field_c0 = frustum;
-    }
-
-    __forceinline ~BSCullingProcess()
-    {
-        FUN_004a0f60();
-    }
-};
-
 void __cdecl FUN_00b6bee0(void* arg0, void* arg2, BSCullingProcess* pCulling);
 void __cdecl FUN_00b6bfc0(void* arg0, void* arg, BSCullingProcess* pCulling);
 
 struct TaskItem
 {
-    NiPointer<NiRefObject> sp00;
+    NiPointer_AccumTaskDetail<NiRefObject> sp00;
     Class0xa4* p04;
-    NiPointer<NiRefObject> sp08;
+    NiPointer_AccumTaskDetail<NiRefObject> sp08;
     void* unk0c;
     void* unk10;
-    NiPointer<NiRefObject> sp14;
+    NiPointer_AccumTaskDetail<NiRefObject> sp14;
     unsigned int cullMode;
     void* unk1c;
 };
@@ -379,10 +326,11 @@ void __fastcall FUN_00ba3390(AccumTaskReceiver* self, void*, NiRefObject* a1, Ta
     }
     else
     {
-        BSCullingProcess culling;
+        CullingProcessScope cullingScope;
+        BSCullingProcess& culling = cullingScope.Get();
         culling.SetAccumulator(a6);
         culling.SetCullMode(a7);
-        culling.SetCompoundFrustum(a2);
+        culling.SetCompoundFrustum(reinterpret_cast<::TaskArg1*>(a2));
         if (a3)
         {
             FUN_00b6bee0(a1, a3, &culling);
@@ -406,44 +354,19 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile lo
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 namespace RenderShutdownDetail {
 typedef int(__stdcall* SemaphoreRelease)(void*, long, long*);
-struct TaskSemaphore
+inline void Signal(ThreadSemaphore& signal, SemaphoreRelease release)
 {
-    volatile long count;
-    void* handle;
-    void Signal(SemaphoreRelease release)
-    {
-        release(handle, 1, 0);
-        InterlockedIncrement(&count);
-    }
-    void Wait()
-    {
-        WaitForSingleObject(handle, 0xffffffffUL);
-        InterlockedDecrement(&count);
-    }
-};
-struct RenderTask
+    release(signal.handle, 1, 0);
+    InterlockedIncrement(&signal.count);
+}
+inline void Wait(ThreadSemaphore& signal)
 {
-    virtual ~RenderTask();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    TaskSemaphore signal;
-    unsigned int unk38;
-    TaskSemaphore completion;
-    unsigned int unk44;
-    bool stopping;
-};
+    WaitForSingleObject(signal.handle, 0xffffffffUL);
+    InterlockedDecrement(&signal.count);
+}
 struct RenderTaskManager : ::TaskThreadManager
 {
-    RenderTask* tasks[2];
+    BSLinearTaskThread* tasks[2];
 };
 // @fnv 0x00ba2d80
 void __fastcall FUN_00ba2d80(RenderTaskManager* manager)
@@ -453,13 +376,13 @@ void __fastcall FUN_00ba2d80(RenderTaskManager* manager)
     SemaphoreRelease release = &ReleaseSemaphore;
     for (unsigned int index = 0; index < 2; ++index)
     {
-        RenderTask* task = manager->tasks[index];
+        BSLinearTaskThread* task = manager->tasks[index];
         if (task)
         {
             task->stopping = true;
-            task->signal.Signal(release);
+            Signal(task->request, release);
             task = manager->tasks[index];
-            task->completion.Wait();
+            Wait(task->completion);
             delete manager->tasks[index];
             manager->tasks[index] = 0;
         }
@@ -471,36 +394,6 @@ void __fastcall FUN_00ba2d80(RenderTaskManager* manager)
 int sprintf_s(char*, size_t, const char*, ...);
 
 extern MemoryManager g_memoryManager;
-struct BSThread
-{
-    void Initialize(int stackSize, const char* name, bool suspended);
-    void FUN_00aa6550(unsigned int);
-    void SetThreadPriority(int);
-    void SetName(const char*);
-};
-struct BSLinearTaskThread : BSThread
-{
-    BSLinearTaskThread();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-};
 extern void* DAT_010b7f50;
 struct RenderTaskThread : BSLinearTaskThread
 {
@@ -544,31 +437,10 @@ void ThreadOwner::FUN_00ba2e00(int index, unsigned int affinity, void(__cdecl* t
 extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void* hSemaphore, long lReleaseCount,
                                                                 long* lpPreviousCount);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* lpAddend);
-struct WorkerSync_ba2f30
-{
-    volatile long activeCount;
-    void* semaphore;
-};
-struct WorkerState_ba2f30
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    void* unk10;
-    void* unk14;
-    void* unk18;
-    void* unk1c;
-    void* unk20;
-    void* unk24;
-    void* unk28;
-    void* unk2c;
-    WorkerSync_ba2f30 synchronization;
-};
 class ThreadCoordinator_ba2f30
 {
   public:
-    WorkerState_ba2f30* workers[2];
+    BSLinearTaskThread* workers[2];
     unsigned int unk08;
     volatile unsigned int counters[2];
     void FUN_00ba2f30();
@@ -586,12 +458,12 @@ void ThreadCoordinator_ba2f30::FUN_00ba2f30()
     } while (--remaining);
     for (unsigned int index = 0; index < 2; ++index)
     {
-        WorkerState_ba2f30* worker = workers[index];
+        BSLinearTaskThread* worker = workers[index];
         if (worker != 0)
         {
-            WorkerSync_ba2f30* synchronization = &worker->synchronization;
-            ReleaseSemaphore(synchronization->semaphore, 1, 0);
-            InterlockedIncrement(&synchronization->activeCount);
+            ThreadSemaphore* synchronization = &worker->request;
+            ReleaseSemaphore(synchronization->handle, 1, 0);
+            InterlockedIncrement(&synchronization->count);
         }
     }
 }
@@ -601,42 +473,10 @@ extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(voi
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* lpAddend);
 extern bool DAT_011f94b4;
 
-struct SemaphoreBA2
-{
-    long m_lCount;
-    void* m_hEvent;
-
-    void Wait()
-    {
-        WaitForSingleObject(m_hEvent, 0xffffffff);
-        InterlockedDecrement(&m_lCount);
-    }
-};
-
-struct TaskThreadBA2
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    SemaphoreBA2 m_kDoneSemaphore;
-};
-
 class FUN_00ba2fa0_C
 {
   public:
-    TaskThreadBA2* m_apThreads[2];
+    BSLinearTaskThread* m_apThreads[2];
 
     void FUN_00ba2fa0();
 };
@@ -648,51 +488,25 @@ void FUN_00ba2fa0_C::FUN_00ba2fa0()
     {
         for (unsigned int i = 0; i < 2; i++)
         {
-            TaskThreadBA2* pThread = m_apThreads[i];
+            BSLinearTaskThread* pThread = m_apThreads[i];
             if (pThread)
-                pThread->m_kDoneSemaphore.Wait();
+            {
+                RenderShutdownDetail::Wait(pThread->completion);
+            }
         }
     }
 }
 
 namespace fnv_00ba2ff0 {
 extern "C" __declspec(dllimport) int __stdcall CloseHandle(void*);
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 namespace fnv_ba2ff0_cleanup {
-struct ThreadState
-{
-    void* vtable;
-    void* criticalSection;
-    unsigned int unk08, unk0c, unk10, unk14, unk18;
-    unsigned int unk1c, unk20, unk24, unk28, unk2c;
-    void __thiscall FUN_00aa63c0();
-};
-struct SemaphoreState
-{
-    volatile int count;
-    void* handle;
-    int maximumCount;
-    __forceinline void Release()
-    {
-        CloseHandle(handle);
-    }
-};
-struct WorkerThreadState : ThreadState
-{
-    SemaphoreState startProcessing;
-    SemaphoreState finishedProcessing;
-    bool killThread;
-};
 // @fnv 0x00ba2ff0
-void* __fastcall FUN_00ba2ff0(WorkerThreadState* self, void*, unsigned int flags)
+void* __fastcall FUN_00ba2ff0(BSLinearTaskThread* self, void*, unsigned int flags)
 {
-    self->finishedProcessing.Release();
-    self->startProcessing.Release();
-    self->ThreadState::FUN_00aa63c0();
+    CloseHandle(self->completion.handle);
+    CloseHandle(self->request.handle);
+    self->BSThread::~BSThread();
     if (flags & 1)
         g_memoryManager.Deallocate(self);
     return self;
@@ -700,27 +514,11 @@ void* __fastcall FUN_00ba2ff0(WorkerThreadState* self, void*, unsigned int flags
 }
 }  // namespace fnv_00ba2ff0
 
-struct NiRefObject
+template <class T> inline NiPointer<T>::~NiPointer()
 {
-    virtual void F0();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
-template <class T> struct NiPointer
-{
-    T* m_pObject;
-    ~NiPointer()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-};
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
 
 struct FUN_00ba3030
 {
@@ -798,125 +596,37 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volati
 extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void* semaphore, long releaseCount,
                                                                 long* previousCount);
 
-struct RefObjMt
-{
-    virtual void vfn00();
-    virtual void DeleteThis();
-    volatile long m_uiRefCount;
-};
-
 struct SubObjMt
 {
     void FUN_00c47770();
 };
 
-struct MemoryManagerMt
-{
-    void Deallocate(void* p);
-};
-extern MemoryManagerMt g_memoryManager;
+extern MemoryManager g_memoryManager;
 
 struct MTRenderingSystem_Helper
 {
     void FUN_00ba3130(int a, int b);
 };
 
-struct FUN_00a69400
-{
-    FUN_00a69400(void* pArray);
-    void* vtbl;
-};
-
-extern const void* DAT_0101e2ec;
-
-struct BSCullingProcess
-{
-    void FUN_004a0f60();
-};
-
-struct CullProc : FUN_00a69400
-{
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    SubObjMt* unkC0;
-    RefObjMt* unkC4;
-    CullProc() : FUN_00a69400(0)
-    {
-        vtbl = &DAT_0101e2ec;
-        unk90 = 0;
-        unkBC = 0;
-        unkC0 = 0;
-        unkC4 = 0;
-    }
-    ~CullProc()
-    {
-        ((BSCullingProcess*)this)->FUN_004a0f60();
-    }
-};
-void FUN_00b6bee0(RefObjMt* a, RefObjMt* b, CullProc* c);
-void FUN_00b6bfc0(RefObjMt* a, void* b, CullProc* c);
-static inline void AddB(RefObjMt* a, RefObjMt* b, CullProc* c)
+void FUN_00b6bee0(NiRefObject* a, NiRefObject* b, BSCullingProcess* c);
+void FUN_00b6bfc0(NiRefObject* a, void* b, BSCullingProcess* c);
+static inline void AddB(NiRefObject* a, NiRefObject* b, BSCullingProcess* c)
 {
     FUN_00b6bee0(a, b, c);
 }
-static inline void AddC(RefObjMt* a, void* b, CullProc* c)
+static inline void AddC(NiRefObject* a, void* b, BSCullingProcess* c)
 {
     FUN_00b6bfc0(a, b, c);
 }
 
 struct TaskRecordMt
 {
-    RefObjMt* unk00;
+    NiRefObject* unk00;
     SubObjMt* unk04;
-    RefObjMt* unk08;
+    NiRefObject* unk08;
     void* unk0C;
     void* unk10;
-    RefObjMt* unk14;
+    NiRefObject* unk14;
     int unk18;
     int unk1C;
 };
@@ -926,12 +636,12 @@ extern unsigned int DAT_0126fd98;
 extern volatile long DAT_012000ac;
 extern void* DAT_012000b0;
 
-static inline void Release(RefObjMt*& rp)
+static inline void Release(NiRefObject*& rp)
 {
-    RefObjMt* p = rp;
+    NiRefObject* p = rp;
     if (p)
     {
-        if (InterlockedDecrement(&p->m_uiRefCount) == 0)
+        if (InterlockedDecrement(reinterpret_cast<volatile long*>(&p->m_uiRefCount)) == 0)
             p->DeleteThis();
         rp = 0;
     }
@@ -947,15 +657,16 @@ void FUN_00ba3190()
         if (rec->unk14)
         {
             *(int*)(((char**)__readfsdword(0x2c))[DAT_0126fd98] + 0x2bc) = rec->unk1C;
-            CullProc cull;
-            RefObjMt* p = rec->unk14;
+            CullingProcessScope cullScope;
+            BSCullingProcess& cull = cullScope.Get();
+            NiRefObject* p = rec->unk14;
             if (p)
             {
-                cull.unkC4 = p;
-                InterlockedIncrement(&p->m_uiRefCount);
+                cull.m_acRendererDataA.m_pObject = reinterpret_cast<NiAccumulator*>(p);
+                InterlockedIncrement(reinterpret_cast<volatile long*>(&p->m_uiRefCount));
             }
             cull.unk90 = rec->unk18;
-            cull.unkC0 = rec->unk04;
+            cull.unkC0 = reinterpret_cast<int>(rec->unk04);
             if (rec->unk08)
                 AddB(rec->unk00, rec->unk08, &cull);
             if (rec->unk0C)

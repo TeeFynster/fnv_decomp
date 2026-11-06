@@ -6,6 +6,12 @@
 // object matching a package type. Each case news one derived ActorPackageData
 // class through the global allocator; unknown types return NULL.
 #include "actorpackagedata.h"
+#include "../../../include/ActorPackageData.h"
+#include "../../../include/EscortActorPackageData.h"
+#include "../../../include/GuardActorPackageData.h"
+#include "../../../include/PatrolActorPackageData.h"
+#include "../../../include/SandBoxActorPackageData.h"
+#include "../../../include/UseWeaponActorPackageData.h"
 
 #ifndef NULL
 #define NULL 0

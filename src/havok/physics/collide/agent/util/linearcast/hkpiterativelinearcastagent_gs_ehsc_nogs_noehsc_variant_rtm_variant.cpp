@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 // src/havok/physics/collide/agent/util/linearcast/hkpiterativelinearcastagent_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/agent/util/linearcast/hkpiterativelinearcastagent_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -8,23 +10,17 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 namespace IterativeSweepSimd {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    struct
-    {
-        float lane0, lane1, lane2, lane3;
-    };
-};
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    void _mm_store_ss(float*, __m128);
-    void _mm_store_ps(float*, __m128);
+using ::_mm_load_ss;
+using ::_mm_load_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
+using ::_mm_add_ss;
+using ::_mm_store_ss;
+using ::_mm_store_ps;
 }
 }
 extern "C" void _ReadWriteBarrier();
@@ -33,7 +29,7 @@ struct __declspec(align(16)) IterativeSweep_hkVector4
 {
     union
     {
-        IterativeSweepSimd::__m128 quad;
+        IterativeSweepSimd::LocalM128 quad;
         struct
         {
             float x, y, z, w;
@@ -42,7 +38,7 @@ struct __declspec(align(16)) IterativeSweep_hkVector4
 
     __forceinline void SetAllComponents(float v)
     {
-        IterativeSweepSimd::__m128 scalar = IterativeSweepSimd::_mm_load_ss(&v);
+        IterativeSweepSimd::LocalM128 scalar = IterativeSweepSimd::_mm_load_ss(&v);
         quad = IterativeSweepSimd::_mm_shuffle_ps(scalar, scalar, 0);
     }
 };
@@ -281,10 +277,10 @@ struct __declspec(align(16)) IterativeSweep_hkpLinearCastCollisionInput : public
 
 __forceinline float IterativeSweep_dot3(const IterativeSweep_hkVector4& a, const IterativeSweep_hkVector4& b)
 {
-    IterativeSweepSimd::__m128 mul = IterativeSweepSimd::_mm_mul_ps(a.quad, b.quad);
-    IterativeSweepSimd::__m128 shuf1 = IterativeSweepSimd::_mm_shuffle_ps(mul, mul, 0x55);
-    IterativeSweepSimd::__m128 shuf2 = IterativeSweepSimd::_mm_shuffle_ps(mul, mul, 0xaa);
-    IterativeSweepSimd::__m128 sum = IterativeSweepSimd::_mm_add_ss(shuf1, mul);
+    IterativeSweepSimd::LocalM128 mul = IterativeSweepSimd::_mm_mul_ps(a.quad, b.quad);
+    IterativeSweepSimd::LocalM128 shuf1 = IterativeSweepSimd::_mm_shuffle_ps(mul, mul, 0x55);
+    IterativeSweepSimd::LocalM128 shuf2 = IterativeSweepSimd::_mm_shuffle_ps(mul, mul, 0xaa);
+    IterativeSweepSimd::LocalM128 sum = IterativeSweepSimd::_mm_add_ss(shuf1, mul);
     sum = IterativeSweepSimd::_mm_add_ss(shuf2, sum);
     float res;
     IterativeSweepSimd::_mm_store_ss(&res, sum);
@@ -380,11 +376,11 @@ void FUN_00daf8e0(const IterativeSweep_hkpCdBody* bodyA, const IterativeSweep_hk
             return;
         }
 
-        IterativeSweepSimd::__m128 position =
+        IterativeSweepSimd::LocalM128 position =
             IterativeSweepSimd::_mm_load_ps(&projectedDistance.m_kHitPoint.m_vContactPosition.x);
         _ReadWriteBarrier();
         double currentFraction = localTransform;
-        IterativeSweepSimd::__m128 normal =
+        IterativeSweepSimd::LocalM128 normal =
             IterativeSweepSimd::_mm_load_ps(&projectedDistance.m_kHitPoint.m_vSeparatingNormal.x);
         step.quad = input->m_step.quad;
         _ReadWriteBarrier();

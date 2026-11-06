@@ -2,7 +2,17 @@
 // src/staging/blk_009c0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/NiNode.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/CombatTargetTimestamp.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/GO.h"
+#include "../../include/InventoryStackRecord.h"
+#include "../../include/PathingAvoidNodeArray.h"
+#include "../../include/SL.h"
+#include "../../include/Setting.h"
 
 struct hkVector4;
 void __cdecl SetNiPoint3FromHkVector4(hkVector4 const&, void*);
@@ -197,35 +207,29 @@ void* FUN_009d9f40_Class::FUN_009d9f40()
     return reinterpret_cast<char*>(this) + 0xE0;
 }
 
-struct PathBuilder
-{
-    void* FUN_006e8f40(void*);
-    void* FUN_009dfd50();
-    void* m_iWordAt00;
-    void* m_iWordAt04;
-    void* m_8;
-};
+#include "../../include/PathBuilder.h"
 
 // @fnv 0x009dfd50
 void* PathBuilder::FUN_009dfd50()
 {
-    return FUN_006e8f40((char*)m_8 - 1);
+    return FUN_006e8f40((char*)m_pAllocator - 1);
 }
 
-struct InventoryStackRecord
+
+// VATS (singleton 0x011f2250, 0x48 bytes): the current weapon object is at +0x40, its extra data at +0x44;
+// 0x009c8950 is VATS's command-playback update.
+struct VATS
 {
-    void SetEquipmentState(bool, bool);
-    void* m_40;
-    void* m_44;
-    void SetPointers(void* a, void* b);
+    void FUN_009c8950(bool abForceQuit, bool abFinishCommandPlayback);
+    void SetPointers(void* pFirst, void* pSecond);
 };
 
 // @fnv 0x009c8a90
-void InventoryStackRecord::SetPointers(void* pFirst, void* pSecond)
+void VATS::SetPointers(void* pFirst, void* pSecond)
 {
     *(void**)((char*)this + 0x40) = pFirst;
     *(void**)((char*)this + 0x44) = pSecond;
-    SetEquipmentState(true, true);
+    FUN_009c8950(true, true);
 }
 
 struct FUN_009c1aa0_Class
@@ -310,11 +314,6 @@ int FUN_009c6440_Class::FUN_009c6440(int a, int aiStoredValue)
     return (int)this;
 }
 
-struct NiAVObject;
-struct TESObjectREFR
-{
-    static TESObjectREFR* GetReferenceFromNiAVObject(NiAVObject* object);
-};
 extern "C" NiAVObject* __cdecl FUN_00c7fa90(NiAVObject* object);
 
 // Converts object via FUN_00c7fa90 and, if the result is non-null, returns the TESObjectREFR obtained from it; otherwise returns null.
@@ -366,10 +365,6 @@ void* FUN_009c8870_Class::FUN_009c8870(unsigned int flags)
     return this;
 }
 
-struct PathingAvoidNodeArray
-{
-    int x;
-};
 struct PathingRequestAvoidPointer
 {
     PathingRequestAvoidPointer(PathingAvoidNodeArray*);
@@ -391,20 +386,6 @@ bool FUN_009d7c80_Class::FUN_009d7c80()
     return UpdateMovementRequest(&t);
 }
 
-struct SL
-{
-    SL();
-    ~SL();
-    int m_iWordAt00;
-    int m_iWordAt04;
-};
-struct GO
-{
-    GO(int);
-    ~GO();
-    void operator=(void*);
-    int m_34;
-};
 extern int DAT_011f21b8;
 
 struct FUN_009c6a30 : SL
@@ -486,34 +467,18 @@ CF845* __thiscall FUN_009c1a00_Class::ConstructCF845(CF845* pObject)
     return pObject;
 }
 
-struct NiPoint3
-{
-    float m_uiX;
-    float m_uiY;
-    float m_uiZ;
-
-    bool FUN_004390c0(NiPoint3 const&);
-    NiPoint3& Set(float, float, float);
-    NiPoint3 operator+(NiPoint3 const&) const;
-};
-
 struct FUN_0058d510_class
 {
     NiPoint3* GetCameraPosition(NiPoint3*);
 };
 
-struct P09H
-{
-    int GetReferenceType() const;
-};
 
 struct FUN_0070c3b0_Dummy
 {
 };
 
-extern NiPoint3 _NiPoint3_ZERO;
 extern FUN_0070c3b0_Dummy* _g_thePlayer;
-extern P09H* DAT_011f21f0;
+extern TESObjectREFR* DAT_011f21f0;
 
 NiPoint3* __fastcall FUN_0045bb80(int);
 float __fastcall FUN_0070c3b0(FUN_0070c3b0_Dummy*);
@@ -532,20 +497,22 @@ struct FUN_009c8ac0_class
 // @fnv 0x009c8ac0
 NiPoint3* FUN_009c8ac0_class::FUN_009c8ac0(NiPoint3* result)
 {
-    NiPoint3 point = _NiPoint3_ZERO;
+    NiPoint3 point = NiPoint3::ZERO;
 
     if (m_10)
     {
-        NiPoint3 sourcePoint;
-        point = *m_10->GetCameraPosition(&sourcePoint);
+        // Output storage avoids introducing a default-constructor call in this /Od unit.
+        float sourcePoint[sizeof(NiPoint3) / sizeof(float)];
+        point = *m_10->GetCameraPosition(reinterpret_cast<NiPoint3*>(sourcePoint));
     }
 
-    if (point.FUN_004390c0(_NiPoint3_ZERO))
+    if (point.FUN_004390c0(NiPoint3::ZERO))
     {
-        NiPoint3 offset;
+        float offset[sizeof(NiPoint3) / sizeof(float)];
+        // The original Set at 0x00416870 returns this in EAX; preserve that result here.
         point = FUN_0045bb80(DAT_011f21f0->GetReferenceType())
-                    ->
-                    operator+(offset.Set(0.0f, 0.0f, FUN_0070c3b0(_g_thePlayer)));
+                    ->operator+(((*reinterpret_cast<NiPoint3*>(offset)).*reinterpret_cast<NiPoint3& (NiPoint3::*)(float, float, float)>(
+                        &NiPoint3::Set))(0.0f, 0.0f, FUN_0070c3b0(_g_thePlayer)));
     }
 
     *result = point;
@@ -581,12 +548,6 @@ FUN_009cbad0::FUN_009cbad0()
 
 extern float DAT_01090e90;
 
-struct CombatTargetTimestamp
-{
-    int m_iWordAt00;
-    CombatTargetTimestamp(float value);
-};
-
 struct FUN_009d1b90_Class
 {
     char m_iWordAt00[0xa4];
@@ -599,7 +560,7 @@ struct FUN_009d1b90_Class
 void FUN_009d1b90_Class::SetNegatedTimestamp()
 {
     CombatTargetTimestamp timestampValue(-DAT_01090e90);
-    m_a4 = timestampValue.m_iWordAt00;
+    m_a4 = *reinterpret_cast<int*>(&timestampValue.fTimeStamp);
 }
 
 struct FUN_00997520_Class
@@ -624,40 +585,25 @@ struct FUN_009c5ee0_sub
     void Init(int value);
 };
 
-struct FUN_009c5ee0_triple
-{
-    unsigned int m_iWordAt00;
-    unsigned int m_iWordAt04;
-    unsigned int m_8;
-};
-
-extern FUN_009c5ee0_triple DAT_011f426c;
-
 class FUN_009c5ee0_cls
 {
   public:
     unsigned int m_00;
     FUN_009c5ee0_sub m_04;
-    FUN_009c5ee0_triple m_08;
+    NiPoint3 m_08;
     FUN_009c5ee0_cls* FUN_009c5ee0();
 };
 
-// Clears m_00, calls m_04.Init(0), copies DAT_011f426c into m_08, and returns this.
+// Clears m_00, calls m_04.Init(0), copies NiPoint3::ZERO into m_08, and returns this.
 // @fnv 0x009c5ee0
 FUN_009c5ee0_cls* FUN_009c5ee0_cls::FUN_009c5ee0()
 {
     m_00 = 0;
     m_04.Init(0);
-    m_08 = DAT_011f426c;
+    m_08 = NiPoint3::ZERO;
     return this;
 }
 
-struct Vector3
-{
-    float x, y, z;
-    void __thiscall FUN_00439ef0(Vector3* dest, void* context);
-    void __thiscall FUN_004a0c10();
-};
 struct OrientationSource
 {
     float __thiscall FUN_00966980();
@@ -668,10 +614,10 @@ struct OrientationObject
     float __thiscall FUN_00931d70();
     void __thiscall ClampLookAngle(float value);
     OrientationSource* __thiscall FUN_004181e0();
-    void __thiscall SetOrientationFromDirection(Vector3 input);
+    void __thiscall SetOrientationFromDirection(NiPoint3 input);
 };
 extern "C" float __cdecl FUN_004b1460(float);
-extern "C" float __cdecl GetDirectionAngle(Vector3*);
+extern "C" float __cdecl GetDirectionAngle(NiPoint3*);
 extern "C" float __cdecl FUN_00408840(float);
 extern const double DAT_01012060;
 extern const double DAT_01018c00;
@@ -679,11 +625,12 @@ typedef void*(__thiscall* GetContextFn)(OrientationObject*);
 typedef float(__thiscall* GetAngleFn)(OrientationObject*, int);
 typedef void(__thiscall* SetAngleFn)(OrientationObject*, float);
 // @fnv 0x009c6030
-void OrientationObject::SetOrientationFromDirection(Vector3 aDirection)
+void OrientationObject::SetOrientationFromDirection(NiPoint3 aDirection)
 {
-    Vector3 c;
-    aDirection.FUN_00439ef0(&c, ((GetContextFn*)vtable)[125](this));
-    Vector3 b = c;
+    // The callee fills this storage; the original has no default-constructor call.
+    float c[sizeof(NiPoint3) / sizeof(float)];
+    aDirection.FUN_00439ef0(reinterpret_cast<NiPoint3*>(c), ((GetContextFn*)vtable)[125](this));
+    NiPoint3 b = *reinterpret_cast<NiPoint3*>(c);
     b.FUN_004a0c10();
     float e = ((GetAngleFn*)vtable)[175](this, 0);
     float d = FUN_00931d70();
@@ -712,10 +659,6 @@ struct TimerX
 {
     float GetMovementDelta();
     void SetMult(float afMult, bool abForce);
-};
-struct SettingX
-{
-    float* Float();
 };
 struct IdleX
 {
@@ -1196,7 +1139,8 @@ struct Obj3DX
 {
     void* GetObject3D();
 };
-struct ModelX
+// Body-part lookup: GetDefaultPart/GetPartByIndex bind to BGSBodyPartData helpers 0x005e50f0/0x005e5130.
+struct DialogueBodyPartLookup
 {
     void* GetRotate();
     Obj3DX* GetPartByIndex(int aiPart);
@@ -1300,7 +1244,7 @@ struct ActorBaseX
     virtual void v174();
     virtual void v178();
     virtual void v17c();
-    virtual ModelX* GetModelFilePath();
+    virtual DialogueBodyPartLookup* GetModelFilePath();
 };
 struct RefX
 {
@@ -1708,7 +1652,7 @@ extern RefX* xpSpecialA;
 extern RefX* xpSpecialB;
 extern bool xbWeaponPending;
 extern int xiTopicCount;
-extern SettingX xsShotMin, xsShotDelay, xsImodStrength, xsFadeAlpha, xsCloseDelay;
+extern Setting xsShotMin, xsShotDelay, xsImodStrength, xsFadeAlpha, xsCloseDelay;
 extern float xfTotalTime;
 extern float xfShotElapsed;
 extern bool xbSlowMo;
@@ -1730,7 +1674,7 @@ void DialogueCameraX::FUN_009c7240()
     void* qVCM;
     Obj3DX* qoqcoe;
     void* qBMjHz;
-    ModelX* qgqKr;
+    DialogueBodyPartLookup* qgqKr;
     RefX* qXSF;
     void* qfpzU;
     void* qZNIZJV;
@@ -2200,127 +2144,6 @@ void DialogueCameraX::FUN_009c7240()
         xkTargets.Add(xpCombatTarget);
 }
 
-class FUN_009c8b90_arg
-{
-  public:
-    virtual int v00();
-    virtual int v04();
-    virtual int v08();
-    virtual int v0C();
-    virtual int v10();
-    virtual int v14();
-    virtual int v18();
-    virtual int v1C();
-    virtual int v20();
-    virtual int v24();
-    virtual int v28();
-    virtual int v2C();
-    virtual int v30();
-    virtual int v34();
-    virtual int v38();
-    virtual int v3C();
-    virtual int v40();
-    virtual int v44();
-    virtual int v48();
-    virtual int v4C();
-    virtual int v50();
-    virtual int v54();
-    virtual int v58();
-    virtual int v5C();
-    virtual int v60();
-    virtual int v64();
-    virtual int v68();
-    virtual int v6C();
-    virtual int v70();
-    virtual int v74();
-    virtual int v78();
-    virtual int v7C();
-    virtual int v80();
-    virtual int v84();
-    virtual int v88();
-    virtual int v8C();
-    virtual int v90();
-    virtual int v94();
-    virtual int v98();
-    virtual int v9C();
-    virtual int vA0();
-    virtual int vA4();
-    virtual int vA8();
-    virtual int vAC();
-    virtual int vB0();
-    virtual int vB4();
-    virtual int vB8();
-    virtual int vBC();
-    virtual int vC0();
-    virtual int vC4();
-    virtual int vC8();
-    virtual int vCC();
-    virtual int vD0();
-    virtual int vD4();
-    virtual int vD8();
-    virtual int vDC();
-    virtual int vE0();
-    virtual int vE4();
-    virtual int vE8();
-    virtual int vEC();
-    virtual int vF0();
-    virtual int vF4();
-    virtual int vF8();
-    virtual int vFC();
-    virtual int v100();
-    virtual int v104();
-    virtual int v108();
-    virtual int v10C();
-    virtual int v110();
-    virtual int v114();
-    virtual int v118();
-    virtual int v11C();
-    virtual int v120();
-    virtual int v124();
-    virtual int v128();
-    virtual int v12C();
-    virtual int v130();
-    virtual int v134();
-    virtual int v138();
-    virtual int v13C();
-    virtual int v140();
-    virtual int v144();
-    virtual int v148();
-    virtual int v14C();
-    virtual int v150();
-    virtual int v154();
-    virtual int v158();
-    virtual int v15C();
-    virtual int v160();
-    virtual int v164();
-    virtual int v168();
-    virtual int v16C();
-    virtual int v170();
-    virtual int v174();
-    virtual int v178();
-    virtual int v17C();
-    virtual int v180();
-    virtual int v184();
-    virtual int v188();
-    virtual int v18C();
-    virtual int v190();
-    virtual int v194();
-    virtual int v198();
-    virtual int v19C();
-    virtual int v1A0();
-    virtual int v1A4();
-    virtual int v1A8();
-    virtual int v1AC();
-    virtual int v1B0();
-    virtual int v1B4();
-    virtual int v1B8();
-    virtual int v1BC();
-    virtual int v1C0();
-    virtual int v1C4();
-    virtual int v1C8();
-    virtual int v1CC();
-    virtual int v1D0();
-};
 
 class FUN_009c8b90_sub
 {
@@ -2341,12 +2164,12 @@ class FUN_009c8b90_cls
     FUN_009c8b90_sub* m_pEntryObject;
     int unk14;
     int unk18;
-    FUN_009c8b90_arg* m_1c;
-    void FUN_009c8b90(FUN_009c8b90_arg* a1);
+    TESObjectREFR* m_1c;
+    void FUN_009c8b90(TESObjectREFR* a1);
 };
 
 // @fnv 0x009c8b90
-void FUN_009c8b90_cls::FUN_009c8b90(FUN_009c8b90_arg* a1)
+void FUN_009c8b90_cls::FUN_009c8b90(TESObjectREFR* a1)
 {
     if (m_pEntryObject != 0)
     {
@@ -2354,7 +2177,7 @@ void FUN_009c8b90_cls::FUN_009c8b90(FUN_009c8b90_arg* a1)
         {
             if (a1 != 0)
             {
-                m_pEntryObject->S(a1->v1D0());
+                m_pEntryObject->S(reinterpret_cast<int>(a1->GetNiNode()));
             }
             else
             {
@@ -2365,7 +2188,7 @@ void FUN_009c8b90_cls::FUN_009c8b90(FUN_009c8b90_arg* a1)
         {
             if (a1 != 0)
             {
-                m_pEntryObject->T(a1->v1D0());
+                m_pEntryObject->T(reinterpret_cast<int>(a1->GetNiNode()));
             }
             else
             {
@@ -2376,166 +2199,26 @@ void FUN_009c8b90_cls::FUN_009c8b90(FUN_009c8b90_arg* a1)
     m_1c = a1;
 }
 
-struct Ret_9d1b70
-{
-    int m_v;
-};
 struct FUN_009d1b70_Class
 {
     char pad_0[0xa4];
-    Ret_9d1b70 m_a4;
-    Ret_9d1b70 GetA4();
+    CombatTargetTimestamp m_a4;
+    CombatTargetTimestamp GetA4();
 };
 // @fnv 0x009d1b70
-Ret_9d1b70 FUN_009d1b70_Class::GetA4()
+CombatTargetTimestamp FUN_009d1b70_Class::GetA4()
 {
     return m_a4;
 }
 
 extern "C" double DAT_0108e058;
 
-struct FUN_009d4f50_vec
-{
-    float x, y, z;
-    void FUN_00439ef0(FUN_009d4f50_vec* apOut, FUN_009d4f50_vec* apIn);
-    float FUN_004a7290();
-};
-
-struct FUN_009d4f50_vt
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual FUN_009d4f50_vec* v125();
-};
 
 struct FUN_009d4f50_obj
 {
     bool FUN_00998a30();
-    FUN_009d4f50_vt* FUN_004030b0();
-    FUN_009d4f50_vt* GetFieldBC();
+    TESObjectREFR* FUN_004030b0();
+    TESObjectREFR* GetFieldBC();
 };
 
 struct FUN_009d4f50_cls
@@ -2548,17 +2231,18 @@ struct FUN_009d4f50_cls
 // @fnv 0x009d4f50
 bool FUN_009d4f50_cls::FUN_009d4f50()
 {
-    FUN_009d4f50_vec local24;
-    FUN_009d4f50_vec local18;
-    FUN_009d4f50_vec local0c;
+    // Keep the original uninitialized vector buffers and explicit output-parameter call.
+    float local24[sizeof(NiPoint3) / sizeof(float)];
+    float local18[sizeof(NiPoint3) / sizeof(float)];
+    float local0c[sizeof(NiPoint3) / sizeof(float)];
     if (!m_04->FUN_00998a30())
     {
         return false;
     }
-    local18 = *m_04->FUN_004030b0()->v125();
-    local0c = *m_04->GetFieldBC()->v125();
-    local18.FUN_00439ef0(&local24, &local0c);
-    if (local24.FUN_004a7290() < DAT_0108e058)
+    *reinterpret_cast<NiPoint3*>(local18) = *static_cast<const TESObjectREFR*>(m_04->FUN_004030b0())->GetPos();
+    *reinterpret_cast<NiPoint3*>(local0c) = *static_cast<const TESObjectREFR*>(m_04->GetFieldBC())->GetPos();
+    reinterpret_cast<NiPoint3*>(local18)->FUN_00439ef0(reinterpret_cast<NiPoint3*>(local24), local0c);
+    if (reinterpret_cast<NiPoint3*>(local24)->FUN_004a7290() < DAT_0108e058)
     {
         return false;
     }
@@ -2652,7 +2336,7 @@ class FUN_009dad00
 // Initializes the object's fields: zeroes pointers and positions, stores param in unk28, sets unk34 to 0x101, calls Reset(0), and sets unk40/unk42 to 0xffff.
 // @fnv 0x009dad00
 FUN_009dad00::FUN_009dad00(int param)
-    : pos04(_NiPoint3_ZERO), pos10(_NiPoint3_ZERO), ptr1C(0), ptr20(0), queue30(0), unk6C(0)
+    : pos04(NiPoint3::ZERO), pos10(NiPoint3::ZERO), ptr1C(0), ptr20(0), queue30(0), unk6C(0)
 {
     unk28 = param;
     ptr1C = 0;
@@ -2783,12 +2467,6 @@ FUN_009ca680::FUN_009ca680()
 }
 }  // namespace fnv_009ca680
 
-class NiNode
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
 struct FUN_009c6b30 : BSSimpleList<int>
 {
     char pad[0x34 - 8];
@@ -3254,12 +2932,7 @@ struct ImpAudio
     ImpSound FUN_00ad7480(void* apSound, int aiFlags, ImpSoundDesc* apDesc);
 };
 
-struct ImpFloatSetting
-{
-    float* FUN_00403e20();
-};
-
-extern ImpFloatSetting DAT_011ce26c;
+extern Setting DAT_011ce26c;
 extern ImpDecalSystem* DAT_011dea10;
 extern char DAT_011f4a20;
 ImpCamera* FUN_00524c90();

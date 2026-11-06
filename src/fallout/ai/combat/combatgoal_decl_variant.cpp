@@ -1,9 +1,25 @@
+// Combat goal world-state validation, using the shared goal declarations.
 
-// src/fallout/ai/combat/combatgoal_decl_variant.cpp - declaration variant unit created 2026-10-26 by decl_variants.py for paused function 0x009843b0: the skeleton of src/fallout/ai/combat/combatgoal.cpp
-// with declarations corrected to what the original code does (combatgoal.h: CombatGoal += bool FUN_009843b0(class CombatStateValues* values); BSSimpleList<UnsignedIdHandle*>* FUN_00717e50();; layout_support.h: void Sort(int (FNV_CDECL *compare)(T, T)); }; -> void Sort(int (FNV_CDECL *compare)(T, T)); BSSimpl). Move the function to its real unit once
-// that unit declares it this way.
-
-#include "combatgoal_decl_combatgoal.h"
+#include "layout_support_decl_combatgoal.h"
+#include "../../../../include/CombatGoal.h"
+#include "../../../../include/CombatWorldStateListNode.h"
+#include "../../../../include/CombatGoalActivateCombatItem.h"
+#include "../../../../include/CombatGoalAdvance.h"
+#include "../../../../include/CombatGoalAmbush.h"
+#include "../../../../include/CombatGoalAvoidThreats.h"
+#include "../../../../include/CombatGoalCluster.h"
+#include "../../../../include/CombatGoalFallBack.h"
+#include "../../../../include/CombatGoalFindTarget.h"
+#include "../../../../include/CombatGoalFlank.h"
+#include "../../../../include/CombatGoalFlee.h"
+#include "../../../../include/CombatGoalFlushTarget.h"
+#include "../../../../include/CombatGoalGuard.h"
+#include "../../../../include/CombatGoalHideFromTarget.h"
+#include "../../../../include/CombatGoalKillTarget.h"
+#include "../../../../include/CombatGoalReachDestination.h"
+#include "../../../../include/CombatGoalStayInCombatArea.h"
+#include "../../../../include/CombatGoalUseCombatItem.h"
+#include "../../../../include/CombatWorldStateListNode.h"
 
 class UnsignedIdHandle
 {
@@ -20,9 +36,9 @@ class CombatStateValues
     bool FUN_009aadc0(int, int);
 };
 // @fnv 0x009843b0
-bool CombatGoal::FUN_009843b0(CombatStateValues* values)
+bool CombatGoal::vf00(CombatStateValues* values)
 {
-    BSSimpleList<UnsignedIdHandle*>* current = FUN_00717e50();
+    BSSimpleList<UnsignedIdHandle*>* current = GetWorldStateList();
     UnsignedIdHandle* value;
     int state;
     int type;
@@ -46,7 +62,7 @@ bool CombatGoal::FUN_009843b0(CombatStateValues* values)
             if (!values->FUN_009aadc0(state, type))
                 return false;
         }
-        current = current->FUN_0062d990();
+        current = reinterpret_cast<BSSimpleList<UnsignedIdHandle*>*>(reinterpret_cast<CombatWorldStateListNode*>(current)->GetNext());  // 0x0062d990
     }
     return true;
 }

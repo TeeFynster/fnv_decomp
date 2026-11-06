@@ -26,23 +26,27 @@ the output.
 Every pull request gets an automatic check, called `match`. It runs on GitHub's machines, involves no part of the
 game, and has to pass before a pull request can be merged:
 
-1. It finds the translation units your change can affect: the files you changed and every unit that includes them.
+1. It finds the translation units your change can affect: the files you changed, every unit that includes them, and
+   every unit whose entry in `build/units.json` changed.
 2. It builds each of those units twice, from `main` and with your change, with the Microsoft compilers the game was
    built with.
-3. Every function has to come out identical: the same code bytes, and every call and data reference resolving to
-   the same original address through `build/units.json`, exception-handling code included. `main` matches the game
-   byte for byte, so a change that passes still does.
+3. Every function has to come out identical, at its original address: the same code bytes, and every call and data
+   reference resolving to the same original address through `build/units.json`, exception-handling code included.
+   A function that moved to another unit is compared with what it compiled to in its old unit. `main` matches the
+   game byte for byte, so a change that passes still does.
 
 What to expect:
 
 - **Passes:** renaming functions, parameters, variables, types and fields; adding or improving comments;
-  reformatting. A change only to comments, spacing or blank lines passes without a build.
+  reformatting; restructuring headers and types; moving functions between units (see "Changing the build recipe"). A
+  change only to comments, spacing or blank lines passes without a build.
 - **Fails:** anything that changes what a function compiles to. The check lists the functions that differ by
   address; see what differs with your own copy of the game:
   `python3 tools/build_and_match.py --image <your FalloutNV.exe> --only <unit>`.
-- **Needs a maintainer:** changes outside `src/`, `include/`, the names in `build/units.json` and Markdown files
-  (the tools, the rest of the build recipe, the workflow). The check fails on these; open an issue instead. Changes
-  to the tools and the workflow are made by the repository owner and verified against the game.
+- **Needs a maintainer:** changes outside `src/`, `include/`, `build/units.json` and Markdown files (the tools, the
+  workflow), and changes to `build/units.json` beyond what "Changing the build recipe" allows. The check fails on
+  these and nobody can merge them, so open an issue instead. Changes to the tools and the workflow are made by the
+  repository owner and verified against the game.
 
 ### Review and merging
 
@@ -65,11 +69,31 @@ function, put its new decorated name at the same address, in every unit that lis
 the old name as unbound. Adding a declaration or a string literal can renumber the compiler's string labels
 (`$SG...`) that `build/units.json` names; the check says so when that is the cause.
 
-A unit may also give an address it refers to a further name, as long as `build/units.json` already has that address.
-Identical code that the linker folded has one address and several names, for example one template instantiated for
-several types. An address that `build/units.json` does not have yet needs a maintainer. Exception-handling code
-resolves names through the whole of `build/units.json`, so when a pull request changes any names there, the check
-also rebuilds every unit with exception-handling code. That adds a few minutes.
+A unit may also bind a name to an address it refers to, for example a global or a vtable that the code used to write
+as a number: the check builds the unit again and the bytes at every function's address have to stay the same.
+Exception-handling code resolves names through the whole of `build/units.json`, so when a pull request changes any
+names there, the check also rebuilds every unit with exception-handling code. That adds a few minutes.
+
+### Changing the build recipe
+
+Besides names, a pull request may change how `build/units.json` builds the functions, because the check builds both
+sides and compares every function at its address:
+
+- add, remove or reorder units, and move functions from one unit to another;
+- change a unit's compiler (`sp1`, `rtm` or `vc8`) or its compiler options, using only the options `main` already
+  uses (listed in `FLAGS` in `tools/compare_builds.py`);
+- a new unit's source is a `.c` or `.cpp` file in `src/` (or `third_party/`).
+
+What has to stay: every function's address and size, each unit's `eh_tails` and `literal_symbols`, and `totals`
+(apart from `units`, which is the number of units). A function that uses exception-handling code, itself or through
+one of its `fold_aliases`, stays in the unit that lists its EH tails. A unit lists each address once, and a function's `fold_aliases` must compile to exactly the
+same code as the function. A unit is identified by its source; when two units build the same source, by their order
+among those. The tree may only hold regular files (no symlinks).
+
+Exception-handling code is the one part the check cannot always follow: the game places it by its EH tables, not in
+the order the compiler writes it. When a change reorders or reshapes it, the check reports "its EH tails". If the
+full build against the game still matches, the owner builds the change against the game and adds its EH code to
+`tools/verified_eh.json` in a pull request of their own; the check then accepts it.
 
 ### Never include any part of the game
 
@@ -146,7 +170,7 @@ of anything that does not match. `--only <text>` builds the units whose path con
 many compile at once, and `--out results.json` writes the per-unit results (addresses and counts only, never bytes of
 your executable).
 
-A full run compiles about 2,988 units; expect it to take a while.
+A full run compiles about 3,000 units; expect it to take a while.
 
 ## Layout
 

@@ -1,17 +1,306 @@
+// LocalVec: unit-local copy of the former shared stand-in Vec. Its Dot sums y*y first, unlike NiPoint3.h's in-class Dot (x87 operand order).
+#include <xmmintrin.h>
+class Matrix;
+class Scalar;
+class Simd;
+class Tok;
+class Mask;
+class Elem;
+class Iter;
+class CIter;
+class CMutIter;
+class Mat3;
+class Mat4;
+class hkVector4;
+class hkQuaternion;
+
+class LocalVec
+{
+public:
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+        };
+        struct
+        {
+            void* m_pData;
+            int m_iArrayLength;
+            int m_iCapacity;
+        };
+    };
+
+    LocalVec();
+    LocalVec(float a, float b, float c);
+    // Keep the implicit copy constructor, copy assignment and destructor trivial.
+
+    void negative(const LocalVec& n);
+    void inv(const Matrix& m, const LocalVec& n);
+    void point(const Matrix& m, const LocalVec& b);
+    void difference(const LocalVec& a, const LocalVec& b);
+    Scalar dot(const LocalVec& n) const;
+    Scalar at(int i) const;
+    void set(float a, float b, float c, float d);
+
+    Simd lengthSquared() const;
+    void mul(const Simd& factor);
+    void SetProduct(const Simd& factor, const LocalVec& v);
+
+    void resize(unsigned n);
+    Tok& operator[](unsigned i);
+    void release(int elemSize);
+
+    LocalVec& operator-=(const LocalVec& v);
+    LocalVec& operator+=(const LocalVec& v);
+    LocalVec operator*(float scale) const;
+    LocalVec operator+(const LocalVec& v) const;
+    LocalVec operator-(const LocalVec& v) const;
+    float Squared() const;
+    float Length() const;
+    float Normalize();
+    float Dot(const LocalVec& v) const;
+    LocalVec Cross(const LocalVec& v) const;
+    LocalVec ApplyScaled(float scale);
+    LocalVec ApplyScaled(float scale) const;
+    void FUN_00acf580(unsigned n, Tok value);
+    LocalVec FUN_004a0bd0();
+    LocalVec FUN_004a0bd0() const;
+    LocalVec FUN_0053d1a0(const LocalVec& v);
+    LocalVec FUN_004b3800(const LocalVec& v);
+    LocalVec FUN_004b3800(const LocalVec& v) const;
+    LocalVec FUN_00439e90(const LocalVec& v);
+    LocalVec FUN_00439e90(const LocalVec& v) const;
+    LocalVec FUN_00439ef0(const LocalVec& v);
+    LocalVec FUN_00439ef0(const LocalVec& v) const;
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    void FUN_006815c0();
+    void FUN_00439180(float scale);
+    LocalVec& FUN_0063c8a0(const LocalVec& v);
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    void FUN_004b4db0(const float* values);
+    void FUN_00a38560();
+    void FUN_004f0180(void* value);
+
+    LocalVec& ScaleByInverse(float divisor);
+    float FUN_00457910();
+    LocalVec* FUN_006a6eb0();
+    bool FUN_004390c0(const LocalVec& v);
+
+    __m128 get() const;
+    void set(__m128 value);
+    void operator=(const __m128& value);
+    operator __m128() const;
+    __m128& getQuad();
+    const __m128& getQuad() const;
+    __m128& quad();
+    const __m128& quad() const;
+    float& operator()(int component);
+    const float& operator()(int component) const;
+    void setZero4();
+    void setSub4(const LocalVec& a, const LocalVec& b);
+    void setAdd4(const LocalVec& a, const LocalVec& b);
+    void setMul4(const LocalVec& a, const LocalVec& b);
+    void setMul4(const Scalar& a, const LocalVec& b);
+    void add4(const LocalVec& v);
+    void mul4(const LocalVec& v);
+    void mul4(const Scalar& value);
+    void add3clobberW(const LocalVec& v);
+    void sub3clobberW(const LocalVec& v);
+    void setBroadcast3clobberW(const LocalVec& v, int component);
+    Scalar horizontalAdd3() const;
+    void setCross(const LocalVec& a, const LocalVec& b);
+    Scalar dot3(const LocalVec& v) const;
+    Scalar lengthSquared3() const;
+    Scalar lengthInverse3() const;
+    void normalize3();
+    Scalar getSimdAt(int component) const;
+    void setInterpolate4(const LocalVec& a, const LocalVec& b, const Scalar& fraction);
+    void setAddMul4(const LocalVec& a, const LocalVec& b, const Scalar& scale);
+    void setNeg4(const LocalVec& v);
+    Mask compareLessThanZero4() const;
+    void SetRotatedDirection(const hkQuaternion& rotation, const LocalVec& direction);
+    void setRotatedTranslation(const hkQuaternion& rotation, const LocalVec& direction);
+    void cross(const LocalVec& a, const LocalVec& b);
+    Scalar squared() const;
+    Scalar inverseLength() const;
+    void normalize();
+    void negate(const LocalVec& v);
+
+    void FUN_00c7f640(const void* matrix, const hkVector4& point);
+    void FUN_00c7f640(Mat4* matrix, void* point);
+    void FUN_00c7f640(const void* matrix, const LocalVec* point);
+    void FUN_00c7f640(const void* matrix, const void* point);
+    void FUN_00c7f700(Mat3* matrix, void* point);
+    void FUN_00c7f700(const void* matrix, const LocalVec* point);
+    void FUN_00b12790();
+    void FUN_00b13040(LocalVec* out, const LocalVec* v);
+    LocalVec* ScaleSwizzled(LocalVec* out, float factor);
+    void AddVector(LocalVec* out, const LocalVec* v);
+    float Dot(const LocalVec& v);
+    LocalVec* FUN_004a3c90(const LocalVec* v);
+    LocalVec* FUN_0062b0a0(LocalVec* out, LocalVec* v);
+    LocalVec* FUN_0062af00(LocalVec* target);
+
+    void FUN_00cf7690(Elem* value);
+    void FUN_00b1e970();
+    Iter begin();
+    Iter end();
+    CIter FUN_00b33030(CIter first, CIter last);
+    void FUN_00b32120();
+    unsigned int size() const;
+    unsigned int capacity() const;
+    void FUN_00b2df90();
+    void FUN_00b2e140(Elem* first, Elem* last);
+    bool InitBuffer(unsigned int count);
+    Elem* _Ucopy(Elem* first, Elem* last, Elem* out);
+    LocalVec& FUN_00b2db10(const LocalVec& v);
+    CMutIter FUN_00aceb80(CMutIter first, CMutIter last);
+    void FUN_00acac40();
+    LocalVec& FUN_00ad61e0(const LocalVec& v);
+};
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3; this unit defines inline bodies for both NiPoint3 and the stand-in in different forms (constructor/temporary, operand order), so one NiPoint3 cannot carry both.
+#include "../../../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPoint3.h"
+#include <string.h>
 
 // src/gamebryo2.2/corelibs/nicollision/niobbleaf.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/niobbleaf.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct S_00eb8250_Pt
-{
-    float x, y, z;
-};
-
 struct S_00eb8250_Tri
 {
-    S_00eb8250_Pt* m_kPointA;
-    S_00eb8250_Pt* m_kPointB;
-    S_00eb8250_Pt* m_iThirdValue;
+    LocalVec3* m_kPointA;
+    LocalVec3* m_kPointB;
+    LocalVec3* m_iThirdValue;
 };
 
 struct S_00eb8250_Edges
@@ -21,14 +310,14 @@ struct S_00eb8250_Edges
     void* m_e2;
 };
 
-int __cdecl FUN_00eb7dc0(void* a, void* b, S_00eb8250_Tri* tri, S_00eb8250_Pt* n, float d, int p3, float p4, int p5,
+int __cdecl FUN_00eb7dc0(void* a, void* b, S_00eb8250_Tri* tri, LocalVec3* n, float d, int p3, float p4, int p5,
                          int p6);
 
 // Computes the triangle's normal and plane offset, then tests it against all three edge pairs via FUN_00eb7dc0, OR-ing the results.
 // @fnv 0x00eb8250
 int __cdecl FUN_00eb8250(S_00eb8250_Edges* e, S_00eb8250_Tri* tri, int p3, float p4, int p5, int p6)
 {
-    S_00eb8250_Pt u, v, n;
+    LocalVec3 u, v, n;
     u.x = tri->m_kPointB->x - tri->m_kPointA->x;
     u.y = tri->m_kPointB->y - tri->m_kPointA->y;
     u.z = tri->m_kPointB->z - tri->m_kPointA->z;
@@ -38,7 +327,7 @@ int __cdecl FUN_00eb8250(S_00eb8250_Edges* e, S_00eb8250_Tri* tri, int p3, float
     n.x = u.y * v.z - u.z * v.y;
     n.y = u.z * v.x - u.x * v.z;
     n.z = u.x * v.y - u.y * v.x;
-    const S_00eb8250_Pt& a = *tri->m_kPointA;
+    const LocalVec3& a = *tri->m_kPointA;
     float d = a.x * n.x + a.y * n.y + a.z * n.z;
     int r = FUN_00eb7dc0(e->m_e0, e->m_e1, tri, &n, d, p3, p4, p5, p6);
     r |= FUN_00eb7dc0(e->m_e0, e->m_e2, tri, &n, d, p3, p4, p5, p6);
@@ -396,29 +685,22 @@ bool FUN_00ee8990()
     return false;
 }
 
-struct Vec3
+inline LocalVec3::LocalVec3()
+{}
+inline LocalVec3::LocalVec3(float fX, float fY, float fZ)
 {
-    float x;
-    float y;
-    float z;
-    Vec3()
-    {}
-    Vec3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    Vec3 operator-(const Vec3& pt) const
-    {
-        return Vec3(x - pt.x, y - pt.y, z - pt.z);
-    }
-    Vec3 Cross(const Vec3& pt) const
-    {
-        return Vec3(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
-    }
-    void FUN_004a0c10();
-};
+    x = fX;
+    y = fY;
+    z = fZ;
+}
+inline LocalVec3 LocalVec3::operator-(const LocalVec3& pt) const
+{
+    return LocalVec3(x - pt.x, y - pt.y, z - pt.z);
+}
+inline LocalVec3 LocalVec3::Cross(const LocalVec3& pt) const
+{
+    return LocalVec3(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
+}
 
 struct SubA
 {
@@ -430,13 +712,13 @@ struct Node
 {
     int unk00;
     int unk04;
-    Vec3 m_08;
+    LocalVec3 m_08;
     float m_14;
     int unk18;
     int unk1c;
     int unk20;
     int unk24;
-    Vec3 m_28;
+    LocalVec3 m_28;
 };
 
 struct Helper
@@ -500,12 +782,12 @@ struct Owner
     int unk80;
     int unk84;
     int m_88;
-    Vec3* m_8c;
-    Vec3* m_90;
-    Vec3* m_94;
+    LocalVec3* m_8c;
+    LocalVec3* m_90;
+    LocalVec3* m_94;
 };
 
-extern "C" unsigned char __cdecl FUN_00eadb90(Vec3* a, Vec3* b, Vec3* c, Vec3* d, Vec3* e, unsigned char f, Vec3* g,
+extern "C" unsigned char __cdecl FUN_00eadb90(LocalVec3* a, LocalVec3* b, LocalVec3* c, LocalVec3* d, LocalVec3* e, unsigned char f, LocalVec3* g,
                                               float* h, float* i, int* j);
 
 struct Obj5
@@ -541,12 +823,12 @@ struct Obj5
 
 struct FUN_00eb8930_cls : Owner
 {
-    int FUN_00eb8930(Vec3* a1, Vec3* a2, Rec* a3, unsigned char* out, Obj5* a5, int a6);
+    int FUN_00eb8930(LocalVec3* a1, LocalVec3* a2, Rec* a3, unsigned char* out, Obj5* a5, int a6);
 };
 
 // Calls an intersection helper and, on success, stores its returned point and parameter in a node, with an optional triangle normal.
 // @fnv 0x00eb8930
-int FUN_00eb8930_cls::FUN_00eb8930(Vec3* a1, Vec3* a2, Rec* apRec, unsigned char* pOutHit, Obj5* apObj5, int a6)
+int FUN_00eb8930_cls::FUN_00eb8930(LocalVec3* a1, LocalVec3* a2, Rec* apRec, unsigned char* pOutHit, Obj5* apObj5, int a6)
 {
     if (a6 != m_88)
     {
@@ -557,57 +839,54 @@ int FUN_00eb8930_cls::FUN_00eb8930(Vec3* a1, Vec3* a2, Rec* apRec, unsigned char
     int index;
     float u;
     float t;
-    Vec3 point;
+    LocalVec3 point;
     unsigned char ok = FUN_00eadb90(a1, a2, m_8c, m_90, m_94, flag, &point, &t, &u, &index);
     *pOutHit = ok;
     if (ok == 0)
         return 0;
     Node* n = apRec->m_18.GetTexture(apObj5);
-    n->m_08 = point;
+    // The original point assignments copy all three float bit patterns.
+    memcpy(&n->m_08, &point, sizeof(point));
     n->m_14 = t;
     if (apRec->m_31 != 0)
     {
-        Vec3 ub = *m_90 - *m_8c;
-        Vec3 wa = *m_94 - *m_8c;
-        Vec3 cross = ub.Cross(wa);
+        LocalVec3 ub = *m_90 - *m_8c;
+        LocalVec3 wa = *m_94 - *m_8c;
+        LocalVec3 cross = ub.Cross(wa);
         cross.FUN_004a0c10();
-        n->m_28 = cross;
+        memcpy(&n->m_28, &cross, sizeof(cross));
     }
     return 0;
 }
 
-struct Vec
+inline LocalVec::LocalVec()
+{}
+inline LocalVec::LocalVec(float a, float b, float c) : x(a), y(b), z(c)
+{}
+inline LocalVec LocalVec::operator+(const LocalVec& b) const
 {
-    float x, y, z;
-    Vec()
-    {}
-    Vec(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Vec operator+(const Vec& b) const
-    {
-        Vec r;
-        r.x = x + b.x;
-        r.y = y + b.y;
-        r.z = z + b.z;
-        return r;
-    }
-    float Dot(const Vec& b) const
-    {
-        return x * b.x + y * b.y + z * b.z;
-    }
-};
-inline Vec operator*(float s, const Vec& v)
+    LocalVec r;
+    r.x = x + b.x;
+    r.y = y + b.y;
+    r.z = z + b.z;
+    return r;
+}
+inline float LocalVec::Dot(const LocalVec& b) const
 {
-    Vec r;
+    return y * b.y + x * b.x + z * b.z;
+}
+inline LocalVec operator*(float s, const LocalVec& v)
+{
+    LocalVec r;
     r.x = v.x;
     r.x *= s;
     r.y = v.y * s;
     r.z = v.z * s;
     return r;
 }
-inline Vec operator*(const Vec& v, float s)
+inline LocalVec ScaleVector(const LocalVec& v, float s)
 {
-    Vec r;
+    LocalVec r;
     r.x = v.x;
     r.x *= s;
     r.y = v.y * s;
@@ -616,14 +895,14 @@ inline Vec operator*(const Vec& v, float s)
 }
 // Finds up to two intersection times and points where the moving segment start+velocity*t to end+velocity*t crosses the plane defined by normal and plane.
 // @fnv 0x00eb7440
-int __cdecl IntersectPlane(float duration, const Vec& normal, float plane, const Vec& velocity, const Vec& start,
-                           const Vec& end, float& time0, Vec& point0, float& time1, Vec& point1)
+int __cdecl IntersectPlane(float duration, const LocalVec& normal, float plane, const LocalVec& velocity, const LocalVec& start,
+                           const LocalVec& end, float& time0, LocalVec& point0, float& time1, LocalVec& point1)
 {
     float delta = duration - 0.0f;
-    float d00 = (start + 0.0f * velocity).Dot(normal) - plane;
-    float d01 = (end + 0.0f * velocity).Dot(normal) - plane;
-    float d10 = (start + duration * velocity).Dot(normal) - plane;
-    float d11 = (end + duration * velocity).Dot(normal) - plane;
+    float d00 = static_cast<const LocalVec&>((start + 0.0f * velocity)).Dot(normal) - plane;
+    float d01 = static_cast<const LocalVec&>((end + 0.0f * velocity)).Dot(normal) - plane;
+    float d10 = static_cast<const LocalVec&>((start + duration * velocity)).Dot(normal) - plane;
+    float d11 = static_cast<const LocalVec&>((end + duration * velocity)).Dot(normal) - plane;
     int found = 0;
     if (d00 * d01 <= 0.0f)
     {
@@ -632,7 +911,7 @@ int __cdecl IntersectPlane(float duration, const Vec& normal, float plane, const
             time0 = 0.0f;
             time1 = 0.0f;
             point0 = start + time0 * velocity;
-            point1 = end + velocity * time1;
+            point1 = end + ScaleVector(velocity, time1);
             return 1;
         }
         time0 = 0.0f;
@@ -651,7 +930,7 @@ int __cdecl IntersectPlane(float duration, const Vec& normal, float plane, const
             return 1;
         }
         float time = 0.0f + delta * d00 / (d00 - d10);
-        Vec point = start + time * velocity;
+        LocalVec point = start + time * velocity;
         if (found)
         {
             time1 = time;
@@ -661,7 +940,7 @@ int __cdecl IntersectPlane(float duration, const Vec& normal, float plane, const
                 float saved = time0;
                 time0 = time1;
                 time1 = saved;
-                Vec savedPoint = point0;
+                LocalVec savedPoint = point0;
                 point0 = point1;
                 point1 = savedPoint;
             }
@@ -682,7 +961,7 @@ int __cdecl IntersectPlane(float duration, const Vec& normal, float plane, const
             return 1;
         }
         float time = 0.0f + delta * d01 / (d01 - d11);
-        Vec point = end + time * velocity;
+        LocalVec point = end + time * velocity;
         if (found)
         {
             time1 = time;
@@ -692,7 +971,7 @@ int __cdecl IntersectPlane(float duration, const Vec& normal, float plane, const
                 float saved = time0;
                 time0 = time1;
                 time1 = saved;
-                Vec savedPoint = point0;
+                LocalVec savedPoint = point0;
                 point0 = point1;
                 point1 = savedPoint;
             }
@@ -708,12 +987,12 @@ int __cdecl IntersectPlane(float duration, const Vec& normal, float plane, const
         {
             time0 = duration;
             time1 = duration;
-            point0 = start + velocity * time0;
+            point0 = start + ScaleVector(velocity, time0);
             point1 = end + time1 * velocity;
             return 1;
         }
         float fraction = d10 / (d10 - d11);
-        Vec point = ((1.0f - fraction) * start + fraction * end) + duration * velocity;
+        LocalVec point = ((1.0f - fraction) * start + fraction * end) + duration * velocity;
         if (found)
         {
             time1 = duration;
@@ -723,7 +1002,7 @@ int __cdecl IntersectPlane(float duration, const Vec& normal, float plane, const
                 float saved = time0;
                 time0 = time1;
                 time1 = saved;
-                Vec savedPoint = point0;
+                LocalVec savedPoint = point0;
                 point0 = point1;
                 point1 = savedPoint;
             }
@@ -742,84 +1021,51 @@ int __cdecl IntersectPlane(float duration, const Vec& normal, float plane, const
     return 0;
 }
 
-extern "C" void _ReadWriteBarrier();
-struct S_eb6b90_Point
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ)
 {
-    float x, y, z;
-
-    S_eb6b90_Point()
-    {}
-    S_eb6b90_Point(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-
-    float XValue() const
-    {
-        return x;
-    }
-    const float& YRef() const
-    {
-        return y;
-    }
-    float YValue() const
-    {
-        return y;
-    }
-    const float& ZRef() const
-    {
-        return z;
-    }
-    S_eb6b90_Point operator+(const S_eb6b90_Point& pt) const
-    {
-        return S_eb6b90_Point(x + pt.x, y + pt.y, z + pt.z);
-    }
-    S_eb6b90_Point operator-(const S_eb6b90_Point& pt) const
-    {
-        return S_eb6b90_Point(x - pt.x, y - pt.y, z - pt.z);
-    }
-    S_eb6b90_Point operator/(float fScalar) const
-    {
-        float inverse = 1.0f / fScalar;
-        return S_eb6b90_Point(inverse * x, inverse * y, inverse * z);
-    }
-    S_eb6b90_Point operator*(float fScalar) const
-    {
-        return S_eb6b90_Point(fScalar * x, fScalar * y, fScalar * z);
-    }
-    float operator*(const S_eb6b90_Point& pt) const
-    {
-        return x * pt.x + y * pt.y + z * pt.z;
-    }
-    S_eb6b90_Point& operator+=(const S_eb6b90_Point& pt)
-    {
-        x += pt.x;
-        y += pt.y;
-        z += pt.z;
-        return *this;
-    }
-    S_eb6b90_Point& operator-=(const S_eb6b90_Point& pt)
-    {
-        x -= pt.x;
-        y -= pt.y;
-        z -= pt.z;
-        return *this;
-    }
-    S_eb6b90_Point Cross(const S_eb6b90_Point& pt) const
-    {
-        return S_eb6b90_Point(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
-    }
-
-    void FUN_004a0c10();  // Unitize
-};
-
-inline S_eb6b90_Point operator*(float k, const S_eb6b90_Point& p)
-{
-    return S_eb6b90_Point(k * p.x, k * p.y, k * p.z);
+    x = fX;
+    y = fY;
+    z = fZ;
 }
-inline float DotThird(const S_eb6b90_Point& a, const S_eb6b90_Point& b)
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& pt) const
+{
+    return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
+}
+inline NiPoint3 NiPoint3::Cross(const NiPoint3& pt) const
+{
+    return NiPoint3(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
+}
+inline float NiPoint3::operator*(const NiPoint3& pt) const
+{
+    return x * pt.x + y * pt.y + z * pt.z;
+}
+extern "C" void _ReadWriteBarrier();
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& pt) const
+{
+    return NiPoint3(x + pt.x, y + pt.y, z + pt.z);
+}
+inline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(inverse * x, inverse * y, inverse * z);
+}
+inline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+inline NiPoint3& NiPoint3::operator-=(const NiPoint3& pt)
+{
+    x -= pt.x;
+    y -= pt.y;
+    z -= pt.z;
+    return *this;
+}
+
+inline NiPoint3 operator*(float k, const NiPoint3& p)
+{
+    return NiPoint3(k * p.x, k * p.y, k * p.z);
+}
+inline float DotThird(const NiPoint3& a, const NiPoint3& b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
@@ -833,7 +1079,7 @@ struct S_eb6b90_Matrix
 struct S_eb6b90_Transform
 {
     S_eb6b90_Matrix m_kOrientation;
-    S_eb6b90_Point m_kTranslation;
+    NiPoint3 m_kTranslation;
     float m_fScale;
 
     S_eb6b90_Transform()
@@ -844,19 +1090,19 @@ struct S_eb6b90_Transform
 struct S_eb6b90_Root;
 struct S_eb6b90_Box
 {
-    S_eb6b90_Point m_kCenterPosition;
-    S_eb6b90_Point m_akBasis[3];
+    NiPoint3 m_kCenterPosition;
+    NiPoint3 m_akBasis[3];
     float m_afExtents[3];
-    S_eb6b90_Point m_kWorldCenter;
-    S_eb6b90_Point m_akWorldBasis[3];
+    NiPoint3 m_kWorldCenter;
+    NiPoint3 m_akWorldBasis[3];
     float m_afWorldExtent[3];
     S_eb6b90_Root* m_pkTreeNode;
 
-    S_eb6b90_Point& Center()
+    NiPoint3& Center()
     {
         return m_kCenterPosition;
     }
-    S_eb6b90_Point& Basis(int i)
+    NiPoint3& Basis(int i)
     {
         return m_akBasis[i];
     }
@@ -896,31 +1142,31 @@ struct S_eb6b90_Node
 
 struct FUN_00eb6b90 : S_eb6b90_Node
 {
-    S_eb6b90_Point* m_apkWorldVertex[3];
+    NiPoint3* m_apkWorldVertex[3];
 
-    FUN_00eb6b90(S_eb6b90_Root* pkRoot, unsigned short* pusTriList, S_eb6b90_Point* pkVertex,
-                 S_eb6b90_Point* pkWorldVertex, unsigned short m_usTriangleID);
+    FUN_00eb6b90(S_eb6b90_Root* pkRoot, unsigned short* pusTriList, NiPoint3* pkVertex,
+                 NiPoint3* pkWorldVertex, unsigned short m_usTriangleID);
 };
 
 // Initializes a triangle node by computing its bounding box center, basis axes, and extents from three vertices.
 // @fnv 0x00eb6b90
-FUN_00eb6b90::FUN_00eb6b90(S_eb6b90_Root* pkRoot, unsigned short* pusTriList, S_eb6b90_Point* pkVertex,
-                           S_eb6b90_Point* pkWorldVertex, unsigned short m_usTriangleID)
+FUN_00eb6b90::FUN_00eb6b90(S_eb6b90_Root* pkRoot, unsigned short* pusTriList, NiPoint3* pkVertex,
+                           NiPoint3* pkWorldVertex, unsigned short m_usTriangleID)
 {
     unsigned short triStart = 3 * m_usTriangleID;
     unsigned short vi = pusTriList[triStart];
     m_apkWorldVertex[0] = pkWorldVertex + vi;
-    const S_eb6b90_Point& kP0 = pkVertex[vi];
+    const NiPoint3& kP0 = pkVertex[vi];
     ++triStart;
     vi = pusTriList[triStart];
     m_apkWorldVertex[1] = pkWorldVertex + vi;
-    const S_eb6b90_Point& kP1 = pkVertex[vi];
+    const NiPoint3& kP1 = pkVertex[vi];
     ++triStart;
     vi = pusTriList[triStart];
     m_apkWorldVertex[2] = pkWorldVertex + vi;
-    const S_eb6b90_Point& kMid = pkVertex[vi];
-    S_eb6b90_Point& kTargetCenter = payload.m_kBoundsBox.Center();
-    S_eb6b90_Point* akAxis = payload.m_kBoundsBox.m_akBasis;
+    const NiPoint3& kMid = pkVertex[vi];
+    NiPoint3& kTargetCenter = payload.m_kBoundsBox.Center();
+    NiPoint3* akAxis = payload.m_kBoundsBox.m_akBasis;
     float* extent = payload.m_kBoundsBox.m_afExtents;
     kTargetCenter = (kP0 + kP1 + kMid) / 3.0f;
 
@@ -932,9 +1178,9 @@ FUN_00eb6b90::FUN_00eb6b90(S_eb6b90_Root* pkRoot, unsigned short* pusTriList, S_
     akAxis[1].FUN_004a0c10();
     akAxis[2] = akAxis[0].Cross(akAxis[1]);
 
-    S_eb6b90_Point minCoord(0.0f, 0.0f, 0.0f);
-    S_eb6b90_Point maxCoord(0.0f, 0.0f, 0.0f);
-    S_eb6b90_Point kDiff;
+    NiPoint3 minCoord(0.0f, 0.0f, 0.0f);
+    NiPoint3 maxCoord(0.0f, 0.0f, 0.0f);
+    NiPoint3 kDiff;
     float fX;
     float fY;
     float fZ;
@@ -994,12 +1240,12 @@ FUN_00eb6b90::FUN_00eb6b90(S_eb6b90_Root* pkRoot, unsigned short* pusTriList, S_
             maxCoord.z = fZ;
     }
 
-    S_eb6b90_Point kExtent = 0.5f * (maxCoord - minCoord);
+    NiPoint3 kExtent = 0.5f * (maxCoord - minCoord);
     extent[0] = kExtent.x;
     extent[1] = kExtent.y;
     extent[2] = kExtent.z;
 
-    S_eb6b90_Point kP2 = 0.5f * (maxCoord + minCoord);
+    NiPoint3 kP2 = 0.5f * (maxCoord + minCoord);
     kTargetCenter += akAxis[0] * kP2.x + akAxis[1] * kP2.y + akAxis[2] * kP2.z;
 
     S_eb6b90_Transform usIndex;
@@ -1009,18 +1255,18 @@ FUN_00eb6b90::FUN_00eb6b90(S_eb6b90_Root* pkRoot, unsigned short* pusTriList, S_
     payload.m_kBoundsBox.m_pkTreeNode = pkRoot;
 }
 
-int __cdecl IntersectPlane(float, S_00eb8250_Pt*, float, int, void*, void*, float*, S_00eb8250_Pt*, float*,
-                           S_00eb8250_Pt*);
+int __cdecl IntersectPlane(float, LocalVec3*, float, int, void*, void*, float*, LocalVec3*, float*,
+                           LocalVec3*);
 // Clips barycentric coordinates to the positive octant and updates the bound and point when a nearer candidate is found.
 // @fnv 0x00eb7dc0
-int __cdecl FUN_00eb7dc0(void* a, void* b, S_00eb8250_Tri* apTriangle, S_00eb8250_Pt* apNormal, float d, int p3,
+int __cdecl FUN_00eb7dc0(void* a, void* b, S_00eb8250_Tri* apTriangle, LocalVec3* apNormal, float d, int p3,
                          float p4, volatile int apNearestDistance, int apHitPoint)
 {
     float t;
     struct Geometry
     {
         float distanceA, distanceB;
-        S_00eb8250_Pt coordA, distance, pointB, pointA;
+        LocalVec3 coordA, distance, pointB, pointA;
     } g;
     (void)g.distanceB;
     if (!IntersectPlane(p4, apNormal, d, p3, a, b, &g.distanceA, &g.coordA, &g.distanceB, &g.distance))
@@ -1057,7 +1303,7 @@ int __cdecl FUN_00eb7dc0(void* a, void* b, S_00eb8250_Tri* apTriangle, S_00eb825
                 g.distance.x = static_cast<const volatile float&>(g.pointA.x) + g.pointB.x;
                 g.distance.y = g.pointA.y + g.pointB.y;
                 g.distance.z = g.pointA.z + g.pointB.z;
-                *(S_00eb8250_Pt*)apHitPoint = g.distance;
+                memcpy((LocalVec3*)apHitPoint, &g.distance, sizeof(LocalVec3));
             }
             return 1;
         }
@@ -1087,7 +1333,7 @@ int __cdecl FUN_00eb7dc0(void* a, void* b, S_00eb8250_Tri* apTriangle, S_00eb825
                 g.distance.x = static_cast<const volatile float&>(g.pointA.x) + g.pointB.x;
                 g.distance.y = g.pointA.y + g.pointB.y;
                 g.distance.z = g.pointA.z + g.pointB.z;
-                *(S_00eb8250_Pt*)apHitPoint = g.distance;
+                memcpy((LocalVec3*)apHitPoint, &g.distance, sizeof(LocalVec3));
             }
             return 1;
         }
@@ -1120,7 +1366,7 @@ int __cdecl FUN_00eb7dc0(void* a, void* b, S_00eb8250_Tri* apTriangle, S_00eb825
                     g.distance.x = static_cast<const volatile float&>(g.pointA.x) + g.pointB.x;
                     g.distance.y = g.pointA.y + g.pointB.y;
                     g.distance.z = g.pointA.z + g.pointB.z;
-                    *(S_00eb8250_Pt*)apHitPoint = g.distance;
+                    memcpy((LocalVec3*)apHitPoint, &g.distance, sizeof(LocalVec3));
                 }
                 return 1;
             }
@@ -1136,37 +1382,20 @@ inside:
     if (g.distanceA < *pNearestDistance)
     {
         *pNearestDistance = g.distanceA;
-        *(S_00eb8250_Pt*)apHitPoint = g.coordA;
+        memcpy((LocalVec3*)apHitPoint, &g.coordA, sizeof(LocalVec3));
     }
     return 1;
 }
 
-struct Point3
-{
-    float x, y, z;
-    Point3 operator+(const Point3& b) const
-    {
-        return Point3(x + b.x, y + b.y, z + b.z);
-    }
-    Point3()
-    {}
-    Point3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Point3 operator-(const Point3& v) const
-    {
-        return Point3(x - v.x, y - v.y, z - v.z);
-    }
-};
-
-extern "C" __declspec(noalias) int __cdecl FUN_00eb8250(S_00eb8250_Edges*, S_00eb8250_Tri*, const Point3&, float,
-                                                        float*, Point3*);
+extern "C" __declspec(noalias) int __cdecl FUN_00eb8250(S_00eb8250_Edges*, S_00eb8250_Tri*, const NiPoint3&, float,
+                                                        float*, NiPoint3*);
 struct PhysObjInfo
 {
     int unk00;
     float duration;
     int unk08;
     int unk0c;
-    Point3 velocity;
+    NiPoint3 velocity;
 };
 
 struct PhysObj_eb83b0
@@ -1194,20 +1423,16 @@ struct PhysObj_eb83b0
     FNV_Shape m_8c;
 };
 
-inline Point3 operator*(float t, const Point3& p)
-{
-    return Point3(t * p.x, t * p.y, t * p.z);
-}
 // Computes the earliest collision time and contact point between two physical objects using their shapes, velocities, and duration.
 // @fnv 0x00eb83b0
-int ComputeContactTime(PhysObj_eb83b0* apObjA, PhysObj_eb83b0* apObjB, float* pfTimeOut, Point3* apContactOut)
+int ComputeContactTime(PhysObj_eb83b0* apObjA, PhysObj_eb83b0* apObjB, float* pfTimeOut, NiPoint3* apContactOut)
 {
     PhysObjInfo* pInfoA = apObjA->unk7c;
     float duration = pInfoA->duration;
-    Point3* velocityB = &apObjB->unk7c->velocity;
+    NiPoint3* velocityB = &apObjB->unk7c->velocity;
     float timeA = 3.402823466e+38F;
-    Point3 vContactA, vContactB;
-    Point3 relativeVelocity;
+    NiPoint3 vContactA, vContactB;
+    NiPoint3 relativeVelocity;
     relativeVelocity = pInfoA->velocity - *velocityB;
     int hitA = FUN_00eb8250((S_00eb8250_Edges*)&apObjA->m_8c, (S_00eb8250_Tri*)&apObjB->m_8c, relativeVelocity,
                             duration, &timeA, &vContactA);

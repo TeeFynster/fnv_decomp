@@ -11,11 +11,6 @@ class AnimData;
 class ValidBip01Names;
 class ScriptLocals;
 class NiAVObject;
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-};
 int __cdecl Warning(const char*, ...);
 class VATS
 {
@@ -43,18 +38,6 @@ class TESFileFormInt
 {
   public:
     int GetTESForm();
-};
-class CombatController;
-class CombatProcedure
-{
-  public:
-    void Initialize(CombatController*);
-};
-class TESFile;
-class BGSImpactData
-{
-  public:
-    void ReadTypedData(TESFile*, void*, unsigned short);
 };
 struct CameraShotLegacyData
 {

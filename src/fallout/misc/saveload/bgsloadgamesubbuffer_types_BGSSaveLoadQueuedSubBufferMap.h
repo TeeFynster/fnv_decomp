@@ -2,45 +2,17 @@
 #ifndef FNV_BGSSAVELOADQUEUEDSUBBUFFERMAP_H
 #define FNV_BGSSAVELOADQUEUEDSUBBUFFERMAP_H
 
-#include "layout_support.h"
-#include "TESForm.h"
-#include "layout_support.h"
-class BGSLoadGameSubBuffer;
-class BGSLoadGameBuffer;
-class BGSLoadFormBuffer;
+#include <stddef.h>
+#include "../../../../include/TESForm.h"
+#include "../../../../include/BGSLoadGameSubBuffer.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
 class LoadGameSubBufferQueue;
 class DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer___;
 class NiTMap_TESForm___BGSLoadGameSubBuffer_;
 class NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer_;
 class NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer___AntiBloatAllocator;
-#pragma pack(push, 4)
-class BGSLoadGameSubBuffer
-{
-  public:
-    char* pBuffer;  // +0x0, 4 bytes
-    void LoadGame(BGSLoadGameBuffer* buffer);
-    BGSLoadFormBuffer* CreateFormBuffer(TESForm* form);
-    void ReadAnimationState(TESForm* form);
-    void RestoreAnimation(TESForm* form);
-    void LoadHavokData(TESForm* form);
-    void FUN_00435b20();
-    // BGSLoadGameSubBuffer
-    // void __cdecl BGSLoadGameSubBuffer::*(char*)
-    // void __cdecl BGSLoadGameSubBuffer::*()
-    // void __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(BGSSaveGameBuffer*)
-    // void __cdecl BGSLoadGameSubBuffer::*(BGSLoadGameBuffer*)
-    // char* __cdecl BGSLoadGameSubBuffer::*()
-    // BGSLoadFormBuffer* __cdecl BGSLoadGameSubBuffer::*(TESForm*)
-    // void __cdecl BGSLoadGameSubBuffer::*(BGSSaveFormBuffer*)
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BGSLoadGameSubBuffer) == 4);
-FNV_STATIC_ASSERT(offsetof(BGSLoadGameSubBuffer, pBuffer) == 0);
+typedef char SubBufferMapLayoutCheck1[(sizeof(BGSLoadGameSubBuffer) == 4) ? 1 : -1];
+typedef char SubBufferMapLayoutCheck2[(offsetof(BGSLoadGameSubBuffer, pBuffer) == 0) ? 1 : -1];
 #pragma pack(push, 4)
 class DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer___
 {
@@ -49,7 +21,7 @@ class DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer___
     // void __cdecl DFALL<NiTMapItem<TESForm *,BGSLoadGameSubBuffer> >::*(void*)
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer___) == 1);
+typedef char SubBufferMapLayoutCheck3[(sizeof(DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer___) == 1) ? 1 : -1];
 #pragma pack(push, 4)
 class NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer___AntiBloatAllocator
     : public DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer___
@@ -59,14 +31,14 @@ class NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BG
     unsigned int m_uiCount;  // +0x0, 4 bytes
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(
+typedef char SubBufferMapLayoutCheck4[(
     sizeof(
         NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer___AntiBloatAllocator) ==
-    4);
-FNV_STATIC_ASSERT(
+    4) ? 1 : -1];
+typedef char SubBufferMapLayoutCheck5[(
     offsetof(
         NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer___AntiBloatAllocator,
-        m_uiCount) == 0);
+        m_uiCount) == 0) ? 1 : -1];
 #pragma pack(push, 4)
 class NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer_
 {
@@ -91,20 +63,20 @@ class NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BG
     // void __cdecl NiTMapBase<DFALL<NiTMapItem<TESForm *,BGSLoadGameSubBuffer> >,TESForm *,BGSLoadGameSubBuffer>::*()
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(
-    sizeof(NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer_) == 16);
-FNV_STATIC_ASSERT(
+typedef char SubBufferMapLayoutCheck6[(
+    sizeof(NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer_) == 16) ? 1 : -1];
+typedef char SubBufferMapLayoutCheck7[(
     offsetof(NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer_, m_ppVirtualMethodTable) ==
-    0);
-FNV_STATIC_ASSERT(
+    0) ? 1 : -1];
+typedef char SubBufferMapLayoutCheck8[(
     offsetof(NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer_,
-             m_uiHashSize) == 4);
-FNV_STATIC_ASSERT(
+             m_uiHashSize) == 4) ? 1 : -1];
+typedef char SubBufferMapLayoutCheck9[(
     offsetof(NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer_,
-             m_ppkHashTable) == 8);
-FNV_STATIC_ASSERT(
+             m_ppkHashTable) == 8) ? 1 : -1];
+typedef char SubBufferMapLayoutCheck10[(
     offsetof(NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer_,
-             m_kItemCount) == 12);
+             m_kItemCount) == 12) ? 1 : -1];
 #pragma pack(push, 4)
 class NiTMap_TESForm___BGSLoadGameSubBuffer_
     : public NiTMapBase_DFALL_NiTMapItem_TESForm___BGSLoadGameSubBuffer____TESForm___BGSLoadGameSubBuffer_
@@ -122,7 +94,7 @@ class NiTMap_TESForm___BGSLoadGameSubBuffer_
     // void __cdecl NiTMap<TESForm *,BGSLoadGameSubBuffer>::*()
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiTMap_TESForm___BGSLoadGameSubBuffer_) == 16);
+typedef char SubBufferMapLayoutCheck11[(sizeof(NiTMap_TESForm___BGSLoadGameSubBuffer_) == 16) ? 1 : -1];
 #pragma pack(push, 4)
 class LoadGameSubBufferQueue
 {
@@ -141,6 +113,6 @@ class LoadGameSubBufferQueue
     // void* __cdecl LoadGameSubBufferQueue::*(unsigned int)
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(LoadGameSubBufferQueue) == 48);
-FNV_STATIC_ASSERT(offsetof(LoadGameSubBufferQueue, m_kSubBuffersByType) == 0);
+typedef char SubBufferMapLayoutCheck12[(sizeof(LoadGameSubBufferQueue) == 48) ? 1 : -1];
+typedef char SubBufferMapLayoutCheck13[(offsetof(LoadGameSubBufferQueue, m_kSubBuffersByType) == 0) ? 1 : -1];
 #endif

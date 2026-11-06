@@ -1,53 +1,17 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 
 // src/havok/physics/utilities/constraint/bilateral/hkpconstraintutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/constraint/bilateral/hkpconstraintutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkReferencedObject.h"
 
-struct hkMemoryAllocator
-{
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
+hkMemoryRouter* __cdecl FUN_00c85750();
 
-struct AudioMgr
-{
-    int unk00, unk04, unk08;
-    hkMemoryAllocator* unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-
-struct BSAudio;
-BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
-{
-    return (AudioMgr*)FUN_00c85750();
-}
-
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
+typedef ::__m128 LocalM128;
 
 struct Block5
 {
@@ -63,20 +27,11 @@ struct Block5b
     int unk08, unk0c, unk10;
 };
 
-struct hkRefObj
-{
-    void* m_vtbl;
-    unsigned short m_usMemSizeAndFlags;
-    unsigned short m_sReferenceCount;
-    void FUN_00c90510();
-    void FUN_00c905b0();
-};
-
-struct CloneDataBase : hkRefObj
+struct CloneDataBase : hkReferencedObject
 {
     int unk08, unk0c;
     int unk10, unk14, unk18, unk1c;
-    __m128 unk20, unk30, unk40, unk50, unk60, unk70;
+    LocalM128 unk20, unk30, unk40, unk50, unk60, unk70;
 };
 
 struct CloneDataA : CloneDataBase
@@ -113,7 +68,7 @@ struct SourceDataHeader
 
 struct SourceData : SourceDataHeader
 {
-    __m128 unk20, unk30, unk40, unk50, unk60, unk70, unk80;
+    LocalM128 unk20, unk30, unk40, unk50, unk60, unk70, unk80;
 };
 
 struct SourceDataB : SourceData
@@ -133,7 +88,7 @@ struct SourceDataA : SourceData
 
 struct Instance;
 
-struct Instance : hkRefObj
+struct Instance : hkReferencedObject
 {
     int unk08;
     SourceData* unk0c;
@@ -146,7 +101,7 @@ struct Instance : hkRefObj
 
 inline void* hkAlloc(int size)
 {
-    hkRefObj* p = (hkRefObj*)audio()->heap().AllocateMemoryBlock(size);
+    hkReferencedObject* p = (hkReferencedObject*)FUN_00c85750()->heap().blockAlloc(size);
     p->m_usMemSizeAndFlags = (unsigned short)size;
     return p;
 }
@@ -194,7 +149,7 @@ Instance* __cdecl CloneInstanceFromSource(Instance* apSource)
     }
     case 18:
     case 19:
-        apSource->FUN_00c90510();
+        apSource->addReference();
         return apSource;
     default:
         return 0;
@@ -204,7 +159,7 @@ Instance* __cdecl CloneInstanceFromSource(Instance* apSource)
     void* eb = apSource->unk18;
     void* ea = apSource->unk14;
     Instance* pInstance = pInstanceMem->FUN_00cf3ea0(ea, eb, clone, iPriority);
-    clone->FUN_00c905b0();
+    clone->removeReference();
     return pInstance;
 }
 
@@ -244,12 +199,12 @@ class FnvInner
     virtual unsigned int GetKind() throw();
 
     char unk04[0x0c];
-    __m128 m_20;
-    __m128 m_30;
+    LocalM128 m_20;
+    LocalM128 m_30;
     char unk40[0x10];
-    __m128 m_50;
+    LocalM128 m_50;
     char unk60[0x30];
-    __m128 m_90;
+    LocalM128 m_90;
 };
 
 class FnvHolder
@@ -261,7 +216,7 @@ class FnvHolder
 
 // Reads the inner constraint's kind and copies two __m128 vectors into a1/a2, or logs an unsupported-type error and returns 1.
 // @fnv 0x00e5ad40
-int FUN_00e5ad40(FnvHolder* pHolder, __m128* pOutA, __m128* pOutB)
+int FUN_00e5ad40(FnvHolder* pHolder, LocalM128* pOutA, LocalM128* pOutB)
 {
     FnvInner* inner = pHolder->m_0c;
 

@@ -1,3 +1,18 @@
+#include "../../../include/BGSSaveLoadGame.h"
+#include "../../../include/BSAudio.h"
+#include "../../../include/BSOcclusionPlane.h"
+#include "../../../include/CombatWorldStateListNode.h"
+#include "../../../include/ExtraDataList.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/NiTPointerMap.h"
+#include "../../../include/RootContactPoint.h"
+#include "../../../include/TESObject.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESRaceForm.h"
+#include "../../../include/TESTrapListener.h"
+#include "../../../include/TrapTargetEntry.h"
+#include "../../../include/hkpAllCdBodyPairCollector.h"
+#include "../../../include/hkpCdBodyPairCollector.h"
 
 // src/fallout_shared/havok/testraplistener.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/testraplistener.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -13,12 +28,10 @@ void* FUN_0062d2f0_shell::GetOffset160()
     return reinterpret_cast<char*>(this) + 0x160;
 }
 
+int __fastcall _ref_0084e3a0(void* self);
+
 extern int DAT_0104e328;
 
-struct hkpCdBodyPairCollector
-{
-    void FUN_0062d420();
-};
 
 // @fnv 0x0062d420
 void hkpCdBodyPairCollector::FUN_0062d420()
@@ -26,11 +39,6 @@ void hkpCdBodyPairCollector::FUN_0062d420()
     *(int*)this = (int)&DAT_0104e328;
 }
 
-struct bhkTrapListener
-{
-    void FUN_0062d760();
-    void* DestroyIfFlagged(unsigned int);
-};
 void* __cdecl _Deallocate(void*);
 
 void bhkTrapListener::FUN_0062d760()
@@ -60,12 +68,6 @@ void FUN_0062d740_shell::FUN_0062d740()
     m_field = (int)&DAT_0104e3d0;
 }
 
-struct CombatWorldStateListNode
-{
-    CombatWorldStateListNode* GetNext();
-    int _ref_0084e3a0();
-};
-
 struct FUN_0062dee0_shell
 {
     CombatWorldStateListNode* m_kNode;
@@ -79,7 +81,7 @@ bool __thiscall FUN_0062dee0_shell::FUN_0062dee0(int arg)
     CombatWorldStateListNode* p = *(CombatWorldStateListNode**)((char*)this + 0x20);
     while (p)
     {
-        if (p->_ref_0084e3a0() == arg)
+        if (_ref_0084e3a0(p) == arg)
             return true;
         p = p->GetNext();
     }
@@ -130,12 +132,6 @@ void* FUN_0062d710_shell::FUN_0062d710(unsigned int flags)
     return this;
 }
 
-struct TESTrapListener
-{
-    void FUN_0062d8a0();
-    void* FUN_0062d870(unsigned int flags);
-};
-
 // Calls FUN_0062d8a0, frees this when flags has bit 0 set, and returns this.
 // @fnv 0x0062d870
 void* TESTrapListener::FUN_0062d870(unsigned int flags)
@@ -173,26 +169,22 @@ void* __thiscall FUN_0062e230_shell::FUN_0062e230(unsigned int a, unsigned int b
     return this;
 }
 
-struct BSSimpleList
+struct TrapEventList
 {
-    BSSimpleList* GetNext();
-    BSSimpleList* FUN_006207a0(BSSimpleList* target);
-};
-struct TESRaceForm
-{
-    void Initialize(unsigned int);
+    TrapEventList* GetNext();
+    TrapEventList* FUN_006207a0(TrapEventList* target);
 };
 // @fnv 0x006207a0
-BSSimpleList* BSSimpleList::FUN_006207a0(BSSimpleList* pHead)
+TrapEventList* TrapEventList::FUN_006207a0(TrapEventList* pHead)
 {
     if (this == pHead)
         pHead = this->GetNext();
     else
     {
-        BSSimpleList* current = pHead;
+        TrapEventList* current = pHead;
         while (current)
         {
-            BSSimpleList* item = current->GetNext();
+            TrapEventList* item = current->GetNext();
             if (this == item)
             {
                 ((TESRaceForm*)current)->Initialize((unsigned int)item->GetNext());
@@ -248,17 +240,24 @@ void* FUN_0062c770_shell::FUN_0062c770(unsigned int flags)
     return this;
 }
 
-struct NiTPointerMap
+// The 16-byte container cleared by 0x0062c980 and emptied by 0x0062e0a0: a polymorphic pointer list (vftable 0,
+// head 4, tail 8, count 0xc; vftable slot 2 frees a node), not a map.
+struct FUN_0062e0a0_List
 {
+    void** vtbl;
+    void* head;
+    void* tail;
+    int count;
     bool IsEmpty();
     void* RemoveFirstNode();
 };
+
 struct Target062c980
 {
     int field0;
     int field4;
     int field8;
-    NiTPointerMap map;
+    FUN_0062e0a0_List map;
     void ClearMap();
 };
 // Resets field4 to 0, then repeatedly takes an item from map and deallocates it until the map is empty.
@@ -277,17 +276,12 @@ void Target062c980::ClearMap()
 }
 
 namespace fnv_0062cb60 {
-struct NiTPointerMap
-{
-    bool IsEmpty();
-    void* RemoveFirstNode();
-};
 struct FUN_0062cb60_shell
 {
     int m_kPointA;
     int m_kPointB;
     int m_iThirdValue;
-    NiTPointerMap m_map;
+    FUN_0062e0a0_List m_map;
     void* FUN_0062cb60();
 };
 // Returns null if m_map is empty, otherwise returns the result of m_map.RemoveFirstNode().
@@ -336,20 +330,12 @@ void* FUN_0062d3f0_Standin::FUN_0062d3f0(unsigned int flags)
     return this;
 }
 
-struct S_62d4b0
-{
-    void FUN_0062d4b0();
-};
 void __cdecl FUN_0062d470(void*);
-struct hkpAllCdBodyPairCollector : hkpCdBodyPairCollector
-{
-    void* FUN_0062d440(unsigned int);
-};
 // Calls FUN_0062d4b0 on this, then FUN_0062d470(this) if bit 0 of flags is set, and returns this.
 // @fnv 0x0062d440
 void* hkpAllCdBodyPairCollector::FUN_0062d440(unsigned int flags)
 {
-    ((S_62d4b0*)this)->FUN_0062d4b0();
+    this->hkpAllCdBodyPairCollector::~hkpAllCdBodyPairCollector();
     if (flags & 1)
         FUN_0062d470(this);
     return this;
@@ -370,7 +356,7 @@ struct TrapHolder
 // @fnv 0x0062d570
 bool TrapHolder::FUN_0062d570(CombatWorldStateListNode* p)
 {
-    int ptriggers = p->_ref_0084e3a0();
+    int ptriggers = _ref_0084e3a0(p);
     {
         int i;
         for (i = 0; i < cnt; ++i)
@@ -598,8 +584,8 @@ void S_0062e350::FUN_0062e350(void* a)
 }
 
 struct ZoneEntry;
-struct TrapTargetEntry;
-struct Caller
+// The shared reference header has no typed declaration for this target callback.
+struct TrapTargetDispatch
 {
     virtual void v0();
     virtual void v1();
@@ -702,17 +688,11 @@ struct Caller
     virtual void v98();
     virtual void target(ZoneEntry* a, TrapTargetEntry* b);
 };
-struct TrapTargetEntry
-{
-    char _pad[16];
-    CombatWorldStateListNode _list;
-    void FUN_0062c600(ZoneEntry* apTrap);
-};
-// Calls target on the object returned by _list._ref_0084e3a0(), passing apTrap and this.
+// Calls target on the object returned by _ref_0084e3a0(reinterpret_cast<char*>(this) + 0x10), passing apTrap and this.
 // @fnv 0x0062c600
 void TrapTargetEntry::FUN_0062c600(ZoneEntry* apTrap)
 {
-    ((Caller*)_list._ref_0084e3a0())->target(apTrap, this);
+    ((TrapTargetDispatch*)_ref_0084e3a0(reinterpret_cast<char*>(this) + 0x10))->target(apTrap, this);
 }
 
 struct FUN_0062c6e0_shell
@@ -812,18 +792,6 @@ void* __thiscall FUN_0062dfa0_shell::FUN_0062dfa0()
 
 struct bhkWorld;
 struct TESObjectCELL;
-struct ExtraDataList
-{
-    bhkWorld* GetRoomId();
-};
-struct BSOcclusionPlane
-{
-    ExtraDataList* GetCullResult() const;
-};
-struct TESObject
-{
-    TESObject* GetNext();
-};
 // Returns the TESObject obtained from the plane's cull result extra data world, or null if any step is missing.
 // @fnv 0x0062ddb0
 TESObject* __cdecl GetOcclusionPlaneObject(BSOcclusionPlane* pOcclusionPlane)
@@ -831,7 +799,7 @@ TESObject* __cdecl GetOcclusionPlaneObject(BSOcclusionPlane* pOcclusionPlane)
     TESObject* pResult = 0;
     if (pOcclusionPlane)
     {
-        ExtraDataList* pData = pOcclusionPlane->GetCullResult();
+        ExtraDataList* pData = (ExtraDataList*)((const BSOcclusionPlane*)pOcclusionPlane)->GetCullResult();
         if (pData)
         {
             bhkWorld* pWorld = pData->GetRoomId();
@@ -862,7 +830,7 @@ void FUN_0062de90_shell::FUN_0062de90(CombatWorldStateListNode* target)
     CombatWorldStateListNode* node = m_20;
     while (node)
     {
-        if (node->_ref_0084e3a0() == (int)target)
+        if (_ref_0084e3a0(node) == (int)target)
         {
             ((FUN_0062d510_shell*)node)->FUN_0062d510();
             break;
@@ -890,30 +858,7 @@ FUN_0062d840_shell* FUN_0062d7c0_shell::FUN_0062d7c0(unsigned int a, unsigned in
     return new FUN_0062d840_shell(a, b);
 }
 
-struct TESObjectREFR;
 TESObjectREFR* __cdecl FUN_0062b4e0(void*);
-struct RootContactPoint
-{
-    void* m_p0;
-    void* m_p4;
-    void* m_p8;
-    void* m_pc;
-    void* m_p10;
-    void* m_p14;
-    void* m_p18;
-    void* m_p1c;
-    void* m_p20;
-    void* m_p24;
-    void* m_p28;
-    void* m_p2c;
-    void* m_p30;
-    void* m_p34;
-    void* m_p38;
-    void* m_p3c;
-    void* m_p40;
-    void* m_p44;
-    void* m_p48;
-};
 struct FUN_00620340_shell
 {
     void* FUN_00620340(RootContactPoint*, TESObjectREFR*, TESObjectREFR*, int, int);
@@ -928,9 +873,9 @@ bool FUN_0062dc80_shell::FUN_0062dc80(RootContactPoint* arPoint)
     bool bres = false;
     TESObjectREFR* ptrapRef = 0;
     TESObjectREFR* m_pReference = 0;
-    ptrapRef = FUN_0062b4e0(arPoint->m_p48);
-    m_pReference = FUN_0062b4e0(arPoint->m_p20);
-    if (ptrapRef && m_pReference && ((bool(__thiscall*)(void*))(*(void***)m_pReference)[0x40])(m_pReference))
+    ptrapRef = FUN_0062b4e0((void*)arPoint->m_pRootCollidableB);
+    m_pReference = FUN_0062b4e0((void*)arPoint->m_pRootCollidableA);
+    if (ptrapRef && m_pReference && m_pReference->IsActor())
     {
         ZoneEntry* ptrap =
             (ZoneEntry*)((FUN_00620340_shell*)((char*)this - 8))->FUN_00620340(arPoint, ptrapRef, m_pReference, 0, 1);
@@ -939,29 +884,19 @@ bool FUN_0062dc80_shell::FUN_0062dc80(RootContactPoint* arPoint)
     return bres;
 }
 
-struct FUN_0062e0a0_shell : NiTPointerMap
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2(void*);
-    void* m_pFirstNode;
-    void* m_pTail;
-    int m_uiItemCount;
-    void* RemoveFirstNode();
-};
-
+// This specialization uses the original list storage and node-deletion slot.
 // @fnv 0x0062e0a0
-void* FUN_0062e0a0_shell::RemoveFirstNode()
+void* FUN_0062e0a0_List::RemoveFirstNode()
 {
-    void* node = m_pFirstNode;
-    m_pFirstNode = *(void**)m_pFirstNode;
-    if (m_pFirstNode)
-        ((void**)m_pFirstNode)[1] = 0;
+    void* node = *(void**)((char*)this + 4);
+    *(void**)((char*)this + 4) = **(void***)((char*)this + 4);
+    if (*(void**)((char*)this + 4))
+        ((void**)*(void**)((char*)this + 4))[1] = 0;
     else
-        m_pTail = 0;
+        *(void**)((char*)this + 8) = 0;
     void* pValue = ((void**)node)[2];
-    v2(node);
-    --m_uiItemCount;
+    ((void(__thiscall*)(void*, void*))(*(void***)this)[2])(this, node);
+    --*(int*)((char*)this + 12);
     return pValue;
 }
 
@@ -1024,26 +959,13 @@ void FUN_0062cb90_shell::CompactEntries()
     }
 }
 
-struct FUN_0062d310_shell : MyCollector
-{
-    void FUN_0062d310();
-};
-
 // @fnv 0x0062d310
-void FUN_0062d310_shell::FUN_0062d310()
+void hkpAllCdBodyPairCollector::FUN_0062d310()
 {
-    FUN_00626870((char*)this + 8);
-    FUN_0062d330();
+    FUN_00626870(&m8);
+    hkpCdBodyPairCollector::FUN_0062d330();
 }
 
-struct BSAudio
-{
-    int GetAudioBackendData();
-};
-struct MemoryManager
-{
-    int _ref_00885750();
-};
 MemoryManager* __cdecl _D1A0E0GetMemoryRouter();
 struct Vt62d470
 {
@@ -1061,19 +983,12 @@ void __cdecl FUN_0062d470(void* ap)
     }
 }
 
-struct BGSSaveLoadGame
-{
-    bool FUN_0042ce10();
-};
-
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
 struct FUN_0062c860_shell
 {
     void ApplyEntriesToRef(int arg);
 };
-
-int __fastcall _ref_0084e3a0(void* self);
 
 // If the save/load game check fails, calls ApplyEntriesToRef with _ref_0084e3a0(this) on the object at offset 0x10, then calls ClearMap on it.
 // @fnv 0x0062d510
@@ -1118,142 +1033,6 @@ struct FUN_00620680_Class
     void* FUN_00620680(void*, void*);
 };
 
-struct FUN_0062dd20_vtable
-{
-    virtual void f00()
-    {}
-    virtual void f01()
-    {}
-    virtual void f02()
-    {}
-    virtual void f03()
-    {}
-    virtual void f04()
-    {}
-    virtual void f05()
-    {}
-    virtual void f06()
-    {}
-    virtual void f07()
-    {}
-    virtual void f08()
-    {}
-    virtual void f09()
-    {}
-    virtual void f10()
-    {}
-    virtual void f11()
-    {}
-    virtual void f12()
-    {}
-    virtual void f13()
-    {}
-    virtual void f14()
-    {}
-    virtual void f15()
-    {}
-    virtual void f16()
-    {}
-    virtual void f17()
-    {}
-    virtual void f18()
-    {}
-    virtual void f19()
-    {}
-    virtual void f20()
-    {}
-    virtual void f21()
-    {}
-    virtual void f22()
-    {}
-    virtual void f23()
-    {}
-    virtual void f24()
-    {}
-    virtual void f25()
-    {}
-    virtual void f26()
-    {}
-    virtual void f27()
-    {}
-    virtual void f28()
-    {}
-    virtual void f29()
-    {}
-    virtual void f30()
-    {}
-    virtual void f31()
-    {}
-    virtual void f32()
-    {}
-    virtual void f33()
-    {}
-    virtual void f34()
-    {}
-    virtual void f35()
-    {}
-    virtual void f36()
-    {}
-    virtual void f37()
-    {}
-    virtual void f38()
-    {}
-    virtual void f39()
-    {}
-    virtual void f40()
-    {}
-    virtual void f41()
-    {}
-    virtual void f42()
-    {}
-    virtual void f43()
-    {}
-    virtual void f44()
-    {}
-    virtual void f45()
-    {}
-    virtual void f46()
-    {}
-    virtual void f47()
-    {}
-    virtual void f48()
-    {}
-    virtual void f49()
-    {}
-    virtual void f50()
-    {}
-    virtual void f51()
-    {}
-    virtual void f52()
-    {}
-    virtual void f53()
-    {}
-    virtual void f54()
-    {}
-    virtual void f55()
-    {}
-    virtual void f56()
-    {}
-    virtual void f57()
-    {}
-    virtual void f58()
-    {}
-    virtual void f59()
-    {}
-    virtual void f60()
-    {}
-    virtual void f61()
-    {}
-    virtual void f62()
-    {}
-    virtual void f63()
-    {}
-    virtual bool f64()
-    {
-        return false;
-    }
-};
-
 struct FUN_0062dd20_shell
 {
     bool FUN_0062dd20(RootContactPoint& arPoint);
@@ -1270,7 +1049,7 @@ bool FUN_0062dd20_shell::FUN_0062dd20(RootContactPoint& arPoint)
     ptrapRef = FUN_0062b4e0(*reinterpret_cast<void**>(reinterpret_cast<char*>(&arPoint) + 0x48));
     m_pReference = FUN_0062b4e0(*reinterpret_cast<void**>(reinterpret_cast<char*>(&arPoint) + 0x20));
 
-    if (ptrapRef && m_pReference && reinterpret_cast<FUN_0062dd20_vtable*>(m_pReference)->f64())
+    if (ptrapRef && m_pReference && m_pReference->IsActor())
     {
         {
             ZoneEntry* ptrap;
@@ -1307,81 +1086,15 @@ FUN_0062c640::FUN_0062c640()
 }
 
 void __cdecl operator delete[](void*);
-struct Form62C
+// The shared reference header does not yet declare this notification helper.
+class TrapReferenceNotification : public TESObjectREFR
 {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual bool isRef();
+public:
+    void FUN_00572e10(TESObjectREFR*);
 };
-struct Extra62C
-{
-};
-struct Ref62C : Form62C
-{
-    Extra62C* FUN_005d43c0();
-    void FUN_00572e10(Ref62C*);
-    void FUN_00565870();
-};
-Form62C* FUN_004839c0(unsigned int);
-bool MarkBaseExtraListScriptEvent(Form62C*, Extra62C*, unsigned int);
+
+TESForm* FUN_004839c0(unsigned int);
+bool MarkBaseExtraListScriptEvent(TESForm*, ExtraDataList*, unsigned int);
 struct Entry62C
 {
     unsigned int id;
@@ -1391,10 +1104,10 @@ struct Shell62C
 {
     Entry62C* entries;
     int count;
-    void ApplyEntriesToRef(Ref62C*);
+    void ApplyEntriesToRef(TESObjectREFR*);
 };
 // @fnv 0x0062c860
-void Shell62C::ApplyEntriesToRef(Ref62C* ref)
+void Shell62C::ApplyEntriesToRef(TESObjectREFR* ref)
 {
     if (!count)
         return;
@@ -1402,15 +1115,15 @@ void Shell62C::ApplyEntriesToRef(Ref62C* ref)
     unsigned int size = count;
     for (int i = 0; i < count; i++)
         copy[i] = entries[i].id;
-    Extra62C* extra = ref->FUN_005d43c0();
+    ExtraDataList* extra = ref->FUN_005d43c0();
     for (unsigned int j = 0; j < size; j++)
     {
-        Form62C* form = FUN_004839c0(copy[j]);
-        if (form && form->isRef())
+        TESForm* form = FUN_004839c0(copy[j]);
+        if (form && form->GetIsReference())
         {
-            Ref62C* target = (Ref62C*)form;
+            TESObjectREFR* target = (TESObjectREFR*)form;
             MarkBaseExtraListScriptEvent(target, extra, 0x40000000);
-            ref->FUN_00572e10(target);
+            static_cast<TrapReferenceNotification*>(ref)->FUN_00572e10(target);
             ref->FUN_00565870();
         }
     }
@@ -1478,31 +1191,9 @@ bool CollisionRegistry::RegisterCollision(void* object)
     return false;
 }
 
-struct S_0062d350_Member
-{
-    S_0062d350_Member(int a);
-    ~S_0062d350_Member();
-};
-
-struct S_0062d350_Base
-{
-    int unk4;
-    S_0062d350_Base();
-    ~S_0062d350_Base();
-    virtual void v00();
-    void FUN_0062d310();
-};
-
-struct FUN_0062d350 : S_0062d350_Base
-{
-    S_0062d350_Member m8;
-    FUN_0062d350();
-    virtual void v00();
-};
-
 // Constructs the object: initializes member m8 with 0 and calls FUN_0062d310 on the base.
 // @fnv 0x0062d350
-FUN_0062d350::FUN_0062d350() : m8(0)
+hkpAllCdBodyPairCollector::hkpAllCdBodyPairCollector() : m8(0)
 {
     FUN_0062d310();
 }
@@ -1598,91 +1289,6 @@ FUN_0062c7a0_Cache::~FUN_0062c7a0_Cache()
     }
 }
 
-struct TESObjectREFR : Ref62C
-{
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual int Active();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual bool FlagA(int);
-    virtual bool FlagB();
-    bool FUN_00440da0();
-    bool FUN_00440d80();
-};
 struct Check62
 {
     bool FUN_005609f0();
@@ -1737,20 +1343,8 @@ struct CollisionObject62
     Array62* GetOffset160();
     Array62* FUN_0045c650();
 };
-struct FUN_0062d350_Collector
-{
-    void* vtable;
-    float earlyOut;
-    void* data;
-    int size;
-    int capacity;
-    ArrayEntry62 pairs[16];
-    int capacityFlags;
-    FUN_0062d350_Collector();
-    ~FUN_0062d350_Collector();
-    void FUN_0062d310();
-    Array62* FUN_00413f40();
-};
+// The shared collector has no declaration for the original pair-array accessor.
+Array62* __fastcall GetCollectedBodyPairs(hkpAllCdBodyPairCollector* collector);
 struct Registry62 : CollisionRegistry
 {
     void CompactEntries();
@@ -1774,7 +1368,7 @@ bool Subject62::ProcessCollisionPairs(int arg)
 {
     bool world = false;
     TESObjectREFR* owner = _ref_0084e3a0();
-    if (!owner || owner->FUN_00440da0() || owner->FUN_00440d80() || !owner->Active())
+    if (!owner || owner->FUN_00440da0() || owner->FUN_00440d80() || !owner->GetNiNode())
         return world;
     Broad62* pending = FUN_0044ddc0();
     CollisionObject62* kind = pending->FUN_004b59d0();
@@ -1789,14 +1383,14 @@ bool Subject62::ProcessCollisionPairs(int arg)
         CollisionObject62* shape = kind;
         if (!shape->GetOffset160()->FUN_0062e120().FUN_005609f0())
         {
-            FUN_0062d350_Collector collector;
+            hkpAllCdBodyPairCollector collector;
             collector.FUN_0062d310();
             if (broad)
                 broad->FUN_00483710();
             shape->Collect(&collector, 0);
             if (broad)
                 broad->FUN_00483710();
-            Array62* array = collector.FUN_00413f40();
+            Array62* array = GetCollectedBodyPairs(&collector);
             if (!array->FUN_0062e120().FUN_005609f0())
             {
                 int count = array->FUN_00726070();
@@ -1809,13 +1403,13 @@ bool Subject62::ProcessCollisionPairs(int arg)
                         if (ref)
                         {
                             bool flag = ref->IsActor() && FUN_004b59f0(body);
-                            bool actor = ref->FlagA(0) || ref->FlagB();
+                            bool actor = ref->HasHealth(false) || ref->GetHasKnockedState();
                             if (!flag || actor)
                             {
                                 bool found = registry.RegisterCollision(ref);
                                 if (found)
                                 {
-                                    Extra62C* extra = _ref_0084e3a0()->FUN_005d43c0();
+                                    ExtraDataList* extra = _ref_0084e3a0()->FUN_005d43c0();
                                     world |= MarkBaseExtraListScriptEvent(ref, extra, 0x10000000);
                                 }
                             }
@@ -1841,13 +1435,13 @@ bool Subject62::ProcessCollisionPairs(int arg)
                     if (ref)
                     {
                         bool flag = ref->IsActor() && FUN_004b59f0(body);
-                        bool actor = ref->FlagA(0) || ref->FlagB();
+                        bool actor = ref->HasHealth(false) || ref->GetHasKnockedState();
                         if (!flag || actor)
                         {
                             bool found = registry.RegisterCollision(ref);
                             if (found)
                             {
-                                Extra62C* extra = _ref_0084e3a0()->FUN_005d43c0();
+                                ExtraDataList* extra = _ref_0084e3a0()->FUN_005d43c0();
                                 world |= MarkBaseExtraListScriptEvent(ref, extra, 0x10000000);
                             }
                         }
@@ -1866,19 +1460,18 @@ bool Subject62::ProcessCollisionPairs(int arg)
         else
             ref = 0x40000000;
         unsigned int id = object->key;
-        Ref62C* flags = (Ref62C*)FUN_004839c0(id);
+        TESObjectREFR* flags = (TESObjectREFR*)FUN_004839c0(id);
         delete object;
         if (flags)
         {
-            Extra62C* extra = _ref_0084e3a0()->FUN_005d43c0();
+            ExtraDataList* extra = _ref_0084e3a0()->FUN_005d43c0();
             world |= MarkBaseExtraListScriptEvent(flags, extra, ref);
-            _ref_0084e3a0()->FUN_00572e10(flags);
+            static_cast<TrapReferenceNotification*>(_ref_0084e3a0())->FUN_00572e10(flags);
         }
     }
     return world;
 }
 
-struct TESObjectREFR;
 TESObjectREFR* __cdecl FUN_0062b4e0(void* object);
 struct EventContext
 {
@@ -1949,12 +1542,12 @@ struct GlobalObject_008c71b0 : FUN_0043b4d0_shell
     GlobalObject_008c71b0(int);
 };
 
-struct FUN_0062d9b0_Class : BSSimpleList
+struct FUN_0062d9b0_Class : TrapEventList
 {
     ~FUN_0062d9b0_Class();
 };
 
-struct ListHead : BSSimpleList
+struct ListHead : TrapEventList
 {
     FUN_0062d9b0_Class* FUN_0062db40(int);
 };
@@ -1989,30 +1582,8 @@ void TargetClass::RemoveMatchingListEntry(ArgClass* arg)
     }
 }
 
-class FUN_0062df80
-{
-  public:
-    ~FUN_0062df80();
-    int unk00;
-};
-
-class FUN_0062d420
-{
-  public:
-    virtual ~FUN_0062d420();
-    int unk04;
-};
-
-class FUN_0062d4b0 : public FUN_0062d420
-{
-  public:
-    FUN_0062df80 m_08;
-
-    virtual ~FUN_0062d4b0();
-};
-
 // @fnv 0x0062d4b0
-FUN_0062d4b0::~FUN_0062d4b0()
+hkpAllCdBodyPairCollector::~hkpAllCdBodyPairCollector()
 {}
 
 struct CollisionBody;
@@ -2071,7 +1642,7 @@ void TrapListener::AddListener(CollisionArgument* apCollisionArgument)
     }
 }
 
-struct BSSimpleList;
+struct TrapEventList;
 
 struct Item62DE
 {

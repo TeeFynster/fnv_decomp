@@ -1,3 +1,25 @@
+#define FNV64_HKENUM_INLINE_BODIES
+#define FNV64_HKENUM_FORCEINLINE
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#include "../../../../../../include/QuantizedFloat8.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkContactPointMaterial.h"
+#include "../../../../../../include/hkTransform.h"
+#include <xmmintrin.h>
+
+#include "../../../../../../include/hkSimdReal.h"
+#include "../../../../../../include/hkMatrix3.h"
+#include "../../../../../../include/hkRotation.h"
+#include "../../../../../../include/hkContactPoint.h"
+#include "../../../../../../include/hkpSimpleContactConstraintAtom.h"
+
 
 // src/havok/physics/constraintsolver/constraint/contact/hkpsimplecontactconstraintinfo_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/constraintsolver/constraint/contact/hkpsimplecontactconstraintinfo_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
@@ -20,17 +42,6 @@ struct StateD72090
 };
 void FUN_00d72090(StateD72090* out);
 #include <string.h>
-struct Node
-{
-    unsigned short unk00;
-    unsigned short unk02;
-    int unk04;
-    int unk08;
-    int unk0c;
-    unsigned short unk10;
-    unsigned short unk12;
-    Node* unk14;
-};
 struct __declspec(align(16)) Buffer
 {
     int unk00;
@@ -67,11 +78,11 @@ struct __declspec(align(16)) Buffer
     int unk7c;
 };
 extern "C" void __cdecl FUN_00d72090(void*);
-extern "C" void __cdecl FUN_00d72190(Node*, Buffer*, int, int*);
-extern "C" void __cdecl FUN_00d6f460(Node*, unsigned short, Buffer*, int*);
+extern "C" void __cdecl FUN_00d72190(hkpSimpleContactConstraintAtom*, Buffer*, int, int*);
+extern "C" void __cdecl FUN_00d6f460(hkpSimpleContactConstraintAtom*, unsigned short, Buffer*, int*);
 extern "C" Buffer* __cdecl GetSharedBuffer();
-static void __cdecl FUN_00d6c5a0(Node* self, int* counter, Buffer* source);
-void __cdecl Caller(Node* self, int* counter);
+static void __cdecl FUN_00d6c5a0(hkpSimpleContactConstraintAtom* self, int* counter, Buffer* source);
+void __cdecl Caller(hkpSimpleContactConstraintAtom* self, int* counter);
 
 #include <xmmintrin.h>
 
@@ -82,58 +93,11 @@ typedef unsigned char hkUint8;
 typedef signed char hkInt8;
 typedef unsigned int hkUint32;
 
-class hkBool
-{
-  public:
-    __forceinline hkBool()
-    {}
-    __forceinline hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    __forceinline operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    __forceinline hkBool& operator=(bool e)
-    {
-        m_cBooleanValue = (char)e;
-        return *this;
-    }
-    char m_cBooleanValue;
-};
+#include "../../../../../../include/hkPadSpu.h"   // Havok 7.1 hkPadSpu (was a unit-local ValueWrapper copy)
 
-template <typename TYPE> class ValueWrapper
-{
-  public:
-    __forceinline void operator=(TYPE e)
-    {
-        m_kStorage = e;
-    }
-    __forceinline TYPE val() const
-    {
-        return m_kStorage;
-    }
-    __forceinline TYPE operator->() const
-    {
-        return m_kStorage;
-    }
-    __forceinline operator TYPE() const
-    {
-        return val();
-    }
-    TYPE m_kStorage;
-};
 
-template <typename ENUM, typename STORAGE> class hkEnum
-{
-  public:
-    __forceinline hkEnum(ENUM e)
-    {
-        m_kStorage = (STORAGE)e;
-    }
-    STORAGE m_kStorage;
-};
+#include "../../../../../../include/hkEnum.h"
+using ::hkEnum;
 
 template <typename TYPE> __forceinline TYPE* hkAddByteOffset(TYPE* base, long offset)
 {
@@ -152,215 +116,239 @@ template <typename T> __forceinline T min2(T x, T y)
 }
 }
 
-class VectorComponentValue
-{
-  public:
-    __forceinline VectorComponentValue(const hkQuadReal& x) : m_vValue(x)
-    {}
-    __forceinline VectorComponentValue(hkReal x)
-    {
-        m_vValue = _mm_load_ss(&x);
-    }
-    __forceinline operator hkReal() const
-    {
-        hkReal s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-    __forceinline hkQuadReal broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-    __forceinline const hkQuadReal& getQuad() const
-    {
-        return m_vValue;
-    }
-
-  private:
-    hkQuadReal m_vValue;
-};
-typedef const VectorComponentValue& hkSimdRealParameter;
-
-class hkMatrix3;
-class hkRotation;
+typedef const hkSimdReal& hkSimdRealParameter;
 
 extern const hkQuadReal DAT_010c44d0;
+extern const hkReal DAT_010c7948[];
 
-class hkVector4
-{
-  public:
-    __forceinline hkVector4()
-    {}
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline void add4(const hkVector4& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void setAdd4(const hkVector4& v0, const hkVector4& v1)
-    {
-        m_vComponents = _mm_add_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    __forceinline void setSub4(const hkVector4& v0, const hkVector4& v1)
-    {
-        m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    __forceinline void mul4(const hkVector4& v)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void setMul4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void mul4(hkSimdRealParameter s)
-    {
-        m_vComponents = _mm_mul_ps(s.broadcast(), m_vComponents);
-    }
-    __forceinline void setCross(const hkVector4& v0, const hkVector4& v1)
-    {
-        hkQuadReal cross0;
-        cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)),
-                            _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)));
-        hkQuadReal cross1;
-        cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)),
-                            _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    __forceinline void setNeg4(const hkVector4& v)
-    {
-        m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c44d0);
-    }
-    __forceinline void setAbs4(const hkVector4& v)
-    {
-        static __declspec(align(16)) const hkUint32 absMask[4] = {0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff};
-        m_vComponents = _mm_and_ps(v.m_vComponents, *(const hkQuadReal*)&absMask);
-    }
-    __forceinline void _setMul3(const hkMatrix3& a, const hkVector4& b);
-    __forceinline void _setRotatedDir(const hkRotation& r, const hkVector4& v);
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        hkQuadReal x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        hkQuadReal xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2)), xySum);
-    }
-    __forceinline VectorComponentValue horizontalAdd3() const
-    {
-        hkQuadReal xySum =
-            _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(1, 1, 1, 1)), m_vComponents);
-        return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(2, 2, 2, 2)), xySum);
-    }
-    __forceinline VectorComponentValue horizontalAdd4() const
-    {
-        hkQuadReal sum0 =
-            _mm_add_ps(_mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(1, 0, 3, 2)), m_vComponents);
-        hkQuadReal sum1 = _mm_shuffle_ps(sum0, sum0, _MM_SHUFFLE(2, 3, 0, 1));
-        return _mm_add_ps(sum0, sum1);
-    }
-    __forceinline VectorComponentValue length3() const
-    {
-        return _mm_sqrt_ss(this->dot3(*this).getQuad());
-    }
-    __forceinline VectorComponentValue lengthSquared3() const
-    {
-        return this->dot3(*this);
-    }
-    __forceinline VectorComponentValue lengthInverse3() const
-    {
-        const hkQuadReal half = _mm_set_ss(0.5f);
-        const hkQuadReal three = _mm_set_ss(3.0f);
-        const hkQuadReal zero = _mm_set_ss(0.0f);
-        const hkQuadReal len2 = this->dot3(*this).getQuad();
-        const hkQuadReal len2EqualsZero = _mm_cmpeq_ss(len2, zero);
-        const hkQuadReal approx = _mm_rsqrt_ss(len2);
-        const hkQuadReal refined =
-            _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
-        return _mm_andnot_ps(len2EqualsZero, refined);
-    }
-    __forceinline void normalize3()
-    {
-        hkQuadReal lenInv = lengthInverse3().broadcast();
-        m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
-    }
-    __forceinline hkReal& operator()(int a)
-    {
-        return reinterpret_cast<hkReal*>(&m_vComponents)[a];
-    }
-    __forceinline const hkReal& operator()(int a) const
-    {
-        return reinterpret_cast<const hkReal*>(&m_vComponents)[a];
-    }
-    __forceinline void setW(const hkVector4& w)
-    {
-        m_vComponents =
-            _mm_shuffle_ps(m_vComponents, _mm_unpackhi_ps(m_vComponents, w.m_vComponents), _MM_SHUFFLE(3, 0, 1, 0));
-    }
-    __forceinline void setBroadcast(const hkVector4& v, int i)
-    {
-        if (i == 0)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(0, 0, 0, 0));
-        }
-        else if (i == 1)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(1, 1, 1, 1));
-        }
-        else if (i == 2)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(2, 2, 2, 2));
-        }
-        else if (i == 3)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
-        }
-    }
-    __forceinline void setBroadcast3clobberW(const hkVector4& v, int i)
-    {
-        setBroadcast(v, i);
-    }
 
-    hkQuadReal m_vComponents;
-};
 
-class hkMatrix3
-{
-  public:
-    __forceinline const hkVector4& getColumn(int x) const
-    {
-        return (&m_kColumn0)[x];
-    }
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-};
-class hkRotation : public hkMatrix3
-{
-};
 
-class hkTransform
+__forceinline hkSimdReal::hkSimdReal(const hkQuadReal& x) : m_vValue(x)
+{}
+
+__forceinline hkSimdReal::hkSimdReal(hkReal x)
 {
-  public:
-    __forceinline const hkVector4& getColumn(int x) const
+    m_vValue = _mm_load_ss(&x);
+}
+
+__forceinline hkSimdReal::operator hkReal() const
+{
+    hkReal s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
+
+__forceinline hkQuadReal hkSimdReal::broadcast() const
+{
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+
+__forceinline const hkQuadReal& hkSimdReal::getQuad() const
+{
+    return m_vValue;
+}
+
+
+
+__forceinline void hkVector4::setZero4()
+{
+    m_vComponents = _mm_setzero_ps();
+}
+
+__forceinline void hkVector4::add4(const hkVector4& v)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
+}
+
+__forceinline void hkVector4::setAdd4(const hkVector4& v0, const hkVector4& v1)
+{
+    m_vComponents = _mm_add_ps(v0.m_vComponents, v1.m_vComponents);
+}
+
+__forceinline void hkVector4::setSub4(const hkVector4& v0, const hkVector4& v1)
+{
+    m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
+}
+
+__forceinline void hkVector4::mul4(const hkVector4& v)
+{
+    m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
+}
+
+__forceinline void hkVector4::setMul4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4::mul4(hkSimdRealParameter s)
+{
+    m_vComponents = _mm_mul_ps(s.broadcast(), m_vComponents);
+}
+
+__forceinline void hkVector4::setCross(const hkVector4& v0, const hkVector4& v1)
+{
+    hkQuadReal cross0;
+    cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)),
+                        _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)));
+    hkQuadReal cross1;
+    cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)),
+                        _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)));
+    m_vComponents = _mm_sub_ps(cross0, cross1);
+}
+
+__forceinline void hkVector4::setNeg4(const hkVector4& v)
+{
+    m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c44d0);
+}
+
+__forceinline void hkVector4::setAbs4(const hkVector4& v)
+{
+    static __declspec(align(16)) const hkUint32 absMask[4] = {0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff};
+    m_vComponents = _mm_and_ps(v.m_vComponents, *(const hkQuadReal*)&absMask);
+}
+
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    hkQuadReal x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    hkQuadReal xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
+    return _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2)), xySum);
+}
+
+__forceinline hkSimdReal hkVector4::horizontalAdd3() const
+{
+    hkQuadReal vSum01 =
+        _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(1, 1, 1, 1)), m_vComponents);
+    return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(2, 2, 2, 2)), vSum01);
+}
+
+__forceinline hkSimdReal hkVector4::horizontalAdd4() const
+{
+    hkQuadReal vPairs =
+        _mm_add_ps(_mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(1, 0, 3, 2)), m_vComponents);
+    hkQuadReal vSwapped = _mm_shuffle_ps(vPairs, vPairs, _MM_SHUFFLE(2, 3, 0, 1));
+    return _mm_add_ps(vPairs, vSwapped);
+}
+
+__forceinline hkSimdReal hkVector4::length3() const
+{
+    return _mm_sqrt_ss(this->dot3(*this).getQuad());
+}
+
+__forceinline hkSimdReal hkVector4::lengthSquared3() const
+{
+    return this->dot3(*this);
+}
+
+// The shared vector declares normalize3 but has no lengthInverse3 member.
+__forceinline hkQuadReal contactLengthInverse3(const hkVector4& vector)
+{
+    const hkQuadReal half = _mm_set_ss(0.5f);
+    const hkQuadReal three = _mm_set_ss(3.0f);
+    const hkQuadReal zero = _mm_set_ss(0.0f);
+    const hkQuadReal len2 = vector.dot3(vector).getQuad();
+    const hkQuadReal len2EqualsZero = _mm_cmpeq_ss(len2, zero);
+    const hkQuadReal approx = _mm_rsqrt_ss(len2);
+    const hkQuadReal refined =
+        _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
+    return _mm_andnot_ps(len2EqualsZero, refined);
+}
+
+__forceinline void hkVector4::normalize3()
+{
+    hkQuadReal lenInv = hkSimdReal(contactLengthInverse3(*this)).broadcast();
+    m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
+}
+
+__forceinline hkReal& hkVector4::operator()(int a)
+{
+    return reinterpret_cast<hkReal*>(&m_vComponents)[a];
+}
+
+__forceinline const hkReal& hkVector4::operator()(int a) const
+{
+    return reinterpret_cast<const hkReal*>(&m_vComponents)[a];
+}
+
+__forceinline void hkVector4::setW(const hkVector4& w)
+{
+    m_vComponents =
+        _mm_shuffle_ps(m_vComponents, _mm_unpackhi_ps(m_vComponents, w.m_vComponents), _MM_SHUFFLE(3, 0, 1, 0));
+}
+
+__forceinline void hkVector4::setBroadcast(const hkVector4& v, int i)
+{
+    if (i == 0)
     {
-        return m_rotation.getColumn(x);
+        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(0, 0, 0, 0));
     }
-    __forceinline static const hkTransform& GetIdentityTransform();
-    hkRotation m_rotation;
-    hkVector4 m_vTranslation;
-};
+    else if (i == 1)
+    {
+        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(1, 1, 1, 1));
+    }
+    else if (i == 2)
+    {
+        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(2, 2, 2, 2));
+    }
+    else if (i == 3)
+    {
+        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
+    }
+}
+
+__forceinline void hkVector4::setBroadcast3clobberW(const hkVector4& v, int i)
+{
+    setBroadcast(v, i);
+}
+
+__forceinline const hkVector4& hkMatrix3::getColumn(int x) const
+{
+    return (&m_kColumn0)[x];
+}
+
+__forceinline const hkVector4& hkRotation::getColumn(int x) const
+{
+return (&m_kColumn0)[x];
+}
+
+__forceinline const hkVector4& hkTransform::getColumn(int x) const
+{
+    return reinterpret_cast<const hkRotation*>(&m_row0)->getColumn(x);
+}
+
+__forceinline const hkVector4& hkContactPoint::getPosition() const
+{
+    return m_vContactPosition;
+}
+
+__forceinline const hkVector4& hkContactPoint::getNormal() const
+{
+    return m_vSeparatingNormal;
+}
+
+__forceinline hkReal hkContactPoint::getDistance() const
+{
+    return m_vSeparatingNormal(3);
+}
+
+__forceinline QuantizedFloat8::operator hkReal() const
+{
+    // QuantizedFloat8 exposes its byte storage only through the conversion operator.
+    return DAT_010c7948[*reinterpret_cast<const hkUint8*>(this)];
+}
+
+__forceinline hkReal hkContactPointMaterial::getFriction() const
+{
+    return m_fSlipAngle;
+}
+
 extern const hkTransform DAT_01268370;
-__forceinline const hkTransform& hkTransform::GetIdentityTransform()
+__forceinline const hkTransform& __cdecl hkTransform::GetIdentityTransform()
 {
     return DAT_01268370;
 }
 
-__forceinline void hkVector4::_setMul3(const hkMatrix3& a, const hkVector4& b)
+__forceinline void hkVector4::_setMul3(const hkRotation& a, const hkVector4& b)
 {
     const hkQuadReal b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, _MM_SHUFFLE(0, 0, 0, 0));
     const hkQuadReal r0 = _mm_mul_ps(a.getColumn(0).m_vComponents, b0);
@@ -374,51 +362,6 @@ __forceinline void hkVector4::_setRotatedDir(const hkRotation& r, const hkVector
 {
     _setMul3(r, v);
 }
-
-class hkContactPoint
-{
-  public:
-    __forceinline const hkVector4& getPosition() const
-    {
-        return m_vContactPosition;
-    }
-    __forceinline const hkVector4& getNormal() const
-    {
-        return m_vSeparatingNormal;
-    }
-    __forceinline hkReal getDistance() const
-    {
-        return m_vSeparatingNormal(3);
-    }
-    hkVector4 m_vContactPosition;
-    hkVector4 m_vSeparatingNormal;
-};
-
-extern const hkReal DAT_010c7948[];
-
-class QuantizedFloat8
-{
-  public:
-    __forceinline operator hkReal() const
-    {
-        return DAT_010c7948[m_uiFilterValue];
-    }
-    hkUint8 m_uiFilterValue;
-};
-
-class hkContactPointMaterial
-{
-  public:
-    __forceinline hkReal getFriction() const
-    {
-        return m_fSlipAngle;
-    }
-    hkUint32 m_ulUserData;
-    QuantizedFloat8 m_fSlipAngle;
-    hkUint8 m_fElasticity;
-    QuantizedFloat8 m_usFlags;
-    hkUint8 m_flags;
-};
 
 class ContactImpulseInfo
 {
@@ -451,35 +394,23 @@ class ContactImpulseState
     ContactImpulseInfo m_kContactImpulseInfos[3];
 };
 
-class __declspec(align(16)) hkpSimpleContactConstraintAtom
+__forceinline hkContactPoint* hkpSimpleContactConstraintAtom::getContactPoints() const
 {
-  public:
-    __forceinline hkContactPoint* getContactPoints() const
-    {
-        return const_cast<hkContactPoint*>(reinterpret_cast<const hkContactPoint*>(this + 1));
-    }
-    __forceinline int getContactPointPropertiesStriding() const
-    {
-        return m_ucContactPointPropertiesStriding;
-    }
-    __forceinline UInt32Value* getContactPointPropertiesStream() const
-    {
-        const hkContactPoint* endContactPoint =
-            hkAddByteOffsetConst(getContactPoints(), sizeof(hkContactPoint) * m_usMaxNumContactPoints);
-        const UInt32Value* beginningOfProperties = reinterpret_cast<const UInt32Value*>(endContactPoint);
-        return const_cast<UInt32Value*>(hkAddByteOffsetConst(beginningOfProperties, 0));
-    }
+    return const_cast<hkContactPoint*>(reinterpret_cast<const hkContactPoint*>(this + 1));
+}
 
-    hkUint16 m_type;
-    hkUint16 m_usSizeOfAllAtoms;
-    hkUint16 m_usNumContactPoints;
-    hkUint16 m_usMaxNumContactPoints;
-    hkUint8 m_ucNumReservedContactPoints;
-    hkUint8 m_ucNumContactPointProperties;
-    hkUint8 m_ucContactPointPropertiesStriding;
-    hkUint16 m_usMaxNumContactPointProperties;
-    __declspec(align(16)) ContactImpulseState m_info;
-};
+__forceinline int hkpSimpleContactConstraintAtom::getContactPointPropertiesStriding() const
+{
+    return m_ucContactPointPropertiesStriding;
+}
+
+__forceinline UInt32Value* hkpSimpleContactConstraintAtom::getContactPointPropertiesStream() const
+{
+    const hkContactPoint* endContactPoint =
+        hkAddByteOffsetConst(getContactPoints(), sizeof(hkContactPoint) * m_usMaxNumContactPoints);
+    const UInt32Value* beginningOfProperties = reinterpret_cast<const UInt32Value*>(endContactPoint);
+    return const_cast<UInt32Value*>(hkAddByteOffsetConst(beginningOfProperties, 0));
+}
 
 class QuantizedBoundsData
 {
@@ -510,34 +441,34 @@ class hkpConstraintInstance;
 class ConstraintQueryData
 {
   public:
-    ValueWrapper<float> m_fQueryInputValue;
-    ValueWrapper<float> m_iBeforeFourthQueryValue;
-    ValueWrapper<float> m_kThirdChainValue;
-    ValueWrapper<float> m_fFirstQueryValue;
-    ValueWrapper<float> m_fSecondQueryValue;
-    ValueWrapper<float> m_fInverseStepCount;
-    ValueWrapper<float> m_fMaxConstraintViolation;
-    ValueWrapper<float> m_maxConstraintViolationSqrdStep;
-    ValueWrapper<float> m_fThirdQueryValue;
-    ValueWrapper<float> m_fFourthQueryValue;
-    ValueWrapper<float> m_fFifthQueryValue;
+    hkPadSpu<float> m_fQueryInputValue;
+    hkPadSpu<float> m_iBeforeFourthQueryValue;
+    hkPadSpu<float> m_kThirdChainValue;
+    hkPadSpu<float> m_fFirstQueryValue;
+    hkPadSpu<float> m_fSecondQueryValue;
+    hkPadSpu<float> m_fInverseStepCount;
+    hkPadSpu<float> m_fMaxConstraintViolation;
+    hkPadSpu<float> m_maxConstraintViolationSqrdStep;
+    hkPadSpu<float> m_fThirdQueryValue;
+    hkPadSpu<float> m_fFourthQueryValue;
+    hkPadSpu<float> m_fFifthQueryValue;
 };
 
 class __declspec(align(16)) SixteenWordFloatRecord : public ConstraintQueryData
 {
   public:
-    __declspec(align(16)) ValueWrapper<const QuantizedBoundsData*> m_pBodyA;
-    ValueWrapper<const QuantizedBoundsData*> m_pBodyB;
-    ValueWrapper<const hkTransform*> m_kBodyALocalFrame;
-    ValueWrapper<const hkTransform*> m_kBodyBLocalFrame;
-    ValueWrapper<hkReal> m_fTau;
-    ValueWrapper<hkReal> m_fMotorDamping;
-    VectorComponentValue m_fMaxConstraintViolationSquared;
-    ValueWrapper<hkpConstraintInstance*> m_pConstraintChainInstance;
-    ValueWrapper<void*> m_pByteBuffer;
-    ValueWrapper<void*> m_pOpaqueData;
-    ValueWrapper<hkUint32> m_uiParameterA;
-    ValueWrapper<hkUint32> m_uiParameterB;
+    __declspec(align(16)) hkPadSpu<const QuantizedBoundsData*> m_pBodyA;
+    hkPadSpu<const QuantizedBoundsData*> m_pBodyB;
+    hkPadSpu<const hkTransform*> m_kBodyALocalFrame;
+    hkPadSpu<const hkTransform*> m_kBodyBLocalFrame;
+    hkPadSpu<hkReal> m_fTau;
+    hkPadSpu<hkReal> m_fMotorDamping;
+    hkSimdReal m_fMaxConstraintViolationSquared;
+    hkPadSpu<hkpConstraintInstance*> m_pConstraintChainInstance;
+    hkPadSpu<void*> m_pByteBuffer;
+    hkPadSpu<void*> m_pOpaqueData;
+    hkPadSpu<hkUint32> m_uiParameterA;
+    hkPadSpu<hkUint32> m_uiParameterB;
 };
 
 class SolverSchemaHeader
@@ -561,7 +492,7 @@ class SolverSchemaHeader
 class QueryResultSchema
 {
   public:
-    ValueWrapper<SolverSchemaHeader*> m_pQueryResultSchema;
+    hkPadSpu<SolverSchemaHeader*> m_pQueryResultSchema;
 };
 
 class AngularJacobianElement
@@ -901,18 +832,19 @@ __forceinline hkReal calculateRhs(const hkContactPoint* ccp, PhysicsMaterial& sr
 }
 
 // @fnv 0x00d72190
-extern "C" void __cdecl FUN_00d72190(Node* atomNode, Buffer* queryIn, int writeHeader, int* queryOut)
+extern "C" void __cdecl FUN_00d72190(hkpSimpleContactConstraintAtom* atomNode, Buffer* queryIn, int writeHeader, int* queryOut)
 {
     int modified = 0;
     const hkContactPoint* __restrict contacts =
-        reinterpret_cast<hkpSimpleContactConstraintAtom*>(atomNode)->getContactPoints();
-    const int numContacts = reinterpret_cast<hkpSimpleContactConstraintAtom*>(atomNode)->m_usNumContactPoints;
+        static_cast<const hkpSimpleContactConstraintAtom*>(atomNode)->getContactPoints();
+    const int numContacts = static_cast<const hkpSimpleContactConstraintAtom*>(atomNode)->m_usNumContactPoints;
     UInt32Value* properties =
-        reinterpret_cast<hkpSimpleContactConstraintAtom*>(atomNode)->getContactPointPropertiesStream();
+        static_cast<const hkpSimpleContactConstraintAtom*>(atomNode)->getContactPointPropertiesStream();
     int propertiesStriding =
-        reinterpret_cast<hkpSimpleContactConstraintAtom*>(atomNode)->getContactPointPropertiesStriding();
+        static_cast<const hkpSimpleContactConstraintAtom*>(atomNode)->getContactPointPropertiesStriding();
     UInt32Value* propertiesInMainMemory = properties;
-    ContactImpulseState& info = reinterpret_cast<hkpSimpleContactConstraintAtom*>(atomNode)->m_info;
+    ContactImpulseState& info = *reinterpret_cast<ContactImpulseState*>(
+        &atomNode->m_infoFlags);
 
     hkVector4 avgPosition;
     avgPosition.setZero4();
@@ -934,7 +866,7 @@ extern "C" void __cdecl FUN_00d72190(Node* atomNode, Buffer* queryIn, int writeH
             reinterpret_cast<const SixteenWordFloatRecord*>(queryIn)->m_uiParameterA,
             reinterpret_cast<const SixteenWordFloatRecord*>(queryIn)->m_uiParameterB,
             reinterpret_cast<ContactImpulseInfo*>(propertiesInMainMemory->asProperties()),
-            reinterpret_cast<hkpSimpleContactConstraintAtom*>(atomNode)->getContactPointPropertiesStriding());
+            static_cast<const hkpSimpleContactConstraintAtom*>(atomNode)->getContactPointPropertiesStriding());
         com = reinterpret_cast<SolverSchemaHeader*>(header + 1);
     }
 
@@ -971,7 +903,7 @@ extern "C" void __cdecl FUN_00d72190(Node* atomNode, Buffer* queryIn, int writeH
 
             if (!contactUsesSolverPath2)
             {
-                int maxImpulse = sr->asProperties()->m_usFlags.m_uiFilterValue;
+                int maxImpulse = *reinterpret_cast<const hkUint8*>(&sr->asProperties()->m_usFlags);
                 JacobianPointerSchema* sc = reinterpret_cast<JacobianPointerSchema*>(com);
                 QuantizedBoundsBuilder::copyJacRegToJac1Reg();
                 sc->initSingleContact(*jac1Lin2Ang, 0);
@@ -1058,7 +990,7 @@ extern "C" void __cdecl FUN_00d72190(Node* atomNode, Buffer* queryIn, int writeH
             biNormal2.normalize3();
             biNormal.setCross(avgNormal, biNormal2);
         }
-        avgPosition.mul4(invNum);
+        avgPosition.mul4(hkSimdReal(invNum));
 
         ContactImpulseInfo* solverResults = &info.m_kContactImpulseInfos[0];
         FrictionJacobianTriple& tripleJac = *reinterpret_cast<FrictionJacobianTriple*>(com);
@@ -1125,7 +1057,7 @@ extern "C" void __cdecl FUN_00d72190(Node* atomNode, Buffer* queryIn, int writeH
                 {
                     hkVector4 diff;
                     diff.setSub4(cp->getPosition(), avgPosition);
-                    info.m_fAngularImpulseFactor = diff.length3() + info.m_fAngularImpulseFactor;
+                    info.m_fAngularImpulseFactor = hkReal(diff.length3()) + info.m_fAngularImpulseFactor;
                     cp = cp + 1;
                 }
                 radius = radius * invNum;

@@ -1,16 +1,27 @@
 // fallout_shared/region system/tesregiondatamanager.cpp: TESRegionDataManager, RegionDataManager_StandIn, MyMgr (9 functions)
 
-#include "TESFile.h"
-#include "TESForm.h"
+#include <windows.h>
+#include "layout_support.h"
+// layout_support.h supplies the list template used by the shared region headers.
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../../include/TESFile.h"
+#include "../../../include/TESForm.h"
 #include <cstring>
+#include "../../../include/RegionMusicData.h"
+#include "../../../include/TESRegion.h"
+#include "../../../include/TESRegionDataImposter.h"
+#include "../../../include/TESRegionDataMap.h"
+#include "../../../include/TESRegionDataSound.h"
+#include "../../../include/TESRegionData.h"
+#include "../../../include/TESRegionDataGrass.h"
+#include "../../../include/TESRegionDataLandscape.h"
+#include "../../../include/TESRegionDataManager.h"
+#include "../../../include/TESRegionDataWeather.h"
+#include "../../../include/TESWeatherList.h"
 
-class TESRegion;
 class RegionDataBlock;
-class RegionSoundEntry;
 class TESRegionGrassObjectList;
-class TESObjectREFR;
 class WeatherEntry;
-class BGSMusicType;
 class TESTexture;
 
 enum REGION_DATA_ID
@@ -41,110 +52,33 @@ FNV_STATIC_ASSERT(offsetof(RegionDataEntry, m_eRegionDataId) == 0);
 FNV_STATIC_ASSERT(offsetof(RegionDataEntry, bOverride) == 4);
 FNV_STATIC_ASSERT(offsetof(RegionDataEntry, m_ucRegionPriority) == 5);
 
-class TESRegionData
-{
-  public:
-    // +0x0 implicit vtable pointer, 4 bytes
-    bool bOverride;                    // +0x4, 1 bytes
-    bool m_bHasRegionData;             // +0x5, 1 bytes
-    unsigned char m_ucRegionPriority;  // +0x6, 1 bytes
-    unsigned char layoutPadding7[1];
-    virtual ~TESRegionData();
-    virtual void Save();
-    virtual bool ApplyEntry(RegionDataEntry* apBase);
-    virtual void SetForm(TESForm* apForm);
-    virtual REGION_DATA_ID GetType();
-    virtual TESRegionData* Clone();
-    virtual TESRegionData* CopyFrom(const TESRegionData* apSrc);
-    virtual void SetFromData(const TESRegionData* apSrc, unsigned int auFlags);
-    virtual bool IsValid();
-};
 FNV_STATIC_ASSERT(sizeof(TESRegionData) == 8);
 FNV_STATIC_ASSERT(offsetof(TESRegionData, bOverride) == 4);
 FNV_STATIC_ASSERT(offsetof(TESRegionData, m_bHasRegionData) == 5);
 FNV_STATIC_ASSERT(offsetof(TESRegionData, m_ucRegionPriority) == 6);
 
-class TESWeatherList : public BSSimpleList<WeatherEntry*>
-{
-};
 
-class TESRegionDataWeather : public TESRegionData
-{
-  public:
-    // base TESRegionData at +0x0, size 8
-    TESWeatherList weatherList;  // +0x8, 8 bytes
-    TESRegionDataWeather();
-    virtual void LoadWeatherData(TESFile* apFile, TESRegion* apRegion);
-};
 FNV_STATIC_ASSERT(sizeof(TESRegionDataWeather) == 16);
 FNV_STATIC_ASSERT(offsetof(TESRegionDataWeather, weatherList) == 8);
 
-class TESRegionDataMap : public TESRegionData
-{
-  public:
-    // base TESRegionData at +0x0, size 8
-    BSStringT<char> m_kMapName;  // +0x8, 8 bytes
-    TESRegionDataMap();
-    virtual bool LoadRegionMapData(TESFile* apFile);
-};
 FNV_STATIC_ASSERT(sizeof(TESRegionDataMap) == 16);
 FNV_STATIC_ASSERT(offsetof(TESRegionDataMap, m_kMapName) == 8);
 
-class TESRegionDataLandscape : public TESRegionData
-{
-  public:
-    // base TESRegionData at +0x0, size 8
-    TESTexture* m_pLandscapeTexture;  // +0x8, 4 bytes
-    TESRegionDataLandscape();
-    virtual bool ReadLandscapeData(TESFile* apFile);
-};
 FNV_STATIC_ASSERT(sizeof(TESRegionDataLandscape) == 12);
 FNV_STATIC_ASSERT(offsetof(TESRegionDataLandscape, m_pLandscapeTexture) == 8);
 
-class TESRegionDataGrass : public TESRegionData
-{
-  public:
-    // base TESRegionData at +0x0, size 8
-    TESRegionGrassObjectList* m_pObjectList;  // +0x8, 4 bytes
-    TESRegionDataGrass();
-    virtual bool ReadGrassData(TESFile* apFile);
-};
 FNV_STATIC_ASSERT(sizeof(TESRegionDataGrass) == 12);
 FNV_STATIC_ASSERT(offsetof(TESRegionDataGrass, m_pObjectList) == 8);
 
-class RegionMusicData
-{
-  public:
-    BGSMusicType* pType;                            // +0x0, 4 bytes
-    BSSimpleList<RegionSoundEntry*> soundList;      // +0x4, 8 bytes
-    unsigned int uiIncidentalMediaSet;              // +0xC, 4 bytes
-    BSSimpleList<unsigned int> battleMediaSetList;  // +0x10, 8 bytes
-};
 FNV_STATIC_ASSERT(sizeof(RegionMusicData) == 24);
 FNV_STATIC_ASSERT(offsetof(RegionMusicData, pType) == 0);
 FNV_STATIC_ASSERT(offsetof(RegionMusicData, soundList) == 4);
 FNV_STATIC_ASSERT(offsetof(RegionMusicData, uiIncidentalMediaSet) == 12);
 FNV_STATIC_ASSERT(offsetof(RegionMusicData, battleMediaSetList) == 16);
 
-class TESRegionDataSound : public TESRegionData
-{
-  public:
-    // base TESRegionData at +0x0, size 8
-    RegionMusicData sounds;  // +0x8, 24 bytes
-    TESRegionDataSound();
-    virtual bool LoadRegionSoundData(TESFile* apFile);
-};
 FNV_STATIC_ASSERT(sizeof(TESRegionDataSound) == 32);
 FNV_STATIC_ASSERT(offsetof(TESRegionDataSound, sounds) == 8);
 
-class TESRegionDataImposter : public TESRegionData
-{
-  public:
-    // base TESRegionData at +0x0, size 8
-    BSSimpleList<TESObjectREFR*> imposters;  // +0x8, 8 bytes
-    TESRegionDataImposter();
-    virtual bool ReadRegionData(TESFile* apFile);
-};
 FNV_STATIC_ASSERT(sizeof(TESRegionDataImposter) == 16);
 FNV_STATIC_ASSERT(offsetof(TESRegionDataImposter, imposters) == 8);
 
@@ -154,30 +88,7 @@ class RegionDataList : public BSSimpleList<TESRegionData*>
     bool m_bDataFlag;
 };
 
-class TESRegion : public TESForm
-{
-  public:
-    // base TESForm at +0x0, size 24
-    RegionDataList* m_pRegionDataList;  // +0x18, 4 bytes
-    RegionDataList* GetDataList();
-};
 
-class TESRegionDataManager
-{
-  public:
-    // +0x0 implicit vtable pointer, 4 bytes
-    TESRegion* m_pLastLoadedRegion;  // +0x4, 4 bytes
-    virtual TESRegion* GetLastLoadedRegion();
-    virtual TESRegionData* GetRegionDataForID(REGION_DATA_ID aeID);
-    virtual RegionDataBlock* GetRegionDataBlock(TESRegionData* apData);
-    virtual TESRegionDataWeather* GetRegionDataWeather(TESRegionData* apData);
-    virtual TESRegionDataMap* GetRegionDataMap(TESRegionData* apData);
-    virtual TESRegionDataLandscape* GetRegionDataLandscape(TESRegionData* apData);
-    virtual TESRegionDataGrass* GetRegionDataGrass(TESRegionData* apData);
-    virtual TESRegionDataSound* GetRegionDataSound(TESRegionData* apData);
-    virtual TESRegionDataImposter* GetRegionDataImposter(TESRegionData* apData);
-    virtual bool ApplyEntry(TESFile* apFile, TESRegion* apRegion);
-};
 FNV_STATIC_ASSERT(sizeof(TESRegionDataManager) == 8);
 FNV_STATIC_ASSERT(offsetof(TESRegionDataManager, m_pLastLoadedRegion) == 4);
 

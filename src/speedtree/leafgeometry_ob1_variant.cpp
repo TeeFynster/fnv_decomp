@@ -1,3 +1,130 @@
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3/CVec3; this unit's code depends on the stand-in's own overload set and inline bodies (its own NiPoint3/CVec3 bodies differ), so the shared class cannot replace it.
+#include "../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+#include "../../include/CVec3.h"
+#include "../../include/NiMatrix3.h"
 
 // src/speedtree/leafgeometry_ob1_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/speedtree/leafgeometry.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -16,13 +143,6 @@ struct SpeedTreeLodData
     char m_pAuxiliaryObject[2];
     LeafLod* m_pLeafLod;
     void FUN_00b27820();
-};
-struct FUN_00b28440_Class
-{
-    float x;
-    float y;
-    float z;
-    FUN_00b28440_Class& Scale(float scale);
 };
 struct FUN_00b27870_Class
 {
@@ -67,65 +187,63 @@ struct CB28
     void FreeLodBuffers();
 };
 
-struct Vec3
+__forceinline void LocalVec3::Set(float a, float b, float c)
 {
-    float v[3];
-    __forceinline void Set(float a, float b, float c)
-    {
-        v[0] = a;
-        v[1] = b;
-        v[2] = c;
-    }
-    __forceinline Vec3(float a = 0, float b = 0, float c = 0)
-    {
-        Set(a, b, c);
-    }
-    __forceinline Vec3(const float* p)
-    {
-        Set(p[0], p[1], p[2]);
-    }
-    __forceinline float& operator[](int n)
-    {
-        return v[n];
-    }
-    inline float FUN_00b04d40(const Vec3& other) const
-    {
-        float squared = (other.v[0] - v[0]) * (other.v[0] - v[0]) + (other.v[1] - v[1]) * (other.v[1] - v[1]) +
-                        (other.v[2] - v[2]) * (other.v[2] - v[2]);
-        int bits = (*reinterpret_cast<int*>(&squared) >> 1) + 0x1fc00000;
-        return *reinterpret_cast<float*>(&bits);
-    }
-};
+    x = a;
+    y = b;
+    z = c;
+}
+__forceinline LocalVec3::LocalVec3(float a, float b, float c)
+{
+    Set(a, b, c);
+}
+__forceinline LocalVec3::LocalVec3(const float* p)
+{
+    Set(p[0], p[1], p[2]);
+}
+__forceinline float& LocalVec3::operator[](int n)
+{
+    return (&x)[n];
+}
+inline float LocalVec3::FUN_00b04d40(const LocalVec3& other) const
+{
+    float squared = (other.x - x) * (other.x - x) + (other.y - y) * (other.y - y) +
+                    (other.z - z) * (other.z - z);
+    int bits = (*reinterpret_cast<int*>(&squared) >> 1) + 0x1fc00000;
+    return *reinterpret_cast<float*>(&bits);
+}
 struct GlobalObject_00b3f100
 {
     float values[5];
     int count;
     ~GlobalObject_00b3f100();
 };
-struct Bounds
+// SpeedTree idv CRegion: min/max as variable-length CVec (float[5] + size; dtor 0x00b3f100); FUN_00b3caa0 grows it
+// by a point, FUN_00b3c9a0 by another region. Not the shared 16-byte-aligned Bounds.
+struct CRegion
 {
     GlobalObject_00b3f100 lo, hi;
-    Bounds();
-    inline Bounds FUN_00b3caa0(const Vec3& p) const
+    CRegion();
+    inline CRegion FUN_00b3caa0(const LocalVec3& p) const
     {
-        Bounds result = *this;
-        if (p.v[0] < result.lo.values[0])
-            result.lo.values[0] = p.v[0];
-        if (p.v[1] < result.lo.values[1])
-            result.lo.values[1] = p.v[1];
-        if (p.v[2] < result.lo.values[2])
-            result.lo.values[2] = p.v[2];
-        if (p.v[0] > result.hi.values[0])
-            result.hi.values[0] = p.v[0];
-        if (p.v[1] > result.hi.values[1])
-            result.hi.values[1] = p.v[1];
-        if (p.v[2] > result.hi.values[2])
-            result.hi.values[2] = p.v[2];
+        CRegion result = *this;
+        if (p.x < result.lo.values[0])
+            result.lo.values[0] = p.x;
+        if (p.y < result.lo.values[1])
+            result.lo.values[1] = p.y;
+        if (p.z < result.lo.values[2])
+            result.lo.values[2] = p.z;
+        if (p.x > result.hi.values[0])
+            result.hi.values[0] = p.x;
+        if (p.y > result.hi.values[1])
+            result.hi.values[1] = p.y;
+        if (p.z > result.hi.values[2])
+            result.hi.values[2] = p.z;
         return result;
     }
-    inline Bounds FUN_00b3c9a0(const Bounds& b) const
+    inline CRegion FUN_00b3c9a0(const CRegion& b) const
     {
-        Bounds result = *this;
+        CRegion result = *this;
         for (int i = 0; i < 3; ++i)
         {
             if (b.lo.values[i] < lo.values[i])
@@ -273,30 +391,30 @@ struct LeafGeometry
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
     unsigned short textureCount, unk1e;
-    Vec3* sizes;
-    Vec3* origins;
+    LocalVec3* sizes;
+    LocalVec3* origins;
     unsigned short lodCount, unk2a;
     LeafRecord* lods;
-    void FUN_00b27910(Bounds& output);
+    void FUN_00b27910(CRegion& output);
 };
 // @fnv 0x00b27910
-void LeafGeometry::FUN_00b27910(Bounds& output)
+void LeafGeometry::FUN_00b27910(CRegion& output)
 {
     if (origins && sizes && lods)
     {
         FUN_00449fd0 radii;
         for (int i = 0; i < textureCount; ++i)
         {
-            Vec3 center(origins[i][0] * sizes[i][0], origins[i][1] * sizes[i][1], 0);
+            LocalVec3 center(origins[i][0] * sizes[i][0], origins[i][1] * sizes[i][1], 0);
             float radius = 0;
-            if (radius < center.FUN_00b04d40(Vec3(0, 0, 0)))
-                radius = center.FUN_00b04d40(Vec3(0, 0, 0));
-            if (radius < center.FUN_00b04d40(Vec3(sizes[i][0], 0, 0)))
-                radius = center.FUN_00b04d40(Vec3(sizes[i][0], 0, 0));
-            if (radius < center.FUN_00b04d40(Vec3(sizes[i][0], sizes[i][1], 0)))
-                radius = center.FUN_00b04d40(Vec3(sizes[i][0], sizes[i][1], 0));
-            if (radius < center.FUN_00b04d40(Vec3(0, sizes[i][1], 0)))
-                radius = center.FUN_00b04d40(Vec3(0, sizes[i][1], 0));
+            if (radius < center.FUN_00b04d40(LocalVec3(0, 0, 0)))
+                radius = center.FUN_00b04d40(LocalVec3(0, 0, 0));
+            if (radius < center.FUN_00b04d40(LocalVec3(sizes[i][0], 0, 0)))
+                radius = center.FUN_00b04d40(LocalVec3(sizes[i][0], 0, 0));
+            if (radius < center.FUN_00b04d40(LocalVec3(sizes[i][0], sizes[i][1], 0)))
+                radius = center.FUN_00b04d40(LocalVec3(sizes[i][0], sizes[i][1], 0));
+            if (radius < center.FUN_00b04d40(LocalVec3(0, sizes[i][1], 0)))
+                radius = center.FUN_00b04d40(LocalVec3(0, sizes[i][1], 0));
             radii.PushBack(radius);
         }
         for (int j = 0; j < lodCount; ++j)
@@ -304,16 +422,16 @@ void LeafGeometry::FUN_00b27910(Bounds& output)
             LeafRecord* lod = &lods[j];
             for (unsigned int k = 0; k < lod->vertexCount; ++k)
             {
-                Bounds bounds;
+                CRegion bounds;
                 const float* vertex5 = &lod->vertices[k * 3];
-                Vec3 position(vertex5);
+                LocalVec3 position(vertex5);
                 float radius = radii[lod->textures[k] / 2];
-                bounds = bounds.FUN_00b3caa0(Vec3(position.v[0] + radius, position.v[1], position.v[2]));
-                bounds = bounds.FUN_00b3caa0(Vec3(position.v[0] - radius, position.v[1], position.v[2]));
-                bounds = bounds.FUN_00b3caa0(Vec3(position.v[0], position.v[1] + radius, position.v[2]));
-                bounds = bounds.FUN_00b3caa0(Vec3(position.v[0], position.v[1] - radius, position.v[2]));
-                bounds = bounds.FUN_00b3caa0(Vec3(position.v[0], position.v[1], position.v[2] + radius));
-                bounds = bounds.FUN_00b3caa0(Vec3(position.v[0], position.v[1], position.v[2] - radius));
+                bounds = bounds.FUN_00b3caa0(LocalVec3(position.x + radius, position.y, position.z));
+                bounds = bounds.FUN_00b3caa0(LocalVec3(position.x - radius, position.y, position.z));
+                bounds = bounds.FUN_00b3caa0(LocalVec3(position.x, position.y + radius, position.z));
+                bounds = bounds.FUN_00b3caa0(LocalVec3(position.x, position.y - radius, position.z));
+                bounds = bounds.FUN_00b3caa0(LocalVec3(position.x, position.y, position.z + radius));
+                bounds = bounds.FUN_00b3caa0(LocalVec3(position.x, position.y, position.z - radius));
                 output = output.FUN_00b3c9a0(bounds);
             }
         }
@@ -325,40 +443,58 @@ struct Matrix4f
     float m_afMatrix[16];
 };
 
-struct Vector3D
+inline CVec3::CVec3()
 {
-    float m_fComponents[3];
+    z = 0.0f;
+    y = 0.0f;
+    x = 0.0f;
+}
 
-    Vector3D()
-    {}
-    Vector3D(float x, float y, float z)
-    {
-        Set(x, y, z);
-    }
-    void Set(float x, float y, float z)
-    {
-        m_fComponents[0] = x;
-        m_fComponents[1] = y;
-        m_fComponents[2] = z;
-    }
-    Vector3D FUN_00b05000(const Matrix4f& cTransform)
-    {
-        Vector3D result;
-        result.m_fComponents[0] =
-            cTransform.m_afMatrix[12] +
-            (cTransform.m_afMatrix[8] * m_fComponents[2] +
-             (cTransform.m_afMatrix[4] * m_fComponents[1] + cTransform.m_afMatrix[0] * m_fComponents[0]));
-        result.m_fComponents[1] =
-            cTransform.m_afMatrix[13] +
-            (cTransform.m_afMatrix[9] * m_fComponents[2] +
-             (cTransform.m_afMatrix[5] * m_fComponents[1] + cTransform.m_afMatrix[1] * m_fComponents[0]));
-        result.m_fComponents[2] =
-            cTransform.m_afMatrix[14] +
-            (cTransform.m_afMatrix[10] * m_fComponents[2] +
-             (cTransform.m_afMatrix[6] * m_fComponents[1] + cTransform.m_afMatrix[2] * m_fComponents[0]));
-        return result;
-    }
-};
+inline CVec3::CVec3(float a, float b, float c)
+{
+    (this->*static_cast<void (CVec3::*)(float, float, float)>(&CVec3::Set))(a, b, c);
+}
+
+inline void CVec3::Set(float a, float b, float c)
+{
+    x = a;
+    y = b;
+    z = c;
+}
+
+inline float& CVec3::operator[](int nIndex)
+{
+    return (&x)[nIndex];
+}
+
+inline CVec3 CVec3::FUN_00b05000(const Matrix4f& cTransform)
+{
+    CVec3 result;
+    result.x =
+        cTransform.m_afMatrix[12] +
+        (cTransform.m_afMatrix[8] * z +
+         (cTransform.m_afMatrix[4] * y + cTransform.m_afMatrix[0] * x));
+    result.y =
+        cTransform.m_afMatrix[13] +
+        (cTransform.m_afMatrix[9] * z +
+         (cTransform.m_afMatrix[5] * y + cTransform.m_afMatrix[1] * x));
+    result.z =
+        cTransform.m_afMatrix[14] +
+        (cTransform.m_afMatrix[10] * z +
+         (cTransform.m_afMatrix[6] * y + cTransform.m_afMatrix[2] * x));
+    return result;
+}
+
+inline CVec3 CVec3::FUN_00b05000(const Matrix4f& cTransform) const
+{
+    float fX = cTransform.m_afMatrix[12] + cTransform.m_afMatrix[8] * z +
+               cTransform.m_afMatrix[4] * y + cTransform.m_afMatrix[0] * x;
+    float fY = cTransform.m_afMatrix[13] + cTransform.m_afMatrix[9] * z +
+               cTransform.m_afMatrix[5] * y + cTransform.m_afMatrix[1] * x;
+    float fZ = cTransform.m_afMatrix[14] + cTransform.m_afMatrix[10] * z +
+               cTransform.m_afMatrix[6] * y + cTransform.m_afMatrix[2] * x;
+    return CVec3(fX, fY, fZ);
+}
 
 struct S00b28280_Lod
 {
@@ -395,7 +531,7 @@ struct S00b28280_Leaf
     int unk18;
     unsigned short m_usValueAt08;
     short unk1e;
-    FUN_00b28440_Class* m_pRockingGroups;
+    CVec3* m_pRockingGroups;
     int unk24;
     unsigned short m_usValueAt28;
     short unk2a;
@@ -421,14 +557,14 @@ void S00b28280_Leaf::FUN_00b28280(const Matrix4f& cTransform)
             for (j_ = 0; j_ < pLodA->m_usNumLeaves; ++j_)
             {
                 pLeafVertex4 = pLodA->m_ppFloatData + j_ * 3;
-                Vector3D cCoord6(pLeafVertex4[0], pLeafVertex4[1], pLeafVertex4[2]);
+                CVec3 cCoord6(pLeafVertex4[0], pLeafVertex4[1], pLeafVertex4[2]);
                 cCoord6 = cCoord6.FUN_00b05000(cTransform);
                 _memmove(pLeafVertex4, &cCoord6, 12);
 
                 if (m_bValueAt00)
                 {
                     float* kPLeafNormal = pLodA->m_pLeafNormals + j_ * 3;
-                    Vector3D cNormal5(kPLeafNormal[0], kPLeafNormal[1], kPLeafNormal[2]);
+                    CVec3 cNormal5(kPLeafNormal[0], kPLeafNormal[1], kPLeafNormal[2]);
                     cNormal5 = cNormal5.FUN_00b05000(cTransform);
                     _memmove(kPLeafNormal, &cNormal5, 12);
                 }
@@ -444,16 +580,6 @@ void S00b28280_Leaf::FUN_00b28280(const Matrix4f& cTransform)
 }
 
 void __cdecl FUN_00ec7c56();
-struct Vec3B28480
-{
-    Vec3B28480()
-    {
-        m_fComponents[2] = 0.0f;
-        m_fComponents[1] = 0.0f;
-        m_fComponents[0] = 0.0f;
-    }
-    float m_fComponents[3];
-};
 struct LeafB28480
 {
     int unk00;
@@ -468,11 +594,11 @@ struct LeafB28480
     int unk24;
     int unk28;
     int unk2C;
-    Vec3B28480 m_kFirstVector;
+    CVec3 m_kFirstVector;
     int unk3C;
     int unk40;
     int unk44;
-    Vec3B28480 m_kTranslation;
+    CVec3 m_kTranslation;
 };
 struct LeafVectorB28480
 {
@@ -526,8 +652,8 @@ struct LeafGeometryB28480
     float* m_pfTexCoords;
     unsigned short m_usNumLeaves;
     unsigned short unk1E;
-    Vec3B28480* m_pPositions;
-    Vec3B28480* m_pLeafVectors;
+    CVec3* m_pPositions;
+    CVec3* m_pLeafVectors;
     void FUN_00b29380(unsigned short usLod, int nSeed);
     void FUN_00b28480(unsigned short usLod, int nSeed, const LeafSourceB28480* pSource);
 };
@@ -540,8 +666,8 @@ void LeafGeometryB28480::FUN_00b28480(unsigned short usLod, int nSeed, const Lea
     m_nTextureWidth = pSource->m_nTextureWidth;
     m_nTextureHeight = pSource->m_nTextureHeight;
     m_usNumLeaves = pSource->m_vLeaves.size();
-    m_pPositions = new Vec3B28480[m_usNumLeaves];
-    m_pLeafVectors = new Vec3B28480[m_usNumLeaves];
+    m_pPositions = new CVec3[m_usNumLeaves];
+    m_pLeafVectors = new CVec3[m_usNumLeaves];
     for (int i = 0; i < m_usNumLeaves; ++i)
     {
         m_pPositions[i] = pSource->m_vLeaves[i].m_kTranslation;
@@ -554,44 +680,14 @@ void LeafGeometryB28480::FUN_00b28480(unsigned short usLod, int nSeed, const Lea
 
 namespace LeafMatrices {
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3()
-    {
-        x = y = z = 0.0f;
-    }
-    NiPoint3(float afX, float afY, float afZ)
-    {
-        x = afX;
-        y = afY;
-        z = afZ;
-    }
-    float& operator[](int aiIndex)
-    {
-        return (&x)[aiIndex];
-    }
-    void Set(float afX, float afY, float afZ)
-    {
-        x = afX;
-        y = afY;
-        z = afZ;
-    }
-};
-
 struct LeafPoint
 {
     float x, y, z;
 };
 
-struct ThreeByThreeMatrix
-{
-    float m[9];
-};
-
 struct LeafRows
 {
-    NiPoint3 akRow[4];
+    CVec3 akRow[4];
     LeafRows()
     {}
 };
@@ -639,8 +735,8 @@ struct LeafBuilder
     int iUnk18;
     unsigned short usLeafCount;
     unsigned short usUnk1E;
-    NiPoint3* pDirections;
-    NiPoint3* pPositions;
+    CVec3* pDirections;
+    CVec3* pPositions;
     unsigned short usEntryCount;
     unsigned short usUnk2A;
     LeafEntry* pEntries;
@@ -662,34 +758,40 @@ void LeafBuilder::FUN_00b288f0(LeafData* apOut, unsigned short ausIndex, int aiU
             float fFactor = 1.0f;
             if (ausIndex > 0)
                 fFactor = 1.0f + ausIndex * afScale;
-            NiPoint3 akRows[4];
-            NiPoint3 akCopyCur[4];
+            CVec3 akRows[4];
+            CVec3 akCopyCur[4];
             for (int i = 0; i < usLeafCount * 2; ++i)
             {
-                NiPoint3 kPos = pPositions[i / 2];
+                CVec3 kPos = pPositions[i / 2];
                 if (i % 2 == 0)
                     kPos[0] = 1.0f - kPos[0];
-                NiPoint3* pDir = &pDirections[i / 2];
-                ThreeByThreeMatrix kMatIn;
-                kMatIn.m[0] = 0.0f;
-                kMatIn.m[1] = (1.0f - kPos[0]) * fFactor * pDir->x;
-                kMatIn.m[2] = (1.0f - kPos[1]) * fFactor * pDir->y;
-                kMatIn.m[3] = 0.0f;
-                kMatIn.m[4] = -(kPos[0] * pDir->x) * fFactor;
-                kMatIn.m[5] = kMatIn.m[2];
-                kMatIn.m[6] = 0.0f;
-                kMatIn.m[7] = kMatIn.m[4];
-                kMatIn.m[8] = -(kPos[1] * pDir->y) * fFactor;
+                CVec3* pDir = &pDirections[i / 2];
+                // Every component is assigned below. Float-aligned raw storage avoids
+                // the shared constructor's extra Set argument temporaries under /Ob1.
+                float kMatIn[sizeof(NiMatrix3) / sizeof(float)];
+                reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[0][0] = 0.0f;
+                reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[0][1] = (1.0f - kPos[0]) * fFactor * pDir->x;
+                reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[0][2] = (1.0f - kPos[1]) * fFactor * pDir->y;
+                reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[1][0] = 0.0f;
+                reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[1][1] = -(kPos[0] * pDir->x) * fFactor;
+                reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[1][2] = reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[0][2];
+                reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[2][0] = 0.0f;
+                reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[2][1] = reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[1][1];
+                reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[2][2] = -(kPos[1] * pDir->y) * fFactor;
                 LeafPoint kTransVal;
                 kTransVal.x = 0.0f;
-                kTransVal.y = kMatIn.m[1];
-                kTransVal.z = kMatIn.m[8];
-                akRows[0].x = kMatIn.m[0];
-                akRows[0].y = kMatIn.m[1];
-                akRows[0].z = kMatIn.m[2];
-                akRows[1].Set(kMatIn.m[3], kMatIn.m[4], kMatIn.m[5]);
-                akRows[2].Set(kMatIn.m[6], kMatIn.m[7], kMatIn.m[8]);
-                akRows[3].Set(kTransVal.x, kTransVal.y, kTransVal.z);
+                kTransVal.y = reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[0][1];
+                kTransVal.z = reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[2][2];
+                akRows[0].x = reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[0][0];
+                akRows[0].y = reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[0][1];
+                akRows[0].z = reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[0][2];
+                (akRows[1].*static_cast<void (CVec3::*)(float, float, float)>(&CVec3::Set))(reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[1][0],
+                              reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[1][1],
+                              reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[1][2]);
+                (akRows[2].*static_cast<void (CVec3::*)(float, float, float)>(&CVec3::Set))(reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[2][0],
+                              reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[2][1],
+                              reinterpret_cast<NiMatrix3&>(kMatIn).m_pEntry[2][2]);
+                (akRows[3].*static_cast<void (CVec3::*)(float, float, float)>(&CVec3::Set))(kTransVal.x, kTransVal.y, kTransVal.z);
                 for (int j = 0; j < usRowCount; ++j)
                 {
                     akCopyCur[0] = akRows[0];
@@ -722,41 +824,6 @@ namespace leafwind {
 struct Matrix4f
 {
     float m_fComponents[4][4];
-};
-
-struct Vector3D
-{
-    float m_fComponents[3];
-
-    Vector3D(float fX = 0.0f, float fY = 0.0f, float fZ = 0.0f)
-    {
-        m_fComponents[2] = fZ;
-        m_fComponents[1] = fY;
-        m_fComponents[0] = fX;
-    }
-    void Set(float fX, float fY, float fZ)
-    {
-        m_fComponents[0] = fX;
-        m_fComponents[1] = fY;
-        m_fComponents[2] = fZ;
-    }
-    float& operator[](int nIndex)
-    {
-        return m_fComponents[nIndex];
-    }
-    Vector3D FUN_00b05000(const Matrix4f& cTransform) const
-    {
-        float fX = cTransform.m_fComponents[3][0] + cTransform.m_fComponents[2][0] * m_fComponents[2] +
-                   cTransform.m_fComponents[1][0] * m_fComponents[1] +
-                   cTransform.m_fComponents[0][0] * m_fComponents[0];
-        float fY = cTransform.m_fComponents[3][1] + cTransform.m_fComponents[2][1] * m_fComponents[2] +
-                   cTransform.m_fComponents[1][1] * m_fComponents[1] +
-                   cTransform.m_fComponents[0][1] * m_fComponents[0];
-        float fZ = cTransform.m_fComponents[3][2] + cTransform.m_fComponents[2][2] * m_fComponents[2] +
-                   cTransform.m_fComponents[1][2] * m_fComponents[1] +
-                   cTransform.m_fComponents[0][2] * m_fComponents[0];
-        return Vector3D(fX, fY, fZ);
-    }
 };
 
 inline float Interpolate(float fStart, float m_fEndValue, float fNormalizedPosition)
@@ -828,18 +895,21 @@ void CLeafGeometryWind::FUN_00b29190(unsigned short usLod)
     if (m_pLeafTreeRuntime && usLod < m_usValueAt28 && m_bWindEnabled && m_pLeafLod && (pLod = m_pLeafLod + usLod) &&
         pLod->m_pOrigCoordCenterCoords && pLod->m_pFloatArrayAt18)
     {
-        Vector3D cPos;
-        Vector3D cNewPos;
+        CVec3 cPos;
+        CVec3 cNewPos;
 
         for (int i = 0; i < pLod->m_usValueAt0C; ++i)
         {
             float fWeight = pLod->m_pFloatArrayAt34[i];
             const float* pOrigCoord = pLod->m_pOrigCoordCenterCoords + i * 3;
-            cPos.Set(pOrigCoord[0], pOrigCoord[1], pOrigCoord[2]);
+            (cPos.*static_cast<void (CVec3::*)(float, float, float)>(&CVec3::Set))(
+                pOrigCoord[0], pOrigCoord[1], pOrigCoord[2]);
             unsigned char ucWindMatrix = pLod->m_pByteArrayAt38[i];
-            cPos = cPos.FUN_00b05000(WindEngine::GetWindMatrix(ucWindMatrix));
-            cNewPos.Set(Interpolate(pOrigCoord[0], cPos[0], fWeight), Interpolate(pOrigCoord[1], cPos[1], fWeight),
-                        Interpolate(pOrigCoord[2], cPos[2], fWeight));
+            cPos = static_cast<const CVec3&>(cPos).FUN_00b05000(
+                reinterpret_cast<const ::Matrix4f&>(WindEngine::GetWindMatrix(ucWindMatrix)));
+            (cNewPos.*static_cast<void (CVec3::*)(float, float, float)>(&CVec3::Set))(
+                Interpolate(pOrigCoord[0], cPos[0], fWeight), Interpolate(pOrigCoord[1], cPos[1], fWeight),
+                Interpolate(pOrigCoord[2], cPos[2], fWeight));
             memcpy(pLod->m_pFloatArrayAt18 + i * 3, &cNewPos, 12);
         }
     }

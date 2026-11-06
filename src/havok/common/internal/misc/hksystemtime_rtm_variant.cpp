@@ -10,49 +10,51 @@ int FUN_00e29910(void);
 #include <math.h>
 __if_not_exists(__m128)
 {
-    union __declspec(intrin_type) __declspec(align(16)) __m128
-    {
+    
+// Exe 0x00e29cd0 _FUN_00e29cd0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
         float m128_f32[4];
         unsigned __int64 m128_u64[2];
-    };
+    } __m128, LocalM128;
 }
 extern "C"
 {
     __if_not_exists(_mm_load_ss)
     {
-        __m128 _mm_load_ss(const float* p);
+        LocalM128 _mm_load_ss(const float* p);
     }
     __if_not_exists(_mm_sub_ps)
     {
-        __m128 _mm_sub_ps(__m128 a, __m128 b);
+        LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
     }
     __if_not_exists(_mm_mul_ps)
     {
-        __m128 _mm_mul_ps(__m128 a, __m128 b);
+        LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
     }
     __if_not_exists(_mm_add_ss)
     {
-        __m128 _mm_add_ss(__m128 a, __m128 b);
+        LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
     }
     __if_not_exists(_mm_mul_ss)
     {
-        __m128 _mm_mul_ss(__m128 a, __m128 b);
+        LocalM128 _mm_mul_ss(LocalM128 a, LocalM128 b);
     }
     __if_not_exists(_mm_rsqrt_ss)
     {
-        __m128 _mm_rsqrt_ss(__m128 a);
+        LocalM128 _mm_rsqrt_ss(LocalM128 a);
     }
     __if_not_exists(_mm_shuffle_ps)
     {
-        __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
+        LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
     }
     __if_not_exists(_mm_store_ss)
     {
-        void _mm_store_ss(float* p, __m128 a);
+        void _mm_store_ss(float* p, LocalM128 a);
     }
 }
 typedef float S29cd0_hkReal;
-typedef __m128 S29cd0_hkQuadReal;
+typedef LocalM128 S29cd0_hkQuadReal;
 
 class S29cd0_hkSimdReal
 {
@@ -213,7 +215,7 @@ struct S29cd0_hkContainerHeapAllocator
 };
 
 template <typename T> class S29cd0_hkArrayBase
-{
+{ // local form of hkArrayBase: 0x00e29cd0 needs inline element destruction/copy and S29cd0_hkMemoryAllocator buffer-free ABI for its stack-array cleanup.
   public:
     enum
     {

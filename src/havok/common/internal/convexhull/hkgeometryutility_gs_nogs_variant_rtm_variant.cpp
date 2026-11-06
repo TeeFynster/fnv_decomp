@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 // src/havok/common/internal/convexhull/hkgeometryutility_gs_nogs_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/convexhull/hkgeometryutility_gs_nogs_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -147,12 +149,8 @@ struct S00d5ad60_cls
     unsigned char S00d5ad60_call(float* other, float threshold);
 };
 static unsigned char FUN_00d5ad60(S00d5ad60_cls* self, float* other, float threshold);
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+typedef ::__m128 LocalM128;
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 extern float DAT_01011d78;
 static int FUN_00d5ad90(const float* pVec, float fTol);
 int __cdecl S00d5ad90_Wrap(const float* pVec, float fTol);
@@ -181,36 +179,25 @@ char* __cdecl FUN_00c856c0(D5C110Allocator* owner, char* data);
 void __cdecl FUN_00d5beb0(S00d5c060_Result* self, char* data, int count, int flags, float scale);
 S00d5c060_Result FUN_00d5c060(const S00d5c060_Src* src, float scale);
 
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_sqrt_ss(__m128);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_setzero_ps();
-extern "C" void _mm_store_ps(float*, __m128);
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool()
-    {}
-    hkBool(bool b) : m_cBooleanValue(b)
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sqrt_ss(LocalM128);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" LocalM128 _mm_setzero_ps();
+extern "C" void _mm_store_ps(float*, LocalM128);
 #include <math.h>
+#include "../../../../../include/hkBool.h"
 static __forceinline float RowLen(const float* r)
 {
-    __m128 v = _mm_load_ps(r);
-    __m128 sq = _mm_mul_ps(v, v);
-    __m128 a = _mm_shuffle_ps(sq, sq, 0x55);
-    __m128 b = _mm_shuffle_ps(sq, sq, 0xaa);
-    __m128 s = _mm_add_ss(a, sq);
-    __m128 t = _mm_add_ss(b, s);
-    __m128 len = _mm_sqrt_ss(t);
+    LocalM128 v = _mm_load_ps(r);
+    LocalM128 sq = _mm_mul_ps(v, v);
+    LocalM128 a = _mm_shuffle_ps(sq, sq, 0x55);
+    LocalM128 b = _mm_shuffle_ps(sq, sq, 0xaa);
+    LocalM128 s = _mm_add_ss(a, sq);
+    LocalM128 t = _mm_add_ss(b, s);
+    LocalM128 len = _mm_sqrt_ss(t);
     float out;
     _mm_store_ss(&out, len);
     return out;
@@ -290,7 +277,7 @@ hkBool __cdecl FUN_00d5a6e0(float m[3][4], int maxIterations)
         afSubDiag[0] = m[1][0];
         afSubDiag[1] = m[2][1];
         afSubDiag[2] = 0.0f;
-        __m128 zero = _mm_setzero_ps();
+        LocalM128 zero = _mm_setzero_ps();
         _mm_store_ps(&m[0][0], zero);
         _mm_store_ps(&m[1][0], zero);
         _mm_store_ps(&m[2][0], zero);
@@ -358,19 +345,19 @@ hkBool __cdecl FUN_00d5a6e0(float m[3][4], int maxIterations)
     return true;
 }
 
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" LocalM128 _mm_set_ps1(float);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
 
 class S00d5ae60_SimdReal
 {
   public:
-    S00d5ae60_SimdReal(const __m128& x) : m_vValue(x)
+    S00d5ae60_SimdReal(const LocalM128& x) : m_vValue(x)
     {}
     S00d5ae60_SimdReal(float x)
     {
@@ -382,13 +369,13 @@ class S00d5ae60_SimdReal
         _mm_store_ss(&s, m_vValue);
         return s;
     }
-    __forceinline __m128 broadcast() const
+    __forceinline LocalM128 broadcast() const
     {
         return _mm_shuffle_ps(m_vValue, m_vValue, 0);
     }
 
   private:
-    __m128 m_vValue;
+    LocalM128 m_vValue;
 };
 
 class S00d5ae60_Vector4
@@ -424,8 +411,8 @@ class S00d5ae60_Vector4
     }
     inline S00d5ae60_SimdReal dot3(const S00d5ae60_Vector4& a) const
     {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+        LocalM128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+        LocalM128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
         return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
     }
     inline float& operator()(int a)
@@ -437,7 +424,7 @@ class S00d5ae60_Vector4
         return reinterpret_cast<const float*>(&m_vComponents)[a];
     }
 
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 
 template <typename T> inline T* S00d5ae60_addByteOffset(T* base, long offset)

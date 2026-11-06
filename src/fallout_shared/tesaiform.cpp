@@ -1,6 +1,59 @@
+#include "../../include/SettingT.h"
+#include "../../include/Setting.h"
+// 0x00408d60 returns the setting value at +4 (or a fallback byte for null this).
+
 // fallout_shared/tesaiform.cpp: TESAIForm, ActorValue, MyInner, AIFormFlags and more (42 functions)
 
-#include "tesaiform_decls.h"
+#include "../../include/PackageList.h"
+#include "../../include/BGSEquipType.h"
+#include "../../include/ActiveEffect.h"
+#include "../../include/Actor.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BSAudio.h"
+#include "../../include/TESAIForm.h"
+#include "../../include/PatrolActorPackageData.h"
+
+class PerkEntryConditionSet;
+struct PackedRecordData
+{
+    unsigned char m_ucField00;
+    unsigned char m_ucField01;
+    unsigned char m_ucField02;
+    unsigned char m_ucField03;
+    unsigned char m_ucField04;
+    unsigned char pad[3];
+    unsigned int m_uiField08;
+    unsigned char m_ucField0C;
+    unsigned char m_ucField0D;
+    unsigned char m_ucField0E;
+    bool m_bField0F;
+    unsigned int m_uiField10;
+};
+// Retained locally: the shared TESAIForm destructor invokes PackageList::~PackageList
+// bound to 0x0046ffb0, whereas this unit requires the destructor at 0x0067e3a0.
+#include "../../include/SettingT_GameSettingCollection_.h"
+#include "../../include/TESSaveLoadGame.h"
+class GameSettingCollection;
+using ::SettingT;
+class GlobalObject_0040e0b0
+{
+  public:
+    char opaque[16];
+};
+extern SettingT<GameSettingCollection> originalRuntimeFloatSetting26, originalRuntimeFloatSetting27,
+    originalRuntimeFloatSetting28;
+extern GlobalObject_0040e0b0 g_011c52e4, g_011c52fc;
+extern float DAT_011c52a8, DAT_011c52ac, DAT_011c52b0, DAT_011c52b4, DAT_011c52b8;
+extern bool DAT_011c52c0;
+class TimeGlobal
+{
+  public:
+    unsigned int GetTimeStamp();
+};
+namespace ActorValue {
+enum Index;
+bool IsSkill(Index);
+}
 
 // @fnv 0x0047ede0
 void TESAIForm::FreeDataComponent()
@@ -352,68 +405,30 @@ struct FUN_0047f4c0_shell : public TESAIForm
     void FUN_0047f4c0(TESForm*);
 };
 
-class ProcessLists
-{
-  public:
-    unsigned char* GetLifeStateControlFlag();
-};
-extern ProcessLists g_011c5348;
 
-struct PackageList_Helper
-{
-    void InitItem(TESForm*);
-};
+extern Setting g_011c5348;
 
-// If the ProcessLists byte is zero, calls InitItem on the conditions object obtained from this, passing apOwner.
+// If the Setting byte is zero, calls InitItem on the conditions object obtained from this, passing apOwner.
 // @fnv 0x0047f4c0
 void FUN_0047f4c0_shell::FUN_0047f4c0(TESForm* apOwner)
 {
-    if (!*g_011c5348.GetLifeStateControlFlag())
+    if (!*g_011c5348.FUN_00408d60())
     {
-        ((PackageList_Helper*)((BGSCameraPath*)this)->GetConditions())->InitItem(apOwner);
+        ((PackageList*)((BGSCameraPath*)this)->GetConditions())->InitItem(apOwner);
     }
 }
 
 namespace fnv_0047f500 {
-struct BGSIdleCollection;
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
-struct MobileObject;
-struct LocationDescriptor;
-struct DurationData;
-struct PackageTargetRecord;
-struct Script;
-struct TESCombatStyle;
-struct PerkEntryConditionSet;
-struct TESEscortPackageData;
-struct TESIdleForm;
-struct TESObjectCELL;
-struct TESObjectREFR;
-struct TESPackage;
-struct TESPackageData;
-struct TESPatrolPackageData;
-struct TESTopic;
-struct TESUseWeaponPackageData;
-struct TESWorldSpace;
-struct blob12
-{
-    char b[12];
-};
 struct FUN_0047f500_shell : public TESAIForm
 {
     void FUN_0047f500(TESPackage*);
-};
-
-struct PackageList_Helper
-{
-    void AddPackage(TESPackage*);
 };
 
 // Adds the given package to the package list obtained from the form's conditions.
 // @fnv 0x0047f500
 void FUN_0047f500_shell::FUN_0047f500(TESPackage* apPack)
 {
-    ((PackageList_Helper*)((BGSCameraPath*)this)->GetConditions())->AddPackage(apPack);
+    ((PackageList*)((BGSCameraPath*)this)->GetConditions())->AddPackage(apPack);
 }
 }  // namespace fnv_0047f500
 
@@ -533,10 +548,6 @@ bool FUN_0047efe0_shell::HasFlags(int aiFlags)
     }
 }
 
-struct TESSaveLoadGame
-{
-    void ReadTypedData(void* data, unsigned int size);
-};
 
 TESSaveLoadGame* g_TESSaveLoadGame;
 
@@ -595,10 +606,6 @@ void MyInner::DispatchToOuter(int arg)
 }
 
 namespace fnv_0047f840 {
-struct TESSaveLoadGame
-{
-    void FUN_008579b0(void*, int);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct FUN_0047f840_shell
@@ -620,11 +627,6 @@ void FUN_0047f840_shell::FUN_0047f840(unsigned int aFlags)
     }
 }
 }  // namespace fnv_0047f840
-
-struct FUN_0067e4a0_shell
-{
-    bool FUN_0067e4a0(PerkEntryConditionSet* condition);
-};
 
 struct FUN_0047f300_shell
 {
@@ -675,8 +677,8 @@ bool FUN_0047f300_shell::FUN_0047f300(BaseFormComponent* apCompareFC)
         reinterpret_cast<ActiveEffect*>(pCompare)->GetByteAtOffset17())
         return true;
 
-    if (reinterpret_cast<FUN_0067e4a0_shell*>(reinterpret_cast<BGSCameraPath*>(this)->GetConditions())
-            ->FUN_0067e4a0(reinterpret_cast<BGSCameraPath*>(pCompare)->GetConditions()))
+    if (reinterpret_cast<PackageList*>(reinterpret_cast<BGSCameraPath*>(this)->GetConditions())
+            ->DiffersFrom(reinterpret_cast<PackageList*>(reinterpret_cast<BGSCameraPath*>(pCompare)->GetConditions())))
         return true;
 
     return false;
@@ -695,14 +697,6 @@ struct AIFormFlags
 struct FormTypeStub
 {
     int GetFormType();
-};
-
-struct BGSEquipType
-{
-    enum EQUIP_TYPE
-    {
-    };
-    static EQUIP_TYPE __cdecl GetEquipType(TESForm* apForm);
 };
 
 // Maps the form's type (and equip type for type 0x2f) to a flag bit and returns the result of HasFlags for that bit.

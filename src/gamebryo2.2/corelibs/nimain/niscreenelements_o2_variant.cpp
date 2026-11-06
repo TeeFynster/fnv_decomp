@@ -2,6 +2,8 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 #include "niscreenelements_flags.h"
+#include "../../../../include/NiScreenElements.h"
+#include "../../../../include/StrArr.h"
 
 extern "C" void* g_011f5b48;
 
@@ -13,149 +15,57 @@ void* __cdecl FUN_00a87800()
 
 extern "C" void _delete(void*, unsigned int);
 
-struct NiScreenElements
-{
-    void* m_pVftable;
-    void __fastcall FUN_00a89760();
-    NiScreenElements* __thiscall FUN_00a87830(unsigned int flags);
-};
-
 // @fnv 0x00a87830
 NiScreenElements* __thiscall NiScreenElements::FUN_00a87830(unsigned int flags)
 {
-    m_pVftable = (void*)0x0109e984;
+    *reinterpret_cast<void**>(this) = (void*)0x0109e984;
     FUN_00a89760();
     if (flags & 1)
         _delete(this, 0xc4);
     return this;
 }
 
-namespace fnv_00a878b0 {
-struct StrArr
-{
-    char pad0[8];
-    unsigned short s8;
-    unsigned short sa;
-    char padC[2];
-    unsigned short se;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
-struct BaseCls
-{
-    void FUN_00a74690(StrArr*);
-};
-extern char* g_011f5b48;
 char* _FUN_00a7d330(char*);
-struct MyTarg : BaseCls
-{
-    void FUN_00a878b0(StrArr*);
-};
+
 // @fnv 0x00a878b0
-void MyTarg::FUN_00a878b0(StrArr* pkStrings)
+void NiScreenElements::GetViewerStrings(NiViewerStringsArray* strings)
 {
-    FUN_00a74690(pkStrings);
-    char* tmp = _FUN_00a7d330(g_011f5b48);
-    unsigned int sz = pkStrings->sa;
-    if (sz >= pkStrings->s8)
-        pkStrings->SetSize(pkStrings->se + sz);
+    StrArr* pkStrings = reinterpret_cast<StrArr*>(strings);
+    NiTriShape::GetViewerStrings(strings);
+    char* tmp = _FUN_00a7d330(reinterpret_cast<char*>(g_011f5b48));
+    unsigned int sz = pkStrings->m_usSize;
+    if (sz >= pkStrings->m_usMaxSize)
+        pkStrings->SetSize(pkStrings->m_usGrowBy + sz);
     pkStrings->SetAt(sz, tmp);
 }
-}  // namespace fnv_00a878b0
 
-class FUN_00a74480
-{
-  public:
-    void* m_pVftable;
-    FUN_00a74480(unsigned int flags);
-};
 extern char DAT_0109e984;
-class FUN_00a87810 : public FUN_00a74480
-{
-  public:
-    FUN_00a87810(unsigned int flags);
-};
+extern "C" void __cdecl ScreenElementsBaseConstructor();
+
+// The shared base has no single-data-pointer constructor declaration.
 // @fnv 0x00a87810
-FUN_00a87810::FUN_00a87810(unsigned int flags) : FUN_00a74480(flags)
+NiScreenElements* __fastcall ConstructScreenElements(NiScreenElements* self, void*, NiScreenElementsData* data)
 {
-    m_pVftable = &DAT_0109e984;
+    ((void (__thiscall*)(NiTriShape*, NiScreenElementsData*))&ScreenElementsBaseConstructor)(self, data);
+    *reinterpret_cast<void**>(self) = &DAT_0109e984;
+    return self;
 }
 
-struct ChildBase
-{
-    virtual void v00();
+extern "C" void __cdecl ScreenElementsBaseDefaultConstructor() throw();
+extern "C" void __cdecl ScreenElementsBaseCopyMembers();
 
-    int m_i04;
-
-    ChildBase() throw();
-};
-
-struct ChildObject : ChildBase
-{
-    int m_i008;
-    int m_i00c;
-    int m_i010;
-    int m_i014;
-    int m_i018;
-    int m_i01c;
-    int m_i020;
-    int m_i024;
-    int m_i028;
-    int m_i02c;
-    int m_i030;
-    int m_i034;
-    int m_i038;
-    int m_i03c;
-    int m_i040;
-    int m_i044;
-    int m_i048;
-    int m_i04c;
-    int m_i050;
-    int m_i054;
-    int m_i058;
-    int m_i05c;
-    int m_i060;
-    int m_i064;
-    int m_i068;
-    int m_i06c;
-    int m_i070;
-    int m_i074;
-    int m_i078;
-    int m_i07c;
-    int m_i080;
-    int m_i084;
-    int m_i088;
-    int m_i08c;
-    int m_i090;
-    int m_i094;
-    int m_i098;
-    int m_i09c;
-    int m_i0a0;
-    int m_i0a4;
-    int m_i0a8;
-    int m_i0ac;
-    int m_i0b0;
-    int m_i0b4;
-    int m_i0b8;
-    int m_i0bc;
-    int m_i0c0;
-
-    static void* operator new(unsigned int auiSize) throw();
-
-    ChildObject() throw()
-    {}
-};
-
-struct FUN_00a87860_cls
-{
-    void FUN_00a744c0(ChildObject* apChild, void* apArg);
-    ChildObject* FUN_00a87860(void* apArg);
-};
-
+// The shared class has no default constructor or clone override declaration.
 // @fnv 0x00a87860
-ChildObject* FUN_00a87860_cls::FUN_00a87860(void* apArg)
+NiObject* __fastcall CloneScreenElements(NiScreenElements* self, void*, CloningProcess& process)
 {
-    ChildObject* pChild = new ChildObject();
-    FUN_00a744c0(pChild, apArg);
+    NiScreenElements* pChild = static_cast<NiScreenElements*>(NiScreenElements::operator new(sizeof(NiScreenElements)));
+    if (pChild)
+    {
+        ((void (__thiscall*)(NiTriShape*) throw())&ScreenElementsBaseDefaultConstructor)(pChild);
+        *reinterpret_cast<void**>(pChild) = &DAT_0109e984;
+    }
+    else
+        pChild = 0;
+    ((void (__thiscall*)(NiTriShape*, NiScreenElements*, CloningProcess&))&ScreenElementsBaseCopyMembers)(self, pChild, process);
     return pChild;
 }

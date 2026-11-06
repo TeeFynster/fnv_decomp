@@ -1,5 +1,7 @@
 // gamebryo2.2/corelibs/niconsolerenderer/niconsolepixelformat.cpp: NiD3DTextureData (1 function)
 
+#include "../../../../include/NiPixelFormat.h"
+#include "../../../../include/NiPixelFormat.h"
 #include "niconsolepixelformat_pc_types.h"
 
 // Maps a NiPixelFormat to a D3DFORMAT: returns the renderer hint if set, otherwise selects a format from the pixel format, bit depth and channel masks.

@@ -1,6 +1,9 @@
 // bssystemutilities/bssystemutility.cpp: BSSystemUtility (12 functions)
 
+#include "../../include/BSSystemUtility.h"
 #include "bssystemutility_private.h"
+#include "../../include/CountingSemaphore.h"
+#include "../../include/MemoryManager.h"
 #include <string.h>
 
 // @fnv 0x00af3250
@@ -34,7 +37,7 @@ void BSSystemUtility::Initialize(const char* pcFilePath, const char* pcArg, unsi
     unsigned int count;
     unsigned int length;
 
-    this->vfn_08();
+    this->Destroy();
     if (pcFilePath != 0)
     {
         count = (unsigned int)strlen(pcFilePath);
@@ -80,43 +83,25 @@ void BSSystemUtility::FUN_00af3340()
     DownloadableContentManager::GetRandomGenerator().FUN_00af2c80();
 }
 
-struct FUN_00af3370_shell
-{
-    char _pad0[0x88];
-    void(__cdecl* _f88)(unsigned char);
-    char _pad1[8];
-    unsigned char _f94;
-    void SetValue(unsigned char);
-};
 // If the new byte differs from the stored one, calls the callback at _f88 with it, then stores the byte in _f94.
 // @fnv 0x00af3370
-void FUN_00af3370_shell::SetValue(unsigned char ucValue)
+void BSSystemUtility::SetValue(unsigned char ucValue)
 {
-    if (ucValue != _f94)
+    if (ucValue != storage[0x90])
     {
-        if (_f88 != 0)
+        if (*reinterpret_cast<void(__cdecl**)(unsigned char)>(storage + 0x84) != 0)
         {
-            _f88(ucValue);
+            (*reinterpret_cast<void(__cdecl**)(unsigned char)>(storage + 0x84))(ucValue);
         }
     }
-    _f94 = ucValue;
+    storage[0x90] = ucValue;
 }
 
-struct MemoryManager
-{
-    void _DeallocateAlias(void* p);
-};
 extern MemoryManager g_memoryManager;
-
-struct FUN_00af33c0_Class
-{
-    void FUN_00af3120();
-    void* DestroyIfFlagged(unsigned int flags);
-};
 
 // Calls FUN_00af3120, then deallocates this via g_memoryManager._DeallocateAlias when flags has bit 1 set, and returns this.
 // @fnv 0x00af33c0
-void* FUN_00af33c0_Class::DestroyIfFlagged(unsigned int flags)
+void* BSSystemUtility::DestroyIfFlagged(unsigned int flags)
 {
     FUN_00af3120();
     if (flags & 1)

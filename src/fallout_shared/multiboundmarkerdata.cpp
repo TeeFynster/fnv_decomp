@@ -2,14 +2,11 @@
 // src/fallout_shared/multiboundmarkerdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/multiboundmarkerdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern char const* const g_011f4408_arg1;
+#include "../../include/NiAlphaProperty.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiMatrix3.h"
 
-struct NiRTTI;
-class NiProperty
-{
-  public:
-    const NiRTTI* GetRTTI() const;
-};
+extern char const* const g_011f4408_arg1;
 
 // @fnv 0x00439280
 const NiRTTI* NiProperty::GetRTTI() const
@@ -17,36 +14,22 @@ const NiRTTI* NiProperty::GetRTTI() const
     return (const NiRTTI*)&g_011f4408_arg1;
 }
 
-namespace fnv_00439290 {
-struct NiProperty
-{
-    ~NiProperty();
-    static void operator delete(void* p, unsigned int size);
-    void* DestroyAndFree(unsigned int flags);
-};
+void __fastcall DestroyNiProperty(NiProperty* property);
 
 // Destructs the NiProperty and, when flags has bit 0 set, frees the 24-byte object; returns this.
 // @fnv 0x00439290
 void* NiProperty::DestroyAndFree(unsigned int flags)
 {
-    this->NiProperty::~NiProperty();
+    DestroyNiProperty(this);
     if (flags & 1)
         NiProperty::operator delete(this, 24);
     return this;
 }
-}  // namespace fnv_00439290
-
-struct FUN_004392c0_shell
-{
-    void FUN_004392c0(void);
-};
-
-void __fastcall DestroyFogProperty(void*);
 
 // @fnv 0x004392c0
-void FUN_004392c0_shell::FUN_004392c0(void)
+void __fastcall DestroyNiProperty(NiProperty* property)
 {
-    DestroyFogProperty(this);
+    property->NiObjectNET::~NiObjectNET();
 }
 
 struct GlobalObjectO2_00a7b610;
@@ -65,12 +48,6 @@ GlobalObjectO2_00a7b610* FUN_004392e0_shell::GetGlobalObject()
 
 extern "C" void __cdecl FUN_00439320();
 extern "C" void __cdecl __Dummy_00b6fef0(void*, unsigned int);
-
-struct NiAlphaProperty
-{
-    virtual void FUN_00439320();
-    void* FUN_004392f0(unsigned int flags);
-};
 
 // @fnv 0x004392f0
 void* NiAlphaProperty::FUN_004392f0(unsigned int flags)
@@ -98,21 +75,6 @@ bool FUN_00439060_shell::FUN_00439060(void* arg)
         return true;
     return false;
 }
-
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3();
-    NiPoint3 FUN_00439e90(const NiPoint3& kOther) const;
-    NiPoint3 FUN_00439ef0(const NiPoint3& kOther) const;
-    NiPoint3& FUN_00439180(float fScale);
-};
-
-struct ThreeByThreeMatrix
-{
-    float m[3][3];
-    void FUN_00439f50(int iCol, NiPoint3& kCol) const;
-};
 
 struct BoundRef
 {
@@ -245,7 +207,7 @@ struct BoundRef
 
     bool FUN_00439f90();
     const NiPoint3& FUN_00569880();
-    ThreeByThreeMatrix FUN_0056fa00();
+    NiMatrix3 FUN_0056fa00();
 };
 
 struct CellRect
@@ -275,12 +237,12 @@ bool __cdecl BoundIntersectsCell(BoundRef* pRef, int m_iGridPositionX, int m_iGr
         NiPoint3 kZ6;
         NiPoint3 kExtentLoc = pRef->FUN_00569880();
         NiPoint3 kCenterZ = pRef->GetBoundCenter();
-        ThreeByThreeMatrix kRot9 = pRef->FUN_0056fa00();
-        kRot9.FUN_00439f50(0, kXY);
+        const NiMatrix3 kRot9 = pRef->FUN_0056fa00();
+        kRot9.GetCol(0, kXY);
         kXY.FUN_00439180(kExtentLoc.x);
-        kRot9.FUN_00439f50(1, kY_);
+        kRot9.GetCol(1, kY_);
         kY_.FUN_00439180(kExtentLoc.y);
-        kRot9.FUN_00439f50(2, kZ6);
+        kRot9.GetCol(2, kZ6);
         kZ6.FUN_00439180(kExtentLoc.z);
 
         akCornersY[0] = kCenterZ.FUN_00439e90(kXY).FUN_00439e90(kY_).FUN_00439e90(kZ6);

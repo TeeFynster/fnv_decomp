@@ -1,8 +1,30 @@
 // nipsysrotationmodifier.cpp: NiPSysRotationModifier, NiPSysMeshUpdateModifier, FnvRotMod (12 functions)
 
-#include "nipsysrotationmodifier_types_NiPSysRotationModifier.h"
-#include "nipsysrotationmodifier_types_NiPSysMeshUpdateModifier.h"
-#include "nipsysrotationmodifier_types_NiStream.h"
+#include "../include/BSFadeNode.h"
+#include "../include/StrArr.h"
+#include "../include/NiPSysModifier.h"
+#include "../include/NiPSysMeshUpdateModifier.h"
+#include "../include/NiPSysData.h"
+#include "../include/NiPSysPositionModifier.h"
+#include "../include/NiStream.h"
+
+class NiPSysRotationModifier : public NiPSysPositionModifier
+{
+  protected:
+    void CopyMemberData(NiPSysRotationModifier* destination, CloningProcess& process);
+
+  public:
+    NiPSysRotationModifier();
+
+    float m_fInitialRotationSpeed;
+    float m_fInitialRotationSpeedVariation;
+    float m_fInitialRotationAngle;
+    float m_fInitialRotationAngleVariation;
+    NiPoint3 m_kRotationAxis;
+    bool m_bUseRandomRotationAxis;
+    bool m_bRandomInitialRotationSpeedSign;
+    unsigned char layoutPadding36[2];
+};
 
 // Calls the base NiPSysModifier copy and copies the rotation modifier's fields from this object into destination.
 // @fnv 0x00c205e0
@@ -89,26 +111,6 @@ bool FUN_00c20a60_shell::FUN_00c20a60(NiObject* object)
     return false;
 }
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
-struct NiPSysPositionModifier
-{
-    void* _v;
-    char _p[20];
-    float _18;
-    float _1c;
-    float _20;
-    float _24;
-    int _28;
-    int _2c;
-    int _30;
-    unsigned char _34;
-    unsigned char _35;
-    char _pad[2];
-    NiPSysPositionModifier();
-};
 extern int DAT_010bdaec;
 extern int DAT_011a946c;
 extern int DAT_011a9470;
@@ -117,21 +119,22 @@ inline void* __cdecl operator new(unsigned int, void* p)
 {
     return p;
 }
-// Allocates and constructs a NiPSysPositionModifier, sets its vtable, zeroes four floats, copies three globals and initializes two flags.
+// Allocates and constructs a NiPSysRotationModifier, sets its vtable, zeroes four floats, copies three globals and initializes two flags.
 // @fnv 0x00c20640
-NiPSysPositionModifier* FUN_00c20640()
+NiPSysRotationModifier* FUN_00c20640()
 {
-    NiPSysPositionModifier* pModifier = (NiPSysPositionModifier*)BSFadeNode::operator new(56);
+    NiPSysRotationModifier* pModifier = (NiPSysRotationModifier*)BSFadeNode::operator new(56);
     if (pModifier)
     {
-        new (pModifier) NiPSysPositionModifier();
+        ::new (static_cast<NiPSysPositionModifier*>(pModifier)) NiPSysPositionModifier();
         *(void**)pModifier = (void*)&DAT_010bdaec;
-        pModifier->_24 = pModifier->_20 = pModifier->_1c = pModifier->_18 = 0.0f;
-        pModifier->_28 = DAT_011a946c;
-        pModifier->_2c = DAT_011a9470;
-        pModifier->_30 = DAT_011a9474;
-        pModifier->_34 = 1;
-        pModifier->_35 = 0;
+        pModifier->m_fInitialRotationAngleVariation = pModifier->m_fInitialRotationAngle =
+            pModifier->m_fInitialRotationSpeedVariation = pModifier->m_fInitialRotationSpeed = 0.0f;
+        *reinterpret_cast<int*>(&pModifier->m_kRotationAxis.x) = DAT_011a946c;
+        *reinterpret_cast<int*>(&pModifier->m_kRotationAxis.y) = DAT_011a9470;
+        *reinterpret_cast<int*>(&pModifier->m_kRotationAxis.z) = DAT_011a9474;
+        pModifier->m_bUseRandomRotationAxis = true;
+        pModifier->m_bRandomInitialRotationSpeedSign = false;
         return pModifier;
     }
     return 0;
@@ -142,18 +145,6 @@ struct FUN_00c20d00_shell : public NiPSysRotationModifier
     void AddRotationStrings(void*);
 };
 
-struct StrArr
-{
-    void* _vtable;
-    void* _data;
-    unsigned short _8;
-    unsigned short _a;
-    unsigned short _c;
-    unsigned short _e;
-
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 
 struct Base00c319e0
 {
@@ -179,67 +170,67 @@ void FUN_00c20d00_shell::AddRotationStrings(void* pkStrings)
     reinterpret_cast<Base00c319e0*>(this)->FUN_00c319e0(strings);
 
     value = _FUN_00a7d330(static_cast<char const*>(g_01202528));
-    unsigned int count = strings->_a;
-    if (count >= strings->_8)
+    unsigned int count = strings->m_usSize;
+    if (count >= strings->m_usMaxSize)
     {
-        strings->SetSize(static_cast<unsigned int>(strings->_e + count));
+        strings->SetSize(static_cast<unsigned int>(strings->m_usGrowBy + count));
     }
     strings->SetAt(count, value);
 
     value = FUN_00a7d550("Initial Rotation Speed", m_fInitialRotationSpeed);
-    count = strings->_a;
-    if (count >= strings->_8)
+    count = strings->m_usSize;
+    if (count >= strings->m_usMaxSize)
     {
-        strings->SetSize(static_cast<unsigned int>(strings->_e + count));
+        strings->SetSize(static_cast<unsigned int>(strings->m_usGrowBy + count));
     }
     strings->SetAt(count, value);
 
     value = FUN_00a7d550("Initial Rotation Speed Variation", m_fInitialRotationSpeedVariation);
-    count = strings->_a;
-    if (count >= strings->_8)
+    count = strings->m_usSize;
+    if (count >= strings->m_usMaxSize)
     {
-        strings->SetSize(static_cast<unsigned int>(strings->_e + count));
+        strings->SetSize(static_cast<unsigned int>(strings->m_usGrowBy + count));
     }
     strings->SetAt(count, value);
 
     value = _FUN_00a7d370("Random Rot Speed Sign", m_bRandomInitialRotationSpeedSign);
-    count = strings->_a;
-    if (count >= strings->_8)
+    count = strings->m_usSize;
+    if (count >= strings->m_usMaxSize)
     {
-        strings->SetSize(static_cast<unsigned int>(strings->_e + count));
+        strings->SetSize(static_cast<unsigned int>(strings->m_usGrowBy + count));
     }
     strings->SetAt(count, value);
 
     value = FUN_00a7d550("Initial Rotation Angle", m_fInitialRotationAngle);
-    count = strings->_a;
-    if (count >= strings->_8)
+    count = strings->m_usSize;
+    if (count >= strings->m_usMaxSize)
     {
-        strings->SetSize(static_cast<unsigned int>(strings->_e + count));
+        strings->SetSize(static_cast<unsigned int>(strings->m_usGrowBy + count));
     }
     strings->SetAt(count, value);
 
     value = FUN_00a7d550("Initial Rotation Angle Variation", m_fInitialRotationAngleVariation);
-    count = strings->_a;
-    if (count >= strings->_8)
+    count = strings->m_usSize;
+    if (count >= strings->m_usMaxSize)
     {
-        strings->SetSize(static_cast<unsigned int>(strings->_e + count));
+        strings->SetSize(static_cast<unsigned int>(strings->m_usGrowBy + count));
     }
     strings->SetAt(count, value);
 
     value = _FUN_00a7d370("Random Initial Axis", m_bUseRandomRotationAxis);
-    count = strings->_a;
-    if (count >= strings->_8)
+    count = strings->m_usSize;
+    if (count >= strings->m_usMaxSize)
     {
-        strings->SetSize(static_cast<unsigned int>(strings->_e + count));
+        strings->SetSize(static_cast<unsigned int>(strings->m_usGrowBy + count));
     }
     strings->SetAt(count, value);
 
     NiPoint3Proxy* initialAxis = reinterpret_cast<NiPoint3Proxy*>(reinterpret_cast<char*>(this) + 0x28);
     value = initialAxis->FUN_00a59af0("Initial Axis");
-    count = strings->_a;
-    if (count >= strings->_8)
+    count = strings->m_usSize;
+    if (count >= strings->m_usMaxSize)
     {
-        strings->SetSize(static_cast<unsigned int>(strings->_e + count));
+        strings->SetSize(static_cast<unsigned int>(strings->m_usGrowBy + count));
     }
     strings->SetAt(count, value);
 }
@@ -300,35 +291,35 @@ void FnvRotMod::FUN_00c20c00(NiStream* stream)
     FnvModBase::FUN_00c31950(stream);
 
     {
-        FnvOutStream* out = (FnvOutStream*)stream->m_pBackingStream;
+        FnvOutStream* out = *(FnvOutStream**)((char*)stream + 0x250);
         {
             int written = 4;
             out->m_uiCount += out->m_pWrite(out, &m_fInitialRotationSpeed, 4, &written, 1);
         }
     }
     {
-        FnvOutStream* out = (FnvOutStream*)stream->m_pBackingStream;
+        FnvOutStream* out = *(FnvOutStream**)((char*)stream + 0x250);
         {
             int written = 4;
             out->m_uiCount += out->m_pWrite(out, &m_fInitialRotationSpeedVariation, 4, &written, 1);
         }
     }
     {
-        FnvOutStream* out = (FnvOutStream*)stream->m_pBackingStream;
+        FnvOutStream* out = *(FnvOutStream**)((char*)stream + 0x250);
         {
             int written = 4;
             out->m_uiCount += out->m_pWrite(out, &m_fInitialRotationAngle, 4, &written, 1);
         }
     }
     {
-        FnvOutStream* out = (FnvOutStream*)stream->m_pBackingStream;
+        FnvOutStream* out = *(FnvOutStream**)((char*)stream + 0x250);
         {
             int written = 4;
             out->m_uiCount += out->m_pWrite(out, &m_fInitialRotationAngleVariation, 4, &written, 1);
         }
     }
     {
-        FnvOutStream* out = (FnvOutStream*)stream->m_pBackingStream;
+        FnvOutStream* out = *(FnvOutStream**)((char*)stream + 0x250);
         {
             unsigned char value = m_bRandomInitialRotationSpeedSign;
             int written = 1;
@@ -336,7 +327,7 @@ void FnvRotMod::FUN_00c20c00(NiStream* stream)
         }
     }
     {
-        FnvOutStream* out = (FnvOutStream*)stream->m_pBackingStream;
+        FnvOutStream* out = *(FnvOutStream**)((char*)stream + 0x250);
         {
             unsigned char value = m_bUseRandomRotationAxis;
             int written = 1;
@@ -590,8 +581,9 @@ void CC20AE0FieldModifier::FUN_00c20ae0(CC20AE0Stream& kStream)
 const float g_fPi = 3.1415927f;
 const float g_fRadiansPerRevolution = 2.0f * g_fPi;
 
-struct Point3ParameterData
+class Point3ParameterData
 {
+  public:
     float m_fVelocityX;
     float m_fVelocityY;
     float m_fVelocityZ;
@@ -602,40 +594,6 @@ struct Point3ParameterData
     unsigned short m_usSecondValue;
 };
 
-struct NiPSysData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    unsigned short m_usVertices;
-    unsigned short unk52;
-    int unk54;
-    int unk58;
-    float* m_pfRotationAngles;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    Point3ParameterData* m_pkParticleInfo;
-    float* m_pfRotationSpeeds;
-};
 
 // For each particle, adds (fTime minus m_fZValue) times its rotation speed to its angle, resetting it to 0 if above 10 pi, else reducing it to at most 2 pi.
 // @fnv 0x00c206b0
@@ -645,7 +603,7 @@ void __stdcall UpdateRotationAngles(float fTime, NiPSysData* pkData)
     if (pfRotationAngles)
     {
         const float* pfRotationSpeeds = pkData->m_pfRotationSpeeds;
-        for (unsigned short us = 0; us < pkData->m_usVertices; us++)
+        for (unsigned short us = 0; us < pkData->m_usActive; us++)
         {
             float* pfAngle = &pfRotationAngles[us];
             float fMoveElapsedTime = fTime - pkData->m_pkParticleInfo[us].m_fZValue;
@@ -666,58 +624,28 @@ void __stdcall UpdateRotationAngles(float fTime, NiPSysData* pkData)
     }
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int size);
-struct C20980_Base
+inline NiPSysRotationModifier::NiPSysRotationModifier()
 {
-    void FUN_00c31720() throw();
-};
-struct C20980_Modifier : C20980_Base
-{
-    void* m_pVtable;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    float m_18;
-    float m_1C;
-    float m_20;
-    float m_24;
-    int m_28;
-    int m_2C;
-    int m_30;
-    unsigned char m_34;
-    unsigned char m_35;
-
-    static void* operator new(unsigned int size)
-    {
-        return FUN_00aa13e0(size);
-    }
-    C20980_Modifier()
-    {
-        FUN_00c31720();
-        m_pVtable = &DAT_010bdaec;
-        m_18 = 0.0f;
-        m_1C = 0.0f;
-        m_20 = 0.0f;
-        m_24 = 0.0f;
-        m_28 = DAT_011a946c;
-        m_2C = DAT_011a9470;
-        m_30 = DAT_011a9474;
-        m_34 = 1;
-        m_35 = 0;
-    }
-};
+    m_fInitialRotationSpeed = 0.0f;
+    m_fInitialRotationSpeedVariation = 0.0f;
+    m_fInitialRotationAngle = 0.0f;
+    m_fInitialRotationAngleVariation = 0.0f;
+    *reinterpret_cast<int*>(&m_kRotationAxis.x) = DAT_011a946c;
+    *reinterpret_cast<int*>(&m_kRotationAxis.y) = DAT_011a9470;
+    *reinterpret_cast<int*>(&m_kRotationAxis.z) = DAT_011a9474;
+    m_bUseRandomRotationAxis = true;
+    m_bRandomInitialRotationSpeedSign = false;
+}
 struct C20980_Owner
 {
-    void FUN_00c205e0(C20980_Modifier* modifier, int arg);
-    C20980_Modifier* CreateModifier(int arg);
+    void FUN_00c205e0(NiPSysRotationModifier* modifier, int arg);
+    NiPSysRotationModifier* CreateModifier(int arg);
 };
-// Allocates and constructs a C20980_Modifier, passes it and arg to FUN_00c205e0, and returns it.
+// Allocates and constructs a NiPSysRotationModifier, passes it and arg to FUN_00c205e0, and returns it.
 // @fnv 0x00c20980
-C20980_Modifier* C20980_Owner::CreateModifier(int arg)
+NiPSysRotationModifier* C20980_Owner::CreateModifier(int arg)
 {
-    C20980_Modifier* modifier = new C20980_Modifier;
+    NiPSysRotationModifier* modifier = new NiPSysRotationModifier;
     FUN_00c205e0(modifier, arg);
     return modifier;
 }
@@ -729,39 +657,6 @@ extern float DAT_011aea98;
 extern float DAT_011f4ae0[];
 extern float DAT_011f52e0[];
 
-struct RotationPSysData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    float* m_pfRotationAngles;
-    NiPoint3* m_pkRotationAxes;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    float* m_pfRotationSpeeds;
-};
 
 static inline float UnitRandom()
 {
@@ -794,7 +689,7 @@ struct FUN_00c207a0_shell : public NiPSysRotationModifier
 // @fnv 0x00c207a0
 void FUN_00c207a0_shell::UpdateParticleRotation(NiPSysData* pkSysData, unsigned short usNewParticle)
 {
-    RotationPSysData* pkData = (RotationPSysData*)pkSysData;
+    NiPSysData* pkData = pkSysData;
     NiPoint3* pkAxes = pkData->m_pkRotationAxes;
     if (pkAxes)
     {

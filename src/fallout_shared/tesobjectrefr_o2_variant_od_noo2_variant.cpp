@@ -1,3 +1,4 @@
+#include "../../include/NiTArray.h"
 
 // src/fallout_shared/tesobjectrefr_o2_variant_od_noo2_variant.cpp - flag-variant unit created 2026-10-28 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy (unit src/fallout_shared/tesobjectrefr_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,6 +7,14 @@
 // src/fallout_shared/tesobjectrefr_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/tesobjectrefr.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 #include "tesobjectrefr_decls.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/hkReferencedObject.h"
+#include "../../include/NiObject.h"
+#include "../../include/ProjectileListener.h"
+#include "../../include/bhkAabbPhantom.h"
+#include "../../include/bhkRefObject.h"
+#include "../../include/bhkSphereShape.h"
+#include "../../include/bhkWorldObject.h"
 GarbageCollectorUpdateState* FUN_00446ef0();
 void* FUN_0056a8c0();
 void FUN_005743f0();
@@ -28,16 +37,6 @@ extern int DAT_01268238;
 extern const void* DAT_01030394;
 extern const void* DAT_0103078c;
 extern const void* DAT_010306b4;
-struct bhkRefObject
-{
-    void* vtbl;
-    int f4;
-    int f8;
-    int fc;
-    int f10;
-    unsigned char f14;
-    bhkRefObject* Initialize();
-};
 struct FUN_0056e2d0
 {
     virtual ~FUN_0056e2d0();
@@ -46,17 +45,6 @@ extern const void* vftable_FUN_0056e2d0;
 struct FUN_00c6d190 : bhkRefObject
 {
     FUN_00c6d190();
-};
-struct ProjectileListener
-{
-    void* vfptr;
-    int m4;
-    int m8;
-    void FUN_00c876a0();
-};
-struct hkReferencedObject
-{
-    void removeReference();
 };
 void FUN_00c876a0();
 struct FUN_00c9d4c0_holder
@@ -123,10 +111,6 @@ struct FUN_00c876a0_holder
     virtual ~FUN_00c876a0_holder();
     void FUN_00c876a0();
 };
-struct bhkWorldObject
-{
-    void FUN_00c85790();
-};
 struct FUN_00c9f3b0 : FUN_00c876a0_holder
 {
     virtual ~FUN_00c9f3b0();
@@ -134,54 +118,6 @@ struct FUN_00c9f3b0 : FUN_00c876a0_holder
 struct WorldHolder
 {
     void UpdatePhantom(void* a, int b);
-};
-struct PhantomBase
-{
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-};
-struct bhkAabbPhantom : PhantomBase
-{
-    virtual WorldHolder* GetWorld();
-    int m4;
-    void* m8;
-    void FUN_00c9f460();
 };
 extern float DAT_010c72bc;
 struct InnerS
@@ -210,57 +146,6 @@ struct RetV
 {
     char _0[4];
     float f4;
-};
-struct bhkSphereShape
-{
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-    virtual void f38();
-    virtual void f39();
-    virtual void f40();
-    virtual void f41();
-    virtual void f42();
-    virtual void f43();
-    virtual void f44();
-    virtual RetV* Target(char* p);
-    void __thiscall FUN_00c84df0(void* a, ArgB* b);
-    void __thiscall FUN_00ca0740(void* a, ArgB* b);
 };
 struct S_00cb3070
 {
@@ -394,19 +279,6 @@ struct FUN_00c84c50 : FUN_00c877b0
 void FUN_00c876a0();
 extern int DAT_012680f8;
 extern int DAT_0126810c;
-class FUN_00c85790_base
-{
-  public:
-    virtual void unk00();
-    ~FUN_00c85790_base();
-    int unk04;
-};
-class FUN_00c85790 : public FUN_00c85790_base
-{
-  public:
-    virtual ~FUN_00c85790();
-    void unk08();
-};
 extern __declspec(thread) unsigned int g_havokThreadMode;
 struct CollisionObject;
 struct CollisionResult
@@ -549,20 +421,8 @@ struct WorldObjectView
     void FUN_00c87600(int a, int b);
     void FUN_00c85900(int a, int b);
 };
-struct NiRTTI
-{
-    const char* m_pcName;
-};
-struct NiObject
-{
-    virtual void v00();
-    virtual void v01();
-    virtual const NiRTTI* GetRTTI();
-};
-template <class T> struct NiTMallocInterface
-{
-};
-template <class T, class A> struct NiTPrimitiveArray
+#include "../../include/NiTMallocInterface.h"
+template <class T, class A> struct DebugPrimitiveArray
 {
     void* vtbl;
     T* m_pBase;
@@ -584,7 +444,7 @@ template <class T, class A> struct NiTPrimitiveArray
         return SetAtGrow(m_usSize, element);
     }
 };
-typedef NiTPrimitiveArray<char*, NiTMallocInterface<char*> > DebugStrArray;
+typedef DebugPrimitiveArray<char*, NiTMallocInterface<char*> > DebugStrArray;
 struct hkShapeStub
 {
     void* vtbl;
@@ -647,10 +507,6 @@ struct bhkBase_c878c0
         return m_pObject;
     }
     void BaseDebugInfo(DebugStrArray* arr);
-};
-struct bhkWorldObject_c86190 : bhkBase_c878c0
-{
-    void FUN_00c86190(DebugStrArray* arr);
 };
 extern int DAT_012681b0;
 class FUN_00c8bed0_base_cls
@@ -1517,31 +1373,19 @@ struct BC9F970AllocTagScope
         g_iC9F970AllocTag = m_iSaved;
     }
 };
-class BC9F970StringArray
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-  public:
-    virtual ~BC9F970StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
+    return SetAtGrow(m_usSize, element);
+}
 
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > BC9F970StringArray;
 extern const char* g_pcC9F970Name;
 char* __cdecl FUN_00a7d330(const char* pcString);
 class FUN_00c9f970_cls
@@ -1876,31 +1720,7 @@ struct BCA05B0AllocTagScope
         g_iCA05B0AllocTag = m_iSaved;
     }
 };
-class BCA05B0StringArray
-{
-  public:
-    virtual ~BCA05B0StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > BCA05B0StringArray;
 extern const char* g_pcCA05B0Name;
 char* __cdecl FUN_00a7d330(const char* pcString);
 class FUN_00ca05b0_cls
@@ -2044,20 +1864,12 @@ class FUN_00ccf740_cls : public FUN_00c9fb00
     virtual ~FUN_00ccf740_cls();
     void FUN_00c876a0();
 };
-class NiObjectC9E
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem, unsigned int uiSize);
-
-    virtual ~NiObjectC9E();
-};
-class NiControllerC9E : public NiObjectC9E
+class NiControllerC9E : public NiObject
 {
   public:
     NiControllerC9E();
 
-    static NiObjectC9E* FUN_00c9ef30();
+    static NiObject* FUN_00c9ef30();
 
     unsigned int m_uiRefCount;
     int unk08;

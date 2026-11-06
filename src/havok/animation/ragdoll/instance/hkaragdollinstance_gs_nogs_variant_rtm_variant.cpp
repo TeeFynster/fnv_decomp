@@ -1,3 +1,4 @@
+#include "../../../../../include/hkArray.h"
 // src/havok/animation/ragdoll/instance/hkaragdollinstance_gs_nogs_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/animation/ragdoll/instance/hkaragdollinstance_gs_nogs_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -7,7 +8,14 @@
 
 // src/havok/animation/ragdoll/instance/hkaragdollinstance.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/ragdoll/instance/hkaragdollinstance.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkaRagdollInstance.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/MemoryManager.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkaBone.h"
+#include "../../../../../include/hkaSkeleton.h"
+#include "../../../../../include/hkpMotion.h"
+#include "../../../../../include/hkpRigidBody.h"
+#include "../../../../../include/hkaRagdollInstance.h"
 extern int DAT_01268700;
 void __stdcall FUN_00ce1760(int, int, int);
 void __stdcall FUN_00ce18d0(int a);
@@ -28,26 +36,12 @@ struct FUN_00ce2430_Class
     void FUN_00ce2150(int, float, void*);
     void ApplyValueToTransforms(float, FUN_00ce2430_Transform*);
 };
-struct MemoryManager
-{
-    virtual void ReportDiagnostic();
-    virtual void unused1();
-    virtual void release(void* object, unsigned short value);
-};
-struct MemoryRouter
-{
-    void* ReportDiagnostic;
-    void* unused1;
-    void* unused2;
-    void* FlushUsageData;
-    MemoryManager* manager;
-};
 struct FUN_00ce29b0_standin
 {
     void FUN_00ce2600();
     void* Destroy(unsigned char deletingFlag);
 };
-MemoryRouter* _D1A0E0GetMemoryRouter();
+hkMemoryRouter* _D1A0E0GetMemoryRouter();
 extern int DAT_010cfd84;
 struct FnvVtObj
 {
@@ -163,55 +157,7 @@ struct hkMemoryRouterR
 };
 hkMemoryRouterR& __cdecl GetMemoryRouterR() throw();
 void __cdecl hkArrayUtil_reserveR(hkMemoryAllocatorR& kAlloc, void* pkArray, int iNumElements, int iSizeElem) throw();
-template <typename T> struct hkArrayR
-{
-    hkArrayR() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    __forceinline ~hkArrayR() throw()
-    {
-        hkMemoryAllocatorR& kAlloc = GetMemoryRouterR().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    const T& operator[](int i) const
-    {
-        return m_data[i];
-    }
-    __forceinline void reserve(int n)
-    {
-        hkMemoryAllocatorR& kAlloc = GetMemoryRouterR().heap();
-        const int iCapacity = getCapacity();
-        if (iCapacity < n)
-        {
-            int iCap2 = 2 * iCapacity;
-            int iNewSize = (n < iCap2) ? iCap2 : n;
-            hkArrayUtil_reserveR(kAlloc, this, iNewSize, sizeof(T));
-        }
-    }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        reserve(n);
-        m_iElementCount = n;
-    }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+
 template <typename T> __forceinline T* hkAllocateStackR(int n)
 {
     hkMemoryRouterR& kRouter = GetMemoryRouterR();
@@ -223,7 +169,7 @@ template <typename T> __forceinline void hkDeallocateStackR(T* p)
 {
     GetMemoryRouterR().m_aiEntries = p;
 }
-template <typename T> struct hkLocalArrayR : public hkArrayR<T>
+template <typename T> struct hkLocalArrayR : public hkArray<T>
 {
     __forceinline hkLocalArrayR(int n) throw()
     {
@@ -248,51 +194,14 @@ class hkReferencedObjectR
     unsigned short m_usMemSizeAndFlags;
     short m_sReferenceCount;
 };
-class hkpRigidBodyR : public hkReferencedObjectR
-{
-  public:
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual hkpRigidBodyR* clone() const throw();
-};
 class hkpConstraintInstanceR : public hkReferencedObjectR
 {
   public:
-    hkpConstraintInstanceR* clone(hkpRigidBodyR* pkEntityA, hkpRigidBodyR* pkEntityB, int eCloneMode) const throw();
+    hkpConstraintInstanceR* clone(hkpRigidBody* pkEntityA, hkpRigidBody* pkEntityB, int eCloneMode) const throw();
 };
-class hkaSkeletonR : public hkReferencedObjectR
-{
-  public:
-    const char* m_name;
-    hkArrayR<short> m_kParentIndices;
-};
-class hkaRagdollInstanceR : public hkReferencedObjectR
-{
-  public:
-    __forceinline void* operator new(hk_size_tR uiBytes)
-    {
-        hkReferencedObjectR* b =
-            static_cast<hkReferencedObjectR*>(GetMemoryRouterR().heap().AllocateMemoryBlock(uiBytes));
-        b->m_usMemSizeAndFlags = static_cast<unsigned short>(uiBytes);
-        return b;
-    }
-    void operator delete(void* p, hk_size_tR uiBytes);
-    hkaRagdollInstanceR(const hkArrayR<hkpRigidBodyR*>& kRigidBodies,
-                        const hkArrayR<hkpConstraintInstanceR*>& kConstraints, const hkaSkeletonR* pkSkeleton,
-                        const hkArrayR<int>& kBoneToRigidBodyMap) throw();
-    hkaRagdollInstanceR* FUN_00ce2730(int eMode) const throw();
-    const hkaSkeletonR* getSkeleton() const
-    {
-        return m_pSkeleton;
-    }
-    hkArrayR<hkpRigidBodyR*> m_ppRigidBodies;
-    hkArrayR<hkpConstraintInstanceR*> m_ppConstraints;
-    hkArrayR<int> m_kBoneMap;
-    const hkaSkeletonR* m_pSkeleton;
-};
+
+#include "../../../../../include/hkaRagdollInstance.h"
+
 #include <xmmintrin.h>
 struct FUN_00ce14b0_standin
 {
@@ -336,65 +245,19 @@ class FUN_00ce1680_Ragdoll : public hkReferencedObject
     int FUN_00ce1680(void* world, unsigned char flag);
 };
 extern int DAT_010cb830;
-void __cdecl FUN_00c908c0(ArrayAllocator* heap, void* array, int numElements, int sizeOfElement);
-struct RouterRef_ce24
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    ArrayAllocator* m_pStreamAllocator;
-    ArrayAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    static RouterRef_ce24& __cdecl FUN_00c85750() throw();
-};
-template <class T> struct hkArray_ce24
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    void init()
-    {
-        m_data = 0;
-        m_iElementCount = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    void SetSizeAndGrow(int n)
-    {
-        ArrayAllocator& heap = RouterRef_ce24::FUN_00c85750().heap();
-        int cap = m_iCapacityState & 0x3fffffff;
-        if (cap < n)
-        {
-            int cap2 = 2 * cap;
-            FUN_00c908c0(&heap, this, n < cap2 ? cap2 : n, sizeof(T));
-        }
-        m_iElementCount = n;
-    }
-};
-struct Skeleton_ce24
-{
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18;
-    int m_iBoneCount;
-};
 struct RagdollInstance_ce24
 {
     int* m_vtbl;
     unsigned short m_usMemSizeAndFlags;
     unsigned short m_sReferenceCount;
-    hkArray_ce24<ReferenceObject*> m_ppRigidBodies;
-    hkArray_ce24<ReferenceObject*> m_ppConstraints;
-    hkArray_ce24<int> m_kBoneMap;
-    Skeleton_ce24* m_pSkeleton;
-    void FUN_00ce22c0(const hkArray_ce24<ReferenceObject*>& bodies, const hkArray_ce24<ReferenceObject*>& constraints,
-                      Skeleton_ce24* skeleton);
-    RagdollInstance_ce24* FUN_00ce2470(const hkArray_ce24<ReferenceObject*>& bodies,
-                                       const hkArray_ce24<ReferenceObject*>& constraints, Skeleton_ce24* skeleton);
+    hkArray<ReferenceObject*> m_ppRigidBodies;
+    hkArray<ReferenceObject*> m_ppConstraints;
+    hkArray<int> m_kBoneMap;
+    hkaSkeleton* m_pSkeleton;
+    void FUN_00ce22c0(const hkArray<ReferenceObject*>& bodies, const hkArray<ReferenceObject*>& constraints,
+                      hkaSkeleton* skeleton);
+    RagdollInstance_ce24* FUN_00ce2470(const hkArray<ReferenceObject*>& bodies,
+                                       const hkArray<ReferenceObject*>& constraints, hkaSkeleton* skeleton);
 };
 extern "C"
 {
@@ -415,88 +278,6 @@ void __cdecl FUN_00ce2f40(unsigned int arg0, unsigned int arg1, unsigned int arg
 extern float DAT_01267e30;
 extern float DAT_01017d00;
 extern float DAT_01017d10;
-struct UnkCall
-{
-    void FUN_00c9c1d0();
-    void FUN_00ca8860(const hkVector4& pos, const hkQuaternion& rot);
-};
-struct hkpMotion
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1c();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2c();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void vf38();
-    virtual void vf3c();
-    virtual void SetTranslationalVelocity(const hkVector4& vel);
-    virtual void SetRotationalVelocity(const hkVector4& vel);
-    int unk04, unk08, unk0c;
-    int unk10, unk14, unk18, unk1c;
-    int unk20, unk24, unk28, unk2c;
-    int unk30, unk34, unk38, unk3c;
-    int unk40, unk44, unk48, unk4c;
-    int unk50, unk54, unk58, unk5c;
-    int unk60, unk64, unk68, unk6c;
-    int unk70, unk74, unk78, unk7c;
-    int unk80, unk84, unk88, unk8c;
-    int unk90, unk94, unk98, unk9c;
-    int unka0, unka4, unka8, unkac;
-    int unkb0, unkb4, unkb8, unkbc;
-    int unkc0, unkc4, unkc8, unkcc;
-    hkVector4 m_kTranslationalVelocity;
-    hkVector4 m_kAngularVelocity;
-};
-struct hkpRigidBody : public UnkCall
-{
-    int unk00, unk04, unk08, unk0c;
-    int unk10, unk14, unk18, unk1c;
-    int unk20, unk24, unk28, unk2c;
-    int unk30, unk34, unk38, unk3c;
-    int unk40, unk44, unk48, unk4c;
-    int unk50, unk54, unk58, unk5c;
-    int unk60, unk64, unk68, unk6c;
-    int unk70, unk74, unk78, unk7c;
-    int unk80, unk84, unk88, unk8c;
-    int unk90, unk94, unk98, unk9c;
-    int unka0, unka4, unka8, unkac;
-    int unkb0, unkb4, unkb8, unkbc;
-    int unkc0, unkc4, unkc8, unkcc;
-    int unkd0, unkd4, unkd8, unkdc;
-    hkpMotion m_pMotionState;
-
-    void SetTranslationalVelocity(const hkVector4& vel)
-    {
-        FUN_00c9c1d0();
-        m_pMotionState.SetTranslationalVelocity(vel);
-    }
-    void SetRotationalVelocity(const hkVector4& vel)
-    {
-        FUN_00c9c1d0();
-        m_pMotionState.SetRotationalVelocity(vel);
-    }
-};
-struct hkaBone
-{
-    hkStringPtr m_name;
-    hkBool m_bLockTranslation;
-};
-class hkaSkeleton : public hkReferencedObject
-{
-  public:
-    hkStringPtr m_name;
-    hkArray<hkInt16> m_kParentIndices;
-    hkArray<hkaBone> m_kBones;
-};
 struct PoseW
 {
     const hkQsTransform* p;
@@ -789,6 +570,7 @@ inline float PoseVelocity_MyQuaternion::GetAngle()
     return value;
 }
 
+// local form of hkQsTransform: 0x00ce1ca0 needs inline SetProduct and quaternion normalization; shared out-of-line product does not reproduce exe bytes.
 struct PoseVelocity_MyQsTransform
 {
     PoseVelocity_MyVector4 m_vTranslation;
@@ -838,8 +620,8 @@ void PoseVelocity_RagdollPoseUpdater::FUN_00ce1ca0(const PoseVelocity_MyQsTransf
                 worldPoseB.SetProduct(worldFromModelB, poseB[i]);
                 worldPoseB.m_rotation.FUN_005611c0();
 
-                body->FUN_00ca8860(reinterpret_cast<const hkVector4&>(worldPoseB.m_vTranslation),
-                                   reinterpret_cast<const hkQuaternion&>(worldPoseB.m_rotation));
+                body->SetPositionAndRotation(reinterpret_cast<const NiPoint3&>(worldPoseB.m_vTranslation),
+                                             reinterpret_cast<const NiQuaternion&>(worldPoseB.m_rotation));
 
                 PoseVelocity_MyVector4 linearVelocity;
                 linearVelocity.setSub4(worldPoseB.m_vTranslation, worldPoseA.m_vTranslation);

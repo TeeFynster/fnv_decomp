@@ -2,6 +2,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <xmmintrin.h>
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/Transform.h"
 struct S_00db4b50_B
 {
     float unk00;
@@ -128,14 +130,6 @@ struct S_00db4b50_Out
 };
 
 void FUN_00cf1710(void* a, float b, float c, void* out);
-struct S_00db4b50_Sub
-{
-    void FUN_00cb22f0(void* p, void* q);
-    void FUN_00c7f700(void* p, void* q);
-    void FUN_00c7f640(void* p, void* q);
-    void FUN_004b4ab0(void* p, void* q);
-};
-
 __forceinline void S_rotInv(const __m128* r, const __m128* in, int n, __m128* out)
 {
     __m128 a0 = r[0], a1 = r[1], a2 = r[2];
@@ -163,46 +157,34 @@ void FUN_00db4b50(S_00db4b50_A* a, float f, S_00db4b50_Out* out)
     FUN_00cf1710(a->unk00 + 0x40, b->unk00, t, out);
     FUN_00cf1710(a->unk04 + 0x40, b->unk00, t, &out->unk40);
     void* m = &out->unk80;
-    ((S_00db4b50_Sub*)m)->FUN_00cb22f0(out, &out->unk40);
-    ((S_00db4b50_Sub*)&out->unkc0)->FUN_00c7f700(m, &a->unk20);
-    ((S_00db4b50_Sub*)&out->unkd0)->FUN_00c7f640(m, &a->unk30);
+    ((Transform*)m)->FUN_00cb22f0(out, &out->unk40);
+    ((Vec4*)&out->unkc0)->FUN_00c7f700(m, *(const Vec4*)&a->unk20);
+    ((Vec4*)&out->unkd0)->FUN_00c7f640((const Buf40*)m, &a->unk30);
     out->unkcc = -a->unk14;
     *(__m128*)&out->unk110 = *(__m128*)(a->unk00 + 0x80);
     S_rotInv((const __m128*)&out->unk00, (const __m128*)&a->unk60, 2, (__m128*)&out->unkf0);
-    ((S_00db4b50_Sub*)&out->unk120)->FUN_00c7f640(m, a->unk04 + 0x80);
-    ((S_00db4b50_Sub*)&out->unke0)->FUN_004b4ab0(out, &a->unk50);
+    ((Vec4*)&out->unk120)->FUN_00c7f640((const Buf40*)m, a->unk04 + 0x80);
+    ((Vec4*)&out->unke0)->FUN_004b4ab0(*(const Rot*)out, *(const Vec4*)&a->unk50);
 }
 
 namespace fnv_00db52c0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00db52c0 FUN_00db52c0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x, y, z, w;
     };
-};
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_unpacklo_ps(__m128, __m128);
-extern "C" __m128 _mm_unpackhi_ps(__m128, __m128);
-extern "C" __m128 _mm_movelh_ps(__m128, __m128);
-extern "C" __m128 _mm_movehl_ps(__m128, __m128);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
 
-union Vec4
-{
-    __m128 v;
-    struct
-    {
-        float x, y, z, w;
-    };
-};
-struct Transform
-{
-    Vec4 row0, row1, row2, translation;
-    void FUN_00cb22f0(const Transform*, const Transform*);
-};
 struct Shape
 {
     int unk00;
@@ -213,7 +195,7 @@ struct Shape
     int unk14;
     int unk18;
     int unk1c;
-    Vec4 vector20;
+    Vec4::Aligned vector20;
     int unk30;
     int unk34;
     int unk38;
@@ -242,7 +224,7 @@ struct Shape
     int unk94;
     int unk98;
     int unk9c;
-    Vec4 vectora0;
+    Vec4::Aligned vectora0;
     int unkb0;
     int unkb4;
     int unkb8;
@@ -275,32 +257,33 @@ struct Shape
     int unk124;
     int unk128;
     int unk12c;
-    Vec4 vector130;
+    Vec4::Aligned vector130;
     void FUN_00daad40(void*, void*, Transform*, Vec4*);
 };
-struct Pair
+// hkpConvexShape view: m_radius at +0x10 (hkReferencedObject 8 + userData + type); distance = d - radiusA - radiusB
+struct GskConvexShape
 {
     int unk00, unk04, unk08, unk0c;
     float radius;
 };
 struct PairArg
 {
-    Pair* p;
+    GskConvexShape* p;
 };
 struct OutArg
 {
     Vec4* p;
 };
 
-static __forceinline void calculate(Vec4& output, const Transform& frame, __m128 r)
+static __forceinline void calculate(Vec4& output, const Transform& frame, LocalM128 r)
 {
-    __m128 x3 = frame.row0.v;
-    __m128 x1 = frame.row1.v;
-    __m128 x5 = frame.row2.v;
-    __m128 x2 = x3;
+    LocalM128 x3 = reinterpret_cast<const LocalM128&>(frame.r[0]);
+    LocalM128 x1 = reinterpret_cast<const LocalM128&>(frame.r[1]);
+    LocalM128 x5 = reinterpret_cast<const LocalM128&>(frame.r[2]);
+    LocalM128 x2 = x3;
     x2 = _mm_unpacklo_ps(x2, x1);
     x3 = _mm_unpackhi_ps(x3, x1);
-    __m128 x4 = x2;
+    LocalM128 x4 = x2;
     x4 = _mm_movelh_ps(x4, x5);
     x1 = x4;
     x1 = _mm_movehl_ps(x1, x2);
@@ -316,50 +299,52 @@ static __forceinline void calculate(Vec4& output, const Transform& frame, __m128
     x2 = _mm_add_ps(x2, x1);
     x3 = _mm_mul_ps(x3, r);
     x2 = _mm_add_ps(x2, x3);
-    output.v = x2;
+    reinterpret_cast<LocalM128&>(output) = x2;
 }
 // @fnv 0x00db52c0
-static __declspec(noinline) void FUN_00db52c0(Shape* obj, const Transform* mat, const Transform* other, Pair* apPairA,
-                                              Pair* apPairB, OutArg a3, Vec4* apResult)
+static __declspec(noinline) void FUN_00db52c0(Shape* obj, const Transform* mat, const Transform* other, GskConvexShape* apPairA,
+                                              GskConvexShape* apPairB, OutArg a3, Vec4* apResult)
 {
     Vec4* out = a3.p;
-    Transform localTransform;
-    Vec4 shapeResult;
+    // Preserve aligned stack storage without introducing /GS checks for Transform's array members.
+    __declspec(align(16)) void* transformStorage[sizeof(Transform) / sizeof(void*)];
+    Transform& localTransform = *reinterpret_cast<Transform*>(transformStorage);
+    Vec4::Aligned shapeResult(Vec4::Uninitialized);
     localTransform.FUN_00cb22f0(mat, other);
     obj->FUN_00daad40(apPairA, apPairB, &localTransform, &shapeResult);
 
-    __m128 v = shapeResult.v;
-    __m128 p = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), mat->row1.v);
-    p = _mm_add_ps(p, _mm_mul_ps(_mm_shuffle_ps(v, v, 0), mat->row0.v));
-    p = _mm_add_ps(p, _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), mat->row2.v));
-    out->v = p;
+    LocalM128 v = reinterpret_cast<const LocalM128&>(shapeResult);
+    LocalM128 p = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), reinterpret_cast<const LocalM128&>(mat->r[1]));
+    p = _mm_add_ps(p, _mm_mul_ps(_mm_shuffle_ps(v, v, 0), reinterpret_cast<const LocalM128&>(mat->r[0])));
+    p = _mm_add_ps(p, _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), reinterpret_cast<const LocalM128&>(mat->r[2])));
+    reinterpret_cast<LocalM128&>(*out) = p;
 
-    __m128 q;
+    LocalM128 q;
     if (obj->unk00 == 1)
-        q = obj->vector20.v;
+        q = reinterpret_cast<const LocalM128&>(obj->vector20);
     else if (obj->unk04 == 1)
     {
         q = _mm_shuffle_ps(v, v, 0xff);
         q = _mm_shuffle_ps(q, q, 0);
         q = _mm_mul_ps(q, v);
-        q = _mm_add_ps(q, obj->vectora0.v);
+        q = _mm_add_ps(q, reinterpret_cast<const LocalM128&>(obj->vectora0));
     }
     else
-        q = obj->vector130.v;
+        q = reinterpret_cast<const LocalM128&>(obj->vector130);
 
     double distance = shapeResult.w;
-    __m128 w = _mm_shuffle_ps(v, v, 0xff);
-    __m128 w2 = _mm_shuffle_ps(w, w, 0);
-    __m128 r = _mm_sub_ps(q, _mm_mul_ps(w2, v));
-    r = _mm_sub_ps(r, localTransform.translation.v);
+    LocalM128 w = _mm_shuffle_ps(v, v, 0xff);
+    LocalM128 w2 = _mm_shuffle_ps(w, w, 0);
+    LocalM128 r = _mm_sub_ps(q, _mm_mul_ps(w2, v));
+    r = _mm_sub_ps(r, reinterpret_cast<const LocalM128&>(localTransform.r[3]));
     calculate(*apResult, localTransform, r);
     out->w = (distance - apPairA->radius) - apPairB->radius;
 }
 extern Shape* volatile inputObj;
 extern const Transform* volatile inputMat;
 extern const Transform* volatile inputOther;
-extern Pair* volatile inputPair1;
-extern Pair* volatile inputPair2;
+extern GskConvexShape* volatile inputPair1;
+extern GskConvexShape* volatile inputPair2;
 extern Vec4* volatile inputOut1;
 extern Vec4* volatile inputOut2;
 void emit_function()

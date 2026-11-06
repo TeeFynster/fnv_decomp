@@ -2,29 +2,18 @@
 // src/fallout_shared/havok/bgszonetargetlistener.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/bgszonetargetlistener.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../include/BGSZoneTargetListener.h"
+
 extern int DAT_0104d9e0;
 
-struct FUN_0061ffb0_shell
-{
-    void* m_iWordAt00;
-    void* m_iWordAt04;
-    void* FUN_0061ffb0();
-};
-
-// Sets the first member to point at DAT_0104d9e0, clears the second member, and returns this.
+// The shared header has no constructor declaration; ECX carries the listener here.
 // @fnv 0x0061ffb0
-void* FUN_0061ffb0_shell::FUN_0061ffb0()
+void* __fastcall ConstructZoneTargetListener(BGSZoneTargetListener* listener)
 {
-    m_iWordAt00 = &DAT_0104d9e0;
-    m_iWordAt04 = 0;
-    return this;
+    *reinterpret_cast<void**>(listener) = &DAT_0104d9e0;
+    listener->m_flags = 0;
+    return listener;
 }
-
-struct BGSZoneTargetListener
-{
-    void* __thiscall Destroy(unsigned int flags);
-    void __thiscall FUN_00620110();
-};
 
 void __cdecl _Deallocate(void* p);
 
@@ -32,29 +21,29 @@ void __cdecl _Deallocate(void* p);
 // @fnv 0x006200e0
 void* __thiscall BGSZoneTargetListener::Destroy(unsigned int flags)
 {
-    FUN_00620110();
+    this->~BGSZoneTargetListener();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-namespace fnv_00620760 {
-struct BGSZoneTargetListener
+struct ZoneLink
 {
-    int m_flags;
-    void SetFlags(int flags, bool set);
+    int unk00;
+    int unk04;
+    void SetValue(int value, bool set);
+    void Attach(ZoneLink* next);
 };
 
-// Sets or clears the given flag bits in m_flags depending on set.
+// Sets or clears the flag bits in the embedded link, whose flags are at offset 0.
 // @fnv 0x00620760
-void BGSZoneTargetListener::SetFlags(int flags, bool set)
+void ZoneLink::SetValue(int flags, bool set)
 {
     if (set)
-        m_flags |= flags;
+        unk00 |= flags;
     else
-        m_flags &= ~flags;
+        unk00 &= ~flags;
 }
-}  // namespace fnv_00620760
 
 void FUN_00553380(int param);
 // @fnv 0x0087e9b0
@@ -173,25 +162,12 @@ void FUN_0061fea0_shell::ClearList()
     m_14 = 0;
 }
 
-struct FUN_0061ffe0_shell
-{
-    FUN_0061fc10* Create(unsigned int a, unsigned int b);
-};
-
 // Allocates and constructs a new FUN_0061fc10 object from the two unsigned int arguments and returns it.
 // @fnv 0x0061ffe0
-FUN_0061fc10* FUN_0061ffe0_shell::Create(unsigned int uiFirst, unsigned int uiSecond)
+void* BGSZoneTargetListener::Create(unsigned int uiFirst, unsigned int uiSecond)
 {
     return new FUN_0061fc10(uiFirst, uiSecond);
 }
-
-struct ZoneLink
-{
-    int unk00;
-    int unk04;
-    void SetValue(int value, int flag);
-    void Attach(ZoneLink* next);
-};
 
 struct ZoneBase
 {
@@ -313,14 +289,9 @@ struct ZoneTargetNode
     ZoneTargetNode(unsigned int a, unsigned int b);
 };
 
-struct FUN_00620060_cls
-{
-    void* CreateZoneTargetNode(unsigned int a, unsigned int b);
-};
-
 // Allocates and constructs a ZoneTargetNode from the two given values and returns it.
 // @fnv 0x00620060
-void* FUN_00620060_cls::CreateZoneTargetNode(unsigned int uiFirst, unsigned int uiSecond)
+void* BGSZoneTargetListener::CreateZoneTargetNode(unsigned int uiFirst, unsigned int uiSecond)
 {
     return new ZoneTargetNode(uiFirst, uiSecond);
 }

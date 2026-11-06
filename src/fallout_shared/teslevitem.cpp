@@ -1,6 +1,7 @@
 // fallout_shared/teslevitem.cpp: TESLevItem, LevItemCopyEntry, LevItemComparison (10 functions)
 
 #include "teslevitem_decls.h"
+#include "../../include/TESLevItem.h"
 // @fnv 0x0050b8d0
 int TESLevItem::GetMaxLevelDifference()
 {
@@ -8,7 +9,7 @@ int TESLevItem::GetMaxLevelDifference()
 }
 
 // @fnv 0x0050b560
-bool TESLevItem::Load(TESFile* file)
+bool TESLevItem::LoadForm(TESFile* file)
 {
     unsigned char ucFormType = file->GetTESForm();
     if (ucFormType != 0x34)
@@ -37,7 +38,7 @@ bool TESLevItem::Load(TESFile* file)
                 file->GetChunkData(&entry, 12);
                 if (file->IsEndianConversionRequired())
                     entry.SwapEndian();
-                DAT_011c8f1c = list.CreateLeveledObject(entry.level, entry.count, entry.form, 0);
+                DAT_011c8f1c = CreateLeveledObject(entry.level, entry.count, entry.form, 0);
                 break;
             }
             case 0x44454f43:
@@ -54,16 +55,16 @@ bool TESLevItem::Load(TESFile* file)
         case 0x444c564c: {
             unsigned char chance = 0;
             file->GetChunkData(&chance, 0);
-            list.FUN_0042e680(chance);
+            FUN_0042e680(chance);
             break;
         }
         case 0x464c564c:
-            file->GetChunkData(&list.flags, 0);
+            file->GetChunkData(&m_ucChanceNone, 0);
             break;
         case 0x474c564c: {
             unsigned int global = 0;
             file->GetChunkData(&global);
-            list.global = global;
+            m_pLevelGlobal = (TESGlobal*)global;
             break;
         }
         }
@@ -77,121 +78,47 @@ void TESLevItem::InitItem()
 {
     if (GetInitialized())
         return;
-    list.InitItem(this);
+    TESLeveledList::InitItem(this);
     SetInitializationState(true);
 }
 
-struct B1_4fe : public TESForm
-{
-    B1_4fe();
-    ~B1_4fe();
-    char pad[0x18];
-};
-struct FUN_00487650
-{
-    FUN_00487650();
-    ~FUN_00487650();
-    virtual void vf();
-    int v;
-};
-struct FUN_0050b400 : public B1_4fe, public FUN_00487650
-{
-    FUN_0050b400();
-    ~FUN_0050b400();
-};
-// Initializes the form by setting its form type to 0x34 and clearing its data.
 // @fnv 0x0050b400
-FUN_0050b400::FUN_0050b400()
+TESLevItem::TESLevItem()
 {
     SetFormType((ENUM_FORM_ID)0x34);
     ClearData();
 }
 
-struct FUN_004855a0_shell
-{
-    void FUN_004855a0();
-};
-struct FUN_00488400_shell
-{
-    void SaveLeveledList();
-};
-struct FUN_00485680_shell
-{
-    void FUN_00485680();
-};
-
-void FUN_004855a0_shell::FUN_004855a0()
-{}
-void FUN_00488400_shell::SaveLeveledList()
-{}
-void FUN_00485680_shell::FUN_00485680()
-{}
-
-struct FUN_0050b530_shell : public B1_4fe, public FUN_00487650
-{
-    void FUN_0050b530();
-};
-
-// Calls FUN_004855a0, TESForm::ClearData, SaveLeveledList on the member at offset 0x30, then FUN_00485680.
-// @fnv 0x0050b530
-void FUN_0050b530_shell::FUN_0050b530()
-{
-    ((FUN_004855a0_shell*)this)->FUN_004855a0();
-    TESForm::ClearData();
-    ((FUN_00488400_shell*)((char*)this + 0x30))->SaveLeveledList();
-    ((FUN_00485680_shell*)this)->FUN_00485680();
-}
-
-struct BGSSaveFormBuffer;
-struct FUN_00484d60_holder
-{
-    char pad[0x30];
-    void SaveIfChanged(BGSSaveFormBuffer*);
-};
-struct FUN_00488c50_holder
-{
-    char dummy;
-    void SaveLeveledListEntries(BGSSaveFormBuffer*);
-};
-struct FUN_0050adb0_shell : FUN_00484d60_holder, FUN_00488c50_holder
-{
-    void FUN_0050adb0(BGSSaveFormBuffer*);
-};
-// @fnv 0x0050adb0
-void FUN_0050adb0_shell::FUN_0050adb0(BGSSaveFormBuffer* apSaveGameBuffer)
-{
-    FUN_00484d60_holder::SaveIfChanged(apSaveGameBuffer);
-    FUN_00488c50_holder::SaveLeveledListEntries(apSaveGameBuffer);
-}
-
-struct S_0050b490
-{
-    void FUN_0050b4c0();
-    void* DestroyIfFlagged(unsigned int);
-};
-void _Deallocate(void*);
-// Calls FUN_0050b4c0, deallocates this when flags has bit 1 set, and returns this.
-// @fnv 0x0050b490
-void* S_0050b490::DestroyIfFlagged(unsigned int flags)
-{
-    FUN_0050b4c0();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct FUN_0050b4c0 : public B1_4fe, public FUN_00487650
-{
-    ~FUN_0050b4c0();
-};
-// Empty destructor for a class deriving from B1_4fe and FUN_00487650.
 // @fnv 0x0050b4c0
-FUN_0050b4c0::~FUN_0050b4c0()
+TESLevItem::~TESLevItem()
 {}
+
+// Saving entry points not yet declared on the shared TESLevItem.
+struct LevItemSerialization : public TESLevItem
+{
+    void Save();
+    void SaveGame(BGSSaveFormBuffer* buffer);
+    void SaveIfChanged(BGSSaveFormBuffer* buffer);
+};
+
+// @fnv 0x0050b530
+void LevItemSerialization::Save()
+{
+    TESForm::FUN_004855a0();
+    TESForm::ClearData();
+    TESLeveledList::Save();
+    TESForm::FUN_00485680();
+}
+
+// @fnv 0x0050adb0
+void LevItemSerialization::SaveGame(BGSSaveFormBuffer* buffer)
+{
+    SaveIfChanged(buffer);
+    TESLeveledList::SaveGame(buffer);
+}
 
 struct LevItemCopyEntry : public ::TESLevItem
 {
-    void FUN_004851b0(::TESForm* source);
     void FUN_0050b800(::TESForm* source);
 };
 
@@ -203,7 +130,7 @@ void LevItemCopyEntry::FUN_0050b800(::TESForm* source)
     sourceItem = dynamic_cast< ::TESLevItem*>(source);
     if (!sourceItem)
         return;
-    FUN_004851b0(source);
+    TESForm::CopyFrom(source);
 }
 
 struct LevItemComparison : public ::TESLevItem

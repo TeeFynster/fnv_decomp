@@ -3,17 +3,17 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/IMemoryHeap.h"
+#include "../../include/AbstractHeap.h"
+#include "../../include/BSThread.h"
+#include "../../include/MemoryPool.h"
 
 extern "C" void* __cdecl _malloc(unsigned int);
 
-struct FUN_00aa4290_Class
-{
-    void* __thiscall AllocateBuffer(unsigned int size, unsigned int pad);
-};
-
 // Allocates size bytes with _malloc and returns the resulting pointer.
 // @fnv 0x00aa4290
-void* __thiscall FUN_00aa4290_Class::AllocateBuffer(unsigned int size, unsigned int pad)
+void* __thiscall MemoryManager::DoSystemAllocation(unsigned int size, bool aligned)
 {
     void* buffer = _malloc(size);
     void* result = buffer;
@@ -22,13 +22,8 @@ void* __thiscall FUN_00aa4290_Class::AllocateBuffer(unsigned int size, unsigned 
 
 extern "C" void __cdecl free(void*);
 
-struct FUN_00aa42c0_class
-{
-    void __thiscall FreePointer(void* p, int dummy);
-};
-
 // @fnv 0x00aa42c0
-void __thiscall FUN_00aa42c0_class::FreePointer(void* p, int dummy)
+void __thiscall MemoryManager::DoSystemDeallocation(void* p, bool aligned)
 {
     free(p);
 }
@@ -138,28 +133,14 @@ void __thiscall FUN_00aa6950_Class::ClearPoolSlot(unsigned int uiIndex)
     DAT_011f67b8[idx] = 0;
 }
 
-struct FUN_00aa7e50_Class
-{
-    int m0;
-    int m4;
-    int GetM4();
-};
-
 // @fnv 0x00aa7e50
-int FUN_00aa7e50_Class::GetM4()
+const char* AbstractHeap::GetName()
 {
-    return m4;
+    return pName;
 }
 
 extern int DAT_010a29c0;
 
-struct BSThread
-{
-    BSThread();
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-};
 
 struct FUN_00aa8410 : BSThread
 {
@@ -197,11 +178,7 @@ void FUN_00aa8a20_class::FUN_00aa8a20()
     *reinterpret_cast<int*>(this) = reinterpret_cast<int>(&DAT_010a2980);
 }
 
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
-extern P03MM g_memoryManager;
+extern MemoryManager g_memoryManager;
 
 struct FUN_00aa8b00_Class
 {
@@ -223,48 +200,23 @@ void __cdecl ReportFr2Error(const char* pcFile, int iLine, const char* pcMessage
     FNV_Warning("DEFAULT: FR2 ERROR in %s line %i : '%s'. Code may crash.", pcFile, iLine, pcMessage);
 }
 
-struct FUN_00aa41e0_Class
-{
-    void* __thiscall FUN_00aa41e0(unsigned int a, unsigned int b);
-};
 // @fnv 0x00aa41e0
-void* __thiscall FUN_00aa41e0_Class::FUN_00aa41e0(unsigned int a, unsigned int b)
+void* __thiscall MemoryManager::AllocatePhysical(unsigned int a, unsigned long b)
 {
     return 0;
 }
 
-struct FUN_00aa41f0_Class
-{
-    void __thiscall FUN_00aa41f0(int a, int b, int c);
-};
-
 // @fnv 0x00aa41f0
-void FUN_00aa41f0_Class::FUN_00aa41f0(int a, int b, int c)
+void MemoryManager::DeallocatePhysical(void* a, unsigned long b, unsigned long c)
 {}
 
-struct FUN_00aa45a0_vt
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual bool v4(int);
-};
-struct FUN_00aa45a0_Class
-{
-    unsigned short m_auiShapeKeys;
-    unsigned short m_uiItemCount;
-    unsigned int m_unknown;
-    FUN_00aa45a0_vt** m_items;
-    FUN_00aa45a0_vt* __thiscall FindItemByArg(int arg);
-};
 // @fnv 0x00aa45a0
-FUN_00aa45a0_vt* FUN_00aa45a0_Class::FindItemByArg(int arg)
+IMemoryHeap* MemoryManager::GetHeapForPointer(void* arg)
 {
-    for (unsigned short i = 0; i < m_uiItemCount; ++i)
+    for (unsigned short i = 0; i < iNumHeaps; ++i)
     {
-        FUN_00aa45a0_vt* item = m_items[i];
-        if (item->v4(arg))
+        IMemoryHeap* item = ppHeaps[i];
+        if (item->ContainsBlockImpl(arg))
             return item;
     }
     return 0;
@@ -291,11 +243,6 @@ char __thiscall FUN_00aa4710_Class::FUN_00aa4710(int a, unsigned char b, int c)
     return flag_;
 }
 
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
-
 struct FUN_00aa4b20_Class
 {
     void __thiscall ClearAndDeallocate(void* p);
@@ -307,15 +254,11 @@ void __thiscall FUN_00aa4b20_Class::ClearAndDeallocate(void* p)
 {
     ((int*)p)[2] = 0;
     void* arg = p;
-    ((MemoryManager*)&g_memoryManager)->Deallocate(arg);
+    g_memoryManager.Deallocate(arg);
 }
 
 namespace fnv_00aa4b50 {
 extern int DAT_010a2618;
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager _g_memoryManager;
 struct FUN_00aa4b50_Class
 {
@@ -359,10 +302,6 @@ void __thiscall FUN_00aa50f0_Class::FUN_00aa50f0(unsigned int uiValue)
 }
 
 namespace fnv_00aa8b20 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager _g_memoryManager;
 struct FUN_00aa8b20_Class
 {
@@ -380,10 +319,6 @@ void* __thiscall FUN_00aa8b20_Class::FUN_00aa8b20(int flag)
 }  // namespace fnv_00aa8b20
 
 namespace fnv_00aa8b50 {
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 struct FUN_00aa8b50_Class
 {
     int* m;
@@ -395,7 +330,7 @@ void* __thiscall FUN_00aa8b50_Class::FUN_00aa8b50(int aiFlags)
 {
     m = &DAT_010a2980;
     if (aiFlags & 1)
-        ((MemoryManager*)&g_memoryManager)->Deallocate(this);
+        g_memoryManager.Deallocate(this);
     return this;
 }
 }  // namespace fnv_00aa8b50
@@ -664,69 +599,28 @@ void __thiscall FUN_00aa8a40_Class::FUN_00aa8a40(FUN_00aa8a40_Node* node)
     m_kNode.PushFront(n);
 }
 
-struct HeapFreeBlock
-{
-};
-
-struct HeapFreeList
-{
-    void* m0;
-    HeapFreeBlock* m4;
-};
-
-struct AbstractHeap
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13(void* value);
-
-    unsigned char m_pad00[0x10];
-    int m14;
-    unsigned char m_pad18[0x18];
-    void* m30;
-    unsigned char m_pad34[0x10];
-    HeapFreeList m_lists[0x400];
-    unsigned char m_pad2044[4];
-    HeapFreeBlock* m2048;
-    HeapFreeBlock* m204c;
-
-    void __thiscall FUN_00aa9e50(HeapFreeList* list, HeapFreeBlock* block);
-    void __thiscall Clear();
-};
-
 // @fnv 0x00aa8ea0
 void AbstractHeap::Clear()
 {
     for (int i = 0; i < 0x400; ++i)
     {
-        HeapFreeList* list = &m_lists[i];
+        HeapFreeList* list = &pSmallFreeList[i];
 
-        while (list->m4 != 0)
+        while (list->pTail != 0)
         {
-            this->FUN_00aa9e50(list, list->m4);
+            this->FUN_00aa9e50(list, list->pTail);
         }
     }
 
-    while (m204c != 0)
+    while (LargeFreeList.pTail != 0)
     {
-        this->FUN_00aa9e50(reinterpret_cast<HeapFreeList*>(&m2048), m204c);
+        this->FUN_00aa9e50(&LargeFreeList, LargeFreeList.pTail);
     }
 
-    v13(m30);
+    FreeHeapMemory(pMemHeap);
 
-    m30 = 0;
-    m14 = 0;
+    pMemHeap = 0;
+    MemHeapSize = 0;
 }
 
 struct FUN_00aaaa80_Class
@@ -741,7 +635,7 @@ void* FUN_00aaaa80_Class::DestroyWithFlags(unsigned int flags)
     int a, b, c, d, e, f, g, h, i, j;
     FUN_00aaaa80();
     if (flags & 1)
-        ((MemoryManager*)&g_memoryManager)->Deallocate(this);
+        g_memoryManager.Deallocate(this);
     return this;
 }
 
@@ -769,107 +663,15 @@ struct FUN_00ab2e40
 FUN_00ab2e40::FUN_00ab2e40()
 {}
 
-class AA4610Pool
-{
-  public:
-    virtual void vfunc00();
-    virtual void vfunc01();
-    virtual void vfunc02();
-    virtual void vfunc03();
-    virtual bool Contains(void* pvMem);
-};
-
-class AA4610Allocator
-{
-  public:
-    int unk00;
-    unsigned short m_usPoolCount;
-    unsigned short unk06;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    AA4610Pool** m_ppkPools;
-
-    AA4610Pool* FindPoolContaining(void* pvMem);
-};
-
 // Scans the pool array and returns the first pool whose Contains check accepts pvMem, or null if none does.
 // @fnv 0x00aa4610
-AA4610Pool* AA4610Allocator::FindPoolContaining(void* pvMem)
+IMemoryHeap* MemoryManager::GetHeapForPhysicalPointer(void* pvMem)
 {
-    AA4610Pool* pkFound = 0;
-    for (unsigned short i = 0; i < m_usPoolCount && !pkFound; i++)
+    IMemoryHeap* pkFound = 0;
+    for (unsigned short i = 0; i < iNumPhysicalHeaps && !pkFound; i++)
     {
-        if (m_ppkPools[i]->Contains(pvMem))
-            pkFound = m_ppkPools[i];
+        if (ppPhysicalHeaps[i]->ContainsBlockImpl(pvMem))
+            pkFound = ppPhysicalHeaps[i];
     }
     return pkFound;
 }
@@ -1147,21 +949,6 @@ LinkedNode* NodeSorter::SortList(LinkedNode* head)
     return head;
 }
 
-struct MemoryPool
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    void Wait(char*);
-    void FUN_00aa7260();
-};
 
 extern MemoryPool* DAT_011f67b8[];
 extern char DAT_010a2850;
@@ -1171,16 +958,16 @@ void FUN_00aa7290(int aiIndex)
 {
     int pad0;
     int pad1;
-    int* pool;
+    RecursiveSpinLock* pool;
     if (DAT_011f67b8[aiIndex])
     {
-        ((MemoryPool*)((char*)DAT_011f67b8[aiIndex] + 0x20))->Wait(&DAT_010a2850);
+        DAT_011f67b8[aiIndex]->m_kCriticalSection.FUN_0040fbf0(&DAT_010a2850);
         DAT_011f67b8[aiIndex]->FUN_00aa7260();
-        pool = (int*)((char*)DAT_011f67b8[aiIndex] + 0x20);
-        pool[1] = pool[1] - 1;
-        if (pool[1] == 0)
+        pool = &DAT_011f67b8[aiIndex]->m_kCriticalSection;
+        pool->m_uiRecursionCount = pool->m_uiRecursionCount - 1;
+        if (pool->m_uiRecursionCount == 0)
         {
-            pool[0] = 0;
+            pool->m_uiOwningThreadID = 0;
         }
     }
 }
@@ -1307,125 +1094,62 @@ extern "C" __declspec(dllimport) void __stdcall InitializeCriticalSection(void* 
 extern "C" char DAT_010a28c8;
 extern "C" char DAT_010a2bbc;
 
-struct FUN_00aa8ca0_cls
+// The shared class has no constructor overload for these four arguments. Keep
+// its initialization and teardown helpers here, using the shared layout.
+struct AbstractHeapLifecycle : AbstractHeap
 {
-    void* m_vtbl;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-    int m_40;
-
-    FUN_00aa8ca0_cls* FUN_00aa8ca0(int a1, int a2, int a3, int a4);
+    AbstractHeap* Initialize(int a1, int a2, int a3, int a4);
+    void Destroy();
 };
 
 // Sets the vtable and initializes fields from the four arguments, zeroes counters, initializes a critical section and returns this.
 // @fnv 0x00aa8ca0
-FUN_00aa8ca0_cls* FUN_00aa8ca0_cls::FUN_00aa8ca0(int a1, int a2, int a3, int a4)
+AbstractHeap* AbstractHeapLifecycle::Initialize(int a1, int a2, int a3, int a4)
 {
-    m_vtbl = &DAT_010a28c8;
-    m_vtbl = &DAT_010a2bbc;
-    m_04 = a3;
-    m_08 = 4;
-    m_10 = a4;
-    m_14 = a1;
-    m_18 = a2;
-    m_1c = a2;
-    m_20 = 0;
-    m_24 = 0;
-    m_28 = 0;
-    m_2c = 0;
-    m_30 = 0;
-    m_34 = 0;
-    m_38 = 0;
-    m_3c = 0;
-    m_40 = 0;
-    void* cs = (char*)this + 0x20d8;
+    *(void**)this = &DAT_010a28c8;
+    *(void**)this = &DAT_010a2bbc;
+    pName = (const char*)a3;
+    iDefaultAlignment = 4;
+    iPageSize = a4;
+    MemHeapSize = a1;
+    iInitialSize = a2;
+    iCurrentSize = a2;
+    iWastedMemory = 0;
+    iMemAllocated = 0;
+    iMemAllocatedHigh = 0;
+    iBlockMemAllocated = 0;
+    pMemHeap = 0;
+    iNumBlocks = 0;
+    pBlockHead = 0;
+    pBlockTail = 0;
+    iNumFreeBlocks = 0;
+    void* cs = CriticalSectionO;
     InitializeCriticalSection(cs);
-    m_0c = (int)((char*)0 + 8) + 8;
-    *(int*)((char*)this + 0x2050) = 0;
-    *(int*)((char*)this + 0x2054) = 0;
+    MinFreeBlockSize = (int)((char*)0 + 8) + 8;
+    pDelayedFreeBlocksA = 0;
+    iNextDelayedFreeIndex = 0;
     return this;
 }
 
 extern "C" void __cdecl FUN_00ec61c0(void* p, int value, unsigned int size);
 extern "C" void __stdcall FUN_00eccec5(int code);
 
-struct FUN_00aa8dd0_slot
-{
-    int m_flag;
-    char* m_ptr;
-};
-
-struct FUN_00aa8dd0_cls
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual int v12(void* a, int b);
-
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    void* m_14;
-    int unk18;
-    int m_1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int m_30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    unsigned char m_buf44[0x2000];
-    char* m_2044;
-    unsigned char m_buf2048[8];
-    int unk2050;
-    int unk2054;
-    FUN_00aa8dd0_slot m_slots[16];
-
-    void InitializeSlots();
-};
-
 // @fnv 0x00aa8dd0
-void FUN_00aa8dd0_cls::InitializeSlots()
+void AbstractHeap::ResetHeap()
 {
-    m_30 = v12(m_14, m_1c);
-    if (m_30 == 0)
+    pMemHeap = (char*)AllocateHeapMemory(MemHeapSize, iCurrentSize);
+    if (pMemHeap == 0)
         FUN_00eccec5(0);
-    m_2044 = (char*)this + 0x203c;
+    pLastSmallList = &pSmallFreeList[1023];
     int stride3 = 0x40;
     int i;
     for (i = 0; i < 0x10; i++)
     {
-        m_slots[i].m_flag = 0;
-        m_slots[i].m_ptr = (char*)this + 0x44 + i * stride3 * 8;
+        pSubBuckets[i].iCount = 0;
+        pSubBuckets[i].pFirst = (HeapFreeList*)((char*)pSmallFreeList + i * stride3 * 8);
     }
-    FUN_00ec61c0(m_buf44, 0, 0x2000);
-    FUN_00ec61c0(m_buf2048, 0, 8);
+    FUN_00ec61c0(pSmallFreeList, 0, 0x2000);
+    FUN_00ec61c0(&LargeFreeList, 0, 8);
 }
 
 struct FUN_00aa9d00_cls
@@ -1668,13 +1392,7 @@ FnvAbaf60Iter* FnvAbaf60Owner::FUN_00abaf60(FnvAbaf60Iter* pOut, FnvAbaf60Iter a
 }
 
 namespace fnv_00abc0a0 {
-class FUN_00abc0a0_pool
-{
-  public:
-    void FUN_00aa4060(void* apMemory);
-};
-
-extern FUN_00abc0a0_pool DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 
 struct FUN_00abc0a0_pair
 {
@@ -1714,7 +1432,7 @@ void FUN_00abc0a0_cls::FUN_00abc0a0()
         s3.unk03 = s3.unk02;
         unsigned int size = m_14 - m_0c;
         unsigned int p2 = m_0c;
-        DAT_011f6238.FUN_00aa4060((void*)p2);
+        DAT_011f6238.Deallocate((void*)p2);
     }
     m_0c = 0;
     m_10 = 0;
@@ -1893,7 +1611,7 @@ struct FUN_00aa7300_pool
 {
     int m_00;
     int m_04;
-    void Wait(const char* name);
+    void FUN_0040fbf0(const char* name);
 };
 
 class FUN_00aa7300_cls
@@ -1925,7 +1643,7 @@ void FUN_00aa7300_cls::FUN_00aa7300()
     int scratch0;
     int scratch1;
     FUN_00aa7300_node* cur;
-    m_20.Wait((const char*)"CheckFreeBlocks");
+    m_20.FUN_0040fbf0((const char*)"CheckFreeBlocks");
     if (m_40 > 8)
     {
         cur = m_08;
@@ -2692,19 +2410,12 @@ extern "C" __declspec(dllimport) void __stdcall DeleteCriticalSection(void* cs);
 extern "C" char DAT_010a28c8;
 extern "C" char DAT_010a2bbc;
 
-struct Heap00aaa5b0
-{
-    void* m_vtbl;
-
-    void FUN_00aa8da0();
-};
-
 // @fnv 0x00aa8da0
-void Heap00aaa5b0::FUN_00aa8da0()
+void AbstractHeapLifecycle::Destroy()
 {
-    m_vtbl = &DAT_010a2bbc;
-    DeleteCriticalSection((char*)this + 0x20d8);
-    m_vtbl = &DAT_010a28c8;
+    *(void**)this = &DAT_010a2bbc;
+    DeleteCriticalSection(CriticalSectionO);
+    *(void**)this = &DAT_010a28c8;
 }
 
 extern "C" __declspec(dllimport) void* __stdcall VirtualAlloc(void*, unsigned int, unsigned long, unsigned long);

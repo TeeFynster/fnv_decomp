@@ -12,7 +12,7 @@ void TESImageSpaceModifiableCountForm_6_::InitItem(TESForm* owner)
             if (!m_pImageSpaceModifier[i]) {
                 if (owner) {
                     if (((BGSCameraPath*)owner)->HasNameForWarning())
-                        Warning(DAT_0101cc80, formID, owner->GetEditorID());
+                        Warning(DAT_0101cc80, formID, owner->GetName());
                     else
                         Warning(DAT_0101cc30, formID, owner->GetFormID());
                 } else

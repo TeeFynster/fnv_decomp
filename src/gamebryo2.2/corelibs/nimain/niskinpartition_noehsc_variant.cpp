@@ -3,7 +3,11 @@
 // byte only under /MT /O2 /GS /Gy (unit src/gamebryo2.2/corelibs/nimain/niskinpartition.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "niskinpartition_decls.h"
+#include "../../../../include/NiAccumulator.h"
+#include "../../../../include/NiSkinPartition.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiRenderer.h"
 const void* g_011f5b1c;
 const void* __cdecl FUN_00a820d0();
 void __stdcall FUN_00a82600(int a, int b, float c);
@@ -13,14 +17,6 @@ struct Holder
     unsigned int m_u4;
     unsigned int m_uiCount;
     bool ContainsSortedSubset(const Holder* pkOther);
-};
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-};
-struct NiRenderer
-{
-    static NiRenderer* ms_pRenderer;
 };
 extern int DAT_0109e47c;
 struct P03MM
@@ -40,10 +36,7 @@ struct NiTAbstractPoolAllocator_unsigned_int
     struct LinkedListEntry* ms_pFreeList;
     struct RecursiveSpinLock* ms_kPoolState;
 };
-struct RecursiveSpinLock
-{
-    void __thiscall Lock(const char*);
-};
+#include "../../../../include/RecursiveSpinLock.h"
 extern RecursiveSpinLock g_011c5f80;
 extern unsigned int DAT_011c5f84;
 extern NiTAbstractPoolAllocator_unsigned_int NiTAbstractPoolAllocator_unsigned_int_instance;
@@ -643,53 +636,30 @@ class SkinPartitionOwner : public SkinObjectBase
     virtual ~SkinPartitionOwner();
     void FUN_00a846e0(SkinViewerStrings* pkStrings);
 };
-struct NiBinaryStreamFake
+inline unsigned int NiBinaryStream::BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes,
+                                                unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-    int unk00;
-    unsigned int m_uiStreamFlags;
-    void* m_pfnRead;
-    unsigned int(__cdecl* m_pfnWrite)(NiBinaryStreamFake* pkThis, const void* pvBuffer, unsigned int uiBytes,
-                                      unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    unsigned int BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                             unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesWritten = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesWritten;
-        return uiBytesWritten;
-    }
-};
-struct NiStreamFake
-{
-    int u000, u004, u008, u00c, u010, u014, u018, u01c, u020, u024, u028, u02c, u030, u034, u038, u03c;
-    int u040, u044, u048, u04c, u050, u054, u058, u05c, u060, u064, u068, u06c, u070, u074, u078, u07c;
-    int u080, u084, u088, u08c, u090, u094, u098, u09c, u0a0, u0a4, u0a8, u0ac, u0b0, u0b4, u0b8, u0bc;
-    int u0c0, u0c4, u0c8, u0cc, u0d0, u0d4, u0d8, u0dc, u0e0, u0e4, u0e8, u0ec, u0f0, u0f4, u0f8, u0fc;
-    int u100, u104, u108, u10c, u110, u114, u118, u11c, u120, u124, u128, u12c, u130, u134, u138, u13c;
-    int u140, u144, u148, u14c, u150, u154, u158, u15c, u160, u164, u168, u16c, u170, u174, u178, u17c;
-    int u180, u184, u188, u18c, u190, u194, u198, u19c, u1a0, u1a4, u1a8, u1ac, u1b0, u1b4, u1b8, u1bc;
-    int u1c0, u1c4, u1c8, u1cc, u1d0, u1d4, u1d8, u1dc, u1e0, u1e4, u1e8, u1ec, u1f0, u1f4, u1f8, u1fc;
-    int u200, u204, u208, u20c, u210, u214, u218, u21c, u220, u224, u228, u22c, u230, u234, u238, u23c;
-    int u240, u244, u248, u24c;
-    NiBinaryStreamFake* m_pBackingStream;
-};
+    unsigned int uiBytesWritten = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    m_uiAbsoluteCurrentPos += uiBytesWritten;
+    return uiBytesWritten;
+}
 template <class T>
-inline unsigned int SerializeValue(NiBinaryStreamFake& binstream, const T* pvValue, unsigned int uiNumEls)
+inline unsigned int SerializeValue(NiBinaryStream& binstream, const T* pvValue, unsigned int uiNumEls)
 {
     unsigned int uiSize = sizeof(T);
     return binstream.BinaryWrite(pvValue, uiNumEls * uiSize, &uiSize, 1);
 }
-template <class T> inline unsigned int SerializeValue(NiStreamFake& bstream, const T& value)
+template <class T> inline unsigned int SerializeValue(NiStream& bstream, const T& value)
 {
-    return SerializeValue(*bstream.m_pBackingStream, &value, 1);
+    return SerializeValue(*bstream.m_pkOstr, &value, 1);
 }
-template <class T> inline unsigned int SerializeValue(NiStreamFake& bstream, const T* pvValue, unsigned int uiNumEls)
+template <class T> inline unsigned int SerializeValue(NiStream& bstream, const T* pvValue, unsigned int uiNumEls)
 {
-    return SerializeValue(*bstream.m_pBackingStream, pvValue, uiNumEls);
+    return SerializeValue(*bstream.m_pkOstr, pvValue, uiNumEls);
 }
 struct PartitionSave : NiSkinPartition::Partition
 {
-    void WriteToStream(NiStreamFake& kStream);
+    void WriteToStream(NiStream& kStream);
 };
 struct Skp_00a828d0_pair
 {
@@ -718,229 +688,39 @@ struct Skp_00a828d0_cls : NiSkinPartition::Partition
 void* __cdecl AllocBlock(unsigned int uiSize);
 void __cdecl FreeBlock(void* p);
 void* __cdecl NiMalloc(unsigned int);
-struct NiBinaryStream;
 typedef unsigned int(__cdecl* NiBinaryStreamReadFn)(NiBinaryStream* pkThis, void* pvBuffer, unsigned int uiBytes,
                                                     unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-struct NiBinaryStream
+inline NiBinaryStream* NiStream::GetBinaryStream()
 {
-    int unk000;
-    unsigned int m_uiStreamFlags;
-    NiBinaryStreamReadFn m_pfnRead;
-
-    template <class T> inline unsigned int BinaryRead(T* pvBuffer, unsigned int auiCount = 1)
-    {
-        unsigned int uiComponentSize = sizeof(T);
-        unsigned int uiTotal = auiCount * sizeof(T);
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotal, &uiComponentSize, 1);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
-struct NiStream
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    unsigned int m_uiFormatVersion;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    NiBinaryStream* m_pkBinaryStream;
-};
+    return m_pkIstr;
+}
 template <class T> inline void ReadBinaryValue(NiStream& kStream, T* ptVal, unsigned int auiCount = 1)
 {
-    kStream.m_pkBinaryStream->BinaryRead(ptVal, auiCount);
+    kStream.GetBinaryStream()->BinaryRead(ptVal, auiCount);
 }
 struct PartitionLoader : NiSkinPartition::Partition
 {
     void FUN_00a82d90(NiStream& kStream);
 };
-class NiBinaryStreamA83C
-{
-  public:
-    typedef unsigned int (*NIBINARYSTREAM_READFN)(NiBinaryStreamA83C* pkThis, void* pvBuffer, unsigned int uiBytes,
-                                                  unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    virtual ~NiBinaryStreamA83C();
-
-    unsigned int m_uiStreamFlags;
-    void* m_pfnWrite;
-    NIBINARYSTREAM_READFN m_pfnRead;
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
-class NiStreamA83C
-{
-  public:
-    virtual ~NiStreamA83C();
-
-    unsigned char m_auPad[0x24c];
-    NiBinaryStreamA83C* m_pUnderlyingStream;
-};
-template <class T> inline void NiBinaryStreamLoad(NiBinaryStreamA83C& is, T* pValue, unsigned int uiNumEls)
+template <class T> inline void NiBinaryStreamSave(NiBinaryStream& os, T* pValue, unsigned int uiNumEls)
 {
     unsigned int uiSize = sizeof(T);
-    is.BinaryRead(pValue, sizeof(T) * uiNumEls, &uiSize, 1);
+    // The old save-stream stand-in called +0x0C: NiBinaryStream::m_pfnWrite, not m_pfnRead (+0x08).
+    os.BinaryWrite(pValue, sizeof(T) * uiNumEls, &uiSize, 1);
 }
-template <class T> inline void ReadBinaryValue(NiStreamA83C& kStream, T& value)
+template <class T> inline void ReadBinaryValue(NiStream& kStream, T& value)
 {
-    NiBinaryStreamLoad(*kStream.m_pUnderlyingStream, &value, 1);
+    NiBinaryStreamSave(*kStream.m_pkOstr, &value, 1);
 }
 class FUN_00a89af0_helper
 {
   public:
-    void FUN_00a89af0(NiStreamA83C& kStream);
+    void FUN_00a89af0(NiStream& kStream);
 };
 class ElemA83C
 {
   public:
-    void WriteToStream(NiStreamA83C& kStream);
+    void WriteToStream(NiStream& kStream);
     int unk00[11];
 };
 class SaverA83C : public FUN_00a89af0_helper
@@ -950,186 +730,26 @@ class SaverA83C : public FUN_00a89af0_helper
     unsigned int m_uiCount;
     ElemA83C* m_pkElems;
 
-    void FUN_00a83ce0(NiStreamA83C& kStream);
+    void FUN_00a83ce0(NiStream& kStream);
 };
 
-struct LBBinaryStream
+inline unsigned int NiBinaryStream::BinaryRead(void* pvBuffer, unsigned int uiTotalBytes,
+                                               unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-    void* pVtable;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(LBBinaryStream* apThis, void* apvBuffer, unsigned int auiBytes,
-                                     unsigned int* apuiComponentSizes, unsigned int auiNumComponents);
+    unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    m_uiAbsoluteCurrentPos += uiBytesRead;
+    return uiBytesRead;
+}
 
-    unsigned int BinaryRead(void* apvBuffer, unsigned int auiTotalBytes, unsigned int* apuiComponentSizes,
-                            unsigned int auiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, apvBuffer, auiTotalBytes, apuiComponentSizes, auiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
-
-template <class T> inline unsigned int LBBinaryStreamLoad(LBBinaryStream& arStream, T* apValue, unsigned int auiNumEls)
+template <class T> inline unsigned int LoadBinaryValues(NiBinaryStream& arStream, T* apValue, unsigned int auiNumEls)
 {
     unsigned int uiComponentSize = sizeof(T);
     return arStream.BinaryRead(apValue, auiNumEls * sizeof(T), &uiComponentSize, 1);
 }
 
-struct LBStream
+template <class T> inline void LBStreamLoadBinary(NiStream& arStream, T& arValue)
 {
-    virtual void v00();
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    LBBinaryStream* m_pUnderlyingStream;
-};
-
-template <class T> inline void LBStreamLoadBinary(LBStream& arStream, T& arValue)
-{
-    LBBinaryStreamLoad(*arStream.m_pUnderlyingStream, &arValue, 1);
+    LoadBinaryValues(*arStream.GetBinaryStream(), &arValue, 1);
 }
 
 struct LBMemoryManager
@@ -1149,7 +769,7 @@ struct LBObject
     virtual ~LBObject();
     int unk04;
 
-    void LoadBinary(LBStream& arStream);
+    void LoadBinary(NiStream& arStream);
 };
 
 struct LBPartition
@@ -1168,7 +788,7 @@ struct LBPartition
 
     LBPartition() throw();
     ~LBPartition();
-    void LoadBinary(LBStream& arStream);
+    void LoadBinary(NiStream& arStream);
 };
 
 struct LBSkinPartition : LBObject
@@ -1176,11 +796,11 @@ struct LBSkinPartition : LBObject
     unsigned int m_uiPartitionCount;
     LBPartition* m_pPartitions;
 
-    void FUN_00a83c30(LBStream& arStream);
+    void FUN_00a83c30(NiStream& arStream);
 };
 
 // @fnv 0x00a83c30
-void LBSkinPartition::FUN_00a83c30(LBStream& arStream)
+void LBSkinPartition::FUN_00a83c30(NiStream& arStream)
 {
     LBObject::LoadBinary(arStream);
     LBStreamLoadBinary(arStream, m_uiPartitionCount);

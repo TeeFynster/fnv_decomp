@@ -3,142 +3,27 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/gamebryo2.2/corelibs/nimain/niintegersextradata.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "niintegersextradata_decls.h"
-struct NiFixedString
-{
-};
-struct NiAVObject
-{
-    void SetName(NiFixedString const& name);
-};
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiColor.h"
+#include "../../../../include/NiFixedString.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/NiExtraData.h"
+#include "../../../../include/NiIntegerStreamArray.h"
+#include "../../../../include/NiIntegersExtraData.h"
+
+// Default colors leave their components uninitialized.
+inline NiColor::NiColor()
+{}
+
 extern NiFixedString* DAT_012031c0;
-struct FUN_00c543e0_shell : NiAVObject
-{
-    void FUN_00c543e0();
-};
 extern int g_012031c4;
-struct FUN_00c54d60_shell
-{
-    int* __thiscall FUN_00c54d60();
-};
-struct FUN_00c54030_shell
-{
-    int __thiscall FUN_00c54030(int param_1);
-};
-struct FUN_00a7b290_shell
-{
-    void __thiscall FUN_00a7b290(int);
-};
-struct FUN_00c54150_shell
-{
-    void __thiscall FUN_00c54150(int param_1);
-};
-struct C00c541e0
-{
-    bool FUN_00a7b3d0(int);
-    bool FUN_00c541e0(int);
-};
-class NiStream;
-struct NiColor
-{
-    float r;
-    float g;
-    float b;
-    void __thiscall SaveBinary(NiStream&);
-};
-void __cdecl FUN_00a303a0(NiStream&, unsigned short*);
-void __cdecl FUN_00a29550(NiStream&, unsigned char*);
-struct FUN_00c54660_shell
-{
-    NiColor color;
-    unsigned short fldC;
-    unsigned char fldE;
-    void __thiscall FUN_00c54660(NiStream&);
-};
-void _delete(void*, unsigned int);
-struct S_FUN_00c53fa0
-{
-    void __thiscall FUN_00c53fa0();
-};
-struct S_FUN_00c547e0
-{
-    void* __thiscall FUN_00c547e0(unsigned int);
-};
 struct MM
 {
     void __thiscall _DeallocateAlias(void*);
 };
 extern MM g_memoryManager;
-extern int DAT_010c2b2c;
-struct S
-{
-    void* vtbl;
-    void* ptr;
-    void __thiscall FUN_00c54810();
-};
-struct NiStream;
-struct NiExtraDataSaveHelper : NiExtraData
-{
-    void SaveBinary(NiStream&);
-};
-void __cdecl FUN_0044adf0(NiStream&, unsigned const&);
-struct NiExtraDataSaveHelperShell : NiExtraDataSaveHelper
-{
-    void FUN_00c54170(NiStream&);
-};
-struct A51BF0Base
-{
-    static void* __cdecl operator new(unsigned int size);
-};
-struct FUN_00c53f10 : A51BF0Base
-{
-    unsigned char padding[28];
-    FUN_00c53f10();
-};
-NiFixedString DAT_011f49e0;
-NiAVObject* FUN_00c54210();
-class NiStream;
-struct FUN_00c54040_cls
-{
-    unsigned int baseData[3];
-    void FUN_00a7b330(NiStream&, unsigned int);
-    unsigned int unk0c;
-    char* entries;
-    unsigned int unk14;
-    unsigned short count;
 
-    void FUN_00c54040(NiStream& stream, unsigned int flags);
-};
-struct S_00c54130
-{
-    void FUN_00a7b3b0(int a);
-    void FUN_00c54130(int a);
-};
-extern double DAT_01012060;
-extern float DAT_012031cc;
-extern double DAT_01017b70;
-struct S_00c54550_Foo
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    unsigned short unk0c;
-
-    void __thiscall FUN_00c54550(float param_1);
-};
-class NiStream;
-extern double DAT_01017b70;
-void __cdecl FUN_00a30370(NiStream&, void*);
-void __cdecl FUN_00a643b0(NiStream&, void*);
-struct FUN_00c545d0_cls
-{
-    unsigned int baseData[3];
-    void __thiscall FUN_00a59be0(NiStream&);
-    unsigned short fldC;
-    unsigned short fldE;
-    void __thiscall FUN_00c54550(float);
-    void __thiscall FUN_00c545d0(NiStream& s);
-};
 struct FUN_00c54b70_cls
 {
     unsigned int unk00[2];
@@ -150,19 +35,6 @@ struct FUN_00c54b70_cls
     void FUN_00c54a30(unsigned int idx, NiIntegerStreamEntry& e);
     unsigned int FUN_00c54b70(NiIntegerStreamEntry& e);
 };
-struct FUN_00c54c50_shell
-{
-    void* vtbl;
-    void* ptr;
-    unsigned short fld8;
-    unsigned short fldA;
-    unsigned short fldC;
-    unsigned short fldE;
-
-    FUN_00c54c50_shell* __thiscall FUN_00c54c50(unsigned short param_1, unsigned short param_2);
-};
-extern int DAT_010c2b2c;
-void* __cdecl FUN_00c54bc0(unsigned int);
 struct FUN_00c54cc0_cls
 {
     float m_00;
@@ -173,31 +45,15 @@ struct FUN_00c54cc0_cls
     bool __thiscall FUN_00c54cc0(FUN_00c54cc0_cls* other);
 };
 
-// Deletes the global NiFixedString instance and clears the pointer; the fixed string's inline
-// destructor releases its global-string-table handle unless it is the shared null handle.
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
-extern char* DAT_0109b220;
-
-struct NiFixedStringD
+inline void NiFixedString::operator delete(void* pvMem)
 {
-    char* m_kHandle;
-    ~NiFixedStringD()
-    {
-        if (m_kHandle == DAT_0109b220)
-            return;
-        volatile long* pRefCount = (volatile long*)(m_kHandle - 8);
-        InterlockedDecrement(pRefCount);
-    }
-    static void operator delete(void* pvMem)
-    {
-        g_memoryManager._DeallocateAlias(pvMem);
-    }
-};
+    g_memoryManager._DeallocateAlias(pvMem);
+}
 
 // @fnv 0x00c54760
 void FUN_00c54760()
 {
-    delete (NiFixedStringD*)DAT_012031c0;
+    delete DAT_012031c0;
     DAT_012031c0 = 0;
 }
 
@@ -250,48 +106,31 @@ void FUN_00c54a30::SetAt(unsigned int uiIndex, const ElemZ& kElem)
     m_pUserData[uiIndex] = kElem;
 }
 
-struct NiRTTI
+inline const NiRTTI* NiRTTI::GetBaseRTTI() const
 {
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-    const NiRTTI* GetBaseRTTI() const
-    {
-        return m_pBaseRTTI;
-    }
-};
+    return m_pBaseRTTI;
+}
 
-class NiObject
+inline bool NiObject::IsKindOfType(const NiRTTI* pkRTTI) const
 {
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual const NiRTTI* GetRTTI() const;
-    bool IsKindOfType(const NiRTTI* pkRTTI) const
+    const NiRTTI* pkTmp = GetRTTI();
+    while (pkTmp)
     {
-        const NiRTTI* pkTmp = GetRTTI();
-        while (pkTmp)
-        {
-            if (pkTmp == pkRTTI)
-                return true;
-            pkTmp = pkTmp->GetBaseRTTI();
-        }
-        return false;
+        if (pkTmp == pkRTTI)
+            return true;
+        pkTmp = pkTmp->GetBaseRTTI();
     }
-};
-
-struct C54400Owner
-{
-    NiObject* FUN_00a5bdd0(const NiFixedString& kName);
-};
+    return false;
+}
 
 // @fnv 0x00c54400
-NiObject* __cdecl FUN_00c54400(C54400Owner* pkOwner)
+NiObject* __cdecl FUN_00c54400(NiAVObject* pkOwner)
 {
     NiObject* pkResult = 0;
     if (pkOwner)
     {
         const NiFixedString& kName = *DAT_012031c0;
-        NiObject* pkTarget = pkOwner->FUN_00a5bdd0(kName);
+        NiObject* pkTarget = (NiObject*)pkOwner->FUN_00a5bdd0(kName);
         if (!pkTarget)
             pkResult = 0;
         else
@@ -300,16 +139,9 @@ NiObject* __cdecl FUN_00c54400(C54400Owner* pkOwner)
     return pkResult;
 }
 
-struct NiIntegerStreamColor
-{
-    float r;
-    float g;
-    float b;
-};
-
 struct NiIntegerStreamEntryData
 {
-    NiIntegerStreamColor m_kFogTint;
+    NiColor m_kFogTint;
     unsigned short m_usValue;
     unsigned char m_ucFlag;
 
@@ -527,55 +359,20 @@ IntegersExtraData::IntegersExtraData()
     FUN_00c543e0();
 }
 
+
+__forceinline void* NiFixedString::operator new(size_t size)
+{
+    return DAT_011f6238.Alloc(size);
+}
+
+
 namespace fnv_00c546c0 {
-struct DynamicMemoryAllocator
-{
-    void* __thiscall FUN_00aa3e40(unsigned int size);
-};
-extern DynamicMemoryAllocator DAT_011f6238;
-extern int DAT_0109b220;
-
-struct NiGlobalStringTable
-{
-    static char* __cdecl AddString(char const* name);
-};
-
-struct NiFS
-{
-    int handle;
-
-    __forceinline void* operator new(unsigned int size)
-    {
-        return DAT_011f6238.FUN_00aa3e40(size);
-    }
-
-    __forceinline NiFS(char const* s)
-    {
-        if (s == 0)
-            handle = DAT_0109b220;
-        else
-            handle = (int)NiGlobalStringTable::AddString(s);
-    }
-};
-
 // @fnv 0x00c546c0
 void __cdecl FUN_00c546c0()
 {
-    DAT_012031c0 = (NiFixedString*)new NiFS("FRN");
+    DAT_012031c0 = new NiFixedString((const char*)"FRN");
 }
 }  // namespace fnv_00c546c0
-
-struct NiIntStreamColorC
-{
-    float r;
-    float g;
-    float b;
-
-    bool operator==(const NiIntStreamColorC& c) const
-    {
-        return (r == c.r && g == c.g && b == c.b);
-    }
-};
 
 struct NiIntStreamMemoryC
 {
@@ -583,7 +380,7 @@ struct NiIntStreamMemoryC
 };
 struct NiIntStreamEntryC
 {
-    NiIntStreamColorC m_kFogTint;
+    NiColor m_kFogTint;
     unsigned short m_usValue;
     unsigned char m_ucFlag;
 

@@ -2,7 +2,9 @@
 // src/staging/blk_005c0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/BGSProjectile.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/Reset3DMobIterator.h"
 
 struct FUN_005c1ae0_class
 {
@@ -27,10 +29,6 @@ void* __cdecl CallWithZeroedArgs(void* apArg1, void* apArg2, void* apArg3, void*
 extern int g_TES;
 extern unsigned char DAT_011c7a64;
 unsigned char __cdecl FUN_005d2a40(void);
-struct EffectSetting
-{
-    unsigned int GetEffectID();
-};
 // @fnv 0x005d2a50
 unsigned char FUN_005d2a50()
 {
@@ -40,22 +38,9 @@ unsigned char FUN_005d2a50()
     return 1;
 }
 
-extern int DAT_0103cf54;
-int* __fastcall FUN_005d8b10(int*);
-
-struct Reset3DMobIterator
-{
-    void* vtbl;
-    void FUN_005d8b10();
-    void* FUN_005d8af0();
-};
-
 // @fnv 0x005d8af0
-void* Reset3DMobIterator::FUN_005d8af0()
+Reset3DMobIterator::Reset3DMobIterator()
 {
-    FUN_005d8b10();
-    vtbl = &DAT_0103cf54;
-    return this;
 }
 
 extern "C" float __cdecl _logf(float);
@@ -103,20 +88,10 @@ void FUN_005dd540_Class::SetByteAtOffsetE3(unsigned char value)
     *(unsigned char*)((char*)this + 0xe3) = value;
 }
 
-struct BGSProjectile
-{
-    bool GetFlag(unsigned int) const;
-};
-
-struct FUN_005de080_shell
-{
-    void FUN_005de080();
-};
-
 // @fnv 0x005de080
-void FUN_005de080_shell::FUN_005de080()
+bool BGSProjectile::FUN_005de080()
 {
-    ((BGSProjectile*)this)->GetFlag(0x400);
+    return GetFlag(0x400);
 }
 
 struct Tgt

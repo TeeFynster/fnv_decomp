@@ -1,3 +1,12 @@
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/BSAudio.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/Pair.h"
+#include "../../../../../../include/Vec4.h"
+
+#include "../../../../../../include/hkStatisticsCollector.h"
+#include "../../../../../../include/hkp3AxisSweep.h"
 // src/havok/physics/collide/broadphase/3axissweep/hkp3axissweep_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/broadphase/3axissweep/hkp3axissweep_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -7,11 +16,7 @@
 // to their real unit once identified.
 // src/havok/physics/collide/broadphase/3axissweep/hkp3axissweep.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/broadphase/3axissweep/hkp3axissweep.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct hkp3AxisSweep {
-    int FUN_00d11630();
-};
 unsigned short MaxUnsignedShort(unsigned short a, unsigned short b);
-struct BSAudio { void* p; int a; int b; };
 BSAudio* __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void*, void*, int);
 struct UnkRet { int x; int y; };
@@ -48,6 +53,7 @@ struct D1A0E0IntArray {
     int* m_data;
     int m_iElementCount;
 };
+// distinct from hkArrayBase: sweep entry remapping method 0x00d1a0e0.
 struct D1A0E0EntryArray {
     D1A0E0Entry* m_data;
     int m_iElementCount;
@@ -88,15 +94,12 @@ struct S_00d1a180_Router {
 struct S_00d1a180_HeapAllocator {
     static S_00d1a180_Allocator& get(const void*) { return S_00d1a180_Router::FUN_00c85750().heap(); }
 };
-struct S_00d1a180_IntArray {
-    int* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+
 struct S_00d1a180_EndPoint {
     unsigned short m_uiFilterValue;
     unsigned short m_usIndex;
 };
+// distinct from hkArrayBase: sweep endpoint remapping method 0x00d1a180.
 struct S_00d1a180_Axis {
     S_00d1a180_EndPoint* m_data;
     int m_iElementCount;
@@ -125,7 +128,7 @@ struct S_00d1a180_Axis {
         _setSize(S_00d1a180_HeapAllocator().get(this), n);
     }
 
-    void RemapEndPoints(char* nodes, const S_00d1a180_IntArray& remap);
+    void RemapEndPoints(char* nodes, const hkArrayBase<int>& remap);
 };
 void __fastcall FUN_00d10af0(int index, unsigned int* bits);
 struct FUN_00d11620_cls {
@@ -335,13 +338,6 @@ struct AllocIface {
     virtual void* unk00();
     virtual void* Alloc(unsigned int size);
 };
-struct AllocHolder {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AllocIface* m_pAllocator;
-};
 struct SpawnedObject {
     int unk00;
     unsigned short m_wSize;
@@ -352,6 +348,7 @@ SpawnedObject* FUN_00d182a0(int a, int b, int c);
 int __cdecl FUN_00d19d10(const float* v, float* out);
 extern int DAT_011b37a4[];
 struct hkp3AxisSweep;
+// hkp3AxisSweep endpoint (Havok hkpBpEndPoint: 16-bit value, 16-bit node index; 4 bytes)
 struct Endpoint {
     unsigned short value;
     unsigned short handle;
@@ -360,13 +357,9 @@ struct S_00d19d90_Class {
     Endpoint* m_endpoints;
     void MergeSortedEndpoints(void* pLookup, int totalCount, Endpoint* pSrc2, int count2);
 };
-struct Pair {
-    unsigned short key;
-    unsigned short hi;
-};
 struct FUN_00d19ef0_cls {
-    Pair* m_pItems;
-    void FUN_00d19ef0(char* out, int n, Pair* src, int k);
+    Endpoint* m_pItems;
+    void FUN_00d19ef0(char* out, int n, Endpoint* src, int k);
 };
 void __cdecl FUN_00d19fa0(unsigned int* base, int lo, int hi, int unkArg);
 void __cdecl QuickSortByLowWord(unsigned int* base, int lo, int hi, int unkArg);
@@ -454,27 +447,6 @@ struct S_d11790_Sweep {
     void FixNodeEdges(unsigned h);
 };
 extern "C" int __cdecl FUN_00d06f80(const void* ptr, int size);
-struct hkStatisticsCollector {
-    virtual void dummy0();
-    virtual void dummy1();
-    virtual void dummy2();
-    virtual void dummy3();
-    virtual void dummy4();
-    virtual void AddMemoryChunk(int type, const char* name, const void* ptr, int size, int allocatedSize);
-
-    int pad04;
-    int pad08;
-    int pad0C;
-    char m_reportInplaceAllocations;
-
-    void DispatchWithMode(const char* name, const void* ptr, int size, int unk);
-};
-template <typename T>
-struct hkArray {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
 struct FourIntegerBlock {
     int unk00;
     int unk04;
@@ -523,36 +495,6 @@ struct S_00d119e0 {
 };
 BSAudio* __cdecl FUN_00c85750() throw();
 void __cdecl FUN_00c856c0(void*, void*) throw();
-struct Allocator_00d182e0 {
-    virtual void unk00() throw();
-    virtual void unk04() throw();
-    virtual void unk08() throw();
-    virtual void unk0c() throw();
-    virtual void ReleaseBlock(void* p, int numBytes) throw();
-};
-struct Router_00d182e0 {
-    int unk0; int unk4; int unk8; int unkc;
-    Allocator_00d182e0* m_pStreamAllocator;
-    static Router_00d182e0* get() throw() {
-        return (Router_00d182e0*)FUN_00c85750();
-    }
-};
-template <typename T>
-struct hkArray_00d182e0 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    void ClearAndRelease(Allocator_00d182e0* alloc) throw() {
-        int cap = m_iCapacityState;
-        m_iElementCount = 0;
-        if (!(cap & 0x80000000)) {
-            alloc->ReleaseBlock(m_data, (cap & 0x3fffffff) * sizeof(T));
-        }
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
 struct Node_00d182e0 {
     int unk00; int unk04; int unk08; int unk0c;
 };
@@ -562,7 +504,7 @@ struct EndPoint_00d182e0 {
 };
 struct SubNode_00d182e0 {
     int unk00;
-    hkArray_00d182e0<unsigned short> m_ppData;
+    hkArray<unsigned short> m_ppData;
 };
 struct BroadPhaseBase {
     virtual ~BroadPhaseBase() throw();
@@ -583,8 +525,8 @@ struct FUN_00d182e0 : public BroadPhaseBase {
     int unk70; int unk74; int unk78; int unk7C;
     int unk80; int unk84; int unk88; int unk8C;
     int unk90; int unk94; int unk98; int unk9C;
-    hkArray_00d182e0<Node_00d182e0> m_kNodeCollection;
-    hkArray_00d182e0<EndPoint_00d182e0> m_kAxisEndPoints[3];
+    hkArray<Node_00d182e0> m_kNodeCollection;
+    hkArray<EndPoint_00d182e0> m_kAxisEndPoints[3];
     int m_numSubNodes;
     int unkD4;
     SubNode_00d182e0* m_subNodes;
@@ -594,12 +536,6 @@ struct FUN_00d182e0 : public BroadPhaseBase {
 int __cdecl FUN_00d10ac0();
 void __cdecl FUN_00d10ff0();
 struct Allocator;
-struct MemoryRouter {
-    int unk00, unk04, unk08, unk0C;
-    Allocator* m_pStreamAllocator;
-    static MemoryRouter* GetMonitorStream() { return (MemoryRouter*)FUN_00c85750(); }
-    Allocator& heap() { return *m_pStreamAllocator; }
-};
 template <typename T>
 static void constructWithCopy(T* p, int n, const T& t) {
     for (int i = 0; i < n; i++) {
@@ -625,7 +561,7 @@ struct SmallArray {
     }
 
     void AddBack(const unsigned short& val) {
-        _pushBack(MemoryRouter::GetMonitorStream()->heap(), val);
+        _pushBack(reinterpret_cast<Allocator&>((&hkMemoryRouter::getInstance())->heap()), val);
     }
 
     int indexOf(const unsigned short& val) const {
@@ -657,7 +593,7 @@ struct BroadPhasePairArray : S_00d138a0_Array {
     }
 
     S_00d138a0_Pair& AllocatePair() {
-        return _expandOne(MemoryRouter::GetMonitorStream()->heap());
+        return _expandOne(reinterpret_cast<Allocator&>((&hkMemoryRouter::getInstance())->heap()));
     }
 };
 struct C_00d13620 {
@@ -721,15 +657,7 @@ struct C_00d13620 {
 };
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 // Broad-phase endpoint sweep with two inline active-node sets.
-struct BSAudioLocal { void* p; int a; int b; };
 void __cdecl ResizeAudioStream(void*, void*, int);
-struct AllocObj {
-    void** m_vtbl;
-};
-struct AllocHolderLocal {
-    int m_00; int m_04; int m_08; int m_0c;
-    AllocObj* m_10;
-};
 struct U16 { unsigned short v; };
 struct ShortVec {
     U16* m_00; int m_04; int m_08;
@@ -748,11 +676,8 @@ struct ObjX {
     int m_00;
     ShortVec m_04v;
 };
-struct PairLocal {
-    int m_00; int m_04;
-};
 struct PairVec {
-    PairLocal* m_00; int m_04; int m_08;
+    Pair* m_00; int m_04; int m_08;
 };
 struct ThisCls {
     int m_00; int m_04; int m_08; int m_0c; int m_10; int m_14; int m_18; int m_1c;
@@ -775,30 +700,30 @@ static int FindIdx(const U16* p, int n, unsigned short v)
 }
 static void PushShort(ShortVec* v, unsigned short val)
 {
-    AllocHolderLocal* h = (AllocHolderLocal*)FUN_00c85750();
+    hkMemoryRouter* h = (hkMemoryRouter*)FUN_00c85750();
     if (v->m_04 == (v->m_08 & 0x3fffffff))
-        ResizeAudioStream(h->m_10, v, 2);
+        ResizeAudioStream(h->m_heap, v, 2);
     v->m_00[v->m_04].v = val;
     v->m_04++;
 }
 static void PushDynamic(ShortVec* v, unsigned short val)
 {
-    AllocHolderLocal* h = (AllocHolderLocal*)FUN_00c85750();
+    hkMemoryRouter* h = (hkMemoryRouter*)FUN_00c85750();
     if (v->m_04 == (v->m_08 & 0x3fffffff))
-        ResizeAudioStream(h->m_10, v, 2);
+        ResizeAudioStream(h->m_heap, v, 2);
     U16* p = v->m_00 + *(volatile int*)&v->m_04;
     p->v = val;
     v->m_04++;
 }
 static void FreeLocalVec(LocalVec& v)
 {
-    AllocHolderLocal* h = (AllocHolderLocal*)FUN_00c85750();
-    AllocObj* ao = h->m_10;
+    hkMemoryRouter* h = (hkMemoryRouter*)FUN_00c85750();
+    Allocator* ao = reinterpret_cast<Allocator*>(h->m_heap);
     int cap = v.m_08;
     v.m_04 = 0;
     if ((cap & (int)0x80000000) == 0) {
-        typedef void (__thiscall* FreeFn)(AllocObj*, void*, int);
-        FreeFn fn = (FreeFn)ao->m_vtbl[4];
+        typedef void (__thiscall* FreeFn)(Allocator*, void*, int);
+        FreeFn fn = (FreeFn)(*reinterpret_cast<void***>(ao))[4];
         fn(ao, v.m_00, (cap & 0x3fffffff) * 2);
     }
     v.m_00 = 0;
@@ -807,10 +732,10 @@ static void FreeLocalVec(LocalVec& v)
 static __forceinline void AppendN(PairVec* out, Record* other, Record* rec, int n)
 {
     for (int k = 0; k < n; ++k) {
-        PairLocal* p = &out->m_00[out->m_04];
+        Pair* p = &out->m_00[out->m_04];
         out->m_04++;
-        p->m_00 = other->m_0c;
-        p->m_04 = rec->m_0c;
+        p->a = other->m_0c;
+        p->b = rec->m_0c;
     }
 }
 static __forceinline void HandlePair(ThisCls* idx, Record* rec, Record* other, PairVec* out, char flag)
@@ -819,9 +744,9 @@ static __forceinline void HandlePair(ThisCls* idx, Record* rec, Record* other, P
     Record* first = other;
     if ((rec->m_0c & 1) == 0) {
         if ((other->m_0c & 1) == 0) {
-            AllocHolderLocal* r = (AllocHolderLocal*)FUN_00c85750();
+            hkMemoryRouter* r = (hkMemoryRouter*)FUN_00c85750();
             if (out->m_04 == (out->m_08 & 0x3fffffff))
-                ResizeAudioStream(r->m_10, out, 8);
+                ResizeAudioStream(r->m_heap, out, 8);
             AppendN(out, other, rec, 1);
             return;
         }
@@ -1399,23 +1324,6 @@ unsigned int* CallZeroBlocks();
 #include <math.h>
 extern __m128 DAT_010c44d0;
 extern __m128 DAT_010c7170;
-struct Vec4
-{
-    __m128 m_vComponents;
-
-    void setNeg4(const Vec4& v) { m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c44d0); }
-    void add4(const Vec4& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
-    void setAdd4(const Vec4& a, const Vec4& b) { m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents); }
-    void setXYZW(const Vec4& xyz, const Vec4& w)
-    {
-        m_vComponents = _mm_shuffle_ps(xyz.m_vComponents, _mm_unpackhi_ps(xyz.m_vComponents, w.m_vComponents), _MM_SHUFFLE(3, 0, 1, 0));
-    }
-    void setReciprocal4(const Vec4& v)
-    {
-        __m128 e = _mm_rcp_ps(v.m_vComponents);
-        m_vComponents = _mm_sub_ps(_mm_add_ps(e, e), _mm_mul_ps(_mm_mul_ps(e, v.m_vComponents), e));
-    }
-};
 struct SweepShiftPairs;
 struct SweepShift
 {
@@ -1472,42 +1380,51 @@ struct S4ef0TypeIsClass {};
 template<class T> __forceinline void S4ef0_construct(T* t,int n,S4ef0TypeIsPod) {}
 template<class T> __forceinline void S4ef0_constructWithCopy(T* t,int n,const T& tcopy,S4ef0TypeIsClass) { for(int i=0;i<n;++i) { if(t+i) t[i]=tcopy; } }
 template<class T> __forceinline void S4ef0_constructWithCopy(T* t,int n,const T& tcopy,S4ef0TypeIsPod) { for(int i=0;i<n;++i) { t[i]=tcopy; } }
-template<class T> struct S4ef0ArrayBase {
- enum { CAPACITY_MASK=0x3fffffff, DONT_DEALLOCATE_FLAG=0x80000000 };
- T* m_data; int m_iElementCount; int m_iCapacityState;
- __forceinline S4ef0ArrayBase():m_data(0),m_iElementCount(0),m_iCapacityState(DONT_DEALLOCATE_FLAG) {}
- __forceinline int GetLogicalSize() const { return m_iElementCount; }
- __forceinline int getCapacity() const { return m_iCapacityState&static_cast<int>(CAPACITY_MASK); }
- __forceinline T* begin() { return m_data; }
- __forceinline T* end() { return m_data+m_iElementCount; }
- __forceinline const T* begin() const { return m_data; }
- __forceinline const T* end() const { return m_data+m_iElementCount; }
- __forceinline T& operator[](int i) { return m_data[i]; }
- __forceinline const T& operator[](int i) const { return m_data[i]; }
- __forceinline void setOwnedData(T* ptr,int size,int capacity) { m_data=ptr; m_iElementCount=size; m_iCapacityState=capacity; }
- __forceinline void clear() { m_iElementCount=0; }
- __forceinline void _clearAndDeallocate(S4ef0Allocator& alloc) {
-  clear();
-  if((m_iCapacityState&DONT_DEALLOCATE_FLAG)==0) alloc._bufFree<T>(m_data,getCapacity());
-  m_data=0; m_iCapacityState=DONT_DEALLOCATE_FLAG;
+template <class T>
+static __forceinline void S4ef0ArrayBase_clear(hkArrayBase<T>& self);
+
+template <class T>
+static __forceinline void S4ef0ArrayBase__clearAndDeallocate(hkArrayBase<T>& self, S4ef0Allocator& alloc);
+
+template <class T>
+static __forceinline void S4ef0ArrayBase_pushBackUnchecked(hkArrayBase<T>& self, const T& t);
+
+template <class T>
+static __forceinline void S4ef0ArrayBase__pushBack(hkArrayBase<T>& self, S4ef0Allocator& alloc,const T& t);
+
+template <class T>
+static __forceinline void S4ef0ArrayBase_clear(hkArrayBase<T>& self)
+{ self.m_iElementCount=0; }
+
+template <class T>
+static __forceinline void S4ef0ArrayBase__clearAndDeallocate(hkArrayBase<T>& self, S4ef0Allocator& alloc)
+{
+  S4ef0ArrayBase_clear(self);
+  if((self.m_iCapacityState&hkArrayBase<T>::DONT_DEALLOCATE_FLAG)==0) alloc._bufFree<T>(self.m_data,self.getCapacity());
+  self.m_data=0; self.m_iCapacityState=hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
  }
- __forceinline void pushBackUnchecked(const T& t) { S4ef0_constructWithCopy(m_data+m_iElementCount,1,t,S4ef0TypeIsPod()); m_iElementCount++; }
- __forceinline void _pushBack(S4ef0Allocator& alloc,const T& t) {
-  if(m_iElementCount==getCapacity()) ResizeAudioStream(&alloc,this,sizeof(T));
-  S4ef0_constructWithCopy(m_data+m_iElementCount,1,t,S4ef0TypeIsClass());
-  m_iElementCount++;
+
+template <class T>
+static __forceinline void S4ef0ArrayBase_pushBackUnchecked(hkArrayBase<T>& self, const T& t)
+{ S4ef0_constructWithCopy(self.m_data+self.m_iElementCount,1,t,S4ef0TypeIsPod()); self.m_iElementCount++; }
+
+template <class T>
+static __forceinline void S4ef0ArrayBase__pushBack(hkArrayBase<T>& self, S4ef0Allocator& alloc,const T& t)
+{
+  if(self.m_iElementCount==self.getCapacity()) ResizeAudioStream(&alloc,(&self),sizeof(T));
+  S4ef0_constructWithCopy(self.m_data+self.m_iElementCount,1,t,S4ef0TypeIsClass());
+  self.m_iElementCount++;
  }
-};
-template<class T,class A> struct S4ef0Array : S4ef0ArrayBase<T> {
- __forceinline S4ef0Array(int n) : S4ef0ArrayBase<T>() {
+template<class T,class A> struct S4ef0Array : hkArrayBase<T> {
+ __forceinline S4ef0Array(int n) : hkArrayBase<T>() {
   S4ef0Allocator& a=A().get(this);
   T* p=n ? a._bufAlloc<T>(n) : 0;
-  int cap=n ? n : S4ef0ArrayBase<T>::DONT_DEALLOCATE_FLAG;
+  int cap=n ? n : hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
   this->setOwnedData(p,n,cap);
   S4ef0_construct(this->m_data,n,S4ef0TypeIsPod());
  }
- __forceinline ~S4ef0Array() { this->_clearAndDeallocate(A().get(this)); }
- __forceinline void AddBack(const T& t) { this->_pushBack(A().get(this),t); }
+ __forceinline ~S4ef0Array() { S4ef0ArrayBase__clearAndDeallocate(*this, A().get(this)); }
+ __forceinline void AddBack(const T& t) { S4ef0ArrayBase__pushBack(*this, A().get(this),t); }
 };
 struct S4ef0Vector {
  __m128 m_vComponents;
@@ -1558,8 +1475,8 @@ struct S4ef0Node {
  }
  __forceinline int isMarker() const { return m_handle&1; }
 };
-struct S4ef0Marker { unsigned short m_usIndex,m_uiFilterValue; S4ef0ArrayBase<unsigned short> m_kMarkerIndices; };
-struct S4ef0Axis : S4ef0ArrayBase<Entry> { const Entry* LowerBoundEntry(const Entry* first,const Entry* last,unsigned short key) const; };
+struct S4ef0Marker { unsigned short m_usIndex,m_uiFilterValue; hkArrayBase<unsigned short> m_kMarkerIndices; };
+struct S4ef0Axis : hkArrayBase<Entry> { const Entry* LowerBoundEntry(const Entry* first,const Entry* last,unsigned short key) const; };
 __declspec(noinline) const Entry* S4ef0Axis::LowerBoundEntry(const Entry* start,const Entry* end,unsigned short value) const {
  while(end-start>16) {
   const Entry* mid=start+((end-start)>>1);
@@ -1571,12 +1488,12 @@ __declspec(noinline) const Entry* S4ef0Axis::LowerBoundEntry(const Entry* start,
 struct S4ef0Handle;
 struct S4ef0Collector { virtual void v0(); virtual float ReleaseCollector(unsigned int h,int i); };
 typedef S4ef0Array<S4ef0Pair,S4ef0HeapAlloc> S4ef0Results;
-typedef S4ef0ArrayBase<const S4ef0Node*> S4ef0NodeArr;
+typedef hkArrayBase<const S4ef0Node*> S4ef0NodeArr;
 struct S4ef0Owner {
  __m128 unk00,unk10,unk20,unk30;
  S4ef0Vector m_kVectorAt40,m_kVectorAt50,m_vScale;
  __m128 unk70,unk80,unk90;
- S4ef0ArrayBase<S4ef0Node> m_kNodeCollection;
+ hkArrayBase<S4ef0Node> m_kNodeCollection;
  S4ef0Axis m_kAxisEndPoints[3];
  int m_iMarkerCount,m_iMarkerCapacity; S4ef0Marker* m_pOverlappingMarkerInfo;
  __forceinline int getNumMarkers() const { return m_iMarkerCount; }
@@ -1833,13 +1750,7 @@ struct SweepBatchNode {
  }
  __forceinline int isMarker() const {return (unsigned int)handle&1;}
 };
-struct Arr:SweepStorageBase<SweepBatchNode*> {
- __forceinline void clear(BatchSweepAllocator& alloc) {
-   size=0;if(!(capacity&0x80000000))alloc.ReturnMemory(data,(capacity&0x3fffffff)*4);
-   data=0;capacity=0x80000000;
- }
- __forceinline void clearAndFree() {Holder* holder=(Holder*)FUN_00c85750();clear(*holder->allocObj);}
-};
+
 struct BatchNodeArray:SweepStorageBase<SweepBatchNode> {};
 struct BatchMarker { unsigned short node,value; unsigned short* data; int size,capacity; };
 struct SortArr15 {
@@ -1878,7 +1789,7 @@ struct Sweep15 : public BroadPhaseBase {
     int m_markerShift;
     BatchMarker* m_pOverlappingMarkerInfo;
 
-    __forceinline void collectSweepCandidates(const BatchAabb& spl,Arr& local);
+    __forceinline void collectSweepCandidates(const BatchAabb& spl,hkArrayBase<SweepBatchNode*>& local);
     void FUN_00d18400(In1* p1, In2* p2, int p3);
     int BuildBroadPhasePairs(void* a, int b, void* c, int d, int e, int f);
 };
@@ -1890,7 +1801,7 @@ __forceinline void sortSweepEndpoints(void* p,int count,EndpointOrder order) {
 }
 void __cdecl FUN_00d9fcf0(void* a, int b, void* c);
 void __cdecl CollectNodePairs(void* a, void* b, int c, int d);
-__forceinline void Sweep15::collectSweepCandidates(const BatchAabb& spl,Arr& local)
+__forceinline void Sweep15::collectSweepCandidates(const BatchAabb& spl,hkArrayBase<SweepBatchNode*>& local)
 {
         int capA4=arrA0.size;
         int sz = (capA4 >> 5) + 8;
@@ -1971,19 +1882,19 @@ __forceinline void Sweep15::collectSweepCandidates(const BatchAabb& spl,Arr& loc
                     if(word & 15) {
                         if(word & 1) {
                             if(!rec[0].disjointYZ(sortBounds) && !rec[0].isMarker())
-                                ((SweepBatchNode**)local.data)[local.size++]=rec+0;
+                                ((SweepBatchNode**)local.m_data)[local.m_iElementCount++]=rec+0;
                         }
                         if(word & 2) {
                             if(!rec[1].disjointYZ(sortBounds) && !rec[1].isMarker())
-                                ((SweepBatchNode**)local.data)[local.size++]=rec+1;
+                                ((SweepBatchNode**)local.m_data)[local.m_iElementCount++]=rec+1;
                         }
                         if(word & 4) {
                             if(!rec[2].disjointYZ(sortBounds) && !rec[2].isMarker())
-                                ((SweepBatchNode**)local.data)[local.size++]=rec+2;
+                                ((SweepBatchNode**)local.m_data)[local.m_iElementCount++]=rec+2;
                         }
                         if(word & 8) {
                             if(!rec[3].disjointYZ(sortBounds) && !rec[3].isMarker())
-                                ((SweepBatchNode**)local.data)[local.size++]=rec+3;
+                                ((SweepBatchNode**)local.m_data)[local.m_iElementCount++]=rec+3;
                         }
                     }
                     word >>= 4;

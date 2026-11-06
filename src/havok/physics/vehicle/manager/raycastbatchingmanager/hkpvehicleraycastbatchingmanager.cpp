@@ -3,6 +3,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include "havok/hkpVehicleRayCastBatchingManager.h"
+#include "../../../../../../include/hkMonitorStream.h"
 
 struct hkObjE42A {
     int unk00;
@@ -39,8 +40,7 @@ extern "C" void _ReadWriteBarrier(void);
 extern "C" unsigned __int64 __rdtsc(void);
 #include <windows.h>
 extern unsigned long DAT_0126835c;
-struct TimerRecord { const char* name; unsigned time; unsigned extra; };
-struct TimerStream { void* start; TimerRecord* current; void* unused; TimerRecord* end; };
+struct TimerStream { void* start; hkMonitorStream::TimerCommand* current; void* unused; hkMonitorStream::TimerCommand* end; };
 struct WheelResult { hkVector4 position, normal, suspension, contact, friction, extra; };
 struct WheelCommand { hkVector4 position, direction, from, to; void* results; int count; int enabled; int state; };
 struct Vehicle;
@@ -67,8 +67,9 @@ struct Allocator {
 };
 struct ThreadMemory { char* stack; unsigned field04, field08, field0c; Allocator* allocator; Allocator& heap() { return *allocator; } };
 ThreadMemory* FUN_00c85750();
-void FUN_00c908c0(Allocator*, hkArray<WheelResult>*, int, int);
-struct LocalWheelResults : hkArray<WheelResult> {
+void FUN_00c908c0(Allocator*, hkArrayBase<WheelResult>*, int, int);
+struct LocalWheelResults : hkArrayBase<WheelResult> {
+ LocalWheelResults() : hkArrayBase<WheelResult>(FinishingFlag(0)) {}
  WheelResult* original;
  void initialize() {
   m_data = 0; m_iElementCount = 0; m_iCapacityState = 0x80000000;
@@ -109,12 +110,12 @@ struct RayBatchManager {
 void RayBatchManager::FUN_00e42da0(void* input, void* world, WheelCommand* commands)
 {
  TimerStream* timer = (TimerStream*)TlsGetValue(DAT_0126835c);
- TimerRecord* record = timer->current;
+ hkMonitorStream::TimerCommand* record = timer->current;
  if (record < timer->end) {
-  record->name = "TtDoVehicles";
+  record->m_commandAndMonitor = "TtDoVehicles";
   _ReadWriteBarrier();
   volatile unsigned tick = (unsigned)__rdtsc();
-  record->time = tick;
+  record->m_time0 = tick;
   timer->current = record + 1;
  }
  int count = vehicleCount;
@@ -143,10 +144,10 @@ void RayBatchManager::FUN_00e42da0(void* input, void* world, WheelCommand* comma
  timer = (TimerStream*)TlsGetValue(DAT_0126835c);
  record = timer->current;
  if (record < timer->end) {
-  record->name = "Et";
+  record->m_commandAndMonitor = "Et";
   _ReadWriteBarrier();
   volatile unsigned tick = (unsigned)__rdtsc();
-  record->time = tick;
+  record->m_time0 = tick;
   timer->current = record + 1;
  }
  results.release();
@@ -154,26 +155,19 @@ void RayBatchManager::FUN_00e42da0(void* input, void* world, WheelCommand* comma
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 
+inline void hkMonitorStream::TimerCommand::setTime()
+{
+    _ReadWriteBarrier();
+    hkUint32 ticks;
+    __asm {
+        rdtsc
+        mov dword ptr[ticks], eax
+    }
+    m_time0 = ticks;
+}
+
 struct VRMonitorStream
 {
-    struct CommandTimingEntry
-    {
-        const char* m_pCommandName;
-        hkUint32 m_uiStartTicks;
-        hkUint32 m_uiEndTicks;
-
-        void setTime()
-        {
-            _ReadWriteBarrier();
-            hkUint32 ticks;
-            __asm {
-                rdtsc
-                mov dword ptr[ticks], eax
-            }
-            m_uiStartTicks = ticks;
-        }
-    };
-
     char* m_kRayStart;
     char* m_kRayEnd;
     char* m_pRayCursor;
@@ -188,8 +182,8 @@ struct VRMonitorStream
     {
         if (memoryAvailable())
         {
-            CommandTimingEntry* h = (CommandTimingEntry*)m_kRayEnd;
-            h->m_pCommandName = name;
+            hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)m_kRayEnd;
+            h->m_commandAndMonitor = name;
             h->setTime();
             m_kRayEnd = (char*)(h + 1);
         }

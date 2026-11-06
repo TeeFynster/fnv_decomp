@@ -1,6 +1,39 @@
-// gamebryo2.2/corelibs/nimain/nilight.cpp: NiLight, Standin (11 functions)
+// gamebryo2.2/corelibs/nimain/nilight.cpp: NiLight (11 functions)
 
-#include "nilight_decls.h"
+#include "../../../../include/NiRenderer.h"
+#include "../../../../include/StrArr.h"
+#include "../../../../include/BSStreamHeader.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiColor.h"
+#include "../../../../include/NiDynamicEffect.h"
+#include "../../../../include/NiLight.h"
+#include "../../../../include/NiStream.h"
+
+template <class T> inline void ReadBinaryValue(NiStream& stream, T& value)
+{
+    stream.m_pkIstr->Read(&value, sizeof(T));
+}
+
+inline unsigned int NiBinaryStream::Read(void* data, unsigned int size)
+{
+    unsigned int componentSizes[1] = {size};
+    return BinaryRead(data, size, componentSizes, 1);
+}
+
+inline unsigned int NiBinaryStream::BinaryRead(void* data, unsigned int size,
+    unsigned int* componentSizes, unsigned int components)
+{
+    unsigned int read = m_pfnRead(this, data, size, componentSizes, components);
+    m_uiAbsoluteCurrentPos += read;
+    return read;
+}
+
+inline NiColor::NiColor()
+{
+    static_cast<volatile float&>(r) = 0.0f;
+    static_cast<volatile float&>(g) = 0.0f;
+    static_cast<volatile float&>(b) = 0.0f;
+}
 
 // Loads the dimmer value and ambient, diffuse and specular colors from the stream after the base NiDynamicEffect data.
 // @fnv 0x00a72080
@@ -17,105 +50,24 @@ void NiLight::LoadBinary(NiStream& stream)
 void NiLight::CopyMemberData(NiLight* clone, CloningProcess& process)
 {
     NiAVObject::FUN_00a5ac90(clone, process);
-    clone->m_uiEffectPushCount = m_uiEffectPushCount;
-    clone->m_uiRevID = m_uiRevID;
-    clone->m_bEffectEnabled = m_bEffectEnabled;
+    clone->pushCount = pushCount;
+    clone->revID = revID;
+    clone->switchState = switchState;
 }
-
-struct FUN_00a72000_shell : public NiLight
-{
-    void* FUN_00a72000();
-};
 
 extern const char* const g_011f4a68_arg1;
 
 // @fnv 0x00a72000
-void* FUN_00a72000_shell::FUN_00a72000()
+const NiRTTI* NiLight::GetRTTI() const
 {
-    return (void*)&g_011f4a68_arg1;
+    return reinterpret_cast<const NiRTTI*>(&g_011f4a68_arg1);
 }
 
 extern int DAT_0109ce4c;
-struct NiDynamicEffect;
 void __fastcall DestroyDynamicEffect(NiDynamicEffect*);
-struct NiRenderer
-{
-    static NiRenderer* ms_pRenderer;
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-    virtual void f38();
-    virtual void f39();
-    virtual void f40();
-    virtual void f41();
-    virtual void f42();
-    virtual void f43();
-    virtual void f44();
-    virtual void f45();
-    virtual void f46();
-    virtual void f47();
-    virtual void f48();
-    virtual void f49();
-    virtual void f50();
-    virtual void f51();
-    virtual void f52();
-    virtual void f53();
-    virtual void f54();
-    virtual void f55();
-    virtual void f56();
-    virtual void f57();
-    virtual void f58();
-    virtual void f59();
-    virtual void f60();
-    virtual void f61();
-    virtual void UnkF8(void*);
-};
-struct Standin : public NiLight
-{
-    void* FUN_00a72040(unsigned int);
-};
 
-struct FUN_00a72010_owner
-{
-    void FUN_00a72010();
-};
 // @fnv 0x00a72010
-void FUN_00a72010_owner::FUN_00a72010()
+void NiLight::DestroyMembers()
 {
     typedef void(__thiscall * Fn_t)(NiRenderer*, void*);
     *(void**)this = (void*)&DAT_0109ce4c;
@@ -125,120 +77,85 @@ void FUN_00a72010_owner::FUN_00a72010()
     DestroyDynamicEffect((NiDynamicEffect*)(void*)this);
 }
 
-struct FUN_00a72160_shell : public NiLight
-{
-    bool FUN_00a72160(NiObject*);
-};
-struct Call_439090_tgt
-{
-    bool __thiscall Call_439090(const NiPoint3&);
-};
-struct FUN_00a68d80_shell
-{
-    bool __thiscall FUN_00a68d80(NiObject*);
-};
 // @fnv 0x00a72160
-bool FUN_00a72160_shell::FUN_00a72160(NiObject* pObject)
+bool NiLight::IsEqual(NiObject* pObject) const
 {
-    if (((FUN_00a68d80_shell*)this)->FUN_00a68d80(pObject) &&
-        *(float*)((char*)this + 0xc4) == *(float*)((char*)pObject + 0xc4) &&
-        !((Call_439090_tgt*)((char*)this + 0xc8))->Call_439090(*(const NiPoint3*)((char*)pObject + 0xc8)) &&
-        !((Call_439090_tgt*)((char*)this + 0xd4))->Call_439090(*(const NiPoint3*)((char*)pObject + 0xd4)) &&
-        !((Call_439090_tgt*)((char*)this + 0xe0))->Call_439090(*(const NiPoint3*)((char*)pObject + 0xe0)))
+    const NiLight* light = static_cast<const NiLight*>(pObject);
+    if (NiDynamicEffect::IsEqual(pObject) &&
+        m_fDimmer == light->m_fDimmer &&
+        !reinterpret_cast<NiPoint3&>(const_cast<NiColor&>(m_kAmb)).operator!=(reinterpret_cast<const NiPoint3&>(light->m_kAmb)) &&
+        !reinterpret_cast<NiPoint3&>(const_cast<NiColor&>(m_kDiff)).operator!=(reinterpret_cast<const NiPoint3&>(light->m_kDiff)) &&
+        !reinterpret_cast<NiPoint3&>(const_cast<NiColor&>(m_kSpec)).operator!=(reinterpret_cast<const NiPoint3&>(light->m_kSpec)))
         return true;
     return false;
 }
 
-struct StrArr
-{
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
-
-struct Zx3Effect
-{
-    void FUN_00a69140(StrArr*);
-};
-
-struct FUN_00a696c0_shell
-{
-    char* GetFormattedString(const char*);
-};
-
 char* __cdecl _FUN_00a7d330(const char*);
 char* __cdecl FUN_00a7d550(const char*, float);
 
-struct FUN_00a721e0_shell
-{
-    void AppendEffectProperties(StrArr*);
-};
-
 // Appends formatted strings for the dimmer, ambient, diffuse and specular properties to pArray, growing it when full.
 // @fnv 0x00a721e0
-void FUN_00a721e0_shell::AppendEffectProperties(StrArr* pArray)
+void NiLight::AppendEffectProperties(StrArr* pArray)
 {
     char* pString;
 
-    reinterpret_cast<Zx3Effect*>(this)->FUN_00a69140(pArray);
+    NiDynamicEffect::AppendEffectProperties(pArray);
 
     pString = _FUN_00a7d330(g_011f4a68_arg1);
     {
-        unsigned int nIndex = *(unsigned short*)((unsigned char*)pArray + 0x0a);
-        unsigned int nCapacity = *(unsigned short*)((unsigned char*)pArray + 0x08);
+        unsigned int nIndex = pArray->m_usSize;
+        unsigned int nCapacity = pArray->m_usMaxSize;
         if (nIndex >= nCapacity)
         {
-            unsigned int nGrow = *(unsigned short*)((unsigned char*)pArray + 0x0e);
+            unsigned int nGrow = pArray->m_usGrowBy;
             pArray->SetSize(nGrow + nIndex);
         }
         pArray->SetAt(nIndex, pString);
     }
 
-    pString = FUN_00a7d550("m_fDimmer", *(float*)((unsigned char*)this + 0xc4));
+    pString = FUN_00a7d550("m_fDimmer", m_fDimmer);
     {
-        unsigned int nIndex = *(unsigned short*)((unsigned char*)pArray + 0x0a);
-        unsigned int nCapacity = *(unsigned short*)((unsigned char*)pArray + 0x08);
+        unsigned int nIndex = pArray->m_usSize;
+        unsigned int nCapacity = pArray->m_usMaxSize;
         if (nIndex >= nCapacity)
         {
-            unsigned int nGrow = *(unsigned short*)((unsigned char*)pArray + 0x0e);
+            unsigned int nGrow = pArray->m_usGrowBy;
             pArray->SetSize(nGrow + nIndex);
         }
         pArray->SetAt(nIndex, pString);
     }
 
-    pString = reinterpret_cast<FUN_00a696c0_shell*>(reinterpret_cast<unsigned char*>(this) + 0xc8)
-                  ->GetFormattedString("m_kAmb");
+    pString = m_kAmb.GetFormattedString("m_kAmb");
     {
-        unsigned int nIndex = *(unsigned short*)((unsigned char*)pArray + 0x0a);
-        unsigned int nCapacity = *(unsigned short*)((unsigned char*)pArray + 0x08);
+        unsigned int nIndex = pArray->m_usSize;
+        unsigned int nCapacity = pArray->m_usMaxSize;
         if (nIndex >= nCapacity)
         {
-            unsigned int nGrow = *(unsigned short*)((unsigned char*)pArray + 0x0e);
+            unsigned int nGrow = pArray->m_usGrowBy;
             pArray->SetSize(nGrow + nIndex);
         }
         pArray->SetAt(nIndex, pString);
     }
 
-    pString = reinterpret_cast<FUN_00a696c0_shell*>(reinterpret_cast<unsigned char*>(this) + 0xd4)
-                  ->GetFormattedString("m_kDiff");
+    pString = m_kDiff.GetFormattedString("m_kDiff");
     {
-        unsigned int nIndex = *(unsigned short*)((unsigned char*)pArray + 0x0a);
-        unsigned int nCapacity = *(unsigned short*)((unsigned char*)pArray + 0x08);
+        unsigned int nIndex = pArray->m_usSize;
+        unsigned int nCapacity = pArray->m_usMaxSize;
         if (nIndex >= nCapacity)
         {
-            unsigned int nGrow = *(unsigned short*)((unsigned char*)pArray + 0x0e);
+            unsigned int nGrow = pArray->m_usGrowBy;
             pArray->SetSize(nGrow + nIndex);
         }
         pArray->SetAt(nIndex, pString);
     }
 
-    pString = reinterpret_cast<FUN_00a696c0_shell*>(reinterpret_cast<unsigned char*>(this) + 0xe0)
-                  ->GetFormattedString("m_kSpec");
+    pString = m_kSpec.GetFormattedString("m_kSpec");
     {
-        unsigned int nIndex = *(unsigned short*)((unsigned char*)pArray + 0x0a);
-        unsigned int nCapacity = *(unsigned short*)((unsigned char*)pArray + 0x08);
+        unsigned int nIndex = pArray->m_usSize;
+        unsigned int nCapacity = pArray->m_usMaxSize;
         if (nIndex >= nCapacity)
         {
-            unsigned int nGrow = *(unsigned short*)((unsigned char*)pArray + 0x0e);
+            unsigned int nGrow = pArray->m_usGrowBy;
             pArray->SetSize(nGrow + nIndex);
         }
         pArray->SetAt(nIndex, pString);
@@ -246,143 +163,43 @@ void FUN_00a721e0_shell::AppendEffectProperties(StrArr* pArray)
 }
 
 extern int DAT_0109ce4c;
-struct FUN_00a69320_base
-{
-    void Init();
-};
-struct FUN_00a71f60_cls : FUN_00a69320_base
-{
-    int m_vptr00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    volatile float m_c4;
-    volatile float m_c8;
-    volatile float m_cc;
-    volatile float m_d0;
-    volatile float m_d4;
-    volatile float m_d8;
-    volatile float m_dc;
-    volatile float m_e0;
-    volatile float m_e4;
-    volatile float m_e8;
-    volatile int m_ec;
 
-    FUN_00a71f60_cls();
-};
-
-// Calls Init, sets the vtable pointer, zeroes m_c8..m_e8 and m_ec, then sets m_c4..m_e8 to 1.0f.
+// Initializes the base and colors, clears the material pointer, and sets the dimmer and colors to 1.0f.
 // @fnv 0x00a71f60
-FUN_00a71f60_cls::FUN_00a71f60_cls()
+NiLight::NiLight()
 {
-    Init();
-    m_vptr00 = (int)&DAT_0109ce4c;
-    m_c8 = 0.0f;
-    m_cc = 0.0f;
-    m_d0 = 0.0f;
-    m_d4 = 0.0f;
-    m_d8 = 0.0f;
-    m_dc = 0.0f;
-    m_e0 = 0.0f;
-    m_e4 = 0.0f;
-    m_e8 = 0.0f;
-    m_ec = 0;
-    m_c4 = 1.0f;
-    m_c8 = 1.0f;
-    m_cc = 1.0f;
-    m_d0 = 1.0f;
-    m_d4 = 1.0f;
-    m_d8 = 1.0f;
-    m_dc = 1.0f;
-    m_e0 = 1.0f;
-    m_e4 = 1.0f;
-    m_e8 = 1.0f;
+    m_pMaterialData = 0;
+    static_cast<volatile float&>(m_fDimmer) = 1.0f;
+    static_cast<volatile float&>(m_kAmb.r) = 1.0f;
+    static_cast<volatile float&>(m_kAmb.g) = 1.0f;
+    static_cast<volatile float&>(m_kAmb.b) = 1.0f;
+    static_cast<volatile float&>(m_kDiff.r) = 1.0f;
+    static_cast<volatile float&>(m_kDiff.g) = 1.0f;
+    static_cast<volatile float&>(m_kDiff.b) = 1.0f;
+    static_cast<volatile float&>(m_kSpec.r) = 1.0f;
+    static_cast<volatile float&>(m_kSpec.g) = 1.0f;
+    static_cast<volatile float&>(m_kSpec.b) = 1.0f;
 }
 
-struct FUN_00a720f0_shell : public NiLight
+inline unsigned int NiBinaryStream::Write(const void* data, unsigned int size)
 {
-    void FUN_00a720f0(NiStream& stream);
-};
-struct FUN_00a68f80_shell : public NiDynamicEffect
-{
-    void SaveToStream(NiStream&);
-};
-struct NiColorSaveHelper
-{
-    void SaveBinary(NiStream&);
-};
-struct NiBinaryStreamWriteShell : public NiBinaryStream
-{
-    unsigned int BinaryWrite(void* data, unsigned int size)
-    {
-        unsigned int componentSizes[1] = {size};
-        unsigned int written = m_pfnWrite(this, data, size, componentSizes, 1);
-        m_uiStreamFlags += written;
-        return written;
-    }
-};
+    unsigned int componentSizes[1] = {size};
+    unsigned int written = m_pfnWrite(this, data, size, componentSizes, 1);
+    m_uiAbsoluteCurrentPos += written;
+    return written;
+}
 // @fnv 0x00a720f0
-void FUN_00a720f0_shell::FUN_00a720f0(NiStream& stream)
+void NiLight::SaveBinary(NiStream& stream)
 {
-    reinterpret_cast<FUN_00a68f80_shell*>(this)->SaveToStream(stream);
-    reinterpret_cast<NiBinaryStreamWriteShell*>(stream.m_pBackingStream)->BinaryWrite(&m_fDimmer, 4);
-    reinterpret_cast<NiColorSaveHelper*>(&m_kAmb)->SaveBinary(stream);
-    reinterpret_cast<NiColorSaveHelper*>(&m_kDiff)->SaveBinary(stream);
-    reinterpret_cast<NiColorSaveHelper*>(&m_kSpec)->SaveBinary(stream);
+    NiDynamicEffect::SaveBinary(stream);
+    stream.m_pkOstr->Write(static_cast<const void*>(&m_fDimmer), 4);
+    m_kAmb.SaveBinary(stream);
+    m_kDiff.SaveBinary(stream);
+    m_kSpec.SaveBinary(stream);
 }
-
-struct FUN_00a71f50_cls : public NiDynamicEffect
-{
-    void FUN_00a71f50(NiStream& stream);
-};
 
 // @fnv 0x00a71f50
-void FUN_00a71f50_cls::FUN_00a71f50(NiStream& stream)
+void NiLight::LinkObject(NiStream& stream)
 {
     NiDynamicEffect::LinkObject(stream);
 }
@@ -401,11 +218,12 @@ extern int DAT_0109ce4c;
 
 // Sets the vtable, calls UnkF8 on the renderer when present, destroys the dynamic effect, and optionally frees memory when flag bit 0 is set.
 // @fnv 0x00a72040
-void* Standin::FUN_00a72040(unsigned int auiFlags)
+void* NiLight::Destroy(unsigned int auiFlags)
 {
     *(void**)this = &DAT_0109ce4c;
+    typedef void(__thiscall * Fn_t)(NiRenderer*, void*);
     if (NiRenderer::ms_pRenderer)
-        NiRenderer::ms_pRenderer->UnkF8(this);
+        ((Fn_t*)*(void**)NiRenderer::ms_pRenderer)[62](NiRenderer::ms_pRenderer, this);
     DestroyDynamicEffect((NiDynamicEffect*)this);
     if (auiFlags & 1)
         _delete(this, 0xF0);

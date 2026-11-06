@@ -1,3 +1,9 @@
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/BGSProjectile.h"
+#include "../../../../include/BeamProjectile.h"
+#include "../../../../include/MissileProjectile.h"
+#include "../../../../include/bhkConstraint.h"
+#include "../../../../include/bhkHingeConstraint.h"
 
 // src/fallout/ai/combat/missileprojectile_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/ai/combat/missileprojectile.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
@@ -13,36 +19,11 @@ struct FUN_009ba4d0_shell
 };
 extern "C" void __cdecl FUN_00c89640(void*);
 extern "C" void __cdecl __Dummy_00b6fef0(void*, unsigned int);
-struct bhkConstraint
-{
-    virtual ~bhkConstraint();
-    void* DestroyConstraint(unsigned int);
-};
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-};
-struct BeamProjectile
-{
-    void LoadProjectile(BGSLoadFormBuffer*);
-};
-struct MissileProjectile : BeamProjectile
-{
-    void FUN_009baad0(BGSLoadFormBuffer*);
-};
-struct BGSProjectile
-{
-    bool GetFlag(unsigned int) const;
-};
 struct FUN_009b7c90_shell : BGSProjectile
 {
     bool FUN_009b7c90();
 };
 extern "C" void __cdecl _delete(void*, unsigned int);
-struct bhkHingeConstraint : bhkConstraint
-{
-    void* FUN_009ba520(unsigned int);
-};
 
 struct TlsBlock_t
 {

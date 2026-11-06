@@ -299,16 +299,17 @@ typedef unsigned long DWORD;
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(DWORD);
 extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00d41a30 FUN_00d41a30: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-} __m128;
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" __m128 _mm_loadu_ps(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" LocalM128 _mm_loadu_ps(const float*);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
 extern volatile DWORD DAT_0126835c;
 extern char DAT_010cf220[];
 extern char DAT_010c41f8[];
@@ -325,7 +326,8 @@ struct ProfileBuffer
     void* unk08;
     ProfileEvent* end;
 };
-struct Vec
+// Plain 4-float view of hkVector4 data (no __m128, copied lane by lane); AlignedVec is the 16-byte-aligned workspace form.
+struct UnalignedFloat4
 {
     float x, y, z, w;
 };
@@ -335,9 +337,9 @@ struct __declspec(align(16)) AlignedVec
     float x, y, z, w;
     AlignedVec()
     {}
-    AlignedVec(const Vec& v) : x(v.x), y(v.y), z(v.z), w(v.w)
+    AlignedVec(const UnalignedFloat4& v) : x(v.x), y(v.y), z(v.z), w(v.w)
     {}
-    AlignedVec& operator=(const Vec& v)
+    AlignedVec& operator=(const UnalignedFloat4& v)
     {
         x = v.x;
         y = v.y;
@@ -348,11 +350,11 @@ struct __declspec(align(16)) AlignedVec
 };
 struct Matrix
 {
-    Vec x, y, z, w;
+    UnalignedFloat4 x, y, z, w;
 };
 struct __declspec(align(16)) AlignedMatrix
 {
-    Vec x, y, z, w;
+    UnalignedFloat4 x, y, z, w;
 };
 struct Workspace
 {
@@ -431,7 +433,7 @@ struct OutputStack
 };
 struct Contact
 {
-    Vec position, normal, data;
+    UnalignedFloat4 position, normal, data;
 };
 struct Output
 {
@@ -503,7 +505,7 @@ void* __cdecl FUN_00d41a30(Request* input, unsigned char* status, ResultData* re
             Shape* shapeB = b->shape;
             workspace.radiusA = shapeA->radius;
             workspace.radiusB = shapeB->radius;
-            *(__m128*)&workspace.separation = *(const __m128*)separation;
+            *(LocalM128*)&workspace.separation = *(const LocalM128*)separation;
             AlignedVec* vertices = workspace.vertices;
             unsigned short* indices = (unsigned short*)((char*)cache + 4 + cache->contacts * 8);
             float threshold = workspace.radiusA + workspace.tolerance + workspace.radiusB;
@@ -511,14 +513,14 @@ void* __cdecl FUN_00d41a30(Request* input, unsigned char* status, ResultData* re
             shapeA->GetIndexedVertices(indices, cache->countA, vertices);
             Matrix* pTransform = a->transform;
             {
-                __declspec(align(16)) Vec mx = pTransform->x, my = pTransform->y, mz = pTransform->z,
+                __declspec(align(16)) UnalignedFloat4 mx = pTransform->x, my = pTransform->y, mz = pTransform->z,
                                           mw = pTransform->w;
-                __m128 x = _mm_load_ps(&mx.x), y = _mm_load_ps(&my.x), z = _mm_load_ps(&mz.x), w = _mm_load_ps(&mw.x);
+                LocalM128 x = _mm_load_ps(&mx.x), y = _mm_load_ps(&my.x), z = _mm_load_ps(&mz.x), w = _mm_load_ps(&mw.x);
                 int i = cache->countA - 1;
                 do
                 {
-                    __m128 v = _mm_load_ps(&vertices[i].x);
-                    __m128 vy = _mm_shuffle_ps(v, v, 0x55), vx = _mm_shuffle_ps(v, v, 0),
+                    LocalM128 v = _mm_load_ps(&vertices[i].x);
+                    LocalM128 vy = _mm_shuffle_ps(v, v, 0x55), vx = _mm_shuffle_ps(v, v, 0),
                            vz = _mm_shuffle_ps(v, v, 0xaa);
                     _mm_store_ps(&vertices[i].x, _mm_add_ps(_mm_add_ps(_mm_mul_ps(vy, y), _mm_mul_ps(vx, x)),
                                                             _mm_add_ps(_mm_mul_ps(vz, z), w)));
@@ -528,14 +530,14 @@ void* __cdecl FUN_00d41a30(Request* input, unsigned char* status, ResultData* re
             shapeB->GetIndexedVertices(indices + cache->countA, cache->countB, verticesB);
             pTransform = b->transform;
             {
-                __declspec(align(16)) Vec mx = pTransform->x, my = pTransform->y, mz = pTransform->z,
+                __declspec(align(16)) UnalignedFloat4 mx = pTransform->x, my = pTransform->y, mz = pTransform->z,
                                           mw = pTransform->w;
-                __m128 x = _mm_load_ps(&mx.x), y = _mm_load_ps(&my.x), z = _mm_load_ps(&mz.x), w = _mm_load_ps(&mw.x);
+                LocalM128 x = _mm_load_ps(&mx.x), y = _mm_load_ps(&my.x), z = _mm_load_ps(&mz.x), w = _mm_load_ps(&mw.x);
                 int j = cache->countB - 1;
                 do
                 {
-                    __m128 v = _mm_load_ps(&verticesB[j].x);
-                    __m128 vy = _mm_shuffle_ps(v, v, 0x55), vx = _mm_shuffle_ps(v, v, 0),
+                    LocalM128 v = _mm_load_ps(&verticesB[j].x);
+                    LocalM128 vy = _mm_shuffle_ps(v, v, 0x55), vx = _mm_shuffle_ps(v, v, 0),
                            vz = _mm_shuffle_ps(v, v, 0xaa);
                     _mm_store_ps(&verticesB[j].x, _mm_add_ps(_mm_add_ps(_mm_mul_ps(vy, y), _mm_mul_ps(vx, x)),
                                                              _mm_add_ps(_mm_mul_ps(vz, z), w)));

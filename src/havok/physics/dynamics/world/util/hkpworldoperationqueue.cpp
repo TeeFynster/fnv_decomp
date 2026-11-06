@@ -1,6 +1,9 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/physics/dynamics/world/util/hkpworldoperationqueue.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/util/hkpworldoperationqueue.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../include/BSAudio.h"
 
 void EnterTlsGuard();
 void FUN_00c904e0();
@@ -9,16 +12,7 @@ struct S_00cf7540_Alloc
 {
 };
 
-struct S_00cf7540_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00cf7540_Alloc* m_pStreamAllocator;
-};
-
-S_00cf7540_Router* FUN_00c85750();
+BSAudio* FUN_00c85750();
 void ResizeAudioStream(S_00cf7540_Alloc* alloc, void* arr, int elemSize);
 
 struct S_00cf7540_Ref
@@ -36,20 +30,14 @@ struct S_00cf7540_Entry
     int m_iFourthElementInteger;
 };
 
-template <class T> struct S_00cf7540_Array
+template <class T>
+static __forceinline T& S_00cf7540_Array_AllocatePair(hkArrayBase<T>& self)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    T& AllocatePair()
-    {
-        S_00cf7540_Router* router = FUN_00c85750();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(router->m_pStreamAllocator, this, sizeof(T));
-        return m_data[m_iElementCount++];
+        BSAudio* router = FUN_00c85750();
+        if (self.m_iElementCount == (self.m_iCapacityState & 0x3fffffff))
+            ResizeAudioStream(reinterpret_cast<S_00cf7540_Alloc*>(router->pListener), (&self), sizeof(T));
+        return self.m_data[self.m_iElementCount++];
     }
-};
 
 struct S_00cf7540_World
 {
@@ -101,7 +89,7 @@ struct S_00cf7540
     int unk10;
     int unk14;
     int unk18;
-    S_00cf7540_Array<S_00cf7540_Entry> m_entries;
+    hkArrayBase<S_00cf7540_Entry> m_entries;
 
     void AddEntry(S_00cf7540_Ref* a, S_00cf7540_Ref* b, int c, int d);
 };
@@ -112,7 +100,7 @@ void S_00cf7540::AddEntry(S_00cf7540_Ref* pRefA, S_00cf7540_Ref* pRefB, int c, i
 {
     EnterTlsGuard();
     unkC->unk90++;
-    S_00cf7540_Entry& e = m_entries.AllocatePair();
+    S_00cf7540_Entry& e = S_00cf7540_Array_AllocatePair(m_entries);
     e.m_kPointA = pRefA;
     e.m_kPointB = pRefB;
     e.m_iThirdValue = c;
@@ -282,21 +270,14 @@ void FUN_00c93580_Class::FUN_00c93580()
     NotifyWorldDeleted(this);
 }
 
-struct S_00cf75c0_Array
-{
-    int* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    S_00cf75c0_Array() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
+
 
 struct FUN_00cf75c0
 {
-    S_00cf75c0_Array m_kPointA;
+    hkArrayBase<int> m_kPointA;
     int unk0c;
-    S_00cf75c0_Array m_kPointB;
-    S_00cf75c0_Array m_iThirdValue;
+    hkArrayBase<int> m_kPointB;
+    hkArrayBase<int> m_iThirdValue;
     FUN_00cf75c0(int v);
 };
 
@@ -311,8 +292,9 @@ extern "C" void _ReadWriteBarrier();
 typedef unsigned char Byte;
 typedef unsigned short UShort;
 typedef unsigned int UInt;
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00cf7c10 FUN_00cf7c10: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x;
@@ -320,15 +302,10 @@ union __declspec(intrin_type) __declspec(align(16)) __m128
         float z;
         float w;
     } scalar;
-};
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-struct Vec
-{
-    union
-    {
-        __m128 quad;
-    };
-};
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
+// The unit keeps its own __m128 (float lanes only); hkVector4.h uses it.
+#include "../../../../../../include/hkVector4.h"
 
 struct Heap
 {
@@ -367,9 +344,9 @@ struct Motion
     virtual void m40();
     virtual void m44();
     virtual void m48();
-    virtual void impulse(const Vec&);
-    virtual void pointImpulse(const Vec&, const Vec&);
-    virtual void angularImpulse(const Vec&);
+    virtual void impulse(const hkVector4&);
+    virtual void pointImpulse(const hkVector4&, const hkVector4&);
+    virtual void angularImpulse(const hkVector4&);
     int state4;
     Byte type;
     Byte typePad9;
@@ -440,9 +417,9 @@ struct Body
     Motion motion;
     void FUN_00ca8420(int, int, int);
     void FUN_00d07ec0(void*);
-    void FUN_00ca8860(const Vec&, const Vec&);
-    void OnTrigger(const Vec&);
-    void FUN_00561800(const Vec&);
+    void FUN_00ca8860(const hkVector4&, const hkVector4&);
+    void OnTrigger(const hkVector4&);
+    void FUN_00561800(const hkVector4&);
     void FUN_00c9c1d0();
     void FUN_00c9c240();
     void FUN_00d87c20(Body*, int);
@@ -525,7 +502,8 @@ struct World
     void FUN_00c96ff0(int, int);
     void FUN_00c93c30(void*);
 };
-struct Pair
+// queued island merge (priority, entity A, entity B, 2 more dwords): sorted by priority, then FUN_00cb5570(world, a, b) merges
+struct IslandMergeRequest
 {
     int priority;
     Body* a;
@@ -543,12 +521,12 @@ struct Op
     {
         Body* object;
         Body** objects;
-        Vec* vector;
+        hkVector4* vector;
     };
     union
     {
         Body* other;
-        Vec* point;
+        hkVector4* point;
         int arg;
         float x;
         struct
@@ -584,14 +562,14 @@ struct Pending
 {
     OpArray operations;
     World* world;
-    Pair* pairs;
+    IslandMergeRequest* pairs;
     int pairCount;
     int pairCapacity;
     void EnterTlsGuard();
     void FUN_00cf7c10();
 };
-extern "C" void __cdecl LessThanPairPriority(Pair*, Pair*);
-extern "C" void __cdecl FUN_00cf8510(Pair*, int, int, void(__cdecl*)(Pair*, Pair*));
+extern "C" void __cdecl LessThanPairPriority(IslandMergeRequest*, IslandMergeRequest*);
+extern "C" void __cdecl FUN_00cf8510(IslandMergeRequest*, int, int, void(__cdecl*)(IslandMergeRequest*, IslandMergeRequest*));
 extern "C" void __cdecl FUN_00cb5570(World*, Body*, Body*);
 extern "C" void __cdecl AddCollisionShape(World*, Body*);
 extern "C" void __cdecl FUN_00c90740(Body**, int, int);
@@ -603,8 +581,8 @@ static __forceinline void release(Body* p)
 }
 static __forceinline Heap* heap()
 {
-    S_00cf7540_Router* router = FUN_00c85750();
-    return reinterpret_cast<Heap*>(router->m_pStreamAllocator);
+    BSAudio* router = FUN_00c85750();
+    return reinterpret_cast<Heap*>(router->pListener);
 }
 static __forceinline void freeBlock(void* p, int n)
 {
@@ -640,7 +618,7 @@ void Pending::FUN_00cf7c10()
             FUN_00cf8510(pairs, 0, pairCount - 1, LessThanPairPriority);
         while (pairCount)
         {
-            Pair p = pairs[pairCount - 1];
+            IslandMergeRequest p = pairs[pairCount - 1];
             pairCount = static_cast<const volatile int&>(pairCount) - 1;
             if (p.a->world == world && p.b->world == world && p.a->motion.type != 5 && p.b->motion.type != 5 &&
                 p.a->island != p.b->island)
@@ -790,21 +768,21 @@ void Pending::FUN_00cf7c10()
             release(p->object);
             break;
         case 25: {
-            Vec v;
+            hkVector4 v;
             v.quad = _mm_setr_ps(p->x, p->y, p->z, 0.0f);
             p->object->OnTrigger(v);
             release(p->object);
             break;
         }
         case 26: {
-            Vec v;
+            hkVector4 v;
             v.quad = _mm_setr_ps(p->x, p->y, p->z, 0.0f);
             p->object->FUN_00561800(v);
             release(p->object);
             break;
         }
         case 27: {
-            Vec v;
+            hkVector4 v;
             v.quad = _mm_setr_ps(p->x, p->y, p->z, 0.0f);
             Body* b = p->object;
             b->FUN_00c9c1d0();
@@ -813,8 +791,8 @@ void Pending::FUN_00cf7c10()
             break;
         }
         case 28: {
-            const Vec& a = p->point[1];
-            const Vec& b = p->point[0];
+            const hkVector4& a = p->point[1];
+            const hkVector4& b = p->point[0];
             Body* body = p->object;
             body->FUN_00c9c1d0();
             body->motion.pointImpulse(a, b);
@@ -823,7 +801,7 @@ void Pending::FUN_00cf7c10()
             break;
         }
         case 29: {
-            Vec v;
+            hkVector4 v;
             v.quad = _mm_setr_ps(p->x, p->y, p->z, 0.0f);
             Body* b = p->object;
             b->FUN_00c9c1d0();
@@ -901,15 +879,6 @@ struct Allocator
     virtual void Release(void* data, unsigned int size) = 0;
 };
 
-struct BSAudio
-{
-    unsigned long field_00;
-    unsigned long field_04;
-    unsigned long field_08;
-    unsigned long field_0c;
-    Allocator* allocator;
-};
-
 BSAudio* __cdecl FUN_00c85750();
 
 struct Elem20
@@ -943,7 +912,7 @@ template <typename T> void Buffer<T>::clear()
     const unsigned int stride = sizeof(T);
 
     BSAudio* audio = FUN_00c85750();
-    Allocator* alloc = audio->allocator;
+    Allocator* alloc = reinterpret_cast<Allocator*>(audio->pListener);
 
     const unsigned int f = flags;
     size = 0;
@@ -978,11 +947,6 @@ void Owner::FUN_00cf75f0()
 }  // namespace fnv_00cf75f0
 
 namespace fnv_00cf7690 {
-struct BSAudio
-{
-    unsigned char unk00[0x10];
-    struct Alloc* alloc;
-};
 struct Alloc
 {
     virtual void V00();
@@ -1032,25 +996,26 @@ struct VecBase
     int cnt;
     int cap;
 };
-struct Vec
+// Havok 7.1 hkpWorldOperationQueue: m_pending (hkArray of 0x14-byte BiggestOperation), m_world, m_islandMerges; 0x00cf7690 = queueOperation.
+struct hkpWorldOperationQueue
 {
     Elem* data;
     int cnt;
     int cap;
     char* owner;
     VecBase sub;
-    void FUN_00cf7690(Elem* arg);
+    void queueOperation(Elem* arg);
 };
 
 // Appends a copy of arg to the vector and, by tag, calls FUN_00c90510 on referenced objects, copying pointer arrays or a 32-byte block for some tags.
 // @fnv 0x00cf7690
-void Vec::FUN_00cf7690(Elem* arg)
+void hkpWorldOperationQueue::queueOperation(Elem* arg)
 {
     EnterTlsGuard();
     BSAudio* bsa = FUN_00c85750();
     if (cnt == (cap & 0x3fffffff))
     {
-        ResizeAudioStream(bsa->alloc, this, 0x14);
+        ResizeAudioStream(reinterpret_cast<Alloc*>(bsa->pListener), this, 0x14);
     }
     Elem* pNew = data + cnt;
     if (pNew)
@@ -1088,7 +1053,7 @@ void Vec::FUN_00cf7690(Elem* arg)
         int f08v = dst->f08;
         int count = (unsigned short)f08v;
         BSAudio* b = FUN_00c85750();
-        void* mem = b->alloc->V04(count * 4);
+        void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(count * 4);
         dst->f04 = (int*)mem;
         FUN_00cb1260(mem, arg->f04, (unsigned short)arg->f08 * 4);
         int* p = dst->f04;
@@ -1104,7 +1069,7 @@ void Vec::FUN_00cf7690(Elem* arg)
         int f08v = dst->f08;
         int count = (unsigned short)f08v;
         BSAudio* b = FUN_00c85750();
-        void* mem = b->alloc->V04(count * 4);
+        void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(count * 4);
         dst->f04 = (int*)mem;
         FUN_00cb1260(mem, arg->f04, (unsigned short)arg->f08 * 4);
         int* p = dst->f04;
@@ -1136,7 +1101,7 @@ void Vec::FUN_00cf7690(Elem* arg)
             BSAudio* b = FUN_00c85750();
             if (s->cnt == (s->cap & 0x3fffffff))
             {
-                ResizeAudioStream(b->alloc, s, 0x14);
+                ResizeAudioStream(reinterpret_cast<Alloc*>(b->pListener), s, 0x14);
             }
             Elem* d2 = s->data + s->cnt;
             if (d2)
@@ -1158,7 +1123,7 @@ void Vec::FUN_00cf7690(Elem* arg)
         int f08v = dst->f08;
         int count = (unsigned short)f08v;
         BSAudio* b = FUN_00c85750();
-        void* mem = b->alloc->V04(count * 4);
+        void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(count * 4);
         dst->f04 = (int*)mem;
         FUN_00cb1260(mem, arg->f04, (unsigned short)arg->f08 * 4);
         int* p = dst->f04;
@@ -1174,7 +1139,7 @@ void Vec::FUN_00cf7690(Elem* arg)
         int f08v = dst->f08;
         int count = (unsigned short)f08v;
         BSAudio* b = FUN_00c85750();
-        void* mem = b->alloc->V04(count * 4);
+        void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(count * 4);
         dst->f04 = (int*)mem;
         FUN_00cb1260(mem, arg->f04, (unsigned short)arg->f08 * 4);
         int* p = dst->f04;
@@ -1189,7 +1154,7 @@ void Vec::FUN_00cf7690(Elem* arg)
     case 17: {
         ((Obj*)dst->f04)->FUN_00c90510();
         BSAudio* b = FUN_00c85750();
-        void* mem = b->alloc->V04(0x20);
+        void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(0x20);
         int nf08;
         if (mem)
         {
@@ -1231,7 +1196,7 @@ void Vec::FUN_00cf7690(Elem* arg)
         int f08v = dst->f08;
         int count = (unsigned short)f08v;
         BSAudio* b = FUN_00c85750();
-        void* mem = b->alloc->V04(count * 4);
+        void* mem = reinterpret_cast<Alloc*>(b->pListener)->V04(count * 4);
         dst->f04 = (int*)mem;
         FUN_00cb1260(mem, arg->f04, (unsigned short)arg->f08 * 4);
         int* p = dst->f04;
@@ -1301,21 +1266,15 @@ struct S_00cf7ae0_Heap
     virtual void vc();
     virtual void ReleaseBlock(void* p, int n);
 };
-struct S_00cf7ae0_Router;
-S_00cf7ae0_Router* __cdecl FUN_00c85750();
-struct S_00cf7ae0_Router
+BSAudio* __cdecl FUN_00c85750();
+inline BSAudio& GetMonitorStream()
 {
-    int unk0, unk4, unk8, unkc;
-    S_00cf7ae0_Heap* m_pStreamAllocator;
-    static S_00cf7ae0_Router& GetMonitorStream()
-    {
-        return *FUN_00c85750();
-    }
-    S_00cf7ae0_Heap& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
+    return *FUN_00c85750();
+}
+inline S_00cf7ae0_Heap& __fastcall GetStreamHeap(BSAudio& audio)
+{
+    return *reinterpret_cast<S_00cf7ae0_Heap*>(audio.pListener);
+}
 void __cdecl FUN_00c908c0(S_00cf7ae0_Heap*, void* arr, int n, int elemSize);
 void __cdecl EnterTlsGuard();
 void __cdecl FUN_00c904e0();
@@ -1424,7 +1383,7 @@ void S_00cf7ae0::FUN_00cf7ae0()
         localArray.m_cap = 0x80000000;
         localArray.SwapThreeInts(&pending);
         owner->unk90 = 0;
-        pending.reserve(S_00cf7ae0_Router::GetMonitorStream().heap(), 16);
+        pending.reserve(GetStreamHeap(GetMonitorStream()), 16);
         int n = localArray.m_iElementCount;
         if (n > 1)
         {
@@ -1459,23 +1418,23 @@ void S_00cf7ae0::FUN_00cf7ae0()
             } while (--n != 0);
         }
         FUN_00c904e0();
-        localArray.ClearAndRelease(S_00cf7ae0_Router::GetMonitorStream().heap());
+        localArray.ClearAndRelease(GetStreamHeap(GetMonitorStream()));
     }
 }
 }  // namespace fnv_00cf7ae0
 
 #include <string.h>
-extern "C" __m128 _mm_and_ps(__m128, __m128);
-extern "C" __m128 _mm_cmple_ps(__m128, __m128);
-extern "C" int _mm_movemask_ps(__m128);
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
+extern "C" LocalM128 _mm_and_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_cmple_ps(LocalM128, LocalM128);
+extern "C" int _mm_movemask_ps(LocalM128);
+extern "C" LocalM128 _mm_set_ps1(float);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
 
 extern __declspec(thread) int g_threadMode;
 extern unsigned char DAT_01267b44;
 extern float DAT_01017d00;
-extern __m128 DAT_01267e30;
-extern __m128 DAT_01017d10;
+extern LocalM128 DAT_01267e30;
+extern LocalM128 DAT_01017d10;
 
 struct S_Motion
 {
@@ -1587,8 +1546,8 @@ struct S_Motion
     int unk1a4;
     int unk1a8;
     int unk1ac;
-    __m128 m_1b0;
-    __m128 m_1c0;
+    LocalM128 m_1b0;
+    LocalM128 m_1c0;
     void FUN_00c9c1d0();
 };
 struct S_Body
@@ -1726,23 +1685,23 @@ static inline S_Body* GetBody(S_Collidable* col)
     return 0;
 }
 
-static inline const __m128& GetLinVel(S_Body* b)
+static inline const LocalM128& GetLinVel(S_Body* b)
 {
     if (b && b->m_8)
         return b->m_8->m_1b0;
     return DAT_01267e30;
 }
 
-static inline const __m128& GetAngVel(S_Body* b)
+static inline const LocalM128& GetAngVel(S_Body* b)
 {
     if (b && b->m_8)
         return b->m_8->m_1c0;
     return DAT_01267e30;
 }
 
-static inline bool AllNear3(const __m128& a, const __m128& b, const __m128& eps)
+static inline bool AllNear3(const LocalM128& a, const LocalM128& b, const LocalM128& eps)
 {
-    __m128 d = _mm_and_ps(_mm_sub_ps(a, b), DAT_01017d10);
+    LocalM128 d = _mm_and_ps(_mm_sub_ps(a, b), DAT_01017d10);
     return (_mm_movemask_ps(_mm_cmple_ps(d, eps)) & 7) == 7;
 }
 
@@ -1802,7 +1761,7 @@ void S_Owner::FUN_00c674d0(S_Item** items, unsigned int count)
         {
             union
             {
-                __m128 v;
+                LocalM128 v;
                 char bytes[16];
             } eps;
             eps.v = _mm_set_ps1(0.001f);

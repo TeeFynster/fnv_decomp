@@ -1,8 +1,82 @@
-// bsshader/bsshaderbloodsplatter.cpp: BSShaderBloodSplatter, BloodShader (17 functions)
+// bsshader/bsshaderbloodsplatter.cpp: BloodSplatterShaderLocal_00b80d30, BloodShader (17 functions)
 
-#include "bsshaderbloodsplatter_types_BSShaderBloodSplatter.h"
-#include "bsshaderbloodsplatter_types_BSShaderManager.h"
-#include "bsshaderbloodsplatter_types_NiConsoleShaderDeclaration.h"
+#include "../../include/BSShader.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiShader.h"
+#include "../../include/NiD3DShaderInterface.h"
+#include "../../include/NiD3DShader.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiD3DDefaultShader.h"
+#include "../../include/NiShaderDeclaration.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/BSShaderManager.h"
+#include "../../include/NiD3DShaderDeclaration.h"
+#include "../../include/NiD3DPixelShader.h"
+#include "../../include/NiD3DVertexShader.h"
+#include "../../include/NiD3DShaderConstantMap.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiGeometryData.h"
+#include "../../include/NiTransform.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiDX9Renderer.h"
+
+namespace fnv_00b80c20 { struct RenderInput; }
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
+
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+inline void NiD3DVertexShader::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DVertexShader::DecRefCount() { NiRefObject::DecRefCount(); }
+inline void NiD3DPixelShader::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DPixelShader::DecRefCount() { NiRefObject::DecRefCount(); }
+inline void NiD3DShaderConstantMap::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DShaderConstantMap::DecRefCount() { NiRefObject::DecRefCount(); }
+
+
+// Retain this definition: the approved shared header lacks the BSShader base and virtual destructor.
+// local form of BSShaderBloodSplatter: 0x00b80d30 needs the BSShader base, virtual destructor and unit render-input call surfaces absent from the shared header.
+class BloodSplatterShaderLocal_00b80d30 : public BSShader
+{
+  public:
+    NiPointer<NiD3DPass> spRenderPass[2];                    // +0x6C, 8 bytes
+    NiPointer<NiD3DVertexShader> m_spTreeVertexShader[2];    // +0x74, 8 bytes
+    NiPointer<NiD3DPixelShader> m_spPixelShaderVariants[2];  // +0x7C, 8 bytes
+    BloodSplatterShaderLocal_00b80d30();
+    static void* __cdecl operator new(unsigned int size);
+    BSShader* CreateShader();
+    void InitializeShaderData();
+    bool ConfigureShaderPass();
+    void FUN_00b81110(unsigned int);
+    void FUN_00b805d0(unsigned int);
+    void FUN_00b80600(NiRefObject*);
+    void SetupConstantMaps();
+    virtual ~BloodSplatterShaderLocal_00b80d30();
+    int FUN_00b807c0(void*, void*);
+    void FUN_00b80380();
+    bool FUN_00b80b20();
+    void* FUN_00b80e40(unsigned int);
+    void CreateShaderConstantMaps();
+    void InitPassItems(struct FUN_00b80b30_arg*);
+    void ApplyBloodShader(fnv_00b80c20::RenderInput*);
+};
+
+class NiD3DVertexDeclaration : public NiD3DShaderDeclaration
+{
+public:
+    void* m_pkVertexElements;
+    void* m_pkD3DVertexDeclaration;
+    static NiD3DVertexDeclaration* Create(GraphicsRenderer*, unsigned int, unsigned int);
+};
 
 extern GraphicsRenderer* g_pkRenderer;
 extern float g_splatterDefaultFirst;
@@ -20,7 +94,7 @@ struct SplatterFloat4
 };
 
 // @fnv 0x00b80e70
-BSShader* BSShaderBloodSplatter::CreateShader()
+BSShader* BloodSplatterShaderLocal_00b80d30::CreateShader()
 {
     NiD3DVertexDeclaration* declaration = NiD3DVertexDeclaration::Create(g_pkRenderer, 2, 1);
     typedef void(__thiscall * Method5)(void*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
@@ -29,31 +103,118 @@ BSShader* BSShaderBloodSplatter::CreateShader()
     reinterpret_cast<Method5>((*reinterpret_cast<void***>(declaration))[35])(declaration, 1, 7, 5, 1, 0);
     reinterpret_cast<Method0>((*reinterpret_cast<void***>(declaration))[45])(declaration);
 
-    BSShaderBloodSplatter* shader = new BSShaderBloodSplatter;
-    reinterpret_cast<Method0>((*reinterpret_cast<void***>(shader))[19])(shader);
+    BloodSplatterShaderLocal_00b80d30* shader = new BloodSplatterShaderLocal_00b80d30;
+    shader->Initialize();
     shader->InitializeShaderData();
     shader->ConfigureShaderPass();
-    typedef void(__thiscall * Method1)(void*, void*);
+    // The approved BSShader header does not declare slot 71 yet.
     reinterpret_cast<Method0>((*reinterpret_cast<void***>(shader))[71])(shader);
-    reinterpret_cast<Method1>((*reinterpret_cast<void***>(shader))[48])(shader, declaration);
+    shader->UseShaderDeclaration(declaration);
     return shader;
 }
 
 // @fnv 0x00b80d30
-BSShaderBloodSplatter::BSShaderBloodSplatter() : BSShader()
+BloodSplatterShaderLocal_00b80d30::BloodSplatterShaderLocal_00b80d30() : BSShader()
 {
     SplatterFloat4 values = {g_splatterDefaultFirst, g_splatterDefaultFirst, 0.0f, g_splatterDefaultSecond};
-    m_iPassId = 0x17;
+    iShaderType = 0x17;
     *reinterpret_cast<SplatterFloat4*>(&g_splatterValueA) = values;
     BSShaderManager::GetTexture(g_splatterWhiteFlashPath, true,
                                 *reinterpret_cast<NiPointer<NiTexture>*>(&g_splatterWhiteFlashTexture), true, false);
 }
 
-#include "bsshaderbloodsplatter_decls.h"
+// Preserve the inlined reference operations used by this unit.
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        T* old = m_pObject;
+        if (old != 0)
+            old->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+
+class BeamStage
+{
+  public:
+    unsigned char layoutPrefix[8];
+    unsigned int m_uiTexture;
+    unsigned char layoutStage[0x54];
+    unsigned int m_uiRefCount;
+    void ApplyPairToState(void*);
+    void FUN_00e7def0(unsigned int);
+    void ReturnToPool();
+    void DecRefCount()
+    {
+        --m_uiRefCount;
+        if (m_uiRefCount == 0)
+            ReturnToPool();
+    }
+    static void CreateNewStage(NiPointer<BeamStage>&);
+};
+template <> inline NiPointer<BeamStage>::NiPointer() : m_pObject(0)
+{}
+template <> inline NiPointer<BeamStage>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+template <> inline BeamStage* NiPointer<BeamStage>::operator->() const
+{
+    return m_pObject;
+}
+template <> inline NiPointer<BeamStage>::operator BeamStage*() const
+{
+    return m_pObject;
+}
+
+class D3DRenderStateGroup
+{
+  public:
+    static D3DRenderStateGroup* GetCurrentRenderStateGroup();
+    void SetRenderState(unsigned int, unsigned int, bool);
+};
+// The shared header has no indexed stage setter yet.
+extern void SetD3DPassStage();
+inline void NiD3DPass::AppendStage(BeamStage* stage)
+{
+    typedef void(__thiscall * SetStage)(NiD3DPass*, unsigned int, BeamStage*);
+    reinterpret_cast<SetStage>(&SetD3DPassStage)(this, m_uiCurrentStage, stage);
+}
+inline void NiD3DPass::Release()
+{
+    --m_uiRefCount;
+    if (!m_uiRefCount)
+        DestroyPass();
+}
+inline void NiD3DPass::SetRenderState(unsigned int state, unsigned int value, bool save)
+{
+    if (!m_pkRenderStateGroup)
+        m_pkRenderStateGroup = D3DRenderStateGroup::GetCurrentRenderStateGroup();
+    m_pkRenderStateGroup->SetRenderState(state, value, save);
+}
+inline void NiD3DPass::SetVertexShader(NiD3DVertexShader* shader)
+{
+    m_spVertexShader = shader;
+}
+inline void NiD3DPass::SetPixelShader(NiD3DPixelShader* shader)
+{
+    m_spPixelShader = shader;
+}
+
+void ConfigureBeamStage(BeamStage*, unsigned int, unsigned int, unsigned int, bool);
+#include "../../include/_D3DXMACRO.h"
+extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
+extern "C" int __cdecl sprintf_s(char*, unsigned int, const char*, ...);
+extern NiD3DPass* DAT_0126f74c;
 
 // Configures two NiD3DPass objects with two texture stages each, render states, vertex and pixel shaders, and returns true.
 // @fnv 0x00b807d0
-bool BSShaderBloodSplatter::ConfigureShaderPass()
+bool BloodSplatterShaderLocal_00b80d30::ConfigureShaderPass()
 {
     NiD3DPass::CreateD3DPass(spRenderPass[0]);
     for (unsigned int i = 0; i < 2; ++i)
@@ -62,7 +223,7 @@ bool BSShaderBloodSplatter::ConfigureShaderPass()
         BeamStage::CreateNewStage(stage);
         ConfigureBeamStage(stage, i, 3, 2, true);
         stage->FUN_00e7def0(1);
-        spRenderPass[0].m_pObject->FUN_00e802b0(spRenderPass[0].m_pObject->m_uiStageMask, stage);
+        spRenderPass[0].m_pObject->AppendStage(stage);
     }
     spRenderPass[0].m_pObject->SetRenderState(27, 1, true);
     spRenderPass[0].m_pObject->SetRenderState(7, 0, true);
@@ -81,7 +242,7 @@ bool BSShaderBloodSplatter::ConfigureShaderPass()
         BeamStage::CreateNewStage(stage);
         ConfigureBeamStage(stage, i, 3, 2, true);
         stage->FUN_00e7def0(1);
-        spRenderPass[1].m_pObject->FUN_00e802b0(spRenderPass[1].m_pObject->m_uiStageMask, stage);
+        spRenderPass[1].m_pObject->AppendStage(stage);
     }
     spRenderPass[1].m_pObject->SetRenderState(27, 1, true);
     spRenderPass[1].m_pObject->SetRenderState(7, 0, true);
@@ -102,7 +263,7 @@ struct SplatterShaderInfo
     _D3DXMACRO macros[9];
 };
 // @fnv 0x00b80090
-void BSShaderBloodSplatter::InitializeShaderData()
+void BloodSplatterShaderLocal_00b80d30::InitializeShaderData()
 {
     SplatterShaderInfo vertex;
     vertex.file = "BloodSplatter\\BloodSplatter.v.hlsl";
@@ -141,13 +302,13 @@ void BSShaderBloodSplatter::InitializeShaderData()
 }
 
 // @fnv 0x00b81110
-void BSShaderBloodSplatter::FUN_00b81110(unsigned int value)
+void BloodSplatterShaderLocal_00b80d30::FUN_00b81110(unsigned int value)
 {
-    m_iPassId = (value != 3) ? 3 : 0;
+    iShaderType = (value != 3) ? 3 : 0;
 }
 
 // @fnv 0x00b805d0
-void BSShaderBloodSplatter::FUN_00b805d0(unsigned int pass)
+void BloodSplatterShaderLocal_00b80d30::FUN_00b805d0(unsigned int pass)
 {
     switch (pass)
     {
@@ -162,9 +323,9 @@ void BSShaderBloodSplatter::FUN_00b805d0(unsigned int pass)
 
 // Assigns value to the NiRefObject pointer at offset 0x44, releasing the old reference and incrementing the new one's ref count.
 // @fnv 0x00b80600
-void BSShaderBloodSplatter::FUN_00b80600(NiRefObject* value)
+void BloodSplatterShaderLocal_00b80d30::FUN_00b80600(NiRefObject* value)
 {
-    NiRefObject** ppSlot = reinterpret_cast<NiRefObject**>(reinterpret_cast<char*>(this) + 0x44);
+    NiRefObject** ppSlot = reinterpret_cast<NiRefObject**>(&m_uiRemainingStages);
     NiRefObject* old = *ppSlot;
     if (old != value)
     {
@@ -176,15 +337,10 @@ void BSShaderBloodSplatter::FUN_00b80600(NiRefObject* value)
     }
 }
 
-struct FUN_00b807c0_shell
-{
-    int __thiscall FUN_00b807c0(void* a, void* b);
-};
-
 // @fnv 0x00b807c0
-int __thiscall FUN_00b807c0_shell::FUN_00b807c0(void* a, void* b)
+int __thiscall BloodSplatterShaderLocal_00b80d30::FUN_00b807c0(void* a, void* b)
 {
-    return *reinterpret_cast<int*>(reinterpret_cast<unsigned char*>(this) + 0x28);
+    return reinterpret_cast<int>(m_spShaderDecl.m_pObject);
 }
 
 extern int g_011fedc8;
@@ -195,75 +351,54 @@ int* __cdecl FUN_00b807b0()
     return &g_011fedc8;
 }
 
-struct FUN_00b80380_shell
-{
-    void FUN_00b80380();
-};
-// Calls the virtual function at vtable slot 74 on this for each of the two pointers stored at this+0x6c and this+0x70.
+// Clears the texture stages in both shader passes.
 // @fnv 0x00b80380
-void FUN_00b80380_shell::FUN_00b80380()
+void BloodSplatterShaderLocal_00b80d30::FUN_00b80380()
 {
-    typedef void(__thiscall * Fn)(void*, void*);
-    void** p = (void**)((char*)this + 0x6c);
+    NiPointer<NiD3DPass>* p = spRenderPass;
     int n = 2;
     do
     {
-        void* a = *p;
-        Fn f = (*(Fn**)this)[74];
-        f(this, a);
+        NiD3DPass* pass = p->m_pObject;
+        // The approved BSShader header does not declare slot 74 yet.
+        reinterpret_cast<void(__thiscall*)(void*, NiD3DPass*)>(
+            (*reinterpret_cast<void***>(this))[74])(this, pass);
         ++p;
     } while (--n != 0);
 }
 
-struct FUN_00b80b20_shell : BSShaderBloodSplatter
-{
-    bool FUN_00b80b20();
-};
-
 // @fnv 0x00b80b20
-bool FUN_00b80b20_shell::FUN_00b80b20()
+bool BloodSplatterShaderLocal_00b80d30::FUN_00b80b20()
 {
     InitializeShaderData();
     return ConfigureShaderPass();
 }
 
 void __cdecl _delete(void*, unsigned int);
-struct Standin00b80e40
-{
-    void __thiscall FUN_00b80650();
-    void* __thiscall FUN_00b80e40(unsigned int);
-};
-// Calls FUN_00b80650, then deletes this with size 0x84 when bit 0 of a1 is set, and returns this.
+// Destroys the shader and releases its allocation when bit 0 of the flags is set.
 // @fnv 0x00b80e40
-void* __thiscall Standin00b80e40::FUN_00b80e40(unsigned int auiFlags)
+void* __thiscall BloodSplatterShaderLocal_00b80d30::FUN_00b80e40(unsigned int auiFlags)
 {
-    FUN_00b80650();
+    this->BloodSplatterShaderLocal_00b80d30::~BloodSplatterShaderLocal_00b80d30();
     if (auiFlags & 1)
         _delete(this, 0x84);
     return this;
 }
 
-struct NiPoint3
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ)
 {
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    NiPoint3 operator-(const NiPoint3& p) const
-    {
-        return NiPoint3(x - p.x, y - p.y, z - p.z);
-    }
-    float operator*(const NiPoint3& p) const
-    {
-        return x * p.x + y * p.y + z * p.z;
-    }
-    void ComputeMagnitude();
-};
+    x = fX;
+    y = fY;
+    z = fZ;
+}
+inline float NiPoint3::operator*(const NiPoint3& kV) const
+{
+    return x * kV.x + y * kV.y + z * kV.z;
+}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kV) const
+{
+    return NiPoint3(x - kV.x, y - kV.y, z - kV.z);
+}
 
 struct Picker_00b803b0
 {
@@ -338,232 +473,66 @@ void __cdecl FUN_00b803b0(Camera_00b803b0* pkCamera)
     }
 }
 
-struct FUN_00b80f50_shell : public BSShaderBloodSplatter
-{
-    void CreateShaderConstantMaps();
-};
-
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 extern char $SG3295[];
 extern char _DAT_010A1E50[];
 extern int DAT_011fedb4;
 extern float DAT_011feda4;
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-    static void __cdecl operator delete(void*);
-    virtual void v0();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (!InterlockedDecrement(&m_uiRefCount))
-            DeleteThis();
-    }
-};
-
-struct NiD3DShaderConstantMap : BSFadeNode
-{
-    NiD3DShaderConstantMap(void*, int);
-    virtual int AddEntry(const char* pcKey, unsigned int uiFlags, unsigned int uiExtra, unsigned int uiShaderRegister,
-                         unsigned int uiRegisterCount, const char* pcVariableName, unsigned int uiConstantDataSize,
-                         unsigned int uiDataStride, const void* pvDataSource, bool bCopyData);
-    char m_auiShapeKeys[0x44 - 8];
-};
-
-template <class T> struct NiPointerS
-{
-    T* m_pObject;
-    NiPointerS& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-    bool operator!() const
-    {
-        return m_pObject == 0;
-    }
-};
-
 // Lazily creates the two NiD3DShaderConstantMap objects stored at offsets 0x30 and 0x34 and registers their shader constant entries.
 // @fnv 0x00b80f50
-void FUN_00b80f50_shell::CreateShaderConstantMaps()
+void BloodSplatterShaderLocal_00b80d30::CreateShaderConstantMaps()
 {
-    NiPointerS<NiD3DShaderConstantMap>& pAlphaMap = *(NiPointerS<NiD3DShaderConstantMap>*)((char*)this + 0x30);
-    NiPointerS<NiD3DShaderConstantMap>& m_pVertexShaderConstantMap =
-        *(NiPointerS<NiD3DShaderConstantMap>*)((char*)this + 0x34);
-    if (!pAlphaMap)
+    NiPointer<NiD3DShaderConstantMap>& pAlphaMap = m_spPixelConstantMap;
+    NiPointer<NiD3DShaderConstantMap>& m_pVertexShaderConstantMap = m_spVertexConstantMap;
+    if (!pAlphaMap.m_pObject)
     {
-        pAlphaMap = new NiD3DShaderConstantMap(*(void**)((char*)this + 0x18), 2);
-        pAlphaMap->AddEntry("alpha", 0x10000007, 0, 0, 1, $SG3295, 0x10, 4, &DAT_011fedb4, false);
+        pAlphaMap = new NiD3DShaderConstantMap(static_cast<void*>(m_pkD3DRenderer), 2);
+        pAlphaMap.m_pObject->SetConstant("alpha", 0x10000007, 0, 0, 1, $SG3295, 0x10, 4, &DAT_011fedb4, false);
     }
-    if (!m_pVertexShaderConstantMap)
+    if (!m_pVertexShaderConstantMap.m_pObject)
     {
-        m_pVertexShaderConstantMap = new NiD3DShaderConstantMap(*(void**)((char*)this + 0x18), 0);
-        m_pVertexShaderConstantMap->AddEntry(_DAT_010A1E50, 0x20000009, 0, 0, 4, 0, 0, 0, 0, false);
-        m_pVertexShaderConstantMap->AddEntry("lightloc", 0x10000007, 0, 4, 1, $SG3295, 0x10, 4, &g_splatterValueA,
+        m_pVertexShaderConstantMap = new NiD3DShaderConstantMap(static_cast<void*>(m_pkD3DRenderer), 0);
+        m_pVertexShaderConstantMap.m_pObject->SetConstant(_DAT_010A1E50, 0x20000009, 0, 0, 4, 0, 0, 0, 0, false);
+        m_pVertexShaderConstantMap.m_pObject->SetConstant("lightloc", 0x10000007, 0, 4, 1, $SG3295, 0x10, 4, &g_splatterValueA,
                                              false);
-        m_pVertexShaderConstantMap->AddEntry("ctrl", 0x10000007, 0, 5, 1, $SG3295, 0x10, 4, &DAT_011feda4, false);
+        m_pVertexShaderConstantMap.m_pObject->SetConstant("ctrl", 0x10000007, 0, 5, 1, $SG3295, 0x10, 4, &DAT_011feda4, false);
     }
 }
 
-struct ShaderBase
-{
-    virtual ~ShaderBase();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-};
-struct PassRef
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int refs;
-    void FUN_00e80190();
-    void Release()
-    {
-        --refs;
-        if (!refs)
-            FUN_00e80190();
-    }
-};
-struct RefView
-{
-    virtual void v00();
-    virtual void Delete();
-    long refs;
-    void Release()
-    {
-        if (InterlockedDecrement(&refs) == 0)
-            Delete();
-    }
-};
-struct FUN_00b80650 : ShaderBase
-{
-    NiPointer<NiD3DPass> passes[2];
-    NiPointer<NiD3DVertexShader> vertex[2];
-    NiPointer<NiD3DPixelShader> pixel[2];
-    virtual ~FUN_00b80650();
-};
 // Releases the two pass, vertex-shader and pixel-shader references and the white-flash texture, clearing each pointer.
 // @fnv 0x00b80650
-FUN_00b80650::~FUN_00b80650()
+BloodSplatterShaderLocal_00b80d30::~BloodSplatterShaderLocal_00b80d30()
 {
     for (unsigned int i = 0; i < 2; ++i)
     {
-        if (passes[i].m_pObject)
+        if (spRenderPass[i].m_pObject)
         {
-            ((PassRef*)passes[i].m_pObject)->Release();
-            passes[i].m_pObject = 0;
+            spRenderPass[i].m_pObject->Release();
+            spRenderPass[i].m_pObject = 0;
         }
     }
     for (unsigned int i = 0; i < 2; ++i)
     {
-        if (vertex[i].m_pObject)
+        if (m_spTreeVertexShader[i].m_pObject)
         {
-            ((RefView*)vertex[i].m_pObject)->Release();
-            vertex[i].m_pObject = 0;
+            m_spTreeVertexShader[i].m_pObject->NiRefObject::DecRefCount();
+            m_spTreeVertexShader[i].m_pObject = 0;
         }
     }
     for (unsigned int i = 0; i < 2; ++i)
     {
-        if (pixel[i].m_pObject)
+        if (m_spPixelShaderVariants[i].m_pObject)
         {
-            ((RefView*)pixel[i].m_pObject)->Release();
-            pixel[i].m_pObject = 0;
+            m_spPixelShaderVariants[i].m_pObject->NiRefObject::DecRefCount();
+            m_spPixelShaderVariants[i].m_pObject = 0;
         }
     }
-    if (*(RefView**)&g_splatterWhiteFlashTexture)
+    if (*(NiRefObject**)&g_splatterWhiteFlashTexture)
     {
-        (*(RefView**)&g_splatterWhiteFlashTexture)->Release();
-        *(RefView**)&g_splatterWhiteFlashTexture = 0;
+        (*(NiRefObject**)&g_splatterWhiteFlashTexture)->DecRefCount();
+        *(NiRefObject**)&g_splatterWhiteFlashTexture = 0;
     }
 }
-
-struct FUN_00b80b30_item
-{
-    int unk00;
-    int unk04;
-    unsigned int m_u08;
-    void ApplyPairToState(void* pValue);
-};
-
-struct FUN_00b80b30_pass
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    FUN_00b80b30_item** m_ppItems;
-};
 
 struct FUN_00b80b30_sub
 {
@@ -662,218 +631,52 @@ extern FUN_00b80b30_mgr DAT_012005a4;
 extern int DAT_011f91e4;
 extern int DAT_011fedc4;
 
-class FUN_00b80b30_cls
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c();
-    virtual void v90();
-    virtual void v94();
-    virtual void v98();
-    virtual void v9c();
-    virtual void va0();
-    virtual void va4();
-    virtual void va8();
-    virtual void vac();
-    virtual void vb0();
-    virtual void vb4();
-    virtual void vb8();
-    virtual void vbc();
-    virtual void vc0();
-    virtual void vc4();
-    virtual void vc8();
-    virtual void vcc();
-    virtual void vd0();
-    virtual void vd4();
-    virtual void vd8();
-    virtual void vdc();
-    virtual void ve0();
-    virtual void ve4();
-    virtual void ve8();
-    virtual void vec();
-    virtual void vf0();
-    virtual void vf4();
-    virtual void vf8();
-    virtual void vfc();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    FUN_00b80b30_pass* m_pPass6c;
-    FUN_00b80b30_pass* m_p70;
-    void InitPassItems(FUN_00b80b30_arg* a1);
-};
-
-// Fills the pass items' m_u08 from the sub's m_arr60 and calls ApplyPairToState with sub->v51(), branching on DAT_011f91e4, then calls v108().
+// Updates the pass texture stages and configures them for the current render pass.
 // @fnv 0x00b80b30
-void FUN_00b80b30_cls::InitPassItems(FUN_00b80b30_arg* apArg)
+void BloodSplatterShaderLocal_00b80d30::InitPassItems(FUN_00b80b30_arg* apArg)
 {
     FUN_00b80b30_sub* sub = apArg->m_pSub;
     if (DAT_011f91e4 == 0x2f1)
     {
-        FUN_00b80b30_pass* pass = m_pPass6c;
+        NiD3DPass* pass = spRenderPass[0].m_pObject;
         for (unsigned int i = 0; i < 2; i++)
         {
-            FUN_00b80b30_item* item = pass->m_ppItems[i];
-            item->m_u08 = sub->m_arr60[i];
+            BeamStage* item = pass->m_kStages.m_pBase[i].m_pObject;
+            item->m_uiTexture = sub->m_arr60[i];
             void* value = sub->v51();
             item->ApplyPairToState(value);
         }
     }
     else if (DAT_011f91e4 == 0x2f0)
     {
-        FUN_00b80b30_pass* pass = m_p70;
-        FUN_00b80b30_item* pFirstItem = pass->m_ppItems[0];
-        pFirstItem->m_u08 = sub->m_arr60[0];
+        NiD3DPass* pass = spRenderPass[1].m_pObject;
+        BeamStage* pFirstItem = pass->m_kStages.m_pBase[0].m_pObject;
+        pFirstItem->m_uiTexture = sub->m_arr60[0];
         void* value0 = sub->v51();
         pFirstItem->ApplyPairToState(value0);
-        FUN_00b80b30_item* pSecondItem = pass->m_ppItems[1];
+        BeamStage* pSecondItem = pass->m_kStages.m_pBase[1].m_pObject;
         if (DAT_012005a4.FUN_00ba3780())
         {
-            pSecondItem->m_u08 = (unsigned int)DAT_012005a4.FUN_00ba3780();
+            pSecondItem->m_uiTexture = (unsigned int)DAT_012005a4.FUN_00ba3780();
         }
         else
         {
-            pSecondItem->m_u08 = DAT_011fedc4;
+            pSecondItem->m_uiTexture = DAT_011fedc4;
         }
         void* value1 = sub->v51();
         pSecondItem->ApplyPairToState(value1);
     }
-    v108();
+    // The approved BSShader header does not declare slot 66 yet.
+    reinterpret_cast<void(__thiscall*)(void*)>((*reinterpret_cast<void***>(this))[66])(this);
 }
 
 namespace fnv_00b80c20 {
-struct Bound
-{
-    float x, y, z, radius;
-};
-extern Bound DAT_011f4288;
+extern NiBound DAT_011f4288;
 extern unsigned int DAT_011f91e4;
 extern float DAT_011ad874, DAT_011ad878;
-struct WorldTransform
-{
-    float r00, r01, r02, r10, r11, r12, r20, r21, r22, x, y, z, scale;
-};
-struct GeomData
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    void* data;
-};
-struct GeomStub
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    Bound* bound;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    WorldTransform transform;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    GeomData* mesh;
-    void* properties;
-};
-extern GeomStub** DAT_011f91e0;
-struct RendererStub
-{
-    void FUN_00e6fbb0(WorldTransform*, int);
-};
+extern NiGeometry** DAT_011f91e0;
+// 0x00e6fbb0 is ApplyObjectTransform; the shared renderer header lacks this method.
+extern void ApplyRendererObjectTransform();
 struct EffectObject
 {
     unsigned int unk00;
@@ -910,87 +713,45 @@ struct RenderInput
     unsigned int unk00, unk04, unk08;
     EffectObject* object;
 };
-struct ConstantMapView
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void Apply(void*, GeomStub*, void*, int, void*, RenderInput*, int, WorldTransform*, Bound*, int, int);
-};
-struct BloodShader
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    RendererStub* renderer;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    ConstantMapView* pixelMap;
-    ConstantMapView* vertexMap;
-    void ApplyBloodShader(RenderInput*);
-};
+}  // namespace fnv_00b80c20
+
 // Computes a scaled value from the render input's object, applies the pixel and vertex constant maps to the current geometry with the bound and transform.
 // @fnv 0x00b80c20
-void BloodShader::ApplyBloodShader(RenderInput* input)
+void BloodSplatterShaderLocal_00b80d30::ApplyBloodShader(fnv_00b80c20::RenderInput* input)
 {
-    GeomStub* geom = *DAT_011f91e0;
-    WorldTransform* transform = &geom->transform;
-    Bound* bound = geom->bound;
+    using namespace fnv_00b80c20;
+    NiGeometry* geom = *DAT_011f91e0;
+    NiTransform* transform = &geom->m_kWorld;
+    NiBound* bound = reinterpret_cast<NiBound*>(geom->m_kWorldBound);
     if (!bound)
         bound = &DAT_011f4288;
-    void* data = geom->mesh->data;
-    void* properties = geom->properties;
-    renderer->FUN_00e6fbb0(transform, 0);
+    NiGeometryBufferData* data = static_cast<NiGeometryBufferData*>(geom->m_spModelData.m_pObject->m_pkBuffData);
+    NiSkinInstance* properties = geom->m_spSkinInstance.m_pObject;
+    typedef void(__thiscall* ApplyObjectTransform)(NiDX9Renderer*, const NiTransform&, bool);
+    reinterpret_cast<ApplyObjectTransform>(&ApplyRendererObjectTransform)(
+        reinterpret_cast<NiDX9Renderer*>(m_pkD3DRenderer), *transform, false);
     float value = *input->object->value * input->object->scale;
     *(float*)&DAT_011fedb4 = value * DAT_011ad878;
-    if (DAT_011f91e4 == 0x2f0)
+    if (fnv_00b80c20::DAT_011f91e4 == 0x2f0)
         *(float*)&DAT_011fedb4 = DAT_011fed90 * DAT_011ad874 * *(float*)&DAT_011fedb4;
-    ConstantMapView* map = pixelMap;
+    NiD3DShaderConstantMap* map = m_spPixelConstantMap.m_pObject;
     if (map)
     {
-        NiD3DPixelShader* shader = DAT_0126f74c->m_spPixelShaderObject.m_pObject;
+        NiD3DPixelShader* shader = DAT_0126f74c->m_spPixelShader.m_pObject;
         if (shader)
-            map->Apply(shader, geom, properties, 0, data, input, 0, transform, bound, 0, 1);
+            map->ConfigureShaderConstantMap(shader, geom, properties,
+                static_cast<const NiSkinPartition::Partition*>(0), data,
+                reinterpret_cast<const NiPropertyState*>(input), static_cast<const NiDynamicEffectState*>(0),
+                *transform, *bound, 0, true);
     }
-    map = vertexMap;
+    map = m_spVertexConstantMap.m_pObject;
     if (map)
     {
-        NiD3DVertexShader* shader = DAT_0126f74c->m_spVertexShaderObject.m_pObject;
+        NiD3DVertexShader* shader = DAT_0126f74c->m_spVertexShader.m_pObject;
         if (shader)
-            map->Apply(shader, geom, properties, 0, data, input, 0, transform, bound, 0, 1);
+            map->ConfigureShaderConstantMap(shader, geom, properties,
+                static_cast<const NiSkinPartition::Partition*>(0), data,
+                reinterpret_cast<const NiPropertyState*>(input), static_cast<const NiDynamicEffectState*>(0),
+                *transform, *bound, 0, true);
     }
 }
-}  // namespace fnv_00b80c20

@@ -1,3 +1,9 @@
+#include "../../../../include/bhkFilter.h"
+#include "../../../../include/BGSProjectile.h"
+#include "../../../../include/GameSettingCollection.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/PathingRequest.h"
+#include "../../../../include/SETTING_VALUE.h"
 
 // src/fallout/ai/combat/combatutilities_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy /Oy- (unit src/fallout/ai/combat/combatutilities_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -18,53 +24,14 @@ struct FUN_009a9f00_shell
 {
     void __thiscall SetFieldE0(float value);
 };
-struct BGSProjectile
-{
-    bool GetFlag(unsigned int) const;
-};
-struct FUN_009a7f80_shell : BGSProjectile
-{
-    bool FUN_009a7f80() const;
-};
 extern "C" double _DAT_0103c348;
 long __cdecl ScaleByRatio(float a);
 
 // FUN_009a6e90 - trajectory raycast stepper, worker5 v1 one-pass transcription
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-struct PtOp
-{
-    NiPoint3 __thiscall operator-(const NiPoint3& o) const;
-};
-struct Pt
-{
-    float __thiscall Length() const;
-};
-struct NiPoint3Ex
-{
-    NiPoint3 __thiscall operator+(const NiPoint3& o) const;
-};
-struct NiPoint3_helper
-{
-    NiPoint3 __thiscall operator*(float f) const;
-};
 
-struct bhkFilter
-{
-    int __thiscall FUN_004a3a20();
-};
 struct FUN_00931ed0_shell
 {
     bhkFilter* __thiscall FUN_00931ed0(void* p);
-};
-struct TESObjectCELL;
-struct TESObjectREFR
-{
-    TESObjectCELL* __thiscall GetTarget(void* query);
 };
 struct FUN_00553ee0_shell
 {
@@ -78,14 +45,6 @@ struct FUN_0059ce80_shell
 {
     void __thiscall FUN_0059ce80(unsigned int a);
 };
-struct FUN_00966980_shell
-{
-    float __thiscall FUN_00966980();
-};
-struct PathingRequest
-{
-    float __thiscall GetFloatAtOffset68() const;
-};
 struct GlobalObject_008c71b0
 {
     int m_val;
@@ -94,15 +53,6 @@ struct GlobalObject_008c71b0
 struct LockObj
 {
     int __thiscall FUN_00483710();
-};
-struct SETTING_VALUE
-{
-    int value;
-};
-struct GameSettingCollection
-{
-    SETTING_VALUE* __thiscall Bool();
-    SETTING_VALUE* __thiscall Int();
 };
 struct hkpAllRayHitCollector;
 struct FUN_004a3f70_shell
@@ -174,7 +124,7 @@ bool __cdecl FUN_009a6e90(void* a0, void* a1, float a2, float s0, float s1, floa
     double d28;
     if (a1)
     {
-        d28 = (double)(((FUN_00966980_shell*)a1)->FUN_00966980() * DAT_011f1c00);
+        d28 = (double)(((BGSProjectile*)a1)->FUN_00966980() * DAT_011f1c00);
     }
     else
     {
@@ -189,10 +139,8 @@ bool __cdecl FUN_009a6e90(void* a0, void* a1, float a2, float s0, float s1, floa
     ((FUN_004a3f70_shell*)&obj410)->FUN_004a3f70(obj18.m_val);
     ((FUN_004a3fb0_shell*)&obj410)->FUN_004a3fb0((hkpAllRayHitCollector*)&obj360);
 
-    NiPoint3 vecStart;
-    vecStart = *(NiPoint3*)&s0;
-    NiPoint3 pos;
-    pos = *(NiPoint3*)&e0;
+    NiPoint3 vecStart = *(NiPoint3*)&s0;
+    NiPoint3 pos = *(NiPoint3*)&e0;
     float frac = 0.0f;
     unsigned int v430 = 1;
     unsigned int cnt = 1;
@@ -211,17 +159,17 @@ bool __cdecl FUN_009a6e90(void* a0, void* a1, float a2, float s0, float s1, floa
     }
     else
     {
-        NiPoint3 diff = ((PtOp*)&e0)->operator-(*(NiPoint3*)&s0);
-        float v448 = FUN_004b54c0(diff.z / ((Pt*)&diff)->Length());
+        NiPoint3 diff = ((const NiPoint3*)&e0)->operator-(*(NiPoint3*)&s0);
+        float v448 = FUN_004b54c0(diff.z / ((const NiPoint3*)&diff)->Length());
         diff.z = 0.0f;
-        float v44c = ((Pt*)&diff)->Length();
+        float v44c = ((const NiPoint3*)&diff)->Length();
         float v450 = FUN_004b1550(&diff);
         float v454 = a2;
         if (v454 == gModifierZero)
         {
-            v454 = ((PathingRequest*)a1)->GetFloatAtOffset68();
+            v454 = ((const PathingRequest*)a1)->GetFloatAtOffset68();
         }
-        cnt = (unsigned int)DAT_011cfd7c.Int()->value;
+        cnt = (unsigned int)*(int*)&DAT_011cfd7c.Int()->f;
         float v464 = v44c / cnt;
         float v468 = FUN_004e44b0(v450) * v464;
         float v46c = cos(v450) * v464;
@@ -260,9 +208,8 @@ bool __cdecl FUN_009a6e90(void* a0, void* a1, float a2, float s0, float s1, floa
         }
         if (outPt)
         {
-            *outPt = ((NiPoint3Ex*)&((NiPoint3_helper*)&((PtOp*)&pos)->operator-(vecStart))->operator*(frac))
-                         ->
-                         operator+(vecStart);
+            *outPt = ((const NiPoint3*)&((const NiPoint3*)&((const NiPoint3*)&pos)->operator-(vecStart))->operator*(frac))
+                         ->operator+(vecStart);
         }
         if (outFrac)
         {

@@ -2,6 +2,9 @@
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkpconstraintdrawer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkpconstraintdrawer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#define FNV_VEC4_SIMD
+#include "../../../../../../../../../include/Vec4.h"
+
 struct ResetField
 {
     void __thiscall FUN_00e10a00();
@@ -79,17 +82,9 @@ void* __thiscall FUN_00de4470_class::InitializeDefaults()
     return this;
 }
 
-struct DE44C0Vector4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-
 struct DE44C0Display
 {
-    void FUN_00e10bf0(const DE44C0Vector4* a, const DE44C0Vector4* b, float radius, unsigned int color, int id,
+    void FUN_00e10bf0(const Vec4* a, const Vec4* b, float radius, unsigned int color, int id,
                       int tag);
 };
 
@@ -111,14 +106,14 @@ struct DE44C0Object
     int unk34;
     int unk38;
     int unk3C;
-    DE44C0Vector4 m_vFirstVector;
-    DE44C0Vector4 m_vSecondVector;
-    DE44C0Vector4 m_dirA;
-    DE44C0Vector4 unk70;
-    DE44C0Vector4 unk80;
-    DE44C0Vector4 m_dirB;
-    DE44C0Vector4 unkA0;
-    DE44C0Vector4 unkB0;
+    Vec4 m_vFirstVector;
+    Vec4 m_vSecondVector;
+    Vec4 m_dirA;
+    Vec4 unk70;
+    Vec4 unk80;
+    Vec4 m_dirB;
+    Vec4 unkA0;
+    Vec4 unkB0;
     DE44C0Display m_display;
 
     float getScaledRadius() const
@@ -226,15 +221,6 @@ void FUN_00de47a0_cls::FUN_00de47a0(unsigned int value)
 {
     m_18 = value;
 }
-
-#include <xmmintrin.h>
-struct __declspec(align(16)) Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
 
 extern float DAT_01016248;
 

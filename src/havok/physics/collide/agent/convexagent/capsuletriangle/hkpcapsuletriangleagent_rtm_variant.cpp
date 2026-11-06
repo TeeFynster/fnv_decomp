@@ -1,3 +1,8 @@
+#define FNV_VEC4_SIMD
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkVector4.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+
 // src/havok/physics/collide/agent/convexagent/capsuletriangle/hkpcapsuletriangleagent_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/agent/convexagent/capsuletriangle/hkpcapsuletriangleagent.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -66,20 +71,7 @@ struct CallbackState
 };
 void __cdecl FUN_00d3a280(void* apFirst, void* apSecond, void* apThird, CallbackState* apState);
 void __cdecl FUN_00d3b220(void* apOne, void* apTwo, void* apThree, int aiValue);
-struct AllocIface
-{
-    virtual void unk00();
-    virtual void* Alloc(unsigned int size);
-};
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AllocIface* m_pAllocator;
-};
-AllocHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 void __cdecl ComputeInverseLengths(void* value, void* self);
 extern char DAT_010ceefc[];
 extern char DAT_010cef38[];
@@ -96,51 +88,7 @@ struct FUN_00d39980_cls
     void* m_sub;
 };
 FUN_00d39980_cls* __cdecl CreateAllocatedObject(int a1, int a2, int a3, int a4);
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned int m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_xor_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
 extern const __m128 DAT_010c4c00;
-struct hkVector4
-{
-    __m128 m_vComponents;
-    void operator=(const hkVector4& o)
-    {
-        m_vComponents = o.m_vComponents;
-    }
-    void setBroadcast3(const hkVector4& v)
-    {
-        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
-    }
-    void mul4(const hkVector4& a)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, a.m_vComponents);
-    }
-    void add4(const hkVector4& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    void addMul4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents));
-    }
-    void setNeg4(const hkVector4& v)
-    {
-        m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c4c00);
-    }
-    void neg()
-    {
-        m_vComponents = _mm_xor_ps(m_vComponents, DAT_010c4c00);
-    }
-};
 struct Elem_d3b260
 {
     hkVector4 m_pos;
@@ -239,10 +187,6 @@ struct CallbackHost_d3b160
 {
     void FUN_00d3a620(void*, void*, void*, void*);
     void FUN_00d3b160(void*, void*, void*, unsigned int);
-};
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
 };
 struct Mat4
 {
@@ -411,22 +355,14 @@ struct CollisionWorkspace
 };
 int __cdecl FUN_00d39bf0(Obj* a, Obj* b, Par* volatile p, void* q, Contact* out);
 #include <windows.h>
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkpCdBody.h"
+#include "../../../../../../../include/hkpShape.h"
 extern DWORD DAT_0126835c;
 extern "C" void _ReadWriteBarrier(void);
 unsigned __int64 __cdecl __rdtsc(void);
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
-struct ProfBuf
-{
-    DWORD unk00;
-    ProfRec* m_pCur;
-    DWORD unk08;
-    ProfRec* m_pRecordEnd;
-};
 typedef ScalarVector Vec4f;
 struct ContactMatrix
 {
@@ -459,24 +395,6 @@ struct Context
 };
 extern "C" void __cdecl FUN_00cd6520(void* out1, float fx, void* out2, float fy, void* p, float afDepth, int zero,
                                      HitRec* hit, int zero2);
-struct hkpShape
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    float m_fSphereRadius;
-    int unk14;
-    int unk18;
-    int unk1c;
-    __m128 m_kVertices[4];
-};
-struct hkpCdBody
-{
-    const hkpShape* m_pCollisionShape;
-    int unk04;
-    const ContactMatrix* m_kMotionState;
-};
 struct CollisionInput
 {
     int unk00;
@@ -508,13 +426,6 @@ struct MonitorRecord
     const char* name;
     unsigned int time;
     unsigned int unk08;
-};
-struct MonitorStream
-{
-    unsigned int unk00;
-    MonitorRecord* cursor;
-    unsigned int unk08;
-    MonitorRecord* end;
 };
 struct __declspec(align(16)) PlainVector
 {

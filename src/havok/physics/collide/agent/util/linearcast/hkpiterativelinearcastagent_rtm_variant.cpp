@@ -1,132 +1,80 @@
+// Retain the unit's original intrinsic type; VC9 treats the SDK's byte-array
+// aliases in __m128 as stack buffers and otherwise adds a security cookie.
+// Exe 0x00daf540 FUN_00daf540: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+
+#include <new>
+#include "../../../../../../../include/hkTransform.h"
+#include "../../../../../../../include/hkMotionState.h"
+#include "../../../../../../../include/hkContactPoint.h"
+#include "../../../../../../../include/hkpShape.h"
+#include "../../../../../../../include/hkpCdBody.h"
+#include "../../../../../../../include/hkpCdPointCollector.h"
+#include "../../../../../../../include/hkpIterativeLinearCastAgent.h"
+#include "../../../../../../../include/hkpSimpleClosestContactCollector.h"
+
+// The original body constructor leaves its members uninitialized.
+__forceinline hkpCdBody::hkpCdBody() {}
 // src/havok/physics/collide/agent/util/linearcast/hkpiterativelinearcastagent_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/agent/util/linearcast/hkpiterativelinearcastagent.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 // src/havok/physics/collide/agent/util/linearcast/hkpiterativelinearcastagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/util/linearcast/hkpiterativelinearcastagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
+__forceinline const float& hkVector4::component(int k) const
 {
-    float m128_f32[4];
-};
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" void _ReadWriteBarrier();
-
-struct __declspec(align(16)) hkVector4
+    return lanes[k];
+}
+__forceinline float& hkVector4::component(int k)
 {
-    union
-    {
-        __m128 quad;
-        struct
-        {
-            float x, y, z, w;
-        };
-        float lanes[4];
-    };
-
-    __forceinline const float& component(int k) const
-    {
-        return lanes[k];
-    }
-    __forceinline float& component(int k)
-    {
-        return lanes[k];
-    }
-    __forceinline void SetAllComponents(float v)
-    {
-        __m128 t = _mm_load_ss(&v);
-        quad = _mm_shuffle_ps(t, t, 0);
-    }
-};
-
-struct __declspec(align(16)) hkTransform
+    return lanes[k];
+}
+__forceinline void hkVector4::SetAllComponents(float v)
 {
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-    hkVector4 m_vTranslation;
-    hkVector4 m_center0;
-    hkVector4 m_center1;
-    hkVector4 m_qRotation0;
-    hkVector4 m_qRotation1;
-    hkVector4 m_centerLocal;
-    hkVector4 m_kDeltaAngle;
-    float m_fSphereRadius;
-    float m_linearLimit;
-    float m_fAngularLimit;
-    float m_timeFactor;
-    void FUN_00d431b0(const void* src);
-};
+    LocalM128 t = _mm_load_ss(&v);
+    quad = _mm_shuffle_ps(t, t, 0);
+}
 
-struct hkpShape
+__forceinline float hkContactPoint::getDistance() const
 {
-    void* vtable;
-    int unk04;
-    int unk08;
-    int m_type;
-};
-
-struct hkpCdBody
+    return m_vSeparatingNormal.w;
+}
+__forceinline void hkContactPoint::setDistance(float value)
 {
-    const hkpShape* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_kMotionState;
-    const hkpCdBody* m_parent;
-};
-
-struct __declspec(align(16)) hkContactPoint
+    m_vSeparatingNormal.component(3) = value;
+}
+__forceinline void hkContactPoint::setSeparatingNormal(const hkVector4& value, float distance)
 {
-    __forceinline float distanceValue() const
-    {
-        return m_vSeparatingNormal.w;
-    }
-    __forceinline void assignDistance(float value)
-    {
-        m_vSeparatingNormal.component(3) = value;
-    }
-    __forceinline void assignPlane(const hkVector4& value, float distance)
-    {
-        m_vSeparatingNormal.quad = value.quad;
-        assignDistance(distance);
-    }
+    m_vSeparatingNormal.quad = value.quad;
+    setDistance(distance);
+}
 
-    hkVector4 m_vContactPosition;
-    hkVector4 m_vSeparatingNormal;
-};
-
-struct __declspec(align(16)) RootContactPoint
+struct __declspec(align(16)) ContactPointPair
 {
     hkContactPoint m_kPoint;
     const hkpCdBody* m_pRootCollidableA;
     const hkpCdBody* m_pRootCollidableB;
 };
 
-struct hkpCdPointCollector
-{
-    virtual void unk_dtor();
-    virtual void AddCdPoint(const RootContactPoint& point) = 0;
-    float m_fEarlyOutDistance;
-};
-
 extern float DAT_0104da48;
-extern char DAT_010cebe0;
-struct __declspec(align(16)) hkpSimpleClosestContactCollector
+// Preserve this unit's inlined collector construction.
+__declspec(nothrow) __forceinline hkpCdPointCollector::hkpCdPointCollector()
+    : m_fEarlyOutDistance(DAT_0104da48) {}
+__declspec(nothrow) __forceinline hkpSimpleClosestContactCollector::hkpSimpleClosestContactCollector()
 {
-    void* m_ppVirtualMethodTable;
-    float m_fEarlyOutDistance;
-    bool m_bHit;
-    hkContactPoint m_kHitPoint;
-    __forceinline hkpSimpleClosestContactCollector()
-    {
-        m_fEarlyOutDistance = m_kHitPoint.m_vSeparatingNormal.w = DAT_0104da48;
-        m_ppVirtualMethodTable = &DAT_010cebe0;
-        m_bHit = false;
-    }
-};
+    m_fEarlyOutDistance = reinterpret_cast<hkContactPoint&>(contact).m_vSeparatingNormal.w = DAT_0104da48;
+    m_bOk = false;
+}
 
 typedef void (*hkpLinearCastFunc)(const hkpCdBody*, const hkpCdBody*, const void*, hkpCdPointCollector*) throw();
 
@@ -170,52 +118,51 @@ struct __declspec(align(16)) ShapeSweepParameters : public CollisionAgentContext
 
 __forceinline float dot3(const hkVector4& a, const hkVector4& b)
 {
-    __m128 mul = _mm_mul_ps(a.quad, b.quad);
-    __m128 shuf1 = _mm_shuffle_ps(mul, mul, 0x55);
-    __m128 shuf2 = _mm_shuffle_ps(mul, mul, 0xaa);
-    __m128 sum = _mm_add_ss(shuf1, mul);
+    LocalM128 mul = _mm_mul_ps(a.quad, b.quad);
+    LocalM128 shuf1 = _mm_shuffle_ps(mul, mul, 0x55);
+    LocalM128 shuf2 = _mm_shuffle_ps(mul, mul, 0xaa);
+    LocalM128 sum = _mm_add_ss(shuf1, mul);
     sum = _mm_add_ss(shuf2, sum);
     float res;
     _mm_store_ss(&res, sum);
     return res;
 }
 
-struct hkpIterativeLinearCastAgent
+// The original motion-state copy does not throw. Keep placement-new cleanup
+// out of the caller while using the shared copy constructor.
+__declspec(nothrow) __forceinline void copyMotionState(void* storage, const void* source)
 {
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void CastImpl(const hkpCdBody*, const hkpCdBody*, const void*, hkpSimpleClosestContactCollector*);
-    void FUN_00daf540(const hkpCdBody* bodyA, const hkpCdBody* bodyB, const ShapeSweepParameters* input,
-                      hkpCdPointCollector* castCollector, hkpCdPointCollector* startCollector);
-};
+    ::new (storage) hkMotionState(*static_cast<const hkMotionState*>(source));
+}
 
 // @fnv 0x00daf540
 void hkpIterativeLinearCastAgent::FUN_00daf540(const hkpCdBody* bodyA, const hkpCdBody* bodyB,
                                                const ShapeSweepParameters* input, hkpCdPointCollector* castCollector,
                                                hkpCdPointCollector* startCollector)
 {
-    hkpSimpleClosestContactCollector localCastCollector;
+    // Explicit storage preserves the original collector lifetime without adding
+    // virtual-destructor cleanup on every exit.
+    __declspec(align(16)) LocalM128 localCastCollectorStorage[sizeof(hkpSimpleClosestContactCollector) / sizeof(LocalM128)];
+    hkpSimpleClosestContactCollector& localCastCollector = *::new (static_cast<void*>(localCastCollectorStorage)) hkpSimpleClosestContactCollector;
     CollisionAgentContext linearInput = *input;
     linearInput.m_fScalar += input->m_fMaxExtraPenetration;
     CastImpl(bodyA, bodyB, &linearInput, &localCastCollector);
-    if (!localCastCollector.m_bHit)
+    if (!localCastCollector.m_bOk)
         return;
 
-    RootContactPoint hitPoint;
-    hitPoint.m_kPoint.m_vContactPosition.quad = localCastCollector.m_kHitPoint.m_vContactPosition.quad;
+    ContactPointPair hitPoint;
+    hitPoint.m_kPoint.m_vContactPosition.quad = reinterpret_cast<const hkContactPoint&>(localCastCollector.contact).m_vContactPosition.quad;
     hitPoint.m_pRootCollidableB = bodyB;
     hitPoint.m_pRootCollidableA = bodyA;
-    hitPoint.m_kPoint.m_vSeparatingNormal.quad = localCastCollector.m_kHitPoint.m_vSeparatingNormal.quad;
+    hitPoint.m_kPoint.m_vSeparatingNormal.quad = reinterpret_cast<const hkContactPoint&>(localCastCollector.contact).m_vSeparatingNormal.quad;
 
-    const float& distance = localCastCollector.m_kHitPoint.m_vSeparatingNormal.w;
+    const float& distance = reinterpret_cast<hkContactPoint&>(localCastCollector.contact).m_vSeparatingNormal.w;
     if (distance < input->m_fScalar && startCollector)
         startCollector->AddCdPoint(hitPoint);
 
     hkVector4 step;
     step.quad = input->m_step.quad;
-    float closing = dot3(step, localCastCollector.m_kHitPoint.m_vSeparatingNormal);
+    float closing = dot3(input->m_step, reinterpret_cast<const hkContactPoint&>(localCastCollector.contact).m_vSeparatingNormal);
     float endpoint = distance + closing;
     if (endpoint > 0.0f)
         return;
@@ -229,53 +176,55 @@ void hkpIterativeLinearCastAgent::FUN_00daf540(const hkpCdBody* bodyA, const hkp
             float t = distance / (distance - endpoint);
             if (t > castCollector->m_fEarlyOutDistance)
                 return;
-            hitPoint.m_kPoint.assignDistance(t);
+            hitPoint.m_kPoint.setDistance(t);
         }
         else
         {
-            hitPoint.m_kPoint.assignDistance(0.0f);
+            hitPoint.m_kPoint.setDistance(0.0f);
         }
         castCollector->AddCdPoint(hitPoint);
         return;
     }
 
-    hitPoint.m_kPoint.assignDistance(distance / (distance - endpoint));
-    hkpSimpleClosestContactCollector projectedDistance;
-    hkTransform motion;
-    motion.FUN_00d431b0(bodyA->m_kMotionState);
+    hitPoint.m_kPoint.setDistance(distance / (distance - endpoint));
+    __declspec(align(16)) LocalM128 projectedDistanceStorage[sizeof(hkpSimpleClosestContactCollector) / sizeof(LocalM128)];
+    hkpSimpleClosestContactCollector& projectedDistance = *::new (static_cast<void*>(projectedDistanceStorage)) hkpSimpleClosestContactCollector;
+    LocalM128 motionStorage[sizeof(hkMotionState) / sizeof(LocalM128)];
+    hkMotionState& motion = *reinterpret_cast<hkMotionState*>(motionStorage);
+    copyMotionState(motionStorage, bodyA->m_pMotionState);
     hkpCdBody movedBody;
     movedBody.m_parent = bodyA;
-    movedBody.m_kMotionState = &motion;
+    movedBody.m_pMotionState = &motion;
     movedBody.m_pCollisionShape = bodyA->m_pCollisionShape;
     movedBody.m_uiCollisionShapeKey = 0xffffffff;
     int iterations = path->m_numIterations;
     while (--iterations >= 0)
     {
-        projectedDistance.m_kHitPoint.m_vSeparatingNormal.w = DAT_0104da48;
+        reinterpret_cast<hkContactPoint&>(projectedDistance.contact).m_vSeparatingNormal.w = DAT_0104da48;
         projectedDistance.m_fEarlyOutDistance = DAT_0104da48;
-        projectedDistance.m_bHit = false;
+        projectedDistance.m_bOk = false;
         hkVector4 delta;
-        float broadcast = hitPoint.m_kPoint.distanceValue();
+        float broadcast = hitPoint.m_kPoint.getDistance();
         delta.SetAllComponents(broadcast);
-        motion.m_vTranslation.quad = _mm_add_ps(_mm_mul_ps(delta.quad, step.quad),
-                                                ((const hkTransform*)bodyA->m_kMotionState)->m_vTranslation.quad);
+        motion.m_kMotionTransform.m_vTranslation = _mm_add_ps(_mm_mul_ps(delta.quad, step.quad),
+                                                ((const hkTransform*)bodyA->m_pMotionState)->m_vTranslation);
         CastImpl(&movedBody, bodyB, &linearInput, &projectedDistance);
 
         step.quad = input->m_step.quad;
-        float approach = dot3(input->m_step, projectedDistance.m_kHitPoint.m_vSeparatingNormal);
+        float approach = dot3(input->m_step, reinterpret_cast<const hkContactPoint&>(projectedDistance.contact).m_vSeparatingNormal);
         if (approach >= 0.0f)
             return;
         float roundedSpeed = -approach;
-        float oldFraction = hitPoint.m_kPoint.distanceValue();
+        float oldFraction = hitPoint.m_kPoint.getDistance();
         float travel = oldFraction * roundedSpeed;
-        float separation = projectedDistance.m_kHitPoint.distanceValue();
+        float separation = reinterpret_cast<hkContactPoint&>(projectedDistance.contact).m_vSeparatingNormal.w;
         if (separation + travel > roundedSpeed)
             return;
         float newFraction = oldFraction + separation / roundedSpeed;
         if (newFraction > castCollector->m_fEarlyOutDistance)
             return;
-        hitPoint.m_kPoint.m_vContactPosition.quad = projectedDistance.m_kHitPoint.m_vContactPosition.quad;
-        hitPoint.m_kPoint.assignPlane(projectedDistance.m_kHitPoint.m_vSeparatingNormal, newFraction);
+        hitPoint.m_kPoint.m_vContactPosition.quad = reinterpret_cast<const hkContactPoint&>(projectedDistance.contact).m_vContactPosition.quad;
+        hitPoint.m_kPoint.setSeparatingNormal(reinterpret_cast<const hkContactPoint&>(projectedDistance.contact).m_vSeparatingNormal, newFraction);
         if (input->m_path->m_minDistance >= separation)
             break;
     }

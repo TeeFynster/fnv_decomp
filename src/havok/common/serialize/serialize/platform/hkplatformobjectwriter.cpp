@@ -2,6 +2,10 @@
 // src/havok/common/serialize/serialize/platform/hkplatformobjectwriter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/serialize/platform/hkplatformobjectwriter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkArray.h"
+
 struct E02A40StreamWriter
 {
     virtual void unk00();
@@ -31,10 +35,6 @@ char* OffsetView::FUN_00e02a70()
     return unk08 + 12;
 }
 
-struct hkReferencedObject
-{
-    __declspec(nothrow) void removeReference();
-};
 struct FUN_00e02d40_helper
 {
     __declspec(nothrow) void ClearAndFreeData();
@@ -44,14 +44,6 @@ struct FUN_00e02c70_audio_iface
     virtual __declspec(nothrow) void v0();
     virtual __declspec(nothrow) void v1();
     virtual __declspec(nothrow) void v2(void* object, unsigned int value);
-};
-struct FUN_00e02c70_audio_holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    FUN_00e02c70_audio_iface* unk10;
 };
 void* __cdecl FUN_00c85750();
 struct BaseE02c70
@@ -75,24 +67,16 @@ FUN_00e02c70_Class::~FUN_00e02c70_Class()
     if (pHelper)
     {
         pHelper->ClearAndFreeData();
-        FUN_00e02c70_audio_holder* pAudioHolder = (FUN_00e02c70_audio_holder*)FUN_00c85750();
-        pAudioHolder->unk10->v2(pHelper, 0x24);
+        hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)FUN_00c85750();
+        reinterpret_cast<FUN_00e02c70_audio_iface*>(pAudioHolder->m_heap)->v2(pHelper, 0x24);
     }
 }
 
-struct AllocIface
+class Allocator
 {
+  public:
     virtual void unk00();
     virtual void* Alloc(unsigned int size);
-};
-
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AllocIface* m_pAllocator;
 };
 
 extern char DAT_010ea370[];
@@ -147,8 +131,8 @@ FUN_00e02bb0_cls* FUN_00e02bb0_cls::FUN_00e02bb0(int a1)
 {
     m_w06 = 1;
     m_vptr = DAT_010ea370;
-    AllocHolder* pAllocHolder = (AllocHolder*)FUN_00c85750();
-    SpawnedBlob* blob = (SpawnedBlob*)pAllocHolder->m_pAllocator->Alloc(0x18);
+    hkMemoryRouter* pAllocHolder = (hkMemoryRouter*)FUN_00c85750();
+    SpawnedBlob* blob = (SpawnedBlob*)pAllocHolder->m_heap->blockAlloc(0x18);
     blob->m_w04 = 0x18;
     KeyRef key;
     key.Set(&DAT_011b7b88);
@@ -159,56 +143,35 @@ FUN_00e02bb0_cls* FUN_00e02bb0_cls::FUN_00e02bb0(int a1)
     if (!(pucData[0] == (unsigned char)DAT_011b7b88[0] && pucData[1] == (unsigned char)DAT_011b7b88[1] &&
           pucData[2] == (unsigned char)DAT_011b7b88[2] && pucData[3] == (unsigned char)DAT_011b7b88[3]))
     {
-        AllocHolder* pAllocHolder2 = (AllocHolder*)FUN_00c85750();
-        small = (SpawnedSmall*)pAllocHolder2->m_pAllocator->Alloc(0x24);
+        hkMemoryRouter* pAllocHolder2 = (hkMemoryRouter*)FUN_00c85750();
+        small = (SpawnedSmall*)pAllocHolder2->m_heap->blockAlloc(0x24);
     }
     m_p0c = small != 0 ? small->Make() : 0;
     return this;
 }
 
-struct hkMemoryHeapE02
+// The local array used the hkArray layout and _reserveMore at 0x00c90940.
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    int unk00;
-};
+    hkMemoryRouter& kMem = *static_cast<hkMemoryRouter*>(FUN_00c85750());
+    return *reinterpret_cast<hkMemoryAllocator*>(kMem.m_heap);
+}
 
-struct hkThreadMemoryE02
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryHeapE02* m_pkHeap;
-};
-
-extern "C" hkThreadMemoryE02& __cdecl hkThreadMemoryInstanceE02();
-void __cdecl hkArrayReserveMoreE02(hkMemoryHeapE02* pkHeap, void* pArray, int iElemSize);
-
-template <class T> inline void hkArrayConstructE02(T* p, int n, const T& t)
+template <class T>
+__forceinline void hkArrayUtil::constructWithCopy(T* p, int n, const T& t, hkTypeIsPod)
 {
     for (int i = 0; i < n; ++i)
         p[i] = t;
 }
 
-template <class T> class hkArrayE02
+template <class T>
+__forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& t)
 {
-  public:
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void AddBack(const T& t)
-    {
-        hkThreadMemoryE02& kMem = hkThreadMemoryInstanceE02();
-        if (m_iElementCount == getCapacity())
-            hkArrayReserveMoreE02(kMem.m_pkHeap, this, sizeof(T));
-        hkArrayConstructE02(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+    if (m_iElementCount == getCapacity())
+        hkArrayUtil::_reserveMore(alloc, this, sizeof(T));
+    hkArrayUtil::constructWithCopy(m_data + m_iElementCount, 1, t, hkTypeIsPod());
+    m_iElementCount++;
+}
 
 struct hkFlagsE02
 {
@@ -251,7 +214,7 @@ class hkLoaderE02
     int m_kOwner;
     int unk10;
     int unk14;
-    hkArrayE02<hkObjectE02*> m_kThirdFollowingStreamField;
+    hkArray<hkObjectE02*> m_kThirdFollowingStreamField;
 };
 
 // Looks up pcName via Get; if not found, creates the object, appends it to the array, tracks it with pkTracker, and returns it.
@@ -263,7 +226,7 @@ hkObjectE02* hkLoaderE02::GetOrCreateObject(const char* pcName, hkTrackerE02* pk
         return pkObject;
 
     hkObjectE02* pkNew = CreateObjectE02(pcName, &g_kRegistryE02, this, 0, 0, hkFlagsE02(0));
-    m_kThirdFollowingStreamField.AddBack(pkNew);
+    m_kThirdFollowingStreamField.pushBack(pkNew);
     pkTracker->Track(pkNew, &m_kOwner, 1);
     return pkNew;
 }
@@ -275,15 +238,6 @@ struct E02Allocator
     virtual void v08();
     virtual void v0C();
     virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct E02Holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    E02Allocator* unk10;
 };
 
 void __cdecl FUN_00c856c0(void* allocator, void* element);
@@ -322,13 +276,13 @@ void FUN_00e02d40_cls::ClearAndFreeData()
         do
         {
             void* pElement = m_pData[i];
-            E02Holder* pHolder = (E02Holder*)FUN_00c85750();
-            FUN_00c856c0(pHolder->unk10, pElement);
+            hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
+            FUN_00c856c0(pHolder->m_heap, pElement);
             ++i;
         } while (i < m_iArrayLength);
     }
-    E02Holder* pHolder = (E02Holder*)FUN_00c85750();
-    E02Allocator* pAllocator = pHolder->unk10;
+    hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
+    E02Allocator* pAllocator = reinterpret_cast<E02Allocator*>(pHolder->m_heap);
     m_iArrayLength = 0;
     unsigned int uCapBits = m_uCapBits;
     if ((uCapBits & 0x80000000u) == 0)
@@ -338,30 +292,16 @@ void FUN_00e02d40_cls::ClearAndFreeData()
     m_pData = 0;
     m_uCapBits = 0x80000000u;
     E02Sub* pSub = &m_sub;
-    pSub->ProcessArgument(((E02Holder*)FUN_00c85750())->unk10);
+    pSub->ProcessArgument(((hkMemoryRouter*)FUN_00c85750())->m_heap);
     pSub->FUN_00a29680();
-    ProcessArgument(((E02Holder*)FUN_00c85750())->unk10);
+    ProcessArgument(((hkMemoryRouter*)FUN_00c85750())->m_heap);
     FUN_00a29680();
 }
 
 struct E02DE0Allocator;
 
-struct E02DE0MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    E02DE0Allocator* m_pStreamAllocator;
-
-    E02DE0Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
 namespace fnvc_adapt {
-extern "C" E02DE0MemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 }
 
 struct E02DE0Map
@@ -372,20 +312,10 @@ struct E02DE0Map
 
     E02DE0Map() : m_kPrimitiveElement(0), m_iCapacityFlags(0), m_iPairCount(-1)
     {
-        reserve(fnvc_adapt::FUN_00c85750().heap(), 0);
+        reserve(*reinterpret_cast<E02DE0Allocator*>((&fnvc_adapt::FUN_00c85750().heap())), 0);
     }
 
     void reserve(E02DE0Allocator& alloc, int numElements);
-};
-
-struct E02DE0Array
-{
-    void* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    E02DE0Array() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
 };
 
 struct FUN_00e02de0
@@ -394,7 +324,7 @@ struct FUN_00e02de0
 
     E02DE0Map m_map0;
     E02DE0Map m_map1;
-    E02DE0Array m_ppData;
+    hkArray<void*> m_ppData;
 };
 
 // Initializes the two maps and the array member by running their default constructors.
@@ -410,21 +340,7 @@ struct E02E40Allocator
     virtual void ReleaseBlock(void* p, int numBytes);
 };
 
-struct E02E40MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    E02E40Allocator* m_pStreamAllocator;
-
-    E02E40Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" E02E40MemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 
 struct FUN_00e02e40
 {
@@ -437,7 +353,7 @@ struct FUN_00e02e40
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00e02e40* b = static_cast<FUN_00e02e40*>(p);
-        FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        reinterpret_cast<E02E40Allocator*>((&FUN_00c85750().heap()))->ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 

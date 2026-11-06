@@ -2,6 +2,9 @@
 // src/bsmenu/xuserinterface.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsmenu/xuserinterface.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/GameTimerRecord.h"
+#include "../../include/OSGlobals.h"
+
 extern "C" __declspec(dllimport) int __stdcall MessageBoxA(void* hWnd, const char* lpText, const char* lpCaption,
                                                            unsigned int uType);
 extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentThreadId();
@@ -28,11 +31,6 @@ struct Controls
     void RecreateDevice(int v);
 };
 
-struct OSGlobals
-{
-    unsigned int GetThreadId();
-    Controls* GetInputControls();
-};
 
 extern SettingBool DAT_011deb3c;
 extern LockObj DAT_011f6394;
@@ -143,33 +141,6 @@ int FUN_0086a580(const char* text, const char* caption, unsigned int flags)
 
 extern "C" __declspec(dllimport) unsigned long __stdcall GetTickCount();
 
-struct GameTimerRecord
-{
-    unsigned char m_ucFirstTimerByte;
-    unsigned char unk01;
-    unsigned char unk02;
-    unsigned char unk03;
-    unsigned char unk04;
-    unsigned char unk05;
-    unsigned char unk06;
-    unsigned char unk07;
-    unsigned char unk08;
-    unsigned char unk09;
-    unsigned char unk0a;
-    unsigned char unk0b;
-    unsigned char unk0c;
-    unsigned char unk0d;
-    unsigned char unk0e;
-    unsigned char unk0f;
-    unsigned char unk10;
-    unsigned char unk11;
-    unsigned char unk12;
-    unsigned char unk13;
-    unsigned int m_uiFirstTimerValue;
-    unsigned int m_uiSecondTimerValue;
-
-    void FUN_00aa50a0();
-};
 
 // When m_ucFirstTimerByte is zero before incrementing, subtracts both stored values from GetTickCount() and stores the results.
 // @fnv 0x00aa50a0

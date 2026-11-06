@@ -1,3 +1,9 @@
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/ContactArray289.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkpAllCdPointCollector.h"
+#include "../../../../../../include/hkpCdPointCollector.h"
+
 // src/havok/physics/utilities/charactercontrol/characterproxy/hkpcharacterproxy_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-31 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/physics/utilities/charactercontrol/characterproxy/hkpcharacterproxy.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
@@ -443,55 +449,21 @@ struct FUN_00cada70_cls
     FUN_00cada70_cls* Construct(void* a1);
 };
 extern float DAT_0104da48;
-struct __declspec(align(16)) Vec289 {float x,y,z,w;};
-struct RootContact289 {
- Vec289 position,normal;
- void* rootA; unsigned shapeKeyA; unsigned pathA[8];
- void* rootB; unsigned shapeKeyB; unsigned pathB[8];
-};
-struct Allocator289 {virtual void f0();virtual void f1();virtual void f2();virtual void f3();__declspec(nothrow) virtual void Free(void*,unsigned) throw();};
-struct Router289 {int unk00,unk04,unk08,unk0c;Allocator289* heap; Allocator289* GetAllocator() {return heap;}};
-namespace Memory289 {extern "C" Router289* FUN_00c85750() throw();}
-class hkpCdPointCollector {
-public:
- __declspec(nothrow) __forceinline virtual ~hkpCdPointCollector() {}
- virtual void AddCdPoint(const void*)=0;
- virtual void reset() {limit=DAT_0104da48;}
- float limit;
- __declspec(nothrow) hkpCdPointCollector():limit(DAT_0104da48) {}
-};
-struct ContactArray289 {
- RootContact289* data;int count;unsigned capacity;
- RootContact289 local[8];
- __declspec(nothrow) ContactArray289():data(local),count(0),capacity(0x80000008) {}
- __declspec(nothrow) __forceinline ~ContactArray289() {
-  Allocator289* alloc=Memory289::FUN_00c85750()->GetAllocator();
-  count=0;
-  if((capacity&0x80000000)==0) alloc->Free(data,(capacity&0x3fffffff)*sizeof(RootContact289));
-  data=0;capacity=0x80000000;
- }
-};
-class hkpAllCdPointCollector:public hkpCdPointCollector {
-public:
- ContactArray289 contacts;
- __declspec(nothrow) hkpAllCdPointCollector() {}
- __declspec(nothrow) __forceinline virtual ~hkpAllCdPointCollector() {}
- virtual void AddCdPoint(const void*);
- virtual void reset() {contacts.count=0;limit=DAT_0104da48;}
-};
 struct Query289 {
  __declspec(nothrow) void FUN_00cade20(void*,void*,hkpCdPointCollector*,hkpCdPointCollector*,unsigned,unsigned) throw();
  void CollectAllContactPoints(void*,void*);
 };
-union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; unsigned __int64 m128_u64[2]; };
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" __m128 _mm_sqrt_ss(__m128 a);
-extern "C" void _mm_store_ss(float* p, __m128 a);
+// Exe 0x00cade20 FUN_00cade20: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4]; unsigned __int64 m128_u64[2]; } __m128, LocalM128;
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" LocalM128 _mm_sqrt_ss(LocalM128 a);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
 extern float DAT_0104da4c;
 struct S00cacaa0_Vec {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 struct S00cacaa0_Base {
     unsigned int f00, f04, f08, f0c, f10, f14;
@@ -590,10 +562,10 @@ template <class T> struct HkArray289 {
 
     void clear() { m_iElementCount = 0; }
     ~HkArray289() throw() {
-        Allocator289* alloc = Memory289::FUN_00c85750()->GetAllocator();
+        hkMemoryAllocator& alloc = hkMemoryRouter::get().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
-            alloc->Free(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
+            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
         m_data = 0;
         m_iCapacityState = 0x80000000;
     }
@@ -645,63 +617,8 @@ struct FUN_00cadb00 : HkReferencedObject289, HkEntityListener289, HkPhantomListe
     virtual ~FUN_00cadb00();
 };
 extern float DAT_0104da48;
-struct S_Heap {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void ReturnMemory(void* p, int n) throw();
-};
-struct S_Router {
-    int unk00, unk04, unk08, unk0C;
-    S_Heap* m_pStreamAllocator;
-    S_Heap& heap() { return *m_pStreamAllocator; }
-};
-struct __declspec(align(16)) S_Contact {
-    int c00; int c04; int c08; int c0C; int c10; int c14; int c18;
-    int c1C; int c20; int c24; int c28; int c2C; int c30; int c34;
-    int c38; int c3C; int c40; int c44; int c48; int c4C; int c50;
-    int c54; int c58; int c5C; int c60; int c64; int c68; int c6C;
-};
-struct S_CdBase {
-    float m_eps;
-    S_CdBase() throw() { m_eps = DAT_0104da48; }
-    virtual ~S_CdBase() throw() {}
-    virtual void v1();
-};
-struct S_Arr {
-    S_Contact* m_data;
-    int m_iElementCount;
-    int m_cap;
-    void _clearAndDeallocate(S_Heap& h) throw() {
-        m_iElementCount = 0;
-        if ((m_cap & 0x80000000) == 0) {
-            h.ReturnMemory(m_data, (m_cap & 0x3fffffff) * (int)sizeof(S_Contact));
-        }
-        m_data = 0;
-        m_cap = 0x80000000;
-    }
-    ~S_Arr() throw() {
-        _clearAndDeallocate(((S_Router*)FUN_00c85750())->heap());
-    }
-};
-struct S_InplArr : S_Arr {
-    int unk0C;
-    S_Contact m_store[8];
-    S_InplArr() throw() {
-        m_data = m_store;
-        m_iElementCount = 0;
-        m_cap = 0x80000008;
-    }
-};
-struct S_Collector : S_CdBase {
-    int unk08, unk0C;
-    S_InplArr m_kHits;
-    S_Collector() throw() { m_kHits.m_iElementCount = 0; }
-    virtual ~S_Collector() throw() {}
-};
 struct S00cafbf0_Obj {
-    void FUN_00cade20(int, int, S_Collector*, S_Collector*, int, int) throw();
+    void FUN_00cade20(int, int, hkpAllCdPointCollector*, hkpAllCdPointCollector*, int, int) throw();
     void FUN_00cafbf0(int a, int b, int c, int d) throw();
 };
 // fires added/removed notifications and keeps entity/phantom listeners attached to the touched objects.
@@ -739,7 +656,7 @@ struct __declspec(align(16)) S_00caf4d0_Vector4 {
     S_00caf4d0_Vector4() throw() {}
     S_00caf4d0_Vector4(const S_00caf4d0_Vector4& v) throw()
     {
-        reinterpret_cast<__m128&>(*this) = reinterpret_cast<const __m128&>(v);
+        reinterpret_cast<LocalM128&>(*this) = reinterpret_cast<const LocalM128&>(v);
     }
 };
 struct S_00caf4d0_Collidable {
@@ -834,13 +751,6 @@ template <class T> struct S_00caf4d0_LocalArray : S_00caf4d0_Array<T> {
             heap.ReturnMemory(this->m_data, (this->m_iCapacityState & 0x3fffffff) * sizeof(T));
     }
 };
-struct S_00caf4d0_Collector {
-    void* m_vt;
-    float m_fEarlyOutDistance;
-    int unk08;
-    int unk0C;
-    S_00caf4d0_Array<S_00caf4d0_Point> m_kHits; // 0x10
-};
 struct S_00caf4d0_EntityListener { virtual void elUnk00(); };
 struct S_00caf4d0_PhantomListener { virtual void plUnk00(); };
 struct S_00caf4d0_TrackerBase { virtual void tbUnk00(); int unk04; };
@@ -902,10 +812,10 @@ struct S_00caf4d0_Tracker : S_00caf4d0_TrackerBase, S_00caf4d0_EntityListener, S
     void FUN_00cad480(const S_00caf4d0_Point* p) throw();
     int FUN_00cacf10(const S_00caf4d0_Point* p) throw();
 
-    void FUN_00caf4d0(const S_00caf4d0_Collector* input, const S_00caf4d0_Collector* extra, bool keepListeners) throw();
+    void FUN_00caf4d0(const hkpAllCdPointCollector* input, const hkpAllCdPointCollector* extra, bool keepListeners) throw();
 };
 struct ContactQuery {
-    void FUN_00cae900(void*, unsigned, S_Collector*) throw();
+    void FUN_00cae900(void*, unsigned, hkpAllCdPointCollector*) throw();
     void FUN_00cafd00(void*, unsigned);
 };
 struct CadColl {
@@ -944,28 +854,7 @@ struct CadPhantomListener {
 struct CadPhantom {
     void RemoveListener(CadPhantomListener* l) throw();
 };
-struct CadPtrArray {
-    CadPhantom** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int GetLogicalSize() const throw() { return m_iElementCount; }
-    CadPhantom*& operator[](int i) throw() { return m_data[i]; }
-    int indexOf(CadPhantom* const& t) const throw()
-    {
-        for (int i = 0; i < m_iElementCount; ++i)
-        {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-    void removeAt(int index) throw()
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            m_data[index] = m_data[m_iElementCount];
-    }
-};
+
 struct Cad820Cls : S_00caf4d0_TrackerBase, S_00caf4d0_EntityListener, CadPhantomListener {
     int unk10;
     int unk14;
@@ -995,14 +884,14 @@ struct Cad820Cls : S_00caf4d0_TrackerBase, S_00caf4d0_EntityListener, CadPhantom
     S_00caf4d0_Array<CadPoint> m_kPoints;
     S_00caf4d0_Array<void*> m_kListeners;
     S_00caf4d0_Array<S_00caf4d0_Entity*> m_kActorEntries;
-    CadPtrArray m_kPhantoms;
+    hkArrayBase<CadPhantom*> m_kPhantoms;
 
     void FUN_00cad820(CadPhantom* phantom) throw();
 };
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_setzero_ps(void);
 struct S00cafd90_Vec {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 struct S00cafd90_Info {
     int unk00;
@@ -1018,7 +907,7 @@ struct S00cafd90_Info {
 };
 struct S00cafd90_Body;
 struct S00cafd90_Conv {
-    __declspec(noalias) void FUN_00ca0c40(S00cafd90_Body* body, __m128* out);
+    __declspec(noalias) void FUN_00ca0c40(S00cafd90_Body* body, LocalM128* out);
 };
 struct S00cafd90_Body {
     int unk00;
@@ -1055,11 +944,11 @@ static __forceinline S00cafd90_Vec S00cafd90_Pos(S00cafd90_Body* b)
         c->FUN_00ca0c40(b, &r.m_vComponents);
     return r;
 }
-static __forceinline float S00cafd90_Dot3(__m128 a, __m128 b)
+static __forceinline float S00cafd90_Dot3(LocalM128 a, LocalM128 b)
 {
-    __m128 prod = _mm_mul_ps(a, b);
-    __m128 s1 = _mm_add_ss(_mm_shuffle_ps(prod, prod, 0x55), prod);
-    __m128 s2 = _mm_add_ss(_mm_shuffle_ps(prod, prod, 0xaa), s1);
+    LocalM128 prod = _mm_mul_ps(a, b);
+    LocalM128 s1 = _mm_add_ss(_mm_shuffle_ps(prod, prod, 0x55), prod);
+    LocalM128 s2 = _mm_add_ss(_mm_shuffle_ps(prod, prod, 0xaa), s1);
     float r;
     _mm_store_ss(&r, s2);
     return r;
@@ -1069,28 +958,28 @@ static __forceinline float S00cafd90_Dot3(__m128 a, __m128 b)
 #include <windows.h>
 extern "C" {
 void _ReadWriteBarrier();
-__m128 _mm_set_ss(float);
-__m128 _mm_set_ps1(float);
-__m128 _mm_setr_ps(float,float,float,float);
+LocalM128 _mm_set_ss(float);
+LocalM128 _mm_set_ps1(float);
+LocalM128 _mm_setr_ps(float,float,float,float);
 unsigned __int64 __rdtsc();
-__m128 _mm_load_ps(const float*);
-__m128 _mm_load_ss(const float*);
-void _mm_store_ps(float*,__m128);
-__m128 _mm_add_ps(__m128,__m128);
-__m128 _mm_mul_ss(__m128,__m128);
-__m128 _mm_sub_ss(__m128,__m128);
-__m128 _mm_rsqrt_ss(__m128);
-__m128 _mm_cmpeq_ss(__m128,__m128);
-__m128 _mm_cmple_ps(__m128,__m128);
-__m128 _mm_and_ps(__m128,__m128);
-__m128 _mm_andnot_ps(__m128,__m128);
-__m128 _mm_unpacklo_ps(__m128,__m128);
-__m128 _mm_movelh_ps(__m128,__m128);
-int _mm_movemask_ps(__m128);
+LocalM128 _mm_load_ps(const float*);
+LocalM128 _mm_load_ss(const float*);
+void _mm_store_ps(float*,LocalM128);
+LocalM128 _mm_add_ps(LocalM128,LocalM128);
+LocalM128 _mm_mul_ss(LocalM128,LocalM128);
+LocalM128 _mm_sub_ss(LocalM128,LocalM128);
+LocalM128 _mm_rsqrt_ss(LocalM128);
+LocalM128 _mm_cmpeq_ss(LocalM128,LocalM128);
+LocalM128 _mm_cmple_ps(LocalM128,LocalM128);
+LocalM128 _mm_and_ps(LocalM128,LocalM128);
+LocalM128 _mm_andnot_ps(LocalM128,LocalM128);
+LocalM128 _mm_unpacklo_ps(LocalM128,LocalM128);
+LocalM128 _mm_movelh_ps(LocalM128,LocalM128);
+int _mm_movemask_ps(LocalM128);
 }
 extern unsigned DAT_0126835c;
 extern char str_010c8508[],str_010c8500[],str_010c84f0[],str_010c84dc[],str_010c84d0[],str_010c84c4[],str_010c84b8[],str_01076f38[];
-extern __m128 DAT_01017d10;
+extern LocalM128 DAT_01017d10;
 __declspec(nothrow) FNVMemoryManager* __cdecl FUN_00c85750();
 template<class T> class PStorage {
     T value;
@@ -1103,21 +992,21 @@ public:
 };
 struct PBool {char value;PBool(bool b) throw():value(b){} operator bool() const throw(){return value!=0;}};
 class PScalar {
-    __m128 q;
+    LocalM128 q;
 public:
-    PScalar(const __m128& x) throw():q(x){}
+    PScalar(const LocalM128& x) throw():q(x){}
     __forceinline operator float() const throw(){float f;_mm_store_ss(&f,q);return f;}
-    const __m128& quad() const throw(){return q;}
-    __m128 broadcast() const throw(){return _mm_shuffle_ps(q,q,0);}
+    const LocalM128& quad() const throw(){return q;}
+    LocalM128 broadcast() const throw(){return _mm_shuffle_ps(q,q,0);}
 };
 class PVec {
-    __m128 q;
+    LocalM128 q;
 public:
     __forceinline PVec() throw(){}
     __forceinline PVec(const PVec& v) throw():q(v.q){}
     __forceinline void operator=(const PVec& v) throw(){q=v.q;}
-    __forceinline void operator=(const __m128& v) throw(){q=v;}
-    const __m128& quad() const throw(){return q;}
+    __forceinline void operator=(const LocalM128& v) throw(){q=v;}
+    const LocalM128& quad() const throw(){return q;}
     __forceinline float& component(int i) throw(){return q.m128_f32[i];}
     __forceinline void set(float x,float y,float z,float w=0.0f) throw(){
         q=_mm_setr_ps(x,y,z,w);
@@ -1127,16 +1016,16 @@ public:
     __forceinline void add(const PVec& v) throw(){q=_mm_add_ps(q,v.q);}
     __forceinline void sum(const PVec& a,const PVec& b) throw(){q=_mm_add_ps(a.q,b.q);}
     __forceinline void mul(float f,const PVec& v) throw(){q=_mm_mul_ps(_mm_set_ps1(f),v.q);}
-    __forceinline PScalar dot(const PVec& v) const throw(){__m128 p=_mm_mul_ps(q,v.q);__m128 a=_mm_add_ss(_mm_shuffle_ps(p,p,0x55),p);return _mm_add_ss(_mm_shuffle_ps(p,p,0xaa),a);}
+    __forceinline PScalar dot(const PVec& v) const throw(){LocalM128 p=_mm_mul_ps(q,v.q);LocalM128 a=_mm_add_ss(_mm_shuffle_ps(p,p,0x55),p);return _mm_add_ss(_mm_shuffle_ps(p,p,0xaa),a);}
     __forceinline PScalar square() const throw(){return dot(*this);}
     __forceinline PScalar inverse() const throw(){
-        __m128 half=_mm_set_ss(0.5f),three=_mm_set_ss(3.0f),zero=_mm_set_ss(0.0f);
-        __m128 d=dot(*this).quad();__m128 mask=_mm_cmpeq_ss(d,zero);__m128 r=_mm_rsqrt_ss(d);
+        LocalM128 half=_mm_set_ss(0.5f),three=_mm_set_ss(3.0f),zero=_mm_set_ss(0.0f);
+        LocalM128 d=dot(*this).quad();LocalM128 mask=_mm_cmpeq_ss(d,zero);LocalM128 r=_mm_rsqrt_ss(d);
         return _mm_andnot_ps(mask,_mm_mul_ss(_mm_mul_ss(half,r),_mm_sub_ss(three,_mm_mul_ss(_mm_mul_ss(d,r),r))));
     }
     __forceinline void normalize() throw(){q=_mm_mul_ps(inverse().broadcast(),q);}
     __forceinline int equal(const PVec& other,float epsilon) const throw(){
-        __m128 d=_mm_sub_ps(q,other.q);d=_mm_and_ps(d,DAT_01017d10);__m128 e=_mm_set_ps1(epsilon);
+        LocalM128 d=_mm_sub_ps(q,other.q);d=_mm_and_ps(d,DAT_01017d10);LocalM128 e=_mm_set_ps1(epsilon);
         int mask=_mm_movemask_ps(_mm_cmple_ps(d,e));return (mask&7)==7;
     }
 };
@@ -1200,9 +1089,8 @@ struct PSolver {PVec position,velocity,maxVelocity,up;float time,minTime;PPlane*
 struct PResult {PVec position,velocity;float time;PInteraction* interactions;};
 struct PPad {float value;__forceinline operator float() const throw(){return value;}};
 struct PStep {__declspec(align(16)) PStorage<float> start;PStorage<float> end,delta,inverse;};
-struct PCollector {virtual void f0();virtual void f1();virtual void reset();int unk04,unk08,unk0c;PArray<PContact> contacts;__forceinline PArray<PContact>& hits() throw(){return contacts;} PBool hit() const throw(){return contacts.count()>0;}void FUN_00cabad0() throw();PContact& operator[](int i) throw(){return contacts[i];}};
 struct PPose {PVec axis0,axis1,axis2,position;void SetWorldPosition(const PVec& v) throw(){position=v;}};
-struct PPhantom {virtual void f0();virtual void f1();virtual void f2();virtual void f3();virtual PPose* pose();virtual void f5();virtual void f6();virtual void f7();virtual void f8();virtual void f9();virtual void fa();virtual void fb();virtual void fc();virtual void fd();virtual void cast(const PVec&,const PCast&,PCollector&,PCollector*) throw();void FUN_00c9e990(const PVec&,float) throw();};
+struct PPhantom {virtual void f0();virtual void f1();virtual void f2();virtual void f3();virtual PPose* pose();virtual void f5();virtual void f6();virtual void f7();virtual void f8();virtual void f9();virtual void fa();virtual void fb();virtual void fc();virtual void fd();virtual void cast(const PVec&,const PCast&,hkpAllCdPointCollector&,hkpAllCdPointCollector*) throw();void FUN_00c9e990(const PVec&,float) throw();};
 struct PBody {void FUN_00c9c5b0(void*) throw();};
 struct POther {void AddItem(void*) throw();};
 void FUN_00d24360(const PSolver&,PResult&) throw();
@@ -1210,17 +1098,17 @@ struct PBase {virtual void f0();virtual void f1();virtual void f2();unsigned sho
 struct PEntityListener {virtual void callback();};
 struct PPhantomListener {virtual void callback();};
 struct POwner:PBase,PEntityListener,PPhantomListener {
-    virtual void update(PCollector&,PCollector&,PBool) throw();virtual void convert(const PContact&,PPlane&,float) const throw();
+    virtual void update(hkpAllCdPointCollector&,hkpAllCdPointCollector&,PBool) throw();virtual void convert(const PContact&,PPlane&,float) const throw();
     PVec velocity,oldDisplacement;PPhantom* phantom;float friction,staticFriction;int m3c;PVec up;float extraUp,extraDown,keepDistance,keepTolerance,angle;int userPlanes;float maxSpeed,strength,mass;PArray<PContact> manifold;PArray<void*> listeners;PArray<PBody*> bodies;PArray<POther*> phantoms;float slope,recovery;int maxIterations;bool refresh;
     const PVec& FUN_00cac910() const throw();
-    void FUN_00cacaa0(PBool,const PCast&,PCollector&,PCollector*) throw();
+    void FUN_00cacaa0(PBool,const PCast&,hkpAllCdPointCollector&,hkpAllCdPointCollector*) throw();
     void FUN_00cac890(const PContact*,int,const PVec&) const throw();
     void FUN_00cad440(const PArray<PContact>&,PSolver&) const throw();
     void FUN_00cacf80(const PStep&,const PVec&,void*,int) throw();
     int FUN_00cacf10(const PContact&) const throw();
     void FUN_00cad480(const PContact&) const throw();
-    float FUN_00cacc50(const PResult&,const PCollector&,const PCast&,PVec&) throw();
-    void FUN_00cade20(const PStep&,const PVec&,PCollector&,PCollector&,void*,int) throw();
+    float FUN_00cacc50(const PResult&,const hkpAllCdPointCollector&,const PCast&,PVec&) throw();
+    void FUN_00cade20(const PStep&,const PVec&,hkpAllCdPointCollector&,hkpAllCdPointCollector&,void*,int) throw();
 };
 struct PTimer {const char* tag;unsigned time,time1;__forceinline void stamp() throw(){
 unsigned int ticks;
@@ -1244,9 +1132,16 @@ static __declspec(noinline) bool FUN_00cadca0(int index,PArray<PPlane>& planes,f
 
 __forceinline PBody* getBody(BhkShape* s) throw(){return s->unk18==1?reinterpret_cast<PBody*>(reinterpret_cast<char*>(s)+s->unk10):0;}
 __forceinline POther* getOther(BhkShape* s) throw(){return s->unk18==2?reinterpret_cast<POther*>(reinterpret_cast<char*>(s)+s->unk10):0;}
-__forceinline void removeFirst(PCollector& c) throw(){c.hits().remove(0);}
+__forceinline PContact* collectorBegin(hkpAllCdPointCollector& c) throw(){return reinterpret_cast<PContact*>(c.contacts.data);}
+__forceinline int collectorCount(const hkpAllCdPointCollector& c) throw(){return c.contacts.count;}
+__forceinline PContact& collectorContact(hkpAllCdPointCollector& c,int i) throw(){return reinterpret_cast<PContact*>(c.contacts.data)[i];}
+__forceinline PBool collectorHit(const hkpAllCdPointCollector& c) throw(){return collectorCount(c)>0;}
+__forceinline void removeFirst(hkpAllCdPointCollector& c) throw(){
+    --c.contacts.count;
+    copyByteRange(c.contacts.data,c.contacts.data+1,c.contacts.count*sizeof(RootContact289));
+}
 // @fnv 0x00cade20
-void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,PCollector& cast,PCollector& start,void* command,int maxInteractions) throw() {
+void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,hkpAllCdPointCollector& cast,hkpAllCdPointCollector& start,void* command,int maxInteractions) throw() {
     {PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimerList* p=reinterpret_cast<PTimerList*>(s.GetStreamEnd());p->tag=str_010c8508;p->first=str_010c8500;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
     PBool threaded=command!=0;
     PVec position=FUN_00cac910();
@@ -1263,9 +1158,9 @@ void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,PCollector& cast
             phantom->pose()->SetWorldPosition(position);
             FUN_00cacaa0(iter!=0,query,cast,&start);
         } else phantom->cast(position,query,cast,&start);
-        if(cast.hit()) {
-            cast.FUN_00cabad0();
-            FUN_00cac890(cast.hits().begin(),cast.hits().count(),oldDisplacement);
+        if(collectorHit(cast)) {
+            cast.sortHits();
+            FUN_00cac890(collectorBegin(cast),collectorCount(cast),oldDisplacement);
         }
         {PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimer* p=reinterpret_cast<PTimer*>(s.GetStreamEnd());p->tag=str_010c84dc;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
         update(start,cast,threaded);
@@ -1303,15 +1198,15 @@ void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,PCollector& cast
                 phantom->pose()->SetWorldPosition(position);
                 FUN_00cacaa0(true,query,cast,0);
             } else phantom->cast(position,query,cast,0);
-            if(cast.hit()) {
-                cast.FUN_00cabad0();
-                FUN_00cac890(cast.hits().begin(),cast.hits().count(),solved.position);
-                while(FUN_00cacf10(cast[0])!=-1) {
+            if(collectorHit(cast)) {
+                cast.sortHits();
+                FUN_00cac890(collectorBegin(cast),collectorCount(cast),solved.position);
+                while(FUN_00cacf10(collectorContact(cast,0))!=-1) {
                     removeFirst(cast);
-                    if(!cast.hit()) {ok=1;break;}
+                    if(!collectorHit(cast)) {ok=1;break;}
                 }
-                if(cast.hits().count()>0) {
-                    const PContact& hit=cast[0];
+                if(collectorCount(cast)>0) {
+                    const PContact& hit=collectorContact(cast,0);
                     FUN_00cad480(hit);
                     manifold.push(hit);
                     if(!refresh) {
@@ -1339,4 +1234,12 @@ void POwner::FUN_00cade20(const PStep& step,const PVec& gravity,PCollector& cast
     if(threaded) phantom->pose()->SetWorldPosition(position);
     else phantom->FUN_00c9e990(position,query.tolerance);
     {PStream& s=*static_cast<PStream*>(TlsGetValue(DAT_0126835c));if(s.available()){PTimer* p=reinterpret_cast<PTimer*>(s.GetStreamEnd());p->tag=str_01076f38;p->stamp();s.end(reinterpret_cast<char*>(p+1));}}
+}
+
+
+template <typename T> __forceinline void hkArrayBase<T>::removeAt(int index)
+{
+    m_iElementCount--;
+    if (m_iElementCount != index)
+        m_data[index] = m_data[m_iElementCount];
 }

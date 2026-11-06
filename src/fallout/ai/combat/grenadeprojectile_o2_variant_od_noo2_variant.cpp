@@ -5,7 +5,7 @@
 
 // src/fallout/ai/combat/grenadeprojectile_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/ai/combat/grenadeprojectile.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
-#include "grenadeprojectile_types.h"
+#include "../../../../include/Creature.h"
 struct S_004f15a0
 {
     void FUN_004f15a0(int);
@@ -53,17 +53,7 @@ struct S4700
         f185(), f186(), f187(), f188(), f189(), f190(), f191(), f192(), f193(), f194();
     virtual void At30C();
 };
-struct NiAVObject;
-struct Creature
-{
-    static void __cdecl SetNodeFlagsRecursive(NiAVObject*, int, bool, bool, bool);
-};
 extern double _gModifierZero;
-struct FUN_009b4c70_shell : public Projectile
-{
-    void FUN_009b4c70();
-};
-struct BGSLoadFormBuffer;
 struct C009c58e0
 {
     void __thiscall FUN_009c58e0(BGSLoadFormBuffer*);

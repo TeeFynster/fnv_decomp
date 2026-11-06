@@ -1,13 +1,9 @@
+#include "../../../../include/NiTStringPointerMap.h"
 // gamebryo2.2/corelibs/nianimation/nicontrollersequence_decls.h: declares NiControllerSequence__IDTag
 #ifndef NICONTROLLERSEQUENCE_DECLS_H
 #define NICONTROLLERSEQUENCE_DECLS_H
 
 class ShaderBufferRecord;
-template <class T> class NiTStringPointerMap
-{
-  public:
-    bool GetAt(const char*, T&);
-};
 class NiControllerSequence__IDTag
 {
   public:

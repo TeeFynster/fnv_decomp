@@ -1,3 +1,4 @@
+#include "../../../include/hkArray.h"
 
 // src/fallout/ai/actor_o2_variant_gs_nogs_variant.cpp - flag-variant unit created 2026-10-29 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/fallout/ai/actor_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,17 +6,29 @@
 
 // src/fallout/ai/actor_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/ai/actor.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
-#include "Actor.h"
-struct MemoryManager
-{
-    void* Deallocate(void*);
-};
+#include "../../../include/Actor.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/hkMemoryAllocator.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/Creature.h"
+#include "../../../include/Mat3.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiTransform.h"
+#include "../../../include/NiUpdateData.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiMatrix3.h"
+#include "../../../include/hkBool.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/hkArray.h"
+#include "../../../include/hkVector4.h"
+#include "../../../include/hkQuaternion.h"
+#include "../../../include/hkQsTransform.h"
+#include "../../../include/hkaSkeleton.h"
+#include "../../../include/hkaPose.h"
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 extern MemoryManager g_memoryManager;
-struct bhkRagdollController
-{
-    void FUN_00c7d900();
-    void* FUN_00c7de30(unsigned int);
-};
 extern "C" void* g_012685f8;
 void* __cdecl FUN_00c7fa60();
 extern "C" void __cdecl _delete(void*, int);
@@ -32,20 +45,6 @@ struct FUN_00cb9900_cls
 };
 void __cdecl FUN_00cda340();
 void __cdecl FUN_00cd9fe0();
-struct FUN_00cda4b0_cls
-{
-    void __thiscall FUN_00cda4b0();
-};
-struct FUN_00cda8d0_class
-{
-    void FUN_00cda340();
-    void* FUN_00cda8d0();
-};
-struct FUN_00cdb290
-{
-    void __thiscall FUN_00cda690();
-    void* __thiscall GetPlus4();
-};
 struct VObj
 {
     virtual void f0();
@@ -168,8 +167,6 @@ struct FUN_00c6ffc0_Class
     Target* FUN_00c6e0b0();
     void FUN_00c6ffc0();
 };
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 extern char* EmptyFS;
 struct FixedStr
 {
@@ -187,18 +184,10 @@ struct FixedStr
     }
     bool Equals(const char*) const;
 };
-struct Mat3
-{
-    float m[9];
-};
-struct Pt3
-{
-    float x, y, z;
-};
 struct Xform
 {
     Mat3 rot;
-    Pt3 trans;
+    NiPoint3 trans;
     float scale;
 };
 struct RNode;
@@ -244,23 +233,6 @@ struct RArr
 struct RCtx;
 RObj* __cdecl FUN_00c4b470(RCtx*, RKey*, int);
 void __cdecl FUN_00c7bcb0(RCtx* ctx, RObj* obj, RArr* arr);
-struct NiUpdateData
-{
-    float m_fTime;
-    bool b0;
-    bool b1;
-    bool b2;
-    bool b3;
-    bool b4;
-};
-struct NiNode : NiAVObject
-{
-    void Update(NiUpdateData const&);
-};
-struct Creature
-{
-    static void __cdecl SetNodeFlagsRecursive(NiAVObject*, int, bool, bool, bool);
-};
 void __cdecl SetFlagRecursive(int, void*);
 void __cdecl FUN_00c7bcb0(void*, void*, void*);
 inline unsigned char GetFlag6(unsigned short w)
@@ -268,18 +240,6 @@ inline unsigned char GetFlag6(unsigned short w)
     return (unsigned char)(w >> 6) & 1;
 }
 void __cdecl FUN_00c7d3b0(NiNode* param_1, void* param_2, void* param_3, char* param_4, unsigned int* param_5);
-struct ThreeByThreeMatrix
-{
-    float m[9];
-    ThreeByThreeMatrix operator*(const ThreeByThreeMatrix&) const;
-};
-struct NiTransform
-{
-    ThreeByThreeMatrix m_kOrientation;
-    float m_kTranslation[3];
-    float m_fScale;
-    NiTransform operator*(const NiTransform&) const;
-};
 void FUN_00c74dd0(void*, NiTransform*);
 extern bool DAT_01267c28;
 extern bool DAT_01267c34;
@@ -341,7 +301,7 @@ struct FUN_00c7d630_t
     char pad4c[0x58 - 0x4c];
     RagNode* m_pkNode;
     char pad5c[4];
-    ThreeByThreeMatrix m_kRot;
+    NiMatrix3 m_kRot;
     void FUN_00c7d630(float);
     void FUN_00c79680();
     void FUN_00c7cb50(int);
@@ -510,23 +470,7 @@ void FUN_00c7d480_cls::FUN_00c7d480()
     }
     *(unsigned int*)_FUN_00c85750() = count;
 }
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00c7d5c0_elem
 {
     int unk00;
@@ -770,12 +714,6 @@ class FUN_00c7f970_cls
     unsigned int m_uiSize;
     void FUN_00c7f970(unsigned int uiNew, unsigned int uiOld);
 };
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool(bool b) : m_cBooleanValue((char)b)
-    {}
-};
 struct Head
 {
     hkBool a, b;
@@ -783,20 +721,13 @@ struct Head
     Head() : a(true), b(true), c(0)
     {}
 };
-struct hkArrayStandIn
-{
-    void* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    hkArrayStandIn() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
+
 struct FUN_00c7bfd0
 {
     int m_00, m_04, m_08;
     float m_0c;
     float m_10;
-    hkArrayStandIn m_14, m_20, m_2c;
+    hkArray<void*> m_14, m_20, m_2c;
     Head m_38;
     int m_40, m_44, m_48;
     float m_4c, m_50;
@@ -806,58 +737,12 @@ struct FUN_00c7bfd0
 // flags: /MT /O2 /GS /EHsc /Gy
 // Recursive child-visitor: controller fetch/set via members, virtual node
 // fetch (vtable slot 3), loop over children (ptr @0xA0, count u16 @0xA6).
-struct FUN_00cb9650_Node
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    void** children;       // 0xA0
-    unsigned short unkA4;  // 0xA4
-    unsigned short count;  // 0xA6
-};
 struct FUN_00cb9650_Object
 {
     virtual void vf00();
     virtual void vf04();
     virtual void vf08();
-    virtual FUN_00cb9650_Node* vf0C();
+    virtual NiNode* vf0C();
 
     void* FUN_00a5c570(const void* typeInfo);
     void FUN_00a5c480(int value);
@@ -865,6 +750,8 @@ struct FUN_00cb9650_Object
 extern const char DAT_012683f4[];
 void __cdecl FUN_00cb9650(FUN_00cb9650_Object* object);
 #include <xmmintrin.h>
+#include "../../../include/MemoryManager.h"
+#include "../../../include/bhkRagdollController.h"
 extern "C" __declspec(align(16)) __m128 DAT_010c71b0;
 struct RagController
 {
@@ -1128,7 +1015,7 @@ struct Cls
     int u25c;
     __int64 m_260;
     __int64 m_268;
-    Pt3 m_pos;
+    NiPoint3 m_pos;
     float m_27c;
     float m_280;
     bool m_284;
@@ -1807,39 +1694,27 @@ struct PoseState
     void FUN_00cda340();
     void FUN_00cda4c0();
 };
-struct C7C2B0_Heap
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void ReturnMemory(void* p, int numBytes);
-};
 struct C7C2B0_Pair
 {
     int a;
     int b;
 };
-struct C7C2B0_Array
+typedef hkArray<C7C2B0_Pair> C7C2B0_Array;
+template<> __forceinline hkArray<C7C2B0_Pair>::~hkArray()
 {
-    C7C2B0_Pair* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline ~C7C2B0_Array()
-    {
         Holder* holder = _FUN_00c85750();
-        C7C2B0_Heap* heap = (C7C2B0_Heap*)holder->p;
+        hkMemoryAllocator* heap = (hkMemoryAllocator*)holder->p;
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
         {
             int cap = m_iCapacityState & 0x3fffffff;
             C7C2B0_Pair* data = m_data;
-            heap->ReturnMemory(data, cap * sizeof(C7C2B0_Pair));
+            heap->bufFree(data, cap * sizeof(C7C2B0_Pair));
         }
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-};
+    
+}
 struct ShapeArrays
 {
     int unk00;
@@ -1853,15 +1728,7 @@ struct ShapeArrays
     ~ShapeArrays();
 };
 extern "C" void _ReadWriteBarrier(void);
-struct AllocHolderX
-{
-    int unk00, unk04, unk08, unk0C;
-    HkAllocator* m_pAllocator;
-    HkAllocator* GetAllocator()
-    {
-        return m_pAllocator;
-    }
-};
+
 __forceinline void FreeObjX(void* p, unsigned int n)
 {
     Holder* h = _FUN_00c85750();
@@ -1874,8 +1741,8 @@ template <class T> struct HkArrX
     int m_capFlags;
     ~HkArrX()
     {
-        AllocHolderX* h = (AllocHolderX*)_FUN_00c85750();
-        HkAllocator* alloc = h->GetAllocator();
+        hkMemoryRouter* h = (hkMemoryRouter*)_FUN_00c85750();
+        HkAllocator* alloc = reinterpret_cast<HkAllocator*>(h->GetAllocator());
         m_iElementCount = 0;
         if (!(m_capFlags & 0x80000000))
             HkDeallocT<T>(alloc, m_data, m_capFlags & 0x3fffffff);
@@ -2213,233 +2080,162 @@ extern __m128 DAT_010c44d0;
 extern __m128 DAT_010c4c00;
 extern __m128 DAT_010c4c10;
 
-class hkQuaternionCDA;
-
-class hkVector4CDA
+__forceinline hkSimdReal::hkSimdReal(const __m128& value) : m_vValue(value) {}
+__forceinline hkQuaternion::hkQuaternion() {}
+__forceinline hkQsTransform::hkQsTransform() {}
+__forceinline void hkQuaternion::operator=(const hkQuaternion& q)
 {
-  public:
-    union
-    {
-        __m128 m_vComponents;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
+    reinterpret_cast<hkVector4&>(*this) = reinterpret_cast<const hkVector4&>(q);
+}
+__forceinline void hkQsTransform::operator=(const hkQsTransform& t)
+{
+    m_vTranslation = t.m_vTranslation;
+    m_rotation = t.m_rotation;
+    m_vScale = t.m_vScale;
+}
 
-    __forceinline hkVector4CDA& operator=(const hkVector4CDA& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
+__forceinline void hkVector4::addMul4(__m128 s, const hkVector4& b)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(_mm_shuffle_ps(s, s, 0), b.m_vComponents));
+}
 
-    __forceinline void setAdd4(const hkVector4CDA& a, const hkVector4CDA& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void add4(const hkVector4CDA& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void setMul4(const hkVector4CDA& a, const hkVector4CDA& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void addMul4(const hkVector4CDA& a, const hkVector4CDA& b)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents));
-    }
-    __forceinline void addMul4(__m128 s, const hkVector4CDA& b)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(_mm_shuffle_ps(s, s, 0), b.m_vComponents));
-    }
-    __forceinline void setNeg4(const hkVector4CDA& a)
-    {
-        m_vComponents = _mm_xor_ps(a.m_vComponents, DAT_010c44d0);
-    }
-    static __forceinline __m128 crossValue(__m128 a, __m128 b)
-    {
+__forceinline void hkVector4::setNeg4(const hkVector4& a)
+{
+    m_vComponents = _mm_xor_ps(a.m_vComponents, DAT_010c44d0);
+}
+
+__forceinline __m128 crossValue(__m128 a, __m128 b)
+{
         return _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a, a, 0xc9), _mm_shuffle_ps(b, b, 0xd2)),
                           _mm_mul_ps(_mm_shuffle_ps(a, a, 0xd2), _mm_shuffle_ps(b, b, 0xc9)));
     }
-    __forceinline void setCross(const hkVector4CDA& v1, const hkVector4CDA& v2)
-    {
-        m_vComponents = crossValue(v1.m_vComponents, v2.m_vComponents);
-    }
-    __forceinline __m128 dot3(const hkVector4CDA& v) const
-    {
-        __m128 x2 = _mm_mul_ps(m_vComponents, v.m_vComponents);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2)), sum);
-    }
-    __forceinline void setReciprocal4(const hkVector4CDA& v)
-    {
-        __m128 r = _mm_rcp_ps(v.m_vComponents);
-        __m128 rr = _mm_mul_ps(_mm_mul_ps(r, v.m_vComponents), r);
-        m_vComponents = _mm_sub_ps(_mm_add_ps(r, r), rr);
-    }
-    void SetRotatedDirection(const hkQuaternionCDA& q, const hkVector4CDA& dir);
-    void setRotatedInverseDir(const hkQuaternionCDA& q, const hkVector4CDA& dir);
-};
 
-class hkQuaternionCDA
+__forceinline void hkVector4::setCross(const hkVector4& v1, const hkVector4& v2)
 {
-  public:
-    hkVector4CDA m_vec;
+    m_vComponents = crossValue(v1.m_vComponents, v2.m_vComponents);
+}
 
-    __forceinline void SetConjugate(const hkQuaternionCDA& q)
-    {
-        m_vec.m_vComponents = _mm_xor_ps(q.m_vec.m_vComponents, DAT_010c4c00);
-    }
-    __declspec(noinline) void SetProduct(const hkQuaternionCDA& q0, const hkQuaternionCDA& q1)
-    {
-        __m128 a = q0.m_vec.m_vComponents;
-        __m128 b = q1.m_vec.m_vComponents;
-        __m128 cross = _mm_sub_ps(
-            _mm_mul_ps(_mm_shuffle_ps(b, b, _MM_SHUFFLE(3, 1, 0, 2)), _mm_shuffle_ps(a, a, _MM_SHUFFLE(3, 0, 2, 1))),
-            _mm_mul_ps(_mm_shuffle_ps(b, b, _MM_SHUFFLE(3, 0, 2, 1)), _mm_shuffle_ps(a, a, _MM_SHUFFLE(3, 1, 0, 2))));
-        __m128 aw = _mm_shuffle_ps(a, a, _MM_SHUFFLE(3, 3, 3, 3));
-        __m128 bw = _mm_shuffle_ps(b, b, _MM_SHUFFLE(3, 3, 3, 3));
-        __m128 imag = _mm_add_ps(_mm_mul_ps(bw, a), _mm_add_ps(_mm_mul_ps(aw, b), cross));
-        __m128 prod = _mm_mul_ps(b, a);
-        __m128 dot = _mm_add_ss(_mm_shuffle_ps(prod, prod, _MM_SHUFFLE(2, 2, 2, 2)),
-                                _mm_add_ss(_mm_shuffle_ps(prod, prod, _MM_SHUFFLE(1, 1, 1, 1)), prod));
-        __m128 real = _mm_sub_ps(prod, _mm_shuffle_ps(dot, dot, 0));
-        m_vec.m_vComponents = _mm_shuffle_ps(imag, _mm_unpackhi_ps(imag, real), _MM_SHUFFLE(3, 0, 1, 0));
-    }
-};
-
-__forceinline void hkVector4CDA::SetRotatedDirection(const hkQuaternionCDA& quat, const hkVector4CDA& direction)
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& v) const
 {
-    hkVector4CDA qreal;
-    qreal.m_vComponents = _mm_shuffle_ps(quat.m_vec.m_vComponents, quat.m_vec.m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
-    hkVector4CDA q2minus1;
+    __m128 x2 = _mm_mul_ps(m_vComponents, v.m_vComponents);
+    __m128 sum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
+    return hkSimdReal(_mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2)), sum));
+}
+
+__forceinline void hkQuaternion::SetConjugate(const hkQuaternion& q)
+{
+    reinterpret_cast<hkVector4&>(*this).m_vComponents = _mm_xor_ps(reinterpret_cast<const hkVector4&>(q).m_vComponents, DAT_010c4c00);
+}
+
+// 0x00c66320: keep the original inline linkage and non-inlined call behavior.
+inline __declspec(noinline) void hkQuaternion::SetProduct(const hkQuaternion& q0, const hkQuaternion& q1)
+{
+    __m128 a = reinterpret_cast<const hkVector4&>(q0).m_vComponents;
+    __m128 b = reinterpret_cast<const hkVector4&>(q1).m_vComponents;
+    __m128 cross = _mm_sub_ps(
+        _mm_mul_ps(_mm_shuffle_ps(b, b, _MM_SHUFFLE(3, 1, 0, 2)), _mm_shuffle_ps(a, a, _MM_SHUFFLE(3, 0, 2, 1))),
+        _mm_mul_ps(_mm_shuffle_ps(b, b, _MM_SHUFFLE(3, 0, 2, 1)), _mm_shuffle_ps(a, a, _MM_SHUFFLE(3, 1, 0, 2))));
+    __m128 aw = _mm_shuffle_ps(a, a, _MM_SHUFFLE(3, 3, 3, 3));
+    __m128 bw = _mm_shuffle_ps(b, b, _MM_SHUFFLE(3, 3, 3, 3));
+    __m128 imag = _mm_add_ps(_mm_mul_ps(bw, a), _mm_add_ps(_mm_mul_ps(aw, b), cross));
+    __m128 prod = _mm_mul_ps(b, a);
+    __m128 dot = _mm_add_ss(_mm_shuffle_ps(prod, prod, _MM_SHUFFLE(2, 2, 2, 2)),
+                            _mm_add_ss(_mm_shuffle_ps(prod, prod, _MM_SHUFFLE(1, 1, 1, 1)), prod));
+    __m128 real = _mm_sub_ps(prod, _mm_shuffle_ps(dot, dot, 0));
+    reinterpret_cast<hkVector4&>(*this).m_vComponents = _mm_shuffle_ps(imag, _mm_unpackhi_ps(imag, real), _MM_SHUFFLE(3, 0, 1, 0));
+}
+
+__forceinline void hkVector4::SetRotatedDirection(const hkQuaternion& quat, const hkVector4& direction)
+{
+    hkVector4 qreal;
+    qreal.m_vComponents = _mm_shuffle_ps(reinterpret_cast<const hkVector4&>(quat).m_vComponents, reinterpret_cast<const hkVector4&>(quat).m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
+    hkVector4 q2minus1;
     q2minus1.setMul4(qreal, qreal);
     q2minus1.m_vComponents = _mm_add_ps(q2minus1.m_vComponents, DAT_010c71e0);
-    hkVector4CDA ret;
+    hkVector4 ret;
     ret.setMul4(direction, q2minus1);
-    __m128 imagDotDir = quat.m_vec.dot3(direction);
-    ret.addMul4(imagDotDir, quat.m_vec);
-    hkVector4CDA imagCrossDir;
-    imagCrossDir.setCross(quat.m_vec, direction);
+    __m128 imagDotDir = reinterpret_cast<const hkVector4&>(quat).dot3(direction).m_vValue;
+    ret.addMul4(imagDotDir, reinterpret_cast<const hkVector4&>(quat));
+    hkVector4 imagCrossDir;
+    imagCrossDir.setCross(reinterpret_cast<const hkVector4&>(quat), direction);
     ret.addMul4(imagCrossDir, qreal);
     setAdd4(ret, ret);
 }
 
-__forceinline void hkVector4CDA::setRotatedInverseDir(const hkQuaternionCDA& quat, const hkVector4CDA& direction)
+__forceinline void hkVector4::setRotatedInverseDir(const hkQuaternion& quat, const hkVector4& direction)
 {
 
-    const hkVector4CDA& d = direction;
-    hkVector4CDA qreal;
-    qreal.m_vComponents = _mm_shuffle_ps(quat.m_vec.m_vComponents, quat.m_vec.m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
-    hkVector4CDA q2minus1;
+    const hkVector4& d = direction;
+    hkVector4 qreal;
+    qreal.m_vComponents = _mm_shuffle_ps(reinterpret_cast<const hkVector4&>(quat).m_vComponents, reinterpret_cast<const hkVector4&>(quat).m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
+    hkVector4 q2minus1;
     q2minus1.setMul4(qreal, qreal);
     q2minus1.m_vComponents = _mm_add_ps(q2minus1.m_vComponents, DAT_010c71e0);
-    hkVector4CDA ret;
+    hkVector4 ret;
     ret.setMul4(d, q2minus1);
-    __m128 imagDotDir = quat.m_vec.dot3(d);
-    ret.addMul4(imagDotDir, quat.m_vec);
-    hkVector4CDA imagCrossDir;
-    imagCrossDir.setCross(d, quat.m_vec);
+    __m128 imagDotDir = reinterpret_cast<const hkVector4&>(quat).dot3(d).m_vValue;
+    ret.addMul4(imagDotDir, reinterpret_cast<const hkVector4&>(quat));
+    hkVector4 imagCrossDir;
+    imagCrossDir.setCross(d, reinterpret_cast<const hkVector4&>(quat));
     ret.addMul4(imagCrossDir, qreal);
     setAdd4(ret, ret);
 }
 
-class hkQsTransformCDA
+__forceinline void hkQsTransform::SetConjugate(const hkQsTransform& t)
 {
-  public:
-    hkVector4CDA m_vTranslation;
-    hkQuaternionCDA m_rotation;
-    hkVector4CDA m_vScale;
+    m_vTranslation.setRotatedInverseDir(t.m_rotation, t.m_vTranslation);
+    m_vTranslation.setNeg4(m_vTranslation);
+    m_rotation.SetConjugate(t.m_rotation);
+    hkVector4 s;
+    s.m_vComponents = _mm_shuffle_ps(
+        t.m_vScale.m_vComponents, _mm_unpackhi_ps(t.m_vScale.m_vComponents, DAT_010c7170), _MM_SHUFFLE(3, 0, 1, 0));
+    // Compute the reciprocal before storing it, as in this unit's original inline body.
+    __m128 r = _mm_rcp_ps(s.m_vComponents);
+    __m128 rr = _mm_mul_ps(_mm_mul_ps(r, s.m_vComponents), r);
+    m_vScale.m_vComponents = _mm_sub_ps(_mm_add_ps(r, r), rr);
+    m_vScale.m_vComponents = _mm_and_ps(m_vScale.m_vComponents, DAT_010c4c10);
+}
 
-    __forceinline void SetConjugate(const hkQsTransformCDA& t)
-    {
-        m_vTranslation.setRotatedInverseDir(t.m_rotation, t.m_vTranslation);
-        m_vTranslation.setNeg4(m_vTranslation);
-        m_rotation.SetConjugate(t.m_rotation);
-        hkVector4CDA s;
-        s.m_vComponents = _mm_shuffle_ps(
-            t.m_vScale.m_vComponents, _mm_unpackhi_ps(t.m_vScale.m_vComponents, DAT_010c7170), _MM_SHUFFLE(3, 0, 1, 0));
-        m_vScale.setReciprocal4(s);
-        m_vScale.m_vComponents = _mm_and_ps(m_vScale.m_vComponents, DAT_010c4c10);
-    }
-    __forceinline void SetProduct(const hkQsTransformCDA& t1, const hkQsTransformCDA& t2)
-    {
-        hkVector4CDA temp;
-        temp.SetRotatedDirection(t1.m_rotation, t2.m_vTranslation);
-        m_vTranslation.setAdd4(temp, t1.m_vTranslation);
-        m_rotation.SetProduct(t1.m_rotation, t2.m_rotation);
-        m_vScale.setMul4(t1.m_vScale, t2.m_vScale);
-    }
-    __forceinline void SetMulInverse(const hkQsTransformCDA& a, const hkQsTransformCDA& b)
-    {
-        hkQsTransformCDA h;
-        h.SetConjugate(a);
-        SetProduct(h, b);
-    }
-};
-
-struct hkaSkeletonCDA
+__forceinline void hkQsTransform::SetProduct(const hkQsTransform& t1, const hkQsTransform& t2)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    short* m_kParentIndices;
-    int m_parentIndicesSize;
-    int m_parentIndicesCap;
-    int unk18;
-    int m_iBoneCount;
-};
+    hkVector4 temp;
+    temp.SetRotatedDirection(t1.m_rotation, t2.m_vTranslation);
+    m_vTranslation.setAdd4(temp, t1.m_vTranslation);
+    m_rotation.SetProduct(t1.m_rotation, t2.m_rotation);
+    m_vScale.setMul4(t1.m_vScale, t2.m_vScale);
+}
 
-class hkaPoseCDA
+__forceinline void hkQsTransform::SetMulInverse(const hkQsTransform& a, const hkQsTransform& b)
 {
-  public:
-    enum
-    {
-        F_DIRTY_LOCAL = 0x1,
-        F_DIRTY_MODEL = 0x2
-    };
-    hkaSkeletonCDA* m_pSkeleton;
-    hkQsTransformCDA* m_pLocalPose;
-    int m_localPoseSize;
-    int m_localPoseCap;
-    hkQsTransformCDA* m_pModelPose;
-    int m_modelPoseSize;
-    int m_modelPoseCap;
-    unsigned int* m_pBoneFlags;
-    int m_boneFlagsSize;
-    int m_boneFlagsCap;
-    bool m_bPoseFlag;
-    bool m_bPoseInitialized;
-
-    const hkQsTransformCDA& GetBoneModelSpace(int boneIdx);
-    void FUN_00cda690();
-};
+    hkQsTransform h;
+    h.SetConjugate(a);
+    SetProduct(h, b);
+}
 
 // @fnv 0x00cda690
-void hkaPoseCDA::FUN_00cda690()
+void hkaPose::FUN_00cda690()
 {
     if (m_bPoseInitialized)
         return;
-    const int numBones = m_pSkeleton->m_iBoneCount;
+    const int numBones = m_pSkeleton->m_kBones.m_iElementCount;
     for (int boneIdx = 0; boneIdx < numBones; boneIdx++)
     {
-        if (m_pBoneFlags[boneIdx] & F_DIRTY_LOCAL)
+        if (m_pBoneFlags.m_data[boneIdx] & F_DIRTY_LOCAL)
         {
-            const short parentIdx = m_pSkeleton->m_kParentIndices[boneIdx];
-            const hkQsTransformCDA& modelFromBone = m_pModelPose[boneIdx];
+            const short parentIdx = m_pSkeleton->m_kParentIndices.m_data[boneIdx];
+            const hkQsTransform& modelFromBone = m_pModelPose.m_data[boneIdx];
             if (parentIdx != -1)
             {
-                const hkQsTransformCDA& modelFromParent = (m_pBoneFlags[parentIdx] & F_DIRTY_MODEL) == 0
-                                                              ? m_pModelPose[parentIdx]
+                const hkQsTransform& modelFromParent = (m_pBoneFlags.m_data[parentIdx] & F_DIRTY_MODEL) == 0
+                                                              ? m_pModelPose.m_data[parentIdx]
                                                               : GetBoneModelSpace(parentIdx);
-                m_pLocalPose[boneIdx].SetMulInverse(modelFromParent, modelFromBone);
+                m_pLocalPose.m_data[boneIdx].SetMulInverse(modelFromParent, modelFromBone);
             }
             else
             {
-                m_pLocalPose[boneIdx] = modelFromBone;
+                m_pLocalPose.m_data[boneIdx] = modelFromBone;
             }
-            m_pBoneFlags[boneIdx] &= ~F_DIRTY_LOCAL;
+            m_pBoneFlags.m_data[boneIdx] &= ~F_DIRTY_LOCAL;
         }
     }
     m_bPoseInitialized = true;

@@ -1,5 +1,9 @@
 // src/havok/common/internal/convexhull/hkgeometryutility_gs_nogs_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/convexhull/hkgeometryutility.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS- /EHsc /Gy (unit lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
+#define FNV_VEC4_SIMD
+#include "../../../../../include/Vec4.h"
+#include "../../../../../include/hkSimdReal.h"
+#include "../../../../../include/hkVector4.h"
 
 
 // src/havok/common/internal/convexhull/hkgeometryutility.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/convexhull/hkgeometryutility.cpp).
@@ -57,16 +61,9 @@ struct FUN_00d5a630_ctxB
 };
 extern float DAT_0106ea1c;
 void __cdecl FUN_00d5a630(void* a1, int a2, int a3);
-struct S_00d5a6b0_Elem
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
 struct S_00d5a6b0_Array
 {
-    S_00d5a6b0_Elem* m_data;
+    Vec4* m_data;
     int m_iElementCount;
 };
 void SubtractFromW(S_00d5a6b0_Array* pArray, float val);
@@ -92,17 +89,10 @@ struct D5C110MemoryRouter
     }
 };
 extern "C" D5C110MemoryRouter& __cdecl FUN_00c85750();
-struct D5C110Vector4
-{
-    float m_uiX;
-    float m_uiY;
-    float m_uiZ;
-    float m_w;
-};
 // hkArray<hkVector4> without a destructor (Havok was built without EH): explicit cleanup.
 struct D5C110VertexArray
 {
-    D5C110Vector4* m_data;
+    Vec4* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
@@ -114,7 +104,7 @@ struct D5C110VertexArray
         D5C110Allocator& alloc = FUN_00c85750().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(D5C110Vector4));
+            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(Vec4));
     }
 };
 struct D5C110StridedVertices
@@ -163,13 +153,6 @@ struct S00d5c060_Src
     int m_uiItemCount;
     int m_iElementIndex;
 };
-struct S00d5c060_Vec3
-{
-    float m_uiX;
-    float m_uiY;
-    float m_uiZ;
-    unsigned int unk0C;
-};
 struct __declspec(align(16)) S00d5c060_Result
 {
     unsigned int unk00;
@@ -190,10 +173,6 @@ extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
 extern "C" __m128 _mm_sqrt_ss(__m128);
 extern "C" __m128 _mm_sub_ps(__m128, __m128);
 extern const float DAT_01012054;
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
-};
 struct MyPoint
 {
     __m128 v;
@@ -943,57 +922,41 @@ static __forceinline __m128 LengthSquared3(__m128 v)
     return _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
 }
 
-struct d5Vec4
+
+__forceinline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x)
+{}
+
+__forceinline hkSimdReal::operator float() const
 {
-    float v[4];
-};
-
-class hkSimdRealX
-{
-
-  public:
-    __forceinline hkSimdRealX(const __m128& x) : m_vValue(x)
-    {}
-
-    __forceinline operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-
-    __m128 m_vValue;
-};
-
-static __forceinline hkSimdRealX operator+(const hkSimdRealX& a, const hkSimdRealX& b)
-{
-    return _mm_add_ss(a.m_vValue, b.m_vValue);
+    float s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
 }
 
-struct hkVec4X
+template <typename T>
+__forceinline hkSimdReal hkSimdReal::operator+(const T& value) const
 {
+    return _mm_add_ss(m_vValue, value.m_vValue);
+}
 
-    __m128 m_vComponents;
+__forceinline hkSimdReal hkVector4::lengthSquared3() const
+{
+    return LengthSquared3(m_vComponents);
+}
 
-    __forceinline hkSimdRealX lengthSquared3() const
-    {
-        return LengthSquared3(m_vComponents);
-    }
-
-    __forceinline void mul4(float s)
-    {
-        m_vComponents = _mm_mul_ps(SplatScalar(s), m_vComponents);
-    }
-};
+__forceinline void hkVector4::mul4(const float& s)
+{
+    m_vComponents = _mm_mul_ps(SplatScalar(s), m_vComponents);
+}
 
 // @fnv 0x00d5b2a0
 static __declspec(noinline) void FUN_00d5b2a0(int a1, int a2, int a3, float d, int outI, const float* p)
 
 {
 
-    __declspec(align(16)) d5Vec4 columns[3];
+    __declspec(align(16)) Vec4 columns[3];
 
-    float* tmp = columns[0].v;
+    float* tmp = columns[0].elements;
 
     *(__m128*)&tmp[0] = _mm_load_ps(p);
 
@@ -1013,11 +976,11 @@ static __declspec(noinline) void FUN_00d5b2a0(int a1, int a2, int a3, float d, i
 
         {
 
-            columns[i].v[k] = d + columns[i].v[k];
+            columns[i].elements[k] = d + columns[i].elements[k];
 
             out[i * 4 + k] = (FUN_00d5b0c0((const BoundsVector*)tmp, a3, (const char*)a1, a2) - first) * invD;
 
-            columns[i].v[k] = p[i * 4 + k];
+            columns[i].elements[k] = p[i * 4 + k];
         }
 
         __m128 sc = _mm_load_ss(&DAT_01012054);
@@ -1028,7 +991,7 @@ static __declspec(noinline) void FUN_00d5b2a0(int a1, int a2, int a3, float d, i
 
     {
 
-        hkVec4X* o = (hkVec4X*)out;
+        hkVector4* o = (hkVector4*)out;
 
         const float len2 = o[0].lengthSquared3() + o[1].lengthSquared3();
 

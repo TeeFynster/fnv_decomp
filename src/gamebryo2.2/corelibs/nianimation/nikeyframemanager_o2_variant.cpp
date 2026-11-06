@@ -1,8 +1,11 @@
+#include "../../../../include/NiTArray.h"
 
 // src/gamebryo2.2/corelibs/nianimation/nikeyframemanager_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/nianimation/nikeyframemanager.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "nikeyframemanager_decls.h"
+#include "../../../../include/NiTimeController.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiBinaryStream.h"
 
 extern "C" void* g_011f3fb4;
 
@@ -48,19 +51,15 @@ void* __cdecl FUN_00a4db60()
     return 0;
 }
 
-struct NiBinaryStream
+// The shared declaration has no inline body or stream-state members yet.
+inline unsigned int NiBinaryStream::BinaryRead(void* pvBuffer, unsigned int uiTotalBytes,
+                                              unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-    void* vtbl;
-    unsigned int m_uiStreamFlags;
-    unsigned int (*m_pfnRead)(NiBinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
+    unsigned int uiBytesRead = (*reinterpret_cast<NIBINARYSTREAM_READFN*>(reinterpret_cast<char*>(this) + 0x08))(
+        this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x04) += uiBytesRead;
+    return uiBytesRead;
+}
 
 template <class T> inline void ReadBinaryValue(NiBinaryStream* pkStream, T& value)
 {
@@ -68,45 +67,21 @@ template <class T> inline void ReadBinaryValue(NiBinaryStream* pkStream, T& valu
     pkStream->BinaryRead(&value, sizeof(T), &uiSize, 1);
 }
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int uiSize);
-};
 extern MemoryManager _g_memoryManager;
 
 void __cdecl NiFree(void* p);
 
-template <class T> struct OutArray
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
 {
-    virtual ~OutArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, const T& element);
-    unsigned int Add(const T& element)
-    {
         unsigned int uiIndex = m_usSize;
         if (uiIndex >= m_usMaxSize)
             SetSize(uiIndex + m_usGrowBy);
         SetAt(uiIndex, element);
         return uiIndex;
     }
-};
 
-template <class T> struct InArray
+template <class T, class TAlloc> inline void NiTArray<T, TAlloc>::SetAt(unsigned int uiIndex, const T& element)
 {
-    virtual ~InArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, const T& element)
-    {
         if (uiIndex >= m_usSize)
         {
             m_usSize = (unsigned short)(uiIndex + 1);
@@ -124,22 +99,14 @@ template <class T> struct InArray
         }
         m_pBase[uiIndex] = element;
     }
-    unsigned int Add(const T& element)
-    {
-        unsigned int uiIndex = m_usSize;
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
-    }
-};
+
 
 struct SequenceData
 {
-    OutArray<unsigned int> m_kArr0;
-    OutArray<char*> m_kArr1;
-    OutArray<unsigned int> m_kArr2;
-    InArray<char*> m_kArr3;
+    NiTArray<unsigned int, NiTMallocInterface<unsigned int> > m_kArr0;
+    NiTArray<char*, NiTMallocInterface<char*> > m_kArr1;
+    NiTArray<unsigned int, NiTMallocInterface<unsigned int> > m_kArr2;
+    NiTArray<char*, NiTMallocInterface<char*> > m_kArr3;
     SequenceData() throw();
     static void* operator new(unsigned int uiSize)
     {
@@ -148,11 +115,6 @@ struct SequenceData
 };
 
 extern SequenceData* g_011f3fb0;
-
-struct NiTimeController
-{
-    void LoadBinary(struct NiStreamR& kStream);
-};
 
 struct NiStreamR
 {
@@ -178,7 +140,7 @@ struct SeqController : NiTimeController
 // @fnv 0x00a4db80
 void SeqController::FUN_00a4db80(NiStreamR& kStream)
 {
-    NiTimeController::LoadBinary(kStream);
+    NiTimeController::LoadBinary(reinterpret_cast<NiStream&>(kStream));
     unsigned int uiCountB;
     if ((unsigned int)kStream.Version() < 0x4010003)
     {
@@ -252,11 +214,8 @@ void SeqController::FUN_00a4db80(NiStreamR& kStream)
     }
 }
 
-template <class T> class CA4D780Array
+template <class T, class TAlloc> inline NiTArray<T, TAlloc>::NiTArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
 {
-  public:
-    CA4D780Array(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) throw()
-    {
         m_usMaxSize = (unsigned short)uiMaxSize;
         m_usGrowBy = (unsigned short)uiGrowBy;
         m_usSize = 0;
@@ -266,20 +225,12 @@ template <class T> class CA4D780Array
         else
             m_pBase = 0;
     }
-    virtual ~CA4D780Array();
 
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
-
-template <class T> class CA4D780PrimitiveArray : public CA4D780Array<T>
+template <class T> class CA4D780PrimitiveArray : public NiTArray<T, NiTMallocInterface<T> >
 {
   public:
     CA4D780PrimitiveArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) throw()
-        : CA4D780Array<T>(uiMaxSize, uiGrowBy)
+        : NiTArray<T, NiTMallocInterface<T> >(uiMaxSize, uiGrowBy)
     {}
     virtual ~CA4D780PrimitiveArray();
 };

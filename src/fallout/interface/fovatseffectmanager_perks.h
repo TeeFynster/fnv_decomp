@@ -1,17 +1,11 @@
 // fallout/interface/fovatseffectmanager_perks.h: declares BGSPerkEntry, BGSEntryPointFunction, EntryPointFunctionDispatcher, EntryPoint
+#include "../../../include/BGSPerkEntry.h"
 #ifndef FNV_FOVATSEFFECTMANAGER_PERKS_H
 #define FNV_FOVATSEFFECTMANAGER_PERKS_H
 
 #include "Actor.h"
 class PlayerCharacter;
 extern PlayerCharacter* g_thePlayer;
-class BGSPerkEntry
-{
-  public:
-    virtual bool IsInfoValidForDialogue(unsigned char count, void** arguments);
-    virtual unsigned char GetFunction();
-    virtual void* GetFunctionData();
-};
 class BGSEntryPointFunction
 {
   public:

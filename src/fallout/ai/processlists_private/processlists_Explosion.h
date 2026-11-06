@@ -29,7 +29,7 @@ class Explosion : public MobileObject
     float m_fFourthRecordValue;
     NiPointer<bhkSimpleShapePhantom> m_pExplosionPhantom;
     BSSimpleList<ExplosionParameters*> kTargets;
-    SoundPlaybackHandle kSoundHandles[2];
+    BSSoundHandle kSoundHandles[2];
     NiPointer<NiLight> m_pMenuLight;
     TESObjectREFR* pOwnerRef;
     TESObjectREFR* ReferenceSoundCauseData;

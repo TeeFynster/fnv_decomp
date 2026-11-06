@@ -1,8 +1,29 @@
-// fallout_shared/bgsdecalmanager.cpp: BGSDecalManager, BSA_, PD_, M3_ and more (61 functions)
+// fallout_shared/bgsdecalmanager.cpp: BGSDecalManager and decal helpers (61 functions)
 
+// Use the checked layouts in place of the generated legacy base layouts.
+#include "layout_support.h"
+#define FNV_NIOBJECT_H
+#define FNV_NIREFOBJECT_H
+#define FNV_NIPOINT3_H
+#include "../../include/NiColorA.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiGeometryData.h"
+#include "../../include/NiTriBasedGeomData.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/hkVector4.h"
+
+// The decal interfaces keep their own pointer/list wrappers (DecalNiPointer, DecalNiTPointerListBase, ...).
 #include "bgsdecalmanager_decls.h"
 #include "bgsdecalmanager_types_BGSDecalManager.h"
 #include "bgsdecalmanager_types_BSTempEffectSimpleDecal.h"
+#include "../../include/GO.h"
+#include "../../include/RecursiveLock.h"
+#include "../../include/Setting.h"
+#include "../../include/TESForm.h"
+#include "../../include/BSCullingProcess.h"
 
 // @fnv 0x004a0030
 void BGSDecalManager::RenderDecals()
@@ -16,13 +37,13 @@ void BGSDecalManager::RenderDecals()
             unsigned int position;
         } iterator;
         iterator.position = reinterpret_cast<unsigned int>(static_cast<BSFaceGenAnimationData*>(
-            *reinterpret_cast<NiPointer<BSFaceGenAnimationData>*>(&m_kSimpleDecalList)));
+            *reinterpret_cast<DecalNiPointer<BSFaceGenAnimationData>*>(&m_kSimpleDecalList)));
         while (iterator.position != 0)
         {
             iterator.previous = iterator.position;
             BSTempEffectSimpleDecal* decal = reinterpret_cast<BSTempEffectSimpleDecal*>(
-                static_cast<BSFaceGenAnimationData*>(reinterpret_cast<NiPointer<BSFaceGenAnimationData>&>(
-                    reinterpret_cast<NiTPointerListBase<NiTPointerAllocator<unsigned int>, NiPointer<NiProperty> >*>(
+                static_cast<BSFaceGenAnimationData*>(reinterpret_cast<DecalNiPointer<BSFaceGenAnimationData>&>(
+                    reinterpret_cast<DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>, DecalNiPointer<NiProperty> >*>(
                         &m_kSimpleDecalList)
                         ->GetNext(reinterpret_cast<void*&>(iterator.position)))));
             if (decal != 0)
@@ -39,14 +60,14 @@ void BGSDecalManager::RenderDecals()
                     {
                         if (decal->m_uiTextureReferenceCount > 0)
                         {
-                            if (*DAT_011c5904.GetLifeStateControlFlag())
-                                Warning(DAT_0101e1c8, decal->FUN_004a0330()->GetLinkToList()->FUN_0043b1b0());
+                            if (*DAT_011c5904.FUN_00408d60())
+                                Warning(DAT_0101e1c8, reinterpret_cast<FirstPointerStringView_0043b1b0*>(decal->FUN_004a0330()->GetLinkToList())->FUN_0043b1b0());
                             reinterpret_cast<DecalVtableCall*>(decal)->vfn_8c();
                         }
                         else
                         {
-                            if (*DAT_011c5904.GetLifeStateControlFlag())
-                                Warning(DAT_0101e19c, decal->FUN_004a0330()->GetLinkToList()->FUN_0043b1b0());
+                            if (*DAT_011c5904.FUN_00408d60())
+                                Warning(DAT_0101e19c, reinterpret_cast<FirstPointerStringView_0043b1b0*>(decal->FUN_004a0330()->GetLinkToList())->FUN_0043b1b0());
                             decal->bWasPlaying = true;
                         }
                     }
@@ -64,34 +85,34 @@ void BGSDecalManager::RenderDecals()
                     if (decal->GetByteAt2D())
                     {
                         ++DAT_011c57ec;
-                        if (*DAT_011c5904.GetLifeStateControlFlag())
-                            Warning(DAT_0101e174, DAT_011c57ec, decal->FUN_004a0330()->GetLinkToList()->FUN_0043b1b0());
+                        if (*DAT_011c5904.FUN_00408d60())
+                            Warning(DAT_0101e174, DAT_011c57ec, reinterpret_cast<FirstPointerStringView_0043b1b0*>(decal->FUN_004a0330()->GetLinkToList())->FUN_0043b1b0());
 
                         if (DAT_011c57f4 & 1)
                         {
-                            ImageSpaceEffectParam color(0.0f, 1.0f, 0.0f, 1.0f);
-                            decal->SetDecalTint(reinterpret_cast<RgbaColor&>(color), true);
+                            NiColorA color(0.0f, 1.0f, 0.0f, 1.0f);
+                            decal->SetDecalTint(reinterpret_cast<NiColorA&>(color), true);
                         }
                         if (DAT_011c57f4 & 2)
                         {
-                            ImageSpaceEffectParam color(0.0f, 1.0f, 0.0f, 0.25f);
-                            decal->SetDecalTint(reinterpret_cast<RgbaColor&>(color), false);
+                            NiColorA color(0.0f, 1.0f, 0.0f, 0.25f);
+                            decal->SetDecalTint(reinterpret_cast<NiColorA&>(color), false);
                         }
                     }
                     else if (DAT_011c57f4 & 0x10)
                     {
                         if (DAT_011c57f4 & 1)
                         {
-                            ImageSpaceEffectParam color(1.0f, 0.0f, 0.0f, 1.0f);
-                            decal->SetDecalTint(reinterpret_cast<RgbaColor&>(color), true);
+                            NiColorA color(1.0f, 0.0f, 0.0f, 1.0f);
+                            decal->SetDecalTint(reinterpret_cast<NiColorA&>(color), true);
                         }
                         if (DAT_011c57f4 & 2)
                         {
-                            ImageSpaceEffectParam color(1.0f, 0.0f, 0.0f, 0.25f);
-                            decal->SetDecalTint(reinterpret_cast<RgbaColor&>(color), false);
+                            NiColorA color(1.0f, 0.0f, 0.0f, 0.25f);
+                            decal->SetDecalTint(reinterpret_cast<NiColorA&>(color), false);
                         }
                     }
-                    reinterpret_cast<NiTPointerListBase<NiTPointerAllocator<unsigned int>, NiPointer<NiProperty> >*>(
+                    reinterpret_cast<DecalNiTPointerListBase<DecalNiTPointerAllocator<unsigned int>, DecalNiPointer<NiProperty> >*>(
                         &m_kSimpleDecalList)
                         ->RemovePos(reinterpret_cast<void*&>(iterator.previous));
                 }
@@ -108,85 +129,12 @@ int __fastcall FUN_00460140(int apBase)
 }
 
 struct NiStream;
-struct blob48
-{
-    char b[48];
-};
-struct blob64
-{
-    char b[64];
-};
-struct ThreeByThreeMatrix
-{
-    void GetRow(unsigned int, float*);
-    void GetRow(unsigned int, float*, float*, float*);
-    void GetRow(unsigned int, NiPoint3*);
-    void SetRow(unsigned int, float*);
-    void SetRow(unsigned int, float, float, float);
-    void SetRow(unsigned int, void*);
-    void GetCol(unsigned int, float*);
-    void GetCol(unsigned int, float*, float*, float*);
-    void GetCol(unsigned int, NiPoint3*);
-    void SetCol(unsigned int, float*);
-    void SetCol(unsigned int, float, float, float);
-    void SetCol(unsigned int, void*);
-    float GetEntry(unsigned int, unsigned int);
-    void SetEntry(unsigned int, unsigned int, float);
-    void MakeZero();
-    void ResetToIdentity();
-    void MakeDiagonal(float, float, float);
-    void SetXRotation(float);
-    void SetYRotation(float);
-    void SetZRotation(float);
-    void MakeZRotationQ(float);
-    void MakeAxisAngleRotation(float, void*);
-    void MakeAxisAngleRotation(float, float, float, float);
-    bool Inverse(ThreeByThreeMatrix*);
-    struct blob48 Inverse();
-    struct blob48 Transpose();
-    void ToQuaternion(float*, float*, float*, float*);
-    bool ExtractEulerAnglesXYZ(float*, float*, float*);
-    bool ToEulerAnglesXZY(float*, float*, float*);
-    bool ToEulerAnglesYXZ(float*, float*, float*);
-    bool ToEulerAnglesYZX(float*, float*, float*);
-    bool ToEulerAnglesZXY(float*, float*, float*);
-    bool ToEulerAnglesZYX(float*, float*, float*);
-    void SetRotationFromEulerXYZ(float, float, float);
-    void FromEulerAnglesXZY(float, float, float);
-    void FromEulerAnglesYXZ(float, float, float);
-    void FromEulerAnglesYZX(float, float, float);
-    void SetRotationFromEulerZXY(float, float, float);
-    void SetRotationFromEulerZYX(float, float, float);
-    bool Reorthogonalize();
-    struct blob48 ComposeMatrices(void*);
-    struct blob48 Congruence(void*);
-    static void TransformPositions(void*, void*, unsigned int, void*, NiPoint3*);
-    static void TransformNormals(void*, unsigned int, void*, NiPoint3*);
-    static void TransformVerticesAndNormals(void*, void*, unsigned int, void*, NiPoint3*, void*, NiPoint3*);
-    void ApplyToVector(float*, NiPoint3*);
-    void LoadBinary(NiStream*);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    void Scale(float, float, float);
-    static struct blob64 XMLoadFloat3x4(float*);
-    static void XMStoreFloat3x4(float*, struct blob64);
-    bool Tridiagonal(float*, float*);
-    bool QLAlgorithm(float*, float*);
-    float Determinant();
-    char m_afEntries[48];
-};
-typedef char _sizecheck_NiMatrix3[sizeof(ThreeByThreeMatrix) == 48 ? 1 : -1];
-struct FUN_004769c0_shell : public ThreeByThreeMatrix
-{
-    void FUN_004769c0(unsigned int, float*);
-};
-
 // @fnv 0x004769c0
-void FUN_004769c0_shell::FUN_004769c0(unsigned int uiCol, float* col)
+void NiMatrix3::SetCol(unsigned int uiCol, const float* col)
 {
-    ((float(*)[3])m_afEntries)[0][uiCol] = col[0];
-    ((float(*)[3])m_afEntries)[1][uiCol] = col[1];
-    ((float(*)[3])m_afEntries)[2][uiCol] = col[2];
+    ((float(*)[3])&m_pEntry[0][0])[0][uiCol] = col[0];
+    ((float(*)[3])&m_pEntry[0][0])[1][uiCol] = col[1];
+    ((float(*)[3])&m_pEntry[0][0])[2][uiCol] = col[2];
 }
 
 class Date
@@ -209,10 +157,6 @@ void __fastcall FUN_004a0370(char* pThis)
 }
 
 namespace fnv_004a03c0 {
-struct RecursiveLock
-{
-    void Leave();
-};
 struct Date
 {
     ~Date();
@@ -231,15 +175,9 @@ void DD::FUN_004a03c0()
 }
 }  // namespace fnv_004a03c0
 
-struct P3
-{
-    float x, y, z;
-    void Set(float, float, float);
-    P3* FUN_004a0bd0(P3*);
-};
 // Writes the negated x, y and z components into out and returns out.
 // @fnv 0x004a0bd0
-P3* P3::FUN_004a0bd0(P3* out)
+NiPoint3* NiPoint3::FUN_004a0bd0(NiPoint3* out)
 {
     out->Set(-x, -y, -z);
     return out;
@@ -251,17 +189,17 @@ void* __fastcall FUN_004a0d10(char* pThis)
     return pThis + 0x100;
 }
 
-template <> class NiPointer<NiNode>
+template <> class DecalNiPointer<NiNode>
 {
   public:
     NiNode* m_pObject;
-    NiPointer<NiNode>& operator=(NiNode*);
+    DecalNiPointer<NiNode>& operator=(NiNode*);
 };
 
 struct FUN_004a0fd0_shell
 {
     char pad[0xc4];
-    NiPointer<NiNode> m_pController;
+    DecalNiPointer<NiNode> m_pController;
     void FUN_004a0fd0(NiNode* apNode);
 };
 
@@ -313,12 +251,7 @@ bool Fake_FUN_004a2020::GetFlag(unsigned int aiFlag) const
     return (ulFlags[uiindex] & uimask) > 0;
 }
 
-class BGSTerrainManager
-{
-  public:
-    unsigned int GetMinLevel();
-};
-
+#include "../../include/BGSTerrainManager.h"
 // Returns 0 for a null pointer, otherwise returns whether GetMinLevel() is between 1 and 12.
 // @fnv 0x004a2c20
 int __cdecl FUN_004a2c20(BGSTerrainManager* apShaderProp)
@@ -331,16 +264,7 @@ int __cdecl FUN_004a2c20(BGSTerrainManager* apShaderProp)
     return itp >= 1 && itp <= 12;
 }
 
-struct __declspec(align(16)) VectorComponentValue
-{
-    char pad[16];
-    float FUN_004586d0(void) const;
-};
 
-struct hkVector4
-{
-    VectorComponentValue& FUN_00458700(VectorComponentValue&, int) const;
-};
 
 struct NiPoint3_local
 {
@@ -351,10 +275,10 @@ struct NiPoint3_local
 // @fnv 0x004a3970
 NiPoint3_local& __cdecl FUN_004a3970(NiPoint3_local& arNiPoint, const hkVector4& arHkVector)
 {
-    VectorComponentValue t0, t1, t2;
-    arNiPoint.x = arHkVector.FUN_00458700(t0, 0).FUN_004586d0();
-    arNiPoint.y = arHkVector.FUN_00458700(t1, 1).FUN_004586d0();
-    arNiPoint.z = arHkVector.FUN_00458700(t2, 2).FUN_004586d0();
+    __declspec(align(16)) char t0[16], t1[16], t2[16];
+    arNiPoint.x = arHkVector.FUN_00458700(*reinterpret_cast<hkSimdReal*>(t0), 0).getReal();
+    arNiPoint.y = arHkVector.FUN_00458700(*reinterpret_cast<hkSimdReal*>(t1), 1).getReal();
+    arNiPoint.z = arHkVector.FUN_00458700(*reinterpret_cast<hkSimdReal*>(t2), 2).getReal();
     return arNiPoint;
 }
 
@@ -430,11 +354,6 @@ unsigned int FUN_004a3a20_shell::FUN_004a3a20()
 }
 }  // namespace fnv_004a3a20
 
-class TESObjectREFR
-{
-  public:
-    unsigned int GetFlags();
-};
 
 // Returns the flags of apRef, or 0 when apRef is null.
 // @fnv 0x004a3a40
@@ -472,14 +391,13 @@ FUN_004a3a70::FUN_004a3a70() : m(0)
     FUN_004a3b70(this);
 }
 
+class NiAVObject;
+class hkpPhantom;
+class hkpRigidBody;
 namespace fnv_004a3da0 {
-struct NiAVObject;
 struct FourComponentNumericValue;
-struct hkVector4;
 struct hkpAllRayHitCollector;
 struct hkpClosestRayHitCollector;
-struct hkpPhantom;
-struct hkpRigidBody;
 struct blob1
 {
     char b[1];
@@ -571,11 +489,6 @@ struct FUN_004a3da0_shell : public BhkPickData
     void FUN_004a3da0(void*);
 };
 
-struct __declspec(align(16)) hkVector4
-{
-    char m_vComponents[16];
-    void _ref_006815c0();
-};
 
 struct FUN_0056d340_helper
 {
@@ -588,9 +501,10 @@ hkVector4& __cdecl FUN_004a3e00(hkVector4&, NiPoint3 const&);
 // @fnv 0x004a3da0
 void FUN_004a3da0_shell::FUN_004a3da0(void* arFrom)
 {
-    hkVector4 hkv;
-    hkv._ref_006815c0();
-    ((FUN_0056d340_helper*)this)->FUN_0056d340(FUN_004a3e00(hkv, *(const NiPoint3*)arFrom));
+    // Raw storage preserves the original initialization call and stack protection.
+    __declspec(align(16)) char hkv[16];
+    reinterpret_cast<hkVector4*>(hkv)->FUN_006815c0();
+    ((FUN_0056d340_helper*)this)->FUN_0056d340(FUN_004a3e00(*reinterpret_cast<hkVector4*>(hkv), *(const NiPoint3*)arFrom));
 }
 }  // namespace fnv_004a3da0
 
@@ -624,7 +538,6 @@ void __fastcall FUN_004a3f70(char* self, Flt f)
 }
 
 struct NiAVObject;
-struct hkVector4;
 struct hkpAllRayHitCollector;
 struct hkpClosestRayHitCollector;
 struct hkpPhantom;
@@ -780,12 +693,8 @@ bool FUN_004a4020_shell::FUN_004a4020()
     return cVisible > 0;
 }
 
-struct M3_
-{
-    void FUN_004b4660(unsigned int, float, float, float);
-};
 // @fnv 0x004b4660
-void M3_::FUN_004b4660(unsigned int uiIndex, float afValue0, float afValue1, float afValue2)
+void NiMatrix3::SetCol(unsigned int uiIndex, float afValue0, float afValue1, float afValue2)
 {
     *(float*)((char*)this + uiIndex * 4) = afValue0;
     *(float*)((char*)this + uiIndex * 4 + 12) = afValue1;
@@ -803,13 +712,12 @@ bool S3e60::FUN_0056d340(unsigned int auiFlag)
     return GetFlag(auiFlag);
 }
 
+class NiAVObject;
+class hkpPhantom;
+class hkpRigidBody;
 namespace fnv_008cdd90 {
-struct NiAVObject;
-struct hkVector4;
 struct hkpAllRayHitCollector;
 struct hkpClosestRayHitCollector;
-struct hkpPhantom;
-struct hkpRigidBody;
 struct blob1
 {
     char b[1];
@@ -912,7 +820,6 @@ struct BSSegmentedTriShape;
 struct NiAVObject;
 struct NiAccumulator;
 struct NiCullingProcess;
-struct NiGeometry;
 struct NiLines;
 struct NiNode;
 struct NiParticles;
@@ -925,10 +832,6 @@ struct bhkLimitedHingeConstraint;
 struct bhkNiCollisionObject;
 struct bhkRigidBody;
 
-struct GO
-{
-    GO(int);
-};
 struct FUN_00a69400
 {
     FUN_00a69400(NiVisibleArray*);
@@ -1192,11 +1095,6 @@ void* StandIn::FUN_004a0490(unsigned int flags)
     return this;
 }
 
-struct BSCullingProcess
-{
-    void FUN_004a0f60();
-    void* FUN_004a0ff0(unsigned int flags);
-};
 void _Deallocate(void*);
 // Calls FUN_004a0f60, then deallocates this when flags has bit 0 set, and returns this.
 // @fnv 0x004a0ff0
@@ -1326,69 +1224,14 @@ unsigned int FUN_004a0330_shell::FUN_004a0330()
 }
 }  // namespace fnv_004a0330
 
-struct NiGeometryData
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-};
-struct NiGeometry
-{
-    NiGeometryData* FUN_005495f0();
-    void FUN_004a1ff0();
-};
-// Calls FUN_005495f0 to get the geometry data and then invokes its v42 method.
+// Calls GetModelData and invokes the triangle data normal operation.
 // @fnv 0x004a1ff0
-void NiGeometry::FUN_004a1ff0()
+void NiGeometry::CalculateNormals()
 {
-    FUN_005495f0()->v42();
+    static_cast<NiTriBasedGeomData*>(GetModelData())->vf42();
 }
 
 namespace fnv_004a2c00 {
-struct GO
-{
-    GO& operator=(void*);
-};
 
 struct FUN_004a2c00_shell
 {
@@ -1571,26 +1414,16 @@ FUN_004a0f60_cls::~FUN_004a0f60_cls()
 {}
 
 namespace CameraPass {
-struct Vec
-{
-    float x, y, z;
-    void FUN_006815c0();
-    void FUN_004a0c10();
-    void FUN_00439180(float);
-    Vec FUN_00439e90(const Vec&);
-    Vec FUN_004a0bd0();
-    Vec ApplyScaled(float);
-};
 struct Matrix
 {
     float xx, xy, xz, yx, yy, yz, zx, zy, zz;
     void FUN_006815c0();
     void FUN_004a0c90(float);
     Matrix FUN_0043f8d0(const Matrix&);
-    void FUN_00476930(int, Vec&);
-    void FUN_004769c0(int, const Vec&);
+    void FUN_00476930(int, NiPoint3&);
+    void FUN_004769c0(int, const NiPoint3&);
 };
-void FUN_00c4b600(Matrix*, Vec);
+void FUN_00c4b600(Matrix*, NiPoint3);
 struct Frustum
 {
     float left, right, top, bottom, nearValue, farValue;
@@ -1629,8 +1462,8 @@ struct Input
     char unk18, unk19, unk1a;
     bool alternate;
     Query* query;
-    Vec FUN_004a0d60();
-    Vec FUN_004a0d30();
+    NiPoint3 FUN_004a0d60();
+    NiPoint3 FUN_004a0d30();
     float FUN_004e3d00();
     float FUN_00507b20();
     float GetField11C();
@@ -1639,11 +1472,11 @@ struct Input
 };
 struct Scene
 {
-    void FUN_00440460(const Vec&);
+    void FUN_00440460(const NiPoint3&);
     void FUN_0043fa80(const Matrix&);
     void FUN_00a6faf0(const Frustum&);
     void FUN_00a59c60(Update*);
-    Vec FUN_0045bba0();
+    NiPoint3 FUN_0045bba0();
     void* FUN_004a0d10();
 };
 struct ScenePtr
@@ -1743,17 +1576,13 @@ struct Cull
 void FUN_00b6bee0(Scene*, Ref*, Cull*);
 void FUN_00b6c0d0(Scene*, Node*, int);
 void FUN_00b6b790();
-struct Setting
-{
-    bool* FUN_00408d60();
-};
 extern Setting DAT_011c5904;
 extern unsigned int DAT_011c57f4;
 extern float DAT_0101b268, DAT_0101e2bc, DAT_01018f5c;
 extern double DAT_01011590, DAT_0101e2c0;
 extern char DAT_0101e298, DAT_0101e274, DAT_0101e24c, DAT_0101e1f8;
 void FUN_005b5e40(const char*, ...);
-void* FUN_004b3890(const Vec&, const Color&, const Vec&, const Color&, int);
+void* FUN_004b3890(const NiPoint3&, const Color&, const NiPoint3&, const Color&, int);
 struct World
 {
     void FUN_00458e20(void*, float);
@@ -1770,20 +1599,18 @@ struct Camera
 // @fnv 0x004a04c0
 void Camera::UpdateCamera(Input* input)
 {
-    Vec directionSlot1Slot0 = input->FUN_004a0d60();
+    NiPoint3 directionSlot1Slot0 = input->FUN_004a0d60();
     directionSlot1Slot0.FUN_004a0c10();
     directionSlot1Slot0.FUN_00439180(DAT_0101b268);
-    Vec originSlot13 = input->FUN_004a0d30().FUN_00439e90(directionSlot1Slot0);
+    NiPoint3 originSlot13 = input->FUN_004a0d30().FUN_00439e90(directionSlot1Slot0);
     Matrix rotationSlot17Slot12;
     FUN_00c4b600(&rotationSlot17Slot12, directionSlot1Slot0.FUN_004a0bd0());
     Matrix scaleSlot22Slot0Slot10;
     scaleSlot22Slot0Slot10.FUN_006815c0();
     scaleSlot22Slot0Slot10.FUN_004a0c90(input->FUN_004e3d00());
     rotationSlot17Slot12 = scaleSlot22Slot0Slot10.FUN_0043f8d0(rotationSlot17Slot12);
-    Vec column0Slot30Slot0;
-    column0Slot30Slot0.FUN_006815c0();
-    Vec column1Slot41Slot18;
-    column1Slot41Slot18.FUN_006815c0();
+    NiPoint3 column0Slot30Slot0;
+    NiPoint3 column1Slot41Slot18;
     rotationSlot17Slot12.FUN_00476930(0, column0Slot30Slot0);
     rotationSlot17Slot12.FUN_00476930(1, column1Slot41Slot18);
     rotationSlot17Slot12.FUN_00476930(2, directionSlot1Slot0);
@@ -1792,10 +1619,8 @@ void Camera::UpdateCamera(Input* input)
     basisSlot28Slot36.FUN_004769c0(0, directionSlot1Slot0);
     basisSlot28Slot36.FUN_004769c0(1, column0Slot30Slot0);
     basisSlot28Slot36.FUN_004769c0(2, column1Slot41Slot18);
-    Vec startSlot14Slot30;
-    startSlot14Slot30.FUN_006815c0();
-    Vec endSlot11;
-    endSlot11.FUN_006815c0();
+    NiPoint3 startSlot14Slot30;
+    NiPoint3 endSlot11;
     float widthSlot15Slot25 = (input->FUN_00507b20() / DAT_01011590) * (1.0f / input->FUN_004a0330()->FUN_008d01e0());
     float heightSlot21 = (input->GetField11C() / DAT_01011590) * (1.0f / input->FUN_004a0330()->FUN_008d01e0());
     float farPlaneSlot12Slot43 = input->GetFloatAt120() + DAT_0101e2c0;
@@ -1823,7 +1648,7 @@ void Camera::UpdateCamera(Input* input)
     }
     if (*DAT_011c5904.FUN_00408d60())
     {
-        Vec look = scene.FUN_00559450()->FUN_0045bba0();
+        NiPoint3 look = scene.FUN_00559450()->FUN_0045bba0();
         FUN_005b5e40(&DAT_0101e298, input->FUN_004a0330()->FUN_00413f40()->FUN_0043b1b0());
         FUN_005b5e40(&DAT_0101e274, originSlot13.x, originSlot13.y, originSlot13.z);
         FUN_005b5e40(&DAT_0101e24c, look.x, look.y, look.z);
@@ -1851,10 +1676,6 @@ void Camera::UpdateCamera(Input* input)
 }
 }
 
-struct TESForm
-{
-    unsigned int GetFormType();
-};
 class Refr_C
 {
   public:
@@ -1877,8 +1698,7 @@ bool __cdecl IsAcousticSpaceFormTypeAllowed(Refr_C* apRef, int aiArg)
     return true;
 }
 
-extern "C" __declspec(dllimport) int __stdcall QueryPerformanceFrequency(__int64* apFrequency);
-extern "C" __declspec(dllimport) int __stdcall QueryPerformanceCounter(__int64* apCounter);
+// QueryPerformanceFrequency/QueryPerformanceCounter come from <windows.h> (read by include/TESFile.h)
 
 namespace DecalAdd {
 
@@ -2202,7 +2022,7 @@ struct DecalHitList
     ~DecalHitList();
     int FUN_0049c680(DecalNode** appNode, int aiFlags);
     void FUN_0076b660(DecalNode** appNode);
-    void RemoveAll();
+    void FUN_004ed900();
 };
 
 struct DecalEmitter
@@ -2292,9 +2112,9 @@ void DecalManager::AddGeometryDecal(DecalRequest* apRequest, int aiType, bool ab
             __int64 llTicks;
             if (*DAT_011c5884.FUN_00408d60())
             {
-                QueryPerformanceFrequency(&llFrequencyCount);
+                QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&llFrequencyCount));
                 dFrequency = llFrequencyCount * 1e-06;
-                QueryPerformanceCounter(&kStartNext.QuadPart);
+                QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&kStartNext.QuadPart));
             }
             if (FUN_004a19f0() >= fDistance || apRequest->bForce || abForce)
             {
@@ -2304,7 +2124,7 @@ void DecalManager::AddGeometryDecal(DecalRequest* apRequest, int aiType, bool ab
             }
             if (*DAT_011c5884.FUN_00408d60())
             {
-                QueryPerformanceCounter(&llEnd);
+                QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&llEnd));
                 llTicks = llEnd - kStartNext.QuadPart;
                 FUN_00406d00(acBuffer, 0xff, s_szTiming, llTicks, llTicks / dFrequency);
                 FUN_0040fbe0(acBuffer, 0);
@@ -2391,7 +2211,7 @@ void DecalManager::AddGeometryDecal(DecalRequest* apRequest, int aiType, bool ab
                     }
                 }
             }
-            kHits.RemoveAll();
+            kHits.FUN_004ed900();
         }
         break;
     }
@@ -2605,10 +2425,10 @@ bool XMgr::FUN_004a1a70(XRef* ref)
                     a5 = list->FUN_006815c0()->FUN_00559450();
                     b_ = a5;
                     list = list->FUN_00726070();
-                    NiPoint3 pt9;
-                    b_->FUN_004a0d30(pt9);
+                    float pt9[3];
+                    b_->FUN_004a0d30(*reinterpret_cast<NiPoint3*>(pt9));
                     float f9 = b_->FUN_00507b20();
-                    NiPoint3 v7 = ref->PtOp(pt9);
+                    NiPoint3 v7 = ref->PtOp(*reinterpret_cast<NiPoint3*>(pt9));
                     v7 = MultiplyComponents(v7, v7);
                     float qA;
                     if (ref->m38 > ref->m3c)
@@ -2768,7 +2588,8 @@ struct DArray
 struct DProp
 {
 };
-struct DList
+// Exe 0x004a2070: unit-local DList view; declarations and layout are preserved.
+struct BgsdecalmanagerDListView
 {
     void FUN_00631540(const DPtr&);
 };
@@ -2816,7 +2637,7 @@ struct DNode : DObj
     unsigned unka0;
     unsigned unka4;
     unsigned unka8;
-    DList* effects;
+    BgsdecalmanagerDListView* effects;
     unsigned unkb0;
     static void* operator new(unsigned);
     static void operator delete(void*, unsigned int);
@@ -3052,7 +2873,7 @@ bool DWork::FUN_004a2070(DArg* arg)
         return false;
     if (DAT_011c57e8 >= *DAT_011c5858.FUN_0043d4d0())
     {
-        if (*DAT_011c5904.GetLifeStateControlFlag())
+        if (*DAT_011c5904.FUN_00408d60())
             FUN_005b5e40("DECAL: Reached max skinned decals per frame. Ignoring decal.");
         return true;
     }
@@ -3109,7 +2930,7 @@ bool DWork::FUN_004a2070(DArg* arg)
                                 return true;
                         }
                         ++DAT_011c57e8;
-                        if (*DAT_011c5904.GetLifeStateControlFlag())
+                        if (*DAT_011c5904.FUN_00408d60())
                             FUN_005b5e40("DECAL: Skinned decal count this frame: #%d", DAT_011c57e8);
                         DPtr decal(new DEffect(arg->flags, DAT_011c5874.FUN_00450410(), arg, geometry, arg->origin,
                                                arg->normal, arg->scale, arg->rotation, arg->unk6c));
@@ -3123,7 +2944,7 @@ bool DWork::FUN_004a2070(DArg* arg)
                                 arg->skin->AssignFixedString(FUN_004a2c60());
                                 selected->Virtualdc((DObj*)arg->skin, true);
                                 ++DAT_011c57f0;
-                                if (*DAT_011c5904.GetLifeStateControlFlag())
+                                if (*DAT_011c5904.FUN_00408d60())
                                     FUN_005b5e40("DECAL: Placing Skin Decal #%d", DAT_011c57f0);
                             }
                             arg->skin->Virtualdc(decal.FUN_00559450()->Virtual98(true));

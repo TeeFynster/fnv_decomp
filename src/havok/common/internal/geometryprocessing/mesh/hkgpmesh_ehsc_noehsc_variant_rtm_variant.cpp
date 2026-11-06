@@ -1,3 +1,222 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+// Keep the intrinsic's scalar-only view: the SDK byte aliases change VC9's GS analysis.
+#ifndef _INCLUDED_MM2
+#define _INCLUDED_MM2
+// Exe 0x00e1ab00 FUN_00e1ab00: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+#endif
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkAabb.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkgpMesh_IConvexOverlap.h"
+#include "../../../../../../include/hkVector4.h"
+// LocalVecArray: unit-local copy of the former shared stand-in Vec. This unit uses it as a 12-byte {m_pData, m_iArrayLength, m_iCapacity} array header (the hkArray layout), not as a point.
+#include <xmmintrin.h>
+class Matrix;
+class Scalar;
+class Simd;
+class Tok;
+class Mask;
+class Elem;
+class Iter;
+class CIter;
+class CMutIter;
+class Mat3;
+class Mat4;
+class hkVector4;
+class hkQuaternion;
+
+class LocalVecArray
+{
+public:
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+        };
+        struct
+        {
+            void* m_pData;
+            int m_iArrayLength;
+            int m_iCapacity;
+        };
+    };
+
+    LocalVecArray();
+    LocalVecArray(float a, float b, float c);
+    // Keep the implicit copy constructor, copy assignment and destructor trivial.
+
+    void negative(const LocalVecArray& n);
+    void inv(const Matrix& m, const LocalVecArray& n);
+    void point(const Matrix& m, const LocalVecArray& b);
+    void difference(const LocalVecArray& a, const LocalVecArray& b);
+    Scalar dot(const LocalVecArray& n) const;
+    Scalar at(int i) const;
+    void set(float a, float b, float c, float d);
+
+    Simd lengthSquared() const;
+    void mul(const Simd& factor);
+    void SetProduct(const Simd& factor, const LocalVecArray& v);
+
+    void resize(unsigned n);
+    Tok& operator[](unsigned i);
+    void release(int elemSize);
+
+    LocalVecArray& operator-=(const LocalVecArray& v);
+    LocalVecArray& operator+=(const LocalVecArray& v);
+    LocalVecArray operator*(float scale) const;
+    LocalVecArray operator+(const LocalVecArray& v) const;
+    LocalVecArray operator-(const LocalVecArray& v) const;
+    float Squared() const;
+    float Length() const;
+    float Normalize();
+    float Dot(const LocalVecArray& v) const;
+    LocalVecArray Cross(const LocalVecArray& v) const;
+    LocalVecArray ApplyScaled(float scale);
+    LocalVecArray ApplyScaled(float scale) const;
+    void FUN_00acf580(unsigned n, Tok value);
+    LocalVecArray FUN_004a0bd0();
+    LocalVecArray FUN_004a0bd0() const;
+    LocalVecArray FUN_0053d1a0(const LocalVecArray& v);
+    LocalVecArray FUN_004b3800(const LocalVecArray& v);
+    LocalVecArray FUN_004b3800(const LocalVecArray& v) const;
+    LocalVecArray FUN_00439e90(const LocalVecArray& v);
+    LocalVecArray FUN_00439e90(const LocalVecArray& v) const;
+    LocalVecArray FUN_00439ef0(const LocalVecArray& v);
+    LocalVecArray FUN_00439ef0(const LocalVecArray& v) const;
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    void FUN_006815c0();
+    void FUN_00439180(float scale);
+    LocalVecArray& FUN_0063c8a0(const LocalVecArray& v);
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    void FUN_004b4db0(const float* values);
+    void FUN_00a38560();
+    void FUN_004f0180(void* value);
+
+    LocalVecArray& ScaleByInverse(float divisor);
+    float FUN_00457910();
+    LocalVecArray* FUN_006a6eb0();
+    bool FUN_004390c0(const LocalVecArray& v);
+
+    LocalM128 get() const;
+    void set(LocalM128 value);
+    void operator=(const LocalM128& value);
+    operator LocalM128() const;
+    LocalM128& getQuad();
+    const LocalM128& getQuad() const;
+    LocalM128& quad();
+    const LocalM128& quad() const;
+    float& operator()(int component);
+    const float& operator()(int component) const;
+    void setZero4();
+    void setSub4(const LocalVecArray& a, const LocalVecArray& b);
+    void setAdd4(const LocalVecArray& a, const LocalVecArray& b);
+    void setMul4(const LocalVecArray& a, const LocalVecArray& b);
+    void setMul4(const Scalar& a, const LocalVecArray& b);
+    void add4(const LocalVecArray& v);
+    void mul4(const LocalVecArray& v);
+    void mul4(const Scalar& value);
+    void add3clobberW(const LocalVecArray& v);
+    void sub3clobberW(const LocalVecArray& v);
+    void setBroadcast3clobberW(const LocalVecArray& v, int component);
+    Scalar horizontalAdd3() const;
+    void setCross(const LocalVecArray& a, const LocalVecArray& b);
+    Scalar dot3(const LocalVecArray& v) const;
+    Scalar lengthSquared3() const;
+    Scalar lengthInverse3() const;
+    void normalize3();
+    Scalar getSimdAt(int component) const;
+    void setInterpolate4(const LocalVecArray& a, const LocalVecArray& b, const Scalar& fraction);
+    void setAddMul4(const LocalVecArray& a, const LocalVecArray& b, const Scalar& scale);
+    void setNeg4(const LocalVecArray& v);
+    Mask compareLessThanZero4() const;
+    void SetRotatedDirection(const hkQuaternion& rotation, const LocalVecArray& direction);
+    void setRotatedTranslation(const hkQuaternion& rotation, const LocalVecArray& direction);
+    void cross(const LocalVecArray& a, const LocalVecArray& b);
+    Scalar squared() const;
+    Scalar inverseLength() const;
+    void normalize();
+    void negate(const LocalVecArray& v);
+
+    void FUN_00c7f640(const void* matrix, const hkVector4& point);
+    void FUN_00c7f640(Mat4* matrix, void* point);
+    void FUN_00c7f640(const void* matrix, const LocalVecArray* point);
+    void FUN_00c7f640(const void* matrix, const void* point);
+    void FUN_00c7f700(Mat3* matrix, void* point);
+    void FUN_00c7f700(const void* matrix, const LocalVecArray* point);
+    void FUN_00b12790();
+    void FUN_00b13040(LocalVecArray* out, const LocalVecArray* v);
+    LocalVecArray* ScaleSwizzled(LocalVecArray* out, float factor);
+    void AddVector(LocalVecArray* out, const LocalVecArray* v);
+    float Dot(const LocalVecArray& v);
+    LocalVecArray* FUN_004a3c90(const LocalVecArray* v);
+    LocalVecArray* FUN_0062b0a0(LocalVecArray* out, LocalVecArray* v);
+    LocalVecArray* FUN_0062af00(LocalVecArray* target);
+
+    void FUN_00cf7690(Elem* value);
+    void FUN_00b1e970();
+    Iter begin();
+    Iter end();
+    CIter FUN_00b33030(CIter first, CIter last);
+    void FUN_00b32120();
+    unsigned int size() const;
+    unsigned int capacity() const;
+    void FUN_00b2df90();
+    void FUN_00b2e140(Elem* first, Elem* last);
+    bool InitBuffer(unsigned int count);
+    Elem* _Ucopy(Elem* first, Elem* last, Elem* out);
+    LocalVecArray& FUN_00b2db10(const LocalVecArray& v);
+    CMutIter FUN_00aceb80(CMutIter first, CMutIter last);
+    void FUN_00acac40();
+    LocalVecArray& FUN_00ad61e0(const LocalVecArray& v);
+};
+#include "../../../../../../include/Vec4.h"
+extern "C" LocalM128 _mm_load_ps(const float* p);
+extern "C" void _mm_store_ps(float* p, LocalM128 a);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_mul_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_sub_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_div_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_sqrt_ss(LocalM128 a);
+extern "C" LocalM128 _mm_load_ss(const float* p);
+extern "C" LocalM128 _mm_set_ps1(float f);
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_min_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_max_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_set_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_load_ps1(const float*);
+extern "C" LocalM128 _mm_set_ps1(float);
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/BSAudio.h"
 // src/havok/common/internal/geometryprocessing/mesh/hkgpmesh_ehsc_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/geometryprocessing/mesh/hkgpmesh_ehsc_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -196,23 +415,10 @@ struct Allocator
     virtual void v0c();
     __declspec(nothrow) virtual void freeBlock(void*, int);
 };
-struct Router
-{
-    int unk00, unk04, unk08, unk0c;
-    Allocator* heap;
-    Allocator& getHeap()
-    {
-        return *heap;
-    }
-};
-__declspec(nothrow) Router& __cdecl FUN_00c85750();
-struct FourFloatVector
-{
-    float x, y, z, w;
-};
+__declspec(nothrow) hkMemoryRouter& __cdecl FUN_00c85750();
 struct VectorArray
 {
-    FourFloatVector* data;
+    hkVector4* data;
     int size;
     int capacity;
     VectorArray() : data(0), size(0), capacity(0x80000000)
@@ -245,9 +451,9 @@ struct FUN_00d76ca0
     }
     static void* operator new(unsigned int bytes)
     {
-        return allocate(FUN_00c85750().getHeap(), bytes);
+        return allocate(reinterpret_cast<Allocator&>(FUN_00c85750().heap()), bytes);
     }
-    __declspec(nothrow) void FUN_00d771c0(FourFloatVector*, int, const Options&);
+    __declspec(nothrow) void FUN_00d771c0(hkVector4*, int, const Options&);
     __declspec(nothrow) int FUN_00d74e10();
 };
 struct Hull
@@ -579,57 +785,6 @@ struct This
     Manager* FUN_00e23530();
     void PushFront(Node* volatile source);
 };
-struct S_00e25f00_Alloc
-{
-    virtual ~S_00e25f00_Alloc();
-    virtual void* AllocateMemoryBlock(int n);
-    virtual void ReleaseBlock(void* p, int n);
-    virtual void* AllocateBufferWithSize(int& n);
-    virtual void ReturnMemory(void* p, int n);
-};
-struct S_00e25f00_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00e25f00_Alloc* m_pStreamAllocator;
-    S_00e25f00_Alloc& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    static S_00e25f00_Router& GetMonitorStream();
-};
-template <typename T> struct S_00e25f00_Array
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline ~S_00e25f00_Array() throw()
-    {
-        _clearAndDeallocate(S_00e25f00_Router::GetMonitorStream().heap());
-    }
-
-    static __forceinline void destruct(T* p, int n) throw()
-    {
-        for (int i = 0; i < n; i++)
-            p[i].~T();
-    }
-    __forceinline void clear() throw()
-    {
-        destruct(m_data, m_iElementCount);
-        m_iElementCount = 0;
-    }
-    __forceinline void _clearAndDeallocate(S_00e25f00_Alloc& alloc) throw()
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
 struct S_00e25f00_Elem
 {
     int unk0;
@@ -638,7 +793,7 @@ struct S_00e25f00_Elem
 };
 struct S_00e25f00
 {
-    S_00e25f00_Array<S_00e25f00_Array<S_00e25f00_Elem> > m_arrays;
+    hkArray<hkArray<S_00e25f00_Elem> > m_arrays;
     int unkC;
     S_00e25f00* FUN_00e25f00(unsigned int flags);
 };
@@ -682,79 +837,6 @@ struct E25FB0Mesh
     void FUN_00e25cd0(E25FB0Edge* edge, const int* data);
     void ProcessItems(E25FB0Edge edge, const E25FB0Item* items);
 };
-// ---------------------------------------------------------------------------
-// hkgpMesh::IConvexOverlap - accessor for the hull the overlap was built for.
-//
-// The object is the Havok side of a convex hull overlap query.  It starts with
-// its virtual table, keeps the list of hull vertices at offset 0x14 and the
-// hkgpConvexHull the overlap belongs to at offset 0xe4.  The function simply
-// hands that hull back to the caller.
-// ---------------------------------------------------------------------------
-// The hull the overlap was built from (defined in the game side code).
-struct hkgpConvexHull;
-struct hkgpMesh_IConvexOverlap
-{
-    void** vftable;  // 0x00
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    void* pVertexList;  // 0x14  linked list of the hull vertices
-    int unk18;          // 0x18  number of vertices of the hull
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    void* pVertexList2;  // 0x2c
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    hkgpConvexHull* pConvexHull;  // 0xe4  the hull this overlap belongs to
-
-    hkgpConvexHull* FUN_00e114a0();
-};
 struct DataBlock_00e118e0
 {
     unsigned int unk00;
@@ -791,9 +873,10 @@ struct E12160Triangle
     E12160Vertex* m_kVertices[3];
 };
 bool __cdecl TriangleHasVertexAtPoint(const E12160Triangle* triangle, const float* point);
-struct ListNode
+// Exe 0x00e21e30: unit-local ListNode view; declarations and layout are preserved.
+struct HkgpmeshListNodeView
 {
-    ListNode* m_pNext;
+    HkgpmeshListNodeView* m_pNext;
     int unk04;
     int unk08;
     int unk0c;
@@ -821,7 +904,7 @@ struct FUN_00e12230_cls
     int unk20;
     int unk24;
     int unk28;
-    ListNode* m_pHead;
+    HkgpmeshListNodeView* m_pHead;
 
     void ReplaceValueInList(int oldValue, int newValue);
 };
@@ -1131,24 +1214,8 @@ struct FUN_00e22970_Item
 {
     int m_data[12];
 };
-struct FUN_00e22970_Cls
-{
-    FUN_00e22970_Item* m_pItems;
-    int m_uiItemCount;
-    int m_pRayCursor;
-
-    void AppendItems(void* apArg1, const FUN_00e22970_Item* apSrc, int aCount);
-};
-void __cdecl FUN_00c908c0(void* apArg1, FUN_00e22970_Cls* apThis, int aCapacity, int aElemSize);
+void __cdecl FUN_00c908c0(void* apArg1, hkArrayBase<FUN_00e22970_Item>* apThis, int aCapacity, int aElemSize);
 extern "C" void* __cdecl memcpy(void* apDst, const void* apSrc, unsigned int aCount);
-struct FUN_00e229f0_cls
-{
-    int* m_data;
-    int m_uiItemCount;
-    unsigned int m_capBits;
-
-    void AppendInts(int a1, int* a2, int a3);
-};
 void __cdecl FUN_00c908c0(int a1, void* self, int newCap, int elemSize);
 struct FUN_00e22c80_cls
 {
@@ -2039,22 +2106,6 @@ class CC0280Writer
 
     CC0280Writer& WriteInt(int iValue);
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 struct BSAudio;
 namespace fnvc_adapt {
 BSAudio* __cdecl FUN_00c85750();
@@ -2141,26 +2192,11 @@ struct FUN_00e18a50_cls
 };
 // Havok ray/plane-triangle cast step: intersect the cast ray with the triangle's plane, test the hit point
 // against the triangle, and keep the closest hit fraction.
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-} __m128;
-extern "C" __m128 _mm_load_ps(const float* p);
-extern "C" void _mm_store_ps(float* p, __m128 a);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_sub_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_div_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern __m128 DAT_010c7160;
+extern LocalM128 DAT_010c7160;
 // constant vector (zero)
 extern float DAT_010c8440;
 // point-in-triangle tolerance (-FLT_EPSILON)
-typedef __m128 SimdReal;
-static inline float ToReal(SimdReal v)
+static inline float ToReal(LocalM128 v)
 {
     float f;
     _mm_store_ss(&f, v);
@@ -2169,11 +2205,11 @@ static inline float ToReal(SimdReal v)
 struct __declspec(align(16)) Vec4f
 {
     float v[4];
-    __m128 Get() const
+    LocalM128 Get() const
     {
         return _mm_load_ps(v);
     }
-    void Set(__m128 q)
+    void Set(LocalM128 q)
     {
         _mm_store_ps(v, q);
     }
@@ -2206,16 +2242,16 @@ struct CastBody
     CastTri* m_tri;
 };
 bool __cdecl FUN_00dea6b0(const Vec4f* pkPoint, const Vec4f& kA, const Vec4f& kB, const Vec4f& kC, float fTolerance);
-static inline SimdReal Dot3(__m128 a, __m128 b)
+static inline LocalM128 Dot3(LocalM128 a, LocalM128 b)
 {
-    const __m128 m = _mm_mul_ps(a, b);
+    const LocalM128 m = _mm_mul_ps(a, b);
     return _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m));
 }
-static inline SimdReal Dot4xyz1(__m128 a, __m128 b)
+static inline LocalM128 Dot4xyz1(LocalM128 a, LocalM128 b)
 {
-    const __m128 m = _mm_mul_ps(a, b);
-    const __m128 zw = _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_shuffle_ps(a, a, 0xff));
-    const __m128 xy = _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m);
+    const LocalM128 m = _mm_mul_ps(a, b);
+    const LocalM128 zw = _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_shuffle_ps(a, a, 0xff));
+    const LocalM128 xy = _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m);
     return _mm_add_ps(zw, xy);
 }
 struct TriRayCaster
@@ -2244,8 +2280,8 @@ struct SceneBone
     unsigned int unk08;
     unsigned int unk0c;
     SceneVec m_10;
-    __m128 m_20;
-    __m128 m_30;
+    LocalM128 m_20;
+    LocalM128 m_30;
 };
 struct SceneSet
 {
@@ -2284,22 +2320,13 @@ struct S_00e11910_Cls
     char FUN_00e11710(float* a, float* b, float* c, S_Vec* out, int normalize);
     char FUN_00e11910(S_00e11910_Src* self);
 };
-struct E11B00Vector4
-{
-    __m128 m_vComponents;
-
-    void mul4(const E11B00Vector4& v)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
-    }
-};
 struct E11B00Vertex
 {
     E11B00Vertex* m_next;
     int unk04;
     int unk08;
     int unk0C;
-    E11B00Vector4 m_vContactPosition;
+    hkVector4 m_vContactPosition;
 };
 struct E11B00Hull
 {
@@ -2312,25 +2339,7 @@ struct E11B00Hull
 
     void updateFaces();
     static void updateStatistics();
-    void FUN_00e11b00(const E11B00Vector4& scale);
-};
-__declspec(align(16)) struct S_00e12260_Vector4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-    S_00e12260_Vector4()
-    {}
-    void operator=(const S_00e12260_Vector4& v)
-    {
-        reinterpret_cast<__m128&>(*this) = reinterpret_cast<const __m128&>(v);
-    }
-};
-struct S_00e12260_Aabb
-{
-    S_00e12260_Vector4 m_kMinimumCorner;
-    S_00e12260_Vector4 m_kMaximumCorner;
+    void FUN_00e11b00(const hkVector4& scale);
 };
 struct S_00e12260_CollectorBase
 {
@@ -2341,8 +2350,8 @@ struct S_00e12260_CollectorBase
 };
 struct S_00e12260_Collector : S_00e12260_CollectorBase
 {
-    S_00e12260_Vector4 m_verts[3];
-    S_00e12260_Collector(const S_00e12260_Vector4& a, const S_00e12260_Vector4& b, const S_00e12260_Vector4& c)
+    hkVector4 m_verts[3];
+    S_00e12260_Collector(const hkVector4& a, const hkVector4& b, const hkVector4& c)
     {
         m_uiItemCount = 0;
         m_verts[0] = a;
@@ -2351,8 +2360,8 @@ struct S_00e12260_Collector : S_00e12260_CollectorBase
     }
     virtual void AddHit(int hit);
 };
-void FUN_00cbeb70(const S_00e12260_Vector4* verts, int numVerts, S_00e12260_Aabb& aabbOut);
-void FUN_00d1d570(void* tree, const S_00e12260_Aabb& aabb, S_00e12260_Collector* collector);
+void FUN_00cbeb70(const hkVector4* verts, int numVerts, hkAabb& aabbOut);
+void FUN_00d1d570(void* tree, const hkAabb& aabb, S_00e12260_Collector* collector);
 struct S_00e12260
 {
     int unk00;
@@ -2372,7 +2381,7 @@ struct S_00e12260
     int unk38;
     int unk3C;
     int unk40;
-    int FUN_00e12260(const S_00e12260_Vector4& a, const S_00e12260_Vector4& b, const S_00e12260_Vector4& c);
+    int FUN_00e12260(const hkVector4& a, const hkVector4& b, const hkVector4& c);
 };
 struct S_00e13660_Res
 {
@@ -2402,7 +2411,7 @@ struct S_00e13660_Res
 struct FUN_00e13660_cls
 {
     void FUN_00e13210(unsigned int a1, S_00e13660_Res* out);
-    float FUN_00e13660(unsigned int a1, __m128* out, bool* flag);
+    float FUN_00e13660(unsigned int a1, LocalM128* out, bool* flag);
 };
 typedef unsigned int HullU32;
 struct HullTriAN
@@ -2470,7 +2479,7 @@ struct WeightedVertex
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
-    __m128 position;
+    LocalM128 position;
 };
 struct VertexTriple
 {
@@ -2484,23 +2493,19 @@ struct FUN_00e21ed0_Class
 {
     unsigned int unk00;
     VertexTriple* vertices;
-    void SelectDominantVertex(const __m128* direction, __m128* output);
+    void SelectDominantVertex(const LocalM128* direction, LocalM128* output);
 };
-static __forceinline __m128 Dot3(__m128 product)
+static __forceinline LocalM128 Dot3(LocalM128 product)
 {
-    __m128 xy = _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product);
+    LocalM128 xy = _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product);
     return _mm_add_ss(_mm_shuffle_ps(product, product, 0xaa), xy);
 }
-static __forceinline float Scalar(__m128 value)
+static __forceinline float Scalar(LocalM128 value)
 {
     float result;
     _mm_store_ss(&result, value);
     return result;
 }
-struct Vec4
-{
-    __m128 m_vComponents;
-};
 struct __declspec(align(16)) Float4
 {
     float x;
@@ -2603,7 +2608,6 @@ struct FUN_00e22f90_cls
     ArrAB<PoolBlockAB*> m_kBlocks;
     void FUN_00e22f90(PoolItemAB* item);
 };
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
 extern int DAT_010eade0;
 struct FUN_00e121c0_probe
 {
@@ -2625,7 +2629,7 @@ struct FUN_00e121c0_probe
 void __cdecl FUN_00d1d0b0(void* owner, const void* a, const void* b, FUN_00e121c0_probe* out, float f);
 struct FUN_00e121c0_cls
 {
-    float FUN_00e121c0(const __m128* a, const __m128* b, int* outI);
+    float FUN_00e121c0(const LocalM128* a, const LocalM128* b, int* outI);
 };
 inline const S_00e13910_Edge& nullMeshEdge()
 {
@@ -2687,69 +2691,9 @@ struct EdgeMesh
 
     bool UnbindEdgePair(S_00e13910_Edge a, S_00e13910_Edge b);
 };
-class hkMemoryAllocatorE15
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void* AllocateBufferWithSize(int& iReqNumBytesInOut);
-    virtual void ReturnMemory(void* pvData, int iNumBytes);
-};
-struct hkMemoryRouterE15
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorE15* m_pStreamAllocator;
-};
-hkMemoryRouterE15* __cdecl GetMemoryRouterE15() throw();
-void __cdecl ReserveMoreE15(hkMemoryAllocatorE15* pkHeap, void* pkArray, int iElemSize);
-template <typename T> inline void ConstructWithCopyE15(T* pDst, int iCount, const T& kItem)
-{
-    for (int i = 0; i < iCount; ++i)
-        pDst[i] = kItem;
-}
-template <typename T> struct hkArrayE15
-{
-    hkArrayE15() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    ~hkArrayE15()
-    {
-        hkMemoryRouterE15* pkRouter = GetMemoryRouterE15();
-        hkMemoryAllocatorE15* pkHeap = pkRouter->m_pStreamAllocator;
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            pkHeap->ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-    }
-    void AddBack(const T& kItem)
-    {
-        hkMemoryRouterE15* pkRouter = GetMemoryRouterE15();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ReserveMoreE15(pkRouter->m_pStreamAllocator, this, sizeof(T));
-        ConstructWithCopyE15(m_data + m_iElementCount, 1, kItem);
-        m_iElementCount++;
-    }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-struct __declspec(align(16)) hkVector4E15
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct hkAabbE15
-{
-    hkVector4E15 m_kMinimumCorner;
-    hkVector4E15 m_kMaximumCorner;
-};
 struct TriangleE15
 {
-    hkVector4E15 m_kVertices[3];
+    hkVector4 m_kVertices[3];
 };
 struct VertexE15
 {
@@ -2757,7 +2701,7 @@ struct VertexE15
     int unk04;
     int unk08;
     int unk0C;
-    hkVector4E15 m_vContactPosition;
+    hkVector4 m_vContactPosition;
 };
 struct TriangleEntryE15
 {
@@ -2765,23 +2709,23 @@ struct TriangleEntryE15
     int unk04;
     VertexE15* m_pkVertices[3];
 };
-void __cdecl CalcAabbE15(const hkVector4E15* pkPoints, int iNumPoints, hkAabbE15& kAabbOut);
+void __cdecl CalcAabbE15(const hkVector4* pkPoints, int iNumPoints, hkAabb& kAabbOut);
 int __cdecl TrianglesOverlapE15(const TriangleE15* pkA, const TriangleE15* pkB);
 class AabbCollectorE15
 {
   public:
     virtual void AddHit(TriangleEntryE15* pkEntry);
-    hkArrayE15<TriangleEntryE15*> m_kHits;
+    hkArray<TriangleEntryE15*> m_kHits;
 };
 struct BroadPhaseE15
 {
 };
-void __cdecl QueryAabbE15(BroadPhaseE15* pkBroadPhase, const hkAabbE15& kAabb, AabbCollectorE15* pkCollector);
+void __cdecl QueryAabbE15(BroadPhaseE15* pkBroadPhase, const hkAabb& kAabb, AabbCollectorE15* pkCollector);
 class TriangleQueryE15
 {
   public:
-    void FUN_00e15220(const hkVector4E15& kA, const hkVector4E15& kB, const hkVector4E15& kC,
-                      hkArrayE15<TriangleEntryE15*>* pkOverlapsOut) throw();
+    void FUN_00e15220(const hkVector4& kA, const hkVector4& kB, const hkVector4& kC,
+                      hkArray<TriangleEntryE15*>* pkOverlapsOut) throw();
     int unk00;
     int unk04;
     int unk08;
@@ -2800,10 +2744,6 @@ class TriangleQueryE15
     int unk3C;
     BroadPhaseE15 m_kBroadPhase;
 };
-struct hkVector4
-{
-    __m128 v;
-};
 struct FUN_00e21d40_cls
 {
     unsigned int unk00;
@@ -2815,10 +2755,10 @@ struct FUN_00e21d40_cls
 
     void FUN_00e21d40(const hkVector4* dir, hkVector4* out);
 };
-static float DotProduct3(__m128 a, __m128 b)
+static float DotProduct3(LocalM128 a, LocalM128 b)
 {
-    __m128 p = _mm_mul_ps(a, b);
-    __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    LocalM128 p = _mm_mul_ps(a, b);
+    LocalM128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
     s = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
     float r;
     _mm_store_ss(&r, s);
@@ -2870,29 +2810,13 @@ struct T27Cls
     void FUN_00e27450(T27Edge* path);
     unsigned __int64 FUN_00e27ae0(T27Edge edge, T27Item* items);
 };
-struct __declspec(align(16)) S_00e11a90_Vec
-{
-    int x;
-    int y;
-    int z;
-    int w;
-};
-struct FUN_00c7f640_Obj
-{
-    int x;
-    int y;
-    int z;
-    int w;
-
-    void __thiscall FUN_00c7f640(int value, S_00e11a90_Vec* data);
-};
 struct S_00e11a90_Node
 {
     S_00e11a90_Node* next;
     int unk04;
     int unk08;
     int unk0C;
-    FUN_00c7f640_Obj vec;
+    hkVector4 vec;
 };
 struct S_00e11a90_Class
 {
@@ -2907,12 +2831,10 @@ struct S_00e11a90_Class
     void __thiscall FUN_00e11a90(int value);
 };
 __declspec(nothrow) void ReleaseSubobject();
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_sqrt_ss(__m128 a);
 struct S_00e12360_Vtx
 {
     int unk00, unk04, unk08, unk0c;
-    __m128 pos;
+    LocalM128 pos;
 };
 struct S_00e12360_Node
 {
@@ -2930,13 +2852,13 @@ struct S_00e12360_Mesh
 };
 __forceinline float S_00e12360_Len(const S_00e12360_Node* n)
 {
-    __m128 a = n->v0->pos;
-    __m128 e1 = _mm_sub_ps(n->v1->pos, a);
-    __m128 e2 = _mm_sub_ps(n->v2->pos, a);
-    __m128 c = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(e2, e2, 0xd2), _mm_shuffle_ps(e1, e1, 0xc9)),
+    LocalM128 a = n->v0->pos;
+    LocalM128 e1 = _mm_sub_ps(n->v1->pos, a);
+    LocalM128 e2 = _mm_sub_ps(n->v2->pos, a);
+    LocalM128 c = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(e2, e2, 0xd2), _mm_shuffle_ps(e1, e1, 0xc9)),
                           _mm_mul_ps(_mm_shuffle_ps(e2, e2, 0xc9), _mm_shuffle_ps(e1, e1, 0xd2)));
-    __m128 sq = _mm_mul_ps(c, c);
-    __m128 d = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
+    LocalM128 sq = _mm_mul_ps(c, c);
+    LocalM128 d = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
     float r;
     _mm_store_ss(&r, _mm_sqrt_ss(d));
     return r;
@@ -2987,9 +2909,9 @@ inline void HullFloodStack::release(Allocator& heap)
 }
 inline void HullFloodStack::AddBack(const HullFloodEdge& edge)
 {
-    Router& mgr = FUN_00c85750();
+    hkMemoryRouter& mgr = FUN_00c85750();
     if (m_iElementCount == (int)(m_cap & 0x3fffffff))
-        ResizeAudioStream(mgr.heap, this, sizeof(HullFloodEdge));
+        ResizeAudioStream(mgr.m_heap, this, sizeof(HullFloodEdge));
     ::new (static_cast<void*>(m_data + m_iElementCount)) HullFloodEdge(edge);
     m_iElementCount++;
 }
@@ -3055,39 +2977,6 @@ struct Edge
     }
 };
 void __cdecl ResizeAudioStream(void*, void*, int);
-template <typename T> struct hkArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArray() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    void ClearAndRelease()
-    {
-        Allocator& heap = FUN_00c85750().getHeap();
-        int cap = m_iCapacityState;
-        m_iElementCount = 0;
-        if ((cap & 0x80000000) == 0)
-            heap.freeBlock(m_data, (cap & 0x3fffffff) * sizeof(T));
-    }
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    void AddBack(const T& t)
-    {
-        Router& router = FUN_00c85750();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(router.heap, this, sizeof(T));
-        m_data[m_iElementCount] = t;
-        m_iElementCount++;
-    }
-};
 struct VertexList
 {
     int unk00;
@@ -3124,29 +3013,15 @@ struct HullMesh
 
     void FUN_00e12bc0(Vertex* from, Vertex* to);
 };
-extern "C" __m128 _mm_load_ss(const float* p);
-extern "C" __m128 _mm_set_ps1(float f);
 extern const float DAT_0104a494;
 extern float DAT_0106c2e0;
-struct S_00e14160_Vec
-{
-    float x, y, z, w;
-    __m128& quad()
-    {
-        return reinterpret_cast<__m128&>(*this);
-    }
-    const __m128& quad() const
-    {
-        return reinterpret_cast<const __m128&>(*this);
-    }
-};
 struct S_00e14160_Node
 {
     S_00e14160_Node* m_next;
     int unk04;
     int unk08;
     int unk0c;
-    S_00e14160_Vec m_pos;
+    hkVector4 m_pos;
 };
 struct S_00e14160_Tri
 {
@@ -3171,53 +3046,21 @@ struct S_00e14160
     int unk28;
     S_00e14160_Tri* m_tris;
 
-    float FUN_00e13660(const S_00e14160_Vec& p, S_00e14160_Vec* out, int flag);
-    float FUN_00e14160(const S_00e14160_Vec& dir, float limit);
+    float FUN_00e13660(const hkVector4& p, hkVector4* out, int flag);
+    float FUN_00e14160(const hkVector4& dir, float limit);
 };
-static __forceinline __m128 S_dot3(__m128 a, __m128 b)
+static __forceinline LocalM128 S_dot3(LocalM128 a, LocalM128 b)
 {
-    __m128 t = _mm_mul_ps(a, b);
-    __m128 s = _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t);
+    LocalM128 t = _mm_mul_ps(a, b);
+    LocalM128 s = _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t);
     return _mm_add_ss(_mm_shuffle_ps(t, t, 0xaa), s);
 }
-extern "C" __m128 _mm_setzero_ps(void);
-struct E142Vec
-{
-    float x, y, z, w;
-};
-struct __declspec(align(16)) E142Vector4
-{
-    float x, y, z, w;
-    __m128& quad()
-    {
-        return *(__m128*)this;
-    }
-    const __m128& quad() const
-    {
-        return *(const __m128*)this;
-    }
-    void operator=(const E142Vector4& v)
-    {
-        quad() = v.quad();
-    }
-    __m128 dot3(const E142Vec& v) const
-    {
-        __m128 prod = _mm_mul_ps(quad(), *(const __m128*)&v);
-        return _mm_add_ss(_mm_shuffle_ps(prod, prod, 0xaa), _mm_add_ss(_mm_shuffle_ps(prod, prod, 0x55), prod));
-    }
-};
 struct E142Hull
 {
-    const E142Vec* FUN_00d75600();
+    const hkVector4* FUN_00d75600();
 };
-void __cdecl FUN_00de9650(const E142Vector4* in, E142Vector4* out);
-struct E142Obj
-{
-    E142Hull* FUN_00e114a0();
-    float FUN_00e14160(const E142Vector4& dir, float bound);
-    float FUN_00e142d0(E142Vector4& out);
-};
-static inline float E142ToReal(__m128 v)
+void __cdecl FUN_00de9650(const hkVector4* in, hkVector4* out);
+static inline float E142ToReal(LocalM128 v)
 {
     float f;
     _mm_store_ss(&f, v);
@@ -3282,12 +3125,11 @@ template <class T> __forceinline void SwapVertices(T& a, T& b)
     a = b;
     b = temp;
 }
-extern "C" __m128 _mm_load_ss(const float*);
 extern float DAT_01012054;
 void __cdecl ResizeAudioStream(void* alloc, void* sizePtr, int elemSize) throw();
 struct EdgeNode : S_00e13910_Triangle
 {
-    __m128 m_20;
+    LocalM128 m_20;
     int m_30;
 };
 typedef S_00e13910_Edge PairItem;
@@ -3359,67 +3201,14 @@ struct EdgeMeshFlip
     void FUN_00e124d0(PairArray* arr);
     void FUN_00e150e0(int a1);
 };
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
 void __cdecl ResizeAudioStream(void* alloc, void* array, int elemSize);
-struct E153F0Vector4
-{
-    __m128 m_vComponents;
-
-    E153F0Vector4& operator=(const E153F0Vector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
-};
-template <class T> __forceinline void E153F0ConstructWithCopy(T* p, int n, const T& t)
-{
-    for (int i = 0; i < n; i++)
-        p[i] = t;
-}
-struct E153F0Points
-{
-    E153F0Vector4* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    E153F0Points() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void reserve(int n)
-    {
-        Allocator& alloc = FUN_00c85750().getHeap();
-        int cap = getCapacity();
-        if (cap < n)
-        {
-            int newCap = 2 * cap;
-            FUN_00c908c0((int)&alloc, this, n < newCap ? newCap : n, sizeof(E153F0Vector4));
-        }
-    }
-    void AddBack(const E153F0Vector4& t)
-    {
-        Allocator& alloc = FUN_00c85750().getHeap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&alloc, this, sizeof(E153F0Vector4));
-        E153F0ConstructWithCopy(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-    void ClearAndRelease(Allocator& alloc)
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.freeBlock(m_data, getCapacity() * sizeof(E153F0Vector4));
-    }
-};
 struct E153F0Vertex
 {
     int unk00;
     int unk04;
     int unk08;
     int unk0c;
-    E153F0Vector4 m_vContactPosition;
+    hkVector4 m_vContactPosition;
 };
 struct E153F0Edge
 {
@@ -3430,11 +3219,11 @@ struct E153F0Edge
     {
         return (9 >> (i << 1)) & 3;
     }
-    const E153F0Vector4& start() const
+    const hkVector4& start() const
     {
         return ((E153F0Vertex*)m_face->m_kVertices[m_uiEdgeIndex])->m_vContactPosition;
     }
-    const E153F0Vector4& end() const
+    const hkVector4& end() const
     {
         return ((E153F0Vertex*)m_face->m_kVertices[next(m_uiEdgeIndex)])->m_vContactPosition;
     }
@@ -3444,29 +3233,15 @@ struct E153F0Edges
     E153F0Edge* m_data;
     int m_iElementCount;
 };
-struct E153F0Aabb
-{
-    E153F0Vector4 m_kMinimumCorner;
-    E153F0Vector4 m_kMaximumCorner;
-};
 float __cdecl FUN_00e153f0(const E153F0Edges* edges);
-struct __declspec(align(16)) VecE21F
-{
-    float x, y, z, w;
-};
-struct __declspec(align(16)) AabbE21F
-{
-    VecE21F m_kMinimumCorner;
-    VecE21F m_kMaximumCorner;
-};
-void __cdecl FUN_00cbeb70(const VecE21F* pElementBuffer, int iNumPoints, AabbE21F& kAabbOut);
+void __cdecl FUN_00cbeb70(const hkVector4* pElementBuffer, int iNumPoints, hkAabb& kAabbOut);
 struct VertE21F
 {
     int unk;
     int unkCur;
     int unkValue;
     int unk0c;
-    VecE21F m_pos;
+    hkVector4 m_pos;
 };
 struct TriE21F
 {
@@ -3480,7 +3255,7 @@ class FUN_00e21fc0_cls
     int unk;
     TriE21F* m_tri;
 
-    AabbE21F FUN_00e21fc0() const;
+    hkAabb FUN_00e21fc0() const;
 };
 struct FUN_00e226b0_cls
 {
@@ -3490,10 +3265,10 @@ struct FUN_00e226b0_cls
 };
 static __forceinline float SceneDot3(const SceneVec* a, const SceneVec* b)
 {
-    __m128 p = _mm_load_ps(&a->x);
-    p = _mm_mul_ps(p, *(__m128*)b);
-    __m128 yx = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
-    __m128 r = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), yx);
+    LocalM128 p = _mm_load_ps(&a->x);
+    p = _mm_mul_ps(p, *(LocalM128*)b);
+    LocalM128 yx = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    LocalM128 r = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), yx);
     float f;
     _mm_store_ss(&f, r);
     return f;
@@ -3505,19 +3280,17 @@ static __forceinline void SceneCopyBone(volatile SceneVec* dst, const SceneBone*
     *(volatile unsigned int*)&dst->z = *(const unsigned int*)&b->m_10.z;
     *(volatile unsigned int*)&dst->w = *(const unsigned int*)&b->m_10.w;
 }
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_sqrt_ss(__m128 a);
 struct TriAreaGreater
 {
     int unk00;
-    static __forceinline __m128 area(const CastTri* t)
+    static __forceinline LocalM128 area(const CastTri* t)
     {
         const Vec4f& a = t->GetVertex(0);
         const Vec4f& b = t->GetVertex(1);
         const Vec4f& c = t->GetVertex(2);
-        const __m128 e1 = _mm_sub_ps(b.Get(), a.Get());
-        const __m128 e2 = _mm_sub_ps(c.Get(), a.Get());
-        const __m128 cross = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(e1, e1, 0xc9), _mm_shuffle_ps(e2, e2, 0xd2)),
+        const LocalM128 e1 = _mm_sub_ps(b.Get(), a.Get());
+        const LocalM128 e2 = _mm_sub_ps(c.Get(), a.Get());
+        const LocalM128 cross = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(e1, e1, 0xc9), _mm_shuffle_ps(e2, e2, 0xd2)),
                                         _mm_mul_ps(_mm_shuffle_ps(e2, e2, 0xc9), _mm_shuffle_ps(e1, e1, 0xd2)));
         return _mm_sqrt_ss(Dot3(cross, cross));
     }
@@ -3534,14 +3307,6 @@ struct MemAllocator
     virtual void v08();
     virtual void v0C();
     virtual void Free(void* p, unsigned int size);
-};
-struct BSAudio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    MemAllocator* m_pAllocator;
 };
 // 12-byte slot; flags word: element count in low 30 bits, bit 31 = no buffer.
 struct FUN_00e25ba0_Slot
@@ -3713,7 +3478,7 @@ struct FUN_00e25ba0_cls
 };
 struct HkV4
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 struct HkVert
 {
@@ -3735,22 +3500,21 @@ struct __declspec(align(16)) Mat3Diffs
     Vec4F m_d0;
     Vec4F m_d1;
     Vec4F m_d2;
-    __forceinline Mat3Diffs(__m128 a, __m128 b, __m128 c)
+    __forceinline Mat3Diffs(LocalM128 a, LocalM128 b, LocalM128 c)
     {
         _mm_store_ps(&m_d0.m_uiX, a);
         _mm_store_ps(&m_d1.m_uiX, b);
         _mm_store_ps(&m_d2.m_uiX, c);
     }
-    __m128* FUN_00cd51c0(Vec4F* out);
+    LocalM128* FUN_00cd51c0(Vec4F* out);
 };
 float __cdecl FUN_00e13870(char* self, unsigned int idx);
 // FUN_00e144d0 : thiscall, float x, __m128* a, __m128* out, int count
 // Clamped-distance accumulation with a dot3 weighted correction.
-extern "C" __m128 _mm_load_ss(const float*);
 struct CollideShape
 {
-    double FUN_00e13660(__m128* out, const __m128* v, unsigned char* flag);
-    float FUN_00e144d0(float x, __m128* a, __m128* out, int count);
+    double FUN_00e13660(LocalM128* out, const LocalM128* v, unsigned char* flag);
+    float FUN_00e144d0(float x, LocalM128* a, LocalM128* out, int count);
 };
 struct __declspec(align(16)) Float4Bits
 {
@@ -3759,39 +3523,33 @@ struct __declspec(align(16)) Float4Bits
     unsigned int z;
     unsigned int w;
 };
-extern "C" __m128 _mm_min_ps(__m128, __m128);
-extern "C" __m128 _mm_max_ps(__m128, __m128);
-extern "C" __m128 _mm_set_ps(float, float, float, float);
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_unpacklo_ps(__m128, __m128);
-extern __m128 DAT_010c71d0;
+extern LocalM128 DAT_010c71d0;
 extern const float DAT_01011d78;
 void __cdecl ResizeAudioStream(void*, void*, int) throw();
 struct __declspec(align(16)) CellVec
 {
     float x, y, z, w;
-    __m128& quad()
+    LocalM128& quad()
     {
-        return reinterpret_cast<__m128&>(*this);
+        return reinterpret_cast<LocalM128&>(*this);
     }
-    const __m128& quad() const
+    const LocalM128& quad() const
     {
-        return reinterpret_cast<const __m128&>(*this);
+        return reinterpret_cast<const LocalM128&>(*this);
     }
 };
 struct CellBounds
 {
     CellVec min, max;
 };
-static __forceinline __m128 CellCorner(const float& x, const float& y, const float& z)
+static __forceinline LocalM128 CellCorner(const float& x, const float& y, const float& z)
 {
     return _mm_setr_ps(x, y, z, DAT_01011d78);
 }
 void __cdecl FUN_00de9590(CellBounds*) throw();
 struct BuildInput
 {
-    FourFloatVector* data;
+    hkVector4* data;
     int count, stride;
 };
 struct BuildOptions
@@ -3828,16 +3586,16 @@ template <class T> struct CellArray
     {}
     __forceinline T& expand() throw()
     {
-        Router& router = FUN_00c85750();
+        hkMemoryRouter& router = FUN_00c85750();
         if (size == (capacity & 0x3fffffff))
-            ResizeAudioStream(router.heap, this, sizeof(T));
+            ResizeAudioStream(router.m_heap, this, sizeof(T));
         return data[size++];
     }
     __forceinline void push(const T& value) throw()
     {
-        Router& router = FUN_00c85750();
+        hkMemoryRouter& router = FUN_00c85750();
         if (size == (capacity & 0x3fffffff))
-            ResizeAudioStream(router.heap, this, sizeof(T));
+            ResizeAudioStream(router.m_heap, this, sizeof(T));
         T* p = data + size;
         if (p)
             new (p) T(value);
@@ -3845,16 +3603,16 @@ template <class T> struct CellArray
     }
     __forceinline void pushVector(const T& value) throw()
     {
-        Router& router = FUN_00c85750();
+        hkMemoryRouter& router = FUN_00c85750();
         if (size == (capacity & 0x3fffffff))
-            ResizeAudioStream(router.heap, this, sizeof(T));
+            ResizeAudioStream(router.m_heap, this, sizeof(T));
         T* p = data + size;
         CellConstruct(p, 1, value);
         ++size;
     }
     __forceinline void release() throw()
     {
-        Allocator& heap = FUN_00c85750().getHeap();
+        Allocator& heap = reinterpret_cast<Allocator&>(FUN_00c85750().getHeap());
         int cap = capacity;
         size = 0;
         if (!(cap & 0x80000000))
@@ -3865,24 +3623,23 @@ template <class T> struct CellArray
 };
 struct CellMesh
 {
-    void FUN_00e12640(CellArray<FourFloatVector>&) throw();
+    void FUN_00e12640(CellArray<hkVector4>&) throw();
     CellBounds FUN_00e11530() throw();
     float FUN_00e13660(const CellVec&, CellVec*, bool*) throw();
     void CollectPoints(int depthLimit, float scale, CellArray<CellVec>& output, bool invert);
 };
 struct FUN_00e21dd0_cls
 {
-    __m128 unk00;
-    __m128 unk10;
-    __m128 unk20;
-    void FUN_00e21dd0(__m128* result);
+    LocalM128 unk00;
+    LocalM128 unk10;
+    LocalM128 unk20;
+    void FUN_00e21dd0(LocalM128* result);
 };
-extern "C" __m128 _mm_load_ss(const float* p);
 extern float DAT_01016248;
 struct FUN_00e21e60_pair
 {
-    __m128 m_v00;
-    __m128 m_v10;
+    LocalM128 m_v00;
+    LocalM128 m_v10;
     unsigned int m_u20;
 };
 struct FUN_00e21e60_cls
@@ -3891,7 +3648,7 @@ struct FUN_00e21e60_cls
     float unk04;
     float unk08;
     float unk0C;
-    __m128 m_v10;
+    LocalM128 m_v10;
     float m_f20;
     unsigned int m_u24;
 
@@ -4138,28 +3895,19 @@ struct LocTriangulator
     LocResult LocatePoint(int x, int y);
 };
 #include <math.h>
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_sqrt_ss(__m128);
-extern "C" __m128 _mm_load_ss(const float*);
-extern __m128 DAT_010ec7f0;
-extern "C" __m128 _mm_load_ps1(const float*);
-static __m128 _mm_set1_ps(const float& f)
-{
-    __m128 a = _mm_load_ss(&f);
-    return _mm_shuffle_ps(a, a, 0);
-}
+extern LocalM128 DAT_010ec7f0;
 extern const float DAT_010141cc;
 extern const float DAT_0104da4c = 1.1920928955078125e-7f;
 struct EVec
 {
     float x, y, z, w;
-    const __m128& quad() const
+    const LocalM128& quad() const
     {
-        return reinterpret_cast<const __m128&>(*this);
+        return reinterpret_cast<const LocalM128&>(*this);
     }
-    __m128 dot(const EVec& a) const
+    LocalM128 dot(const EVec& a) const
     {
-        __m128 v = _mm_mul_ps(quad(), a.quad());
+        LocalM128 v = _mm_mul_ps(quad(), a.quad());
         return _mm_add_ss(_mm_shuffle_ps(v, v, 0xaa), _mm_add_ss(_mm_shuffle_ps(v, v, 0x55), v));
     }
     char* FUN_00c7f520(char* out, float tolerance);
@@ -4174,7 +3922,7 @@ struct ELocalVec
     union
     {
         EVec scalar;
-        __m128 simd;
+        LocalM128 simd;
     };
     ELocalVec(const EVec& v)
     {
@@ -4237,18 +3985,18 @@ struct EMesh
     __declspec(noalias) float FUN_00e16e50(float value, EVec* point, int filter);
     void FUN_00e17010(EParams* p, EArray* out);
 };
-static __m128 load(const EVec& v)
+static LocalM128 load(const EVec& v)
 {
     return _mm_load_ps(&v.x);
 }
-static void store(EVec& v, __m128 a)
+static void store(EVec& v, LocalM128 a)
 {
     _mm_store_ps(&v.x, a);
 }
-static float sum3(__m128 p)
+static float sum3(LocalM128 p)
 {
-    __m128 y = _mm_shuffle_ps(p, p, 0x55);
-    __m128 z = _mm_shuffle_ps(p, p, 0xaa);
+    LocalM128 y = _mm_shuffle_ps(p, p, 0x55);
+    LocalM128 z = _mm_shuffle_ps(p, p, 0xaa);
     y = _mm_add_ss(y, p);
     z = _mm_add_ss(z, y);
     float r;
@@ -4261,19 +4009,6 @@ struct S_00e21e30_Alloc
     virtual void unk4();
     virtual void ReleaseBlock(void* p, int n);
 };
-struct S_00e21e30_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkc;
-    S_00e21e30_Alloc* m_pStreamAllocator;
-    static S_00e21e30_Router& FUN_00c85750();
-    S_00e21e30_Alloc& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
 struct FUN_00e21e30
 {
     int unk4;
@@ -4283,7 +4018,7 @@ struct FUN_00e21e30
     {}
     void operator delete(void* p, unsigned int nbytes)
     {
-        S_00e21e30_Router::FUN_00c85750().heap().ReleaseBlock(p, static_cast<int>(nbytes));
+        reinterpret_cast<S_00e21e30_Alloc*>(hkMemoryRouter::getInstance().m_heap)->ReleaseBlock(p, static_cast<int>(nbytes));
     }
 };
 FUN_00e21e30::FUN_00e21e30()
@@ -4399,15 +4134,11 @@ template <typename T, typename BASE> struct S00e1c5e0_List
     int m_iAllocatedCount;
     unsigned int m_uiUniqueId;
 };
-struct __declspec(align(16)) S00e1c5e0_Vec4
-{
-    int x, y, z, w;
-};
 struct S00e1c5e0_Vertex : S00e1c5e0_List<S00e1c5e0_Vertex, S00e1c5e0_EmptyBase>::Item
 {
-    S00e1c5e0_Vec4 m_vContactPosition;
-    S00e1c5e0_Vec4 m_v20;
-    S00e1c5e0_Vec4 m_v30;
+    hkVector4 m_vContactPosition;
+    hkVector4 m_v20;
+    hkVector4 m_v30;
     int m_i40;
     int m_i44;
 };
@@ -4423,7 +4154,7 @@ struct S00e1c5e0_Triangle : S00e1c5e0_List<S00e1c5e0_Triangle, S00e1c5e0_EmptyBa
     }
     S00e1c5e0_Vertex* m_kVertices[3];
     S00e1c5e0_Uid m_ppLinks[3];
-    S00e1c5e0_Vec4 m_kTriangleNormal;
+    hkVector4 m_kTriangleNormal;
     int m_i30, m_i34, m_i38, m_i3c, m_i40;
 };
 __forceinline S00e1c5e0_Ulong S00e1c5e0_uid2ulong(void* t, unsigned int i)
@@ -4504,18 +4235,18 @@ struct S00e1c5e0_Map : S00e1c5e0_MapBase
 {
     S00e1c5e0_Map(int nelem = 0)
     {
-        EnsureCapacity(&FUN_00c85750().getHeap(), nelem);
+        EnsureCapacity(&reinterpret_cast<Allocator&>(FUN_00c85750().heap()), nelem);
     }
     ~S00e1c5e0_Map()
     {
-        ProcessArgument(&FUN_00c85750().getHeap());
+        ProcessArgument(&reinterpret_cast<Allocator&>(FUN_00c85750().heap()));
     }
 };
 template <typename K, typename V> struct S00e1c5e0_PointerMap
 {
     __forceinline int insert(K key, V val)
     {
-        return m_map.FUN_00cb1870(&FUN_00c85750().getHeap(), S00e1c5e0_Ulong(key), S00e1c5e0_Ulong(val));
+        return m_map.FUN_00cb1870(&reinterpret_cast<Allocator&>(FUN_00c85750().getHeap()), S00e1c5e0_Ulong(key), S00e1c5e0_Ulong(val));
     }
     __forceinline V FindValueForKey(K key, V def) const
     {
@@ -4825,7 +4556,7 @@ struct ProbeHeapPolicy
 {
     __forceinline Allocator& get(const void*) const
     {
-        return FUN_00c85750().getHeap();
+        return reinterpret_cast<Allocator&>(FUN_00c85750().heap());
     }
 };
 template <class T> struct ProbeArrayBase
@@ -4992,9 +4723,6 @@ struct ProbeThis
     ProbeOutput FUN_00e27ea0(int x, int y, bool conform, const ProbeLocation& where, bool split);
 };
 
-extern "C" __m128 _mm_min_ps(__m128, __m128);
-extern "C" __m128 _mm_max_ps(__m128, __m128);
-extern "C" __m128 _mm_set_ps1(float);
 extern int DAT_010eaf00, DAT_010cd664;
 extern double DAT_010d5370;
 namespace RuntimeEpsilon {
@@ -5003,14 +4731,14 @@ extern float DAT_0104da4c;
 extern char str_010eb06c[], str_010eaeb4[];
 class Scalar56
 {
-    __m128 value;
+    LocalM128 value;
 
   public:
-    __forceinline Scalar56(__m128 x) : value(x)
+    __forceinline Scalar56(LocalM128 x) : value(x)
     {}
     __forceinline Scalar56(float x) : value(_mm_load_ss(&x))
     {}
-    __forceinline __m128 get() const
+    __forceinline LocalM128 get() const
     {
         return value;
     }
@@ -5023,7 +4751,7 @@ class Scalar56
 };
 class __declspec(align(16)) Vector56
 {
-    __m128 value;
+    LocalM128 value;
 
   public:
     __forceinline Vector56()
@@ -5060,8 +4788,8 @@ class __declspec(align(16)) Vector56
     }
     __forceinline Scalar56 dot(const Vector56& x) const
     {
-        __m128 products = _mm_mul_ps(value, x.value);
-        __m128 pair = _mm_add_ss(_mm_shuffle_ps(products, products, 0x55), products);
+        LocalM128 products = _mm_mul_ps(value, x.value);
+        LocalM128 pair = _mm_add_ss(_mm_shuffle_ps(products, products, 0x55), products);
         return _mm_add_ss(_mm_shuffle_ps(products, products, 0xaa), pair);
     }
     __forceinline Scalar56 squaredLength() const
@@ -5177,7 +4905,7 @@ struct ArrayHeap56
 {
     __forceinline Allocator& get(void*)
     {
-        return FUN_00c85750().getHeap();
+        return reinterpret_cast<Allocator&>(FUN_00c85750().heap());
     }
 };
 template <class T, class A> struct PointerArray56 : PointerArrayBase56<T>
@@ -5295,7 +5023,6 @@ void StandinClass::FUN_00e1ab00(float tolerance, bool report)
 #include <string.h>
 void __cdecl ResizeAudioStream(Allocator*, void*, int);
 extern void* DAT_010eae98;
-extern "C" __m128 _mm_load_ss(const float* p);
 struct SolFloat4
 {
     float f0;
@@ -5372,20 +5099,15 @@ static __declspec(noinline) void BuildHull(Obj* o)
     t = t * t;
     o->m_18 = t;
 }
-struct Vec
-{
-    void* m_00;
-    int m_04;
-    int m_08;
-    __forceinline void release(int elemSize);
-};
-template <int ES> struct HArr : Vec
+__forceinline LocalVecArray::LocalVecArray()
+{}
+template <int ES> struct HArr : LocalVecArray
 {
     __forceinline HArr()
     {
-        m_00 = 0;
-        m_04 = 0;
-        m_08 = (int)0x80000000;
+        m_pData = 0;
+        m_iArrayLength = 0;
+        m_iCapacity = (int)0x80000000;
     }
     __forceinline ~HArr()
     {
@@ -5432,7 +5154,7 @@ struct LocalD
     int m_18;
     void FUN_00d9c110();
     void FUN_00d9be30();
-    void BuildTree(void* a, void* b, int c, Vec* out);
+    void BuildTree(void* a, void* b, int c, LocalVecArray* out);
 };
 struct InitA
 {
@@ -5461,15 +5183,15 @@ struct ThisCls
     int m_38;
     Obj* FUN_00e1c5e0();
 };
-void Vec::release(int elemSize)
+__forceinline void LocalVecArray::release(int elemSize)
 {
-    Allocator& ao = FUN_00c85750().getHeap();
-    int cap = m_08;
-    m_04 = 0;
+    Allocator& ao = reinterpret_cast<Allocator&>(FUN_00c85750().heap());
+    int cap = m_iCapacity;
+    m_iArrayLength = 0;
     if (!((unsigned int)cap & 0x80000000))
-        ao.freeBlock(m_00, (cap & 0x3fffffff) * elemSize);
-    m_00 = 0;
-    m_08 = (int)0x80000000;
+        ao.freeBlock(m_pData, (cap & 0x3fffffff) * elemSize);
+    m_pData = 0;
+    m_iCapacity = (int)0x80000000;
 }
 // @fnv 0x00e1c940
 __declspec(noinline) Obj* __fastcall FUN_00e1c940(ThisCls* self, void*, float a, int n)
@@ -5511,11 +5233,11 @@ __declspec(noinline) Obj* __fastcall FUN_00e1c940(ThisCls* self, void*, float a,
                 *(int*)&rec[0].f3 = 0x3f000000;
                 rec[1] = sa->m_10v;
                 {
-                    __m128 z = _mm_load_ps((float*)&sa->m_30v);
+                    LocalM128 z = _mm_load_ps((float*)&sa->m_30v);
                     z = _mm_shuffle_ps(z, z, 0xaa);
-                    __m128 p = _mm_shuffle_ps(z, z, 0x00);
+                    LocalM128 p = _mm_shuffle_ps(z, z, 0x00);
                     p = _mm_mul_ps(p, _mm_load_ps((float*)&sa->m_20v));
-                    __m128 r = _mm_load_ps((float*)&rec[1]);
+                    LocalM128 r = _mm_load_ps((float*)&rec[1]);
                     r = _mm_add_ps(p, r);
                     _mm_store_ps((float*)&rec[1], r);
                     sa = node->m_0c;
@@ -5525,11 +5247,11 @@ __declspec(noinline) Obj* __fastcall FUN_00e1c940(ThisCls* self, void*, float a,
                 *(int*)&rec[2].f3 = 0x3f000002;
                 rec[3] = sa->m_10v;
                 {
-                    __m128 z = _mm_load_ps((float*)&sa->m_30v);
+                    LocalM128 z = _mm_load_ps((float*)&sa->m_30v);
                     z = _mm_shuffle_ps(z, z, 0xaa);
-                    __m128 p = _mm_shuffle_ps(z, z, 0x00);
+                    LocalM128 p = _mm_shuffle_ps(z, z, 0x00);
                     p = _mm_mul_ps(p, _mm_load_ps((float*)&sa->m_20v));
-                    __m128 r = _mm_load_ps((float*)&rec[3]);
+                    LocalM128 r = _mm_load_ps((float*)&rec[3]);
                     r = _mm_add_ps(p, r);
                     _mm_store_ps((float*)&rec[3], r);
                     sa = node->m_10;
@@ -5539,36 +5261,36 @@ __declspec(noinline) Obj* __fastcall FUN_00e1c940(ThisCls* self, void*, float a,
                 *(int*)&rec[4].f3 = 0x3f000004;
                 rec[5] = sa->m_10v;
                 {
-                    __m128 z = _mm_load_ps((float*)&sa->m_30v);
+                    LocalM128 z = _mm_load_ps((float*)&sa->m_30v);
                     z = _mm_shuffle_ps(z, z, 0xaa);
-                    __m128 p = _mm_shuffle_ps(z, z, 0x00);
+                    LocalM128 p = _mm_shuffle_ps(z, z, 0x00);
                     p = _mm_mul_ps(p, _mm_load_ps((float*)&sa->m_20v));
-                    __m128 r = _mm_load_ps((float*)&rec[5]);
+                    LocalM128 r = _mm_load_ps((float*)&rec[5]);
                     r = _mm_add_ps(p, r);
                     _mm_store_ps((float*)&rec[5], r);
                 }
                 *(int*)&rec[5].f3 = 0x3f000005;
                 FUN_00cbeb70(rec, 6, ws.buf);
                 {
-                    Router* h = &FUN_00c85750();
-                    if (v2.m_04 == (v2.m_08 & 0x3fffffff))
-                        ResizeAudioStream(h->heap, &v2, 0x20);
-                    char* dst = (char*)v2.m_00 + v2.m_04 * 32;
+                    hkMemoryRouter* h = &FUN_00c85750();
+                    if (v2.m_iArrayLength == (v2.m_iCapacity & 0x3fffffff))
+                        ResizeAudioStream(reinterpret_cast<Allocator*>(h->m_heap), &v2, 0x20);
+                    char* dst = (char*)v2.m_pData + v2.m_iArrayLength * 32;
                     if (dst != 0)
                         memcpy(dst, ws.buf, 32);
-                    v2.m_04 += 1;
+                    v2.m_iArrayLength += 1;
                 }
                 {
-                    Router* h = &FUN_00c85750();
-                    if (v1.m_04 == (v1.m_08 & 0x3fffffff))
-                        ResizeAudioStream(h->heap, &v1, 4);
-                    ((Node1**)v1.m_00)[v1.m_04] = node;
-                    v1.m_04 += 1;
+                    hkMemoryRouter* h = &FUN_00c85750();
+                    if (v1.m_iArrayLength == (v1.m_iCapacity & 0x3fffffff))
+                        ResizeAudioStream(reinterpret_cast<Allocator*>(h->m_heap), &v1, 4);
+                    ((Node1**)v1.m_pData)[v1.m_iArrayLength] = node;
+                    v1.m_iArrayLength += 1;
                 }
             }
         }
         HArr<4> vb;
-        d.BuildTree(v2.m_00, v1.m_00, v2.m_04, &vb);
+        d.BuildTree(v2.m_pData, v1.m_pData, v2.m_iArrayLength, &vb);
     }
     double one = 1.0;
     if (n > 0)
@@ -5608,12 +5330,12 @@ __declspec(noinline) Obj* __fastcall FUN_00e1c940(ThisCls* self, void*, float a,
         Node2* n3 = obj->m_14;
         while (n3 != 0)
         {
-            __m128 sel;
+            LocalM128 sel;
             if (n3->m_3c == one)
                 sel = _mm_load_ss(&n3->m_34);
             else
                 sel = _mm_load_ss(&n3->m_30);
-            __m128 p = _mm_shuffle_ps(sel, sel, 0);
+            LocalM128 p = _mm_shuffle_ps(sel, sel, 0);
             p = _mm_mul_ps(p, _mm_load_ps((float*)&n3->m_20v));
             p = _mm_add_ps(p, _mm_load_ps((float*)&n3->m_10v));
             _mm_store_ps((float*)&n3->m_10v, p);

@@ -1,6 +1,11 @@
-// fallout_shared/bgsequiptype.cpp: BGSEquipType, QueryObject (8 functions)
+// fallout_shared/bgsequiptype.cpp: BGSEquipType (8 functions)
 
-#include "bgsequiptype_decls.h"
+#include "../../include/ENUM_FORM_ID.h"
+
+#include "../../include/BGSMenuIcon.h"
+#include "../../include/BGSEquipType.h"
+#include "../../include/TESFullName.h"
+#include "../../include/BaseFormComponent.h"
 
 // @fnv 0x00479430
 BGSEquipType::EQUIP_TYPE BGSEquipType::GetEquipType(TESForm* form)
@@ -8,85 +13,57 @@ BGSEquipType::EQUIP_TYPE BGSEquipType::GetEquipType(TESForm* form)
     EQUIP_TYPE result = ET_NONE;
     if (form)
     {
-        switch (form->GetFormType())
+        switch (static_cast<const TESForm*>(form)->GetFormType())
         {
         case 40:
-            result = (EQUIP_TYPE)(int)((BSSimpleList<BGSPerkEntry*>*)((char*)form + 0xc4))->GetNext();
+            result = (EQUIP_TYPE)((BGSEquipType*)((char*)form + 0xc4))->GetEquipType();
             break;
         case 24:
-            result = (EQUIP_TYPE)(int)((BSSimpleList<BGSPerkEntry*>*)((char*)form + 0x154))->GetNext();
+            result = (EQUIP_TYPE)((BGSEquipType*)((char*)form + 0x154))->GetEquipType();
             break;
         case 26:
-            result = (EQUIP_TYPE)(int)((BSSimpleList<BGSPerkEntry*>*)((char*)form + 0x14c))->GetNext();
+            result = (EQUIP_TYPE)((BGSEquipType*)((char*)form + 0x14c))->GetEquipType();
             break;
         case 47:
-            result = (EQUIP_TYPE)(int)((BSSimpleList<BGSPerkEntry*>*)((char*)form + 0x9c))->GetNext();
+            result = (EQUIP_TYPE)((BGSEquipType*)((char*)form + 0x9c))->GetEquipType();
             break;
         case 29:
-            result = (EQUIP_TYPE)(int)((BSSimpleList<BGSPerkEntry*>*)((char*)form + 0x8c))->GetNext();
+            result = (EQUIP_TYPE)((BGSEquipType*)((char*)form + 0x8c))->GetEquipType();
             break;
         }
     }
     return result;
 }
 
-extern int DAT_0101aa14;
-void __fastcall FUN_008c6060(void* pThis);
-
-class BaseFormComponent
-{
-  public:
-    BaseFormComponent();
-};
-
-// Initializes the BaseFormComponent base, sets the vtable pointer to DAT_0101aa14, calls FUN_008c6060, and returns pThis.
 // @fnv 0x00479320
-void* __fastcall FUN_00479320(int* pFormComponent)
+BGSEquipType::BGSEquipType()
 {
-    ((BaseFormComponent*)pFormComponent)->BaseFormComponent::BaseFormComponent();
-    *pFormComponent = (int)&DAT_0101aa14;
-    FUN_008c6060(pFormComponent);
-    return pFormComponent;
+    BGSEquipType::InitializeComponent();
 }
 
 extern int DAT_011c4b54[14];
 
 // Returns DAT_011c4b54[a1] when a1 is between 0 and 13, otherwise returns 0.
 // @fnv 0x00479510
-int __cdecl FUN_00479510(int aiIndex)
+BGSMenuIcon* BGSEquipType::GetEquipTypeIcon(int aiIndex)
 {
-    int iValue = 0;
+    BGSMenuIcon* iValue = 0;
     if (aiIndex > -1 && aiIndex < 14)
     {
-        iValue = DAT_011c4b54[aiIndex];
+        iValue = (BGSMenuIcon*)DAT_011c4b54[aiIndex];
     }
     return iValue;
 }
 
-namespace fnv_00479540 {
-struct FNStub
-{
-    const char* __thiscall GetFullName(void);
-};
-
-struct BGSMenuIcon
-{
-    const char* __thiscall GetFullName(void);
-};
-
-extern BGSMenuIcon* __cdecl FUN_00479510(int);
-extern const char $SG5812[];
-
 // Looks up the BGSMenuIcon for aeType and returns its full name, or a fallback string when none exists.
 // @fnv 0x00479540
-const char* __cdecl GetMenuIconName(int aeType)
+char* BGSEquipType::GetEquipTypeName(int aeType)
 {
-    BGSMenuIcon* picon = FUN_00479510(aeType);
+    BGSMenuIcon* picon = GetEquipTypeIcon(aeType);
     if (picon)
-        return reinterpret_cast<FNStub*>(picon + 0x18)->GetFullName();
-    return $SG5812;
+        return reinterpret_cast<TESFullName*>((char*)picon + sizeof(TESForm))->GetFullName();
+    return "";
 }
-}  // namespace fnv_00479540
 
 struct FUN_004029d0_shell
 {
@@ -165,45 +142,26 @@ float S_0040a0a0_Actor::FUN_0040a0a0(int avCode)
 extern const char DAT_01183040[];
 extern const char DAT_01183290[];
 extern "C" void* __cdecl FUN_00ec43fb(int, int, const char*, const char*, int);
-struct LookupObject
-{
-    int __thiscall FUN_00726070();
-};
-struct QueryObject
-{
-    bool __thiscall FUN_004793d0(int);
-    int __thiscall FUN_00726070();
-};
 // @fnv 0x004793d0
-bool __thiscall QueryObject::FUN_004793d0(int argument)
+bool BGSEquipType::CompareWithBase(BaseFormComponent* argument)
 {
-    void* found = FUN_00ec43fb(argument, 0, DAT_01183040, DAT_01183290, 0);
+    void* found = FUN_00ec43fb((int)argument, 0, DAT_01183040, DAT_01183290, 0);
     if (found == 0)
         return true;
-    if (FUN_00726070() != ((LookupObject*)found)->FUN_00726070())
+    if (GetEquipType() != ((BGSEquipType*)found)->GetEquipType())
         return true;
     return false;
 }
 
-extern const char DAT_01183040[];
-extern const char DAT_01183290[];
-extern "C" void* __cdecl FUN_00ec43fb(int, int, const char*, const char*, int);
-
-struct FUN_00479380_cls
-{
-    void FUN_006ecd40(int value);
-    void SetFromLookup(int a1);
-};
-
 // @fnv 0x00479380
-void FUN_00479380_cls::SetFromLookup(int a1)
+void BGSEquipType::CopyFromBase(BaseFormComponent* a1)
 {
-    LookupObject* obj = (LookupObject*)FUN_00ec43fb(a1, 0, DAT_01183040, DAT_01183290, 0);
+    BGSEquipType* obj = (BGSEquipType*)FUN_00ec43fb((int)a1, 0, DAT_01183040, DAT_01183290, 0);
     if (obj == 0)
     {
     }
     else
     {
-        this->FUN_006ecd40(obj->FUN_00726070());
+        this->SetEquipType(obj->GetEquipType());
     }
 }

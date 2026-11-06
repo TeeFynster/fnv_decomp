@@ -1,4 +1,4 @@
-// gamebryo2.2/corelibs/nimain/niobject_decls.h: declares CloningProcess, NiObject, NiObjectCopyInfo, NiAVObject, hkReferencedObject and more
+// gamebryo2.2/corelibs/nimain/niobject_decls.h: declares CloningProcess, NiObject, NiObjectCopyInfo, NiAVObject and more
 #ifndef FNV_NIOBJECT_LUNA_DEFS_H
 #define FNV_NIOBJECT_LUNA_DEFS_H
 
@@ -56,12 +56,6 @@ class NiAVObject : public NiObject
     virtual void LoadBinary(NiStream&);
     void FUN_00c87c50(NiObject*);
 };
-class hkReferencedObject
-{
-  public:
-    void RetainReference();
-    void removeReference();
-};
 class bhkRefObject : public NiObject
 {
   public:
@@ -87,11 +81,7 @@ class NiPlane
   public:
     bool operator==(const NiPlane&) const;
 };
-class ThreeByThreeMatrix
-{
-  public:
-    bool operator==(const ThreeByThreeMatrix&) const;
-};
+#include "../../../../include/NiMatrix3.h"
 class NiVBSet
 {
   public:

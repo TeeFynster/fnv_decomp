@@ -5,441 +5,19 @@
 
 // src/havok/animation/animation/animation/splinecompressed/hkasplinecompressedanimationctor.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/animation/splinecompressed/hkasplinecompressedanimationctor.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_load_ps(float const* p);
-extern "C" void _mm_store_ps(float* p, __m128 a);
-struct __declspec(align(16)) FUN_005611c0_t
-{
-    float x, y, z, w;
-    FUN_005611c0_t(const FUN_005611c0_t& o)
-    {
-        *(__m128*)&x = *(const __m128*)&o.x;
-    }
-    void FUN_005611c0();
-};
-struct Buffer
-{
-    char* m_data;
-    int m_iElementCount;
-};
-void __cdecl FUN_00e318a0(int type, Buffer* buf);
-void __cdecl FUN_00e31800(int size, Buffer* buf);
-void __cdecl CallHandlerByIndex(int, int, int);
-extern int DAT_010eb3d0[];
-struct VecArray
-{
-    FUN_005611c0_t* m_data;
-};
-struct Writer
-{
-    char pad[0x74];
-    Buffer m_buf;
+#include "../../../../../../include/hkThreadMemory.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkSimdReal.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkQsTransform.h"
+#include "../../../../../../include/hkError.h"
 
-    void FUN_00e319e0(unsigned char flags, int type, const FUN_005611c0_t* v, int last, const VecArray* arr);
-};
-struct S_00e31ca0_Heap;
-struct S_00e31ca0_Router
+// Read the legacy heap slot as its allocator type to retain the original aliasing behavior.
+inline hkMemoryAllocator& hkThreadMemory::heap()
 {
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00e31ca0_Heap* m_pStreamAllocator;
-    S_00e31ca0_Heap& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-S_00e31ca0_Router* FUN_00c85750();
-void ResizeAudioStream(S_00e31ca0_Heap& alloc, void* arr, int elemSize);
-template <typename T> inline void S_00e31ca0_constructWithCopy(T* p, int n, const T& t)
-{
-    for (int i = 0; i < n; i++)
-        p[i] = t;
+    return **reinterpret_cast<hkMemoryAllocator**>(&m_pMemoryAllocator);
 }
-struct S_00e31ca0_ByteArray
-{
-    unsigned char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void _pushBack(S_00e31ca0_Heap& alloc, const unsigned char& t)
-    {
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(alloc, this, sizeof(unsigned char));
-        S_00e31ca0_constructWithCopy<unsigned char>(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-    void AddBack(const unsigned char& t)
-    {
-        _pushBack(FUN_00c85750()->heap(), t);
-    }
-};
-struct S_00e31ca0_FloatArray
-{
-    float* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-void WriteUInt16ToBuffer(int v, S_00e31ca0_ByteArray& out);
-void AppendChar(int v, S_00e31ca0_ByteArray& out);
-struct S_00e31ca0
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    float unkC;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    S_00e31ca0_ByteArray m_out;
-    void AppendScaledValues(int a, int b, S_00e31ca0_FloatArray& values);
-};
-struct E317C0Allocator;
-struct E317C0MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    E317C0Allocator* m_pStreamAllocator;
-
-    E317C0Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-namespace fnvc_adapt {
-extern "C" E317C0MemoryRouter& __cdecl FUN_00c85750();
-}
-void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
-struct E317C0CharArray
-{
-    char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    static void construct(char* p, int n, char const& e)
-    {
-        for (int i = 0; i < n; i++)
-            p[i] = e;
-    }
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    void AddBack(char const& e)
-    {
-        E317C0Allocator& alloc = fnvc_adapt::FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&alloc, this, sizeof(char));
-        construct(m_data + m_iElementCount, 1, e);
-        m_iElementCount++;
-    }
-};
-void __cdecl AppendChar(char acChar, E317C0CharArray& arOut);
-extern void __cdecl FUN_00e31800(int amount, struct MemWriter* writer);
-struct MemWriter
-{
-    int used;
-    char* data;
-};
-void __cdecl WriteFloatToMemWriter(float value, MemWriter* writer);
-struct E32C80Array
-{
-    void* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    E32C80Array() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
-class E32C80Base
-{
-  public:
-    E32C80Base(void* info);
-    virtual void unk00();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-};
-class FUN_00e32c80 : public E32C80Base
-{
-  public:
-    FUN_00e32c80(void* info, void* arg1, void* arg2);
-    virtual void unk00();
-
-    void init(void* info, void* arg1, void* arg2);
-
-    E32C80Array m_array44;
-    E32C80Array m_array50;
-    E32C80Array m_array5C;
-    E32C80Array m_array68;
-    E32C80Array m_array74;
-};
-struct hkMemory
-{
-    virtual void v0() throw();
-    virtual void v1() throw();
-    virtual void v2() throw();
-    virtual void v3() throw();
-    virtual void deallocateChunk(void* p, int nbytes) throw();
-};
-struct hkThreadMemory
-{
-    char pad[0x10];
-    hkMemory* m_pMemoryAllocator;
-};
-template <typename T> struct hkArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    ~hkArray() throw()
-    {
-        hkThreadMemory* tm = (hkThreadMemory*)FUN_00c85750();
-        hkMemory* mem = tm->m_pMemoryAllocator;
-        m_iElementCount = 0;
-        if (!(m_iCapacityState & (int)0x80000000))
-        {
-            mem->deallocateChunk(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        }
-        m_data = 0;
-        m_iCapacityState = (int)0x80000000;
-    }
-};
-struct Struct28
-{
-    char data[28];
-};
-struct FUN_00e32cf0_Class
-{
-    hkArray<Struct28> arr1;
-    hkArray<int> arr2;
-    hkArray<int> arr3;
-
-    ~FUN_00e32cf0_Class() throw();
-};
-void __cdecl FUN_00e31740(unsigned char a, unsigned int b, char** pp);
-void __cdecl FUN_00e31780(unsigned char a, unsigned int b, char** pp);
-union e319Rec
-{
-    unsigned char raw;
-    struct
-    {
-        unsigned char lo : 2;
-        unsigned char mid : 4;
-        unsigned char hi : 2;
-    } f;
-};
-union e319Tail
-{
-    unsigned char raw;
-    struct
-    {
-        unsigned char b0 : 1;
-        unsigned char sel : 2;
-        unsigned char rest : 5;
-    } f;
-};
-struct e319Cls
-{
-    char pad[0x10];
-    int m_10;
-    int m_14;
-    char padCur[0x14];
-    int m_2c;
-    char kad[4];
-    char* m_34;
-    char pNewad[0xc];
-    int* m_44;
-    char pTmpad[0x2c];
-    int m_74;
-    char pad78[8];
-    int m_80;
-    void FUN_00e31900();
-};
-// Havok-style constructor: base init from a1, five empty hkArray members, then a temporary set of
-// arrays (one 28-byte element from a2, two int arrays sized from a1 and zero-filled) handed to a
-// member initialiser together with a3.
-struct HeapL;
-struct RouterL
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    HeapL* m_pStreamAllocator;
-    HeapL& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-RouterL* GetRouterL() throw();
-void ReserveMoreL(HeapL& alloc, void* arr, int elemSize) throw();
-void ReserveL(HeapL& alloc, void* arr, int numElem, int elemSize) throw();
-inline void* operator new(unsigned int, void* p) throw()
-{
-    return p;
-}
-template <class T> struct ArrL
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    ArrL() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void _pushBack(HeapL& alloc, const T& t)
-    {
-        if (m_iElementCount == getCapacity())
-            ReserveMoreL(alloc, this, sizeof(T));
-        new (&m_data[m_iElementCount]) T(t);
-        m_iElementCount++;
-    }
-    void AddBack(const T& t)
-    {
-        _pushBack(GetRouterL()->heap(), t);
-    }
-    void GrowArrayCapacity(HeapL& alloc, int n)
-    {
-        int cap = getCapacity();
-        if (cap < n)
-        {
-            int cap2 = 2 * cap;
-            int newSize = (n < cap2) ? cap2 : n;
-            ReserveL(alloc, this, newSize, sizeof(T));
-        }
-    }
-    void _setSize(HeapL& alloc, int n)
-    {
-        GrowArrayCapacity(alloc, n);
-        m_iElementCount = n;
-    }
-    void SetSizeAndGrow(int n)
-    {
-        _setSize(GetRouterL()->heap(), n);
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-};
-struct SrcL
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int m_numA;
-    int m_numB;
-};
-struct Elem28L
-{
-    int v00, v04, v08, v0c, v10, v14, v18;
-};
-struct LocalArraysL
-{
-    ArrL<Elem28L> m_pElements;
-    ArrL<int> m_kPointA;
-    ArrL<int> m_kPointB;
-    ~LocalArraysL() throw();
-};
-struct BaseL
-{
-    BaseL(SrcL* src) throw();
-    virtual void vf0();
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    int unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40;
-};
-struct FUN_00e32af0 : BaseL
-{
-    ArrL<int> m_arr44;
-    ArrL<int> m_arr50;
-    ArrL<int> m_arr5c;
-    ArrL<int> m_arr68;
-    ArrL<int> m_arr74;
-    FUN_00e32af0(SrcL* src, const Elem28L* elem, void* arg3) throw();
-    void InitL(SrcL* src, LocalArraysL* arrays, void* arg3) throw();
-};
-#include <stdlib.h>
-extern "C"
-{
-    void __cdecl FUN_00e31850(int alignment, void* stream);
-    void __cdecl WriteFloatToMemWriter(float val, void* stream);
-    void __cdecl AppendChar(unsigned int val, void* stream);
-    void __cdecl WriteUInt16ToBuffer(unsigned int val, void* stream);
-    unsigned char __cdecl ScaleToByte(float minVal, float maxVal, float val);
-    unsigned short __cdecl NormalizeToUShort(float minVal, float maxVal, float val);
-}
-struct Vector4Array
-{
-    const float* m_data;
-};
-struct AnimationCompressor
-{
-    char pad[0x74];
-    char m_stream;
-
-    void WriteCompressedAnimation(unsigned char mask, int quantType, const float* staticValues, const float* minValues,
-                                  const float* maxValues, int numFrames, const Vector4Array* data);
-};
 
 extern "C" const char str_010eb400[];  // "Compression Ratio: "
 extern "C" const char str_010eb414[];  // ":1."
@@ -464,48 +42,27 @@ extern "C" __m128 _mm_setzero_ps();
 extern "C" __m128 _mm_min_ps(__m128, __m128);
 extern "C" __m128 _mm_max_ps(__m128, __m128);
 
-struct Se31d50_Alloc
+template <typename TYPE> __forceinline TYPE* hkMemoryAllocator::_bufAlloc(int& reqNumInOut)
 {
-    virtual ~Se31d50_Alloc();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-    template <typename TYPE> __forceinline TYPE* _bufAlloc(int& reqNumInOut)
-    {
-        const int SIZE_ELEM = sizeof(TYPE);
-        int n = reqNumInOut * SIZE_ELEM;
-        void* p = AllocateBufferWithSize(n);
-        reqNumInOut = n / SIZE_ELEM;
-        return static_cast<TYPE*>(p);
-    }
-    template <typename TYPE> __forceinline void _bufFree(void* p, int numElem)
-    {
-        const int SIZE_ELEM = sizeof(TYPE);
-        ReturnMemory(p, numElem * SIZE_ELEM);
-    }
-};
-struct Se31d50_Router
+    const int SIZE_ELEM = sizeof(TYPE);
+    int n = reqNumInOut * SIZE_ELEM;
+    void* p = bufAlloc(n);
+    reqNumInOut = n / SIZE_ELEM;
+    return static_cast<TYPE*>(p);
+}
+template <typename TYPE> __forceinline void hkMemoryAllocator::_bufFree(void* p, int numElem)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    Se31d50_Alloc* m_pStreamAllocator;
-    __forceinline Se31d50_Alloc& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    static Se31d50_Router& FUN_00c85750();
-};
-void ResizeAudioStream(Se31d50_Alloc& a, void* array, int sizeElem);
-void FUN_00c908c0(Se31d50_Alloc& a, void* array, int reqElem, int sizeElem);
+    const int SIZE_ELEM = sizeof(TYPE);
+    bufFree(p, numElem * SIZE_ELEM);
+}
+void ResizeAudioStream(hkMemoryAllocator& a, void* array, int sizeElem);
+void FUN_00c908c0(hkMemoryAllocator& a, void* array, int reqElem, int sizeElem);
 
 struct Se31d50_ContainerHeap
 {
-    __forceinline Se31d50_Alloc& get(const void*)
+    __forceinline hkMemoryAllocator& get(const void*)
     {
-        return Se31d50_Router::FUN_00c85750().heap();
+        return hkThreadMemory::GetMonitorStream()->heap();
     }
 };
 template <bool B> struct Se31d50_Trait
@@ -525,6 +82,7 @@ struct Se31d50_ArrayUtil
             t[i] = tcopy;
     }
 };
+// The shared hkArray currently exposes storage only, without the allocation API below.
 template <typename T> struct Se31d50_ArrayBase
 {
     enum
@@ -568,7 +126,7 @@ template <typename T> struct Se31d50_ArrayBase
         Se31d50_ArrayUtil::destruct(m_data, m_iElementCount, Se31d50_IsPod());
         m_iElementCount = 0;
     }
-    __forceinline void _clearAndDeallocate(Se31d50_Alloc& alloc)
+    __forceinline void _clearAndDeallocate(hkMemoryAllocator& alloc)
     {
         clear();
         if ((m_iCapacityState & 0x80000000) == 0)
@@ -578,7 +136,7 @@ template <typename T> struct Se31d50_ArrayBase
         m_data = 0;
         m_iCapacityState = 0x80000000;
     }
-    __forceinline void GrowArrayCapacity(Se31d50_Alloc& alloc, int n)
+    __forceinline void GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
     {
         const int capacity = getCapacity();
         if (capacity < n)
@@ -588,14 +146,14 @@ template <typename T> struct Se31d50_ArrayBase
             FUN_00c908c0(alloc, this, newSize, sizeof(T));
         }
     }
-    __forceinline void _setSize(Se31d50_Alloc& alloc, int n)
+    __forceinline void _setSize(hkMemoryAllocator& alloc, int n)
     {
         GrowArrayCapacity(alloc, n);
         Se31d50_ArrayUtil::destruct(m_data + n, m_iElementCount - n, Se31d50_IsPod());
         Se31d50_ArrayUtil::construct(m_data + m_iElementCount, n - m_iElementCount, Se31d50_IsPod());
         m_iElementCount = n;
     }
-    __forceinline void _pushBack(Se31d50_Alloc& alloc, const T& t)
+    __forceinline void _pushBack(hkMemoryAllocator& alloc, const T& t)
     {
         if (m_iElementCount == getCapacity())
         {
@@ -626,7 +184,7 @@ template <typename T> struct Se31d50_Array : Se31d50_ArrayBase<T>
         this->m_data = 0;
         this->m_iElementCount = 0;
         this->m_iCapacityState = Se31d50_ArrayBase<T>::DONT_DEALLOCATE_FLAG;
-        Se31d50_Alloc& a = Se31d50_ContainerHeap().get(this);
+        hkMemoryAllocator& a = Se31d50_ContainerHeap().get(this);
         T* p = n ? a._bufAlloc<T>(n) : 0;
         int cap = n ? n : (int)0x80000000;
         this->setOwnedData(p, n, cap);
@@ -649,95 +207,58 @@ template <typename T> struct Se31d50_Array : Se31d50_ArrayBase<T>
         this->_pushBack(Se31d50_ContainerHeap().get(this), t);
     }
 };
-struct Se31d50_SimdReal
+__forceinline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x) {}
+__forceinline __m128 hkSimdReal::broadcast() const
 {
-    __m128 m_vValue;
-    __forceinline Se31d50_SimdReal(const __m128& x) : m_vValue(x)
-    {}
-    __forceinline __m128 broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-    __forceinline const __m128& getQuad() const
-    {
-        return m_vValue;
-    }
-};
-class __declspec(align(16)) Se31d50_Vector4
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+__forceinline const __m128& hkSimdReal::getQuad() const { return m_vValue; }
+
+__forceinline void hkVector4::set(float a, float b, float c, float d)
 {
-  public:
-    __m128 m_vComponents;
-    __forceinline Se31d50_Vector4()
-    {}
-    __forceinline Se31d50_Vector4(const Se31d50_Vector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void operator=(const Se31d50_Vector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void set(float a, float b, float c, float d)
-    {
-        m_vComponents = _mm_setr_ps(a, b, c, d);
-    }
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline void add4(const Se31d50_Vector4& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void setMul4(float a, const Se31d50_Vector4& b)
-    {
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(_mm_set_ss(a), _mm_set_ss(a), 0), b.m_vComponents);
-    }
-    __forceinline void setMin4(const Se31d50_Vector4& a, const Se31d50_Vector4& b)
-    {
-        m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setMax4(const Se31d50_Vector4& a, const Se31d50_Vector4& b)
-    {
-        m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline const float& operator()(int i) const
-    {
-        return reinterpret_cast<const float*>(&m_vComponents)[i];
-    }
-    __forceinline Se31d50_SimdReal dot4(const Se31d50_Vector4& a) const
-    {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 sum0 = _mm_add_ps(_mm_shuffle_ps(x2, x2, 0x4e), x2);
-        __m128 sum1 = _mm_shuffle_ps(sum0, sum0, 0xb1);
-        return _mm_add_ps(sum0, sum1);
-    }
-    __forceinline Se31d50_SimdReal lengthInverse4() const
-    {
-        const __m128 half = _mm_set_ss(0.5f);
-        const __m128 three = _mm_set_ss(3.0f);
-        const __m128 zero = _mm_set_ss(0.0f);
-        const __m128 len2 = this->dot4(*this).getQuad();
-        const __m128 len2EqualsZero = _mm_cmpeq_ss(len2, zero);
-        const __m128 approx = _mm_rsqrt_ss(len2);
-        const __m128 refined =
-            _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
-        return _mm_andnot_ps(len2EqualsZero, refined);
-    }
-    __forceinline void normalize4()
-    {
-        __m128 lenInv = lengthInverse4().broadcast();
-        m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
-    }
-};
-struct Se31d50_Bool
+    m_vComponents = _mm_setr_ps(a, b, c, d);
+}
+__forceinline void hkVector4::setZero4() { m_vComponents = _mm_setzero_ps(); }
+__forceinline void hkVector4::setMul4(float a, const hkVector4& b)
 {
-    char m_cBooleanValue;
-    __forceinline operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(_mm_set_ss(a), _mm_set_ss(a), 0), b.m_vComponents);
+}
+__forceinline void hkVector4::setMin4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
+}
+__forceinline void hkVector4::setMax4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents);
+}
+__forceinline const float& hkVector4::operator()(int i) const
+{
+    return reinterpret_cast<const float*>(&m_vComponents)[i];
+}
+__forceinline hkSimdReal hkVector4::dot4(const hkVector4& a) const
+{
+    __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    __m128 sum0 = _mm_add_ps(_mm_shuffle_ps(x2, x2, 0x4e), x2);
+    __m128 sum1 = _mm_shuffle_ps(sum0, sum0, 0xb1);
+    return _mm_add_ps(sum0, sum1);
+}
+__forceinline hkSimdReal lengthInverse4(const hkVector4& v)
+{
+    const __m128 half = _mm_set_ss(0.5f);
+    const __m128 three = _mm_set_ss(3.0f);
+    const __m128 zero = _mm_set_ss(0.0f);
+    const __m128 len2 = v.dot4(v).getQuad();
+    const __m128 len2EqualsZero = _mm_cmpeq_ss(len2, zero);
+    const __m128 approx = _mm_rsqrt_ss(len2);
+    const __m128 refined =
+        _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
+    return _mm_andnot_ps(len2EqualsZero, refined);
+}
+__forceinline void hkVector4::normalize4()
+{
+    __m128 lenInv = lengthInverse4(*this).broadcast();
+    m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
+}
 enum Se31d50_RotQ
 {
     Se31d50_POLAR32 = 0
@@ -786,14 +307,9 @@ struct Se31d50_PerTrack
 struct Se31d50_AnimParams
 {
     unsigned short m_iMaxFramesPerBlock;
-    Se31d50_Bool m_bEnableSampleSingleTracks;
+    hkBool m_bEnableSampleSingleTracks;
 };
-struct __declspec(align(16)) Se31d50_Qs
-{
-    Se31d50_Vector4 m_vTranslation;
-    Se31d50_Vector4 m_rotation;
-    Se31d50_Vector4 m_vScale;
-};
+// The shared animation base lacks the frame-count virtual signature used here.
 struct Se31d50_Raw
 {
     virtual void v00();
@@ -814,22 +330,11 @@ struct Se31d50_Raw
     int unk1c;
     int unk20;
     int unk24;
-    Se31d50_Array<Se31d50_Qs> m_kTransforms;
+    Se31d50_Array<hkQsTransform> m_kTransforms;
     Se31d50_Array<float> m_kFloats;
 };
-struct Se31d50_Error
-{
-    virtual ~Se31d50_Error();
-    virtual void v04();
-    virtual void v08();
-    virtual int message(int msg, int id, const char* description, const char* file, int line);
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void BeginSection(int id, const char* name);
-    virtual void EndSection();
-};
-extern Se31d50_Error* DAT_01268360;
+extern hkError* DAT_01268360;
+// The shared hkOstream lacks the integer writer declaration used by these reports.
 struct Se31d50_ErrStream
 {
     void* unk00;
@@ -866,12 +371,13 @@ struct Se31d50_ErrStream
         return WriteFloat(f);
     }
 };
-typedef Se31d50_Array<Se31d50_Vector4> Se31d50_VecArr;
+typedef Se31d50_Array<hkVector4> Se31d50_VecArr;
 typedef Se31d50_Array<float> Se31d50_FltArr;
 typedef Se31d50_Array<unsigned char> Se31d50_ByteArr;
-void FUN_00e58740(int numPoints, const float* U, const Se31d50_Vector4* P, int degree, float tolerance, int* numKnots,
-                  float* knots, int* numCP, Se31d50_Vector4* cp);
+void FUN_00e58740(int numPoints, const float* U, const hkVector4* P, int degree, float tolerance, int* numKnots,
+                  float* knots, int* numCP, hkVector4* cp);
 
+// The shared spline animation header lacks the builder methods and parameter types.
 struct Se31d50_Anim
 {
     virtual void v00();
@@ -910,30 +416,30 @@ struct Se31d50_Anim
     int m_iEndian;
     int FUN_00e33330() const;
     void AppendScaledValues(int n, int p, const Se31d50_FltArr& U);
-    void FUN_00e319e0(unsigned char mask, Se31d50_RotQ q, const Se31d50_Vector4& s, int n, const Se31d50_VecArr& p);
-    void WriteCompressedAnimation(unsigned char mask, Se31d50_ScalQ q, const Se31d50_Vector4& s,
-                                  const Se31d50_Vector4& mn, const Se31d50_Vector4& mx, int n, const Se31d50_VecArr& p);
+    void FUN_00e319e0(unsigned char mask, Se31d50_RotQ q, const hkVector4& s, int n, const Se31d50_VecArr& p);
+    void WriteCompressedAnimation(unsigned char mask, Se31d50_ScalQ q, const hkVector4& s,
+                                  const hkVector4& mn, const hkVector4& mx, int n, const Se31d50_VecArr& p);
     void FUN_00e31d50(const Se31d50_Raw& raw, const Se31d50_PerTrack& trackParams,
                       const Se31d50_AnimParams& animationParams);
-    static Se31d50_Vector4 FUN_00e31410(const Se31d50_VecArr& d);
-    static Se31d50_Vector4 FUN_00e31470(const Se31d50_VecArr& d);
-    static Se31d50_Vector4 FUN_00e314c0(const Se31d50_VecArr& d);
-    static unsigned char FUN_00e311f0(const Se31d50_Vector4& mean, const Se31d50_Vector4& mn, const Se31d50_Vector4& mx,
-                                      float tol, const Se31d50_Vector4& id);
+    static hkVector4 FUN_00e31410(const Se31d50_VecArr& d);
+    static hkVector4 FUN_00e31470(const Se31d50_VecArr& d);
+    static hkVector4 FUN_00e314c0(const Se31d50_VecArr& d);
+    static unsigned char FUN_00e311f0(const hkVector4& mean, const hkVector4& mn, const hkVector4& mx,
+                                      float tol, const hkVector4& id);
     static unsigned char PackBitFields(Se31d50_ScalQ t, Se31d50_RotQ r, Se31d50_ScalQ s);
     static unsigned char FUN_00e30f40(unsigned char mask, Se31d50_ScalQ f);
     static void FUN_00e31800(int n, Se31d50_ByteArr& out);
     static void FUN_00e31850(int align, Se31d50_ByteArr& out);
     static void FillInterpolatedValues(int n, Se31d50_FltArr& U, float a, float b);
-    static void FUN_00e310c0(const Se31d50_Qs* t, int numTracks, int numFrames, int first, int track, Se31d50_VecArr& a,
+    static void FUN_00e310c0(const hkQsTransform* t, int numTracks, int numFrames, int first, int track, Se31d50_VecArr& a,
                              Se31d50_VecArr& b, Se31d50_VecArr& c);
     static void FUN_00e31180(const float* f, int numTracks, int numFrames, int first, int track, Se31d50_VecArr& a);
 };
 
 extern "C" double __cdecl fabs(double);
-__declspec(noinline) Se31d50_Vector4 Se31d50_Anim::FUN_00e31410(const Se31d50_VecArr& data)
+__declspec(noinline) hkVector4 Se31d50_Anim::FUN_00e31410(const Se31d50_VecArr& data)
 {
-    Se31d50_Vector4 mean;
+    hkVector4 mean;
     mean.setZero4();
     const int n = data.GetLogicalSize();
     for (int i = 0; i < n; i++)
@@ -943,9 +449,9 @@ __declspec(noinline) Se31d50_Vector4 Se31d50_Anim::FUN_00e31410(const Se31d50_Ve
     mean.setMul4(1.0f / n, mean);
     return mean;
 }
-__declspec(noinline) Se31d50_Vector4 Se31d50_Anim::FUN_00e31470(const Se31d50_VecArr& data)
+__declspec(noinline) hkVector4 Se31d50_Anim::FUN_00e31470(const Se31d50_VecArr& data)
 {
-    Se31d50_Vector4 m = data[0];
+    hkVector4 m = data[0];
     const int n = data.GetLogicalSize();
     for (int i = 1; i < n; i++)
     {
@@ -953,9 +459,9 @@ __declspec(noinline) Se31d50_Vector4 Se31d50_Anim::FUN_00e31470(const Se31d50_Ve
     }
     return m;
 }
-__declspec(noinline) Se31d50_Vector4 Se31d50_Anim::FUN_00e314c0(const Se31d50_VecArr& data)
+__declspec(noinline) hkVector4 Se31d50_Anim::FUN_00e314c0(const Se31d50_VecArr& data)
 {
-    Se31d50_Vector4 m = data[0];
+    hkVector4 m = data[0];
     const int n = data.GetLogicalSize();
     for (int i = 1; i < n; i++)
     {
@@ -963,9 +469,9 @@ __declspec(noinline) Se31d50_Vector4 Se31d50_Anim::FUN_00e314c0(const Se31d50_Ve
     }
     return m;
 }
-__declspec(noinline) unsigned char Se31d50_Anim::FUN_00e311f0(const Se31d50_Vector4& mean, const Se31d50_Vector4& mn,
-                                                              const Se31d50_Vector4& mx, float tol,
-                                                              const Se31d50_Vector4& id)
+__declspec(noinline) unsigned char Se31d50_Anim::FUN_00e311f0(const hkVector4& mean, const hkVector4& mn,
+                                                              const hkVector4& mx, float tol,
+                                                              const hkVector4& id)
 {
     unsigned char mask = 0;
     for (int i = 0; i < 4; i++)
@@ -998,14 +504,14 @@ __declspec(noinline) void Se31d50_Anim::FillInterpolatedValues(int n, Se31d50_Fl
         U[i] = (float)i / n * (b - a) + a;
     }
 }
-__declspec(noinline) void Se31d50_Anim::FUN_00e310c0(const Se31d50_Qs* src, int numTracks, int numFrames, int first,
+__declspec(noinline) void Se31d50_Anim::FUN_00e310c0(const hkQsTransform* src, int numTracks, int numFrames, int first,
                                                      int track, Se31d50_VecArr& a, Se31d50_VecArr& b, Se31d50_VecArr& c)
 {
     for (int i = 0; i < numFrames; i++)
     {
-        const Se31d50_Qs& t = src[(i + first) * numTracks + track];
+        const hkQsTransform& t = src[(i + first) * numTracks + track];
         a[i].set(t.m_vTranslation(0), t.m_vTranslation(1), t.m_vTranslation(2), 0.0f);
-        b[i].set(t.m_rotation(0), t.m_rotation(1), t.m_rotation(2), t.m_rotation(3));
+        b[i].set(reinterpret_cast<const hkVector4&>(t.m_rotation)(0), reinterpret_cast<const hkVector4&>(t.m_rotation)(1), reinterpret_cast<const hkVector4&>(t.m_rotation)(2), reinterpret_cast<const hkVector4&>(t.m_rotation)(3));
         c[i].set(t.m_vScale(0), t.m_vScale(1), t.m_vScale(2), 0.0f);
     }
 }
@@ -1033,7 +539,7 @@ void Se31d50_Anim::FUN_00e31d50(const Se31d50_Raw& raw, const Se31d50_PerTrack& 
     m_iEndian = 0;
     m_type = Se31d50_SPLINE;
     m_iMaxFramesPerBlock = animationParams.m_iMaxFramesPerBlock;
-    Se31d50_Bool enableSampleSingleTracks = animationParams.m_bEnableSampleSingleTracks;
+    hkBool enableSampleSingleTracks = animationParams.m_bEnableSampleSingleTracks;
     m_iFrameCount = raw.GetIntegerValue();
     m_iBlockCount = Se31d50_max2(1, (m_iFrameCount + m_iMaxFramesPerBlock - 3) / (m_iMaxFramesPerBlock - 1));
     m_fBlockDuration = m_fAnimationDuration / (m_iFrameCount - 1) * (m_iMaxFramesPerBlock - 1);
@@ -1120,14 +626,14 @@ void Se31d50_Anim::FUN_00e31d50(const Se31d50_Raw& raw, const Se31d50_PerTrack& 
                 }
                 for (int c = 0; c < numComponents; c++)
                 {
-                    Se31d50_Vector4 mean = FUN_00e31410(data[c]);
-                    Se31d50_Vector4 minV = FUN_00e31470(data[c]);
-                    Se31d50_Vector4 maxV = FUN_00e314c0(data[c]);
+                    hkVector4 mean = FUN_00e31410(data[c]);
+                    hkVector4 minV = FUN_00e31470(data[c]);
+                    hkVector4 maxV = FUN_00e314c0(data[c]);
                     if (c == 1)
                     {
                         mean.normalize4();
                     }
-                    Se31d50_Vector4 identity[3];
+                    hkVector4 identity[3];
                     identity[0].set(0.0f, 0.0f, 0.0f, 0.0f);
                     identity[1].set(0.0f, 0.0f, 0.0f, 1.0f);
                     identity[2].set(1.0f, 1.0f, 1.0f, 0.0f);
@@ -1200,7 +706,7 @@ void Se31d50_Anim::FUN_00e31d50(const Se31d50_Raw& raw, const Se31d50_PerTrack& 
         f += nf - 1;
         FUN_00e31850(16, m_kCompressedData);
     }
-    DAT_01268360->BeginSection(0x36118e94, str_010eb4c8);
+    DAT_01268360->beginSection(0x36118e94, str_010eb4c8);
     {
         char reportBuf[512];
         Se31d50_ErrStream ostr(reportBuf, sizeof(reportBuf));
@@ -1231,5 +737,5 @@ void Se31d50_Anim::FUN_00e31d50(const Se31d50_Raw& raw, const Se31d50_PerTrack& 
         ostr.FUN_00cc01c0(str_010eb400).WriteFloat((float)originalSize / FUN_00e33330()).FUN_00cc01c0(str_010eb414);
         DAT_01268360->message(0, -1, reportBuf, str_010eb470, 373);
     }
-    DAT_01268360->EndSection();
+    DAT_01268360->endSection();
 }

@@ -1,3 +1,4 @@
+#include "../../../../../include/hkArray.h"
 // src/havok/common/visualize/shape/hkdisplaycone_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/visualize/shape/hkdisplaycone.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -13,18 +14,12 @@ struct Edge
 {
     int polygon, end, start, adjacent;
 };
-template <class T> struct DynamicArray
-{
-    T* data;
-    int size;
-    unsigned int capacityAndFlags;
-    DynamicArray() : data(0), size(0), capacityAndFlags(0x80000000u)
-    {}
-};
+// Exe 0x00de57a0: three-word Havok owning arrays, initialized with DONT_DEALLOCATE_FLAG.
+
 struct GeometryBuffers
 {
-    DynamicArray<Vertex> vertices;
-    DynamicArray<Edge> edges;
+    hkArray<Vertex> vertices;
+    hkArray<Edge> edges;
     GeometryBuffers() : vertices(), edges()
     {}
     static void* operator new(unsigned int, void* position)
@@ -43,8 +38,8 @@ struct GlobalContext
     Allocator* allocator;
 };
 extern "C" GlobalContext* __cdecl FUN_00c85750();
-extern "C" void __cdecl ResizeAudioStream(Allocator*, DynamicArray<Vertex>*, int);
-extern "C" void __cdecl FUN_00c908c0(Allocator*, DynamicArray<Edge>*, int, int);
+extern "C" void __cdecl ResizeAudioStream(Allocator*, hkArray<Vertex>*, int);
+extern "C" void __cdecl FUN_00c908c0(Allocator*, hkArray<Edge>*, int, int);
 struct ForwardArg
 {
     GeometryBuffers* value;
@@ -219,7 +214,7 @@ void __thiscall Cls::FUN_00de54b0(ArrayRef output)
         int grow = capacity * 2;
         if (count >= grow)
             grow = count;
-        ::FUN_00c908c0(ctx, (::DynamicArray< ::Edge>*)arr, grow, 16);
+        ::FUN_00c908c0(ctx, (::hkArray< ::Edge>*)arr, grow, 16);
     }
     arr->m_iElementCount = count;
 

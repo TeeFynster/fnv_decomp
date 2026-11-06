@@ -66,7 +66,7 @@ bool BSFaceGenModel::ApplyTextureCoordinate(FaceGenCoordinates* coord, NiPointer
     }
     unsigned int uiBasis;
     for (uiBasis = 0; uiBasis < 2; ++uiBasis) {
-        if (reinterpret_cast<unsigned int>(reinterpret_cast<NiAVObject*>(&coord->basis[uiBasis])->GetParent()) < m_kTextureSlots->m_pTextureData->basis[uiBasis].FUN_0065cea0()) {
+        if (reinterpret_cast<unsigned int>(reinterpret_cast<NiAVObject*>(&reinterpret_cast<FaceGenCoordinateBasis*>(coord->data + 64)[uiBasis])->GetParent()) < m_kTextureSlots->m_pTextureData->basis[uiBasis].FUN_0065cea0()) {
             Warning("MODELS: FaceGen - Tried to apply a coordinate that did not match the EGT basis.");
             FUN_00652190();
             return false;
@@ -102,7 +102,7 @@ bool BSFaceGenModel::ApplyTextureCoordinate(FaceGenCoordinates* coord, NiPointer
         if (m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cec0(mode)->height == piAccum) {}
         else ReportAssertionViolation("D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\FaceGen\\BSFaceGenModel.cpp", 1163);
         FaceGenModeParameters modeData;
-        modeData.weight = static_cast<int>(*coord->basis[uiWidth].FUN_0060b370(mode, 0).FUN_00629ab0() * DAT_010231d8);
+        modeData.weight = static_cast<int>(*reinterpret_cast<FaceGenCoordinateBasis*>(coord->data + 64)[uiWidth].FUN_0060b370(mode, 0).FUN_00629ab0() * DAT_010231d8);
         if (!modeData.weight)
             continue;
         modeData.stride = m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cec0(mode)->width + m_kTextureSlots->m_pTextureData->basis[uiWidth].FUN_0065cec0(mode)->rowPadding;

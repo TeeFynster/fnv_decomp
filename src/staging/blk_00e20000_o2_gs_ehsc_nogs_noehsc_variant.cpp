@@ -1,3 +1,4 @@
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
 // src/staging/blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-28 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/staging/blk_00e20000_o2.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,6 +7,83 @@
 // src/staging/blk_00e20000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkStringPtr.h"
+#include "../../include/hkAabb.h"
+#include "../../include/hkKdTreeCastCollector.h"
+#include "../../include/hkpBroadPhaseCastCollector.h"
+#include "../../include/hkCpuWorldRayCastCollector.h"
+#include "../../include/hkAabbTreeQueryUtils.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkReferencedObject.h"
+// hkRefPtrE_blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant: local type (was include/hkRefPtrE.h, which had no evidence of one real class); no method of it is bound to a named game function
+#include "../../include/hkReferencedObject.h"
+
+class hkRefPtrE_blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant
+{
+public:
+    hkReferencedObject* m_pRetainedObject;
+
+    ~hkRefPtrE_blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant();
+};
+#include "../../include/hkTypeIsClass.h"
+#include "../../include/hkArray.h"
+
+__forceinline hkAabb::hkAabb()
+{}
+
+
+inline hkpBroadPhaseCastCollector::~hkpBroadPhaseCastCollector()
+{}
+inline hkKdTreeCastCollector::~hkKdTreeCastCollector()
+{}
+__forceinline hkVector4::hkVector4(const hkVector4& a) : m_vComponents(a.m_vComponents)
+{}
+inline void hkVector4::operator=(const __m128& a)
+{
+    m_vComponents = a;
+}
+__forceinline void hkVector4::set(float x, float y, float z, float w)
+{
+    m_vComponents = _mm_setr_ps(x, y, z, w);
+}
+__forceinline float& hkVector4::operator()(int i)
+{
+    return ((float*)&m_vComponents)[i];
+}
+inline void hkVector4::SetAllComponents(float f)
+{
+    m_vComponents = _mm_set_ps1(f);
+}
+inline void hkVector4::scale(const __m128& f)
+{
+    m_vComponents = _mm_mul_ps(m_vComponents, f);
+}
+
+template <class B, class I>
+inline hkAabbTreeQueryUtils<B, I>::Collector::~Collector()
+{}
+
+__forceinline hkCpuWorldRayCastCollector::hkCpuWorldRayCastCollector()
+{
+    m_workFilter = 0;
+    m_workCollection = 0;
+    m_fixedBufferRayHitFilterCollector = 0;
+    m_fHitFraction = 1.0f;
+    // The original initializes and reads only the hkBool byte in this shared slot.
+    *reinterpret_cast<hkBool*>(&m_bHasHit) = false;
+}
+inline hkBool hkCpuWorldRayCastCollector::DidHit()
+{
+    return *reinterpret_cast<hkBool*>(&m_bHasHit);
+}
+inline float hkCpuWorldRayCastCollector::GetHitFraction()
+{
+    return m_fHitFraction;
+}
+
 int __cdecl PackBitFields(int a, int b, int c);
 extern void* DAT_011be488[];
 void __cdecl CallHandlerByIndex(int a, int b, int c);
@@ -1090,24 +1168,7 @@ inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
-struct hkMemoryAllocator;
-struct hkMemoryRouterStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    hkMemoryAllocator* m_pStreamAllocator;
-};
-hkMemoryRouterStub* GetMemoryRouterStub();
-struct hkArrayUtilStub
-{
-    static void __cdecl reserve(hkMemoryAllocator& alloc, void* array, int numElem, int sizeElem);
-};
+hkMemoryRouter* GetMemoryRouterStub();
 struct RefHolderE2
 {
     void* m_ptr;
@@ -1120,73 +1181,53 @@ struct KeyedEntryE2
     float m_key;
     RefHolderE2 m_uiFilterValue;
 };
-template <typename T> struct hkArrayStub
+// The original reserve call is 0x00c908c0, hkArrayUtil::_reserve in the shared units.
+template <typename T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
+    if (getCapacity() < n)
     {
-        return m_iCapacityState & 0x3fffffff;
+        int cap2 = 2 * getCapacity();
+        int newCap = n < cap2 ? cap2 : n;
+        hkArrayUtil::_reserve(alloc, this, newCap, sizeof(T));
     }
+}
 
-    __forceinline void destruct(T* p, int n)
-    {
-        for (int i = 0; i < n; i++)
-        {
-            p[i].~T();
-        }
-    }
+template <typename T> __forceinline void hkArrayUtil::destruct(T* p, int n, hkTypeIsClass)
+{
+    for (int i = 0; i < n; i++)
+        p[i].~T();
+}
 
-    __forceinline void copy(T* dst, const T* src, int n)
-    {
-        for (int i = 0; i < n; i++)
-        {
-            dst[i] = src[i];
-        }
-    }
+template <typename T> __forceinline void hkArrayUtil::constructWithArray(T* dst, int n, const T* src, hkTypeIsClass)
+{
+    for (int i = 0; i < n; i++)
+        new (dst + i) T(src[i]);
+}
 
-    __forceinline void constructWithCopy(T* dst, int n, const T* src)
-    {
-        for (int i = 0; i < n; i++)
-        {
-            new (dst + i) T(src[i]);
-        }
-    }
+template <typename T> __forceinline hkArrayBase<T>& hkArrayBase<T>::copyFromArray(
+    hkMemoryAllocator& kHeap, const hkArrayBase<T>& kSrc, hkTypeIsClass)
+{
+    const int iWas = m_iElementCount;
+    const int iNow = kSrc.m_iElementCount;
+    const int iShared = iNow > iWas ? iWas : iNow;
+    GrowArrayCapacity(kHeap, iNow);
+    hkArrayUtil::destruct(m_data + iNow, iWas - iNow, hkTypeIsClass());
+    copy(m_data, kSrc.m_data, iShared);
+    hkArrayUtil::constructWithArray(m_data + iShared, iNow - iShared, kSrc.m_data + iShared, hkTypeIsClass());
+    m_iElementCount = iNow;
+    return *this;
+}
 
-    __forceinline void reserve(hkMemoryAllocator& alloc, int n)
-    {
-        if (getCapacity() < n)
-        {
-            int cap2 = 2 * getCapacity();
-            int newCap = n < cap2 ? cap2 : n;
-            hkArrayUtilStub::reserve(alloc, this, newCap, sizeof(T));
-        }
-    }
+template <typename T, typename A> __forceinline hkArray<T, A>& hkArray<T, A>::operator=(const hkArray<T, A>& a)
+{
+    copyFromArray(GetMemoryRouterStub()->heap(), a, hkTypeIsClass());
+    return *this;
+}
 
-    __forceinline hkArrayStub& operator=(const hkArrayStub& a)
-    {
-        copyFromArray(GetMemoryRouterStub()->heap(), a);
-        return *this;
-    }
-
-    __forceinline void copyFromArray(hkMemoryAllocator& alloc, const hkArrayStub& a)
-    {
-        const int oldSize = m_iElementCount;
-        const int newSize = a.m_iElementCount;
-        const int copiedSize = newSize > oldSize ? oldSize : newSize;
-        reserve(alloc, newSize);
-        destruct(m_data + newSize, oldSize - newSize);
-        copy(m_data, a.m_data, copiedSize);
-        constructWithCopy(m_data + copiedSize, newSize - copiedSize, a.m_data + copiedSize);
-        m_iElementCount = newSize;
-    }
-};
 struct FUN_00e2f680_Class
 {
     RefHolderE2 m_ref;
-    hkArrayStub<KeyedEntryE2> m_entries;
+    hkArray<KeyedEntryE2> m_entries;
 
     FUN_00e2f680_Class& CopyFrom(const FUN_00e2f680_Class& other);
 };
@@ -1284,16 +1325,7 @@ class FUN_00e39a80
     float m_14;
     FUN_00e39a80();
 };
-struct S_00e3a270_RefObj
-{
-    virtual void FUN_vfn0();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    S_00e3a270_RefObj() : m_sReferenceCount(1)
-    {}
-};
-struct FUN_00e3a270 : S_00e3a270_RefObj
+struct FUN_00e3a270 : hkReferencedObject
 {
     int unk08;
     int unk0c;
@@ -1398,20 +1430,6 @@ struct FUN_00e3c5b0 : S_00e3c5b0_Base
     unsigned char unk40;
     FUN_00e3c5b0(float f);
 };
-struct ScriptRecord
-{
-    unsigned int identifier;
-    unsigned short flags;
-    short type;
-    unsigned int value;
-};
-struct ScriptRecordList
-{
-    ScriptRecord* records;
-    int count;
-
-    ScriptRecord* FindByTypeAndOccurrence(int type, int occurrence);
-};
 struct FUN_00e3dfb0_arg
 {
     int value;
@@ -1490,53 +1508,16 @@ struct S_00e3ed00_Foo
     int __thiscall AppendToTraversalList(S_00e3ed00_Foo* param1, S_00e3ed00_List* param2);
 };
 void __cdecl ResizeAudioStream(int param1, S_00e3ed00_List* param2, int param3);
-struct hkMemoryAllocator
+hkMemoryRouter& GetMemoryRouter();
+inline hkRefPtrE_blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant::~hkRefPtrE_blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant()
 {
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-    template <class T> __forceinline void _bufFree(void* p, int numElem)
-    {
-        ReturnMemory(p, numElem * sizeof(T));
-    }
-};
-struct NineIntegerRecord
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* m_pStreamAllocator;
-    hkMemoryAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-NineIntegerRecord& GetMemoryRouter();
-struct hkReferencedObj
-{
-    void removeReference();
-};
-struct hkStringPtr
-{
-    const char* m_pcText;
-    void release();
-};
-struct hkRefPtrE
-{
-    hkReferencedObj* m_pRetainedObject;
-    ~hkRefPtrE()
-    {
-        if (m_pRetainedObject)
-            m_pRetainedObject->removeReference();
-        m_pRetainedObject = 0;
-    }
-};
+    if (m_pRetainedObject)
+        m_pRetainedObject->removeReference();
+    m_pRetainedObject = 0;
+}
 struct ReferenceCountedPointer
 {
-    hkReferencedObj* m_pRetainedObject;
+    hkReferencedObject* m_pRetainedObject;
     void release()
     {
         if (m_pRetainedObject)
@@ -1544,15 +1525,10 @@ struct ReferenceCountedPointer
         m_pRetainedObject = 0;
     }
 };
-struct hkStringPtrE
-{
-    const char* m_pcText;
-    ~hkStringPtrE();
-};
 struct Pair8
 {
     int unk00;
-    hkStringPtrE m_name;
+    hkStringPtr m_name;
     ~Pair8()
     {}
 };
@@ -1575,9 +1551,6 @@ struct Elem40
     int unk38;
     int unk3C;
 };
-struct hkTypeIsClass
-{
-};
 template <class T> __forceinline void destructAll2(T* t, int n, hkTypeIsClass)
 {
     for (int i = 0; i < n; ++i)
@@ -1589,33 +1562,6 @@ template <class T> __forceinline void destructAll(T* t, int n)
 {
     destructAll2(t, n, hkTypeIsClass());
 }
-template <class T> struct hkArr
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void clear()
-    {
-        destructAll(m_data, m_iElementCount);
-        m_iElementCount = 0;
-    }
-    __forceinline void _clearAndDeallocate(hkMemoryAllocator& alloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc._bufFree<T>(m_data, getCapacity());
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    __forceinline void ClearAndRelease()
-    {
-        _clearAndDeallocate(GetMemoryRouter().heap());
-    }
-};
 struct BaseE3EAA0
 {
     int unk04;
@@ -1629,9 +1575,9 @@ struct FUN_00e3ed80 : BaseE3EAA0
 {
     hkStringPtr m_14;
     ReferenceCountedPointer m_18;
-    hkArr<Elem40> m_1c;
-    hkArr<hkRefPtrE> m_28;
-    hkArr<Pair8> m_34;
+    hkArray<Elem40> m_1c;
+    hkArray<hkRefPtrE_blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant> m_28;
+    hkArray<Pair8> m_34;
     hkStringPtr m_40;
     virtual ~FUN_00e3ed80();
 };
@@ -1788,23 +1734,14 @@ struct FUN_00e3f370_cls
     void ReleaseItems();
 };
 
-#include <xmmintrin.h>
-struct hkVector4Stub
-{
-    __m128 m_vComponents;
-    void set(float x, float y, float z, float w = 0.0f)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
 struct Mat34
 {
     float m[3][4];
 };
 
 // @fnv 0x00e310c0
-void FUN_00e310c0(const Mat34* src, int stride, int n, int row, int col, hkVector4Stub** outA, hkVector4Stub** outB,
-                  hkVector4Stub** outC)
+void FUN_00e310c0(const Mat34* src, int stride, int n, int row, int col, hkVector4** outA, hkVector4** outB,
+                  hkVector4** outC)
 {
     for (int i = 0; i < n; i++)
     {
@@ -1815,63 +1752,24 @@ void FUN_00e310c0(const Mat34* src, int stride, int n, int row, int col, hkVecto
     }
 }
 
-class RayVector
-{
-    __m128 v;
-
-  public:
-    __forceinline RayVector()
-    {}
-    __forceinline RayVector(const RayVector& a) : v(a.v)
-    {}
-    __forceinline void operator=(const RayVector& a)
-    {
-        v = a.v;
-    }
-    __forceinline void set(float a, float b, float c, float d)
-    {
-        v = _mm_setr_ps(a, b, c, d);
-    }
-    __forceinline float& operator()(int i)
-    {
-        return ((float*)&v)[i];
-    }
-};
-class Flag
-{
-    char value;
-
-  public:
-    __forceinline Flag()
-    {}
-    __forceinline Flag(bool b) : value(char(b))
-    {}
-    __forceinline Flag& operator=(bool b)
-    {
-        value = char(b);
-        return *this;
-    }
-    __forceinline operator bool() const
-    {
-        return value != 0;
-    }
-};
 struct Ray
 {
-    RayVector from, to;
-    Flag filtering;
+    hkVector4 from, to;
+    hkBool filtering;
     unsigned int filterInfo;
     Ray() : filtering(false), filterInfo(0)
     {}
 };
-struct Command
+// Havok 7.1 hkpWorldRayCastCommand (hkpRayCastQueryJobs.h): m_rayInput, m_results, m_resultsCapacity,
+// m_numResultsOut, m_useCollector, m_stopAfterFirstHit; same constructor. Not the console-command Command.
+struct hkpWorldRayCastCommand
 {
     Ray input;
     void* results;
     int capacity;
     int count;
-    Flag useCollector, stop;
-    Command()
+    hkBool useCollector, stop;
+    hkpWorldRayCastCommand()
     {
         useCollector = false;
         stop = false;
@@ -1881,14 +1779,14 @@ struct BundleCommand
 {
     Ray input[4];
     int active;
-    Flag stop;
+    hkBool stop;
     void* results[4];
     __declspec(align(16)) int counts[4];
-    Flag useCollector;
+    hkBool useCollector;
 };
 struct Task
 {
-    RayVector o0, o1, o2, i0, i1, i2;
+    hkVector4 o0, o1, o2, i0, i1, i2;
     int mask;
 };
 struct Input
@@ -1896,121 +1794,35 @@ struct Input
     int unk00, unk04, unk08, unk0c;
     void* data10;
 };
-struct WorkInput
-{
-    RayVector from, to;
-    unsigned int filterInfo;
-    void* filter;
-    WorkInput()
-    {
-        filterInfo = 0;
-        filter = 0;
-    }
-};
-class hkpBroadPhaseHandle;
-class hkpBroadPhaseCastCollector
-{
-  public:
-    virtual ~hkpBroadPhaseCastCollector()
-    {}
-    virtual float ReleaseCollector(const hkpBroadPhaseHandle*, int) = 0;
-};
-class hkKdTreeCastCollector
-{
-  public:
-    virtual ~hkKdTreeCastCollector()
-    {}
-    virtual Flag ReportHit(unsigned long) = 0;
-    virtual Flag DidHit() = 0;
-    virtual float GetHitFraction() = 0;
-};
-struct hkAabbTreeData
-{
-    struct RayQueryAabb
-    {
-    };
-    struct QuantizedAabb
-    {
-    };
-};
-template <class B, class I = unsigned short> class hkAabbTree
-{
-  public:
-    struct Node;
-};
-template <class B, class I = unsigned short> class hkAabbTreeQueryUtils
-{
-  public:
-    struct Collector
-    {
-        virtual ~Collector()
-        {}
-        virtual float GetHitDistance(const typename hkAabbTree<B, I>::Node*) = 0;
-    };
-};
-class hkCpuWorldRayCastCollector : public hkpBroadPhaseCastCollector,
-                                   public hkKdTreeCastCollector,
-                                   public hkAabbTreeQueryUtils<hkAabbTreeData::RayQueryAabb>::Collector,
-                                   public hkAabbTreeQueryUtils<hkAabbTreeData::QuantizedAabb>::Collector
-{
-  public:
-    void* filter;
-    float fraction;
-    Flag hit;
-    Command* command;
-    const Ray* original;
-    void* result;
-    void* next;
-    WorkInput work;
-    void* fixed;
-    RayVector fractions;
-    hkCpuWorldRayCastCollector() : fixed(0)
-    {
-        fraction = 1.0f;
-        hit = false;
-    }
-    virtual float ReleaseCollector(const hkpBroadPhaseHandle*, int);
-    virtual Flag ReportHit(unsigned long);
-    virtual Flag DidHit()
-    {
-        return hit;
-    }
-    virtual float GetHitFraction()
-    {
-        return fraction;
-    }
-    virtual float GetHitDistance(const hkAabbTree<hkAabbTreeData::RayQueryAabb>::Node*);
-    virtual float GetHitDistance(const hkAabbTree<hkAabbTreeData::QuantizedAabb>::Node*);
-};
 extern int DAT_011b3830[];
-Task __cdecl FUN_00d1bb50(const RayVector&, const RayVector&, const RayVector&, const RayVector&, const RayVector&,
-                          const RayVector&, const RayVector&, const RayVector&, int);
+Task __cdecl FUN_00d1bb50(const hkVector4&, const hkVector4&, const hkVector4&, const hkVector4&, const hkVector4&,
+                          const hkVector4&, const hkVector4&, const hkVector4&, int);
 void __cdecl FUN_00d1d530(const Input*, void*, int, const Task&,
                           hkAabbTreeQueryUtils<hkAabbTreeData::RayQueryAabb>::Collector**, float*);
 // @fnv 0x00e2b070
-void FUN_00e2b070(const Input* input, BundleCommand* src, void* filter, RayVector& fractions, void*, void*, void*,
+void FUN_00e2b070(const Input* input, BundleCommand* src, void* filter, hkVector4& fractions, void*, void*, void*,
                   void*, int*)
 {
     if (!input)
         return;
     Task task = FUN_00d1bb50(src->input[0].from, src->input[0].to, src->input[1].from, src->input[1].to,
                              src->input[2].from, src->input[2].to, src->input[3].from, src->input[3].to, 15);
-    Command commands[4];
+    hkpWorldRayCastCommand commands[4];
     hkCpuWorldRayCastCollector collectors[4];
     float limits[4];
     hkAabbTreeQueryUtils<hkAabbTreeData::RayQueryAabb>::Collector* ptrs[4];
     for (int i = 0; i < 4; ++i)
     {
         commands[i].results = src->results[i];
-        collectors[i].result = commands[i].results;
-        collectors[i].next = commands[i].results;
+        collectors[i].m_result = reinterpret_cast<int>(commands[i].results);
+        collectors[i].m_iFieldAfterResult = reinterpret_cast<int>(commands[i].results);
         commands[i].input = src->input[i];
         commands[i].stop = src->stop;
         commands[i].capacity = 1;
         commands[i].count = 0;
-        collectors[i].filter = filter;
-        collectors[i].original = &commands[i].input;
-        collectors[i].command = &commands[i];
+        collectors[i].m_iFilter = reinterpret_cast<int>(filter);
+        collectors[i].m_iFieldBeforeResult = reinterpret_cast<int>(&commands[i].input);
+        collectors[i].m_iFieldAfterHasHit = reinterpret_cast<int>(&commands[i]);
         limits[i] = fractions(i);
         ptrs[i] = &collectors[i];
     }
@@ -2021,28 +1833,9 @@ void FUN_00e2b070(const Input* input, BundleCommand* src, void* filter, RayVecto
     fractions.set(limits[0], limits[1], limits[2], limits[3]);
 }
 
-class Vec4
-{
-  public:
-    void operator=(const Vec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void operator=(const __m128& q)
-    {
-        m_vComponents = q;
-    }
-    operator __m128() const
-    {
-        return m_vComponents;
-    }
-
-  private:
-    __m128 m_vComponents;
-};
 struct Bundle
 {
-    Vec4 m_data[3];
+    hkVector4 m_data[3];
 };
 struct RayQuerySet
 {
@@ -2053,14 +1846,14 @@ struct RayQuerySet
     int m_uiMask;
 };
 // @fnv 0x00e2baf0
-RayQuerySet __cdecl FUN_00e2baf0(const Vec4& from0, const Vec4& invDir0, const Vec4& from1, const Vec4& invDir1,
-                                 const Vec4& from2, const Vec4& invDir2, const Vec4& from3, const Vec4& invDir3,
+RayQuerySet __cdecl FUN_00e2baf0(const hkVector4& from0, const hkVector4& invDir0, const hkVector4& from1, const hkVector4& invDir1,
+                                 const hkVector4& from2, const hkVector4& invDir2, const hkVector4& from3, const hkVector4& invDir3,
                                  int mask)
 {
     Bundle bundleFrom;
-    Vec4 tmpFrom;
+    hkVector4 tmpFrom;
     Bundle bundleInvDir;
-    Vec4 tmpInvDir;
+    hkVector4 tmpInvDir;
     bundleFrom.m_data[0] = from0;
     bundleFrom.m_data[1] = from1;
     bundleFrom.m_data[2] = from2;
@@ -2102,40 +1895,8 @@ RayQuerySet __cdecl FUN_00e2baf0(const Vec4& from0, const Vec4& invDir0, const V
     return bundle;
 }
 
-#include <xmmintrin.h>
 namespace fnv_00e2c100 {
 extern float DAT_01011d78;
-struct CastVector4
-{
-    __m128 v;
-    CastVector4()
-    {}
-    CastVector4(const CastVector4& o)
-    {
-        v = o.v;
-    }
-    CastVector4& operator=(const CastVector4& o)
-    {
-        v = o.v;
-        return *this;
-    }
-    inline void SetAllComponents(float f)
-    {
-        v = _mm_set_ps1(f);
-    }
-    inline void set(float x, float y, float z, float w = DAT_01011d78)
-    {
-        v = _mm_setr_ps(x, y, z, w);
-    }
-    inline void scale(const __m128& f)
-    {
-        v = _mm_mul_ps(v, f);
-    }
-    inline void subtract(const __m128& f)
-    {
-        v = _mm_sub_ps(v, f);
-    }
-};
 struct QuantizedNode
 {
     unsigned short maxX, maxY, maxZ, minX, minY, minZ, child0, child1, flags, metadata;
@@ -2147,19 +1908,19 @@ struct NodeArray
 };
 struct Tree
 {
-    CastVector4 treeHeader;
+    hkVector4 treeHeader;
     int nodeCount, capacity, root;
     NodeArray nodes;
     int field20, field24, field28, field2c;
-    CastVector4 bounds;
-    CastVector4 offset;
-    CastVector4 scale0;
-    CastVector4 scale1;
-    CastVector4 scale;
+    hkVector4 bounds;
+    hkVector4 offset;
+    hkVector4 scale0;
+    hkVector4 scale1;
+    hkVector4 scale;
 };
 struct Ray
 {
-    CastVector4 origin, invDirection;
+    hkVector4 origin, invDirection;
 };
 struct Shape
 {
@@ -2194,15 +1955,15 @@ struct Query : QueryHeader, Collector
     void* shape;
     void* object;
     void* object2;
-    CastVector4 normal;
-    CastVector4 position;
+    hkVector4 normal;
+    hkVector4 position;
     int key;
     void* filter;
     int mode;
     int state;
     void* callback;
     int callbackFlags, callbackKey, callbackState;
-    CastVector4 maxFraction;
+    hkVector4 maxFraction;
 };
 struct Filter
 {
@@ -2239,46 +2000,42 @@ extern void __cdecl FUN_00e2baf0(void*, __m128*, __m128*, __m128*, __m128*, __m1
 extern void __cdecl FUN_00d1bfa0(Tree*, QuantizedNode*, void*, void*, Collector**, float*);
 extern int DAT_011b3830[];
 extern float DAT_01267e30;
-struct Bounds
-{
-    CastVector4 low, high;
-};
-__forceinline void restore(QuantizedNode* n, const CastVector4& scale, const CastVector4& offset, Bounds& out)
+__forceinline void restore(QuantizedNode* n, const hkVector4& scale, const hkVector4& offset, hkAabb& out)
 {
 
-    out.high.set(float(n->maxX << 15), float(n->maxY << 15), float(n->maxZ << 15));
-    out.low.set(float(n->minX << 15), float(n->minY << 15), float(n->minZ << 15));
+    reinterpret_cast<hkVector4&>(out.m_kMaximumCorner.x).set(float(n->maxX << 15), float(n->maxY << 15), float(n->maxZ << 15), DAT_01011d78);
+    reinterpret_cast<hkVector4&>(out.m_kMinimumCorner.x).set(float(n->minX << 15), float(n->minY << 15), float(n->minZ << 15), DAT_01011d78);
     __m128 factor = scale.v;
-    out.low.v = _mm_mul_ps(out.low.v, factor);
-    out.high.v = _mm_mul_ps(factor, out.high.v);
-    out.low.subtract(offset.v);
-    out.high.subtract(offset.v);
+    reinterpret_cast<hkVector4&>(out.m_kMinimumCorner.x).v = _mm_mul_ps(reinterpret_cast<hkVector4&>(out.m_kMinimumCorner.x).v, factor);
+    reinterpret_cast<hkVector4&>(out.m_kMaximumCorner.x).v = _mm_mul_ps(factor, reinterpret_cast<hkVector4&>(out.m_kMaximumCorner.x).v);
+    reinterpret_cast<hkVector4&>(out.m_kMinimumCorner.x).v = _mm_sub_ps(reinterpret_cast<hkVector4&>(out.m_kMinimumCorner.x).v, offset.v);
+    reinterpret_cast<hkVector4&>(out.m_kMaximumCorner.x).v = _mm_sub_ps(reinterpret_cast<hkVector4&>(out.m_kMaximumCorner.x).v, offset.v);
 }
 __forceinline __m128 reduceNear(const __m128& mn)
 {
     __m128 y = _mm_shuffle_ps(mn, mn, 0x55), z = _mm_shuffle_ps(mn, mn, 0xaa);
     return _mm_max_ps(_mm_max_ps(mn, *(__m128*)&DAT_01267e30), _mm_max_ps(y, z));
 }
-__forceinline __m128 reduceFar(const __m128& mx, const CastVector4& limit)
+__forceinline __m128 reduceFar(const __m128& mx, const hkVector4& limit)
 {
     __m128 y = _mm_shuffle_ps(mx, mx, 0x55), z = _mm_shuffle_ps(mx, mx, 0xaa);
     return _mm_min_ps(_mm_min_ps(mx, limit.v), _mm_min_ps(y, z));
 }
-__forceinline bool intersects(const Bounds& bounds, Ray* r, const CastVector4& limit)
+__forceinline bool intersects(const hkAabb& bounds, Ray* r, const hkVector4& limit)
 {
-    const __m128& lo = bounds.low.v;
-    const __m128& hi = bounds.high.v;
-    CastVector4 a, b;
+    const __m128& lo = reinterpret_cast<const hkVector4&>(bounds.m_kMinimumCorner.x).v;
+    const __m128& hi = reinterpret_cast<const hkVector4&>(bounds.m_kMaximumCorner.x).v;
+    hkVector4 a, b;
     a.v = lo;
     b.v = hi;
-    a.subtract(r->origin.v);
-    b.subtract(r->origin.v);
+    a.v = _mm_sub_ps(a.v, r->origin.v);
+    b.v = _mm_sub_ps(b.v, r->origin.v);
     a.scale(r->invDirection.v);
     b.scale(r->invDirection.v);
-    CastVector4 mn, mx;
+    hkVector4 mn, mx;
     mn.v = _mm_min_ps(a.v, b.v);
     mx.v = _mm_max_ps(a.v, b.v);
-    CastVector4 nearValue, farValue;
+    hkVector4 nearValue, farValue;
     nearValue.v = reduceNear(mn.v);
     farValue.v = reduceFar(mx.v, limit);
     return (_mm_movemask_ps(_mm_cmplt_ps(nearValue.v, farValue.v)) & 1) != 0;
@@ -2291,15 +2048,15 @@ void __cdecl FUN_00e2c100(Tree* tree, QuantizedNode* node, void* arg3, Ray* rays
 {
     *num1 = 0;
     *num0 = 0;
-    const CastVector4& scale = tree->scale;
-    const CastVector4& offset = tree->offset;
+    const hkVector4& scale = tree->scale;
+    const hkVector4& offset = tree->offset;
     if (node->flags & 0x8000)
     {
-        Bounds bounds;
+        hkAabb bounds;
         restore(node, scale, offset, bounds);
         if (0 >= count)
             return;
-        CastVector4 limit;
+        hkVector4 limit;
         limit.v = _mm_set_ps1(1.0f);
         for (int i = 0; i < count; ++i)
         {
@@ -2319,10 +2076,10 @@ void __cdecl FUN_00e2c100(Tree* tree, QuantizedNode* node, void* arg3, Ray* rays
         QuantizedNode* b = manager->GetEntryOffset(node->child1);
         *child0 = *a;
         *child1 = *b;
-        Bounds bounds0, bounds1;
+        hkAabb bounds0, bounds1;
         restore(child0, scale, offset, bounds0);
         restore(child1, scale, offset, bounds1);
-        CastVector4 limit;
+        hkVector4 limit;
         limit.v = _mm_set_ps1(1.0f);
         for (int i = 0; i < count; ++i)
         {

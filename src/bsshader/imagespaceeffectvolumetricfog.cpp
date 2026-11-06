@@ -2,28 +2,16 @@
 // src/bsshader/imagespaceeffectvolumetricfog.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/imagespaceeffectvolumetricfog.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/MemoryManager.h"
+#include "../../include/ImageSpaceEffectParam.h"
+
 typedef unsigned int size_t;
 
 struct ImageSpaceTexture;
-struct ImageSpaceEffectParam
-{
-};
 
-template <typename T> struct NiTPrimitiveArray
-{
-    void* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usGrowBy;
-    unsigned short m_usQuantity;
-    char pad[6];
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int i, const T& element);
-};
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTPrimitiveArray.h"
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int size);
-};
 extern MemoryManager g_memoryManager;
 
 void __cdecl _Deallocate(void* p);

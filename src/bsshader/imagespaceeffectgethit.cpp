@@ -2,13 +2,19 @@
 
 #include "imagespaceeffectgethit_types_ImageSpaceEffectGetHit.h"
 #include "imagespaceeffectgethit_types_ImageSpaceShaderParam.h"
-#include "MemoryManager.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/ImageSpaceManager.h"
 #include "imagespaceeffectgethit_decls.h"
 extern MemoryManager g_memoryManager;
 
+// The original out-of-line SetAt (0x00ba3aa0) does not alias other effect arrays.
+template <>
+__declspec(noalias) void NiTArray<GetHitEffectParamLocalForm*, NiTMallocInterface<GetHitEffectParamLocalForm*> >::SetAt(
+    unsigned int index, GetHitEffectParamLocalForm* const& element);
+
 // Updates two shader parameters from global constants using a computed angle, sets DAT_012003c4, and returns true.
 // @fnv 0x00c03740
-bool ImageSpaceEffectWithTwoTextures::UpdateParams(ImageSpaceEffectParam* param)
+bool ImageSpaceEffectWithTwoTextures::UpdateParams(GetHitEffectParamLocalForm* param)
 {
     ImageSpaceShaderParam* shader = reinterpret_cast<ImageSpaceShaderParam*>(pEffectParamList.m_pBase[3]);
     float angle = static_cast<float>(DAT_011f940c / DAT_01012640 * DAT_0104eea0);
@@ -23,7 +29,7 @@ bool ImageSpaceEffectWithTwoTextures::UpdateParams(ImageSpaceEffectParam* param)
 // @fnv 0x00c03810
 ImageSpaceEffectWithTwoTextures::ImageSpaceEffectWithTwoTextures()
 {
-    pTextures.AddFirstEmpty(4);
+    pTextures.SetSize(4);  // 0x00a90180: the folded NiTArray<T>::SetSize
 }
 
 struct Standin
@@ -41,64 +47,30 @@ void* Standin::ReleaseIfFlagged(unsigned int flags)
     return this;
 }
 
-extern MemoryManager g_memoryManager;
-struct ImageSpaceManagerX
+inline ImageSpaceEffect* ImageSpaceManager::GetEffect(int index)
 {
-    int unk00;
-    NiTPrimitiveArray_ImageSpaceEffect___ kEffects;
-    ImageSpaceEffect* GetEffect(unsigned int index)
-    {
-        return kEffects.m_pBase[index];
-    }
-};
-struct ImageSpaceTextureArrayX
-{
-    void SetSize(unsigned int size);
-};
-struct ImageSpaceParamArrayX
-{
-    __declspec(noalias) void SetAt(unsigned int index, ImageSpaceEffectParam* const& element);
-};
-struct ImageSpaceShaderParamX : ImageSpaceShaderParam
-{
-    ImageSpaceShaderParamX();
-    static void* operator new(unsigned int size)
-    {
-        return g_memoryManager.Allocate(size);
-    }
-    static void operator delete(void* pointer)
-    {
-        g_memoryManager.Deallocate(pointer);
-    }
-};
-struct ImageSpaceEffectX : ImageSpaceEffect
-{
-    void SetEffectParamAt(int pass, int input, int output);
-    void SetupEffect(ImageSpaceManagerX* manager, ImageSpaceEffectParam* param);
-    ImageSpaceParamArrayX& Params()
-    {
-        return *(ImageSpaceParamArrayX*)&pEffectParamList;
-    }
-};
+    return reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)->m_pBase[index];
+}
+
 // Sets texture and parameter arrays, configures four effect slots, and creates shader constants for the fourth slot.
 // @fnv 0x00c038b0
-void ImageSpaceEffectX::SetupEffect(ImageSpaceManagerX* manager, ImageSpaceEffectParam* param)
+void ImageSpaceEffectWithTwoTextures::Setup(ImageSpaceManager* manager, GetHitEffectParamLocalForm* param)
 {
     SetTextureArrayCount(4);
-    ((ImageSpaceTextureArrayX*)&pTextures)->SetSize(4);
-    Params().SetAt(0, 0);
+    pTextures.SetSize(4);
+    pEffectParamList.SetAt(0, 0);
     SetEffectParamAt(0, 1, 0);
     SetEffectAt(0, manager->GetEffect(34), 0, 2);
-    Params().SetAt(1, 0);
+    pEffectParamList.SetAt(1, 0);
     SetEffectAt(1, 2, 3, 0, 0);
     SetEffectAt(1, manager->GetEffect(17), 0, 2);
-    Params().SetAt(2, 0);
+    pEffectParamList.SetAt(2, 0);
     SetEffectAt(2, 2, 3, 0, 0);
     SetEffectAt(2, manager->GetEffect(17), 0, 2);
-    ImageSpaceShaderParamX* shaderParam = new ImageSpaceShaderParamX;
+    ImageSpaceShaderParam* shaderParam = new ImageSpaceShaderParam;
     shaderParam->AllocateShaderConstants(0, 2);
     shaderParam->m_bTextureFlags[2] = false;
-    Params().SetAt(3, shaderParam);
+    pEffectParamList.SetAt(3, shaderParam);
     SetEffectAt(3, 1, 2, 0, 0);
     SetEffectAt(3, manager->GetEffect(44), shaderParam, 0);
 }

@@ -11,21 +11,8 @@
 // radio extra up by its type index and hands back its data pointer.
 
 #include "layout_support.h"
-
-class ExtraRadioData;
-
-class ExtraDataList
-{
-  public:
-    ExtraRadioData* GetExtraRadioData();  // 0x00418460
-};
-
-class TESObjectREFR
-{
-  public:
-    ExtraDataList* GetExtraData();        // 0x005d43c0
-    ExtraRadioData* GetExtraRadioData();  // 0x00568e50
-};
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/ExtraDataList.h"
 
 // @fnv 0x00568e50
 ExtraRadioData* TESObjectREFR::GetExtraRadioData()

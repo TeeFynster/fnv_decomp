@@ -1,6 +1,27 @@
+#include "../../../../include/NiTListBase.h"
+#include "../../../../include/NiTListItem.h"
 // gamebryo2.2/corelibs/niconsolerenderer/nid3dshaderprogramfactory.cpp: NiD3DShaderProgramFactory, ProgFactoryDirs, ShaderEntryOwner (26 functions)
 
-#include "nid3dshaderprogramfactory_packet.h"
+#include "../../../../include/NiD3DShaderProgramCreator.h"
+#include "../../../../include/NiD3DPixelShader.h"
+#include "../../../../include/NiD3DVertexShader.h"
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiD3DShaderProgramFactory.h"
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiTStringPointerMap.h"
+
+class NiShader;
+
+typedef NiTStringTemplateMap<NiTPointerMap<const char*, NiShader*>, NiShader*> CreatorMap;
+extern CreatorMap* DAT_0126fa14;
+extern "C" const char* __cdecl strchr(const char*, int);
+extern "C" int __cdecl tolower(int);
+struct DirectoryEntry
+{
+    DirectoryEntry* next;
+    unsigned int unused;
+    const char* value;
+};
 // @fnv 0x00e93000
 const char* NiD3DShaderProgramFactory::GetNextName(void*& apPosition)
 {
@@ -105,27 +126,25 @@ void* __thiscall FUN_00e93f30_shell::DestroyShaderProgramFactory(unsigned int fl
 
 struct ShaderBufferRecord;
 
-struct NiTStringPointerMap_00e93060
+// Local fallback: the shared factory lacks both cache fields (+0x14/+0x18) and lookups (0x00e93020/0x00e93060).
+struct ShaderFactoryCacheView
 {
-    bool __thiscall GetAt(const char* key, ShaderBufferRecord*& out);
-};
-
-struct NiD3DShaderProgramFactory_00e93060
-{
-    int m_auiShapeKeys[6];
-    NiTStringPointerMap_00e93060* m_pShaderBufferMap;
-    ShaderBufferRecord* __thiscall FUN_00e93060(const char* pcShaderName);
+    int m_unusedPrefix[5];
+    NiTStringPointerMap<ShaderBufferRecord*>* m_pVertexShaderMap;
+    NiTStringPointerMap<ShaderBufferRecord*>* m_pPixelShaderMap;
+    ShaderBufferRecord* __thiscall FindVertexShader(const char* pcShaderName);
+    ShaderBufferRecord* __thiscall FindPixelShader(const char* pcShaderName);
 };
 
 // @fnv 0x00e93060
-ShaderBufferRecord* NiD3DShaderProgramFactory_00e93060::FUN_00e93060(const char* pcShaderName)
+ShaderBufferRecord* ShaderFactoryCacheView::FindPixelShader(const char* pcShaderName)
 {
-    NiTStringPointerMap_00e93060* map = m_pShaderBufferMap;
+    NiTStringPointerMap<ShaderBufferRecord*>* map = m_pPixelShaderMap;
     if (!map)
         return 0;
-    ShaderBufferRecord* pkVertexShader = 0;
-    if (map->GetAt(pcShaderName, pkVertexShader))
-        return pkVertexShader;
+    ShaderBufferRecord* pkPixelShader = 0;
+    if (map->GetAt(pcShaderName, pkPixelShader))
+        return pkPixelShader;
     return 0;
 }
 
@@ -162,55 +181,6 @@ void CreateCreatorMap()
 }
 
 namespace fnv_00e92ee0 {
-struct NiD3DVertexShader;
-struct NiD3DShaderProgramCreator
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual void f6();
-    virtual bool Recreate(NiD3DVertexShader* pkVertexShader);
-};
-struct NiD3DVertexShader
-{
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual NiD3DShaderProgramCreator* GetCreator();
-    virtual void g28();
-    virtual void g29();
-    virtual void g30();
-    virtual void g31();
-    virtual void g32();
-    virtual int IsRecreated();
-};
 // If a global flag is set and pkVertexShader is non-null, returns true when already recreated, otherwise asks its creator to recreate it.
 // @fnv 0x00e92ee0
 bool __cdecl FUN_00e92ee0(NiD3DVertexShader* pkVertexShader)
@@ -228,59 +198,24 @@ bool __cdecl FUN_00e92ee0(NiD3DVertexShader* pkVertexShader)
 }
 }  // namespace fnv_00e92ee0
 
-struct ShaderBufferRecord;
-struct NiTStringPointerMap_00e93020
-{
-    bool __thiscall GetAt(const char* key, ShaderBufferRecord*& out);
-};
-struct NiD3DShaderProgramFactory_00e93020
-{
-    int m_auiShapeKeys[5];
-    NiTStringPointerMap_00e93020* m_pShaderBufferMap;
-    ShaderBufferRecord* __thiscall FUN_00e93020(const char* pcShaderName);
-};
 // @fnv 0x00e93020
-ShaderBufferRecord* NiD3DShaderProgramFactory_00e93020::FUN_00e93020(const char* pcShaderName)
+ShaderBufferRecord* ShaderFactoryCacheView::FindVertexShader(const char* pcShaderName)
 {
-    if (!m_pShaderBufferMap)
+    if (!m_pVertexShaderMap)
         return 0;
-    ShaderBufferRecord* pkPixelShader = 0;
-    return m_pShaderBufferMap->GetAt(pcShaderName, pkPixelShader) ? pkPixelShader : 0;
+    ShaderBufferRecord* pkVertexShader = 0;
+    return m_pVertexShaderMap->GetAt(pcShaderName, pkVertexShader) ? pkVertexShader : 0;
 }
 
-struct FakeShader_00e93820
-{
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual const char* GetName();
-};
 struct FUN_00e93820_shell
 {
     int m_auiShapeKeys[6];
     NiTStringTemplateMap<NiTPointerMap<char const*, NiShader*>, NiShader*>* m_map;
-    void RegisterShader(FakeShader_00e93820* p);
+    void RegisterShader(NiD3DPixelShader* p);
 };
 // If p and m_map are non-null, inserts p into m_map keyed by p->GetName().
 // @fnv 0x00e93820
-void FUN_00e93820_shell::RegisterShader(FakeShader_00e93820* apShader)
+void FUN_00e93820_shell::RegisterShader(NiD3DPixelShader* apShader)
 {
     if (apShader && m_map)
         m_map->SetAt(apShader->GetName(), (NiShader*)apShader);
@@ -305,54 +240,6 @@ void* __thiscall Owner_00e93ab0::DestroyIfFlagged(unsigned int flags)
 }
 
 namespace fnv_00e92f30 {
-struct NiD3DPixelShader;
-struct NiD3DShaderProgramCreator
-{
-    virtual void vf00();
-    virtual void vf01();
-    virtual void vf02();
-    virtual void vf03();
-    virtual void vf04();
-    virtual void vf05();
-    virtual void vf06();
-    virtual void vf07();
-    virtual bool Recreate(NiD3DPixelShader* pkPixelShader);
-};
-struct NiD3DPixelShader
-{
-    virtual void vf00();
-    virtual void vf01();
-    virtual void vf02();
-    virtual void vf03();
-    virtual void vf04();
-    virtual void vf05();
-    virtual void vf06();
-    virtual void vf07();
-    virtual void vf08();
-    virtual void vf09();
-    virtual void vf10();
-    virtual void vf11();
-    virtual void vf12();
-    virtual void vf13();
-    virtual void vf14();
-    virtual void vf15();
-    virtual void vf16();
-    virtual void vf17();
-    virtual void vf18();
-    virtual void vf19();
-    virtual void vf20();
-    virtual void vf21();
-    virtual void vf22();
-    virtual void vf23();
-    virtual void vf24();
-    virtual void vf25();
-    virtual void vf26();
-    virtual NiD3DShaderProgramCreator* GetCreator();
-    virtual void vf28();
-    virtual void vf29();
-    virtual void vf30();
-    virtual int CanRecreate();
-};
 // Returns true if the pixel shader can be recreated or its creator successfully recreates it, otherwise false.
 // @fnv 0x00e92f30
 bool FUN_00e92f30(NiD3DPixelShader* pkPixelShader)
@@ -360,7 +247,7 @@ bool FUN_00e92f30(NiD3DPixelShader* pkPixelShader)
     NiD3DShaderProgramCreator* pkCreator;
     if (DAT_0126fa10 && pkPixelShader)
     {
-        if (pkPixelShader->CanRecreate())
+        if (pkPixelShader->GetD3DPixelShader())
             return true;
         pkCreator = pkPixelShader->GetCreator();
         if (pkCreator)
@@ -444,12 +331,7 @@ extern "C" unsigned int __cdecl strlen(const char*);
 int strcpy_s(char* dst, unsigned int size, const char* src);
 void* NiMalloc(unsigned int size);
 extern "C" int __cdecl FUN_00aa1360(const char* a, const char* b);
-struct DirNode
-{
-    DirNode* m_pkNext;
-    DirNode* m_pkPrev;
-    char* m_element;
-};
+typedef NiTListItem<char* > DirNode;
 struct NodePoolView
 {
     unsigned int m_uiCount;
@@ -544,7 +426,8 @@ struct BSBatchRenderer__AlphaList
     BSBatchRenderer__GeometryGroup* __thiscall Remove(BSBatchRenderer__GeometryGroup*&);
 };
 
-struct NiD3DShaderProgramFactory_Shell
+// Factory directory view: 0x00e93bb0 accesses the list at +0x08, absent from the shared factory.
+struct ShaderFactoryDirectoryView
 {
     int unk00;
     int unk04;
@@ -555,7 +438,7 @@ struct NiD3DShaderProgramFactory_Shell
 
 // Copies pcDirectory into a path buffer, converts '/' to '\\', then removes the matching entry from m_directories if found.
 // @fnv 0x00e93bb0
-void __thiscall NiD3DShaderProgramFactory_Shell::RemoveDirectoryEntry(const char* pcDirectory)
+void __thiscall ShaderFactoryDirectoryView::RemoveDirectoryEntry(const char* pcDirectory)
 {
     if (!pcDirectory || strcmp(pcDirectory, "") == 0)
         return;
@@ -641,7 +524,8 @@ void FUN_00e93e00_Obj::FUN_00e93e00()
     DAT_00fdf1c4(&DAT_011f4400);
 }
 
-class NiTMapBase
+// The creator map at DAT_0126fa14 (an NiTStringPointerMap) seen through the members 0x00e93260 uses.
+class CreatorMapView
 {
   public:
     void* m_pvVtbl;
@@ -662,38 +546,25 @@ class NiTMapBase
     bool RemoveAt(const char* pcKey);
 };
 
-// Removes pkCreator from the global NiTMapBase at DAT_0126fa14 if found, iterating entries and calling RemoveAt on a matching key.
+// Removes pkCreator from the global CreatorMapView at DAT_0126fa14 if found, iterating entries and calling RemoveAt on a matching key.
 // @fnv 0x00e93260
 void __cdecl FUN_00e93260(NiD3DShaderProgramCreator* pkCreator)
 {
     if (DAT_0126fa14 == 0)
         return;
 
-    void* pvIter = ((NiTMapBase*)DAT_0126fa14)->GetFirstPos();
+    void* pvIter = ((CreatorMapView*)DAT_0126fa14)->GetFirstPos();
     while (pvIter)
     {
         const char* pcExt = 0;
         NiD3DShaderProgramCreator* pkTestCreator = 0;
-        ((NiTMapBase*)DAT_0126fa14)->AdvanceToNextEntry(pvIter, pcExt, pkTestCreator);
+        ((CreatorMapView*)DAT_0126fa14)->AdvanceToNextEntry(pvIter, pcExt, pkTestCreator);
         if (pkCreator == pkTestCreator)
-            ((NiTMapBase*)DAT_0126fa14)->RemoveAt(pcExt);
+            ((CreatorMapView*)DAT_0126fa14)->RemoveAt(pcExt);
     }
 }
 
-class NiShaderLibraryE93
-{
-  public:
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0C();
-    virtual void vf10();
-    virtual void vf14();
-    virtual FakeShader_00e93820* CreateShader(void* pkDesc, void* pkRenderer, const char* pcName, void* pvArg4,
-                                              void* pvArg5, void* pvArg6);
-};
-
-NiShaderLibraryE93* __cdecl FUN_00e932f0(const char* pcLibName);
+NiD3DShaderProgramCreator* __cdecl FUN_00e932f0(const char* pcLibName);
 
 // Returns the cached entry for pcName, or creates a shader with pkLibrary, registers it, and returns it.
 // @fnv 0x00e938e0
@@ -705,13 +576,17 @@ void* __cdecl FUN_00e938e0(void* pkDesc, void* pkRenderer, const char* pcLibName
     if (!pkDesc || !pkRenderer)
         return 0;
     ShaderBufferRecord* pkEntry =
-        reinterpret_cast<NiD3DShaderProgramFactory_00e93060*>(DAT_0126fa10)->FUN_00e93060(pcName);
+        reinterpret_cast<ShaderFactoryCacheView*>(DAT_0126fa10)->FindPixelShader(pcName);
     if (pkEntry)
         return pkEntry;
-    NiShaderLibraryE93* pkLibrary = FUN_00e932f0(pcLibName);
+    NiD3DShaderProgramCreator* pkLibrary = FUN_00e932f0(pcLibName);
     if (!pkLibrary)
         return 0;
-    FakeShader_00e93820* pkShader = pkLibrary->CreateShader(pkDesc, pkRenderer, pcName, pvArg4, pvArg5, pvArg6);
+    // The shared creator header does not yet declare the pixel-shader creation slot.
+    typedef NiD3DPixelShader* (__thiscall* CreatePixelShader)(NiD3DShaderProgramCreator*, void*, void*, const char*,
+                                                            void*, void*, void*);
+    NiD3DPixelShader* pkShader =
+        (*reinterpret_cast<CreatePixelShader**>(pkLibrary))[6](pkLibrary, pkDesc, pkRenderer, pcName, pvArg4, pvArg5, pvArg6);
     reinterpret_cast<FUN_00e93820_shell*>(DAT_0126fa10)->RegisterShader(pkShader);
     return pkShader;
 }
@@ -719,31 +594,18 @@ void* __cdecl FUN_00e938e0(void* pkDesc, void* pkRenderer, const char* pcLibName
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* p);
 extern "C" void* __cdecl MemSet_00e93ad0(void* dst, int value, unsigned int size);
 
-class NiRefObject
+inline NiRefObject::NiRefObject()
 {
-  public:
-    NiRefObject() throw()
-    {
-        m_uiRefCount = 0;
-        InterlockedIncrement((long volatile*)&DAT_011f4400);
-    }
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
+    m_uiRefCount = 0;
+    InterlockedIncrement((long volatile*)&DAT_011f4400);
+}
 
-    unsigned int m_uiRefCount;
-};
-
-class NiMemObject_00e93ad0
+inline void* NiMemObject::operator new(size_t uiSize)
 {
-  public:
-    static void* operator new(unsigned int uiSize) throw()
-    {
-        return g_memoryManager.Allocate(uiSize);
-    }
-    static void operator delete(void*, unsigned int);
-};
+    return g_memoryManager.Allocate(uiSize);
+}
 
-template <class TVAL> class ShaderMapBase : public NiMemObject_00e93ad0
+template <class TVAL> class ShaderMapBase : public NiMemObject
 {
   public:
     ShaderMapBase(unsigned int uiHashSize) throw()
@@ -781,13 +643,11 @@ template <class TVAL> class ShaderStringMap : public ShaderStringTemplateMap<TVA
     virtual ~ShaderStringMap();
 };
 
-struct DirAllocator_00e93ad0
-{
-    unsigned int m_uiCount;
-};
+struct DirAllocator_00e93ad0 { unsigned int m_uiCount; };
 
-struct DirListItem_00e93ad0;
+typedef NiTListItem<char*> DirListItem_00e93ad0;
 
+// local form of NiTListBase: 0x00e93ad0 needs its inlined member constructor; shared-list trial moves the owner vftable store (exe relocation +0x1e).
 class DirList_00e93ad0
 {
   public:
@@ -848,7 +708,7 @@ struct ShaderEntryList
 struct ShaderEntryNodePool
 {
     void* first;
-    void __thiscall Wait(int count);
+    void __thiscall FUN_0040fbf0(int count);
 };
 extern ShaderEntryNodePool DAT_011c5f80;
 extern ShaderEntryNode* DAT_011c5f58;
@@ -902,7 +762,7 @@ void ShaderEntryOwner::FUN_00e93cc0()
                     if (pNext)
                         pNext->previous = pPrev;
                     candidate->element = 0;
-                    DAT_011c5f80.Wait(0);
+                    DAT_011c5f80.FUN_0040fbf0(0);
                     candidate->previous = 0;
                     candidate->next = DAT_011c5f58;
                     --DAT_011c5f84;
@@ -919,16 +779,6 @@ void ShaderEntryOwner::FUN_00e93cc0()
 }
 
 namespace fnv_00e93850 {
-class NiD3DShaderProgramCreator
-{
-  public:
-    virtual void vf00();
-    virtual void vf01();
-    virtual void vf02();
-    virtual void vf03();
-    virtual ShaderArg* CreateShader(const char* p0, const char* p1, const char* p3, unsigned int p4, unsigned int p5,
-                                    unsigned int p6, unsigned int p7, unsigned int p8, unsigned int p9);
-};
 
 NiD3DShaderProgramCreator* FUN_00e932f0(const char* p2);
 
@@ -944,7 +794,7 @@ ShaderArg* FUN_00e93850(const char* p0, const char* p1, const char* apCreatorNam
     if (!p0 || !p1)
         return 0;
 
-    ShaderArg* pkShader = (ShaderArg*)((NiD3DShaderProgramFactory_00e93020*)DAT_0126fa10)->FUN_00e93020(apShaderName);
+    ShaderArg* pkShader = (ShaderArg*)((ShaderFactoryCacheView*)DAT_0126fa10)->FindVertexShader(apShaderName);
     if (pkShader)
         return pkShader;
 
@@ -964,12 +814,7 @@ extern "C" int __cdecl FUN_00ec65a6(char* d, unsigned int n, const char* s);
 int __cdecl FUN_00aa0020(int, bool, const char*, ...);
 void __cdecl FUN_00e983f0(const char* pcPath, char* pcDrive, char* pcDir, char* pcFName, char* pcExt);
 int __cdecl FUN_00a305b0(char* d, unsigned int n, const char* fmt, ...);
-struct ShPF_Node
-{
-    ShPF_Node* m_pkNext;
-    ShPF_Node* m_pkPrev;
-    const char* m_element;
-};
+typedef NiTListItem<const char* > ShPF_Node;
 struct ShPF_Factory
 {
     void* vt;

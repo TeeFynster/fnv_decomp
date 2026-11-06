@@ -1,11 +1,17 @@
 // fallout_shared/bgsmovablestatic.cpp: BGSMovableStatic, MovableRecord, MovableStaticFormComparison (11 functions)
 
-#include "bgsmovablestatic_decls.h"
+#include "../../include/BGSMovableStatic.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectSTAT.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESChallenge.h"
+#include "../../include/BGSDestructibleObjectForm.h"
 
 // @fnv 0x004fbb50
-void BGSMovableStatic::ResetFormData()
+void BGSMovableStatic::InitializeComponent()
 {
-    m_pSoundEffect = 0;
+    soundLoop = 0;
 }
 
 struct BGSLoadFormBuffer;
@@ -38,13 +44,6 @@ struct blob36
 {
     char b[36];
 };
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
 struct FUN_004fbf00_shell : public BGSMovableStatic
 {
@@ -57,48 +56,24 @@ void FUN_004fbf00_shell::FUN_004fbf00(TESSound* apSound)
     *reinterpret_cast<TESSound**>(reinterpret_cast<char*>(this) + 0x6c) = apSound;
 }
 
-struct TESFullName
-{
-    int a[3];
-    TESFullName();
-    ~TESFullName();
-};
-struct BGSDestructibleObjectForm
-{
-    int a[2];
-    BGSDestructibleObjectForm();
-    ~BGSDestructibleObjectForm();
-};
-struct TESObjectSTAT
-{
-    TESObjectSTAT();
-    ~TESObjectSTAT();
-};
 struct SFTX
 {
     void SetFormType(int);
 };
-extern void* DAT_01024cc8[];
-extern void* DAT_01024cec[];
-extern void* DAT_01024e70[];
-extern void* DAT_01024e84[];
 char* __fastcall FUN_00864490(char*);
 
-struct FUN_004fba00_obj : public TESFullName, public BGSDestructibleObjectForm, public TESObjectSTAT
+struct MovableStaticObject : TESFullName, BGSDestructibleObjectForm, TESObjectSTAT
 {
-    FUN_004fba00_obj();
+    MovableStaticObject();
+    virtual ~MovableStaticObject();
 };
 
 // @fnv 0x004fba00
-FUN_004fba00_obj::FUN_004fba00_obj()
+MovableStaticObject::MovableStaticObject()
 {
-    *(void***)this = DAT_01024e84;
-    *(void***)((char*)this + 0xc) = DAT_01024e70;
-    *(void***)((char*)this + 0x14) = DAT_01024cec;
-    *(void***)((char*)this + 0x44) = DAT_01024cc8;
     FUN_00864490((char*)this + 0x70);
     ((SFTX*)((char*)this + 0x14))->SetFormType(0x22);
-    ((BGSMovableStatic*)((char*)this + 0x14))->ResetFormData();
+    ((BGSMovableStatic*)this)->BGSMovableStatic::InitializeComponent();
 }
 
 struct FUN_004fc060_shell
@@ -146,10 +121,6 @@ struct Date
 {
     ~Date();
 };
-struct DoorPart30
-{
-    void FUN_00487010();
-};
 struct DoorPart68
 {
     void FUN_00477f20();
@@ -185,7 +156,7 @@ void FUN_004fbf20_shell::Destroy()
 {
     unsigned int itempint;
     ((FUN_004855a0*)this)->M();
-    ((DoorPart30*)((char*)this - 0x14))->FUN_00487010();
+    ((TESFullName*)((char*)this - 0x14))->FUN_00487010();
     ((DoorPart3c*)((char*)this + 0x30))->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
     ((DoorPart68*)((char*)this - 8))->FUN_00477f20();
     if (FUN_00401500())
@@ -201,59 +172,12 @@ void FUN_004fbf20_shell::Destroy()
     ((FUN_00485680*)this)->M();
 }
 
-struct S_004fbac0_P
-{
-    virtual ~S_004fbac0_P();
-    int unk04;
-    int unk08;
-};
-struct S_004fbac0_B
-{
-    virtual void b0();
-    ~S_004fbac0_B();
-    int unk04;
-};
-struct S_004fbac0_C
-{
-    virtual void c0();
-    ~S_004fbac0_C();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-};
-struct S_004fbac0_E
-{
-    virtual void e0();
-};
-struct FUN_004fbac0 : S_004fbac0_P, S_004fbac0_B, S_004fbac0_C, S_004fbac0_E
-{
-    virtual ~FUN_004fbac0();
-};
 // Empty destructor for the class; performs no work.
 // @fnv 0x004fbac0
-FUN_004fbac0::~FUN_004fbac0()
+MovableStaticObject::~MovableStaticObject()
 {}
 
 extern "C" void* __cdecl _alloca(unsigned int);
-class TESFile
-{
-  public:
-    unsigned char GetTESForm();
-    int GetChunkID();
-    unsigned int GetChunkSize();
-    bool GetChunkData(void*, unsigned int);
-    bool GetChunkData(unsigned int*);
-    unsigned short GetFormVersion();
-    bool GetNextChunk();
-};
 struct AlchTexSwap
 {
     unsigned int modelPath;
@@ -269,15 +193,7 @@ struct AlchTexSwap
     unsigned int modelState;
     bool LoadTextureSwapList(void*, unsigned int, unsigned int);
 };
-struct AlchDestr
-{
-};
-void FUN_004781e0(AlchDestr*, TESFile*);
 void FUN_004892d0(AlchTexSwap*, TESFile*);
-struct TESFullNameLoader
-{
-    static void LoadFullNameChunk(TESFullName*, TESFile*);
-};
 struct MovableRecord;
 struct StaticRecord
 {
@@ -373,18 +289,7 @@ struct StaticRecord
     void LoadRecordHeader(TESFile*);
     void FUN_004861f0(TESFile*, void*, unsigned short);
 };
-struct RecordName
-{
-    virtual void nameSlot();
-    unsigned int name;
-    unsigned int nameLength;
-};
-struct RecordDestruct
-{
-    virtual void destructSlot();
-    unsigned int destructible;
-};
-struct MovableRecord : RecordName, RecordDestruct, StaticRecord, AlchTexSwap
+struct MovableRecord : TESFullName, BGSDestructibleObjectForm, StaticRecord, AlchTexSwap
 {
     unsigned char data;
     virtual bool LoadRecordChunks(TESFile* file);
@@ -413,7 +318,7 @@ bool MovableRecord::LoadRecordChunks(TESFile* file)
             LoadBounds(file);
             break;
         case 0x4c4c5546:
-            TESFullNameLoader::LoadFullNameChunk(reinterpret_cast<TESFullName*>(this), file);
+            TESFullName::LoadFullNameChunk(reinterpret_cast<TESFullName*>(this), file);
             break;
         case 0x4c444f4d:
         case 0x54444f4d:
@@ -429,7 +334,7 @@ bool MovableRecord::LoadRecordChunks(TESFile* file)
             break;
         case 0x54534544:
         case 0x44545344:
-            FUN_004781e0(reinterpret_cast<AlchDestr*>(static_cast<RecordDestruct*>(this)), file);
+            BGSDestructibleObjectForm::LoadDestructibleData(static_cast<BGSDestructibleObjectForm*>(this), file);
             break;
         case 0x41544144:
             FUN_004861f0(file, &this->data, 1);
@@ -446,8 +351,8 @@ bool MovableRecord::LoadRecordChunks(TESFile* file)
     return true;
 }
 
-namespace fnv_004fbfe0 {
 class TESForm;
+namespace fnv_004fbfe0 {
 struct FUN_004fbf00_shell
 {
     void FUN_004fbf00(TESSound*);
@@ -461,17 +366,13 @@ extern void* DAT_01189d4c;
 
 void* __cdecl FUN_00ec43fb(int, int, void*, void*, int);
 
-struct TESChallenge
-{
-    int GetProgressValue();
-};
 
 struct FUN_005e78f0_t
 {
     void FUN_004851b0(TESForm*);
 };
 
-struct FUN_004fbfe0_shell : public BGSMovableStatic
+struct FUN_004fbfe0_shell : public TESObjectSTAT  // TESForm vftable slot 66 of BGSMovableStatic: this = TESObjectSTAT subobject (+0x14)
 {
     void FUN_004fbfe0(int);
 };
@@ -487,108 +388,15 @@ void FUN_004fbfe0_shell::FUN_004fbfe0(int arg)
         reinterpret_cast<FUN_004fbf00_shell*>(reinterpret_cast<char*>(this) - 0x14)
             ->FUN_004fbf00(reinterpret_cast<TESSound*>(reinterpret_cast<TESChallenge*>(result)->GetProgressValue()));
 
-        reinterpret_cast<FUN_004fc060_shell*>(this->_pdbpad_5c)
-            ->SetByteFromPtr(reinterpret_cast<const unsigned char*>(reinterpret_cast<BGSMovableStatic*>(result)->data));
+        reinterpret_cast<FUN_004fc060_shell*>(&reinterpret_cast<BGSMovableStatic*>(reinterpret_cast<char*>(this) - 0x14)->data)
+            ->SetByteFromPtr(&reinterpret_cast<BGSMovableStatic*>(result)->data);
 
         reinterpret_cast<FUN_005e78f0_t*>(this)->FUN_004851b0(
-            result ? reinterpret_cast<TESForm*>(reinterpret_cast<char*>(result) + 0x14) : 0);
+            result ? reinterpret_cast<::TESForm*>(reinterpret_cast<char*>(result) + 0x14) : 0);
     }
 }
 }  // namespace fnv_004fbfe0
 
-class TESForm
-{
-  public:
-    virtual void unk004();
-    virtual void unk008();
-    virtual void unk00C();
-    virtual void unk010();
-    virtual void unk014();
-    virtual void unk018();
-    virtual void unk01C();
-    virtual void unk020();
-    virtual void unk024();
-    virtual void unk028();
-    virtual void unk02C();
-    virtual void unk030();
-    virtual void unk034();
-    virtual void unk038();
-    virtual void unk03C();
-    virtual void unk040();
-    virtual void unk044();
-    virtual void unk048();
-    virtual void unk04C();
-    virtual void unk050();
-    virtual void unk054();
-    virtual void unk058();
-    virtual void unk05C();
-    virtual void unk060();
-    virtual void unk064();
-    virtual void unk068();
-    virtual void unk06C();
-    virtual void unk070();
-    virtual void unk074();
-    virtual void unk078();
-    virtual void unk07C();
-    virtual void unk080();
-    virtual void unk084();
-    virtual void unk088();
-    virtual void unk08C();
-    virtual void unk090();
-    virtual void unk094();
-    virtual void unk098();
-    virtual void unk09C();
-    virtual void unk0A0();
-    virtual void unk0A4();
-    virtual void unk0A8();
-    virtual void unk0AC();
-    virtual void unk0B0();
-    virtual void unk0B4();
-    virtual void unk0B8();
-    virtual void unk0BC();
-    virtual void unk0C0();
-    virtual void unk0C4();
-    virtual void unk0C8();
-    virtual void unk0CC();
-    virtual void unk0D0();
-    virtual void unk0D4();
-    virtual void unk0D8();
-    virtual void unk0DC();
-    virtual void unk0E0();
-    virtual void unk0E4();
-    virtual void unk0E8();
-    virtual void unk0EC();
-    virtual void unk0F0();
-    virtual void unk0F4();
-    virtual void unk0F8();
-    virtual void unk0FC();
-    virtual void unk100();
-    virtual void unk104();
-    virtual void unk108();
-    virtual void unk10C();
-    virtual void unk110();
-    virtual void unk114();
-    virtual void unk118();
-    virtual void unk11C();
-    virtual void unk120();
-    virtual void unk124();
-    virtual void unk128();
-    virtual void unk12C();
-    virtual void unk130();
-    virtual const char* GetName();
-    bool GetInitialized();
-    TESFile* GetFile(int a);
-    unsigned int GetFormID();
-    void SetInitializationState(bool b);
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-};
 
 struct MovableStaticComponentComparison
 {
@@ -602,7 +410,7 @@ struct MovableStaticSoundComparison
 {
     ::TESSound* FUN_005e3fa0();
 };
-struct MovableStaticFormComparison : ::BGSMovableStatic
+struct MovableStaticFormComparison : ::TESObjectSTAT  // TESForm vftable slot 67 of BGSMovableStatic: this = TESObjectSTAT subobject (+0x14)
 {
     bool FUN_004fc080(::TESForm* apCompare);
 };
@@ -616,7 +424,7 @@ bool MovableStaticFormComparison::FUN_004fc080(::TESForm* apCompare)
     if (((MovableStaticComponentComparison*)this)
             ->FUN_00485270(pMovableStatic ? (::TESForm*)((char*)pMovableStatic + 0x14) : 0))
         return true;
-    if (((MovableStaticDataComparison*)this->_pdbpad_5c)->IsByteDifferent((unsigned char*)pMovableStatic->data))
+    if (((MovableStaticDataComparison*)&((::BGSMovableStatic*)((char*)this - 0x14))->data)->IsByteDifferent(&pMovableStatic->data))
         return true;
     if (((MovableStaticSoundComparison*)((char*)this - 0x14))->FUN_005e3fa0() !=
         ((MovableStaticSoundComparison*)pMovableStatic)->FUN_005e3fa0())

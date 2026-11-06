@@ -3,7 +3,7 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /GF /Ob1 (unit src/fallout_shared/tesobject.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "tesobject_decls.h"
+#include "../../include/NiPoint3.h"
 
 extern "C" unsigned __cdecl FUN_00ec6130(const char*);
 extern "C" void __cdecl ReportAssertionViolation(const char*, int);
@@ -438,14 +438,10 @@ template <class E, class T, class A> class basic_string
 };
 }
 typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > GameString;
-struct Vector3
-{
-    float x, y, z;
-};
 struct GameRecord
 {
     int id;
-    Vector3 position;
+    NiPoint3 position;
     GameString name;
 };
 struct GameAllocator
@@ -4121,21 +4117,15 @@ extern "C" int __cdecl memmove_s(void* pvDst, unsigned int uiDstSize, const void
 void* __cdecl operator new(unsigned int uiSize);
 namespace std {}
 extern "C" char* __cdecl strcpy(char* pcDst, const char* pcSrc);
-struct Point3_b2e7
-{
-    float x;
-    float y;
-    float z;
-};
 struct FUN_00b2e740
 {
     bool m_bEnableState;
-    Point3_b2e7 m_kPathOffset;
+    NiPoint3 m_kPathOffset;
     float m_fBoundRadius;
     String m_kName;
-    Point3_b2e7 m_kPoint1;
-    Point3_b2e7 m_kPoint2;
-    Point3_b2e7 m_kPoint3;
+    NiPoint3 m_kPoint1;
+    NiPoint3 m_kPoint2;
+    NiPoint3 m_kPoint3;
 
     FUN_00b2e740(const FUN_00b2e740& kOther);
 };
@@ -4945,7 +4935,8 @@ struct Tok
     Str a, b;
     Tok();
 };
-struct Vec
+// std::vector<Tok> (Tok = two strings): 0x00acf580 = resize(n, value); operator[] has the checked-index call.
+struct TokVector
 {
     unsigned allocatorProxy;
     unsigned iteratorProxy;
@@ -5014,12 +5005,12 @@ struct Big : Input
 };
 
 void FUN_00ac6430(int, Str);  // -> 0x00ac6430  SetError(int, string)
-bool FUN_00ac7f50(Big*, Vec*, const Str&, int);
+bool FUN_00ac7f50(Big*, TokVector*, const Str&, int);
 
 }
 
 // @fnv 0x00ac8c50
-bool FUN_00ac8c50(const Str& name, const Str& arg2, Vec* pVec)
+bool FUN_00ac8c50(const Str& name, const Str& arg2, TokVector* pVec)
 {
     Str msg5;
     Big kObj(name.c_str(), 1, 0x40);
@@ -6008,14 +5999,10 @@ inline void __cdecl ThrowVectorTooLong()
 {
     throw InsertionLengthError(ErrorText(DAT_010173c4));
 }
-struct Point3
-{
-    float x, y, z;
-};
 struct Element52
 {
     BxString name;
-    GvVector<Point3> points;
+    GvVector<NiPoint3> points;
     Element52(const Element52& other) : name(other.name), points(other.points)
     {}
     ~Element52()

@@ -1,18 +1,14 @@
+#include "../../include/AutoMemHelper.h"
+#include "../../include/InterfacedClass.h"
+#include "../../include/QueuedReference.h"
+#include "../../include/RecursiveSpinLock.h"
+#include "../../include/SL.h"
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern int DAT_01017458;
-
-struct FUN_0044b4b0_Class
-{
-    int* p;
-    void FUN_0044b4b0();
-};
-
 // @fnv 0x0044b4b0
-void FUN_0044b4b0_Class::FUN_0044b4b0()
+InterfacedClass::~InterfacedClass()
 {
-    p = &DAT_01017458;
 }
 
 int __cdecl FinishScriptRunLock(void*);
@@ -65,11 +61,6 @@ void FUN_0044f200_Class::FUN_0044f200()
         FilterListByQueueData();
 }
 
-struct RecursiveSpinLock
-{
-    void __thiscall Lock(const char*);
-    void __thiscall Unlock();
-};
 struct FUN_0044bd60_Class
 {
     void* m;
@@ -95,37 +86,13 @@ bool __thiscall FUN_0044bd60_Class::FUN_0044bd60(void* a, void* b)
     return r;
 }
 
-struct AutoMemHelper
-{
-    int m;
-    AutoMemHelper(int, bool, const char*, int);
-    ~AutoMemHelper();
-};
-struct InterfacedClass
-{
-    InterfacedClass();
-    ~InterfacedClass();
-    virtual void Interface();
-};
 struct CF_0081c630
 {
     int v;
     CF_0081c630();
 };
-struct SL
-{
-    void* item;
-    void* next;
-    SL();
-};
 class bhkRigidBody;
-template <class T> class LockFreeQueue
-{
-  public:
-    class QueueDeleteManagerTag
-    {
-    };
-};
+#include "../../include/LockFreeQueue.h"
 template <class T> class ThreadInterfaceManager
 {
   public:
@@ -146,7 +113,7 @@ struct FUN_0044c920 : InterfacedClass
     ThreadInterfaceManager<LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag>* m_pManager;
     int m_iArrayLength;
     int unk1C;
-    SL m_kNode;
+    unsigned char m_kNode[sizeof(SL)];
     FUN_0044c920(unsigned int a, unsigned int buckets, int c);
 };
 
@@ -154,6 +121,8 @@ struct FUN_0044c920 : InterfacedClass
 // @fnv 0x0044c920
 FUN_0044c920::FUN_0044c920(unsigned int auiSlotCount, unsigned int auiBucketCount, int aiParam)
 {
+    reinterpret_cast<SL*>(m_kNode)->SL::SL();
+
     AutoMemHelper mem(6, true, _kThreadSafeStructuresSourceFile, 0x390);
     m_iArrayLength = 0;
     m_uiBuckets = auiBucketCount;
@@ -172,7 +141,7 @@ struct FUN_0044c760_class : InterfacedClass
     ThreadInterfaceManager<LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag>* m_pManager;
     int m_iArrayLength;
     int unk1C;
-    SL m_kNode;
+    unsigned char m_kNode[sizeof(SL)];
 
     FUN_0044c760_class(unsigned int a, unsigned int b, unsigned int c);
 };
@@ -182,6 +151,8 @@ struct FUN_0044c760_class : InterfacedClass
 FUN_0044c760_class::FUN_0044c760_class(unsigned int auiSlotCount, unsigned int auiBucketCount, unsigned int aiParam)
     : InterfacedClass()
 {
+    reinterpret_cast<SL*>(m_kNode)->SL::SL();
+
     AutoMemHelper autoMemHelper(6, true, _kThreadSafeStructuresSourceFile, 0x390);
 
     m_iArrayLength = 0;
@@ -203,7 +174,7 @@ struct FUN_006ec660 : InterfacedClass
     ThreadInterfaceManager<LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag>* m_pManager;
     int m_iArrayLength;
     int unk1C;
-    SL m_kNode;
+    unsigned char m_kNode[sizeof(SL)];
 
     FUN_006ec660(unsigned int a, unsigned int b, int c);
 };
@@ -212,6 +183,8 @@ struct FUN_006ec660 : InterfacedClass
 // @fnv 0x006ec660
 FUN_006ec660::FUN_006ec660(unsigned int auiSlotCount, unsigned int auiBucketCount, int aiParam)
 {
+    reinterpret_cast<SL*>(m_kNode)->SL::SL();
+
     AutoMemHelper memHelper(6, true, _kThreadSafeStructuresSourceFile, 0x390);
 
     m_iArrayLength = 0;
@@ -222,24 +195,7 @@ FUN_006ec660::FUN_006ec660(unsigned int auiSlotCount, unsigned int auiBucketCoun
     m_pManager = new ThreadInterfaceManager<LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag>(auiSlotCount);
 }
 
-template <class T> class NiPointer
-{
-};
-class QueuedReference
-{
-};
 
-template <> class LockFreeQueue<NiPointer<QueuedReference> >
-{
-  public:
-    class LockFreeQueueEntry
-    {
-      public:
-        void* m_pFirst;
-        void* m_pSecond;
-        LockFreeQueueEntry();
-    };
-};
 
 typedef LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag FUN_0044b500_LockFreeQueueInterface;
 
@@ -247,14 +203,14 @@ template <> ThreadInterfaceManager<FUN_0044b500_LockFreeQueueInterface>::ThreadI
 
 struct FUN_0044b500 : public InterfacedClass
 {
-    LockFreeQueue<NiPointer<QueuedReference> >::LockFreeQueueEntry* m_pHead;
-    LockFreeQueue<NiPointer<QueuedReference> >::LockFreeQueueEntry* m_pTail;
+    LockFreeQueue<NiPointer<QueuedReference> >::LockFreeQueueNode* m_pHead;
+    LockFreeQueue<NiPointer<QueuedReference> >::LockFreeQueueNode* m_pTail;
     void* m_pIntegerData;
     unsigned int* m_pSlots;
     ThreadInterfaceManager<FUN_0044b500_LockFreeQueueInterface>* m_pManager;
     int m_iArrayLength;
     int unk1C;
-    SL m_kNode;
+    unsigned char m_kNode[sizeof(SL)];
 
     FUN_0044b500(unsigned int numBuckets, void* value);
 };
@@ -262,21 +218,20 @@ struct FUN_0044b500 : public InterfacedClass
 // @fnv 0x0044b500
 FUN_0044b500::FUN_0044b500(unsigned int numBuckets, void* value)
 {
+    reinterpret_cast<SL*>(m_kNode)->SL::SL();
+
     AutoMemHelper autoMemHelper(6, true, _kThreadSafeStructuresSourceFile, 0xfd);
 
     m_iArrayLength = 0;
-    m_pHead = new LockFreeQueue<NiPointer<QueuedReference> >::LockFreeQueueEntry;
+    m_pHead = new LockFreeQueue<NiPointer<QueuedReference> >::LockFreeQueueNode;
     m_pTail = m_pHead;
     m_pIntegerData = value;
     m_pSlots = new unsigned int[numBuckets * 2];
     m_pManager = new ThreadInterfaceManager<FUN_0044b500_LockFreeQueueInterface>(numBuckets);
 }
 
-extern int DAT_0108864c;
-
-struct FUN_00906160
+struct FUN_00906160 : InterfacedClass
 {
-    InterfacedClass m_interface;
     unsigned int* m_pSlots;
     unsigned int m_uiBuckets;
     CF_0081c630* m_pBuckets;
@@ -292,7 +247,6 @@ struct FUN_00906160
 // @fnv 0x00906160
 FUN_00906160::FUN_00906160(int a, unsigned int auiBucketCount, int aiParam)
 {
-    reinterpret_cast<int*>(this)[0] = reinterpret_cast<int>(&DAT_0108864c);
     reinterpret_cast<SL*>(m_kNode)->SL::SL();
 
     AutoMemHelper helper(6, true, _kThreadSafeStructuresSourceFile, 0x390);
@@ -420,7 +374,7 @@ struct FUN_0044c270 : InterfacedClass
     ThreadInterfaceManager<LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag>* m_pManager;
     int m_iArrayLength;
     int unk1C;
-    SL m_kNode;
+    unsigned char m_kNode[sizeof(SL)];
 
     FUN_0044c270(unsigned int a, unsigned int buckets, int c);
 };
@@ -429,6 +383,8 @@ struct FUN_0044c270 : InterfacedClass
 // @fnv 0x0044c270
 FUN_0044c270::FUN_0044c270(unsigned int a, unsigned int auiBucketCount, int aiParam)
 {
+    reinterpret_cast<SL*>(m_kNode)->SL::SL();
+
     AutoMemHelper mem(6, true, _kThreadSafeStructuresSourceFile, 0x390);
     m_iArrayLength = 0;
     m_uiBuckets = auiBucketCount;
@@ -438,16 +394,7 @@ FUN_0044c270::FUN_0044c270(unsigned int a, unsigned int auiBucketCount, int aiPa
     m_pManager = new ThreadInterfaceManager<LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag>(a);
 }
 
-struct BaseInterface
-{
-    virtual void Interface();
-    void FUN_0044b4b0();
-    ~BaseInterface()
-    {
-        FUN_0044b4b0();
-    }
-};
-struct FUN_0044c3f0 : BaseInterface
+struct FUN_0044c3f0 : InterfacedClass
 {
     void* first;
     void* unused;
@@ -648,13 +595,7 @@ int C44C8E0Map::LookupBucket(int iKey, int iSize)
 
 void __cdecl FormHeap_Free(void* apMemory);
 
-struct CleanupBaseDtor
-{
-    virtual void unk00();
-    ~CleanupBaseDtor();
-};
-
-struct FUN_0044cae0_cls : CleanupBaseDtor
+struct FUN_0044cae0_cls : InterfacedClass
 {
     int m_04;
     int unk08;
@@ -751,15 +692,6 @@ FUN_006ec870::~FUN_006ec870()
     delete m_pSlots;
 }
 
-class AutoMemHelper44B
-{
-  public:
-    AutoMemHelper44B(int iPool, bool bEnable, const char* pcFile, int iLine);
-    ~AutoMemHelper44B();
-
-    int m_iSaved;
-};
-
 extern const char g_pcFile44B[];
 
 class Container44B;
@@ -791,7 +723,7 @@ class Container44B
 // @fnv 0x0044b660
 Iterator44B* Container44B::CreateBucketIterator(int iBucketIndex)
 {
-    AutoMemHelper44B kHelper(6, true, g_pcFile44B, 0x95);
+    AutoMemHelper kHelper(6, true, g_pcFile44B, 0x95);
     return new Iterator44B(this, &m_ppvBuckets[iBucketIndex * 2], &m_ppvBuckets[iBucketIndex * 2 + 1]);
 }
 
@@ -874,7 +806,7 @@ struct FUN_00665cb0 : InterfacedClass
     ThreadInterfaceManager<LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag>* m_pManager;
     int m_iArrayLength;
     int unk1C;
-    SL m_kNode;
+    unsigned char m_kNode[sizeof(SL)];
 
     FUN_00665cb0(unsigned int a, unsigned int buckets, int c);
 };
@@ -883,6 +815,8 @@ struct FUN_00665cb0 : InterfacedClass
 // @fnv 0x00665cb0
 FUN_00665cb0::FUN_00665cb0(unsigned int a, unsigned int uiBucketCount, int iParam)
 {
+    reinterpret_cast<SL*>(m_kNode)->SL::SL();
+
     AutoMemHelper mem(6, true, _kThreadSafeStructuresSourceFile, 0x390);
     m_iArrayLength = 0;
     m_uiBuckets = uiBucketCount;
@@ -892,12 +826,7 @@ FUN_00665cb0::FUN_00665cb0(unsigned int a, unsigned int uiBucketCount, int iPara
     m_pManager = new ThreadInterfaceManager<LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag>(a);
 }
 
-struct HashBase44c1e0
-{
-    virtual void Interface();
-    ~HashBase44c1e0();
-};
-struct HashMap44c1e0 : HashBase44c1e0
+struct HashMap44c1e0 : InterfacedClass
 {
     unsigned int* m_pSlots;
     unsigned int m_uiBuckets;

@@ -1,3 +1,11 @@
+#include "../../include/BSSimpleArray.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/PathingLocation.h"
+#include "../../include/BSScrapArray.h"
+#include "../../include/PathingAvoidNode.h"
+#include "../../include/PathBuilderDetailedPathInfos.h"
+#include "../../include/PathingGraphNode.h"
 
 // src/unmapped/bssimplearray_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/unmapped/bssimplearray.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -74,51 +82,14 @@ struct FUN_006e9260Class : PSNodeStub
 {
     void FUN_006e9260();
 };
-struct BSSimpleArray_006e93c0
-{
-    void* AllocateElements(int count);
-};
 void* __cdecl Reallocate(void* p, int size);
 struct FUN_006e93f0
 {
     void* __thiscall FUN_006e93f0_(void* p, int n);
 };
-struct NiPoint3
-{
-    float x, y, z;
-    bool FUN_004390c0(const NiPoint3& a);
-};
-struct FUN_00692290_class
-{
-    void FUN_005ef650(unsigned int count, unsigned int growBy);
-};
-struct FUN_00691820_arr
-{
-    int m0;
-    unsigned short* pBuffer;
-    unsigned int GetNextPosition();
-    unsigned int Append(const unsigned short* aValue);
-};
-struct NavMeshSearchLOSArray
-{
-    void FUN_006a8500();
-};
 struct PacketNodeRecord
 {
     void FUN_006a8500();
-};
-struct BSSimpleArray_006cefa0
-{
-    void* vfptr;
-    PacketNodeRecord* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-    void ReleaseElements(PacketNodeRecord* pItems, unsigned int ItemUpdateArray);
-    void FreeArray(bool abFreeMemory);
-};
-struct PathingLocation
-{
-    PathingLocation& operator=(const PathingLocation&);
 };
 struct PathingLocationArray
 {
@@ -128,12 +99,6 @@ struct PathingLocationArray
     void ConstructItems(PathingLocation* pItems, unsigned int ItemUpdateArray);
     unsigned int AppendSlot();
     unsigned int FUN_006cf1b0(const PathingLocation& aValue);
-};
-struct PathBuilderDetailedPathInfos
-{
-    int* vfptr;
-    void Clear(bool);
-    virtual ~PathBuilderDetailedPathInfos();
 };
 struct FUN_006cf340 : PathBuilderDetailedPathInfos
 {
@@ -187,7 +152,8 @@ struct ScrapHeapBuffer
     void* Allocate(unsigned int, unsigned int);
     void Deallocate(void*);
 };
-struct ArrSI
+// Exe 0x00a0d0c0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BssimplearrayOffset08View
 {
     unsigned int GetFlags();
 };
@@ -292,22 +258,6 @@ struct FUN_006d0450_Class
 {
     int __thiscall GetNextIndex();
 };
-struct BSSimpleArrayActor
-{
-    virtual ~BSSimpleArrayActor();
-    virtual unsigned short* Allocate(unsigned int count);
-
-    unsigned short* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-
-    void Clear(bool abFreeMemory);
-    void FUN_005eee80(unsigned int aiNewSize, bool abFreeMemory);
-};
-struct FUN_005ef6a0Class
-{
-    void __thiscall SetOrReplace(unsigned int newSize, int oldSize);
-};
 void* __cdecl operator new(unsigned int, void*);
 struct EightByteData
 {
@@ -346,15 +296,6 @@ struct FUN_006cf200
 {
     int* vfptr;
     FUN_006cf200();
-};
-struct BSScrapArray
-{
-    void* vfptr;
-    void* field04;
-    void* field08;
-    void* field0c;
-    ScrapHeapBuffer* m_pPoolBase;
-    void* __thiscall FUN_006cf670(unsigned int size);
 };
 struct EH
 {
@@ -421,14 +362,6 @@ struct FUN_006bf8f0_Class
 
     void __thiscall FUN_006bf8f0(unsigned int aiIndex, bool abShrink);
 };
-class PathingGraphNode
-{
-    unsigned char m_data[0x3c];
-};
-template <class T, unsigned int Capacity> struct BSSimpleArray
-{
-    void ReleaseElements(T* pItems, unsigned int ItemUpdateArray);
-};
 struct FUN_006a2270_class
 {
     void FUN_006a2270(char* pDest, char* pSource, unsigned int ItemUpdateArray);
@@ -444,12 +377,6 @@ struct FUN_006cf000_Class
 
     void RemoveAt(unsigned int uiIndex, bool bCondition);
 };
-struct PathingAvoidanceNode
-{
-    NiPoint3 m_kLocation;
-    NiPoint3 TwoComponentVector;
-    char Padding[12];
-};
 struct S5460_FUN_006e3d30_Helper
 {
     void* __thiscall FUN_006e3d30(unsigned int newSize, unsigned int oldSize);
@@ -459,11 +386,11 @@ struct BSSimpleArray_PathingAvoidNode_1024
     virtual void* Dummy();
     virtual void* Allocate(unsigned int newSize);
 
-    PathingAvoidanceNode* pBuffer;
+    PathingAvoidNode* pBuffer;
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
 
-    void InitializeItems(PathingAvoidanceNode* pItems, unsigned int ItemUpdateArray);
+    void InitializeItems(PathingAvoidNode* pItems, unsigned int ItemUpdateArray);
     void SetSize(unsigned int aiNewSize, bool abFreeMemory);
 };
 struct FUN_009f6540_Helper
@@ -657,12 +584,6 @@ struct FUN_006cf230
     void Clear(bool abFree);
 };
 class Allocator6CF;
-class MemoryManager6CF
-{
-  public:
-    Allocator6CF* GetDefaultAllocator();
-};
-MemoryManager6CF* __cdecl GetMemoryManager6CF();
 class ContainerBase6CF
 {
   public:

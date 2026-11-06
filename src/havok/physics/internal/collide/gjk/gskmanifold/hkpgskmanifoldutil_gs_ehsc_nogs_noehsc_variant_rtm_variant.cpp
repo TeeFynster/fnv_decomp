@@ -323,7 +323,7 @@ __forceinline Scalar operator/(const Scalar& a, const Scalar& b)
 class Mask
 {
     __m128 bits;
-    friend class Vec;
+    friend class ManifoldVector4;
 
   public:
     enum
@@ -339,16 +339,17 @@ class Mask
         return _mm_movemask_ps(bits);
     }
 };
-class Vec
+// hkVector4 with the unit's own inline Havok 7.1 SIMD bodies (setCross, dot3, normalize3, setInterpolate4, compareLessThanZero4...) over a private __m128.
+class ManifoldVector4
 {
     __m128 value;
 
   public:
-    __forceinline Vec()
+    __forceinline ManifoldVector4()
     {}
-    __forceinline Vec(const Vec& input) : value(input.value)
+    __forceinline ManifoldVector4(const ManifoldVector4& input) : value(input.value)
     {}
-    __forceinline void operator=(const Vec& input)
+    __forceinline void operator=(const ManifoldVector4& input)
     {
         value = input.value;
     }
@@ -376,21 +377,21 @@ class Vec
     {
         value = _mm_setzero_ps();
     }
-    __forceinline void setSub4(const Vec& a, const Vec& b)
+    __forceinline void setSub4(const ManifoldVector4& a, const ManifoldVector4& b)
     {
         value = _mm_sub_ps(a.value, b.value);
     }
-    __forceinline void setAdd4(const Vec& a, const Vec& b)
+    __forceinline void setAdd4(const ManifoldVector4& a, const ManifoldVector4& b)
     {
         value = _mm_add_ps(a.value, b.value);
     }
-    __forceinline void setCross(const Vec& a, const Vec& b)
+    __forceinline void setCross(const ManifoldVector4& a, const ManifoldVector4& b)
     {
         __m128 left = _mm_mul_ps(_mm_shuffle_ps(a.value, a.value, 0xc9), _mm_shuffle_ps(b.value, b.value, 0xd2));
         __m128 right = _mm_mul_ps(_mm_shuffle_ps(a.value, a.value, 0xd2), _mm_shuffle_ps(b.value, b.value, 0xc9));
         value = _mm_sub_ps(left, right);
     }
-    __forceinline Scalar dot3(const Vec& b) const
+    __forceinline Scalar dot3(const ManifoldVector4& b) const
     {
         __m128 terms = _mm_mul_ps(value, b.value);
         __m128 sum = _mm_add_ss(_mm_shuffle_ps(terms, terms, 0x55), terms);
@@ -431,17 +432,17 @@ class Vec
             return _mm_shuffle_ps(value, value, 0xff);
         }
     }
-    __forceinline void setInterpolate4(const Vec& a, const Vec& b, const Scalar& fraction)
+    __forceinline void setInterpolate4(const ManifoldVector4& a, const ManifoldVector4& b, const Scalar& fraction)
     {
         __m128 t = fraction.broadcast();
         __m128 s = _mm_sub_ps(DAT_010ec7f0, t);
         value = _mm_add_ps(_mm_mul_ps(s, a.value), _mm_mul_ps(t, b.value));
     }
-    __forceinline void setAddMul4(const Vec& a, const Vec& b, const Scalar& scale)
+    __forceinline void setAddMul4(const ManifoldVector4& a, const ManifoldVector4& b, const Scalar& scale)
     {
         value = _mm_add_ps(a.value, _mm_mul_ps(scale.broadcast(), b.value));
     }
-    __forceinline void setNeg4(const Vec& a)
+    __forceinline void setNeg4(const ManifoldVector4& a)
     {
         value = _mm_xor_ps(a.value, DAT_010c44d0);
     }
@@ -479,8 +480,8 @@ template <class T> class Field
     }
 };
 namespace Parallel {
-__forceinline void dot3_3vs3(const Vec& a, const Vec& b, const Vec& c, const Vec& d, const Vec& e, const Vec& f,
-                             Vec& result)
+__forceinline void dot3_3vs3(const ManifoldVector4& a, const ManifoldVector4& b, const ManifoldVector4& c, const ManifoldVector4& d, const ManifoldVector4& e, const ManifoldVector4& f,
+                             ManifoldVector4& result)
 {
     register __m128 ab = _mm_mul_ps(a.getQuad(), b.getQuad());
     register __m128 cd = _mm_mul_ps(c.getQuad(), d.getQuad());
@@ -492,7 +493,7 @@ __forceinline void dot3_3vs3(const Vec& a, const Vec& b, const Vec& c, const Vec
     ef = upper;
     result.getQuad() = _mm_add_ps(_mm_add_ps(ab, cd), ef);
 }
-__forceinline void dot3_1vs4(const Vec& v, const Vec& a, const Vec& b, const Vec& c, const Vec& d, Vec& result)
+__forceinline void dot3_1vs4(const ManifoldVector4& v, const ManifoldVector4& a, const ManifoldVector4& b, const ManifoldVector4& c, const ManifoldVector4& d, ManifoldVector4& result)
 {
     register __m128 va = _mm_mul_ps(a.getQuad(), v.getQuad());
     register __m128 vb = _mm_mul_ps(b.getQuad(), v.getQuad());
@@ -508,7 +509,7 @@ __forceinline void dot3_1vs4(const Vec& v, const Vec& a, const Vec& b, const Vec
     vd = _mm_shuffle_ps(abHi, cdHi, 0xdd);
     result.getQuad() = _mm_add_ps(_mm_add_ps(va, vb), vc);
 }
-__forceinline void dot3_2vs2(const Vec& a, const Vec& b, const Vec& c, const Vec& d, Vec& result)
+__forceinline void dot3_2vs2(const ManifoldVector4& a, const ManifoldVector4& b, const ManifoldVector4& c, const ManifoldVector4& d, ManifoldVector4& result)
 {
     register __m128 ac = _mm_mul_ps(a.getQuad(), c.getQuad());
     register __m128 ad = _mm_mul_ps(a.getQuad(), d.getQuad());
@@ -537,30 +538,30 @@ struct Manifold
     unsigned char verticesA, verticesB, count, reserved;
     Feature features[4];
 };
-struct CdVertex : Vec
+struct CdVertex : ManifoldVector4
 {
 };
 struct WorkData
 {
     CdVertex points[16];
-    Vec axis;
+    ManifoldVector4 axis;
     Field<float> radiusA, radiusB, tolerance, maxDistanceSq;
-    const Vec& getA(unsigned int offset) const
+    const ManifoldVector4& getA(unsigned int offset) const
     {
         return *reinterpret_cast<const CdVertex*>(reinterpret_cast<const char*>(points) + offset);
     }
-    const Vec& getB(unsigned int offset) const
+    const ManifoldVector4& getB(unsigned int offset) const
     {
         return *reinterpret_cast<const CdVertex*>(reinterpret_cast<const char*>(points) + offset);
     }
 };
 struct Converted
 {
-    Vec position, difference, normal;
+    ManifoldVector4 position, difference, normal;
 };
 struct ProcessPoint
 {
-    Vec position, normal;
+    ManifoldVector4 position, normal;
     Field<unsigned int> id;
     unsigned int extra0, extra1, extra2;
 };
@@ -591,9 +592,9 @@ struct Manager
 
 __forceinline int pointPair(const WorkData& data, const Feature& feature, Converted& out)
 {
-    const Vec& a = data.getA(feature.vertices[0]);
-    const Vec& b = data.getB(feature.vertices[1]);
-    Vec difference;
+    const ManifoldVector4& a = data.getA(feature.vertices[0]);
+    const ManifoldVector4& b = data.getB(feature.vertices[1]);
+    ManifoldVector4 difference;
     difference.setSub4(a, b);
     float square = difference.lengthSquared3();
     if (square > data.maxDistanceSq)
@@ -605,53 +606,53 @@ __forceinline int pointPair(const WorkData& data, const Feature& feature, Conver
 }
 __forceinline int pointSegment(const WorkData& data, const Feature& feature, Converted& out)
 {
-    const Vec& a = data.getA(feature.vertices[0]);
-    const Vec& b = data.getB(feature.vertices[1]);
-    const Vec& c = data.getB(feature.vertices[2]);
+    const ManifoldVector4& a = data.getA(feature.vertices[0]);
+    const ManifoldVector4& b = data.getB(feature.vertices[1]);
+    const ManifoldVector4& c = data.getB(feature.vertices[2]);
     out.position = a;
     out.normal = data.axis;
-    Vec edge;
+    ManifoldVector4 edge;
     edge.setSub4(c, b);
-    Vec fromC;
+    ManifoldVector4 fromC;
     fromC.setSub4(c, a);
-    Vec fromB;
+    ManifoldVector4 fromB;
     fromB.setSub4(a, b);
-    Vec cross;
+    ManifoldVector4 cross;
     cross.setCross(edge, fromC);
-    Vec products;
+    ManifoldVector4 products;
     Parallel::dot3_3vs3(fromC, edge, fromB, edge, cross, cross, products);
     float square = edge.lengthSquared3();
     int outside = products.compareLessThanZero4().anyIsSet(Mask::MASK_XY);
     if (products(3) > data.maxDistanceSq * square || outside)
         return 1;
     Scalar fraction = products.getSimdAt(0) / (products.getSimdAt(0) + products.getSimdAt(1));
-    Vec onSegment;
+    ManifoldVector4 onSegment;
     onSegment.setInterpolate4(b, c, fraction);
     out.difference.setSub4(a, onSegment);
     return 0;
 }
-__forceinline Vec copyVector(const Vec& input)
+__forceinline ManifoldVector4 copyVector(const ManifoldVector4& input)
 {
-    Vec result;
+    ManifoldVector4 result;
     result = input;
     return result;
 }
 __forceinline int segmentPoint(const WorkData& data, const Feature& feature, Converted& out)
 {
-    const Vec& a = data.getA(feature.vertices[0]);
-    const Vec& b = data.getB(feature.vertices[1]);
-    const Vec& c = data.getB(feature.vertices[2]);
+    const ManifoldVector4& a = data.getA(feature.vertices[0]);
+    const ManifoldVector4& b = data.getB(feature.vertices[1]);
+    const ManifoldVector4& c = data.getB(feature.vertices[2]);
     out.normal = data.axis;
-    const Vec& aValue = copyVector(a);
-    Vec edge;
+    const ManifoldVector4& aValue = copyVector(a);
+    ManifoldVector4 edge;
     edge.setSub4(b, aValue);
-    Vec fromB;
+    ManifoldVector4 fromB;
     fromB.setSub4(b, c);
-    Vec fromA;
+    ManifoldVector4 fromA;
     fromA.setSub4(c, a);
-    Vec cross;
+    ManifoldVector4 cross;
     cross.setCross(edge, fromB);
-    Vec products;
+    ManifoldVector4 products;
     Parallel::dot3_3vs3(fromB, edge, fromA, edge, cross, cross, products);
     float square = edge.lengthSquared3();
     int outside = products.compareLessThanZero4().anyIsSet(Mask::MASK_XY);
@@ -664,34 +665,34 @@ __forceinline int segmentPoint(const WorkData& data, const Feature& feature, Con
 }
 __forceinline int pointTriangle(const WorkData& data, const Feature& feature, Converted& out)
 {
-    const Vec& a = data.getA(feature.vertices[0]);
-    const Vec& b = data.getB(feature.vertices[1]);
-    const Vec& c = data.getB(feature.vertices[2]);
-    const Vec& d = data.getB(feature.vertices[3]);
+    const ManifoldVector4& a = data.getA(feature.vertices[0]);
+    const ManifoldVector4& b = data.getB(feature.vertices[1]);
+    const ManifoldVector4& c = data.getB(feature.vertices[2]);
+    const ManifoldVector4& d = data.getB(feature.vertices[3]);
     out.position = a;
     out.difference.setSub4(a, b);
-    Vec edge0;
+    ManifoldVector4 edge0;
     edge0.setSub4(d, c);
-    Vec edge1;
+    ManifoldVector4 edge1;
     edge1.setSub4(b, d);
-    Vec edge2;
+    ManifoldVector4 edge2;
     edge2.setSub4(c, b);
-    Vec normal;
+    ManifoldVector4 normal;
     normal.setCross(edge0, edge1);
     normal.normalize3();
-    Vec products;
+    ManifoldVector4 products;
     {
-        Vec toC;
+        ManifoldVector4 toC;
         toC.setSub4(a, c);
-        Vec toD;
+        ManifoldVector4 toD;
         toD.setSub4(a, d);
-        Vec toB;
+        ManifoldVector4 toB;
         toB.setSub4(a, b);
-        Vec side0;
+        ManifoldVector4 side0;
         side0.setCross(toC, edge0);
-        Vec side1;
+        ManifoldVector4 side1;
         side1.setCross(toD, edge1);
-        Vec side2;
+        ManifoldVector4 side2;
         side2.setCross(toB, edge2);
         Parallel::dot3_1vs4(normal, side0, side1, side2, data.axis, products);
     }
@@ -703,34 +704,34 @@ __forceinline int pointTriangle(const WorkData& data, const Feature& feature, Co
 }
 __forceinline int trianglePoint(const WorkData& data, const Feature& feature, Converted& out)
 {
-    const Vec& a = data.getA(feature.vertices[0]);
-    const Vec& b = data.getB(feature.vertices[1]);
-    const Vec& c = data.getB(feature.vertices[2]);
-    const Vec& d = data.getB(feature.vertices[3]);
+    const ManifoldVector4& a = data.getA(feature.vertices[0]);
+    const ManifoldVector4& b = data.getB(feature.vertices[1]);
+    const ManifoldVector4& c = data.getB(feature.vertices[2]);
+    const ManifoldVector4& d = data.getB(feature.vertices[3]);
     out.position = d;
     out.difference.setSub4(a, d);
-    Vec edge0;
+    ManifoldVector4 edge0;
     edge0.setSub4(c, b);
-    Vec edge1;
+    ManifoldVector4 edge1;
     edge1.setSub4(a, c);
-    Vec edge2;
+    ManifoldVector4 edge2;
     edge2.setSub4(b, a);
-    Vec normal;
+    ManifoldVector4 normal;
     normal.setCross(edge0, edge1);
     normal.normalize3();
-    Vec products;
+    ManifoldVector4 products;
     {
-        Vec toB;
+        ManifoldVector4 toB;
         toB.setSub4(d, b);
-        Vec toC;
+        ManifoldVector4 toC;
         toC.setSub4(d, c);
-        Vec toA;
+        ManifoldVector4 toA;
         toA.setSub4(d, a);
-        Vec side0;
+        ManifoldVector4 side0;
         side0.setCross(toB, edge0);
-        Vec side1;
+        ManifoldVector4 side1;
         side1.setCross(toC, edge1);
-        Vec side2;
+        ManifoldVector4 side2;
         side2.setCross(toA, edge2);
         Parallel::dot3_1vs4(normal, side0, side1, side2, data.axis, products);
     }
@@ -744,26 +745,26 @@ __forceinline int trianglePoint(const WorkData& data, const Feature& feature, Co
 }
 __forceinline int segmentPair(const WorkData& data, const Feature& feature, Converted& out)
 {
-    const Vec& a = data.getA(feature.vertices[0]);
-    const Vec& b = data.getA(feature.vertices[1]);
-    const Vec& c = data.getB(feature.vertices[2]);
-    const Vec& d = data.getB(feature.vertices[3]);
-    Vec edgeA;
+    const ManifoldVector4& a = data.getA(feature.vertices[0]);
+    const ManifoldVector4& b = data.getA(feature.vertices[1]);
+    const ManifoldVector4& c = data.getB(feature.vertices[2]);
+    const ManifoldVector4& d = data.getB(feature.vertices[3]);
+    ManifoldVector4 edgeA;
     edgeA.setSub4(b, a);
-    Vec edgeB;
+    ManifoldVector4 edgeB;
     edgeB.setSub4(d, c);
-    Vec difference0;
+    ManifoldVector4 difference0;
     difference0.setSub4(a, c);
-    Vec difference1;
+    ManifoldVector4 difference1;
     difference1.setSub4(b, d);
-    Vec normal;
+    ManifoldVector4 normal;
     normal.setCross(edgeA, edgeB);
-    Vec ortA;
+    ManifoldVector4 ortA;
     ortA.setCross(edgeA, normal);
-    Vec ortB;
+    ManifoldVector4 ortB;
     ortB.setCross(edgeB, normal);
     out.normal = data.axis;
-    Vec products;
+    ManifoldVector4 products;
     Parallel::dot3_2vs2(difference0, difference1, ortB, ortA, products);
     int mask = products.compareLessThanZero4().GetLaneMask();
     if (mask != 3 && mask != 12)
@@ -773,7 +774,7 @@ __forceinline int segmentPair(const WorkData& data, const Feature& feature, Conv
     out.position.setInterpolate4(a, b, t);
     Scalar second = products.getSimdAt(1);
     Scalar u = second / (second - products.getSimdAt(3));
-    Vec onB;
+    ManifoldVector4 onB;
     onB.setInterpolate4(c, d, u);
     out.difference.setSub4(out.position, onB);
     return 0;
@@ -865,7 +866,7 @@ void __cdecl FUN_00dae3a0(Manifold& manifold, const WorkData& data, int start, P
         int result = convert(data, feature, converted);
         if (result == 0)
         {
-            const Vec& normal = converted.normal;
+            const ManifoldVector4& normal = converted.normal;
             float distance = normal.dot3(converted.difference);
             float radiusSum = data.radiusA + data.radiusB;
             Scalar shift = data.radiusB - distance;

@@ -4,8 +4,8 @@
 
 #include "layout_support.h"
 #include "BaseFormComponent.h"
-#include "TESForm.h"
-#include "TESFullName.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFullName.h"
 #include "TESHealthForm.h"
 #include "TESIcon.h"
 #include "TESScriptableForm.h"

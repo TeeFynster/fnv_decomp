@@ -1,10 +1,23 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#include "../../include/hkArray.h"
 // staging/blk_00da0000_o2.cpp: Holder, MapHolder, SpawnedOuter, SearchObject and more (113 functions)
 
 #include <windows.h>
+#include "../../include/hkResult.h"
 // src/staging/blk_00da0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/BSAudio.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkMemoryAllocator.h"
 
 extern "C" void __cdecl FUN_00cb0a70(void*);
 extern int DAT_010d461c;
@@ -707,11 +720,6 @@ struct DB7570Pair
     unsigned int m_uiFilterValue;
 };
 
-enum DB7570Result
-{
-    DB7570_SUCCESS = 0,
-    DB7570_FAILURE = 1
-};
 
 class DB7570Map
 {
@@ -720,22 +728,22 @@ class DB7570Map
     DB7570Pair* m_data;
     int m_iElementCount;
 
-    DB7570Result Lookup(unsigned int key, unsigned int& valueOut) const;
+    hkResult Lookup(unsigned int key, unsigned int& valueOut) const;
 };
 
-// Searches m_data for an entry whose m_key equals key; on a match stores its value in valueOut and returns DB7570_SUCCESS, otherwise DB7570_FAILURE.
+// Searches m_data for an entry whose m_key equals key; on a match stores its value in valueOut and returns HK_SUCCESS, otherwise HK_FAILURE.
 // @fnv 0x00db7570
-DB7570Result DB7570Map::Lookup(unsigned int key, unsigned int& valueOut) const
+hkResult DB7570Map::Lookup(unsigned int key, unsigned int& valueOut) const
 {
     for (int i = 0; i < m_iElementCount; i++)
     {
         if (m_data[i].m_key == key)
         {
             valueOut = m_data[i].m_uiFilterValue;
-            return DB7570_SUCCESS;
+            return HK_SUCCESS;
         }
     }
-    return DB7570_FAILURE;
+    return HK_FAILURE;
 }
 
 extern "C" int __cdecl CompareStringsCaseInsensitive(int a1, int a2);
@@ -807,24 +815,10 @@ void FUN_00db78a0_cls::FUN_00db78a0(FUN_00db78a0_item** apItems, void** apValues
     } while (*p != 0);
 }
 
-struct hkMemoryAllocator;
-
-struct AudioMgr
-{
-    int unk00, unk04, unk08;
-    hkMemoryAllocator* unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-
-struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
+inline hkMemoryRouter* audio()
 {
-    return (AudioMgr*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
 
 struct MapPair
@@ -895,12 +889,6 @@ namespace fnv_00db7960 {
 extern "C" void* __cdecl FUN_00c85750();
 extern int DAT_010cf844;
 
-struct FUN_00db7960_Target
-{
-    virtual void vf00();
-    virtual void* vf04(int a);
-};
-
 struct FUN_00db7960_Data
 {
     void __thiscall EnsureCapacity(void* a, int b);
@@ -920,10 +908,10 @@ struct FUN_00db7960_Result
 // @fnv 0x00db7960
 void* __cdecl CreateAudioResult()
 {
-    void* audio = FUN_00c85750();
-    FUN_00db7960_Target* target = *reinterpret_cast<FUN_00db7960_Target**>(reinterpret_cast<char*>(audio) + 0x10);
+    hkMemoryRouter* audio = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryAllocator* target = audio->m_heap;
 
-    void* allocated = target->vf04(0x14);
+    void* allocated = target->blockAlloc(0x14);
     FUN_00db7960_Result* result = reinterpret_cast<FUN_00db7960_Result*>(allocated);
 
     result->unk04 = 0x14;
@@ -935,8 +923,8 @@ void* __cdecl CreateAudioResult()
     data[1] = 0;
     data[2] = -1;
 
-    void* audio2 = FUN_00c85750();
-    void* target2 = *reinterpret_cast<void**>(reinterpret_cast<char*>(audio2) + 0x10);
+    hkMemoryRouter* audio2 = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+    void* target2 = audio2->m_heap;
 
     FUN_00db7960_Data* dataObject = reinterpret_cast<FUN_00db7960_Data*>(reinterpret_cast<char*>(allocated) + 8);
     dataObject->EnsureCapacity(target2, 0);
@@ -946,34 +934,16 @@ void* __cdecl CreateAudioResult()
 }  // namespace fnv_00db7960
 
 namespace fnv_00db7a20 {
-struct hkMemoryAllocator
-{
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-};
 
-struct AudioMgr
-{
-    int unk00[4];
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-
-struct BSAudio;
 __declspec(nothrow) BSAudio* __cdecl FUN_00c85750();
 
-struct hkBool
+// This constructor takes the original one-word POD hkBool argument. The shared
+// hkBool has a user-declared copy constructor, so pass the legacy ABI slot directly.
+inline unsigned int MakeBool(bool b)
 {
-    char m_cBooleanValue;
-};
-inline hkBool MakeBool(bool b)
-{
-    hkBool r;
-    r.m_cBooleanValue = (char)b;
-    return r;
+    unsigned int slot;
+    reinterpret_cast<hkBool*>(&slot)->m_cBooleanValue = (char)b;
+    return slot;
 }
 
 class RefObj
@@ -989,7 +959,7 @@ class RefObj
 
     static void* operator new(unsigned int nbytes)
     {
-        RefObj* b = (RefObj*)((AudioMgr*)FUN_00c85750())->heap().AllocateMemoryBlock(nbytes);
+        RefObj* b = (RefObj*)((hkMemoryRouter*)FUN_00c85750())->heap().blockAlloc(nbytes);
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -998,7 +968,7 @@ class RefObj
 
 struct Inner
 {
-    __declspec(nothrow) Inner(hkBool bFlag);
+    __declspec(nothrow) Inner(unsigned int bFlag);
     int m_data[4];
 };
 
@@ -1073,30 +1043,8 @@ int DBA340Object::FUN_00dba340(void* pvA, void* pvB, void* pvC)
 }
 
 namespace fnv_00dba3d0 {
-struct DBA3D0Allocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual void ReturnMemory(void* p, int numBytes) throw();
-};
 
-struct DBA3D0MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    DBA3D0Allocator* m_pStreamAllocator;
-
-    DBA3D0Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" DBA3D0MemoryRouter& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 
 struct DBA3D0Pair
 {
@@ -1104,26 +1052,21 @@ struct DBA3D0Pair
     int m_iValue;
 };
 
-template <class T> struct DBA3D0Array
+template <class T>
+static __forceinline void DBA3D0Array_destroy(hkArrayBase<T>& self) throw()
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
+        hkMemoryAllocator& alloc = FUN_00c85750().heap();
+        self.m_iElementCount = 0;
+        if ((self.m_iCapacityState & 0x80000000) == 0)
+            alloc.bufFree(self.m_data, self.getCapacity() * sizeof(T));
+        self.m_iCapacityState = 0x80000000;
+        self.m_data = 0;
     }
 
-    ~DBA3D0Array() throw()
-    {
-        DBA3D0Allocator& alloc = FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-        m_iCapacityState = 0x80000000;
-        m_data = 0;
-    }
+struct DBA3D0ArrayPolicy
+{
+    template <class T>
+    static __forceinline void destroy(hkArrayBase<T>& self) { DBA3D0Array_destroy(self); }
 };
 
 class DBA3D0MapBase
@@ -1131,7 +1074,7 @@ class DBA3D0MapBase
   public:
     ~DBA3D0MapBase() throw();
 
-    void ClearAndRelease(DBA3D0Allocator& alloc) throw();
+    void ClearAndRelease(hkMemoryAllocator& alloc) throw();
 
     int unk00;
     int unk04;
@@ -1151,7 +1094,7 @@ class FUN_00dba3d0
   public:
     ~FUN_00dba3d0() throw();
 
-    DBA3D0Array<DBA3D0Pair> m_kPairs;
+    hkArray<DBA3D0Pair, DBA3D0ArrayPolicy> m_kPairs;
     DBA3D0Map m_kFormatEntries;
 };
 
@@ -1199,23 +1142,7 @@ void DBB100WriteClassNames(const DBB100Registry* registry, const void** objects,
     FUN_00dbb100(registry, objects[1], writer);
 }
 
-struct hkMemoryAllocator
-{
-    virtual void vSlot00();
-    virtual void vSlot04();
-    virtual void vSlot08();
-    virtual void vSlot0C(void* field, void* item);
-    virtual void free(void* p, unsigned int nbytes);
-};
-struct AudioRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* unk10;
-};
-AudioRouter* __cdecl da06d0_getRouter();
+hkMemoryRouter* __cdecl da06d0_getRouter();
 struct Elem
 {
     int unk00;
@@ -1252,12 +1179,12 @@ void __cdecl FUN_00da06d0(Buffer* self)
 {
     int* pSize = &self->m_iElementCount;
     int* piCapacity = &self->m_pRayCursor;
-    AudioRouter* router = da06d0_getRouter();
-    hkMemoryAllocator* alloc = router->unk10;
+    hkMemoryRouter* router = da06d0_getRouter();
+    hkMemoryAllocator* alloc = router->m_heap;
     int iCapacity = self->m_pRayCursor;
     *pSize = 0;
     if ((iCapacity & (int)0x80000000) == 0)
-        alloc->free(self->m_ppData, (iCapacity & 0x3fffffff) * sizeof(Elem));
+        alloc->bufFree(self->m_ppData, (iCapacity & 0x3fffffff) * sizeof(Elem));
     *piCapacity = (int)0x80000000;
     self->m_ppData = 0;
 }
@@ -1339,31 +1266,11 @@ int __cdecl SweepCollidePairs(const SweepBounds* bounds, int count, SweepPair* p
     return int(out - pairs);
 }
 
-struct DBA430Listener
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vslot10(int a, int b);
-};
-
 struct DBA430Inner
 {
-    void __thiscall Sync(DBA430Listener* listener);
+    void __thiscall Sync(hkMemoryAllocator* listener);
     void __thiscall Mark();
 };
-
-struct BSAudio
-{
-    virtual void vf00();
-    int unk04;
-    int unk08;
-    int unk0c;
-    DBA430Listener* m_10;
-};
-
-BSAudio* __cdecl FUN_00c85750();
 
 struct DBA430Owner
 {
@@ -1379,10 +1286,10 @@ struct DBA430Owner
 void DBA430Owner::Reset()
 {
     DBA430Inner* p = &m_0C;
-    p->Sync(FUN_00c85750()->m_10);
+    p->Sync(reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->pListener));
     p->Mark();
     BSAudio* audio = FUN_00c85750();
-    DBA430Listener* listener = audio->m_10;
+    hkMemoryAllocator* listener = reinterpret_cast<hkMemoryAllocator*>(audio->pListener);
     m_04 = 0;
     if (!(m_08 & (int)0x80000000))
     {
@@ -1390,7 +1297,7 @@ void DBA430Owner::Reset()
         n = n + n;
         n = n + n;
         n = n + n;
-        listener->vslot10(m_00, n);
+        listener->bufFree(reinterpret_cast<void*>(m_00), n);
     }
     m_08 = (int)0x80000000;
     m_00 = 0;
@@ -1612,22 +1519,6 @@ unsigned int* __thiscall FUN_00da2b90_Obj::Initialize()
     return reinterpret_cast<unsigned int*>(this);
 }
 
-struct DA2D70Listener
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08(void* object, int value);
-};
-
-struct DA2D70Audio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    DA2D70Listener* m_10;
-};
-
 struct DA2D70Object
 {
     int unk00;
@@ -1637,8 +1528,6 @@ struct DA2D70Object
     void* __thiscall NotifyAudioListener(int flags);
 };
 
-extern BSAudio* __cdecl FUN_00c85750();
-
 // @fnv 0x00da2d70
 void* DA2D70Object::NotifyAudioListener(int flags)
 {
@@ -1646,9 +1535,9 @@ void* DA2D70Object::NotifyAudioListener(int flags)
 
     if (flags & 1)
     {
-        DA2D70Audio* audio = reinterpret_cast<DA2D70Audio*>(FUN_00c85750());
-        DA2D70Listener* listener = audio->m_10;
-        listener->vf08(this, static_cast<int>(unk04));
+        BSAudio* audio = FUN_00c85750();
+        hkMemoryAllocator* listener = reinterpret_cast<hkMemoryAllocator*>(audio->pListener);
+        listener->blockFree(this, static_cast<int>(unk04));
     }
 
     return this;
@@ -1677,21 +1566,6 @@ void* __cdecl FUN_00da6e10(void* apUnused, void* b, void* c)
 extern int DAT_010cf7d4;
 extern int DAT_010cf804;
 extern char str_010cf830[];
-
-struct Allocator
-{
-    virtual void Reserved();
-    virtual void* Alloc(unsigned int bytes);
-};
-
-struct Manager
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    Allocator* heap;
-};
 
 struct SubObject
 {
@@ -1734,8 +1608,8 @@ struct CreatedObject
 // @fnv 0x00db79c0
 void* __cdecl FUN_00db79c0()
 {
-    Manager* manager = (Manager*)FUN_00c85750();
-    CreatedObject* object = (CreatedObject*)manager->heap->Alloc(0x20);
+    hkMemoryRouter* manager = (hkMemoryRouter*)FUN_00c85750();
+    CreatedObject* object = (CreatedObject*)manager->heap().blockAlloc(0x20);
     object->Init();
     return object;
 }
@@ -2493,34 +2367,16 @@ void __cdecl FUN_00da6dc0(void* aUnused, void* arg2, void* arg3, void* arg4, voi
 void __cdecl FUN_00da82c0()
 {}
 
-struct S06c0_Alloc
+template <class T> __forceinline T* hkMemoryAllocator::_bufAlloc(int& num)
 {
-    virtual void slot00();
-    virtual void slot04();
-    virtual void slot08();
-    virtual void* AllocateBufferWithSize(int& bytes);
-    virtual void ReturnMemory(void* memory, int bytes);
-
-    template <class T> __forceinline T* bufAllocT(int& num)
-    {
-        int bytes = num * (int)sizeof(T);
-        T* p = static_cast<T*>(AllocateBufferWithSize(bytes));
-        num = bytes / (int)sizeof(T);
-        return p;
-    }
-};
-struct S06c0_Mgr
+    int bytes = num * (int)sizeof(T);
+    T* p = static_cast<T*>(bufAlloc(bytes));
+    num = bytes / (int)sizeof(T);
+    return p;
+}
+inline hkMemoryRouter* s06c0_mgr()
 {
-    int unk00, unk04, unk08;
-    S06c0_Alloc* unk0c;
-    S06c0_Alloc& heap()
-    {
-        return *unk0c;
-    }
-};
-inline S06c0_Mgr* s06c0_mgr()
-{
-    return (S06c0_Mgr*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
 struct S06c0_Key
 {
@@ -2539,12 +2395,12 @@ void __cdecl RadixSort(S06c0_Key* keys, int count, S06c0_Key* scratch);
 
 template <class T> __forceinline void s06c0_allocArray(int n, int& capacity, T*& data)
 {
-    S06c0_Alloc& a = s06c0_mgr()->heap();
+    hkMemoryAllocator& a = s06c0_mgr()->temp();
     int num;
     if (n)
     {
         num = n;
-        data = a.bufAllocT<T>(num);
+        data = a._bufAlloc<T>(num);
     }
     else
     {
@@ -2555,9 +2411,9 @@ template <class T> __forceinline void s06c0_allocArray(int n, int& capacity, T*&
 }
 template <class T> __forceinline void s06c0_freeArray(T* data, int capacity)
 {
-    S06c0_Alloc& a = s06c0_mgr()->heap();
+    hkMemoryAllocator& a = s06c0_mgr()->temp();
     if (!(capacity & 0x80000000))
-        a.ReturnMemory(data, (capacity & 0x3fffffff) * sizeof(T));
+        a.bufFree(data, (capacity & 0x3fffffff) * sizeof(T));
 }
 inline void s06c0_memCpy16NonEmpty(void* dst, const void* src, int numQuads)
 {
@@ -2690,13 +2546,13 @@ extern "C" void __cdecl S00db0aa0_Entry(void)
 }
 
 namespace fnv_00db0e50 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe-matched intrinsic packet; __m128 remains an ABI compatibility alias.
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x, y, z, w;
     };
-};
+} __m128, LocalM128;
 extern "C" __m128 _mm_setzero_ps();
 extern "C" __m128 _mm_cmplt_ps(__m128, __m128);
 extern "C" int _mm_movemask_ps(__m128);
@@ -2943,11 +2799,6 @@ struct S00da6eb0_Ctx
     S00da6eb0_Router* m_pRouter;
 };
 
-struct S00da6eb0_Alloc
-{
-    char* m_pCur;
-};
-
 extern unsigned long DAT_0126835c;
 extern char str_010d50b8[];
 extern char str_010c41f8[];
@@ -2987,10 +2838,10 @@ void* __cdecl BuildEventIndex(void* apCtx, void* apUnused, void* apOut, void* ap
     S00da6eb0_List* pList = static_cast<S00da6eb0_Ctx*>(apCtx)->m_pRouter->m_pEntries;
     int iSize = pList->m_uiSize;
 
-    S00da6eb0_Alloc* pAlloc = reinterpret_cast<S00da6eb0_Alloc*>(FUN_00c85750());
-    unsigned int* pEventIndex = reinterpret_cast<unsigned int*>(pAlloc->m_pCur);
+    hkMemoryRouter* pAlloc = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+    unsigned int* pEventIndex = reinterpret_cast<unsigned int*>(pAlloc->m_stack.m_next.m_storage);
 
-    pAlloc->m_pCur += (iSize * 4 + 0x83) & 0xffffff80;
+    pAlloc->m_stack.m_next.m_storage = (char*)pAlloc->m_stack.m_next.m_storage + ((iSize * 4 + 0x83) & 0xffffff80);
 
     unsigned int iIndexCount = 0;
     unsigned int uiBitMask = 1;
@@ -3011,17 +2862,17 @@ void* __cdecl BuildEventIndex(void* apCtx, void* apUnused, void* apOut, void* ap
 
     S00da6eb0_TimerMark(str_010c41f8);
 
-    reinterpret_cast<S00da6eb0_Alloc*>(FUN_00c85750())->m_pCur = reinterpret_cast<char*>(pEventIndex);
+    reinterpret_cast<hkMemoryRouter*>(FUN_00c85750())->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(pEventIndex));
 
     return reinterpret_cast<char*>(apOut) + 0x10;
 }
 
 namespace CleanSimd {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe-matched intrinsic packet; __m128 remains an ABI compatibility alias.
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float lane[4];
     unsigned int bits[4];
-} __m128;
+} __m128, LocalM128;
 extern "C"
 {
     __m128 _mm_load_ps(const float*);
@@ -3048,50 +2899,46 @@ extern float DAT_01017718;
 extern float DAT_01016248;
 extern __m128 DAT_010c44d0;
 
-struct Vector
+// Keep the original inline SIMD operations and intrinsic type on shared hkVector4 storage.
+static __forceinline __m128& packet(hkVector4& v) { return reinterpret_cast<__m128&>(v.m_vComponents); }
+static __forceinline const __m128& packet(const hkVector4& v) { return reinterpret_cast<const __m128&>(v.m_vComponents); }
+__forceinline void vectorNegate(hkVector4& out, const hkVector4& a)
 {
-    __m128 value;
-    __forceinline void operator=(const Vector& v)
-    {
-        value = v.value;
-    }
-    __forceinline void negate(const Vector& a)
-    {
-        value = _mm_xor_ps(a.value, DAT_010c44d0);
-    }
-    __forceinline void sub(const Vector& a, const Vector& b)
-    {
-        value = _mm_sub_ps(a.value, b.value);
-    }
-    __forceinline void cross(const Vector& a, const Vector& b)
-    {
-        __m128 first = _mm_mul_ps(_mm_shuffle_ps(a.value, a.value, 0xc9), _mm_shuffle_ps(b.value, b.value, 0xd2));
-        __m128 second = _mm_mul_ps(_mm_shuffle_ps(a.value, a.value, 0xd2), _mm_shuffle_ps(b.value, b.value, 0xc9));
-        value = _mm_sub_ps(first, second);
-    }
-    __forceinline __m128 dot(const Vector& a) const
-    {
-        __m128 sq = _mm_mul_ps(value, a.value);
-        __m128 xy = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-        return _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), xy);
-    }
-    __forceinline void normalize()
-    {
-        __m128 half = _mm_set_ss(DAT_01016248);
-        __m128 three = _mm_set_ss(DAT_01017718);
-        __m128 zero = _mm_set_ss(DAT_01011d78);
-        __m128 len = dot(*this);
-        __m128 eq = _mm_cmpeq_ss(len, zero);
-        __m128 rs = _mm_rsqrt_ss(len);
-        __m128 refine = _mm_mul_ss(_mm_mul_ss(half, rs), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len, rs), rs)));
-        __m128 inv = _mm_andnot_ps(eq, refine);
-        value = _mm_mul_ps(_mm_shuffle_ps(inv, inv, 0), value);
-    }
-    __forceinline void addMul(const Vector& a, __m128 scale, const Vector& b)
-    {
-        value = _mm_add_ps(a.value, _mm_mul_ps(_mm_shuffle_ps(scale, scale, 0), b.value));
-    }
-};
+    packet(out) = _mm_xor_ps(packet(a), DAT_010c44d0);
+}
+__forceinline void vectorSub(hkVector4& out, const hkVector4& a, const hkVector4& b)
+{
+    packet(out) = _mm_sub_ps(packet(a), packet(b));
+}
+__forceinline void vectorCross(hkVector4& out, const hkVector4& a, const hkVector4& b)
+{
+    __m128 first = _mm_mul_ps(_mm_shuffle_ps(packet(a), packet(a), 0xc9), _mm_shuffle_ps(packet(b), packet(b), 0xd2));
+    __m128 second = _mm_mul_ps(_mm_shuffle_ps(packet(a), packet(a), 0xd2), _mm_shuffle_ps(packet(b), packet(b), 0xc9));
+    packet(out) = _mm_sub_ps(first, second);
+}
+__forceinline __m128 vectorDot(const hkVector4& out, const hkVector4& a)
+{
+    __m128 sq = _mm_mul_ps(packet(out), packet(a));
+    __m128 xy = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
+    return _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), xy);
+}
+__forceinline void vectorNormalize(hkVector4& out)
+{
+    __m128 half = _mm_set_ss(DAT_01016248);
+    __m128 three = _mm_set_ss(DAT_01017718);
+    __m128 zero = _mm_set_ss(DAT_01011d78);
+    __m128 len = vectorDot(out, out);
+    __m128 eq = _mm_cmpeq_ss(len, zero);
+    __m128 rs = _mm_rsqrt_ss(len);
+    __m128 refine = _mm_mul_ss(_mm_mul_ss(half, rs), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len, rs), rs)));
+    __m128 inv = _mm_andnot_ps(eq, refine);
+    packet(out) = _mm_mul_ps(_mm_shuffle_ps(inv, inv, 0), packet(out));
+}
+__forceinline void vectorAddMul(hkVector4& out, const hkVector4& a, __m128 scale, const hkVector4& b)
+{
+    packet(out) = _mm_add_ps(packet(a), _mm_mul_ps(_mm_shuffle_ps(scale, scale, 0), packet(b)));
+}
+
 struct Indices
 {
     unsigned int flags;
@@ -3099,20 +2946,20 @@ struct Indices
 };
 struct Output
 {
-    Vector origin, direction, normal;
+    hkVector4 origin, direction, normal;
 };
 struct VertexBlock
 {
-    Vector vertices[16];
-    Vector direction;
+    hkVector4 vertices[16];
+    hkVector4 direction;
 };
-inline __forceinline void fourDots(const Vector& n, const Vector& a, const Vector& b, const Vector& c, const Vector& d,
-                                   Vector& out)
+inline __forceinline void fourDots(const hkVector4& n, const hkVector4& a, const hkVector4& b, const hkVector4& c, const hkVector4& d,
+                                   hkVector4& out)
 {
-    __m128 x = _mm_mul_ps(a.value, n.value);
-    __m128 y = _mm_mul_ps(b.value, n.value);
-    __m128 z = _mm_mul_ps(c.value, n.value);
-    __m128 w = _mm_mul_ps(d.value, n.value);
+    __m128 x = _mm_mul_ps(packet(a), packet(n));
+    __m128 y = _mm_mul_ps(packet(b), packet(n));
+    __m128 z = _mm_mul_ps(packet(c), packet(n));
+    __m128 w = _mm_mul_ps(packet(d), packet(n));
     __m128 xylo = _mm_shuffle_ps(x, y, 0x44);
     __m128 xyhi = _mm_shuffle_ps(x, y, 0xee);
     __m128 zwlo = _mm_shuffle_ps(z, w, 0x44);
@@ -3120,41 +2967,41 @@ inline __forceinline void fourDots(const Vector& n, const Vector& a, const Vecto
     __m128 r0 = _mm_shuffle_ps(xylo, zwlo, 0x88);
     __m128 r1 = _mm_shuffle_ps(xylo, zwlo, 0xdd);
     __m128 r2 = _mm_shuffle_ps(xyhi, zwhi, 0x88);
-    out.value = _mm_add_ps(_mm_add_ps(r0, r1), r2);
+    packet(out) = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
 // Builds out origin, direction and normal from four vertices at idx offsets in base, negating the normal if the fourth dot is negative; returns ~mask & 7.
 // @fnv 0x00dad110
 static __declspec(noinline) int FUN_00dad110(const Indices* idx, const char* apVertexBlock, Output* out)
 {
-    const Vector* pVertexB = (const Vector*)(apVertexBlock + idx->b);
-    const Vector* pVertexC = (const Vector*)(apVertexBlock + idx->c);
-    const Vector* pVertexD = (const Vector*)(apVertexBlock + idx->d);
-    const Vector* pVertexA = (const Vector*)(apVertexBlock + idx->a);
-    out->origin = *pVertexA;
-    out->direction.sub(*pVertexB, *pVertexA);
-    Vector vEdge0, e1, e2;
-    vEdge0.sub(*pVertexD, *pVertexC);
-    e1.sub(*pVertexB, *pVertexD);
-    e2.sub(*pVertexC, *pVertexB);
-    Vector normal;
-    normal.cross(vEdge0, e1);
-    normal.normalize();
-    Vector a0, a1, a2;
-    a0.sub(*pVertexA, *pVertexC);
-    a1.sub(*pVertexA, *pVertexD);
-    a2.sub(*pVertexA, *pVertexB);
-    Vector pt0, pt1, pt2;
-    pt0.cross(a0, vEdge0);
-    pt1.cross(a1, e1);
-    pt2.cross(a2, e2);
-    Vector dots;
+    const hkVector4* pVertexB = (const hkVector4*)(apVertexBlock + idx->b);
+    const hkVector4* pVertexC = (const hkVector4*)(apVertexBlock + idx->c);
+    const hkVector4* pVertexD = (const hkVector4*)(apVertexBlock + idx->d);
+    const hkVector4* pVertexA = (const hkVector4*)(apVertexBlock + idx->a);
+    packet(out->origin) = packet(*pVertexA);
+    vectorSub(out->direction, *pVertexB, *pVertexA);
+    hkVector4 vEdge0, e1, e2;
+    vectorSub(vEdge0, *pVertexD, *pVertexC);
+    vectorSub(e1, *pVertexB, *pVertexD);
+    vectorSub(e2, *pVertexC, *pVertexB);
+    hkVector4 normal;
+    vectorCross(normal, vEdge0, e1);
+    vectorNormalize(normal);
+    hkVector4 a0, a1, a2;
+    vectorSub(a0, *pVertexA, *pVertexC);
+    vectorSub(a1, *pVertexA, *pVertexD);
+    vectorSub(a2, *pVertexA, *pVertexB);
+    hkVector4 pt0, pt1, pt2;
+    vectorCross(pt0, a0, vEdge0);
+    vectorCross(pt1, a1, e1);
+    vectorCross(pt2, a2, e2);
+    hkVector4 dots;
     fourDots(normal, pt0, pt1, pt2, ((const VertexBlock*)apVertexBlock)->direction, dots);
-    __m128 dist = out->direction.dot(normal);
-    out->origin.addMul(*pVertexA, dist, normal);
-    out->normal = normal;
-    int mask = _mm_movemask_ps(_mm_cmplt_ps(dots.value, _mm_setzero_ps()));
+    __m128 dist = vectorDot(out->direction, normal);
+    vectorAddMul(out->origin, *pVertexA, dist, normal);
+    packet(out->normal) = packet(normal);
+    int mask = _mm_movemask_ps(_mm_cmplt_ps(packet(dots), _mm_setzero_ps()));
     if (mask & 8)
-        out->normal.negate(normal);
+        vectorNegate(out->normal, normal);
     return ~mask & 7;
 }
 const Indices* volatile inputIndices;
@@ -3167,16 +3014,17 @@ void caller_dad110()
 }
 }
 
+
 // @fnv 0x00da8340
 void __cdecl FUN_00da8340()
 {}
 
 namespace N {
 extern "C" void _ReadWriteBarrier();
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe-matched intrinsic packet; __m128 remains an ABI compatibility alias.
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-};
+} __m128, LocalM128;
 extern "C"
 {
     __m128 _mm_add_ss(__m128, __m128);
@@ -3212,7 +3060,8 @@ class Scalar
         return _mm_shuffle_ps(data, data, 0);
     }
 };
-class Vec
+// hkVector4 of the GSK vertex rows (16 vertices + separating normal) with the unit's own inline SIMD forms (setSub4, setCross, normalize3, setNeg4).
+class GskVector4
 {
     __m128 data;
 
@@ -3221,7 +3070,7 @@ class Vec
     {
         return data;
     }
-    __forceinline void operator=(const Vec& x)
+    __forceinline void operator=(const GskVector4& x)
     {
         data = x.data;
     }
@@ -3229,11 +3078,11 @@ class Vec
     {
         data = x;
     }
-    __forceinline void difference(const Vec& a, const Vec& b)
+    __forceinline void difference(const GskVector4& a, const GskVector4& b)
     {
         data = _mm_sub_ps(a.data, b.data);
     }
-    __forceinline void cross(const Vec& a, const Vec& b)
+    __forceinline void cross(const GskVector4& a, const GskVector4& b)
     {
         __m128 p = _mm_mul_ps(_mm_shuffle_ps(a.data, a.data, 201), _mm_shuffle_ps(b.data, b.data, 210));
         __m128 q = _mm_mul_ps(_mm_shuffle_ps(a.data, a.data, 210), _mm_shuffle_ps(b.data, b.data, 201));
@@ -3261,7 +3110,7 @@ class Vec
     {
         data = _mm_mul_ps(inverseLength().splat(), data);
     }
-    __forceinline void negate(const Vec& v)
+    __forceinline void negate(const GskVector4& v)
     {
         data = _mm_xor_ps(v.data, DAT_010c44d0);
     }
@@ -3274,18 +3123,18 @@ struct Desc
 };
 struct Rows
 {
-    Vec vertices[16];
-    Vec separating;
+    GskVector4 vertices[16];
+    GskVector4 separating;
 };
 struct Out
 {
-    Vec point, delta, normal;
+    GskVector4 point, delta, normal;
 };
-static __forceinline const Vec& vertex(const Rows* p, int offset)
+static __forceinline const GskVector4& vertex(const Rows* p, int offset)
 {
-    return *(const Vec*)((const char*)p->vertices + offset);
+    return *(const GskVector4*)((const char*)p->vertices + offset);
 }
-static __forceinline __m128 fourDots(const Vec& a, const Vec& b, const Vec& c, const Vec& d, const Vec& n)
+static __forceinline __m128 fourDots(const GskVector4& a, const GskVector4& b, const GskVector4& c, const GskVector4& d, const GskVector4& n)
 {
     __m128 p = _mm_mul_ps(a, n), q = _mm_mul_ps(b, n), r = _mm_mul_ps(c, n), s = _mm_mul_ps(d, n);
     __m128 pq = _mm_shuffle_ps(p, q, 68), rs = _mm_shuffle_ps(r, s, 68);
@@ -3297,19 +3146,19 @@ static __forceinline __m128 fourDots(const Vec& a, const Vec& b, const Vec& c, c
 // @fnv 0x00dacf10
 static __declspec(noinline) int FUN_00dacf10(const N::Rows* rows, const N::Desc* desc, N::Out* out)
 {
-    const N::Vec& a = N::vertex(rows, desc->offsets[0]);
-    const N::Vec& b = N::vertex(rows, desc->offsets[1]);
-    const N::Vec& c = N::vertex(rows, desc->offsets[2]);
-    const N::Vec& d = N::vertex(rows, desc->offsets[3]);
+    const N::GskVector4& a = N::vertex(rows, desc->offsets[0]);
+    const N::GskVector4& b = N::vertex(rows, desc->offsets[1]);
+    const N::GskVector4& c = N::vertex(rows, desc->offsets[2]);
+    const N::GskVector4& d = N::vertex(rows, desc->offsets[3]);
     out->point = a;
     out->delta.difference(a, b);
-    N::Vec u, v, w, n;
+    N::GskVector4 u, v, w, n;
     u.difference(d, c);
     v.difference(b, d);
     w.difference(c, b);
     n.cross(u, v);
     n.normalize();
-    N::Vec ac, ad, ab, p, q, r;
+    N::GskVector4 ac, ad, ab, p, q, r;
     ac.difference(a, c);
     ad.difference(a, d);
     ab.difference(a, b);
@@ -3334,13 +3183,13 @@ void callPlane()
 
 #include <xmmintrin.h>
 namespace fnv_00db47a0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe-matched intrinsic packet; __m128 remains an ABI compatibility alias.
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x, y, z, w;
     };
-};
+} __m128, LocalM128;
 extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
 extern "C" __m128 _mm_mul_ps(__m128, __m128);
 extern "C" __m128 _mm_sub_ps(__m128, __m128);
@@ -3464,10 +3313,10 @@ void drive()
 
 #include <xmmintrin.h>
 namespace fnv_00db48a0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe-matched intrinsic packet; __m128 remains an ABI compatibility alias.
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-};
+} __m128, LocalM128;
 extern "C" __m128 _mm_set_ps1(float);
 extern "C" __m128 _mm_load_ps(const float*);
 extern "C" __m128 _mm_add_ps(__m128, __m128);
@@ -3505,6 +3354,7 @@ struct SlabMath
     union
     {
         __m128 q;
+        __m128 m_vComponents;
         float lane[4];
     };
     SlabMath()
@@ -3515,22 +3365,22 @@ struct SlabMath
     {}
     __forceinline void sub(const SlabMath& a, const SlabMath& b)
     {
-        q = _mm_sub_ps(a.q, b.q);
+        q = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
     }
     __forceinline void add(const SlabMath& a, const SlabMath& b)
     {
-        q = _mm_add_ps(a.q, b.q);
+        q = _mm_add_ps(a.m_vComponents, b.m_vComponents);
     }
     __forceinline void mul(const SlabMath& a, const SlabMath& b)
     {
-        q = _mm_mul_ps(a.q, b.q);
+        q = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
     }
     __forceinline void cross(const SlabMath& a, const SlabMath& b)
     {
-        __m128 bc = _mm_shuffle_ps(b.q, b.q, 0xC9);
-        __m128 ad = _mm_shuffle_ps(a.q, a.q, 0xD2);
-        __m128 bd = _mm_shuffle_ps(b.q, b.q, 0xD2);
-        __m128 ac = _mm_shuffle_ps(a.q, a.q, 0xC9);
+        __m128 bc = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xC9);
+        __m128 ad = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xD2);
+        __m128 bd = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xD2);
+        __m128 ac = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xC9);
         q = _mm_sub_ps(_mm_mul_ps(ad, bc), _mm_mul_ps(ac, bd));
     }
     __forceinline void interpolate(const SlabObj* a, const SlabMath& t)
@@ -3539,15 +3389,15 @@ struct SlabMath
     }
     __forceinline SlabMath operator-(const SlabMath& b) const
     {
-        return SlabMath(_mm_sub_ps(q, b.q));
+        return SlabMath(_mm_sub_ps(q, b.m_vComponents));
     }
     __forceinline SlabMath operator+(const SlabMath& b) const
     {
-        return SlabMath(_mm_add_ps(q, b.q));
+        return SlabMath(_mm_add_ps(q, b.m_vComponents));
     }
     __forceinline SlabMath operator*(const SlabMath& b) const
     {
-        return SlabMath(_mm_mul_ps(q, b.q));
+        return SlabMath(_mm_mul_ps(q, b.m_vComponents));
     }
 };
 struct W_a
@@ -3680,4 +3530,10 @@ void StackTraceOwner::FUN_00da2930()
     }
 
     vtable = &DAT_0102e388;
+}
+
+
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
+{
+    A::destroy(*this);
 }

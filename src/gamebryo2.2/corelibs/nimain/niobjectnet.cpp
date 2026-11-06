@@ -1,6 +1,28 @@
 // gamebryo2.2/corelibs/nimain/niobjectnet.cpp: NiObjectNET, ShortArray, MorphTarget, bhkSphereShape and more (26 functions)
 
+#include <stddef.h>
+#include <string.h>
+
+#include "../../../../include/NiFixedString.h"
+#include "../../../../include/NiGlobalStringTable.h"
+#include "NiRefObject_inline.h"
+
 #include "niobjectnet_decls.h"
+#include "../../../../include/NiNode.h"
+
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiShader.h"
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
+extern char* _EmptyFS;
+
+
+inline NiFixedString::operator const char*() const
+{
+    return m_kHandle;
+}
+
 
 // @fnv 0x00a5bba0
 bool NiObjectNET::ResizeExtraData(unsigned short usCapacity)
@@ -13,17 +35,17 @@ bool NiObjectNET::ResizeExtraData(unsigned short usCapacity)
     if (m_usMaxSize == 0)
     {
         m_usMaxSize = usCapacity;
-        m_ppExtraData = (NiExtraData**)_NiMalloc(usCapacity * sizeof(NiExtraData*));
-        m_usExtraDataCount = 0;
+        m_ppkExtra = (NiExtraData**)_NiMalloc(usCapacity * sizeof(NiExtraData*));
+        m_usExtraDataSize = 0;
         LeaveCriticalSection(&g_NiObjectNETExtraDataLock);
         return true;
     }
 
     m_usMaxSize = usCapacity;
     NiExtraData** pNewExtraData = (NiExtraData**)_NiMalloc(usCapacity * sizeof(NiExtraData*));
-    fnv_zlib_memcpy(pNewExtraData, m_ppExtraData, m_usExtraDataCount * sizeof(NiExtraData*));
-    NiFree(m_ppExtraData);
-    m_ppExtraData = pNewExtraData;
+    fnv_zlib_memcpy(pNewExtraData, m_ppkExtra, m_usExtraDataSize * sizeof(NiExtraData*));
+    NiFree(m_ppkExtra);
+    m_ppkExtra = pNewExtraData;
     LeaveCriticalSection(&g_NiObjectNETExtraDataLock);
     return true;
 }
@@ -33,12 +55,12 @@ void NiObjectNET::LoadBinary(NiStream& kStream)
 {
     NiObject::LoadBinary(kStream);
 
-    if (kStream.m_uiNifVersion < 0x14010001)
+    if (kStream.m_uiNifFileVersion < 0x14010001)
         kStream.ReadFixedString(m_kName);
     else
         kStream.ReadStringTableEntry(m_kName);
 
-    if (kStream.m_uiNifVersion < 0x0500000B)
+    if (kStream.m_uiNifFileVersion < 0x0500000B)
     {
         kStream.ResetStreamState();
         kStream.ResetStreamState();
@@ -52,9 +74,9 @@ void NiObjectNET::LoadBinary(NiStream& kStream)
 
 #pragma optimize("", off)
 // @fnv 0x0043b480
-void NiObjectNET::GetNumChildren()
+unsigned int NiNode::GetNumChildren()
 {
-    m_kArray.GetSize();
+    return m_kChildren.GetSize();
 }
 #pragma optimize("", on)
 
@@ -64,14 +86,14 @@ void NiObjectNET::ProcessClone(CloningProcess& kProcess)
 {
     NiObject::ProcessClone(kProcess);
 
-    for (unsigned short i = 0; i < m_usExtraDataCount; ++i)
+    for (unsigned short i = 0; i < m_usExtraDataSize; ++i)
     {
-        NiExtraData* pExtraData = m_ppExtraData[i];
+        NiExtraData* pExtraData = m_ppkExtra[i];
         if (pExtraData)
             pExtraData->ProcessClone(kProcess);
     }
 
-    NiTimeController* pController = m_pControllers;
+    NiTimeController* pController = m_spControllers;
     if (pController)
         pController->ProcessClone(kProcess);
 }
@@ -82,9 +104,9 @@ void NiObjectNET::LinkObject(NiStream& kStream)
 {
     NiObject::LinkObject(kStream);
 
-    if (kStream.m_uiNifVersion < 0x0500000B)
+    if (kStream.m_uiNifFileVersion < 0x0500000B)
     {
-        m_ppExtraData = (NiExtraData**)kStream.GetLoadedObject();
+        m_ppkExtra = (NiExtraData**)kStream.GetLoadedObject();
     }
     else
     {
@@ -99,15 +121,15 @@ void NiObjectNET::LinkObject(NiStream& kStream)
     }
 
     NiTimeController* pController = (NiTimeController*)kStream.GetLoadedObject();
-    if (m_pControllers != pController)
+    if (m_spControllers != pController)
     {
-        if (m_pControllers)
-            m_pControllers->DecRefCount();
+        if (m_spControllers)
+            m_spControllers->DecRefCount();
 
-        m_pControllers = pController;
+        m_spControllers = pController;
 
-        if (m_pControllers)
-            m_pControllers->IncRefCount();
+        if (m_spControllers)
+            m_spControllers->IncRefCount();
     }
 }
 
@@ -115,15 +137,15 @@ void NiObjectNET::LinkObject(NiStream& kStream)
 // @fnv 0x00a5c000
 void NiMorphData::MorphTarget::SetTargetInterpolator(NiInterpolator* pInterpolator)
 {
-    if (m_spTargetInterpolator != pInterpolator)
+    if (m_spTargetInterpolator.m_pObject != pInterpolator)
     {
-        if (m_spTargetInterpolator)
-            m_spTargetInterpolator->DecRefCount();
+        if (m_spTargetInterpolator.m_pObject)
+            m_spTargetInterpolator.m_pObject->NiRefObject::DecRefCount();
 
-        m_spTargetInterpolator = pInterpolator;
+        m_spTargetInterpolator.m_pObject = pInterpolator;
 
-        if (m_spTargetInterpolator)
-            m_spTargetInterpolator->IncRefCount();
+        if (m_spTargetInterpolator.m_pObject)
+            m_spTargetInterpolator.m_pObject->NiRefObject::IncRefCount();
     }
 }
 
@@ -141,22 +163,22 @@ void NiObjectNET::AddController(NiTimeController* controller)
 {
     if (controller)
     {
-        NiTimeController* next = m_pControllers;
-        if (controller->m_spNextController != next)
+        NiTimeController* next = m_spControllers;
+        if (controller->m_spNextController.m_pObject != next)
         {
-            if (controller->m_spNextController)
-                controller->m_spNextController->DecRefCount();
-            controller->m_spNextController = next;
-            if (controller->m_spNextController)
-                controller->m_spNextController->IncRefCount();
+            if (controller->m_spNextController.m_pObject)
+                controller->m_spNextController.m_pObject->DecRefCount();
+            controller->m_spNextController.m_pObject = next;
+            if (controller->m_spNextController.m_pObject)
+                controller->m_spNextController.m_pObject->IncRefCount();
         }
-        if (m_pControllers != controller)
+        if (m_spControllers != controller)
         {
-            if (m_pControllers)
-                m_pControllers->DecRefCount();
-            m_pControllers = controller;
-            if (m_pControllers)
-                m_pControllers->IncRefCount();
+            if (m_spControllers)
+                m_spControllers->DecRefCount();
+            m_spControllers = controller;
+            if (m_spControllers)
+                m_spControllers->IncRefCount();
         }
     }
 }
@@ -174,10 +196,10 @@ bhkSphereShape::bhkSphereShape(float radius, bool convert)
 // @fnv 0x00a5c050
 void NiObjectNET::FUN_00a5c050()
 {
-    if (m_pControllers)
+    if (m_spControllers)
     {
-        m_pControllers->DecRefCount();
-        m_pControllers = NULL;
+        m_spControllers->DecRefCount();
+        m_spControllers = NULL;
     }
 }
 
@@ -234,14 +256,14 @@ struct NiExtraDataDeleteProxy : public NiObjectNET
 void FUN_00a5bfa0_shell::ClearExtraData()
 {
     EnterCriticalSection(&g_NiObjectNETExtraDataLock);
-    for (short i = static_cast<short>(m_usExtraDataCount) - 1; i >= 0; --i)
+    for (short i = static_cast<short>(m_usExtraDataSize) - 1; i >= 0; --i)
     {
         reinterpret_cast<NiExtraDataDeleteProxy*>(this)->DeleteExtraData(static_cast<unsigned short>(i));
     }
-    NiFree(m_ppExtraData);
-    m_ppExtraData = 0;
+    NiFree(m_ppkExtra);
+    m_ppkExtra = 0;
     m_usMaxSize = 0;
-    m_usExtraDataCount = 0;
+    m_usExtraDataSize = 0;
     LeaveCriticalSection(&g_NiObjectNETExtraDataLock);
 }
 
@@ -485,6 +507,7 @@ void __fastcall SaveNiObjectLinks(char* self, int, VStream* kStream)
 }
 }  // namespace fnv_00a5c5b0
 
+class NiBinaryExtraData;
 namespace fnv_00a5c290 {
 struct CloningProcess
 {
@@ -509,22 +532,13 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volati
 extern char* _EmptyFS;
 int strcpy_s(char*, unsigned int, const char*);
 void NiFree(void*);
-struct NiGlobalStringTable
-{
-    static char* __cdecl AddString(const char*);
-};
-class NiBinaryExtraData;
 struct FUN_00a5d450_holder
 {
     void CreateVertexBufferSet(NiBinaryExtraData*, CloningProcess*);
 };
-struct FSH
-{
-    char* m_kHandle;
-};
 struct FUN_00a5b950_holder
 {
-    void AssignFixedString(const FSH&);
+    void AssignFixedString(const NiFixedString&);
 };
 struct RefView_a5c290
 {
@@ -602,36 +616,36 @@ void FUN_00a5c290_shell::FUN_00a5c290(NiObjectNET* pkDest, CloningProcess* kClon
             strcpy_s(pcSuffixedName, iNameLen, m_kName.m_kHandle);
             pcSuffixedName[iNameLen - 2] = kCloning->m_bExactType;
             pcSuffixedName[iNameLen - 1] = 0;
-            FSH kName;
+            char* kName;
             if (!pcSuffixedName)
-                kName.m_kHandle = _EmptyFS;
+                kName = _EmptyFS;
             else
-                kName.m_kHandle = NiGlobalStringTable::AddString(pcSuffixedName);
-            FSH kArg = kName;
-            ((FUN_00a5b950_holder*)pkDest)->AssignFixedString(kArg);
-            if (kName.m_kHandle != _EmptyFS)
-                InterlockedDecrement((long*)(kName.m_kHandle - 8));
+                kName = NiGlobalStringTable::AddString(pcSuffixedName);
+            char* kArg = kName;
+            ((FUN_00a5b950_holder*)pkDest)->AssignFixedString(reinterpret_cast<const NiFixedString&>(kArg));
+            if (kName != _EmptyFS)
+                InterlockedDecrement((long*)(kName - 8));
             NiFree(pcSuffixedName);
         }
     }
 
-    for (unsigned short i = 0; i < m_usExtraDataCount; i++)
+    for (unsigned short i = 0; i < m_usExtraDataSize; i++)
     {
-        NiExtraData* pkExtra = m_ppExtraData[i];
+        NiExtraData* pkExtra = m_ppkExtra[i];
         if (pkExtra && ((VObj*)pkExtra)->IsCloneable())
             pkDest->AddExtraData((NiExtraData*)((VObj*)pkExtra)->MakeClone(*kCloning));
     }
 
-    NiTimeController* pkCtrl = m_pControllers;
+    NiTimeController* pkCtrl = m_spControllers;
     if (pkCtrl)
     {
         NiTimeController* pkNew = (NiTimeController*)((VObj*)pkCtrl)->MakeClone(*kCloning);
-        if (pkDest->m_pControllers != pkNew)
+        if (pkDest->m_spControllers != pkNew)
         {
-            RefView_a5c290* pkOld = (RefView_a5c290*)pkDest->m_pControllers;
+            RefView_a5c290* pkOld = (RefView_a5c290*)pkDest->m_spControllers;
             if (pkOld && InterlockedDecrement(&pkOld->m_uiRefCount) == 0)
                 pkOld->DeleteThis();
-            pkDest->m_pControllers = pkNew;
+            pkDest->m_spControllers = pkNew;
             if (pkNew)
                 InterlockedIncrement(&((RefView_a5c290*)pkNew)->m_uiRefCount);
         }
@@ -659,42 +673,42 @@ struct ControllerOwner : NiObjectNET
 // @fnv 0x00a5c480
 void ControllerOwner::FUN_00a5c480(NiTimeController* controller)
 {
-    if (!controller || !m_pControllers)
+    if (!controller || !m_spControllers)
         return;
-    NiTimeController* current = m_pControllers;
+    NiTimeController* current = m_spControllers;
     if (current == controller)
     {
         volatile long* refCount = reinterpret_cast<volatile long*>(&controller->m_uiRefCount);
         InterlockedIncrement(refCount);
-        reinterpret_cast<ControllerPointerProxy*>(&m_pControllers)->FUN_00a5f860(controller->m_spNextController);
-        NiTimeController* following = controller->m_spNextController;
+        reinterpret_cast<ControllerPointerProxy*>(&m_spControllers)->FUN_00a5f860(controller->m_spNextController.m_pObject);
+        NiTimeController* following = controller->m_spNextController.m_pObject;
         if (following)
         {
             if (InterlockedDecrement(reinterpret_cast<volatile long*>(&following->m_uiRefCount)) == 0)
                 following->DeleteThis();
-            controller->m_spNextController = 0;
+            controller->m_spNextController.m_pObject = 0;
         }
         if (InterlockedDecrement(refCount) == 0)
             controller->DeleteThis();
         return;
     }
-    NiTimeController* following = current->m_spNextController;
+    NiTimeController* following = current->m_spNextController.m_pObject;
     while (following && following != controller)
     {
         current = following;
-        following = following->m_spNextController;
+        following = following->m_spNextController.m_pObject;
     }
     if (following)
     {
         ControllerPointerProxy retainedProxy = {controller};
         InterlockedIncrement(reinterpret_cast<volatile long*>(&controller->m_uiRefCount));
-        reinterpret_cast<ControllerLinkProxy*>(current)->FUN_00a67260(controller->m_spNextController);
-        NiTimeController* tail = controller->m_spNextController;
+        reinterpret_cast<ControllerLinkProxy*>(current)->FUN_00a67260(controller->m_spNextController.m_pObject);
+        NiTimeController* tail = controller->m_spNextController.m_pObject;
         if (tail)
         {
             if (InterlockedDecrement(reinterpret_cast<volatile long*>(&tail->m_uiRefCount)) == 0)
                 tail->DeleteThis();
-            controller->m_spNextController = 0;
+            controller->m_spNextController.m_pObject = 0;
         }
         retainedProxy.FUN_0045cec0();
     }
@@ -703,8 +717,6 @@ void ControllerOwner::FUN_00a5c480(NiTimeController* controller)
 // Deleting destructor of an NiObjectNET-style object: drop extra data, the controller and the name, then free.
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
-
-extern char* g_pcC7B0NullString;
 
 class C7B0RefObject
 {
@@ -716,7 +728,7 @@ class C7B0RefObject
 
     void DecRefCount()
     {
-        if (InterlockedDecrement(&m_lRefCount) == 0)
+        if (::InterlockedDecrement(&m_lRefCount) == 0)
             DeleteThis();
     }
 };
@@ -726,23 +738,11 @@ template <class T> class C7B0Pointer
   public:
     __forceinline ~C7B0Pointer()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
 
     T* m_pObject;
-};
-
-class C7B0FixedString
-{
-  public:
-    __forceinline ~C7B0FixedString()
-    {
-        if (m_pcHandle != g_pcC7B0NullString)
-            InterlockedDecrement((long volatile*)(m_pcHandle - 8));
-    }
-
-    char* m_pcHandle;
 };
 
 class C7B0Object
@@ -766,7 +766,7 @@ class C7B0ObjectNET : public C7B0Object
     void DeleteExtraData() throw();
     C7B0ObjectNET* DestroyObject(unsigned int uiFlags);
 
-    C7B0FixedString m_kName;
+    NiFixedString m_kName;
     C7B0Pointer<C7B0RefObject> m_spController;
     int unk10;
     int unk14;
@@ -899,8 +899,37 @@ struct EqObject
     virtual bool Equal(EqObject*);
 };
 
-struct VExtra : NiExtraData
+struct VExtra
 {
+    virtual void v00();
+    virtual void v01();
+    virtual void v02();
+    virtual void v03();
+    virtual void v04();
+    virtual void v05();
+    virtual void v06();
+    virtual void v07();
+    virtual void v08();
+    virtual void v09();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
     virtual void v29();
     virtual void v30();
     virtual void v31();
@@ -929,11 +958,11 @@ bool NetEqual::FUN_00a5c820(NiObjectNET* other)
         return false;
     ShortArray first, second;
     unsigned short countA;
-    for (countA = 0; countA < m_usExtraDataCount; ++countA)
-        if (((VExtra*)m_ppExtraData[countA])->IsGeometryController())
+    for (countA = 0; countA < m_usExtraDataSize; ++countA)
+        if (((VExtra*)m_ppkExtra[countA])->IsGeometryController())
             first.Add(countA);
-    for (countA = 0; countA < other->m_usExtraDataCount; ++countA)
-        if (((VExtra*)other->m_ppExtraData[countA])->IsGeometryController())
+    for (countA = 0; countA < other->m_usExtraDataSize; ++countA)
+        if (((VExtra*)other->m_ppkExtra[countA])->IsGeometryController())
             second.Add(countA);
     if (first.m_usSize != second.m_usSize)
     {
@@ -943,8 +972,8 @@ bool NetEqual::FUN_00a5c820(NiObjectNET* other)
     }
     for (unsigned short j = 0; j < first.m_usSize; ++j)
     {
-        EqObject* o1 = (EqObject*)m_ppExtraData[first.m_pBase[j]];
-        EqObject* o2 = (EqObject*)other->m_ppExtraData[second.m_pBase[j]];
+        EqObject* o1 = (EqObject*)m_ppkExtra[first.m_pBase[j]];
+        EqObject* o2 = (EqObject*)other->m_ppkExtra[second.m_pBase[j]];
         if (!o1->Equal(o2))
         {
             NiFree(second.m_pBase);
@@ -952,8 +981,8 @@ bool NetEqual::FUN_00a5c820(NiObjectNET* other)
             return false;
         }
     }
-    NiTimeController* pOtherController = other->m_pControllers;
-    NiTimeController* pController = m_pControllers;
+    NiTimeController* pOtherController = other->m_spControllers;
+    NiTimeController* pController = m_spControllers;
     unsigned int i = pController ? ((CountController*)pController)->FUN_00a6cd00() : 0;
     unsigned int uiOtherControllerCount = pOtherController ? ((CountController*)pOtherController)->FUN_00a6cd00() : 0;
     if (i != uiOtherControllerCount)
@@ -966,8 +995,8 @@ bool NetEqual::FUN_00a5c820(NiObjectNET* other)
             NiFree(first.m_pBase);
             return false;
         }
-        pController = pController->m_spNextController;
-        pOtherController = pOtherController->m_spNextController;
+        pController = pController->m_spNextController.m_pObject;
+        pOtherController = pOtherController->m_spNextController.m_pObject;
     }
     NiFree(second.m_pBase);
     NiFree(first.m_pBase);
@@ -1026,7 +1055,7 @@ inline bool IsExactTypeA5(const void* type, const LinkExtraA5* object)
 void LinkObjectA5::FUN_00a5c6a0(NiStream& stream)
 {
     LinkBaseA5::LinkObject(stream);
-    if (stream.m_uiNifVersion < 0x0500000b)
+    if (stream.m_uiNifFileVersion < 0x0500000b)
     {
         LinkExtraA5* extra = reinterpret_cast<LinkExtraA5*>(m_extra);
         if (extra)
@@ -1108,23 +1137,9 @@ struct FUN_00a5bca0_shell : public NiObjectNET
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 
 extern char* _EmptyFS;
-struct BSFadeNode
-{
-    BSFadeNode(const char*);
-    ~BSFadeNode()
-    {
-        if (m_kHandle != _EmptyFS)
-            InterlockedDecrement((long*)(m_kHandle - 8));
-    }
-    char* m_kHandle;
-};
 struct NamedObj
 {
-    void SetName(const BSFadeNode&) throw();
-};
-struct NiShader
-{
-    const NiFixedString& GetFilename() const;
+    void SetName(const ::NiFixedString&) throw();
 };
 class NiTexture;
 struct Holder
@@ -1168,16 +1183,11 @@ bool FUN_00a5bca0_shell::SetExtraDataName(NiExtraData* pkExtra)
             char* pcGeneratedKey = (char*)_NiMalloc(uiLen);
             CopyFilePath(pcGeneratedKey, uiLen, pcRTTI, uiStrLength);
             _strcat_s(pcGeneratedKey, uiLen, pcSuffix);
-            ((NamedObj*)pkExtra)->SetName(BSFadeNode(pcGeneratedKey));
+            ((NamedObj*)pkExtra)->SetName(::NiFixedString(static_cast<const char*>(pcGeneratedKey)));
             NiFree(pcGeneratedKey);
         }
     }
     return ((Holder*)this)->FUN_00a5ba40((NiTexture*)pkExtra);
-}
-
-inline NiFixedString::operator const char*() const
-{
-    return m_kHandle;
 }
 
 struct FUN_00a5be90_shell : public NiObjectNET
@@ -1185,30 +1195,30 @@ struct FUN_00a5be90_shell : public NiObjectNET
     bool DeleteExtraDataByKey(const NiFixedString& kKey);
 };
 
-// Binary-searches m_ppExtraData using filename pointer ordering and deletes an entry when its filename pointer equals kKey.
+// Binary-searches m_ppkExtra using filename pointer ordering and deletes an entry when its filename pointer equals kKey.
 // @fnv 0x00a5be90
 bool FUN_00a5be90_shell::DeleteExtraDataByKey(const NiFixedString& kKey)
 {
-    if (m_usExtraDataCount == 0)
+    if (m_usExtraDataSize == 0)
         return false;
 
     EnterCriticalSection(&g_NiObjectNETExtraDataLock);
 
-    if (kKey == _EmptyFS)
+    if ((const char*)kKey == _EmptyFS)
     {
         LeaveCriticalSection(&g_NiObjectNETExtraDataLock);
         return false;
     }
 
     short sLow = 0;
-    short sHigh = m_usExtraDataCount - 1;
+    short sHigh = m_usExtraDataSize - 1;
     short sMiddle;
     int dtCompare;
 
     while (sLow <= sHigh)
     {
         sMiddle = (sLow + sHigh) >> 1;
-        dtCompare = (const char*)kKey - (const char*)((NiShader*)m_ppExtraData[sMiddle])->GetFilename();
+        dtCompare = (const char*)kKey - (const char*)((NiShader*)m_ppkExtra[sMiddle])->GetFilename();
         if (dtCompare == 0)
         {
             ((NiExtraDataDeleteProxy*)this)->DeleteExtraData(sMiddle);
@@ -1229,11 +1239,7 @@ bool FUN_00a5be90_shell::DeleteExtraDataByKey(const NiFixedString& kKey)
     return false;
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
-extern MemoryManager g_memoryManager;
+extern ::MemoryManager g_memoryManager;
 struct FUN_00a5c780
 {
     void* m_pData;
@@ -1249,3 +1255,4 @@ FUN_00a5c780::~FUN_00a5c780()
 {
     NiFree(m_pData);
 }
+

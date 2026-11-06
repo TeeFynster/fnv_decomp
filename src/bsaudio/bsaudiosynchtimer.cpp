@@ -1,3 +1,4 @@
+#include "../../include/BSAudioSyncTimer.h"
 // bsaudio/bsaudiosynchtimer.cpp: free functions (1 function)
 
 #include <windows.h>
@@ -6,19 +7,11 @@
 
 #include "BSAudioSyncTimer.h"
 
-class FUN_00aea100_cls
-{
-  public:
-    unsigned int m_uiValueAt00;
-    unsigned int m_uiValueAt04;
-    unsigned int iFlags;
 
-    void UpdateAccumulatedTime();
-};
 
 // Computes the elapsed time since the last call and, when iFlags bit 0 is clear, adds it to m_uiValueAt00, then stores the current tick count in m_uiValueAt04.
 // @fnv 0x00aea100
-void FUN_00aea100_cls::UpdateAccumulatedTime()
+void BSAudioSyncTimer::UpdateAccumulatedTime()
 {
     unsigned int now = GetTickCount();
     unsigned int delta = now - m_uiValueAt04;

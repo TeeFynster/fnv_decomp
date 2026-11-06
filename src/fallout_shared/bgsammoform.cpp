@@ -2,18 +2,11 @@
 // src/fallout_shared/bgsammoform.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/bgsammoform.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct BaseFormComponent
-{
-    virtual ~BaseFormComponent();
-};
-struct BGSAmmoForm : BaseFormComponent
-{
-    void* m_pAmmo;
-    bool FUN_00474b70(BaseFormComponent* apCompareFC);
-};
+#include "../../include/BGSAmmoForm.h"
+#include "../../include/BaseFormComponent.h"
 
 // @fnv 0x00474b70
-bool BGSAmmoForm::FUN_00474b70(BaseFormComponent* apCompareFC)
+bool BGSAmmoForm::CompareWithBase(BaseFormComponent* apCompareFC)
 {
     BGSAmmoForm* pcompare = dynamic_cast<BGSAmmoForm*>(apCompareFC);
     if (!pcompare)
@@ -28,12 +21,8 @@ struct DeallocHolder
 {
     unsigned int __thiscall _ref_0084e3a0();
 };
-struct Shell474af0 : BGSAmmoForm
-{
-    void FUN_00474af0();
-};
 // @fnv 0x00474af0
-void Shell474af0::FUN_00474af0()
+void BGSAmmoForm::Free()
 {
     if (m_pAmmo != 0)
     {
@@ -42,18 +31,13 @@ void Shell474af0::FUN_00474af0()
     }
 }
 
-struct FUN_00474b30_Holder : BaseFormComponent
-{
-    void* ammo;
-    void CopyAmmoFrom(BaseFormComponent* apCopyFC);
-};
 // @fnv 0x00474b30
-void FUN_00474b30_Holder::CopyAmmoFrom(BaseFormComponent* apCopyFC)
+void BGSAmmoForm::CopyFromBase(BaseFormComponent* apCopyFC)
 {
     BGSAmmoForm* pcopy = dynamic_cast<BGSAmmoForm*>(apCopyFC);
     if (!pcopy)
         return;
-    ammo = pcopy->m_pAmmo;
+    m_pAmmo = pcopy->m_pAmmo;
 }
 
 extern char DAT_01183028;
@@ -67,17 +51,14 @@ struct GroupHolder
 {
     RangeHolder* FUN_00500940();
 };
-struct FUN_00474a80_Class
-{
-    GroupHolder* FUN_00474a40();
-    bool FUN_00474a80();
-};
+// The shared class does not yet declare the scripted-ammo queries.
+GroupHolder* __fastcall GetAmmoScript(BGSAmmoForm* ammoForm);
 // @fnv 0x00474a80
-bool FUN_00474a80_Class::FUN_00474a80()
+bool __fastcall HasAmmoScript(BGSAmmoForm* ammoForm)
 {
-    if (FUN_00474a40())
+    if (GetAmmoScript(ammoForm))
     {
-        int value = *FUN_00474a40()->FUN_00500940()->FUN_006815c0();
+        int value = *GetAmmoScript(ammoForm)->FUN_00500940()->FUN_006815c0();
         if (value != 0)
         {
             int result = FUN_00ec43fb(value, 0, &DAT_01183028, &DAT_011840c4, 0);
@@ -105,19 +86,14 @@ extern const char str_0101a3c8[];
 extern const char str_0101a404[];
 extern const char str_0101a444[];
 
-struct FUN_00474bc0_shell : BaseFormComponent
-{
-    void* m_pAmmo;
-    void __thiscall CompareAmmo(BaseFormComponent*);
-};
 // @fnv 0x00474bc0
-void __thiscall FUN_00474bc0_shell::CompareAmmo(BaseFormComponent* apCompareFC)
+void BGSAmmoForm::InitItem(TESForm* apCompareFC)
 {
     if (m_pAmmo)
     {
         void* oldAmmo = m_pAmmo;
         ResolveFormID(&oldAmmo, reinterpret_cast<ComparisonInfo*>(apCompareFC)->FUN_00484e60(-1));
-        m_pAmmo = FUN_004839c0(oldAmmo);
+        m_pAmmo = static_cast<TESForm*>(FUN_004839c0(oldAmmo));
         if (m_pAmmo && reinterpret_cast<AmmoRecord*>(m_pAmmo)->FUN_00401170() != 0x29 &&
             reinterpret_cast<AmmoRecord*>(m_pAmmo)->FUN_00401170() != 0x55)
         {
@@ -130,7 +106,7 @@ void __thiscall FUN_00474bc0_shell::CompareAmmo(BaseFormComponent* apCompareFC)
                 if (reinterpret_cast<ComparisonInfo*>(apCompareFC)->FUN_00474cb0())
                 {
                     FUN_005b5e40(str_0101a444, oldAmmo,
-                                 (reinterpret_cast<int(__thiscall*)(BaseFormComponent*)>(
+                                 (reinterpret_cast<int(__thiscall*)(TESForm*)>(
                                      (*reinterpret_cast<void***>(apCompareFC))[0x130 / 4]))(apCompareFC));
                 }
                 else

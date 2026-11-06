@@ -1,6 +1,7 @@
 // gamebryo2.2/corelibs/niconsolerenderer/nid3drenderstategroup.cpp: D3DRenderStateGroup, RenderOwner, StateGroup, StateGroupE7F5 (12 functions)
 
 #include "nid3drenderstategroup_decls.h"
+#include "../../../../include/NiDX9RenderState.h"
 // Returns the render state group from DAT_0126f718, setting its flag to true if it was false.
 // @fnv 0x00e7f5d0
 D3DRenderStateGroup* D3DRenderStateGroup::GetCurrentRenderStateGroup()
@@ -17,43 +18,21 @@ struct Entry00e7ef40
     int m_iPad;
     Entry00e7ef40* m_pkNext;
 };
-struct Renderer00e7ef40
+// DAT_0126f714 is NiDX9Renderer::pRenderState, assigned by NiD3DPass::SetActiveRenderer (0x00e7eea0).
+extern NiDX9RenderState* DAT_0126f714;
+
+// The shared header leaves the render-state cache at 0x124 in its padding and slot 26 untyped.
+inline int GetCachedRenderState(NiDX9RenderState* state, int key)
 {
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void Set(int, int, int, int);
-    char _pad[288];
-    struct Val
-    {
-        int m_iVal;
-        int m_iPad;
-    } m_kVals[64];
-};
-extern Renderer00e7ef40* DAT_0126f714;
+    return reinterpret_cast<int*>(state->_pad + 0x124 - sizeof(NiD3DRenderState))[key * 2];
+}
+
+inline void SetCachedRenderState(NiDX9RenderState* state, int key, int value, int save, int force)
+{
+    typedef void (__thiscall* SetState)(NiDX9RenderState*, int, int, int, int);
+    reinterpret_cast<SetState>((*reinterpret_cast<void***>(state))[26])(state, key, value, save, force);
+}
+
 struct Group00e7ef40
 {
     char _pad0[16];
@@ -67,9 +46,9 @@ unsigned int Group00e7ef40::FUN_00e7ef40()
     while (pkRSEntry)
     {
         int iState = pkRSEntry->m_iFadeIndex;
-        Renderer00e7ef40* pRenderer = DAT_0126f714;
-        int iVal = pRenderer->m_kVals[iState].m_iVal;
-        pRenderer->Set(iState, iVal, 0, 0);
+        NiDX9RenderState* pRenderer = DAT_0126f714;
+        int iVal = GetCachedRenderState(pRenderer, iState);
+        SetCachedRenderState(pRenderer, iState, iVal, 0, 0);
         pkRSEntry = pkRSEntry->m_pkNext;
     }
     return 0;
@@ -88,13 +67,13 @@ unsigned int Group00e7eed0::ApplyGroupEntries()
     Entry00e7ef40* entry = *(Entry00e7ef40**)((char*)this + 8);
     while (entry)
     {
-        DAT_0126f714->Set(entry->m_iFadeIndex, entry->m_iPad, 0, 0);
+        SetCachedRenderState(DAT_0126f714, entry->m_iFadeIndex, entry->m_iPad, 0, 0);
         entry = entry->m_pkNext;
     }
     entry = m_pkSaved;
     while (entry)
     {
-        DAT_0126f714->Set(entry->m_iFadeIndex, entry->m_iPad, 1, 0);
+        SetCachedRenderState(DAT_0126f714, entry->m_iFadeIndex, entry->m_iPad, 1, 0);
         entry = entry->m_pkNext;
     }
     return 0;

@@ -1,135 +1,168 @@
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiBoundingVolume.h"
+#include "../../../../include/NiColor.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiSphere.h"
+#include "../../../../include/NiSphereBV.h"
+// LocalPt3: unit-local copy of the former shared stand-in Pt3. Same layout as NiPoint3; its operator- builds the difference in a temporary while this unit's NiPoint3::operator- uses the constructor (one NiPoint3 cannot carry both bodies).
+class LocalPt3
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    LocalPt3();
+    LocalPt3(float fX, float fY, float fZ);
+
+    LocalPt3 operator+(const LocalPt3& other) const;
+    LocalPt3 operator-(const LocalPt3& other) const;
+    LocalPt3 operator-() const;
+    LocalPt3 operator*(float scale) const;
+    LocalPt3& operator*=(float scale);
+    bool operator!=(const LocalPt3& other) const;
+
+    float Dot(const LocalPt3& other) const;
+    float DotAccumulated(const LocalPt3& other) const;
+    float DotPlane(const LocalPt3& other) const;
+    float DotProduct(const LocalPt3& other) const;
+    LocalPt3 Cross(const LocalPt3& other) const;
+    float SqrLength() const;
+    float Length2() const;
+    float Length() const;
+    float Len() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+
+    void FUN_004a0c10();
+    LocalPt3* FUN_00439ef0(LocalPt3* out, LocalPt3* other);
+    LocalPt3 FUN_00439ef0(const LocalPt3& rhs);
+    bool FUN_00439090(LocalPt3* other);
+    float FUN_00457990() const;
+
+    static const LocalPt3 ms_kFirstPoint;
+    static const LocalPt3 ms_kSecondPoint;
+    static const LocalPt3 ms_kThirdPoint;
+};
+#include "../../../../include/NiPoint3.h"
 
 // src/gamebryo2.2/corelibs/nicollision/nispherebv.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/nispherebv.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiStream
-{
-    void GetLoadedObject();
-};
 
-struct NiObject
+struct DotTerm
 {
-    virtual void LinkObject(NiStream&);
+    const float& first;
+    const float& second;
+    DotTerm(const float& a, const float& b) : first(a), second(b)
+    {}
+    double Value() const
+    {
+        return first * second;
+    }
 };
-
-struct NiSphere
+inline float SumTerms(DotTerm c, DotTerm a, DotTerm b)
 {
-    void LoadBinary(NiStream&);
-};
-
-struct NiSphereBV : NiObject
+    double sum = a.Value();
+    sum += b.Value();
+    return sum + c.Value();
+}
+inline LocalPt3::LocalPt3()
+{}
+inline LocalPt3::LocalPt3(float xx, float yy, float zz) : x(xx), y(yy), z(zz)
+{}
+inline LocalPt3 LocalPt3::operator+(LocalPt3 const& p) const
 {
-    NiSphere m_kBoundingSphere;
-    void FUN_00eab860(NiStream& kStream);
-};
+    LocalPt3 r;
+    r.x = x + p.x;
+    r.y = y + p.y;
+    r.z = z + p.z;
+    return r;
+}
+inline LocalPt3 LocalPt3::operator-(LocalPt3 const& p) const
+{
+    return LocalPt3(x - p.x, y - p.y, z - p.z);
+}
+inline LocalPt3 LocalPt3::operator-() const
+{
+    return LocalPt3(-x, -y, -z);
+}
+inline LocalPt3 LocalPt3::operator*(float s) const
+{
+    return LocalPt3(x * s, y * s, z * s);
+}
+inline float LocalPt3::Dot(LocalPt3 const& p) const
+{
+    return x * p.x + y * p.y + z * p.z;
+}
+inline float LocalPt3::DotAccumulated(LocalPt3 const& p) const
+{
+    const float* a[2] = {&y, &z};
+    const float* b[2] = {&p.y, &p.z};
+    double sum = x * p.x;
+    for (int i = 0; i < 2; ++i)
+        sum += (*a[i]) * (*b[i]);
+    return sum;
+}
+inline float LocalPt3::DotPlane(LocalPt3 const& p) const
+{
+    return SumTerms(DotTerm(z, p.z), DotTerm(x, p.x), DotTerm(y, p.y));
+}
+inline float LocalPt3::SqrLength() const
+{
+    return x * x + y * y + z * z;
+}
+inline LocalPt3 LocalPt3::Cross(LocalPt3 const& p) const
+{
+    return LocalPt3(y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x);
+}
 
 // @fnv 0x00eab860
-void NiSphereBV::FUN_00eab860(NiStream& kStream)
+void NiSphereBV::LoadBinary(NiStream& kStream)
 {
-    NiObject::LinkObject(kStream);
+    reinterpret_cast<NiObject*>(this)->NiObject::LinkObject(kStream);
     m_kBoundingSphere.LoadBinary(kStream);
 }
 
-namespace fnv_00eab880 {
-struct NiStream;
-struct NiBoundingVolume
-{
-    void SaveBinary(NiStream&);
-};
-struct NiSphere
-{
-    void SaveBinary(NiStream&);
-};
-struct NiSphereBV : NiBoundingVolume
-{
-    NiSphere m_kBoundingSphere;
-    void FUN_00eab880(NiStream&);
-};
-
 // @fnv 0x00eab880
-void NiSphereBV::FUN_00eab880(NiStream& kStream)
+void NiSphereBV::SaveBinary(NiStream& kStream)
 {
     NiBoundingVolume::SaveBinary(kStream);
-    ((NiSphere*)((char*)this + 4))->SaveBinary(kStream);
+    m_kBoundingSphere.SaveBinary(kStream);
 }
-}  // namespace fnv_00eab880
 
-namespace fnv_00eab8d0 {
-struct NiPoint3
-{
-    float x, y, z;
-};
-
-struct NiSphere
-{
-    NiPoint3 m_kCenter;
-    float m_fBoundRadius;
-};
-
-struct NiBoundingVolume
-{
-    NiBoundingVolume* m_pParent;
-    NiSphere m_kBoundingSphere;
-};
-
-struct NiSphereBV : NiBoundingVolume
-{
-    void CopySphereFrom(const NiBoundingVolume&);
-};
-
-// Copies the sphere (center and radius) from the given bounding volume into this sphere bounding volume.
 // @fnv 0x00eab8d0
 void NiSphereBV::CopySphereFrom(const NiBoundingVolume& kABV)
 {
-    NiSphereBV* kSBV = this;
-    kSBV->m_kBoundingSphere = kABV.m_kBoundingSphere;
+    m_kBoundingSphere = static_cast<const NiSphereBV&>(kABV).m_kBoundingSphere;
 }
-}  // namespace fnv_00eab8d0
 
-struct NiBoundingVolume
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual int f3() const;
-};
-struct Q
-{
-    bool FUN_00a92660(Q const&) const;
-};
-struct MyBV
-{
-    void* _vf;
-    Q m_kBoundingSphere;
-    int FUN_00eab820(const NiBoundingVolume& kABV);
-};
+extern "C" void SphereIsEqual();
+typedef bool (__thiscall *SphereEqualFunction)(const NiSphere*, const NiSphere&);
+
 // @fnv 0x00eab820
-int MyBV::FUN_00eab820(const NiBoundingVolume& kABV)
+int __fastcall SphereBVIsEqual(const NiSphereBV* self, void*, const NiBoundingVolume& kABV)
 {
-    return kABV.f3() == 0 && ((Q const*)((char const*)&kABV + 4))->FUN_00a92660(m_kBoundingSphere);
+    return kABV.F3() == 0 && reinterpret_cast<SphereEqualFunction>(SphereIsEqual)(
+        &static_cast<const NiSphereBV&>(kABV).m_kBoundingSphere,
+        self->m_kBoundingSphere);
 }
 
 extern int DAT_010f1854;
-struct Proxy00eab8a0
-{
-    Proxy00eab8a0* InitFromParams(float, int const*);
-};
-// Sets the vtable pointer, copies three ints from p into slots 1-3, stores f in slot 4, and returns this.
+// The unused EDX argument keeps these file-local helpers compatible with the original thiscall entry points.
+// Initializes the sphere vtable, center and radius.
 // @fnv 0x00eab8a0
-Proxy00eab8a0* Proxy00eab8a0::InitFromParams(float afValue, int const* paiParams)
+NiSphereBV* __fastcall InitSphereFromParams(NiSphereBV* self, void*, float afValue, int const* paiParams)
 {
-    *(int*)this = (int)&DAT_010f1854;
-    ((int*)this)[1] = paiParams[0];
-    ((int*)this)[2] = paiParams[1];
-    ((int*)this)[3] = paiParams[2];
-    ((float*)this)[4] = afValue;
-    return this;
+    *(int*)self = (int)&DAT_010f1854;
+    ((int*)self)[1] = paiParams[0];
+    ((int*)self)[2] = paiParams[1];
+    ((int*)self)[3] = paiParams[2];
+    ((float*)self)[4] = afValue;
+    return self;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-};
 extern NiPoint3 _NiPoint3_ZERO;
 extern int DAT_010f1854;
 struct P03MM
@@ -137,29 +170,23 @@ struct P03MM
     void* Allocate(unsigned int);
 };
 extern P03MM g_memoryManager;
-struct FUN_00eac170_Ret
-{
-    virtual void F(NiStream&);
-    NiPoint3 c;
-    float r;
-};
 // @fnv 0x00eac170
-FUN_00eac170_Ret* FUN_00eac170(NiStream& kStream)
+NiSphereBV* FUN_00eac170(NiStream& kStream)
 {
     void* mem = g_memoryManager.Allocate(20);
-    FUN_00eac170_Ret* p;
+    NiSphereBV* p;
     if (mem)
     {
         *(void**)mem = (void*)&DAT_010f1854;
-        ((FUN_00eac170_Ret*)mem)->c = _NiPoint3_ZERO;
-        ((FUN_00eac170_Ret*)mem)->r = 1.0f;
-        p = (FUN_00eac170_Ret*)mem;
+        reinterpret_cast<NiPoint3&>(((NiSphereBV*)mem)->m_kBoundingSphere) = _NiPoint3_ZERO;
+        ((NiSphereBV*)mem)->m_kBoundingSphere.r = 1.0f;
+        p = (NiSphereBV*)mem;
     }
     else
     {
         p = 0;
     }
-    p->F(kStream);
+    p->LoadBinary(kStream);
     return p;
 }
 
@@ -170,19 +197,14 @@ struct P03MM
     void __thiscall Deallocate(void*);
 };
 extern P03MM g_memoryManager;
-struct FUN_00eac1d0_shell
-{
-    void* m_p;
-    void* InitAndMaybeFree(bool b);
-};
-// Sets m_p to DAT_010f16f4, frees this via g_memoryManager.Deallocate when b has bit 0 set, and returns this.
+// Restores the bounding-volume vtable and optionally frees the object.
 // @fnv 0x00eac1d0
-void* FUN_00eac1d0_shell::InitAndMaybeFree(bool abFree)
+void* __fastcall InitAndMaybeFree(NiBoundingVolume* self, void*, bool abFree)
 {
-    m_p = &DAT_010f16f4;
+    *(void**)self = &DAT_010f16f4;
     if (abFree & 1)
-        g_memoryManager.Deallocate(this);
-    return this;
+        g_memoryManager.Deallocate(self);
+    return self;
 }
 }  // namespace fnv_00eac1d0
 
@@ -196,7 +218,6 @@ extern int DAT_010f1854;
 extern int _NiPoint3_ZERO;
 extern int DAT_011f4270;
 extern int DAT_011f4274;
-struct NiBoundingVolume;
 // Allocates 0x14 bytes, initialises a vtable pointer and four fields (including a float set to 1.0), and returns the new NiBoundingVolume or null.
 // @fnv 0x00eac200
 NiBoundingVolume* CreateNiBoundingVolume()
@@ -223,141 +244,88 @@ struct P03MM
 };
 extern P03MM g_memoryManager;
 extern int DAT_010f1854;
-struct S16
-{
-    int i0;
-    int i1;
-    int i2;
-    int i3;
-};
-struct BVClone
-{
-    int v;
-    S16 s;
-    BVClone* Clone();
-};
-// Allocates a 20-byte BVClone, sets its vtable pointer and copies the S16 at offset 4 from this, returning the clone or 0.
+}  // namespace fnv_00eacac0
+
 // @fnv 0x00eacac0
-BVClone* BVClone::Clone()
+NiSphereBV* __fastcall CloneSphere(NiSphereBV* self, void*)
 {
-    BVClone* pkClone = (BVClone*)g_memoryManager.Allocate(20);
+    NiSphereBV* pkClone = (NiSphereBV*)fnv_00eacac0::g_memoryManager.Allocate(20);
     if (pkClone)
     {
-        *(int*)pkClone = (int)&DAT_010f1854;
-        *(S16*)((char*)pkClone + 4) = *(S16*)((char*)this + 4);
+        *(int*)pkClone = (int)&fnv_00eacac0::DAT_010f1854;
+        pkClone->m_kBoundingSphere = self->m_kBoundingSphere;
         return pkClone;
     }
     return 0;
 }
-}  // namespace fnv_00eacac0
 
-struct S_00eab900_Pt
+
+inline LocalPt3 operator*(float s, const LocalPt3& p)
 {
-    float x, y, z;
-    S_00eab900_Pt()
-    {}
-    S_00eab900_Pt(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    S_00eab900_Pt operator+(const S_00eab900_Pt& p) const
-    {
-        return S_00eab900_Pt(x + p.x, y + p.y, z + p.z);
-    }
-};
-inline S_00eab900_Pt operator*(float s, const S_00eab900_Pt& p)
-{
-    return S_00eab900_Pt(s * p.x, s * p.y, s * p.z);
+    return LocalPt3(s * p.x, s * p.y, s * p.z);
 }
-struct S_00eab900_Mat
+struct SphereBVMatrix
 {
     float e[3][3];
-    S_00eab900_Pt operator*(const S_00eab900_Pt& p) const
+    LocalPt3 operator*(const LocalPt3& p) const
     {
-        return S_00eab900_Pt(e[0][1] * p.y + e[0][0] * p.x + e[0][2] * p.z,
-                             e[1][1] * p.y + e[1][0] * p.x + e[1][2] * p.z,
-                             e[2][1] * p.y + e[2][0] * p.x + e[2][2] * p.z);
+        LocalPt3 result;
+        // Preserve the original x87 operand-load order for the first row.
+        result.x = e[0][1] * p.y + *reinterpret_cast<const volatile float*>(&e[0][0]) * p.x + e[0][2] * p.z;
+        result.y = e[1][1] * p.y + e[1][0] * p.x + e[1][2] * p.z;
+        result.z = e[2][1] * p.y + e[2][0] * p.x + e[2][2] * p.z;
+        return result;
     }
 };
-struct S_00eab900_Xform
+struct SphereBVTransform
 {
-    S_00eab900_Mat rot;
-    S_00eab900_Pt trans;
+    SphereBVMatrix rot;
+    LocalPt3 trans;
     float scale;
-};
-struct S_00eab900_Bound
-{
-    void* vf;
-    S_00eab900_Pt c;
-    float r;
-};
-struct S_00eab900 : S_00eab900_Bound
-{
-    void TransformBound(const S_00eab900_Bound& b, const S_00eab900_Xform& x);
 };
 // Transforms the bound's center by the transform's rotation and scale plus translation, and scales its radius.
 // @fnv 0x00eab900
-void S_00eab900::TransformBound(const S_00eab900_Bound& aBound, const S_00eab900_Xform& aXform)
+void __fastcall TransformBound(NiSphereBV* self, void*, const NiBoundingVolume& aBound, const SphereBVTransform& aXform)
 {
-    c = aXform.scale * (aXform.rot * aBound.c) + aXform.trans;
-    r = aBound.r * aXform.scale;
+    const NiSphere& sphere = static_cast<const NiSphereBV&>(aBound).m_kBoundingSphere;
+    reinterpret_cast<LocalPt3&>(self->m_kBoundingSphere) = aXform.scale * (aXform.rot * reinterpret_cast<const LocalPt3&>(sphere)) + aXform.trans;
+    self->m_kBoundingSphere.r = sphere.r * aXform.scale;
 }
 
-struct Point3Lite
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& p) const
 {
-    float x, y, z;
-    Point3Lite()
-    {}
-    Point3Lite(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    Point3Lite operator-(const Point3Lite& p) const
-    {
-        Point3Lite r;
-        r.x = x - p.x;
-        r.y = y - p.y;
-        r.z = z - p.z;
-        return r;
-    }
-    float operator*(const Point3Lite& p) const
-    {
-        return x * p.x + y * p.y + z * p.z;
-    }
-    float SqrLength() const
-    {
-        return x * x + y * y + z * z;
-    }
-};
+    NiPoint3 r;
+    r.x = x - p.x;
+    r.y = y - p.y;
+    r.z = z - p.z;
+    return r;
+}
 
-struct SphereLite
+inline float NiPoint3::operator*(const NiPoint3& p) const
 {
-    Point3Lite m_kCenter;
-    float m_fBoundRadius;
-};
+    return x * p.x + y * p.y + z * p.z;
+}
 
-struct BoundVolLite
+// NiPoint3 has no squared-length declaration; keep the inlined calculation here.
+inline float SquaredLength(const NiPoint3& p)
 {
-    virtual ~BoundVolLite();
-};
-
-struct SphereBVLite : BoundVolLite
-{
-    SphereLite m_kBoundingSphere;
-    static bool CheckSweptSphereOverlap(float fTime, const BoundVolLite& kBV0, const Point3Lite& kV0,
-                                        const BoundVolLite& kBV1, const Point3Lite& kV1);
-};
+    return p.x * p.x + p.y * p.y + p.z * p.z;
+}
 
 // Tests whether two moving spheres overlap within fTime by comparing squared centre distance against the squared sum of radii.
 // @fnv 0x00eab9d0
-bool SphereBVLite::CheckSweptSphereOverlap(float fTime, const BoundVolLite& kBV0, const Point3Lite& kV0,
-                                           const BoundVolLite& kBV1, const Point3Lite& kV1)
+bool CheckSweptSphereOverlap(float fTime, const NiBoundingVolume& kBV0, const NiPoint3& kV0,
+                      const NiBoundingVolume& kBV1, const NiPoint3& kV1)
 {
-    Point3Lite kVel;
+    NiPoint3 kVel;
     kVel = kV1 - kV0;
-    float fVelSqrLen = kVel.SqrLength();
-    const SphereLite& kS0 = ((const SphereBVLite&)kBV0).m_kBoundingSphere;
-    const SphereLite& kS1 = ((const SphereBVLite&)kBV1).m_kBoundingSphere;
-    Point3Lite kDiff = kS1.m_kCenter - kS0.m_kCenter;
-    float fCenterDistSqr = kDiff.SqrLength();
-    float fRadiusSum = ((const SphereBVLite&)kBV0).m_kBoundingSphere.m_fBoundRadius +
-                       ((const SphereBVLite&)kBV1).m_kBoundingSphere.m_fBoundRadius;
+    float fVelSqrLen = SquaredLength(kVel);
+    const NiSphere& kS0 = ((const NiSphereBV&)kBV0).m_kBoundingSphere;
+    const NiSphere& kS1 = ((const NiSphereBV&)kBV1).m_kBoundingSphere;
+    NiPoint3 kDiff = reinterpret_cast<const NiPoint3&>(kS1) - reinterpret_cast<const NiPoint3&>(kS0);
+    float fCenterDistSqr = SquaredLength(kDiff);
+    float fRadiusSum = ((const NiSphereBV&)kBV0).m_kBoundingSphere.r +
+                       ((const NiSphereBV&)kBV1).m_kBoundingSphere.r;
     float fRadiusSumSqr = fRadiusSum * fRadiusSum;
     if (fVelSqrLen > 0.0f)
     {
@@ -433,59 +401,59 @@ void Display0::AppendFormattedText(char* text, Stream0* out)
 
 struct Triangle3
 {
-    Point3Lite m_kStartPoint;
-    Point3Lite m_kPoint1;
-    Point3Lite m_kPoint2;
+    NiPoint3 m_kStartPoint;
+    NiPoint3 m_kPoint1;
+    NiPoint3 m_kPoint2;
 };
 
 struct Segment3
 {
-    Point3Lite m_kStartPoint;
-    Point3Lite m_kLightVector;
+    NiPoint3 m_kStartPoint;
+    NiPoint3 m_kLightVector;
 };
 
-inline Point3Lite operator*(const Point3Lite& p, float s)
+inline NiPoint3 NiPoint3::operator*(float s) const
 {
-    Point3Lite r;
-    r.x = p.x * s;
-    r.y = p.y * s;
-    r.z = p.z * s;
+    NiPoint3 r;
+    r.x = x * s;
+    r.y = y * s;
+    r.z = z * s;
     return r;
 }
 
-inline bool operator==(const Point3Lite& a, const NiPoint3& b)
+inline bool SpherePointsEqual(const NiPoint3& a, const NiPoint3& b)
 {
     return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
-inline bool operator!=(const Point3Lite& a, const NiPoint3& b)
+inline bool SpherePointsDiffer(const NiPoint3& a, const NiPoint3& b)
 {
-    return !(a == b);
+    return !SpherePointsEqual(a, b);
 }
 
 float FUN_00eb1d20(const Segment3&, const Triangle3&, float*, float*, float*);
-float GetSquaredDistanceToTriangle(const Point3Lite&, const Triangle3&, float*, float*);
+float GetSquaredDistanceToTriangle(const NiPoint3&, const Triangle3&, float*, float*);
 
 // Builds a triangle from three points and tests whether the sphere's center swept along kV0-kV1 over fTime comes within the sphere radius of the triangle.
 // @fnv 0x00eac240
-bool SphereTriangleSweepTest(float fTime, const SphereBVLite& kBV0, const Point3Lite& kV0, const Point3Lite& kTriP0,
-                             const Point3Lite& kTriP1, const Point3Lite& kTriP2, const Point3Lite& kV1)
+bool SphereTriangleSweepTest(float fTime, const NiSphereBV& kBV0, const NiPoint3& kV0, const NiPoint3& kTriP0,
+                             const NiPoint3& kTriP1, const NiPoint3& kTriP2, const NiPoint3& kV1)
 {
     Triangle3 kTriangle;
     kTriangle.m_kStartPoint = kTriP0;
     kTriangle.m_kPoint1 = kTriP1 - kTriP0;
     kTriangle.m_kPoint2 = kTriP2 - kTriP0;
 
-    Point3Lite kDelta = kV0 - kV1;
+    NiPoint3 kDelta = kV0 - kV1;
 
     float fSqrDistance;
     float fTriP0;
     float fTriP1;
 
-    if (kDelta != _NiPoint3_ZERO)
+    if (SpherePointsDiffer(kDelta, _NiPoint3_ZERO))
     {
         Segment3 seg;
-        seg.m_kStartPoint = kBV0.m_kBoundingSphere.m_kCenter;
+        seg.m_kStartPoint = reinterpret_cast<const NiPoint3&>(kBV0.m_kBoundingSphere);
         seg.m_kLightVector = kDelta * fTime;
 
         float fSegP;
@@ -493,18 +461,15 @@ bool SphereTriangleSweepTest(float fTime, const SphereBVLite& kBV0, const Point3
     }
     else
     {
-        fSqrDistance = GetSquaredDistanceToTriangle(kBV0.m_kBoundingSphere.m_kCenter, kTriangle, &fTriP0, &fTriP1);
+        fSqrDistance = GetSquaredDistanceToTriangle(reinterpret_cast<const NiPoint3&>(kBV0.m_kBoundingSphere), kTriangle, &fTriP0, &fTriP1);
     }
 
-    double fRadius = kBV0.m_kBoundingSphere.m_fBoundRadius;
+    double fRadius = kBV0.m_kBoundingSphere.r;
     return fSqrDistance <= fRadius * fRadius;
 }
 
-struct NiColor
-{
-    float r, g, b;
-    void LoadBinary(NiStream&);
-};
+inline NiColor::NiColor()
+{}
 
 struct BinStrB0
 {
@@ -671,22 +636,17 @@ inline void ReadRawData(BinStrB0* p, float& f)
     p->m_uiPos += p->m_pfnRead(p, &f, 4, &uiSize, 1);
 }
 
-struct ObjB0
+inline NiSphereBV* __fastcall ConstructSphere(NiSphereBV* self, void*, const NiPoint3& center, float radius)
 {
-    void* vf;
-    NiPoint3 m_iThirdValue;
-    float m_r;
-    static void* operator new(unsigned int n)
-    {
-        return g_memoryManager.Allocate(n);
-    }
-    ObjB0(const NiPoint3& c, float r) : vf(&DAT_010f1854), m_iThirdValue(c), m_r(r)
-    {}
-};
+    *(void**)self = &DAT_010f1854;
+    reinterpret_cast<NiPoint3&>(self->m_kBoundingSphere) = center;
+    self->m_kBoundingSphere.r = radius;
+    return self;
+}
 
-// Reads three NiColor values and three floats from kStream, then allocates and returns an ObjB0 built from the first color and the third float.
+// Reads three NiColor values and three floats from kStream, then allocates and returns a NiSphereBV built from the first color and the third float.
 // @fnv 0x00eacb00
-ObjB0* ReadObjB0(NiStream& kStream)
+NiSphereBV* ReadObjB0(NiStream& kStream)
 {
     NiColor a, b, c;
     a.LoadBinary(kStream);
@@ -696,7 +656,10 @@ ObjB0* ReadObjB0(NiStream& kStream)
     ReadRawData(((StreamAccess&)kStream).m_pBinaryStream, f1);
     ReadRawData(((StreamAccess&)kStream).m_pBinaryStream, f2);
     ReadRawData(((StreamAccess&)kStream).m_pBinaryStream, f3);
-    return new ObjB0(*(NiPoint3*)&a, f3);
+    NiSphereBV* sphere = (NiSphereBV*)g_memoryManager.Allocate(20);
+    if (sphere)
+        return ConstructSphere(sphere, 0, *(NiPoint3*)&a, f3);
+    return 0;
 }
 
 extern "C" void _ReadWriteBarrier(void);
@@ -750,11 +713,6 @@ inline V3 operator*(float f, const V3& v)
 {
     return V3(f * v.x, f * v.y, f * v.z);
 }
-struct Sphere0 : BoundVolLite
-{
-    V3 c;
-    float r;
-};
 extern V3 DAT_011a946c;
 inline V3 ScaleLife(const float& f, const V3& v)
 {
@@ -762,7 +720,7 @@ inline V3 ScaleLife(const float& f, const V3& v)
 }
 // Tests sphere separation over fDur and writes contact data on a hit; normal outputs are conditional on flag in some branches.
 // @fnv 0x00eabb20
-bool IntersectSpheres(float afDuration, const Sphere0& A, const V3& B, const Sphere0& C, const V3& D, float& time,
+bool IntersectSpheres(float afDuration, const NiSphereBV& A, const V3& B, const NiSphereBV& C, const V3& D, float& time,
                       V3& point, bool flag, V3& normal0, V3& normal1)
 {
     V3& local_point = point;
@@ -777,10 +735,10 @@ bool IntersectSpheres(float afDuration, const Sphere0& A, const V3& B, const Sph
     a.z = vz;
     float fRelVelSq = a.SqrLength();
     float fDistSq;
-    V3 vCenterDiff = C.c - A.c;
+    V3 vCenterDiff = reinterpret_cast<const V3&>(C.m_kBoundingSphere) - reinterpret_cast<const V3&>(A.m_kBoundingSphere);
     fDistSq = vCenterDiff.SqrLength();
-    float fRadiusA = A.r;
-    float fRadiusB = C.r;
+    float fRadiusA = A.m_kBoundingSphere.r;
+    float fRadiusB = C.m_kBoundingSphere.r;
     float sum = fRadiusA + fRadiusB;
     float c = sum * sum;
     if (fRelVelSq > 0.0f)
@@ -801,7 +759,7 @@ bool IntersectSpheres(float afDuration, const Sphere0& A, const V3& B, const Sph
                 if (b <= 0.0f)
                 {
                     time = 0.0f;
-                    local_point = 0.5f * (A.c + C.c);
+                    local_point = 0.5f * (reinterpret_cast<const V3&>(A.m_kBoundingSphere) + reinterpret_cast<const V3&>(C.m_kBoundingSphere));
                     if (flag)
                     {
                         if (fDistSq > 1.1920928955078125e-7f)
@@ -824,9 +782,9 @@ bool IntersectSpheres(float afDuration, const Sphere0& A, const V3& B, const Sph
                     time = afDuration;
                 scale = time;
                 a = vCenterDiff + ScaleLife(scale, a);
-                float disc = A.r / sum;
+                float disc = A.m_kBoundingSphere.r / sum;
                 V3 y = a * disc;
-                vCenterDiff = A.c + time * B;
+                vCenterDiff = reinterpret_cast<const V3&>(A.m_kBoundingSphere) + time * B;
                 local_point = vCenterDiff + y;
                 if (flag)
                 {
@@ -850,105 +808,28 @@ bool IntersectSpheres(float afDuration, const Sphere0& A, const V3& B, const Sph
     float dotBB = B.SqrLength();
     if (fDistBSq > dotBB)
     {
-        normal0 = C.c - A.c;
+        normal0 = reinterpret_cast<const V3&>(C.m_kBoundingSphere) - reinterpret_cast<const V3&>(A.m_kBoundingSphere);
         normal0.FUN_004a0c10();
-        float radius = A.r;
-        local_point = A.c + radius * normal0;
+        float radius = A.m_kBoundingSphere.r;
+        local_point = reinterpret_cast<const V3&>(A.m_kBoundingSphere) + radius * normal0;
         normal1 = -normal0;
         return true;
     }
-    normal1 = A.c - C.c;
+    normal1 = reinterpret_cast<const V3&>(A.m_kBoundingSphere) - reinterpret_cast<const V3&>(C.m_kBoundingSphere);
     normal1.FUN_004a0c10();
-    local_point = C.c + C.r * normal1;
+    local_point = reinterpret_cast<const V3&>(C.m_kBoundingSphere) + C.m_kBoundingSphere.r * normal1;
     normal0 = -normal1;
     return true;
 }
 
-struct DotTerm
-{
-    const float& first;
-    const float& second;
-    DotTerm(const float& a, const float& b) : first(a), second(b)
-    {}
-    double Value() const
-    {
-        return first * second;
-    }
-};
-inline float SumTerms(DotTerm c, DotTerm a, DotTerm b)
-{
-    double sum = a.Value();
-    sum += b.Value();
-    return sum + c.Value();
-}
-struct Pt3
-{
-    float x, y, z;
-    Pt3()
-    {}
-    Pt3(float xx, float yy, float zz) : x(xx), y(yy), z(zz)
-    {}
-    Pt3 operator+(Pt3 const& p) const
-    {
-        Pt3 r;
-        r.x = x + p.x;
-        r.y = y + p.y;
-        r.z = z + p.z;
-        return r;
-    }
-    Pt3 operator-(Pt3 const& p) const
-    {
-        return Pt3(x - p.x, y - p.y, z - p.z);
-    }
-    Pt3 operator-() const
-    {
-        return Pt3(-x, -y, -z);
-    }
-    Pt3 operator*(float s) const
-    {
-        return Pt3(x * s, y * s, z * s);
-    }
-    float Dot(Pt3 const& p) const
-    {
-        return x * p.x + y * p.y + z * p.z;
-    }
-    float DotAccumulated(Pt3 const& p) const
-    {
-        const float* a[2] = {&y, &z};
-        const float* b[2] = {&p.y, &p.z};
-        double sum = x * p.x;
-        for (int i = 0; i < 2; ++i)
-            sum += (*a[i]) * (*b[i]);
-        return sum;
-    }
-    float DotPlane(Pt3 const& p) const
-    {
-        return SumTerms(DotTerm(z, p.z), DotTerm(x, p.x), DotTerm(y, p.y));
-    }
-    float SqrLength() const
-    {
-        return x * x + y * y + z * z;
-    }
-    Pt3 Cross(Pt3 const& p) const
-    {
-        return Pt3(y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x);
-    }
-    void FUN_004a0c10();
-    float DotProduct(Pt3 const&) const;
-};
-struct Sphere : BoundVolLite
-{
-    Pt3 center;
-    float radius;
-};
 struct Triangle
 {
-    Pt3 origin, edge0, edge1;
+    LocalPt3 origin, edge0, edge1;
     float radiusSquared, b, q;
-    Pt3 FUN_00eb3830() const;
+    LocalPt3 FUN_00eb3830() const;
 };
-float __cdecl GetSquaredDistanceToTriangle(Pt3 const&, Triangle const&, float&, float&);
-Pt3 __cdecl FUN_004a3760(float, Pt3 const&);
+float __cdecl GetSquaredDistanceToTriangle(LocalPt3 const&, Triangle const&, float&, float&);
+LocalPt3 __cdecl FUN_004a3760(float, LocalPt3 const&);
 struct Isect
 {
     float unk00;
@@ -978,29 +859,29 @@ struct Isect
     float unk60;
     float unk64;
     float unk68;
-    void FUN_00eb5e30(Sphere const&, Pt3 const&, Pt3 const&, Pt3 const&, float, float, float, int);
-    void Solve(Pt3 const&, Pt3 const&);
+    void FUN_00eb5e30(NiSphereBV const&, LocalPt3 const&, LocalPt3 const&, LocalPt3 const&, float, float, float, int);
+    void Solve(LocalPt3 const&, LocalPt3 const&);
     float FUN_00eae6f0();
     int FUN_00be0aa0();
     void FUN_00eae6d0();
-    Pt3 const& FUN_00eae700();
-    Pt3 const& FUN_00eae710();
+    LocalPt3 const& FUN_00eae700();
+    LocalPt3 const& FUN_00eae710();
 };
 struct Query
 {
-    Pt3 c, l;
+    LocalPt3 c, l;
     Triangle k;
 };
 // Computes the time and point of collision between a moving sphere and a moving triangle, returning true if they intersect.
 // @fnv 0x00eac3f0
-bool __cdecl SphereTriangleCollision(float time, Sphere const& sphere, Pt3 const& sphereVelocity, Pt3 const& v0,
-                                     Pt3 const& v1, Pt3 const& v2, Pt3 const& triangleVelocity, float& contactTime,
-                                     Pt3& contactPoint, bool calcNormals, Pt3& sphereNormal, Pt3& triangleNormal)
+bool __cdecl SphereTriangleCollision(float time, NiSphereBV const& sphere, LocalPt3 const& sphereVelocity, LocalPt3 const& v0,
+                                     LocalPt3 const& v1, LocalPt3 const& v2, LocalPt3 const& triangleVelocity, float& contactTime,
+                                     LocalPt3& contactPoint, bool calcNormals, LocalPt3& sphereNormal, LocalPt3& triangleNormal)
 {
     Query query;
-    query.c = sphere.center;
+    query.c = reinterpret_cast<const LocalPt3&>(sphere.m_kBoundingSphere);
 
-    query.k.radiusSquared = sphere.radius * sphere.radius;
+    query.k.radiusSquared = sphere.m_kBoundingSphere.r * sphere.m_kBoundingSphere.r;
     query.k.origin = v0;
     query.k.edge0 = v1 - v0;
     query.k.edge1 = v2 - v0;
@@ -1016,13 +897,13 @@ bool __cdecl SphereTriangleCollision(float time, Sphere const& sphere, Pt3 const
         }
         return true;
     }
-    Pt3 vRelativeVelocity = sphereVelocity - triangleVelocity;
+    LocalPt3 vRelativeVelocity = sphereVelocity - triangleVelocity;
     query.l = vRelativeVelocity;
     float speedSquared = vRelativeVelocity.SqrLength();
     if (speedSquared * time <= double(0.00001f))
         return false;
     {
-        Pt3 normal = -query.k.edge0.Cross(query.k.edge1);
+        LocalPt3 normal = -query.k.edge0.Cross(query.k.edge1);
         float centerProjection = normal.Dot(query.c);
         float planeProjection = normal.DotAccumulated(v0);
         float difference = centerProjection - planeProjection;
@@ -1031,20 +912,20 @@ bool __cdecl SphereTriangleCollision(float time, Sphere const& sphere, Pt3 const
         if (difference * difference > extentSquared)
         {
             normal.FUN_004a0c10();
-            Pt3 vSupport;
+            LocalPt3 vSupport;
             if (centerProjection > planeProjection)
             {
                 float direction = normal.Dot(vRelativeVelocity);
                 if (direction >= 0.0f)
                     return false;
-                vSupport = query.c - FUN_004a3760(sphere.radius, normal);
+                vSupport = query.c - FUN_004a3760(sphere.m_kBoundingSphere.r, normal);
             }
             else
             {
                 float direction = normal.Dot(vRelativeVelocity);
                 if (direction <= 0.0f)
                     return false;
-                vSupport = FUN_004a3760(sphere.radius, normal) + query.c;
+                vSupport = FUN_004a3760(sphere.m_kBoundingSphere.r, normal) + query.c;
             }
             planeProjection = v0.DotPlane(normal);
             float supportProjection = normal.Dot(vSupport);
@@ -1086,7 +967,7 @@ struct PositionDifference
 
 // Computes the squared distance from a point to a triangle, writing the closest point's barycentric coordinates to s and t.
 // @fnv 0x00eb5450
-float __cdecl GetSquaredDistanceToTriangle(const Point3Lite& first, const Triangle3& second, float* s, float* t)
+float __cdecl GetSquaredDistanceToTriangle(const NiPoint3& first, const Triangle3& second, float* s, float* t)
 {
     float tmp0;
     float tmp1;
@@ -1094,13 +975,13 @@ float __cdecl GetSquaredDistanceToTriangle(const Point3Lite& first, const Triang
     float denom;
     float fProjS;
     float fProjT;
-    Point3Lite difference = second.m_kStartPoint - first;
+    NiPoint3 difference = second.m_kStartPoint - first;
     float a = second.m_kPoint1 * second.m_kPoint1;
     float b = second.m_kPoint1 * second.m_kPoint2;
     float c = second.m_kPoint2 * second.m_kPoint2;
     float d = difference * second.m_kPoint1;
     float e = difference * second.m_kPoint2;
-    float fSqDist = difference.SqrLength();
+    float fSqDist = SquaredLength(difference);
     float det = fabsf(a * c - b * b);
     *s = e * b - d * c;
     *t = b * d - a * e;

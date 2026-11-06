@@ -2,7 +2,24 @@
 // src/staging/blk_004c0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
+// Keep legacy support templates separate from the shared NiAVObject helpers.
 #include "../../include/layout_support.h"
+#include "../../include/SETTING_VALUE.h"
+#include "../../include/SkyTextureManager.h"
+#include "../../include/BGSLoadGameBuffer.h"
+#include "../../include/BGSMoviePlayer.h"
+#include "../../include/INISettingCollection.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/BSAudio.h"
+#include "../../include/GO.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiControllerSequence.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/bhkWorldObject.h"
 
 struct FUN_004dfdd0_StandIn
 {
@@ -75,7 +92,8 @@ void FUN_004d7490_Class::FUN_004d7490()
     DAT_00fdf28c(*(void**)((char*)this + 0xC), 0x1101, 0, 0xffff0000);
 }
 
-struct ArrSI
+// Exe 0x004d7d50: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int GetFlags();
 };
@@ -86,7 +104,7 @@ struct FUN_004d7d50_StandIn
 // @fnv 0x004d7d50
 unsigned int __thiscall FUN_004d7d50_StandIn::FUN_004d7d50()
 {
-    return ((ArrSI*)((char*)this + 0xC8))->GetFlags();
+    return ((BlkOffset08View*)((char*)this + 0xC8))->GetFlags();
 }
 
 struct FUN_004d8510_StandIn
@@ -355,10 +373,6 @@ void FUN_004def90_Class::FUN_004def90()
     ((GlobalObject_004aff00*)((char*)this + 0x9c))->RemoveAll();
 }
 
-struct GO
-{
-    GO& operator=(void*);
-};
 
 struct FUN_004dfe80_Class
 {
@@ -671,10 +685,7 @@ struct FUN_004d8560_Outer
     char _0[0x10];
     FUN_004d8560_Inner _10;
 };
-struct ScriptLocalsX
-{
-    FUN_004d8560_Outer* GetLocalData();
-};
+// 0x004ae750 binds bhkWorldObject::FUN_004ae750, a Havok-object accessor rather than ScriptLocals data.
 struct FUN_004d8560_StandIn
 {
     void* __thiscall GetInnerVirtualResult();
@@ -682,15 +693,11 @@ struct FUN_004d8560_StandIn
 // @fnv 0x004d8560
 void* __thiscall FUN_004d8560_StandIn::GetInnerVirtualResult()
 {
-    FUN_004d8560_Outer* result = ((ScriptLocalsX*)this)->GetLocalData();
+    FUN_004d8560_Outer* result = (FUN_004d8560_Outer*)((bhkWorldObject*)this)->FUN_004ae750();
     return result ? result->_10.f1() : 0;
 }
 
 namespace fnv_004d8630 {
-struct ScriptLocalsX
-{
-    void* __thiscall GetLocalData();
-};
 struct FUN_004d8630_Class
 {
     bhkShape* __thiscall GetShape();
@@ -698,7 +705,7 @@ struct FUN_004d8630_Class
 // @fnv 0x004d8630
 bhkShape* __thiscall FUN_004d8630_Class::GetShape()
 {
-    void* p = ((ScriptLocalsX*)this)->GetLocalData();
+    void* p = ((bhkWorldObject*)this)->FUN_004ae750();
     return FUN_004a3a40(p ? ((FUN_004d8670_Class*)p)->GetListNext() : 0);
 }
 }  // namespace fnv_004d8630
@@ -1041,11 +1048,6 @@ void* __thiscall FUN_004de550_StandIn::FUN_004de550(unsigned int flags)
     return this;
 }
 
-struct NiTexture;
-struct SkyTextureManager
-{
-    static void __cdecl LoadTextureFromPath(NiPointer<NiTexture>*, char const*);
-};
 extern NiPointer<NiTexture> DAT_011c7804[];
 // @fnv 0x004deed0
 bool __cdecl FUN_004deed0(char const* a, unsigned char aucIndex)
@@ -1560,46 +1562,10 @@ void __cdecl ExpandTreeItemsRecursively(void* tree, int startingItem, int expand
 int FUN_00406d30(char* pcDest, unsigned int uiSize, const char* pcSrc);
 int FUN_00406d50(char* pcDest, unsigned int uiSize, const char* pcSrc);
 
-class NiObject
-{
-  public:
-    int m_aiObject[2];
-};
 
-class NiFixedString
-{
-  public:
-    operator const char*() const;
-    const char* m_kHandle;
-};
 
-struct NiUpdateData
-{
-    float m_fTime;
-    bool m_bUpdate;
-    bool m_bIsMultiThreaded;
-    int m_pkUpdateProcess;
-    NiUpdateData(float fTime, bool m_bUpdateEnabled, bool bIsMultiThreaded);
-};
 
-class NiAVObject : public NiObject
-{
-  public:
-    void FUN_00450f90(bool bCulled);
-    void FUN_00a5a040();
-    void Update(NiUpdateData& kUpdateData);
-    NiFixedString& GetName();
-};
 
-class NiStream
-{
-  public:
-    NiStream();
-    ~NiStream();
-    void InsertObject(NiObject* pkObject);
-    bool FUN_00a640b0(const char* pcFileName);
-    int m_kNextStreamField[0x172];
-};
 
 // @fnv 0x004d78c0
 int FUN_004d78c0(NiObject* pkObject, int iType, int iCommand)
@@ -1660,12 +1626,6 @@ int FUN_004d78c0(NiObject* pkObject, int iType, int iCommand)
     return iResult;
 }
 
-struct NiObject;
-struct NiRTTI
-{
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
 extern const NiRTTI DAT_012024e0;
 NiObject* __cdecl FUN_00653270(const NiRTTI*, NiObject*);
 
@@ -2180,10 +2140,7 @@ typedef void*(__stdcall* SendMessage4d86)(void*, int, int, int);
 
 const char* PrepareScriptMessage(const char* pcText, bool bFlag);
 
-struct MediaSet4d86
-{
-    int FUN_008041a0();
-};
+// 0x00495d20 binds NiControllerManager::GetSequenceAt; 0x008041a0 reads the returned animation sequence state.
 
 struct Palette4d86;
 
@@ -2191,7 +2148,7 @@ struct Object4d86
 {
     Palette4d86* GetStringAtOffset();
     unsigned int FUN_00495d00();
-    MediaSet4d86* FUN_00495d20(unsigned int uiIndex);
+    NiControllerSequence* FUN_00495d20(unsigned int uiIndex);
 };
 
 struct TreeCtrl4d86
@@ -2201,7 +2158,7 @@ struct TreeCtrl4d86
     void* m_hWnd;
     void* m_hTreeWnd;
     void AddNameItems(void* hParent, Palette4d86* pkPalette);
-    void FUN_004d8b90(void* hParent, MediaSet4d86* pkSet);
+    void FUN_004d8b90(void* hParent, NiControllerSequence* pkSet);
     void PopulateObjectTree(void* hParent, Object4d86* pkObject);
 };
 
@@ -2232,16 +2189,16 @@ void TreeCtrl4d86::PopulateObjectTree(void* hParentItem, Object4d86* pkObject)
         hItem = ((SendMessage4d86)DAT_00fdf28c)(m_hTreeWnd, 0x1100, 0, (int)&kInsert);
         for (unsigned int i = 0; i < pkObject->FUN_00495d00(); i++)
         {
-            MediaSet4d86* pkSet = pkObject->FUN_00495d20(i);
-            if (pkSet && pkSet->FUN_008041a0())
+            NiControllerSequence* pkSet = pkObject->FUN_00495d20(i);
+            if (pkSet && pkSet->GetState())
                 FUN_004d8b90(hItem, pkSet);
         }
         kInsert.item.pszText = PrepareScriptMessage("Inactive Sequences", false);
         hItem = ((SendMessage4d86)DAT_00fdf28c)(m_hTreeWnd, 0x1100, 0, (int)&kInsert);
         for (unsigned int uiIndex2 = 0; uiIndex2 < pkObject->FUN_00495d00(); uiIndex2++)
         {
-            MediaSet4d86* pkSet = pkObject->FUN_00495d20(uiIndex2);
-            if (pkSet && !pkSet->FUN_008041a0())
+            NiControllerSequence* pkSet = pkObject->FUN_00495d20(uiIndex2);
+            if (pkSet && !pkSet->GetState())
                 FUN_004d8b90(hItem, pkSet);
         }
     }
@@ -2864,11 +2821,6 @@ void* __thiscall FUN_004de3f0_Class::FUN_004de3f0(int flags)
     return this;
 }
 
-struct INISettingCollection
-{
-    INISettingCollection();
-    virtual void v0();
-};
 struct FUN_004de530 : public INISettingCollection
 {
     FUN_004de530();
@@ -2907,12 +2859,6 @@ void FUN_004def20()
 void* __cdecl operator new(unsigned int uiSize);
 void __cdecl operator delete(void* pvMem);
 
-class C4DF040Object
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem, unsigned int);
-};
 
 class C4DF040Point3
 {
@@ -2960,15 +2906,13 @@ class C4DF040TexturePtr
     C4DF040Texture* m_pPointer;
 };
 
-class C4DF040Property : public C4DF040Object
+class C4DF040Property : public NiObject
 {
   public:
     C4DF040Property();
 
     void SetTexture(int iSlot, C4DF040Texture* pkTexture);
 
-    int unk00;
-    int unk04;
     int unk08;
     int unk0C;
     int unk10;
@@ -2997,7 +2941,7 @@ class C4DF040Property : public C4DF040Object
     int unk6C;
 };
 
-class C4DF040TriShape : public C4DF040Object
+class C4DF040TriShape : public NiObject
 {
   public:
     C4DF040TriShape(unsigned short usVertices, C4DF040Point3* pkVertex, C4DF040Point3* pkNormal, void* pkColor,
@@ -3006,8 +2950,6 @@ class C4DF040TriShape : public C4DF040Object
 
     void AttachProperty(C4DF040Property* pkProperty);
 
-    int unk00;
-    int unk04;
     int unk08;
     int unk0C;
     int unk10;
@@ -3057,46 +2999,11 @@ class C4DF040TriShape : public C4DF040Object
     int unkC0;
 };
 
-class C4DF040Node : public C4DF040Object
+class C4DF040Node : public NiObject
 {
   public:
     C4DF040Node(unsigned int uiMode);
 
-    virtual void VFunc000();
-    virtual void VFunc004();
-    virtual void VFunc008();
-    virtual void VFunc00C();
-    virtual void VFunc010();
-    virtual void VFunc014();
-    virtual void VFunc018();
-    virtual void VFunc01C();
-    virtual void VFunc020();
-    virtual void VFunc024();
-    virtual void VFunc028();
-    virtual void VFunc02C();
-    virtual void VFunc030();
-    virtual void VFunc034();
-    virtual void VFunc038();
-    virtual void VFunc03C();
-    virtual void VFunc040();
-    virtual void VFunc044();
-    virtual void VFunc048();
-    virtual void VFunc04C();
-    virtual void VFunc050();
-    virtual void VFunc054();
-    virtual void VFunc058();
-    virtual void VFunc05C();
-    virtual void VFunc060();
-    virtual void VFunc064();
-    virtual void VFunc068();
-    virtual void VFunc06C();
-    virtual void VFunc070();
-    virtual void VFunc074();
-    virtual void VFunc078();
-    virtual void VFunc07C();
-    virtual void VFunc080();
-    virtual void VFunc084();
-    virtual void VFunc088();
     virtual void VFunc08C();
     virtual void VFunc090();
     virtual void VFunc094();
@@ -3119,7 +3026,6 @@ class C4DF040Node : public C4DF040Object
     virtual void VFunc0D8();
     virtual void AttachChildInAvailableSlot(C4DF040TriShape* pkChild, bool abFirstAvailableSlot);
 
-    int unk04;
     int unk08;
     int unk0C;
     int unk10;
@@ -3358,11 +3264,6 @@ FUN_004d4eb0::~FUN_004d4eb0()
     FUN_00438af0();
 }
 
-struct BGSLoadGameBuffer
-{
-    virtual unsigned char GetVersion();
-    void FUN_00864980(void*, unsigned int);
-};
 struct SavedSettingValue
 {
     unsigned int unk00;
@@ -3489,21 +3390,17 @@ FUN_004d9070::~FUN_004d9070()
 }
 }  // namespace fnv_004d9070
 
-struct NiTMallocInterface_004d91b0
-{
-    static void __cdecl Deallocate(void*);
-};
 struct FUN_004d91b0_Class
 {
     virtual void v00();
     void* pData;
     ~FUN_004d91b0_Class();
 };
-// Frees the pData buffer by calling NiTMallocInterface_004d91b0::Deallocate.
+// Frees the pData buffer by calling NiTMallocInterface<void>::Deallocate.
 // @fnv 0x004d91b0
 FUN_004d91b0_Class::~FUN_004d91b0_Class()
 {
-    NiTMallocInterface_004d91b0::Deallocate(pData);
+    NiTMallocInterface<void>::Deallocate(pData);
 }
 
 struct DoorTeleportLoadData
@@ -3550,24 +3447,13 @@ extern int(__stdcall* DAT_00fdf2a4)(unsigned int, int, int);
 
 unsigned int FUN_004bc3f0();
 
-class NiAVObject;
 struct FUN_004dc540_shell
 {
     void FUN_004dc540(NiAVObject*);
 };
 
-class BGSMoviePlayer
-{
-  public:
-    void FUN_00ec25e0();
-};
 extern BGSMoviePlayer* DAT_0126fac4;
 
-class BSAudio
-{
-  public:
-    unsigned int FUN_0044ddc0();
-};
 extern BSAudio* g_osGlobals;
 
 struct FUN_00b7b930_Ctx
@@ -3612,7 +3498,8 @@ class E73shell
     int FUN_00e73eb0(int, int);
 };
 
-class Interface
+// Exe 0x004dc360: unit-local Interface view; declarations and layout are preserved.
+class BlkInterfaceView
 {
   public:
     static void Init(bool);
@@ -3642,7 +3529,7 @@ void RecreateRenderDevice()
             DAT_011c70eb = false;
         else
             DAT_011c70eb = true;
-        DAT_0126fac4->FUN_00ec25e0();
+        DAT_0126fac4->ClearMovieJob();
         FUN_00702330();
         FUN_004dc560();
         FUN_004dc590();
@@ -3670,7 +3557,7 @@ void RecreateRenderDevice()
         FUN_0045c670()->FUN_00c52520();
         FUN_004dc5c0();
         FUN_004dc650();
-        Interface::Init(false);
+        BlkInterfaceView::Init(false);
         FUN_007022c0();
         FUN_007053f0();
     }
@@ -3722,11 +3609,11 @@ struct FUN_004d8610_StandIn
 {
     void* GetSubValue(int);
 };
-// Retrieves the sub-value at index a from the local data of this ScriptLocalsX, returning null if no local data exists.
+// Retrieves the sub-value at index a from the Havok object, returning null if no object exists.
 // @fnv 0x004d85d0
 void* FUN_004d85a0_Class::GetLocalSubValue(int a)
 {
-    FUN_004d8610_StandIn* pLocalData = (FUN_004d8610_StandIn*)((ScriptLocalsX*)this)->GetLocalData();
+    FUN_004d8610_StandIn* pLocalData = (FUN_004d8610_StandIn*)((bhkWorldObject*)this)->FUN_004ae750();
     return pLocalData ? pLocalData->GetSubValue(a) : 0;
 }
 

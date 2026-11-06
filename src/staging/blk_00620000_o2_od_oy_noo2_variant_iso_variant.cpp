@@ -8,24 +8,11 @@
 // src/staging/blk_00620000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/bhkSphereShape.h"
+#include "../../include/hkVector4.h"
 // Collision object initialization with two filter descriptions.
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-class bhkSphereShape : public NiMemObject
-{
-  public:
-    void* vtable;
-    unsigned int references;
-    void* shape;
-    unsigned int flags;
-    float radius;
-    bhkSphereShape(float, bool);
-    void* FUN_004ae750();
-};
+#include "../../include/NiMemObject.h"
 struct __declspec(align(16)) CollisionTransform
 {
     float xx, xy, xz, xw;
@@ -72,26 +59,10 @@ struct CollisionPair
     CollisionPointer second;
     void FUN_00620930(float radius, unsigned int filter);
 };
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int8 m128_i8[16];
-    __int16 m128_i16[8];
-    __int32 m128_i32[4];
-    unsigned __int32 m128_u32[4];
-} __m128;
 struct xMemObj
 {
     static void* operator new(unsigned int uiSize);
     static void operator delete(void* p, unsigned int);
-};
-class xSphereShape : public xMemObj
-{
-  public:
-    int m_ai[5];
-    xSphereShape(float fRadius, bool b);
-    void* GetHavok();
 };
 class __declspec(align(16)) xSub20
 {
@@ -150,24 +121,10 @@ class xPick
 };
 extern float DAT_0104e148;
 extern float DAT_0104da48;
-struct Vec_006286f0
-{
-    __m128 v;
-    Vec_006286f0();
-    void Set(float f);
-};
-struct Half_006286f0
-{
-    float x;
-    float y;
-    float z;
-    float w;
-    void Assign(const Vec_006286f0& src);
-};
 struct __declspec(align(16)) Box_006286f0
 {
-    Half_006286f0 lo;
-    Half_006286f0 hi;
+    hkVector4 lo;
+    hkVector4 hi;
     Box_006286f0();
 };
 struct Shape_006286f0
@@ -203,7 +160,8 @@ struct Ptr_006286f0
     Src_006286f0* p;
     Src_006286f0* operator->() const;
 };
-struct Main_006286f0
+// FUN_006286f0 unions six source AABBs; AddShape binds 0x00628df0 in loadedareabound.cpp.
+struct LoadedAreaBoundsAccumulator
 {
     int unk00;
     int unk04;
@@ -213,21 +171,8 @@ struct Main_006286f0
     void AddPoint(Box_006286f0* box, float* pt);
     void FUN_006286f0();
 };
-struct VMin_006286f0 : Vec_006286f0
-{
-    void Min(const Vec_006286f0& a, const Box_006286f0& b);
-    void Max(const Vec_006286f0& a, const Half_006286f0& b);
-};
 class TESForm620;
 class bhkWorldObject620;
-class hkVector4620
-{
-  public:
-    hkVector4620();
-    void SetFromPosition(const void* pvPos);
-    void SetZero();
-    __m128 m_vComponents;
-};
 class CollisionInfo620
 {
   public:
@@ -253,7 +198,8 @@ class CollisionInfo620
     void* m_pvBodyB;
     int m_iBodyIndex;
 };
-class TESObjectREFR620
+// The 0x00560dc0 accessor returns a physics hkVector4 in tesobjectrefr.cpp (fnv_00560d80).
+class PhysicsVectorSource
 {
   public:
     const void* GetPosition();
@@ -376,7 +322,8 @@ class bhkNode620
     virtual bhkCharacter620* GetCharacter();
     void* GetBody();
 };
-class Actor620
+// Shape lookup at 0x004ae6a0 is also bound as bhkWorldObject::FUN_004ae6a0 in bipedanim.cpp.
+class PhysicsShapeSource
 {
   public:
     bhkNode620* GetNode();
@@ -386,7 +333,7 @@ class ImpactEvent620
   public:
     void SetCollision(CollisionInfo620* pkInfo);
     void SetBody(void* pvBody);
-    void SetPosition(hkVector4620* pkPos);
+    void SetPosition(hkVector4* pkPos);
 };
 class FormRef620
 {
@@ -402,7 +349,7 @@ class ImpactHandler620
 };
 void* __cdecl FUN_004b5820(void* pvBody);
 void* __cdecl FUN_0056f930(void* pvObject);
-TESObjectREFR620* __cdecl FUN_004b59f0(void* pvForm);
+PhysicsVectorSource* __cdecl FUN_004b59f0(void* pvForm);
 void* __cdecl FUN_004b5a80(const void* pvRef);
 class ImpactManager620
 {
@@ -411,29 +358,9 @@ class ImpactManager620
     ImpactHandler620* FUN_00620340(CollisionInfo620* pkInfo, void* pvSource, void* pvTarget, void* pvData,
                                    bool bDirect);
 };
-struct xP3
-{
-    float x, y, z;
-    xP3 operator-(const xP3&) const;
-    float FUN_00457990() const;
-};
-union __declspec(align(16)) xM128
-{
-    float m128_f32[4];
-    char m128_i8[16];
-};
-struct __declspec(align(16)) xVec4
-{
-    xM128 m_vComponents;
-    xVec4();
-    xVec4 FUN_00458700(int) const;
-    float FUN_004586d0() const;
-    float& FUN_00560d30(int);
-    void FUN_004a3f10(void*);
-};
-void xFUN_004a3e00(xVec4*, const xP3&);
+void xFUN_004a3e00(hkVector4*, const NiPoint3&);
 float xFUN_004a3e90(float);
-const xP3* __fastcall xFUN_0045bb80(void*);
+const NiPoint3* __fastcall xFUN_0045bb80(void*);
 struct xFltSetting
 {
     float* FUN_00403e20();
@@ -924,7 +851,7 @@ struct xModelPtr
 struct xBody
 {
     xModelPtr* GetSourceFilesFromObject();
-    void FUN_006219f0(xVec4*);
+    void FUN_006219f0(hkVector4*);
 };
 struct xMotion
 {
@@ -968,12 +895,7 @@ struct xCaster
 {
     xBodyPtr m_iWordAt00;
     xBodyPtr m_iWordAt04;
-    bool FUN_006214d0(xRef* apRef, const xP3& akPos, float afA, float afB);
-};
-struct __declspec(align(16)) MotionVector
-{
-    __m128 value;
-    MotionVector();
+    bool FUN_006214d0(xRef* apRef, const NiPoint3& akPos, float afA, float afB);
 };
 struct __declspec(align(16)) MotionFrame
 {
@@ -984,7 +906,7 @@ struct __declspec(align(16)) MotionFrame
 struct MotionOwner;
 struct MotionWorld
 {
-    void InvokeInterfaceCall(MotionVector&, MotionFrame&, MotionOwner*, int);
+    void InvokeInterfaceCall(hkVector4&, MotionFrame&, MotionOwner*, int);
 };
 struct MotionPointer
 {
@@ -1065,37 +987,20 @@ struct MotionOwner
     void FUN_00623070();
     void FUN_00622f80(const void*, const void*, float);
 };
-class S006230f0_Vector
-{
-  public:
-    S006230f0_Vector();  // FUN_006815c0
-    __m128 m_vComponents;
-};
 class S006230f0_Source;
-const S006230f0_Vector* __cdecl FUN_004a3e00(S006230f0_Vector* pOut, const S006230f0_Source* pSource);
+const hkVector4* __cdecl FUN_004a3e00(hkVector4* pOut, const S006230f0_Source* pSource);
 class S006230f0_Object
 {
   public:
-    void FUN_006219f0(const S006230f0_Vector* pValue);
+    void FUN_006219f0(const hkVector4* pValue);
     void FUN_006230f0(const S006230f0_Source* pSource);
-};
-class hkVector4B
-{
-  public:
-    hkVector4B();
-    void SetAllComponents(float f);
-    void setMax4(const hkVector4B& a, const hkVector4B& b);
-    void setMin4(const hkVector4B& a, const hkVector4B& b);
-    float& operator()(int i);
-    void set(const hkVector4B* pkFrom);
-    __m128 m_vComponents;
 };
 class hkAabbB
 {
   public:
     hkAabbB();
-    hkVector4B m_kMinimumCorner;
-    hkVector4B m_kMaximumCorner;
+    hkVector4 m_kMinimumCorner;
+    hkVector4 m_kMaximumCorner;
 };
 class hkTransformB
 {
@@ -1295,17 +1200,13 @@ class SpawnAreaB
   public:
     bool FUN_006281d0(TESObjectREFRB* pkRef, GridB* pkGrid, hkAabbB* pkOut);
 };
-struct S006288c0_Vector
-{
-    __m128 m_vComponents;
-};
-const S006288c0_Vector& FUN_00458b20();
+const hkVector4& FUN_00458b20();
 // shared zero vector
 struct S006288c0_Aabb
 {
-    S006288c0_Aabb(const S006288c0_Vector& min, const S006288c0_Vector& max);  // FUN_00628950
-    S006288c0_Vector m_kMinimumCorner;
-    S006288c0_Vector m_kMaximumCorner;
+    S006288c0_Aabb(const hkVector4& min, const hkVector4& max);  // FUN_00628950
+    hkVector4 m_kMinimumCorner;
+    hkVector4 m_kMaximumCorner;
 };
 class S006288c0_Shape
 {
@@ -1408,19 +1309,7 @@ class S00628c50_Box
     __m128 unk00;
     S00628c50_Vector m_kCenter;
 };
-class NiPoint3P
-{
-  public:
-    NiPoint3P();
-    float x, y, z;
-};
-class hkVector4P
-{
-  public:
-    hkVector4P();
-    __m128 m_vComponents;
-};
-void __cdecl FUN_004a3e00(hkVector4P* pkOut, const NiPoint3P* pkIn);
+void __cdecl FUN_004a3e00(hkVector4* pkOut, const NiPoint3* pkIn);
 class TESObjectCELLP;
 class TESObjectREFRP
 {
@@ -1503,7 +1392,7 @@ class TESObjectREFRP
     virtual void vs028();
     virtual void vs02c();
     virtual void vs030();
-    virtual bool PickPoint(NiPoint3P* pkPos, NiPoint3P* pkNormal, int* piCell, int iFlags);
+    virtual bool PickPoint(NiPoint3* pkPos, NiPoint3* pkNormal, int* piCell, int iFlags);
     virtual void vt000();
     virtual void vt004();
     virtual void vt008();
@@ -1592,15 +1481,15 @@ class TESObjectREFRP
     virtual void vt154();
     virtual void vt158();
     virtual TESObjectCELLP* GetParentCell();
-    virtual NiPoint3P GetPosition();
+    virtual NiPoint3 GetPosition();
 };
 class TESObjectCELLP
 {
   public:
     void* GetLandData();
-    void ResolvePoint(NiPoint3P* pkOut, NiPoint3P* pkNormal);
+    void ResolvePoint(NiPoint3* pkOut, NiPoint3* pkNormal);
 };
-bool __cdecl FUN_006d97b0(NiPoint3P* pkPos, TESObjectCELLP* pkCell, void* pvLand, float* pfZ);
+bool __cdecl FUN_006d97b0(NiPoint3* pkPos, TESObjectCELLP* pkCell, void* pvLand, float* pfZ);
 class RegionP
 {
   public:
@@ -1609,7 +1498,7 @@ class RegionP
 class RegionListP
 {
   public:
-    RegionP* FindRegion(NiPoint3P kPos);
+    RegionP* FindRegion(NiPoint3 kPos);
 };
 extern RegionListP* g_pkRegionsP;
 struct ShapeTransformP
@@ -1646,7 +1535,7 @@ class ShapeCastP
     ShapeCastP();
     void Reset();
     void AddShape(const void* pvShape);
-    int Cast(hkVector4P* pkFrom);
+    int Cast(hkVector4* pkFrom);
     __m128 m_kFrom;
     __m128 m_kTo;
 };
@@ -1663,7 +1552,7 @@ class SpawnPlacerP
     BodyPtrP m_spBodyB;
     TESObjectCELLP* m_pkCell;
 
-    void FUN_006296d0(TESObjectREFRP* pkRef, const NiPoint3P* pkPos, NiPoint3P* pkOut);
+    void FUN_006296d0(TESObjectREFRP* pkRef, const NiPoint3* pkPos, NiPoint3* pkOut);
 };
 struct S00629930_Vector
 {
@@ -1686,15 +1575,6 @@ class hkSimdRealV
     hkSimdRealV(float f);
     __m128 m_vValue;
 };
-class hkVector4V
-{
-  public:
-    hkVector4V();
-    hkVector4V(const hkVector4V& v);
-    void mul4(const hkSimdRealV& s);
-    void setSub4(const hkVector4V& a, const hkVector4V& b);
-    __m128 m_vComponents;
-};
 class hkQuaternionV
 {
   public:
@@ -1705,10 +1585,10 @@ class hkTransformV
 {
   public:
     hkTransformV();
-    hkTransformV(const hkQuaternionV& kRot, const hkVector4V& kPos);
+    hkTransformV(const hkQuaternionV& kRot, const hkVector4& kPos);
     void SetConjugate(const hkTransformV& t);
     void SetProduct(const hkTransformV& a, const hkTransformV& b);
-    const hkVector4V& getTranslation() const;
+    const hkVector4& getTranslation() const;
     __m128 m_kColumn0;
     __m128 m_kColumn1;
     __m128 m_kColumn2;
@@ -1723,7 +1603,7 @@ extern SettingV g_kSmoothTimeV;
 class MotionV
 {
   public:
-    void SetLinearVelocity(const hkVector4V& kMotionVelocity);
+    void SetLinearVelocity(const hkVector4& kMotionVelocity);
     void Activate();
 };
 class BodyV
@@ -1788,7 +1668,7 @@ class BodyV
     virtual void vb0e0();
     virtual void vb0e4();
     virtual void vb0e8();
-    virtual void GetLinearVelocityVector(hkVector4V& kOut);
+    virtual void GetLinearVelocityVector(hkVector4& kOut);
     virtual void vbf0();
     virtual void GetTransform(hkTransformV& kOut);
     float GetTime();
@@ -1817,30 +1697,15 @@ class SmoothListV
     void AddHead(SmoothEntryV* const& rpkEntry);
 };
 extern SmoothListV g_kSmoothListV;
-void __cdecl FUN_0062a7e0(const hkVector4V& kTarget, void* pvRef);
-struct hkVector4
-{
-    __m128 m_vComponents;
-    hkVector4();
-};
+void __cdecl FUN_0062a7e0(const hkVector4& kTarget, void* pvRef);
 hkVector4& FUN_004a3e00(hkVector4& out, const NiPoint3& in);
 void FUN_0062bae0(void* obj, hkVector4& v, int flag);
 void FUN_0062ba80(void* obj, const NiPoint3& pos, bool flag);
-struct Vector62BAE0
-{
-    Vector62BAE0();
-    void Set(float fX, float fY, float fZ, float fW);
-    void FUN_00553f70(void* pkRotation);
-    __m128 m_vComponents;
-};
-struct Point62BAE0
-{
-    float& FUN_00560d30(int i);
-};
+// These arguments are hkVector4: component access binds 0x00560d30 and addition binds 0x00553f70.
 struct WorldObject62BAE0
 {
     void* FUN_00560e10();
-    void FUN_005617c0(Vector62BAE0& kVector);
+    void FUN_005617c0(hkVector4& kVector);
 };
 struct Collision62BAE0
 {
@@ -1860,37 +1725,22 @@ struct Node62BAE0 : public Object62BAE0
     Object62BAE0* FUN_0043b4a0(unsigned int i);
 };
 Collision62BAE0* __cdecl FUN_0043b610(Object62BAE0* pkObject);
-void __cdecl FUN_0062bae0(Object62BAE0* pkObject, Point62BAE0* pkPoint, bool bLocal);
-class S00632b40_Vector
-{
-  public:
-    S00632b40_Vector();                                      // FUN_006815c0
-    S00632b40_Vector(const S00632b40_Vector& v);             // FUN_004a3c90
-    S00632b40_Vector& operator=(const S00632b40_Vector& v);  // FUN_004a3f10
-    __m128 m_vComponents;
-};
+void __cdecl FUN_0062bae0(Object62BAE0* pkObject, hkVector4* pkPoint, bool bLocal);
 class S00632b40_Rotation
 {
   public:
     S00632b40_Rotation();  // FUN_0056df00
-    S00632b40_Vector m_kColumn0;
-    S00632b40_Vector m_kColumn1;
-    S00632b40_Vector m_kColumn2;
+    hkVector4 m_kColumn0;
+    hkVector4 m_kColumn1;
+    hkVector4 m_kColumn2;
 };
 class FUN_00632b40 : public S00632b40_Rotation
 {
   public:
     FUN_00632b40(const FUN_00632b40& t);
-    S00632b40_Vector& getColumn(int i) const;  // FUN_004b4cf0
+    hkVector4& getColumn(int i) const;  // FUN_004b4cf0
 
-    S00632b40_Vector m_vTranslation;
-};
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3 operator*(float f) const;
-    NiPoint3 operator+(const NiPoint3& k) const;
+    hkVector4 m_vTranslation;
 };
 class InitFloats
 {
@@ -2167,12 +2017,6 @@ class ShapeCaster
 };
 extern "C" __m128 _mm_min_ps(__m128, __m128);
 const __m128* __fastcall FUN_006815c0(const void* obj);
-struct VecHolder
-{
-    __m128 m_uiFilterValue;
-
-    void FUN_006285e0(const void* a, const void* b);
-};
 extern "C" __m128 __cdecl _mm_set_ss(float);
 extern "C" __m128 __cdecl _mm_cmpeq_ss(__m128, __m128);
 extern "C" __m128 __cdecl _mm_rsqrt_ss(__m128);
@@ -2182,30 +2026,7 @@ extern "C" __m128 __cdecl _mm_andnot_ps(__m128, __m128);
 extern float DAT_01016248;
 extern float DAT_01017718;
 extern float DAT_01011d78;
-struct Vec
-{
-    __m128 q;
-    const __m128* FUN_006815c0();
-    Vec* FUN_004a3c90(const Vec* src);
-    Vec* FUN_0062b0a0(Vec* out, Vec* other);
-    Vec* FUN_0062af00(Vec* target);
-};
 
-namespace N {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int8 m128_i8[16];
-    __int16 m128_i16[8];
-    __int32 m128_i32[4];
-    unsigned __int32 m128_u32[4];
-};
-extern "C"
-{
-    __m128 _mm_mul_ps(__m128, __m128);
-}
-}
 
 class S0062aea0_Result
 {
@@ -2213,18 +2034,20 @@ class S0062aea0_Result
     void FUN_00561240();
 };
 
-struct S0062aea0_Vector
+
+// Declaration for the helper missing from hkVector4.h; no vector layout is duplicated.
+struct VectorNormalizeOperations
 {
-    N::__m128 m_vComponents;
-    S0062aea0_Result* FUN_0062af00(S0062aea0_Vector* a, S0062aea0_Vector* b) const;
-    void FUN_0062aea0();
+    S0062aea0_Result* FUN_0062af00(hkVector4* temp, hkVector4* scale) const;
 };
 
 // @fnv 0x0062aea0
-void S0062aea0_Vector::FUN_0062aea0()
+void hkVector4::FUN_0062aea0()
 {
-    S0062aea0_Vector kScale;
-    S0062aea0_Vector kTemp;
-    FUN_0062af00(&kTemp, &kScale)->FUN_00561240();
-    m_vComponents = N::_mm_mul_ps(kScale.m_vComponents, m_vComponents);
+    // The helper writes these SIMD temporaries without calling vector constructors.
+    __m128 kScale;
+    __m128 kTemp;
+    reinterpret_cast<const VectorNormalizeOperations*>(this)->FUN_0062af00(
+        reinterpret_cast<hkVector4*>(&kTemp), reinterpret_cast<hkVector4*>(&kScale))->FUN_00561240();
+    m_vComponents = _mm_mul_ps(kScale, m_vComponents);
 }

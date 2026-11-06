@@ -1,16 +1,18 @@
-// Source layout: ExtraContainerChanges. PC corrections are in generate_headers.py.
-#ifndef FNV_EXTRACONTAINERCHANGES_H
-#define FNV_EXTRACONTAINERCHANGES_H
-#include "layout_support.h"
+#pragma once
+
 #include "BSExtraData.h"
-#pragma pack(push, 4)
+
+class EntryData;
+class InventoryChanges;
+class TESForm;
+
 class ExtraContainerChanges : public BSExtraData
 {
-  public:
-    InventoryChanges* pChanges;  // +0xC
+public:
+    virtual ~ExtraContainerChanges();
+
     ExtraContainerChanges(InventoryChanges* changes);
+    EntryData* FUN_004d0650(TESForm*, int);
+
+    InventoryChanges* pChanges;
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(ExtraContainerChanges) == 0x10);
-FNV_STATIC_ASSERT(offsetof(ExtraContainerChanges, pChanges) == 0xC);
-#endif

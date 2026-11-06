@@ -5,7 +5,7 @@
 
 // Reads the record header and iterates chunks, handling EDID, OBND, model and texture-swap subrecords until no chunk remains, then returns true.
 // @fnv 0x004fe390
-bool BGSStaticCollection::Load(TESFile* file)
+bool BGSStaticCollection::LoadForm(TESFile* file)
 {
     LoadRecordHeader(file);
     CHUNK_ID chunk;

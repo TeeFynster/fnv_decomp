@@ -12,36 +12,25 @@ struct CpuObject
     void FUN_00e10a10(int value);
 };
 
-#include <xmmintrin.h>
+#include "../../../../../../../../../include/hkRotation.h"
 
-struct hkVector4
+
+__forceinline hkRotation::hkRotation()
 {
-    __m128 m_vComponents;
+}
 
-    __forceinline void normalize3()
-    {
-        __m128 m = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 len2 = _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m));
-        __m128 est = _mm_rsqrt_ss(len2);
-        __m128 zero = _mm_set_ss(0.0f);
-        __m128 three = _mm_set_ss(3.0f);
-        __m128 half = _mm_set_ss(0.5f);
-        __m128 step = _mm_mul_ss(_mm_mul_ss(half, est), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, est), est)));
-        __m128 inv = _mm_andnot_ps(_mm_cmpeq_ss(len2, zero), step);
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(inv, inv, 0), m_vComponents);
-    }
-
-    void FUN_00c7f700(const struct hkRotation* r, const hkVector4* v);
-};
-
-struct hkRotation
+__forceinline void hkVector4::normalize3()
 {
-    __m128 c0;
-    __m128 c1;
-    __m128 c2;
-
-    void FUN_00cb2e30(const hkVector4* axis, float angle);
-};
+    __m128 m = _mm_mul_ps(m_vComponents, m_vComponents);
+    __m128 len2 = _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m));
+    __m128 est = _mm_rsqrt_ss(len2);
+    __m128 zero = _mm_set_ss(0.0f);
+    __m128 three = _mm_set_ss(3.0f);
+    __m128 half = _mm_set_ss(0.5f);
+    __m128 step = _mm_mul_ss(_mm_mul_ss(half, est), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, est), est)));
+    __m128 inv = _mm_andnot_ps(_mm_cmpeq_ss(len2, zero), step);
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(inv, inv, 0), m_vComponents);
+}
 
 struct DisplayTarget
 {

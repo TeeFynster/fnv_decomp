@@ -5,7 +5,6 @@
 
 // src/fallout/ai/highprocess_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/ai/highprocess.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
-#include "highprocess_decls.h"
 
 struct xPoint3
 {
@@ -641,7 +640,7 @@ struct xActor
     char m_pad04[0x64];
     xMiddle* m_68;
     xCell* FUN_008d6f30();
-    float GetScale();
+    float FUN_00567400();
 };
 struct xController
 {
@@ -823,7 +822,7 @@ void xController::FUN_008e4e50(xActor* apActor)
         if (!m_434.FUN_00559450())
         {
             xPoint3 HALF = *apActor->m_68->FUN_5f0()->FUN_00500940();
-            float fActorScale = apActor->GetScale();
+            float fActorScale = apActor->FUN_00567400();
             if (HALF.y > HALF.z)
                 HALF.y = HALF.y * fActorScale;
             else

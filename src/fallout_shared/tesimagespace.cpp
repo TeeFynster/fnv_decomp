@@ -1,8 +1,12 @@
-// fallout_shared/tesimagespace.cpp: TESImageSpace, ImageSpaceCopyEntry (7 functions)
+// fallout_shared/tesimagespace.cpp: TESImageSpace (7 functions)
 
-#include "tesimagespace.h"
+#define FNV_TESFILE_H  // the shared TESFile below replaces layout_support.h's stub
+#include "../../include/NiFile.h"
+#include "layout_support.h"
+#include "../../include/TESImageSpace.h"
 #include <malloc.h>
 #include <string.h>
+#include "../../include/TESFile.h"
 
 // Zeroes out the Data member of the TESImageSpace form using memset.
 // @fnv 0x0052b410
@@ -59,95 +63,57 @@ bool TESImageSpace::Load(TESFile* file)
     return true;
 }
 
-struct Base5a
-{
-    virtual ~Base5a();
-};
-struct FUN_0052b3b0 : public Base5a
-{
-    virtual void ClearData();
-    ~FUN_0052b3b0();
-};
 // @fnv 0x0052b3b0
-FUN_0052b3b0::~FUN_0052b3b0()
+TESImageSpace::~TESImageSpace()
 {
     ClearData();
 }
 
 bool __cdecl FUN_00401500();
 void __cdecl AppendChunk(unsigned int, char*, unsigned int);
-struct FUN_004855a0
-{
-    void M();
-};
-struct FUN_00485680
-{
-    void M();
-};
-struct FUN_0052b630_obj
-{
-    void FUN_004855a0();
-    void FUN_00485680();
-    void FUN_0052b630();
-};
 // @fnv 0x0052b630
-void FUN_0052b630_obj::FUN_0052b630()
+void TESImageSpace::Save()
 {
     FUN_004855a0();
     if (FUN_00401500())
-        ((ImageSpaceModifierParameterData*)((char*)this + 0x18))->Endian();
-    AppendChunk(0x4d414e44, (char*)this + 0x18, 0x98);
+        Data.Endian();
+    AppendChunk(0x4d414e44, (char*)&Data, sizeof(Data));
     if (FUN_00401500())
-        ((ImageSpaceModifierParameterData*)((char*)this + 0x18))->Endian();
+        Data.Endian();
     FUN_00485680();
 }
 
-struct FUN_0052b700_shell : public TESImageSpace
-{
-    bool FUN_00485270(TESForm*);
-    bool FUN_0052b700(TESForm*);
-};
-
 // @fnv 0x0052b700
-bool FUN_0052b700_shell::FUN_0052b700(TESForm* apCompare)
+bool TESImageSpace::Compare(TESForm* apCompare)
 {
     TESImageSpace* pcomp = dynamic_cast<TESImageSpace*>(apCompare);
     if (!pcomp)
         return true;
-    if (FUN_00485270((TESForm*)pcomp))
+    if (TESForm::Compare((TESForm*)pcomp))
         return true;
-    if (memcmp((char*)this + 0x18, (char*)pcomp + 0x18, 0x98))
+    if (memcmp(&Data, &pcomp->Data, sizeof(Data)))
         return true;
     return false;
 }
 
 void __cdecl _Deallocate(void*);
-struct FUN_0052b380_shell : public FUN_0052b3b0
-{
-    void* DestroyAndDeallocate(unsigned int flags);
-};
 // Runs the base destructor, then frees this object with _Deallocate when flags has bit 0 set, and returns this.
 // @fnv 0x0052b380
-void* FUN_0052b380_shell::DestroyAndDeallocate(unsigned int flags)
+void* TESImageSpace::DestroyAndDeallocate(unsigned int flags)
 {
-    FUN_0052b3b0::~FUN_0052b3b0();
+    TESImageSpace::~TESImageSpace();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-struct ImageSpaceCopyEntry : public ::TESImageSpace
-{
-    void FUN_004851b0(::TESForm*);
-    void FUN_0052b6a0(::TESForm* apCopy);
-};
-// Copies the TESImageSpace data from apCopy into this entry after calling FUN_004851b0.
+// Copies the TESImageSpace data after copying its base form.
 // @fnv 0x0052b6a0
-void ImageSpaceCopyEntry::FUN_0052b6a0(::TESForm* apCopy)
+void TESImageSpace::Copy(TESForm* apCopy)
 {
     ::TESImageSpace* pcopy = dynamic_cast< ::TESImageSpace*>(apCopy);
     if (!pcopy)
         return;
-    FUN_004851b0(pcopy);
+    TESForm::CopyFrom(pcopy);
     ::memcpy(&Data, &pcopy->Data, sizeof(Data));
 }

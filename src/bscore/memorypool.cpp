@@ -1,5 +1,7 @@
 // bscore/memorypool.cpp: MemoryPool (13 functions)
 
+#include "../../include/MemoryManager.h"
+#include "../../include/RecursiveSpinLock.h"
 #include "memorypool_decls.h"
 
 // @fnv 0x00aa6e00
@@ -310,10 +312,6 @@ void* FUN_00aa6aa0_shell::FUN_00aa6aa0(unsigned int requested)
 }
 }  // namespace fnv_00aa6aa0
 
-struct MemoryManager
-{
-    void _DeallocateAlias(void* p);
-};
 extern MemoryManager g_memoryManager;
 
 struct FUN_00aa6800
@@ -445,12 +443,6 @@ void FUN_00aa6a10_shell::ClearPoolSlots()
 }
 
 namespace fnv_00aa66a0 {
-struct MemoryManager
-{
-    void* Allocate(unsigned int size);
-};
-extern MemoryManager g_memoryManager;
-
 struct PageRefCount66a0
 {
     unsigned short iCount;
@@ -460,6 +452,8 @@ struct PageRefCount66a0
     }
 };
 
+// The shared lock's nontrivial destructor adds unwind code to the pool
+// constructor at 0x00aa66a0, so its original inline initialization stays here.
 struct PoolSpinLock66a0
 {
     unsigned int m_uiOwningThreadID;

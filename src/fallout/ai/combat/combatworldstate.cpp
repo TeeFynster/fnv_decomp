@@ -1,20 +1,15 @@
-// fallout/ai/combat/combatworldstate.cpp: CombatWorldStateListNode, CombatStateArray, WorldStateManager (8 functions)
+// fallout/ai/combat/combatworldstate.cpp: CombatWorldStateListNode, CombatWorldStateArray, WorldStateManager (8 functions)
 
-#include "layout_support.h"
-
-class UnsignedIdHandle;
-
-// offset 0, no vtable; GetNext returns the following list node.
-class CombatWorldStateListNode : public BSSimpleList<UnsignedIdHandle*>
-{
-  public:
-    CombatWorldStateListNode* GetNext();
-};
+#include "../../../../include/BSSimpleList.h"
+#include "../../../../include/Actor.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/CombatWorldStateListNode.h"
+#include "../../../../include/CombatWorldStateArray.h"
 
 // @fnv 0x0062d990
 CombatWorldStateListNode* CombatWorldStateListNode::GetNext()
 {
-    return static_cast<CombatWorldStateListNode*>(BSSimpleList<UnsignedIdHandle*>::GetNext());
+    return reinterpret_cast<CombatWorldStateListNode*>(reinterpret_cast<BSSimpleList<UnsignedIdHandle*>*>(this)->GetNext());
 }
 
 struct FUN_009aad60_shell
@@ -56,15 +51,9 @@ bool FUN_009aad40_shell::IsFlagSet()
 }
 
 void* __cdecl __memcpy(void* _Dst, const void* _Src, unsigned int _Size);
-struct CombatStateArray
-{
-    char _00[0x50];
-    char _50[0x0C];
-    void __thiscall CopyFrom(CombatStateArray* apWorldStateArray);
-};
 // Copies 0x50 bytes from apWorldStateArray into this, then 0xC bytes into this+0x50 from apWorldStateArray+0x50.
 // @fnv 0x009aad80
-void __thiscall CombatStateArray::CopyFrom(CombatStateArray* apWorldStateArray)
+void __thiscall CombatWorldStateArray::CopyFrom(CombatWorldStateArray* apWorldStateArray)
 {
     __memcpy(this, apWorldStateArray, 0x50);
     __memcpy((char*)this + 0x50, (char*)apWorldStateArray + 0x50, 0xC);
@@ -83,18 +72,11 @@ void __thiscall FUN_009aad20_shell::SetItem(int index, CombatWorldStateListNode*
 }
 
 namespace fnv_009aa4e0 {
-struct Vec
-{
-    float x, y, z;
-    Vec();
-    Vec operator-(const Vec&) const;
-    float FUN_004a7290() const;
-};
 struct Pos
 {
     float x, y, z, w;
     Pos();
-    Vec* FUN_006815c0();
+    NiPoint3* FUN_006815c0();
     double FUN_00527a40(const Pos&);
 };
 struct RefType
@@ -431,14 +413,6 @@ struct Process
     virtual void v450();
     virtual bool Ready();
 };
-struct Actor
-{
-    Pos FUN_00575650();
-    Weapon* FUN_008a1710();
-    Process* FUN_008d8520();
-    float GetHealthFraction();
-    ActorBase* FUN_004181e0();
-};
 struct Caster
 {
     void* FUN_0045cd60();
@@ -493,7 +467,7 @@ extern FloatSetting originalRuntimeFloatSetting481, originalRuntimeFloatSetting4
 extern IntSetting g_011ce0b4;
 extern double DAT_0108cb08;
 void FUN_005b5e40(const char*, ...);
-void FUN_009a9370(Context*, Entry*, Vec*, int);
+void FUN_009a9370(Context*, Entry*, NiPoint3*, int);
 struct WorldStateManager
 {
     void FUN_009aa4b0();
@@ -509,10 +483,10 @@ void WorldStateManager::UpdateWorldState(Context* context)
     State* stateB = context->FUN_00586150();
     Actor* actor15 = context->GetFieldBC();
     Actor* target9 = context->FUN_004030b0();
-    Pos position6 = actor15->FUN_00575650();
+    Pos position6 = actor15->FUN_00575650<Pos>();
     Pos targetPositions5;
     if (target9)
-        targetPositions5 = target9->FUN_00575650();
+        targetPositions5 = target9->FUN_00575650<Pos>();
     Caster* local4 = context->FUN_004fb070();
     unsigned int q = 0;
     Form* bolt9 = context->FUN_004fd3c0();
@@ -527,11 +501,11 @@ void WorldStateManager::UpdateWorldState(Context* context)
         }
         else
         {
-            Vec point4;
+            NiPoint3 point4;
             FUN_009a9370(context, entry7, &point4, 0);
-            Vec delta = point4 - *position6.FUN_006815c0();
+            NiPoint3 delta = point4 - *position6.FUN_006815c0();
             delta.z *= 0.10000000149011612;
-            if (delta.FUN_004a7290() < 1024.0)
+            if (static_cast<const NiPoint3&>(delta).FUN_004a7290() < 1024.0)
                 q |= 1 << entry7->bit;
         }
     }
@@ -596,13 +570,13 @@ void WorldStateManager::UpdateWorldState(Context* context)
     }
     else
         FUN_009aad00(3, 1);
-    Weapon* weapon0 = actor15->FUN_008a1710();
+    Weapon* weapon0 = reinterpret_cast<Weapon*>(actor15->FUN_008a1710());
     int weapon4 = weapon0 ? weapon0->FUN_00522c80() : 6;
     if (weapon0 && weapon0 != stateB->FUN_0097c150(weapon4))
         weapon4 = 7;
     FUN_009aad00(11, weapon4);
     SetItem(-65512, weapon4);
-    FUN_009aad00(10, actor15->FUN_008d8520()->Ready() ? weapon4 : 7);
+    FUN_009aad00(10, reinterpret_cast<Process*>(actor15->FUN_008d8520())->Ready() ? weapon4 : 7);
     FUN_009aad00(12, stateB->GetField38());
     for (unsigned int first = 0; first < 5; ++first)
     {
@@ -644,7 +618,7 @@ void WorldStateManager::UpdateWorldState(Context* context)
         flags28 |= 65536;
     if (context->FUN_009a0240())
         flags28 |= 131072;
-    if (!target9 || !target9->FUN_004181e0()->part.Valid())
+    if (!target9 || !reinterpret_cast<ActorBase*>(target9->FUN_004181e0())->part.Valid())
         flags28 |= 262144;
     FUN_009aad00(18, flags28);
 }

@@ -2,9 +2,22 @@
 #ifndef FNV_MEMORYMANAGER_H
 #define FNV_MEMORYMANAGER_H
 
-#include "layout_support.h"
-#include "MemoryPool.h"
+#include <stddef.h>
+#include "../../include/MemoryPool.h"
 #include "IMemoryHeap.h"
+// the shared MemoryPool only declares these; the original inlines them here
+__forceinline bool MemoryPool::IsHeapValid()
+{
+    return m_pPoolBase != 0;
+}
+__forceinline bool MemoryPool::PointerInPool(const void* pointer)
+{
+    return static_cast<const char*>(pointer) >= m_pPoolBase && static_cast<const char*>(pointer) < m_pPoolBase + m_uiPoolSize;
+}
+__forceinline unsigned int MemoryPool::GetBlockSize()
+{
+    return m_uiAllocationSize;
+}
 class ScrapHeapBuffer
 {
   public:
@@ -21,30 +34,6 @@ template <class K, class V> class BSMapBase
     void SetAt(K, V);
 };
 extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentThreadId();
-// Partial PC prefix through m_bPoolAllocationEnabled; sizeof is the prefix, not the runtime allocation.
-#pragma pack(push, 4)
-class MemoryManager
-{
-  public:
-    unsigned char layoutPadding0[0x114];
-    BSMapBase<unsigned long, ScrapHeapBuffer*> threadScrapHeaps;
-    char pad124[5];
-    bool m_bPoolAllocationEnabled;  // +0x129
-    unsigned char layoutPadding12A[2];
-    static MemoryManager& Instance();
-    ScrapHeapBuffer* GetGeneralAllocator();
-    void CreatePool(unsigned int blockSize, unsigned int poolSize, char* description);
-    void* Allocate(unsigned int size);
-    void Deallocate(void* pointer);
-    void* Reallocate(void* pointer, unsigned int size);
-    unsigned int Size(const void* pointer);
-    IMemoryHeap* GetHeapForPointer(const void* pointer);
-    IMemoryHeap* GetHeapForPhysicalPointer(const void* pointer);
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(MemoryManager) == 0x12C);
-FNV_STATIC_ASSERT(offsetof(MemoryManager, m_bPoolAllocationEnabled) == 0x129);
-#endif
 
 extern MemoryManager g_memoryManager;
 enum
@@ -52,15 +41,15 @@ enum
     kMinimumPoolBlockSize = 8,
     kPoolAddressRegionShift = 24
 };
-FNV_FORCEINLINE MemoryManager& MemoryManager::Instance()
+__forceinline MemoryManager& MemoryManager::Instance()
 {
     return g_memoryManager;
 }
-FNV_FORCEINLINE void* operator new(size_t size)
+__forceinline void* operator new(size_t size)
 {
     return g_memoryManager.Allocate(size);
 }
-FNV_FORCEINLINE void operator delete(void* p)
+__forceinline void operator delete(void* p)
 {
     g_memoryManager.Deallocate(p);
 }
@@ -78,3 +67,6 @@ __forceinline void ScrapHeapBuffer::operator delete(void* p)
 {
     g_memoryManager.Deallocate(p);
 }
+
+
+#endif

@@ -1,3 +1,4 @@
+#include "../../include/BSStringT.h"
 
 // src/staging/blk_00820000_od_decl_variant.cpp - declaration variant unit created 2026-10-24 by decl_variants.py for paused function 0x0083d8b0: the skeleton of src/staging/blk_00820000_od.cpp
 // with declarations corrected to what the original code does (layout_support.h: BSStringT(); ~BSStringT(); -> BSStringT(); BSStringT(const BSStringT&); ~BSStrin). Move the function to its real unit once
@@ -5,7 +6,33 @@
 
 // src/staging/blk_00820000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
+#include <windows.h>
+// Keep the legacy support enum separate from the shared MagicCaster enum.
 #include "../../include/layout_support_decl_blk_00820000_od.h"
+#include "../../include/ActiveEffect.h"
+#include "../../include/Actor.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSLoadGameBuffer.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/BSAudio.h"
+// The former list stand-in bound its destructor to 0x008373f0, the float-list destructor in falloutradio.
+#include "../../include/BSSimpleList.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/CBSAStream.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/GO.h"
+#include "../../include/MagicProjectile.h"
+#include "../../include/MobileObject.h"
+#include "../../include/RecursiveLock.h"
+#include "../../include/SL.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESIdleForm.h"
+#include "../../include/TESObject.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESQuest.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESTopic.h"
+#include "../../include/TESTopicInfo.h"
 struct FUN_00821620_Class
 {
     void __thiscall FUN_00821620(float value);
@@ -28,23 +55,6 @@ struct FUN_00827200_class
     void __thiscall FUN_00cb26e0(int);
     FUN_00827200_class* __thiscall FUN_00827200(int a);
 };
-struct FUN_0082d660_class
-{
-    char GetByteAtOffset44();
-};
-struct FUN_0082d6a0_Class
-{
-    unsigned short GetShortAt(int index);
-};
-struct FUN_0082d6c0_class
-{
-    unsigned short __thiscall GetShortAtOffset5A();
-};
-int __fastcall FUN_0082d700(void* self);
-struct FUN_0082d720_Class
-{
-    unsigned int __thiscall FUN_0082d720();
-};
 extern int DAT_0107ca44;
 void __cdecl InitArray(int);
 struct FUN_0082ee80_class
@@ -62,14 +72,6 @@ void __fastcall FUN_0082f1b0(void*);
 struct FUN_0082f190_class
 {
     void FUN_0082f190();
-};
-struct RecursiveLock
-{
-    void Leave();
-};
-struct CBSAStream
-{
-    void FUN_0082f1d0();
 };
 void __fastcall FUN_0082f1b0(void*);
 struct FUN_0082f520Class
@@ -94,10 +96,6 @@ struct FUN_008321c0_Class
     int m_iFourthElementInteger;
     void FUN_00836030();
     void FUN_008321c0();
-};
-struct BGSLoadFormBuffer
-{
-    bool ReadFormIdentifier(void*);
 };
 struct FUN_00836240
 {
@@ -149,11 +147,6 @@ struct FUN_008224b0_Class
     FUN_00438690 b;
     ~FUN_008224b0_Class();
 };
-struct GO
-{
-    ~GO();
-    GO* __thiscall FUN_008228f0(unsigned int flags);
-};
 void* __cdecl _NiMalloc(unsigned int);
 void* __cdecl memset(void*, int, unsigned int);
 struct FUN_0082eee0_class
@@ -179,10 +172,6 @@ struct FUN_00831fb0_class
     int d;
     void __thiscall FUN_00831fb0();
 };
-struct BGSSaveFormBuffer
-{
-    void SerializeFormData(void* id, int a);
-};
 struct FUN_00836600_class
 {
     void __thiscall FUN_00836600(BGSLoadFormBuffer* buffer);
@@ -198,18 +187,10 @@ struct FUN_0083b740_Class
     void* __thiscall FUN_0083b740(unsigned int flags);
     void __thiscall FUN_0083b710();
 };
-struct SoundPlaybackHandle
-{
-    int x;
-    int y;
-    int z;
-    SoundPlaybackHandle();
-    ~SoundPlaybackHandle();
-};
 struct FUN_0083b770
 {
-    SoundPlaybackHandle a;
-    SoundPlaybackHandle b;
+    BSSoundHandle a;
+    BSSoundHandle b;
     FUN_0083b770();
 };
 struct Date
@@ -229,14 +210,6 @@ struct FUN_0083c750_class
 {
     void __thiscall FUN_0083c750();
     void* __thiscall FUN_0083c720(unsigned int flags);
-};
-struct TESForm
-{
-    virtual ~TESForm();
-};
-struct TESObjectREFR : TESForm
-{
-    virtual ~TESObjectREFR();
 };
 TESForm* __cdecl ref_004839c0(TESForm* p);
 struct FUN_0083d0d0_Class
@@ -258,41 +231,12 @@ struct FUN_00824290_class
 {
     void __thiscall AddWeatherEntry(int a, int b, int c);
 };
-struct SoundDataDummy
-{
-    char pad[28];
-    int a;
-    int b;
-};
-struct TESSound
-{
-    SoundDataDummy CopyBig();
-};
 bool FUN_0082d740(TESSound* self, int* outA, int* outB);
-struct BSAudio
-{
-    static BSAudio* __cdecl GetSingleton();
-    unsigned int GetSynchTime();
-};
-struct EffectSetting
-{
-    void* GetBoltSound();
-};
-struct TESObject
-{
-    unsigned int GetNext();
-};
-struct SndX
-{
-    int a, b, c;
-    void Stop();
-    void PausePlayback();
-};
 struct SndItem
 {
     TESObject* obj;
-    SndX first;
-    SndX second;
+    BSSoundHandle first;
+    BSSoundHandle second;
     bool active;
 };
 int __fastcall FNV_GetFormType(TESForm*);
@@ -318,25 +262,7 @@ struct S_00836470
     void UpdateSoundItems(int);
 };
 void* __cdecl operator new(unsigned int);
-struct TESTopic : TESForm
-{
-    virtual ~TESTopic();
-};
-struct TESTopicInfo : TESForm
-{
-    virtual ~TESTopicInfo();
-};
-struct TESQuest : TESForm
-{
-    virtual ~TESQuest();
-};
 TESForm* __cdecl GetFormByID(unsigned int formID);
-struct BGSLoadGameBuffer
-{
-    unsigned int ReadFormIdentifier();
-    int ReadElementCount();
-    void ReadTypedData(void* data, unsigned int size);
-};
 struct FUN_0083d1e0
 {
     unsigned int unk00;
@@ -382,11 +308,6 @@ struct FUN_00836030_class
     int pad[4];
     ListX c;
     ~FUN_00836030_class();
-};
-struct SL
-{
-    SL();
-    int alignment;
 };
 struct FUN_00822a40_Class
 {
@@ -440,11 +361,6 @@ extern int DAT_0107bf1c;
 struct MagicCaster;
 struct MagicItem;
 struct EffectItem;
-struct ActiveEffect
-{
-    void* vtbl;
-    ActiveEffect(MagicCaster* caster, MagicItem* item, EffectItem* effect);
-};
 struct FUN_008260b0 : ActiveEffect
 {
     FUN_008260b0(MagicCaster* caster, MagicItem* item, EffectItem* effect);
@@ -461,10 +377,6 @@ struct FUN_0082cf80
     __fastcall FUN_0082cf80(int, int, int);
 };
 void* __cdecl CreateFUN0082cf80(int a, int b, int c);
-struct FUN_0082d6e0_Class
-{
-    unsigned char GetHighByteOfField4E();
-};
 struct GlobalObject_0082ee80
 {
     ~GlobalObject_0082ee80();
@@ -498,32 +410,12 @@ struct FUN_00831ee0_class
     virtual void __stdcall FUN_00831ee0_virtual1();
 };
 void __stdcall FUN_00831ee0(void* p);
-struct BSSimpleListEx
-{
-    virtual ~BSSimpleListEx();
-};
-struct FUN_00837480 : BSSimpleListEx
-{
-    void* __thiscall DeleteThis(unsigned int flags);
-};
 struct GlobalObject_0083b5e0
 {
     ~GlobalObject_0083b5e0();
     void* __thiscall FUN_0083b610(unsigned int flags);
 };
-struct BSStr
-{
-    bool Set(char const* value, unsigned int length);
-};
-struct BGSLoadGameBufferHelper
-{
-    char* __thiscall LoadString(char* destination);
-};
-struct TESIdleForm : TESForm
-{
-    virtual ~TESIdleForm()
-    {}
-};
+
 TESForm* __cdecl _ref_004839c0(unsigned int formID);
 struct FUN_0083d740_Class
 {
@@ -532,15 +424,6 @@ struct FUN_0083d740_Class
 struct Str6a70
 {
     Str6a70& __thiscall operator=(char const*);
-};
-struct BGSLoadGameBufferLoadStringHelper
-{
-    char* __thiscall LoadString(char*);
-};
-struct BGSLoadFormBufferHelper
-{
-    unsigned int __thiscall ReadFormIdentifier();
-    void __thiscall ReadTypedData(void*, unsigned int);
 };
 TESForm* __cdecl _ref_004839c0(unsigned int formID);
 extern void* _DAT_01183028;
@@ -669,31 +552,14 @@ struct FUN_00825ea0 : S_00825ea0_A, S_00825ea0_B
     FUN_00825ea0();
     virtual ~FUN_00825ea0();
 };
-struct SoundDataEx
-{
-    unsigned int unk00;
-    unsigned int flags;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-};
-struct TESSoundEx : TESSound
-{
-    const char* GetSoundPath();
-    SoundDataEx GetSoundData();
-};
 struct DataHandler
 {
-    TESSoundEx* LookupSound(unsigned int formID);
+    TESSound* LookupSound(unsigned int formID);
 };
 extern DataHandler* g_dataHandler;
 int strcpy_s(char* dest, unsigned int size, const char* src);
 unsigned int __cdecl SoundFlagsToAudioFlags(unsigned int flags);
-bool GetSoundPathAndFlags(unsigned int formID, char* path, unsigned int* flags, TESSoundEx** outSound);
+bool GetSoundPathAndFlags(unsigned int formID, char* path, unsigned int* flags, TESSound** outSound);
 struct Base_82efb0
 {
     virtual ~Base_82efb0();
@@ -962,58 +828,19 @@ struct FUN_0082f9c0_obj
 void __cdecl FUN_0082f9c0();
 int __stdcall FUN_00831f70(int unused);
 // PlayWeaponSound v2 (worker11): pack types reused; extra callees via shell classes
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3();
-};
-struct Vec3
-{
-    float x, y, z;
-    NiPoint3 operator-(const NiPoint3& rhs) const;
-};
-struct AudioPlaybackHandle;
-struct SndXShell
-{
-    void __thiscall FUN_00ad89e0(float v);
-    void __thiscall FUN_00ad88f0();
-    void __thiscall FUN_00418900(const AudioPlaybackHandle& src);
-    void __thiscall FUN_00ad8f20(void* obj);
-    void __thiscall FUN_00ad9030(unsigned int v);
-    bool __thiscall FUN_00ad8b60(float x, float y, float z);
-    bool __thiscall FUN_00ad8830(bool v);
-    void __thiscall FUN_00ad8be0(float a, float b);
-};
 struct Entry
 {
-    SndX ch0;
-    SndX ch1;
+    BSSoundHandle ch0;
+    BSSoundHandle ch1;
     void* f18;
     unsigned int f1c;
     float f20;
     bool __thiscall FUN_00ad8ce0();
 };
-struct GlobalObject_0041a250
-{
-    int f00, f04, f08;
-    GlobalObject_0041a250();
-    ~GlobalObject_0041a250();
-};
-struct AudioPlaybackHandle
-{
-    int f00, f04, f08;
-    ~AudioPlaybackHandle();
-};
 struct BSAudioShell
 {
     NiPoint3 __thiscall FUN_00ad78e0();
-    AudioPlaybackHandle __thiscall FUN_00ad7480(const char* name);
-};
-struct TESSoundShell
-{
-    char __thiscall GetByteAtOffset44();
-    unsigned char __thiscall GetField45();
-    const char* __thiscall FUN_00511840(int a, void* b);
+    BSSoundHandle __thiscall FUN_00ad7480(const char* name);
 };
 struct Weap
 {
@@ -1243,7 +1070,7 @@ struct Player
 };
 struct ListObj
 {
-    Vec3* __thiscall FUN_0045bb80();
+    NiPoint3* __thiscall FUN_0045bb80();
 };
 struct SettingObj
 {
@@ -1253,9 +1080,9 @@ bool __cdecl FUN_00839da0();
 bool __fastcall FUN_00524d10(void* p);
 void* __cdecl FUN_00453a70();
 unsigned int __cdecl FUN_00457fe0();
-bool __cdecl FUN_0082eca0(void* snd, Vec3 pos, float v);
+bool __cdecl FUN_0082eca0(void* snd, NiPoint3 pos, float v);
 extern Player* DAT_011dea3c;
-extern Vec3 DAT_011f426c;
+extern NiPoint3 DAT_011f426c;
 extern const float DAT_01016970;
 extern SettingObj DAT_011dd008;
 extern SettingObj DAT_011dd034;
@@ -1321,223 +1148,7 @@ struct FUN_008216c0_shell
     void UpdateEffectTimes();
 };
 // Minimal declarations for the process list and its polymorphic entries.
-class MobileObject
-{
-  public:
-    virtual void V000();
-    virtual void V001();
-    virtual void V002();
-    virtual void V003();
-    virtual void V004();
-    virtual void V005();
-    virtual void V006();
-    virtual void V007();
-    virtual void V008();
-    virtual void V009();
-    virtual void V010();
-    virtual void V011();
-    virtual void V012();
-    virtual void V013();
-    virtual void V014();
-    virtual void V015();
-    virtual void V016();
-    virtual void V017();
-    virtual void V018();
-    virtual void V019();
-    virtual void V020();
-    virtual void V021();
-    virtual void V022();
-    virtual void V023();
-    virtual void V024();
-    virtual void V025();
-    virtual void V026();
-    virtual void V027();
-    virtual void V028();
-    virtual void V029();
-    virtual void V030();
-    virtual void V031();
-    virtual void V032();
-    virtual void V033();
-    virtual void V034();
-    virtual void V035();
-    virtual void V036();
-    virtual void V037();
-    virtual void V038();
-    virtual void V039();
-    virtual void V040();
-    virtual void V041();
-    virtual void V042();
-    virtual void V043();
-    virtual void V044();
-    virtual void V045();
-    virtual void V046();
-    virtual void V047();
-    virtual void V048();
-    virtual void V049();
-    virtual void V050();
-    virtual void V051();
-    virtual void V052();
-    virtual void V053();
-    virtual void V054();
-    virtual void V055();
-    virtual void V056();
-    virtual void V057();
-    virtual void V058();
-    virtual void V059();
-    virtual void V060();
-    virtual void V061();
-    virtual void V062();
-    virtual void V063();
-    virtual bool IsActor();
-    virtual void V065();
-    virtual void V066();
-    virtual void V067();
-    virtual void V068();
-    virtual void V069();
-    virtual void V070();
-    virtual void V071();
-    virtual void V072();
-    virtual void V073();
-    virtual void V074();
-    virtual void V075();
-    virtual void V076();
-    virtual void V077();
-    virtual void V078();
-    virtual void V079();
-    virtual void V080();
-    virtual void V081();
-    virtual void V082();
-    virtual void V083();
-    virtual void V084();
-    virtual void V085();
-    virtual void V086();
-    virtual void V087();
-    virtual void V088();
-    virtual void V089();
-    virtual void V090();
-    virtual void V091();
-    virtual void V092();
-    virtual void V093();
-    virtual void V094();
-    virtual void V095();
-    virtual void V096();
-    virtual void V097();
-    virtual void V098();
-    virtual void V099();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual void V125();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual bool IsMagicProjectile();
-};
-class Actor : public MobileObject
-{
-  public:
-    void FUN_008c4f10(BCaster_S* caster);
-};
-class MagicProjectile : public MobileObject
-{
-  public:
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
-    virtual void V144();
-    virtual void V145();
-    virtual void V146();
-    virtual void V147();
-    virtual void V148();
-    virtual void V149();
-    virtual void V150();
-    virtual void V151();
-    virtual void V152();
-    virtual void V153();
-    virtual void V154();
-    virtual void V155();
-    virtual void V156();
-    virtual void V157();
-    virtual void V158();
-    virtual void V159();
-    virtual void V160();
-    virtual void V161();
-    virtual void V162();
-    virtual void V163();
-    virtual void V164();
-    virtual void V165();
-    virtual void V166();
-    virtual void V167();
-    virtual void V168();
-    virtual void V169();
-    virtual void V170();
-    virtual void V171();
-    virtual void V172();
-    virtual void V173();
-    virtual void V174();
-    virtual void V175();
-    virtual void V176();
-    virtual void V177();
-    virtual void V178();
-    virtual void V179();
-    virtual void V180();
-    virtual void V181();
-    virtual void V182();
-    virtual void V183();
-    virtual void V184();
-    virtual void V185();
-    virtual void V186();
-    virtual void V187();
-    virtual void V188();
-    virtual void V189();
-    virtual void V190();
-    virtual void V191();
-    virtual void V192();
-    virtual void V193();
-    virtual void V194();
-    virtual void V195();
-    virtual void V196();
-    virtual void UpdateCaster(BCaster_S* caster);
-};
-struct MobileObjectProcessArray
-{
-    unsigned int FUN_005be5c0(int group);
-    unsigned int FUN_005de0f0(int group);
-    MobileObject* FUN_00968670(unsigned int index);
-};
+#include "../../include/MobileObjectProcessArray.h"
 struct ProcessRegistry
 {
     MobileObjectProcessArray* FUN_00717e50();
@@ -1549,45 +1160,7 @@ struct CasterUpdate : BE, BCaster_S
     void UpdateCasters();
 };
 unsigned int __cdecl GetFlagMask(unsigned int auiFlags);
-struct SoundFormData
-{
-    unsigned char ucMinAtten;
-    unsigned char ucMaxAtten;
-    unsigned char ucStaticAtten;
-    unsigned char ucPad03;
-    unsigned int uiFlags;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-};
-struct SoundForm
-{
-    unsigned short FUN_0082d680();
-    unsigned char GetByteAtOffset44();
-    unsigned char GetField45();
-    unsigned char GetHighByteOfField4E();
-    unsigned char FUN_0082d700();
-    unsigned short GetShortAt(int aiIndex);
-    unsigned short GetShortAtOffset5A();
-    unsigned char FUN_0082d720();
-    SoundFormData GetData();
-};
-struct GameSound
-{
-    bool SetStaticAttenuation(unsigned short ausValue);
-    void FUN_00ad8e20(unsigned char aucA, unsigned char aucB);
-    void FUN_00ad8be0(float afMin, float afMax);
-    void FUN_00ad8c20(unsigned short aus0, unsigned short aus1, unsigned short aus2, unsigned short aus3,
-                      unsigned short aus4);
-    void FUN_00ad8c70(unsigned short ausValue);
-    void FUN_00ad9030(unsigned int auiValue);
-    bool FUN_00ad8ad0(unsigned char aucValue);
-};
-unsigned int __cdecl ApplySoundFormToGameSound(GameSound* apSound, void* apForm, unsigned int* apFlags);
+unsigned int __cdecl ApplySoundFormToGameSound(BSSoundHandle* apSound, void* apForm, unsigned int* apFlags);
 class Thread82F
 {
   public:
@@ -1691,8 +1264,6 @@ struct AudGuid
     unsigned long d3;
 };
 extern "C" __declspec(dllimport) long __stdcall CoInitializeEx(void* reserved, unsigned long flags);
-extern "C" __declspec(dllimport) long __stdcall CoCreateInstance(const AudGuid& clsid, void* outer, unsigned long ctx,
-                                                                 const AudGuid& iid, void** out);
 extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(void* handle, unsigned long ms);
 struct IAudUnk
 {
@@ -2064,16 +1635,9 @@ struct FUN_00831f10_Target
     virtual void __stdcall unk08();
 };
 void __stdcall CallVirtualOnContainedNode(char* a1);
-struct SaveFormBufferEx : BGSSaveFormBuffer
-{
-    void SaveData(void* data, unsigned int size, int flags);
-    unsigned int GetPosition();
-    void PatchCount(int count, unsigned int position);
-};
-struct SoundForm;
 struct SoundEntry
 {
-    SoundForm* form;
+    TESSound* form;
 };
 struct SoundListNode
 {
@@ -2082,7 +1646,7 @@ struct SoundListNode
 };
 struct SoundQueue
 {
-    void SaveGame(SaveFormBufferEx* buffer);
+    void SaveGame(BGSSaveFormBuffer* buffer);
 };
 struct SoundTimer
 {
@@ -2094,7 +1658,7 @@ struct SoundTimer
     unsigned char m_flag11;
     int unk14;
     SoundListNode m_kNode;
-    void FUN_00836110(SaveFormBufferEx* buffer);
+    void FUN_00836110(BGSSaveFormBuffer* buffer);
 };
 
 // These declarations name the existing BSStringT ABI accessors omitted from

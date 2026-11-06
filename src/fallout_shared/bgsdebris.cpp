@@ -1,6 +1,42 @@
-// fallout_shared/bgsdebris.cpp: BGSDebris, MagicItemForm, BGSDebris_shell2, BGSDebris_cmp (19 functions)
+// fallout_shared/bgsdebris.cpp: BGSDebris and MagicItemForm (19 functions)
 
-#include "bgsdebris_decls.h"
+#include "../../include/BGSDebris.h"
+#include "../../include/TESForm.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/BGSPreloadable.h"
+#include "../../include/MagicItemForm.h"
+#include "../../include/TESFile.h"
+#include "../../include/FileEntryList.h"
+#include "../../include/NiPoint3.h"
+
+// The shared FileEntryList changes /GS stack placement in LoadForm.
+
+extern const char DAT_01015890[];
+extern const char DAT_01024988[];
+int Warning(const char*, ...);
+extern "C" void* _alloca(unsigned int);
+
+// DebrisModelEntry and ModelLoader do not yet have shared headers.
+class DebrisModelEntry
+{
+  public:
+    char chance, flags;
+    short pad;
+    char* path;
+    FileEntryList model;
+    DebrisModelEntry();
+    ~DebrisModelEntry();
+    void FUN_004fa670(const char*);
+};
+void Deallocate(void*);
+void* Allocate(unsigned int);
+template <class T> unsigned int BSStringLength(const T*);
+class ModelLoader
+{
+  public:
+    void QueueFullWithNullResult(const char*, void*, int, void*, int, int, int, int);
+};
+extern ModelLoader* g_modelLoader;
 
 // @fnv 0x00409140
 BSSimpleList<DebrisModelEntry*>* BGSDebris::GetDataList()
@@ -28,7 +64,7 @@ void BGSDebris::ClearData()
 
 // Iterates the debris data list and asks g_modelLoader to load each entry's non-empty path into its model with the given priority and file.
 // @fnv 0x004fa970
-void BGSDebris::Preload(int priority, void* file)
+void BGSDebris::QueueResourceLoad(IO_TASK_PRIORITY priority, QueuedFile* file)
 {
     BSSimpleList<DebrisModelEntry*>* list = GetDataList();
     while (list)
@@ -60,7 +96,7 @@ DebrisModelEntry* BGSDebris::AddDebrisModel(char chance, const char* path, char 
 
 // Reads a BGSDebris record from a TESFile, handling EDID, OBND, DATA and MODL chunks, and returns false if the form type is not 0x52.
 // @fnv 0x004f9f10
-bool BGSDebris::Load(TESFile* file)
+bool BGSDebris::LoadForm(TESFile* file)
 {
     // Local identifiers preserve MSVC9 stack-slot ordering.
     unsigned char v0 = file->GetTESForm();
@@ -125,27 +161,14 @@ bool BGSDebris::Load(TESFile* file)
     return true;
 }
 
-#include "bgsdebris_magic.h"
 // Constructs a MagicItemForm object; the body is empty.
 // @fnv 0x00409190
 MagicItemForm::MagicItemForm()
 {}
 
-extern int DAT_01024970;
-
-struct FUN_004f9d90_helper
-{
-    void* vftable;
-    FUN_004f9d90_helper* ctor();
-};
-
 // @fnv 0x004f9d90
-FUN_004f9d90_helper* FUN_004f9d90_helper::ctor()
-{
-    reinterpret_cast<BaseFormComponent*>(this)->BaseFormComponent::BaseFormComponent();
-    this->vftable = &DAT_01024970;
-    return this;
-}
+BGSPreloadable::BGSPreloadable()
+{}
 
 int __cdecl FUN_00408b20(char const*, char const*);
 
@@ -240,21 +263,9 @@ void FUN_004fa670_shell::FUN_004fa670(char* apFileName)
     }
 }
 
-struct SL
-{
-    SL();
-    ~SL();
-};
-class FUN_004f9cd0 : public TESForm, public BGSPreloadable
-{
-  public:
-    SL DataList;
-    FUN_004f9cd0();
-    virtual ~FUN_004f9cd0();
-};
 // Sets the form type to 0x52 and clears the form data.
 // @fnv 0x004f9cd0
-FUN_004f9cd0::FUN_004f9cd0()
+BGSDebris::BGSDebris()
 {
     SetFormType(static_cast<ENUM_FORM_ID>(0x52));
     TESForm::ClearData();
@@ -271,40 +282,14 @@ int __thiscall FUN_004fa950_shell::IsFlagSet()
     return (*reinterpret_cast<signed char*>(this + 1) & 1);
 }
 
-void _Deallocate(void*);
-struct S_004f9d60
-{
-    void FUN_004f9db0();
-    void* DestroyIfFlagged(unsigned int);
-};
-// Calls FUN_004f9db0, then deallocates this if bit 0 of flags is set, and returns this.
-// @fnv 0x004f9d60
-void* S_004f9d60::DestroyIfFlagged(unsigned int flags)
-{
-    FUN_004f9db0();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct FUN_005e78f0_t
-{
-    void FUN_004851b0(TESForm*);
-};
-
-struct BGSDebris_shell : BGSDebris
-{
-    void CopyFromDebris(TESForm* source);
-};
-
 // @fnv 0x004fa2f0
-void BGSDebris_shell::CopyFromDebris(TESForm* source)
+void BGSDebris::CopyFrom(const TESForm* source)
 {
-    BGSDebris* debris2 = dynamic_cast<BGSDebris*>(source);
+    BGSDebris* debris2 = dynamic_cast<BGSDebris*>(const_cast<TESForm*>(source));
     if (!debris2)
         return;
     ClearData();
-    ((FUN_005e78f0_t*)this)->FUN_004851b0(debris2);
+    TESForm::CopyFrom(debris2);
     BSSimpleList<DebrisModelEntry*>* list = debris2->GetDataList();
     while (list)
     {
@@ -315,12 +300,6 @@ void BGSDebris_shell::CopyFromDebris(TESForm* source)
     }
 }
 
-struct Vec3
-{
-    float x, y, z;
-    Vec3();
-    void Normalize();
-};
 struct DNode
 {
     void** FUN_006815c0();
@@ -333,10 +312,6 @@ struct DItem
     void* model;
     unsigned char IsFlagSet();
 };
-struct DList
-{
-    DNode* FUN_00409140();
-};
 void* __cdecl FUN_00aa13e0(unsigned int);
 struct DebrisObj
 {
@@ -346,31 +321,23 @@ struct DebrisObj
         return FUN_00aa13e0(n);
     }
     static void operator delete(void*, unsigned int);
-    DebrisObj(void* a1, float f, void* m, int z, Vec3* pos, Vec3* v1, Vec3* v2, Vec3* v3, float s, int z1, int z2);
+    DebrisObj(void* a1, float f, void* m, int z, NiPoint3* pos, NiPoint3* v1, NiPoint3* v2, NiPoint3* v3, float s, int z1, int z2);
 };
 extern const float DAT_01012054;
 extern const float DAT_010249d8;
 extern const float DAT_01017b78;
 extern const double DAT_01020758;
-extern Vec3 DAT_011f426c;
+extern NiPoint3 DAT_011f426c;
 float __cdecl FUN_00476b70(float, float);
 
-void __cdecl FUN_006890b0(void* a1, float f, void* m, Vec3 v1, Vec3 v2, float s, int k, int z);
-struct DNode2
-{
-};
-struct BGSDebris_shell2 : BGSDebris
-{
-    void FUN_004fa6f0(void* a1, Vec3* pos, unsigned int count, float scale);
-};
-
+void __cdecl FUN_006890b0(void* a1, float f, void* m, NiPoint3 v1, NiPoint3 v2, float s, int k, int z);
 // @fnv 0x004fa6f0
-void BGSDebris_shell2::FUN_004fa6f0(void* a1, Vec3* apPosition, unsigned int count, float scale)
+void BGSDebris::SpawnDebris(void* a1, NiPoint3* apPosition, unsigned int count, float scale)
 {
     if (!a1)
         return;
     unsigned int i8 = 0;
-    DNode* node_ = ((DList*)this)->FUN_00409140();
+    DNode* node_ = (DNode*)GetDataList();
     while (node_)
     {
         DItem* d9 = (DItem*)*node_->FUN_006815c0();
@@ -381,14 +348,14 @@ void BGSDebris_shell2::FUN_004fa6f0(void* a1, Vec3* apPosition, unsigned int cou
                 n = 1;
             for (unsigned int j3 = 0; j3 < n; j3++)
             {
-                Vec3 v4;
+                NiPoint3 v4;
                 v4.x = FUN_00476b70(DAT_01012054, 1.0f);
                 v4.y = FUN_00476b70(DAT_01012054, 1.0f);
                 v4.z = FUN_00476b70(DAT_01012054, 1.0f);
                 v4.Normalize();
                 if (d9->IsFlagSet())
                 {
-                    Vec3 dir = DAT_011f426c;
+                    NiPoint3 dir = DAT_011f426c;
                     DebrisObj* o3 =
                         new DebrisObj(a1, DAT_010249d8, d9->model, 0, apPosition, &v4, &dir, &dir, scale, 0, 0);
                     (void)o3;
@@ -418,22 +385,13 @@ struct DebrisEntry4fa
     DebrisModel4fa kModel;
 };
 
-int __cdecl strcpy_s(char* pcDest, unsigned int uiSize, const char* pcSrc);
 void __cdecl FUN_004856f0(unsigned int uiType, void* pvData, unsigned int uiSize);
 
-struct FUN_004fa1a0_shell
-{
-    void FUN_004855a0();
-    DNode* FUN_00409140();
-    void FUN_00485680();
-    void WriteDebrisEntries();
-};
-
 // @fnv 0x004fa1a0
-void FUN_004fa1a0_shell::WriteDebrisEntries()
+void BGSDebris::WriteDebrisEntries()
 {
     FUN_004855a0();
-    DNode* pkNode = FUN_00409140();
+    DNode* pkNode = (DNode*)GetDataList();
     while (pkNode)
     {
         DebrisEntry4fa* pkData = (DebrisEntry4fa*)*pkNode->FUN_006815c0();
@@ -444,7 +402,7 @@ void FUN_004fa1a0_shell::WriteDebrisEntries()
             char* pcCur = pTmpcBuffer;
             *pcCur = pkData->cChance;
             pcCur++;
-            strcpy_s(pcCur, uiSize, pkData->pcPath);
+            TaskQueueInterface::CopyStringToBuffer(pcCur, uiSize, pkData->pcPath);
             pcCur += BSStringLength(pkData->pcPath) + 1;
             *pcCur = pkData->cFlags;
             pcCur++;
@@ -466,20 +424,14 @@ struct DebrisListNode
     DebrisListNode* NextNode();
 };
 
-struct BGSDebris_cmp : BGSDebris
-{
-    DebrisListNode* DataListHead();
-    bool FUN_004fa390(TESForm* form);
-};
-
 // Compares this debris list against another BGSDebris's list, returning true if counts, entries, chance, path or flags differ.
 // @fnv 0x004fa390
-bool BGSDebris_cmp::FUN_004fa390(TESForm* form)
+bool BGSDebris::Compare(TESForm* form)
 {
-    BGSDebris_cmp* other7 = (BGSDebris_cmp*)dynamic_cast<BGSDebris*>(form);
+    BGSDebris* other7 = dynamic_cast<BGSDebris*>(form);
     if (!other7)
         return true;
-    DebrisListNode* otherIter2 = other7->DataListHead();
+    DebrisListNode* otherIter2 = (DebrisListNode*)other7->GetDataList();
     if (otherIter2->GetCount() != ((DebrisListNode*)&DataList)->GetCount())
         return true;
     DebrisListNode* iter = (DebrisListNode*)&DataList;
@@ -504,20 +456,8 @@ bool BGSDebris_cmp::FUN_004fa390(TESForm* form)
     return false;
 }
 
-struct FUN_004f9db0_Base : public TESForm
-{
-    virtual ~FUN_004f9db0_Base();
-};
-
-struct FUN_004f9db0 : public FUN_004f9db0_Base, public BGSPreloadable
-{
-    BSSimpleList<DebrisModelEntry*> DataList;
-    virtual void ClearData();
-    ~FUN_004f9db0();
-};
-
 // @fnv 0x004f9db0
-FUN_004f9db0::~FUN_004f9db0()
+BGSDebris::~BGSDebris()
 {
     ClearData();
 }

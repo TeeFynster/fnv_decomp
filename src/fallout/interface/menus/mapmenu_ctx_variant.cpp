@@ -1,55 +1,41 @@
 
 // mapmenu_ctx_variant.cpp: context variant of src/fallout/interface/menus/mapmenu.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
-#include "mapmenu_decls.h"
+#include "../../../../include/BSSimpleArray.h"
+#include "../../../../include/BGSNote.h"
+#include "../../../../include/BSAudio.h"
+#include "../../../../include/Character.h"
+#include "../../../../include/FOPipboyManager.h"
+#include "../../../../include/FORenderedMenu.h"
+#include "../../../../include/FalloutRadio.h"
+#include "../../../../include/MapMenu.h"
+#include "../../../../include/Menu.h"
+#include "../../../../include/NiNode.h"
+#include "../../../../include/NiPoint2.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/SettingT_GameSettingCollection_.h"
+#include "../../../../include/BSSoundHandle.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/TESObjectCELL.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/TESQuest.h"
+#include "../../../../include/TESTopicInfo.h"
+#include "../../../../include/TESWorldSpace.h"
+#include "../../../../include/Tile.h"
+#include "../../../../include/TileImage.h"
+#include "../../../../include/Tile.h"
+#include "../../../../include/PathingLocation.h"
+#include "../../../../include/TESDataHandler.h"
+
 // @fnv 0x007a1930
 template <> void ListBox<TESQuest*>::ClearSelection(bool notify)
 {
     SetSelectedTile(0, notify);
 }
 
-struct TESFullName
-{
-    const char* GetFullName();
-};
-
-class PathingLocation
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-
-    PathingLocation();
-    PathingLocation(const NiPoint3*, TESWorldSpace*);
-    ~PathingLocation();
-    PathingLocation& operator=(const PathingLocation&);
-    bool FUN_006de250();
-};
-
-class TESWorldSpaceCustom : public TESWorldSpace
-{
-  public:
-    int unk10;
-    int unk14;
-    TESFullName fullName;
-
-    bool HasFlag2();
-    const char* FUN_00586440();
-};
-
-class TESDataHandler
-{
-  public:
-    BSSimpleList<TESWorldSpace*>* GetWorldSpaces();
-};
+// The shared class does not yet declare the flag query at 0x00586210.
+extern "C" bool WorldSpaceHasFlag2();
 
 extern TESDataHandler* g_dataHandler;
 
@@ -65,11 +51,12 @@ TESWorldSpace* MapMenu::FUN_007984d0(NiPoint3 pt)
     for (BSSimpleList<TESWorldSpace*>* node2 = g_dataHandler->GetWorldSpaces(); node2 && node2->GetItem();
          node2 = node2->GetNext())
     {
-        TESWorldSpaceCustom* ws4 = (TESWorldSpaceCustom*)node2->GetItem();
-        const char* name = ws4->fullName.GetFullName();
+        TESWorldSpace* ws4 = node2->GetItem();
+        const char* name = ws4->GetFullName();
         NiPoint3 ptCopy3 = pt;
         PathingLocation loc4;
-        if (!name || !*name || FindString(name, "test") == name || ws4->HasFlag2())
+        if (!name || !*name || FindString(name, "test") == name ||
+            reinterpret_cast<bool (__thiscall*)(TESWorldSpace*)>(WorldSpaceHasFlag2)(ws4))
         {
             continue;
         }
@@ -77,12 +64,12 @@ TESWorldSpace* MapMenu::FUN_007984d0(NiPoint3 pt)
         loc4 = PathingLocation(&ptCopy3, ws4);
         if (loc4.FUN_006de250() && this->m_pCurrentWorldspace && ws4)
         {
-            if (BSStringLength(((TESWorldSpaceCustom*)this->m_pCurrentWorldspace)->FUN_00586440()) < 31 ||
+            if (BSStringLength(this->m_pCurrentWorldspace->FUN_00586440()) < 31 ||
                 BSStringLength(ws4->FUN_00586440()) < 31)
             {
                 continue;
             }
-            if (_mbsnicmp(((TESWorldSpaceCustom*)this->m_pCurrentWorldspace)->FUN_00586440() + 29,
+            if (_mbsnicmp(this->m_pCurrentWorldspace->FUN_00586440() + 29,
                           ws4->FUN_00586440() + 29, 3) == 0)
             {
                 result5 = ws4;

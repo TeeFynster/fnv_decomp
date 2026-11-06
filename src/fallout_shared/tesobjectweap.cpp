@@ -1,9 +1,24 @@
 // fallout_shared/tesobjectweap.cpp: TESObjectWEAP, TransHolder, Weapon, WeaponCopyAccess and more (72 functions)
 
+#include <stddef.h>
+
+#include "layout_support.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESValueForm.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/BSFaceGenAnimationData.h"
+#include "../../include/BSFaceGenNiNode.h"
+#include "../../include/Actor.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/PlayerCharacter.h"
 #include "tesobjectweap_decls.h"
 // Reads a weapon record from the file: validates form type 40, then dispatches each chunk to its loader and fixes up invalid weapon data.
 // @fnv 0x0051f630
-bool TESObjectWEAP::Load(TESFile* file)
+bool TESObjectWEAP::LoadForm(TESFile* file)
 {
     unsigned char formType = file->GetTESForm();
     if(formType != 40) return false;
@@ -227,21 +242,21 @@ bool TESObjectWEAP::Load(TESFile* file)
         {
             TESObjectIMOD* modItem1 = 0;
             file->GetChunkData((unsigned int*)&modItem1);
-            SetModItem(1,modItem1);
+            SetModItem((unsigned char)1,modItem1);
             break;
         }
         case 0x32494d57: // WMI2
         {
             TESObjectIMOD* modItem2 = 0;
             file->GetChunkData((unsigned int*)&modItem2);
-            SetModItem(2,modItem2);
+            SetModItem((unsigned char)2,modItem2);
             break;
         }
         case 0x33494d57: // WMI3
         {
             TESObjectIMOD* modItem3 = 0;
             file->GetChunkData((unsigned int*)&modItem3);
-            SetModItem(4,modItem3);
+            SetModItem((unsigned char)4,modItem3);
             break;
         }
         case 0x314d414e: // NAM1
@@ -501,8 +516,8 @@ bool TESObjectWEAP::Load(TESFile* file)
         {
             unsigned int soundLevel;
             file->GetChunkData(&soundLevel);
-            if(soundLevel > 3) m_eSoundLevel = SOUND_LEVEL_SOUND_LEVEL_NORMAL;
-            else m_eSoundLevel = (SOUND_LEVEL)soundLevel;
+            if(soundLevel > 3) m_eSoundLevel = (TESObjectWEAP::SOUND_LEVEL)_SoundLevel::NORMAL;
+            else m_eSoundLevel = (TESObjectWEAP::SOUND_LEVEL)soundLevel;
             break;
         }
         }
@@ -698,7 +713,7 @@ void TESObjectWEAP::InitItem()
     }
     if(data.fSpeed <= 0.0) data.fSpeed = 1.0f;
     if(data.m_fAnimationAttackMultiplier <= 0.0) data.m_fAnimationAttackMultiplier = 1.0f;
-    if(DAT_011c94d0.Bool()->b) SetNPCsUseAmmo(true);
+    if(*DAT_011c94d0.Bool()) SetNPCsUseAmmo(true);
     m_bHasReloadAnimation = false;
     if(data.m_ucReloadAnimation >= 19) m_bHasReloadAnimation = true;
     SetInitializationState(true);
@@ -710,7 +725,7 @@ void TESObjectWEAP::ResetFormData()
 {
     memset(&data,0,sizeof(data));
     data.m_ucAmmoUse = 1;
-    data.m_fOverrideActionPoints = 5.0f;
+    data.fWeaponDamageMultiplier = 5.0f;
     data.m_fMinimumSpread = 0.0f;
     data.fBodyPartChance = 10.0f;
     data.m_fUnknownFloat = 1.0f;
@@ -723,11 +738,11 @@ void TESObjectWEAP::ResetFormData()
     data.m_fMinimumRange = 500.0f;
     data.m_fMaximumRange = 2000.0f;
     data.m_eHitBehavior = WEAPONHITBEHAVIOR_WHB_NORMAL;
-    data.m_fLeftRumbleMotorStrength = 0.0f;
-    data.m_fRightRumbleMotorStrength = 0.5f;
-    data.m_fRumbleDuration = 1.0f;
-    data.m_fOverrideDamageToWeaponMultiplier = 0.33f;
-    data.m_fAttackShotsPerSecond = 1.0f;
+    data.m_fOverrideActionPoints = 0.0f;
+    data.m_fLeftRumbleMotorStrength = 0.5f;
+    data.m_fRightRumbleMotorStrength = 1.0f;
+    data.m_fRumbleDuration = 0.33f;
+    data.m_fOverrideDamageToWeaponMultiplier = 1.0f;
     data.m_eWeaponSkill = (ActorValue__Index)45;
     data.m_fLimbDamageMultiplier = 1.0f;
     data.m_fSightUsage = 0.0f;
@@ -792,7 +807,7 @@ void TESObjectWEAP::ResetFormData()
     m_kWeaponModTextureSwap6.Init();
     m_kWeaponModTextureSwap7.Init();
     SetCastingType(MagicSystem__CastingType_WHEN_STRIKES);
-    m_eSoundLevel = SOUND_LEVEL_SOUND_LEVEL_NORMAL;
+    m_eSoundLevel = (TESObjectWEAP::SOUND_LEVEL)_SoundLevel::NORMAL;
     m_bHasReloadAnimation = false;
     if(GetReloadAnim(false) >= 196) m_bHasReloadAnimation = true;
 }
@@ -820,6 +835,15 @@ void TESObjectWEAP::ClearData()
     m_kEmbeddedWeaponNodeName.Set(0,0);
     VATSAttackName.Set(0,0);
 }
+// BGSProjectile and BGSImpactDataSet reached through their BGSPreloadable base (the original calls the inherited
+// BGSPreloadable::QueueResourceLoad slot; the shared classes redeclare it)
+struct ProjectilePreloadView : public TESBoundObject, public TESFullName, public TESModel, public BGSPreloadable
+{
+};
+struct ImpactDataSetPreloadView : public TESForm, public BGSPreloadable
+{
+};
+
 
 // @fnv 0x00525510
 void TESObjectWEAP::QueueResourceLoad(int priority, QueuedFile* file, bool includeScope)
@@ -828,8 +852,8 @@ void TESObjectWEAP::QueueResourceLoad(int priority, QueuedFile* file, bool inclu
         g_modelLoader->ProcessModelRequest(&m_kModel,priority,file,false,true,false,false);
     if(includeScope && GetHasScope() && m_kModel1stPerson.GetModelLength())
         g_modelLoader->ProcessModelRequest(&m_kModel1stPerson,priority,file,TES::GetModelResourceType(this),true,false,false);
-    if(GetProjectileData(0)) GetProjectileData(0)->QueueResourceLoad(priority,file);
-    if(m_pImpactDataSet) m_pImpactDataSet->QueueResourceLoad(priority,file);
+    if(GetProjectileData(0)) reinterpret_cast<ProjectilePreloadView*>(GetProjectileData(0))->QueueResourceLoad((IO_TASK_PRIORITY)priority,file);
+    if(m_pImpactDataSet) reinterpret_cast<ImpactDataSetPreloadView*>(m_pImpactDataSet)->QueueResourceLoad((IO_TASK_PRIORITY)priority,file);
 }
 
 // @fnv 0x00525b20
@@ -995,101 +1019,27 @@ void FUN_005216f0_shell::FUN_005216f0(TESSound* apSnd)
     m_pWeaponUnequipSound = apSnd;
 }
 
-struct NiPoint3;
-struct NiStream;
-struct blob48 { char b[48]; };
-struct blob64 { char b[64]; };
-struct ThreeByThreeMatrix {
-    void GetRow(unsigned int, float*);
-    void GetRow(unsigned int, float*, float*, float*);
-    void GetRow(unsigned int, NiPoint3*);
-    void SetRow(unsigned int, float*);
-    void SetRow(unsigned int, float, float, float);
-    void SetRow(unsigned int, void*);
-    void GetCol(unsigned int, float*);
-    void GetCol(unsigned int, float*, float*, float*);
-    void GetCol(unsigned int, NiPoint3*);
-    void SetCol(unsigned int, float*);
-    void SetCol(unsigned int, float, float, float);
-    void SetCol(unsigned int, void*);
-    float GetEntry(unsigned int, unsigned int);
-    void SetEntry(unsigned int, unsigned int, float);
-    void MakeZero();
-    void ResetToIdentity();
-    void MakeDiagonal(float, float, float);
-    void SetXRotation(float);
-    void SetYRotation(float);
-    void SetZRotation(float);
-    void MakeZRotationQ(float);
-    void MakeAxisAngleRotation(float, void*);
-    void MakeAxisAngleRotation(float, float, float, float);
-    bool Inverse(ThreeByThreeMatrix*);
-    struct blob48 Inverse();
-    struct blob48 Transpose();
-    void ToQuaternion(float*, float*, float*, float*);
-    bool ExtractEulerAnglesXYZ(float*, float*, float*);
-    bool ToEulerAnglesXZY(float*, float*, float*);
-    bool ToEulerAnglesYXZ(float*, float*, float*);
-    bool ToEulerAnglesYZX(float*, float*, float*);
-    bool ToEulerAnglesZXY(float*, float*, float*);
-    bool ToEulerAnglesZYX(float*, float*, float*);
-    void SetRotationFromEulerXYZ(float, float, float);
-    void FromEulerAnglesXZY(float, float, float);
-    void FromEulerAnglesYXZ(float, float, float);
-    void FromEulerAnglesYZX(float, float, float);
-    void SetRotationFromEulerZXY(float, float, float);
-    void SetRotationFromEulerZYX(float, float, float);
-    bool Reorthogonalize();
-    struct blob48 ComposeMatrices(void*);
-    struct blob48 Congruence(void*);
-    static void TransformPositions(void*, void*, unsigned int, void*, NiPoint3*);
-    static void TransformNormals(void*, unsigned int, void*, NiPoint3*);
-    static void TransformVerticesAndNormals(void*, void*, unsigned int, void*, NiPoint3*, void*, NiPoint3*);
-    void ApplyToVector(float*, NiPoint3*);
-    void LoadBinary(NiStream*);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    void Scale(float, float, float);
-    static struct blob64 XMLoadFloat3x4(float*);
-    static void XMStoreFloat3x4(float*, struct blob64);
-    bool Tridiagonal(float*, float*);
-    bool QLAlgorithm(float*, float*);
-    float Determinant();
-    char m_afEntries[48];
-};
-typedef char _sizecheck_NiMatrix3[sizeof(ThreeByThreeMatrix) == 48 ? 1 : -1];
-struct FUN_00524ac0_shell : public ThreeByThreeMatrix {
-    void FUN_00524ac0(float);
-};
-
 void __cdecl FUN_004169a0(float, float &, float &);
 
+// one matrix row per macro use, entries in column order (the exe stores them in this order)
+#define WEAP_M3_ROW(r, a, b, c) m_pEntry[r][0] = a; m_pEntry[r][1] = b; m_pEntry[r][2] = c;
 // Builds a rotation matrix about the X axis from the sine and cosine of the given angle.
 // @fnv 0x00524ac0
-void FUN_00524ac0_shell::FUN_00524ac0(float afAngle)
+void NiMatrix3::MakeXRotation(float afAngle)
 {
     float sn, cs;
     FUN_004169a0(afAngle, sn, cs);
 
-    *(float*)&m_afEntries[0] = 1.0f;
-    *(float*)&m_afEntries[4] = 0.0f;
-    *(float*)&m_afEntries[8] = 0.0f;
-    *(float*)&m_afEntries[12] = 0.0f;
-    *(float*)&m_afEntries[16] = cs;
-    *(float*)&m_afEntries[20] = sn;
-    *(float*)&m_afEntries[24] = 0.0f;
-    *(float*)&m_afEntries[28] = -sn;
-    *(float*)&m_afEntries[32] = cs;
+    WEAP_M3_ROW(0, 1.0f, 0.0f, 0.0f)
+    WEAP_M3_ROW(1, 0.0f, cs, sn)
+    WEAP_M3_ROW(2, 0.0f, -sn, cs)
 }
-
-struct TESObjectCELL {
-    NiAVObject* GetCellChildAt(int);
-};
+#undef WEAP_M3_ROW
 
 // @fnv 0x00524cf0
 NiAVObject* __fastcall FUN_00524cf0(TESObjectCELL* apCell)
 {
-    return apCell->GetCellChildAt(1);
+    return (NiAVObject*)apCell->GetCellChildAt(1);
 }
 
 // @fnv 0x00524d10
@@ -1098,145 +1048,137 @@ bool __fastcall FUN_00524d10(bool* pThis)
     return pThis[0x64b];
 }
 
+class ActiveEffect;
+class ActorMover;
+class ActorValueOwner;
+class AlchemyItem;
+struct BGSEncounterZone;
+class BGSLoadFormBuffer;
+class BGSLoadGameBuffer;
+struct BGSMusicType;
+class BGSNote;
+class BGSPerk;
+class BGSPerkEntry;
+class BGSQuestObjective;
+class BGSSaveFormBuffer;
+class BGSSaveGameBuffer;
+class BGSTextureSet;
+class BSAnimGroupSequence;
+class BSAnimNote;
+class BSAnimNoteReceiver;
+class BSExtraData;
+class BSMultiBound;
+class BSMultiBoundRoom;
+class BaseProcess;
+class CellMopp;
+class CombatController;
+class ActorCombatGroup;
+class ContinuousBeamProjectile;
+class DialoguePackage;
+class EffectItem;
+class ExtraDataList;
+class ExtraLock;
+class FormRecordHeader;
+class FurnitureMark;
+class IDebugText;
+class ImageSpaceModifierInstanceDOF;
+class ImageSpaceModifierInstanceDRB;
+struct InventoryChanges;
+class InventoryStackRecord;
+class MagicCaster;
+class MagicItem;
+class MagicProjectile;
+class MagicShaderHitEffect;
+class MagicTarget;
+struct MediaLocationController;
+class MobileObject;
+class NiAVObject;
+class NiControllerManager;
+class NiControllerSequence;
+class NiFixedString;
+class NiGeometry;
+class NiLight;
+class NiNode;
+class NiPointLight;
+class PlacedObjectInfo;
+class PathingAvoidNodeArray;
+class PathingLocation;
+class PathingRequest;
+class Projectile;
+class QueuedFile;
+class Script;
+class ScriptLocals;
+class TESActorBase;
+class TESCaravanCard;
+class TESClass;
+class TESCombatStyle;
+class TESContainer;
+class TESFaction;
+class TESGlobal;
+class TESIdleForm;
+class TESObjectARMO;
+class TESObjectBOOK;
+class TESObjectCLOT;
+class TESObjectDOOR;
+class TESObjectLIGH;
+class TESPackage;
+class TESQuest;
+class TESRace;
+class TESRegion;
+class TESReputation;
+class TESSkill;
+class TESTopic;
+class TESTopicInfo;
+class TESWorldSpace;
+class TargetEntry;
+class PathingPath;
+class TrespassPackage;
+class WeaponObject;
+class bhkCharacterController;
+class bhkMouseSpringAction;
+class bhkNiCollisionObject;
+class bhkRagdollController;
+class bhkRigidBody;
+class hkpRigidBody;
 namespace fnv_00524d70 {
-struct ActiveEffect;
-struct Actor;
 struct ActorCause;
-struct ActorMover;
-struct ActorValueOwner;
 struct ActorCombatEntry;
-struct AlchemyItem;
 struct Animation;
 struct TwoIntegerValues;
 struct MediaLocation;
 struct MusicMarkerReference;
-struct BGSEncounterZone;
 struct ExplosionForm;
-struct BGSLoadFormBuffer;
-struct BGSLoadGameBuffer;
-struct BGSMusicType;
-struct BGSNote;
-struct BGSPerk;
-struct BGSPerkEntry;
-struct BGSQuestObjective;
-struct BGSSaveFormBuffer;
-struct BGSSaveGameBuffer;
-struct BGSTextureSet;
-struct BSAnimGroupSequence;
-struct BSAnimNote;
-struct BSAnimNoteReceiver;
-struct BSExtraData;
-struct BSFaceGenAnimationData;
-struct BSFaceGenNiNode;
-struct BSMultiBound;
-struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
-struct BaseProcess;
 struct BipedAnim;
 struct BipedActor;
 struct CombatGroupCollection;
-struct CellMopp;
 struct NiNodeBooleanState;
-struct CombatController;
-struct ActorCombatGroup;
-struct ContinuousBeamProjectile;
 struct Crime;
 struct GameFormRecord;
-struct DialoguePackage;
 struct DialogueResponse;
 struct DetectionParameters;
 struct TeleportableReference;
-struct EffectItem;
-struct ExtraDataList;
-struct ExtraLock;
-struct FormRecordHeader;
 struct TESFileGroup;
-struct FurnitureMark;
 struct BooleanIntegerAccessor;
 struct FurnitureRelatedType;
 struct BooleanFloatQuery;
-struct IDebugText;
-struct ImageSpaceModifierInstanceDOF;
-struct ImageSpaceModifierInstanceDRB;
-struct InventoryChanges;
-struct InventoryStackRecord;
 struct CellDataNode;
-struct MagicCaster;
-struct MagicItem;
 struct MagicEffectCollection;
-struct MagicProjectile;
-struct MagicShaderHitEffect;
-struct MagicTarget;
 struct MapMarkerData;
-struct MediaLocationController;
-struct MobileObject;
 struct Point3Offset;
-struct NiAVObject;
 struct AnimationInterpolator;
-struct NiControllerManager;
-struct NiControllerSequence;
-struct NiFixedString;
-struct NiGeometry;
-struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
-struct NiPoint3;
-struct NiPointLight;
-struct PlacedObjectInfo;
 struct IndexedPointerCollection;
 struct PlayerTargetLocation;
 struct LocationDescriptor;
-struct PathingAvoidNodeArray;
-struct PathingLocation;
-struct PathingRequest;
 struct IntegerPairPointerRecord;
-struct Projectile;
-struct QueuedFile;
 struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
-struct ScriptLocals;
-struct TESActorBase;
-struct TESCaravanCard;
-struct TESClass;
-struct TESCombatStyle;
-struct TESContainer;
-struct TESFaction;
-struct TESGlobal;
-struct TESIdleForm;
-struct TESObjectARMO;
-struct TESObjectBOOK;
-struct TESObjectCELL;
-struct TESObjectCLOT;
-struct TESObjectDOOR;
-struct TESObjectLIGH;
-struct TESObjectREFR;
-struct TESPackage;
-struct TESQuest;
 struct PlayerQuestData;
-struct TESRace;
-struct TESRegion;
 struct TESRegionList;
-struct TESReputation;
-struct TESSkill;
-struct TESTopic;
-struct TESTopicInfo;
-struct TESWorldSpace;
-struct TargetEntry;
-struct PathingPath;
 struct TrapEntry;
-struct TrespassPackage;
 struct WaterZone;
-struct WeaponObject;
-struct bhkCharacterController;
-struct bhkMouseSpringAction;
-struct bhkNiCollisionObject;
-struct bhkRagdollController;
 struct bhkRagdollPenetrationUtil;
-struct bhkRigidBody;
-struct hkpRigidBody;
 struct blob4 { char b[4]; };
 struct blob12 { char b[12]; };
 struct blob16 { char b[16]; };
@@ -1252,15 +1194,13 @@ void __fastcall FUN_00524d70(char* this_ptr)
 }
 }  // namespace fnv_00524d70
 
-struct BSFaceGenAnimationData;
-struct BSFaceGenNiNode { BSFaceGenAnimationData* GetAnimationData(); };
 struct Flt { BSFaceGenNiNode* GetNode() const; };
 struct GlobalObject_00633c90 { char pad[4]; };
 extern GlobalObject_00633c90 g_011deb7c;
 // @fnv 0x00524c90
 BSFaceGenAnimationData* FUN_00524c90()
 {
-    return ((BSFaceGenNiNode*)(((Flt*)&g_011deb7c)->GetNode()))->GetAnimationData();
+    return ((BSFaceGenNiNode*)(((Flt*)&g_011deb7c)->GetNode()))->BSFaceGenNiNode::GetAnimationData();
 }
 
 struct FUN_00522440_shell
@@ -1462,36 +1402,27 @@ unsigned int FUN_00522c00_shell::FUN_00522c00()
 }
 }  // namespace fnv_00522c00
 
-struct TESFormStub {
-    void FUN_00484c50(unsigned int, unsigned int);
+// The base-form loader at 0x00484c50 needs two flags; TESForm has no declaration for this overload.
+struct FormRecordLoadAccess : TESForm {
+    void LoadRecordArguments(unsigned int, unsigned int);
 };
 
-struct TESValueFormStub {
-    void FUN_0048ea10(unsigned int, unsigned int);
+struct WeaponRecordLoadAccess : TESObjectWEAP {
+    void LoadRecordArguments(unsigned int, unsigned int);
 };
 
-struct FUN_005230b0_shell {
-    TESFormStub m_stub;
-    char m_auiShapeKeys[0x84 - sizeof(TESFormStub)];
-    TESValueFormStub m_valueStub;
-    void FUN_005230b0(unsigned int, unsigned int);
-};
-
-// Calls FUN_00484c50 on the TESFormStub member and FUN_0048ea10 on the TESValueFormStub member, forwarding a and b to both.
+// Loads the base form and value component using the same change flags.
 // @fnv 0x005230b0
-void FUN_005230b0_shell::FUN_005230b0(unsigned int auiArg1, unsigned int auiArg2)
+void WeaponRecordLoadAccess::LoadRecordArguments(unsigned int auiArg1, unsigned int auiArg2)
 {
-    m_stub.FUN_00484c50(auiArg1, auiArg2);
-    m_valueStub.FUN_0048ea10(auiArg1, auiArg2);
+    reinterpret_cast<FormRecordLoadAccess*>(this)->LoadRecordArguments(auiArg1, auiArg2);
+    TESValueForm::FUN_0048ea10(auiArg1, auiArg2);
 }
 
 struct BGSSaveFormBuffer;
 
 struct FUN_00484d60_holder {
     void SaveIfChanged(BGSSaveFormBuffer*);
-};
-struct FUN_0048ea40_holder {
-    void FUN_0048ea40(BGSSaveFormBuffer*);
 };
 
 struct FUN_005230f0_shell : TESObjectWEAP {
@@ -1502,7 +1433,7 @@ struct FUN_005230f0_shell : TESObjectWEAP {
 void FUN_005230f0_shell::FUN_005230f0(BGSSaveFormBuffer* buffer)
 {
     reinterpret_cast<FUN_00484d60_holder*>(this)->SaveIfChanged(buffer);
-    reinterpret_cast<FUN_0048ea40_holder*>(reinterpret_cast<char*>(this) + 0x84)->FUN_0048ea40(buffer);
+    TESValueForm::FUN_0048ea40(buffer);
 }
 
 struct FUN_00524cd0_shell
@@ -1601,9 +1532,7 @@ float FUN_00524be0_shell::FUN_00524be0(bool abApplyMod)
 }
 
 namespace fnv_00524c40 {
-struct NiPoint3 { float x; float y; float z; NiPoint3 operator+(NiPoint3 const &) const; NiPoint3 operator*(float) const; };
-struct ThreeByThreeMatrix { float m[9]; NiPoint3 operator*(NiPoint3 const &) const; };
-struct TransHolder { ThreeByThreeMatrix rot; NiPoint3 pos; float scl; NiPoint3 FUN_00524c40(NiPoint3 const &) const; };
+struct TransHolder { NiMatrix3 rot; NiPoint3 pos; float scl; NiPoint3 FUN_00524c40(NiPoint3 const &) const; };
 // Applies the holder's rotation and scale to a point, then adds its position offset.
 // @fnv 0x00524c40
 NiPoint3 TransHolder::FUN_00524c40(NiPoint3 const &aPoint) const
@@ -1680,24 +1609,17 @@ int S522c30::FUN_00522c30()
 struct FUN_00484bf0 {
     unsigned short GetSaveSize(unsigned int);
 };
-struct FUN_0048e9b0 {
-    unsigned short GetSaveSize(unsigned int);
-};
-
-struct FUN_00523020_shell {
-    FUN_00484bf0 m_iWordAt00;
-    unsigned char pad1[0x83];
-    FUN_0048e9b0 m_cByteAtOffset1;
-    unsigned short GetSaveSize(unsigned int aiFlags);
+struct WeaponRecordSaveSizeAccess : TESObjectWEAP {
+    unsigned short GetRecordSaveSize(unsigned int aiFlags);
 };
 
 // Returns the sum of the save sizes reported by the two embedded objects for the given flags.
 // @fnv 0x00523020
-unsigned short FUN_00523020_shell::GetSaveSize(unsigned int aiFlags)
+unsigned short WeaponRecordSaveSizeAccess::GetRecordSaveSize(unsigned int aiFlags)
 {
     unsigned short usSize = 0;
-    usSize += m_iWordAt00.GetSaveSize(aiFlags);
-    usSize += m_cByteAtOffset1.GetSaveSize(aiFlags);
+    usSize += reinterpret_cast<FUN_00484bf0*>(this)->GetSaveSize(aiFlags);
+    usSize += TESValueForm::FUN_0048e9b0(aiFlags);
     return usSize;
 }
 
@@ -1790,9 +1712,9 @@ void FUN_00525450_shell::QueueModelsForLoad(int aiIndex, class QueuedFile* apFil
     if (reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x104)->GetModelLength())
         g_modelLoader->ProcessModelRequest(reinterpret_cast<TESModel*>(reinterpret_cast<char*>(this) + 0x104), aiIndex, apFile, 0, true, false, false);
     if (reinterpret_cast<TESObjectWEAP*>(reinterpret_cast<char*>(this) - 0xcc)->GetProjectileData(0))
-        reinterpret_cast<TESModel*>(reinterpret_cast<char*>(reinterpret_cast<TESObjectWEAP*>(reinterpret_cast<char*>(this) - 0xcc)->GetProjectileData(0)) + 0x54)->vfn_10(aiIndex, apFile);
+        reinterpret_cast<BGSPreloadable*>(reinterpret_cast<char*>(reinterpret_cast<TESObjectWEAP*>(reinterpret_cast<char*>(this) - 0xcc)->GetProjectileData(0)) + 0x54)->QueueResourceLoad((IO_TASK_PRIORITY)aiIndex, apFile);
     if (*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x180))
-        reinterpret_cast<TESModelTextureSwap*>(reinterpret_cast<char*>(*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x180)) + 0x18)->vfn_10(aiIndex, apFile);
+        reinterpret_cast<BGSPreloadable*>(reinterpret_cast<char*>(*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x180)) + 0x18)->QueueResourceLoad((IO_TASK_PRIORITY)aiIndex, apFile);
 }
 
 struct GlobalObject_0045cfe0 { int* Int(); };
@@ -1987,7 +1909,8 @@ void __cdecl WriteChunkStr(UInt32 chunk, const char* str, UInt32 len);
 void __cdecl WriteChunkBuf(UInt32 chunk, void* buf, UInt32 len);
 bool __cdecl IsBigEndian();
 
-struct BSString
+// a BSStringT<char> member viewed with out-of-line Length/CStr calls (the shared BSString defines CStr inline)
+struct WeaponStringView
 {
     char* pString;
     unsigned short len;
@@ -1995,7 +1918,6 @@ struct BSString
     UInt32 Length();
     const char* CStr();
 };
-
 struct FullName { char pad[0xc]; void Save(); };
 struct ModelSwap { char pad[0x20]; void Save(UInt32 a, UInt32 b, UInt32 c); void SaveSwap(UInt32 a); };
 struct Icon { char pad[0xc]; void Save(UInt32 a); };
@@ -2066,9 +1988,9 @@ struct Weapon
     TESForm* pMod1;             // 0x350
     TESForm* pMod2;             // 0x354
     TESForm* pMod3;             // 0x358
-    BSString embeddedNode;      // 0x35c
+    WeaponStringView embeddedNode;      // 0x35c
     UInt32 soundLevel;          // 0x364
-    BSString vatsAttackName;    // 0x368
+    WeaponStringView vatsAttackName;    // 0x368
     VATSData vats;              // 0x370
 
     void BeginSave();
@@ -2225,13 +2147,13 @@ void WeaponCopyAccess::CopyFromWeapon(unsigned int id)
     if (source == 0) return;
     {
         FUN_004851b0(this, *(StackWord*)&id);
-        m_kModel.CopyFromBase(&source->m_kModel);
+        m_kModel.CopyFromBase(static_cast<BaseFormComponent*>(&source->m_kModel));
         ((StringCopyAccess*)&m_kEmbeddedWeaponNodeName)->FUN_004037f0(
             ((StringCopyAccess*)&source->m_kEmbeddedWeaponNodeName)->FUN_00559450(false));
         ((StringCopyAccess*)&VATSAttackName)->FUN_004037f0(
             ((StringCopyAccess*)&source->VATSAttackName)->FUN_00559450(false));
-        m_kModel3rdPerson.CopyFromBase(&source->m_kModel3rdPerson);
-        m_kModel1stPerson.CopyFromBase(&source->m_kModel1stPerson);
+        m_kModel3rdPerson.CopyFromBase(static_cast<BaseFormComponent*>(&source->m_kModel3rdPerson));
+        m_kModel1stPerson.CopyFromBase(static_cast<BaseFormComponent*>(&source->m_kModel1stPerson));
         SetEffectShader(source->GetScopeEffect());
         FUN_008d8ae0(FUN_008d8ac0(source));
         FUN_00521710(source->FUN_008d8b00());
@@ -2242,16 +2164,16 @@ void WeaponCopyAccess::CopyFromWeapon(unsigned int id)
         SetModObject(5, source->GetModSlotStat(5));
         SetModObject(6, source->GetModSlotStat(6));
         SetModObject(7, source->GetModSlotStat(7));
-        SetModItem(1, source->FUN_004bd570(1));
-        SetModItem(2, source->FUN_004bd570(2));
-        SetModItem(4, source->FUN_004bd570(4));
-        m_kWeaponModTextureSwap1.CopyFromBase(&source->m_kWeaponModTextureSwap1);
-        m_kWeaponModTextureSwap2.CopyFromBase(&source->m_kWeaponModTextureSwap2);
-        m_kWeaponModTextureSwap3.CopyFromBase(&source->m_kWeaponModTextureSwap3);
-        m_kWeaponModTextureSwap4.CopyFromBase(&source->m_kWeaponModTextureSwap4);
-        m_kWeaponModTextureSwap5.CopyFromBase(&source->m_kWeaponModTextureSwap5);
-        m_kWeaponModTextureSwap6.CopyFromBase(&source->m_kWeaponModTextureSwap6);
-        m_kWeaponModTextureSwap7.CopyFromBase(&source->m_kWeaponModTextureSwap7);
+        SetModItem((unsigned char)1, source->FUN_004bd570(1));
+        SetModItem((unsigned char)2, source->FUN_004bd570(2));
+        SetModItem((unsigned char)4, source->FUN_004bd570(4));
+        m_kWeaponModTextureSwap1.CopyFromBase(static_cast<BaseFormComponent*>(&source->m_kWeaponModTextureSwap1));
+        m_kWeaponModTextureSwap2.CopyFromBase(static_cast<BaseFormComponent*>(&source->m_kWeaponModTextureSwap2));
+        m_kWeaponModTextureSwap3.CopyFromBase(static_cast<BaseFormComponent*>(&source->m_kWeaponModTextureSwap3));
+        m_kWeaponModTextureSwap4.CopyFromBase(static_cast<BaseFormComponent*>(&source->m_kWeaponModTextureSwap4));
+        m_kWeaponModTextureSwap5.CopyFromBase(static_cast<BaseFormComponent*>(&source->m_kWeaponModTextureSwap5));
+        m_kWeaponModTextureSwap6.CopyFromBase(static_cast<BaseFormComponent*>(&source->m_kWeaponModTextureSwap6));
+        m_kWeaponModTextureSwap7.CopyFromBase(static_cast<BaseFormComponent*>(&source->m_kWeaponModTextureSwap7));
         memcpy(&data, &source->data, sizeof(data));
         memcpy(&m_kCriticalData, &source->m_kCriticalData, sizeof(m_kCriticalData));
         memcpy(&m_kVATSData, &source->m_kVATSData, sizeof(m_kVATSData));
@@ -2441,16 +2363,16 @@ bool WeaponCompareAccess::IsDifferentFrom(TESForm* form) {
     WeaponCompareAccess* other = (WeaponCompareAccess*)dynamic_cast<TESObjectWEAP*>(form);
     if (!other) return true;
     if (FUN_00485270(other)) return true;
-    if (m_kModel.CompareWithBase(&other->m_kModel)) return true;
-    if (m_kModel3rdPerson.CompareWithBase(&other->m_kModel3rdPerson)) return true;
-    if (m_kWeaponModTextureSwap1.CompareWithBase(&other->m_kWeaponModTextureSwap1)) return true;
-    if (m_kWeaponModTextureSwap2.CompareWithBase(&other->m_kWeaponModTextureSwap2)) return true;
-    if (m_kWeaponModTextureSwap3.CompareWithBase(&other->m_kWeaponModTextureSwap3)) return true;
-    if (m_kWeaponModTextureSwap4.CompareWithBase(&other->m_kWeaponModTextureSwap4)) return true;
-    if (m_kWeaponModTextureSwap5.CompareWithBase(&other->m_kWeaponModTextureSwap5)) return true;
-    if (m_kWeaponModTextureSwap6.CompareWithBase(&other->m_kWeaponModTextureSwap6)) return true;
-    if (m_kWeaponModTextureSwap7.CompareWithBase(&other->m_kWeaponModTextureSwap7)) return true;
-    if (m_kModel1stPerson.CompareWithBase(&other->m_kModel1stPerson)) return true;
+    if (m_kModel.CompareWithBase(static_cast<BaseFormComponent*>(&other->m_kModel))) return true;
+    if (m_kModel3rdPerson.CompareWithBase(static_cast<BaseFormComponent*>(&other->m_kModel3rdPerson))) return true;
+    if (m_kWeaponModTextureSwap1.CompareWithBase(static_cast<BaseFormComponent*>(&other->m_kWeaponModTextureSwap1))) return true;
+    if (m_kWeaponModTextureSwap2.CompareWithBase(static_cast<BaseFormComponent*>(&other->m_kWeaponModTextureSwap2))) return true;
+    if (m_kWeaponModTextureSwap3.CompareWithBase(static_cast<BaseFormComponent*>(&other->m_kWeaponModTextureSwap3))) return true;
+    if (m_kWeaponModTextureSwap4.CompareWithBase(static_cast<BaseFormComponent*>(&other->m_kWeaponModTextureSwap4))) return true;
+    if (m_kWeaponModTextureSwap5.CompareWithBase(static_cast<BaseFormComponent*>(&other->m_kWeaponModTextureSwap5))) return true;
+    if (m_kWeaponModTextureSwap6.CompareWithBase(static_cast<BaseFormComponent*>(&other->m_kWeaponModTextureSwap6))) return true;
+    if (m_kWeaponModTextureSwap7.CompareWithBase(static_cast<BaseFormComponent*>(&other->m_kWeaponModTextureSwap7))) return true;
+    if (m_kModel1stPerson.CompareWithBase(static_cast<BaseFormComponent*>(&other->m_kModel1stPerson))) return true;
     if (GetScopeEffect() != other->GetScopeEffect()) return true;
     if (FUN_008d8ac0() != other->FUN_008d8ac0()) return true;
     if (FUN_008d8b00() != other->FUN_008d8b00()) return true;
@@ -2485,7 +2407,6 @@ bool WeaponCompareAccess::IsDifferentFrom(TESForm* form) {
     return false;
 }
 
-struct NiPoint3 { float x; float y; float z; };
 struct WeapNode { NiPoint3* GetWorldPos(); };
 struct WeapProcess {
     virtual void v000();
@@ -2590,153 +2511,7 @@ struct WeapProcess {
     virtual void v18c();
     virtual WeapNode* GetWeaponNode(void*);
 };
-class TESObjectREFR {
-public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual bool IsActor();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void* GetNiNode();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void* GetBipedRoot();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual WeapNode* Get3D();
-    NiPoint3* GetPos();
-};
-class Actor : public TESObjectREFR {
-public:
-    WeapProcess* GetCurrentProcess() const;
-    float GetHeight() const;
-};
-class PlayerCharacter : public Actor {
-public:
-    bool FUN_004eaf60();
-    void* GetBipedAnim(bool);
-    void* GetPlayerNode();
-};
+
 extern PlayerCharacter* g_thePlayer;
 struct WeapAimShell : public TESObjectWEAP {
     int FUN_00446390();
@@ -2749,20 +2524,20 @@ struct WeapAimShell : public TESObjectWEAP {
 NiPoint3 WeapAimShell::FUN_005257a0(TESObjectREFR* ref)
 {
     Actor* actor2 = ref->IsActor() ? (Actor*)ref : 0;
-    WeapProcess* process = actor2 ? actor2->GetCurrentProcess() : 0;
-    bool isPlayer_2 = actor2 == g_thePlayer;
+    WeapProcess* process = actor2 ? (WeapProcess*)((const Actor*)actor2)->GetCurrentProcess() : 0;
+    bool isPlayer_2 = (void*)actor2 == g_thePlayer;
     NiPoint3 pos5 = *ref->GetPos();
     if (actor2)
         pos5.z += actor2->GetHeight();
     WeapNode* node9 = 0;
     if (actor2 && process && (FUN_00446390() == 10 || FUN_00446390() == 11 || FUN_00446390() == 12 || FUN_00446390() == 13)) {
-        void* biped = isPlayer_2 ? g_thePlayer->GetBipedAnim(g_thePlayer->FUN_004eaf60()) : actor2->GetBipedRoot();
+        void* biped = isPlayer_2 ? g_thePlayer->GetBipedAnim(g_thePlayer->FUN_004eaf60()) : (void*)actor2->CallGetValidBip01Names();
         WeapNode* weapNode = process->GetWeaponNode(biped);
         if (weapNode)
             pos5 = *weapNode->GetWorldPos();
     } else {
         if (process)
-            node9 = ref->Get3D();
+            node9 = (WeapNode*)ref->Unk_83();
         else
             node9 = FUN_00525700(isPlayer_2 ? g_thePlayer->GetPlayerNode() : ref->GetNiNode());
         if (node9)
@@ -2834,9 +2609,7 @@ int CombatWeapon::FUN_00522c80()
 	}
 }
 
-struct TESObjectCELL;
 struct NiFixedString;
-struct BSFaceGenAnimationData;
 BSFaceGenAnimationData* __cdecl FUN_00524c90();
 NiAVObject* __fastcall FUN_00524cf0(TESObjectCELL*);
 NiFixedString* __cdecl FUN_00524cc0();
@@ -4060,7 +3833,6 @@ struct Sub461130 {
 };
 struct GetterBase { P12* FUN_0045bb80(); };
 struct NodeObj : GetterBase { Sub461130* FUN_00461130(); };
-struct BSFaceGenAnimationData : GetterBase {};
 struct SubA {
     virtual void Unk_00();
     virtual void Unk_01();
@@ -4263,7 +4035,7 @@ void ThisObj::FUN_00524db0(Param* param)
     flag7 = true;
     if (!FUN_004b61d0(*node3->FUN_0045bb80(), FUN_00524c90(), DAT_0101e704))
         flag7 = false;
-    node3->FUN_0045bb80()->FUN_00439ef0(&aVec24, FUN_00524c90()->FUN_0045bb80());
+    node3->FUN_0045bb80()->FUN_00439ef0(&aVec24, (P12*)&((NiAVObject*)FUN_00524c90())->FUN_0045bb80());
     if (aVec24.FUN_00457990() > *DAT_011cf57c.FUN_00403e20())
         flag7 = false;
     if (flag7) {
@@ -4303,3 +4075,4 @@ void ThisObj::FUN_00524db0(Param* param)
     }
 }
 }  // namespace fnv_00524db0
+

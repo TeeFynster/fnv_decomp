@@ -1,52 +1,62 @@
 // fallout/ai/aitaskmanager.cpp: MovementTaskData, PackageUpdateTaskData, Owner, ActorsScriptTaskData and more (87 functions)
 
-#include "../../../include/layout_support.h"
+#include <stddef.h>
+#include "../../../include/BSSimpleList.h"
 #include "../../../include/Actor.h"
+#include "../../../include/ActorTaskManager.h"
+#include "../../../include/ActorUpdateTaskData.h"
+#include "../../../include/ActorsScriptTaskData.h"
+#include "../../../include/AnimationTaskData.h"
+#include "../../../include/BaseProcess.h"
+#include "../../../include/ExtraFollower.h"
+#include "../../../include/ExtraDataList.h"
+#include "../../../include/HighProcess.h"
+#include "../../../include/MobileObjectTaskletData.h"
+#include "../../../include/MovementTaskData.h"
+#include "../../../include/PackageUpdateTaskData.h"
+#include "../../../include/PathingTaskData.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/Script.h"
+#include "../../../include/TESQuest.h"
 #include "../../../include/RecursiveLock.h"
-// ActorTaskManager task-list serialisation.
-//
-// The manager guards its task data with a critical section that lives at the
-// front of the object, so a guarded helper can hand `this` straight to the
-// lock. Releasing the guard is a single forwarded call, which is all this
-// translation unit needs to express for the covered method.
+#include "../../../include/BSThread.h"
+#include "../../../include/CountingSemaphore.h"
+#include "../../../include/GameTimerRecord.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/SL.h"
+#include "../../../include/TESSaveLoadGame.h"
 
-class ActorTaskManager
-{
-  public:
-    RecursiveLock m_taskLock;
+// Migration limit: the lifetime views for AnimationTaskData,
+// ActorUpdateTaskData, PackageUpdateTaskData, ActorsScriptTaskData and
+// MovementTaskData remain because their shared declarations lack constructors.
+// The MobileObjectTaskletData destructor view also remains: using the shared
+// virtual destructor changes the code at 0x008c83a0. Its constructor and message
+// processing implementations below use the shared class.
 
-    void WaitForTasksDuringRendering();
-};
-
+// The rendering wait helper forwards the lock at the start of this object.
 // @fnv 0x004538c0
 void ActorTaskManager::WaitForTasksDuringRendering()
 {
-    m_taskLock.Leave();
+    reinterpret_cast<RecursiveLock*>(this)->Leave();
 }
 
-struct ST_008c8bb0
-{
-    char pad[0x5f8];
-    bool m_bState;
-    void FUN_008c8bb0(bool f);
-};
+
 // @fnv 0x008c8bb0
-void ST_008c8bb0::FUN_008c8bb0(bool abValue)
+// PlayerCharacter.h has no bool-taking setter for this flag.
+struct PlayerTaskMethods : PlayerCharacter
 {
-    m_bState = abValue;
+    void SetUpdateFlag(bool);
+};
+void PlayerTaskMethods::SetUpdateFlag(bool abValue)
+{
+    *reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 0x5f8) = abValue;
 }
 
-struct FUN_008c8fd0_helper
-{
-    char pad[0x2c7];
-    bool bSkippedLastUpdate;
-    void Set(bool abVal);
-};
 
 // @fnv 0x008c8fd0
-void FUN_008c8fd0_helper::Set(bool abVal)
+void BaseProcess::FUN_008c8fd0(bool abVal)
 {
-    bSkippedLastUpdate = abVal;
+    reinterpret_cast<HighProcess*>(this)->m_kFirstAdditionalHighProcessField = abVal;
 }
 
 struct WeatherEntry;
@@ -125,15 +135,10 @@ void FUN_008c8430_shell::FUN_008c8430()
     FUN_008c83a0();
 }
 
-struct ATM
-{
-    void WaitForTasksDuringRendering();
-};
-struct PC7d;
-extern PC7d* g_thePlayer;
+extern PlayerCharacter* g_thePlayer;
 void __fastcall FUN_00964260(void*);
-extern ATM g_011dfbe8;
-extern ATM g_011dfc04;
+extern ActorTaskManager g_011dfbe8;
+extern ActorTaskManager g_011dfc04;
 struct FUN_008c8490_shell
 {
     void FUN_008c8490(unsigned int);
@@ -194,12 +199,8 @@ void FUN_008c8890_shell::FUN_008c8890()
 }
 
 namespace fnv_008c88b0 {
-struct ATM
-{
-    void QueryPerformanceCounter(int);
-};
-extern ATM g_011dfc38;
-extern ATM g_011dfc04;
+extern ActorTaskManager g_011dfc38;
+extern ActorTaskManager g_011dfc04;
 struct FUN_008c88b0_shell
 {
     void QueryPerformanceCounters(int);
@@ -214,12 +215,8 @@ void FUN_008c88b0_shell::QueryPerformanceCounters(int)
 }  // namespace fnv_008c88b0
 
 namespace fnv_008c88e0 {
-struct ATM
-{
-    void WaitForTasksDuringRendering();
-};
-extern ATM g_011dfc04;
-extern ATM g_011dfc38;
+extern ActorTaskManager g_011dfc04;
+extern ActorTaskManager g_011dfc38;
 struct FUN_008c88e0_shell
 {
     void FUN_008c88e0(int a);
@@ -282,11 +279,7 @@ void FUN_008c8a00_shell::FUN_008c8a00()
 }
 
 namespace fnv_008c8a20 {
-struct ATM
-{
-    void QueryPerformanceCounter(int);
-};
-extern ATM g_011dfc38;
+extern ActorTaskManager g_011dfc38;
 struct FUN_008c8a20_shell
 {
     void FUN_008c8a20(int);
@@ -301,11 +294,7 @@ void FUN_008c8a20_shell::FUN_008c8a20(int)
 }  // namespace fnv_008c8a20
 
 namespace fnv_008c8a50 {
-struct ATM
-{
-    void WaitForTasksDuringRendering();
-};
-extern ATM g_011dfc38;
+extern ActorTaskManager g_011dfc38;
 struct FUN_008c8a50_shell
 {
     void FUN_008c8a50(int a);
@@ -363,25 +352,19 @@ struct PkgObj
 {
     void FUN_00977130(float f);
 };
-struct ATM
-{
-    void WaitForTasksDuringRendering();
-    void QueryPerformanceCounter(int);
-};
 extern Twin_0084d030 g_timeGlobal;
 extern PkgObj DAT_011e0e80;
-extern ATM g_011dfbe8;
-struct PackageUpdateTaskData
-{
-    void RunPackageUpdateTask(unsigned int aiThread);
-};
+extern ActorTaskManager g_011dfbe8;
+
 // @fnv 0x008c8ff0
+}  // namespace fnv_008c8ff0
 void PackageUpdateTaskData::RunPackageUpdateTask(unsigned int aiThread)
 {
-    DAT_011e0e80.FUN_00977130(g_timeGlobal.GetStoredFloatValue());
-    g_011dfbe8.WaitForTasksDuringRendering();
+    using namespace fnv_008c8ff0;
+    fnv_008c8ff0::DAT_011e0e80.FUN_00977130(fnv_008c8ff0::g_timeGlobal.GetStoredFloatValue());
+    fnv_008c8ff0::g_011dfbe8.WaitForTasksDuringRendering();
 }
-}  // namespace fnv_008c8ff0
+
 
 namespace fnv_008c9020 {
 struct FUN_008c82e0
@@ -435,18 +418,14 @@ void FUN_008c9080_shell::FUN_008c9080()
 }
 
 namespace fnv_008c90e0 {
-struct ATM
-{
-    void WaitForTasksDuringRendering();
-};
-extern ATM g_011dfbe8;
-extern ATM g_011dfc04;
-extern ATM g_011dfc38;
+extern ActorTaskManager g_011dfbe8;
+extern ActorTaskManager g_011dfc04;
+extern ActorTaskManager g_011dfc38;
 struct FUN_008c90e0_shell
 {
     void FUN_008c90e0(unsigned int);
 };
-// Calls WaitForTasksDuringRendering on three global ATM instances to wait for their tasks during rendering.
+// Calls WaitForTasksDuringRendering on three global ActorTaskManager instances to wait for their tasks during rendering.
 // @fnv 0x008c90e0
 void FUN_008c90e0_shell::FUN_008c90e0(unsigned int)
 {
@@ -510,35 +489,24 @@ void FUN_008c91d0_shell::FUN_008c91d0()
 }
 
 namespace fnv_008c91f0 {
-struct ATM
-{
-    void QueryPerformanceCounter(int);
-};
-extern ATM g_011dfbe8;
-extern ATM g_011dfc04;
-struct MovementTaskData
-{
-    int pad[14];
-    int field;
-    void FUN_008c91f0(unsigned int auiCount);
-};
+extern ActorTaskManager g_011dfbe8;
+extern ActorTaskManager g_011dfc04;
+
 // Clears field and queries the performance counter on both g_011dfc04 and g_011dfbe8.
 // @fnv 0x008c91f0
-void MovementTaskData::FUN_008c91f0(unsigned int auiCount)
-{
-    field = 0;
-    g_011dfc04.QueryPerformanceCounter(0);
-    g_011dfbe8.QueryPerformanceCounter(0);
-}
 }  // namespace fnv_008c91f0
+void MovementTaskData::SetMobileObjectCount(unsigned int auiCount)
+{
+    using namespace fnv_008c91f0;
+    uiRunCount = 0;
+    fnv_008c91f0::g_011dfc04.QueryPerformanceCounter(0);
+    fnv_008c91f0::g_011dfbe8.QueryPerformanceCounter(0);
+}
+
 
 namespace fnv_008c9300 {
-struct ATM
-{
-    void WaitForTasksDuringRendering();
-};
-extern ATM g_011dfbe8;
-extern ATM g_011dfc04;
+extern ActorTaskManager g_011dfbe8;
+extern ActorTaskManager g_011dfc04;
 struct FUN_008c9300_shell
 {
     void FUN_008c9300(int a);
@@ -635,10 +603,6 @@ struct FUN_008c9ef0 : FUN_00aa63c0_base
 FUN_008c9ef0::~FUN_008c9ef0()
 {}
 
-struct CountingSemaphore
-{
-    void Signal();
-};
 struct FUN_008c9fb0_shell
 {
     void SignalAtOffset30();
@@ -866,28 +830,19 @@ struct List_009e03e0
     void RemoveAll();
 };
 
-struct Obj_009529d0
-{
-    char pad[0x6b8];
-    int m_6b8;
-    char pad2[0x6c4 - 0x6bc];
-    List_009e03e0 m_6c4;
-    void FUN_009529d0(int a);
-};
-
-// If the new value differs from m_6b8, stores it and, when it becomes zero, clears the m_6c4 list.
+// If the new value differs from reinterpret_cast<int&>(m_pCurrentQuest), stores it and, when it becomes zero, clears the m_6c4 list.
 // @fnv 0x009529d0
-void Obj_009529d0::FUN_009529d0(int a)
+void PlayerCharacter::FUN_009529d0(int a)
 {
-    if (a != m_6b8)
+    if (a != reinterpret_cast<int&>(m_pCurrentQuest))
     {
-        m_6b8 = a;
-        if (m_6b8)
+        reinterpret_cast<int&>(m_pCurrentQuest) = a;
+        if (reinterpret_cast<int&>(m_pCurrentQuest))
         {
         }
         else
         {
-            m_6c4.RemoveAll();
+            reinterpret_cast<List_009e03e0*>(layoutPadding6C4)->RemoveAll();
         }
     }
 }
@@ -982,13 +937,6 @@ FUN_008c9a20_shell* FUN_008c9a20_shell::FUN_008c9a20(unsigned int v)
 }
 
 void* __cdecl operator new(unsigned int);
-struct BSThread
-{
-    char d[0x30];
-    void Initialize(int stackSize, const char* name, bool b);
-    void SetSchedulingPriority(unsigned int);
-    void SetName(const char*);
-};
 struct FUN_008c9bd0 : BSThread
 {
     char e[0x48];
@@ -1014,31 +962,13 @@ void FUN_008c9ae0_mgr::CreateThread(unsigned int aiThread)
 }
 
 namespace fnv_008c9bd0 {
-struct BSThread
-{
-    virtual void v0();
-    char d[0x2c];
-    BSThread();
-    ~BSThread();
-};
-struct CountingSemaphore
-{
-    char d[0xc];
-    CountingSemaphore(int, int);
-    ~CountingSemaphore();
-};
-struct NineIntegerRecord
-{
-    char d[0x100];
-    NineIntegerRecord();
-};
 struct FUN_008c9bd0 : BSThread
 {
     CountingSemaphore start;
     CountingSemaphore finish;
     unsigned char quit;
     unsigned int arg;
-    NineIntegerRecord router;
+    hkMemoryRouter router;
     FUN_008c9bd0(unsigned int aiThread);
     virtual void v0();
 };
@@ -1205,14 +1135,10 @@ void* FUN_008ca710_shell::FUN_008ca710(unsigned int flags)
     return this;
 }
 
-struct AnimationTaskData
-{
-    void FUN_008c8910(MobileObject* apMob);
-};
 
 // If apMob is an actor with a flag at offset 0xbc set, or a talking activator, calls Unk_9A with 0.0f.
 // @fnv 0x008c8910
-void AnimationTaskData::FUN_008c8910(MobileObject* apMob)
+void AnimationTaskData::ProcessMobileObject(MobileObject* apMob)
 {
     MobileObject* pmob = apMob;
     if (pmob && pmob->IsActor())
@@ -1229,160 +1155,78 @@ void AnimationTaskData::FUN_008c8910(MobileObject* apMob)
     }
 }
 
-namespace fnv_008c8240 {
-struct FUN_008c8190
-{
-    int _00;
-    int _04;
-    int _08;
-    FUN_008c8190();
-};
-struct MsgQueue
-{
-    virtual void f0()
-    {}
-    virtual void f1()
-    {}
-    virtual void f2()
-    {}
-    virtual bool Pop(FUN_008c8190*)
-    {
-        return false;
-    }
-};
-struct MessageQueueHandler
-{
-    char _00[0x1c];
-    MsgQueue m_kMessageQueue;
-    char _20[0x14];
-    int _34;
-    bool ProcessMessage(FUN_008c8190*, int);
-    void FUN_008c8240(int);
-};
 // @fnv 0x008c8240
-void MessageQueueHandler::FUN_008c8240(int eType)
+void MobileObjectTaskletData::ProcessMessages(int eType)
 {
-    _34 = eType;
-    FUN_008c8190 msg;
-    while (m_kMessageQueue.Pop(&msg))
+    this->eType = eType;
+    // Raw storage preserves the original constructor-only lifetime.
+    struct { unsigned int word0, word1; void* word2; } msg;
+    reinterpret_cast<MobileObjectTaskletContext*>(&msg)->MobileObjectTaskletContext::MobileObjectTaskletContext();
+    while (kMessageQueue.Pop(*reinterpret_cast<MobileObjectTaskletContext*>(&msg)))
     {
         if (!ProcessMessage(&msg, eType))
             break;
     }
 }
-}  // namespace fnv_008c8240
 
-struct Script
-{
-    static bool __cdecl IsConsolePlatform();
-};
+
 struct MobileObjectExt
 {
     void FUN_00565870();
 };
-struct ActorsScriptTaskData
-{
-    unsigned char _pad[0x3C];
-    int m_3C;
-    void FUN_008c9110(MobileObject* apMob);
-};
+
 // If apMob is an actor and the script check passes, calls FUN_00565870 on it and increments m_3C.
 // @fnv 0x008c9110
-void ActorsScriptTaskData::FUN_008c9110(MobileObject* apMob)
+// File-local extension for a method absent from the shared declaration.
+struct ProcessActorScriptMethods : ActorsScriptTaskData
+{
+    void Run(MobileObject* apMob);
+};
+void ProcessActorScriptMethods::Run(MobileObject* apMob)
 {
     MobileObject* pmob = apMob;
     if (pmob && pmob->IsActor() && Script::IsConsolePlatform())
     {
         ((MobileObjectExt*)pmob)->FUN_00565870();
-        m_3C++;
+        uiRunCount++;
     }
 }
 
-struct MobileObjectTaskletContext
-{
-    int m_iFirstValue;
-    unsigned int ItemUpdateArray;
-    void* pCurrentObject;
-};
-
-struct FUN_008c81c0_shell
-{
-    void* m_vtbl;
-    void* m_kNode;
-    unsigned int m_uiHighActorCount;
-    void SetActorCount(unsigned int);
-    void SetMob(void*);
-    void SetCount(unsigned int);
-    bool ProcessMessage(const MobileObjectTaskletContext* aMessage, unsigned int aThread);
-};
-
-typedef void(__thiscall* SetCountFn)(FUN_008c81c0_shell*, unsigned int);
-typedef void(__thiscall* SetMobFn)(FUN_008c81c0_shell*, void*);
 
 // @fnv 0x008c81c0
-bool FUN_008c81c0_shell::ProcessMessage(const MobileObjectTaskletContext* aMessage, unsigned int aThread)
+bool MobileObjectTaskletData::ProcessMessage(void* aMessage, int aThread)
 {
     bool bResult = true;
-    switch (aMessage->m_iFirstValue)
+    switch (static_cast<const MobileObjectTaskletContext*>(aMessage)->eType)
     {
     case 0:
-        *(unsigned int*)((char*)this + 0x30) = aMessage->ItemUpdateArray;
-        ((SetCountFn*)m_vtbl)[4](this, aMessage->ItemUpdateArray);
+        MobileObjectTaskletState = static_cast<const MobileObjectTaskletContext*>(aMessage)->uiObjectCount;
+        SetMobileObjectCount(static_cast<const MobileObjectTaskletContext*>(aMessage)->uiObjectCount);
         break;
     case 1:
-        ((SetMobFn*)m_vtbl)[5](this, aMessage->pCurrentObject);
+        ProcessMobileObject(static_cast<MobileObject*>(static_cast<const MobileObjectTaskletContext*>(aMessage)->pObject));
         break;
     case 2:
-        ((SetCountFn*)m_vtbl)[6](this, aThread);
+        SetThreadNumber(aThread);
         bResult = false;
         break;
     }
     return bResult;
 }
 
-namespace fnv_008c8130 {
-struct FUN_008c8190
+void MobileObjectTaskletData::Process()
 {
-    int a;
-    int b;
-    int c;
-    FUN_008c8190();
-};
-typedef FUN_008c8190 MobileObjectTaskletContext;
-struct PathingTaskData
-{
-    void FUN_006ea330();
-};
-struct MsgQueue
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual bool GetMsg(MobileObjectTaskletContext*);
-    int _pad[5];
-};
-struct MobileObjectTaskletData
-{
-    int _pad0[7];
-    MsgQueue m_kMessageQueue;
-    int eType;
-    bool ProcessMessage(void*, int);
-    void FUN_008c8130();
-};
-// Drains messages from the queue, stops if ProcessMessage rejects one, otherwise calls FUN_006ea330 on this as PathingTaskData.
-// @fnv 0x008c8130
-void MobileObjectTaskletData::FUN_008c8130()
-{
-    MobileObjectTaskletContext msg;
-    while (m_kMessageQueue.GetMsg(&msg))
+    // Raw storage preserves the original constructor-only lifetime.
+    struct { unsigned int word0, word1; void* word2; } msg;
+    reinterpret_cast<MobileObjectTaskletContext*>(&msg)->MobileObjectTaskletContext::MobileObjectTaskletContext();
+    while (kMessageQueue.TryPop(*reinterpret_cast<MobileObjectTaskletContext*>(&msg)))
     {
         if (!ProcessMessage(&msg, eType))
             return;
     }
-    ((PathingTaskData*)this)->FUN_006ea330();
+    ((PathingTaskData*)this)->SetTaskYielded();
 }
-}  // namespace fnv_008c8130
+
 
 namespace fnv_008c82a0 {
 struct FUN_008c82e0
@@ -1407,54 +1251,27 @@ FUN_008c82a0::FUN_008c82a0(int a) : FUN_008c82e0(a)
 }
 }  // namespace fnv_008c82a0
 
-namespace fnv_008c82e0 {
-struct FUN_006c7850_base
-{
-    virtual void v0();
-    char d[0x14];
-    FUN_006c7850_base();
-    ~FUN_006c7850_base();
-};
-struct FUN_008ca440_member
-{
-    char d[0x14];
-    FUN_008ca440_member(unsigned int);
-};
-struct FUN_008c82e0 : FUN_006c7850_base
-{
-    int f18;
-    FUN_008ca440_member list;
-    int f30;
-    int f34;
-    FUN_008c82e0(unsigned int arg);
-    virtual void v0();
-};
-// Constructor: initializes f18, f30 and f34 to 0 and constructs the list member from arg.
 // @fnv 0x008c82e0
-FUN_008c82e0::FUN_008c82e0(unsigned int arg) : f18(0), list(arg), f30(0), f34(0)
+MobileObjectTaskletData::MobileObjectTaskletData(BSTFreeList<MobileObjectTaskletContext>* arg)
+    : pMobList(0), kMessageQueue(arg), MobileObjectTaskletState(0), eType(0)
 {}
-}  // namespace fnv_008c82e0
+
 
 namespace fnv_008c8450 {
-struct ATM
-{
-    void QueryPerformanceCounter(int);
-};
-extern ATM g_011dfbe8;
-extern ATM g_011dfc04;
-struct MovementTaskData
-{
-    int pad[14];
-    float f38;
-    int f3c;
-    void FUN_008c8450(unsigned int a);
-};
+extern ActorTaskManager g_011dfbe8;
+extern ActorTaskManager g_011dfc04;
+
 // Clears f38 and f3c, then calls QueryPerformanceCounter on g_011dfc04 and g_011dfbe8.
 // @fnv 0x008c8450
-void MovementTaskData::FUN_008c8450(unsigned int auUnused)
+// File-local extension for a method absent from the shared declaration.
+struct ResetMovementTaskMethods : MovementTaskData
 {
-    f38 = 0.0f;
-    f3c = 0;
+    void Run(unsigned int auUnused);
+};
+void ResetMovementTaskMethods::Run(unsigned int auUnused)
+{
+    *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x38) = 0.0f;
+    *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x3c) = 0;
     g_011dfc04.QueryPerformanceCounter(0);
     g_011dfbe8.QueryPerformanceCounter(0);
 }
@@ -1484,29 +1301,21 @@ FUN_008c8ae0::FUN_008c8ae0(int a) : FUN_008c82e0(a)
 }  // namespace fnv_008c8ae0
 
 namespace fnv_008c8b70 {
-struct ATM
-{
-    void QueryPerformanceCounter(int);
-};
-struct Actor
-{
-    void FUN_008c8bb0(int);
-};
-extern ATM g_011dfbe8;
+
+extern ActorTaskManager g_011dfbe8;
 extern Actor* g_thePlayer;
 void FUN_008c8bd0();
-struct PackageUpdateTaskData
-{
-    int pad[15];
-    int f3c;
-    int f40;
-    void FUN_008c8b70(unsigned int a);
-};
+
 // @fnv 0x008c8b70
-void PackageUpdateTaskData::FUN_008c8b70(unsigned int auiUnused)
+// File-local extension for a method absent from the shared declaration.
+struct ResetPackageTaskMethods : PackageUpdateTaskData
 {
-    f3c = 0;
-    f40 = 0;
+    void Run(unsigned int auiUnused);
+};
+void ResetPackageTaskMethods::Run(unsigned int auiUnused)
+{
+    uiUpdatedCount = 0;
+    uiSkippedCount = 0;
     FUN_008c8bd0();
     g_thePlayer->FUN_008c8bb0(0);
     g_011dfbe8.QueryPerformanceCounter(0);
@@ -1514,24 +1323,20 @@ void PackageUpdateTaskData::FUN_008c8b70(unsigned int auiUnused)
 }  // namespace fnv_008c8b70
 
 namespace fnv_008c90a0 {
-struct ATM
-{
-    void QueryPerformanceCounter(int);
-};
-extern ATM g_011dfbe8;
-extern ATM g_011dfc04;
-extern ATM g_011dfc38;
-struct ActorsScriptTaskData
-{
-    int pad[15];
-    int f3c;
-    void FUN_008c90a0(unsigned int a);
-};
+extern ActorTaskManager g_011dfbe8;
+extern ActorTaskManager g_011dfc04;
+extern ActorTaskManager g_011dfc38;
+
 // Clears f3c and queries the three performance counters with argument 0.
 // @fnv 0x008c90a0
-void ActorsScriptTaskData::FUN_008c90a0(unsigned int a)
+// File-local extension for a method absent from the shared declaration.
+struct ResetActorScriptTaskMethods : ActorsScriptTaskData
 {
-    f3c = 0;
+    void Run(unsigned int a);
+};
+void ResetActorScriptTaskMethods::Run(unsigned int a)
+{
+    uiRunCount = 0;
     g_011dfc38.QueryPerformanceCounter(0);
     g_011dfc04.QueryPerformanceCounter(0);
     g_011dfbe8.QueryPerformanceCounter(0);
@@ -1539,16 +1344,7 @@ void ActorsScriptTaskData::FUN_008c90a0(unsigned int a)
 }  // namespace fnv_008c90a0
 
 namespace fnv_008c9c70 {
-struct CountingSemaphore
-{
-    char d[0xc];
-    void Wait();
-    void Signal();
-};
-struct MobileObjectTaskletData
-{
-    void FUN_008c8240(int arg);
-};
+
 struct GlobalObject_008caab0
 {
     MobileObjectTaskletData* FUN_008c9cf0();
@@ -1582,7 +1378,7 @@ unsigned int FUN_008c9c70_cls::RunTaskletLoop()
         {
             pTaskletData = g_011dfb98.FUN_008c9cf0();
             if (pTaskletData)
-                pTaskletData->FUN_008c8240(arg);
+                pTaskletData->ProcessMessages(arg);
         } while (pTaskletData);
         finish.Signal();
     }
@@ -1643,299 +1439,21 @@ void H008ca010::ForwardToInner(int aiValue)
     inner.f1(aiValue);
 }
 
-struct VTMobileObjectBase
-{
-    virtual void m00();
-    virtual void m01();
-    virtual void m02();
-    virtual void m03();
-    virtual void m04();
-    virtual void m05();
-    virtual void m06();
-    virtual void m07();
-    virtual void m08();
-    virtual void m09();
-    virtual void m10();
-    virtual void m11();
-    virtual void m12();
-    virtual void m13();
-    virtual void m14();
-    virtual void m15();
-    virtual void m16();
-    virtual void m17();
-    virtual void m18();
-    virtual void m19();
-    virtual void m20();
-    virtual void m21();
-    virtual void m22();
-    virtual void m23();
-    virtual void m24();
-    virtual void m25();
-    virtual void m26();
-    virtual void m27();
-    virtual void m28();
-    virtual void m29();
-    virtual void m30();
-    virtual void m31();
-    virtual void m32();
-    virtual void m33();
-    virtual void m34();
-    virtual void m35();
-    virtual void m36();
-    virtual void m37();
-    virtual void m38();
-    virtual void m39();
-    virtual void m40();
-    virtual void m41();
-    virtual void m42();
-    virtual void m43();
-    virtual void m44();
-    virtual void m45();
-    virtual void m46();
-    virtual void m47();
-    virtual void m48();
-    virtual void m49();
-    virtual void m50();
-    virtual void m51();
-    virtual void m52();
-    virtual void m53();
-    virtual void m54();
-    virtual void m55();
-    virtual void m56();
-    virtual void m57();
-    virtual void m58();
-    virtual void m59();
-    virtual void m60();
-    virtual void m61();
-    virtual void m62();
-    virtual void m63();
-};
-
-struct VTMobileObject : VTMobileObjectBase
-{
-    virtual bool v100();
-};
-
-struct VTActorBase
-{
-    virtual void a000();
-    virtual void a001();
-    virtual void a002();
-    virtual void a003();
-    virtual void a004();
-    virtual void a005();
-    virtual void a006();
-    virtual void a007();
-    virtual void a008();
-    virtual void a009();
-    virtual void a010();
-    virtual void a011();
-    virtual void a012();
-    virtual void a013();
-    virtual void a014();
-    virtual void a015();
-    virtual void a016();
-    virtual void a017();
-    virtual void a018();
-    virtual void a019();
-    virtual void a020();
-    virtual void a021();
-    virtual void a022();
-    virtual void a023();
-    virtual void a024();
-    virtual void a025();
-    virtual void a026();
-    virtual void a027();
-    virtual void a028();
-    virtual void a029();
-    virtual void a030();
-    virtual void a031();
-    virtual void a032();
-    virtual void a033();
-    virtual void a034();
-    virtual void a035();
-    virtual void a036();
-    virtual void a037();
-    virtual void a038();
-    virtual void a039();
-    virtual void a040();
-    virtual void a041();
-    virtual void a042();
-    virtual void a043();
-    virtual void a044();
-    virtual void a045();
-    virtual void a046();
-    virtual void a047();
-    virtual void a048();
-    virtual void a049();
-    virtual void a050();
-    virtual void a051();
-    virtual void a052();
-    virtual void a053();
-    virtual void a054();
-    virtual void a055();
-    virtual void a056();
-    virtual void a057();
-    virtual void a058();
-    virtual void a059();
-    virtual void a060();
-    virtual void a061();
-    virtual void a062();
-    virtual void a063();
-    virtual void a064();
-    virtual void a065();
-    virtual void a066();
-    virtual void a067();
-    virtual void a068();
-    virtual void a069();
-    virtual void a070();
-    virtual void a071();
-    virtual void a072();
-    virtual void a073();
-    virtual void a074();
-    virtual void a075();
-    virtual void a076();
-    virtual void a077();
-    virtual void a078();
-    virtual void a079();
-    virtual void a080();
-    virtual void a081();
-    virtual void a082();
-    virtual void a083();
-    virtual void a084();
-    virtual void a085();
-    virtual void a086();
-    virtual void a087();
-    virtual void a088();
-    virtual void a089();
-    virtual void a090();
-    virtual void a091();
-    virtual void a092();
-    virtual void a093();
-    virtual void a094();
-    virtual void a095();
-    virtual void a096();
-    virtual void a097();
-    virtual void a098();
-    virtual void a099();
-    virtual void a100();
-    virtual void a101();
-    virtual void a102();
-    virtual void a103();
-    virtual void a104();
-    virtual void a105();
-    virtual void a106();
-    virtual void a107();
-    virtual void a108();
-    virtual void a109();
-    virtual void a110();
-    virtual void a111();
-    virtual void a112();
-    virtual void a113();
-    virtual void a114();
-    virtual void a115();
-    virtual void a116();
-    virtual void a117();
-    virtual void a118();
-    virtual void a119();
-    virtual void a120();
-    virtual void a121();
-    virtual void a122();
-    virtual void a123();
-    virtual void a124();
-    virtual void a125();
-    virtual void a126();
-    virtual void a127();
-    virtual void a128();
-    virtual void a129();
-    virtual void a130();
-    virtual void a131();
-    virtual void a132();
-    virtual void a133();
-    virtual void a134();
-    virtual void a135();
-    virtual void a136();
-    virtual void a137();
-    virtual void a138();
-    virtual void a139();
-    virtual void a140();
-    virtual void a141();
-    virtual void a142();
-    virtual void a143();
-    virtual void a144();
-    virtual void a145();
-    virtual void a146();
-    virtual void a147();
-    virtual void a148();
-    virtual void a149();
-    virtual void a150();
-    virtual void a151();
-    virtual void a152();
-    virtual void a153();
-    virtual void a154();
-    virtual void a155();
-    virtual void a156();
-    virtual void a157();
-    virtual void a158();
-    virtual void a159();
-    virtual void a160();
-    virtual void a161();
-    virtual void a162();
-    virtual void a163();
-    virtual void a164();
-    virtual void a165();
-    virtual void a166();
-    virtual void a167();
-    virtual void a168();
-    virtual void a169();
-    virtual void a170();
-    virtual void a171();
-    virtual void a172();
-    virtual void a173();
-    virtual void a174();
-    virtual void a175();
-    virtual void a176();
-    virtual void a177();
-    virtual void a178();
-    virtual void a179();
-    virtual void a180();
-    virtual void a181();
-    virtual void a182();
-    virtual void a183();
-    virtual void a184();
-    virtual void a185();
-    virtual void a186();
-    virtual void a187();
-    virtual void a188();
-    virtual void a189();
-};
-
-struct VTActor : VTActorBase
-{
-    virtual void v2f8(float);
-};
-
-struct ActorUpdateTaskData
-{
-    char m_auiShapeKeys[0x38];
-    int m_unk38;
-    void UpdateActorTask(MobileObject* apMob);
-};
 
 // If apMob is a valid mobile object with v100 set, resets the actor's v2f8 to 0 when byte 0xbc is nonzero and increments m_unk38.
 // @fnv 0x008c8a70
 void ActorUpdateTaskData::UpdateActorTask(MobileObject* apMob)
 {
     MobileObject* pmob = apMob;
-    VTActor* pact;
-    if (pmob != 0 && ((VTMobileObject*)pmob)->v100())
+    Actor* pact;
+    if (pmob != 0 && pmob->IsActor())
     {
-        pact = (VTActor*)pmob;
+        pact = (Actor*)pmob;
         if (*((unsigned char*)pact + 0xbc) != 0)
         {
-            pact->v2f8(0.0f);
+            static_cast<MobileObject*>(pact)->Update(0.0f);
         }
-        m_unk38++;
+        uiRunCount++;
     }
 }
 
@@ -1981,6 +1499,8 @@ struct M6
     void FUN_008ca680();
 };
 
+// ActorTaskManager.h lacks the constructor at 0x008c9330.
+// Retain this lifetime view until that constructor can be declared there.
 struct FUN_008c9330
 {
     M0 m0;
@@ -2004,45 +1524,18 @@ FUN_008c9330::FUN_008c9330() : m0(&m6), m1(&m6), m2(&m6), m3(&m6), m4(&m6), m5(&
 }
 
 namespace fnv_0077a480 {
-struct GameTimerRecord
-{
-    unsigned int GetTime() const;
-};
 
 extern GameTimerRecord g_timeGlobal;
 
-struct TESQuest
-{
-    bool HasFlag40();
-    bool GetCompleted();
-};
 
-class ATM
-{
-  public:
-    void QueryPerformanceCounter(int);
-    void WaitForTasksDuringRendering();
-};
 
-class GlobalObject_0044fae0 : public ATM
-{
-};
 
-struct Obj_009529d0
-{
-    void FUN_009529d0(int);
-};
-
-struct PlayerCharacter : public Obj_009529d0
-{
-    TESQuest* FUN_005cbb50();
-};
 
 void __cdecl FUN_0076bad0(char*);
 
 extern int DAT_011d96ac;
 extern int _pme;
-extern GlobalObject_0044fae0 g_011d96cc;
+extern ActorTaskManager g_011d96cc;
 extern PlayerCharacter* _g_thePlayer;
 
 struct Task
@@ -2147,327 +1640,37 @@ void TaskOwner::DispatchTask()
 // Stand-in for the game's PlayerCharacter.  The unit file only
 // forward-declares it (as PC7d), so a separate class is needed to
 // reach the IsSleepingOrResting() member.
-struct PlayerPC
-{
-    bool IsSleepingOrResting();
-};
 
-// Stand-in for the game's HighProcess.  What matters here is the
-// virtual layout (the four slots the original calls sit at vtable
-// offsets 0x100 / 0x220 / 0x224 / 0x348) and the byte at +0xBC.
-struct HighProcess
-{
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    unsigned char unkBC;
-    virtual void Unk_00(void);
-    virtual void Unk_01(void);
-    virtual void Unk_02(void);
-    virtual void Unk_03(void);
-    virtual void Unk_04(void);
-    virtual void Unk_05(void);
-    virtual void Unk_06(void);
-    virtual void Unk_07(void);
-    virtual void Unk_08(void);
-    virtual void Unk_09(void);
-    virtual void Unk_0A(void);
-    virtual void Unk_0B(void);
-    virtual void Unk_0C(void);
-    virtual void Unk_0D(void);
-    virtual void Unk_0E(void);
-    virtual void Unk_0F(void);
-    virtual void Unk_10(void);
-    virtual void Unk_11(void);
-    virtual void Unk_12(void);
-    virtual void Unk_13(void);
-    virtual void Unk_14(void);
-    virtual void Unk_15(void);
-    virtual void Unk_16(void);
-    virtual void Unk_17(void);
-    virtual void Unk_18(void);
-    virtual void Unk_19(void);
-    virtual void Unk_1A(void);
-    virtual void Unk_1B(void);
-    virtual void Unk_1C(void);
-    virtual void Unk_1D(void);
-    virtual void Unk_1E(void);
-    virtual void Unk_1F(void);
-    virtual void Unk_20(void);
-    virtual void Unk_21(void);
-    virtual void Unk_22(void);
-    virtual void Unk_23(void);
-    virtual void Unk_24(void);
-    virtual void Unk_25(void);
-    virtual void Unk_26(void);
-    virtual void Unk_27(void);
-    virtual void Unk_28(void);
-    virtual void Unk_29(void);
-    virtual void Unk_2A(void);
-    virtual void Unk_2B(void);
-    virtual void Unk_2C(void);
-    virtual void Unk_2D(void);
-    virtual void Unk_2E(void);
-    virtual void Unk_2F(void);
-    virtual void Unk_30(void);
-    virtual void Unk_31(void);
-    virtual void Unk_32(void);
-    virtual void Unk_33(void);
-    virtual void Unk_34(void);
-    virtual void Unk_35(void);
-    virtual void Unk_36(void);
-    virtual void Unk_37(void);
-    virtual void Unk_38(void);
-    virtual void Unk_39(void);
-    virtual void Unk_3A(void);
-    virtual void Unk_3B(void);
-    virtual void Unk_3C(void);
-    virtual void Unk_3D(void);
-    virtual void Unk_3E(void);
-    virtual void Unk_3F(void);
-    virtual bool Unk_40(void);
-    virtual void Unk_41(void);
-    virtual void Unk_42(void);
-    virtual void Unk_43(void);
-    virtual void Unk_44(void);
-    virtual void Unk_45(void);
-    virtual void Unk_46(void);
-    virtual void Unk_47(void);
-    virtual void Unk_48(void);
-    virtual void Unk_49(void);
-    virtual void Unk_4A(void);
-    virtual void Unk_4B(void);
-    virtual void Unk_4C(void);
-    virtual void Unk_4D(void);
-    virtual void Unk_4E(void);
-    virtual void Unk_4F(void);
-    virtual void Unk_50(void);
-    virtual void Unk_51(void);
-    virtual void Unk_52(void);
-    virtual void Unk_53(void);
-    virtual void Unk_54(void);
-    virtual void Unk_55(void);
-    virtual void Unk_56(void);
-    virtual void Unk_57(void);
-    virtual void Unk_58(void);
-    virtual void Unk_59(void);
-    virtual void Unk_5A(void);
-    virtual void Unk_5B(void);
-    virtual void Unk_5C(void);
-    virtual void Unk_5D(void);
-    virtual void Unk_5E(void);
-    virtual void Unk_5F(void);
-    virtual void Unk_60(void);
-    virtual void Unk_61(void);
-    virtual void Unk_62(void);
-    virtual void Unk_63(void);
-    virtual void Unk_64(void);
-    virtual void Unk_65(void);
-    virtual void Unk_66(void);
-    virtual void Unk_67(void);
-    virtual void Unk_68(void);
-    virtual void Unk_69(void);
-    virtual void Unk_6A(void);
-    virtual void Unk_6B(void);
-    virtual void Unk_6C(void);
-    virtual void Unk_6D(void);
-    virtual void Unk_6E(void);
-    virtual void Unk_6F(void);
-    virtual void Unk_70(void);
-    virtual void Unk_71(void);
-    virtual void Unk_72(void);
-    virtual void Unk_73(void);
-    virtual void Unk_74(void);
-    virtual void Unk_75(void);
-    virtual void Unk_76(void);
-    virtual void Unk_77(void);
-    virtual void Unk_78(void);
-    virtual void Unk_79(void);
-    virtual void Unk_7A(void);
-    virtual void Unk_7B(void);
-    virtual void Unk_7C(void);
-    virtual void Unk_7D(void);
-    virtual void Unk_7E(void);
-    virtual void Unk_7F(void);
-    virtual void Unk_80(void);
-    virtual void Unk_81(void);
-    virtual void Unk_82(void);
-    virtual void Unk_83(void);
-    virtual void Unk_84(void);
-    virtual void Unk_85(void);
-    virtual void Unk_86(void);
-    virtual void Unk_87(void);
-    virtual bool Unk_88(void);
-    virtual bool Unk_89(void);
-    virtual void Unk_8A(void);
-    virtual void Unk_8B(void);
-    virtual void Unk_8C(void);
-    virtual void Unk_8D(void);
-    virtual void Unk_8E(void);
-    virtual void Unk_8F(void);
-    virtual void Unk_90(void);
-    virtual void Unk_91(void);
-    virtual void Unk_92(void);
-    virtual void Unk_93(void);
-    virtual void Unk_94(void);
-    virtual void Unk_95(void);
-    virtual void Unk_96(void);
-    virtual void Unk_97(void);
-    virtual void Unk_98(void);
-    virtual void Unk_99(void);
-    virtual void Unk_9A(void);
-    virtual void Unk_9B(void);
-    virtual void Unk_9C(void);
-    virtual void Unk_9D(void);
-    virtual void Unk_9E(void);
-    virtual void Unk_9F(void);
-    virtual void Unk_A0(void);
-    virtual void Unk_A1(void);
-    virtual void Unk_A2(void);
-    virtual void Unk_A3(void);
-    virtual void Unk_A4(void);
-    virtual void Unk_A5(void);
-    virtual void Unk_A6(void);
-    virtual void Unk_A7(void);
-    virtual void Unk_A8(void);
-    virtual void Unk_A9(void);
-    virtual void Unk_AA(void);
-    virtual void Unk_AB(void);
-    virtual void Unk_AC(void);
-    virtual void Unk_AD(void);
-    virtual void Unk_AE(void);
-    virtual void Unk_AF(void);
-    virtual void Unk_B0(void);
-    virtual void Unk_B1(void);
-    virtual void Unk_B2(void);
-    virtual void Unk_B3(void);
-    virtual void Unk_B4(void);
-    virtual void Unk_B5(void);
-    virtual void Unk_B6(void);
-    virtual void Unk_B7(void);
-    virtual void Unk_B8(void);
-    virtual void Unk_B9(void);
-    virtual void Unk_BA(void);
-    virtual void Unk_BB(void);
-    virtual void Unk_BC(void);
-    virtual void Unk_BD(void);
-    virtual void Unk_BE(void);
-    virtual void Unk_BF(void);
-    virtual void Unk_C0(void);
-    virtual void Unk_C1(void);
-    virtual void Unk_C2(void);
-    virtual void Unk_C3(void);
-    virtual void Unk_C4(void);
-    virtual void Unk_C5(void);
-    virtual void Unk_C6(void);
-    virtual void Unk_C7(void);
-    virtual void Unk_C8(void);
-    virtual void Unk_C9(void);
-    virtual void Unk_CA(void);
-    virtual void Unk_CB(void);
-    virtual void Unk_CC(void);
-    virtual void Unk_CD(void);
-    virtual void Unk_CE(void);
-    virtual void Unk_CF(void);
-    virtual void Unk_D0(void);
-    virtual void Unk_D1(void);
-    virtual void Unk_D2(float arg0, bool arg1);
-    void FUN_009bec10(float arg0);
-    void FUN_009ae580(float arg0);
-};
-
-// Stand-in for the game's MovementTaskData (the vtable slot that
-// holds UpdateMovementTask).  The int at +0x38 is the task counter.
-struct MovementTaskData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    void UpdateMovementTask(HighProcess* apMob);
-};
 
 // Advances the task counter and, depending on the mob's state, calls Unk_D2, FUN_009bec10 or FUN_009ae580 with 0.0f.
 // @fnv 0x008c9220
+void __fastcall UpdateProjectileMovement(MobileObject*, float);
+void __fastcall UpdateExplosionMovement(MobileObject*, float);
 void MovementTaskData::UpdateMovementTask(HighProcess* apMob)
 {
-    HighProcess* pCurrentObject = apMob;
-    if (pCurrentObject && pCurrentObject->Unk_40())
+    MobileObject* pCurrentObject = reinterpret_cast<MobileObject*>(apMob);
+    if (pCurrentObject && pCurrentObject->IsActor())
     {
-        HighProcess* pActor = pCurrentObject;
-        if (pActor->unkBC)
+        Actor* pActor = static_cast<Actor*>(pCurrentObject);
+        if (pActor->m_bFirstActorFlag)
         {
-            pActor->Unk_D2(0.0f, ((PlayerPC*)g_thePlayer)->IsSleepingOrResting());
+            pActor->Virtual_348(0.0f, g_thePlayer->IsSleepingOrResting());
         }
     }
     else
     {
-        if (pCurrentObject->Unk_89())
+        if (pCurrentObject->IsProjectile())
         {
-            HighProcess* pObj = pCurrentObject;
-            pObj->FUN_009bec10(0.0f);
+            MobileObject* pObj = pCurrentObject;
+            UpdateProjectileMovement(pObj, 0.0f);
         }
-        else if (pCurrentObject->Unk_88())
+        else if (pCurrentObject->IsExplosion())
         {
-            HighProcess* pTarget = pCurrentObject;
-            pTarget->FUN_009ae580(0.0f);
+            MobileObject* pTarget = pCurrentObject;
+            UpdateExplosionMovement(pTarget, 0.0f);
         }
     }
-    unk38++;
+    uiRunCount++;
 }
 
 struct CountTask
@@ -2740,7 +1943,7 @@ void TaskOwnerTarget::FUN_008c94e0()
 
 namespace fnv_008c84c0 {
 // ---- shell declarations ----
-class R;
+class ActorProjectileMethods;
 
 class V20SP
 {
@@ -2772,230 +1975,16 @@ class PROJ
     ABSP m90;
 };
 
-class BP
-{
-  public:
-    virtual void b00();
-    virtual void b04();
-    virtual void b08();
-    virtual void b0c();
-    virtual void b10();
-    virtual void b14();
-    virtual void b18();
-    virtual void b1c();
-    virtual void b20();
-    virtual void b24();
-    virtual void b28();
-    virtual void b2c();
-    virtual void b30();
-    virtual void b34();
-    virtual void b38();
-    virtual void b3c();
-    virtual void b40();
-    virtual void b44();
-    virtual void b48();
-    virtual void b4c();
-    virtual void b50();
-    virtual void b54();
-    virtual void b58();
-    virtual void b5c();
-    virtual void b60();
-    virtual void b64();
-    virtual void b68();
-    virtual void b6c();
-    virtual unsigned char b70(R* who);
-};
 
-class R
+// Additional operations absent from Actor.h; the layout is inherited.
+class ActorProjectileMethods : public Actor
 {
-  public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual unsigned char s100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual void v214();
-    virtual void v218();
-    virtual void v21c();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual unsigned char s22c(int);
-    virtual void v230();
-    virtual void v234();
-    virtual void v238();
-    virtual void v23c();
-    virtual void v240();
-    virtual void v244();
-    virtual void v248();
-    virtual void v24c();
-    virtual void v250();
-    virtual void v254();
-    virtual void v258();
-    virtual void v25c();
-    virtual void v260();
-    virtual void v264();
-    virtual void v268();
-    virtual void v26c();
-    virtual void v270();
-    virtual void v274();
-    virtual void v278();
-    virtual void v27c();
-    virtual void v280();
-    virtual void v284();
-    virtual void v288();
-    virtual void v28c();
-    virtual void v290();
-    virtual void v294();
-    virtual void v298();
-    virtual void v29c();
-    virtual void v2a0();
-    virtual void v2a4();
-    virtual void v2a8();
-    virtual void v2ac();
-    virtual void s2b0(float);
-    virtual float s2b4();
-    virtual void s2b8();
-    char padBC[0xb8];
-    unsigned char mBC;
+public:
     PROJ* GetProjectileBase();
-    unsigned char FUN_00437bd0();
-    BP* GetProcess();
-    float FUN_005723b0(R* a, int b, int c);
-    char FUN_00493bb0();
-    unsigned char IsHostileTo(R* a, int b, int* c, int d);
-    unsigned char FUN_008bc700(R* a);
-    int FUN_008a0d10(int a, R* b, unsigned char* c, unsigned char d, int e, int f, unsigned char* g);
-    void FUN_00966f20(R* a, unsigned char b, int c);
-    void FUN_00967350(R* a);
+    unsigned char FUN_008bc700(ActorProjectileMethods* a);
+    int FUN_008a0d10(int a, ActorProjectileMethods* b, unsigned char* c, unsigned char d, int e, int f, unsigned char* g);
+    void FUN_00966f20(ActorProjectileMethods* a, unsigned char b, int c);
+    void FUN_00967350(ActorProjectileMethods* a);
 };
 
 class TG
@@ -3019,22 +2008,18 @@ class S3
 class S4
 {
   public:
-    void FUN_0096e3c0(R* a);
+    void FUN_0096e3c0(ActorProjectileMethods* a);
 };
 
-extern R* DAT_011dea3c;
+extern ActorProjectileMethods* DAT_011dea3c;
 extern S3* DAT_011d8804;
-extern class SL* DAT_011de45c;
+// 0x011de45c holds the TESSaveLoadGame singleton; its GetLoading() is 0x0047c850 (xor al, al; ret: folded return false).
+extern TESSaveLoadGame* DAT_011de45c;
 extern TG DAT_011f6394;
 extern FS DAT_011ccf94;
 extern FS DAT_011d13c8;
 extern S4 DAT_011e0e80;
 
-class SL
-{
-  public:
-    unsigned char GetLoading();
-};
 
 float FUN_0040ebd0(float a, float b);
 float _RandomFloat(float a, float b);
@@ -3047,31 +2032,31 @@ class Owner
     char pad34[8];
     int m3c;
 
-    void UpdateProjectile(R* arg);
+    void UpdateProjectile(ActorProjectileMethods* arg);
 };
 
 // @fnv 0x008c84c0
-void Owner::UpdateProjectile(R* arg)
+void Owner::UpdateProjectile(ActorProjectileMethods* arg)
 {
     float v6 = (double)m30 * DAT_011f6394.GetTime();
     v6 = FUN_0040ebd0(v6, 5.0f);
     v6 = _RandomFloat(0.0f, v6);
-    R* p = NULL;
-    if (arg && arg->s100())
+    ActorProjectileMethods* p = NULL;
+    if (arg && static_cast<MobileObject*>(arg)->IsActor())
     {
         p = arg;
-        R* aQ = p;
-        if (aQ->mBC && !aQ->GetProjectileBase()->m30.a20())
+        ActorProjectileMethods* aQ = p;
+        if (aQ->m_bFirstActorFlag && !aQ->GetProjectileBase()->m30.a20())
         {
             float v3 = aQ->FUN_005723b0(DAT_011dea3c, 0, 0);
             if (aQ != DAT_011dea3c && !DAT_011de45c->GetLoading())
             {
-                if (p->s2b4() < 0.0 && !aQ->FUN_00437bd0() && !p->s22c(0))
+                if (reinterpret_cast<float (__thiscall*)(ActorProjectileMethods*)>((*reinterpret_cast<void***>(p))[0xad])(p) < 0.0 && !aQ->FUN_00437bd0() && !reinterpret_cast<unsigned char (__thiscall*)(ActorProjectileMethods*, int)>((*reinterpret_cast<void***>(p))[0x8b])(p, 0))
                 {
                     if (DAT_011d8804->FUN_007014e0(1) <= 0.0)
                     {
-                        p->s2b0(v6);
-                        if (aQ->GetProcess()->b70(aQ))
+                        reinterpret_cast<void (__thiscall*)(ActorProjectileMethods*, float)>((*reinterpret_cast<void***>(p))[0xac])(p, v6);
+                        if (static_cast<const MobileObject*>(aQ)->FUN_008d8520()->CanUsePlayerAction(aQ))
                         {
                             unsigned char v16 = 0;
                             unsigned char v1e2 = p->FUN_00493bb0();
@@ -3079,7 +2064,7 @@ void Owner::UpdateProjectile(R* arg)
                             int aV14 = DAT_011dea3c->FUN_008a0d10(1, p, &v16, v1e2, 0, 0, &v1d);
                             unsigned char v15 = 0;
                             int v1c2 = 0;
-                            if (p->IsHostileTo(DAT_011dea3c, 0, &v1c2, 0) || p->FUN_008bc700(DAT_011dea3c))
+                            if (p->IsHostileToActor(DAT_011dea3c, 0, &v1c2, false) || p->FUN_008bc700(DAT_011dea3c))
                             {
                                 v15 = 1;
                             }
@@ -3111,9 +2096,9 @@ void Owner::UpdateProjectile(R* arg)
                 }
                 else
                 {
-                    if (p->s2b4() < 0.0)
+                    if (reinterpret_cast<float (__thiscall*)(ActorProjectileMethods*)>((*reinterpret_cast<void***>(p))[0xad])(p) < 0.0)
                         DAT_011dea3c->FUN_00967350(p);
-                    p->s2b8();
+                    p->Unk_AE();
                 }
             }
         }
@@ -3123,28 +2108,15 @@ void Owner::UpdateProjectile(R* arg)
 }  // namespace fnv_008c84c0
 
 namespace fnv_008c8be0 {
-class BaseProcess
+bool __fastcall ShouldUpdateActor(Actor*);
+void __fastcall ApplyFatigueDamage(Actor*, float);
+// Additional Actor operation absent from Actor.h; no layout is duplicated.
+struct FollowerActorMethods : Actor
 {
-  public:
-    virtual void Unk00();
-    virtual void Unk01();
-    virtual void Unk02();
-    virtual void Unk03();
-    virtual void Unk04();
-    virtual void Unk05();
-    virtual void Unk06();
-    virtual void Unk07();
-    virtual void Unk08();
-    virtual void UpdateActor(Actor* actor, int mode);
-    void FUN_008c8fd0(bool active);
+    bool IsFollowerOf(Actor*);
 };
-struct ExtraFollower
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    BSSimpleList<Actor*>* followers;
-};
+
+
 struct FollowerExtra : ExtraDataList
 {
     ExtraFollower* FUN_00422700();
@@ -3152,34 +2124,8 @@ struct FollowerExtra : ExtraDataList
     void FUN_00422720();
 };
 // This view supplies the float-taking update slot at vtable index 0x97.
-class UpdateObject : public TESObjectREFR
-{
-  public:
-    virtual void Unk90();
-    virtual void Unk91();
-    virtual void Unk92();
-    virtual void Unk93();
-    virtual void Unk94();
-    virtual void Unk95();
-    virtual void Unk96();
-    virtual void Update(float elapsed);
-    BaseProcess* FUN_008d8520();
-    void* FUN_00931850();
-};
-class UpdateActor : public Actor
-{
-  public:
-    bool FUN_008b0520();
-    BaseProcess* FUN_008d8520();
-    void RestoreHealth(float amount);
-    void ApplyFatigueDamage(float amount);
-    bool FUN_008bc860(Actor* actor);
-};
-class PlayerCharacter : public UpdateActor
-{
-  public:
-    bool IsSleepingOrResting();
-};
+
+
 extern PlayerCharacter* g_thePlayer;
 class UpdateManager
 {
@@ -3206,39 +2152,40 @@ class UpdateManager
 // @fnv 0x008c8be0
 void UpdateManager::UpdateMobileObject(MobileObject* object)
 {
-    UpdateObject* current = reinterpret_cast<UpdateObject*>(object);
-    UpdateActor* actorTmp;
+    MobileObject* current = object;
+    Actor* actorTmp;
     bool allowedTmp;
     ExtraFollower* otherList3;
     BSSimpleList<Actor*>* list_;
     BSSimpleList<Actor*>* listVal;
     BSSimpleList<Actor*>* otherListA;
     BSSimpleList<Actor*>* nodeVal;
-    if (current && !current->IsStillLoading() && !current->GetDeleted() && !current->GetDisabled() &&
-        current->FUN_008d8520() && !current->FUN_00931850())
+    if (current && !current->IsStillLoading() && !current->GetDeleted() && !static_cast<const TESForm*>(current)->GetDisabled() &&
+        static_cast<const MobileObject*>(current)->FUN_008d8520() && !current->FUN_00931850())
     {
         actorTmp = 0;
         allowedTmp = true;
         if (current && current->IsActor())
-            actorTmp = reinterpret_cast<UpdateActor*>(current);
+            actorTmp = reinterpret_cast<Actor*>(current);
         if (actorTmp && !actorTmp->m_bFirstActorFlag)
             return;
-        if (actorTmp && actorTmp->FUN_008b0520())
+        if (actorTmp && ShouldUpdateActor(actorTmp))
         {
-            actorTmp->FUN_008d8520()->UpdateActor(actorTmp, 0);
+            static_cast<const MobileObject*>(actorTmp)->FUN_008d8520()->CheckForNewPackage(actorTmp, false);
             allowedTmp = false;
             ++updatedActors;
-            actorTmp->FUN_008d8520()->FUN_008c8fd0(true);
+            static_cast<const MobileObject*>(actorTmp)->FUN_008d8520()->FUN_008c8fd0(true);
         }
         else
         {
-            current->Update(0.0f);
+            // The shared declaration of slot 0x97 lacks its float argument.
+            reinterpret_cast<void (__thiscall*)(MobileObject*, float)>((*reinterpret_cast<void***>(current))[0x97])(current, 0.0f);
             ++updatedObjects;
         }
         if (actorTmp && g_thePlayer->IsSleepingOrResting())
         {
             actorTmp->RestoreHealth(2.0f);
-            actorTmp->ApplyFatigueDamage(2.0f);
+            ApplyFatigueDamage(actorTmp, 2.0f);
         }
         if (current->FUN_00931850())
             pending = 0;
@@ -3251,7 +2198,7 @@ void UpdateManager::UpdateMobileObject(MobileObject* object)
                 listVal = new BSSimpleList<Actor*>;
                 otherListA = new BSSimpleList<Actor*>;
                 nodeVal = otherListA;
-                list_ = otherList3->followers;
+                list_ = otherList3->list;
                 while (list_ && list_->GetItem())
                 {
                     otherListA->AddTail(list_->GetItem());
@@ -3260,7 +2207,7 @@ void UpdateManager::UpdateMobileObject(MobileObject* object)
                 while (nodeVal && nodeVal->GetItem())
                 {
                     Actor* actorA = nodeVal->GetItem();
-                    if (actorA && actorA != g_thePlayer && !static_cast<UpdateActor*>(actorA)->FUN_008bc860(actorTmp))
+                    if (actorA && actorA != g_thePlayer && !static_cast<FollowerActorMethods*>(actorA)->IsFollowerOf(actorTmp))
                         listVal->AddHead(actorA);
                     nodeVal = nodeVal->GetNext();
                 }
@@ -3275,7 +2222,7 @@ void UpdateManager::UpdateMobileObject(MobileObject* object)
                 delete listVal;
                 otherListA->RemoveAll();
                 delete otherListA;
-                if (otherList3->followers->IsEmpty())
+                if (otherList3->list->IsEmpty())
                     static_cast<FollowerExtra*>(current->GetExtraData())->FUN_00422720();
             }
         }
@@ -3486,3 +2433,5 @@ int Obj_008c9cf0::FUN_008c9cf0()
     reinterpret_cast<ActorTaskManager*>(this)->WaitForTasksDuringRendering();
     return result;
 }
+
+

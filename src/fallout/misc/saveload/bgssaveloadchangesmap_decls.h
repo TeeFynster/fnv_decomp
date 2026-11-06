@@ -5,7 +5,6 @@
 
 #include "bgssaveloadchangesmap_types_BGSSaveLoadChangesMap.h"
 #include "bgssaveloadchangesmap_types_BGSChangeFlags.h"
-#include "bgssaveloadchangesmap_types_CombatTargetMap.h"
 #include "bgssaveloadchangesmap_types_BGSUnloadedFormBuffer.h"
 
 class FormChangeRecord : public FormChangeMask

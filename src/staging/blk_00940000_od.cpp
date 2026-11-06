@@ -2,7 +2,36 @@
 // src/staging/blk_00940000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+// BaseA_blk_00940000_od: local type (was include/BaseA.h, which had no evidence of one real class); its methods are 0x004f15a0 TESRegionData::SetOverride, 0x00a57780 NiBoolInterpController::RegisterStreamables, 0x00a897c0 NiTriBasedGeom::GetViewerStrings
+#include "../../include/StrArr.h"
+
+class BaseA_blk_00940000_od
+{
+public:
+    int a0;
+    int a1;
+    int a2;
+    int a3;
+    int a4;
+    int a5;
+
+    void FUN_00a897c0(StrArr*);
+};
+#include "../../include/BSAudio.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESObjectWEAP.h"
+#include "../../include/Data.h"
+#include "../../include/TESEnchantableForm.h"
+#include "../../include/TESForm.h"
+#include "../../include/BGSQuestObjective.h"
+#include "../../include/EnchantmentItem.h"
+#include "../../include/MagicItem.h"
+#include "../../include/MagicTarget.h"
+#include "../../include/Setting.h"
+#include "../../include/TESObject.h"
+#include "../../include/TESQuest.h"
+#include "../../include/PlayerCharacter.h"
+
 
 extern "C" void* DAT_011d8a80;
 
@@ -30,6 +59,8 @@ float Animation::FUN_009442a0() const
     return *(const float*)((const char*)this + 0x10c);
 }
 
+// The shared PlayerCharacter lacks the staging methods used by the player
+// stand-ins below, including FUN_00952a20 and RestorePlayerLocation.
 struct FUN_009442c0_Class
 {
     bool IsFlagSet() const;
@@ -197,13 +228,8 @@ void __thiscall FUN_0094c380_Class::FUN_0094c380()
 }
 
 namespace fnv_0094c3a0 {
-struct Setting_S
-{
-    float* Float();
-};
 extern "C" void* _pme;
-struct GlobalObject_0044f440;
-extern GlobalObject_0044f440 g_011d9748;
+extern Setting g_011d9748;
 
 // If _pme is set, stores value multiplied by the float from g_011d9748 into the field at offset 0x274 of _pme.
 // @fnv 0x0094c3a0
@@ -211,7 +237,7 @@ void SetScaledValue(float value)
 {
     if (_pme)
     {
-        *(float*)((char*)_pme + 0x274) = value * *(float*)((Setting_S*)&g_011d9748)->Float();
+        *(float*)((char*)_pme + 0x274) = value * *(float*)g_011d9748.Float();
     }
 }
 }  // namespace fnv_0094c3a0
@@ -227,22 +253,12 @@ unsigned int __thiscall FUN_0094c8c0_class::GetField6EC()
     return *(unsigned int*)((char*)this + 0x6ec);
 }
 
-struct Biped;
-struct TESObjectREFR
-{
-    Biped* GetBipedComponent();
-    Biped* pBiped;
-};
-struct PlayerCharacter : TESObjectREFR
-{
-    Biped* FUN_00950b00(bool firstPerson);
-};
 // @fnv 0x00950b00
-Biped* PlayerCharacter::FUN_00950b00(bool firstPerson)
+int PlayerCharacter::FUN_00950b00(bool firstPerson)
 {
     if (firstPerson)
-        return *(Biped**)((char*)this + 0x68c);
-    return GetBipedComponent();
+        return *(int*)((char*)this + 0x68c);
+    return (int)GetBipedComponent();
 }
 
 struct FUN_0095f6a0_Class
@@ -257,12 +273,6 @@ void FUN_0095f6a0_Class::FUN_0095f6a0()
     FUN_00961280();
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
 
 struct FUN_0094df30_Class
 {
@@ -277,22 +287,10 @@ NiPoint3& FUN_0094df30_Class::FUN_0094df30(NiPoint3& akDest)
     return akDest;
 }
 
-class TESQuest;
-class BGSQuestObjective
-{
-  public:
-    TESQuest* FUN_0044edb0();
-    void AddMatchingTargetsToList(void*);
-};
 class QuestObjectiveList
 {
   public:
     bool FUN_008256d0();
-};
-class TESQuest
-{
-  public:
-    QuestObjectiveList* FUN_005d43e0();
 };
 class QuestObjectiveNode
 {
@@ -349,28 +347,16 @@ struct FUN_00952b30_BSSimpleList
     FUN_00952b30_BSSimpleList* GetNext();
     FUN_00952b30_BSSimpleList* _ref_006815c0();
 };
-struct BSAudio
-{
-    void* GetAudioBackendData();
-};
-struct TESObject
-{
-    unsigned int GetNext();
-};
-struct FUN_00952b30_Class
-{
-    BSAudio* FindAudioEntry();
-};
 
 // @fnv 0x00952b30
-BSAudio* FUN_00952b30_Class::FindAudioEntry()
+int PlayerCharacter::FindAudioEntry()
 {
     FUN_00952b30_BSSimpleList* node = (FUN_00952b30_BSSimpleList*)((char*)this + 0x6bc);
     while (node && node->_ref_006815c0()->m_pInventoryEntryData)
     {
         BSAudio* entry = (BSAudio*)node->_ref_006815c0()->m_pInventoryEntryData;
-        if (entry->GetAudioBackendData() == *(void**)((char*)this + 0x6b8) && ((TESObject*)entry)->GetNext() == 1)
-            return entry;
+        if (entry->GetAudioBackendData() == *(void**)((char*)this + 0x6b8) && ((TESObject*)entry)->GetNext() == (TESObject*)1)
+            return (int)entry;
         node = node->GetNext();
     }
     return 0;
@@ -380,33 +366,24 @@ struct FUN_00952830_Class
 {
     bool FUN_00952830(BSAudio*, unsigned int, unsigned int);
 };
-struct FUN_00464e30_shell
-{
-    FUN_00952b30_Class* GetSelfOffset6A8();
-};
-struct FUN_009527b0_Class
-{
-    void FUN_00952830(BSAudio*, unsigned int, unsigned int);
-    void __thiscall AddTopics(FUN_00952b30_BSSimpleList*);
-};
-void __cdecl SortTopicList(unsigned int, FUN_00952b30_Class*);
+void __cdecl SortTopicList(unsigned int, BSSimpleList<TESTopic*>*);
 // Iterates the given topic list, calls FUN_00952830 on each entry, and if any returns true calls SortTopicList with 1 and the result of GetSelfOffset6A8.
 // @fnv 0x009527b0
-void __thiscall FUN_009527b0_Class::AddTopics(FUN_00952b30_BSSimpleList* apAddTopicList)
+void __thiscall PlayerCharacter::AddTopics(BSSimpleList<TESTopic*>* apAddTopicList)
 {
     if (apAddTopicList)
     {
         bool bNeedsResort = false;
-        FUN_00952b30_BSSimpleList* pNode = apAddTopicList;
-        while (pNode && ((FUN_00952b30_Class**)pNode->_ref_006815c0())[0])
+        FUN_00952b30_BSSimpleList* pNode = (FUN_00952b30_BSSimpleList*)apAddTopicList;
+        while (pNode && ((BSAudio**)pNode->_ref_006815c0())[0])
         {
             if (((FUN_00952830_Class*)this)
-                    ->FUN_00952830((BSAudio*)(((FUN_00952b30_Class**)pNode->_ref_006815c0())[0]), 0, 1))
+                    ->FUN_00952830((BSAudio*)(((BSAudio**)pNode->_ref_006815c0())[0]), 0, 1))
                 bNeedsResort = true;
             pNode = pNode->GetNext();
         }
         if (bNeedsResort)
-            SortTopicList(1, ((FUN_00464e30_shell*)this)->GetSelfOffset6A8());
+            SortTopicList(1, ((PlayerCharacter*)this)->GetSelfOffset6A8());
     }
 }
 
@@ -416,11 +393,7 @@ struct FUN_00952830_BSSimpleList
     FUN_00952830_BSSimpleList* GetNext();
     int* _ref_006815c0();
 };
-struct FUN_00464e30_shell
-{
-    FUN_00952830_BSSimpleList* GetSelfOffset6A8();
-};
-void SortTopicList(int, FUN_00952830_BSSimpleList*);
+void SortTopicList(int, BSSimpleList<TESTopic*>*);
 struct FUN_00952830_Class
 {
     bool FUN_00952830(int param_2, unsigned char param_3, int pad);
@@ -432,7 +405,7 @@ bool FUN_00952830_Class::FUN_00952830(int aiValue, unsigned char param_3, int pa
     FUN_00952830_BSSimpleList* pEntry;
     if (aiValue == 0)
         return false;
-    pEntry = ((FUN_00464e30_shell*)this)->GetSelfOffset6A8();
+    pEntry = (FUN_00952830_BSSimpleList*)((PlayerCharacter*)this)->GetSelfOffset6A8();
     while (pEntry && *pEntry->_ref_006815c0())
     {
         if (*pEntry->_ref_006815c0() == aiValue)
@@ -441,7 +414,7 @@ bool FUN_00952830_Class::FUN_00952830(int aiValue, unsigned char param_3, int pa
     }
     ((G2*)((char*)this + 0x6a8))->AddHead(&aiValue);
     if (param_3)
-        SortTopicList(1, ((FUN_00464e30_shell*)this)->GetSelfOffset6A8());
+        SortTopicList(1, ((PlayerCharacter*)this)->GetSelfOffset6A8());
     return true;
 }
 }  // namespace fnv_00952830
@@ -454,21 +427,16 @@ float __cdecl FUN_009443f0()
     return DAT_011ac3a4;
 }
 
-struct BaseA
-{
-    char pad[0x18];
-};
-
 struct BaseB
 {
     int dummy;
 };
 
-struct DerivedNode : public BaseA, public BaseB
+struct DerivedNode : public BaseA_blk_00940000_od, public BaseB
 {
 };
 
-struct ListNode
+struct ArgumentListNode
 {
     DerivedNode* FUN_00726070();
 };
@@ -476,7 +444,7 @@ struct ListNode
 struct ArgObj
 {
     char pad[0x74];
-    ListNode list;
+    ArgumentListNode list;
 };
 
 struct FUN_0094c950_shell
@@ -557,47 +525,6 @@ void FUN_00952f90_cls::ClearHelper()
     m_6f8.ClearTeleportPath();
 }
 
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-    int FNV_GetFormType();
-};
-class TESBoundObject : public TESForm
-{
-};
-class MagicItem
-{
-  public:
-    virtual ~MagicItem();
-};
-struct EnchantmentItemBase
-{
-    virtual ~EnchantmentItemBase();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-class EnchantmentItem : public EnchantmentItemBase, public MagicItem
-{
-};
-class TESEnchantableForm
-{
-  public:
-    virtual ~TESEnchantableForm();
-    EnchantmentItem* GetEnchantment();
-};
-class MagicTarget
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    bool HasSpell(MagicItem* apSpell, bool abFlag);
-    void RemoveSpellStub(TESBoundObject* apForm, bool abFlag);
-};
 class EnchantedFormList
 {
   public:
@@ -647,7 +574,6 @@ struct PlayerEnchantStub
     int unk8C;
     int unk90;
     MagicTarget kMagicTarget;
-    int unk0A0;
     int unk0A4;
     int unk0A8;
     int unk0AC;
@@ -754,11 +680,6 @@ struct PlayerEnchantStub
     void RemoveEnchantment(TESBoundObject* apForm, int aiUnused);
 };
 
-class TESObjectWEAP : public TESBoundObject
-{
-  public:
-    virtual ~TESObjectWEAP();
-};
 
 struct InvEntry
 {
@@ -1457,6 +1378,12 @@ struct SavedForm
 {
     int FNV_GetFormType();
 };
+// These staging calls pass a trivial three-float value; NiPoint3's shared
+// copy constructor changes the by-value call sequence.
+struct RestorePosition
+{
+    float x, y, z;
+};
 struct RestoreUpdate
 {
     float time;
@@ -1466,20 +1393,16 @@ struct RestoreUpdate
 };
 struct RestoreNode
 {
-    void SetPosition(const NiPoint3&);
+    void SetPosition(const RestorePosition&);
     void Update(RestoreUpdate&);
 };
 void RefreshNode(RestoreNode*, bool);
 struct RestoreController
 {
     bool IsFlying();
-    void SetPosition(const NiPoint3&);
+    void SetPosition(const RestorePosition&);
 };
-struct RestoreSetting
-{
-    const char* String();
-};
-extern RestoreSetting g_011d50bc;
+extern Setting g_011d50bc;
 bool QueueUIMessage(const char*, int, const char*, const char*, float, bool);
 struct RestoreData
 {
@@ -2115,15 +2038,15 @@ struct RestorePlayer
     int unk794;
     int unk798;
     int unk79c;
-    NiPoint3 savedPosition;
+    RestorePosition savedPosition;
     SavedForm* savedDestination;
-    const NiPoint3& GetAngle();
-    NiPoint3 GetDestination();
-    void MoveWorld(NiPoint3, NiPoint3, SavedForm*, int);
-    void MoveCell(NiPoint3, NiPoint3, SavedForm*, int);
+    const RestorePosition& GetAngle();
+    RestorePosition GetDestination();
+    void MoveWorld(RestorePosition, RestorePosition, SavedForm*, int);
+    void MoveCell(RestorePosition, RestorePosition, SavedForm*, int);
     RestoreController* GetController();
-    NiPoint3* GetPosition();
-    void SetLocation(const NiPoint3&);
+    RestorePosition* GetPosition();
+    void SetLocation(const RestorePosition&);
     RestoreNode* GetNode(bool);
     void RestorePlayerLocation(bool);
 };
@@ -2209,10 +2132,6 @@ void RestorePlayer::RestorePlayerLocation(bool travel)
 }
 
 struct Ref;
-struct Data
-{
-    void* Resolve();
-};
 struct Package
 {
     Data* GetData();
@@ -2520,28 +2439,24 @@ bool Controller::IsPlayerTargeted(Ref* actor, bool mode)
     return false;
 }
 
-struct Setting97
-{
-    float& FUN_00403e20();
-    unsigned char& FUN_00408d60();
-    int FUN_0044ddc0();
-    double FUN_00450410();
-};
-extern Setting97 DAT_011e097c;
-extern Setting97 DAT_0120315c;
-extern Setting97 DAT_01203168;
-extern Setting97 DAT_01203174;
-extern Setting97 DAT_011e0970;
-extern Setting97 DAT_011ce870;
-extern Setting97 DAT_011f2250;
-extern Setting97 DAT_011e0b84;
-extern Setting97 DAT_011ce5a0;
-extern Setting97 DAT_011ce344;
-extern Setting97 DAT_011cfe2c;
-extern Setting97 DAT_011cea44;
-extern Setting97 DAT_01203150;
-extern Setting97 DAT_011d48dc;
-extern Setting97 DAT_011d4a2c;
+// Accessors absent from Setting.h; preserve their calling convention without a local class.
+int __fastcall GetSettingInteger(Setting* setting);
+double __fastcall GetSettingDouble(Setting* setting);
+extern Setting DAT_011e097c;
+extern Setting DAT_0120315c;
+extern Setting DAT_01203168;
+extern Setting DAT_01203174;
+extern Setting DAT_011e0970;
+extern Setting DAT_011ce870;
+extern Setting DAT_011f2250;
+extern Setting DAT_011e0b84;
+extern Setting DAT_011ce5a0;
+extern Setting DAT_011ce344;
+extern Setting DAT_011cfe2c;
+extern Setting DAT_011cea44;
+extern Setting DAT_01203150;
+extern Setting DAT_011d48dc;
+extern Setting DAT_011d4a2c;
 struct Data97
 {
     int FUN_0044ddc0();
@@ -3414,15 +3329,15 @@ struct Update97
 void Update97::UpdateScopeZoom(float elapsed)
 {
     static Actor97* previous = 0;
-    if (DAT_011e097c.FUN_00408d60())
+    if (*(unsigned char*)DAT_011e097c.FUN_00408d60())
     {
         float weapon;
         Data97* unusedScale = actor->getData() ? (Data97*)actor->getData()->FUN_0044ddc0() : 0;
-        float normalVertical = DAT_0120315c.FUN_00403e20();
-        float scope = DAT_01203168.FUN_00403e20();
-        float normalHorizontal = DAT_01203174.FUN_00403e20();
-        weapon = DAT_011e0970.FUN_00403e20();
-        float speed = DAT_011ce870.FUN_00403e20();
+        float normalVertical = *DAT_0120315c.FUN_00403e20();
+        float scope = *DAT_01203168.FUN_00403e20();
+        float normalHorizontal = *DAT_01203174.FUN_00403e20();
+        weapon = *DAT_011e0970.FUN_00403e20();
+        float speed = *DAT_011ce870.FUN_00403e20();
         float resetVertical = 1.0f;
         FUN_0045c670(&DAT_011ad840)->FUN_006629f0()->FUN_00712e60();
         if (unusedScale && actor->isScoped())
@@ -3452,12 +3367,12 @@ void Update97::UpdateScopeZoom(float elapsed)
             float step = scope;
             float horizontal = elapsed * 30.0 / speed;
             if (FUN_008bbc10() && weapon > 5.0 &&
-                ((FUN_008a7570() != 9 && FUN_008a7570() != 17) || DAT_011f2250.FUN_0044ddc0() == 4))
+                ((FUN_008a7570() != 9 && FUN_008a7570() != 17) || GetSettingInteger(&DAT_011f2250) == 4))
             {
                 vertical = weapon;
                 step = weapon / normalVertical * scope;
             }
-            if ((DAT_011f2250.FUN_0044ddc0() == 2 || DAT_011f2250.FUN_0044ddc0() == 3) && DAT_011f21cc &&
+            if ((GetSettingInteger(&DAT_011f2250) == 2 || GetSettingInteger(&DAT_011f2250) == 3) && DAT_011f21cc &&
                 state64c == state64a)
             {
                 Node97* a;
@@ -3479,27 +3394,27 @@ void Update97::UpdateScopeZoom(float elapsed)
                                             a = b->FUN_0043d450();
                                             DAT_011e07d0->FUN_0045bb80(&g, a->FUN_006815c0())->FUN_00439ef0();
                                             e = g.FUN_00457990();
-                                            d = a->FUN_0084d030() * DAT_011e0b84.FUN_00450410() / e;
-                                            c = DAT_011ce5a0.FUN_00403e20() - DAT_011ce344.FUN_00403e20();
-                                            f = e / DAT_011cfe2c.FUN_00403e20();
+                                            d = a->FUN_0084d030() * GetSettingDouble(&DAT_011e0b84) / e;
+                                            c = *DAT_011ce5a0.FUN_00403e20() - *DAT_011ce344.FUN_00403e20();
+                                            f = e / *DAT_011cfe2c.FUN_00403e20();
                                             if (f > 1.0)
                                                 f = 1.0f;
-                                            h = DAT_011ce344.FUN_00403e20() + c * f;
+                                            h = *DAT_011ce344.FUN_00403e20() + c * f;
                                             vertical = LogFloat(d) * h;
-                                            if (vertical < DAT_011cea44.FUN_00403e20())
-                                                vertical = DAT_011cea44.FUN_00403e20();
+                                            if (vertical < *DAT_011cea44.FUN_00403e20())
+                                                vertical = *DAT_011cea44.FUN_00403e20();
                                             step = vertical;
-                                            if (step >= DAT_01203150.FUN_00403e20())
-                                                step = DAT_01203150.FUN_00403e20();
+                                            if (step >= *DAT_01203150.FUN_00403e20())
+                                                step = *DAT_01203150.FUN_00403e20();
                                             static FUN_00939880* horizontalBlend = new FUN_00939880;
                                             static FUN_00939880* verticalBlend = new FUN_00939880;
                                             if (previous != DAT_011f21cc)
                                             {
                                                 float i = 0.75f;
-                                                if (DAT_011f2250.FUN_0044ddc0() == 1)
-                                                    i = DAT_011d48dc.FUN_00403e20();
-                                                else if (DAT_011f2250.FUN_0044ddc0() == 2)
-                                                    i = DAT_011d4a2c.FUN_00403e20();
+                                                if (GetSettingInteger(&DAT_011f2250) == 1)
+                                                    i = *DAT_011d48dc.FUN_00403e20();
+                                                else if (GetSettingInteger(&DAT_011f2250) == 2)
+                                                    i = *DAT_011d4a2c.FUN_00403e20();
                                                 horizontalBlend->FUN_00946020(currentHorizontal, vertical, i);
                                                 verticalBlend->FUN_00946020(currentVertical, step, i);
                                                 previous = DAT_011f21cc;
@@ -3526,7 +3441,7 @@ void Update97::UpdateScopeZoom(float elapsed)
                     }
                 }
             }
-            else if (DAT_011f2250.FUN_0044ddc0() == 4)
+            else if (GetSettingInteger(&DAT_011f2250) == 4)
             {
                 previous = 0;
                 currentHorizontal = vertical;
@@ -3596,10 +3511,6 @@ struct ItemEntry
 };
 struct Entry;
 ItemEntry* __cdecl FUN_004b5260(Entry*);
-struct Setting
-{
-    float* FUN_00403e20();
-};
 extern Setting DAT_011d1230;
 struct Quest
 {

@@ -1,8 +1,15 @@
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
 
 // src/havok/physics/collide/shape/convex/sphere/hkpsphereshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/sphere/hkpsphereshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include "havok/hkpSphereShape.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
 
 extern char const* const g_01268970_arg1;
 void __cdecl FUN_00c90360(char const* const*, char const* const*);
@@ -42,14 +49,12 @@ int __stdcall FUN_00cd87f0(int a1, int a2)
     return 0x20;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_load_ps1(const float*);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
+// Exe 0x00cd8100 GetAabb: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+
+extern "C" LocalM128 _mm_load_ps1(const float*);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
 
 struct Shape_00cd8100
 {
@@ -74,13 +79,13 @@ struct Vec_00cd8100
     int unk24;
     int unk28;
     int unk2c;
-    __m128 m_pos;
+    LocalM128 m_pos;
 };
 
 struct Aabb_00cd8100
 {
-    __m128 m_kMinimumCorner;
-    __m128 m_kMaximumCorner;
+    LocalM128 m_kMinimumCorner;
+    LocalM128 m_kMaximumCorner;
 };
 
 struct Shape_00cd8100_cls
@@ -94,7 +99,7 @@ struct Shape_00cd8100_cls
 void Shape_00cd8100_cls::GetAabb(const Vec_00cd8100* t, float afTolerance, Aabb_00cd8100* apAabb)
 {
     float r = self.m_fSphereRadius + afTolerance;
-    __m128 s = _mm_load_ps1(&r);
+    LocalM128 s = _mm_load_ps1(&r);
     apAabb->m_kMinimumCorner = _mm_sub_ps(t->m_pos, s);
     apAabb->m_kMaximumCorner = _mm_add_ps(t->m_pos, s);
 }
@@ -103,21 +108,6 @@ extern "C" void _ReadWriteBarrier(void);
 extern "C" unsigned __int64 __rdtsc(void);
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 extern unsigned long DAT_0126835c;
-
-struct hkMonitorStreamCD81
-{
-    int unk00;
-    char* m_kRayEnd;
-    int unk08;
-    char* m_pRayCursor;
-};
-
-struct hkTimerCommandCD81
-{
-    const char* m_pCommandName;
-    unsigned int m_uiStartTicks;
-    int unk08;
-};
 
 extern const char DAT_010cb5f4[];
 extern const char DAT_010c41f8[];
@@ -136,60 +126,60 @@ class HostCD81
 // @fnv 0x00cd8190
 void* HostCD81::RecordTimerCommands(void* pvResult, int a, int b)
 {
-    hkMonitorStreamCD81* pkStream = (hkMonitorStreamCD81*)TlsGetValue(DAT_0126835c);
-    char* end = pkStream->m_kRayEnd;
-    if (end < pkStream->m_pRayCursor)
+    hkMonitorStream* pkStream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* end = pkStream->m_end.m_storage;
+    if (end < pkStream->m_capacityMinus16.m_storage)
     {
-        hkTimerCommandCD81* pkCmd = (hkTimerCommandCD81*)end;
-        pkCmd->m_pCommandName = DAT_010cb5f4;
+        hkMonitorStream::TimerCommand* pkCmd = (hkMonitorStream::TimerCommand*)end;
+        pkCmd->m_commandAndMonitor = DAT_010cb5f4;
         _ReadWriteBarrier();
         volatile unsigned int t0 = (unsigned int)__rdtsc();
-        pkCmd->m_uiStartTicks = t0;
-        end += sizeof(hkTimerCommandCD81);
-        pkStream->m_kRayEnd = end;
+        pkCmd->m_time0 = t0;
+        end += sizeof(hkMonitorStream::TimerCommand);
+        pkStream->m_end.m_storage = end;
     }
     FUN_00cd85c0(pvResult, m_fValue, a, b);
-    pkStream = (hkMonitorStreamCD81*)TlsGetValue(DAT_0126835c);
-    char* end2 = pkStream->m_kRayEnd;
-    if (end2 < pkStream->m_pRayCursor)
+    pkStream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* end2 = pkStream->m_end.m_storage;
+    if (end2 < pkStream->m_capacityMinus16.m_storage)
     {
-        hkTimerCommandCD81* pkCmd = (hkTimerCommandCD81*)end2;
-        pkCmd->m_pCommandName = DAT_010c41f8;
+        hkMonitorStream::TimerCommand* pkCmd = (hkMonitorStream::TimerCommand*)end2;
+        pkCmd->m_commandAndMonitor = DAT_010c41f8;
         _ReadWriteBarrier();
         volatile unsigned int t1 = (unsigned int)__rdtsc();
-        pkCmd->m_uiStartTicks = t1;
-        end2 += sizeof(hkTimerCommandCD81);
-        pkStream->m_kRayEnd = end2;
+        pkCmd->m_time0 = t1;
+        end2 += sizeof(hkMonitorStream::TimerCommand);
+        pkStream->m_end.m_storage = end2;
     }
     return pvResult;
 }
 
-extern "C" __m128 _mm_set_ps(float, float, float, float);
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_cmplt_ps(__m128, __m128);
-extern "C" __m128 _mm_cmple_ps(__m128, __m128);
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" __m128 _mm_and_ps(__m128, __m128);
-extern "C" __m128 _mm_andnot_ps(__m128, __m128);
-extern "C" __m128 _mm_or_ps(__m128, __m128);
-extern "C" __m128 _mm_xor_ps(__m128, __m128);
-extern "C" __m128 _mm_rcp_ps(__m128);
-extern "C" __m128 _mm_rsqrt_ps(__m128);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_unpacklo_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" int _mm_movemask_ps(__m128);
+extern "C" LocalM128 _mm_set_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_set_ps1(float);
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_cmplt_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_cmple_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_and_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_or_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_rcp_ps(LocalM128);
+extern "C" LocalM128 _mm_rsqrt_ps(LocalM128);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" int _mm_movemask_ps(LocalM128);
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern unsigned long DAT_0126835c;
 extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 class RayMask
 {
-    __m128 bits;
+    LocalM128 bits;
     friend class RayVector;
 
   public:
@@ -211,18 +201,18 @@ class RayMask
     }
 };
 const RayMask::Component RayMask::components[4] = {RayMask::X, RayMask::Y, RayMask::Z, RayMask::W};
-static const __m128 signVector = {{-0.0f, -0.0f, -0.0f, -0.0f}};
-static const __m128 tripleVector = {{3.0f, 3.0f, 3.0f, 3.0f}};
-static const __m128 halfVector = {{0.5f, 0.5f, 0.5f, 0.5f}};
-extern __m128 kOne;
-static __forceinline __m128 reciprocalVector(__m128 value)
+static const LocalM128 signVector = {{-0.0f, -0.0f, -0.0f, -0.0f}};
+static const LocalM128 tripleVector = {{3.0f, 3.0f, 3.0f, 3.0f}};
+static const LocalM128 halfVector = {{0.5f, 0.5f, 0.5f, 0.5f}};
+extern LocalM128 kOne;
+static __forceinline LocalM128 reciprocalVector(LocalM128 value)
 {
-    __m128 estimate = _mm_rcp_ps(value);
+    LocalM128 estimate = _mm_rcp_ps(value);
     return _mm_sub_ps(_mm_add_ps(estimate, estimate), _mm_mul_ps(_mm_mul_ps(estimate, value), estimate));
 }
 class RayVector
 {
-    __m128 value;
+    LocalM128 value;
 
   public:
     __forceinline RayVector()
@@ -231,7 +221,7 @@ class RayVector
     {
         value = other.value;
     }
-    __forceinline RayVector(const __m128& other)
+    __forceinline RayVector(const LocalM128& other)
     {
         value = other;
     }
@@ -239,15 +229,15 @@ class RayVector
     {
         value = other.value;
     }
-    __forceinline __m128& quad()
+    __forceinline LocalM128& quad()
     {
         return value;
     }
-    __forceinline const __m128& quad() const
+    __forceinline const LocalM128& quad() const
     {
         return value;
     }
-    __forceinline operator __m128() const
+    __forceinline operator LocalM128() const
     {
         return value;
     }
@@ -351,30 +341,18 @@ struct RayHits
 {
     RayHit m_akRayOutputs[4];
 };
-static __forceinline void transposeVectors(__m128& r0, __m128& r1, __m128& r2, __m128& r3)
+static __forceinline void transposeVectors(LocalM128& r0, LocalM128& r1, LocalM128& r2, LocalM128& r3)
 {
-    __m128 t0 = _mm_shuffle_ps(r0, r1, 0x44);
-    __m128 t2 = _mm_shuffle_ps(r0, r1, 0xee);
-    __m128 t1 = _mm_shuffle_ps(r2, r3, 0x44);
-    __m128 t3 = _mm_shuffle_ps(r2, r3, 0xee);
+    LocalM128 t0 = _mm_shuffle_ps(r0, r1, 0x44);
+    LocalM128 t2 = _mm_shuffle_ps(r0, r1, 0xee);
+    LocalM128 t1 = _mm_shuffle_ps(r2, r3, 0x44);
+    LocalM128 t3 = _mm_shuffle_ps(r2, r3, 0xee);
     r0 = _mm_shuffle_ps(t0, t1, 0x88);
     r1 = _mm_shuffle_ps(t0, t1, 0xdd);
     r2 = _mm_shuffle_ps(t2, t3, 0x88);
     r3 = _mm_shuffle_ps(t2, t3, 0xdd);
 }
 
-struct ProbeRecord
-{
-    const char* tag;
-    unsigned time, highTime;
-};
-struct ProbeStream
-{
-    int reserved;
-    char* current;
-    int reserved2;
-    char* end;
-};
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern unsigned long DAT_0126835c;
 extern "C" unsigned __int64 __rdtsc();
@@ -387,24 +365,24 @@ struct ProbeSphere : hkpSphereShape
 // @fnv 0x00cd8220
 RayMask ProbeSphere::FUN_00cd8220(const RayQuerySet& ray, RayHits& hits, const RayMask& enabled) const
 {
-    ProbeStream* s = (ProbeStream*)TlsGetValue(DAT_0126835c);
-    char* pCurrent = s->current;
-    if (pCurrent < s->end)
+    hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* pCurrent = s->m_end.m_storage;
+    if (pCurrent < s->m_capacityMinus16.m_storage)
     {
         unsigned ticks;
-        ((ProbeRecord*)pCurrent)->tag = (char*)&ticks;
-        ((ProbeRecord*)pCurrent)->tag = "TtrcSphereBundle";
+        ((hkMonitorStream::TimerCommand*)pCurrent)->m_commandAndMonitor = (char*)&ticks;
+        ((hkMonitorStream::TimerCommand*)pCurrent)->m_commandAndMonitor = "TtrcSphereBundle";
         _ReadWriteBarrier();
         ticks = (unsigned)__rdtsc();
         _ReadWriteBarrier();
-        ((ProbeRecord*)pCurrent)->time = ticks;
-        s->current = pCurrent + 12;
+        ((hkMonitorStream::TimerCommand*)pCurrent)->m_time0 = ticks;
+        s->m_end.m_storage = pCurrent + sizeof(hkMonitorStream::TimerCommand);
     }
     RayMask active = enabled;
     RayVector radius, radiusSquared;
     radius.splat(m_fSphereRadius);
     radiusSquared.product(radius, radius);
-    __m128 hundredValues = {100.0f, 100.0f, 100.0f, 100.0f};
+    LocalM128 hundredValues = {100.0f, 100.0f, 100.0f, 100.0f};
     RayVector hundred;
     hundred.quad() = hundredValues;
     RayVector quadratic, linear;
@@ -456,8 +434,8 @@ RayMask ProbeSphere::FUN_00cd8220(const RayQuerySet& ray, RayHits& hits, const R
     RayMask infiniteHit = det.greater(zero);
     active.intersect(active, infiniteHit);
     RayVector root;
-    __m128 approx = _mm_rsqrt_ps(det);
-    __m128 three = tripleVector, half = halfVector;
+    LocalM128 approx = _mm_rsqrt_ps(det);
+    LocalM128 three = tripleVector, half = halfVector;
     root.quad() = _mm_mul_ps(
         _mm_mul_ps(_mm_sub_ps(three, _mm_mul_ps(_mm_mul_ps(det, approx), approx)), _mm_mul_ps(approx, half)), det);
     root.choose(zero, root, infiniteHit);
@@ -493,29 +471,29 @@ RayMask ProbeSphere::FUN_00cd8220(const RayQuerySet& ray, RayHits& hits, const R
             hits.m_akRayOutputs[lane].setKey(~0u);
         }
     }
-    s = (ProbeStream*)TlsGetValue(DAT_0126835c);
-    pCurrent = s->current;
-    if (pCurrent < s->end)
+    s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    pCurrent = s->m_end.m_storage;
+    if (pCurrent < s->m_capacityMinus16.m_storage)
     {
         unsigned ticks;
-        ((ProbeRecord*)pCurrent)->tag = (char*)&ticks;
-        ((ProbeRecord*)pCurrent)->tag = "Et";
+        ((hkMonitorStream::TimerCommand*)pCurrent)->m_commandAndMonitor = (char*)&ticks;
+        ((hkMonitorStream::TimerCommand*)pCurrent)->m_commandAndMonitor = "Et";
         _ReadWriteBarrier();
         ticks = (unsigned)__rdtsc();
         _ReadWriteBarrier();
-        ((ProbeRecord*)pCurrent)->time = ticks;
-        s->current = pCurrent + 12;
+        ((hkMonitorStream::TimerCommand*)pCurrent)->m_time0 = ticks;
+        s->m_end.m_storage = pCurrent + sizeof(hkMonitorStream::TimerCommand);
     }
     return active;
 }
 
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" void _mm_store_ps(float*, __m128);
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" void _mm_store_ps(float*, LocalM128);
 
 // @fnv 0x00cd8060
 void __stdcall FUN_00cd8060(int direction, float* vertexOut)
 {
-    __m128 zero = _mm_setzero_ps();
+    LocalM128 zero = _mm_setzero_ps();
     _mm_store_ps(vertexOut, zero);
 }
 
@@ -540,17 +518,17 @@ void __stdcall FUN_00cd8080(int aUnused, __int64 packed)
     if (c >= 0)
     {
         unsigned long n = ((unsigned long)c & 0xfffffff) * 4;
-        __m128 z = _mm_setzero_ps();
-        *(__m128*)u.s.dst = z;
+        LocalM128 z = _mm_setzero_ps();
+        *(LocalM128*)u.s.dst = z;
         __movsd((unsigned long*)(u.s.dst + 4), (const unsigned long*)u.s.dst, n);
     }
 }
 
-extern "C" __m128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_setzero_ps(void);
 
 struct __declspec(align(16)) CentreVectorCD80
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 
     void zero()
     {
@@ -595,5 +573,5 @@ void FUN_00cd8140_Obj::FUN_00cd8140(FUN_00cd8140_Result* result)
 // @fnv 0x00cd80e0
 void __stdcall FUN_00cd80e0(float* output)
 {
-    *reinterpret_cast<__m128*>(output) = _mm_setzero_ps();
+    *reinterpret_cast<LocalM128*>(output) = _mm_setzero_ps();
 }

@@ -1,6 +1,34 @@
 // gamebryo2.2/corelibs/nianimation/nifloatextradatacontroller.cpp: NiFloatExtraDataController (9 functions)
 
-#include "nifloatextradatacontroller_decls.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiColorInterpolator.h"
+#include "../../../../include/NiPSysModifierCtlr.h"
+#include "../../../../include/NiFloatExtraDataController.h"
+#include "../../../../include/NiFloatExtraData.h"
+#include "../../../../include/NiFloatInterpolator.h"
+#include "../../../../include/NiUpdateData.h"
+#include "../../../../include/NiStream.h"
+
+extern const float DAT_01096324;
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
+
+inline bool NiTimeController::GetManagerControlled() const
+{
+    return ((m_uiObjectFlags >> 5) & 1) != 0;
+}
+
+inline void NiInterpolator::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+
+inline void NiInterpolator::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+
 
 // @fnv 0x00a41300
 void NiFloatExtraDataController::Update(NiUpdateData& update)
@@ -9,33 +37,23 @@ void NiFloatExtraDataController::Update(NiUpdateData& update)
         m_fControllerTime = DAT_01096324;
     else if (AdvanceController(update.GetTime()))
     {
-        if (!m_spControllerInterpolator.m_pObject || !m_spControllerInterpolator.m_pObject->Unk_35())
+        if (!m_spControllerInterpolator.m_pObject || !m_spControllerInterpolator.m_pObject->AlwaysUpdate())
             return;
     }
 
     float value;
     if (m_spControllerInterpolator.m_pObject &&
-        m_spControllerInterpolator.m_pObject->Unk_27(m_fControllerTime, m_pkTarget, value))
+        m_spControllerInterpolator.m_pObject->UpdateFloat(m_fControllerTime, m_pkTarget, value))
     {
         if (m_pExtraData.m_pObject)
             static_cast<NiFloatExtraData*>(m_pExtraData.m_pObject)->m_fValue = value;
     }
 }
 
-struct NiStream
-{
-    void ResetStreamState();
-};
-
-struct NiPSysModifierCtlr
-{
-    void LoadBinary(NiStream&);
-};
-
 // @fnv 0x00a4fbd0
 void __fastcall LoadBinaryWithVersionCheck(NiPSysModifierCtlr* pThis, int, NiStream& kStream)
 {
-    pThis->LoadBinary(kStream);
+    pThis->NiPSysModifierCtlr::LoadBinary(kStream);
     if (*(unsigned int*)((char*)&kStream + 0xd8) < 0x0a010068)
     {
         kStream.ResetStreamState();
@@ -72,15 +90,8 @@ const GlobalObjectO2_00a7b610* __cdecl FUN_00a41230()
     return &g_011f3e6c;
 }
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
-struct FUN_00a3c390 : BSFadeNode
-{
-    char pad[0x18];
-    FUN_00a3c390(float v) throw();
-};
+// The shared NiFloatInterpolator header does not yet declare its float constructor.
+extern "C" void FUN_00a3c390();
 struct FloatSrc
 {
     char pad[0xc];
@@ -92,18 +103,18 @@ struct FloatSrc
     }
 };
 
-// Allocates a FUN_00a3c390 fade node constructed from the float value returned by the FloatSrc at self+0x3c.
+// Constructs a float pose interpolator from the float extra data at self+0x3c.
 // @fnv 0x00a41240
 void* __fastcall CreateFadeNodeFromFloatSource(void* self, int edx, unsigned short usIndex)
 {
-    return new FUN_00a3c390((*(FloatSrc**)((char*)self + 0x3c))->Get());
+    NiFloatInterpolator* p = static_cast<NiFloatInterpolator*>(BSFadeNode::operator new(sizeof(NiFloatInterpolator)));
+    if (p)
+        return reinterpret_cast<NiFloatInterpolator* (__thiscall*)(NiFloatInterpolator*, float)>(&FUN_00a3c390)(
+            p, (*(FloatSrc**)((char*)self + 0x3c))->Get());
+    return 0;
 }
 
 namespace fnv_00a41280 {
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 extern void* DAT_010975fc;
 int* __fastcall InitTimeController(int*);
 struct CopyHelper
@@ -128,10 +139,10 @@ void* __fastcall FUN_00a41280(CopyHelper* self, int edx, void* kCloning)
 }
 }  // namespace fnv_00a41280
 
+class ActorCombatGroup;
 namespace fnv_00a41380 {
 struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610* g_011f3e6c;
-struct ActorCombatGroup;
 struct ArrHelper
 {
     void* vt;
@@ -159,43 +170,15 @@ void __stdcall AppendGlobalObject(ArrHelper* pkStrings)
 }  // namespace fnv_00a41380
 
 namespace fnv_00a4fc00 {
-struct NiPSysModifierCtlr
-{
-    void LinkObject(NiStream& s);
-};
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
-struct NiColorData;
-struct NiColorInterpolator : NiRefObject
-{
-    char pad[0x1c];
-    static void* operator new(unsigned int n)
-    {
-        return BSFadeNode::operator new(n);
-    }
-    NiColorInterpolator(NiColorData* pkColorData) throw();
-};
-struct StreamLink
-{
-    NiObject* GetLoadedObject();
-};
-struct StreamView
-{
-    char pad[0xd8];
-    unsigned int m_uiNifVersion;
-};
-
 // @fnv 0x00a4fc00
 void __fastcall LinkColorInterpolator(NiPSysModifierCtlr* self, int edx, NiStream* kStream)
 {
-    self->LinkObject(*kStream);
-    if (((StreamView*)kStream)->m_uiNifVersion < 0x0a010068)
+    self->NiPSysModifierCtlr::LinkObject(*kStream);
+    if (*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(kStream) + 0xd8) < 0x0a010068)
     {
-        NiColorData* pkColorData = (NiColorData*)((StreamLink*)kStream)->GetLoadedObject();
+        NiColorData* pkColorData = (NiColorData*)kStream->GetLoadedObject();
         NiColorInterpolator* p = new NiColorInterpolator(pkColorData);
-        NiColorInterpolator** ppInterpolatorSlot = (NiColorInterpolator**)((char*)self + 0x34);
+        NiColorInterpolator** ppInterpolatorSlot = reinterpret_cast<NiColorInterpolator**>(&self->m_spControllerInterpolator.m_pObject);
         if (*ppInterpolatorSlot != p)
         {
             if (*ppInterpolatorSlot)
@@ -204,7 +187,7 @@ void __fastcall LinkColorInterpolator(NiPSysModifierCtlr* self, int edx, NiStrea
             if (p)
                 p->IncRefCount();
         }
-        (*(void(__thiscall**)(NiColorInterpolator*))(*(char**)*ppInterpolatorSlot + 0xbc))(*ppInterpolatorSlot);
+        (*ppInterpolatorSlot)->Collapse();
     }
 }
 }  // namespace fnv_00a4fc00
@@ -234,6 +217,6 @@ void FUN_00a412d0_cls::ApplyFadeValue(FadeNode* pFadeNode, int iIndex)
     else
         pTarget = pFadeNode->LookupNode(&g_011f3738);
 
-    NiFloatExtraData* pExtraData = static_cast<NiFloatExtraData*>(this->m_pExtraData.operator->());
+    NiFloatExtraData* pExtraData = static_cast<NiFloatExtraData*>(this->m_pExtraData.m_pObject);
     pTarget->SetValue(pExtraData->m_fValue);
 }

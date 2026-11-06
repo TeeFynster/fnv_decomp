@@ -1,6 +1,11 @@
-// fallout_shared/packagedatadialogue.cpp: TESDialoguePackageData, DelStandIn, ConstructorHost (8 functions)
+// fallout_shared/packagedatadialogue.cpp: TESDialoguePackageData, ConstructorHost (8 functions)
 
+#include "../../include/BSSimpleList.h"
+#include "../../include/TESDialoguePackageData.h"
 #include "packagedatadialogue_decls.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSSaveFormBuffer.h"
+
 // Resolves the stored topic ID to a TESTopic via the form's file and warns if the topic is missing.
 // @fnv 0x0067b590
 void TESDialoguePackageData::InitItem(TESForm* form)
@@ -13,55 +18,20 @@ void TESDialoguePackageData::InitItem(TESForm* form)
                 form->GetName(), form->GetFormID());
 }
 
-void __cdecl Deallocate(void*);
-namespace p07 {
-struct DtorStandIn
-{
-    void FUN_0083dec0();
-};
-struct DelStandIn
-{
-    void* FUN_0067b1e0(unsigned int flags);
-};
-// Runs the destructor on this object, frees it when flags has bit 0 set, and returns this.
-// @fnv 0x0067b1e0
-void* DelStandIn::FUN_0067b1e0(unsigned int flags)
-{
-    ((DtorStandIn*)this)->FUN_0083dec0();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
-}
-
 struct FUN_00670b30
 {
     void* __vecDelDtor(unsigned int);
 };
 
-struct FUN_0067ad70_cls
-{
-    virtual ~FUN_0067ad70_cls();
-    int field4;
-    int field8;
-};
-
-struct FUN_0067b280_cls : FUN_0067ad70_cls
-{
-    FUN_00670b30* data;
-    virtual ~FUN_0067b280_cls();
-};
-
 // Destructor that deletes the owned data object via its vector deleting destructor.
 // @fnv 0x0067b280
-FUN_0067b280_cls::~FUN_0067b280_cls()
+TESDialoguePackageData::~TESDialoguePackageData()
 {
-    FUN_00670b30* b = data;
+    FUN_00670b30* b = (FUN_00670b30*)m_pTargetLocation;
     FUN_00670b30* a = b;
     a ? a->__vecDelDtor(1) : 0;
 }
 
-class BGSLoadFormBuffer;
 struct FUN_0067fc50_impl
 {
     void ResolveObject(BGSLoadFormBuffer*);
@@ -154,21 +124,6 @@ struct FUNObj
     void FUN_0067fb60(void*);
 };
 
-struct SaveFormIDHelper
-{
-    void SerializeFormData(void*, int);
-};
-
-struct BGSSaveFormBuffer : SaveFormIDHelper
-{
-    void SaveData(void*, int, int);
-};
-
-struct TESPackageData
-{
-    int pad;
-};
-
 struct FUN_0067b6f0_cls : TESPackageData
 {
     int field4;
@@ -248,15 +203,6 @@ ConstructorHost* ConstructorHost::Construct(float initial, unsigned int object, 
 
 void* __cdecl operator new(unsigned int);
 
-class TESForm;
-
-class BGSLoadFormBuffer
-{
-  public:
-    unsigned int ReadFormIdentifier();
-    void ReadTypedData(void* data, unsigned int size);
-};
-
 TESForm* __cdecl _GetFormByNumericID(unsigned int formID);
 
 struct TESEatPackageData_
@@ -294,18 +240,18 @@ struct FUN_0067b7d0_shell
 // @fnv 0x0067b7d0
 void FUN_0067b7d0_shell::FUN_0067b7d0(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    apLoadGameBuffer->ReadTypedData(&field4, 4);
-    apLoadGameBuffer->ReadTypedData(&field10, 1);
-    apLoadGameBuffer->ReadTypedData(&field11, 1);
-    apLoadGameBuffer->ReadTypedData(&field12, 1);
-    apLoadGameBuffer->ReadTypedData(&field14, 4);
-    apLoadGameBuffer->ReadTypedData(&field18, 1);
-    apLoadGameBuffer->ReadTypedData(&field1c, 4);
+    apLoadGameBuffer->ReadTypedData((void*)&field4, 4u);
+    apLoadGameBuffer->ReadTypedData((void*)&field10, 1u);
+    apLoadGameBuffer->ReadTypedData((void*)&field11, 1u);
+    apLoadGameBuffer->ReadTypedData((void*)&field12, 1u);
+    apLoadGameBuffer->ReadTypedData((void*)&field14, 4u);
+    apLoadGameBuffer->ReadTypedData((void*)&field18, 1u);
+    apLoadGameBuffer->ReadTypedData((void*)&field1c, 4u);
 
     pMenuTopicEntry = dynamic_cast<TESTopic*>(_GetFormByNumericID(apLoadGameBuffer->ReadFormIdentifier()));
 
     bool bhasLocation = false;
-    apLoadGameBuffer->ReadTypedData(&bhasLocation, 1);
+    apLoadGameBuffer->ReadTypedData((void*)&bhasLocation, 1u);
     if (bhasLocation)
     {
         m_pTargetLocation = (LocationDescriptor*)new B0067f030;

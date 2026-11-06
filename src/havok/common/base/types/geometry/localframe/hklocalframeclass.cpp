@@ -2,6 +2,8 @@
 // src/havok/common/base/types/geometry/localframe/hklocalframeclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/types/geometry/localframe/hklocalframeclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/BSAudio.h"
+
 struct FUN_00df67d0_Base
 {
     virtual void v0();
@@ -12,14 +14,6 @@ struct FUN_00da0860_manager
     virtual void v0();
     virtual void v1();
     virtual void FUN_00da0860_release(void*, unsigned short);
-};
-struct BSAudio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    FUN_00da0860_manager* unk10;
 };
 BSAudio* FUN_00c85750();
 struct FUN_00da0860_class : FUN_00df67d0_Base
@@ -34,7 +28,7 @@ FUN_00da0860_class* FUN_00da0860_class::FUN_00da0860(unsigned int flags)
     if (flags & 1)
     {
         BSAudio* audio = FUN_00c85750();
-        audio->unk10->FUN_00da0860_release(this, unk04);
+        ((FUN_00da0860_manager*)audio->pListener)->FUN_00da0860_release(this, unk04);
     }
     return this;
 }
@@ -85,7 +79,6 @@ struct FUN_00cb0c00_class
     void FUN_00cb0c00();
 };
 
-BSAudio* FUN_00c85750();
 
 struct SomeClass
 {
@@ -104,7 +97,7 @@ void* SomeClass::FUN_00da0800(unsigned int flags)
     {
         BSAudio* a = FUN_00c85750();
         unsigned short d = this->unk04;
-        ((FUN_00da0860_manager*)a->unk10)->FUN_00da0860_release(this, d);
+        ((FUN_00da0860_manager*)a->pListener)->FUN_00da0860_release(this, d);
     }
     return this;
 }

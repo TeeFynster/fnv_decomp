@@ -11,40 +11,9 @@ class BSTextureSet;
 class BSTextureSet : public NiObject
 {
   public:
-    virtual void vfn_03() = 0;
-    virtual void vfn_04() = 0;
-    virtual void vfn_05() = 0;
-    virtual void vfn_06() = 0;
-    virtual void vfn_07() = 0;
-    virtual void vfn_08() = 0;
-    virtual void vfn_09() = 0;
-    virtual void vfn_0a() = 0;
-    virtual void vfn_0b() = 0;
-    virtual void vfn_0c() = 0;
-    virtual void vfn_0d() = 0;
-    virtual void vfn_0e() = 0;
-    virtual void vfn_0f() = 0;
-    virtual void vfn_10() = 0;
-    virtual void vfn_11() = 0;
-    virtual void vfn_12() = 0;
-    virtual void LoadBinary(NiStream& stream) = 0;
-    virtual void vfn_14() = 0;
-    virtual void vfn_15() = 0;
-    virtual void SaveBinary(NiStream& stream) = 0;
-    virtual void vfn_17() = 0;
-    virtual void vfn_18() = 0;
-    virtual void vfn_19() = 0;
-    virtual void vfn_1a() = 0;
-    virtual void vfn_1b() = 0;
-    virtual void vfn_1c() = 0;
-    virtual void vfn_1d() = 0;
-    virtual void vfn_1e() = 0;
-    virtual void vfn_1f() = 0;
-    virtual void vfn_20() = 0;
-    virtual void vfn_21() = 0;
-    virtual void vfn_22() = 0;
-    virtual const char* GetTexture(BSShaderProperty::TextureTypeEnum textureType);
+    // slots 0x00-0x88 are the shared NiObject virtuals (LoadBinary 0x4c, SaveBinary 0x58)
     virtual void GetTexture(BSShaderProperty::TextureTypeEnum textureType, NiPointer<NiTexture>& texture);
+    virtual const char* GetTexture(BSShaderProperty::TextureTypeEnum textureType);  // MSVC lays overloads out in reverse: this one is slot 0x8c
     virtual void SetTexture(BSShaderProperty::TextureTypeEnum textureType, const char* textureName);
     // base NiObject at +0x0, size 8
     // void __cdecl BSTextureSet::*(NiStream&)

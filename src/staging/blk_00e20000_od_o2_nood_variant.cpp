@@ -1,5 +1,9 @@
 // staging/blk_00e20000_od_o2_nood_variant.cpp: Face, Hull (8 functions)
 #include <windows.h>
+#include "../../include/hkMonitorStream.h"
+#include "../../include/hkMonitorStream.h"
+#include "../../include/hkArray.h"
+#include "../../include/hkMemoryRouter.h"
 
 // src/staging/blk_00e20000_od_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHsc /Gy (unit src/staging/blk_00e20000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -9,22 +13,24 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; } __m128;
+// Exe 0x00e2b510 FUN_00e2b510: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4]; } __m128, LocalM128;
 extern "C" {
-__m128 _mm_mul_ps(__m128,__m128);
-__m128 _mm_mul_ss(__m128,__m128);
-__m128 _mm_add_ss(__m128,__m128);
-__m128 _mm_sub_ps(__m128,__m128);
-__m128 _mm_sub_ss(__m128,__m128);
-__m128 _mm_shuffle_ps(__m128,__m128,int);
-__m128 _mm_rsqrt_ss(__m128);
-__m128 _mm_set_ss(float);
-__m128 _mm_cmpeq_ss(__m128,__m128);
-__m128 _mm_andnot_ps(__m128,__m128);
-void _mm_store_ss(float*,__m128);
+LocalM128 _mm_mul_ps(LocalM128,LocalM128);
+LocalM128 _mm_mul_ss(LocalM128,LocalM128);
+LocalM128 _mm_add_ss(LocalM128,LocalM128);
+LocalM128 _mm_sub_ps(LocalM128,LocalM128);
+LocalM128 _mm_sub_ss(LocalM128,LocalM128);
+LocalM128 _mm_shuffle_ps(LocalM128,LocalM128,int);
+LocalM128 _mm_rsqrt_ss(LocalM128);
+LocalM128 _mm_set_ss(float);
+LocalM128 _mm_cmpeq_ss(LocalM128,LocalM128);
+LocalM128 _mm_andnot_ps(LocalM128,LocalM128);
+void _mm_store_ss(float*,LocalM128);
 void _ReadWriteBarrier();
 }
-struct Vertex { __m128 position; __m128 supportA; __m128 supportB; int flags; int unk34; int unk38; int unk3c; };
+struct Vertex { LocalM128 position; LocalM128 supportA; LocalM128 supportB; int flags; int unk34; int unk38; int unk3c; };
 struct Face;
 struct Edge {
     Vertex* vertex;
@@ -33,7 +39,7 @@ struct Edge {
     Face* face;
 };
 struct Face {
-    __m128 normal;
+    LocalM128 normal;
     Edge edges[3];
     float distance;
     int flags;
@@ -44,18 +50,18 @@ struct Face {
 extern float DAT_01011d78;
 extern float DAT_01017718;
 extern float DAT_01016248;
-static __forceinline __m128 dot3(__m128 a, __m128 b) {
-    __m128 v = _mm_mul_ps(a,b);
+static __forceinline LocalM128 dot3(LocalM128 a, LocalM128 b) {
+    LocalM128 v = _mm_mul_ps(a,b);
     return _mm_add_ss(_mm_shuffle_ps(v,v,0xaa), _mm_add_ss(_mm_shuffle_ps(v,v,0x55),v));
 }
 Vertex* Face::ComputePlane() {
     Vertex* first = edges[0].vertex;
-    __m128 a = _mm_sub_ps(first->position,edges[1].vertex->position);
-    __m128 b = _mm_sub_ps(edges[1].vertex->position,edges[2].vertex->position);
-    __m128 n = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a,a,0xc9),_mm_shuffle_ps(b,b,0xd2)),_mm_mul_ps(_mm_shuffle_ps(a,a,0xd2),_mm_shuffle_ps(b,b,0xc9)));
-    __m128 len = dot3(n,n);
-    __m128 inv = _mm_rsqrt_ss(len);
-    __m128 scale = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(DAT_01016248),inv), _mm_sub_ss(_mm_set_ss(DAT_01017718), _mm_mul_ss(_mm_mul_ss(len,inv),inv)));
+    LocalM128 a = _mm_sub_ps(first->position,edges[1].vertex->position);
+    LocalM128 b = _mm_sub_ps(edges[1].vertex->position,edges[2].vertex->position);
+    LocalM128 n = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a,a,0xc9),_mm_shuffle_ps(b,b,0xd2)),_mm_mul_ps(_mm_shuffle_ps(a,a,0xd2),_mm_shuffle_ps(b,b,0xc9)));
+    LocalM128 len = dot3(n,n);
+    LocalM128 inv = _mm_rsqrt_ss(len);
+    LocalM128 scale = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(DAT_01016248),inv), _mm_sub_ss(_mm_set_ss(DAT_01017718), _mm_mul_ss(_mm_mul_ss(len,inv),inv)));
     scale = _mm_andnot_ps(_mm_cmpeq_ss(len,_mm_set_ss(DAT_01011d78)), scale);
     normal = n;
     _ReadWriteBarrier();
@@ -112,12 +118,12 @@ void Hull::FUN_00e2d440() {
 
 struct E29Src { int idx[4]; int n; };
 struct E29SrcList { E29Src* data; int count; };
-struct E29Item { __m128 a; __m128 b; char flag20; int val24; };
+struct E29Item { LocalM128 a; LocalM128 b; char flag20; int val24; };
 struct E29Out1 { E29Item item; void* ptr30; int one34; int zero38; char unk3c; char flag3d; };
 struct E29Out2 { E29Item items[4]; int count; char flagC4; void* ptrs[4]; int unkD8; int unkDC; int zeros[4]; int unkF0; };
 
 // @fnv 0x00e29a10
-void FUN_00e29a10(E29SrcList* src, const __m128* posA, const __m128* posB, char* base, E29Out1* out1, int* outCount1, E29Out2* out2, int* outCount2)
+void FUN_00e29a10(E29SrcList* src, const LocalM128* posA, const LocalM128* posB, char* base, E29Out1* out1, int* outCount1, E29Out2* out2, int* outCount2)
 {
     int n1 = 0;
     int n2 = 0;
@@ -160,11 +166,13 @@ void FUN_00e29a10(E29SrcList* src, const __m128* posA, const __m128* posB, char*
 }
 
 namespace fnv_00e2ab00 {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; } __m128;
-extern "C" { __m128 _mm_load_ps(const __m128*); void _mm_store_ps(__m128*,__m128); __m128 _mm_shuffle_ps(__m128,__m128,int); void _ReadWriteBarrier(); }
+// Exe 0x00e2b510 FUN_00e2b510: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4]; } __m128, LocalM128;
+extern "C" { LocalM128 _mm_load_ps(const LocalM128*); void _mm_store_ps(LocalM128*,LocalM128); LocalM128 _mm_shuffle_ps(LocalM128,LocalM128,int); void _ReadWriteBarrier(); }
 
 // @fnv 0x00e2ab00
-__m128* FUN_00e2ab00(__m128* src, __m128* out1, __m128* out2) {
+LocalM128* FUN_00e2ab00(LocalM128* src, LocalM128* out1, LocalM128* out2) {
     out1[0] = src[0];
     out2[0] = src[1];
     out1[1] = src[3];
@@ -172,27 +180,27 @@ __m128* FUN_00e2ab00(__m128* src, __m128* out1, __m128* out2) {
     out1[2] = src[6];
     out2[2] = src[7];
 
-    __m128 d0 = src[9];
+    LocalM128 d0 = src[9];
     _ReadWriteBarrier();
-    __m128 a2 = out1[2];
-    __m128 a0 = out1[0];
-    __m128 d1 = src[10];
-    __m128 a1 = out1[1];
-    __m128 t2 = _mm_shuffle_ps(a2, d0, 0x44);
-    __m128 t1 = _mm_shuffle_ps(a0, a1, 0xEE);
-    __m128 t3 = _mm_shuffle_ps(a2, d0, 0xEE);
-    __m128 t0 = _mm_shuffle_ps(a0, a1, 0x44);
+    LocalM128 a2 = out1[2];
+    LocalM128 a0 = out1[0];
+    LocalM128 d1 = src[10];
+    LocalM128 a1 = out1[1];
+    LocalM128 t2 = _mm_shuffle_ps(a2, d0, 0x44);
+    LocalM128 t1 = _mm_shuffle_ps(a0, a1, 0xEE);
+    LocalM128 t3 = _mm_shuffle_ps(a2, d0, 0xEE);
+    LocalM128 t0 = _mm_shuffle_ps(a0, a1, 0x44);
     out1[0] = _mm_shuffle_ps(t0, t2, 0x88);
     out1[2] = _mm_shuffle_ps(t1, t3, 0x88);
     out1[1] = _mm_shuffle_ps(t0, t2, 0xDD);
 
-    __m128 b0 = out2[0];
-    __m128 b1 = out2[1];
-    __m128 b2 = out2[2];
-    __m128 u0 = _mm_shuffle_ps(b0, b1, 0x44);
-    __m128 u1 = _mm_shuffle_ps(b0, b1, 0xEE);
-    __m128 u2 = _mm_shuffle_ps(b2, d1, 0x44);
-    __m128 u3 = _mm_shuffle_ps(b2, d1, 0xEE);
+    LocalM128 b0 = out2[0];
+    LocalM128 b1 = out2[1];
+    LocalM128 b2 = out2[2];
+    LocalM128 u0 = _mm_shuffle_ps(b0, b1, 0x44);
+    LocalM128 u1 = _mm_shuffle_ps(b0, b1, 0xEE);
+    LocalM128 u2 = _mm_shuffle_ps(b2, d1, 0x44);
+    LocalM128 u3 = _mm_shuffle_ps(b2, d1, 0xEE);
     out2[0] = _mm_shuffle_ps(u0, u2, 0x88);
     out2[1] = _mm_shuffle_ps(u0, u2, 0xDD);
     out2[2] = _mm_shuffle_ps(u1, u3, 0x88);
@@ -202,38 +210,28 @@ __m128* FUN_00e2ab00(__m128* src, __m128* out1, __m128* out2) {
 
 inline void* operator new(unsigned int, void* p) { return p; }
 
-struct Router_e3a1 {
-    int unk00, unk04, unk08, unk0C;
-    void* m_pStreamAllocator;
-};
-Router_e3a1* __cdecl FUN_00c85750();
-void __cdecl ResizeAudioStream(void* mem, void* array, int sizeOfElement);
-
 struct __declspec(align(16)) Key_e3a1 {
     float m_ax, m_ay, m_az, m_aw;
     float m_bx, m_by, m_bz, m_bw;
     Key_e3a1* FUN_00e39e50();
 };
 
-template <class T> struct hkArray_e3a1 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    void AddBack(const T& t)
-    {
-        Router_e3a1* router = FUN_00c85750();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(router->m_pStreamAllocator, this, sizeof(T));
-        new (&m_data[m_iElementCount]) T(t);
-        m_iElementCount++;
-    }
-};
+// This instantiation fetches the router before the capacity check and its heap only when growing.
+template <>
+__forceinline void hkArray<Key_e3a1>::pushBack(const Key_e3a1& t)
+{
+    hkMemoryRouter& router = hkMemoryRouter::getInstance();
+    if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
+        hkArrayUtil::_reserveMore(*reinterpret_cast<hkMemoryAllocator*>(router.m_heap), this, sizeof(Key_e3a1));
+    new (&m_data[m_iElementCount]) Key_e3a1(t);
+    m_iElementCount++;
+}
 
 struct Track_e3a1 {
     int unk00, unk04;
     int m_numKeys;
     int m_pRayCursor;
-    hkArray_e3a1<Key_e3a1> m_keys;
+    hkArray<Key_e3a1> m_keys;
     void FUN_00e3a1e0(int numKeys);
 };
 
@@ -245,21 +243,21 @@ void Track_e3a1::FUN_00e3a1e0(int numKeys)
     for (int i = 0; i < m_pRayCursor; i++) {
         Key_e3a1 key;
         key.FUN_00e39e50();
-        m_keys.AddBack(key);
+        m_keys.pushBack(key);
     }
 }
 
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_unpacklo_ps(__m128, __m128);
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 
 extern int DAT_010dbacc, DAT_010dbad8, DAT_010dbae4, DAT_010dbaf8;
 extern int DAT_010ccfac, DAT_010ccfa0, DAT_010ccf8c, DAT_010c3bb8;
 extern void* DAT_011b3830[];
 void __cdecl FUN_00d1bb50(void*, void*, void*, void*, void*, void*, void*, void*, void*, int) throw();
 void __cdecl FUN_00d1d490(void*, void*, int, void*, void*, void*) throw();
-typedef __m128 FourFloatVector;
+typedef LocalM128 FourFloatVector;
 __forceinline FourFloatVector packFractions(float x,float y,float z,float w) { FourFloatVector v; v.m128_f32[0]=x; v.m128_f32[1]=y; v.m128_f32[2]=z; v.m128_f32[3]=w; return v; }
 struct RaySource {
     FourFloatVector from, to;
@@ -367,29 +365,6 @@ extern DWORD DAT_0126835c;
 
 unsigned __int64 __cdecl __rdtsc(void);
 
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
-
-struct ProfRec2
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-    const char* m_pName2;
-};
-
-struct ProfBuf
-{
-    DWORD unk00;
-    char* m_pCur;
-    DWORD unk08;
-    char* m_pRecordEnd;
-};
-
 class ScrapAllocator
 {
 public:
@@ -400,20 +375,9 @@ public:
     virtual void Free(void* p, unsigned int size);
 };
 
-struct ScrapHolder
-{
-    DWORD unk00, unk04, unk08, unk0C;
-    ScrapAllocator* m_pAllocationContext;
-};
 
 
 
-template <class T> struct ScrapArr
-{
-    T* m_pData;
-    int m_uiLogicalSize;
-    unsigned int m_uiCap;
-};
 
 class JobTarget
 {
@@ -520,36 +484,36 @@ void __cdecl FUN_00e29b80(int a, int b, int n, void* p1, void* p2, void* p3, Spl
 
 __forceinline void ProfMark(const char* pName)
 {
-    ProfBuf* pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+    hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
     {
-        ProfRec* pRec = (ProfRec*)pBuf->m_pCur;
-        pRec->m_pName = pName;
+        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+        pRec->m_commandAndMonitor = pName;
         { unsigned int ticks;
 __asm {
     rdtsc
     mov dword ptr[ticks], eax
 }
-pRec->m_iTick = ticks; }
-        pBuf->m_pCur = (char*)(pRec + 1);
+pRec->m_time0 = ticks; }
+        pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
     }
 }
 
 __forceinline void ProfMark2(const char* pName, const char* pName2)
 {
-    ProfBuf* pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+    hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
     {
-        ProfRec2* pRec = (ProfRec2*)pBuf->m_pCur;
-        pRec->m_pName = pName;
-        pRec->m_pName2 = pName2;
+        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+        pRec->m_commandAndMonitor = pName;
+        *(const char**)(pRec + 1) = pName2;
         { unsigned int ticks;
 __asm {
     rdtsc
     mov dword ptr[ticks], eax
 }
-pRec->m_iTick = ticks; }
-        pBuf->m_pCur = (char*)(pRec + 1);
+pRec->m_time0 = ticks; }
+        pBuf->m_end.m_storage = reinterpret_cast<char*>((hkMonitorStream::TimerCommand*)((const char**)(pRec + 1) + 1));
     }
 }
 
@@ -563,8 +527,8 @@ template <class T> __forceinline T* BufAlloc(ScrapAllocator* pAlloc, int& n)
 
 template <class T> __forceinline void ArrInit(T*& rData, unsigned int& rCap, int n)
 {
-    ScrapHolder* pHolder = ((ScrapHolder*)FUN_00c85750());
-    ScrapAllocator* pAlloc = pHolder->m_pAllocationContext;
+    hkMemoryRouter* pHolder = &hkMemoryRouter::getInstance();
+    ScrapAllocator* pAlloc = reinterpret_cast<ScrapAllocator*>(pHolder->m_heap);
     int cap = n;
     rData = cap ? BufAlloc<T>(pAlloc, cap) : 0;
     rCap = cap ? cap : 0x80000000;
@@ -572,22 +536,22 @@ template <class T> __forceinline void ArrInit(T*& rData, unsigned int& rCap, int
 
 template <class T> __forceinline void ArrFree(T* pData, unsigned int uiCap)
 {
-    ScrapHolder* pHolder = ((ScrapHolder*)FUN_00c85750());
-    ScrapAllocator* pAlloc = pHolder->m_pAllocationContext;
+    hkMemoryRouter* pHolder = &hkMemoryRouter::getInstance();
+    ScrapAllocator* pAlloc = reinterpret_cast<ScrapAllocator*>(pHolder->m_heap);
     if ((uiCap & 0x80000000) == 0)
         pAlloc->Free(pData, (uiCap & 0x3fffffff) * sizeof(T));
 }
 
-template <class T> __forceinline void ArrClearFree(ScrapArr<T>& arr)
+template <class T> __forceinline void ArrClearFree(hkArrayBase<T>& arr)
 {
-    ScrapHolder* pHolder = ((ScrapHolder*)FUN_00c85750());
-    ScrapAllocator* pAlloc = pHolder->m_pAllocationContext;
-    unsigned int cap = arr.m_uiCap;
-    arr.m_uiLogicalSize = 0;
+    hkMemoryRouter* pHolder = &hkMemoryRouter::getInstance();
+    ScrapAllocator* pAlloc = reinterpret_cast<ScrapAllocator*>(pHolder->m_heap);
+    unsigned int cap = arr.m_iCapacityState;
+    arr.m_iElementCount = 0;
     if ((cap & 0x80000000) == 0)
-        pAlloc->Free(arr.m_pData, (cap & 0x3fffffff) * sizeof(T));
-    arr.m_pData = 0;
-    arr.m_uiCap = 0x80000000;
+        pAlloc->Free(arr.m_data, (cap & 0x3fffffff) * sizeof(T));
+    arr.m_data = 0;
+    arr.m_iCapacityState = 0x80000000;
 }
 
 // @fnv 0x00e2a390
@@ -645,7 +609,7 @@ void __cdecl FUN_00e2a390(int a, int b, int n, float f1, float f2, JobSource* pS
     unsigned int uiCap1;
     SplitOut* pData2;
     unsigned int uiCap2;
-    ScrapArr<int>* pData3;
+    hkArrayBase<int>* pData3;
     int iSize3;
     unsigned int uiCap3;
     int* pData4;
@@ -656,20 +620,20 @@ void __cdecl FUN_00e2a390(int a, int b, int n, float f1, float f2, JobSource* pS
     ArrInit(pData1, uiCap1, n);
     ArrInit(pData2, uiCap2, n);
     {
-        ScrapHolder* pHolder = ((ScrapHolder*)FUN_00c85750());
+        hkMemoryRouter* pHolder = &hkMemoryRouter::getInstance();
         int cap = 8;
-        pData3 = cap ? BufAlloc<ScrapArr<int> >(pHolder->m_pAllocationContext, cap) : 0;
+        pData3 = cap ? BufAlloc<hkArrayBase<int> >(reinterpret_cast<ScrapAllocator*>(pHolder->m_heap), cap) : 0;
         iSize3 = cap;
         uiCap3 = cap ? cap : 0x80000000;
     }
     for (int k = 0; k < iSize3; k++)
     {
-        ScrapArr<int>* pElem = &pData3[k];
+        hkArrayBase<int>* pElem = &pData3[k];
         if (pElem != 0)
         {
-            pElem->m_pData = 0;
-            pElem->m_uiLogicalSize = 0;
-            pElem->m_uiCap = 0x80000000;
+            pElem->m_data = 0;
+            pElem->m_iElementCount = 0;
+            pElem->m_iCapacityState = 0x80000000;
         }
     }
     SplitResult out;
@@ -681,13 +645,13 @@ void __cdecl FUN_00e2a390(int a, int b, int n, float f1, float f2, JobSource* pS
     int off2 = pSrc->m_i2C;
     for (int j = 0; j < 8; j++)
     {
-        if (pData3[j].m_uiLogicalSize == 0)
+        if (pData3[j].m_iElementCount == 0)
             continue;
         {
             AutoJob job;
             InitJob(job);
-            job.m_i20 = pData3[j].m_pData;
-            job.m_i28 = pData3[j].m_uiLogicalSize;
+            job.m_i20 = pData3[j].m_data;
+            job.m_i28 = pData3[j].m_iElementCount;
             job.m_i2C = a;
             job.m_i30 = b;
             job.m_i34 = n;
@@ -719,45 +683,41 @@ void __cdecl FUN_00e2a390(int a, int b, int n, float f1, float f2, JobSource* pS
     ArrFree(pData5, uiCap5);
     ArrFree(pData4, uiCap4);
     {
-        ScrapAllocator* pAlloc = ((ScrapHolder*)FUN_00c85750())->m_pAllocationContext;
+        ScrapAllocator* pAlloc = reinterpret_cast<ScrapAllocator*>(hkMemoryRouter::getInstance().m_heap);
         for (int k = 0; k < iSize3; k++)
             ArrClearFree(pData3[k]);
         if ((uiCap3 & 0x80000000) == 0)
-            pAlloc->Free(pData3, (uiCap3 & 0x3fffffff) * sizeof(ScrapArr<int>));
+            pAlloc->Free(pData3, (uiCap3 & 0x3fffffff) * sizeof(hkArrayBase<int>));
     }
     ArrFree(pData2, uiCap2);
     ArrFree(pData1, uiCap1);
 }
 
-extern "C" __m128 _mm_max_ps(__m128, __m128);
+extern "C" LocalM128 _mm_max_ps(LocalM128, LocalM128);
 namespace SplineMax {
-struct Vec { __m128 value; };
-struct Points { Vec* data; int count; int capacity; };
+// Keep the vector POD: FUN_00e314c0 returns it by value through the hidden pointer.
+struct MaxVec4 { LocalM128 value; };
 }
 // @fnv 0x00e314c0
-SplineMax::Vec __cdecl FUN_00e314c0(const SplineMax::Points& input)
+SplineMax::MaxVec4 __cdecl FUN_00e314c0(const hkArrayBase<SplineMax::MaxVec4>& input)
 {
-    SplineMax::Vec result = input.data[0];
-    const int count = input.count;
+    SplineMax::MaxVec4 result = input.m_data[0];
+    const int count = input.m_iElementCount;
     for (int i = 1; i < count; ++i)
-        result.value = _mm_max_ps(result.value, input.data[i].value);
+        result.value = _mm_max_ps(result.value, input.m_data[i].value);
     return result;
 }
 
 namespace S31470_Intrinsics {
-extern "C" ::__m128 (_mm_min_ps)(::__m128, ::__m128);
+extern "C" ::LocalM128 (_mm_min_ps)(::LocalM128, ::LocalM128);
 }
 
 struct MinVec4 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     void setMin4(const MinVec4& a, const MinVec4& b) { m_vComponents = (S31470_Intrinsics::_mm_min_ps)(a.m_vComponents, b.m_vComponents); }
 };
-struct MinVec4Array {
-    MinVec4* m_data;
-    int m_iElementCount;
-};
 // @fnv 0x00e31470
-MinVec4 __cdecl FUN_00e31470(const MinVec4Array& arr)
+MinVec4 __cdecl FUN_00e31470(const hkArrayBase<MinVec4>& arr)
 {
     MinVec4 r = arr.m_data[0];
     for (int i = 1; i < arr.m_iElementCount; i++)

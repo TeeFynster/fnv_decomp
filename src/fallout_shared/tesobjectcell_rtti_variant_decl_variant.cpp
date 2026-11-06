@@ -6,15 +6,66 @@
 // src/fallout_shared/tesobjectcell_rtti_variant.cpp - RTTI variant unit created 2026-10-24 by rtti_variants.py for paused functions whose original code needs
 // polymorphic classes (TESObjectCELL, TESObjectREFR, TESWorldSpace). The skeleton of src/fallout_shared/tesobjectcell.cpp with those classes made polymorphic; move the functions to
 // their real unit once its classes are.
-#include "tesobjectcell_packet_rtti_variant_decl_tesobjectcell_rtti_variant.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/BGSLoadedReferenceCollection.h"
+#include "../../include/NiNode.h"
+#include "../../include/MobileObject.h"
+#include "../../include/SettingT_GameSettingCollection_.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESObject.h"
+#include "../../include/TESObjectDOOR.h"
+#include "../../include/BaseExtraList.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/PlayerMover.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESWorldSpace.h"
+// Private packet declarations, with shared-header definitions supplied above.
+struct TESRecordHeader;
+class TESImageSpaceModifier;
+template <class T> class BSSimpleList;
+class BGSEncounterZone;
+class DoorCell
+{
+  public:
+    TESForm* GetOwner();
+};
+extern unsigned int DAT_011ca438;
+class GarbageCollectorObjectPtr
+{
+  public:
+    NiAVObject* operator->() const;
+};
+class GlobalObject_00633c90 : public GarbageCollectorObjectPtr
+{
+};
+extern GlobalObject_00633c90 g_011deda4;
+struct InteriorCellData
+{
+    char pad[0x20];
+    float clipDist;
+};
+class CellLightingTemplate
+{
+  public:
+    float FUN_009a9350();
+};
+extern BGSLoadedReferenceCollection* DAT_011c95c8;
+class ActorCause;
+class BSExtraData;
+#include "../../include/RecursiveSpinLock.h"
+class ExteriorCellData
+{
+  public:
+    int x;
+    int y;
+};
+class TESWorldSpace;
+
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
 unsigned int FUN_0054f4c0();
 NiAVObject* FUN_0054f4f0();
-class CellView;
-class MobileObject : public TESObjectREFR
-{
-};
 class RefView : public TESObjectREFR
 {
   public:
@@ -155,7 +206,7 @@ class RefView : public TESObjectREFR
     virtual void v087();
     virtual void v088();
     virtual void v089();
-    virtual void SetParentCell(CellView* pkCell);  // +0x228
+    virtual void SetParentCell(TESObjectCELL* pkCell);  // +0x228
     virtual void v0x8b();
     virtual void v08c();
     virtual void v08d();
@@ -170,7 +221,7 @@ class RefView : public TESObjectREFR
     bool FUN_00564e60();
     bool FUN_00440da0();  // GetDisabled
     class RefExtra* FUN_005d43c0();
-    CellView* FUN_008d6f30();  // GetParentCell
+    TESObjectCELL* FUN_008d6f30();  // GetParentCell
     bool FUN_005656d0();
     bool FUN_0056a250();
     bool FUN_00437b90();
@@ -181,7 +232,7 @@ class RefView : public TESObjectREFR
 class RefExtra
 {
   public:
-    void FUN_0041d390(CellView* pkCell);
+    void FUN_0041d390(TESObjectCELL* pkCell);
 };
 struct RefList
 {
@@ -204,8 +255,8 @@ extern CellDataHandler* DAT_011c3f2c;
 class CellTES
 {
   public:
-    bool FUN_004511e0(CellView* pkCell, int iValue);
-    int FUN_00458be0(CellView* pkCell, int iA, int iB);
+    bool FUN_004511e0(TESObjectCELL* pkCell, int iValue);
+    int FUN_00458be0(TESObjectCELL* pkCell, int iA, int iB);
 };
 extern CellTES* DAT_011dea10;
 class CellPlayer
@@ -246,144 +297,7 @@ class CellTaskQueue
 };
 CellTaskQueue* FUN_004537b0();
 bool FUN_008c7aa0();
-class CellView
-{
-  public:
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v00a();
-    virtual void v00b();
-    virtual void v00c();
-    virtual void v00d();
-    virtual void v00e();
-    virtual void v00f();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v01a();
-    virtual void v01b();
-    virtual void v01c();
-    virtual void v01d();
-    virtual void v01e();
-    virtual void v01f();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v02a();
-    virtual void v02b();
-    virtual void v02c();
-    virtual void v02d();
-    virtual void v02e();
-    virtual void v02f();
-    virtual void v030();
-    virtual void v031();
-    virtual void Unk_0c8(int iValue);  // +0xc8
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    unsigned short m_usPersistentCount;  // +0xa8
-    unsigned short unkaa;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    void* m_pkNavMeshes;  // +0xc4
 
-    bool FUN_005516c0();
-    void FUN_00541ac0();  // CellRefLockEnter
-    void FUN_00541ae0();  // CellRefLockLeave
-    RefList* FUN_009604f0();
-    CellNavHandler* FUN_0054ddd0();
-    void FUN_0054ca90(RefView* pkRef);  // RemoveReference
-    bool FUN_00450ff0();
-    bool FUN_004523c0();
-    void FUN_00545560(RefView* pkRef);
-    void FUN_005455c0(RefView* pkRef);
-    void FUN_00548880(RefView* pkRef, bool bArg);
-    bool FUN_00548720();
-    bool FUN_00425fd0();  // IsInterior
-    void FUN_00548230(RefView* pkRef, bool bArg);
-};
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-    int GetFormType();
-};
-class TESObject : public TESForm
-{
-};
-class TESBoundObject : public TESObject
-{
-};
-class TESObjectDOOR : public TESBoundObject
-{
-  public:
-    bool FUN_005194d0();
-    bool HasEntry(TESForm* destination);
-};
 class ReferenceList
 {
   public:
@@ -455,7 +369,7 @@ bool TESObjectCELL::FUN_005434d0(FormGroupQuery* group)
 
             if (cell)
 
-                matched = MatchForm(cell);
+                matched = Sort(cell);
 
             break;
         }
@@ -501,7 +415,7 @@ bool TESObjectCELL::FUN_005434d0(FormGroupQuery* group)
 
                 if (world)
 
-                    matched = MatchForm(world);
+                    matched = Sort(world);
             }
             else
                 matched = true;

@@ -1,8 +1,9 @@
-// fallout_shared/teleportdata_decls.h: declares DoorTeleportLoadData, BaseProcess, DoorTeleportSpaceReceiver, DoorTeleportSpaceOwner, DoorCell and more
+// fallout_shared/teleportdata_decls.h: declares DoorTeleportLoadData, DoorTeleportSpaceReceiver, DoorTeleportSpaceOwner, DoorCell and more
 #ifndef FNV_TELEPORTDATA_DECLS_H
 #define FNV_TELEPORTDATA_DECLS_H
+#include "../../include/layout_support.h"
 #include "ActorPackageContext.h"
-#include "TESForm.h"
+#include "../../include/TESForm.h"
 #include "NiPoint3.h"
 #include "TESFile.h"
 extern "C" void* __cdecl memset(void*, int, unsigned int);
@@ -12,15 +13,8 @@ struct DoorTeleportLoadData
     NiPoint3 position;
     NiPoint3 rotation;
     unsigned char flags;
-    void FUN_0055a400();
+    DoorTeleportLoadData();  // 0x0055a400
     void SwapEndian();
-};
-class BaseProcess
-{
-  public:
-    char layoutPrefix[4];
-    ActorPackageContext m_kProcessData;
-    ActorPackageContext* GetCurrentProcessData(void);
 };
 class DoorTeleportSpaceReceiver
 {

@@ -1,7 +1,268 @@
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
-// SSE_DECLARATIONS_DEFER_TO_SDK
 // src/havok/physics/internal/collide/gjk/hkpgsk.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/gjk/hkpgsk.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+// Preserve the original intrinsic type; the SDK union changes alias analysis.
+#ifndef _INCLUDED_MM2
+// Exe-matched intrinsic packet; __m128 remains an ABI compatibility alias.
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+extern "C"
+{
+    __m128 _mm_sub_ps(__m128, __m128);
+    __m128 _mm_mul_ps(__m128, __m128);
+    __m128 _mm_add_ps(__m128, __m128);
+    __m128 _mm_add_ss(__m128, __m128);
+    __m128 _mm_shuffle_ps(__m128, __m128, int);
+    __m128 _mm_unpacklo_ps(__m128, __m128);
+    __m128 _mm_unpackhi_ps(__m128, __m128);
+    __m128 _mm_movelh_ps(__m128, __m128);
+    __m128 _mm_movehl_ps(__m128, __m128);
+    __m128 _mm_xor_ps(__m128, __m128);
+    __m128 _mm_cmplt_ps(__m128, __m128);
+    __m128 _mm_setzero_ps();
+    int _mm_movemask_ps(__m128);
+    void _mm_store_ss(float*, __m128);
+    __m128 _mm_sub_ss(__m128, __m128);
+    __m128 _mm_mul_ss(__m128, __m128);
+    __m128 _mm_rsqrt_ss(__m128);
+    __m128 _mm_and_ps(__m128, __m128);
+    __m128 _mm_andnot_ps(__m128, __m128);
+    __m128 _mm_cmpeq_ss(__m128, __m128);
+    __m128 _mm_set_ss(float);
+    __m128 _mm_load_ps(const float*);
+}
+#define _INCLUDED_MM2
+#endif
+
+#include "../../../../../../include/hkVector4.h"
+// local form of hkVector4: 0x00da8500 needs separate packet aliasing to preserve instruction scheduling.
+
+
+// Define FNV_VECTOR_USE_LOCAL_SSE when __m128 and intrinsics are already declared.
+#if !defined(FNV_VECTOR_USE_LOCAL_SSE)
+#include <xmmintrin.h>
+#endif
+
+class Scalar;
+class Comparison;
+class Transform;
+class hkRotation;
+
+class GskVectorCallLocal_00da8500
+{
+public:
+    union
+    {
+        __m128 q;
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+    };
+
+    __forceinline GskVectorCallLocal_00da8500() {}
+    __forceinline GskVectorCallLocal_00da8500(const GskVectorCallLocal_00da8500& vector) : q(vector.q) {}
+    __forceinline GskVectorCallLocal_00da8500(const __m128& vector) : q(vector) {}
+    GskVectorCallLocal_00da8500(float x, float y, float z);
+    __forceinline GskVectorCallLocal_00da8500& operator=(const GskVectorCallLocal_00da8500& vector)
+    {
+        q = vector.q;
+        return *this;
+    }
+    __forceinline void operator=(const __m128& vector)
+    {
+        q = vector;
+    }
+    operator __m128() const;
+    GskVectorCallLocal_00da8500 operator*(float value) const;
+    GskVectorCallLocal_00da8500 operator+(const GskVectorCallLocal_00da8500& vector) const;
+    GskVectorCallLocal_00da8500 operator-() const;
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    __m128& packet();
+    const __m128& packet() const;
+
+    void set(float x, float y, float z, float w = 0.0f);
+    void zero();
+    void setZero4();
+    void subtract(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b);
+    void sub(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b);
+    void setSub(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b);
+    void setSub4(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b);
+    void add(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b);
+    void setAdd(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b);
+    void setAdd4(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b);
+    void add4(const GskVectorCallLocal_00da8500& vector);
+    void mul(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b);
+    void mul4(const GskVectorCallLocal_00da8500& vector);
+    void mul4(const Scalar& scalar);
+    void multiply(const Scalar& scalar);
+    void scale(const Scalar& scalar);
+    void product(const Scalar& scalar, const GskVectorCallLocal_00da8500& vector);
+    void cross(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b);
+    void setCross(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b);
+    void negate(const GskVectorCallLocal_00da8500& vector);
+    void setNeg4(const GskVectorCallLocal_00da8500& vector);
+    void addMul(const GskVectorCallLocal_00da8500& a, __m128 scale, const GskVectorCallLocal_00da8500& b);
+    void setAddMul4(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b, const Scalar& scalar);
+    void interpolate(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b, const Scalar& t);
+    void setInterpolate4(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b, const Scalar& t);
+    void Interpolate(const GskVectorCallLocal_00da8500& oldValue, const GskVectorCallLocal_00da8500& newValue, float factor);
+    void SetTransformedPoint(const Transform& transform, const GskVectorCallLocal_00da8500& point);
+
+    Scalar getSimdAt(int index) const;
+    Scalar dot(const GskVectorCallLocal_00da8500& vector) const;
+    Scalar dot3(const GskVectorCallLocal_00da8500& vector) const;
+    float DotProduct(const GskVectorCallLocal_00da8500& vector);
+    Scalar sum() const;
+    Scalar norm() const;
+    Scalar lengthSquared3() const;
+    Scalar length3() const;
+    float length() const;
+    Scalar inverseLength() const;
+    void normalize();
+    void normalize3();
+    Comparison compareLessThanZero4() const;
+    int getMajorAxis() const;
+    int maxAxisSecond() const;
+    int maxAxis() const;
+    float GetAngle();
+
+    void FUN_00416870(float x, float y, float z);
+    GskVectorCallLocal_00da8500 FUN_00439ef0(const GskVectorCallLocal_00da8500& vector);
+    GskVectorCallLocal_00da8500 FUN_00439e90(const GskVectorCallLocal_00da8500& vector);
+    void FUN_00439180(float value);
+    void FUN_004a0c10();
+    void FUN_005611c0();
+    void FUN_00c66320(const GskVectorCallLocal_00da8500* a, const GskVectorCallLocal_00da8500* b);
+    void FUN_00c74ac0(const GskVectorCallLocal_00da8500* a, const GskVectorCallLocal_00da8500* b);
+    void FUN_00c74c90(GskVectorCallLocal_00da8500* vector);
+    void FUN_00c7f640(const Transform& transform, const GskVectorCallLocal_00da8500& point);
+    void FUN_00cb2450(const GskVectorCallLocal_00da8500* vector, float value);
+    void FUN_00cb26e0(const hkRotation* rotation);
+
+    template <int I> void splat(const GskVectorCallLocal_00da8500& vector);
+
+    static const GskVectorCallLocal_00da8500& getZero();
+};
+
+
+__forceinline hkSimdReal::hkSimdReal()
+{}
+
+__forceinline hkSimdReal::hkSimdReal(const __m128& input) : m_vValue(input)
+{}
+
+__forceinline hkSimdReal::operator float() const
+{
+    float scalar;
+    _mm_store_ss(&scalar, m_vValue);
+    return scalar;
+}
+
+__forceinline __m128 hkSimdReal::broadcast() const
+{
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+
+__forceinline const __m128& hkSimdReal::getQuad() const
+{
+    return m_vValue;
+}
+
+
+__forceinline hkVector4::hkVector4(const hkVector4& vector) : m_vComponents(vector.m_vComponents)
+{}
+
+
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4::setAdd4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4::setMul4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4::setCross(const hkVector4& a, const hkVector4& b)
+{
+    __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9),
+                              _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2));
+    __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2),
+                              _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(cross0, cross1);
+}
+
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& vector) const
+{
+    __m128 p = _mm_mul_ps(m_vComponents, vector.m_vComponents);
+    __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
+}
+
+__forceinline hkSimdReal hkVector4::horizontalAdd3() const
+{
+    __m128 s = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55), m_vComponents);
+    return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa), s);
+}
+
+__forceinline hkSimdReal hkVector4::lengthSquared3() const
+{
+    return dot3(*this);
+}
+
+// The shared class has no inverse-length member; keep the calculation local.
+static __forceinline hkSimdReal vectorLengthInverse3(const hkVector4& vector)
+{
+    __m128 len2 = vector.dot3(vector).getQuad();
+    __m128 e = _mm_rsqrt_ss(len2);
+    __m128 r = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e),
+                          _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(len2, e), e)));
+    return _mm_andnot_ps(_mm_cmpeq_ss(len2, _mm_set_ss(0.0f)), r);
+}
+
+extern const __m128 DAT_010c44d0;
+__forceinline void hkVector4::setFlipSign(const hkVector4& vector, const hkSimdReal& sign)
+{
+    m_vComponents = _mm_xor_ps(_mm_and_ps(sign.broadcast(), DAT_010c44d0), vector.m_vComponents);
+}
+
+__forceinline void hkVector4::mul4(const hkSimdReal& scalar)
+{
+    m_vComponents = _mm_mul_ps(m_vComponents, scalar.broadcast());
+}
+
+__forceinline void hkVector4::normalize3()
+{
+    __m128 scale = vectorLengthInverse3(*this).broadcast();
+    m_vComponents = _mm_mul_ps(scale, m_vComponents);
+}
+
+__forceinline void hkVector4::SetAllComponents(const hkSimdReal& scalar)
+{
+    m_vComponents = scalar.broadcast();
+}
+
+__forceinline void hkVector4::setW(const hkVector4& vector)
+{
+    m_vComponents = _mm_shuffle_ps(m_vComponents, _mm_unpackhi_ps(m_vComponents, vector.m_vComponents), 0xc4);
+}
 
 struct Entry
 {
@@ -106,56 +367,20 @@ void ThisClass::FUN_00da9790(Dest* pDest)
     pDest->words[this->count1] = u0;
 }
 
-#ifndef _INCLUDED_MM2
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-#endif
-#ifndef _INCLUDED_MM2
-extern "C"
-{
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    __m128 _mm_setzero_ps();
-    int _mm_movemask_ps(__m128);
-}
-#endif
-
 struct PlainVector
 {
     float x, y, z, w;
-};
-struct Vector
-{
-    __m128 quad;
-    Vector()
-    {}
-    Vector& operator=(const Vector& v)
-    {
-        quad = v.quad;
-        return *this;
-    }
 };
 extern const __m128 signMask;
 
 struct Simplex
 {
     int countA, countB, unk08, unk0c, unk10, status, unk18, unk1c;
-    Vector a[4];
-    Vector unk60, unk70, unk80, unk90;
-    Vector verticesB[8];
-    Vector result, axis, unk140, unk150, weights;
-    int FUN_00da8500(const Vector* point, Vector* vertices, int orient);
+    GskVectorCallLocal_00da8500 a[4];
+    GskVectorCallLocal_00da8500 unk60, unk70, unk80, unk90;
+    GskVectorCallLocal_00da8500 verticesB[8];
+    GskVectorCallLocal_00da8500 result, axis, unk140, unk150, weights;
+    int FUN_00da8500(const GskVectorCallLocal_00da8500* point, GskVectorCallLocal_00da8500* vertices, int orient);
 };
 
 static __forceinline __m128 cross(__m128 a, __m128 b)
@@ -169,62 +394,62 @@ static __forceinline void swapFloat(float& a, float& b)
     a = b;
     b = temp;
 }
-static __forceinline Vector copyVector(const PlainVector& p)
+static __forceinline GskVectorCallLocal_00da8500 copyVector(const PlainVector& p)
 {
-    Vector v;
-    reinterpret_cast<PlainVector&>(v.quad) = p;
+    GskVectorCallLocal_00da8500 v;
+    reinterpret_cast<PlainVector&>(v.q) = p;
     return v;
 }
 
-static __forceinline __m128 triangleSideTests(const Vector* point, Vector* vertices, Vector& normal, Vector& weights)
+static __forceinline __m128 triangleSideTests(const GskVectorCallLocal_00da8500* point, GskVectorCallLocal_00da8500* vertices, GskVectorCallLocal_00da8500& normal, GskVectorCallLocal_00da8500& weights)
 {
-    __m128 edgeA = _mm_sub_ps(vertices[2].quad, vertices[1].quad);
-    __m128 edgeB = _mm_sub_ps(vertices[0].quad, vertices[2].quad);
-    __m128 edgeC = _mm_sub_ps(vertices[1].quad, vertices[0].quad);
-    normal.quad = cross(edgeA, edgeB);
-    __m128 pa = _mm_sub_ps(point->quad, vertices[1].quad);
-    __m128 pb = _mm_sub_ps(point->quad, vertices[2].quad);
-    __m128 pc = _mm_sub_ps(point->quad, vertices[0].quad);
-    __m128 da = _mm_mul_ps(cross(pa, edgeA), normal.quad);
-    __m128 db = _mm_mul_ps(cross(pb, edgeB), normal.quad);
-    __m128 dc = _mm_mul_ps(cross(pc, edgeC), normal.quad);
+    __m128 edgeA = _mm_sub_ps(vertices[2].q, vertices[1].q);
+    __m128 edgeB = _mm_sub_ps(vertices[0].q, vertices[2].q);
+    __m128 edgeC = _mm_sub_ps(vertices[1].q, vertices[0].q);
+    normal.q = cross(edgeA, edgeB);
+    __m128 pa = _mm_sub_ps(point->q, vertices[1].q);
+    __m128 pb = _mm_sub_ps(point->q, vertices[2].q);
+    __m128 pc = _mm_sub_ps(point->q, vertices[0].q);
+    __m128 da = _mm_mul_ps(cross(pa, edgeA), normal.q);
+    __m128 db = _mm_mul_ps(cross(pb, edgeB), normal.q);
+    __m128 dc = _mm_mul_ps(cross(pc, edgeC), normal.q);
     __m128 tmp0 = _mm_unpacklo_ps(da, db);
     __m128 tmp1 = _mm_unpackhi_ps(da, db);
     da = _mm_movelh_ps(tmp0, dc);
     db = _mm_shuffle_ps(_mm_movehl_ps(da, tmp0), dc, 0xd4);
     dc = _mm_shuffle_ps(tmp1, dc, 0xe4);
-    weights.quad = _mm_add_ps(_mm_add_ps(da, db), dc);
-    return weights.quad;
+    weights.q = _mm_add_ps(_mm_add_ps(da, db), dc);
+    return weights.q;
 }
 
 // Computes barycentric side tests for point against a triangle, optionally flips orientation and swaps vertices if the point is behind the face.
 // @fnv 0x00da8500
-int Simplex::FUN_00da8500(const Vector* point, Vector* vertices, int orient)
+int Simplex::FUN_00da8500(const GskVectorCallLocal_00da8500* point, GskVectorCallLocal_00da8500* vertices, int orient)
 {
-    Vector normalVector;
-    __m128& normal = normalVector.quad;
+    GskVectorCallLocal_00da8500 normalVector;
+    __m128& normal = normalVector.q;
     __m128 tested = triangleSideTests(point, vertices, normalVector, weights);
     int bits = _mm_movemask_ps(_mm_cmplt_ps(tested, _mm_setzero_ps())) & 7;
     if (orient)
     {
-        result.quad = normal;
+        result.q = normal;
         if (bits == 7)
         {
-            __m128 d = _mm_mul_ps(_mm_sub_ps(a[0].quad, verticesB[0].quad), normal);
+            __m128 d = _mm_mul_ps(_mm_sub_ps(a[0].q, verticesB[0].q), normal);
             __m128 dy = _mm_shuffle_ps(d, d, 0x55);
             __m128 dz = _mm_shuffle_ps(d, d, 0xaa);
             __m128 dot = _mm_add_ss(dz, _mm_add_ss(dy, d));
             if (_mm_movemask_ps(dot) & 1)
             {
                 normal = _mm_xor_ps(normal, signMask);
-                result.quad = normal;
-                Vector tmp = copyVector(reinterpret_cast<const PlainVector&>(vertices[0].quad));
+                result.q = normal;
+                GskVectorCallLocal_00da8500 tmp = copyVector(reinterpret_cast<const PlainVector&>(vertices[0].q));
                 vertices[0] = vertices[1];
                 vertices[1] = tmp;
-                tmp = copyVector(reinterpret_cast<const PlainVector&>(vertices[4].quad));
+                tmp = copyVector(reinterpret_cast<const PlainVector&>(vertices[4].q));
                 vertices[4] = vertices[5];
                 vertices[5] = tmp;
-                swapFloat(weights.quad.m128_f32[0], weights.quad.m128_f32[1]);
+                swapFloat(weights.q.m128_f32[0], weights.q.m128_f32[1]);
                 status = 1;
             }
         }
@@ -233,91 +458,6 @@ int Simplex::FUN_00da8500(const Vector* point, Vector* vertices, int orient)
 }
 
 namespace fnv_00da8700 {
-#ifndef _INCLUDED_MM2
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-#endif
-#ifndef _INCLUDED_MM2
-extern "C"
-{
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_load_ps(const float*);
-}
-#endif
-
-extern const __m128 g_signMask;
-
-struct VectorComponentValue
-{
-    __m128 m_vValue;
-};
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-
-    __forceinline void setCross(const hkVector4& v0, const hkVector4& v1)
-    {
-        m_vComponents = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
-                                              _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2)),
-                                   _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
-                                              _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9)));
-    }
-
-    __forceinline VectorComponentValue dot3(const hkVector4& v) const
-    {
-        __m128 p = _mm_mul_ps(m_vComponents, v.m_vComponents);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
-        VectorComponentValue r;
-        r.m_vValue = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
-        return r;
-    }
-
-    __forceinline VectorComponentValue lengthInverse3() const
-    {
-        __m128 len2 = dot3(*this).m_vValue;
-        __m128 e = _mm_rsqrt_ss(len2);
-        __m128 r = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e),
-                              _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(len2, e), e)));
-        VectorComponentValue res;
-        res.m_vValue = _mm_andnot_ps(_mm_cmpeq_ss(len2, _mm_set_ss(0.0f)), r);
-        return res;
-    }
-
-    __forceinline void setFlipSign(const hkVector4& v, const VectorComponentValue& s)
-    {
-        m_vComponents = _mm_xor_ps(_mm_and_ps(_mm_shuffle_ps(s.m_vValue, s.m_vValue, 0), g_signMask), v.m_vComponents);
-    }
-
-    __forceinline void mul4(const VectorComponentValue& s)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, _mm_shuffle_ps(s.m_vValue, s.m_vValue, 0));
-    }
-};
 
 struct Tri
 {
@@ -328,7 +468,7 @@ struct Tri
 
 // Computes the signed distance from point to the plane of the triangle defined by tri, using ref to orient the normal.
 // @fnv 0x00da8700
-static __declspec(noinline) VectorComponentValue
+static __declspec(noinline) hkSimdReal
     FUN_00da8700(const Tri* tri, hkVector4* normal, const hkVector4* ref, const hkVector4* point)
 {
     hkVector4 e0;
@@ -336,7 +476,7 @@ static __declspec(noinline) VectorComponentValue
     hkVector4 e1;
     e1.setSub4(tri->m_v0, tri->m_v2);
     normal->setCross(e0, e1);
-    VectorComponentValue inv = normal->lengthInverse3();
+    hkSimdReal inv = vectorLengthInverse3(*normal);
     normal->setFlipSign(*normal, normal->dot3(*ref));
     normal->mul4(inv);
     hkVector4 d;
@@ -344,7 +484,7 @@ static __declspec(noinline) VectorComponentValue
     return d.dot3(*normal);
 }
 
-void Caller00da(const Tri* tri, hkVector4* normal, const hkVector4* ref, VectorComponentValue* dist,
+void Caller00da(const Tri* tri, hkVector4* normal, const hkVector4* ref, hkSimdReal* dist,
                 const hkVector4* point)
 {
     *dist = FUN_00da8700(tri, normal, ref, point);
@@ -472,48 +612,9 @@ extern "C" int _mm_movemask_ps(__m128);
 
 extern const signed char DAT_010cb440[];
 
-struct S00da8390_Real
-{
-    __m128 r;
-    S00da8390_Real operator*(const S00da8390_Real& o) const
-    {
-        S00da8390_Real t;
-        t.r = _mm_mul_ss(r, o.r);
-        return t;
-    }
-    S00da8390_Real operator-(const S00da8390_Real& o) const
-    {
-        S00da8390_Real t;
-        t.r = _mm_sub_ss(r, o.r);
-        return t;
-    }
-};
-
-struct S00da8390_Vec
-{
-    __m128 q;
-    void setSub4(const S00da8390_Vec& a, const S00da8390_Vec& b)
-    {
-        q = _mm_sub_ps(a.q, b.q);
-    }
-    void setMul4(const S00da8390_Vec& a, const S00da8390_Vec& b)
-    {
-        q = _mm_mul_ps(a.q, b.q);
-    }
-    S00da8390_Real horizontalAdd3() const
-    {
-        S00da8390_Real t;
-        __m128 y = _mm_shuffle_ps(q, q, 0x55);
-        y = _mm_add_ss(y, q);
-        __m128 z = _mm_shuffle_ps(q, q, 0xaa);
-        t.r = _mm_add_ss(z, y);
-        return t;
-    }
-};
-
 // For each i, when dist[a] and dist[b] are both non-negative, sets one to -1 from a dot-product test with p and v[3]; returns first index with dist > 0, else -1.
 // @fnv 0x00da8390
-static __declspec(noinline) int __cdecl FUN_00da8390(const S00da8390_Vec* apVertices, const S00da8390_Vec* apPoint,
+static __declspec(noinline) int __cdecl FUN_00da8390(const hkVector4* apVertices, const hkVector4* apPoint,
                                                      float* apDistances)
 {
     for (int i = 0; i < 3; ++i)
@@ -522,29 +623,29 @@ static __declspec(noinline) int __cdecl FUN_00da8390(const S00da8390_Vec* apVert
         int b = DAT_010cb440[i];
         if (apDistances[a] >= 0.0f && apDistances[b] >= 0.0f)
         {
-            S00da8390_Vec ea;
+            hkVector4 ea;
             ea.setSub4(apVertices[a], apVertices[i]);
-            S00da8390_Vec eb;
+            hkVector4 eb;
             eb.setSub4(apVertices[b], apVertices[i]);
-            S00da8390_Vec d;
+            hkVector4 d;
             d.setSub4(*apPoint, apVertices[i]);
-            S00da8390_Vec n;
+            hkVector4 n;
             n.setSub4(apVertices[3], apVertices[i]);
-            S00da8390_Vec m_dea;
+            hkVector4 m_dea;
             m_dea.setMul4(d, ea);
-            S00da8390_Vec m_deb;
+            hkVector4 m_deb;
             m_deb.setMul4(d, eb);
-            S00da8390_Vec m_nea;
+            hkVector4 m_nea;
             m_nea.setMul4(n, ea);
-            S00da8390_Vec m_neb;
+            hkVector4 m_neb;
             m_neb.setMul4(n, eb);
-            S00da8390_Real nb = m_neb.horizontalAdd3();
-            S00da8390_Real da = m_dea.horizontalAdd3();
-            S00da8390_Real db = m_deb.horizontalAdd3();
-            S00da8390_Real na = m_nea.horizontalAdd3();
-            S00da8390_Real s;
-            s.r = _mm_sub_ss(_mm_mul_ss(da.r, nb.r), _mm_mul_ss(db.r, na.r));
-            if (_mm_movemask_ps(s.r) & 1)
+            hkSimdReal nb = m_neb.horizontalAdd3();
+            hkSimdReal da = m_dea.horizontalAdd3();
+            hkSimdReal db = m_deb.horizontalAdd3();
+            hkSimdReal na = m_nea.horizontalAdd3();
+            hkSimdReal s;
+            s.m_vValue = _mm_sub_ss(_mm_mul_ss(da.m_vValue, nb.m_vValue), _mm_mul_ss(db.m_vValue, na.m_vValue));
+            if (_mm_movemask_ps(s.m_vValue) & 1)
                 apDistances[b] = -1.0f;
             else
                 apDistances[a] = -1.0f;
@@ -559,7 +660,7 @@ static __declspec(noinline) int __cdecl FUN_00da8390(const S00da8390_Vec* apVert
     return -1;
 }
 
-int S00da8390_Call(const S00da8390_Vec* p, float* dist, const S00da8390_Vec* v)
+int S00da8390_Call(const hkVector4* p, float* dist, const hkVector4* v)
 {
     return FUN_00da8390(v, p, dist);
 }
@@ -576,126 +677,25 @@ extern "C"
 
 extern const __m128 DAT_010c44d0;
 
-class S00da8820_Simd
-{
-  public:
-    S00da8820_Simd(const __m128& x) : m_vValue(x)
-    {}
-    operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-    __forceinline __m128 broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-    __forceinline const __m128& getQuad() const
-    {
-        return m_vValue;
-    }
-
-  private:
-    __m128 m_vValue;
-};
-
-class S00da8820_Vec4
-{
-  public:
-    void operator=(const S00da8820_Vec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void setSub4(const S00da8820_Vec4& v0, const S00da8820_Vec4& v1)
-    {
-        m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    void setAdd4(const S00da8820_Vec4& v0, const S00da8820_Vec4& v1)
-    {
-        m_vComponents = _mm_add_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    void setMul4(const S00da8820_Vec4& a, const S00da8820_Vec4& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void setCross(const S00da8820_Vec4& v0, const S00da8820_Vec4& v1)
-    {
-        __m128 cross0;
-        cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
-                            _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
-        __m128 cross1;
-        cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
-                            _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    S00da8820_Simd dot3(const S00da8820_Vec4& a) const
-    {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
-    }
-    S00da8820_Simd horizontalAdd3() const
-    {
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55), m_vComponents);
-        return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa), xySum);
-    }
-    S00da8820_Simd lengthSquared3() const
-    {
-        return this->dot3(*this);
-    }
-    __forceinline S00da8820_Simd lengthInverse3() const
-    {
-        const __m128 half = _mm_set_ss(0.5f);
-        const __m128 three = _mm_set_ss(3.0f);
-        const __m128 zero = _mm_set_ss(0.0f);
-        const __m128 len2 = this->dot3(*this).getQuad();
-        const __m128 len2EqualsZero = _mm_cmpeq_ss(len2, zero);
-        const __m128 approx = _mm_rsqrt_ss(len2);
-        const __m128 refined =
-            _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
-        return _mm_andnot_ps(len2EqualsZero, refined);
-    }
-    __forceinline void normalize3()
-    {
-        __m128 lenInv = lengthInverse3().broadcast();
-        m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
-    }
-    void SetAllComponents(const S00da8820_Simd& a)
-    {
-        m_vComponents = _mm_shuffle_ps(a.getQuad(), a.getQuad(), 0);
-    }
-    void setW(const S00da8820_Vec4& w)
-    {
-        m_vComponents = _mm_shuffle_ps(m_vComponents, _mm_unpackhi_ps(m_vComponents, w.m_vComponents), 0xc4);
-    }
-    void setFlipSign4(const S00da8820_Vec4& v, const S00da8820_Simd& s)
-    {
-        m_vComponents = _mm_xor_ps(_mm_and_ps(s.broadcast(), DAT_010c44d0), v.m_vComponents);
-    }
-
-    __m128 m_vComponents;
-};
-
 struct S00da8820_Result
 {
-    S00da8820_Vec4 m_kFirstVector;
-    S00da8820_Vec4 m_kClosestPointOnSecond;
+    hkVector4 m_kFirstVector;
+    hkVector4 m_kClosestPointOnSecond;
     float m_fValue;
 };
 
-int __cdecl FUN_00d22e40(const S00da8820_Vec4& A, const S00da8820_Vec4& dA, const S00da8820_Vec4& B,
-                         const S00da8820_Vec4& dB, S00da8820_Result& result);
+int __cdecl FUN_00d22e40(const hkVector4& A, const hkVector4& dA, const hkVector4& B,
+                         const hkVector4& dB, S00da8820_Result& result);
 
 // Finds the closest points of two edges, builds a plane from their cross product (using oldNormal if near-parallel), and stores the point and plane.
 // @fnv 0x00da8820
-static __declspec(noinline) void __cdecl FUN_00da8820(S00da8820_Vec4* edgeA, S00da8820_Vec4* edgeB,
-                                                      const S00da8820_Vec4& oldNormal, S00da8820_Vec4& pointOut,
-                                                      S00da8820_Vec4& planeOut)
+static __declspec(noinline) void __cdecl FUN_00da8820(hkVector4* edgeA, hkVector4* edgeB,
+                                                      const hkVector4& oldNormal, hkVector4& pointOut,
+                                                      hkVector4& planeOut)
 {
-    S00da8820_Vec4 dA;
+    hkVector4 dA;
     dA.setSub4(edgeA[1], edgeA[0]);
-    S00da8820_Vec4 dB;
+    hkVector4 dB;
     dB.setSub4(edgeB[1], edgeB[0]);
 
     S00da8820_Result result;
@@ -703,17 +703,17 @@ static __declspec(noinline) void __cdecl FUN_00da8820(S00da8820_Vec4* edgeA, S00
 
     planeOut.setCross(dA, dB);
 
-    S00da8820_Vec4 vDeltaASquared;
+    hkVector4 vDeltaASquared;
     vDeltaASquared.setMul4(dA, dA);
-    S00da8820_Vec4 b2;
+    hkVector4 b2;
     b2.setMul4(dB, dB);
-    S00da8820_Vec4 sum;
+    hkVector4 sum;
     sum.setAdd4(vDeltaASquared, b2);
     float lenSq = sum.horizontalAdd3();
     float crossLenSq = planeOut.lengthSquared3();
     if (crossLenSq * 0.001f > lenSq * lenSq)
     {
-        planeOut.setFlipSign4(planeOut, planeOut.dot3(oldNormal));
+        planeOut.setFlipSign(planeOut, planeOut.dot3(oldNormal));
         planeOut.normalize3();
     }
     else
@@ -721,17 +721,17 @@ static __declspec(noinline) void __cdecl FUN_00da8820(S00da8820_Vec4* edgeA, S00
         planeOut = oldNormal;
     }
 
-    S00da8820_Vec4 d;
+    hkVector4 d;
     d.setSub4(edgeA[0], edgeB[0]);
-    S00da8820_Simd dist = d.dot3(planeOut);
+    hkSimdReal dist = d.dot3(planeOut);
     pointOut = result.m_kFirstVector;
-    S00da8820_Vec4 w;
+    hkVector4 w;
     w.SetAllComponents(dist);
     planeOut.setW(w);
 }
 
-void __cdecl S00da8820_RecalcContact(S00da8820_Vec4* vA, S00da8820_Vec4* vB, const S00da8820_Vec4& n, S00da8820_Vec4& p,
-                                     S00da8820_Vec4& plane)
+void __cdecl S00da8820_RecalcContact(hkVector4* vA, hkVector4* vB, const hkVector4& n, hkVector4& p,
+                                     hkVector4& plane)
 {
     FUN_00da8820(vA, vB, n, p, plane);
 }
@@ -1627,32 +1627,6 @@ extern "C" __m128 _mm_and_ps(__m128, __m128);
 extern "C" __m128 _mm_load_ss(const float*);
 extern "C" void _mm_store_ss(float*, __m128);
 
-struct hkVector4
-{
-    __m128 m_vComponents;
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setCross(const hkVector4& v1, const hkVector4& v2)
-    {
-        __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
-                                   _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
-                                   _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-};
-
-static __forceinline void hkTranspose3(hkVector4& c0, hkVector4& c1, hkVector4& c2)
-{
-    __m128 tmp = _mm_unpacklo_ps(c0.m_vComponents, c1.m_vComponents);
-    __m128 ctmp = _mm_unpackhi_ps(c0.m_vComponents, c1.m_vComponents);
-    c0.m_vComponents = _mm_movelh_ps(tmp, c2.m_vComponents);
-    c1.m_vComponents = _mm_shuffle_ps(_mm_movehl_ps(c0.m_vComponents, tmp), c2.m_vComponents, 0xd4);
-    c2.m_vComponents = _mm_shuffle_ps(ctmp, c2.m_vComponents, 0xe4);
-}
-
 struct Int4
 {
     int i[4];
@@ -1662,49 +1636,46 @@ struct Int4
 // @fnv 0x00da8fb0
 static __declspec(noinline) int FUN_00da8fb0(const hkVector4* vertices, const hkVector4* point, float orient)
 {
-    hkVector4 e21;
-    e21.setSub4(vertices[2], vertices[1]);
-    hkVector4 e02;
-    e02.setSub4(vertices[0], vertices[2]);
-    hkVector4 e10;
-    e10.setSub4(vertices[1], vertices[0]);
-    hkVector4 e30;
-    e30.setSub4(vertices[3], vertices[0]);
-    hkVector4 e31;
-    e31.setSub4(vertices[3], vertices[1]);
-    hkVector4 e32;
-    e32.setSub4(vertices[3], vertices[2]);
+    __m128 e21 = _mm_sub_ps(vertices[2].m_vComponents, vertices[1].m_vComponents);
+    __m128 e02 = _mm_sub_ps(vertices[0].m_vComponents, vertices[2].m_vComponents);
+    __m128 e10 = _mm_sub_ps(vertices[1].m_vComponents, vertices[0].m_vComponents);
+    __m128 e30 = _mm_sub_ps(vertices[3].m_vComponents, vertices[0].m_vComponents);
+    __m128 e31 = _mm_sub_ps(vertices[3].m_vComponents, vertices[1].m_vComponents);
+    __m128 e32 = _mm_sub_ps(vertices[3].m_vComponents, vertices[2].m_vComponents);
 
-    hkVector4 normals[3];
-    normals[0].setCross(e21, e31);
-    normals[1].setCross(e02, e32);
-    normals[2].setCross(e10, e30);
+    __m128 normals[3];
+    normals[0] = cross(e21, e31);
+    normals[1] = cross(e02, e32);
+    normals[2] = cross(e10, e30);
 
-    hkVector4 diff;
-    diff.m_vComponents = _mm_sub_ps(point->m_vComponents, vertices[3].m_vComponents);
+    __m128 diff = _mm_sub_ps(point->m_vComponents, vertices[3].m_vComponents);
     __m128 orientVec = _mm_shuffle_ps(_mm_load_ss(&orient), _mm_load_ss(&orient), 0);
-    __m128 dir = _mm_mul_ps(diff.m_vComponents, orientVec);
+    __m128 dir = _mm_mul_ps(diff, orientVec);
 
-    hkVector4 c0 = normals[0];
-    hkVector4 c1 = normals[1];
-    hkVector4 c2 = normals[2];
-    hkTranspose3(c0, c1, c2);
+    __m128 c0 = normals[0];
+    __m128 c1 = normals[1];
+    __m128 c2 = normals[2];
+    __m128 tmp = _mm_unpacklo_ps(c0, c1);
+    __m128 ctmp = _mm_unpackhi_ps(c0, c1);
+    c0 = _mm_movelh_ps(tmp, c2);
+    c1 = _mm_shuffle_ps(_mm_movehl_ps(c0, tmp), c2, 0xd4);
+    c2 = _mm_shuffle_ps(ctmp, c2, 0xe4);
 
     __m128 x = _mm_shuffle_ps(dir, dir, 0x00);
     __m128 y = _mm_shuffle_ps(dir, dir, 0x55);
     __m128 z = _mm_shuffle_ps(dir, dir, 0xaa);
 
-    Vector weights;
-    weights.quad = _mm_add_ps(_mm_add_ps(_mm_mul_ps(y, c1.m_vComponents), _mm_mul_ps(x, c0.m_vComponents)),
-                              _mm_mul_ps(z, c2.m_vComponents));
+    GskVectorCallLocal_00da8500 weights;
+    weights.q = _mm_add_ps(_mm_add_ps(_mm_mul_ps(y, c1), _mm_mul_ps(x, c0)),
+                              _mm_mul_ps(z, c2));
 
-    Vector dotsSqr;
-    dotsSqr.quad = _mm_mul_ps(_mm_and_ps(weights.quad, DAT_01017d10), weights.quad);
+    GskVectorCallLocal_00da8500 dotsSqr;
+    dotsSqr.q = _mm_mul_ps(_mm_and_ps(weights.q, DAT_01017d10), weights.q);
 
     float dist[4];
     for (int i = 0; i < 3; ++i)
     {
-        __m128 n = normals[i].m_vComponents;
+        __m128 n = normals[i];
         __m128 sq = _mm_mul_ps(n, n);
         __m128 s1 = _mm_shuffle_ps(sq, sq, 0x55);
         __m128 s2 = _mm_shuffle_ps(sq, sq, 0xaa);
@@ -1712,7 +1683,7 @@ static __declspec(noinline) int FUN_00da8fb0(const hkVector4* vertices, const hk
         _mm_store_ss(&lenSq, _mm_add_ss(s2, _mm_add_ss(s1, sq)));
         if (lenSq != 0.0f)
         {
-            dist[i] = dotsSqr.quad.m128_f32[i] / lenSq;
+            dist[i] = dotsSqr.q.m128_f32[i] / lenSq;
         }
         else
         {
@@ -1748,7 +1719,7 @@ static __declspec(noinline) int FUN_00da8fb0(const hkVector4* vertices, const hk
         return bestIdx;
     }
     *(Int4*)dist = *(const Int4*)&weights;
-    return FUN_00da8390((const S00da8390_Vec*)vertices, (const S00da8390_Vec*)point, dist);
+    return FUN_00da8390((const hkVector4*)vertices, (const hkVector4*)point, dist);
 }
 
 hkVector4* g_v;
@@ -2661,51 +2632,38 @@ static inline __m128 crossDA(__m128 cx, __m128 cy)
     return _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(cx, cx, 0xc9), _mm_shuffle_ps(cy, cy, 0xd2)),
                       _mm_mul_ps(_mm_shuffle_ps(cx, cx, 0xd2), _mm_shuffle_ps(cy, cy, 0xc9)));
 }
-struct VectorDA
-{
-    __m128 quad;
-    VectorDA()
-    {}
-    VectorDA(const VectorDA& v) : quad(v.quad)
-    {}
-    VectorDA& operator=(const VectorDA& v)
-    {
-        quad = v.quad;
-        return *this;
-    }
-};
 struct SimplexDA
 {
-    VectorDA m_kPointA[4];
-    VectorDA m_kPointB[4];
+    GskVectorCallLocal_00da8500 m_kPointA[4];
+    GskVectorCallLocal_00da8500 m_kPointB[4];
 };
-static __forceinline VectorDA subV(const VectorDA& a, const VectorDA& b)
+static __forceinline GskVectorCallLocal_00da8500 subV(const GskVectorCallLocal_00da8500& a, const GskVectorCallLocal_00da8500& b)
 {
-    VectorDA r(a);
-    r.quad = _mm_sub_ps(r.quad, b.quad);
+    GskVectorCallLocal_00da8500 r(a);
+    r.q = _mm_sub_ps(r.q, b.q);
     return r;
 }
 // @fnv 0x00da9210
-static void FUN_00da9210(SimplexDA* apSimplex, int* apCount, int flag, VectorDA* out, const VectorDA* apPoint)
+static void FUN_00da9210(SimplexDA* apSimplex, int* apCount, int flag, GskVectorCallLocal_00da8500* out, const GskVectorCallLocal_00da8500* apPoint)
 {
-    VectorDA vPoint;
-    vPoint.quad = apPoint->quad;
-    VectorDA vDir = subV(apSimplex->m_kPointA[1], apSimplex->m_kPointA[0]);
-    VectorDA vA = subV(apSimplex->m_kPointA[1], vPoint);
-    VectorDA vB = subV(apSimplex->m_kPointA[0], vPoint);
-    __m128 d1 = dot3DA(vA.quad, vDir.quad);
-    __m128 d2 = dot3DA(vB.quad, vDir.quad);
+    GskVectorCallLocal_00da8500 vPoint;
+    vPoint.q = apPoint->q;
+    GskVectorCallLocal_00da8500 vDir = subV(apSimplex->m_kPointA[1], apSimplex->m_kPointA[0]);
+    GskVectorCallLocal_00da8500 vA = subV(apSimplex->m_kPointA[1], vPoint);
+    GskVectorCallLocal_00da8500 vB = subV(apSimplex->m_kPointA[0], vPoint);
+    __m128 d1 = dot3DA(vA.q, vDir.q);
+    __m128 d2 = dot3DA(vB.q, vDir.q);
     int sg1 = _mm_movemask_ps(d1) & 1;
     int sg2 = _mm_movemask_ps(d2) & 1;
     if (sg1 != sg2)
     {
-        __m128 vInvLen = _mm_rsqrt_ss(dot3DA(vDir.quad, vDir.quad));
-        __m128 vNorm = _mm_mul_ps(_mm_shuffle_ps(vInvLen, vInvLen, 0), vDir.quad);
-        __m128 vCross = crossDA(vA.quad, vB.quad);
+        __m128 vInvLen = _mm_rsqrt_ss(dot3DA(vDir.q, vDir.q));
+        __m128 vNorm = _mm_mul_ps(_mm_shuffle_ps(vInvLen, vInvLen, 0), vDir.q);
+        __m128 vCross = crossDA(vA.q, vB.q);
         if (flag == 1)
-            out->quad = crossDA(vNorm, vCross);
+            out->q = crossDA(vNorm, vCross);
         else
-            out->quad = crossDA(vCross, vNorm);
+            out->q = crossDA(vCross, vNorm);
         return;
     }
     if (sg1)
@@ -2716,15 +2674,15 @@ static void FUN_00da9210(SimplexDA* apSimplex, int* apCount, int flag, VectorDA*
     }
     (*apCount)--;
     if (flag == 1)
-        out->quad = _mm_sub_ps(vPoint.quad, apSimplex->m_kPointA[0].quad);
+        out->q = _mm_sub_ps(vPoint.q, apSimplex->m_kPointA[0].q);
     else
-        out->quad = _mm_sub_ps(apSimplex->m_kPointA[0].quad, vPoint.quad);
+        out->q = _mm_sub_ps(apSimplex->m_kPointA[0].q, vPoint.q);
 }
 
 static SimplexDA g_sxDA;
 static int g_numDA;
-static VectorDA g_outDA;
-static VectorDA g_ppDA;
+static GskVectorCallLocal_00da8500 g_outDA;
+static GskVectorCallLocal_00da8500 g_ppDA;
 void CallerDA()
 {
     FUN_00da9210(&g_sxDA, &g_numDA, 1, &g_outDA, &g_ppDA);
@@ -3004,26 +2962,22 @@ struct S00daac40_ProfBuf
     S00daac40_ProfRec* m_pRecordEnd;
 };
 
-struct S00daac40_Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-
 struct S00daac40_Mat3
 {
-    S00daac40_Vec4 r0;
-    S00daac40_Vec4 r1;
-    S00daac40_Vec4 r2;
+    hkVector4 r0;
+    hkVector4 r1;
+    hkVector4 r2;
 };
 
 struct S00daac40_RayParams
 {
     unsigned long unk00;
     unsigned long unk04;
-    S00daac40_Vec4 m_v08;
+    // These scalar fields begin at an unaligned offset in the ray parameters.
+    float m_x08;
+    float m_y0C;
+    float m_z10;
+    float m_w14;
     unsigned long unk18;
     unsigned long unk1C;
     unsigned long unk20;
@@ -3054,7 +3008,7 @@ class S00daac40_FUN_00daac40_cls
     void FUN_00da9b30(bool* hit, int p2, int zero, S00daac40_Mat3* m, int p3, S00daac40_RayParams* p);
 };
 
-// Records a GJK ray-cast profile tick, runs FUN_00da9b30 with an identity matrix, and sets out true when hit and local.m_v08.z is non-zero.
+// Records a GJK ray-cast profile tick, runs FUN_00da9b30 with an identity matrix, and sets out true when hit and local.m_z10 is non-zero.
 // @fnv 0x00daac40
 bool* S00daac40_FUN_00daac40_cls::FUN_00daac40(S00daac40_RayArgument<bool*> out, int p2, int p3,
                                                S00daac40_RayArgument<S00daac40_RayParams*> apRayParams)
@@ -3097,7 +3051,7 @@ bool* S00daac40_FUN_00daac40_cls::FUN_00daac40(S00daac40_RayArgument<bool*> out,
         pProfBuf->m_pCur = pProfRec + 1;
     }
 
-    if (hit && rayParams.m_v08.z != 0.0f)
+    if (hit && rayParams.m_z10 != 0.0f)
     {
         reinterpret_cast<S00daac40_RayCastTarget*>((S00daac40_RayParams*)apRayParams)->FUN_009c1aa0(&rayParams);
         bool* destination = out;

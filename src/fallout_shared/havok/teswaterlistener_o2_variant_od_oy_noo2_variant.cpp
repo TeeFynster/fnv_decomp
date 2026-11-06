@@ -1,3 +1,9 @@
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit defines its own form
+#include "../../../include/hkVector4.h"
+#include "../../../include/ExtraDataList.h"
+#include "../../../include/BSOcclusionPlane.h"
+#include "../../../include/BSThread.h"
+#include "../../../include/TESDataHandler.h"
 
 // src/fallout_shared/havok/teswaterlistener_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy /Oy- (unit src/fallout_shared/havok/teswaterlistener_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -19,18 +25,6 @@ extern unsigned char DAT_011c7a5a;
 void FUN_0062f8e0(unsigned char value);
 extern float _DAT_011c7a5c;
 void FUN_0062f8f0(float value);
-struct BSOcclusionPlane
-{
-    unsigned int GetCullResult() const;
-};
-struct ExtraDataList
-{
-    unsigned int GetRoomId();
-};
-struct BSThread
-{
-    unsigned int GetThreadID();
-};
 unsigned int __cdecl GetOcclusionPlaneThreadID(BSOcclusionPlane* pPlane);
 extern "C" float __cdecl ExpFloat(float);
 float FUN_00630aa0(float value);
@@ -48,14 +42,6 @@ struct FUN_0062e710_shell
 {
     void __thiscall SetValueAt(float f, int a, int b);
 };
-struct BSSimpleList_Ragdoll
-{
-    void* __thiscall FUN_006310e0();
-};
-struct TESDataHandler
-{
-    BSSimpleList_Ragdoll* __thiscall GetBGSRagdollList();
-};
 struct FUN_006310c0_shell
 {
     void __thiscall FUN_006310c0();
@@ -67,34 +53,13 @@ struct FUN_00c9a460_shell
 };
 
 #include <xmmintrin.h>
-class S0062b0a0_SimdReal
-{
-  public:
-    S0062b0a0_SimdReal(const __m128& q);  // FUN_004a3c90
-    __m128 m_vValue;
-};
-
-class S0062b0a0_Vector
-{
-  public:
-    S0062b0a0_SimdReal FUN_0062b0a0(const S0062b0a0_Vector& v) const;  // dot3
-    __m128 m_vComponents;
-};
-
 // @fnv 0x0062b0a0
-S0062b0a0_SimdReal S0062b0a0_Vector::FUN_0062b0a0(const S0062b0a0_Vector& v) const
+hkSimdReal hkVector4::dot3(const hkVector4& v) const
 {
     __m128 x2 = _mm_mul_ps(m_vComponents, v.m_vComponents);
     __m128 xy = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-    return S0062b0a0_SimdReal(_mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xy));
+    return hkSimdReal(_mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xy));
 }
-
-class hkVector4E
-{
-  public:
-    hkVector4E();
-    __m128 m_vComponents;
-};
 
 class NiPoint3E
 {
@@ -102,7 +67,7 @@ class NiPoint3E
     float x, y, z;
 };
 
-void __cdecl FUN_004a3e00(hkVector4E* pkOut, const NiPoint3E* pkIn);
+void __cdecl FUN_004a3e00(hkVector4* pkOut, const NiPoint3E* pkIn);
 float __cdecl FUN_004a3e90(float fValue);
 float __cdecl FUN_004587d0(float fValue);
 
@@ -411,12 +376,14 @@ class SpawnManagerE
     float m_fTimer;
 
     bool IsEnabled();
-    bool FUN_0062ff10(BodyE* pkBody, const hkVector4E& kTarget, float fRadius, SpawnCellE* pkCell, float* pfHeight);
+    bool FUN_0062ff10(BodyE* pkBody, const hkVector4& kTarget, float fRadius, SpawnCellE* pkCell, float* pfHeight);
     int Update(BodyE* pkBody, float m_fGlyphExtent, float fTimeDelta, int iFlag);
     void Finish(int a, int b, int c);
     void FUN_0062ee60(float fTimeDelta);
 };
 
+// Preserve the original /GS prologue with the shared union storage.
+#pragma strict_gs_check(push, on)
 // @fnv 0x0062ee60
 void SpawnManagerE::FUN_0062ee60(float fTimeDelta)
 {
@@ -427,9 +394,9 @@ void SpawnManagerE::FUN_0062ee60(float fTimeDelta)
         fRadius = fRadius * fRadius;
         fRadius = FUN_004a3e90(fRadius);
         float m_fGlyphExtent = FUN_004a3e90(g_kSpawnHeightE.GetValue());
-        hkVector4E kPlayerPos;
+        hkVector4 kPlayerPos;
         FUN_004a3e00(&kPlayerPos, g_pkPlayerE->GetPosition());
-        hkVector4E kUnused;
+        hkVector4 kUnused;
         ListNodeE* pkNode = &m_kActive;
         float fFoundHeight = 0.0f;
         g_kSpawnLockE.Lock();
@@ -508,23 +475,7 @@ void SpawnManagerE::FUN_0062ee60(float fTimeDelta)
     }
 }
 
-class hkSimdRealW
-{
-  public:
-    __m128 m_vValue;
-    float getReal() const;
-};
-
-class hkVector4W
-{
-  public:
-    __m128 m_vComponents;
-    hkVector4W();
-    hkVector4W(const hkVector4W& v);
-    void setSub4(const hkVector4W& a, const hkVector4W& b);
-    hkSimdRealW length3() const;
-    hkSimdRealW getComponent(int i) const;
-};
+#pragma strict_gs_check(pop)
 
 class hkBoolW
 {
@@ -544,7 +495,7 @@ class NiPoint3W
 class TESObjectREFRW
 {
   public:
-    const hkVector4W& GetHavokPosition() const;
+    const hkVector4& GetHavokPosition() const;
     hkBoolW IsInactive() const;
 };
 
@@ -574,7 +525,7 @@ class GameSettingW
 extern GameSettingW g_kFloorOffsetW;
 
 void* __cdecl FUN_004b5a80(const void* pvRef);
-NiPoint3W* __cdecl FUN_00458620(NiPoint3W* pkOut, const hkVector4W* pkIn);
+NiPoint3W* __cdecl FUN_00458620(NiPoint3W* pkOut, const hkVector4* pkIn);
 float __cdecl FUN_004a3e90(float fHavok);
 int __cdecl FUN_00406d90(float fValue);
 
@@ -596,12 +547,14 @@ class HeightGridW
     int m_iOriginY;
 
     float GetHeight(int iX, int iY);
-    bool FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4W& kTarget, float fRadius, HeightSourceW* pkSource,
+    bool FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4& kTarget, float fRadius, HeightSourceW* pkSource,
                       float* pfHeight);
 };
 
+// Preserve the original /GS prologue with the shared union storage.
+#pragma strict_gs_check(push, on)
 // @fnv 0x0062ff10
-bool HeightGridW::FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4W& kTarget, float fRadius, HeightSourceW* pkSource,
+bool HeightGridW::FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4& kTarget, float fRadius, HeightSourceW* pkSource,
                                float* pfHeight)
 {
     if (pkRef)
@@ -610,10 +563,10 @@ bool HeightGridW::FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4W& kTarget,
         if (!pkCharacter)
             return false;
 
-        hkVector4W kPos(pkRef->GetHavokPosition());
-        hkVector4W kDiff;
+        hkVector4 kPos(pkRef->GetHavokPosition());
+        hkVector4 kDiff;
         kDiff.setSub4(kPos, kTarget);
-        if (kDiff.length3().getReal() > fRadius)
+        if (kDiff.lengthSquared3().getReal() > fRadius)
         {
             if (pkCharacter->IsNonZero(0x88))
             {
@@ -650,136 +603,67 @@ bool HeightGridW::FUN_0062ff10(TESObjectREFRW* pkRef, const hkVector4W& kTarget,
     return false;
 }
 
-struct S00630ae0_Vector
-{
-    __m128 m_vComponents;
-};
+#pragma strict_gs_check(pop)
 
 class S00630ae0_Source
 {
   public:
-    S00630ae0_Vector FUN_00561240() const;
-};
-
-struct S00630ae0_Result
-{
-    __m128 m_vComponents;
-    void FUN_00630ae0(const S00630ae0_Source* a, const S00630ae0_Vector* b);
+    hkVector4 FUN_00561240() const;
 };
 
 // @fnv 0x00630ae0
-void S00630ae0_Result::FUN_00630ae0(const S00630ae0_Source* a, const S00630ae0_Vector* b)
+void hkVector4::setMul4(const hkSimdReal& a, const hkVector4& b)
 {
-    m_vComponents = _mm_mul_ps(a->FUN_00561240().m_vComponents, b->m_vComponents);
+    m_vComponents = _mm_mul_ps(reinterpret_cast<const S00630ae0_Source&>(a).FUN_00561240().m_vComponents, b.m_vComponents);
 }
 
-class S00630b40_SimdReal
-{
-  public:
-    S00630b40_SimdReal(const __m128& q);  // FUN_004a3c90
-    const __m128& getQuad() const;        // FUN_006815c0
-    __m128 m_vValue;
-};
-
-class S00630b40_Vector
-{
-  public:
-    S00630b40_SimdReal dot3(const S00630b40_Vector& v) const;  // FUN_0062b0a0
-    S00630b40_SimdReal FUN_00630b40() const;                   // length3
-    __m128 m_vComponents;
-};
+// Emit the game entry point even though the shared declaration is inline.
+hkSimdReal (hkVector4::*g_length3Implementation)() const = &hkVector4::length3;
 
 // @fnv 0x00630b40
-S00630b40_SimdReal S00630b40_Vector::FUN_00630b40() const
+hkSimdReal hkVector4::length3() const
 {
-    return S00630b40_SimdReal(_mm_sqrt_ss(dot3(*this).getQuad()));
+    return hkSimdReal(_mm_sqrt_ss(dot3(*this).getQuad()));
 }
-
-class FUN_006815c0
-{
-  public:
-    __m128 m_vComponents;
-
-    FUN_006815c0();
-    __m128& FUN_006815c0_quad();
-
-    void FUN_00630fa0(void* pvSource, int iCount);
-    void FUN_00630d90(FUN_006815c0* pkA, FUN_006815c0* pkB, FUN_006815c0* pkC);
-    void FUN_00630ce0(void* pvParam, FUN_006815c0* pkVector);
-    void FUN_00630ed0(int iParam);
-    void FUN_00630d30(FUN_006815c0* pkA, FUN_006815c0* pkB);
-    void FUN_00630df0(FUN_006815c0* pkA, void* pvParam);
-};
-
-struct Transform630
-{
-    FUN_006815c0 FUN_0062b0a0(void* pvParam);
-};
-
-struct Source630
-{
-    Transform630* FUN_006815c0_transform();
-};
 
 extern const __m128 DAT_010c71e0;
 
-struct FUN_00630bb0_shell
-{
-    void FUN_00458880(FUN_006815c0* pkA, FUN_006815c0* pkB);
-    void FUN_00630bb0(Source630* pkSource, void* pvParam);
-};
-
+// Preserve the original /GS prologue with the shared union storage.
+#pragma strict_gs_check(push, on)
 // @fnv 0x00630bb0
-void FUN_00630bb0_shell::FUN_00630bb0(Source630* pkSource, void* pvParam)
+void hkVector4::SetRotatedDirection(const hkVector4& source, const hkVector4& param)
 {
-    FUN_006815c0 kA;
-    kA.FUN_006815c0_quad() = DAT_010c71e0;
-    FUN_006815c0 kB;
-    kB.FUN_00630fa0(pkSource, 3);
-    FUN_006815c0 kC;
-    kC.FUN_00630d90(&kA, &kB, &kB);
-    FUN_006815c0 kD;
-    kD.FUN_00630ce0(pvParam, &kC);
-    FUN_006815c0 kE;
-    kE.FUN_006815c0_quad() = pkSource->FUN_006815c0_transform()->FUN_0062b0a0(pvParam).FUN_006815c0_quad();
-    kE.FUN_00630ed0(0);
-    kD.FUN_00630d30(&kE, (FUN_006815c0*)pkSource->FUN_006815c0_transform());
-    FUN_006815c0 kF;
-    kF.FUN_00630df0((FUN_006815c0*)pkSource->FUN_006815c0_transform(), pvParam);
-    kD.FUN_00630d30(&kB, &kF);
-    FUN_00458880(&kD, &kD);
+    hkVector4 kA;
+    kA.getQuad() = DAT_010c71e0;
+    hkVector4 kB;
+    kB.setBroadcast(source, 3);
+    hkVector4 kC;
+    kC.setAddMul4(kA, kB, kB);
+    hkVector4 kD;
+    kD.setMul4(param, kC);
+    hkVector4 kE;
+    kE.getQuad() = reinterpret_cast<const hkVector4&>(source.getQuad()).dot3(param).getQuad();
+    kE.broadcast(0);
+    kD.addMul4(kE, reinterpret_cast<const hkVector4&>(source.getQuad()));
+    hkVector4 kF;
+    kF.FUN_00630df0(reinterpret_cast<const hkVector4&>(source.getQuad()), param);
+    kD.addMul4(kB, kF);
+    setAdd4(kD, kD);
 }
 
-struct S00630ce0_Vector
-{
-    __m128 m_vComponents;
-    void FUN_00630ce0(const S00630ce0_Vector* a, const S00630ce0_Vector* b);
-};
+#pragma strict_gs_check(pop)
 
 // @fnv 0x00630ce0
-void S00630ce0_Vector::FUN_00630ce0(const S00630ce0_Vector* a, const S00630ce0_Vector* b)
+void hkVector4::setMul4(const hkVector4& a, const hkVector4& b)
 {
-    m_vComponents = _mm_mul_ps(a->m_vComponents, b->m_vComponents);
+    m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
 }
-
-struct S00630d90_Vector
-{
-    __m128 m_vComponents;
-    void FUN_00630d90(const S00630d90_Vector* a, const S00630d90_Vector* b, const S00630d90_Vector* c);  // setAddMul4
-};
 
 // @fnv 0x00630d90
-void S00630d90_Vector::FUN_00630d90(const S00630d90_Vector* a, const S00630d90_Vector* b, const S00630d90_Vector* c)
+void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b, const hkVector4& c)
 {
-    m_vComponents = _mm_add_ps(a->m_vComponents, _mm_mul_ps(b->m_vComponents, c->m_vComponents));
+    m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(b.m_vComponents, c.m_vComponents));
 }
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-
-    void FUN_00630df0(const hkVector4& a, const hkVector4& b);
-};
 
 // @fnv 0x00630df0
 void hkVector4::FUN_00630df0(const hkVector4& a, const hkVector4& b)
@@ -791,14 +675,8 @@ void hkVector4::FUN_00630df0(const hkVector4& a, const hkVector4& b)
     m_vComponents = _mm_sub_ps(cross0, cross1);
 }
 
-struct S00630ed0_Vector
-{
-    __m128 m_vComponents;
-    void FUN_00630ed0(int i);  // broadcast(i)
-};
-
 // @fnv 0x00630ed0
-void S00630ed0_Vector::FUN_00630ed0(int i)
+void hkVector4::broadcast(int i)
 {
     if (i == 0)
         m_vComponents = _mm_shuffle_ps(m_vComponents, m_vComponents, 0x00);
@@ -810,14 +688,8 @@ void S00630ed0_Vector::FUN_00630ed0(int i)
         m_vComponents = _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
 }
 
-struct VectorStandIn
-{
-    __m128 m_vComponents;
-    void FUN_00630fa0(const VectorStandIn& v, int i);
-};
-
 // @fnv 0x00630fa0
-void VectorStandIn::FUN_00630fa0(const VectorStandIn& v, int i)
+void hkVector4::setBroadcast(const hkVector4& v, int i)
 {
     if (i == 0)
         m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x00);

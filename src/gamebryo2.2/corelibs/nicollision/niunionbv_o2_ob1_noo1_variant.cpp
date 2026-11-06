@@ -1,3 +1,9 @@
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiGPUProgram.h"
+#include "../../../../include/NiD3DShaderProgram.h"
+#include "../../../../include/MemoryManager.h"
+
 
 // src/gamebryo2.2/corelibs/nicollision/niunionbv_o2_ob1_noo1_variant.cpp - flag-variant unit created 2026-10-29 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Oy /GS /EHsc /Gy /O2 /Ob1 (unit src/gamebryo2.2/corelibs/nicollision/niunionbv.cpp lists /MT /O1 /Oy /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -17,69 +23,6 @@
 // evidence - NiGPUProgram is 12 bytes and NiD3DShaderProgram is 44
 // bytes, with m_uiProgramCodeSize at offset 20.
 //
-typedef unsigned int NiUInt32;
-class NiMemObject
-{
-};
-class NiRefObject : public NiMemObject
-{
-  public:
-    NiRefObject() : m_uiRefCount(0)
-    {}
-
-    virtual ~NiRefObject()
-    {}
-
-    virtual void DeleteThis()
-    {
-        delete this;
-    }
-
-  protected:
-    NiUInt32 m_uiRefCount;
-};
-class NiGPUProgram : public NiRefObject
-{
-  public:
-    enum ProgramType
-    {
-        PROGRAMTYPE_INVALID,
-        PROGRAMTYPE_VERTEX,
-        PROGRAMTYPE_PIXEL
-    };
-
-    ProgramType GetProgramType()
-    {
-        return m_iProgramType;
-    }
-
-  protected:
-    ProgramType m_iProgramType;
-};
-class NiD3DShaderProgramCreator;
-class Direct3DDeviceInterface;
-class NiD3DRenderer;
-class NiD3DRenderState;
-class NiD3DShaderProgram : public NiGPUProgram
-{
-  public:
-    NiUInt32 GetCodeSize() const;
-
-  protected:
-    char* m_pcProgramName;
-    char* m_pcProfile;
-    NiUInt32 m_uiProgramCodeSize;
-    void* m_pProgramCode;
-    NiD3DShaderProgramCreator* m_pCreator;
-    Direct3DDeviceInterface* m_pD3DDevice;
-    NiD3DRenderer* m_pShaderObject;
-    NiD3DRenderState* m_pRenderState;
-};
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
-typedef P03MM MemoryManager;
 extern MemoryManager g_memoryManager;
 struct S
 {
@@ -96,7 +39,7 @@ S* __fastcall FUN_00e9efb0(void* self);
 extern int g_fnv_00e9ecc0_value_anchor;
 int FUN_00e9ecc0();
 
-class ImageSpaceTexture;
+class VirtualTextureView_00e9ecd0;
 struct Item
 {
     virtual void v0();
@@ -105,7 +48,7 @@ struct Item
     virtual void v3();
     virtual void v4();
     virtual void v5();
-    virtual ImageSpaceTexture* GetTexture();
+    virtual VirtualTextureView_00e9ecd0* GetTexture();
 };
 struct TextureVTable
 {
@@ -117,9 +60,10 @@ struct TextureVTable
     void* vf14;
     void* vf18;
     void* vf1C;
-    void(__thiscall* Attach)(ImageSpaceTexture*, Item*);
+    void(__thiscall* Attach)(VirtualTextureView_00e9ecd0*, Item*);
 };
-class ImageSpaceTexture
+// 0x00e9ecd0 reads a vptr at +0 and calls slot +0x20; ImageSpaceTexture has flags at +0 and no vptr.
+class VirtualTextureView_00e9ecd0
 {
   public:
     TextureVTable* vtable;
@@ -138,7 +82,7 @@ struct Source
 struct TexArray
 {
     void SetSize(unsigned int n);
-    void SetAt(unsigned int i, ImageSpaceTexture*& t);
+    void SetAt(unsigned int i, VirtualTextureView_00e9ecd0*& t);
 };
 struct TexCache
 {
@@ -157,9 +101,9 @@ void TexCache::FUN_00e9ecd0(Source* src)
         for (unsigned int i = 0; i < src->m_uiItemCount; i++)
         {
             Item* item = src->m_items[i];
-            ImageSpaceTexture* value = item->GetTexture();
+            VirtualTextureView_00e9ecd0* value = item->GetTexture();
             TextureVTable* table = value->vtable;
-            ImageSpaceTexture* tex = value;
+            VirtualTextureView_00e9ecd0* tex = value;
             table->Attach(value, item);
             m_textures.SetAt(i, tex);
         }

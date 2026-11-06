@@ -1,96 +1,32 @@
 // src/fallout/ai/actor_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/fallout/ai/actor.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
-#include "Actor.h"
+// BaseForm_actor: local type (was include/BaseForm.h, which had no evidence of one real class); its methods are 0x00401170 TESForm::GetFormType
+class BaseForm_actor
+{
+public:
+    int FUN_00401170();
+    unsigned int FormType();
+    unsigned int GetFormType();
+};
+#include "../../../include/Actor.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/CombatController.h"
+#include "../../../include/NiBound.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiMatrix3.h"
+#include "../../../include/TESActorBase.h"
 
 #include <xmmintrin.h>
-namespace ActorUpdate3D {
-
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3();
-    NiPoint3(float afX, float afY, float afZ);
-    NiPoint3 FUN_00439e90(const NiPoint3& arOther) const;
-    NiPoint3 FUN_00439ef0(const NiPoint3& arOther) const;
-    float FUN_00457990() const;
-};
-
-struct ThreeByThreeMatrix
-{
-    float m[9];
-    ThreeByThreeMatrix();
-    void FUN_004a0c90(float afAngle);
-    NiPoint3 FUN_004b4500(const NiPoint3& arPoint) const;
-};
-
-struct NiBound
-{
-    float fData[4];
-    NiPoint3* FUN_006815c0();
-    float FUN_0084d030();
-};
-
-struct AlignedRotation
-{
-    __m128 vec;
-    AlignedRotation(float afA, float afB, float afC, float afD);
-};
-
-struct FormType
-{
-    int iData;
-    FormType();
-    int FUN_0043b4d0();
-};
-
+#include <string.h>
+#pragma intrinsic(memcpy)
+#include "../../../include/NiObject.h"
 struct HandleRef
 {
     int iData;
     HandleRef();
     int FUN_004a3a20();
-};
-
-struct NiObject
-{
-    float GetFloatAtOffsetB0();
-};
-
-struct NiNode
-{
-    virtual void vn000();
-    virtual void vn001();
-    virtual void vn002();
-    virtual void vn003();
-    virtual NiObject* FUN_vt10();
-    NiBound* FUN_0043d450();
-};
-
-struct NiAVObject
-{
-    int FUN_006838b0();
-};
-
-struct ProfileMarker
-{
-    void FUN_00483710();
-};
-
-struct Clock
-{
-    float FUN_0084d030();
-};
-
-struct ActorList
-{
-    unsigned int FUN_0044ddc0();
-    float FUN_009c8d60();
-};
-
-struct CombatController
-{
-    void FUN_008879d0(bool abFar);
-    void FUN_00810610(bool abValue);
 };
 
 struct Process
@@ -261,6 +197,50 @@ struct Process
     virtual CombatController* FUN_vt28c();
 };
 
+struct PathMover
+{
+    void GetMovement(NiPoint3* apPos, void* apActor, int aiA, int aiB);
+};
+
+struct LookTarget
+{
+    bool FUN_00450ff0();
+};
+
+namespace ActorUpdate3D {
+
+
+struct AlignedRotation
+{
+    __m128 vec;
+    AlignedRotation(float afA, float afB, float afC, float afD);
+};
+
+struct FormType
+{
+    int iData;
+    FormType();
+    int FUN_0043b4d0();
+};
+
+
+struct ProfileMarker
+{
+    void FUN_00483710();
+};
+
+struct Clock
+{
+    float FUN_0084d030();
+};
+
+struct ActorList
+{
+    unsigned int FUN_0044ddc0();
+    float FUN_009c8d60();
+};
+
+
 struct Holder
 {
     virtual void vh000();
@@ -275,15 +255,6 @@ struct Holder
     virtual bool FUN_vt24(NiPoint3* apPos);
 };
 
-struct PathMover
-{
-    void GetMovement(NiPoint3* apPos, void* apActor, int aiA, int aiB);
-};
-
-struct LookTarget
-{
-    bool FUN_00450ff0();
-};
 
 struct CameraNode
 {
@@ -296,10 +267,6 @@ struct LodManager
     void UpdateOrAddItem(int aiRefID, NiBound* apBound, bool abVisible);
 };
 
-struct BaseForm
-{
-    int FUN_00401170();
-};
 
 struct Havok
 {
@@ -327,17 +294,18 @@ struct AnimController
     void FUN_00493900(void* apActor);
 };
 
-struct ListNode;
+struct ActorListNodeView;
 
 struct ChildPtr
 {
     NiAVObject* FUN_00559450();
 };
 
-struct ListNode
+// Exe 0x00886cb0: unit-local ListNode view; declarations and layout are preserved.
+struct ActorListNodeView
 {
     ChildPtr* FUN_006815c0();
-    ListNode* FUN_00726070();
+    ActorListNodeView* FUN_00726070();
 };
 
 struct ShaderProp
@@ -421,7 +389,7 @@ struct GeomData
     virtual void vz023();
     virtual void vz024();
     virtual int FUN_vt94();
-    ListNode* FUN_007d6bb0();
+    ActorListNodeView* FUN_007d6bb0();
     int FUN_00517630();
     void UpdateMatchingNodes(int aiValue);
     FormType FUN_0043b4f0();
@@ -438,7 +406,6 @@ struct FaceAnim
     void SetPairIfEnabled();
 };
 
-struct Actor;
 
 extern ProfileMarker DAT_011df69e;
 extern Clock DAT_011f6394;
@@ -474,347 +441,10 @@ FaceAnim* __stdcall FUN_004537b0(Actor* apActor, NiAVObject* apObject);
 void __cdecl SetTlsValueAndReset(NiAVObject* apObject, int aiValue);
 NiPoint3 __cdecl FUN_004a3760(float afScale, const NiPoint3& arPoint);
 
-struct Actor
-{
-    virtual void va000();
-    virtual void va001();
-    virtual void va002();
-    virtual void va003();
-    virtual void va004();
-    virtual void va005();
-    virtual void va006();
-    virtual void va007();
-    virtual void va008();
-    virtual void va009();
-    virtual void va00a();
-    virtual void va00b();
-    virtual void va00c();
-    virtual void va00d();
-    virtual void va00e();
-    virtual void va00f();
-    virtual void va010();
-    virtual void va011();
-    virtual void FUN_vt48(int aiFlags);
-    virtual void va013();
-    virtual void va014();
-    virtual void va015();
-    virtual void va016();
-    virtual void va017();
-    virtual void va018();
-    virtual void va019();
-    virtual void va01a();
-    virtual void va01b();
-    virtual void va01c();
-    virtual void va01d();
-    virtual void va01e();
-    virtual void va01f();
-    virtual void va020();
-    virtual void va021();
-    virtual void va022();
-    virtual void va023();
-    virtual void va024();
-    virtual void va025();
-    virtual void va026();
-    virtual void va027();
-    virtual void va028();
-    virtual void va029();
-    virtual void va02a();
-    virtual void va02b();
-    virtual void va02c();
-    virtual void va02d();
-    virtual void va02e();
-    virtual void va02f();
-    virtual void va030();
-    virtual void va031();
-    virtual void va032();
-    virtual void va033();
-    virtual void va034();
-    virtual void va035();
-    virtual void va036();
-    virtual void va037();
-    virtual void va038();
-    virtual void va039();
-    virtual void va03a();
-    virtual void va03b();
-    virtual void va03c();
-    virtual void va03d();
-    virtual void va03e();
-    virtual void va03f();
-    virtual void va040();
-    virtual void va041();
-    virtual void va042();
-    virtual void va043();
-    virtual void va044();
-    virtual void va045();
-    virtual void va046();
-    virtual void va047();
-    virtual void va048();
-    virtual void va049();
-    virtual void va04a();
-    virtual void va04b();
-    virtual void va04c();
-    virtual void va04d();
-    virtual void va04e();
-    virtual void va04f();
-    virtual void va050();
-    virtual void va051();
-    virtual void va052();
-    virtual void va053();
-    virtual void va054();
-    virtual void va055();
-    virtual void va056();
-    virtual void va057();
-    virtual void va058();
-    virtual void va059();
-    virtual void va05a();
-    virtual void va05b();
-    virtual void va05c();
-    virtual void va05d();
-    virtual void va05e();
-    virtual void va05f();
-    virtual void va060();
-    virtual void va061();
-    virtual void va062();
-    virtual void va063();
-    virtual void va064();
-    virtual void va065();
-    virtual void va066();
-    virtual void va067();
-    virtual void va068();
-    virtual void va069();
-    virtual void va06a();
-    virtual void va06b();
-    virtual void va06c();
-    virtual void va06d();
-    virtual void va06e();
-    virtual void va06f();
-    virtual void va070();
-    virtual void va071();
-    virtual void va072();
-    virtual void va073();
-    virtual NiNode* FUN_vt1d0();
-    virtual void va075();
-    virtual void va076();
-    virtual void va077();
-    virtual void va078();
-    virtual AnimController* FUN_vt1e4();
-    virtual void va07a();
-    virtual void va07b();
-    virtual void va07c();
-    virtual NiPoint3* FUN_vt1f4();
-    virtual void va07e();
-    virtual void va07f();
-    virtual void va080();
-    virtual void va081();
-    virtual void va082();
-    virtual void va083();
-    virtual void va084();
-    virtual void va085();
-    virtual void va086();
-    virtual void va087();
-    virtual void va088();
-    virtual void va089();
-    virtual void va08a();
-    virtual bool FUN_vt22c(int aiValue);
-    virtual void va08c();
-    virtual void va08d();
-    virtual void va08e();
-    virtual void va08f();
-    virtual void va090();
-    virtual void va091();
-    virtual void va092();
-    virtual void va093();
-    virtual void FUN_vt250(float afDelta, NiPoint3* apPos, int aiValue);
-    virtual void va095();
-    virtual void va096();
-    virtual void va097();
-    virtual void va098();
-    virtual void va099();
-    virtual void va09a();
-    virtual void va09b();
-    virtual void va09c();
-    virtual void va09d();
-    virtual void va09e();
-    virtual void va09f();
-    virtual void va0a0();
-    virtual void va0a1();
-    virtual void va0a2();
-    virtual void va0a3();
-    virtual void va0a4();
-    virtual void va0a5();
-    virtual void va0a6();
-    virtual void va0a7();
-    virtual void FUN_vt2a0();
-    virtual void va0a9();
-    virtual void va0aa();
-    virtual void va0ab();
-    virtual void va0ac();
-    virtual void va0ad();
-    virtual void va0ae();
-    virtual float FUN_vt2bc(int aiValue);
-    virtual void va0b0();
-    virtual void va0b1();
-    virtual void va0b2();
-    virtual void va0b3();
-    virtual void va0b4();
-    virtual void va0b5();
-    virtual void va0b6();
-    virtual void va0b7();
-    virtual void va0b8();
-    virtual void va0b9();
-    virtual void va0ba();
-    virtual void va0bb();
-    virtual void va0bc();
-    virtual void va0bd();
-    virtual void va0be();
-    virtual void va0bf();
-    virtual void va0c0();
-    virtual void va0c1();
-    virtual void va0c2();
-    virtual void va0c3();
-    virtual void va0c4();
-    virtual void va0c5();
-    virtual void va0c6();
-    virtual void va0c7();
-    virtual void va0c8();
-    virtual void va0c9();
-    virtual void va0ca();
-    virtual void va0cb();
-    virtual void va0cc();
-    virtual void va0cd();
-    virtual void va0ce();
-    virtual void va0cf();
-    virtual void va0d0();
-    virtual void va0d1();
-    virtual void va0d2();
-    virtual void va0d3();
-    virtual void va0d4();
-    virtual void va0d5();
-    virtual void va0d6();
-    virtual void va0d7();
-    virtual void va0d8();
-    virtual void va0d9();
-    virtual void va0da();
-    virtual void va0db();
-    virtual void va0dc();
-    virtual void va0dd();
-    virtual void va0de();
-    virtual void va0df();
-    virtual void va0e0();
-    virtual void va0e1();
-    virtual void va0e2();
-    virtual bool FUN_vt38c();
-    virtual void va0e4();
-    virtual void va0e5();
-    virtual void va0e6();
-    virtual void va0e7();
-    virtual void va0e8();
-    virtual void va0e9();
-    virtual void va0ea();
-    virtual void va0eb();
-    virtual void va0ec();
-    virtual void va0ed();
-    virtual void va0ee();
-    virtual void va0ef();
-    virtual void va0f0();
-    virtual void va0f1();
-    virtual void va0f2();
-    virtual void va0f3();
-    virtual void va0f4();
-    virtual void va0f5();
-    virtual void va0f6();
-    virtual void va0f7();
-    virtual void va0f8();
-    virtual void va0f9();
-    virtual void va0fa();
-    virtual void va0fb();
-    virtual void va0fc();
-    virtual void va0fd();
-    virtual void va0fe();
-    virtual void va0ff();
-    virtual void va100();
-    virtual void va101();
-    virtual void va102();
-    virtual void va103();
-    virtual void va104();
-    virtual void va105();
-    virtual void va106();
-    virtual void va107();
-    virtual void va108();
-    virtual void va109();
-    virtual void va10a();
-    virtual void va10b();
-    virtual void va10c();
-    virtual void va10d();
-    virtual void va10e();
-    virtual void va10f();
-    virtual void va110();
-    virtual void va111();
-    virtual void va112();
-    virtual void va113();
-    virtual void va114();
-    virtual void va115();
-    virtual void va116();
-    virtual void va117();
-    virtual void va118();
-    virtual void va119();
-    virtual void va11a();
-    virtual void va11b();
-    virtual void va11c();
-    virtual void va11d();
-    virtual void va11e();
-    virtual void va11f();
-    virtual void va120();
-    virtual void va121();
-    virtual void va122();
-    virtual void va123();
-    virtual void va124();
-    virtual void va125();
-    virtual void va126();
-    virtual void va127();
-    virtual void va128();
-    virtual void va129();
-    virtual void va12a();
-    virtual void va12b();
-    virtual void va12c();
-    virtual bool FUN_vt4b4();
-    char pad04[0x20];
-    float fScale24;
-    char pad28[0x40];
-    Process* pProcess;
-    char pad6C[0x40];
-    Havok* pHavok;
-    Ragdoll* pRagdoll;
-    char padB4[0x64];
-    bool bResetPose;
-    char pad119[0x77];
-    Holder* pHolder;
-    char pad194[4];
 
-    int FUN_00931850();
-    void UpdateFlag800State();
-    bool PlaceAtPosition(NiPoint3* apPos);
-    PathMover* FUN_008b70d0();
-    LookTarget* FUN_008d6f30();
-    bool FUN_0094df60();
-    NiPoint3* FUN_00430830();
-    void FUN_00575830(const NiPoint3& arPos);
-    bool FUN_00493bb0();
-    void UpdateControllerFlag();
-    bool FUN_004eaf60();
-    float FUN_008be940();
-    NiPoint3* FUN_00436aa0();
-    int FUN_0084e3a0();
-    int FUN_008d8520();
-    NiNode* FUN_0043fcd0();
-    BaseForm* FUN_007af430();
-    HandleRef FUN_00931ed0();
-    void FUN_008a1800(int aiValue);
-    void TryMakeTargetThing();
-    bool FUN_0087eeb0();
-    bool FUN_00437bd0();
-    void FUN_00886cb0(float afDelta, int aiUnused);
-};
+}
+
+using namespace ActorUpdate3D;
 
 // @fnv 0x00886cb0
 void Actor::FUN_00886cb0(float afDelta, int aiUnused)
@@ -835,8 +465,8 @@ void Actor::FUN_00886cb0(float afDelta, int aiUnused)
         int iTargetFlags = 0;
         if (!FUN_vt4b4() && !PlaceAtPosition(&kTarget))
         {
-            iTargetFlags = pHolder->FUN_vt20();
-            if (!pHolder->FUN_vt24(&kTarget))
+            iTargetFlags = ((Holder*)m_pActorMover)->FUN_vt20();
+            if (!((Holder*)m_pActorMover)->FUN_vt24(&kTarget))
             {
                 PathMover* pMover = FUN_008b70d0();
                 if (pMover)
@@ -846,21 +476,21 @@ void Actor::FUN_00886cb0(float afDelta, int aiUnused)
         LookTarget* pLook = FUN_008d6f30();
         if (pLook && pLook->FUN_00450ff0() && !DAT_011dea3c->FUN_0094df60())
         {
-            FUN_vt250(fTimeSinceScaleStart, &kTarget, iTargetFlags);
+            Move(fTimeSinceScaleStart, &kTarget, iTargetFlags);
         }
         else
         {
-            ThreeByThreeMatrix kRotate;
-            kRotate.FUN_004a0c90(FUN_00430830()->z);
-            FUN_00575830(FUN_vt1f4()->FUN_00439e90(kRotate.FUN_004b4500(kTarget)));
+            NiMatrix3 kRotate;
+            kRotate.MakeZRotation(FUN_00430830()->z);
+            FUN_00575830(static_cast<const Actor*>(this)->GetPos()->FUN_00439e90(static_cast<const NiMatrix3&>(kRotate).operator*(kTarget)));
         }
     }
     if (FUN_00493bb0())
         UpdateControllerFlag();
-    CombatController* pCombat = pProcess ? pProcess->FUN_vt28c() : 0;
+    CombatController* pCombat = m_pBaseProcess ? ((Process*)m_pBaseProcess)->FUN_vt28c() : 0;
     if (this != DAT_011dea3c)
     {
-        NiNode* p3D = FUN_vt1d0();
+        NiNode* p3D = GetNiNode();
         if (this != DAT_011dea3c && p3D)
         {
             NiPoint3 kCameraPos;
@@ -871,11 +501,14 @@ void Actor::FUN_00886cb0(float afDelta, int aiUnused)
             else
                 kCameraPos = DAT_011dea3c->FUN_00436aa0()->FUN_00439e90(
                     FUN_004a3760(DAT_011dea3c->FUN_008be940(), DAT_011a9484));
-            NiBound kBound = *p3D->FUN_0043d450();
+            // Preserve the original trivial snapshot copy of the bound.
+            __declspec(align(4)) unsigned char boundStorage[sizeof(NiBound)];
+            memcpy(boundStorage, p3D->FUN_0043d450(), sizeof(boundStorage));
             float fDistance =
-                kCameraPos.FUN_00439ef0(*kBound.FUN_006815c0()).FUN_00457990() - kBound.FUN_0084d030() * DAT_01021798;
+                kCameraPos.FUN_00439ef0(*reinterpret_cast<NiBound*>(boundStorage)->FUN_006815c0()).FUN_00457990() -
+                reinterpret_cast<NiBound*>(boundStorage)->FUN_0084d030() * DAT_01021798;
             bool bFar = false;
-            NiObject* pFade = p3D->FUN_vt10();
+            NiObject* pFade = reinterpret_cast<NiObject*>(p3D->IsFadeNode());
             if (pFade)
             {
                 float fRatio = fDistance / FUN_007d1d00(3);
@@ -885,7 +518,7 @@ void Actor::FUN_00886cb0(float afDelta, int aiUnused)
             if (pLod && pLod->GetStringAtOffset13C())
             {
                 bool bVisible = bFar ? false : fDistance > DAT_01012060;
-                pLod->UpdateOrAddItem(FUN_0084e3a0(), &kBound, bVisible);
+                pLod->UpdateOrAddItem(FUN_0084e3a0(), reinterpret_cast<NiBound*>(boundStorage), bVisible);
             }
             if (pCombat)
                 pCombat->FUN_008879d0(bFar);
@@ -893,36 +526,36 @@ void Actor::FUN_00886cb0(float afDelta, int aiUnused)
     }
     if (pCombat)
         pCombat->FUN_00810610(FUN_00525420());
-    if (bResetPose && FUN_008d8520())
+    if (m_bHasUpdated && FUN_008d8520())
     {
         NiNode* pRoot = FUN_0043fcd0();
         if (pRoot)
         {
             bool bUpright = true;
             Actor* pCreature = 0;
-            if (FUN_007af430()->FUN_00401170() == 0x2b)
+            if (((BaseForm_actor*)FUN_007af430())->FUN_00401170() == 0x2b)
                 pCreature = this;
             if (pCreature && !pCreature->FUN_vt38c())
                 bUpright = false;
-            if (pHavok && pHavok->FUN_00552490())
-                pHavok->FUN_00c7c150(1);
-            if (pRagdoll)
-                pRagdoll->FUN_00ca2ad0(pRoot, FUN_00931ed0().FUN_004a3a20());
+            if (m_pRagdollController && ((Havok*)m_pRagdollController)->FUN_00552490())
+                ((Havok*)m_pRagdollController)->FUN_00c7c150(1);
+            if (m_pRagdollPenetrationUtil)
+                ((Ragdoll*)m_pRagdollPenetrationUtil)->FUN_00ca2ad0(pRoot, FUN_00931ed0().FUN_004a3a20());
             FUN_008a1800(1);
-            FUN_vt2a0();
+            Unk_A8();
             if (bUpright)
             {
-                ThreeByThreeMatrix kHeading;
-                kHeading.FUN_004a0c90(FUN_vt2bc(0));
+                NiMatrix3 kHeading;
+                kHeading.MakeZRotation(GetCurrentTargetDistance(0));
                 NiPoint3 kForward(0.0f, 1.0f, 0.0f);
-                kForward = kHeading.FUN_004b4500(kForward);
+                kForward = static_cast<const NiMatrix3&>(kHeading).operator*(kForward);
                 FUN_00c9b670(pRoot, &kForward, 1, 0.0f, 0);
-                FUN_vt48(4);
-                pProcess->FUN_vt28();
+                MarkAsModified(4);
+                ((Process*)m_pBaseProcess)->FUN_vt28();
             }
             else
             {
-                AnimController* pAnim = FUN_vt1e4();
+                AnimController* pAnim = (AnimController*)GetAnimData();
                 if (pAnim && pAnim->FUN_00494710(0xe0))
                 {
                     pAnim->FUN_004955c0(0x14, 0xe0, -1, 0.0f, -1);
@@ -936,22 +569,22 @@ void Actor::FUN_00886cb0(float afDelta, int aiUnused)
                     TryMakeTargetThing();
                 }
             }
-            bResetPose = false;
+            m_bHasUpdated = false;
         }
     }
-    if (FUN_0087eeb0() && !FUN_vt22c(0) && !FUN_00437bd0())
+    if (FUN_0087eeb0() && !HasHealth(0) && !FUN_00437bd0())
     {
-        NiNode* pFaceRoot = FUN_vt1d0();
+        NiNode* pFaceRoot = GetNiNode();
         NiAVObject* pObject = FUN_004ade00(pFaceRoot, FUN_0087e9a0());
         bool bChanged = false;
         if (pObject)
         {
-            int iObject = pObject->FUN_006838b0();
-            Geometry* m_pShaderGeometry = (Geometry*)FUN_00653270(&DAT_01267e64, pObject->FUN_006838b0());
+            NiObject* iObject = pObject->FUN_006838b0();
+            Geometry* m_pShaderGeometry = (Geometry*)FUN_00653270(&DAT_01267e64, (int)pObject->FUN_006838b0());
             if (m_pShaderGeometry)
             {
                 GeomData* pData = m_pShaderGeometry->FUN_006fa820();
-                ListNode* pIter = pData->FUN_007d6bb0();
+                ActorListNodeView* pIter = pData->FUN_007d6bb0();
                 int iSkin = pData->FUN_00517630();
                 if (!FUN_00c8cce0(&iSkin))
                 {
@@ -970,7 +603,7 @@ void Actor::FUN_00886cb0(float afDelta, int aiUnused)
                         (FaceProp*)FUN_00653270(&DAT_012683ec, (int)pIter->FUN_006815c0()->FUN_00559450());
                     if (pFace)
                     {
-                        float fDesiredHeadingAngle = FUN_vt2bc(0);
+                        float fDesiredHeadingAngle = GetCurrentTargetDistance(0);
                         AlignedRotation kRotationBasis(FUN_005c53d0(fDesiredHeadingAngle), FUN_005b9e80(fDesiredHeadingAngle), 0.0f, 0.0f);
                         pFace->ForwardToScriptLocals(1);
                         pFace->FUN_00887af0(&kRotationBasis);
@@ -987,12 +620,12 @@ void Actor::FUN_00886cb0(float afDelta, int aiUnused)
         pObject = FUN_004ade00(pFaceRoot, FUN_00887a00());
         if (pObject)
         {
-            int iObject = pObject->FUN_006838b0();
-            Geometry* m_pShaderGeometry = (Geometry*)FUN_00653270(&DAT_01267e64, pObject->FUN_006838b0());
+            NiObject* iObject = pObject->FUN_006838b0();
+            Geometry* m_pShaderGeometry = (Geometry*)FUN_00653270(&DAT_01267e64, (int)pObject->FUN_006838b0());
             if (m_pShaderGeometry)
             {
                 GeomData* pData = m_pShaderGeometry->FUN_006fa820();
-                ListNode* pIter = pData->FUN_007d6bb0();
+                ActorListNodeView* pIter = pData->FUN_007d6bb0();
                 int iSkin = pData->FUN_00517630();
                 if (!FUN_00c8cce0(&iSkin))
                 {
@@ -1012,7 +645,7 @@ void Actor::FUN_00886cb0(float afDelta, int aiUnused)
                     if (pShader)
                     {
                         ShaderData* m_pSPData = pShader->FUN_00887a10();
-                        float fScale = fScale24;
+                        float fScale = data.Angle.x;
                         FUN_005330e0(&fScale, m_pSPData->FUN_00644a50(), m_pSPData->GetFloatAt0xC8());
                         pShader->FUN_00887a80(1);
                         pShader->FUN_00887ac0(fScale);
@@ -1027,26 +660,12 @@ void Actor::FUN_00886cb0(float afDelta, int aiUnused)
             }
         }
         if (bChanged)
-            FUN_vt48(4);
+            MarkAsModified(4);
     }
     DAT_011df69e.FUN_00483710();
 }
 
-}
-
-#include <string.h>
-struct P164FormType
-{
-    int FUN_00401170();
-};
-
 extern const char DAT_0102fdc8[];
-__if_not_exists(TESActorBase::TESActorBase)
-{
-    struct TESActorBase : TESForm
-    {
-    };
-}
 struct P164Flags
 {
     unsigned int value;
@@ -1094,162 +713,15 @@ struct P164Biped
 {
     TESForm* FUN_0088e0f0(int);
 };
-struct P164State
-{
-    int FUN_004f8960();
-};
-struct P164Actor : Actor
+// Declaration-only extension for load routines not yet exposed by the shared Actor header.
+struct ActorLoadGame : Actor
 {
     void FUN_008ab3a0(P164Buffer*);
     void FUN_00932a00(P164Buffer*);
-    void FUN_00884f80();
     void FUN_008c1ac0(bool);
     void SetFlag40000000(bool);
     bool FUN_00566950();
-    const char* FUN_0055d520();
-};
-struct P164ActorVirtual
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual P164Biped* GetBipedAnimation();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual bool IsCharacter();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual bool IsDead(int);
+    int FUN_004f8960();
 };
 struct P164Mover
 {
@@ -1553,9 +1025,9 @@ struct P164Process
     virtual void Update(bool);
 };
 // @fnv 0x008ab3a0
-void P164Actor::FUN_008ab3a0(P164Buffer* buffer)
+void ActorLoadGame::FUN_008ab3a0(P164Buffer* buffer)
 {
-    int oldState = ((P164State*)this)->FUN_004f8960();
+    int oldState = FUN_004f8960();
     FUN_00932a00(buffer);
     m_eLifeState = (ACTOR_LIFE_STATE)oldState;
     FUN_00884f80();
@@ -1625,7 +1097,7 @@ void P164Actor::FUN_008ab3a0(P164Buffer* buffer)
     ((P164Mover*)m_pActorMover)->Load(buffer);
     if (Get3DSimple() && m_pBaseProcess)
     {
-        P164Biped* inventory = ((P164ActorVirtual*)this)->GetBipedAnimation();
+        P164Biped* inventory = ((P164Biped*)GetValidBip01Names());
         P164Inventory* biped = FUN_004bf220(this);
         if (inventory && biped)
         {
@@ -1638,7 +1110,7 @@ void P164Actor::FUN_008ab3a0(P164Buffer* buffer)
                 TESForm* equipped = item ? item->FUN_0044ddc0() : 0;
                 if (current)
                 {
-                    if (((P164FormType*)current)->FUN_00401170() == 12)
+                    if (((BaseForm_actor*)current)->FUN_00401170() == 12)
                         current = 0;
                     else if (current->Unk_3D())
                         current = 0;
@@ -1651,7 +1123,7 @@ void P164Actor::FUN_008ab3a0(P164Buffer* buffer)
                 delete item;
             }
         }
-        else if (biped && ((P164ActorVirtual*)this)->IsCharacter() && FUN_00566950() &&
+        else if (biped && IsCreature() && FUN_00566950() &&
                  strstr(FUN_0055d520(), DAT_0102fdc8))
         {
             P164Item* weapon = biped->FUN_004c8c10(5, 0);
@@ -1661,6 +1133,6 @@ void P164Actor::FUN_008ab3a0(P164Buffer* buffer)
                 ((P164Process*)m_pBaseProcess)->Update(true);
         }
     }
-    if (!((P164ActorVirtual*)this)->IsDead(0) && m_eCriticalStage != 0)
+    if (!HasHealth(false) && m_eCriticalStage != 0)
         m_eCriticalStage = (ACTOR_CRITICAL_STAGE)0;
 }

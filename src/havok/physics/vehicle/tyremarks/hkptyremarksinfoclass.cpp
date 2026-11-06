@@ -2,25 +2,11 @@
 // src/havok/physics/vehicle/tyremarks/hkptyremarksinfoclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/tyremarks/hkptyremarksinfoclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiBytes) throw();
-};
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct ArrayMember
 {
@@ -30,12 +16,12 @@ struct ArrayMember
 
     ~ArrayMember() throw()
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
         if ((uCapacity & 0x80000000) == 0)
-            pAllocator->FreeArray(m_pData, (uCapacity & 0x3fffffff) * 0x20);
+            pAllocator->bufFree(m_pData, (uCapacity & 0x3fffffff) * 0x20);
         m_pData = 0;
         m_uCapacity = 0x80000000;
     }
@@ -67,9 +53,9 @@ struct FUN_00dfc2c0 : SizedBase
 
     static void operator delete(void* apMemory) throw()
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(apMemory, ((FUN_00dfc2c0*)apMemory)->m_uSize);
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        pAllocator->blockFree(apMemory, ((FUN_00dfc2c0*)apMemory)->m_uSize);
     }
 };
 
@@ -79,29 +65,6 @@ FUN_00dfc2c0::FUN_00dfc2c0()
 }
 
 namespace fnv_00dfc330 {
-struct DFC330Allocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-
-struct DFC330MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    DFC330Allocator* m_pStreamAllocator;
-
-    DFC330Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" DFC330MemoryRouter& __cdecl FUN_00c85750();
-
 struct FUN_00dfc330
 {
     unsigned short m_usMemSizeAndFlags;
@@ -113,7 +76,9 @@ struct FUN_00dfc330
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00dfc330* b = static_cast<FUN_00dfc330*>(p);
-        FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        pAllocator->blockFree(p, b->m_usMemSizeAndFlags);
     }
 };
 

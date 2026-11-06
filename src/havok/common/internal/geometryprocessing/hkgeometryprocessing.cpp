@@ -1,3 +1,10 @@
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/Vec4.h"
 
 // src/havok/common/internal/geometryprocessing/hkgeometryprocessing.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/geometryprocessing/hkgeometryprocessing.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -41,23 +48,7 @@ float FUN_00dee6b0_Class::FUN_00dee6b0(int testFlag)
 
 extern int DAT_010cd664;
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct FUN_00dee6c0_cls
 {
@@ -73,82 +64,131 @@ FUN_00dee6c0_cls* FUN_00dee6c0_cls::FUN_00dee6c0(unsigned char acFlags)
     m_vptr = (int)&DAT_010cd664;
     if (acFlags & 1)
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(this, 0x40);
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        pAllocator->blockFree(this, 0x40);
     }
     return this;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Preserve the original SSE storage and its aliasing behavior in geometry helpers.
+namespace geometry_sse {
+// Exe 0x00de94b0 FUN_00de94b0: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
-
+} __m128, LocalM128;
+typedef LocalM128 GeometryQuad;
 extern "C"
 {
-    __m128 _mm_add_ss(__m128 a, __m128 b);
-    __m128 _mm_sub_ss(__m128 a, __m128 b);
-    __m128 _mm_div_ss(__m128 a, __m128 b);
-    __m128 _mm_add_ps(__m128 a, __m128 b);
-    __m128 _mm_sub_ps(__m128 a, __m128 b);
-    __m128 _mm_mul_ps(__m128 a, __m128 b);
-    __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-    __m128 _mm_load_ps1(const float* p);
-    void _mm_store_ss(float* p, __m128 a);
+    GeometryQuad _mm_add_ss(GeometryQuad, GeometryQuad);
+    GeometryQuad _mm_sub_ss(GeometryQuad, GeometryQuad);
+    GeometryQuad _mm_div_ss(GeometryQuad, GeometryQuad);
+    GeometryQuad _mm_add_ps(GeometryQuad, GeometryQuad);
+    GeometryQuad _mm_sub_ps(GeometryQuad, GeometryQuad);
+    GeometryQuad _mm_mul_ps(GeometryQuad, GeometryQuad);
+    GeometryQuad _mm_shuffle_ps(GeometryQuad, GeometryQuad, unsigned int);
+    GeometryQuad _mm_load_ps1(const float*);
+    GeometryQuad _mm_and_ps(GeometryQuad, GeometryQuad);
+    GeometryQuad _mm_setr_ps(float, float, float, float);
+    GeometryQuad _mm_sqrt_ss(GeometryQuad);
+    GeometryQuad _mm_set_ps1(float);
+    GeometryQuad _mm_load_ss(const float*);
+    GeometryQuad _mm_set_ss(float);
+    GeometryQuad _mm_mul_ss(GeometryQuad, GeometryQuad);
+    GeometryQuad _mm_rsqrt_ss(GeometryQuad);
+    GeometryQuad _mm_cmpeq_ss(GeometryQuad, GeometryQuad);
+    GeometryQuad _mm_andnot_ps(GeometryQuad, GeometryQuad);
+    GeometryQuad _mm_load_ps(const float*);
+    void _mm_store_ss(float*, GeometryQuad);
+}
+} // namespace geometry_sse
+using geometry_sse::GeometryQuad;
+
+static __forceinline const __m128& asSharedQuad(const GeometryQuad& value)
+{
+    return reinterpret_cast<const __m128&>(value);
 }
 
-struct VectorComponentValue
+static __forceinline const GeometryQuad& asGeometryQuad(const __m128& value)
 {
-    __m128 m_vValue;
-
-    VectorComponentValue()
-    {}
-    VectorComponentValue(const __m128& r) : m_vValue(r)
-    {}
-    operator float() const
-    {
-        float f;
-        _mm_store_ss(&f, m_vValue);
-        return f;
-    }
-};
-
-__forceinline VectorComponentValue operator/(const VectorComponentValue& a, const VectorComponentValue& b)
-{
-    return _mm_div_ss(a.m_vValue, b.m_vValue);
+    return reinterpret_cast<const GeometryQuad&>(value);
 }
 
-struct hkVector4
-{
-    __m128 m_vComponents;
+inline hkSimdReal::hkSimdReal()
+{}
 
-    __forceinline void sub4(const hkVector4& a)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setAddMul4(const hkVector4& a, const hkVector4& b, const VectorComponentValue& r)
-    {
-        m_vComponents =
-            _mm_add_ps(a.m_vComponents, _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), b.m_vComponents));
-    }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        const __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        const __m128 z = _mm_shuffle_ps(x2, x2, 0xaa);
-        return _mm_add_ss(z, xySum);
-    }
-    __forceinline VectorComponentValue lengthSquared3() const
-    {
-        return dot3(*this);
-    }
-};
+inline hkSimdReal::hkSimdReal(const __m128& r) : m_vValue(r)
+{}
+
+inline hkSimdReal::operator float() const
+{
+    float f;
+    _mm_store_ss(&f, m_vValue);
+    return f;
+}
+
+__forceinline hkSimdReal operator/(const hkSimdReal& a, const hkSimdReal& b)
+{
+    return asSharedQuad(_mm_div_ss(asGeometryQuad(a.m_vValue), asGeometryQuad(b.m_vValue)));
+}
+
+static __forceinline GeometryQuad& geometryQuad(hkVector4& value)
+{
+    return reinterpret_cast<GeometryQuad&>(value.m_vComponents);
+}
+
+static __forceinline const GeometryQuad& geometryQuad(const hkVector4& value)
+{
+    return asGeometryQuad(value.m_vComponents);
+}
+
+inline hkVector4::hkVector4(const hkVector4& value) : m_vComponents(value.m_vComponents) {}
+
+__forceinline void hkVector4::sub4(const hkVector4& a)
+{
+    geometryQuad(*this) = _mm_sub_ps(geometryQuad(*this), geometryQuad(a));
+}
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    geometryQuad(*this) = _mm_sub_ps(geometryQuad(a), geometryQuad(b));
+}
+__forceinline void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b, const hkSimdReal& r)
+{
+    geometryQuad(*this) =
+        _mm_add_ps(geometryQuad(a),
+                   _mm_mul_ps(_mm_shuffle_ps(asGeometryQuad(r.m_vValue), asGeometryQuad(r.m_vValue), 0),
+                              geometryQuad(b)));
+}
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    const GeometryQuad x2 = _mm_mul_ps(geometryQuad(*this), geometryQuad(a));
+    const GeometryQuad xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    const GeometryQuad z = _mm_shuffle_ps(x2, x2, 0xaa);
+    return asSharedQuad(_mm_add_ss(z, xySum));
+}
+__forceinline hkSimdReal hkVector4::lengthSquared3() const
+{
+    return dot3(*this);
+}
+
+__forceinline void hkVector4::setCross(const hkVector4& a, const hkVector4& b)
+{
+    const GeometryQuad cross0 = _mm_mul_ps(_mm_shuffle_ps(geometryQuad(a), geometryQuad(a), 0xc9),
+                                         _mm_shuffle_ps(geometryQuad(b), geometryQuad(b), 0xd2));
+    const GeometryQuad cross1 = _mm_mul_ps(_mm_shuffle_ps(geometryQuad(a), geometryQuad(a), 0xd2),
+                                         _mm_shuffle_ps(geometryQuad(b), geometryQuad(b), 0xc9));
+    geometryQuad(*this) = _mm_sub_ps(cross0, cross1);
+}
+__forceinline float hkVector4::dot3scalar(const hkVector4& a) const
+{
+    const GeometryQuad x2 = _mm_mul_ps(geometryQuad(*this), geometryQuad(a));
+    const GeometryQuad res = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2));
+    float result;
+    _mm_store_ss(&result, res);
+    return result;
+}
 
 extern const hkVector4 DAT_010c7160;
 
@@ -160,8 +200,9 @@ float __cdecl FUN_00de94b0(const hkVector4& a, const hkVector4& b, const hkVecto
     d1.setSub4(b, a);
     hkVector4 vSegmentVec;
     vSegmentVec.setSub4(c, b);
-    const VectorComponentValue fLenSq = vSegmentVec.lengthSquared3();
-    const VectorComponentValue num = _mm_sub_ss(DAT_010c7160.m_vComponents, vSegmentVec.dot3(d1).m_vValue);
+    const hkSimdReal fLenSq = vSegmentVec.lengthSquared3();
+    const hkSimdReal num =
+        asSharedQuad(_mm_sub_ss(geometryQuad(DAT_010c7160), asGeometryQuad(vSegmentVec.dot3(d1).m_vValue)));
     const float t = num / fLenSq;
     *pfT = t;
     if (t < 0.0f)
@@ -173,88 +214,61 @@ float __cdecl FUN_00de94b0(const hkVector4& a, const hkVector4& b, const hkVecto
         *pfT = 1.0f;
     }
     hkVector4 v;
-    v.m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_load_ps1(pfT), vSegmentVec.m_vComponents), d1.m_vComponents);
+    geometryQuad(v) =
+        _mm_add_ps(_mm_mul_ps(geometry_sse::_mm_load_ps1(pfT), geometryQuad(vSegmentVec)), geometryQuad(d1));
     return v.lengthSquared3();
 }
 
 namespace fnv_00dea810 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00de94b0 FUN_00de94b0: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_cmplt_ps(__m128, __m128);
-extern "C" __m128 _mm_and_ps(__m128, __m128);
-extern "C" __m128 _mm_andnot_ps(__m128, __m128);
-extern "C" __m128 _mm_or_ps(__m128, __m128);
-
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_cmplt_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_and_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_or_ps(LocalM128, LocalM128);
 extern float DAT_0104e148;
 
 struct hkVector4Comparisonq
 {
-    __m128 m_uiMask;
+    LocalM128 m_uiMask;
 };
-struct hkVector4q
+static __forceinline LocalM128& supportingQuad(hkVector4& value)
 {
-    __m128 m_vComponents;
-    __forceinline void operator=(const hkVector4q& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void set(float x, float y, float z, float w)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline void setMul4(const hkVector4q& a, const hkVector4q& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setAdd4(const hkVector4q& a, const hkVector4q& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void add4(const hkVector4q& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void addMul4(const hkVector4q& a, const hkVector4q& b)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents));
-    }
-    __forceinline hkVector4Comparisonq compareLessThan4(const hkVector4q& a) const
-    {
-        hkVector4Comparisonq c;
-        c.m_uiMask = _mm_cmplt_ps(m_vComponents, a.m_vComponents);
-        return c;
-    }
-    __forceinline void setSelect4(const hkVector4Comparisonq& comp, const hkVector4q& trueValue,
-                                  const hkVector4q& falseValue)
-    {
-        m_vComponents = _mm_or_ps(_mm_and_ps(comp.m_uiMask, trueValue.m_vComponents),
-                                  _mm_andnot_ps(comp.m_uiMask, falseValue.m_vComponents));
-    }
-    template <int I> __forceinline void setBroadcast(const hkVector4q& v)
-    {
-        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, (I << 6) | (I << 4) | (I << 2) | I);
-    }
-    __forceinline float& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-};
+    return reinterpret_cast<LocalM128&>(value.m_vComponents);
+}
+static __forceinline const LocalM128& supportingQuad(const hkVector4& value)
+{
+    return reinterpret_cast<const LocalM128&>(value.m_vComponents);
+}
+static __forceinline hkVector4Comparisonq compareLessThan(const hkVector4& value, const hkVector4& a)
+{
+    hkVector4Comparisonq c;
+    c.m_uiMask = _mm_cmplt_ps(supportingQuad(value), supportingQuad(a));
+    return c;
+}
+static __forceinline void selectSupporting(hkVector4& result, const hkVector4Comparisonq& comp,
+                                          const hkVector4& trueValue, const hkVector4& falseValue)
+{
+    supportingQuad(result) = _mm_or_ps(_mm_and_ps(comp.m_uiMask, supportingQuad(trueValue)),
+                                      _mm_andnot_ps(comp.m_uiMask, supportingQuad(falseValue)));
+}
+template <int I> static __forceinline void broadcastSupporting(hkVector4& result, const hkVector4& value)
+{
+    supportingQuad(result) = _mm_shuffle_ps(supportingQuad(value), supportingQuad(value), (I << 6) | (I << 4) | (I << 2) | I);
+}
 
 struct hkFourTransposedPointsq
 {
-    hkVector4q m_kVertices[3];
+    hkVector4 m_kVertices[3];
 };
 
 struct FourPointsArray
@@ -263,65 +277,86 @@ struct FourPointsArray
     int m_iElementCount;
 };
 
-extern hkVector4q DAT_010d9fe0;
-extern hkVector4q DAT_010d0fa0;
+extern hkVector4 DAT_010d9fe0;
+extern hkVector4 DAT_010d0fa0;
+
+static __forceinline void setSupporting(hkVector4& result, float x, float y, float z, float w)
+{
+    supportingQuad(result) = _mm_setr_ps(x, y, z, w);
+}
+static __forceinline void multiplySupporting(hkVector4& result, const hkVector4& a, const hkVector4& b)
+{
+    supportingQuad(result) = _mm_mul_ps(supportingQuad(a), supportingQuad(b));
+}
+static __forceinline void addSupporting(hkVector4& result, const hkVector4& a, const hkVector4& b)
+{
+    supportingQuad(result) = _mm_add_ps(supportingQuad(a), supportingQuad(b));
+}
+static __forceinline void addSupporting(hkVector4& result, const hkVector4& a)
+{
+    supportingQuad(result) = _mm_add_ps(supportingQuad(result), supportingQuad(a));
+}
+static __forceinline float& supportingComponent(hkVector4& value, int i)
+{
+    return supportingQuad(value).m128_f32[i];
+}
 
 // Finds the vertex with the maximum dot product against direction, stores it in supportingVertexOut, and packs vertexId into the w component.
 // @fnv 0x00dea810
-void __cdecl FUN_00dea810(const FourPointsArray& rotatedVertices, const hkVector4q& direction,
-                          hkVector4q& supportingVertexOut)
+void __cdecl FUN_00dea810(const FourPointsArray& rotatedVertices, const hkVector4& direction,
+                          hkVector4& supportingVertexOut)
 {
 
-    hkVector4q vBestDot;
-    vBestDot.set(DAT_0104e148, DAT_0104e148, DAT_0104e148, DAT_0104e148);
-    hkVector4q vCurIndices;
-    vCurIndices = DAT_010d9fe0;
-    hkVector4q vBestIndices;
-    vBestIndices.setZero4();
+    hkVector4 vBestDot;
+    setSupporting(vBestDot, DAT_0104e148, DAT_0104e148, DAT_0104e148, DAT_0104e148);
+    hkVector4 vCurIndices;
+    supportingQuad(vCurIndices) = supportingQuad(DAT_010d9fe0);
+    hkVector4 vBestIndices;
+    supportingQuad(vBestIndices) = _mm_setzero_ps();
 
     int i = 0;
     const hkFourTransposedPointsq* p = rotatedVertices.m_data;
-    hkVector4q vDirX;
-    vDirX.setBroadcast<0>(direction);
-    hkVector4q vDirY;
-    vDirY.m_vComponents = _mm_shuffle_ps(direction.m_vComponents, direction.m_vComponents, 0x55);
-    hkVector4q vDirZ;
-    vDirZ.setBroadcast<2>(direction);
+    hkVector4 vDirX;
+    broadcastSupporting<0>(vDirX, direction);
+    hkVector4 vDirY;
+    supportingQuad(vDirY) = _mm_shuffle_ps(supportingQuad(direction), supportingQuad(direction), 0x55);
+    hkVector4 vDirZ;
+    broadcastSupporting<2>(vDirZ, direction);
 
     {
         for (; i < rotatedVertices.m_iElementCount * 4; i += 4)
         {
-            hkVector4q x;
-            x.setMul4(vDirX, p->m_kVertices[0]);
-            hkVector4q y;
-            y.setMul4(vDirY, p->m_kVertices[1]);
-            hkVector4q z;
-            z.setMul4(vDirZ, p->m_kVertices[2]);
-            hkVector4q dot;
-            dot.setAdd4(x, y);
-            dot.add4(z);
-            hkVector4Comparisonq comp = vBestDot.compareLessThan4(dot);
-            vBestDot.setSelect4(comp, dot, vBestDot);
-            vBestIndices.setSelect4(comp, vCurIndices, vBestIndices);
-            vCurIndices.add4(DAT_010d0fa0);
+            hkVector4 x;
+            multiplySupporting(x, vDirX, p->m_kVertices[0]);
+            hkVector4 y;
+            multiplySupporting(y, vDirY, p->m_kVertices[1]);
+            hkVector4 z;
+            multiplySupporting(z, vDirZ, p->m_kVertices[2]);
+            hkVector4 dot;
+            addSupporting(dot, x, y);
+            addSupporting(dot, z);
+            hkVector4Comparisonq comp = compareLessThan(vBestDot, dot);
+            selectSupporting(vBestDot, comp, dot, vBestDot);
+            selectSupporting(vBestIndices, comp, vCurIndices, vBestIndices);
+            supportingQuad(vCurIndices) = _mm_add_ps(supportingQuad(vCurIndices), supportingQuad(DAT_010d0fa0));
             ++p;
         }
     }
 
-    int a = (vBestDot(0) > vBestDot(1)) ? 0 : 1;
-    int b = (vBestDot(2) > vBestDot(3)) ? 2 : 3;
-    int best = (vBestDot(a) > vBestDot(b)) ? a : b;
-    int vertexId = (int)vBestIndices(best);
+    int a = (supportingComponent(vBestDot, 0) > supportingComponent(vBestDot, 1)) ? 0 : 1;
+    int b = (supportingComponent(vBestDot, 2) > supportingComponent(vBestDot, 3)) ? 2 : 3;
+    int best = (supportingComponent(vBestDot, a) > supportingComponent(vBestDot, b)) ? a : b;
+    int vertexId = (int)supportingComponent(vBestIndices, best);
 
     const hkFourTransposedPointsq& f = rotatedVertices.m_data[(unsigned int)vertexId >> 2];
     int c = vertexId & 3;
-    supportingVertexOut.set(f.m_kVertices[0].m_vComponents.m128_f32[c], f.m_kVertices[1].m_vComponents.m128_f32[c],
-                            f.m_kVertices[2].m_vComponents.m128_f32[c], 0.0f);
-    *(int*)&supportingVertexOut(3) = vertexId | 0x3f000000;
+    setSupporting(supportingVertexOut, supportingQuad(f.m_kVertices[0]).m128_f32[c], supportingQuad(f.m_kVertices[1]).m128_f32[c],
+                            supportingQuad(f.m_kVertices[2]).m128_f32[c], 0.0f);
+    *(int*)&supportingComponent(supportingVertexOut, 3) = vertexId | 0x3f000000;
 }
 }  // namespace fnv_00dea810
 
-extern __m128 DAT_010c71d0;
+extern GeometryQuad DAT_010c71d0;
 
 struct FUN_00dee640_cls
 {
@@ -329,7 +364,7 @@ struct FUN_00dee640_cls
     int unk04;
     int unk08;
     int unk0C;
-    __m128 m_vec10;
+    GeometryQuad m_vec10;
     float m_fDist20;
     int unk24;
     int unk28;
@@ -342,11 +377,11 @@ struct FUN_00dee640_cls
 // @fnv 0x00dee640
 float FUN_00dee640_cls::UpdateNearestDistance(void* pair)
 {
-    const __m128* ab = (const __m128*)pair;
-    __m128 vMidpoint = _mm_mul_ps(_mm_add_ps(ab[0], ab[1]), DAT_010c71d0);
-    __m128 d = _mm_sub_ps(m_vec10, vMidpoint);
+    const GeometryQuad* ab = (const GeometryQuad*)pair;
+    GeometryQuad vMidpoint = _mm_mul_ps(_mm_add_ps(ab[0], ab[1]), DAT_010c71d0);
+    GeometryQuad d = _mm_sub_ps(m_vec10, vMidpoint);
     d = _mm_mul_ps(d, d);
-    __m128 xy = _mm_add_ss(_mm_shuffle_ps(d, d, 0x55), d);
+    GeometryQuad xy = _mm_add_ss(_mm_shuffle_ps(d, d, 0x55), d);
     float fDistSq;
     _mm_store_ss(&fDistSq, _mm_add_ss(_mm_shuffle_ps(d, d, 0xaa), xy));
     if (fDistSq < m_fDist20)
@@ -357,7 +392,7 @@ float FUN_00dee640_cls::UpdateNearestDistance(void* pair)
     return 1.0f;
 }
 
-extern __m128 DAT_01267e30;
+extern GeometryQuad DAT_01267e30;
 
 struct Vertex
 {
@@ -365,12 +400,12 @@ struct Vertex
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0C;
-    __m128 m_vContactPosition;
+    GeometryQuad m_vContactPosition;
     unsigned int unk20;
     unsigned int unk24;
     unsigned int unk28;
     unsigned int unk2C;
-    __m128 m_vHitNormal;
+    GeometryQuad m_vHitNormal;
 };
 
 struct Triangle
@@ -473,7 +508,7 @@ void FUN_00e19200_cls::FUN_00e19200(Triangle* apTriangle, const __m128* b, int a
     stBlock.m_44 = -1;
     Vertex* v = m_08.PushFront(&stBlock);
     v->m_vHitNormal = DAT_01267e30;
-    v->m_vContactPosition = *b;
+    v->m_vContactPosition = asGeometryQuad(*b);
     Triangle* pTriangle1 = m_20.FUN_00e241a0(apTriangle);
     Triangle* pTriangle2 = m_20.FUN_00e241a0(apTriangle);
     apTriangle->m_kVertices[0] = v;
@@ -487,99 +522,57 @@ void FUN_00e19200_cls::FUN_00e19200(Triangle* apTriangle, const __m128* b, int a
 }
 
 namespace fnv_00dea6b0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" void _mm_store_ss(float*, __m128);
-
-struct S00dea6b0_Vec
-{
-    __m128 m_vComponents;
-
-    void setSub4(const S00dea6b0_Vec& a, const S00dea6b0_Vec& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void setCross(const S00dea6b0_Vec& v1, const S00dea6b0_Vec& v2)
-    {
-        const __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
-                                         _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        const __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
-                                         _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    float dot3(const S00dea6b0_Vec& a) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        const __m128 res = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2));
-        float r;
-        _mm_store_ss(&r, res);
-        return r;
-    }
-};
-
 // Checks if point p lies inside triangle abc by verifying the dot product of each edge cross product with the triangle normal is at least tol.
 // @fnv 0x00dea6b0
-bool __cdecl FUN_00dea6b0(const S00dea6b0_Vec& p, const S00dea6b0_Vec& a, const S00dea6b0_Vec& b,
-                          const S00dea6b0_Vec& c, float afTolerance)
+bool __cdecl FUN_00dea6b0(const hkVector4& p, const hkVector4& a, const hkVector4& b,
+                          const hkVector4& c, float afTolerance)
 {
-    S00dea6b0_Vec ab;
+    hkVector4 ab;
     ab.setSub4(b, a);
-    S00dea6b0_Vec vEdgeAC;
+    hkVector4 vEdgeAC;
     vEdgeAC.setSub4(c, a);
-    S00dea6b0_Vec n;
+    hkVector4 n;
     n.setCross(ab, vEdgeAC);
     {
-        S00dea6b0_Vec e0;
+        hkVector4 e0;
         e0.setSub4(a, p);
-        S00dea6b0_Vec e1;
+        hkVector4 e1;
         e1.setSub4(b, p);
-        S00dea6b0_Vec cr;
+        hkVector4 cr;
         cr.setCross(e0, e1);
-        if (cr.dot3(n) < afTolerance)
+        if (cr.dot3scalar(n) < afTolerance)
             return false;
     }
     {
-        S00dea6b0_Vec e0;
+        hkVector4 e0;
         e0.setSub4(b, p);
-        S00dea6b0_Vec e1;
+        hkVector4 e1;
         e1.setSub4(c, p);
-        S00dea6b0_Vec cr;
+        hkVector4 cr;
         cr.setCross(e0, e1);
-        if (cr.dot3(n) < afTolerance)
+        if (cr.dot3scalar(n) < afTolerance)
             return false;
     }
     {
-        S00dea6b0_Vec e0;
+        hkVector4 e0;
         e0.setSub4(c, p);
-        S00dea6b0_Vec e1;
+        hkVector4 e1;
         e1.setSub4(a, p);
-        S00dea6b0_Vec cr;
+        hkVector4 cr;
         cr.setCross(e0, e1);
-        if (cr.dot3(n) < afTolerance)
+        if (cr.dot3scalar(n) < afTolerance)
             return false;
     }
     return true;
 }
 }  // namespace fnv_00dea6b0
 
-extern "C"
-{
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_setr_ps(float, float, float, float);
-}
-extern __m128 DAT_01017d10;
+extern GeometryQuad DAT_01017d10;
 extern float DAT_01011d78;
 
 struct CubeVector
 {
-    __m128 lanes;
+    GeometryQuad lanes;
     __forceinline void sum(const CubeVector& lhs, const CubeVector& rhs)
     {
         lanes = _mm_add_ps(lhs.lanes, rhs.lanes);
@@ -588,7 +581,7 @@ struct CubeVector
     {
         lanes = _mm_sub_ps(lhs.lanes, rhs.lanes);
     }
-    __forceinline void scale(const __m128& k)
+    __forceinline void scale(const GeometryQuad& k)
     {
         lanes = _mm_mul_ps(k, lanes);
     }
@@ -632,7 +625,7 @@ void __cdecl FUN_00de9590(CubeBox* box)
     box->center(center);
     float size = extent.component(extent.longestAxis());
     CubeVector vRadius;
-    vRadius.lanes = _mm_setr_ps(size, size, size, DAT_01011d78);
+    vRadius.lanes = geometry_sse::_mm_setr_ps(size, size, size, DAT_01011d78);
     box->lower.difference(center, vRadius);
     box->upper.sum(center, vRadius);
 }
@@ -640,9 +633,6 @@ void __cdecl FUN_00de9590(CubeBox* box)
 #include <math.h>
 extern const float DAT_0104da4c = 1.1920928955078125e-7f;
 extern float DAT_0104da48;
-extern "C" __m128 _mm_sqrt_ss(__m128);
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" __m128 _mm_load_ss(const float*);
 
 // Computes the closest distance between two line segments defined by start and end points, writing clamped parameters to the output pointers.
 // @fnv 0x00dea450
@@ -669,22 +659,23 @@ float __cdecl FUN_00dea450(const hkVector4& firstStart, const hkVector4& firstEn
         float clamped = parameter < 0.0f ? 0.0f : (parameter > 1.0f ? 1.0f : parameter);
         *secondParameter = clamped;
         hkVector4 point;
-        point.setAddMul4(secondStart, secondDirection, VectorComponentValue(_mm_load_ss(secondParameter)));
+        point.setAddMul4(secondStart, secondDirection, hkSimdReal(asSharedQuad(geometry_sse::_mm_load_ss(secondParameter))));
         hkVector4 offset;
         offset.setSub4(firstStart, point);
-        VectorComponentValue squaredLength = firstDirection.lengthSquared3();
-        VectorComponentValue projected = offset.dot3(firstDirection);
-        VectorComponentValue s =
-            _mm_sub_ss(DAT_010c7160.m_vComponents, _mm_div_ss(projected.m_vValue, squaredLength.m_vValue));
+        hkSimdReal squaredLength = firstDirection.lengthSquared3();
+        hkSimdReal projected = offset.dot3(firstDirection);
+        hkSimdReal s =
+            asSharedQuad(_mm_sub_ss(geometryQuad(DAT_010c7160),
+                                   _mm_div_ss(asGeometryQuad(projected.m_vValue), asGeometryQuad(squaredLength.m_vValue))));
         float rawFirst = s;
         float firstClamped = rawFirst < 0.0f ? 0.0f : (rawFirst > 1.0f ? 1.0f : rawFirst);
         *firstParameter = firstClamped;
         hkVector4 difference;
-        difference.m_vComponents =
-            _mm_sub_ps(_mm_add_ps(_mm_mul_ps(_mm_set_ps1(*firstParameter), firstDirection.m_vComponents),
-                                  firstStart.m_vComponents),
-                       point.m_vComponents);
-        VectorComponentValue result = _mm_sqrt_ss(difference.dot3(difference).m_vValue);
+        geometryQuad(difference) =
+            _mm_sub_ps(_mm_add_ps(_mm_mul_ps(geometry_sse::_mm_set_ps1(*firstParameter), geometryQuad(firstDirection)),
+                                  geometryQuad(firstStart)),
+                       geometryQuad(point));
+        hkSimdReal result = asSharedQuad(_mm_sqrt_ss(asGeometryQuad(difference.dot3(difference).m_vValue)));
         return result;
     }
     *secondParameter = 0.0f;
@@ -693,47 +684,35 @@ float __cdecl FUN_00dea450(const hkVector4& firstStart, const hkVector4& firstEn
 }
 
 extern const float DAT_0101622c;
-struct Vec4
-{
-    __m128 value;
-};
 // @fnv 0x00de9b90
 Vec4 __cdecl FUN_00de9b90(const Vec4& a, const Vec4& b, const Vec4& c, const Vec4& d)
 {
-    __m128 scale = _mm_load_ss(&DAT_0101622c);
-    __m128 cv = c.value;
-    __m128 dv = d.value;
-    __m128 bv = b.value;
-    __m128 cd = _mm_add_ps(cv, dv);
-    __m128 av = a.value;
-    __m128 ab = _mm_add_ps(av, bv);
-    __m128 sum = _mm_add_ps(cd, ab);
+    GeometryQuad scale = geometry_sse::_mm_load_ss(&DAT_0101622c);
+    GeometryQuad cv = reinterpret_cast<const GeometryQuad&>(c);
+    GeometryQuad dv = reinterpret_cast<const GeometryQuad&>(d);
+    GeometryQuad bv = reinterpret_cast<const GeometryQuad&>(b);
+    GeometryQuad cd = _mm_add_ps(cv, dv);
+    GeometryQuad av = reinterpret_cast<const GeometryQuad&>(a);
+    GeometryQuad ab = _mm_add_ps(av, bv);
+    GeometryQuad sum = _mm_add_ps(cd, ab);
     scale = _mm_shuffle_ps(scale, scale, 0);
-    Vec4 result;
-    result.value = _mm_mul_ps(sum, scale);
+    Vec4::Aligned result(Vec4::Uninitialized);
+    reinterpret_cast<GeometryQuad&>(result) = _mm_mul_ps(sum, scale);
     return result;
 }
 
-extern "C"
-{
-    __m128 _mm_set_ss(float);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-}
 extern const float DAT_01012054, DAT_01012068, DAT_0106c2e0;
 
 class ScalarValue
 {
-    __m128 value;
+    GeometryQuad value;
 
   public:
     ScalarValue()
     {}
-    ScalarValue(const __m128& x) : value(x)
+    ScalarValue(const GeometryQuad& x) : value(x)
     {}
-    ScalarValue(float x) : value(_mm_load_ss(&x))
+    ScalarValue(float x) : value(geometry_sse::_mm_load_ss(&x))
     {}
     operator float() const
     {
@@ -741,11 +720,11 @@ class ScalarValue
         _mm_store_ss(&x, value);
         return x;
     }
-    __forceinline const __m128& lanes() const
+    __forceinline const GeometryQuad& lanes() const
     {
         return value;
     }
-    __forceinline __m128 spread() const
+    __forceinline GeometryQuad spread() const
     {
         return _mm_shuffle_ps(value, value, 0);
     }
@@ -760,16 +739,16 @@ inline ScalarValue operator/(const ScalarValue& x, const ScalarValue& y)
 }
 inline ScalarValue operator-(const ScalarValue& x)
 {
-    return _mm_sub_ss(DAT_010c7160.m_vComponents, x.lanes());
+    return _mm_sub_ss(geometryQuad(DAT_010c7160), x.lanes());
 }
 
 class GeomVector
 {
   public:
-    __m128 data;
+    GeometryQuad data;
     GeomVector()
     {}
-    GeomVector(const __m128& x) : data(x)
+    GeomVector(const GeometryQuad& x) : data(x)
     {}
     __forceinline GeomVector(const GeomVector& x) : data(x.data)
     {}
@@ -783,14 +762,14 @@ class GeomVector
     }
     __forceinline void cross(const GeomVector& x, const GeomVector& y)
     {
-        __m128 first = _mm_mul_ps(_mm_shuffle_ps(x.data, x.data, 0xc9), _mm_shuffle_ps(y.data, y.data, 0xd2));
-        __m128 second = _mm_mul_ps(_mm_shuffle_ps(x.data, x.data, 0xd2), _mm_shuffle_ps(y.data, y.data, 0xc9));
+        GeometryQuad first = _mm_mul_ps(_mm_shuffle_ps(x.data, x.data, 0xc9), _mm_shuffle_ps(y.data, y.data, 0xd2));
+        GeometryQuad second = _mm_mul_ps(_mm_shuffle_ps(x.data, x.data, 0xd2), _mm_shuffle_ps(y.data, y.data, 0xc9));
         data = _mm_sub_ps(first, second);
     }
     __forceinline ScalarValue dot(const GeomVector& x) const
     {
-        __m128 product = _mm_mul_ps(data, x.data);
-        __m128 xy = _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product);
+        GeometryQuad product = _mm_mul_ps(data, x.data);
+        GeometryQuad xy = _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product);
         return _mm_add_ss(_mm_shuffle_ps(product, product, 0xaa), xy);
     }
     __forceinline ScalarValue magnitude() const
@@ -799,19 +778,19 @@ class GeomVector
     }
     __forceinline ScalarValue inverseMagnitude() const
     {
-        const __m128 half = _mm_set_ss(0.5f);
-        const __m128 three = _mm_set_ss(3.0f);
-        const __m128 zero = _mm_set_ss(0.0f);
-        const __m128 squared = dot(*this).lanes();
-        const __m128 empty = _mm_cmpeq_ss(squared, zero);
-        const __m128 estimate = _mm_rsqrt_ss(squared);
-        const __m128 refined = _mm_mul_ss(_mm_mul_ss(half, estimate),
+        const GeometryQuad half = geometry_sse::_mm_set_ss(0.5f);
+        const GeometryQuad three = geometry_sse::_mm_set_ss(3.0f);
+        const GeometryQuad zero = geometry_sse::_mm_set_ss(0.0f);
+        const GeometryQuad squared = dot(*this).lanes();
+        const GeometryQuad empty = _mm_cmpeq_ss(squared, zero);
+        const GeometryQuad estimate = _mm_rsqrt_ss(squared);
+        const GeometryQuad refined = _mm_mul_ss(_mm_mul_ss(half, estimate),
                                           _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(squared, estimate), estimate)));
         return _mm_andnot_ps(empty, refined);
     }
     __forceinline void normalize()
     {
-        __m128 scale = inverseMagnitude().spread();
+        GeometryQuad scale = inverseMagnitude().spread();
         data = _mm_mul_ps(scale, data);
     }
     __forceinline float& component(int i)
@@ -838,11 +817,11 @@ class GeomVector
     }
     __forceinline void set(float x, float y, float z, float w)
     {
-        data = _mm_setr_ps(x, y, z, w);
+        data = geometry_sse::_mm_setr_ps(x, y, z, w);
     }
     __forceinline ScalarValue sum() const
     {
-        __m128 xy = _mm_add_ss(_mm_shuffle_ps(data, data, 0x55), data);
+        GeometryQuad xy = _mm_add_ss(_mm_shuffle_ps(data, data, 0x55), data);
         return _mm_add_ss(_mm_shuffle_ps(data, data, 0xaa), xy);
     }
     __forceinline void scale(const ScalarValue& x)
@@ -932,50 +911,32 @@ float __cdecl FUN_00de9f10(const GeomVector& point, const GeomVector& a, const G
 }
 
 #include <float.h>
-extern "C"
-{
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_div_ss(__m128, __m128);
-    __m128 _mm_sqrt_ss(__m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_setr_ps(float, float, float, float);
-    void _mm_store_ss(float*, __m128);
-}
 
-struct S00dea980_Vec
+inline GeometryQuad S00dea980_cross(GeometryQuad a, GeometryQuad b)
 {
-    __m128 m_vComponents;
-};
-
-inline __m128 S00dea980_cross(__m128 a, __m128 b)
-{
-    __m128 b_yzx = _mm_shuffle_ps(b, b, 0xc9);
-    __m128 a_zxy = _mm_shuffle_ps(a, a, 0xd2);
-    __m128 a_yzx = _mm_shuffle_ps(a, a, 0xc9);
-    __m128 prod1 = _mm_mul_ps(b_yzx, a_zxy);
-    __m128 b_zxy = _mm_shuffle_ps(b, b, 0xd2);
-    __m128 prod2 = _mm_mul_ps(b_zxy, a_yzx);
+    GeometryQuad b_yzx = _mm_shuffle_ps(b, b, 0xc9);
+    GeometryQuad a_zxy = _mm_shuffle_ps(a, a, 0xd2);
+    GeometryQuad a_yzx = _mm_shuffle_ps(a, a, 0xc9);
+    GeometryQuad prod1 = _mm_mul_ps(b_yzx, a_zxy);
+    GeometryQuad b_zxy = _mm_shuffle_ps(b, b, 0xd2);
+    GeometryQuad prod2 = _mm_mul_ps(b_zxy, a_yzx);
     return _mm_sub_ps(prod2, prod1);
 }
 
-inline __m128 S00dea980_len2m(__m128 v)
+inline GeometryQuad S00dea980_len2m(GeometryQuad v)
 {
-    __m128 m = _mm_mul_ps(v, v);
-    __m128 s = _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m);
+    GeometryQuad m = _mm_mul_ps(v, v);
+    GeometryQuad s = _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m);
     return _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), s);
 }
 
-inline __m128 S00dea980_hadd(__m128 v)
+inline GeometryQuad S00dea980_hadd(GeometryQuad v)
 {
-    __m128 s = _mm_add_ss(_mm_shuffle_ps(v, v, 0x55), v);
+    GeometryQuad s = _mm_add_ss(_mm_shuffle_ps(v, v, 0x55), v);
     return _mm_add_ss(_mm_shuffle_ps(v, v, 0xaa), s);
 }
 
-inline float S00dea980_f(__m128 v)
+inline float S00dea980_f(GeometryQuad v)
 {
     float s;
     _mm_store_ss(&s, v);
@@ -983,16 +944,16 @@ inline float S00dea980_f(__m128 v)
 }
 
 // @fnv 0x00dea980
-float FUN_00dea980(const S00dea980_Vec* apFirst, const S00dea980_Vec* apSecond, const S00dea980_Vec* apThird)
+float FUN_00dea980(const hkVector4* apFirst, const hkVector4* apSecond, const hkVector4* apThird)
 {
-    __m128 vFirst = apFirst->m_vComponents;
-    __m128 v1 = apSecond->m_vComponents;
-    __m128 v2 = apThird->m_vComponents;
+    GeometryQuad vFirst = geometryQuad(*apFirst);
+    GeometryQuad v1 = geometryQuad(*apSecond);
+    GeometryQuad v2 = geometryQuad(*apThird);
 
-    __m128 eSecondFirst = _mm_sub_ps(v1, vFirst);
-    __m128 eThirdFirst = _mm_sub_ps(v2, vFirst);
+    GeometryQuad eSecondFirst = _mm_sub_ps(v1, vFirst);
+    GeometryQuad eThirdFirst = _mm_sub_ps(v2, vFirst);
 
-    __m128 cr = S00dea980_cross(eSecondFirst, eThirdFirst);
+    GeometryQuad cr = S00dea980_cross(eSecondFirst, eThirdFirst);
 
     float fCrossLength = S00dea980_f(_mm_sqrt_ss(S00dea980_len2m(cr)));
     float fSqrtThree = (float)sqrt(3.0);
@@ -1003,56 +964,55 @@ float FUN_00dea980(const S00dea980_Vec* apFirst, const S00dea980_Vec* apSecond, 
     float fLenSqFirstSecond;
     _mm_store_ss(&fLenSqFirstSecond, S00dea980_len2m(_mm_sub_ps(vFirst, v1)));
 
-    __m128 vLengthsSq = _mm_setr_ps(fLenSqFirstSecond, fLenSqSecondThird, fLenSqThirdFirst, 0.0f);
-    __m128 vDenominator = S00dea980_hadd(vLengthsSq);
+    GeometryQuad vLengthsSq = geometry_sse::_mm_setr_ps(fLenSqFirstSecond, fLenSqSecondThird, fLenSqThirdFirst, 0.0f);
+    GeometryQuad vDenominator = S00dea980_hadd(vLengthsSq);
 
     if (S00dea980_f(vDenominator) > FLT_EPSILON)
     {
-        return S00dea980_f(_mm_div_ss(_mm_load_ss(&num), vDenominator));
+        return S00dea980_f(_mm_div_ss(geometry_sse::_mm_load_ss(&num), vDenominator));
     }
 
     return 0.0f;
 }
 
 extern float DAT_01016248;
-extern __m128 DAT_010ec7f0;
+extern GeometryQuad DAT_010ec7f0;
 static __forceinline void medianInterpolate(hkVector4& result, const hkVector4& first, const hkVector4& second,
-                                            const VectorComponentValue& fraction)
+                                            const hkSimdReal& fraction)
 {
-    __m128 weight = _mm_shuffle_ps(fraction.m_vValue, fraction.m_vValue, 0);
-    __m128 complement = _mm_sub_ps(DAT_010ec7f0, weight);
-    result.m_vComponents =
-        _mm_add_ps(_mm_mul_ps(complement, first.m_vComponents), _mm_mul_ps(weight, second.m_vComponents));
+    GeometryQuad weight = _mm_shuffle_ps(asGeometryQuad(fraction.m_vValue), asGeometryQuad(fraction.m_vValue), 0);
+    GeometryQuad complement = _mm_sub_ps(DAT_010ec7f0, weight);
+    geometryQuad(result) =
+        _mm_add_ps(_mm_mul_ps(complement, geometryQuad(first)), _mm_mul_ps(weight, geometryQuad(second)));
 }
 // Interpolates between first and second using a fraction loaded from DAT_01016248.
 // @fnv 0x00de9b10
 hkVector4 __cdecl FUN_00de9b10(const hkVector4& first, const hkVector4& second)
 {
     hkVector4 result;
-    medianInterpolate(result, first, second, VectorComponentValue(_mm_load_ss(&DAT_01016248)));
+    medianInterpolate(result, first, second, hkSimdReal(asSharedQuad(geometry_sse::_mm_load_ss(&DAT_01016248))));
     return result;
 }
 
-extern "C" __m128 _mm_load_ps(const float*);
 
 extern const float DAT_0106c2e0;
 
 struct CentroidVector
 {
-    __m128 value;
+    GeometryQuad value;
 };
 
 // @fnv 0x00de9b50
 CentroidVector __cdecl FUN_00de9b50(const CentroidVector* apCentroidA, const CentroidVector* apCentroidB,
                                     const CentroidVector* apCentroidC)
 {
-    __m128 vSum = _mm_load_ps((const float*)&apCentroidA->value);
-    __m128 scale = _mm_load_ss(&DAT_0106c2e0);
-    __m128 vb = _mm_load_ps((const float*)&apCentroidB->value);
+    GeometryQuad vSum = geometry_sse::_mm_load_ps((const float*)&apCentroidA->value);
+    GeometryQuad scale = geometry_sse::_mm_load_ss(&DAT_0106c2e0);
+    GeometryQuad vb = geometry_sse::_mm_load_ps((const float*)&apCentroidB->value);
 
     vSum = _mm_add_ps(vSum, vb);
 
-    __m128 vc = _mm_load_ps((const float*)&apCentroidC->value);
+    GeometryQuad vc = geometry_sse::_mm_load_ps((const float*)&apCentroidC->value);
     vSum = _mm_add_ps(vSum, vc);
     vSum = _mm_mul_ps(vSum, _mm_shuffle_ps(scale, scale, 0));
 

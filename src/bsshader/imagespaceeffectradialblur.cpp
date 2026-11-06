@@ -2,12 +2,13 @@
 // src/bsshader/imagespaceeffectradialblur.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/imagespaceeffectradialblur.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "../../include/ImageSpaceTexture.h"
+// 0x00b5a590 initializes four unaligned scalar matrix rows.
+struct RadialShaderRow_00b5a590 { float x, y, z, w; };
+#include <string.h>
+
 extern "C" void* __cdecl DeallocateAlias(void*);
-struct P03MM
-{
-    void* Deallocate(void*);
-};
-extern P03MM g_memoryManager;
 
 struct FUN_00b5a700_shell
 {
@@ -90,8 +91,6 @@ struct S_00b5a4a0_ParamArray
     void FUN_00ba3aa0(unsigned int idx, S_00b5a4a0_EffectParam* const& p);
 };
 
-struct S_00b5a4a0_Tex;
-
 struct S_00b5a4a0_Holder
 {
     int unk0;
@@ -148,7 +147,7 @@ struct S_00b5a4a0_Holder
     int unkCC;
     int unkD0;
     int unkD4;
-    S_00b5a4a0_Tex* unkD8[8];
+    ImageSpaceTexture* unkD8[8];
 };
 
 struct S_00b5a4a0_Src
@@ -170,7 +169,7 @@ struct S_00b5a4a0
     int unk14;
     S_00b5a4a0_ParamArray m_params;
     void SetTextureArraySize(int n);
-    void FUN_00ba3c70(int idx, S_00b5a4a0_Tex* tex, S_00b5a4a0_Param* param, int d);
+    void FUN_00ba3c70(int idx, ImageSpaceTexture* tex, S_00b5a4a0_Param* param, int d);
     void SetEffectParamAt(int a, int b, int c);
     void FUN_00b5a4a0(S_00b5a4a0_Src* src, int unused);
 };
@@ -190,26 +189,6 @@ void S_00b5a4a0::FUN_00b5a4a0(S_00b5a4a0_Src* src, int unused)
 extern float g_f_01013974;
 extern float g_f_012023e0;
 
-struct ImageSpaceTexture
-{
-    unsigned char m_00;
-    unsigned char m_01;
-    unsigned char m_02;
-    int m_04;
-    int m_08;
-    int m_0c;
-
-    ImageSpaceTexture()
-    {
-        m_00 = 0;
-        m_01 = 0;
-        m_02 = 0;
-        m_04 = 0;
-        m_08 = 0;
-        m_0c = 0;
-    }
-    ~ImageSpaceTexture();
-};
 
 struct S_EffectArray
 {
@@ -244,26 +223,20 @@ struct ImageSpaceEffect
     ImageSpaceEffect();
 };
 
-struct FourFloatVector
-{
-    float x, y, z, w;
-    FourFloatVector()
-    {}
-    FourFloatVector(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w)
-    {}
-};
-
 struct S_00b5a590_Matrix
 {
-    FourFloatVector m_00;
-    FourFloatVector m_10;
-    FourFloatVector m_20;
-    FourFloatVector m_30;
+    // The game's vectors are packed at four-byte boundaries; the shared
+    // SIMD type requires sixteen-byte alignment when stored as a member.
+    float m_vectors[16];
     float m_40;
     int unk44;
 
     S_00b5a590_Matrix()
     {
+        RadialShaderRow_00b5a590& m_00 = *reinterpret_cast<RadialShaderRow_00b5a590*>(m_vectors);
+        RadialShaderRow_00b5a590& m_10 = *reinterpret_cast<RadialShaderRow_00b5a590*>(m_vectors + 4);
+        RadialShaderRow_00b5a590& m_20 = *reinterpret_cast<RadialShaderRow_00b5a590*>(m_vectors + 8);
+        RadialShaderRow_00b5a590& m_30 = *reinterpret_cast<RadialShaderRow_00b5a590*>(m_vectors + 12);
         float zero = 0.0f;
         m_00.x = zero;
         m_00.y = zero;
@@ -300,8 +273,13 @@ FUN_00b5a590::FUN_00b5a590()
 {
     m_effectTextures.SetSize(4);
 
-    m_5c.m_20 = FourFloatVector(1.0f, g_f_01013974, 0.0f, g_f_012023e0);
-    m_5c.m_10 = FourFloatVector(0.0f, 1.0f, 1.0f, 0.0f);
+    float values[4] = {1.0f, g_f_01013974, 0.0f, g_f_012023e0};
+    memcpy(m_5c.m_vectors + 8, values, sizeof(values));
+    values[0] = 0.0f;
+    values[1] = 1.0f;
+    values[2] = 1.0f;
+    values[3] = 0.0f;
+    memcpy(m_5c.m_vectors + 4, values, sizeof(values));
     m_5c.m_40 = 600.0f;
     unk58 = 0;
 }
@@ -338,7 +316,7 @@ void FUN_00b5a720_cls::FUN_00b5a720(S_00b5a4a0_Src* src, int unused)
     p->FUN_00b8ab10(0, 2);
     p->FUN_00b8a790(0, DAT_0101e2bc, 0.0f, 0.0f, 0.0f);
 
-    S_00b5a4a0_Tex* tex = src->unk8->unkD8[g_00b5a4a0_index];
+    ImageSpaceTexture* tex = src->unk8->unkD8[g_00b5a4a0_index];
     FUN_00ba3c70(0, tex, p, 2);
 
     m_params.FUN_00ba3aa0(0, p);
@@ -353,7 +331,7 @@ void FUN_00b5a720_cls::FUN_00b5a720(S_00b5a4a0_Src* src, int unused)
 
     FUN_00ba3ba0(1, 1, 2, 3, 0, 1, 0);
 
-    FUN_00ba3c70(1, reinterpret_cast<S_00b5a4a0_Tex*>(src->unk8->unkCC), p, 0);
+    FUN_00ba3c70(1, reinterpret_cast<ImageSpaceTexture*>(src->unk8->unkCC), p, 0);
     if (0)
         m_params.FUN_00ba3aa0(0, p);
 }

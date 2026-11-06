@@ -87,17 +87,7 @@ class BSTextureSet : public NiObject
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(BSTextureSet) == 8);
 
-// TESTexture has a non-trivial constructor/destructor (0x0048e270/0x0048e2e0)
-// and a texture-name getter (0x00408da0) not declared in the bundled
-// TESTexture.h; declared here on a shim following the accepted
-// TESTextureLoader precedent in tescasinochips.h. The texture slots use this
-// shim so the constructor emits the array construction iterator.
-struct BGSTESTexture : public TESTexture
-{
-    BGSTESTexture();
-    ~BGSTESTexture();
-    const char* GetTextureResourceName();
-};
+// Exe 0x0048e270/0x0048e2e0: the texture slots use the shared TESTexture lifecycle.
 
 // Texture slots on PC (see note above).
 #pragma pack(push, 4)
@@ -106,7 +96,7 @@ class BGSTextureSet : public TESBoundObject, public BSTextureSet
   public:
     // base TESBoundObject at +0x0, size 48
     // base BSTextureSet at +0x30, size 8
-    BGSTESTexture pTextures[6];  // +0x38, 72 bytes
+    TESTexture pTextures[6];  // +0x38, 72 bytes
     DecalData* m_pDecalData;     // +0x80, 4 bytes
     unsigned short iFlags;       // +0x84, 2 bytes
     unsigned char layoutPadding86[2];
@@ -131,39 +121,21 @@ FNV_STATIC_ASSERT(offsetof(BGSTextureSet, m_ppTextureFileEntries) == 136);
 
 // DecalData::`scalar deleting destructor' (0x007b3fa0); layout copied
 #pragma pack(push, 4)
-class ImpactDecalData
-{
-  public:
-    float m_fDecalMinWidth;            // +0x0, 4 bytes
-    float m_fDecalMaxWidth;            // +0x4, 4 bytes
-    float m_fDecalMinHeight;           // +0x8, 4 bytes
-    float m_fDecalMaxHeight;           // +0xC, 4 bytes
-    float m_fProjectionDepth;          // +0x10, 4 bytes
-    float m_fShininess;                // +0x14, 4 bytes
-    float m_fParallaxScale;            // +0x18, 4 bytes
-    unsigned char m_ucParallaxPasses;  // +0x1C, 1 bytes
-    unsigned char cFlags;              // +0x1D, 1 bytes
-    unsigned char layoutPadding1E[2];
-    unsigned int iColor;  // +0x20, 4 bytes
-};
+#include "../../include/DecalData.h"
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(ImpactDecalData) == 36);
-FNV_STATIC_ASSERT(offsetof(ImpactDecalData, m_fDecalMinWidth) == 0);
-FNV_STATIC_ASSERT(offsetof(ImpactDecalData, m_fDecalMaxWidth) == 4);
-FNV_STATIC_ASSERT(offsetof(ImpactDecalData, m_fDecalMinHeight) == 8);
-FNV_STATIC_ASSERT(offsetof(ImpactDecalData, m_fDecalMaxHeight) == 12);
-FNV_STATIC_ASSERT(offsetof(ImpactDecalData, m_fProjectionDepth) == 16);
-FNV_STATIC_ASSERT(offsetof(ImpactDecalData, m_fShininess) == 20);
-FNV_STATIC_ASSERT(offsetof(ImpactDecalData, m_fParallaxScale) == 24);
-FNV_STATIC_ASSERT(offsetof(ImpactDecalData, m_ucParallaxPasses) == 28);
-FNV_STATIC_ASSERT(offsetof(ImpactDecalData, cFlags) == 29);
-FNV_STATIC_ASSERT(offsetof(ImpactDecalData, iColor) == 32);
+FNV_STATIC_ASSERT(sizeof(DecalData::DataRecordView) == 36);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fDecalMinWidth) == 0);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fDecalMaxWidth) == 4);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fDecalMinHeight) == 8);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fDecalMaxHeight) == 12);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fProjectionDepth) == 16);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fShininess) == 20);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fParallaxScale) == 24);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_ucParallaxPasses) == 28);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, cFlags) == 29);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, iColor) == 32);
 #pragma pack(push, 4)
-class DecalData
-{
-  public:
-    ImpactDecalData Data;  // +0x0, 36 bytes
-};
+#include "../../include/DecalData.h"
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(DecalData) == 36);
 FNV_STATIC_ASSERT(offsetof(DecalData, Data) == 0);

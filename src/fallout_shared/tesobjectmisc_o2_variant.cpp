@@ -3,41 +3,8 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 #include "tesobjectmisc_decls.h"
-#include <malloc.h>
-extern const char DAT_0102b038[];
-TESForm* GetFormByID(unsigned int formID);
-int Warning(const char* format, ...);
-struct FUN_0051b070_shell
-{
-    void FUN_00484c20(unsigned int aiFlags);
-    void FUN_0048e9e0(unsigned int aiFlags);
-    void FUN_0051b070(unsigned int aiFlags);
-};
-struct FUN_00484bf0
-{
-    unsigned short __thiscall GetSaveSize(unsigned int aiFlags);
-};
-struct FUN_0048e9b0
-{
-    unsigned short __thiscall GetSaveSize(unsigned int aiFlags);
-};
-struct FUN_0051b020_shell
-{
-    unsigned short __thiscall FUN_0051b020(unsigned int aiFlags);
-};
-struct TESFormStub
-{
-    void FUN_00484c50(unsigned int, unsigned int);
-};
-struct TESValueFormStub
-{
-    void FUN_0048ea10(unsigned int, unsigned int);
-};
-struct BGSLoadFormBuffer;
-struct FUN_0051b0a0_shell
-{
-    void LoadForm(unsigned int aiFlags, BGSLoadFormBuffer* apLoadGameBuffer);
-};
+#include "../../include/TESForm.h"
+#include "../../include/TESValueForm.h"
 
 // MSVC adjustor thunk: the primary base occupies 0x3c bytes; both bases declare the virtual,
 // the derived class defines only its constructor, so the compiler emits the this-adjusting thunk.

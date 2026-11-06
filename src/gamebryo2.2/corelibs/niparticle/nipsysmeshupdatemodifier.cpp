@@ -1,6 +1,46 @@
-
+// Exe 0x00c215d0: nothrow smart-pointer inlines preserve the original EH cleanup.
+#define FNV64_NIPOINTER_EXCEPTION_SPEC throw()
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "../../../../include/NiPointer.h"
 // src/gamebryo2.2/corelibs/niparticle/nipsysmeshupdatemodifier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysmeshupdatemodifier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiPSysModifier.h"
+#include "../../../../include/NiPSysMeshUpdateModifier.h"
+#include "../../../../include/NiTObjectArray.h"
+#include "../../../../include/NiPointer.h"
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/StrArr.h"
+
+// Gamebryo inline bodies (NiTArray.inl / NiTCollection.h) this unit's original inlines:
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::GetSize() const
+{
+    return m_usSize;
+}
+
+template <class T, class TAlloc> inline NiTArray<T, TAlloc>::NiTArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
+{
+    m_usMaxSize = (unsigned short)uiMaxSize;
+    m_usGrowBy = (unsigned short)uiGrowBy;
+    m_usSize = 0;
+    m_usESize = 0;
+    if (m_usMaxSize > 0)
+        m_pBase = TAlloc::Allocate(m_usMaxSize);
+    else
+        m_pBase = 0;
+}
+template <class T> inline T* NiTNewInterface<T>::Allocate(unsigned int uiNumElements)
+{
+    return new T[uiNumElements];
+}
+template <class T>
+inline NiTObjectArray<T>::NiTObjectArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
+    : NiTArray<T, NiTNewInterface<T> >(uiMaxSize, uiGrowBy)
+{
+}
+
 
 extern "C" void* g_01202530;
 
@@ -10,125 +50,42 @@ void* __cdecl FUN_00c21720()
     return &g_01202530;
 }
 
-class CloningProcess;
-class NiPSysModifier
-{
-  public:
-    virtual void ProcessClone(class CloningProcess&);
-};
-class NiAVObject
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void ProcessClone(class CloningProcess&);
-};
-class NiPSysMeshUpdateModifier : public NiPSysModifier
-{
-  public:
-    char _pad[0x18];
-    class NiAVObject** m_ppkMeshes;
-    unsigned short m_usPad;
-    unsigned short m_usNumMeshes;
-    void FUN_00c20f30(class CloningProcess&);
-};
-// Calls the base modifier's ProcessClone, then clones each non-null mesh in m_ppkMeshes up to m_usNumMeshes.
+// Calls the base modifier's ProcessClone, then clones each non-null mesh in m_kSceneObjects.
 // @fnv 0x00c20f30
-void NiPSysMeshUpdateModifier::FUN_00c20f30(class CloningProcess& kCloning)
+void NiPSysMeshUpdateModifier::FUN_00c20f30(CloningProcess& kCloning)
 {
     NiPSysModifier::ProcessClone(kCloning);
     unsigned int ui;
     NiAVObject* pkMesh;
-    for (ui = 0; ui < m_usNumMeshes; ui++)
+    for (ui = 0; ui < m_kSceneObjects.m_usSize; ui++)
     {
-        pkMesh = m_ppkMeshes[ui];
+        pkMesh = m_kSceneObjects.m_pBase[ui].m_pObject;
         if (pkMesh)
             pkMesh->ProcessClone(kCloning);
     }
 }
 
 namespace fnv_00c20f80 {
-struct NiStream
-{
-    int _d;
-};
-struct NiAVObject
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual bool RegisterStreamables(NiStream&);
-};
 struct Holder31670
 {
     bool FUN_00c31670(NiStream&);
 };
-struct NiPSysMeshUpdateModifier
-{
-    char _pad[0x1c];
-    NiAVObject** m_ppkMeshes;
-    char _pad2[2];
-    unsigned short m_usElementCount;
-    bool FUN_00c20f80(NiStream&);
-};
+}  // namespace fnv_00c20f80
 // @fnv 0x00c20f80
 bool NiPSysMeshUpdateModifier::FUN_00c20f80(NiStream& kStream)
 {
-    if (!((Holder31670*)this)->FUN_00c31670(kStream))
+    if (!((fnv_00c20f80::Holder31670*)this)->FUN_00c31670(kStream))
         return false;
     unsigned int ui;
     NiAVObject* pkMesh;
-    for (ui = 0; ui < m_usElementCount; ui++)
+    for (ui = 0; ui < m_kSceneObjects.m_usSize; ui++)
     {
-        pkMesh = m_ppkMeshes[ui];
+        pkMesh = m_kSceneObjects.m_pBase[ui].m_pObject;
         if (pkMesh)
             pkMesh->RegisterStreamables(kStream);
     }
     return true;
 }
-}  // namespace fnv_00c20f80
 
 extern int DAT_0101fbcc;
 void __cdecl FUN_004b0220(void*);
@@ -159,54 +116,36 @@ void* Unk21730::DestroyIfFlagged(unsigned int auiFlags)
 
 namespace fnv_00c21840 {
 char* __cdecl _FUN_00a7d330(void*);
-struct StrArr
-{
-    char _pad0[8];
-    unsigned short m_usMax;
-    unsigned short m_usSize;
-    unsigned short _pad1;
-    unsigned short m_usGrow;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
+
 struct BaseMod
 {
     void FUN_00c319e0(StrArr*);
 };
-struct NiPSysMeshUpdateModifier : BaseMod
-{
-    void AppendString(StrArr*);
-};
+}  // namespace fnv_00c21840
 // Calls the base handler, then appends the string returned by _FUN_00a7d330(g_01202530) to pkStrings, growing it if full.
 // @fnv 0x00c21840
 void NiPSysMeshUpdateModifier::AppendString(StrArr* pkStrings)
 {
-    FUN_00c319e0(pkStrings);
-    char* pcStr = _FUN_00a7d330(g_01202530);
+    reinterpret_cast<fnv_00c21840::BaseMod*>(this)->FUN_00c319e0(pkStrings);
+    char* pcStr = fnv_00c21840::_FUN_00a7d330(g_01202530);
     unsigned int uiSize = pkStrings->m_usSize;
-    if (uiSize >= pkStrings->m_usMax)
-        pkStrings->SetSize(uiSize + pkStrings->m_usGrow);
+    if (uiSize >= pkStrings->m_usMaxSize)
+        pkStrings->SetSize(uiSize + pkStrings->m_usGrowBy);
     pkStrings->SetAt(uiSize, pcStr);
 }
-}  // namespace fnv_00c21840
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-struct NiRefObject
-{
-    virtual void v00();
-    virtual void DeleteThis();
-    volatile long refCount;
-};
-struct NiPointer
+
+struct RefHandle
 {
     NiRefObject* ptr;
-    explicit NiPointer(NiRefObject* p) : ptr(p)
+    explicit RefHandle(NiRefObject* p) : ptr(p)
     {
         if (p)
         {
-            InterlockedIncrement(&p->refCount);
-            if (!InterlockedDecrement(&p->refCount))
+            InterlockedIncrement(reinterpret_cast<volatile long*>(&p->m_uiRefCount));
+            if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&p->m_uiRefCount)))
                 p->DeleteThis();
         }
     }
@@ -218,45 +157,32 @@ struct RefArray
     unsigned short capacity;
     unsigned short size;
     unsigned short count;
-    NiPointer PopBack();
+    RefHandle PopBack();
 };
 
 // Removes and returns the last entry of the array, decrementing the count and releasing the slot's reference.
 // @fnv 0x00c20fd0
-NiPointer RefArray::PopBack()
+RefHandle RefArray::PopBack()
 {
     if (!size)
-        return NiPointer(0);
+        return RefHandle(0);
     NiRefObject* object = entries[--size];
     if (object)
-        InterlockedIncrement(&object->refCount);
+        InterlockedIncrement(reinterpret_cast<volatile long*>(&object->m_uiRefCount));
     NiRefObject** slot = entries + size;
     NiRefObject* old = *slot;
     if (old)
     {
-        if (!InterlockedDecrement(&old->refCount))
+        if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&old->m_uiRefCount)))
             old->DeleteThis();
         *slot = 0;
     }
     const bool& x = object != 0;
     if (x)
         --count;
-    return NiPointer(object);
+    return RefHandle(object);
 }
 
-class FUN_00c212b0_ref
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    long m_iRefCount;
-};
-
-class FUN_00c212b0_src
-{
-  public:
-    void* FUN_00a5d680();
-};
 
 class FUN_00c212b0_item
 {
@@ -273,11 +199,11 @@ class FUN_00c212b0_cls
     FUN_00c212b0_item** m_ppItems;
     char unk90[2];
     unsigned short m_usNumMeshes;
-    void FUN_00c212b0(unsigned int a1, FUN_00c212b0_src* a2);
+    void FUN_00c212b0(unsigned int a1, NiAVObject* a2);
 };
 
 // @fnv 0x00c212b0
-void FUN_00c212b0_cls::FUN_00c212b0(unsigned int uiIndex, FUN_00c212b0_src* pSource)
+void FUN_00c212b0_cls::FUN_00c212b0(unsigned int uiIndex, NiAVObject* pSource)
 {
     if (uiIndex < m_usNumMeshes && m_ppItems[uiIndex] != 0)
     {
@@ -287,18 +213,18 @@ void FUN_00c212b0_cls::FUN_00c212b0(unsigned int uiIndex, FUN_00c212b0_src* pSou
         {
             do
             {
-                FUN_00c212b0_ref* p = (FUN_00c212b0_ref*)pSource->FUN_00a5d680();
+                NiRefObject* p = (NiRefObject*)pSource->Clone();
                 void* out = p;
                 if (p != 0)
                 {
-                    InterlockedIncrement(&p->m_iRefCount);
+                    InterlockedIncrement(reinterpret_cast<volatile long*>(&p->m_uiRefCount));
                 }
                 item->FUN_004b0310(i, &out);
                 if (p != 0)
                 {
-                    if (InterlockedDecrement(&p->m_iRefCount) == 0)
+                    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&p->m_uiRefCount)) == 0)
                     {
-                        p->v01();
+                        p->DeleteThis();
                     }
                 }
                 ++i;
@@ -311,22 +237,19 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile lo
 struct CloneHandle;
 struct MeshObject
 {
-    virtual void OnBeginDestroy();
-    virtual void Destroy();
-    volatile long refCount;
     CloneHandle __thiscall PopBack() throw();
 };
 struct CloneHandle
 {
-    MeshObject* pointer;
+    NiRefObject* pointer;
     ~CloneHandle() throw()
     {
         if (pointer)
         {
-            MeshObject* oldObject = pointer;
-            if (InterlockedDecrement(&oldObject->refCount) == 0)
+            NiRefObject* oldObject = pointer;
+            if (InterlockedDecrement(reinterpret_cast<volatile long*>(&oldObject->m_uiRefCount)) == 0)
             {
-                oldObject->Destroy();
+                oldObject->DeleteThis();
             }
         }
     }
@@ -334,10 +257,10 @@ struct CloneHandle
     {
         if (pointer)
         {
-            MeshObject* oldObject = pointer;
-            if (InterlockedDecrement(&oldObject->refCount) == 0)
+            NiRefObject* oldObject = pointer;
+            if (InterlockedDecrement(reinterpret_cast<volatile long*>(&oldObject->m_uiRefCount)) == 0)
             {
-                oldObject->Destroy();
+                oldObject->DeleteThis();
             }
             pointer = 0;
         }
@@ -403,149 +326,24 @@ void MeshLookup::GetMeshHandle(unsigned int index, CloneHandle* result)
     result->FUN_006e5cc0(meshes[index]->PopBack());
 }
 
-class C217F0Object
+// NiPSysMeshUpdateModifier's constructor is inline: NiPSysModifier::NiPSysModifier (0x00c31720), the vftable,
+// then m_kSceneObjects as NiTObjectArray(0, 1).
+inline NiPSysMeshUpdateModifier::NiPSysMeshUpdateModifier() throw()
 {
-  public:
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem);
-
-    virtual ~C217F0Object();
-};
-
-class C217F0ModifierBase : public C217F0Object
-{
-  public:
-    C217F0ModifierBase() throw();
-    virtual ~C217F0ModifierBase();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-template <class T> class C217F0Array
-{
-  public:
-    C217F0Array(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) throw()
-    {
-        m_usMaxSize = (unsigned short)uiMaxSize;
-        m_usGrowBy = (unsigned short)uiGrowBy;
-        m_usSize = 0;
-        m_usESize = 0;
-        if (m_usMaxSize > 0)
-            m_pBase = new T[m_usMaxSize];
-        else
-            m_pBase = 0;
-    }
-    virtual ~C217F0Array();
-
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
-
-template <class T> class C217F0PrimitiveArray : public C217F0Array<T>
-{
-  public:
-    C217F0PrimitiveArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) throw()
-        : C217F0Array<T>(uiMaxSize, uiGrowBy)
-    {}
-    virtual ~C217F0PrimitiveArray();
-};
-
-class C217F0Element;
-
-class C217F0Modifier : public C217F0ModifierBase
-{
-  public:
-    C217F0Modifier() throw()
-    {}
-    virtual ~C217F0Modifier();
-
-    static C217F0Object* CreateModifier();
-
-    C217F0PrimitiveArray<C217F0Element*> m_kElements;
-};
-
-// Allocates and returns a new C217F0Modifier object.
-// @fnv 0x00c217f0
-C217F0Object* C217F0Modifier::CreateModifier()
-{
-    return new C217F0Modifier;
 }
 
-class BC21890CloningProcess;
-
-class BC21890ChildArray
+// Allocates and returns a new NiPSysMeshUpdateModifier (the stream factory).
+// @fnv 0x00c217f0
+NiObject* NiPSysMeshUpdateModifier::CreateModifier()
 {
-  public:
-    __forceinline BC21890ChildArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1)
-    {
-        m_usMaxSize = (unsigned short)uiMaxSize;
-        m_usGrowBy = (unsigned short)uiGrowBy;
-        m_usSize = 0;
-        m_usESize = 0;
-        if (m_usMaxSize > 0)
-            m_pBase = Allocate(m_usMaxSize);
-        else
-            m_pBase = 0;
-    }
+    return new NiPSysMeshUpdateModifier;
+}
 
-    static void** Allocate(unsigned int ItemUpdateArray) throw();
-    virtual ~BC21890ChildArray();
-
-    void** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
-
-class BC21890ObjectArray : public BC21890ChildArray
-{
-  public:
-    __forceinline BC21890ObjectArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1)
-        : BC21890ChildArray(uiMaxSize, uiGrowBy)
-    {}
-    virtual ~BC21890ObjectArray();
-};
-
-class BC21890AVObject
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-
-    BC21890AVObject() throw();
-    virtual ~BC21890AVObject();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class BC21890Node : public BC21890AVObject
-{
-  public:
-    __forceinline BC21890Node()
-    {}
-    virtual ~BC21890Node();
-
-    void CopyMemberData(BC21890Node* pkDest, BC21890CloningProcess& kCloning);
-    BC21890Node* FUN_00c21890(BC21890CloningProcess& kCloning);
-
-    BC21890ObjectArray m_kChildList;
-};
-
+// Clones the modifier: a new NiPSysMeshUpdateModifier whose members CopyMemberData (0x00c21770) fills.
 // @fnv 0x00c21890
-BC21890Node* BC21890Node::FUN_00c21890(BC21890CloningProcess& kCloning)
+NiObject* NiPSysMeshUpdateModifier::MakeClone(CloningProcess& kCloning)
 {
-    BC21890Node* pkClone = new BC21890Node;
+    NiPSysMeshUpdateModifier* pkClone = new NiPSysMeshUpdateModifier;
     CopyMemberData(pkClone, kCloning);
     return pkClone;
 }
@@ -553,81 +351,33 @@ BC21890Node* BC21890Node::FUN_00c21890(BC21890CloningProcess& kCloning)
 __declspec(dllimport) __declspec(nothrow) long __stdcall InterlockedIncrement(volatile long* p);
 __declspec(dllimport) __declspec(nothrow) long __stdcall InterlockedDecrement(volatile long* p);
 
-class MyRefObject
+inline void NiRefObject::IncRefCount()
 {
-  public:
-    virtual ~MyRefObject() throw();
-    __declspec(nothrow) virtual void DeleteThis() throw();
-    volatile long m_uiRefCount;
-    void IncRefCount() throw()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount() throw()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
 
-template <class T> class NiPtr
+inline void NiRefObject::DecRefCount()
 {
-  public:
-    NiPtr(T* p = 0) throw() : m_pObject(p)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    NiPtr(const NiPtr& o) throw() : m_pObject(o.m_pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPtr() throw()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    NiPtr& operator=(const NiPtr& o) throw()
-    {
-        if (m_pObject != o.m_pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = o.m_pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    NiPtr& operator=(T* p) throw()
-    {
-        if (m_pObject != p)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = p;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    bool operator==(const NiPtr& o) const throw()
-    {
-        return m_pObject == o.m_pObject;
-    }
-    bool operator!=(const NiPtr& o) const throw()
-    {
-        return m_pObject != o.m_pObject;
-    }
-    T* m_pObject;
-};
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
 
-class MyMeshObj : public MyRefObject
+inline void NiAVObject::IncRefCount()
 {
-};
-typedef NiPtr<MyMeshObj> MyMeshObjPtr;
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
 
+inline void NiAVObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+
+
+
+typedef NiPointer<NiAVObject> MyMeshObjPtr;
+
+// local form of NiTArray: 0x00c215d0 needs nothrow inline helpers (shared trial is 399 bytes, exe 329).
 class MyMeshPtrArray
 {
   public:
@@ -686,12 +436,12 @@ class MyMeshUpdateMod
     int unk10;
     int unk14;
     MyMeshPtrArray m_kSceneObjects;
-    void SetMeshAt(unsigned int uiIndex, MyMeshObj* pkMesh, MyMeshObjPtr& spOld);
+    void SetMeshAt(unsigned int uiIndex, NiAVObject* pkMesh, MyMeshObjPtr& spOld);
 };
 
 // Stores pkMesh at uiIndex in the mesh pointer array, returning the previous entry in spOld (or null when growing).
 // @fnv 0x00c215d0
-void MyMeshUpdateMod::SetMeshAt(unsigned int uiIndex, MyMeshObj* pkMesh, MyMeshObjPtr& spOld)
+void MyMeshUpdateMod::SetMeshAt(unsigned int uiIndex, NiAVObject* pkMesh, MyMeshObjPtr& spOld)
 {
     if (uiIndex < m_kSceneObjects.GetSize())
     {
@@ -718,31 +468,17 @@ struct BinaryStream
         return write(this, data, size, &elementSize, 1);
     }
 };
-struct StreamSlot
+// Keep the original inline access while using the shared stream declaration.
+inline NiBinaryStream* NiStream::GetBinaryStream()
 {
-    BinaryStream* stream;
-};
-class NiStream
+    return reinterpret_cast<NiBinaryStream*&>(m_pkOstr);
+}
+
+inline unsigned int NiStream::GetFileVersion() const
 {
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void RegisterObject(NiAVObject*);
-    BinaryStream* GetBinaryStream()
-    {
-        return reinterpret_cast<StreamSlot*>(reinterpret_cast<unsigned char*>(this) + 0x250)->stream;
-    }
-};
+    return m_uiNifFileVersion;
+}
+
 class MeshUpdateStreamWriter : public NiPSysMeshUpdateModifier
 {
   public:
@@ -754,20 +490,15 @@ class MeshUpdateStreamWriter : public NiPSysMeshUpdateModifier
 void MeshUpdateStreamWriter::WriteMeshUpdate(NiStream* stream)
 {
     FUN_00c31950(stream);
-    unsigned int meshCount = m_usNumMeshes;
-    BinaryStream* binary = stream->GetBinaryStream();
+    unsigned int meshCount = m_kSceneObjects.m_usSize;
+    BinaryStream* binary = reinterpret_cast<BinaryStream*>(stream->GetBinaryStream());
     binary->offset += binary->WriteData(&meshCount, 4);
     for (unsigned int i = 0; i < meshCount; ++i)
-        stream->RegisterObject(m_ppkMeshes[i]);
+        stream->SaveLinkID(reinterpret_cast<const NiObject*>(m_kSceneObjects.m_pBase[i].m_pObject));
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-struct ReferenceSource
-{
-    unsigned int FUN_00a63460();
-    NiRefObject* FUN_00a63430();
-};
 struct ReferenceArray
 {
     void FUN_0060bef0(unsigned int count);
@@ -782,15 +513,15 @@ struct ReferenceContainer
     int unk10;
     int unk14;
     ReferenceArray array;
-    void FUN_00c31650(ReferenceSource* source);
-    void CopyReferencesFromSource(ReferenceSource* source);
+    void FUN_00c31650(NiStream* source);
+    void CopyReferencesFromSource(NiStream* source);
 };
 // Resizes the array to the source's count, then copies each referenced object into the array while adjusting its reference count.
 // @fnv 0x00c214c0
-void ReferenceContainer::CopyReferencesFromSource(ReferenceSource* source)
+void ReferenceContainer::CopyReferencesFromSource(NiStream* source)
 {
     FUN_00c31650(source);
-    unsigned int count = source->FUN_00a63460();
+    unsigned int count = source->GetLinkID();
     ReferenceArray* array = &this->array;
     array->FUN_0060bef0(count);
     for (unsigned int index = 0; index < count; ++index)
@@ -798,87 +529,24 @@ void ReferenceContainer::CopyReferencesFromSource(ReferenceSource* source)
         NiRefObject* object = source->FUN_00a63430();
         NiRefObject* handle = object;
         if (object != 0)
-            InterlockedIncrement(&object->refCount);
+            InterlockedIncrement(reinterpret_cast<volatile long*>(&object->m_uiRefCount));
         array->FUN_004b0310(index, &handle);
-        if (object != 0 && InterlockedDecrement(&object->refCount) == 0)
+        if (object != 0 && InterlockedDecrement(reinterpret_cast<volatile long*>(&object->m_uiRefCount)) == 0)
             object->DeleteThis();
     }
 }
 
-class NiObjectC212
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual bool IsEqual(NiObjectC212* pkObject);
-};
-
-class NiPSysModifierC212 : public NiObjectC212
-{
-  public:
-    int unk04, unk08, unk0C, unk10, unk14;
-    bool FUN_00c31830(NiObjectC212* pkObject);
-};
-
-template <class T> class NiTPrimitiveArrayC212
-{
-  public:
-    virtual ~NiTPrimitiveArrayC212();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    unsigned int GetSize() const
-    {
-        return m_usSize;
-    }
-    T GetAt(unsigned int uiIndex) const
-    {
-        return m_pBase[uiIndex];
-    }
-};
-
-class NiPSysMeshUpdateModifierC212 : public NiPSysModifierC212
-{
-  public:
-    NiTPrimitiveArrayC212<NiObjectC212*> m_kSceneObjects;
-
-    bool FUN_00c21230(NiObjectC212* pkObject);
-};
 
 // Compares m_kSceneObjects with pkObject's m_kSceneObjects, returning true only if both arrays have the same size and each element is equal.
 // @fnv 0x00c21230
-bool NiPSysMeshUpdateModifierC212::FUN_00c21230(NiObjectC212* pkObject)
+bool NiPSysMeshUpdateModifier::IsEqual(NiObject* pkObject) const
 {
-    if (!FUN_00c31830(pkObject))
+    if (!NiPSysModifier::IsEqual(reinterpret_cast<NiObject*>(pkObject)))
     {
         return false;
     }
 
-    NiPSysMeshUpdateModifierC212* pkDest = (NiPSysMeshUpdateModifierC212*)pkObject;
+    NiPSysMeshUpdateModifier* pkDest = (NiPSysMeshUpdateModifier*)pkObject;
 
     if (m_kSceneObjects.GetSize() != pkDest->m_kSceneObjects.GetSize())
     {
@@ -887,8 +555,8 @@ bool NiPSysMeshUpdateModifierC212::FUN_00c21230(NiObjectC212* pkObject)
 
     for (unsigned int ui = 0; ui < m_kSceneObjects.GetSize(); ui++)
     {
-        NiObjectC212* pkMesh = m_kSceneObjects.GetAt(ui);
-        NiObjectC212* pkDestMesh = (ui < pkDest->m_kSceneObjects.GetSize()) ? pkDest->m_kSceneObjects.GetAt(ui) : 0;
+        NiAVObject* pkMesh = m_kSceneObjects.m_pBase[ui].m_pObject;
+        NiAVObject* pkDestMesh = (ui < pkDest->m_kSceneObjects.GetSize()) ? pkDest->m_kSceneObjects.m_pBase[ui].m_pObject : 0;
         if ((pkMesh && !pkDestMesh) || (!pkMesh && pkDestMesh) ||
             (pkMesh && pkDestMesh && !pkMesh->IsEqual(pkDestMesh)))
         {
@@ -927,67 +595,6 @@ struct MeshUpdateData
     bool byte06;
     bool bUpdateGeomorphs;
     bool bUpdateShadowScene;
-};
-class MeshAVObject
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void UpdateDownwardPass(MeshUpdateData& kData, unsigned int uiFlags);
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    MeshNiMatrix3 m_kRotate;
-    MeshNiPoint3 m_kTranslate;
-    float m_fScale;
 };
 struct MeshParticleInfo
 {
@@ -1041,7 +648,7 @@ struct MeshSystem
     int unk94;
     int unk98;
     int unk9C;
-    MeshAVObject** m_ppkMeshes;
+    NiAVObject** m_ppkMeshes;
 };
 struct MeshPSysData
 {
@@ -1089,17 +696,17 @@ void __stdcall FUN_00c21080(float fTime, MeshPSysData* pkData)
     for (unsigned short i = 0; i < pkData->m_usActiveVertices; i++)
     {
         MeshParticleInfo* pkInfo = &pkData->m_pkParticleInfo[i];
-        MeshAVObject* pkMesh = pkData->m_pkSystem->m_ppkMeshes[i];
-        pkMesh->m_kTranslate = pkData->m_pkVertex[i];
+        NiAVObject* pkMesh = pkData->m_pkSystem->m_ppkMeshes[i];
+        pkMesh->m_kLocal.m_Translate = reinterpret_cast<const NiPoint3&>(pkData->m_pkVertex[i]);
         if (pfRotationAngles && pkRotationAxes)
         {
             MeshNiMatrix3 kRot;
             kRot.MakeAxisAngleRotation(pfRotationAngles[i], pkRotationAxes[i].x, pkRotationAxes[i].y,
                                        pkRotationAxes[i].z);
-            pkMesh->m_kRotate = kRot;
+            pkMesh->m_kLocal.m_Rotate = reinterpret_cast<const NiMatrix3&>(kRot);
         }
         float fSize = pkData->m_pfSizes[i];
-        pkMesh->m_fScale = (float)fabs(fSize * pkData->m_pfRadii[i]);
+        pkMesh->m_kLocal.m_fScale = (float)fabs(fSize * pkData->m_pfRadii[i]);
         MeshUpdateData kUpdate;
         kUpdate.fTime = pkInfo->m_fXValue;
         kUpdate.m_bUpdateEnabled = true;
@@ -1107,71 +714,14 @@ void __stdcall FUN_00c21080(float fTime, MeshPSysData* pkData)
         kUpdate.byte06 = false;
         kUpdate.bUpdateGeomorphs = false;
         kUpdate.bUpdateShadowScene = false;
-        pkMesh->UpdateDownwardPass(kUpdate, 0);
+        pkMesh->UpdateDownwardPass(reinterpret_cast<NiUpdateData&>(kUpdate), 0);
     }
 }
 
 extern int(__stdcall* DAT_00fdf1c0)(void*);
 extern int(__stdcall* DAT_00fdf1c4)(void*);
 
-class Mesh_c21
-{
-  public:
-    virtual void w00();
-    virtual void Destroy();
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void SetTarget(void* pkTarget);
-    volatile long m_lRefCount;
-    int m_08, m_0c, m_10, m_14, m_18, m_1c, m_20, m_24, m_28, m_2c;
-    unsigned int m_uiValue1;
-};
 
-class Src_c21
-{
-  public:
-    Mesh_c21* FUN_00a5d680();
-};
 
 class Sink_c21
 {
@@ -1238,7 +788,7 @@ class Sink_c21
     virtual void s3b();
     virtual void s3c();
     virtual void s3d();
-    virtual void Attach(unsigned int uiIndex, Mesh_c21* pkMesh);
+    virtual void Attach(unsigned int uiIndex, NiAVObject* pkMesh);
 };
 
 struct Entry_c21
@@ -1248,7 +798,7 @@ struct Entry_c21
     unsigned short m_1a;
 };
 
-void __cdecl StartControllersRecursive(Mesh_c21* pkMesh, float fTime);
+void __cdecl StartControllersRecursive(NiAVObject* pkMesh, float fTime);
 
 struct Lk2_c21
 {
@@ -1260,7 +810,7 @@ class FUN_00c21400_cls
     int m_00, m_04, m_08, m_0c;
     char* m_10;
     int m_14, m_18;
-    Src_c21** m_1c;
+    NiAVObject** m_1c;
     unsigned short m_20;
     unsigned short m_usElementCount;
     void AttachMesh(MeshLookup* pkLookup, unsigned short usIndex);
@@ -1273,64 +823,43 @@ void FUN_00c21400_cls::AttachMesh(MeshLookup* pkLookup, unsigned short usIndex)
     unsigned short usMesh = ((Entry_c21*)pkLookup->unk70)[usIndex].m_usIndex;
     if (usMesh >= m_usElementCount)
         usMesh = m_usElementCount - 1;
-    Mesh_c21* pkOut = 0;
+    NiAVObject* pkOut = 0;
     ((Lk2_c21*)pkLookup)->GetMeshHandle(usMesh, (CloneHandle*)&pkOut);
     if (!pkOut)
     {
-        Mesh_c21* pkClone = m_1c[usMesh]->FUN_00a5d680();
+        NiAVObject* pkClone = m_1c[usMesh]->Clone();
         if (pkClone)
         {
             pkOut = pkClone;
-            DAT_00fdf1c0((void*)&pkClone->m_lRefCount);
+            DAT_00fdf1c0((void*)&pkClone->m_uiRefCount);
         }
     }
-    Mesh_c21* pkMesh = pkOut;
-    pkMesh->m_uiValue1 |= 1;
+    NiAVObject* pkMesh = pkOut;
+    pkMesh->m_uFlags |= 1;
     StartControllersRecursive(pkMesh, 0.0f);
     ((Sink_c21*)pkLookup->unk7c)->Attach(usIndex, pkMesh);
-    pkMesh->SetTarget(m_10 + 0x9c);
-    if (DAT_00fdf1c4((void*)&pkMesh->m_lRefCount) == 0)
-        pkMesh->Destroy();
+    pkMesh->UpdatePropertiesDownwardPass(reinterpret_cast<NiPropertyState*>(m_10 + 0x9c));
+    if (DAT_00fdf1c4((void*)&pkMesh->m_uiRefCount) == 0)
+        pkMesh->DeleteThis();
 }
 
 extern "C" void _ReadWriteBarrier();
-class NiCloningProcess_c217;
+
 struct S_c21770_Slot
 {
-    MyMeshObj* m_pObject;
-};
-class S_c21770_Obj : public MyMeshObj
-{
-  public:
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual MyMeshObj* MakeClone(NiCloningProcess_c217& kCloning) throw();
+    NiAVObject* m_pObject;
 };
 struct OldSlot
 {
-    MyMeshObj* m_pObject;
+    NiAVObject* m_pObject;
     OldSlot() : m_pObject(0)
     {}
     ~OldSlot()
     {
-        MyMeshObj* p = *(MyMeshObj* volatile*)&m_pObject;
+        NiAVObject* p = *(NiAVObject* volatile*)&m_pObject;
         if (p)
         {
-            if (InterlockedDecrement(&p->m_uiRefCount) == 0)
+            if (InterlockedDecrement(reinterpret_cast<volatile long*>(&p->m_uiRefCount)) == 0)
                 p->DeleteThis();
         }
     }
@@ -1341,21 +870,21 @@ class S_c21770_Mod
     virtual ~S_c21770_Mod() throw();
     int unk04, unk08, unk0C, unk10, unk14;
     MyMeshPtrArray m_kSceneObjects;
-    void FUN_00c31780(S_c21770_Mod* pkDest, NiCloningProcess_c217& kCloning) throw();
-    void SetMeshAt(unsigned int uiIndex, MyMeshObj* pkMesh, OldSlot& spOld) throw();
-    void CloneInto(S_c21770_Mod* pkDest, NiCloningProcess_c217& kCloning);
+    void FUN_00c31780(S_c21770_Mod* pkDest, CloningProcess& kCloning) throw();
+    void SetMeshAt(unsigned int uiIndex, NiAVObject* pkMesh, OldSlot& spOld) throw();
+    void CloneInto(S_c21770_Mod* pkDest, CloningProcess& kCloning);
 };
 // Calls FUN_00c31780 on pkDest, then clones each non-null entry of m_kSceneObjects via MakeClone and stores it in pkDest with SetMeshAt.
 // @fnv 0x00c21770
-void S_c21770_Mod::CloneInto(S_c21770_Mod* pkDest, NiCloningProcess_c217& kCloning)
+void S_c21770_Mod::CloneInto(S_c21770_Mod* pkDest, CloningProcess& kCloning)
 {
     FUN_00c31780(pkDest, kCloning);
     for (unsigned int ui = 0; ui < m_kSceneObjects.GetSize(); ui++)
     {
-        MyMeshObj* pkMesh = m_kSceneObjects.GetAt(ui).m_pObject;
+        NiAVObject* pkMesh = m_kSceneObjects.GetAt(ui).m_pObject;
         if (pkMesh)
         {
-            MyMeshObj* pkClone = ((S_c21770_Obj*)pkMesh)->MakeClone(kCloning);
+            NiAVObject* pkClone = static_cast<NiAVObject*>(pkMesh->MakeClone(kCloning));
             OldSlot spOld;
             (*(S_c21770_Mod* volatile*)&pkDest)->SetMeshAt(ui, pkClone, spOld);
         }
@@ -1365,25 +894,6 @@ void S_c21770_Mod::CloneInto(S_c21770_Mod* pkDest, NiCloningProcess_c217& kCloni
 struct C21550LinkBase
 {
     void FUN_00a89af0(NiStream& stream);
-};
-
-struct C21550StreamView
-{
-    unsigned int unk00, unk04, unk08, unk0C;
-    unsigned int unk10, unk14, unk18, unk1C;
-    unsigned int unk20, unk24, unk28, unk2C;
-    unsigned int unk30, unk34, unk38, unk3C;
-    unsigned int unk40, unk44, unk48, unk4C;
-    unsigned int unk50, unk54, unk58, unk5C;
-    unsigned int unk60, unk64, unk68, unk6C;
-    unsigned int unk70, unk74, unk78, unk7C;
-    unsigned int unk80, unk84, unk88, unk8C;
-    unsigned int unk90, unk94, unk98, unk9C;
-    unsigned int unkA0, unkA4, unkA8, unkAC;
-    unsigned int unkB0, unkB4, unkB8, unkBC;
-    unsigned int unkC0, unkC4, unkC8, unkCC;
-    unsigned int unkD0, unkD4;
-    unsigned int fileVersion;
 };
 
 struct C21550PoolData : MeshPSysData
@@ -1401,25 +911,18 @@ struct C21550ParticleSystem : MeshSystem
     C21550PoolData* modelData;
 };
 
-class C21550PostLink : public NiPSysMeshUpdateModifierC212
-{
-  public:
-    void FUN_00c21550(NiStream& stream);
-};
-
 // @fnv 0x00c21550
-void C21550PostLink::FUN_00c21550(NiStream& stream)
+void NiPSysMeshUpdateModifier::PostLinkObject(NiStream& stream)
 {
     reinterpret_cast<C21550LinkBase*>(this)->FUN_00a89af0(stream);
-    C21550StreamView* streamView = reinterpret_cast<C21550StreamView*>(&stream);
-    if (streamView->fileVersion <= 0x0A010000)
+    if (stream.GetFileVersion() <= 0x0A010000)
     {
         unsigned int count = m_kSceneObjects.m_usSize;
-        C21550PoolData* data = reinterpret_cast<C21550ParticleSystem*>(unk10)->modelData;
+        C21550PoolData* data = reinterpret_cast<C21550ParticleSystem*>(m_pkTarget)->modelData;
         data->ResizeChildren(count);
         return;
     }
-    C21550PoolData* data = reinterpret_cast<C21550ParticleSystem*>(unk10)->modelData;
+    C21550PoolData* data = reinterpret_cast<C21550ParticleSystem*>(m_pkTarget)->modelData;
     if (data->fillPoolsOnLoad == 0)
         return;
     unsigned int index = 0;
@@ -1429,14 +932,15 @@ void C21550PostLink::FUN_00c21550(NiStream& stream)
         {
             if (index < m_kSceneObjects.m_usMaxSize)
             {
-                NiObjectC212* mesh = m_kSceneObjects.m_pBase[index];
+                NiAVObject* mesh = m_kSceneObjects.m_pBase[index].m_pObject;
                 if (mesh != 0)
                 {
                     reinterpret_cast<FUN_00c212b0_cls*>(data)->FUN_00c212b0(index,
-                                                                            reinterpret_cast<FUN_00c212b0_src*>(mesh));
+                                                                            reinterpret_cast<NiAVObject*>(mesh));
                 }
             }
             index++;
         } while (index < data->generationCount);
     }
 }
+

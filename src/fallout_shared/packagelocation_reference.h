@@ -6,7 +6,7 @@
 #include "ExtraDataList.h"
 #include "PlacedObjectInfo.h"
 #include "TESChildCell.h"
-#include "TESForm.h"
+#include "../../include/TESForm.h"
 #pragma pack(push, 4)
 class TESObjectREFR : public TESForm
 {

@@ -1,17 +1,9 @@
-// fallout/misc/saveload/bgsloadgamebuffer.h: declares BGSLoadGameBuffer
+// fallout/misc/saveload/bgsloadgamebuffer.h: defines BGSLoadGameBuffer::ResetReadPosition
 #ifndef FNV_BGSLOADGAMEBUFFER_H
 #define FNV_BGSLOADGAMEBUFFER_H
 
 #include "bgsloadgamebuffer_decls.h"
-class BGSLoadGameBuffer
-{
-  public:
-    void** m_ppVirtualMethodTable;
-    char* pBuffer;
-    unsigned int iBufferSize;
-    unsigned int m_uiReadOffset;
-    void ResetReadPosition();
-};
+
 
 // @fnv 0x00848d50
 void BGSLoadGameBuffer::ResetReadPosition()

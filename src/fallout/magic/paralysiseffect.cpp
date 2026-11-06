@@ -2,15 +2,9 @@
 // src/fallout/magic/paralysiseffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/paralysiseffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct ValueModifierEffect
-{
-    void ApplyEffect();
-};
-
-struct ParalysisEffect : ValueModifierEffect
-{
-    void FUN_008264b0();
-};
+#include "../../../include/ParalysisEffect.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/ValueModifierEffect.h"
 
 // @fnv 0x008264b0
 void ParalysisEffect::FUN_008264b0()
@@ -18,42 +12,16 @@ void ParalysisEffect::FUN_008264b0()
     ValueModifierEffect::ApplyEffect();
 }
 
-namespace fnv_00826550 {
-struct Actor;
-
-struct BaseEffect
-{
-    virtual void FUN_0082cd10(Actor* apActor);
-};
-
-struct ParalysisEffect : BaseEffect
-{
-    void FUN_00826550(Actor* apActor);
-};
-
 // @fnv 0x00826550
 void ParalysisEffect::FUN_00826550(Actor* apActor)
 {
-    BaseEffect::FUN_0082cd10(apActor);
+    ValueModifierEffect::FUN_0082cd10(apActor);
 }
-}  // namespace fnv_00826550
 
-extern int DAT_0107bfbc;
-struct ValueModifierEffect_CallHelper
-{
-    void ValueModifierEffect(void*, void*, void*);
-};
-struct FUN_008262e0_Holder
-{
-    void* FUN_008262e0(void*, void*, void*);
-};
-// Calls ValueModifierEffect with the three arguments, sets the object's vtable pointer to DAT_0107bfbc, and returns this.
 // @fnv 0x008262e0
-void* FUN_008262e0_Holder::FUN_008262e0(void* apArg1, void* apArg2, void* apArg3)
+ParalysisEffect::ParalysisEffect(void* caster, void* item, void* effect)
+    : ValueModifierEffect(caster, item, effect)
 {
-    ((ValueModifierEffect_CallHelper*)this)->ValueModifierEffect(apArg1, apArg2, apArg3);
-    *(void**)this = (void*)&DAT_0107bfbc;
-    return this;
 }
 
 struct ParalysisActor
@@ -205,83 +173,23 @@ struct ParalysisMagicTarget
     ParalysisActor* GetActor();
 };
 
-struct ParalysisValueModifierEffect
-{
-    void Update(float afElapsed);
-    ParalysisMagicTarget* GetTarget();
-    void Dispel(bool abForce);
-};
-
-struct ParalysisEffectStandIn : ParalysisValueModifierEffect
-{
-    void UpdateParalysisEffect(float afElapsed);
-};
-
 // Updates the effect, then dispels it if the target actor is paralysis immune.
 // @fnv 0x00826430
-void ParalysisEffectStandIn::UpdateParalysisEffect(float afElapsed)
+void ParalysisEffect::UpdateParalysisEffect(float afElapsed)
 {
-    ParalysisValueModifierEffect::Update(afElapsed);
-    ParalysisActor* pActor = GetTarget() ? GetTarget()->GetActor() : 0;
+    ValueModifierEffect::Update(afElapsed);
+    ParalysisActor* pActor = GetTarget() ? ((ParalysisMagicTarget*)GetTarget())->GetActor() : 0;
     if (pActor && pActor->IsParalysisImmune(false))
         Dispel(true);
 }
 
-struct ParalysisEffectFactoryObject
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-
-    ParalysisEffectFactoryObject(void* caster, void* item, void* effect);
-};
-
-// Allocates and constructs a ParalysisEffectFactoryObject from the caster, item and effect pointers, returning the new object.
+// Allocates and constructs a ParalysisEffect from the caster, item and effect pointers, returning the new object.
 // @fnv 0x008264d0
-ParalysisEffectFactoryObject* __cdecl CreateParalysisEffectFactoryObject(void* caster, void* item, void* effect)
+ParalysisEffect* __cdecl CreateParalysisEffectFactoryObject(void* caster, void* item, void* effect)
 {
-    return new ParalysisEffectFactoryObject(caster, item, effect);
+    return new ParalysisEffect(caster, item, effect);
 }
 
-struct FUN_008262e0
-{
-    unsigned int m00;
-    unsigned int m04;
-    unsigned int m08;
-    unsigned int m0c;
-    unsigned int m10;
-    unsigned int m14;
-    unsigned int m18;
-    unsigned int m1c;
-    unsigned int m20;
-    unsigned int m24;
-    unsigned int m28;
-    unsigned int m2c;
-    unsigned int m30;
-    unsigned int m34;
-    unsigned int m38;
-    unsigned int m3c;
-    unsigned int m40;
-    unsigned int m44;
-    unsigned int m48;
-    FUN_008262e0(void* source, void* actor, void* target);
-};
 struct ParalysisController
 {
     virtual void v00();
@@ -309,11 +217,11 @@ struct ParalysisController
     void* source28;
     void* CreateEffect();
 };
-// Allocates a FUN_008262e0 from source28, actor08 and target0c, registers it, and returns it.
+// Allocates a ParalysisEffect from source28, actor08 and target0c, registers it, and returns it.
 // @fnv 0x00826310
 void* ParalysisController::CreateEffect()
 {
-    FUN_008262e0* effect = new FUN_008262e0(source28, actor08, target0c);
+    ParalysisEffect* effect = new ParalysisEffect(source28, actor08, target0c);
     Register(effect);
     return effect;
 }
@@ -471,20 +379,13 @@ struct ParalysisSourceHolder
     ParalysisEffectSubject* FUN_00822b40();
 };
 
-struct FUN_008263c0_cls
-{
-    ParalysisSourceHolder* FUN_0059bb30();
-    void FUN_0082c000();
-    void FUN_008263c0();
-};
-
 // Gets the paralysis subject via FUN_0059bb30/FUN_00822b40, calls FUN_00934250 on it, reads IsSubjectActive, then calls FUN_0082c000.
 // @fnv 0x008263c0
-void FUN_008263c0_cls::FUN_008263c0()
+void ParalysisEffect::FUN_008263c0()
 {
     bool active;
     {
-        ParalysisEffectSubject* subject = (this->FUN_0059bb30() != 0) ? this->FUN_0059bb30()->FUN_00822b40() : 0;
+        ParalysisEffectSubject* subject = (this->FUN_0059bb30() != 0) ? ((ParalysisSourceHolder*)this->FUN_0059bb30())->FUN_00822b40() : 0;
         if (subject == 0)
         {
         }
@@ -492,32 +393,19 @@ void FUN_008263c0_cls::FUN_008263c0()
         {
             subject->FUN_00934250();
             active = subject->IsSubjectActive();
-            this->FUN_0082c000();
+            ValueModifierEffect::Start();
         }
     }
 }
 
-class NiAVObject;
-class TESObjectREFR
-{
-  public:
-    NiAVObject* Get3DSimple();
-};
-
 void __cdecl ApplyHavokOperation(NiAVObject*, int, int);
-
-struct ParalysisRevertEffect : ParalysisEffect
-{
-    void FUN_004534f0(TESObjectREFR* actor);
-    void FUN_00826570(TESObjectREFR* actor);
-};
 
 // Calls FUN_004534f0 with actor, then calls FUN_00c8f210 with 0 and 1 if actor->Get3DSimple() is non-null.
 // @fnv 0x00826570
-void ParalysisRevertEffect::FUN_00826570(TESObjectREFR* actor)
+void ParalysisEffect::FUN_00826570(TESObjectREFR* actor)
 {
     NiAVObject* object;
-    FUN_004534f0(actor);
+    ActiveEffect::Revert((Actor*)actor);
     object = actor->Get3DSimple();
     if (object)
         ApplyHavokOperation(object, 0, 1);

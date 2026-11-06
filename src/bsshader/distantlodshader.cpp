@@ -1,49 +1,130 @@
-// bsshader/distantlodshader.cpp: DistantLODShader, BSShaderStandin, RSShader, LodCompiler (13 functions)
+// bsshader/distantlodshader.cpp: DistantLODShader, BSShader, RSShader, LodCompiler (13 functions)
 
-#include "distantlodshader_decls.h"
+#include "../../include/BSShader.h"
+#include "../../include/NiD3DShader.h"
+#include "../../include/NiD3DShaderDeclaration.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiD3DVertexShader.h"
+#include "../../include/NiD3DPixelShader.h"
+#include "../../include/NiD3DShaderConstantMap.h"
 
-// Calls the base NiD3DShader::Initialize, then invokes vfn_75, vfn_77 and vfn_76, returning false if the base call fails.
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
+
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+inline void NiD3DVertexShader::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DVertexShader::DecRefCount() { NiRefObject::DecRefCount(); }
+inline void NiD3DPixelShader::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DPixelShader::DecRefCount() { NiRefObject::DecRefCount(); }
+inline void NiD3DShaderConstantMap::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DShaderConstantMap::DecRefCount() { NiRefObject::DecRefCount(); }
+
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0) {}
+template <class T> inline NiPointer<T>::~NiPointer() {}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+template <class T> inline NiPointer<T>::operator T*() const { return m_pObject; }
+template <class T> inline T* NiPointer<T>::operator->() const { return m_pObject; }
+
+extern const float DAT_011ad860;
+extern const float DAT_011fa280[];
+extern const float DAT_011fa290[];
+
+
+class DistantLODShader : public BSShader
+{
+  public:
+    NiD3DPass* m_pRenderPass;
+    unsigned char m_pAuxiliaryObject[0x24];
+    const void* m_pDiffuseDirection;
+    unsigned int m_uiInstanceData;
+    unsigned short m_usInstanceDataCount;
+    unsigned char m_pad3[2];
+    unsigned char m_afAmbientColor[0x10];
+    unsigned char m_diffuseDirection[0x10];
+    unsigned char m_afDiffuseColor[0x10];
+    unsigned char m_alphaTestRef[0x10];
+    unsigned char m_eyeVector[0x10];
+    unsigned char m_eyeRightVector[0x10];
+    void UpdateShaderConstants();
+    virtual void ClearAllTextureStages();
+};
+
+// 0x00bd5670 stores four scalar shader constants at each 0x10 stride; these are color/direction registers.
+struct LodShaderConstantRow_00bd5670 { float x, y, z, w; LodShaderConstantRow_00bd5670(); void operator=(const LodShaderConstantRow_00bd5670&); };
+
+inline LodShaderConstantRow_00bd5670::LodShaderConstantRow_00bd5670() : x(0.0f), y(0.0f), z(0.0f), w(0.0f)
+{}
+inline void LodShaderConstantRow_00bd5670::operator=(const LodShaderConstantRow_00bd5670& vector)
+{
+    unsigned int* destination = reinterpret_cast<unsigned int*>(this);
+    const unsigned int* source = reinterpret_cast<const unsigned int*>(&vector);
+    destination[0] = source[0];
+    destination[1] = source[1];
+    destination[2] = source[2];
+    destination[3] = source[3];
+}
+
+// Initializes the base shader, then configures shader constants and the D3D pass.
 // @fnv 0x00be0870
 bool BSShader::Initialize()
 {
-    if (!reinterpret_cast<NiD3DShader*>(this)->Initialize())
+    if (!NiD3DShader::Initialize())
         return false;
-    vfn_75();
-    vfn_77();
-    vfn_76();
+    Func_75();
+    Func_77();
+    CreateD3DPass();
     return true;
 }
 
 // @fnv 0x00bd5a60
 void DistantLODShader::UpdateShaderConstants()
 {
-    if (m_spSecondShaderConstantMap.m_pObject == 0)
+    if (m_spVertexConstantMap.m_pObject == 0)
     {
-        NiD3DShaderConstantMap* map = new NiD3DShaderConstantMap(m_pOwnerShader, 0);
-        m_spSecondShaderConstantMap = map;
-        m_spSecondShaderConstantMap->AddEntry("WorldViewProjTranspose", 0x20000009, 0, 0, 4, 0, 0, 0, 0, false);
-        m_spSecondShaderConstantMap->AddEntry("Diffuse Light direction", 0x10000007, 0, 4, 1, "", 16, 4,
+        NiD3DShaderConstantMap* map = new NiD3DShaderConstantMap(static_cast<void*>(m_pkD3DRenderer), 0);
+        m_spVertexConstantMap = map;
+        m_spVertexConstantMap->SetConstant("WorldViewProjTranspose", 0x20000009, 0, 0, 4, 0, 0, 0, 0, false);
+        m_spVertexConstantMap->SetConstant("Diffuse Light direction", 0x10000007, 0, 4, 1, "", 16, 4,
                                               m_diffuseDirection, false);
-        m_spSecondShaderConstantMap->AddEntry("Diffuse Light color", 0x10000007, 0, 5, 1, "", 16, 4, m_afDiffuseColor,
+        m_spVertexConstantMap->SetConstant("Diffuse Light color", 0x10000007, 0, 5, 1, "", 16, 4, m_afDiffuseColor,
                                               false);
-        m_spSecondShaderConstantMap->AddEntry("ambient color", 0x10000007, 0, 13, 1, "", 16, 4, m_afAmbientColor,
+        m_spVertexConstantMap->SetConstant("ambient color", 0x10000007, 0, 13, 1, "", 16, 4, m_afAmbientColor,
                                               false);
-        m_spSecondShaderConstantMap->AddEntry("eye vector", 0x10000007, 0, 14, 1, "", 16, 4, m_eyeVector, false);
-        m_spSecondShaderConstantMap->AddEntry("eye right vector", 0x10000007, 0, 9, 1, "", 16, 4, m_eyeRightVector,
+        m_spVertexConstantMap->SetConstant("eye vector", 0x10000007, 0, 14, 1, "", 16, 4, m_eyeVector, false);
+        m_spVertexConstantMap->SetConstant("eye right vector", 0x10000007, 0, 9, 1, "", 16, 4, m_eyeRightVector,
                                               false);
-        m_spSecondShaderConstantMap->AddEntry("alpha param param", 0x10000007, 0, 12, 1, "", 16, 4, &DAT_011ad860,
+        m_spVertexConstantMap->SetConstant("alpha param param", 0x10000007, 0, 12, 1, "", 16, 4, &DAT_011ad860,
                                               false);
-        m_spSecondShaderConstantMap->AddEntry("fogparam", 0x10000007, 0, 11, 1, "", 16, 4, DAT_011fa280, false);
-        m_spSecondShaderConstantMap->AddEntry("fogcolor", 0x10000007, 0, 10, 1, "", 16, 4, DAT_011fa290, false);
-        m_spSecondShaderConstantMap->AddEntry("instance data", 0x10000009, 0, 0x14, m_usInstanceDataCount, "",
+        m_spVertexConstantMap->SetConstant("fogparam", 0x10000007, 0, 11, 1, "", 16, 4, DAT_011fa280, false);
+        m_spVertexConstantMap->SetConstant("fogcolor", 0x10000007, 0, 10, 1, "", 16, 4, DAT_011fa290, false);
+        m_spVertexConstantMap->SetConstant("instance data", 0x10000009, 0, 0x14, m_usInstanceDataCount, "",
                                               m_usInstanceDataCount << 4, 4, m_pDiffuseDirection, false);
-        m_uiInstanceData = m_spSecondShaderConstantMap->LookupSequenceByKey("instance data");
+        m_uiInstanceData = reinterpret_cast<unsigned int>(m_spVertexConstantMap->GetEntry(reinterpret_cast<unsigned int>("instance data")));
     }
-    if (m_spFirstShaderConstantMap.m_pObject == 0)
+    if (m_spPixelConstantMap.m_pObject == 0)
     {
-        NiD3DShaderConstantMap* map = new NiD3DShaderConstantMap(m_pOwnerShader, 2);
-        m_spFirstShaderConstantMap = map;
-        m_spFirstShaderConstantMap->AddEntry("alpha test ref", 0x10000007, 0, 3, 1, "", 16, 4, m_alphaTestRef, false);
+        NiD3DShaderConstantMap* map = new NiD3DShaderConstantMap(static_cast<void*>(m_pkD3DRenderer), 2);
+        m_spPixelConstantMap = map;
+        m_spPixelConstantMap->SetConstant("alpha test ref", 0x10000007, 0, 3, 1, "", 16, 4, m_alphaTestRef, false);
     }
 }
 
@@ -158,8 +239,6 @@ void* __thiscall S_00bd58f0::DestroyIfFlagged(unsigned int flags)
         _delete(this, 0x100);
     return this;
 }
-
-struct NiRenderer;
 
 struct ShaderVTable
 {
@@ -371,11 +450,6 @@ FUN_00bd5670* FUN_00bd5920()
     return result;
 }
 
-struct NiD3DPass
-{
-    static void __cdecl CreateD3DPass(NiD3DPass*& pass);
-};
-
 struct FUN_00bd5a40_shell
 {
     void __thiscall SetupRenderPass();
@@ -390,100 +464,12 @@ bool FUN_00bd5a40_shell::FUN_00bd5a40()
     return true;
 }
 
-struct BSShaderStandin
-{
-    virtual void vfn_0();
-    virtual void vfn_1();
-    virtual void vfn_2();
-    virtual void vfn_3();
-    virtual void vfn_4();
-    virtual void vfn_5();
-    virtual void vfn_6();
-    virtual void vfn_7();
-    virtual void vfn_8();
-    virtual void vfn_9();
-    virtual void vfn_10();
-    virtual void vfn_11();
-    virtual void vfn_12();
-    virtual void vfn_13();
-    virtual void vfn_14();
-    virtual void vfn_15();
-    virtual void vfn_16();
-    virtual void vfn_17();
-    virtual void vfn_18();
-    virtual void vfn_19();
-    virtual void vfn_20();
-    virtual void vfn_21();
-    virtual void vfn_22();
-    virtual void vfn_23();
-    virtual void vfn_24();
-    virtual void vfn_25();
-    virtual void vfn_26();
-    virtual void vfn_27();
-    virtual void vfn_28();
-    virtual void vfn_29();
-    virtual void vfn_30();
-    virtual void vfn_31();
-    virtual void vfn_32();
-    virtual void vfn_33();
-    virtual void vfn_34();
-    virtual void vfn_35();
-    virtual void vfn_36();
-    virtual void vfn_37();
-    virtual void vfn_38();
-    virtual void vfn_39();
-    virtual void vfn_40();
-    virtual void vfn_41();
-    virtual void vfn_42();
-    virtual void vfn_43();
-    virtual void vfn_44();
-    virtual void vfn_45();
-    virtual void vfn_46();
-    virtual void vfn_47();
-    virtual void vfn_48();
-    virtual void vfn_49();
-    virtual void vfn_50();
-    virtual void vfn_51();
-    virtual void vfn_52();
-    virtual void vfn_53();
-    virtual void vfn_54();
-    virtual void vfn_55();
-    virtual void vfn_56();
-    virtual void vfn_57();
-    virtual void vfn_58();
-    virtual void vfn_59();
-    virtual void vfn_60();
-    virtual void vfn_61();
-    virtual void vfn_62();
-    virtual void vfn_63();
-    virtual void vfn_64();
-    virtual void vfn_65();
-    virtual void vfn_66();
-    virtual void vfn_67();
-    virtual void vfn_68();
-    virtual void vfn_69();
-    virtual void vfn_70();
-    virtual void vfn_71();
-    virtual void vfn_72();
-    virtual void vfn_73();
-    virtual void vfn_74(unsigned int);
-
-    unsigned char pad04[0x68];
-    unsigned int field6c;
-
-    void FUN_00bd5320();
-};
-
 // @fnv 0x00bd5320
-void BSShaderStandin::FUN_00bd5320()
+void DistantLODShader::ClearAllTextureStages()
 {
-    vfn_74(field6c);
+    ClearTextureStages(m_pRenderPass);
 }
 
-struct FUN_00be0f10
-{
-    virtual ~FUN_00be0f10();
-};
 struct FUN_00b79930
 {
     unsigned int member;
@@ -499,34 +485,8 @@ struct MM_011f6238
     void FUN_00aa4060(void* ptr);
 };
 extern MM_011f6238 DAT_011f6238;
-struct FUN_00bd5330 : FUN_00be0f10
+struct FUN_00bd5330 : BSShader
 {
-    unsigned int unknown04;
-    unsigned int unknown08;
-    unsigned int unknown0c;
-    unsigned int unknown10;
-    unsigned int unknown14;
-    unsigned int unknown18;
-    unsigned int unknown1c;
-    unsigned int unknown20;
-    unsigned int unknown24;
-    unsigned int unknown28;
-    unsigned int unknown2c;
-    unsigned int unknown30;
-    unsigned int unknown34;
-    unsigned int unknown38;
-    unsigned int unknown3c;
-    unsigned int unknown40;
-    unsigned int unknown44;
-    unsigned int unknown48;
-    unsigned int unknown4c;
-    unsigned int unknown50;
-    unsigned int unknown54;
-    unsigned int unknown58;
-    unsigned int unknown5c;
-    unsigned int unknown60;
-    unsigned int unknown64;
-    unsigned int unknown68;
     FUN_00b79930 table6c[1];
     unsigned int unknown70;
     unsigned int unknown74;
@@ -565,45 +525,6 @@ FUN_00bd5330::~FUN_00bd5330()
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* apValue);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* apValue);
-
-struct RSRefObject
-{
-    virtual ~RSRefObject();
-    virtual void DeleteThis();
-    long volatile m_uiRefCount;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
-template <class T> struct RSPointer
-{
-    T* m_pObject;
-
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    __forceinline RSPointer& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-};
 
 struct RSTexture
 {
@@ -650,78 +571,36 @@ struct RSTexturePtr
     {}
     ~RSTexturePtr()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
 };
 
-struct RSRenderState
+class D3DRenderStateGroup
 {
+public:
     void SetRenderState(int aiState, int aiValue, int aiSave);
 };
 
-RSRenderState* __cdecl RSCreateRenderState();
+D3DRenderStateGroup* __cdecl RSCreateRenderState();
 void __cdecl RSGetTexture(RSTexturePtr* apTexture);
 void __cdecl RSSetupTexture(RSTexture* apTexture, int aiUnk1, int aiUnk2, int aiUnk3, int aiUnk4);
 extern int g_iRSShaderLevel;
 
-struct RSPass
+inline void NiD3DPass::SetVertexShader(NiD3DVertexShader* shader)
 {
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int iUnk14;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    RSRenderState* m_pCurrentRenderState;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    RSRefObject* m_pkPixelShader;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    RSRefObject* m_pkVertexShader;
-
-    void SetTexture(int aiStage, RSTexture* apTexture);
-    void SetVertexShader(RSRefObject* pkShader)
-    {
-        if (m_pkVertexShader != pkShader)
-        {
-            if (m_pkVertexShader)
-                m_pkVertexShader->DecRefCount();
-            m_pkVertexShader = pkShader;
-            if (m_pkVertexShader)
-                m_pkVertexShader->IncRefCount();
-        }
-    }
-    void SetPixelShader(RSRefObject* pkShader)
-    {
-        if (m_pkPixelShader != pkShader)
-        {
-            if (m_pkPixelShader)
-                m_pkPixelShader->DecRefCount();
-            m_pkPixelShader = pkShader;
-            if (m_pkPixelShader)
-                m_pkPixelShader->IncRefCount();
-        }
-    }
-    RSRenderState* GetRenderState()
-    {
-        if (!m_pCurrentRenderState)
-            m_pCurrentRenderState = RSCreateRenderState();
-        return m_pCurrentRenderState;
-    }
-};
+    m_spVertexShader = shader;
+}
+inline void NiD3DPass::SetPixelShader(NiD3DPixelShader* shader)
+{
+    m_spPixelShader = shader;
+}
+inline D3DRenderStateGroup* NiD3DPass::GetRenderStateGroup()
+{
+    if (!m_pkRenderStateGroup)
+        m_pkRenderStateGroup = RSCreateRenderState();
+    return m_pkRenderStateGroup;
+}
 
 struct RSShader
 {
@@ -752,15 +631,15 @@ struct RSShader
     int unk060;
     int unk064;
     int unk068;
-    RSPass* m_pRenderPass;
+    NiD3DPass* m_pRenderPass;
     int unk070;
     int unk074;
     int unk078;
-    RSRefObject* m_pkVertexShader;
+    NiD3DVertexShader* m_pkVertexShader;
     int unk080;
     int unk084;
     int unk088;
-    RSRefObject* m_pkPixelShader;
+    NiD3DPixelShader* m_pkPixelShader;
 
     void SetupRenderPass();
 };
@@ -772,24 +651,24 @@ void RSShader::SetupRenderPass()
     RSTexturePtr spTexture;
     RSGetTexture(&spTexture);
     RSSetupTexture(spTexture.m_pObject, 0, 3, 2, 1);
-    m_pRenderPass->SetTexture(m_pRenderPass->iUnk14, spTexture.m_pObject);
+    m_pRenderPass->FUN_00e802b0(m_pRenderPass->m_uiCurrentStage, reinterpret_cast<BeamStage*>(spTexture.m_pObject));
     m_pRenderPass->SetVertexShader(m_pkVertexShader);
     m_pRenderPass->SetPixelShader(m_pkPixelShader);
-    RSRenderState* pkRS;
+    D3DRenderStateGroup* pkRS;
     if (g_iRSShaderLevel >= 2)
     {
-        pkRS = m_pRenderPass->GetRenderState();
+        pkRS = m_pRenderPass->GetRenderStateGroup();
         pkRS->SetRenderState(0x18, 0xa, 1);
     }
-    pkRS = m_pRenderPass->GetRenderState();
+    pkRS = m_pRenderPass->GetRenderStateGroup();
     pkRS->SetRenderState(0xa8, 7, 1);
-    pkRS = m_pRenderPass->GetRenderState();
+    pkRS = m_pRenderPass->GetRenderStateGroup();
     pkRS->SetRenderState(0x1b, 0, 1);
-    pkRS = m_pRenderPass->GetRenderState();
+    pkRS = m_pRenderPass->GetRenderStateGroup();
     pkRS->SetRenderState(7, 1, 1);
-    pkRS = m_pRenderPass->GetRenderState();
+    pkRS = m_pRenderPass->GetRenderStateGroup();
     pkRS->SetRenderState(0x17, 4, 1);
-    pkRS = m_pRenderPass->GetRenderState();
+    pkRS = m_pRenderPass->GetRenderStateGroup();
     pkRS->SetRenderState(0xe, 1, 1);
 }
 
@@ -912,38 +791,6 @@ void LodCompiler::CompileDistanceLodShaders()
 }
 
 namespace fnv_00bd5670 {
-struct BaseShader_00be2200
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    NiPointer<NiRefObject> m_spDeclaration;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-
-    BaseShader_00be2200();
-    virtual ~BaseShader_00be2200();
-};
-
 struct PassPointer
 {
     NiD3DPass* m_pObject;
@@ -958,14 +805,7 @@ struct ShaderPointer
     ~ShaderPointer();
 };
 
-struct FourFloatVector
-{
-    float x, y, z, w;
-    FourFloatVector() : x(0.0f), y(0.0f), z(0.0f), w(0.0f)
-    {}
-};
-
-extern FourFloatVector DAT_011a9bd0;
+extern LodShaderConstantRow_00bd5670 DAT_011a9bd0;
 extern int DAT_011f91c0;
 
 struct MemoryManager_Helper
@@ -985,9 +825,8 @@ struct InstanceData_00bd5670
     }
 };
 
-struct FUN_00bd5670_c : BaseShader_00be2200
+struct FUN_00bd5670_c : BSShader
 {
-    int m_field68;
     PassPointer table6c[1];
     float m_field70;
     int m_field74;
@@ -1002,12 +841,12 @@ struct FUN_00bd5670_c : BaseShader_00be2200
     unsigned short m_usInstanceDataCount;
     char unk9e;
     char unk9f;
-    FourFloatVector m_afAmbientColor;
-    FourFloatVector m_diffuseDirection;
-    FourFloatVector m_afDiffuseColor;
-    FourFloatVector m_alphaTestRef;
-    FourFloatVector m_eyeVector;
-    FourFloatVector m_eyeRightVector;
+    LodShaderConstantRow_00bd5670 m_afAmbientColor;
+    LodShaderConstantRow_00bd5670 m_diffuseDirection;
+    LodShaderConstantRow_00bd5670 m_afDiffuseColor;
+    LodShaderConstantRow_00bd5670 m_alphaTestRef;
+    LodShaderConstantRow_00bd5670 m_eyeVector;
+    LodShaderConstantRow_00bd5670 m_eyeRightVector;
 
     FUN_00bd5670_c(NiRefObject* decl);
     virtual ~FUN_00bd5670_c();
@@ -1017,7 +856,7 @@ struct FUN_00bd5670_c : BaseShader_00be2200
 // @fnv 0x00bd5670
 FUN_00bd5670_c::FUN_00bd5670_c(NiRefObject* apDeclaration)
 {
-    m_field68 = 7;
+    iShaderType = 7;
     for (int i = 0; i < 4; ++i)
     {
         if (maps7c[i].m_pObject)
@@ -1034,7 +873,7 @@ FUN_00bd5670_c::FUN_00bd5670_c(NiRefObject* apDeclaration)
             maps8c[i].m_pObject = 0;
         }
     }
-    m_spDeclaration = apDeclaration;
+    m_spShaderDecl = reinterpret_cast<NiD3DShaderDeclaration*>(apDeclaration);
     m_field70 = 0.0f;
     m_afAmbientColor = DAT_011a9bd0;
     if (DAT_011f91c0 >= 2)

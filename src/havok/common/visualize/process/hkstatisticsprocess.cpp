@@ -2,25 +2,151 @@
 // src/havok/common/visualize/process/hkstatisticsprocess.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/process/hkstatisticsprocess.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiCapacity) throw();
-};
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/Pair.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Havok visualizer code: uses the stand-in's uint aliases (xb/yb/zb) and expand/FUN_00ddc870/FUN_00e0f6e0 members, which NiPoint3 does not have.
+#include "../../../../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
 
-struct AudioHolder
+struct LocalVec3
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
 
-AudioHolder* __cdecl FUN_00c85750() throw();
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+#include "../../../../../include/Vec4.h"
+
+// The shared allocator declarations do not expose the virtual dispatch slots yet.
+__forceinline void FreeAudioArray(hkMemoryAllocator* allocator, void* memory, unsigned int capacity) throw()
+{
+    typedef void (__thiscall *FreeFunction)(hkMemoryAllocator*, void*, unsigned int);
+    (*reinterpret_cast<FreeFunction**>(allocator))[4](allocator, memory, capacity);
+}
+
+__forceinline void FreeAudioBlock(hkMemoryAllocator* allocator, void* memory, unsigned int size)
+{
+    typedef void (__thiscall *FreeFunction)(hkMemoryAllocator*, void*, unsigned int);
+    (*reinterpret_cast<FreeFunction**>(allocator))[2](allocator, memory, size);
+}
+
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct ArrayMember
 {
@@ -30,12 +156,12 @@ struct ArrayMember
 
     ~ArrayMember() throw()
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
         if ((uCapacity & 0x80000000) == 0)
-            pAllocator->FreeArray(m_pData, uCapacity & 0x3fffffff);
+            FreeAudioArray(pAllocator, m_pData, uCapacity & 0x3fffffff);
         m_pData = 0;
         m_uCapacity = 0x80000000;
     }
@@ -49,12 +175,12 @@ struct PtrArrayMember
 
     ~PtrArrayMember() throw()
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
         if ((uCapacity & 0x80000000) == 0)
-            pAllocator->FreeArray(m_ppData, (uCapacity & 0x3fffffff) * 4);
+            FreeAudioArray(pAllocator, m_ppData, (uCapacity & 0x3fffffff) * 4);
         m_ppData = 0;
         m_uCapacity = 0x80000000;
     }
@@ -119,17 +245,9 @@ struct Allocator
     virtual void* Alloc(int* pBytes);
     virtual void Free(void* p, int bytes);
 };
-struct Singleton
+__forceinline hkMemoryRouter* GetSingleton()
 {
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    Allocator* m_10;
-};
-__forceinline Singleton* GetSingleton()
-{
-    return reinterpret_cast<Singleton*>(FUN_00c85750());
+    return reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
 }
 void __cdecl ResizeAudioStream(Allocator* ctx, void* pVec, int elem);
 void __cdecl FUN_00c908c0(Allocator* ctx, void* pVec, int sz, int elem);
@@ -158,11 +276,6 @@ struct Entry
     int m_28;
     SrcArr m_2c;
 };
-struct Pair
-{
-    int m_00;
-    int m_04;
-};
 struct ObjA
 {
     Pair* m_pData;
@@ -175,7 +288,7 @@ struct ObjA
     {
         int i;
         for (i = 0; i <= m_iArrayLength; ++i)
-            if (m_pData[i].m_00 != -1)
+            if (m_pData[i].a != -1)
                 break;
         return i;
     }
@@ -183,7 +296,7 @@ struct ObjA
     {
         int i;
         for (i = previous + 1; i <= m_iArrayLength; ++i)
-            if (m_pData[i].m_00 != -1)
+            if (m_pData[i].a != -1)
                 break;
         return i;
     }
@@ -205,23 +318,20 @@ struct Elem16
     Sub8 m_08;
     void FUN_00e0bf20();
 };
-struct Vec3
+// This array uses the shared LocalVec3's three words as data, length, and capacity.
+__forceinline Elem16& LocalVec3::expand(Allocator& allocator)
 {
-    Elem16* m_pData;
-    int m_iArrayLength;
-    int m_iCapacity;
-    void FUN_00e0f6e0();
-    void FUN_00ddc870();
-    __forceinline Elem16& expand(Allocator& allocator)
-    {
-        if (m_iArrayLength == (m_iCapacity & 0x3fffffff))
-            ResizeAudioStream(&allocator, this, 0x10);
-        Elem16* item = m_pData + m_iArrayLength;
-        if (item != 0)
-            item->FUN_00e0bf20();
-        return m_pData[m_iArrayLength++];
-    }
-};
+    Elem16*& data = reinterpret_cast<Elem16*&>(xb);
+    int& length = reinterpret_cast<int&>(yb);
+    int& capacity = reinterpret_cast<int&>(zb);
+    if (length == (capacity & 0x3fffffff))
+        ResizeAudioStream(&allocator, this, 0x10);
+    Elem16* item = data + length;
+    if (item != 0)
+        item->FUN_00e0bf20();
+    return data[length++];
+}
+
 extern char DAT_010c9368;
 extern char DAT_0102e388;
 extern char DAT_010d6ae8;
@@ -250,12 +360,6 @@ struct Elem12
     int m_10;
     int m_14;
 };
-struct Vec4
-{
-    Elem12* m_pData;
-    int m_iArrayLength;
-    int m_iCapacity;
-};
 struct MiniStr
 {
     char* m_00;
@@ -270,7 +374,7 @@ struct SObj
     int m_0c;
     int m_10;
 };
-void __cdecl FUN_00e0bd40(SObj* s, MiniStr* ms, int a, int b, Vec3* v3, void* g, Vec4* v4);
+void __cdecl FUN_00e0bd40(SObj* s, MiniStr* ms, int a, int b, LocalVec3* v3, void* g, Vec4* v4);
 struct Stream
 {
     void FUN_00d60960(int total);
@@ -305,7 +409,9 @@ void ThisCls::WriteToStream(int aiUnused)
 {
     if (m_0c == 0)
         return;
-    Vec4 vec4;
+    // Only the shared Vec4 array view is used here: data, length, and capacity.
+    int vec4Storage[3];
+    Vec4& vec4 = *reinterpret_cast<Vec4*>(vec4Storage);
     IntVec vecStarts;
     IntVec vecEnds;
     vec4.m_iCapacity = (int)0x80000000;
@@ -324,8 +430,8 @@ void ThisCls::WriteToStream(int aiUnused)
             if (m_18[i]->m_08.m_iArrayLength > 0)
             {
                 SrcArr* pSrcStarts = &m_18[i]->m_08;
-                Singleton* s = GetSingleton();
-                Allocator* alloc = s->m_10;
+                hkMemoryRouter* s = GetSingleton();
+                Allocator* alloc = reinterpret_cast<Allocator*>(s->m_heap);
                 if ((vecStarts.m_iCapacity & 0x3fffffff) < pSrcStarts->m_iArrayLength)
                 {
                     if ((vecStarts.m_iCapacity & 0x80000000u) == 0)
@@ -343,8 +449,8 @@ void ThisCls::WriteToStream(int aiUnused)
                         pDstData[k] = pSrcData[k];
                 }
                 SrcArr* pSrcEnds = &m_18[i]->m_2c;
-                Singleton* pSingleton2 = GetSingleton();
-                Allocator* pAllocator2 = pSingleton2->m_10;
+                hkMemoryRouter* pSingleton2 = GetSingleton();
+                Allocator* pAllocator2 = reinterpret_cast<Allocator*>(pSingleton2->m_heap);
                 if ((vecEnds.m_iCapacity & 0x3fffffff) < pSrcEnds->m_iArrayLength)
                 {
                     if ((vecEnds.m_iCapacity & 0x80000000u) == 0)
@@ -370,20 +476,20 @@ void ThisCls::WriteToStream(int aiUnused)
         TlsBuf* pTlsBuf = (TlsBuf*)TlsGetValue(DAT_0126835c);
         int cur = (int)pTlsBuf->m_pCurrent;
         int end = (int)pTlsBuf->m_pRecordEnd;
-        Singleton* s = GetSingleton();
+        hkMemoryRouter* s = GetSingleton();
         if (vecStarts.m_iArrayLength == (vecStarts.m_iCapacity & 0x3fffffff))
-            ResizeAudioStream(s->m_10, &vecStarts, 4);
+            ResizeAudioStream(reinterpret_cast<Allocator*>(s->m_heap), &vecStarts, 4);
         vecStarts.m_pData[vecStarts.m_iArrayLength] = cur;
         vecStarts.m_iArrayLength++;
-        Singleton* pSingleton2 = GetSingleton();
+        hkMemoryRouter* pSingleton2 = GetSingleton();
         if (vecEnds.m_iArrayLength == (vecEnds.m_iCapacity & 0x3fffffff))
-            ResizeAudioStream(pSingleton2->m_10, &vecEnds, 4);
+            ResizeAudioStream(reinterpret_cast<Allocator*>(pSingleton2->m_heap), &vecEnds, 4);
         vecEnds.m_pData[vecEnds.m_iArrayLength] = end;
         vecEnds.m_iArrayLength++;
     }
     CharVec* pOutText = &m_30;
     {
-        ReserveChars(*GetSingleton()->m_10, pOutText, 0);
+        ReserveChars(*reinterpret_cast<Allocator*>(GetSingleton()->m_heap), pOutText, 0);
         pOutText->m_iArrayLength = 0;
     }
     int iTotalRangeLen = 0;
@@ -391,9 +497,10 @@ void ThisCls::WriteToStream(int aiUnused)
     objRecords.m_pData = 0;
     objRecords.m_04 = 0;
     objRecords.m_iArrayLength = -1;
-    Singleton* pSingleton4 = GetSingleton();
-    objRecords.EnsureCapacity(pSingleton4->m_10, 0);
-    Vec3 vecProcessed;
+    hkMemoryRouter* pSingleton4 = GetSingleton();
+    objRecords.EnsureCapacity(reinterpret_cast<Allocator*>(pSingleton4->m_heap), 0);
+    int vecProcessedStorage[sizeof(LocalVec3) / sizeof(int)];
+    LocalVec3& vecProcessed = *reinterpret_cast<LocalVec3*>(vecProcessedStorage);
     vecProcessed.FUN_00e0f6e0();
     for (int i = 0; i < vecStarts.m_iArrayLength; i++)
     {
@@ -404,9 +511,9 @@ void ThisCls::WriteToStream(int aiUnused)
         int iRecordIdx = objRecords.first();
         while (objRecords.valid(iRecordIdx))
         {
-            Elem16* pElem = &vecProcessed.expand(*GetSingleton()->m_10);
-            pElem->m_00 = (long long)objRecords.m_pData[iRecordIdx].m_00;
-            pElem->m_08.FUN_00cb0c10(objRecords.m_pData[iRecordIdx].m_04);
+            Elem16* pElem = &vecProcessed.expand(*reinterpret_cast<Allocator*>(GetSingleton()->m_heap));
+            pElem->m_00 = (long long)objRecords.m_pData[iRecordIdx].a;
+            pElem->m_08.FUN_00cb0c10(objRecords.m_pData[iRecordIdx].b);
             iRecordIdx = objRecords.next(iRecordIdx);
         }
     }
@@ -418,7 +525,7 @@ void ThisCls::WriteToStream(int aiUnused)
     objStr.m_0c = iTextLen;
     objStr.m_10 = 1;
     int need = objStr.m_08->m_iArrayLength + 1;
-    ReserveChars(*GetSingleton()->m_10, pOutText, need);
+    ReserveChars(*reinterpret_cast<Allocator*>(GetSingleton()->m_heap), pOutText, need);
     objStr.m_08->m_pData[objStr.m_08->m_iArrayLength] = 0;
     MiniStr ms;
     ms.FUN_00dc1680(&DAT_010d6ae8);
@@ -429,37 +536,37 @@ void ThisCls::WriteToStream(int aiUnused)
         CharVec* pCharVec = objStr.m_08;
         if (pCharVec != 0)
         {
-            Singleton* pSingleton7 = GetSingleton();
-            Allocator* pAllocator7 = pSingleton7->m_10;
+            hkMemoryRouter* pSingleton7 = GetSingleton();
+            Allocator* pAllocator7 = reinterpret_cast<Allocator*>(pSingleton7->m_heap);
             int cap = pCharVec->m_iCapacity;
             pCharVec->m_iArrayLength = 0;
             if ((cap & 0x80000000u) == 0)
                 pAllocator7->Free(pCharVec->m_pData, cap & 0x3fffffff);
             pCharVec->m_pData = 0;
             pCharVec->m_iCapacity = (int)0x80000000;
-            Singleton* pSingleton7b = GetSingleton();
-            pSingleton7b->m_10->a2(pCharVec, 12);
+            hkMemoryRouter* pSingleton7b = GetSingleton();
+            pSingleton7b->m_heap->blockFree(pCharVec, 12);
         }
     }
     objStr.m_00 = &DAT_0102e388;
     vecProcessed.FUN_00ddc870();
     {
-        Singleton* pSingleton8 = GetSingleton();
-        objRecords.ProcessArgument(pSingleton8->m_10);
+        hkMemoryRouter* pSingleton8 = GetSingleton();
+        objRecords.ProcessArgument(reinterpret_cast<Allocator*>(pSingleton8->m_heap));
     }
     objRecords.FUN_00a29680();
     if (iTotalRangeLen < 1)
     {
-        Singleton* pSingleton9 = GetSingleton();
-        Allocator* pAllocator9 = pSingleton9->m_10;
+        hkMemoryRouter* pSingleton9 = GetSingleton();
+        Allocator* pAllocator9 = reinterpret_cast<Allocator*>(pSingleton9->m_heap);
         int cap2 = vecEnds.m_iCapacity;
         vecEnds.m_iArrayLength = 0;
         if ((cap2 & (int)0x80000000) == 0)
             pAllocator9->Free(vecEnds.m_pData, (cap2 & 0x3fffffff) * 4);
         vecEnds.m_pData = 0;
         vecEnds.m_iCapacity = (int)0x80000000;
-        Singleton* pSingleton10 = GetSingleton();
-        Allocator* pAllocator10 = pSingleton10->m_10;
+        hkMemoryRouter* pSingleton10 = GetSingleton();
+        Allocator* pAllocator10 = reinterpret_cast<Allocator*>(pSingleton10->m_heap);
         int cap1 = vecStarts.m_iCapacity;
         vecStarts.m_iArrayLength = 0;
         if ((cap1 & (int)0x80000000) == 0)
@@ -467,8 +574,8 @@ void ThisCls::WriteToStream(int aiUnused)
         vecStarts.m_pData = 0;
         vecStarts.m_iCapacity = (int)0x80000000;
         {
-            Singleton* pSingleton11 = GetSingleton();
-            Allocator* pAllocator11 = pSingleton11->m_10;
+            hkMemoryRouter* pSingleton11 = GetSingleton();
+            Allocator* pAllocator11 = reinterpret_cast<Allocator*>(pSingleton11->m_heap);
             int cap4 = vec4.m_iCapacity;
             vec4.m_iArrayLength = 0;
             if ((cap4 & (int)0x80000000) == 0)
@@ -497,16 +604,16 @@ void ThisCls::WriteToStream(int aiUnused)
             if (diff > 0)
                 m_0c->FUN_00d607b0(vecStarts.m_pData[i], diff);
         }
-        Singleton* pSingleton9 = GetSingleton();
-        Allocator* pAllocator9 = pSingleton9->m_10;
+        hkMemoryRouter* pSingleton9 = GetSingleton();
+        Allocator* pAllocator9 = reinterpret_cast<Allocator*>(pSingleton9->m_heap);
         int cap2 = vecEnds.m_iCapacity;
         vecEnds.m_iArrayLength = 0;
         if ((cap2 & (int)0x80000000) == 0)
             pAllocator9->Free(vecEnds.m_pData, (cap2 & 0x3fffffff) * 4);
         vecEnds.m_pData = 0;
         vecEnds.m_iCapacity = (int)0x80000000;
-        Singleton* pSingleton10 = GetSingleton();
-        Allocator* pAllocator10 = pSingleton10->m_10;
+        hkMemoryRouter* pSingleton10 = GetSingleton();
+        Allocator* pAllocator10 = reinterpret_cast<Allocator*>(pSingleton10->m_heap);
         int cap1 = vecStarts.m_iCapacity;
         vecStarts.m_iArrayLength = 0;
         if ((cap1 & (int)0x80000000) == 0)
@@ -515,8 +622,8 @@ void ThisCls::WriteToStream(int aiUnused)
         vecStarts.m_iCapacity = (int)0x80000000;
     }
     {
-        Singleton* pSingleton11 = GetSingleton();
-        Allocator* pAllocator11 = pSingleton11->m_10;
+        hkMemoryRouter* pSingleton11 = GetSingleton();
+        Allocator* pAllocator11 = reinterpret_cast<Allocator*>(pSingleton11->m_heap);
         int cap4 = vec4.m_iCapacity;
         vec4.m_iArrayLength = 0;
         if ((cap4 & (int)0x80000000) == 0)
@@ -550,23 +657,7 @@ AdjustDerived::AdjustDerived()
 {}
 
 namespace fnv_00ddc840 {
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize);
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct FUN_00ddc840
 {
@@ -576,10 +667,10 @@ struct FUN_00ddc840
     virtual ~FUN_00ddc840();
     static void operator delete(void* apMemory)
     {
-        AudioHolder* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = FUN_00c85750();
         unsigned int uiSize = ((FUN_00ddc840*)apMemory)->m_u04;
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(apMemory, uiSize);
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        FreeAudioBlock(pAllocator, apMemory, uiSize);
     }
 };
 
@@ -629,26 +720,18 @@ struct Sbf00_Arr24
     unsigned int m_uCapacity;
     void Free()
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
         if ((uCapacity & 0x80000000) == 0)
-            pAllocator->FreeArray(m_pData, (uCapacity & 0x3fffffff) * 24);
+            FreeAudioArray(pAllocator, m_pData, (uCapacity & 0x3fffffff) * 24);
     }
 };
 struct Sbf00_B2
 {
     void* m_pVtbl;
     unsigned char m_bFlag;
-};
-struct Sbf00_Alloc
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void* AllocArray(int* apBytes);
-    virtual void FreeArray(void* apMemory, unsigned int auiCapacity);
 };
 extern int DAT_010d1508;
 extern int DAT_010d7e48;
@@ -735,15 +818,15 @@ FUN_00ddbf00::FUN_00ddbf00(PtrArrayMember* pSource)
     }
     kCtx.FUN_00cc0780();
     kArr.Free();
-    Sbf00_Alloc* pAlloc = (Sbf00_Alloc*)FUN_00c85750()->m_pAllocator;
+    Allocator* pAlloc = reinterpret_cast<Allocator*>(FUN_00c85750()->m_heap);
     unsigned int uCap = pThis->m_kFirst.m_uCapacity;
     int iCap = uCap & 0x3fffffff;
     if (iCap < pSource->m_iArrayLength)
     {
         if ((uCap & 0x80000000) == 0)
-            pAlloc->FreeArray(pThis->m_kFirst.m_ppData, iCap * 4);
+            pAlloc->Free(pThis->m_kFirst.m_ppData, iCap * 4);
         int iBytes = pSource->m_iArrayLength * 4;
-        pThis->m_kFirst.m_ppData = (void**)pAlloc->AllocArray(&iBytes);
+        pThis->m_kFirst.m_ppData = (void**)pAlloc->Alloc(&iBytes);
         pThis->m_kFirst.m_uCapacity = iBytes / 4;
     }
     int n = pSource->m_iArrayLength;
@@ -764,16 +847,7 @@ struct FixedAllocator
     virtual void FreeArray(void* p, unsigned int size);
 };
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    FixedAllocator* m_pAllocator;
-};
-
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 
 struct ElemSub
 {
@@ -789,22 +863,16 @@ struct Elem
     ElemSub m_08;
 };
 
-struct FUN_00ddc870_cls
-{
-    Elem* m_pItems;
-    int m_iArrayLength;
-    unsigned int m_uCapBits;
-
-    void FUN_00ddc870();
-};
+}  // namespace fnv_00ddc870
 
 // @fnv 0x00ddc870
-void FUN_00ddc870_cls::FUN_00ddc870()
+void LocalVec3::FUN_00ddc870()
 {
-    AllocHolder* holder = FUN_00c85750();
-    FixedAllocator* alloc = holder->m_pAllocator;
-    int iCount = m_iArrayLength;
-    Elem* pItems = *(Elem* volatile*)&m_pItems;
+    using namespace fnv_00ddc870;
+    hkMemoryRouter* holder = fnv_00ddc870::FUN_00c85750();
+    FixedAllocator* alloc = reinterpret_cast<FixedAllocator*>(holder->m_heap);
+    int iCount = reinterpret_cast<int&>(yb);
+    Elem* pItems = *reinterpret_cast<Elem* volatile*>(&xb);
     if (iCount > 0)
     {
         ElemSub* s = &pItems->m_08;
@@ -816,13 +884,12 @@ void FUN_00ddc870_cls::FUN_00ddc870()
         } while (--n != 0);
     }
 
-    m_iArrayLength = 0;
-    unsigned int cap = m_uCapBits;
+    yb = 0;
+    unsigned int cap = zb;
     if ((cap & 0x80000000u) == 0)
     {
-        alloc->FreeArray(m_pItems, (cap & 0x3fffffffu) * 16);
+        alloc->FreeArray(reinterpret_cast<Elem*>(xb), (cap & 0x3fffffffu) * 16);
     }
-    m_uCapBits = 0x80000000u;
-    m_pItems = 0;
+    zb = 0x80000000u;
+    xb = 0;
 }
-}  // namespace fnv_00ddc870

@@ -1,0 +1,9 @@
+#pragma once
+
+enum HAIR_PART
+{
+    HAIR_PART_HAIR_PART_NONE = -1,
+    HAIR_PART_HAIR_PART_NORMAL = 0,
+    HAIR_PART_HAIR_PART_HAT = 1,
+    HAIR_PART_HAIR_PART_COUNT = 2,
+};

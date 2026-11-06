@@ -1,16 +1,25 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiD3DShaderFactory
-{
-    void UpdateShaderMaterialCache(void*);
-    void FUN_00e94050(void*);
-};
-
-struct NiD3DRenderState
-{
-    void FUN_00e87980(void*);
-};
+#define FNV64_NIPOINTER_INLINE_BODIES
+#define FNV64_NIFIXEDSTRING_OWN_BODIES
+#include "../../include/NiRefObject.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTArray.h"
+#include "../../include/NiTObjectArray.h"
+#include "../../include/NiTNewInterface.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiShaderConstantMapEntry.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/NiD3DRenderState.h"
+#include "../../include/NiD3DShaderFactory.h"
+#include "../../include/NiTexturingProperty.h"
 
 // Forwards p to the shader factory at offset 0xf8, then passes the pointer at 0x10f8 to its second method.
 // @fnv 0x00e87980
@@ -49,11 +58,6 @@ void FUN_00c89c80_obj::CopyFromSource(unsigned int pDest)
     }
 }
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int auiSize) throw();
-};
-
 extern MemoryManager DAT_011f6238;
 
 struct KeyPair
@@ -70,108 +74,97 @@ struct KeyPair
     {}
 };
 
-struct FUN_00a41520_cls
+template <> void NiTArray<KeyPair*, NiTMallocInterface<KeyPair*> >::SetSize(unsigned int);
+template <> void NiTArray<KeyPair*, NiTMallocInterface<KeyPair*> >::SetAt(unsigned int, KeyPair* const&);
+
+// Adds pair lookup and insertion to the standard NiTPrimitiveArray layout (data +4, four shorts +8..+0xe).
+struct KeyPairArray : NiTPrimitiveArray<KeyPair*>
 {
-    int unk00;
-    int unk04;
-    unsigned short m_uCapacity;
-    unsigned short m_uCount;
-    unsigned short m_u0c;
-    unsigned short m_uGrowStep;
-
     int FindPairIndex(void* apFirst, void* apSecond);
-    void FUN_00a90180(unsigned int auiNewSize);
-    void FUN_00ba3aa0(unsigned int auiIndex, KeyPair** appEntry);
-
     bool FUN_00a41520(void* apFirst, void* apSecond);
 };
 
 // @fnv 0x00a41520
-bool FUN_00a41520_cls::FUN_00a41520(void* apFirst, void* apSecond)
+bool KeyPairArray::FUN_00a41520(void* apFirst, void* apSecond)
 {
     if (FindPairIndex(apFirst, apSecond) == -1)
     {
         KeyPair* pEntry = new KeyPair(apFirst, apSecond);
 
-        unsigned int ItemUpdateArray = m_uCount;
-        if (ItemUpdateArray >= m_uCapacity)
-            FUN_00a90180(m_uGrowStep + ItemUpdateArray);
+        unsigned int ItemUpdateArray = m_usSize;
+        if (ItemUpdateArray >= m_usMaxSize)
+            SetSize(m_usGrowBy + ItemUpdateArray);
 
-        FUN_00ba3aa0(ItemUpdateArray, &pEntry);
+        SetAt(ItemUpdateArray, pEntry);
     }
     return false;
 }
 
-struct MM
-{
-    void __thiscall Deallocate(void*);
-};
-extern MM g_memoryManager;
+extern MemoryManager g_memoryManager;
 class NiNode;
-template <class T> struct NiPointer
-{
-    T* ptr;
-    ~NiPointer();
-    static void __cdecl operator delete[](void* memory)
-    {
-        g_memoryManager.Deallocate(memory);
-    }
-};
-// Deletes the array of NiPointer<NiNode> objects pointed to by buffer when buffer is non-null.
+// NiPointer has no array deallocator in its shared declaration; preserve the game's cookie-aware heap release here.
+void __stdcall DestroyArrayElements(void* elements, unsigned int size, int count,
+                                   void (__thiscall* destructor)(void*));
+// 0x0045cec0 is NiPointer<NiNode>::~NiPointer; its ECX callback entry is shared by these array deletes.
+void __fastcall DestroyNiNodePointerElement(void* element);
+
+// Deletes the NiPointer<NiNode> elements and releases the allocation including its element-count cookie.
 // @fnv 0x00b7ce30
 void __cdecl DeleteNiNodePointerArray(NiPointer<NiNode>* pNodePointerArray)
 {
     if (pNodePointerArray)
-        delete[] pNodePointerArray;
+    {
+        unsigned int* cookie = (unsigned int*)pNodePointerArray - 1;
+        DestroyArrayElements(pNodePointerArray, sizeof(*pNodePointerArray), *cookie,
+                             (void (__thiscall*)(void*))DestroyNiNodePointerElement);
+        g_memoryManager.Deallocate(cookie);
+    }
 }
 
 void* __cdecl FUN_00aa1070(unsigned int auiSize);
 void __cdecl FUN_00aa10f0(void* apMemory);
 
-struct S_Interface
+template <> inline KeyPair** NiTMallocInterface<KeyPair*>::Allocate(unsigned int auiCount)
 {
-    static KeyPair** Allocate(unsigned int auiCount)
-    {
-        return (KeyPair**)FUN_00aa1070(sizeof(KeyPair*) * auiCount);
-    }
-};
+    return (KeyPair**)FUN_00aa1070(sizeof(KeyPair*) * auiCount);
+}
 
 // Resizes the key-pair array to auiNewSize, clearing dropped entries, reallocating, copying old entries and freeing the old buffer.
 // @fnv 0x00a90180
-void FUN_00a41520_cls::FUN_00a90180(unsigned int auiNewSize)
+template <> void NiTArray<KeyPair*, NiTMallocInterface<KeyPair*> >::SetSize(unsigned int auiNewSize)
 {
-    if (auiNewSize == m_uCapacity)
+    if (auiNewSize == this->m_usMaxSize)
         return;
 
-    if (auiNewSize < m_uCount)
+    if (auiNewSize < this->m_usSize)
     {
-        for (unsigned short i = (unsigned short)auiNewSize; i < m_uCount; i++)
+        for (unsigned short i = (unsigned short)auiNewSize; i < this->m_usSize; i++)
         {
-            if (((KeyPair**)unk04)[i] != 0)
+            if (this->m_pBase[i] != 0)
             {
-                ((KeyPair**)unk04)[i] = 0;
-                m_u0c += 0xffff;
+                this->m_pBase[i] = 0;
+                this->m_usESize += 0xffff;
             }
         }
-        m_uCount = (unsigned short)auiNewSize;
+        this->m_usSize = (unsigned short)auiNewSize;
     }
 
-    KeyPair** oldEntries = (KeyPair**)unk04;
-    m_uCapacity = (unsigned short)auiNewSize;
+    KeyPair** oldEntries = this->m_pBase;
+    this->m_usMaxSize = (unsigned short)auiNewSize;
 
     if (auiNewSize > 0)
     {
-        unk04 = (int)S_Interface::Allocate(m_uCapacity);
+        this->m_pBase = NiTMallocInterface<KeyPair*>::Allocate(this->m_usMaxSize);
 
-        for (unsigned short i = 0; i < m_uCount; i++)
-            ((KeyPair**)unk04)[i] = oldEntries[i];
+        for (unsigned short i = 0; i < this->m_usSize; i++)
+            this->m_pBase[i] = oldEntries[i];
 
-        for (unsigned short j = m_uCount; j < m_uCapacity; j++)
-            ((KeyPair**)unk04)[j] = 0;
+        for (unsigned short j = this->m_usSize; j < this->m_usMaxSize; j++)
+            this->m_pBase[j] = 0;
     }
     else
     {
-        unk04 = 0;
+        this->m_pBase = 0;
     }
 
     FUN_00aa10f0(oldEntries);
@@ -179,38 +172,38 @@ void FUN_00a41520_cls::FUN_00a90180(unsigned int auiNewSize)
 
 // Stores the entry pointer at the given index, growing the count and adjusting the non-null entry counter when the slot's nullness changes.
 // @fnv 0x00ba3aa0
-void FUN_00a41520_cls::FUN_00ba3aa0(unsigned int auiIndex, KeyPair** appEntry)
+template <> void NiTArray<KeyPair*, NiTMallocInterface<KeyPair*> >::SetAt(unsigned int auiIndex, KeyPair* const& entry)
 {
-    if (auiIndex >= m_uCount)
+    if (auiIndex >= this->m_usSize)
     {
-        m_uCount = (unsigned short)(auiIndex + 1);
-        if (*appEntry != 0)
+        this->m_usSize = (unsigned short)(auiIndex + 1);
+        if (entry != 0)
         {
-            m_u0c++;
+            this->m_usESize++;
         }
     }
     else
     {
-        if (*appEntry != 0)
+        if (entry != 0)
         {
-            KeyPair** pEntries = (KeyPair**)unk04;
+            KeyPair** pEntries = this->m_pBase;
             if (pEntries[auiIndex] == 0)
             {
-                m_u0c++;
+                this->m_usESize++;
             }
         }
         else
         {
-            KeyPair** pEntries = (KeyPair**)unk04;
+            KeyPair** pEntries = this->m_pBase;
             if (pEntries[auiIndex] != 0)
             {
                 unsigned short minusOne = 0xffff;
-                m_u0c += minusOne;
+                this->m_usESize += minusOne;
             }
         }
     }
-    KeyPair** store = (KeyPair**)unk04;
-    store[auiIndex] = *appEntry;
+    KeyPair** store = this->m_pBase;
+    store[auiIndex] = entry;
 }
 
 struct C89CD0Target
@@ -266,124 +259,83 @@ void FUN_00c89cf0_cls::DispatchToTarget(void* apArg)
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 
-class NiRefObjectA47
+inline void NiRefObject::IncRefCount()
 {
-  public:
-    virtual ~NiRefObjectA47();
-    virtual void DeleteThis();
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    long m_uiRefCount;
-};
-
-template <class T> class NiPointerA47
+    InterlockedIncrement((long volatile*)&m_uiRefCount);
+}
+inline void NiRefObject::DecRefCount()
 {
-  public:
-    NiPointerA47(T* pObject = 0)
+    if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+inline void NiAVObject::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiAVObject::DecRefCount() { NiRefObject::DecRefCount(); }
+inline void NiShaderConstantMapEntry::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiShaderConstantMapEntry::DecRefCount() { NiRefObject::DecRefCount(); }
+
+template <> inline NiPointer<NiShaderConstantMapEntry>::NiPointer(NiShaderConstantMapEntry* pObject) throw()
+    : m_pObject(pObject)
+{
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <> inline NiPointer<NiShaderConstantMapEntry>::~NiPointer() throw()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+template <> inline NiPointer<NiShaderConstantMapEntry>& NiPointer<NiShaderConstantMapEntry>::operator=(const NiPointer& ptr) throw()
+{
+    if (m_pObject != ptr.m_pObject)
     {
-        m_pObject = pObject;
-        if (m_pObject)
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = ptr.m_pObject;
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
-    ~NiPointerA47()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    NiPointerA47& operator=(const NiPointerA47& ptr)
-    {
-        if (m_pObject != ptr.m_pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = ptr.m_pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    NiPointerA47& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    bool operator!=(const NiPointerA47& ptr) const
-    {
-        return m_pObject != ptr.m_pObject;
-    }
+    return *this;
+}
 
-    T* m_pObject;
-};
+typedef NiPointer<NiObject> ObjectPtr;
 
-typedef NiPointerA47<NiRefObjectA47> NiObjectPtrA47;
-
-NiObjectPtrA47* __cdecl FUN_00c1d790(unsigned int auiCount);
-void __cdecl ReleaseObjectArray(NiObjectPtrA47* pkArray);
-
-class NiTObjectArrayA47
-{
-  public:
-    virtual ~NiTObjectArrayA47();
-
-    NiObjectPtrA47* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void FUN_00a47770(unsigned int uiMaxSize);
-};
+ObjectPtr* __cdecl FUN_00c1d790(unsigned int auiCount);
+void __cdecl ReleaseObjectArray(ObjectPtr* pkArray);
 
 // Resizes the object array to uiMaxSize, releasing surplus elements and reallocating m_pBase while preserving existing entries.
 // @fnv 0x00a47770
-void NiTObjectArrayA47::FUN_00a47770(unsigned int uiMaxSize)
+template <> void NiTArray<ObjectPtr, NiTNewInterface<ObjectPtr> >::SetSize(unsigned int uiCapacity)
 {
-    if (uiMaxSize == m_usMaxSize)
+    if (uiCapacity == this->m_usMaxSize)
         return;
 
     unsigned short i;
-    if (uiMaxSize < m_usSize)
+    if (uiCapacity < this->m_usSize)
     {
-        for (i = (unsigned short)uiMaxSize; i < m_usSize; i++)
+        for (i = (unsigned short)uiCapacity; i < this->m_usSize; i++)
         {
-            if (m_pBase[i] != NiObjectPtrA47(0))
+            if (this->m_pBase[i] != ObjectPtr(0))
             {
-                m_pBase[i] = 0;
-                m_usESize--;
+                this->m_pBase[i] = 0;
+                this->m_usESize--;
             }
         }
-        m_usSize = (unsigned short)uiMaxSize;
+        this->m_usSize = (unsigned short)uiCapacity;
     }
 
-    NiObjectPtrA47* pSaveBase = m_pBase;
-    m_usMaxSize = (unsigned short)uiMaxSize;
-    if (uiMaxSize > 0)
+    ObjectPtr* pSaveBase = this->m_pBase;
+    this->m_usMaxSize = (unsigned short)uiCapacity;
+    if (uiCapacity > 0)
     {
-        m_pBase = FUN_00c1d790(m_usMaxSize);
-        for (i = 0; i < m_usSize; i++)
-            m_pBase[i] = pSaveBase[i];
-        for (i = m_usSize; i < m_usMaxSize; i++)
-            m_pBase[i] = 0;
+        this->m_pBase = FUN_00c1d790(this->m_usMaxSize);
+        for (i = 0; i < this->m_usSize; i++)
+            this->m_pBase[i] = pSaveBase[i];
+        for (i = this->m_usSize; i < this->m_usMaxSize; i++)
+            this->m_pBase[i] = 0;
     }
     else
     {
-        m_pBase = 0;
+        this->m_pBase = 0;
     }
     ReleaseObjectArray(pSaveBase);
 }
@@ -392,32 +344,17 @@ extern char* DAT_0109b220;
 extern long DAT_011f4400;
 void __cdecl RemoveGlobalConstant(char** name);
 
-struct S_00e87690_Str
+inline __declspec(nothrow) NiFixedString::NiFixedString(const NiFixedString& o)
 {
-    char* h;
-    S_00e87690_Str(const S_00e87690_Str& o) throw()
-    {
-        if (o.h != DAT_0109b220)
-            InterlockedIncrement((long*)(o.h - 8));
-        h = o.h;
-    }
-    ~S_00e87690_Str() throw()
-    {
-        if (h != DAT_0109b220)
-            InterlockedDecrement((long*)(h - 8));
-    }
-};
-
-struct S_00e87690_Obj
+    if (o.m_kHandle != DAT_0109b220)
+        InterlockedIncrement((long*)(o.m_kHandle - 8));
+    m_kHandle = o.m_kHandle;
+}
+inline NiFixedString::~NiFixedString()
 {
-    virtual void v0() throw();
-    virtual void v1() throw();
-    long refs;
-    int unk08;
-    S_00e87690_Str name;
-    int unk10;
-    unsigned int flags;
-};
+    if (m_kHandle != DAT_0109b220)
+        InterlockedDecrement((long*)(m_kHandle - 8));
+}
 
 struct S_00e87690_Com
 {
@@ -428,35 +365,31 @@ struct S_00e87690_Com
 
 void __cdecl DeleteNiNodePointerArray(void* buffer) throw();
 
-struct S_00e87690_Arr
-{
-    virtual void v0() throw();
-    S_00e87690_Obj** data;
-    unsigned short maxSize;
-    unsigned short size;
-    unsigned short esize;
-    unsigned short grow;
-    void FUN_00b799c0() throw();
-    ~S_00e87690_Arr() throw()
-    {
-        DeleteNiNodePointerArray(data);
-    }
-};
+typedef NiTArray<NiPointer<NiShaderConstantMapEntry>, NiTNewInterface<NiPointer<NiShaderConstantMapEntry> > > ShaderEntryArray;
 
-struct S_00e87690_Base
+template <> void ShaderEntryArray::RemoveAll() throw();
+template <> unsigned int ShaderEntryArray::AddFirstEmpty(const NiPointer<NiShaderConstantMapEntry>&);
+template <> inline ShaderEntryArray::~NiTArray() throw()
 {
-    virtual ~S_00e87690_Base() throw()
-    {
-        InterlockedDecrement(&DAT_011f4400);
-    }
-    long refs;
+    DeleteNiNodePointerArray(m_pBase);
+}
+
+inline NiRefObject::~NiRefObject() throw()
+{
+    InterlockedDecrement(&DAT_011f4400);
+}
+
+// The shader-map base adds its program-type word at +8 to NiRefObject's vtable and reference count.
+struct ShaderConstantMapBase : NiRefObject
+{
     int unk08;
+    virtual ~ShaderConstantMapBase() throw() {}
 };
 
-struct FUN_00e87690 : S_00e87690_Base
+struct FUN_00e87690 : ShaderConstantMapBase
 {
-    S_00e87690_Arr a1;
-    S_00e87690_Arr a2;
+    ShaderEntryArray a1;
+    ShaderEntryArray a2;
     int unk2c;
     int unk30;
     int unk34;
@@ -470,53 +403,41 @@ struct FUN_00e87690 : S_00e87690_Base
 // @fnv 0x00e87690
 FUN_00e87690::~FUN_00e87690() throw()
 {
-    for (unsigned int i = 0; i < a1.maxSize; i++)
+    for (unsigned int i = 0; i < a1.m_usMaxSize; i++)
     {
-        S_00e87690_Obj* p = a1.data[i];
+        NiShaderConstantMapEntry* p = a1.m_pBase[i].m_pObject;
         if (p)
         {
-            InterlockedIncrement(&p->refs);
-            if ((p->flags & 0xf0000000) == 0x40000000)
+            InterlockedIncrement((long*)&p->m_uiRefCount);
+            if ((p->m_uiValue1 & 0xf0000000) == 0x40000000)
             {
-                S_00e87690_Str k(p->name);
-                RemoveGlobalConstant(&k.h);
+                NiFixedString k(p->m_kControlPoint);
+                RemoveGlobalConstant(&k.m_kHandle);
             }
-            if (!InterlockedDecrement(&p->refs))
-                p->v1();
+            if (!InterlockedDecrement((long*)&p->m_uiRefCount))
+                p->DeleteThis();
         }
     }
-    a1.FUN_00b799c0();
-    for (unsigned int i = 0; i < a2.maxSize; i++)
+    a1.RemoveAll();
+    for (unsigned int i = 0; i < a2.m_usMaxSize; i++)
     {
-        S_00e87690_Obj* p = a2.data[i];
+        NiShaderConstantMapEntry* p = a2.m_pBase[i].m_pObject;
         if (p)
         {
-            InterlockedIncrement(&p->refs);
-            if ((p->flags & 0xf0000000) == 0x40000000)
-                RemoveGlobalConstant(&p->name.h);
-            if (!InterlockedDecrement(&p->refs))
-                p->v1();
+            InterlockedIncrement((long*)&p->m_uiRefCount);
+            if ((p->m_uiValue1 & 0xf0000000) == 0x40000000)
+                RemoveGlobalConstant(&p->m_kControlPoint.m_kHandle);
+            if (!InterlockedDecrement((long*)&p->m_uiRefCount))
+                p->DeleteThis();
         }
     }
-    a2.FUN_00b799c0();
+    a2.RemoveAll();
     unk3c = 0;
     if (unk38)
         unk38->Release();
     unk38 = 0;
     unk40 = 0;
 }
-
-struct NiRefObj
-{
-    virtual void v00();
-    virtual void v04();
-    long m_iObjectReferenceCount;
-};
-
-struct FUN_00e87800_obj
-{
-    int FUN_00e87800(NiRefObj** appObj);
-};
 
 struct FUN_00e878c0_cls
 {
@@ -535,24 +456,24 @@ struct FUN_00e878c0_cls
     int unk30;
     int m_34;
 
-    int FUN_00e878c0(NiRefObj* apObj);
+    int FUN_00e878c0(NiShaderConstantMapEntry* apObj);
 };
 
 // Holds a reference on apObj while calling FUN_00e87800 on the sub-object at unk0c; sets m_34 to 0x30 if it returns -1, and returns m_34.
 // @fnv 0x00e878c0
-int FUN_00e878c0_cls::FUN_00e878c0(NiRefObj* apObj)
+int FUN_00e878c0_cls::FUN_00e878c0(NiShaderConstantMapEntry* apObj)
 {
-    NiRefObj* pObj = apObj;
-    *(NiRefObj* volatile*)&apObj = pObj;
+    NiShaderConstantMapEntry* pObj = apObj;
+    *(NiShaderConstantMapEntry* volatile*)&apObj = pObj;
     if (pObj != 0)
     {
-        InterlockedIncrement(&pObj->m_iObjectReferenceCount);
+        InterlockedIncrement((long volatile*)&pObj->m_uiRefCount);
     }
-    FUN_00e87800_obj* sub = (FUN_00e87800_obj*)&unk0c;
-    bool failed = sub->FUN_00e87800(&apObj) == -1;
-    if (pObj != 0 && InterlockedDecrement(&pObj->m_iObjectReferenceCount) == 0)
+    ShaderEntryArray* sub = (ShaderEntryArray*)&unk0c;
+    bool failed = sub->AddFirstEmpty(*(const NiPointer<NiShaderConstantMapEntry>*)&apObj) == -1;
+    if (pObj != 0 && InterlockedDecrement((long volatile*)&pObj->m_uiRefCount) == 0)
     {
-        pObj->v04();
+        pObj->DeleteThis();
     }
     if (failed)
     {
@@ -562,17 +483,6 @@ int FUN_00e878c0_cls::FUN_00e878c0(NiRefObj* apObj)
 }
 
 namespace fnv_00e87920 {
-struct NiRefObj
-{
-    virtual void v00();
-    virtual void v04();
-    long m_iObjectReferenceCount;
-};
-
-struct FUN_00e87800_obj
-{
-    int FUN_00e87800(NiRefObj** appObj);
-};
 
 struct FUN_00e87920_cls
 {
@@ -591,24 +501,24 @@ struct FUN_00e87920_cls
     int unk30;
     int m_34;
 
-    int FUN_00e87920(NiRefObj* apObj);
+    int FUN_00e87920(NiShaderConstantMapEntry* apObj);
 };
 
 // Holds a reference on apObj while calling FUN_00e87800 on the sub-object at unk1c; sets m_34 to 0x30 if it returns -1, and returns m_34.
 // @fnv 0x00e87920
-int FUN_00e87920_cls::FUN_00e87920(NiRefObj* apObj)
+int FUN_00e87920_cls::FUN_00e87920(NiShaderConstantMapEntry* apObj)
 {
-    NiRefObj* pObj = apObj;
-    *(NiRefObj* volatile*)&apObj = pObj;
+    NiShaderConstantMapEntry* pObj = apObj;
+    *(NiShaderConstantMapEntry* volatile*)&apObj = pObj;
     if (pObj != 0)
     {
-        InterlockedIncrement(&pObj->m_iObjectReferenceCount);
+        InterlockedIncrement((long volatile*)&pObj->m_uiRefCount);
     }
-    FUN_00e87800_obj* sub = (FUN_00e87800_obj*)&unk1c;
-    bool failed = sub->FUN_00e87800(&apObj) == -1;
-    if (pObj != 0 && InterlockedDecrement(&pObj->m_iObjectReferenceCount) == 0)
+    ShaderEntryArray* sub = (ShaderEntryArray*)&unk1c;
+    bool failed = sub->AddFirstEmpty(*(const NiPointer<NiShaderConstantMapEntry>*)&apObj) == -1;
+    if (pObj != 0 && InterlockedDecrement((long volatile*)&pObj->m_uiRefCount) == 0)
     {
-        pObj->v04();
+        pObj->DeleteThis();
     }
     if (failed)
     {
@@ -618,16 +528,9 @@ int FUN_00e87920_cls::FUN_00e87920(NiRefObj* apObj)
 }
 }  // namespace fnv_00e87920
 
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* value);
-
-struct NiPoint2
+class TextureMapTransform
 {
-    float x;
-    float y;
-};
-
-struct TextureMapTransform
-{
+  public:
     int unk00;
     int unk04;
     float unk08;
@@ -676,34 +579,15 @@ struct TextureMapTransform
     }
 };
 
-struct NiTexturePtr
+inline NiTexturingProperty::Map::TexturePtr::TexturePtr(const TexturePtr& kPtr) : m_pObject(kPtr.m_pObject)
 {
-    void* m_pObject;
-    NiTexturePtr() : m_pObject(0)
-    {}
-    NiTexturePtr(const NiTexturePtr& kPtr) : m_pObject(kPtr.m_pObject)
-    {
-        if (m_pObject)
-            InterlockedIncrement((long volatile*)((char*)m_pObject + 4));
-    }
-};
-
-struct NiTexturingProperty
-{
-    struct Map
-    {
-        virtual ~Map();
-        unsigned short m_usFlags;
-        NiTexturePtr m_spTexture;
-        TextureMapTransform* m_pTextureTransform;
-
-        Map(const Map& kMap) throw();
-    };
-};
+    if (m_pObject)
+        InterlockedIncrement((long volatile*)((char*)m_pObject + 4));
+}
 
 // Copy-constructs a NiTexturingProperty::Map, copying flags and texture, and deep-copying the texture transform if present.
 // @fnv 0x00a6a8b0
-NiTexturingProperty::Map::Map(const Map& kMap) throw() : m_usFlags(kMap.m_usFlags), m_spTexture(kMap.m_spTexture)
+NiTexturingProperty::Map::Map(const Map& kMap) : m_usFlags(kMap.m_usFlags), m_spTexture(kMap.m_spTexture)
 {
     if (kMap.m_pTextureTransform)
     {
@@ -735,52 +619,27 @@ struct FUN_004eba20
     int unk20;
 };
 
-struct RefObject;
-template <class T> struct RefPtr
+template <class T, class TAlloc>
+inline NiTArray<T, TAlloc>::NiTArray(unsigned int uiCapacity, unsigned int uiStep)
 {
-    T* m_pObject;
-    RefPtr(T* p = 0) : m_pObject(p)
-    {
-        if (m_pObject)
-            AcquireReference();
-    }
-    ~RefPtr();
-    void AcquireReference();
-};
-
-template <class T> struct TArray
-{
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    TArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1)
-    {
-        m_usMaxSize = (unsigned short)uiMaxSize;
-        m_usGrowBy = (unsigned short)uiGrowBy;
-        m_usSize = 0;
-        m_usESize = 0;
-        if (m_usMaxSize > 0)
-            m_pBase = new T[m_usMaxSize];
-        else
-            m_pBase = 0;
-    }
-    virtual ~TArray();
-};
-
-template <class T> struct TObjectArray : TArray<T>
-{
-    TObjectArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) : TArray<T>(uiMaxSize, uiGrowBy)
-    {}
-    virtual ~TObjectArray();
-};
-template <class T> struct TPrimitiveArray : TArray<T>
-{
-    TPrimitiveArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) : TArray<T>(uiMaxSize, uiGrowBy)
-    {}
-    virtual ~TPrimitiveArray();
-};
+    this->m_usMaxSize = (unsigned short)uiCapacity;
+    this->m_usGrowBy = (unsigned short)uiStep;
+    this->m_usSize = 0;
+    this->m_usESize = 0;
+    if (this->m_usMaxSize > 0)
+        this->m_pBase = TAlloc::Allocate(this->m_usMaxSize);
+    else
+        this->m_pBase = 0;
+}
+// the two array flavours only pick the allocator policy (new/delete vs malloc/free) for the shared base
+template <typename T>
+inline NiTObjectArray<T>::NiTObjectArray(unsigned int uiCapacity, unsigned int uiStep)
+    : NiTArray<T, NiTNewInterface<T> >(uiCapacity, uiStep)
+{}
+template <typename T>
+inline NiTPrimitiveArray<T>::NiTPrimitiveArray(unsigned int uiCapacity, unsigned int uiStep)
+    : NiTArray<T, NiTMallocInterface<T> >(uiCapacity, uiStep)
+{}
 
 template <class T> struct TFixedArray
 {
@@ -817,11 +676,11 @@ struct FUN_00b8a9e0 : FUN_004eba20
     int m_40;
     int m_44;
     int m_48;
-    RefPtr<RefObject> m_4c;
-    RefPtr<RefObject> m_50;
+    NiPointer<NiRefObject> m_4c;
+    NiPointer<NiRefObject> m_50;
     bool m_abFlags[3];
-    TObjectArray<RefObject*> m_58;
-    TPrimitiveArray<int> m_68;
+    NiTObjectArray<NiRefObject*> m_58;
+    NiTPrimitiveArray<int> m_68;
     RenderStateGroup<int> m_78;
 
     FUN_00b8a9e0();
@@ -836,117 +695,46 @@ FUN_00b8a9e0::FUN_00b8a9e0() : m_24(0), m_28(0), m_3c(0), m_40(0), m_44(0), m_48
 }
 
 #include <windows.h>
-struct S_00c1e9a0_RefObject
-{
-    virtual void v0();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
 
-    void IncRefCount()
-    {
-        InterlockedIncrement((LONG*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((LONG*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
+typedef NiPointer<NiGeometry> GeometryPtr;
 
-template <class T> struct S_00c1e9a0_Ptr
-{
-    T* m_pObject;
-    S_00c1e9a0_Ptr(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~S_00c1e9a0_Ptr()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    S_00c1e9a0_Ptr& operator=(const S_00c1e9a0_Ptr& ptr)
-    {
-        if (m_pObject != ptr.m_pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = ptr.m_pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    S_00c1e9a0_Ptr& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    bool operator!=(const S_00c1e9a0_Ptr& ptr) const
-    {
-        return m_pObject != ptr.m_pObject;
-    }
-};
-
-typedef S_00c1e9a0_Ptr<S_00c1e9a0_RefObject> S_00c1e9a0_RefPtr;
-
-S_00c1e9a0_RefPtr* FUN_00c1d740(unsigned int ItemUpdateArray);
-void ReleaseObjectArray(S_00c1e9a0_RefPtr* pBase);
-
-struct S_00c1e9a0_Array
-{
-    virtual ~S_00c1e9a0_Array();
-    S_00c1e9a0_RefPtr* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void FUN_00c1e9a0(unsigned int uiMaxSize);
-};
+GeometryPtr* FUN_00c1d740(unsigned int ItemUpdateArray);
+void ReleaseObjectArray(GeometryPtr* pBase);
 
 // Sets the array capacity to uiMaxSize, clearing entries past it, copying entries into a new buffer from FUN_00c1d740 and releasing the old buffer.
 // @fnv 0x00c1e9a0
-void S_00c1e9a0_Array::FUN_00c1e9a0(unsigned int uiMaxSize)
+template <> void NiTArray<GeometryPtr, NiTNewInterface<GeometryPtr> >::SetSize(unsigned int uiCapacity)
 {
-    if (uiMaxSize == m_usMaxSize)
+    if (uiCapacity == this->m_usMaxSize)
         return;
 
     unsigned short i;
-    if (uiMaxSize < m_usSize)
+    if (uiCapacity < this->m_usSize)
     {
-        for (i = (unsigned short)uiMaxSize; i < m_usSize; i++)
+        for (i = (unsigned short)uiCapacity; i < this->m_usSize; i++)
         {
-            if (m_pBase[i] != S_00c1e9a0_RefPtr(0))
+            if (this->m_pBase[i] != GeometryPtr(0))
             {
-                m_pBase[i] = (S_00c1e9a0_RefObject*)0;
-                m_usESize--;
+                this->m_pBase[i] = (NiGeometry*)0;
+                this->m_usESize--;
             }
         }
-        m_usSize = (unsigned short)uiMaxSize;
+        this->m_usSize = (unsigned short)uiCapacity;
     }
 
-    S_00c1e9a0_RefPtr* pSaveBase = m_pBase;
-    m_usMaxSize = (unsigned short)uiMaxSize;
-    if (uiMaxSize > 0)
+    GeometryPtr* pSaveBase = this->m_pBase;
+    this->m_usMaxSize = (unsigned short)uiCapacity;
+    if (uiCapacity > 0)
     {
-        m_pBase = FUN_00c1d740(m_usMaxSize);
-        for (i = 0; i < m_usSize; i++)
-            m_pBase[i] = pSaveBase[i];
-        for (i = m_usSize; i < m_usMaxSize; i++)
-            m_pBase[i] = (S_00c1e9a0_RefObject*)0;
+        this->m_pBase = FUN_00c1d740(this->m_usMaxSize);
+        for (i = 0; i < this->m_usSize; i++)
+            this->m_pBase[i] = pSaveBase[i];
+        for (i = this->m_usSize; i < this->m_usMaxSize; i++)
+            this->m_pBase[i] = (NiGeometry*)0;
     }
     else
     {
-        m_pBase = 0;
+        this->m_pBase = 0;
     }
     ReleaseObjectArray(pSaveBase);
 }
@@ -1054,74 +842,12 @@ void FUN_00e7ecd0_cls::FUN_00e7ecd0()
     DAT_0126f6cc->FindOrAdd(&ref);
 }
 
-struct S_00e87510_RefObject
-{
-    virtual ~S_00e87510_RefObject() throw();
-    virtual void DeleteThis() throw();
-
-    void IncRefCount() throw()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount() throw()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    LONG m_uiRefCount;
-};
-
-struct S_00e87510_Ptr
-{
-    S_00e87510_RefObject* m_pObject;
-
-    S_00e87510_Ptr(S_00e87510_RefObject* pObject = 0) throw() : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~S_00e87510_Ptr() throw()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    S_00e87510_Ptr& operator=(const S_00e87510_Ptr& ptr) throw()
-    {
-        if (m_pObject != ptr.m_pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = ptr.m_pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    bool operator!=(const S_00e87510_Ptr& ptr) const
-    {
-        return m_pObject != ptr.m_pObject;
-    }
-};
-
-S_00e87510_Ptr* AllocateGOArray(unsigned int auiCount);
-void __cdecl DeleteNiNodePointerArray(S_00e87510_Ptr* pArray);
-
-struct S_00e87510_Array
-{
-    int unk00;
-    S_00e87510_Ptr* m_pBase;     // 04
-    unsigned short m_usMaxSize;  // 08
-    unsigned short m_usSize;     // 0a
-    unsigned short m_usESize;    // 0c
-    unsigned short m_usGrowBy;   // 0e
-
-    void Resize(unsigned int uiMaxSize);
-};
+NiPointer<NiShaderConstantMapEntry>* AllocateGOArray(unsigned int auiCount);
+void __cdecl DeleteNiNodePointerArray(NiPointer<NiShaderConstantMapEntry>* pArray);
 
 // Resizes the array to uiMaxSize, clearing excess elements and reallocating the backing pointer array while preserving existing entries.
 // @fnv 0x00e87510
-void S_00e87510_Array::Resize(unsigned int uiMaxSize)
+template <> void ShaderEntryArray::SetSize(unsigned int uiMaxSize)
 {
     if (uiMaxSize == m_usMaxSize)
         return;
@@ -1131,16 +857,16 @@ void S_00e87510_Array::Resize(unsigned int uiMaxSize)
     {
         for (i = (unsigned short)uiMaxSize; i < m_usSize; i++)
         {
-            if (m_pBase[i] != S_00e87510_Ptr(0))
+            if (m_pBase[i] != NiPointer<NiShaderConstantMapEntry>(0))
             {
-                m_pBase[i] = S_00e87510_Ptr(0);
+                m_pBase[i] = NiPointer<NiShaderConstantMapEntry>(0);
                 m_usESize--;
             }
         }
         m_usSize = (unsigned short)uiMaxSize;
     }
 
-    S_00e87510_Ptr* pSaveBase = m_pBase;
+    NiPointer<NiShaderConstantMapEntry>* pSaveBase = m_pBase;
     m_usMaxSize = (unsigned short)uiMaxSize;
     if (uiMaxSize > 0)
     {
@@ -1148,7 +874,7 @@ void S_00e87510_Array::Resize(unsigned int uiMaxSize)
         for (i = 0; i < m_usSize; i++)
             m_pBase[i] = pSaveBase[i];
         for (i = m_usSize; i < m_usMaxSize; i++)
-            m_pBase[i] = S_00e87510_Ptr(0);
+            m_pBase[i] = NiPointer<NiShaderConstantMapEntry>(0);
     }
     else
     {
@@ -1158,156 +884,47 @@ void S_00e87510_Array::Resize(unsigned int uiMaxSize)
     DeleteNiNodePointerArray(pSaveBase);
 }
 
-struct S_00e98aa0_RefObj
-{
-    virtual ~S_00e98aa0_RefObj();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((LONG*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (!InterlockedDecrement((LONG*)&m_uiRefCount))
-            DeleteThis();
-    }
-};
-
-template <class T> struct S_00e98aa0_Ptr
-{
-    T* m_pObject;
-    S_00e98aa0_Ptr& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-};
-
 struct S_00e98aa0_Holder
 {
-    S_00e98aa0_Ptr<S_00e98aa0_RefObj> m_sp0;
-    S_00e98aa0_Ptr<S_00e98aa0_RefObj> m_sp4;
-    void SetObject(S_00e98aa0_RefObj* p);
+    NiPointer<NiRefObject> m_sp0;
+    NiPointer<NiRefObject> m_sp4;
+    void SetObject(NiRefObject* p);
 };
 
 // Assigns p to m_sp0 and null to m_sp4 through the reference-counting pointer assignment.
 // @fnv 0x00e98aa0
-void S_00e98aa0_Holder::SetObject(S_00e98aa0_RefObj* apRefObj)
+void S_00e98aa0_Holder::SetObject(NiRefObject* apRefObj)
 {
     m_sp0 = apRefObj;
     m_sp4 = 0;
 }
 
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-
-class NiRefObjectX
+template <class T, class TAlloc>
+inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiSlot, const T& kItem)
 {
-  public:
-    virtual ~NiRefObjectX();
-    virtual void DeleteThis();
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-    unsigned int m_uiRefCount;
-};
-
-template <class T> class NiPtrX
-{
-  public:
-    NiPtrX(T* pObject = (T*)0)
-    {
-        m_pObject = pObject;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    NiPtrX(const NiPtrX& ptr)
-    {
-        m_pObject = ptr.m_pObject;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPtrX()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    NiPtrX& operator=(const NiPtrX& ptr)
-    {
-        if (m_pObject != ptr.m_pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = ptr.m_pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    bool operator==(const NiPtrX& ptr) const
-    {
-        return m_pObject == ptr.m_pObject;
-    }
-    T* m_pObject;
-};
-
-typedef NiPtrX<NiRefObjectX> ElemPtr;
-
-class NiTArrayX
-{
-  public:
-    virtual ~NiTArrayX();
-    ElemPtr* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void FUN_00c1e9a0(unsigned int uiMaxSize);
-    void Set(unsigned int uiIndex, const ElemPtr& element);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, const ElemPtr& element)
-    {
-        if (uiIndex >= m_usMaxSize)
-            FUN_00c1e9a0(uiIndex + m_usGrowBy);
-        Set(uiIndex, element);
-        return uiIndex;
-    }
-
-    unsigned int FUN_00c1f360(const ElemPtr& element);
-};
+    if (uiSlot >= this->m_usMaxSize)
+        SetSize(uiSlot + this->m_usGrowBy);
+    SetAt(uiSlot, kItem);
+    return uiSlot;
+}
 
 // @fnv 0x00c1f360
-unsigned int NiTArrayX::FUN_00c1f360(const ElemPtr& element)
+template <> unsigned int NiTArray<GeometryPtr, NiTNewInterface<GeometryPtr> >::AddFirstEmpty(const GeometryPtr& kItem)
 {
-    if (element == ElemPtr(0))
+    if (kItem == GeometryPtr(0))
         return (unsigned int)~0;
 
-    for (unsigned short i = 0; i < m_usSize; i++)
+    for (unsigned short i = 0; i < this->m_usSize; i++)
     {
-        if (m_pBase[i] == ElemPtr(0))
+        if (this->m_pBase[i] == GeometryPtr(0))
         {
-            m_pBase[i] = element;
-            m_usESize++;
+            this->m_pBase[i] = kItem;
+            this->m_usESize++;
             return i;
         }
     }
 
-    return SetAtGrow(m_usSize, element);
+    return SetAtGrow(this->m_usSize, kItem);
 }
 
 struct MaterialDeviceView;
@@ -1371,55 +988,35 @@ struct MaterialDeviceView
     MaterialDeviceMethods* methods;
 };
 
-struct MaterialUploadState
-{
-    void* currentMaterial;
-    bool dirty;
-    void FUN_00e94050(MaterialDeviceView* device);
-};
-
 // @fnv 0x00e94050
-void MaterialUploadState::FUN_00e94050(MaterialDeviceView* device)
+__declspec(noinline) void NiD3DShaderFactory::FUN_00e94050(void* apDevice)
 {
-    if (dirty)
+    MaterialDeviceView* device = (MaterialDeviceView*)apDevice;
+    if (*(bool*)((char*)this + 4))
     {
-        dirty = false;
-        device->methods->SetMaterial(device, currentMaterial);
+        *(bool*)((char*)this + 4) = false;
+        device->methods->SetMaterial(device, *(void**)this);
     }
 }
 
-struct ShaderConstantEntryArray
-{
-    int unk00;
-    ElemPtr* data;
-    unsigned short capacity;
-    unsigned short count;
-    unsigned short effective;
-    unsigned short grow;
-
-    void Resize(unsigned int newCapacity);
-    void FUN_00e86f40(unsigned int index, void* element);
-    unsigned int FUN_00e87800(const ElemPtr& element);
-};
-
 // Stores element in the first null slot, else grows the array if full and appends it, returning its index; returns -1 for a null element.
 // @fnv 0x00e87800
-unsigned int ShaderConstantEntryArray::FUN_00e87800(const ElemPtr& element)
+template <> unsigned int ShaderEntryArray::AddFirstEmpty(const NiPointer<NiShaderConstantMapEntry>& element)
 {
-    if (element == ElemPtr(0))
+    if (element == NiPointer<NiShaderConstantMapEntry>(0))
         return 0xffffffff;
-    for (unsigned short i = 0; i < count; ++i)
+    for (unsigned short i = 0; i < m_usSize; ++i)
     {
-        if (data[i] == ElemPtr(0))
+        if (m_pBase[i] == NiPointer<NiShaderConstantMapEntry>(0))
         {
-            data[i] = element;
-            ++effective;
+            m_pBase[i] = element;
+            ++m_usESize;
             return i;
         }
     }
-    unsigned int oldCount = count;
-    if (oldCount >= capacity)
-        Resize(grow + oldCount);
-    FUN_00e86f40(oldCount, (void*)&element);
+    unsigned int oldCount = m_usSize;
+    if (oldCount >= m_usMaxSize)
+        SetSize(m_usGrowBy + oldCount);
+    SetAt(oldCount, element);
     return oldCount;
 }

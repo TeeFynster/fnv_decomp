@@ -1,9 +1,10 @@
 // fallout_shared/region system/tesregiondatagrass.cpp: TESRegionDataGrass, GrassRegion, RegionSaveShell, GrassMergeRegion (6 functions)
 
+#include "../../../include/TESRegionData.h"
 #include "tesregiondatagrass_decls.h"
 // Default constructor for TESRegionDataGrass; the body is empty.
 // @fnv 0x004f1ed0
-TESRegionDataGrass::TESRegionDataGrass()
+LocalTESRegionDataGrass::LocalTESRegionDataGrass()
 {}
 
 void __cdecl _Deallocate(void*);
@@ -31,7 +32,7 @@ struct FUN_004f16c0
     FUN_004f16c0(const void* pSource);
 };
 
-struct FUN_004f1b60_shell : TESRegionDataGrass
+struct FUN_004f1b60_shell : LocalTESRegionDataGrass
 {
     TESRegionData* FUN_004f1b60();
 };
@@ -232,14 +233,7 @@ struct GrassMergeList
 float __cdecl floor(float value);
 struct GrassMergeRegion : TESRegionData
 {
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual int GetType();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
+    virtual REGION_DATA_ID GetType();
     virtual void v9();
     virtual GrassMergeList* GetGrassList();
     bool FUN_004f1540();

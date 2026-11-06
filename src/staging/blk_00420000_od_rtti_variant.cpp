@@ -5,11 +5,31 @@
 
 // src/staging/blk_00420000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
-struct BaseExtraList
-{
-    bool HasExtraData(unsigned char);
-};
+#include <windows.h>
+#include "../../include/BSString.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/BSExtraData.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/BSMultiBound.h"
+#include "../../include/BaseExtraList.h"
+#include "../../include/Bound.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/ExtraLock.h"
+#include "../../include/GO.h"
+#include "../../include/NavMeshPtr.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiInterpController.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESLeveledList.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESObjectTREE.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESSaveLoadGame.h"
 struct FUN_004216d0_shell
 {
     bool FUN_004216d0();
@@ -37,10 +57,6 @@ struct GlobalObject_00869f00
     void FUN_0042ff80();
 };
 extern void* DAT_01015968;
-struct BSExtraData
-{
-    virtual ~BSExtraData();
-};
 struct FUN_00435ef0 : public BSExtraData
 {
     void* vtbl;
@@ -114,15 +130,6 @@ struct FUN_004392c0_shell
     void FUN_004392c0();
     void FUN_00439320();
 };
-struct NiObjectNET
-{
-    void FUN_00439360(unsigned short a, unsigned int b, unsigned int c);
-    void FUN_00439340(unsigned short a);
-};
-struct NiPoint3
-{
-    float x, y, z;
-};
 struct FUN_00439680_class
 {
     void FUN_00439680(const NiPoint3& p);
@@ -137,15 +144,6 @@ struct TaskQueueInterface
     void SetTaskFlagDWord(bool, unsigned int);
     void FUN_0043b350(bool enabled);
 };
-struct TESForm
-{
-    virtual ~TESForm();  // the original class is polymorphic (rtti_variants.py)
-    void Revert(unsigned int);
-};
-struct TESObjectTREE
-{
-    TESForm* GetData();
-};
 struct FUN_0043b5b0_shell
 {
     void FUN_0043b5b0();
@@ -157,10 +155,6 @@ struct FUN_0043ba10_shell
 struct FUN_0043b9f0_shell
 {
     void FUN_0043b9f0(FUN_0043ba10_shell* p);
-};
-struct GO
-{
-    void* operator=(void*);
 };
 struct FUN_0043baa0_class
 {
@@ -185,11 +179,6 @@ struct BE
 struct FUN_00436ac0 : BE
 {
     FUN_00436ac0();
-};
-struct NavMeshPtr
-{
-    void __thiscall FUN_0042fa40();
-    void* __thiscall FUN_0042ffa0(unsigned int flags);
 };
 void __cdecl Deallocate(void*);
 struct FUN_0042ffd0_cls : public FUN_0042fee0_cls
@@ -361,16 +350,6 @@ struct FUN_0042dee0_shell
 {
     void __thiscall FUN_0042dee0(int v);
 };
-struct ExtraDataList
-{
-    BSExtraData* GetExtraData(unsigned char);
-};
-struct ExtraLock
-{
-    bool FUN_0042dff0();
-    void FUN_0042e010(int);
-    ~ExtraLock();
-};
 struct FUN_0042df90_shell
 {
     ExtraLock* FUN_0042df90(int a);
@@ -393,10 +372,6 @@ struct FUN_0042e650_class : BE
     int b;
     unsigned char c;
     FUN_0042e650_class(unsigned char c);
-};
-struct NiAVObject
-{
-    void FUN_00401970();
 };
 struct G00559a40
 {
@@ -442,14 +417,6 @@ void __cdecl Deallocate(void*);
 struct FNStub
 {
     const char* GetFullName();
-};
-struct TESModel
-{
-    unsigned int GetModelLength();
-};
-struct TESSound
-{
-    unsigned int Deallocate();
 };
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
 void __cdecl FUN_004858f0(unsigned int, unsigned char);
@@ -512,11 +479,6 @@ struct ScriptPool
     Node* FUN_0049fa80();
     void FUN_0049fa20(Node* p);
     void FUN_00439fd0(const void* arg);
-};
-struct TESSaveLoadGame
-{
-    void ReadTypedData(void* p, unsigned int size);
-    void FUN_00857aa0(unsigned int* pOut, int size);
 };
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 struct FUN_0043a9a0_class
@@ -604,10 +566,6 @@ struct BaseExtraList2
     BSExtraData* GetExtraData(unsigned char type);
     BSExtraData* AddExtra(BSExtraData* extra);
 };
-struct TESLeveledList
-{
-    void FUN_0042e680(unsigned char type);
-};
 struct FUN_0042e5a0_class
 {
     void FUN_0042e5a0(unsigned char type);
@@ -627,10 +585,6 @@ struct NiPoint3Set
 struct FUN_00439ef0_class : public NiPoint3
 {
     NiPoint3* FUN_00439ef0(NiPoint3* a, const NiPoint3& b);
-};
-struct NiInterpController
-{
-    static const unsigned short INVALID_INDEX;
 };
 struct FUN_0043b3b0_class
 {
@@ -699,37 +653,11 @@ struct NavMeshArr
 };
 NavMeshArr::~NavMeshArr()
 {}
-struct BSSimpleArrayActor
-{
-    void* m_vtbl;
-    int* m_data;
-    unsigned int m_iElementCount;
-    unsigned int m_pRayCursor;
-
-    void Clear(bool);
-    void FUN_0042f5f0(unsigned int count, bool clear);
-};
-struct FUN_0042fc00_shell
-{
-    void __thiscall FUN_0042fc00(void* count, unsigned int size);
-};
-struct BSSimpleArrayShell_FUN_00430000
-{
-    void __thiscall FUN_00430000(void* data, unsigned int count);
-};
-struct FUN_0072ba80_shell
-{
-    void __thiscall FUN_0072ba80(char* data, unsigned int count);
-};
 struct AC_0042f730
 {
     void* vtbl;
     void __fastcall FUN_0066e2b0();
     void __fastcall FUN_0042f760();
-};
-struct NiPointerStandIn
-{
-    bool operator==(int) const;
 };
 struct BSExtraDataHelper
 {
@@ -762,10 +690,6 @@ struct Date
 {
     ~Date();
 };
-struct FUN_0043b5f0_cls : TESObjectTREE
-{
-    void FUN_0043b5f0();
-};
 struct ExtraListShell
 {
     void RemoveExtraType(unsigned char type);
@@ -793,33 +717,14 @@ struct FUN_0042cb30 : public FUN_0040ecb0
 
     virtual ~FUN_0042cb30();
 };
-class BSString42C
-{
-  public:
-    BSString42C();
-    ~BSString42C();
-
-    char* m_pString;
-    unsigned short m_usLen;
-    unsigned short m_usMaxLen;
-};
-class BSExtraData42C
-{
-  public:
-    BSExtraData42C(unsigned char ucType);
-    virtual ~BSExtraData42C();
-
-    unsigned char m_ucType;
-    BSExtraData42C* m_pkNext;
-};
-class FUN_0042ccc0 : public BSExtraData42C
+class FUN_0042ccc0 : public BSExtraData
 {
   public:
     FUN_0042ccc0();
     virtual ~FUN_0042ccc0();
 
-    BSString42C m_kFirst;
-    BSString42C m_kSecond;
+    BSString m_kFirst;
+    BSString m_kSecond;
 };
 struct FUN_00436b20
 {
@@ -1818,198 +1723,6 @@ struct Matrix
 {
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
 };
-class TESObjectREFR
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual int v125();
-    const NiPoint3& GetAngleOnReference() const;
-    const NiPoint3& FUN_00569880();
-    Matrix FUN_0056fa00();
-};
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*);
-};
-struct Bound : NiMemObject
-{
-    virtual void b0();
-    virtual void b1();
-    virtual void b2();
-    virtual void b3();
-    virtual void b4();
-    virtual void b5();
-    virtual void b6();
-    virtual void b7();
-    virtual void b8();
-    virtual void b9();
-    virtual void b10();
-    virtual void b11();
-    virtual void b12();
-    virtual void b13();
-    virtual void b14();
-    virtual void b15();
-    virtual void b16();
-    virtual void b17();
-    virtual void b18();
-    virtual void b19();
-    virtual void b20();
-    virtual void b21();
-    virtual void b22();
-    virtual void b23();
-    virtual void b24();
-    virtual void b25();
-    virtual void b26();
-    virtual void b27();
-    virtual void b28();
-    virtual void b29();
-    virtual void b30();
-    virtual void b31();
-    virtual void b32();
-    virtual void b33();
-    virtual void b34();
-    virtual void b35();
-    virtual void b36();
-    virtual void b37();
-    virtual void b38();
-    virtual void b39();
-    virtual void b40();
-    virtual void b41();
-    virtual void b42();
-    virtual void b43();
-    virtual void b44();
-    virtual void b45();
-    virtual void SetScale(int);
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    void FUN_00439680(const NiPoint3&);
-    void FUN_004396b0(const Matrix&);
-};
 struct FUN_00c37ec0 : Bound
 {
     FUN_00c37ec0();
@@ -2018,13 +1731,6 @@ struct FUN_00c36310 : Bound
 {
     int unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40, unk44;
     FUN_00c36310();
-};
-class BSMultiBound : public NiMemObject
-{
-  public:
-    int unk00, unk04, unk08, unk0c;
-    BSMultiBound();
-    void FUN_004addc0(Bound*);
 };
 BSMultiBound* __cdecl FUN_00439490(TESObjectREFR* reference);
 int __cdecl FUN_0043b290();
@@ -2047,22 +1753,6 @@ struct Host00437df0
     char m_auiShapeKeys[0x20];
     Sub4037 m_sub;
     void FUN_00437df0();
-};
-class NiTMapBase438
-{
-  public:
-    virtual ~NiTMapBase438();
-
-    void RemoveAll();
-
-    unsigned int m_uiHashSize;
-    void** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
-class FUN_004388a0 : public NiTMapBase438
-{
-  public:
-    virtual ~FUN_004388a0();
 };
 struct AnimPoint3
 {
@@ -2308,13 +1998,6 @@ struct FUN_0043b750
     int m_unk10;
 
     ~FUN_0043b750();
-};
-class NiFixedString
-{
-  public:
-    NiFixedString(const char* pcString);
-    ~NiFixedString();
-    const char* m_kHandle;
 };
 class NameSource
 {

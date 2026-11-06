@@ -1,3 +1,9 @@
+#include "../../../../include/BSFaceGenMorphData.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiLookAtController.h"
+#include "../../../../include/StrArr.h"
+#include "../../../../include/NiTPointerMap.h"
 
 // src/gamebryo2.2/corelibs/nianimation/nilookatcontroller.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/nilookatcontroller.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -9,17 +15,6 @@ void* __cdecl FUN_00a4cd30()
 {
     return &g_011f3f98;
 }
-
-struct NiTimeController
-{
-    virtual ~NiTimeController();
-};
-
-struct NiLookAtController : NiTimeController
-{
-    virtual ~NiLookAtController();
-    void* FUN_00a4cd40(unsigned int flags);
-};
 
 void __cdecl FUN_00a6d290();
 extern "C" __declspec(noinline) void __cdecl _delete(void* p, unsigned int flags);
@@ -34,114 +29,49 @@ void* __thiscall NiLookAtController::FUN_00a4cd40(unsigned int flags)
     return this;
 }
 
-struct StrArr
-{
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 struct BaseStub
 {
     void FUN_00a6d830(StrArr*);
 };
 char* _FUN_00a7d330(const char*);
-struct Holder : NiLookAtController
-{
-    void AppendString(StrArr*);
-};
+
 // Appends the string returned by _FUN_00a7d330(g_011f3f98) to pkStrings, growing its size first if it is full.
 // @fnv 0x00a4cef0
-void Holder::AppendString(StrArr* pkStrings)
+void NiLookAtController::AppendString(StrArr* pkStrings)
 {
     ((BaseStub*)this)->FUN_00a6d830(pkStrings);
     char* s = _FUN_00a7d330((const char*)g_011f3f98);
-    unsigned int sz = *(unsigned short*)((char*)pkStrings + 0xa);
-    if (sz >= *(unsigned short*)((char*)pkStrings + 8))
+    unsigned int sz = pkStrings->m_usSize;
+    if (sz >= pkStrings->m_usMaxSize)
     {
-        unsigned int gr = *(unsigned short*)((char*)pkStrings + 0xe);
+        unsigned int gr = pkStrings->m_usGrowBy;
         pkStrings->SetSize(gr + sz);
     }
     pkStrings->SetAt(sz, s);
 }
 
-namespace fnv_00a4c840 {
-struct NiObject
-{
-};
-struct NiAVObject : NiObject
-{
-};
-
-struct NiStream
-{
-    NiObject* GetLoadedObject();
-};
-
-struct NiTimeController
-{
-    virtual void LinkObject(NiStream&);
-};
-
-struct NiLookAtController : NiTimeController
-{
-    char _pad[0x34];
-    NiAVObject* m_pkLookAt;
-    void FUN_00a4c840(NiStream&);
-};
+// The stream stays opaque here; this accessor takes only the this register.
+NiObject* __fastcall GetLoadedObject(NiStream* stream);
 
 // @fnv 0x00a4c840
 void NiLookAtController::FUN_00a4c840(NiStream& stream)
 {
     NiTimeController::LinkObject(stream);
-    m_pkLookAt = static_cast<NiAVObject*>(stream.GetLoadedObject());
+    m_pkLookAt = static_cast<NiAVObject*>(GetLoadedObject(&stream));
 }
-}  // namespace fnv_00a4c840
 
-struct NiStream
-{
-    char _d;
-};
 struct TCReg
 {
     bool __thiscall FUN_00a6d0f0(NiStream&);
 };
-struct FakeAV
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual bool v21(NiStream&);
-};
-struct S00a4c860
-{
-    char _p[0x38];
-    FakeAV* m;
-    bool __thiscall FUN_00a4c860(NiStream&);
-};
+
 // @fnv 0x00a4c860
-bool __thiscall S00a4c860::FUN_00a4c860(NiStream& s)
+bool __thiscall NiLookAtController::FUN_00a4c860(NiStream& s)
 {
     if (!((TCReg*)this)->FUN_00a6d0f0(s))
         return false;
-    if (m)
-        m->v21(s);
+    if (m_pkLookAt)
+        m_pkLookAt->RegisterStreamables(s);
     return true;
 }
 
@@ -325,118 +255,59 @@ struct StreamFinish
 {
     void FUN_00a645b0();
 };
-struct LookAt : BaseLoad
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned short flags;
-    void FUN_00a4ce20(NiStream& stream);
-};
+
 // @fnv 0x00a4ce20
-void LookAt::FUN_00a4ce20(NiStream& stream)
+void NiLookAtController::FUN_00a4ce20(NiStream& stream)
 {
-    BaseLoad::FUN_00a6d5e0(stream);
+    reinterpret_cast<BaseLoad*>(this)->FUN_00a6d5e0(stream);
     StreamLayout& streamLayout = reinterpret_cast<StreamLayout&>(stream);
     if (streamLayout.version < 0x0a000102)
     {
-        flags = (streamLayout.controllerFlags >> 5) & 0xff;
+        *reinterpret_cast<unsigned short*>(_pad) = (streamLayout.controllerFlags >> 5) & 0xff;
     }
     else
     {
         BinaryInput* input = streamLayout.input;
         unsigned int(__cdecl * read)(BinaryInput*, void*, unsigned int, unsigned int*, unsigned int) = input->read;
         unsigned int size = 2;
-        input->position += read(input, &flags, 2, &size, 1);
+        input->position += read(input, _pad, 2, &size, 1);
     }
     reinterpret_cast<StreamFinish*>(&stream)->FUN_00a645b0();
 }
 
-class NiTStringPointerMap_00e93020
+struct BaseClone
 {
-  public:
-    bool GetAt(void* pKey, void*& rValue);
+    void FUN_00a6d0c0(void* item);
 };
 
-struct FUN_00a4ccd0_Item
-{
-    NiTStringPointerMap_00e93020* m_pMgr;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    FUN_00a4ccd0_Item* m_38;
-};
-
-class FUN_00a4ccd0_cls
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    FUN_00a4ccd0_Item* m_38;
-
-    void FUN_00a6d0c0(void* pArg);
-    void LookupAndLinkItem(void* pArg);
-};
-
-// Calls FUN_00a6d0c0, looks up this in the item's map, and if m_38 is set resolves it via GetAt and stores the result on the looked-up item.
+// Resolves the look-at object through the cloning map after the base controller.
 // @fnv 0x00a4ccd0
-void FUN_00a4ccd0_cls::LookupAndLinkItem(void* apItem)
+void NiLookAtController::LookupAndLinkItem(void* apItem)
 {
-    void* local;
+    NiObject* local;
     void* pItem;
     bool bFound;
-    FUN_00a4ccd0_Item* pResolved;
-    NiTStringPointerMap_00e93020* pMap;
+    NiAVObject* pResolved;
+    // NiTimeController uses this object cloning map; its GetAt is bound to 0x00a53c30.
+    NiTPointerMap<NiObject*, NiObject*>* pMap;
 
     pItem = apItem;
-    FUN_00a6d0c0(pItem);
-    pMap = ((FUN_00a4ccd0_Item*)pItem)->m_pMgr;
+    reinterpret_cast<BaseClone*>(this)->FUN_00a6d0c0(pItem);
+    pMap = *reinterpret_cast<NiTPointerMap<NiObject*, NiObject*>**>(pItem);
     apItem = 0;
-    pMap->GetAt(this, apItem);
-    if (m_38 != 0)
+    pMap->GetAt(this, reinterpret_cast<NiObject*&>(apItem));
+    if (m_pkLookAt != 0)
     {
-        bFound = ((FUN_00a4ccd0_Item*)pItem)->m_pMgr->GetAt(m_38, local);
+        bFound = (*reinterpret_cast<NiTPointerMap<NiObject*, NiObject*>**>(pItem))->GetAt(m_pkLookAt, local);
         if (!bFound)
         {
-            pResolved = m_38;
+            pResolved = m_pkLookAt;
         }
         else
         {
-            pResolved = (FUN_00a4ccd0_Item*)local;
+            pResolved = static_cast<NiAVObject*>(local);
         }
-        ((FUN_00a4ccd0_Item*)apItem)->m_38 = pResolved;
+        static_cast<NiLookAtController*>(apItem)->m_pkLookAt = pResolved;
     }
 }
 
@@ -467,7 +338,7 @@ struct StreamObj
     virtual void v09();
     virtual void v10();
     virtual void v11();
-    virtual void v12(FakeAV* arg);
+    virtual void v12(NiAVObject* arg);
     unsigned int unk004;
     unsigned int unk008;
     unsigned int unk00c;
@@ -624,38 +495,11 @@ struct Base44
     void FUN_00a6d730(StreamObj* stream);
 };
 
-// The look-at data that is handed to the callback.
-struct LookAtData
-{
-    unsigned int unk000;
-};
-
-// The controller that owns FUN_00a4cea0: the look-at data object sits at
-// +0x34 and the renderer data pointer at +0x38.
-struct Ctl : Base44
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    LookAtData m34;
-    FakeAV* m38;
-    void FUN_00a4cea0(StreamObj* stream);
-};
-
 // @fnv 0x00a4cea0
-void Ctl::FUN_00a4cea0(StreamObj* stream)
+void NiLookAtController::FUN_00a4cea0(NiStream* pkStream)
 {
-    Base44::FUN_00a6d730(stream);
+    StreamObj* stream = reinterpret_cast<StreamObj*>(pkStream);
+    reinterpret_cast<Base44*>(this)->FUN_00a6d730(stream);
     Handler* handler = stream->m250;
     {
         // The out-value is kept in an inner block on purpose: that way the
@@ -663,172 +507,106 @@ void Ctl::FUN_00a4cea0(StreamObj* stream)
         // the caller's register (EDX) and hoisted to the top of the block,
         // while the store into the out-value stays ordered after the load.
         int local = 2;
-        handler->counter += handler->fn(handler, &m34, 2, &local, 1);
+        handler->counter += handler->fn(handler, _pad, 2, &local, 1);
     }
-    stream->v12(m38);
+    stream->v12(m_pkLookAt);
 }
 
-class BSFaceGenMorphData
+// The shared header leaves the controller flag word unnamed at +0x34.
+struct LookAtFlags
 {
-  public:
-    static void* operator new(unsigned int uiSize);
-};
-
-struct FUN_00a6d220 : public BSFaceGenMorphData
-{
-    FUN_00a6d220() throw();
-    virtual void v00();
-    void FUN_00a6cfe0(FUN_00a6d220* pkDest, void* pkCloning);
-    int unk;
-    unsigned short m_usFlags;
-    unsigned short unk0a;
-    int unk0c;
-    int unkCur;
-    int unkValue;
-    int uNewnk;
-    int unk1c;
-    int uTmpnk;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-};
-
-struct Clone_a4c : public FUN_00a6d220
-{
-    Clone_a4c()
-    {
-        m_38 = 0;
-        m_34 = 0;
-        m_usFlags &= ~0x40;
-    }
-    virtual void v00();
     void SetBit(bool bVal, unsigned short usMask)
     {
         if (bVal)
-            m_34 |= usMask;
+            value |= usMask;
         else
-            m_34 &= ~usMask;
+            value &= ~usMask;
     }
     bool GetBit(unsigned short usMask) const
     {
-        return (m_34 & usMask) != 0;
+        return (value & usMask) != 0;
     }
     void SetField(unsigned short us, unsigned short usMask, unsigned short usPos)
     {
-        m_34 = (m_34 & ~usMask) | (us << usPos);
+        value = (value & ~usMask) | (us << usPos);
     }
     unsigned short GetField(unsigned short usMask, unsigned short usPos) const
     {
-        return (m_34 & usMask) >> usPos;
+        return (value & usMask) >> usPos;
     }
-    Clone_a4c* FUN_00a4cd60(void* pkCloning);
-    union
-    {
-        unsigned short m_34;
-        struct
-        {
-            unsigned short m_bFlag0 : 1;
-            unsigned short m_uiMode : 2;
-        };
-    };
-    int m_38;
-};
 
-// Allocates a Clone_a4c, copies the base data via FUN_00a6cfe0, then copies m_34, bit 1, field 6 and m_38, and returns the clone.
-// @fnv 0x00a4cd60
-Clone_a4c* Clone_a4c::FUN_00a4cd60(void* pkCloning)
+    unsigned short value;
+};
+inline LookAtFlags& Flags(NiLookAtController* controller)
 {
-    Clone_a4c* pkClone = new Clone_a4c;
-    FUN_00a6cfe0(pkClone, pkCloning);
-    pkClone->m_34 = m_34;
-    pkClone->SetBit(GetBit(1), 1);
-    pkClone->SetField(GetField(6, 1), 6, 1);
-    pkClone->m_38 = m_38;
-    return pkClone;
+    return *reinterpret_cast<LookAtFlags*>(controller->_pad);
+}
+inline const LookAtFlags& Flags(const NiLookAtController* controller)
+{
+    return *reinterpret_cast<const LookAtFlags*>(controller->_pad);
 }
 
+struct BaseCopy
+{
+    void FUN_00a6cfe0(NiTimeController* destination, void* process);
+};
 extern int DAT_01098c14;
 void __fastcall FUN_00a6d220(void*) throw();
 
-struct Base4c : BSFaceGenMorphData
+// The base constructor's nonthrowing entry is not declared in the shared header.
+inline NiLookAtController* AllocateLookAtController()
 {
-    void* vt;
-    unsigned int u4;
-    unsigned short m_flags;
-    unsigned short ua;
-    unsigned int pad[10];
-    Base4c()
+    NiLookAtController* controller = static_cast<NiLookAtController*>(
+        BSFaceGenMorphData::operator new(sizeof(NiLookAtController)));
+    NiLookAtController* result;
+    if (controller)
     {
-        FUN_00a6d220(this);
+        FUN_00a6d220(controller);
+        *reinterpret_cast<void**>(controller) = &DAT_01098c14;
+        controller->m_pkLookAt = 0;
+        *reinterpret_cast<unsigned short*>(controller->_pad) = 0;
+        controller->m_uiObjectFlags &= ~0x40;
+        result = controller;
     }
-};
-struct X4c : Base4c
+    else
+        result = 0;
+    return result;
+}
+
+// @fnv 0x00a4cd60
+NiLookAtController* NiLookAtController::FUN_00a4cd60(void* pkCloning)
 {
-    unsigned short m_34;
-    unsigned short u36;
-    void* m_38;
-    X4c()
-    {
-        vt = &DAT_01098c14;
-        m_38 = 0;
-        m_34 = 0;
-        m_flags &= ~0x40;
-    }
-};
-// Allocates and constructs a new X4c (BSFaceGenMorphData-derived) object and returns it.
+    NiLookAtController* pkClone = AllocateLookAtController();
+    reinterpret_cast<BaseCopy*>(this)->FUN_00a6cfe0(pkClone, pkCloning);
+    LookAtFlags& source = Flags(this);
+    LookAtFlags& destination = Flags(pkClone);
+    destination.value = source.value;
+    destination.SetBit(source.GetBit(1), 1);
+    destination.SetField(source.GetField(6, 1), 6, 1);
+    pkClone->m_pkLookAt = m_pkLookAt;
+    return pkClone;
+}
+
 // @fnv 0x00a4cde0
 void* __cdecl CreateMorphData()
 {
-    return new X4c;
+    return AllocateLookAtController();
 }
 
-struct EqAV4c
+struct BaseEqual
 {
-    virtual void w00();
-    virtual void w01();
-    virtual void w02();
-    virtual void w03();
-    virtual void w04();
-    virtual void w05();
-    virtual void w06();
-    virtual void w07();
-    virtual void w08();
-    virtual void w09();
-    virtual void w10();
-    virtual void w11();
-    virtual void w12();
-    virtual void w13();
-    virtual void w14();
-    virtual void w15();
-    virtual void w16();
-    virtual void w17();
-    virtual void w18();
-    virtual void w19();
-    virtual void w20();
-    virtual void w21();
-    virtual void w22();
-    virtual bool IsEqual(EqAV4c* other);
+    bool FUN_00a6cc80(NiLookAtController* other);
 };
 
-struct Eq4c
-{
-    unsigned int unk[14];
-    EqAV4c* m_spObj;
-
-    bool FUN_00a6cc80(Eq4c* other);
-    bool FUN_00a4c890(Eq4c* other);
-};
-
-// Compares this object with other via FUN_00a6cc80, checks m_spObj presence matches, and delegates to m_spObj->IsEqual.
+// Compares the base controller and the optional look-at object.
 // @fnv 0x00a4c890
-bool Eq4c::FUN_00a4c890(Eq4c* other)
+bool NiLookAtController::FUN_00a4c890(NiLookAtController* other)
 {
-    if (!FUN_00a6cc80(other))
+    if (!reinterpret_cast<BaseEqual*>(this)->FUN_00a6cc80(other))
         return false;
-    if ((m_spObj && !other->m_spObj) || (!m_spObj && other->m_spObj))
+    if ((m_pkLookAt && !other->m_pkLookAt) || (!m_pkLookAt && other->m_pkLookAt))
         return false;
-    if (m_spObj && !m_spObj->IsEqual(other->m_spObj))
+    if (m_pkLookAt && !m_pkLookAt->IsEqual(other->m_pkLookAt))
         return false;
     return true;
 }
@@ -909,86 +687,45 @@ struct S00a4c8e0_Mat
         m22 = p.z;
     }
 };
-struct S00a4c8e0_Node
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    S00a4c8e0_Node* parent;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    S00a4c8e0_Mat rotation;
-    S00a4c8e0_Pt translation;
-    float scale;
-    S00a4c8e0_Mat worldRotation;
-    S00a4c8e0_Pt worldTranslation;
-    float worldScale;
-};
-struct S00a4c8e0_Ctl
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned short flags;
-    unsigned short unk0a;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    S00a4c8e0_Node* object;
-    unsigned int unk30;
-    unsigned short options;
-    unsigned short unk36;
-    bool GetFlip() const
-    {
-        return (options & 1) != 0;
-    }
-    unsigned short GetAxis() const
-    {
-        return (options & 6) >> 1;
-    }
-    S00a4c8e0_Node* target;
-    bool IsActive() const
-    {
-        return ((flags >> 3) & 1) != 0;
-    }
-    void Update(float);
-};
+
 extern S00a4c8e0_Mat DAT_011a9448;
 extern S00a4c8e0_Pt DAT_011a9478;
 extern S00a4c8e0_Pt DAT_011a9484;
 
+inline bool NiLookAtController::GetFlip() const
+{
+    return (Flags(this).value & 1) != 0;
+}
+inline unsigned short NiLookAtController::GetAxis() const
+{
+    return (Flags(this).value & 6) >> 1;
+}
+inline bool NiLookAtController::IsActive() const
+{
+    return ((m_uiObjectFlags >> 3) & 1) != 0;
+}
+
 // Rotates the controlled node to face the target node by building a look-at matrix from their world positions and applying the parent transform.
 // @fnv 0x00a4c8e0
-void S00a4c8e0_Ctl::Update(float time)
+void NiLookAtController::Update(NiUpdateData& update)
 {
-    if (!target || !IsActive())
+    if (!m_pkLookAt || !IsActive())
         return;
-    S00a4c8e0_Pt targetPos = target->worldTranslation;
-    S00a4c8e0_Node* node = object;
-    S00a4c8e0_Node* pParent = node->parent;
+    S00a4c8e0_Pt targetPos = reinterpret_cast<const S00a4c8e0_Pt&>(m_pkLookAt->m_kWorld.m_Translate);
+    NiAVObject* node = reinterpret_cast<NiAVObject*>(m_pkTarget);
+    NiAVObject* pParent = reinterpret_cast<NiAVObject*>(node->m_pkParent);
     S00a4c8e0_Mat parentRot;
     S00a4c8e0_Pt worldPos;
     if (pParent)
     {
-        parentRot = pParent->worldRotation;
-        float parentScale = pParent->worldScale;
-        worldPos = pParent->worldTranslation + parentRot.FUN_004b4500(node->translation) * parentScale;
+        parentRot = reinterpret_cast<const S00a4c8e0_Mat&>(pParent->m_kWorld.m_Rotate);
+        float parentScale = pParent->m_kWorld.m_fScale;
+        worldPos = reinterpret_cast<const S00a4c8e0_Pt&>(pParent->m_kWorld.m_Translate) + parentRot.FUN_004b4500(reinterpret_cast<const S00a4c8e0_Pt&>(node->m_kLocal.m_Translate)) * parentScale;
     }
     else
     {
         parentRot = DAT_011a9448;
-        worldPos = node->translation;
+        worldPos = reinterpret_cast<const S00a4c8e0_Pt&>(node->m_kLocal.m_Translate);
     }
     S00a4c8e0_Pt at = targetPos - worldPos;
     S00a4c8e0_Mat rot;
@@ -1037,5 +774,5 @@ void S00a4c8e0_Ctl::Update(float time)
         }
         rot = parentRot.FUN_00a588a0(rot);
     }
-    node->rotation = rot;
+    reinterpret_cast<S00a4c8e0_Mat&>(node->m_kLocal.m_Rotate) = rot;
 }

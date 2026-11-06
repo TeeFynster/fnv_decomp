@@ -3,7 +3,19 @@
 // with declarations corrected to what the original code does (effectsetting_decls.h: EffectSetting += void FUN_00407300();; effectsetting_decls.h: TESForm += void FUN_004855a0(); void FUN_00485680();; effectsetting_decls.h: TESFullName += void FUN_00487010();; effectsetting_decls.h: TESDescription += void FUN_00482cb0();; effectsetting_decls.h: TESIcon += void). Move the function to its real unit once
 // that unit declares it this way.
 
-#include "effectsetting_decls_decl_effectsetting.h"
+#include "../include/BaseFormComponent.h"
+#include "../include/EffectSetting.h"
+#include "../include/FileEntryList.h"
+#include "../include/TESDescription.h"
+#include "../include/TESEffectShader.h"
+#include "../include/TESFile.h"
+#include "../include/TESForm.h"
+#include "../include/TESFullName.h"
+#include "../include/TESIcon.h"
+#include "../include/TESModel.h"
+#include "../include/TESObjectLIGH.h"
+#include "../include/TESSound.h"
+#include "../include/TESTexture.h"
 
 enum
 {
@@ -23,26 +35,26 @@ void EffectSetting::FUN_00407300()
     FUN_004855a0();
     TESFullName::FUN_00487010();
     TESDescription::FUN_00482cb0();
-    TESIcon::FUN_0048e370(CHUNK_ICON);
+    TESIcon::Save(CHUNK_ICON);
     TESModel::WriteToBuffer(CHUNK_MODL, CHUNK_MODT);
 
     TESSound* pkCastSound = data.m_pCastSound;
-    data.m_pCastSound = (TESSound*)(data.m_pCastSound ? data.m_pCastSound->GetFormID() : 0);
+    data.m_pCastSound = (TESSound*)(data.m_pCastSound ? static_cast<const TESForm*>(data.m_pCastSound)->GetFormID() : 0);
     TESSound* pkBoltSound = data.m_pBoltSound;
-    data.m_pBoltSound = (TESSound*)(data.m_pBoltSound ? data.m_pBoltSound->GetFormID() : 0);
+    data.m_pBoltSound = (TESSound*)(data.m_pBoltSound ? static_cast<const TESForm*>(data.m_pBoltSound)->GetFormID() : 0);
     TESSound* m_pContactSound = data.m_pContactSound;
-    data.m_pContactSound = (TESSound*)(data.m_pContactSound ? data.m_pContactSound->GetFormID() : 0);
+    data.m_pContactSound = (TESSound*)(data.m_pContactSound ? static_cast<const TESForm*>(data.m_pContactSound)->GetFormID() : 0);
     TESSound* m_pAreaEffectSound = data.m_pAreaEffectSound;
-    data.m_pAreaEffectSound = (TESSound*)(data.m_pAreaEffectSound ? data.m_pAreaEffectSound->GetFormID() : 0);
+    data.m_pAreaEffectSound = (TESSound*)(data.m_pAreaEffectSound ? static_cast<const TESForm*>(data.m_pAreaEffectSound)->GetFormID() : 0);
     TESEffectShader* pkEffectShaderSave = data.m_pEffectShader;
-    data.m_pEffectShader = (TESEffectShader*)(data.m_pEffectShader ? data.m_pEffectShader->GetFormID() : 0);
+    data.m_pEffectShader = (TESEffectShader*)(data.m_pEffectShader ? static_cast<const TESForm*>(data.m_pEffectShader)->GetFormID() : 0);
     TESEffectShader* pkEnchantEffect = data.m_pEnchantEffectShader;
     data.m_pEnchantEffectShader =
-        (TESEffectShader*)(data.m_pEnchantEffectShader ? data.m_pEnchantEffectShader->GetFormID() : 0);
+        (TESEffectShader*)(data.m_pEnchantEffectShader ? static_cast<const TESForm*>(data.m_pEnchantEffectShader)->GetFormID() : 0);
     TESObjectLIGH* pkLight = data.apTargetLight;
-    data.apTargetLight = (TESObjectLIGH*)(data.apTargetLight ? data.apTargetLight->GetFormID() : 0);
+    data.apTargetLight = (TESObjectLIGH*)(data.apTargetLight ? static_cast<const TESForm*>(data.apTargetLight)->GetFormID() : 0);
     TESForm* savedPAssociatedItemOriginal = data.m_pAssociatedForm;
-    data.m_pAssociatedForm = (TESForm*)(data.m_pAssociatedForm ? data.m_pAssociatedForm->GetFormID() : 0);
+    data.m_pAssociatedForm = (TESForm*)(data.m_pAssociatedForm ? static_cast<const TESForm*>(data.m_pAssociatedForm)->GetFormID() : 0);
 
     if (FUN_00401500())
         data.Endian();
@@ -62,7 +74,7 @@ void EffectSetting::FUN_00407300()
     EffectSetting* savedPkEffect;
     for (BSSimpleList<EffectSetting*>* pkIter = &counterEffects; pkIter && (savedPkEffect = pkIter->GetItem()) != 0;
          pkIter = pkIter->GetNext())
-        FUN_00485910(CHUNK_ESCE, savedPkEffect->GetFormID());
+        FUN_00485910(CHUNK_ESCE, static_cast<const TESForm*>(savedPkEffect)->GetFormID());
 
     FUN_00485680();
 }

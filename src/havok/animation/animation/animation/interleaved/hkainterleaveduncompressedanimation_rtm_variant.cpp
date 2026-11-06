@@ -1,10 +1,15 @@
+#include "../../../../../../include/hkArray.h"
+#define FNV_HAVOK_SHARED_ARRAYS
 // src/havok/animation/animation/animation/interleaved/hkainterleaveduncompressedanimation_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/animation/animation/animation/interleaved/hkainterleaveduncompressedanimation.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
 // src/havok/animation/animation/animation/interleaved/hkainterleaveduncompressedanimation.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/animation/interleaved/hkainterleaveduncompressedanimation.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkaInterleavedUncompressedAnimation.h"
+#include "../../../../../../include/hkaInterleavedUncompressedAnimation.h"
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/Vec4.h"
 struct FUN_00e3f950_class
 {
     int m_00;
@@ -63,26 +68,10 @@ struct S00e3fd20_Desc
     void __thiscall FUN_00e3fd20(int scale, int unused1, int* out, int unused2);
 };
 #include <xmmintrin.h>
-struct QsTransformX
-{
-    __m128 m_vTranslation, m_rotation, m_vScale;
-};
-struct XformArrayX
-{
-    QsTransformX* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    XformArrayX() : m_data(0), m_iElementCount(0), m_iCapacityState((int)0x80000000)
-    {}
-};
-struct FloatArrayX
-{
-    float* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    FloatArrayX() : m_data(0), m_iElementCount(0), m_iCapacityState((int)0x80000000)
-    {}
-};
+#include "../../../../../../include/hkQsTransform.h"
+
+typedef hkArrayBase<hkQsTransform> XformArrayX;
+typedef hkArrayBase<float> FloatArrayX;
 struct SrcAnimX
 {
     void* m_vfptr;
@@ -141,19 +130,6 @@ extern "C" void _ReadWriteBarrier(void);
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 typedef void*(__stdcall* TlsGetValueFn)(unsigned long);
 extern unsigned long DAT_0126835c;
-struct ProfRec
-{
-    const char* m_pName;
-    unsigned int m_iTick;
-    unsigned int unk08;
-};
-struct ProfBuf
-{
-    int unk00;
-    ProfRec* m_pCur;
-    int unk08;
-    ProfRec* m_pRecordEnd;
-};
 struct QsTm
 {
     __m128 t;
@@ -211,21 +187,22 @@ struct hkaAnimSlot : hkaInterleavedUncompressedAnimation
 };
 
 namespace E3fda0Simd {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00e3fda0 FUN_00e3fda0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float x, y, z, w;
-};
+} __m128, LocalM128;
 extern "C"
 {
-    E3fda0Simd::__m128 _mm_load_ss(const float*);
-    E3fda0Simd::__m128 _mm_load_ps(const float*);
-    void _mm_store_ps(float*, E3fda0Simd::__m128);
-    void _mm_store_ss(float*, E3fda0Simd::__m128);
-    E3fda0Simd::__m128 _mm_shuffle_ps(E3fda0Simd::__m128, E3fda0Simd::__m128, unsigned int);
-    E3fda0Simd::__m128 _mm_mul_ps(E3fda0Simd::__m128, E3fda0Simd::__m128);
-    E3fda0Simd::__m128 _mm_add_ps(E3fda0Simd::__m128, E3fda0Simd::__m128);
-    E3fda0Simd::__m128 _mm_sub_ps(E3fda0Simd::__m128, E3fda0Simd::__m128);
-    E3fda0Simd::__m128 _mm_sub_ss(E3fda0Simd::__m128, E3fda0Simd::__m128);
+    E3fda0Simd::LocalM128 _mm_load_ss(const float*);
+    E3fda0Simd::LocalM128 _mm_load_ps(const float*);
+    void _mm_store_ps(float*, E3fda0Simd::LocalM128);
+    void _mm_store_ss(float*, E3fda0Simd::LocalM128);
+    E3fda0Simd::LocalM128 _mm_shuffle_ps(E3fda0Simd::LocalM128, E3fda0Simd::LocalM128, unsigned int);
+    E3fda0Simd::LocalM128 _mm_mul_ps(E3fda0Simd::LocalM128, E3fda0Simd::LocalM128);
+    E3fda0Simd::LocalM128 _mm_add_ps(E3fda0Simd::LocalM128, E3fda0Simd::LocalM128);
+    E3fda0Simd::LocalM128 _mm_sub_ps(E3fda0Simd::LocalM128, E3fda0Simd::LocalM128);
+    E3fda0Simd::LocalM128 _mm_sub_ss(E3fda0Simd::LocalM128, E3fda0Simd::LocalM128);
 }
 
 }
@@ -236,10 +213,6 @@ struct DataChunk
     unsigned char m_offset;
 };
 
-struct Vec4
-{
-    float x, y, z, w;
-};
 
 struct FUN_005611c0_t
 {
@@ -250,7 +223,7 @@ struct FUN_005611c0_t
 extern ::__m128 DAT_010ec7f0;
 extern ::__m128 DAT_010c7160;
 
-inline float scalarValue(E3fda0Simd::__m128 value)
+inline float scalarValue(E3fda0Simd::LocalM128 value)
 {
     float result;
     E3fda0Simd::_mm_store_ss(&result, value);
@@ -261,7 +234,7 @@ struct VectorLane
 {
     union
     {
-        E3fda0Simd::__m128 v;
+        E3fda0Simd::LocalM128 v;
         struct
         {
             float x, y, z, w;
@@ -290,49 +263,49 @@ void FUN_00e3fda0(unsigned int frameIndex, float frameDelta, unsigned int maxNum
             TransformLane* transformTracksOut = (TransformLane*)transformOutArg;
             for (unsigned int left = 0; left < maxNumTransformTracks; ++left)
             {
-                E3fda0Simd::__m128 invScalar;
+                E3fda0Simd::LocalM128 invScalar;
                 (void)invScalar;
 
-                E3fda0Simd::__m128 tss = E3fda0Simd::_mm_load_ss(&frameDelta);
-                E3fda0Simd::__m128 tAll = E3fda0Simd::_mm_shuffle_ps(tss, tss, 0);
-                E3fda0Simd::__m128 ones = (*reinterpret_cast<const E3fda0Simd::__m128*>(&DAT_010ec7f0));
-                E3fda0Simd::__m128 inv = E3fda0Simd::_mm_sub_ps(ones, tAll);
-                E3fda0Simd::__m128 scale = E3fda0Simd::_mm_add_ps(E3fda0Simd::_mm_mul_ps(inv, pose0->scale.v),
+                E3fda0Simd::LocalM128 tss = E3fda0Simd::_mm_load_ss(&frameDelta);
+                E3fda0Simd::LocalM128 tAll = E3fda0Simd::_mm_shuffle_ps(tss, tss, 0);
+                E3fda0Simd::LocalM128 ones = (*reinterpret_cast<const E3fda0Simd::LocalM128*>(&DAT_010ec7f0));
+                E3fda0Simd::LocalM128 inv = E3fda0Simd::_mm_sub_ps(ones, tAll);
+                E3fda0Simd::LocalM128 scale = E3fda0Simd::_mm_add_ps(E3fda0Simd::_mm_mul_ps(inv, pose0->scale.v),
                                                                   E3fda0Simd::_mm_mul_ps(tAll, pose1->scale.v));
                 transformTracksOut->scale.v = scale;
 
-                ones = (*reinterpret_cast<const E3fda0Simd::__m128*>(&DAT_010ec7f0));
+                ones = (*reinterpret_cast<const E3fda0Simd::LocalM128*>(&DAT_010ec7f0));
                 inv = E3fda0Simd::_mm_sub_ps(ones, tAll);
-                E3fda0Simd::__m128 trans = E3fda0Simd::_mm_add_ps(E3fda0Simd::_mm_mul_ps(inv, pose0->translation.v),
+                E3fda0Simd::LocalM128 trans = E3fda0Simd::_mm_add_ps(E3fda0Simd::_mm_mul_ps(inv, pose0->translation.v),
                                                                   E3fda0Simd::_mm_mul_ps(tAll, pose1->translation.v));
                 transformTracksOut->translation.v = trans;
 
-                E3fda0Simd::__m128 r0 = pose0->rotation.v;
+                E3fda0Simd::LocalM128 r0 = pose0->rotation.v;
                 float oneMinus = 1.0f - scalarValue(tss);
-                E3fda0Simd::__m128 prod = E3fda0Simd::_mm_mul_ps(r0, pose1->rotation.v);
+                E3fda0Simd::LocalM128 prod = E3fda0Simd::_mm_mul_ps(r0, pose1->rotation.v);
                 prod = E3fda0Simd::_mm_add_ps(E3fda0Simd::_mm_shuffle_ps(prod, prod, 0x4e), prod);
                 prod = E3fda0Simd::_mm_add_ps(E3fda0Simd::_mm_shuffle_ps(prod, prod, 0xb1), prod);
-                Vec4 pos;
-                E3fda0Simd::_mm_store_ps(&pos.x, tss);
-                Vec4 neg;
+                E3fda0Simd::LocalM128 pos;
+                E3fda0Simd::_mm_store_ps(reinterpret_cast<float*>(&pos), tss);
+                E3fda0Simd::LocalM128 neg;
                 const Vec4* picked;
                 if (scalarValue(prod) < 0.0f)
                 {
                     E3fda0Simd::_mm_store_ps(
-                        &neg.x,
-                        E3fda0Simd::_mm_sub_ss((*reinterpret_cast<const E3fda0Simd::__m128*>(&DAT_010c7160)), tss));
-                    picked = &neg;
+                        reinterpret_cast<float*>(&neg),
+                        E3fda0Simd::_mm_sub_ss((*reinterpret_cast<const E3fda0Simd::LocalM128*>(&DAT_010c7160)), tss));
+                    picked = reinterpret_cast<const Vec4*>(&neg);
                 }
                 else
                 {
-                    picked = &pos;
+                    picked = reinterpret_cast<const Vec4*>(&pos);
                 }
-                E3fda0Simd::__m128 chosen = E3fda0Simd::_mm_load_ps(&picked->x);
+                E3fda0Simd::LocalM128 chosen = E3fda0Simd::_mm_load_ps(reinterpret_cast<const float*>(picked));
                 float signedT = scalarValue(chosen);
-                E3fda0Simd::__m128 signedScalar = E3fda0Simd::_mm_load_ss(&signedT);
+                E3fda0Simd::LocalM128 signedScalar = E3fda0Simd::_mm_load_ss(&signedT);
                 invScalar = E3fda0Simd::_mm_load_ss(&oneMinus);
-                E3fda0Simd::__m128 signedAll = E3fda0Simd::_mm_shuffle_ps(signedScalar, signedScalar, 0);
-                E3fda0Simd::__m128 invAll = E3fda0Simd::_mm_shuffle_ps(invScalar, invScalar, 0);
+                E3fda0Simd::LocalM128 signedAll = E3fda0Simd::_mm_shuffle_ps(signedScalar, signedScalar, 0);
+                E3fda0Simd::LocalM128 invAll = E3fda0Simd::_mm_shuffle_ps(invScalar, invScalar, 0);
                 FUN_005611c0_t quat;
                 E3fda0Simd::_mm_store_ps(&quat.x,
                                          E3fda0Simd::_mm_add_ps(E3fda0Simd::_mm_mul_ps(signedAll, pose1->rotation.v),

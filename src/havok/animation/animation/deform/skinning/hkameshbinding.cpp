@@ -2,103 +2,26 @@
 // src/havok/animation/animation/deform/skinning/hkameshbinding.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/deform/skinning/hkameshbinding.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkaMeshBinding.h"
+#include "../../../../../../include/hkBaseObject.h"
+#include "../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../include/hkStringPtr.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkTransform.h"
+#include "../../../../../../include/hkArray.h"
 
-struct hkaMemoryManager
-{
-    virtual void FUN_00000000()
-    {}
-    virtual void FUN_00000004()
-    {}
-    virtual void Free(void* ptr, unsigned short size)
-    {}
-};
 
-struct hkaMemoryRouter
-{
-    void* m_p0000;
-    void* m_p0004;
-    void* m_p0008;
-    void* m_p000C;
-    hkaMemoryManager* m_pMemoryManager;
-};
 
-extern hkaMemoryRouter* _D1A0E0GetMemoryRouter();
-
-struct hkaMeshBindingStandIn
-{
-    virtual void FUN_00000000()
-    {}
-    virtual void FUN_00000004()
-    {}
-
-    unsigned short m_nDataSize;
-
-    void FUN_00e34820();
-    void* FUN_00e34920(int flags);
-};
-
-// Calls FUN_00e34820, then if bit 0 of flags is set frees this through the memory router's manager using m_nDataSize, and returns this.
-// @fnv 0x00e34920
-void* hkaMeshBindingStandIn::FUN_00e34920(int flags)
-{
-    FUN_00e34820();
-
-    if (flags & 1)
-    {
-        hkaMemoryRouter* router = _D1A0E0GetMemoryRouter();
-        router->m_pMemoryManager->Free(this, m_nDataSize);
-    }
-
-    return this;
-}
-
-class hkMemoryAllocatorE348
-{
-  public:
-    virtual ~hkMemoryAllocatorE348() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void unk08() throw();
-    virtual void unk0C() throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterE348
-{
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorE348* m_pStreamAllocator;
-
-    hkMemoryAllocatorE348& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" hkMemoryRouterE348& __cdecl FUN_00c85750() throw();
+// hkMemoryRouter is the shared router returned at 0x00c85750.
 
 namespace hkE348 {
-class hkBaseObject
-{
-  public:
-    virtual ~hkBaseObject() throw()
-    {}
-};
-
-class hkReferencedObject : public hkBaseObject
-{
-  public:
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    void FUN_00c905b0() throw();
-};
-
 template <class T> class ReferenceCountedPointer
 {
   public:
     __forceinline ~ReferenceCountedPointer() throw()
     {
         if (m_pRetainedObject)
-            m_pRetainedObject->FUN_00c905b0();
+            m_pRetainedObject->removeReference();
         m_pRetainedObject = 0;
     }
     T* m_pRetainedObject;
@@ -110,57 +33,49 @@ template <class T> __forceinline void destruct(T* ptr, int size)
         ptr[i].~T();
 }
 
-template <class T> class hkArray
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline ~hkArray() throw()
-    {
-        hkMemoryAllocatorE348& kAlloc = FUN_00c85750().heap();
-        destruct(m_data, m_iElementCount);
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReleaseBlock(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
 }
 
-namespace FUN_00cb0c00 {
-class hkStringPtr
+// ~hkArray (clearAndDeallocate with element destruction) through the memory router's heap.
+template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
 {
-  public:
-    ~hkStringPtr() throw();
-    const char* m_pcText;
-};
+    hkMemoryAllocator& kAlloc = hkMemoryRouter::getInstance().heap();
+    hkE348::destruct(this->m_data, this->m_iElementCount);
+    this->m_iElementCount = 0;
+    if ((this->m_iCapacityState & 0x80000000) == 0)
+        kAlloc.bufFree(this->m_data, (this->m_iCapacityState & 0x3fffffff) * sizeof(T));
+    this->m_data = 0;
+    this->m_iCapacityState = 0x80000000;
 }
 
-namespace hkE348 {
-struct hkTransformE348
-{
-    float m_rotation[12];
-    float m_vTranslation[4];
-};
-}
-
-namespace FUN_00e34820 {
-class hkaMeshBinding : public hkE348::hkReferencedObject
+// No shared hkaMeshBinding header exists yet; retain its complete local layout.
+class hkaMeshBinding : public hkReferencedObject
 {
   public:
-    virtual ~hkaMeshBinding();
+    virtual ~hkaMeshBinding() throw();
+    void* FUN_00e34920(int flags);
 
-    hkE348::ReferenceCountedPointer<hkE348::hkReferencedObject> m_pMesh;
-    FUN_00cb0c00::hkStringPtr m_name;
-    hkE348::ReferenceCountedPointer<hkE348::hkReferencedObject> m_pSkeleton;
-    hkE348::hkArray<hkE348::hkArray<short> > m_kMappings;
-    hkE348::hkArray<hkE348::hkTransformE348> m_kBoneFromSkinningTransforms;
+    hkE348::ReferenceCountedPointer<hkReferencedObject> m_pMesh;
+    hkStringPtr m_name;
+    hkE348::ReferenceCountedPointer<hkReferencedObject> m_pSkeleton;
+    hkArray<hkArray<short> > m_kMappings;
+    hkArray<hkTransform> m_kBoneFromSkinningTransforms;
 };
 
 // @fnv 0x00e34820
-hkaMeshBinding::~hkaMeshBinding()
+hkaMeshBinding::~hkaMeshBinding() throw()
 {}
+
+// Calls the destructor, optionally frees the allocation, and returns this.
+// @fnv 0x00e34920
+void* hkaMeshBinding::FUN_00e34920(int flags)
+{
+    hkaMeshBinding::~hkaMeshBinding();
+
+    if (flags & 1)
+    {
+        hkMemoryRouter* router = &hkMemoryRouter::getInstance();
+        router->m_heap->blockFree(this, m_usMemSizeAndFlags);
+    }
+
+    return this;
 }

@@ -270,6 +270,8 @@ void __cdecl ProcessChildLoop(ParamObj* param)
 }
 
 #include <windows.h>
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkMonitorStream.h"
 
 extern "C" void _ReadWriteBarrier(void);
 
@@ -281,20 +283,7 @@ typedef LPVOID(WINAPI* PFN_TlsGetValue)(DWORD dwTlsIndex);
 
 unsigned __int64 __cdecl __rdtsc(void);
 
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
 
-struct ProfBuf
-{
-    DWORD unk00;
-    ProfRec* m_pCur;
-    DWORD unk08;
-    ProfRec* m_pRecordEnd;
-};
 
 class TaskObj
 {
@@ -343,27 +332,27 @@ void __cdecl FUN_00d01d20(Src* pSrc)
     if (!h->m_pTask->vtbl24(r))
     {
         pfnTls = (PFN_TlsGetValue)DAT_00fdf044;
-        ProfBuf* pBuf = (ProfBuf*)pfnTls(DAT_0126835c);
-        if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+        hkMonitorStream* pBuf = (hkMonitorStream*)pfnTls(DAT_0126835c);
+        if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
         {
-            ProfRec* pRec = pBuf->m_pCur;
-            pRec->m_pName = "TtWatchDog:FreeMem";
+            hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+            pRec->m_commandAndMonitor = "TtWatchDog:FreeMem";
             _ReadWriteBarrier();
             tick = (DWORD)__rdtsc();
-            pRec->m_iTick = tick;
-            pBuf->m_pCur = pRec + 1;
+            pRec->m_time0 = tick;
+            pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
         }
         TaskObj* pTask2 = pSrc->GetB();
         pTask2->vtbl10((DWORD)pSrc);
-        ProfBuf* pBuf2 = (ProfBuf*)pfnTls(DAT_0126835c);
-        if (pBuf2->m_pCur < pBuf2->m_pRecordEnd)
+        hkMonitorStream* pBuf2 = (hkMonitorStream*)pfnTls(DAT_0126835c);
+        if (pBuf2->m_end.m_storage < pBuf2->m_capacityMinus16.m_storage)
         {
-            ProfRec* pRec = pBuf2->m_pCur;
-            pRec->m_pName = "Et";
+            hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf2->m_end.m_storage);
+            pRec->m_commandAndMonitor = "Et";
             _ReadWriteBarrier();
             tick = (DWORD)__rdtsc();
-            pRec->m_iTick = tick;
-            pBuf2->m_pCur = pRec + 1;
+            pRec->m_time0 = tick;
+            pBuf2->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
         }
     }
     if (DAT_01269200 != 0)

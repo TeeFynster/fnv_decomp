@@ -2,16 +2,15 @@
 // src/fallout_shared/havok/foislandactivationlistener.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/foislandactivationlistener.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkpIslandActivationListener
-{
-    void InitPtr();
-    void* FUN_006241e0(unsigned int);
-};
+#include "../../../include/BSXFlags.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/hkpIslandActivationListener.h"
 extern "C" void __cdecl _Deallocate(void*);
 
 // Calls InitPtr, then deallocates this when flags has bit 0 set, and returns this.
 // @fnv 0x006241e0
-void* hkpIslandActivationListener::FUN_006241e0(unsigned int flags)
+void* hkpIslandActivationListener::vf00(unsigned int flags)
 {
     InitPtr();
     if (flags & 1)
@@ -21,16 +20,10 @@ void* hkpIslandActivationListener::FUN_006241e0(unsigned int flags)
 
 extern int DAT_0104de10;
 
-struct FUN_00624210_shell
-{
-    int* m_ptr;
-    void InitPtr();
-};
-
 // @fnv 0x00624210
-void FUN_00624210_shell::InitPtr()
+void hkpIslandActivationListener::InitPtr()
 {
-    m_ptr = &DAT_0104de10;
+    *reinterpret_cast<int**>(this) = &DAT_0104de10;
 }
 
 extern int DAT_011f942c;
@@ -41,10 +34,6 @@ void FUN_00624bd0()
     DAT_011f942c = 0;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-};
 struct hkVector4;
 struct NiTransform;
 struct TopicH
@@ -63,7 +52,8 @@ NiTransform* FUN_00624ad0(NiTransform* arNiTran, TopicH* arTopicH)
     return arNiTran;
 }
 
-struct NiTArray
+// FUN_006228e0 is an NiTArray<T>::SetAtGrow of an unknown element type: this local view holds its SetSize call
+struct FUN_006228e0_ArrayView
 {
     void SetSize(unsigned int);
 };
@@ -78,7 +68,7 @@ struct FUN_006228e0_shell
 unsigned int FUN_006228e0_shell::FUN_006228e0(unsigned int n, void* p)
 {
     if (n >= *(unsigned short*)((char*)this + 8))
-        ((NiTArray*)this)->SetSize(*(unsigned short*)((char*)this + 0xe) + n);
+        ((FUN_006228e0_ArrayView*)this)->SetSize(*(unsigned short*)((char*)this + 0xe) + n);
     SetAt(n, p);
     return n;
 }
@@ -99,22 +89,13 @@ void* FUN_00624190_shell::FUN_00624190(unsigned int flags)
     return this;
 }
 
-struct FUN_006241c0_shell
-{
-    int* m_ptr;
-    FUN_006241c0_shell();
-};
-
 // @fnv 0x006241c0
-FUN_006241c0_shell::FUN_006241c0_shell()
+hkpIslandActivationListener* __fastcall InitializeIslandActivationListener(hkpIslandActivationListener* listener)
 {
-    m_ptr = &DAT_0104de10;
+    *reinterpret_cast<int**>(listener) = &DAT_0104de10;
+    return listener;
 }
 
-struct TESObjectREFR
-{
-    static TESObjectREFR* GetReferenceFromNiAVObject(void* p);
-};
 extern "C" int __cdecl FUN_00c7fa90(int);
 struct FUN_00807730_shell
 {
@@ -156,10 +137,6 @@ int FUN_00573eb0_Class::FUN_00624bb0()
     return FUN_0047b4d0(8);
 }
 
-struct BSXFlags
-{
-    unsigned int GetFlags(unsigned int);
-};
 extern "C" unsigned int __cdecl GetExtraDataChecked(unsigned int);
 // @fnv 0x00624b70
 unsigned int GetBSXFlags(unsigned int a, unsigned int uiFlags)
@@ -213,15 +190,7 @@ struct FUN_00624230 : BaseDtor_b4091, MemberDtor_b4091
 FUN_00624230::~FUN_00624230()
 {}
 
-struct hkVector4;
-
-struct NiPoint3_local
-{
-    float x, y, z;
-    NiPoint3_local();
-};
-
-NiPoint3_local& SetNiPoint3FromHkVector4(NiPoint3_local& dest, const hkVector4& src);
+NiPoint3& SetNiPoint3FromHkVector4_004a3970(NiPoint3& dest, const hkVector4& src);
 
 struct FUN_004b4cf0_shell
 {
@@ -236,11 +205,11 @@ struct FUN_004769c0_shell
 // @fnv 0x00624b10
 FUN_004769c0_shell* FUN_00624b10(FUN_004769c0_shell* dest, FUN_004b4cf0_shell* src)
 {
-    NiPoint3_local vec;
+    NiPoint3 vec;
 
     for (unsigned int i = 0; i < 3; i++)
     {
-        SetNiPoint3FromHkVector4(vec, *src->FUN_004b4cf0(i));
+        SetNiPoint3FromHkVector4_004a3970(vec, *src->FUN_004b4cf0(i));
         dest->FUN_004769c0(i, (float*)&vec);
     }
 

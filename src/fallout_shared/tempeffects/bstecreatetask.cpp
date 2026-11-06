@@ -1,3 +1,4 @@
+#include "../../../include/NiTask.h"
 
 // src/fallout_shared/tempeffects/bstecreatetask.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/tempeffects/bstecreatetask.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -31,11 +32,6 @@ void* __thiscall FUN_00682490_shell::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-struct NiTask
-{
-    int m_eStatus;
-    bool FUN_006824e0();
-};
 
 // Returns true if the status field at offset 8 is 4 or 3, otherwise false.
 // @fnv 0x006824e0

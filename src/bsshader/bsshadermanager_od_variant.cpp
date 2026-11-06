@@ -1,9 +1,21 @@
+#include "../../include/ImageSpaceTexture.h"
 
 // src/bsshader/bsshadermanager_od_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/bsshader/bsshadermanager.cpp functions whose prologue its flags cannot
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 #include "bsshadermanager_decls.h"
 #include <stddef.h>
+#include "../../include/BSShaderManager.h"
+#include "../../include/ImageSpaceManager.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiTexturingProperty.h"
+#include "../../include/NiTexture.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiSourceTexture.h"
+#include "../../include/ShadowSceneNode.h"
+#include "../../include/SkyShaderProperty.h"
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern "C" int __cdecl sprintf_s(char*, size_t, const char*, ...);
 extern "C" int __cdecl strcpy_s(char*, size_t, const char*);
@@ -15,30 +27,6 @@ class NiRTTI;
 class NiRenderer;
 class BSFileEntry;
 class BSFogProperty;
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    __forceinline void DecRefCount()
-    {
-        if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)))
-            DeleteThis();
-    }
-};
-class NiObject : public NiRefObject
-{
-  public:
-    NiObject* DynamicCast(const NiRTTI*);
-};
-class NiFixedString
-{
-  public:
-    char* m_kHandle;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
 class NiTextureRendererData
 {
   public:
@@ -82,42 +70,6 @@ class NiTextureRendererData
     virtual void vfn_94();
     virtual unsigned int vfn_98();
 };
-class NiTexture : public NiObject
-{
-  public:
-    unsigned char objectNET[16];
-    struct TextureFormatPreferences
-    {
-        unsigned int m_ePreferredPixelLayout, m_eAlphaFormat, m_eMipFlag;
-    } m_kTextureFormatPreferences;
-    NiTextureRendererData* m_pTextureRendererData;
-    NiTexture* m_pkPrev;
-    NiTexture* m_pkNext;
-};
-template <class T> class NiPointer;
-template <> class NiPointer<NiTexture>
-{
-  public:
-    NiTexture* m_pObject;
-    NiPointer();
-    ~NiPointer();
-    NiPointer& operator=(NiTexture*);
-    __forceinline void Reset()
-    {
-        if (m_pObject)
-        {
-            m_pObject->DecRefCount();
-            m_pObject = 0;
-        }
-    }
-};
-class NiSourceTexture : public NiTexture
-{
-  public:
-    void* m_spPixelData;
-    const char* m_pcFileName;
-    static NiSourceTexture* Create(const NiFixedString&, NiTexture::TextureFormatPreferences&, bool, bool);
-};
 class FileFinder
 {
   public:
@@ -132,33 +84,6 @@ class TextureFileEntrySetter
   public:
     static void SetTexture(NiTexture*, const BSFileEntry*);
 };
-class NiAVObject
-{
-  public:
-    void UpdateSceneObject();
-};
-class ShadowSceneNode
-{
-  public:
-    void SetFogPropertyForIndex(BSFogProperty*);
-};
-class BSShaderManager
-{
-  public:
-    enum eObjectType
-    {
-        OBJECT_0 = 0,
-        OBJECT_1 = 1
-    };
-    static void GetTexture(const char*, bool, NiPointer<NiTexture>&, bool, bool);
-    static void BuildTexturePath(char*, const char*, const char*, bool);
-    static void SetFOV(float);
-    static char* GetRenderModeName();
-    static void SetRenderMode(unsigned int);
-    static void UpdateObjectTypeRecurse(NiAVObject*, bool, bool);
-    static void SetObjectTypeRecursively(NiAVObject*, eObjectType, bool, bool);
-    static void SetFogPropertyForIndex(int, BSFogProperty*);
-};
 extern "C" FileFinder* g_fileFinder;
 extern "C" bool fnv_NiStreamGetTexture(const char*, NiPointer<NiTexture>&);
 NiTexture* CreateSpawnedCubeShell(const NiFixedString&, NiRenderer*, NiTexture::TextureFormatPreferences&);
@@ -172,27 +97,12 @@ extern void (*DAT_011f9f38)(), (*DAT_011f9f3c)();
 extern void (*DAT_011f9f40[16])(), (*DAT_011f9f80[16])();
 extern unsigned int (*DAT_011f91ec)(NiAVObject*);
 extern ShadowSceneNode* DAT_011f91c8[4];
-class SkyShaderProperty
-{
-  public:
-    unsigned char propertyData[0x70];
-    NiPointer<NiTexture> m_spTexture;
-    void SetTexture(NiTexture*);
-};
 #pragma intrinsic(sin, cos)
 // The shipped setter was built without optimization.
 #pragma optimize("", off)
 #pragma optimize("", on)
 void __cdecl FUN_00b4f2f0(int idx, ShadowSceneNode* p);
-struct ImageSpaceTexture
-{
-    NiTexture* GetTexture();
-};
-struct ImageSpaceManager
-{
-    char data[0x204];
-    ImageSpaceTexture m_texture;
-};
+
 extern ImageSpaceManager* DAT_011f91ac;
 NiTexture* GetImageSpaceTexture();
 extern "C" NiTexture* DAT_011f95ec;

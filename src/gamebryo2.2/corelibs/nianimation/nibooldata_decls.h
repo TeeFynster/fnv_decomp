@@ -1,77 +1,30 @@
-// gamebryo2.2/corelibs/nianimation/nibooldata_decls.h: declares NiObject, NiBinaryStream, AnimationKey, BooleanKey, NiBoolData
+// Boolean-key dispatch tables and binary-reading helpers used by NiBoolData.
 #ifndef FNV_NIBOOLDATA_DECLS_H
 #define FNV_NIBOOLDATA_DECLS_H
 
-#include "layout_support.h"
-#include "NiRefObject.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiBoolData.h"
+#include "../../../../include/NiObject.h"
+// NiStream.h also defines the shared BSStreamHeader; its standalone header would redefine it.
+#include "../../../../include/NiStream.h"
 
-class NiStream;
-class NiRTTI;
-class NiObject : public NiRefObject
+inline unsigned int NiBinaryStream::BinaryRead(void* buffer, unsigned int bytes,
+                                               unsigned int* sizes, unsigned int count)
 {
-  public:
-    virtual const NiRTTI* GetRTTI() const;
-    virtual NiNode* GetNiNode();
-    virtual void* GetFadeNode();
-    virtual void* GetMultiBoundNode();
-    virtual void* GetNiGeometry();
-    virtual void* GetTriBasedGeom();
-    virtual void* GetTriStrips();
-    virtual void* GetTriShape();
-    virtual void* GetSegmentedTriShape();
-    virtual void* GetResizableTriShape();
-    virtual void* GetNiParticles();
-    virtual void* GetNiLines();
-    virtual void* GetCollisionObject();
-    virtual void* GetBlendCollisionObject();
-    virtual void* GetRigidBody();
-    virtual void* GetLimitedHingeConstraint();
-    virtual NiObject* MakeClone(void*);
-    virtual void LoadBinary(NiStream&);
-};
+    unsigned int read = (*m_pfnRead)(this, buffer, bytes, sizes, count);
+    m_uiAbsoluteCurrentPos += read;
+    return read;
+}
 
-class NiBinaryStream
-{
-  public:
-    void** m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(NiBinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int(__cdecl* m_pfnWrite)(NiBinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
+extern unsigned char DAT_011f3776[NiAnimationKey::NUMKEYTYPES];
+typedef NiAnimationKey*(__cdecl* NiBoolLoadFunction)(NiStream&, unsigned int);
+typedef void(__cdecl* NiBoolFillFunction)(NiAnimationKey*, unsigned int, unsigned char);
+typedef void(__cdecl* NiBoolDeleteFunction)(NiAnimationKey*);
+extern NiBoolLoadFunction DAT_011f3e28[NiAnimationKey::NUMKEYTYPES];
+extern NiBoolFillFunction DAT_011f37f8[NiAnimationKey::NUMKEYTYPES];
+extern NiBoolDeleteFunction DAT_011f3918[NiAnimationKey::NUMKEYTYPES];
 
-    inline unsigned int BinaryRead(void* buffer, unsigned int bytes, unsigned int* sizes, unsigned int count)
-    {
-        unsigned int read = (*m_pfnRead)(this, buffer, bytes, sizes, count);
-        m_uiStreamFlags += read;
-        return read;
-    }
-};
-#include "nibooldata_stream_layout.h"
-
-class AnimationKey
-{
-  public:
-    enum KeyType
-    {
-        NOINTERP,
-        LINKEY,
-        BEZKEY,
-        TCBKEY,
-        EULERKEY,
-        STEPKEY,
-        NUMKEYTYPES
-    };
-    float m_fTime;
-};
-
-extern unsigned char DAT_011f3776[AnimationKey::NUMKEYTYPES];
-typedef AnimationKey*(__cdecl* NiBoolLoadFunction)(NiStream&, unsigned int);
-typedef void(__cdecl* NiBoolFillFunction)(AnimationKey*, unsigned int, unsigned char);
-typedef void(__cdecl* NiBoolDeleteFunction)(AnimationKey*);
-extern NiBoolLoadFunction DAT_011f3e28[AnimationKey::NUMKEYTYPES];
-extern NiBoolFillFunction DAT_011f37f8[AnimationKey::NUMKEYTYPES];
-extern NiBoolDeleteFunction DAT_011f3918[AnimationKey::NUMKEYTYPES];
-
-class BooleanKey : public AnimationKey
+class BooleanKey : public NiAnimationKey
 {
   public:
     bool m_bValue;
@@ -100,34 +53,20 @@ template <class T> inline void ReadBinaryValue(NiBinaryStream& input, T& value)
 }
 template <class T> inline void ReadBinaryValue(NiStream& stream, T& value)
 {
-    ReadBinaryValue(*stream.m_pUnderlyingStream, value);
+    ReadBinaryValue(*stream.m_pkIstr, value);
 }
 
-inline void ReadBinaryValue(NiBinaryStream& input, AnimationKey::KeyType& type)
+inline void ReadBinaryValue(NiBinaryStream& input, NiAnimationKey::KeyType& type)
 {
     unsigned int storedType;
     unsigned int size = sizeof(storedType);
     unsigned int bytesRead = (*input.m_pfnRead)(&input, &storedType, size, &size, 1);
-    type = static_cast<AnimationKey::KeyType>(storedType);
-    input.m_uiStreamFlags += bytesRead;
+    type = static_cast<NiAnimationKey::KeyType>(storedType);
+    input.m_uiAbsoluteCurrentPos += bytesRead;
 }
-inline void ReadBinaryValue(NiStream& stream, AnimationKey::KeyType& type)
+inline void ReadBinaryValue(NiStream& stream, NiAnimationKey::KeyType& type)
 {
-    ReadBinaryValue(*stream.m_pUnderlyingStream, type);
+    ReadBinaryValue(*stream.m_pkIstr, type);
 }
 
-class NiBoolData : public NiObject
-{
-  public:
-    unsigned int m_uiNumKeys;
-    BooleanKey* m_pKeyArray;
-    AnimationKey::KeyType m_eRequestType;
-    unsigned char m_ucKeyDataSize;
-    virtual void LoadBinary(NiStream& stream);
-    void SetColorKeys(BooleanKey*, unsigned int, AnimationKey::KeyType);
-};
-FNV_STATIC_ASSERT(sizeof(NiBoolData) == 24);
-FNV_STATIC_ASSERT(offsetof(NiBoolData, m_uiNumKeys) == 8);
-FNV_STATIC_ASSERT(offsetof(NiBoolData, m_ucKeyDataSize) == 20);
-FNV_STATIC_ASSERT(sizeof(NiBinaryStream) == 16);
 #endif

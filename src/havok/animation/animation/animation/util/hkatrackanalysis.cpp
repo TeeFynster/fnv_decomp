@@ -1,3 +1,8 @@
+#include <new>
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
 
 // src/havok/animation/animation/animation/util/hkatrackanalysis.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/animation/util/hkatrackanalysis.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -173,62 +178,30 @@ void TrackStatistics::LogStatistics()
     return DAT_01268360->end();
 }
 
-void* FUN_00c85750();
+// hkMemoryRouter is the shared memory router: GetMonitorStream is 0x00c85750,
+// and its heap allocator is at +0x10, as in both original router views here.
 
-struct hkMemoryAllocator_e50650;
-void FUN_00c908c0(hkMemoryAllocator_e50650& kAllocator, void* pkArray, int iNewCapacity, int iElementSize);
-
-struct hkMemoryRouter_e50650
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    char m_acPad00[0x10];
-    hkMemoryAllocator_e50650* m_pkHeap;
-    hkMemoryAllocator_e50650& heap()
-    {
-        return *m_pkHeap;
-    }
-};
+    return hkMemoryRouter::getInstance().heap();
+}
 
-struct hkContainerHeapAllocator_e50650
+template <class T> inline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& kAllocator, int n)
 {
-    hkMemoryAllocator_e50650& get(const void*)
+    const int iCapacity = getCapacity();
+    if (iCapacity < n)
     {
-        return ((hkMemoryRouter_e50650*)FUN_00c85750())->heap();
+        int iCap = 2 * iCapacity;
+        int iNewSize = (n < iCap) ? iCap : n;
+        hkArrayUtil::_reserve(kAllocator, this, iNewSize, sizeof(T));
     }
-};
+}
 
-template <class T> struct hkArray_e50650
+template <class T> inline void hkArrayBase<T>::_setSize(hkMemoryAllocator& kAllocator, int n)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArray_e50650() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void reserve(hkMemoryAllocator_e50650& kAllocator, int n)
-    {
-        const int iCapacity = getCapacity();
-        if (iCapacity < n)
-        {
-            int iCap = 2 * iCapacity;
-            int iNewSize = (n < iCap) ? iCap : n;
-            FUN_00c908c0(kAllocator, this, iNewSize, sizeof(T));
-        }
-    }
-    void _setSize(hkMemoryAllocator_e50650& kAllocator, int n)
-    {
-        reserve(kAllocator, n);
-        m_iElementCount = n;
-    }
-    void SetSizeAndGrow(int n)
-    {
-        _setSize(hkContainerHeapAllocator_e50650().get(this), n);
-    }
-};
+    GrowArrayCapacity(kAllocator, n);
+    m_iElementCount = n;
+}
 
 struct TrackHeader_e50650
 {
@@ -250,39 +223,47 @@ struct TrackSource_e50650
 struct TrackBuffers_e50650
 {
     TrackHeader_e50650 m_kHeader;
-    hkArray_e50650<float> m_kA;
-    hkArray_e50650<float> m_kB;
-    hkArray_e50650<float> m_kC;
-    hkArray_e50650<float> m_kCubicCoefficient;
-    hkArray_e50650<unsigned char> m_kE;
+    hkArray<float> m_kA;
+    hkArray<float> m_kB;
+    hkArray<float> m_kC;
+    hkArray<float> m_kCubicCoefficient;
+    hkArray<unsigned char> m_kE;
 
     void FUN_00e50ca0();
 };
 
-struct hkBool_e50650
-{
-    char m_cBooleanValue;
-    hkBool_e50650(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-
-void FUN_00e4f910(TrackBuffers_e50650* pkBuffers, void* pkArg, void* pkArgCur, hkBool_e50650 bFlag);
+void FUN_00e4f910(TrackBuffers_e50650* pkBuffers, void* pkArg, void* pkArgCur, hkBool bFlag);
 
 // @fnv 0x00e50650
 void ExpandTrackSource(const TrackSource_e50650* pkSource, void* pkArg, void* pkArgCur)
 {
-    TrackBuffers_e50650 kBuffers;
+    // The original explicitly destroys this buffer through FUN_00e50ca0.
+    void* bufferStorage[sizeof(TrackBuffers_e50650) / sizeof(void*)];
+    TrackBuffers_e50650& kBuffers = *(TrackBuffers_e50650*)bufferStorage;
+    kBuffers.m_kA.m_data = 0;
+    kBuffers.m_kA.m_iElementCount = 0;
+    kBuffers.m_kA.m_iCapacityState = 0x80000000;
+    kBuffers.m_kB.m_data = 0;
+    kBuffers.m_kB.m_iElementCount = 0;
+    kBuffers.m_kB.m_iCapacityState = 0x80000000;
+    kBuffers.m_kC.m_data = 0;
+    kBuffers.m_kC.m_iElementCount = 0;
+    kBuffers.m_kC.m_iCapacityState = 0x80000000;
+    kBuffers.m_kCubicCoefficient.m_data = 0;
+    kBuffers.m_kCubicCoefficient.m_iElementCount = 0;
+    kBuffers.m_kCubicCoefficient.m_iCapacityState = 0x80000000;
+    kBuffers.m_kE.m_data = 0;
+    kBuffers.m_kE.m_iElementCount = 0;
+    kBuffers.m_kE.m_iCapacityState = 0x80000000;
     int iCount = pkSource->m_kHeader.m_iArrayLength;
     kBuffers.m_kHeader.m_iUnk00 = pkSource->m_kHeader.m_iUnk00;
     kBuffers.m_kHeader.m_iArrayLength = iCount;
     kBuffers.m_kHeader.m_iUnk08 = pkSource->m_kHeader.m_iUnk08;
-    kBuffers.m_kA.SetSizeAndGrow(iCount);
-    kBuffers.m_kB.SetSizeAndGrow(iCount);
-    kBuffers.m_kC.SetSizeAndGrow(iCount);
-    kBuffers.m_kCubicCoefficient.SetSizeAndGrow(iCount);
-    kBuffers.m_kE.SetSizeAndGrow(iCount);
+    kBuffers.m_kA.setSize(iCount);
+    kBuffers.m_kB.setSize(iCount);
+    kBuffers.m_kC.setSize(iCount);
+    kBuffers.m_kCubicCoefficient.setSize(iCount);
+    kBuffers.m_kE.setSize(iCount);
     for (int i = 0; i < iCount; i++)
     {
         kBuffers.m_kA.m_data[i] = pkSource->m_fCoefficientA;
@@ -355,15 +336,16 @@ void __cdecl FUN_00e4ebb0(const unsigned short* apFirst, void* apSecond, unsigne
 #include <xmmintrin.h>
 #include <math.h>
 namespace fnv_00e4f640 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00e4f640 FUN_00e4f640: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" void _mm_store_ps(float* p, __m128 a);
-extern "C" __m128 _mm_load_ps(const float* p);
-extern "C" __m128 _mm_set_ps1(float a);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" void _mm_store_ps(float* p, LocalM128 a);
+extern "C" LocalM128 _mm_load_ps(const float* p);
+extern "C" LocalM128 _mm_set_ps1(float a);
 struct TrackData
 {
     unsigned int numTransforms;
@@ -463,25 +445,7 @@ struct PerFloatIn
     const float* floatData;
     unsigned int numberOfFloatTracks;
     unsigned int numberOfPoses;
-    hkArray_e50650<float> absoluteTolerance;
-};
-
-struct hkMemoryAllocator_e50650
-{
-    virtual void AllocateMemoryBlock(int);
-    virtual void ReleaseBlock(void*, int);
-    virtual void* AllocateBufferWithSize(int&);
-    virtual void* BufRealloc(void*, int, int&);
-    virtual void ReturnMemory(void*, int);
-};
-
-struct E50920Router
-{
-    char* stackTop;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocator_e50650* heap;
+    hkArray<float> absoluteTolerance;
 };
 
 static __forceinline void ClearStatistics(TrackStatistics& s)
@@ -502,91 +466,91 @@ static __forceinline void ClearStatistics(TrackStatistics& s)
     s.rate = 0.0f;
 }
 
-struct PassBool
-{
-    unsigned char value;
-    PassBool(bool b) : value(b)
-    {}
-    PassBool(const PassBool& other) : value(other.value)
-    {}
-};
-
-typedef void(__cdecl* QsAnalyzeFn)(TrackBuffers_e50650*, void*, void*, PassBool);
-
 void __cdecl FUN_00e4ead0(const unsigned short* mask, unsigned int count, TrackStatistics* result);
 void __cdecl FUN_00e4ebb0(const unsigned short* maskT, const unsigned short* maskF, unsigned int numT,
                           unsigned int numF, TrackStatistics* result);
 
+// Own the array storage explicitly: release() restores the stack router before freeing heap spillover.
 struct FloatLocalArray
 {
-    hkArray_e50650<float> values;
+    void* arrayStorage[sizeof(hkArray<float>) / sizeof(void*)];
     float* localMemory;
+
+    FloatLocalArray()
+    {
+        new (arrayStorage) hkArray<float>;
+    }
+
+    __forceinline hkArray<float>& values()
+    {
+        return *reinterpret_cast<hkArray<float>*>(arrayStorage);
+    }
 
     __forceinline void allocate(int n)
     {
-        E50920Router* router = (E50920Router*)FUN_00c85750();
-        char* block = router->stackTop;
-        router->stackTop = block + ((n * 4 + 127) & ~127);
-        values.m_iCapacityState = n | 0x80000000;
-        values.m_data = (float*)block;
+        hkMemoryRouter* router = &hkMemoryRouter::getInstance();
+        char* block = (char*)router->m_stack.m_next.m_storage;
+        router->m_stack.m_next.m_storage = block + ((n * 4 + 127) & ~127);
+        values().m_iCapacityState = n | 0x80000000;
+        values().m_data = (float*)block;
         localMemory = (float*)block;
     }
 
-    __forceinline void freeStorage(hkMemoryAllocator_e50650& alloc)
+    __forceinline void freeStorage(hkMemoryAllocator& alloc)
     {
-        int cap = values.m_iCapacityState;
-        values.m_iElementCount = 0;
+        int cap = values().m_iCapacityState;
+        values().m_iElementCount = 0;
         if ((cap & 0x80000000) == 0)
         {
-            alloc.ReturnMemory(values.m_data, (cap & 0x3fffffff) * 4);
+            alloc.bufFree(values().m_data, (cap & 0x3fffffff) * 4);
         }
-        values.m_data = 0;
-        values.m_iCapacityState = 0x80000000;
+        values().m_data = 0;
+        values().m_iCapacityState = 0x80000000;
     }
 
     __forceinline void release()
     {
         float* saved = localMemory;
-        if (saved == values.m_data)
+        if (saved == values().m_data)
         {
-            values.m_iElementCount = 0;
+            values().m_iElementCount = 0;
         }
-        ((E50920Router*)FUN_00c85750())->stackTop = (char*)saved;
-        freeStorage(hkContainerHeapAllocator_e50650().get(&values));
+        hkMemoryRouter::getInstance().m_stack.m_next.m_storage = saved;
+        freeStorage(hkContainerHeapAllocator().get(&values()));
     }
 };
 
 // Computes per-track min/max over poses, marks float tracks static when range is below tolerance, and optionally logs statistics.
 // @fnv 0x00e50920
 void __cdecl FUN_00e50920(const PerTransformIn& input, const PerFloatIn& apFloatIn, unsigned short* staticMask,
-                          float* staticDOFs, hkBool_e50650 displayStatsReport)
+                          float* staticDOFs, hkBool displayStatsReport)
 {
-    ((QsAnalyzeFn)FUN_00e4f910)((TrackBuffers_e50650*)&input, staticMask, staticDOFs, PassBool(false));
+    FUN_00e4f910((TrackBuffers_e50650*)&input, staticMask, staticDOFs, false);
     TrackStatistics statistics;
     ClearStatistics(statistics);
     FUN_00e4ead0(staticMask, input.numberOfTransformTracks, &statistics);
     float* pStaticDOF = staticDOFs + statistics.field0 + statistics.field1 + statistics.field2;
     FloatLocalArray minimum;
     minimum.allocate(apFloatIn.numberOfFloatTracks);
-    minimum.values.SetSizeAndGrow(apFloatIn.numberOfFloatTracks);
+    minimum.values().setSize(apFloatIn.numberOfFloatTracks);
     FloatLocalArray maximum;
     maximum.allocate(apFloatIn.numberOfFloatTracks);
-    maximum.values.SetSizeAndGrow(apFloatIn.numberOfFloatTracks);
+    maximum.values().setSize(apFloatIn.numberOfFloatTracks);
     for (unsigned int track = 0; track < apFloatIn.numberOfFloatTracks; ++track)
     {
         float tolerance = apFloatIn.absoluteTolerance.m_data[track];
-        minimum.values.m_data[track] = 3.40282e+38f;
-        maximum.values.m_data[track] = -3.40282e+38f;
+        minimum.values().m_data[track] = 3.40282e+38f;
+        maximum.values().m_data[track] = -3.40282e+38f;
         for (unsigned int pose = 0; pose < input.numberOfPoses; ++pose)
         {
             float value = apFloatIn.floatData[pose * apFloatIn.numberOfFloatTracks + track];
-            if (value < minimum.values.m_data[track])
-                minimum.values.m_data[track] = value;
-            if (value > maximum.values.m_data[track])
-                maximum.values.m_data[track] = value;
+            if (value < minimum.values().m_data[track])
+                minimum.values().m_data[track] = value;
+            if (value > maximum.values().m_data[track])
+                maximum.values().m_data[track] = value;
         }
-        float midpoint = (minimum.values.m_data[track] + maximum.values.m_data[track]) * 0.5;
-        float range = fabsf(maximum.values.m_data[track] - minimum.values.m_data[track]);
+        float midpoint = (minimum.values().m_data[track] + maximum.values().m_data[track]) * 0.5;
+        float range = fabsf(maximum.values().m_data[track] - minimum.values().m_data[track]);
         float threshold = (float)(tolerance * 2.0);
         if (range < threshold)
         {

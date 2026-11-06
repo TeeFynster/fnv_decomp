@@ -9,13 +9,6 @@
 
 namespace s4a5200 {
 
-template <class T> class NiPointer
-{
-  public:
-    operator T*() const;
-
-    T* m_pObject;
-};
 
 struct Target
 {

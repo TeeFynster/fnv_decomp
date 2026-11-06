@@ -1,8 +1,13 @@
-// fallout_shared/bgslightingtemplate.cpp: BGSLightingTemplate, SwapBlock, LightingDelete, LightingTemplateInit and more (11 functions)
+// fallout_shared/bgslightingtemplate.cpp: lighting template operations (11 functions)
 
+#define FNV_TESFILE_H  // the shared TESFile below replaces layout_support.h's stub
+#include "../../include/NiFile.h"
 #include "bgslightingtemplate.h"
+#include "../../include/BGSLightingTemplate.h"
+#include "../../include/InteriorData.h"
 #include <malloc.h>
 #include <string.h>
+#include "../../include/TESFile.h"
 
 // @fnv 0x005265c0
 BGSLightingTemplate::BGSLightingTemplate()
@@ -51,77 +56,48 @@ bool BGSLightingTemplate::Load(TESFile* file)
     return true;
 }
 
-struct FUN_00526640
-{
-    int a;
-    int b;
-    int c;
-    float d;
-    float e;
-    int f;
-    int g;
-    float h;
-    float i;
-    float j;
-    int k;
-    FUN_00526640();
-};
-// Initialises all members of FUN_00526640 to zero, with h and j set to 1.0f.
+// Initializes the lighting fields, with directional fade and fog power set to 1.0f.
 // @fnv 0x00526640
-FUN_00526640::FUN_00526640()
+InteriorData::InteriorData()
 {
-    a = 0;
-    b = 0;
-    c = 0;
-    d = 0.0f;
-    e = 0.0f;
-    f = 0;
-    g = 0;
-    h = 1.0f;
-    i = 0.0f;
-    j = 1.0f;
-    k = 0;
+    m_uiAmbientColor = 0;
+    m_uiDirectionalColor = 0;
+    m_uiFogColor = 0;
+    m_fFogNear = 0.0f;
+    m_fFogFar = 0.0f;
+    m_uiDirectionalRotationXY = 0;
+    m_uiDirectionalRotationZ = 0;
+    m_fDirectionalFade = 1.0f;
+    m_fFogClipDistance = 0.0f;
+    m_fFogPower = 1.0f;
+    m_uiTrailingValue = 0;
 }
 
-struct Base5a
-{
-    virtual ~Base5a();
-};
-struct FUN_005266f0 : Base5a
-{
-    virtual ~FUN_005266f0();
-};
 // @fnv 0x005266f0
-FUN_005266f0::~FUN_005266f0()
+BGSLightingTemplate::~BGSLightingTemplate()
 {}
 
-struct FUN_004855a0_shell
+// Method-only adapter for operations not declared on the shared lighting template.
+// All object layout comes from BGSLightingTemplate.
+struct LightingTemplateOperations : BGSLightingTemplate
 {
-    void FUN_004855a0();
+    void SaveForm();
+    void CopyFrom(TESForm* source);
+    void ClearData();
+    bool Compare(TESForm* form);
 };
-struct FUN_00485680_shell
-{
-    void FUN_00485680();
-};
-struct FUN_00485e00_shell
-{
-    void FUN_00485e20(int, int);
-};
+
 extern "C" bool __cdecl FUN_00401500();
-struct FUN_00526730_obj : FUN_004855a0_shell
-{
-    void FUN_00526730();
-};
 // @fnv 0x00526730
-void FUN_00526730_obj::FUN_00526730()
+void LightingTemplateOperations::SaveForm()
 {
     FUN_004855a0();
     if (FUN_00401500())
-        ((InteriorData*)((char*)this + 0x18))->Endian();
-    ((FUN_00485e00_shell*)this)->FUN_00485e20((int)((char*)this + 0x18), 0x2c);
+        Data.Endian();
+    FUN_00485e20(&Data, sizeof(Data));
     if (FUN_00401500())
-        ((InteriorData*)((char*)this + 0x18))->Endian();
-    ((FUN_00485680_shell*)this)->FUN_00485680();
+        Data.Endian();
+    FUN_00485680();
 }
 
 struct SwapTag
@@ -130,53 +106,27 @@ struct SwapTag
 
 void SwapInt(int* p, SwapTag tag);
 
-struct SwapBlock
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-
-    void SwapBytes();
-};
-
-// Swaps the byte order of every 32-bit field in the block by calling SwapInt on each member.
+// Swaps the byte order of the ten serialized 32-bit lighting fields.
 // @fnv 0x00526790
-void SwapBlock::SwapBytes()
+void InteriorData::Endian()
 {
-    SwapInt(&unk00, SwapTag());
-    SwapInt(&unk04, SwapTag());
-    SwapInt(&unk08, SwapTag());
-    SwapInt(&unk0C, SwapTag());
-    SwapInt(&unk10, SwapTag());
-    SwapInt(&unk14, SwapTag());
-    SwapInt(&unk18, SwapTag());
-    SwapInt(&unk1C, SwapTag());
-    SwapInt(&unk20, SwapTag());
-    SwapInt(&unk24, SwapTag());
+    SwapInt(reinterpret_cast<int*>(&m_uiAmbientColor), SwapTag());
+    SwapInt(reinterpret_cast<int*>(&m_uiDirectionalColor), SwapTag());
+    SwapInt(reinterpret_cast<int*>(&m_uiFogColor), SwapTag());
+    SwapInt(reinterpret_cast<int*>(&m_fFogNear), SwapTag());
+    SwapInt(reinterpret_cast<int*>(&m_fFogFar), SwapTag());
+    SwapInt(reinterpret_cast<int*>(&m_uiDirectionalRotationXY), SwapTag());
+    SwapInt(reinterpret_cast<int*>(&m_uiDirectionalRotationZ), SwapTag());
+    SwapInt(reinterpret_cast<int*>(&m_fDirectionalFade), SwapTag());
+    SwapInt(reinterpret_cast<int*>(&m_fFogClipDistance), SwapTag());
+    SwapInt(reinterpret_cast<int*>(&m_fFogPower), SwapTag());
 }
 
 extern "C" void* __cdecl _memcpy(void* dst, const void* src, unsigned int size);
 
-struct FUN_005054b0_shell : TESForm
-{
-    void FUN_004851b0(TESForm* arg);
-};
-
-struct FUN_005269f0_Lighting : BGSLightingTemplate
-{
-    void FUN_005269f0(TESForm* arg);
-};
-
 // Copies InteriorData from a BGSLightingTemplate source and calls the base class copy routine.
 // @fnv 0x005269f0
-void FUN_005269f0_Lighting::FUN_005269f0(TESForm* apSource)
+void LightingTemplateOperations::CopyFrom(TESForm* apSource)
 {
     BGSLightingTemplate* src = dynamic_cast<BGSLightingTemplate*>(apSource);
     if (src == 0)
@@ -185,35 +135,13 @@ void FUN_005269f0_Lighting::FUN_005269f0(TESForm* apSource)
     else
     {
         _memcpy(&Data, &src->Data, sizeof(InteriorData));
-        reinterpret_cast<FUN_005054b0_shell*>(this)->FUN_004851b0(apSource);
+        TESForm::CopyFrom(apSource);
     }
 }
 
-void _Deallocate(void*);
-
-struct LightingDelete : BGSLightingTemplate
-{
-    void FUN_005266f0();
-    void* FUN_005266c0(unsigned int flags);
-};
-
-// Calls FUN_005266f0, then deallocates this via _Deallocate when the low bit of flags is set, and returns this.
-// @fnv 0x005266c0
-void* LightingDelete::FUN_005266c0(unsigned int flags)
-{
-    FUN_005266f0();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct LightingTemplateInit : BGSLightingTemplate
-{
-    void FUN_005269c0();
-};
 // If the form is not yet initialized, clears its data and marks it as initialized.
 // @fnv 0x005269c0
-void LightingTemplateInit::FUN_005269c0()
+void LightingTemplateOperations::ClearData()
 {
     if (IsFormInitialized())
         return;
@@ -222,13 +150,9 @@ void LightingTemplateInit::FUN_005269c0()
 }
 
 extern "C" int __cdecl _memcmp(const void*, const void*, unsigned int);
-struct LightingComparison : public BGSLightingTemplate
-{
-    bool FUN_00526a50(TESForm*);
-};
 // Returns true when the cast fails, the InteriorData bytes differ, or TESForm::Compare returns true.
 // @fnv 0x00526a50
-bool LightingComparison::FUN_00526a50(TESForm* form)
+bool LightingTemplateOperations::Compare(TESForm* form)
 {
     BGSLightingTemplate* other = dynamic_cast<BGSLightingTemplate*>(form);
     if (!other)

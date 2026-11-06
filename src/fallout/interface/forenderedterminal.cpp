@@ -1,22 +1,78 @@
+#include "../../../include/BSAudio.h"
+#include "../../../include/BSFadeNode.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/FORenderedTerminal.h"
+#define FNV_FOURFLOATVECTOR_NO_SSE
+// 0x007feeb0 constructs four-float color/viewport values with four-byte alignment (shared SIMD extent 1897 vs 1940).
+struct TerminalColorViewport_007feeb0
+{
+    float x, y, z, w;
+    TerminalColorViewport_007feeb0(float, float, float, float);
+};
+
+#undef FNV_FOURFLOATVECTOR_NO_SSE
+#include "../../../include/NiAdditionalGeometryData.h"
+#include "../../../include/NiRenderer.h"
+#include "../../../include/NiUpdateData.h"
+// LocalVector3: unit-local copy of the former shared stand-in Vector3. Same layout as NiPoint3 but with the stand-in's inline bodies (constructor, operator-, SquaredLength); with NiPoint3, SetupPowerButtonScreen (0x007feeb0) does not match.
+class FloatMatrix3;
+
+class LocalVector3
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    LocalVector3()
+    {
+    }
+    LocalVector3(float x, float y, float z) : x(x), y(y), z(z)
+    {}
+    LocalVector3(float x, int y, int z);
+
+    LocalVector3 AddVector(const LocalVector3& other) const;
+    LocalVector3 ScaleSwizzled(float scale) const;
+    LocalVector3 operator*(double multiplier) const;
+    LocalVector3 operator*(float multiplier) const;
+    LocalVector3 operator+(const LocalVector3& right) const;
+    LocalVector3 operator-(const LocalVector3& right) const
+    {
+        return LocalVector3(x - right.x, y - right.y, z - right.z);
+    }
+    LocalVector3& operator-=(const LocalVector3& right);
+    LocalVector3& operator+=(const LocalVector3& right);
+    float& operator[](int index);
+    float Dot(const LocalVector3& right) const;
+    float SquaredLength() const
+    {
+        return x * x + y * y + z * z;
+    }
+    void Normalize();
+    float Length() const;
+
+    LocalVector3 FUN_00b13040(const LocalVector3& other) const;
+    LocalVector3 FUN_00b12890(const FloatMatrix3& matrix) const;
+    LocalVector3 FUN_00b12810(const LocalVector3& other) const;
+    void FUN_00b12790();
+    void __thiscall FUN_00439ef0(LocalVector3* dest, void* context);
+    void __thiscall FUN_004a0c10();
+    LocalVector3 FUN_00439ef0(const LocalVector3& other) const
+    {
+        return LocalVector3(x - other.x, y - other.y, z - other.z);
+    }
+    float FUN_004a7290() const
+    {
+        return x * x + y * y + z * z;
+    }
+};
 
 // src/fallout/interface/forenderedterminal.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/interface/forenderedterminal.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 struct ShadowSceneNode;
-struct NiAVObject
-{
-    virtual ~NiAVObject();
-};
-struct FORenderedTerminal
-{
-    NiAVObject* GetTerminalScreenObject();
-    NiAVObject* FUN_007ffad0();
-};
 
-struct NiAdditionalGeometryData
-{
-    static NiAVObject* __cdecl GetShadowSceneNodeForIndex(int);
-};
 
 // @fnv 0x007ffad0
 NiAVObject* FORenderedTerminal::FUN_007ffad0()
@@ -81,24 +137,9 @@ bool FUN_007ff8c0_shell::FUN_007ff8c0()
     return FUN_007ff8e0();
 }
 
-struct NiUpdateData
-{
-    int _00;
-    int _04;
-    int _08;
-    NiUpdateData(float, bool, bool);
-};
-struct BSAudio
-{
-    unsigned int GetSynchTime();
-};
 struct FUN_004bc1f0_S
 {
     void FUN_004bc1f0(float, float, float);
-};
-struct NiNode
-{
-    void Update(NiUpdateData const&);
 };
 extern float DAT_01078bb0;
 struct FUN_007ff900_This
@@ -124,17 +165,6 @@ struct FUN_00440460_S
     void FUN_00440460(V3 const*);
 };
 struct BSRenderedTexture;
-struct NiRenderer
-{
-    enum ClearFlags
-    {
-        kClearNone,
-        kClearZ,
-        kClearColor,
-        kClearStencil,
-        kClearAll
-    };
-};
 struct FUN_007ff7c0_shell : public BSAudio, public FUN_00440460_S
 {
     void FUN_007ff7c0(BSRenderedTexture* apTarget, NiRenderer::ClearFlags aeClearMode, BSRenderedTexture* apSwapTarget);
@@ -160,10 +190,6 @@ struct Flt
 };
 extern Flt g_011db63c;
 void ForwardToGlobalObject(int param);
-struct BSFadeNode
-{
-    void SetRange(float, float);
-};
 int __cdecl FUN_007ffb80();
 struct FUN_007ffaf0_shell
 {
@@ -407,16 +433,6 @@ struct Name
     Name(const char*);
     ~Name();
 };
-struct Vector3
-{
-    float x, y, z;
-    Vector3(float, int, int);
-};
-struct FourFloatVector
-{
-    float x, y, z, w;
-    FourFloatVector(float, float, float, float);
-};
 struct Matrix
 {
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
@@ -477,12 +493,12 @@ struct Resource
     Resource* AsNode();
     void SetRotation(const Matrix&);
     void SetTranslation(float, float, float);
-    void SetPosition(const Vector3&);
+    void SetPosition(const LocalVector3&);
     Resource* GetBound();
     float GetRadius();
     void AddProperty(void*);
     void SetController(void*);
-    Vector3 const& GetPosition();
+    LocalVector3 const& GetPosition();
     void SetFlag(int);
 };
 struct NodeHolder
@@ -506,7 +522,7 @@ struct Camera : Resource
     int f100, f104, f108, f10c, f110;
     static void* operator new(unsigned);
     Camera();
-    void SetViewport(const FourFloatVector&);
+    void SetViewport(const TerminalColorViewport_007feeb0&);
     void SetScale(float);
     void SetNearFar(float);
     void SetFrustum(const Frustum&);
@@ -517,7 +533,8 @@ struct Controller
     static void* operator new(unsigned);
     Controller();
 };
-struct Interface
+// Exe 0x007feeb0: unit-local ForenderedterminalInterfaceView view used by this matched implementation.
+struct ForenderedterminalInterfaceView
 {
     virtual void v00();
     virtual void v04();
@@ -585,7 +602,7 @@ struct Interface
     virtual void vfc();
     virtual float GetFar();
 };
-Interface* __cdecl GetInterface();
+ForenderedterminalInterfaceView* __cdecl GetInterface();
 bool __cdecl FUN_00707b50();
 int __cdecl FUN_004dc200();
 int __cdecl FUN_004dc1f0();
@@ -598,7 +615,7 @@ struct Backend
 Backend* __cdecl GetBackend(int);
 struct Colors
 {
-    bool GetColor(FourFloatVector&);
+    bool GetColor(TerminalColorViewport_007feeb0&);
 };
 Colors* __stdcall GetColors(int);
 extern Matrix DAT_011a9448;
@@ -614,7 +631,7 @@ struct RenderNode
     void NoBackend();
     void Enable(int);
     void Toggle(int);
-    void SetColor(const FourFloatVector&);
+    void SetColor(const TerminalColorViewport_007feeb0&);
     void SetupPowerButtonScreen();
 };
 // Loads the screen and PowerButton nodes, builds a camera with frustum, sets screen/root/camera, updates, and creates the backend render object.
@@ -650,10 +667,10 @@ void RenderNode::SetupPowerButtonScreen()
     if (!FUN_00707b50() && !DAT_011f9426)
         rate9 = (float)(rate9 * DAT_0101de30);
     rootP->SetTranslation(rate9, *g_011db614.FUN_00403e20(), *g_011db62c.FUN_00403e20());
-    Vector3 akStart(0.f, 0, 0);
+    LocalVector3 akStart(0.f, 0, 0);
     rootP->SetPosition(akStart);
     Camera* cameraK = new Camera;
-    FourFloatVector viewport(0.f, 1.f, 1.f, 0.f);
+    TerminalColorViewport_007feeb0 viewport(0.f, 1.f, 1.f, 0.f);
     cameraK->SetViewport(viewport);
     Matrix frame5;
     frame5.SetColumn(0, 0.f, 0.f, 1.f);
@@ -674,7 +691,7 @@ void RenderNode::SetupPowerButtonScreen()
     frustum.top = FUN_0057dd70(angle7) * aspect6 * scale4;
     frustum.ortho = false;
     cameraK->SetFrustum(frustum);
-    Vector3 pos2(0.f, 0, 0);
+    LocalVector3 pos2(0.f, 0, 0);
     cameraK->SetPosition(pos2);
     SetScreen(screenNode);
     SetScreen2(screenNode);
@@ -683,7 +700,7 @@ void RenderNode::SetupPowerButtonScreen()
     screenNode->SetController(new Controller);
     SetCamera(cameraK);
     Update();
-    *(Vector3*)((char*)this + 0xd8) = GetRenderObject()->GetPosition();
+    *(LocalVector3*)((char*)this + 0xd8) = GetRenderObject()->GetPosition();
     GetRenderObject()->SetTranslation(DAT_01078bb0, 0.f, 0.f);
     float radius = (float)(rootP->GetBound()->GetRadius() * DAT_01021928);
     void* aBackend = GetBackend(1)->Create(rootP, radius);
@@ -692,7 +709,7 @@ void RenderNode::SetupPowerButtonScreen()
     Enable(0);
     Toggle(0);
     ((Resource*)(unsigned)g_011db63c)->SetFlag(8);
-    FourFloatVector colorF(0.f, 0.f, 0.f, 0.f);
+    TerminalColorViewport_007feeb0 colorF(0.f, 0.f, 0.f, 0.f);
     if (GetColors(3)->GetColor(colorF))
         SetColor(colorF);
     *(float*)((char*)this + 0xe8) = 1.f;

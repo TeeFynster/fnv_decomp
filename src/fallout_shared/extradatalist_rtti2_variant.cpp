@@ -2,11 +2,34 @@
 // polymorphic classes (BSExtraData). The skeleton of src/fallout_shared/extradatalist.cpp with those classes made polymorphic; move the functions to
 // their real unit once its classes are.
 
-#include "extradatalist_packet.h"
-#include "ExtraDataList.h"
-#include "ExtraContainerChanges_rtti2_extradatalist.h"
-#include "InventoryChanges.h"
+#include <stddef.h>
 #include "game_constants.h"
+#include "../../include/ExtraDataList.h"
+enum DIALOGUE_EMOTION;
+enum SIT_SLEEP_STATE;
+#include "../../include/Actor.h"
+#include "../../include/AlchemyItem.h"
+#include "../../include/ExtraLastFinishedSequence.h"
+#include "../../include/ExtraAudioBuoyMarker.h"
+#include "../../include/ExtraAudioMarker.h"
+#include "../../include/ExtraFollower.h"
+#include "../../include/ExtraHasNoRumors.h"
+#include "../../include/ExtraHeadingTarget.h"
+#include "../../include/ExtraInfoGeneralTopic.h"
+#include "../../include/ExtraItemDropper.h"
+#include "../../include/ExtraLeveledItem.h"
+#include "../../include/ExtraMapMarker.h"
+#include "../../include/ExtraPackage.h"
+#include "../../include/ExtraPackageStartLocation.h"
+#include "../../include/ExtraPersistentCell.h"
+#include "../../include/ExtraPoison.h"
+#include "../../include/ExtraReferencePointer.h"
+#include "../../include/ExtraRunOncePacks.h"
+#include "../../include/ExtraTeleport.h"
+#include "../../include/ExtraTresPassPackage.h"
+#include "../../include/NonActorMagicCaster.h"
+#include "../../include/NonActorMagicTarget.h"
+#include "../../include/SCaster.h"
 
 namespace extra_save {
 
@@ -114,46 +137,13 @@ struct Obj44
 {
     int RefreshItem();
 };
-class SCaster
-{
-  public:
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0C();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1C();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual SForm* vf2C();
-    virtual void vf30();
-    virtual Obj34* vf34();
-    virtual void vf38();
-    virtual void vf3C();
-    virtual void vf40();
-    virtual Obj44* vf44();
-};
-class STarget
-{
-  public:
-    virtual void vf00();
-    virtual SForm* vf04();
-    virtual void* vf08();
-};
 struct ListItem
 {
     SForm* form;
     char flag;
 };
-struct ListNode
-{
-    bool FUN_008256d0();
-    ListItem** FUN_006815c0();
-    ListNode* FUN_00726070();
-};
+// Exe 0x004235e0 SaveShell::FUN_004235e0: opaque package-list accessor view.
+
 struct FormNode
 {
     bool FUN_008256d0();
@@ -185,36 +175,6 @@ struct GenericExtra : public ::BSExtraData
         int i;
     } d10;
 };
-class SExtraPackage : public ::BSExtraData
-{
-  public:
-    SForm* package;
-    int unk10;
-    SForm* form14;
-    char unk18;
-    char unk19;
-};
-class SExtraTresPassPackage : public ::BSExtraData
-{
-  public:
-    SForm* package;
-};
-class SExtraRunOncePacks : public ::BSExtraData
-{
-  public:
-    ListNode* list;
-};
-class SExtraPersistentCell : public ::BSExtraData
-{
-  public:
-    SForm* cell;
-};
-class SExtraHeadingTarget : public ::BSExtraData
-{
-  public:
-    SForm* target;
-};
-
 struct FormIDEntry
 {
     unsigned int formID;
@@ -237,7 +197,7 @@ struct DebugFlag
 };
 struct SaveLock
 {
-    void Wait(int a);
+    void FUN_0040fbf0(int a);
     void Leave();
 };
 struct PackageMgr
@@ -261,113 +221,6 @@ struct SaveShell : public ExtraDataList
 };
 
 }
-class ExtraPackage : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* package;
-    int unk10;
-    extra_save::SForm* form14;
-    char unk18;
-    char unk19;
-};
-class ExtraTresPassPackage : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* package;
-};
-class ExtraRunOncePacks : public ::BSExtraData
-{
-  public:
-    extra_save::ListNode* list;
-};
-class ExtraPersistentCell : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* cell;
-};
-class ExtraHeadingTarget : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* target;
-};
-class ExtraLeveledItem : public ::BSExtraData
-{
-  public:
-    int unk0C;
-    char unk10;
-};
-class ExtraReferencePointer : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* ref;
-};
-class ExtraPackageStartLocation : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* loc;
-    float pos[3];
-    int unk1C;
-};
-class ExtraFollower : public ::BSExtraData
-{
-  public:
-    extra_save::FormNode* list;
-};
-class NonActorMagicCaster : public ::BSExtraData
-{
-  public:
-    extra_save::SCaster caster;
-};
-class NonActorMagicTarget : public ::BSExtraData
-{
-  public:
-    extra_save::STarget target;
-};
-class ExtraTeleport : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* data;
-};
-class ExtraPoison : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* poison;
-};
-class ExtraLastFinishedSequence : public ::BSExtraData
-{
-  public:
-    char* name;
-};
-class ExtraMapMarker : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* data;
-};
-class ExtraAudioMarker : public ::BSExtraData
-{
-  public:
-    int unk0C;
-};
-class ExtraAudioBuoyMarker : public ::BSExtraData
-{
-  public:
-    int unk0C;
-};
-class ExtraItemDropper : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* dropper;
-};
-class ExtraInfoGeneralTopic : public ::BSExtraData
-{
-  public:
-    extra_save::SForm* topic;
-};
-class ExtraHasNoRumors : public ::BSExtraData
-{
-  public:
-    char value;
-};
 namespace extra_save {
 
 // @fnv 0x004235e0
@@ -395,7 +248,7 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
         blkA4 = DAT_011de45c->FUN_00825c00();
         DAT_011de45c->FUN_008579b0(&zero, 2);
     }
-    DAT_011c3920.Wait(0);
+    DAT_011c3920.FUN_0040fbf0(0);
     count9 = 0;
     cnt = DAT_011de45c->FUN_00825c00();
     DAT_011de45c->FUN_008579b0(&count9, 2);
@@ -528,13 +381,13 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
             {
                 DAT_011de45c->FUN_008579b0(&type, 1);
                 ::ExtraLeveledItem* x = dynamic_cast< ::ExtraLeveledItem*>((::BSExtraData*)extra);
-                DAT_011de45c->FUN_008579b0(&x->unk0C, 4);
-                DAT_011de45c->FUN_008579b0(&x->unk10, 1);
+                DAT_011de45c->FUN_008579b0(&x->iIndex, 4);
+                DAT_011de45c->FUN_008579b0(&x->m_bIsLeveledItem, 1);
             }
             break;
         case 25: {
             DAT_011de45c->FUN_008579b0(&type, 1);
-            SExtraPackage* x = (SExtraPackage*)dynamic_cast< ::ExtraPackage*>((::BSExtraData*)extra);
+            ExtraPackage* x = dynamic_cast< ::ExtraPackage*>((::BSExtraData*)extra);
             unsigned int id = x->package->FUN_0084e3a0();
             unsigned int iD8 = 0;
             if (x->form14)
@@ -550,7 +403,7 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
             {
                 unsigned char b = x->package->FUN_0041ca90();
                 DAT_011de45c->FUN_008579b0(&b, 1);
-                x->package->vf150();
+                ((SForm*)x->package)->vf150();
             }
             break;
         }
@@ -558,17 +411,17 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
             if (flags & 0)
             {
                 DAT_011de45c->FUN_008579b0(&type, 1);
-                SExtraTresPassPackage* x =
-                    (SExtraTresPassPackage*)dynamic_cast< ::ExtraTresPassPackage*>((::BSExtraData*)extra);
+                ExtraTresPassPackage* x =
+                    dynamic_cast< ::ExtraTresPassPackage*>((::BSExtraData*)extra);
                 unsigned int id = 0;
                 if (x->package)
                 {
-                    id = x->package->FUN_0084e3a0();
+                    id = ((SForm*)x->package)->FUN_0084e3a0();
                 }
                 DAT_011de45c->FUN_00857a10(&id, 4);
                 if (x->package)
                 {
-                    x->package->vf150();
+                    ((SForm*)x->package)->vf150();
                 }
             }
             break;
@@ -592,11 +445,11 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
             short n = 0;
             unsigned int pos2 = DAT_011de45c->FUN_00825c00();
             DAT_011de45c->FUN_008579b0(&n, 2);
-            SExtraRunOncePacks* x = (SExtraRunOncePacks*)dynamic_cast< ::ExtraRunOncePacks*>((::BSExtraData*)extra);
-            ListNode* kIter = x->list;
-            while (kIter && !kIter->FUN_008256d0())
+            ExtraRunOncePacks* x = dynamic_cast< ::ExtraRunOncePacks*>((::BSExtraData*)extra);
+            ExtraSavePackageListView* kIter = x->list;
+            while (kIter && !kIter->IsEmpty())
             {
-                ListItem* item = *kIter->FUN_006815c0();
+                ListItem* item = kIter->GetItem();
                 if (item)
                 {
                     unsigned int id = item->form->FUN_0084e3a0();
@@ -604,7 +457,7 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
                     DAT_011de45c->FUN_008579b0(&item->flag, 1);
                     n++;
                 }
-                kIter = kIter->FUN_00726070();
+                kIter = kIter->GetNext();
             }
             *(short*)pos2 = n;
             break;
@@ -633,7 +486,7 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
             short n = 0;
             unsigned int pos2 = DAT_011de45c->FUN_00825c00();
             DAT_011de45c->FUN_008579b0(&n, 2);
-            FormNode* kIter = x->list;
+            FormNode* kIter = (FormNode*)x->list;
             while (kIter && !kIter->FUN_008256d0())
             {
                 SForm* f = *kIter->FUN_006815c0();
@@ -654,21 +507,21 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
                 DAT_011de45c->FUN_008579b0(&type, 1);
                 ::NonActorMagicCaster* X = dynamic_cast< ::NonActorMagicCaster*>((::BSExtraData*)extra);
                 int a = 0;
-                if (X->caster.vf34())
+                if (X->GetSelectedMagicItem())
                 {
-                    a = X->caster.vf34()->FUN_0040a1e0();
+                    a = ((Obj34*)X->GetSelectedMagicItem())->FUN_0040a1e0();
                 }
                 DAT_011de45c->FUN_00857a10(&a, 4);
                 int b = 0;
-                if (X->caster.vf44())
+                if (X->GetCurrentMagicTarget())
                 {
-                    b = X->caster.vf44()->RefreshItem();
+                    b = ((Obj44*)X->GetCurrentMagicTarget())->RefreshItem();
                 }
                 DAT_011de45c->FUN_00857a10(&b, 4);
                 unsigned int c = 0;
-                if (X->caster.vf2C())
+                if (X->GetCasterReference())
                 {
-                    c = X->caster.vf2C()->FUN_0084e3a0();
+                    c = X->GetCasterReference()->FUN_0084e3a0();
                 }
                 DAT_011de45c->FUN_00857a10(&c, 4);
             }
@@ -679,12 +532,12 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
                 DAT_011de45c->FUN_008579b0(&type, 1);
                 ::NonActorMagicTarget* x = dynamic_cast< ::NonActorMagicTarget*>((::BSExtraData*)extra);
                 unsigned int iD = 0;
-                if (x->target.vf04())
+                if (x->GetMagicTargetReference())
                 {
-                    iD = x->target.vf04()->FUN_0084e3a0();
+                    iD = x->GetMagicTargetReference()->FUN_0084e3a0();
                 }
                 DAT_011de45c->FUN_00857a10(&iD, 4);
-                FUN_00805b40(x->target.vf08(), 0);
+                FUN_00805b40(x->GetActiveEffectList(), 0);
             }
             break;
         case 43:
@@ -692,7 +545,7 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
             {
                 DAT_011de45c->FUN_008579b0(&type, 1);
                 ::ExtraTeleport* x = dynamic_cast< ::ExtraTeleport*>((::BSExtraData*)extra);
-                x->data->Save();
+                ((SForm*)x->data)->Save();
             }
             break;
         case 63:
@@ -700,7 +553,7 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
             {
                 DAT_011de45c->FUN_008579b0(&type, 1);
                 ::ExtraPoison* x = dynamic_cast< ::ExtraPoison*>((::BSExtraData*)extra);
-                unsigned int iD = x->poison->FUN_0084e3a0();
+                unsigned int iD = ((SForm*)x->poison)->FUN_0084e3a0();
                 DAT_011de45c->FUN_00857a10(&iD, 4);
             }
             break;
@@ -719,7 +572,7 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
             {
                 DAT_011de45c->FUN_008579b0(&type, 1);
                 ::ExtraMapMarker* x = dynamic_cast< ::ExtraMapMarker*>((::BSExtraData*)extra);
-                unsigned char b = x->data->FUN_00424940();
+                unsigned char b = ((SForm*)x->data)->FUN_00424940();
                 DAT_011de45c->FUN_008579b0(&b, 1);
             }
             break;
@@ -741,12 +594,12 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
             if (form && form->vf100())
             {
                 DAT_011de45c->FUN_008579b0(&type, 1);
-                SExtraPersistentCell* x =
-                    (SExtraPersistentCell*)dynamic_cast< ::ExtraPersistentCell*>((::BSExtraData*)extra);
+                ExtraPersistentCell* x =
+                    dynamic_cast< ::ExtraPersistentCell*>((::BSExtraData*)extra);
                 unsigned int iD = 0;
                 if (x->cell)
                 {
-                    iD = x->cell->FUN_0054ddd0()->FUN_0084e3a0();
+                    iD = ((SForm*)x->cell)->FUN_0054ddd0()->FUN_0084e3a0();
                 }
                 DAT_011de45c->FUN_00857a10(&iD, 4);
             }
@@ -766,7 +619,7 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
         }
         case 70: {
             DAT_011de45c->FUN_008579b0(&type, 1);
-            SExtraHeadingTarget* x = (SExtraHeadingTarget*)dynamic_cast< ::ExtraHeadingTarget*>((::BSExtraData*)extra);
+            ExtraHeadingTarget* x = dynamic_cast< ::ExtraHeadingTarget*>((::BSExtraData*)extra);
             unsigned int id = 0;
             if (x->target)
             {
@@ -845,10 +698,6 @@ void SaveShell::FUN_004235e0(unsigned int flags, SForm* form)
 }
 
 }
-
-class AlchemyItem : public TESForm
-{
-};
 
 namespace load_extra_fixup {
 class R;
@@ -1096,29 +945,6 @@ class O
     virtual bool v64();
     R* FUN_004181e0();
 };
-class IA
-{
-  public:
-    virtual void s0();
-    virtual G* s1();
-    virtual int s2();
-    virtual void s3();
-    virtual void s4();
-    virtual void s5();
-    virtual void s6();
-    virtual void s7();
-    virtual void s8();
-    virtual void s9();
-    virtual void s10();
-    virtual G* s11();
-    virtual void s12();
-    virtual G* s13();
-    virtual void s14();
-    virtual void s15();
-    virtual void s16(int);
-    virtual G* s17();
-    virtual void s18(int);
-};
 class E
 {
   public:
@@ -1129,15 +955,17 @@ class E
     int unk10;
     G* m14;
 };
-class X54
+// The shared classes omit these reference setters; inherit their layouts and
+// declare only the missing nonvirtual methods here.
+class CasterReferenceSetter : public NonActorMagicCaster
 {
   public:
-    void* vt;
-    int unk04;
-    int unk08;
-    IA ia;
-    void FUN_0050f9c0(G*);
-    void FUN_0050f9a0(G*);
+    void FUN_0050f9c0(TESObjectREFR*);
+};
+class TargetReferenceSetter : public NonActorMagicTarget
+{
+  public:
+    void FUN_0050f9a0(TESObjectREFR*);
 };
 class LMgr
 {
@@ -1287,26 +1115,26 @@ void ThisQ::FUN_00426020(unsigned int a1, int a2, O* a3, void* a4)
         {
             if (a1 & 0)
             {
-                X54* x = (X54*)dynamic_cast<NonActorMagicCaster*>((BSExtraData*)FUN_00410220(0x32));
+                NonActorMagicCaster* x = dynamic_cast<NonActorMagicCaster*>((BSExtraData*)FUN_00410220(0x32));
                 if (x)
                 {
-                    G* v5c = x->ia.s13();
-                    G* v60 = x->ia.s17();
-                    G* v58 = x->ia.s11();
+                    G* v5c = (G*)x->GetSelectedMagicItem();
+                    G* v60 = (G*)x->GetCurrentMagicTarget();
+                    G* v58 = (G*)x->GetCasterReference();
                     if (v5c)
-                        x->ia.s16(FUN_0040a250(v5c));
+                        x->SetSelectedMagicItem((MagicItem*)FUN_0040a250(v5c));
                     if (v60)
-                        x->ia.s18(FUN_00825550(v60));
+                        x->SetMagicTarget((MagicTarget*)FUN_00825550(v60));
                     if (v58)
-                        x->FUN_0050f9c0((G*)dynamic_cast<TESObjectREFR*>(FUN_004839c0(v58)));
+                        ((CasterReferenceSetter*)x)->FUN_0050f9c0(dynamic_cast<TESObjectREFR*>(FUN_004839c0(v58)));
                 }
-                X54* y = (X54*)dynamic_cast<NonActorMagicTarget*>((BSExtraData*)FUN_00410220(0x33));
+                NonActorMagicTarget* y = dynamic_cast<NonActorMagicTarget*>((BSExtraData*)FUN_00410220(0x33));
                 if (y)
                 {
-                    G* v64 = y->ia.s1();
+                    G* v64 = (G*)y->GetMagicTargetReference();
                     if (v64)
-                        y->FUN_0050f9a0((G*)dynamic_cast<TESObjectREFR*>(FUN_004839c0(v64)));
-                    FUN_008060e0(y->ia.s2(), 0);
+                        ((TargetReferenceSetter*)y)->FUN_0050f9a0(dynamic_cast<TESObjectREFR*>(FUN_004839c0(v64)));
+                    FUN_008060e0((int)y->GetActiveEffectList(), 0);
                 }
             }
             if (a1 & 0x20000)

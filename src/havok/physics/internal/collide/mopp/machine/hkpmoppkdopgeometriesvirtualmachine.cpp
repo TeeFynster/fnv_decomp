@@ -2,6 +2,18 @@
 // src/havok/physics/internal/collide/mopp/machine/hkpmoppkdopgeometriesvirtualmachine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/machine/hkpmoppkdopgeometriesvirtualmachine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkVector4.h"
+
+
+static inline hkBool& AssignMoppFlag(hkBool& flag, bool value)
+{
+    static_cast<volatile char&>(flag.m_cBooleanValue) = static_cast<char>(value);
+    return flag;
+}
+
 struct __declspec(align(16)) E5CF70Solver
 {
     E5CF70Solver();
@@ -71,7 +83,8 @@ void __cdecl SolveWithSolver(void* a, void* b, void* c)
     solver.solve(a, b, c);
 }
 
-struct Vector4f
+// Exe 0x00e65040: unit-local Vector4f view; declarations and layout are preserved.
+struct HkpmoppkdopgeometriesvirtualmachineVector4fView
 {
     int a;
     int b;
@@ -80,12 +93,12 @@ struct Vector4f
 };
 struct Block
 {
-    Vector4f q0;
-    Vector4f q1;
-    Vector4f q2;
-    Vector4f RunFourthVirtual;
-    Vector4f InvokeFifthVirtualFunction;
-    Vector4f q5;
+    HkpmoppkdopgeometriesvirtualmachineVector4fView q0;
+    HkpmoppkdopgeometriesvirtualmachineVector4fView q1;
+    HkpmoppkdopgeometriesvirtualmachineVector4fView q2;
+    HkpmoppkdopgeometriesvirtualmachineVector4fView RunFourthVirtual;
+    HkpmoppkdopgeometriesvirtualmachineVector4fView InvokeFifthVirtualFunction;
+    HkpmoppkdopgeometriesvirtualmachineVector4fView q5;
     int e0;
     int e1;
 };
@@ -102,10 +115,10 @@ struct Flag
 };
 struct Cls
 {
-    Vector4f h0;
-    Vector4f h1;
-    Vector4f h2;
-    Vector4f h3;
+    HkpmoppkdopgeometriesvirtualmachineVector4fView h0;
+    HkpmoppkdopgeometriesvirtualmachineVector4fView h1;
+    HkpmoppkdopgeometriesvirtualmachineVector4fView h2;
+    HkpmoppkdopgeometriesvirtualmachineVector4fView h3;
     Entry* cursor;
     Block current;
     char flag;
@@ -199,25 +212,7 @@ S_00e65e70* S_00e65e70::Reset()
     return this;
 }
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct FUN_00e65ea0_cls
 {
@@ -245,14 +240,14 @@ struct FUN_00e65ea0_cls
 // @fnv 0x00e65ea0
 void FUN_00e65ea0_cls::ClearArray()
 {
-    AudioHolder* pHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uFlags = m_uiObjectFlags;
     m_uCount = 0;
     if ((uFlags & 0x80000000u) == 0)
     {
         unsigned int uCount = uFlags & 0x3fffffffu;
-        pAllocator->FreeArray(m_pData, uCount * 4u);
+        pAllocator->bufFree(m_pData, uCount * 4u);
     }
     m_pData = 0;
     m_uiObjectFlags = 0x80000000u;
@@ -279,9 +274,9 @@ struct ItemList
     }
     void AddBack(void* const& value)
     {
-        AudioHolder* holder = FUN_00c85750();
+        hkMemoryRouter* holder = FUN_00c85750();
         if (count == (int)(capacity & 0x3fffffff))
-            ResizeAudioStream(holder->m_pAllocator, this, 4);
+            ResizeAudioStream(holder->m_heap, this, 4);
         CopyConstruct(data + count, 1, value);
         ++count;
     }
@@ -375,30 +370,8 @@ void FUN_00e65080_cls::FUN_00e65080(void* item, unsigned int unused)
         m_c0 = 1;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 extern double const DAT_01091c00;
 extern double const DAT_01011590;
-struct hkVector4
-{
-    __m128 m_vComponents;
-    void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-struct hkBool
-{
-    volatile char m_cBooleanValue;
-    hkBool& operator=(bool e)
-    {
-        m_cBooleanValue = (char)e;
-        return *this;
-    }
-};
 struct E65Range
 {
     float m_kMinimumCorner;
@@ -464,7 +437,7 @@ void E65Solver::FUN_00e65d90(E65Input* apInput, E65Key* __restrict key, int aiDa
     out.unk10 = 0;
     m_invMass = 1.0f / apInput->m_vec.m_vComponents.m128_f32[3];
     m_vec.m_vComponents = apInput->m_vec.m_vComponents;
-    m_flag = false;
+    AssignMoppFlag(m_flag, false);
     float t = (float)(m_invMass * DAT_01091c00);
     E65Key* __restrict pKey = &m_key;
     pKey->unk00 = *(volatile int*)&key->unk00;
@@ -892,11 +865,11 @@ append:
 
     MoppResults* output = results;
 
-    AudioHolder* memory = FUN_00c85750();
+    hkMemoryRouter* memory = FUN_00c85750();
 
     if (output->size == (output->capacityAndFlags & 0x3fffffff))
 
-        ResizeAudioStream(memory->m_pAllocator, output, sizeof(unsigned int));
+        ResizeAudioStream(memory->m_heap, output, sizeof(unsigned int));
 
     unsigned int* dst = output->data + output->size;
     output->size++;

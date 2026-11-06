@@ -55,7 +55,7 @@ class BSGameDataSystemUtility;
 class BSSaveDataSystemUtility;
 class BSSaveDataSystemUtility__SaveDataEntry;
 class BSSaveDataOperationEntry;
-class SoundPlaybackHandle;
+class BSSoundHandle;
 class RecursiveSpinLock;
 class BSSysInfoSystemUtility;
 class BSThread;
@@ -262,44 +262,14 @@ class NiFile
         APPEND_ONLY = 2
     };
 };
-template <class T> class BSSimpleList
-{
-  public:
-    T m_item;
-    BSSimpleList<T>* m_pkNext;
-    BSSimpleList();
-    BSSimpleList(T& item);
-    ~BSSimpleList();
-    T& GetItem();
-    BSSimpleList<T>* GetNext();
-    bool IsEmpty();
-    void AddTail(T& item);
-    void AddHead(T& item);
-    void RemoveHead();
-    void RemoveAll();
-};
-template <class T> class NiTMallocInterface
-{
-};
-template <class T> class NiTNewInterface
-{
-};
-template <class T, class Allocator> class NiTArray
-{
-  public:
-    virtual ~NiTArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    unsigned int GetSize();
-    T& GetAt(unsigned int index);
-    T RemoveAtAndFill(unsigned int index);
-};
-template <class T> class NiTObjectArray : public NiTArray<T, NiTNewInterface<T> >
-{
-};
+// the shared BSSimpleList
+#include "../../../../include/BSSimpleList.h"
+#include "../../../../include/NiTMallocInterface.h"
+#include "../../../../include/NiTNewInterface.h"
+#include "../../../../include/NiTArray.h"
+#include "../../../../include/NiTObjectArray.h"
+#include "../../../../include/NiTLargeArray.h"
+#include "../../../../include/NiTLargePrimitiveArray.h"
 typedef NiTObjectArray<TESObjectREFR*> FNVReferenceObjectArray;
 FNV_STATIC_ASSERT(sizeof(FNVReferenceObjectArray) == 16);
 FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_pBase) == 4);
@@ -307,22 +277,6 @@ FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usMaxSize) == 8);
 FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usSize) == 10);
 FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usESize) == 12);
 FNV_STATIC_ASSERT(offsetof(FNVReferenceObjectArray, m_usGrowBy) == 14);
-template <class T, class Allocator> class NiTLargeArray
-{
-  public:
-    void** m_ppVirtualMethodTable;
-    T* m_pBase;
-    unsigned int m_uiMaxSize;
-    unsigned int m_uiSize;
-    unsigned int m_uiESize;
-    unsigned int m_uiGrowBy;
-    unsigned int GetSize();
-    T& GetAt(unsigned int index);
-    unsigned int Add(T& item);
-};
-template <class T> class NiTLargePrimitiveArray : public NiTLargeArray<T, NiTMallocInterface<T> >
-{
-};
 template <class T, unsigned int Growth> class BSSimpleArray
 {
   public:
@@ -356,7 +310,7 @@ template <class T> class NiPointer
     T* m_pObject;
     ~NiPointer()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     NiPointer<T>& operator=(T* object)
@@ -365,20 +319,14 @@ template <class T> class NiPointer
         {
             if (object)
                 object->IncRefCount();
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = object;
         }
         return *this;
     }
 };
-template <class K, class V> class NiTMapItem
-{
-  public:
-    NiTMapItem<K, V>* m_pkNext;
-    K m_key;
-    V m_val;
-};
+#include "../../../../include/NiTMapItem.h"
 template <class K, class V> class NiTPointerMap
 {
   public:
@@ -417,7 +365,7 @@ FNV_STATIC_ASSERT(sizeof(BSStringT<char>) == 8);
 FNV_STATIC_ASSERT(offsetof(BSStringT<char>, pString) == 0);
 FNV_STATIC_ASSERT(offsetof(BSStringT<char>, sLen) == 4);
 FNV_STATIC_ASSERT(offsetof(BSStringT<char>, sMaxLen) == 6);
-FNV_STATIC_ASSERT(sizeof(NiPointer<void>) == 4);
+FNV_STATIC_ASSERT(sizeof(NiPointer<NiRefObject>) == 4);
 typedef NiTLargeArray<void*, NiTMallocInterface<void*> > FNVPointerArray;
 FNV_STATIC_ASSERT(sizeof(FNVPointerArray) == 24);
 FNV_STATIC_ASSERT(offsetof(FNVPointerArray, m_pBase) == 4);
@@ -912,13 +860,7 @@ enum BSSaveDataSystemUtility__RESULT_FAILED_REASON
     BSSaveDataSystemUtility__RESULT_FAILED_REASON_RESULT_FAILED_REASON_DATA_CORRUPT = 2,
     BSSaveDataSystemUtility__RESULT_FAILED_REASON_RESULT_FAILED_REASON_UNKNOWN = 3,
 };
-enum BSSoundHandle__ASSUMED_STATE
-{
-    BSSoundHandle__ASSUMED_STATE_ASSUMED_STATE_INITIALIZED = 0,
-    BSSoundHandle__ASSUMED_STATE_ASSUMED_STATE_PLAYING = 1,
-    BSSoundHandle__ASSUMED_STATE_ASSUMED_STATE_STOPPED = 2,
-    BSSoundHandle__ASSUMED_STATE_ASSUMED_STATE_PAUSED = 3,
-};
+#include "../../../../include/BSSoundHandle.h"
 enum BSSysInfoSystemUtility__LANGUAGE
 {
     BSSysInfoSystemUtility__LANGUAGE_LANGUAGE_JAPANESE = 0,
@@ -1676,6 +1618,8 @@ enum MEM_CONTEXT
     MEM_CONTEXT_MEM_CONTEXT_DEFAULT = 65,
     MEM_CONTEXT_MEM_CONTEXT_COUNT = 66,
 };
+// the shared include/MagicCaster.h declares the same enum (a unit may rename this copy by a macro)
+#if !defined(FNV_MAGICCASTER_STATE_DEFINED) || defined(MagicCaster__State)
 enum MagicCaster__State
 {
     MagicCaster__State_NO_SPELL = 0,
@@ -1687,6 +1631,10 @@ enum MagicCaster__State
     MagicCaster__State_ERR_ALREADY_CASTING = 6,
     MagicCaster__State_ERR_CANNOT_CAST = 7,
 };
+#ifndef MagicCaster__State
+#define FNV_MAGICCASTER_STATE_DEFINED
+#endif
+#endif
 enum PACKAGE_OBJECT_TYPE
 {
     PACKAGE_OBJECT_TYPE_POTYPE_NONE = 0,

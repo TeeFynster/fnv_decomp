@@ -1,160 +1,72 @@
+// Load an active effect from a save-game record.
 
-// src/fallout/magic/activeeffect_decl_variant.cpp - declaration variant unit created 2026-10-26 by decl_variants.py for paused function 0x00805920: the skeleton of src/fallout/magic/activeeffect.cpp
-// with declarations corrected to what the original code does (activeeffect_local.h: virtual void LoadGame(Actor* apActor); -> virtual void @@LGTMP@@;; activeeffect_local.h: virtual void LoadGame(BGSLoadFormBuffer* apBuf -> virtual void LoadGame(Actor* apActor);; activeeffect_local.h: virtual void @@LGTMP@@; -> virtual void LoadGame(BGSLoadFormBuffer* apBuf). Move the function to its real unit once
-// that unit declares it this way.
+#include "../../../include/AlchemyItem.h"
+#include "../../../include/TESSaveLoadGame.h"
+// MagicEffectSystem_activeeffect_decl_variant: local type (was include/MagicEffectSystem.h, which had no evidence of one real class); its methods are 0x00403ab0 EffectArchetypes::Activate, 0x00403c80 EffectArchetypes::CheckFlag, 0x00810fd0 EffectSetting::GetEffectArchetype
+class ActiveEffect;
+class MagicCaster;
+class MagicItem;
+class EffectItem;
+class TESBoundObject;
 
-#include "activeeffect_local_decl_activeeffect.h"
-class ActiveEffectLoadDispatch
+class MagicEffectSystem_activeeffect_decl_variant
 {
-  public:
-    virtual void Slot00();
-    virtual void Slot01();
-    virtual void Slot02();
-    virtual void Slot03();
-    virtual void Slot04();
-    virtual void Slot05();
-    virtual void Slot06();
-    virtual void Slot07();
-    virtual void Slot08();
-    virtual void Slot09();
-    virtual void Slot0A();
-    virtual void Slot0B();
-    virtual void Slot0C();
-    virtual void Slot0D();
-    virtual void Slot0E();
-    virtual void Slot0F();
-    virtual void ApplyLoadBuffer(BGSLoadFormBuffer* pBuffer);
-};
-class MagicCaster
-{
-  public:
-    MagicItem* GetSelectedMagicItem();
-    static MagicCaster* GetCasterByHandle(unsigned int id);
-};
-class MagicTarget
-{
-  public:
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    virtual bool IsActor();
-    char data[12];
-    static int CompareActiveEffects(ActiveEffect*, ActiveEffect*);
-    static MagicTarget* GetMagicTargetByID(unsigned int id);
-};
-class MagicItem
-{
-  public:
-    virtual void vfn_00();
-    virtual void vfn_01();
-    virtual void vfn_02();
-    virtual void vfn_03();
-    virtual void vfn_04();
-    virtual void vfn_05();
-    virtual MagicSystem__SpellType GetSpellType();
-    char prefix[8];
-    EffectItemList effects;
-    static MagicItem* GetMagicItemByID(unsigned int id);
-};
-class Actor : public ActorPrimary, public MagicTarget, public ActorValueOwner
-{
-};
-class SpellItem : public MagicItem
-{
-};
-class AlchemyItem : public MagicItem
-{
-  public:
-    void* FUN_004030b0();
-};
-class MagicHitEffectLoadDispatch
-{
-  public:
-    virtual void Slot00();
-    virtual void Slot01();
-    virtual void Slot02();
-    virtual void Slot03();
-    virtual void Slot04();
-    virtual void Slot05();
-    virtual void Slot06();
-    virtual void Slot07();
-    virtual void Slot08();
-    virtual void Slot09();
-    virtual void Slot0A();
-    virtual void Slot0B();
-    virtual void Slot0C();
-    virtual void Slot0D();
-    virtual void Slot0E();
-    virtual void Slot0F();
-    virtual void Slot10();
-    virtual void Slot11();
-    virtual void Slot12();
-    virtual void Slot13();
-    virtual void Slot14();
-    virtual void Slot15();
-    virtual void Slot16();
-    virtual void Slot17();
-    virtual void Slot18();
-    virtual void Slot19();
-    virtual void Slot1A();
-    virtual void Slot1B();
-    virtual void Slot1C();
-    virtual void Slot1D();
-    virtual void Slot1E();
-    virtual void Slot1F();
-    virtual void Slot20();
-    virtual void Slot21();
-    virtual void Slot22();
-    virtual void Slot23();
-    virtual void Slot24();
-    virtual void Slot25();
-    virtual void Slot26();
-    virtual void Slot27();
-    virtual void Slot28();
-    virtual void Slot29();
-    virtual void Slot2A();
-    virtual void Slot2B();
-    virtual void Slot2C();
-    virtual void Slot2D();
-    virtual void InitLoadGame(BGSLoadFormBuffer* pBuffer);
-    virtual void ApplyLoadBuffer(BGSLoadFormBuffer*);
-};
-class ActiveEffectLoadGameDispatch
-{
-  public:
-    virtual void Slot00();
-    virtual void Slot01();
-    virtual void Slot02();
-    virtual void Slot03();
-    virtual void Slot04();
-    virtual void Slot05();
-    virtual void Slot06();
-    virtual void LoadGame(BGSLoadFormBuffer*);
-};
-class ActiveEffectInitLoadGameDispatch
-{
-  public:
-    virtual void Slot00();
-    virtual void Slot01();
-    virtual void Slot02();
-    virtual void Slot03();
-    virtual void Slot04();
-    virtual void Slot05();
-    virtual void Slot06();
-    virtual void Slot07();
-    virtual void Slot08();
-    virtual void InitLoadGame(Actor*);
-};
-void InitLoadGameForEffects(Actor* pActor, BSSimpleList<ActiveEffect*>* pList);
+public:
+    struct _Type
+    {
+        enum Type
+        {
+            VALUE_MODIFIER,
+            SCRIPT,
+            DISPEL,
+            CURE_DISEASE,
+            ABSORB,
+            SHIELD,
+            CALM,
+            DEMORALIZE,
+            FRENZY,
+            COMMAND_CREATURE,
+            COMMAND_HUMANOID,
+            INVISIBILITY,
+            CHAMELEON,
+            LIGHT,
+            DARKNESS,
+            NIGHT_EYE,
+            LOCK,
+            OPEN,
+            BOUND_ITEM,
+            SUMMON_CREATURE,
+            DETECT_LIFE,
+            TELEKINESIS,
+            DISINTEGRATE_ARMOR,
+            DISINTEGRATE_WEAPON,
+            PARALYSIS,
+            REANIMATE,
+            SOUL_TRAP,
+            TURN_UNDEAD,
+            SUN_DAMAGE,
+            VAMPIRISM,
+            CURE_PARALYSIS,
+            CURE_ADDICTION,
+            CURE_POISON,
+            CONCUSSION,
+            VALUE_AND_PARTS,
+            LIMB_CONDITION,
+            TURBO,
+            COUNT,
+        };
+    };
 
-class TESSaveLoadGame
-{
-  public:
-    unsigned char FUN_008df040();
-    void FUN_008579e0(void*, unsigned int);
-    void FUN_00857aa0(unsigned int*, unsigned int);
-    void FUN_00857bd0(unsigned int);
+    typedef _Type::Type Type;
+
+    static bool __cdecl IsFlagSet(Type type, unsigned int flags);
+    static bool __cdecl IsFlagSet(int type, unsigned int flags);
+    static ActiveEffect* Activate(MagicCaster*, MagicItem*, EffectItem*, TESBoundObject*);
 };
+#include "../../../include/MagicItem.h"
+#include "../../../include/MagicTarget.h"
+#include "../../../include/SpellItem.h"
+
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 extern const char DAT_010793e0[];
 void FNV_Warning(const char*, ...);
@@ -172,11 +84,13 @@ ActiveEffect* FUN_00805920(BGSLoadFormBuffer* buffer)
     magicItem = MagicItem::GetMagicItemByID(magicItemID);
     if (magicItem)
     {
-        EffectItem* effect = magicItem->effects.GetEffectItemAtIndex(recordIndex);
+        EffectItem* effect = magicItem->GetEffectItemAtIndex(recordIndex);
         if (effect)
         {
-            ActiveEffect* active = MagicEffectSystem::Activate(0, magicItem, effect, 0);
-            active->LoadGame(buffer);
+            ActiveEffect* active = MagicEffectSystem_activeeffect_decl_variant::Activate(0, magicItem, effect, 0);
+            // This save-load variant dispatches through slot 0x20, which the shared
+            // ActiveEffect declaration exposes as the Actor* overload.
+            active->LoadGame(reinterpret_cast<Actor*>(buffer));
             return active;
         }
     }

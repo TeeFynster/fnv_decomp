@@ -1,6 +1,92 @@
+// the shared NiTArray first: NiNode.h then takes it (its own copy is only for units without one)
+#include "../../include/NiTArray.h"
 // fallout_shared/bgsprimitive.cpp: BGSPrimitiveSphere, BGSPrimitiveBox, BSMultiBoundAABB, BSMultiBoundSphere and more (113 functions)
 
-#include "bgsprimitive_decls.h"
+#include "../../include/BGSPrimitive.h"
+#include "../../include/BGSPrimitiveBox.h"
+#include "../../include/BGSPrimitivePlane.h"
+#include "../../include/BGSPrimitiveSphere.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSMultiBoundAABB.h"
+#include "../../include/BSMultiBoundOBB.h"
+#include "../../include/BSMultiBoundSphere.h"
+#include "../../include/BSOcclusionPlane.h"
+#include "../../include/BSPortal.h"
+#include "../../include/BSShaderNoLightingProperty.h"
+
+#include "../../include/NiColorInterpolator.h"
+// Both header revisions describe the same public stream type. Keep its class
+// tag consistent with the shared NiObject and matrix declarations in this unit.
+#pragma push_macro("struct")
+#define struct class
+#include "../../include/NiStream.h"
+#pragma pop_macro("struct")
+
+#include "../../include/NiBound.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiGeometryData.h"
+#include "../../include/NiLines.h"
+#include "../../include/NiAlphaProperty.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/NiColorA.h"
+#include "../../include/bhkMultiSphereShape.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/NiColor.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiPlane.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former NiPoint3_ext stand-in.
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x - kRhs.x, y - kRhs.y, z - kRhs.z);
+}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x + kRhs.x, y + kRhs.y, z + kRhs.z);
+}
+inline float NiPoint3::operator*(const NiPoint3& point) const
+{
+    return x * point.x + y * point.y + z * point.z;
+}
+inline NiPoint3 operator*(float scalar, const NiPoint3& point)
+{
+    return NiPoint3(scalar * point.x, scalar * point.y, scalar * point.z);
+}
+#include "../../include/NiPoint3.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/Vec4.h"
+#include "../../include/BSMultiBoundShape.h"
+
+class PrimitiveAABB : public BSMultiBoundAABB
+{
+public:
+    PrimitiveAABB(const NiPoint3& center, const NiPoint3& extents);
+    PrimitiveAABB* Initialize(const NiPoint3& center, const NiPoint3& extents);
+};
+extern void* gMultiBoundAABBVtable[];
+
+// NiPoint3 is used for raw point copies to preserve the original bitwise
+// assignments; NiPoint3 now has a user-declared assignment operator.
+namespace std {
+float abs(float);
+}
+
+#include "../../include/NiMemObject.h"
+
+typedef char BGSPrimitive_size_check[sizeof(BGSPrimitive) == 0x34 ? 1 : -1];
+typedef char BGSPrimitiveBox_size_check[sizeof(BGSPrimitiveBox) == 0x4c ? 1 : -1];
+typedef char BSFadeNode_size_check[sizeof(BSFadeNode) == 0xe4 ? 1 : -1];
+
+#include "../../include/GO.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/TESCombatStyle.h"
+#include "../../include/NiFrustumPlanes.h"
 
 // Takes the absolute value of each radius component, stores it, rebuilds the box and frame geometry vertices, and updates the model and world bounds.
 // @fnv 0x004a6640
@@ -9,7 +95,7 @@ void BGSPrimitiveBox::NormalizeRadii(NiPoint3& radii)
     radii[0] = std::abs(radii[0]);
     radii[1] = std::abs(radii[1]);
     radii[2] = std::abs(radii[2]);
-    m_kRadii = radii;
+    reinterpret_cast<NiPoint3&>(m_kRadii) = reinterpret_cast<const NiPoint3&>(radii);
     if (m_kGeometry)
     {
         struct GeometryVertices
@@ -17,34 +103,34 @@ void BGSPrimitiveBox::NormalizeRadii(NiPoint3& radii)
             NiPoint3* vertices;
             NiGeometryData* data;
         } geometry;
-        geometry.data = m_kGeometry->FUN_005495f0();
+        geometry.data = m_kGeometry->GetModelData();
         geometry.vertices = geometry.data->GetVertices();
-        geometry.vertices[0] = NiPoint3(-m_kRadii[0], m_kRadii[1], m_kRadii[2]);
-        geometry.vertices[1] = NiPoint3(m_kRadii[0], m_kRadii[1], m_kRadii[2]);
-        geometry.vertices[2] = NiPoint3(m_kRadii[0], -m_kRadii[1], m_kRadii[2]);
-        geometry.vertices[3] = NiPoint3(-m_kRadii[0], -m_kRadii[1], m_kRadii[2]);
-        geometry.vertices[4] = NiPoint3(-m_kRadii[0], m_kRadii[1], -m_kRadii[2]);
-        geometry.vertices[5] = NiPoint3(m_kRadii[0], m_kRadii[1], -m_kRadii[2]);
-        geometry.vertices[6] = NiPoint3(m_kRadii[0], -m_kRadii[1], -m_kRadii[2]);
-        geometry.vertices[7] = NiPoint3(-m_kRadii[0], -m_kRadii[1], -m_kRadii[2]);
+        reinterpret_cast<NiPoint3&>(geometry.vertices[0]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(geometry.vertices[1]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(geometry.vertices[2]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], -m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(geometry.vertices[3]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], -m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(geometry.vertices[4]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], m_kRadii[1], -m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(geometry.vertices[5]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], m_kRadii[1], -m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(geometry.vertices[6]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], -m_kRadii[1], -m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(geometry.vertices[7]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], -m_kRadii[1], -m_kRadii[2]));
         geometry.data->SetDirtyFlags(1);
     }
     if (m_kLines)
     {
-        NiGeometryData* pkData = m_kLines->FUN_005495f0();
+        NiGeometryData* pkData = m_kLines->GetModelData();
         {
             struct FrameVertices
             {
                 NiPoint3* vertices;
                 NiPoint3 scale;
-            } frame = {pkData->GetVertices(), radii};
+            } frame = {pkData->GetVertices(), reinterpret_cast<const NiPoint3&>(radii)};
             if (std::abs(frame.scale.x) < (double)0.01f)
                 frame.scale.x = 0.01f;
             if (std::abs(frame.scale.y) < (double)0.01f)
                 frame.scale.y = 0.01f;
             if (std::abs(frame.scale.z) < (double)0.01f)
                 frame.scale.z = 0.01f;
-            for (int i = 0; i < pkData->GetVertexCount(); i++)
+            for (int i = 0; i < pkData->NiGeometryData::GetVertexCount(); i++)
             {
                 frame.vertices[i].x = frame.vertices[i].x < 0.0 ? -1.0f : 1.0f;
                 frame.vertices[i].y = frame.vertices[i].y < 0.0 ? -1.0f : 1.0f;
@@ -67,27 +153,27 @@ void BGSPrimitiveBox::NormalizeRadii(NiPoint3& radii)
         NiBound bound;
         bound.SetCenterAndRadius(NiPoint3::ZERO, radius);
         m_kGeometry->SetModelBound(bound);
-        m_pController->Update(kUpdateData);
+        static_cast<NiAVObject*>(m_pController)->Update(kUpdateData);
         m_kGeometry->UpdateSceneObject();
         m_pController->UpdateWorldBound();
     }
 }
 
 // @fnv 0x004a53e0
-void BGSPrimitivePlane::SetColor(RgbaColor& color)
+void BGSPrimitivePlane::SetColor(NiColorA& color)
 {
     Color = color;
     if (m_kGeometry)
     {
         struct GeometryColors
         {
-            RgbaColor* colors;
+            NiColorA* colors;
             NiGeometryData* data;
         } geometry;
-        geometry.data = m_kGeometry->FUN_005495f0();
-        geometry.colors = geometry.data->GetColors();
+        geometry.data = m_kGeometry->GetModelData();
+        geometry.colors = reinterpret_cast<NiColorA*>(geometry.data->GetColors());
         geometry.colors[0] = geometry.colors[1] = geometry.colors[2] = geometry.colors[3] = geometry.colors[4] =
-            geometry.colors[5] = geometry.colors[6] = geometry.colors[7] = Color;
+            geometry.colors[5] = geometry.colors[6] = geometry.colors[7] = reinterpret_cast<const NiColorA&>(Color);
         geometry.data->SetDirtyFlags(4);
     }
     if (m_kLines)
@@ -96,26 +182,26 @@ void BGSPrimitivePlane::SetColor(RgbaColor& color)
 
 // Stores color, then if geometry exists, fills both geometry data color arrays with it and sets app-culled based on alpha.
 // @fnv 0x004a64e0
-void BGSPrimitiveBox::SetColor(RgbaColor& color)
+void BGSPrimitiveBox::SetColor(NiColorA& color)
 {
     Color = color;
     if (m_kGeometry)
     {
         struct GeometryColors
         {
-            RgbaColor* colors;
+            NiColorA* colors;
             NiGeometryData* data;
         } geometry;
-        geometry.data = m_kGeometry->FUN_005495f0();
-        geometry.colors = geometry.data->GetColors();
+        geometry.data = m_kGeometry->GetModelData();
+        geometry.colors = reinterpret_cast<NiColorA*>(geometry.data->GetColors());
         int i;
-        for (i = 0; i < geometry.data->GetVertexCount(); i++)
-            geometry.colors[i] = Color;
+        for (i = 0; i < geometry.data->NiGeometryData::GetVertexCount(); i++)
+            geometry.colors[i] = reinterpret_cast<const NiColorA&>(Color);
         geometry.data->SetDirtyFlags(4);
-        geometry.data = m_kLines->FUN_005495f0();
-        geometry.colors = geometry.data->GetColors();
-        for (i = 0; i < geometry.data->GetVertexCount(); i++)
-            geometry.colors[i] = Color;
+        geometry.data = m_kLines->GetModelData();
+        geometry.colors = reinterpret_cast<NiColorA*>(geometry.data->GetColors());
+        for (i = 0; i < geometry.data->NiGeometryData::GetVertexCount(); i++)
+            geometry.colors[i] = reinterpret_cast<const NiColorA&>(Color);
         geometry.data->SetDirtyFlags(4);
         m_kLines->SetAppCulled(color.a < 0.001);
     }
@@ -128,7 +214,7 @@ void BGSPrimitiveBox::Build()
     if (!m_pController)
     {
         m_pController = new BSFadeNode;
-        m_pController->SetName(NiFixedString("Box"));
+        static_cast<NiAVObject*>(m_pController)->SetName(NiFixedString("Box"));
         m_pController->UpdateSceneObject();
     }
 }
@@ -148,44 +234,26 @@ unsigned int bhkMultiSphereShape::GetInstanceSize()
     return 16;
 }
 
-struct FUN_004a4cc0_shell : public RgbaColor
-{
-    bool FUN_004a4cc0(void*);
-};
-
 // Compares this object's first four floats with those of p and returns true only if all four are equal.
 // @fnv 0x004a4cc0
-bool FUN_004a4cc0_shell::FUN_004a4cc0(void* apOther)
+bool NiColorA::operator==(const NiColorA& apOther) const
 {
-    return reinterpret_cast<const float*>(this)[0] == static_cast<const float*>(apOther)[0] &&
-           reinterpret_cast<const float*>(this)[1] == static_cast<const float*>(apOther)[1] &&
-           reinterpret_cast<const float*>(this)[2] == static_cast<const float*>(apOther)[2] &&
-           reinterpret_cast<const float*>(this)[3] == static_cast<const float*>(apOther)[3];
+    return r == apOther.r && g == apOther.g && b == apOther.b && a == apOther.a;
 }
-
-struct FUN_004a51d0_shell : public NiBound
-{
-    void FUN_004a51d0(void*, float);
-};
 
 // @fnv 0x004a51d0
-void FUN_004a51d0_shell::FUN_004a51d0(void* apCenter, float fRadius)
+void NiBound::SetCenterAndRadius(const NiPoint3& apCenter, float fRadius)
 {
-    m_kCenter = *(const NiPoint3*)apCenter;
-    m_fBoundRadius = fRadius;
+    reinterpret_cast<NiPoint3&>(m_kCenter) = reinterpret_cast<const NiPoint3&>(apCenter);
+    m_fRadius = fRadius;
 }
-
-struct FUN_004a5250_shell : public NiBound
-{
-    void* AssignFromBound(void*);
-};
 
 // Copies the center and radius from the given NiBound into this bound and returns this.
 // @fnv 0x004a5250
-void* FUN_004a5250_shell::AssignFromBound(void* aRhs)
+const NiBound& NiBound::operator=(const NiBound& aRhs)
 {
-    SetCenterAndRadius(static_cast<const NiBound*>(aRhs)->m_kCenter, static_cast<const NiBound*>(aRhs)->m_fBoundRadius);
-    return this;
+    SetCenterAndRadius(aRhs.m_kCenter, aRhs.m_fRadius);
+    return *this;
 }
 
 void __fastcall _ref_006815c0(void* pThis);
@@ -197,13 +265,12 @@ void* __fastcall FUN_006240d0(void* pThis)
     return pThis;
 }
 
-void __fastcall FUN_00c4f980(void*);
 
 // @fnv 0x00c37ec0
 void* __fastcall FUN_00c37ec0(void* this_ptr)
 {
-    FUN_00c4f980(this_ptr);
-    *(const char**)this_ptr = "`pJ";
+    static_cast<BSMultiBoundShape*>(this_ptr)->BSMultiBoundShape::BSMultiBoundShape();
+    *(void***)this_ptr = gMultiBoundAABBVtable;
     return this_ptr;
 }
 
@@ -213,22 +280,10 @@ int __fastcall FUN_004a6100(int this_)
     return 0x1e;
 }
 
-struct Pt
-{
-    float Length() const;
-};
-
-struct BSMultiBoundAABB
-{
-    unsigned char pad[0x18];
-    Pt m_afExtents;
-    float GetPointLength();
-};
-
 // @fnv 0x004a7040
 float BSMultiBoundAABB::GetPointLength()
 {
-    return m_afExtents.Length();
+    return static_cast<const NiPoint3&>(m_kOffset).Length();
 }
 
 extern int g_01202818;
@@ -285,53 +340,29 @@ int __thiscall FUN_00c4fec0_shell::FUN_00c4fec0()
     return 3;
 }
 
-struct FUN_004a6d90_shell
+struct PrimitiveBoxContainment : public BGSPrimitiveBox
 {
     bool IsPointInsideBox(NiPoint3& aPoint);
 };
 
 // Returns true when aPoint lies within the axis-aligned box given by the negated and positive extents stored at offset 0x18 of this.
 // @fnv 0x004a6d90
-bool FUN_004a6d90_shell::IsPointInsideBox(NiPoint3& aPoint)
+bool PrimitiveBoxContainment::IsPointInsideBox(NiPoint3& aPoint)
 {
-    if (-((NiPoint3*)((char*)this + 0x18))->x > aPoint.x || -((NiPoint3*)((char*)this + 0x18))->y > aPoint.y ||
-        -((NiPoint3*)((char*)this + 0x18))->z > aPoint.z || aPoint.x > ((NiPoint3*)((char*)this + 0x18))->x ||
-        aPoint.y > ((NiPoint3*)((char*)this + 0x18))->y || aPoint.z > ((NiPoint3*)((char*)this + 0x18))->z)
+    if (-m_kRadii.x > aPoint.x || -m_kRadii.y > aPoint.y ||
+        -m_kRadii.z > aPoint.z || aPoint.x > m_kRadii.x ||
+        aPoint.y > m_kRadii.y || aPoint.z > m_kRadii.z)
         return false;
     return true;
 }
 
-struct CloningProcess;
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-    unsigned int m_uiRefCount;
-};
-struct NiPoint2
-{
-    float x, y;
-};
-struct ThreeByThreeMatrix
-{
-    float m_afEntries[3][3];
-};
-struct NiPlane
-{
-    NiPoint3 m_kPlaneNormal;
-    float m_fPlaneConstant;
-};
-struct NiFrustumPlanes
-{
-    NiPlane m_akPlanes[6];
-    unsigned int m_uiActivePlaneMask;
-};
 struct FUN_00c335d0 : NiRefObject
 {
     static void* operator new(unsigned int uiSize);
     static void operator delete(void*, unsigned int);
     NiPoint3 kTargetCenter;
     NiPoint2 m_kPoint2;
-    ThreeByThreeMatrix kRotationBasis;
+    NiMatrix3 kRotationBasis;
     int m_uiShapeType;
     NiFrustumPlanes m_kFrustumPlanes;
     NiPoint3 m_kCornerPoints[4];
@@ -358,102 +389,47 @@ FUN_00c335d0* FUN_00c33730_shell::FUN_00c33730(CloningProcess& kCloning)
 }
 
 namespace fnv_00c36330 {
-struct CloningProcess;
-struct NiRefObject
+
+// The shared OBB has no clone/copy declarations yet.
+struct MultiBoundOBBClone : public BSMultiBoundOBB
 {
-    virtual ~NiRefObject();
-    unsigned int m_uiRefCount;
-};
-struct ThreeByThreeMatrix
-{
-    float m_afEntries[3][3];
-};
-struct FUN_00c36310 : NiRefObject
-{
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void*, unsigned int);
-    int m_uiShapeType;
-    NiPoint3 kTargetCenter;
-    NiPoint3 kSize;
-    ThreeByThreeMatrix kAxis;
-    FUN_00c36310();
-};
-struct FUN_00c36330_shell
-{
-    void FUN_00c363c0(FUN_00c36310* pkDest, CloningProcess& kCloning);
-    FUN_00c36310* FUN_00c36330(CloningProcess& kCloning);
+    void CopyTo(BSMultiBoundOBB* pkDest, CloningProcess& kCloning);
+    BSMultiBoundOBB* Clone(CloningProcess& kCloning);
 };
 
 // @fnv 0x00c36330
-FUN_00c36310* FUN_00c36330_shell::FUN_00c36330(CloningProcess& kCloning)
+BSMultiBoundOBB* MultiBoundOBBClone::Clone(CloningProcess& kCloning)
 {
-    FUN_00c36310* pkObject = new FUN_00c36310;
-    FUN_00c363c0(pkObject, kCloning);
+    BSMultiBoundOBB* pkObject = new BSMultiBoundOBB;
+    CopyTo(pkObject, kCloning);
     return pkObject;
 }
 }  // namespace fnv_00c36330
 
 namespace fnv_00c37ee0 {
-struct CloningProcess;
-struct NiRefObject
+
+struct MultiBoundAABBCloneHelper
 {
-    virtual ~NiRefObject();
-    unsigned int m_uiRefCount;
-};
-struct FUN_00c37ec0 : NiRefObject
-{
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void*, unsigned int);
-    int m_uiShapeType;
-    NiPoint3 kTargetCenter;
-    NiPoint3 m_kPoint2;
-    FUN_00c37ec0();
-};
-struct FUN_00c37ee0_shell
-{
-    void FUN_00c37f70(FUN_00c37ec0* pkDest, CloningProcess& kCloning);
-    FUN_00c37ec0* FUN_00c37ee0(CloningProcess& kCloning);
+    void FUN_00c37f70(BSMultiBoundAABB* pkDest, CloningProcess& kCloning);
+    BSMultiBoundAABB* FUN_00c37ee0(CloningProcess& kCloning);
 };
 
 // @fnv 0x00c37ee0
-FUN_00c37ec0* FUN_00c37ee0_shell::FUN_00c37ee0(CloningProcess& kCloning)
+BSMultiBoundAABB* MultiBoundAABBCloneHelper::FUN_00c37ee0(CloningProcess& kCloning)
 {
-    FUN_00c37ec0* pkObject = new FUN_00c37ec0;
+    BSMultiBoundAABB* pkObject = new BSMultiBoundAABB;
     FUN_00c37f70(pkObject, kCloning);
     return pkObject;
 }
 }  // namespace fnv_00c37ee0
 
-namespace fnv_00c4fb30 {
-struct CloningProcess;
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-    unsigned int m_uiRefCount;
-};
-struct FUN_00c4fb10 : NiRefObject
-{
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void*, unsigned int);
-    int m_uiShapeType;
-    NiPoint3 kTargetCenter;
-    float fRadius;
-    FUN_00c4fb10();
-};
-struct FUN_00c4fb30_shell
-{
-    void FUN_00c4fbc0(FUN_00c4fb10* pkDest, CloningProcess& kCloning);
-    FUN_00c4fb10* FUN_00c4fb30(CloningProcess& kCloning);
-};
-
 // @fnv 0x00c4fb30
-FUN_00c4fb10* FUN_00c4fb30_shell::FUN_00c4fb30(CloningProcess& kCloning)
+BSMultiBoundSphere* BSMultiBoundSphere::FUN_00c4fb30(CloningProcess& kCloning)
 {
-    FUN_00c4fb10* pkObject = new FUN_00c4fb10;
+    BSMultiBoundSphere* pkObject = new BSMultiBoundSphere;
     FUN_00c4fbc0(pkObject, kCloning);
     return pkObject;
 }
-}  // namespace fnv_00c4fb30
 
 extern char const* const g_012030b0_arg1;
 
@@ -481,24 +457,11 @@ int* FUN_004a62c0_shell::FUN_004a62c0()
     return &g_012030b0;
 }
 
-namespace fnv_004a7030 {
-struct BSMultiBoundAABB
-{
-    int FUN_004a7030();
-};
-
 // @fnv 0x004a7030
 int BSMultiBoundAABB::FUN_004a7030()
 {
     return 0x24;
 }
-}  // namespace fnv_004a7030
-
-struct BGSPrimitiveSphere
-{
-    void SetRadius(float radius);
-    void FUN_004a71d0(NiPoint3& akRadii);
-};
 
 // @fnv 0x004a71d0
 void BGSPrimitiveSphere::FUN_004a71d0(NiPoint3& aPoint)
@@ -506,31 +469,16 @@ void BGSPrimitiveSphere::FUN_004a71d0(NiPoint3& aPoint)
     SetRadius(aPoint.x);
 }
 
-struct FUN_004a4bd0_shell
+// This destructor entry calls the base directly without installing a vtable.
+struct PrimitiveSphereDestruction
 {
-    void FUN_004a4bd0();
+    void Destroy();
 };
-
-void FUN_004a4bd0_shell::FUN_004a4bd0()
-{}
-
-struct FUN_004a7220_shell
-{
-    void FUN_004a7220();
-};
-
 // @fnv 0x004a7220
-void FUN_004a7220_shell::FUN_004a7220()
+void PrimitiveSphereDestruction::Destroy()
 {
-    ((FUN_004a4bd0_shell*)this)->FUN_004a4bd0();
+    reinterpret_cast<BGSPrimitive*>(this)->BGSPrimitive::~BGSPrimitive();
 }
-
-struct BSMultiBoundSphere
-{
-    void DestroyBase();
-    static void _delete(void* p, unsigned int size);
-    void* FUN_004a7bf0(unsigned int flags);
-};
 
 // Calls DestroyBase, frees this with _delete when flags has bit 0 set, and returns this.
 // @fnv 0x004a7bf0
@@ -586,15 +534,6 @@ void* FUN_00c4f820_shell::FUN_00c4f820(unsigned int flags)
     return this;
 }
 
-struct NiStream
-{
-};
-
-struct NiObject
-{
-    virtual void LoadBinary(NiStream&);
-};
-
 struct FUN_00c4f9f0_shell : NiObject
 {
     void FUN_00c4f9f0(NiStream& stream);
@@ -607,14 +546,6 @@ void FUN_00c4f9f0_shell::FUN_00c4f9f0(NiStream& stream)
 }
 
 namespace fnv_00c4fa10 {
-struct NiStream
-{
-};
-
-struct NiObject
-{
-    virtual void LinkObject(NiStream&);
-};
 
 struct FUN_00c4fa10_shell : NiObject
 {
@@ -629,12 +560,6 @@ void FUN_00c4fa10_shell::FUN_00c4fa10(NiStream& stream)
 }  // namespace fnv_00c4fa10
 
 namespace fnv_00c4fa30 {
-class NiStream;
-
-struct NiObject
-{
-    virtual bool RegisterStreamables(NiStream&);
-};
 
 struct FUN_00c4fa30_shell : NiObject
 {
@@ -652,17 +577,6 @@ bool FUN_00c4fa30_shell::FUN_00c4fa30(NiStream& stream)
 }  // namespace fnv_00c4fa30
 
 namespace fnv_00c4fa60 {
-struct NiStream
-{
-};
-
-struct NiObject
-{
-    virtual void LinkObject(NiStream&);
-};
-
-void NiObject::LinkObject(NiStream&)
-{}
 
 struct FUN_00c4fa60_shell : NiObject
 {
@@ -689,86 +603,53 @@ char const* const* FUN_00c4fb00_shell::FUN_00c4fb00()
     return &g_01202820_arg1;
 }
 
-namespace fnv_004a4c90 {
-struct FUN_004a4cc0_shell
-{
-    bool FUN_004a4cc0(void*);
-};
-struct FUN_004a4c90_shell : FUN_004a4cc0_shell
-{
-    bool FUN_004a4c90(void*);
-};
-// Returns the logical negation of FUN_004a4cc0 called on c.
+// Returns the logical negation of color equality.
 // @fnv 0x004a4c90
-bool FUN_004a4c90_shell::FUN_004a4c90(void* c)
+bool NiColorA::operator!=(const NiColorA& c) const
 {
-    return !FUN_004a4cc0(c);
+    return !operator==(c);
 }
-}  // namespace fnv_004a4c90
 
-struct _Fake_FUN_004a7090
-{
-    void f();
-};
 void __cdecl _delete(void*, unsigned int);
-struct BSOcclusionPlane
-{
-    void* FUN_004a6110(unsigned int);
-};
+
 // @fnv 0x004a6110
 void* BSOcclusionPlane::FUN_004a6110(unsigned int flags)
 {
-    ((_Fake_FUN_004a7090*)this)->f();
+    this->BSOcclusionPlane::~BSOcclusionPlane();
     if (flags & 1)
         _delete(this, 0xfc);
     return this;
 }
 
 void __cdecl _delete(void*, unsigned int);
-struct Unk462D0
-{
-    void __thiscall FUN_004a6310();
-    void* __thiscall FUN_004a62d0(unsigned int);
-};
 // @fnv 0x004a62d0
-void* __thiscall Unk462D0::FUN_004a62d0(unsigned int flags)
+void* BSPortal::Destroy(unsigned int flags)
 {
-    this->FUN_004a6310();
+    DestroyBase();
     if (flags & 1)
         _delete(this, 0x108);
     return this;
 }
 
-struct GO
+// BSPortal's destructor body (BSPortal::DestroyBase, called by the scalar deleting destructor 0x004a62d0): it destroys
+// m_104 (0x0045cec0), then runs 0x004a7090 (BSOcclusionPlane's teardown, straight to ~NiRefObject 0x00a5d3d0); neither
+// stores a vftable, which no destructor of the virtual shared classes reproduces, so these two views carry the shape.
+struct BSOcclusionPlaneTeardown_004a7090
 {
-    void* p;
-    ~GO();
-};
-struct FUN_004a7090
-{
-    ~FUN_004a7090();
+    ~BSOcclusionPlaneTeardown_004a7090();
     char _pad[0x104];
 };
-struct FUN_004a6310 : FUN_004a7090
+struct BSPortalTeardown_004a6310 : BSOcclusionPlaneTeardown_004a7090
 {
     GO field_104;
-    ~FUN_004a6310();
+    ~BSPortalTeardown_004a6310();
 };
-// Destructor for FUN_004a6310 that destroys its field_104 member and the base FUN_004a7090.
 // @fnv 0x004a6310
-FUN_004a6310::~FUN_004a6310()
+BSPortalTeardown_004a6310::~BSPortalTeardown_004a6310()
 {}
 
-namespace fnv_004a7060 {
-struct BSMultiBoundSphere
-{
-    void DestroyBase();
-};
 void __cdecl _delete(void*, unsigned int);
-struct BSMultiBoundAABB
-{
-    void* FUN_004a7060(unsigned int);
-};
+
 // Calls DestroyBase on this, optionally frees this with _delete when flags has bit 0 set, and returns this.
 // @fnv 0x004a7060
 void* BSMultiBoundAABB::FUN_004a7060(unsigned int flags)
@@ -778,13 +659,7 @@ void* BSMultiBoundAABB::FUN_004a7060(unsigned int flags)
         _delete(this, 0x24);
     return this;
 }
-}  // namespace fnv_004a7060
 
-struct BSMultiBoundOBB
-{
-    void FUN_004a7130();
-    void* FUN_004a7100(unsigned int);
-};
 void __cdecl _delete(void*, unsigned int);
 // @fnv 0x004a7100
 void* BSMultiBoundOBB::FUN_004a7100(unsigned int flags)
@@ -795,104 +670,55 @@ void* BSMultiBoundOBB::FUN_004a7100(unsigned int flags)
     return this;
 }
 
-namespace fnv_004a71f0 {
-struct FUN_004a7220_shell
-{
-    void FUN_004a7220();
-};
 void _Deallocate(void*);
-struct FUN_004a71f0_shell : FUN_004a7220_shell
-{
-    void* FUN_004a71f0(unsigned int);
-};
-// Calls FUN_004a7220, then deallocates this when bit 0 of flags is set, and returns this.
+// Calls the sphere destructor and optionally deallocates the primitive.
 // @fnv 0x004a71f0
-void* FUN_004a71f0_shell::FUN_004a71f0(unsigned int flags)
+void* BGSPrimitiveSphere::FUN_004a71f0(unsigned int flags)
 {
-    FUN_004a7220();
+    this->BGSPrimitiveSphere::~BGSPrimitiveSphere();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
-}  // namespace fnv_004a71f0
 
-namespace fnv_004a7240 {
-struct TESCombatStyle
-{
-    float UpdateCombatStyle();
-};
-struct BGSPrimitiveSphere
-{
-    bool FUN_004a7240(TESCombatStyle& aPoint);
-};
 // @fnv 0x004a7240
 bool BGSPrimitiveSphere::FUN_004a7240(TESCombatStyle& aPoint)
 {
     return (double)*(float*)((char*)this + 0x18) * *(float*)((char*)this + 0x18) > aPoint.UpdateCombatStyle();
 }
-}  // namespace fnv_004a7240
 
-struct ImageSpaceEffectParam
-{
-    ImageSpaceEffectParam(float, float, float, float);
-};
-struct S
-{
-    void FUN_004a7800();
-};
-// Constructs an ImageSpaceEffectParam on this object with all four float arguments set to 0.0f.
-// @fnv 0x004a7800
-void S::FUN_004a7800()
-{
-    ((ImageSpaceEffectParam*)this)->ImageSpaceEffectParam::ImageSpaceEffectParam(0.0f, 0.0f, 0.0f, 0.0f);
-}
-
-void __fastcall FUN_00c4f980(void*);
 extern int DAT_0101ea8c;
-struct FUN_004a7b40_Pt
+// Keep the original constructor entry's explicit base initialization: expressing
+// this as a C++ constructor adds exception unwinding absent from this entry.
+struct MultiBoundSphereInitialization : public BSMultiBoundSphere
 {
-    float x;
-    float y;
-    float z;
+    BSMultiBoundSphere* Initialize(const NiPoint3& point, float radius);
 };
-struct FUN_004a7b40
-{
-    int _00;
-    int _04;
-    int _08;
-    FUN_004a7b40_Pt mPt;
-    float mRadius;
-    FUN_004a7b40(const FUN_004a7b40_Pt&, float);
-};
-// Initializes the object's vtable, copies the given point into mPt and stores the radius in mRadius.
+
+// Initializes the base, center and radius.
 // @fnv 0x004a7b40
-FUN_004a7b40::FUN_004a7b40(const FUN_004a7b40_Pt& aPt, float aRadius)
+BSMultiBoundSphere* MultiBoundSphereInitialization::Initialize(const NiPoint3& aPt, float aRadius)
 {
-    FUN_00c4f980(this);
+    this->BSMultiBoundShape::BSMultiBoundShape();
     *(void**)this = (void*)&DAT_0101ea8c;
-    mPt = aPt;
-    mRadius = aRadius;
+    center = aPt;
+    radius = aRadius;
+    return this;
 }
 
 namespace fnv_00c36400 {
-class NiStream;
-struct ThreeByThreeMatrix
+
+struct MultiBoundOBBLoad : public BSMultiBoundOBB
 {
+    void LoadBase(NiStream&);
     void LoadBinary(NiStream&);
-};
-struct My36400
-{
-    void FUN_00c37fc0(NiStream&);
-    void FUN_00c36400(NiStream&);
-    char pad[0x24];
-    ThreeByThreeMatrix m;
 };
 // Loads the object from the stream: calls FUN_00c37fc0(s), then loads the member via LoadBinary(s).
 // @fnv 0x00c36400
-void My36400::FUN_00c36400(NiStream& aStream)
+void MultiBoundOBBLoad::LoadBinary(NiStream& aStream)
 {
-    FUN_00c37fc0(aStream);
-    m.LoadBinary(aStream);
+    LoadBase(aStream);
+    reinterpret_cast<NiMatrix3&>(unk24).LoadBinary(aStream);
 }
 }  // namespace fnv_00c36400
 
@@ -914,25 +740,16 @@ bool FUN_00c36450_shell::FUN_00c36450(int aiValue)
 }
 }  // namespace fnv_00c36450
 
-class NiStream;
-struct FUN_00a59a90_tgt
+struct MultiBoundOBBSave : public BSMultiBoundOBB
 {
-    void ReadMatrixFromStream(NiStream*);
-};
-struct S00c38050
-{
-    char _f[36];
-    void FUN_00c38050(NiStream*);
-};
-struct FUN_00c36480_tgt : S00c38050, FUN_00a59a90_tgt
-{
-    void FUN_00c36480(NiStream*);
+    void SaveBase(NiStream*);
+    void SaveBinary(NiStream*);
 };
 // @fnv 0x00c36480
-void FUN_00c36480_tgt::FUN_00c36480(NiStream* p)
+void MultiBoundOBBSave::SaveBinary(NiStream* p)
 {
-    S00c38050::FUN_00c38050(p);
-    FUN_00a59a90_tgt::ReadMatrixFromStream(p);
+    SaveBase(p);
+    reinterpret_cast<NiMatrix3&>(unk24).SaveBinary(*p);
 }
 
 namespace fnv_00c37110 {
@@ -972,11 +789,7 @@ void S37110::GetVectorAndLength(Out12* apOut)
 }  // namespace fnv_00c37110
 
 namespace fnv_00c37fc0 {
-struct NiColor
-{
-    float r, g, b;
-    void LoadBinary(class NiStream&);
-};
+
 struct FUN_00c4f9f0_shell
 {
     char _pad[12];
@@ -998,12 +811,6 @@ void FUN_00c37fc0_shell::FUN_00c37fc0(class NiStream& aStream)
 }
 }  // namespace fnv_00c37fc0
 
-class NiStream;
-struct NiColor
-{
-    float r, g, b;
-    void SaveBinary(NiStream&);
-};
 struct FUN_00c38050_Holder
 {
     char _pad[12];
@@ -1020,50 +827,20 @@ void FUN_00c38050_Holder::FUN_00c38050(NiStream& aStream)
     c2.SaveBinary(aStream);
 }
 
-namespace fnv_00c389e0 {
-struct Pt
-{
-    float Length() const;
-};
-struct Vec3
-{
-    float x;
-    float y;
-    float z;
-};
-struct Vec4
-{
-    Vec3 v;
-    float w;
-};
-struct BSMultiBoundAABB
-{
-    char pad0[12];
-    Vec3 v;
-    Pt pt;
-    void FUN_00c389e0(Vec4* p);
-};
 // @fnv 0x00c389e0
 void BSMultiBoundAABB::FUN_00c389e0(Vec4* apOut)
 {
     int pad;
     {
-        float len = pt.Length();
-        apOut->v = v;
+        float len = static_cast<const NiPoint3&>(m_kOffset).Length();
+        *reinterpret_cast<NiPoint3*>(apOut) = reinterpret_cast<const NiPoint3&>(Center);
         apOut->w = len;
     }
 }
-}  // namespace fnv_00c389e0
 
 namespace fnv_00c4f9b0 {
-struct NiObject
-{
-    void CopyMembersStream(unsigned int, void*);
-    int _pad0;
-    int _pad4;
-    int m08;
-};
-struct FUN_00c4f9b0_class : NiObject
+
+struct FUN_00c4f9b0_class : BSMultiBoundShape
 {
     void CopyMembersStreamWithField(NiObject*, void*);
 };
@@ -1073,8 +850,8 @@ void FUN_00c4f9b0_class::CopyMembersStreamWithField(NiObject* pDest, void* pArg)
 {
     int tmp;
     NiObject::CopyMembersStream((unsigned int)pDest, pArg);
-    tmp = m08;
-    pDest->m08 = tmp;
+    tmp = m_uiShapeType;
+    static_cast<BSMultiBoundShape*>(pDest)->m_uiShapeType = tmp;
 }
 }  // namespace fnv_00c4f9b0
 
@@ -1091,10 +868,7 @@ bool TCEq::FUN_00c4fa80(class NiObject* apObject)
 }
 
 namespace fnv_00c4fad0 {
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-};
+
 void __cdecl _delete(void*, unsigned int);
 struct FUN_00c4fad0_host : NiRefObject
 {
@@ -1106,32 +880,28 @@ void* FUN_00c4fad0_host::FUN_00c4fad0(unsigned int flags)
 {
     this->NiRefObject::~NiRefObject();
     if (flags & 1)
-        _delete(this, 12);
+        fnv_00c4fad0::_delete(this, 12);
     return this;
 }
 }  // namespace fnv_00c4fad0
 
 namespace fnv_00c4fc10 {
-class NiStream;
-struct NiColor
-{
-    void LoadBinary(NiStream&);
-};
+
 struct FUN_00c4f9f0_shell
 {
     void FUN_00c4f9f0(NiStream&);
 };
 template <typename T> void ReadBinaryValue(NiStream&, T&);
-struct FUN_00c4fc10_shell
+struct MultiBoundSphereLoad : public BSMultiBoundSphere
 {
     void FUN_00c4fc10(NiStream&);
 };
 // @fnv 0x00c4fc10
-void FUN_00c4fc10_shell::FUN_00c4fc10(NiStream& stream)
+void MultiBoundSphereLoad::FUN_00c4fc10(NiStream& stream)
 {
     ((FUN_00c4f9f0_shell*)this)->FUN_00c4f9f0(stream);
-    ((NiColor*)((char*)this + 0xC))->LoadBinary(stream);
-    ReadBinaryValue<unsigned int>(stream, *(unsigned int*)((char*)this + 0x18));
+    reinterpret_cast<NiColor&>(center).LoadBinary(stream);
+    ReadBinaryValue<unsigned int>(stream, reinterpret_cast<unsigned int&>(radius));
 }
 }  // namespace fnv_00c4fc10
 
@@ -1152,32 +922,22 @@ unsigned char FUN_00c38020_shell::FUN_00c4fc70(int a)
 }  // namespace fnv_00c4fc70
 
 namespace fnv_00c4fca0 {
-class NiStream;
-struct NiColor
-{
-    float r;
-    float g;
-    float b;
-    void SaveBinary(NiStream&);
-};
+
 struct Holder60
 {
     void FUN_00c4fa60(NiStream&);
 };
 void __cdecl CallAnimCallback(NiStream&, void*);
-struct FUN_00c4fca0_This
+struct MultiBoundSphereSave : public BSMultiBoundSphere
 {
-    char _pad[12];
-    NiColor _c;
-    int _f18;
     void SaveToStream(NiStream&);
 };
 // @fnv 0x00c4fca0
-void FUN_00c4fca0_This::SaveToStream(NiStream& s)
+void MultiBoundSphereSave::SaveToStream(NiStream& s)
 {
     ((Holder60*)this)->FUN_00c4fa60(s);
-    _c.SaveBinary(s);
-    CallAnimCallback(s, &_f18);
+    reinterpret_cast<NiColor&>(center).SaveBinary(s);
+    CallAnimCallback(s, &radius);
 }
 }  // namespace fnv_00c4fca0
 
@@ -1194,50 +954,26 @@ char const* const* __thiscall FUN_004a7020_shell::FUN_004a7020()
     return &g_01202818_arg1;
 }
 
-namespace fnv_004a7130 {
-struct BSMultiBoundSphere
-{
-    void DestroyBase();
-    void FUN_004a7130();
-};
-
 // @fnv 0x004a7130
 void BSMultiBoundSphere::FUN_004a7130()
 {
     DestroyBase();
 }
-}  // namespace fnv_004a7130
 
-namespace fnv_004a7830 {
-struct Flt
-{
-    operator unsigned int();
-};
-struct BGSPrimitiveSphere : NiGeometry
-{
-    BGSPrimitiveSphere();
-    RgbaColor m_kRgbaColor;
-    unsigned int m_uiValue1;
-    void FUN_004a7830(RgbaColor&);
-};
 // @fnv 0x004a7830
-void BGSPrimitiveSphere::FUN_004a7830(RgbaColor& apTextColor)
+void BGSPrimitiveSphere::FUN_004a7830(NiColorA& apTextColor)
 {
-    *(RgbaColor*)((char*)this + 8) = apTextColor;
-    if (reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x24)->operator unsigned int())
+    Color = apTextColor;
+    if (m_kGeometry)
     {
-        NiGeometryData* pgeomdata =
-            reinterpret_cast<NiGeometry*>(
-                reinterpret_cast<Flt*>(reinterpret_cast<char*>(this) + 0x24)->operator unsigned int())
-                ->FUN_005495f0();
-        RgbaColor* pcolors = pgeomdata->GetColors();
+        NiGeometryData* pgeomdata = m_kGeometry->GetModelData();
+        NiColorA* pcolors = reinterpret_cast<NiColorA*>(pgeomdata->GetColors());
         int i2 = 0;
         for (; i2 < 112; ++i2)
-            pcolors[i2] = *(RgbaColor*)((char*)this + 8);
+            pcolors[i2] = reinterpret_cast<const NiColorA&>(Color);
         pgeomdata->SetDirtyFlags(4);
     }
 }
-}  // namespace fnv_004a7830
 
 extern "C" void* g_01203108;
 
@@ -1339,34 +1075,21 @@ void FUN_00c50370_shell::FUN_00c50370(int a, int b, int c, int d, int e, int f)
 
 extern float _DAT_010162c0;
 
-struct RgbaColor;
-
-struct NiPoint2_helper : public NiPoint2
-{
-    NiPoint2_helper(float, float);
-    NiPoint2 operator*(float) const;
-};
-
-struct NiPoint3_helper : public NiPoint3
-{
-    NiPoint3 operator*(float) const;
-};
-
-void* __cdecl FUN_004a4f80(NiPoint2*, RgbaColor*);
-void* __cdecl CreatePrimitiveBox(NiPoint3*, RgbaColor*);
-void* __cdecl FUN_004a5100(float, RgbaColor*);
+void* __cdecl FUN_004a4f80(NiPoint2*, NiColorA*);
+void* __cdecl CreatePrimitiveBox(NiPoint3*, NiColorA*);
+void* __cdecl FUN_004a5100(float, NiColorA*);
 
 // @fnv 0x004a4e90
-void* __cdecl FUN_004a4e90(int eType, NiPoint3* apPoint, RgbaColor* apTextColor)
+void* __cdecl FUN_004a4e90(int eType, NiPoint3* apPoint, NiColorA* apTextColor)
 {
     switch (eType)
     {
     case 3: {
-        NiPoint2 extents = NiPoint2_helper(apPoint->x, apPoint->z) * _DAT_010162c0;
+        NiPoint2 extents = NiPoint2(apPoint->x, apPoint->z) * _DAT_010162c0;
         return FUN_004a4f80(&extents, apTextColor);
     }
     case 1: {
-        NiPoint3 extents = *(NiPoint3_helper*)apPoint * _DAT_010162c0;
+        NiPoint3 extents = *static_cast<const NiPoint3*>(apPoint) * _DAT_010162c0;
         return CreatePrimitiveBox(&extents, apTextColor);
     }
     case 2:
@@ -1376,29 +1099,16 @@ void* __cdecl FUN_004a4e90(int eType, NiPoint3* apPoint, RgbaColor* apTextColor)
     }
 }
 
-void __fastcall FUN_00c4f980(void*);
-struct FUN_004a6fc0_Pt
-{
-    float x;
-    float y;
-    float z;
-};
-struct FUN_004a6fc0
-{
-    const char* f00;
-    char pad[8];
-    FUN_004a6fc0_Pt p0c;
-    FUN_004a6fc0_Pt p18;
-    FUN_004a6fc0(const FUN_004a6fc0_Pt&, const FUN_004a6fc0_Pt&);
-};
-// Initializes the object via FUN_00c4f980, sets f00 to a string literal, and copies the two point arguments into p0c and p18.
+// The shared AABB has no two-point constructor overload. Keep its entry
+// callable here while using the shared base and members for all storage.
 // @fnv 0x004a6fc0
-FUN_004a6fc0::FUN_004a6fc0(const FUN_004a6fc0_Pt& aPoint1, const FUN_004a6fc0_Pt& aPoint2)
+PrimitiveAABB* PrimitiveAABB::Initialize(const NiPoint3& aPoint1, const NiPoint3& aPoint2)
 {
-    FUN_00c4f980(this);
-    f00 = "`pJ";
-    p0c = aPoint1;
-    p18 = aPoint2;
+    this->BSMultiBoundShape::BSMultiBoundShape();
+    *(void***)this = gMultiBoundAABBVtable;
+    reinterpret_cast<NiPoint3&>(Center) = reinterpret_cast<const NiPoint3&>(aPoint1);
+    reinterpret_cast<NiPoint3&>(m_kOffset) = reinterpret_cast<const NiPoint3&>(aPoint2);
+    return this;
 }
 
 extern int DAT_0101e9a4;
@@ -1406,345 +1116,125 @@ struct Data9
 {
     int v[9];
 };
-struct BaseFake
+struct MultiBoundOBBInitialization : public BSMultiBoundOBB
 {
-    int pad[9];
-    void FUN_004a6fc0(int a, int b);
-};
-struct MyHolder : BaseFake
-{
-    Data9 d;
-    MyHolder* FUN_004a70b0(int a, int b, const Data9& c);
+    void InitializeBase(int a, int b);
+    MultiBoundOBBInitialization* Initialize(int a, int b, const Data9& c);
 };
 // Calls FUN_004a6fc0 with a and b, sets the vtable pointer to DAT_0101e9a4, copies c into d, and returns this.
 // @fnv 0x004a70b0
-MyHolder* MyHolder::FUN_004a70b0(int aiArg1, int aiArg2, const Data9& arData)
+MultiBoundOBBInitialization* MultiBoundOBBInitialization::Initialize(int aiArg1, int aiArg2, const Data9& arData)
 {
-    FUN_004a6fc0(aiArg1, aiArg2);
+    InitializeBase(aiArg1, aiArg2);
     *(int*)this = (int)&DAT_0101e9a4;
-    d = arData;
+    reinterpret_cast<Data9&>(unk24) = arData;
     return this;
 }
 
-struct Holder
+struct MultiBoundOBBCopy : public BSMultiBoundOBB
 {
-    char _pad[0x24];
-    struct Nine
-    {
-        int v[9];
-    } fld;
-    void FUN_00c37f70(Holder*, int);
-    void FUN_00c363c0(Holder*, int);
+    void CopyBase(MultiBoundOBBCopy*, int);
+    void CopyTo(MultiBoundOBBCopy*, int);
 };
 // Calls FUN_00c37f70 on the passed Holder and then copies this object's fld into it.
 // @fnv 0x00c363c0
-void Holder::FUN_00c363c0(Holder* apTarget, int b)
+void MultiBoundOBBCopy::CopyTo(MultiBoundOBBCopy* apTarget, int b)
 {
-    FUN_00c37f70(apTarget, b);
-    apTarget->fld = fld;
+    CopyBase(apTarget, b);
+    reinterpret_cast<Data9&>(apTarget->unk24) = reinterpret_cast<const Data9&>(unk24);
 }
 
-struct Mat364
+struct MultiBoundOBBEquality : public BSMultiBoundOBB
 {
-    char d[36];
-    bool __thiscall _Call_4d9ae0(const Mat364&) const;
-};
-struct Obj364
-{
-    char pad[36];
-    Mat364 m;
-    bool __thiscall FUN_00c38090(Obj364*);
-    bool __thiscall FUN_00c364b0(Obj364*);
+    bool EqualsBase(MultiBoundOBBEquality*);
+    bool Equals(MultiBoundOBBEquality*);
 };
 // Calls FUN_00c38090 on other; if it returns true, also compares m with other's m via _Call_4d9ae0 and returns that result.
 // @fnv 0x00c364b0
-bool __thiscall Obj364::FUN_00c364b0(Obj364* other)
+bool MultiBoundOBBEquality::Equals(MultiBoundOBBEquality* other)
 {
-    bool ret = FUN_00c38090(other);
+    bool ret = EqualsBase(other);
     if (ret)
     {
-        Obj364* p = other;
-        ret = m._Call_4d9ae0(p->m);
+        MultiBoundOBBEquality* p = other;
+        ret = reinterpret_cast<const NiMatrix3&>(unk24) == reinterpret_cast<const NiMatrix3&>(p->unk24);
     }
     return ret;
 }
 
-struct D12_00c37f70
+// Copy support missing from the shared declaration; all state is inherited.
+struct MultiBoundAABBCopy : public BSMultiBoundAABB
 {
-    int x, y, z;
+    void CopyMembersStreamWithField(BSMultiBoundAABB* target, int process);
+    void CopyTo(BSMultiBoundAABB* target, int process);
 };
-struct A00c37f70
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void vm(void* p);
-    char _04[20];
-    D12_00c37f70 d;
-};
-struct C00c37f70
-{
-    char _00[12];
-    int _0C;
-    char _10[8];
-    D12_00c37f70 d;
-    void CopyMembersStreamWithField(A00c37f70* a, int b);
-    void FUN_00c37f70(A00c37f70* a, int b);
-};
-// Calls CopyMembersStreamWithField, then passes &_0C to a->vm and copies d into a->d.
+
 // @fnv 0x00c37f70
-void C00c37f70::FUN_00c37f70(A00c37f70* apTarget, int b)
+void MultiBoundAABBCopy::CopyTo(BSMultiBoundAABB* apTarget, int b)
 {
     CopyMembersStreamWithField(apTarget, b);
-    apTarget->vm((void*)&_0C);
-    apTarget->d = d;
+    apTarget->SetGridPosition(Center);
+    reinterpret_cast<NiPoint3&>(apTarget->m_kOffset) = reinterpret_cast<const NiPoint3&>(m_kOffset);
 }
 
-struct S_C4F420
-{
-    char _pad[0xFC];
-    int m_fc;
-    int m_100;
-    void CopyFields(S_C4F420* a, int b);
-};
-// Copies m_fc and m_100 from this object into the object pointed to by a.
+// Copies the portal fields into the target portal.
 // @fnv 0x00c4f420
-void S_C4F420::CopyFields(S_C4F420* apTarget, int aiUnused)
+void BSPortal::CopyFields(BSPortal* apTarget, int aiUnused)
 {
     apTarget->m_fc = this->m_fc;
     apTarget->m_100 = this->m_100;
 }
 
-struct Shell
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void Real(int*);
-    char _pad0[8];
-    int _m0C;
-    char _pad1[8];
-    float _m18;
-    void CopyMembersStreamWithField(Shell*, int);
-    void FUN_00c4fbc0(Shell*, int);
-};
 // Calls CopyMembersStreamWithField with a2, invokes Real on _m0C, then reads and rewrites _m18 with its own value.
 // @fnv 0x00c4fbc0
-void Shell::FUN_00c4fbc0(Shell* a1, int a2)
+void BSMultiBoundSphere::FUN_00c4fbc0(BSMultiBoundSphere* a1, CloningProcess& a2)
 {
-    CopyMembersStreamWithField(a1, a2);
-    a1->Real(&_m0C);
-    float f = _m18;
-    a1->_m18 = f;
+    reinterpret_cast<fnv_00c4f9b0::FUN_00c4f9b0_class*>(this)->CopyMembersStreamWithField(a1, &a2);
+    a1->SetGridPosition(reinterpret_cast<const NiPoint3&>(center));
+    float f = radius;
+    a1->radius = f;
 }
 
-struct V00c50330
+struct MultiBoundSphereVector : public BSMultiBoundSphere
 {
-    float x;
-    float y;
-    float z;
-};
-struct O00c50330
-{
-    V00c50330 v;
-    float w;
-};
-struct H00c50330
-{
-    char pad[12];
-    V00c50330 v;
-    float w;
-    void CopyTo(O00c50330* p);
+    void CopyTo(Vec4* p);
 };
 // Copies the stored vector and scalar into the given output structure.
 // @fnv 0x00c50330
-void H00c50330::CopyTo(O00c50330* pOut)
+void MultiBoundSphereVector::CopyTo(Vec4* pOut)
 {
-    float f = w;
-    pOut->v = v;
+    float f = radius;
+    *reinterpret_cast<NiPoint3*>(pOut) = reinterpret_cast<const NiPoint3&>(center);
     pOut->w = f;
 }
 
-struct FUN_00c4fb10_shell
-{
-    char m0[0x1c];
-    static void* __cdecl operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    FUN_00c4fb10_shell();
-};
-// Allocates and constructs a new FUN_00c4fb10_shell object, returning the pointer.
+// Allocates and constructs a sphere bound.
 // @fnv 0x00c4fdb0
-FUN_00c4fb10_shell* FUN_00c4fdb0()
+BSMultiBoundSphere* FUN_00c4fdb0()
 {
-    return new FUN_00c4fb10_shell;
+    return new BSMultiBoundSphere;
 }
 
-namespace fnv_004a5100 {
-struct FUN_004a5100
-{
-    virtual void v0();
-    virtual void v1(int);
-    virtual void v2(int);
-    char pad[0x30];
-    FUN_004a5100();
-    virtual ~FUN_004a5100();
-    void SetRadius(float f);
-};
-// Allocates a FUN_004a5100, calls v2(a) and SetRadius(f), sets the field at offset 4 to 2, and returns it.
+// Allocates a sphere, applies color and radius, and sets its primitive type.
 // @fnv 0x004a5100
-FUN_004a5100* FUN_004a5100_create(float afValue, int aiArg)
+void* __cdecl FUN_004a5100(float afValue, NiColorA* apColor)
 {
-    FUN_004a5100* p = new FUN_004a5100;
-    p->v2(aiArg);
+    BGSPrimitiveSphere* p = new BGSPrimitiveSphere;
+    p->ApplyColor(reinterpret_cast<NiColorA&>(*apColor));
     p->SetRadius(afValue);
-    *(int*)((char*)p + 4) = 2;
+    p->eType = 2;
     return p;
 }
-}  // namespace fnv_004a5100
-
-namespace fnv_004a5300 {
-class GO
-{
-  public:
-    void operator=(void*);
-    operator unsigned int() const;
-};
-
-struct A51BF0Base
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-
-struct FUN_004a5300_shell
-{
-    unsigned char m_unk_00[0x2C];
-    GO m_go;
-
-    void CreatePlaneFadeNode();
-};
 
 // @fnv 0x004a5300
-void FUN_004a5300_shell::CreatePlaneFadeNode()
+void BGSPrimitivePlane::Build()
 {
-    m_go = new BSFadeNode;
-    reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(m_go))->SetName(NiFixedString("Plane"));
-    reinterpret_cast<NiAVObject*>(static_cast<unsigned int>(m_go))->UpdateSceneObject();
+    m_pController = new BSFadeNode;
+    static_cast<NiAVObject*>(m_pController)->SetName(NiFixedString("Plane"));
+    static_cast<NiAVObject*>(m_pController)->UpdateSceneObject();
 }
-}  // namespace fnv_004a5300
 
 namespace fnv_004a6150 {
-struct NiPoint2
-{
-    float x;
-    float y;
-
-    NiPoint2(float, float);
-};
-
-struct NiPoint3Access
-{
-    static NiPoint3 const ZERO;
-};
-
-struct A51BF0Base
-{
-    static void* __cdecl operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-
-struct BSPortal : A51BF0Base
-{
-    char data[0x108];
-
-    BSPortal(NiPoint3 const&, NiPoint2*, char*);
-};
 
 struct FUN_004a6150_shell
 {
@@ -1758,7 +1248,7 @@ extern int _data_011c16bc;
 // @fnv 0x004a6150
 BSPortal* FUN_004a6150_shell::CreateBSPortal()
 {
-    return new BSPortal(NiPoint3Access::ZERO,
+    return new BSPortal(NiPoint3::ZERO,
                         &NiPoint2(*reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x18),
                                   *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x20)),
                         &DAT_011a9448);
@@ -1771,28 +1261,18 @@ struct FUN_00c4fab0_shell
     void FUN_00c4fab0(int);
 };
 
-struct NiTPrimitiveArray_unsigned_int_
-{
-    unsigned int AddFirstEmpty(unsigned int const&);
-};
-
-struct NiPoint3_FUN_00a59af0_helper
-{
-    char* FUN_00a59af0(char const*);
-};
-
 void* _FUN_00a7d330(char const*);
 
 extern char const* const g_01202818_arg1;
 
 struct FUN_00c38220_shell : public FUN_00c4fab0_shell
 {
-    void AddPropertyNames(NiTPrimitiveArray_unsigned_int_*);
+    void AddPropertyNames(NiTPrimitiveArray<unsigned int>*);
 };
 
 // Calls the base method, then appends the property id and the "Center" and "Half Extents" names to the array.
 // @fnv 0x00c38220
-void FUN_00c38220_shell::AddPropertyNames(NiTPrimitiveArray_unsigned_int_* array)
+void FUN_00c38220_shell::AddPropertyNames(NiTPrimitiveArray<unsigned int>* array)
 {
     char unused[0x20];
     char* denter;
@@ -1804,10 +1284,10 @@ void FUN_00c38220_shell::AddPropertyNames(NiTPrimitiveArray_unsigned_int_* array
     array->AddFirstEmpty(reinterpret_cast<unsigned int const&>(propertyId));
 
     denter =
-        reinterpret_cast<NiPoint3_FUN_00a59af0_helper*>(reinterpret_cast<char*>(this) + 0x0c)->FUN_00a59af0("Center");
+        reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0x0c)->FUN_00a59af0("Center");
     array->AddFirstEmpty(reinterpret_cast<unsigned int const&>(denter));
 
-    char* halfExtents = reinterpret_cast<NiPoint3_FUN_00a59af0_helper*>(reinterpret_cast<char*>(this) + 0x18)
+    char* halfExtents = reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0x18)
                             ->FUN_00a59af0("Half Extents");
     array->AddFirstEmpty(reinterpret_cast<unsigned int const&>(halfExtents));
 }
@@ -1846,144 +1326,57 @@ FUN_00c4f460* FUN_00c4f6c0_shell::FUN_00c4f620(int arg)
 }
 }  // namespace fnv_00c4f620
 
-class Base_b4940
-{
-  public:
-    virtual ~Base_b4940();
-    unsigned int m_04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    Base_b4940();
-};
-
-class Ptr_b4940
-{
-  public:
-    void* m_pObject;
-    Ptr_b4940(void* aObject);
-};
-
-class FUN_004a5280 : public Base_b4940
-{
-  public:
-    virtual ~FUN_004a5280();
-    Ptr_b4940 m_24;
-    unsigned int unk28;
-    Ptr_b4940 m_2c;
-    unsigned int unk30;
-
-    FUN_004a5280();
-};
-
-// Initializes the base, sets m_04 to 3, and constructs the two pointer members m_24 and m_2c with null.
+// Initializes the primitive type and clears its geometry and controller pointers.
 // @fnv 0x004a5280
-FUN_004a5280::FUN_004a5280() : Base_b4940(), m_24(0), m_2c(0)
+BGSPrimitivePlane::BGSPrimitivePlane()
 {
-    m_04 = 3;
+    m_kGeometry = 0;
+    m_pController = 0;
+    eType = 3;
 }
-
-struct NiAVObjB8_shell
-{
-    virtual void s00();
-    virtual void s04();
-    virtual void s08();
-    virtual void s0c();
-    virtual void s10();
-    virtual void s14();
-    virtual void s18();
-    virtual void s1c();
-    virtual void s20();
-    virtual void s24();
-    virtual void s28();
-    virtual void s2c();
-    virtual void s30();
-    virtual void s34();
-    virtual void s38();
-    virtual void s3c();
-    virtual void s40();
-    virtual void s44();
-    virtual void s48();
-    virtual void s4c();
-    virtual void s50();
-    virtual void s54();
-    virtual void s58();
-    virtual void s5c();
-    virtual void s60();
-    virtual void s64();
-    virtual void s68();
-    virtual void s6c();
-    virtual void s70();
-    virtual void s74();
-    virtual void s78();
-    virtual void s7c();
-    virtual void s80();
-    virtual void s84();
-    virtual void s88();
-    virtual void s8c();
-    virtual void s90();
-    virtual void s94();
-    virtual void s98();
-    virtual void s9c();
-    virtual void sa0();
-    virtual void sa4();
-    virtual void sa8();
-    virtual void sac();
-    virtual void sb0();
-    virtual void sb4();
-    virtual void UpdateB8(NiUpdateData&);
-};
-struct FUN_004a55a0_shell : public BGSPrimitiveBox
-{
-    void UpdateBoxGeometry(NiPoint3& akRadii);
-};
 
 // Takes the absolute X/Z of a point, zeroes Y, writes the 8 or 16 box vertices into the geometry data and updates the model bound and node.
 // @fnv 0x004a55a0
-void FUN_004a55a0_shell::UpdateBoxGeometry(NiPoint3& aExtents)
+void BGSPrimitivePlane::NormalizeRadii(NiPoint3& aExtents)
 {
     aExtents[0] = std::abs(aExtents[0]);
     aExtents[1] = 0.0f;
     aExtents[2] = std::abs(aExtents[2]);
-    m_kRadii = aExtents;
+    reinterpret_cast<NiPoint3&>(m_kRadii) = reinterpret_cast<const NiPoint3&>(aExtents);
     if (m_kGeometry)
     {
-        NiGeometryData* dataB = m_kGeometry->FUN_005495f0();
+        NiGeometryData* dataB = m_kGeometry->GetModelData();
         NiPoint3* verts = dataB->GetVertices();
-        verts[0] = NiPoint3(-m_kRadii[0], m_kRadii[1], m_kRadii[2]);
-        verts[1] = NiPoint3(m_kRadii[0], m_kRadii[1], m_kRadii[2]);
-        verts[2] = NiPoint3(m_kRadii[0], -m_kRadii[1], m_kRadii[2]);
-        verts[3] = NiPoint3(-m_kRadii[0], -m_kRadii[1], m_kRadii[2]);
-        verts[4] = NiPoint3(-m_kRadii[0], m_kRadii[1], -m_kRadii[2]);
-        verts[5] = NiPoint3(m_kRadii[0], m_kRadii[1], -m_kRadii[2]);
-        verts[6] = NiPoint3(m_kRadii[0], -m_kRadii[1], -m_kRadii[2]);
-        verts[7] = NiPoint3(-m_kRadii[0], -m_kRadii[1], -m_kRadii[2]);
+        reinterpret_cast<NiPoint3&>(verts[0]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(verts[1]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(verts[2]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], -m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(verts[3]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], -m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(verts[4]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], m_kRadii[1], -m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(verts[5]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], m_kRadii[1], -m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(verts[6]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], -m_kRadii[1], -m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(verts[7]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], -m_kRadii[1], -m_kRadii[2]));
         dataB->SetDirtyFlags(1);
     }
     if (m_kLines)
     {
-        NiGeometryData* data2 = m_kLines->FUN_005495f0();
+        NiGeometryData* data2 = m_kLines->GetModelData();
         NiPoint3* aVerts2 = data2->GetVertices();
-        aVerts2[0] = NiPoint3(-m_kRadii[0], m_kRadii[1], m_kRadii[2]);
-        aVerts2[1] = NiPoint3(m_kRadii[0], m_kRadii[1], m_kRadii[2]);
-        aVerts2[2] = NiPoint3(m_kRadii[0], -m_kRadii[1], m_kRadii[2]);
-        aVerts2[3] = NiPoint3(-m_kRadii[0], -m_kRadii[1], m_kRadii[2]);
-        aVerts2[4] = aVerts2[0];
-        aVerts2[5] = NiPoint3(-m_kRadii[0], m_kRadii[1], -m_kRadii[2]);
-        aVerts2[6] = NiPoint3(-m_kRadii[0], -m_kRadii[1], -m_kRadii[2]);
-        aVerts2[7] = NiPoint3(m_kRadii[0], -m_kRadii[1], -m_kRadii[2]);
-        aVerts2[8] = NiPoint3(m_kRadii[0], m_kRadii[1], -m_kRadii[2]);
-        aVerts2[9] = aVerts2[5];
-        aVerts2[10] = aVerts2[3];
-        aVerts2[11] = aVerts2[6];
-        aVerts2[12] = aVerts2[1];
-        aVerts2[13] = aVerts2[8];
-        aVerts2[14] = aVerts2[2];
-        aVerts2[15] = aVerts2[7];
+        reinterpret_cast<NiPoint3&>(aVerts2[0]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(aVerts2[1]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(aVerts2[2]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], -m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(aVerts2[3]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], -m_kRadii[1], m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(aVerts2[4]) = reinterpret_cast<const NiPoint3&>(aVerts2[0]);
+        reinterpret_cast<NiPoint3&>(aVerts2[5]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], m_kRadii[1], -m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(aVerts2[6]) = reinterpret_cast<const NiPoint3&>(NiPoint3(-m_kRadii[0], -m_kRadii[1], -m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(aVerts2[7]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], -m_kRadii[1], -m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(aVerts2[8]) = reinterpret_cast<const NiPoint3&>(NiPoint3(m_kRadii[0], m_kRadii[1], -m_kRadii[2]));
+        reinterpret_cast<NiPoint3&>(aVerts2[9]) = reinterpret_cast<const NiPoint3&>(aVerts2[5]);
+        reinterpret_cast<NiPoint3&>(aVerts2[10]) = reinterpret_cast<const NiPoint3&>(aVerts2[3]);
+        reinterpret_cast<NiPoint3&>(aVerts2[11]) = reinterpret_cast<const NiPoint3&>(aVerts2[6]);
+        reinterpret_cast<NiPoint3&>(aVerts2[12]) = reinterpret_cast<const NiPoint3&>(aVerts2[1]);
+        reinterpret_cast<NiPoint3&>(aVerts2[13]) = reinterpret_cast<const NiPoint3&>(aVerts2[8]);
+        reinterpret_cast<NiPoint3&>(aVerts2[14]) = reinterpret_cast<const NiPoint3&>(aVerts2[2]);
+        reinterpret_cast<NiPoint3&>(aVerts2[15]) = reinterpret_cast<const NiPoint3&>(aVerts2[7]);
         data2->SetDirtyFlags(1);
     }
     NiUpdateData updateData3(0.0f, false, false);
@@ -1997,8 +1390,8 @@ void FUN_004a55a0_shell::UpdateBoxGeometry(NiPoint3& aExtents)
         NiBound bound2;
         bound2.SetCenterAndRadius(NiPoint3::ZERO, fMax3);
         m_kGeometry->SetModelBound(bound2);
-        m_pController->Update(updateData3);
-        ((NiAVObjB8_shell*)(BSFadeNode*)m_pController)->UpdateB8(updateData3);
+        static_cast<NiAVObject*>(m_pController)->Update(updateData3);
+        m_pController->UpdateWorldData(updateData3);
         m_kGeometry->UpdateSceneObject();
         m_pController->UpdateWorldBound();
     }
@@ -2058,7 +1451,7 @@ class FUN_004a5ff0_cls : public BGSPrimBase
 // Constructs the primitive from a center point, pair and matrix, and initializes m_e4, m_e5, m_ea to 1 and m_40 to 0.
 // @fnv 0x004a5ff0
 FUN_004a5ff0_cls::FUN_004a5ff0_cls(NiPoint3& akCenter, BGSPrimPair& akPair, BGSPrimMatrix& akMatrix)
-    : m_kCenter(akCenter), m_pair(akPair), m_mat(akMatrix)
+    : m_kCenter(reinterpret_cast<const NiPoint3&>(akCenter)), m_pair(akPair), m_mat(akMatrix)
 {
     m_e4 = 1;
     m_e5 = 1;
@@ -2066,100 +1459,10 @@ FUN_004a5ff0_cls::FUN_004a5ff0_cls(NiPoint3& akCenter, BGSPrimPair& akPair, BGSP
     m_ea = 1;
 }
 
-class Base_b4579
-{
-  public:
-    virtual ~Base_b4579();
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    Base_b4579(int aA, int aB, int aC);
-};
-
-class Sub_b4579
-{
-  public:
-    unsigned int unk00;
-    Sub_b4579(int aValue);
-    ~Sub_b4579();
-    void Ping(int aValue);
-};
-
-class FUN_004a61f0 : public Base_b4579
-{
-  public:
-    virtual ~FUN_004a61f0();
-    unsigned int m_40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    unsigned int unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
-    unsigned int unkc4;
-    unsigned int unkc8;
-    unsigned int unkcc;
-    unsigned int unkd0;
-    unsigned int unkd4;
-    unsigned int unkd8;
-    unsigned int unkdc;
-    unsigned int unke0;
-    unsigned char m_e4;
-    unsigned char m_e5;
-    unsigned short unke6;
-    unsigned int unke8;
-    unsigned int unkec;
-    unsigned int unkf0;
-    unsigned int unkf4;
-    unsigned int unkf8;
-    unsigned int m_fc;
-    unsigned int m_100;
-    Sub_b4579 m_104;
-
-    FUN_004a61f0(int aA, int aB, int aC);
-};
-
-// Initializes the base with aA, aB, aC, sets m_e4/m_e5 to 1, zeroes m_40, m_100, m_fc, and constructs m_104 with 0 then calls Ping(0).
+// Initializes the base from the centre, extents and rotation, sets m_e4/m_e5 to 1, zeroes m_40, m_100, m_fc, and constructs m_104 with 0 then calls Ping(0).
 // @fnv 0x004a61f0
-FUN_004a61f0::FUN_004a61f0(int aA, int aB, int aC) : Base_b4579(aA, aB, aC), m_104(0)
+BSPortal::BSPortal(const NiPoint3& arCenter, NiPoint2* apExtents, char* apRotation)
+    : BSOcclusionPlane(arCenter, apExtents, apRotation), m_104(0)
 {
     m_e4 = 1;
     m_e5 = 1;
@@ -2189,42 +1492,10 @@ struct BoundBase : public NiMemObject
 {
 };
 
-struct BoundOBB : public BoundBase
+struct BoundOBB : public BSMultiBoundOBB
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
     BoundOBB(const NiPoint3& akStart, const NiPoint3& kExtents, const BoundMatrix3& kRot);
     void SetRotation(const BoundMatrix3& kRot);
-};
-
-struct BoundAABB : public BoundBase
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    BoundAABB(const NiPoint3& akStart, const NiPoint3& kExtents);
 };
 
 struct BoundOwner
@@ -2258,11 +1529,11 @@ BoundBase* BoundOwner::CreateBound(NiPoint3* pAngles)
             kRot.SetRotationFromEulerXYZ(pAngles->x, pAngles->y, pAngles->z);
             pOBB->SetRotation(kRot);
         }
-        return pOBB;
+        return reinterpret_cast<BoundBase*>(pOBB);
     }
     else
     {
-        return new BoundAABB(NiPoint3::ZERO, kExtents);
+        return reinterpret_cast<BoundBase*>(new PrimitiveAABB(NiPoint3::ZERO, kExtents));
     }
 }
 
@@ -2272,16 +1543,10 @@ struct FUN_004a7aa0_color
     FUN_004a7aa0_color(float, float, float, float);
 };
 
-struct FUN_004a7aa0_obj
+// The shared sphere lacks the bound-value constructor used by this allocation.
+struct PrimitiveSphereBound : public BSMultiBoundSphere
 {
-    int _00;
-    int _04;
-    int _08;
-    FUN_004a7aa0_color mColor;
-    float mRadius;
-    static void* __cdecl operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    FUN_004a7aa0_obj(const FUN_004a7aa0_color& c);
+    PrimitiveSphereBound(const FUN_004a7aa0_color& c);
 };
 
 struct FUN_004a7aa0_cls
@@ -2295,114 +1560,47 @@ struct FUN_004a7aa0_cls
 // @fnv 0x004a7aa0
 void* FUN_004a7aa0_cls::FUN_004a7aa0(int aiUnused)
 {
-    return new FUN_004a7aa0_obj(FUN_004a7aa0_color(0.0f, 0.0f, 0.0f, m_f18));
+    return new PrimitiveSphereBound(FUN_004a7aa0_color(0.0f, 0.0f, 0.0f, m_f18));
 }
 
-class BC36500Object
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem, unsigned int);
-
-    BC36500Object();
-    virtual ~BC36500Object();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-};
-
-// Allocates and constructs a new BC36500Object, returning the pointer.
+// Allocates and constructs a new OBB.
 // @fnv 0x00c36500
-BC36500Object* __cdecl CreateBC36500Object()
+BSMultiBoundOBB* __cdecl CreateMultiBoundOBB()
 {
-    return new BC36500Object;
+    return new BSMultiBoundOBB;
 }
 
 extern "C" int _NiPoint3_ZERO;
 
-class C37E00Point3
+class MultiBoundOBBPlanes : public BSMultiBoundOBB
 {
   public:
-    float Dot(const C37E00Point3& kPoint) const;
-
-    float x;
-    float y;
-    float z;
-};
-
-struct C37E00Matrix3
-{
-    float m_afEntries[3][3];
-};
-
-struct C37E00Plane
-{
-    C37E00Point3 m_kPlaneNormal;
-    float m_fPlaneConstant;
-};
-
-class C37E00Box
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    C37E00Point3 m_kCenter;
-    int unk18;
-    int unk1C;
-    int unk20;
-    C37E00Matrix3 m_kRotate;
-
-    void GetPlanes(C37E00Plane* pkPlanes);
+    void GetPlanes(NiPlane* pkPlanes);
 };
 
 // Builds three planes from the columns of m_kRotate, setting each plane normal to a matrix column and its constant to the dot product with m_kCenter.
 // @fnv 0x00c37e00
-void C37E00Box::GetPlanes(C37E00Plane* pkPlanes)
+void MultiBoundOBBPlanes::GetPlanes(NiPlane* pkPlanes)
 {
     for (int i = 0; i < 3; i++)
     {
-        C37E00Point3 kColumn = reinterpret_cast<const C37E00Point3&>(_NiPoint3_ZERO);
-        const C37E00Matrix3& kMatrix = m_kRotate;
-        kColumn.x = kMatrix.m_afEntries[0][i];
-        kColumn.y = kMatrix.m_afEntries[1][i];
-        kColumn.z = kMatrix.m_afEntries[2][i];
-        pkPlanes[i].m_kPlaneNormal = kColumn;
-        float fConstant = kColumn.Dot(m_kCenter);
-        pkPlanes[i].m_fPlaneConstant = fConstant;
+        NiPoint3 kColumn = reinterpret_cast<const NiPoint3&>(_NiPoint3_ZERO);
+        const NiMatrix3& kMatrix = reinterpret_cast<const NiMatrix3&>(unk24);
+        kColumn.x = reinterpret_cast<const float(*)[3]>(&kMatrix)[0][i];
+        kColumn.y = reinterpret_cast<const float(*)[3]>(&kMatrix)[1][i];
+        kColumn.z = reinterpret_cast<const float(*)[3]>(&kMatrix)[2][i];
+        reinterpret_cast<NiPoint3&>(pkPlanes[i]) = kColumn;
+        float fConstant = kColumn.Dot(reinterpret_cast<const NiPoint3&>(Center));
+        pkPlanes[i].c = fConstant;
     }
 }
 
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
 
-struct NewBodyCls
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    static void* operator new(unsigned int size);
-    static void operator delete(void*, unsigned int);
-    NewBodyCls();
-};
-
-// Allocates and constructs a NewBodyCls object, returning the new instance.
 // @fnv 0x00c381a0
-NewBodyCls* __cdecl CreateNewBodyCls()
+BSMultiBoundAABB* __cdecl CreateMultiBoundAABB()
 {
-    return new NewBodyCls();
+    return new BSMultiBoundAABB();
 }
 
 struct Vec12
@@ -2637,17 +1835,9 @@ struct FUN_00c4f7b0_scratch
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
 };
 
-struct FUN_00c4f7b0_cls
-{
-    char _pad[0xfc];
-    int m_fc;
-    int m_100;
-    int FUN_00c4f7b0();
-};
-
 // Returns whether either of the two fields m_fc or m_100 is nonzero and passes FUN_00c4f860 with result 1.
 // @fnv 0x00c4f7b0
-int FUN_00c4f7b0_cls::FUN_00c4f7b0()
+int BSPortal::QueryLinkedObjects()
 {
     FUN_00c4f7b0_scratch scratch;
     int result5 = 0;
@@ -2664,46 +1854,29 @@ int FUN_00c4f7b0_cls::FUN_00c4f7b0()
     return result5;
 }
 
-struct FUN_00a5d3a0_shell
-{
-    virtual void v00();
-    FUN_00a5d3a0_shell();
-};
-
-struct FUN_00c4f980 : public FUN_00a5d3a0_shell
-{
-    FUN_00c4f980();
-};
-
-FUN_00a5d3a0_shell::FUN_00a5d3a0_shell()
-{}
-
 // @fnv 0x00c4f980
-FUN_00c4f980::FUN_00c4f980()
+BSMultiBoundShape::BSMultiBoundShape()
 {}
 
-struct FUN_00c4fce0_cls
+struct MultiBoundSphereEquality : public BSMultiBoundSphere
 {
-    char _00[0xc];
-    NiPoint3 m_pos;
-    float m_18;
     bool FUN_00c4fa80(void* other);
-    bool Equals(FUN_00c4fce0_cls* other);
+    bool Equals(MultiBoundSphereEquality* other);
 };
 
 // Compares this object with another: first calls FUN_00c4fa80, then checks m_pos x/y/z and m_18 are equal, returning the combined result.
 // @fnv 0x00c4fce0
-bool FUN_00c4fce0_cls::Equals(FUN_00c4fce0_cls* other)
+bool MultiBoundSphereEquality::Equals(MultiBoundSphereEquality* other)
 {
     bool r6 = FUN_00c4fa80(other);
     if (r6)
     {
-        FUN_00c4fce0_cls* o4 = other;
-        NiPoint3* pb = &o4->m_pos;
-        NiPoint3* pa = &m_pos;
+        MultiBoundSphereEquality* o4 = other;
+        const NiPoint3* pb = &o4->center;
+        const NiPoint3* pa = &center;
         r6 = (pa->x == pb->x && pa->y == pb->y && pa->z == pb->z);
-        float t = m_18;
-        r6 = r6 & (t == o4->m_18);
+        float t = radius;
+        r6 = r6 & (t == o4->radius);
     }
     return r6;
 }
@@ -2713,28 +1886,19 @@ struct NodeArgB9733
     void FUN_0096a610(void** pp);
 };
 
-struct NodeSubB9733
-{
-    char unk00[0xc];
-    void* FUN_00a59af0(const char* name);
-};
-
 void* FUN_00a7d330(void* g);
 void* FUN_00a7d550(const char* name, float value);
 
 extern void* DAT_01203108;
 
-struct FUN_00c4fe30_cls
+struct MultiBoundSphereProperties : public BSMultiBoundSphere
 {
-    char unk00[0xc];
-    NodeSubB9733 m_sub0c;
-    float m_f18;
     void Init(NodeArgB9733* p);
     void InitNode(NodeArgB9733* pNode);
 };
 
 // @fnv 0x00c4fe30
-void FUN_00c4fe30_cls::InitNode(NodeArgB9733* pNode)
+void MultiBoundSphereProperties::InitNode(NodeArgB9733* pNode)
 {
     Init(pNode);
     unsigned int data[5];
@@ -2742,9 +1906,9 @@ void FUN_00c4fe30_cls::InitNode(NodeArgB9733* pNode)
     void* g = DAT_01203108;
     void* root = FUN_00a7d330(g);
     pNode->FUN_0096a610(&root);
-    void* center7 = m_sub0c.FUN_00a59af0("Center");
+    void* center7 = reinterpret_cast<NiPoint3*>(&center)->FUN_00a59af0("Center");
     pNode->FUN_0096a610(&center7);
-    float r = m_f18;
+    float r = radius;
     void* radius = FUN_00a7d550("Radius", r);
     pNode->FUN_0096a610(&radius);
 }
@@ -2758,7 +1922,7 @@ struct FUN_004a5ff0_shell : FUN_00c335d0
 {
     FUN_004a5ff0_shell(const void* type, const Point2_construct_shell& extent);
 };
-struct FUN_004a5f50_shell : BGSPrimitive
+struct PrimitivePlaneClone : BGSPrimitive
 {
     FUN_004a5ff0_shell* CreatePrimitive();
 };
@@ -2767,7 +1931,7 @@ extern int g_011f426c;
 
 // Allocates a new primitive of type g_011f426c using this primitive's x and z extents and returns it.
 // @fnv 0x004a5f50
-FUN_004a5ff0_shell* FUN_004a5f50_shell::CreatePrimitive()
+FUN_004a5ff0_shell* PrimitivePlaneClone::CreatePrimitive()
 {
     return new FUN_004a5ff0_shell(&g_011f426c, Point2_construct_shell(m_kRadii.x, m_kRadii.z, &g_011a9448));
 }
@@ -2780,46 +1944,35 @@ struct SphereVertex
 };
 extern SphereVertex DAT_01187ac8[];
 
-struct NiPoint3_ext : public NiPoint3
-{
-    NiPoint3_ext& operator*=(float);
-};
-
 // @fnv 0x004a78e0
 void BGSPrimitiveSphere::SetRadius(float radius)
 {
     radius = std::abs(radius);
-    if (((BGSPrimitive*)this)->m_kGeometry)
+    if (m_kGeometry)
     {
-        NiGeometryData* pkData5 = ((BGSPrimitive*)this)->m_kGeometry->FUN_005495f0();
+        NiGeometryData* pkData5 = m_kGeometry->GetModelData();
         NiPoint3* pkVertices2 = pkData5->GetVertices();
         for (int i = 0; i < 0x70; i++)
         {
             pkVertices2[i].x = DAT_01187ac8[i].x;
             pkVertices2[i].y = DAT_01187ac8[i].y;
             pkVertices2[i].z = DAT_01187ac8[i].z;
-            ((NiPoint3_ext*)pkVertices2)[i] *= radius;
+            ((NiPoint3*)pkVertices2)[i] *= radius;
         }
         pkData5->SetDirtyFlags(1);
     }
-    ((BGSPrimitive*)this)->m_kRadii.x = ((BGSPrimitive*)this)->m_kRadii.y = ((BGSPrimitive*)this)->m_kRadii.z = radius;
+    m_kRadii.x = m_kRadii.y = m_kRadii.z = radius;
     NiUpdateData kUpdateDataTmp(0.0f, false, false);
-    if (((BGSPrimitive*)this)->m_pController)
+    if (m_pController)
     {
         NiBound kBound;
         kBound.SetCenterAndRadius(NiPoint3(0.0f, 0.0f, 0.0f), radius);
-        ((BGSPrimitive*)this)->m_kGeometry->SetModelBound(kBound);
-        ((BGSPrimitive*)this)->m_pController->Update(kUpdateDataTmp);
-        ((BGSPrimitive*)this)->m_kGeometry->UpdateSceneObject();
-        ((BGSPrimitive*)this)->m_pController->UpdateWorldBound();
+        m_kGeometry->SetModelBound(kBound);
+        static_cast<NiAVObject*>(m_pController)->Update(kUpdateDataTmp);
+        m_kGeometry->UpdateSceneObject();
+        m_pController->UpdateWorldBound();
     }
 }
-
-namespace fnv_004a72d0 {
-struct SphereVertexColor : public RgbaColor
-{
-    SphereVertexColor();
-};
 
 struct SphereVertexPosition
 {
@@ -2827,159 +1980,17 @@ struct SphereVertexPosition
     SphereVertexPosition();
 };
 
-class Lines_Standin : public NiLines
+class PrimitiveSphereStrips : public NiGeometry
 {
   public:
-    Lines_Standin(unsigned short count, SphereVertexPosition* vertices, void* normals, RgbaColor* colors, void* extra1,
+    static void operator delete(void*, unsigned int);
+    PrimitiveSphereStrips(unsigned short count, SphereVertexPosition* vertices, void* normals, NiColorA* colors, void* extra1,
                   void* extra2, void* extra3, unsigned short segments, unsigned int groups, unsigned short* lengths,
                   unsigned short* indices);
-    void AttachProperty(void*);
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-};
-
-class BSShaderLightingProperty : public NiMemObject
-{
-  public:
-    BSShaderLightingProperty();
-    void FUN_005a8060(unsigned int);
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-};
-
-class NiAlphaProperty : public NiAVObject
-{
-  public:
-    NiAlphaProperty();
-    void FUN_0049ed90(bool);
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-};
-
-template <> class NiPointer<NiAlphaProperty>
-{
-  public:
-    NiAlphaProperty* m_pObject;
-    NiPointer(NiAlphaProperty* = 0);
-    ~NiPointer();
-    operator NiAlphaProperty*() const;
-    NiPointer& operator=(NiAlphaProperty*);
-};
-
-struct NiPropertyHelper
-{
-    void FUN_00441130(unsigned int, bool);
-};
-
-struct NiGeometryHelper : public NiGeometry
-{
-    NiPropertyHelper* GetProperty(unsigned int);
-};
-
-class BSFadeNodeHelper : public BSFadeNode
-{
-  public:
-    virtual void vfn_c0();
-    virtual void vfn_c4();
-    virtual void vfn_c8();
-    virtual void vfn_cc();
-    virtual void vfn_d0();
-    virtual void vfn_d4();
-    virtual void vfn_d8();
-    virtual void AttachChildInAvailableSlot(NiGeometry*, bool);
 };
 
 extern const double gSphereCoordinates[112][3];
-void __cdecl FUN_00b57e30(Lines_Standin*, int, int);
-
-class BGSPrimitiveSphere : public BGSPrimitive
-{
-  public:
-    virtual void vfn_04();
-    virtual void ApplyColor(RgbaColor&);
-    void CreateSphereGeometry();
-    void SetRadius(float);
-};
+void __cdecl FUN_00b57e30(PrimitiveSphereStrips*, int, int);
 
 // Builds the sphere's line geometry, shader and alpha properties and fade node on first call, otherwise updates radius and color, then updates the fade node.
 // @fnv 0x004a72d0
@@ -2987,7 +1998,7 @@ void BGSPrimitiveSphere::CreateSphereGeometry()
 {
     if (!m_kGeometry)
     {
-        SphereVertexColor* colors5 = new SphereVertexColor[112];
+        NiColorA* colors5 = new NiColorA[112];
         SphereVertexPosition* positions = new SphereVertexPosition[112];
         unsigned short* indices5 = new unsigned short[112];
 
@@ -2996,30 +2007,30 @@ void BGSPrimitiveSphere::CreateSphereGeometry()
             positions[i2].x = (float)gSphereCoordinates[i2][0] * m_kRadii.x;
             positions[i2].y = (float)gSphereCoordinates[i2][1] * m_kRadii.x;
             positions[i2].z = (float)gSphereCoordinates[i2][2] * m_kRadii.x;
-            (RgbaColor&)colors5[i2] = Color;
+            colors5[i2] = reinterpret_cast<const NiColorA&>(Color);
             indices5[i2] = (unsigned short)i2;
         }
 
         unsigned short* lengths3 = new unsigned short[1];
         lengths3[0] = 112;
 
-        Lines_Standin* lines2 =
-            new Lines_Standin(112, positions, 0, (RgbaColor*)colors5, 0, 0, 0, 110, 1, lengths3, indices5);
-        BSShaderLightingProperty* prop2 = new BSShaderLightingProperty;
-        prop2->FUN_005a8060(33);
-        lines2->AttachProperty(prop2);
+        PrimitiveSphereStrips* lines2 =
+            new PrimitiveSphereStrips(112, positions, 0, colors5, 0, 0, 0, 110, 1, lengths3, indices5);
+        BSShaderNoLightingProperty* prop2 = new BSShaderNoLightingProperty;
+        prop2->SetShader(33);
+        lines2->NiAVObject::AttachProperty(reinterpret_cast<NiObject*>(prop2));
         FUN_00b57e30(lines2, 0, 0);
         m_kGeometry = lines2;
 
         NiPointer<NiAlphaProperty> spAlphaProperty2 = new NiAlphaProperty;
-        ((NiAlphaProperty*)spAlphaProperty2)->SetName(NiFixedString("primitive: alpha"));
+        ((NiObjectNET*)(NiAlphaProperty*)spAlphaProperty2)->SetName(NiFixedString("primitive: alpha"));
         ((NiAlphaProperty*)spAlphaProperty2)->FUN_0049ed90(true);
-        ((Lines_Standin*)(NiGeometry*)m_kGeometry)->AttachProperty((NiAlphaProperty*)spAlphaProperty2);
-        ((NiGeometryHelper*)(NiGeometry*)m_kGeometry)->GetProperty(3)->FUN_00441130(32, false);
+        m_kGeometry->AttachProperty((NiAlphaProperty*)spAlphaProperty2);
+        m_kGeometry->GetProperty(3u)->FUN_00441130(32, false);
 
         m_pController = new BSFadeNode;
-        ((BSFadeNodeHelper*)(BSFadeNode*)m_pController)->AttachChildInAvailableSlot(m_kGeometry, true);
-        m_pController->SetName(NiFixedString("Sphere"));
+        m_pController->AttachChildInAvailableSlot(static_cast<NiAVObject*>((NiGeometry*)m_kGeometry), true);
+        static_cast<NiAVObject*>(m_pController)->SetName(NiFixedString("Sphere"));
         m_pController->UpdateSceneObject();
         m_kGeometry->UpdateSceneObject();
     }
@@ -3030,9 +2041,8 @@ void BGSPrimitiveSphere::CreateSphereGeometry()
     }
 
     NiUpdateData updateData3(0.0f, false, false);
-    m_pController->Update(updateData3);
+    static_cast<NiAVObject*>(m_pController)->Update(updateData3);
 }
-}  // namespace fnv_004a72d0
 
 struct KVec
 {
@@ -3062,27 +2072,22 @@ struct KSphere
     int Side(KPlane* pPlane);
 };
 
-class FUN_00c50210_cls
+class MultiBoundSphereFrustum : public BSMultiBoundSphere
 {
   public:
-    int unk00;
-    int unk04;
-    int unk08;
-    NiPoint3 m_kCenter;
-    float m_fBoundRadius;
 
     bool FUN_00c50210(KPlanes* planes);
 };
 
 // @fnv 0x00c50210
-bool FUN_00c50210_cls::FUN_00c50210(KPlanes* planes)
+bool MultiBoundSphereFrustum::FUN_00c50210(KPlanes* planes)
 {
     int iPlaneIndex;
-    float fRad = m_fBoundRadius;
+    float fRad = radius;
     int result;
     KSphere kBound;
     unsigned int iLoop;
-    kBound.m_kCenter = *(KVec*)&m_kCenter;
+    kBound.m_kCenter = *(KVec*)&center;
     kBound.m_fBoundRadius = fRad;
     for (iLoop = 0; iLoop < 6; ++iLoop)
     {
@@ -3305,132 +2310,79 @@ void BoxB::BuildBoxGeometry(MeshB* apLineMesh, MeshB* apFaceMesh, ColorB aFaceCo
     }
 }
 
-struct Xform
-{
-    float a, b, c, d;
-    Xform(float, float, float, float);
-};
-struct ListQ
-{
-    void *x, *y, *z;
-    ListQ();
-};
-struct SlotQ
-{
-    int v;
-    SlotQ(int);
-    ~SlotQ();
-    void FUN_0066b0d0(int);
-};
-
-struct FUN_004a4ac0
-{
-    int unk04;
-    Xform xform;
-    ListQ list;
-    SlotQ s24;
-    SlotQ s28;
-    SlotQ s2c;
-    int field30;
-    FUN_004a4ac0();
-    virtual ~FUN_004a4ac0();
-};
-
-// Constructs a FUN_004a4ac0 object, initializing xform to zero, s24, s28, s2c to 0, and field30 to 7.
+// Initializes the primitive's color, extents, geometry pointers and flags.
 // @fnv 0x004a4ac0
-FUN_004a4ac0::FUN_004a4ac0() : xform(0.0f, 0.0f, 0.0f, 0.0f), s24(0), s28(0), s2c(0)
+BGSPrimitive::BGSPrimitive() : Color(0.0f, 0.0f, 0.0f, 0.0f), m_kGeometry(0), m_kLines(0), m_pController(0)
 {
-    s24.FUN_0066b0d0(0);
-    s2c.FUN_0066b0d0(0);
-    s28.FUN_0066b0d0(0);
-    field30 = 7;
+    m_kGeometry = 0;
+    m_pController = 0;
+    m_kLines = 0;
+    m_uiPrimitiveFlags = 7;
 }
 
 #include <math.h>
-struct SphereBoxTest
+struct MultiBoundAABBSphereTest : public BSMultiBoundAABB
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    NiPoint3 m_kCenter;
-    NiPoint3 m_kExtents;
     int TestSphereBox(const NiBound& bound);
 };
-// Tests a sphere against the axis-aligned box m_kCenter/m_kExtents and returns 2 for inside, 1 for intersecting, or 0 for outside.
+// Tests a sphere against the axis-aligned box Center/m_kOffset and returns 2 for inside, 1 for intersecting, or 0 for outside.
 // @fnv 0x00c382b0
-int SphereBoxTest::TestSphereBox(const NiBound& bound)
+int MultiBoundAABBSphereTest::TestSphereBox(const NiBound& bound)
 {
-    NiPoint3 p = bound.m_kCenter;
-    float cf = bound.m_fBoundRadius;
+    NiPoint3 p = reinterpret_cast<const NiPoint3&>(bound.m_kCenter);
+    float cf = bound.m_fRadius;
     bool s = true;
     bool eb = true;
     float f, q, b;
     float c, e, j;
-    c = (p.x) - (m_kCenter.x);
+    c = (p.x) - (Center.x);
     f = (double)(float)fabs((double)c);
-    s &= f - (m_kExtents.x - cf) <= 0.0;
-    eb &= f - (m_kExtents.x + cf) <= 0.0;
+    s &= f - (m_kOffset.x - cf) <= 0.0;
+    eb &= f - (m_kOffset.x + cf) <= 0.0;
     if (s || eb)
     {
-        e = (p.y) - (m_kCenter.y);
+        e = (p.y) - (Center.y);
         q = (double)(float)fabs((double)e);
         if (s)
-            s &= q - (m_kExtents.y - cf) <= 0.0;
-        eb &= q - (m_kExtents.y + cf) <= 0.0;
+            s &= q - (m_kOffset.y - cf) <= 0.0;
+        eb &= q - (m_kOffset.y + cf) <= 0.0;
         if (s || eb)
         {
-            j = (p.z) - (m_kCenter.z);
+            j = (p.z) - (Center.z);
             b = (double)(float)fabs((double)j);
             if (s)
-                s &= b - (m_kExtents.z - cf) <= 0.0;
-            eb &= b - (m_kExtents.z + cf) <= 0.0;
+                s &= b - (m_kOffset.z - cf) <= 0.0;
+            eb &= b - (m_kOffset.z + cf) <= 0.0;
         }
     }
     return s ? 2 : (eb ? 1 : 0);
 }
 
-struct NiPoint3Ex : public NiPoint3
-{
-    NiPoint3Ex() : NiPoint3(0.0f, 0.0f, 0.0f)
-    {}
-    NiPoint3Ex(float fx, float fy, float afDepth) : NiPoint3(fx, fy, afDepth)
-    {}
-    NiPoint3Ex operator-(const NiPoint3& pt) const
-    {
-        return NiPoint3Ex(x - pt.x, y - pt.y, z - pt.z);
-    }
-    float Length() const;
-};
-
 extern double DAT_01012060;
 
-class FUN_00c4fed0_cls
+class MultiBoundSphereIntersection : public BSMultiBoundSphere
 {
   public:
-    int unk00;
-    int unk04;
-    int unk08;
-    NiBound m_kBound;
     int FUN_00c4fed0(const NiBound& kBound);
 };
 
 // Returns 2 when center distance is at most the radius difference plus DAT_01012060, 1 when at most the radius sum plus that value, otherwise 0.
 // @fnv 0x00c4fed0
-int FUN_00c4fed0_cls::FUN_00c4fed0(const NiBound& kBound)
+int MultiBoundSphereIntersection::FUN_00c4fed0(const NiBound& kBound)
 {
-    NiPoint3Ex kDiff = static_cast<const NiPoint3Ex&>(m_kBound.m_kCenter) - kBound.m_kCenter;
-    float fCenterDist = kDiff.Length();
+    NiPoint3 kDiff = reinterpret_cast<const NiPoint3&>(center) - kBound.m_kCenter;
+    float fCenterDist = static_cast<const NiPoint3&>(kDiff).Length();
     float ba;
     float k;
     float l;
     float c;
-    float j = kBound.m_fBoundRadius;
-    if (fCenterDist - (m_kBound.m_fBoundRadius - j) <= DAT_01012060)
+    float j = kBound.m_fRadius;
+    if (fCenterDist - (radius - j) <= DAT_01012060)
         return 2;
     else
     {
-        float kTemp = kBound.m_fBoundRadius;
-        if (fCenterDist - (m_kBound.m_fBoundRadius + kTemp) <= DAT_01012060)
+        float kTemp = kBound.m_fRadius;
+        if (fCenterDist - (radius + kTemp) <= DAT_01012060)
             return 1;
     }
     return 0;
@@ -3451,21 +2403,16 @@ struct Sphere
     float radius;
     int ClassifySphereAgainstPlane(const Plane& plane);
 };
-struct BoundObject
+struct MultiBoundSphereContainment : public BSMultiBoundSphere
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    NiPoint3 center;
-    float radius;
     bool FUN_00c502a0(const Frustum* frustum);
 };
 // Returns true when every plane selected by kComparisonMask classifies the sphere as 1; otherwise returns false.
 // @fnv 0x00c502a0
-bool BoundObject::FUN_00c502a0(const Frustum* frustum)
+bool MultiBoundSphereContainment::FUN_00c502a0(const Frustum* frustum)
 {
     float radius = this->radius;
-    Sphere bound = {center, radius};
+    Sphere bound = {reinterpret_cast<const NiPoint3&>(center), radius};
     int planeSide;
     unsigned int uiPlaneIndex;
     for (uiPlaneIndex = 0; uiPlaneIndex < 6; ++uiPlaneIndex)
@@ -3483,61 +2430,34 @@ bool BoundObject::FUN_00c502a0(const Frustum* frustum)
     return true;
 }
 
-namespace fnv_004a7150 {
-struct FUN_004a4ac0
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    FUN_004a4ac0();
-    virtual ~FUN_004a4ac0();
-};
-struct FUN_0066b0d0
-{
-    int unk00;
-    int unk04;
-    FUN_0066b0d0(int a);
-};
-struct Obj_004a7150 : FUN_004a4ac0
-{
-    FUN_0066b0d0 unk24;
-    FUN_0066b0d0 unk2c;
-    Obj_004a7150();
-    virtual ~Obj_004a7150();
-};
-// Constructor for Obj_004a7150 that initializes unk24 and unk2c to 0 and sets unk04 to 2.
+// Initializes the sphere's geometry and controller pointers and primitive type.
 // @fnv 0x004a7150
-Obj_004a7150::Obj_004a7150() : unk24(0), unk2c(0)
+BGSPrimitiveSphere::BGSPrimitiveSphere()
 {
-    unk04 = 2;
+    m_kGeometry = 0;
+    m_pController = 0;
+    eType = 2;
 }
-}  // namespace fnv_004a7150
 
 void* __fastcall FUN_00c37ec0(void*);
 extern int DAT_0101e9a4;
-struct FUN_00c36310_shell
+struct MultiBoundOBBConstructor
 {
     int __thiscall FUN_00c36310();
 };
 // @fnv 0x00c36310
-int __thiscall FUN_00c36310_shell::FUN_00c36310()
+int __thiscall MultiBoundOBBConstructor::FUN_00c36310()
 {
     FUN_00c37ec0(this);
     *(int**)this = &DAT_0101e9a4;
     return (int)this;
 }
 
-void __fastcall FUN_00c4f980(void*);
 extern int DAT_0101ea8c;
 // @fnv 0x00c4fb10
 void* __fastcall FUN_00c4fb10(void* apObj)
 {
-    FUN_00c4f980(apObj);
+    static_cast<BSMultiBoundShape*>(apObj)->BSMultiBoundShape::BSMultiBoundShape();
     *(int*)apObj = (int)&DAT_0101ea8c;
     return apObj;
 }

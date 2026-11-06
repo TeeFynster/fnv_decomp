@@ -1,5 +1,7 @@
 // bscore/scrapheap.cpp: ScrapHeapBuffer, SHStub (21 functions)
 
+#include "../../include/MemoryManager.h"
+#include "../../include/RecursiveSpinLock.h"
 #include "scrapheap_decls.h"
 
 const char kScrapHeapManagerReleaseBufferLabel[] = "ScrapHeapManager::ReleaseBuffer()";
@@ -232,10 +234,10 @@ char* FUN_00aa59b0_shell::FUN_00aa59b0(unsigned int* auiRequestedSize)
     {
         i = AllocateBuffer(*auiRequestedSize);
         pbuffer2 = &bufferLock;
-        pbuffer2->listCount--;
-        if (pbuffer2->listCount == 0)
+        pbuffer2->m_uiRecursionCount--;
+        if (pbuffer2->m_uiRecursionCount == 0)
         {
-            pbuffer2->lockWord = 0;
+            pbuffer2->m_uiOwningThreadID = 0;
         }
         return i;
     }
@@ -249,10 +251,10 @@ char* FUN_00aa59b0_shell::FUN_00aa59b0(unsigned int* auiRequestedSize)
             ilargestBufferSize = entries[iUnused1].buffer;
             RemoveEntry(iUnused1);
             pbuffer1 = &bufferLock;
-            pbuffer1->listCount--;
-            if (pbuffer1->listCount == 0)
+            pbuffer1->m_uiRecursionCount--;
+            if (pbuffer1->m_uiRecursionCount == 0)
             {
-                pbuffer1->lockWord = 0;
+                pbuffer1->m_uiOwningThreadID = 0;
             }
             return ilargestBufferSize;
         }
@@ -266,10 +268,10 @@ char* FUN_00aa59b0_shell::FUN_00aa59b0(unsigned int* auiRequestedSize)
     RemoveEntry(pLockA);
     ReleaseBufferContents(iUnused0, pLockC, *auiRequestedSize - pLockC);
     pbuffer = &bufferLock;
-    pbuffer->listCount--;
-    if (pbuffer->listCount == 0)
+    pbuffer->m_uiRecursionCount--;
+    if (pbuffer->m_uiRecursionCount == 0)
     {
-        pbuffer->lockWord = 0;
+        pbuffer->m_uiOwningThreadID = 0;
     }
     return iUnused0;
 }
@@ -293,10 +295,10 @@ void FUN_00aa5b70_shell::FUN_00aa5b70(char* apBuffer, unsigned int aiCommittedSi
     {
         FreeBuffer(apBuffer, aiCommittedSize);
         RecursiveSpinLock* pLock = &bufferLock;
-        pLock->listCount--;
-        if (pLock->listCount == 0)
+        pLock->m_uiRecursionCount--;
+        if (pLock->m_uiRecursionCount == 0)
         {
-            pLock->lockWord = 0;
+            pLock->m_uiOwningThreadID = 0;
         }
     }
     else
@@ -306,10 +308,10 @@ void FUN_00aa5b70_shell::FUN_00aa5b70(char* apBuffer, unsigned int aiCommittedSi
         count++;
         totalSize += aiCommittedSize;
         RecursiveSpinLock* pLock2 = &bufferLock;
-        pLock2->listCount--;
-        if (pLock2->listCount == 0)
+        pLock2->m_uiRecursionCount--;
+        if (pLock2->m_uiRecursionCount == 0)
         {
-            pLock2->lockWord = 0;
+            pLock2->m_uiOwningThreadID = 0;
         }
     }
 }
@@ -333,11 +335,6 @@ void FUN_00aa5e30_shell::CommitMemory(char* apBuffer, unsigned int aiBufferSize,
 }
 
 namespace fnv_00aa58d0 {
-struct FUN_00aa58d0_Alloc
-{
-    void* Allocate(unsigned int);
-};
-
 struct FUN_00aa5860
 {
     char data[0x240];
@@ -346,7 +343,7 @@ struct FUN_00aa5860
 // @fnv 0x00aa58d0
     void* operator new(unsigned int uiSize)
     {
-        return ((FUN_00aa58d0_Alloc*)&g_memoryManager)->Allocate(uiSize);
+        return g_memoryManager.Allocate(uiSize);
     }
     void operator delete(void*);
 };
@@ -454,16 +451,12 @@ void FUN_00aa5f30_holder::FUN_00aa5f30(char* apBuffer, unsigned int aiCommittedS
     VirtualFree(apBuffer, 0, 0x8000);
 }
 
-struct MemoryManagerDealloc
-{
-    void Deallocate(void*);
-};
 struct FUN_00aa5950_s
 {
     ~FUN_00aa5950_s();
     static void operator delete(void* p)
     {
-        ((MemoryManagerDealloc*)&g_memoryManager)->Deallocate(p);
+        g_memoryManager.Deallocate(p);
     }
 };
 extern FUN_00aa5950_s* DAT_011f63b4;
@@ -479,7 +472,6 @@ namespace fnv_00866d10 {
 struct FUN_00aa5860 : public ScrapHeapManager
 {
     FUN_00aa5860();
-    unsigned char tail[0x18];
 };
 extern ScrapHeapManager* DAT_011f63b4;
 // Returns the global ScrapHeapManager singleton, allocating a FUN_00aa5860 instance on first call if DAT_011f63b4 is null.
@@ -491,16 +483,6 @@ ScrapHeapManager* GetScrapHeapManager()
     return DAT_011f63b4;
 }
 }  // namespace fnv_00866d10
-
-struct MySpinLock : RecursiveSpinLock
-{
-    void Unlock()
-    {
-        listCount--;
-        if (listCount == 0)
-            lockWord = 0;
-    }
-};
 
 struct FUN_00aa5c80_shell : ScrapHeapManager
 {
@@ -526,20 +508,10 @@ void FUN_00aa5c80_shell::FUN_00aa5c80()
 
     count = 0;
     totalSize = 0;
-    ((MySpinLock&)bufferLock).Unlock();
+    bufferLock.Unlock();
 }
 
 namespace fnv_00aa5d40 {
-struct MySpinLock : RecursiveSpinLock
-{
-    void Unlock()
-    {
-        listCount--;
-        if (listCount == 0)
-            lockWord = 0;
-    }
-};
-
 struct TwoPointerRecord
 {
     void* p1;
@@ -576,20 +548,15 @@ unsigned int FUN_00aa5d40_shell::FUN_00aa5d40(unsigned int aiSize)
     }
 
     totalSize -= ifreedSize;
-    ((MySpinLock&)bufferLock).Unlock();
+    bufferLock.Unlock();
     return ifreedSize;
 }
 }  // namespace fnv_00aa5d40
 
-namespace fnv_00aa5770 {
-struct ScrapBlock
+// ScrapHeap has this five-field, 0x14-byte layout; the shared header is not available yet.
+class ScrapHeap
 {
-    int unk00;
-    ScrapBlock* next;
-};
-
-struct ScrapHeap_00aa5770
-{
+public:
     char* m_pHeapBase;
     char* m_pCurrentPosition;
     char* m_pBufferLimit;
@@ -601,7 +568,7 @@ struct ScrapHeap_00aa5770
 
 // Walks the m_pBufferHeader linked list of ScrapBlock entries when m_pCurrentPosition differs from m_pHeapBase.
 // @fnv 0x00aa5770
-void ScrapHeap_00aa5770::FUN_00aa5770()
+void ScrapHeap::FUN_00aa5770()
 {
     if (this->m_pCurrentPosition != this->m_pHeapBase)
     {
@@ -618,7 +585,6 @@ void ScrapHeap_00aa5770::FUN_00aa5770()
         }
     }
 }
-}  // namespace fnv_00aa5770
 
 struct FUN_00aa5ec0_shell : public ScrapHeapManager
 {

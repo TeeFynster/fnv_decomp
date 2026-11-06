@@ -2,11 +2,8 @@
 // src/bsmenu/radialtile.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsmenu/radialtile.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct TileImage
-{
-    TileImage();
-    virtual void Dummy();
-};
+#include "../../include/TileImage.h"
+
 struct FUN_00a21660 : TileImage
 {
     FUN_00a21660();
@@ -67,16 +64,6 @@ void* FUN_00a219e0_shell::FUN_00a219e0(unsigned int flags)
 // ever used by address, so a declaration is enough.
 extern void* const FUN_00a21660Vftable[];
 
-// The base class of the object.  Its destructor is defined in another
-// translation unit (TileImage::~TileImage(), 0x0070b6c0 in the original
-// binary), so it is declared here and never defined.
-struct TileImageBase
-{
-    const void* vtable;  // +0x00, the vtable pointer of the object
-    TileImageBase();
-    ~TileImageBase();
-};
-
 // Six dead words of stack space.  The original /Od build reserved them
 // between the frame pointer and the spilled `this` pointer, and nothing ever
 // reads or writes them.
@@ -95,6 +82,6 @@ void FUN_00a219e0_shell::DestroyTileImageBase()
 {
     DeadStackSpace dead;
 
-    ((TileImageBase*)this)->vtable = FUN_00a21660Vftable;
-    ((TileImageBase*)this)->TileImageBase::~TileImageBase();
+    *reinterpret_cast<const void**>(this) = FUN_00a21660Vftable;
+    reinterpret_cast<TileImage*>(this)->TileImage::~TileImage();
 }

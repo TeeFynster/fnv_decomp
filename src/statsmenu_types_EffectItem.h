@@ -3,7 +3,7 @@
 #define FNV_EFFECTITEM_H
 
 #include "statsmenu_layout_support.h"
-#include "statsmenu_TESCondition.h"
+#include "../include/PerkEntryConditionSet.h"
 class EffectItem;
 class MagicEffectEntry;
 enum MagicSystem__Range
@@ -38,6 +38,10 @@ class EffectItem
     float m_fCost;                    // +0x18, 4 bytes
     PerkEntryConditionSet Conditions;          // +0x1C, 8 bytes
     EffectSetting* GetEffectSetting() const;
+    bool IsScriptBasedEffect();
+    bool FUN_00403ee0();
+    int GetAffectedActorValue();
+    int FUN_00403ea0();
     // EffectItem
     // void __cdecl EffectItem::*()
     // void __cdecl EffectItem::*()

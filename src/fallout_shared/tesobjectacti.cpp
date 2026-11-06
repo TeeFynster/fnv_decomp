@@ -1,6 +1,25 @@
+#include "../../include/BSStringT.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSTalkingActivator.h"
+#include "../../include/FormChangeMask.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESWaterForm.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/CombatProcedure.h"
 
-#include "tesobjectacti_load.h"
+#undef LoadString
+#undef CompareString
+
+class TESFileFormVersion
+{
+public:
+    unsigned short GetFormVersion();
+};
+void* __cdecl operator new(unsigned int);
+void __cdecl operator delete(void*);
 #include <malloc.h>
+#include "../../include/BGSSaveGameBuffer.h"
 
 template <> BSStringT<char>::~BSStringT()
 {
@@ -39,7 +58,7 @@ bool TESObjectACTI::Load(TESFile* file)
             readOBNDSubRecord(file);
             break;
         case 0x4c4c5546:
-            TESFullNameLoader::LoadFullNameChunk(this, file);
+            TESFullName::LoadFullNameChunk(this, file);
             break;
         case 0x4c444f4d:
         case 0x54444f4d:
@@ -120,7 +139,6 @@ bool TESObjectACTI::Load(TESFile* file)
     return true;
 }
 
-struct TESSound;
 struct FUN_004fd3a0_shell : public TESObjectACTI
 {
     TESSound* FUN_004fd3a0();
@@ -141,19 +159,15 @@ void* __fastcall FUN_00510620(void** pThis)
     return pThis;
 }
 
-struct SH
-{
-    bool Set(BSStringT<char> const&);
-};
 struct FloatValueProvider : public TESObjectACTI
 {
     void FUN_00510ea0(BSStringT<char> s);
 };
-// Calls Set on the SH object at offset 0x88 with the given string.
+// Sets the activation prompt at offset 0x88 to the given string.
 // @fnv 0x00510ea0
 void FloatValueProvider::FUN_00510ea0(BSStringT<char> s)
 {
-    ((SH*)((char*)this + 0x88))->Set(s);
+    m_kActivationPrompt.Set(s);
 }
 
 struct TESFullName_ext : TESFullName
@@ -182,25 +196,9 @@ void* Holder005105F0::FUN_005105f0(unsigned int flags)
     return this;
 }
 
-struct FormChangeMask
-{
-    int flags;
-    operator bool() const;
-};
-struct BGSLoadFormBuffer
-{
-    FormChangeMask GetChangeFlags(int);
-};
-struct BGSSaveFormBuffer
-{
-};
 struct FUN_00484d60_holder
 {
     void SaveIfChanged(BGSSaveFormBuffer*);
-};
-struct BGSSaveGameBuffer
-{
-    void SaveGameString(const char*, int);
 };
 struct FNStub
 {
@@ -214,7 +212,7 @@ struct FUN_00511860_holder
 void FUN_00511860_holder::FUN_00511860(BGSSaveFormBuffer* apSaveGameBuffer)
 {
     ((FUN_00484d60_holder*)this)->SaveIfChanged(apSaveGameBuffer);
-    if (((BGSLoadFormBuffer*)apSaveGameBuffer)->GetChangeFlags(4))
+    if (((BGSLoadFormBuffer*)apSaveGameBuffer)->GetChangeFlags(4).operator bool())
     {
         const char* pfullname = ((FNStub*)((char*)this + 0x30))->GetFullName();
         ((BGSSaveGameBuffer*)apSaveGameBuffer)->SaveGameString(pfullname, 0);
@@ -255,22 +253,6 @@ BSStringT<char> FUN_005110e0_Holder::GetString()
 struct FUN_00510770_shell : public TESObjectACTI
 {
     void FUN_00510770();
-};
-
-class TESSound : public TESForm
-{
-  public:
-};
-
-class TESWaterForm : public TESForm
-{
-  public:
-};
-
-class BGSTalkingActivator : public TESForm
-{
-  public:
-    bool IsRadioStation(void);
 };
 
 struct BGSDestructibleObjectFormInitItemProxy
@@ -359,21 +341,19 @@ void FUN_00510770_shell::FUN_00510770()
     SetInitializationState(true);
 }
 
-struct ACTIStr : public BSStringT<char>
+// BSStringT.h does not yet declare the string-to-string comparison at 0x00501c90.
+struct BSStringComparison
 {
     int CompareString(const BSStringT<char>* apOther, bool abCaseInsensitive);
 };
 
 struct ACTIView : public TESObjectACTI
 {
-    virtual void Unk_4E();
-    virtual void Unk_4F();
-    virtual TESForm* Unk_50();
     TESSound* GetLoopSoundA();
     TESForm* GetFormTwoA();
     TESForm* GetFormThreeA();
     TESSound* GetFormFourA();
-    ACTIStr GetPromptA();
+    BSStringT<char> GetPromptA();
     bool CompareFormA(TESForm* apForm);
     bool FUN_005111e0(TESForm* apForm);
 };
@@ -391,11 +371,11 @@ bool ACTIView::FUN_005111e0(TESForm* apForm)
         return true;
     if (GetFormThreeA() != pOther->GetFormThreeA())
         return true;
-    if (Unk_50() != pOther->Unk_50())
+    if (GetAssociatedWaterForm() != pOther->GetAssociatedWaterForm())
         return true;
     if (GetFormFourA() != pOther->GetFormFourA())
         return true;
-    iCompare = GetPromptA().CompareString(&pOther->GetPromptA(), true);
+    iCompare = reinterpret_cast<BSStringComparison*>(&GetPromptA())->CompareString(&pOther->GetPromptA(), true);
     if (iCompare)
         return true;
     if (CompareFormA(pOther))
@@ -403,14 +383,6 @@ bool ACTIView::FUN_005111e0(TESForm* apForm)
     return false;
 }
 
-struct StrLen
-{
-    unsigned int Length();
-};
-struct StrOut : BSStringT<char>
-{
-    unsigned int Length();
-};
 struct SoundId
 {
     unsigned int FUN_0084e3a0();
@@ -478,7 +450,7 @@ struct ActiSave
 
     void FUN_004855a0();
     void FinishSave();
-    StrOut GetString();
+    BSStringT<char> GetString();
     void Save();
 };
 
@@ -516,22 +488,13 @@ void ActiSave::Save()
         unsigned int uiSoundId = m_pTalkingActivator->FUN_0084e3a0();
         FUN_00485910(0x4d414e52, uiSoundId);
     }
-    if (((StrLen*)&m_kActivationPrompt)->Length() > 0)
+    if (m_kActivationPrompt.Length() > 0)
     {
         FUN_004856f0(0x4f544158, (void*)GetString().String(), GetString().Length() + 1);
     }
     FinishSave();
 }
 
-struct FUN_004280f0_cls
-{
-    bool FUN_004280f0();
-};
-struct FUN_00428110_cls
-{
-    FUN_004280f0_cls* FUN_00428110(void* dst, unsigned int size);
-    void FUN_008649a0(char* dst);
-};
 struct FUN_00489100_cls
 {
     void FUN_00489100(const char* src);
@@ -551,19 +514,18 @@ struct S_005118c0
     int unk28;
     int unk2c;
     FUN_00489100_cls unk30;
-    void FUN_00484da0(FUN_00428110_cls* stream);
-    void FUN_005118c0(FUN_00428110_cls* stream);
+    void FUN_00484da0(BGSLoadFormBuffer* stream);
+    void FUN_005118c0(BGSLoadFormBuffer* stream);
 };
 // Reads a flag from the stream, and if set reads a string into buf and stores it in unk30.
 // @fnv 0x005118c0
-void S_005118c0::FUN_005118c0(FUN_00428110_cls* stream)
+void S_005118c0::FUN_005118c0(BGSLoadFormBuffer* stream)
 {
-    int flag;
     char buf[260];
     FUN_00484da0(stream);
-    if (stream->FUN_00428110(&flag, 4)->FUN_004280f0())
+    if (stream->GetChangeFlags(4).operator bool())
     {
-        stream->FUN_008649a0(buf);
+        stream->LoadString(buf);
         unk30.FUN_00489100(buf);
     }
 }
@@ -607,12 +569,6 @@ struct OpenClose476
 {
     virtual void Method();
 };
-struct FUN_004037d0
-{
-    char* data;
-    unsigned short length, capacity;
-    ~FUN_004037d0();
-};
 struct FUN_00510640 : FUN_0050f740, FUN_00591300, FUN_0048a490, Scriptable476, FUN_00475380, OpenClose476
 {
     void* loopingSound;
@@ -620,14 +576,12 @@ struct FUN_00510640 : FUN_0050f740, FUN_00591300, FUN_0048a490, Scriptable476, F
     void* radioTemplate;
     void* water;
     void* radioStation;
-    FUN_004037d0 activationPrompt;
+    BSStringT<char> activationPrompt;
     virtual ~FUN_00510640();
 };
 // @fnv 0x00510640
 FUN_00510640::~FUN_00510640()
 {}
-
-class TESEffectShader;
 
 class ActiV511
 {

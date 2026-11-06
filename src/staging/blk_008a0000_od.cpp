@@ -2,7 +2,12 @@
 // src/staging/blk_008a0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiTransform.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/TESForm.h"
+#include "../../include/Actor.h"
+#include "../../include/PlayerCharacter.h"
 
 struct FUN_008a0250_class
 {
@@ -15,21 +20,13 @@ void FUN_008a0250_class::FUN_008a0250()
     *reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 0xc4) = true;
 }
 
-struct FUN_008a08c0_Class
-{
-    char GetByteAt7C4();
-};
-
 // @fnv 0x008a08c0
-char FUN_008a08c0_Class::GetByteAt7C4()
+bool Actor::GetByteAt7C4()
 {
-    return ((char*)this)[0x7c4];
+    return *reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 0x7c4);
 }
 
-struct Actor
-{
-    void ProcessQueuedActorUpdate();
-};
+// Actor.h does not yet declare this entry point; retain its local shell.
 struct FUN_008a1a40_shell : Actor
 {
     void FUN_008a1a40(Actor* p);
@@ -37,7 +34,7 @@ struct FUN_008a1a40_shell : Actor
 // @fnv 0x008a1a40
 void FUN_008a1a40_shell::FUN_008a1a40(Actor* apActor)
 {
-    ((int*)this)[0x10c / 4] = (int)apActor;
+    *reinterpret_cast<Actor**>(&m_eCriticalStage) = apActor;
     ProcessQueuedActorUpdate();
 }
 
@@ -2154,23 +2151,6 @@ void Me::FUN_008bf500(void* arg)
     g_thePlayer->FUN_00966e50();
 }
 
-struct ThreeByThreeMatrix
-{
-    float m[9];
-};
-struct NiPoint3
-{
-    float x, y, z;
-};
-struct NiTransform
-{
-    ThreeByThreeMatrix m_kOrientation;
-    NiPoint3 m_kTranslation;
-    float m_fScale;
-    NiTransform();
-    NiTransform operator*(const NiTransform& o) const;
-    void InvertTransform();
-};
 struct X38
 {
     float m_00[7];
@@ -2234,7 +2214,13 @@ struct P
 {
     P2* GetValueByIndex(void* a);
 };
-void CreateProjectileRef(int a, int b, int c, int d, NiPoint3 pt, ThreeByThreeMatrix mat);
+// Preserve the trivial by-value copy at this legacy call boundary.
+// The shared matrix declares a copy constructor.
+template <class T> struct TrivialValue
+{
+    unsigned char data[sizeof(T)];
+};
+void CreateProjectileRef(int a, int b, int c, int d, NiPoint3 pt, TrivialValue<NiMatrix3> mat);
 struct BaseObj
 {
     virtual void v0();
@@ -2456,7 +2442,7 @@ struct ThisC
     virtual RObj* GetR116(NiTransform* t);
     BaseObj* FUN_004181e0();
     int FUN_008d6f30();
-    double GetScale();
+    double FUN_00567400();
     ResObj* CreateNodeFromTransform(void* a1, A2* a2, A3* a3, unsigned char a4);
 };
 
@@ -2483,14 +2469,14 @@ ResObj* ThisC::CreateNodeFromTransform(void* pLookupKey, A2* pTransformSource, A
                         if (p4->FUN_005e3fa0() != 0)
                         {
                             CreateProjectileRef(p4->FUN_005e3fa0(), 0, 0, FUN_008d6f30(), pPlacement->m_24,
-                                                pTransformSource->FUN_00461130()->m_kOrientation);
+                                                reinterpret_cast<const TrivialValue<NiMatrix3>&>(pTransformSource->FUN_00461130()->m_Rotate));
                         }
                         if (p4->FUN_008d8520() != 0)
                         {
                             if (p4->GetUnk66() > 0)
                             {
                                 p4->FUN_008d8520()->FUN_004fa6f0(FUN_008d6f30(), &pPlacement->m_24, p4->GetUnk66(),
-                                                                 (float)(GetScale() * p4->FUN_009b0bd0()));
+                                                                 (float)(FUN_00567400() * p4->FUN_009b0bd0()));
                             }
                         }
                     }
@@ -2508,7 +2494,7 @@ ResObj* ThisC::CreateNodeFromTransform(void* pLookupKey, A2* pTransformSource, A
                                 NiTransform t2;
                                 GetR116(&t1)->FUN_00461130()->InvertTransform();
                                 t2 = t1 * *pTransformSource->FUN_00461130();
-                                retValA->FUN_00440460(t2.m_kTranslation);
+                                retValA->FUN_00440460(t2.m_Translate);
                                 retValA->FUN_0043fa80(&t2);
                                 retValA->FUN_00440490(p4->FUN_009b88c0());
                             }
@@ -2524,11 +2510,9 @@ ResObj* ThisC::CreateNodeFromTransform(void* pLookupKey, A2* pTransformSource, A
 
 typedef unsigned int size_t_;
 
-struct ActorX;
-struct TESForm;
 struct RefObj;
 
-extern "C" ActorX* DAT_011dea3c;
+extern "C" Actor* DAT_011dea3c;
 extern "C" char DAT_011cd6fc;
 extern "C" char DAT_011cdf84;
 extern "C" char DAT_011cde20;
@@ -2563,11 +2547,6 @@ struct Sub4
     virtual void s1();
     virtual int s2(int);
     virtual float s3(int);
-};
-struct TESForm
-{
-    char pad[0x100];
-    Sub4 m100;
 };
 struct Faction
 {
@@ -2843,10 +2822,10 @@ struct RefObj
     virtual void r265(void*, int, int, int, int, int, int, int);
     TESForm* GetOwner();
     ExtraList* GetExtraData();
-    int FUN_008a0d10(int, ActorX*, char*, int, int, int, int);
+    int FUN_008a0d10(int, Actor*, char*, int, int, int, int);
     void FUN_008bff50();
     void FUN_008b7c00(int, int);
-    void FUN_008bf7b0(ActorX*, TESForm*);
+    void FUN_008bf7b0(Actor*, TESForm*);
     ProcV* GetProcess();
 };
 struct ProcV
@@ -3154,11 +3133,11 @@ struct NewObj
 {
     char pad[0x3c];
     static void* operator new(size_t_ n);
-    NewObj(int, RefObj*, ActorX*, int, int, TESForm*);
+    NewObj(int, RefObj*, Actor*, int, int, TESForm*);
     void FUN_008bff50();
     void FUN_008b7c00(int, int);
-    void FUN_008bf7b0(ActorX*, TESForm*);
-    int FUN_008a0d10(int, ActorX*, char*, int, int, int, int);
+    void FUN_008bf7b0(Actor*, TESForm*);
+    int FUN_008a0d10(int, Actor*, char*, int, int, int, int);
     void* FUN_0084e3a0();
     void AddActor(RefObj*);
 };
@@ -3175,20 +3154,13 @@ struct Z
     RefObj* FUN_00970a20(TESForm*, int);
     void AddObjectToList(NewObj*);
 };
-struct ActorX
+// Calls at 0x008bffa0, 0x008bff70 and 0x00964100 lack shared declarations;
+// this declaration-only adapter adds no fields to the shared Actor layout.
+struct TheftAlarmRuntimeCalls : Actor
 {
-    char pad0[0xa4];
-    Sub4 m_a4;
-    char pad2[0x134 - 0xa4 - sizeof(Sub4)];
-    unsigned char m134;
-    int m138;
     int GetField228();
     void AddToField(int, int);
-    void FUN_0094fd30(int);
     void* FUN_00964100(int);
-    ProcV* GetProcess();
-    void SetLight(void* p);
-    void FUN_008bfa40(RefObj* pSrc, int a2, int a3, int a4, TESForm* p5);
 };
 
 int __fastcall FNV_GetFormType(TESForm* p);
@@ -3199,7 +3171,7 @@ int __cdecl GetTopicSubTypeName(int, int);
 void __cdecl SetTlsInt(int);
 
 // @fnv 0x008bfa40
-void ActorX::FUN_008bfa40(RefObj* apSource, int a2, int aiArg3, int aiArg4, TESForm* apForm)
+void Actor::StealAlarm(TESObjectREFR* apSource, int a2, int aiArg3, int aiArg4, TESForm* apForm)
 {
     bool h = false; /* -0x11  bFlag  bucket 14 */
     RefObj* p = 0;  /* -0x10  pRes   bucket 15 */
@@ -3219,19 +3191,19 @@ void ActorX::FUN_008bfa40(RefObj* apSource, int a2, int aiArg3, int aiArg4, TESF
 
     if (this != DAT_011dea3c)
         return;
-    if (DAT_011dea3c->GetField228() < ((SettingColl*)&DAT_011cd6fc)->Int()->i)
+    if (static_cast<TheftAlarmRuntimeCalls*>(DAT_011dea3c)->GetField228() < ((SettingColl*)&DAT_011cd6fc)->Int()->i)
     {
         if (this == DAT_011dea3c)
             h = true;
     }
     if (this == DAT_011dea3c)
-        DAT_011dea3c->AddToField(0, aiArg3);
-    else if (this->m_a4.s2(0x2a) >= 100)
+        static_cast<TheftAlarmRuntimeCalls*>(DAT_011dea3c)->AddToField(0, aiArg3);
+    else if (this->GetActorValue(static_cast<ActorValue::Index>(0x2a)) >= 100)
         return;
     i = 0;
     f = false;
-    if (apSource->r64())
-        i = apSource;
+    if (reinterpret_cast<RefObj*>(apSource)->r64())
+        i = reinterpret_cast<RefObj*>(apSource);
     s = apForm;
     if (!s && i)
         s = i->GetOwner();
@@ -3239,11 +3211,11 @@ void ActorX::FUN_008bfa40(RefObj* apSource, int a2, int aiArg3, int aiArg4, TESF
     if (a > DAT_01012060)
     {
         a = a * ((FloatSetting*)&DAT_011cdf84)->Float()->f;
-        this->GetProcess()->p297(a);
+        reinterpret_cast<ProcV*>(this->GetProcess())->p297(a);
     }
     if (i && i->r134())
         p = i;
-    else if (FNV_GetFormType(s) == 8)
+    else if (::FNV_GetFormType(s) == 8)
     {
         ax = (Faction*)s;
         if (!ax->FUN_0047d7c0())
@@ -3255,36 +3227,36 @@ void ActorX::FUN_008bfa40(RefObj* apSource, int a2, int aiArg3, int aiArg4, TESF
         aj = s;
         if (aj)
         {
-            q = FUN_0047e040(aj->m100.s3(0x17));
+            q = FUN_0047e040(reinterpret_cast<Sub4*>(reinterpret_cast<char*>(aj) + 0x100)->s3(0x17));
             if (q != 2 && q != 4)
                 f = true;
             p = ((Z*)&DAT_011e0e80)->FUN_00970a20(aj, 1);
         }
     }
     if (f)
-        DAT_011dea3c->FUN_0094fd30((int)((FloatSetting*)&DAT_011cde20)->Float()->f);
+        static_cast<PlayerCharacter*>(DAT_011dea3c)->ModifyKarmaForTheft((int)((FloatSetting*)&DAT_011cde20)->Float()->f);
     if (p && !p->r200() && (b = p->FUN_008a0d10(0, this, &ak, 0, 0, 0, 0)) > 0)
     {
         k = 0;
         if (a2)
-            k = new NewObj(0, apSource, this, a2, aiArg3, apForm);
+            k = new NewObj(0, reinterpret_cast<RefObj*>(apSource), this, a2, aiArg3, apForm);
         else
-            k = new NewObj(0, apSource, this, a2, aiArg4, apForm);
+            k = new NewObj(0, reinterpret_cast<RefObj*>(apSource), this, a2, aiArg4, apForm);
         p->GetExtraData()->AddOrCreateExtraItem(k, ((G67*)&DAT_011de7b8)->FUN_00867da0());
         p->FUN_008bff50();
         p->FUN_008b7c00(1, 1);
         ((Z*)&DAT_011e0e80)->AddObjectToList(k);
         k->AddActor(p);
-        if (this->m134)
+        if (this->m_bActorListValid)
         {
             c = true;
-            if (this->m138 > 0)
+            if (this->m_iIntegerAfterActorListValid > 0)
             {
-                e = this->m138 & 0x1ff;
+                e = this->m_iIntegerAfterActorListValid & 0x1ff;
                 if (e != (signed char)((G67*)&DAT_011de7b8)->FUN_00867d60())
                 {
                     c = false;
-                    this->m134 = 0;
+                    this->m_bActorListValid = 0;
                 }
             }
             if (c)
@@ -3295,10 +3267,10 @@ void ActorX::FUN_008bfa40(RefObj* apSource, int a2, int aiArg3, int aiArg4, TESF
         }
         else
         {
-            if (!DAT_011dea3c->FUN_00964100(5))
+            if (!static_cast<TheftAlarmRuntimeCalls*>(DAT_011dea3c)->FUN_00964100(5))
             {
-                this->m134 = 1;
-                this->m138 = (((G67*)&DAT_011de7b8)->FUN_00867d20() << 9) |
+                this->m_bActorListValid = 1;
+                this->m_iIntegerAfterActorListValid = (((G67*)&DAT_011de7b8)->FUN_00867d20() << 9) |
                              (signed char)((G67*)&DAT_011de7b8)->FUN_00867d60() |
                              (((G67*)&DAT_011de7b8)->FUN_00867c60() << 13);
             }
@@ -3309,7 +3281,7 @@ void ActorX::FUN_008bfa40(RefObj* apSource, int a2, int aiArg3, int aiArg4, TESF
             return;
         }
         SetTlsInt((int)s);
-        this->SetLight(k->FUN_0084e3a0());
+        this->FUN_0057bd60(reinterpret_cast<Actor*>(k->FUN_0084e3a0()));
         l = GetTopicSubTypeName(2, 9);
         p->GetProcess()->p169(p, l, 0, 0, 1, 0);
         SetTlsInt(0);

@@ -3,21 +3,13 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include "havok/hkpPositionConstraintMotor.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
 
 struct MotorAllocator
 {
     virtual void Release(void*);
     virtual void* Allocate(unsigned int size);
 };
-struct MemoryRouter
-{
-    void* m_iValueAtOffset0C;
-    void* m_activeThread;
-    void* m_allocatorContext;
-    void* m_debugData;
-    MotorAllocator* m_pThreadAllocator;
-};
-MemoryRouter* __cdecl FUN_00c85750();
 extern int DAT_010cb76c;
 extern int DAT_010cb780;
 extern int DAT_010cb798;
@@ -55,8 +47,8 @@ struct PositionConstraintMotor
 // @fnv 0x00cdf5b0
 PositionConstraintMotor* __thiscall PositionConstraintMotor::Clone()
 {
-    MemoryRouter* router = FUN_00c85750();
-    PositionConstraintMotor* copy = (PositionConstraintMotor*)router->m_pThreadAllocator->Allocate(0x24);
+    hkMemoryRouter* router = (&hkMemoryRouter::getInstance());
+    PositionConstraintMotor* copy = (PositionConstraintMotor*)reinterpret_cast<MotorAllocator*>(router->m_heap)->Allocate(0x24);
     ReferencedMotorView* referenced = (ReferencedMotorView*)copy;
     referenced->m_ppVirtualMethodTable = &DAT_010cb76c;
     referenced->m_memorySizeAndFlags = 0x24;

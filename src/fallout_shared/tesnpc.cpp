@@ -1,6 +1,305 @@
+#include "../../include/SettingT.h"
 // fallout_shared/tesnpc.cpp: TESNPC, ActorValue, TESActorBaseData, FR2MatrixVTCData and more (114 functions)
 
-#include "tesnpc_pc_decls.h"
+// Shared geometry and pointer dependencies use their checked layouts.
+#include "../../include/NiPointer.h"
+// include/TESFile.h needs the Windows types before layout_support.h stubs them.
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "../../include/BGSDefaultObjectManager.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/DialoguePackage.h"
+#include "../../include/GameSettingCollection.h"
+#include "../../include/NP.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESPackage.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiSkinInstance.h"
+#include "../../include/NiTriBasedGeom.h"
+#include "../../include/TESObject.h"
+#include "../../include/BGSDestructibleObjectForm.h"
+#include "../../include/BGSHeadPart.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BSFaceGenAnimationData.h"
+#include "../../include/BSFaceGenManager.h"
+#include "../../include/BSFaceGenNiNode.h"
+#include "../../include/CombatController.h"
+#include "../../include/ExtraDismemberedLimbs.h"
+#include "../../include/NiControllerManager.h"
+#include "../../include/TESAttributes.h"
+#include "../../include/TESBipedModelForm.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESClass.h"
+#include "../../include/TESHair.h"
+#include "../../include/TESHealthForm.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESObjectARMO.h"
+#include "../../include/TESObjectWEAP.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESScriptableForm.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESNPC.h"
+#include "../../include/TESRace.h"
+#include "../../include/TESRaceForm.h"
+#include "../../include/DialogueItem.h"
+#include "../../include/InventoryChanges.h"
+#include "../../include/InventoryStackRecord.h"
+#include "../../include/TESSaveLoadGame.h"
+#include "../../include/FormChangeMask.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiMatrix3.h"
+
+// Unit-specific call-site declarations follow; every game class with a shared header comes from include/.
+
+#include "../../include/ENUM_FORM_ID.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/ActorValueOwner.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/SETTING_VALUE.h"
+#include "../../include/BSAudio.h"
+#include "../../include/TESFile.h"
+class TESFullName;
+class TESFullNameLoader
+{
+  public:
+    static void LoadFullNameChunk(TESFullName* apName, TESFile* apFile);
+};
+class QuestDialogueInfo;
+class TESTopic;
+class ExtraDataList;
+class TESDialoguePackage;
+#include "../../include/ActorValue.h"
+namespace ActorValue {
+Index GetActorValueForSectionIndex(Section, unsigned char);
+bool GetFlag(Index, unsigned int);
+bool IsSkill(Index);
+}
+
+#include "../../include/NiPoint3.h"
+class InventoryStackRecord;
+class ActorAnimData;
+class NiDefaultAVObjectPalette;
+class NiAVObject;
+class TESEyes;
+class TESCombatStyle;
+class BipedAnim;
+class BaseProcess;
+class PlayerQuestData;
+#include "../../include/SEX.h"
+#include "../../include/ActorBaseAttributes.h"
+#include "../../include/ActorSkillData.h"
+#include "../../include/BGSBipedModelList.h"
+#include "../../include/BGSListForm.h"
+#include "../../include/BGSTouchSpellForm.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/MagicCaster.h"
+#include "../../include/TESAIForm.h"
+#include "../../include/TESAnimation.h"
+#include "../../include/TESCombatStyle.h"
+#include "../../include/TESContainer.h"
+#include "../../include/TESEyes.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESSpellList.h"
+#include "../../include/TESTopic.h"
+#include "../../include/Actor.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/bhkRagdollController.h"
+class TESDialoguePackage;
+class TESDialoguePackage : public TESPackage
+{
+};
+class Calendar
+{
+  public:
+    unsigned char GetDayOfMonth();
+    float GetGameTime();
+};
+extern Calendar g_calendar;
+class SettingActivationText
+{
+  public:
+    const char* IsContentAvailable();
+};
+extern SettingActivationText DAT_011d210c, DAT_011d2538, DAT_011d2394, DAT_011cf594;
+class ActivationMenuState
+{
+  public:
+    void SetEquipmentState(int, int);
+};
+extern ActivationMenuState DAT_011f2250;
+BSAudio* GetAudioSystem();
+extern PlayerCharacter* g_thePlayer;
+bool FUN_00754d90(Actor*);
+void OpenDialogueMenu(int, TESObjectREFR*, TESTopic*, void*, int, bool);
+bool ShowMessage(const char*, int, const char*, const char*, float, bool);
+int FUN_00702640();
+extern "C" int sprintf(char*, const char*, ...);
+class ContainerItemExtra
+{
+  public:
+    TESForm* m_pForm;
+    int m_cRank;
+    float m_fHealth;
+    ContainerItemExtra();
+    bool Load(TESFile*);
+};
+struct InventoryItemEntry
+{
+    int iCount;
+    TESForm* pForm;
+    ContainerItemExtra* pExtra;
+    void FUN_00462230();
+};
+struct ContainerItem
+{
+    int iCount;
+    unsigned int iFormID;
+    void FUN_00462230();
+};
+extern InventoryItemEntry* DAT_011cb7d8;
+struct PackedRecordData
+{
+    unsigned char m_ucField00, m_ucField01, m_ucField02, m_ucField03;
+    unsigned char m_ucField04;
+    unsigned int m_uiField08;
+    unsigned char m_ucField0C, m_ucField0D, m_ucField0E;
+    bool m_bField0F;
+    unsigned int m_uiField10;
+    void SwapEndianFields();
+};
+struct FactionReaction
+{
+    TESFaction* pFaction;
+    char m_ucRank;
+    void Endian();
+};
+
+struct FaceGenCoordinateValue
+{
+    float* value;
+    unsigned int offset;
+    const float* FUN_00629ab0();
+};
+class FaceGenCoordinateBasis
+{
+  public:
+    FaceGenCoordinateValue FUN_0060b370(unsigned int, unsigned int);
+};
+class NiTexture;
+class FaceGenUndo;
+typedef char TESNPC_unit_actorbase_size_check[(sizeof(TESActorBase) == 0x10c) ? 1 : -1];
+typedef char TESNPC_unit_class_offset_check[(offsetof(TESNPC, m_pClass) == 0x130) ? 1 : -1];
+typedef char TESNPC_unit_hair_offset_check[(offsetof(TESNPC, m_pHair) == 0x1b8) ? 1 : -1];
+typedef char TESNPC_unit_weight_offset_check[(offsetof(TESNPC, fWeight) == 0x1f8) ? 1 : -1];
+class TESFileChunkData16 : public TESFile
+{
+  public:
+    bool GetChunkData(unsigned short*);
+};
+class TESFileFormVersion : public TESFile
+{
+  public:
+    unsigned short GetFormVersion();
+};
+// The shared TESFile declaration lacks these methods, so use a private extension.
+class TESNPCFileAccess : public TESFileFormVersion
+{
+  public:
+    unsigned int GetOffset();
+    const char* GetFilename();
+};
+
+extern "C" void* __cdecl _alloca(unsigned int);
+extern "C" void* __cdecl memset(void*, int, unsigned int);
+void* __cdecl operator new(unsigned int);
+void __cdecl operator delete(void*);
+void __cdecl operator delete[](void*);
+template <int N> struct EndianSizeTag
+{
+};
+void BSEndian(float*, EndianSizeTag<4>);
+void BSEndian(unsigned short*, EndianSizeTag<2>);
+TESForm* GetFormByID(unsigned int);
+int Warning(const char*, ...);
+
+
+bool FUN_009a3830(BGSHeadPart*&, BGSHeadPart*&);
+extern unsigned char DAT_011a9448;
+extern "C" const NiPoint3 NiPoint3_ZERO;
+class ActorAnimData
+{
+  public:
+    class NiControllerManager* FUN_00496940();
+};
+struct BIPED_OBJECT_DATA
+{
+    TESBoundObject* pObject;
+    void* pItem;
+    NiAVObject* p3D;
+    NiNode* pBone;
+};
+#include "../../include/BIPED_BONE.h"
+class BipedAnim
+{
+  public:
+    BipedAnim(TESObjectREFR*, bool);
+    void AddBipedWeapon(TESObjectWEAP*, unsigned char);
+    unsigned char bipedData[0x2b4];
+    NiNode* GetBoneNode(BIPED_BONE);
+    BIPED_OBJECT_DATA* FUN_00606800();
+    void UpdateRaceSex(TESRace*, SEX);
+};
+void AddObjectToPalette(NiNode*, NiDefaultAVObjectPalette*);
+void ComputeAngleRange(float*, float*);
+void ClampMinMaxFromSetting(float*, float*);
+void FUN_00649fe0(float*, float*);
+void GetEyeAngleLimits(float*, float*);
+
+extern BGSSaveLoadGame* g_BGSSaveLoadGame;
+extern SettingT_GameSettingCollection_ DAT_011d0e7c, DAT_011cd6c0;
+class GameSettingCollection;
+using ::SettingT;
+extern SettingT<GameSettingCollection> originalRuntimeFloatSetting327;
+int TruncateFloatToInt(float);
+double FUN_00404040(float);
+int ComputeIntelligenceResult(int, bool);
+void GetSkillAttributeAndBase(ActorValue::Index, int*, float*);
+class AIFormulas
+{
+  public:
+    static float CalculateSkillValue(float, float, float);
+};
+struct NPCDefaultSelection
+{
+    bool useClassDefaults;
+    bool isPlayer;
+};
+struct DismembermentPart
+{
+    bool bIsBody, bDismembered;
+};
+bool FUN_004abfa0();
+extern BSSimpleList<TESNPC*> DAT_011cb764;
+TESCombatStyle* FUN_00505000();
+class SceneObjectLookup
+{
+  public:
+    static NiAVObject* GetObjectByName(NiNode*, const char*);
+};
+const char* FUN_00605d40(bool);
+extern TESSaveLoadGame* g_TESSaveLoadGame;
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+extern const char* DAT_01188b98[];
+
+
+#include "../../include/FurnitureMark.h"
+#include "../../include/GO.h"
+#include "../../include/TES.h"
 
 // @fnv 0x00601170
 TESNPC::TESNPC() : m_pkPrimaryFaceGenNode(0), m_pkSecondaryFaceGenNode(0), m_pkFaceGenTexture(0), undoStates(0, true)
@@ -48,7 +347,7 @@ void TESNPC::ResetFormData()
     m_pAssignedRace = 0;
     m_pTemplateNPC = 0;
     TESActorBaseData::UpdateFlagBit(1, false);
-    TESHealthForm::FUN_006ecd40(50);
+    TESHealthForm::SetFormHealth(50);
 }
 
 // @fnv 0x00601750
@@ -213,13 +512,13 @@ bool TESNPC::Load(TESFile* file)
             case 'MANI': {
                 unsigned int deathItem = 0;
                 file->GetChunkData(&deathItem);
-                m_pBaseTemplateForm = reinterpret_cast<TESForm*>(deathItem);
+                m_pBaseTemplateForm = reinterpret_cast<TESLevItem*>(deathItem);
                 break;
             }
             case 'KCTV': {
                 unsigned int voice;
                 file->GetChunkData(&voice);
-                m_kFactionList = reinterpret_cast<TESForm*>(voice);
+                m_kFactionList = reinterpret_cast<BGSVoiceType*>(voice);
                 break;
             }
             case 'TLPT': {
@@ -297,7 +596,7 @@ bool TESNPC::Load(TESFile* file)
                     if (file->IsEndianConversionRequired())
                         BSEndian(&cursor.values[index], EndianSizeTag<4>());
                     *const_cast<float*>(
-                        m_kFaceGenCoordinates[cursor.row][cursor.column].FUN_0060b370(index, 0).FUN_00629ab0()) =
+                        reinterpret_cast<FaceGenCoordinateBasis*>(&m_kFaceGenCoordinates[cursor.row][cursor.column])->FUN_0060b370(index, 0).FUN_00629ab0()) =
                         cursor.values[index];
                 }
                 break;
@@ -448,11 +747,11 @@ void TESNPC::InitItem()
         RemapFormIDForFile(classID, GetFile(-1));
         m_pClass = dynamic_cast<TESClass*>(TESForm::GetFormByID(classID));
     }
-    if (vfn_144())
+    if (static_cast<const TESObject*>(this)->IsAutoCalculated())
         UpdateActorBaseData(false);
     if (m_pCombatStyle)
     {
-        combatID = reinterpret_cast<unsigned int>(GetCombatStyle());
+        combatID = reinterpret_cast<unsigned int>(TESNPC::GetCombatStyle());
         if (combatID)
         {
             RemapFormIDForFile(combatID, GetFile(-1));
@@ -462,9 +761,9 @@ void TESNPC::InitItem()
                         GetFormID(), GetName());
         }
     }
-    if (!GetCombatStyle())
+    if (!TESNPC::GetCombatStyle())
         SetCombatStyle(FUN_00505000());
-    if (TESHealthForm::FUN_00726070() <= 0)
+    if (TESHealthForm::GetBaseHealth() <= 0)
         SetEssentialState(true);
     if (m_fGlyphExtent == 0.0)
         m_fGlyphExtent = GetDefaultHeight();
@@ -491,9 +790,9 @@ void TESNPC::Copy(TESForm* form)
     TESAnimation::BaseFormRecord(form);
     BGSDestructibleObjectForm::BaseFormRecord(form);
     memcpy(&data, npc->GetTextureManager(), 28);
-    m_pClass = npc->GetClass();
-    SetCombatStyle(npc->GetCombatStyle());
-    vfn_5c(npc->vfn_58());
+    m_pClass = npc->TESActorBase::GetClass();
+    SetCombatStyle(static_cast<const TESActorBase*>(npc)->GetCombatStyle());
+    SetBloodImpactMaterial(static_cast<const TESNPC*>(npc)->GetBloodImpactMaterial());
     CopyActorBaseData(npc);
     m_fGlyphExtent = npc->m_fGlyphExtent;
     fWeight = npc->fWeight;
@@ -527,7 +826,7 @@ void TESNPC::GetFaceGenCoords(FaceGenMatrix<float> (&coords)[2][2])
         BSFaceGenManager::CopyFaceGenCoordinates(
             reinterpret_cast<FaceGenMatrix<float>(*)[2]>(BSFaceGenManager::GetFaceGenCoordinates()), coords, 0, 0);
     else
-        BSFaceGenManager::BlendFaceGenCoordinates(GetFormRace()->GetMeanFaceCoord(GetSex()), GetOffsetFaceCoord(),
+        BSFaceGenManager::BlendFaceGenCoordinates(GetFormRace()->GetMeanFaceCoord(TESActorBase::GetSex()), GetOffsetFaceCoord(),
                                                   coords, false, 0.0f);
 }
 
@@ -537,7 +836,7 @@ TESHair* TESNPC::GetHair()
 {
     TESHair* hair = m_pHair;
     if (m_pAssignedRace && this != g_thePlayer->GetObjectReference())
-        hair = GetFormRace()->FUN_00613870(GetSex());
+        hair = GetFormRace()->FUN_00613870(TESActorBase::GetSex());
     return hair;
 }
 
@@ -551,9 +850,9 @@ void TESNPC::UpdateActorBaseData(bool menu)
     if (GetFormID() == 7)
         m_bFaceGenDataValid = true;
     bool bUseDefaults = true;
-    if (m_bFaceGenDataValid && DAT_011d0e7c.Int()->i == GetClass()->GetFormID())
+    if (m_bFaceGenDataValid && DAT_011d0e7c.Int()->i == TESActorBase::GetClass()->GetFormID())
         bUseDefaults = false;
-    if (vfn_144())
+    if (static_cast<const TESObject*>(this)->IsAutoCalculated())
     {
         int iLevel;
         {
@@ -569,9 +868,9 @@ void TESNPC::UpdateActorBaseData(bool menu)
                 for (int iIndex = 0; iIndex < 7; ++iIndex)
                 {
                     ActorValue::Index eAttribute =
-                        ActorValue::GetActorValueForSectionIndex(ActorValue::Attributes, (unsigned char)iIndex);
+                        ActorValue::GetActorValueForSectionIndex(ActorValue::ATTRIBUTE, (unsigned char)iIndex);
                     if (bUseDefaults)
-                        fValue = GetClass()->classAttributes.GetAttributeValue(iIndex + 5);
+                        fValue = TESActorBase::GetClass()->TESAttributes::GetAttributeValue(iIndex + 5);
                     if (fValue > 10.0)
                         fValue = 10.0f;
                     TESAttributes::SetAttributeValue(eAttribute, (unsigned char)TruncateFloatToInt(fValue), false);
@@ -588,18 +887,18 @@ void TESNPC::UpdateActorBaseData(bool menu)
                 for (int iIndex = 0; iIndex < 14; ++iIndex)
                 {
                     ActorValue::Index eAttribute =
-                        ActorValue::GetActorValueForSectionIndex(ActorValue::Skills, (unsigned char)iIndex);
+                        ActorValue::GetActorValueForSectionIndex(ActorValue::SKILL, (unsigned char)iIndex);
                     if (!ActorValue::GetFlag(eAttribute, 0x2000) && ActorValue::IsSkill(eAttribute))
                     {
                         fValue = 0.0f;
                         int iAttribute = -1;
                         GetSkillAttributeAndBase(eAttribute, &iAttribute, &fValue);
                         fValue =
-                            AIFormulas::CalculateSkillValue(fValue, (float)attributes[iAttribute - 5], (float)luck);
+                            AIFormulas::CalculateSkillValue(fValue, (float)cAttribute[iAttribute - 5], (float)luck);
                         if (bUseDefaults && m_pClass && m_pClass->IsTagSkill(eAttribute))
                         {
                             fValue = fValue + (budget.fPointsPerSkill + budget.overflow +
-                                               originalRuntimeFloatSetting327.Float()->f);
+                                               *originalRuntimeFloatSetting327.Float());
                             budget.overflow = 0.0f;
                             if (fValue > 100.0)
                             {
@@ -616,7 +915,7 @@ void TESNPC::UpdateActorBaseData(bool menu)
                 }
                 if (m_pClass)
                 {
-                    if (vfn_30())
+                    if (static_cast<const TESNPC*>(this)->GetNoHeadTracking())
                         TESAIForm::SetServiceFlags(m_pClass->FUN_006286d0(), false);
                 }
                 else
@@ -630,8 +929,8 @@ void TESNPC::UpdateActorBaseData(bool menu)
 // @fnv 0x006041d0
 float TESNPC::GetDefaultHeight()
 {
-    if (reinterpret_cast<TESHairCanBeNPCData*>(this)->FUN_004ac110())
-        return reinterpret_cast<TESHairCanBeNPCData*>(this)->FUN_004ac110()->FUN_00604210(GetSex());
+    if (FUN_004ac110())
+        return FUN_004ac110()->GetHeight(TESActorBase::GetSex());
     return 0.0f;
 }
 
@@ -727,58 +1026,10 @@ void TESNPC::UpdateModel3D(TESObjectREFR* refr, bool armor, bool weapon, bool up
 }
 
 // @fnv 0x006055f0
-BipedAnim* TESNPC::GetBipedAnimationForReference(TESObjectREFR* refr)
-{
-    AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_ANIMATION, true,
-                           "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESNPC.cpp", 5585);
-    BipedAnim* biped = refr->GetBipedAnim();
-    if (biped)
-        Warning("ANIMATION: This npc \"%s\" has already been used.\r\nOnly the first reference will be used.\n",
-                GetName());
-    else
-    {
-        biped = new BipedAnim(refr, false);
-        refr->SetBipedAnim(biped);
-    }
-    return biped;
-}
+
 
 // @fnv 0x006061b0
-bool TESNPC::InitWornObject(TESObjectREFR* refr, BipedAnim* biped, TESBoundObject* object)
-{
-    bool bReturnValue = true;
-    {
-        struct BipedModelSources
-        {
-            BGSBipedModelList* list;
-            TESBipedModelForm* model;
-        } models;
-        models.model = TESBipedModelForm::GetFormAsBipedModel(object);
-        if (object->GetFormType() == ENUM_FORM_ID_WEAP_ID)
-        {
-            TESObjectWEAP* weapon = static_cast<TESObjectWEAP*>(object);
-            biped->AddBipedWeapon(weapon, 0);
-        }
-        else if (models.model)
-            models.model->SetBipedModel(biped, (SEX)((actorData.m_uiActorFlags & 1) != 0), -1);
-        else
-            Warning("MODELS: Bad part '%s' in TESNPC::InitWornObject.", TESFullName::GetFullName(object));
-        models.list = BGSBipedModelList::GetBipedModelList(object);
-        if (models.list && models.list->GetList())
-        {
-            BSSimpleList<TESForm*>* node = models.list->GetList()->GetList();
-            while (node && !node->IsEmpty())
-            {
-                TESBoundObject* part = static_cast<TESBoundObject*>(node->GetItem());
-                models.model = TESBipedModelForm::GetFormAsBipedModel(part);
-                if (models.model)
-                    models.model->SetBipedModel(biped, (SEX)((actorData.m_uiActorFlags & 1) != 0), -1);
-                node = node->GetNext();
-            }
-        }
-    }
-    return bReturnValue;
-}
+
 
 // @fnv 0x006062e0
 void TESNPC::AttachHeadParts(TESObjectREFR* refr, NiNode* node)
@@ -879,7 +1130,7 @@ void TESNPC::RebuildHeadModel(TESObjectREFR* refr, BipedAnim* biped, bool rebuil
                 }
             }
             if (intact)
-                pActorRefr->GetProcess()->ResetActorModel(1);
+                pActorRefr->GetProcess()->ResetActorModel((RESET_3D_FLAGS)1);
         }
         if (!refr->Get3DSimple() || rebuild)
         {
@@ -903,7 +1154,7 @@ void TESNPC::RebuildHeadModel(TESObjectREFR* refr, BipedAnim* biped, bool rebuil
             if (defaults)
             {
                 bool bShouldEquipWeapon = true;
-                TESPackage* pActorPackage = pActorRefr->GetCurrentPackage();
+                TESPackage* pActorPackage = pActorRefr->MobileObject::GetCurrentPackage();
                 if (pActorPackage && pActorPackage->FUN_00441b00())
                     bShouldEquipWeapon = false;
                 UpdateModel3D(refr, true, bShouldEquipWeapon, false, false);
@@ -933,90 +1184,10 @@ void TESNPC::GetFaceGenNodes(BSFaceGenNiNode*& headBiped, BSFaceGenNiNode*& head
 }
 
 // @fnv 0x00607420
-void TESNPC::UpdateActorFaceGen(TESObjectREFR* refr, BipedAnim* biped, BSFaceGenNiNode* head, BSFaceGenNiNode* skinned)
-{
-    BSFaceGenAnimationData* pAnimationData = 0;
-    NiNode* pNode;
-    {
-        NiAVObject* p3D = refr->Get3DSimple();
-        pNode = 0;
-        if (p3D)
-            pNode = p3D->IsSceneNode();
-    }
-    NiNode* pHeadBone = biped->GetBoneNode(BIPED_BONE_HEAD);
-    ThreeByThreeMatrix kRotationBasis;
-    NiDefaultAVObjectPalette* pObjectPalette = 0;
-    if (refr->GetAnimData() && refr->GetAnimData()->FUN_00496940())
-        pObjectPalette =
-            reinterpret_cast<NiDefaultAVObjectPalette*>(refr->GetAnimData()->FUN_00496940()->GetStringAtOffset());
-    {
-        NiDefaultAVObjectPalette* objectPalette = pObjectPalette;
-        if (pHeadBone && pNode)
-        {
-            if (head)
-            {
-                if (head->GetFaceGenAnimationData() && refr->GetHealth() <= 0.0)
-                {
-                    head->GetFaceGenAnimationData()->vfn_d8(true, true);
-                    head->GetFaceGenAnimationData()->vfn_d0(true);
-                }
-                head->vfn_114(true);
-                head->vfn_11c(true);
-                head->FUN_00440460(NiPoint3_ZERO);
-                head->SetLocalRotation(reinterpret_cast<const ThreeByThreeMatrix&>(DAT_011a9448));
-                pHeadBone->AttachChildInAvailableSlot(head, true);
-                AddObjectToPalette(head, objectPalette);
-            }
-            if (skinned)
-            {
-                kRotationBasis = reinterpret_cast<const ThreeByThreeMatrix&>(DAT_011a9448);
-                skinned->vfn_114(head == 0);
-                skinned->vfn_11c(head == 0);
-                skinned->FUN_00440460(NiPoint3_ZERO);
-                pNode->AttachChildInAvailableSlot(skinned, true);
-                AddObjectToPalette(skinned, objectPalette);
-                skinned->vfn_128(pNode, true);
-            }
-            pAnimationData = head ? head->GetFaceGenAnimationData() : 0;
-            if (!pAnimationData)
-                pAnimationData = skinned ? skinned->GetFaceGenAnimationData() : 0;
-            if (pAnimationData)
-            {
-                pAnimationData->vfn_b4(0.0f, true, true, true, true, false);
-                if (refr->IsActor())
-                {
-                    Actor* pActor = static_cast<Actor*>(refr);
-                    if (pActor->pFaceGenAnimationData)
-                    {
-                        struct AnimationSample
-                        {
-                            float value, time;
-                        } sample;
-                        float fDuration;
-                        ComputeAngleRange(&sample.value, &sample.time);
-                        ClampMinMaxFromSetting(&sample.value, &fDuration);
-                        pActor->pFaceGenAnimationData->FUN_00607830(fDuration);
-                        pActor->pFaceGenAnimationData->SetBoneMaxAngle(0, sample.time);
-                        FUN_00649fe0(&sample.value, &sample.time);
-                        GetEyeAngleLimits(&sample.value, &fDuration);
-                        pActor->pFaceGenAnimationData->SetSlotFloats(0, sample.time, fDuration);
-                    }
-                }
-            }
-            m_pkPrimaryFaceGenNode = head;
-            m_pkSecondaryFaceGenNode = skinned;
-            pNode->UpdateSceneObject();
-            NiUpdateData kUpdateData(0.0f, 0, false);
-            pNode->Update(kUpdateData);
-        }
-        else
-            Warning("MODELS: Cannot create a head for an NPC (%d) that does not have a biped-head node.", GetFormID());
-    }
-    AttachHeadParts(refr, 0);
-}
+
 
 // @fnv 0x00607950
-TESCombatStyle* TESNPC::GetCombatStyle()
+TESCombatStyle* TESNPC::GetCombatStyle() const
 {
     return m_pCombatStyle;
 }
@@ -1028,60 +1199,21 @@ void TESNPC::SetCombatStyle(TESCombatStyle* style)
 }
 
 // @fnv 0x006099f0
-void TESNPC::Revert(BGSLoadFormBuffer* buffer)
-{
-    TESActorBase::Revert(buffer);
-    unsigned char modified = 0;
-    bool keepHeight = false;
-    if (m_fGlyphExtent == GetDefaultHeight())
-        keepHeight = true;
-    if (buffer->GetOldChangeFlags(0x2000000) && !buffer->GetChangeFlags(0x2000000) && m_pAssignedRace)
-    {
-        TESRaceForm::SetFormRace(m_pAssignedRace);
-        m_pAssignedRace = 0;
-        modified |= 0x1b;
-    }
-    if (keepHeight)
-        m_fGlyphExtent = GetDefaultHeight();
-    if (buffer->GetOldChangeFlags(0x800) && !buffer->GetChangeFlags(0x800))
-    {
-        delete[] m_pOffsetFaceCoordinates;
-        m_pOffsetFaceCoordinates = 0;
-        modified |= 8;
-        m_kHeadPartList.RemoveAll();
-    }
-    if (buffer->GetOldChangeFlags(0x1000000) && !buffer->GetChangeFlags(0x1000000))
-    {
-        TESActorBaseData::UpdateFlagBit(1, !TESActorBaseData::GetFlag(1), true);
-        modified |= 0x1b;
-    }
-    if (modified & 8)
-        ResetFaceGen();
-    if (modified)
-        FUN_005f20a0(modified);
-}
 
-struct FUN_004169d0_shell : public TESNPC
-{
-    unsigned int FUN_004169d0();
-};
+
 
 // @fnv 0x004169d0
-unsigned int FUN_004169d0_shell::FUN_004169d0()
+unsigned int TESNPC::FUN_004169d0()
 {
     return *(unsigned int*)((char*)this + 0x1d8);
 }
 
-struct FUN_004a0c90_shell : public ThreeByThreeMatrix
-{
-    void FUN_004a0c90(float);
-};
 
 void __cdecl FUN_004169a0(float, float&, float&);
 
 // Computes the sine and cosine of the angle and writes a 3x3 rotation matrix about Z into the object's fields.
 // @fnv 0x004a0c90
-void FUN_004a0c90_shell::FUN_004a0c90(float afAngle)
+void NiMatrix3::MakeZRotation(float afAngle)
 {
     float fSin, fCos;
     FUN_004169a0(afAngle, fSin, fCos);
@@ -1099,187 +1231,76 @@ void FUN_004a0c90_shell::FUN_004a0c90(float afAngle)
     *(float*)((char*)this + 0x20) = 1.0f;
 }
 
-struct FUN_00601570_shell : public TESNPC
-{
-    void ResetCharacterData();
-};
 
 struct Calendar_DaysPassed_Helper : public Calendar
 {
     unsigned int GetDaysPassed();
 };
 
-// Resets face, hair color, skill values and related character fields, clears them when not loading, and reinitializes face coordinates and skills.
-// @fnv 0x00601570
-void FUN_00601570_shell::ResetCharacterData()
-{
-    fWeight = 0.0f;
-    m_fGlyphExtent = 0.0f;
-    m_pHair = 0;
-    m_fHairLength = 0.0f;
-    m_pEyes = 0;
-    if (!g_TESSaveLoadGame->GetLoading())
-    {
-        m_pkPrimaryFaceGenNode = (m_pkSecondaryFaceGenNode = 0);
-        m_pkFaceGenTexture = 0;
-    }
-    m_usLastRace = 0xff;
-    m_pClass = 0;
-    m_pCombatStyle = 0;
-    iHairColor = 0x19324b;
-    m_pOffsetFaceCoordinates = 0;
-    BSFaceGenManager::CopyFaceGenCoordinates((FaceGenMatrix<float>(*)[2])BSFaceGenManager::GetFaceGenCoordinates(),
-                                             GetOffsetFaceCoord(), false, false);
-    for (int etype = 0; etype < 2; ++etype)
-    {
-        for (int esymm = 0; esymm < 2; ++esymm)
-        {
-            if (((Calendar_DaysPassed_Helper*)&m_kFaceGenCoordinates[etype][esymm])->GetDaysPassed())
-                m_kFaceGenCoordinates[etype][esymm].FUN_0060b3b0();
-        }
-    }
-    for (int iSkillIndex = 0; iSkillIndex < 14; ++iSkillIndex)
-    {
-        data.skills[iSkillIndex] = 5;
-        data.skillOffsets[iSkillIndex] = 0;
-    }
-    m_eImpactMaterial = 6;
-    m_pAssignedRace = 0;
-    m_pTemplateNPC = 0;
-    UpdateFlagBit(1, false);
-    FUN_006ecd40(50);
-}
 
-struct FUN_00601800_shell : public TESNPC
-{
-    void* FUN_00601800();
-};
 
 // Returns the pointer stored at offset 0x1b4 if non-null, otherwise returns this plus 0x134.
 // @fnv 0x00601800
-void* FUN_00601800_shell::FUN_00601800()
+FaceGenMatrix<float> (*TESNPC::GetOffsetFaceCoord())[2]
 {
     if (*(void**)((char*)this + 0x1b4))
     {
-        return *(void**)((char*)this + 0x1b4);
+        return m_pOffsetFaceCoordinates;
     }
     else
     {
-        return (char*)this + 0x134;
+        return m_kFaceGenCoordinates;
     }
 }
 
-struct FUN_00601c10_shell : public TESNPC
-{
-    void FUN_00601c10(float);
-};
 
 // @fnv 0x00601c10
-void FUN_00601c10_shell::FUN_00601c10(float afHairLength)
+void TESNPC::FUN_00601c10(float afHairLength)
 {
     *(float*)((char*)this + 0x1bc) = afHairLength;
 }
 
-struct FUN_00602130_shell : public TESNPC
-{
-    float FUN_00602130();
-};
 
 // @fnv 0x00602130
-float FUN_00602130_shell::FUN_00602130()
+float TESNPC::FUN_00602130()
 {
     return *(float*)((char*)this + 0x1bc);
 }
 
-struct FUN_00602170_shell : public TESNPC
-{
-    void* FUN_00602170();
-};
 
 // @fnv 0x00602170
-void* FUN_00602170_shell::FUN_00602170()
+BSSimpleList<BGSHeadPart*>* TESNPC::FUN_00602170()
 {
-    return reinterpret_cast<char*>(this) + 0x1DC;
+    return &m_kHeadPartList;
 }
 
-struct FUN_006031e0_shell : public TESNPC
-{
-    void SetHair(TESHair*);
-};
 
 // @fnv 0x006031e0
-void FUN_006031e0_shell::SetHair(TESHair* apHair)
+void TESNPC::SetHair(TESHair* apHair)
 {
     *(TESHair**)((char*)this + 0x1b8) = apHair;
 }
 
-struct FUN_00603200_shell : public TESNPC
-{
-    void SetEyes(TESEyes*);
-};
 
 // @fnv 0x00603200
-void FUN_00603200_shell::SetEyes(TESEyes* apEyes)
+void TESNPC::SetEyes(TESEyes* apEyes)
 {
     *(TESEyes**)((char*)this + 0x1c0) = apEyes;
 }
 
-struct FUN_006035e0_shell : public TESNPC
-{
-    void CopyFromNPC(TESForm*);
-};
 
-// Copies an NPC form's components and fields into this actor base after checking the form type is 0x2a.
-// @fnv 0x006035e0
-void FUN_006035e0_shell::CopyFromNPC(TESForm* apCopy)
-{
-    if (apCopy->GetFormType() != 0x2a)
-        return;
 
-    TESNPC* npc = (TESNPC*)apCopy;
-
-    TESAIForm::BaseFormRecord((BaseFormComponent*)apCopy);
-    TESSpellList::BaseFormRecord((BaseFormComponent*)apCopy);
-    BGSTouchSpellForm::BaseFormRecord((BaseFormComponent*)apCopy);
-    TESRaceForm::BaseFormRecord((BaseFormComponent*)apCopy);
-    TESActorBaseData::BaseFormRecord((BaseFormComponent*)apCopy);
-    TESHealthForm::BaseFormRecord((BaseFormComponent*)apCopy);
-    TESAttributes::BaseFormRecord((BaseFormComponent*)apCopy);
-    TESFullName::BaseFormRecord((BaseFormComponent*)apCopy);
-    TESModel::BaseFormRecord((BaseFormComponent*)apCopy);
-    TESScriptableForm::BaseFormRecord((BaseFormComponent*)apCopy);
-    TESContainer::BaseFormRecord((BaseFormComponent*)apCopy);
-    TESAnimation::BaseFormRecord((BaseFormComponent*)apCopy);
-    BGSDestructibleObjectForm::BaseFormRecord((BaseFormComponent*)apCopy);
-
-    memcpy(&data, npc->GetTextureManager(), sizeof(ActorSkillData));
-    m_pClass = npc->GetClass();
-    ((TESActorBase*)this)->SetCombatStyle(((TESActorBase*)npc)->GetCombatStyle());
-    vfn_5c(npc->vfn_58());
-    CopyActorBaseData(npc);
-    m_fGlyphExtent = npc->m_fGlyphExtent;
-    fWeight = npc->fWeight;
-}
-
-struct FUN_00604210_shell : public TESRace
-{
-    float FUN_00604210(int);
-};
 
 // @fnv 0x00604210
-float FUN_00604210_shell::FUN_00604210(int aeSex)
+float TESRace::GetHeight(SEX aeSex)
 {
     return (aeSex >= 0 && aeSex < 2) ? reinterpret_cast<const float*>(reinterpret_cast<const char*>(this) + 0x60)[aeSex]
                                      : 0.0f;
 }
 
-struct FUN_006044c0_shell : public TESNPC
-{
-    TESNPC* FUN_006044c0();
-};
 
 // @fnv 0x006044c0
-TESNPC* FUN_006044c0_shell::FUN_006044c0()
+TESNPC* TESNPC::FUN_006044c0()
 {
     return *(TESNPC**)((char*)this + 0x1f0);
 }
@@ -1295,132 +1316,6 @@ bool FUN_006047a0_shell::FUN_006047a0()
     return *((bool*)((char*)this + 0x7c5));
 }
 
-struct VR_00605d70
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual BipedAnim* v122();
-};
 struct VN_00605d70
 {
     virtual void v0();
@@ -1477,27 +1372,23 @@ struct PC_00605d70 : PlayerCharacter
     bool FUN_004eaf60();
     NiNode* GetNode(bool);
 };
-struct NN_00605d70 : NiNode
-{
-    void Update(const NiUpdateData&);
-};
 void FUN_004ac1e0_x();
 struct BA_00605d70
 {
     void UpdateBipedObjects(int);
 };
-struct T_00605d70 : TESNPC
+struct TESNPCSceneUpdates : TESNPC
 {
     void FUN_00605d70(TESObjectREFR* apRef);
 };
 // @fnv 0x00605d70
-void T_00605d70::FUN_00605d70(TESObjectREFR* apRef)
+void TESNPCSceneUpdates::FUN_00605d70(TESObjectREFR* apRef)
 {
     int iPasses;
     BipedAnim* pbiped;
     NiAVObject* pobj;
-    pbiped = ((VR_00605d70*)apRef)->v122();
-    pobj = apRef->Get3DSimple();
+    pbiped = reinterpret_cast<BipedAnim*>(apRef->GetValidBip01Names());
+    pobj = reinterpret_cast<NiAVObject*>(apRef->Get3DSimple());
     iPasses = 1;
     if (apRef == g_thePlayer)
         iPasses = 2;
@@ -1506,7 +1397,7 @@ void T_00605d70::FUN_00605d70(TESObjectREFR* apRef)
         if (apRef == g_thePlayer && iPasses == 1)
         {
             pbiped = g_thePlayer->GetBipedAnim(((PC_00605d70*)g_thePlayer)->FUN_004eaf60());
-            pobj = ((PC_00605d70*)g_thePlayer)->GetNode(true);
+            pobj = reinterpret_cast<NiAVObject*>(((PC_00605d70*)g_thePlayer)->GetNode(true));
         }
         RebuildHeadModel(apRef, pbiped, false);
         ((BA_00605d70*)pbiped)->UpdateBipedObjects(0);
@@ -1515,16 +1406,12 @@ void T_00605d70::FUN_00605d70(TESObjectREFR* apRef)
             pobj->UpdateSceneObject();
             ((VN_00605d70*)pobj)->v47();
             NiUpdateData UpdateData(0.0f, false, false);
-            ((NN_00605d70*)pobj)->Update(UpdateData);
+            reinterpret_cast<NiNode*>(pobj)->Update(static_cast<const NiUpdateData&>(UpdateData));
         }
         iPasses--;
     }
 }
 
-struct FUN_00606050_shell : public TESNPC
-{
-    void InitWornObjects(TESObjectREFR*, BipedAnim*);
-};
 
 bool __fastcall FUN_006061b0(TESNPC*, int, TESObjectREFR*, BipedAnim*, TESBoundObject*);
 
@@ -1533,8 +1420,13 @@ struct FUN_006061b0_caller
     bool FUN_006061b0_call(TESObjectREFR*, BipedAnim*, TESBoundObject*);
 };
 
+// The shared NPC interface does not yet declare InitWornObjects.
+struct TESNPCWornObjectUpdates : TESNPC
+{
+    void InitWornObjects(TESObjectREFR*, BipedAnim*);
+};
 // @fnv 0x00606050
-void FUN_00606050_shell::InitWornObjects(TESObjectREFR* apRef, BipedAnim* apBipedAnim)
+void TESNPCWornObjectUpdates::InitWornObjects(TESObjectREFR* apRef, BipedAnim* apBipedAnim)
 {
     InventoryChanges* pinv = InventoryChanges::GetOrAddInventoryChanges(apRef);
     InventoryStackRecord* pitem;
@@ -1589,17 +1481,13 @@ void FUN_00606050_shell::InitWornObjects(TESObjectREFR* apRef, BipedAnim* apBipe
     }
 }
 
-struct FUN_006061b0_shell : public TESNPC
-{
-    bool FUN_006061b0(TESObjectREFR*, BipedAnim*, TESBoundObject*);
-};
 
 bool __fastcall _ref_008256d0(BSSimpleList<TESForm*>*);
 TESForm** __fastcall _ref_006815c0(BSSimpleList<TESForm*>*);
 
 // Attaches the given object's biped model (or weapon) to the biped anim, then attaches models from the object's race form list.
 // @fnv 0x006061b0
-bool FUN_006061b0_shell::FUN_006061b0(TESObjectREFR* apRef, BipedAnim* apBipedAnim, TESBoundObject* apObject)
+bool TESNPC::InitWornObject(TESObjectREFR* apRef, BipedAnim* apBipedAnim, TESBoundObject* apObject)
 {
     bool bresult = true;
     TESBipedModelForm* pbipedModel = TESBipedModelForm::GetFormAsBipedModel(apObject);
@@ -1657,7 +1545,7 @@ struct FourComponentFloatVector;
 struct NiAdditionalGeometryData;
 struct NiBound;
 struct CloningProcess;
-struct RgbaColor;
+struct NiColorA;
 struct NiCullingProcess;
 struct NiGeometryData;
 struct NiObject;
@@ -1665,160 +1553,43 @@ struct NiPoint2;
 struct NiPropertyState;
 struct NiRenderer;
 struct NiShader;
-struct NiSkinInstance;
 struct NiStream;
-struct NiGeometry : public NiAVObject
-{
-    virtual void __vslot_0();
-    virtual void RenderImmediate(NiRenderer*);
-    virtual void RenderWithRenderer(NiRenderer*);
-    virtual void ReplaceModelData(NiGeometryData*);
-    virtual void CalculateNormals();
-    virtual void CalculateConsistency(bool);
-    virtual void* GetRTTI();
-    void CopyMemberData(NiGeometry*, CloningProcess*);
-    virtual void LoadBinary(NiStream*);
-    virtual void LinkObject(NiStream*);
-    virtual bool RegisterStreamables(NiStream*);
-    virtual void SaveBinary(NiStream*);
-    virtual bool IsEqual(NiObject*);
-    virtual void GetViewerStrings(void*);
-    unsigned short GetVertexCount();
-    NiPoint3* GetVertices();
-    void SetActiveVertexQuantity(unsigned short);
-    unsigned short GetActiveVertexQuantity();
-    void SetDynamicData(bool);
-    NiPoint3* GetNormals();
-    int GetNormalBinormalTangentMethod();
-    void StoreNormalBinormalTangent(int);
-    void SetModelBound(void*);
-    NiBound* GetModelBound();
-    void CreateColors(bool);
-    RgbaColor* GetColors();
-    void CreateTextures(bool, unsigned short);
-    unsigned short GetTextureSets();
-    NiPoint2* GetTextures();
-    NiPoint2* GetTextureSet(unsigned short);
-    void AppendTextureSet(NiPoint2*);
-    NiSkinInstance* GetSkinInstance();
-    void SetSkinInstance(NiSkinInstance*);
-    NiAdditionalGeometryData* GetAdditionalGeometryData();
-    void AssignAdditionalGeometryData(NiAdditionalGeometryData*);
-    void SetSortObject(bool);
-    bool GetSortObject();
-    NiPropertyState* GetPropertyStateP();
-    virtual NiGeometry* IsGeometry();
-    virtual void SetObjectBound(FourComponentFloatVector*);
-    NiShader* GetGeometryShaderObject();
-    NiShader* GetShaderFromMaterial();
-    void SetShader(NiShader*);
-    NiGeometryData* GetModelData();
-    bool HasGeometryProperty(int);
-    virtual void OnVisible(NiCullingProcess*);
-    virtual void ApplyTransform(void*, void*, bool);
-    virtual void UpdatePropertiesDownwardPass(NiPropertyState*);
-    int GetConsistency();
-    void SetDataConsistency(int);
-    virtual void ProcessClone(CloningProcess*);
-    virtual void PostLinkObject(NiStream*);
-    virtual void SetSelectiveUpdateFlags(bool*, bool, bool*);
-    virtual void PurgeRendererData(NiRenderer*);
-    unsigned int QMemContext();
-    virtual void UpdateWorldBound();
-    void __local_vftable_ctor_closure();
-    char _pad_4[188];
-    char m_kPropertyState[28];
-    char m_spGeometryData[4];
-    char m_spSkinningInstance[4];
-    NiShader* m_pGeometryShader;
-    unsigned int m_uiGeometryShaderFlags;
-    char _pad_ec[4];
-};
-typedef char _sizecheck_NiGeometry[sizeof(NiGeometry) == 240 ? 1 : -1];
-struct NiTriBasedGeom : public NiGeometry
-{
-    virtual void __vslot_0();
-    virtual void GetTrianglePoints(unsigned short, NiPoint3**, NiPoint3**, NiPoint3**);
-    virtual void* GetRTTI();
-    void CopyMemberData(NiTriBasedGeom*, CloningProcess*);
-    virtual void LoadBinary(NiStream*);
-    virtual void LinkObject(NiStream*);
-    virtual bool RegisterStreamables(NiStream*);
-    virtual void SaveBinary(NiStream*);
-    virtual bool IsEqual(NiObject*);
-    virtual void GetViewerStrings(void*);
-    virtual void ReplaceModelData(NiGeometryData*);
-    unsigned short GetTriangleCount();
-    void SetNumberOfVertices(unsigned short);
-    unsigned short GetNumberOfVertices();
-    virtual NiTriBasedGeom* IsTriBasedGeom();
-    void GetTriangleVertexIndices(unsigned short, unsigned short*, unsigned short*, unsigned short*);
-    void __local_vftable_ctor_closure();
-};
-typedef char _sizecheck_NiTriBasedGeom[sizeof(NiTriBasedGeom) == 240 ? 1 : -1];
 
 class NiExtraData;
 class NiFixedString;
 
 const NiFixedString& __cdecl FUN_00607340();
 
-struct NiAVObjectCall : public NiAVObject
-{
-    NiExtraData* GetExtraData(const NiFixedString&);
-};
 
 // Returns the extra data named by FUN_00607340 from apGeom, or null if apGeom is null.
 // @fnv 0x00607310
 NiExtraData* __cdecl GetGeomExtraData(NiTriBasedGeom* apGeom)
 {
-    return apGeom ? reinterpret_cast<NiAVObjectCall*>(apGeom)->GetExtraData(FUN_00607340()) : 0;
+    return apGeom ? apGeom->GetExtraData(FUN_00607340()) : 0;
 }
 
-struct FUN_00607350_shell : public TESRace
-{
-    unsigned short FUN_00607350();
-};
 
 // @fnv 0x00607350
-unsigned short FUN_00607350_shell::FUN_00607350()
+unsigned short TESRace::FUN_00607350()
 {
     return *reinterpret_cast<unsigned short*>(reinterpret_cast<char*>(this) + 0x4f8);
 }
 
-struct Dummy_00607810
-{
-    void SetBoneMaxAngle(int aeBone, float afMaxAngle);
-};
 
-struct Elem_00607810
-{
-    char pad[0x50];
-};
 
-struct Layout_00607810
-{
-    char pad[0xf8];
-    Elem_00607810 arr[1];
-};
 
 // Stores afMaxAngle into the per-bone entry of the array at offset 0xf8 indexed by aeBone.
 // @fnv 0x00607810
-void Dummy_00607810::SetBoneMaxAngle(int aeBone, float afMaxAngle)
+void bhkRagdollController::SetBoneMaxAngle(int aeBone, float afMaxAngle)
 {
-    *(float*)&((Layout_00607810*)this)->arr[aeBone] = afMaxAngle;
+    *(float*)(reinterpret_cast<char*>(this) + 0xf8 + aeBone * 0x50) = afMaxAngle;
 }
 
-struct FUN_00607830_helper
-{
-    char pad[0x1a8];
-    float f1A8;
-    void set(float afAngle);
-};
 
 // @fnv 0x00607830
-void FUN_00607830_helper::set(float afAngle)
+void bhkRagdollController::FUN_00607830(float afAngle)
 {
-    f1A8 = afAngle;
+    *(float*)(reinterpret_cast<char*>(this) + 0x1a8) = afAngle;
 }
 
 struct FUN_00608d80_shell : public Actor
@@ -1826,10 +1597,6 @@ struct FUN_00608d80_shell : public Actor
     bool FUN_00608d80();
 };
 
-struct GameSettingCollection
-{
-    TESFile* FUN_004f8960();
-};
 
 // @fnv 0x00608d80
 bool FUN_00608d80_shell::FUN_00608d80()
@@ -1837,20 +1604,16 @@ bool FUN_00608d80_shell::FUN_00608d80()
     return (int)((GameSettingCollection*)this)->FUN_004f8960() == 4 ? true : false;
 }
 
-struct FUN_006099f0_shell : public TESNPC
-{
-    void LoadGamePostProcess(BGSLoadFormBuffer*);
-};
 
 // @fnv 0x006099f0
-void FUN_006099f0_shell::LoadGamePostProcess(BGSLoadFormBuffer* apLoadGameBuffer)
+void TESNPC::Revert(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    Revert(apLoadGameBuffer);
+    TESActorBase::Revert(apLoadGameBuffer);
     unsigned char cresetFlags = 0;
     bool bfixHeight = false;
     if (m_fGlyphExtent == GetDefaultHeight())
         bfixHeight = true;
-    if (apLoadGameBuffer->GetOldChangeFlags(0x2000000) && !apLoadGameBuffer->GetChangeFlags(0x2000000) &&
+    if (reinterpret_cast<const FormChangeMask&>(apLoadGameBuffer->GetOldChangeFlags(0x2000000)) && !reinterpret_cast<const FormChangeMask&>(apLoadGameBuffer->GetChangeFlags(0x2000000)) &&
         m_pAssignedRace)
     {
         TESRaceForm::Initialize(reinterpret_cast<unsigned int>(m_pAssignedRace));
@@ -1859,16 +1622,16 @@ void FUN_006099f0_shell::LoadGamePostProcess(BGSLoadFormBuffer* apLoadGameBuffer
     }
     if (bfixHeight)
         m_fGlyphExtent = GetDefaultHeight();
-    if (apLoadGameBuffer->GetOldChangeFlags(0x800) && !apLoadGameBuffer->GetChangeFlags(0x800))
+    if (reinterpret_cast<const FormChangeMask&>(apLoadGameBuffer->GetOldChangeFlags(0x800)) && !reinterpret_cast<const FormChangeMask&>(apLoadGameBuffer->GetChangeFlags(0x800)))
     {
         delete[] m_pOffsetFaceCoordinates;
         m_pOffsetFaceCoordinates = 0;
         cresetFlags |= 8;
         reinterpret_cast<BSSimpleList<int>*>(&m_kHeadPartList)->RemoveAll();
     }
-    if (apLoadGameBuffer->GetOldChangeFlags(0x1000000) && !apLoadGameBuffer->GetChangeFlags(0x1000000))
+    if (reinterpret_cast<const FormChangeMask&>(apLoadGameBuffer->GetOldChangeFlags(0x1000000)) && !reinterpret_cast<const FormChangeMask&>(apLoadGameBuffer->GetChangeFlags(0x1000000)))
     {
-        UpdateFlagBit(1, !GetFlag(1), true);
+        UpdateFlagBit(1, !TESActorBaseData::GetFlag(1), true);
         cresetFlags |= 0x1b;
     }
     if (cresetFlags & 8)
@@ -1974,36 +1737,24 @@ void QueueHelper::FUN_00444040(int aiArg1, int aiArg2, int aiArg3, int aiArg4, b
     QueueTaskByKey(aiArg1, &obj, aiArg2, aiArg3, aiArg4, abFlag1, abFlag2, abFlag3);
 }
 
-struct BSFaceGenManager;
-struct NP
-{
-    NP(int);
-    ~NP();
-    int FUN_00559450() const;
-    int* p;
-};
 extern BSFaceGenManager* DAT_011d59e8;
 // Returns FUN_00559450() of the NP at offset 0x119c of DAT_011d59e8, or of a default NP(0) when DAT_011d59e8 is null.
 // @fnv 0x006045f0
 int __cdecl GetFaceGenManagerValue()
 {
-    return (DAT_011d59e8 ? *(NP*)((char*)DAT_011d59e8 + 0x119c) : NP(0)).FUN_00559450();
+    return static_cast<const NP&>(DAT_011d59e8 ? *reinterpret_cast<NP*>(&DAT_011d59e8->m_spBaseTexture) : NP(0)).FUN_00559450();
 }
 
-struct FUN_006055f0_shell : public TESNPC
-{
-    BipedAnim* GetOrCreateBipedAnim(TESObjectREFR*);
-};
 
 int __cdecl Warning(const char*, ...);
 // Returns the reference's existing BipedAnim, warning if already set, otherwise creates one and assigns it to the reference.
 // @fnv 0x006055f0
-BipedAnim* FUN_006055f0_shell::GetOrCreateBipedAnim(TESObjectREFR* apRef)
+BipedAnim* TESNPC::GetBipedAnimationForReference(TESObjectREFR* apRef)
 {
     BipedAnim* pExistingBipedAnim;
     AutoMemContext tempMemContext((MEM_CONTEXT)0x33, true,
                                   "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESNPC.cpp", 0x15d1);
-    pExistingBipedAnim = apRef->GetBipedAnim();
+    pExistingBipedAnim = reinterpret_cast<BipedAnim*>(apRef->GetValidBip01Names());
     if (pExistingBipedAnim)
     {
         Warning("ANIMATION: This npc \"%s\" has already been used.\r\nOnly the first reference will be used.\r\n",
@@ -2012,7 +1763,9 @@ BipedAnim* FUN_006055f0_shell::GetOrCreateBipedAnim(TESObjectREFR* apRef)
     else
     {
         pExistingBipedAnim = new BipedAnim(apRef, false);
-        apRef->SetBipedAnim(pExistingBipedAnim);
+        // Shared SetValidBip01Names declares an incomplete value; this slot takes a pointer.
+        reinterpret_cast<void (__thiscall*)(TESObjectREFR*, BipedAnim*)>(
+            (*reinterpret_cast<void***>(apRef))[0x7c])(apRef, pExistingBipedAnim);
     }
     return pExistingBipedAnim;
 }
@@ -2028,38 +1781,30 @@ void FUN_005d9f70_shell::SetField1B4(int value)
     *(int*)((char*)this + 0x1b4) = value;
 }
 
-struct FUN_005f1230_shell : TESAttributes
-{
-    unsigned char GetAttributeValue7();
-};
 
 // @fnv 0x005f1230
-unsigned char FUN_005f1230_shell::GetAttributeValue7()
+unsigned char TESAttributes::GetAttributeValue7()
 {
     return GetAttributeValue(7);
 }
 
-struct FUN_00601c70_shell
-{
-    void __thiscall FUN_00601c70(int param);
-};
 
 // Stores param at offset 0x130 of this and calls the virtual function at vtable offset 0x48 with 0x400.
 // @fnv 0x00601c70
-void __thiscall FUN_00601c70_shell::FUN_00601c70(int aiValue)
+void TESNPC::FUN_00601c70(TESClass* aiValue)
 {
-    *(int*)((char*)this + 0x130) = aiValue;
+    m_pClass = aiValue;
     ((void(__thiscall*)(void*, int)) * (int**)(*(int*)this + 0x48))(this, 0x400);
 }
 
-struct FUN_00603f90_shell : TESRaceForm
+
+struct TESNPCRaceQueries : TESRaceForm
 {
     TESRace* GetRaceOrNull();
 };
-
 // Returns GetFormRace(), replacing a negative result with null.
 // @fnv 0x00603f90
-TESRace* FUN_00603f90_shell::GetRaceOrNull()
+TESRace* TESNPCRaceQueries::GetRaceOrNull()
 {
     TESRace* race = GetFormRace();
     if ((long)race < 0)
@@ -2075,19 +1820,19 @@ NiFixedString* __cdecl FUN_006041c0()
     return DAT_011c6210;
 }
 
-struct FUN_00604780_shell
+struct TESRaceVoiceQueries : TESRace
 {
     int __thiscall FUN_00604780(int index);
 };
 
 // @fnv 0x00604780
-int __thiscall FUN_00604780_shell::FUN_00604780(int index)
+int __thiscall TESRaceVoiceQueries::FUN_00604780(int index)
 {
     return *(int*)((char*)this + 0x4FC + index * 4);
 }
 
-namespace fnv_00607340 {
 class BSFadeNode;
+namespace fnv_00607340 {
 extern BSFadeNode* DAT_011d5b50;
 
 // @fnv 0x00607340
@@ -2108,13 +1853,13 @@ struct FUN_00472660_shell
 {
     int FUN_00472660();
 };
-struct FUN_00609bf0_s : TESNPC
+struct TESNPCFileQueries : TESNPC
 {
     bool FUN_00609bf0(TESFile* apFile);
 };
 // Checks apFile and the offset at this+0x1e8, seeks there, compares the read value to DAT_011871f8 and the form ID to GetFormID.
 // @fnv 0x00609bf0
-bool FUN_00609bf0_s::FUN_00609bf0(TESFile* apFile)
+bool TESNPCFileQueries::FUN_00609bf0(TESFile* apFile)
 {
     if (apFile && *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x1e8) &&
         reinterpret_cast<FileH*>(apFile)->OpenTESFile(0, false) &&
@@ -2126,70 +1871,65 @@ bool FUN_00609bf0_s::FUN_00609bf0(TESFile* apFile)
     return false;
 }
 
-struct FUN_0060b1d0_shell : TESActorBaseData
+// Local helpers extend the shared interfaces without copying their storage or virtual tables.
+struct TESNPCActorFlag800Queries : TESActorBaseData
 {
-    bool FUN_0060b1d0();
+    bool GetFlag800();
 };
 
 // @fnv 0x0060b1d0
-bool FUN_0060b1d0_shell::FUN_0060b1d0()
+bool TESNPCActorFlag800Queries::GetFlag800()
 {
     return GetFlag(0x800);
 }
 
-struct FUN_0060b1f0_shell : TESActorBaseData
+struct TESNPCActorFlag1000Queries : TESActorBaseData
 {
-    bool FUN_0060b1f0();
+    bool GetFlag1000();
 };
 
 // @fnv 0x0060b1f0
-bool FUN_0060b1f0_shell::FUN_0060b1f0()
+bool TESNPCActorFlag1000Queries::GetFlag1000()
 {
     return GetFlag(0x1000);
 }
 
-struct FUN_0060b210_shell : TESActorBaseData
+struct TESNPCActorFlag1000Updates : TESActorBaseData
 {
-    void FUN_0060b210(bool bArg);
+    void SetFlag1000(bool bArg);
 };
 
 // @fnv 0x0060b210
-void FUN_0060b210_shell::FUN_0060b210(bool bArg)
+void TESNPCActorFlag1000Updates::SetFlag1000(bool bArg)
 {
     UpdateFlagBit(0x1000, bArg, true);
 }
 
-struct BGSSaveFormBuffer;
 struct Crime;
-struct FUN_009dace0_shell : public TESActorBase
+struct TESNPCActorBaseQueries : public TESActorBase
 {
-    void FUN_009dace0(BGSLoadFormBuffer*);
+    void RevertFormOnly(BGSLoadFormBuffer*);
 };
 
 // @fnv 0x009dace0
-void FUN_009dace0_shell::FUN_009dace0(BGSLoadFormBuffer* apLoadGameBuffer)
+void TESNPCActorBaseQueries::RevertFormOnly(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     TESForm::Revert((unsigned int)apLoadGameBuffer);
 }
 
-struct FUN_005f16f0_shell
-{
-    unsigned short __thiscall FUN_005f16f0(unsigned int);
-};
 
-struct TESNPC;
 
-struct FUN_00608da0_shell : TESNPC
+struct TESNPCSaveSizeQueries : TESNPC
 {
     unsigned short __thiscall FUN_00608da0(unsigned int aiFlags);
 };
 
 // Accumulates the base size from FUN_005f16f0 and adds 0xe when aiFlags has 0x200 set, returning the total.
 // @fnv 0x00608da0
-unsigned short __thiscall FUN_00608da0_shell::FUN_00608da0(unsigned int aiFlags)
+unsigned short __thiscall TESNPCSaveSizeQueries::FUN_00608da0(unsigned int aiFlags)
 {
     unsigned short isize = 0;
-    isize += ((FUN_005f16f0_shell*)this)->FUN_005f16f0(aiFlags);
+    isize += TESActorBase::FUN_005f16f0(aiFlags);
     if (aiFlags & 0x200)
         isize += 0xe;
     if (aiFlags & 0)
@@ -2197,17 +1937,16 @@ unsigned short __thiscall FUN_00608da0_shell::FUN_00608da0(unsigned int aiFlags)
     return isize;
 }
 
-struct FUN_00601370_shell
+struct TESNPCDeleteAccess : TESNPC
 {
-    void FUN_006013c0();
     void* FUN_00601370(unsigned int);
 };
 void __cdecl _Deallocate(void*);
 // Calls FUN_006013c0, then frees this with _Deallocate when flags has bit 1 set, and returns this.
 // @fnv 0x00601370
-void* FUN_00601370_shell::FUN_00601370(unsigned int flags)
+void* TESNPCDeleteAccess::FUN_00601370(unsigned int flags)
 {
-    this->FUN_006013c0();
+    this->TESNPC::~TESNPC();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -2240,11 +1979,6 @@ const char* Struct00601c30::GetSexBasedString()
     return g_011d3e44.String();
 }
 
-struct GO
-{
-    void* p;
-    GO& operator=(void*);
-};
 struct FUN_00603bb0_Owner
 {
     char pad[0x1C4];
@@ -2260,11 +1994,6 @@ void FUN_00603bb0_Owner::FUN_00603bb0()
 }
 
 namespace fnv_006072c0 {
-struct NiSkinInstance;
-struct NiTriBasedGeom
-{
-    NiSkinInstance* FUN_0043fad0();
-};
 int __fastcall FUN_00559450(int*);
 struct Inner6072
 {
@@ -2280,7 +2009,7 @@ struct Outer6072
 // @fnv 0x006072c0
 NiSkinInstance* Outer6072::FUN_006072c0()
 {
-    return (p && FUN_00559450(&p->_v)) ? ((NiTriBasedGeom*)FUN_00559450(&p->_v))->FUN_0043fad0() : 0;
+    return (p && FUN_00559450(&p->_v)) ? ((NiTriBasedGeom*)FUN_00559450(&p->_v))->GetSkinInstance() : 0;
 }
 }  // namespace fnv_006072c0
 
@@ -2288,12 +2017,12 @@ struct FUN_008b78c0_shell
 {
     void UpdateHurtReaction(int);
 };
-struct FUN_0060b240_shell : public TESNPC
+struct TESNPCRaceUpdates : public TESNPC
 {
     void SetRace(TESRace* race, FUN_008b78c0_shell* actor);
 };
 // @fnv 0x0060b240
-void FUN_0060b240_shell::SetRace(TESRace* race, FUN_008b78c0_shell* actor)
+void TESNPCRaceUpdates::SetRace(TESRace* race, FUN_008b78c0_shell* actor)
 {
     TESRace* current = TESRaceForm::GetFormRace();
     if (race != current)
@@ -2391,17 +2120,11 @@ void Holder_FUN_0060b9b0::FUN_0060b9b0()
     FUN_004ede70(m_data);
 }
 
-struct FUN_006042d0_Owner
-{
-    char _pad[0x68];
-    float _arr[2];
-    float GetArrValue(int);
-};
 // Returns the element of _arr at index a1 when a1 is in [0,2), otherwise returns 0.0f.
 // @fnv 0x006042d0
-float FUN_006042d0_Owner::GetArrValue(int aiIndex)
+float TESRace::GetWeight(SEX aiIndex)
 {
-    return (aiIndex >= 0 && aiIndex < 2) ? _arr[aiIndex] : 0.0f;
+    return (aiIndex >= 0 && aiIndex < 2) ? Data.fWeight[aiIndex] : 0.0f;
 }
 
 struct FUN_0060b860_Cls
@@ -2432,65 +2155,23 @@ void* STR_0060b9e0::FUN_0060b9e0(unsigned int arg1, unsigned int arg2)
     return this;
 }
 
-namespace fnv_006013c0 {
-struct GO
-{
-    void* p;
-    ~GO();
-};
-struct ListX
-{
-    void* a;
-    void* b;
-    ~ListX();
-};
-struct FUN_006013a0
-{
-    unsigned char d[0x10];
-    ~FUN_006013a0();
-};
 struct NpcList_t
 {
     void FUN_00905330(TESNPC* const&);
 };
 
-struct FUN_006013c0 : public TESActorBase, public TESRaceForm
-{
-    ActorSkillData data;
-    TESClass* m_pClass;
-    FaceGenMatrix<float> m_kFaceGenCoordinates[2][2];
-    void* m_pOffsetFaceCoordinates;
-    TESHair* m_pHair;
-    float m_fHairLength;
-    TESEyes* m_pEyes;
-    GO m_pkPrimaryFaceGenNode, m_pkSecondaryFaceGenNode, m_pkFaceGenTexture;
-    unsigned short m_usLastRace;
-    unsigned short lastRacePadding;
-    TESCombatStyle* m_pCombatStyle;
-    unsigned int iHairColor;
-    ListX m_kHeadPartList;
-    int m_eImpactMaterial;
-    unsigned int m_ulTopicFlags;
-    TESRace* m_pAssignedRace;
-    TESNPC* m_pTemplateNPC;
-    float m_fGlyphExtent, fWeight;
-    FUN_006013a0 undoStates;
-    ~FUN_006013c0();
-};
-
 // @fnv 0x006013c0
-FUN_006013c0::~FUN_006013c0()
+TESNPC::~TESNPC()
 {
-    ((TESNPC*)this)->TESNPC::ClearData();
-    if (GetFlag(4))
+    TESNPC::ClearData();
+    if (TESActorBaseData::GetFlag(4))
     {
-        ((NpcList_t*)&DAT_011cb764)->FUN_00905330((TESNPC*)this);
+        ((NpcList_t*)&DAT_011cb764)->FUN_00905330(this);
     }
 }
-}  // namespace fnv_006013c0
 
 namespace fnv_006044e0 {
-struct FUN_006044e0_shell : public TESNPC
+struct TESNPCPartTextures : public TESNPC
 {
     void CreatePartTexture(int, void*);
 };
@@ -2500,24 +2181,9 @@ struct GlobalObject_0045cf30
     unsigned char* Bool();
 };
 extern GlobalObject_0045cf30 g_011d5adc;
-struct TESObject
-{
-    unsigned int GetNext();
-};
-struct GO
-{
-    GO(int);
-    ~GO();
-    void operator=(void*);
-    void* ptr;
-};
 struct Helper62d0
 {
     void* operator=(void const*);
-};
-struct TES
-{
-    void CreateTextureImage(char const*, GO&, bool, bool);
 };
 extern TES* g_TES;
 struct FUN_00604310_shell
@@ -2527,9 +2193,9 @@ struct FUN_00604310_shell
 void* GetFaceGenManagerValue();
 
 // @fnv 0x006044e0
-void FUN_006044e0_shell::CreatePartTexture(int aePart, void* aspTexture)
+void TESNPCPartTextures::CreatePartTexture(int aePart, void* aspTexture)
 {
-    if (*g_011d5adc.Bool() || (unsigned int)this == ((TESObject*)g_thePlayer)->GetNext())
+    if (*g_011d5adc.Bool() || (TESObject*)this == ((TESObject*)g_thePlayer)->GetNext())
     {
         *(GO*)aspTexture = 0;
         return;
@@ -2597,7 +2263,6 @@ void FUN_00608e00_shell::FUN_00608e00(unsigned int aiFlags)
 }
 
 struct TESCombatStyle;
-struct TESForm;
 TESForm* __cdecl GetFormByID(unsigned int);
 struct STR00
 {
@@ -2628,25 +2293,17 @@ void FUN_00608e80_shell::FUN_00608e80(unsigned int aiFlags, unsigned int aiCurre
 }
 
 namespace fnv_006046a0 {
-struct TESObject
-{
-    unsigned int GetNext();
-};
 
 struct FUN_006047a0_shell : public TESObject
 {
     bool FUN_006047a0();
 };
 
-struct FUN_00604780_shell
+struct TESRaceVoiceQueries : TESRace
 {
     int FUN_00604780(int);
 };
 
-struct BGSDefaultObjectManager
-{
-    static TESForm* __cdecl GetDefaultObjectByIndex(int);
-};
 
 struct FUN_006046a0_shell
 {
@@ -2659,25 +2316,25 @@ extern FUN_006047a0_shell* _g_thePlayer;
 // @fnv 0x006046a0
 TESForm* FUN_006046a0_shell::GetHeadPartForm()
 {
-    if (reinterpret_cast<unsigned int>(reinterpret_cast<char*>(this) - 0x30) == _g_thePlayer->GetNext())
+    if (reinterpret_cast<TESObject*>(reinterpret_cast<char*>(this) - 0x30) == _g_thePlayer->GetNext())
     {
         if (reinterpret_cast<TESActorBase*>(reinterpret_cast<char*>(this) - 0x30)->GetSex() == 0)
         {
             if (!_g_thePlayer->FUN_006047a0())
                 *reinterpret_cast<TESForm**>(reinterpret_cast<char*>(this) + 0x20) =
-                    BGSDefaultObjectManager::GetDefaultObjectByIndex(0x0e);
+                    reinterpret_cast<TESForm*>(BGSDefaultObjectManager::GetDefaultObjectByIndex(0x0e));
             else
                 *reinterpret_cast<TESForm**>(reinterpret_cast<char*>(this) + 0x20) =
-                    BGSDefaultObjectManager::GetDefaultObjectByIndex(0x0f);
+                    reinterpret_cast<TESForm*>(BGSDefaultObjectManager::GetDefaultObjectByIndex(0x0f));
         }
         else
         {
             if (!_g_thePlayer->FUN_006047a0())
                 *reinterpret_cast<TESForm**>(reinterpret_cast<char*>(this) + 0x20) =
-                    BGSDefaultObjectManager::GetDefaultObjectByIndex(0x10);
+                    reinterpret_cast<TESForm*>(BGSDefaultObjectManager::GetDefaultObjectByIndex(0x10));
             else
                 *reinterpret_cast<TESForm**>(reinterpret_cast<char*>(this) + 0x20) =
-                    BGSDefaultObjectManager::GetDefaultObjectByIndex(0x11);
+                    reinterpret_cast<TESForm*>(BGSDefaultObjectManager::GetDefaultObjectByIndex(0x11));
         }
     }
 
@@ -2688,104 +2345,16 @@ TESForm* FUN_006046a0_shell::GetHeadPartForm()
         reinterpret_cast<BSSimpleList<BGSHeadPart*>*>(reinterpret_cast<char*>(this) + 0xdc)->GetNext();
 
     if (list)
-        return reinterpret_cast<TESForm*>(reinterpret_cast<FUN_00604780_shell*>(list)->FUN_00604780(
+        return reinterpret_cast<TESForm*>(reinterpret_cast<TESRaceVoiceQueries*>(list)->FUN_00604780(
             reinterpret_cast<TESActorBase*>(reinterpret_cast<char*>(this) - 0x30)->GetSex()));
 
     return 0;
 }
 }  // namespace fnv_006046a0
 
-struct FUN_006062e0_shell : public TESNPC
-{
-    void UpdateFaceGenHairVisibility(TESObjectREFR*, NiNode*);
-};
 
 // @fnv 0x006062e0
-void FUN_006062e0_shell::UpdateFaceGenHairVisibility(TESObjectREFR* apRef, NiNode* apNode)
-{
-    NiAVObject* pheadSkinned;
-    NiAVObject* pheadBiped5;
-    InventoryStackRecord* pitem7;
-    InventoryChanges* pinv5;
-    NiAVObject* pearsObj9;
 
-    if (apNode == 0)
-        apNode = reinterpret_cast<NiNode*>(apRef->Get3DSimple());
-
-    if (apNode == 0)
-        return;
-
-    pheadBiped5 = SceneObjectLookup::GetObjectByName(apNode, "BSFaceGenNiNodeBiped");
-    pheadSkinned = SceneObjectLookup::GetObjectByName(apNode, "BSFaceGenNiNodeSkinned");
-
-    if (pheadBiped5 == 0 || pheadSkinned == 0)
-        return;
-
-    {
-        bool bhideHair9;
-        bool bhideHatHair7;
-        NiAVObject* phairObjX[2];
-        char tempHairName4[32];
-
-        pinv5 = InventoryChanges::GetOrAddInventoryChanges(apRef);
-        pitem7 = pinv5->GetInventoryEntryData(0, false);
-
-        if (pitem7 != 0)
-        {
-            pheadBiped5->FUN_00450f90(true);
-            pheadSkinned->FUN_00450f90(true);
-            delete pitem7;
-            pitem7 = 0;
-            return;
-        }
-
-        pheadBiped5->FUN_00450f90(false);
-        pheadSkinned->FUN_00450f90(false);
-
-        pearsObj9 = SceneObjectLookup::GetObjectByName(apNode, FUN_00605d40(true));
-
-        for (int i = 0; i < 2; ++i)
-            phairObjX[i] =
-                SceneObjectLookup::GetObjectByName(apNode, BSFaceGenManager::BuildFaceGenPartPath(tempHairName4, i));
-
-        bhideHair9 = false;
-        bhideHatHair7 = true;
-
-        pitem7 = pinv5->GetInventoryEntryData(1, false);
-        if (pitem7 != 0)
-        {
-            delete pitem7;
-            pitem7 = 0;
-            bhideHair9 = true;
-        }
-
-        if (phairObjX[1] != 0)
-        {
-            pitem7 = pinv5->GetInventoryEntryData(10, false);
-            if (pitem7 != 0)
-            {
-                delete pitem7;
-                pitem7 = 0;
-                bhideHatHair7 = false;
-                bhideHair9 = true;
-            }
-        }
-
-        if (pearsObj9 != 0)
-            pearsObj9->FUN_00450f90(bhideHair9);
-
-        for (int i = 0; i < 2; ++i)
-        {
-            if (phairObjX[i] != 0)
-            {
-                if (i == 0)
-                    phairObjX[i]->FUN_00450f90(bhideHair9);
-                else
-                    phairObjX[i]->FUN_00450f90(bhideHatHair7);
-            }
-        }
-    }
-}
 
 struct SaveField
 {
@@ -3117,13 +2686,13 @@ bool NpcLoadShell::FUN_00602190(TESFile* apFile)
         case 0x4D414E49 /* INAM */: {
             unsigned int uiDeathItem = 0;
             apFile->GetChunkData(&uiDeathItem);
-            m_pBaseTemplateForm = (TESForm*)uiDeathItem;
+            m_pBaseTemplateForm = (TESLevItem*)uiDeathItem;
             break;
         }
         case 0x4B435456 /* VTCK */: {
             unsigned int uiVoice;
             apFile->GetChunkData(&uiVoice);
-            m_kFactionList = (TESForm*)uiVoice;
+            m_kFactionList = (BGSVoiceType*)uiVoice;
             break;
         }
         case 0x544C5054 /* TPLT */: {
@@ -3198,7 +2767,7 @@ bool NpcLoadShell::FUN_00602190(TESFile* apFile)
             {
                 if (apFile->IsEndianConversionRequired())
                     BSEndian(&buf3[i], EndianSizeTag<4>());
-                *(float*)m_kFaceGenCoordinates[iRow_2][aType].FUN_0060b370(i, 0).FUN_00629ab0() = buf3[i];
+                *(float*)reinterpret_cast<FaceGenCoordinateBasis*>(&m_kFaceGenCoordinates[iRow_2][aType])->FUN_0060b370(i, 0).FUN_00629ab0() = buf3[i];
             }
             break;
         }
@@ -3471,107 +3040,24 @@ extern B6040D0Setting g_kB6040D0BaseSetting;
 extern B6040D0Setting g_kB6040D0AttributeMult;
 extern B6040D0Setting g_kB6040D0LevelMult;
 
-class B6040D0ActorBase
+
+
+
+class NPCDerivedValueQueries : public TESNPC
 {
-  public:
-    virtual void vfn000();
-    virtual void vfn004();
-    virtual void vfn008();
-    virtual void vfn00C();
-    virtual void vfn010();
-    virtual void vfn014();
-    virtual void vfn018();
-    virtual void vfn01C();
-    virtual void vfn020();
-    virtual void vfn024();
-    virtual void vfn028();
-    virtual void vfn02C();
-    virtual void vfn030();
-    virtual void vfn034();
-    virtual void vfn038();
-    virtual void vfn03C();
-    virtual void vfn040();
-    virtual void vfn044();
-    virtual void vfn048();
-    virtual void vfn04C();
-    virtual void vfn050();
-    virtual void vfn054();
-    virtual void vfn058();
-    virtual void vfn05C();
-    virtual unsigned short GetBaseValue();
-
-    unsigned short GetLevel();
-};
-
-class B6040D0Attributes
-{
-  public:
-    unsigned char GetAttribute();
-};
-
-class B6040D0NPC
-{
-  public:
-    int ComputeDerivedValue(bool bUseBase);
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    B6040D0ActorBase m_kBaseData;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    B6040D0Attributes m_kAttributes;
+public:
+    int ComputeDerivedValue(bool);
 };
 
 // @fnv 0x006040d0
-int B6040D0NPC::ComputeDerivedValue(bool bUseBase)
+int NPCDerivedValueQueries::ComputeDerivedValue(bool bUseBase)
 {
-    int iLevel = m_kBaseData.GetLevel();
+    int iLevel = TESActorBaseData::FUN_0047ded0();
     if (iLevel < 1)
         iLevel = 1;
-    int iResult = m_kBaseData.GetBaseValue()
-                      ? (int)((bUseBase ? (float)m_kBaseData.GetBaseValue() : *g_kB6040D0BaseSetting.Float()) +
-                              m_kAttributes.GetAttribute() * *g_kB6040D0AttributeMult.Float() +
+    int iResult = static_cast<const NPCDerivedValueQueries*>(this)->GetFatigue()
+                      ? (int)((bUseBase ? (float)static_cast<const NPCDerivedValueQueries*>(this)->GetFatigue() : *g_kB6040D0BaseSetting.Float()) +
+                              TESAttributes::GetAttributeValue7() * *g_kB6040D0AttributeMult.Float() +
                               iLevel * *g_kB6040D0LevelMult.Float())
                       : 0;
     if (iResult < 0)
@@ -3584,23 +3070,22 @@ struct WeightAccessor
 {
     float GetArrValue();
 };
-struct FUN_00604250_shell : TESNPC
+struct TESNPCWeightQueries : TESNPC
 {
     int FUN_0084e3a0();
     WeightAccessor* FUN_004ac110();
     WeightAccessor* FUN_004ac110(void*);
     void* FUN_005f0cc0();
     float FUN_00944300();
-    float GetWeight();
 };
 // @fnv 0x00604250
-float FUN_00604250_shell::GetWeight()
+float TESNPC::GetWeight()
 {
-    if (FUN_0084e3a0() == 7)
+    if (static_cast<TESNPCWeightQueries*>(this)->FUN_0084e3a0() == 7)
     {
-        return fWeight == DAT_01012060 && FUN_004ac110() ? FUN_004ac110(FUN_005f0cc0())->GetArrValue() : fWeight;
+        return fWeight == DAT_01012060 && static_cast<TESNPCWeightQueries*>(this)->FUN_004ac110() ? static_cast<TESNPCWeightQueries*>(this)->FUN_004ac110(static_cast<TESNPCWeightQueries*>(this)->FUN_005f0cc0())->GetArrValue() : fWeight;
     }
-    return FUN_00944300();
+    return static_cast<TESNPCWeightQueries*>(this)->FUN_00944300();
 }
 
 struct FUN_00605fc0_obj
@@ -4227,15 +3712,8 @@ struct FaceSetting
     float* FUN_00403e20();
 };
 extern FaceSetting DAT_011cb7a0;
-struct FaceRace;
-struct RaceLink
-{
-    FaceRace* FUN_00726070();
-};
-struct FaceRace
-{
-    void* FUN_005d9fb0(int);
-};
+
+
 void FUN_006521f0(void*);
 void FUN_00652fc0(float, void*, void*);
 float FUN_00652440(void*, int, int);
@@ -4263,127 +3741,9 @@ struct HeadPointer
 {
     HeadPointer& operator=(void*);
 };
-struct FaceNpc
+// Randomization is not declared by the shared TESNPC interface yet.
+struct FaceNpc : TESNPC
 {
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    RaceLink race;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    HeadPointer head;
-    int FUN_005f0cc0();
-    void FUN_00601c10(float);
-    void* FUN_00601800();
     void RandomizeFace(bool, bool, bool);
 };
 // Builds a face matrix from the race data, randomizes age/shape/other values unless kept, clamps them, and applies the result to the head if it differs.
@@ -4394,7 +3754,7 @@ void FaceNpc::RandomizeFace(bool keepAge, bool keepShape, bool keepOther)
     FaceMatrixLocal _result[2][2];
     float first2, second, value, other7;
     FUN_006521f0(_result);
-    FUN_00652fc0(*DAT_011cb7a0.FUN_00403e20(), race.FUN_00726070()->FUN_005d9fb0(FUN_005f0cc0()), source9);
+    FUN_00652fc0(*DAT_011cb7a0.FUN_00403e20(), GetFormRace()->GetMeanFaceCoord(static_cast<SEX>(FUN_005f0cc0())), source9);
     first2 = FUN_00652440(source9, 0, 0);
     second = FUN_00652440(source9, 0, 1);
     if (keepAge)
@@ -4424,11 +3784,11 @@ void FaceNpc::RandomizeFace(bool keepAge, bool keepShape, bool keepOther)
     FUN_00652470(source9, 1, 1, other7);
     if (!keepOther)
         FUN_00601c10(FUN_005c5420());
-    FUN_00652e00(race.FUN_00726070()->FUN_005d9fb0(FUN_005f0cc0()), source9, _result, 0);
-    if (FUN_00652900(_result, FUN_00601800()))
+    FUN_00652e00(GetFormRace()->GetMeanFaceCoord(static_cast<SEX>(FUN_005f0cc0())), source9, _result, 0);
+    if (FUN_00652900(_result, GetOffsetFaceCoord()))
     {
-        FUN_006529a0(_result, FUN_00601800(), 0, 0);
-        head = 0;
+        FUN_006529a0(_result, GetOffsetFaceCoord(), 0, 0);
+        reinterpret_cast<HeadPointer&>(m_pkFaceGenTexture) = 0;
     }
 }
 
@@ -4457,7 +3817,7 @@ bool NPCCompare::IsDifferentFrom(TESForm* form)
         return true;
     if (memcmp(&data, npc->GetTextureManager(), sizeof(data)))
         return true;
-    if (m_pClass != npc->GetClass())
+    if (m_pClass != npc->TESActorBase::GetClass())
         return true;
     if (m_pHair != npc->GetHair())
         return true;
@@ -4467,12 +3827,12 @@ bool NPCCompare::IsDifferentFrom(TESForm* form)
         return true;
     if (iHairColor != npc->FUN_004169d0())
         return true;
-    if (FUN_00652900(reinterpret_cast<FUN_00601800_shell*>(this)->FUN_00601800(),
-                     static_cast<FUN_00601800_shell*>(npc)->FUN_00601800()))
+    if (FUN_00652900(GetOffsetFaceCoord(),
+                     npc->GetOffsetFaceCoord()))
         return true;
-    if (GetCombatStyle() != npc->GetCombatStyle())
+    if (static_cast<const TESActorBase*>(this)->GetCombatStyle() != static_cast<const TESActorBase*>(npc)->GetCombatStyle())
         return true;
-    if (vfn_58() != npc->vfn_58())
+    if (static_cast<const TESNPC*>(this)->GetBloodImpactMaterial() != static_cast<const TESNPC*>(npc)->GetBloodImpactMaterial())
         return true;
     if (reinterpret_cast<HeadPartCompare*>(FUN_00602170())->FUN_005ae380() !=
         reinterpret_cast<HeadPartCompare*>(npc->FUN_00602170())->FUN_005ae380())
@@ -4502,155 +3862,14 @@ struct RaceID
 {
     unsigned int FUN_0084e3a0();
 };
-struct GenderQuery
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual bool v2c();
-};
-struct Target
-{
-    unsigned int unknown_000;
-    unsigned int unknown_004;
-    unsigned int unknown_008;
-    unsigned int unknown_00c;
-    unsigned int unknown_010;
-    unsigned int unknown_014;
-    unsigned int unknown_018;
-    unsigned int unknown_01c;
-    unsigned int unknown_020;
-    unsigned int unknown_024;
-    unsigned int unknown_028;
-    unsigned int unknown_02c;
-    GenderQuery actorData;
-    unsigned int unknown_034;
-    unsigned int unknown_038;
-    unsigned int unknown_03c;
-    unsigned int unknown_040;
-    unsigned int unknown_044;
-    unsigned int unknown_048;
-    unsigned int unknown_04c;
-    unsigned int unknown_050;
-    unsigned int unknown_054;
-    unsigned int unknown_058;
-    unsigned int unknown_05c;
-    unsigned int unknown_060;
-    unsigned int unknown_064;
-    unsigned int unknown_068;
-    unsigned int unknown_06c;
-    unsigned int unknown_070;
-    unsigned int unknown_074;
-    unsigned int unknown_078;
-    unsigned int unknown_07c;
-    unsigned int unknown_080;
-    unsigned int unknown_084;
-    unsigned int unknown_088;
-    unsigned int unknown_08c;
-    unsigned int unknown_090;
-    unsigned int unknown_094;
-    unsigned int unknown_098;
-    unsigned int unknown_09c;
-    unsigned int unknown_0a0;
-    unsigned int unknown_0a4;
-    unsigned int unknown_0a8;
-    unsigned int unknown_0ac;
-    unsigned int unknown_0b0;
-    unsigned int unknown_0b4;
-    unsigned int unknown_0b8;
-    unsigned int unknown_0bc;
-    unsigned int unknown_0c0;
-    unsigned int unknown_0c4;
-    unsigned int unknown_0c8;
-    unsigned int unknown_0cc;
-    unsigned int unknown_0d0;
-    unsigned int unknown_0d4;
-    unsigned int unknown_0d8;
-    unsigned int unknown_0dc;
-    unsigned int unknown_0e0;
-    unsigned int unknown_0e4;
-    unsigned int unknown_0e8;
-    unsigned int unknown_0ec;
-    unsigned int unknown_0f0;
-    unsigned int unknown_0f4;
-    unsigned int unknown_0f8;
-    unsigned int unknown_0fc;
-    unsigned int unknown_100;
-    unsigned int unknown_104;
-    unsigned int unknown_108;
-    unsigned int unknown_10c;
-    unsigned int unknown_110;
-    unsigned int unknown_114;
-    unsigned int unknown_118;
-    unsigned int unknown_11c;
-    unsigned int unknown_120;
-    unsigned int unknown_124;
-    unsigned int unknown_128;
-    unsigned int unknown_12c;
-    unsigned int unknown_130;
-    unsigned int unknown_134;
-    unsigned int unknown_138;
-    unsigned int unknown_13c;
-    unsigned int unknown_140;
-    unsigned int unknown_144;
-    unsigned int unknown_148;
-    unsigned int unknown_14c;
-    unsigned int unknown_150;
-    unsigned int unknown_154;
-    unsigned int unknown_158;
-    unsigned int unknown_15c;
-    unsigned int unknown_160;
-    unsigned int unknown_164;
-    unsigned int unknown_168;
-    unsigned int unknown_16c;
-    unsigned int unknown_170;
-    unsigned int unknown_174;
-    unsigned int unknown_178;
-    unsigned int unknown_17c;
-    unsigned int unknown_180;
-    unsigned int unknown_184;
-    unsigned int unknown_188;
-    unsigned int unknown_18c;
-    unsigned int unknown_190;
-    unsigned int unknown_194;
-    unsigned int unknown_198;
-    unsigned int unknown_19c;
-    unsigned int unknown_1a0;
-    unsigned int unknown_1a4;
-    unsigned int unknown_1a8;
-    unsigned int unknown_1ac;
-    unsigned int unknown_1b0;
-    unsigned int unknown_1b4;
-    unsigned int unknown_1b8;
-    unsigned int unknown_1bc;
-    unsigned int unknown_1c0;
-    unsigned int unknown_1c4;
-    unsigned int unknown_1c8;
-    unsigned int unknown_1cc;
-    unsigned int unknown_1d0;
-    unsigned int unknown_1d4;
-    unsigned int unknown_1d8;
-    unsigned int unknown_1dc;
-    unsigned int unknown_1e0;
-    unsigned int unknown_1e4;
-    unsigned int unknown_1e8;
-    unsigned int unknown_1ec;
-    Target* m_pTemplateNPC;
 
+// Extra texture-path helpers are still unit-specific; NPC storage is shared.
+struct Target : TESNPC
+{
     bool FUN_00604310(const char*, char*, unsigned int);
-    Target* FUN_006044c0();
     FileName* FUN_00484ee0();
     unsigned int FUN_0084e3a0();
     RaceID* FUN_004ac110();
-    int FUN_005f0cc0();
 };
 // @fnv 0x00604310
 bool Target::FUN_00604310(const char* extension, char* output, unsigned int length)
@@ -4659,7 +3878,7 @@ bool Target::FUN_00604310(const char* extension, char* output, unsigned int leng
     {
         Target* face = static_cast<Target*>(m_pTemplateNPC);
         while (face && face->FUN_006044c0())
-            face = face->FUN_006044c0();
+            face = static_cast<Target*>(face->FUN_006044c0());
         return face->FUN_00604310(extension, output, length);
     }
     FileName* file = FUN_00484ee0();
@@ -4670,7 +3889,7 @@ bool Target::FUN_00604310(const char* extension, char* output, unsigned int leng
     bool master = false;
     if (!FUN_004564f0(file->FUN_00891170(), str_0104a714, 6))
         master = true;
-    if (actorData.v2c())
+    if (reinterpret_cast<const TESActorBaseData*>(reinterpret_cast<const char*>(this) + 0x30)->GetCanBeAllRaces())
     {
         if (FUN_005f0cc0() == 1)
         {
@@ -5961,15 +5180,6 @@ struct FaceSkinData
 {
     unsigned int FUN_008041a0();
 };
-class NiSkinInstance
-{
-  public:
-    FaceObject* GetControllers() const;
-    void SetBone(unsigned int, FaceObject*);
-    void FUN_004addc0(NiSkinInstance*);
-    FaceObject** FUN_00825c00();
-    FaceSkinData* GetSkinData();
-};
 struct FaceExtraModel
 {
     NiSkinInstance* FUN_006072c0();
@@ -6309,7 +5519,7 @@ struct HeadMatrix
 };
 int __cdecl FUN_00651b30();
 bool __cdecl FUN_0043faf0();
-void __cdecl AddObjectToPaletteRecursive(FaceObject*, NiControllerManager*);
+void __cdecl AddObjectToPaletteRecursive(FaceObject*, NiAVObjectPalette*);
 struct HeadNPC : TESNPC
 {
     void FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped);
@@ -6329,10 +5539,10 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
             aNode2 = node1_2->IsSceneNode();
         FaceObject* bipedNodeB = ((HeadBipedLookup*)biped)->FUN_004ab230(0);
         HeadMatrix a;
-        NiControllerManager* p = 0;
+        NiAVObjectPalette* p = 0;
         if (((HeadRefCalls*)ref)->GetAnimData() && ((HeadRefCalls*)ref)->GetAnimData()->FUN_00496940())
             p = ((HeadRefCalls*)ref)->GetAnimData()->FUN_00496940()->GetStringAtOffset();
-        NiControllerManager* f = p;
+        NiAVObjectPalette* f = p;
         if (bipedNodeB && aNode2)
         {
             if (!((HeadRefCalls*)ref)->HasNodeA(bipedNodeB) && !((HeadRefCalls*)ref)->HasNodeB(bipedNodeB))
@@ -6407,7 +5617,7 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
                                     NiSkinInstance* l = extra->GetModelFilePath()->FUN_006072c0();
                                     NiSkinInstance* k = aNode5->FUN_0043fad0();
                                     FaceObject** ba = l->FUN_00825c00();
-                                    unsigned int b = l->GetSkinData()->FUN_008041a0();
+                                    unsigned int b = reinterpret_cast<FaceSkinData*>(l->GetSkinData())->FUN_008041a0();
                                     for (unsigned int j = 0; j < b; j++)
                                         k->SetBone(j, ba[j]);
                                 }
@@ -6488,13 +5698,13 @@ void HeadNPC::FUN_00606820(TESObjectREFR* ref, NiPointer<BipedAnim>* biped)
     }
 }
 
-struct FUN_00609d60_shell : public TESNPC
+struct TESNPCFaceSerialization : public TESNPC
 {
     void SerializeFaceGenData(int);
 };
 
 // @fnv 0x00609d60
-void FUN_00609d60_shell::SerializeFaceGenData(int unused)
+void TESNPCFaceSerialization::SerializeFaceGenData(int unused)
 {
     unsigned int i2 = 0;
     for (; i2 < 2; ++i2)
@@ -6510,7 +5720,7 @@ void FUN_00609d60_shell::SerializeFaceGenData(int unused)
                 unsigned int col = 0;
                 for (; col < cols; ++col)
                 {
-                    float value = *this->m_kFaceGenCoordinates[i2][j].FUN_0060b370(row, col).FUN_00629ab0();
+                    float value = *reinterpret_cast<FaceGenCoordinateBasis*>(&m_kFaceGenCoordinates[i2][j])->FUN_0060b370(row, col).FUN_00629ab0();
                     ((PC7d*)this)->FUN_00484ce0((unsigned int)&value, 4);
                 }
             }
@@ -6537,56 +5747,17 @@ void FUN_00609d60_shell::SerializeFaceGenData(int unused)
     ((PC7d*)this)->FUN_00484ce0((unsigned int)&this->m_fHairLength, 4);
     ((PC7d*)this)->FUN_00484ce0((unsigned int)&this->iHairColor, 4);
     unsigned char sex = 0;
-    if (this->GetSex() == 1)
+    if (this->TESActorBase::GetSex() == 1)
     {
         sex = 1;
     }
     ((PC7d*)this)->FUN_00484ce0((unsigned int)&sex, 1);
 }
 
-struct BipedModelView : TESBipedModelForm
-{
-    const char* FUN_004811e0(int sex);
-};
-struct EnchantmentComponent : BaseFormComponent
-{
-    TESForm* enchantment;
-    unsigned short charge;
-    unsigned short castingType;
-    unsigned int enchantmentFlags;
-};
-struct ValueComponent : BaseFormComponent
-{
-    int value;
-};
-struct WeightComponent : BaseFormComponent
-{
-    float weight;
-};
-struct ArmorModelView : TESObjectARMO
-{
-    TESFullName fullName;
-    TESScriptableForm script;
-    EnchantmentComponent enchantment;
-    ValueComponent value;
-    WeightComponent weight;
-    TESHealthForm health;
-    BipedModelView biped;
-};
-struct ModelPathView : TESModel
-{
-    virtual void vfn_10();
-    virtual const char* GetModelPath();
-};
-struct WeaponModelView : TESObjectWEAP
-{
-    TESFullName fullName;
-    ModelPathView model;
-};
 struct ContainerModelView : TESContainer
 {
-    ArmorModelView* FindBestArmorForSlot(TESActorBase*, int);
-    WeaponModelView* FindBestRecord(TESActorBase*);
+    TESObjectARMO* FindBestArmorForSlot(TESActorBase*, int);
+    TESObjectWEAP* FindBestRecord(TESActorBase*);
 };
 struct NPCModelView : TESBoundObject, TESActorBaseData, ContainerModelView
 {
@@ -6598,23 +5769,23 @@ BSSimpleList<const char*>* NPCModelView::CollectModelPaths(bool armorModels, boo
     BSSimpleList<const char*>* models = new BSSimpleList<const char*>;
     if (armorModels)
     {
-        BipedModelView* pBodyModel = 0;
+        TESBipedModelForm* pBodyModel = 0;
         {
             int sex = reinterpret_cast<TESActorBase*>(this)->GetSex();
             {
-                BipedModelView* apSlotModels[20];
+                TESBipedModelForm* apSlotModels[20];
                 memset(apSlotModels, 0, sizeof(apSlotModels));
                 for (int slot = 0; slot < 20; slot++)
                 {
                     TESObjectARMO* unusedArmor = 0;
                     {
-                        ArmorModelView* armor = FindBestArmorForSlot(reinterpret_cast<TESActorBase*>(this), slot);
+                        TESObjectARMO* armor = FindBestArmorForSlot(reinterpret_cast<TESActorBase*>(this), slot);
                         if (armor && (!pBodyModel || !pBodyModel->HasBipedModel(slot, false, 0)) && !apSlotModels[slot])
                         {
-                            apSlotModels[slot] = armor ? &armor->biped : 0;
+                            apSlotModels[slot] = armor ? reinterpret_cast<TESBipedModelForm*>(reinterpret_cast<char*>(armor) + offsetof(TESObjectARMO, partMask) - offsetof(TESBipedModelForm, partMask)) : 0;
                             if (apSlotModels[slot])
                             {
-                                const char* pModelPath = apSlotModels[slot]->FUN_004811e0(sex);
+                                const char* pModelPath = apSlotModels[slot]->GetBipedModel(sex);
                                 if (pModelPath)
                                     models->AddHead(pModelPath);
                             }
@@ -6628,13 +5799,13 @@ BSSimpleList<const char*>* NPCModelView::CollectModelPaths(bool armorModels, boo
     }
     if (weaponModels)
     {
-        WeaponModelView* weapon = FindBestRecord(reinterpret_cast<TESActorBase*>(this));
+        TESObjectWEAP* weapon = FindBestRecord(reinterpret_cast<TESActorBase*>(this));
         if (weapon)
         {
-            ModelPathView* model = weapon ? &weapon->model : 0;
+            TESModel* model = weapon ? reinterpret_cast<TESModel*>(reinterpret_cast<char*>(weapon) + offsetof(TESObjectWEAP, m_kModelFilePath) - offsetof(TESModel, m_kModelFilePath)) : 0;
             if (model)
             {
-                const char* pModelPath = model->GetModelPath();
+                const char* pModelPath = model->GetModelFilePath();
                 if (pModelPath)
                     models->AddHead(pModelPath);
             }
@@ -6903,20 +6074,20 @@ void NPC_Helper::InitAttributesAndSkills(bool arg1)
     s = true;
     if (i)
     {
-        if (DAT_011d0e7c.Int()->i == GetClass()->GetFormID())
+        if (DAT_011d0e7c.Int()->i == TESActorBase::GetClass()->GetFormID())
             s = false;
     }
 
-    if (vfn_144())
+    if (static_cast<const TESObject*>(this)->IsAutoCalculated())
     {
         ActorValue::Index luck;
         int z;
         for (z = 0; z < 7; ++z)
         {
-            luck = ActorValue::GetActorValueForSectionIndex(ActorValue::Attributes, (unsigned char)z);
+            luck = ActorValue::GetActorValueForSectionIndex(ActorValue::ATTRIBUTE, (unsigned char)z);
             if (s)
             {
-                level = (float)GetClass()->classAttributes.GetAttributeValue(5 + z);
+                level = (float)TESActorBase::GetClass()->TESAttributes::GetAttributeValue(5 + z);
             }
             if (level > 10.0)
             {
@@ -6945,7 +6116,7 @@ void NPC_Helper::InitAttributesAndSkills(bool arg1)
         int j;
         for (pObj = 0; pObj < 14; ++pObj)
         {
-            fPointsPerSkill = ActorValue::GetActorValueForSectionIndex(ActorValue::Skills, (unsigned char)pObj);
+            fPointsPerSkill = ActorValue::GetActorValueForSectionIndex(ActorValue::SKILL, (unsigned char)pObj);
             if (!ActorValue::GetFlag(fPointsPerSkill, 0x2000))
             {
                 if (ActorValue::IsSkill(fPointsPerSkill))
@@ -6954,13 +6125,13 @@ void NPC_Helper::InitAttributesAndSkills(bool arg1)
                     j = -1;
                     GetSkillAttributeAndBase(fPointsPerSkill, &j, &level);
 
-                    level = AIFormulas::CalculateSkillValue(level, (float)attributes[j - 5], (float)res);
+                    level = AIFormulas::CalculateSkillValue(level, (float)cAttribute[j - 5], (float)res);
 
                     if (s && m_pClass)
                     {
                         if (m_pClass->IsTagSkill(fPointsPerSkill))
                         {
-                            level += (q + y) + originalRuntimeFloatSetting327.Float()->f;
+                            level += (q + y) + *originalRuntimeFloatSetting327.Float();
                             y = 0.0f;
                             if (level > 100.0)
                             {
@@ -6985,7 +6156,7 @@ void NPC_Helper::InitAttributesAndSkills(bool arg1)
 
         if (m_pClass)
         {
-            if (vfn_30())
+            if (static_cast<const TESNPC*>(this)->GetNoHeadTracking())
             {
                 SetServiceFlags(m_pClass->FUN_006286d0(), false);
             }
@@ -7030,16 +6201,12 @@ struct Process : Slots<282>
 {
     virtual void FUN_00606540_slot(bool);
 };
-struct Package
-{
-    bool FUN_00441b00();
-};
 struct Ref
 {
     Process* FUN_008d8520();
     Extras* FUN_005d43c0();
     void* FUN_0043fcd0();
-    Package* FUN_009344a0();
+    TESPackage* FUN_009344a0();
 };
 struct FUN_004459e0
 {
@@ -7143,7 +6310,7 @@ void Shell::FUN_00606540(Ref* ref, Biped* biped, bool force)
         if (update)
         {
             bool package = true;
-            Package* equip = actor->FUN_009344a0();
+            TESPackage* equip = actor->FUN_009344a0();
             if (equip && equip->FUN_00441b00())
                 package = false;
             FUN_006047c0(ref, true, package, 0, 0);
@@ -7160,20 +6327,15 @@ void Shell::FUN_00606540(Ref* ref, Biped* biped, bool force)
 }
 }  // namespace fnv_00606540
 
-struct TESNPC_Sub : public TESNPC
-{
-    void AttachHeadModels(TESObjectREFR* apRefr, BipedAnim* apBiped, BSFaceGenNiNode* apHeadBiped,
-                          BSFaceGenNiNode* apHeadSkinned);
-};
 
 // @fnv 0x00607420
-void TESNPC_Sub::AttachHeadModels(TESObjectREFR* apRefr, BipedAnim* apBiped, BSFaceGenNiNode* apHeadBiped,
+void TESNPC::UpdateActorFaceGen(TESObjectREFR* apRefr, BipedAnim* apBiped, BSFaceGenNiNode* apHeadBiped,
                                   BSFaceGenNiNode* apHeadSkinned)
 {
     BSFaceGenAnimationData* animData;
     NiAVObject* palette;
     animData = NULL;
-    palette = apRefr->Get3DSimple();
+    palette = reinterpret_cast<NiAVObject*>(apRefr->Get3DSimple());
     NiNode* a;
     a = NULL;
     if (palette)
@@ -7181,13 +6343,13 @@ void TESNPC_Sub::AttachHeadModels(TESObjectREFR* apRefr, BipedAnim* apBiped, BSF
         a = palette->IsSceneNode();
     }
     NiNode* idx;
-    idx = apBiped->GetBoneNode(BIPED_BONE_HEAD);
-    NiControllerManager* f54;
-    ThreeByThreeMatrix ptr;
+    idx = apBiped->GetBoneNode(BIPED_BONE_BIPED_BONE_HEAD);
+    NiAVObjectPalette* f54;
+    NiMatrix3 ptr;
     f54 = NULL;
-    if (apRefr->GetAnimData() && apRefr->GetAnimData()->FUN_00496940())
+    if (reinterpret_cast<ActorAnimData*>(apRefr->GetAnimData()) && reinterpret_cast<ActorAnimData*>(apRefr->GetAnimData())->FUN_00496940())
     {
-        f54 = apRefr->GetAnimData()->FUN_00496940()->GetStringAtOffset();
+        f54 = reinterpret_cast<ActorAnimData*>(apRefr->GetAnimData())->FUN_00496940()->GetStringAtOffset();
     }
     NiDefaultAVObjectPalette* val;
     val = (NiDefaultAVObjectPalette*)f54;
@@ -7196,37 +6358,37 @@ void TESNPC_Sub::AttachHeadModels(TESObjectREFR* apRefr, BipedAnim* apBiped, BSF
     {
         if (apHeadBiped)
         {
-            if (apHeadBiped->GetFaceGenAnimationData())
+            if (apHeadBiped->GetAnimationData())
             {
                 if (apRefr->GetHealth() <= 0.0)
                 {
-                    apHeadBiped->GetFaceGenAnimationData()->vfn_d8(true, true);
-                    apHeadBiped->GetFaceGenAnimationData()->vfn_d0(true);
+                    apHeadBiped->GetAnimationData()->SetStateFlags(true, true);
+                    apHeadBiped->GetAnimationData()->SetUpdated(true);
                 }
             }
-            apHeadBiped->vfn_114(true);
-            apHeadBiped->vfn_11c(true);
+            apHeadBiped->SetAnimationUpdate(true);
+            apHeadBiped->SetApplyRotToParent(true);
             apHeadBiped->FUN_00440460(NiPoint3_ZERO);
-            apHeadBiped->SetLocalRotation(*(const ThreeByThreeMatrix*)&DAT_011a9448);
-            idx->AttachChildInAvailableSlot(apHeadBiped, true);
+            apHeadBiped->SetLocalRotation(*(const NiMatrix3*)&DAT_011a9448);
+            idx->AttachChildInAvailableSlot(static_cast<NiAVObject*>(apHeadBiped), true);
             AddObjectToPalette(apHeadBiped, val);
         }
 
         if (apHeadSkinned)
         {
-            ptr = *(const ThreeByThreeMatrix*)&DAT_011a9448;
-            apHeadSkinned->vfn_114(0 == apHeadBiped);
-            apHeadSkinned->vfn_11c(apHeadBiped == 0);
+            ptr = *(const NiMatrix3*)&DAT_011a9448;
+            apHeadSkinned->SetAnimationUpdate(0 == apHeadBiped);
+            apHeadSkinned->SetApplyRotToParent(apHeadBiped == 0);
             apHeadSkinned->FUN_00440460(NiPoint3_ZERO);
-            a->AttachChildInAvailableSlot(apHeadSkinned, true);
+            a->AttachChildInAvailableSlot(static_cast<NiAVObject*>(apHeadSkinned), true);
             AddObjectToPalette(apHeadSkinned, val);
-            apHeadSkinned->vfn_128(a, true);
+            reinterpret_cast<void (__thiscall*)(BSFaceGenNiNode*, NiNode*, bool)>((*reinterpret_cast<void***>(apHeadSkinned))[0x4a])(apHeadSkinned, a, true);
         }
 
-        animData = apHeadBiped ? apHeadBiped->GetFaceGenAnimationData() : NULL;
+        animData = apHeadBiped ? apHeadBiped->GetAnimationData() : NULL;
         if (0 == animData)
         {
-            animData = apHeadSkinned ? apHeadSkinned->GetFaceGenAnimationData() : NULL;
+            animData = apHeadSkinned ? apHeadSkinned->GetAnimationData() : NULL;
         }
 
         if (animData)
@@ -7236,18 +6398,18 @@ void TESNPC_Sub::AttachHeadModels(TESObjectREFR* apRefr, BipedAnim* apBiped, BSF
             {
                 Actor* pObj;
                 pObj = (Actor*)apRefr;
-                if (pObj->pFaceGenAnimationData)
+                if (pObj->m_pRagdollController)
                 {
                     float v;
                     float obj3D;
                     float res;
                     ComputeAngleRange(&obj3D, &v);
                     ClampMinMaxFromSetting(&obj3D, &res);
-                    pObj->pFaceGenAnimationData->FUN_00607830(res);
-                    pObj->pFaceGenAnimationData->SetBoneMaxAngle(0, v);
+                    pObj->m_pRagdollController->FUN_00607830(res);
+                    pObj->m_pRagdollController->SetBoneMaxAngle(0, v);
                     FUN_00649fe0(&obj3D, &v);
                     GetEyeAngleLimits(&obj3D, &res);
-                    pObj->pFaceGenAnimationData->SetSlotFloats(0, v, res);
+                    pObj->m_pRagdollController->SetSlotFloats(0, v, res);
                 }
             }
         }
@@ -7380,30 +6542,13 @@ struct Buffer75
 
 TESForm* FUN_004839c0(unsigned int);
 
-struct Cell75
-{
-    int unk00, unk04;
-    float* FUN_00629ab0();
-};
 
-struct Matrix75
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    Matrix75();
-    ~Matrix75();
-    unsigned int FUN_009611e0();
-    unsigned int FUN_00441110();
-    Cell75 FUN_0060b370(unsigned int, unsigned int);
-};
 
-void FUN_006521f0(Matrix75 (*)[2]);
 
-struct Race75
-{
-    int unk00, unk04;
-    TESRace* FUN_00726070();
-    void FUN_006ecd40(TESRace*);
-};
+
+void FUN_006521f0(FaceGenMatrix<float> (*)[2]);
+
+
 
 struct Node75
 {
@@ -7426,256 +6571,69 @@ struct Saved75
     unsigned int FUN_0044ddc0();
 };
 
-struct ActorData75
-{
-    int unk00;
-    bool FUN_00461580(int);
-    void FUN_0047dd50(int, bool, int);
-};
 
-struct NPC75
-{
 
-    int unk00;
 
-    int unk04;
-
-    int unk08;
-
-    int unk0c;
-
-    int unk10;
-
-    int unk14;
-
-    int unk18;
-
-    int unk1c;
-
-    int unk20;
-
-    int unk24;
-
-    int unk28;
-
-    int unk2c;
-
-    ActorData75 actorData;
-
-    int unk34;
-
-    int unk38;
-
-    int unk3c;
-
-    int unk40;
-
-    int unk44;
-
-    int unk48;
-
-    int unk4c;
-
-    int unk50;
-
-    int unk54;
-
-    int unk58;
-
-    int unk5c;
-
-    int unk60;
-
-    int unk64;
-
-    int unk68;
-
-    int unk6c;
-
-    int unk70;
-
-    int unk74;
-
-    int unk78;
-
-    int unk7c;
-
-    int unk80;
-
-    int unk84;
-
-    int unk88;
-
-    int unk8c;
-
-    int unk90;
-
-    int unk94;
-
-    int unk98;
-
-    int unk9c;
-
-    int unka0;
-
-    int unka4;
-
-    int unka8;
-
-    int unkac;
-
-    int unkb0;
-
-    int unkb4;
-
-    int unkb8;
-
-    int unkbc;
-
-    int unkc0;
-
-    int unkc4;
-
-    int unkc8;
-
-    int unkcc;
-
-    int unkd0;
-
-    int unkd4;
-
-    int unkd8;
-
-    int unkdc;
-
-    int unke0;
-
-    int unke4;
-
-    int unke8;
-
-    int unkec;
-
-    int unkf0;
-
-    int unkf4;
-
-    int unkf8;
-
-    int unkfc;
-
-    int unk100;
-
-    int unk104;
-
-    int unk108;
-
-    Race75 race;
-
-    ActorSkillData skills;
-
-    TESClass* npcClass;
-
-    Matrix75 face[2][2];
-
-    Matrix75 (*alternate)[2];
-
-    TESHair* hair;
-
-    float hairLength;
-
-    TESEyes* eyes;
-
-    int unk1c4;
-
-    int unk1c8;
-
-    int unk1cc;
-
-    int unk1d0;
-
-    int unk1d4;
-
-    unsigned int hairColor;
-
-    Node75 parts;
-
-    int unk1e4;
-
-    int unk1e8;
-
-    TESRace* originalRace;
-
-    int unk1f0;
-
-    float height;
-
-    void FUN_005f1fd0(Buffer75*);
-    float FUN_006041d0();
-    void FUN_005dd560();
-    void FUN_005f20a0(unsigned char);
-    void FUN_00609220(Buffer75*);
-};
 
 // Reads actor data, race, face matrices, hair, eyes, head parts, and sex from a save buffer, updating fields and marking changes.
 // @fnv 0x00609220
-void NPC75::FUN_00609220(Buffer75* buffer)
+void TESNPC::LoadGame(BGSLoadFormBuffer* buffer)
 {
 
-    FUN_005f1fd0(buffer);
+    TESActorBase::LoadGame(buffer);
 
-    if (buffer->FUN_00428110(0x200).FUN_004280f0())
-        buffer->FUN_00864980(&skills, 28);
+    if (reinterpret_cast<Buffer75*>(buffer)->FUN_00428110(0x200).FUN_004280f0())
+        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&data, 28);
 
-    if (buffer->FUN_00428110(0x400).FUN_004280f0())
-        npcClass = dynamic_cast<TESClass*>(FUN_004839c0(buffer->FUN_008648a0()));
+    if (reinterpret_cast<Buffer75*>(buffer)->FUN_00428110(0x400).FUN_004280f0())
+        m_pClass = dynamic_cast<TESClass*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
 
     unsigned char changed1 = 0;
 
-    if (buffer->FUN_0042ce90())
+    if (reinterpret_cast<Buffer75*>(buffer)->FUN_0042ce90())
         changed1 |= 0x1b;
 
     bool updateHeight27 = false;
 
-    if (height == FUN_006041d0())
+    if (m_fGlyphExtent == GetDefaultHeight())
         updateHeight27 = true;
 
-    if (buffer->FUN_00428110(0x2000000).FUN_004280f0())
+    if (reinterpret_cast<Buffer75*>(buffer)->FUN_00428110(0x2000000).FUN_004280f0())
     {
 
         TESRace* newRace = 0;
 
-        newRace = dynamic_cast<TESRace*>(FUN_004839c0(buffer->FUN_008648a0()));
+        newRace = dynamic_cast<TESRace*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
 
-        if (newRace != race.FUN_00726070())
+        if (newRace != GetFormRace())
         {
-            race.FUN_006ecd40(newRace);
+            SetFormRace(newRace);
             changed1 |= 0x1b;
         }
 
-        originalRace = dynamic_cast<TESRace*>(FUN_004839c0(buffer->FUN_008648a0()));
+        m_pAssignedRace = dynamic_cast<TESRace*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
     }
 
     if (updateHeight27)
-        height = FUN_006041d0();
+        m_fGlyphExtent = GetDefaultHeight();
 
-    if (buffer->FUN_00428110(0x800).FUN_004280f0())
+    if (reinterpret_cast<Buffer75*>(buffer)->FUN_00428110(0x800).FUN_004280f0())
     {
 
         bool useAlternate7 = false;
 
-        buffer->FUN_00864980(&useAlternate7, 1);
+        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&useAlternate7, 1);
 
-        Matrix75(*coordinates20)[2] = face;
+        FaceGenMatrix<float>(*coordinates20)[2] = m_kFaceGenCoordinates;
 
         if (useAlternate7)
         {
-            if (!alternate)
+            if (!m_pOffsetFaceCoordinates)
             {
-                alternate = (Matrix75(*)[2]) new Matrix75[4];
-                FUN_006521f0(alternate);
+                m_pOffsetFaceCoordinates = (FaceGenMatrix<float>(*)[2]) new FaceGenMatrix<float>[4];
+                FUN_006521f0(m_pOffsetFaceCoordinates);
             }
-            coordinates20 = alternate;
+            coordinates20 = m_pOffsetFaceCoordinates;
         }
 
         for (unsigned int set = 0; set < 2; ++set)
@@ -7695,12 +6653,12 @@ void NPC75::FUN_00609220(Buffer75* buffer)
                     {
 
                         float value = 0.0f;
-                        buffer->FUN_00864980(&value, 4);
+                        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&value, 4);
 
-                        if (*coordinates20[set][group].FUN_0060b370(row, col).FUN_00629ab0() != value)
+                        if (*reinterpret_cast<FaceGenCoordinateBasis*>(&coordinates20[set][group])->FUN_0060b370(row, col).FUN_00629ab0() != value)
                         {
 
-                            *coordinates20[set][group].FUN_0060b370(row, col).FUN_00629ab0() = value;
+                            *const_cast<float*>(reinterpret_cast<FaceGenCoordinateBasis*>(&coordinates20[set][group])->FUN_0060b370(row, col).FUN_00629ab0()) = value;
                             changed1 |= 8;
                         }
                     }
@@ -7708,25 +6666,25 @@ void NPC75::FUN_00609220(Buffer75* buffer)
             }
         }
 
-        TESHair* oldHair4 = hair;
-        TESEyes* oldEyes3 = eyes;
-        float oldLength23 = hairLength;
-        float oldColor22 = (float)hairColor;
+        TESHair* oldHair4 = m_pHair;
+        TESEyes* oldEyes3 = m_pEyes;
+        float oldLength23 = m_fHairLength;
+        float oldColor22 = (float)iHairColor;
 
-        hair = dynamic_cast<TESHair*>(FUN_004839c0(buffer->FUN_008648a0()));
-        eyes = dynamic_cast<TESEyes*>(FUN_004839c0(buffer->FUN_008648a0()));
+        m_pHair = dynamic_cast<TESHair*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
+        m_pEyes = dynamic_cast<TESEyes*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
 
-        buffer->FUN_00864980(&hairLength, 4);
-        buffer->FUN_00864980(&hairColor, 4);
+        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&m_fHairLength, 4);
+        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&iHairColor, 4);
 
         bool partsChanged41 = false;
 
-        if (buffer->Version() >= 14)
+        if (reinterpret_cast<Buffer75*>(buffer)->Version() >= 14)
         {
 
             Saved75 saved14;
 
-            Node75* node17 = &parts;
+            Node75* node17 = reinterpret_cast<Node75*>(&m_kHeadPartList);
 
             while (node17)
             {
@@ -7736,21 +6694,21 @@ void NPC75::FUN_00609220(Buffer75* buffer)
                 node17 = node17->FUN_00726070();
             }
 
-            parts.FUN_00470470();
+            reinterpret_cast<Node75*>(&m_kHeadPartList)->FUN_00470470();
 
             {
 
-                unsigned int count33 = buffer->FUN_00864a60();
+                unsigned int count33 = reinterpret_cast<Buffer75*>(buffer)->FUN_00864a60();
 
                 for (unsigned int index = 0; index < count33; ++index)
                 {
                     BGSHeadPart* part = 0;
-                    part = dynamic_cast<BGSHeadPart*>(FUN_004839c0(buffer->FUN_008648a0()));
+                    part = dynamic_cast<BGSHeadPart*>(FUN_004839c0(reinterpret_cast<Buffer75*>(buffer)->FUN_008648a0()));
                     if (part)
-                        parts.FUN_005ae3d0(part);
+                        reinterpret_cast<Node75*>(&m_kHeadPartList)->FUN_005ae3d0(part);
                 }
 
-                node17 = &parts;
+                node17 = reinterpret_cast<Node75*>(&m_kHeadPartList);
 
                 while (node17)
                 {
@@ -7777,51 +6735,32 @@ void NPC75::FUN_00609220(Buffer75* buffer)
             }
         }
 
-        if (partsChanged41 || oldHair4 != hair || oldEyes3 != eyes || oldLength23 != hairLength ||
-            oldColor22 != hairColor)
+        if (partsChanged41 || oldHair4 != m_pHair || oldEyes3 != m_pEyes || oldLength23 != m_fHairLength ||
+            oldColor22 != iHairColor)
             changed1 |= 8;
     }
 
-    if (buffer->FUN_00428110(0x1000000).FUN_004280f0())
+    if (reinterpret_cast<Buffer75*>(buffer)->FUN_00428110(0x1000000).FUN_004280f0())
     {
 
         bool sex = false;
-        buffer->FUN_00864980(&sex, 1);
+        reinterpret_cast<Buffer75*>(buffer)->FUN_00864980(&sex, 1);
 
-        if (actorData.FUN_00461580(1) != sex)
+        if (TESActorBaseData::GetFlag(1) != sex)
         {
-            actorData.FUN_0047dd50(1, sex, 1);
+            TESActorBaseData::UpdateFlagBit(1, sex, true);
             changed1 |= 0x1b;
         }
     }
 
     if (changed1 & 8)
-        FUN_005dd560();
+        ResetFaceGen();
 
     if (changed1)
         FUN_005f20a0(changed1);
 }
 
-class Shell_00608f00_Flags
-{
-  public:
-    unsigned int flags;
-    Shell_00608f00_Flags();
-    bool Test(unsigned int);
-};
-class BGSSaveFormBuffer
-{
-  public:
-    Shell_00608f00_Flags FUN_00428110();
-    void FUN_00865e50(void*, unsigned int, int);
-    unsigned int FUN_00865f20();
-    void FUN_00865ff0(int, unsigned int);
-};
-class Shell_00608f00_Buf
-{
-  public:
-    void FUN_00865df0(void*, int);
-};
+#include "../../include/BGSChangeFlags.h"
 class Shell_00608f00_Base
 {
   public:
@@ -7855,7 +6794,7 @@ class Shell_00608f00_Flag
     bool GetFlag(unsigned int) const;
 };
 
-class Shell_00608f00_NPC : public TESNPC
+class TESNPCSaveBufferWriter : public TESNPC
 {
   public:
     void FUN_00608f00(BGSSaveFormBuffer* apFile);
@@ -7863,18 +6802,18 @@ class Shell_00608f00_NPC : public TESNPC
 
 // Writes NPC data to the buffer, including face coordinates, hair, eyes, head parts, and selected flag state.
 // @fnv 0x00608f00
-void Shell_00608f00_NPC::FUN_00608f00(BGSSaveFormBuffer* apFile)
+void TESNPCSaveBufferWriter::FUN_00608f00(BGSSaveFormBuffer* apFile)
 {
     ((Shell_00608f00_Base*)this)->FUN_005f1f30((unsigned int)apFile);
     if (apFile->FUN_00428110().Test(0x200))
         apFile->FUN_00865e50(&data, 0x1c, 0);
     if (apFile->FUN_00428110().Test(0x400))
-        ((Shell_00608f00_Buf*)apFile)->FUN_00865df0(m_pClass, 0);
+        apFile->FUN_00865df0(m_pClass, 0);
     if (apFile->FUN_00428110().Test(0x2000000))
     {
         Shell_00608f00_Node* pRace = ::FUN_00726070((Shell_00608f00_Node*)((char*)this + 0x10c));
-        ((Shell_00608f00_Buf*)apFile)->FUN_00865df0(pRace, 0);
-        ((Shell_00608f00_Buf*)apFile)->FUN_00865df0(m_pAssignedRace, 0);
+        apFile->FUN_00865df0(pRace, 0);
+        apFile->FUN_00865df0(m_pAssignedRace, 0);
     }
     if (apFile->FUN_00428110().Test(0x800))
     {
@@ -7902,8 +6841,8 @@ void Shell_00608f00_NPC::FUN_00608f00(BGSSaveFormBuffer* apFile)
                 }
             }
         }
-        ((Shell_00608f00_Buf*)apFile)->FUN_00865df0(m_pHair, 0);
-        ((Shell_00608f00_Buf*)apFile)->FUN_00865df0(m_pEyes, 0);
+        apFile->FUN_00865df0(m_pHair, 0);
+        apFile->FUN_00865df0(m_pEyes, 0);
         apFile->FUN_00865e50(&m_fHairLength, 4, 0);
         apFile->FUN_00865e50(&iHairColor, 4, 0);
         {
@@ -7916,7 +6855,7 @@ void Shell_00608f00_NPC::FUN_00608f00(BGSSaveFormBuffer* apFile)
                     *(BGSHeadPart**)&((Shell_00608f00_Item*)pIter)->Shell_00608f00_Item::Shell_00608f00_Item();
                 if (pHeadPart)
                 {
-                    ((Shell_00608f00_Buf*)apFile)->FUN_00865df0(pHeadPart, 0);
+                    apFile->FUN_00865df0(pHeadPart, 0);
                     iNumParts++;
                 }
                 pIter = ::FUN_00726070(pIter);
@@ -7932,49 +6871,27 @@ void Shell_00608f00_NPC::FUN_00608f00(BGSSaveFormBuffer* apFile)
 }
 
 // Furniture marker entry returned by BaseProcess::GetFurnitureMarkerData().
-class FurnitureMark
-{
-  public:
-    float fX, fY, fZ;
-    unsigned short usHeading;
-    unsigned char cMarkerType;
-};
 
-// Dialogue package (RTTI .?AUDialoguePackage@@); its topic lives at TESPackage::pTopic.
-struct DialoguePackage : public TESPackage
-{
-};
+// Dialogue package (RTTI .?AUDialoguePackage@@); its topic lives in DialoguePackage.
 
 // Actor queries the pack does not declare.
 class ActorQueries : public Actor
 {
   public:
     bool IsFleeingFrom(bool abCheck);
-    bool IsInCombat();
-};
-class PlayerActivationQueries : public PlayerCharacter
-{
-  public:
-    bool FUN_00894d60();
 };
 
 int __fastcall GetActorKnockState(Actor* apActor);
 unsigned char __fastcall GetCalendarDay(Calendar* apCalendar);
 void __fastcall SetProcessLastTimeProcessed(BaseProcess* apProcess, float afHour);
-BSSimpleList<Actor*>* __fastcall GetScheduleListNext(BSSimpleList<Actor*>* apList);
+BSSimpleList<Actor*>* __fastcall GetScheduleListNext(DurationData* apList);
 bool __fastcall GetPackageDialogueNoHeadtrack(TESPackage* apPackage);
 
 // TESNPC::Activate (vtable slot 73).
-class TESNPCActivate : public TESNPC
-{
-  public:
-    bool FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef, bool abIsItem,
-                      TESBoundObject* apObjectToGet, int aiCount);
-};
 
 // Handles NPC activation by checking combat, health, and dialogue conditions, then opening menus or transferring items between actors.
 // @fnv 0x00607990
-bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef, bool abIsItem,
+bool TESNPC::Activate(TESObjectREFR* apTargetRef, TESObjectREFR* apActivatorRef, bool abIsItem,
                                   TESBoundObject* apObjectToGet, int aiCount)
 {
     Actor* pActivator = dynamic_cast<Actor*>(apActivatorRef);
@@ -7990,13 +6907,14 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
     if (pProcess && pProcess->GetCurrentFadeState())
         return false;
 
-    TESPackage* pActivatorPackage = pActivator->GetProcess()->GetOneTimePackage();
-    TESPackage* pTargetCurrentPackage = pProcess->GetOneTimePackage();
+    // a virtual call (slot 0x9F): through the const declaration, not the folded non-virtual twin
+    TESPackage* pActivatorPackage = static_cast<const BaseProcess*>(pActivator->GetProcess())->GetOneTimePackage();
+    TESPackage* pTargetCurrentPackage = static_cast<const BaseProcess*>(pProcess)->GetOneTimePackage();
     char szLine[300];
 
-    if (pTarget == g_thePlayer && g_thePlayer->bPreventActivation)
+    if (pTarget == g_thePlayer && g_thePlayer->bResting)
     {
-        if (pTarget->IsGuard() && pTarget->IsInDeadState())
+        if (pTarget->Unk_C1() && pTarget->IsInDeadState())
             SetProcessLastTimeProcessed(pProcess, g_calendar.GetGameTime() - 1.0);
         return false;
     }
@@ -8014,7 +6932,7 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
         {
             CombatController* m_pCombatController = pTarget->GetCombatController();
             if (!m_pCombatController || !m_pCombatController->SetActive(g_thePlayer) ||
-                static_cast<PlayerActivationQueries*>(g_thePlayer)->FUN_00894d60())
+                g_thePlayer->FUN_00894d60())
             {
                 sprintf(szLine, "%s %s", pTarget->GetFullName(), DAT_011d2538.IsContentAvailable());
                 ShowMessage(szLine, 0, "Interface\\Icons\\Message Icons\\glow_message_vaultboy_sad.dds", 0, 2.0f,
@@ -8040,20 +6958,20 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
             pActivator->GetExtraData()->SetPackageOverride(pPackage, 4, pTargetExtra->GetTalkingActor(), true, true,
                                                            false);
             if (pPackage->IsMustReachLocation())
-                pActivator->SetExtraRunOncePacks(pPackage, GetCalendarDay(&g_calendar));
+                pActivator->vfn_28c(pPackage, GetCalendarDay(&g_calendar));
             pTarget->GetProcess()->OnPackageEnd(pActivator, pPackage);
             pTarget->MarkAsModified(0x80000000);
         }
         if (pActivator != g_thePlayer && pActivator->GetProcess())
             pActivator->GetProcess()->SetProcessConditionMet(true);
 
-        if (static_cast<ActorQueries*>(pTarget)->IsInCombat() && pActivator == g_thePlayer &&
+        if (pTarget->FUN_00493bb0() && pActivator == g_thePlayer &&
             pTarget->IsPlayerTeammate())
         {
             DAT_011f2250.SetEquipmentState(0, 0);
             OpenDialogueMenu(4, pTarget, 0, 0, 1, false);
         }
-        else if (pTarget && (!static_cast<ActorQueries*>(pTarget)->IsInCombat() || pTarget->GetHasKnockedState()) &&
+        else if (pTarget && (!pTarget->FUN_00493bb0() || pTarget->GetHasKnockedState()) &&
                  (pActivator != g_thePlayer || !pTarget->GetSitSleepState() || pTarget->GetSitSleepState() == 9 ||
                   pTarget->GetSitSleepState() == 4 ||
                   (pTarget->GetProcess()->GetFurnitureMarkerData() &&
@@ -8073,7 +6991,7 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
                                                                          false, true, 0, false, false, true, 0))
                             return true;
                     }
-                    else if (!pTarget->IsGuard() && pTarget->IsHostileToActor(pActivator, 0, &iAttackReason, false) &&
+                    else if (!pTarget->Unk_C1() && pTarget->IsHostileToActor(pActivator, 0, &iAttackReason, false) &&
                              !pActivator->IsSneaking())
                     {
                         if (pTarget->GetProcess()->ShouldAttackTarget(pTarget, pActivator, true, true, 0, false, false,
@@ -8087,9 +7005,9 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
                     return false;
                 }
                 else if (pActivator == g_thePlayer ||
-                         (pTarget == g_thePlayer && (pActivator->GetCurrentPackage()->IsPackageBlockingGreeting() ||
-                                                     !pActivator->GetCurrentPackage()->GetPackType() ||
-                                                     pActivator->GetCurrentPackage()->GetPackType() == 9)))
+                         (pTarget == g_thePlayer && (pActivator->MobileObject::GetCurrentPackage()->IsPackageBlockingGreeting() ||
+                                                     !pActivator->MobileObject::GetCurrentPackage()->GetPackType() ||
+                                                     pActivator->MobileObject::GetCurrentPackage()->GetPackType() == 9)))
                 {
                     if (pActivator == g_thePlayer &&
                         (pTarget->GetHasKnockedState() ||
@@ -8127,7 +7045,7 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
                             if (pTarget->GetSitSleepState() == 9)
                             {
                                 pTarget->GetProcess()->SetCombatState(true);
-                                pTarget->InitGetUpPackage();
+                                pTarget->Unk_106();
                                 return true;
                             }
                             else if (pTarget == g_thePlayer)
@@ -8143,9 +7061,9 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
                         {
                             if (pTarget->GetProcess()->GetFurnitureMarkerData() &&
                                 pTarget->GetProcess()->GetFurnitureMarkerData()->cMarkerType > 19)
-                                pTarget->GetProcess()->AddPostAnimAction(0x200);
+                                pTarget->GetProcess()->AddPostAnimAction(BaseProcess::_PostAnimAction::GET_OUT_OF_FURNITURE);
                             if (!pTarget->GetSitSleepState())
-                                pTarget->SetReferenceHeading(*pActivator->GetPos(), false);
+                                pTarget->SetReferenceHeading(*static_cast<const TESObjectREFR*>(pActivator)->GetPos(), false);
 
                             TESTopic* pMenuTopic = 0;
                             TESObjectREFR* pDialogueReference = 0;
@@ -8156,11 +7074,11 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
                                 pActivator->FUN_008a8e50();
                                 pTarget->FUN_008a8e50();
                                 DialoguePackage* pDialoguePackage =
-                                    dynamic_cast<DialoguePackage*>(pActivator->GetCurrentPackage());
+                                    dynamic_cast<DialoguePackage*>(pActivator->MobileObject::GetCurrentPackage());
                                 if (pDialoguePackage)
-                                    pMenuTopic = pDialoguePackage->pTopic;
+                                    pMenuTopic = reinterpret_cast<TESTopic*>(pDialoguePackage->topic);
                                 pDialogueReference = apTargetRef;
-                                if (pTarget->GetCurrentTarget() == g_thePlayer && pTargetCurrentPackage &&
+                                if (pTarget->GetPackageTargetRef() == g_thePlayer && pTargetCurrentPackage &&
                                     !pTargetCurrentPackage->GetPackType())
                                 {
                                     if (pTargetCurrentPackage->FUN_0041d8a0() &&
@@ -8182,7 +7100,7 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
                                 else
                                 {
                                     pTarget->GetProcess()->SetCombatState(true);
-                                    pTarget->InitGetUpPackage();
+                                    pTarget->Unk_106();
                                 }
                             }
                             else if (FUN_00702640() != 0x3f1)
@@ -8193,12 +7111,12 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
                                 pActivator->FUN_008a8e50();
                                 pTarget->FUN_008a8e50();
                                 pDialogueReference = pActivator;
-                                if (!static_cast<ActorQueries*>(pActivator)->IsInCombat())
+                                if (!pActivator->FUN_00493bb0())
                                 {
                                     DialoguePackage* pActivatorDialogue =
-                                        dynamic_cast<DialoguePackage*>(pActivator->GetCurrentPackage());
+                                        dynamic_cast<DialoguePackage*>(pActivator->MobileObject::GetCurrentPackage());
                                     if (pActivatorDialogue)
-                                        pMenuTopic = pActivatorDialogue->pTopic;
+                                        pMenuTopic = reinterpret_cast<TESTopic*>(pActivatorDialogue->topic);
                                 }
                                 if (pActivatorPackage->FUN_0041d8a0() &&
                                     !GetScheduleListNext(pActivatorPackage->FUN_0041d8a0()))
@@ -8209,11 +7127,11 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
                                 if (pTarget == g_thePlayer)
                                     pTarget->FUN_008a7a90();
                                 else
-                                    pTarget->GetProcess()->AddPostAnimAction(0x400);
+                                    pTarget->GetProcess()->AddPostAnimAction(BaseProcess::_PostAnimAction::FORCE_IDLE_ANIMATION);
                                 if (pActivator == g_thePlayer)
                                     pActivator->FUN_008a7a90();
                                 else
-                                    pActivator->GetProcess()->AddPostAnimAction(0x400);
+                                    pActivator->GetProcess()->AddPostAnimAction(BaseProcess::_PostAnimAction::FORCE_IDLE_ANIMATION);
                                 DAT_011f2250.SetEquipmentState(0, 0);
                                 TESObjectREFR* m_pDialogueSpeaker = pActivator;
                                 if (m_pDialogueSpeaker == g_thePlayer)
@@ -8236,31 +7154,31 @@ bool TESNPCActivate::FUN_00607990(TESObjectREFR* apTargetRef, TESObjectREFR* apA
                             return true;
                         }
                     }
-                    if (pActivator->GetCurrentPackage()->GetPackType() == 2)
+                    if (pActivator->MobileObject::GetCurrentPackage()->GetPackType() == 2)
                     {
                         pActivator->GetProcess()->SetProcessTarget(pActivator, 2);
                     }
                     else
                     {
-                        if (pActivator->GetCurrentPackage() && pActivator->GetCurrentPackage()->GetPackType() != 1)
+                        if (pActivator->MobileObject::GetCurrentPackage() && pActivator->MobileObject::GetCurrentPackage()->GetPackType() != 1)
                             pActivator->GetProcess()->SetProcessTarget(pActivator, 1);
                         if (pTarget != g_thePlayer)
                         {
-                            if (pTarget != pActivator && pTarget->GetCurrentPackage() &&
-                                pTarget->GetCurrentPackage()->GetPackType() != 1 &&
-                                pTarget->GetCurrentPackage()->GetPackType() != 2)
+                            if (pTarget != pActivator && pTarget->MobileObject::GetCurrentPackage() &&
+                                pTarget->MobileObject::GetCurrentPackage()->GetPackType() != 1 &&
+                                pTarget->MobileObject::GetCurrentPackage()->GetPackType() != 2)
                                 pProcess->SetProcessTarget(pTarget, 1);
                             if (pTarget != pActivator && !pTarget->GetSitSleepState())
                             {
                                 if (pActivator->IsCombatStateActive())
                                 {
-                                    TESPackage* pDialoguePkg = pActivator->GetCurrentPackage();
+                                    TESPackage* pDialoguePkg = pActivator->MobileObject::GetCurrentPackage();
                                     if (!GetPackageDialogueNoHeadtrack(pDialoguePkg) && !pDialoguePkg->FUN_006727b0())
-                                        pTarget->SetReferenceHeading(*pActivator->GetPos(), false);
+                                        pTarget->SetReferenceHeading(*static_cast<const TESObjectREFR*>(pActivator)->GetPos(), false);
                                 }
                                 else
                                 {
-                                    pTarget->SetReferenceHeading(*pActivator->GetPos(), false);
+                                    pTarget->SetReferenceHeading(*static_cast<const TESObjectREFR*>(pActivator)->GetPos(), false);
                                 }
                             }
                             if (!pActivator->IsCombatStateActive() && pActivator->IsCharacter() && pTarget->IsCharacter())

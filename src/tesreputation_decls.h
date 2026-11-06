@@ -1,4 +1,4 @@
-// tesreputation_decls.h: declares BGSMessageIcon, ReputationLimitData, TESReputation, TESFullNameLoader, TESTextureLoader
+// tesreputation_decls.h: local TESReputation and loader declarations
 #ifndef FNV_REPUTATION_LOCAL_H
 #define FNV_REPUTATION_LOCAL_H
 
@@ -6,21 +6,11 @@
 #include "TESFullName.h"
 #include "TESIcon.h"
 #include "TESFile.h"
+#include "../include/BGSMessageIcon.h"
+#include "../include/ReputationLimitData.h"
 
-class BGSMessageIcon : public BaseFormComponent
-{
-  public:
-    TESIcon Icon;
-    static void LoadMessageIconChunk(BGSMessageIcon* component, TESFile* file);
-};
-
-class ReputationLimitData
-{
-  public:
-    float m_fMaximumReputation;
-    void Endian();
-};
-
+// Retained locally: the shared GetReputationRank returns int, but the function
+// at 0x00616950 returns unsigned char. It also lacks the message and change methods.
 enum ReputationType
 {
     ReputationType_REPUTATION_NEGATIVE = 0,
@@ -51,10 +41,6 @@ class TESTextureLoader
   public:
     static void ReadTextureData(TESTexture* component, TESFile* file);
 };
-FNV_STATIC_ASSERT(sizeof(BGSMessageIcon) == 16);
-FNV_STATIC_ASSERT(offsetof(BGSMessageIcon, Icon) == 4);
-FNV_STATIC_ASSERT(sizeof(ReputationLimitData) == 4);
-FNV_STATIC_ASSERT(offsetof(ReputationLimitData, m_fMaximumReputation) == 0);
 FNV_STATIC_ASSERT(sizeof(TESReputation) == 80);
 FNV_STATIC_ASSERT(offsetof(TESReputation, data) == 64);
 FNV_STATIC_ASSERT(offsetof(TESReputation, m_fFirstReputationValue) == 68);

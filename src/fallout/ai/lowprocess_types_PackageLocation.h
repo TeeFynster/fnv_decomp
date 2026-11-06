@@ -1,15 +1,12 @@
 // fallout/ai/lowprocess_types_PackageLocation.h: declares LocationDescriptor
 
-enum PACK_LOC_TYPE
-{
-    lowprocessLocationNone = 0
-};
+#include "../../../include/PACK_LOC_TYPE.h"
 // Names of nested/template specializations use the canonical generator identifier mapping.
 #ifndef FNV_PACKAGELOCATION_H
 #define FNV_PACKAGELOCATION_H
 #include "layout_support.h"
-#include "lowprocess_TESForm.h"
-#include "lowprocess_TESObjectREFR.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESObjectREFR.h"
 #include "layout_support.h"
 class LocationDescriptor;
 #pragma pack(push, 4)

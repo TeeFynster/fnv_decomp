@@ -3,6 +3,9 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include "havok/hkaDeltaCompressedAnimation.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkMonitorStream.h"
 
 struct FUN_00e34b40_s {
     unsigned int FUN_00e34b40(unsigned int arg);
@@ -103,7 +106,7 @@ struct FUN_00e34b50_s : hkaDeltaCompressedAnimation {
 void FUN_00e34b50_s::FUN_00e34b50(e34b50_reader* reader) {
     int buf;
     int blockSize = m_iDofCount;
-    int count = v20();
+    int count = vf08();
     int numBlocks = (count - 1) / blockSize + 1;
     int size = m_eQuantizationFormat.m_uiDynamicDofCount * blockSize * 4;
     int i;
@@ -274,19 +277,6 @@ extern unsigned int DAT_0126835c;
 extern char DAT_010eb77c[];
 extern char DAT_010c41f8[];
 
-struct DqEvt {
-    const char* tag;
-    unsigned int time;
-    unsigned int unk08;
-};
-
-struct DqProf {
-    unsigned int unk00;
-    DqEvt* head;
-    unsigned int unk08;
-    DqEvt* end;
-};
-
 struct DqArgs {
     unsigned int m_uiItemCount;          // +0x00
     unsigned int m_iDofCount;      // +0x04
@@ -320,14 +310,14 @@ static __declspec(noinline) void FUN_00e349c0(float* dst, DqArgs args)
 static __declspec(noinline) void FUN_00e34d80(hkaDeltaCompressedAnimation* anim, unsigned int time, float* dst, unsigned int count)
 {
     {
-        DqProf* prof = (DqProf*)TlsGetValue(DAT_0126835c);
-        if (prof->head < prof->end) {
-            DqEvt* ev = prof->head;
-            ev->tag = DAT_010eb77c;
+        hkMonitorStream* prof = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        if (prof->m_end.m_storage < prof->m_capacityMinus16.m_storage) {
+            hkMonitorStream::TimerCommand* ev = (hkMonitorStream::TimerCommand*)prof->m_end.val();
+            ev->m_commandAndMonitor = DAT_010eb77c;
             _ReadWriteBarrier();
             volatile unsigned int stamped = (unsigned int)__rdtsc();
-            ev->time = stamped;
-            prof->head = ev + 1;
+            ev->m_time0 = stamped;
+            prof->m_end.m_storage = (char*)(ev + 1);
         }
     }
     {
@@ -356,14 +346,14 @@ static __declspec(noinline) void FUN_00e34d80(hkaDeltaCompressedAnimation* anim,
         FUN_00e349c0(dst, args);
     }
     {
-        DqProf* prof = (DqProf*)TlsGetValue(DAT_0126835c);
-        if (prof->head < prof->end) {
-            DqEvt* ev = prof->head;
-            ev->tag = DAT_010c41f8;
+        hkMonitorStream* prof = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        if (prof->m_end.m_storage < prof->m_capacityMinus16.m_storage) {
+            hkMonitorStream::TimerCommand* ev = (hkMonitorStream::TimerCommand*)prof->m_end.val();
+            ev->m_commandAndMonitor = DAT_010c41f8;
             _ReadWriteBarrier();
             volatile unsigned int stamped = (unsigned int)__rdtsc();
-            ev->time = stamped;
-            prof->head = ev + 1;
+            ev->m_time0 = stamped;
+            prof->m_end.m_storage = (char*)(ev + 1);
         }
     }
 }
@@ -458,36 +448,17 @@ extern DWORD DAT_0126835c;
 extern unsigned int* g_escape;
 extern int g_never;
 
-struct StringCursor {
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    char* m_pRayCursor;
-    char* m_pCurrentCommand;
-};
-
-struct hkTimerCommand {
-    const char* m_pCommandName;
-    unsigned int m_ticks;
-    unsigned int m_auiShapeKeys;
-};
-
 __forceinline void hkTimer(const char* name)
 {
-    StringCursor* s = (StringCursor*)TlsGetValue(DAT_0126835c);
-    if (s->m_kRayEnd < s->m_pCurrentCommand) {
-        hkTimerCommand* c = (hkTimerCommand*)s->m_kRayEnd;
-        c->m_pCommandName = name;
+    hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (s->m_end.m_storage < s->m_capacityMinus16.m_storage) {
+        hkMonitorStream::TimerCommand* c = (hkMonitorStream::TimerCommand*)s->m_end.val();
+        c->m_commandAndMonitor = name;
         _ReadWriteBarrier();
-        unsigned int t = (unsigned int)__rdtsc(); _ReadWriteBarrier(); c->m_ticks = *&t; if (0) memmove(&t, &t, 4);
-        s->m_kRayEnd = (char*)(c + 1);
+        unsigned int t = (unsigned int)__rdtsc(); _ReadWriteBarrier(); c->m_time0 = *&t; if (0) memmove(&t, &t, 4);
+        s->m_end.m_storage = (char*)(c + 1);
     }
 }
-
-struct hkBoolR {
-    char m_cBooleanValue;
-    hkBoolR(bool b) { m_cBooleanValue = (char)b; }
-    operator bool() const { return m_cBooleanValue != 0; }
-};
 
 struct ChunkAccessManager {
     virtual void unk00();
@@ -496,11 +467,11 @@ struct ChunkAccessManager {
     virtual void* retrieveChunk(hkUint32 key, int size);
     virtual void* allocateChunk(hkUint32 key, int size);
     virtual void unk14();
-    virtual hkBoolR markForRead(hkUint32 key, int size);
+    virtual hkBool markForRead(hkUint32 key, int size);
     virtual void unk1c();
-    virtual hkBoolR MarkForWrite(hkUint32 key, int size);
-    virtual hkBoolR unmarkForWrite(hkUint32 key, int size);
-    virtual hkBoolR isLocked(hkUint32 key, int size);
+    virtual hkBool MarkForWrite(hkUint32 key, int size);
+    virtual hkBool unmarkForWrite(hkUint32 key, int size);
+    virtual hkBool isLocked(hkUint32 key, int size);
     virtual void lock();
     virtual void unlock();
 };
@@ -521,7 +492,6 @@ struct hkaDeltaAnimExt : hkaDeltaCompressedAnimation {
     virtual void vfunc0d();
     virtual void vfunc0e();
     virtual void vfunc0f();
-    virtual hkUint32 getBlockKey(int block) const;
 };
 
 struct ChunkCacheRef { ChunkAccessManager* m_pAccessManager; };
@@ -584,18 +554,6 @@ void* SampleCaller(const hkaDeltaCompressedAnimation* anim, int block, int numPo
 extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 
-struct ProfileRecord {
-    const char* name;
-    unsigned int time;
-    unsigned int secondaryTime;
-    const char* object;
-};
-struct ProfileStream {
-    char* allocation;
-    char* current;
-    char* begin;
-    char* end;
-};
 struct Chunk {
     hkUint8* data;
     unsigned int size;
@@ -702,16 +660,16 @@ void __cdecl FUN_00e354b0(unsigned int frame, float delta, unsigned int numTrans
     SampleScratch scratch;
     const hkaDeltaCompressedAnimation* r = reinterpret_cast<const hkaDeltaCompressedAnimation*>(chunks[0].data + chunks[0].offset);
     const hkaDeltaCompressedAnimation* it = r;
-    ProfileStream* pStream = static_cast<ProfileStream*>(TlsGetValue(DAT_0126835c));
-    if (pStream->current < pStream->end) {
-        volatile ProfileRecord* record = reinterpret_cast<volatile ProfileRecord*>(pStream->current);
-        record->name = "LtSampleDeltaChunk";
-        record->object = "StStaticD";
+    hkMonitorStream* pStream = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+    if (pStream->m_end.m_storage < pStream->m_capacityMinus16.m_storage) {
+        volatile hkMonitorStream::TimerBeginListCommand* record = reinterpret_cast<volatile hkMonitorStream::TimerBeginListCommand*>(pStream->m_end.m_storage);
+        record->m_commandAndMonitor = "LtSampleDeltaChunk";
+        record->m_nameOfFirstSplit = "StStaticD";
         _ReadWriteBarrier();
         stamp = (unsigned int)__rdtsc();
         _ReadWriteBarrier();
-        record->time = stamp;
-        pStream->current = reinterpret_cast<char*>(const_cast<ProfileRecord*>(record)) + 16;
+        record->m_time0 = stamp;
+        pStream->m_end.m_storage = reinterpret_cast<char*>(const_cast<hkMonitorStream::TimerBeginListCommand*>(record)) + 16;
     }
     const hkUint8* data = chunks[1].data + chunks[1].offset;
     const hkUint16* masks = reinterpret_cast<const hkUint16*>(data + r->m_uiFramesPerBlock);
@@ -729,15 +687,15 @@ void __cdecl FUN_00e354b0(unsigned int frame, float delta, unsigned int numTrans
             numDOFs = statistics.selectedScales + statistics.selectedFloats + statistics.selectedRotations + statistics.selectedTranslations;
         }
     }
-    pStream = static_cast<ProfileStream*>(TlsGetValue(DAT_0126835c));
-    if (pStream->current < pStream->end) {
-        volatile ProfileRecord* record = reinterpret_cast<volatile ProfileRecord*>(pStream->current);
-        record->name = "StDecompressDChunk";
+    pStream = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+    if (pStream->m_end.m_storage < pStream->m_capacityMinus16.m_storage) {
+        volatile hkMonitorStream::TimerBeginListCommand* record = reinterpret_cast<volatile hkMonitorStream::TimerBeginListCommand*>(pStream->m_end.m_storage);
+        record->m_commandAndMonitor = "StDecompressDChunk";
         _ReadWriteBarrier();
         stamp = (unsigned int)__rdtsc();
         _ReadWriteBarrier();
-        record->time = stamp;
-        pStream->current = reinterpret_cast<char*>(const_cast<ProfileRecord*>(record)) + 12;
+        record->m_time0 = stamp;
+        pStream->m_end.m_storage = reinterpret_cast<char*>(const_cast<hkMonitorStream::TimerBeginListCommand*>(record)) + 12;
     }
     BlendStorage blend;
     float& inverseDelta = blend.inverseDelta;
@@ -814,15 +772,15 @@ void __cdecl FUN_00e354b0(unsigned int frame, float delta, unsigned int numTrans
         }
     }
     }
-    pStream = static_cast<ProfileStream*>(TlsGetValue(DAT_0126835c));
-    if (pStream->current < pStream->end) {
-        volatile ProfileRecord* record = reinterpret_cast<volatile ProfileRecord*>(pStream->current);
-        record->name = "StRecomposeDChunk";
+    pStream = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+    if (pStream->m_end.m_storage < pStream->m_capacityMinus16.m_storage) {
+        volatile hkMonitorStream::TimerBeginListCommand* record = reinterpret_cast<volatile hkMonitorStream::TimerBeginListCommand*>(pStream->m_end.m_storage);
+        record->m_commandAndMonitor = "StRecomposeDChunk";
         _ReadWriteBarrier();
         blend.stamp = (unsigned int)__rdtsc();
         { _ReadWriteBarrier(); }
-        record->time = blend.stamp;
-        pStream->current = reinterpret_cast<char*>(const_cast<ProfileRecord*>(record)) + 12;
+        record->m_time0 = blend.stamp;
+        pStream->m_end.m_storage = reinterpret_cast<char*>(const_cast<hkMonitorStream::TimerBeginListCommand*>(record)) + 12;
     }
     RecomposeParameters& m_kRecomposeParameters = scratch.m_kRecomposeParameters;
     m_kRecomposeParameters.numTransformTracks = numTransforms;
@@ -838,15 +796,15 @@ void __cdecl FUN_00e354b0(unsigned int frame, float delta, unsigned int numTrans
     FUN_00e4f640(&m_kRecomposeParameters, transforms, floats);
     FUN_00c85750()->current = reinterpret_cast<char*>(interpolated);
     FUN_00c85750()->current = reinterpret_cast<char*>(decompressed);
-    pStream = static_cast<ProfileStream*>(TlsGetValue(DAT_0126835c));
-    if (pStream->current < pStream->end) {
-        volatile ProfileRecord* record = reinterpret_cast<volatile ProfileRecord*>(pStream->current);
-        record->name = "lt";
+    pStream = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+    if (pStream->m_end.m_storage < pStream->m_capacityMinus16.m_storage) {
+        volatile hkMonitorStream::TimerBeginListCommand* record = reinterpret_cast<volatile hkMonitorStream::TimerBeginListCommand*>(pStream->m_end.m_storage);
+        record->m_commandAndMonitor = "lt";
         _ReadWriteBarrier();
         blend.stamp = (unsigned int)__rdtsc();
         _ReadWriteBarrier();
-        record->time = blend.stamp;
-        pStream->current = reinterpret_cast<char*>(const_cast<ProfileRecord*>(record)) + 12;
+        record->m_time0 = blend.stamp;
+        pStream->m_end.m_storage = reinterpret_cast<char*>(const_cast<hkMonitorStream::TimerBeginListCommand*>(record)) + 12;
     }
 }
 
@@ -858,58 +816,40 @@ namespace fnv_00e359f0 {
 
 extern "C" void _ReadWriteBarrier(void);
 
-struct MonitorStream {
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    char* m_pRayCursor;
-    char* m_pCurrentCommand;
-};
-struct CommandTimingEntry {
-    const char* m_name;
-    DWORD m_uiCommandId;
-    DWORD m_uiEndTicks;
-};
-struct TimedNameRecord {
-    const char* m_name;
-    DWORD m_uiCommandId;
-    DWORD m_uiEndTicks;
-    const char* m_pFirst;
-};
-
 static __forceinline void TimerBeginList(const char* name, const char* first)
 {
-    MonitorStream* s = (MonitorStream*)TlsGetValue(DAT_0126835c);
-    char* p = s->m_kRayEnd;
-    if (p < s->m_pCurrentCommand) {
-        TimedNameRecord* h = (TimedNameRecord*)p;
-        h->m_name = name;
-        h->m_pFirst = first;
+    hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* p = s->m_end.m_storage;
+    if (p < s->m_capacityMinus16.m_storage) {
+        hkMonitorStream::TimerBeginListCommand* h = (hkMonitorStream::TimerBeginListCommand*)p;
+        h->m_commandAndMonitor = name;
+        h->m_nameOfFirstSplit = first;
         DWORD t;
         __asm {
             rdtsc
             mov dword ptr[t], eax
         }
         _ReadWriteBarrier();
-        h->m_uiCommandId = t;
-        s->m_kRayEnd = p + sizeof(TimedNameRecord);
+        h->m_time0 = t;
+        s->m_end = p + sizeof(hkMonitorStream::TimerBeginListCommand);
     }
 }
 
 static __forceinline void TimerSplit(const char* name)
 {
-    MonitorStream* s = (MonitorStream*)TlsGetValue(DAT_0126835c);
-    char* p = s->m_kRayEnd;
-    if (p < s->m_pCurrentCommand) {
-        CommandTimingEntry* h = (CommandTimingEntry*)p;
-        h->m_name = name;
+    hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* p = s->m_end.m_storage;
+    if (p < s->m_capacityMinus16.m_storage) {
+        hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)p;
+        h->m_commandAndMonitor = name;
         DWORD t;
         __asm {
             rdtsc
             mov dword ptr[t], eax
         }
         _ReadWriteBarrier();
-        h->m_uiCommandId = t;
-        s->m_kRayEnd = p + sizeof(CommandTimingEntry);
+        h->m_time0 = t;
+        s->m_end.m_storage = p + sizeof(hkMonitorStream::TimerCommand);
     }
 }
 

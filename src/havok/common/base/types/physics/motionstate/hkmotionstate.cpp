@@ -77,7 +77,9 @@ class FUN_00c9ea40_cls : public FUN_00c9ea90
     int unkA4;
     int unkA8;
     int unkAC;
-    hkMotionState m_swept;
+    unsigned char m_sweptStorage[sizeof(hkMotionState)];
+    __declspec(property(get=GetSweptStorage)) hkMotionState m_swept;
+    __forceinline hkMotionState& GetSweptStorage() { return *reinterpret_cast<hkMotionState*>(m_sweptStorage); }
 
     FUN_00c9ea40_cls(int a, int b);
 };

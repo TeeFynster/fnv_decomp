@@ -1,20 +1,26 @@
-// Source layout: ItemModMenu. PC corrections are in generate_headers.py.
-#ifndef FNV_ITEMMODMENU_H
-#define FNV_ITEMMODMENU_H
+#pragma once
 
-#include "layout_support.h"
-#include "ListBox_ItemChange___.h"
 #include "Menu.h"
-#pragma pack(push, 4)
+#include "ListBox_ItemChange___.h"
+
+class Tile;
+class EqEntry;
+
 class ItemModMenu : public Menu
 {
-  public:
-    Tile* m_pTiles[14];                 // +0x28
-    ListBox_ItemChange___ m_kItemList;  // +0x60
-    int GetClass();
+public:
+    Tile* m_pTiles[14];
+    ListBox_ItemChange___ m_kItemList;
+
+    ItemModMenu();
+    Tile* __cdecl Create();
+    virtual ~ItemModMenu();
+    virtual void HandleSelection(int, Tile*) override;
+    virtual int GetClass() override;
+    virtual bool HandleMenuInput(int, float) override;
+
+    void* DestroyIfFlagged(unsigned int);
+    void UpdateItemModTile(int, Tile*);
+    bool FUN_00783af0(EqEntry*);
+    void FUN_00783ed0(int, int);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(ItemModMenu) == 0x90);
-FNV_STATIC_ASSERT(offsetof(ItemModMenu, m_pTiles) == 0x28);
-FNV_STATIC_ASSERT(offsetof(ItemModMenu, m_kItemList) == 0x60);
-#endif

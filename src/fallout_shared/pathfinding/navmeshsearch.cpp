@@ -1,6 +1,77 @@
+#include "../../../include/NavMeshTriangle.h"
+#include "../../../include/NavMeshInfo.h"
+#include "../../../include/BSSimpleArray.h"
 // fallout_shared/pathfinding/navmeshsearch.cpp: NavMeshSearch, NavMeshSearchEdges (25 functions)
 
-#include "navmeshsearch_decls.h"
+#include "../../../include/NavMesh.h"
+#include "../../../include/NavMeshTriangleEdgeReference.h"
+#include "../../../include/NavMeshTriangleReference.h"
+#include "../../../include/AStarSearch.h"
+#include "../../../include/NavMeshStaticAvoidNode.h"
+#include "../../../include/NavMeshClosedDoorInfo.h"
+
+class NavMeshSearchNode;
+class NavMeshSearchLink;
+
+#include "../../../include/NavMeshSearch.h"
+#include "../../../include/SETTING_VALUE.h"
+#include "../../../include/SettingT_GameSettingCollection_.h"
+#include "../../../include/NavMeshPtr.h"
+#include "../../../include/PathingRequest.h"
+#include "../../../include/DoorAccessData.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/TESObjectDOOR.h"
+#include "../../../include/PathingAvoidNodeArray.h"
+
+class NavMeshInfo;
+class NavMeshStaticAvoidNode;
+
+
+class EdgeExtraInfo
+{
+  public:
+    int type;
+};
+class NavMeshEdgeExtra
+{
+  public:
+    unsigned int unknown;
+    NavMeshInfo* info;
+};
+template <class N, class L> class AStarNode
+{
+  public:
+    unsigned int key;
+    float cost;
+    N Node;
+    L Link;
+    N& GetNode() const;
+    void FUN_004f5d90(float);
+    float GetCost() const;
+};
+class AStarMapNav
+{
+  public:
+    char storage[0x1fe0];
+    void FUN_00996800();
+};
+class AStarQueueNav
+{
+  public:
+    char storage[0x54];
+    void FUN_006a84e0();
+};
+
+
+extern SettingT_GameSettingCollection_ DAT_011d6ef0;
+extern float DAT_0119cdf8;
+namespace std {
+float abs(float);
+}
+float GetDirectionAngle(const NiPoint3&);
+void WrapValueToRange(float&, float, float);
+void FUN_005330e0(float&, float, float);
+bool FUN_009a3830(NavMeshInfo*&, NavMeshInfo*&);
 
 // Clears the node and link arrays, sets up start and goal points, runs the search, and optionally collects meshes from the solution.
 // @fnv 0x006a6b70
@@ -12,24 +83,24 @@ bool NavMeshSearch::ComputePath(const PathingRequest* request, const NavMeshTria
     m_pPathingRequest = request;
     nodes->Clear(false);
     links->Clear(false);
-    NavMeshSearch::~NavMeshSearch();
-    m_kStartingTriangle.m_pLocationNavMesh = start.m_pLocationNavMesh;
-    m_kStartingTriangle.m_usTriangleIdentifier = start.m_usTriangleIdentifier;
+    ClearSearch();
+    (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_pLocationNavMesh = start.m_pLocationNavMesh;
+    (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_usTriangleIdentifier = start.m_usTriangleIdentifier;
     NiPoint3 center =
-        m_kStartingTriangle.m_pLocationNavMesh->GetNavMeshData(m_kStartingTriangle.m_usTriangleIdentifier);
-    m_kStartingTriangle.GetCenterX = center.x;
-    m_kStartingTriangle.m_fCenterY = center.y;
-    m_kStartingTriangle.m_fCenterZ = center.z;
-    m_kGoalTriangle.m_pLocationNavMesh = goal.m_pLocationNavMesh;
-    m_kGoalTriangle.m_usTriangleIdentifier = goal.m_usTriangleIdentifier;
-    center = m_kGoalTriangle.m_pLocationNavMesh->GetNavMeshData(m_kGoalTriangle.m_usTriangleIdentifier);
-    m_kGoalTriangle.GetCenterX = center.x;
-    m_kGoalTriangle.m_fCenterY = center.y;
-    m_kGoalTriangle.m_fCenterZ = center.z;
-    FUN_006a7d30((m_kStartingTriangle.FUN_006a6eb0() - m_kGoalTriangle.FUN_006a6eb0()).ComputeMagnitude() * 2.0f);
+        (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_pLocationNavMesh->GetNavMeshData((*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_usTriangleIdentifier);
+    (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_fCenterX = center.x;
+    (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_fCenterY = center.y;
+    (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_fCenterZ = center.z;
+    (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_pLocationNavMesh = goal.m_pLocationNavMesh;
+    (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_usTriangleIdentifier = goal.m_usTriangleIdentifier;
+    center = (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_pLocationNavMesh->GetNavMeshData((*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_usTriangleIdentifier);
+    (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_fCenterX = center.x;
+    (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_fCenterY = center.y;
+    (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_fCenterZ = center.z;
+    FUN_006a7d30(((*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).FUN_006a6eb0() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0()).FUN_00457990() * 2.0f);
     FindOrCreateSearchNode(
-        FUN_006a94f0(m_kStartingTriangle.m_pLocationNavMesh, m_kStartingTriangle.m_usTriangleIdentifier),
-        m_kStartingTriangle, (m_kStartingTriangle.FUN_006a6eb0() - m_kGoalTriangle.FUN_006a6eb0()).ComputeMagnitude());
+        FUN_006a94f0((*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_pLocationNavMesh, (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).m_usTriangleIdentifier),
+        (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)), ((*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).FUN_006a6eb0() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0()).FUN_00457990());
     m_pNavMeshInfos = solution;
     if (m_pNavMeshInfos)
     {
@@ -37,7 +108,7 @@ bool NavMeshSearch::ComputePath(const PathingRequest* request, const NavMeshTria
         for (unsigned int i = 0; i < m_pNavMeshInfos->GetSize(); i++)
         {
             NavMeshPtr mesh;
-            if (m_pNavMeshInfos->GetAt(i)->ResolveNavMesh(mesh))
+            if (m_pNavMeshInfos->GetAt((int)i)->ResolveNavMesh(mesh))
                 meshes[i] = mesh;
         }
     }
@@ -51,15 +122,15 @@ bool NavMeshSearch::HasReachedGoal(const SearchNode* node)
 {
     if (m_pPathingRequest && m_pPathingRequest->GetFloatAtOffset68() > 100.0)
     {
-        NiPoint3 kDelta = m_kGoalTriangle.FUN_006a6eb0() - node->GetNode().FUN_006a6eb0();
+        NiPoint3 kDelta = (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0() - node->GetNode().FUN_006a6eb0();
         float fDistanceSquared = kDelta.GetSquaredXYLength();
         float fHeightSquared = kDelta.z * kDelta.z;
         if (m_pPathingRequest->FUN_009b0bd0() * 0.25 * m_pPathingRequest->FUN_009b0bd0() > fDistanceSquared &&
             fHeightSquared < fDistanceSquared)
             return true;
     }
-    return node->GetNode().m_pLocationNavMesh == m_kGoalTriangle.m_pLocationNavMesh &&
-           node->GetNode().m_usTriangleIdentifier == m_kGoalTriangle.m_usTriangleIdentifier;
+    return node->GetNode().m_pLocationNavMesh == (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_pLocationNavMesh &&
+           node->GetNode().m_usTriangleIdentifier == (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).m_usTriangleIdentifier;
 }
 
 // @fnv 0x006a6ef0
@@ -69,55 +140,40 @@ void NavMeshSearch::SetSearchNodeTriangle(SearchNode* node, NavMesh* mesh, unsig
     data.m_pLocationNavMesh = mesh;
     data.m_usTriangleIdentifier = triangle;
     NiPoint3 center = mesh->GetNavMeshData(triangle);
-    data.GetCenterX = center.x;
+    data.m_fCenterX = center.x;
     data.m_fCenterY = center.y;
     data.m_fCenterZ = center.z;
-    float distance = (data.FUN_006a6eb0() - m_kGoalTriangle.FUN_006a6eb0()).ComputeMagnitude();
+    float distance = (data.FUN_006a6eb0() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0()).FUN_00457990();
     node->FUN_004f5d90(distance * double(0.01f));
 }
 
 // Calls FUN_00996800 and FUN_006a84e0, then zeroes three members.
 // @fnv 0x006a7c40
-NavMeshSearch::~NavMeshSearch()
+void NavMeshSearch::ClearSearch()
 {
-    m_kNodeHashTable.FUN_00996800();
-    AStarBucketQueue.FUN_006a84e0();
+    (*reinterpret_cast<AStarMapNav*>(&unk014)).FUN_00996800();
+    (*reinterpret_cast<AStarQueueNav*>(&unk1ff4)).FUN_006a84e0();
     m_pFirstNode = 0;
     m_pCurrentNode = 0;
     m_pLastCreatedNode = 0;
 }
 
-struct FUN_006a7940_shell : public PathingRequest
-{
-    bool FUN_006a7940();
-};
-
 // @fnv 0x006a7940
-bool FUN_006a7940_shell::FUN_006a7940()
+bool PathingRequest::FUN_006a7940() const
 {
-    return *reinterpret_cast<const bool*>(reinterpret_cast<const char*>(this) + 0x9d);
+    return bCanSwim;
 }
-
-struct FUN_006a7980_shell : public PathingRequest
-{
-    bool FUN_006a7980();
-};
 
 // @fnv 0x006a7980
-bool FUN_006a7980_shell::FUN_006a7980()
+bool PathingRequest::FUN_006a7980() const
 {
-    return *((bool*)this + 0xa2);
+    return m_bCanUseDoors;
 }
 
-struct FUN_006a79a0_shell : public PathingRequest
-{
-    bool FUN_006a79a0();
-};
-
 // @fnv 0x006a79a0
-bool FUN_006a79a0_shell::FUN_006a79a0()
+bool PathingRequest::FUN_006a79a0() const
 {
-    return *((bool*)((unsigned char*)this + 0xA4));
+    return bIgnoreLocks;
 }
 
 struct S3e60
@@ -176,14 +232,6 @@ struct HX
 {
     bool FUN_006a8290(PNode*, BSSimpleArray<NavMeshTriangleReference, 1024>*, BSSimpleArray<EdgeExtraInfo, 1024>*);
 };
-struct S20
-{
-    int a[5];
-};
-struct S12
-{
-    int a[3];
-};
 struct H1
 {
     void FUN_006a8750(unsigned int, int);
@@ -194,17 +242,17 @@ struct H2
 };
 struct H3
 {
-    S12* FUN_006a1440(unsigned short);
+    NavMeshTriangleEdgeReference* FUN_006a1440(unsigned short);
 };
 struct H4
 {
-    S20* FUN_006b3160(unsigned int);
+    NavMeshTriangleReference* FUN_006b3160(unsigned int);
 };
 struct PNode
 {
     char pad[8];
-    S20 f;
-    S12 e;
+    NavMeshTriangleReference f;
+    NavMeshTriangleEdgeReference e;
     PNode* next;
 };
 // @fnv 0x006a8290
@@ -246,99 +294,42 @@ void __fastcall FUN_006a84e0(char* this_ptr)
     memset(this_ptr + 4, 0, 0x50);
 }
 
-struct FUN_006a94f0_shell : public NavMeshSearch
-{
-    unsigned int FUN_006a94f0(NavMesh*, unsigned short);
-};
-
 unsigned int __fastcall _ref_0084e3a0(NavMesh*);
 
 // @fnv 0x006a94f0
-unsigned int FUN_006a94f0_shell::FUN_006a94f0(NavMesh* apNavMesh, unsigned short aiTri)
+unsigned int NavMeshSearch::FUN_006a94f0(NavMesh* apNavMesh, unsigned short aiTri)
 {
     return ((_ref_0084e3a0(apNavMesh) & 0xFFFF) << 16) | aiTri;
 }
 
-struct P3
-{
-    void Set(float, float, float);
-};
 
-struct GetCenterX_006a6eb0
-{
-    char pad[8];
-    float x;
-    float y;
-    float z;
-    P3* FUN_006a6eb0(P3* ret);
-};
-
-// Copies the object's x, y and z into the returned P3 via Set and returns it.
+// Copies the triangle center into the returned point.
 // @fnv 0x006a6eb0
-P3* GetCenterX_006a6eb0::FUN_006a6eb0(P3* ret)
+NiPoint3 NavMeshTriangleReference::FUN_006a6eb0() const
 {
-    ret->Set(x, y, z);
-    return ret;
+    return NiPoint3(m_fCenterX, m_fCenterY, m_fCenterZ);
 }
 
-extern int DAT_0106b63c;
-struct FUN_006a7b10
-{
-    FUN_006a7b10();
-    ~FUN_006a7b10();
-};
-struct FUN_00501cd0_s
-{
-    void FUN_00501cd0();
-};
-namespace FUN_006a6a40 {
-struct NavMeshSearch : public ::FUN_006a7b10
-{
-    NavMeshSearch();
-};
-}
+// The shared header does not yet declare the default initializer at 0x00501cd0.
+void __fastcall InitializeDoorAccessData(DoorAccessData*);
 
-// Constructor: installs the vtable, constructs the sub-object at offset 0x208c, and zeroes fields at 0x2058, 0x2084 and 0x2088.
 // @fnv 0x006a6a40
-FUN_006a6a40::NavMeshSearch::NavMeshSearch()
+NavMeshSearch::NavMeshSearch()
 {
-    *(int**)this = &DAT_0106b63c;
-    ((FUN_00501cd0_s*)((char*)this + 0x208c))->FUN_00501cd0();
-    *(int*)((char*)this + 0x2058) = 0;
-    *(int*)((char*)this + 0x2084) = 0;
-    *(int*)((char*)this + 0x2088) = 0;
+    InitializeDoorAccessData(reinterpret_cast<DoorAccessData*>(&unk208c));
+    m_pPathingRequest = 0;
+    m_pNavMeshTriangleEdges = 0;
+    m_pNavMeshInfos = 0;
 }
 
-namespace stub {
-struct FUN_006a7bc0_Class
-{
-    virtual void Unused0();
-    ~FUN_006a7bc0_Class();
-    char pad[0x2054];
-};
-struct DoorAccessData
-{
-    ~DoorAccessData();
-    int a;
-};
-}
-namespace FUN_006a6b00 {
-struct NavMeshSearch : public stub::FUN_006a7bc0_Class
-{
-    ~NavMeshSearch();
-    char pad[0x34];
-    stub::DoorAccessData lock;
-};
-}
-
-// Destructor for NavMeshSearch; destroys the embedded lock member and the base class.
 // @fnv 0x006a6b00
-FUN_006a6b00::NavMeshSearch::~NavMeshSearch()
-{}
+NavMeshSearch::~NavMeshSearch()
+{
+    reinterpret_cast<DoorAccessData*>(&unk208c)->DoorAccessData::~DoorAccessData();
+}
 
-namespace fnv_006a7b10 {
 class NavMeshInfo;
-class TESObjectREFR;
+namespace fnv_006a7b10 {
 struct FUN_006a8380
 {
     FUN_006a8380();
@@ -382,15 +373,10 @@ FUN_006a7b10::FUN_006a7bc0_Class::FUN_006a7bc0_Class()
 }
 }  // namespace fnv_006a7b10
 
-struct FUN_006a7960_class
-{
-    char GetByteAtOffset9E();
-};
-
 // @fnv 0x006a7960
-char FUN_006a7960_class::GetByteAtOffset9E()
+bool PathingRequest::GetByteAtOffset9E() const
 {
-    return ((char*)this)[0x9e];
+    return bCanFly;
 }
 
 struct FUN_00aa5410_Helper
@@ -523,11 +509,6 @@ extern double DAT_01012060, DAT_01016408, DAT_01011588, DAT_0101ff40;
 extern float DAT_01016410, DAT_0101712c, DAT_0101e570, DAT_010231a0;
 extern float DAT_0106b648, DAT_0102b3c8;
 
-struct NavMeshPointLength : NiPoint3
-{
-    float FUN_00457990();
-};
-
 struct NavMeshSearchEdges : NavMeshSearch
 {
     bool FindEdgeConnections(const SearchNode* current, BSSimpleArray<SearchNode*>* connections);
@@ -591,7 +572,7 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                         {
                             bool canUnlock3;
                             const PathingActorData* lockData7;
-                            unsigned int doorID = neighborMesh->GetClosedDoorInfo(neighborTriangle)->door;
+                            unsigned int doorID = neighborMesh->GetClosedDoorInfo(neighborTriangle)->m_uiDoorFormID;
                             TESObjectREFR* doorRef = (TESObjectREFR*)TESForm::GetFormByID(doorID);
                             if (doorRef != 0)
                             {
@@ -599,9 +580,9 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                                 {
                                     if (doorRef->FUN_0057b460())
                                         continue;
-                                    m_kDoorAccessData.SetDoorReference(doorRef);
+                                    (*reinterpret_cast<DoorAccessData*>(&unk208c)).SetDoorReference(doorRef);
                                     lockData7 = m_pPathingRequest->FUN_006c9900();
-                                    if (!m_kDoorAccessData.CanUnlockDoor(lockData7, doorRef, canUnlock3))
+                                    if (!(*reinterpret_cast<DoorAccessData*>(&unk208c)).CanUnlockDoor(lockData7, doorRef, canUnlock3))
                                         continue;
                                 }
                                 if (((TESObjectDOOR*)doorRef->GetObjectReference())->IsTeleportDoor())
@@ -629,11 +610,11 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                     {
                         for (unsigned int i = 0; i < m_pNavMeshTriangleEdges->GetSize(); ++i)
                         {
-                            if (m_pNavMeshTriangleEdges->GetAt(i).m_usTriangleIdentifier ==
+                            if (m_pNavMeshTriangleEdges->GetAt((int)i).m_usTriangleIdentifier ==
                                     current->Node.m_usTriangleIdentifier &&
-                                m_pNavMeshTriangleEdges->GetAt(i).m_pLocationNavMesh ==
+                                m_pNavMeshTriangleEdges->GetAt((int)i).m_pLocationNavMesh ==
                                     current->Node.m_pLocationNavMesh &&
-                                m_pNavMeshTriangleEdges->GetAt(i).m_iEdgeIndex == edgeIndex)
+                                m_pNavMeshTriangleEdges->GetAt((int)i).m_iEdgeIndex == edgeIndex)
                             {
                                 revisitPenalty4 = DAT_01016410;
                                 break;
@@ -659,7 +640,7 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                             {
                                 float staticPenalty = 0.0f;
                                 for (unsigned int i = 0; i < staticAvoids.GetSize(); ++i)
-                                    staticPenalty += staticAvoids.GetAt(i)->GetFloatAtOffset1C();
+                                    staticPenalty += staticAvoids.GetAt((int)i)->GetFloatAtOffset1C();
                                 baseDistance7 *= staticPenalty;
                             }
                         }
@@ -675,16 +656,16 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
                         baseDistance7 *= usePenalty6;
                         if (m_pPathingRequest->FUN_006a7980())
                         {
-                            NiPoint3 goalVector = m_kStartingTriangle.FUN_006a6eb0() - m_kGoalTriangle.FUN_006a6eb0();
-                            NiPoint3 nodeVector = nextCenter - m_kGoalTriangle.FUN_006a6eb0();
+                            NiPoint3 goalVector = (*reinterpret_cast<NavMeshTriangleReference*>(&unk205c)).FUN_006a6eb0() - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0();
+                            NiPoint3 nodeVector = nextCenter - (*reinterpret_cast<NavMeshTriangleReference*>(&unk2070)).FUN_006a6eb0();
                             float goalDistance8 = GetDirectionAngle(goalVector);
                             float nodeDistance3 = GetDirectionAngle(nodeVector);
                             float difference7 = nodeDistance3 - goalDistance8;
                             WrapValueToRange(difference7, DAT_0106b648, DAT_0102b3c8);
                             difference7 = std::abs(difference7);
-                            float goalLength7 = static_cast<NavMeshPointLength&>(goalVector).FUN_00457990();
+                            float goalLength7 = goalVector.FUN_00457990();
                             float adjustedTmp = (DAT_0101ff40 - difference7) * goalLength7 / DAT_0101ff40;
-                            float nodeLength_ = static_cast<NavMeshPointLength&>(nodeVector).FUN_00457990();
+                            float nodeLength_ = nodeVector.FUN_00457990();
                             baseDistance7 *= std::abs(nodeLength_ - adjustedTmp) * DAT_0119cdf8;
                         }
                         baseDistance7 += current->GetCost();
@@ -710,25 +691,13 @@ bool NavMeshSearchEdges::FindEdgeConnections(const SearchNode* current, BSSimple
     return true;
 }
 
-struct blob12
-{
-    char b[12];
-};
-struct FUN_006a7910_shell : public PathingRequest
-{
-    struct blob12 FUN_006a7910();
-};
-
 // @fnv 0x006a7910
-struct blob12 FUN_006a7910_shell::FUN_006a7910()
+NiPoint3 PathingRequest::FUN_006a7910() const
 {
-    return *reinterpret_cast<const blob12*>(reinterpret_cast<const char*>(this) + 0x7C);
+    return Center;
 }
 
-struct FUN_006a6ad0 : public FUN_006a7b10
-{
-    virtual ~FUN_006a6ad0();
-};
-// @fnv 0x006a6ad0
-FUN_006a6ad0::~FUN_006a6ad0()
-{}
+
+
+
+

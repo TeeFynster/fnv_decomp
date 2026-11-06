@@ -1,28 +1,35 @@
-// Source layout: Character. PC corrections are in generate_headers.py.
-#ifndef FNV_CHARACTER_H
-#define FNV_CHARACTER_H
-#include "layout_support.h"
+#pragma once
+
 #include "Actor.h"
-#pragma pack(push, 4)
+
+class BipedAnim;
+class BGSLoadFormBuffer;
+
 class Character : public Actor
 {
-  public:
-    BipedAnim* pBiped;      // +0x1B4
-    float m_fFirstResetValue;     // +0x1B8
-    float m_fSecondValue;  // +0x1BC
-    bool m_bTrespassing;    // +0x1C0
-    bool m_bActorGuard;     // +0x1C1
+public:
+    BipedAnim* pBiped;
+    float m_fFirstResetValue;
+    float m_fSecondValue;
+    bool m_bTrespassing;
+    bool m_bActorGuard;
     unsigned short layoutPadding1C2;
-    float m_fThirdValue;  // +0x1C4
+    float m_fThirdValue;
+
     virtual void Unk_137(void);
     virtual void Unk_138(void);
+
+    Character(bool);
+    virtual ~Character();
+    void* operator new(unsigned int);
+
+    MagicTarget* GetMagicTarget();
+    void InitLoadGame(BGSLoadFormBuffer* buffer);
+    void ApplyLoadBuffer(BGSLoadFormBuffer* buffer);
+    void Revert(BGSLoadFormBuffer* buffer);
+    virtual void LoadGame(BGSLoadFormBuffer* buffer);
+    void* GetCurrentMusicMarker();
+    bool GetActorGuard();
+    void SetActorGuardState(bool guard);
+    void Reset3D();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(Character) == 0x1C8);
-FNV_STATIC_ASSERT(offsetof(Character, pBiped) == 0x1B4);
-FNV_STATIC_ASSERT(offsetof(Character, m_fFirstResetValue) == 0x1B8);
-FNV_STATIC_ASSERT(offsetof(Character, m_fSecondValue) == 0x1BC);
-FNV_STATIC_ASSERT(offsetof(Character, m_bTrespassing) == 0x1C0);
-FNV_STATIC_ASSERT(offsetof(Character, m_bActorGuard) == 0x1C1);
-FNV_STATIC_ASSERT(offsetof(Character, m_fThirdValue) == 0x1C4);
-#endif

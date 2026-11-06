@@ -2,7 +2,6 @@
 // src/fallout_shared/bgsmovablestatic_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/bgsmovablestatic.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "bgsmovablestatic_decls.h"
 
 // sub ecx,0x44; jmp <target>  ==  MSVC adjustor thunk for a second base.
 // PrimaryBase is vptr (4) + 16 int fields (64) = 0x44 bytes; the shared virtual

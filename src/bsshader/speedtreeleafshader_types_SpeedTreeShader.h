@@ -2,7 +2,6 @@
 #ifndef FNV_SPEEDTREESHADER_H
 #define FNV_SPEEDTREESHADER_H
 
-#include "layout_support.h"
 class SpeedTreeLeafShaderConstantMapSetup;
 #pragma pack(push, 4)
 class SpeedTreeLeafShaderConstantMapSetup
@@ -20,5 +19,4 @@ class SpeedTreeLeafShaderConstantMapSetup
     // void* __cdecl SpeedTreeLeafShaderConstantMapSetup::*(unsigned int)
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(SpeedTreeLeafShaderConstantMapSetup) == 1);
 #endif

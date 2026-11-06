@@ -5,20 +5,15 @@
 class Script;
 #include "tesammo_types.h"
 
-class BGSProjectile : public TESForm
-{
-};
-class TESAmmoEffect : public TESForm
-{
-};
-
-class MiddleLowProcess
+#include "../../include/BGSProjectile.h"
+#include "../../include/TESAmmoEffect.h"
+// TESAmmo projectile form-ID field accessors (0x008d80e0 get / 0x00502c90 set); not MiddleLowProcess
+class TESAmmoProjectileField
 {
   public:
     int GetProcessInteger();
     void SetProcessInteger(int);
 };
-
 class TESAmmoInitCalls
 {
   public:

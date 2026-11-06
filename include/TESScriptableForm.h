@@ -1,20 +1,41 @@
-// Source layout: TESScriptableForm. PC corrections are in generate_headers.py.
-#ifndef FNV_TESSCRIPTABLEFORM_H
-#define FNV_TESSCRIPTABLEFORM_H
+#pragma once
 
-#include "layout_support.h"
 #include "BaseFormComponent.h"
-#pragma pack(push, 4)
+
+class Script;
+class TESForm;
+
 class TESScriptableForm : public BaseFormComponent
 {
-  public:
-    Script* m_pFormScript;  // +0x4
-    bool m_bHasScript;      // +0x8
+public:
+    TESScriptableForm();
+
+    virtual void Init();
+    virtual void Free();
+    virtual void CopyFromBase(BaseFormComponent* component);
+    virtual bool CompareWithBase(BaseFormComponent* component);
+
+    void InitializeComponent();
+    void ClearComponent();
+    void BaseFormRecord(BaseFormComponent* component);
+    bool IsEqualToBase(BaseFormComponent* component);
+    void Save();
+    void Initialize(unsigned int);
+    void FUN_006ecd40(unsigned int);
+    void FUN_0048cca0();
+    void* FUN_00726070();
+    void InitItem(TESForm* form);
+    static Script* GetScriptForForm(TESForm* form);
+    Script* GetScriptForForm();
+    static char* GetFormScriptEditorID(TESForm* form);
+    char* GetFormScriptEditorID();
+    static void SetFormScript(TESForm* form, Script* script);
+    void SetFormScript(Script* script);
+    Script* GetScript();
+    void SetScript(Script* script);
+
+    Script* m_pFormScript;
+    bool m_bHasScript;
     unsigned char layoutPadding9;
     unsigned short layoutPaddingA;
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(TESScriptableForm) == 0xC);
-FNV_STATIC_ASSERT(offsetof(TESScriptableForm, m_pFormScript) == 0x4);
-FNV_STATIC_ASSERT(offsetof(TESScriptableForm, m_bHasScript) == 0x8);
-#endif

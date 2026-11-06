@@ -1,7 +1,30 @@
-// fallout_shared/tescontainer.cpp: TESContainer, InventoryItemEntry, DelStandIn, ContainerOperation and more (31 functions)
+// fallout_shared/tescontainer.cpp: TESContainer, InventoryItemEntry and inventory helpers (31 functions)
 
-#include "tescontainer_decls.h"
-#include "BaseFormComponent.h"
+#include "../../include/BGSPerkEntry.h"
+class InventoryStackRecord;
+class TESObject;
+#include "../../include/BaseFormComponent.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/BSSimpleList.h"
+
+#include "../../include/BSStringT.h"
+
+#include "../../include/TESContainer.h"
+#include "../../include/Actor.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/GridArray.h"
+#include "../../include/InventoryStackRecord.h"
+#include "../../include/Script.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESHealthForm.h"
+#include "../../include/TESLeveledList.h"
+#include "../../include/TESObjectARMO.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESScriptableForm.h"
+
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/InventoryChanges.h"
+#include "../../include/PatrolActorPackageData.h"
 
 class ContainerItemExtra
 {
@@ -35,8 +58,6 @@ struct ContainerCountState
     BSSimpleList<InventoryStackRecord*>* list;
 };
 
-class TESContainer;
-
 struct CopyComponentState
 {
     BSSimpleList<InventoryStackRecord*>* list;
@@ -58,24 +79,6 @@ void InventoryItemEntry::Copy(InventoryItemEntry* other)
         }
     }
 }
-
-class TESContainer : public BaseFormComponent
-{
-  public:
-    BSSimpleList<InventoryStackRecord*> objectList;
-    virtual void Init();
-    BSSimpleList<InventoryStackRecord*>* GetObjectList();
-    void AddObject(InventoryItemEntry* object);
-    void ClearObjects();
-    void InitItem(TESForm* form);
-    virtual void Free();
-    virtual void CopyFromBase(BaseFormComponent* component);
-    ~TESContainer();
-    bool HasObjectOfType(TESObject* object);
-    int GetObjectCount(TESObject* object);
-    static bool IsValidContainerType(unsigned char type);
-    TESContainer();
-};
 
 // Constructs a TESContainer, initializing its objectList and calling Init().
 // @fnv 0x00481610
@@ -227,14 +230,9 @@ struct ContainerObjectNew : InventoryItemEntry
     ContainerObjectNew();
 };
 
-struct FUN_00481a90_shell : TESContainer
-{
-    void AddContainerCopy(InventoryItemEntry* object);
-};
-
 // If object is non-null, allocates a ContainerObjectNew, copies object into it, and adds it to the head of the object list.
 // @fnv 0x00481a90
-void FUN_00481a90_shell::AddContainerCopy(InventoryItemEntry* object)
+void TESContainer::AddObject(InventoryItemEntry* object)
 {
     if (!object)
         return;
@@ -243,28 +241,12 @@ void FUN_00481a90_shell::AddContainerCopy(InventoryItemEntry* object)
     GetObjectList()->AddHead((InventoryStackRecord*&)newObj);
 }
 
-struct FUN_00481fd0_shell : public TESContainer
-{
-    void AddAllFromContainer(TESContainer*);
-};
-
 InventoryItemEntry** __fastcall _ref_006815c0(void*);
 void* __fastcall _ref_00726070(void*);
 
-struct TeleportableReference
-{
-    int& GetPosition();
-};
-
-class TESContainer_Add : public TESContainer
-{
-  public:
-    void AddObject(TESForm* form, int count, ContainerItemExtra* extra);
-};
-
 // Iterates the object list of apAddCont and adds each entry's object, count and extra to this container.
 // @fnv 0x00481fd0
-void FUN_00481fd0_shell::AddAllFromContainer(TESContainer* apAddCont)
+void TESContainer::MergeContainer(TESContainer* apAddCont)
 {
     if (apAddCont)
     {
@@ -274,25 +256,19 @@ void FUN_00481fd0_shell::AddAllFromContainer(TESContainer* apAddCont)
             InventoryItemEntry* pcont = *_ref_006815c0(pListEntry);
             if (pcont)
             {
-                reinterpret_cast<TESContainer_Add*>(this)->AddObject(static_cast<TESForm*>(pcont->object), pcont->count,
-                                                                     pcont->extra);
+                AddObject(static_cast<TESForm*>(pcont->object), pcont->count, pcont->extra);
             }
             pListEntry = _ref_00726070(pListEntry);
         }
     }
 }
 
-struct FUN_00482040_shell : public TESContainer
-{
-    void ScaleEntryCounts(int);
-};
-
 InventoryItemEntry** __fastcall _ref_006815c0(void*);
 void* __fastcall _ref_00726070(void*);
 
 // Walks the object list and multiplies each contained entry's count by aiMult.
 // @fnv 0x00482040
-void FUN_00482040_shell::ScaleEntryCounts(int aiMult)
+void TESContainer::ScaleEntryCounts(int aiMult)
 {
     void* pCurrentElementNext = (void*)GetObjectList();
     while (pCurrentElementNext)
@@ -307,17 +283,6 @@ void FUN_00482040_shell::ScaleEntryCounts(int aiMult)
 }
 
 namespace fnv_00482090 {
-struct FUN_00482090_shell : public TESContainer
-{
-    void FUN_00482090(float);
-};
-
-class NiPoint3;
-class TeleportableReference
-{
-  public:
-    NiPoint3 const& GetPosition(void);
-};
 bool __fastcall _ref_008256d0(void* pThis);
 InventoryItemEntry** __fastcall _ref_006815c0(void* pThis);
 void* __fastcall _ref_00726070(void* pThis);
@@ -327,26 +292,27 @@ struct ContainerItemExtra_helper
     void FUN_0040eb90(float);
 };
 
+}  // namespace fnv_00482090
+
 // Walks the container's item list, creating each item's extra data if missing, applies afHealthPerc to it, and deletes extras that become default.
 // @fnv 0x00482090
-void FUN_00482090_shell::FUN_00482090(float afHealthPerc)
+void TESContainer::FUN_00482090(float afHealthPerc)
 {
-    void* pCurrentElementNext = (void*)&((TeleportableReference*)this)->GetPosition();
-    while (pCurrentElementNext && !_ref_008256d0(pCurrentElementNext))
+    void* pCurrentElementNext = (void*)GetObjectList();
+    while (pCurrentElementNext && !fnv_00482090::_ref_008256d0(pCurrentElementNext))
     {
-        InventoryItemEntry* pcont = *_ref_006815c0(pCurrentElementNext);
+        InventoryItemEntry* pcont = *fnv_00482090::_ref_006815c0(pCurrentElementNext);
         if (!pcont->extra)
             pcont->extra = new ContainerItemExtra;
-        ((ContainerItemExtra_helper*)pcont->extra)->FUN_0040eb90(afHealthPerc);
+        ((fnv_00482090::ContainerItemExtra_helper*)pcont->extra)->FUN_0040eb90(afHealthPerc);
         if (pcont->extra->IsDefault())
         {
             delete pcont->extra;
             pcont->extra = 0;
         }
-        pCurrentElementNext = _ref_00726070(pCurrentElementNext);
+        pCurrentElementNext = fnv_00482090::_ref_00726070(pCurrentElementNext);
     }
 }
-}  // namespace fnv_00482090
 
 struct BGSLoadFormBuffer;
 struct BGSSaveFormBuffer;
@@ -362,13 +328,11 @@ struct NiColor;
 struct NiPoint3;
 struct TESActorBase;
 struct TESBoundObject;
-struct TESForm;
 struct TESGlobal;
 struct TESModel;
 struct TESModelTextureSwap;
 struct TESObject;
 struct TESFormList;
-struct TESObjectREFR;
 struct FileEntryList;
 struct TESWaterForm;
 struct DistantTreeTextureInfo;
@@ -379,48 +343,6 @@ struct blob8
 struct blob12
 {
     char b[12];
-};
-struct TESLeveledList : public BaseFormComponent
-{
-    virtual unsigned char GetChanceNone();
-    virtual bool UsesAllEntries();
-    virtual int GetMaxLevelDifference();
-    virtual void ErrorCheckList();
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void SetChanceNone(unsigned char);
-    bool GetCalcAllBelow();
-    void SetCalcAllBelow(bool);
-    void SetMultCalc(bool);
-    bool GetUseAll();
-    void SetUseAll(bool);
-    TESGlobal* GetChanceGlobal();
-    void SetChanceGlobal(TESGlobal*);
-    void InitializeLeveledList();
-    void SortLeveledList();
-    LeveledObject* CreateLeveledObject(unsigned short, unsigned short, TESForm*, ContainerItemExtra*);
-    void DeleteLeveledObject(LeveledObject*);
-    void SelectLeveledObject(unsigned short, TESForm**, unsigned short*, ContainerItemExtra**, bool, int);
-    void PopulateContainerWithLeveledItems(unsigned short, unsigned short, TESContainer*, int);
-    void PopulateContainerFromReference(TESObjectREFR*, TESContainer*);
-    void ClearScriptAddedLeveledObjects();
-    void AddScriptAddedLeveledObject(TESForm*, unsigned short, unsigned short, TESForm*, ContainerItemExtra*);
-    void SaveGame(BGSSaveFormBuffer*);
-    void LoadGame(BGSLoadFormBuffer*);
-    void Revert(BGSLoadFormBuffer*);
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    void InitItem(TESForm*);
-    static TESLeveledList* GetFormAsLeveledList(TESForm*);
-    void* GetLeveledList();
-    void* __vecDelDtor(unsigned int);
-    char leveledList[8];
-    unsigned char m_pChanceGlobal;
-    unsigned char m_ucChanceNone;
-    char _pad_e[2];
-    TESGlobal* m_pLevelGlobal;
-    char m_kLeveledObjects[8];
 };
 typedef char _sizecheck_TESLeveledList[sizeof(TESLeveledList) == 28 ? 1 : -1];
 
@@ -491,52 +413,45 @@ void* DelStandIn::Destroy(unsigned int flags)
 }
 }
 
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
+class FormRecordHeader;
+class HWND__;
+class NiAVObject;
+class NiColor;
+class NiPoint3;
+class TESBoundObject;
+class TESObject;
+struct TESWaterForm;
 namespace fnv_004817f0 {
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
 struct BipedAnim;
 struct CHUNK;
-struct ContainerChanges;
-struct FormRecordHeader;
 struct TESFileGroup;
-struct HWND__;
-struct NiAVObject;
-struct NiColor;
-struct NiPoint3;
-struct TESBoundObject;
-struct TESForm;
-struct TESObject;
 struct TESFormList;
-struct TESObjectREFR;
-struct TESWaterForm;
 struct blob8
 {
     char b[8];
 };
-struct FUN_004817f0_shell : public TESContainer
-{
-    InventoryItemEntry* AddContainerObject(ContainerChanges*);
-};
-
 struct ContainerObjectNew : public InventoryItemEntry
 {
     ContainerObjectNew();
 };
-// If apObj is non-null, allocates a ContainerObjectNew copying its object and count, adds it to the head of the object list, and returns it.
+}  // namespace fnv_004817f0
+
+// If apObj is non-null, allocates a fnv_004817f0::ContainerObjectNew copying its object and count, adds it to the head of the object list, and returns it.
 // @fnv 0x004817f0
-InventoryItemEntry* FUN_004817f0_shell::AddContainerObject(ContainerChanges* apObj)
+InventoryItemEntry* TESContainer::AddObject(ContainerChanges* apObj)
 {
     if (!apObj)
         return 0;
     InventoryItemEntry* pcobj;
     BSSimpleList<InventoryStackRecord*>* pList = GetObjectList();
-    pcobj = new ContainerObjectNew;
+    pcobj = new fnv_004817f0::ContainerObjectNew;
     pcobj->object = *(void**)apObj;
     pcobj->count = ((int*)apObj)[1];
     GetObjectList()->AddHead(reinterpret_cast<InventoryStackRecord*&>(pcobj));
     return pcobj;
 }
-}  // namespace fnv_004817f0
 
 struct CompareHelper
 {
@@ -570,15 +485,10 @@ bool FUN_00481470_shell::IsNotEqual(InventoryItemEntry* apCompare)
     return false;
 }
 
-struct FUN_0084e3a0_shell
-{
-    int __thiscall FUN_0084e3a0();
-};
-
 // @fnv 0x00481f10
 bool __cdecl FUN_00481f10(TESObject* pObj)
 {
-    if (pObj && ((FUN_0084e3a0_shell*)pObj)->FUN_0084e3a0() == 0xF)
+    if (pObj && ((TESForm*)pObj)->FUN_0084e3a0() == 0xF)
         return true;
     return false;
 }
@@ -586,21 +496,11 @@ bool __cdecl FUN_00481f10(TESObject* pObj)
 namespace fnv_004818e0 {
 void* __cdecl operator new(unsigned int);
 namespace N {
-struct BSSimpleList
-{
-    bool _ref_008256d0();
-    InventoryItemEntry** _ref_006815c0();
-    BSSimpleList* GetNext();
-};
 struct ContainerItemExtra
 {
     bool Compare(::ContainerItemExtra*);
 };
 }
-struct TgtOps
-{
-    void* GetPosition();
-};
 struct G2
 {
     void AddHead(int*);
@@ -610,28 +510,26 @@ struct ContainerObjectNew
     int a, b, c;
     ContainerObjectNew();
 };
-struct FUN_004818e0_t : public TESContainer
-{
-    InventoryItemEntry* FUN_004818e0(TESObject* apObj, int aiCount, ContainerItemExtra* apExtra);
-};
+}  // namespace fnv_004818e0
+
 // Finds a container entry matching apObj and apExtra, adds aiCount to its count, or creates a new entry and prepends it to the list.
 // @fnv 0x004818e0
-InventoryItemEntry* FUN_004818e0_t::FUN_004818e0(TESObject* apObj, int aiCount, ContainerItemExtra* apExtra)
+InventoryItemEntry* TESContainer::AddObject(TESObject* apObj, int aiCount, ContainerItemExtra* apExtra)
 {
     if (!apObj || !aiCount)
         return 0;
-    N::BSSimpleList* pCurrentElementNext;
+    BSSimpleList<InventoryItemEntry*>* pCurrentElementNext;
     InventoryItemEntry* pcobj;
     pcobj = 0;
-    pCurrentElementNext = (N::BSSimpleList*)((TgtOps*)this)->GetPosition();
-    while (pCurrentElementNext && !pCurrentElementNext->_ref_008256d0())
+    pCurrentElementNext = (BSSimpleList<InventoryItemEntry*>*)GetObjectList();
+    while (pCurrentElementNext && !pCurrentElementNext->IsEmpty())
     {
-        pcobj = *pCurrentElementNext->_ref_006815c0();
+        pcobj = pCurrentElementNext->GetItem();
         if (pcobj->object == apObj)
         {
             if (pcobj->extra)
             {
-                if (apExtra && !((N::ContainerItemExtra*)pcobj->extra)->Compare(apExtra))
+                if (apExtra && !((fnv_004818e0::N::ContainerItemExtra*)pcobj->extra)->Compare(apExtra))
                     break;
             }
             else if (!apExtra)
@@ -646,7 +544,7 @@ InventoryItemEntry* FUN_004818e0_t::FUN_004818e0(TESObject* apObj, int aiCount, 
     }
     else
     {
-        pcobj = (InventoryItemEntry*)new ContainerObjectNew;
+        pcobj = (InventoryItemEntry*)new fnv_004818e0::ContainerObjectNew;
         pcobj->count = aiCount;
         pcobj->object = apObj;
         if (apExtra)
@@ -654,74 +552,93 @@ InventoryItemEntry* FUN_004818e0_t::FUN_004818e0(TESObject* apObj, int aiCount, 
             pcobj->extra = new ContainerItemExtra;
             pcobj->extra->Copy(apExtra);
         }
-        ((G2*)((TgtOps*)this)->GetPosition())->AddHead((int*)&pcobj);
+        ((fnv_004818e0::G2*)GetObjectList())->AddHead((int*)&pcobj);
     }
     return pcobj;
 }
-}  // namespace fnv_004818e0
 
+class ActorPackageData;
+class AlchemyItem;
+class BGSAcousticSpace;
+struct BGSEncounterZone;
+class BGSListForm;
+class BGSLoadFormBuffer;
+struct BGSMusicType;
+class BGSPrimitive;
+class BGSSaveFormBuffer;
+class BGSTalkingActivator;
+class BSExtraData;
+class BSMultiBound;
+class BSMultiBoundRoom;
+class BSOcclusionPlane;
+class BSPortal;
+class BaseExtraList;
+class CellMopp;
+class ExtraAction;
+class ExtraActorCause;
+class ExtraAmmo;
+class ExtraAnim;
+class ExtraAudioBuoyMarker;
+class ExtraAudioMarker;
+class ExtraDismemberedLimbs;
+class ExtraFactionChanges;
+class ExtraFollower;
+class ExtraFollowerSwimBreadcrumbs;
+struct ExtraLeveledItem;
+class ExtraLock;
+class ExtraMapMarker;
+class ExtraNavMeshPortal;
+class ExtraRefractionProperty;
+struct ExtraSayToTopicInfo;
+class ExtraSayTopicInfoOnceADay;
+class ExtraStartingPosition;
+class ExtraTeleport;
+class NiNode;
+class NiPoint3;
+class NiRenderedTexture;
+class ScriptLocals;
+class SeenData;
+class TESActorBase;
+class TESAmmo;
+class TESBoundObject;
+class TESClimate;
+class TESCombatStyle;
+class TESFaction;
+class TESGlobal;
+struct TESImageSpace;
+class TESLevItem;
+class TESModel;
+class TESNPC;
+class TESObject;
+class TESObjectCELL;
+class TESObjectLAND;
+class TESObjectWEAP;
+class TESPackage;
+class TESTopic;
+class TESTopicInfo;
+struct TESWaterForm;
+class TESWorldSpace;
+class TrespassPackage;
+class bhkWorld;
 namespace fnv_00482770 {
-struct Actor;
 struct ActorCause;
-struct ActorPackageData;
-struct AlchemyItem;
 struct Animation;
 struct TwoIntegerValues;
 struct MediaLocation;
-struct BGSAcousticSpace;
-struct BGSEncounterZone;
-struct BGSListForm;
-struct BGSLoadFormBuffer;
-struct BGSMusicType;
-struct BGSPrimitive;
-struct BGSSaveFormBuffer;
-struct BGSTalkingActivator;
-struct BSExtraData;
-struct BSMultiBound;
-struct BSMultiBoundRoom;
-struct BSOcclusionPlane;
-struct BSPortal;
-struct SoundPlaybackHandle;
-struct BaseExtraList;
 struct BipedAnim;
-struct CellMopp;
 struct CollisionData;
 struct Crime;
 struct TeleportableReference;
-struct ExtraAction;
-struct ExtraActorCause;
-struct ExtraAmmo;
-struct ExtraAnim;
 struct ExtraAshPileReference;
-struct ExtraAudioBuoyMarker;
-struct ExtraAudioMarker;
 struct ExtraCannotWearData;
-struct ExtraDataList;
-struct ExtraDismemberedLimbs;
-struct ExtraFactionChanges;
-struct ExtraFollower;
-struct ExtraFollowerSwimBreadcrumbs;
-struct ExtraLeveledItem;
 struct ExtraLight;
-struct ExtraLock;
-struct ExtraMapMarker;
-struct ExtraNavMeshPortal;
-struct ExtraRefractionProperty;
-struct ExtraSayToTopicInfo;
-struct ExtraSayTopicInfoOnceADay;
-struct ExtraStartingPosition;
 struct ExtraTalkingActor;
-struct ExtraTeleport;
 struct PositionRotation;
 struct ImpactSwap;
 struct InventoryIterator;
-struct InventoryStackRecord;
 struct MapMarkerData;
 struct MenuTopic;
 struct Point3Offset;
-struct NiNode;
-struct NiPoint3;
-struct NiRenderedTexture;
 struct IndexedPointerCollection;
 struct PatrolReferenceData;
 struct PatrolRefData;
@@ -733,37 +650,10 @@ struct ReferenceFloatEntry;
 struct RagDollData;
 struct PointerFlagNode;
 struct TopicInfoVisitRecord;
-struct Script;
-struct ScriptLocals;
-struct SeenData;
-struct TESActorBase;
-struct TESAmmo;
-struct TESBoundObject;
-struct TESClimate;
-struct TESCombatStyle;
-struct TESFaction;
-struct TESForm;
-struct TESGlobal;
-struct TESImageSpace;
-struct TESLevItem;
-struct TESModel;
-struct TESNPC;
-struct TESObject;
-struct TESObjectCELL;
-struct TESObjectLAND;
-struct TESObjectREFR;
-struct TESObjectWEAP;
-struct TESPackage;
 struct TESRegionList;
-struct TESTopic;
-struct TESTopicInfo;
-struct TESWaterForm;
-struct TESWorldSpace;
-struct TrespassPackage;
 struct WorldLocation;
 struct WaterZone;
 struct _D3DLOCKED_RECT;
-struct bhkWorld;
 struct blob8
 {
     char b[8];
@@ -772,165 +662,14 @@ struct blob12
 {
     char b[12];
 };
-struct InventoryChanges
-{
-    void ForceWeightRecalculation();
-    static void KillTempRef();
-    void AddItemToEntry(TESBoundObject*, int, Actor*, ExtraDataList*, InventoryStackRecord*);
-    bool IsEmpty();
-    void AddItem(TESBoundObject*, ExtraDataList*, int);
-    void AddItem(TESObjectREFR*, int, bool, bool);
-    void AddChangeEntry(InventoryStackRecord*, bool);
-    void RemoveChangeItem(TESBoundObject*);
-    TESObjectREFR* RemoveItem(TESObjectREFR*, TESBoundObject*, bool, int, ExtraDataList*, bool, TESObjectREFR*, void*,
-                              void*, bool, bool, InventoryStackRecord*);
-    void UpdateItemCount(int, bool, int);
-    TESObjectREFR* DropItem(TESObjectREFR*, TESBoundObject*, int, TESObjectREFR*, void*, void*);
-    void PutItemIntoContainer(TESBoundObject*, int, TESObjectREFR*, ExtraDataList*);
-    void DamageItem(TESBoundObject*, float);
-    void RepairBatch(TESBoundObject*, float);
-    void AddOwnership(TESBoundObject*, TESForm*);
-    void RemoveOwnership(TESBoundObject*);
-    TESContainer* GetOriginalContainer();
-    void RemoveBoundItem(TESBoundObject*, int, Actor*, ExtraDataList*, bool, bool);
-    bool RemoveInventoryItem(bool*, TESBoundObject*, int, Actor*, ExtraDataList*, bool, bool, InventoryStackRecord*, bool*);
-    void ResetInventoryChanges();
-    bool RunScripts(TESObjectREFR*);
-    void ResetInventoryState();
-    void CleanUpBoundItems(Actor*);
-    TESBoundObject* GetLeveledCalculatedBaseObject(TESLevItem*);
-    void ModifyCharge(float);
-    InventoryStackRecord* GetOrCreateInventoryEntry(TESBoundObject*, bool, unsigned int);
-    static InventoryChanges* CreateForReference(TESObjectREFR*);
-    ExtraDataList* GetExtraDataListForObject(TESBoundObject*, bool);
-    bool WearingWeapon(TESBoundObject**);
-    bool WearingAmmo(TESBoundObject**);
-    bool WearingTorch(TESBoundObject**);
-    InventoryStackRecord* WearingRing(bool);
-    bool WearingVoiceModulateItem();
-    bool HasItemOfType(unsigned int);
-    bool FindItemInInventory(TESBoundObject*, int, int, int*, unsigned int, TESObjectREFR*);
-    bool HasQuestObject();
-    bool HasScript();
-    TESBoundObject* GetObjectAtIndex(int, int*);
-    TESBoundObject* GetBoundObjectByIndex(int, int*);
-    InventoryStackRecord* GetPotion(void*);
-    InventoryStackRecord* GetBestAmmoForActor(TESActorBase*, bool);
-    TESAmmo* GetBestAmmoForWeapon(TESObjectWEAP*, bool*);
-    InventoryStackRecord* GetBestWeapon(TESActorBase*, float*, int, bool);
-    InventoryStackRecord* FindBestArmor(TESActorBase*, int, bool);
-    void* GetListBestArmor(TESActorBase*);
-    InventoryStackRecord* GetBestClothing(TESActorBase*, int, bool);
-    InventoryStackRecord* GetBestLight(TESActorBase*, bool);
-    InventoryStackRecord* GetInventoryEntryData(int, bool);
-    InventoryStackRecord* GetEquippedItemForSlot(int);
-    InventoryStackRecord** GetEntryPointerByIndices(int, int);
-    void SetHotKeyItem(InventoryStackRecord*, ExtraDataList*, int);
-    void SetInventoryEntryCount(InventoryStackRecord*, int);
-    void RemoveAllObjectsWorn(bool, TESObjectREFR*);
-    bool RechargeAll();
-    void RemoveAllHealth();
-    int GetCount(bool);
-    InventoryStackRecord* GetInventoryEntryAtIndex(int);
-    IndexedPointerCollection* GetFirstItem();
-    InventoryStackRecord* GetEntryForListNode(IndexedPointerCollection*);
-    void RemoveItemChangeEntry(TESBoundObject*, void*);
-    void RefreshItemChange(TESBoundObject*, void*);
-    void UpdateItemChangeEntry(TESBoundObject*, void*);
-    int GetObjectCount(int);
-    int GetObjectCount(TESBoundObject*);
-    InventoryStackRecord* GetFirstInventoryEntry();
-    int GetInventoryEntryCount();
-    void TransferItemToReference(TESObjectREFR*, int, TESObjectREFR*);
-    float RemoveAllTypedItems(TESObjectREFR*, TESObjectREFR*, bool, bool, bool, bool, int, BGSListForm*);
-    float RemoveAllItems(TESObjectREFR*, TESObjectREFR*, bool, bool, bool, bool, int, BGSListForm*);
-    void DuplicateAllItems(TESObjectREFR*, TESObjectREFR*);
-    void MoveItemsOfType(TESObjectREFR*, TESObjectREFR*, TESForm*);
-    void RemoveNonStolenItems(TESObjectREFR*, TESObjectREFR*);
-    float GetInventoryWeight(bool);
-    unsigned int GetTotalItemCount(bool, bool);
-    void AddAmountToItemChange(TESBoundObject*, int);
-    float GetArmorValueForActor(Actor*);
-    void UpdateArmorWeight();
-    void UpdateWeight();
-    void RemoveDefaultLeveledItems();
-    bool IsLevelItemInited(int);
-    InventoryStackRecord* FindEntryForObject(TESBoundObject*, unsigned int);
-    void SetItemsBacktoDefaultState();
-    void CopyInventoryChanges(InventoryChanges*, TESObjectREFR*, bool);
-    void ResetEntryList();
-    void ResetCachedWeights();
-    unsigned short GetSaveSize();
-    void SaveGame(BGSSaveFormBuffer*);
-    void SaveGame();
-    void LoadGame(BGSLoadFormBuffer*);
-    void LoadGame();
-    void InitLoadGame(BGSLoadFormBuffer*);
-    void InitLoadGame();
-    int GetExtraDataListIndexForItem(TESBoundObject*, ExtraDataList*);
-    ExtraDataList* GetExtraDataListFromIndexForItem(TESBoundObject*, int);
-    unsigned int FindItemEntryData(int*, void*, unsigned int);
-    bool GetNextItem(InventoryIterator*, InventoryStackRecord**, unsigned int);
-    TESObjectREFR* GetRef();
-    static TESObjectREFR* GetTempRef();
-    void RemoveExtraFromObject(TESObject*, ExtraDataList*);
-    void DeleteExtraData(TESBoundObject*, ExtraDataList*);
-    void* __vecDelDtor(unsigned int);
-    void* m_pEntryList;
-    TESObjectREFR* pRef;
-    float m_fTotalWeight;
-    float m_fArmorWeight;
-    bool m_bChanged;
-    char _pad_11[3];
-};
 typedef char _sizecheck_InventoryChanges[sizeof(InventoryChanges) == 20 ? 1 : -1];
-struct FUN_00482770_shell : public TESContainer
-{
-    void AddLeveledItemsToChanges(int, InventoryChanges*);
-};
-
-struct ExtraDataList
-{
-    char pad[0x20];
-    ExtraDataList();
-    void SetLeveledItemIndex(int);
-};
-struct FUN_00419ad0_shell
-{
-    void FUN_00419ad0(unsigned short);
-};
-struct TESHealthForm
-{
-    static TESHealthForm* __cdecl GetFormAsHealthForm(TESForm*);
-};
 struct Fn40ea20
 {
     void FUN_0040ea20(ExtraDataList*, TESHealthForm*);
 };
-struct TESForm
-{
-    void SetFormFlags(int);
-};
 struct FUN_004c29a0_t
 {
     void FUN_004c29a0(void*, ExtraDataList*, int);
-};
-struct PatrolActorPackageData
-{
-    bool IsPatrolling();
-};
-struct BGSSaveLoadGame
-{
-    bool FUN_0042ce10();
-    bool IsFlag20Set();
-};
-struct GridArray
-{
-    TESForm* GetCenterX();
-};
-struct TgtOps
-{
-    void* GetPosition();
 };
 struct ContList
 {
@@ -941,13 +680,15 @@ struct ContList
 extern PatrolActorPackageData* g_osGlobals;
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
+}  // namespace fnv_00482770
+
 // @fnv 0x00482770
-void FUN_00482770_shell::AddLeveledItemsToChanges(int aiLevItemIndex, InventoryChanges* apChanges)
+void TESContainer::AddInventoryChangesToContainer(int aiLevItemIndex, InventoryChanges* apChanges)
 {
     bool bhadChanges = false;
     if (apChanges)
     {
-        ContList* pCurrentElementNext = (ContList*)((TgtOps*)this)->GetPosition();
+        fnv_00482770::ContList* pCurrentElementNext = (fnv_00482770::ContList*)GetObjectList();
         while (pCurrentElementNext && !pCurrentElementNext->_ref_008256d0())
         {
             InventoryItemEntry* pcont = *pCurrentElementNext->_ref_006815c0();
@@ -956,22 +697,21 @@ void FUN_00482770_shell::AddLeveledItemsToChanges(int aiLevItemIndex, InventoryC
                 bhadChanges = true;
                 ExtraDataList* pextra = new ExtraDataList();
                 pextra->SetLeveledItemIndex(aiLevItemIndex);
-                ((FUN_00419ad0_shell*)pextra)->FUN_00419ad0(pcont->count);
+                pextra->FUN_00419ad0((unsigned short)pcont->count);
                 if (pcont->extra)
-                    ((Fn40ea20*)pcont->extra)
+                    ((fnv_00482770::Fn40ea20*)pcont->extra)
                         ->FUN_0040ea20(pextra, TESHealthForm::GetFormAsHealthForm((TESForm*)pcont->object));
-                ((FUN_004c29a0_t*)apChanges)->FUN_004c29a0(pcont->object, pextra, pcont->count);
+                ((fnv_00482770::FUN_004c29a0_t*)apChanges)->FUN_004c29a0(pcont->object, pextra, pcont->count);
             }
             pCurrentElementNext = pCurrentElementNext->GetNext();
         }
-        if (bhadChanges && ((GridArray*)apChanges)->GetCenterX() && g_osGlobals->IsPatrolling())
+        if (bhadChanges && ((GridArray*)apChanges)->GetCenterX() && fnv_00482770::g_osGlobals->IsPatrolling())
         {
-            if (!g_BGSSaveLoadGame->FUN_0042ce10() || g_BGSSaveLoadGame->IsFlag20Set())
+            if (!fnv_00482770::g_BGSSaveLoadGame->FUN_0042ce10() || fnv_00482770::g_BGSSaveLoadGame->IsFlag20Set())
                 ((GridArray*)apChanges)->GetCenterX()->SetFormFlags(0x8000000);
         }
     }
 }
-}  // namespace fnv_00482770
 
 struct RefH
 {
@@ -986,19 +726,12 @@ struct FUN_00481310_shell
 {
     void FUN_00481310();
 };
-struct TgtOps
-{
-    void* GetPosition();
-};
-struct FUN_00481b40_shell
-{
-    void FUN_00481b40();
-};
-// Iterates the list returned by GetPosition and calls FUN_00481310 on each item whose ref is not deleted.
+// The shared header has no declaration for this operation; the free helper keeps the object in ECX.
+// Iterates the object list and calls FUN_00481310 on each item whose ref is not deleted.
 // @fnv 0x00481b40
-void FUN_00481b40_shell::FUN_00481b40()
+void __fastcall InitializeContainerItems(TESContainer* container)
 {
-    BSSimpleList<ItemNode*>* node = (BSSimpleList<ItemNode*>*)((TgtOps*)this)->GetPosition();
+    BSSimpleList<ItemNode*>* node = (BSSimpleList<ItemNode*>*)container->GetObjectList();
     if (!node->GetItem())
         node = 0;
     while (node)
@@ -1021,17 +754,12 @@ struct ContainerNode
 };
 int __cdecl FUN_00ec7d40(int);
 double __cdecl FUN_0048ebc0(void*, unsigned char);
-struct FUN_00481e10_shell
-{
-    ContainerNode* __thiscall FUN_00717e50();
-    float __thiscall FUN_00481e10(unsigned char);
-};
 // @fnv 0x00481e10
-float __thiscall FUN_00481e10_shell::FUN_00481e10(unsigned char flag)
+float __thiscall TESContainer::GetContainerWeight(bool flag)
 {
     ContainerNode* node;
     float sum = 0.0f;
-    node = FUN_00717e50();
+    node = reinterpret_cast<ContainerNode*>(GetObjectList());
     if (*node->FUN_006815c0() == 0)
         node = 0;
     while (node != 0)
@@ -1046,168 +774,6 @@ float __thiscall FUN_00481e10_shell::FUN_00481e10(unsigned char flag)
 }
 
 class ScriptLocals;
-class Script;
-class ExtraDataList;
-class TESForm
-{
-  public:
-    unsigned FUN_00401170();
-};
-class TESObjectREFR
-{
-  public:
-    virtual void Unk00();
-    virtual void Unk01();
-    virtual void Unk02();
-    virtual void Unk03();
-    virtual ~TESObjectREFR();
-    unsigned unk04;
-    unsigned unk08;
-    unsigned unk0c;
-    unsigned unk10;
-    unsigned unk14;
-    unsigned unk18;
-    unsigned unk1c;
-    unsigned unk20;
-    unsigned unk24;
-    unsigned unk28;
-    unsigned unk2c;
-    unsigned unk30;
-    unsigned unk34;
-    unsigned unk38;
-    unsigned unk3c;
-    unsigned unk40;
-    unsigned unk44;
-    unsigned unk48;
-    unsigned unk4c;
-    unsigned unk50;
-    unsigned unk54;
-    unsigned unk58;
-    unsigned unk5c;
-    unsigned unk60;
-    unsigned unk64;
-    TESObjectREFR();
-    void FUN_00484490();
-    void FUN_00574fa0(TESForm*, ExtraDataList*, int);
-};
-class Actor : public TESObjectREFR
-{
-  public:
-    virtual void Unk05();
-    virtual void Unk06();
-    virtual void Unk07();
-    virtual void Unk08();
-    virtual void Unk09();
-    virtual void Unk0a();
-    virtual void Unk0b();
-    virtual void Unk0c();
-    virtual void Unk0d();
-    virtual void Unk0e();
-    virtual void Unk0f();
-    virtual void Unk10();
-    virtual void Unk11();
-    virtual void Unk12();
-    virtual void Unk13();
-    virtual void Unk14();
-    virtual void Unk15();
-    virtual void Unk16();
-    virtual void Unk17();
-    virtual void Unk18();
-    virtual void Unk19();
-    virtual void Unk1a();
-    virtual void Unk1b();
-    virtual void Unk1c();
-    virtual void Unk1d();
-    virtual void Unk1e();
-    virtual void Unk1f();
-    virtual void Unk20();
-    virtual void Unk21();
-    virtual void Unk22();
-    virtual void Unk23();
-    virtual void Unk24();
-    virtual void Unk25();
-    virtual void Unk26();
-    virtual void Unk27();
-    virtual void Unk28();
-    virtual void Unk29();
-    virtual void Unk2a();
-    virtual void Unk2b();
-    virtual void Unk2c();
-    virtual void Unk2d();
-    virtual void Unk2e();
-    virtual void Unk2f();
-    virtual void Unk30();
-    virtual void Unk31();
-    virtual void Unk32();
-    virtual void Unk33();
-    virtual void Unk34();
-    virtual void Unk35();
-    virtual void Unk36();
-    virtual void Unk37();
-    virtual void Unk38();
-    virtual void Unk39();
-    virtual void Unk3a();
-    virtual void Unk3b();
-    virtual void Unk3c();
-    virtual void Unk3d();
-    virtual void Unk3e();
-    virtual void Unk3f();
-    virtual void Unk40();
-    virtual void Unk41();
-    virtual void Unk42();
-    virtual void Unk43();
-    virtual void Unk44();
-    virtual void Unk45();
-    virtual void Unk46();
-    virtual void Unk47();
-    virtual void Unk48();
-    virtual void Unk49();
-    virtual void Unk4a();
-    virtual void Unk4b();
-    virtual void Unk4c();
-    virtual void Unk4d();
-    virtual void Unk4e();
-    virtual void Unk4f();
-    virtual void Unk50();
-    virtual void Unk51();
-    virtual void Unk52();
-    virtual void Unk53();
-    virtual void Unk54();
-    virtual void Unk55();
-    virtual void Unk56();
-    virtual void Unk57();
-    virtual void Unk58();
-    virtual void Unk59();
-    virtual void Unk5a();
-    virtual void Unk5b();
-    virtual void Unk5c();
-    virtual void Unk5d();
-    virtual void Unk5e();
-    virtual void Unk5f();
-    virtual void Unk60();
-    virtual void Unk61();
-    virtual void Unk62();
-    virtual void Unk63();
-    virtual void AddItem(TESForm*, ExtraDataList*, int);
-    const char* FUN_008adcf0(TESForm*, int, int);
-};
-class ExtraDataList
-{
-  public:
-    unsigned unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    ExtraDataList();
-    void FUN_00419ad0(unsigned short);
-    Script* FUN_00418800();
-    void FUN_00419ed0(Script*);
-    void FUN_00419f80(ScriptLocals*);
-    ScriptLocals* FUN_00418830();
-};
-class Script
-{
-  public:
-    ScriptLocals* FUN_005abf60();
-    void Run(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
-};
 struct ItemExtra
 {
     void FUN_0040ea20(ExtraDataList*, void*);
@@ -1232,21 +798,15 @@ extern Actor* DAT_011dea3c;
 Script* FUN_004826d0(TESForm*);
 void* GetHealthForm(TESForm*);
 const char* FUN_00482720(TESForm*);
-int FUN_00406f60(BSStringT<char>*, const char*, ...);
 bool QueueUIMessage(const char*, int, const char*, const char*, float, bool);
-struct ContainerOperation
-{
-    Node* FUN_00717e50();
-    void FUN_004821a0(TESObjectREFR*, bool);
-};
 // @fnv 0x004821a0
-void ContainerOperation::FUN_004821a0(TESObjectREFR* target, bool silent)
+void TESContainer::FUN_004821a0(TESObjectREFR* target, bool silent)
 {
     if (target)
     {
         Actor* last = dynamic_cast<Actor*>(target);
         Item* actor = 0;
-        Node* node = FUN_00717e50();
+        Node* node = reinterpret_cast<Node*>(GetObjectList());
         while (node)
         {
             Item* item = *node->FUN_006815c0();
@@ -1268,7 +828,7 @@ void ContainerOperation::FUN_004821a0(TESObjectREFR* target, bool silent)
                             extra->FUN_00419f80(script->FUN_005abf60());
                             TESObjectREFR* ref = new TESObjectREFR;
                             ref->FUN_00484490();
-                            script->Run(ref, extra->FUN_00418830(), 0, false);
+                            script->FUN_005ac1e0(ref, extra->FUN_00418830(), 0, false);
                             delete ref;
                             if (item->extra)
                                 item->extra->FUN_0040ea20(extra, GetHealthForm(item->form));
@@ -1300,10 +860,10 @@ void ContainerOperation::FUN_004821a0(TESObjectREFR* target, bool silent)
         {
             BSStringT<char> text;
             if (actor->count > 1)
-                FUN_00406f60(&text, "%i %s%s %s", actor->count, FUN_00482720(actor->form), DAT_011d3114.FUN_00403df0(),
+                text.PrintfString("%i %s%s %s", actor->count, FUN_00482720(actor->form), DAT_011d3114.FUN_00403df0(),
                              DAT_011d4e7c.FUN_00403df0());
             else
-                FUN_00406f60(&text, "%s %s", FUN_00482720(actor->form), DAT_011d4e7c.FUN_00403df0());
+                text.PrintfString("%s %s", FUN_00482720(actor->form), DAT_011d4e7c.FUN_00403df0());
             switch (actor->form->FUN_00401170())
             {
             case 25:
@@ -1353,18 +913,11 @@ struct FUN_00482910_obj
 
 int __cdecl FUN_00ec43fb(int a, int b, void* c, void* d, int e);
 
-class FUN_00482910_cls
-{
-  public:
-    FUN_00482910_node* FUN_00717e50();
-    FUN_00482910_rec* FindBestRecord(FUN_00482910_obj* a1);
-};
-
-// Walks the node list, scores each record via a1->FUN_005f0d60, and returns the record with the highest score above DAT_01015f5c.
+// Scores each weapon and returns the one with the highest score above DAT_01015f5c.
 // @fnv 0x00482910
-FUN_00482910_rec* FUN_00482910_cls::FindBestRecord(FUN_00482910_obj* pScorer)
+TESObjectWEAP* TESContainer::GetBestWeapon(TESActorBase* pScorer)
 {
-    FUN_00482910_node* p = FUN_00717e50();
+    FUN_00482910_node* p = reinterpret_cast<FUN_00482910_node*>(GetObjectList());
     float best = DAT_01015f5c;
     FUN_00482910_rec* result2 = 0;
     while (p != 0)
@@ -1375,7 +928,7 @@ FUN_00482910_rec* FUN_00482910_cls::FindBestRecord(FUN_00482910_obj* pScorer)
             FUN_00482910_rec* r = (FUN_00482910_rec*)FUN_00ec43fb(t3->unk04, 0, &DAT_01183108, &DAT_01183998, 0);
             if (r != 0)
             {
-                float f7 = pScorer->FUN_005f0d60(r);
+                float f7 = reinterpret_cast<FUN_00482910_obj*>(pScorer)->FUN_005f0d60(r);
                 if (f7 > best)
                 {
                     best = f7;
@@ -1385,18 +938,14 @@ FUN_00482910_rec* FUN_00482910_cls::FindBestRecord(FUN_00482910_obj* pScorer)
         }
         p = p->FUN_00726070();
     }
-    return result2;
+    return reinterpret_cast<TESObjectWEAP*>(result2);
 }
 
-struct FUN_00481d10_shell : TESContainer
-{
-    bool FUN_00481d10(BaseFormComponent* other);
-};
 void* __fastcall _ref_00717e50(void*);
 int __fastcall _ref_005ae380(void*);
 // Compares this container's entries against another TESContainer's entries, returning true when they differ or the counts do not match.
 // @fnv 0x00481d10
-bool FUN_00481d10_shell::FUN_00481d10(BaseFormComponent* other)
+bool TESContainer::CompareWithBase(BaseFormComponent* other)
 {
     TESContainer* otherContainer = dynamic_cast<TESContainer*>(other);
     if (otherContainer == 0)
@@ -1437,24 +986,13 @@ bool FUN_00481d10_shell::FUN_00481d10(BaseFormComponent* other)
 }
 
 void* __cdecl operator new(unsigned int);
-class InventoryStackRecord
-{
-  public:
-    int count;
-    void* object;
-};
-struct Source08
-{
-    int unk00;
-    BSSimpleList<InventoryStackRecord*> objects;
-    BSSimpleList<InventoryStackRecord*>* CopyUniqueObjects();
-};
-// Copies the objects list into a new list in reverse order, then removes duplicate entries that share the same object pointer.
+// The shared header has no declaration for this operation; the free helper keeps the object in ECX.
+// Copies the object list in reverse order, then removes entries that share the same object pointer.
 // @fnv 0x00482b00
-BSSimpleList<InventoryStackRecord*>* Source08::CopyUniqueObjects()
+BSSimpleList<InventoryStackRecord*>* __fastcall CopyUniqueContainerObjects(TESContainer* container)
 {
     BSSimpleList<InventoryStackRecord*>* pNewList = new BSSimpleList<InventoryStackRecord*>;
-    BSSimpleList<InventoryStackRecord*>* pList = &objects;
+    BSSimpleList<InventoryStackRecord*>* pList = &container->objectList;
     while (pList && pList->GetItem())
     {
         pNewList->AddHead(pList->GetItem());
@@ -1467,7 +1005,7 @@ BSSimpleList<InventoryStackRecord*>* Source08::CopyUniqueObjects()
         iter = pList->GetNext();
         while (iter && iter->GetItem())
         {
-            if (pList->GetItem()->object == iter->GetItem()->object)
+            if (reinterpret_cast<InventoryItemEntry*>(pList->GetItem())->object == reinterpret_cast<InventoryItemEntry*>(iter->GetItem())->object)
             {
                 pList->Remove(iter->GetItem());
                 iter = pList->GetNext();
@@ -1481,57 +1019,29 @@ BSSimpleList<InventoryStackRecord*>* Source08::CopyUniqueObjects()
 }
 
 struct VATSCommand;
-struct ContNode;
 struct VATS_CommandList
 {
     void FUN_00905330(VATSCommand* const& apCommand);
 };
-ContNode* __fastcall FUN_00717e50(void* apList);
-struct FUN_00481790_t
-{
-    void FUN_00481790(BGSPerkEntry* apEntry);
-};
 // @fnv 0x00481790
-void FUN_00481790_t::FUN_00481790(BGSPerkEntry* apEntry)
+void TESContainer::RemoveContainerObject(InventoryItemEntry* apEntry)
 {
     if (!apEntry)
         return;
-    ((VATS_CommandList*)FUN_00717e50(this))->FUN_00905330((VATSCommand* const&)apEntry);
-    BGSPerkEntry* pkEntry = apEntry;
+    ((VATS_CommandList*)GetObjectList())->FUN_00905330((VATSCommand* const&)apEntry);
+    BGSPerkEntry* pkEntry = reinterpret_cast<BGSPerkEntry*>(apEntry);
     BGSPerkEntry* pkDeleteCur = pkEntry;
     pkDeleteCur ? pkDeleteCur->Destroy(1) : 0;
 }
 
-class TESBoundObject
-{
-  public:
-    virtual ~TESBoundObject();
-};
-struct ArmorSlotMask
-{
-    bool FUN_00480af0(int slot, int a2, int a3);
-};
-class TESObjectARMO : public TESBoundObject
-{
-  public:
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
-    int unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c;
-    int unk60, unk64, unk68, unk6c;
-    ArmorSlotMask bipedSlots;
-};
 struct ArmorRater
 {
     float FUN_005f0d60(TESObjectARMO* armor);
 };
 static const float kNegInfinity = -3.402823466e+38f;
-struct ArmorContainer : TESContainer
-{
-    TESObjectARMO* FindBestArmorForSlot(ArmorRater* rater, int slot);
-};
 // Scans the container's object list for armor matching the given biped slot and returns the one with the highest rater score, or null.
 // @fnv 0x004829c0
-TESObjectARMO* ArmorContainer::FindBestArmorForSlot(ArmorRater* rater, int slot)
+TESObjectARMO* TESContainer::FindBestArmor(TESActorBase* rater, int slot)
 {
     BSSimpleList<InventoryStackRecord*>* iter = GetObjectList();
     float best = kNegInfinity;
@@ -1542,9 +1052,9 @@ TESObjectARMO* ArmorContainer::FindBestArmorForSlot(ArmorRater* rater, int slot)
         if (pkObject)
         {
             TESObjectARMO* armor = dynamic_cast<TESObjectARMO*>((TESBoundObject*)pkObject->object);
-            if (armor && slot != -1 && armor->bipedSlots.FUN_00480af0(slot, 0, 0))
+            if (armor && slot != -1 && armor->TESBipedModelForm::FUN_00480af0(slot, 0, 0))
             {
-                float fVal = rater->FUN_005f0d60(armor);
+                float fVal = reinterpret_cast<ArmorRater*>(rater)->FUN_005f0d60(armor);
                 if (fVal > best)
                 {
                     best = fVal;
@@ -1853,18 +1363,6 @@ struct WeaponFormOps
     void* FUN_00525980(void* actor);
 };
 
-struct RecipeContainerOps : TESContainer
-{
-    void FUN_004818e0(TESForm* form, int count, ContainerItemExtra* extra);
-    void FUN_00482090(float health);
-    void FUN_004821a0(void* target, int a2);
-};
-
-struct RecipeStringOps : BSStringT<char>
-{
-    const char* FUN_00559450();
-};
-
 extern RecipeMenuState* DAT_011d8e90;
 extern ActiveRecipe* DAT_011d8e94;
 extern FUN_004f2770_Class* _g_thePlayer;
@@ -1877,7 +1375,6 @@ extern const char str_0101c140[];
 int __cdecl FUN_005f5950(int a1, int a2, void* a3, int a4, int a5, int a6, int a7);
 void __cdecl FUN_004d5e10(int statId, int delta);
 const char* __cdecl FUN_00482720(void* form);
-int __cdecl FUN_00406f60(BSStringT<char>* outStr, const char* fmt, ...);
 bool __cdecl QueueUIMessage(const char* msg, int emotion, const char* iconPath, const char* soundName, float duration,
                             bool instant);
 void __cdecl FUN_00727430();
@@ -1986,11 +1483,10 @@ void CraftRecipe(int count)
                                         TESContainer tempCont1;
                                         if (itemForm != 0)
                                         {
-                                            ((RecipeContainerOps*)&tempCont1)
-                                                ->FUN_004818e0((TESForm*)itemForm, compQty * count, 0);
+                                            tempCont1.FUN_004818e0((TESForm*)itemForm, compQty * count, 0);
                                         }
-                                        ((RecipeContainerOps*)&tempCont1)->FUN_00482090(DAT_01030ff0);
-                                        ((RecipeContainerOps*)&tempCont1)->FUN_004821a0(DAT_011d8e90->crafterRef, 0);
+                                        tempCont1.FUN_00482090(DAT_01030ff0);
+                                        tempCont1.FUN_004821a0(DAT_011d8e90->crafterRef, 0);
                                     }
                                 }
                                 else if (itemForm->FUN_00401170() == 0x18 || itemForm->FUN_00401170() == 0x1a)
@@ -1998,11 +1494,10 @@ void CraftRecipe(int count)
                                     TESContainer tempCont2;
                                     if (itemForm != 0)
                                     {
-                                        ((RecipeContainerOps*)&tempCont2)
-                                            ->FUN_004818e0((TESForm*)itemForm, compQty * count, 0);
+                                        tempCont2.FUN_004818e0((TESForm*)itemForm, compQty * count, 0);
                                     }
-                                    ((RecipeContainerOps*)&tempCont2)->FUN_00482090(DAT_01030ff0);
-                                    ((RecipeContainerOps*)&tempCont2)->FUN_004821a0(DAT_011d8e90->crafterRef, 0);
+                                    tempCont2.FUN_00482090(DAT_01030ff0);
+                                    tempCont2.FUN_004821a0(DAT_011d8e90->crafterRef, 0);
                                 }
                                 else
                                 {
@@ -2011,15 +1506,15 @@ void CraftRecipe(int count)
                                 BSStringT<char> msgStr;
                                 if (compQty * count > 1)
                                 {
-                                    FUN_00406f60(&msgStr, str_0101c178, compQty * count, FUN_00482720(itemForm),
+                                    msgStr.PrintfString(str_0101c178, compQty * count, FUN_00482720(itemForm),
                                                  DAT_011d3114.FUN_00403df0(), DAT_011d4e7c.FUN_00403df0());
                                 }
                                 else
                                 {
-                                    FUN_00406f60(&msgStr, str_01012058, FUN_00482720(itemForm),
+                                    msgStr.PrintfString(str_01012058, FUN_00482720(itemForm),
                                                  DAT_011d4e7c.FUN_00403df0());
                                 }
-                                QueueUIMessage(((RecipeStringOps*)&msgStr)->FUN_00559450(), 0, str_0101c140,
+                                QueueUIMessage(msgStr.String(), 0, str_0101c140,
                                                _g_thePlayer->FUN_008adcf0(itemForm, 1, 0), DAT_010162c0, 0);
                             }
                             node = node->FUN_00726070();
@@ -2032,44 +1527,21 @@ void CraftRecipe(int count)
     }
 }
 
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
+class FormRecordHeader;
+class HWND__;
+class NiColor;
+class NiPoint3;
+class TESBoundObject;
 namespace fnv_004826d0 {
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
 struct CHUNK;
-struct FormRecordHeader;
 struct TESFileGroup;
-struct HWND__;
-struct NiColor;
-struct NiPoint3;
-struct Script;
-struct TESBoundObject;
-struct TESForm;
-struct TESObjectREFR;
 struct blob8
 {
     char b[8];
 };
-struct TESScriptableForm : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    void InitItem(TESForm*);
-    static Script* GetScriptForForm(TESForm*);
-    Script* GetScriptForForm();
-    static char* GetFormScriptEditorID(TESForm*);
-    char* GetFormScriptEditorID();
-    static void SetFormScript(TESForm*, Script*);
-    void SetFormScript(Script*);
-    Script* m_pFormScript;
-    bool m_bHasScript;
-    char _pad_9[3];
-};
 typedef char _sizecheck_TESScriptableForm[sizeof(TESScriptableForm) == 12 ? 1 : -1];
-
-struct Script;
 
 extern unsigned char DAT_01183028;
 extern unsigned char DAT_01183254;

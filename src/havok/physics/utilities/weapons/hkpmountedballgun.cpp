@@ -3,6 +3,29 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include "havok/hkpMountedBallGun.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+// hkMemoryRouterQ_hkpmountedballgun: local type (was include/hkMemoryRouterQ.h, which had no evidence of one real class); no method of it is bound to a named game function
+
+class hkMemoryRouterQ_hkpmountedballgun
+{
+public:
+    int unk00;
+    int unk04;
+    int unk08;
+    union
+    {
+        int unk0C;
+        int unk0c;
+    };
+    hkMemoryAllocator* m_pStreamAllocator;
+
+    hkMemoryAllocator& heap()
+    {
+        return *m_pStreamAllocator;
+    }
+
+    hkMemoryAllocator& debug();
+};
 
 #include <xmmintrin.h>
 extern unsigned int DAT_010ec004;
@@ -79,42 +102,22 @@ MBG* FUN_00e45150_class::Initialize(int a)
     return self;
 }
 
-struct hkMemoryAllocatorQ
-{
-    virtual void v00();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-
-struct hkMemoryRouterQ
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocatorQ* m_pStreamAllocator;
-    hkMemoryAllocatorQ& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
 void* __cdecl FUN_00c85750();
 void __cdecl FUN_00cb1260(void* dst, const void* src, int numBytes);
 
-inline hkMemoryRouterQ& getRouter()
+inline hkMemoryRouterQ_hkpmountedballgun& getRouter()
 {
-    return *(hkMemoryRouterQ*)FUN_00c85750();
+    return *(hkMemoryRouterQ_hkpmountedballgun*)FUN_00c85750();
 }
 
 template <typename T> inline T* hkAllocateChunkQ(int n)
 {
-    return (T*)getRouter().heap().AllocateMemoryBlock(n * sizeof(T));
+    return (T*)getRouter().heap().blockAlloc(n * sizeof(T));
 }
 
 template <typename T> inline void hkDeallocateChunkQ(T* p, int n)
 {
-    getRouter().heap().ReleaseBlock(p, n * sizeof(T));
+    getRouter().heap().blockFree(p, n * sizeof(T));
 }
 
 struct hkpRigidBody;

@@ -4,102 +4,47 @@
 
 #include <stddef.h>
 
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int size);
-    static void operator delete(void* pointer);
-};
+#include "../../include/NiD3DShaderConstantMap.h"
+#include "../../include/NiRefObject.h"
+
+#include "../../include/NiMemObject.h"
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
 
-class NiRefObject : public NiMemObject
+__forceinline void NiD3DShaderConstantMap::IncRefCount()
 {
-  public:
-    unsigned int m_uiRefCount;
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
 
-    __forceinline void IncRefCount()
-    {
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
-    }
-
-    __forceinline void DecRefCount()
-    {
-        if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
-            DeleteThis();
-    }
-};
-
-class GraphicsRenderer;
-class NiRenderer;
-
-class NiD3DShaderConstantMap : public NiRefObject
+__forceinline void NiD3DShaderConstantMap::DecRefCount()
 {
-  public:
-    NiD3DShaderConstantMap(GraphicsRenderer* renderer, unsigned int programType);
-    virtual unsigned int vfn_8(const char*, unsigned int, unsigned int, unsigned int, unsigned int, const char*,
-                               unsigned int, unsigned int, const void*, bool);
-    virtual void vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual unsigned int vfn_68(const char*, unsigned int, unsigned int, const char*, unsigned int, unsigned int,
-                                const void*, bool);
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
 
-  private:
-    unsigned char m_abyInternalData[60];
-};
-
-template <class T> class NiPointer
+template <class T> __forceinline NiPointer<T>::operator T*() const
 {
-  public:
-    T* m_pObject;
+    return m_pObject;
+}
 
-    __forceinline operator T*() const
-    {
-        return m_pObject;
-    }
+template <class T> __forceinline T* NiPointer<T>::operator->() const
+{
+    return m_pObject;
+}
 
-    __forceinline T* operator->() const
+template <class T> __forceinline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
     {
-        return m_pObject;
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
     }
-
-    __forceinline NiPointer& operator=(T* object)
-    {
-        if (m_pObject != object)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = object;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-};
+    return *this;
+}
 
 class NiD3DVertexDeclaration
 {

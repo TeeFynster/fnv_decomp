@@ -1,3 +1,42 @@
+#include "../../include/NiD3DGPUProgramCache.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiD3DPixelShader.h"
+#include "../../include/NiD3DShaderConstantMap.h"
+#include "../../include/NiPropertyState.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/Transform.h"
+#include "../../include/NiTransform.h"
+#include "../../include/Vec4.h"
+#include "../../include/Bound.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/NiColorA.h"
+
+inline Vec4::Vec4(const Vec4& other)
+{
+    *this = other;
+}
+
+inline NiTransform::NiTransform() {}
 
 // src/bsshader/skyshader.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/skyshader.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -13,20 +52,16 @@ void* __cdecl FUN_00b887b0()
 extern void __cdecl AddToTwoCounters(int, int, int);
 extern void __cdecl _FUN_00b98070(int, int);
 
-struct NiPropertyState
-{
-    void* m_spProperties[16];
-};
 
 // @fnv 0x00b8a1a0
 void __stdcall FUN_00b8a1a0(const NiPropertyState* apState)
 {
-    void* pkSkyProp = apState->m_spProperties[3];
+    void* pkSkyProp = apState->m_aspProps[3];
     int val = *(int*)((char*)pkSkyProp + 0x8c);
     if (val == 0 || val == 6)
         AddToTwoCounters(6, 7, 0);
 
-    void* rendererSpecific = apState->m_spProperties[4];
+    void* rendererSpecific = apState->m_aspProps[4];
     if (rendererSpecific && (*(unsigned char*)((char*)rendererSpecific + 0x18) & 1))
         _FUN_00b98070(0, 0);
 }
@@ -142,80 +177,40 @@ void Struct00b884b0::AttachAll()
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 
-struct NiD3DPixelShader : NiRefObject
-{
-};
 
-struct NiD3DPass
-{
-    void* vtbl;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    unsigned int m_uiRefCount;
-    void Release();
-    void DecRefCount()
-    {
-        if (--m_uiRefCount == 0)
-            Release();
-    }
-};
 
-template <class T> class NiPointer
+inline void NiRefObject::DecRefCount()
 {
-  public:
-    NiPointer() : m_pObject(0)
-    {}
-    ~NiPointer()
+    if (InterlockedDecrement(reinterpret_cast<long volatile*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+inline void NiD3DPixelShader::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<long volatile*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+inline void NiD3DPass::DecRefCount()
+{
+    if (--m_uiRefCount == 0)
+        Release();
+}
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0) {}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pObject)
+{
+    if (m_pObject != pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
+        m_pObject = pObject;
     }
-    NiPointer& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-        }
-        return *this;
-    }
-    T* m_pObject;
-};
+    return *this;
+}
 
 struct ShaderBase
 {
@@ -296,10 +291,6 @@ struct Mgr_Stand
     Pair_Stand* m_24;
 };
 extern Mgr_Stand* DAT_0126f74c;
-struct NiD3DPass_Ex
-{
-    bool ShutdownPools_Ex(bool b);
-};
 struct Node_Stand
 {
     virtual void f00();
@@ -405,7 +396,7 @@ void __stdcall FUN_00b89cc0(Holder_Stand* apHolder)
         Dev_Stand* d = mgr->m_24->m_00;
         d->m_08 = esi->m_70;
         d->ApplyPairToState(esi->f51());
-        reinterpret_cast<NiD3DPass_Ex*>(d)->ShutdownPools_Ex(false);
+        reinterpret_cast<NiD3DPass*>(d)->ApplyRenderStateChanges(false);
     }
     void* val;
     unsigned int v = DAT_011f91e4;
@@ -432,38 +423,30 @@ void __stdcall FUN_00b89cc0(Holder_Stand* apHolder)
     }
     d->m_08 = val;
     d->ApplyPairToState(esi->f51());
-    reinterpret_cast<NiD3DPass_Ex*>(d)->ShutdownPools_Ex(false);
+    reinterpret_cast<NiD3DPass*>(d)->ApplyRenderStateChanges(false);
 }
 
+class NiD3DVertexShader;
 namespace fnv_00b8a1f0 {
-struct NiD3DPass;
-struct NiD3DPixelShader;
-struct NiD3DVertexShader;
 
-template <class T> class NiPointer
+// Unit-local view of NiPointer for 0x00b8a1f0 (namespace fnv_00b8a1f0): built on the shared NiPointer, that code does not compile or does not match.
+template <class T> class NiPointer_00b8a1f0
 {
   public:
-    NiPointer();
-    ~NiPointer();
+    NiPointer_00b8a1f0();
+    ~NiPointer_00b8a1f0();
     T* m_pObject;
 };
 
-struct RgbaColor
-{
-    float r;
-    float g;
-    float b;
-    float a;
-};
 
-extern RgbaColor g_kDefaultColor;
-extern RgbaColor g_kColorA;
-extern RgbaColor g_kColorB;
-extern RgbaColor g_kColorC;
-extern RgbaColor g_kColorD;
-extern RgbaColor g_kColorE;
-extern RgbaColor g_kColorF;
-extern RgbaColor g_kColorG;
+extern NiColorA g_kDefaultColor;
+extern NiColorA g_kColorA;
+extern NiColorA g_kColorB;
+extern NiColorA g_kColorC;
+extern NiColorA g_kColorD;
+extern NiColorA g_kColorE;
+extern NiColorA g_kColorF;
+extern NiColorA g_kColorG;
 
 struct ShaderBase
 {
@@ -501,9 +484,9 @@ struct FUN_00b8a1f0 : ShaderBase
     FUN_00b8a1f0();
     virtual ~FUN_00b8a1f0();
     unsigned int m_uiPassCount;
-    NiPointer<NiD3DPass> m_aspPasses[11];
-    NiPointer<NiD3DPixelShader> m_aspPixelShaders[11];
-    NiPointer<NiD3DVertexShader> m_aspVertexShaders[8];
+    NiPointer_00b8a1f0<NiD3DPass> m_aspPasses[11];
+    NiPointer_00b8a1f0<NiD3DPixelShader> m_aspPixelShaders[11];
+    NiPointer_00b8a1f0<NiD3DVertexShader> m_aspVertexShaders[8];
 };
 
 // Initializes the shader: sets m_uiPassCount to 11, resets the global colors to g_kDefaultColor, and sets unk24 to true.
@@ -855,33 +838,11 @@ struct StagePtr
     }
 };
 
-struct RefObject
 
+inline void NiRefObject::IncRefCount()
 {
-
-    virtual void Unused0();
-
-    virtual void DeleteThis();
-
-    long m_iObjectReferenceCount;
-
-    void DecRefCount()
-
-    {
-
-        if (InterlockedDecrement(&m_iObjectReferenceCount) == 0)
-
-            DeleteThis();
-    }
-
-    void IncRefCount()
-
-    {
-
-        InterlockedIncrement(&m_iObjectReferenceCount);
-    }
-};
-
+    InterlockedIncrement(reinterpret_cast<long volatile*>(&m_uiRefCount));
+}
 struct ElemObj
 
 {
@@ -931,7 +892,7 @@ struct ClusterObj
 
     unsigned int unk040;
 
-    RefObject* m_44;
+    NiRefObject* m_44;
 
     unsigned int unk048;
 
@@ -943,9 +904,9 @@ struct ClusterObj
 
     unsigned int unk058;
 
-    RefObject* m_5c;
+    NiRefObject* m_5c;
 
-    __forceinline void SetPixelShader(RefObject* p)
+    __forceinline void SetPixelShader(NiRefObject* p)
     {
         if (m_5c != p)
         {
@@ -956,7 +917,7 @@ struct ClusterObj
                 m_5c->IncRefCount();
         }
     }
-    __forceinline void SetVertexShader(RefObject* p)
+    __forceinline void SetVertexShader(NiRefObject* p)
     {
         if (m_44 != p)
         {
@@ -1059,43 +1020,43 @@ struct ShaderPassBuilder
 
     PassSlot m_94;
 
-    RefObject* m_98;
+    NiRefObject* m_98;
 
-    RefObject* m_9c;
+    NiRefObject* m_9c;
 
-    RefObject* m_a0;
+    NiRefObject* m_a0;
 
     unsigned int unk0a4;
 
-    RefObject* m_a8;
+    NiRefObject* m_a8;
 
-    RefObject* m_ac;
+    NiRefObject* m_ac;
 
-    RefObject* m_b0;
+    NiRefObject* m_b0;
 
-    RefObject* m_b4;
+    NiRefObject* m_b4;
 
-    RefObject* m_b8;
+    NiRefObject* m_b8;
 
-    RefObject* m_bc;
+    NiRefObject* m_bc;
 
-    RefObject* m_c0;
+    NiRefObject* m_c0;
 
-    RefObject* m_c4;
+    NiRefObject* m_c4;
 
-    RefObject* m_c8;
+    NiRefObject* m_c8;
 
-    RefObject* m_cc;
+    NiRefObject* m_cc;
 
-    RefObject* m_d0;
+    NiRefObject* m_d0;
 
-    RefObject* m_d4;
+    NiRefObject* m_d4;
 
-    RefObject* m_d8;
+    NiRefObject* m_d8;
 
-    RefObject* m_dc;
+    NiRefObject* m_dc;
 
-    RefObject* m_e0;
+    NiRefObject* m_e0;
 
     bool InitPasses();
 };
@@ -1480,33 +1441,11 @@ bool ShaderPassBuilder::InitPasses()
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiD3DShaderConstantMap : NiRefObject
+inline void NiD3DShaderConstantMap::DecRefCount()
 {
-    NiD3DShaderConstantMap(void*, int);
-    void* operator new(unsigned int size)
-    {
-        return FUN_00aa13e0(size);
-    }
-    void operator delete(void*)
-    {}
-    virtual void Add(const char*, unsigned int, unsigned int, unsigned int, unsigned int, const char*, unsigned int,
-                     unsigned int, void*, unsigned int);
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-};
+    if (InterlockedDecrement(reinterpret_cast<long volatile*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
 struct ConstantMapPointer
 {
     NiD3DShaderConstantMap* object;
@@ -1518,7 +1457,7 @@ struct ConstantMapPointer
                 object->DecRefCount();
             object = value;
             if (value)
-                InterlockedIncrement(&value->m_uiRefCount);
+                InterlockedIncrement(reinterpret_cast<long volatile*>(&value->m_uiRefCount));
         }
     }
 };
@@ -1595,19 +1534,19 @@ void ConstantMapOwner::CreateShaderConstantMaps()
 {
     if (!pixelConstants.object)
     {
-        pixelConstants = new NiD3DShaderConstantMap(renderer, 2);
-        pixelConstants.object->Add("Params", 0x10000005, 0, 4, 1, "", 8, 4, &unkE8, 0);
+        pixelConstants = new NiD3DShaderConstantMap(reinterpret_cast<GraphicsRenderer*>(renderer), 2u);
+        pixelConstants.object->SetConstant("Params", 0x10000005, 0, 4, 1, "", 8, 4, &unkE8, 0);
     }
     if (!vertexConstants.object)
     {
-        vertexConstants = new NiD3DShaderConstantMap(renderer, 0);
-        vertexConstants.object->Add("WorldViewProjTranspose", 0x20000009, 0, 0, 4, 0, 0, 0, 0, 0);
-        vertexConstants.object->Add("WorldTranspose", 0x20000009, 0, 8, 4, 0, 0, 0, 0, 0);
-        vertexConstants.object->Add("Color0", 0x10000007, 0, 4, 1, "", 16, 4, &DAT_011ff910, 0);
-        vertexConstants.object->Add("Color1", 0x10000007, 0, 5, 1, "", 16, 4, &DAT_011ff920, 0);
-        vertexConstants.object->Add("Color2", 0x10000007, 0, 6, 1, "", 16, 4, &DAT_011ff930, 0);
-        vertexConstants.object->Add("eyepos", 0x10000007, 0, 7, 1, "", 16, 4, &DAT_011ff8c8, 0);
-        vertexConstants.object->Add("Params", 0x10000004, 0, 12, 1, "", 4, 4, &unkE4, 0);
+        vertexConstants = new NiD3DShaderConstantMap(reinterpret_cast<GraphicsRenderer*>(renderer), 0u);
+        vertexConstants.object->SetConstant("WorldViewProjTranspose", 0x20000009, 0, 0, 4, 0, 0, 0, 0, 0);
+        vertexConstants.object->SetConstant("WorldTranspose", 0x20000009, 0, 8, 4, 0, 0, 0, 0, 0);
+        vertexConstants.object->SetConstant("Color0", 0x10000007, 0, 4, 1, "", 16, 4, &DAT_011ff910, 0);
+        vertexConstants.object->SetConstant("Color1", 0x10000007, 0, 5, 1, "", 16, 4, &DAT_011ff920, 0);
+        vertexConstants.object->SetConstant("Color2", 0x10000007, 0, 6, 1, "", 16, 4, &DAT_011ff930, 0);
+        vertexConstants.object->SetConstant("eyepos", 0x10000007, 0, 7, 1, "", 16, 4, &DAT_011ff8c8, 0);
+        vertexConstants.object->SetConstant("Params", 0x10000004, 0, 12, 1, "", 4, 4, &unkE4, 0);
     }
 }
 
@@ -1644,7 +1583,8 @@ struct Col_b899a0
     Col_b899a0();
 };
 extern Col_b899a0 DAT_011a9bd0;
-struct Bound_b899a0
+// Geometry-data prefix: the sphere is at 0x10 (NiGeometryData::m_kBound), not at 0 as in Bound.
+struct SkyGeometryDataView
 {
     int u00;
     int u04;
@@ -1707,7 +1647,7 @@ struct Shape_b899a0 : NiRefObject
     int sac;
     int sb0;
     int sb4;
-    Bound_b899a0* m_spGeometryData;
+    SkyGeometryDataView* m_spGeometryData;
     int sbc;
     int sc0;
 };
@@ -1717,7 +1657,7 @@ struct ShapePtr_b899a0
     ShapePtr_b899a0(Shape_b899a0* p) : m_p(p)
     {
         if (m_p)
-            InterlockedIncrement(&m_p->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&m_p->m_uiRefCount));
     }
     ~ShapePtr_b899a0()
     {
@@ -1732,7 +1672,7 @@ struct ShapePtr_b899a0
                 m_p->DecRefCount();
             m_p = o.m_p;
             if (m_p)
-                InterlockedIncrement(&m_p->m_uiRefCount);
+                InterlockedIncrement(reinterpret_cast<long volatile*>(&m_p->m_uiRefCount));
         }
     }
     Shape_b899a0* operator->() const
@@ -1817,9 +1757,9 @@ void __cdecl FUN_00b899a0(ShapePtr_b899a0& rspOut)
         pkColors[i] = kColor;
     }
     ShapePtr_b899a0 pShape = new Shape_b899a0(4, pkVerts, 0, pkColors, 0, 0, 0, 2, pusTris);
-    Bound_b899a0* pkBound = pShape->m_spGeometryData;
-    pkBound->m_kCenter = Pt3_b899a0(0.0f, 0.0f, 0.0f);
-    pkBound->m_fBoundRadius = 1000.0f;
+    SkyGeometryDataView* pkGeometryData = pShape->m_spGeometryData;
+    pkGeometryData->m_kCenter = Pt3_b899a0(0.0f, 0.0f, 0.0f);
+    pkGeometryData->m_fBoundRadius = 1000.0f;
     Shell_b899a0 kShell;
     kShell.FUN_00baf3c0();
     kShell.f00 = 6;
@@ -1841,25 +1781,6 @@ bool Shader447::FUN_00b89960()
     return InitPasses();
 }
 
-struct Point
-{
-    float x, y, z;
-};
-struct Vec4
-{
-    float x, y, z, w;
-};
-struct Transform
-{
-    float rotation[9];
-    Point translate;
-    float scale;
-};
-struct Bound
-{
-    Point center;
-    float radius;
-};
 struct GeoData
 {
     int unk00;
@@ -1905,7 +1826,7 @@ struct Geometry
     int unk5C;
     int unk60;
     int unk64;
-    Transform world;
+    NiTransform world;
 
     int unk9C;
     int unkA0;
@@ -1954,7 +1875,7 @@ struct Camera
     int unk80;
     int unk84;
     int unk88;
-    Point position;
+    NiPoint3 position;
 };
 struct Context
 {
@@ -2106,7 +2027,7 @@ struct RenderArg
 };
 struct Device
 {
-    void FUN_00e6fbb0(Transform*, int);
+    void FUN_00e6fbb0(NiTransform*, int);
 };
 struct Pass
 {
@@ -2140,7 +2061,7 @@ struct Pass
     virtual void v27();
     virtual void v28();
     virtual void v29();
-    virtual void Render(void*, Geometry*, void*, int, void*, RenderArg*, int, Transform*, Bound*, int, int);
+    virtual void Render(void*, Geometry*, void*, int, void*, RenderArg*, int, NiTransform*, Bound*, int, int);
 };
 struct EndDevice
 {
@@ -2187,7 +2108,7 @@ extern unsigned int DAT_011f91e4;
 extern Bound DAT_011f4288;
 extern Camera* DAT_011f95d8;
 extern Vec4 DAT_011fa2a0;
-extern Point DAT_011f474c;
+extern NiPoint3 DAT_011f474c;
 extern float DAT_011ff8a8;
 extern float DAT_011ff8b4[];
 extern const double runtimeInitializationDouble6;
@@ -2268,7 +2189,7 @@ void Shader::FUN_00b89d80(float apRenderArg)
     Vec4& out930 = *(Vec4*)&DAT_011ff930;
     unsigned int mode = DAT_011f91e4;
     Geometry* geometry = *DAT_011f91e0;
-    Transform* world = &geometry->world;
+    NiTransform* world = &geometry->world;
     Bound* bound = geometry->bound ? geometry->bound : &DAT_011f4288;
     void* data = geometry->geometryData->data;
     RenderArg* pRenderArg = *(RenderArg**)&apRenderArg;
@@ -2276,8 +2197,9 @@ void Shader::FUN_00b89d80(float apRenderArg)
     Property* property = pRenderArg->property;
     if (FUN_00b4f5d0()->relative)
     {
-        Transform tTransform = *world;
-        Point position = tTransform.translate;
+        NiTransform tTransform;
+        tTransform = *world;
+        NiPoint3 position = *reinterpret_cast<NiPoint3*>(&tTransform.m_Translate);
         position.x -= DAT_011f95d8->position.x;
         position.y -= DAT_011f95d8->position.y;
         position.z -= DAT_011f95d8->position.z;
@@ -2288,13 +2210,13 @@ void Shader::FUN_00b89d80(float apRenderArg)
             position.y += camera->position.y;
             position.z += camera->position.z;
         }
-        tTransform.translate = position;
+        *reinterpret_cast<NiPoint3*>(&tTransform.m_Translate) = position;
         device->FUN_00e6fbb0(&tTransform, 0);
     }
     else
         device->FUN_00e6fbb0(world, 0);
     Vec4 value = DAT_011fa2a0;
-    Point tDelta;
+    NiPoint3 tDelta;
     tDelta.x = value.x - DAT_011f474c.x;
     tDelta.y = value.y - DAT_011f474c.y;
     tDelta.z = value.z - DAT_011f474c.z;
@@ -2366,11 +2288,6 @@ void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 void __cdecl FUN_00be0c00(const char*, char*);
 int __cdecl FUN_00406d00(char*, int, const char*, ...);
-struct NiD3DGPUProgramCache
-{
-    static const char* GetVertexShaderProfile();
-    static const char* GetPixelShaderProfile(bool);
-};
 extern float DAT_011ff8ac;
 extern float DAT_011ff8b0;
 struct SkyShader
@@ -2460,7 +2377,7 @@ void SkyShader::FUN_00b874f0()
             m_98->DecRefCount();
         m_98 = next0;
         if (next0)
-            InterlockedIncrement(&next0->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next0->m_uiRefCount));
     }
     const char* shader1[19];
     shader1[0] = "sky\\v\\sky.v.hlsl";
@@ -2479,7 +2396,7 @@ void SkyShader::FUN_00b874f0()
             m_9c->DecRefCount();
         m_9c = next1;
         if (next1)
-            InterlockedIncrement(&next1->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next1->m_uiRefCount));
     }
     const char* shader2[19];
     shader2[0] = "sky\\v\\sky.v.hlsl";
@@ -2500,7 +2417,7 @@ void SkyShader::FUN_00b874f0()
             m_a0->DecRefCount();
         m_a0 = next2;
         if (next2)
-            InterlockedIncrement(&next2->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next2->m_uiRefCount));
     }
     shader16[0] = "sky\\v\\sky.v.hlsl";
     shader16[1] = "DEPTH_VALUE";
@@ -2520,7 +2437,7 @@ void SkyShader::FUN_00b874f0()
             m_a8->DecRefCount();
         m_a8 = next3;
         if (next3)
-            InterlockedIncrement(&next3->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next3->m_uiRefCount));
     }
     const char* shader4[19];
     shader4[0] = "sky\\v\\sky.v.hlsl";
@@ -2539,7 +2456,7 @@ void SkyShader::FUN_00b874f0()
             m_ac->DecRefCount();
         m_ac = next4;
         if (next4)
-            InterlockedIncrement(&next4->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next4->m_uiRefCount));
     }
     const char* shader5[19];
     shader5[0] = "sky\\v\\sky.v.hlsl";
@@ -2560,7 +2477,7 @@ void SkyShader::FUN_00b874f0()
             m_b0->DecRefCount();
         m_b0 = next5;
         if (next5)
-            InterlockedIncrement(&next5->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next5->m_uiRefCount));
     }
     const char* shader13[19] = {"sky\\v\\sky.v.hlsl", "HORIZFADE", 0, "TEX", 0, "CLOUDS", 0, 0, 0};
     FUN_00be0c00(shader5[0], sourceName);
@@ -2573,7 +2490,7 @@ void SkyShader::FUN_00b874f0()
             m_b4->DecRefCount();
         m_b4 = next6;
         if (next6)
-            InterlockedIncrement(&next6->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next6->m_uiRefCount));
     }
     const char* shader7[19];
     shader7[0] = "sky\\p\\sky.p.hlsl";
@@ -2590,7 +2507,7 @@ void SkyShader::FUN_00b874f0()
             m_c4->DecRefCount();
         m_c4 = next7;
         if (next7)
-            InterlockedIncrement(&next7->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next7->m_uiRefCount));
     }
     const char* shader8[19];
     shader8[0] = "sky\\p\\sky.p.hlsl";
@@ -2609,7 +2526,7 @@ void SkyShader::FUN_00b874f0()
             m_c8->DecRefCount();
         m_c8 = next8;
         if (next8)
-            InterlockedIncrement(&next8->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next8->m_uiRefCount));
     }
     const char* shader9[19];
     shader9[0] = "sky\\p\\sky.p.hlsl";
@@ -2630,7 +2547,7 @@ void SkyShader::FUN_00b874f0()
             m_cc->DecRefCount();
         m_cc = next9;
         if (next9)
-            InterlockedIncrement(&next9->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next9->m_uiRefCount));
     }
     _gcvt(DAT_011ff8ac, 12, numberBuffer);
     const char* shader10[19];
@@ -2650,7 +2567,7 @@ void SkyShader::FUN_00b874f0()
             m_d0->DecRefCount();
         m_d0 = next10;
         if (next10)
-            InterlockedIncrement(&next10->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next10->m_uiRefCount));
     }
     const char* shader11[19];
     shader11[0] = "sky\\p\\sky.p.hlsl";
@@ -2669,7 +2586,7 @@ void SkyShader::FUN_00b874f0()
             m_d4->DecRefCount();
         m_d4 = next11;
         if (next11)
-            InterlockedIncrement(&next11->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next11->m_uiRefCount));
     }
     const char* shader12[19];
     shader12[0] = "sky\\v\\sky.v.hlsl";
@@ -2690,7 +2607,7 @@ void SkyShader::FUN_00b874f0()
             m_b8->DecRefCount();
         m_b8 = next12;
         if (next12)
-            InterlockedIncrement(&next12->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next12->m_uiRefCount));
     }
     const char* shader6[19] = {"sky\\v\\sky.v.hlsl", "DEPTH_VALUE", "0.999999", "SI", 0, "SI_CLOUDS", "", 0, 0};
     FUN_00be0c00(shader6[0], sourceName);
@@ -2703,7 +2620,7 @@ void SkyShader::FUN_00b874f0()
             m_bc->DecRefCount();
         m_bc = next13;
         if (next13)
-            InterlockedIncrement(&next13->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next13->m_uiRefCount));
     }
     const char* shader14[19];
     shader14[0] = "sky\\v\\sky_quad.v.hlsl";
@@ -2722,7 +2639,7 @@ void SkyShader::FUN_00b874f0()
             m_c0->DecRefCount();
         m_c0 = next14;
         if (next14)
-            InterlockedIncrement(&next14->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next14->m_uiRefCount));
     }
     _gcvt(DAT_011ff8b0, 12, numberBuffer);
     const char* shader15[19];
@@ -2742,7 +2659,7 @@ void SkyShader::FUN_00b874f0()
             m_e0->DecRefCount();
         m_e0 = next15;
         if (next15)
-            InterlockedIncrement(&next15->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next15->m_uiRefCount));
     }
     _gcvt(DAT_011ff8ac, 12, numberBuffer);
     shader3[0] = "sky\\p\\sky.p.hlsl";
@@ -2763,7 +2680,7 @@ void SkyShader::FUN_00b874f0()
             m_d8->DecRefCount();
         m_d8 = next16;
         if (next16)
-            InterlockedIncrement(&next16->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next16->m_uiRefCount));
     }
     const char* shader17[19];
     shader17[0] = "sky\\p\\sky.p.hlsl";
@@ -2784,6 +2701,6 @@ void SkyShader::FUN_00b874f0()
             m_dc->DecRefCount();
         m_dc = next17;
         if (next17)
-            InterlockedIncrement(&next17->m_uiRefCount);
+            InterlockedIncrement(reinterpret_cast<long volatile*>(&next17->m_uiRefCount));
     }
 }

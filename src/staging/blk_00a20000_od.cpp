@@ -1,8 +1,11 @@
+#include "../../include/BSStringT.h"
 
 // src/staging/blk_00a20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/NiAllocator.h"
+#include "../../include/Setting.h"
+#include "../../include/SettingCollectionList.h"
 
 struct FUN_00a23a30_Class
 {
@@ -336,10 +339,7 @@ void FUN_00a26310_Class::FUN_00a26310(int a, FUN_00a26480_class* b)
     }
 }
 
-struct BSStr
-{
-    bool Set(const char*, unsigned int);
-};
+
 struct FUN_00a22640_Class
 {
     int m_00;
@@ -356,7 +356,7 @@ struct FUN_00a22640_Class
     int m_2c;
     int m_30;
     int m_34;
-    BSStr m_38;
+    ::BSStringT<char> m_38;
     void FUN_00a22640();
 };
 // @fnv 0x00a22640
@@ -763,10 +763,6 @@ struct InputInterface
     virtual unsigned long __stdcall Release() = 0;
 };
 
-struct NiAllocator
-{
-    void __thiscall FUN_00aa4060(void*);
-};
 extern NiAllocator DAT_011f6238;
 
 struct InputManagerClose
@@ -808,7 +804,7 @@ void InputManagerClose::ShutdownInput()
     if (*(void**)((char*)this + 0x1b84))
     {
         void* buffer = *(void**)((char*)this + 0x1b84);
-        DAT_011f6238.FUN_00aa4060(buffer);
+        DAT_011f6238.Deallocate(buffer);
     }
 }
 
@@ -7173,17 +7169,6 @@ void WaveController::UpdateWaveChannel(int channel, short* output, unsigned int 
 }
 
 void FUN_004de4a0();
-class Setting
-{
-  public:
-    void* m_pKey;
-    unsigned int m_uiVal;
-};
-template <class T> class SettingCollectionList
-{
-  public:
-    bool Get(const char* pcName, T*& rpSetting);
-};
 namespace a260 {
 extern SettingCollectionList<Setting>* DAT_011f35a0;
 }
@@ -7212,7 +7197,7 @@ bool RedeemedContentA26::FUN_00a26020(unsigned int a1)
     pSetting3 = r;
     {
         unsigned int unk08;
-        return pSetting3 ? (unk08 = ((FUN_00a261a0_cls*)this)->FUN_00a261a0(a1), (pSetting3->m_uiVal & unk08) != 0)
+        return pSetting3 ? (unk08 = ((FUN_00a261a0_cls*)this)->FUN_00a261a0(a1), (*reinterpret_cast<unsigned int*>(&pSetting3->uValue) & unk08) != 0)
                          : false;
     }
 }

@@ -1,7 +1,117 @@
 // tesobjectarmo.cpp: TESObjectARMO, ArmorSerializer, ArmorCopy, TESObjectARMOFoley and more (15 functions)
 
-#include "tesobjectarmo_decls.h"
-#include "tesobjectarmo_load.h"
+#include <stddef.h>
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+
+// Keep the list lifetime declarations used by these record loaders. The shared
+// MagicTarget list currently declares neither its constructor nor destructor.
+#include "../include/BSSimpleList.h"
+#include "../include/BaseFormComponent.h"
+#define FNV_BASEFORMCOMPONENT_H
+#include "../include/TESForm.h"
+#include "../include/ENUM_FORM_ID.h"
+#include "../include/BSSoundHandle.h"
+#include "../include/BGSBipedModelList.h"
+#include "../include/BGSPickupPutdownSounds.h"
+#include "../include/BGSRepairItemList.h"
+#include "../include/TESBipedModelForm.h"
+#include "../include/TESFullName.h"
+#include "../include/TESHealthForm.h"
+#include "../include/TESValueForm.h"
+#include "../include/TESWeightForm.h"
+#include "../include/ArmorData.h"
+#include "../include/BGSDestructibleObjectForm.h"
+#include "../include/BGSEquipType.h"
+#include "../include/ShortPoint3.h"
+#include "../include/TESBoundObject.h"
+#include "../include/TESBoundObject__BOUND_DATA.h"
+#include "../include/TESEnchantableForm.h"
+#include "../include/TESObject.h"
+#include "../include/TESTexture1024.h"
+
+#include "../include/TESScriptableForm.h"
+#include "../include/TESObjectARMO.h"
+
+class BipedModelForm;
+class BSFileEntry;
+
+// Only corroborated SoundDescriptor fields are exposed; the middle four bytes have
+// conflicting chance-field offsets in public declarations and are not accessed.
+class SoundDescriptor
+{
+  public:
+    SoundDescriptor();
+    void Endian();
+    TESSound* SoundAssetTmp;
+    unsigned char layoutPadding4[4];
+    int eType;
+};
+FNV_STATIC_ASSERT(sizeof(SoundDescriptor) == 12);
+class DistantTreeTextureInfo;
+
+class BipedModelForm
+{
+  public:
+    void Endian();
+    unsigned int m_uiBipedModelFlags;  // +0x0, 4 bytes
+    unsigned char m_ucBipedModelData;  // +0x4, 1 bytes
+    unsigned char layoutPadding5[3];
+};
+FNV_STATIC_ASSERT(sizeof(BipedModelForm) == 8);
+FNV_STATIC_ASSERT(offsetof(BipedModelForm, m_uiBipedModelFlags) == 0);
+FNV_STATIC_ASSERT(offsetof(BipedModelForm, m_ucBipedModelData) == 4);
+
+FNV_STATIC_ASSERT(sizeof(ArmorData) == 12);
+FNV_STATIC_ASSERT(offsetof(ArmorData, m_usArmorRating) == 0);
+FNV_STATIC_ASSERT(offsetof(ArmorData, fArmorProtectionValue) == 4);
+FNV_STATIC_ASSERT(offsetof(ArmorData, cFlags) == 8);
+FNV_STATIC_ASSERT(offsetof(ArmorData, m_ucSubtype) == 9);
+
+FNV_STATIC_ASSERT(sizeof(TESObjectARMO) == 400);
+FNV_STATIC_ASSERT(offsetof(TESObjectARMO, data) == 376);
+FNV_STATIC_ASSERT(offsetof(TESObjectARMO, flags) == 388);
+FNV_STATIC_ASSERT(offsetof(TESObjectARMO, m_pPickupPutdownSoundList) == 392);
+FNV_STATIC_ASSERT(offsetof(TESObjectARMO, m_pSoundSourceArmor) == 392);
+FNV_STATIC_ASSERT(offsetof(TESObjectARMO, m_bUsesSoundList) == 396);
+
+// ArmorData does not yet declare its record endian helper.
+struct ArmorDataEndian
+{
+    void FUN_00535aa0();
+};
+
+// Record-loading helpers and legacy armor layouts.
+#include "../include/TESFile.h"
+extern "C" void* __cdecl _alloca(unsigned int);
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+void* __cdecl operator new(unsigned int);
+void __cdecl operator delete(void*);
+class TESFileFormVersion
+{
+  public:
+    unsigned short GetFormVersion();
+};
+class TESFileChunkData16
+{
+  public:
+    bool GetChunkData(unsigned short*);
+};
+
+// Legacy formats retained for records written before the current armor layout.
+struct TESObjectARMOOldBipedModel
+{
+    unsigned short slots;
+    unsigned char flags;
+    void FUN_00512810();
+};
+struct TESObjectARMOOldData
+{
+    unsigned short rating;
+    void FUN_00512810();
+};
+
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 int __cdecl Warning(const char*, ...);
 
@@ -30,7 +140,7 @@ void TESObjectARMO::InitItem()
 {
     if (IsFormInitialized())
         return;
-    if (!m_kBipedModelForm.m_uiBipedModelFlags)
+    if (!partMask)
         Warning("MASTERFILE: Armor '%s' needs to have biped slots selected in the editor.", GetName());
     TESScriptableForm::InitItem(this);
     TESEnchantableForm::InitItem(this);
@@ -81,7 +191,7 @@ bool TESObjectARMO::Load(TESFile* file)
             readOBNDSubRecord(file);
             break;
         case 'LLUF':
-            TESFullNameLoader::LoadFullNameChunk(this, file);
+            TESFullName::LoadFullNameChunk(this, file);
             break;
         case 'IRCS': {
             unsigned int uiScriptFormID = 0;
@@ -111,22 +221,22 @@ bool TESObjectARMO::Load(TESFile* file)
                 file->GetChunkData(&oldBipedModel, sizeof(oldBipedModel));
                 if (file->IsEndianConversionRequired())
                     oldBipedModel.FUN_00512810();
-                m_kBipedModelForm.m_ucBipedModelData = oldBipedModel.flags;
-                m_kBipedModelForm.m_uiBipedModelFlags = oldBipedModel.slots;
+                bipedFlags = oldBipedModel.flags;
+                partMask = oldBipedModel.slots;
             }
             else
             {
-                file->GetChunkData(&m_kBipedModelForm, sizeof(m_kBipedModelForm));
+                file->GetChunkData(&partMask, sizeof(BipedModelForm));
                 if (file->IsEndianConversionRequired())
-                    m_kBipedModelForm.Endian();
+                    ((BipedModelForm*)&partMask)->Endian();
             }
-            m_kBipedModelForm.m_ucBipedModelData &= ~16;
+            bipedFlags &= ~16;
             break;
         }
         case 'TCMB': {
             char* name = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(name, 0);
-            m_kFaceGenModel.SetModelFilePath(name);
+            modelRDT.SetModelFilePath(name);
             break;
         }
         case 'LDOM': {
@@ -150,19 +260,19 @@ bool TESObjectARMO::Load(TESFile* file)
         case '2DOM': {
             char* name = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(name, 0);
-            worldModel[0].SetModelFilePath(name);
+            groundModel[0].SetModelFilePath(name);
             break;
         }
         case 'T2OM':
-            TESModel::LoadTextureSwapData(&worldModel[0], file);
+            TESModel::LoadTextureSwapData(&groundModel[0], file);
             break;
         case 'S2OM':
-            TESModelTextureSwap::ReadTextureSwapChunk(&worldModel[0], file);
+            TESModelTextureSwap::ReadTextureSwapChunk(&groundModel[0], file);
             break;
         case 'NOCI': {
             char* name = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(name, 0);
-            ((TESTexture1024*)&m_kIcon[0])->SetTexture(name);
+            ((TESTexture1024*)&icon[0])->SetTexture(name);
             break;
         }
         case 'OCIM': {
@@ -192,19 +302,19 @@ bool TESObjectARMO::Load(TESFile* file)
         case '4DOM': {
             char* name = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(name, 0);
-            worldModel[1].SetModelFilePath(name);
+            groundModel[1].SetModelFilePath(name);
             break;
         }
         case 'T4OM':
-            TESModel::LoadTextureSwapData(&worldModel[1], file);
+            TESModel::LoadTextureSwapData(&groundModel[1], file);
             break;
         case 'S4OM':
-            TESModelTextureSwap::ReadTextureSwapChunk(&worldModel[1], file);
+            TESModelTextureSwap::ReadTextureSwapChunk(&groundModel[1], file);
             break;
         case '2OCI': {
             char* name = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(name, 0);
-            ((TESTexture1024*)&m_kIcon[1])->SetTexture(name);
+            ((TESTexture1024*)&icon[1])->SetTexture(name);
             break;
         }
         case 'TSED':
@@ -294,12 +404,12 @@ bool TESObjectARMO::Load(TESFile* file)
             memset(&data, 0, sizeof(data));
             file->GetChunkData(&data, sizeof(data));
             if (file->IsEndianConversionRequired())
-                data.FUN_00535aa0();
+                reinterpret_cast<ArmorDataEndian*>(&data)->FUN_00535aa0();
             break;
         }
         }
         if (chunk == 'ATAD' && file->IsEndianConversionRequired())
-            data.FUN_00535aa0();
+            reinterpret_cast<ArmorDataEndian*>(&data)->FUN_00535aa0();
         if (!file->NextChunk())
             break;
     }
@@ -317,263 +427,52 @@ bool FUN_00514450_shell::FUN_00514450()
     return *((unsigned char*)this + 8) & 8;
 }
 
-struct FUN_00484bf0
+// Save-game methods absent from TESObjectARMO use method-only bridges.
+struct ArmorSaveGame
 {
     unsigned short GetSaveSize(unsigned int);
+    void SaveGame(unsigned int);
+    void LoadGame(unsigned int, unsigned int);
 };
-
-struct FUN_0048e9b0
+struct FormSaveGame
 {
     unsigned short GetSaveSize(unsigned int);
+    void SaveGame(unsigned int);
+    void LoadGame(unsigned int, unsigned int);
 };
 
-struct FUN_00514470
-{
-    FUN_00484bf0 m_00;
-    unsigned char m_58[0x58];
-    unsigned short GetSaveSize(unsigned int);
-};
-
-// Returns the sum of the save sizes reported by the sub-object at offset 0 and the one at offset 0x58, both queried with aiFlags.
 // @fnv 0x00514470
-unsigned short FUN_00514470::GetSaveSize(unsigned int aiFlags)
+unsigned short ArmorSaveGame::GetSaveSize(unsigned int aiFlags)
 {
     unsigned short isize = 0;
-    isize += m_00.GetSaveSize(aiFlags);
-    isize += ((FUN_0048e9b0*)((char*)this + 0x58))->GetSaveSize(aiFlags);
+    isize += reinterpret_cast<FormSaveGame*>(this)->GetSaveSize(aiFlags);
+    isize += ((TESValueForm*)((char*)this + 0x58))->TESValueForm::GetSaveSize(aiFlags);
     return isize;
 }
 
-struct FUN_0051b070_shell
-{
-    void FUN_00484c20(unsigned int);
-    void FUN_0048e9e0(unsigned int);
-};
-struct FUN_00516040_shell
-{
-    FUN_0051b070_shell m0;
-    char _pad[0x58 - sizeof(FUN_0051b070_shell)];
-    FUN_0051b070_shell m58;
-    void FUN_00516040(unsigned int);
-};
-// Calls FUN_00484c20 on m0 and FUN_0048e9e0 on m58, passing aiFlags to each.
 // @fnv 0x00516040
-void FUN_00516040_shell::FUN_00516040(unsigned int aiFlags)
+void ArmorSaveGame::SaveGame(unsigned int aiFlags)
 {
-    m0.FUN_00484c20(aiFlags);
-    m58.FUN_0048e9e0(aiFlags);
+    reinterpret_cast<FormSaveGame*>(this)->SaveGame(aiFlags);
+    reinterpret_cast<TESValueForm*>((char*)this + 0x58)->FUN_0048e9e0(aiFlags);
 }
 
-struct TESFormStub
-{
-    void __thiscall FUN_00484c50(unsigned int, unsigned int);
-};
-
-struct TESValueFormStub
-{
-    void __thiscall FUN_0048ea10(unsigned int, unsigned int);
-};
-
-struct FUN_00516070_shell
-{
-    char _pad[0x58];
-    TESValueFormStub m_valueStub;
-    void __thiscall FUN_00516070(unsigned int, unsigned int);
-};
-
-// Forwards both arguments to TESFormStub::FUN_00484c50 on this object, then to m_valueStub.FUN_0048ea10.
 // @fnv 0x00516070
-void __thiscall FUN_00516070_shell::FUN_00516070(unsigned int a1, unsigned int a2)
+void ArmorSaveGame::LoadGame(unsigned int a1, unsigned int a2)
 {
-    reinterpret_cast<TESFormStub*>(this)->FUN_00484c50(a1, a2);
-    m_valueStub.FUN_0048ea10(a1, a2);
+    reinterpret_cast<FormSaveGame*>(this)->LoadGame(a1, a2);
+    reinterpret_cast<TESValueForm*>((char*)this + 0x58)->FUN_0048ea10(a1, a2);
 }
 
-struct B1_4fe
-{
-    virtual ~B1_4fe();
-    B1_4fe();
-    char pad[0x2c];
-};
-namespace stand {
-struct TESFullName
-{
-    virtual void f0();
-    TESFullName();
-    ~TESFullName();
-    char pad[0x8];
-};
-struct TESScriptableForm
-{
-    virtual void f0();
-    TESScriptableForm();
-    char pad[0x8];
-};
-struct TESEnchantableForm
-{
-    virtual void f0();
-    TESEnchantableForm();
-    char pad[0xc];
-};
-struct TESValueForm
-{
-    virtual void f0();
-    TESValueForm();
-    ~TESValueForm();
-    char pad[0x4];
-};
-struct TESWeightForm
-{
-    virtual void f0();
-    TESWeightForm();
-    ~TESWeightForm();
-    char pad[0x4];
-};
-struct TESHealthForm
-{
-    virtual void f0();
-    TESHealthForm();
-    ~TESHealthForm();
-    char pad[0x4];
-};
-struct TESBipedModelForm
-{
-    virtual void f0();
-    TESBipedModelForm();
-    ~TESBipedModelForm();
-    char pad[0xd8];
-};
-struct BGSDestructibleObjectForm
-{
-    virtual void f0();
-    BGSDestructibleObjectForm();
-    ~BGSDestructibleObjectForm();
-    char pad[0x4];
-};
-struct BGSEquipType
-{
-    virtual void f0();
-    BGSEquipType();
-    char pad[0x4];
-};
-struct BGSRepairItemList
-{
-    virtual void f0();
-    BGSRepairItemList();
-    ~BGSRepairItemList();
-    char pad[0x4];
-};
-struct BGSBipedModelList
-{
-    virtual void f0();
-    BGSBipedModelList();
-    ~BGSBipedModelList();
-    char pad[0x4];
-};
-struct BGSPickupPutdownSounds
-{
-    virtual void f0();
-    BGSPickupPutdownSounds();
-    ~BGSPickupPutdownSounds();
-    char pad[0x8];
-};
-}
-struct SoundPlaybackHandle
-{
-    void SetFormType(int);
-};
-struct FUN_005129f0_ARMO
-{
-    void ResetFormData();
-};
-struct FUN_005129f0 : public B1_4fe,
-                      public stand::TESFullName,
-                      public stand::TESScriptableForm,
-                      public stand::TESEnchantableForm,
-                      public stand::TESValueForm,
-                      public stand::TESWeightForm,
-                      public stand::TESHealthForm,
-                      public stand::TESBipedModelForm,
-                      public stand::BGSDestructibleObjectForm,
-                      public stand::BGSEquipType,
-                      public stand::BGSRepairItemList,
-                      public stand::BGSBipedModelList,
-                      public stand::BGSPickupPutdownSounds
-{
-    unsigned char data[0xc];
-    unsigned int flags;
-    void* m_pPickupPutdownSoundList;
-    bool m_bUsesSoundList;
-    FUN_005129f0();
-    virtual ~FUN_005129f0();
-};
-// Sets the form type to 0x18 and then runs the ARMO-specific initialization on this object.
 // @fnv 0x005129f0
-FUN_005129f0::FUN_005129f0()
+TESObjectARMO::TESObjectARMO()
 {
-    ((SoundPlaybackHandle*)this)->SetFormType(0x18);
-    ((FUN_005129f0_ARMO*)this)->ResetFormData();
+    SetFormType(ENUM_FORM_ID_ARMO_ID);
+    ResetFormData();
 }
 
-struct FUN_0050e9f0 : public TESBoundObject
-{
-    ~FUN_0050e9f0();
-};
-struct FUN_00591300 : public TESFullName
-{
-    ~FUN_00591300();
-};
-struct FUN_0048e7d0 : public TESValueForm
-{
-    ~FUN_0048e7d0();
-};
-struct FUN_0048eaf0 : public TESWeightForm
-{
-    ~FUN_0048eaf0();
-};
-struct FUN_00487200 : public TESHealthForm
-{
-    ~FUN_00487200();
-};
-struct FUN_00480400 : public TESBipedModelForm
-{
-    ~FUN_00480400();
-};
-struct FUN_00475380 : public BGSDestructibleObjectForm
-{
-    ~FUN_00475380();
-};
-struct FUN_0047b880 : public BGSRepairItemList
-{
-    ~FUN_0047b880();
-};
-struct FUN_00474d40 : public BGSBipedModelList
-{
-    ~FUN_00474d40();
-};
-struct FUN_0047b520 : public BGSPickupPutdownSounds
-{
-    ~FUN_0047b520();
-};
-class FUN_00512bd0 : public FUN_0050e9f0,
-                     public FUN_00591300,
-                     public TESScriptableForm,
-                     public TESEnchantableForm,
-                     public FUN_0048e7d0,
-                     public FUN_0048eaf0,
-                     public FUN_00487200,
-                     public FUN_00480400,
-                     public FUN_00475380,
-                     public BGSEquipType,
-                     public FUN_0047b880,
-                     public FUN_00474d40,
-                     public FUN_0047b520
-{
-  public:
-    virtual ~FUN_00512bd0();
-};
 // @fnv 0x00512bd0
-FUN_00512bd0::~FUN_00512bd0()
+TESObjectARMO::~TESObjectARMO()
 {}
 
 bool FUN_00401500();
@@ -585,39 +484,23 @@ struct FUN_004855a0_shell
     void FUN_00485680();
     void FUN_00485e00();
 };
-struct FUN_00487010_shell
-{
-    void FUN_00487010();
-};
-struct S_0048cca0
-{
-    void FUN_0048cca0();
-};
-struct FUN_0047bd70_shell
-{
-    void FUN_0047bd70();
-};
-struct S_00480610
+
+// Serialization methods missing from the shared component headers use method-only bridges.
+struct BipedModelSerialization
 {
     void InitBipedModel();
 };
-struct S_00477f20
-{
-    void FUN_00477f20();
-};
-struct S0047b8a0
+
+struct RepairListSerialization
 {
     void FUN_0047b8a0();
 };
-struct FUN_00474d60_shell
+struct BipedModelListSerialization
 {
     void FUN_00474d60();
 };
-struct FUN_00479350_shell
-{
-    void FUN_00479350();
-};
-struct FUN_0047b560_holder
+
+struct PickupPutdownSerialization
 {
     void LogFormIDs();
 };
@@ -638,29 +521,8 @@ struct FUN_00513d60
     FUN_00513d60();
     void FUN_00483710();
 };
-struct ArmorSerializer
+struct ArmorSerializer : TESObjectARMO
 {
-    TESBoundObject bound;
-    TESFullName fullName;
-    TESScriptableForm scriptable;
-    TESEnchantableForm enchantable;
-    TESValueForm valueForm;
-    TESWeightForm weightForm;
-    TESHealthForm healthForm;
-    TESBipedModelForm biped;
-    BGSDestructibleObjectForm destructible;
-    BGSEquipType equipType;
-    BGSRepairItemList repairList;
-    BGSBipedModelList modelList;
-    BGSPickupPutdownSounds pickupSounds;
-    ArmorData data;
-    unsigned int flags;
-    union
-    {
-        BSSimpleList<SoundDescriptor*>* m_pPickupPutdownSoundList;
-        TESObjectARMO* m_pSoundSourceArmor;
-    };
-    bool m_bUsesSoundList;
     void Save();
 };
 
@@ -668,21 +530,21 @@ struct ArmorSerializer
 void ArmorSerializer::Save()
 {
     ((FUN_004855a0_shell*)this)->FUN_004855a0();
-    ((FUN_00487010_shell*)&fullName)->FUN_00487010();
-    ((S_0048cca0*)&scriptable)->FUN_0048cca0();
-    ((FUN_0047bd70_shell*)&enchantable)->FUN_0047bd70();
-    ((S_00480610*)&biped)->InitBipedModel();
-    ((S_00477f20*)&destructible)->FUN_00477f20();
-    ((S0047b8a0*)&repairList)->FUN_0047b8a0();
-    ((FUN_00474d60_shell*)&modelList)->FUN_00474d60();
-    ((FUN_00479350_shell*)&equipType)->FUN_00479350();
-    ((FUN_0047b560_holder*)&pickupSounds)->LogFormIDs();
+    TESFullName::FUN_00487010();
+    TESScriptableForm::Save();
+    TESEnchantableForm::Save();
+    reinterpret_cast<BipedModelSerialization*>(((char*)this + 0x70))->InitBipedModel();
+    BGSDestructibleObjectForm::Save();
+    reinterpret_cast<RepairListSerialization*>(((char*)this + 0x15C))->FUN_0047b8a0();
+    reinterpret_cast<BipedModelListSerialization*>(((char*)this + 0x164))->FUN_00474d60();
+    BGSEquipType::Save();
+    reinterpret_cast<PickupPutdownSerialization*>(((char*)this + 0x16C))->LogFormIDs();
     ((FUN_004855a0_shell*)this)->FUN_00485e00();
     if (FUN_00401500())
-        data.FUN_00535aa0();
+        reinterpret_cast<ArmorDataEndian*>(&data)->FUN_00535aa0();
     AppendChunk(0x4d414e44, &data, sizeof(data));
     if (FUN_00401500())
-        data.FUN_00535aa0();
+        reinterpret_cast<ArmorDataEndian*>(&data)->FUN_00535aa0();
     FUN_00485910(0x4d414e42, m_bUsesSoundList ? 1 : 0);
     if (!m_bUsesSoundList)
     {
@@ -799,14 +661,6 @@ TESSound* TESObjectARMOFoley::GetFoleySound(int eType)
     }
     return pkSound;
 }
-
-struct FUN_00512ba0 : TESObjectARMO
-{
-    virtual ~FUN_00512ba0();
-};
-// @fnv 0x00512ba0
-FUN_00512ba0::~FUN_00512ba0()
-{}
 
 #include <string.h>
 struct ArmorCompare : TESObjectARMO

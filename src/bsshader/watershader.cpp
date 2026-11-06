@@ -1,8 +1,36 @@
 // bsshader/watershader.cpp: WaterShader, MaterialShader, WaterShaderLoader, WaterShaderReleaser and more (12 functions)
+#include "NiRefObject_inline.h"
 
 #include "watershader_decls.h"
+inline NiColorA::NiColorA(float red, float green, float blue, float alpha)
+    : r(red), g(green), b(blue), a(alpha) {}
+
+
+inline void NiTexture::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiTexture::DecRefCount() { NiRefObject::DecRefCount(); }
+inline void NiD3DPass::IncRefCount() { ++m_uiRefCount; }
+inline void NiD3DPass::DecRefCount() { if (--m_uiRefCount == 0) DeleteThis(); }
+inline void NiD3DVertexShader::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DVertexShader::DecRefCount() { NiRefObject::DecRefCount(); }
+inline void NiD3DPixelShader::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DPixelShader::DecRefCount() { NiRefObject::DecRefCount(); }
+inline void NiD3DShaderConstantMap::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DShaderConstantMap::DecRefCount() { NiRefObject::DecRefCount(); }
+inline void NiShaderConstantMapEntry::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiShaderConstantMapEntry::DecRefCount() { NiRefObject::DecRefCount(); }
+
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 #pragma intrinsic(memset)
+
+// VC9 reverses the shared GetEntry overloads within their vtable group. The
+// game's name lookup is slot 0x70; preserve its pointer signature without a
+// second class definition or narrowing the name to an unsigned integer.
+static __forceinline NiShaderConstantMapEntry* LookupWaterConstant(
+    NiD3DShaderConstantMap* map, const char* name)
+{
+    typedef NiShaderConstantMapEntry* (__thiscall* Lookup)(NiD3DShaderConstantMap*, const char*);
+    return (*reinterpret_cast<Lookup**>(map))[28](map, name);
+}
 
 // Creates the vertex and pixel shader constant maps once, registers their constants and stores the resulting handles in globals.
 // @fnv 0x00b86f20
@@ -10,39 +38,39 @@ void WaterShader::UpdateShaderConstants()
 {
     WaterShaderThreadState* threadState = WaterShaderGetThreadState();
     WaterShaderMemContext m_uiMemoryContext(threadState, 29);
-    if (!m_spSecondShaderConstantMap.m_pObject)
+    if (!m_spVertexConstantMap.m_pObject)
     {
-        NiD3DShaderConstantMap* vertexMap = new NiD3DShaderConstantMap(m_pShaderObject, 0);
-        m_spSecondShaderConstantMap = vertexMap;
-        m_spSecondShaderConstantMap.m_pObject->vfn_68("WorldViewProjTranspose", 0x20000009, 0, "", 0, 0, 0, false);
-        DAT_011ff4a0 = m_spSecondShaderConstantMap.m_pObject->vfn_70("WorldViewProjTranspose");
-        m_spSecondShaderConstantMap.m_pObject->vfn_68("WorldTranspose", 0x20000009, 4, "", 0, 0, 0, false);
-        DAT_011ff4a4 = m_spSecondShaderConstantMap.m_pObject->vfn_70("WorldTranspose");
-        m_spSecondShaderConstantMap.m_pObject->vfn_8("CommonData", 0x10000009, 0, 8, 3, "", 0x30, 4, DAT_011ff548,
+        NiD3DShaderConstantMap* vertexMap = new NiD3DShaderConstantMap(m_pkD3DRenderer, 0u);
+        m_spVertexConstantMap = vertexMap;
+        m_spVertexConstantMap.m_pObject->AddConstant8("WorldViewProjTranspose", 0x20000009, 0, "", 0, 0, 0, false);
+        DAT_011ff4a0 = LookupWaterConstant(m_spVertexConstantMap.m_pObject, "WorldViewProjTranspose");
+        m_spVertexConstantMap.m_pObject->AddConstant8("WorldTranspose", 0x20000009, 4, "", 0, 0, 0, false);
+        DAT_011ff4a4 = LookupWaterConstant(m_spVertexConstantMap.m_pObject, "WorldTranspose");
+        m_spVertexConstantMap.m_pObject->SetConstant("CommonData", 0x10000009, 0, 8, 3, "", 0x30, 4, DAT_011ff548,
                                                      false);
-        DAT_011ff4a8 = m_spSecondShaderConstantMap.m_pObject->vfn_70("CommonData");
+        DAT_011ff4a8 = LookupWaterConstant(m_spVertexConstantMap.m_pObject, "CommonData");
     }
-    if (!m_spFirstShaderConstantMap.m_pObject)
+    if (!m_spPixelConstantMap.m_pObject)
     {
-        NiD3DShaderConstantMap* pixelMap = new NiD3DShaderConstantMap(m_pShaderObject, 2);
-        m_spFirstShaderConstantMap = pixelMap;
-        m_spFirstShaderConstantMap.m_pObject->vfn_8("CommonData", 0x10000009, 0, 1, 7, "", 0x70, 4, DAT_011ff588,
+        NiD3DShaderConstantMap* pixelMap = new NiD3DShaderConstantMap(m_pkD3DRenderer, 2u);
+        m_spPixelConstantMap = pixelMap;
+        m_spPixelConstantMap.m_pObject->SetConstant("CommonData", 0x10000009, 0, 1, 7, "", 0x70, 4, DAT_011ff588,
                                                     false);
-        DAT_011ff4ac = m_spFirstShaderConstantMap.m_pObject->vfn_70("CommonData");
-        m_spFirstShaderConstantMap.m_pObject->vfn_8("VarAmounts", 0x10000007, 0, 8, 1, "", 0x10, 4, DAT_011ff5f8,
+        DAT_011ff4ac = LookupWaterConstant(m_spPixelConstantMap.m_pObject, "CommonData");
+        m_spPixelConstantMap.m_pObject->SetConstant("VarAmounts", 0x10000007, 0, 8, 1, "", 0x10, 4, DAT_011ff5f8,
                                                     false);
-        DAT_011ff4b0 = m_spFirstShaderConstantMap.m_pObject->vfn_70("VarAmounts");
-        m_spFirstShaderConstantMap.m_pObject->vfn_8("FogData", 0x1000000c, 0, 9, 2, "", 0x20, 4, DAT_011ff608, false);
-        DAT_011ff4b4 = m_spFirstShaderConstantMap.m_pObject->vfn_70("FogData");
-        m_spFirstShaderConstantMap.m_pObject->vfn_8("DepthData", 0x10000007, 0, 11, 1, "", 0x10, 4, DAT_011ff628,
+        DAT_011ff4b0 = LookupWaterConstant(m_spPixelConstantMap.m_pObject, "VarAmounts");
+        m_spPixelConstantMap.m_pObject->SetConstant("FogData", 0x1000000c, 0, 9, 2, "", 0x20, 4, DAT_011ff608, false);
+        DAT_011ff4b4 = LookupWaterConstant(m_spPixelConstantMap.m_pObject, "FogData");
+        m_spPixelConstantMap.m_pObject->SetConstant("DepthData", 0x10000007, 0, 11, 1, "", 0x10, 4, DAT_011ff628,
                                                     false);
-        DAT_011ff4b8 = m_spFirstShaderConstantMap.m_pObject->vfn_70("DepthData");
-        m_spFirstShaderConstantMap.m_pObject->vfn_8("SunLightData", 0x1000000c, 0, 12, 2, "", 0x20, 4, DAT_011ff638,
+        DAT_011ff4b8 = LookupWaterConstant(m_spPixelConstantMap.m_pObject, "DepthData");
+        m_spPixelConstantMap.m_pObject->SetConstant("SunLightData", 0x1000000c, 0, 12, 2, "", 0x20, 4, DAT_011ff638,
                                                     false);
-        DAT_011ff4bc = m_spFirstShaderConstantMap.m_pObject->vfn_70("SunLightData");
-        m_spFirstShaderConstantMap.m_pObject->vfn_8("LightData", 0x10000009, 0, 14, 17, "", 0x110, 4, DAT_011ff658,
+        DAT_011ff4bc = LookupWaterConstant(m_spPixelConstantMap.m_pObject, "SunLightData");
+        m_spPixelConstantMap.m_pObject->SetConstant("LightData", 0x10000009, 0, 14, 17, "", 0x110, 4, DAT_011ff658,
                                                     false);
-        DAT_011ff4c0 = m_spFirstShaderConstantMap.m_pObject->vfn_70("LightData");
+        DAT_011ff4c0 = LookupWaterConstant(m_spPixelConstantMap.m_pObject, "LightData");
     }
     m_uiMemoryContext.Restore(threadState);
 }
@@ -50,8 +78,8 @@ void WaterShader::UpdateShaderConstants()
 // @fnv 0x00b86bd0
 WaterShader::WaterShader()
 {
-    m_iPassId = 13;
-    m_bIsInitialized = true;
+    iShaderType = 13;
+    m_bUsesNiRenderState = true;
     m_spSecondTexture = 0;
     m_spTexture4 = 0;
     m_spFirstTexture = 0;
@@ -60,7 +88,7 @@ WaterShader::WaterShader()
     DAT_011ff104 = false;
     DAT_011ff103 = false;
     DAT_011ff102 = false;
-    DAT_011ff458 = RgbaColor(0.0f, 0.0f, 0.0f, 0.0f);
+    DAT_011ff458 = NiColorA(0.0f, 0.0f, 0.0f, 0.0f);
     if (fnv_particle_shader_renderer_level <= 2)
         DAT_011ff100 = false;
     memset(&DAT_011ff118, 0, sizeof(DAT_011ff118.count) + sizeof(DAT_011ff118.active));
@@ -74,16 +102,16 @@ BSShader* WaterShader::CreateShader()
     WaterShaderThreadState* threadState = WaterShaderGetThreadState();
     WaterShaderMemContext m_uiMemoryContext(threadState, 29);
     NiD3DVertexDeclaration* declaration = NiD3DVertexDeclaration::Create(DAT_011f9508, 4, 1);
-    declaration->SetEntry(0, 0, 0, 2, 0);
-    declaration->SetEntry(1, 3, 3, 2, 0);
-    declaration->SetEntry(2, 5, 4, 4, 0);
-    declaration->SetEntry(3, 7, 5, 1, 0);
-    declaration->vfn_b4();
+    declaration->SetEntry(0, 0, (NiShaderDeclaration::ShaderParameter)0, (NiShaderDeclaration::ShaderParameterType)2, 0);
+    declaration->SetEntry(1, 3, (NiShaderDeclaration::ShaderParameter)3, (NiShaderDeclaration::ShaderParameterType)2, 0);
+    declaration->SetEntry(2, 5, (NiShaderDeclaration::ShaderParameter)4, (NiShaderDeclaration::ShaderParameterType)4, 0);
+    declaration->SetEntry(3, 7, (NiShaderDeclaration::ShaderParameter)5, (NiShaderDeclaration::ShaderParameterType)1, 0);
+    declaration->GetD3DDeclaration();
     WaterShader* shader = new WaterShader;
     shader->Initialize();
     shader->InitializeShaderData();
     shader->InitWaterPasses();
-    shader->vfn_11c();
+    shader->InitShaderConstants();
     shader->UseShaderDeclaration(declaration);
     m_uiMemoryContext.Restore(threadState);
     return shader;
@@ -145,11 +173,6 @@ void __stdcall FUN_00b86b80(FUN_00b86b80_arg* apArg)
         _FUN_00b98070(0, 0);
 }
 
-struct WaterPassOps
-{
-    void FUN_00b79950(NiD3DVertexShader*);
-    void FUN_00b80600(NiD3DPixelShader*);
-};
 
 extern unsigned int DAT_11ff120;
 extern unsigned int DAT_11ff124;
@@ -223,12 +246,6 @@ extern unsigned int DAT_11ff238;
 extern unsigned int DAT_11ff23c;
 extern unsigned int DAT_11ff240;
 extern unsigned int DAT_11ff244;
-struct Ref112
-{
-    virtual void Unused();
-    virtual void DeleteThis();
-    long refs;
-};
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 struct Stage112
@@ -283,60 +300,31 @@ struct WaterConstantState
     void SetNodeValue(unsigned int, unsigned int, unsigned int);
 };
 extern WaterConstantState* __cdecl FUN_00e7f5d0();
-struct Pass112
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    void* stages;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    WaterConstantState* map;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    Ref112* pixel;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    Ref112* vertex;
-    void FUN_00e802b0(void*, Stage112*);
-    void FUN_00b80040(unsigned int, unsigned int, unsigned int);
-};
-extern void __cdecl FUN_00e804d0(Pass112**);
+extern void __cdecl FUN_00e804d0(NiD3DPass**);
 extern void __cdecl AssignStageFromPool(Stage112**);
 extern void __cdecl ConfigureBeamStage(Stage112*, unsigned int, unsigned int, unsigned int, unsigned int);
-static __forceinline void AssignPassConstant(Pass112* pass, unsigned int index, unsigned int kind, unsigned int stages)
+static __forceinline void AssignPassConstant(NiD3DPass* pass, unsigned int index, unsigned int kind, unsigned int stages)
 {
-    if (!pass->map)
-        pass->map = FUN_00e7f5d0();
-    pass->map->SetNodeValue(index, kind, stages);
+    if (!reinterpret_cast<WaterConstantState*&>(pass->m_pkRenderStateGroup))
+        reinterpret_cast<WaterConstantState*&>(pass->m_pkRenderStateGroup) = FUN_00e7f5d0();
+    reinterpret_cast<WaterConstantState*&>(pass->m_pkRenderStateGroup)->SetNodeValue(index, kind, stages);
 }
-static __forceinline void AssignRef112(Ref112*& dst, Ref112* src)
+template <class T> static __forceinline void AssignWaterShader(NiPointer<T>& dst, T* src)
 {
-    Ref112* old = dst;
+    T* old = dst.m_pObject;
     if (old != src)
     {
         if (old)
         {
-            if (InterlockedDecrement(&old->refs) == 0)
+            if (InterlockedDecrement(reinterpret_cast<volatile long*>(&old->m_uiRefCount)) == 0)
                 old->DeleteThis();
         }
-        dst = src;
+        dst.m_pObject = src;
         if (src)
-            InterlockedIncrement(&src->refs);
+            InterlockedIncrement(reinterpret_cast<volatile long*>(&src->m_uiRefCount));
     }
 }
-static __forceinline void SetSpecial112(Pass112* pass)
+static __forceinline void SetSpecial112(NiD3DPass* pass)
 {
     AssignPassConstant(pass, 0x13, 5, 1);
     AssignPassConstant(pass, 0x14, 2, 1);
@@ -350,7 +338,7 @@ bool Water112::InitWaterPasses()
 {
     for (int iPass = 0; iPass < 74; ++iPass)
     {
-        Pass112** slot = (Pass112**)&spRenderPass[iPass];
+        NiD3DPass** slot = (NiD3DPass**)&spRenderPass[iPass];
         if ((*slot) == 0)
         {
             FUN_00e804d0(slot);
@@ -358,23 +346,23 @@ bool Water112::InitWaterPasses()
             AssignStageFromPool(&declaration.p);
             ConfigureBeamStage(declaration.p, 0, 3, 2, 1);
             declaration.p->FUN_00e7def0(1);
-            (*slot)->FUN_00e802b0((*slot)->stages, declaration.p);
+            (*slot)->FUN_00e802b0((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
             AssignStageFromPool(&declaration.p);
             ConfigureBeamStage(declaration.p, 1, 3, 2, 1);
             declaration.p->FUN_00e7def0(1);
-            (*slot)->FUN_00e802b0((*slot)->stages, declaration.p);
+            (*slot)->FUN_00e802b0((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
             AssignStageFromPool(&declaration.p);
             ConfigureBeamStage(declaration.p, 2, 1, 2, 1);
             declaration.p->FUN_00e7def0(1);
-            (*slot)->FUN_00e802b0((*slot)->stages, declaration.p);
+            (*slot)->FUN_00e802b0((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
             AssignStageFromPool(&declaration.p);
             ConfigureBeamStage(declaration.p, 3, 1, 2, 1);
             declaration.p->FUN_00e7def0(1);
-            (*slot)->FUN_00e802b0((*slot)->stages, declaration.p);
+            (*slot)->FUN_00e802b0((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
             AssignStageFromPool(&declaration.p);
             ConfigureBeamStage(declaration.p, 4, 3, 2, 1);
             declaration.p->FUN_00e7def0(1);
-            (*slot)->FUN_00e802b0((*slot)->stages, declaration.p);
+            (*slot)->FUN_00e802b0((*slot)->m_uiCurrentStage, reinterpret_cast<BeamStage*>(declaration.p));
             AssignPassConstant(*slot, 0x0f, 1, 1);
             AssignPassConstant(*slot, 0x18, 0, 1);
             AssignPassConstant(*slot, 0x19, 5, 1);
@@ -383,7 +371,7 @@ bool Water112::InitWaterPasses()
                 if (iPass != 0x24 && iPass != 0x48 && iPass != 0x25 && iPass != 0x49)
                 {
                     AssignPassConstant(*slot, 0x1b, 1, 1);
-                    (*slot)->FUN_00b80040(5, 6, 0);
+                    (*slot)->SetAlphaBlendMode(5, 6, false);
                 }
                 else
                 {
@@ -416,227 +404,227 @@ bool Water112::InitWaterPasses()
             }
         }
     }
-    AssignRef112(((Pass112*)spRenderPass[0].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[0].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[0].m_pObject);
+    AssignWaterShader(spRenderPass[0].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[0].m_pObject->m_spPixelShader, m_aspPixelShaders[0].m_pObject);
     DAT_11ff120 = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[1].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[1].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[1].m_pObject);
+    AssignWaterShader(spRenderPass[1].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[1].m_pObject->m_spPixelShader, m_aspPixelShaders[1].m_pObject);
     DAT_11ff124 = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[2].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[2].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[2].m_pObject);
+    AssignWaterShader(spRenderPass[2].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[2].m_pObject->m_spPixelShader, m_aspPixelShaders[2].m_pObject);
     DAT_11ff128 = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[3].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[3].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[3].m_pObject);
+    AssignWaterShader(spRenderPass[3].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[3].m_pObject->m_spPixelShader, m_aspPixelShaders[3].m_pObject);
     DAT_11ff12c = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[4].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[4].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[4].m_pObject);
+    AssignWaterShader(spRenderPass[4].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[4].m_pObject->m_spPixelShader, m_aspPixelShaders[4].m_pObject);
     DAT_11ff130 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[5].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[5].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[5].m_pObject);
+    AssignWaterShader(spRenderPass[5].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[5].m_pObject->m_spPixelShader, m_aspPixelShaders[5].m_pObject);
     DAT_11ff134 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[6].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[6].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[6].m_pObject);
+    AssignWaterShader(spRenderPass[6].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[6].m_pObject->m_spPixelShader, m_aspPixelShaders[6].m_pObject);
     DAT_11ff138 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[7].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[7].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[7].m_pObject);
+    AssignWaterShader(spRenderPass[7].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[7].m_pObject->m_spPixelShader, m_aspPixelShaders[7].m_pObject);
     DAT_11ff13c = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[8].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[8].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[8].m_pObject);
+    AssignWaterShader(spRenderPass[8].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[8].m_pObject->m_spPixelShader, m_aspPixelShaders[8].m_pObject);
     DAT_11ff140 = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[9].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[9].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[9].m_pObject);
+    AssignWaterShader(spRenderPass[9].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[9].m_pObject->m_spPixelShader, m_aspPixelShaders[9].m_pObject);
     DAT_11ff144 = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[10].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[10].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[10].m_pObject);
+    AssignWaterShader(spRenderPass[10].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[10].m_pObject->m_spPixelShader, m_aspPixelShaders[10].m_pObject);
     DAT_11ff148 = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[11].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[11].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[11].m_pObject);
+    AssignWaterShader(spRenderPass[11].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[11].m_pObject->m_spPixelShader, m_aspPixelShaders[11].m_pObject);
     DAT_11ff14c = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[12].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[12].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[12].m_pObject);
+    AssignWaterShader(spRenderPass[12].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[12].m_pObject->m_spPixelShader, m_aspPixelShaders[12].m_pObject);
     DAT_11ff150 = 0xe;
-    AssignRef112(((Pass112*)spRenderPass[13].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[13].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[13].m_pObject);
+    AssignWaterShader(spRenderPass[13].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[13].m_pObject->m_spPixelShader, m_aspPixelShaders[13].m_pObject);
     DAT_11ff154 = 0xe;
-    AssignRef112(((Pass112*)spRenderPass[14].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[14].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[14].m_pObject);
+    AssignWaterShader(spRenderPass[14].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[14].m_pObject->m_spPixelShader, m_aspPixelShaders[14].m_pObject);
     DAT_11ff158 = 0xe;
-    AssignRef112(((Pass112*)spRenderPass[15].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[15].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[15].m_pObject);
+    AssignWaterShader(spRenderPass[15].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[15].m_pObject->m_spPixelShader, m_aspPixelShaders[15].m_pObject);
     DAT_11ff15c = 0xe;
-    AssignRef112(((Pass112*)spRenderPass[16].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[16].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[16].m_pObject);
+    AssignWaterShader(spRenderPass[16].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[16].m_pObject->m_spPixelShader, m_aspPixelShaders[16].m_pObject);
     DAT_11ff160 = 0xe;
-    AssignRef112(((Pass112*)spRenderPass[17].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[17].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[17].m_pObject);
+    AssignWaterShader(spRenderPass[17].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[17].m_pObject->m_spPixelShader, m_aspPixelShaders[17].m_pObject);
     DAT_11ff164 = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[18].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[18].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[18].m_pObject);
+    AssignWaterShader(spRenderPass[18].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[18].m_pObject->m_spPixelShader, m_aspPixelShaders[18].m_pObject);
     DAT_11ff168 = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[19].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[19].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[19].m_pObject);
+    AssignWaterShader(spRenderPass[19].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[19].m_pObject->m_spPixelShader, m_aspPixelShaders[19].m_pObject);
     DAT_11ff16c = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[20].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[20].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[20].m_pObject);
+    AssignWaterShader(spRenderPass[20].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[20].m_pObject->m_spPixelShader, m_aspPixelShaders[20].m_pObject);
     DAT_11ff170 = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[21].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[21].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[21].m_pObject);
+    AssignWaterShader(spRenderPass[21].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[21].m_pObject->m_spPixelShader, m_aspPixelShaders[21].m_pObject);
     DAT_11ff174 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[22].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[22].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[22].m_pObject);
+    AssignWaterShader(spRenderPass[22].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[22].m_pObject->m_spPixelShader, m_aspPixelShaders[22].m_pObject);
     DAT_11ff178 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[23].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[23].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[23].m_pObject);
+    AssignWaterShader(spRenderPass[23].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[23].m_pObject->m_spPixelShader, m_aspPixelShaders[23].m_pObject);
     DAT_11ff17c = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[24].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[24].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[24].m_pObject);
+    AssignWaterShader(spRenderPass[24].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[24].m_pObject->m_spPixelShader, m_aspPixelShaders[24].m_pObject);
     DAT_11ff180 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[25].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[25].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[25].m_pObject);
+    AssignWaterShader(spRenderPass[25].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[25].m_pObject->m_spPixelShader, m_aspPixelShaders[25].m_pObject);
     DAT_11ff184 = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[26].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[26].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[26].m_pObject);
+    AssignWaterShader(spRenderPass[26].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[26].m_pObject->m_spPixelShader, m_aspPixelShaders[26].m_pObject);
     DAT_11ff188 = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[27].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[27].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[27].m_pObject);
+    AssignWaterShader(spRenderPass[27].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[27].m_pObject->m_spPixelShader, m_aspPixelShaders[27].m_pObject);
     DAT_11ff18c = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[28].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[28].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[28].m_pObject);
+    AssignWaterShader(spRenderPass[28].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[28].m_pObject->m_spPixelShader, m_aspPixelShaders[28].m_pObject);
     DAT_11ff190 = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[29].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[29].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[29].m_pObject);
+    AssignWaterShader(spRenderPass[29].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[29].m_pObject->m_spPixelShader, m_aspPixelShaders[29].m_pObject);
     DAT_11ff190 = 0xe;
-    AssignRef112(((Pass112*)spRenderPass[30].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[30].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[30].m_pObject);
+    AssignWaterShader(spRenderPass[30].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[30].m_pObject->m_spPixelShader, m_aspPixelShaders[30].m_pObject);
     DAT_11ff198 = 0xe;
-    AssignRef112(((Pass112*)spRenderPass[31].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[31].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[31].m_pObject);
+    AssignWaterShader(spRenderPass[31].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[31].m_pObject->m_spPixelShader, m_aspPixelShaders[31].m_pObject);
     DAT_11ff19c = 0xe;
-    AssignRef112(((Pass112*)spRenderPass[32].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[32].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[32].m_pObject);
+    AssignWaterShader(spRenderPass[32].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[32].m_pObject->m_spPixelShader, m_aspPixelShaders[32].m_pObject);
     DAT_11ff1a0 = 0xe;
-    AssignRef112(((Pass112*)spRenderPass[33].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[33].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[33].m_pObject);
+    AssignWaterShader(spRenderPass[33].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[33].m_pObject->m_spPixelShader, m_aspPixelShaders[33].m_pObject);
     DAT_11ff1a4 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[34].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[34].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[34].m_pObject);
+    AssignWaterShader(spRenderPass[34].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[34].m_pObject->m_spPixelShader, m_aspPixelShaders[34].m_pObject);
     DAT_11ff1a8 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[35].m_pObject)->vertex, (Ref112*)m_spVertexShader1.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[35].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[35].m_pObject);
+    AssignWaterShader(spRenderPass[35].m_pObject->m_spVertexShader, m_spVertexShader1.m_pObject);
+    AssignWaterShader(spRenderPass[35].m_pObject->m_spPixelShader, m_aspPixelShaders[35].m_pObject);
     DAT_11ff1ac = 0;
-    AssignRef112(((Pass112*)spRenderPass[36].m_pObject)->vertex, (Ref112*)m_spVertexShader3.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[36].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[36].m_pObject);
+    AssignWaterShader(spRenderPass[36].m_pObject->m_spVertexShader, m_spVertexShader3.m_pObject);
+    AssignWaterShader(spRenderPass[36].m_pObject->m_spPixelShader, m_aspPixelShaders[36].m_pObject);
     DAT_11ff1b0 = 0x4e;
-    AssignRef112(((Pass112*)spRenderPass[37].m_pObject)->vertex, (Ref112*)m_spVertexShader3.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[37].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[37].m_pObject);
+    AssignWaterShader(spRenderPass[37].m_pObject->m_spVertexShader, m_spVertexShader3.m_pObject);
+    AssignWaterShader(spRenderPass[37].m_pObject->m_spPixelShader, m_aspPixelShaders[37].m_pObject);
     DAT_11ff1b4 = 0x4e;
-    AssignRef112(((Pass112*)spRenderPass[38].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[38].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[0].m_pObject);
+    AssignWaterShader(spRenderPass[38].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[38].m_pObject->m_spPixelShader, m_aspPixelShaders[0].m_pObject);
     DAT_11ff1b8 = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[39].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[39].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[1].m_pObject);
+    AssignWaterShader(spRenderPass[39].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[39].m_pObject->m_spPixelShader, m_aspPixelShaders[1].m_pObject);
     DAT_11ff1bc = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[40].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[40].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[2].m_pObject);
+    AssignWaterShader(spRenderPass[40].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[40].m_pObject->m_spPixelShader, m_aspPixelShaders[2].m_pObject);
     DAT_11ff1c0 = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[41].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[41].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[3].m_pObject);
+    AssignWaterShader(spRenderPass[41].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[41].m_pObject->m_spPixelShader, m_aspPixelShaders[3].m_pObject);
     DAT_11ff1c4 = 0x3e;
-    AssignRef112(((Pass112*)spRenderPass[42].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[42].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[4].m_pObject);
+    AssignWaterShader(spRenderPass[42].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[42].m_pObject->m_spPixelShader, m_aspPixelShaders[4].m_pObject);
     DAT_11ff1c8 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[43].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[43].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[5].m_pObject);
+    AssignWaterShader(spRenderPass[43].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[43].m_pObject->m_spPixelShader, m_aspPixelShaders[5].m_pObject);
     DAT_11ff1cc = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[44].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[44].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[6].m_pObject);
+    AssignWaterShader(spRenderPass[44].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[44].m_pObject->m_spPixelShader, m_aspPixelShaders[6].m_pObject);
     DAT_11ff1d0 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[45].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[45].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[7].m_pObject);
+    AssignWaterShader(spRenderPass[45].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[45].m_pObject->m_spPixelShader, m_aspPixelShaders[7].m_pObject);
     DAT_11ff1d4 = 0x2e;
-    AssignRef112(((Pass112*)spRenderPass[46].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[46].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[8].m_pObject);
+    AssignWaterShader(spRenderPass[46].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[46].m_pObject->m_spPixelShader, m_aspPixelShaders[8].m_pObject);
     DAT_11ff1d8 = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[47].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[47].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[9].m_pObject);
+    AssignWaterShader(spRenderPass[47].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[47].m_pObject->m_spPixelShader, m_aspPixelShaders[9].m_pObject);
     DAT_11ff1dc = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[48].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[48].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[10].m_pObject);
+    AssignWaterShader(spRenderPass[48].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[48].m_pObject->m_spPixelShader, m_aspPixelShaders[10].m_pObject);
     DAT_11ff1e0 = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[49].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    AssignRef112(((Pass112*)spRenderPass[49].m_pObject)->pixel, (Ref112*)m_aspPixelShaders[11].m_pObject);
+    AssignWaterShader(spRenderPass[49].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    AssignWaterShader(spRenderPass[49].m_pObject->m_spPixelShader, m_aspPixelShaders[11].m_pObject);
     DAT_11ff1e4 = 0x1e;
-    AssignRef112(((Pass112*)spRenderPass[50].m_pObject)->vertex, (Ref112*)m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[50].m_pObject)->FUN_00b80600(m_aspPixelShaders[12].m_pObject);
+    AssignWaterShader(spRenderPass[50].m_pObject->m_spVertexShader, m_spVertexShader2.m_pObject);
+    spRenderPass[50].m_pObject->SetPixelShader(m_aspPixelShaders[12].m_pObject);
     DAT_11ff1e8 = 0xe;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[51].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[51].m_pObject)->FUN_00b80600(m_aspPixelShaders[13].m_pObject);
+    spRenderPass[51].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[51].m_pObject->SetPixelShader(m_aspPixelShaders[13].m_pObject);
     DAT_11ff1ec = 0xe;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[52].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[52].m_pObject)->FUN_00b80600(m_aspPixelShaders[14].m_pObject);
+    spRenderPass[52].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[52].m_pObject->SetPixelShader(m_aspPixelShaders[14].m_pObject);
     DAT_11ff1f0 = 0xe;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[53].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[53].m_pObject)->FUN_00b80600(m_aspPixelShaders[15].m_pObject);
+    spRenderPass[53].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[53].m_pObject->SetPixelShader(m_aspPixelShaders[15].m_pObject);
     DAT_11ff1f4 = 0xe;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[54].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[54].m_pObject)->FUN_00b80600(m_aspPixelShaders[16].m_pObject);
+    spRenderPass[54].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[54].m_pObject->SetPixelShader(m_aspPixelShaders[16].m_pObject);
     DAT_11ff1f8 = 0xe;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[55].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[55].m_pObject)->FUN_00b80600(m_aspPixelShaders[17].m_pObject);
+    spRenderPass[55].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[55].m_pObject->SetPixelShader(m_aspPixelShaders[17].m_pObject);
     DAT_11ff1fc = 0x3e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[56].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[56].m_pObject)->FUN_00b80600(m_aspPixelShaders[18].m_pObject);
+    spRenderPass[56].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[56].m_pObject->SetPixelShader(m_aspPixelShaders[18].m_pObject);
     DAT_11ff200 = 0x3e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[57].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[57].m_pObject)->FUN_00b80600(m_aspPixelShaders[19].m_pObject);
+    spRenderPass[57].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[57].m_pObject->SetPixelShader(m_aspPixelShaders[19].m_pObject);
     DAT_11ff204 = 0x3e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[58].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[58].m_pObject)->FUN_00b80600(m_aspPixelShaders[20].m_pObject);
+    spRenderPass[58].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[58].m_pObject->SetPixelShader(m_aspPixelShaders[20].m_pObject);
     DAT_11ff208 = 0x3e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[59].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[59].m_pObject)->FUN_00b80600(m_aspPixelShaders[21].m_pObject);
+    spRenderPass[59].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[59].m_pObject->SetPixelShader(m_aspPixelShaders[21].m_pObject);
     DAT_11ff20c = 0x2e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[60].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[60].m_pObject)->FUN_00b80600(m_aspPixelShaders[22].m_pObject);
+    spRenderPass[60].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[60].m_pObject->SetPixelShader(m_aspPixelShaders[22].m_pObject);
     DAT_11ff210 = 0x2e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[61].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[61].m_pObject)->FUN_00b80600(m_aspPixelShaders[23].m_pObject);
+    spRenderPass[61].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[61].m_pObject->SetPixelShader(m_aspPixelShaders[23].m_pObject);
     DAT_11ff214 = 0x2e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[62].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[62].m_pObject)->FUN_00b80600(m_aspPixelShaders[24].m_pObject);
+    spRenderPass[62].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[62].m_pObject->SetPixelShader(m_aspPixelShaders[24].m_pObject);
     DAT_11ff218 = 0x2e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[63].m_pObject)->FUN_00b79950(m_spVertexShader1.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[63].m_pObject)->FUN_00b80600(m_aspPixelShaders[25].m_pObject);
+    spRenderPass[63].m_pObject->SetVertexShader(m_spVertexShader1.m_pObject);
+    spRenderPass[63].m_pObject->SetPixelShader(m_aspPixelShaders[25].m_pObject);
     DAT_11ff21c = 0x1e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[64].m_pObject)->FUN_00b79950(m_spVertexShader1.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[64].m_pObject)->FUN_00b80600(m_aspPixelShaders[26].m_pObject);
+    spRenderPass[64].m_pObject->SetVertexShader(m_spVertexShader1.m_pObject);
+    spRenderPass[64].m_pObject->SetPixelShader(m_aspPixelShaders[26].m_pObject);
     DAT_11ff220 = 0x1e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[65].m_pObject)->FUN_00b79950(m_spVertexShader1.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[65].m_pObject)->FUN_00b80600(m_aspPixelShaders[27].m_pObject);
+    spRenderPass[65].m_pObject->SetVertexShader(m_spVertexShader1.m_pObject);
+    spRenderPass[65].m_pObject->SetPixelShader(m_aspPixelShaders[27].m_pObject);
     DAT_11ff224 = 0x1e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[66].m_pObject)->FUN_00b79950(m_spVertexShader1.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[66].m_pObject)->FUN_00b80600(m_aspPixelShaders[28].m_pObject);
+    spRenderPass[66].m_pObject->SetVertexShader(m_spVertexShader1.m_pObject);
+    spRenderPass[66].m_pObject->SetPixelShader(m_aspPixelShaders[28].m_pObject);
     DAT_11ff228 = 0x1e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[67].m_pObject)->FUN_00b79950(m_spVertexShader1.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[67].m_pObject)->FUN_00b80600(m_aspPixelShaders[29].m_pObject);
+    spRenderPass[67].m_pObject->SetVertexShader(m_spVertexShader1.m_pObject);
+    spRenderPass[67].m_pObject->SetPixelShader(m_aspPixelShaders[29].m_pObject);
     DAT_11ff228 = 0xe;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[68].m_pObject)->FUN_00b79950(m_spVertexShader1.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[68].m_pObject)->FUN_00b80600(m_aspPixelShaders[30].m_pObject);
+    spRenderPass[68].m_pObject->SetVertexShader(m_spVertexShader1.m_pObject);
+    spRenderPass[68].m_pObject->SetPixelShader(m_aspPixelShaders[30].m_pObject);
     DAT_11ff230 = 0xe;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[69].m_pObject)->FUN_00b79950(m_spVertexShader1.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[69].m_pObject)->FUN_00b80600(m_aspPixelShaders[31].m_pObject);
+    spRenderPass[69].m_pObject->SetVertexShader(m_spVertexShader1.m_pObject);
+    spRenderPass[69].m_pObject->SetPixelShader(m_aspPixelShaders[31].m_pObject);
     DAT_11ff234 = 0xe;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[70].m_pObject)->FUN_00b79950(m_spVertexShader1.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[70].m_pObject)->FUN_00b80600(m_aspPixelShaders[32].m_pObject);
+    spRenderPass[70].m_pObject->SetVertexShader(m_spVertexShader1.m_pObject);
+    spRenderPass[70].m_pObject->SetPixelShader(m_aspPixelShaders[32].m_pObject);
     DAT_11ff238 = 0xe;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[71].m_pObject)->FUN_00b79950(m_spVertexShader2.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[71].m_pObject)->FUN_00b80600(m_aspPixelShaders[35].m_pObject);
+    spRenderPass[71].m_pObject->SetVertexShader(m_spVertexShader2.m_pObject);
+    spRenderPass[71].m_pObject->SetPixelShader(m_aspPixelShaders[35].m_pObject);
     DAT_11ff23c = 0;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[72].m_pObject)->FUN_00b79950(m_spVertexShader3.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[72].m_pObject)->FUN_00b80600(m_aspPixelShaders[36].m_pObject);
+    spRenderPass[72].m_pObject->SetVertexShader(m_spVertexShader3.m_pObject);
+    spRenderPass[72].m_pObject->SetPixelShader(m_aspPixelShaders[36].m_pObject);
     DAT_11ff240 = 0x4e;
-    reinterpret_cast<WaterPassOps*>(spRenderPass[73].m_pObject)->FUN_00b79950(m_spVertexShader3.m_pObject);
-    reinterpret_cast<WaterPassOps*>(spRenderPass[73].m_pObject)->FUN_00b80600(m_aspPixelShaders[37].m_pObject);
+    spRenderPass[73].m_pObject->SetVertexShader(m_spVertexShader3.m_pObject);
+    spRenderPass[73].m_pObject->SetPixelShader(m_aspPixelShaders[37].m_pObject);
     DAT_11ff244 = 0x4e;
     return true;
 }
@@ -876,52 +864,6 @@ void MaterialShader::BindMaterialTextures(ShaderArgument* argument)
     }
 }
 
-class D3DPassB824B0
-{
-  public:
-    void IncRefCount()
-    {
-        ++m_uiRefCount;
-    }
-    void DecRefCount()
-    {
-        if (--m_uiRefCount == 0)
-            DeleteThis();
-    }
-    void DeleteThis();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    unsigned int m_uiRefCount;
-};
-class D3DShaderProgramB824B0 : public NiRefObject
-{
-};
-class TextureB824B0 : public NiRefObject
-{
-};
 struct ShaderConstantB824B0
 {
     float x;
@@ -932,65 +874,18 @@ struct ShaderConstantB824B0
 extern const ShaderConstantB824B0 g_kZeroConstantB824B0;
 extern ShaderConstantB824B0 g_akVertexConstantsB824B0[11];
 extern ShaderConstantB824B0 g_akPixelConstantsB824B0[31];
-class ShaderBaseB824B0
-{
-  public:
-    virtual ~ShaderBaseB824B0();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-};
-class FUN_00b824b0 : public ShaderBaseB824B0
-{
-  public:
-    virtual ~FUN_00b824b0();
-    NiPointer<D3DPassB824B0> m_aspPasses[74];
-    NiPointer<D3DShaderProgramB824B0> m_spWaterVertexShader;
-    NiPointer<D3DShaderProgramB824B0> m_spWaterVertexShaderVc;
-    NiPointer<D3DShaderProgramB824B0> m_spWaterVertexShaderLighting;
-    NiPointer<D3DShaderProgramB824B0> m_aspWaterPixelShaders[38];
-    NiPointer<TextureB824B0> m_spNormalMapTexture;
-    NiPointer<TextureB824B0> m_spReflectionTexture;
-    NiPointer<TextureB824B0> m_spRefractionTexture;
-    NiPointer<TextureB824B0> m_spInteriorReflectionTexture;
-    NiPointer<TextureB824B0> m_spDetailTexture;
-    NiPointer<TextureB824B0> m_spNoiseMap;
-};
 
 // Destructor that nulls the water shader NiPointers and arrays and zeroes the global vertex and pixel constant arrays.
 // @fnv 0x00b824b0
-FUN_00b824b0::~FUN_00b824b0()
+WaterShader::~WaterShader()
 {
-    m_spWaterVertexShader = 0;
-    m_spWaterVertexShaderVc = 0;
-    m_spWaterVertexShaderLighting = 0;
+    m_spVertexShader1 = 0;
+    m_spVertexShader2 = 0;
+    m_spVertexShader3 = 0;
     for (unsigned int i = 0; i < 74; ++i)
-        m_aspPasses[i] = 0;
+        spRenderPass[i] = 0;
     for (unsigned int i = 0; i < 38; ++i)
-        m_aspWaterPixelShaders[i] = 0;
+        m_aspPixelShaders[i] = 0;
     for (int i = 0; i < 11; ++i)
         g_akVertexConstantsB824B0[i] = g_kZeroConstantB824B0;
     for (int i = 0; i < 31; ++i)
@@ -1599,123 +1494,7 @@ struct WaterTransformSink
     void FUN_00e6fbb0(void*, int);
 };
 
-struct WaterProgram
-{
 
-    virtual void slot0();
-
-    virtual void slot1();
-
-    virtual void slot2();
-
-    virtual void slot3();
-
-    virtual void slot4();
-
-    virtual void slot5();
-
-    virtual void slot6();
-
-    virtual void slot7();
-
-    virtual void slot8();
-
-    virtual void slot9();
-
-    virtual void slot10();
-
-    virtual void slot11();
-
-    virtual void slot12();
-
-    virtual void slot13();
-
-    virtual void slot14();
-
-    virtual void slot15();
-
-    virtual void slot16();
-
-    virtual void slot17();
-
-    virtual void slot18();
-
-    virtual void slot19();
-
-    virtual void slot20();
-
-    virtual void slot21();
-
-    virtual void slot22();
-
-    virtual void slot23();
-
-    virtual void slot24();
-
-    virtual void slot25();
-
-    virtual void slot26();
-
-    virtual void slot27();
-
-    virtual void slot28();
-
-    virtual void slot29();
-
-    virtual void Setup(void*, WaterGeometry*, void*, int, void*, WaterRenderArg*, int, void*, void*, int, int);
-};
-
-struct WaterRenderContext
-{
-
-    int unk000;
-
-    int unk004;
-
-    int unk008;
-
-    int unk00c;
-
-    int unk010;
-
-    int unk014;
-
-    int unk018;
-
-    int unk01c;
-
-    int unk020;
-
-    int unk024;
-
-    int unk028;
-
-    int unk02c;
-
-    int unk030;
-
-    int unk034;
-
-    int unk038;
-
-    int unk03c;
-
-    int unk040;
-
-    void* vertexShader;
-
-    int unk048;
-
-    int unk04c;
-
-    int unk050;
-
-    int unk054;
-
-    int unk058;
-
-    void* pixelShader;
-};
 
 struct WaterSetup
 {
@@ -1744,9 +1523,9 @@ struct WaterSetup
 
     int unk02c;
 
-    WaterProgram* vertex;
+    NiD3DShaderConstantMap* vertex;
 
-    WaterProgram* pixel;
+    NiD3DShaderConstantMap* pixel;
 
     void FUN_00b864d0(WaterRenderArg*);
 };
@@ -1898,7 +1677,7 @@ __forceinline void SetWaterAlpha(WaterMaterial* material, unsigned int mode)
     AddToSlot(255, 0);
 }
 
-// Fills global water shader constants from the material, fog and lights, then calls Setup on the vertex and pixel WaterPrograms.
+// Fills global water shader constants from the material, fog and lights, then configures the vertex and pixel shader constant maps.
 // @fnv 0x00b864d0
 void WaterSetup::FUN_00b864d0(WaterRenderArg* arg)
 {
@@ -2044,19 +1823,27 @@ void WaterSetup::FUN_00b864d0(WaterRenderArg* arg)
 
     WaterSetup* setup = savedSetup;
 
-    WaterProgram* vertex = setup->vertex;
+    NiD3DShaderConstantMap* vertex = setup->vertex;
     if (vertex)
     {
-        void* shader = reinterpret_cast<WaterRenderContext*>(DAT_0126f74c)->vertexShader;
+        NiD3DShaderProgram* shader = reinterpret_cast<NiD3DPass*>(DAT_0126f74c)->m_spPixelShader.m_pObject;
         if (shader)
-            vertex->Setup(shader, geometry, geometryData, 0, properties, arg, 0, world, bound, 0, 1);
+            vertex->ConfigureShaderConstantMap(shader, reinterpret_cast<NiGeometry*>(geometry),
+                static_cast<const NiSkinInstance*>(geometryData), static_cast<const NiSkinPartition::Partition*>(0),
+                static_cast<NiGeometryBufferData*>(properties), reinterpret_cast<const NiPropertyState*>(arg),
+                static_cast<const NiDynamicEffectState*>(0), *static_cast<const NiTransform*>(world),
+                *static_cast<const NiBound*>(bound), 0, true);
     }
 
-    WaterProgram* pixel = setup->pixel;
+    NiD3DShaderConstantMap* pixel = setup->pixel;
     if (pixel)
     {
-        void* shader = reinterpret_cast<WaterRenderContext*>(DAT_0126f74c)->pixelShader;
+        NiD3DShaderProgram* shader = reinterpret_cast<NiD3DPass*>(DAT_0126f74c)->m_spVertexShader.m_pObject;
         if (shader)
-            pixel->Setup(shader, geometry, geometryData, 0, properties, arg, 0, world, bound, 0, 1);
+            pixel->ConfigureShaderConstantMap(shader, reinterpret_cast<NiGeometry*>(geometry),
+                static_cast<const NiSkinInstance*>(geometryData), static_cast<const NiSkinPartition::Partition*>(0),
+                static_cast<NiGeometryBufferData*>(properties), reinterpret_cast<const NiPropertyState*>(arg),
+                static_cast<const NiDynamicEffectState*>(0), *static_cast<const NiTransform*>(world),
+                *static_cast<const NiBound*>(bound), 0, true);
     }
 }

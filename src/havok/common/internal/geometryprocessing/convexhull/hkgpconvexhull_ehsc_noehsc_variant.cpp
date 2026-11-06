@@ -1,3 +1,9 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/NiPoint3.h"
+
 
 // src/havok/common/internal/geometryprocessing/convexhull/hkgpconvexhull_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/common/internal/geometryprocessing/convexhull/hkgpconvexhull.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -666,21 +672,6 @@ struct FUN_00d76990_Class
     FUN_00d76990_State* unk08;
     void SetValue(float value, bool clearFlag);
 };
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_setr_ps(float a, float b, float c, float d);
-struct Vec3
-{
-    float x, y, z;
-};
 struct __declspec(align(16)) hkVec4
 {
     float x, y, z, w;
@@ -689,7 +680,7 @@ struct Shape
 {
     float FUN_00d768b0(const hkVec4& v);
     float FUN_00d76840(const hkVec4& v);
-    float FUN_00d769c0(const Vec3& p);
+    float FUN_00d769c0(const NiPoint3& p);
 };
 struct AudioSink
 {
@@ -1066,16 +1057,12 @@ struct FUN_00d74e10_cls
 
     int FUN_00d74e10();
 };
-struct FourFloatVector
-{
-    int x, y, z, w;
-};
 struct FUN_00d74e20_class
 {
     void* m_00;
     void* m_04;
     char* m_08;
-    FourFloatVector __thiscall GetFieldAtD0();
+    hkVector4 __thiscall GetFieldAtD0();
 };
 struct Inner
 {
@@ -1453,14 +1440,6 @@ struct AudioSystem
 // The audio system object the game hands out.
 // The layout of the object this method belongs to: a queue of elements at
 // m_00 with its length at m_04, plus two counters that are cleared again.
-struct QueuedElements
-{
-    void** m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-};
 // FUN_00d7c2a0 - create a new object of type 0x808 and append it to the
 // item list of this container.
 //
@@ -1626,50 +1605,11 @@ namespace fnvc_adapt {
 extern "C" D76250MemoryRouter& __cdecl FUN_00c85750();
 }
 void __cdecl FUN_00c908c0(D76250Allocator* alloc, void* array, int numElements, int sizeElem);
-struct D76250Vector4
-{
-    __m128 m_vComponents;
-
-    void operator=(const D76250Vector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-struct D76250VectorArray
-{
-    D76250Vector4* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    void reserve(D76250Allocator& alloc, int n)
-    {
-        const int cap = getCapacity();
-        if (cap < n)
-        {
-            int cap2 = 2 * cap;
-            int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(D76250Vector4));
-        }
-    }
-
-    D76250Vector4* expandBy(int n)
-    {
-        D76250Allocator& alloc = fnvc_adapt::FUN_00c85750().heap();
-        int oldSize = m_iElementCount;
-        reserve(alloc, oldSize + n);
-        m_iElementCount += n;
-        return m_data + oldSize;
-    }
-};
+typedef hkArray<hkVector4> D76250VectorArray;
 struct D76250Shape
 {
     int getNumVertices() const;
-    const D76250Vector4& getVertex(int i) const;
+    const hkVector4& getVertex(int i) const;
 
     void CopyVerticesToArray(D76250VectorArray& vertices) const;
 };
@@ -1967,14 +1907,6 @@ struct SortRec12
     float key;
 };
 void __cdecl FUN_00d7b160(SortRec12* base, int lo, int hi, int unkArg);
-extern "C"
-{
-    __m128 __cdecl _mm_sub_ps(__m128, __m128);
-    __m128 __cdecl _mm_mul_ps(__m128, __m128);
-    __m128 __cdecl _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 __cdecl _mm_add_ss(__m128, __m128);
-    void __cdecl _mm_store_ss(float*, __m128);
-}
 struct DistanceScalar
 {
     __m128 q;

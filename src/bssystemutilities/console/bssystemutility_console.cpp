@@ -1,13 +1,6 @@
 
 // bssystemutilities/console/bssystemutility_console.cpp: BSSystemUtility (1 function)
-class BSSystemUtility
-{
-  public:
-    static void GetRandomGenerator();
-    void Update();
-    static int s_iUpdateEnabled;
-    static BSSystemUtility* ms_pSystemUtility;
-};
+#include "../../../include/BSSystemUtility.h"
 
 int BSSystemUtility::s_iUpdateEnabled;
 BSSystemUtility* BSSystemUtility::ms_pSystemUtility;

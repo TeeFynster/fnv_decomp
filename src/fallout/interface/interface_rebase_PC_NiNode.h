@@ -1,7 +1,7 @@
 // fallout/interface/interface_rebase_PC_NiNode.h: declares NiNode
 #ifndef FNV_INTERFACE_REBASE_IFNV_EARLY_FOLDED_PC_NINODE_DECLARATION_H
 #define FNV_INTERFACE_REBASE_IFNV_EARLY_FOLDED_PC_NINODE_DECLARATION_H
-#include "interface_rebase_PC_NiAVObject.h"
+#include "../../../include/NiAVObject.h"
 class NiNode : public NiAVObject
 {
   public:

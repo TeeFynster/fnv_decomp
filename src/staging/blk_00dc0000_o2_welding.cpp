@@ -1,3 +1,4 @@
+#include "../../include/hkArray.h"
 
 // src/staging/blk_00dc0000_o2_welding.cpp - staging unit created 2026-10-31 for 0x00ddf070 (flag review): in hkpmeshweldingutility.cpp
 // the SSE helper methods of NormalVector (used by 0x00ddd620) make VC9 drop the private register convention of static functions
@@ -33,36 +34,14 @@ struct S00ddf070_StringPtr
         return (const char*)((unsigned int)m_pcText & ~1u);
     }
 };
-struct S00ddf070_StringArray
-{
-    S00ddf070_StringPtr* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline S00ddf070_StringPtr& back()
-    {
-        return m_data[m_iElementCount - 1];
-    }
-};
+
 struct S00ddf070_Node;
-struct S00ddf070_NodeArray
-{
-    S00ddf070_Node** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline S00ddf070_Node*& operator[](int i)
-    {
-        return m_data[i];
-    }
-    __forceinline int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-};
+
 struct S00ddf070_Node
 {
     float m_uiFilterValue[8];
     unsigned short m_uiItemCount[8];
-    S00ddf070_NodeArray m_children;
+    hkArrayBase<S00ddf070_Node*> m_children;
     int unk3c;
     double m_dValue;
     int unk48;
@@ -82,7 +61,7 @@ int __cdecl FUN_00cb0fa0(const char* a, const char* b) throw();
 // Finds or creates a child node by name, appends the name to the string pool if new, and accumulates value, count, and two counters on the node.
 // @fnv 0x00ddf070
 static __declspec(noinline) S00ddf070_Node* FUN_00ddf070(S00ddf070_Node* parent, const char* name, int value, int count,
-                                                         S00ddf070_StringArray* strings)
+                                                         hkArrayBase<S00ddf070_StringPtr>* strings)
 {
     if (count == 0)
         count = value;
@@ -126,7 +105,7 @@ static __declspec(noinline) S00ddf070_Node* FUN_00ddf070(S00ddf070_Node* parent,
     return child;
 }
 
-S00ddf070_StringArray* volatile g00ddf070_strings;
+hkArrayBase<S00ddf070_StringPtr>* volatile g00ddf070_strings;
 S00ddf070_Node* volatile g00ddf070_parent;
 const char* volatile g00ddf070_name;
 volatile int g00ddf070_v;

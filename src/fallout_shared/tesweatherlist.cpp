@@ -91,10 +91,6 @@ FUN_00582570_Data* FUN_00582570_Data::FUN_00582570()
 }
 
 unsigned int __cdecl DialogueRandom();
-struct TESGlobalValueReader
-{
-    float GetValue();
-};
 struct FUN_005827d0_list : public BSSimpleList<WeatherEntry*>
 {
     TESWeather* FUN_005827d0();
@@ -116,10 +112,8 @@ TESWeather* FUN_005827d0_list::FUN_005827d0()
             if (((FUN_005827d0_node*)pCurrent7)->_ref_006815c0())
             {
                 if (((FUN_005827d0_node*)pCurrent7)->_ref_006815c0()->m_otherWeather)
-                    uiTotalChance5 += (unsigned int)((TESGlobalValueReader*)((FUN_005827d0_node*)pCurrent7)
-                                                         ->_ref_006815c0()
-                                                         ->m_otherWeather)
-                                          ->GetValue();
+                    uiTotalChance5 += (unsigned int)((FUN_005827d0_node*)pCurrent7)
+                                          ->_ref_006815c0()->m_otherWeather->GetValue();
                 else
                     uiTotalChance5 += ((FUN_005827d0_node*)pCurrent7)->_ref_006815c0()->m_uiFilterValue;
             }
@@ -144,7 +138,7 @@ TESWeather* FUN_005827d0_list::FUN_005827d0()
                 {
                     unsigned int m_uiWeatherChance =
                         pEntry->m_otherWeather
-                            ? (unsigned int)((TESGlobalValueReader*)pEntry->m_otherWeather)->GetValue()
+                            ? (unsigned int)pEntry->m_otherWeather->GetValue()
                             : pEntry->m_uiFilterValue;
                     if (m_uiWeatherChance)
                     {

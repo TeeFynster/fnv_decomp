@@ -2,6 +2,21 @@
 // src/havok/physics/collide/query/multithreaded/raycastquery/cpu/hkpcpuworldraycastjob.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/query/multithreaded/raycastquery/cpu/hkpcpuworldraycastjob.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/hkBool.h"
+#include "../../../../../../../../include/hkRotation.h"
+#include "../../../../../../../../include/hkTransform.h"
+#include "../../../../../../../../include/hkVector4.h"
+#include "../../../../../../../../include/hkpCdBody.h"
+#include "../../../../../../../../include/hkpCollisionFilter.h"
+#include "../../../../../../../../include/hkpRayCollidableFilter.h"
+#include "../../../../../../../../include/hkpRayHitCollector.h"
+#include "../../../../../../../../include/hkpShape.h"
+#include "../../../../../../../../include/hkpFixedBufferRayHitCollector.h"
+
+
+
 struct ValueHolder
 {
     int unk00;
@@ -35,12 +50,6 @@ void S_00df8990_Obj::InvokeCallback(void* a, void* b)
     DAT_0126ec04(a, b, this);
 }
 
-struct S_00df8d60_Bool
-{
-    char m_cBooleanValue;
-    S_00df8d60_Bool()
-    {}
-};
 struct S_00df8d60_Data
 {
     char unk0;
@@ -58,7 +67,7 @@ struct S_00df8d60
     int unkC;
     int unk10;
     float unk14;
-    S_00df8d60_Bool FUN_00df8aa0(const void* data);
+    hkBool FUN_00df8aa0(const void* data);
     float FUN_00df8d60(const S_00df8d60_Data* data, int unused);
 };
 // @fnv 0x00df8d60
@@ -107,23 +116,7 @@ float FUN_00df8db0_cls::GetResult(ParamBlock* apParam)
 
 extern int DAT_0101e594;
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct FUN_00df8960_cls
 {
@@ -139,9 +132,9 @@ FUN_00df8960_cls* FUN_00df8960_cls::FUN_00df8960(unsigned char acFlags)
     m_vptr = (int)&DAT_0101e594;
     if (acFlags & 1)
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(this, 0x1c);
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        pAllocator->blockFree(this, 0x1c);
     }
     return this;
 }
@@ -193,23 +186,7 @@ float FUN_00df8dd0_cls::FUN_00df8dd0(FUN_00df8dd0_Param* pParam)
 }
 
 namespace fnv_00df9470 {
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct BaseA
 {
@@ -248,9 +225,9 @@ MultiBaseOwner* MultiBaseOwner::FUN_00df9470(unsigned char acFlags)
     this->MultiBaseOwner::~MultiBaseOwner();
     if (acFlags & 1)
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(this, 0x80);
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        pAllocator->blockFree(this, 0x80);
     }
     return this;
 }
@@ -422,7 +399,8 @@ struct Local
     unsigned int m_1c;
 };
 
-struct Interface
+// Exe 0x00df89b0: unit-local Interface view; declarations and layout are preserved.
+struct HkpcpuworldraycastjobInterfaceView
 {
     virtual void v00();
     virtual void v04();
@@ -452,7 +430,7 @@ struct Interface
 
 // Fills out from src, builds a Local, constructs a Spawned in spawned if src->m_3c is set, writes fields of src->m_30's block, then calls iface->v5c.
 // @fnv 0x00df89b0
-void __cdecl FUN_00df89b0(Interface* apInterface, Source* apSource, Output* apOutput, Spawned* spawned)
+void __cdecl FUN_00df89b0(HkpcpuworldraycastjobInterfaceView* apInterface, Source* apSource, Output* apOutput, Spawned* spawned)
 {
     Local local;
 
@@ -493,92 +471,79 @@ void __cdecl FUN_00df89b0(Interface* apInterface, Source* apSource, Output* apOu
     apInterface->v5c(&local, apOutput, 0);
 }
 
+
+// The compiler's intrinsic view omits byte arrays so that inlined SIMD temporaries
+// retain the original compiler's stack-buffer classification.
 namespace SimdN {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00df8aa0 FUN_00df8aa0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
+    LocalM128 _mm_load_ps(const float*);
+    LocalM128 _mm_set_ps1(float);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
 }
 }
-struct hkRotation;
-struct hkTransform;
 
-struct hkVector4
+__forceinline SimdN::LocalM128& simd(hkVector4& vector)
 {
-    SimdN::__m128 m_vComponents;
+    return reinterpret_cast<SimdN::LocalM128&>(vector.m_vComponents);
+}
 
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = SimdN::_mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void _setRotatedDir(const hkRotation& r, const hkVector4& b);
-    __forceinline void _setRotatedInverseDir(const hkRotation& r, const hkVector4& b);
-    __forceinline void _setTransformedInversePos(const hkTransform& t, const hkVector4& b);
-};
-
-struct hkRotation
+__forceinline const SimdN::LocalM128& simd(const hkVector4& vector)
 {
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-};
-
-struct hkTransform
-{
-    hkRotation m_rotation;
-    hkVector4 m_vTranslation;
-};
+    return reinterpret_cast<const SimdN::LocalM128&>(vector.m_vComponents);
+}
 
 __forceinline void hkVector4::_setRotatedDir(const hkRotation& r, const hkVector4& b)
 {
-    const SimdN::__m128 c1 = SimdN::_mm_load_ps(&r.m_kColumn1.m_vComponents.m128_f32[0]);
-    const SimdN::__m128 b1 = SimdN::_mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
-    const SimdN::__m128 r1 = SimdN::_mm_mul_ps(c1, b1);
-    const SimdN::__m128 b0 = SimdN::_mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
-    const SimdN::__m128 r0 = SimdN::_mm_mul_ps(r.m_kColumn0.m_vComponents, b0);
-    const SimdN::__m128 b2 = SimdN::_mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
-    const SimdN::__m128 r2 = SimdN::_mm_mul_ps(r.m_kColumn2.m_vComponents, b2);
-    m_vComponents = SimdN::_mm_add_ps(SimdN::_mm_add_ps(r1, r0), r2);
+    const SimdN::LocalM128 c1 = SimdN::_mm_load_ps(&r.m_kColumn1.m_f[0]);
+    const SimdN::LocalM128 b1 = SimdN::_mm_shuffle_ps(simd(b), simd(b), 0x55);
+    const SimdN::LocalM128 r1 = SimdN::_mm_mul_ps(c1, b1);
+    const SimdN::LocalM128 b0 = SimdN::_mm_shuffle_ps(simd(b), simd(b), 0x00);
+    const SimdN::LocalM128 r0 = SimdN::_mm_mul_ps(simd(r.m_kColumn0), b0);
+    const SimdN::LocalM128 b2 = SimdN::_mm_shuffle_ps(simd(b), simd(b), 0xaa);
+    const SimdN::LocalM128 r2 = SimdN::_mm_mul_ps(simd(r.m_kColumn2), b2);
+    simd(*this) = SimdN::_mm_add_ps(SimdN::_mm_add_ps(r1, r0), r2);
 }
 
-__forceinline void hkVector4::_setRotatedInverseDir(const hkRotation& r, const hkVector4& b)
+__forceinline void hkVector4::_setRotatedInverseDir(const hkRotation& r, const hkVector4& vector)
 {
-    SimdN::__m128 c0 = r.m_kColumn0.m_vComponents;
-    SimdN::__m128 c1 = r.m_kColumn1.m_vComponents;
-    SimdN::__m128 c2 = r.m_kColumn2.m_vComponents;
-    SimdN::__m128 tmp = SimdN::_mm_unpacklo_ps(c0, c1);
-    SimdN::__m128 ctmp = SimdN::_mm_unpackhi_ps(c0, c1);
+    const SimdN::LocalM128& b = simd(vector);
+    SimdN::LocalM128 c0 = simd(r.m_kColumn0);
+    SimdN::LocalM128 c1 = simd(r.m_kColumn1);
+    SimdN::LocalM128 c2 = simd(r.m_kColumn2);
+    SimdN::LocalM128 tmp = SimdN::_mm_unpacklo_ps(c0, c1);
+    SimdN::LocalM128 ctmp = SimdN::_mm_unpackhi_ps(c0, c1);
     c0 = SimdN::_mm_movelh_ps(tmp, c2);
     tmp = SimdN::_mm_movehl_ps(c0, tmp);
     c1 = SimdN::_mm_shuffle_ps(tmp, c2, 0xd4);
-    SimdN::__m128 t2 = SimdN::_mm_shuffle_ps(ctmp, c2, 0xe4);
-    const SimdN::__m128 b0 = SimdN::_mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
-    const SimdN::__m128 r0 = SimdN::_mm_mul_ps(c0, b0);
-    const SimdN::__m128 b1 = SimdN::_mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
-    const SimdN::__m128 r1 = SimdN::_mm_mul_ps(c1, b1);
-    const SimdN::__m128 b2 = SimdN::_mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
-    const SimdN::__m128 r2 = SimdN::_mm_mul_ps(t2, b2);
-    m_vComponents = SimdN::_mm_add_ps(SimdN::_mm_add_ps(r0, r1), r2);
+    SimdN::LocalM128 t2 = SimdN::_mm_shuffle_ps(ctmp, c2, 0xe4);
+    const SimdN::LocalM128 b0 = SimdN::_mm_shuffle_ps(b, b, 0x00);
+    const SimdN::LocalM128 r0 = SimdN::_mm_mul_ps(c0, b0);
+    const SimdN::LocalM128 b1 = SimdN::_mm_shuffle_ps(b, b, 0x55);
+    const SimdN::LocalM128 r1 = SimdN::_mm_mul_ps(c1, b1);
+    const SimdN::LocalM128 b2 = SimdN::_mm_shuffle_ps(b, b, 0xaa);
+    const SimdN::LocalM128 r2 = SimdN::_mm_mul_ps(t2, b2);
+    simd(*this) = SimdN::_mm_add_ps(SimdN::_mm_add_ps(r0, r1), r2);
 }
 
 __forceinline void hkVector4::_setTransformedInversePos(const hkTransform& t, const hkVector4& b)
 {
     hkVector4 d;
-    d.setSub4(b, t.m_vTranslation);
-    _setRotatedInverseDir(t.m_rotation, d);
+    simd(d) = SimdN::_mm_sub_ps(simd(b), reinterpret_cast<const SimdN::LocalM128&>(t.m_row3));
+    _setRotatedInverseDir(reinterpret_cast<const hkRotation&>(t), d);
 }
 
 struct WorldRayCastInput
@@ -596,8 +561,6 @@ struct ShapeRayCastQuery
     int unk28;
     int unk2C;
 };
-
-struct hkpCdBody;
 
 struct __declspec(align(16)) ShapeRayCastOutput
 {
@@ -619,70 +582,6 @@ struct WorldRayCastOutput : ShapeRayCastOutput
     int unk54;
     int unk58;
     int unk5C;
-};
-
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool()
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    hkBool& operator=(bool b)
-    {
-        m_cBooleanValue = (char)b;
-        return *this;
-    }
-};
-
-struct hkpRayHitCollector
-{
-    int unk00;
-    float m_fEarlyOutHitFraction;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int m_iValueAtOffset14;
-};
-
-struct hkpShape
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual hkBool RayCast(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
-    virtual void castRayWithCollector(const ShapeRayCastQuery& input, const hkpCdBody& cdBody,
-                                      hkpRayHitCollector& collector) const;
-};
-
-struct hkpCdBody
-{
-    const hkpShape* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const hkTransform* m_pMotionState;
-};
-
-struct hkpRayCollidableFilter
-{
-    virtual void v00();
-    virtual hkBool IsCollisionEnabled(const WorldRayCastInput& input, const hkpCdBody& collidable) const;
-};
-
-struct hkpCollisionFilter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    hkpRayCollidableFilter m_rayCollidableFilter;
 };
 
 struct HitList
@@ -711,7 +610,7 @@ struct HitList
 __forceinline void memCpy16NonEmpty(void*, const void*, int);
 struct RayCaster_00df8aa0 : S_00df8d60
 {
-    S_00df8d60_Bool FUN_00df8aa0(const void* data);
+    hkBool FUN_00df8aa0(const void* data);
     hkBool m_bHit;
     char unk19;
     char unk1A;
@@ -722,27 +621,27 @@ struct RayCaster_00df8aa0 : S_00df8d60
     WorldRayCastOutput* m_pHitBufferEnd;
     int unk2C;
     ShapeRayCastQuery m_kShapeRayInput;
-    hkpRayHitCollector* m_kCollector;
+    hkpFixedBufferRayHitCollector* m_kCollector;
     int unk64;
     int unk68;
     int unk6C;
     hkVector4 m_earlyOutHitFractionVec;
 
-    __forceinline S_00df8d60_Bool castBody(const void* data)
+    __forceinline hkBool castBody(const void* data)
     {
 
         RayCaster_00df8aa0* self = this;
         const hkpCdBody* body = (const hkpCdBody*)data;
         const hkpShape* shape = body->m_pCollisionShape;
 
-        S_00df8d60_Bool result;
+        hkBool result;
         result.m_cBooleanValue = 0;
-        if (!shape || !self->filter()->m_rayCollidableFilter.IsCollisionEnabled(*self->m_pRayCastInput, *body))
+        if (!shape || !self->filter()->IsCollisionEnabled(*self->m_pRayCastInput, reinterpret_cast<const hkpCollidable&>(*body)))
         {
             return result;
         }
 
-        const hkTransform& t = *body->m_pMotionState;
+        const hkTransform& t = *static_cast<const hkTransform*>(body->m_pMotionState);
         self->m_kShapeRayInput.m_vFrom._setTransformedInversePos(t, self->m_pRayCastInput->m_vFrom);
         self->m_kShapeRayInput.m_vTo._setTransformedInversePos(t, self->m_pRayCastInput->m_vTo);
 
@@ -754,7 +653,7 @@ struct RayCaster_00df8aa0 : S_00df8d60
 
         if (!self->m_kCollector)
         {
-            hkBool hit = shape->RayCast(self->m_kShapeRayInput, output);
+            hkBool hit = shape->IntersectRayWithShape(self->m_kShapeRayInput, output);
             result.m_cBooleanValue = hit.m_cBooleanValue;
             if (!hit)
             {
@@ -765,7 +664,7 @@ struct RayCaster_00df8aa0 : S_00df8d60
                 WorldRayCastOutput* slot = self->getOutputSlot(output.m_fHitFraction, fraction);
                 if (slot)
                 {
-                    output.m_vHitNormal._setRotatedDir(t.m_rotation, output.m_vHitNormal);
+                    output.m_vHitNormal._setRotatedDir(reinterpret_cast<const hkRotation&>(t), output.m_vHitNormal);
                     memCpy16NonEmpty(slot, &output, sizeof(WorldRayCastOutput) / 16);
                     slot->m_pRootCollidable = body;
                     if (self->m_kHits->m_earlyOutOnFirstHit)
@@ -774,20 +673,23 @@ struct RayCaster_00df8aa0 : S_00df8d60
                     }
                     self->unk14 = (self->m_kHits->m_pRayCursor == 1) ? output.m_fHitFraction : fraction;
                     self->m_bHit = true;
-                    self->m_earlyOutHitFractionVec.m_vComponents = SimdN::_mm_set_ps1(self->unk14);
+                    simd(self->m_earlyOutHitFractionVec) = SimdN::_mm_set_ps1(self->unk14);
                 }
             }
             return result;
         }
-        shape->castRayWithCollector(self->m_kShapeRayInput, *body, *self->m_kCollector);
-        self->m_kHits->m_iElementCount = self->m_kCollector->m_iValueAtOffset14;
-        self->m_earlyOutHitFractionVec.m_vComponents = SimdN::_mm_set_ps1(self->m_kCollector->m_fEarlyOutHitFraction);
+        shape->CastRayWithCollector(self->m_kShapeRayInput, *body, *self->m_kCollector);
+        self->m_kHits->m_iElementCount = self->m_kCollector->m_iHitCount.m_storage;
+        simd(self->m_earlyOutHitFractionVec) = SimdN::_mm_set_ps1(self->m_kCollector->m_fEarlyOutHitFraction);
         return result;
     }
 
-    const hkpCollisionFilter* filter() const
+    const hkpRayCollidableFilter* filter() const
     {
-        return (const hkpCollisionFilter*)unk10;
+        const hkpCollisionFilter* collisionFilter = (const hkpCollisionFilter*)unk10;
+        // The query requires a filter; preserve the original unconditional base adjustment.
+        __assume(collisionFilter != 0);
+        return static_cast<const hkpRayCollidableFilter*>(collisionFilter);
     }
 
     __forceinline WorldRayCastOutput* getOutputSlot(float hitFraction, float& oldFraction)
@@ -842,7 +744,7 @@ __forceinline void memCpy16NonEmpty(void* dst, const void* src, int numQuads)
 
 // Delegates to castBody to test a collision body against the ray and record any hit in the output buffer.
 // @fnv 0x00df8aa0
-S_00df8d60_Bool RayCaster_00df8aa0::FUN_00df8aa0(const void* apBody)
+hkBool RayCaster_00df8aa0::FUN_00df8aa0(const void* apBody)
 {
     return castBody(apBody);
 }

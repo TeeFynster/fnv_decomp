@@ -1,48 +1,39 @@
+#include "../../../../include/NiTArray.h"
 
 // src/fallout/ai/combat/explosion_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/ai/combat/explosion.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 // src/fallout/ai/combat/explosion.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/explosion.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct ActorCause
+#include "../../../../include/AutoMemContext.h"
+#include "../../../../include/BSOcclusionPlane.h"
+#include "../../../../include/Explosion.h"
+// HavokAllocatorContext_explosion: local type (was include/HavokAllocatorContext.h, which had no evidence of one real class); no method of it is bound to a named game function
+class HavokMemoryRouter;
+#include "../../../../include/hkMemoryAllocator.h"
+
+class HavokAllocatorContext_explosion
 {
+public:
+    int unk00;
+    int unk04;
+    int unk08;
+    int unk0c;
+    union
+    {
+        HavokMemoryRouter* m_router;
+        hkMemoryAllocator* m_alloc;
+    };
 };
-struct NiPointer
-{
-    NiPointer& operator=(ActorCause*);
-};
-struct FUN_009ac170_shell
-{
-    char m_auiShapeKeys[0xd0];
-    NiPointer m_actorCause;
-    void __thiscall FUN_009ac170(ActorCause* apActorCause);
-};
-struct Explosion
-{
-    virtual ~Explosion();
-    void* Destroy(unsigned int flags);
-};
+#include "../../../../include/NavMeshPtr.h"
+#include "../../../../include/bhkLiquidAction.h"
+
 void __cdecl _Deallocate(void*);
-struct NiRTTI;
-struct bhkLiquidAction
-{
-    const NiRTTI* __thiscall GetRTTI() const;
-};
 extern NiRTTI g_01268420;
-struct NavMesh;
-struct NavMeshPtr
-{
-    NavMesh* FUN_00458b50();
-};
 struct FUN_009afc30_shell
 {
     NavMeshPtr m_navMeshPtr;
     NavMesh* FUN_009afc30();
-};
-struct BSOcclusionPlane
-{
-    int __thiscall GetCullResult() const;
-    int __thiscall IsNotCulled();
 };
 struct FUN_009afbb0_shell
 {
@@ -374,19 +365,15 @@ extern __declspec(thread) int g_memoryContext;
 void __cdecl FUN_00c876f0();
 void __cdecl FUN_00c87700();
 void* __cdecl FUN_00aa13e0(unsigned int size);
-struct AutoMemContext
+inline AutoMemContext::AutoMemContext()
 {
-    int oldContext;
-    AutoMemContext()
-    {
-        oldContext = g_memoryContext;
-        g_memoryContext = 16;
-    }
-    ~AutoMemContext()
-    {
-        g_memoryContext = oldContext;
-    }
-};
+    m_eMemoryContext = (MEM_CONTEXT)g_memoryContext;
+    g_memoryContext = 16;
+}
+inline AutoMemContext::~AutoMemContext()
+{
+    g_memoryContext = (int)m_eMemoryContext;
+}
 struct FUN_00cbc550_class
 {
     int unk00;
@@ -427,23 +414,8 @@ FUN_00cbc550_class* __thiscall FUN_00cbca20_class::FUN_00cbca20(int flags)
     return result;
 }
 
-struct HavokAllocator
-{
-    virtual void vf00();
-    virtual void* allocate(int size);
-    virtual void deallocate(void* p, int size);
-};
 
-struct HavokAllocatorContext
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    HavokAllocator* m_alloc;
-};
-
-extern "C" HavokAllocatorContext* __cdecl FUN_00c85750();
+extern "C" HavokAllocatorContext_explosion* __cdecl FUN_00c85750();
 
 struct HavokObj
 {
@@ -463,8 +435,8 @@ struct HavokObj
 
     static void* operator new(size_t size)
     {
-        HavokAllocatorContext* tm = FUN_00c85750();
-        HavokObj* p = (HavokObj*)tm->m_alloc->allocate(size);
+        HavokAllocatorContext_explosion* tm = FUN_00c85750();
+        HavokObj* p = (HavokObj*)tm->m_alloc->blockAlloc(size);
         p->m_flags = (short)size;
         return p;
     }
@@ -611,30 +583,19 @@ void TargetClass::FUN_00cbd520(ArgStruct* arg)
     this->vfbc(arg);
 }
 
-class NiViewerStringArray
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-  public:
-    virtual ~NiViewerStringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
+    return SetAtGrow(m_usSize, element);
+}
 
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > NiViewerStringArray;
 class FUN_00cbd650_base
 {
   public:

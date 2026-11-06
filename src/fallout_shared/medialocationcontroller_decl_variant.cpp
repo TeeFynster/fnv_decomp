@@ -3,16 +3,19 @@
 // with declarations corrected to what the original code does (medialocationcontroller_update_decls.h: class MediaLocationController : public TESForm, pu -> class MediaLocationController : public TESForm, pu). Move the function to its real unit once
 // that unit declares it this way.
 
-#include "medialocationcontroller_update_decls_decl_medialocationcontroller.h"
-#include "medialocationcontroller.h"
-#include "mediaset.h"
+#include "../../include/Actor.h"
+#include "../../include/BGSDefaultObjectManager.h"
+#include "../../include/BSAudio.h"
+#include "../../include/MediaLocationController.h"
+#include "../../include/MediaSet.h"
+#include "../../include/MediaSetEntry.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/TESFaction.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESDataHandler.h"
 unsigned int __cdecl GetRandomNumberInRange(int aiMin, int aiMax);
 int __cdecl Warning(const char* apFormat, ...);
-class TESDataHandler
-{
-  public:
-    TESFaction* GetFactionByFormID(unsigned int auiFormID);
-};
 extern TESDataHandler* g_dataHandler;
 
 // @fnv 0x00595310

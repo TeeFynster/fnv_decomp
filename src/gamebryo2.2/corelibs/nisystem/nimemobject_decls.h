@@ -1,16 +1,11 @@
-// gamebryo2.2/corelibs/nisystem/nimemobject_decls.h: declares NiPoint2, SNAEntry, NiObject, NiFixedString, NiProperty
+// gamebryo2.2/corelibs/nisystem/nimemobject_decls.h: declares SNAEntry, NiObjectWords, FixedStringHandle
 class Flag512Receiver
 {
   public:
     void FUN_00633ba0(bool enabled, unsigned int mask);
     void SetFlag512(bool enabled);
 };
-class NiPoint2
-{
-  public:
-    float x, y;
-    NiPoint2(float a, float b);
-};
+#include "../../../../include/NiPoint2.h"
 class SNAEntry
 {
   public:
@@ -19,26 +14,20 @@ class SNAEntry
 extern void* DAT_011f6080;
 
 // Declarations for the constructor/getter span.
-class NiObject
+// NiObject seen as its two raw words: 0x00a5c200 (an NiObjectNET-style ctor) calls the NiObject ctor 0x00a5d3a0 and then
+// stores its own vtable by hand, so the stand-in carries no virtuals.
+class NiObjectWords
 {
   public:
     unsigned int words[2];
-    NiObject();
+    NiObjectWords();
 };
-class NiFixedString
+// Raw NiFixedString handle: 0x00a5c200 copies EmptyFS (0x0109b220) without touching its refcount.
+class FixedStringHandle
 {
   public:
     const char* value;
 };
-extern NiFixedString EmptyFS;
+extern FixedStringHandle EmptyFS;
 extern unsigned char DAT_0109b244[];
 extern unsigned char DAT_011f4304[];
-class NiProperty : public NiObject
-{
-  public:
-    NiFixedString name;
-    void* controller;
-    void* extraData;
-    unsigned short extraDataSize, extraDataCapacity;
-    NiProperty();
-};

@@ -505,7 +505,6 @@ struct ThisShell
 void ThisShell::FUN_0094a0c0(NiPoint3* p1, NiPoint3* p2, unsigned char flag)
 {
     NiPoint3 vec;
-    ((VecInit*)&vec)->FUN_006815c0();
     signed char state = (signed char)((unsigned char)bThirdPerson - byte64a);
     float f = 1.0f;
     if (state != 0)

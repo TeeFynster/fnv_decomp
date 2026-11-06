@@ -1,11 +1,18 @@
-// Source layout: ActorValueOwner. PC corrections are in generate_headers.py.
-#ifndef FNV_ACTORVALUEOWNER_H
-#define FNV_ACTORVALUEOWNER_H
-#include "layout_support.h"
-#pragma pack(push, 4)
+#pragma once
+
+namespace ActorValue
+{
+    enum Index;
+}
+
+class Actor;
+class TESForm;
+
 class ActorValueOwner
 {
-  public:
+public:
+    ActorValueOwner();
+
     virtual int GetBaseActorValue(ActorValue::Index actorValue);
     virtual float GetBaseActorValueFloat(ActorValue::Index actorValue);
     virtual int GetActorValue(ActorValue::Index actorValue);
@@ -17,8 +24,10 @@ class ActorValueOwner
     virtual float GetPermanentActorValueAdjustment(ActorValue::Index actorValue);
     virtual TESForm* GetActorValueOwnerForm();
     virtual unsigned short GetActorValueOwnerType();
+
     Actor* GetActorOwner();
+    float GetActorValueFloatByIndex(ActorValue::Index index);
+    float GetActorValueFloatByIndex(int index);
+    int GetActorValueAsInteger(ActorValue::Index index);
+    int GetActorValueAsInteger(int index);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(ActorValueOwner) == 0x4);
-#endif

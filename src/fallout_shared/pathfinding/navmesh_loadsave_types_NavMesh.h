@@ -26,15 +26,8 @@ class NiTMap_unsigned_short_NiPointer_ObstacleData___;
 class NiTMapBase_DFALL_NiTMapItem_unsigned_short_NavMeshPOVData____unsigned_short_NavMeshPOVData_;
 class NiTMapBase_DFALL_NiTMapItem_unsigned_short_NavMeshPOVData____unsigned_short_NavMeshPOVData___AntiBloatAllocator;
 class ObstacleUndoData;
-class PathingAvoidanceNode;
-enum EDGE_EXTRA_INFO_TYPE
-{
-    EDGE_EXTRA_INFO_TYPE_EIT_INVALID = -1,
-    EDGE_EXTRA_INFO_TYPE_EIT_PORTAL = 0,
-    EDGE_EXTRA_INFO_TYPE_EIT_LEDGE_UP = 1,
-    EDGE_EXTRA_INFO_TYPE_EIT_LEDGE_DOWN = 2,
-    EDGE_EXTRA_INFO_TYPE_EIT_ENABLE_DISABLE_PORTAL = 3
-};
+class PathingAvoidNode;
+#include "../../../include/EDGE_EXTRA_INFO_TYPE.h"
 enum PathingAvoidNode__AVOID_NODE_TYPE
 {
     PathingAvoidNode__AVOID_NODE_TYPE_AVOID_NODE_SPHERE = 0,
@@ -304,7 +297,7 @@ FNV_STATIC_ASSERT(offsetof(NavMeshGrid, NavMeshPointEntry) == 8);
 FNV_STATIC_ASSERT(offsetof(NavMeshGrid, IndexedPointRecord) == 12);
 FNV_STATIC_ASSERT(offsetof(NavMeshGrid, IndexedPointData) == 24);
 FNV_STATIC_ASSERT(offsetof(NavMeshGrid, TESFileRecordLoader) == 36);
-class PathingAvoidanceNode
+class PathingAvoidNode
 {
   public:
     NiPoint3 m_kLocation;                          // +0x0, 12 bytes
@@ -312,26 +305,26 @@ class PathingAvoidanceNode
     float fRadius;                            // +0x18, 4 bytes
     float m_fPathingCostCur;                              // +0x1C, 4 bytes
     PathingAvoidNode__AVOID_NODE_TYPE eType;  // +0x20, 4 bytes
-    // PathingAvoidanceNode
-    // float __cdecl PathingAvoidanceNode::*(NiPoint3&)
-    // PathingAvoidanceNode::AVOID_NODE_TYPE __cdecl PathingAvoidanceNode::*()
-    // const NiPoint3& __cdecl PathingAvoidanceNode::*()
-    // const NiPoint3& __cdecl PathingAvoidanceNode::*()
-    // float __cdecl PathingAvoidanceNode::*()
-    // float __cdecl PathingAvoidanceNode::*()
-    // void __cdecl PathingAvoidanceNode::*(BGSSaveFormBuffer*)
-    // void __cdecl PathingAvoidanceNode::*(BGSLoadFormBuffer*)
+    // PathingAvoidNode
+    // float __cdecl PathingAvoidNode::*(NiPoint3&)
+    // PathingAvoidNode::AVOID_NODE_TYPE __cdecl PathingAvoidNode::*()
+    // const NiPoint3& __cdecl PathingAvoidNode::*()
+    // const NiPoint3& __cdecl PathingAvoidNode::*()
+    // float __cdecl PathingAvoidNode::*()
+    // float __cdecl PathingAvoidNode::*()
+    // void __cdecl PathingAvoidNode::*(BGSSaveFormBuffer*)
+    // void __cdecl PathingAvoidNode::*(BGSLoadFormBuffer*)
 };
-FNV_STATIC_ASSERT(sizeof(PathingAvoidanceNode) == 36);
-FNV_STATIC_ASSERT(offsetof(PathingAvoidanceNode, m_kLocation) == 0);
-FNV_STATIC_ASSERT(offsetof(PathingAvoidanceNode, TwoComponentVector) == 12);
-FNV_STATIC_ASSERT(offsetof(PathingAvoidanceNode, fRadius) == 24);
-FNV_STATIC_ASSERT(offsetof(PathingAvoidanceNode, m_fPathingCostCur) == 28);
-FNV_STATIC_ASSERT(offsetof(PathingAvoidanceNode, eType) == 32);
-class NavMeshStaticAvoidNode : public PathingAvoidanceNode
+FNV_STATIC_ASSERT(sizeof(PathingAvoidNode) == 36);
+FNV_STATIC_ASSERT(offsetof(PathingAvoidNode, m_kLocation) == 0);
+FNV_STATIC_ASSERT(offsetof(PathingAvoidNode, TwoComponentVector) == 12);
+FNV_STATIC_ASSERT(offsetof(PathingAvoidNode, fRadius) == 24);
+FNV_STATIC_ASSERT(offsetof(PathingAvoidNode, m_fPathingCostCur) == 28);
+FNV_STATIC_ASSERT(offsetof(PathingAvoidNode, eType) == 32);
+class NavMeshStaticAvoidNode : public PathingAvoidNode
 {
   public:
-    // base PathingAvoidanceNode at +0x0, size 36
+    // base PathingAvoidNode at +0x0, size 36
     unsigned short m_usTriangleID;  // +0x24, 2 bytes
     unsigned char layoutPadding26[2];
     // NavMeshStaticAvoidNode

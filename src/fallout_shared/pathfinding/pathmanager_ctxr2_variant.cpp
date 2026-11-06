@@ -1,6 +1,13 @@
 // fallout_shared/pathfinding/pathmanager_ctxr2_variant.cpp: free functions (1 function)
 
-#include "pathmanager_decls.h"
+#include "../../../include/PathingRequest.h"
+
+class PathManagerImpl
+{
+  public:
+    char pad[0x14c0];
+};
+
 class BSSpinLock_r006eb6b0
 {
   public:
@@ -8,17 +15,10 @@ class BSSpinLock_r006eb6b0
     void Unlock();
 };
 
-class PathingActorData;
-
 struct PathSlot
 {
     int unk00;
     int unk04;
-};
-
-struct PathingRequest
-{
-    PathingActorData* FUN_006c9900();
 };
 
 struct PathWorkList

@@ -2,7 +2,28 @@
 // src/staging/blk_00920000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/PTYPE.h"
+#include <stddef.h>
+#pragma pack(push, 4)
+#include "../../include/Actor.h"
+#include "../../include/ActorValueModifierList.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/GameTimerRecord.h"
+#include "../../include/NiControllerManager.h"
+#include "../../include/NiControllerSequence.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/SL.h"
+#include "../../include/Setting.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESContainer.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectSTAT.h"
+#include "../../include/TESPackage.h"
+#include "../../include/bhkCharacterController.h"
+#include "../../include/TESResponse.h"
 
 struct ObjB
 {
@@ -21,10 +42,6 @@ void FUN_0092c890_class::FUN_0092c890()
         reinterpret_cast<ObjB*>(reinterpret_cast<int*>(this)[0])->FUN_004b0ef0();
 }
 
-struct bhkCharacterController
-{
-    int __fastcall FUN_005c0880(char*);
-};
 int __fastcall FUN_005c0880(char*);
 // @fnv 0x009306b0
 bool __fastcall FUN_009306b0(bhkCharacterController* self)
@@ -37,6 +54,7 @@ struct FUN_0042ed70_
     void FUN_0042ed70();
 };
 
+// Retained: the shared actor interfaces do not declare FUN_00934430().
 struct XActor
 {
     FUN_0042ed70_* GetExtra();
@@ -93,14 +111,8 @@ FUN_00937d30_cls* FUN_00937d30_cls::FUN_00937d30()
     return this;
 }
 
-struct ActorValueModifierList
-{
-    void RemoveAllModifiers();
-    void FUN_00937d50(int a);
-};
-
 // @fnv 0x00937d50
-void ActorValueModifierList::FUN_00937d50(int aiUnused)
+void ActorValueModifierList::InitLoadGame(BGSLoadFormBuffer* apBuffer)
 {
     RemoveAllModifiers();
 }
@@ -233,11 +245,6 @@ struct FUN_0092ca00 : FUN_0092c950
 FUN_0092ca00::~FUN_0092ca00()
 {}
 
-struct TESForm
-{
-    virtual void v0();
-    virtual bool IsEnabled();
-};
 struct _Dummy_004bc4a0
 {
     void SetAccumulate(bool b);
@@ -268,6 +275,7 @@ struct ListX
 {
     ~ListX();
 };
+// Retained: the shared modifier list does not declare its destructor.
 struct FUN_00937030_Class : public ListX
 {
     ~FUN_00937030_Class();
@@ -294,10 +302,6 @@ void* __thiscall FUN_0055a2b0_Class::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-struct TESResponse
-{
-    TESResponse* GetNext();
-};
 // Returns 0 for a null response, otherwise counts the response and its chained GetNext() responses.
 // @fnv 0x009369d0
 int __fastcall GetResponseCount(TESResponse* apResponse)
@@ -317,12 +321,6 @@ int __fastcall GetResponseCount(TESResponse* apResponse)
     }
 }
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-    unsigned int FUN_00865f20();
-    void FUN_00865ff0(int, unsigned int);
-};
 struct Node_006815c0
 {
     void** _ref_006815c0();
@@ -332,6 +330,7 @@ struct Item_00937b50
     char a;
     int b;
 };
+// Retained: the shared modifier list does not declare its save routine.
 struct FUN_00937b50_cls
 {
     unsigned int unk00;
@@ -373,14 +372,6 @@ void FUN_00937b50_cls::FUN_00937b50(BGSSaveFormBuffer* buf)
     buf->FUN_00865ff0(iCount, uiPos);
 }
 
-struct NiAVObject
-{
-};
-struct NiNode
-{
-    unsigned int GetNumChildren();
-    NiAVObject* GetAt(unsigned int);
-};
 struct FUN_009380e0_shell
 {
     virtual void v0();
@@ -409,10 +400,6 @@ void FUN_009380e0(TaskQueueInterface* self)
     }
 }
 
-struct P09H
-{
-    int GetReferenceType();
-};
 struct FUN_008e56b0_cls
 {
     void ClearNode();
@@ -433,7 +420,7 @@ bool __fastcall FUN_00930870(Actor* pActor)
         }
     }
     result = (*(bool(__thiscall*)(Actor*))((*(void***)pActor)[0x2a0 / 4]))(pActor);
-    anim = (NiAVObject*)((P09H*)pActor)->GetReferenceType();
+    anim = (NiAVObject*)pActor->GetReferenceType();
     if (anim != 0)
     {
         GetObjectFromNode(anim, true, 0);
@@ -459,88 +446,6 @@ int FUN_00933810::Method()
 }
 
 namespace fnv_00935cc0 {
-enum PTYPE
-{
-    PTYPE_COUNT
-};
-
-struct TESPackage
-{
-    PTYPE GetPackType();
-};
-
-struct Actor
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual bool IsEnabled();
-};
-
-struct FUN_009344a0_shell
-{
-    TESPackage* GetCurrentPackage();
-};
 
 // @fnv 0x00935cc0
 void FUN_00935cc0(int param_1)
@@ -550,20 +455,20 @@ void FUN_00935cc0(int param_1)
 
     if (pForm != 0)
     {
-        if (reinterpret_cast<Actor*>(pForm)->IsEnabled())
+        if (reinterpret_cast<Actor*>(pForm)->IsMobileObject())
         {
             Actor* actor = reinterpret_cast<Actor*>(pForm);
 
             if (actor != 0)
             {
-                reinterpret_cast<unsigned char*>(actor)[0x7f] = 1;
+                actor->m_bFourthBooleanValue = 1;
 
-                if (reinterpret_cast<unsigned char*>(actor)[0x7d])
+                if (actor->m_bSecondBooleanValue)
                 {
-                    reinterpret_cast<unsigned char*>(actor)[0x7c] = 1;
+                    actor->m_bFirstFlag = 1;
                 }
 
-                TESPackage* currentPackage = reinterpret_cast<FUN_009344a0_shell*>(actor)->GetCurrentPackage();
+                TESPackage* currentPackage = actor->MobileObject::GetCurrentPackage();
                 TESPackage* dialoguePackage = 0;
 
                 if (currentPackage != 0 && currentPackage->GetPackType() == 28)
@@ -573,7 +478,7 @@ void FUN_00935cc0(int param_1)
 
                 if (dialoguePackage != 0)
                 {
-                    if (reinterpret_cast<unsigned char*>(actor)[0x7f])
+                    if (actor->m_bFourthBooleanValue)
                     {
                         *reinterpret_cast<float*>(reinterpret_cast<char*>(dialoguePackage) + 0x90) =
                             0.30000001192092896f;
@@ -616,13 +521,7 @@ void FUN_00936fb0_shell::FUN_00936fb0()
     ((FUN_00456630_helper*)this)->FUN_00456630((unsigned int)&DAT_01000000);
 }
 
-struct SL
-{
-    void* m_iWordAt00;
-    void* m_iWordAt04;
-    SL();
-};
-
+// Retained: the shared modifier list does not declare its constructor.
 struct FUN_00937000 : public SL
 {
     unsigned char m_flag;
@@ -642,23 +541,15 @@ struct FUN_00986500_shell
 {
     void RemoveByTarget(int);
 };
-struct FUN_0093a660_class
-{
-    void __thiscall FUN_0093a660(int apActor);
-};
 // If the pointer at this+0xd64 is non-null, forwards apActor to its RemoveByTarget method.
 // @fnv 0x0093a660
-void FUN_0093a660_class::FUN_0093a660(int apActor)
+void Actor::FUN_0093a660(Actor* apActor)
 {
     if (*(void**)((char*)this + 0xd64) == 0)
         return;
-    ((FUN_00986500_shell*)*(void**)((char*)this + 0xd64))->RemoveByTarget(apActor);
+    ((FUN_00986500_shell*)*(void**)((char*)this + 0xd64))->RemoveByTarget(reinterpret_cast<int>(apActor));
 }
 
-struct GameTimerRecord
-{
-    void SetGlobalTimeMultiplier(float, bool);
-};
 struct FUN_0093e840_shell : GameTimerRecord
 {
     void ApplyGlobalTimeMultiplier();
@@ -669,30 +560,21 @@ void FUN_0093e840_shell::ApplyGlobalTimeMultiplier()
     SetGlobalTimeMultiplier(DAT_011ac3a8, false);
 }
 
-struct Vec3_00921e00
-{
-    int m_uiX;
-    int m_uiY;
-    int m_uiZ;
-};
-
-extern Vec3_00921e00 g_011f426c;
-
 struct FUN_00921e00_cls
 {
     int unk00;
     int unk04;
     int unk08;
     int unk0c;
-    Vec3_00921e00 m_pos;
+    NiPoint3 m_pos;
     void CopyGlobalPosition();
 };
 
-// Copies the global position g_011f426c into the m_pos field of this object.
+// 0x011F426C binds to NiPoint3::ZERO; copy its three position components.
 // @fnv 0x00921e00
 void FUN_00921e00_cls::CopyGlobalPosition()
 {
-    m_pos = g_011f426c;
+    m_pos = NiPoint3::ZERO;
 }
 
 struct VirtualElement
@@ -879,6 +761,7 @@ struct FUN_00934450_Obj68
     virtual void v145();
 };
 
+// Retained: the shared actor interfaces do not declare FUN_00934450(int, int, int).
 struct FUN_00934450_cls
 {
     unsigned int unk00;
@@ -918,22 +801,8 @@ void FUN_00934450_cls::FUN_00934450(int a1, int a2, int a3)
     m_68->v145();
 }
 
-struct NiRTTI
-{
-    int unk00;
-};
 extern NiRTTI DAT_011f36ac;
 
-struct NiControllerSequence
-{
-    int unk00;
-};
-
-struct NiControllerManager
-{
-    NiControllerSequence* FUN_0047a520(const char* name);
-    void FUN_0047b220(NiControllerSequence* seq, float f);
-};
 void __cdecl SetSequenceProgress(float f, NiControllerManager* mgr, NiControllerSequence* seq);
 
 struct NiAVObj
@@ -3521,10 +3390,11 @@ struct Base0a8
     float f4ac;
     float f4b0[77];
 };
-struct Actor122 : Base000, Base018, Base088, Base094, Base0a4, Base0a8
+// Synthetic 0x5E4 player-construction layout: calls Character ctor 0x008D1D30, unlike the shared 0x1B4 Actor layout.
+struct PlayerConstructionBase : Base000, Base018, Base088, Base094, Base0a4, Base0a8
 {
-    Actor122();   //0x8d1d30
-    ~Actor122();  //0x8d2060
+    PlayerConstructionBase();   //0x8d1d30
+    ~PlayerConstructionBase();  //0x8d2060
 };
 struct Controller122
 {
@@ -3532,7 +3402,7 @@ struct Controller122
     void FUN_00c6d770(int);
     void FUN_0070c440(int&);
 };
-struct FUN_00938180 : Actor122
+struct FUN_00938180 : PlayerConstructionBase
 {
     List122 f5e4;
     int f5ec;
@@ -3776,11 +3646,9 @@ struct Profile122
     Profile122(int, int, const char*, int);  //0x404eb0
     ~Profile122();                           //0x404ee0
 };
-struct Setting122
+// Setting.h lacks the float setter bound to 0x004ED780; retain only that call interface.
+struct FloatOptionWriter : Setting
 {
-    float* FUN_00403e20();
-    bool* FUN_00408d60();
-    int* FUN_0043d4d0();
     void FUN_004ed780(float);
 };
 struct Global122
@@ -3788,7 +3656,7 @@ struct Global122
     void FUN_0096d470(FUN_00938180*, int);
 };
 extern Global122 DAT_011e0e80;
-extern Setting122 DAT_011ccf2c, DAT_011e0934, DAT_011e0b4c, DAT_01203150, DAT_011e0940, DAT_011e087c, DAT_011cd8f0,
+extern Setting DAT_011ccf2c, DAT_011e0934, DAT_011e0b4c, DAT_01203150, DAT_011e0940, DAT_011e087c, DAT_011cd8f0,
     DAT_0120315c, DAT_011cda58, DAT_01203168;
 extern Vec122 DAT_011f426c, DAT_011e0808;
 extern float DAT_011e0b5c, DAT_011e0768;
@@ -3966,7 +3834,7 @@ FUN_00938180::FUN_00938180() : f634(0), f694(0), f69c(0), f764(1), f854(0x25), f
     f604 = 0;
     f84c.FUN_00470470();
     FUN_009627f0();
-    DAT_011cd8f0.FUN_004ed780(0.f);
+    static_cast<FloatOptionWriter&>(DAT_011cd8f0).FUN_004ed780(0.f);
     f870 = 0.f;
     f874 = 0.f;
     int flags24 = FUN_0044ddc0();
@@ -5090,7 +4958,7 @@ struct RV5 : VSlot<RV4, 1>
 };
 struct TickRef : VSlot<RV5, 0>
 {
-    bool Activate(TickPlayer*, bool, void*, int);
+    bool FUN_00573170(TickPlayer*, bool, void*, int);
     bool FUN_00568680();
     TickProc* FUN_008d8520();
     int GetExtraDataShort();
@@ -5141,36 +5009,14 @@ struct TickLists
     bool HasNearbyDetectedActor(unsigned char);
     bool IsFlagged();
 };
-struct BSSoundHandleEx
-{
-    int id;
-    int state;
-    int flags;
-    BSSoundHandleEx();
-    ~BSSoundHandleEx();
-    BSSoundHandleEx& operator=(const BSSoundHandleEx&);
-    bool FUN_00ad8ce0();
-    void FUN_00ad8da0(int);
-    bool FUN_00ad8830(bool);
-    void FUN_00ad88f0();
-    bool FUN_00ad8930();
-    void SetPositionFromArray(MPt*);
-};
-class AutoMemContext
-{
-  public:
-    int active;
-    AutoMemContext(MEM_CONTEXT, bool, const char*, int);
-    ~AutoMemContext();
-};
 struct TickAudio
 {
     float FUN_00ad7c80();
     void FUN_00ad7ec0();
     void FUN_00ad7da0(float);
-    BSSoundHandleEx FUN_00ad7550(const char*, int);
-    BSSoundHandleEx FUN_00ad7480(const char*, int, struct TickSoundForm*);
-    BSSoundHandleEx FUN_00ad73b0(unsigned int, unsigned int);
+    BSSoundHandle FUN_00ad7550(const char*, int);
+    BSSoundHandle FUN_00ad7480(const char*, int, struct TickSoundForm*);
+    BSSoundHandle FUN_00ad73b0(unsigned int, unsigned int);
 };
 struct TickTime
 {
@@ -5220,9 +5066,9 @@ struct TickSoundForm
 };
 struct TickContext
 {
-    void SetValueFromExtraData(BSSoundHandleEx*);
-    void FUN_00418940(BSSoundHandleEx*);
-    void FUN_0041a090(BSSoundHandleEx*);
+    void SetValueFromExtraData(BSSoundHandle*);
+    void FUN_00418940(BSSoundHandle*);
+    void FUN_0041a090(BSSoundHandle*);
     void* FUN_0041cd70();
     void FUN_0041cda0();
 };
@@ -5307,30 +5153,10 @@ struct TickRefList
     TickRef** FUN_006815c0();
     TickRefList* FUN_00726070();
 };
-class TESBoundObject
-{
-  public:
-    virtual void v00();
-};
-class TESObjectSTAT : public TESBoundObject
-{
-  public:
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40,
-        unk44, unk48, unk4c;
-    signed char unk50;
-};
+
 struct TickSoundID
 {
     unsigned int FUN_0084e3a0();
-};
-class TESContainer
-{
-  public:
-    int unk00, unk04, unk08;
-    TESContainer();
-    ~TESContainer();
-    void FUN_004818e0(void*, int, int);
-    void FUN_004821a0(TickPlayer*, int);
 };
 struct PV0 : VSlot<VSlotRoot, 53>
 {
@@ -6196,7 +6022,7 @@ extern TickPlayer* DAT_011dea3c;
 extern TickVATS DAT_011f2250;
 extern float DAT_011e07e8;
 extern bool DAT_011f21d0, DAT_011f21d1;
-extern BSSoundHandleEx DAT_011f6df0;
+extern BSSoundHandle DAT_011f6df0;
 extern MSetting DAT_011ca7c0, DAT_011d0fa8, DAT_011cdde0, DAT_011d0658, DAT_011d0b08;
 extern const float DAT_01017870, DAT_0108b084, DAT_010162c0, DAT_01017868, DAT_01012054;
 extern const char DAT_0108b088[], DAT_0108b078[], DAT_0108a8e0[];
@@ -6317,10 +6143,10 @@ void TickPlayer::FUN_0093e860(float elapsed)
     {
     case 0:
         FUN_00453a70();
-        if (DAT_011f6df0.FUN_00ad8ce0())
+        if (DAT_011f6df0.IsValid())
         {
             FUN_00453a70();
-            DAT_011f6df0.FUN_00ad8da0(1500);
+            DAT_011f6df0.FadeOutAndRelease(1500);
         }
         if (FUN_00453a70()->FUN_00ad7c80() < 0.99f)
             FUN_00453a70()->FUN_00ad7ec0();
@@ -6329,9 +6155,9 @@ void TickPlayer::FUN_0093e860(float elapsed)
         if (FUN_00453a70()->FUN_00ad7c80() > 0.99f && *DAT_011ca7c0.FUN_00403e20() < 0.99f)
         {
             FUN_00453a70()->FUN_00ad7da0(*DAT_011ca7c0.FUN_00403e20());
-            if (!DAT_011f6df0.FUN_00ad8ce0())
+            if (!DAT_011f6df0.IsValid())
                 DAT_011f6df0 = FUN_00453a70()->FUN_00ad7550(DAT_0108b088, 0x31);
-            DAT_011f6df0.FUN_00ad8830(false);
+            DAT_011f6df0.Play(false);
         }
     }
     if (unke1c > 0.0)
@@ -6410,7 +6236,7 @@ void TickPlayer::FUN_0093e860(float elapsed)
     TickAnimation* firstPersonAnim = FUN_00950a60(true);
     bool flag = false;
     unsigned short animGroup = 0;
-    BSSoundHandleEx sound;
+    BSSoundHandle sound;
     unk870 = 0.0f;
     unk874 = 0.0f;
     if (unk154 > 0.0)
@@ -6566,7 +6392,7 @@ void TickPlayer::FUN_0093e860(float elapsed)
     }
     if (GetField688())
     {
-        GetField688()->Activate(this, false, 0, 1);
+        GetField688()->FUN_00573170(this, false, 0, 1);
         SetField688(0);
         return;
     }
@@ -6766,9 +6592,9 @@ void TickPlayer::FUN_0093e860(float elapsed)
                 }
                 else
                 {
-                    BSSoundHandleEx repeatSound;
+                    BSSoundHandle repeatSound;
                     DAT_011dea3c->FUN_005d43c0()->SetValueFromExtraData(&repeatSound);
-                    repeatSound.FUN_00ad88f0();
+                    repeatSound.Stop();
                     vf1e4()->FUN_00922650(7, 0);
                     repeatDelay = *DAT_011cd5c8.FUN_00403e20();
                     DAT_011e0788 = 0;
@@ -6844,14 +6670,14 @@ void TickPlayer::FUN_0093e860(float elapsed)
                             if (!BuildActionMenu(&list, target))
                             {
                                 int count = target->GetExtraDataShort();
-                                if (target->Activate(this, false, 0, count))
+                                if (target->FUN_00573170(this, false, 0, count))
                                     activateFallback = false;
                             }
                         }
                         else
                         {
                             int count = target->GetExtraDataShort();
-                            if (target->Activate(this, false, 0, count))
+                            if (target->FUN_00573170(this, false, 0, count))
                                 activateFallback = false;
                         }
                     }
@@ -6859,7 +6685,7 @@ void TickPlayer::FUN_0093e860(float elapsed)
                         failed = true;
                     if (activateFallback && unk68->vf4c8())
                     {
-                        if (!unk68->vf4c8()->Activate(this, false, 0, 1))
+                        if (!unk68->vf4c8()->FUN_00573170(this, false, 0, 1))
                             failed = true;
                         else
                             failed = false;
@@ -6871,10 +6697,10 @@ void TickPlayer::FUN_0093e860(float elapsed)
                 {
                     FUN_005d43c0()->FUN_00418940(&sound);
                     TickSoundForm* errorSound = GetUIActivateNothingSound();
-                    if (!sound.FUN_00ad8ce0() && errorSound)
+                    if (!sound.IsValid() && errorSound)
                         sound = FUN_00453a70()->FUN_00ad7480(errorSound->FUN_00511840(), 0x121, errorSound);
-                    if (!sound.FUN_00ad8930())
-                        sound.FUN_00ad8830(false);
+                    if (!sound.IsPlaying())
+                        sound.Play(false);
                     FUN_005d43c0()->FUN_0041a090(&sound);
                 }
                 flag = true;
@@ -6973,16 +6799,16 @@ void TickPlayer::FUN_0093e860(float elapsed)
                 {
                     animGroup &= ~0x400;
                     sound = FUN_00453a70()->FUN_00ad7550(DAT_0108b064, 0x40102);
-                    sound.SetPositionFromArray(vf1f4());
-                    sound.FUN_00ad8830(false);
+                    sound.SetPosition(*reinterpret_cast<const NiPoint3*>(vf1f4()));
+                    sound.Play(false);
                     vf340(0xb);
                 }
                 else
                 {
                     animGroup |= 0x400;
                     sound = FUN_00453a70()->FUN_00ad7550(DAT_0108b050, 0x40102);
-                    sound.SetPositionFromArray(vf1f4());
-                    sound.FUN_00ad8830(false);
+                    sound.SetPosition(*reinterpret_cast<const NiPoint3*>(vf1f4()));
+                    sound.Play(false);
                     vf340(0xa);
                 }
                 if (!unk64f)
@@ -7428,7 +7254,7 @@ axesDone:
         }
         else
         {
-            FUN_00453a70()->FUN_00ad7550(DAT_01077d84, 0x121).FUN_00ad8830(false);
+            FUN_00453a70()->FUN_00ad7550(DAT_01077d84, 0x121).Play(false);
             DAT_011e0780 = false;
         }
         flag = true;
@@ -7544,14 +7370,14 @@ axesDone:
                     if (!BuildActionMenu(&list, target))
                     {
                         int count = target->GetExtraDataShort();
-                        if (target->Activate(this, false, 0, count))
+                        if (target->FUN_00573170(this, false, 0, count))
                             activateFallback = false;
                     }
                 }
                 else
                 {
                     int count = target->GetExtraDataShort();
-                    if (target->Activate(this, false, 0, count))
+                    if (target->FUN_00573170(this, false, 0, count))
                         activateFallback = false;
                     else if (target->FUN_00569160() && target->FUN_00569160()->FUN_004309e0(target) != 5 &&
                              !target->FUN_0057b460())
@@ -7562,7 +7388,7 @@ axesDone:
                 failed = true;
             if (activateFallback && unk68->vf4c8())
             {
-                if (!unk68->vf4c8()->Activate(this, false, 0, 1))
+                if (!unk68->vf4c8()->FUN_00573170(this, false, 0, 1))
                     failed = true;
                 else
                     failed = false;
@@ -7572,13 +7398,13 @@ axesDone:
         }
         if (failed || blocked)
         {
-            BSSoundHandleEx failSound;
+            BSSoundHandle failSound;
             FUN_005d43c0()->FUN_00418940(&failSound);
             TickSoundForm* errorSound = GetUIActivateNothingSound();
-            if (!failSound.FUN_00ad8ce0() && errorSound)
+            if (!failSound.IsValid() && errorSound)
                 failSound = FUN_00453a70()->FUN_00ad7480(errorSound->FUN_00511840(), 0x121, errorSound);
-            if (!failSound.FUN_00ad8930())
-                failSound.FUN_00ad8830(false);
+            if (!failSound.IsPlaying())
+                failSound.Play(false);
             FUN_005d43c0()->FUN_0041a090(&failSound);
         }
         flag = true;
@@ -7736,7 +7562,7 @@ axesDone:
                     {
                         TESObjectSTAT* stat =
                             dynamic_cast<TESObjectSTAT*>((TESBoundObject*)(*item->FUN_006815c0())->FUN_007af430());
-                        if (stat && stat->unk50 != -1)
+                        if (stat && static_cast<signed char>(stat->m_cType) != -1)
                         {
                             TickRef* refA = *item->FUN_006815c0();
                             if (refA->vf1d0())
@@ -7747,12 +7573,12 @@ axesDone:
                                 TickRef* refC = *item->FUN_006815c0();
                                 if ((double)radius > (*refC->vf1f4() - *vf1f4()).FUN_004a7290())
                                 {
-                                    TickSoundID* ambient = GetBrushSound(stat->unk50);
+                                    TickSoundID* ambient = GetBrushSound(static_cast<signed char>(stat->m_cType));
                                     if (ambient)
                                     {
                                         FUN_00453a70()
                                             ->FUN_00ad73b0(ambient->FUN_0084e3a0(), 0x101)
-                                            .FUN_00ad8830(false);
+                                            .Play(false);
                                         DAT_011e0ba8 = FUN_00457fe0() + FUN_00944460(1500, 2000);
                                     }
                                 }
@@ -7780,3 +7606,5 @@ axesDone:
     if (unke24 > 0.0 && (double)FUN_00457fe0() - unke24 > *DAT_011d03a0.FUN_00403e20() * 1000.0)
         unke24 = DAT_01012054;
 }
+
+#pragma pack(pop)

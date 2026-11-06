@@ -1,3 +1,4 @@
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
 // src/staging/blk_00dc0000_od_o2_gs_nood_nogs_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/staging/blk_00dc0000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,81 +7,53 @@
 // src/staging/blk_00dc0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkSimdReal.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkContactPoint.h"
 
 #include <xmmintrin.h>
 #include <math.h>
+#include <string.h>
 inline void* __cdecl operator new(unsigned int, void* location) throw()
 {
     return location;
 }
 
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool()
-    {}
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-struct hkVector4
-{
-    __m128 m_vComponents;
-};
 
-struct VectorComponentValue
-{
-    __m128 m_vValue;
-    VectorComponentValue(__m128 x) : m_vValue(x)
-    {}
-    operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-};
+inline hkVector4::hkVector4(const hkVector4& vector) : m_vComponents(vector.m_vComponents)
+{}
 
-struct Contact
-{
-    hkVector4 m_kPoint;
-    hkVector4 m_vHitNormal;
-};
+inline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x)
+{}
 
-struct MemoryRouter
+inline hkSimdReal::operator float() const
 {
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    void* m_pStreamAllocator;
-};
+    float s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
 
-extern MemoryRouter* __cdecl FUN_00c85750() throw();
 extern void __cdecl ResizeAudioStream(void* heap, void* array, int elemSize) throw();
 
-template <class T> struct hkArray
+#include "../../include/hkArray.h"
+// hkArray<T>::pushBack as this unit's original inlines it: the router's heap pointer is read only on the grow path.
+template <class T> static __forceinline void AddBack(hkArray<T>* a, const T& t)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline void AddBack(const T& t)
+    hkMemoryRouter* router = (&hkMemoryRouter::getInstance());
+    if (a->m_iElementCount == (a->m_iCapacityState & 0x3fffffff))
+        ResizeAudioStream(router->m_heap, a, sizeof(T));
+    T* destination = a->m_data + a->m_iElementCount;
+    if (destination)
     {
-        MemoryRouter* router = FUN_00c85750();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(router->m_pStreamAllocator, this, sizeof(T));
-        new (m_data + m_iElementCount) T(t);
-        m_iElementCount++;
+        ::new (destination) T;
+        memcpy(destination, &t, sizeof(T));
     }
-};
+    a->m_iElementCount++;
+}
 
-extern int __cdecl FUN_00dd6380(hkArray<hkVector4>* planes, int skip1, int skip2, int plane, Contact* contact);
+extern int __cdecl FUN_00dd6380(hkArray<hkVector4>* planes, int skip1, int skip2, int plane, hkContactPoint* contact);
 
 extern float DAT_0104da48;
 extern float DAT_0109afc4;
@@ -89,7 +62,7 @@ extern __m128 DAT_010c7160;
 
 // @fnv 0x00dd66d0
 hkBool __cdecl FUN_00dd66d0(const hkVector4* direction, hkArray<hkVector4>* planes, int skip1, int skip2,
-                            hkVector4* position, hkArray<Contact>* contacts)
+                            hkVector4* position, hkArray<hkContactPoint>* contacts)
 {
     float best = DAT_0104da48;
     bool found = false;
@@ -100,31 +73,31 @@ hkBool __cdecl FUN_00dd66d0(const hkVector4* direction, hkArray<hkVector4>* plan
         __m128 products = _mm_mul_ps(planes->m_data[i].m_vComponents, direction->m_vComponents);
         __m128 denomv = _mm_add_ss(_mm_shuffle_ps(products, products, 0xaa),
                                    _mm_add_ss(_mm_shuffle_ps(products, products, 0x55), products));
-        float denom = VectorComponentValue(denomv);
+        float denom = hkSimdReal(denomv);
         if (DAT_0109afc4 < denom)
         {
             position->m_vComponents.m128_f32[3] = 1.0f;
             __m128 dot = _mm_mul_ps(planes->m_data[i].m_vComponents, position->m_vComponents);
             __m128 sum = _mm_add_ps(_mm_shuffle_ps(dot, dot, 0x4e), dot);
             sum = _mm_add_ps(_mm_shuffle_ps(sum, sum, 0xb1), sum);
-            float num = VectorComponentValue(_mm_sub_ss(DAT_010c7160, sum));
+            float num = hkSimdReal(_mm_sub_ss(DAT_010c7160, sum));
             float absDenom = (float)fabs(denom);
             float dist = num / absDenom;
             if (dist < best + DAT_01032980)
             {
-                Contact contact;
+                hkContactPoint contact;
                 if (FUN_00dd6380(planes, skip1, skip2, i, &contact) == 0)
                 {
                     found = true;
                     float diff = dist - best;
                     if ((float)fabs(diff) < DAT_01032980)
                     {
-                        contacts->AddBack(contact);
+                        AddBack(contacts, contact);
                     }
                     else
                     {
                         contacts->m_iElementCount = 0;
-                        contacts->AddBack(contact);
+                        AddBack(contacts, contact);
                         best = dist;
                     }
                 }
@@ -156,24 +129,19 @@ void __cdecl FUN_00ddd5a0(const float* a, const float* b, const float* c)
 
 extern __m128 DAT_010c44d0;
 
-struct S00dd2fd0_cls
-{
-    __m128 m_00;
-};
-
 // @fnv 0x00dd2fd0
-static __declspec(noinline) void FUN_00dd2fd0(S00dd2fd0_cls* self, __m128* out, __m128* a1, __m128* a2)
+static __declspec(noinline) void FUN_00dd2fd0(hkSimdReal* self, __m128* out, __m128* a1, __m128* a2)
 {
-    __m128 d = _mm_sub_ps(*a1, self->m_00);
+    __m128 d = _mm_sub_ps(*a1, self->m_vValue);
     __m128 r = _mm_rcp_ps(d);
     __m128 t = _mm_mul_ps(_mm_mul_ps(r, d), r);
     r = _mm_sub_ps(_mm_add_ps(r, r), t);
     *a2 = _mm_mul_ps(*a1, r);
-    *out = _mm_mul_ps(self->m_00, r);
+    *out = _mm_mul_ps(self->m_vValue, r);
     *out = _mm_xor_ps(*out, DAT_010c44d0);
 }
 
-void S00dd2fd0_wrap(S00dd2fd0_cls* self, __m128* out, __m128* a1, __m128* a2)
+void S00dd2fd0_wrap(hkSimdReal* self, __m128* out, __m128* a1, __m128* a2)
 {
     FUN_00dd2fd0(self, out, a1, a2);
 }

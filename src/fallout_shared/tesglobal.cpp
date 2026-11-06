@@ -1,7 +1,11 @@
 // fallout_shared/tesglobal.cpp: TESGlobal, TESImageSpace (8 functions)
 
+#include "../../include/BSStringT.h"
 #include "tesglobal_layout.h"
-#include "tesglobal_decls.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESGlobal.h"
+#include "../../include/TESImageSpace.h"
+#include "../../include/BSFaceGenModelMap.h"
 #include <malloc.h>
 
 #define FNV_FOURCC(a, b, c, d)                                                                                         \
@@ -11,7 +15,8 @@
 // @fnv 0x005a64b0
 bool TESGlobal::Load(TESFile* file)
 {
-    if (file->GetTESForm() != 6)
+    // This caller compares the full return register, as in the original unsigned-int declaration.
+    if ((file->*reinterpret_cast<unsigned int (TESFile::*)()>(&TESFile::GetTESForm))() != 6)
         return false;
 
     LoadRecordHeader(file);
@@ -44,7 +49,6 @@ bool TESGlobal::Load(TESFile* file)
     return true;
 }
 
-#include "tesglobal_imagespace.h"
 
 // @fnv 0x0052b310
 TESImageSpace::TESImageSpace()
@@ -53,145 +57,56 @@ TESImageSpace::TESImageSpace()
     TESImageSpace::ResetFormData();
 }
 
-struct BSStr
-{
-    bool Set(char const*, unsigned int);
-};
-
-struct FUN_005a63a0_shell
-{
-    BSStr m_str;
-    bool SetString(char const* a1);
-};
-
-// Calls Set on the BSStr at offset 0x18 with the given string and a length of 0, then returns true.
+// Sets the global's editor ID, then returns true.
 // @fnv 0x005a63a0
-bool __thiscall FUN_005a63a0_shell::SetString(char const* apString)
+bool TESGlobal::SetEditorID_AtRuntime(char const* apString)
 {
-    ((BSStr*)((char*)this + 0x18))->Set(apString, 0);
+    cGlobalEditorID.Set(apString, 0);
     return 1;
 }
 
-void _Deallocate(void*);
-struct S_5a63c0
-{
-    void FUN_005a63f0();
-    void* Destroy(unsigned int flags);
-};
-// Calls FUN_005a63f0, then deallocates this if flags has bit 1 set, and returns this.
-// @fnv 0x005a63c0
-void* S_5a63c0::Destroy(unsigned int flags)
-{
-    FUN_005a63f0();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct FUN_004855a0
-{
-    void M();
-};
-struct FUN_00485680
-{
-    void M();
-};
 void __cdecl FUN_004858f0(unsigned int, unsigned char);
 void __cdecl _FUN_00485910(unsigned int, float);
-struct FUN_005a6460_standin
-{
-    char _p0[32];
-    unsigned char _b20;
-    char _p1[3];
-    float _f24;
-    void FUN_005a6460();
-};
-// Calls M on this, then passes the byte at offset 0x20 and the float at offset 0x24 to FUN_004858f0 and _FUN_00485910, then calls M again.
+
+// Writes the global's type and value chunks.
 // @fnv 0x005a6460
-void FUN_005a6460_standin::FUN_005a6460()
+void TESGlobal::SaveForm()
 {
-    ((FUN_004855a0*)this)->M();
-    FUN_004858f0(0x4D414E46, _b20);
-    _FUN_00485910(0x56544C46, _f24);
-    ((FUN_00485680*)this)->M();
+    TESForm::FUN_004855a0();
+    FUN_004858f0(0x4D414E46, cType);
+    _FUN_00485910(0x56544C46, fValue);
+    TESForm::FUN_00485680();
 }
 
-struct FUN_005e78f0_t
-{
-    void FUN_004851b0(TESForm*);
-};
-struct BSFaceGenModelMap
-{
-    bool FUN_00529ea0();
-};
-struct TESGlobalValueReader
-{
-    float GetValue();
-};
-struct FUN_005a65e0_shell : TESGlobal
-{
-    void FUN_005a65e0(TESForm* apCopy);
-};
 // @fnv 0x005a65e0
-void FUN_005a65e0_shell::FUN_005a65e0(TESForm* apCopy)
+void TESGlobal::CopyFrom(const TESForm* apCopy)
 {
-    TESGlobal* pCopy = dynamic_cast<TESGlobal*>(apCopy);
+    TESGlobal* pCopy = dynamic_cast<TESGlobal*>(const_cast<TESForm*>(apCopy));
     if (!pCopy)
         return;
-    reinterpret_cast<FUN_005e78f0_t*>(this)->FUN_004851b0(apCopy);
-    cType = reinterpret_cast<BSFaceGenModelMap*>(pCopy)->FUN_00529ea0();
-    fValue = reinterpret_cast<TESGlobalValueReader*>(pCopy)->GetValue();
+    TESForm::CopyFrom(apCopy);
+    cType = reinterpret_cast<BSFaceGenModelMap*>(pCopy)->HasModels();
+    fValue = pCopy->GetValue();
 }
 
-struct FUN_005e79a0_t
-{
-    bool FUN_00485270(TESForm*);
-};
-struct FUN_005a6640_shell : TESGlobal
-{
-    bool IsNotEqual(TESForm* apCompare);
-};
-// Compares this global with apCompare: returns true if apCompare is not a TESGlobal or differs by FUN_00485270, FUN_00529ea0 or GetValue; false otherwise.
+// Returns true when the other form is not a global or its base data, type or value differs.
 // @fnv 0x005a6640
-bool FUN_005a6640_shell::IsNotEqual(TESForm* apCompare)
+bool TESGlobal::Compare(TESForm* apCompare)
 {
     TESGlobal* pComp = dynamic_cast<TESGlobal*>(apCompare);
     if (!pComp)
         return true;
-    if (((FUN_005e79a0_t*)this)->FUN_00485270(pComp))
+    if (TESForm::Compare(pComp))
         return true;
-    if (((char)((BSFaceGenModelMap*)this)->FUN_00529ea0()) != ((char)((BSFaceGenModelMap*)pComp)->FUN_00529ea0()))
+    if (((char)((BSFaceGenModelMap*)this)->HasModels()) != ((char)((BSFaceGenModelMap*)pComp)->HasModels()))
         return true;
-    if (((TESGlobalValueReader*)this)->GetValue() != ((TESGlobalValueReader*)pComp)->GetValue())
+    if (GetValue() != pComp->GetValue())
         return true;
     return false;
 }
 
-struct FUN_00483710_t
-{
-    void FUN_00483710();
-};
-
-struct FUN_004037d0
-{
-    ~FUN_004037d0();
-};
-
-struct FUN_00483630
-{
-    virtual void Vb();
-    char _p4[0x14];
-    ~FUN_00483630();
-};
-
-struct FUN_005a63f0 : FUN_00483630
-{
-    virtual ~FUN_005a63f0();
-    FUN_004037d0 m_18;
-};
-
 // @fnv 0x005a63f0
-FUN_005a63f0::~FUN_005a63f0()
+TESGlobal::~TESGlobal()
 {
-    ((FUN_00483710_t*)this)->FUN_00483710();
+    TESForm::ClearData();
 }

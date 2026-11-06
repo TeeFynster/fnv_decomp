@@ -5,12 +5,11 @@
 
 // src/havok/physics/internal/collide/mopp/machine/hkpmoppearlyexitobbvirtualmachine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/machine/hkpmoppearlyexitobbvirtualmachine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-class hkBool {
-public:
-    hkBool() {}
-    hkBool(bool b) { m_cBooleanValue = (char)b; }
-    char m_cBooleanValue;
-};
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkErrStream.h"
+#include "../../../../../../../include/hkError.h"
+#include "../../../../../../../include/hkOstream.h"
+
 extern char DAT_0126efba;
 void ValidateHavokKeyCode(char* pKey);
 struct S_00e647e0_Shape;
@@ -45,34 +44,9 @@ struct CollisionShapeRecord
     unsigned int m_kProperties[1];
 };
 
-class hkOstream
-{
-public:
-    void* m_ppVirtualMethodTable;
-    int m_usMemSizeAndFlags;
-    void* m_pStreamWriter;
-    hkOstream& FUN_00cc01c0(const char* s);
-};
-
-class hkErrStream : public hkOstream
-{
-public:
-    void FUN_00cb1600(void* buf, int bufSize);
-    void FUN_00cc00e0();
-};
-
-class hkError
-{
-public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual int message(int id, int code, const char* msg, const char* file, int line);
-};
-
 }
 
-extern S00e63f10::hkError* DAT_01268360;
+extern hkError* DAT_01268360;
 extern char DAT_010d5100[];
 extern char DAT_010ecfbc[];
 
@@ -426,7 +400,9 @@ void S00e63f10::hkpMoppEarlyExitObbVirtualMachine::FUN_00e63f10(const CollisionS
         default:
             {
                 char buf[512];
-                hkErrStream ostr;
+                // Keep the original explicit stream lifetime without automatic unwinding.
+                union { char bytes[sizeof(hkErrStream)]; void* alignment; } streamStorage;
+                hkErrStream& ostr = *reinterpret_cast<hkErrStream*>(streamStorage.bytes);
                 ostr.FUN_00cb1600(buf, sizeof(buf));
                 ostr.FUN_00cc01c0(DAT_010d5100);
                 if (DAT_01268360->message(3, 0x1298fedd, buf, DAT_010ecfbc, 0x156))

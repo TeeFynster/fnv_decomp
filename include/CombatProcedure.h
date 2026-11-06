@@ -1,22 +1,74 @@
-// Source layout: CombatProcedure. PC corrections are in generate_headers.py.
-#ifndef FNV_COMBATPROCEDURE_H
-#define FNV_COMBATPROCEDURE_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+class CombatController;
+class TESObjectREFR;
+class TESBoundObject;
+class BGSSaveFormBuffer;
+class BGSLoadFormBuffer;
+class NiPoint3;
+
 class CombatProcedure
 {
-  public:
-    void** m_ppVirtualMethodTable;                                   // +0x0
-    CombatController* m_pCombatController;             // +0x4
-    CombatProcedure__COMBAT_PROCEDURE_STATUS eStatus;  // +0x8
-    const char* m_pcProcedureName;                     // +0xC
+public:
+    enum COMBAT_PROCEDURE_STATUS
+    {
+        ACTIVE = 0,
+        FAILED = 1,
+        FINISHED = 2,
+        COMBAT_PROCEDURE_STATUS_COUNT = 3,
+    };
+
+    enum COMBAT_PROCEDURES  // values: Xbox PDB CombatProcedure::COMBAT_PROCEDURES
+    {
+        NONE = -1,
+        ATTACK_RANGED = 0,
+        ATTACK_MELEE = 1,
+        ATTACK_GRENADE = 2,
+        ATTACK_LOW = 3,
+        EVADE = 4,
+        SWITCH_WEAPON = 5,
+        MOVE_TO_LOCATION = 6,
+        BE_IN_COVER = 7,
+        ACTIVATE_OBJECT = 8,
+        HIDE_FROM_TARGET = 9,
+        SEARCH = 10,
+        USE_COMBAT_ITEM = 11
+    };
+
+    CombatController* m_pCombatController;
+    int eStatus;
+    const char* m_pcProcedureName;
+
+    CombatProcedure();
+
+    virtual ~CombatProcedure();
+    virtual void Unk04();
+    virtual void Unk08(CombatController*);
+    virtual void Unk0c();
+    virtual void Unk10(int);
+    virtual void d05();
+    virtual void d06();
+    virtual void d07();
+    virtual void d08();
+    virtual void d09();
+    virtual void OnInventoryItemChanged(TESObjectREFR* apRef, TESBoundObject* apObject,
+                                        int aiCount, bool abActivatedScriptOnly);
+    virtual void d11();
+    virtual void d12();
+    virtual int GetType();
+    virtual void SaveGame(BGSSaveFormBuffer* apBuffer);
+    virtual void LoadGame(BGSLoadFormBuffer* apBuffer);
+    virtual void vf16();
+
     void Initialize(CombatController*);
+    void RunProcedure();
+    void* DestroyIfFlagged(unsigned int flags);
+    void FUN_009ca6c0();
+    void* FUN_00996e00();
+    void FUN_00996e20(int aiCombatMoveMode);
+    void FUN_00996e40();
+    void SetLookAtPoint(const NiPoint3& arLookAtPoint, unsigned char acPriority);
+    void FUN_00996ea0();
+    void SaveToBuffer(BGSSaveFormBuffer* apSaveGameBuffer);
+    void FUN_00996ef0(BGSLoadFormBuffer* buffer);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(CombatProcedure) == 0x10);
-FNV_STATIC_ASSERT(offsetof(CombatProcedure, m_ppVirtualMethodTable) == 0x0);
-FNV_STATIC_ASSERT(offsetof(CombatProcedure, m_pCombatController) == 0x4);
-FNV_STATIC_ASSERT(offsetof(CombatProcedure, eStatus) == 0x8);
-FNV_STATIC_ASSERT(offsetof(CombatProcedure, m_pcProcedureName) == 0xC);
-#endif

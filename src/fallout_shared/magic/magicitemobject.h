@@ -6,19 +6,8 @@
 #ifndef FNV_MAGICITEMOBJECT_H
 #define FNV_MAGICITEMOBJECT_H
 
-#include "layout_support.h"
-
-class TESForm
-{
-  public:
-    void SetAltered(bool bAltered);
-};
-
-class MagicItemForm : public TESForm
-{
-  public:
-    void SetAltered(bool bAltered);
-};
+#include "../../../include/TESForm.h"
+#include "../../../include/MagicItemForm.h"
 
 // @fnv 0x00402990
 void MagicItemForm::SetAltered(bool bAltered)

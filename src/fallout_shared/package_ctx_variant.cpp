@@ -1,7 +1,12 @@
 
 // package_ctx_variant.cpp: context variant of src/fallout_shared/package.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
+#include "../../include/ImageSpaceModifierInstanceDOF.h"
+#include "../../include/MobileObject.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESPackage.h"
 #include "package_decls.h"
+#include "../../include/TESCombatStyle.h"
 
 void* __cdecl operator new(unsigned int);
 void __cdecl operator delete(void*);
@@ -55,14 +60,6 @@ struct PackageDataInit
 };
 int __cdecl FUN_0046e8a0();
 void __cdecl ResolveFormID(unsigned int*, void*);
-class TESForm
-{
-  public:
-    virtual void unused();
-};
-class TESCombatStyle : public TESForm
-{
-};
 TESForm* __cdecl FUN_004839c0(unsigned int);
 void* __cdecl FUN_00ec43fb(void*, int, void*, void*, int);
 extern int DAT_0118627c, DAT_01183028;

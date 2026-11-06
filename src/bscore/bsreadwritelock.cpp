@@ -1,17 +1,15 @@
 // bscore/bsreadwritelock.cpp: free functions (7 functions)
 
-#include "bsreadwritelock_decls.h"
+#include "../../include/BGSEntryPointPerkEntry.h"
 
-// Calls FUN_005e9530, then sets the vtable to kVtbl_BGSEntryPointPerkEntry and zeroes value0C, value10, flag0A and flag09.
+// Runs the BGSPerkEntry constructor (0x005e9530), then sets the derived vtable and clears the function data, conditions, condition count and function.
 // @fnv 0x005e9f60
-PerkEntryConditionSet::PerkEntryConditionSet()
+BGSEntryPointPerkEntry::BGSEntryPointPerkEntry()
 {
-    reinterpret_cast<BGSIdleMarker*>(this)->FUN_005e9530();
-    vtable = &kVtbl_BGSEntryPointPerkEntry;
-    value0C = 0;
-    value10 = 0;
-    flag0A = 0;
-    flag09 = 0;
+    m_pFunctionData = 0;
+    m_pConditions = 0;
+    Data.m_ucConditionCount = 0;
+    Data.m_ucFunction = 0;
 }
 
 struct ReadWriteLock

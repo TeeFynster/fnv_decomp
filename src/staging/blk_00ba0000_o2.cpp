@@ -1,10 +1,268 @@
+#include "../../include/ImageSpaceTexture.h"
+#include "../../include/NiTArray.h"
 // staging/blk_00ba0000_o2.cpp: GeomList_S, Owner, BSFogProperty, FnvOdbObject and more (245 functions)
 
 #include <windows.h>
 // src/staging/blk_00ba0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/BSStringT.h"
+#include "../../include/BSFogProperty.h"
+#include "../../include/TileShaderProperty.h"
+
+#include "../../include/BSString.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTransform.h"
+#include "../../include/ShadowSceneLight.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiTPrimitiveArray.h"
+// NiMemObjectAllocation_blk_00ba0000_o2: local type (was include/NiMemObjectAllocation.h, which had no evidence of one real class); no method of it is bound to a named game function
+class NiMemObjectAllocation_blk_00ba0000_o2
+{
+public:
+    static void* operator new(unsigned int size);
+    static void operator delete(void* pointer);
+    static void operator delete(void* pointer, unsigned int size);
+};
+#include "../../include/NiRTTI.h"
+#include "../../include/StrArr.h"
+#include "../../include/Bound.h"
+#include "../../include/NiGeometryData.h"
+#include "../../include/BSFaceGenMorphData.h"
+#include "../../include/BSShaderNoLightingProperty.h"
+#include "../../include/BSShaderManager.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiAlphaProperty.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiColor.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiProperty.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTexture.h"
+#include "../../include/NiColorA.h"
+#include "../../include/ShadowSceneNode.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3; this unit defines inline bodies for both NiPoint3 and the stand-in in different forms (constructor/temporary, operand order), so one NiPoint3 cannot carry both.
+#include "../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+#include "../../include/Vec4.h"
+#include "../../include/ImageSpaceEffectParam.h"
+
+void __cdecl operator delete(void*);
+
+// Bodies kept here so shared declarations retain the original inlining.
+inline NiAlphaProperty::NiAlphaProperty() : NiProperty()
+{
+    m_usAlphaArg = 0x00EC;
+    m_ucAlphaArg2 = 0;
+}
+__forceinline NiRefObject::~NiRefObject()
+{
+    InterlockedDecrement((volatile long*)&ms_lObjectCount);
+}
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement((volatile long*)&m_uiRefCount);
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+inline void NiAVObject::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiAVObject::DecRefCount() { NiRefObject::DecRefCount(); }
+inline NiPoint3::NiPoint3(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
+inline NiColorA::NiColorA(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
+inline NiColor::NiColor() : r(0), g(0), b(0) {}
+inline LocalVec3::LocalVec3() {}
+inline LocalVec3::LocalVec3(float fA, float fB, float fC) : x(fA), y(fB), z(fC) {}
+inline Vec4::Vec4(float fA, float fB, float fC, float fD) : x(fA), y(fB), z(fC), w(fD) {}
+inline Vec4::Vec4(const Vec4& kSrc) : x(kSrc.x), y(kSrc.y), z(kSrc.z), w(kSrc.w) {}
+inline NiBound::NiBound() {}
+inline const NiBound& NiBound::operator=(const NiBound& other)
+{
+    unsigned int* __restrict dest = reinterpret_cast<unsigned int*>(this);
+    const unsigned int* __restrict source = reinterpret_cast<const unsigned int*>(&other);
+    dest[0] = source[0];
+    dest[1] = source[1];
+    dest[2] = source[2];
+    dest[3] = source[3];
+    return *this;
+}
+template <class T> inline NiPointer<T>::NiPointer()
+{
+    m_pObject = 0;
+    if (m_pObject != 0) m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::NiPointer(T* pkNew) : m_pObject(pkNew)
+{
+    if (m_pObject != 0) m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::NiPointer(const NiPointer& kSrc) : m_pObject(kSrc.m_pObject)
+{
+    if (m_pObject != 0) m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0) m_pObject->DecRefCount();
+}
+template <class T> inline NiPointer<T>::operator T*() const { return m_pObject; }
+template <class T> inline T* NiPointer<T>::operator->() const { return m_pObject; }
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject != 0) m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0) m_pObject->IncRefCount();
+    }
+    return *this;
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer& kSrc)
+{
+    if (m_pObject != kSrc.m_pObject)
+    {
+        if (m_pObject != 0) m_pObject->DecRefCount();
+        m_pObject = kSrc.m_pObject;
+        if (m_pObject != 0) m_pObject->IncRefCount();
+    }
+    return *this;
+}
+
+inline void CopyPointBits(NiPoint3& output, const NiPoint3& input)
+{
+    unsigned int* __restrict dest = reinterpret_cast<unsigned int*>(&output);
+    const unsigned int* __restrict source = reinterpret_cast<const unsigned int*>(&input);
+    dest[0] = source[0];
+    dest[1] = source[1];
+    dest[2] = source[2];
+}
 
 struct FUN_00bb0e90_Class
 {
@@ -25,10 +283,6 @@ const char* const* __cdecl FUN_00bb35a0()
     return &g_01200788_arg1;
 }
 
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 void __cdecl FUN_00ba0400();
 struct FUN_00ba1230_Class
@@ -46,10 +300,6 @@ void* __thiscall FUN_00ba1230_Class::FUN_00ba1230(bool flag)
 }
 
 namespace fnv_00ba1750 {
-struct MemoryManager
-{
-    void* __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 void __cdecl FUN_00ba12d0();
 struct FUN_00ba1750_Class
@@ -83,10 +333,6 @@ void __thiscall FUN_00ba3d10_Class::FUN_00ba3d10()
 }
 
 namespace fnv_00ba4170 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 void __cdecl FUN_00ba3d30();
 struct FUN_00ba4170_Class
@@ -104,10 +350,6 @@ void* __thiscall FUN_00ba4170_Class::FUN_00ba4170(int flag)
 }  // namespace fnv_00ba4170
 
 namespace fnv_00ba46a0 {
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 void __cdecl FUN_00ba4190();
 struct FUN_00ba46a0_Class
@@ -125,10 +367,6 @@ FUN_00ba46a0_Class* __thiscall FUN_00ba46a0_Class::FUN_00ba46a0(unsigned char fl
 }  // namespace fnv_00ba46a0
 
 namespace fnv_00ba4920 {
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00ba4480_Class
 {
@@ -185,10 +423,6 @@ FUN_00baa160_Class::FUN_00baa160_Class()
 }
 
 namespace fnv_00baa220 {
-struct MemoryManager
-{
-    void* __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 void* __cdecl FUN_00baa180();
 struct FUN_00baa220_Class
@@ -230,10 +464,6 @@ int FUN_00bad4d0_Class::FUN_00bad4d0()
     return 0;
 }
 
-struct NiAVObject
-{
-    void __thiscall UpdateSceneObject();
-};
 extern char DAT_011F941E;
 struct FUN_00bae780_Class
 {
@@ -460,10 +690,6 @@ FUN_00bb7f60_Class* __thiscall FUN_00bb7f60_Class::FUN_00bb7f60(unsigned char fl
 }
 
 namespace fnv_00bb8990 {
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 struct MM
 {
     void* p;
@@ -588,11 +814,6 @@ void __thiscall FUN_00ba5100_Class::FUN_00ba5100()
     ((LodShaderBase*)this)->FUN_00e814b0();
 }
 
-struct NiD3DPass;
-struct NiD3DPass
-{
-    static void __cdecl CreateD3DPass(NiD3DPass*&);
-};
 struct FUN_00ba63a0_Class
 {
     char b[0x74];
@@ -628,15 +849,12 @@ struct NiObjectNET_stub
 {
     void FUN_00a5c6a0(int);
 };
-struct NiTexture;
+
 struct NiPointer_NiTexture
 {
     NiTexture* p;
 };
-struct BSShaderManager
-{
-    static void GetTexture(const char* name, bool a, NiPointer_NiTexture& out, bool b, bool c);
-};
+
 struct FUN_00bae740_Class : NiObjectNET_stub
 {
     void FUN_00bae740(int a);
@@ -709,11 +927,7 @@ struct NiObjectNET_stub
 {
     void __thiscall FUN_00a5c6a0(int);
 };
-struct NiTexture;
-struct BSShaderManager
-{
-    static void GetTexture(const char* name, bool a, NiTexture*& tex, bool b, bool c);
-};
+
 struct FUN_00bb79e0_Class
 {
     void __thiscall FUN_00bb79e0(int arg);
@@ -730,14 +944,7 @@ void __thiscall FUN_00bb79e0_Class::FUN_00bb79e0(int arg)
 }
 }  // namespace fnv_00bb79e0
 
-struct NiTexture
-{
-    void* m_vft;
-};
-struct ImageSpaceTexture
-{
-    void __thiscall SetTexture(NiTexture*);
-};
+
 struct FUN_00bb9010_Class
 {
     void __thiscall FUN_00bb9010();
@@ -751,10 +958,7 @@ void __thiscall FUN_00bb9010_Class::FUN_00bb9010()
 
 namespace fnv_00bb9560 {
 extern int DAT_01200ec0;
-struct NiD3DPass
-{
-    static void __cdecl CreateD3DPass(void**);
-};
+
 struct FUN_00c072c0_Class
 {
     void __thiscall ConfigureAllPasses();
@@ -823,11 +1027,6 @@ FUN_00bb7170_Class* FUN_00bb7300_Class::CreateInstance()
 struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011fa05c;
 char* __cdecl FUN_00a7d330(void*);
-struct StrArr
-{
-    void __thiscall SetSize(unsigned int);
-    void __thiscall SetAt(unsigned int, char*&);
-};
 void __stdcall WriteToSettingArray(StrArr*);
 
 // @fnv 0x00bb74e0
@@ -868,10 +1067,6 @@ struct ImageSpaceTexture_ReturnRenderedTexture_H
 {
     void __thiscall AddRenderedTexture();
 };
-struct NiTPrimitiveArray_int___H
-{
-    void __thiscall SetAt(unsigned int, int&);
-};
 
 // @fnv 0x00ba4580
 void FUN_00ba4580_Class::FUN_00ba4580()
@@ -881,11 +1076,11 @@ void FUN_00ba4580_Class::FUN_00ba4580()
     void* t0 = *(void**)(*(char**)a + 8);
     ((ImageSpaceTexture_ReturnRenderedTexture_H*)t0)->AddRenderedTexture();
     int tmp = 0;
-    ((NiTPrimitiveArray_int___H*)(p + 0x28))->SetAt(2, tmp);
+    ((NiTPrimitiveArray<int>*)(p + 0x28))->SetAt(2, tmp);
     void* t1 = *(void**)(*(char**)a + 0xc);
     ((ImageSpaceTexture_ReturnRenderedTexture_H*)t1)->AddRenderedTexture();
     tmp = 0;
-    ((NiTPrimitiveArray_int___H*)(p + 0x28))->SetAt(3, tmp);
+    ((NiTPrimitiveArray<int>*)(p + 0x28))->SetAt(3, tmp);
 }
 
 struct FUN_00ba52b0_Class
@@ -1255,27 +1450,27 @@ FUN_00bb4520_Class::FUN_00bb4520_Class()
 
 void __fastcall DestroyFogProperty(void*);
 extern "C" void __cdecl _delete(void*, unsigned int);
-struct BSFogProperty
-{
-    void* m_vft;
-    BSFogProperty* __thiscall FUN_00bb8250(unsigned char flags);
-};
 extern const void* vftable_BSFogProperty;
 // Sets the vftable, calls DestroyFogProperty on this, and if flags bit 0 is set deletes this with size 0x64, returning this.
 // @fnv 0x00bb8250
 BSFogProperty* BSFogProperty::FUN_00bb8250(unsigned char flags)
 {
-    m_vft = (void*)&vftable_BSFogProperty;
+    unk00 = (int)&vftable_BSFogProperty;
     DestroyFogProperty(this);
     if (flags & 1)
         _delete(this, 0x64);
     return this;
 }
 
-struct NiTPrimitiveArray_ImageSpaceTexture___
+// This by-value member is a declaration-only shim: the shared
+// NiTPrimitiveArray<ImageSpaceTexture*> adds an implicit member constructor.
+// Rebind measured 0x00bb8900 at 151 bytes instead of the original 136 bytes.
+// Keep the original empty layout and external destructor until the owning
+// effect can be represented without changing its constructor code.
+struct LocalTextureArrayMember
 {
     void __thiscall SetSize(unsigned int);
-    ~NiTPrimitiveArray_ImageSpaceTexture___();
+    ~LocalTextureArrayMember();
 };
 
 extern int DAT_010b9f04;
@@ -1293,7 +1488,7 @@ struct FUN_00bb8900_Class : ImageSpaceEffect
     void* m_vft;
     unsigned char m_flag;
     char m_auiShapeKeys[0x23];
-    NiTPrimitiveArray_ImageSpaceTexture___ m_ppData;
+    LocalTextureArrayMember m_ppData;
 
     FUN_00bb8900_Class();
 };
@@ -1390,34 +1585,6 @@ void __stdcall FUN_00bb96d0(unsigned int)
     DAT_012010bc[8] = 0;
 }
 
-struct NiObject : A51BF0Base
-{
-    virtual ~NiObject();
-};
-
-struct NiProperty : NiObject
-{
-    unsigned char m_0x04[0x14];
-    NiProperty();
-};
-
-struct NiAlphaProperty : NiProperty
-{
-    unsigned short m_flags;
-    unsigned char m_uiFilterValue;
-
-    NiAlphaProperty() : NiProperty()
-    {
-        m_flags = 0x00EC;
-        m_uiFilterValue = 0;
-    }
-};
-
-struct NiAVObjectAttachProperty
-{
-    void __thiscall AttachProperty(NiObject*);
-};
-
 struct FUN_00baff20_Class
 {
     unsigned char m_0x00[0x38];
@@ -1446,22 +1613,22 @@ void __thiscall FUN_00baff20_Class::AttachAlphaProperty(NiAVObject* target)
         NiAlphaProperty* property = new NiAlphaProperty;
 
         if (m_0x38)
-            property->m_flags |= 0x0001;
+            property->m_usAlphaArg |= 0x0001;
         else
-            property->m_flags &= 0xFFFE;
+            property->m_usAlphaArg &= 0xFFFE;
 
-        property->m_flags = (property->m_flags & 0xFFE1) | (m_0x3c << 1);
-        property->m_flags = (property->m_flags & 0xFE1F) | (m_0x40 << 5);
+        property->m_usAlphaArg = (property->m_usAlphaArg & 0xFFE1) | (m_0x3c << 1);
+        property->m_usAlphaArg = (property->m_usAlphaArg & 0xFE1F) | (m_0x40 << 5);
 
         if (m_0x44)
-            property->m_flags |= 0x0200;
+            property->m_usAlphaArg |= 0x0200;
         else
-            property->m_flags &= 0xFDFF;
+            property->m_usAlphaArg &= 0xFDFF;
 
-        property->m_uiFilterValue = m_0x4c;
-        property->m_flags = (property->m_flags & 0xE3FF) | (m_0x48 << 10);
+        property->m_ucAlphaArg2 = m_0x4c;
+        property->m_usAlphaArg = (property->m_usAlphaArg & 0xE3FF) | (m_0x48 << 10);
 
-        reinterpret_cast<NiAVObjectAttachProperty*>(target)->AttachProperty(property);
+        target->AttachProperty(static_cast<NiObject*>(property));
     }
 }
 
@@ -1768,36 +1935,23 @@ void FnvOdbObject::ProcessEntries(void* arg1, void* arg2, void* arg3, FnvOdbValu
 
 void* BA4080Alloc(unsigned int uiSize);
 
-template <class T> class BA4080Array
+template <class T, class TAlloc>
+inline NiTArray<T, TAlloc>::NiTArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
 {
-  public:
-    BA4080Array(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1)
-    {
-        m_usMaxSize = (unsigned short)uiMaxSize;
-        m_usGrowBy = (unsigned short)uiGrowBy;
-        m_usSize = 0;
-        m_usESize = 0;
-        if (m_usMaxSize > 0)
-            m_pBase = (T*)BA4080Alloc(m_usMaxSize * sizeof(T));
-        else
-            m_pBase = 0;
-    }
-    virtual ~BA4080Array();
+    m_usMaxSize = (unsigned short)uiMaxSize;
+    m_usGrowBy = (unsigned short)uiGrowBy;
+    m_usSize = 0;
+    m_usESize = 0;
+    if (m_usMaxSize > 0)
+        m_pBase = (T*)BA4080Alloc(m_usMaxSize * sizeof(T));
+    else
+        m_pBase = 0;
+}
 
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
-
-template <class T> class BA4080PrimitiveArray : public BA4080Array<T>
-{
-  public:
-    BA4080PrimitiveArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) : BA4080Array<T>(uiMaxSize, uiGrowBy)
-    {}
-    virtual ~BA4080PrimitiveArray();
-};
+template <class T>
+inline NiTPrimitiveArray<T>::NiTPrimitiveArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
+    : NiTArray<T, NiTMallocInterface<T> >(uiMaxSize, uiGrowBy)
+{}
 
 struct BA4080Pass;
 struct BA4080PendingPass;
@@ -1813,11 +1967,11 @@ class FUN_00ba4080
 
     bool m_bEnableState;
     bool m_bVisible;
-    BA4080PrimitiveArray<BA4080Pass*> m_kPasses;
-    BA4080PrimitiveArray<BA4080PendingPass*> m_kPendingPasses;
-    BA4080PrimitiveArray<BA4080Stage*> m_kStageArray;
-    BA4080PrimitiveArray<BA4080PendingStage*> m_kPendingStages;
-    BA4080PrimitiveArray<BA4080FreeStage*> m_kFreeStages;
+    NiTPrimitiveArray<BA4080Pass*> m_kPasses;
+    NiTPrimitiveArray<BA4080PendingPass*> m_kPendingPasses;
+    NiTPrimitiveArray<BA4080Stage*> m_kStageArray;
+    NiTPrimitiveArray<BA4080PendingStage*> m_kPendingStages;
+    NiTPrimitiveArray<BA4080FreeStage*> m_kFreeStages;
 };
 
 // @fnv 0x00ba4080
@@ -1830,27 +1984,17 @@ class BA4190Object
     virtual ~BA4190Object();
 };
 
-template <class T> class BA4190PrimitiveArray
+template <class T, class TAlloc>
+inline unsigned int NiTArray<T, TAlloc>::GetSize() const
 {
-  public:
-    virtual ~BA4190PrimitiveArray();
+    return m_usSize;
+}
 
-    unsigned int GetSize() const
-    {
-        return m_usSize;
-    }
-    T& GetAt(unsigned int uiIndex) const
-    {
-        return m_pBase[uiIndex];
-    }
-    void SetAt(unsigned int uiIndex, const T& element);
-
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+template <class T, class TAlloc>
+inline T& NiTArray<T, TAlloc>::GetAt(unsigned int uiIndex)
+{
+    return m_pBase[uiIndex];
+}
 
 class BA4190Base
 {
@@ -1862,7 +2006,7 @@ class BA4190Base
     int unk0C;
     int unk10;
     int unk14;
-    BA4190PrimitiveArray<BA4190Object*> m_kThirdFollowingStreamField;
+    NiTPrimitiveArray<BA4190Object*> m_kThirdFollowingStreamField;
 };
 
 class FUN_00ba4190 : public BA4190Base
@@ -2503,86 +2647,8 @@ Obj_b10008* FUN_00ba82a0_cls::FUN_00ba82a0(int arg)
 
 extern "C" int __cdecl strncmp(const char*, const char*, unsigned int);
 
-struct NiRTTI_S
-{
-    const char* m_pcName;
-    const NiRTTI_S* m_pBaseRTTI;
-};
-
-struct NiRefObj_S
-{
-    virtual ~NiRefObj_S();
-    virtual void DeleteThis();
-    virtual const NiRTTI_S* GetRTTI() const;
-    virtual struct NiNode_S* IsSceneNode();
-    volatile long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
-struct NiProp_S : NiRefObj_S
-{
-};
-
-struct NiAVObj_S : NiRefObj_S
-{
-    const char* m_kName;
-    NiProp_S* GetProperty(unsigned int type);
-};
-
-struct NiNode_S : NiAVObj_S
-{
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    void* m_childVtbl;
-    NiAVObj_S** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-};
-
-extern NiRTTI_S g_GeomRTTI_S;
-extern NiRTTI_S g_ShaderPropRTTI_S;
+extern NiRTTI g_GeomRTTI_S;
+extern NiRTTI g_ShaderPropRTTI_S;
 extern const char* g_SkipName_S;
 
 template <class T> struct NiPtr_S
@@ -2591,22 +2657,22 @@ template <class T> struct NiPtr_S
     NiPtr_S(T* object = 0)
     {
         m_pObject = object;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     __forceinline ~NiPtr_S()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     NiPtr_S& operator=(const NiPtr_S& other)
     {
         if (m_pObject != other.m_pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = other.m_pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -2616,19 +2682,19 @@ template <class T> struct NiPtr_S
 struct GeomList_S
 {
     void* m_vtbl;
-    NiPtr_S<NiAVObj_S>* m_pBase;
+    NiPtr_S<NiAVObject>* m_pBase;
     unsigned short m_usMaxSize;
     unsigned short m_usSize;
     unsigned short m_usESize;
     unsigned short m_usGrowBy;
     void SetSize(unsigned int n);
-    void SetAt(unsigned int i, const NiPtr_S<NiAVObj_S>& e);
-    unsigned int AddFirstEmpty(const NiPtr_S<NiAVObj_S>& e);
+    void SetAt(unsigned int i, const NiPtr_S<NiAVObject>& e);
+    unsigned int AddFirstEmpty(const NiPtr_S<NiAVObject>& e);
 };
 
 void GeomList_S::SetSize(unsigned int n)
 {
-    NiPtr_S<NiAVObj_S>* p = new NiPtr_S<NiAVObj_S>[n];
+    NiPtr_S<NiAVObject>* p = new NiPtr_S<NiAVObject>[n];
     for (unsigned int i = 0; i < m_usSize; i++)
         p[i] = m_pBase[i];
     delete[] m_pBase;
@@ -2636,7 +2702,7 @@ void GeomList_S::SetSize(unsigned int n)
     m_usMaxSize = (unsigned short)n;
 }
 
-void GeomList_S::SetAt(unsigned int i, const NiPtr_S<NiAVObj_S>& e)
+void GeomList_S::SetAt(unsigned int i, const NiPtr_S<NiAVObject>& e)
 {
     if (i >= m_usSize)
         m_usSize = (unsigned short)(i + 1);
@@ -2645,7 +2711,7 @@ void GeomList_S::SetAt(unsigned int i, const NiPtr_S<NiAVObj_S>& e)
     m_pBase[i] = e;
 }
 
-unsigned int GeomList_S::AddFirstEmpty(const NiPtr_S<NiAVObj_S>& e)
+unsigned int GeomList_S::AddFirstEmpty(const NiPtr_S<NiAVObject>& e)
 {
     if (e.m_pObject == 0)
         return 0xffffffff;
@@ -2665,9 +2731,9 @@ unsigned int GeomList_S::AddFirstEmpty(const NiPtr_S<NiAVObj_S>& e)
     return n;
 }
 
-static inline bool IsKind_S(const NiRTTI_S* target, const NiRefObj_S* obj)
+static inline bool IsKind_S(const NiRTTI* target, const NiObject* obj)
 {
-    for (const NiRTTI_S* r = obj->GetRTTI(); r; r = r->m_pBaseRTTI)
+    for (const NiRTTI* r = obj->GetRTTI(); r; r = r->m_pBaseRTTI)
         if (r == target)
             return true;
     return false;
@@ -2747,31 +2813,31 @@ struct GeomCollector_S
     int unk114;
     int unk118;
     GeomList_S m_geomList;
-    void CollectShaderGeometries(NiAVObj_S* obj);
+    void CollectShaderGeometries(NiAVObject* obj);
 };
 
 // @fnv 0x00ba8320
-void GeomCollector_S::CollectShaderGeometries(NiAVObj_S* obj)
+void GeomCollector_S::CollectShaderGeometries(NiAVObject* obj)
 {
     if (!obj)
         return;
     if (IsKind_S(&g_GeomRTTI_S, obj))
     {
-        NiProp_S* prop = obj->GetProperty(3);
+        NiProperty* prop = obj->GetProperty(3);
         if (prop && IsKind_S(&g_ShaderPropRTTI_S, prop))
         {
-            NiPtr_S<NiAVObj_S> sp(obj);
+            NiPtr_S<NiAVObject> sp(obj);
             m_geomList.AddFirstEmpty(sp);
         }
         return;
     }
-    NiNode_S* node = obj->IsSceneNode();
+    NiNode* node = obj->IsSceneNode();
     if (!node)
         return;
-    if (node->m_kName != g_SkipName_S && strncmp(node->m_kName, "Bip", 3) == 0)
+    if (node->m_kName.m_kHandle != g_SkipName_S && strncmp(node->m_kName.m_kHandle, "Bip", 3) == 0)
         return;
-    for (unsigned int i = 0; i < node->m_usSize; i++)
-        CollectShaderGeometries(node->m_pBase[i]);
+    for (unsigned int i = 0; i < node->m_kChildren.m_usSize; i++)
+        CollectShaderGeometries(node->m_kChildren.m_pBase[i].m_pObject);
 }
 
 class ImgRef
@@ -3500,31 +3566,6 @@ int __thiscall FUN_00baa700_cls::FUN_00baa700(int a1, int a2, int a3, FUN_00baa7
     return 0;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float ax, float ay, float az) : x(ax), y(ay), z(az)
-    {}
-    NiPoint3& operator=(const NiPoint3& p)
-    {
-        x = p.x;
-        y = p.y;
-        z = p.z;
-        return *this;
-    }
-};
-
-struct RgbaColor
-{
-    float r, g, b, a;
-    RgbaColor()
-    {}
-    RgbaColor(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa)
-    {}
-};
-
 struct BAA720_Matrix;
 
 NiPoint3* __stdcall FUN_00ee6df8(NiPoint3* out, const NiPoint3* in, const BAA720_Matrix* m);
@@ -3782,7 +3823,7 @@ struct BAA720_Effect
     int unk1a4;
     int unk1a8;
     int unk1ac;
-    RgbaColor lightColor;
+    NiColorA lightColor;
     void ApplyLightToEffect(BAA720_List* list, const BAA720_Matrix* mat, float scale, unsigned int flags);
 };
 
@@ -3792,16 +3833,20 @@ void BAA720_Effect::ApplyLightToEffect(BAA720_List* list, const BAA720_Matrix* a
 {
     BAA720_Node* iter = 0;
     BAA720_Light* light = list->GetAt(&iter)->light;
-    NiPoint3 diffuse = light->GetDiffuse();
-    lightColor = RgbaColor(diffuse.x, diffuse.y, diffuse.z, 1.0f);
-    NiPoint3 kWorldTranslate = light->GetWorldTranslate();
+    NiPoint3 diffuse;
+    CopyPointBits(diffuse, light->diffuse);
+    lightColor = NiColorA(diffuse.x, diffuse.y, diffuse.z, 1.0f);
+    NiPoint3 kWorldTranslate;
+    CopyPointBits(kWorldTranslate, light->worldTranslate);
     NiPoint3 pos(kWorldTranslate.x, kWorldTranslate.y, kWorldTranslate.z);
     NiPoint3 viewPos;
     FUN_00ee6df8(&viewPos, &pos, apMatrix);
     float dimmer = light->dimmer;
     if (!FUN_00b630f0(flags))
         dimmer = dimmer / scale;
-    DAT_01200540 = viewPos;
+    DAT_01200540.x = viewPos.x;
+    DAT_01200540.y = viewPos.y;
+    DAT_01200540.z = viewPos.z;
     DAT_0120054c = dimmer;
 }
 
@@ -3817,23 +3862,6 @@ void FUN_00bae720_Class::FUN_00bae720(int a1)
 }
 
 extern "C" void _ReadWriteBarrier(void);
-
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    volatile long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 
 class FUN_00bae980_cls
 {
@@ -4300,24 +4328,6 @@ SpawnedObject90* __cdecl CreateSpawnedObject90()
 }  // namespace fnv_00baee40
 
 namespace fnv_00baf3c0 {
-struct NiColor
-{
-    float r;
-    float g;
-    float b;
-    NiColor() : r(0.0f), g(0.0f), b(0.0f)
-    {}
-};
-
-struct RgbaColor
-{
-    float r;
-    float g;
-    float b;
-    float a;
-    RgbaColor() : r(0.0f), g(0.0f), b(0.0f), a(0.0f)
-    {}
-};
 
 extern NiColor DAT_011f4998;
 
@@ -4367,7 +4377,7 @@ struct FUN_00baf3c0
     float unk8c;
     int unk90;
     int unk94;
-    RgbaColor color98;
+    NiColorA color98;
     int unka8;
     int unkac;
     short unkb0;
@@ -4444,31 +4454,6 @@ struct NiBase24
     int unk0c;
     int unk10;
     NiVariant m_14;
-};
-
-class NiRefObject
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    volatile long m_uiRefCount;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    NiBase24* m_24;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            v1();
-    }
 };
 
 struct FUN_00baf580_iface
@@ -4574,7 +4559,7 @@ void FUN_00baf580_cls::FUN_00baf580()
         m_a8->v36(i, pObjectPtr);
         if (pObjectPtr.m_pObject != 0)
         {
-            NiBase24* h = pObjectPtr.m_pObject->m_24;
+            NiBase24* h = reinterpret_cast<NiBase24*>(reinterpret_cast<NiTexture*>(pObjectPtr.m_pObject)->m_pkRendererData);
             NiVariant* v = h ? &h->m_14 : 0;
             if (v->m_04 == 5 || v->m_04 == 6)
             {
@@ -4586,22 +4571,6 @@ void FUN_00baf580_cls::FUN_00baf580()
 }  // namespace fnv_00baf580
 
 namespace fnv_00bafa80 {
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 
 class TargetObject_cls
 {
@@ -4784,41 +4753,6 @@ void FUN_00bafa80_cls::FUN_00bafa80(TargetObject_cls* apTarget)
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 
-const char* __cdecl FUN_00a5b690(const char* pcString);
-extern const char* g_pcNullStringBAF;
-
-class NiFixedStringBAF
-{
-  public:
-    NiFixedStringBAF(const char* pcString)
-    {
-        if (pcString == 0)
-            m_kHandle = g_pcNullStringBAF;
-        else
-            m_kHandle = FUN_00a5b690(pcString);
-    }
-    ~NiFixedStringBAF()
-    {
-        if (m_kHandle != g_pcNullStringBAF)
-            InterlockedDecrement((long volatile*)(m_kHandle - 8));
-    }
-    operator const char*() const
-    {
-        return m_kHandle;
-    }
-
-    const char* m_kHandle;
-};
-
-class BSStringBAF
-{
-  public:
-    bool Set(const char* pcString, unsigned int uiLength);
-
-    char* m_pString;
-    unsigned short m_usLen;
-    unsigned short m_usMaxLen;
-};
 
 class TargetBAF
 {
@@ -4828,7 +4762,7 @@ class TargetBAF
     int unk040, unk044, unk048, unk04C, unk050, unk054, unk058, unk05C;
     int unk060, unk064, unk068, unk06C, unk070, unk074, unk078, unk07C;
     int unk080, unk084;
-    BSStringBAF m_kName;
+    BSString m_kName;
 };
 
 class SourceBAF
@@ -4886,24 +4820,18 @@ class OwnerBAF
     SourceBAF* m_pkSource;
 };
 
-// If m_pkSource is set, copies the source's name at index 0 into pkTarget->m_kName via BSStringBAF::Set.
+// If m_pkSource is set, copies the source's name at index 0 into pkTarget->m_kName via BSString::Set.
 // @fnv 0x00bafcb0
 void OwnerBAF::SetTargetName(TargetBAF* pkTarget)
 {
     if (m_pkSource)
     {
-        NiFixedStringBAF kName(m_pkSource->GetName(0));
-        pkTarget->m_kName.Set(kName, 0);
+        NiFixedString kName(m_pkSource->GetName(0));
+        pkTarget->m_kName.Set(kName.m_kHandle, 0);
     }
 }
 
 namespace fnv_00bafe10 {
-struct NiColor
-{
-    float r;
-    float g;
-    float b;
-};
 
 struct MatProp
 {
@@ -4995,11 +4923,6 @@ struct Target
     virtual void v38(MatProp*);
 };
 
-struct NiAVObject_Attach
-{
-    void AttachProperty(MatProp*);
-};
-
 struct Src
 {
     void* m_vft;
@@ -5012,12 +4935,12 @@ struct Src
     Target* m_t2c;
     Target* m_t30;
     Target* m_t34;
-    void CreateAndAttachMaterialProperty(NiAVObject_Attach* obj);
+    void CreateAndAttachMaterialProperty(NiAVObject* obj);
 };
 
 // Allocates a MatProp, copies the ambient/diffuse colors and three floats into it, notifies up to four targets, then attaches it to obj.
 // @fnv 0x00bafe10
-void Src::CreateAndAttachMaterialProperty(NiAVObject_Attach* obj)
+void Src::CreateAndAttachMaterialProperty(NiAVObject* obj)
 {
     MatProp* p = new MatProp;
     p->SetAmb(m_amb);
@@ -5033,7 +4956,7 @@ void Src::CreateAndAttachMaterialProperty(NiAVObject_Attach* obj)
         m_t30->v38(p);
     if (m_t34)
         m_t34->v38(p);
-    obj->AttachProperty(p);
+    obj->AttachProperty(reinterpret_cast<NiObject*>(p));
 }
 }  // namespace fnv_00bafe10
 
@@ -5117,40 +5040,26 @@ FUN_00bb0d40::FUN_00bb0d40(int a1, float a2, Triple3* a3, Triple3* a4, Triple3* 
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 
-class BB0DE0RefObject
-{
-  public:
-    virtual void vfn00();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
 class BB0DE0Ptr
 {
   public:
     ~BB0DE0Ptr()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
-    BB0DE0Ptr& operator=(BB0DE0RefObject* pObject)
+    BB0DE0Ptr& operator=(NiRefObject* pObject)
     {
         if (m_pObject != pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = pObject;
         }
         return *this;
     }
 
-    BB0DE0RefObject* m_pObject;
+    NiRefObject* m_pObject;
 };
 
 class BB0DE0Base
@@ -5209,25 +5118,6 @@ FUN_00bb0de0::~FUN_00bb0de0()
     m_iFadeIndex = 0;
     m_pReferencedObject = 0;
 }
-
-class BB0ED0RefObject
-{
-  public:
-    virtual ~BB0ED0RefObject();
-    virtual void DeleteThis();
-
-    unsigned int m_uiRefCount;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (!InterlockedDecrement((volatile long*)&m_uiRefCount))
-            DeleteThis();
-    }
-};
 
 struct BB0ED0CloningProcess;
 
@@ -5290,7 +5180,7 @@ class BB0ED0Property : public BB0ED0Base
     int m_iValue6;
     int m_iValue7;
     int m_iValue8;
-    NiPointer<BB0ED0RefObject> m_spTexture;
+    NiPointer<NiRefObject> m_spTexture;
     int m_iMode;
 
     void CloneTo(BB0ED0Property* pkDest, BB0ED0CloningProcess& kCloning);
@@ -5654,54 +5544,42 @@ SpawnedObject* FUN_00bb1080_cls::FUN_00bb1080(int a1)
 }
 }  // namespace fnv_00bb1080
 
-struct Vec3
-{
-    float x, y, z;
-};
-struct Vec4
-{
-    float x, y, z, w;
-    Vec4()
-    {}
-    Vec4(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw)
-    {}
-};
 struct Matrix44;
 
-Vec3* __stdcall D3DXVec3TransformCoord(Vec3* out, const Vec3* v, const Matrix44* m);
-Vec3* __stdcall D3DXVec3Normalize(Vec3* out, const Vec3* v);
-Vec3* __stdcall D3DXVec3TransformNormal(Vec3* out, const Vec3* v, const Matrix44* m);
+LocalVec3* __stdcall D3DXVec3TransformCoord(LocalVec3* out, const LocalVec3* v, const Matrix44* m);
+LocalVec3* __stdcall D3DXVec3Normalize(LocalVec3* out, const LocalVec3* v);
+LocalVec3* __stdcall D3DXVec3TransformNormal(LocalVec3* out, const LocalVec3* v, const Matrix44* m);
 
 struct LightOwner
 {
     unsigned short __thiscall InitializeTESResources();
 };
 
-extern Vec3 DAT_011fa1f0;
-extern Vec3 DAT_011fa180;
+extern LocalVec3 DAT_011fa1f0;
+extern LocalVec3 DAT_011fa180;
 extern float DAT_011fa200;
 extern Vec4 DAT_01200618;
-extern Vec3 DAT_01200628;
+extern LocalVec3 DAT_01200628;
 extern float DAT_01200634;
 
 // @fnv 0x00bb1960
 void __stdcall UpdateLightDirection(LightOwner* owner, const Matrix44* matrix, float scale)
 {
-    Vec3 dir;
+    LocalVec3 dir;
     dir.x = -DAT_011fa1f0.x;
     dir.y = -DAT_011fa1f0.y;
     dir.z = -DAT_011fa1f0.z;
-    Vec3 tmp;
+    LocalVec3 tmp;
     D3DXVec3TransformCoord(&tmp, &dir, matrix);
     D3DXVec3Normalize(&dir, &tmp);
     DAT_01200618 = Vec4(dir.x, dir.y, dir.z, 0.0f);
     if (owner->InitializeTESResources() > 0)
     {
-        Vec3 v;
+        LocalVec3 v;
         v.x = DAT_011fa180.x;
         v.y = DAT_011fa180.y;
         v.z = DAT_011fa180.z;
-        Vec3 out;
+        LocalVec3 out;
         D3DXVec3TransformNormal(&out, &v, matrix);
         DAT_01200628.x = out.x;
         DAT_01200628.y = out.y;
@@ -6092,41 +5970,23 @@ int FUN_00bb2580_cls::FUN_00bb2580(int a1, int a2, int a3, int a4, int a5, int a
     return 0;
 }
 
-struct D3DXMATRIXBB2
-{
-    float _11, _12, _13, _14;
-    float _21, _22, _23, _24;
-    float _31, _32, _33, _34;
-    float _41, _42, _43, _44;
-};
+extern "C" D3DXMATRIX* __stdcall D3DXMatrixInverseBB2(D3DXMATRIX* pOut, float* pDeterminant,
+                                                         const D3DXMATRIX* pM);
 
-extern "C" D3DXMATRIXBB2* __stdcall D3DXMatrixInverseBB2(D3DXMATRIXBB2* pOut, float* pDeterminant,
-                                                         const D3DXMATRIXBB2* pM);
-
-class NiTransformBB2
+__forceinline void GetD3DFromNiBB2(D3DXMATRIX& kD3D, const NiTransform& kNi)
 {
-  public:
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
-    float tx, ty, tz;
-    float m_fScale;
-};
-
-__forceinline void GetD3DFromNiBB2(D3DXMATRIXBB2& kD3D, const NiTransformBB2& kNi)
-{
-    kD3D._11 = kNi.m00 * kNi.m_fScale;
-    kD3D._12 = kNi.m10 * kNi.m_fScale;
-    kD3D._13 = kNi.m20 * kNi.m_fScale;
-    kD3D._21 = kNi.m01 * kNi.m_fScale;
-    kD3D._22 = kNi.m11 * kNi.m_fScale;
-    kD3D._23 = kNi.m21 * kNi.m_fScale;
-    kD3D._31 = kNi.m02 * kNi.m_fScale;
-    kD3D._32 = kNi.m12 * kNi.m_fScale;
-    kD3D._33 = kNi.m22 * kNi.m_fScale;
-    kD3D._41 = kNi.tx;
-    kD3D._42 = kNi.ty;
-    kD3D._43 = kNi.tz;
+    kD3D._11 = kNi.m_Rotate.m_pEntry[0][0] * kNi.m_fScale;
+    kD3D._12 = kNi.m_Rotate.m_pEntry[1][0] * kNi.m_fScale;
+    kD3D._13 = kNi.m_Rotate.m_pEntry[2][0] * kNi.m_fScale;
+    kD3D._21 = kNi.m_Rotate.m_pEntry[0][1] * kNi.m_fScale;
+    kD3D._22 = kNi.m_Rotate.m_pEntry[1][1] * kNi.m_fScale;
+    kD3D._23 = kNi.m_Rotate.m_pEntry[2][1] * kNi.m_fScale;
+    kD3D._31 = kNi.m_Rotate.m_pEntry[0][2] * kNi.m_fScale;
+    kD3D._32 = kNi.m_Rotate.m_pEntry[1][2] * kNi.m_fScale;
+    kD3D._33 = kNi.m_Rotate.m_pEntry[2][2] * kNi.m_fScale;
+    kD3D._41 = kNi.m_Translate.x;
+    kD3D._42 = kNi.m_Translate.y;
+    kD3D._43 = kNi.m_Translate.z;
     kD3D._14 = 0.0f;
     kD3D._24 = 0.0f;
     kD3D._34 = 0.0f;
@@ -6163,7 +6023,7 @@ class RenderObjBB2
 class SetterBB2
 {
   public:
-    void SetWorldTransform(const NiTransformBB2* pkXform, int iUnk);
+    void SetWorldTransform(const NiTransform* pkXform, int iUnk);
 };
 
 void __cdecl FUN_00bb1a90();
@@ -6171,8 +6031,8 @@ void __cdecl FUN_00bb1a90();
 class ShaderBB2
 {
   public:
-    void Apply(GeometryBB2* pkGeom, const D3DXMATRIXBB2* pkInvWorld, float fScale);
-    int RenderGeometry(int iA, int iB, int iC, int iD, RenderObjBB2* pkObj, int iF, const NiTransformBB2* pkXform,
+    void Apply(GeometryBB2* pkGeom, const D3DXMATRIX* pkInvWorld, float fScale);
+    int RenderGeometry(int iA, int iB, int iC, int iD, RenderObjBB2* pkObj, int iF, const NiTransform* pkXform,
                        int iH);
 
     int unk00;
@@ -6186,12 +6046,12 @@ class ShaderBB2
 
 // @fnv 0x00bb25d0
 int ShaderBB2::RenderGeometry(int iA, int iB, int iC, int iD, RenderObjBB2* pkObj, int iF,
-                              const NiTransformBB2* pkXform, int iH)
+                              const NiTransform* pkXform, int iH)
 {
     m_pkSetter->SetWorldTransform(pkXform, 0);
 
-    D3DXMATRIXBB2 kWorld;
-    D3DXMATRIXBB2 kInvWorld;
+    D3DXMATRIX kWorld;
+    D3DXMATRIX kInvWorld;
     GetD3DFromNiBB2(kWorld, *pkXform);
     D3DXMatrixInverseBB2(&kInvWorld, 0, &kWorld);
 
@@ -6827,25 +6687,6 @@ void FUN_00bb33a0_Class::FUN_00bb33a0(int parameter)
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 
-class BBB3500RefObject
-{
-  public:
-    virtual ~BBB3500RefObject();
-    virtual void DeleteThis();
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_lRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_lRefCount) == 0)
-            DeleteThis();
-    }
-
-    long m_lRefCount;
-};
-
 template <class T> class BBB3500Pointer
 {
   public:
@@ -6853,17 +6694,17 @@ template <class T> class BBB3500Pointer
     {}
     ~BBB3500Pointer()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     BBB3500Pointer& operator=(T* pObject)
     {
         if (m_pObject != pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -6947,15 +6788,15 @@ class BBB3500Base
 class FUN_00bb3500_cls : public BBB3500Base
 {
   public:
-    FUN_00bb3500_cls(BBB3500RefObject* pkObject);
+    FUN_00bb3500_cls(NiRefObject* pkObject);
     virtual ~FUN_00bb3500_cls();
 
-    BBB3500Pointer<BBB3500RefObject> m_pReferencedObject;
+    BBB3500Pointer<NiRefObject> m_pReferencedObject;
 };
 
 // Stores pkObject into the reference-counted pointer member, incrementing its reference count.
 // @fnv 0x00bb3500
-FUN_00bb3500_cls::FUN_00bb3500_cls(BBB3500RefObject* pkObject)
+FUN_00bb3500_cls::FUN_00bb3500_cls(NiRefObject* pkObject)
 {
     m_pReferencedObject = pkObject;
 }
@@ -7070,25 +6911,6 @@ FUN_00bb35b0::~FUN_00bb35b0()
     m_kSmartReference = static_cast<RefCounted*>(0);
 }
 
-class BB3660RefObject
-{
-  public:
-    virtual ~BB3660RefObject();
-    virtual void DeleteThis();
-
-    unsigned int m_uiRefCount;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
-            DeleteThis();
-    }
-};
-
 class BB3660Base
 {
   public:
@@ -7131,14 +6953,14 @@ class FUN_00bb3660 : public BB3660Base
   public:
     int m_iFadeIndex;
     int m_iMode;
-    NiPointer<BB3660RefObject> m_spTexture;
+    NiPointer<NiRefObject> m_spTexture;
 
-    FUN_00bb3660(BB3660RefObject* pkTexture);
+    FUN_00bb3660(NiRefObject* pkTexture);
     virtual ~FUN_00bb3660();
 };
 
 // @fnv 0x00bb3660
-FUN_00bb3660::FUN_00bb3660(BB3660RefObject* pkTexture) : m_iFadeIndex(0), m_iMode(3), m_spTexture(pkTexture)
+FUN_00bb3660::FUN_00bb3660(NiRefObject* pkTexture) : m_iFadeIndex(0), m_iMode(3), m_spTexture(pkTexture)
 {}
 
 extern int DAT_01200798;
@@ -7194,22 +7016,6 @@ int CpuObject::FUN_00bb36c0()
 }
 
 namespace fnv_00bb3740 {
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 
 class FUN_00bb3740_cls
 {
@@ -7256,13 +7062,6 @@ void FUN_00bb3740_cls::FUN_00bb3740(NiRefObject* obj)
     m_pReferencedObject = obj;
 }
 }  // namespace fnv_00bb3740
-
-class NiRTTI
-{
-  public:
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
 
 class BB3880Object
 {
@@ -7736,25 +7535,6 @@ int FUN_00bb3c80_cls::FUN_00bb3c80()
     return m_88;
 }
 
-class BB3CD0RefObject
-{
-  public:
-    virtual ~BB3CD0RefObject();
-    virtual void DeleteThis();
-
-    unsigned int m_uiRefCount;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
-            DeleteThis();
-    }
-};
-
 class BB3CD0Base
 {
   public:
@@ -7797,7 +7577,7 @@ class BB3CD0Base
 class FUN_00bb3cd0 : public BB3CD0Base
 {
   public:
-    NiPointer<BB3CD0RefObject> m_spTexture;
+    NiPointer<NiRefObject> m_spTexture;
 
     virtual ~FUN_00bb3cd0();
 };
@@ -7872,22 +7652,6 @@ int* __cdecl FUN_00bb40b0()
 }
 
 namespace fnv_00bb40c0 {
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 
 class SpawnedBase_bb40
 {
@@ -8357,8 +8121,6 @@ Obj_b9974* FUN_00bb4680_cls::FUN_00bb4680(int arg)
     return p;
 }
 
-class ShadowSceneLight;
-class NiGeometry;
 
 struct BSShaderProperty__RenderPassArray
 {
@@ -8369,84 +8131,6 @@ struct BSShaderProperty__RenderPassArray
     int unk10;
     void Add(NiGeometry* geom, unsigned short passType, bool enabled, unsigned char a, ShadowSceneLight* light,
              ShadowSceneLight* b, ShadowSceneLight* c, ShadowSceneLight* d);
-};
-
-struct GeomProp
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    unsigned short flags18;
-};
-
-struct GeomData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-};
-
-class NiGeometry
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    GeomProp* unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    GeomData* unkB8;
 };
 
 struct ShaderStub
@@ -8520,10 +8204,10 @@ BSShaderProperty__RenderPassArray* ShaderStub::GetRenderPassArray(NiGeometry* ap
         return 0;
 
     bool bFlag = false;
-    if (apGeometry->unk9C)
-        bFlag = (apGeometry->unk9C->flags18 >> 9) & 1;
+    if (apGeometry->m_PropertyState.m_aspProps[0])
+        bFlag = (static_cast<NiAlphaProperty*>(apGeometry->m_PropertyState.m_aspProps[0])->m_usAlphaArg >> 9) & 1;
     bool bHasData = false;
-    if (apGeometry->unkB8->unk28)
+    if (apGeometry->m_spModelData.m_pObject->m_pkColor)
         bHasData = true;
 
     ClearPassTextureSlots(1);
@@ -8764,31 +8448,13 @@ S_00bb7370_Obj* S_00bb7370_Obj::FUN_00bb7370(unsigned int flags)
 }  // namespace fnv_00bb7370
 
 void* __cdecl FUN_00aa13e0(unsigned int);
-class FUN_00bb7c30_Class
-{
-  public:
-    static void* operator new(unsigned int)
-    {
-        return FUN_00aa13e0(0xb0);
-    }
-    FUN_00bb7c30_Class(int flag);
-};
-// Allocates a 0xb0-byte object and constructs a FUN_00bb7c30_Class with flag 0, returning the pointer.
+// Allocates a 0xb0-byte TileShaderProperty with flag false, returning the pointer.
 // @fnv 0x00bb7ef0
-FUN_00bb7c30_Class* __cdecl FUN_00bb7ef0()
+TileShaderProperty* __cdecl FUN_00bb7ef0()
 {
-    return new FUN_00bb7c30_Class(0);
+    return new TileShaderProperty(false);
 }
 
-struct StrArrView
-{
-    void* vtable;
-    char** data;
-    unsigned short capacity;
-    unsigned short count;
-    unsigned short elementSize;
-    unsigned short growBy;
-};
 extern void* DAT_012007d8;
 extern const char DAT_010b9e1c[];
 extern const char DAT_010b9e0c[];
@@ -8880,40 +8546,39 @@ struct ShaderPassParameters
 void ShaderPassParameters::AppendShaderParameters(StrArr* array)
 {
     WriteToSettingArray(array);
-    StrArrView* arrayView = reinterpret_cast<StrArrView*>(array);
     char* value = FUN_00a7d330(DAT_012007d8);
     {
-        unsigned int at = arrayView->count;
-        if (at >= arrayView->capacity)
-            array->SetSize(at + arrayView->growBy);
+        unsigned int at = array->m_usSize;
+        if (at >= array->m_usMaxSize)
+            array->SetSize(at + array->m_usGrowBy);
         array->SetAt(at, value);
     }
     value = FUN_00a7d550(DAT_010b9e1c, parameter68);
     {
-        unsigned int at = arrayView->count;
-        if (at >= arrayView->capacity)
-            array->SetSize(at + arrayView->growBy);
+        unsigned int at = array->m_usSize;
+        if (at >= array->m_usMaxSize)
+            array->SetSize(at + array->m_usGrowBy);
         array->SetAt(at, value);
     }
     value = FUN_00a7d550(DAT_010b9e0c, parameter6c);
     {
-        unsigned int at = arrayView->count;
-        if (at >= arrayView->capacity)
-            array->SetSize(at + arrayView->growBy);
+        unsigned int at = array->m_usSize;
+        if (at >= array->m_usMaxSize)
+            array->SetSize(at + array->m_usGrowBy);
         array->SetAt(at, value);
     }
     value = FUN_00a7d550(DAT_010b9dfc, parameter70);
     {
-        unsigned int at = arrayView->count;
-        if (at >= arrayView->capacity)
-            array->SetSize(at + arrayView->growBy);
+        unsigned int at = array->m_usSize;
+        if (at >= array->m_usMaxSize)
+            array->SetSize(at + array->m_usGrowBy);
         array->SetAt(at, value);
     }
     value = FUN_00a7d550(DAT_010b9df4, parameter74);
     {
-        unsigned int at = arrayView->count;
-        if (at >= arrayView->capacity)
-            array->SetSize(at + arrayView->growBy);
+        unsigned int at = array->m_usSize;
+        if (at >= array->m_usMaxSize)
+            array->SetSize(at + array->m_usGrowBy);
         array->SetAt(at, value);
     }
     if (enabledData)
@@ -8924,9 +8589,9 @@ void ShaderPassParameters::AppendShaderParameters(StrArr* array)
             unsigned int graphicalValue = *object->GetGraphicsValue();
             value = FUN_00a7d5e0(DAT_010b9dec, graphicalValue);
             {
-                unsigned int at = arrayView->count;
-                if (at >= arrayView->capacity)
-                    array->SetSize(at + arrayView->growBy);
+                unsigned int at = array->m_usSize;
+                if (at >= array->m_usMaxSize)
+                    array->SetSize(at + array->m_usGrowBy);
                 array->SetAt(at, value);
             }
         }
@@ -9114,26 +8779,7 @@ FUN_00bb83d0::~FUN_00bb83d0()
     }
 }
 
-class BB8590RefObject
-{
-  public:
-    virtual ~BB8590RefObject();
-    virtual void DeleteThis();
-
-    unsigned int m_uiRefCount;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
-            DeleteThis();
-    }
-};
-
-extern NiPointer<BB8590RefObject> g_spBB8590Shared;
+extern NiPointer<NiRefObject> g_spBB8590Shared;
 
 class BB8590Effect
 {
@@ -9301,19 +8947,6 @@ struct BA02F0EffectBase
     int unk54;
 };
 
-struct BA02F0RefObject
-{
-    virtual ~BA02F0RefObject();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void IncRefCount();
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
 struct FUN_00ba02f0;
 extern FUN_00ba02f0* g_pBA02F0Instance;
 extern bool g_bBA02F0Flag;
@@ -9329,7 +8962,7 @@ extern float g_ISParam8;
 
 struct FUN_00ba02f0 : BA02F0EffectBase
 {
-    NiPointer<BA02F0RefObject> m_pReferencedObject;
+    NiPointer<NiRefObject> m_pReferencedObject;
     float m_5c;
     float m_60;
     float m_64;
@@ -9463,14 +9096,7 @@ struct S_00ba63e0_MM
     void __thiscall Deallocate(void*);
 };
 extern S_00ba63e0_MM DAT_011f6238;
-class NiObject
-{
-  public:
-    NiObject();
-    virtual void v0();
-    virtual ~NiObject();
-    int unk04;
-};
+
 struct S_00ba63e0_Elem
 {
     char unk00;
@@ -9544,99 +9170,18 @@ FUN_00ba63e0::FUN_00ba63e0(unsigned short a, unsigned int auiCount)
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
-class NiNodeBA8;
-class NiAVObjectBA8
-{
-  public:
-    virtual ~NiAVObjectBA8();
-    virtual void DeleteThis();
-    virtual void vfn08();
-    virtual NiNodeBA8* IsSceneNode();
 
-    void IncRefCount()
-    {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    unsigned int m_uiRefCount;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    void* m_pkGeometryData;
-};
-class NiNodeBA8 : public NiAVObjectBA8
-{
-  public:
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    NiAVObjectBA8** m_apkChildren;
-    unsigned short unkA4;
-    unsigned short m_usChildCount;
-};
-template <class T> class NiPointerBA8
-{
-  public:
-    NiPointerBA8(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointerBA8()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-
-    T* m_pObject;
-};
 struct ListItemBA8
 {
     ListItemBA8* m_pkNext;
     ListItemBA8* m_pkPrev;
-    NiAVObjectBA8* m_pkElement;
+    NiAVObject* m_pkElement;
 };
-ListItemBA8* __cdecl NewListItemBA8(NiAVObjectBA8* pkObject);
+ListItemBA8* __cdecl NewListItemBA8(NiAVObject* pkObject);
 class GeometryListBA8
 {
   public:
-    __declspec(noinline) void AddTail(const NiPointerBA8<NiAVObjectBA8>& spRetainedObject)
+    __declspec(noinline) void AddTail(const NiPointer<NiAVObject>& spRetainedObject)
     {
         ListItemBA8* pkItem = NewListItemBA8(spRetainedObject.m_pObject);
         pkItem->m_pkNext = 0;
@@ -9656,7 +9201,7 @@ class GeometryListBA8
 class GeometryCollectorBA8
 {
   public:
-    void CollectGeometry(NiAVObjectBA8* pkObject);
+    void CollectGeometry(NiAVObject* pkObject);
 
     int unk000;
     int unk004;
@@ -9733,18 +9278,18 @@ class GeometryCollectorBA8
 };
 // Recursively walks the node tree, adding objects that have both geometry data and a node to m_kGeometry.
 // @fnv 0x00ba8480
-void GeometryCollectorBA8::CollectGeometry(NiAVObjectBA8* pkObject)
+void GeometryCollectorBA8::CollectGeometry(NiAVObject* pkObject)
 {
     if (!pkObject)
         return;
-    void* pvGeometryData = pkObject->m_pkGeometryData;
-    NiNodeBA8* pkNode = pkObject->IsSceneNode();
+    void* pvGeometryData = pkObject->m_spCollisionObject.m_pObject;
+    NiNode* pkNode = pkObject->IsSceneNode();
     if (pvGeometryData && pkNode)
         m_kGeometry.AddTail(pkObject);
     if (pkNode)
     {
-        for (unsigned int i = 0; i < pkNode->m_usChildCount; i++)
-            CollectGeometry(pkNode->m_apkChildren[i]);
+        for (unsigned int i = 0; i < pkNode->m_kChildren.m_usSize; i++)
+            CollectGeometry(pkNode->m_kChildren.m_pBase[i].m_pObject);
     }
 }
 
@@ -10050,14 +9595,14 @@ struct RefPtr
     RefObj* m_pObject;
     ~RefPtr()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     RefPtr& operator=(RefObj* object)
     {
         if (m_pObject != object)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = object;
         }
@@ -10135,12 +9680,7 @@ FUN_00baec90::~FUN_00baec90()
     m_spTex70 = 0;
 }
 
-struct NiMemObjectAllocation
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-struct FUN_00b6abb0 : NiMemObjectAllocation
+struct FUN_00b6abb0 : NiMemObjectAllocation_blk_00ba0000_o2
 {
     FUN_00b6abb0();
     int unk000;
@@ -10228,43 +9768,8 @@ struct FUN_00b6abb0 : NiMemObjectAllocation
     int unk148;
     int unk14C;
 };
-struct BSShaderLightingProperty : NiMemObjectAllocation
-{
-    BSShaderLightingProperty();
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-};
-struct FUN_00bc37b0 : NiMemObjectAllocation
+
+struct FUN_00bc37b0 : NiMemObjectAllocation_blk_00ba0000_o2
 {
     FUN_00bc37b0();
     int unk000;
@@ -10296,7 +9801,7 @@ struct FUN_00bc37b0 : NiMemObjectAllocation
     int unk068;
     int unk06C;
 };
-struct FUN_00baeb80 : NiMemObjectAllocation
+struct FUN_00baeb80 : NiMemObjectAllocation_blk_00ba0000_o2
 {
     FUN_00baeb80();
     int unk000;
@@ -10336,7 +9841,7 @@ struct FUN_00baeb80 : NiMemObjectAllocation
     int unk088;
     int unk08C;
 };
-struct FUN_00b60cb0 : NiMemObjectAllocation
+struct FUN_00b60cb0 : NiMemObjectAllocation_blk_00ba0000_o2
 {
     FUN_00b60cb0();
     int unk000;
@@ -10378,55 +9883,8 @@ struct FUN_00b60cb0 : NiMemObjectAllocation
     int unk090;
     int unk094;
 };
-struct TileShaderProperty : NiMemObjectAllocation
-{
-    TileShaderProperty(bool);
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-};
-struct FUN_00c05880 : NiMemObjectAllocation
+
+struct FUN_00c05880 : NiMemObjectAllocation_blk_00ba0000_o2
 {
     FUN_00c05880();
     int unk000;
@@ -10498,11 +9956,11 @@ struct FUN_00c05880 : NiMemObjectAllocation
 };
 inline void* operator new(unsigned int, int bytes)
 {
-    return NiMemObjectAllocation::operator new(bytes);
+    return NiMemObjectAllocation_blk_00ba0000_o2::operator new(bytes);
 }
 inline void operator delete(void* p, int bytes)
 {
-    NiMemObjectAllocation::operator delete(p, bytes);
+    NiMemObjectAllocation_blk_00ba0000_o2::operator delete(p, bytes);
 }
 struct FactorySelector
 {
@@ -10528,7 +9986,7 @@ void* FactorySelector::FUN_00baf120()
         result = new FUN_00b6abb0;
         break;
     case 4:
-        result = new BSShaderLightingProperty;
+        result = new BSShaderNoLightingProperty;
         break;
     case 5:
         result = new FUN_00bc37b0;
@@ -11046,13 +10504,7 @@ void FUN_00baf640_Class::UpdateRenderFlags(FlagState* a, RenderInput* b)
     *pfValue = field8c;
 }
 
-struct NiGlobalStringTable
-{
-    static char* __cdecl AddString(const char*);
-};
-extern char* DAT_0109b220;
 extern const float DAT_01012054;
-extern int(__stdcall* DAT_00fdf1c4)(void*);
 struct Getter08
 {
     virtual void v00();
@@ -11233,11 +10685,11 @@ void Source08::CopyToTarget(Target08* target)
     {
         {
 
-            NiFixedStringBAF fixedName(getter->get(0));
+            NiFixedString fixedName(getter->get(0));
 
             BSStringT<char>* output = &target->name;
 
-            output->Set(fixedName, 0);
+            output->Set(fixedName.m_kHandle, 0);
         }
         target->set(value);
     }
@@ -12066,23 +11518,11 @@ inline void CBB3B10Free(void* pvMem)
     if (pvMem)
         g_kBB3B10MemoryManager.Deallocate(pvMem);
 }
-class CBB3B10RefObject
+
+class CBB3B10Object : public NiRefObject
 {
   public:
-    virtual __forceinline ~CBB3B10RefObject()
-    {
-        InterlockedDecrement(&ms_lObjects);
-    }
-
-    static void operator delete(void* pvMem, unsigned int uiSize);
-
-    unsigned int m_uiRefCount;
-
-    static volatile long ms_lObjects;
-};
-class CBB3B10Object : public CBB3B10RefObject
-{
-  public:
+    static void operator delete(void* memory, unsigned int size);
     virtual __forceinline ~CBB3B10Object()
     {
         CBB3B10Free(m_pResource);
@@ -12107,13 +11547,6 @@ CBB3B10Object* CBB3B10Object::DestroyObject(unsigned int uiFlags)
     return this;
 }
 
-class RefObj_b4622
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    volatile long m_uiRefCount;
-};
 class FUN_00bb3d80_cls
 {
   public:
@@ -12207,7 +11640,7 @@ class FUN_00bb3d80_cls
     void* m_07c;
     int unk80;
     int unk84;
-    RefObj_b4622* m_088;
+    NiRefObject* m_088;
     unsigned short m_08c;
     void __thiscall FUN_00bb3d80(FUN_00bb3d80_cls* arg1, unsigned int arg2);
 };
@@ -12216,50 +11649,26 @@ void FUN_00bb3d80_cls::FUN_00bb3d80(FUN_00bb3d80_cls* arg1, unsigned int arg2)
 {
     this->FUN_00b702b0(arg1, arg2);
     arg1->v55(m_07c);
-    RefObj_b4622* old = arg1->m_088;
+    NiRefObject* old = arg1->m_088;
     if (old != m_088)
     {
-        if (old != 0 && InterlockedDecrement(&old->m_uiRefCount) == 0)
+        if (old != 0 && InterlockedDecrement((volatile long*)&old->m_uiRefCount) == 0)
         {
-            old->v1();
+            old->DeleteThis();
         }
-        RefObj_b4622* n = m_088;
+        NiRefObject* n = m_088;
         arg1->m_088 = n;
         if (n != 0)
         {
-            InterlockedIncrement(&n->m_uiRefCount);
+            InterlockedIncrement((volatile long*)&n->m_uiRefCount);
         }
     }
     arg1->m_08c = m_08c;
 }
 
-class BSFaceGenMorphData
-{
-  public:
-    static void* operator new(unsigned int size);
-};
-
 namespace nsbb {
 struct FUN_00bb3ba0 : BSFaceGenMorphData
 {
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2C();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3C();
-    virtual void v40();
-    virtual void v44();
     virtual void v48();
     virtual void v4C();
     virtual void v50();
@@ -12306,7 +11715,6 @@ struct FUN_00bb3ba0 : BSFaceGenMorphData
     virtual void vFCur();
     virtual unsigned short vFValue();
     virtual void* vFC();
-    int unk;
     int unkCur;
     int unk0C;
     int unkValue;
@@ -12362,79 +11770,13 @@ struct BB5DD0Heap
     void* FUN_00aa3e40(unsigned int uiSize);
 };
 
-struct BB5DD0Inner
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    void* unk28;
-};
-
-struct BB5DD0Ref
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    BB5DD0Inner* unkB8;
-};
-
 struct BB5DD0Obj
 {
     int unk00;
     int unk04;
     int unk08;
     int unk0C;
-    BB5DD0Obj(BB5DD0Ref* pRef, int iType, ...);
+    BB5DD0Obj(NiGeometry* pRef, int iType, ...);
     static void* operator new(unsigned int uiSize)
     {
         return reinterpret_cast<BB5DD0Heap&>(g_memoryManager).FUN_00aa3e40(uiSize);
@@ -12513,16 +11855,16 @@ struct BB5DD0Owner
     int unkFC;
     BB5DD0Obj* m_pEntryObject;
 
-    BB5DD0Obj* CreateObject(BB5DD0Ref* pRef);
+    BB5DD0Obj* CreateObject(NiGeometry* pRef);
 };
 
 // @fnv 0x00bb5dd0
-BB5DD0Obj* BB5DD0Owner::CreateObject(BB5DD0Ref* pRef)
+BB5DD0Obj* BB5DD0Owner::CreateObject(NiGeometry* pRef)
 {
     if ((m_uiValue1 & 0x4000000) > 0 || (m_uiValue1 & 0x8000000) > 0)
         return 0;
     bool bHas = false;
-    void* pData = pRef->unkB8->unk28;
+    void* pData = pRef->m_spModelData.m_pObject->m_pkColor;
     if (pData)
         bHas = true;
     if (m_pEntryObject == 0)
@@ -12637,7 +11979,7 @@ class TgtC00
     int pad[0x8c / 4];
     int m_8c;
     int padCur;
-    BSStringBAF m_kName;
+    BSString m_kName;
 };
 class OwnC00
 {
@@ -12655,8 +11997,8 @@ void OwnC00::CopySourceNameToTarget(TgtC00* pkTarget)
     if (m_pkSource)
     {
         {
-            NiFixedStringBAF kName(m_pkSource->GetName(0));
-            pkTarget->m_kName.Set(kName, 0);
+            NiFixedString kName(m_pkSource->GetName(0));
+            pkTarget->m_kName.Set(kName.m_kHandle, 0);
         }
         pkTarget->m_8c = m_b4;
     }
@@ -13050,7 +12392,6 @@ bool EffectCtx::FUN_00bb85e0(int aiUnused)
     return false;
 }
 
-struct NiStream;
 
 struct FUN_00b6f460_class
 {
@@ -13206,23 +12547,22 @@ struct FUN_00baeee0_shell
 void __thiscall FUN_00baeee0_shell::AppendToStringArray(StrArr* arr)
 {
     char buf[256];
-    StrArrView* view = (StrArrView*)arr;
 
     WriteToSettingArray(arr);
 
     {
         char* val = FUN_00a7d330((void*)DAT_012005b8);
-        unsigned int idx = view->count;
-        if (idx >= view->capacity)
-            arr->SetSize(view->growBy + idx);
+        unsigned int idx = arr->m_usSize;
+        if (idx >= arr->m_usMaxSize)
+            arr->SetSize(arr->m_usGrowBy + idx);
         arr->SetAt(idx, val);
     }
 
     {
         char* val = FUN_00a7d4d0("SOType", soType);
-        unsigned int idx = view->count;
-        if (idx >= view->capacity)
-            arr->SetSize(view->growBy + idx);
+        unsigned int idx = arr->m_usSize;
+        if (idx >= arr->m_usMaxSize)
+            arr->SetSize(arr->m_usGrowBy + idx);
         arr->SetAt(idx, val);
     }
 
@@ -13231,17 +12571,17 @@ void __thiscall FUN_00baeee0_shell::AppendToStringArray(StrArr* arr)
         if (!name)
             name = "";
         char* val = FUN_00a7d5e0("Blend Texture", (unsigned int)name);
-        unsigned int idx = view->count;
-        if (idx >= view->capacity)
-            arr->SetSize(view->growBy + idx);
+        unsigned int idx = arr->m_usSize;
+        if (idx >= arr->m_usMaxSize)
+            arr->SetSize(arr->m_usGrowBy + idx);
         arr->SetAt(idx, val);
     }
 
     {
         char* val = FUN_00a7d550("Blend Value", blendValue);
-        unsigned int idx = view->count;
-        if (idx >= view->capacity)
-            arr->SetSize(view->growBy + idx);
+        unsigned int idx = arr->m_usSize;
+        if (idx >= arr->m_usMaxSize)
+            arr->SetSize(arr->m_usGrowBy + idx);
         arr->SetAt(idx, val);
     }
 
@@ -13251,18 +12591,18 @@ void __thiscall FUN_00baeee0_shell::AppendToStringArray(StrArr* arr)
         if (r)
         {
             char* val = FUN_00a7d5e0("base texture", r);
-            unsigned int idx = view->count;
-            if (idx >= view->capacity)
-                arr->SetSize(view->growBy + idx);
+            unsigned int idx = arr->m_usSize;
+            if (idx >= arr->m_usMaxSize)
+                arr->SetSize(arr->m_usGrowBy + idx);
             arr->SetAt(idx, val);
         }
         else
         {
             void* bt2 = baseTex;
             char* val = FUN_00a7d5a0("base texture", bt2);
-            unsigned int idx = view->count;
-            if (idx >= view->capacity)
-                arr->SetSize(view->growBy + idx);
+            unsigned int idx = arr->m_usSize;
+            if (idx >= arr->m_usMaxSize)
+                arr->SetSize(arr->m_usGrowBy + idx);
             arr->SetAt(idx, val);
         }
     }
@@ -13272,9 +12612,9 @@ void __thiscall FUN_00baeee0_shell::AppendToStringArray(StrArr* arr)
         FUN_00406d00(buf, 256, "%d %d %d %d", (int)(col60 * 255.0), (int)(col64 * 255.0), (int)(col68 * 255.0),
                      (int)(col6c * 255.0));
         char* val = FUN_00a7d5e0("Blend Color", (unsigned int)buf);
-        unsigned int idx = view->count;
-        if (idx >= view->capacity)
-            arr->SetSize(view->growBy + idx);
+        unsigned int idx = arr->m_usSize;
+        if (idx >= arr->m_usMaxSize)
+            arr->SetSize(arr->m_usGrowBy + idx);
         arr->SetAt(idx, val);
     }
 }
@@ -13526,7 +12866,6 @@ void FUN_00bb3940()
 }
 }  // namespace fnv_00bb3940
 
-struct NiStream;
 struct FUN_00b68dc0_class
 {
     void LoadFromStream(NiStream&);
@@ -13579,7 +12918,6 @@ void __stdcall FUN_00bb66c0(unsigned int)
     }
 }
 
-struct NiStream;
 
 struct FUN_00bc3780_Class
 {
@@ -13665,9 +13003,9 @@ bool S00baa660_Obj::FUN_00baa660()
 extern int DAT_011f91e4;
 extern bool DAT_011f9ef0;
 extern float DAT_01200550, DAT_01200554;
-extern RgbaColor DAT_01200570, DAT_01200520, DAT_01200510;
-D3DXMATRIXBB2* __stdcall FUN_00ee6dda(D3DXMATRIXBB2*, float*, const D3DXMATRIXBB2*);
-NiPoint3* __stdcall FUN_00ee6df2(NiPoint3*, const NiPoint3*, const D3DXMATRIXBB2*);
+extern NiColorA DAT_01200570, DAT_01200520, DAT_01200510;
+D3DXMATRIX* __stdcall FUN_00ee6dda(D3DXMATRIX*, float*, const D3DXMATRIX*);
+NiPoint3* __stdcall FUN_00ee6df2(NiPoint3*, const NiPoint3*, const D3DXMATRIX*);
 NiPoint3* __stdcall FUN_00ee6dec(NiPoint3*, const NiPoint3*);
 struct ACList
 {
@@ -13689,7 +13027,7 @@ struct ACObject
 };
 struct ACSetter
 {
-    void FUN_00e6fbb0(const NiTransformBB2*, int);
+    void FUN_00e6fbb0(const NiTransform*, int);
 };
 struct ACDirection
 {
@@ -13831,10 +13169,10 @@ struct ACShader
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14;
     ACSetter* setter;
-    void FUN_00baa850(int, const NiTransformBB2*);
-    void ApplyLightToEffect(ACList*, const D3DXMATRIXBB2*, float, unsigned int);
-    int FUN_00e807d0(int, int, int, int, ACObject*, int, const NiTransformBB2*, int);
-    int FUN_00baac10(int, int, int, int, ACObject*, int, const NiTransformBB2*, int);
+    void FUN_00baa850(int, const NiTransform*);
+    void ApplyLightToEffect(ACList*, const D3DXMATRIX*, float, unsigned int);
+    int FUN_00e807d0(int, int, int, int, ACObject*, int, const NiTransform*, int);
+    int FUN_00baac10(int, int, int, int, ACObject*, int, const NiTransform*, int);
 };
 struct UpPair
 {
@@ -13842,10 +13180,10 @@ struct UpPair
     NiPoint3 up;
 };
 // @fnv 0x00baac10
-int ACShader::FUN_00baac10(int a, int b, int c, int d, ACObject* object, int f, const NiTransformBB2* transform, int h)
+int ACShader::FUN_00baac10(int a, int b, int c, int d, ACObject* object, int f, const NiTransform* transform, int h)
 {
     setter->FUN_00e6fbb0(transform, 0);
-    D3DXMATRIXBB2 world, inverse;
+    D3DXMATRIX world, inverse;
     GetD3DFromNiBB2(world, *transform);
     unsigned int flags = DAT_011f91e4;
     FUN_00ee6dda(&inverse, 0, &world);
@@ -13873,11 +13211,13 @@ int ACShader::FUN_00baac10(int a, int b, int c, int d, ACObject* object, int f, 
             pDestDir[2] = pSrcDir[2];
             ACDirection& direction = upPair.dir;
             direction.FUN_004a0c10();
-            NiPoint3 color = light->GetAmbient();
-            DAT_01200570 = RgbaColor(color.x, color.y, color.z, 1.0f);
-            NiPoint3 diffuse = light->GetDiffuse();
-            DAT_01200520 = RgbaColor(diffuse.x, diffuse.y, diffuse.z, 1.0f);
-            DAT_01200510 = RgbaColor(-direction.x, -direction.y, -direction.z, 1.0f);
+            NiPoint3 color;
+            CopyPointBits(color, light->ambient);
+            DAT_01200570 = NiColorA(color.x, color.y, color.z, 1.0f);
+            NiPoint3 diffuse;
+            CopyPointBits(diffuse, light->diffuse);
+            DAT_01200520 = NiColorA(diffuse.x, diffuse.y, diffuse.z, 1.0f);
+            DAT_01200510 = NiColorA(-direction.x, -direction.y, -direction.z, 1.0f);
         }
         if (FUN_00b630f0(flags))
             FUN_00baa850(b, transform);
@@ -13978,40 +13318,20 @@ struct S00bafd50_Cls
     void* m_b4;
     void __thiscall FUN_00bafd50(S00bafd50_Arg* argument);
 };
-struct S00bafd50_Ptr
-{
-    void* p;
-    S00bafd50_Ptr(void* v) : p(v)
-    {}
-    operator void*() const
-    {
-        return p;
-    }
-    ~S00bafd50_Ptr()
-    {
-        if (p != DAT_0109b220)
-            DAT_00fdf1c4((char*)p - 8);
-    }
-};
 typedef int(__thiscall* S00bafd50_GetFn)(void*, int);
 typedef void(__thiscall* S00bafd50_FinishFn)(void*, void*);
 
-// If m_a8 is set, passes the result of its vtable slot 35 (via FUN_00a5b690) to argument->m_74, then calls argument's vtable slot 52 with m_b4.
+// If m_a8 is set, passes the result of its vtable slot 35 (via NiGlobalStringTable::AddString) to argument->m_74, then calls argument's vtable slot 52 with m_b4.
 // @fnv 0x00bafd50
 void S00bafd50_Cls::FUN_00bafd50(S00bafd50_Arg* argument)
 {
     if (m_a8 != 0)
     {
         int value = ((S00bafd50_GetFn)m_a8->m_vft[35])(m_a8, 0);
-        void* r;
-        if (value == 0)
-            r = DAT_0109b220;
-        else
-            r = (void*)FUN_00a5b690((const char*)value);
         {
-            S00bafd50_Ptr result(r);
+            NiFixedString result((const char*)value);
             S00bafd50_Sub& sub = argument->m_74;
-            sub.FUN_004037f0(result, 0);
+            sub.FUN_004037f0(result.m_kHandle, 0);
         }
         ((S00bafd50_FinishFn)argument->m_vft[52])(argument, m_b4);
     }
@@ -14164,18 +13484,6 @@ struct Fn6290Result
 struct Fn6290Item
 {
     Fn6290Result* FUN_00a59d30(int value);
-};
-
-struct Fn6290Ref
-{
-    virtual void v00();
-    virtual void Destroy();
-    __forceinline void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_04) == 0)
-            Destroy();
-    }
-    long m_04;
 };
 
 struct Fn6290Owner
@@ -14801,7 +14109,9 @@ struct Ptr
         return *this;
     }
 };
-struct Data
+// NiTexturingProperty::Map: m_usFlags +0x04 (bits 12-13 = clamp mode passed to SetMode), m_spTexture +0x08;
+// the shared NiTexturingProperty.h only forward-declares Map.
+struct TexturingPropertyMap
 {
     int unk00;
     unsigned short m_04;
@@ -14818,7 +14128,7 @@ struct Item
     int unk14;
     int unk18;
     int unk1c;
-    Data** m_20;
+    TexturingPropertyMap** m_20;
 };
 struct Holder
 {
@@ -14985,7 +14295,7 @@ bool nbb::Owner::FUN_00bb12e0(Root248* apRoot)
     Item* item = h->m_14;
     if (item)
     {
-        Data* d = *item->m_20;
+        TexturingPropertyMap* d = *item->m_20;
         m_90 = d ? d->m_08 : 0;
         d = *item->m_20;
         SetMode(d ? (d->m_04 >> 12) & 3 : 3);
@@ -15488,17 +14798,8 @@ int FUN_00bb3440_Class::FUN_00bb3440(FUN_00a5a040_Class* a1, int, int)
 extern long DAT_011f4400;
 
 namespace bb3470 {
-class BBRefBase
-{
-  public:
-    virtual __forceinline ~BBRefBase()
-    {
-        InterlockedDecrement((volatile long*)&DAT_011f4400);
-    }
-    unsigned int m_uiRefCount;
-};
 
-class BBRefObj : public BBRefBase
+class BBRefObj : public NiRefObject
 {
   public:
     virtual __forceinline ~BBRefObj()
@@ -15525,39 +14826,22 @@ BBRefObj* BBRefObj::FUN_00bb3470(unsigned int uiFlags)
 }
 }
 
-class RefObject_bb37
-{
-  public:
-    virtual ~RefObject_bb37();
-    virtual void DeleteThis();
-    volatile long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
 template <class T> class Pointer_bb37
 {
   public:
     ~Pointer_bb37()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     Pointer_bb37& operator=(T* pObject)
     {
         if (m_pObject != pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -15580,9 +14864,9 @@ class FUN_00bb3790 : public ShaderBase_bb37
   public:
     virtual void v00();
     ~FUN_00bb3790();
-    Pointer_bb37<RefObject_bb37> m_spTexture0;
+    Pointer_bb37<NiRefObject> m_spTexture0;
     int unk80;
-    Pointer_bb37<RefObject_bb37> m_spTexture1;
+    Pointer_bb37<NiRefObject> m_spTexture1;
 };
 
 // Destructor: clears m_spTexture1 then m_spTexture0, releasing their references, after which the ShaderBase_bb37 base destructor runs.
@@ -16241,17 +15525,8 @@ void AAF40Updater::FUN_00baaf40(void* pUnused, AAF40Object* pkObject)
 namespace ShaderDraw {
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
-struct Vec3
-{
-    float x, y, z;
-};
-struct Vec4
-{
-    float x, y, z, w;
-    Vec4(float a, float b, float c, float d) : x(a), y(b), z(c), w(d)
-    {}
-};
-extern Vec3 DAT_011fa2a0;
+
+extern LocalVec3 DAT_011fa2a0;
 extern Vec4 DAT_011fa280, DAT_011fa290, DAT_011fa0c0, DAT_011fa0d0;
 extern unsigned char DAT_011f91c4, DAT_011f941c;
 extern bool DAT_011f91a7;
@@ -16269,7 +15544,7 @@ struct Fog
     int unk14;
     int unk18;
     int unk1c;
-    Vec3 color;
+    LocalVec3 color;
     float farDistance, nearDistance;
 };
 Fog* FUN_00b55520(unsigned char);
@@ -16310,16 +15585,7 @@ struct Geometry
     int unk80;
     int unk84;
     int unk88;
-    Vec3 position;
-};
-struct Bound
-{
-    Vec3 center;
-    float radius;
-    __forceinline float Radius()
-    {
-        return radius;
-    }
+    LocalVec3 position;
 };
 struct MaterialValues
 {
@@ -16607,7 +15873,7 @@ void Shader::FUN_00bb1f60(Geometry* geometry, int unused1, int unused2, PassInfo
     {
         float farDistance = fog->farDistance;
         float nearDistance = fog->nearDistance;
-        Vec3 camera;
+        LocalVec3 camera;
         camera.x = DAT_011fa2a0.x;
         camera.y = DAT_011fa2a0.y;
         camera.z = DAT_011fa2a0.z;
@@ -16618,7 +15884,7 @@ void Shader::FUN_00bb1f60(Geometry* geometry, int unused1, int unused2, PassInfo
         if (distance > farDistance || distance + bound->Radius() > farDistance)
         {
             float interval = nearDistance - farDistance;
-            Vec3 color = fog->color;
+            LocalVec3 color = fog->color;
             useFog = true;
             DAT_011fa280 = Vec4(nearDistance, interval, 0.0f, 0.0f);
             DAT_011fa290 = Vec4(color.x, color.y, color.z, 0.0f);
@@ -16725,146 +15991,11 @@ void Shader::FUN_00bb1f60(Geometry* geometry, int unused1, int unused2, PassInfo
 }
 }
 
-struct NiBound
-{
-    NiPoint3 m_kCenter;
-    float m_fBoundRadius;
-};
-
 extern NiBound DAT_011f4288;
 extern float DAT_011f9470;
 extern float DAT_011f9474;
 extern float DAT_011f9478;
 extern "C" float __cdecl LinearInterpolate(float, float, float, float, float);
-
-struct ShadowSceneNode
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    NiPoint3 m_kCameraPos;
-};
 
 extern ShadowSceneNode* DAT_011f91c8;
 
@@ -16893,56 +16024,6 @@ struct DecalPropertyList
     int unk00;
     int unk04;
     DecalMaterialProp* m_pMaterial;
-};
-
-struct DecalGeomStandin
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    NiBound* m_pBound;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    DecalPropertyList m_propList;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int m_bFlagBC;
 };
 
 struct DecalShaderProperty
@@ -16983,10 +16064,18 @@ BSShaderProperty__RenderPassArray* DecalShaderProperty::UpdateRenderPasses(NiGeo
 
     float fOldHitDistance;
     fOldHitDistance = m_fHitDistance;
-    NiPoint3 camPos = DAT_011f91c8->m_kCameraPos;
+    NiPoint3 camPos;
+    CopyPointBits(camPos, DAT_011f91c8->kEyePosition);
 
-    DecalGeomStandin* pDecalGeom = (DecalGeomStandin*)geom;
-    NiBound kBound = pDecalGeom->m_pBound ? *pDecalGeom->m_pBound : DAT_011f4288;
+    NiGeometry* pDecalGeom = geom;
+    NiBound kBound;
+    const NiBound& sourceBound = reinterpret_cast<NiBound*>(pDecalGeom->m_kWorldBound) ? *reinterpret_cast<NiBound*>(pDecalGeom->m_kWorldBound) : DAT_011f4288;
+    unsigned int* __restrict boundDest = reinterpret_cast<unsigned int*>(&kBound);
+    const unsigned int* __restrict boundSource = reinterpret_cast<const unsigned int*>(&sourceBound);
+    boundDest[0] = boundSource[0];
+    boundDest[1] = boundSource[1];
+    boundDest[2] = boundSource[2];
+    boundDest[3] = boundSource[3];
 
     NiPoint3 diff;
     diff.x = kBound.m_kCenter.x - camPos.x;
@@ -16996,7 +16085,7 @@ BSShaderProperty__RenderPassArray* DecalShaderProperty::UpdateRenderPasses(NiGeo
     float lenSq = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
     float len = sqrt(lenSq);
     float fDist;
-    fDist = len - kBound.m_fBoundRadius;
+    fDist = len - kBound.m_fRadius;
     m_fHitDistance = fDist;
 
     if (fDist != fOldHitDistance)
@@ -17008,7 +16097,7 @@ BSShaderProperty__RenderPassArray* DecalShaderProperty::UpdateRenderPasses(NiGeo
         }
     }
 
-    DecalPropertyList* pPropList = &pDecalGeom->m_propList;
+    DecalPropertyList* pPropList = reinterpret_cast<DecalPropertyList*>(&pDecalGeom->m_PropertyState);
     if (pPropList)
     {
         DecalMaterialProp* bound;
@@ -17037,7 +16126,7 @@ BSShaderProperty__RenderPassArray* DecalShaderProperty::UpdateRenderPasses(NiGeo
         if (!bRender)
             return 0;
 
-        if (!!pDecalGeom->m_bFlagBC)
+        if (!!pDecalGeom->m_spSkinInstance.m_pObject)
             m_pRenderPassArray->Add(geom, 0x24d, 1, 0, 0, 0, 0, 0);
         else
             m_pRenderPassArray->Add(geom, 0x24c, 1, 0, 0, 0, 0, 0);
@@ -17133,9 +16222,6 @@ struct GameHeap
 
 extern GameHeap g_gameHeap;
 
-struct ImageSpaceEffectParam
-{
-};
 
 struct ImageSpaceShaderParam : ImageSpaceEffectParam
 {
@@ -17309,23 +16395,7 @@ struct BA01A0Target
     void AddWatcher(BA01A0Owner* owner) throw();
 };
 
-struct BA01A0RefObject
-{
-    virtual ~BA01A0RefObject();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
-struct BA01A0Item : BA01A0RefObject
+struct BA01A0Item : NiRefObject
 {
     int unk08;
     int unk0C;
@@ -17372,8 +16442,8 @@ struct BA01A0Item : BA01A0RefObject
 
 struct RefPtr_b9fcc0
 {
-    BA01A0RefObject* m_p;
-    RefPtr_b9fcc0(BA01A0RefObject* p) : m_p(p)
+    NiRefObject* m_p;
+    RefPtr_b9fcc0(NiRefObject* p) : m_p(p)
     {
         m_p->IncRefCount();
     }
@@ -17544,88 +16614,14 @@ struct S2760_Xf
     float m01;
 };
 
-struct Bound2760
-{
-    float x, y, z, radius;
-};
-class NiBound;
 extern NiBound DAT_011f4288;
-
-struct GeometryData2760
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    void* buffer;
-};
-
-struct Geometry2760
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    Bound2760* bound;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    S2760_Xf world;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    GeometryData2760* data;
-    void* skin;
-};
 
 struct FUN_00b71360_water;
 void __cdecl FUN_00b71360(unsigned int, FUN_00b71360_water*, float);
 
 struct RenderGroup2760
 {
-    Geometry2760* geometry;
+    NiGeometry* geometry;
     int unk04;
     unsigned char unk08;
     unsigned char count;
@@ -17782,7 +16778,7 @@ struct Pass2760
     virtual void slot27();
     virtual void slot28();
     virtual void slot29();
-    virtual void Submit(void*, Geometry2760*, void*, int, void*, Input2760*, int, const S2760_Xf&, Bound2760*, int,
+    virtual void Submit(void*, NiGeometry*, void*, int, void*, Input2760*, int, const S2760_Xf&, NiBound*, int,
                         int);
 };
 
@@ -17805,13 +16801,13 @@ struct PassManager2760
     int unk38;
     int unk3C;
     int unk40;
-    NiPointer<void> pass44;
+    NiPointer<NiD3DPass> pass44;
     int unk48;
     int unk4C;
     int unk50;
     int unk54;
     int unk58;
-    NiPointer<void> pass5C;
+    NiPointer<NiD3DPass> pass5C;
 };
 
 struct Shader2760
@@ -17840,7 +16836,7 @@ struct Shader2760
     virtual void slot21();
     virtual void slot22();
     virtual void slot23();
-    virtual void Setup(Geometry2760*, int, int, void*, Input2760*, int, const S2760_Xf&, Bound2760*);
+    virtual void Setup(NiGeometry*, int, int, void*, Input2760*, int, const S2760_Xf&, NiBound*);
     int unk04;
     int unk08;
     int unk0C;
@@ -17867,7 +16863,7 @@ struct Shader2760
     int unk60;
     int unk64;
     int unk68;
-    D3DXMATRIXBB2 matrix[12];  // Complete768-byte transform data block copied by this pass.
+    D3DXMATRIX matrix[12];  // Complete768-byte transform data block copied by this pass.
     void FUN_00bb2760(Input2760* input);
 };
 
@@ -17886,13 +16882,13 @@ void* __cdecl _memmove(void*, const void*, unsigned int);
 void Shader2760::FUN_00bb2760(Input2760* input)
 {
     RenderGroup2760* group = (RenderGroup2760*)DAT_011f91e0;
-    Geometry2760* geometry = group->geometry;
-    const S2760_Xf& world = geometry->world;
-    Bound2760* bound = geometry->bound;
+    NiGeometry* geometry = group->geometry;
+    const S2760_Xf& world = reinterpret_cast<const S2760_Xf&>(geometry->m_kWorld);
+    NiBound* bound = reinterpret_cast<NiBound*>(geometry->m_kWorldBound);
     if (!bound)
-        bound = (Bound2760*)&DAT_011f4288;
-    void* buffer = geometry->data->buffer;
-    void* skin = geometry->skin;
+        bound = (NiBound*)&DAT_011f4288;
+    void* buffer = geometry->m_spModelData.m_pObject->m_pkBuffData;
+    void* skin = geometry->m_spSkinInstance.m_pObject;
     Camera2760* camera = input->camera;
     float scale = camera->scale;
     for (unsigned char i = 0; i < group->count; i++)
@@ -18901,16 +17897,7 @@ struct ISEffectParam
     virtual ~ISEffectParam();
 };
 
-template <class T> struct ISArray
-{
-    virtual ~ISArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetAt(unsigned int index, const T& item);
-};
+
 
 struct ISEffectBase
 {
@@ -18920,8 +17907,8 @@ struct ISEffectBase
     int unk0C;
     int unk10;
     int unk14;
-    ISArray<ISEffectParam*> m_kParams;
-    ISArray<ISTexture*> m_kTextureSwapList;
+    NiTArray<ISEffectParam*, NiTMallocInterface<ISEffectParam*> > m_kParams;
+    NiTArray<ISTexture*, NiTMallocInterface<ISTexture*> > m_kTextureSwapList;
 };
 
 struct FUN_00bb8ea0 : ISEffectBase
@@ -19079,39 +18066,6 @@ enum P368Enum
 
 // Based on an unverified contribution attributed to another contributor (2026-10-23).
 
-struct P368Vec3
-{
-    union
-    {
-        struct
-        {
-            float x, y, z;
-        };
-        struct
-        {
-            unsigned int bx, by, bz;
-        };
-    };
-    float FUN_00457990();
-};
-
-class NiBound;
-
-struct P368Sphere
-{
-    union
-    {
-        struct
-        {
-            float x, y, z, r;
-        };
-        struct
-        {
-            unsigned int bx, by, bz, br;
-        };
-    };
-};
-
 struct P368Light
 {
 
@@ -19265,119 +18219,6 @@ struct P368PassArray
     P368Pass** data;
     unsigned int unk08, unk0C, size;
     void FUN_00ba9ee0(void*, unsigned int, bool, unsigned char, P368Light*, P368Light*, P368Light*, P368Light*);
-};
-
-struct P368GeomProp
-{
-    int unk00, unk04, unk08, unk0C, unk10, unk14;
-    unsigned short flags18;
-};
-struct P368GeomData
-{
-    int unk00, unk04, unk08, unk0C, unk10, unk14;
-    int unk18, unk1C, unk20, unk24, unk28;
-};
-
-struct P368Geom
-{
-
-    unsigned int unk00;
-
-    unsigned int unk04;
-
-    unsigned int unk08;
-
-    unsigned int unk0C;
-
-    unsigned int unk10;
-
-    unsigned int unk14;
-
-    unsigned int unk18;
-
-    unsigned int unk1C;
-
-    P368Sphere* bound;
-
-    unsigned int unk24;
-
-    unsigned int unk28;
-
-    unsigned int unk2C;
-
-    unsigned int unk30;
-
-    unsigned int unk34;
-
-    unsigned int unk38;
-
-    unsigned int unk3C;
-
-    unsigned int unk40;
-
-    unsigned int unk44;
-
-    unsigned int unk48;
-
-    unsigned int unk4C;
-
-    unsigned int unk50;
-
-    unsigned int unk54;
-
-    unsigned int unk58;
-
-    unsigned int unk5C;
-
-    unsigned int unk60;
-
-    unsigned int unk64;
-
-    unsigned int unk68;
-
-    unsigned int unk6C;
-
-    unsigned int unk70;
-
-    unsigned char unk74;
-    unsigned char unk75;
-    unsigned short unk76;
-
-    unsigned int unk78;
-
-    unsigned int unk7C;
-
-    unsigned int unk80;
-
-    unsigned int unk84;
-
-    unsigned int unk88;
-
-    unsigned int unk8C;
-
-    unsigned int unk90;
-
-    unsigned int unk94;
-
-    unsigned int unk98;
-
-    P368GeomProp* alpha;
-
-    unsigned int unkA0;
-
-    unsigned int unkA4;
-
-    unsigned int unkA8;
-
-    unsigned int unkAC;
-
-    unsigned int unkB0;
-
-    unsigned int unkB4;
-
-    P368GeomData* data;
-
-    unsigned int unkBC;
 };
 
 struct P368Camera
@@ -19633,7 +18474,7 @@ struct P368Camera
 
     unsigned int unk1EC;
 
-    P368Vec3 eye;
+    LocalVec3 eye;
 
     unsigned int unk1FC;
 };
@@ -19991,13 +18832,13 @@ struct P368Shader
     void CreateSpawnedObjectIfMissing(bool);
     void FUN_00ba95e0(int);
     void FUN_00ba8ab0(float);
-    void SortShadowSceneLights(P368Sphere*);
+    void SortShadowSceneLights(NiBound*);
     P368Light* FUN_00b70600(void**);
     P368Light* FUN_00b70700(void**);
     P368Light* FUN_00b70590(void**);
     P368Light* FUN_00b70680(void**);
     void FUN_00441130(int, int);
-    P368PassArray* FUN_00bb4740(P368Geom*, unsigned int, bool, unsigned int, P368Context*, bool);
+    P368PassArray* FUN_00bb4740(NiGeometry*, unsigned int, bool, unsigned int, P368Context*, bool);
 };
 
 __declspec(noinline) bool P368Shader::FUN_004a2020(int n)
@@ -20006,12 +18847,12 @@ __declspec(noinline) bool P368Shader::FUN_004a2020(int n)
 }
 // Selects and builds the P368PassArray for a given pass index, updating lights, distance, and blend state based on shader flags and context.
 // @fnv 0x00bb4740
-P368PassArray* P368Shader::FUN_00bb4740(P368Geom* geom, unsigned int auFlags, bool unused, unsigned int pass,
+P368PassArray* P368Shader::FUN_00bb4740(NiGeometry* geom, unsigned int auFlags, bool unused, unsigned int pass,
                                         P368Context* context, bool unused2)
 
 {
 
-    P368GeomProp** ppProperties = &geom->alpha;
+    NiProperty** ppProperties = geom->m_PropertyState.m_aspProps;
 
     unsigned int requested = (pass << 8) | auFlags;
 
@@ -20040,7 +18881,7 @@ P368PassArray* P368Shader::FUN_00bb4740(P368Geom* geom, unsigned int auFlags, bo
         else
         {
 
-            if (geom->data->unk28)
+            if (geom->m_spModelData.m_pObject->m_pkColor)
             {
 
                 if (!FUN_004a2020(1))
@@ -20089,7 +18930,7 @@ P368PassArray* P368Shader::FUN_00bb4740(P368Geom* geom, unsigned int auFlags, bo
         {
 
             bool skinned = false;
-            if (geom->data->unk28)
+            if (geom->m_spModelData.m_pObject->m_pkColor)
                 skinned = true;
 
             if (!FUN_004a2020(1))
@@ -20149,7 +18990,7 @@ P368PassArray* P368Shader::FUN_00bb4740(P368Geom* geom, unsigned int auFlags, bo
 
         P368PassArray* a = velocity;
 
-        if (!a->size && !geom->unkBC)
+        if (!a->size && !geom->m_spSkinInstance.m_pObject)
         {
 
             if (FUN_004a2020(0x25))
@@ -20162,7 +19003,7 @@ P368PassArray* P368Shader::FUN_00bb4740(P368Geom* geom, unsigned int auFlags, bo
         return velocity;
     }
 
-    P368Sphere bound;
+    NiBound bound;
 
     float previous = distance;
 
@@ -20181,25 +19022,25 @@ P368PassArray* P368Shader::FUN_00bb4740(P368Geom* geom, unsigned int auFlags, bo
     {
 
         P368Camera* camera = context->camera;
-        P368Vec3 eye;
-        eye.bx = camera->eye.bx;
-        eye.by = camera->eye.by;
-        eye.bz = camera->eye.bz;
+        LocalVec3 eye;
+        eye.xb = camera->eye.xb;
+        eye.yb = camera->eye.yb;
+        eye.zb = camera->eye.zb;
 
         {
-            P368Sphere* src = geom->bound ? geom->bound : (P368Sphere*)&DAT_011f4288;
-            unsigned int x = src->bx, y = src->by;
+            NiBound* src = reinterpret_cast<NiBound*>(geom->m_kWorldBound) ? reinterpret_cast<NiBound*>(geom->m_kWorldBound) : (NiBound*)&DAT_011f4288;
+            unsigned int x = reinterpret_cast<unsigned int&>(src->m_kCenter.x), y = reinterpret_cast<unsigned int&>(src->m_kCenter.y);
             _ReadWriteBarrier();
-            bound.bx = x;
-            unsigned int z = src->bz;
-            bound.by = y;
-            bound.br = src->br;
-            bound.bz = z;
+            reinterpret_cast<unsigned int&>(bound.m_kCenter.x) = x;
+            unsigned int z = reinterpret_cast<unsigned int&>(src->m_kCenter.z);
+            reinterpret_cast<unsigned int&>(bound.m_kCenter.y) = y;
+            reinterpret_cast<unsigned int&>(bound.m_fRadius) = reinterpret_cast<unsigned int&>(src->m_fRadius);
+            reinterpret_cast<unsigned int&>(bound.m_kCenter.z) = z;
         }
 
-        P368Vec3 delta = {bound.x - eye.x, bound.y - eye.y, bound.z - eye.z};
+        LocalVec3 delta(bound.m_kCenter.x - eye.x, bound.m_kCenter.y - eye.y, bound.m_kCenter.z - eye.z);
 
-        distance = delta.FUN_00457990() - bound.r;
+        distance = delta.FUN_00457990() - bound.m_fRadius;
 
         if (((P368Context*)FUN_00b4f5c0())->state)
             distance *= *(float*)&((P368Context*)FUN_00b4f5c0())->state->unk110;
@@ -20281,7 +19122,7 @@ P368PassArray* P368Shader::FUN_00bb4740(P368Geom* geom, unsigned int auFlags, bo
     if ((unsigned char)unk74)
     {
 
-        bound = *(geom->bound ? geom->bound : (P368Sphere*)&DAT_011f4288);
+        bound = *(reinterpret_cast<NiBound*>(geom->m_kWorldBound) ? reinterpret_cast<NiBound*>(geom->m_kWorldBound) : (NiBound*)&DAT_011f4288);
 
         SortShadowSceneLights(&bound);
     }
@@ -20413,13 +19254,13 @@ P368PassArray* P368Shader::FUN_00bb4740(P368Geom* geom, unsigned int auFlags, bo
 
     bool rangeDLater = FUN_004a2020(0) && (((char*)&requested)[0] & 8) > 0 && rangeD;
 
-    bool skipDistanceLater = hasExtra || (geom->alpha->flags18 & 1) != 0;
+    bool skipDistanceLater = hasExtra || (static_cast<NiAlphaProperty*>(geom->m_PropertyState.m_aspProps[0])->m_usAlphaArg & 1) != 0;
 
     bool scene = IsParticleShaderRendererEnabled() && !FUN_004a2020(0xd) && GetGlobalFloatAsUInt() &&
                  (unsigned char)((P368Context*)FUN_00b4f5c0())->camera->mode != 1 &&
                  (unsigned char)((P368Context*)FUN_00b4f5c0())->camera->mode != 3;
 
-    if (geom->data->unk28 || FUN_004a2020(0x25))
+    if (geom->m_spModelData.m_pObject->m_pkColor || FUN_004a2020(0x25))
         rangeC = true;
 
     if (extra)
@@ -20876,7 +19717,7 @@ P368PassArray* P368Shader::FUN_00bb4740(P368Geom* geom, unsigned int auFlags, bo
     else if (FUN_004a2020(9) || fade < 1.0f)
     {
 
-        if (!geom->alpha || !(geom->alpha->flags18 & 1))
+        if (!geom->m_PropertyState.m_aspProps[0] || !(static_cast<NiAlphaProperty*>(geom->m_PropertyState.m_aspProps[0])->m_usAlphaArg & 1))
         {
 
             if (rangeC)
@@ -21023,15 +19864,15 @@ struct FUN_00bb3ba0 : LeafLightingBase
     int lightingType;
     int unk5C, unk60, unk64, unk68, unk6C, unk70, unk74, unk78;
     int unk7C, unk80, unk84;
-    NiPointer<BB3660RefObject> leafData;
+    NiPointer<NiRefObject> leafData;
     unsigned short level;
 
-    FUN_00bb3ba0(unsigned short value, void* texture, BB3660RefObject* data);
+    FUN_00bb3ba0(unsigned short value, void* texture, NiRefObject* data);
 };
 
 // Constructs the LeafLightingBase from texture, sets the vtable, stores data in leafData and value in level, and sets lightingType and shaderType to 6.
 // @fnv 0x00bb3ba0
-FUN_00bb3ba0::FUN_00bb3ba0(unsigned short value, void* texture, BB3660RefObject* data)
+FUN_00bb3ba0::FUN_00bb3ba0(unsigned short value, void* texture, NiRefObject* data)
     : LeafLightingBase(texture), vtable(&DAT_010b9700), leafData()
 {
     leafData = data;

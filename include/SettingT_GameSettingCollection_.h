@@ -1,17 +1,26 @@
-// Source layout: SettingT<GameSettingCollection>. PC corrections are in generate_headers.py.
-#ifndef FNV_SETTINGT_GAMESETTINGCOLLECTION__H
-#define FNV_SETTINGT_GAMESETTINGCOLLECTION__H
-#include "layout_support.h"
+#pragma once
+
+#include "SETTING_VALUE.h"
 #include "Setting.h"
-#pragma pack(push, 4)
-template <> class SettingT<GameSettingCollection> : public Setting
+
+#include "SettingT.h"
+
+// Stand-in still used by many units for a SettingT<GameSettingCollection> global (to be moved onto the class above).
+
+class SettingT_GameSettingCollection_
 {
-  public:
-    SettingT(const char* key, float value);
-    SettingT(const char* key, int value);
-    SettingT(const char* key, char* value);
-    virtual ~SettingT();
+public:
+    char pad[12];
+
+    SettingT_GameSettingCollection_();
+    ~SettingT_GameSettingCollection_();
+
+    SETTING_VALUE* Float();
+    SETTING_VALUE* Bool();
+    SETTING_VALUE* Int();
+    const char* String();
+
+    bool* FUN_00408d60();
+    int* FUN_0043d4d0();
+    const char* FUN_00403df0();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(SettingT<GameSettingCollection>) == 0xC);
-#endif

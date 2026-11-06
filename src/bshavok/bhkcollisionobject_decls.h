@@ -1,4 +1,4 @@
-// bshavok/bhkcollisionobject_decls.h: declares BGSBodyPart, NiShader
+// bshavok/bhkcollisionobject_decls.h: declares DynamicCastByRTTI
 #ifndef BHKCOLLISIONOBJECT_DECLS_H
 #define BHKCOLLISIONOBJECT_DECLS_H
 
@@ -6,16 +6,8 @@ class NiRTTI;
 class NiProperty;
 class SkyShaderProperty;
 class NiAVObject;
-class BGSBodyPart
-{
-  public:
-    const char* GetPartName();
-};
+#include "../../include/BGSBodyPart.h"
 class NiNode;
 void* DynamicCastByRTTI(void*, NiNode*);
-class NiShader
-{
-  public:
-    static NiAVObject* DynamicCast(NiAVObject*);
-};
+#include "../../include/NiShader.h"
 #endif

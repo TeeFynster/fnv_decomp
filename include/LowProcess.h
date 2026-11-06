@@ -1,76 +1,252 @@
-// Source layout: LowProcess. PC corrections are in generate_headers.py.
-#ifndef FNV_LOWPROCESS_H
-#define FNV_LOWPROCESS_H
-#include "layout_support.h"
+#pragma once
+
 #include "BaseProcess.h"
 #include "TimeoutTimer.h"
+#include "BSSimpleList.h"
 #include "ActorValueModifierList.h"
+
+class Actor;
+class BGSListForm;
+class BGSLoadFormBuffer;
+class MobileObject;
+class PatrolActorPackageData;
+class TargetDoorController;
+class TESActorBase;
+class TESBoundObject;
+class TESFaction;
+class TESForm;
+class TESObjectREFR;
+class TESPackage;
+class TESTopic;
+
+typedef ActorValue::Index ActorValue__Index;
+
 #pragma pack(push, 4)
 class LowProcess : public BaseProcess
 {
-  public:
-    unsigned char m_uiObjectFlags;  // +0x30
+public:
+    LowProcess();
+    virtual ~LowProcess();
+
+    virtual void UpdateAlt(MobileObject* apObject, float afDelta);
+    virtual void Update(MobileObject* apObject);
+    virtual void SetMobileObjectState(MobileObject* apObject, bool abActionflag);
+    virtual NiPoint3 GetActorWorldPosition(Actor* apActor);
+    virtual bool CheckForNewPackage(Actor* apActor, bool abFlag);
+    virtual void ResetPackageState();
+    virtual bool IsLowProcessStateValid() const;
+    virtual unsigned int GetPackedStateBits0To8() const;
+    virtual unsigned int GetPackedStateBits9To12() const;
+    virtual unsigned int GetPackedStateBits13To26() const;
+    virtual bool FindPackageTarget(Actor* apActor);
+    virtual TESObjectREFR* GetPackageLocationReference(Actor* apActor, bool abSecond);
+    virtual TESObjectREFR* GetActorTargetReference(Actor* apActor, bool abInterrupt);
+    virtual NiPoint3 GetActorTargetPosition(Actor* apActor, bool abInterrupt);
+    virtual TESObjectCELL* GetTargetCell(Actor* apActor);
+    virtual TESWorldSpace* GetTargetWorldSpace(Actor* apActor);
+    virtual float GetTargetDistance(Actor* apActor);
+    virtual bool EvaluateActorPackage(Actor* apActor, TESPackage* apPackage, bool abInCombat);
+    virtual bool FindPackageToEvaluate(Actor* apActor, TESPackage*& apPackage);
+    virtual void SelectPackage(Actor* apActor, bool abInterateIndex);
+    virtual void SetPackageForActor(Actor* apActor, TESPackage* apPackage, bool abCheck);
+    virtual void ClearAnimationState();
+    virtual float GetEssentialDownTimer() const;
+    virtual void SetEssentialDownTimer(float afValue);
+    virtual void SetAnimationComplete(bool abVal);
+    virtual bool IsMovementComplete() const;
+    virtual TESObjectREFR* GetTarget() const;
+    virtual void SetTarget(TESObjectREFR* apTarget);
+    virtual unsigned int GetPackageObjectType() const;
+    virtual bool IsAnimationStateActive() const;
+    virtual void SetAnimationStateActive(bool abVal);
+    virtual bool IsProcessTaskComplete() const;
+    virtual void SetProcessTaskComplete(bool abVal);
+    virtual void SetCurrentBoundObject(TESObject* apItem);
+    virtual TESObject* GetCurrentBoundObject() const;
+    virtual void SetCombatDelayFadeTimer(float afVal);
+    virtual bool IsProcessConditionMet() const;
+    virtual float GetDistanceBetweenActors(Actor* apActor, Actor* apTarget);
+    virtual bool IsPackageRunningForActor(Actor* apActor) const;
+    virtual void SetProcessTarget(MobileObject* apTarget, int aiOffset);
+    virtual void UpdateActorPackage(Actor* apActor, bool abFlag, unsigned int aeMoveMode, bool abPursuit);
+    virtual void EvaluatePackage(Actor* apActor, bool abNewPackage, bool abInterateIndex, unsigned int aeMoveMode);
+    virtual void ProcessFlee(Actor* apActor);
+    virtual void ProcessDialogueTopic(Actor* apActor, TESTopic* apTopic, bool abForceSub, bool abStop, bool abQueue, bool abSayCallBack);
+    virtual void SetActorProcessTime(Actor* apActor, float afTimeDelta);
+    virtual bool IsCurrentlyAlerted() const;
+    virtual void SetAlert(bool abVal);
+    virtual bool ShouldAttackTarget(Actor* apActor, Actor* apTarget, bool, bool abIsEvil, ActorCombatGroup* apCombatGroup, bool, bool, bool abIsAggressor, bool, bool abIgnoreActorLimit, bool, bool, TESPackage* apPackage);
+    virtual bool IsCurrentProcessComplete() const;
+    virtual void SetCurrentProcessComplete(bool abVal);
+    virtual int GetActorValueI(TESActorBase* apBase, ActorValue::Index aeIndex, Actor* apActor);
+    virtual float GetActorValueF(TESActorBase* apBase, ActorValue::Index aeIndex, Actor* apActor);
+    virtual void DamageModActorValueF(Actor* apActor, ActorValue::Index aeIndex, float afVal);
+    virtual void DamageModActorValueI(Actor* apActor, ActorValue::Index aeIndex, int aiVal);
+    virtual void ClearReferenceRecords(TESObjectREFR* apObject);
+    virtual void ClearObjectFromAcquireListAlt(unsigned int auiFormID);
+    virtual bool IsPlayingAnimation() const;
+    virtual void SetProcessConditionMet(bool abVal);
+    virtual TESObjectREFR* GetActiveCombatTarget() const;
+    virtual void SetCurrentCombatTarget(TESObjectREFR* apLocation);
+    virtual TESObjectREFR* GetProcessReference() const;
+    virtual void SetCurrentLocationReference(TESObjectREFR* apLocation);
+    virtual void UpdateCurrentPackage(Actor* apActor);
+    virtual unsigned short GetSaveSize(unsigned int auiFlags, MobileObject* apObject);
+    virtual void SaveGameBGS(BGSSaveGameBuffer* apBuffer);
+    virtual void SaveGameTES(unsigned int auiFlags, MobileObject* apObject);
+    virtual void LoadGameBGS(BGSLoadFormBuffer* apBuffer);
+    virtual void LoadGameTES(unsigned int auiFlags, unsigned int auiCurrentFlags, MobileObject* apObject);
+    virtual void InitLoadGameBGS(BGSLoadFormBuffer* apBuffer);
+    virtual void InitLoadGameTES(unsigned int auiFlags, unsigned int auiOldFlags, MobileObject* apObject);
+    virtual void RevertBGS(BGSLoadFormBuffer* apBuffer);
+    virtual void RevertTES(unsigned int auiFlags, MobileObject* apObject);
+    virtual void OnPackageChanged(Actor* apActor, TESPackage* apPackage);
+    virtual void OnPackageStart(Actor* apActor, TESPackage* apPackage);  // 0x009135a0 (LowProcess), 0x00903bf0 (HighProcess): no return value
+    virtual void OnPackageEnd(Actor* apActor, TESPackage* apPackage);
+    virtual bool IsProcessActivityActive() const;
+    virtual void SetProcessModeEnabled(bool abVal);
+    virtual float GetTemporaryActorValue(ActorValue::Index aeActorValue);
+    virtual float GetCurrentDetectionAmount() const;
+    virtual void SetLightingAmount(float afVal);
+    virtual void SetProcessReference(TESObjectREFR* apRef);
+    virtual void SetMobileObjectTarget(TESObjectREFR* apRef);
+    virtual void ApplyDamageToActor(Actor* apSource, float afDamage);
+    virtual float GetLastDamage() const;
+
+    virtual void vfn_7b4(Actor*);
+    virtual void ProcessSleep(Actor*);
+    virtual void ProcessEat(Actor*, TESForm*);
+    virtual void vfn_7c0();
+    virtual void ProcessAlarm(Actor*);
+    virtual bool ProcessActivate(Actor*, bool);
+    virtual void ProcessAccompany(Actor*);
+    virtual void ProcessAcquire(Actor*);
+    virtual void ProcessAmbushWait(Actor*);
+    virtual bool ProcessUseItemAt(Actor*);   // slot 502: HighProcess 0x008f9320 returns bool
+    virtual bool ProcessUseWeapon(Actor*);
+    virtual void vfn_7e0(Actor*);
+    virtual void ProcessFleeNonCombat(Actor*);
+    virtual void ProcessAvoidRadiation(Actor*);
+    virtual void ProcessSandbox(Actor*);
+    virtual void ProcessMovementBlocked(Actor*);
+    virtual void ProcessGuard(Actor*);
+    virtual void vfn_7f8(Actor*, PatrolActorPackageData*);
+    virtual void ProcessPatrol(Actor*);
+    virtual void vfn_800(Actor*);
+    virtual void vfn_804(Actor*); // slot 513 (HighProcess::Update 0x008eeec0 passes the actor)
+    virtual void ProcessNotify(Actor*);
+    virtual bool vfn_80c(Actor*, int);
+    virtual TESObjectREFR* vfn_810(Actor*, TESPackage*);
+    virtual TESObjectREFR* vfn_814(Actor*, TESPackage*, bool);
+    virtual void vfn_818(Actor*);
+
+    unsigned char m_uiObjectFlags;
     unsigned char layoutPadding31;
     unsigned short layoutPadding32;
-    TESBoundObject* m_pCurrentWeapon;  // +0x34
-    TimeoutTimer m_kProcessData38;      // +0x38
-    TESObjectREFR* pTarget;            // +0x40
-    TESObjectREFR* m_pReference40;     // +0x44
-    TESObjectREFR* m_pReference44;     // +0x48
-    BGSListForm* m_pFormList;          // +0x4C
-    short m_sFourthValue;              // +0x50
+    TESBoundObject* m_pCurrentWeapon;
+    TimeoutTimer m_kProcessData38;
+    TESObjectREFR* pTarget;
+    TESObjectREFR* m_pReference40;
+    TESObjectREFR* m_pReference44;
+    BGSListForm* m_pFormList;
+    short m_sFourthValue;
     unsigned short layoutPadding52;
-    TESObjectREFR* m_pObjectReference;                     // +0x54
-    int m_iValue58;                                        // +0x58
-    BSSimpleList<TargetDoorController*> ReferenceListNode;     // +0x5C
-    TargetDoorController* m_pDetectionData60;                  // +0x64
-    TargetDoorController* m_pDetectionData64;                  // +0x68
-    BSSimpleList<TESObjectREFR*> m_kReferenceList68;       // +0x6C
-    BSSimpleList<TargetDoorController*> m_kDetectionDataList;  // +0x74
-    BSSimpleList<TESObjectREFR*> m_kReferenceList70;       // +0x7C
-    TESBoundObject* m_pBoundObject74;                      // +0x84
-    TESBoundObject* m_pBoundObject78;                      // +0x88
-    PACKAGE_OBJECT_TYPE m_eReferenceTypeInfo;                         // +0x8C
-    TESFaction* PackageFactionTarget;                      // +0x90
-    ActorValueModifierList m_kActorValueModifiers;                   // +0x94
-    float m_fValue88;                                      // +0xA4
-    float m_fValue8C;                                      // +0xA8
-    float m_fValue90;                                      // +0xAC
-    bool m_bHasBoundObject;                                // +0xB0
+    TESObjectREFR* m_pObjectReference;
+    int m_iValue58;
+    BSSimpleList<TargetDoorController*> ReferenceListNode;
+    TargetDoorController* m_pDetectionData60;
+    TargetDoorController* m_pDetectionData64;
+    BSSimpleList<TESObjectREFR*> m_kReferenceList68;
+    BSSimpleList<TargetDoorController*> m_kDetectionDataList;
+    BSSimpleList<TESObjectREFR*> m_kReferenceList70;
+    TESBoundObject* m_pBoundObject74;
+    TESBoundObject* m_pBoundObject78;
+    PACKAGE_OBJECT_TYPE m_eReferenceTypeInfo;
+    TESFaction* PackageFactionTarget;
+    ActorValueModifierList m_kActorValueModifiers;
+    float m_fValue88;
+    float m_fValue8C;
+    float m_fValue90;
+    bool m_bHasBoundObject;
     unsigned char layoutPaddingB1;
     unsigned short layoutPaddingB2;
-    void SetCurrentBoundObject(TESBoundObject*);
-    void SetCurrentCombatTarget(TESObjectREFR*);
-    TESObjectREFR* GetTarget();
-    void SetPackageObjectType(int);
-    int GetPackageObjectType();
-    TESObjectREFR* GetActiveCombatTarget();
+
+    virtual ActorPackageData* GetCurrentPackageData() const;
+    virtual void SetPackageObjectType(unsigned int auiCount);
+    void SetFlag(bool, unsigned char);
+    bool GetFlag(unsigned char) const;
+    void UpdateTargetFromPackage();
+    void SetFlag40(int);
+    void HandlePackageChange(LowProcess*);
+    void ClearData();
+    int GetActorValue(TESActorBase*, ActorValue__Index, Actor*);
+    bool CanProcessActor(Actor*, bool);
+    bool SelectNextPackage(Actor*);
+    bool CanRunPackage(TESPackage*, bool);
+    float GetCurrentActorValue(TESActorBase*, ActorValue__Index, Actor*);
+    static bool HandlePackageTargetLoaded(TESObjectREFR*, long);
+    static bool HandlePackageLocationLoaded(TESObjectREFR*, long);
+    void Revert(BGSLoadFormBuffer*);
+    void LoadGame(BGSLoadFormBuffer*);
+    void InitLoadGame(BGSLoadFormBuffer*);
+    float GetActorTimeDelta(Actor*);
+    TESObjectREFR* ResolvePackageLocation(Actor*, TESPackage*, bool);
+    bool FindPatrolTarget(Actor*, PatrolActorPackageData*);
+    void ProcessPatrolPackage(Actor*, PatrolActorPackageData*);
+    float RunProcessUpdate(Actor*, PatrolActorPackageData*, float);
+    void HandlePatrolArrival(Actor*, PatrolActorPackageData*);
+    float UpdatePatrolProgress(Actor*, PatrolActorPackageData*, float);
+    TESObjectREFR* ResolvePackageTarget(Actor*, TESPackage*);
+    void FUN_0092cab0(Actor* source);
+    using BaseProcess::GetCurrentBoundObject;
+    float FUN_00911ae0(Actor*, Actor*);
+    bool IsProcedureTypeAllowed();
+    bool FUN_0090dc10(void*, void*, bool, bool, void*, bool, bool, bool, char, bool, bool, bool, void*);
+    void FUN_00911ed0(void*);
+    bool IsPackageProcedureAllowed(void*);
+    void FUN_009134c0(Actor*, float);
+    void FUN_008675e0(LowProcess*);
+    void SetBits(unsigned char, unsigned char, unsigned char);
+    float GetModifierValue(char);
+    void FUN_00907620();
+    void FUN_00908f40(void*);
+    void FUN_009177a0(Actor*);
+    void FUN_0090d240(Actor*);
+    void UpdateTargetAndMovement(Actor*, bool, bool, int);
+    void FUN_00907460(Actor*, int, float);
+    bool FUN_00907960(TESPackage*, int);
+    bool FUN_009079f0(Actor*, TESPackage*);
+    bool UpdatePackageState(Actor*);
+    void UpdatePackageTarget(Actor*);
+    void UpdateTargetRefs(unsigned int, unsigned int, MobileObject*);
+    void UpdateActorIfStale(Actor*);
+    void FUN_009130f0(MobileObject*);
+    void* FUN_00924080(void*, bool);
+    void InitPackageFromExtraData(MobileObject*);
+    void FUN_00908cd0(Actor*, TESObjectREFR*, int);
+    void InitWornForms(Actor*, bool);
+    void FUN_00909c90(Actor*);
+    void FUN_0090c360(SpellItem*, float);
+    void RemoveById(unsigned int);
+    NiPoint3 GetControllerPoint(int);
+    unsigned short FUN_0090f8b0(unsigned int, unsigned int);
+    void FUN_0090fd80(unsigned int, unsigned int, unsigned int);
+    void FUN_00910450(BGSSaveFormBuffer*);
+    void UpdateMoveToTarget(Actor*);
+    bool TrySelectTarget(Actor*, TESPackage**);
+    void FUN_0090d000(Actor*);
+    TESObjectCELL* GetProcedureCell(Actor*);
+    void* FUN_0090f3f0(Actor*);
+    void SaveToStream(unsigned int, unsigned int);
+    void CollectSearchResults(TESObjectREFR*, TESObjectREFR*, int);
+    void UpdateFollowerList(TESObjectREFR*, float);
+    void StartPackagePathing(Actor*, TESForm*);
+    void FUN_00909430(Actor*);
+    bool FUN_0090ac40(TESObjectREFR*, int);
+    float FUN_0090f670(int);
+    void ResetAndClear(unsigned int, MobileObject*);
+    TESObjectREFR* FUN_0090e970(Actor*, bool);
+    NiPoint3 FUN_0090ec70(Actor*, bool);
+    void DispatchToTarget(Actor*);
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(LowProcess) == 0xB4);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_uiObjectFlags) == 0x30);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_pCurrentWeapon) == 0x34);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_kProcessData38) == 0x38);
-FNV_STATIC_ASSERT(offsetof(LowProcess, pTarget) == 0x40);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_pReference40) == 0x44);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_pReference44) == 0x48);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_pFormList) == 0x4C);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_sFourthValue) == 0x50);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_pObjectReference) == 0x54);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_iValue58) == 0x58);
-FNV_STATIC_ASSERT(offsetof(LowProcess, ReferenceListNode) == 0x5C);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_pDetectionData60) == 0x64);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_pDetectionData64) == 0x68);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_kReferenceList68) == 0x6C);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_kDetectionDataList) == 0x74);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_kReferenceList70) == 0x7C);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_pBoundObject74) == 0x84);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_pBoundObject78) == 0x88);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_eReferenceTypeInfo) == 0x8C);
-FNV_STATIC_ASSERT(offsetof(LowProcess, PackageFactionTarget) == 0x90);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_kActorValueModifiers) == 0x94);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_fValue88) == 0xA4);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_fValue8C) == 0xA8);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_fValue90) == 0xAC);
-FNV_STATIC_ASSERT(offsetof(LowProcess, m_bHasBoundObject) == 0xB0);
-#endif

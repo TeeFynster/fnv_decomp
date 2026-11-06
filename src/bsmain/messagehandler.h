@@ -7,7 +7,7 @@
 #define BSMESSAGEHANDLER_H
 
 
-#include "layout_support.h"
+#include "../../include/MessageHandler.h"
 
 // Per-thread warning bookkeeping.  The warning queueing state is kept per
 // thread because a message box is shown on the main thread while game logic
@@ -20,26 +20,6 @@ struct MessageHandlerThreadState
 };
 
 #include "messagehandler_tls.h"
-
-class MessageHandler
-{
-  public:
-    static MessageHandler* pHandler;
-
-    // Report file names owned by the handler; the warning report sits first.
-    unsigned char otherReportFileNames[0x180];
-    char warningFileName[0x100];
-
-    // Speech playback bookkeeping.
-    unsigned char speechState[0x15c];
-    float speechProgress;
-
-    static MessageHandler& Handler();
-    static void SetWarningCount(int count);
-
-    const char* GetWarningFileName();
-    float GetSpeechProgress();
-};
 
 // The message handler singleton.
 MessageHandler* MessageHandler::pHandler = 0;
@@ -55,13 +35,15 @@ int Warning();
 // @fnv 0x0045a330
 const char* MessageHandler::GetWarningFileName()
 {
-    return warningFileName;
+    // The report-name storage is not exposed by the shared declaration.
+    return reinterpret_cast<const char*>(this) + 0x180;
 }
 
 // @fnv 0x004694c0
 float MessageHandler::GetSpeechProgress()
 {
-    return speechProgress;
+    // Speech progress lives at this offset in the original game layout.
+    return *reinterpret_cast<const float*>(reinterpret_cast<const char*>(this) + 0x3dc);
 }
 
 #endif

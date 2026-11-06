@@ -2,6 +2,10 @@
 // src/gamebryo2.2/corelibs/niparticle/nipsysfieldattenuationctlr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysfieldattenuationctlr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/NiObjectNET.h"
+#include "../../../../include/NiPSysModifier.h"
+#include "../../../../include/StrArr.h"
+
 extern "C" void* g_01202720;
 
 // @fnv 0x00c2b230
@@ -10,25 +14,14 @@ void* __cdecl FUN_00c2b230()
     return &g_01202720;
 }
 
-struct NiObjectNET;
 struct BaseStandIn
 {
     bool IsTargetParticleSystem(NiObjectNET*);
 };
-struct B00c1bff0
-{
-    void* FUN_00c1b0f0(void*);
-};
-struct NiObjectNET : B00c1bff0
-{
-};
+// The shared headers do not yet declare this modifier lookup.
+// An explicit-this function pointer preserves its thiscall ABI.
+NiPSysModifier* __cdecl FUN_00c1b0f0();
 extern char const* const g_01202688_arg1;
-struct NiPSysModifier
-{
-    virtual void* _v0();
-    virtual void* _v1();
-    virtual void* GetRTTI();
-};
 struct NiPSysFieldAttenuationCtlr : BaseStandIn
 {
     bool FUN_00c2b290(NiObjectNET*);
@@ -39,10 +32,12 @@ bool NiPSysFieldAttenuationCtlr::FUN_00c2b290(NiObjectNET* pkTarget)
 {
     if (!BaseStandIn::IsTargetParticleSystem(pkTarget))
         return false;
-    NiPSysModifier* pkModifier = (NiPSysModifier*)pkTarget->FUN_00c1b0f0((void*)((char*)this + 0x38));
+    typedef NiPSysModifier* (__thiscall* FindModifier)(NiObjectNET*, const NiFixedString*);
+    NiPSysModifier* pkModifier = ((FindModifier)&FUN_00c1b0f0)(
+        pkTarget, reinterpret_cast<const NiFixedString*>((char*)this + 0x38));
     if (!pkModifier)
         return false;
-    for (void* p = pkModifier->GetRTTI(); p; p = *(void**)((char*)p + 4))
+    for (const void* p = pkModifier->GetRTTI(); p; p = *(const void* const*)((const char*)p + 4))
     {
         if (p == (void*)&g_01202688_arg1)
             return true;
@@ -113,17 +108,6 @@ NiPSysFieldAttenuationCtlr* Owner::CreateFieldAttenuationController(NiObjectNET*
     return (NiPSysFieldAttenuationCtlr*)pCtlr;
 }
 
-struct StrArr
-{
-    void* unk00;
-    char** data;
-    unsigned short capacity;
-    unsigned short index;
-    unsigned short count;
-    unsigned short growBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 char* __cdecl FUN_00a7d330(char*);
 void __stdcall FUN_00c32f60(StrArr*);
 // Appends the string returned by FUN_00a7d330(g_01202720) to the array, growing it if the index reaches capacity.
@@ -132,9 +116,9 @@ void __stdcall FUN_00c2b2e0(StrArr* array)
 {
     FUN_00c32f60(array);
     char* value = FUN_00a7d330(static_cast<char*>(g_01202720));
-    unsigned int index = array->index;
-    unsigned int capacity = array->capacity;
+    unsigned int index = array->m_usSize;
+    unsigned int capacity = array->m_usMaxSize;
     if (index >= capacity)
-        array->SetSize(index + array->growBy);
+        array->SetSize(index + array->m_usGrowBy);
     array->SetAt(index, value);
 }

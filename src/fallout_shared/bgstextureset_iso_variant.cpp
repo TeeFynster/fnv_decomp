@@ -3,7 +3,122 @@
 
 
 // Fallout: New Vegas decompilation: fallout_shared/bgstextureset.cpp.
-#include "bgstextureset_packet.h"
+#include "layout_support.h"
+#include "../../include/NiPointer.h"
+#include "../../include/ARCHIVE_TYPE_INDEX.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/BSShaderManager.h"
+#include "../../include/NiTexture.h"
+#include "../../include/BGSTextureSet.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESObject.h"
+
+#include "../../include/BSTextureSet.h"
+#include "../../include/ShortPoint3.h"
+#include "../../include/TESBoundObject__BOUND_DATA.h"
+
+class BSFileEntry;
+class BSTextureSet;
+class DecalData;
+class ShortPoint3;
+class TESBoundObject__BOUND_DATA;
+class TESFormList;
+class QueuedFile;
+
+#pragma pack(push, 4)
+#pragma pack(pop)
+FNV_STATIC_ASSERT(sizeof(ShortPoint3) == 6);
+FNV_STATIC_ASSERT(offsetof(ShortPoint3, x) == 0);
+FNV_STATIC_ASSERT(offsetof(ShortPoint3, y) == 2);
+FNV_STATIC_ASSERT(offsetof(ShortPoint3, z) == 4);
+
+#pragma pack(push, 4)
+#pragma pack(pop)
+FNV_STATIC_ASSERT(sizeof(TESBoundObject__BOUND_DATA) == 12);
+FNV_STATIC_ASSERT(offsetof(TESBoundObject__BOUND_DATA, m_kBoundMin) == 0);
+FNV_STATIC_ASSERT(offsetof(TESBoundObject__BOUND_DATA, m_kBoundMax) == 6);
+
+#pragma pack(push, 4)
+#pragma pack(pop)
+FNV_STATIC_ASSERT(sizeof(BSTextureSet) == 8);
+FNV_STATIC_ASSERT(sizeof(TESBoundObject) == 48);
+FNV_STATIC_ASSERT(offsetof(TESBoundObject, TESBoundObjectBounds) == 36);
+
+FNV_STATIC_ASSERT(sizeof(BGSTextureSet) == 0xA0);
+FNV_STATIC_ASSERT(offsetof(BGSTextureSet, pTextures) == 56);
+FNV_STATIC_ASSERT(offsetof(BGSTextureSet, m_pDecalData) == 128);
+FNV_STATIC_ASSERT(offsetof(BGSTextureSet, iFlags) == 132);
+FNV_STATIC_ASSERT(offsetof(BGSTextureSet, m_ppTextureFileEntries) == 136);
+
+// DecalData::`scalar deleting destructor' (0x007b3fa0); layout copied
+#pragma pack(push, 4)
+#include "../../include/DecalData.h"
+#pragma pack(pop)
+FNV_STATIC_ASSERT(sizeof(DecalData::DataRecordView) == 36);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fDecalMinWidth) == 0);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fDecalMaxWidth) == 4);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fDecalMinHeight) == 8);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fDecalMaxHeight) == 12);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fProjectionDepth) == 16);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fShininess) == 20);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_fParallaxScale) == 24);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, m_ucParallaxPasses) == 28);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, cFlags) == 29);
+FNV_STATIC_ASSERT(offsetof(DecalData::DataRecordView, iColor) == 32);
+#pragma pack(push, 4)
+#include "../../include/DecalData.h"
+#pragma pack(pop)
+FNV_STATIC_ASSERT(sizeof(DecalData) == 36);
+FNV_STATIC_ASSERT(offsetof(DecalData, Data) == 0);
+struct DecalDataDeleter : public DecalData
+{
+    void* DeleteThis(int aiFlag);
+};
+
+// ModelLoader queue call (0x00443af0) on the global at 0x011c3b3c.
+struct ModelLoader
+{
+    void QueueTextureFile(BSFileEntry* apEntry, int aePriority, QueuedFile* apQueuedFile);
+};
+extern ModelLoader* g_pModelLoader;
+
+// Bethesda memset (0x00403d30).
+void* FillBytes(void* apDst, int aiValue, unsigned int auSize);
+
+struct TESDataHandlerForms
+{
+    void AddFormToDataHandler(TESForm*);
+};
+class TESDataHandler;
+extern TESDataHandler* g_dataHandler;
+
+void* operator new(unsigned int);
+void operator delete(void*);
+struct TESFileChunkData16
+{
+    bool GetChunkData(unsigned short*);
+};
+struct TESTextureLoader
+{
+    static void ReadTextureData(TESTexture*, TESFile*);
+};
+struct TaskQueueInterface
+{
+    static void CopyStringToBuffer(char*, unsigned int, const char*);
+};
+int strcat_s(char*, unsigned int, const char*);
+bool CleanPath(const char*, char*, unsigned int);
+class FileNameHash;
+class FileNameHash
+{
+  public:
+    static void CreateDirectoryAndFileHashes(const char*, FileNameHash&, FileNameHash&);
+};
+struct ArchiveManager
+{
+    static BSFileEntry* FindFileEntry(ARCHIVE_TYPE_INDEX, FileNameHash&, FileNameHash&, const char*);
+};
+
 void FUN_00593210();
 BGSTextureSet* __cdecl FUN_00593220();
 void __cdecl _Deallocate(void*);
@@ -13,23 +128,12 @@ struct S591140
     void* FUN_00591140(unsigned int);
 };
 void __cdecl _delete(void*, unsigned int);
-struct Holder
-{
-    void FUN_005923c0();
-    void* FUN_00592380(unsigned int flags);
-};
 struct FullNameEx
 {
     int _m0;
     int _m1;
     int _m2;
     void SetFullName(char const*);
-};
-struct Holder00592cc0
-{
-    char _pad[56];
-    FullNameEx _arr[6];
-    void SetFullNameByType(int, char const*);
 };
 struct FUN_004855a0
 {
@@ -43,16 +147,8 @@ struct FUN_0048e370_obj
 {
     void FUN_0048e370(unsigned int);
 };
-struct FUN_00593320_shell
-{
-    void FUN_00593320(void*);
-};
 void __cdecl FUN_00485950(unsigned int, unsigned int);
 extern unsigned int DAT_0118c574[6];
-struct FUN_00592810_shell
-{
-    void FUN_00592810();
-};
 struct FUN_005e79a0_t : public TESForm
 {
     bool FUN_00485270(TESForm*);
@@ -68,116 +164,15 @@ struct FUN_005926f0_entry
     virtual void FUN_2() = 0;
     virtual bool Compare(void*) = 0;
 };
-struct FUN_005926f0_texture
-{
-    char _pad[0x80];
-    FUN_005932e0_shell* _compareObject;
-    unsigned short _flags;
-};
-struct FUN_005926f0_shell
-{
-    char _pad[0x80];
-    FUN_005932e0_shell* _compareObject;
-    unsigned short _flags;
-
-    bool CompareTextureSet(TESForm* apCompare);
-};
 struct DecalDataOwned : public DecalData
 {
     ~DecalDataOwned();
-};
-struct BoundObjectCopier
-{
-    void CopyBoundObject(TESForm* apForm);
-};
-struct BGSTextureSetCopy : public BGSTextureSet
-{
-    void CopyFromTextureSet(TESForm* apForm);
 };
 struct DecalDataCopier
 {
     void Copy(DecalData* apSrc);
 };
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-    NiPointer(T* object = 0);
-    ~NiPointer();
-    NiPointer<T>& operator=(const NiPointer<T>& other);
-};
-class NiTexture
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
-class BSShaderManager
-{
-  public:
-    static void GetTexture(const char* apPath, bool abFlag, NiPointer<NiTexture>& arspTexture, bool abFlag2,
-                           bool abFlag3);
-};
 int FUN_00406d30(char*, unsigned int, const char*);
-struct TexSetIface
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual const char* GetTextureFilePath(int aeTextureType);
-    virtual void GetTextureByType(int aeTextureType, NiPointer<NiTexture>& arspTexture);
-};
-struct FormBase9
-{
-    virtual void f00();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-};
-struct TexSetB : FormBase9, TexSetIface
-{
-    virtual void GetTextureByType(int aeTextureType, NiPointer<NiTexture>& arspTexture);
-};
 namespace s593030 {
 
 struct ValueList
@@ -231,46 +226,8 @@ void Owner::FUN_00593030(unsigned int uiType, int iValue)
 
 }
 
-struct S_005923c0_Base0
-{
-    virtual ~S_005923c0_Base0();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-};
-
-struct S_005923c0_Sec
-{
-    virtual void unk00();
-    int unk04;
-    ~S_005923c0_Sec();
-};
-
-struct S_005923c0_Elem
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    ~S_005923c0_Elem();
-};
-
-struct FUN_005923c0 : S_005923c0_Base0, S_005923c0_Sec
-{
-    S_005923c0_Elem m_38[6];
-    virtual ~FUN_005923c0();
-    virtual void ClearData();
-};
-
 // @fnv 0x005923c0
-FUN_005923c0::~FUN_005923c0()
+BGSTextureSet::~BGSTextureSet()
 {
     ClearData();
 }

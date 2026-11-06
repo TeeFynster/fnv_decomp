@@ -17,75 +17,12 @@
 // evidence - NiGPUProgram is 12 bytes and NiD3DShaderProgram is 44
 // bytes, with m_uiProgramCodeSize at offset 20.
 //
-typedef unsigned int NiUInt32;
-class NiMemObject
-{
-};
-class NiRefObject : public NiMemObject
-{
-  public:
-    NiRefObject() : m_uiRefCount(0)
-    {}
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiGPUProgram.h"
+#include "../../../../include/NiD3DShaderProgram.h"
+#include "../../../../include/MemoryManager.h"
 
-    virtual ~NiRefObject()
-    {}
-
-    virtual void DeleteThis()
-    {
-        delete this;
-    }
-
-  protected:
-    NiUInt32 m_uiRefCount;
-};
-class NiGPUProgram : public NiRefObject
-{
-  public:
-    enum ProgramType
-    {
-        PROGRAMTYPE_INVALID,
-        PROGRAMTYPE_VERTEX,
-        PROGRAMTYPE_PIXEL
-    };
-
-    ProgramType GetProgramType()
-    {
-        return m_iProgramType;
-    }
-
-  protected:
-    ProgramType m_iProgramType;
-};
-class NiD3DShaderProgramCreator;
-class Direct3DDeviceInterface;
-class NiD3DRenderer;
-class NiD3DRenderState;
-class NiD3DShaderProgram : public NiGPUProgram
-{
-  public:
-    NiUInt32 GetCodeSize() const;
-
-  protected:
-    char* m_pcProgramName;
-    char* m_pcProfile;
-    NiUInt32 m_uiProgramCodeSize;
-    void* m_pProgramCode;
-    NiD3DShaderProgramCreator* m_pCreator;
-    Direct3DDeviceInterface* m_pD3DDevice;
-    NiD3DRenderer* m_pShaderObject;
-    NiD3DRenderState* m_pRenderState;
-};
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
-typedef P03MM MemoryManager;
-extern MemoryManager g_memoryManager;
-struct S
-{
-    S* FUN_00e9ee60(void*);
-};
-S* __fastcall FUN_00e9efb0(void* self);
 // FUN_00e9ecc0 - 6-byte leaf stub of the retail binary.
 //
 // The original code is "mov eax, 4 ; ret": the function simply hands the
@@ -97,12 +34,9 @@ extern int g_fnv_00e9ecc0_value_anchor;
 int FUN_00e9ecc0();
 
 void NiFree(void* pvMem);
-struct E9EE20MemoryManager
-{
-    void Deallocate(void* pvMem);
-};
-extern E9EE20MemoryManager g_kE9EE20MemoryManager;
+extern MemoryManager g_kE9EE20MemoryManager;
 
+// NiUnionBV remains local: its shared header has no buffer member or FUN_00e9e860.
 class E9EE20Base
 {
   public:

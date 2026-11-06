@@ -1,9 +1,46 @@
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
 
 // src/fallout_shared/tesobjectrefr_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHsc /Gy (unit src/fallout_shared/tesobjectrefr.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
 #include "tesobjectrefr_decls.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/NiTexturingProperty.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiTransform.h"
+#include "../../include/hkRotation.h"
+#include "../../include/hkQuaternion.h"
+#include "../../include/hkTransform.h"
+// bhkViewerObject_tesobjectrefr_o2_nood_variant: local type (was include/bhkViewerObject.h, which had no evidence of one real class); its methods are 0x00c9ec00 bhkShapePhantom::GetTransform, 0x00c9ed30 bhkShapePhantom::GetViewerStrings, 0x00c9f480 bhkPhantom::GetViewerStrings
+#include "../../include/hkTransform.h"
+
+// Gamebryo's viewer-string array, as include/NiObject.h declares it.
+template <class T> class NiTPrimitiveArray;
+typedef NiTPrimitiveArray<const char*> NiViewerStringsArray;
+
+class bhkViewerObject_tesobjectrefr_o2_nood_variant
+{
+public:
+    void FUN_00c9f480(NiViewerStringsArray* pkStrings);
+    void FUN_00c9ec00(hkTransform& kTransform);
+    void FUN_00c9ed30(NiViewerStringsArray* pkStrings);
+};
+#include "../../include/hkVector4.h"
+#include "../../include/NiUpdateData.h"
+// The original constructors leave these temporary transforms uninitialized.
+__forceinline NiTransform::NiTransform() {}
+__forceinline hkTransform::hkTransform() {}
+__forceinline hkRotation::hkRotation() {}
+__forceinline hkQuaternion::hkQuaternion() {}
+
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = ::_mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+
 GarbageCollectorUpdateState* FUN_00446ef0();
 void* FUN_0056a8c0();
 void FUN_005743f0();
@@ -11,19 +48,6 @@ void FUN_00575c90(unsigned char value);
 float FUN_005790b0();
 float FUN_005790d0();
 void FUN_0057acc0(unsigned int index);
-
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int8 m128_i8[16];
-    __int16 m128_i16[8];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int8 m128_u8[16];
-    unsigned __int16 m128_u16[8];
-    unsigned __int32 m128_u32[4];
-};
 
 extern "C" __declspec(thread) int tls_state;
 
@@ -41,36 +65,13 @@ struct MemContextGuard
     }
 };
 
-template <class T> class NiTMallocInterface
+static __forceinline void AddViewerString(NiViewerStringsArray* strings, const char* text)
 {
-};
-
-template <class T, class TAlloc> class NiTPrimitiveArray
-{
-  public:
-    virtual ~NiTPrimitiveArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, T& element);
-    unsigned int SetAtGrow(unsigned int uiIndex, T& element)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
-    }
-    unsigned int Add(T element)
-    {
-        return SetAtGrow(m_usSize, element);
-    }
-};
-
-typedef NiTPrimitiveArray<char*, NiTMallocInterface<char*> > NiViewerStringsArray;
+    unsigned int index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
+    strings->SetAt(index, text);
+}
 
 class GlobalObjectO2_00a7b610
 {
@@ -86,135 +87,40 @@ extern GlobalObjectO2_00a7b610 g_01268224;
 
 char* FUN_00a7d330(const char* pcText);
 
-struct NiPoint3
-{
-    float x, y, z;
-    char* FUN_00a59af0(const char* pcPrefix);
-};
-
-struct ThreeByThreeMatrix
-{
-    float m_afEntries[3][3];
-    char* ToString(const char* pcPrefix);
-};
-
-struct NiTransform
-{
-    ThreeByThreeMatrix m_kOrientation;
-    NiPoint3 m_kTranslation;
-    float m_fScale;
-};
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-};
-struct hkRotation
-{
-    hkVector4 m_kColumn0, m_kColumn1, m_kColumn2;
-};
-struct hkTransform
-{
-    hkRotation m_rotation;
-    hkVector4 m_vTranslation;
-};
-
-void FUN_00624b10(ThreeByThreeMatrix* pkOut, const hkRotation* pkIn);
+void FUN_00624b10(NiMatrix3* pkOut, const hkRotation* pkIn);
 void FUN_00458620(NiPoint3* pkOut, const hkVector4* pkIn);
 
-class bhkViewerObject
-{
-  public:
-    void FUN_00c9f480(NiViewerStringsArray* pkStrings);
-    void FUN_00c9ec00(hkTransform& kTransform);
-    void FUN_00c9ed30(NiViewerStringsArray* pkStrings);
-};
 
 // @fnv 0x00c9ed30
-void bhkViewerObject::FUN_00c9ed30(NiViewerStringsArray* pkStrings)
+void bhkViewerObject_tesobjectrefr_o2_nood_variant::FUN_00c9ed30(NiViewerStringsArray* pkStrings)
 {
     MemContextGuard kGuard(16);
 
     FUN_00c9f480(pkStrings);
-    pkStrings->Add(FUN_00a7d330(g_01268224.GetName()));
+    AddViewerString(pkStrings, FUN_00a7d330(g_01268224.GetName()));
 
     hkTransform kTransform;
     FUN_00c9ec00(kTransform);
 
     NiTransform kNiTransform;
-    FUN_00624b10(&kNiTransform.m_kOrientation, &kTransform.m_rotation);
-    FUN_00458620(&kNiTransform.m_kTranslation, &kTransform.m_vTranslation);
+    FUN_00624b10(&kNiTransform.m_Rotate, reinterpret_cast<const hkRotation*>(&kTransform.m_row0));
+    FUN_00458620(&kNiTransform.m_Translate, reinterpret_cast<const hkVector4*>(&kTransform.m_row3));
 
-    pkStrings->Add(kNiTransform.m_kOrientation.ToString("Rot"));
-    pkStrings->Add(kNiTransform.m_kTranslation.FUN_00a59af0("Trans"));
+    AddViewerString(pkStrings, kNiTransform.m_Rotate.GetViewerString("Rot"));
+    AddViewerString(pkStrings, kNiTransform.m_Translate.FUN_00a59af0("Trans"));
 }
 
 namespace fnv_00cb3650 {
-struct FUN_00a5ecb0;
-typedef FUN_00a5ecb0 Body;
+
 struct InitArgs
 {
     float time;
     char flag0, flag1, flag2, flag3, flag4;
 };
-struct ThreeByThreeMatrix
-{
-    float m_afEntries[3][3];
-};
-struct NiPoint3
-{
-    float x, y, z;
-};
-struct NiTransform
-{
-    ThreeByThreeMatrix m_kOrientation;
-    NiPoint3 m_kTranslation;
-    float m_fScale;
-};
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    signed char m128_i8[16];
-    unsigned char m128_u8[16];
-    int m128_i32[4];
-} __m128;
-typedef __m128 Vec4;
-struct Rot
-{
-    Vec4 rows[3];
-    void FUN_00cb2d90(const void* src);
-};
-struct HavokTransform
-{
-    Rot basis;
-    Vec4 position;
-};
-extern volatile unsigned int DAT_0126fd98;
-struct StringHeader
-{
-    volatile long refs;
-    unsigned int length;
-};
-extern StringHeader* DAT_0109b220;
 extern const char g_012683c8_arg0[];
-__declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-StringHeader* __cdecl FUN_00a5b690(const char*);
-void* __cdecl FUN_00aa13e0(unsigned int);
-void __cdecl FUN_00aa1400(void*);
 void __cdecl FUN_00624b10(void*, void*);
 void __cdecl FUN_00458620(void*, void*);
 
-struct FixedString
-{
-    StringHeader* value;
-    FixedString(const char* s) : value(FUN_00a5b690(s))
-    {}
-    ~FixedString()
-    {
-        if (value != DAT_0109b220)
-            InterlockedDecrement(&(value - 1)->refs);
-    }
-};
 extern "C" __declspec(thread) int tls_memContext;
 struct TlsScope
 {
@@ -228,50 +134,6 @@ struct TlsScope
     {
         tls_memContext = m_iSaved;
     }
-};
-struct BSFadeNode
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*);
-    unsigned int unk00;
-};
-struct FUN_00a5ecb0 : BSFadeNode
-{
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    ThreeByThreeMatrix f34;
-    NiPoint3 position;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    FUN_00a5ecb0(int);
-    void FUN_00a59c60(InitArgs&);
-    void AssignFixedString(const FixedString&);
 };
 struct ArgObj
 {
@@ -330,7 +192,7 @@ struct ArgObj
     virtual void d52();
     virtual void d53();
     virtual void d54();
-    virtual void Vdc(Body*, int);
+    virtual void Vdc(NiNode*, int);
     int f4;
     void* f8;
 };
@@ -343,32 +205,24 @@ struct Owner
     unsigned int unk14;
     unsigned int unk18;
     unsigned int unk1c;
-    Vec4 rotation;
-    Vec4 vec30;
-    void FUN_00c8d2f0(Body*);
+    __m128 rotation;
+    __m128 vec30;
+    void FUN_00c8d2f0(NiNode*);
     void FUN_00cb3650(ArgObj* arg);
 };
 
-static __forceinline Body* NewNode()
-{
-    return new Body(0);
-}
-static __forceinline void SetNameStr(Body* b, const char* s)
-{
-    b->AssignFixedString(FixedString(s));
-}
 // @fnv 0x00cb3650
 void Owner::FUN_00cb3650(ArgObj* arg)
 {
     TlsScope scope(0x10);
-    Body* body = 0;
+    NiNode* body = 0;
     if (arg)
     {
         if (arg->f8 == 0)
-            body = (Body*)arg;
+            body = (NiNode*)arg;
         else
         {
-            body = new Body(0);
+            body = new NiNode(0);
             arg->Vdc(body, 1);
             InitArgs ia;
             ia.time = 0.0f;
@@ -377,21 +231,21 @@ void Owner::FUN_00cb3650(ArgObj* arg)
             ia.flag2 = 0;
             ia.flag3 = 0;
             ia.flag4 = 0;
-            body->FUN_00a59c60(ia);
+            body->Update(*reinterpret_cast<const NiUpdateData*>(&ia));
         }
     }
     else
-        body = new Body(0);
+        body = new NiNode(0);
     {
-        body->AssignFixedString(FixedString(g_012683c8_arg0));
-        HavokTransform hk;
-        hk.basis.FUN_00cb2d90(&rotation);
-        hk.position = vec30;
+        body->SetName(NiFixedString(g_012683c8_arg0));
+        hkTransform hk;
+        reinterpret_cast<hkRotation*>(&hk.m_row0)->FUN_00cb2d90(*reinterpret_cast<const hkQuaternion*>(&rotation));
+        hk.m_row3 = vec30;
         NiTransform t;
-        FUN_00624b10(&t.m_kOrientation, &hk.basis);
-        FUN_00458620(&t.m_kTranslation, &hk.position);
-        body->f34 = t.m_kOrientation;
-        body->position = t.m_kTranslation;
+        FUN_00624b10(&t.m_Rotate, &hk.m_row0);
+        FUN_00458620(&t.m_Translate, &hk.m_row3);
+        body->m_kLocal.m_Rotate = t.m_Rotate;
+        body->m_kLocal.m_Translate = t.m_Translate;
         FUN_00c8d2f0(body);
     }
 }
@@ -519,23 +373,6 @@ void S00cb3250_Object::FUN_00cb3250(int iArg)
     FUN_00c8d1a0(&kQuery);
 }
 
-struct RotationResult
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    __m128 translation;
-    void FUN_00cb2d90(const __m128*);
-};
 struct ShapeFrame
 {
     virtual void v00();
@@ -593,15 +430,15 @@ struct ShapeFrame
     virtual void vd0();
     virtual void GetTranslation(__m128*);
     virtual void GetRotation(__m128*);
-    RotationResult* FUN_00cb3310(RotationResult*);
+    hkTransform* FUN_00cb3310(hkTransform*);
 };
 // @fnv 0x00cb3310
-RotationResult* ShapeFrame::FUN_00cb3310(RotationResult* result)
+hkTransform* ShapeFrame::FUN_00cb3310(hkTransform* result)
 {
     __m128 rotation;
-    GetTranslation(&result->translation);
+    GetTranslation(&result->m_row3);
     GetRotation(&rotation);
-    result->FUN_00cb2d90(&rotation);
+    reinterpret_cast<hkRotation*>(&result->m_row0)->FUN_00cb2d90(*reinterpret_cast<const hkQuaternion*>(&rotation));
     return result;
 }
 
@@ -822,12 +659,9 @@ struct F9_Scope
     }
 };
 
-struct F9_Mat
+// hkTransform does not declare this viewer operation; its storage remains shared.
+struct ViewerTransform : public hkTransform
 {
-    __m128 c0;
-    __m128 c1;
-    __m128 c2;
-    __m128 c3;
     void FUN_00cb2fc0();
 };
 
@@ -939,7 +773,7 @@ struct F9_Obj
     int unk164;
     int unk168;
     int unk16C;
-    F9_Obj(int a, const F9_Mat* m, int b);
+    F9_Obj(int a, const hkTransform* m, int b);
     void FUN_00c905b0();
     static void* operator new(unsigned int n)
     {
@@ -1009,101 +843,17 @@ struct F9_Owner
 void F9_Owner::FUN_00c9f050(F9_Arg* arg)
 {
     F9_Scope scope;
-    F9_Mat mat;
-    mat.c0 = _mm_setr_ps(arg->m[0], arg->m[1], arg->m[2], arg->m[3]);
-    mat.c1 = _mm_setr_ps(arg->m[4], arg->m[5], arg->m[6], arg->m[7]);
-    mat.c2 = _mm_setr_ps(arg->m[8], arg->m[9], arg->m[10], arg->m[11]);
-    mat.c3 = _mm_setr_ps(arg->m[12], arg->m[13], arg->m[14], arg->m[15]);
+    ViewerTransform mat;
+    mat.m_row0 = _mm_setr_ps(arg->m[0], arg->m[1], arg->m[2], arg->m[3]);
+    mat.m_row1 = _mm_setr_ps(arg->m[4], arg->m[5], arg->m[6], arg->m[7]);
+    mat.m_row2 = _mm_setr_ps(arg->m[8], arg->m[9], arg->m[10], arg->m[11]);
+    mat.m_row3 = _mm_setr_ps(arg->m[12], arg->m[13], arg->m[14], arg->m[15]);
     mat.FUN_00cb2fc0();
     F9_Obj* o = new F9_Obj(arg->unk04, &mat, arg->unk00);
     add(o);
     o->FUN_00c905b0();
     post(arg);
 }
-
-class NiGlobalStringTable
-{
-  public:
-    static char* AddString(const char* pcString);
-};
-
-class NiFixedString
-{
-  public:
-    char* m_kHandle;
-    NiFixedString(const char* pcString)
-    {
-        m_kHandle = NiGlobalStringTable::AddString(pcString);
-    }
-    ~NiFixedString();
-};
-
-class NiAVObject
-{
-  public:
-    void SetName(const NiFixedString& kName);
-};
-
-class NiNode
-{
-  public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00C();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01C();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02C();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03C();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04C();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05C();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06C();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07C();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08C();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09C();
-    virtual void v0A0();
-    virtual void v0A4();
-    virtual void v0A8();
-    virtual void v0AC();
-    virtual void v0B0();
-    virtual void v0B4();
-    virtual void v0B8();
-    virtual void v0BC();
-    virtual void v0C0();
-    virtual void v0C4();
-    virtual void v0C8();
-    virtual void v0CC();
-    virtual void v0D0();
-    virtual void v0D4();
-    virtual void v0D8();
-    virtual void AttachChildInAvailableSlot(NiAVObject* pkChild, bool abFirstAvailableSlot);
-};
 
 struct PositionSource
 {
@@ -1129,6 +879,8 @@ struct PositionOwner
     void FUN_00ca02b0(NiNode* pkParent, int iUnused);
 };
 
+// Preserve the original stack protection with the shared SIMD union layout.
+#pragma strict_gs_check(on)
 // @fnv 0x00ca02b0
 void PositionOwner::FUN_00ca02b0(NiNode* pkParent, int iUnused)
 {
@@ -1149,13 +901,10 @@ void PositionOwner::FUN_00ca02b0(NiNode* pkParent, int iUnused)
     }
 }
 
+#pragma strict_gs_check(off)
+
 extern "C" __m128 _mm_add_ps(__m128, __m128);
 extern "C" __m128 _mm_setzero_ps();
-
-struct Vec16Helper
-{
-    void FUN_00c7f700(char* a, void* b);
-};
 
 struct Obj08
 {
@@ -1554,7 +1303,8 @@ void MotionObject::FUN_00c6e390(__m128* v)
 {
     __m128 t;
     char* base = (m_594 != 0) ? (char*)m_594->m_08 : (char*)0;
-    ((Vec16Helper*)&t)->FUN_00c7f700(base + 0xb0, (char*)&m_570);
+    reinterpret_cast<hkVector4*>(&t)->FUN_00c7f700(
+        reinterpret_cast<const hkRotation*>(base + 0xb0), reinterpret_cast<const hkVector4*>(&m_570));
     __m128 s = _mm_add_ps(*v, t);
     Obj08* object = m_08;
     if (object != 0)
@@ -1825,107 +1575,6 @@ C9FA20_Data* C9FA20_Owner::FUN_00c9fa20(bool* created)
     return m_pData;
 }
 
-namespace N {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int8 m128_i8[16];
-    __int16 m128_i16[8];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int8 m128_u8[16];
-    unsigned __int16 m128_u16[8];
-    unsigned __int32 m128_u32[4];
-};
-extern "C"
-{
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_sub_ps(__m128, __m128);
-}
-}
-
-extern const N::__m128 DAT_010c71e0;
-
-class hkQuaternionDAD;
-
-class __declspec(align(16)) hkVector4DAD
-{
-  public:
-    __forceinline void SetRotatedDirection(const hkQuaternionDAD& quat, const hkVector4DAD& direction);
-    inline hkVector4DAD& operator=(const hkVector4DAD& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
-    __forceinline void setAdd4(const hkVector4DAD& a, const hkVector4DAD& b)
-    {
-        m_vComponents = N::_mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setMul4(const hkVector4DAD& a, const hkVector4DAD& b)
-    {
-        m_vComponents = N::_mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void addMul4(const hkVector4DAD& a, const hkVector4DAD& b)
-    {
-        m_vComponents = N::_mm_add_ps(m_vComponents, N::_mm_mul_ps(a.m_vComponents, b.m_vComponents));
-    }
-    __forceinline void setCross(const hkVector4DAD& v1, const hkVector4DAD& v2)
-    {
-        const N::__m128 cross0 = N::_mm_mul_ps(N::_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
-                                               N::_mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        const N::__m128 cross1 = N::_mm_mul_ps(N::_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
-                                               N::_mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = N::_mm_sub_ps(cross0, cross1);
-    }
-    __forceinline void setBroadcast3(const hkVector4DAD& v)
-    {
-        m_vComponents = N::_mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
-    }
-    __forceinline N::__m128 dot3(const hkVector4DAD& v) const
-    {
-        const N::__m128 x2 = N::_mm_mul_ps(m_vComponents, v.m_vComponents);
-        const N::__m128 sum = N::_mm_add_ss(N::_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return N::_mm_add_ss(N::_mm_shuffle_ps(x2, x2, 0xaa), sum);
-    }
-
-    N::__m128 m_vComponents;
-};
-
-class hkQuaternionDAD
-{
-  public:
-    void FUN_00c66320(const hkQuaternionDAD& q0, const hkQuaternionDAD& q1);  // SetProduct
-    void FUN_005611c0();                                                      // normalize
-    const hkVector4DAD& getImag() const
-    {
-        return m_vec;
-    }
-
-    hkVector4DAD m_vec;
-};
-
-__forceinline void hkVector4DAD::SetRotatedDirection(const hkQuaternionDAD& quat, const hkVector4DAD& direction)
-{
-    hkVector4DAD qreal;
-    qreal.setBroadcast3(quat.m_vec);
-    hkVector4DAD q2minus1;
-    q2minus1.m_vComponents = N::_mm_add_ps(N::_mm_mul_ps(qreal.m_vComponents, qreal.m_vComponents), DAT_010c71e0);
-    hkVector4DAD ret;
-    ret.setMul4(q2minus1, direction);
-    hkVector4DAD imagDotDir;
-    imagDotDir.m_vComponents = quat.getImag().dot3(direction);
-    imagDotDir.m_vComponents = N::_mm_shuffle_ps(imagDotDir.m_vComponents, imagDotDir.m_vComponents, 0);
-    hkVector4DAD imagCrossDir;
-    imagCrossDir.setCross(quat.getImag(), direction);
-    ret.addMul4(imagDotDir, quat.getImag());
-    ret.addMul4(qreal, imagCrossDir);
-    setAdd4(ret, ret);
-}
-
 struct PhantomDataDAD
 {
     int m_unk00;
@@ -1940,8 +1589,8 @@ struct PhantomDataDAD
     int m_unk24;
     int m_unk28;
     int m_unk2C;
-    hkVector4DAD m_v30;
-    hkVector4DAD m_v40;
+    hkVector4 m_v30;
+    hkVector4 m_v40;
 };
 
 class BhkWrapperBaseDAD
@@ -2009,8 +1658,8 @@ class BhkWrapperDAD : public BhkWrapperBaseDAD
     void FUN_00c8d960(int a);
     void FUN_00cb3150(int a);
 
-    hkVector4DAD m_v20;
-    hkVector4DAD m_v30;
+    hkVector4 m_v20;
+    hkVector4 m_v30;
 };
 
 // @fnv 0x00cb3150
@@ -2026,16 +1675,6 @@ void BhkWrapperDAD::FUN_00cb3150(int a)
 
 namespace center_of_mass {
 extern "C" __m128 _mm_sub_ps(__m128, __m128);
-
-class OffsetVector : public hkVector4
-{
-  public:
-    void FUN_00c7f750(const hkRotation& rotation, const hkVector4& direction);
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-};
 
 struct WorldObject
 {
@@ -2122,24 +1761,28 @@ class PositionBase
 class Position : public PositionBase
 {
   public:
-    OffsetVector& GetVec(OffsetVector& out);
-    OffsetVector& FUN_00cb32a0(OffsetVector& out);
+    hkVector4& GetVec(hkVector4& out);
+    hkVector4& FUN_00cb32a0(hkVector4& out);
     hkVector4 localTranslation;
 };
 
+// Preserve the original stack protection with the shared SIMD union layout.
+#pragma strict_gs_check(on)
 // @fnv 0x00cb32a0
-OffsetVector& Position::FUN_00cb32a0(OffsetVector& out)
+hkVector4& Position::FUN_00cb32a0(hkVector4& out)
 {
     GetVec(out);
     if (this && worldObject)
     {
-        OffsetVector offset;
-        offset.FUN_00c7f750(worldObject->rotation, localTranslation);
+        hkVector4 offset;
+        offset._setRotatedInverseDir(worldObject->rotation, localTranslation);
         out.setSub4(out, offset);
     }
     return out;
 }
 }
+
+#pragma strict_gs_check(off)
 
 namespace position_cb3 {
 extern "C" __m128 _mm_add_ps(__m128, __m128);
@@ -2157,138 +1800,44 @@ extern __m128 DAT_010c44d0;
 extern __m128 DAT_010c4c00;
 extern __m128 DAT_010c4c10;
 
-class hkQuaternionCB3;
-
-class hkVector4CB3
+static __forceinline __m128 Dot3(const hkVector4& a, const hkVector4& b)
 {
-  public:
-    __m128 m_vComponents;
-
-    __forceinline hkVector4CB3& operator=(const hkVector4CB3& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
-
-    __forceinline void setAdd4(const hkVector4CB3& a, const hkVector4CB3& b)
-    {
-        m_vComponents = position_cb3::_mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void add4(const hkVector4CB3& a)
-    {
-        m_vComponents = position_cb3::_mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void setMul4(const hkVector4CB3& a, const hkVector4CB3& b)
-    {
-        m_vComponents = position_cb3::_mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void addMul4(const hkVector4CB3& a, const hkVector4CB3& b)
-    {
-        m_vComponents =
-            position_cb3::_mm_add_ps(m_vComponents, position_cb3::_mm_mul_ps(a.m_vComponents, b.m_vComponents));
-    }
-    __forceinline void addMul4(__m128 s, const hkVector4CB3& b)
-    {
-        m_vComponents = position_cb3::_mm_add_ps(
-            m_vComponents, position_cb3::_mm_mul_ps(position_cb3::_mm_shuffle_ps(s, s, 0), b.m_vComponents));
-    }
-    __forceinline void setNeg4(const hkVector4CB3& a)
-    {
-        m_vComponents = position_cb3::_mm_xor_ps(a.m_vComponents, DAT_010c44d0);
-    }
-    __forceinline void setCross(const hkVector4CB3& v1, const hkVector4CB3& v2)
-    {
-        __m128 cross0 =
-            position_cb3::_mm_mul_ps(position_cb3::_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xC9),
-                                     position_cb3::_mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xD2));
-        __m128 cross1 =
-            position_cb3::_mm_mul_ps(position_cb3::_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xD2),
-                                     position_cb3::_mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xC9));
-        m_vComponents = position_cb3::_mm_sub_ps(cross0, cross1);
-    }
-    __forceinline __m128 dot3(const hkVector4CB3& v) const
-    {
-        __m128 x2 = position_cb3::_mm_mul_ps(m_vComponents, v.m_vComponents);
-        __m128 sum = position_cb3::_mm_add_ss(position_cb3::_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return position_cb3::_mm_add_ss(position_cb3::_mm_shuffle_ps(x2, x2, 0xAA), sum);
-    }
-    __forceinline void setReciprocal4(const hkVector4CB3& v)
-    {
-        __m128 r = position_cb3::_mm_rcp_ps(v.m_vComponents);
-        __m128 rr = position_cb3::_mm_mul_ps(position_cb3::_mm_mul_ps(r, v.m_vComponents), r);
-        m_vComponents = position_cb3::_mm_sub_ps(position_cb3::_mm_add_ps(r, r), rr);
-    }
-    void SetRotatedDirection(const hkQuaternionCB3& q, const hkVector4CB3& dir);
-    void setRotatedInverseDir(const hkQuaternionCB3& q, const hkVector4CB3& dir);
-};
-
-class hkQuaternionCB3
-{
-  public:
-    hkVector4CB3 m_vec;
-
-    __forceinline void SetConjugate(const hkQuaternionCB3& q)
-    {
-        m_vec.m_vComponents = position_cb3::_mm_xor_ps(DAT_010c4c00, q.m_vec.m_vComponents);
-    }
-    __declspec(noinline) void SetProduct(const hkQuaternionCB3& q0, const hkQuaternionCB3& q1)
-    {
-        __m128 a = q0.m_vec.m_vComponents;
-        __m128 b = q1.m_vec.m_vComponents;
-        __m128 cross = position_cb3::_mm_sub_ps(position_cb3::_mm_mul_ps(position_cb3::_mm_shuffle_ps(b, b, 0xD2),
-                                                                         position_cb3::_mm_shuffle_ps(a, a, 0xC9)),
-                                                position_cb3::_mm_mul_ps(position_cb3::_mm_shuffle_ps(b, b, 0xC9),
-                                                                         position_cb3::_mm_shuffle_ps(a, a, 0xD2)));
-        __m128 aw = position_cb3::_mm_shuffle_ps(a, a, 0xFF);
-        __m128 bw = position_cb3::_mm_shuffle_ps(b, b, 0xFF);
-        __m128 imag = position_cb3::_mm_add_ps(position_cb3::_mm_mul_ps(bw, a),
-                                               position_cb3::_mm_add_ps(position_cb3::_mm_mul_ps(aw, b), cross));
-        __m128 prod = position_cb3::_mm_mul_ps(b, a);
-        __m128 dot =
-            position_cb3::_mm_add_ss(position_cb3::_mm_shuffle_ps(prod, prod, 0xAA),
-                                     position_cb3::_mm_add_ss(position_cb3::_mm_shuffle_ps(prod, prod, 0x55), prod));
-        __m128 real = position_cb3::_mm_sub_ps(prod, position_cb3::_mm_shuffle_ps(dot, dot, 0));
-        m_vec.m_vComponents = position_cb3::_mm_shuffle_ps(imag, position_cb3::_mm_unpackhi_ps(imag, real), 0xC4);
-    }
-};
-
-__forceinline void hkVector4CB3::SetRotatedDirection(const hkQuaternionCB3& quat, const hkVector4CB3& direction)
-{
-    hkVector4CB3 qreal;
-    qreal.m_vComponents = position_cb3::_mm_shuffle_ps(quat.m_vec.m_vComponents, quat.m_vec.m_vComponents, 0xFF);
-    hkVector4CB3 q2minus1;
-    q2minus1.setMul4(qreal, qreal);
-    q2minus1.m_vComponents = position_cb3::_mm_add_ps(q2minus1.m_vComponents, DAT_010c71e0);
-    hkVector4CB3 ret;
-    ret.setMul4(direction, q2minus1);
-    __m128 imagDotDir = quat.m_vec.dot3(direction);
-    ret.addMul4(imagDotDir, quat.m_vec);
-    hkVector4CB3 imagCrossDir;
-    imagCrossDir.setCross(quat.m_vec, direction);
-    ret.addMul4(imagCrossDir, qreal);
-    setAdd4(ret, ret);
+    __m128 x2 = position_cb3::_mm_mul_ps(a.m_vComponents, b.m_vComponents);
+    __m128 sum = position_cb3::_mm_add_ss(position_cb3::_mm_shuffle_ps(x2, x2, 0x55), x2);
+    return position_cb3::_mm_add_ss(position_cb3::_mm_shuffle_ps(x2, x2, 0xAA), sum);
 }
 
-__forceinline void hkVector4CB3::setRotatedInverseDir(const hkQuaternionCB3& quat, const hkVector4CB3& direction)
+static __forceinline void RotateDirection(hkVector4& result, const hkQuaternion& quat,
+                                         const hkVector4& direction)
 {
-    hkVector4CB3 qreal;
-    qreal.m_vComponents = position_cb3::_mm_shuffle_ps(quat.m_vec.m_vComponents, quat.m_vec.m_vComponents, 0xFF);
-    hkVector4CB3 q2minus1;
-    q2minus1.setMul4(qreal, qreal);
+    hkVector4 qreal;
+    qreal.m_vComponents = position_cb3::_mm_shuffle_ps(reinterpret_cast<const hkVector4&>(quat).m_vComponents, reinterpret_cast<const hkVector4&>(quat).m_vComponents, 0xFF);
+    hkVector4 q2minus1;
+    q2minus1.m_vComponents = position_cb3::_mm_mul_ps(qreal.m_vComponents, qreal.m_vComponents);
     q2minus1.m_vComponents = position_cb3::_mm_add_ps(q2minus1.m_vComponents, DAT_010c71e0);
-    hkVector4CB3 ret;
-    ret.setMul4(direction, q2minus1);
-    __m128 imagDotDir = quat.m_vec.dot3(direction);
-    ret.addMul4(imagDotDir, quat.m_vec);
-    hkVector4CB3 imagCrossDir;
-    imagCrossDir.setCross(direction, quat.m_vec);
-    ret.addMul4(imagCrossDir, qreal);
-    setAdd4(ret, ret);
+    hkVector4 ret;
+    ret.m_vComponents = position_cb3::_mm_mul_ps(direction.m_vComponents, q2minus1.m_vComponents);
+    __m128 imagDotDir = Dot3(reinterpret_cast<const hkVector4&>(quat), direction);
+    ret.m_vComponents = position_cb3::_mm_add_ps(
+        ret.m_vComponents, position_cb3::_mm_mul_ps(position_cb3::_mm_shuffle_ps(imagDotDir, imagDotDir, 0),
+                                                   reinterpret_cast<const hkVector4&>(quat).m_vComponents));
+    hkVector4 imagCrossDir;
+    __m128 cross0 = position_cb3::_mm_mul_ps(
+        position_cb3::_mm_shuffle_ps(reinterpret_cast<const hkVector4&>(quat).m_vComponents, reinterpret_cast<const hkVector4&>(quat).m_vComponents, 0xC9),
+        position_cb3::_mm_shuffle_ps(direction.m_vComponents, direction.m_vComponents, 0xD2));
+    __m128 cross1 = position_cb3::_mm_mul_ps(
+        position_cb3::_mm_shuffle_ps(reinterpret_cast<const hkVector4&>(quat).m_vComponents, reinterpret_cast<const hkVector4&>(quat).m_vComponents, 0xD2),
+        position_cb3::_mm_shuffle_ps(direction.m_vComponents, direction.m_vComponents, 0xC9));
+    imagCrossDir.m_vComponents = position_cb3::_mm_sub_ps(cross0, cross1);
+    ret.m_vComponents = position_cb3::_mm_add_ps(
+        ret.m_vComponents, position_cb3::_mm_mul_ps(imagCrossDir.m_vComponents, qreal.m_vComponents));
+    result.m_vComponents = position_cb3::_mm_add_ps(ret.m_vComponents, ret.m_vComponents);
 }
 
-extern const hkVector4CB3 g_vZeroCB3;
+extern const hkVector4 g_vZeroCB3;
 
-class hkReferencedObjectCB3
+// bhk wrapper view: rotation is vtable slot 0xD8 and the Havok object is at +8; hkReferencedObject has only three slots.
+class RigidBodyTransformViewBase
 {
   public:
     virtual void vf00();
@@ -2345,10 +1894,10 @@ class hkReferencedObjectCB3
     virtual void vfcc();
     virtual void vfd0();
     virtual void vfd4();
-    virtual void getRotation(hkQuaternionCB3& kRotationOut) const;
+    virtual void getRotation(hkQuaternion& kRotationOut) const;
 
     int unk04;
-    void* m_pOwningWorld;
+    void* m_pHavokObject;
     int unk0c;
     int unk10;
     int unk14;
@@ -2360,24 +1909,27 @@ class hkReferencedObjectCB3
     int unk2c;
 };
 
-class hkpEntityCB3 : public hkReferencedObjectCB3
+// getPosition binds to bhkRigidBody::GetPosition (0x00C8D0F0); the local offset at +0x30 is absent from hkpEntity.
+class RigidBodyCenterOffsetView : public RigidBodyTransformViewBase
 {
   public:
-    hkVector4CB3 m_vCenterOfMassLocal;
+    hkVector4 m_vCenterOfMassLocal;
 
-    void getPosition(hkVector4CB3& kPositionOut) const;
-    hkVector4CB3& FUN_00cb3370(hkVector4CB3& kOut) const;
+    void getPosition(hkVector4& kPositionOut) const;
+    hkVector4& FUN_00cb3370(hkVector4& kOut) const;
 };
 
+// Preserve the original stack protection with the shared SIMD union layout.
+#pragma strict_gs_check(on)
 // @fnv 0x00cb3370
-hkVector4CB3& hkpEntityCB3::FUN_00cb3370(hkVector4CB3& kOut) const
+hkVector4& RigidBodyCenterOffsetView::FUN_00cb3370(hkVector4& kOut) const
 {
-    if (this && m_pOwningWorld)
+    if (this && m_pHavokObject)
     {
-        hkQuaternionCB3 kRotationBasis;
+        __declspec(align(16)) hkQuaternion kRotationBasis;
         getRotation(kRotationBasis);
-        hkVector4CB3 kIntersectionOffset;
-        kIntersectionOffset.SetRotatedDirection(kRotationBasis, m_vCenterOfMassLocal);
+        hkVector4 kIntersectionOffset;
+        RotateDirection(kIntersectionOffset, kRotationBasis, m_vCenterOfMassLocal);
         getPosition(kOut);
         kOut.m_vComponents = position_cb3::_mm_sub_ps(kOut.m_vComponents, kIntersectionOffset.m_vComponents);
         return kOut;
@@ -2386,3 +1938,5 @@ hkVector4CB3& hkpEntityCB3::FUN_00cb3370(hkVector4CB3& kOut) const
     return kOut;
 }
 }
+
+#pragma strict_gs_check(off)

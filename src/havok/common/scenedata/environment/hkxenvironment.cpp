@@ -2,7 +2,11 @@
 // src/havok/common/scenedata/environment/hkxenvironment.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/environment/hkxenvironment.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkxEnvironment.h"
+#include "../../../../../include/hkBaseObject.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkStringPtr.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryAllocator.h"
 
 struct HKXMemoryManager
 {
@@ -60,159 +64,95 @@ FnvVtObj* FnvVtObj::FUN_00e3f510(unsigned int unusedArg)
     return this;
 }
 
-struct HavokString
-{
-    char* text;
-};
 struct EnvironmentVariable
 {
-    HavokString name;
-    HavokString value;
-};
-struct HavokAllocator
-{
-    virtual ~HavokAllocator();
-    virtual void* AllocateMemoryBlock(int);
-    virtual void ReleaseBlock(void*, int);
-    virtual void* AllocateBufferWithSize(int&);
-    virtual void ReturnMemory(void*, int);
+    hkStringPtr m_name;
+    hkStringPtr m_value;
 };
 HKXMemoryRouter* __cdecl FUN_00c85750();
-void __fastcall FUN_00cb0c00(HavokString* string);
-struct EnvironmentArray
-{
-    EnvironmentVariable* data;
-    int size;
-    int capacityAndFlags;
 
-    __forceinline void release()
+__forceinline void ReleaseEnvironmentVariables(hkArray<EnvironmentVariable>& variables)
+{
+    hkMemoryAllocator* allocator = reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->manager);
+    EnvironmentVariable* entry = variables.m_data;
+    if (variables.m_iElementCount > 0)
     {
-        HavokAllocator* allocator = reinterpret_cast<HavokAllocator*>(FUN_00c85750()->manager);
-        EnvironmentVariable* entry = data;
-        if (size > 0)
+        int remaining = variables.m_iElementCount;
+        do
         {
-            int remaining = size;
-            do
-            {
-                FUN_00cb0c00(&entry->value);
-                FUN_00cb0c00(&entry->name);
-                ++entry;
-            } while (--remaining != 0);
-        }
-        size = 0;
-        if ((static_cast<unsigned int>(capacityAndFlags) & 0x80000000u) == 0)
-            allocator->ReturnMemory(data, (capacityAndFlags & 0x3fffffff) * sizeof(EnvironmentVariable));
-        data = 0;
-        capacityAndFlags = 0x80000000;
+            entry->m_value.~hkStringPtr();
+            entry->m_name.~hkStringPtr();
+            ++entry;
+        } while (--remaining != 0);
     }
-};
+    variables.m_iElementCount = 0;
+    if ((static_cast<unsigned int>(variables.m_iCapacityState) & 0x80000000u) == 0)
+        allocator->bufFree(variables.m_data, (variables.m_iCapacityState & 0x3fffffff) * sizeof(EnvironmentVariable));
+    variables.m_data = 0;
+    variables.m_iCapacityState = 0x80000000;
+}
 struct EnvironmentLayout
 {
     void** vtable;
     unsigned short memoryFlags;
     short referenceCount;
-    EnvironmentArray variables;
+    hkArray<EnvironmentVariable> variables;
 };
-hkBaseObject::~hkBaseObject()
-{}
 // Releases the environment's variable array, then calls the hkBaseObject destructor.
 // @fnv 0x00e3f820
 void HKXEnvironmentStandIn::DestroyEnvironment()
 {
     EnvironmentLayout* environment = reinterpret_cast<EnvironmentLayout*>(this);
-    environment->variables.release();
+    ReleaseEnvironmentVariables(environment->variables);
     reinterpret_cast<hkBaseObject*>(environment)->hkBaseObject::~hkBaseObject();
 }
 
 void ResizeAudioStream(void* pvAlloc, void* apvArray, int iSizeElem);
 
-struct PlaceTagE3F3
+// The shared header omits the copy constructor at 0x00cb0bd0. This
+// one-pointer aggregate is passed on the stack; fastcall supplies this in ECX.
+struct EnvironmentStringCopyArgument
 {
+    const hkStringPtr* source;
 };
-inline void* operator new(unsigned int, void* p, PlaceTagE3F3) throw()
-{
-    return p;
-}
-inline void operator delete(void*, void*, PlaceTagE3F3) throw()
-{}
+void __fastcall CopyConstructEnvironmentString(hkStringPtr* destination, EnvironmentStringCopyArgument source) throw();
 
-class hkStringPtrE3F3
-{
-  public:
-    const char* m_pcText;
-
-    void FUN_00cb0a60() throw();
-    void FUN_00cb0bd0(const hkStringPtrE3F3& kOther) throw();
-    void FUN_00cb0c00() throw();
-    void FUN_00cb0c10(const char* pcString) throw();
-
-    hkStringPtrE3F3()
-    {
-        FUN_00cb0a60();
-    }
-    hkStringPtrE3F3(const hkStringPtrE3F3& kOther)
-    {
-        FUN_00cb0bd0(kOther);
-    }
-    ~hkStringPtrE3F3()
-    {
-        FUN_00cb0c00();
-    }
-    void operator=(const char* pcString)
-    {
-        FUN_00cb0c10(pcString);
-    }
-};
-
-struct hkxAttributePairE3F3
-{
-    hkStringPtrE3F3 m_name;
-    hkStringPtrE3F3 m_uiFilterValue;
-};
-
-template <int ELEMENTSIZE> __forceinline void memCpyOneAlignedE3F3(void* pvDst, const void* pvSrc)
+template <int ELEMENTSIZE> __forceinline void CopyAlignedWords(void* pvDst, const void* pvSrc)
 {
     for (int i = 0; i < ELEMENTSIZE / 4; ++i)
         static_cast<unsigned int*>(pvDst)[i] = static_cast<const unsigned int*>(pvSrc)[i];
 }
 
-template <typename T> __forceinline void destructE3F3(T* t, int n)
+template <typename T> __forceinline void DestroyElements(T* t, int n)
 {
     for (int i = 0; i < n; ++i)
         t[i].~T();
 }
 
-template <typename T> struct hkArrayE3F3
+template <typename T> __forceinline void hkArrayBase<T>::removeAt(int iIndex)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+    DestroyElements<T>(&m_data[iIndex], 1);
+    m_iElementCount--;
+    if (m_iElementCount != iIndex)
+        CopyAlignedWords<sizeof(T)>(m_data + iIndex, m_data + m_iElementCount);
+}
 
-    int getCapacity() const
+template <> __forceinline void hkArray<EnvironmentVariable>::pushBack(const EnvironmentVariable& kElem)
+{
+    HKXMemoryRouter* pRouter = FUN_00c85750();
+    hkMemoryAllocator* pAlloc = reinterpret_cast<hkMemoryAllocator*>(pRouter->manager);
+    if (m_iElementCount == getCapacity())
+        ResizeAudioStream(pAlloc, this, sizeof(EnvironmentVariable));
+    EnvironmentVariable* destination = &m_data[m_iElementCount];
+    if (destination)
     {
-        return m_iCapacityState & 0x3fffffff;
+        EnvironmentStringCopyArgument name = { &kElem.m_name };
+        CopyConstructEnvironmentString(&destination->m_name, name);
+        EnvironmentStringCopyArgument value = { &kElem.m_value };
+        CopyConstructEnvironmentString(&destination->m_value, value);
     }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    __forceinline void removeAt(int iIndex)
-    {
-        destructE3F3<T>(&m_data[iIndex], 1);
-        m_iElementCount--;
-        if (m_iElementCount != iIndex)
-            memCpyOneAlignedE3F3<sizeof(T)>(m_data + iIndex, m_data + m_iElementCount);
-    }
-    __forceinline void AddBack(const T& kElem)
-    {
-        HKXMemoryRouter* pRouter = FUN_00c85750();
-        HavokAllocator* pAlloc = reinterpret_cast<HavokAllocator*>(pRouter->manager);
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(pAlloc, this, sizeof(T));
-        new (&m_data[m_iElementCount], PlaceTagE3F3()) T(kElem);
-        m_iElementCount++;
-    }
-};
+    m_iElementCount++;
+}
 
 class hkxAttributeMapE3F3
 {
@@ -220,7 +160,7 @@ class hkxAttributeMapE3F3
     virtual void V0() throw();
     unsigned short m_usMemSizeAndFlags;
     short m_sReferenceCount;
-    hkArrayE3F3<hkxAttributePairE3F3> m_pCustomAttributes;
+    hkArray<EnvironmentVariable> m_pCustomAttributes;
 
     int FindEntryByKey(const char* pcName) throw();
     int FUN_00e3f3b0(const char* pcName, const char* pcValue) throw();
@@ -240,12 +180,13 @@ int hkxAttributeMapE3F3::FUN_00e3f3b0(const char* pcName, const char* pcValue) t
     }
     if (iIndex != -1)
     {
-        m_pCustomAttributes[iIndex].m_uiFilterValue = pcValue;
+        m_pCustomAttributes[iIndex].m_value = pcValue;
         return 0;
     }
-    hkxAttributePairE3F3 kPair;
+    EnvironmentVariable kPair;
     kPair.m_name = pcName;
-    kPair.m_uiFilterValue = pcValue;
-    m_pCustomAttributes.AddBack(kPair);
+    kPair.m_value = pcValue;
+    m_pCustomAttributes.pushBack(kPair);
     return 0;
 }
+

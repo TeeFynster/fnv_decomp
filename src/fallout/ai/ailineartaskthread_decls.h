@@ -1,4 +1,4 @@
-// fallout/ai/ailineartaskthread_decls.h: declares BSThread, CountingSemaphore, BSLinearTaskThread, NineIntegerRecord, AILinearTaskThread
+// fallout/ai/ailineartaskthread_decls.h: declares BSThread, CountingSemaphore, BSLinearTaskThread, hkMemoryRouter, AILinearTaskThread
 #ifndef BSLINEARTASKTHREAD_DECLS_H
 #define BSLINEARTASKTHREAD_DECLS_H
 
@@ -32,18 +32,13 @@ class BSLinearTaskThread : public BSThread
     bool m_bStopRequested;
 };
 #endif
-class NineIntegerRecord
-{
-  public:
-    NineIntegerRecord();
-    unsigned char data[36];
-};
+#include "../../../include/hkMemoryRouter.h"
 class AILinearTaskThread : public BSLinearTaskThread
 {
   public:
     AILinearTaskThread(void(__cdecl* taskFunction)());
     virtual ~AILinearTaskThread();
     void(__cdecl* m_pTaskFunction)();
-    NineIntegerRecord ThreadMemory;
+    hkMemoryRouter ThreadMemory;
     void* m_pTaskMemory;
 };

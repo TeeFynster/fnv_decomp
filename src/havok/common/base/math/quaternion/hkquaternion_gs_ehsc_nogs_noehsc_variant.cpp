@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 
 // src/havok/common/base/math/quaternion/hkquaternion_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-29 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/common/base/math/quaternion/hkquaternion.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -30,16 +32,16 @@ static __declspec(noinline) void FUN_00cb2550(FUN_005611c0_t* obj, float* pts)
 #include <math.h>
 struct FUN_00cb24c0_cls
 {
-    __m128 m_00;
+    LocalM128 m_00;
     void FUN_00c7f500(unsigned char* flag);
     unsigned char* IsNormalized(unsigned char* flag);
 };
 struct Block64
 {
-    __m128 v0;
-    __m128 v1;
-    __m128 v2;
-    __m128 v3;
+    LocalM128 v0;
+    LocalM128 v1;
+    LocalM128 v2;
+    LocalM128 v3;
 };
 struct SubObj
 {
@@ -69,7 +71,7 @@ struct S00cb2550_V4
 {
     union
     {
-        __m128 q;
+        LocalM128 q;
         float v[4];
     };
 };
@@ -91,43 +93,32 @@ void S00cb2550_caller(S00cb2550_Quat* q, const S00cb2550_Rot& r);
 #include <xmmintrin.h>
 #include <math.h>
 namespace fnv_00cb2700 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int8 m128_i8[16];
-    __int16 m128_i16[8];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int8 m128_u8[16];
-    unsigned __int16 m128_u16[8];
-    unsigned __int32 m128_u32[4];
-};
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    __m128 _mm_setzero_ps();
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
+using ::_mm_setzero_ps;
+using ::_mm_store_ps;
+using ::_mm_load_ps;
+using ::_mm_mul_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_add_ss;
+using ::_mm_set_ss;
+using ::_mm_cmpeq_ss;
+using ::_mm_rsqrt_ss;
+using ::_mm_mul_ss;
+using ::_mm_sub_ss;
+using ::_mm_andnot_ps;
 }
 
 union VecStorage
 {
-    __m128 quad;
+    LocalM128 quad;
     float axis[4];
 };
 
 struct PerpendicularVector
 {
-    __m128 m_result;
+    LocalM128 m_result;
 
     void FUN_00cb2700(const float* v);
 };
@@ -137,12 +128,12 @@ extern const float DAT_01011d78;
 extern const float DAT_01017718;
 extern "C" void _ReadWriteBarrier();
 
-static __forceinline __m128 inverse_length(__m128 t)
+static __forceinline LocalM128 inverse_length(LocalM128 t)
 {
-    __m128 mask = _mm_cmpeq_ss(t, _mm_set_ss(0.0f));
-    __m128 inv = _mm_rsqrt_ss(t);
-    __m128 xi = _mm_mul_ss(_mm_mul_ss(t, inv), inv);
-    __m128 yy = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), inv), _mm_sub_ss(_mm_set_ss(DAT_01017718), xi));
+    LocalM128 mask = _mm_cmpeq_ss(t, _mm_set_ss(0.0f));
+    LocalM128 inv = _mm_rsqrt_ss(t);
+    LocalM128 xi = _mm_mul_ss(_mm_mul_ss(t, inv), inv);
+    LocalM128 yy = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), inv), _mm_sub_ss(_mm_set_ss(DAT_01017718), xi));
     return _mm_andnot_ps(mask, yy);
 }
 
@@ -186,16 +177,16 @@ void PerpendicularVector::FUN_00cb2700(const float* v)
     w.axis[i2] = -v[i1];
 
     float zz = 0.0f;
-    __m128 sq = _mm_mul_ps(w.quad, w.quad);
-    __m128 p1 = _mm_shuffle_ps(sq, sq, 0x55);
-    __m128 p2 = _mm_shuffle_ps(sq, sq, 0xaa);
-    __m128 t = _mm_add_ss(p1, sq);
+    LocalM128 sq = _mm_mul_ps(w.quad, w.quad);
+    LocalM128 p1 = _mm_shuffle_ps(sq, sq, 0x55);
+    LocalM128 p2 = _mm_shuffle_ps(sq, sq, 0xaa);
+    LocalM128 t = _mm_add_ss(p1, sq);
     t = _mm_add_ss(p2, t);
 
-    __m128 s = inverse_length(t);
+    LocalM128 s = inverse_length(t);
 
-    __m128 sv = _mm_shuffle_ps(s, s, 0);
-    __m128 r = _mm_mul_ps(sv, w.quad);
+    LocalM128 sv = _mm_shuffle_ps(s, s, 0);
+    LocalM128 r = _mm_mul_ps(sv, w.quad);
     r.m128_f32[3] = zz;
     m_result = r;
 }

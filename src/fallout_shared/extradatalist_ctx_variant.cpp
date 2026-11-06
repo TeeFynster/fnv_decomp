@@ -1,16 +1,102 @@
 
 // extradatalist_ctx_variant.cpp: context variant of src/fallout_shared/extradatalist.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
-#include "extradatalist_packet.h"
-#include "ExtraDataList.h"
+// Use the shared extra-data base while retaining the packet's support templates.
+#include "../../include/BSExtraData.h"
+#include "../../include/BaseExtraList.h"
+#include "../../include/layout_support.h"
 #include "ExtraContainerChanges.h"
 #include "InventoryChanges.h"
 #include "game_constants.h"
 
+// These support types are already supplied by the packet's generated headers.
+#pragma include_alias("NiPoint3.h", "../../include/NiPoint3.h")
+#pragma include_alias("NiAVObject.h", "../../include/layout_support.h")
+#pragma include_alias("MagicTarget.h", "../../include/layout_support.h")
+#pragma include_alias("TESForm.h", "../../include/TESForm.h")
+#pragma include_alias("BaseFormComponent.h", "../../include/BaseFormComponent.h")
+#pragma include_alias("TESFullName.h", "../../include/TESFullName.h")
+#pragma include_alias("TESTexture.h", "../../include/TESTexture.h")
+#include "../../include/BGSPrimitive.h"
+#include "../../include/ExtraAction.h"
+#include "../../include/ExtraActivateRef.h"
+#include "../../include/ExtraAmmo.h"
+#include "../../include/ExtraAudioBuoyMarker.h"
+#include "../../include/ExtraAudioMarker.h"
+#include "../../include/ExtraCell3D.h"
+#include "../../include/ExtraCharge.h"
+#include "../../include/ExtraCollisionData.h"
+#include "../../include/ExtraCount.h"
+#include "../../include/ExtraDecalRefs.h"
+#include "../../include/ExtraDistantData.h"
+#include "../../include/ExtraEditorRefMoveData.h"
+#include "../../include/ExtraEmittanceSource.h"
+#include "../../include/ExtraEnableStateParent.h"
+#include "../../include/ExtraEncounterZone.h"
+#include "../../include/ExtraFactionChanges.h"
+#include "../../include/ExtraFollower.h"
+#include "../../include/ExtraFollowerSwimBreadcrumbs.h"
+#include "../../include/ExtraGlobal.h"
+#include "../../include/ExtraHealth.h"
+#include "../../include/ExtraHealthPerc.h"
+#include "../../include/ExtraLevCreaModifier.h"
+#include "../../include/ExtraLeveledItem.h"
+#include "../../include/ExtraLinkedRef.h"
+#include "../../include/ExtraLitWaterRefs.h"
+#include "../../include/ExtraLock.h"
+#include "../../include/ExtraMapMarker.h"
+#include "../../include/ExtraMerchantContainer.h"
+#include "../../include/ExtraMultiBound.h"
+#include "../../include/ExtraMultiBoundRef.h"
+#include "../../include/ExtraOcclusionPlaneRefData.h"
+#include "../../include/ExtraOriginalReference.h"
+#include "../../include/ExtraOwnership.h"
+#include "../../include/ExtraPackage.h"
+#include "../../include/ExtraPackageStartLocation.h"
+#include "../../include/ExtraPatrolRefData.h"
+#include "../../include/ExtraPoison.h"
+#include "../../include/ExtraPortal.h"
+#include "../../include/ExtraPortalRefData.h"
+#include "../../include/ExtraPrimitive.h"
+#include "../../include/ExtraRadiation.h"
+#include "../../include/ExtraRadioData.h"
+#include "../../include/ExtraRadius.h"
+#include "../../include/ExtraRagDollData.h"
+#include "../../include/ExtraRandomTeleportMarker.h"
+#include "../../include/ExtraRank.h"
+#include "../../include/ExtraReferencePointer.h"
+#include "../../include/ExtraReflectedRefs.h"
+#include "../../include/ExtraReflectorRefs.h"
+#include "../../include/ExtraRefractionProperty.h"
+#include "../../include/ExtraRoom.h"
+#include "../../include/ExtraRoomRefData.h"
+#include "../../include/ExtraRunOncePacks.h"
+#include "../../include/ExtraSayTopicInfoOnceADay.h"
+#include "../../include/ExtraScale.h"
+#include "../../include/ExtraScript.h"
+#include "../../include/ExtraSeed.h"
+#include "../../include/ExtraSpecialRenderFlags.h"
+#include "../../include/ExtraTeleport.h"
+#include "../../include/ExtraTimeLeft.h"
+#include "../../include/ExtraTresPassPackage.h"
+#include "../../include/ExtraUses.h"
+#include "../../include/ExtraWaterLightRefs.h"
+#include "../../include/ExtraWeaponModFlags.h"
+#include "../../include/ExtraXTarget.h"
+#include "../../include/TESWorldSpace.h"
+#pragma include_alias("NiAVObject.h", "NiAVObject.h")
+// Keep the packet's inline support templates separate from the scene graph declarations.
+#include "../../include/BSMultiBoundNode.h"
+#pragma include_alias("NiPoint3.h", "NiPoint3.h")
+#pragma include_alias("MagicTarget.h", "MagicTarget.h")
+#pragma include_alias("TESForm.h", "TESForm.h")
+#pragma include_alias("BaseFormComponent.h", "BaseFormComponent.h")
+#pragma include_alias("TESFullName.h", "TESFullName.h")
+#pragma include_alias("TESTexture.h", "TESTexture.h")
+
 void* memcpy(void* apDest, const void* apSrc, unsigned int auiSize);
 
 class BGSPortal;
-class BGSPrimitive;
 class BGSAcousticSpace;
 class BGSEncounterZone;
 class BGSMusicType;
@@ -21,13 +107,7 @@ class TESFaction;
 class TESWaterForm;
 class Script;
 class ScriptLocals;
-class NiNode;
-class NiTexture;
-class TESWorldSpace : public TESForm
-{
-};
 class TESTopicInfo;
-class BSMultiBound;
 class BSMultiBoundRoom;
 class BSOcclusionShape;
 class BSPortal;
@@ -35,8 +115,6 @@ class CanopyShadowMaskData;
 class RagDollData;
 class LevCreaModifierData;
 class RadioData;
-class DistantData;
-class FollowerSwimBreadcrumb;
 
 int Warning(const char* format, ...);
 
@@ -53,9 +131,6 @@ class NiCell3DNode : public NiRefCounted
 class NiCanopyTexture : public NiRefCounted
 {
 };
-class BSMultiBoundNode : public NiRefCounted
-{
-};
 class BSRoomNode : public NiRefCounted
 {
 };
@@ -66,11 +141,9 @@ class BSPortalNode : public NiRefCounted
 {
 };
 
-class BSExtraDataEx : public BSExtraData
-{
-  public:
-    unsigned char GetType();
-};
+// The original out-of-line byte accessor (0x004f1540) takes its object in ECX.
+// Keep that call while the shared BSExtraData header has no GetType declaration.
+unsigned char __fastcall GetExtraDataType(BSExtraData* apExtra);
 
 struct LockExtraData
 {
@@ -182,193 +255,33 @@ struct CanopyShadowMaskData
     int unk04;
 };
 
-class BGSPrimitive
-{
-  public:
-    static BGSPrimitive* __cdecl Copy(BGSPrimitive* apSource);
-};
 
-class ExtraFactionChanges
-{
-  public:
-    void AddToFaction(TESFaction* apFaction, int aiRank);
-};
-
-class ExtraEditorRefMoveData : public BSExtraDataEx
-{
-  public:
-    NiPoint3 kRealLocation;
-    NiPoint3 kRealAngle;
-    NiPoint3 kOldLocation;
-    ExtraEditorRefMoveData(TESObjectREFR* apRef);
-};
-
-class ExtraAction : public BSExtraDataEx
-{
-  public:
-    unsigned char cFlags;
-};
-class ExtraOwnership : public BSExtraDataEx
-{
-  public:
-    TESForm* pOwner;
-};
-class ExtraGlobal : public BSExtraDataEx
-{
-  public:
-    TESGlobal* pGlobalForm;
-};
-class ExtraRank : public BSExtraDataEx
-{
-  public:
-    int m_iRank;
-};
-class ExtraCount : public BSExtraDataEx
-{
-  public:
-    unsigned short m_sCount;
-};
-class ExtraAmmo : public BSExtraDataEx
-{
-  public:
-    TESForm* pAmmo;
-    int iCount;
-};
-class ExtraHotkey : public BSExtraDataEx
+class ExtraHotkey : public BSExtraData
 {
   public:
     unsigned char cKey;
 };
-class ExtraSeed : public BSExtraDataEx
-{
-  public:
-    unsigned char cSeed;
-};
-class ExtraLeveledItem : public BSExtraDataEx
-{
-  public:
-    int iLevelItem;
-    unsigned char bFlag;
-};
-class ExtraHealth : public BSExtraDataEx
-{
-  public:
-    float fHealthPercent;
-};
-class ExtraHealthPerc : public BSExtraDataEx
-{
-  public:
-    float m_fHealthPercentage;
-};
-class ExtraUses : public BSExtraDataEx
-{
-  public:
-    unsigned char m_ucUses;
-};
-class ExtraTimeLeft : public BSExtraDataEx
-{
-  public:
-    float fTimeLeft;
-};
-class ExtraCharge : public BSExtraDataEx
-{
-  public:
-    float m_fCharge;
-};
-class ExtraScript : public BSExtraDataEx
-{
-  public:
-    Script* pScript;
-    ScriptLocals* pLocals;
-};
-class ExtraScale : public BSExtraDataEx
-{
-  public:
-    float fScale;
-};
-class ExtraLock : public BSExtraDataEx
-{
-  public:
-    LockExtraData* pLock;
-};
-class ExtraRadioData : public BSExtraDataEx
-{
-  public:
-    int kRadioData;
-};
-class ExtraTeleport : public BSExtraDataEx
-{
-  public:
-    TeleportableReference* pData;
-};
-class ExtraMapMarker : public BSExtraDataEx
-{
-  public:
-    MapMarkerData* pData;
-};
-class ExtraAudioMarker : public BSExtraDataEx
-{
-  public:
-    MediaLocation* pData;
-};
-class ExtraAudioBuoyMarker : public BSExtraDataEx
-{
-  public:
-    TwoIntegerValues* pData;
-};
-class ExtraPackageStartLocation : public BSExtraDataEx
-{
-  public:
-    TESForm* pLocation;
-    NiPoint3 kPos;
-    float fAngleDifference;
-};
-class ExtraRagDollData : public BSExtraDataEx
-{
-  public:
-    RagDollData* pData;
-};
-class ExtraDistantData : public BSExtraDataEx
-{
-  public:
-    int kDistantData;
-};
-class ExtraFollower : public BSExtraDataEx
-{
-  public:
-    BSSimpleList<Actor*>* pFollowers;
-};
-class ExtraHeadTrackTarget : public BSExtraDataEx
+class ExtraHeadTrackTarget : public BSExtraData
 {
   public:
     TESObjectREFR* pTarget;
 };
-class ExtraPoison : public BSExtraDataEx
-{
-  public:
-    TESForm* m_pPoisonItem;
-};
-class ExtraCell3D : public BSExtraDataEx
-{
-  public:
-    NiPointer<NiCell3DNode> m_pController;
-};
-class ExtraWaterType : public BSExtraDataEx
+class ExtraWaterType : public BSExtraData
 {
   public:
     TESWaterForm* m_pWaterForm;
 };
-class ExtraMusicType : public BSExtraDataEx
+class ExtraMusicType : public BSExtraData
 {
   public:
     BGSMusicType* pMusic;
 };
-class ExtraAcousticSpace : public BSExtraDataEx
+class ExtraAcousticSpace : public BSExtraData
 {
   public:
     BGSAcousticSpace* m_pPathingCell;
 };
-class ExtraCanopyShadowMask : public BSExtraDataEx
+class ExtraCanopyShadowMask : public BSExtraData
 {
   public:
     int iMask;
@@ -376,340 +289,50 @@ class ExtraCanopyShadowMask : public BSExtraDataEx
     int unk14;
     int unk18;
 };
-class ExtraClimate : public BSExtraDataEx
+class ExtraClimate : public BSExtraData
 {
   public:
     TESClimate* pClimateData;
 };
-class ExtraImageSpace : public BSExtraDataEx
+class ExtraImageSpace : public BSExtraData
 {
   public:
     TESImageSpace* m_pImageSpace;
 };
-class ExtraImpactSwap : public BSExtraDataEx
+class ExtraImpactSwap : public BSExtraData
 {
   public:
     ImpactSwap* pSwap;
 };
-class ExtraReferencePointer : public BSExtraDataEx
-{
-  public:
-    TESObjectREFR* pRef;
-};
-class ExtraPackage : public BSExtraDataEx
-{
-  public:
-    TESPackage* pPackage;
-    int iPackageFlags;
-    int m_iPackageData;
-    unsigned char cA;
-    unsigned char m_ucPackageByte;
-    unsigned char cC;
-};
-class ExtraTresPassPackage : public BSExtraDataEx
-{
-  public:
-    TESPackage* pPackage;
-};
-class ExtraRunOncePacks : public BSExtraDataEx
-{
-  public:
-    BSSimpleList<PackageReference*>* pPackages;
-};
-class ExtraOriginalReference : public BSExtraDataEx
-{
-  public:
-    TESObjectREFR* pRef;
-};
-class ExtraEnableStateParent : public BSExtraDataEx
-{
-  public:
-    TESObjectREFR* pParent;
-    unsigned char cFlags;
-};
-class ExtraRandomTeleportMarker : public BSExtraDataEx
-{
-  public:
-    TESObjectREFR* pTeleportMarker;
-};
-class ExtraLinkedRef : public BSExtraDataEx
-{
-  public:
-    TESObjectREFR* m_pLinkedReference;
-};
-class ExtraActivateRef : public BSExtraDataEx
-{
-  public:
-    int unk0C, unk10, unk14, unk18, unk1C;
-    ExtraActivateRef();
-    void Copy(BSExtraDataEx* apSource);
-};
-class ExtraDecalRefs : public BSExtraDataEx
-{
-  public:
-    int unk0C, unk10;
-    ExtraDecalRefs();
-    void Copy(BSExtraDataEx* apSource);
-};
-class ExtraReflectedRefs : public BSExtraDataEx
-{
-  public:
-    int unk0C, unk10;
-    ExtraReflectedRefs();
-    void Copy(BSExtraDataEx* apSource);
-};
-class ExtraReflectorRefs : public BSExtraDataEx
-{
-  public:
-    int unk0C, unk10;
-    ExtraReflectorRefs();
-    void Copy(BSExtraDataEx* apSource);
-};
-class ExtraLitWaterRefs : public BSExtraDataEx
-{
-  public:
-    int unk0C, unk10;
-    ExtraLitWaterRefs();
-    void Copy(BSExtraDataEx* apSource);
-};
-class ExtraWaterLightRefs : public BSExtraDataEx
-{
-  public:
-    int unk0C, unk10;
-    ExtraWaterLightRefs();
-    void Copy(BSExtraDataEx* apSource);
-};
-class ExtraMerchantContainer : public BSExtraDataEx
-{
-  public:
-    TESObjectREFR* pContainer;
-};
-class ExtraXTarget : public BSExtraDataEx
-{
-  public:
-    TESObjectREFR* pTarget;
-};
-class ExtraEncounterZone : public BSExtraDataEx
-{
-  public:
-    BGSEncounterZone* m_pEncounterZone;
-};
-class ExtraEmittanceSource : public BSExtraDataEx
-{
-  public:
-    TESForm* pSource;
-};
-class ExtraMultiBoundRef : public BSExtraDataEx
-{
-  public:
-    TESObjectREFR* pRef;
-};
-class ExtraMultiBoundMarkerData : public BSExtraDataEx
+class ExtraMultiBoundMarkerData : public BSExtraData
 {
   public:
     Point3Offset* pData;
 };
-class ExtraLevCreaModifier : public BSExtraDataEx
-{
-  public:
-    int iModifier;
-};
-class ExtraRefractionProperty : public BSExtraDataEx
-{
-  public:
-    float fRefraction;
-};
-class ExtraRadius : public BSExtraDataEx
-{
-  public:
-    float fRadius;
-};
-class ExtraRadiation : public BSExtraDataEx
-{
-  public:
-    float m_fRadiation;
-};
-class ExtraFactionChangesData : public BSExtraDataEx
-{
-  public:
-    BSSimpleList<FactionRankData*>* pFactions;
-};
-class ExtraPrimitive : public BSExtraDataEx
-{
-  public:
-    BGSPrimitive* m_pPrimitive;
-};
-class ExtraMultiBound : public BSExtraDataEx
-{
-  public:
-    NiPointer<BSMultiBoundNode> m_kMultiBoundNode;
-};
-class ExtraRoom : public BSExtraDataEx
-{
-  public:
-    NiPointer<BSRoomNode> m_pRoomNode;
-};
-class ExtraPatrolRefData : public BSExtraDataEx
-{
-  public:
-    PatrolRefData* pData;
-};
-class ExtraOcclusionShape : public BSExtraDataEx
+class ExtraOcclusionShape : public BSExtraData
 {
   public:
     NiPointer<BSOcclusionShapeNode> pShape;
 };
-class ExtraOcclusionPlaneRefData : public BSExtraDataEx
+
+// The shared render-flags class has no default constructor declaration.
+// Supply only the construction entry point while inheriting its checked layout.
+class ConstructibleExtraSpecialRenderFlags : public ExtraSpecialRenderFlags
 {
   public:
-    PatrolReferenceData* pData;
-};
-class ExtraPortalRefData : public BSExtraDataEx
-{
-  public:
-    PortalRefData* pData;
-};
-class ExtraRoomRefData : public BSExtraDataEx
-{
-  public:
-    RoomRefData* pData;
-};
-class ExtraCollisionData : public BSExtraDataEx
-{
-  public:
-    CollisionData* pData;
-};
-class ExtraSayTopicInfoOnceADay : public BSExtraDataEx
-{
-  public:
-    BSSimpleList<TESTopicInfo*>* m_pTopicInfoList;
-};
-class ExtraPortal : public BSExtraDataEx
-{
-  public:
-    NiPointer<BSPortalNode> m_pPortalNode;
-};
-class ExtraFollowerSwimBreadcrumbs : public BSExtraDataEx
-{
-  public:
-    int iCount;
-    NiPoint3 kLastPos;
-    int iLastCell;
-    BSSimpleList<FollowerSwimBreadcrumb*> kBreadcrumbs;
-};
-class ExtraWeaponModFlags : public BSExtraDataEx
-{
-  public:
-    bool IsModActive(unsigned char acSlot);
+    ConstructibleExtraSpecialRenderFlags();
 };
 
-class ExtraSpecialRenderFlags
-{
-  public:
-    unsigned char cType;
-    BSExtraData* pNext;
-    int iFlags;
-    int unk10;
-    virtual void Unk_00();
-    virtual void Unk_01();
-    virtual void Unk_02();
-    virtual void CopyFrom(BSExtraDataEx* apSource);
-    ExtraSpecialRenderFlags();
-};
-
-class ExtraDataListEx : public ExtraDataList
-{
-  public:
-    bool AttachExtraData(BSExtraDataEx* apExtra);
-    void GetLocalData(unsigned int auiFlags);
-    void SetOwnership(TESForm* apOwner);
-    void SetGlobalForm(TESGlobal* apGlobal);
-    void SetRank(int aiRank);
-    void SetCount(short asCount);
-    void SetAmmoExtra(TESForm* apAmmo, int aiCount);
-    void SetEquippedState(bool abWorn, bool abLeft);
-    void SetHotKey(unsigned char acKey);
-    void SetSeedIndex(unsigned char acSeed);
-    void SetLeveledItem(int aiLevelItem);
-    void SetLevelItemExtraFlag(unsigned char acFlag);
-    void SetHealth(float afHealth);
-    void SetHealthPerc(float afHealthPerc);
-    void SetUses(unsigned char acUses);
-    void SetTimeLeft(float afTimeLeft);
-    void SetCharge(float afCharge);
-    void SetScript(Script* apScript);
-    void AssignScriptLocals(ScriptLocals* apLocals);
-    void SetScale(float afScale);
-    void SetLockData(LockExtraData* apLock);
-    void SetRadioData(int* apRadioData);
-    void SetTeleportData(TeleportableReference* apData);
-    void SetMapMarkerPtr(MapMarkerData* apData);
-    void SetAudioMarkerPtr(MediaLocation* apData);
-    void SetAudioBuoyMarkerPtr(TwoIntegerValues* apData);
-    void RelocateTo(TESWorldSpace* apWorld, TESObjectCELL* apCell, NiPoint3* apPos, float afAngle);
-    void SetRagDollDataFromCopy(RagDollData* apData);
-    void SetWeaponModFlags(int* apData);
-    void SetCombatOpponent(Actor* apFollower);
-    void SetHeadTrackTargetExtra(TESObjectREFR* apTarget);
-    void SetPoison(TESForm* apPoison);
-    void SetCell3D(NiCell3DNode* apNode);
-    void SetWaterType(TESWaterForm* apWater);
-    void SetMusicType(BGSMusicType* apMusic);
-    void SetAcousticSpace(BGSAcousticSpace* apSpace);
-    void SetCanopyShadowMaskData(int aiMask, NiCanopyTexture* apTexture, CanopyShadowMaskData** appData);
-    void SetClimate(TESClimate* apClimate);
-    void SetImageSpace(TESImageSpace* apImageSpace);
-    void SetImpactSwapData(ImpactSwap* apSwap);
-    void SetActivateRef(TESObjectREFR* apRef);
-    void SetPackageOverride(TESPackage* apPackage, int aiFlags, int aiTime, unsigned char acA, unsigned char acB,
-                            unsigned char acC);
-    void SetActivePackage(TESPackage* apPackage);
-    void SetPackageDoneState(TESPackage* apPackage, unsigned char acDone);
-    void SetEnableStateChildren(TESObjectREFR* apRef);
-    void SetEnableStateParentRef(TESObjectREFR* apParent);
-    void SetEnableStateParentFlags(unsigned char acFlags);
-    void SetRandomTeleportMarker(TESObjectREFR* apMarker);
-    void SetLinkedRef(TESObjectREFR* apRef);
-    void SetMerchantContainer(TESObjectREFR* apContainer);
-    void SetXTarget(TESObjectREFR* apTarget);
-    void SetEncounterZone(BGSEncounterZone* apZone);
-    void SetEmittanceSource(TESForm* apSource);
-    void SetMultiBoundRef(TESObjectREFR* apRef);
-    void SetExtraRecord(Point3Offset* apData);
-    void SetLevCreaModifier(int aiModifier);
-    void SetRefractionAmount(bool abSet, float afRefraction);
-    void SetCannotWear(bool abCanNotWear);
-    void SetRadius(float afRadius);
-    void SetRadiation(float afRadiation);
-    void UpdateExtraDataListExtension();
-    ExtraFactionChanges* GetFactionChangesExtra();
-    void SetPortalRefData(BSExtraDataEx* apPortal);
-    void AddPrimitive(BGSPrimitive* apPrimitive);
-    void SetMultiBound(BSMultiBoundNode* apMultiBound);
-    void SetRoomNode(BSRoomNode* apRoom);
-    void SetPatrolRefData(PatrolRefData* apData);
-    void SetOcclusionShape(BSOcclusionShapeNode* apShape);
-    void SetRoomRefData(PatrolReferenceData* apData);
-    void SetRoomLinkedRoomRef(int aiIndex, TESObjectREFR* apRoom);
-    void AddRoomLinkedRoomRef(TESObjectREFR* apRoom);
-    void SetRoomIsMaster(bool abMaster);
-    void SetCollisionData(CollisionData* apData);
-    void SetExtraSayTopicInfoOnceADayExtra(TESTopicInfo* apInfo);
-    void SetPortalNode(BSPortalNode* apPortal);
-    void SetIgnoredBySandbox(bool abIgnored);
-    ExtraFollowerSwimBreadcrumbs* GetFollowerSwimBreadcrumbsExtra();
-    void RemoveExtraByType(unsigned char acSlot);
-    void FUN_004103d0(BSExtraDataEx* apExtra);
-};
+#include "../../include/ExtraDataList.h"
 
 // @fnv 0x004103d0
-void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
+void ExtraDataList::FUN_004103d0(BSExtraData* apExtra)
 {
     if (!apExtra || !AttachExtraData(apExtra))
         return;
 
     BSSimpleList<PackageReference*>* pIter = 0;
-    switch (apExtra->GetType())
+    switch (GetExtraDataType(apExtra))
     {
     case 0x4C: {
         ExtraEditorRefMoveData* pMoveData = (ExtraEditorRefMoveData*)GetExtraData(0x4C);
@@ -725,10 +348,10 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
         break;
     }
     case 0x0E:
-        GetLocalData(((ExtraAction*)apExtra)->cFlags);
+        GetLocalData(((ExtraAction*)apExtra)->eAction);
         break;
     case 0x21:
-        SetOwnership(((ExtraOwnership*)apExtra)->pOwner);
+        SetOwnership((TESForm*)((ExtraOwnership*)apExtra)->pOwner);
         break;
     case 0x22:
         SetGlobalForm(((ExtraGlobal*)apExtra)->pGlobalForm);
@@ -737,11 +360,11 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
         SetRank(((ExtraRank*)apExtra)->m_iRank);
         break;
     case 0x24:
-        SetCount(((ExtraCount*)apExtra)->m_sCount);
+        SetCount(((ExtraCount*)apExtra)->iCount);
         break;
     case 0x6E: {
         ExtraAmmo* pAmmo = (ExtraAmmo*)apExtra;
-        SetAmmoExtra(pAmmo->pAmmo, pAmmo->iCount);
+        SetAmmoExtra(reinterpret_cast<TESForm*>(pAmmo->pAmmo), pAmmo->iCount);
         break;
     }
     case 0x16:
@@ -754,11 +377,11 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
         SetEquippedState(true, true);
         break;
     case 0x31:
-        SetSeedIndex(((ExtraSeed*)apExtra)->cSeed);
+        SetSeedIndex(((ExtraSeed*)apExtra)->seed);
         break;
     case 0x2F:
-        SetLeveledItem(((ExtraLeveledItem*)apExtra)->iLevelItem);
-        SetLevelItemExtraFlag(((ExtraLeveledItem*)apExtra)->bFlag);
+        SetLeveledItem(((ExtraLeveledItem*)apExtra)->iIndex);
+        SetLevelItemExtraFlag(((ExtraLeveledItem*)apExtra)->m_bIsLeveledItem);
         break;
     case 0x25:
         SetHealth((((ExtraHealth*)apExtra)->fHealthPercent));
@@ -770,14 +393,14 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
         SetUses(((ExtraUses*)apExtra)->m_ucUses);
         break;
     case 0x27:
-        SetTimeLeft((((ExtraTimeLeft*)apExtra)->fTimeLeft));
+        SetTimeLeft((((ExtraTimeLeft*)apExtra)->fTime));
         break;
     case 0x28:
         SetCharge((((ExtraCharge*)apExtra)->m_fCharge));
         break;
     case 0x0D:
         SetScript(((ExtraScript*)apExtra)->pScript);
-        AssignScriptLocals(((ExtraScript*)apExtra)->pLocals);
+        AssignScriptLocals(((ExtraScript*)apExtra)->m_pLocals);
         break;
     case 0x30:
         SetScale(((ExtraScale*)apExtra)->fScale);
@@ -789,47 +412,47 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
         break;
     }
     case 0x68:
-        SetRadioData(&((ExtraRadioData*)apExtra)->kRadioData);
+        SetRadioData((int*)((ExtraRadioData*)apExtra)->unk0C);
         break;
     case 0x2B: {
         TeleportableReference* pTeleport = new TeleportableReference;
-        pTeleport->Copy(((ExtraTeleport*)apExtra)->pData);
+        pTeleport->Copy(((ExtraTeleport*)apExtra)->data);
         SetTeleportData(pTeleport);
         break;
     }
     case 0x2C: {
         MapMarkerData* pTeleportMarker = new MapMarkerData;
-        pTeleportMarker->Copy(((ExtraMapMarker*)apExtra)->pData);
+        pTeleportMarker->Copy(((ExtraMapMarker*)apExtra)->data);
         SetMapMarkerPtr(pTeleportMarker);
         break;
     }
     case 0x90: {
         MediaLocation* pAudio = new MediaLocation;
-        pAudio->Copy(((ExtraAudioMarker*)apExtra)->pData);
+        pAudio->Copy(((ExtraAudioMarker*)apExtra)->pAudioData);
         SetAudioMarkerPtr(pAudio);
         break;
     }
     case 0x91: {
         TwoIntegerValues* pBuoy = new TwoIntegerValues;
-        pBuoy->Copy(((ExtraAudioBuoyMarker*)apExtra)->pData);
+        pBuoy->Copy((TwoIntegerValues*)((ExtraAudioBuoyMarker*)apExtra)->unk0C);
         SetAudioBuoyMarkerPtr(pBuoy);
         break;
     }
     case 0x18: {
-        TESWorldSpace* pWorld = dynamic_cast<TESWorldSpace*>(((ExtraPackageStartLocation*)apExtra)->pLocation);
-        TESObjectCELL* m_pOwningCell = dynamic_cast<TESObjectCELL*>(((ExtraPackageStartLocation*)apExtra)->pLocation);
-        RelocateTo(pWorld, m_pOwningCell, &((ExtraPackageStartLocation*)apExtra)->kPos,
-                   ((ExtraPackageStartLocation*)apExtra)->fAngleDifference);
+        TESWorldSpace* pWorld = dynamic_cast<TESWorldSpace*>((TESForm*)((ExtraPackageStartLocation*)apExtra)->loc);
+        TESObjectCELL* m_pOwningCell = dynamic_cast<TESObjectCELL*>((TESForm*)((ExtraPackageStartLocation*)apExtra)->loc);
+        RelocateTo(pWorld, m_pOwningCell, (NiPoint3*)((ExtraPackageStartLocation*)apExtra)->pos,
+                   *(float*)&((ExtraPackageStartLocation*)apExtra)->unk1C);
         break;
     }
     case 0x14:
-        SetRagDollDataFromCopy(((ExtraRagDollData*)apExtra)->pData);
+        SetRagDollDataFromCopy(((ExtraRagDollData*)apExtra)->m_pRagDollData);
         break;
     case 0x13:
         SetWeaponModFlags(&((ExtraDistantData*)apExtra)->kDistantData);
         break;
     case 0x1D: {
-        BSSimpleList<Actor*>* pFollowerIter = ((ExtraFollower*)apExtra)->pFollowers;
+        BSSimpleList<Actor*>* pFollowerIter = ((ExtraFollower*)apExtra)->list;
         while (pFollowerIter && pFollowerIter->GetItem())
         {
             Actor* pFollower = pFollowerIter->GetItem();
@@ -842,7 +465,7 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
         SetHeadTrackTargetExtra(((ExtraHeadTrackTarget*)apExtra)->pTarget);
         break;
     case 0x3F:
-        SetPoison(((ExtraPoison*)apExtra)->m_pPoisonItem);
+        SetPoison((TESForm*)((ExtraPoison*)apExtra)->poison);
         break;
     case 0x02:
         SetCell3D(((ExtraCell3D*)apExtra)->m_pController);
@@ -877,18 +500,19 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
         break;
     }
     case 0x1C:
-        SetActivateRef(((ExtraReferencePointer*)apExtra)->pRef);
+        SetActivateRef(((ExtraReferencePointer*)apExtra)->ref);
         break;
+    // The third package byte follows unk19 in the shared class's tail padding.
     case 0x19:
-        SetPackageOverride(((ExtraPackage*)apExtra)->pPackage, ((ExtraPackage*)apExtra)->iPackageFlags,
-                           ((ExtraPackage*)apExtra)->m_iPackageData, ((ExtraPackage*)apExtra)->cA,
-                           ((ExtraPackage*)apExtra)->m_ucPackageByte, ((ExtraPackage*)apExtra)->cC);
+        SetPackageOverride((TESPackage*)((ExtraPackage*)apExtra)->package, ((ExtraPackage*)apExtra)->unk10,
+                           (int)((ExtraPackage*)apExtra)->form14, (unsigned char)((ExtraPackage*)apExtra)->unk18,
+                           (unsigned char)((ExtraPackage*)apExtra)->unk19, ((unsigned char*)&((ExtraPackage*)apExtra)->unk19)[1]);
         break;
     case 0x1A:
-        SetActivePackage(((ExtraTresPassPackage*)apExtra)->pPackage);
+        SetActivePackage((TESPackage*)((ExtraTresPassPackage*)apExtra)->package);
         break;
     case 0x1B:
-        pIter = ((ExtraRunOncePacks*)apExtra)->pPackages;
+        pIter = (BSSimpleList<PackageReference*>*)((ExtraRunOncePacks*)apExtra)->list;
         while (pIter)
         {
             PackageReference* pRunOnce = pIter->GetItem();
@@ -902,7 +526,7 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
         }
         break;
     case 0x20:
-        SetEnableStateChildren(((ExtraOriginalReference*)apExtra)->pRef);
+        SetEnableStateChildren(((ExtraOriginalReference*)apExtra)->m_pWorldReferenceInfo);
         break;
     case 0x37:
         SetEnableStateParentRef(((ExtraEnableStateParent*)apExtra)->pParent);
@@ -921,7 +545,7 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
             m_pFourthReference = new ExtraActivateRef;
             AddExtra(m_pFourthReference);
         }
-        m_pFourthReference->Copy(apExtra);
+        m_pFourthReference->Copy(reinterpret_cast<BSExtraDataEx*>(apExtra));
         break;
     }
     case 0x57: {
@@ -931,7 +555,7 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
             pDecalRefs = new ExtraDecalRefs;
             AddExtra(pDecalRefs);
         }
-        pDecalRefs->Copy(apExtra);
+        pDecalRefs->Copy(reinterpret_cast<BSExtraDataEx*>(apExtra));
         break;
     }
     case 0x65: {
@@ -961,7 +585,7 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
             pLitWaterRefs = new ExtraLitWaterRefs;
             AddExtra(pLitWaterRefs);
         }
-        pLitWaterRefs->Copy(apExtra);
+        pLitWaterRefs->Copy(reinterpret_cast<BSExtraDataEx*>(apExtra));
         break;
     }
     case 0x84: {
@@ -971,7 +595,7 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
             pWaterLightRefs = new ExtraWaterLightRefs;
             AddExtra(pWaterLightRefs);
         }
-        pWaterLightRefs->Copy(apExtra);
+        pWaterLightRefs->Copy(reinterpret_cast<BSExtraDataEx*>(apExtra));
         break;
     }
     case 0x3C:
@@ -980,14 +604,15 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
     case 0x44:
         SetXTarget(((ExtraXTarget*)apExtra)->pTarget);
         break;
+    // These shared classes reserve the payload as alignment padding after BSExtraData.
     case 0x74:
-        SetEncounterZone(((ExtraEncounterZone*)apExtra)->m_pEncounterZone);
+        SetEncounterZone(*(BGSEncounterZone**)((char*)(ExtraEncounterZone*)apExtra + sizeof(BSExtraData)));
         break;
     case 0x67:
         SetEmittanceSource(((ExtraEmittanceSource*)apExtra)->pSource);
         break;
     case 0x63:
-        SetMultiBoundRef(((ExtraMultiBoundRef*)apExtra)->pRef);
+        SetMultiBoundRef(((ExtraMultiBoundRef*)apExtra)->m_pReference);
         break;
     case 0x62: {
         Point3Offset* pNewData = 0;
@@ -1001,7 +626,7 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
         break;
     }
     case 0x1E:
-        SetLevCreaModifier(((ExtraLevCreaModifier*)apExtra)->iModifier);
+        SetLevCreaModifier(((ExtraLevCreaModifier*)apExtra)->m_iModifier);
         break;
     case 0x48:
         SetRefractionAmount(true, ((ExtraRefractionProperty*)apExtra)->fRefraction);
@@ -1014,13 +639,14 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
     case 0x5C:
         SetRadius(((ExtraRadius*)apExtra)->fRadius);
         break;
+    // ExtraRadiation likewise stores its float in the shared class's tail padding.
     case 0x5D:
-        SetRadiation(((ExtraRadiation*)apExtra)->m_fRadiation);
+        SetRadiation(*(float*)((char*)(ExtraRadiation*)apExtra + sizeof(BSExtraData)));
         break;
     case 0x5E: {
         UpdateExtraDataListExtension();
         ExtraFactionChanges* pChanges = GetFactionChangesExtra();
-        BSSimpleList<FactionRankData*>* pRankIter = ((ExtraFactionChangesData*)apExtra)->pFactions;
+        BSSimpleList<FactionRankData*>* pRankIter = (BSSimpleList<FactionRankData*>*)((ExtraFactionChanges*)apExtra)->m_pFactionChanges;
         while (pRankIter && pRankIter->GetItem())
         {
             FactionRankData* pRank = pRankIter->GetItem();
@@ -1065,7 +691,7 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
     }
     case 0x77: {
         ExtraPortalRefData* pPortalRefExtra = (ExtraPortalRefData*)apExtra;
-        PortalRefData* pPortalRefData = pPortalRefExtra->pData;
+        PortalRefData* pPortalRefData = (PortalRefData*)pPortalRefExtra->pData;
         for (int j = 0; j < 2; j++)
             SetRoomLinkedRoomRef(j, pPortalRefData->pRooms[j]);
         break;
@@ -1084,12 +710,12 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
     }
     case 0x72: {
         CollisionData* pCollision = new CollisionData;
-        pCollision->SetCollisionLayer(((ExtraCollisionData*)apExtra)->pData->GetCollisionLayer());
+        pCollision->SetCollisionLayer(((ExtraCollisionData*)apExtra)->m_pCollisionData->GetCollisionLayer());
         SetCollisionData(pCollision);
         break;
     }
     case 0x73: {
-        BSSimpleList<TESTopicInfo*>* pInfoIter = ((ExtraSayTopicInfoOnceADay*)apExtra)->m_pTopicInfoList;
+        BSSimpleList<TESTopicInfo*>* pInfoIter = (BSSimpleList<TESTopicInfo*>*)((ExtraSayTopicInfoOnceADay*)apExtra)->pList;
         while (pInfoIter && pInfoIter->GetItem())
         {
             SetExtraSayTopicInfoOnceADayExtra(pInfoIter->GetItem());
@@ -1132,14 +758,14 @@ void ExtraDataListEx::FUN_004103d0(BSExtraDataEx* apExtra)
         ExtraSpecialRenderFlags* pRenderFlags = (ExtraSpecialRenderFlags*)GetExtraData(0x92);
         if (!pRenderFlags)
         {
-            pRenderFlags = new ExtraSpecialRenderFlags;
+            pRenderFlags = new ConstructibleExtraSpecialRenderFlags;
             AddExtra((BSExtraData*)pRenderFlags);
         }
-        pRenderFlags->CopyFrom(apExtra);
+        pRenderFlags->FUN_00438330(apExtra);
         break;
     }
     default:
-        Warning("AI: No Copy function available for Extra Data type %i.", apExtra->GetType());
+        Warning("AI: No Copy function available for Extra Data type %i.", GetExtraDataType(apExtra));
         break;
     }
 }

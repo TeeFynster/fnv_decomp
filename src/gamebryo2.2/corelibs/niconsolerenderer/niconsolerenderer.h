@@ -5,6 +5,8 @@
 #include "niconsolerenderer_types_NiConsoleRenderer.h"
 #include "niconsolerenderer_vtable.h"
 #include "niconsolerenderer_packet.h"
+// 0x00a29680: an empty function (a bare ret) many units call with a message string
+void __cdecl FUN_00a29680(const char*, ...);
 #pragma optimize("", off)
 
 // @fnv 0x004dee10
@@ -15,10 +17,10 @@ unsigned int GraphicsRenderer::GetRenderTargetWidth()
         NiRenderTargetGroup* group;
         NiConsoleRendererHeightArray* array;
     } local;
-    local.group = ((NiConsoleRendererRendererVTable*)this)->slot50();
+    local.group = GetDefaultRT();
     if (local.group == 0)
         return 0;
-    local.array = ((NiConsoleRendererGroupVTable*)local.group)->slot44(0);
+    local.array = (NiConsoleRendererHeightArray*)local.group->FUN_00ee84f0(0);
     if (local.array == 0)
         return 0;
     return local.array->GetSize();
@@ -32,32 +34,32 @@ unsigned int GraphicsRenderer::GetRenderTargetHeight()
         NiRenderTargetGroup* group;
         MagicCaster* caster;
     } local;
-    local.group = ((NiConsoleRendererRendererVTable*)this)->slot50();
+    local.group = GetDefaultRT();
     if (local.group == 0)
         return 0;
-    local.caster = ((NiConsoleRendererWidthGroupVTable*)local.group)->slot44(0);
+    local.caster = (MagicCaster*)local.group->FUN_00ee84f0(0);
     if (local.caster == 0)
         return 0;
-    return (unsigned int)local.caster->GetSelectedMagicItem();
+    return (unsigned int)local.caster->MagicCaster::GetSelectedMagicItem();
 }
 
 #pragma optimize("", on)
 // @fnv 0x00b6b2a0
 bool GraphicsRenderer::BeginUsingRenderTargetGroup(NiRenderTargetGroup* group, unsigned int clear)
 {
-    if ((m_iRendererState != 1 && m_iRendererState != 2) || m_bRendererFlagA)
+    if ((m_eFrameState != 1 && m_eFrameState != 2) || m_bRenderTargetGroupActive)
         return false;
     if (!group)
     {
-        NiD3DDefaultShader::SetShaderName(DAT_010ae590);
+        FUN_00a29680(DAT_010ae590);
         return false;
     }
-    fnv_EnterCriticalSection(&m_acRendererDataC);
+    fnv_EnterCriticalSection(&m_kRendererLock);
     bool result = ((NiConsoleRendererPacketVTable*)this)->BeginGroup(group, clear);
     if (result)
-        m_bRendererFlagA = true;
+        m_bRenderTargetGroupActive = true;
     else
-        fnv_LeaveCriticalSection(&m_acRendererDataC);
+        fnv_LeaveCriticalSection(&m_kRendererLock);
     return result;
 }
 // @fnv 0x00a6fa30
@@ -65,7 +67,7 @@ bool GraphicsRenderer::MapScreenCoordinates(unsigned int x, unsigned int y, floa
                                             NiRenderTargetGroup* group)
 {
     if (!group)
-        group = ((NiConsoleRendererPacketVTable*)this)->GetDefaultGroup();
+        group = GetDefaultRT();
     unsigned int width = ((NiConsoleRendererPacketGroup*)group)->GetWidth(0);
     unsigned int height = ((NiConsoleRendererPacketGroup*)group)->GetHeight(0);
     if (width && height)

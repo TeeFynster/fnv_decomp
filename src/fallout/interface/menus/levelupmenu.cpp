@@ -1,6 +1,72 @@
 // fallout/interface/menus/levelupmenu.cpp: Holder, LBItemListBox, LevelUpMenu, EffectSetting and more (53 functions)
 
 #include "levelupmenu_decls.h"
+#include "../../../../include/BSAudio.h"
+#include "../../../../include/LevelUpMenu.h"
+#include "../../../../include/Actor.h"
+#include "../../../../include/ActorValues.h"
+#include "../../../../include/BGSPerk.h"
+#include "../../../../include/EffectSetting.h"
+#include "../../../../include/EffectItem.h"
+// HighlightTile_levelupmenu: local type (was include/HighlightTile.h, which had no evidence of one real class); its methods are 0x00700320 Tile::Set, 0x0071aa60 Tile::SetSpeechChallengeFailure, 0x0071aa80 Tile::ShouldPaintRed, 0x00a00f30 Tile::GetValue
+// HighlightValue_levelupmenu: local type (was include/HighlightValue.h, which had no evidence of one real class); its methods are 0x00a09130 Tile::Value::AddRefValueAction, 0x00a09410 Tile::Value::SetFloat
+#include "../../../../include/Tile.h"
+
+class HighlightValue_levelupmenu
+{
+public:
+    void FUN_00a09130(int trait, Tile* tile, int sourceTrait);
+    void FUN_00a09130(int trait, void* source, int sourceTrait);
+    void FUN_00a09410(int value);
+};
+
+class HighlightTile_levelupmenu
+{
+public:
+    HighlightTile_levelupmenu* FUN_00a03da0(const char* name);
+    void FUN_0071aa60(bool value);
+    void SetChangeFlag(int flags);
+    bool GetSpeechChallengeFailure();
+    float FUN_00a011b0(int trait);
+    void FUN_00a012d0(int trait, float value, bool propagate);
+    void SetTraitAndReset(int trait, float value);
+    HighlightValue_levelupmenu* FUN_00a00f30(int property);
+    bool FUN_0071aa80();
+    HighlightTile_levelupmenu* GetValue(int trait);
+    void Link(int trait, HighlightTile_levelupmenu* tile, int sourceTrait);
+    void Update(int trait);
+    HighlightTile_levelupmenu* Child(const char* name);
+    void SetQuestCompleted(bool value);
+    void Refresh(int flags);
+    void SetInt(int trait, int value);
+};
+#include "../../../../include/ListBox_enum_ActorValue__Index_.h"
+#include "../../../../include/ListBox_int_.h"
+#include "../../../../include/Menu.h"
+// NiNodeBooleanState_levelupmenu: local type (was include/NiNodeBooleanState.h, which had no evidence of one real class); its methods are 0x008d0360 ReturnTrue, 0x008d51f0 CharacterProgression::QReadyToLevelUp, 0x008d5270 CharacterProgression::FinishLevelUp
+#include "../../../../include/NiAVObject.h"
+
+class NiNode;
+
+class NiNodeBooleanState_levelupmenu
+{
+public:
+    NiPointer<NiNode> pData;
+
+    __declspec(noinline) bool GetBooleanValue();
+    void FUN_008d5270();
+};
+#include "../../../../include/StatsMenu.h"
+#include "../../../../include/Setting.h"
+#include "../../../../include/VATSMenu.h"
+#include "../../../../include/BSSoundHandle.h"
+#include "../../../../include/PerkEntryConditionSet.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/Tile.h"
+#include "../../../../include/BSSimpleList.h"
+
+// The shared Tile header does not yet declare the root-tile lookup at 0x00a03d40.
+Tile* __fastcall GetRootTile(Tile* tile);
 
 // @fnv 0x007d6720
 void LevelUpMenu::RefreshNetworkState()
@@ -8,16 +74,13 @@ void LevelUpMenu::RefreshNetworkState()
     NetworkSystemUtility::GetRandomGenerator();
 }
 
-struct ActorValue
+namespace ActorValue
 {
-    static bool __cdecl GetFlag(int, unsigned int);
-};
-struct EffectSetting
-{
-    bool IsFlagSet(unsigned int);
-    bool IsDetrimentalToActorValue(int av);
-};
+    bool __cdecl GetFlag(int, unsigned int);
+}
+
 // Returns whether the effect's detrimental flag differs from the actor value's damage-positive flag, treating av -1 as not damage-positive.
+
 // @fnv 0x007869e0
 bool EffectSetting::IsDetrimentalToActorValue(int aiActorValue)
 {
@@ -29,11 +92,8 @@ bool EffectSetting::IsDetrimentalToActorValue(int aiActorValue)
 }
 
 struct RecursiveLock;
-struct Menu;
 struct NiAVObject;
 struct NiNode;
-struct Tile;
-struct TileShaderProperty;
 struct MenuValueDescriptor;
 
 struct ListBoxItemX
@@ -85,37 +145,9 @@ int __cdecl FUN_00785180()
 }
 
 namespace fnv_007851d0 {
-struct ActorValue
-{
-    enum Index
-    {
-    };
-};
-struct NiNodeBooleanState
-{
-    bool GetBooleanValue();
-    void FUN_008d5270();
-};
-struct Actor
-{
-    void ConfigureActorState(bool, bool);
-};
-struct Tile
-{
-    void Set(int, int);
-};
-struct ListBox_enum_ActorValue__Index_
-{
-    void Traverse(void(__cdecl*)(Tile*, ActorValue::Index), int, int);
-};
-struct StatsMenu
-{
-    static void __cdecl UpdateStatusEffects();
-};
 struct PC7d
 {
-    NiNodeBooleanState* FUN_00464e10();
-    void ConfigureActorState(bool, bool);
+    NiNodeBooleanState_levelupmenu* FUN_00464e10();
 };
 extern PC7d* g_thePlayer;
 extern int DAT_011d9fdc;
@@ -123,12 +155,6 @@ extern "C" void __cdecl UpdateStatsMenuLevelText();
 void __cdecl FUN_0077da30();
 void __cdecl FUN_008d5270();
 void __cdecl FUN_00786570(Tile*, ActorValue::Index);
-struct LevelUpMenuShell
-{
-    Tile* _ref_00726070();
-    void LoadMenuData();
-};
-
 // @fnv 0x007851d0
 void __cdecl UpdateLevelUpMenu()
 {
@@ -138,11 +164,11 @@ void __cdecl UpdateLevelUpMenu()
         g_thePlayer->FUN_00464e10()->FUN_008d5270();
         ((ListBox_enum_ActorValue__Index_*)((int)DAT_011d9fdc + 0x94))->Traverse(FUN_00786570, 0, 0x7fffffff);
         if (g_thePlayer->FUN_00464e10()->GetBooleanValue())
-            g_thePlayer->ConfigureActorState(true, false);
+            ((Actor*)g_thePlayer)->ConfigureActorState(true, false);
         UpdateStatsMenuLevelText();
         StatsMenu::UpdateStatusEffects();
-        ((LevelUpMenuShell*)DAT_011d9fdc)->_ref_00726070()->Set(0x1772, 1);
-        ((LevelUpMenuShell*)DAT_011d9fdc)->LoadMenuData();
+        ((Menu*)DAT_011d9fdc)->FUN_00726070()->Set(0x1772, 1);
+        ((Menu*)DAT_011d9fdc)->LoadMenuData();
         DAT_011d9fdc = 0;
     }
 }
@@ -208,13 +234,6 @@ void* FUN_00784bc0_shell::FUN_00784bc0(unsigned int flags)
     return this;
 }
 
-struct TESObjectREFR
-{
-};
-struct PerkEntryConditionSet
-{
-    bool ContainsTrait(TESObjectREFR*, TESObjectREFR*, bool&, bool);
-};
 struct FUN_00785150_This
 {
     bool FUN_00785150(TESObjectREFR*);
@@ -244,11 +263,6 @@ bool FUN_00785190_This::HasAllValsNonZero()
     return true;
 }
 
-struct Tile
-{
-    bool ContainsTrait(int);
-    void Set(int, int);
-};
 struct Holder
 {
     void UpdateTileEffects(Tile*);
@@ -267,11 +281,6 @@ void FUN_00786200(Tile* pTile)
 }
 
 namespace fnv_00786570 {
-struct BGSPerk;
-struct Tile
-{
-    bool ContainsTrait(int);
-};
 extern int DAT_011d9fe0;
 template <int N> struct Pad;
 template <> struct Pad<1>
@@ -299,14 +308,10 @@ void FUN_00786570(Tile* apTile, BGSPerk* apPerk)
 
 namespace fnv_007871c0 {
 struct WeatherEntry;
-struct BSSimpleList
-{
-    void Sort(int(__cdecl*)(WeatherEntry*, WeatherEntry*));
-};
 struct Holder
 {
     char _0[4];
-    BSSimpleList _4;
+    BSSimpleList<WeatherEntry*> _4;
     void SortWeatherEntries(int(__cdecl*)(WeatherEntry*, WeatherEntry*));
     void ResetAndProcessTiles();
 };
@@ -334,8 +339,8 @@ void* Unk_7879c0::FUN_007879c0(unsigned int flags)
     return this;
 }
 
+class TESObjectREFR;
 namespace fnv_007864e0 {
-struct TESObjectREFR;
 struct PC7d;
 struct FUN_006aabf0_shell
 {
@@ -344,14 +349,6 @@ struct FUN_006aabf0_shell
 struct FUN_00785150_This
 {
     bool FUN_00785150(TESObjectREFR*);
-};
-struct Actor
-{
-    unsigned short GetLevel();
-};
-struct Tile
-{
-    void Set(int, float, bool);
 };
 extern int DAT_011d9ff4;
 extern PC7d* g_thePlayer;
@@ -405,11 +402,8 @@ void __thiscall FUN_00787c20_shell::FUN_00787c20(unsigned int a)
 }
 
 namespace fnv_00786110 {
-struct Tile
-{
-    bool ContainsTrait(int);
-};
-struct Interface
+// Exe 0x00786110: unit-local Interface view; declarations and layout are preserved.
+struct LevelupmenuInterfaceView
 {
     static void __cdecl PlayUISound(int);
 };
@@ -432,7 +426,7 @@ bool FakeMenu::HandleButton(int aiButton, float afValue)
     case 11:
         if (mTile->ContainsTrait(0xFAF))
         {
-            Interface::PlayUISound(1);
+            LevelupmenuInterfaceView::PlayUISound(1);
             f3(7, 0);
             bhandled = true;
         }
@@ -442,45 +436,20 @@ bool FakeMenu::HandleButton(int aiButton, float afValue)
 }
 }  // namespace fnv_00786110
 
-struct CombatMember_1024
-{
-    int a;
-    int b;
-    int c;
-    int d;
-    int e;
-};
-
-struct BSSimpleArray_CombatMember_1024
-{
-    int mSize;
-    CombatMember_1024* mBase;
-    unsigned int FUN_007881d0();
-    void ConstructElems(CombatMember_1024*, int);
-};
-
-struct FUN_00787950_shell : BSSimpleArray_CombatMember_1024
-{
-    int AppendMember(CombatMember_1024* apSrc);
-};
-
-// Appends a copy of the given member to the array and returns the index it was stored at.
+// The perk effect array stores the five-field EFIT data copied at 0x00787950.
 // @fnv 0x00787950
-int FUN_00787950_shell::AppendMember(CombatMember_1024* apSrc)
+template <>
+unsigned int BSSimpleArray<MagicEffectEntry>::Add(MagicEffectEntry& value)
 {
-    unsigned int uiIdx = FUN_007881d0();
-    ConstructElems(mBase + uiIdx, 1);
-    mBase[uiIdx] = *apSrc;
+    unsigned int uiIdx = ReserveIndex();
+    InitializeItems(pBuffer + uiIdx, 1);
+    pBuffer[uiIdx] = value;
     return uiIdx;
 }
 
 struct TGF
 {
     float GetFloat(int);
-};
-struct VATSMenu
-{
-    int GetSelectedTargetIndex();
 };
 int __cdecl GetTileValueID(const char*, int);
 struct FUN_007879f0
@@ -502,17 +471,6 @@ extern GlobalObject_0040c150 g_011d1d48;
 extern GlobalObject_0040c150 g_011d2a00;
 extern GlobalObject_0040c150 g_011d2a24;
 extern GlobalObject_0040c150 g_011d2e74;
-
-struct StartMenu
-{
-    char const* GetMenuTitle();
-};
-
-struct Tile
-{
-    void Set(int, int);
-    void Set(int, char const*, bool);
-};
 
 struct FUN_00785990_shell
 {
@@ -536,8 +494,8 @@ void FUN_00785990_shell::FUN_00785990()
     int ipointsLeft;
     char strtemp[64];
 
-    strcounterStrings[0] = reinterpret_cast<StartMenu*>(&g_011d1d48)->GetMenuTitle();
-    strcounterStrings[1] = reinterpret_cast<StartMenu*>(&g_011d2a00)->GetMenuTitle();
+    strcounterStrings[0] = reinterpret_cast<Setting*>(&g_011d1d48)->FUN_00403df0();
+    strcounterStrings[1] = reinterpret_cast<Setting*>(&g_011d2a00)->FUN_00403df0();
 
     ipointsLeft = m_iPointsRemaining[iValue] - m_iPointsUsed[iValue];
 
@@ -548,8 +506,8 @@ void FUN_00785990_shell::FUN_00785990()
     else if (ipointsLeft == 1)
     {
         tile->Set(0xFC4,
-                  iValue == 0 ? reinterpret_cast<StartMenu*>(&g_011d2a24)->GetMenuTitle()
-                              : reinterpret_cast<StartMenu*>(&g_011d2e74)->GetMenuTitle(),
+                  iValue == 0 ? reinterpret_cast<Setting*>(&g_011d2a24)->FUN_00403df0()
+                              : reinterpret_cast<Setting*>(&g_011d2e74)->FUN_00403df0(),
                   true);
         tile->Set(0xFA3, 1);
     }
@@ -575,20 +533,10 @@ class TGF
     float GetFloat(int);
 };
 
-class Tile : public TGF
-{
-  public:
-    char const* GetString(int);
-};
-
-class BGSPerk : public Tile
-{
-};
-
 template <class T> class ListBoxItem
 {
   public:
-    T m_pInventoryEntryData;
+    Tile* m_pInventoryEntryData;
     FUN_006aabf0_shell* m_pShell;
 };
 
@@ -636,11 +584,6 @@ namespace fnv_007866e0 {
 struct TGF
 {
     float GetFloat(int);
-};
-
-struct Tile : public TGF
-{
-    void Set(int, char const*, bool);
 };
 
 int __cdecl _sprintf_s(char*, unsigned int, char const*, ...);
@@ -748,7 +691,7 @@ bool FUN_007877a0_Object::FUN_007877a0(LevelOption* option)
 struct LevelValue
 {
     float __thiscall FUN_00a011b0(unsigned int property);
-    void __thiscall SetFloat(int property, float value, int doUpdate);
+    void __thiscall FUN_00a012d0(int property, float value, int doUpdate);
     void __thiscall FUN_00700320(int property, int value);
 };
 struct FUN_007879f0_helper
@@ -794,7 +737,7 @@ void LevelMenuView::FUN_007880a0()
             }
             if (count > 1)
             {
-                meter0c->SetFloat(FUN_00a01860(str_0106f90c), (maximum20 - current) / (count - 1), 1);
+                meter0c->FUN_00a012d0(FUN_00a01860(str_0106f90c), (maximum20 - current) / (count - 1), 1);
             }
         }
         if (count14)
@@ -933,7 +876,7 @@ struct SkillTile
 {
     void SetName(const char*);
     void FUN_00700320(int, int);
-    void SetFloat(int, float, int);
+    void FUN_00a012d0(int, float, int);
 };
 struct SkillList
 {
@@ -960,17 +903,6 @@ struct SkillList
     void FUN_0075a0d0(Tile*, const char*);
     SkillTile* AddListEntry(int, const char*, int, int);
     SkillTile* AddItemTile(void*, const char*, int, int);
-};
-struct ActorValues
-{
-    virtual void slot00();
-    virtual void slot01();
-    virtual void slot02();
-    virtual void slot03();
-    virtual void slot04();
-    virtual void slot05();
-    virtual void slot06();
-    virtual int GetValue(int);
 };
 struct Perk;
 struct PlayerSkills
@@ -1393,9 +1325,11 @@ void SkillsMenu::UpdateSkillsAndPerks()
             SkillTile* tile = skills.AddListEntry(iSkillId, FUN_0066e950(iSkillId), 0, 0);
             tile->SetName(FUN_0066e950(iSkillId));
             tile->FUN_00700320(0xfaa, 11);
-            tile->SetFloat(DAT_011d9ff0, 0.0f, 1);
-            tile->FUN_00700320(DAT_011d9fe4, DAT_011dea3c->values.GetValue(iSkillId));
-            iTotalSkillValue += DAT_011dea3c->values.GetValue(iSkillId);
+            tile->FUN_00a012d0(DAT_011d9ff0, 0.0f, 1);
+            tile->FUN_00700320(DAT_011d9fe4,
+                              ((ActorValueOwner*)&DAT_011dea3c->values)->GetPermanentActorValue((ActorValue::Index)iSkillId));
+            iTotalSkillValue +=
+                ((ActorValueOwner*)&DAT_011dea3c->values)->GetPermanentActorValue((ActorValue::Index)iSkillId);
             ++count;
         }
     }
@@ -1820,11 +1754,6 @@ struct VT_b9166
 };
 extern int DAT_011dea3c;
 extern int DAT_011d9ff0;
-struct FUN_00a011b0_cls
-{
-    double FUN_00a011b0(int);
-    void SetFloat(int, float, int);
-};
 
 // @fnv 0x00786170
 void __cdecl FUN_00786170(Tile* apTile, int a2)
@@ -1832,17 +1761,10 @@ void __cdecl FUN_00786170(Tile* apTile, int a2)
     bool flag = false;
     reinterpret_cast<VT_b9166*>(DAT_011dea3c)
         ->v229(a2, (float)(reinterpret_cast<VT_b9166*>(DAT_011dea3c)->v291(a2, flag) -
-                           reinterpret_cast<FUN_00a011b0_cls*>(apTile)->FUN_00a011b0(DAT_011d9ff0)));
-    reinterpret_cast<FUN_00a011b0_cls*>(apTile)->SetFloat(DAT_011d9ff0, 0.0f, 1);
+                           (double)apTile->FUN_00a011b0(DAT_011d9ff0)));
+    apTile->FUN_00a012d0(DAT_011d9ff0, 0.0f, 1);
     reinterpret_cast<FUN_007866e0_shell*>(DAT_011d9fdc)->UpdateDisplayValue((const char*)apTile);
 }
-
-struct EffectItem
-{
-    int FUN_00403ea0();
-    int GetMagnitude();
-    EffectSetting* GetEffectSetting();
-};
 
 struct ContObj
 {
@@ -1957,7 +1879,7 @@ void Holder::UpdateTileEffects(Tile* tile)
         {
             EffRec recVal;
             recVal.FUN_00403ba0();
-            int av7 = ((EffectItem*)*curVal->_ref_006815c0())->FUN_00403ea0();
+            int av7 = ((EffectItem*)*curVal->_ref_006815c0())->GetAffectedActorValue();
             recVal.mag = ((EffectItem*)*curVal->_ref_006815c0())->GetMagnitude();
             if (av7 == -1)
             {
@@ -1967,7 +1889,7 @@ void Holder::UpdateTileEffects(Tile* tile)
             for (cur4 = contX ? &contX->node : (LBNode*)0; cur4 != 0 && *cur4->_ref_006815c0() != 0;
                  cur4 = cur4->_ref_00726070())
             {
-                if (((EffectItem*)*cur4->_ref_006815c0())->FUN_00403ea0() == av7)
+                if (((EffectItem*)*cur4->_ref_006815c0())->GetAffectedActorValue() == av7)
                 {
                     recVal.mag -= ((EffectItem*)*cur4->_ref_006815c0())->GetMagnitude();
                 }
@@ -2199,32 +2121,26 @@ void LBListBox::ClearItems()
 
 int __cdecl FUN_00a00940(const char* pcName, int iDefault);
 
-class Tile787
-{
-  public:
-    bool GetBool(int m_iValueId);
-};
-
 class ListBox787
 {
   public:
     bool IsActive();
-    bool Contains(Tile787* pkTile);
+    bool Contains(Tile* pkTile);
     void UpdateSelection();
-    bool SelectTile(Tile787* pkTile);
+    bool SelectTile(Tile* pkTile);
 
     int unk00;
     int unk04;
     int unk08;
     int unk0C;
-    Tile787* m_pkSelected;
+    Tile* m_pkSelected;
 };
 
 // If the list box is active and the tile is null or contained and enabled, stores it as the selected tile, updates the selection and returns true.
 // @fnv 0x007871f0
-bool ListBox787::SelectTile(Tile787* pkTile)
+bool ListBox787::SelectTile(Tile* pkTile)
 {
-    if (IsActive() && (!pkTile || (Contains(pkTile) && pkTile->GetBool(FUN_00a00940("_enabled", -1)))))
+    if (IsActive() && (!pkTile || (Contains(pkTile) && pkTile->IsTraitNonZero(FUN_00a00940("_enabled", -1)))))
     {
         m_pkSelected = pkTile;
         UpdateSelection();
@@ -2236,8 +2152,6 @@ bool ListBox787::SelectTile(Tile787* pkTile)
     }
 }
 
-class Tile;
-class Menu;
 struct InterfaceManager;
 int FUN_00a01860(const char* apName);
 float FUN_0040ebd0(float afA, float afB);
@@ -2247,47 +2161,18 @@ struct IMStandIn
 {
     void FUN_00715860(int aiA, int aiB, int aiC);
 };
-struct FUN_00a012d0_t
-{
-    void SetFloat(int aiTrait, float afValue, bool abFlag);
-};
-struct FUN_00a01290_shell
-{
-    void SetTraitAndReset(int aiTrait, float afValue);
-};
-struct FUN_00a03d40_shell
-{
-    Tile* FUN_00a03d40();
-};
-struct FUN_00a03c90_shell
-{
-    Menu* FUN_00a03c90();
-};
-struct FUN_00787600_Tile
-{
-    float FUN_00a011b0(int aiTrait);
-};
-struct FUN_00787600_MenuVT
-{
-    virtual void Unk_00();
-    virtual void Unk_01();
-    virtual void Unk_02();
-    virtual void Unk_03();
-    virtual void Unk_04();
-    virtual void Unk_05(int aiValue, FUN_00787600_Tile* apTile);
-};
 struct FUN_00787600_shell
 {
-    virtual void Unk_00(FUN_00787600_Tile* apTile);
+    virtual void Unk_00(Tile* apTile);
     virtual void Unk_01();
     virtual void Unk_02();
     virtual void Unk_03();
     virtual void Unk_04();
-    virtual FUN_00787600_Tile* Unk_05(unsigned int auiIndex);
+    virtual Tile* Unk_05(unsigned int auiIndex);
     char pad04[8];
-    FUN_00a03d40_shell* m_pFourthMenuObject;
+    Tile* m_pFourthMenuObject;
     int iPad10;
-    FUN_00a012d0_t* pScrollTile;
+    Tile* pScrollTile;
     char pad18[0xc];
     float fScrollPos;
     float fValue;
@@ -2297,11 +2182,11 @@ struct FUN_00787600_shell
 // @fnv 0x00787600
 void FUN_00787600_shell::UpdateScrollTile(bool abFlag)
 {
-    FUN_00787600_Tile* pTile = 0;
+    Tile* pTile = 0;
     if (m_pFourthMenuObject && pScrollTile)
     {
-        pScrollTile->SetFloat(FUN_00a01860("_current_value"), fValue, false);
-        ((FUN_00a01290_shell*)pScrollTile)->SetTraitAndReset(FUN_00a01860("_SetInCode"), 1.0f);
+        pScrollTile->FUN_00a012d0(FUN_00a01860("_current_value"), fValue, false);
+        pScrollTile->SetTraitFloat(FUN_00a01860("_SetInCode"), 1.0f);
         pTile = Unk_05((unsigned int)FUN_0040ebd0(fScrollPos, (float)FUN_007879f0(0) - 1.0));
         ((IMStandIn*)FUN_004b7210())->FUN_00715860((int)pTile, 0xfc3, abFlag);
         Unk_00(pTile);
@@ -2309,8 +2194,8 @@ void FUN_00787600_shell::UpdateScrollTile(bool abFlag)
         {
             if (pTile)
             {
-                ((FUN_00787600_MenuVT*)((FUN_00a03c90_shell*)m_pFourthMenuObject->FUN_00a03d40())->FUN_00a03c90())
-                    ->Unk_05((int)pTile->FUN_00a011b0(0xfaa), pTile);
+                GetRootTile(m_pFourthMenuObject)->FUN_00a03c90()
+                    ->HandleMouseoverTileAlt((int)pTile->FUN_00a011b0(0xfaa), pTile);
             }
             Unk_00(0);
         }
@@ -2407,87 +2292,9 @@ extern int DAT_011d9fd4;
 extern int DAT_011d9ff8;
 extern int DAT_011d9fe0;
 extern int DAT_011d9ff4;
-struct Menu
-{
-    Menu();
-    virtual ~Menu();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-};
-struct Member64
-{
-    Member64();
-    ~Member64();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-};
-struct Member94
-{
-    Member94();
-    ~Member94();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-};
-template <class T> struct BSSimpleList
-{
-    T item;
-    BSSimpleList* next;
-    BSSimpleList();
-    ~BSSimpleList();
-};
-struct FUN_00784a40 : Menu
-{
-    Member64 unk64;
-    Member94 unk94;
-    BSSimpleList<void*> unkC4;
-    FUN_00784a40();
-    virtual ~FUN_00784a40();
-};
 // Initializes the menu's trait IDs by resolving each trait name to an ID via TraitNameToID and storing the results in the DAT globals.
 // @fnv 0x00784a40
-FUN_00784a40::FUN_00784a40()
+LevelUpMenu::LevelUpMenu()
 {
     DAT_011d9fe4 = TraitNameToID("_BaseValue", -1);
     DAT_011d9fec = TraitNameToID("_ExtraValue", -1);
@@ -2507,66 +2314,29 @@ struct FUN_00525430_Class
 {
     bool FUN_00525430();
 };
-struct BSSoundHandleEx
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    ~BSSoundHandleEx();
-    bool Play(bool);
-};
-struct BSAudio
-{
-    BSSoundHandleEx GetSoundHandleByEditorID(const char* name, unsigned int flags);
-};
-struct FUN_00a1dc20_Obj
-{
-    void FUN_00a1dc20(int a1);
-};
-
-BSAudio* __cdecl FUN_00453a70(void);
 bool __cdecl IsStartMenuFlag1Set(void);
 
-struct LevelUpMenuStand
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    void PlayLevelUpSuccessSound();
-};
-
-// If unk24 equals 4 and neither FUN_00525430 nor IsStartMenuFlag1Set is true, plays the MUSSuccess sound and calls FUN_00a1dc20(0).
+// If m_eFadeState equals 4 and neither FUN_00525430 nor IsStartMenuFlag1Set is true, plays the MUSSuccess sound and calls FUN_00a1dc20(0).
 // @fnv 0x00785e20
-void LevelUpMenuStand::PlayLevelUpSuccessSound()
+void LevelUpMenu::PlayLevelUpSuccessSound()
 {
-    if (unk24 == 4)
+    if (m_eFadeState == 4)
     {
         if (!((FUN_00525430_Class*)&g_011f2250)->FUN_00525430() && !IsStartMenuFlag1Set())
         {
-            FUN_00453a70()->GetSoundHandleByEditorID("MUSSuccess", 0x901).Play(false);
-            ((FUN_00a1dc20_Obj*)this)->FUN_00a1dc20(0);
+            BSAudio::FUN_00453a70()->GetSoundHandleByEditorID("MUSSuccess", 0x901).Play(false);
+            ((Menu*)this)->FUN_00a1dc20(false);
         }
     }
 }
 
-struct FUN_00787b70_inner
-{
-    bool IsTraitNonZero(void* apKey);
-};
 
 struct FUN_00787b70_cls
 {
     int m_00;
     int m_04;
     int m_08;
-    FUN_00787b70_inner* m_0c;
+    Tile* m_0c;
     bool FUN_00787b70();
 };
 
@@ -2576,17 +2346,8 @@ int __cdecl FUN_00a00940(const char* s, int n);
 bool FUN_00787b70_cls::FUN_00787b70()
 {
     static void* sKey = (void*)FUN_00a00940("_enabled", -1);
-    return (m_0c != 0 && m_0c->IsTraitNonZero(sKey)) ? 1 : 0;
+    return (m_0c != 0 && m_0c->IsTraitNonZero((int)sKey)) ? 1 : 0;
 }
-
-struct TileStandIn
-{
-    TileStandIn* fn_45cd60();
-    float fn_a011b0(int k);
-    bool fn_a01230(int k);
-    void fn_a012d0(int k, float v, bool b);
-    void fn_700320(int k, int v);
-};
 
 struct ListBox64
 {
@@ -2602,29 +2363,24 @@ struct ListBox64
     int unk24;
     int unk28;
     int unk2c;
-    int fn_7e1110(TileStandIn* t);
-    void fn_7314c0(void(__cdecl* cb)(TileStandIn*), int a, int b);
+    int fn_7e1110(Tile* t);
+    void fn_7314c0(void(__cdecl* cb)(Tile*), int a, int b);
 };
 
 struct ListBox94
 {
     int unk00;
-    bool fn_7877a0(TileStandIn* t);
-    void fn_787780(TileStandIn* t);
+    bool fn_7877a0(Tile* t);
+    void fn_787780(Tile* t);
     void fn_787850(bool b);
-    void fn_787760(TileStandIn* t);
+    void fn_787760(Tile* t);
     int fn_7878d0();
-    void fn_7314c0(void(__cdecl* cb)(TileStandIn*), int a, int b);
+    void fn_7314c0(void(__cdecl* cb)(Tile*), int a, int b);
 };
 
 struct ClassStandIn
 {
     bool fn_5a5f40(int av);
-};
-
-struct SettingStandIn
-{
-    int* fn_43d4d0();
 };
 
 struct PlayerStandIn
@@ -2929,13 +2685,14 @@ extern int g_11d9ff4;
 extern int g_11d9fd8;
 extern int g_11d9ff0;
 extern PlayerStandIn* g_11dea3c;
-extern SettingStandIn g_11cd6c0;
+extern Setting g_11cd6c0;
 
 void __cdecl fn_706f30(int a);
-void __cdecl fn_786170(TileStandIn* t);
-void __cdecl fn_786200(TileStandIn* t);
+void __cdecl fn_786170(Tile* t);
+void __cdecl fn_786200(Tile* t);
 
-struct MenuStandIn
+// 0x00785aa0 handles level-up clicks using +0x28 page state and +0x64/+0x94 lists; shared LevelUpMenu lacks this handler and its named fields.
+struct LevelUpButtonHandler
 {
     int unk00;
     int unk04;
@@ -2955,8 +2712,8 @@ struct MenuStandIn
     int unk3c;
     int unk40;
     int unk44;
-    TileStandIn* unk48;
-    TileStandIn* unk4c;
+    Tile* unk48;
+    Tile* unk4c;
     int unk50;
     int unk54;
     int unk58;
@@ -2965,17 +2722,17 @@ struct MenuStandIn
     ListBox64 unk64;
     ListBox94 unk94;
 
-    void fn_7867a0(TileStandIn* t);
-    TileStandIn* fn_726070();
+    void fn_7867a0(Tile* t);
+    Tile* fn_726070();
     void fn_785990();
-    void fn_7866e0(TileStandIn* t);
+    void fn_7866e0(Tile* t);
     void fn_785830(int page);
-    void OnButtonPressed(int btn, TileStandIn* tile);
+    void OnButtonPressed(int btn, Tile* tile);
 };
 
 // Handles button press events (btn) on a tile, updating list states, adjusting values, and navigating between menu pages.
 // @fnv 0x00785aa0
-void MenuStandIn::OnButtonPressed(int aiButton, TileStandIn* tile)
+void LevelUpButtonHandler::OnButtonPressed(int aiButton, Tile* tile)
 {
     int avTmp;
     bool bOut;
@@ -2989,42 +2746,42 @@ void MenuStandIn::OnButtonPressed(int aiButton, TileStandIn* tile)
             unk94.fn_787780(tile);
             fn_7867a0(tile);
         }
-        else if (tile->fn_a011b0(g_11d9ff4) == 255.0)
+        else if (tile->FUN_00a011b0(g_11d9ff4) == 255.0)
         {
             unk94.fn_787850(true);
             unk94.fn_787760(tile);
             fn_7867a0(tile);
         }
         (&unk54)[unk28] = unk94.fn_7878d0();
-        fn_726070()->fn_700320(g_11d9fd8, (&unk54)[unk28]);
+        fn_726070()->FUN_00700320(g_11d9fd8, (&unk54)[unk28]);
         fn_785990();
         break;
     case 13:
     case 14:
-        if (tile->fn_a01230(0xfa3))
+        if (tile->IsTraitNonZero(0xfa3))
         {
-            avTmp = unk64.fn_7e1110(tile->fn_45cd60());
+            avTmp = unk64.fn_7e1110(tile->FUN_0045cd60());
             delta = (aiButton == 13) ? -1 : 1;
             (&unk54)[unk28] += delta;
-            fn_726070()->fn_700320(g_11d9fd8, (&unk54)[unk28]);
+            fn_726070()->FUN_00700320(g_11d9fd8, (&unk54)[unk28]);
             if (g_11dea3c->fn_884350()->fn_5a5f40(avTmp))
             {
-                delta *= *g_11cd6c0.fn_43d4d0();
+                delta *= *g_11cd6c0.FUN_0043d4d0();
             }
-            tile->fn_45cd60()->fn_a012d0(g_11d9ff0, tile->fn_45cd60()->fn_a011b0(g_11d9ff0) + delta, true);
+            tile->FUN_0045cd60()->FUN_00a012d0(g_11d9ff0, tile->FUN_0045cd60()->FUN_00a011b0(g_11d9ff0) + delta, true);
             bOut = false;
             g_11dea3c->vf229(avTmp, g_11dea3c->vf291(avTmp, &bOut) + delta);
-            fn_7866e0(tile->fn_45cd60());
+            fn_7866e0(tile->FUN_0045cd60());
             fn_785990();
         }
         break;
     case 7:
         fn_785830(unk28 + 1);
-        unk48->fn_a012d0(0xfc3, 0.0f, true);
+        unk48->FUN_00a012d0(0xfc3, 0.0f, true);
         break;
     case 8:
         fn_785830(unk28 - 1);
-        unk4c->fn_a012d0(0xfc3, 0.0f, true);
+        unk4c->FUN_00a012d0(0xfc3, 0.0f, true);
         break;
     case 6:
         if ((&unk54)[unk28] > 0)
@@ -3032,7 +2789,7 @@ void MenuStandIn::OnButtonPressed(int aiButton, TileStandIn* tile)
             fn_706f30(1);
         }
         (&unk54)[unk28] = 0;
-        fn_726070()->fn_700320(g_11d9fd8, (&unk54)[unk28]);
+        fn_726070()->FUN_00700320(g_11d9fd8, (&unk54)[unk28]);
         switch (unk28)
         {
         case 0:
@@ -3291,27 +3048,14 @@ int Counter_007878d0::FUN_007878d0()
     return iCount;
 }
 
-struct HighlightValue
-{
-    void FUN_00a09130(int property, void* source, int sourceProperty);
-    void FUN_00a09410(int value);
-};
-struct HighlightTile : LevelValue
-{
-    HighlightValue* FUN_00a00f30(int property);
-    bool FUN_0071aa80();
-    HighlightTile* FUN_00a03da0(const char* name);
-    void FUN_0071aa60(bool value);
-    void SetChangeFlag(int flags);
-};
-HighlightTile* __cdecl FUN_00a08b20(HighlightTile*, const char*);
+HighlightTile_levelupmenu* __cdecl FUN_00a08b20(HighlightTile_levelupmenu*, const char*);
 struct SkillHighlight
 {
     int unk00;
     int unk04;
     int unk08;
-    HighlightTile* tile;
-    HighlightTile* selected;
+    HighlightTile_levelupmenu* tile;
+    HighlightTile_levelupmenu* selected;
     void UpdateHighlight();
 };
 // Links two tile values to the selected tile, then calls update methods on the highlight box and its edges.
@@ -3324,18 +3068,18 @@ void SkillHighlight::UpdateHighlight()
     {
         if (selected)
         {
-            HighlightValue* highlightYValue = tile->FUN_00a00f30(highlightY);
-            HighlightValue* heightValue = tile->FUN_00a00f30(selectedHeight);
+            HighlightValue_levelupmenu* highlightYValue = tile->FUN_00a00f30(highlightY);
+            HighlightValue_levelupmenu* heightValue = tile->FUN_00a00f30(selectedHeight);
             highlightYValue->FUN_00a09130(2000, selected, 4002);
             highlightYValue->FUN_00a09410(0);
             heightValue->FUN_00a09130(2000, selected, 4016);
             heightValue->FUN_00a09410(0);
             if (selected->FUN_0071aa80())
             {
-                HighlightTile* box = FUN_00a08b20(tile, "lb_highlight_box");
+                HighlightTile_levelupmenu* box = FUN_00a08b20(tile, "lb_highlight_box");
                 if (box)
                 {
-                    HighlightTile* edge = box->FUN_00a03da0("top");
+                    HighlightTile_levelupmenu* edge = box->FUN_00a03da0("top");
                     if (edge)
                     {
                         edge->FUN_0071aa60(true);
@@ -3356,10 +3100,10 @@ void SkillHighlight::UpdateHighlight()
             }
             else
             {
-                HighlightTile* box = FUN_00a08b20(tile, "lb_highlight_box");
+                HighlightTile_levelupmenu* box = FUN_00a08b20(tile, "lb_highlight_box");
                 if (box)
                 {
-                    HighlightTile* edge = box->FUN_00a03da0("top");
+                    HighlightTile_levelupmenu* edge = box->FUN_00a03da0("top");
                     if (edge)
                     {
                         edge->FUN_0071aa60(false);
@@ -3381,33 +3125,17 @@ void SkillHighlight::UpdateHighlight()
         }
         else
         {
-            tile->FUN_00700320(highlightY, -1);
-            tile->FUN_00700320(selectedHeight, 0);
+            tile->SetInt(highlightY, -1);
+            tile->SetInt(selectedHeight, 0);
         }
     }
 }
 
+class TESConditionItem;
 namespace fnv_00784c80 {
 struct DelObj
 {
     virtual ~DelObj();
-};
-struct MenuV
-{
-    virtual int ph0();
-    virtual int ph1();
-    virtual int ph2();
-    virtual int ph3();
-    virtual int ph4();
-    virtual int ph5();
-    virtual int ph6();
-    virtual int ph7();
-    virtual int ph8();
-    virtual int ph9();
-    virtual int ph10();
-    virtual int ph11();
-    virtual int ph12();
-    virtual int GetID();
 };
 struct ActorV
 {
@@ -3709,8 +3437,6 @@ struct ActorV
     virtual int q295();
     virtual unsigned char FUN_v4a0(void* a1, int a2);
 };
-struct Tile;
-struct TileMenu;
 struct ResourceProvider
 {
     Tile* FUN_00586150(const char*);
@@ -3719,25 +3445,9 @@ struct TileB
 {
     void* FUN_00a01b00();
 };
-struct FUN_00a03c90_shell
-{
-    Menu* FUN_00a03c90();
-};
 struct TileMenuO
 {
     float FUN_00a011b0(int);
-};
-struct FUN_00a012d0_t
-{
-    void SetFloat(int, float);
-};
-struct FUN_00a01290_shell
-{
-    void SetTraitAndReset(int, float);
-};
-struct FUN_00a1dc70_shell
-{
-    void FUN_00a1dc70(TileMenu*, bool);
 };
 struct InventoryMenuSetting
 {
@@ -3809,7 +3519,6 @@ int& __fastcall FUN_0043d4d0(int*);
 struct ContNode;
 ContNode* __fastcall FUN_00726070(ContNode*);
 char __fastcall GetByteAtOffset56(char*);
-struct TESConditionItem;
 struct ConditionList_t
 {
     TESConditionItem* const* FUN_006815c0();
@@ -3860,10 +3569,10 @@ int ShowLevelUpMenu()
     if (objB)
         delete (DelObj*)objB;
     menu = ((TileB*)((ResourceProvider*)objA)->FUN_00586150(s_xml))->FUN_00a01b00();
-    DAT_011d9fdc = (int)(void*)((FUN_00a03c90_shell*)menu)->FUN_00a03c90();
-    if (DAT_011d9fdc && ((MenuV*)(void*)(unsigned int)DAT_011d9fdc)->GetID() == FUN_00785180())
+    DAT_011d9fdc = (int)(void*)((Tile*)menu)->FUN_00a03c90();
+    if (DAT_011d9fdc && ((Menu*)(void*)(unsigned int)DAT_011d9fdc)->GetClass() == FUN_00785180())
     {
-        ((FUN_00a1dc70_shell*)(void*)(unsigned int)DAT_011d9fdc)->FUN_00a1dc70((TileMenu*)menu, false);
+        ((Menu*)(void*)(unsigned int)DAT_011d9fdc)->FUN_00a1dc70((::TileMenu*)menu, false);
         if (!((FUN_00785190_This*)(void*)(unsigned int)DAT_011d9fdc)->HasAllValsNonZero())
         {
             FUN_005b5e40(s_err);
@@ -3871,7 +3580,7 @@ int ShowLevelUpMenu()
         }
         if (((TileMenuO*)menu)->FUN_00a011b0(0xfa7) == 6006.0 || ((TileMenuO*)menu)->FUN_00a011b0(0xfa7) == 102.0)
         {
-            ((FUN_00a012d0_t*)menu)->SetFloat(0xfad, FUN_00a01530(1));
+            ((Tile*)menu)->FUN_00a012d0(0xfad, FUN_00a01530(1));
         }
         ((MgrObj*)((char*)FUN_004b7210() + 0x4d4))->FUN_00718630(0x10, FUN_00785180(), 0x200);
         {
@@ -3886,7 +3595,7 @@ int ShowLevelUpMenu()
             ->f48->FUN_00a01350(FUN_00a01860(s_title0), (int)((InventoryMenuSetting*)&DAT_011d3564)->FUN_00403df0(), 1);
         ((DatObj*)(void*)(unsigned int)DAT_011d9fdc)
             ->f48->FUN_00a01350(FUN_00a01860(s_title1), (int)((InventoryMenuSetting*)&DAT_011d35c4)->FUN_00403df0(), 1);
-        ((FUN_00a01290_shell*)menu)->SetTraitAndReset(FUN_00a01860(s_curpage), 1.0f);
+        ((Tile*)menu)->SetTraitFloat(FUN_00a01860(s_curpage), 1.0f);
         ((DatObj*)(void*)(unsigned int)DAT_011d9fdc)
             ->f4c->FUN_00a01350(0xfc4, ((InventoryMenuSetting*)&DAT_011d1fec)->FUN_00403df0(), 1);
         {
@@ -3950,18 +3659,11 @@ struct TileValue
 {
     bool IsTraitNonZero(int m_iValueId);
 };
-struct ListBox_int_
-{
-    bool FUN_00787b70();
-    bool ContainsKey(Tile* pkTile);
-    bool SetTileSelection(Tile* pkTile, int eMode);
-};
-
 // Sets or toggles pkTile's selected trait according to eMode and returns true when it writes the trait.
 // @fnv 0x00787c40
 bool ListBox_int_::SetTileSelection(Tile* pkTile, int eMode)
 {
-    if (FUN_00787b70() && pkTile && ContainsKey(pkTile))
+    if (((FUN_00787b70_cls*)this)->FUN_00787b70() && pkTile && ContainsKey(pkTile))
     {
         static int s_iSelectedTrait = (int)FUN_00a00940("_selected", -1);
         bool bSelected = ((TileValue*)pkTile)->IsTraitNonZero(s_iSelectedTrait);
@@ -4025,7 +3727,7 @@ void __cdecl FUN_00786240(LevelValue* apTile, int aiMatchValue)
             if (apTile->FUN_00a011b0(overflowTrait2) != DAT_01012060)
             {
                 g_011da050.GetItem(i)->unk00 += (int)apTile->FUN_00a011b0(overflowTrait2);
-                apTile->SetFloat(overflowTrait2, 0.0f, 1);
+                apTile->FUN_00a012d0(overflowTrait2, 0.0f, 1);
             }
 
             if (total + g_011da050.GetItem(i)->unk00 > apTile->FUN_00a011b0(FUN_00a01860("_MaxValue")))
@@ -4043,7 +3745,7 @@ void __cdecl FUN_00786240(LevelValue* apTile, int aiMatchValue)
                 g_011da050.GetItem(i)->unk00 -= diff;
             }
 
-            apTile->SetFloat(DAT_011d9fec,
+            apTile->FUN_00a012d0(DAT_011d9fec,
                                  (float)(apTile->FUN_00a011b0(DAT_011d9fec) + g_011da050.GetItem(i)->unk00), 1);
         }
     }

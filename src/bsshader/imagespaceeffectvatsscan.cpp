@@ -1,10 +1,23 @@
 // bsshader/imagespaceeffectvatsscan.cpp: free functions (3 functions)
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "NiRefObject_inline.h"
+#include "../../include/BSShaderManager.h"
+#include "../../include/NiColorA.h"
+#include "../../include/ImageSpaceTexture.h"
 
 #include "imagespaceeffectvatsscan_decls.h"
 #include <new>
 
+inline NiColorA::NiColorA(float fR, float fG, float fB, float fA)
+{
+    r = fR;
+    g = fG;
+    b = fB;
+    a = fA;
+}
+
 // @fnv 0x00bc06c0
-void ImageSpaceEffectMultiTexture::Setup(ImageSpaceManager* manager, ImageSpaceEffectParam* params)
+void ImageSpaceEffectMultiTexture::Setup(ImageSpaceManager* manager, VatsScanEffectParamLocalForm* params)
 {
     SetTextureArrayCount(1);
     pTextures.NiTArray<ImageSpaceTexture*, NiTMallocInterface<ImageSpaceTexture*> >::SetSize(5);
@@ -16,7 +29,7 @@ void ImageSpaceEffectMultiTexture::Setup(ImageSpaceManager* manager, ImageSpaceE
     ImageSpaceTexture* pTexture = new ImageSpaceTexture;
     pTextures.SetAt(3, pTexture);
     pTextures.m_pBase[3]->SetTexture(pScanTexture);
-    ((NonActorMagicCaster*)pTextures.m_pBase[3])->SetSelectedMagicItem((MagicItem*)3);
+    pTextures.m_pBase[3]->FUN_00ba3760(3);
     pTexture = new ImageSpaceTexture;
     pTextures.SetAt(4, pTexture);
     pTextures.m_pBase[4]->SetTexture(pDistortTexture);
@@ -27,7 +40,7 @@ void ImageSpaceEffectMultiTexture::Setup(ImageSpaceManager* manager, ImageSpaceE
     char* pAdjustedEffect = effect ? effect - 0x6c : 0;
     ImageSpaceShaderParam* pShaderParam = new ImageSpaceShaderParam;
     pShaderParam->AllocateShaderConstants(0, 3);
-    pShaderParam->m_eClearFlags = (NiRenderer__ClearFlags)1;
+    pShaderParam->m_eClearFlags = (NiRenderer::ClearFlags)1;
     pShaderParam->SetShaderConstantVector4(1, DAT_011ae614, DAT_01201f2c, DAT_011ae618, 0.0f);
     pShaderParam->SetShaderConstantVector4(2, DAT_01201f30, DAT_01201f34, DAT_01201f38, DAT_01201f3c);
     pEffectParamList.SetAt(0, pShaderParam);
@@ -58,7 +71,7 @@ class FUN_00bc0600 : public ImageSpaceEffect
 // @fnv 0x00bc0600
 FUN_00bc0600::FUN_00bc0600()
 {
-    RgbaColor kWhiteColor;
+    NiColorA kWhiteColor;
     m_ppVirtualMethodTable = (void**)&DAT_010ba350;
     pTextures.SetSize(5);
     kWhiteColor.r = 1.0f;
@@ -66,5 +79,5 @@ FUN_00bc0600::FUN_00bc0600()
     kWhiteColor.g = kWhiteColor.r;
     kWhiteColor.b = kWhiteColor.g;
     kWhiteColor.a = kWhiteColor.b;
-    *(RgbaColor*)&DAT_01201f30 = kWhiteColor;
+    *(NiColorA*)&DAT_01201f30 = kWhiteColor;
 }

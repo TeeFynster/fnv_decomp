@@ -2,28 +2,63 @@
 // src/staging/blk_00a80000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include <stddef.h>
+#include "../../include/NiPoint3.h"
+#include "../../include/Ni2DBuffer.h"
+#include "../../include/NiDepthStencilBuffer.h"
+#include "../../include/NiPointer.h"
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
+#include "../../include/MemoryManager.h"
+#include "../../include/NiPixelFormat.h"
+#include "../../include/NiTFixedStringMap_NiAVObject___.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/NiAlphaAccumulator.h"
+#include "../../include/NiBinaryStream.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiCollisionObject.h"
+#include "../../include/NiCullingProperty.h"
+#include "../../include/NiDirectionalLight.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/NiLODData.h"
+#include "../../include/NiParticleMeshes.h"
+#include "../../include/NiProperty.h"
+#include "../../include/NiRefObject.h"
+// NiStreamLinkIDSet_blk_00a80000_o2: local type (was include/NiStreamLinkIDSet.h, which had no evidence of one real class); its methods are 0x00a311e0 NiTSet<NiScreenGeometryData::ScreenElement *,NiTMallocInterface<NiScreenGeometryData::ScreenElement *> >::Add, 0x00a543b0 NiTSet::Ptr::Add
+class Item;
+class NiGeomMorpherUpdateTask;
+class D3DRenderStateGroup;
+
+class NiStreamLinkIDSet_blk_00a80000_o2
+{
+public:
+    void* m_kPointA;
+    unsigned int m_uiItemCount;
+    unsigned int m_pRayCursor;
+
+    void Realloc(unsigned int);
+    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    unsigned int Find(Item* item);
+    int Find(unsigned int value);
+    void Add(Item* item);
+    void Add(NiGeomMorpherUpdateTask* pkTask);
+    void Add(D3DRenderStateGroup* p);
+    void AddUnique(Item* item);
+};
+#include "../../include/NiTransform.h"
+#include "../../include/Pair.h"
+#include "../../include/NiMatrix3.h"
+
 
 extern "C" void __cdecl _Call_a5d3a0();
 extern const void* NiCollisionObject_vftable;
 
-struct NiCollisionObject {
-    void* vft;
-    int m_kPointA;
-    int m_kPointB;
-    NiCollisionObject();
-    NiCollisionObject* Construct();
-};
-NiCollisionObject::NiCollisionObject()
-{
-    _Call_a5d3a0();
-}
 // @fnv 0x00a80fa0
 NiCollisionObject* NiCollisionObject::Construct()
 {
-    NiCollisionObject::NiCollisionObject();
-    vft = (void*)&NiCollisionObject_vftable;
-    m_kPointB = 0;
+    _Call_a5d3a0();
+    *(void**)this = (void*)&NiCollisionObject_vftable;
+    m_pkSceneObject = 0;
     return this;
 }
 
@@ -48,11 +83,6 @@ int __cdecl FUN_00a81b80(const unsigned short* ausLeft, const unsigned short* au
     return *ausLeft > *ausRight;
 }
 
-struct FUN_00a744a0 { void Init(); };
-struct BSFadeNode {
-    void* vtbl;
-    static void* operator new(unsigned int size);
-};
 extern const void* DAT_0109e984;
 // Allocates a 0xc4-byte BSFadeNode, runs Init on it, sets its vtbl to DAT_0109e984 and returns it, or returns 0 on allocation failure.
 // @fnv 0x00a877a0
@@ -60,16 +90,12 @@ BSFadeNode* FUN_00a877a0()
 {
     BSFadeNode* node = static_cast<BSFadeNode*>(BSFadeNode::operator new(0xc4));
     if (node) {
-        reinterpret_cast<FUN_00a744a0*>(node)->Init();
-        node->vtbl = &DAT_0109e984;
+        node->FUN_00a744a0();
+        *(const void**)node = &DAT_0109e984;
         return node;
     }
     return 0;
 }
-
-struct NiBound {
-    void ComputeFromPoints(int count, const NiPoint3* points);
-};
 
 struct FUN_00a87900_class {
     void FUN_00a87900();
@@ -117,19 +143,12 @@ void FUN_00a8f060_class::FUN_00a8f060()
     *(int*)((char*)this + 0x50) = 0;
 }
 
-struct FUN_00a8f080_Class {
-    int m_iWordAt00;
-    int m_iWordAt04;
-    int m_8;
-    int m_iThirdValue;
-    void SetValues(int a, int b);
-};
-
+// The shared header has no dimension setter; preserve its thiscall ABI with an unused EDX parameter.
 // @fnv 0x00a8f080
-void FUN_00a8f080_Class::SetValues(int aiValue, int aiOther)
+void __fastcall SetBufferDimensions(Ni2DBuffer* self, int, unsigned int width, unsigned int height)
 {
-    m_8 = aiValue;
-    m_iThirdValue = aiOther;
+    self->m_uiImageWidth = width;
+    self->m_uiImageHeight = height;
 }
 
 struct SdmBase;
@@ -158,15 +177,11 @@ int __cdecl GetGlobalDataPtr()
 extern int DAT_011f5e44;
 extern int DAT_011f5e4c;
 
-struct NiStreamLinkIDSet {
-    void Realloc(unsigned int);
-};
-
 // @fnv 0x00a8ff30
 void ResetStreamLinkIDSet()
 {
     DAT_011f5e4c = 0;
-    ((NiStreamLinkIDSet*)&DAT_011f5e44)->Realloc(0);
+    ((NiStreamLinkIDSet_blk_00a80000_o2*)&DAT_011f5e44)->Realloc(0);
 }
 
 extern int DAT_0109f814;
@@ -248,11 +263,6 @@ void FUN_00a964a0_Class::FUN_00a964a0(void* apValue) {
 }
 
 namespace fnv_00a982d0 {
-struct BSFadeNode {
-    void* operator new(unsigned int);
-    void* __thiscall FUN_00a981d0();
-};
-
 // @fnv 0x00a982d0
 void* FUN_00a982d0()
 {
@@ -266,10 +276,6 @@ void* FUN_00a982d0()
 struct CloningProcess;
 struct NiBinaryExtraData;
 struct NiFloatsExtraData;
-struct NiExtraData {
-    void* p;
-    void FUN_00a7b330(void* dst, CloningProcess* cp);
-};
 struct FUN_00a99c40_shell : public NiExtraData {
     void FUN_00a99c40(NiBinaryExtraData* dst, CloningProcess* cp);
 };
@@ -280,18 +286,15 @@ void FUN_00a99c40_shell::FUN_00a99c40(NiBinaryExtraData* dst, CloningProcess* cp
     *(void**)((char*)dst + 0xc) = *(void**)((char*)this + 0xc);
 }
 
+
 extern const void* DAT_0109e47c;
-struct NiLODData {
-    NiLODData();
-    void* operator new(size_t, void* p) { return p; }
-};
 // @fnv 0x00a81fb0
 BSFadeNode* FUN_00a81fb0()
 {
     BSFadeNode* p = static_cast<BSFadeNode*>(BSFadeNode::operator new(0x10));
     if (p) {
         new (static_cast<void*>(p)) NiLODData;
-        p->vtbl = &DAT_0109e47c;
+        *(const void**)p = &DAT_0109e47c;
         *(int*)((char*)p + 0xc) = 0;
         return p;
     }
@@ -316,16 +319,13 @@ unsigned int __cdecl FUN_00a88ac0(unsigned int auiValue)
     return auiValue + 1;
 }
 
-struct NiExtraDataHelper {
-    void FUN_00a7b2e0();
-};
 extern int DAT_0109fb94;
 // @fnv 0x00a91fe0
 void* __cdecl FUN_00a91fe0()
 {
     void* p = BSFadeNode::operator new(0x1c);
     if (p) {
-        ((NiExtraDataHelper*)p)->FUN_00a7b2e0();
+        ((NiExtraData*)p)->FUN_00a7b2e0();
         *(float*)((char*)p + 0x18) = 0.0f;
         *(int*)p = (int)&DAT_0109fb94;
         *(float*)((char*)p + 0x14) = 0.0f;
@@ -337,18 +337,6 @@ void* __cdecl FUN_00a91fe0()
 }
 
 extern int DAT_010a02e4;
-struct NiProperty {
-    void* vtbl;
-    int m_iWordAt04;
-    int m_8;
-    int m_iThirdValue;
-    int m_10;
-    int m_14;
-    short m_18;
-    short m_1a;
-    int m_1c;
-    NiProperty();
-};
 // Allocates a 0x1c-byte NiProperty, constructs it, sets m_18 to 0 and its vtbl to DAT_010a02e4, returning the object or null on allocation failure.
 // @fnv 0x00a95160
 NiProperty* __cdecl FUN_00a95160()
@@ -358,23 +346,14 @@ NiProperty* __cdecl FUN_00a95160()
     {
         p = (NiProperty*)mem;
         p->NiProperty::NiProperty();
-        p->m_18 = 0;
-        p->vtbl = &DAT_010a02e4;
+        ((NiCullingProperty*)p)->m_usFlags = 0;
+        *(const void**)p = &DAT_010a02e4;
     }
     else
         return 0;
     return p;
 }
 
-struct NiParticleMeshes {
-    void* vft;
-    int m_kPointA;
-    int m_kPointB;
-    char m_auiShapeKeys[0xbc];
-    char m_flag;
-    NiParticleMeshes();
-    void Init();
-};
 extern const void* DAT_010a0a6c;
 // Allocates a 0xcc-byte NiParticleMeshes, calls Init, sets its vtable and m_flag to 1, and returns it (or null on allocation failure).
 // @fnv 0x00a98e70
@@ -382,8 +361,8 @@ NiParticleMeshes* __cdecl FUN_00a98e70() {
     NiParticleMeshes* p = (NiParticleMeshes*)BSFadeNode::operator new(0xcc);
     if (p) {
         p->Init();
-        p->vft = &DAT_010a0a6c;
-        p->m_flag = 1;
+        *(const void**)p = &DAT_010a0a6c;
+        *(char*)((char*)p + 0xc8) = 1;
         return p;
     }
     return 0;
@@ -432,9 +411,6 @@ void* __cdecl FUN_00a9b330()
 }
 
 extern unsigned int kVtbl_NiAlphaAccumulator;
-struct NiAlphaAccumulator {
-    NiAlphaAccumulator();
-};
 // Allocates a 0x34-byte NiAlphaAccumulator, runs its constructor, sets the vtable and initializes bytes at offsets 0x30-0x32, returning the object or null.
 // @fnv 0x00a9b4b0
 NiAlphaAccumulator* CreateNiAlphaAccumulator()
@@ -443,9 +419,9 @@ NiAlphaAccumulator* CreateNiAlphaAccumulator()
     if (p) {
         p->NiAlphaAccumulator::NiAlphaAccumulator();
         *(unsigned int*)p = (unsigned int)&kVtbl_NiAlphaAccumulator;
-        *(unsigned char*)(p + 0x30) = 1;
-        *( char*)(p + 0x31) = 0;
-        *( char*)(p + 0x32) = 0;
+        p->m_bObserveNoSortHint = true;
+        p->m_bSortByClosestPoint = false;
+        p->m_bInterfaceSort = false;
         return p;
     }
     return 0;
@@ -551,25 +527,6 @@ void __cdecl FUN_00a9b8b0()
     DAT_011f6000 = v;
 }
 
-struct FUN_00a85520_class {
-    void FUN_00a85520(float* dst, float scale);
-};
-
-// Multiplies the nine floats starting at this by scale and writes the results to dst.
-// @fnv 0x00a85520
-void FUN_00a85520_class::FUN_00a85520(float* afOut, float scale)
-{
-    *afOut = *(float*)this * scale;
-    afOut[1] = ((float*)this)[1] * scale;
-    afOut[2] = ((float*)this)[2] * scale;
-    afOut[3] = ((float*)this)[3] * scale;
-    afOut[4] = ((float*)this)[4] * scale;
-    afOut[5] = ((float*)this)[5] * scale;
-    afOut[6] = ((float*)this)[6] * scale;
-    afOut[7] = ((float*)this)[7] * scale;
-    afOut[8] = ((float*)this)[8] * scale;
-}
-
 extern const void* DAT_0109e834;
 struct FUN_00a87140_class {
     void* vtbl;
@@ -641,9 +598,9 @@ FUN_00a87140_class* FUN_00a87140() {
     return p;
 }
 
-struct NiDirectionalLight {
-    void FUN_00a7d6a0(NiDirectionalLight* dst, CloningProcess& cp);
-};
+// This compatibility entry point is absent from the shared light declaration.
+extern "C" void __cdecl FUN_00a7d6a0();
+
 struct FUN_00a94c00_shell {
     char m_iWordAt00[0xfc];
     int m_fc;
@@ -657,7 +614,7 @@ struct FUN_00a94c00_shell {
 // @fnv 0x00a94c00
 void FUN_00a94c00_shell::FUN_00a94c00(NiDirectionalLight* dst, CloningProcess& cp)
 {
-    ((NiDirectionalLight*)this)->FUN_00a7d6a0(dst, cp);
+    reinterpret_cast<void (__thiscall*)(NiDirectionalLight*, NiDirectionalLight*, CloningProcess&)>(FUN_00a7d6a0)((NiDirectionalLight*)this, dst, cp);
     FUN_00a94c00_shell* d = (FUN_00a94c00_shell*)dst;
     d->m_fc = m_fc;
     d->m_100 = m_100;
@@ -667,7 +624,6 @@ void FUN_00a94c00_shell::FUN_00a94c00(NiDirectionalLight* dst, CloningProcess& c
     d->m_110 = m_110;
 }
 
-struct MemoryManager { void Deallocate(void*); };
 extern MemoryManager g_memoryManager;
 extern char* DAT_010a05e4;
 struct FUN_00a96800_shell {
@@ -755,15 +711,11 @@ void FUN_00a8f810_class::FUN_00a8f810()
 }
 
 struct CloningProcess;
-struct NiCullingProperty {
-    void FUN_00a5d7a0(void* dst, CloningProcess& proc);
-    void FUN_00a81430(void* dst, CloningProcess& proc);
-};
 // @fnv 0x00a81430
 void NiCullingProperty::FUN_00a81430(void* dst, CloningProcess& proc)
 {
     FUN_00a5d7a0(dst, proc);
-    *(unsigned short*)((char*)dst + 0x18) = *(unsigned short*)((char*)this + 0x18);
+    static_cast<NiCullingProperty*>(dst)->m_usFlags = m_usFlags;
 }
 
 void __cdecl NiFree(void*);
@@ -778,9 +730,6 @@ void FUN_00a8a670_shell::FUN_00a8a670()
     NiFree(m_iWordAt04);
 }
 
-struct NiTFixedStringMap_NiAVObject___ {
-    void RemoveAll();
-};
 extern const void* vftable_SdmDerived;
 extern const void* vftable_SdmBase;
 void _NiFree(void*);
@@ -847,21 +796,10 @@ FUN_00a5a390_shell* FUN_00a5a390_shell::FUN_00a950f0(bool bDel)
     return this;
 }
 
-namespace fnv_00a99e00 {
 struct NiCullingData {
     int m_iWordAt00;
     int m_iWordAt04;
     int m_8;
-};
-
-struct NiCullingProperty {
-    char m_auiShapeKeys[0x18];
-    unsigned short m_18;
-    float m_1c;
-    NiCullingData m_20;
-
-    void FUN_00a5d7a0(void*, CloningProcess&);
-    void FUN_00a99e00(void*, CloningProcess&);
 };
 
 // Copies this NiCullingProperty's m_18, m_1c and m_20 into the destination after calling FUN_00a5d7a0.
@@ -872,11 +810,10 @@ void NiCullingProperty::FUN_00a99e00(
     NiCullingProperty* dest = static_cast<NiCullingProperty*>(destination);
 
     FUN_00a5d7a0(destination, cloningProcess);
-    dest->m_18 = m_18;
-    dest->m_1c = m_1c;
-    dest->m_20 = m_20;
+    dest->m_usFlags = m_usFlags;
+    *(float*)((char*)dest + 0x1c) = *(float*)((char*)this + 0x1c);
+    *(NiCullingData*)((char*)dest + 0x20) = *(NiCullingData*)((char*)this + 0x20);
 }
-}  // namespace fnv_00a99e00
 
 void __cdecl FUN_00a9b8b0();
 void __cdecl FUN_00a9b9b0();
@@ -886,12 +823,6 @@ void __cdecl FUN_00a9ba80()
     FUN_00a9b8b0();
     FUN_00a9b9b0();
 }
-
-struct SpawnedRef {
-    virtual void Vslot00();
-    virtual void DeleteThis();
-    long m_iObjectReferenceCount;
-};
 
 extern int DAT_0109e04c;
 
@@ -914,34 +845,34 @@ struct FUN_00a80580_cls {
     int unk60, unk64, unk68, unk6C, unk70, unk74, unk78, unk7C, unk80, unk84, unk88, unk8C;
     int unk90, unk94, unk98;
     FUN_00a80580_sub m_sub9c;
-    SpawnedRef* m_b8;
-    SpawnedRef* m_bc;
+    NiRefObject* m_b8;
+    NiRefObject* m_bc;
 
     void BaseTeardown();
     void FUN_00a80580();
 };
 
-// Releases the two SpawnedRef members via reference counting, cleans up m_sub9c, then calls BaseTeardown.
+// Releases the two NiRefObject members via reference counting, cleans up m_sub9c, then calls BaseTeardown.
 // @fnv 0x00a80580
 void FUN_00a80580_cls::FUN_00a80580()
 {
     *(void* volatile*)&m_vptr = (void*)&DAT_0109e04c;
-    SpawnedRef* first = *(SpawnedRef* volatile*)&m_b8;
+    NiRefObject* first = *(NiRefObject* volatile*)&m_b8;
     if (first != 0) {
-        if (InterlockedDecrement(&first->m_iObjectReferenceCount) == 0) {
+        if (InterlockedDecrement((volatile long*)&first->m_uiRefCount) == 0) {
             first->DeleteThis();
         }
         m_b8 = 0;
     }
-    SpawnedRef* second = m_bc;
+    NiRefObject* second = m_bc;
     if (second != 0) {
-        if (InterlockedDecrement(&second->m_iObjectReferenceCount) == 0) {
+        if (InterlockedDecrement((volatile long*)&second->m_uiRefCount) == 0) {
             second->DeleteThis();
         }
     }
-    SpawnedRef* third = m_b8;
+    NiRefObject* third = m_b8;
     if (third != 0) {
-        if (InterlockedDecrement(&third->m_iObjectReferenceCount) == 0) {
+        if (InterlockedDecrement((volatile long*)&third->m_uiRefCount) == 0) {
             third->DeleteThis();
         }
     }
@@ -953,13 +884,9 @@ extern const void* DAT_0109e174;
 
 void FUN_00a5d3d0();
 
-struct FUN_00a80fc0_class {
-    void __thiscall FUN_00a80fc0();
-};
-
 // @fnv 0x00a80fc0
-void __thiscall FUN_00a80fc0_class::FUN_00a80fc0() {
-    *reinterpret_cast<void**>(this) = reinterpret_cast<void*>(&DAT_0109e174);
+void __fastcall DestroyNiCollisionObject(NiCollisionObject* object, void*) {
+    *reinterpret_cast<void**>(object) = reinterpret_cast<void*>(&DAT_0109e174);
     FUN_00a5d3d0();
 }
 
@@ -1208,17 +1135,11 @@ void FUN_00a84ca0_class::FreeEntryResources()
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
 
-struct RefCountedObject {
-    virtual void UnknownVirtual();
-    virtual void DeleteThis();
-    volatile long referenceCount;
-};
-
 struct CloneObject {
     int unk00;
     int unk04;
-    RefCountedObject* first;
-    RefCountedObject* second;
+    NiRefObject* first;
+    NiRefObject* second;
 
     void CreateVertexBufferSet(CloneObject* destination, void* process);
     void CopyRefCountedPointers(CloneObject* destination, void* process);
@@ -1229,27 +1150,27 @@ void CloneObject::CopyRefCountedPointers(CloneObject* destination, void* process
 {
     CreateVertexBufferSet(destination, process);
 
-    RefCountedObject* previous = destination->first;
+    NiRefObject* previous = destination->first;
     if (previous != first) {
-        if (previous && InterlockedDecrement(&previous->referenceCount) == 0) {
+        if (previous && InterlockedDecrement((volatile long*)&previous->m_uiRefCount) == 0) {
             previous->DeleteThis();
         }
-        RefCountedObject* replacement = first;
+        NiRefObject* replacement = first;
         destination->first = replacement;
         if (replacement) {
-            InterlockedIncrement(&replacement->referenceCount);
+            InterlockedIncrement((volatile long*)&replacement->m_uiRefCount);
         }
     }
 
     previous = destination->second;
     if (previous != second) {
-        if (previous && InterlockedDecrement(&previous->referenceCount) == 0) {
+        if (previous && InterlockedDecrement((volatile long*)&previous->m_uiRefCount) == 0) {
             previous->DeleteThis();
         }
-        RefCountedObject* replacement = second;
+        NiRefObject* replacement = second;
         destination->second = replacement;
         if (replacement) {
-            InterlockedIncrement(&replacement->referenceCount);
+            InterlockedIncrement((volatile long*)&replacement->m_uiRefCount);
         }
     }
 }
@@ -1614,110 +1535,63 @@ void FUN_00a8bdf0_cls::FUN_00a8bdf0(unsigned char* dst, unsigned int a2, unsigne
     }
 }
 
-class NiRefObject {
-public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount() { InterlockedIncrement((volatile long*)&m_uiRefCount); }
-    void DecRefCount() { if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0) DeleteThis(); }
-};
+inline void NiRefObject::IncRefCount() { InterlockedIncrement((volatile long*)&m_uiRefCount); }
+inline void NiRefObject::DecRefCount() { if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0) DeleteThis(); }
 
-class FUN_00a8f140_cls {
-public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    NiRefObject* m_10;
-
-    void SetRefObject(NiRefObject* obj);
-};
-
-// Assigns obj to m_10, releasing the previous reference and incrementing the new one's ref count.
+// Assigns the renderer data, releasing the previous reference and acquiring the new one.
 // @fnv 0x00a8f140
-void FUN_00a8f140_cls::SetRefObject(NiRefObject* obj)
+void Ni2DBuffer::SetRendererData(RendererData* obj)
 {
-    NiRefObject* old = m_10;
+    NiRefObject* old = static_cast<RendererData*>(m_pRendererData);
     if (old != obj) {
         if (old != 0) {
             old->DecRefCount();
         }
-        m_10 = obj;
+        m_pRendererData = obj;
         if (obj != 0) {
             obj->IncRefCount();
         }
     }
 }
 
-namespace fnv_00a8f1c0 {
-struct SpawnedRef {
-    virtual void Vslot00();
-    virtual void DeleteThis();
-    long m_iObjectReferenceCount;
-};
+extern const void* DAT_0109f4dc;
 
-extern int DAT_0109f4dc;
-
-struct FUN_00a8f1c0_cls {
-    void* m_vptr00;
-    unsigned int unk04, unk08, unk0C;
-    SpawnedRef* m_10;
-
-    void BaseTeardown();
-    void FUN_00a8f1c0();
-};
-
-// Sets the vtable, releases the reference at m_10 via an interlocked decrement and deletes it at zero, then calls BaseTeardown.
+// Releases the renderer data and calls the shared base teardown at 0x00a5d3d0.
 // @fnv 0x00a8f1c0
-void FUN_00a8f1c0_cls::FUN_00a8f1c0() {
-    *(void* volatile*)&m_vptr00 = (void*)&DAT_0109f4dc;
-    SpawnedRef* p = *(SpawnedRef* volatile*)&m_10;
+void __fastcall DestroyBufferMembers(Ni2DBuffer* self, int) {
+    *(void* volatile*)self = (void*)&DAT_0109f4dc;
+    NiRefObject* p = *(NiRefObject* volatile*)&self->m_pRendererData;
     if (p != 0) {
-        if (InterlockedDecrement(&p->m_iObjectReferenceCount) == 0) {
+        if (InterlockedDecrement((volatile long*)&p->m_uiRefCount) == 0) {
             p->DeleteThis();
         }
     }
-    BaseTeardown();
+    self->NiObject::FUN_00a5d3d0();
 }
-}  // namespace fnv_00a8f1c0
 
-struct S_00a8f2c0_Arg { int unk00; int unk04; int unk08; int unk0c; };
-extern const void* DAT_0109f4dc;
+// This unit calls the out-of-line smart-pointer assignment at 0x00a5f860.
+template <> NiPointer<Ni2DBuffer::RendererData>&
+NiPointer<Ni2DBuffer::RendererData>::operator=(Ni2DBuffer::RendererData*);
 
-struct S_00a8f2c0_Sub {
-    int unk00;
-    void FUN_00a5f860(S_00a8f2c0_Arg* c);
-};
-
-struct S_00a8f2c0_Obj {
-    void* vft;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00a8f2c0_Sub sub;
-    static void* operator new(unsigned int n) { return BSFadeNode::operator new(n); }
-    S_00a8f2c0_Obj() throw() {
-        FUN_00a5d3a0();
-        vft = (void*)&DAT_0109f4dc;
-        unk08 = 0;
-        unk0c = 0;
-        sub.unk00 = 0;
-    }
-    void FUN_00a5d3a0();
-    void SetRefObject(S_00a8f2c0_Arg* c);
-};
-
-// Allocates an object, stores a and b, then calls the sub-object and object methods with c and returns it; returns 0 if c or c->unk0c is null.
+// Creates a buffer when the renderer data has a pixel format.
 // @fnv 0x00a8f2c0
-S_00a8f2c0_Obj* __cdecl CreateFadeNodeFromArg(int aiValueA, int aiValueB, S_00a8f2c0_Arg* c) {
-    if (c == 0) return 0;
-    if (c->unk0c == 0) return 0;
-    S_00a8f2c0_Obj* p = new S_00a8f2c0_Obj();
-    p->unk08 = aiValueA;
-    p->unk0c = aiValueB;
-    p->sub.FUN_00a5f860(c);
-    p->SetRefObject(c);
+Ni2DBuffer* Ni2DBuffer::Create(unsigned int uiWidth, unsigned int uiHeight, RendererData* pkData) {
+    if (pkData == 0) return 0;
+    if (pkData->m_pkPixelFormat == 0) return 0;
+    Ni2DBuffer* p = static_cast<Ni2DBuffer*>(Ni2DBuffer::operator new(sizeof(Ni2DBuffer)));
+    if (p) {
+        new (p) NiObject;
+        *(const void**)p = &DAT_0109f4dc;
+        p->m_uiImageWidth = 0;
+        p->m_uiImageHeight = 0;
+        p->m_pRendererData = 0;
+    } else {
+        p = 0;
+    }
+    p->m_uiImageWidth = uiWidth;
+    p->m_uiImageHeight = uiHeight;
+    reinterpret_cast<NiPointer<RendererData>&>(p->m_pRendererData) = pkData;
+    p->SetRendererData(pkData);
     return p;
 }
 
@@ -1789,11 +1663,6 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile lo
 extern "C" const void* DAT_010a08ac;
 extern "C" const void* DAT_010a080c;
 void __cdecl NiFree(void*);
-struct NiRefObject {
-    virtual void Reserved();
-    virtual void Release();
-    volatile long referenceCount;
-};
 struct NiObjectShell {
     void* volatile vtable;
     unsigned int unk04;
@@ -1840,8 +1709,8 @@ void NiObjectShell::FUN_00a98240() {
     vtable = (void*)&DAT_010a08ac;
     NiRefObject* oldReference = reference;
     if (oldReference) {
-        if (InterlockedDecrement(&oldReference->referenceCount) == 0)
-            oldReference->Release();
+        if (InterlockedDecrement((volatile long*)&oldReference->m_uiRefCount) == 0)
+            oldReference->DeleteThis();
         reference = 0;
     }
     if (allocation) {
@@ -1853,8 +1722,8 @@ void NiObjectShell::FUN_00a98240() {
     }
     NiRefObject* lastReference = reference;
     if (lastReference) {
-        if (InterlockedDecrement(&lastReference->referenceCount) == 0)
-            lastReference->Release();
+        if (InterlockedDecrement((volatile long*)&lastReference->m_uiRefCount) == 0)
+            lastReference->DeleteThis();
     }
     vtable = (void*)&DAT_010a080c;
     FUN_00a5d3d0();
@@ -2088,24 +1957,6 @@ void DestroyPairArrays()
 }
 }  // namespace fnv_00a9fda0
 
-struct FUN_00a9ff00_Child
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-};
-
-struct FUN_00a9ff00_Arg
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    FUN_00a9ff00_Child* unk10;
-};
-
 struct FUN_00a9ff00_Obj
 {
     virtual void v00();
@@ -2148,22 +1999,23 @@ struct FUN_00a9ff00_Obj
     virtual int v37(int a, int b, int c);
 };
 
-int __cdecl FUN_00a9fe90(int a, int b, FUN_00a9ff00_Obj* c, int d, int e);
-
-// Validates a and b, reads two fields from a->unk10, calls b->v37 and passes the results to FUN_00a9fe90.
+// Uses the buffer format and sample preference to request a depth-stencil buffer.
 // @fnv 0x00a9ff00
-int __cdecl ProcessArgWithObj(FUN_00a9ff00_Arg* a, FUN_00a9ff00_Obj* pObj)
+NiDepthStencilBuffer* __cdecl ProcessArgWithObj(Ni2DBuffer* a, FUN_00a9ff00_Obj* pObj)
 {
     if (a == 0 || pObj == 0)
     {
         return 0;
     }
-    int x = a->unk10 != 0 ? a->unk10->unk0C : 0;
+    Ni2DBuffer::RendererData* data = static_cast<Ni2DBuffer::RendererData*>(a->m_pRendererData);
+    int x = data != 0 ? reinterpret_cast<int>(data->m_pkPixelFormat) : 0;
     int r = pObj->v37(x, 0x20, 8);
-    int y = a->unk10 != 0 ? a->unk10->unk10 : 0;
-    int w = a->unk0C;
-    int u = a->unk08;
-    return FUN_00a9fe90(u, w, pObj, r, y);
+    data = static_cast<Ni2DBuffer::RendererData*>(a->m_pRendererData);
+    int y = data != 0 ? static_cast<int>(data->m_eMSAAPref) : 0;
+    int w = a->m_uiImageHeight;
+    int u = a->m_uiImageWidth;
+    return NiDepthStencilBuffer::Create(u, w, reinterpret_cast<NiRenderer*>(pObj),
+        *reinterpret_cast<const NiPixelFormat*>(r), y);
 }
 
 extern unsigned char* DAT_011f5b04;
@@ -2612,7 +2464,7 @@ FNVObj* FNVObj::FUN_00a8fe70(const ReferenceHandle& src) {
             capacity += capacity;
         else
             capacity = 1;
-        ((NiStreamLinkIDSet*)&DAT_011f5e44)->Realloc(capacity);
+        ((NiStreamLinkIDSet_blk_00a80000_o2*)&DAT_011f5e44)->Realloc(capacity);
     }
     ((FNVObj**)DAT_011f5e44)[DAT_011f5e4c] = this;
     ++DAT_011f5e4c;
@@ -2661,94 +2513,46 @@ extern "C" void* DAT_0109b220;
 extern int (__stdcall* DAT_00fdf1c4)(void*);
 extern "C" void* __cdecl FUN_00a5b690(int);
 
-struct Pair {
-    volatile unsigned int id;
-    void* volatile value;
-    Pair* __thiscall Reset();
-};
-
 // @fnv 0x00a9bdf0
-Pair* __thiscall Pair::Reset()
+Pair::Pair() throw()
 {
-    value = DAT_0109b220;
-    id = 0;
-    volatile void* old = value;
+    *(void* volatile*)&b = DAT_0109b220;
+    *(volatile unsigned int*)&a = 0;
+    volatile void* old = *(void* volatile*)&b;
     if (old) {
-        value = FUN_00a5b690(0);
+        *(void* volatile*)&b = FUN_00a5b690(0);
         if (old != DAT_0109b220)
             DAT_00fdf1c4((void*)((char*)old - 8));
     }
-    return this;
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 
-class NiRefObjectA9F {
-public:
-    virtual ~NiRefObjectA9F() throw();
-    virtual void DeleteThis() throw();
-
-    void IncRefCount() throw() { InterlockedIncrement((long volatile*)&m_uiRefCount); }
-    void DecRefCount() throw()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    unsigned int m_uiRefCount;
-};
-
-template <class T> class NiPointerA9F {
-public:
-    NiPointerA9F& operator=(T* pObject) throw()
-    {
-        if (m_pObject != pObject) {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-
-    T* m_pObject;
-};
-
-class RendererDataA9F : public NiRefObjectA9F {
-};
-
-class Ni2DBufferA9F : public NiRefObjectA9F {
-public:
-    static void* operator new(unsigned int uiSize) throw();
-
-    Ni2DBufferA9F() throw();
-    virtual ~Ni2DBufferA9F() throw();
-
-    unsigned int m_uiImageWidth;
-    unsigned int m_uiImageHeight;
-    NiPointerA9F<RendererDataA9F> m_pRendererData;
-};
-
-class NiDepthStencilBufferA9F : public Ni2DBufferA9F {
-public:
-    __forceinline NiDepthStencilBufferA9F() throw() {}
-    virtual ~NiDepthStencilBufferA9F() throw();
-
-    static NiDepthStencilBufferA9F* FUN_00a9ff60(unsigned int uiWidth, unsigned int uiHeight,
-        RendererDataA9F* pkRendererData);
-};
-
-// Allocates a NiDepthStencilBufferA9F, stores the width, height and renderer data, and returns it.
-// @fnv 0x00a9ff60
-NiDepthStencilBufferA9F* NiDepthStencilBufferA9F::FUN_00a9ff60(unsigned int uiWidth, unsigned int uiHeight,
-    RendererDataA9F* pkRendererData)
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pObject)
 {
-    NiDepthStencilBufferA9F* pkBuffer = new NiDepthStencilBufferA9F;
+    if (m_pObject != pObject) {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pObject;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+
+__forceinline NiDepthStencilBuffer::NiDepthStencilBuffer() throw() {}
+
+// The shared header lacks the renderer-data factory overload; keep its implementation local.
+// Allocates a NiDepthStencilBuffer and stores the width, height and renderer data.
+// @fnv 0x00a9ff60
+NiDepthStencilBuffer* CreateDepthStencilBuffer(unsigned int uiWidth, unsigned int uiHeight,
+    Ni2DBuffer::RendererData* pkRendererData)
+{
+    NiDepthStencilBuffer* pkBuffer = new NiDepthStencilBuffer;
     pkBuffer->m_uiImageWidth = uiWidth;
     pkBuffer->m_uiImageHeight = uiHeight;
-    pkBuffer->m_pRendererData = pkRendererData;
+    reinterpret_cast<NiPointer<NiRefObject>&>(pkBuffer->m_pRendererData) = pkRendererData;
     return pkBuffer;
 }
 
@@ -2831,12 +2635,16 @@ void CustomBlockDecoder::DecodePaletteBlock(unsigned char* pDest)
 }
 
 void __cdecl _memmove(void*,const void*,unsigned int);
-struct NiBinaryStream {
- void* vtable;
- unsigned int position;
- unsigned int (__cdecl *read)(NiBinaryStream*,void*,unsigned int,unsigned int*,unsigned int);
- void Read(void* data,unsigned int bytes) { unsigned int uiComponentSize = 1; position += read(this,data,bytes,&uiComponentSize,1); }
-};
+// Transfer state used by the original stream implementation (offsets 4 and 8).
+static inline unsigned int& StreamPosition(NiBinaryStream& stream) { return *(unsigned int*)((char*)&stream + 4); }
+static inline NiBinaryStream::ReadFunction& StreamReadFunction(NiBinaryStream& stream) { return *(NiBinaryStream::ReadFunction*)((char*)&stream + 8); }
+inline unsigned int NiBinaryStream::Read(void* data, unsigned int bytes) {
+    unsigned int componentSize = 1;
+    unsigned int transferred = StreamReadFunction(*this)(this, data, bytes, &componentSize, 1);
+    StreamPosition(*this) += transferred;
+    return transferred;
+}
+
 struct RleDecoder {
  unsigned int unk000;
  unsigned int unk004;
@@ -3372,56 +3180,58 @@ struct StaticKeyB5542 {
     unsigned int m_00;
 };
 
-class NiRefStubB5542 {
-public:
-    virtual void Slot0();
-    virtual void Destroy();
-    long m_iObjectReferenceCount;
-};
+extern unsigned int NiReferenceSlotKeyInitialized;
+extern StaticKeyB5542 NiReferenceSlotKey;
+extern void __cdecl DestroyNiReferenceSlotKey();
+extern "C" int __cdecl atexit(void (__cdecl*)());
 
 class FUN_00a9ba90_cls {
 public:
     unsigned int unk00;
-    NiRefStubB5542** m_04;
+    NiRefObject** m_04;
     unsigned short unk08;
     unsigned short m_0a;
     unsigned short m_0c;
-    void FUN_00a9ba90(unsigned int idx, NiRefStubB5542** a2);
+    void FUN_00a9ba90(unsigned int idx, NiRefObject** a2);
 };
 
 // Sets the NiRefStub at idx, updating m_0a/m_0c and swapping the reference with ref-counted destroy/increment.
 // @fnv 0x00a9ba90
-void FUN_00a9ba90_cls::FUN_00a9ba90(unsigned int idx, NiRefStubB5542** apRefStub) {
-    static StaticKeyB5542 key(0);
+void FUN_00a9ba90_cls::FUN_00a9ba90(unsigned int idx, NiRefObject** apRefStub) {
+    if (!(NiReferenceSlotKeyInitialized & 1)) {
+        NiReferenceSlotKeyInitialized |= 1;
+        NiReferenceSlotKey.m_00 = 0;
+        atexit(DestroyNiReferenceSlotKey);
+    }
     if (idx >= m_0a) {
         m_0a = (unsigned short)(idx + 1);
-        if ((unsigned int)*apRefStub == key.m_00) {
+        if ((unsigned int)*apRefStub == NiReferenceSlotKey.m_00) {
         } else {
             m_0c++;
         }
     } else {
-        if ((unsigned int)*apRefStub != key.m_00) {
-            if ((unsigned int)m_04[idx] == key.m_00) {
+        if ((unsigned int)*apRefStub != NiReferenceSlotKey.m_00) {
+            if ((unsigned int)m_04[idx] == NiReferenceSlotKey.m_00) {
                 m_0c++;
             }
         } else {
-            if ((unsigned int)m_04[idx] != key.m_00) {
+            if ((unsigned int)m_04[idx] != NiReferenceSlotKey.m_00) {
                 m_0c--;
             }
         }
     }
-    NiRefStubB5542** slot = &m_04[idx];
-    NiRefStubB5542* old = *slot;
+    NiRefObject** slot = &m_04[idx];
+    NiRefObject* old = *slot;
     if (old != *apRefStub) {
         if (old != 0) {
-            if (InterlockedDecrement(&old->m_iObjectReferenceCount) == 0) {
-                old->Destroy();
+            if (InterlockedDecrement((volatile long*)&old->m_uiRefCount) == 0) {
+                old->DeleteThis();
             }
         }
-        NiRefStubB5542* pNew = *apRefStub;
+        NiRefObject* pNew = *apRefStub;
         *slot = pNew;
         if (pNew != 0) {
-            InterlockedIncrement(&pNew->m_iObjectReferenceCount);
+            InterlockedIncrement((volatile long*)&pNew->m_uiRefCount);
         }
     }
 }
@@ -3435,26 +3245,6 @@ struct BitmapStreamVtable {
 };
 extern void (__stdcall* DAT_00fdf05c)(void*);
 extern void (__stdcall* DAT_00fdf100)(void*);
-class NiPixelFormat {
-public:
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-};
 extern const NiPixelFormat DAT_011aa210;
 extern const NiPixelFormat DAT_011aa2e8;
 extern const NiPixelFormat gNiPoint3StartupSrc;
@@ -3536,13 +3326,13 @@ struct BitmapReader {
 };
 template<class T> inline void ReadValue(NiBinaryStream& stream, T& value) {
     unsigned int componentSize = sizeof(T);
-    stream.position += stream.read(&stream, &value, sizeof(T), &componentSize, 1);
+    StreamPosition(stream) += StreamReadFunction(stream)(&stream, &value, sizeof(T), &componentSize, 1);
 }
 // @fnv 0x00a8e4b0
 bool BitmapReader::ReadBitmapHeader(NiBinaryStream& stream, unsigned int& outWidth,
     unsigned int& outHeight, NiPixelFormat& outFormat, bool& outFlag, unsigned int& outMips)
 {
-    ((BitmapStreamVtable*)stream.vtable)->seek(&stream, 0);
+    ((BitmapStreamVtable*)*(void**)&stream)->seek(&stream, 0);
     outMips = 1;
     unsigned short signature;
     ReadValue(stream, signature);
@@ -3599,87 +3389,113 @@ bool BitmapReader::ReadBitmapHeader(NiBinaryStream& stream, unsigned int& outWid
     return true;
 }
 
-class NiPoint3 {
-public:
-    float x, y, z;
-    float& operator[](int i) { return (&x)[i]; }
-    const float& operator[](int i) const { return (&x)[i]; }
-float Readx() const { return x; }
-float Ready() const { return y; }
-    NiPoint3() {}
-    NiPoint3(float a, float b, float c) { x=a; y=b; z=c; }
-    NiPoint3 operator*(float s) const {
-        NiPoint3 p; p.x=s*x; p.y=s*y; p.z=s*z; return p;
-    }
-    NiPoint3& operator+=(const NiPoint3& p) {
-        x += p.x; y += p.y; z += p.z;
-        return *this;
-    }
- void AddByValue(NiPoint3 p) {x += p[0]; y += p[1]; z += p[2];}
 
 
-};
-class ThreeByThreeMatrix {
-public:
-    float m[3][3];
-    ThreeByThreeMatrix() {}
-    ThreeByThreeMatrix(const ThreeByThreeMatrix& o) {
-        m[0][0]=o.m[0][0];
-        m[0][1]=o.m[0][1];
-        m[0][2]=o.m[0][2];
-        m[1][0]=o.m[1][0];
-        m[1][1]=o.m[1][1];
-        m[1][2]=o.m[1][2];
-        m[2][0]=o.m[2][0];
-        m[2][1]=o.m[2][1];
-        m[2][2]=o.m[2][2];
-    }
-    float Entry(unsigned int row, unsigned int col) const { return m[row][col]; }
-    ThreeByThreeMatrix operator*(float s) const {
-        ThreeByThreeMatrix r;
-        r.m[0][0] = Entry(0,0) * s;
-        r.m[0][1] = Entry(0,1) * s;
-        r.m[0][2] = Entry(0,2) * s;
-        r.m[1][0] = Entry(1,0) * s;
-        r.m[1][1] = Entry(1,1) * s;
-        r.m[1][2] = Entry(1,2) * s;
-        r.m[2][0] = Entry(2,0) * s;
-        r.m[2][1] = Entry(2,1) * s;
-        r.m[2][2] = Entry(2,2) * s;
+
+    inline float NiMatrix3::GetEntry(unsigned int row, unsigned int col) const { return (&m_pEntry[0][0])[row * 3 + col]; }
+
+
+
+// @fnv 0x00a85520
+
+    inline NiMatrix3 NiMatrix3::operator*(float s) const {
+
+
+
+        NiMatrix3 r;
+
+
+
+        r.m_pEntry[0][0] = GetEntry(0,0) * s;
+
+
+
+        r.m_pEntry[0][1] = GetEntry(0,1) * s;
+
+
+
+        r.m_pEntry[0][2] = GetEntry(0,2) * s;
+
+
+
+        r.m_pEntry[1][0] = GetEntry(1,0) * s;
+
+
+
+        r.m_pEntry[1][1] = GetEntry(1,1) * s;
+
+
+
+        r.m_pEntry[1][2] = GetEntry(1,2) * s;
+
+
+
+        r.m_pEntry[2][0] = GetEntry(2,0) * s;
+
+
+
+        r.m_pEntry[2][1] = GetEntry(2,1) * s;
+
+
+
+        r.m_pEntry[2][2] = GetEntry(2,2) * s;
+
+
+
         return r;
+
+
+
     }
-    NiPoint3 operator*(const NiPoint3& p) const {
-        return NiPoint3(
-            m[0][0]*p.x + m[0][1]*p.y + m[0][2]*p.z,
-            m[1][0]*p.x + m[1][1]*p.y + m[1][2]*p.z,
-            m[2][0]*p.x + m[2][1]*p.y + m[2][2]*p.z);
-    }
-    NiPoint3 MulAddFirst(const NiPoint3& p, const NiPoint3& t) const {
-        return NiPoint3(
-            Entry(0,0)*p.Readx() + Entry(0,1)*p.Ready() + Entry(0,2)*p.z + t.x,
-            ((Entry(1,0)*p.Readx() + Entry(1,1)*p.Ready()) + Entry(1,2)*p.z + t.y),
-            Entry(2,0)*p.Readx() + Entry(2,1)*p.Ready() + Entry(2,2)*p.z + t.z);
-    }
-    NiPoint3 MulAddSecond(const NiPoint3& p, const NiPoint3& t) const {
-        return NiPoint3(
-            Entry(0,0)*p.Readx() + Entry(0,1)*p.Ready() + Entry(0,2)*p.z + t.x,
-            Entry(1,0)*p.Readx() + (Entry(1,1)*p.Ready()) + Entry(1,2)*p.z + t.y,
-            (Entry(2,0)*p.Readx() + Entry(2,1)*p.Ready()) + Entry(2,2)*p.z + t.z);
-    }
-};
-static __forceinline ThreeByThreeMatrix operator*(float s, const ThreeByThreeMatrix& m) { return m*s; }
-static __forceinline void XformZ(const ThreeByThreeMatrix& m, const float& x, const float& y, const float& z, const NiPoint3& t, NiPoint3& r) {
-        r.x = m.Entry(0,0)*x + m.Entry(0,1)*y + m.Entry(0,2)*z + t.x;
-        r.y = m.Entry(1,0)*x + (m.Entry(1,1)*y) + m.Entry(1,2)*z + t.y;
-        r.z = m.Entry(2,0)*x + (m.Entry(2,1)*y) + m.Entry(2,2)*z + t.z;
+
+
+
+
+// Inline arithmetic used by the skinning routine.
+inline float& NiPoint3::operator[](int i) { return (&x)[i]; }
+inline const float& NiPoint3::operator[](int i) const { return (&x)[i]; }
+inline float NiPoint3::Readx() const { return x; }
+inline float NiPoint3::Ready() const { return y; }
+inline NiPoint3::NiPoint3(float a, float b, float c) { x=a; y=b; z=c; }
+inline NiPoint3 NiPoint3::operator*(float s) const {
+    NiPoint3 p; p.x=s*x; p.y=s*y; p.z=s*z; return p;
 }
-struct NiTransform {
-    ThreeByThreeMatrix rotate;
-    NiPoint3 translate;
-    float scale;
-    void FUN_004b4880(NiTransform* out) const;
-    NiTransform operator*(const NiTransform&) const;
+inline void NiPoint3::AddByValue(NiPoint3 p) { x += p[0]; y += p[1]; z += p[2]; }
+
+inline NiTransform::NiTransform() {}
+// M * v: each output coordinate is one matrix row dotted with v (x, y, z terms in that order)
+#define M3_ROW_DOT_V(i) m_pEntry[i][0] * kV.x + m_pEntry[i][1] * kV.y + m_pEntry[i][2] * kV.z
+inline NiPoint3 NiMatrix3::operator*(const NiPoint3& kV) const
+{
+    return NiPoint3(M3_ROW_DOT_V(0), M3_ROW_DOT_V(1), M3_ROW_DOT_V(2));
+}
+#undef M3_ROW_DOT_V
+// The skinning loops inline M*p+t in two parenthesisations (row sums kept apart differently).
+struct NiMatrix3_SkinView : public NiMatrix3
+{
+    NiPoint3 MulAddFirst(const NiPoint3& p, const NiPoint3& t) const;
+    NiPoint3 MulAddSecond(const NiPoint3& p, const NiPoint3& t) const;
 };
+inline NiPoint3 NiMatrix3_SkinView::MulAddFirst(const NiPoint3& p, const NiPoint3& t) const {
+    return NiPoint3(
+        GetEntry(0,0)*p.Readx() + GetEntry(0,1)*p.Ready() + GetEntry(0,2)*p.z + t.x,
+        ((GetEntry(1,0)*p.Readx() + GetEntry(1,1)*p.Ready()) + GetEntry(1,2)*p.z + t.y),
+        GetEntry(2,0)*p.Readx() + GetEntry(2,1)*p.Ready() + GetEntry(2,2)*p.z + t.z);
+}
+inline NiPoint3 NiMatrix3_SkinView::MulAddSecond(const NiPoint3& p, const NiPoint3& t) const {
+    return NiPoint3(
+        GetEntry(0,0)*p.Readx() + GetEntry(0,1)*p.Ready() + GetEntry(0,2)*p.z + t.x,
+        GetEntry(1,0)*p.Readx() + (GetEntry(1,1)*p.Ready()) + GetEntry(1,2)*p.z + t.y,
+        (GetEntry(2,0)*p.Readx() + GetEntry(2,1)*p.Ready()) + GetEntry(2,2)*p.z + t.z);
+}
+
+namespace skinning {
+static __forceinline NiMatrix3 operator*(float s, const NiMatrix3& m) { return m*s; }
+static __forceinline void XformZ(const NiMatrix3& m, const float& x, const float& y, const float& z, const NiPoint3& t, NiPoint3& r) {
+        r.x = m.GetEntry(0,0)*x + m.GetEntry(0,1)*y + m.GetEntry(0,2)*z + t.x;
+        r.y = m.GetEntry(1,0)*x + (m.GetEntry(1,1)*y) + m.GetEntry(1,2)*z + t.y;
+        r.z = m.GetEntry(2,0)*x + (m.GetEntry(2,1)*y) + m.GetEntry(2,2)*z + t.z;
+}
 struct SkinObject {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
     unsigned int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
@@ -3743,7 +3559,7 @@ void SkinInstance::FUN_00a855f0(const NiPoint3* positions, const NiPoint3* norma
     unsigned int boneCount = data->GetCount();
     unsigned int boneIndex;
     NiTransform boneTransform;
-    ThreeByThreeMatrix scaledRotation;
+    NiMatrix3 scaledRotation;
     unsigned short vertexIndex;
     if (normals && dstNorm) {
         if (dstTan && dstBin) {
@@ -3775,21 +3591,21 @@ void SkinInstance::FUN_00a855f0(const NiPoint3* positions, const NiPoint3* norma
                 const SkinData::Bone& bone = boneData[boneIndex];
                 unsigned int vertexCount = bone.count;
                 boneTransform = rootTransform * bones[boneIndex]->GetWorld() * bone.skinToBone;
-                scaledRotation = boneTransform.scale * boneTransform.rotate;
+                scaledRotation = boneTransform.m_fScale * boneTransform.m_Rotate;
                 const SkinData::Weight* weights = bone.weights;
                 for (unsigned int j = 0; j < vertexCount; ++j) {
                     const SkinData::Weight& w = weights[j];
                     vertexIndex = w.vertex;
                     float weight = w.weight;
                     unsigned int offset = vertexIndex * stride;
-                    p = scaledRotation.MulAddFirst(positions[vertexIndex], boneTransform.translate);
+                    p = ((const NiMatrix3_SkinView&)scaledRotation).MulAddFirst(positions[vertexIndex], boneTransform.m_Translate);
                     {
-                    n.x = boneTransform.rotate.Entry(0, 0) * normals[vertexIndex].Readx() + boneTransform.rotate.Entry(0, 1) * normals[vertexIndex].y + boneTransform.rotate.Entry(0, 2) * normals[vertexIndex].z;
-                    n.y = boneTransform.rotate.Entry(1, 0) * normals[vertexIndex].x + boneTransform.rotate.Entry(1, 1) * normals[vertexIndex].y + boneTransform.rotate.Entry(1, 2) * normals[vertexIndex].z;
-                    n.z = boneTransform.rotate.Entry(2, 0) * normals[vertexIndex].x + boneTransform.rotate.Entry(2, 1) * normals[vertexIndex].Ready() + boneTransform.rotate.Entry(2, 2) * normals[vertexIndex].z;
+                    n.x = boneTransform.m_Rotate.GetEntry(0, 0) * normals[vertexIndex].Readx() + boneTransform.m_Rotate.GetEntry(0, 1) * normals[vertexIndex].y + boneTransform.m_Rotate.GetEntry(0, 2) * normals[vertexIndex].z;
+                    n.y = boneTransform.m_Rotate.GetEntry(1, 0) * normals[vertexIndex].x + boneTransform.m_Rotate.GetEntry(1, 1) * normals[vertexIndex].y + boneTransform.m_Rotate.GetEntry(1, 2) * normals[vertexIndex].z;
+                    n.z = boneTransform.m_Rotate.GetEntry(2, 0) * normals[vertexIndex].x + boneTransform.m_Rotate.GetEntry(2, 1) * normals[vertexIndex].Ready() + boneTransform.m_Rotate.GetEntry(2, 2) * normals[vertexIndex].z;
                     }
-                    t = boneTransform.rotate * tangents[vertexIndex];
-                    b = boneTransform.rotate * binormals[vertexIndex];
+                    t = boneTransform.m_Rotate * tangents[vertexIndex];
+                    b = boneTransform.m_Rotate * binormals[vertexIndex];
                     *(NiPoint3*)((char*)dstPos + offset) += p * weight;
                     ((NiPoint3*)((char*)dstNorm + offset))->AddByValue(n * weight);
                     *(NiPoint3*)((char*)dstTan + offset) += t * weight;
@@ -3819,18 +3635,18 @@ void SkinInstance::FUN_00a855f0(const NiPoint3* positions, const NiPoint3* norma
             const SkinData::Bone& bone = boneData[boneIndex];
             unsigned int vertexCount = bone.count;
             boneTransform = rootTransform * bones[boneIndex]->GetWorld() * bone.skinToBone;
-            scaledRotation = boneTransform.rotate * boneTransform.scale;
+            scaledRotation = boneTransform.m_Rotate * boneTransform.m_fScale;
             const SkinData::Weight* weights = bone.weights;
-            const NiPoint3& translate = boneTransform.translate;
+            const NiPoint3& translate = boneTransform.m_Translate;
             for (unsigned int j = 0; j < vertexCount; ++j) {
                 vertexIndex = weights[j].vertex;
                 float weight = weights[j].weight;
                 unsigned int offset = vertexIndex * stride;
-                p = scaledRotation.MulAddSecond(positions[vertexIndex], translate);
+                p = ((const NiMatrix3_SkinView&)scaledRotation).MulAddSecond(positions[vertexIndex], translate);
                     {
-                    n.x = boneTransform.rotate.Entry(0, 0) * normals[vertexIndex].x + boneTransform.rotate.Entry(0, 1) * normals[vertexIndex].y + boneTransform.rotate.Entry(0, 2) * normals[vertexIndex].z;
-                    n.y = boneTransform.rotate.Entry(1, 0) * normals[vertexIndex].x + boneTransform.rotate.Entry(1, 1) * normals[vertexIndex].y + boneTransform.rotate.Entry(1, 2) * normals[vertexIndex].z;
-                    n.z = boneTransform.rotate.Entry(2, 0) * normals[vertexIndex].x + boneTransform.rotate.Entry(2, 1) * normals[vertexIndex].y + boneTransform.rotate.Entry(2, 2) * normals[vertexIndex].z;
+                    n.x = boneTransform.m_Rotate.GetEntry(0, 0) * normals[vertexIndex].x + boneTransform.m_Rotate.GetEntry(0, 1) * normals[vertexIndex].y + boneTransform.m_Rotate.GetEntry(0, 2) * normals[vertexIndex].z;
+                    n.y = boneTransform.m_Rotate.GetEntry(1, 0) * normals[vertexIndex].x + boneTransform.m_Rotate.GetEntry(1, 1) * normals[vertexIndex].y + boneTransform.m_Rotate.GetEntry(1, 2) * normals[vertexIndex].z;
+                    n.z = boneTransform.m_Rotate.GetEntry(2, 0) * normals[vertexIndex].x + boneTransform.m_Rotate.GetEntry(2, 1) * normals[vertexIndex].y + boneTransform.m_Rotate.GetEntry(2, 2) * normals[vertexIndex].z;
                     }
                 *(NiPoint3*)((char*)dstPos + offset) += p * weight;
                 ((NiPoint3*)((char*)dstNorm + offset))->AddByValue(n * weight);
@@ -3853,9 +3669,9 @@ void SkinInstance::FUN_00a855f0(const NiPoint3* positions, const NiPoint3* norma
         const SkinData::Bone& bone = boneData[boneIndex];
         unsigned int vertexCount = bone.count;
         boneTransform = rootTransform * bones[boneIndex]->GetWorld() * bone.skinToBone;
-        scaledRotation = boneTransform.scale * boneTransform.rotate;
+        scaledRotation = boneTransform.m_fScale * boneTransform.m_Rotate;
         const SkinData::Weight* weights = bone.weights;
-        const NiPoint3& translate = boneTransform.translate;
+        const NiPoint3& translate = boneTransform.m_Translate;
         for (unsigned int j = 0; j < vertexCount; ++j) {
             const SkinData::Weight& w = weights[j];
             unsigned short vertexIndex = w.vertex;
@@ -3868,6 +3684,8 @@ void SkinInstance::FUN_00a855f0(const NiPoint3* positions, const NiPoint3* norma
         }
     }
 }
+
+} // namespace skinning
 
 extern int DAT_011f5e44;
 extern int DAT_011f5e4c;

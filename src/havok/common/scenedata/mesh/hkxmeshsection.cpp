@@ -2,7 +2,10 @@
 // src/havok/common/scenedata/mesh/hkxmeshsection.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/mesh/hkxmeshsection.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkxMeshSection.h"
+#include "../../../../../include/hkxMeshSection.h"
+#include "../../../../../include/hkxIndexBuffer.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkMemoryAllocator.h"
 
 extern int DAT_010e9b7c;
 struct IndexArray
@@ -38,14 +41,11 @@ inline void* operator new(unsigned int, void* p)
     return p;
 }
 
-class hkMemoryAllocatorE6;
-void __cdecl FUN_00c908c0(hkMemoryAllocatorE6& alloc, void* pArray, int iReqElem, int iElemSize);
-
 class hkMemoryRouterE6
 {
   public:
     static hkMemoryRouterE6& GetMonitorStream();
-    hkMemoryAllocatorE6& heap()
+    hkMemoryAllocator& heap()
     {
         return *m_pStreamAllocator;
     }
@@ -53,7 +53,7 @@ class hkMemoryRouterE6
     void* m_pTemp;
     void* m_pDebugAllocator;
     void* m_pSolver;
-    hkMemoryAllocatorE6* m_pStreamAllocator;
+    hkMemoryAllocator* m_pStreamAllocator;
 };
 
 class hkReferencedObjectE6
@@ -113,56 +113,42 @@ class hkRefVariantE6 : public hkRefPtrE6<hkReferencedObjectE6>
     }
 };
 
-template <class T> class hkArrayE6
+template <class T, class Allocator>
+__forceinline hkArray<T, Allocator>& hkArray<T, Allocator>::operator=(const hkArray<T, Allocator>& a)
 {
-  public:
-    int getCapacity() const
+    hkMemoryAllocator& alloc = hkMemoryRouterE6::GetMonitorStream().heap();
+    int oldSize = m_iElementCount;
+    int newSize = a.m_iElementCount;
+    int copiedSize = newSize > oldSize ? oldSize : newSize;
+    if (getCapacity() < newSize)
     {
-        return m_iCapacityState & 0x3fffffff;
+        int cap2 = 2 * getCapacity();
+        int newCap = newSize < cap2 ? cap2 : newSize;
+        hkArrayUtil::_reserve(alloc, this, newCap, sizeof(T));
     }
-    __forceinline hkArrayE6& operator=(const hkArrayE6& a)
-    {
-        hkMemoryAllocatorE6& alloc = hkMemoryRouterE6::GetMonitorStream().heap();
-        int oldSize = m_iElementCount;
-        int newSize = a.m_iElementCount;
-        int copiedSize = newSize > oldSize ? oldSize : newSize;
-        if (getCapacity() < newSize)
-        {
-            int cap2 = 2 * getCapacity();
-            int newCap = newSize < cap2 ? cap2 : newSize;
-            FUN_00c908c0(alloc, this, newCap, sizeof(T));
-        }
-        T* pDestroy = m_data + newSize;
-        for (int i = 0; i < oldSize - newSize; i++)
-            pDestroy[i].~T();
-        const T* pSrc = a.m_data;
-        T* pDst = m_data;
-        for (int i = 0; i < copiedSize; i++)
-            pDst[i] = pSrc[i];
-        pSrc = a.m_data + copiedSize;
-        pDst = m_data + copiedSize;
-        for (int i = 0; i < newSize - copiedSize; i++)
-            new (&pDst[i]) T(pSrc[i]);
-        m_iElementCount = newSize;
-        return *this;
-    }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-
-class hkxVertexBufferE6;
-class hkxIndexBufferE6;
-class hkxMaterialE6;
+    T* pDestroy = m_data + newSize;
+    for (int i = 0; i < oldSize - newSize; i++)
+        pDestroy[i].~T();
+    const T* pSrc = a.m_data;
+    T* pDst = m_data;
+    for (int i = 0; i < copiedSize; i++)
+        pDst[i] = pSrc[i];
+    pSrc = a.m_data + copiedSize;
+    pDst = m_data + copiedSize;
+    for (int i = 0; i < newSize - copiedSize; i++)
+        new (&pDst[i]) T(pSrc[i]);
+    m_iElementCount = newSize;
+    return *this;
+}
 
 class hkxMeshSectionE6 : public hkReferencedObjectE6
 {
   public:
     hkxMeshSectionE6& FUN_00e61770(const hkxMeshSectionE6& o);
     hkRefPtrE6<hkReferencedObjectE6> m_pMeshVertexBuffer;
-    hkArrayE6<hkRefPtrE6<hkReferencedObjectE6> > m_kIndexBuffers;
+    hkArray<hkRefPtrE6<hkReferencedObjectE6> > m_kIndexBuffers;
     hkRefPtrE6<hkReferencedObjectE6> m_iMaterialIndex;
-    hkArrayE6<hkRefVariantE6> m_kUserChannels;
+    hkArray<hkRefVariantE6> m_kUserChannels;
 };
 
 // @fnv 0x00e61770
@@ -177,12 +163,6 @@ hkxMeshSectionE6& hkxMeshSectionE6::FUN_00e61770(const hkxMeshSectionE6& o)
     return *this;
 }
 
-class hkxIndexBuffer
-{
-  public:
-    int GetPrimitiveCount() const;
-    bool FUN_00e67420(unsigned int offset, unsigned int& a, unsigned int& b, unsigned int& c) const;
-};
 struct MeshSection : public hkxMeshSection
 {
     void FUN_00e61420(unsigned int position, unsigned int& a, unsigned int& b, unsigned int& c) const;
@@ -199,7 +179,7 @@ void MeshSection::FUN_00e61420(unsigned int aiPrimitiveIndex, unsigned int& aiVe
         int iPrimitiveCount = pIndexBuffer->GetPrimitiveCount();
         if (aiPrimitiveIndex < (unsigned)(start + iPrimitiveCount))
         {
-            pIndexBuffer->FUN_00e67420(aiPrimitiveIndex - start, aiVertexA, aiVertexB, aiVertexC);
+            pIndexBuffer->GetTriangleIndices(aiPrimitiveIndex - start, aiVertexA, aiVertexB, aiVertexC);
             return;
         }
         start += iPrimitiveCount;
@@ -207,23 +187,22 @@ void MeshSection::FUN_00e61420(unsigned int aiPrimitiveIndex, unsigned int& aiVe
 }
 
 #include <xmmintrin.h>
-template <class T> struct hkArray_e614
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline void SetSizeAndGrow(int n)
+    return hkMemoryRouterE6::GetMonitorStream().heap();
+}
+
+template <class T>
+__forceinline void hkArrayBase<T>::_setSize(hkMemoryAllocator& alloc, int n)
+{
+    int cap = m_iCapacityState & 0x3fffffff;
+    if (cap < n)
     {
-        hkMemoryAllocatorE6& alloc = hkMemoryRouterE6::GetMonitorStream().heap();
-        int cap = m_iCapacityState & 0x3fffffff;
-        if (cap < n)
-        {
-            int cap2 = 2 * cap;
-            FUN_00c908c0(alloc, this, n < cap2 ? cap2 : n, sizeof(T));
-        }
-        m_iElementCount = n;
+        int cap2 = 2 * cap;
+        hkArrayUtil::_reserve(alloc, this, n < cap2 ? cap2 : n, sizeof(T));
     }
-};
+    m_iElementCount = n;
+}
 
 struct VertexDesc_e614
 {
@@ -265,12 +244,12 @@ struct Mesh_e614
 {
     int unk00, unk04;
     VertexBuffer_e614* m_pMeshVertexBuffer;
-    void FUN_00e61480(hkArray_e614<__m128>& positions);
+    void FUN_00e61480(hkArray<__m128>& positions);
 };
 
 // Copies vertex position vectors from the mesh vertex buffer into the positions array, growing it as needed.
 // @fnv 0x00e61480
-void Mesh_e614::FUN_00e61480(hkArray_e614<__m128>& positions)
+void Mesh_e614::FUN_00e61480(hkArray<__m128>& positions)
 {
     VertexBuffer_e614* pVertexBuffer = m_pMeshVertexBuffer;
     if (!pVertexBuffer)
@@ -282,7 +261,7 @@ void Mesh_e614::FUN_00e61480(hkArray_e614<__m128>& positions)
     const char* src = pVertexBuffer->FUN_00e3dfb0(desc);
     int stride = desc->m_iElementIndex;
     int base = positions.m_iElementCount;
-    positions.SetSizeAndGrow(base + numVertices);
+    positions.setSize(base + numVertices);
     for (int i = 0; i < numVertices; i++)
     {
         positions.m_data[base + i] = *(const __m128*)src;

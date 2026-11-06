@@ -2,8 +2,8 @@
 #ifndef FNV_NIPSYSCOLORMODIFIER_H
 #define FNV_NIPSYSCOLORMODIFIER_H
 
-#include "NiStream.h"
-#include "NiPSysModifier.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiPSysModifier.h"
 
 class NiColorData;
 
@@ -11,11 +11,16 @@ class NiColorData;
 class NiPSysColorModifier : public NiPSysModifier
 {
   public:
+    NiPSysColorModifier() throw();
+    virtual ~NiPSysColorModifier();
+
+    virtual NiObject* MakeClone(CloningProcess& kCloning);
+    virtual void GetViewerStrings(NiViewerStringsArray* pkStrings);
     virtual void LoadBinary(NiStream& kStream);
     virtual void LinkObject(NiStream& kStream);
     virtual bool RegisterStreamables(NiStream& kStream);
     virtual void SaveBinary(NiStream& kStream);
-    virtual bool IsEqual(NiObject* pkObject);
+    virtual bool IsEqual(NiObject* pkObject) const;
     virtual void Update(float fTime, NiPSysData* pkData);
 
     NiColorData* GetColorData();

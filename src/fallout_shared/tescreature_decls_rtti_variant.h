@@ -83,12 +83,12 @@ extern "C" void FnvAttackDtorAlias();
 extern "C" void FnvActorBaseDtorAlias();
 extern "C" unsigned int __security_cookie;
 
-class CreatureSoundCollection
+class CreatureSounds
 {
   public:
     unsigned char soundLists[0x58];
-    CreatureSoundCollection();
-    ~CreatureSoundCollection();
+    CreatureSounds();
+    ~CreatureSounds();
 };
 
 class TESActorBaseData
@@ -239,7 +239,7 @@ class TESCreature : public TESActorBase, public TESAttackDamageForm, public TESM
   public:
     union
     {
-        CreatureSoundCollection* m_pCreatureSounds;
+        CreatureSounds* m_pCreatureSounds;
         TESCreature* m_pCreature;
     };
     unsigned char dataPadding;
@@ -267,7 +267,7 @@ class TESCreature : public TESActorBase, public TESAttackDamageForm, public TESM
     BGSBodyPartData* GetBodyPartData();
     void ResetFormData();
     void LoadGame(BGSLoadFormBuffer* buffer);
-    CreatureSoundCollection* GetMutableCreatureSounds();
+    CreatureSounds* GetMutableCreatureSounds();
     void SetCreatureSoundsFrom(TESCreature* soundCreature);
     void SetBodyPartData(BGSBodyPartData* bodyPartData);
     void Revert(BGSLoadFormBuffer* buffer);

@@ -2,28 +2,24 @@
 // src/fallout/ai/bsplayerdistancecheckcontroller.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/bsplayerdistancecheckcontroller.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiRTTI
-{
-};
+#include "../../../include/NiRTTI.h"
+#include "../../../include/BSPlayerDistanceCheckController.h"
+
 extern "C" const NiRTTI* const g_011dfeac;
 
-struct FUN_008d1610_shell
+struct FUN_00a6d290
 {
-    const NiRTTI* const* GetNiRTTI();
+    virtual void v00();
+    ~FUN_00a6d290();
 };
 
+// The shared controller header does not yet declare these methods or the callback at 0x38.
+
 // @fnv 0x008d1610
-const NiRTTI* const* FUN_008d1610_shell::GetNiRTTI()
+const NiRTTI* const* BSPlayerDistanceCheckController::GetNiRTTI()
 {
     return &g_011dfeac;
 }
-
-struct BSPlayerDistanceCheckController
-{
-    virtual ~BSPlayerDistanceCheckController();
-    static void __cdecl operator delete(void* p, unsigned int size);
-    void* __thiscall ScalarDeletingDestructor(unsigned int flags);
-};
 
 // Runs the destructor and, when bit 0 of flags is set, frees this with operator delete; returns this.
 // @fnv 0x008d1620
@@ -222,19 +218,8 @@ struct Manager
 extern Manager* DAT_011dea3c;
 DoorSpawnRequest* __cdecl FUN_00653270(char* tag, void* owner);
 
-struct FUN_008d1670_cls
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28;
-    void* m_2c;
-    unsigned int unk30, unk34;
-    void(__cdecl* m_38)(void*);
-    double FUN_00508120();
-    int GetField38();
-    void UpdateDoorSpawn(unsigned int unkArg);
-};
-
 // @fnv 0x008d1670
-void FUN_008d1670_cls::UpdateDoorSpawn(unsigned int unkArg)
+void BSPlayerDistanceCheckController::UpdateDoorSpawn(unsigned int unkArg)
 {
     DoorSpawnRequest* req;
     ItemHandle handle;
@@ -243,13 +228,13 @@ void FUN_008d1670_cls::UpdateDoorSpawn(unsigned int unkArg)
     }
     else
     {
-        req = FUN_00653270((char*)&DAT_011f4280, m_2c);
+        req = FUN_00653270((char*)&DAT_011f4280, m_pkTarget);
         if (req != 0)
         {
             DAT_011dea3c->v1f4(&handle, req->FUN_0045bb80())->FUN_00439ef0();
             if (handle.FUN_00457990() < FUN_00508120())
             {
-                m_38(req);
+                m_callback(req);
             }
         }
     }
@@ -260,41 +245,14 @@ extern int DAT_011f4280;
 
 void __cdecl FUN_0043b300(int* apTarget, void* apValue);
 
-struct FUN_008d1720_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    void* m_pIntegerData;
-
-    void FUN_008d1720();
-};
-
-// @fnv 0x008d1720
-void FUN_008d1720_cls::FUN_008d1720()
-{
-    FUN_0043b300(&DAT_011f4280, m_pIntegerData);
-}
 }  // namespace fnv_008d1720
 
-struct FUN_00a6d290
+// @fnv 0x008d1720
+void BSPlayerDistanceCheckController::FUN_008d1720()
 {
-    virtual void v00();
-    ~FUN_00a6d290();
-};
-struct FUN_008d1650 : FUN_00a6d290
-{
-    virtual void v00();
-    ~FUN_008d1650();
-};
+    fnv_008d1720::FUN_0043b300(&fnv_008d1720::DAT_011f4280, m_pkTarget);
+}
+
 // @fnv 0x008d1650
-FUN_008d1650::~FUN_008d1650()
+BSPlayerDistanceCheckController::~BSPlayerDistanceCheckController()
 {}

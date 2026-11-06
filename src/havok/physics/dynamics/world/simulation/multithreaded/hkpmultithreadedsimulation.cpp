@@ -1,3 +1,30 @@
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/BSAudio.h"
+#include "../../../../../../../include/Pair.h"
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+// hkMemoryRouterQ_hkpmultithreadedsimulation: local type (was include/hkMemoryRouterQ.h, which had no evidence of one real class); no method of it is bound to a named game function
+
+class hkMemoryRouterQ_hkpmultithreadedsimulation
+{
+public:
+    int unk00;
+    int unk04;
+    int unk08;
+    union
+    {
+        int unk0C;
+        int unk0c;
+    };
+    hkMemoryAllocator* m_pStreamAllocator;
+
+    hkMemoryAllocator& heap()
+    {
+        return *m_pStreamAllocator;
+    }
+
+    hkMemoryAllocator& debug();
+};
 
 // src/havok/physics/dynamics/world/simulation/multithreaded/hkpmultithreadedsimulation.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/simulation/multithreaded/hkpmultithreadedsimulation.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -70,25 +97,19 @@ struct S_00d02020_Handle
     }
 };
 
-struct S_00d02020_Pair
-{
-    S_00d02020_Handle* m_kPointA;
-    S_00d02020_Handle* m_kPointB;
-};
-
 // For each handle in the pair whose m_type is 2, calls v24 on the owner's owner with the other handle's owner as argument.
 // @fnv 0x00d02020
-void __stdcall FUN_00d02020(S_00d02020_Pair* pair)
+void __stdcall FUN_00d02020(Pair* pair)
 {
-    if (pair->m_kPointA->m_type == 2)
+    if (((S_00d02020_Handle*)pair->a)->m_type == 2)
     {
-        S_00d02020_Collidable* c = pair->m_kPointB->getOwner();
-        pair->m_kPointA->getOwner()->getOwner()->v24(c);
+        S_00d02020_Collidable* c = ((S_00d02020_Handle*)pair->b)->getOwner();
+        ((S_00d02020_Handle*)pair->a)->getOwner()->getOwner()->v24(c);
     }
-    if (pair->m_kPointB->m_type == 2)
+    if (((S_00d02020_Handle*)pair->b)->m_type == 2)
     {
-        S_00d02020_Owner* pOwner = pair->m_kPointB->getOwner()->getOwner();
-        pOwner->v24(pair->m_kPointA->getOwner());
+        S_00d02020_Owner* pOwner = ((S_00d02020_Handle*)pair->b)->getOwner()->getOwner();
+        pOwner->v24(((S_00d02020_Handle*)pair->a)->getOwner());
     }
 }
 
@@ -531,16 +552,7 @@ struct PairList
     unsigned int m_capBits;
 };
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pAllocator;
-};
-
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 void ResizeAudioStream(void* allocator, PairList* list, unsigned int elemSize);
 char* FindEntryValue(char* a, char* b);
 void FUN_00cc10b0(char* p);
@@ -568,10 +580,10 @@ void FUN_00d027c0_cls::ProcessPairEntry(PairEntry* entry)
         if (na[0xe8] != 5 && nb[0xe8] != 5 && *(int*)(na + 0xcc) != *(int*)(nb + 0xcc))
         {
             PairList* list = (PairList*)(m_pSharedOwner + 0x90);
-            AllocHolder* holder = FUN_00c85750();
+            hkMemoryRouter* holder = FUN_00c85750();
             if (list->m_uiItemCount == (int)(list->m_capBits & 0x3fffffffu))
             {
-                ResizeAudioStream(holder->m_pAllocator, list, 8);
+                ResizeAudioStream(holder->m_heap, list, 8);
             }
             PairEntry* slot = &list->m_data[list->m_uiItemCount];
             if (slot != 0)
@@ -1125,20 +1137,20 @@ CpuObject* CpuObject::FUN_00d04320(unsigned int flags)
 // are ignored; otherwise each phantom side is told about the other side's collidable.
 // For each pair member of type 3, calls v24 on the other member's owner's owner, passing the non-phantom member's owner.
 // @fnv 0x00d020f0
-void __stdcall FUN_00d020f0(S_00d02020_Pair* pair)
+void __stdcall FUN_00d020f0(Pair* pair)
 {
-    if (pair->m_kPointA->m_type == 3 && pair->m_kPointB->m_type == 3)
+    if (((S_00d02020_Handle*)pair->a)->m_type == 3 && ((S_00d02020_Handle*)pair->b)->m_type == 3)
         return;
-    if (pair->m_kPointA->m_type == 3)
+    if (((S_00d02020_Handle*)pair->a)->m_type == 3)
     {
-        S_00d02020_Collidable* other = pair->m_kPointB->getOwner();
-        S_00d02020_Owner* pPhantomOwner = pair->m_kPointA->getOwner()->getOwner();
+        S_00d02020_Collidable* other = ((S_00d02020_Handle*)pair->b)->getOwner();
+        S_00d02020_Owner* pPhantomOwner = ((S_00d02020_Handle*)pair->a)->getOwner()->getOwner();
         pPhantomOwner->v24(other);
     }
-    if (pair->m_kPointB->m_type == 3)
+    if (((S_00d02020_Handle*)pair->b)->m_type == 3)
     {
-        S_00d02020_Collidable* other = pair->m_kPointA->getOwner();
-        S_00d02020_Owner* pPhantomOwner = pair->m_kPointB->getOwner()->getOwner();
+        S_00d02020_Collidable* other = ((S_00d02020_Handle*)pair->a)->getOwner();
+        S_00d02020_Owner* pPhantomOwner = ((S_00d02020_Handle*)pair->b)->getOwner()->getOwner();
         pPhantomOwner->v24(other);
     }
 }
@@ -1190,27 +1202,21 @@ struct CollidableD020
     }
 };
 
-struct PairD020
-{
-    CollidableD020* m_pkA;
-    CollidableD020* m_pkB;
-};
-
 // Unless both collidables have type 3, calls v07 on the phantom of each type-3 collidable with the other collidable's owner.
 // @fnv 0x00d02080
-void __stdcall NotifyPhantomCollision(PairD020* pkPair)
+void __stdcall NotifyPhantomCollision(Pair* pkPair)
 {
-    if (pkPair->m_pkA->m_cType == 3 && pkPair->m_pkB->m_cType == 3)
+    if (((CollidableD020*)pkPair->a)->m_cType == 3 && ((CollidableD020*)pkPair->b)->m_cType == 3)
         return;
-    if (pkPair->m_pkA->m_cType == 3)
+    if (((CollidableD020*)pkPair->a)->m_cType == 3)
     {
-        OwnerD020* pkOther = pkPair->m_pkB->GetOwner();
-        pkPair->m_pkA->GetOwner()->GetPhantom()->v07(pkOther);
+        OwnerD020* pkOther = ((CollidableD020*)pkPair->b)->GetOwner();
+        ((CollidableD020*)pkPair->a)->GetOwner()->GetPhantom()->v07(pkOther);
     }
-    if (pkPair->m_pkB->m_cType == 3)
+    if (((CollidableD020*)pkPair->b)->m_cType == 3)
     {
-        PhantomD020* pkPhantom = pkPair->m_pkB->GetOwner()->GetPhantom();
-        pkPhantom->v07(pkPair->m_pkA->GetOwner());
+        PhantomD020* pkPhantom = ((CollidableD020*)pkPair->b)->GetOwner()->GetPhantom();
+        pkPhantom->v07(((CollidableD020*)pkPair->a)->GetOwner());
     }
 }
 
@@ -1223,24 +1229,15 @@ struct GroupIdentity
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
     unsigned short count;
 };
-struct Vector4f
+// Exe 0x00d02930: unit-local Vector4f view; declarations and layout are preserved.
+struct HkpmultithreadedsimulationVector4fView
 {
     int x, y, z, w;
-};
-struct hkBoolX
-{
-    char m_cBooleanValue;
-    hkBoolX()
-    {}
-    hkBoolX(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
 };
 struct __declspec(align(16)) CollisionInput
 {
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
-    Vector4f unk20, unk30, unk40;
+    HkpmultithreadedsimulationVector4fView unk20, unk30, unk40;
     int unk50, unk54, unk58, unk5C, unk60;
     void* scratch;
     int unk68, unk6C, unk70, unk74, unk78, unk7C;
@@ -1324,16 +1321,16 @@ struct TaskInput
     int unk00, unk04, unk08, unk0C;
     void* unk10;
     int unk14, unk18, unk1C, unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C;
-    Vector4f step;
+    HkpmultithreadedsimulationVector4fView step;
 };
 struct __declspec(align(16)) BuildJob : JobBase
 {
     void* results;
     unsigned short unk24, unk26, numItems, batch;
     int** items;
-    Vector4f step;
+    HkpmultithreadedsimulationVector4fView step;
     unsigned char flag;
-    __forceinline BuildJob(int** p, int n, TaskInput* input, int b, hkBoolX f) : JobBase(15, 0, 80, 1)
+    __forceinline BuildJob(int** p, int n, TaskInput* input, int b, hkBool f) : JobBase(15, 0, 80, 1)
     {
         step = input->step;
         count = 0;
@@ -1411,8 +1408,8 @@ struct Processor
     int unkB0, unkB4, unkB8, unkBC;
     JobQueue* active;
 
-    void ProcessGroups(int**, int, struct Group*, int, TaskInput*, hkBoolX);
-    void FUN_00d0c9c0(int**, int, TaskInput*, GroupIdentity*, hkBoolX);
+    void ProcessGroups(int**, int, struct Group*, int, TaskInput*, hkBool);
+    void FUN_00d0c9c0(int**, int, TaskInput*, GroupIdentity*, hkBool);
 };
 struct Group
 {
@@ -1423,7 +1420,7 @@ struct Group
 };
 // Processes physics groups by creating and executing BuildJobs for large batches or calling FUN_00d0c9c0 directly for small ones.
 // @fnv 0x00d02930
-void Processor::ProcessGroups(int** items, int total, Group* groups, int count, TaskInput* input, hkBoolX flag)
+void Processor::ProcessGroups(int** items, int total, Group* groups, int count, TaskInput* input, hkBool flag)
 {
     if (active && total > owner->threshold)
     {
@@ -1490,87 +1487,65 @@ void Processor::ProcessGroups(int** items, int total, Group* groups, int count, 
     }
 }
 
-struct hkMemoryAllocatorQ
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void ReturnMemory(void* p, int numBytes);
-};
-
-struct hkStackMemoryQ
-{
-    char* m_pTileTemplate;
-};
-
-struct hkMemoryRouterQ
-{
-    hkStackMemoryQ m_aiEntries;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocatorQ* m_pStreamAllocator;
-};
-
 void __cdecl ResizeAudioStream(void* alloc, void* arr, int elemSize);
 extern "C" void __cdecl FUN_00cb1280(void* p, int v, int n);
 
-__forceinline hkMemoryRouterQ& getRouter()
+__forceinline hkMemoryRouterQ_hkpmultithreadedsimulation& getRouter()
 {
-    return *(hkMemoryRouterQ*)FUN_00c85750();
+    return *(hkMemoryRouterQ_hkpmultithreadedsimulation*)FUN_00c85750();
 }
 
-template <class T> struct hkArrayQ
+#include "../../../../../../../include/hkArray.h"
+// 0x00d03970's local arrays (hkLocalArray / hkArray in Havok) have no destructor state in the original: this /EHsc
+// unit would give hkArrayBase locals (user-declared ~hkArrayBase) an EH state for the by-value hkBool argument
+// (+0x1cd `mov [esp+54h],esp`), so they are this plain hkArrayBase layout (m_data, m_size, m_capacityAndFlags) with
+// hkArray's pushBack / clearAndDeallocate (hkArray.inl bodies, through the router's stream heap) as members.
+template <class T> struct StreamHeapArrayQ
 {
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
-
-    __forceinline hkArrayQ() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    __forceinline int getCapacity() const
+    __forceinline StreamHeapArrayQ() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
+    __forceinline int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
+    __forceinline void _clearAndDeallocate(hkMemoryAllocator& alloc)
     {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void _clearAndDeallocate(hkMemoryAllocatorQ& alloc)
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
+        this->m_iElementCount = 0;
+        if ((this->m_iCapacityState & 0x80000000) == 0)
+            alloc.bufFree(this->m_data, this->getCapacity() * sizeof(T));
+        this->m_data = 0;
+        this->m_iCapacityState = 0x80000000;
     }
     __forceinline void ClearAndRelease()
     {
         _clearAndDeallocate(*getRouter().m_pStreamAllocator);
     }
-    __forceinline void _pushBack(hkMemoryAllocatorQ& alloc, const T& t)
+    __forceinline void _pushBack(hkMemoryAllocator& alloc, const T& t)
     {
-        if (m_iElementCount == getCapacity())
+        if (this->m_iElementCount == this->getCapacity())
             ResizeAudioStream(&alloc, this, sizeof(T));
-        m_data[m_iElementCount++] = t;
+        this->m_data[this->m_iElementCount++] = t;
     }
     __forceinline void AddBack(const T& t)
     {
         _pushBack(*getRouter().m_pStreamAllocator, t);
     }
+    __forceinline hkArray<T>& array() { return reinterpret_cast<hkArray<T>&>(*this); }
 };
 
 template <class T> __forceinline T* hkAllocateStackQ(int n)
 {
-    hkStackMemoryQ& s = getRouter().m_aiEntries;
-    char* p = s.m_pTileTemplate;
-    s.m_pTileTemplate = p + ((n * sizeof(T) + 0x7f) & ~0x7f);
+    hkMemoryRouterQ_hkpmultithreadedsimulation& s = getRouter();
+    char* p = (char*)s.unk00;
+    s.unk00 = (int)(p + ((n * sizeof(T) + 0x7f) & ~0x7f));
     return (T*)p;
 }
 
 template <class T> __forceinline void hkDeallocateStackQ(T* p)
 {
-    getRouter().m_aiEntries.m_pTileTemplate = (char*)p;
+    getRouter().unk00 = (int)p;
 }
 
-template <class T> struct hkLocalArrayQ : hkArrayQ<T>
+template <class T> struct hkLocalArrayQ : StreamHeapArrayQ<T>
 {
     T* m_pStackAllocation;
 
@@ -1587,13 +1562,6 @@ template <class T> struct hkLocalArrayQ : hkArrayQ<T>
         hkDeallocateStackQ(m_pStackAllocation);
         this->ClearAndRelease();
     }
-};
-
-struct hkBoolQ
-{
-    char m_cBooleanValue;
-    hkBoolQ(bool b) : m_cBooleanValue(b)
-    {}
 };
 
 struct AgentTableEntryQ
@@ -1652,7 +1620,7 @@ struct CollidableQ
 
 struct LinkedCollidableQ
 {
-    void CopyAndSortGeometryList(hkArrayQ<CollisionEntryQ>& entries);
+    void CopyAndSortGeometryList(hkArray<CollisionEntryQ>& entries);
 };
 
 struct EntityQ
@@ -1678,7 +1646,7 @@ struct SimulationIslandQ
 struct InputQ
 {
     int LookupHashEntry(int key, int flag);
-    void FUN_00cb1870(hkMemoryAllocatorQ* heap, int key, EntityQ* entity);
+    void FUN_00cb1870(hkMemoryAllocator* heap, int key, EntityQ* entity);
 };
 
 struct CollideSimQ
@@ -1692,7 +1660,7 @@ struct CollideSimQ
     int unk40[0x20];
     int m_c0;
     void FUN_00d0db40(EntityQ** entities, int numEntities, void* input, int* out);
-    void FUN_00d03030(AgentEntryQ** entries, int numEntries, void* input, SimulationIslandQ* island, hkBoolQ flag);
+    void FUN_00d03030(AgentEntryQ** entries, int numEntries, void* input, SimulationIslandQ* island, hkBool flag);
     void ProcessCollisionEntries(EntityQ** entities, int numEntities, void* input, InputQ* collInput) throw();
 };
 
@@ -1708,13 +1676,13 @@ void CollideSimQ::ProcessCollisionEntries(EntityQ** entities, int numEntities, v
         FUN_00cb1280(marked.m_data, 0, numIslandEntities);
 
         hkLocalArrayQ<AgentEntryQ*> toProcess(1000);
-        hkArrayQ<CollisionEntryQ> entries;
+        StreamHeapArrayQ<CollisionEntryQ> entries;
 
         for (int i = 0; i < numEntities; i++)
         {
             EntityQ* entity = entities[i];
             marked.m_data[entity->m_usStorageIndex] = 1;
-            entity->m_kCollidable.CopyAndSortGeometryList(entries);
+            entity->m_kCollidable.CopyAndSortGeometryList(entries.array());
 
             for (int j = 0; j < entries.m_iElementCount; j++)
             {
@@ -1859,15 +1827,6 @@ struct AudioSink
     virtual void Release(void* data, int size);
 };
 
-struct BSAudio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioSink* m_sink;
-};
-
 extern BSAudio* __cdecl FUN_00c85750();
 
 // A streamed audio buffer: the size field counts the live items, the data
@@ -1972,7 +1931,7 @@ FUN_00d02da0::~FUN_00d02da0()
     DeleteCriticalSection(&m_critical9c);
     {
         BSAudio* audio = FUN_00c85750();
-        AudioSink* sink = audio->m_sink;
+        AudioSink* sink = reinterpret_cast<AudioSink*>(audio->pListener);
         int items = m_audio90.m_iElementCount;
         m_audio90.m_uiItemCount = 0;
         if (!(items & 0x80000000))
@@ -1982,7 +1941,7 @@ FUN_00d02da0::~FUN_00d02da0()
     DeleteCriticalSection(&m_critical78);
     {
         BSAudio* audio = FUN_00c85750();
-        AudioSink* sink = audio->m_sink;
+        AudioSink* sink = reinterpret_cast<AudioSink*>(audio->pListener);
         int items = m_audio6c.m_iElementCount;
         m_audio6c.m_uiItemCount = 0;
         if (!(items & 0x80000000))
@@ -3974,12 +3933,6 @@ static inline Singleton* GetSingleton()
     return (Singleton*)FUN_00c85750();
 }
 
-struct Pair
-{
-    void* m_00;
-    int m_04;
-};
-
 struct ArrPair
 {
     Pair* m_pData;
@@ -3990,8 +3943,8 @@ struct ArrPair
         for (int k = 0; k < n; ++k)
         {
             Pair& pr = m_pData[m_iArrayLength++];
-            pr.m_00 = a;
-            pr.m_04 = b;
+            pr.a = (int)a;
+            pr.b = b;
         }
     }
 };
@@ -6372,7 +6325,7 @@ struct ParamObj
         int index = 0;
         if (m_iArrayLength >= 0)
         {
-            while (index <= m_iArrayLength && m_pData[index].m_00 == (void*)-1)
+            while (index <= m_iArrayLength && m_pData[index].a == -1)
                 ++index;
         }
         return index;
@@ -6382,7 +6335,7 @@ struct ParamObj
         ++index;
         if (index <= m_iArrayLength)
         {
-            while (index <= m_iArrayLength && m_pData[index].m_00 == (void*)-1)
+            while (index <= m_iArrayLength && m_pData[index].a == -1)
                 ++index;
         }
         return index;
@@ -6449,7 +6402,7 @@ void ThisCls::FUN_00d03c20(ParamObj* apUnused, ParamObj* p1)
     i = p1->First();
     while (i <= p1->m_iArrayLength)
     {
-        savedElem = (Elem*)p1->m_pData[i].m_04;
+        savedElem = (Elem*)p1->m_pData[i].b;
         L.contacts.m_pData = 0;
         L.contacts.m_iArrayLength = 0;
         L.contacts.m_iCapacity = sentinel;
@@ -6460,7 +6413,7 @@ void ThisCls::FUN_00d03c20(ParamObj* apUnused, ParamObj* p1)
         {
             for (; j < iContactCount; j++)
             {
-                Elem* e2 = (Elem*)L.contacts.m_pData[j].m_00;
+                Elem* e2 = (Elem*)L.contacts.m_pData[j].a;
                 if (L.seen.LookupHashEntry(e2, 0) != 0)
                     continue;
                 int idx = e2->m_0c;
@@ -6514,8 +6467,8 @@ void ThisCls::FUN_00d03c20(ParamObj* apUnused, ParamObj* p1)
     pSingleton5->m_00 = (int*)((char*)p1 + ((total * 4 + 0x7f) & ~0x7f));
     for (int pi = 0; pi < pairs.m_iArrayLength; pi++)
     {
-        void* pfirst = pairs.m_pData[pi].m_00;
-        GroupIdentity* pkey = (GroupIdentity*)pairs.m_pData[pi].m_04;
+        void* pfirst = (void*)pairs.m_pData[pi].a;
+        GroupIdentity* pkey = (GroupIdentity*)pairs.m_pData[pi].b;
         Group& triple = groups.FindOrAdd(pkey);
         int slot = triple.unk0C;
         triple.unk0C = slot + 1;

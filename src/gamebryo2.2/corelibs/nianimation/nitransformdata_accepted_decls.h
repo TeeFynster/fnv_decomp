@@ -1,24 +1,8 @@
-// gamebryo2.2/corelibs/nianimation/nitransformdata_accepted_decls.h: declares AnimationKey, TimedRotationKey, NiTransformData
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiTransformData.h"
+// Unit-specific rotation-key operation and animation-key dispatch tables.
 #ifndef FNV_NITRANSFORMDATA_ACCEPTED_DECLS_H
 #define FNV_NITRANSFORMDATA_ACCEPTED_DECLS_H
-
-
-#include "nitransformdata_NiObject.h"
-
-class AnimationKey
-{
-  public:
-    enum KeyType
-    {
-        NOINTERP,
-        LINKEY,
-        BEZKEY,
-        TCBKEY,
-        EULERKEY,
-        STEPKEY,
-        NUMKEYTYPES
-    };
-};
 
 class TimedRotationKey
 {
@@ -31,33 +15,12 @@ class TimedAnimationKey;
 typedef void(__cdecl* NiRotKeyDeleteFunction)(TimedRotationKey*);
 typedef void(__cdecl* NiPosKeyDeleteFunction)(PositionKeyInterpolator*);
 typedef void(__cdecl* NiFloatKeyDeleteFunction)(TimedAnimationKey*);
-extern NiRotKeyDeleteFunction DAT_011f38d0[AnimationKey::NUMKEYTYPES];
-extern NiPosKeyDeleteFunction DAT_011f38b8[AnimationKey::NUMKEYTYPES];
-extern NiFloatKeyDeleteFunction DAT_011f38a0[AnimationKey::NUMKEYTYPES];
-extern unsigned char DAT_011f3764[AnimationKey::NUMKEYTYPES];
-extern unsigned char DAT_011f375e[AnimationKey::NUMKEYTYPES];
-extern unsigned char DAT_011f3758[AnimationKey::NUMKEYTYPES];
-
-class NiTransformData : public NiObject
-{
-  public:
-    unsigned short m_usNumRotKeys;
-    unsigned short m_usNumPosKeys;
-    unsigned short m_usNumScaleKeys;
-    AnimationKey::KeyType m_eRotationKeyType;
-    AnimationKey::KeyType m_ePositionKeyType;
-    AnimationKey::KeyType m_eScaleKeyType;
-    unsigned char m_ucRotationKeySize;
-    unsigned char m_ucPositionKeySize;
-    unsigned char m_ucScaleKeySize;
-    TimedRotationKey* m_pkRotationKeys;
-    PositionKeyInterpolator* m_pkPositionKeys;
-    TimedAnimationKey* m_pkScaleKeyArray;
-
-    void SetRotationKeys(TimedRotationKey*, unsigned int, AnimationKey::KeyType);
-    void SetPositionKeys(PositionKeyInterpolator*, unsigned int, AnimationKey::KeyType);
-    void SetScaleKeys(TimedAnimationKey*, unsigned int, AnimationKey::KeyType);
-};
+extern NiRotKeyDeleteFunction DAT_011f38d0[NiAnimationKey::NUMKEYTYPES];
+extern NiPosKeyDeleteFunction DAT_011f38b8[NiAnimationKey::NUMKEYTYPES];
+extern NiFloatKeyDeleteFunction DAT_011f38a0[NiAnimationKey::NUMKEYTYPES];
+extern unsigned char DAT_011f3764[NiAnimationKey::NUMKEYTYPES];
+extern unsigned char DAT_011f375e[NiAnimationKey::NUMKEYTYPES];
+extern unsigned char DAT_011f3758[NiAnimationKey::NUMKEYTYPES];
 
 FNV_STATIC_ASSERT(sizeof(NiTransformData) == 0x2c);
 FNV_STATIC_ASSERT(offsetof(NiTransformData, m_eRotationKeyType) == 0x10);

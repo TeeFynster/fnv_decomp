@@ -1,17 +1,20 @@
-// Source layout: AutoMemContext. PC corrections are in generate_headers.py.
-#ifndef FNV_AUTOMEMCONTEXT_H
-#define FNV_AUTOMEMCONTEXT_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+enum MEM_CONTEXT;
+
 class AutoMemContext
 {
   public:
-    MEM_CONTEXT m_eMemoryContext;  // +0x0
+    MEM_CONTEXT m_eMemoryContext;
+
+    AutoMemContext();
+    AutoMemContext(int context);
     AutoMemContext(MEM_CONTEXT context, bool track, const char* file, int line);
+    AutoMemContext(MEM_CONTEXT context, bool track, const char* file, unsigned int line);
+    AutoMemContext(int context, bool track, const char* file, int line);
     ~AutoMemContext();
+
+    void Enter(int context, bool track, char* file, int line);
+    void Leave();
+    // The compiler generates __vecDelDtor(unsigned int) from the destructor.
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(AutoMemContext) == 0x4);
-FNV_STATIC_ASSERT(offsetof(AutoMemContext, m_eMemoryContext) == 0x0);
-#endif

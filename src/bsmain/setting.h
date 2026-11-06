@@ -5,24 +5,24 @@
 #include "setting_declarations.h"
 
 // @fnv 0x0044f570
-template <> void SettingT<INISettingCollection>::EnsureCollection()
+void __cdecl EnsureINISettingCollection()
 {
-    if (!ms_pCollection)
-        ms_pCollection = new INISettingCollection;
+    if (!g_pINISettingCollection)
+        g_pINISettingCollection = new INISettingCollection;
 }
 
 // @fnv 0x0044f560
 template <> INISettingCollection* SettingT<INISettingCollection>::GetCollection()
 {
-    EnsureCollection();
-    return ms_pCollection;
+    EnsureINISettingCollection();
+    return g_pINISettingCollection;
 }
 
 // @fnv 0x004de490
 template <> INIPrefSettingCollection* SettingT<INIPrefSettingCollection>::GetCollection()
 {
-    EnsureCollection();
-    return ms_pCollection;
+    EnsureINIPrefSettingCollection();
+    return g_pINIPrefSettingCollection;
 }
 
 // @fnv 0x005e02b0

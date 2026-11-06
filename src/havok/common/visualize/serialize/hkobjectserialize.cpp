@@ -1,26 +1,21 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/common/visualize/serialize/hkobjectserialize.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/serialize/hkobjectserialize.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkBool.h"
+
+
 typedef unsigned int C68E30size_t;
 
-struct C68E30Allocator;
-
-struct C68E30MemoryRouter
+inline hkMemoryAllocator& GetAudioAllocator(hkMemoryRouter& holder)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    C68E30Allocator* m_pStreamAllocator;
+    return *reinterpret_cast<hkMemoryAllocator*>(holder.m_heap);
+}
 
-    C68E30Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" C68E30MemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
 
 struct C68E30PrimaryBase
@@ -58,25 +53,22 @@ struct C68E30Pair
     }
 };
 
-struct C68E30PairArray
+typedef hkArray<C68E30Pair> C68E30PairArray;
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    C68E30Pair* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+return reinterpret_cast<hkMemoryAllocator&>(GetAudioAllocator(FUN_00c85750()));
+}
+template<> __forceinline void hkArrayBase<C68E30Pair>::_pushBack(hkMemoryAllocator& sharedAlloc, C68E30Pair const& pair)
+{
+hkMemoryAllocator& alloc = reinterpret_cast<hkMemoryAllocator&>(sharedAlloc);
 
-    void _pushBack(C68E30Allocator& alloc, const C68E30Pair& pair)
-    {
         if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
             ResizeAudioStream(&alloc, this, sizeof(C68E30Pair));
         new (m_data + m_iElementCount) C68E30Pair(pair);
         m_iElementCount++;
-    }
+    
+}
 
-    void AddBack(const C68E30Pair& pair)
-    {
-        _pushBack(FUN_00c85750().heap(), pair);
-    }
-};
 
 struct C68E30Owner
 {
@@ -125,29 +117,11 @@ void C68E30Owner::FUN_00c68e30(C68E30Holder* holder, int value)
     if (holder->m_pEntity)
         listener = holder->m_pEntity;
     pair.m_kListener = listener;
-    m_kListeners.AddBack(pair);
+    m_kListeners.pushBack(pair);
 }
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-    virtual void v0c();
-    virtual void Resize(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    void* volatile m_pAllocator;
-};
-
 namespace fnvc_adapt {
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 }
 void __cdecl FUN_00c908c0(void* apOwner, void* apArray, int aiSize, int aiAlign);
 
@@ -211,8 +185,9 @@ void FUN_00d641f0_cls::ClearSweptEntry(int aiIndex)
     }
 
     SweptItemArray* pArray = &pEntry->m_04;
-    AudioHolder* pAudioHolder = fnvc_adapt::FUN_00c85750();
-    void* pAllocator = pAudioHolder->m_pAllocator;
+    hkMemoryRouter* pAudioHolder = fnvc_adapt::FUN_00c85750();
+    // Preserve the original volatile allocator read.
+    void* pAllocator = *reinterpret_cast<hkMemoryAllocator* volatile*>(&pAudioHolder->m_heap);
     int iCapacity = (int)(pArray->m_08 & 0x3fffffffu);
     if (iCapacity < 0)
     {
@@ -238,7 +213,8 @@ struct Entry16
 {
     unsigned int first, second, third, unused;
 };
-struct Data
+// hkObjectSerialize fixup arrays: local fixups (8-byte from/to pairs) and global fixups (16-byte entries), written by FUN_00e0b850
+struct FixupLists
 {
     Entry8* pairs;
     unsigned int pairCount;
@@ -251,6 +227,7 @@ struct ByteSwap
 {
     bool value;
 };
+
 struct Buffer
 {
     void* vtable;
@@ -268,7 +245,7 @@ struct Buffer
 // @fnv 0x00e0b850
 static __declspec(noinline) int FUN_00e0b850(unsigned int a1, unsigned int a2, unsigned int a3, unsigned int a4,
                                              const void* payload, unsigned int payloadBytes, ByteSwap byteSwap,
-                                             Data* data, Sink* sink)
+                                             FixupLists* data, Sink* sink)
 {
     bool status;
     unsigned int bytes;
@@ -333,36 +310,14 @@ static __declspec(noinline) int FUN_00e0b850(unsigned int a1, unsigned int a2, u
 }
 
 int SerializeData(unsigned int a1, unsigned int a2, unsigned int a3, unsigned int a4, const void* payload,
-                  unsigned int payloadBytes, ByteSwap byteSwap, Data* data, Sink* sink)
+                  unsigned int payloadBytes, ByteSwap byteSwap, FixupLists* data, Sink* sink)
 {
     return FUN_00e0b850(a1, a2, a3, a4, payload, payloadBytes, byteSwap, data, sink);
 }
 
-struct C68E30Allocator
-{
-    virtual ~C68E30Allocator() throw();
-    virtual void unk04() throw();
-    virtual void unk08() throw();
-    virtual void unk0C() throw();
-    virtual void ReleaseBlock(void* p, int numBytes) throw();
-};
-
 void __cdecl FUN_00c908c0(void* alloc, void* array, int numElements, int sizeElem);
 void* __cdecl AllocateWithHeader(void* alloc, int size);
 void __cdecl FUN_00c856c0(void* alloc, void* p);
-
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool() throw()
-    {}
-    hkBool(bool b) throw() : m_cBooleanValue(b ? 1 : 0)
-    {}
-    operator bool() const throw()
-    {
-        return m_cBooleanValue != 0;
-    }
-};
 
 struct hkStreamReader
 {
@@ -387,43 +342,30 @@ struct Item24
     __int64 field10;
 };
 
-template <typename T> struct hkArray
+// hkArray::clearAndDeallocate / setSize through the audio allocator. The relocation table is a local hkArray in
+// Havok; the unit is /EHsc while the original has no EH frame, so it is held as its hkArrayBase and freed by hand.
+template <typename T> static __forceinline void ClearAndRelease(hkArrayBase<T>& a, hkMemoryAllocator& alloc) throw()
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArray() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-
-    __forceinline void ClearAndRelease(C68E30Allocator& alloc) throw()
+    int cap = a.m_iCapacityState;
+    a.m_iElementCount = 0;
+    if ((cap & 0x80000000) == 0)
     {
-        int cap = m_iCapacityState;
-        m_iElementCount = 0;
-        if ((cap & 0x80000000) == 0)
-        {
-            alloc.ReleaseBlock(m_data, (cap & 0x3fffffff) * sizeof(T));
-        }
+        alloc.bufFree(a.m_data, (cap & 0x3fffffff) * sizeof(T));
     }
+}
 
-    __forceinline void SetSizeAndGrow(C68E30Allocator& alloc, int size) throw()
+template <typename T> static __forceinline void SetSizeAndGrow(hkArrayBase<T>& a, hkMemoryAllocator& alloc, int size) throw()
+{
+    int cap = a.m_iCapacityState & 0x3fffffff;
+    if (cap < size)
     {
-        int cap = m_iCapacityState & 0x3fffffff;
-        if (cap < size)
-        {
-            int newCap = cap + cap;
-            if (size >= newCap)
-                newCap = size;
-            FUN_00c908c0(&alloc, this, newCap, sizeof(T));
-        }
-        m_iElementCount = size;
+        int newCap = cap + cap;
+        if (size >= newCap)
+            newCap = size;
+        FUN_00c908c0(&alloc, &a, newCap, sizeof(T));
     }
-
-    __forceinline T& operator[](int index)
-    {
-        return m_data[index];
-    }
-};
+    a.m_iElementCount = size;
+}
 
 // Reads a header, tag, relocation table, item list, and allocated buffer from a stream, applies relocations to the buffer, and returns the header value.
 // @fnv 0x00e0ba10
@@ -443,16 +385,16 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
     if (!stream->IsStreamValid())
         return 0;
 
-    hkArray<Reloc> relocs;
+    hkArrayBase<Reloc> relocs;
     stream->read(&numRelocs, 4);
     if (!stream->IsStreamValid())
     {
-        relocs.ClearAndRelease(FUN_00c85750().heap());
+        ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
         return 0;
     }
 
     int count = numRelocs;
-    relocs.SetSizeAndGrow(FUN_00c85750().heap(), count);
+    SetSizeAndGrow(relocs, GetAudioAllocator(FUN_00c85750()), count);
     for (i = 0; i < (unsigned int)numRelocs; ++i)
     {
         Reloc& r = relocs[i];
@@ -460,7 +402,7 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
         stream->read(&r.toOffset, 4);
         if (!stream->IsStreamValid())
         {
-            relocs.ClearAndRelease(FUN_00c85750().heap());
+            ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
             return 0;
         }
     }
@@ -468,12 +410,12 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
     stream->read(&numItems, 4);
     if (!stream->IsStreamValid())
     {
-        relocs.ClearAndRelease(FUN_00c85750().heap());
+        ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
         return 0;
     }
 
     count = numItems;
-    outItems.SetSizeAndGrow(FUN_00c85750().heap(), count);
+    SetSizeAndGrow(outItems, GetAudioAllocator(FUN_00c85750()), count);
     for (i = 0; i < (unsigned int)numItems; ++i)
     {
         char* item = (char*)&outItems[i];
@@ -482,7 +424,7 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
         stream->read(item + 16, 8);
         if (!stream->IsStreamValid())
         {
-            relocs.ClearAndRelease(FUN_00c85750().heap());
+            ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
             return 0;
         }
     }
@@ -490,17 +432,17 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
     stream->read(outAllocSize, 4);
     if (!stream->IsStreamValid())
     {
-        relocs.ClearAndRelease(FUN_00c85750().heap());
+        ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
         return 0;
     }
 
     int iAllocationSize = *outAllocSize;
-    char* buffer = (char*)AllocateWithHeader(&FUN_00c85750().heap(), iAllocationSize);
+    char* buffer = (char*)AllocateWithHeader(&GetAudioAllocator(FUN_00c85750()), iAllocationSize);
     stream->read(buffer, *outAllocSize);
     if (!stream->IsStreamValid())
     {
-        FUN_00c856c0(&FUN_00c85750().heap(), buffer);
-        relocs.ClearAndRelease(FUN_00c85750().heap());
+        FUN_00c856c0(&GetAudioAllocator(FUN_00c85750()), buffer);
+        ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
         return 0;
     }
 
@@ -515,7 +457,7 @@ unsigned __int64 __cdecl ReadRelocatedData(hkStreamReader* stream, char** outBuf
 
     *outBuffer = buffer;
     unsigned __int64 ret = header;
-    relocs.ClearAndRelease(FUN_00c85750().heap());
+    ClearAndRelease(relocs, GetAudioAllocator(FUN_00c85750()));
     return ret;
 }
 
@@ -531,7 +473,8 @@ struct ObjectWriteFlag
         return value != 0;
     }
 };
-static __declspec(noinline) int FUN_00e0b850(Data* fixups, Sink* output, unsigned int idLow, unsigned int idHigh,
+
+static __declspec(noinline) int FUN_00e0b850(FixupLists* fixups, Sink* output, unsigned int idLow, unsigned int idHigh,
                                              unsigned int classLow, unsigned int classHigh, const void* payload,
                                              unsigned int payloadSize, ObjectWriteFlag swap)
 {
@@ -715,7 +658,7 @@ int __cdecl FUN_00e0bd40(Sink* p1, ObjectWriteInfo* p2, unsigned int aiIdLow, un
     x.FUN_00e02a80(&z, p5, p6, &w);
 
     int need = out->m_iElementCount + w.m_a1.m_iElementCount;
-    C68E30Allocator& alloc = FUN_00c85750().heap();
+    hkMemoryAllocator& alloc = GetAudioAllocator(FUN_00c85750());
     if ((out->m_cap & 0x3fffffff) < need)
     {
         int iDoubled = (out->m_cap & 0x3fffffff) * 2;
@@ -723,9 +666,9 @@ int __cdecl FUN_00e0bd40(Sink* p1, ObjectWriteInfo* p2, unsigned int aiIdLow, un
     }
     for (int i = 0; i < w.m_a1.m_iElementCount; i++)
     {
-        C68E30MemoryRouter* router = &FUN_00c85750();
+        hkMemoryRouter* router = &FUN_00c85750();
         if (out->m_iElementCount == (out->m_cap & 0x3fffffff))
-            ResizeAudioStream(router->m_pStreamAllocator, out, 0x18);
+            ResizeAudioStream(router->m_heap, out, 0x18);
         ObjectWriteItem* p = out->m_data + out->m_iElementCount;
         out->m_iElementCount++;
         p->m_00 = w.m_a1.m_data[i].a;
@@ -734,14 +677,14 @@ int __cdecl FUN_00e0bd40(Sink* p1, ObjectWriteInfo* p2, unsigned int aiIdLow, un
         p->m_10 = w.m_a1.m_data[i].c;
         p->m_14 = 0;
     }
-    int r = FUN_00e0b850((Data*)&w, p1, aiIdLow, aiIdHigh, p6, 0, y.m_data, y.m_iElementCount,
+    int r = FUN_00e0b850((FixupLists*)&w, p1, aiIdLow, aiIdHigh, p6, 0, y.m_data, y.m_iElementCount,
                          ObjectWriteFlag(p2->m_01 != DAT_011b7b89));
     w.FUN_00e028e0();
     z.FUN_00cc0780();
-    C68E30Allocator& allocY = FUN_00c85750().heap();
+    hkMemoryAllocator& allocY = GetAudioAllocator(FUN_00c85750());
     y.m_iElementCount = 0;
     if ((y.m_cap & 0x80000000) == 0)
-        allocY.ReleaseBlock(y.m_data, y.m_cap & 0x3fffffff);
+        allocY.bufFree(y.m_data, y.m_cap & 0x3fffffff);
     y.m_data = 0;
     y.m_cap = 0x80000000;
     x.FUN_00e02c70();

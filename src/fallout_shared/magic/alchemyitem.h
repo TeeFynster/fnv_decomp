@@ -1,49 +1,37 @@
-// fallout_shared/magic/alchemyitem.h: declares bhkHingeConstraint, BSFile
+// fallout_shared/magic/alchemyitem.h: bhkHingeConstraint::GetInstanceSize, BSFile::GetFileSize and a +0x168 getter
 #ifndef ALCHEMYITEM_H
 #define ALCHEMYITEM_H
 
-#include "alchemyitem_decls.h"
-class bhkHingeConstraint
+#include "../../../include/bhkHingeConstraint.h"
+#include "../../../include/BSFile.h"
+
+// 0x00afc0c0 reads +0x168, past the end of BSFile (0x158 bytes): the owner is another class.
+class FUN_00afc0c0_Owner
 {
   public:
-    unsigned int GetInstanceSize();
+    char* GetName168() const;
+
+  private:
+    char unknown_000[0x168];
+    char* m_pName168;
 };
-class BSFile
-{
-  public:
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    virtual void vfn_0c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    char padding04[0x150];
-    char* fileName;
-    char padding158[0x10];
-    char* cachedFileName;
-    char* FileName() const;
-    char* FileName();
-};
+
 // @fnv 0x00402b00
 unsigned int bhkHingeConstraint::GetInstanceSize()
 {
     return 20;
 }
 // @fnv 0x00afc0c0
-char* BSFile::FileName() const
+char* FUN_00afc0c0_Owner::GetName168() const
 {
-    return cachedFileName;
+    return m_pName168;
 }
+// BSFile vftable slot 7 (0x010a4764 + 0x1c): computes the size through slot 10 (GetSize) on first use.
 // @fnv 0x00aff610
-char* BSFile::FileName()
+unsigned int BSFile::GetFileSize()
 {
-    if (!fileName)
-        vfn_28();
-    return fileName;
+    if (!m_uiValueId)
+        GetSize();
+    return m_uiValueId;
 }
 #endif

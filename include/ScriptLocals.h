@@ -1,26 +1,59 @@
-// Source layout: ScriptLocals. PC corrections are in generate_headers.py.
-#ifndef FNV_SCRIPTLOCALS_H
-#define FNV_SCRIPTLOCALS_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+class Script;
+class ScriptDefinition;
+class FormFlagRecord;
+class ScriptLocalVariable;
+class TESForm;
+class TESBoundObject;
+class ScriptHeaderData;
+class BGSSaveFormBuffer;
+class BGSLoadFormBuffer;
+template <class T> class BSSimpleList;
+
 class ScriptLocals
 {
-  public:
-    Script* m_pOwnerScript;  // +0x0
-    char m_cActionFlags;     // +0x4
+public:
+    Script* m_pOwnerScript;
+    char m_cActionFlags;
     unsigned char layoutPadding5;
     unsigned short layoutPadding6;
-    BSSimpleList<FormFlagRecord*>* m_pLocalVariableList;  // +0x8
-    BSSimpleList<ScriptLocalVariable*>* m_pVariableList;        // +0xC
-    ScriptDefinition* m_pExtendedLocals;               // +0x10
-    void SetVariable(unsigned int index, double value);
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(ScriptLocals) == 0x14);
-FNV_STATIC_ASSERT(offsetof(ScriptLocals, m_pOwnerScript) == 0x0);
-FNV_STATIC_ASSERT(offsetof(ScriptLocals, m_cActionFlags) == 0x4);
-FNV_STATIC_ASSERT(offsetof(ScriptLocals, m_pLocalVariableList) == 0x8);
-FNV_STATIC_ASSERT(offsetof(ScriptLocals, m_pVariableList) == 0xC);
-FNV_STATIC_ASSERT(offsetof(ScriptLocals, m_pExtendedLocals) == 0x10);
+    BSSimpleList<FormFlagRecord*>* m_pLocalVariableList;
+    BSSimpleList<ScriptLocalVariable*>* m_pVariableList;
+    ScriptDefinition* m_pExtendedLocals;
+
+    ScriptLocals();
+    ~ScriptLocals();
+    void Destroy();
+#ifdef __vecDelDtor
+    void* __vecDelDtor(unsigned int);
 #endif
+    void ClearActionFlags();
+    bool GetLocalData(TESForm*, unsigned int);
+    TESBoundObject* GetLocalData();
+    void ClearActionFlagsForForm(TESForm*);
+    bool CheckActionFlag(TESForm*, unsigned int);
+    FormFlagRecord* GetActionEntry(TESForm*, bool);
+    TESBoundObject* GetActionEntry();
+    void Save(ScriptHeaderData*);
+    void ClearActionList();
+    void InitializeActionList();
+    void CopyActionListFrom(ScriptLocals*);
+    void* GetActionList();
+    void ResetFormData(Script*);
+    void SetVariable(unsigned int, double);
+    double GetVariable(unsigned int, Script*);
+    BSSimpleList<ScriptLocalVariable*>* GetLocalList();
+    bool IsReferenceVariable(unsigned int);
+    unsigned short GetSaveSize();
+    void SaveGame(BGSSaveFormBuffer*);
+    void SaveGame();
+    void LoadGame(BGSLoadFormBuffer*);
+    void LoadGame();
+    void Revert(BGSLoadFormBuffer*);
+    void Revert();
+    static void ProcessPendingTasks();
+    FormFlagRecord* FUN_005a90b0(ScriptLocals* locals, bool create);
+    bool FUN_005a8e20(TESForm* form, unsigned int flag);
+    void FUN_005a85c0();
+};

@@ -2,30 +2,20 @@
 // src/gamebryo2.2/corelibs/nicollision/nicapsulesphereintersector.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/nicapsulesphereintersector.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiPoint3
-{
-    float x, y, z;
+#include "../../../../include/NiPoint3.h"
 
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    NiPoint3 operator+(const NiPoint3& kPt) const
-    {
-        return NiPoint3(x + kPt.x, y + kPt.y, z + kPt.z);
-    }
-    NiPoint3 operator*(float fScalar) const
-    {
-        return NiPoint3(x * fScalar, y * fScalar, z * fScalar);
-    }
-    NiPoint3& operator+=(const NiPoint3& kPt)
-    {
-        x += kPt.x;
-        y += kPt.y;
-        z += kPt.z;
-        return *this;
-    }
-};
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kPt) const
+{
+    return NiPoint3(x + kPt.x, y + kPt.y, z + kPt.z);
+}
+
+inline NiPoint3 NiPoint3::operator*(float fScalar) const
+{
+    return NiPoint3(x * fScalar, y * fScalar, z * fScalar);
+}
 
 struct OriginDirectionPair
 {
@@ -92,14 +82,6 @@ struct SegmentMethods : OriginDirectionPair
 {
     NiPoint3 FUN_00eb6090(float parameter) const;
 };
-struct PointMethods
-{
-    void FUN_004a0c10();
-};
-struct Call_439090_tgt
-{
-    bool FUN_00439090(const NiPoint3& point);
-};
 struct CapsuleGeometry : S_00eaea50_Capsule
 {
     float m_fBoundRadius;
@@ -134,16 +116,16 @@ void ContactGeometry::ComputeContactPoint(const NiPoint3& velocity0, const NiPoi
         kCapsulePoint += velocity0 * m_fTime;
         kSpherePoint += velocity1 * m_fTime;
         m_kPlaneNormal = Difference(kSpherePoint, kCapsulePoint);
-        reinterpret_cast<PointMethods*>(&m_kPlaneNormal)->FUN_004a0c10();
+        m_kPlaneNormal.FUN_004a0c10();
         m_kPoint = kCapsulePoint + m_kPlaneNormal * m_pkCapsule->m_fBoundRadius;
     }
     else
     {
-        m_kPoint = (kCapsulePoint + kSpherePoint) * 0.5;
-        if (reinterpret_cast<Call_439090_tgt*>(&kCapsulePoint)->FUN_00439090(kSpherePoint))
+        m_kPoint = (kCapsulePoint + kSpherePoint) * 0.5f;
+        if (kCapsulePoint != kSpherePoint)
         {
             m_kPlaneNormal = Difference(kSpherePoint, kCapsulePoint);
-            reinterpret_cast<PointMethods*>(&m_kPlaneNormal)->FUN_004a0c10();
+            m_kPlaneNormal.FUN_004a0c10();
         }
         else
             m_kPlaneNormal = DAT_011a9484;

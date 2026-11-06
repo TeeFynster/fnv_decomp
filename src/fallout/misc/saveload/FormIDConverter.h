@@ -1,41 +1,10 @@
-// fallout/misc/saveload/FormIDConverter.h: declares TESDataHandler, FormIDConverter
+// fallout/misc/saveload/FormIDConverter.h: declares FormIDConverter
 #ifndef FNV_BGSSAVELOADFORMIDMAP_H
 #define FNV_BGSSAVELOADFORMIDMAP_H
 
+#include "../../../../include/NiTPointerMap.h"
+#include "../../../../include/TESDataHandler.h"
 
-// Map node layout shared by the NiT map family (pointer-value map variant).
-template <class K, class V> class NiTMapItem
-{
-  public:
-    NiTMapItem<K, V>* m_pkNext;
-    K m_key;
-    V m_val;
-};
-
-// Gamebryo pointer map: vtable, hash size, bucket table and the packed
-template <class K, class V> class NiTPointerMap
-{
-  public:
-    void** m_ppVirtualMethodTable;
-    unsigned int m_uiHashSize;
-    NiTMapItem<K, V>** m_ppkHashTable;
-    struct MapEntryCount
-    {
-        unsigned int m_uiCount;
-    } m_kItemCount;
-
-    NiTPointerMap(unsigned int uiHashSize);
-    ~NiTPointerMap();
-    bool GetAt(K key, V& result) const;
-    void SetAt(K key, V value);
-    void RemoveAll();
-};
-
-class TESDataHandler
-{
-  public:
-    bool FormIDExists(unsigned int formID);
-};
 
 extern TESDataHandler* g_dataHandler;
 

@@ -1,3 +1,5 @@
+#include "../../include/NiTArray.h"
+#define FNV64_HKVECTOR4_LENGTHINVERSE4  // this unit defines hkVector4::lengthInverse4 (0x005612a0)
 
 // src/fallout_shared/tesobjectrefr_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy /Oy- (unit src/fallout_shared/tesobjectrefr_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,6 +8,30 @@
 // src/fallout_shared/tesobjectrefr_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/tesobjectrefr.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 #include "tesobjectrefr_decls.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiMemObject.h"
+#include "../../include/NiTransform.h"
+#include "../../include/NiMatrix3.h"
+// Constructor 0x0043d410 writes time and byte flags: this is NiUpdateData, not NiColor.
+#include "../../include/NiUpdateData.h"
+#include "../../include/TESForm.h"
+#include "../../include/BGSPlaceableWater.h"
+#include "../../include/hkQuaternion.h"
+// Constructor 0x0056ded0 constructs a 0x40-byte transform, not the 0xB0-byte hkMotionState.
+#include "../../include/hkTransform.h"
+#include "../../include/hkSimdReal.h"
+// Its 16-byte SIMD layout and dot4 call at 0x00561440 identify the former hkVector4X.
+#include "../../include/NiObject.h"
+#include "../../include/ProjectileListener.h"
+#include "../../include/bhkAabbPhantom.h"
+#include "../../include/bhkCharacterController.h"
+#include "../../include/bhkRefObject.h"
+#include "../../include/bhkSphereShape.h"
+#include "../../include/bhkWorldObject.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/hkReferencedObject.h"
+#include "../../include/hkVector4.h"
 GarbageCollectorUpdateState* FUN_00446ef0();
 void* FUN_0056a8c0();
 void FUN_005743f0();
@@ -28,35 +54,9 @@ extern int DAT_01268238;
 extern const void* DAT_01030394;
 extern const void* DAT_0103078c;
 extern const void* DAT_010306b4;
-struct bhkRefObject
-{
-    void* vtbl;
-    int f4;
-    int f8;
-    int fc;
-    int f10;
-    unsigned char f14;
-    bhkRefObject* Initialize();
-};
-struct FUN_0056e2d0
-{
-    virtual ~FUN_0056e2d0();
-};
-extern const void* vftable_FUN_0056e2d0;
 struct FUN_00c6d190 : bhkRefObject
 {
     FUN_00c6d190();
-};
-struct ProjectileListener
-{
-    void* vfptr;
-    int m4;
-    int m8;
-    void FUN_00c876a0();
-};
-struct hkReferencedObject
-{
-    void removeReference();
 };
 void FUN_00c876a0();
 struct FUN_00c9d4c0_holder
@@ -123,10 +123,6 @@ struct FUN_00c876a0_holder
     virtual ~FUN_00c876a0_holder();
     void FUN_00c876a0();
 };
-struct bhkWorldObject
-{
-    void FUN_00c85790();
-};
 struct FUN_00c9f3b0 : FUN_00c876a0_holder
 {
     virtual ~FUN_00c9f3b0();
@@ -134,54 +130,6 @@ struct FUN_00c9f3b0 : FUN_00c876a0_holder
 struct WorldHolder
 {
     void UpdatePhantom(void* a, int b);
-};
-struct PhantomBase
-{
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-};
-struct bhkAabbPhantom : PhantomBase
-{
-    virtual WorldHolder* GetWorld();
-    int m4;
-    void* m8;
-    void FUN_00c9f460();
 };
 extern float DAT_010c72bc;
 struct InnerS
@@ -210,57 +158,6 @@ struct RetV
 {
     char _0[4];
     float f4;
-};
-struct bhkSphereShape
-{
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-    virtual void f38();
-    virtual void f39();
-    virtual void f40();
-    virtual void f41();
-    virtual void f42();
-    virtual void f43();
-    virtual void f44();
-    virtual RetV* Target(char* p);
-    void __thiscall FUN_00c84df0(void* a, ArgB* b);
-    void __thiscall FUN_00ca0740(void* a, ArgB* b);
 };
 struct S_00cb3070
 {
@@ -395,19 +292,6 @@ struct FUN_00c84c50 : FUN_00c877b0
 void FUN_00c876a0();
 extern int DAT_012680f8;
 extern int DAT_0126810c;
-class FUN_00c85790_base
-{
-  public:
-    virtual void unk00();
-    ~FUN_00c85790_base();
-    int unk04;
-};
-class FUN_00c85790 : public FUN_00c85790_base
-{
-  public:
-    virtual ~FUN_00c85790();
-    void unk08();
-};
 extern __declspec(thread) unsigned int g_havokThreadMode;
 struct CollisionObject;
 struct CollisionResult
@@ -550,42 +434,22 @@ struct WorldObjectView
     void FUN_00c87600(int a, int b);
     void FUN_00c85900(int a, int b);
 };
-struct NiRTTI
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTPrimitiveArray.h"
+// Gamebryo NiTArray.inl bodies this unit's original inlines (the shared NiTArray declares them):
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-    const char* m_pcName;
-};
-struct NiObject
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+template <class T, class TAlloc> __forceinline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
 {
-    virtual void v00();
-    virtual void v01();
-    virtual const NiRTTI* GetRTTI();
-};
-template <class T> struct NiTMallocInterface
-{
-};
-template <class T, class A> struct NiTPrimitiveArray
-{
-    void* vtbl;
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, T& element);
-    unsigned int SetAtGrow(unsigned int uiIndex, T& element)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
-    }
-    __forceinline unsigned int Add(T element)
-    {
-        return SetAtGrow(m_usSize, element);
-    }
-};
-typedef NiTPrimitiveArray<char*, NiTMallocInterface<char*> > DebugStrArray;
+    T value = element;
+    return SetAtGrow(m_usSize, value);
+}
+typedef NiTPrimitiveArray<char*> DebugStrArray;
 struct hkShapeStub
 {
     void* vtbl;
@@ -648,10 +512,6 @@ struct bhkBase_c878c0
         return m_pObject;
     }
     void BaseDebugInfo(DebugStrArray* arr);
-};
-struct bhkWorldObject_c86190 : bhkBase_c878c0
-{
-    void FUN_00c86190(DebugStrArray* arr);
 };
 extern int DAT_012681b0;
 class FUN_00c8bed0_base_cls
@@ -1518,31 +1378,8 @@ struct BC9F970AllocTagScope
         g_iC9F970AllocTag = m_iSaved;
     }
 };
-class BC9F970StringArray
-{
-  public:
-    virtual ~BC9F970StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
 
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > BC9F970StringArray;
 extern const char* g_pcC9F970Name;
 char* __cdecl FUN_00a7d330(const char* pcString);
 class FUN_00c9f970_cls
@@ -1631,10 +1468,6 @@ struct SphereScaleFields
 {
     unsigned int m_00, m_04, m_08, m_0c;
     float m_10, m_14, m_18, m_1c;
-};
-struct SphereScalingMethod : bhkSphereShape
-{
-    void __thiscall FUN_00c9fea0(void* first, ArgB* second);
 };
 struct Tls_ca0090
 {
@@ -1877,31 +1710,7 @@ struct BCA05B0AllocTagScope
         g_iCA05B0AllocTag = m_iSaved;
     }
 };
-class BCA05B0StringArray
-{
-  public:
-    virtual ~BCA05B0StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > BCA05B0StringArray;
 extern const char* g_pcCA05B0Name;
 char* __cdecl FUN_00a7d330(const char* pcString);
 class FUN_00ca05b0_cls
@@ -2045,22 +1854,13 @@ class FUN_00ccf740_cls : public FUN_00c9fb00
     virtual ~FUN_00ccf740_cls();
     void FUN_00c876a0();
 };
-class NiObjectC9E
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem, unsigned int uiSize);
-
-    virtual ~NiObjectC9E();
-};
-class NiControllerC9E : public NiObjectC9E
+class NiControllerC9E : public NiObject
 {
   public:
     NiControllerC9E();
 
-    static NiObjectC9E* FUN_00c9ef30();
+    static NiObject* FUN_00c9ef30();
 
-    unsigned int m_uiRefCount;
     int unk08;
     int unk0C;
     int unk10;
@@ -2262,57 +2062,27 @@ S00561240_Vector* S00561240_Vector::FUN_00561240(S00561240_Vector* pOut) const
 
 typedef __m128 hkQuadReal;
 
-class hkSimdRealX
-{
-  public:
-    hkQuadReal m_vValue;
-    void assignQuad(const hkQuadReal& q);
-    const hkQuadReal& getQuad() const;
-};
-
-class hkVector4X
-{
-  public:
-    hkQuadReal m_vComponents;
-    hkSimdRealX dot3(const hkVector4X& a) const;
-    hkSimdRealX* FUN_005612a0(hkSimdRealX* out) const;
-};
 
 // @fnv 0x005612a0
-hkSimdRealX* hkVector4X::FUN_005612a0(hkSimdRealX* out) const
+hkSimdReal hkVector4::lengthInverse4() const
 {
     const hkQuadReal half = _mm_set_ss(0.5f);
     const hkQuadReal three = _mm_set_ss(3.0f);
     const hkQuadReal zero = _mm_set_ss(0.0f);
-    const hkQuadReal len2 = dot3(*this).getQuad();
+    const hkQuadReal len2 = dot4(*this).getQuad();
     const hkQuadReal equalsZero = _mm_cmpeq_ss(len2, zero);
     const hkQuadReal e = _mm_rsqrt_ss(len2);
     const hkQuadReal r = _mm_mul_ss(_mm_mul_ss(half, e), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, e), e)));
-    out->assignQuad(_mm_andnot_ps(equalsZero, r));
-    return out;
+    return hkSimdReal(_mm_andnot_ps(equalsZero, r));
 }
 
-class S00561440_SimdReal
-{
-  public:
-    S00561440_SimdReal(const __m128& q);  // FUN_004a3c90
-    __m128 m_vValue;
-};
-
-class S00561440_Vector
-{
-  public:
-    S00561440_SimdReal FUN_00561440(const S00561440_Vector& v) const;  // dot4
-    __m128 m_vComponents;
-};
-
 // @fnv 0x00561440
-S00561440_SimdReal S00561440_Vector::FUN_00561440(const S00561440_Vector& v) const
+hkSimdReal hkVector4::dot4(const hkVector4& v) const
 {
     __m128 x2 = _mm_mul_ps(m_vComponents, v.m_vComponents);
     __m128 sum = _mm_add_ps(_mm_shuffle_ps(x2, x2, 0x4e), x2);
     __m128 swapped = _mm_shuffle_ps(sum, sum, 0xb1);
-    return S00561440_SimdReal(_mm_add_ps(sum, swapped));
+    return hkSimdReal(_mm_add_ps(sum, swapped));
 }
 
 struct AlignedLocal5615
@@ -2333,12 +2103,6 @@ void Owner5615::FUN_005615d0(int value)
     FUN_00561690(FUN_004a3e00(&local, value));
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
 
 struct __declspec(align(16)) HKVector4
 {
@@ -2348,12 +2112,6 @@ struct __declspec(align(16)) HKVector4
 
 void* __cdecl FUN_00553fc0(void* pFrom, const NiPoint3& vec);
 
-class bhkCharacterController
-{
-  public:
-    void FUN_00561630(const NiPoint3& param_1);
-    void FUN_005617c0(void* controller);
-};
 
 // @fnv 0x00561630
 void bhkCharacterController::FUN_00561630(const NiPoint3& param_1)
@@ -2402,18 +2160,19 @@ class S005620e0_Vector
 class S005620e0_Source;
 const S005620e0_Vector* __cdecl FUN_004a3e00(S005620e0_Vector* pOut, const S005620e0_Source* pSource);
 
-class S005620e0_Object
+// The shared controller has no declaration for this vector setter yet.
+class ControllerVectorSetter
 {
   public:
     void FUN_00c6e390(const S005620e0_Vector* pValue);
-    void FUN_005620e0(const S005620e0_Source* pSource);
 };
 
 // @fnv 0x005620e0
-void S005620e0_Object::FUN_005620e0(const S005620e0_Source* pSource)
+void bhkCharacterController::FUN_005620e0(void* pSource)
 {
     S005620e0_Vector kValue;
-    FUN_00c6e390(FUN_004a3e00(&kValue, pSource));
+    reinterpret_cast<ControllerVectorSetter*>(this)->FUN_00c6e390(
+        FUN_004a3e00(&kValue, static_cast<const S005620e0_Source*>(pSource)));
 }
 
 class S0056e810_Vector
@@ -2502,77 +2261,29 @@ void S0056e810_Object::FUN_0056e810(const S0056e810_Vector& v)
     vfB0(&kRotationBasis);
 }
 
-class NiPoint3F14
-{
-  public:
-    NiPoint3F14();
-    float x;
-    float y;
-    float z;
-};
 
-class NiMatrix3F14
-{
-  public:
-    NiMatrix3F14();
-    float m_afEntries[3][3];
-};
 
-class NiTransformF14
-{
-  public:
-    NiTransformF14();
-    NiMatrix3F14 m_kOrientation;
-    NiPoint3F14 m_kTranslation;
-    float m_fScale;
-};
 
-class NiColorF14
-{
-  public:
-    NiColorF14(float fR, unsigned int uiG, unsigned int uiB);
-    float r;
-    float g;
-    float b;
-};
 
-class hkVector4F14
-{
-  public:
-    hkVector4F14();
-    __m128 m_vComponents;
-};
 
-class hkQuaternionF14
-{
-  public:
-    hkQuaternionF14();
-    __m128 m_vec;
-};
 
-class hkMotionStateF14
-{
-  public:
-    hkMotionStateF14();
-    __m128 m_data[4];
-};
 
-void __cdecl FUN_004a3e00(hkVector4F14& kOut, const NiPoint3F14& kIn);
-void __cdecl FUN_00561500(hkQuaternionF14& kOut, const hkVector4F14& kIn);
+void __cdecl FUN_004a3e00(hkVector4& kOut, const NiPoint3& kIn);
+void __cdecl FUN_00561500(hkQuaternion& kOut, const hkVector4& kIn);
 
 class SceneNodeF14
 {
   public:
     void SetScale(float fScale);
-    void SetColor(const NiColorF14& kColor);
-    void GetRotation(hkVector4F14& kRot);
+    void SetColor(const NiUpdateData& kColor);
+    void GetRotation(hkVector4& kRot);
     void AttachController(void* pvCtlr);
 };
 
 class OwnerF14
 {
   public:
-    NiPoint3F14 GetNavMeshData();
+    NiPoint3 GetNavMeshData();
 };
 
 class OwnerRootF14
@@ -2600,7 +2311,7 @@ class ShapeF14
   public:
     static void* operator new(unsigned int uiSize);
     static void operator delete(void* pv);
-    ShapeF14(const hkVector4F14& m_kPoint2, float fRadius);
+    ShapeF14(const hkVector4& m_kPoint2, float fRadius);
     char m_acData[0x30];
 };
 
@@ -2628,21 +2339,15 @@ class BodyInfoF14
     BodyInfoF14();
     ~BodyInfoF14();
     void SetMotionType(int iType);
-    void SetPosition(const hkVector4F14& kPos);
-    void SetRotation(const hkQuaternionF14& kRot);
+    void SetPosition(const hkVector4& kPos);
+    void SetRotation(const hkQuaternion& kRot);
     unsigned int m_uiFilterInfo;
     WrapperF14* m_pkShape;
     __m128 m_akData[13];
 };
 
-class NiMemObjectF14
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pv, unsigned int);
-};
 
-class BodyF14 : public NiMemObjectF14
+class BodyF14 : public NiMemObject
 {
   public:
     BodyF14(const BodyInfoF14& kInfo);
@@ -2650,7 +2355,7 @@ class BodyF14 : public NiMemObjectF14
     char m_acData[0x1c];
 };
 
-class BodyWrapF14 : public NiMemObjectF14
+class BodyWrapF14 : public NiMemObject
 {
   public:
     BodyWrapF14(SceneNodeF14* pkNode);
@@ -2658,7 +2363,7 @@ class BodyWrapF14 : public NiMemObjectF14
     char m_acData[0x14];
 };
 
-class CtlrF14 : public NiMemObjectF14
+class CtlrF14 : public NiMemObject
 {
   public:
     CtlrF14();
@@ -2794,11 +2499,11 @@ class P107RefF14
     virtual void v7a();
     virtual void v7b();
     virtual void v7c();
-    virtual const NiPoint3F14* GetPos();
+    virtual const NiPoint3* GetPos();
     OwnerRootF14* GetOwnerRoot();
     SystemSrcF14* GetSystemSrc();
     void SetScaleF14(float fScale);
-    NiMatrix3F14 GetRotationMatrix();
+    NiMatrix3 GetRotationMatrix();
     void FUN_0056f140();
 };
 
@@ -2810,15 +2515,15 @@ void P107RefF14::FUN_0056f140()
     if (pkSystem)
     {
         ShapeF14* pkShape = 0;
-        hkMotionStateF14 kMotion;
-        hkVector4F14 m_kPoint2;
+        hkTransform kMotion;
+        hkVector4 m_kPoint2;
         SetScaleF14(1.0f);
         Get3D()->SetScale(1.0f);
-        NiColorF14 kColor(0.0f, 0, 0);
+        NiUpdateData kColor(0.0f, false, false);
         Get3D()->SetColor(kColor);
-        NiTransformF14 kXform;
-        kXform.m_kOrientation = GetRotationMatrix();
-        kXform.m_kTranslation = *GetPos();
+        NiTransform kXform;
+        kXform.m_Rotate = GetRotationMatrix();
+        kXform.m_Translate = *GetPos();
         kXform.m_fScale = 1.0f;
         const int iLayer = 0x15;
         FUN_004a3e00(m_kPoint2, pkOwner->GetNavMeshData());
@@ -2828,9 +2533,9 @@ void P107RefF14::FUN_0056f140()
         BodyInfoF14 kInfo;
         kInfo.m_pkShape = pkWrapper;
         kInfo.SetMotionType(5);
-        hkVector4F14 kPos;
-        hkVector4F14 kRot;
-        hkQuaternionF14 kQuat;
+        hkVector4 kPos;
+        hkVector4 kRot;
+        __declspec(align(16)) hkQuaternion kQuat;
         Get3D()->GetRotation(kRot);
         FUN_004a3e00(kPos, *GetPos());
         FUN_00561500(kQuat, kRot);
@@ -2850,45 +2555,18 @@ void P107RefF14::FUN_0056f140()
     }
 }
 
-class NiPoint3Q
-{
-  public:
-    float x, y, z;
-    NiPoint3Q operator*(float fScalar) const;
-};
-extern const NiPoint3Q g_kUpVectorQ;
+extern const NiPoint3 g_kUpVectorQ;
 
-class hkVector4Q
-{
-  public:
-    hkVector4Q(const hkVector4Q& v);
-    int IsInWater(void* pvWorld, float fTolerance);
-    __m128 m_vComponents;
-};
 
-class TESFormQ
-{
-  public:
-    int GetFormType();
-    bool IsPlayable();
-};
-extern TESFormQ* g_pkArrowFormQ;
-extern TESFormQ* g_pkGrenadeFormAQ;
-extern TESFormQ* g_pkGrenadeFormBQ;
+extern TESForm* g_pkArrowFormQ;
+extern TESForm* g_pkGrenadeFormAQ;
+extern TESForm* g_pkGrenadeFormBQ;
 
-class NiAVObjectQ
-{
-  public:
-    virtual void vn000();
-    virtual void vn004();
-    virtual void vn008();
-    virtual void* GetName();
-};
 
 class NodeQ
 {
   public:
-    NiAVObjectQ* GetObject();
+    NiAVObject* GetObject();
 };
 
 class ProjectileStateQ
@@ -2989,8 +2667,8 @@ class ControllerQ
     virtual void vd0c4();
     virtual void vd0c8();
     virtual void vd0cc();
-    virtual void Detach(NiAVObjectQ* pkRoot, int a, int b, int c, int d);
-    virtual void Attach(NiAVObjectQ* pkTarget, NiAVObjectQ* pkRoot);
+    virtual void Detach(NiAVObject* pkRoot, int a, int b, int c, int d);
+    virtual void Attach(NiAVObject* pkTarget, NiAVObject* pkRoot);
 };
 
 class ProcessQ
@@ -3014,7 +2692,7 @@ class CharControllerQ
 class BodyQ
 {
   public:
-    const hkVector4Q* GetPosition();
+    const hkVector4* GetPosition();
     CharControllerQ* GetPhysicsCharacterController();
 };
 
@@ -3058,10 +2736,11 @@ NodeQ* __cdecl FUN_00c812d0(void* pvName, int iFlag);
 BodyRefQ* __cdecl FUN_004b5260(void* pvTarget);
 void __cdecl FUN_00c6a350(void* pvRoot, int a, int b, int c, int d);
 void* __cdecl FUN_00458b20();
-void __cdecl FUN_0062b8d0(void* pvRoot, NiPoint3Q* pkPos, int iFlag);
+void __cdecl FUN_0062b8d0(void* pvRoot, NiPoint3* pkPos, int iFlag);
 bool __cdecl FUN_0043b300(ListQ* pkList, void* pvRoot);
 
-class ProjectileQ
+// Reference physics attachment view: cell at +0x40 and helpers 0x0056c8f0/0x0056f140 belong to TESObjectREFR, not Projectile.
+class ReferencePhysicsAttachment
 {
   public:
     virtual void vp000();
@@ -3180,7 +2859,7 @@ class ProjectileQ
     virtual void vq1c4();
     virtual void vq1c8();
     virtual void vq1cc();
-    virtual NiAVObjectQ* Get3D();
+    virtual NiAVObject* Get3D();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -3199,7 +2878,7 @@ class ProjectileQ
     CellQ* m_pkCell;
 
     bool HasFlag(int iFlag);
-    TESFormQ* GetBaseForm();
+    TESForm* GetBaseForm();
     void HandleArrow();
     void HandleGrenade();
     void HandleFlame();
@@ -3209,19 +2888,21 @@ class ProjectileQ
     bool IsInWaterVolume();
     bool IsSubmerged();
     void SetSubmerged(int iFlag);
-    void UpdateAttachment(NiAVObjectQ* pkRoot);
+    void UpdateAttachment(NiAVObject* pkRoot);
     void Finish(int a, int b);
 
     void FUN_005768b0();
 };
 
+// The shared hkVector4 union hides the local vector from MSVC's /GS heuristic; retain this function's original cookie.
+#pragma strict_gs_check(push, on)
 // @fnv 0x005768b0
-void ProjectileQ::FUN_005768b0()
+void ReferencePhysicsAttachment::FUN_005768b0()
 {
     if (m_pkCell && !m_pkCell->IsLoaded() && !m_pkCell->IsAttached())
         return;
-    NiAVObjectQ* pkRoot = Get3D();
-    NiAVObjectQ* pkTarget = pkRoot;
+    NiAVObject* pkRoot = Get3D();
+    NiAVObject* pkTarget = pkRoot;
     if (pkRoot)
     {
         g_pkManagerQ->SetLocked(true);
@@ -3229,8 +2910,8 @@ void ProjectileQ::FUN_005768b0()
         {
             if (GetBaseForm()->GetFormType() == 0x23)
             {
-                TESFormQ* pkBase = GetBaseForm();
-                if (!pkBase->IsPlayable())
+                TESForm* pkBase = GetBaseForm();
+                if (!static_cast<BGSPlaceableWater*>(pkBase)->FUN_00452440())
                     HandleArrow();
             }
             else if (GetBaseForm() == g_pkArrowFormQ)
@@ -3246,7 +2927,7 @@ void ProjectileQ::FUN_005768b0()
                 HandleBeam();
             }
         }
-        void* pvName = pkRoot->GetName();
+        void* pvName = pkRoot->IsSceneNode();
         NodeQ* pkNode = 0;
         if (!IsActor())
         {
@@ -3269,9 +2950,9 @@ void ProjectileQ::FUN_005768b0()
                         if (GetBaseForm() == g_pkGrenadeFormAQ || GetBaseForm() == g_pkGrenadeFormBQ)
                         {
                             BodyQ* pkBody = pkBodyRef ? pkBodyRef->Get() : 0;
-                            hkVector4Q kPos(*pkBody->GetPosition());
+                            hkVector4 kPos(*pkBody->GetPosition());
                             if (((g_pkSettingsQ->IsEnabled() || IsInWaterVolume()) && pkBody &&
-                                 kPos.IsInWater(FUN_00458b20(), 0.001f)) ||
+                                 kPos.equals4(*static_cast<const hkVector4*>(FUN_00458b20()), 0.001f)) ||
                                 !IsSubmerged())
                                 FUN_00c6a350(pkRoot, 5, 1, 0, 1);
                         }
@@ -3289,7 +2970,7 @@ void ProjectileQ::FUN_005768b0()
                                 if (pkChar && pkChar->GetWaterState()->GetState() != 5 &&
                                     pkChar->GetWaterState()->GetState() != 4)
                                 {
-                                    NiPoint3Q kIntersectionOffset = g_kUpVectorQ * -1.0f;
+                                    NiPoint3 kIntersectionOffset = g_kUpVectorQ * -1.0f;
                                     FUN_0062b8d0(pkRoot, &kIntersectionOffset, 0);
                                 }
                                 SetSubmerged(0);
@@ -3318,3 +2999,4 @@ void ProjectileQ::FUN_005768b0()
     }
     Finish(1, 1);
 }
+#pragma strict_gs_check(pop)

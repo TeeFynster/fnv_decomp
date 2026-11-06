@@ -2,19 +2,16 @@
 // src/fallout/misc/appmemory.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/misc/appmemory.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../include/IOManager.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/OSGlobals.h"
+#include "../../../include/TES.h"
+
 unsigned int gm_GetCurrentThreadId();
 void FUN_0040fca0(unsigned long);
-struct OSGlobals
-{
-    unsigned int FUN_0044edb0();
-};
+
 extern OSGlobals* g_osGlobals;
-struct TES
-{
-    void FUN_00452490(int);
-    bool FUN_00453a80();
-    void FUN_004539a0(int, int);
-};
+
 extern TES* g_TES;
 extern unsigned int DAT_011de70c;
 struct ScrapHeapManager
@@ -35,18 +32,9 @@ void SetTlsFlag(int);
 void FUN_00868d70(int);
 void FUN_00c459d0(int);
 void FUN_00aa7030();
-struct RecursiveSpinLock
-{
-    bool FUN_0078d200();
-    void Leave();
-};
+#include "../../../include/RecursiveSpinLock.h"
 extern RecursiveSpinLock DAT_011f11a0;
-struct IOManager
-{
-    unsigned int CallSlotMethod(int);
-    void FUN_00866dc0(int);
-    void CallElementAt(int);
-};
+
 extern IOManager* DAT_01202d98;
 struct StateMachine
 {
@@ -216,11 +204,7 @@ int StateMachine::RunStep(void* context, unsigned int step, bool* finished)
     return step + 1;
 }
 
-struct MemoryManager
-{
-    void CreateMemoryPool(unsigned int, unsigned int, const char*);
-    void FUN_00866770();
-};
+
 
 // Calls CreateMemoryPool repeatedly with fixed numeric values and matching "Pool N" names.
 // @fnv 0x00866770

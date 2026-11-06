@@ -1,6 +1,18 @@
+#include "../../include/BSStringT.h"
 // fallout_shared/testexture.cpp: TESTexture, TESEyes, TESSkill (21 functions)
 
-#include "testexture_decls.h"
+#include "layout_support.h"
+#include "../../include/TESEyes.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESSkill.h"
+
+class TaskQueueInterface
+{
+public:
+    static void CopyStringToBuffer(char* destination, unsigned int size, const char* source);
+};
+
+char* __cdecl FUN_0040ab30(char* string, int character);
 
 #include <malloc.h>
 #include <stdio.h>
@@ -47,11 +59,11 @@ void TESTexture::ReadTextureData(TESTexture* texture, TESFile* file)
             for (; index < strlen(buffer); ++index)
                 buffer[index] = buffer[index + 1];
         }
-        reinterpret_cast<TESFullName*>(texture)->SetFullName(buffer);
+        reinterpret_cast<TESFullName*>(texture)->SetFullName(static_cast<const char*>(buffer));
     }
     else
     {
-        reinterpret_cast<TESFullName*>(texture)->SetFullName(0);
+        reinterpret_cast<TESFullName*>(texture)->SetFullName(static_cast<const char*>(0));
     }
 }
 
@@ -76,10 +88,7 @@ const char* TESTexture::NormalizeTextureFilePath(BSStringT<char>& result, const 
     }
 }
 
-struct BSS
-{
-    ~BSS();
-};
+
 struct TFH
 {
     void InitializeComponent();
@@ -87,7 +96,7 @@ struct TFH
 struct FUN_0048e2e0
 {
     virtual void v();
-    BSS m;
+    ::BSStringT<char> m;
     ~FUN_0048e2e0();
 };
 // @fnv 0x0048e2e0
@@ -153,14 +162,10 @@ const char* TESTexture_shell::FUN_0048e720()
     return "Textures\\";
 }
 
-struct TESEyes
-{
-    void FUN_005fc1b0();
-};
 // @fnv 0x005fc1b0
 void TESEyes::FUN_005fc1b0()
 {
-    ((char*)this)[0x30] = 0;
+    cFlags = 0;
 }
 
 struct FUN_005fdc30_shell
@@ -173,12 +178,6 @@ void FUN_005fdc30_shell::FUN_005fdc30()
 {
     ((char*)this)[0x48] = 0;
 }
-
-struct TESSkill
-{
-    void ResetData();
-    void FUN_00617e80();
-};
 
 // @fnv 0x00617e80
 void TESSkill::FUN_00617e80()
@@ -225,10 +224,6 @@ const char* FUN_00487410_shell::GetLeafTexturePath()
 }
 
 namespace fnv_0048e370 {
-struct TESModel
-{
-    unsigned int GetModelLength() const;
-};
 struct FNStub
 {
     char const* GetFullName();
@@ -248,10 +243,7 @@ void FUN_0048e370_shell::FUN_0048e370(unsigned int aeTextureID)
 }  // namespace fnv_0048e370
 
 namespace fnv_0048e4a0 {
-struct BSStr
-{
-    bool Set(char const*, unsigned int);
-};
+
 struct FNStub
 {
     char const* GetFullName(void);
@@ -260,14 +252,14 @@ struct FUN_0048e4a0_shell
 {
     void CopyTextureName(BaseFormComponent* apCopyFC);
 };
-// Casts apCopyFC to TESTexture; if valid, stores its full name into the BSStr at offset 4 of this.
+// Casts apCopyFC to TESTexture; if valid, stores its full name into the ::BSStringT<char> at offset 4 of this.
 // @fnv 0x0048e4a0
 void FUN_0048e4a0_shell::CopyTextureName(BaseFormComponent* apCopyFC)
 {
     TESTexture* pcopy = dynamic_cast<TESTexture*>(apCopyFC);
     if (!pcopy)
         return;
-    ((BSStr*)((char*)this + 4))->Set(((FNStub*)pcopy)->GetFullName(), 0);
+    ((::BSStringT<char>*)((char*)this + 4))->Set(((FNStub*)pcopy)->GetFullName(), 0);
 }
 }  // namespace fnv_0048e4a0
 
@@ -275,10 +267,6 @@ namespace fnv_0048e4f0 {
 struct FNStub
 {
     char* GetFullName();
-};
-struct TESModel
-{
-    unsigned int GetModelLength();
 };
 int __cdecl FUN_00404dc0(const char*, const char*);
 struct FUN_0048e4f0_shell : TESModel

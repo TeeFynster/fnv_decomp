@@ -1,8 +1,26 @@
+#include "../../include/BSStringT.h"
 
 // src/staging/blk_00580000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include <stddef.h>
+#include "../../include/Mat3.h"
+#include "../../include/SL.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESWeatherList.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/TESSoundFile.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESFile.h"
+#include "../../include/NiFormArray.h"
+#include "../../include/NiTLargeArray.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/NP.h"
+#include "../../include/BSAudio.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/PerkEntryConditionSet.h"
+#include "../../include/StrMem.h"
+#include "../../include/TES.h"
 
 struct FUN_004fc990_t
 {
@@ -359,10 +377,6 @@ void __thiscall FUN_00582000_Class::ClearArray()
 }
 
 void __cdecl FUN_00485910(int, int);
-struct TESSound
-{
-    unsigned int Deallocate();
-};
 struct FUN_00582040_Class
 {
     void ReleaseSoundSlots();
@@ -380,24 +394,10 @@ void FUN_00582040_Class::ReleaseSoundSlots()
     }
 }
 
-struct TESWeatherList
-{
-    void ClearWeatherSounds();
-};
-struct SL
-{
-    SL();
-    ~SL();
-};
-struct FUN_005822c0 : SL
-{
-    FUN_005822c0();
-    TESWeatherList weather;
-};
 // @fnv 0x005822c0
-FUN_005822c0::FUN_005822c0()
+TESWeatherList::TESWeatherList()
 {
-    weather.ClearWeatherSounds();
+    ClearWeatherSounds();
 }
 
 // @fnv 0x00582be0
@@ -463,7 +463,7 @@ void* __thiscall FUN_00589090_Cls::FUN_00589090(unsigned int flags)
     return this;
 }
 
-void __cdecl memset(void* dst, int val, unsigned int count);
+
 void* __cdecl NiMalloc(unsigned int size);
 struct FUN_005890c0
 {
@@ -625,7 +625,7 @@ float __thiscall FUN_00589850_Class::FUN_00589850()
 
 struct FUN_004726b0_class
 {
-    int __thiscall GetNextChunk();
+    int __thiscall FUN_004726b0();
 };
 struct FUN_00589890_Class
 {
@@ -636,15 +636,11 @@ bool FUN_00589890_Class::FUN_00589890(FUN_004726b0_class* apData)
 {
     if (!apData)
         return false;
-    if (apData->GetNextChunk() != 0x4b524d4d)
+    if (apData->FUN_004726b0() != 0x4b524d4d)
         return false;
     return true;
 }
 
-struct NiFormArray
-{
-    unsigned int GetIndexOfForm(TESForm*);
-};
 struct FUN_0058b680_Class
 {
     unsigned int __thiscall FUN_0058b680(TESForm* form);
@@ -658,20 +654,10 @@ unsigned int __thiscall FUN_0058b680_Class::FUN_0058b680(TESForm* form)
     return result;
 }
 
-struct TESSound;
 struct TESTopicInfo;
 struct FUN_0058b630_shell
 {
     TESSound* GetCameraPathAt(unsigned int index);
-};
-struct NiTLargeArray_TESTopicInfo
-{
-    TESTopicInfo* RemoveAt(unsigned int index);
-    void Compact();
-};
-struct TES
-{
-    void SetDawnSound(TESSound*);
 };
 struct FUN_0058b6c0_shell
 {
@@ -688,8 +674,8 @@ void FUN_0058b6c0_shell::RemoveSoundAt(unsigned int index)
         prev = ((FUN_0058b630_shell*)this)->GetCameraPathAt(index - 1);
         if (next)
             ((TES*)next)->SetDawnSound(prev);
-        ((NiTLargeArray_TESTopicInfo*)*(unsigned int*)((char*)this + 0x2c))->RemoveAt(index);
-        ((NiTLargeArray_TESTopicInfo*)*(unsigned int*)((char*)this + 0x2c))->Compact();
+        ((NiTLargeArray<TESTopicInfo*, NiTMallocInterface<TESTopicInfo*> >*)*(unsigned int*)((char*)this + 0x2c))->RemoveAt(index);
+        ((NiTLargeArray<TESTopicInfo*, NiTMallocInterface<TESTopicInfo*> >*)*(unsigned int*)((char*)this + 0x2c))->Compact();
     }
 }
 
@@ -719,22 +705,13 @@ void __thiscall Holder730::FUN_0058b730(int a1)
     }
 }
 
+class BGSCameraPath;
+
 namespace fnv_0058b770 {
-struct NiFormArray
+struct FUN_0058b770
 {
-    NiFormArray();
-    ~NiFormArray();
-};
-struct BGSCameraPath;
-struct NiTPrimitiveArray_BGSCameraPath
-{
-    NiTPrimitiveArray_BGSCameraPath(unsigned int, unsigned int);
-    ~NiTPrimitiveArray_BGSCameraPath();
-};
-struct FUN_0058b770 : public NiFormArray
-{
-    char pad[0x18 - sizeof(NiFormArray) + 1];
-    NiTPrimitiveArray_BGSCameraPath arr;
+    NiFormArray forms;
+    NiTPrimitiveArray<BGSCameraPath*> arr;
     FUN_0058b770();
 };
 // @fnv 0x0058b770
@@ -865,16 +842,8 @@ void* FUN_0058f9a0_Class::FUN_0058f9a0(unsigned int flags)
     return this;
 }
 
-struct BSS
-{
-    char c[8];
-    ~BSS();
-};
-struct PerkEntryConditionSet
-{
-    ~PerkEntryConditionSet();
-};
-struct FUN_00591170 : BSS
+
+struct FUN_00591170 : ::BSStringT<char>
 {
     PerkEntryConditionSet cond;
     ~FUN_00591170();
@@ -884,32 +853,11 @@ struct FUN_00591170 : BSS
 FUN_00591170::~FUN_00591170()
 {}
 
-namespace fnv_005912d0 {
-struct BFC_s
-{
-    int vf;
-    __thiscall BFC_s();
-};
-struct StrMem
-{
-    __thiscall StrMem();
-};
-extern int DAT_01033ab8;
-struct TESSoundFile : BFC_s
-{
-    StrMem s;
-    TESSoundFile* __thiscall FUN_005912d0();
-};
-// Initialises the object: calls the base constructor, sets the vtable pointer to DAT_01033ab8, constructs s, and returns this.
 // @fnv 0x005912d0
-TESSoundFile* __thiscall TESSoundFile::FUN_005912d0()
+// m_kSoundFile is the shared BSStringT<char>: its default constructor (0x004037b0) runs as the member's
+TESSoundFile::TESSoundFile()
 {
-    this->BFC_s::BFC_s();
-    *(int*)this = (int)&DAT_01033ab8;
-    s.StrMem::StrMem();
-    return this;
 }
-}  // namespace fnv_005912d0
 
 extern unsigned int DAT_011ca87c;
 extern void** DAT_011ca880;
@@ -944,20 +892,14 @@ bool IsValidTypeValue(int aiParam, int aiType)
     return bResult;
 }
 
-class TESFile
-{
-  public:
-    int GetChunkID();
-    bool NextChunk();
-    bool GetChunkData(unsigned int* p);
-};
 class TESFullName;
 class TESFullNameLoader
 {
   public:
     static void LoadFullNameChunk(TESFullName* a, TESFile* f);
 };
-struct AudioMarkerData_589600
+// Partial loader layout retained until include/ provides AudioMarkerData.
+struct AudioMarkerData
 {
     unsigned int unk00;
     unsigned int unk04;
@@ -973,7 +915,7 @@ struct AudioMarkerData_589600
     bool LoadFromFile(TESFile* apFile);
 };
 // @fnv 0x00589600
-bool AudioMarkerData_589600::LoadFromFile(TESFile* apFile)
+bool AudioMarkerData::LoadFromFile(TESFile* apFile)
 {
     if (!apFile)
         return false;
@@ -1068,24 +1010,6 @@ int FUN_0058cb00_Class::FUN_0058cb00(unsigned int* puiValue, int* piValue, unsig
     return 0;
 }
 
-struct FNStub
-{
-    char* GetFullName();
-    unsigned char m_auiShapeKeys[0x0c];
-};
-
-struct TESModel : FNStub
-{
-    unsigned int GetModelLength();
-    float m_0c;
-    float m_10;
-    unsigned char m_pad14[0x10];
-    int m_24;
-    unsigned char m_28;
-
-    void WriteToStream();
-};
-
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
 void __cdecl _FUN_00485910(int, int);
 void __cdecl _FUN_00485910(int, float);
@@ -1095,12 +1019,13 @@ void TESModel::WriteToStream()
 {
     FUN_004856f0(0x4c4c5546, GetFullName(), GetModelLength() + 1);
 
-    if (m_24 != 0)
-        _FUN_00485910(0x4d414e43, m_24);
+    // These stream fields are not yet named in the shared definition.
+    if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x24) != 0)
+        _FUN_00485910(0x4d414e43, *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x24));
 
-    _FUN_00485910(0x4d414e42, m_28 != 0);
-    _FUN_00485910(0x4d414e4d, m_0c);
-    _FUN_00485910(0x4d414e4e, m_10);
+    _FUN_00485910(0x4d414e42, *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x28) != 0);
+    _FUN_00485910(0x4d414e4d, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x0c));
+    _FUN_00485910(0x4d414e4e, *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x10));
 }
 
 extern char DAT_01183040;
@@ -1333,18 +1258,6 @@ FUN_0058bcc0::FUN_0058bcc0(unsigned short ausValue, unsigned short a2)
         m_04 = 0;
 }
 
-struct Mat3_58cbc0
-{
-    float m00;
-    float m01;
-    float m02;
-    float m10;
-    float m11;
-    float m12;
-    float m20;
-    float m21;
-    float m22;
-};
 
 struct Node_58cbc0
 {
@@ -1394,7 +1307,7 @@ struct Node_58cbc0
     static void* operator new(unsigned int uiSize);
     static void operator delete(void* pMem, unsigned int);
     Node_58cbc0(unsigned short usChildren);
-    void SetLocalRotate(const Mat3_58cbc0& kRot);
+    void SetLocalRotate(const Mat3& kRot);
     void AttachObject(void* pObj);
 };
 
@@ -1407,7 +1320,7 @@ struct NodePtr_58cbc0
 
 struct Source_58cbc0
 {
-    Mat3_58cbc0 GetRotation();
+    Mat3 GetRotation();
 };
 
 void* __fastcall GetRenderObject_58cbc0(Node_58cbc0* pNode);
@@ -1467,12 +1380,6 @@ void Owner_58cbc0::SetNode(Node_58cbc0* pNode)
     g_bNodeDirty_58cbc0 = true;
 }
 
-struct NP
-{
-    void* object;
-    NP& operator=(void*);
-    int FUN_00559450() const;
-};
 struct ModelComponent
 {
     virtual void v0();
@@ -1496,20 +1403,16 @@ class BSSimpleListTESRaceSize
     int GetSize();
 };
 extern BSSimpleListTESRaceSize DAT_011f2250;
-struct BSSoundHandleEx
-{
-    unsigned int soundID;
-    unsigned int state;
-    unsigned int flags;
-    ~BSSoundHandleEx();
-    bool Play(bool);
-};
-class BSAudio
-{
-  public:
-    BSSoundHandleEx GetSoundHandleByEditorID(const char*, unsigned int);
-};
 BSAudio* FUN_00453a70();
+
+// BSAudio's shared declaration still returns the former sound-handle stand-in.
+// Declare the same entry point with the checked handle type for this unit.
+class BSAudioWithSoundHandle : public BSAudio
+{
+public:
+    BSSoundHandle GetSoundHandleByEditorID(const char* editorID, unsigned int flags);
+};
+
 struct CameraState
 {
     int unk00;
@@ -1548,20 +1451,20 @@ struct CameraState
 // @fnv 0x0058ce50
 void CameraState::ResetCameraState()
 {
-    node60 = 0;
-    node64 = 0;
+    node60 = static_cast<void*>(0);
+    node64 = static_cast<void*>(0);
     unk68 = 0;
-    node70 = 0;
+    node70 = static_cast<void*>(0);
     active = false;
-    if (node6c.FUN_00559450())
+    if (static_cast<const NP&>(node6c).FUN_00559450())
     {
-        node6c = 0;
+        node6c = static_cast<void*>(0);
         DAT_011c3b3c->FUN_0045a5e0(model.Name());
     }
     if (DAT_011ca729 && !DAT_011f2250.GetSize())
     {
         DAT_011ca729 = false;
-        BSSoundHandleEx sound = FUN_00453a70()->GetSoundHandleByEditorID("UIVATSCameraOut", 0x121);
+        BSSoundHandle sound = static_cast<BSAudioWithSoundHandle*>(FUN_00453a70())->GetSoundHandleByEditorID("UIVATSCameraOut", 0x121);
         sound.Play(false);
     }
 }
@@ -1736,16 +1639,6 @@ struct Form_58bd30
     Form_58bd30();
     void SetFormType(int type);
 };
-struct Model_58bd30
-{
-    virtual ~Model_58bd30();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    Model_58bd30();
-};
 struct ISMForm_58bd30
 {
     virtual void v00();
@@ -1759,7 +1652,7 @@ struct NodePtr_58bd30
     ~NodePtr_58bd30();
     NodePtr_58bd30& operator=(void* object);
 };
-struct FUN_0058bd30 : Form_58bd30, Model_58bd30, ISMForm_58bd30
+struct FUN_0058bd30 : Form_58bd30, TESModel, ISMForm_58bd30
 {
     unsigned int unk38;
     unsigned int unk3C;
@@ -1790,11 +1683,11 @@ FUN_0058bd30::FUN_0058bd30() : node60(0), node64(0), node6c(0), node70(0)
 {
     SetFormType(0x5b);
     Reset();
-    node60 = 0;
-    node64 = 0;
-    node6c = 0;
+    node60 = static_cast<void*>(0);
+    node64 = static_cast<void*>(0);
+    node6c = static_cast<void*>(0);
     unk68 = 0;
-    node70 = 0;
+    node70 = static_cast<void*>(0);
     unk74 = 0xff;
     unk75 = false;
     unk76 = false;

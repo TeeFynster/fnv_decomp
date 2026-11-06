@@ -2,8 +2,8 @@
 #ifndef FNV_BGSSAVELOADHISTORY_H
 #define FNV_BGSSAVELOADHISTORY_H
 
-#include "layout_support.h"
-#include "layout_support.h"
+#include <stddef.h>
+#include "../../../../include/BSSimpleArray.h"
 class SaveLoadChangeHistory;
 class SaveLoadFile;
 #pragma pack(push, 4)
@@ -31,6 +31,6 @@ class SaveLoadChangeHistory
     // void* __cdecl SaveLoadChangeHistory::*(unsigned int)
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(SaveLoadChangeHistory) == 16);
-FNV_STATIC_ASSERT(offsetof(SaveLoadChangeHistory, Notes) == 0);
+typedef char SaveLoadChangeHistorySizeCheck[sizeof(SaveLoadChangeHistory) == 16 ? 1 : -1];
+typedef char SaveLoadChangeHistoryNotesOffsetCheck[offsetof(SaveLoadChangeHistory, Notes) == 0 ? 1 : -1];
 #endif

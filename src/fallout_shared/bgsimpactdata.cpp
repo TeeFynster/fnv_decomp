@@ -1,8 +1,12 @@
-// fallout_shared/bgsimpactdata.cpp: BGSImpactData, SelfX, OpaqueData (14 functions)
+// fallout_shared/bgsimpactdata.cpp: BGSImpactData and impact-data helpers (14 functions)
 
+#define FNV_TESFILE_H  // the shared TESFile below replaces layout_support.h's stub
+#include "../../include/NiFile.h"
 #include "bgsimpactdata.h"
+#include "../../include/BGSImpactData.h"
 #include <string.h>
 #include <malloc.h>
+#include "../../include/TESFile.h"
 
 static const char s_textureSetWarning[] = "MASTERFILE: Unable to find texture set (%08X) on impact data %s (%08X).";
 static const char s_soundWarning[] = "MASTERFILE: Unable to find sound (%08X) on impact data %s (%08X).";
@@ -25,12 +29,12 @@ void BGSImpactData::ResetFormData()
     m_pDecalTextureSet = 0;
     m_pPrimaryImpactSound = 0;
     m_pSecondaryImpactSound = 0;
-    Data.m_eSoundLevel = SOUND_LEVEL_SOUND_LEVEL_NORMAL;
+    Data.m_eSoundLevel = _SoundLevel::NORMAL;
 }
 
 // Loads a BGSImpactData record from a TESFile, reading the DATA chunk (old or new layout), editor ID, OBND, model, decal texture set and sound references.
 // @fnv 0x0058dea0
-bool BGSImpactData::Load(TESFile* file)
+bool BGSImpactData::LoadForm(TESFile* file)
 {
     if (static_cast<TESFileFormInt*>(file)->GetTESForm() != ENUM_FORM_ID_IPCT_ID)
         return false;
@@ -166,42 +170,8 @@ void BGSImpactData::InitItem()
     SetInitializationState(true);
 }
 
-void __cdecl operator delete(void*);
-struct FUN_0058dbe0_class
-{
-    void FUN_0058dc10();
-    void* Free(unsigned int flags);
-};
-// Calls FUN_0058dc10, then deletes this if the low bit of flags is set, and returns this.
-// @fnv 0x0058dbe0
-void* FUN_0058dbe0_class::Free(unsigned int flags)
-{
-    FUN_0058dc10();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
-struct FUN_00483630_Base : public TESForm
-{
-    virtual ~FUN_00483630_Base();
-};
-struct FUN_00483710_Member : public DecalData
-{
-    ~FUN_00483710_Member();
-};
-struct FUN_0058dc10 : public FUN_00483630_Base, public TESModel
-{
-    BGSImpactData__IMPACT_DATA_DATA Data;
-    BGSTextureSet* m_pDecalTextureSet;
-    TESSound* m_pPrimaryImpactSound;
-    TESSound* m_pSecondaryImpactSound;
-    FUN_00483710_Member ImpactDecalInfo;
-    virtual ~FUN_0058dc10();
-};
-// The destructor body is empty; the class inherits TESForm and TESModel and contains impact data and decal-related fields.
 // @fnv 0x0058dc10
-FUN_0058dc10::~FUN_0058dc10()
+BGSImpactData::~BGSImpactData()
 {}
 
 extern const char DAT_01183028[];
@@ -220,42 +190,11 @@ struct FUN_005932b0_decal
     void __thiscall FUN_005932b0(FUN_005932b0_decal* source);
 };
 
-struct FUN_0058dd10_shell : public TESForm
-{
-    void* unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    float unk30;
-    unsigned char unk34;
-    unsigned char unk35;
-    unsigned char unk36;
-    unsigned char unk37;
-    float unk38;
-    float unk3C;
-    unsigned char unk40;
-    unsigned char unk41;
-    unsigned char unk42;
-    unsigned char unk43;
-    unsigned char unk44;
-    unsigned char unk45;
-    unsigned char unk46;
-    unsigned char unk47;
-    void* unk48;
-    void* unk4C;
-    void* unk50;
-    FUN_005932b0_decal unk54;
-
-    void __thiscall FUN_0058dd10(int arg);
-};
-
 // @fnv 0x0058dd10
-void __thiscall FUN_0058dd10_shell::FUN_0058dd10(int arg)
+void __thiscall BGSImpactData::FUN_0058dd10(int arg)
 {
-    FUN_0058dd10_shell* source =
-        reinterpret_cast<FUN_0058dd10_shell*>(FUN_00ec43fb(arg, 0, DAT_01183028, DAT_011862fc, 0));
+    BGSImpactData* source =
+        reinterpret_cast<BGSImpactData*>(FUN_00ec43fb(arg, 0, DAT_01183028, DAT_011862fc, 0));
 
     if (source == 0)
         return;
@@ -264,9 +203,9 @@ void __thiscall FUN_0058dd10_shell::FUN_0058dd10(int arg)
     FUN_00401460(reinterpret_cast<char*>(this) + 0x30, reinterpret_cast<char*>(source) + 0x30, 0x18);
     reinterpret_cast<FUN_005932b0_decal*>(reinterpret_cast<char*>(this) + 0x54)
         ->FUN_005932b0(reinterpret_cast<FUN_005932b0_decal*>(reinterpret_cast<char*>(source) + 0x54));
-    unk48 = source->unk48;
-    unk4C = source->unk4C;
-    unk50 = source->unk50;
+    m_pDecalTextureSet = source->m_pDecalTextureSet;
+    m_pPrimaryImpactSound = source->m_pPrimaryImpactSound;
+    m_pSecondaryImpactSound = source->m_pSecondaryImpactSound;
 }
 
 struct FUN_005e79a0_t
@@ -277,18 +216,9 @@ struct FUN_005932e0_shell
 {
     bool Compare(void*);
 };
-struct FUN_0058de80_shell
-{
-    bool IsFlagSet();
-};
-struct FUN_0058dda0_shell : public BGSImpactData
-{
-    bool IsDifferentFrom(TESForm* apCompare);
-};
-
 // Returns true if apCompare is not BGSImpactData or a checked comparison reports a difference.
 // @fnv 0x0058dda0
-bool FUN_0058dda0_shell::IsDifferentFrom(TESForm* apCompare)
+bool BGSImpactData::IsDifferentFrom(TESForm* apCompare)
 {
     BGSImpactData* pOther = dynamic_cast<BGSImpactData*>(apCompare);
     if (!pOther)
@@ -297,7 +227,7 @@ bool FUN_0058dda0_shell::IsDifferentFrom(TESForm* apCompare)
         return true;
     if (memcmp((char*)this + 0x30, (char*)pOther + 0x30, 0x18) != 0)
         return true;
-    if (!((FUN_0058de80_shell*)this)->IsFlagSet() &&
+    if (!IsFlagSet() &&
         ((FUN_005932e0_shell*)((char*)this + 0x54))->Compare((char*)pOther + 0x54))
         return true;
     if (m_pDecalTextureSet != pOther->m_pDecalTextureSet)
@@ -309,15 +239,10 @@ bool FUN_0058dda0_shell::IsDifferentFrom(TESForm* apCompare)
     return false;
 }
 
-struct FUN_0058de80_class
-{
-    bool __thiscall IsFlagSet();
-};
-
 // @fnv 0x0058de80
-bool __thiscall FUN_0058de80_class::IsFlagSet()
+bool __thiscall BGSImpactData::IsFlagSet()
 {
-    return (reinterpret_cast<unsigned char*>(this)[0x44] & 1) ? true : false;
+    return (Data.cFlags & 1) ? true : false;
 }
 
 struct TagX
@@ -367,13 +292,9 @@ template <int N> struct EndianSizeTag
 };
 void __cdecl BSEndian(unsigned char*, EndianSizeTag<1>);
 
-struct OpaqueData
-{
-    void SwapEndian();
-};
 // Calls BSEndian on this object at byte offsets 0, 4, 8, 12, and 16.
 // @fnv 0x0058e3a0
-void OpaqueData::SwapEndian()
+void BGSImpactData__IMPACT_DATA_DATA::Endian()
 {
     BSEndian((unsigned char*)this, EndianSizeTag<1>());
     BSEndian((unsigned char*)this + 4, EndianSizeTag<1>());
@@ -381,21 +302,6 @@ void OpaqueData::SwapEndian()
     BSEndian((unsigned char*)this + 12, EndianSizeTag<1>());
     BSEndian((unsigned char*)this + 16, EndianSizeTag<1>());
 }
-
-struct FUN_004855a0
-{
-    void M();
-};
-
-struct FUN_00485680
-{
-    void M();
-};
-
-struct FUN_004891d0_obj
-{
-    void WriteToBuffer(unsigned int, unsigned int);
-};
 
 struct FUN_00485e00_shell
 {
@@ -407,26 +313,16 @@ struct FUN_00593320_shell
     void FUN_00593320(void*);
 };
 
-struct FUN_0058e450_shell
-{
-    unsigned char padding[0x48];
-    TESForm* m_pDecalTextureSet;
-    TESForm* m_pPrimaryImpactSound;
-    TESForm* m_pSecondaryImpactSound;
-
-    void FUN_0058e450();
-};
-
 bool _FUN_00401500();
 void _FUN_00485910(int, int);
 
 // Calls base helpers, processes bytes at offset 0x30, and passes non-null form IDs to _FUN_00485910.
 // @fnv 0x0058e450
-void FUN_0058e450_shell::FUN_0058e450()
+void BGSImpactData::FUN_0058e450()
 {
-    reinterpret_cast<FUN_004855a0*>(this)->M();
+    TESForm::FUN_004855a0();
 
-    reinterpret_cast<FUN_004891d0_obj*>(reinterpret_cast<unsigned char*>(this) + 0x18)
+    reinterpret_cast<TESModel*>(reinterpret_cast<unsigned char*>(this) + 0x18)
         ->WriteToBuffer(0x4c444f4d, 0x54444f4d);
 
     if (_FUN_00401500())
@@ -442,7 +338,7 @@ void FUN_0058e450_shell::FUN_0058e450()
         reinterpret_cast<BGSImpactData__IMPACT_DATA_DATA*>(reinterpret_cast<unsigned char*>(this) + 0x30)->Endian();
     }
 
-    if (!reinterpret_cast<FUN_0058de80_shell*>(this)->IsFlagSet())
+    if (!IsFlagSet())
     {
         reinterpret_cast<FUN_00593320_shell*>(reinterpret_cast<unsigned char*>(this) + 0x54)
             ->FUN_00593320(reinterpret_cast<void*>(0x54444f44));
@@ -478,39 +374,28 @@ void FUN_0058e450_shell::FUN_0058e450()
         }
     }
 
-    reinterpret_cast<FUN_00485680*>(this)->M();
+    TESForm::FUN_00485680();
 }
 
-struct TESQuest;
-struct TopicInfo_Ext
-{
-    bool IsFlagSet();
-    TESQuest* GetParentQuest();
-    void FUN_005932b0(DecalData*);
-};
 void* __fastcall FUN_0056a880(char*);
 void* FUN_0056a8c0();
+// DecalData::Copy is 0x005932b0 (see decaldata.cpp); the shared BGSImpactData.h omits it.
 struct DecalDataCopy
 {
     void Copy(DecalData*);
 };
 
-struct FUN_0058e730Class
-{
-    void CopyDecalData();
-};
-
-// When the flag is set, copies data into offset 0x54 from a source selected by whether GetParentQuest() returns non-null.
+// When the flag is set, copies decal data from the texture set or the default data.
 // @fnv 0x0058e730
-void FUN_0058e730Class::CopyDecalData()
+void BGSImpactData::CopyDecalData()
 {
-    if (reinterpret_cast<TopicInfo_Ext*>(this)->IsFlagSet())
+    if (IsFlagSet())
     {
-        if (reinterpret_cast<TopicInfo_Ext*>(this)->GetParentQuest())
+        if (GetDecalTextureSet())
         {
             reinterpret_cast<DecalDataCopy*>(reinterpret_cast<char*>(this) + 0x54)
                 ->Copy(reinterpret_cast<DecalData*>(
-                    FUN_0056a880(reinterpret_cast<char*>(reinterpret_cast<TopicInfo_Ext*>(this)->GetParentQuest()))));
+                    FUN_0056a880(reinterpret_cast<char*>(GetDecalTextureSet()))));
         }
         else
         {
@@ -528,17 +413,12 @@ extern GlobalObject_0045cfe0 g_011cd3b4;
 extern GlobalObject_0045cfe0 g_011cd538;
 extern GlobalObject_0045cfe0 g_011cdde0;
 
-struct FUN_0058e790_S
-{
-    int GetGlobalValue();
-};
-
 // Returns the int value of one of three global objects selected by the member at offset 0x40.
 // @fnv 0x0058e790
-int FUN_0058e790_S::GetGlobalValue()
+int BGSImpactData::GetGlobalValue()
 {
     int result = 0;
-    switch (*(int*)((char*)this + 0x40))
+    switch (Data.m_eSoundLevel)
     {
     case 2:
         result = *g_011cd3b4.Int();

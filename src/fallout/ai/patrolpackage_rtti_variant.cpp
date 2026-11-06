@@ -3,13 +3,17 @@
 // polymorphic classes (TESForm, TESObjectREFR, TESPackage). The skeleton of src/fallout/ai/patrolpackage.cpp with those classes made polymorphic; move the functions to
 // their real unit once its classes are.
 
-class TESObjectREFR;
+#include "../../../include/BGSLoadGameBuffer.h"
+#include "../../../include/BGSLoadFormBuffer.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESPackage.h"
+#include "../../../include/PatrolActorPackageData.h"
+
 class Actor;
 class TESPackage;
 class TESPatrolPackageData;
 class NiPoint3;
-class BGSLoadFormBuffer;
-class TESForm;
 class TESObjectWEAP;
 class NavMeshInfo;
 class BSSimpleArray_TESObjectWEAP___1024_
@@ -28,68 +32,15 @@ class LocationDescriptor
     void SetLocRef(TESObjectREFR*);
     TESObjectREFR* GetLocationReference();
 };
-class TESObjectREFR
-{
-  public:
-    virtual ~TESObjectREFR();  // the original class is polymorphic (rtti_variants.py)
-  public:
-    TESObjectREFR* GetLinkedRef();
-};
 class ArchiveManager
 {
   public:
     void CopyArchiveName(char*, unsigned int);
 };
-class TESPackage
-{
-  public:
-    virtual ~TESPackage();  // the original class is polymorphic (rtti_variants.py)
-  public:
-    const TESPatrolPackageData* GetPackagePatrolData();
-};
-class BGSLoadGameBuffer
-{
-  public:
-    void ReadDataBlock(void*, unsigned int);
-    unsigned int ReadFormIdentifier();
-};
-class BGSLoadFormBuffer
-{
-  public:
-    bool ReadFormIdentifier(void*);
-    int ReadElementCount();
-};
-class TESForm
-{
-  public:
-    virtual ~TESForm();  // the original class is polymorphic (rtti_variants.py)
-  public:
-    static TESForm* GetFormByID(unsigned int);
-};
-class PatrolActorPackageData
-{
-  public:
-    void* vtable;
-    bool flag;
-
-    bool IsPatrolling();
-    TESObjectREFR* GetPatrolReference(Actor*, TESPackage*);
-    bool Init(Actor*, TESPackage*);
-    void SetPatrolPosition(const NiPoint3&);
-    void LoadGame(BGSLoadFormBuffer*);
-};
 
 // Adapted from another contributor's unverified prior attempt; credit retained.
 
 class NavMeshInfo;
-class LoadBuf
-{
-  public:
-    void ReadDataBlock(void*, unsigned int);
-    unsigned int ReadFormIdentifier();
-    bool ReadFormIdentifier(void*);
-    unsigned int ReadElementCount();
-};
 class NavInfoArray
 {
   public:
@@ -112,10 +63,10 @@ struct PatrolLoadShell
     bool bFlag2C;
     int unk30;
     int unk34;
-    void FUN_009f34e0(LoadBuf* apBuffer);
+    void FUN_009f34e0(BGSLoadFormBuffer* apBuffer);
 };
 // @fnv 0x009f34e0
-void PatrolLoadShell::FUN_009f34e0(LoadBuf* apBuffer)
+void PatrolLoadShell::FUN_009f34e0(BGSLoadFormBuffer* apBuffer)
 {
     apBuffer->ReadDataBlock(&iState, 4);
     iState = (iState >= 0 && iState <= 2) ? iState : 0;
@@ -136,12 +87,6 @@ void PatrolLoadShell::FUN_009f34e0(LoadBuf* apBuffer)
 
 struct ExtraHolder;
 
-struct PatrolRef : public TESObjectREFR
-{
-    void FUN_00564db0(bool);
-    ExtraHolder* FUN_005d43c0();
-};
-TESForm* LookupFormByID9f3610(unsigned int);
 struct ExtraHolder
 {
     void FUN_0042f300(struct PatrolActor* actor);
@@ -279,24 +224,17 @@ struct PatrolPackage
 {
     void* GetPatrolData();
 };
-struct PatrolLoadBuf
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual PatrolActor* GetActor();
-};
 struct PatrolRefArray
 {
     void* vtbl;
-    PatrolRef** pBuffer;
+    TESObjectREFR** pBuffer;
     unsigned int uiSize;
     unsigned int uiAlloc;
     unsigned int GetSize();
-    PatrolRef*& GetAtRef(unsigned int);
+    TESObjectREFR*& GetAtRef(unsigned int);
     void RemoveAt(unsigned int, unsigned int);
     bool IsEmpty() const;
-    PatrolRef*& GetAt(unsigned int);
+    TESObjectREFR*& GetAt(unsigned int);
 };
 struct PatrolData9f3610
 {
@@ -314,20 +252,20 @@ struct PatrolData9f3610
 
     bool SetPatrolRefIndex(unsigned int);
     void SelectClosestPatrolPoint(void*);
-    void FUN_009f3610(PatrolLoadBuf* apBuf);
+    void FUN_009f3610(BGSLoadFormBuffer* apBuf);
 };
 
 // @fnv 0x009f3610
-void PatrolData9f3610::FUN_009f3610(PatrolLoadBuf* apBuf)
+void PatrolData9f3610::FUN_009f3610(BGSLoadFormBuffer* apBuf)
 {
     bool bAnyRemoved = false;
     unsigned int ItemUpdateArray = kRefs.GetSize();
     for (unsigned int i = 0; i < ItemUpdateArray; i++)
     {
         bool bRemove = false;
-        PatrolRef*& rRef = kRefs.GetAtRef(i);
+        TESObjectREFR*& rRef = kRefs.GetAtRef(i);
         rRef =
-            rRef ? reinterpret_cast<PatrolRef*>(dynamic_cast<TESObjectREFR*>(LookupFormByID9f3610((unsigned int)rRef)))
+            rRef ? dynamic_cast<TESObjectREFR*>(TESForm::GetFormByID((unsigned int)rRef))
                  : 0;
         if (rRef)
         {
@@ -346,7 +284,7 @@ void PatrolData9f3610::FUN_009f3610(PatrolLoadBuf* apBuf)
             ItemUpdateArray--;
         }
     }
-    pActor = apBuf->GetActor();
+    pActor = reinterpret_cast<PatrolActor*>(apBuf->GetActor());
     if (pPackage)
     {
         if (!pPatrolRefData)
@@ -359,8 +297,8 @@ void PatrolData9f3610::FUN_009f3610(PatrolLoadBuf* apBuf)
         }
         if (!kRefs.IsEmpty() && bRepeat)
         {
-            PatrolRef* pRef = kRefs.GetAt(uiIndex);
-            ExtraHolder* pExtraList = pRef ? pRef->FUN_005d43c0() : 0;
+            TESObjectREFR* pRef = kRefs.GetAt(uiIndex);
+            ExtraHolder* pExtraList = pRef ? reinterpret_cast<ExtraHolder*>(pRef->FUN_005d43c0()) : 0;
             if (pExtraList)
             {
                 pExtraList->FUN_0042f300(pActor);

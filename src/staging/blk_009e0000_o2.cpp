@@ -1,8 +1,16 @@
+#include "../../include/BSThreadCriticalSectionPC.h"
 
 // src/staging/blk_009e0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/CAsyncStream.h"
+#include "../../include/SpectatorPackage.h"
+// Keep SDK types in the namespace used by this unit's Win32-backed helpers.
+namespace fnv_009fae90 {
+#include <unknwn.h>
+}
+using fnv_009fae90::IUnknown;
 
 // @fnv 0x009faba0
 int __stdcall FUN_009faba0(int, int, int)
@@ -34,29 +42,20 @@ void FUN_009f9a30_class::FUN_009f9a30()
     *(int*)((char*)this + 0x20) = 1;
 }
 
-struct SpectatorPackage
-{
-    int IsComplete(const SpectatorPackage&);
-    SpectatorPackage* FUN_009f9d10(const SpectatorPackage&);
-};
-
+// The unused EDX parameter preserves the original member-call ABI.
 // @fnv 0x009f9d10
-SpectatorPackage* SpectatorPackage::FUN_009f9d10(const SpectatorPackage& aPackage)
+SpectatorPackage* __fastcall FUN_009f9d10(SpectatorPackage* self, void*, const SpectatorPackage& aPackage)
 {
-    IsComplete(aPackage);
-    return this;
+    self->IsComplete(aPackage);
+    return self;
 }
 
-struct FUN_009f9d10_cls
-{
-    void __thiscall FUN_009f9d10(int);
-    int __thiscall CallAndReturnThis(int a);
-};
 // @fnv 0x009f9d30
-int __thiscall FUN_009f9d10_cls::CallAndReturnThis(int a)
+int __fastcall CallAndReturnThis(SpectatorPackage* self, void*, int a)
 {
-    FUN_009f9d10(a);
-    return (int)this;
+    typedef SpectatorPackage* (__thiscall* CopyPackage)(SpectatorPackage*, const SpectatorPackage&);
+    reinterpret_cast<CopyPackage>(&FUN_009f9d10)(self, *reinterpret_cast<const SpectatorPackage*>(a));
+    return (int)self;
 }
 
 extern void** DAT_00fdf1c0;
@@ -966,15 +965,10 @@ void __stdcall FUN_009f9c20(FUN_009f9c20_cls* p)
 
 void __stdcall FUN_009f9c20(SpectatorPackage* pkg);
 
-struct SpectatorPackageImpl : SpectatorPackage
-{
-    void FUN_009f9c60();
-};
-
 // @fnv 0x009f9c60
-void SpectatorPackageImpl::FUN_009f9c60()
+void __fastcall FUN_009f9c60(SpectatorPackage* self, void*)
 {
-    FUN_009f9c20(this);
+    FUN_009f9c20(self);
 }
 
 struct SeekableStream
@@ -1985,7 +1979,8 @@ long Pin9FD460::ForwardIfConnected(void* p)
     return 0x80040266;
 }
 
-struct Interface
+// Exe 0x009fdaf0: unit-local Interface view; declarations and layout are preserved.
+struct BlkInterfaceView
 {
     virtual void __stdcall method0();
     virtual void __stdcall method1();
@@ -2003,7 +1998,7 @@ struct Interface
 };
 struct Worker
 {
-    int __thiscall WaitForCompletion(int resource, Interface** result, int flags, int* originalFlags);
+    int __thiscall WaitForCompletion(int resource, BlkInterfaceView** result, int flags, int* originalFlags);
 };
 struct Device
 {
@@ -2051,11 +2046,11 @@ struct Device
     Worker* m_a4;
 };
 // @fnv 0x009fdaf0
-int __stdcall FUN_009fdaf0(Device* device, int resource, Interface** output, int flags)
+int __stdcall FUN_009fdaf0(Device* device, int resource, BlkInterfaceView** output, int flags)
 {
     if (output == 0)
         return 0x80004003;
-    Interface* result = 0;
+    BlkInterfaceView* result = 0;
     int status = device->m_a4->WaitForCompletion(resource, &result, flags, &flags);
     if (status >= 0)
         result->OnReady(flags);
@@ -2732,7 +2727,8 @@ int FnvCpu_FUN_009fd0f0_CpuObject::FUN_009fd0f0()
 
 extern "C" int __cdecl memcmp(const void*, const void*, unsigned int);
 
-struct Vector4f
+// Exe 0x009f9a80: unit-local Vector4f view; declarations and layout are preserved.
+struct BlkVector4fView
 {
     int x;
     int y;
@@ -2743,24 +2739,24 @@ struct Vector4f
 extern int DAT_01093f04;
 int __stdcall FUN_009f9980(int, int);
 
-static inline int operator==(const Vector4f& a, const Vector4f& b)
+static inline int operator==(const BlkVector4fView& a, const BlkVector4fView& b)
 {
     return FUN_009f9980((int)&a, (int)&b);
 }
 
-static inline int operator!=(const Vector4f& a, const Vector4f& b)
+static inline int operator!=(const BlkVector4fView& a, const BlkVector4fView& b)
 {
     return !(a == b);
 }
 
 struct MediaType
 {
-    Vector4f majortype;
-    Vector4f subtype;
+    BlkVector4fView majortype;
+    BlkVector4fView subtype;
     int bFixedSizeSamples;
     int bTemporalCompression;
     int lSampleSize;
-    Vector4f formattype;
+    BlkVector4fView formattype;
     void* pUnk;
     unsigned int cbFormat;
     unsigned char* pbFormat;
@@ -2773,7 +2769,7 @@ struct MediaType
 // @fnv 0x009f9a80
 int MediaType::FUN_009f9a80(const MediaType* ppartial) const
 {
-    const Vector4f& guidNull = *(const Vector4f*)&DAT_01093f04;
+    const BlkVector4fView& guidNull = *(const BlkVector4fView*)&DAT_01093f04;
 
     if ((ppartial->majortype != guidNull) && (majortype != ppartial->majortype))
     {
@@ -3376,7 +3372,8 @@ unsigned long __stdcall FUN_009fb270(Obj** p)
 }
 
 namespace fnv_009fb290 {
-struct Vector4f
+// Exe 0x009fb290: unit-local Vector4f view; declarations and layout are preserved.
+struct BlkVector4fView
 {
     int x;
     int y;
@@ -3385,8 +3382,8 @@ struct Vector4f
 };
 struct LinkPair
 {
-    const Vector4f* first;
-    const Vector4f* second;
+    const BlkVector4fView* first;
+    const BlkVector4fView* second;
 };
 struct Record
 {
@@ -3395,14 +3392,14 @@ struct Record
     int property;
     int setting;
     int flags;
-    const Vector4f* attachment;
+    const BlkVector4fView* attachment;
     int attachmentKind;
     unsigned int linkCount;
     const LinkPair* links;
 };
 struct RecordSet
 {
-    const Vector4f* root;
+    const BlkVector4fView* root;
     int category;
     int version;
     unsigned int recordCount;
@@ -3413,12 +3410,12 @@ struct RecordWriter
     virtual int __stdcall QueryInterface() = 0;
     virtual int __stdcall AddRef() = 0;
     virtual int __stdcall Release() = 0;
-    virtual int __stdcall BeginSet(Vector4f header, int category, int version) = 0;
+    virtual int __stdcall BeginSet(BlkVector4fView header, int category, int version) = 0;
     virtual int __stdcall FinishSet() = 0;
-    virtual int __stdcall WriteRecord(Vector4f header, int type, int group, int property, int setting, int flags,
-                                      Vector4f attachment, int attachmentKind) = 0;
-    virtual int __stdcall WriteLink(Vector4f header, int type, Vector4f first, Vector4f second) = 0;
-    virtual int __stdcall WriteHeader(Vector4f header) = 0;
+    virtual int __stdcall WriteRecord(BlkVector4fView header, int type, int group, int property, int setting, int flags,
+                                      BlkVector4fView attachment, int attachmentKind) = 0;
+    virtual int __stdcall WriteLink(BlkVector4fView header, int type, BlkVector4fView first, BlkVector4fView second) = 0;
+    virtual int __stdcall WriteHeader(BlkVector4fView header) = 0;
 };
 // @fnv 0x009fb290
 int __stdcall WriteRecordSet(const RecordSet* source, RecordWriter* writer, int includeRecords)
@@ -3529,11 +3526,11 @@ struct FindGuard
     FindCritSec* m_pLock;
     FindGuard(FindCritSec* p) : m_pLock(p)
     {
-        m_pLock->Lock();
+        EnterCriticalSection(m_pLock);
     }
     ~FindGuard()
     {
-        m_pLock->Unlock();
+        LeaveCriticalSection(m_pLock);
     }
 };
 struct FindPinIface
@@ -3962,11 +3959,11 @@ struct DsAutoLock
     DsAutoLock(DsCritSec* plock)
     {
         m_pLock = plock;
-        m_pLock->Lock();
+        EnterCriticalSection(m_pLock);
     }
     ~DsAutoLock()
     {
-        m_pLock->Unlock();
+        LeaveCriticalSection(m_pLock);
     }
 };
 
@@ -4399,11 +4396,11 @@ class S9fcc60_AutoLock
     S9fcc60_AutoLock(S9fcc60_CritSec* plock)
     {
         m_pLock = plock;
-        m_pLock->Lock();
+        EnterCriticalSection(m_pLock);
     }
     ~S9fcc60_AutoLock()
     {
-        m_pLock->Unlock();
+        LeaveCriticalSection(m_pLock);
     }
 };
 
@@ -4744,19 +4741,12 @@ int HolderObj::FUN_009fd3a0(int aMask)
     return !((m_pEntryObject->v04() - 1) & aMask);
 }
 
-struct IUnknownFD4
-{
-    virtual long __stdcall QueryInterface(const void* riid, void** ppvObject);
-    virtual unsigned long __stdcall AddRef();
-    virtual unsigned long __stdcall Release();
-};
-
 struct AggregateFD4
 {
     int m_unk00;
     int m_unk04;
     int m_unk08;
-    IUnknownFD4* m_pOuter;
+    IUnknown* m_pOuter;
 };
 
 // @fnv 0x009fd430
@@ -5350,11 +5340,11 @@ class CAutoLock
     CAutoLock(CCritSec* plock)
     {
         m_pLock = plock;
-        m_pLock->Lock();
+        EnterCriticalSection(m_pLock);
     }
     ~CAutoLock()
     {
-        m_pLock->Unlock();
+        LeaveCriticalSection(m_pLock);
     }
 };
 class CAMEvent
@@ -5366,15 +5356,6 @@ class CAMEvent
     {
         return WaitForSingleObject(m_hEvent, dwTimeout) == 0;
     }
-};
-class CAsyncStream
-{
-  public:
-    virtual long QueryInterface(void* riid, void** ppv) = 0;
-    virtual long SetPointer(__int64 llPos) = 0;
-    virtual long Read(unsigned char* pbBuffer, unsigned long dwBytesToRead, int bAlign,
-                      unsigned long* pdwBytesRead) = 0;
-    virtual __int64 Size(__int64* pSizeAvailable = 0) = 0;
 };
 class CAsyncRequest
 {
@@ -6385,11 +6366,11 @@ class CAutoLockW
   public:
     CAutoLockW(CCritSecW* plock) : m_pLock(plock)
     {
-        m_pLock->Lock();
+        EnterCriticalSection(m_pLock);
     }
     ~CAutoLockW()
     {
-        m_pLock->Unlock();
+        LeaveCriticalSection(m_pLock);
     }
 
     CCritSecW* m_pLock;
@@ -6796,35 +6777,19 @@ int __stdcall FilterInterface::Activate()
     return 0;
 }
 
-struct FltCritSec
-{
-    void* DebugInfo;
-    long LockCount;
-    long RecursionCount;
-    void* OwningThread;
-    void* LockSemaphore;
-    unsigned long SpinCount;
-    void Lock()
-    {
-        EnterCriticalSection(this);
-    }
-    void Unlock()
-    {
-        LeaveCriticalSection(this);
-    }
-};
+
 
 struct FltAutoLock
 {
-    FltCritSec* m_pLock;
-    FltAutoLock(FltCritSec* plock)
+    BSThreadCriticalSectionPC* m_pLock;
+    FltAutoLock(BSThreadCriticalSectionPC* plock)
     {
         m_pLock = plock;
-        m_pLock->Lock();
+        EnterCriticalSection(m_pLock);
     }
     ~FltAutoLock()
     {
-        m_pLock->Unlock();
+        LeaveCriticalSection(m_pLock);
     }
 };
 
@@ -6894,7 +6859,7 @@ struct FltBaseFilter : FltUnknown, FltMediaFilter, FltMovieSetup
     unsigned long m_clsid1;
     unsigned long m_clsid2;
     unsigned long m_clsid3;
-    FltCritSec* m_pLock;
+    BSThreadCriticalSectionPC* m_pLock;
 
     virtual void v0c();
     virtual void v10();
@@ -7493,7 +7458,6 @@ void __stdcall FUN_009fac30(int a, int b, int c)
 }  // namespace fnv_009fac30
 
 namespace fnv_009fae90 {
-#include <windows.h>
 
 struct Packet;
 struct PacketCallbacks
@@ -7569,35 +7533,19 @@ extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(voi
                                                                              unsigned long dwMilliseconds);
 extern "C" __declspec(dllimport) int __stdcall SetEvent(void* hEvent);
 
-struct AsyncCritSec
-{
-    void* DebugInfo;
-    long LockCount;
-    long RecursionCount;
-    void* OwningThread;
-    void* LockSemaphore;
-    unsigned long SpinCount;
-    void Lock()
-    {
-        EnterCriticalSection(this);
-    }
-    void Unlock()
-    {
-        LeaveCriticalSection(this);
-    }
-};
+
 
 struct AsyncAutoLock
 {
-    AsyncCritSec* m_pLock;
-    AsyncAutoLock(AsyncCritSec* plock)
+    BSThreadCriticalSectionPC* m_pLock;
+    AsyncAutoLock(BSThreadCriticalSectionPC* plock)
     {
         m_pLock = plock;
-        m_pLock->Lock();
+        EnterCriticalSection(m_pLock);
     }
     ~AsyncAutoLock()
     {
-        m_pLock->Unlock();
+        LeaveCriticalSection(m_pLock);
     }
 };
 
@@ -7625,7 +7573,7 @@ struct AsyncIo
     int unk10;
     int unk14;
     int unk18;
-    AsyncCritSec m_csLists;
+    BSThreadCriticalSectionPC m_csLists;
     int m_bFlushing;
     int unk38;
     int unk3c;
@@ -8031,7 +7979,7 @@ int __stdcall FUN_009fb650(FltMediaFilter* self, void** pClock)
     FltAutoLock lock(filter->m_pLock);
     if (filter->m_pClock != 0)
     {
-        ((IUnknownFD4*)filter->m_pClock)->AddRef();
+        ((IUnknown*)filter->m_pClock)->AddRef();
     }
     *pClock = filter->m_pClock;
     return 0;
@@ -8439,8 +8387,8 @@ int AsyncPinMediaTypes::FUN_009fd4e0(int position, MediaType* apMediaType)
         return 0x80004003;
     if (unk98 == 0)
         return 0x8000ffff;
-    int (FUN_009f9d10_cls::*copyMediaType)(int) = &FUN_009f9d10_cls::CallAndReturnThis;
-    (reinterpret_cast<FUN_009f9d10_cls*>(apMediaType)->*copyMediaType)(
+    typedef int (__thiscall* CopyMediaType)(SpectatorPackage*, int);
+    reinterpret_cast<CopyMediaType>(&CallAndReturnThis)(reinterpret_cast<SpectatorPackage*>(apMediaType),
         reinterpret_cast<int>(&reinterpret_cast<AsyncReaderMediaStorage*>(unk98)->mediaType));
     return 0;
 }

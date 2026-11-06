@@ -9,9 +9,9 @@
 // translation unit did.
 //
 // Compiler: MSVC9 SP1 15.00.30729.01, flags /Od /Oy- /GS /EHsc /Gy
-#include "bhkhingeconstraint.h"
-
-const NiRTTI bhkHingeConstraint::ms_kRTTI;
+#include "../../include/NiRTTI.h"
+#include "../../include/bhkConstraint.h"
+#include "../../include/bhkHingeConstraint.h"
 
 // @fnv 0x009ba510
 const NiRTTI* bhkHingeConstraint::GetRTTI() const

@@ -1,19 +1,27 @@
+#include <xmmintrin.h>
 
 // src/havok/physics/utilities/actions/angulardashpot/hkpangulardashpotaction.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/actions/angulardashpot/hkpangulardashpotaction.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpAngularDashpotAction.h"
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkQuaternion.h"
+#include "../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../include/hkVector4.h"
 
-struct hkQuaternionD4DB
+__forceinline hkQuaternion::hkQuaternion() {}
+
+
+// The TLS accessor is 0x00c85750, also bound as hkMemoryRouter::GetMonitorStream in hkbsdsocket.cpp.
+inline void* hkReferencedObject::operator new(std::size_t uiSize)
 {
-    __m128 m_vec;
-};
+    hkMemoryAllocator& allocator =
+        reinterpret_cast<hkMemoryAllocator&>((&hkMemoryRouter::getInstance())->heap());
+    hkReferencedObject* pkObj = static_cast<hkReferencedObject*>(allocator.blockAlloc(uiSize));
+    pkObj->m_usMemSizeAndFlags = (unsigned short)uiSize;
+    return pkObj;
+}
 
 extern const __m128 DAT_010c71b0;
 
@@ -39,7 +47,7 @@ class FUN_00d4dbe0 : public FUN_00cf4d80
     FUN_00d4dbe0(void* pkEntityA, void* pkEntityB, unsigned long ulUserData) throw();
     virtual ~FUN_00d4dbe0() throw();
 
-    hkQuaternionD4DB m_rotation;
+    hkQuaternion m_rotation;
     float m_fSpringStrength;
     float m_fMotorDamping;
     int unk38, unk3C;
@@ -49,40 +57,10 @@ class FUN_00d4dbe0 : public FUN_00cf4d80
 FUN_00d4dbe0::FUN_00d4dbe0(void* pkEntityA, void* pkEntityB, unsigned long ulUserData) throw()
     : FUN_00cf4d80(pkEntityA, pkEntityB, ulUserData), m_fSpringStrength(0.1f), m_fMotorDamping(0.01f)
 {
-    m_rotation.m_vec = DAT_010c71b0;
+    *reinterpret_cast<__m128*>(&m_rotation) = DAT_010c71b0;
 }
 
 namespace fnv_00d4dc30 {
-class hkMemoryAllocatorD4DC
-{
-  public:
-    virtual ~hkMemoryAllocatorD4DC() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-};
-
-struct hkMemoryRouterD4DC
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorD4DC* m_pStreamAllocator;
-    hkMemoryAllocatorD4DC& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterD4DC& __cdecl FUN_00c85750();
-
-struct __declspec(align(16)) hkVector4D4DC
-{
-    __m128 m_vComponents;
-    void operator=(const hkVector4D4DC& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-
 struct hkpEntityPairD4DC
 {
     void* m_pEntityA;
@@ -95,24 +73,7 @@ struct hkpConstraintInputD4DC
     int m_type;
 };
 
-class hkReferencedObjectD4DC
-{
-  public:
-    virtual ~hkReferencedObjectD4DC() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    static void* operator new(unsigned int uiSize)
-    {
-        hkReferencedObjectD4DC* pkObj =
-            static_cast<hkReferencedObjectD4DC*>(FUN_00c85750().heap().AllocateMemoryBlock(uiSize));
-        pkObj->m_usMemSizeAndFlags = (unsigned short)uiSize;
-        return pkObj;
-    }
-    static void operator delete(void* p) throw();
-};
-
-class FUN_00d4dbe0 : public hkReferencedObjectD4DC
+class FUN_00d4dbe0 : public hkReferencedObject
 {
   public:
     int unk08;
@@ -121,7 +82,7 @@ class FUN_00d4dbe0 : public hkReferencedObjectD4DC
     int unk14;
     int unk18;
     int unk1C;
-    hkVector4D4DC m_kAxisEndPoints;
+    hkVector4 m_kAxisEndPoints;
     float m_kMinimumCorner;
     float m_kMaximumCorner;
     int unk38;
@@ -142,7 +103,7 @@ class hkpConstraintTemplateD4DC
     int unk14;
     int unk18;
     int unk1C;
-    hkVector4D4DC m_kAxisEndPoints;
+    hkVector4 m_kAxisEndPoints;
     float m_kMinimumCorner;
     float m_kMaximumCorner;
 

@@ -8,11 +8,6 @@ typedef DepthDevice*(__stdcall* CreateFunction)(unsigned int);
 extern CreateExFunction DAT_0126f0e0;
 extern CreateFunction DAT_0126f0dc;
 bool InitD3D9CreateFunctions();
-class NiD3DDefaultShader
-{
-  public:
-    static void SetShaderName(const char*);
-};
 class ShaderPassRenderer
 {
   public:

@@ -3,51 +3,5 @@
 #define FNV_MISCSTATMANAGER_MISCSTATID_H
 
 #include "statsmenu_layout_support.h"
-enum MiscStatManager__MiscStatID
-{
-    MiscStatManager__MiscStatID_MS_QUESTS_COMPLETED = 0,
-    MiscStatManager__MiscStatID_MS_LOCATIONS_DISCOVERED = 1,
-    MiscStatManager__MiscStatID_MS_HUMANS_KILLED = 2,
-    MiscStatManager__MiscStatID_MS_CREATURES_KILLED = 3,
-    MiscStatManager__MiscStatID_MS_LOCKS_PICKED = 4,
-    MiscStatManager__MiscStatID_MS_COMPUTERS_HACKED = 5,
-    MiscStatManager__MiscStatID_MS_STIMPAKS_TAKEN = 6,
-    MiscStatManager__MiscStatID_MS_RADX_TAKEN = 7,
-    MiscStatManager__MiscStatID_MS_RADAWAY_TAKEN = 8,
-    MiscStatManager__MiscStatID_MS_CHEMS_TAKEN = 9,
-    MiscStatManager__MiscStatID_MS_ADDICTIONS = 10,
-    MiscStatManager__MiscStatID_MS_MINES_DISARMED = 11,
-    MiscStatManager__MiscStatID_MS_SPEECH_SUCCESSES = 12,
-    MiscStatManager__MiscStatID_MS_POCKETS_PICKED = 13,
-    MiscStatManager__MiscStatID_MS_PANTS_EXPLODED = 14,
-    MiscStatManager__MiscStatID_MS_BOOKS_READ = 15,
-    MiscStatManager__MiscStatID_MS_STIMPAK_HEALTH_RESTORED = 16,
-    MiscStatManager__MiscStatID_MS_WEAPONS_CONSTRUCTED = 17,
-    MiscStatManager__MiscStatID_MS_FOOD_HEALTH_RESTORED = 18,
-    MiscStatManager__MiscStatID_MS_WATER_CONSUMED = 19,
-    MiscStatManager__MiscStatID_MS_SANDMAN_KILLS = 20,
-    MiscStatManager__MiscStatID_MS_PARALYZING_PUNCHES = 21,
-    MiscStatManager__MiscStatID_MS_ROBOTS_DISABLED = 22,
-    MiscStatManager__MiscStatID_MS_TIMES_SLEPT = 23,
-    MiscStatManager__MiscStatID_MS_CORPSES_EATEN = 24,
-    MiscStatManager__MiscStatID_MS_STRANGER_ASSISTS = 25,
-    MiscStatManager__MiscStatID_MS_DOCTORBAG_USED = 26,
-    MiscStatManager__MiscStatID_MS_CHALLENGES_COMPLETED = 27,
-    MiscStatManager__MiscStatID_MS_MISS_FORTUNE = 28,
-    MiscStatManager__MiscStatID_MS_DISINTEGRATIONS = 29,
-    MiscStatManager__MiscStatID_MS_HAVE_LIMBS_CRIPPLED = 30,
-    MiscStatManager__MiscStatID_MS_SPEECH_FAILURES = 31,
-    MiscStatManager__MiscStatID_MS_ITEMS_CRAFTED = 32,
-    MiscStatManager__MiscStatID_MS_WEAPONS_MODDED = 33,
-    MiscStatManager__MiscStatID_MS_ITEMS_REPAIRED = 34,
-    MiscStatManager__MiscStatID_MS_TOTAL_THINGS_KILLED = 35,
-    MiscStatManager__MiscStatID_MS_DISMEMBERMENTS = 36,
-    MiscStatManager__MiscStatID_MS_CARAVAN_GAMES_WON = 37,
-    MiscStatManager__MiscStatID_MS_CARAVAN_GAMES_LOST = 38,
-    MiscStatManager__MiscStatID_MS_BARTER_AMOUNT_TRADED = 39,
-    MiscStatManager__MiscStatID_MS_ROULETTE_GAMES_PLAYED = 40,
-    MiscStatManager__MiscStatID_MS_BLACKJACK_GAMES_PLAYED = 41,
-    MiscStatManager__MiscStatID_MS_SLOTS_GAMES_PLAYED = 42,
-    MiscStatManager__MiscStatID_MS_COUNT = 43
-};
+#include "../include/MiscStatManager__MiscStatID.h"
 #endif

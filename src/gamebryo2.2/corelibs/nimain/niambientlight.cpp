@@ -2,6 +2,8 @@
 // src/gamebryo2.2/corelibs/nimain/niambientlight.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/niambientlight.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/StrArr.h"
+
 struct S00
 {
     void _FUN_00a72010();
@@ -18,16 +20,6 @@ void* S00::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-struct StrArr
-{
-    char _0[8];
-    unsigned short m_usMax;
-    unsigned short m_usSize;
-    char _c[2];
-    unsigned short m_usGrow;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 void __stdcall AppendEffectProperties(StrArr*);
 char* __cdecl _FUN_00a7d330(void const*);
 extern void const* const g_011f5f6c;
@@ -38,9 +30,9 @@ void __stdcall FUN_00a9b430(StrArr* pStrArr)
     AppendEffectProperties(pStrArr);
     char* pkString = _FUN_00a7d330(g_011f5f6c);
     unsigned int uiIndex = pStrArr->m_usSize;
-    if (uiIndex >= pStrArr->m_usMax)
+    if (uiIndex >= pStrArr->m_usMaxSize)
     {
-        pStrArr->SetSize(uiIndex + pStrArr->m_usGrow);
+        pStrArr->SetSize(uiIndex + pStrArr->m_usGrowBy);
     }
     pStrArr->SetAt(uiIndex, pkString);
 }

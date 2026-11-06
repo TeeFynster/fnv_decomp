@@ -2,10 +2,13 @@
 // src/havok/animation/animation/ik/footplacement/hkafootplacementiksolver.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/ik/footplacement/hkafootplacementiksolver.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/hkaRaycastInterface.h"
+
 // @fnv 0x00cd8800
-void __stdcall FUN_00cd8800(unsigned char* out, int arg2, int arg3, int arg4, int arg5)
+hkBool hkaRaycastInterface::castRay(const hkVector4& fromWS, const hkVector4& toWS,
+                                    float& hitFractionOut, hkVector4& normalWSOut)
 {
-    *out = 0;
+    return false;
 }
 
 struct GlobalMgr
@@ -35,23 +38,10 @@ FUN_00c74e70_cls* FUN_00c74e70_cls::FUN_00c74e70(unsigned char acFlags)
     return this;
 }
 
-struct CD8810Bool
-{
-    char m_cBooleanValue;
-
-    CD8810Bool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-
-struct CD8810Filter
-{
-    virtual CD8810Bool FUN_00cd8810(const void* a, const void* b, const void* c, const void* d, const void* e) const;
-};
-
 // @fnv 0x00cd8810
-CD8810Bool CD8810Filter::FUN_00cd8810(const void* a, const void* b, const void* c, const void* d, const void* e) const
+hkBool hkaRaycastInterface::castRay(const hkVector4& fromWS, const hkVector4& toWS,
+                                    unsigned int collisionFilterInfo, float& hitFractionOut,
+                                    hkVector4& normalWSOut)
 {
     return false;
 }

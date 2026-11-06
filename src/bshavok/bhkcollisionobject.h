@@ -1,33 +1,11 @@
-// bshavok/bhkcollisionobject.h: declares bhkNiCollisionObject, bhkCollisionObject
 #ifndef BHKCOLLISIONOBJECT_H
 #define BHKCOLLISIONOBJECT_H
 
 
 #include "layout_support.h"
+#include "../../include/bhkCollisionObject.h"
+#include "../../include/bhkNiCollisionObject.h"
 #include "bhkcollisionobject_decls.h"
-
-class NiRTTI;
-class NiObject;
-class NiAVObject;
-class hkpRigidBody;
-
-class bhkNiCollisionObject
-{
-  public:
-    virtual ~bhkNiCollisionObject();
-};
-
-class bhkCollisionObject : public bhkNiCollisionObject
-{
-  public:
-    virtual ~bhkCollisionObject();
-    virtual const NiRTTI* GetRTTI() const;
-
-    static const NiRTTI ms_kRTTI;
-
-    static bhkCollisionObject* GetFromNiAVObject(NiAVObject* object);
-    static bhkCollisionObject* GetFromRigidBody(const hkpRigidBody* body);
-};
 
 // @fnv 0x0056d5b0
 const NiRTTI* bhkCollisionObject::GetRTTI() const

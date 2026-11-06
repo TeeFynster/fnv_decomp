@@ -1,40 +1,32 @@
 // gamebryo2.2/corelibs/nimain/nipoint2.cpp: NiPoint2 (2 functions)
 
-#include "nipoint2_decls.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiPoint2.h"
+#include "../../../../include/NiStream.h"
+
+__forceinline void NiBinaryStream::ReadFloat(float& value)
+{
+    unsigned int size = 4;
+    m_uiAbsoluteCurrentPos += m_pfnRead(this, &value, 4, &size, 1);
+}
+
+inline void NiBinaryStream::Write(float* value)
+{
+    unsigned int size = 4;
+    m_uiAbsoluteCurrentPos += m_pfnWrite(this, value, 4, &size, 1);
+}
+
 // Reads two floats from the stream into the point's x and y coordinates.
 // @fnv 0x00a68c80
 void NiPoint2::LoadBinary(NiStream& stream)
 {
-    stream.m_pUnderlyingStream->ReadFloat(x);
-    stream.m_pUnderlyingStream->ReadFloat(y);
+    stream.m_pkIstr->ReadFloat(x);
+    stream.m_pkIstr->ReadFloat(y);
 }
 
-struct OS_00a68ce0
-{
-    int f0;
-    int f4;
-    int f8;
-    int(__cdecl* fC)(OS_00a68ce0*, void*, int, int*, int);
-    void WriteFloat(float& f)
-    {
-        int tmp = 4;
-        f4 += fC(this, &f, 4, &tmp, 1);
-    }
-};
-struct ST_00a68ce0
-{
-    char _0[0x250];
-    OS_00a68ce0* m_pBackingStream;
-};
-struct THIS_00a68ce0
-{
-    float x;
-    float y;
-    void WriteCoords(ST_00a68ce0&);
-};
 // @fnv 0x00a68ce0
-void THIS_00a68ce0::WriteCoords(ST_00a68ce0& aStream)
+void NiPoint2::SaveBinary(NiStream* stream)
 {
-    aStream.m_pBackingStream->WriteFloat(x);
-    aStream.m_pBackingStream->WriteFloat(y);
+    stream->m_pkOstr->Write(&x);
+    stream->m_pkOstr->Write(&y);
 }

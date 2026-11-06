@@ -1,10 +1,15 @@
-// fallout/misc/saveload/bgschangeflags.cpp: BGSChangeFlagsState, FormChangeMask, BGSChangeFlagsEx (6 functions)
+// fallout/misc/saveload/bgschangeflags.cpp: BGSChangeFlagsState, LocalFormChangeMask, BGSChangeFlags (6 functions)
+
+#include "../../../../include/BGSChangeFlags.h"
+#include "../../../../include/TESDataHandler.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/TESObjectREFR.h"
 
 #include "bgschangeflags_decls.h"
 // @fnv 0x008c71b0
-GlobalObject_008c71b0::GlobalObject_008c71b0(int initial)
+BGSChangeFlags::BGSChangeFlags(int initial)
 {
-    value = initial;
+    uiFlags = initial;
 }
 // Sets or clears bit 8 of flags according to enabled.
 // @fnv 0x0042ce50
@@ -16,7 +21,7 @@ void BGSChangeFlagsState::CombineFlags(bool enabled)
         flags &= ~8;
 }
 // @fnv 0x00841120
-FormChangeMask FormChangeMask::HasFormChanged(FormChangeMask changes, FormChangeMask forced, int type, bool enabled)
+LocalFormChangeMask LocalFormChangeMask::HasFormChanged(LocalFormChangeMask changes, LocalFormChangeMask forced, int type, bool enabled)
 {
     ((FormChangeRecord*)&changes)->FUN_00562210(forced.FUN_00559450());
     ((FormChangeRecord*)&changes)->FUN_00562210(0xffff0000);
@@ -34,15 +39,10 @@ FormChangeMask FormChangeMask::HasFormChanged(FormChangeMask changes, FormChange
     return changes;
 }
 
-struct FUN_00841100_shell : public FormChangeMask
-{
-    void FUN_00841100(int);
-};
-
 // @fnv 0x00841100
-void FUN_00841100_shell::FUN_00841100(int aiFlags)
+void BGSChangeFlags::AddFlags(int aiFlags)
 {
-    *(int*)this |= aiFlags;
+    uiFlags |= aiFlags;
 }
 
 static const char kStr_Flags[] = "Flags";
@@ -462,39 +462,14 @@ const char* GetChangeFlagName(int flags, int aiFormType, bool enabled)
     return kStr_Bad_Flag_Name;
 }
 
-class TESForm
-{
-  public:
-    int GetFormType();
-    unsigned int GetFormID();
-};
-
-class TESObjectREFR : public TESForm
-{
-  public:
-    bool FUN_0057b790();
-};
-
-struct TESDataHandler
-{
-    bool FUN_00469860(unsigned int);
-};
-
 extern TESDataHandler* g_dataHandler;
-
-struct BGSChangeFlagsEx : public FUN_00841100_shell
-{
-    BGSChangeFlagsEx();
-    bool Test(unsigned int);
-    bool TestFormChangeFlags(TESForm* apForm);
-};
 
 // Builds a forced change-flags set from the form type and its flags, stores it in flags, and returns whether any forced flag is set or the form is kept.
 // @fnv 0x00840f70
-bool BGSChangeFlagsEx::TestFormChangeFlags(TESForm* apForm)
+bool BGSChangeFlags::TestFormChangeFlags(TESForm* apForm)
 {
     int eFormType2 = apForm->GetFormType();
-    BGSChangeFlagsEx kForced;
+    BGSChangeFlags kForced;
     bool bKeep2 = false;
     TESObjectREFR* pRef;
 
@@ -509,7 +484,7 @@ bool BGSChangeFlagsEx::TestFormChangeFlags(TESForm* apForm)
     case 0x40:
     case 0x69:
         pRef = (TESObjectREFR*)apForm;
-        if (g_dataHandler->FUN_00469860(apForm->GetFormID()))
+        if (g_dataHandler->FormIDExists(apForm->GetFormID()))
         {
             bKeep2 = true;
         }
@@ -517,11 +492,11 @@ bool BGSChangeFlagsEx::TestFormChangeFlags(TESForm* apForm)
         {
             if (Test(0x10000000))
             {
-                kForced.FUN_00841100(0x10000000);
+                kForced.AddFlags(0x10000000);
             }
             if (Test(0x8000000))
             {
-                kForced.FUN_00841100(0x8000000);
+                kForced.AddFlags(0x8000000);
             }
         }
         switch (eFormType2)
@@ -530,7 +505,7 @@ bool BGSChangeFlagsEx::TestFormChangeFlags(TESForm* apForm)
         case 0x3C:
             if (Test(0x40000))
             {
-                kForced.FUN_00841100(0x40000);
+                kForced.AddFlags(0x40000);
             }
             break;
         }
@@ -538,11 +513,11 @@ bool BGSChangeFlagsEx::TestFormChangeFlags(TESForm* apForm)
     case 0x47:
         if (Test(0x40000000))
         {
-            kForced.FUN_00841100(0x40000000);
+            kForced.AddFlags(0x40000000);
         }
         break;
     }
 
-    flags = kForced.FUN_00559450();
-    return flags != 0 || bKeep2;
+    uiFlags = kForced.GetFlags();
+    return uiFlags != 0 || bKeep2;
 }

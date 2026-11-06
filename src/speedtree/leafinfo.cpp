@@ -2,12 +2,7 @@
 // src/speedtree/leafinfo.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/speedtree/leafinfo.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
+#include "../../include/NiPoint3.h"
 
 class Sub14_cls
 {
@@ -56,12 +51,13 @@ class FUN_00b2e680_cls
     FUN_00b2e680_cls(const FUN_00b2e680_cls& src);
 
     unsigned char m_b00;
-    NiPoint3 m_p04;
+    // Raw storage avoids default construction before the copy constructor assigns the points.
+    float m_p04[3];
     float m_f10;
     Sub14_cls m_s14;
-    NiPoint3 m_p30;
-    NiPoint3 m_p3c;
-    NiPoint3 m_p48;
+    float m_p30[3];
+    float m_p3c[3];
+    float m_p48[3];
 };
 
 // Copies the fields of src into this, delegating the embedded Sub14_cls member to AssignSubstring with DAT_010173f0.
@@ -72,13 +68,13 @@ FUN_00b2e680_cls::FUN_00b2e680_cls(const FUN_00b2e680_cls& src)
     unsigned int tail;
 
     this->m_b00 = src.m_b00;
-    this->m_p04 = src.m_p04;
+    *reinterpret_cast<NiPoint3*>(this->m_p04) = *reinterpret_cast<const NiPoint3*>(src.m_p04);
     this->m_f10 = src.m_f10;
     Sub14_cls* sub = &m_s14;
     sub->AssignSubstring(&src.m_s14, 0, DAT_010173f0);
-    this->m_p30 = src.m_p30;
-    this->m_p3c = src.m_p3c;
-    this->m_p48 = src.m_p48;
+    *reinterpret_cast<NiPoint3*>(this->m_p30) = *reinterpret_cast<const NiPoint3*>(src.m_p30);
+    *reinterpret_cast<NiPoint3*>(this->m_p3c) = *reinterpret_cast<const NiPoint3*>(src.m_p3c);
+    *reinterpret_cast<NiPoint3*>(this->m_p48) = *reinterpret_cast<const NiPoint3*>(src.m_p48);
 }
 
 struct S_00b3cf40_Random

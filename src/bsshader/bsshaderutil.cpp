@@ -1,85 +1,164 @@
-// bsshader/bsshaderutil.cpp: BSShaderRenderUtility (7 functions)
+// bsshader/bsshaderutil.cpp: BSShaderRenderUtility_bsshaderutil (7 functions)
 
-#include "bsshaderutil_decls.h"
+#include <d3d9.h>
+
+// BSShaderRenderUtility_bsshaderutil: local type (was include/BSShaderRenderUtility.h, which had no evidence of one real class); its methods are 0x00469860 TESDataHandler::IsFormIDCreated, 0x00b6ba70 BSShaderUtil::InitSDM, 0x00b6bb30 BSShaderUtil::RecursiveSetPropertyFadeAlpha, 0x00b6c0d0 BSShaderUtil::RenderScene
+class AnimIdle;
+class BSShaderAccumulator;
+class NiCamera;
+class NiNode;
+
+class BSShaderRenderUtility_bsshaderutil
+{
+public:
+    bool IsRenderTargetId(unsigned int value);
+    static void InitializeMultiBounds();
+    static void SetRenderCamera(NiCamera* camera, BSShaderAccumulator* accumulator, bool unused);
+    static void SetRenderCamera(AnimIdle* camera, AnimIdle* accumulator, bool unused);
+    static void SetRenderCamera(void* camera, unsigned int accumulator, bool unused);
+    static void SetAlphaOnNode(NiNode* node, float alpha);
+};
+#include "../../include/BSSimpleArray.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiTexture.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/BSShaderProperty.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiDX9Renderer.h"
+#include "../../include/NiSourceTexture.h"
+#include "../../include/NiPixelFormat.h"
+#include "../../include/NiPixelData.h"
+#include "../../include/NiMemObject.h"
+#include "../../include/BSShaderAccumulator.h"
+#include "../../include/BSCullingProcess.h"
+#include "../../include/NiDX9TextureData.h"
+
+extern NiCamera* DAT_011f917c;
+extern void* DAT_011fa050;
+extern void* DAT_011fa054;
+extern MemoryManager g_memoryManager;
+void FUN_00b54b10(BSShaderAccumulator* accumulator);
+
+inline void* NiFixedString::operator new(size_t size)
+{
+    return g_memoryManager.Allocate(size);
+}
+inline void NiFixedString::operator delete(void* pointer)
+{
+    g_memoryManager.Deallocate(pointer);
+}
 
 #pragma optimize("", off)
 // @fnv 0x00469860
-bool BSShaderRenderUtility::IsRenderTargetId(unsigned int value)
+bool BSShaderRenderUtility_bsshaderutil::IsRenderTargetId(unsigned int value)
 {
     return value >= 0xff000000u;
 }
 
 #pragma optimize("", on)
 
-// Allocates two BSShaderUtilTextureName objects and stores them in DAT_011fa050 and DAT_011fa054.
+// Allocates two NiFixedString objects and stores them in DAT_011fa050 and DAT_011fa054.
 // @fnv 0x00b6ba70
-void BSShaderRenderUtility::InitializeMultiBounds()
+void BSShaderRenderUtility_bsshaderutil::InitializeMultiBounds()
 {
-    DAT_011fa050 = new BSShaderUtilTextureName("ConvertedTexture");
-    DAT_011fa054 = new BSShaderUtilTextureName("BackgroundConvertedTexture");
+    DAT_011fa050 = new NiFixedString("ConvertedTexture");
+    DAT_011fa054 = new NiFixedString("BackgroundConvertedTexture");
 }
 
 // @fnv 0x00b6c0d0
-void BSShaderRenderUtility::SetRenderCamera(NiCamera* camera, BSShaderAccumulator* accumulator, bool)
+void BSShaderRenderUtility_bsshaderutil::SetRenderCamera(NiCamera* camera, BSShaderAccumulator* accumulator, bool)
 {
+    typedef void (__thiscall* AccumulatorCallback)(BSShaderAccumulator*);
     if (NiRenderer::ms_pRenderer && camera)
     {
         NiRenderer::ms_pRenderer->SetCurrentCamera(camera);
         DAT_011f917c = camera;
         FUN_00b54b10(accumulator);
-        accumulator->SetCamera(camera);
-        accumulator->Unk_2A();
+        accumulator->StartAccumulating(camera);
+        // The shared accumulator does not yet declare the callbacks at 0xa8 and 0xac.
+        ((AccumulatorCallback)(*(void***)accumulator)[0xa8 / 4])(accumulator);
     }
-    accumulator->Unk_2B();
+    ((AccumulatorCallback)(*(void***)accumulator)[0xac / 4])(accumulator);
 }
 
 // @fnv 0x00b6bb30
-void BSShaderRenderUtility::SetAlphaOnNode(NiNode* node, float alpha)
+void BSShaderRenderUtility_bsshaderutil::SetAlphaOnNode(NiNode* node, float alpha)
 {
-    if (node && node->m_kWorldBound && node->m_kWorldBound->m_fBoundRadius != 0.0f)
+    if (node && node->m_kWorldBound && reinterpret_cast<NiBound*>(node->m_kWorldBound)->m_fRadius != 0.0f)
     {
-        for (unsigned int i = 0; i < node->m_usChildrenCount; ++i)
+        for (unsigned int i = 0; i < node->m_kChildren.m_usSize; ++i)
         {
-            NiAVObject* child = node->m_ppChildren[i];
+            NiAVObject* child = node->m_kChildren.m_pBase[i].m_pObject;
             if (child)
             {
-                FadeProperties* properties = child->vfn_18();
+                NiGeometry* properties = child->IsGeometry();
                 if (properties)
                 {
-                    if (&properties->m_uiInterior)
+                    if (&properties->m_PropertyState)
                     {
-                        FadeState* state = properties->m_pFadeState;
+                        BSShaderProperty* state = static_cast<BSShaderProperty*>(properties->m_PropertyState.m_aspProps[3]);
                         if (state)
                         {
-                            state = state->m_iFadeIndex != -1 ? state : 0;
+                            state = state->iShaderPropertyType != -1 ? state : 0;
                             if (state)
-                                state->m_fAlpha = alpha;
+                                state->fFadeAlpha = alpha;
                         }
                     }
                 }
 
-                BSShaderRenderUtility::SetAlphaOnNode(child->vfn_0c(), alpha);
+                BSShaderRenderUtility_bsshaderutil::SetAlphaOnNode(child->IsSceneNode(), alpha);
             }
         }
     }
 }
 
-class NiRefObject
+inline void NiRefObject::IncRefCount()
 {
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
+    InterlockedIncrement((volatile long*)&m_uiRefCount);
+}
+
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0) {}
+template <class T> inline NiPointer<T>::NiPointer(T* pkNew) : m_pObject(pkNew)
+{
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::NiPointer(const NiPointer& kSrc) : m_pObject(kSrc.m_pObject)
+{
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+template <class T> inline NiPointer<T>::operator T*() const { return m_pObject; }
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
     {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
     }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
+    return *this;
+}
 
 extern NiPointer<NiRefObject> g_spCurrentAccumulator;
 
@@ -90,342 +169,87 @@ void FUN_00b54b10(BSShaderAccumulator* accumulator)
     g_spCurrentAccumulator = reinterpret_cast<NiRefObject*>(accumulator);
 }
 
-struct PipboyManager6b
+// The shared renderer lacks this setter; retain only its member-call ABI.
+struct RendererAccumulatorCall
 {
-    int unk00;
-    int unk04;
-    NiPointer<NiRefObject> m_pReferencedObject;
-    void FUN_004dc540(NiRefObject* pkNode);
+    void FUN_004dc540(NiRefObject* accumulator);
 };
-extern PipboyManager6b* DAT_011f4748;
+extern NiRenderer* DAT_011f4748;
 void __cdecl FUN_00b54ac0(NiRefObject* pkNode);
 
-struct Accumulator6b
+// Slot18 has not yet acquired its camera/object signature in the shared header.
+inline void SetSortingCamera(BSCullingProcess* process, void* camera, void* object, int flags)
 {
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void RegisterObject(void* pkObject);
-    virtual void SetSortingCamera(void* pkCamera, void* pkObject, int iFlags);
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    NiPointer<NiRefObject> m_spNode;
-};
+    typedef void (__thiscall* SetCamera)(BSCullingProcess*, void*, void*, int);
+    ((SetCamera)(*(void***)process)[0x48 / 4])(process, camera, object, flags);
+}
 
-typedef void* ListIter6b;
-
-struct PointerList6b
+template <class Allocator, class T> inline void* NiTListBase<Allocator, T>::GetHeadPos() const
 {
-    NiTListItem<void*>* m_pkHead;
-    NiTListItem<void*>* m_pkTail;
-    unsigned int m_uiCount;
+    return m_pkHead;
+}
 
-    ListIter6b GetHeadPos() const
+inline void* NextObject(void*& position)
+{
+    if (position)
     {
-        return m_pkHead;
+        void*& object = static_cast<NiTListItem<void*>*>(position)->m_element;
+        position = static_cast<NiTListItem<void*>*>(position)->m_pkNext;
+        return object;
     }
-    void* GetNext(ListIter6b& kPos) const
-    {
-        if (kPos)
-        {
-            void*& rpvElement = ((NiTListItem<void*>*)kPos)->m_element;
-            kPos = ((NiTListItem<void*>*)kPos)->m_pkNext;
-            return rpvElement;
-        }
-        return 0;
-    }
-};
+    return 0;
+}
+
 // Sets the sorting camera from the first list item, then registers later items when the manager and camera are non-null.
 // @fnv 0x00b6bfc0
-void __cdecl FUN_00b6bfc0(void* pkCamera, PointerList6b& kList, Accumulator6b* pkAccumulator)
+void __cdecl FUN_00b6bfc0(void* pkCamera, NiTPointerList<void*>& kList, BSCullingProcess* pkAccumulator)
 {
     if (!DAT_011f4748 || !pkCamera)
         return;
 
-    NiPointer<NiRefObject> spRetainedObject = DAT_011f4748->m_pReferencedObject;
-    DAT_011f4748->FUN_004dc540(pkAccumulator->m_spNode);
-    FUN_00b54ac0(pkAccumulator->m_spNode);
+    NiPointer<NiRefObject> spRetainedObject = *reinterpret_cast<NiPointer<NiRefObject>*>(&DAT_011f4748->m_spAccum);
+    reinterpret_cast<RendererAccumulatorCall*>(DAT_011f4748)->FUN_004dc540(
+        reinterpret_cast<NiPointer<NiRefObject>&>(pkAccumulator->m_acRendererDataA));
+    FUN_00b54ac0(reinterpret_cast<NiPointer<NiRefObject>&>(pkAccumulator->m_acRendererDataA));
 
-    ListIter6b kPos = kList.GetHeadPos();
+    void* kPos = kList.GetHeadPos();
     if (kPos)
     {
-        pkAccumulator->SetSortingCamera(pkCamera, kList.GetNext(kPos), 0);
+        SetSortingCamera(pkAccumulator, pkCamera, NextObject(kPos), 0);
         if (kPos)
         {
-            void* pvObject = kList.GetNext(kPos);
+            void* pvObject = NextObject(kPos);
             do
             {
                 void* pvCurrent = pvObject;
-                pvObject = kList.GetNext(kPos);
-                pkAccumulator->RegisterObject(pvCurrent);
+                pvObject = NextObject(kPos);
+                pkAccumulator->Process(static_cast<NiAVObject*>(pvCurrent));
             } while (pvObject);
         }
     }
 }
 
+// Preserve the original NiMemObject allocation and exception cleanup calls.
+
+
 namespace fnv_00b6bbd0 {
-#include <d3d9.h>
 
 void _memmove(void* destination, const void* source, unsigned int size);
 
-class NiPixelFormat
-{
-  public:
-    unsigned int bitsPerPixel;
-    unsigned int format;
-    unsigned int tiling;
-    unsigned int rendererHint;
-    unsigned int extraData;
-    unsigned int flags;
-    unsigned int redComponent;
-    unsigned int redRepresentation;
-    unsigned int redBits;
-    unsigned int greenComponent;
-    unsigned int greenRepresentation;
-    unsigned int greenBits;
-    unsigned int blueComponent;
-    unsigned int blueRepresentation;
-    unsigned int blueBits;
-    unsigned int alphaComponent;
-    unsigned int alphaRepresentation;
-};
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*);
-};
-class NiPixelData : public NiRefObject, public NiMemObject
-{
-  public:
-    NiPixelFormat m_kPixelFormat;
-    void* m_spPalette;
-    unsigned char* m_pucPixels;
-    unsigned int* m_puiWidth;
-    unsigned int* m_puiHeight;
-    unsigned int* m_puiOffset;
-    unsigned int m_uiMipmapLevels;
-    unsigned int m_uiPixelStride;
-    unsigned int m_uiFaces;
-    unsigned int m_uiFaceSize;
-    unsigned int m_uiValue5;
-    NiPixelData(unsigned int, unsigned int, const NiPixelFormat&, unsigned int, unsigned int);
-};
-class TextureRendererData
-{
-  public:
-    virtual void vfn_00() = 0;
-    virtual void vfn_04() = 0;
-    virtual void vfn_08() = 0;
-    virtual void vfn_0c() = 0;
-    virtual void vfn_10() = 0;
-    virtual void vfn_14() = 0;
-    virtual void vfn_18() = 0;
-    virtual void vfn_1c() = 0;
-    virtual void vfn_20() = 0;
-    virtual void vfn_24() = 0;
-    virtual void vfn_28() = 0;
-    virtual void vfn_2c() = 0;
-    virtual void vfn_30() = 0;
-    virtual void vfn_34() = 0;
-    virtual void vfn_38() = 0;
-    virtual void vfn_3c() = 0;
-    virtual void vfn_40() = 0;
-    virtual void vfn_44() = 0;
-    virtual void vfn_48() = 0;
-    virtual void vfn_4c() = 0;
-    virtual void vfn_50() = 0;
-    virtual void vfn_54() = 0;
-    virtual void vfn_58() = 0;
-    virtual void vfn_5c() = 0;
-    virtual void vfn_60() = 0;
-    virtual void vfn_64() = 0;
-    virtual void vfn_68() = 0;
-    virtual void vfn_6c() = 0;
-    virtual void vfn_70() = 0;
-    virtual void vfn_74() = 0;
-    virtual void vfn_78() = 0;
-    virtual void vfn_7c() = 0;
-    virtual void vfn_80() = 0;
-    virtual void vfn_84() = 0;
-    virtual void vfn_88() = 0;
-    virtual void vfn_8c() = 0;
-    virtual void vfn_90() = 0;
-    virtual void vfn_94() = 0;
-    virtual void vfn_98() = 0;
-    virtual IDirect3DTexture9* GetTexture() = 0;
-};
-struct TextureMipData
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int m_uiMipmapLevels;
-};
-class NiTexture
-{
-  public:
-    virtual void vfn_00() = 0;
-    virtual void vfn_04() = 0;
-    virtual void vfn_08() = 0;
-    virtual void vfn_0c() = 0;
-    virtual void vfn_10() = 0;
-    virtual void vfn_14() = 0;
-    virtual void vfn_18() = 0;
-    virtual void vfn_1c() = 0;
-    virtual void vfn_20() = 0;
-    virtual void vfn_24() = 0;
-    virtual void vfn_28() = 0;
-    virtual void vfn_2c() = 0;
-    virtual void vfn_30() = 0;
-    virtual void vfn_34() = 0;
-    virtual void vfn_38() = 0;
-    virtual void vfn_3c() = 0;
-    virtual void vfn_40() = 0;
-    virtual void vfn_44() = 0;
-    virtual void vfn_48() = 0;
-    virtual void vfn_4c() = 0;
-    virtual void vfn_50() = 0;
-    virtual void vfn_54() = 0;
-    virtual void vfn_58() = 0;
-    virtual void vfn_5c() = 0;
-    virtual void vfn_60() = 0;
-    virtual void vfn_64() = 0;
-    virtual void vfn_68() = 0;
-    virtual void vfn_6c() = 0;
-    virtual void vfn_70() = 0;
-    virtual void vfn_74() = 0;
-    virtual void vfn_78() = 0;
-    virtual void vfn_7c() = 0;
-    virtual void vfn_80() = 0;
-    virtual void vfn_84() = 0;
-    virtual void vfn_88() = 0;
-    virtual void vfn_8c() = 0;
-    virtual void vfn_90() = 0;
-    virtual unsigned int GetWidth() = 0;
-    virtual unsigned int GetHeight() = 0;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    TextureRendererData* m_pTextureRendererData;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    TextureMipData* m_pkPixelData;
-};
-class TextureRenderer : public NiRenderer
-{
-  public:
-    unsigned int unk280;
-    unsigned int unk284;
-    IDirect3DDevice9* m_pkDevice;
-};
-extern TextureRenderer* DAT_011f4748;
+extern NiDX9Renderer* DAT_011f4748;
 extern unsigned char DAT_011f4448;
 extern bool DAT_011a9595;
-struct TextureFormatPrefs
-{
-    unsigned int pixelLayout, alphaFormat, mipMapped;
-};
-extern TextureFormatPrefs DAT_011a9598;
+extern NiTexture::TextureFormatPreferences DAT_011a9598;
 int FUN_00e7bd20(const NiPixelFormat*);
 HRESULT __stdcall FUN_00ee6de6(IDirect3DSurface9*, const PALETTEENTRY*, const RECT*, IDirect3DSurface9*,
                                const PALETTEENTRY*, const RECT*, DWORD, D3DCOLOR);
-NiTexture* FUN_00a5ff10(NiPixelData*, void*, TextureFormatPrefs*);
+NiTexture* FUN_00a5ff10(NiPixelData*, void*, NiTexture::TextureFormatPreferences*);
 
 // Converts a NiTexture to a supported D3D format by copying each mip level and swapping RGB bytes when needed, then builds a new NiTexture from the result.
 // @fnv 0x00b6bbd0
 NiTexture* FUN_00b6bbd0(NiTexture* texture, const NiPixelFormat* pixelFormat)
 {
-    TextureRenderer* renderer = DAT_011f4748;
+    NiDX9Renderer* renderer = DAT_011f4748;
     NiPixelFormat format = *pixelFormat;
     if (!texture || !renderer)
         return 0;
@@ -443,11 +267,16 @@ NiTexture* FUN_00b6bbd0(NiTexture* texture, const NiPixelFormat* pixelFormat)
     default:
         return 0;
     }
-    IDirect3DDevice9* device = renderer->m_pkDevice;
+    IDirect3DDevice9* device = renderer->pD3DDevice;
     unsigned int width = texture->GetWidth();
     unsigned int height = texture->GetHeight();
-    unsigned int levels = texture->m_pkPixelData ? texture->m_pkPixelData->m_uiMipmapLevels : 1;
-    IDirect3DTexture9* source = texture->m_pTextureRendererData->GetTexture();
+    // The converted texture is a source texture; its pixel-data pointer is at 0x3c.
+    NiPixelData* mipData = static_cast<NiSourceTexture*>(texture)->m_spSrcPixelData.m_pObject;
+    unsigned int levels = mipData ? mipData->m_uiMipmapLevels : 1;
+    // GetTexture is not yet declared by the shared DX9 texture-data header.
+    typedef IDirect3DTexture9* (__thiscall* GetD3DTexture)(NiDX9TextureData*);
+    IDirect3DTexture9* source = ((GetD3DTexture)(*(void***)texture->m_pkRendererData)[0x9c / 4])(
+        static_cast<NiDX9TextureData*>(texture->m_pkRendererData));
     IDirect3DTexture9* destination;
     HRESULT hStatus =
         device->CreateTexture(width, height, levels, 0, (D3DFORMAT)d3dFormat, D3DPOOL_SYSTEMMEM, &destination, 0);
@@ -457,7 +286,8 @@ NiTexture* FUN_00b6bbd0(NiTexture* texture, const NiPixelFormat* pixelFormat)
     IDirect3DSurface9* sourceSurface;
     IDirect3DSurface9* destinationSurface;
     D3DLOCKED_RECT lockedRect;
-    pixels = new NiPixelData(width, height, format, levels, 1);
+    // The pointer overload retains the original throwing-constructor cleanup.
+    pixels = new NiPixelData(width, height, &format, levels, 1);
     for (unsigned int level = 0; level < levels; ++level)
     {
         source->GetSurfaceLevel(level, &sourceSurface);
@@ -466,9 +296,9 @@ NiTexture* FUN_00b6bbd0(NiTexture* texture, const NiPixelFormat* pixelFormat)
         destinationSurface->LockRect(&lockedRect, 0, 0);
         if (d3dFormat == 21)
         {
-            _memmove(pixels->m_pucPixels + pixels->m_puiOffset[level], lockedRect.pBits,
+            _memmove(pixels->m_pucPixels + pixels->m_puiOffsetInBytes[level], lockedRect.pBits,
                      pixels->m_puiHeight[level] * lockedRect.Pitch);
-            unsigned char* pPixelData = pixels->m_pucPixels + pixels->m_puiOffset[level];
+            unsigned char* pPixelData = pixels->m_pucPixels + pixels->m_puiOffsetInBytes[level];
             unsigned int bytes = pixels->m_puiWidth[level] * pixels->m_puiHeight[level] * 4;
             for (unsigned int offset = 0; offset < bytes; offset += 4)
             {
@@ -479,7 +309,7 @@ NiTexture* FUN_00b6bbd0(NiTexture* texture, const NiPixelFormat* pixelFormat)
         }
         else if (d3dFormat == 0x31545844 || d3dFormat == 0x33545844 || d3dFormat == 0x35545844)
         {
-            unsigned char* pPixelData = pixels->m_pucPixels + pixels->m_puiOffset[level];
+            unsigned char* pPixelData = pixels->m_pucPixels + pixels->m_puiOffsetInBytes[level];
             unsigned int rows = pixels->m_puiHeight[level];
             if (rows < 4)
                 rows = 4;

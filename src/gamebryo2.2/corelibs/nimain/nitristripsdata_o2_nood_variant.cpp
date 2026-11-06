@@ -3,26 +3,19 @@
 // say /MT /O2 /GS /EHsc /Gy (unit src/gamebryo2.2/corelibs/nimain/nitristripsdata.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions to their real
 // unit once identified.
 
-#include "nitristripsdata_types_NiTriStripsData.h"
-extern "C" const NiRTTI DAT_011f4a70;
-extern "C" void* NiMalloc(unsigned int, const char* = 0, int = 0, const char* = 0);
-#include "nitristripsdata_forwarders.h"
+#include "../../../../include/NiBound.h"
+#include "../../../../include/NiGeometryData.h"
+#include "../../../../include/NiTriBasedGeomData.h"
+#include "../../../../include/NiTriStripsData.h"
 
 // @fnv 0x00a75f30
-extern "C" const NiRTTI* __cdecl FUN_00a75f30()
+const NiRTTI* NiTriStripsData::GetRTTI() const
 {
-    return &DAT_011f4a70;
+    return &ms_kRTTI;
 }
 
-class NiTriStripsDataWork : public NiTriStripsData
-{
-  public:
-    void FUN_00a75f40(unsigned short& rNumStrips, const unsigned short*& rStripLengths,
-                      const unsigned short*& rStripLists, unsigned int& rNumIndices);
-};
-
 // @fnv 0x00a75f40
-void NiTriStripsDataWork::FUN_00a75f40(unsigned short& rNumStrips, const unsigned short*& rStripLengths,
+void NiTriStripsData::GetTriangleStripData(unsigned short& rNumStrips, const unsigned short*& rStripLengths,
                                        const unsigned short*& rStripLists, unsigned int& rNumIndices)
 {
     rNumStrips = m_usStrips;

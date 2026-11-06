@@ -1,10 +1,36 @@
-// fallout_shared/region system/tesregion.cpp: TESRegion, RegionProxy, OwnQ (12 functions)
+// fallout_shared/region system/tesregion.cpp: TESRegion (12 functions)
+
+#include <windows.h>
+#include "layout_support.h"
+
+#include "../../../include/NiPoint2.h"
+#include "../../../include/TESFile.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESRegionDataManager.h"
+#include "../../../include/SL.h"
+#include "../../../include/NiPoint3.h"
+// 0x004f15a0 stores its argument byte at +4 (the form type here); the same folded code is BSSoundHandle::SetAssumeSuccess.
+struct FormTypeSetter_4f15a0
+{
+    void SetFormType(int);
+};
+#include "../../../include/TESRegionDataWeather.h"
+#include "../../../include/TESWorldSpace.h"
 
 #include "tesregion_TESRegion.h"
 #include "tesregion_TESRegionDataList.h"
 #include "tesregion_TESRegionPointList.h"
-#include "tesregion_data_types.h"
 #include "tesregion_load.h"
+
+// The shared base declares Initialize nonvirtual; this call site uses the original vtable slot.
+class RegionDataInitialization
+{
+public:
+    virtual void Reserved0();
+    virtual void Reserved1();
+    virtual void Reserved2();
+    virtual void Initialize(TESRegion* region);
+};
 
 // Clears the region's data list and deletes every point list held in the point list queue.
 // @fnv 0x004f0ef0
@@ -42,7 +68,7 @@ void TESRegion::InitItem()
     data = GetRegionDataList();
     while (data && data->GetItem())
     {
-        data->GetItem()->Initialize(this);
+        reinterpret_cast<RegionDataInitialization*>(data->GetItem())->Initialize(this);
         data = data->GetNext();
     }
 }
@@ -114,7 +140,7 @@ bool TESRegion::Load(TESFile* file)
         case 0x53474452:
         case 0x54414452:
         case 0x54574452:
-            ((TESRegionLoadHandler*)g_dataHandler)->GetRegionDataManager()->Load(file, this);
+            ((TESRegionLoadHandler*)g_dataHandler)->GetRegionDataManager()->ApplyEntry(file, this);
             break;
         }
         if (!file->NextChunk())
@@ -155,36 +181,6 @@ void __fastcall FUN_004f10b0(char* param_1)
     FUN_005827d0(param_1 + 8);
 }
 
-struct FUN_004f0890_shell
-{
-    void FUN_004f08c0();
-    void* DestroyIfFlagged(unsigned int);
-};
-// Calls FUN_004f08c0 on this, deletes this when bit 0 of flags is set, and returns this.
-// @fnv 0x004f0890
-void* FUN_004f0890_shell::DestroyIfFlagged(unsigned int flags)
-{
-    this->FUN_004f08c0();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
-struct NiPoint3
-{
-    float x, y, z;
-    void Set(float, float, float);
-};
-struct SoundPlaybackHandle
-{
-    void SetFormType(int);
-};
-struct SL
-{
-    void* a;
-    void* b;
-    SL();
-};
 struct RDL_004f3330
 {
     void* a;
@@ -193,55 +189,21 @@ struct RDL_004f3330
     RDL_004f3330(bool);
 };
 
-struct FUN_004f0770 : public TESForm
-{
-    RDL_004f3330* m_pRegionDataList;
-    SL* pRegionPointList;
-    void* m_pContainingWorldspace;
-    void* m_pRegionWeather;
-    float fWeatherChance;
-    NiPoint3 m_kDiffuseColor;
-    FUN_004f0770();
-    ~FUN_004f0770();
-};
-
 // Initialises the object: zeroes the point, allocates two members, sets form type 0x37, clears two pointers and sets a float to -1.
 // @fnv 0x004f0770
-FUN_004f0770::FUN_004f0770()
+TESRegion::TESRegion()
 {
-    m_kDiffuseColor.Set(0.0f, 0.0f, 0.0f);
-    m_pRegionDataList = new RDL_004f3330(true);
-    pRegionPointList = new SL;
-    ((SoundPlaybackHandle*)this)->SetFormType(0x37);
+    ((NiPoint3*)&m_kDiffuseColor)->Set(0.0f, 0.0f, 0.0f);
+    m_pRegionDataList = (RegionDataList*)new RDL_004f3330(true);
+    pRegionPointList = (BSSimpleList<RegionPointList*>*)new SL;
+    ((FormTypeSetter_4f15a0*)this)->SetFormType(0x37);
     m_pContainingWorldspace = 0;
     m_pRegionWeather = 0;
     fWeatherChance = -1.0f;
 }
 
-class FUN_00483630 : public BaseFormComponent
-{
-  public:
-    unsigned char m_ucFormType;
-    unsigned int m_uiFormFlags;
-    unsigned int iFormID;
-    TESFile* firstSourceFile;
-    BSSimpleList<TESFile*>* nextSourceFile;
-    ~FUN_00483630();
-};
-class FUN_004f08c0 : public FUN_00483630
-{
-  public:
-    RegionDataList* m_pRegionDataList;
-    BSSimpleList<RegionPointList*>* pRegionPointList;
-    TESWorldSpace* m_pContainingWorldspace;
-    TESWeather* m_pRegionWeather;
-    float fWeatherChance;
-    NiColor m_kDiffuseColor;
-    virtual ~FUN_004f08c0();
-};
-
 // @fnv 0x004f08c0
-FUN_004f08c0::~FUN_004f08c0()
+TESRegion::~TESRegion()
 {
     if (m_pRegionDataList != 0)
     {
@@ -274,18 +236,11 @@ struct DataProxy
 {
     void FUN_004f3470(DataProxy*);
 };
-struct RegionProxy : FUN_004f0770
-{
-    ListProxy* FUN_00441110();
-    void WarnCopyUnsupported(RegionProxy*);
-    DataProxy* FUN_009611e0();
-    RegionProxy* FUN_004f10d0(RegionProxy*);
-};
 // Copies this region into destination (allocating one if null), copying its data and each list node's point proxy.
 // @fnv 0x004f10d0
-RegionProxy* RegionProxy::FUN_004f10d0(RegionProxy* destination)
+TESRegion* TESRegion::Clone(TESRegion* destination)
 {
-    RegionProxy* result = destination ? destination : (RegionProxy*)new FUN_004f0770;
+    TESRegion* result = destination ? destination : new TESRegion;
     ListProxy* pNode = FUN_00441110();
     WarnCopyUnsupported(result);
     FUN_009611e0()->FUN_004f3470(result->FUN_009611e0());
@@ -353,12 +308,6 @@ void __cdecl FUN_004f1300()
     *pusCount4 = m_usPassCountLocal;
 }
 
-class TESRegionDataWeather : public TESRegionData
-{
-  public:
-    virtual ~TESRegionDataWeather();
-};
-
 class B4F1050DataList
 {
   public:
@@ -367,33 +316,16 @@ class B4F1050DataList
 
 void* __fastcall B4F1050GetWeatherTypes(TESRegionDataWeather* pkWeather);
 
-class B4F1050Region
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    B4F1050DataList* m_pkDataList;
-    int unk1C;
-    int unk20;
-    void* m_pvWeatherTypes;
-
-    void FUN_004f1050();
-};
-
-// Clears m_pvWeatherTypes, then if m_pkDataList exists, gets the type-3 region data and stores its weather types.
+// Clears m_pRegionWeather, then if m_pRegionDataList exists, gets the type-3 region data and stores its weather types.
 // @fnv 0x004f1050
-void B4F1050Region::FUN_004f1050()
+void TESRegion::UpdateWeather()
 {
-    m_pvWeatherTypes = 0;
-    if (m_pkDataList)
+    m_pRegionWeather = 0;
+    if (m_pRegionDataList)
     {
-        TESRegionDataWeather* pkWeather = dynamic_cast<TESRegionDataWeather*>(m_pkDataList->GetDataByType(3));
+        TESRegionDataWeather* pkWeather = dynamic_cast<TESRegionDataWeather*>(((B4F1050DataList*)m_pRegionDataList)->GetDataByType(3));
         if (pkWeather)
-            m_pvWeatherTypes = B4F1050GetWeatherTypes(pkWeather);
+            m_pRegionWeather = (TESWeather*)B4F1050GetWeatherTypes(pkWeather);
     }
 }
 
@@ -423,33 +355,24 @@ struct LstBQ
     VElemQ** FUN_006815c0();
     LstBQ* FUN_00726070();
 };
-struct OwnQ
-{
-    void FUN_004855a0();
-    RefQ* FUN_007af430();
-    LstAQ* FUN_00441110();
-    LstBQ* FUN_009611e0();
-    void FUN_00485680();
-    void FUN_004f0a40();
-};
 // Calls FUN_004855a0, passes a reference-derived ID to FUN_00485910, traverses two lists calling FUN_004f77c0 and Save on their elements, then calls FUN_00485680.
 // @fnv 0x004f0a40
-void OwnQ::FUN_004f0a40()
+void TESRegion::SaveForm()
 {
     FUN_004855a0();
-    RefQ* pRef_gmplt = FUN_007af430();
+    RefQ* pRef_gmplt = (RefQ*)GetParentWorldSpace();
     if (pRef_gmplt)
     {
         unsigned int uiID_ldrt = pRef_gmplt->FUN_0084e3a0();
         FUN_00485910(0x4d414e57, uiID_ldrt);
     }
-    LstAQ* pIterA_kkeo = FUN_00441110();
+    LstAQ* pIterA_kkeo = (LstAQ*)FUN_00441110();
     while (pIterA_kkeo && !pIterA_kkeo->FUN_008256d0())
     {
         (*pIterA_kkeo->FUN_006815c0())->FUN_004f77c0();
         pIterA_kkeo = pIterA_kkeo->FUN_00726070();
     }
-    LstBQ* pIterB_jeqla = FUN_009611e0();
+    LstBQ* pIterB_jeqla = (LstBQ*)FUN_009611e0();
     while (pIterB_jeqla && !pIterB_jeqla->FUN_008256d0())
     {
         (*pIterB_jeqla->FUN_006815c0())->Save();

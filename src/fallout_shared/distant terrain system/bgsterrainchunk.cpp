@@ -2,6 +2,42 @@
 // src/fallout_shared/distant terrain system/bgsterrainchunk.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/distant terrain system/bgsterrainchunk.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../include/BGSTerrainChunkLoadTask.h"
+#include "../../../include/BSMultiBound.h"
+#include "../../../include/GO.h"
+#include "../../../include/IOManager.h"
+#include "../../../include/IOTask.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiFixedString.h"
+#include "../../../include/NiGeometry.h"
+#include "../../../include/NiGeometryData.h"
+#include "../../../include/NiProperty.h"
+#include "../../../include/NiRenderer.h"
+#include "../../../include/NiTPointerMap.h"
+#include "../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../../include/QueuedFile.h"
+#include "../../../include/QueuedFileEntry.h"
+
 struct FUN_006fa840_shell
 {
     unsigned char GetByteAt5D();
@@ -23,11 +59,6 @@ unsigned char FUN_006fb150_shell::GetByteAtOffset5C()
 {
     return ((unsigned char*)this)[0x5c];
 }
-
-struct NiAVObject
-{
-    void SetAppCulled(bool);
-};
 
 struct Flt
 {
@@ -57,32 +88,21 @@ void FUN_006fb6e0_shell::SetAllAppCulled()
             ->SetAppCulled(true);
 }
 
-struct FUN_006fb940_shell
+// This terrain property operation is not declared on the shared NiProperty base.
+// Keep its declaration here without duplicating any shared class layout.
+struct TerrainChunkProperty : NiProperty
 {
     void FUN_006fb940(float a, float b, float c);
 };
 
 // Stores the three float arguments at offsets 0xf0, 0xf4 and 0xf8 of this object.
 // @fnv 0x006fb940
-void FUN_006fb940_shell::FUN_006fb940(float a, float b, float c)
+void TerrainChunkProperty::FUN_006fb940(float a, float b, float c)
 {
     *(float*)((char*)this + 0xf0) = a;
     *(float*)((char*)this + 0xf4) = b;
     *(float*)((char*)this + 0xf8) = c;
 }
-
-struct QueuedFileEntry
-{
-    int f0[0x34 / 4];
-};
-
-struct BGSTerrainChunkLoadTask : QueuedFileEntry
-{
-    int iX;
-    int iY;
-    int iLevel;
-    bool FUN_006fc400(char* apDescription, unsigned int aiBufferSize);
-};
 
 extern int _sprintf_s(char*, unsigned int, const char*, ...);
 
@@ -301,22 +321,6 @@ void FUN_006fb760_shell::FUN_006fb760()
             ->SetAppCulled(false);
 }
 
-struct S_006fbae0
-{
-    void FUN_006fbb10();
-    void* DestroyIfFlagged(unsigned int);
-};
-void __cdecl _Deallocate(void*);
-// Calls FUN_006fbb10, deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x006fbae0
-void* S_006fbae0::DestroyIfFlagged(unsigned int flags)
-{
-    FUN_006fbb10();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
 struct FUN_006fbcd0_shell
 {
     void FUN_00c3cb70(int a, int b);
@@ -341,42 +345,11 @@ unsigned int FUN_006fbfe0_shell::GetFlagOrValue()
     return ((unsigned char*)this)[0xcd] ? 1 : *(unsigned int*)((char*)this + 0xc8);
 }
 
-struct IOTask
-{
-    bool FUN_0043caa0();
-    void NotifyParents();
-};
-struct SoundPlaybackHandle;
-template <class K, class V> struct NiTPointerMap
-{
-    bool IsEmpty();
-};
-struct IOManager
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void vfn_48(void*);
-};
+class BSSoundHandle;
 extern IOManager* DAT_01202d98;
 struct FUN_006f7140_shell : IOTask
 {
-    char _pad[48];
+    char _pad[0x30 - sizeof(IOTask)];
     bool b30;
     void ProcessTask();
 };
@@ -388,8 +361,8 @@ void FUN_006f7140_shell::ProcessTask()
     {
         if (b30)
         {
-            if (reinterpret_cast<NiTPointerMap<unsigned int, SoundPlaybackHandle*>*>(this)->IsEmpty())
-                DAT_01202d98->vfn_48(this);
+            if (reinterpret_cast<NiTPointerMap<unsigned int, BSSoundHandle*>*>(this)->IsEmpty())
+                DAT_01202d98->AddTask(reinterpret_cast<QIOTask*>(this));
             else
                 NotifyParents();
         }
@@ -485,16 +458,9 @@ void __cdecl BuildLODDiffuseTexturePath(char* pBuffer, FakeObj* obj, int level, 
              obj->GetStr(), level, x, y);
 }
 
-struct GO;
 struct FUN_006fea10_Class
 {
     unsigned char FUN_006fe920(bool);
-};
-
-struct GO
-{
-    FUN_006fea10_Class* f0;
-    operator unsigned int() const;
 };
 
 struct SoundListView
@@ -516,8 +482,8 @@ void UpdateSoundListItems()
         while (current != 0 && !current->_ref_008256d0())
         {
             go = current->_ref_006815c0()[0];
-            if (((FUN_006fb150_shell*)go->operator unsigned int())->GetByteAtOffset5C() &&
-                ((FUN_006fa840_shell*)go->operator unsigned int())->GetByteAt5D() && go->f0->FUN_006fe920(false))
+            if (((FUN_006fb150_shell*)static_cast<const GO*>(go)->operator unsigned int())->GetByteAtOffset5C() &&
+                ((FUN_006fa840_shell*)static_cast<const GO*>(go)->operator unsigned int())->GetByteAt5D() && static_cast<FUN_006fea10_Class*>(go->m_pObject)->FUN_006fe920(false))
             {
                 ((FUN_006fb6e0_shell*)go)->SetAllAppCulled();
             }
@@ -530,38 +496,16 @@ void UpdateSoundListItems()
     }
 }
 
-struct QueuedFile
-{
-};
-
 struct ModelLoader
 {
     void QueueModelFilePath(const char*, int, QueuedFile*);
 };
 
-struct FUN_0043cc60_shell
-{
-    int FUN_0043cc60();
-};
-
-struct FUN_006fbbd0_virtual
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual void f6();
-    virtual void f7();
-    virtual void f8();
-    virtual void f9();
-    virtual void f10();
-};
-
-struct FUN_006fbbd0_shell : BGSTerrainChunkLoadTask
+// Operations absent from the shared task interface; no additional object layout.
+struct TerrainChunkTaskOperations : BGSTerrainChunkLoadTask
 {
     void LoadTerrainChunkTextures();
+    void UpdateTerrainLODNames();
 };
 
 extern ModelLoader* g_modelLoader;
@@ -570,86 +514,49 @@ void __cdecl BuildLODDiffuseTexturePath(char*, FakeObj*, int, short, short);
 
 // Builds diffuse and normal texture file names from the chunk's level and coordinates, queues both with g_modelLoader, sets a flag at offset 0x30 and calls f10.
 // @fnv 0x006fbbd0
-void FUN_006fbbd0_shell::LoadTerrainChunkTextures()
+void TerrainChunkTaskOperations::LoadTerrainChunkTextures()
 {
     char pdiffuseTextureFileName[260];
     char pnormalTextureFileName[260];
 
     BuildLODDiffuseTexturePath(
         pdiffuseTextureFileName,
-        reinterpret_cast<FakeObj*>(*reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x44)), iLevel,
+        reinterpret_cast<FakeObj*>(world), iLevel,
         static_cast<unsigned short>(iX), static_cast<unsigned short>(iY));
 
     g_modelLoader->QueueModelFilePath(pdiffuseTextureFileName,
-                                      reinterpret_cast<FUN_0043cc60_shell*>(this)->FUN_0043cc60(),
+                                      reinterpret_cast<IOTask*>(this)->FUN_0043cc60(),
                                       reinterpret_cast<QueuedFile*>(this));
 
     BuildLodNormalTexturePath(
         pnormalTextureFileName,
-        reinterpret_cast<FakeFab*>(*reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x44)), iLevel,
+        reinterpret_cast<FakeFab*>(world), iLevel,
         static_cast<unsigned short>(iX), static_cast<unsigned short>(iY));
 
     g_modelLoader->QueueModelFilePath(pnormalTextureFileName,
-                                      reinterpret_cast<FUN_0043cc60_shell*>(this)->FUN_0043cc60(),
+                                      reinterpret_cast<IOTask*>(this)->FUN_0043cc60(),
                                       reinterpret_cast<QueuedFile*>(this));
 
-    *reinterpret_cast<bool*>(reinterpret_cast<unsigned char*>(this) + 0x30) = true;
+    unk30 = true;
 
-    reinterpret_cast<FUN_006fbbd0_virtual*>(this)->f10();
+    OnChildCompletion();
 }
 
-struct FUN_006fbb10_base
+// The shared ChunkPtr has no reset operation; retain only that operation's view.
+struct TerrainChunkNodeReference
 {
-    virtual ~FUN_006fbb10_base();
-};
-
-struct FUN_006fbb10_sub
-{
-    int unk00;
-    ~FUN_006fbb10_sub();
     void Reset(int aiValue);
 };
 
-struct FUN_006fbb10 : FUN_006fbb10_base
-{
-    virtual ~FUN_006fbb10();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    FUN_006fbb10_sub m_48;
-    FUN_006fbb10_sub m_4c;
-    FUN_006fbb10_sub m_50;
-    FUN_006fbb10_sub m_54;
-};
-
-// Destructor that resets the m_48, m_4c and m_50 sub-objects to zero.
 // @fnv 0x006fbb10
-FUN_006fbb10::~FUN_006fbb10()
+BGSTerrainChunkLoadTask::~BGSTerrainChunkLoadTask()
 {
-    m_48.Reset(0);
-    m_4c.Reset(0);
-    m_50.Reset(0);
+    reinterpret_cast<TerrainChunkNodeReference*>(&unk48)->Reset(0);
+    reinterpret_cast<TerrainChunkNodeReference*>(&unk4c)->Reset(0);
+    reinterpret_cast<TerrainChunkNodeReference*>(&unk50)->Reset(0);
 }
 
 extern "C" char DAT_011d85ec;
-struct Point006fac
-{
-    float x, y, z;
-};
 struct FUN_0043d410
 {
     int a, b, c;
@@ -673,8 +580,8 @@ struct Obj006fac
     Obj006fac* FUN_004ea9a0();
     Obj006fac* FUN_006629f0();
     Obj006fac* FUN_0043b230();
-    Point006fac& GetOffsetC();
-    Point006fac& FUN_00500940();
+    NiPoint3& GetOffsetC();
+    NiPoint3& FUN_00500940();
     float GetFieldCC();
     void FUN_00439920(void*);
     void FUN_00a5a040();
@@ -788,19 +695,13 @@ struct FUN_00c37ec0 : TESObjectDoorController
     virtual void v43();
     virtual void v44();
     virtual void v45();
-    virtual void position(const Point006fac&);
-    void FUN_00439680(const Point006fac&);
+    virtual void position(const NiPoint3&);
+    void FUN_00439680(const NiPoint3&);
 };
 struct FUN_00c46970 : TESObjectDoorController
 {
     int pad[45];
     FUN_00c46970();
-};
-struct BSMultiBound : TESObjectDoorController
-{
-    int pad[4];
-    BSMultiBound();
-    void FUN_004addc0(FUN_00c37ec0*);
 };
 struct Target006fac
 {
@@ -826,8 +727,8 @@ void Target006fac::FUN_006facb0()
         {
             FUN_00559450()->FUN_00559450()->FUN_004ea9a0()->attach(r10.FUN_00559450(), 1);
             Obj006fac* i = r10.FUN_00559450()->FUN_006629f0()->FUN_0043b230();
-            Point006fac s = i->GetOffsetC();
-            Point006fac eb = i->FUN_00500940();
+            NiPoint3 s = i->GetOffsetC();
+            NiPoint3 eb = i->FUN_00500940();
             BSMultiBound* f;
             p = new FUN_00c37ec0;
             s.z = root->FUN_00559450()->FUN_00559450()->GetFieldCC();
@@ -902,31 +803,7 @@ void __cdecl UpdateListItems()
     }
 }
 
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-    operator T*() const;
-    NiPointer& operator=(T*);
-};
-
 class NiNode;
-class NiGeometry;
-class NiProperty;
-
-class NiProperty : public FUN_006fb940_shell
-{
-  public:
-    void FUN_00441130(int, int);
-};
-
-class NiGeometryData
-{
-  public:
-    void SetByteAtOffset38(int);
-    void FUN_00a67050(int);
-    void FUN_004410f0(int);
-};
 
 struct PropState
 {
@@ -1003,80 +880,6 @@ struct PropState
     virtual void* v70(NiGeometry*, NiProperty*);
 };
 
-class NiRenderer
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59(NiGeometry*, int, int, void*);
-    void FUN_00e74120();
-};
-
-class NiGeometry : public NiAVObject
-{
-  public:
-    NiProperty* GetProperty(unsigned int);
-    NiGeometryData* FUN_005495f0();
-    PropState* FUN_004030b0();
-};
-
 int FUN_00438220();
 void __cdecl FUN_00b57e30(NiGeometry*, int, int);
 NiRenderer* FUN_0043c4b0();
@@ -1110,28 +913,21 @@ void TerrainChunk::FUN_006fb7e0()
     {
         if (m_spGeom)
         {
-            NiProperty* prop = ((NiGeometry*)m_spGeom)->GetProperty(FUN_00438220());
+            NiProperty* prop = ((NiGeometry*)m_spGeom)->GetProperty(static_cast<unsigned int>(FUN_00438220()));
             prop->FUN_00441130(0x21, 1);
-            prop->FUN_006fb940(0.0f, 0.0f, 1.0f);
+            reinterpret_cast<TerrainChunkProperty*>(prop)->FUN_006fb940(0.0f, 0.0f, 1.0f);
             FUN_00b57e30(m_spGeom, 0, 0);
             m_spProperty = (NiNode*)prop;
-            ((NiGeometry*)m_spGeom)->FUN_005495f0()->SetByteAtOffset38(0);
-            ((NiGeometry*)m_spGeom)->FUN_005495f0()->FUN_00a67050(0x4000);
-            ((NiGeometry*)m_spGeom)->FUN_005495f0()->FUN_004410f0(1);
-            FUN_0043c4b0()->v59(m_spGeom, 0, 0, ((NiGeometry*)m_spGeom)->FUN_004030b0()->v70(m_spGeom, prop));
+            ((NiGeometry*)m_spGeom)->GetModelData()->SetByteAtOffset38(0);
+            ((NiGeometry*)m_spGeom)->GetModelData()->FUN_00a67050(0x4000);
+            ((NiGeometry*)m_spGeom)->GetModelData()->FUN_004410f0(1);
+            FUN_0043c4b0()->PrecacheGeometry(m_spGeom, 0, 0, static_cast<NiD3DShaderDeclaration*>(reinterpret_cast<PropState*>(((NiGeometry*)m_spGeom)->GetGeometryShaderObject())->v70(m_spGeom, prop)));
             FUN_0043c4b0()->FUN_00e74120();
             m_bFlag = true;
         }
     }
 }
 
-struct NiFixedString
-{
-    unsigned int m_data;
-    NiFixedString(const char*);
-    ~NiFixedString();
-    operator const char*() const;
-};
 struct LoadedNode
 {
     void AssignFixedString(const NiFixedString&);
@@ -1146,47 +942,36 @@ struct FinalObject
 {
     void FUN_006fa990();
 };
-struct TerrainTask : BGSTerrainChunkLoadTask
-{
-    FinalObject* m_pExtra40;
-    unsigned int m_unk44;
-    NodeRef m_ref48;
-    NodeRef m_ref4c;
-    NodeRef m_ref50;
-    unsigned int m_unk54;
-    bool m_bDisabled58;
-    void UpdateTerrainLODNames();
-};
 // @fnv 0x006fc020
-void TerrainTask::UpdateTerrainLODNames()
+void TerrainChunkTaskOperations::UpdateTerrainLODNames()
 {
-    if (m_ref48.Get())
+    if (reinterpret_cast<NodeRef*>(&unk48)->Get())
     {
-        if (!m_bDisabled58)
+        if (!unk58)
         {
             char szFile[260];
             _sprintf(szFile, (const char*)NiFixedString("Terrain LOD | Level %i | Cells (%i,%i)-(%i,%i)"), iLevel, iX,
                      iY, iX + iLevel - 1, iY + iLevel - 1);
-            m_ref48.Get()->AssignFixedString(NiFixedString(szFile));
-            if (m_ref4c.Get())
+            reinterpret_cast<NodeRef*>(&unk48)->Get()->AssignFixedString(NiFixedString(static_cast<const char*>(szFile)));
+            if (reinterpret_cast<NodeRef*>(&unk4c)->Get())
             {
                 _sprintf(szFile, (const char*)NiFixedString("Water LOD | Level %i | Cells (%i,%i)-(%i,%i)"), iLevel, iX,
                          iY, iX + iLevel - 1, iY + iLevel - 1);
-                m_ref4c.Get()->AssignFixedString(NiFixedString(szFile));
+                reinterpret_cast<NodeRef*>(&unk4c)->Get()->AssignFixedString(NiFixedString(static_cast<const char*>(szFile)));
             }
-            if (m_ref50.Get())
+            if (reinterpret_cast<NodeRef*>(&unk50)->Get())
             {
                 _sprintf(szFile, (const char*)NiFixedString("Water LOD w/ refl.) | Level %i | Cells (%i,%i)-(%i,%i)"),
                          iLevel, iX, iY, iX + iLevel - 1, iY + iLevel - 1);
-                m_ref50.Get()->AssignFixedString(NiFixedString(szFile));
+                reinterpret_cast<NodeRef*>(&unk50)->Get()->AssignFixedString(NiFixedString(static_cast<const char*>(szFile)));
             }
-            m_pExtra40->FUN_006fa990();
+            reinterpret_cast<FinalObject*>(owner)->FUN_006fa990();
         }
-        else if (m_bDisabled58)
+        else if (unk58)
         {
-            m_ref48 = (void*)0;
-            m_ref4c = (void*)0;
-            m_ref50 = (void*)0;
+            *reinterpret_cast<NodeRef*>(&unk48) = (void*)0;
+            *reinterpret_cast<NodeRef*>(&unk4c) = (void*)0;
+            *reinterpret_cast<NodeRef*>(&unk50) = (void*)0;
         }
     }
 }

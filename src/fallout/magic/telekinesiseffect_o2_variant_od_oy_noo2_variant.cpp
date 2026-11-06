@@ -7,11 +7,8 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 // src/fallout/magic/telekinesiseffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/telekinesiseffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct FUN_0082a510_shell
-{
-    void FUN_0082a540();
-    void* DestroyIfFlagged(unsigned int flags);
-};
+#include "../../../include/TelekinesisEffect.h"
+
 void __cdecl _Deallocate(void*);
 struct FUN_0082aab0_shell
 {
@@ -22,28 +19,11 @@ struct FUN_0082af40_shell
     float fTelekinesisStrength;  // +0x644
     float GetTelekinesisStrength();
 };
-struct Actor
-{
-};
-struct ValueModifierEffect
-{
-    unsigned short __thiscall FUN_00802d90(Actor* apActor);
-};
-struct TelekinesisEffect : ValueModifierEffect
-{
-    unsigned short __thiscall FUN_0082b190(Actor* apActor);
-};
 struct FUN_008df040_shell
 {
     unsigned char __thiscall FUN_008df040();
 };
 extern FUN_008df040_shell* g_TESSaveLoadGame;
-struct FUN_0082a670_shell
-{
-    void __thiscall FUN_0082a670();
-    void __thiscall FUN_0082c000();
-    void __thiscall StartTelekinesisEffect();
-};
 void* __cdecl FUN_00703390();
 struct Flt
 {
@@ -126,39 +106,8 @@ class GameSettingTableT
 };
 extern GameSettingTableT g_kTelekinesisDistanceT;
 
-class TelekinesisEffectT
-{
-  public:
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    float m_fHitDistance;
-    unsigned int unk58;
-    bool m_bHolding;
-
-    void FUN_0082afa0();
-};
-
 // @fnv 0x0082afa0
-void TelekinesisEffectT::FUN_0082afa0()
+void TelekinesisEffect::FUN_0082afa0()
 {
     if (g_pkPlayerCameraT->GetGrab())
     {

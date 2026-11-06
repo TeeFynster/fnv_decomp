@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 // src/staging/blk_00d60000_o2_gs_nogs_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00d60000_o2_gs_nogs_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -8,6 +10,17 @@
 // src/staging/blk_00d60000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkStringPtr.h"
+#include "../../include/hkArray.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkError.h"
+#include "../../include/FinishingFlag.h"
+#include "../../include/hkOstream.h"
+#include "../../include/hkReferencedObject.h"
+#include "../../include/hkpPhysicsContext.h"
+#include "../../include/hkSmallArray.h"
 void __cdecl FUN_00d687c0(void);
 struct Registry_00dd9380
 {
@@ -42,19 +55,6 @@ struct FUN_00d68770_cls
 };
 void* __stdcall FUN_00d687b0(char* a1);
 struct FnvCpu_FUN_00d687c0_CpuBlock;
-struct FnvCpu_FUN_00d687c0_CpuAllocator
-{
-    virtual void slot00();
-    virtual void* Invoke(unsigned int size);
-};
-struct FnvCpu_FUN_00d687c0_CpuHolder
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    FnvCpu_FUN_00d687c0_CpuAllocator* allocator;
-};
 void* __cdecl FUN_00c85750();
 struct FnvCpu_FUN_00d687c0_CpuBlock
 {
@@ -174,24 +174,10 @@ inline void* operator new(unsigned int, void* pvMem)
 {
     return pvMem;
 }
-struct hkFinishLoadedObjectFlagD6A
-{
-    int m_bFinishing;
-};
-template <class T> class hkSmallArrayD6A
-{
-  public:
-    hkSmallArrayD6A() : m_data(0), m_iElementCount(0), m_iCapacityState(0x8000)
-    {}
-
-    T* m_data;
-    unsigned short m_iElementCount;
-    unsigned short m_iCapacityState;
-};
 class hkMemberD6A
 {
   public:
-    hkMemberD6A(hkFinishLoadedObjectFlagD6A flag) throw();
+    hkMemberD6A(FinishingFlag flag) throw();
 
     int unk00;
     int unk04;
@@ -209,35 +195,21 @@ class hkBaseD6A
 class hkDerivedD6A : public hkBaseD6A
 {
   public:
-    __forceinline hkDerivedD6A(hkFinishLoadedObjectFlagD6A flag) : m_kMemberDescriptor(flag)
+    __forceinline hkDerivedD6A(FinishingFlag flag) : m_kMemberDescriptor(flag)
     {
         m_iType = -16;
     }
     virtual ~hkDerivedD6A();
 
-    hkSmallArrayD6A<int> m_ppData;
+    hkSmallArray<int> m_ppData;
     hkMemberD6A m_kMemberDescriptor;
     int m_iType;
 };
 void __cdecl ConstructHkDerived(void* pvObject, int iFinishing);
-struct hkFinishLoadedObjectFlagD605
-{
-    int m_bFinishing;
-};
-class hkReferencedObjectD605
+class FUN_00d60540 : public hkReferencedObject
 {
   public:
-    hkReferencedObjectD605(hkFinishLoadedObjectFlagD605 flag)
-    {}
-    virtual ~hkReferencedObjectD605();
-
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-class FUN_00d60540 : public hkReferencedObjectD605
-{
-  public:
-    FUN_00d60540(hkFinishLoadedObjectFlagD605 flag);
+    FUN_00d60540(FinishingFlag flag);
     virtual ~FUN_00d60540();
 };
 extern int DAT_010d14f8;
@@ -260,387 +232,6 @@ struct FUN_00d60600_class
 {
     void __thiscall WriteSwapped(int a, int b, int c);
     void __thiscall FUN_00d60b20(int a, int b);
-};
-struct FUN_00d61470_Class
-{
-    void* FUN_00d61470();
-};
-char* __cdecl FUN_00cb1130(char* pcHaystack, const char* pcNeedle);
-class hkStringBufD614
-{
-  public:
-    char* m_data;
-
-    int FindSubstring(const char* pcNeedle, int iStartIndex, int iEndIndex) throw();
-};
-inline char toLowerD614(char c)
-{
-    return (c >= 'A' && c <= 'Z') ? c - 'A' + 'a' : c;
-}
-struct hkStringD614
-{
-    const char* m_kStringBuffer;
-
-    int FindCaseInsensitive(const char* needle) const;
-};
-int __cdecl FUN_00cb1130(int a1, int a2);
-struct FUN_00d61520_cls
-{
-    int unk00;
-    int FindOffset(int a, int b, int c);
-};
-struct FnvString
-{
-    const char* text;
-    int FUN_00d61560(const char* other);
-};
-inline char toLowerD615(char c)
-{
-    return (c >= 'A' && c <= 'Z') ? c - 'A' + 'a' : c;
-}
-struct hkStringD615
-{
-    const char* m_kStringBuffer;
-
-    int FUN_00d615a0(const char* other) const;
-};
-struct FNV_00d61600_Buffer
-{
-    unsigned char* data;
-    int length;
-    int FindCharacter(unsigned char character, int start, int limit);
-};
-struct FUN_00d61640_cls
-{
-    char* m_data;
-    int m_fRestLength;
-
-    int FindLastCharInRange(char c, int startIndex, int endIndex);
-};
-struct FUN_00d61680_Obj
-{
-    int unk00;
-    void __thiscall FUN_00d61680(unsigned int param);
-};
-int __cdecl FUN_00cb0fa0(int, int);
-void __cdecl CompareStringsCaseInsensitive(void* pvOwner, int iValue);
-struct FUN_00d616a0_cls
-{
-    void* m_pOwnerObject;
-
-    void FUN_00d616a0(int iValue);
-};
-int __stdcall FUN_00d61680(unsigned int value);
-int __stdcall FUN_00d616e0(unsigned int value);
-int __cdecl FUN_00cb10d0(int s);
-struct FUN_00d61700_cls
-{
-    char* m_00;
-    int m_04;
-    int EndsWith(char* s);
-};
-int __cdecl FUN_00cb10d0(const char* str);
-static inline int tolower_custom(char c)
-{
-    if ((unsigned char)(c - 'A') <= 25)
-        return c + 0x20;
-    return c;
-}
-struct FUN_00d61750_cls
-{
-    char* m_data;
-    int m_fRestLength;
-
-    int EndsWithIgnoreCase(const char* suffix);
-};
-struct FUN_00d617d0_cls
-{
-    char* m_p00;
-    int m_i04;
-    void RemoveFront(int count);
-};
-struct hkMathD618
-{
-    static int max2(int x, int y)
-    {
-        return x > y ? x : y;
-    }
-};
-class hkStringBufD618
-{
-  public:
-    char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int FindLastCharInRange(char c, int iStartIndex, int iEndIndex) const;
-    void RemoveFront(int n);
-    void TrimToFileName();
-};
-struct hkStringD618
-{
-    char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getLength() const
-    {
-        return m_iElementCount - 1;
-    }
-
-    int ReplaceChar(char from, char to, int replaceType);
-};
-class hkMemoryAllocatorD61B;
-struct hkMemoryRouterD61B
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    hkMemoryAllocatorD61B* m_pTemp;
-    hkMemoryAllocatorD61B* m_pStreamAllocator;
-    hkMemoryAllocatorD61B& temp()
-    {
-        return *m_pTemp;
-    }
-};
-void __cdecl FUN_00c908c0(hkMemoryAllocatorD61B& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
-void __cdecl FUN_00cb1260(void* pvDst, const void* pvSrc, int iNumBytes) throw();
-template <class T, int N> class hkInplaceArrayD61B
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    T m_kStorage[N];
-
-    hkInplaceArrayD61B() : m_data(m_kStorage), m_iElementCount(0), m_iCapacityState(N | 0x80000000)
-    {}
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    T* begin()
-    {
-        return m_data;
-    }
-    __forceinline void reserve(hkMemoryAllocatorD61B& kAlloc, int n)
-    {
-        const int iCap = getCapacity();
-        if (iCap < n)
-        {
-            int iCap2 = 2 * iCap;
-            int iNewCap = (n < iCap2) ? iCap2 : n;
-            FUN_00c908c0(kAlloc, this, iNewCap, sizeof(T));
-        }
-    }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        reserve(static_cast<hkMemoryRouterD61B*>(FUN_00c85750())->temp(), n);
-        m_iElementCount = n;
-    }
-};
-class FUN_00d61b10
-{
-  public:
-    hkInplaceArrayD61B<char, 128> m_kStringBuffer;
-
-    FUN_00d61b10(const char* pcString, int iLength) throw();
-};
-int __cdecl FUN_00cb10d0(int);
-void* __cdecl FUN_00c85750();
-struct FUN_00d62630_Obj
-{
-    void FUN_00d62630(int a1, int a2, int a3, int a4);
-};
-struct FUN_00d61df0_cls
-{
-    int unk00;
-    int unk04;
-    FUN_00d61df0_cls* FUN_00d61df0(int arg);
-};
-class hkMemoryAllocatorD61E;
-struct hkMemoryRouterD61E
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    hkMemoryAllocatorD61E* m_pTemp;
-    hkMemoryAllocatorD61E& temp()
-    {
-        return *m_pTemp;
-    }
-};
-int __cdecl FUN_00cb10d0(const char* pcString) throw();
-void __cdecl FUN_00cb1260(void* pvDst, const void* pvSrc, int iNumBytes) throw();
-void __cdecl FUN_00c908c0(hkMemoryAllocatorD61E& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
-class hkStringBufD61E
-{
-  public:
-    char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getLength() const
-    {
-        return m_iElementCount - 1;
-    }
-    void SetSizeAndGrow(int n)
-    {
-        hkMemoryAllocatorD61E& kAlloc = static_cast<hkMemoryRouterD61E*>(FUN_00c85750())->temp();
-        int iCap = m_iCapacityState & 0x3fffffff;
-        if (iCap < n)
-        {
-            int iNewCap = 2 * iCap;
-            FUN_00c908c0(kAlloc, this, n < iNewCap ? iNewCap : n, 1);
-        }
-        m_iElementCount = n;
-    }
-
-    void AppendStrings(const char* s0, const char* s1, const char* s2, const char* s3, const char* s4,
-                       const char* s5) throw();
-};
-class hkMemoryAllocatorD620;
-struct hkMemoryRouterD620
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkMemoryAllocatorD620* m_pTemp;
-    hkMemoryAllocatorD620* m_pStreamAllocator;
-    hkMemoryAllocatorD620& temp()
-    {
-        return *m_pTemp;
-    }
-};
-namespace hkRouterD620 {
-extern "C" hkMemoryRouterD620& __cdecl FUN_00c85750() throw();
-}
-void __cdecl FUN_00c908c0(hkMemoryAllocatorD620& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
-void __cdecl FUN_00d2caa0(void* pvDst, void* pvSrc, unsigned int uiNumBytes);
-class hkStringBufD620
-{
-  public:
-    char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void reserve(hkMemoryAllocatorD620& kAlloc, int n)
-    {
-        const int iCap = getCapacity();
-        if (iCap < n)
-        {
-            int iCap2 = 2 * iCap;
-            int iNewCap = (n < iCap2) ? iCap2 : n;
-            FUN_00c908c0(kAlloc, this, iNewCap, sizeof(char));
-        }
-    }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        reserve(hkRouterD620::FUN_00c85750().temp(), n);
-        m_iElementCount = n;
-    }
-
-    void Assign(void* src, int len);
-};
-int __cdecl FUN_00cb10d0(int value);
-void* __cdecl FUN_00c85750();
-void __cdecl FUN_00c908c0(int value1, int value2, int value3, int value4);
-void __cdecl FUN_00d2caa0(void* value1, unsigned int value2, unsigned int value3);
-struct D62080_Audio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-};
-struct D62080_Object
-{
-    unsigned char* m_data;
-    int m_uiItemCount;
-    unsigned int m_pRayCursor;
-
-    void __thiscall FUN_00d62080(int param2, int param3);
-};
-extern int __cdecl FUN_00cb10d0(int value);
-struct Router_d62100
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int m_iValueAtOffset0C;
-};
-struct FUN_00d62100_Class
-{
-    int __thiscall FUN_00d62630(int context, int first, int second, int third);
-    int __thiscall FUN_00d62100(int first, int second, int third);
-};
-struct SearchBase
-{
-    int FUN_00d61cc0();
-};
-struct SearchController : SearchBase
-{
-    int FindLastCharInRange(int token, int start, int limit);
-    int FUN_00d61fc0(int start, int position);
-    int FUN_00d62140();
-};
-struct hkStringPtr
-{
-    const char* m_stringAndFlags;
-    const char* cString() const
-    {
-        return (const char*)((unsigned int)m_stringAndFlags & ~1);
-    }
-};
-struct FUN_00d623a0
-{
-    char* m_data;
-    int m_iElementCount;
-    unsigned int m_iCapacityState;
-    char m_kStorage;
-
-    void FUN_00d61c10(const char* str);
-
-    FUN_00d623a0(const hkStringPtr& str);
-};
-struct FUN_00d623d0
-{
-    void* m_p00;
-    int m_i04;
-    int m_i08;
-    int m_i0c;
-    int m_i10;
-    int m_i14;
-    int m_i18;
-    void* m_p1c;
-    int m_i20;
-    void* m_p24;
-
-    void AppendStrings(int a, int b, int c, int d, int e, int f);
-    FUN_00d623d0(int a, int b, int c, int d, int e, int f);
-};
-struct FUN_00d62100_Obj
-{
-    int FUN_00d62100(int a, int b, int c);
-};
-struct FUN_00d62580_Cls
-{
-    int FUN_00d62580(int a, int b);
-};
-class hkObjectD626
-{
-  public:
-    int ReplaceRange(int a, int b, int c, int d, int e);
-    int FUN_00d62630(int a, int b, int d, int e);
 };
 struct FUN_00ddccb0_Obj
 {
@@ -665,19 +256,6 @@ struct FUN_00d62ef0_cls
 extern int DAT_010d1720;
 extern int DAT_010d1700;
 extern int DAT_010d16f0;
-struct HeapAllocator
-{
-    virtual void* GetStats();
-    virtual void* Allocate(unsigned int bytes);
-};
-struct MemorySystem
-{
-    void* unknown00;
-    void* unknown04;
-    void* unknown08;
-    void* unknown0c;
-    HeapAllocator* heap;
-};
 struct HeapBlockMetadata
 {
     unsigned int flags;
@@ -686,19 +264,6 @@ struct HeapBlockMetadata
     HeapBlockMetadata* FUN_00d62ef0(void* data, unsigned int enabled);
 };
 void* __cdecl AllocateRecordWithData(void* data);
-struct Allocator_d632c0
-{
-    virtual void slot00();
-    virtual void* Allocate(unsigned int size);
-};
-struct Holder_d632c0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    Allocator_d632c0* allocator;
-};
 struct Base1_d632c0
 {
     virtual void vfn1();
@@ -817,40 +382,6 @@ class hkDisplayHandlerD633
     virtual void V3C() throw();
     virtual void WriteOutput(const char* pcData, int iLength) throw();
 };
-class hkpWorldD633;
-class hkpPhysicsContextD633
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    hkpWorldD633** m_ppWorlds;
-    int m_numWorlds;
-};
 class FUN_00d63370_class
 {
   public:
@@ -861,32 +392,13 @@ class FUN_00d63370_class
     hkDisplayHandlerD633* m_pDisplayHandler;
     int unk14;
     int unk18;
-    hkpPhysicsContextD633* m_iValueAtOffset0C;
+    hkpPhysicsContext* m_iValueAtOffset0C;
     FUN_00ddf050_cls m_pStreamWriter;
 
     void UpdatePhysicsDebugDisplay(float fFrameTime) throw();
 };
 extern int DAT_01268fc8;
 int __cdecl FUN_00d63420();
-class hkMemoryAllocatorD634
-{
-  public:
-    virtual ~hkMemoryAllocatorD634() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-struct hkMemoryRouterD634
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorD634* m_pStreamAllocator;
-    hkMemoryAllocatorD634& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
 void* __cdecl FUN_00c85750();
 class FUN_00d63340
 {
@@ -897,9 +409,9 @@ class FUN_00d63340
 
     static void operator delete(void* p) throw()
     {
-        ((hkMemoryRouterD634*)FUN_00c85750())
+        ((hkMemoryRouter*)FUN_00c85750())
             ->heap()
-            .ReleaseBlock(p, static_cast<FUN_00d63340*>(p)->m_usMemSizeAndFlags);
+            .blockFree(p, static_cast<FUN_00d63340*>(p)->m_usMemSizeAndFlags);
     }
 
     FUN_00d63340* Destroy(unsigned int uiFlags) throw();
@@ -944,18 +456,10 @@ class hkIfaceBD642
   public:
     virtual void b0() = 0;
 };
-template <class T> struct hkArrayD642
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    hkArrayD642() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
 class FUN_00d64260 : public FUN_00ddccb0, public hkIfaceAD642, public hkIfaceBD642
 {
   public:
-    hkArrayD642<void*> m_ppData;
+    hkArray<void*> m_ppData;
 
     FUN_00d64260(void* p) throw();
     virtual ~FUN_00d64260() throw();
@@ -965,19 +469,6 @@ class FUN_00d64260 : public FUN_00ddccb0, public hkIfaceAD642, public hkIfaceBD6
     virtual void b0();
 };
 struct FnvCpu_FUN_00d645f0_CpuBlock;
-struct FnvCpu_FUN_00d645f0_CpuAllocator
-{
-    virtual void slot00();
-    virtual void* Invoke(unsigned int size);
-};
-struct FnvCpu_FUN_00d645f0_CpuHolder
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    FnvCpu_FUN_00d645f0_CpuAllocator* allocator;
-};
 void* __cdecl FUN_00c85750();
 struct FnvCpu_FUN_00d645f0_CpuBlock
 {
@@ -1163,36 +654,7 @@ struct FUN_00d73400_cls
 
     void FUN_00d73400();
 };
-class hkOstreamD734
-{
-  public:
-    void* m_ppVirtualMethodTable;
-    int m_usMemSizeAndFlags;
-    void* m_pStreamWriter;
-
-    void FUN_00cb1600(void* pvBuffer, int iSize) throw();
-    void FUN_00cc00e0() throw();
-    hkOstreamD734& FUN_00cc01c0(const char* pcString) throw();
-    hkOstreamD734& WriteInt(int i) throw();
-
-    hkOstreamD734(void* pvBuffer, int iSize)
-    {
-        FUN_00cb1600(pvBuffer, iSize);
-    }
-    ~hkOstreamD734()
-    {
-        FUN_00cc00e0();
-    }
-};
-class hkErrorD734
-{
-  public:
-    virtual void V0() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual int message(int iType, int aiSoundId, const char* pcDescription, const char* pcFile, int iLine) throw();
-};
-extern hkErrorD734* DAT_01268360;
+extern hkError* DAT_01268360;
 struct hkpTransformCollapseUtilResultsD734
 {
     int m_iFirstResult;
@@ -1214,32 +676,11 @@ struct FnvCpu_FUN_00d76d80_CpuOwner
     void FUN_00d76d80();
 };
 extern int DAT_010d14f8;
-struct hkBoolD608
-{
-    unsigned char value;
-    hkBoolD608(bool enabled = false) : value(enabled)
-    {}
-    hkBoolD608(const hkBoolD608& other) : value(other.value)
-    {}
-};
-struct hkAllocatorD608
-{
-    virtual void vf00();
-    virtual void* Allocate(int bytes);
-};
-struct hkRouterD608
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    hkAllocatorD608* allocator;
-};
 struct FUN_00d274c0
 {
     void* unk00;
     unsigned short allocatedSize;
-    FUN_00d274c0(int first, int second, hkBoolD608 enabled);
+    FUN_00d274c0(int first, int second, hkBool enabled);
 };
 struct FUN_00d608a0
 {
@@ -1262,307 +703,23 @@ struct S
     int value;
     R IsLessThan(int other) const;
 };
-class hkMemoryAllocatorD619;
-struct hkMemoryRouterD619
-{
-    int unk00, unk04, unk08;
-    hkMemoryAllocatorD619* m_pStreamAllocator;
-
-    hkMemoryAllocatorD619& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-namespace hkRouterD619 {
-extern "C" hkMemoryRouterD619& __cdecl FUN_00c85750() throw();
-}
-void __cdecl ResizeAudioStream(hkMemoryAllocatorD619& kAlloc, void* pArray, int iElemSize);
-template <class T> __forceinline void constructWithCopyD619(T* p, int n, const T& t)
-{
-    for (int i = 0; i < n; i++)
-        p[i] = t;
-}
-template <class T> class hkArrayD619
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    void _pushBack(hkMemoryAllocatorD619& kAlloc, T t)
-    {
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(kAlloc, this, sizeof(T));
-        constructWithCopyD619(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-    void AddBack(T t)
-    {
-        _pushBack(hkRouterD619::FUN_00c85750().heap(), t);
-    }
-};
-class hkStringD619
-{
-  public:
-    char* m_kStringBuffer;
-
-    int FindCharacter(int c, int iStart, int iEnd) const;
-    int SplitString(int c, hkArrayD619<const char*>& kBits);
-};
-class hkMemoryAllocatorD61
-{
-  public:
-    virtual ~hkMemoryAllocatorD61();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-};
-struct hkMemoryRouterD61
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkMemoryAllocatorD61* m_alloc;
-};
-template <class T> inline void hkArrayCopyD61(T* dst, const T* src, int n)
-{
-    for (int i = 0; i < n; i++)
-        dst[i] = src[i];
-}
-class FUN_00d619d0
-{
-  public:
-    char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    FUN_00d619d0& operator=(const FUN_00d619d0& a);
-};
-struct FUN_00d61a50_cls
-{
-    int* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int* FUN_00d61a50(int value);
-};
-namespace fnvc_adapt {
-char* __cdecl FUN_00cb10d0(int value);
-}
-void __cdecl FUN_00c908c0(int allocator, FUN_00d61a50_cls* array, int capacity, int value);
-void __cdecl FUN_00cb1260(int* data, int value, char* source);
-class hkMemoryAllocatorD61B8
-{
-  public:
-    virtual ~hkMemoryAllocatorD61B8() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void* AllocateBufferWithSize(int& iReqNumBytesInOut) throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
-struct hkMemoryRouterD61B8
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    hkMemoryAllocatorD61B8* m_pTemp;
-    hkMemoryAllocatorD61B8* m_pStreamAllocator;
-    hkMemoryAllocatorD61B8& temp()
-    {
-        return *m_pTemp;
-    }
-};
-template <class T> __forceinline void hkArrayCopyD61B8(T* pDst, const T* pSrc, int n)
-{
-    for (int i = 0; i < n; ++i)
-        pDst[i] = pSrc[i];
-}
-template <class T, int N> class hkInplaceArrayD61B8
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    T m_kStorage[N];
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    __forceinline hkInplaceArrayD61B8(const hkInplaceArrayD61B8& kOther) throw()
-        : m_data(m_kStorage), m_iElementCount(0), m_iCapacityState(N | 0x80000000)
-    {
-        hkMemoryAllocatorD61B8& kAlloc = static_cast<hkMemoryRouterD61B8*>(FUN_00c85750())->temp();
-        if (getCapacity() < kOther.m_iElementCount)
-        {
-            if ((m_iCapacityState & 0x80000000) == 0)
-                kAlloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-            int n = kOther.m_iElementCount * sizeof(T);
-            m_data = static_cast<T*>(kAlloc.AllocateBufferWithSize(n));
-            m_iCapacityState = n / sizeof(T);
-        }
-        m_iElementCount = kOther.m_iElementCount;
-        hkArrayCopyD61B8(m_data, kOther.m_data, m_iElementCount);
-    }
-};
-class FUN_00d61b80
-{
-  public:
-    hkInplaceArrayD61B8<char, 128> m_kStringBuffer;
-
-    FUN_00d61b80(const FUN_00d61b80& kOther) throw();
-};
-struct C6DF60Router;
-C6DF60Router* __cdecl _FNV_e03300_arena();
-struct C6DF60Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-};
-struct C540BC0Allocator
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-};
-struct FUN_00d61cc0_t
-{
-    char* m_pBuffer;
-    int m_iFadeIndex;
-    int m_iState2;
-    void FUN_00d61cc0();
-};
-void __cdecl ArrayReserveImpl(void*, void*, int, int);
-class hkMemoryAllocatorD61F;
-struct hkMemoryRouterD61F
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkMemoryAllocatorD61F* m_pTemp;
-    hkMemoryAllocatorD61F* m_pStreamAllocator;
-    hkMemoryAllocatorD61F& temp()
-    {
-        return *m_pTemp;
-    }
-};
-namespace hkRouterD61F {
-extern "C" hkMemoryRouterD61F& __cdecl FUN_00c85750() throw();
-}
-void __cdecl FUN_00c908c0(hkMemoryAllocatorD61F& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
-template <class T> class hkArrayD61F
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void reserve(hkMemoryAllocatorD61F& kAlloc, int n)
-    {
-        const int iCap = getCapacity();
-        if (iCap < n)
-        {
-            int iCap2 = 2 * iCap;
-            int iNewCap = (n < iCap2) ? iCap2 : n;
-            FUN_00c908c0(kAlloc, this, iNewCap, sizeof(T));
-        }
-    }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        reserve(hkRouterD61F::FUN_00c85750().temp(), n);
-        m_iElementCount = n;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-};
-class hkStringBufD61F
-{
-  public:
-    hkArrayD61F<char> m_kStringBuffer;
-
-    void FUN_00d61f70(int n);
-};
-class hkMemoryAllocatorD62
-{
-  public:
-    virtual ~hkMemoryAllocatorD62() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-struct hkMemoryRouterD62
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorD62* m_pStreamAllocator;
-
-    hkMemoryAllocatorD62& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
 namespace hkRouterD62 {
-extern "C" hkMemoryRouterD62& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
-class hkReferencedObjectD62
-{
-  public:
-    virtual ~hkReferencedObjectD62();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    static void* operator new(unsigned int nbytes)
-    {
-        hkReferencedObjectD62* b =
-            static_cast<hkReferencedObjectD62*>(hkRouterD62::FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
-        b->m_usMemSizeAndFlags = (unsigned short)nbytes;
-        return b;
-    }
-    static void operator delete(void* p);
-};
-class hkpCollisionAgentD62
+// The 0x00d62f20 snapshot-viewer factory returns this +8 interface; hkpCollisionAgent has a reference-counted base and contact-manager field.
+class SnapshotViewerProcessInterface
 {
   public:
     virtual void cleanup();
 };
-class FUN_00d62ef0 : public hkReferencedObjectD62, public hkpCollisionAgentD62
+class FUN_00d62ef0 : public hkReferencedObject, public SnapshotViewerProcessInterface
 {
   public:
     FUN_00d62ef0(void* contactMgr, int flags) throw();
 
     int unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28;
 };
-hkpCollisionAgentD62* __cdecl FUN_00d62f20(void* contactMgr);
+SnapshotViewerProcessInterface* __cdecl FUN_00d62f20(void* contactMgr);
 static void FUN_00d6c1a0(int* piValue);
 void E6C1A0Adjust(int* piValue);
 // FUN_00d73400's body must be in-TU so VC9 knows it clobbers only eax:
@@ -1614,91 +771,7 @@ struct FUN_00d76c20_cls
 
     int ForwardToTarget(int iSelector, int iArg0, int iArg1, int iArg2);
 };
-struct hkResultD794
-{
-    int m_bHasHit;
-};
-void __cdecl FUN_00d79250(void* a, void* b, hkResultD794* out, int flags, float f);
-bool __cdecl FUN_00d794e0(void* a, void* b, hkResultD794* out, float f);
-class hkMemoryAllocator
-{
-  public:
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes) throw();
-};
-struct NineIntegerRecord
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkMemoryAllocator* m_pTemp;
-    hkMemoryAllocator& temp()
-    {
-        return *m_pTemp;
-    }
-};
-void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* array, int numElem, int sizeElem) throw();
 int __cdecl FUN_00cb10d0(const char* s) throw();
-class InlineStorageString
-{
-  public:
-    char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    char m_kStorage[128];
-
-    InlineStorageString(const InlineStorageString& other)
-    {
-        FUN_00d61b80(&other);
-    }
-    ~InlineStorageString()
-    {
-        hkMemoryAllocator& alloc = static_cast<NineIntegerRecord*>(FUN_00c85750())->temp();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, getCapacity());
-    }
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    int getLength() const
-    {
-        return m_iElementCount - 1;
-    }
-    const char* cString() const
-    {
-        return m_data;
-    }
-
-    void SetSizeAndGrow(int n)
-    {
-        hkMemoryAllocator& alloc = static_cast<NineIntegerRecord*>(FUN_00c85750())->temp();
-        int cap = getCapacity();
-        if (cap < n)
-        {
-            int cap2 = 2 * cap;
-            FUN_00c908c0(alloc, this, n < cap2 ? cap2 : n, 1);
-        }
-        m_iElementCount = n;
-    }
-    void setLength(int length)
-    {
-        SetSizeAndGrow(length + 1);
-        m_data[length] = 0;
-    }
-
-    void FUN_00d61b80(const InlineStorageString* other) throw();
-    void FUN_00d61cc0() throw();
-    int FindSubstring(const char* needle, int startIndex, int endIndex) const throw();
-    void FUN_00d62080(const char* s, int len) throw();
-    int FUN_00d62190(const char* from, const char* to, int rtype);
-};
-
 #include <xmmintrin.h>
 extern "C"
 {
@@ -1706,7 +779,7 @@ extern "C"
 }
 
 extern float DAT_0104da4c;
-extern __m128 DAT_01268370;
+extern LocalM128 DAT_01268370;
 
 struct StiffSpringBodyBF60
 {
@@ -1722,15 +795,15 @@ struct StiffSpringBodyBF60
     int unk24;
     int unk28;
     int unk2c;
-    __m128 v30;
+    LocalM128 v30;
 };
 union StiffSpringSegmentBF60
 {
     struct
     {
-        __m128 from;
-        __m128 to;
-        __m128 dir;
+        LocalM128 from;
+        LocalM128 to;
+        LocalM128 dir;
     };
 };
 struct StiffSpringAtomBF60
@@ -1747,11 +820,11 @@ static __declspec(noinline) void FUN_00d6bf60(StiffSpringBodyBF60* oa, StiffSpri
     StiffSpringSegmentBF60 v;
     v.from = oa->v30;
     v.to = ob->v30;
-    __m128 d = _mm_sub_ps(v.from, v.to);
-    __m128 sq = _mm_mul_ps(d, d);
-    __m128 sy = _mm_shuffle_ps(sq, sq, 0x55);
-    __m128 sz = _mm_shuffle_ps(sq, sq, 0xaa);
-    __m128 sum = _mm_add_ss(sz, _mm_add_ss(sy, sq));
+    LocalM128 d = _mm_sub_ps(v.from, v.to);
+    LocalM128 sq = _mm_mul_ps(d, d);
+    LocalM128 sy = _mm_shuffle_ps(sq, sq, 0x55);
+    LocalM128 sz = _mm_shuffle_ps(sq, sq, 0xaa);
+    LocalM128 sum = _mm_add_ss(sz, _mm_add_ss(sy, sq));
     float dist;
     _mm_store_ss(&dist, _mm_sqrt_ss(sum));
     float scale = dist;
@@ -1765,7 +838,7 @@ static __declspec(noinline) void FUN_00d6bf60(StiffSpringBodyBF60* oa, StiffSpri
         float inv = 1.0f / dist;
         v.dir = d;
         _ReadWriteBarrier();
-        __m128 s = _mm_load_ss(&inv);
+        LocalM128 s = _mm_load_ss(&inv);
         v.dir = _mm_mul_ps(d, _mm_shuffle_ps(s, s, 0));
     }
     FUN_00dcf5b0(&v, p4, p5, ps->value - scale);
@@ -1781,17 +854,14 @@ __declspec(noinline) void InvokeStiffSpringBF60(StiffSpringBodyBF60* a, StiffSpr
 #include <xmmintrin.h>
 namespace fnv_00d6c080 {
 
-struct __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float x, y, z, w;
-};
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
+typedef ::__m128 LocalM128;
+using ::_mm_load_ss;
+using ::_mm_load_ps;
+using ::_mm_store_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_sub_ps;
+using ::_mm_add_ps;
+using ::_mm_mul_ps;
 
 struct F4
 {
@@ -1812,7 +882,7 @@ struct FUN_004b4ab0_Class
             float z;
             float w;
         };
-        __m128 m;
+        LocalM128 m;
     };
 
     void __thiscall FUN_004b4ab0(int, int);
@@ -1837,12 +907,12 @@ struct Obj4
     int u5c;
 };
 
-static __m128 cross4(__m128 a, __m128 b)
+static LocalM128 cross4(LocalM128 a, LocalM128 b)
 {
-    __m128 a_yzx = _mm_shuffle_ps(a, a, 0xC9);
-    __m128 b_zxy = _mm_shuffle_ps(b, b, 0xD2);
-    __m128 a_zxy = _mm_shuffle_ps(a, a, 0xD2);
-    __m128 b_yzx = _mm_shuffle_ps(b, b, 0xC9);
+    LocalM128 a_yzx = _mm_shuffle_ps(a, a, 0xC9);
+    LocalM128 b_zxy = _mm_shuffle_ps(b, b, 0xD2);
+    LocalM128 a_zxy = _mm_shuffle_ps(a, a, 0xD2);
+    LocalM128 b_yzx = _mm_shuffle_ps(b, b, 0xC9);
     return _mm_sub_ps(_mm_mul_ps(a_yzx, b_zxy), _mm_mul_ps(a_zxy, b_yzx));
 }
 
@@ -1851,18 +921,18 @@ static __declspec(noinline) void FUN_00d6c080(Obj4* firstObject, F4* second, F4*
                                               float divisor, float multiplier, F4* out)
 {
     float scale = (1.0f / divisor) * multiplier;
-    __m128 s0 = _mm_load_ss(&scale);
-    __m128 diff = _mm_sub_ps(_mm_load_ps(&first->x), _mm_load_ps(&second->x));
+    LocalM128 s0 = _mm_load_ss(&scale);
+    LocalM128 diff = _mm_sub_ps(_mm_load_ps(&first->x), _mm_load_ps(&second->x));
     _mm_store_ps(&out->x, diff);
-    __m128 d1 = _mm_sub_ps(_mm_load_ps(&second->x), _mm_load_ps(&firstObject->u40.x));
-    __m128 d2 = _mm_sub_ps(_mm_load_ps(&first->x), _mm_load_ps(&secondObject->u40.x));
+    LocalM128 d1 = _mm_sub_ps(_mm_load_ps(&second->x), _mm_load_ps(&firstObject->u40.x));
+    LocalM128 d2 = _mm_sub_ps(_mm_load_ps(&first->x), _mm_load_ps(&secondObject->u40.x));
     FUN_004b4ab0_Class r1;
     FUN_004b4ab0_Class r2;
     r1.FUN_004b4ab0((int)&firstObject->u50, (int)&firstObject->u20);
     r2.FUN_004b4ab0((int)&secondObject->u50, (int)&secondObject->u20);
-    __m128 s = _mm_shuffle_ps(s0, s0, 0);
-    __m128 c2 = cross4(d2, r2.m);
-    __m128 c1 = cross4(d1, r1.m);
+    LocalM128 s = _mm_shuffle_ps(s0, s0, 0);
+    LocalM128 c2 = cross4(d2, r2.m);
+    LocalM128 c1 = cross4(d1, r1.m);
     _mm_store_ps(&out->x, _mm_sub_ps(_mm_add_ps(diff, _mm_mul_ps(c2, s)), _mm_mul_ps(c1, s)));
 }
 

@@ -2,7 +2,10 @@
 // shadowscenenode_od_variant_ctxr_variant.cpp: rename variant for 0x006056f0 (integration 2026-10-30): the unit's skeleton with strncmp renamed, whose names are bound elsewhere.
 // src/bsshader/shadowscenenode_od_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/bsshader/shadowscenenode.cpp functions whose prologue its flags cannot
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
-#include "shadowscenenode_local.h"
+// The copied point constructor binds to 0x00416870, NiPoint3 in other units.
+#include "../../include/NiPoint3.h"
+#include "../../include/Setting.h"
+
 struct FUN_00c5b5a0_cls
 {
     int __thiscall FUN_00c5b5a0(int idx);
@@ -20,11 +23,6 @@ struct Frustum2180
     bool ortho;
     Frustum2180(bool);
 };
-struct Point2180
-{
-    float x, y, z;
-    Point2180(float, float, float);
-};
 struct Update2180
 {
     int data[3];
@@ -35,10 +33,6 @@ struct String2180
     int value;
     String2180(const char*);
     ~String2180();
-};
-struct Setting2180
-{
-    float* FUN_00403e20();
 };
 struct Provider2180
 {
@@ -121,7 +115,7 @@ struct FUN_00a712f0
     void FUN_00712e60(const Rect2180&);
     void FUN_00507700(float);
     void FUN_00a6faf0(const Frustum2180&);
-    void SetLookAt(const Point2180&, const Point2180&);
+    void SetLookAt(const NiPoint3&, const NiPoint3&);
     void FUN_00733fd0(float);
     void FUN_00a59c60(const Update2180&);
     void AssignFixedString(const String2180&);

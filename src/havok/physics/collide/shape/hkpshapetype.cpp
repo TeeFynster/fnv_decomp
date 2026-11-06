@@ -2,10 +2,7 @@
 // src/havok/physics/collide/shape/hkpshapetype.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/hkpshapetype.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkpCollisionDispatcher
-{
-    void FUN_00cfbf60(int, int);
-};
+#include "../../../../../include/hkpCollisionDispatcher.h"
 
 // @fnv 0x00d46410
 void FUN_00d46410(hkpCollisionDispatcher* dispatcher)

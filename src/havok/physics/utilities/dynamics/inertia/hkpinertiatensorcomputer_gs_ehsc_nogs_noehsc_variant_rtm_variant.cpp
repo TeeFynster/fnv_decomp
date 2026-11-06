@@ -1,3 +1,23 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#include "../../../../../../include/hkAabb.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/Transform.h"
+
+__forceinline float& hkVector4::operator()(int index)
+{
+    return m_vComponents.m128_f32[index];
+}
+
+__forceinline const float& hkVector4::operator()(int index) const
+{
+    return m_vComponents.m128_f32[index];
+}
+
 // src/havok/physics/utilities/dynamics/inertia/hkpinertiatensorcomputer_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/utilities/dynamics/inertia/hkpinertiatensorcomputer_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -199,76 +219,12 @@ void S00cec3d0_Base::FUN_00cec000(const float* v)
     P1 = v[A] * v[B];
     Pa = v[A];
 }
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-extern "C"
-{
-    __m128 _mm_setr_ps(float, float, float, float);
-    __m128 _mm_setzero_ps();
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-}
-struct Vector
-{
-    union
-    {
-        __m128 q;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-    Vector()
-    {}
-    Vector(const Vector& other) : q(other.q)
-    {}
-    void operator=(const Vector& other)
-    {
-        q = other.q;
-    }
-    void set(float x, float y, float z, float w)
-    {
-        q = _mm_setr_ps(x, y, z, w);
-    }
-    float& operator()(int i)
-    {
-        return q.m128_f32[i];
-    }
-    int maxAxisSecond() const
-    {
-        if (x < y)
-            return y < z ? 2 : 1;
-        return x < z ? 2 : 0;
-    }
-    int maxAxis() const
-    {
-        if (x < y)
-        {
-            if (z > y)
-                return 2;
-            return 1;
-        }
-        if (z > x)
-            return 2;
-        return 0;
-    }
-};
 struct Matrix
 {
-    Vector c0, c1, c2;
+    hkVector4 c0, c1, c2;
 };
-struct Transform
-{
-    Vector columns[4];
-};
-struct Bounds
-{
-    Vector lo, hi;
-};
-extern const Vector DAT_01017d10;
-void FUN_00d5ac50(char*, Matrix*, Vector*, Vector*, Vector*);
+extern const hkVector4 DAT_01017d10;
+void FUN_00d5ac50(char*, Matrix*, hkVector4*, hkVector4*, hkVector4*);
 struct Shape
 {
     virtual void v0();
@@ -278,26 +234,21 @@ struct Shape
     virtual void v4();
     virtual void v5();
     virtual void v6();
-    virtual void getAabb(const Transform*, float, Bounds*);
+    virtual void getAabb(const Transform*, float, hkAabb*);
 };
-void FUN_00cedae0(Shape* shape, const Matrix* input, Vector* outA, Vector* outB);
-extern "C" void _mm_store_ps(float*, __m128);
+void FUN_00cedae0(Shape* shape, const Matrix* input, hkVector4* outA, hkVector4* outB);
 extern const float DAT_01011d78;
 extern const double DAT_010240b0;
-struct __declspec(align(16)) CE50Vector
-{
-    float x, y, z, w;
-};
 struct CE50Matrix
 {
-    CE50Vector row0, row1, row2;
+    hkVector4 row0, row1, row2;
     void FUN_00c6cd00(const CE50Matrix* source);
     void Subtract(const CE50Matrix* source);
 };
 struct CE50Body
 {
     float volume, mass;
-    CE50Vector center;
+    hkVector4 center;
     CE50Matrix inertia;
     CE50Body() : volume(0.0f), mass(0.0f)
     {
@@ -331,18 +282,6 @@ static __declspec(noinline) void FUN_00cebfd0(CE50Body* body, float scale)
     body->inertia.row2.z *= scale;
 }
 int __cdecl FUN_00cece50(float* src, float mass, float thickness, CE50Body* out, ...);
-extern "C"
-{
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_min_ps(__m128, __m128);
-    __m128 _mm_max_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-}
 extern const float DAT_0104da48;
 extern const float DAT_01016248;
 extern const __m128 DAT_010c44d0;
@@ -367,14 +306,8 @@ __declspec(noinline) void __cdecl FUN_00cec7f0(int first, int count, float* b, f
     }
 }
 __int64 __cdecl FUN_00cebaf0(float* source, float value, void* dest);
-__declspec(align(16)) struct Vec4F
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-__declspec(align(16)) struct Pair
+// distinct from Pair: exe 0x00ced8e0 passes this 16-byte-aligned floating output prefix to 0x00cebaf0; shared Pair holds two integers.
+__declspec(align(16)) struct InertiaOutputPrefix
 {
     float x;
     float y;
@@ -433,7 +366,7 @@ __declspec(align(16)) struct Solver
 };
 __declspec(align(16)) struct Work
 {
-    Pair pair;
+    InertiaOutputPrefix pair;
     Mat4 mat;
     Solver solver;
 };
@@ -504,7 +437,7 @@ __declspec(noinline) void Solver::FUN_00ced390(State* self, float* shift)
     for (int i = 0; i < mesh->triangleCount; ++i)
     {
         MeshTriangle& face = mesh->triangles[i];
-        Vec4F p, q, r, n;
+        hkVector4 p, q, r, n;
         __m128 offset = _mm_load_ps(shift);
         __m128 a = _mm_add_ps(mesh->vertices[face.a], offset);
         __m128 b = _mm_add_ps(mesh->vertices[face.b], offset);
@@ -544,22 +477,16 @@ inline float MaxVal(float a, float b)
     return a > b ? a : b;
 }
 int __cdecl FUN_00ced8e0(State* self, float value, OutBlock* out);
-extern "C" __m128 _mm_mul_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_set_ps1(float _A);
-struct __declspec(align(16)) S00cf0690_Vec
-{
-    float x, y, z, w;
-};
 struct S00cf0690_Mass
 {
     float volume;
     float mass;
-    S00cf0690_Vec center;
-    S00cf0690_Vec row0, row1, row2;
+    hkVector4 center;
+    hkVector4 row0, row1, row2;
 };
 struct S00cf0690_Xf
 {
-    S00cf0690_Vec row0, row1, row2, translation;
+    hkVector4 row0, row1, row2, translation;
 };
 void __cdecl FUN_00ceff00(void*, const S00cf0690_Xf*, float, S00cf0690_Mass*);
 extern const float DAT_01013ea4;
@@ -576,45 +503,13 @@ static __declspec(noinline) void FUN_00cebfd0(S00cf0690_Mass* p, float density)
 void __cdecl FUN_00cf0690(void* shape, float mass, S00cf0690_Mass* result);
 
 #include <math.h>
-extern "C"
-{
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_sqrt_ss(__m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_load_ss(const float*);
-    void _mm_store_ss(float*, __m128);
-}
-struct __declspec(align(16)) IntegralVector159
-{
-    float x, y, z, w;
-    IntegralVector159()
-    {}
-    __forceinline void SetProduct(const float& scalar, __m128 v)
-    {
-        quad() = _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&scalar), _mm_load_ss(&scalar), 0), v);
-    }
-    __forceinline __m128& quad()
-    {
-        return reinterpret_cast<__m128&>(*this);
-    }
-    __forceinline const __m128& quad() const
-    {
-        return reinterpret_cast<const __m128&>(*this);
-    }
-    float operator[](int i) const
-    {
-        return (&x)[i];
-    }
-};
 struct Triangle159
 {
     int a, b, c, material;
 };
 struct Mesh159
 {
-    IntegralVector159* vertices;
+    hkVector4* vertices;
     int unk04, unk08;
     Triangle159* triangles;
     int count;
@@ -629,19 +524,19 @@ struct Integrals159
     float first[3];
     float second[3];
     float products[3];
-    void FUN_00cec000(const IntegralVector159* triangle);
-    void FUN_00cec3d0(const IntegralVector159* triangle, const IntegralVector159* normal);
-    void FUN_00ced390(Mesh159* mesh, const IntegralVector159* offset);
+    void FUN_00cec000(const hkVector4* triangle);
+    void FUN_00cec3d0(const hkVector4* triangle, const hkVector4* normal);
+    void FUN_00ced390(Mesh159* mesh, const hkVector4* offset);
 };
-__declspec(noinline) void Integrals159::FUN_00cec000(const IntegralVector159* triangle)
+__declspec(noinline) void Integrals159::FUN_00cec000(const hkVector4* triangle)
 {
     P1 = Pa = Pb = m_fComponent0 = m_fComponent1 = m_fComponent2 = m_fComponent3 = m_fComponent4 = m_fComponent5 =
         m_fComponent6 = 0.0f;
     for (int i = 0; i < 3; ++i)
     {
-        const IntegralVector159& p = triangle[i];
-        const IntegralVector159& q = triangle[(i + 1) % 3];
-        float a0 = p[axisA], b0 = p[axisB], a1 = q[axisA], b1 = q[axisB];
+        const hkVector4& p = triangle[i];
+        const hkVector4& q = triangle[(i + 1) % 3];
+        float a0 = p(axisA), b0 = p(axisB), a1 = q(axisA), b1 = q(axisB);
         float da = a1 - a0, db = b1 - b0;
         float a02 = a0 * a0, a03 = a02 * a0, a04 = a03 * a0;
         float b02 = b0 * b0, b03 = b02 * b0, b04 = b03 * b0;
@@ -677,12 +572,12 @@ __declspec(noinline) void Integrals159::FUN_00cec000(const IntegralVector159* tr
     m_fComponent4 /= 60.0f;
     m_fComponent5 /= -60.0f;
 }
-__declspec(noinline) void Integrals159::FUN_00cec3d0(const IntegralVector159* triangle, const IntegralVector159* normal)
+__declspec(noinline) void Integrals159::FUN_00cec3d0(const hkVector4* triangle, const hkVector4* normal)
 {
     FUN_00cec000(triangle);
     float w = -normal->x * triangle[0].x - normal->y * triangle[0].y - normal->z * triangle[0].z;
-    float na = (*normal)[axisA], nb = (*normal)[axisB];
-    float k1 = 1.0f / (*normal)[axisC], k2 = k1 * k1, k3 = k2 * k1, k4 = k3 * k1;
+    float na = (*normal)(axisA), nb = (*normal)(axisB);
+    float k1 = 1.0f / (*normal)(axisC), k2 = k1 * k1, k3 = k2 * k1, k4 = k3 * k1;
     face[0] = k1 * Pa;
     face[1] = k1 * Pb;
     face[2] = -k2 * (na * Pa + nb * Pb + w * P1);
@@ -702,7 +597,7 @@ __declspec(noinline) void Integrals159::FUN_00cec3d0(const IntegralVector159* tr
                      w * (2 * (na * m_fComponent0 + nb * m_fComponent1) + w * Pa));
 }
 // @fnv 0x00ced390
-void Integrals159::FUN_00ced390(Mesh159* mesh, const IntegralVector159* offset)
+void Integrals159::FUN_00ced390(Mesh159* mesh, const hkVector4* offset)
 {
     int triangleCount = mesh->count;
     volume = first[0] = first[1] = first[2] = second[0] = second[1] = second[2] = products[0] = products[1] =
@@ -714,12 +609,12 @@ void Integrals159::FUN_00ced390(Mesh159* mesh, const IntegralVector159* offset)
         do
         {
             Triangle159 tri = *(Triangle159*)((char*)mesh->triangles + byteOff);
-            IntegralVector159 points[3];
-            points[1].quad() = _mm_add_ps(mesh->vertices[tri.b].quad(), offset->quad());
-            points[2].quad() = _mm_add_ps(mesh->vertices[tri.c].quad(), offset->quad());
-            points[0].quad() = _mm_add_ps(mesh->vertices[tri.a].quad(), offset->quad());
-            __m128 e0 = _mm_sub_ps(points[1].quad(), points[0].quad());
-            __m128 e1 = _mm_sub_ps(points[2].quad(), points[0].quad());
+            hkVector4 points[3];
+            points[1].m_vComponents = _mm_add_ps(mesh->vertices[tri.b].m_vComponents, offset->m_vComponents);
+            points[2].m_vComponents = _mm_add_ps(mesh->vertices[tri.c].m_vComponents, offset->m_vComponents);
+            points[0].m_vComponents = _mm_add_ps(mesh->vertices[tri.a].m_vComponents, offset->m_vComponents);
+            __m128 e0 = _mm_sub_ps(points[1].m_vComponents, points[0].m_vComponents);
+            __m128 e1 = _mm_sub_ps(points[2].m_vComponents, points[0].m_vComponents);
             __m128 cross = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(e1, e1, 0xd2), _mm_shuffle_ps(e0, e0, 0xc9)),
                                       _mm_mul_ps(_mm_shuffle_ps(e1, e1, 0xc9), _mm_shuffle_ps(e0, e0, 0xd2)));
             __m128 square = _mm_mul_ps(cross, cross);
@@ -731,8 +626,8 @@ void Integrals159::FUN_00ced390(Mesh159* mesh, const IntegralVector159* offset)
             if (length > 0.0f)
             {
                 float inverse = 1.0f / length;
-                IntegralVector159 normal;
-                normal.SetProduct(inverse, cross);
+                hkVector4 normal;
+                normal.m_vComponents = _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&inverse), _mm_load_ss(&inverse), 0), cross);
                 float nx = fabsf(normal.x), ny = fabsf(normal.y), nz = fabsf(normal.z);
                 if (nx > ny && nx > nz)
                     axisC = 0;
@@ -744,15 +639,15 @@ void Integrals159::FUN_00ced390(Mesh159* mesh, const IntegralVector159* offset)
                 int a = axisA;
                 float projected = (a == 0) ? face[0] : ((axisB == 0) ? face[1] : face[2]);
                 volume += static_cast<volatile float&>(normal.x) * projected;
-                first[a] += normal[a] * face[3];
-                first[axisB] += normal[axisB] * face[4];
-                first[axisC] += normal[axisC] * face[5];
-                second[axisA] += normal[axisA] * face[6];
-                second[axisB] += normal[axisB] * face[7];
-                second[axisC] += normal[axisC] * face[8];
-                products[axisA] += normal[axisA] * face[9];
-                products[axisB] += normal[axisB] * face[10];
-                products[axisC] += normal[axisC] * face[11];
+                first[a] += normal(a) * face[3];
+                first[axisB] += normal(axisB) * face[4];
+                first[axisC] += normal(axisC) * face[5];
+                second[axisA] += normal(axisA) * face[6];
+                second[axisB] += normal(axisB) * face[7];
+                second[axisC] += normal(axisC) * face[8];
+                products[axisA] += normal(axisA) * face[9];
+                products[axisB] += normal(axisB) * face[10];
+                products[axisC] += normal(axisC) * face[11];
             }
             byteOff += 16;
         } while (--remaining);

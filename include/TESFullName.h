@@ -1,15 +1,48 @@
-// Source layout: TESFullName. PC corrections are in generate_headers.py.
+#pragma once
+
+#include "BaseFormComponent.h"
+
+// units that still carry their own BSStringT (or layout_support.h's) define FNV64_BSSTRINGT_DEFINED first
+#if !defined(FNV_LAYOUT_SUPPORT_H) && !defined(FNV64_BSSTRINGT_DEFINED)
+#include "BSStringT.h"
+#endif
+
 #ifndef FNV_TESFULLNAME_H
 #define FNV_TESFULLNAME_H
-#include "layout_support.h"
-#include "BaseFormComponent.h"
-#pragma pack(push, 4)
+
+class TESForm;
+class TESFile;
+
 class TESFullName : public BaseFormComponent
 {
-  public:
-    BSStringT<char> m_kName;  // +0x4
+public:
+    TESFullName();
+    ~TESFullName();
+
+    virtual void Init();
+    virtual void Free();
+    virtual void CopyFromBase(BaseFormComponent* component);
+    virtual bool CompareWithBase(BaseFormComponent* component);
+
+    void InitializeComponent();
+    void ClearComponent();
+    void BaseFormRecord(BaseFormComponent* component);
+    bool IsEqualToBase(BaseFormComponent* component);
+    void Save();
+    static unsigned int GetFullNameLength(TESForm* form);
+    unsigned int GetFullNameLength();
+    static char* GetFullName(TESForm* form);
+    char* GetFullName();
+    void SetFullName(char* name);
+    void SetFullName(const char* name);
+    static void LoadFullNameChunk(TESFullName* fullName, TESFile* file);
+    void* GetFullNameString();
+    unsigned int GetModelLength() const;
+    int GetLength() const;
+    void FUN_00487010();
+    void FUN_00402d00();
+
+    BSStringT<char> m_kName;
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(TESFullName) == 0xC);
-FNV_STATIC_ASSERT(offsetof(TESFullName, m_kName) == 0x4);
+
 #endif

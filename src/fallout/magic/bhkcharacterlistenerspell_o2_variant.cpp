@@ -4,14 +4,8 @@
 
 // src/fallout/magic/bhkcharacterlistenerspell.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/bhkcharacterlistenerspell.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct NiRTTI
-{
-};
-struct bhkCharacterProxy
-{
-    virtual ~bhkCharacterProxy();
-    const NiRTTI* GetRTTI();
-};
+#include "../../../include/NiRTTI.h"
+#include "../../../include/bhkCharacterProxy.h"
 extern const NiRTTI g_01268344;
 struct FUN_00806f10_shell
 {

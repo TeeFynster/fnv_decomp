@@ -2,7 +2,7 @@
 // src/havok/physics/vehicle/suspension/default/hkpvehicledefaultsuspension.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/suspension/default/hkpvehicledefaultsuspension.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpVehicleDefaultSuspension.h"
+#include "../../../../../../include/hkArray.h"
 
 class FUN_00c86430_s
 {
@@ -63,25 +63,13 @@ struct WheelSpringParamsE397
     float m_fDampingRelaxation;
 };
 
-template <class T> struct hkArrayE397
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    T& operator[](int i) const
-    {
-        return m_data[i];
-    }
-};
-
 class SuspensionE397
 {
   public:
     virtual ~SuspensionE397();
     int unk04;
-    hkArrayE397<SuspensionWheelParamsE397> m_kWheelParams;
-    hkArrayE397<WheelSpringParamsE397> m_kWheelSpringSuspensionParameters;
+    hkArray<SuspensionWheelParamsE397> m_kWheelParams;
+    hkArray<WheelSpringParamsE397> m_kWheelSpringSuspensionParameters;
 
     void CalculateSuspensionForces(const void* pkStepInfo, const VehicleE397* pkVehicle,
                                    const CdWheelOutputE397* pkCdInfo, float* pfSuspensionForceOut);

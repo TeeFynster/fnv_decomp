@@ -1,74 +1,78 @@
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
 // src/havok/common/base/algorithm/collide/linesegment/hklinesegmentutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/algorithm/collide/linesegment/hklinesegmentutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00d22e40 FUN_00d22e40: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" LocalM128 _mm_load_ps1(const float* p);
+extern "C" LocalM128 _mm_load_ss(const float* p);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
 
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" __m128 _mm_load_ps1(const float* p);
-extern "C" __m128 _mm_load_ss(const float* p);
-extern "C" void _mm_store_ss(float* p, __m128 a);
+// Keep the original SSE intrinsic type used by this unit's MSVC code generation.
+#define _INCLUDED_MM2
+#include "../../../../../../../include/hkVector4.h"
 
-struct hkSimdRealD230
+typedef float hkReal;
+
+inline hkSimdReal::hkSimdReal()
+{}
+
+inline hkSimdReal::hkSimdReal(const LocalM128& x) : m_vValue(x)
+{}
+
+inline hkSimdReal::hkSimdReal(float x)
 {
-    __m128 m_vValue;
+    m_vValue = _mm_load_ss(&x);
+}
 
-    operator float() const
-    {
-        float f;
-        _mm_store_ss(&f, m_vValue);
-        return f;
-    }
-};
-
-struct hkVector4D230
+inline hkSimdReal::operator float() const
 {
-    __m128 m_vComponents;
+    hkReal r;
+    _mm_store_ss(&r, m_vValue);
+    return r;
+}
 
-    hkVector4D230()
-    {}
-    hkVector4D230(const hkVector4D230& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void operator=(const hkVector4D230& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void setSub4(const hkVector4D230& a, const hkVector4D230& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void setAddMul4(const hkVector4D230& a, const hkVector4D230& b, float t)
-    {
-        const __m128 s = _mm_load_ss(&t);
-        m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(s, s, 0), b.m_vComponents), a.m_vComponents);
-    }
-    hkSimdRealD230 dot3(const hkVector4D230& a) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        const __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        hkSimdRealD230 r;
-        r.m_vValue = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
-        return r;
-    }
-};
+inline LocalM128 hkSimdReal::broadcast() const
+{
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+
+
+inline hkVector4::hkVector4(const hkVector4& v)
+{
+    m_vComponents = v.m_vComponents;
+}
+
+inline void hkVector4::operator=(const hkVector4& v)
+{
+    m_vComponents = v.m_vComponents;
+}
+
+inline void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b, float t)
+{
+    const LocalM128 s = _mm_load_ss(&t);
+    m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(s, s, 0), b.m_vComponents), a.m_vComponents);
+}
 
 // @fnv 0x00d230e0
-int __cdecl FUN_00d230e0(const hkVector4D230& akPoint, const hkVector4D230& kA, const hkVector4D230& kB,
-                         hkVector4D230& kClosestOut)
+int __cdecl FUN_00d230e0(const hkVector4& akPoint, const hkVector4& kA, const hkVector4& kB,
+                         hkVector4& kClosestOut)
 {
-    hkVector4D230 kAP;
+    hkVector4 kAP;
     kAP.setSub4(akPoint, kA);
-    hkVector4D230 kAB;
+    hkVector4 kAB;
     kAB.setSub4(kB, kA);
     const float fProj = kAP.dot3(kAB);
     const float fLen2 = kAB.dot3(kAB);
@@ -87,72 +91,49 @@ int __cdecl FUN_00d230e0(const hkVector4D230& akPoint, const hkVector4D230& kA, 
 }
 
 #include <math.h>
-extern "C" __m128 _mm_set_ps1(float);
 
-typedef float hkReal;
 
-struct VectorComponentValue
+inline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
 {
-    __m128 m_vValue;
-    VectorComponentValue(__m128 x) : m_vValue(x)
-    {}
-    VectorComponentValue(const hkReal& x)
-    {
-        m_vValue = _mm_load_ss(&x);
-    }
-    operator hkReal() const
-    {
-        hkReal r;
-        _mm_store_ss(&r, m_vValue);
-        return r;
-    }
-    __m128 broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-};
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
 
-class hkVector4
+inline void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b, const hkSimdReal& r)
 {
-  public:
-    __m128 m_vComponents;
+    m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(r.broadcast(), b.m_vComponents));
+}
 
-    inline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    inline void setAddMul4(const hkVector4& a, const hkVector4& b, const VectorComponentValue& r)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(r.broadcast(), b.m_vComponents));
-    }
-    inline void setAddMul4b(const hkVector4& a, const hkVector4& b, hkReal r)
-    {
-        __m128 rr = _mm_load_ss(&r);
-        m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(_mm_shuffle_ps(rr, rr, 0), b.m_vComponents));
-    }
-    inline void setAddMul4a(const hkVector4& a, const hkVector4& b, hkReal r)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents,
-                                   _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&r), _mm_load_ss(&r), 0), b.m_vComponents));
-    }
-    inline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        __m128 m = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 y = _mm_shuffle_ps(m, m, 0x55);
-        __m128 xy = _mm_add_ss(y, m);
-        __m128 z = _mm_shuffle_ps(m, m, 0xaa);
-        __m128 xyz = _mm_add_ss(z, xy);
-        return VectorComponentValue(xyz);
-    }
-    inline hkReal dot3scalar(const hkVector4& a) const
-    {
-        return dot3(a);
-    }
-    inline VectorComponentValue lengthSquared3() const
-    {
-        return dot3(*this);
-    }
-};
+inline void hkVector4::setAddMul4b(const hkVector4& a, const hkVector4& b, hkReal r)
+{
+    LocalM128 rr = _mm_load_ss(&r);
+    m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(_mm_shuffle_ps(rr, rr, 0), b.m_vComponents));
+}
+
+inline void hkVector4::setAddMul4a(const hkVector4& a, const hkVector4& b, hkReal r)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents,
+                               _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&r), _mm_load_ss(&r), 0), b.m_vComponents));
+}
+
+inline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    LocalM128 m = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    LocalM128 y = _mm_shuffle_ps(m, m, 0x55);
+    LocalM128 xy = _mm_add_ss(y, m);
+    LocalM128 z = _mm_shuffle_ps(m, m, 0xaa);
+    LocalM128 xyz = _mm_add_ss(z, xy);
+    return hkSimdReal(xyz);
+}
+
+inline hkReal hkVector4::dot3scalar(const hkVector4& a) const
+{
+    return dot3(a);
+}
+
+inline hkSimdReal hkVector4::lengthSquared3() const
+{
+    return dot3(*this);
+}
 
 static inline hkReal hkFabs(hkReal r)
 {

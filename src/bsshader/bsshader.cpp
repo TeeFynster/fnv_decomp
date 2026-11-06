@@ -1,16 +1,130 @@
-// bsshader/bsshader.cpp: Zero4, ShaderDerived (27 functions)
+// bsshader/bsshader.cpp: BSShader and shader helpers (27 functions)
 
-#include "bsshader_decls.h"
+#include "../../include/NiPointer.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSShaderProperty.h"
+#include "../../include/NiAlphaProperty.h"
+#include "../../include/NiPropertyState.h"
+// BSRenderStateManager_bsshader: local type (was include/BSRenderStateManager.h, which had no evidence of one real class); its methods are 0x00b97fa0 BSRenderState::SetAlphaBlendEnable, 0x00b98380 BSRenderState::SetColorWriteEnable
+#include "../../include/BSRENDERSTATE_LOCK.h"
+
+class BSRenderStateManager_bsshader
+{
+public:
+    static void __cdecl SetDepthBufferEnabled(bool, BSRENDERSTATE_LOCK);
+    static void __cdecl SetDepthBufferEnabled(bool, int);
+    static void __cdecl SetColorWriteMask(unsigned int, BSRENDERSTATE_LOCK);
+    static void __cdecl SetColorWriteMask(unsigned int, unsigned int);
+};
+#include "../../include/BSFile.h"
+#include "../../include/NiD3DGPUProgramCache.h"
+#include "../../include/NiD3DShaderProgram.h"
+#include "../../include/NiD3DPixelShader.h"
+#include "../../include/NiD3DVertexShader.h"
+#include "../../include/NiGPUProgram.h"
+#include "../../include/NiD3DPass.h"
+
+
+
+// Shader passes use the pool reference count.
+inline void ReleaseShaderPass(NiD3DPass* pass)
+{
+    if (--pass->m_uiRefCount == 0)
+        pass->DestroyPass();
+}
+template <> inline NiPointer<NiD3DPass>& NiPointer<NiD3DPass>::operator=(NiD3DPass* object)
+{
+    if (m_pObject != object)
+    {
+        if (m_pObject)
+            ReleaseShaderPass(m_pObject);
+        m_pObject = object;
+        if (object)
+            ++object->m_uiRefCount;
+    }
+    return *this;
+}
+#include "../../include/BSShader.h"
 
 // Initializes the object by zeroing the first element of an array and setting a flag to false.
 // @fnv 0x00be2200
 BSShader::BSShader()
 {
-    spRenderPass[0] = 0;
-    m_bIsBest = false;
+    spPass[0] = 0;
+    bFirstPass = false;
 }
 
-#include "bsshader_compile_decls.h"
+class IMemoryHeap;
+#include "../../include/MemoryManager.h"
+
+extern MemoryManager g_memoryManager;
+extern "C" unsigned int __security_cookie;
+extern "C" void __fastcall __security_check_cookie(unsigned int);
+extern "C" int strcpy_s(char*, unsigned int, const char*);
+extern "C" int strcat_s(char*, unsigned int, const char*);
+extern "C" int sprintf_s(char*, unsigned int, const char*, ...);
+struct _iobuf;
+#include "../../include/_D3DXMACRO.h"
+struct _FILETIME
+{
+    unsigned int dwLowDateTime, dwHighDateTime;
+};
+class FileFinder
+{
+  public:
+    static BSFile* GetFile(const char*, NiFile::OpenMode, unsigned int, unsigned int);
+    static bool GetFileTime(const char*, _FILETIME&, unsigned int);
+};
+class ShaderBufferRecord;
+class ShaderBufferCollection
+{
+  public:
+    ShaderBufferRecord* Get(const char*);
+};
+class ShaderBufferTableBuilder
+{
+  public:
+    void Add(const char*, char*, unsigned int);
+};
+class ID3DXBuffer;
+class ID3DXConstantTable;
+class ID3DXInclude;
+extern "C" long __stdcall D3DXCompileShader(const char*, unsigned int, const _D3DXMACRO*, ID3DXInclude*, const char*,
+                                            const char*, unsigned long, ID3DXBuffer**, ID3DXBuffer**,
+                                            ID3DXConstantTable**);
+extern GraphicsRenderer* g_pkRenderer;
+extern char DAT_011f9200[260];
+extern bool DAT_011f941e;
+extern bool DAT_011ae638;
+extern bool DAT_011f94a7;
+extern ShaderBufferCollection* DAT_011f9498;
+extern ShaderBufferTableBuilder* DAT_011f9494;
+void BuildShaderCachePath(char*, const char*, const char*, const char*);
+void HasFileInArchives(const char*);
+
+// Pooled strings, the include vtable and the compiler exception handler.
+
+int FUN_00f2d322(void*, void*, void*, void*);
+extern const unsigned char DAT_01011584[];
+extern const unsigned char DAT_01012630[];
+extern const unsigned char DAT_01063ec8[];
+extern const unsigned char DAT_0106e798[];
+extern const unsigned char DAT_01094d90[];
+extern const unsigned char DAT_010bc610[];
+extern const unsigned char DAT_010bc754[];
+extern const unsigned char DAT_010bc784[];
+extern const unsigned char DAT_010bc7b8[];
+extern const unsigned char DAT_010bc7e4[];
+extern const unsigned char DAT_010bc7fc[];
+extern const unsigned char DAT_010bc808[];
+extern const unsigned char DAT_010bc820[];
+extern const unsigned char DAT_010bc824[];
+extern const unsigned char DAT_010bc828[];
+extern const unsigned char DAT_010bc82c[];
+extern const unsigned char DAT_010bc860[];
+extern const unsigned char DAT_010bc868[];
+void FUN_00ec8660();
+
 
 extern char DAT_011f9308[];
 extern void _strcat_s(char*, unsigned, const char*);
@@ -18,7 +132,7 @@ extern void __splitpath_s(const char*, char*, unsigned, char*, unsigned, char*, 
 extern void FUN_00ec825b(char*, unsigned, const char*, const char*, const char*, const char*);
 
 // @fnv 0x00be0c00
-void FUN_00be0c00(const char* path, char* result)
+void __cdecl BSShader::GetShaderPath(const char* path, char* result)
 {
     char drive[0x10];
     char dir[0x104];
@@ -59,14 +173,6 @@ int __stdcall FUN_00be0e30(void* apUnused, void* apBlock)
     return 0;
 }
 
-enum BSRENDERSTATE_LOCK
-{
-};
-class BSRenderStateManager
-{
-  public:
-    static void __cdecl SetDepthBufferEnabled(bool, BSRENDERSTATE_LOCK);
-};
 
 extern unsigned int DAT_011f91e4;
 void __cdecl FUN_00b97e30(unsigned int, unsigned int);
@@ -77,28 +183,20 @@ void __stdcall FUN_00be0e50(int)
 {
     if (DAT_011f91e4 < 0x252 || DAT_011f91e4 > 0x256)
     {
-        BSRenderStateManager::SetDepthBufferEnabled(true, (BSRENDERSTATE_LOCK)0);
+        BSRenderStateManager_bsshader::SetDepthBufferEnabled(true, BSRENDERSTATE_LOCK_BSRS_NOLOCK);
         FUN_00b97e30(0, 0);
         FUN_00b97e80(2, 0);
     }
 }
 
 namespace fnv_00be0e90 {
-enum BSRENDERSTATE_LOCK
-{
-};
-class BSRenderStateManager
-{
-  public:
-    static void __cdecl SetDepthBufferEnabled(bool, BSRENDERSTATE_LOCK);
-};
 void __cdecl FUN_00b97e30(unsigned int, unsigned int);
 void __cdecl FUN_00b97e80(unsigned int, unsigned int);
 
 // @fnv 0x00be0e90
 void __cdecl FUN_00be0e90()
 {
-    BSRenderStateManager::SetDepthBufferEnabled(false, (BSRENDERSTATE_LOCK)0);
+    BSRenderStateManager_bsshader::SetDepthBufferEnabled(false, BSRENDERSTATE_LOCK_BSRS_NOLOCK);
     FUN_00b97e30(1, 0);
     FUN_00b97e80(3, 0);
 }
@@ -150,28 +248,14 @@ void __stdcall FUN_00be0ee0(int)
     }
 }
 
+// The approved NiFile layout does not name the stream state in unk04 yet.
+inline bool ShaderFileIsGood(BSFile* file)
+{
+    return *(bool*)((char*)file + 0x2c);
+}
+
 void __cdecl ResolveRelativePath(const char*, const char*, char*);
 
-class BSFile
-{
-  public:
-    virtual ~BSFile();
-    virtual void vfunc1();
-    virtual void vfunc2();
-    virtual void vfunc3();
-    virtual void vfunc4();
-    virtual void vfunc5();
-    virtual void vfunc6();
-    virtual void vfunc7();
-    virtual void vfunc8();
-    virtual void vfunc9();
-    virtual unsigned int GetFileSize();
-
-    unsigned int m_uiStreamFlags;                                                                 // +0x04
-    unsigned int(__cdecl* m_pfnRead)(BSFile*, void*, unsigned int, unsigned int*, unsigned int);  // +0x08
-    unsigned char pad0C[0x20];                                                                    // +0x0C
-    bool m_bGood;                                                                                 // +0x2C
-};
 
 // Builds a full path from pFileName, opens the file, allocates a buffer of its size, reads it into ppData, and returns the byte count in pBytes.
 // @fnv 0x00be1eb0
@@ -184,14 +268,14 @@ long __stdcall ReadFileIntoMemory(void* pThis, int aiUnused, const char* pFileNa
     BSFile* pFile = FileFinder::GetFile(fullPath, NiFile::READ_ONLY, 0x4000, 0x20);
     if (pFile)
     {
-        if (pFile->m_bGood)
+        if (ShaderFileIsGood(pFile))
         {
-            unsigned int size = pFile->GetFileSize();
+            unsigned int size = pFile->GetSize();
             void* pData = g_memoryManager.Allocate(size);
             *appData = pData;
             unsigned int compSize = 1;
-            unsigned int bytesRead = pFile->m_pfnRead(pFile, pData, size, &compSize, 1);
-            pFile->m_uiStreamFlags += bytesRead;
+            unsigned int bytesRead = (*(NiBinaryStream::ReadFunction*)((char*)pFile + 8))(pFile, pData, size, &compSize, 1);
+            *(unsigned int*)((char*)pFile + 4) += bytesRead;
             *apuiBytes = bytesRead;
             delete pFile;
             return 0;
@@ -317,12 +401,7 @@ int __stdcall FUN_00be20b0(unsigned char** apData)
 
 extern int DAT_0126f74c;
 
-struct NiD3DPass_Ex : NiD3DPass
-{
-    bool ShutdownPools_Ex(bool);
-};
-
-// Iterates the pass list at DAT_0126f74c and calls ShutdownPools_Ex(false) on each non-null pass that is flagged and has a nonzero field at offset 8.
+// Iterates the pass list at DAT_0126f74c and calls ApplyRenderStateChanges(false) on each non-null pass that is flagged and has a nonzero field at offset 8.
 // @fnv 0x00be2170
 void __cdecl FUN_00be2170()
 {
@@ -330,21 +409,16 @@ void __cdecl FUN_00be2170()
     unsigned int count = *(unsigned int*)(p + 0x18);
     for (unsigned int i = 0; i < count; ++i)
     {
-        NiD3DPass_Ex* pass = ((NiD3DPass_Ex**)*(int*)(p + 0x24))[i];
+        NiD3DPass* pass = ((NiD3DPass**)*(int*)(p + 0x24))[i];
         if (!pass)
             break;
         if (*(bool*)((char*)pass + 0x64) && *(int*)((char*)pass + 8))
-            pass->ShutdownPools_Ex(false);
+            pass->ApplyRenderStateChanges(false);
     }
 }
 
 extern int DAT_011ae640[];
 extern int DAT_0126f74c;
-
-struct NiD3DPass_Ext : public NiD3DPass
-{
-    bool ApplyRenderStateChanges(bool);
-};
 
 // @fnv 0x00be21b0
 void __cdecl FUN_00be21b0()
@@ -356,7 +430,7 @@ void __cdecl FUN_00be21b0()
     {
         if (DAT_011ae640[i] & mask)
         {
-            NiD3DPass_Ext* pass = ((NiD3DPass_Ext**)*(int*)(p + 0x24))[i];
+            NiD3DPass* pass = ((NiD3DPass**)*(int*)(p + 0x24))[i];
             if (!pass)
                 break;
             if (*(int*)((char*)pass + 8) != 0)
@@ -365,90 +439,10 @@ void __cdecl FUN_00be21b0()
     }
 }
 
-struct FUN_00be0ce0_obj
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void vslot(int);
-    char pad[0x5c - 4];
-    int f5c;
-};
 // @fnv 0x00be0ce0
-void __fastcall FUN_00be0ce0(FUN_00be0ce0_obj* p, int unused)
+void BSShader::ClearAllTextureStages()
 {
-    p->vslot(p->f5c);
+    ClearTextureStages(spPass[0].m_pObject);
 }
 
 struct BeamTextureState
@@ -619,7 +613,6 @@ void AssignStageFromPool(StageReturn*& output)
         stage->ReturnToPool();
 }
 
-struct BSFadeNode;
 struct BSMultiBoundNode;
 struct BSResizableTriShape;
 struct BSSegmentedTriShape;
@@ -701,118 +694,12 @@ struct ShaderBufferRecord
     char _pad_105[3];
 };
 typedef char _sizecheck_ShaderBufferEntry[sizeof(ShaderBufferRecord) == 264 ? 1 : -1];
-struct NiGPUProgram : public NiRefObject
-{
-    virtual void __vslot_0();
-    virtual void* GetRTTI();
-    virtual NiNode* IsSceneNode();
-    virtual BSFadeNode* IsFadeNode();
-    virtual BSMultiBoundNode* IsMultiBoundNode();
-    virtual NiGeometry* IsGeometry();
-    virtual NiTriBasedGeom* IsTriBasedGeom();
-    virtual NiTriStrips* IsTriStrips();
-    virtual NiTriShape* IsTriShape();
-    virtual BSSegmentedTriShape* IsSegmentedTriShape();
-    virtual BSResizableTriShape* IsResizableTriShape();
-    virtual NiParticles* IsParticlesGeom();
-    virtual NiLines* IsLineGeometry();
-    virtual bhkNiCollisionObject* IsBhkNiCollisionObject();
-    virtual bhkBlendCollisionObject* IsBhkBlendCollisionObject();
-    virtual bhkRigidBody* IsBhkRigidBody();
-    virtual bhkLimitedHingeConstraint* IsBhkLimitedHingeConstraint();
-    virtual unsigned int GetNumberOfVariables();
-    virtual char* GetVariableName(unsigned int);
-    bool IsExactKindOf(void*);
-    static bool IsExactKindOf(void*, void*);
-    bool IsKindOfType(void*);
-    static bool IsKindOfType(void*, void*);
-    NiGPUProgram* DynamicCast(void*);
-    static NiGPUProgram* DynamicCast(void*, void*);
-    int GetProgramType();
-    int m_iProgramType;
-};
 typedef char _sizecheck_NiGPUProgram[sizeof(NiGPUProgram) == 12 ? 1 : -1];
-struct NiD3DShaderProgram : public NiGPUProgram
-{
-    virtual void __vslot_0();
-    virtual char* GetName();
-    virtual void SetName(char*);
-    virtual char* GetProgramProfile();
-    virtual void SetShaderProfile(char*);
-    virtual unsigned int GetCodeSize();
-    virtual void* GetCode();
-    virtual void SetProgramCode(unsigned int, void*);
-    virtual NiD3DShaderProgramCreator* GetCreator();
-    virtual void SetCreator(NiD3DShaderProgramCreator*);
-    virtual bool SetShaderConstant(NiShaderConstantMapEntry*, void*, unsigned int);
-    virtual bool SetShaderConstantArray(NiShaderConstantMapEntry*, void*, unsigned int, unsigned int, unsigned short*);
-    virtual void* GetRTTI();
-    void SetD3DDevice(Direct3DDeviceInterface*);
-    void SetD3DRenderState(ShaderPassRenderer*);
-    void SetShaderObject(GraphicsRenderer*);
-    void SetVertexShaderConstant(int, int, float*);
-    void SetPixelShaderConstant(int, int, float*);
-    char* m_pcProgramName;
-    char* m_pcProfile;
-    unsigned int m_uiProgramCodeSize;
-    void* m_pProgramCode;
-    NiD3DShaderProgramCreator* m_pCreator;
-    Direct3DDeviceInterface* m_pD3DDevice;
-    GraphicsRenderer* m_pShaderObject;
-    ShaderPassRenderer* m_pRenderState;
-};
 typedef char _sizecheck_NiD3DShaderProgram[sizeof(NiD3DShaderProgram) == 44 ? 1 : -1];
-struct NiD3DPixelShader : public NiD3DShaderProgram
-{
-    virtual void __vslot_0();
-    virtual GeometryRelatedType* GetD3DPixelShader();
-    virtual void SetD3DPixelShader(GeometryRelatedType*);
-    virtual void UnloadShader();
-    virtual void BuildVertexShader();
-    virtual void* GetRTTI();
-    virtual bool SetShaderConstant(NiShaderConstantMapEntry*, void*, unsigned int);
-    virtual bool SetShaderConstantArray(NiShaderConstantMapEntry*, void*, unsigned int, unsigned int, unsigned short*);
-    GeometryRelatedType* m_pD3DPixelShader;
-};
 typedef char _sizecheck_NiD3DPixelShader[sizeof(NiD3DPixelShader) == 48 ? 1 : -1];
-struct FUN_00be1750_shell : public BSShader
-{
-    NiD3DPixelShader* FUN_00be1750(char*, void*, char*, char*);
-};
 
 int FUN_00ec8a19(const char*, const char*, unsigned int);
 int FUN_00ecda70(_iobuf*);
-struct NiD3DGPUProgramCache
-{
-    static const char* GetPixelShaderProfile(bool);
-};
-struct BSFadeNode
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*);
-};
-struct ShaderSourceFile_be1750
-{
-    virtual ~ShaderSourceFile_be1750();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual unsigned int GetSize();
-    unsigned int Read(void* apBuffer, unsigned int auiBytes)
-    {
-        return ((NiBinaryStream*)this)->Read(apBuffer, auiBytes);
-    }
-    bool IsGood()
-    {
-        return *((bool*)this + 0x2c);
-    }
-};
 struct ShaderCodeBuffer_be1750
 {
     virtual long __stdcall QueryInterface(void*, void**);
@@ -821,10 +708,11 @@ struct ShaderCodeBuffer_be1750
     virtual void* __stdcall GetBufferPointer();
     virtual unsigned long __stdcall GetBufferSize();
 };
-struct ShaderIncludes_be1750
+// ShaderIncludes has an 8-byte include-callback ABI (filename at +4); no shared header exists yet.
+struct ShaderIncludes
 {
     const void* vtbl;
-    const char* pPath;
+    const char* pShaderFileName;
 };
 struct ShaderDevice_be1750
 {
@@ -940,65 +828,10 @@ template <unsigned int _Size> inline int ShaderStrCat_be1750(char (&_Dest)[_Size
 {
     return strcat_s(_Dest, _Size, _Source);
 }
-struct FUN_00be08f0
-{
-    static void* operator new(unsigned int size)
-    {
-        return BSFadeNode::operator new(size);
-    }
-    static void operator delete(void* p)
-    {
-        BSFadeNode::operator delete(p);
-    }
-    FUN_00be08f0(GraphicsRenderer*);
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void SetD3DPixelShader(GeometryRelatedType*);
-    unsigned int m_uiRefCount;
-    int m_iProgramType;
-    char* m_pcProgramName;
-    char* m_pcProfile;
-    unsigned int m_uiProgramCodeSize;
-    void* m_pProgramCode;
-    void* m_pCreator;
-    Direct3DDeviceInterface* m_pD3DDevice;
-    GraphicsRenderer* m_pShaderObject;
-    void* m_pRenderState;
-    GeometryRelatedType* m_pD3DPixelShader;
-};
 
 // @fnv 0x00be1750
-NiD3DPixelShader* FUN_00be1750_shell::FUN_00be1750(char* apFilename, void* apMacro, char* apTarget, char* apCacheName)
+NiD3DPixelShader* BSShader::CompilePixelShader(const char* apFilename, const _D3DXMACRO* apMacro,
+                                             const char* apTarget, const char* apCacheName)
 {
     bool bSourceExists;
     bool bfreeBuffer;
@@ -1006,7 +839,7 @@ NiD3DPixelShader* FUN_00be1750_shell::FUN_00be1750(char* apFilename, void* apMac
     bool busecache;
     ShaderBufferRecord* pprePackagedShader = 0;
     ShaderCodeBuffer_be1750* pCompileError = 0;
-    FUN_00be08f0* pshader = 0;
+    NiD3DPixelShader* pshader = 0;
     ID3DXConstantTable* pConstantTable = 0;
     unsigned int uiShaderSize = 0;
     char pcachepath[260];
@@ -1070,9 +903,9 @@ NiD3DPixelShader* FUN_00be1750_shell::FUN_00be1750(char* apFilename, void* apMac
             if (!pProfile)
                 pProfile = apTarget;
         }
-        ShaderSourceFile_be1750* pfile =
-            (ShaderSourceFile_be1750*)FileFinder::GetFile(apFilename, NiFile::READ_ONLY, 0x4000, 0x20);
-        if (!pfile || !pfile->IsGood())
+        BSFile* pfile =
+            (BSFile*)FileFinder::GetFile(apFilename, NiFile::READ_ONLY, 0x4000, 0x20);
+        if (!pfile || !ShaderFileIsGood(pfile))
         {
             if (pfile)
                 delete pfile;
@@ -1081,10 +914,10 @@ NiD3DPixelShader* FUN_00be1750_shell::FUN_00be1750(char* apFilename, void* apMac
         }
         unsigned int uiFileSize = pfile->GetSize();
         char* pfileData = (char*)g_memoryManager.Allocate(uiFileSize);
-        pfile->Read(pfileData, uiFileSize);
-        ShaderIncludes_be1750 includes;
+        pfile->NiBinaryStream::Read(pfileData, uiFileSize);
+        ShaderIncludes includes;
         includes.vtbl = DAT_010bc610;
-        includes.pPath = apFilename;
+        includes.pShaderFileName = apFilename;
         {
             char pCompileMacros[1300];
             char pMacroDefines[1300];
@@ -1155,15 +988,15 @@ NiD3DPixelShader* FUN_00be1750_shell::FUN_00be1750(char* apFilename, void* apMac
             {
                 if (!bCacheExists)
                     return 0;
-                pfile = (ShaderSourceFile_be1750*)FileFinder::GetFile(pcachepath, NiFile::READ_ONLY, 0x4000, 0x20);
+                pfile = (BSFile*)FileFinder::GetFile(pcachepath, NiFile::READ_ONLY, 0x4000, 0x20);
                 if (!pfile)
                     return 0;
-                if (pfile->IsGood())
+                if (ShaderFileIsGood(pfile))
                 {
                     uiShaderSize = pfile->GetSize();
                     pshaderbuffer = (unsigned int*)g_memoryManager.Allocate(uiShaderSize);
                     bfreeBuffer = true;
-                    pfile->Read(pshaderbuffer, uiShaderSize);
+                    pfile->NiBinaryStream::Read(pshaderbuffer, uiShaderSize);
                 }
                 delete pfile;
                 if (!pshaderbuffer)
@@ -1178,16 +1011,16 @@ NiD3DPixelShader* FUN_00be1750_shell::FUN_00be1750(char* apFilename, void* apMac
     }
     else
     {
-        ShaderSourceFile_be1750* pfile =
-            (ShaderSourceFile_be1750*)FileFinder::GetFile(pcachepath, NiFile::READ_ONLY, 0x4000, 0x20);
+        BSFile* pfile =
+            (BSFile*)FileFinder::GetFile(pcachepath, NiFile::READ_ONLY, 0x4000, 0x20);
         if (pfile)
         {
-            if (pfile->IsGood())
+            if (ShaderFileIsGood(pfile))
             {
                 uiShaderSize = pfile->GetSize();
                 pshaderbuffer = (unsigned int*)g_memoryManager.Allocate(uiShaderSize);
                 bfreeBuffer = true;
-                pfile->Read(pshaderbuffer, uiShaderSize);
+                pfile->NiBinaryStream::Read(pshaderbuffer, uiShaderSize);
             }
             delete pfile;
         }
@@ -1214,7 +1047,7 @@ NiD3DPixelShader* FUN_00be1750_shell::FUN_00be1750(char* apFilename, void* apMac
                 sprintf_s(perror, 0x104, "SHADER ERROR : failed to create pixel shader : %s", pcachepath);
                 return 0;
             }
-            pshader = new FUN_00be08f0(g_pkRenderer);
+            pshader = new NiD3DPixelShader(g_pkRenderer);
             pshader->SetD3DPixelShader(pd3dShader);
         }
     }
@@ -1485,51 +1318,35 @@ void FUN_00b71b90_class::FUN_00be08b0()
     FUN_00e814b0();
 }
 
-struct Alpha818
-{
-    int unk00, unk04, unk08, unk0C, unk10, unk14;
-    unsigned short flags;
-};
-struct Data818
-{
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, valid;
-    float unk20, unk24, alpha1, alpha2;
-};
-struct Input818
-{
-    Alpha818* alpha;
-    int unk04, unk08;
-    Data818* data;
-};
 void __cdecl FUN_00b97fa0(int, int);
 void __cdecl AddToTwoCounters(int, int, int);
 // Reads alpha and data from input, checks flags and alpha values, then calls FUN_00b97fa0 and AddToTwoCounters with blend or default counters.
 // @fnv 0x00be1ff0
-void __stdcall FUN_00be1ff0(Input818* input)
+void __stdcall FUN_00be1ff0(NiPropertyState* input)
 {
-    Alpha818* alpha = input->alpha;
-    Data818* data = input->data;
-    Data818* pSelected;
+    NiAlphaProperty* alpha = (NiAlphaProperty*)input->m_aspProps[NiProperty::ALPHA];
+    BSShaderProperty* data = (BSShaderProperty*)input->m_aspProps[NiProperty::SHADE];
+    BSShaderProperty* pSelected;
     if (!data)
         pSelected = 0;
     else
-        pSelected = data->valid != -1 ? data : 0;
+        pSelected = data->iShaderPropertyType != -1 ? data : 0;
     data = pSelected;
     bool enabled = false;
     bool blend = false;
     volatile bool test = false;
     if (alpha)
     {
-        unsigned char uiFlagBit = (unsigned char)(alpha->flags >> 9);
+        unsigned char uiFlagBit = (unsigned char)(alpha->m_usAlphaArg >> 9);
         if (uiFlagBit & 1)
             test = true;
-        if (alpha->flags & 1)
+        if (alpha->m_usAlphaArg & 1)
         {
             enabled = true;
             blend = enabled;
         }
     }
-    if (!(data->alpha1 < 1.0f) && !(data->alpha2 < 1.0f) && !enabled)
+    if (!(data->fAlpha < 1.0f) && !(data->fFadeAlpha < 1.0f) && !enabled)
     {
         FUN_00b97fa0(0, 0);
         return;
@@ -1537,7 +1354,7 @@ void __stdcall FUN_00be1ff0(Input818* input)
     FUN_00b97fa0(1, 0);
     if (blend)
     {
-        unsigned int flags = alpha->flags;
+        unsigned int flags = alpha->m_usAlphaArg;
         AddToTwoCounters((flags >> 1) & 15, (flags >> 5) & 15, 0);
     }
     else
@@ -1565,120 +1382,28 @@ Zero4* Zero4::Zero()
 }
 
 namespace fnv_00be0f10 {
-struct ShaderPassTarget
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    void FUN_00e80190();
-};
-struct PassHolder
-{
-    ShaderPassTarget* m_pObject;
-    ~PassHolder();
-};
-struct ShaderBase
-{
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    virtual ~ShaderBase();
-};
 struct ShaderManager
 {
     void FUN_00e75340(void*);
 };
 extern ShaderManager* DAT_011f9508;
-struct ShaderDerived : ShaderBase
-{
-    PassHolder m_akPasses[1];
-    virtual ~ShaderDerived();
-};
-// Releases the referenced ShaderPassTarget when its count reaches zero, then calls a method on the shader manager.
-// @fnv 0x00be0f10
-ShaderDerived::~ShaderDerived()
-{
-    ShaderPassTarget* p = m_akPasses[0].m_pObject;
-    if (p)
-    {
-        if (--p->unk64 == 0)
-            p->FUN_00e80190();
-        m_akPasses[0].m_pObject = 0;
-    }
-    DAT_011f9508->FUN_00e75340(this);
-}
 }  // namespace fnv_00be0f10
 
-namespace fnv_00be0fe0 {
-class VertexShaderFile
+// Releases the referenced pass when its count reaches zero, then calls a method on the shader manager.
+// @fnv 0x00be0f10
+BSShader::~BSShader()
 {
-  public:
-    virtual ~VertexShaderFile();
-    virtual void FileMethod1();
-    virtual void FileMethod2();
-    virtual void FileMethod3();
-    virtual void FileMethod4();
-    virtual void FileMethod5();
-    virtual void FileMethod6();
-    virtual void FileMethod7();
-    virtual void FileMethod8();
-    virtual void FileMethod9();
-    virtual unsigned int GetSize();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    bool valid;
-    unsigned int ReadBytes(void*, unsigned int);
-};
+    NiD3DPass* p = spPass[0].m_pObject;
+    if (p)
+    {
+        if (--p->m_uiRefCount == 0)
+            p->FUN_00e80190();
+        spPass[0].m_pObject = 0;
+    }
+    fnv_00be0f10::DAT_011f9508->FUN_00e75340(this);
+}
+
+namespace fnv_00be0fe0 {
 struct CacheEntryView
 {
     char name[260];
@@ -1951,60 +1676,6 @@ class VertexRendererView
         return device;
     }
 };
-class FUN_00be0b30 : public NiMemObjectAllocation
-{
-  public:
-    FUN_00be0b30(GraphicsRenderer*);
-    virtual void ShaderMethod0();
-    virtual void ShaderMethod1();
-    virtual void ShaderMethod2();
-    virtual void ShaderMethod3();
-    virtual void ShaderMethod4();
-    virtual void ShaderMethod5();
-    virtual void ShaderMethod6();
-    virtual void ShaderMethod7();
-    virtual void ShaderMethod8();
-    virtual void ShaderMethod9();
-    virtual void ShaderMethod10();
-    virtual void ShaderMethod11();
-    virtual void ShaderMethod12();
-    virtual void ShaderMethod13();
-    virtual void ShaderMethod14();
-    virtual void ShaderMethod15();
-    virtual void ShaderMethod16();
-    virtual void ShaderMethod17();
-    virtual void ShaderMethod18();
-    virtual void ShaderMethod19();
-    virtual void ShaderMethod20();
-    virtual void ShaderMethod21();
-    virtual void ShaderMethod22();
-    virtual void ShaderMethod23();
-    virtual void ShaderMethod24();
-    virtual void ShaderMethod25();
-    virtual void ShaderMethod26();
-    virtual void ShaderMethod27();
-    virtual void ShaderMethod28();
-    virtual void ShaderMethod29();
-    virtual void ShaderMethod30();
-    virtual void ShaderMethod31();
-    virtual void ShaderMethod32();
-    virtual void ShaderMethod33();
-    virtual void SetShader(void*);
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-};
 extern "C" void HasFileInArchives(const char*);
 extern "C" void _ReadWriteBarrier();
 extern "C" void BuildCachePath(char*, const char*, const char*, const char*);
@@ -2040,15 +1711,21 @@ class FileView
     FileViewMethods* methods;
 };
 
+}  // namespace fnv_00be0fe0
+
 // Compiles a vertex shader source file with macros and profile, caches the bytecode to disk, and creates a shader object on the device.
 // @fnv 0x00be0fe0
-FUN_00be0b30* __stdcall FUN_00be0fe0(const char* source, _D3DXMACRO* macros, const char* profile,
-                                     const char* shaderName)
+NiD3DVertexShader* BSShader::CompileVertexShader(const char* source, const _D3DXMACRO* apMacros,
+                                              const char* profile, const char* shaderName)
 {
+    using namespace fnv_00be0fe0;
+    using fnv_00be0fe0::BuildCachePath;
+    using fnv_00be0fe0::HasFileInArchives;
+    _D3DXMACRO* macros = (_D3DXMACRO*)apMacros;
     ShaderBufferRecord* pCacheEntry = 0;
     ShaderCodeBuffer_be1750* pCompiledShader = 0;
     ShaderCodeBuffer_be1750* pCompileErrors = 0;
-    FUN_00be0b30* result = 0;
+    NiD3DVertexShader* result = 0;
     ID3DXConstantTable* constants = 0;
     unsigned int bytecodeSize = 0;
     void* d3dShader;
@@ -2110,8 +1787,8 @@ FUN_00be0b30* __stdcall FUN_00be0fe0(const char* source, _D3DXMACRO* macros, con
             pMacro->Definition = (const char*)DAT_01011584;
             addedMacro = pMacro;
         }
-        VertexShaderFile* pSourceFile = (VertexShaderFile*)FileFinder::GetFile(source, NiFile::READ_ONLY, 0x4000, 32);
-        if (!pSourceFile || !pSourceFile->valid)
+        BSFile* pSourceFile = (BSFile*)FileFinder::GetFile(source, NiFile::READ_ONLY, 0x4000, 32);
+        if (!pSourceFile || !ShaderFileIsGood(pSourceFile))
         {
             if (pSourceFile)
                 delete pSourceFile;
@@ -2120,7 +1797,7 @@ FUN_00be0b30* __stdcall FUN_00be0fe0(const char* source, _D3DXMACRO* macros, con
         }
         unsigned int sourceSize = pSourceFile->GetSize();
         char* sourceData = (char*)g_memoryManager.Allocate(sourceSize);
-        pSourceFile->ReadBytes(sourceData, sourceSize);
+        pSourceFile->NiBinaryStream::Read(sourceData, sourceSize);
         struct IncludeHandler
         {
             const unsigned char* methods;
@@ -2195,16 +1872,16 @@ FUN_00be0b30* __stdcall FUN_00be0fe0(const char* source, _D3DXMACRO* macros, con
         {
             if (!cacheExists)
                 goto failure;
-            VertexShaderFile* pCacheFile =
-                (VertexShaderFile*)FileFinder::GetFile(cachePath, NiFile::READ_ONLY, 0x4000, 32);
+            BSFile* pCacheFile =
+                (BSFile*)FileFinder::GetFile(cachePath, NiFile::READ_ONLY, 0x4000, 32);
             if (!pCacheFile)
                 goto failure;
-            if (pCacheFile->valid)
+            if (ShaderFileIsGood(pCacheFile))
             {
                 bytecodeSize = pCacheFile->GetSize();
                 bytecode = (char*)g_memoryManager.Allocate(bytecodeSize);
                 owned = true;
-                pCacheFile->ReadBytes(bytecode, bytecodeSize);
+                pCacheFile->NiBinaryStream::Read(bytecode, bytecodeSize);
             }
             delete pCacheFile;
             if (!bytecode)
@@ -2218,16 +1895,16 @@ FUN_00be0b30* __stdcall FUN_00be0fe0(const char* source, _D3DXMACRO* macros, con
     }
     else
     {
-        VertexShaderFile* pCacheFile = (VertexShaderFile*)FileFinder::GetFile(cachePath, NiFile::READ_ONLY, 0x4000, 32);
+        BSFile* pCacheFile = (BSFile*)FileFinder::GetFile(cachePath, NiFile::READ_ONLY, 0x4000, 32);
         if (pCacheFile)
         {
-            if (pCacheFile->valid)
+            if (ShaderFileIsGood(pCacheFile))
             {
                 FileView* pFileView = (FileView*)pCacheFile;
                 bytecodeSize = pFileView->methods->size(pFileView);
                 bytecode = (char*)g_memoryManager.Allocate(bytecodeSize);
                 owned = true;
-                pCacheFile->ReadBytes(bytecode, bytecodeSize);
+                pCacheFile->NiBinaryStream::Read(bytecode, bytecodeSize);
             }
             delete pCacheFile;
         }
@@ -2246,8 +1923,8 @@ FUN_00be0b30* __stdcall FUN_00be0fe0(const char* source, _D3DXMACRO* macros, con
             VertexDevice* device = ((VertexRendererView*)g_pkRenderer)->GetDevice();
             if (device->CreateVertexShader(bytecode, &d3dShader))
                 goto deviceError;
-            result = new FUN_00be0b30(g_pkRenderer);
-            result->SetShader(d3dShader);
+            result = new NiD3DVertexShader(g_pkRenderer);
+            result->SetD3DPixelShader(d3dShader);
         }
     }
     if (owned)
@@ -2259,4 +1936,3 @@ failure:
     _ReadWriteBarrier();
     return result;
 }
-}  // namespace fnv_00be0fe0

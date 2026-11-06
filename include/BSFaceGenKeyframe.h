@@ -1,20 +1,37 @@
-// Source layout: BSFaceGenKeyframe. PC corrections are in generate_headers.py.
-#ifndef FNV_BSFACEGENKEYFRAME_H
-#define FNV_BSFACEGENKEYFRAME_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+enum BS_FACEGEN_MORPH_TYPE;
+
 class BSFaceGenKeyframe
 {
-  public:
-    void** m_ppVirtualMethodTable;              // +0x0
-    BS_FACEGEN_MORPH_TYPE eType;  // +0x4
-    float fTime;                  // +0x8
+public:
+    BSFaceGenKeyframe(BS_FACEGEN_MORPH_TYPE type);
+    virtual ~BSFaceGenKeyframe();
+    virtual void UnknownSlot1() = 0;
+    virtual bool SetType(BS_FACEGEN_MORPH_TYPE type);
+    virtual float vfn_0c();
+    virtual bool vfn_10(float time);
+    virtual void UnknownSlot5() = 0;
+    virtual void UnknownSlot6() = 0;
+    virtual void UnknownSlot7() = 0;
+    virtual bool ClearData(bool initialize);
+    virtual void UnknownSlot9() = 0;
+    virtual void UnknownSlot10() = 0;
+    virtual bool vfn_2c(BSFaceGenKeyframe* keyframe);
+    virtual float GetAttributeStrength();
+    virtual void UnknownSlot13() = 0;
+    virtual void NormalizeFaceGenValues();
+    virtual void UnknownSlot15() = 0;
+    virtual bool HasNonzeroQuantity();
+    virtual void UnknownSlot17() = 0;
+    virtual void UnknownSlot18() = 0;
+
     float GetTime();
+    bool SetTime(float time);
+    double FUN_00621b00();
+    bool FUN_006828a0(float fArg);
+    bool FUN_006830a0(float fArg);
+
+    BS_FACEGEN_MORPH_TYPE eType;
+    float fTime;
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BSFaceGenKeyframe) == 0xC);
-FNV_STATIC_ASSERT(offsetof(BSFaceGenKeyframe, m_ppVirtualMethodTable) == 0x0);
-FNV_STATIC_ASSERT(offsetof(BSFaceGenKeyframe, eType) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BSFaceGenKeyframe, fTime) == 0x8);
-#endif

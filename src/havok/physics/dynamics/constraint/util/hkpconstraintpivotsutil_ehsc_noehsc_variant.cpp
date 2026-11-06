@@ -1,3 +1,11 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 
 // src/havok/physics/dynamics/constraint/util/hkpconstraintpivotsutil_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/physics/dynamics/constraint/util/hkpconstraintpivotsutil.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,30 +14,18 @@
 // src/havok/physics/dynamics/constraint/util/hkpconstraintpivotsutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/util/hkpconstraintpivotsutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00d85160 FUN_00d85160: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setzero_ps(void);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setzero_ps(void);
 
-struct hkVector4q
-{
-    __m128 m_vComponents;
+// Preserve this unit's intrinsic storage while using the shared vector definition.
+#define _INCLUDED_MM2
+#include "../../../../../../include/hkVector4q.h"
 
-    void operator=(const hkVector4q& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    float& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-};
 
 struct hkTransformq
 {

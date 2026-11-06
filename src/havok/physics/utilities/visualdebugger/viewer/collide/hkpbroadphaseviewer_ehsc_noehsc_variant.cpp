@@ -1,3 +1,5 @@
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
 
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkpbroadphaseviewer_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-30 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/physics/utilities/visualdebugger/viewer/collide/hkpbroadphaseviewer.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -127,21 +129,7 @@ private:
     ~FUN_00d6a940();               // never defined: keeps a second tagged
                                    // symbol out of the object file
 };
-struct AudioAllocator {
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0c();
-    virtual void FreeData(void* apMemory, unsigned int auiSize);
-};
-struct AudioHolder {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 struct SpawnedItem {
     virtual void v00(int aiFlags);
     int unk04;
@@ -314,30 +302,17 @@ static inline void S00d6a9b0_Mark(const char* name)
     }
 }
 
-struct S00d6a9b0_Alloc
+// hkMemoryRouter::m_pAllocator (+0x10) is the thread heap, an hkMemoryAllocator (bufAlloc slot 3, bufFree slot 4).
+static inline hkMemoryAllocator& __fastcall GetAudioAllocator(hkMemoryRouter* holder)
 {
-    virtual void a00();
-    virtual void a04();
-    virtual void a08();
-    virtual void* GetStack(int& nBytes);
-    virtual void FreeData(void* p, unsigned int size);
-};
-
-struct S00d6a9b0_Holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S00d6a9b0_Alloc* m_pAllocationContext;
-    S00d6a9b0_Alloc& heap() { return *m_pAllocationContext; }
-};
-
-static inline S00d6a9b0_Alloc& S00d6a9b0_heap()
-{
-    return reinterpret_cast<S00d6a9b0_Holder*>(FUN_00c85750())->heap();
+    return *reinterpret_cast<hkMemoryAllocator*>(holder->m_heap);
 }
-void __cdecl FUN_00c908c0(S00d6a9b0_Alloc* a, void* arr, int cap, int elemSize);
+
+static inline hkMemoryAllocator& S00d6a9b0_heap()
+{
+    return GetAudioAllocator(FUN_00c85750());
+}
+void __cdecl FUN_00c908c0(hkMemoryAllocator* a, void* arr, int cap, int elemSize);
 
 template <typename T>
 struct S00d6a9b0_Arr
@@ -349,10 +324,10 @@ struct S00d6a9b0_Arr
     S00d6a9b0_Arr() : m_data(0), m_iElementCount(0), m_capFlags((int)0x80000000) {}
     ~S00d6a9b0_Arr()
     {
-        S00d6a9b0_Alloc& a = S00d6a9b0_heap();
+        hkMemoryAllocator& a = S00d6a9b0_heap();
         m_iElementCount = 0;
         if ((m_capFlags & 0x80000000) == 0)
-            a.FreeData(m_data, (m_capFlags & 0x3fffffff) * sizeof(T));
+            a.bufFree(m_data, (m_capFlags & 0x3fffffff) * sizeof(T));
         m_data = 0;
         m_capFlags = (int)0x80000000;
     }
@@ -364,7 +339,7 @@ struct S00d6a9b0_Arr
     }
     void reserve(int n)
     {
-        S00d6a9b0_Alloc& a = S00d6a9b0_heap();
+        hkMemoryAllocator& a = S00d6a9b0_heap();
         int cap = m_capFlags & 0x3fffffff;
         if (cap < n)
         {
@@ -419,10 +394,10 @@ __forceinline void S00d6a9b0_Arr<T>::SetSizeAndGrow(int n)
 }
 
 template <typename T>
-static __forceinline T* S00d6a9b0_bufAlloc(S00d6a9b0_Alloc& a, int n, int& nbytes)
+static __forceinline T* S00d6a9b0_bufAlloc(hkMemoryAllocator& a, int n, int& nbytes)
 {
     int req = n * (int)sizeof(T);
-    T* p = (T*)a.GetStack(req);
+    T* p = (T*)a.bufAlloc(req);
     nbytes = req;
     return p;
 }

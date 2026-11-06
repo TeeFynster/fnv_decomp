@@ -1,5 +1,14 @@
 // fallout_shared/tesidlemanager.cpp: IdleAnimationManager, IdleAnimationDirectoryEntry, IdleCleanup (22 functions)
 
+#include "../../include/NiFormArray.h"
+#include "../../include/NiTMap.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/TESAnimGroup.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESIdleForm.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESObjectREFR.h"
+
 #include "tesidlemanager_decls.h"
 
 // @fnv 0x006008f0
@@ -89,7 +98,7 @@ void IdleAnimationManager::InitializeIdleAnimations()
     unsigned int count = idleForms.GetSize();
     for (unsigned int i = 0; i < count; ++i)
     {
-        TESIdleForm* idle = (TESIdleForm*)idleForms.FUN_00877a30(i);
+        TESIdleForm* idle = (TESIdleForm*)idleForms.GetAt(i);
         if (idle && !idle->GetInitialized())
             idle->InitItem();
         else
@@ -97,7 +106,7 @@ void IdleAnimationManager::InitializeIdleAnimations()
     }
     for (unsigned int uiIndex2 = 0; uiIndex2 < count; ++uiIndex2)
     {
-        TESIdleForm* idle = (TESIdleForm*)idleForms.FUN_00877a30(uiIndex2);
+        TESIdleForm* idle = (TESIdleForm*)idleForms.GetAt(uiIndex2);
         if (idle && idle->HasMissingPathArray())
             idleForms.SetAt(uiIndex2,
                             const_cast<BGSCameraPath*&>(static_cast<BGSCameraPath* const&>((BGSCameraPath*)0)));
@@ -217,18 +226,6 @@ IdleAnimationDirectoryEntry* IdleAnimationManager::ClearIdleData(const char* dir
     return result;
 }
 
-class NavMeshVertexMap
-{
-  public:
-    void* GetFirstPos();
-};
-
-template <class K, class V> class NiTPointerMap
-{
-  public:
-    void GetNext(void*&, K&, V&);
-};
-
 bool __fastcall _ref_008256d0(BSSimpleList<const char*>*);
 const char** __fastcall _ref_006815c0(BSSimpleList<const char*>*);
 void __fastcall _ref_0063f7b0(BSSimpleList<const char*>*);
@@ -236,7 +233,7 @@ void __fastcall _ref_0063f7b0(BSSimpleList<const char*>*);
 // @fnv 0x006003c0
 void __fastcall FUN_006003c0(void* thisPtr)
 {
-    void* pIter = ((NavMeshVertexMap*)thisPtr)->GetFirstPos();
+    void* pIter = ((NiTPointerMap<unsigned int, void*>*)thisPtr)->GetFirstPos();
     while (pIter)
     {
         IdleAnimationDirectoryEntry* root = 0;
@@ -287,12 +284,6 @@ struct FUN_00600560_shell : public IdleAnimationManager
     NiFormArray* GetFormArrayForIdleDir(TESForm*);
 };
 
-template <class TKey, class TVal> class NiTPointerMap
-{
-  public:
-    bool GetAt(TKey, TVal&) const;
-};
-
 // Looks up apIdleDir in the map and returns the stored NiFormArray pointer, or null if the key is missing or empty.
 // @fnv 0x00600560
 NiFormArray* FUN_00600560_shell::GetFormArrayForIdleDir(TESForm* apIdleDir)
@@ -314,12 +305,6 @@ namespace fnv_00600630 {
 struct FUN_00600630_shell : public IdleAnimationManager
 {
     NiFormArray* GetIdleFormArray(TESForm*);
-};
-
-template <class TKey, class TVal> class NiTPointerMap
-{
-  public:
-    bool GetAt(TKey, TVal&) const;
 };
 
 // Looks up apIdleDir in the map and returns the NiFormArray at offset 0x18 of the found entry, or null if the key is empty or missing.
@@ -404,17 +389,6 @@ NiFormArray* FUN_006005c0_shell::FUN_006005c0(const char* path)
     return result;
 }
 
-struct S_005fffc0_B
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    ~S_005fffc0_B();
-};
-
 struct S_005fffc0_C
 {
     int unk00;
@@ -422,37 +396,19 @@ struct S_005fffc0_C
     ~S_005fffc0_C();
 };
 
-struct FUN_005fffc0 : S_005fffc0_B
+struct FUN_005fffc0
 {
-    S_005fffc0_B unk18;
+    NiFormArray unk00;
+    NiFormArray unk18;
     S_005fffc0_C unk30;
     ~FUN_005fffc0();
 };
 
-// Destructor for FUN_005fffc0; destroys its embedded S_005fffc0_B and S_005fffc0_C members.
+// Destroys the directory entry's form arrays and list data.
 // @fnv 0x005fffc0
 FUN_005fffc0::~FUN_005fffc0()
 {}
 
-struct OwnedForm
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual ~OwnedForm();
-};
-struct FormArray
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    unsigned int Count();
-    OwnedForm* At(unsigned int);
-};
 struct FilenameList
 {
     bool Empty();
@@ -462,8 +418,8 @@ struct FilenameList
 };
 struct RootData
 {
-    FormArray first;
-    FormArray second;
+    NiFormArray first;
+    NiFormArray second;
     int unk30;
     int unk34;
     FilenameList* files[12];
@@ -472,7 +428,7 @@ struct RootData
 struct IdleBaseArray
 {
     unsigned int Count();
-    OwnedForm*& At(unsigned int);
+    TESForm*& At(unsigned int);
     void Clear();
 };
 struct IdleCleanup
@@ -484,33 +440,30 @@ struct IdleCleanup
     int unk10;
     int unk14;
     IdleBaseArray forms;
-    void* First();
-    void Next(void*&, unsigned int&, RootData*&);
-    void Clear();
     void DeleteAllOwnedForms();
 };
 // Iterates the container, deleting each root's forms, file lists and filenames, then deletes all forms in forms and clears both containers.
 // @fnv 0x005ffd20
 void IdleCleanup::DeleteAllOwnedForms()
 {
-    void* position = First();
+    void* position = ((NiTPointerMap<unsigned int, RootData*>*)this)->GetFirstPos();
     while (position)
     {
         RootData* root = 0;
         unsigned int key = 0;
-        Next(position, key, root);
+        ((NiTPointerMap<unsigned int, RootData*>*)this)->GetNext(position, key, root);
         if (root)
         {
-            unsigned int count = root->first.Count();
+            unsigned int count = root->first.GetSize();
             for (unsigned int firstIndex = 0; firstIndex < count; firstIndex++)
             {
-                OwnedForm* form = root->first.At(firstIndex);
+                TESForm* form = root->first.GetFormAt(firstIndex);
                 delete form;
             }
-            count = root->second.Count();
+            count = root->second.GetSize();
             for (unsigned int secondIndex = 0; secondIndex < count; secondIndex++)
             {
-                OwnedForm* pSecondForm = root->second.At(secondIndex);
+                TESForm* pSecondForm = root->second.GetFormAt(secondIndex);
                 delete pSecondForm;
             }
             for (unsigned int listIndex = 0; listIndex < 12; listIndex++)
@@ -532,74 +485,44 @@ void IdleCleanup::DeleteAllOwnedForms()
     unsigned int formCount = forms.Count();
     for (unsigned int formIndex = 0; formIndex < formCount; formIndex++)
     {
-        OwnedForm* pThirdForm = forms.At(formIndex);
+        TESForm* pThirdForm = forms.At(formIndex);
         delete pThirdForm;
     }
     forms.Clear();
-    Clear();
+    ((NiTPointerMap<unsigned int, RootData*>*)this)->RemoveAll();
 }
 
-struct FUN_00600030_item
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void* v10(int flag);
-};
-
-struct FUN_00600030_list
-{
-    unsigned char unk00[0x18];
-    unsigned int FUN_0084e3a0();
-    FUN_00600030_item* FUN_004d6170(unsigned int index);
-    void ClearItems();
-};
-
-struct FUN_00600030_cls
-{
-    void* FUN_004b9ba0();
-    void FUN_006b7f20(void** a, void** b, FUN_00600030_list** c);
-    void FUN_00600030();
-};
+void __fastcall ClearIdleFormArray(NiFormArray* array);
 
 // @fnv 0x00600030
-void FUN_00600030_cls::FUN_00600030()
+void IdleAnimationManager::FUN_00600030()
 {
-    void* a = FUN_004b9ba0();
+    void* a = ((NiTPointerMap<void*, NiFormArray*>*)this)->GetFirstPos();
     while (a != 0)
     {
-        FUN_00600030_list* c = 0;
+        NiFormArray* c = 0;
         void* b = 0;
-        FUN_006b7f20(&a, &b, &c);
+        ((NiTPointerMap<void*, NiFormArray*>*)this)->GetNext(a, b, c);
         if (c != 0)
         {
-            unsigned int nG = c->FUN_0084e3a0();
+            unsigned int nG = c->GetSize();
             unsigned int i;
-            FUN_00600030_item* TD;
-            FUN_00600030_item* q;
-            FUN_00600030_item* BQ;
-            FUN_00600030_item* DQ;
-            FUN_00600030_item* EQ;
-            FUN_00600030_item* F;
+            TESForm* TD;
+            TESForm* DQ;
             unsigned int jF;
             for (i = 0; i < nG; i++)
             {
-                TD = c->FUN_004d6170(i);
-                q = TD;
-                BQ = q;
-                BQ != 0 ? BQ->v10(1) : 0;
+                TD = c->GetFormAt(i);
+                delete TD;
             }
-            c->ClearItems();
-            nG = reinterpret_cast<FUN_00600030_list*>(reinterpret_cast<unsigned char*>(c) + 0x18)->FUN_0084e3a0();
+            ClearIdleFormArray(c);
+            nG = reinterpret_cast<NiFormArray*>(reinterpret_cast<unsigned char*>(c) + 0x18)->GetSize();
             for (jF = 0; jF < nG; jF++)
             {
-                DQ = reinterpret_cast<FUN_00600030_list*>(reinterpret_cast<unsigned char*>(c) + 0x18)->FUN_004d6170(jF);
-                EQ = DQ;
-                F = EQ;
-                F != 0 ? F->v10(1) : 0;
+                DQ = reinterpret_cast<NiFormArray*>(reinterpret_cast<unsigned char*>(c) + 0x18)->GetFormAt(jF);
+                delete DQ;
             }
-            reinterpret_cast<FUN_00600030_list*>(reinterpret_cast<unsigned char*>(c) + 0x18)->ClearItems();
+            ClearIdleFormArray(reinterpret_cast<NiFormArray*>(reinterpret_cast<unsigned char*>(c) + 0x18));
         }
     }
 }

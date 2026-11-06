@@ -3,15 +3,12 @@
 #define FNV_PROCESSLISTS_PRIVATE_PROCESSLISTS_H
 
 #include "processlists_layout_support.h"
-#include "processlists_ProcessArray.h"
-#include "processlists_task_data.h"
 #include "processlists_lock_free_map.h"
 
-class Actor;
 class Crime;
 class MagicShaderHitEffect;
 class BGSLoadGameBuffer;
-class BSTempEffect;
+
 class MuzzleFlash;
 class DialoguePackage;
 

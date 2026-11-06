@@ -8,16 +8,16 @@ void ShadowSceneNode::SetFogPropertyForIndex(BSFogProperty* property)
 {
     if (!property)
     {
-        m_spFogProperty = new BSFogProperty;
-        m_spFogProperty->SetFog(500000.0f, 500000.0f);
-        m_spFogProperty->SetPower(1.0f);
-        m_spFogProperty->SetWaterFog(500000.0f, 500000.0f);
-        m_spFogProperty->SetColor(NiColor(0.5f, 0.5f, 0.5f));
-        m_spFogProperty->SetWaterColor(NiColor(0.5f, 0.5f, 0.5f));
+        spFog = new BSFogProperty;
+        spFog->SetFog(500000.0f, 500000.0f);
+        spFog->SetPower(1.0f);
+        spFog->SetWaterFog(500000.0f, 500000.0f);
+        spFog->color = NiColor(0.5f, 0.5f, 0.5f);
+        spFog->SetWaterColor(NiColor(0.5f, 0.5f, 0.5f));
     }
     else
     {
-        m_spFogProperty = property;
+        spFog = property;
     }
 }
 #endif

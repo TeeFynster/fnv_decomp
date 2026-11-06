@@ -1,121 +1,64 @@
+// src/fallout_shared/tesworldspace_rtti2_variant.cpp - world-space comparison.
 
-// src/fallout_shared/tesworldspace_rtti2_variant.cpp - RTTI variant unit created 2026-11-01 by rtti_variants.py for paused functions whose original code needs
-// polymorphic classes (TESForm, TESWorldSpace). The skeleton of src/fallout_shared/tesworldspace.cpp with those classes made polymorphic; move the functions to
-// their real unit once its classes are.
-
-#include "tesworldspace_packet_rtti2_tesworldspace.h"
+#include "../../include/BGSAcousticSpace.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESObjectACTI.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESRegion.h"
+#include "../../include/TESWorldSpace.h"
+#include "../../include/TESImageSpace.h"
 
 extern "C" int __cdecl memcmp(const void*, const void*, unsigned int);
-struct S00585250_WorldData
+
+// Method-only extensions for declarations not yet exposed by the shared headers.
+struct WorldImageSpaceComparison : TESImageSpace
 {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual bool Different(S00585250_WorldData*);
-    int unk04, unk08;
+    bool Different(TESImageSpace*);
 };
-struct S00585250_WorldReference
+
+struct WorldSpaceComparison : TESWorldSpace
 {
-    bool Different(S00585250_WorldReference*);
-};
-struct WorldCompareView
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    S00585250_WorldReference* reference;
-    unsigned char flags;
-    unsigned char unk4D;
-    unsigned short field4E;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9C;
-    unsigned int unkA0;
-    unsigned int unkA4;
-    unsigned int unkA8;
-    unsigned int unkAC;
-    unsigned int unkB0;
-    unsigned int unkB4;
-    unsigned int unkB8;
-    unsigned int unkBC;
-    unsigned int unkC0;
-    unsigned int unkC4;
-    float fC8;
-    float fCC;
-    unsigned int unkD0;
-    S00585250_WorldData dataD4;
-    S00585250_WorldData dataE0;
-    bool BaseDifferent(WorldCompareView*);
-    void* Climate();
     void* ImageSpace();
     void* Water();
-    void* LODWater();
     float Height();
     void* Map();
     bool FUN_00585250(TESForm*);
 };
 // @fnv 0x00585250
-bool WorldCompareView::FUN_00585250(TESForm* form)
+bool WorldSpaceComparison::FUN_00585250(TESForm* form)
 {
-    WorldCompareView* other = (WorldCompareView*)dynamic_cast< ::TESWorldSpace*>(form);
+    WorldSpaceComparison* other = (WorldSpaceComparison*)dynamic_cast< ::TESWorldSpace*>(form);
     if (!other)
         return true;
-    if (BaseDifferent(other))
+    if (TESForm::Compare(other))
         return true;
-    if (flags != other->flags)
+    if (flags4C != other->flags4C)
         return true;
     if (field4E != other->field4E)
         return true;
-    if (unk70 != other->unk70)
+    if (parent != other->parent)
         return true;
-    if (unkD0 != other->unkD0)
+    if (fieldD0 != other->fieldD0)
         return true;
-    if (Climate() != other->Climate())
+    if (FUN_00585fe0() != other->FUN_00585fe0())
         return true;
     if (ImageSpace() != other->ImageSpace())
         return true;
-    if (reference && other->reference)
+    if (data && other->data)
     {
-        if (reference->Different(other->reference))
+        if (((WorldImageSpaceComparison*)data)->Different(other->data))
             return true;
     }
-    else if (reference || other->reference)
+    else if (data || other->data)
         return true;
     if (Water() != other->Water())
         return true;
-    if (LODWater() != other->LODWater())
+    if (FUN_005860c0() != other->FUN_005860c0())
         return true;
     if (Height() != other->Height())
         return true;
@@ -123,13 +66,13 @@ bool WorldCompareView::FUN_00585250(TESForm* form)
         return true;
     if (memcmp(&unk80, &other->unk80, 16))
         return true;
-    if (memcmp(&unk90, &other->unk90, 12))
+    if (memcmp(unk80 + 0x10, other->unk80 + 0x10, 12))
         return true;
     if (Map() != other->Map())
         return true;
-    if (dataD4.Different(&other->dataD4))
+    if (CanopyShadowTexture.CompareWithBase((BaseFormComponent*)&other->CanopyShadowTexture))
         return true;
-    if (dataE0.Different(&other->dataE0))
+    if (m_kLeafShadowTexture.CompareWithBase((BaseFormComponent*)&other->m_kLeafShadowTexture))
         return true;
     return false;
 }

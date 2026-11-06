@@ -1,27 +1,11 @@
-// fallout_shared/bgsidlecollection_decls.h: declares TESObjectANIO, TESIdleForm, TESFormInitFlag, Actor
+#include "../../include/BSSimpleArray.h"
+// fallout_shared/bgsidlecollection_decls.h: unit-local declarations
 #ifndef FALLOUT_SHARED_BGSIDLECOLLECTION_DECLS_H
 #define FALLOUT_SHARED_BGSIDLECOLLECTION_DECLS_H
 
-#include "TESForm.h"
-template <class T, unsigned int N> class BSSimpleArray
-{
-  public:
-    unsigned int GetSize();
-    void SetAt(unsigned int, T&);
-    unsigned int Add(T&);
-};
-#include "bgsidlecollection_types_BGSIdleCollection.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESForm.h"
 
-class TESObjectANIO : public TESForm
-{
-};
-
-class TESIdleForm : public TESObjectANIO
-{
-  public:
-    bool IsIdleFile();
-    bool IsValidForReferences(TESObjectREFR*, TESObjectREFR*, bool);
-};
 
 class TESFormInitFlag
 {
@@ -33,11 +17,6 @@ extern "C" const char kBGSIdleCollectionMissingIdle[];
 extern "C" const char kBGSIdleCollectionMissingAnim[];
 int Warning(const char* format, ...);
 
-class Actor
-{
-  public:
-    bool HasIdleInFormArray(TESIdleForm*);
-};
 bool FUN_00479e20(unsigned int);
 template <int N> struct EndianSizeTag
 {

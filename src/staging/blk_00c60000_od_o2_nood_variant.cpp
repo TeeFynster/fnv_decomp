@@ -1,3 +1,6 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
 
 // src/staging/blk_00c60000_od_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHsc /Gy (unit src/staging/blk_00c60000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,20 +8,64 @@
 
 // src/staging/blk_00c60000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#define FNV_VEC4_SIMD
+#include "../../include/Vec4.h"
+#include "../../include/Bound.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiPSysData.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/Setting.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkMatrix4.h"
+#include "../../include/NiTPointerList.h"
+#include "../../include/hkpCdBody.h"
+#include "../../include/hkpCollidable.h"
+#include "../../include/hkpRigidBody.h"
+#include "../../include/hkpShape.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/NiColorA.h"
+#include "../../include/hkpShapeInfo.h"
+#include "../../include/BSDecalPlacementVectorExtraData.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/NiObject.h"
+#include "../../include/BSPSysSimpleColorModifier.h"
+#include "../../include/NiPSysModifier.h"
+#include "../../include/NiBinaryExtraData.h"
+#include "../../include/NiPSysCylinderEmitter.h"
+#include "../../include/NiPSysVolumeEmitter.h"
+#include "../../include/NiPSysPositionModifier.h"
+__declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+__declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern "C" void* g_01204388;
 struct FUN_00c600f0_Class
 {
     void* __thiscall FUN_00c600f0();
-};
-struct NiStream;
-struct NiPSysModifier
-{
-    virtual void LinkObject(NiStream&);
-};
-struct BSPSysSimpleColorModifier : public NiPSysModifier
-{
-    void FUN_00c60910(NiStream& stream);
 };
 struct FUN_00c60930_class
 {
@@ -72,12 +119,6 @@ struct FUN_00c614e0_Class
     char FUN_00a998e0(int arg);
     char FUN_00c614e0(int arg);
 };
-struct NiFixedString;
-struct NiAVObject
-{
-    void SetName(NiFixedString const&);
-    void FUN_00c61610();
-};
 extern NiFixedString* DAT_012043a0;
 extern "C" void* g_012043a4;
 struct FUN_00c61810_class
@@ -88,19 +129,6 @@ struct FUN_00c61820_class
 {
     void* FUN_00c61820(int);
 };
-struct NiStream;
-struct NiPSysVolumeEmitter
-{
-    void LoadBinary(NiStream&);
-    void LoadBinaryFromStream(NiStream* stream);
-};
-struct NiStream;
-struct NiObject
-{
-    void FUN_00c62140();
-    void LinkObject(NiStream&);
-    void FUN_00c61f30(NiStream& stream);
-};
 struct FUN_00c61f60_class
 {
     void __thiscall FUN_00c2f4f0(int);
@@ -110,12 +138,6 @@ struct FUN_00c61f80_cls
 {
     void FUN_00c31b60(void* apParam);
     void FUN_00c61f80(void* apParam);
-};
-struct NiAVObject;
-struct NiPSysCylinderEmitter
-{
-    bool FUN_00c31b80(NiAVObject*);
-    bool FUN_00c61fa0(NiAVObject*);
 };
 struct FUN_00c627e0_Class
 {
@@ -143,14 +165,6 @@ struct FUN_00c63aa0_class
 };
 void __cdecl FUN_00c63c30(int, int);
 void __cdecl CallWithSameArgumentTwice(int a);
-struct NiBinaryExtraData
-{
-    void LinkObject(void*);
-};
-struct BSDecalPlacementVectorExtraData : NiBinaryExtraData
-{
-    void LinkToObject(void*);
-};
 struct FUN_00c644d0_Class
 {
     unsigned char Equals(const char*);
@@ -161,24 +175,13 @@ struct FUN_00c64600_Class
 {
     void* __thiscall GetGlobalPointer();
 };
-struct NiStream;
-struct NiObjectBase
-{
-    bool RegisterStreamables(NiStream&);
-};
-struct FUN_00c64b70 : NiObjectBase
+struct FUN_00c64b70 : NiObject
 {
     bool RegisterStreamables(NiStream& stream);
 };
 struct FUN_00c64fc0_class
 {
     int __thiscall GetThisAddress(int);
-};
-struct NiStream;
-struct NiExtraData
-{
-    void LinkObject(NiStream& stream);
-    void FUN_00c65160(NiStream& stream);
 };
 struct C00c541e0
 {
@@ -192,12 +195,6 @@ struct FUN_00c657e0_class
 };
 extern "C" void NiFreeAlias(void*);
 extern int DAT_010c377c;
-struct NiTPointerList_00c62890
-{
-    void* m_pObjectItem;
-    void* m_pNext;
-    void FUN_00c62890();
-};
 extern "C" void NiFreeAlias(void*);
 extern int DAT_010c3a08;
 struct FUN_00c65680_Class
@@ -219,10 +216,6 @@ struct FUN_00c613a0_Class
     void operator delete(void* p, unsigned int size);
 };
 extern "C" void NiFree(void*);
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00c63210_Class
 {
@@ -239,11 +232,6 @@ struct FUN_00c632f0_class
     void* __thiscall FUN_00c632f0(unsigned int flags);
 };
 void __cdecl operator delete(void*, int);
-struct CloningProcess;
-struct NiPSysModifierCopy : NiPSysModifier
-{
-    void CopyMemberData(NiPSysModifier* dst, CloningProcess& proc);
-};
 struct FUN_00c63840_Class : NiPSysModifier
 {
     void __thiscall CopyModifierWithValue(NiPSysModifier* dst, CloningProcess* proc);
@@ -251,11 +239,7 @@ struct FUN_00c63840_Class : NiPSysModifier
 struct SStream;
 struct SObj;
 void __cdecl CallAnimCallback(SStream*, SObj*);
-struct NiPSysModifier_00c31950
-{
-    void __thiscall FUN_00c31950(void*);
-};
-struct FUN_00c63970_class : NiPSysModifier_00c31950
+struct FUN_00c63970_class : NiPSysModifier
 {
     void __thiscall FUN_00c63970(void* stream);
 };
@@ -279,11 +263,6 @@ struct FUN_00c64c30_Class
     bool __thiscall FUN_00c64c30(int a);
 };
 extern int DAT_010c3384;
-struct NiPSysPositionModifier
-{
-    NiPSysPositionModifier();
-    ~NiPSysPositionModifier();
-};
 struct FUN_00c60240 : NiPSysPositionModifier
 {
     int m_vt;
@@ -292,21 +271,12 @@ struct FUN_00c60240 : NiPSysPositionModifier
     float m_w[4];
     FUN_00c60240();
 };
-struct NiStream;
-struct RgbaColor
-{
-    void SaveBinary(NiStream&);
-};
-struct FUN_00c60950_class : NiPSysModifier_00c31950
+struct FUN_00c60950_class : NiPSysModifier
 {
     void FUN_00c60950(NiStream* stream);
 };
 int _sprintf_s(char*, unsigned int, const char*, ...);
 size_t _strlen(const char*);
-struct P03MM
-{
-    void* __thiscall Allocate(unsigned int);
-};
 struct FUN_00c62090_Class
 {
     char* __thiscall BuildAttachTypeString(const char* name, int type);
@@ -315,10 +285,6 @@ extern GlobalObject_00a7b610 g_012043b0;
 struct FUN_00c63320_Class
 {
     GlobalObject_00a7b610* __thiscall FUN_00c63320();
-};
-struct NiStream
-{
-    void SerializeString(const char* s);
 };
 struct NiExtraDataSaveHelper
 {
@@ -382,10 +348,6 @@ struct FUN_00c63330 : NiPSysPositionModifier
 };
 int strcpy_s(char* dst, unsigned int size, const char* src);
 size_t strlen(const char*);
-struct MemoryManagerAllocHelper
-{
-    void* Allocate(unsigned int);
-};
 struct FUN_00c64780_Class
 {
     void* m_iWordAt00;
@@ -427,19 +389,11 @@ struct FUN_00c60700_Data
     float value40;
     float value44;
 };
-struct FUN_00c60700_Class : NiPSysModifierCopy
+struct FUN_00c60700_Class : NiPSysModifier
 {
     void FUN_00c60700(NiPSysModifier* dst, CloningProcess& proc);
 };
 template <class T> void __cdecl ReadBinaryValue(NiStream& stream, T& value);
-struct NiPSysModifierLoadBinary_StandIn
-{
-    void LoadBinary(NiStream& stream);
-};
-struct NiColorALoadBinary_StandIn
-{
-    void LoadBinary(NiStream& stream);
-};
 struct FUN_00c60850_Class : public NiPSysModifier
 {
     void FUN_00c60850(NiStream& stream);
@@ -447,10 +401,6 @@ struct FUN_00c60850_Class : public NiPSysModifier
 struct MyIsEqual
 {
     bool __thiscall FUN_00c31830(NiObject*);
-};
-struct FUN_004a4cc0_shell
-{
-    bool __thiscall FUN_004a4cc0(void*);
 };
 struct FUN_00c60a10_Class
 {
@@ -500,11 +450,7 @@ struct FUN_00c61ba0_class : FUN_00c62390_class
     void ForwardToBase(void* a, void* b, void* c);
 };
 template <class T> void ReadBinaryValue(NiStream&, T&);
-struct NiPSysModifierStub
-{
-    virtual void LoadBinary(NiStream&);
-};
-struct FUN_00c63900_class : NiPSysModifierStub
+struct FUN_00c63900_class : NiPSysModifier
 {
     void LoadModifierData(NiStream& stream);
 };
@@ -932,13 +878,6 @@ struct FUN_00c65180_Class
 
     unsigned char __thiscall VisitEntries(FUN_00c65180_VTable* p);
 };
-struct MyColorA
-{
-    float r;
-    float g;
-    float b;
-    float a;
-};
 struct Point3ParameterData
 {
     float unk00;
@@ -949,39 +888,6 @@ struct Point3ParameterData
     float unk14;
     float unk18;
 };
-struct NiPSysData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    MyColorA* m_pkParticleColors;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    unsigned short m_usNumParticles;
-    short pad52;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    Point3ParameterData* m_pkParticleInfo;
-};
 struct BSPSysSimpleColorModifierCand
 {
     int unk00;
@@ -990,9 +896,9 @@ struct BSPSysSimpleColorModifierCand
     int unk0c;
     int unk10;
     int unk14;
-    MyColorA m_kColor1;
-    MyColorA m_kColor2;
-    MyColorA m_kColor3;
+    NiColorA m_kColor1;
+    NiColorA m_kColor2;
+    NiColorA m_kColor3;
     float m_fFadeInPercent;
     float m_fFadeOutPercent;
     float m_fColor1End;
@@ -1002,58 +908,14 @@ struct BSPSysSimpleColorModifierCand
 
     void UpdateParticleColors(float fTime, NiPSysData* pkData);
 };
-class NiObjectC60
-{
-  public:
-    NiObjectC60();
-    virtual ~NiObjectC60();
-
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem);
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-};
-class NiCloningProcessC60;
-class NiOwnerC60
-{
-  public:
-    void CopyMemberData(NiObjectC60* pkDest, NiCloningProcessC60& kCloning);
-    NiObjectC60* CloneObject(NiCloningProcessC60& kCloning);
-};
-struct NiTPrimitiveArray_unsigned_int_
-{
-    unsigned int AddFirstEmpty(const unsigned int& value);
-};
 struct FUN_00c615a0_class
 {
     int unk00;
     int unk04;
     int unk08;
     unsigned int unk0c;
-    void FUN_00a99b20(NiTPrimitiveArray_unsigned_int_* values);
-    void AppendGlobalAndFormatValues(NiTPrimitiveArray_unsigned_int_* values);
+    void FUN_00a99b20(NiTPrimitiveArray<unsigned int>* values);
+    void AppendGlobalAndFormatValues(NiTPrimitiveArray<unsigned int>* values);
 };
 extern "C" void* g_012043a4;
 extern const char str_0109df4c[];
@@ -1411,191 +1273,32 @@ void CharacterProxy::FUN_00c6cf30(unsigned int formID)
 }
 
 extern "C" void _ReadWriteBarrier();
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 
-struct hkVector4
+
+inline const hkpCollidable* hkpCdBody::getRootCollidable() const
 {
-    __m128 m_vComponents;
-};
+    const hkpCdBody* body = this;
+    while (body->m_parent)
+    {
+        body = body->m_parent;
+    }
+    return reinterpret_cast<const hkpCollidable*>(body);
+}
+inline void* hkpCollidable::getOwner() const
+{
+    return (void*)((char*)this + m_iOwnerOffset);
+}
+inline const hkVector4& hkpRigidBody::getLinearVelocity() const
+{
+    return m_pMotionState.m_kTranslationalVelocity;
+}
 
 extern float DAT_01267e30;
 
-struct hkpShapeInfo
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    unsigned int m_flags;
-};
-
-struct hkpShape
-{
-    int unk00;
-    int unk04;
-    hkpShapeInfo* m_info;
-};
-
-struct hkpCdBody
-{
-    const hkpShape* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const hkpCdBody* m_parent;
-
-    const hkpCdBody* getRootCollidable() const
-    {
-        const hkpCdBody* body = this;
-        while (body->m_parent)
-        {
-            body = body->m_parent;
-        }
-        return body;
-    }
-};
-
-struct hkpCollidable : hkpCdBody
-{
-    signed char m_iOwnerOffset;
-    char unk11;
-    short unk12;
-    int m_broadPhaseId;
-    char m_type;
-    char unk19;
-    short unk1a;
-    unsigned int m_uiCollisionFilterData;
-
-    void* getOwner() const
-    {
-        return (void*)((char*)this + m_iOwnerOffset);
-    }
-};
-
-struct hkpRigidBody
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    hkVector4 m_kTranslationalVelocity;
-
-    const hkVector4& getLinearVelocity() const
-    {
-        return m_kTranslationalVelocity;
-    }
-};
 
 __forceinline hkpRigidBody* hkGetRigidBody(const hkpCollidable* collidable)
 {
-    if (collidable->m_type == 1)
+    if (collidable->m_kBroadPhaseHandle.m_type == 1)
     {
         return (hkpRigidBody*)collidable->getOwner();
     }
@@ -2007,18 +1710,18 @@ void GroundController::FUN_00c6e980(const GroundPoint* point)
     {
         return;
     }
-    int layer = ((const hkpCollidable*)body->getRootCollidable())->m_uiCollisionFilterData & 0x7f;
+    int layer = body->getRootCollidable()->m_kBroadPhaseHandle.m_uiCollisionFilterData & 0x7f;
     m_layer = layer;
-    hkpRigidBody* rb = hkGetRigidBody((const hkpCollidable*)body->getRootCollidable());
+    hkpRigidBody* rb = hkGetRigidBody(body->getRootCollidable());
     const hkVector4* velocity = rb ? &rb->getLinearVelocity() : (const hkVector4*)&DAT_01267e30;
     m_fVelocity.m_vComponents = velocity->m_vComponents;
 
     if (point->m_uiCollisionShapeKey == -1)
     {
         const hkpShape* shape = body->m_pCollisionShape;
-        if (shape && shape->m_info)
+        if (shape && shape->m_ulUserData)
         {
-            material = shape->m_info->m_flags & 0x1f;
+            material = reinterpret_cast<const hkpShapeInfo*>(shape->m_ulUserData)->m_flags & 0x1f;
         }
     }
     else if (layer != 0x11)
@@ -2064,14 +1767,10 @@ void GroundController::FUN_00c6e980(const GroundPoint* point)
 }
 
 namespace fnv_00c741e0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+typedef ::__m128 LocalM128;
+using ::_mm_store_ps;
+using ::_mm_setzero_ps;
+using ::_mm_setr_ps;
 extern "C" unsigned long __readfsdword(unsigned long);
 
 extern "C" unsigned int DAT_0126fd98;
@@ -2080,14 +1779,14 @@ extern "C" double DAT_01023128;
 extern "C" float DAT_010162c0;
 extern "C" float DAT_01017b78;
 extern "C" float DAT_01012054;
-extern "C" __m128 DAT_01267e30;
+extern "C" LocalM128 DAT_01267e30;
 union T741_V
 {
-    __forceinline T741_V(const __m128& q)
+    __forceinline T741_V(const LocalM128& q)
     {
         m_vComponents = q;
     }
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     float m_f[4];
     unsigned char m_kPointB[16];
 };
@@ -2461,7 +2160,7 @@ struct T741_B2a
     __forceinline void Reset()
     {
         f414 = 0;
-        *(__m128*)f450 = _mm_setzero_ps();
+        *(LocalM128*)f450 = _mm_setzero_ps();
     }
 };
 struct T741_B3
@@ -2717,39 +2416,36 @@ FUN_00c741e0::FUN_00c741e0(T741_Src* p)
 }  // namespace fnv_00c741e0
 
 namespace fnv_00c66320 {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float f[4];
-} __m128;
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_unpackhi_ps(__m128, __m128);
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
+typedef ::__m128 LocalM128;
+using ::_mm_store_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_mul_ps;
+using ::_mm_sub_ps;
+using ::_mm_add_ps;
+using ::_mm_add_ss;
+using ::_mm_unpackhi_ps;
+using ::_mm_load_ps;
 
-static __forceinline void multiply(__m128* out, const __m128* a, const __m128* b);
+static __forceinline void multiply(LocalM128* out, const LocalM128* a, const LocalM128* b);
 
 // @fnv 0x00c66320
-void __fastcall FUN_00c66320(__m128* out, void*, const __m128* a, const __m128* b)
+void __fastcall FUN_00c66320(LocalM128* out, void*, const LocalM128* a, const LocalM128* b)
 {
     __declspec(align(16)) char result[16];
-    __m128 value;
+    LocalM128 value;
     multiply(&value, a, b);
     _mm_store_ps((float*)result, value);
     *out = _mm_load_ps((const float*)result);
 }
 
-static __forceinline void multiply(__m128* out, const __m128* a, const __m128* b)
+static __forceinline void multiply(LocalM128* out, const LocalM128* a, const LocalM128* b)
 {
-    __m128 x = *a;
-    __m128 y = *b;
-    __m128 t0 = _mm_shuffle_ps(x, x, 0xd2);
-    __m128 t1 = _mm_shuffle_ps(y, y, 0xc9);
+    LocalM128 x = *a;
+    LocalM128 y = *b;
+    LocalM128 t0 = _mm_shuffle_ps(x, x, 0xd2);
+    LocalM128 t1 = _mm_shuffle_ps(y, y, 0xc9);
     t1 = _mm_mul_ps(t1, t0);
-    __m128 t2 = _mm_shuffle_ps(x, x, 0xc9);
+    LocalM128 t2 = _mm_shuffle_ps(x, x, 0xc9);
     t0 = _mm_shuffle_ps(y, y, 0xd2);
     t0 = _mm_mul_ps(t0, t2);
     t0 = _mm_sub_ps(t0, t1);
@@ -3133,36 +2829,26 @@ bool RayCaster::FUN_00c696d0(Query* query)
 
 // hkMatrix4-style copy: assign four 16-byte columns and return *this.
 
-struct hkVector4CD60
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
 {
-    __m128 m_vComponents;
-    void operator=(const hkVector4CD60& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-struct hkMatrix4CD60
-{
-    hkVector4CD60 m_kColumn0;
-    hkVector4CD60 m_kColumn1;
-    hkVector4CD60 m_kColumn2;
-    hkVector4CD60 m_kColumn3;
-    hkMatrix4CD60& FUN_00c6cd60(const hkMatrix4CD60& other);
-};
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+
+// The shared assignment returns void; this out-of-line copy also returns its destination.
 // @fnv 0x00c6cd60
-hkMatrix4CD60& hkMatrix4CD60::FUN_00c6cd60(const hkMatrix4CD60& other)
+hkMatrix4& __fastcall AssignMatrix(hkMatrix4* destination, void*, const hkMatrix4& other)
 {
-    m_kColumn0 = other.m_kColumn0;
-    m_kColumn1 = other.m_kColumn1;
-    m_kColumn2 = other.m_kColumn2;
-    m_kColumn3 = other.m_kColumn3;
-    return *this;
+    destination->m_kColumn0 = other.m_kColumn0;
+    destination->m_kColumn1 = other.m_kColumn1;
+    destination->m_kColumn2 = other.m_kColumn2;
+    destination->m_kColumn3 = other.m_kColumn3;
+    return *destination;
 }
 
 struct SseBlock
 {
-    __m128 m_00;
-    __m128 m_10;
+    LocalM128 m_00;
+    LocalM128 m_10;
     float m_20;
     float m_24;
     float m_28;
@@ -3188,20 +2874,20 @@ SseBlock& SseBlock::FUN_00c6d670(const SseBlock& o)
 // Reconstruction adapted from an unverified 2026-10-26 contribution by another contributor.
 extern "C"
 {
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_setr_ps(float, float, float, float);
-    __m128 _mm_setzero_ps(void);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_sqrt_ss(__m128);
-    void _mm_store_ss(float*, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
+using ::_mm_add_ss;
+using ::_mm_andnot_ps;
+using ::_mm_cmpeq_ss;
+using ::_mm_mul_ps;
+using ::_mm_mul_ss;
+using ::_mm_rsqrt_ss;
+using ::_mm_set_ss;
+using ::_mm_setr_ps;
+using ::_mm_setzero_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_sqrt_ss;
+using ::_mm_store_ss;
+using ::_mm_sub_ps;
+using ::_mm_sub_ss;
 }
 extern "C" double __cdecl cos(_In_ double _X);
 extern "C" inline float cosf(_In_ float _X)
@@ -3224,52 +2910,41 @@ extern const double DAT_0102f248, DAT_01066808, DAT_01020758, DAT_0102fc70, DAT_
 extern const char* DAT_0109b220;
 extern "C" long(__stdcall* DAT_00fdf1c4)(long*);
 
-union Vec4
+__forceinline float& Vec4::operator()(int i)
 {
-    __m128 m_vComponents;
-    signed char m_ai8[16];
-    __forceinline Vec4()
-    {}
-    __forceinline Vec4(const Vec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline float& operator()(int i)
-    {
-        return reinterpret_cast<float*>(&m_vComponents)[i];
-    }
-    __forceinline void operator=(const Vec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setSub4(const Vec4& a, const Vec4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline float length3() const
-    {
-        float result;
-        __m128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-        sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), sum);
-        _mm_store_ss(&result, _mm_sqrt_ss(sum));
-        return result;
-    }
-    __forceinline void normalize3()
-    {
-        __m128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-        sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), sum);
-        __m128 inv = _mm_rsqrt_ss(sum);
-        __m128 zero = _mm_set_ss(DAT_01011d78);
-        __m128 three = _mm_set_ss(DAT_01017718);
-        __m128 half = _mm_set_ss(DAT_01016248);
-        __m128 isZero = _mm_cmpeq_ss(sum, zero);
-        __m128 r = _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(sum, inv), inv));
-        r = _mm_andnot_ps(isZero, _mm_mul_ss(_mm_mul_ss(half, inv), r));
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(r, r, 0), m_vComponents);
-    }
-};
+    return reinterpret_cast<float*>(&m_vComponents)[i];
+}
+
+__forceinline void Vec4::operator=(const Vec4& v)
+{
+    m_vComponents = v.m_vComponents;
+}
+
+// Preserve this unit's scalar length result using the shared vector storage.
+__forceinline float Vec4Length3(const Vec4& value)
+{
+    float result;
+    LocalM128 sq = _mm_mul_ps(value.m_vComponents, value.m_vComponents);
+    LocalM128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
+    sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), sum);
+    _mm_store_ss(&result, _mm_sqrt_ss(sum));
+    return result;
+}
+
+__forceinline void Vec4::normalize3()
+{
+    LocalM128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
+    LocalM128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
+    sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), sum);
+    LocalM128 inv = _mm_rsqrt_ss(sum);
+    LocalM128 zero = _mm_set_ss(DAT_01011d78);
+    LocalM128 three = _mm_set_ss(DAT_01017718);
+    LocalM128 half = _mm_set_ss(DAT_01016248);
+    LocalM128 isZero = _mm_cmpeq_ss(sum, zero);
+    LocalM128 r = _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(sum, inv), inv));
+    r = _mm_andnot_ps(isZero, _mm_mul_ss(_mm_mul_ss(half, inv), r));
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(r, r, 0), m_vComponents);
+}
 
 struct FxString
 {
@@ -3357,24 +3032,23 @@ __forceinline FxObject** Properties(FxNode* pkNode)
 struct SceneObject
 {
     unsigned unk00, unk04, unk08, unk0c;
-    struct Point
-    {
-        float x, y, z, w;
-    };
-    Point origin, end;
+    NiPoint3 origin;
+    float originW;
+    NiPoint3 end;
+    float endW;
 };
 __forceinline Vec4 DifferenceOf(const SceneObject* o)
 {
     Vec4 v;
-    v.m_vComponents = _mm_sub_ps(_mm_setr_ps(o->origin.x, o->origin.y, o->origin.z, o->origin.w),
-                                 _mm_setr_ps(o->end.x, o->end.y, o->end.z, o->end.w));
+    v.m_vComponents = _mm_sub_ps(_mm_setr_ps(o->origin.x, o->origin.y, o->origin.z, o->originW),
+                                 _mm_setr_ps(o->end.x, o->end.y, o->end.z, o->endW));
     return v;
 }
 __forceinline Vec4 DifferenceOfMid(const SceneObject* o)
 {
     Vec4 v;
-    __m128 a = _mm_setr_ps(o->origin.x, o->origin.y, o->origin.z, o->origin.w);
-    __m128 b = _mm_setr_ps(o->end.x, o->end.y, o->end.z, o->end.w);
+    LocalM128 a = _mm_setr_ps(o->origin.x, o->origin.y, o->origin.z, o->originW);
+    LocalM128 b = _mm_setr_ps(o->end.x, o->end.y, o->end.z, o->endW);
     _ReadWriteBarrier();
     v.m_vComponents = _mm_sub_ps(a, b);
     return v;
@@ -3457,10 +3131,6 @@ __forceinline VfxSource* FindSource(FxObject** ppkProperties)
     return pkSource;
 }
 
-struct Setting
-{
-    float* FUN_00403e20();
-};
 extern Setting DAT_01267d98, DAT_01267de0;
 
 struct EffectOutput
@@ -3529,7 +3199,9 @@ bool SceneEffect::FUN_00c77ac0(EffectOutput* pkOutput, EffectRequest* pkRequest)
     fAngleDifference = fAngleDifference * DAT_01023128;
     fAngleDifference = cos(fAngleDifference);
     context.angleY = fAngleDifference;
-    Vec4 kDirection;
+    // Keep the original SIMD byte buffers for /GS stack placement, using the shared Vec4 view.
+    __declspec(align(16)) char kDirectionStorage[sizeof(Vec4)];
+    Vec4& kDirection = *reinterpret_cast<Vec4*>(kDirectionStorage);
     kDirection = pkBase->m_kInitialDirection;
 
     VfxSource* pkFinal = FindSource(ppkEndProps);
@@ -3542,23 +3214,26 @@ bool SceneEffect::FUN_00c77ac0(EffectOutput* pkOutput, EffectRequest* pkRequest)
         if (!pkSpecial)
             return false;
     }
-    Vec4 kFinal;
+    __declspec(align(16)) char kFinalStorage[sizeof(Vec4)];
+    Vec4& kFinal = *reinterpret_cast<Vec4*>(kFinalStorage);
     if (pkFinal)
         kFinal = pkFinal->m_kFinalDirection;
     else
         kFinal = pkSpecial->m_kInitialDirection;
-    Vec4 kDisplacement = DifferenceOf(pkEndObj);
+    __declspec(align(16)) char kDisplacementStorage[sizeof(Vec4)];
+    Vec4& kDisplacement = *reinterpret_cast<Vec4*>(kDisplacementStorage);
+    kDisplacement = DifferenceOf(pkEndObj);
     fAngleDifference = *DAT_01267d98.FUN_00403e20() + kFinal(0);
     if (pkSpecial)
     {
-        DifferenceOf(pkRootObj).length3();
-        DifferenceOfMid(context.object).length3();
+        Vec4Length3(DifferenceOf(pkRootObj));
+        Vec4Length3(DifferenceOfMid(context.object));
     }
 
     EffectOutput* __restrict result = pkOutput;
     result->m_kLightVector = kDirection;
     result->m_kLightVector.normalize3();
-    if (kDisplacement.length3() < 0.5f)
+    if (Vec4Length3(kDisplacement) < 0.5f)
         kDisplacement.m_vComponents = _mm_setzero_ps();
     pkOutput->m_kDisplacement = kDisplacement;
     pkOutput->m_fAngleZ = -*DAT_01267de0.FUN_00403e20();
@@ -3572,18 +3247,9 @@ bool SceneEffect::FUN_00c77ac0(EffectOutput* pkOutput, EffectRequest* pkRequest)
 }
 
 namespace fnv_00c7b1f0 {
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
+using ::_mm_setr_ps;
+using ::_mm_load_ps;
 __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-
-// Full SIMD storage views mirror the VC9 intrinsic type; the pack supplies only its float/qword views.
-union __declspec(align(16)) Vector_c7
-{
-    __m128 q;
-    unsigned char bytes[16];
-    float data[4];
-};
 
 struct StringHeader_c7
 {
@@ -3632,7 +3298,7 @@ struct Holder_c7
 
 struct Matrix_c7
 {
-    __m128 row0, row1, row2;
+    LocalM128 row0, row1, row2;
     Matrix_c7& operator=(const Matrix_c7& r)
     {
         _mm_store_ps((float*)&row0, _mm_load_ps((const float*)&r.row0));
@@ -3705,7 +3371,7 @@ struct FUN_00ce14b0
     unsigned int unk24;
     unsigned int unk28;
     unsigned int unk2c;
-    FUN_00ce14b0(unsigned int a, unsigned int b, unsigned int c, Vector_c7* v);
+    FUN_00ce14b0(unsigned int a, unsigned int b, unsigned int c, Vec4* v);
     static void* operator new(unsigned int size);
     static void operator delete(void* p);
     unsigned int FUN_00ce1420(unsigned char* a, unsigned int b, float c);
@@ -3925,6 +3591,8 @@ struct Actor_c7
     void FUN_00c7b1f0(void* a1, short a2, short a3, short a4);
 };
 
+// Preserve stack protection formerly induced by the vector byte-array views.
+#pragma strict_gs_check(push, on)
 // @fnv 0x00c7b1f0
 void Actor_c7::FUN_00c7b1f0(void* a1, short a2, short a3, short a4)
 {
@@ -3970,8 +3638,8 @@ void Actor_c7::FUN_00c7b1f0(void* a1, short a2, short a3, short a4)
     {
         idx3 = FindIndexByKey(root, "Bip01 R UpperArm", 0);
     }
-    Vector_c7 vec;
-    vec.q = _mm_setr_ps(0.0f, 0.0f, 1.0f, 0.0f);
+    Vec4 vec;
+    vec.m_vComponents = _mm_setr_ps(0.0f, 0.0f, 1.0f, 0.0f);
     if (!IsBodyValid())
     {
         if ((short)idx1 != -1 && (short)idx2 != -1 && (short)idx3 != -1)
@@ -4010,13 +3678,14 @@ void Actor_c7::FUN_00c7b1f0(void* a1, short a2, short a3, short a4)
     }
     m_254 = m_250->ContainsAllNames(root);
 }
+#pragma strict_gs_check(pop)
 }  // namespace fnv_00c7b1f0
 
 struct SRC
 {
     int m_00, m_04, m_08, m_0c;
     float m_10, m_14, m_18, m_1c;
-    __m128 m_20;
+    LocalM128 m_20;
 };
 struct DST
 {
@@ -4053,38 +3722,29 @@ DST* __cdecl FUN_00c74d50(DST* dst, const SRC* src)
 }
 
 extern "C" void _ReadWriteBarrier();
-class NiPoint3
+// Preserve this routine's existing trivial NiPoint3 value ABI independently of
+// the shared NiPoint3 declaration pulled in by NiAVObject.
+class ShapePoint3
 {
   public:
     float x, y, z;
-    NiPoint3()
+    ShapePoint3()
     {}
-    NiPoint3(float xx, float yy, float zz)
+    ShapePoint3(float xx, float yy, float zz)
     {
         x = xx;
         y = yy;
         z = zz;
     }
-    NiPoint3 operator*(float scale) const
+    ShapePoint3 operator*(float scale) const
     {
-        return NiPoint3(x * scale, y * scale, z * scale);
+        return ShapePoint3(x * scale, y * scale, z * scale);
     }
 };
-inline const NiPoint3& ZeroPoint()
+inline const ShapePoint3& ZeroPoint()
 {
-    return reinterpret_cast<const NiPoint3&>(NiPoint3_ZERO);
+    return reinterpret_cast<const ShapePoint3&>(NiPoint3_ZERO);
 }
-struct Bound
-{
-    union
-    {
-        struct
-        {
-            float x, y, z, radius;
-        };
-        float coordinates[4];
-    };
-};
 extern Bound DAT_011f4288;
 extern float DAT_010c72bc, DAT_011b0194;
 static float DAT_01267bcc;
@@ -4107,6 +3767,59 @@ struct ShapeRef
             Destroy();
     }
 };
+template <class T> inline NiPointer<T>::NiPointer()
+{
+    m_pObject = 0;
+}
+template <class T> inline NiPointer<T>::NiPointer(T* pkNew)
+{
+    m_pObject = pkNew;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::NiPointer(const NiPointer<T>& kSrc)
+{
+    m_pObject = kSrc.m_pObject;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+template <class T> inline NiPointer<T>::operator T*() const
+{
+    return m_pObject;
+}
+template <class T> inline T* NiPointer<T>::operator->() const
+{
+    return m_pObject;
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer<T>& kSrc)
+{
+    if (m_pObject != kSrc.m_pObject)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = kSrc.m_pObject;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
 struct ShapePointer : NiPointer<ShapeRef>
 {
     ShapePointer& operator=(ShapeRef* incoming)
@@ -4121,7 +3834,7 @@ extern ShapePointer DAT_01267be0;
 struct Geometry
 {
     int unk00, unk04, unk08;
-    NiPoint3 center, extents;
+    ShapePoint3 center, extents;
 };
 struct NodeBounds
 {
@@ -4199,7 +3912,7 @@ struct CompoundInfo
 };
 struct FUN_00cab710 : ShapeRef
 {
-    FUN_00cab710(NiPoint3 const&, NiPoint3 const&, float);
+    FUN_00cab710(ShapePoint3 const&, ShapePoint3 const&, float);
     static void* operator new(unsigned int n)
     {
         return FUN_00aa13e0(n);
@@ -4250,18 +3963,14 @@ struct __declspec(align(16)) AuxInfo
 };
 struct ShapeInput;
 struct ShapeOwner;
-struct MemoryManagerLocal
-{
-    void* FUN_00aa3e40(unsigned int);
-};
-extern MemoryManagerLocal DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 struct FUN_00c6d1e0 : ShapeRef
 {
     int unk14, unk18, unk1c;
     FUN_00c6d1e0(AuxInfo const&, ShapeOwner*);
     static void* operator new(unsigned int n)
     {
-        unsigned char* p = (unsigned char*)DAT_011f6238.FUN_00aa3e40(n + 16);
+        unsigned char* p = (unsigned char*)DAT_011f6238.Allocate(n + 16);
         unsigned char offset = 16 - ((unsigned int)p & 15);
         p += offset;
         p[-1] = offset;
@@ -4269,7 +3978,7 @@ struct FUN_00c6d1e0 : ShapeRef
     }
     static void operator delete(void*);
 };
-ShapeRef* __cdecl FUN_00c70de0(NiPoint3 const&, NiPoint3 const&, float, float);
+ShapeRef* __cdecl FUN_00c70de0(ShapePoint3 const&, ShapePoint3 const&, float, float);
 struct ShapeInput
 {
     int unk000;
@@ -4725,7 +4434,7 @@ struct ShapeOwner
     int unk5e4;
     int unk5e8;
     int unk5ec;
-    NiPoint3 dimensions;
+    ShapePoint3 dimensions;
     __forceinline void SetShape(unsigned int index, ShapeRef* incoming)
     {
         shapes[index] = incoming;
@@ -4749,7 +4458,7 @@ void ShapeOwner::FUN_00c72410(ShapeInput* input)
     shapeCount = 2;
     float diameter, radius;
     float scratch;
-    NiPoint3 extents, center;
+    ShapePoint3 extents, center;
     if (input->GetShape())
     {
         shapes[input->GetIndex()] = input->GetShape();
@@ -4759,7 +4468,7 @@ void ShapeOwner::FUN_00c72410(ShapeInput* input)
     }
     else
     {
-        NiPoint3 scaled, b;
+        ShapePoint3 scaled, b;
         if (input->node && !input->flag96)
         {
             Geometry* geometry;
@@ -4856,14 +4565,14 @@ void ShapeOwner::FUN_00c72410(ShapeInput* input)
                 ShapeRef* halfLength = new FUN_00cab710(scaled, b, radius);
                 scaled.z = z;
                 scaled.y = (float)(scaled.y - 8.0);
-                NiPoint3 sideA = scaled;
+                ShapePoint3 sideA = scaled;
                 float sideZ = (float)(z + 1.0);
                 scaled.z = sideZ;
                 sideA.z = (float)(sideA.z - 1.0);
                 ShapeRef* left = new FUN_00cab710(scaled, sideA, (float)(z - 1.0));
                 b.z = z;
                 b.y = (float)(b.y + 8.0);
-                NiPoint3 sideB = b;
+                ShapePoint3 sideB = b;
                 b.z = sideZ;
                 sideB.z = (float)(sideB.z - 1.0);
                 ShapeRef* right = new FUN_00cab710(b, sideB, (float)(z - 1.0));
@@ -4963,42 +4672,38 @@ void ShapeOwner::FUN_00c72410(ShapeInput* input)
     }
 }
 
+
 namespace P064Intrinsics {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    signed char m128_i8[16];
-};
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_div_ss(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_cmple_ps(__m128, __m128);
-    __m128 _mm_sqrt_ss(__m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_rcp_ps(__m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_setzero_ps();
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    void _mm_store_ss(float*, __m128);
-    float _mm_cvtss_f32(__m128);
-    int _mm_movemask_ps(__m128);
+using ::_mm_mul_ps;
+using ::_mm_load_ps;
+using ::_mm_add_ps;
+using ::_mm_sub_ps;
+using ::_mm_add_ss;
+using ::_mm_sub_ss;
+using ::_mm_mul_ss;
+using ::_mm_div_ss;
+using ::_mm_shuffle_ps;
+using ::_mm_xor_ps;
+using ::_mm_and_ps;
+using ::_mm_andnot_ps;
+using ::_mm_cmpeq_ss;
+using ::_mm_cmple_ps;
+using ::_mm_sqrt_ss;
+using ::_mm_rsqrt_ss;
+using ::_mm_rcp_ps;
+using ::_mm_set_ss;
+using ::_mm_set_ps1;
+using ::_mm_setzero_ps;
+using ::_mm_unpackhi_ps;
+using ::_mm_store_ss;
+using ::_mm_cvtss_f32;
+using ::_mm_movemask_ps;
 }
 }
-typedef P064Intrinsics::__m128 P064Quad;
+typedef P064Intrinsics::LocalM128 P064Quad;
 
 struct P064Bool
 {
@@ -5484,19 +5189,6 @@ bool P064Controller::FUN_00c78610(int index, const P064Point* point)
     return !changed;
 }
 
-union CharacterVector
-{
-    hkVector4 vector;
-    signed char bytes[16];
-    float& component(int index)
-    {
-        return reinterpret_cast<float*>(bytes)[index];
-    }
-    void set(float a, float b, float c, float d)
-    {
-        vector.m_vComponents = _mm_setr_ps(a, b, c, d);
-    }
-};
 struct ParticleArgument
 {
     int unk00;
@@ -5555,14 +5247,6 @@ struct ParticleResult
 struct ParticleOwner
 {
     ParticleResult* FUN_00cac980();
-};
-struct ParticleSlot
-{
-    int unk00;
-    int unk04;
-    float value;
-    int unk0c;
-    void FUN_00c7f640(void* argument, hkVector4* vector);
 };
 struct CharacterProbeLocal
 {
@@ -5931,13 +5615,15 @@ struct CharacterProbeLocal
     int unk5a4;
     int unk5a8;
     int unk5ac;
-    ParticleSlot firstSlots[2];
-    ParticleSlot secondSlots[2];
+    hkVector4 firstSlots[2];
+    hkVector4 secondSlots[2];
     float baseOffset;
     float height;
     void FUN_00c6e820();
 };
 
+// Keep the stack protection originally induced by the local SIMD storage.
+#pragma strict_gs_check(push, on)
 // @fnv 0x00c6e820
 void CharacterProbeLocal::FUN_00c6e820()
 {
@@ -5951,26 +5637,28 @@ void CharacterProbeLocal::FUN_00c6e820()
     if (result->inner->type != 9)
         base = -baseOffset * 0.5;
 
-    CharacterVector vector;
-    vector.set(DAT_01011d78, offset, base, DAT_01011d78);
-    ParticleSlot* slots = firstSlots;
+    hkVector4 vector;
+    vector.m_vComponents = _mm_setr_ps(DAT_01011d78, offset, base, DAT_01011d78);
+    hkVector4* slots = firstSlots;
     for (int i = 0; i < 2; i++)
     {
-        slots[i].FUN_00c7f640(&result->unkb0, &vector.vector);
-        float previous = slots[i].value;
-        slots[i].value = elevation + previous;
-        vector.component(1) = opposite;
+        slots[i].FUN_00c7f640(*reinterpret_cast<const hkTransform*>(&result->unkb0), vector);
+        float previous = slots[i].m_f[2];
+        slots[i].m_f[2] = elevation + previous;
+        vector.m_f[1] = opposite;
     }
 
-    vector.set(opposite, DAT_01011d78, base, DAT_01011d78);
+    vector.m_vComponents = _mm_setr_ps(opposite, DAT_01011d78, base, DAT_01011d78);
     slots = secondSlots;
     for (int i = 0; i < 2; i++)
     {
-        slots[i].FUN_00c7f640(&result->unkb0, &vector.vector);
-        slots[i].value = slots[i].value + elevation;
-        vector.component(0) = offset;
+        slots[i].FUN_00c7f640(*reinterpret_cast<const hkTransform*>(&result->unkb0), vector);
+        slots[i].m_f[2] = slots[i].m_f[2] + elevation;
+        vector.m_f[0] = offset;
     }
 }
+
+#pragma strict_gs_check(pop)
 
 extern "C" double __cdecl atan(double);
 
@@ -5982,11 +5670,6 @@ __forceinline float AimMax(float a, float b)
 {
     return a > b ? a : b;
 }
-struct AimVector_c70060
-{
-    P064Quad q;
-    void FUN_004b4ab0(int, int);
-};
 struct AimNode_c70060
 {
     int unk00, unk04;
@@ -6377,13 +6060,15 @@ struct AimController_c70060
     unsigned int field_5ec;
     unsigned int field_5f0;
     float field_5f4;
-    void FUN_00c6e680(int index, AimVector_c70060* result);
+    void FUN_00c6e680(int index, hkVector4* result);
     void FUN_00c70060();
 };
+// Keep the stack protection originally induced by the local SIMD storage.
+#pragma strict_gs_check(push, on)
 // @fnv 0x00c70060
 void AimController_c70060::FUN_00c70060()
 {
-    AimVector_c70060 position;
+    hkVector4 position;
     float difference, angle;
     if (((unsigned char)(field_414 >> 18) & 1) || !(field_530 > 0.0f))
         return;
@@ -6397,12 +6082,12 @@ void AimController_c70060::FUN_00c70060()
             {
                 FUN_00c6e680(0, &position);
                 difference =
-                    P064Intrinsics::_mm_cvtss_f32(P064Intrinsics::_mm_shuffle_ps(position.q, position.q, 0xaa));
+                    P064Intrinsics::_mm_cvtss_f32(P064Intrinsics::_mm_shuffle_ps(reinterpret_cast<const P064Quad&>(position.m_vComponents), reinterpret_cast<const P064Quad&>(position.m_vComponents), 0xaa));
             }
             if (angle == 1.1754943508222875e-38f)
             {
                 FUN_00c6e680(1, &position);
-                angle = P064Intrinsics::_mm_cvtss_f32(P064Intrinsics::_mm_shuffle_ps(position.q, position.q, 0xaa));
+                angle = P064Intrinsics::_mm_cvtss_f32(P064Intrinsics::_mm_shuffle_ps(reinterpret_cast<const P064Quad&>(position.m_vComponents), reinterpret_cast<const P064Quad&>(position.m_vComponents), 0xaa));
             }
             difference = angle - difference;
             if (difference != 0.0f)
@@ -6439,12 +6124,12 @@ void AimController_c70060::FUN_00c70060()
             {
                 FUN_00c6e680(2, &position);
                 difference =
-                    P064Intrinsics::_mm_cvtss_f32(P064Intrinsics::_mm_shuffle_ps(position.q, position.q, 0xaa));
+                    P064Intrinsics::_mm_cvtss_f32(P064Intrinsics::_mm_shuffle_ps(reinterpret_cast<const P064Quad&>(position.m_vComponents), reinterpret_cast<const P064Quad&>(position.m_vComponents), 0xaa));
             }
             if (angle == 1.1754943508222875e-38f)
             {
                 FUN_00c6e680(3, &position);
-                angle = P064Intrinsics::_mm_cvtss_f32(P064Intrinsics::_mm_shuffle_ps(position.q, position.q, 0xaa));
+                angle = P064Intrinsics::_mm_cvtss_f32(P064Intrinsics::_mm_shuffle_ps(reinterpret_cast<const P064Quad&>(position.m_vComponents), reinterpret_cast<const P064Quad&>(position.m_vComponents), 0xaa));
             }
             difference = angle - difference;
             if (difference != 0.0f)
@@ -6477,7 +6162,7 @@ void AimController_c70060::FUN_00c70060()
     else
     {
         char* object = field_594 ? field_594->object : 0;
-        position.FUN_004b4ab0((int)(object + 0xb0), (int)&field_450);
+        position.FUN_004b4ab0(*reinterpret_cast<const hkRotation*>(object + 0xb0), *reinterpret_cast<const hkVector4*>(&field_450));
         double ucLimitOffset = DAT_011b0148 * 0.01745329238474369;
         unsigned int flags = field_414;
         P064Quad rotation;
@@ -6509,23 +6194,16 @@ void AimController_c70060::FUN_00c70060()
     }
 }
 
-union S00c70550_Vector
-{
-    __int8 m_i8[16];
-    __m128 m_vComponents;
-    struct
-    {
-        float x, y, z, w;
-    };
-};
+#pragma strict_gs_check(pop)
+
 
 struct S00c70550_Point3
 {
     float x, y, z;
 };
 
-void __stdcall SubtractVectors(S00c70550_Vector* pOut);
-void __cdecl FUN_00458620(S00c70550_Point3* pOut, const S00c70550_Vector* pIn);
+void __stdcall SubtractVectors(hkVector4* pOut);
+void __cdecl FUN_00458620(S00c70550_Point3* pOut, const hkVector4* pIn);
 
 class FUN_00c70550_cls
 {
@@ -6871,13 +6549,15 @@ class FUN_00c70550_cls
     float m_fOriginZ;
 };
 
+// Keep the stack protection originally induced by the local SIMD storage.
+#pragma strict_gs_check(push, on)
 // @fnv 0x00c70550
 float FUN_00c70550_cls::FUN_00c70550()
 {
     float fResult = 0.0f;
     if (m_fOriginZ != 0.0f)
     {
-        S00c70550_Vector kPos;
+        hkVector4 kPos;
         SubtractVectors(&kPos);
         S00c70550_Point3 kPoint;
         FUN_00458620(&kPoint, &kPos);
@@ -6886,11 +6566,8 @@ float FUN_00c70550_cls::FUN_00c70550()
     return fResult;
 }
 
-union C74570_Vec
-{
-    __m128 q;
-    char bytes[16];  // the real xmmintrin __m128 also overlays __int8 m128_i8[16]
-};
+#pragma strict_gs_check(pop)
+
 struct C74570_Ctrl
 {
     virtual void v00();
@@ -6992,14 +6669,14 @@ struct C74570_Node
 };
 struct C74570_Mat
 {
-    C74570_Vec r0;
-    C74570_Vec r1;
-    C74570_Vec r2;
+    Vec4 r0;
+    Vec4 r1;
+    Vec4 r2;
     void Build(void* out, float angle);
 };
 struct C74570_Xf
 {
-    C74570_Vec a;
+    Vec4 a;
     void Combine(void* p, void* q);
 };
 extern float DAT_01267c14;
@@ -7027,6 +6704,8 @@ struct C74570_This
     void FUN_00c74570(float dt);
 };
 
+// Preserve stack protection formerly induced by the vector byte-array views.
+#pragma strict_gs_check(push, on)
 // @fnv 0x00c74570
 void C74570_This::FUN_00c74570(float dt)
 {
@@ -7055,11 +6734,11 @@ void C74570_This::FUN_00c74570(float dt)
                 b -= DAT_011b02e0;
             else if (b < 0.0f)
                 b += DAT_011b02e0;
-            C74570_Vec v0;
+            Vec4 v0;
             C74570_Xf xf;
-            C74570_Vec v1;
-            v1.q = _mm_setr_ps(0.0f, a, 0.0f, 0.0f);
-            v0.q = _mm_setr_ps(0.0f, 0.0f, 1.0f, 0.0f);
+            Vec4 v1;
+            v1.m_vComponents = _mm_setr_ps(0.0f, a, 0.0f, 0.0f);
+            v0.m_vComponents = _mm_setr_ps(0.0f, 0.0f, 1.0f, 0.0f);
             C74570_Mat m;
             m.Build(&v0, b);
             xf.Combine(&m, &v1);
@@ -7071,6 +6750,7 @@ void C74570_This::FUN_00c74570(float dt)
         }
     }
 }
+#pragma strict_gs_check(pop)
 
 struct P064Vector
 {
@@ -7307,8 +6987,8 @@ extern int DAT_01034ec4;
 
 struct S00c6e680_C6RayInput
 {
-    __m128 from;
-    __m128 to;
+    LocalM128 from;
+    LocalM128 to;
     bool enableShapeCollectionFilter;
     unsigned int filterInfo;
     unsigned int unk28;
@@ -7320,7 +7000,7 @@ struct S00c6e680_C6RayInput
 
 struct S00c6e680_C6RayOutput
 {
-    __m128 normal;
+    LocalM128 normal;
     float hitFraction;
     int m_uiExtraInfo;
     int unk18;
@@ -7336,7 +7016,7 @@ struct S00c6e680_C6RayOutput
 
 struct S00c6e680_C6RayOutputPlain
 {
-    __m128 normal;
+    LocalM128 normal;
     float hitFraction;
     int m_uiExtraInfo;
     int unk18;
@@ -7379,7 +7059,7 @@ struct S00c6e680_C6PickData
     S00c6e680_C6RayOutput output;
     void* unk80;
     char unk84[12];
-    __m128 unk90;
+    LocalM128 unk90;
     unsigned int unkA0;
     S00c6e680_C6Collector* collectorPointer;
     unsigned int unkA8;
@@ -7484,11 +7164,11 @@ struct S00c6e680_Ctrl
 
 struct S00c6e680_Class : S00c6e680_Ctrl
 {
-    void FUN_00c6e680(int index, __m128* position);
+    void FUN_00c6e680(int index, LocalM128* position);
 };
 
 // @fnv 0x00c6e680
-void S00c6e680_Class::FUN_00c6e680(int index, __m128* position)
+void S00c6e680_Class::FUN_00c6e680(int index, LocalM128* position)
 {
     unsigned int pick;
     bool none = false;
@@ -7496,11 +7176,11 @@ void S00c6e680_Class::FUN_00c6e680(int index, __m128* position)
     filterInfo.collectorPointer = &filterInfo.collector;
     filterInfo.unkA8 = 0;
 
-    *position = *(__m128*)((char*)this + ((index + 0x5B) << 4));
+    *position = *(LocalM128*)((char*)this + ((index + 0x5B) << 4));
     filterInfo.input.from = *position;
     position->m128_f32[2] = position->m128_f32[2] - DAT_0104f2f0;
 
-    filterInfo.unk90 = (*(__m128*)&DAT_01267e30);
+    filterInfo.unk90 = (*(LocalM128*)&DAT_01267e30);
     filterInfo.input.to = *position;
 
     FUN_0070c440(pick);
@@ -7548,38 +7228,6 @@ void __cdecl FUN_00c6d620(VectorData* data, int arg, Vec4Sink* callee)
     callee->FUN_00c7f640(arg, &value);
 }
 
-namespace N {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int8 m128_i8[16];
-    __int16 m128_i16[8];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int8 m128_u8[16];
-    unsigned __int16 m128_u16[8];
-    unsigned __int32 m128_u32[4];
-};
-extern "C"
-{
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-}
-}
-
-struct __declspec(align(16)) hkVector4C66
-{
-    void setSub4(const hkVector4C66& a, const hkVector4C66& b)
-    {
-        m_vComponents = N::_mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void add4(const hkVector4C66& a)
-    {
-        m_vComponents = N::_mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    N::__m128 m_vComponents;
-};
 
 class BodyC66
 {
@@ -7588,7 +7236,7 @@ class BodyC66
     {}
     void unmarkForWrite()
     {}
-    void FUN_00c96a20(const hkVector4C66& delta, hkVector4C66& out, int flags);
+    void FUN_00c96a20(const hkVector4& delta, hkVector4& out, int flags);
 };
 
 class ControllerBaseC66
@@ -7639,40 +7287,43 @@ class ControllerBaseC66
 class ControllerC66 : public ControllerBaseC66
 {
   public:
-    void FUN_00c66c00(const hkVector4C66& position);
+    void FUN_00c66c00(const hkVector4& position);
 
-    hkVector4C66 m_v60;
+    hkVector4 m_v60;
 };
 
+// The original vector storage triggered /GS protection for these stack locals.
+#pragma strict_gs_check(push, on)
 // @fnv 0x00c66c00
-void ControllerC66::FUN_00c66c00(const hkVector4C66& position)
+void ControllerC66::FUN_00c66c00(const hkVector4& position)
 {
-    hkVector4C66 delta;
+    hkVector4 delta;
     delta.setSub4(position, m_v60);
     BodyC66* pkBody = GetBody();
     GetBody()->MarkForWrite();
-    hkVector4C66 moved;
+    hkVector4 moved;
     pkBody->FUN_00c96a20(delta, moved, 0);
     GetBody()->unmarkForWrite();
     m_v60.add4(moved);
 }
+#pragma strict_gs_check(pop)
 
 union __declspec(align(16)) VecBoxQ
 {
-    __m128 q;
+    LocalM128 q;
     __int8 i8[16];
 };
-extern "C" __m128 _mm_and_ps(__m128, __m128);
-extern "C" int _mm_movemask_ps(__m128);
-extern "C" __m128 _mm_cmple_ps(__m128, __m128);
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
+using ::_mm_and_ps;
+using ::_mm_movemask_ps;
+using ::_mm_cmple_ps;
+using ::_mm_set_ps1;
+using ::_mm_add_ps;
 extern const float DAT_01013ea4;
 
 struct ProxyHolder
 {
     const char* FUN_00cac950();
-    void FUN_00cac960(const __m128* v);
+    void FUN_00cac960(const LocalM128* v);
 };
 struct VecSrc
 {
@@ -7680,31 +7331,31 @@ struct VecSrc
     int unk04;
     int unk08;
     int unk0c;
-    __m128 vec10;
+    LocalM128 vec10;
 };
 
 // @fnv 0x00c6ca30
 void __stdcall FUN_00c6ca30(ProxyHolder* a, ProxyHolder* b, VecSrc* src)
 {
-    __m128 p = *(const __m128*)a->FUN_00cac950();
+    LocalM128 p = *(const LocalM128*)a->FUN_00cac950();
     VecBoxQ db;
-    db.q = _mm_and_ps(_mm_sub_ps(p, *(const __m128*)&DAT_01267e30), *(const __m128*)&DAT_01017d10);
-    __m128& d = db.q;
+    db.q = _mm_and_ps(_mm_sub_ps(p, *(const LocalM128*)&DAT_01267e30), *(const LocalM128*)&DAT_01017d10);
+    LocalM128& d = db.q;
     if ((_mm_movemask_ps(_mm_cmple_ps(d, _mm_set_ps1(DAT_01013ea4))) & 7) == 7)
         return;
-    __m128 zero = _mm_set_ss(DAT_01011d78);
-    __m128 dir = src->vec10;
+    LocalM128 zero = _mm_set_ss(DAT_01011d78);
+    LocalM128 dir = src->vec10;
     dir.m128_f32[2] = 0.0f;
     p.m128_f32[2] = 0.0f;
-    __m128 three = _mm_set_ss(DAT_01017718);
-    __m128 sq = _mm_mul_ps(dir, dir);
-    __m128 len = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
-    __m128 r = _mm_rsqrt_ss(len);
-    __m128 inv =
+    LocalM128 three = _mm_set_ss(DAT_01017718);
+    LocalM128 sq = _mm_mul_ps(dir, dir);
+    LocalM128 len = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
+    LocalM128 r = _mm_rsqrt_ss(len);
+    LocalM128 inv =
         _mm_andnot_ps(_mm_cmpeq_ss(len, zero), _mm_mul_ss(_mm_mul_ss(_mm_set_ss(DAT_01016248), r),
                                                           _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len, r), r))));
     dir = _mm_mul_ps(_mm_mul_ps(_mm_shuffle_ps(inv, inv, 0), dir), p);
-    p = _mm_add_ps(*(const __m128*)b->FUN_00cac950(), dir);
+    p = _mm_add_ps(*(const LocalM128*)b->FUN_00cac950(), dir);
     b->FUN_00cac960(&p);
 }
 

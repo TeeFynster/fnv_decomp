@@ -14,9 +14,9 @@ void TESCombatStyle::ResetFormData()
     TESCombatStyle* style = FUN_00505000();
     if (style)
     {
-        memcpy(&Data, &((NiAVObject*)style)->FUN_0043c490(), 0x5c);
-        memcpy(&m_kUInt32ChunkData, ((CombatStyleAccess*)style)->FUN_006ab360(), 0x54);
-        memcpy(&m_kUnsignedIntArray16, ((BGSHungerStage*)style)->FUN_00500940(), 0x40);
+        memcpy(&Data, &GetCombatStyleData(style), 0x5c);
+        memcpy(&m_kUInt32ChunkData, GetCombatStyleAdvancedData(style), 0x54);
+        memcpy(&m_kUnsignedIntArray16, GetHungerStageData((BGSHungerStage*)style), 0x40);
     }
     else
     {
@@ -59,7 +59,7 @@ bool TESCombatStyle::Load(TESFile* file)
         case 0x44415343:
             file->GetChunkData(&m_kUInt32ChunkData, 0x54);
             if (((TESFileExtra*)file)->FUN_00401680())
-                m_kUInt32ChunkData.FUN_005057a0();
+                SwapUInt32ChunkData(&m_kUInt32ChunkData);
             break;
         case 0x44535343:
             file->GetChunkData(&m_kUnsignedIntArray16, 0x40);
@@ -69,7 +69,7 @@ bool TESCombatStyle::Load(TESFile* file)
                 unsigned int size = file->GetChunkSize();
                 if (size < 0x40)
                     memcpy(&saved, &m_kUnsignedIntArray16, 0x40);
-                m_kUnsignedIntArray16.FUN_00505610();
+                m_kUnsignedIntArray16.SwapEndianFields();
                 if (size < 0x40)
                     memcpy((char*)&m_kUnsignedIntArray16 + size, (char*)&saved + size, 0x40 - size);
             }
@@ -88,108 +88,87 @@ bool TESCombatStyle::Load(TESFile* file)
 
 extern "C" int __cdecl memcmp(const void*, const void*, unsigned int);
 
-class TESForm;
-class TESCombatStyle;
-
-struct FUN_00505550_shell
+// A one-word aggregate stays on the stack under fastcall, preserving the
+// original thiscall argument layout for helpers absent from the shared class.
+struct CombatStyleFormArgument
 {
-    bool FUN_00485270(TESCombatStyle*);
-    bool IsCombatStyleDifferent(TESForm* apCompare);
+    TESForm* form;
 };
 
+bool __fastcall CompareCombatStyleBase(TESCombatStyle* self, void*, TESCombatStyle* other);
+
 // @fnv 0x00505550
-bool FUN_00505550_shell::IsCombatStyleDifferent(TESForm* apCompare)
+bool __fastcall IsCombatStyleDifferent(TESCombatStyle* self, CombatStyleFormArgument apCompare)
 {
-    TESCombatStyle* pcomp = dynamic_cast<TESCombatStyle*>(apCompare);
+    TESCombatStyle* pcomp = dynamic_cast<TESCombatStyle*>(apCompare.form);
     if (!pcomp)
         return true;
-    if (FUN_00485270(pcomp))
+    if (reinterpret_cast<bool (__thiscall*)(TESCombatStyle*, TESCombatStyle*)>(CompareCombatStyleBase)(self, pcomp))
         return true;
-    if (memcmp(&((NiAVObject*)this)->FUN_0043c490(), &((NiAVObject*)pcomp)->FUN_0043c490(), 0x5c))
+    if (memcmp(&GetCombatStyleData(self), &GetCombatStyleData(pcomp), 0x5c))
         return true;
-    if (memcmp(((CombatStyleAccess*)this)->FUN_006ab360(), ((CombatStyleAccess*)pcomp)->FUN_006ab360(), 0x54))
+    if (memcmp(GetCombatStyleAdvancedData(self), GetCombatStyleAdvancedData(pcomp), 0x54))
         return true;
-    if (memcmp(((BGSHungerStage*)this)->FUN_00500940(), ((BGSHungerStage*)pcomp)->FUN_00500940(), 0x40))
+    if (memcmp(GetHungerStageData((BGSHungerStage*)self), GetHungerStageData((BGSHungerStage*)pcomp), 0x40))
         return true;
     return false;
 }
 
-struct FUN_00505080_shell
-{
-    void FUN_005050b0();
-    void* FUN_00505080(unsigned int);
-};
+void __fastcall DestroyCombatStyle(TESCombatStyle* self);
 void _Deallocate(void*);
-// Calls FUN_005050b0, then deallocates this when flags has bit 0 set, and returns this.
+// Destroys the combat style, then deallocates it when flags has bit 0 set.
 // @fnv 0x00505080
-void* FUN_00505080_shell::FUN_00505080(unsigned int flags)
+void* __fastcall DeleteCombatStyle(TESCombatStyle* self, void*, unsigned int flags)
 {
-    FUN_005050b0();
+    DestroyCombatStyle(self);
     if (flags & 1)
-        _Deallocate(this);
-    return this;
+        _Deallocate(self);
+    return self;
 }
 
 bool __cdecl FUN_00401500();
-struct FUN_00485680_shell
-{
-    void M();
-};
+
 void __cdecl AppendChunk(unsigned int, void*, unsigned int);
 
-struct FUN_004855a0_shell
-{
-    void M();
-};
-
-struct FUN_005053c0_shell : FUN_004855a0_shell
-{
-    void FUN_005053c0();
-};
-
 // @fnv 0x005053c0
-void __thiscall FUN_005053c0_shell::FUN_005053c0()
+void __fastcall SaveCombatStyle(TESCombatStyle* self)
 {
-    M();
+    self->FUN_004855a0();
     if (FUN_00401500())
-        ((StatsChunkData*)((char*)this + 0x58))->SwapEndianFields();
-    AppendChunk(0x44545343, (char*)this + 0x58, 0x5c);
+        self->Data.SwapEndianFields();
+    AppendChunk(0x44545343, &self->Data, 0x5c);
     if (FUN_00401500())
-        ((StatsChunkData*)((char*)this + 0x58))->SwapEndianFields();
+        self->Data.SwapEndianFields();
     if (FUN_00401500())
-        ((UInt32ChunkData*)((char*)this + 0xb4))->FUN_005057a0();
-    AppendChunk(0x44415343, (char*)this + 0xb4, 0x54);
+        SwapUInt32ChunkData(&self->m_kUInt32ChunkData);
+    AppendChunk(0x44415343, &self->m_kUInt32ChunkData, 0x54);
     if (FUN_00401500())
-        ((UInt32ChunkData*)((char*)this + 0xb4))->FUN_005057a0();
+        SwapUInt32ChunkData(&self->m_kUInt32ChunkData);
     if (FUN_00401500())
-        ((UnsignedIntArray16*)((char*)this + 0x18))->FUN_00505610();
-    AppendChunk(0x44535343, (char*)this + 0x18, 0x40);
+        self->m_kUnsignedIntArray16.SwapEndianFields();
+    AppendChunk(0x44535343, &self->m_kUnsignedIntArray16, 0x40);
     if (FUN_00401500())
-        ((UnsignedIntArray16*)((char*)this + 0x18))->FUN_00505610();
-    ((FUN_00485680_shell*)this)->M();
+        self->m_kUnsignedIntArray16.SwapEndianFields();
+    self->FUN_00485680();
 }
 
 void __memcpy(void* __dst, const void* __src, unsigned int __n);
 
-struct FUN_005054b0_shell : public NiAVObject
-{
-    void FUN_004851b0(TESForm* apCopy);
-    void CopyFromCombatStyle(TESForm* apCopy);
-};
+void __fastcall CopyCombatStyleBase(TESCombatStyle* self, void*, TESForm* apCopy);
 
 // Casts apCopy to TESCombatStyle, calls FUN_004851b0, then memcpy's three sub-objects (0x5c, 0x54, 0x40 bytes) from the copy into this.
 // @fnv 0x005054b0
-void FUN_005054b0_shell::CopyFromCombatStyle(TESForm* apCopy)
+void __fastcall CopyFromCombatStyle(TESCombatStyle* self, CombatStyleFormArgument apCopy)
 {
-    TESForm* pcopy = dynamic_cast<TESForm*>(dynamic_cast<TESCombatStyle*>(apCopy));
+    TESForm* pcopy = dynamic_cast<TESForm*>(dynamic_cast<TESCombatStyle*>(apCopy.form));
     if (!pcopy)
         return;
-    FUN_004851b0(pcopy);
-    __memcpy(&FUN_0043c490(), &reinterpret_cast<NiAVObject*>(pcopy)->FUN_0043c490(), 0x5c);
-    __memcpy(reinterpret_cast<CombatStyleAccess*>(this)->FUN_006ab360(),
-             reinterpret_cast<CombatStyleAccess*>(pcopy)->FUN_006ab360(), 0x54);
-    __memcpy(reinterpret_cast<BGSHungerStage*>(this)->FUN_00500940(),
-             reinterpret_cast<BGSHungerStage*>(pcopy)->FUN_00500940(), 0x40);
+    reinterpret_cast<void (__thiscall*)(TESCombatStyle*, TESForm*)>(CopyCombatStyleBase)(self, pcopy);
+    __memcpy(&GetCombatStyleData(self), &GetCombatStyleData(reinterpret_cast<TESCombatStyle*>(pcopy)), 0x5c);
+    __memcpy(GetCombatStyleAdvancedData(self),
+             GetCombatStyleAdvancedData(reinterpret_cast<TESCombatStyle*>(pcopy)), 0x54);
+    __memcpy(GetHungerStageData(reinterpret_cast<BGSHungerStage*>(self)),
+             GetHungerStageData(reinterpret_cast<BGSHungerStage*>(pcopy)), 0x40);
 }
 
 template <int N> struct EndianSizeTag
@@ -200,35 +179,30 @@ typedef EndianSizeTag<0> BSIntToType0;
 
 void __cdecl BSEndian(unsigned char*, BSIntToType0);
 
-struct FUN_005057a0_shell
-{
-    void FUN_005057a0();
-};
-
 // @fnv 0x005057a0
-void FUN_005057a0_shell::FUN_005057a0()
+void __fastcall SwapUInt32ChunkData(UInt32ChunkData* self)
 {
-    BSEndian((unsigned char*)this + 0x00, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x04, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x08, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x0C, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x10, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x14, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x18, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x1C, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x20, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x24, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x28, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x2C, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x30, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x34, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x38, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x3C, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x40, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x48, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x44, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x4C, BSIntToType0());
-    BSEndian((unsigned char*)this + 0x50, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x00, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x04, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x08, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x0C, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x10, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x14, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x18, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x1C, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x20, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x24, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x28, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x2C, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x30, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x34, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x38, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x3C, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x40, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x48, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x44, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x4C, BSIntToType0());
+    BSEndian((unsigned char*)self + 0x50, BSIntToType0());
 }
 
 namespace fnv_005059c0 {
@@ -239,41 +213,36 @@ template <int N> struct EndianSizeTag
 
 void __cdecl BSEndian(unsigned char*, EndianSizeTag<9>);
 
-struct FUN_005059c0_shell
-{
-    void* vptr;
-
-    void SwapEndianFields();
-};
+}  // namespace fnv_005059c0
 
 // @fnv 0x005059c0
-void FUN_005059c0_shell::SwapEndianFields()
+void StatsChunkData::SwapEndianFields()
 {
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x04, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x08, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x0c, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x10, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x14, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x18, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x1c, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x20, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x28, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x2c, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x30, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x38, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x3c, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x48, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x4c, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x58, EndianSizeTag<9>());
-    BSEndian(reinterpret_cast<unsigned char*>(this) + 0x50, EndianSizeTag<9>());
+
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x04, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x08, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x0c, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x10, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x14, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x18, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x1c, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x20, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x28, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x2c, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x30, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x38, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x3c, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x48, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x4c, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x58, fnv_005059c0::EndianSizeTag<9>());
+    fnv_005059c0::BSEndian(reinterpret_cast<unsigned char*>(this) + 0x50, fnv_005059c0::EndianSizeTag<9>());
 }
-}  // namespace fnv_005059c0
 
 void __cdecl BSEndianUInt(unsigned int* apData, BSIntToType0);
 
 // Byte-swaps each of the 15 data words in place via BSEndianUInt.
 // @fnv 0x00505610
-void UnsignedIntArray16::FUN_00505610()
+void UnsignedIntArray16::SwapEndianFields()
 {
     BSEndianUInt(&data[0], BSIntToType0());
     BSEndianUInt(&data[1], BSIntToType0());

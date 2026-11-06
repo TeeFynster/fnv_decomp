@@ -3,7 +3,250 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /GF /Ob1 (unit src/fallout_shared/bgsprimitive.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "bgsprimitive_decls.h"
+#include "../../include/BSMultiBound.h"
+#include "../../include/BSMultiBoundAABB.h"
+#include "../../include/BSMultiBoundOBB.h"
+#include "../../include/BSMultiBoundShape.h"
+#include "../../include/BSMultiBoundSphere.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former NiPoint3_ext stand-in.
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& point) const
+{
+    return NiPoint3(x + point.x, y + point.y, z + point.z);
+}
+
+inline float NiPoint3::operator*(const NiPoint3& point) const
+{
+    return x * point.x + y * point.y + z * point.z;
+}
+
+inline NiPoint3 operator*(float scalar, const NiPoint3& point)
+{
+    return NiPoint3(scalar * point.x, scalar * point.y, scalar * point.z);
+}
+#include "../../include/MemoryManager.h"
+#include "../../include/NiFrustumPlanes.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiPlane.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+// PodPoint3: unit-local copy of the former shared stand-in Point3. Same layout as NiPoint3 but constructor-free (an aggregate under VC9): with NiPoint3, 0x00c38b00 does not match (POD construction/return; NiPoint3's user constructors change the code).
+#include <stddef.h>
+class PodPoint3
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    // Legacy compilers require an aggregate for brace initialization.
+#if !defined(_MSC_VER) || _MSC_VER >= 1800
+    PodPoint3()
+    {}
+    PodPoint3(float fX, float fY, float fZ)
+        : x(fX), y(fY), z(fZ)
+    {}
+#endif
+
+    PodPoint3 operator+(const PodPoint3& other) const;
+    PodPoint3 operator-(const PodPoint3& other) const;
+    PodPoint3 operator-() const;
+    PodPoint3 operator*(float scalar) const;
+    float operator*(const PodPoint3& other) const;
+    PodPoint3& operator+=(const PodPoint3& other);
+    friend PodPoint3 operator*(float scalar, const PodPoint3& point);
+
+    float DotPart(float value, const PodPoint3& point) const;
+    float DotProduct(const PodPoint3& point) const;
+    double DotProduct(const PodPoint3& point);
+    float Length() const;
+
+    PodPoint3& FUN_00439180(float scalar);
+    PodPoint3 FUN_00439e90(const PodPoint3& shift) const;
+    PodPoint3* FUN_00439e90(PodPoint3* output, const PodPoint3* other) const;
+    PodPoint3 FUN_00439ef0(const PodPoint3& other) const;
+    void FUN_00439ef0();
+    PodPoint3 FUN_004b3800(const PodPoint3& axis) const;
+    void FUN_004a0c10();
+    float FUN_00457910();
+    float FUN_00457990() const;
+    double FUN_004a7290();
+    PodPoint3* FUN_006815c0();
+    PodPoint3* FUN_00416870(float x, float y, float z);
+    void FUN_0043d410(float x, int y, int z);
+    char* FUN_00a59af0(const char* text);
+
+    static void* operator new[](size_t size);
+    static void operator delete[](void* memory);
+    static const PodPoint3 ZERO;
+};
+// LocalPt3: unit-local copy of the former shared stand-in Pt3. Same layout as NiPoint3; with NiPoint3, OccShape::FUN_00c387f0 (0x00c387f0) does not match (constructor/inline bodies differ).
+class LocalPt3
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    LocalPt3();
+    LocalPt3(float fX, float fY, float fZ);
+
+    LocalPt3 operator+(const LocalPt3& other) const;
+    LocalPt3 operator-(const LocalPt3& other) const;
+    LocalPt3 operator-() const;
+    LocalPt3 operator*(float scale) const;
+    LocalPt3& operator*=(float scale);
+    bool operator!=(const LocalPt3& other) const;
+
+    float Dot(const LocalPt3& other) const;
+    float DotAccumulated(const LocalPt3& other) const;
+    float DotPlane(const LocalPt3& other) const;
+    float DotProduct(const LocalPt3& other) const;
+    LocalPt3 Cross(const LocalPt3& other) const;
+    float SqrLength() const;
+    float Length2() const;
+    float Length() const;
+    float Len() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+
+    void FUN_004a0c10();
+    LocalPt3* FUN_00439ef0(LocalPt3* out, LocalPt3* other);
+    LocalPt3 FUN_00439ef0(const LocalPt3& rhs);
+    bool FUN_00439090(LocalPt3* other);
+    float FUN_00457990() const;
+
+    static const LocalPt3 ms_kFirstPoint;
+    static const LocalPt3 ms_kSecondPoint;
+    static const LocalPt3 ms_kThirdPoint;
+};
+#include "../../include/NiMatrix3.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3; this unit defines inline bodies for both NiPoint3 and the stand-in in different forms (constructor/temporary, operand order), so one NiPoint3 cannot carry both.
+#include "../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
 
 class ColorPair
 {
@@ -168,25 +411,24 @@ void __thiscall C_00c36580::FUN_00c36580(Obj_0096a610* value)
 
 // Previous geometry reconstruction credited to another contributor.
 
+// Preserve the original empty element-construction loop for the shared POD type.
+static __forceinline void InitializePoint3Array(PodPoint3* points, int count)
+{
+    while (--count >= 0)
+        ++points;
+}
+
+inline PodPoint3 PodPoint3::operator-(const PodPoint3& p) const
+{
+    PodPoint3 result;
+    result.x = x - p.x;
+    result.y = y - p.y;
+    result.z = z - p.z;
+    return result;
+}
+
 namespace BoxGeometry {
 
-struct Point3
-{
-
-    float x, y, z;
-
-    __forceinline Point3()
-    {}
-
-    Point3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Point3 operator-(const Point3& p) const
-    {
-        return Point3(x - p.x, y - p.y, z - p.z);
-    }
-    Point3 operator+(const Point3&) const;
-    Point3 operator*(float) const;
-};
 
 struct Color
 {
@@ -194,14 +436,14 @@ struct Color
 };
 
 extern Color DAT_011a9be0;
-extern Point3 DAT_011a946c, DAT_011a9478, DAT_011a9484;
+extern PodPoint3 DAT_011a946c, DAT_011a9478, DAT_011a9484;
 
 struct GeometryData
 {
 
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
 
-    Point3* vertices;
+    PodPoint3* vertices;
 
     unsigned int unk24;
 
@@ -213,9 +455,9 @@ struct GeometryData
 
     unsigned short* FUN_00a7b850();
 
-    __forceinline Point3* GetVertices()
+    __forceinline PodPoint3* GetVertices()
     {
-        Point3* result = vertices;
+        PodPoint3* result = vertices;
         return result;
     }
 
@@ -279,7 +521,7 @@ struct Geometry
 
     unsigned int unk54;
 
-    Point3 position;
+    PodPoint3 position;
 
     unsigned int unk64;
 
@@ -331,19 +573,21 @@ struct Geometry
     }
 };
 
-struct Bound
+// BSMultiBoundAABB's layout seen through this unit's PodPoint3 math: Center at +0x0c, half extents (m_kOffset) at +0x18;
+// other units bind 0x00c39270 as BSMultiBoundAABB::FUN_00c39270. Not the 16-byte sphere Bound.
+struct AABBDebugView
 {
 
     unsigned int unk00, unk04, unk08;
 
-    Point3 center;
+    PodPoint3 center;
 
     float extentX, extentY, extentZ;
-    void FUN_00c39270(Point3* out)
+    void FUN_00c39270(PodPoint3* out)
     {
-        Point3 axisX = DAT_011a946c * extentX;
-        Point3 axisY = DAT_011a9478 * extentY;
-        Point3 axisZ = DAT_011a9484 * extentZ;
+        PodPoint3 axisX = DAT_011a946c * extentX;
+        PodPoint3 axisY = DAT_011a9478 * extentY;
+        PodPoint3 axisZ = DAT_011a9484 * extentZ;
         out[0] = center + axisX + axisY + axisZ;
         out[1] = center + axisX + axisY - axisZ;
         out[2] = center + axisX - axisY + axisZ;
@@ -358,10 +602,11 @@ struct Bound
 };
 
 // @fnv 0x00c38b00
-void Bound::FUN_00c38b00(Geometry* lines, Geometry* triangles, Color color)
+void AABBDebugView::FUN_00c38b00(Geometry* lines, Geometry* triangles, Color color)
 {
 
-    Point3 corners[8];
+    PodPoint3 corners[8];
+    InitializePoint3Array(corners, 8);
 
     FUN_00c39270(corners);
 
@@ -375,7 +620,7 @@ void Bound::FUN_00c38b00(Geometry* lines, Geometry* triangles, Color color)
 
     Color edgeColor = DAT_011a9be0;
 
-    Point3* vertices9 = lines->GetData()->GetVertices();
+    PodPoint3* vertices9 = lines->GetData()->GetVertices();
 
     Color* colors8 = lines->GetData()->GetColors();
 
@@ -432,56 +677,20 @@ void Bound::FUN_00c38b00(Geometry* lines, Geometry* triangles, Color color)
 
 }
 
+inline NiPoint2::NiPoint2(float fX, float fY)
+{
+    x = fX;
+    y = fY;
+}
+
 namespace bs {
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3()
-    {}
-    static const NiPoint3 ZERO;
-};
-struct NiObject
-{
-    NiObject();
-    virtual ~NiObject();
-    unsigned int m_uiRefCount;
-};
-struct NiPoint2
-{
-    float x, y;
-    NiPoint2()
-    {}
-    NiPoint2(float fX, float fY)
-    {
-        x = fX;
-        y = fY;
-    }
-};
-struct ThreeByThreeMatrix
-{
-    float m_afEntries[3][3];
-    static const ThreeByThreeMatrix IDENTITY;
-};
-struct NiPlane
-{
-    NiPlane();
-    NiPoint3 m_kPlaneNormal;
-    float m_fPlaneConstant;
-};
-struct NiFrustumPlanes
-{
-    NiFrustumPlanes()
-    {
-        m_uiActivePlaneMask = 0x3f;
-    }
-    NiPlane m_akPlanes[6];
-    unsigned int m_uiActivePlaneMask;
-};
+
+
 struct FUN_00c335d0 : NiObject
 {
     NiPoint3 kTargetCenter;
     NiPoint2 m_kPoint2;
-    ThreeByThreeMatrix kRotationBasis;
+    NiMatrix3 kRotationBasis;
     int m_uiShapeType;
     NiFrustumPlanes m_kFrustumPlanes;
     NiPoint3 m_kCornerPoints[4];
@@ -500,7 +709,7 @@ FUN_00c335d0::FUN_00c335d0()
 {
     kTargetCenter = NiPoint3::ZERO;
     m_kPoint2 = NiPoint2(50.0f, 50.0f);
-    kRotationBasis = ThreeByThreeMatrix::IDENTITY;
+    kRotationBasis = NiMatrix3::IDENTITY;
     m_uiShapeType = 0;
     m_bDecalTextureCreated = true;
     for (int i = 0; i < 4; i++)
@@ -509,176 +718,76 @@ FUN_00c335d0::FUN_00c335d0()
 }
 
 #include <math.h>
-class NiPoint3_ext
-{
-  public:
-    float x, y, z;
-    NiPoint3_ext()
-    {}
-    float Dot(const NiPoint3&) const;
-    NiPoint3_ext operator+(const NiPoint3_ext&) const;
-    NiPoint3_ext operator-(const NiPoint3_ext&) const;
-    void operator*=(float);
-};
+#include "../../include/NiRefObject.h"
+struct SphereBound { float x, y, z, r; };
 
-class NiPlane
+template <> inline NiPointer<BSMultiBoundShape>::operator BSMultiBoundShape*() const
 {
-  public:
-    NiPoint3_ext m_kPlaneNormal;
-    float m_fPlaneConstant;
-    NiPlane();
-    float Distance(const NiPoint3& kPt) const
+    return m_pObject;
+}
+
+inline BSMultiBoundShape* BSMultiBound::GetShape() const
+{
+    return pShape;
+}
+
+inline float NiPlane::Distance(const NiPoint3& kPt) const
+{
+    // The original calls the out-of-line dot product (0x004b6190); NiPoint3.h defines Dot in its class.
+    return reinterpret_cast<const NiPoint3*>(this)->DotProduct(kPt) - c;
+}
+
+inline void BSMultiBoundShape::FUN_00c37a00(NiPoint3* pts)
+{
+    NiPoint3 axisX, axisY, axisZ;
+    axisX *= static_cast<BSMultiBoundOBB*>(this)->m_kOffset.x;
+    axisY *= static_cast<BSMultiBoundOBB*>(this)->m_kOffset.y;
+    axisZ *= static_cast<BSMultiBoundOBB*>(this)->m_kOffset.z;
+    pts[0] = reinterpret_cast<const NiPoint3&>(static_cast<BSMultiBoundOBB*>(this)->Center) - axisX - axisY - axisZ;
+    pts[1] = reinterpret_cast<const NiPoint3&>(static_cast<BSMultiBoundOBB*>(this)->Center) + axisX - axisY - axisZ;
+    pts[2] = reinterpret_cast<const NiPoint3&>(static_cast<BSMultiBoundOBB*>(this)->Center) + axisX + axisY - axisZ;
+    pts[3] = reinterpret_cast<const NiPoint3&>(static_cast<BSMultiBoundOBB*>(this)->Center) - axisX + axisY - axisZ;
+    pts[4] = reinterpret_cast<const NiPoint3&>(static_cast<BSMultiBoundOBB*>(this)->Center) - axisX - axisY + axisZ;
+    pts[5] = reinterpret_cast<const NiPoint3&>(static_cast<BSMultiBoundOBB*>(this)->Center) + axisX - axisY + axisZ;
+    pts[6] = reinterpret_cast<const NiPoint3&>(static_cast<BSMultiBoundOBB*>(this)->Center) + axisX + axisY + axisZ;
+    pts[7] = reinterpret_cast<const NiPoint3&>(static_cast<BSMultiBoundOBB*>(this)->Center) - axisX + axisY + axisZ;
+}
+
+inline void BSMultiBoundShape::GetPlanes(NiPlane* planes)
+{
+    for (int i = 0; i < 3; i++)
     {
-        return m_kPlaneNormal.Dot(kPt) - m_fPlaneConstant;
+        NiPoint3 kNormal;
+        float* pRow = reinterpret_cast<float*>(&static_cast<BSMultiBoundOBB*>(this)->unk24);
+        kNormal.x = pRow[i];
+        kNormal.y = pRow[i + 3];
+        kNormal.z = pRow[i + 6];
+        *reinterpret_cast<NiPoint3*>(&planes[i]) = kNormal;
+        planes[i].c = kNormal.DotProduct(static_cast<BSMultiBoundOBB*>(this)->Center);  // out-of-line, as NiPlane::Distance
     }
-};
-
-struct NiMatrix33
-{
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
-};
-
-struct SphereBound
-{
-    float x, y, z, r;
-};
-
-class BSMultiBoundShape
-{
-  public:
-    virtual void d00();
-    virtual void d01();
-    virtual void d02();
-    virtual void d03();
-    virtual void d04();
-    virtual void d05();
-    virtual void d06();
-    virtual void d07();
-    virtual void d08();
-    virtual void d09();
-    virtual void d10();
-    virtual void d11();
-    virtual void d12();
-    virtual void d13();
-    virtual void d14();
-    virtual void d15();
-    virtual void d16();
-    virtual void d17();
-    virtual void d18();
-    virtual void d19();
-    virtual void d20();
-    virtual void d21();
-    virtual void d22();
-    virtual void d23();
-    virtual void d24();
-    virtual void d25();
-    virtual void d26();
-    virtual void d27();
-    virtual void d28();
-    virtual void d29();
-    virtual void d30();
-    virtual void d31();
-    virtual void d32();
-    virtual void d33();
-    virtual void d34();
-    virtual int v8c();
-    virtual void d36();
-    virtual void d37();
-    virtual int v98(SphereBound* b);
-    virtual void d39();
-    virtual void d40();
-    virtual void va4(SphereBound* b);
-
-    int unk04;
-    int unk08;
-    NiPoint3_ext m_kCenter;
-    NiPoint3_ext m_kHalfExtents;
-    NiMatrix33 m_kRotationMatrix;
-
-    void FUN_00c39270(NiPoint3_ext* pts);
-
-    void FUN_00c37a00(NiPoint3_ext* pts)
-    {
-        NiPoint3_ext axisX, axisY, axisZ;
-        axisX *= m_kHalfExtents.x;
-        axisY *= m_kHalfExtents.y;
-        axisZ *= m_kHalfExtents.z;
-        pts[0] = m_kCenter - axisX - axisY - axisZ;
-        pts[1] = m_kCenter + axisX - axisY - axisZ;
-        pts[2] = m_kCenter + axisX + axisY - axisZ;
-        pts[3] = m_kCenter - axisX + axisY - axisZ;
-        pts[4] = m_kCenter - axisX - axisY + axisZ;
-        pts[5] = m_kCenter + axisX - axisY + axisZ;
-        pts[6] = m_kCenter + axisX + axisY + axisZ;
-        pts[7] = m_kCenter - axisX + axisY + axisZ;
-    }
-
-    void GetPlanes(NiPlane* planes)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            NiPoint3_ext kNormal;
-            float* pRow = &m_kRotationMatrix.m00;
-            kNormal.x = pRow[i];
-            kNormal.y = pRow[i + 3];
-            kNormal.z = pRow[i + 6];
-            planes[i].m_kPlaneNormal = kNormal;
-            planes[i].m_fPlaneConstant = kNormal.Dot(*(const NiPoint3*)&m_kCenter);
-        }
-    }
-
-    int FUN_00c369b0(struct BSMultiBound* p);
-};
-
-template <class T> class MyPtr
-{
-  public:
-    T* m_pObject;
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-};
-
-struct BSMultiBound
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    MyPtr<BSMultiBoundShape> pShape;
-    BSMultiBoundShape* GetShape() const
-    {
-        return pShape;
-    }
-};
+}
 
 // @fnv 0x00c369b0
 int BSMultiBoundShape::FUN_00c369b0(BSMultiBound* p)
 {
-    int v = p->GetShape()->v8c();
+    int v = p->GetShape()->GetShapeType();
     if (v == 1)
     {
         BSMultiBoundShape* j = (BSMultiBoundShape*)p->GetShape();
-        NiPoint3_ext e[8];
+        NiPoint3 e[8];
         j->FUN_00c39270(e);
         NiPlane c[3];
         this->GetPlanes(c);
         for (int i = 0; i < 8; i++)
         {
             float dx = (float)fabs(c[0].Distance(*(NiPoint3*)&e[i]));
-            if (dx - m_kHalfExtents.x > 0.0)
+            if (dx - static_cast<BSMultiBoundAABB*>(this)->m_kOffset.x > 0.0)
                 return 0;
             float dz = (float)fabs(c[1].Distance(*(NiPoint3*)&e[i]));
-            if (dz - m_kHalfExtents.y > 0.0)
+            if (dz - static_cast<BSMultiBoundAABB*>(this)->m_kOffset.y > 0.0)
                 return 0;
             float dy = (float)fabs(c[2].Distance(*(NiPoint3*)&e[i]));
-            if (dy - m_kHalfExtents.z > 0.0)
+            if (dy - static_cast<BSMultiBoundAABB*>(this)->m_kOffset.z > 0.0)
                 return 0;
         }
         return 2;
@@ -686,20 +795,20 @@ int BSMultiBoundShape::FUN_00c369b0(BSMultiBound* p)
     else if (v == 2)
     {
         BSMultiBoundShape* c = (BSMultiBoundShape*)p->GetShape();
-        NiPoint3_ext j[8];
+        NiPoint3 j[8];
         c->FUN_00c37a00(j);
         NiPlane e[3];
         this->GetPlanes(e);
         for (int i = 0; i < 8; i++)
         {
             float dx = (float)fabs(e[0].Distance(*(NiPoint3*)&j[i]));
-            if (dx - m_kHalfExtents.x > 0.0)
+            if (dx - static_cast<BSMultiBoundAABB*>(this)->m_kOffset.x > 0.0)
                 return 0;
             float dz = (float)fabs(e[1].Distance(*(NiPoint3*)&j[i]));
-            if (dz - m_kHalfExtents.y > 0.0)
+            if (dz - static_cast<BSMultiBoundAABB*>(this)->m_kOffset.y > 0.0)
                 return 0;
             float dy = (float)fabs(e[2].Distance(*(NiPoint3*)&j[i]));
-            if (dy - m_kHalfExtents.z > 0.0)
+            if (dy - static_cast<BSMultiBoundAABB*>(this)->m_kOffset.z > 0.0)
                 return 0;
         }
         return 2;
@@ -714,45 +823,36 @@ int BSMultiBoundShape::FUN_00c369b0(BSMultiBound* p)
     return 0;
 }
 
-struct C37050_Point
-{
-    float x, y, z;
-    C37050_Point()
-    {}
-};
 struct C37050_Plane
 {
     float a, b, c, d;
-    int ClassifyPoint(const C37050_Point& point) const;
+    int ClassifyPoint(const PodPoint3& point) const;
 };
-struct C37050_Frustum
+inline bool NiFrustumPlanes::IsPlaneActive(unsigned int i)
 {
-    C37050_Plane m_kPlaneArray[6];
-    unsigned int m_activePlanes;
-    bool IsPlaneActive(int i) const
-    {
-        int unused[83];
-        (void)unused;
-        return ((1 << i) & m_activePlanes) ? true : false;
-    }
-};
+    int unused[83];
+    (void)unused;
+    return ((1 << i) & m_uiActivePlaneMask) ? true : false;
+}
+// BSMultiBoundOBB has no FUN_00c37050 frustum overload in the shared header.
 struct C37050_Bound
 {
-    void FUN_00c37a00(C37050_Point* corners);
-    bool FUN_00c37050(const C37050_Frustum& frustum);
+    void FUN_00c37a00(PodPoint3* corners);
+    bool FUN_00c37050(const NiFrustumPlanes& frustum);
 };
 // @fnv 0x00c37050
-bool C37050_Bound::FUN_00c37050(const C37050_Frustum& frustum)
+bool C37050_Bound::FUN_00c37050(const NiFrustumPlanes& frustum)
 {
-    C37050_Point corners[8];
+    PodPoint3 corners[8];
+    InitializePoint3Array(corners, 8);
     FUN_00c37a00(corners);
     for (int i = 0; i < 6; i++)
     {
-        if (frustum.IsPlaneActive(i))
+        if (const_cast<NiFrustumPlanes&>(frustum).IsPlaneActive(i))
         {
             for (int j = 0; j < 8; j++)
             {
-                if (frustum.m_kPlaneArray[i].ClassifyPoint(corners[j]) == 2)
+                if (reinterpret_cast<const C37050_Plane&>(frustum.m_akPlanes[i]).ClassifyPoint(corners[j]) == 2)
                     return false;
             }
         }
@@ -843,27 +943,19 @@ bool FrustQ::FUN_00c378c0(const Pt3Q& kPt)
 extern "C" double fabs(double);
 extern double DAT_01012060;
 
-struct Vec3
-{
-    float x;
-    float y;
-    float z;
-    __forceinline Vec3()
-    {}
-    Vec3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Vec3 operator-(const Vec3& v) const
-    {
-        return Vec3(x - v.x, y - v.y, z - v.z);
-    }
-};
+
+inline LocalVec3::LocalVec3() {}
+inline LocalVec3::LocalVec3(float a, float b, float c) : x(a), y(b), z(c) {}
+inline LocalVec3 LocalVec3::operator-(const LocalVec3& v) const
+{ return LocalVec3(x - v.x, y - v.y, z - v.z); }
+
 __forceinline float AbsPoint(float x)
 {
     return (double)(float)fabs((double)x);
 }
 struct Bound16
 {
-    Vec3 c;
+    LocalVec3 c;
     float r;
 };
 struct PtOp
@@ -932,15 +1024,15 @@ struct Prim
     virtual int v41(void* p);
     int m_04;
     int m_08;
-    Vec3 m_kCenterPosition;
-    Vec3 m_radii;
-    inline bool FUN_00c39560(Vec3 v)
+    LocalVec3 m_kCenterPosition;
+    LocalVec3 m_radii;
+    inline bool FUN_00c39560(LocalVec3 v)
     {
-        Vec3 delta = v - m_kCenterPosition;
+        LocalVec3 delta = v - m_kCenterPosition;
         return AbsPoint(delta.x) - m_radii.x <= 0.01 && AbsPoint(delta.y) - m_radii.y <= 0.01 &&
                AbsPoint(delta.z) - m_radii.z <= 0.01;
     }
-    void FUN_00c37a00(Vec3* arr);
+    void FUN_00c37a00(LocalVec3* arr);
     int FUN_00c384f0(Param* arg);
 };
 
@@ -951,7 +1043,7 @@ int Prim::FUN_00c384f0(Param* arg)
     if (mode_2 == 1)
     {
         Prim* q = arg->GetBV();
-        Vec3 diff_2 = m_kCenterPosition - q->m_kCenterPosition;
+        LocalVec3 diff_2 = m_kCenterPosition - q->m_kCenterPosition;
         float resZ = AbsPoint(diff_2.x) + q->m_radii.x - m_radii.x;
         float resY4 = AbsPoint(diff_2.y) + q->m_radii.y - m_radii.y;
         float resX9 = AbsPoint(diff_2.z) + q->m_radii.z - m_radii.z;
@@ -966,7 +1058,7 @@ int Prim::FUN_00c384f0(Param* arg)
             return 0;
         else
         {
-            Vec3 arr[8];
+            LocalVec3 arr[8];
             q->FUN_00c37a00(arr);
             for (int i3 = 0; i3 < 8; ++i3)
             {
@@ -986,28 +1078,17 @@ int Prim::FUN_00c384f0(Param* arg)
     return 0;
 }
 
-struct Pt3
-{
-    float x, y, z;
-    Pt3()
-    {}
-    Pt3(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {}
-    Pt3 operator*(float f) const
-    {
-        return Pt3(x * f, y * f, z * f);
-    }
-    Pt3 operator+(const Pt3& r) const;
-    Pt3 operator-(const Pt3& r) const;
-    static const Pt3 ms_kFirstPoint;
-    static const Pt3 ms_kSecondPoint;
-    static const Pt3 ms_kThirdPoint;
-};
+
+
+inline LocalPt3::LocalPt3() {}
+inline LocalPt3::LocalPt3(float a, float b, float c) : x(a), y(b), z(c) {}
+inline LocalPt3 LocalPt3::operator*(float f) const
+{ return LocalPt3(x * f, y * f, z * f); }
 
 struct Plane4
 {
     float nx, ny, nz, d;
-    int WhichSide(const Pt3* p) const
+    int WhichSide(const LocalPt3* p) const
     {
         float fDist = nx * p->x + ny * p->y + nz * p->z - d;
         if (fDist < 0.0)
@@ -1018,22 +1099,16 @@ struct Plane4
     }
 };
 
-struct Frustum6
-{
-    Plane4 m_akPlanes[6];
-    unsigned int m_uiActivePlaneMask;
-};
-
 struct OccShape
 {
     int unk00, unk04, unk08;
-    Pt3 kTargetCenter;
+    LocalPt3 kTargetCenter;
     float fScaleMultiplier, m_fGlyphExtent, m_fGlyphWidthInPixels;
-    void GetVertices(Pt3* m_pkDeltas)
+    void GetVertices(LocalPt3* m_pkDeltas)
     {
-        Pt3 vX = Pt3::ms_kFirstPoint * fScaleMultiplier;
-        Pt3 vY = Pt3::ms_kSecondPoint * m_fGlyphExtent;
-        Pt3 vZ = Pt3::ms_kThirdPoint * m_fGlyphWidthInPixels;
+        LocalPt3 vX = LocalPt3::ms_kFirstPoint * fScaleMultiplier;
+        LocalPt3 vY = LocalPt3::ms_kSecondPoint * m_fGlyphExtent;
+        LocalPt3 vZ = LocalPt3::ms_kThirdPoint * m_fGlyphWidthInPixels;
         m_pkDeltas[0] = kTargetCenter + vX + vY + vZ;
         m_pkDeltas[1] = kTargetCenter + vX + vY - vZ;
         m_pkDeltas[2] = kTargetCenter + vX - vY + vZ;
@@ -1043,13 +1118,13 @@ struct OccShape
         m_pkDeltas[6] = kTargetCenter - vX - vY + vZ;
         m_pkDeltas[7] = kTargetCenter - vX - vY - vZ;
     }
-    bool FUN_00c387f0(Frustum6* pkPlanes);
+    bool FUN_00c387f0(NiFrustumPlanes* pkPlanes);
 };
 
 // @fnv 0x00c387f0
-bool OccShape::FUN_00c387f0(Frustum6* pkPlanes)
+bool OccShape::FUN_00c387f0(NiFrustumPlanes* pkPlanes)
 {
-    Pt3 kVerts[8];
+    LocalPt3 kVerts[8];
     bool bFlat = (m_fGlyphWidthInPixels == 0.0);
     GetVertices(kVerts);
     for (int i = 0; i < 6; i++)
@@ -1061,7 +1136,7 @@ bool OccShape::FUN_00c387f0(Frustum6* pkPlanes)
             {
                 if (!bFlat || (j % 2) != 0)
                 {
-                    if (pkPlanes->m_akPlanes[i].WhichSide(&kVerts[j]) != 2)
+                    if (reinterpret_cast<const Plane4&>(pkPlanes->m_akPlanes[i]).WhichSide(&kVerts[j]) != 2)
                         bAllOut = false;
                 }
             }
@@ -1237,145 +1312,17 @@ int ObjA::FUN_00c4f860()
     return a ? (b = unkAC, c5 = b->unk0C, (c5 ? (d = b->unk0C, d->Get08()) : 0)) : 0;
 }
 
-namespace fnv_00c4ff60 {
-template <class T> class NiTArray;
-class NiControllerManager;
-class NiBound;
-class NiStream;
-class NiObjectCopyInfo;
-class bhkLimitedHingeConstraint;
-class bhkRigidBody;
-class bhkBlendCollisionObject;
-class bhkNiCollisionObject;
-class NiLines;
-class NiParticles;
-class BSResizableTriShape;
-class BSSegmentedTriShape;
-class NiTriShape;
-class NiTriStrips;
-class NiTriBasedGeom;
-class NiGeometry;
-class BSMultiBoundNode;
-class BSFadeNode;
-class NiNode;
-class NiRTTI;
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int references;
-};
-class NiObject : public NiRefObject
-{
-  public:
-    virtual NiRTTI* GetType();
-    virtual NiNode* GetNiNode();
-    virtual BSFadeNode* GetFadeNode();
-    virtual BSMultiBoundNode* GetMultiBoundNode();
-    virtual NiGeometry* GetNiGeometry();
-    virtual NiTriBasedGeom* GetTriBasedGeom();
-    virtual NiTriStrips* GetTriStrips();
-    virtual NiTriShape* GetTriShape();
-    virtual BSSegmentedTriShape* GetSegmentedTriShape();
-    virtual BSResizableTriShape* GetResizableTriShape();
-    virtual NiParticles* GetNiParticles();
-    virtual NiLines* GetNiLines();
-    virtual bhkNiCollisionObject* GetCollisionObject();
-    virtual bhkBlendCollisionObject* GetBlendCollisionObject();
-    virtual bhkRigidBody* GetRigidBody();
-    virtual bhkLimitedHingeConstraint* GetLimitedHingeConstraint();
-    virtual NiObject* Clone(NiObjectCopyInfo*);
-    virtual void LoadBinary(NiStream*);
-    virtual void LinkObject(NiStream*);
-    virtual void RegisterStreamables(NiStream*);
-    virtual void SaveBinary(NiStream*);
-    virtual bool Compare(NiObject*);
-    virtual void GetViewerStrings(NiTArray<char*>*);
-    virtual void AddViewerStrings(NiTArray<char*>*);
-    virtual void ProcessClone(NiObjectCopyInfo*);
-    virtual void PostLinkObject(NiStream*);
-    virtual bool StreamCanSkip();
-    virtual NiRTTI* GetStreamableRTTI();
-    virtual void SetWorldBound(NiBound*);
-    virtual unsigned int GetBlockAllocationSize();
-    virtual void Unk_20();
-    virtual void Unk_21(unsigned int);
-    virtual NiControllerManager* GetControllerManager();
-};
-
 float FUN_004019b0(float);
-inline float FUN_004579e0(float value)
-{
-    return FUN_004019b0(value);
-}
-struct BoundPoint
-{
-    float x, y, z;
-    BoundPoint()
-    {}
-    BoundPoint(float fx, float fy, float afDepth) : x(fx), y(fy), z(afDepth)
-    {}
-    BoundPoint FUN_00439ef0(const BoundPoint& rhs) const
-    {
-        return BoundPoint(x - rhs.x, y - rhs.y, z - rhs.z);
-    }
-    float FUN_004a7290() const
-    {
-        return x * x + y * y + z * z;
-    }
-    float FUN_00457990() const
-    {
-        return FUN_004579e0(x * x + y * y + z * z);
-    }
-};
-template <class T> struct BoundPointer
-{
-    T* m_pObject;
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-};
-class BSMultiBoundShape : public NiObject
-{
-  public:
-    unsigned int flags;
-    virtual int GetShapeType();
-};
-class BSMultiBoundAABB : public BSMultiBoundShape
-{
-  public:
-    BoundPoint center;
-    BoundPoint halfExtents;
-    void FUN_00c39270(BoundPoint*);
-};
-class BSMultiBoundOBB : public BSMultiBoundShape
-{
-  public:
-    void FUN_00c37a00(BoundPoint*);
-};
-class BSMultiBound : public NiObject
-{
-  public:
-    unsigned int flags;
-    BoundPointer<BSMultiBoundShape> shape;
-    BSMultiBoundShape* GetShape() const
-    {
-        return shape;
-    }
-};
-class BSMultiBoundSphere : public BSMultiBoundShape
-{
-  public:
-    BoundPoint center;
-    float radius;
-    int FUN_00c4ff60(BSMultiBound*);
-};
+inline float FUN_004579e0(float value) { return FUN_004019b0(value); }
+inline NiPoint3::NiPoint3(float a, float b, float c) : x(a), y(b), z(c) {}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& rhs) const
+{ return NiPoint3(x - rhs.x, y - rhs.y, z - rhs.z); }
+inline float NiPoint3::SqrLength() const { return x * x + y * y + z * z; }
+inline float NiPoint3::Length() const { return FUN_004579e0(x * x + y * y + z * z); }
+// Non-const locals call these overloads: same inline bodies as the const ones.
+inline float NiPoint3::SqrLength() { return x * x + y * y + z * z; }
+inline float NiPoint3::Length() { return FUN_004579e0(x * x + y * y + z * z); }
+
 // @fnv 0x00c4ff60
 int BSMultiBoundSphere::FUN_00c4ff60(BSMultiBound* other)
 {
@@ -1383,13 +1330,13 @@ int BSMultiBoundSphere::FUN_00c4ff60(BSMultiBound* other)
     if (type == 1)
     {
         BSMultiBoundAABB* box2 = static_cast<BSMultiBoundAABB*>(other->GetShape());
-        BoundPoint _vertices[8];
+        NiPoint3 _vertices[8];
         box2->FUN_00c39270(_vertices);
         float radiusSquared8 = radius * radius;
         for (int i = 0; i < 8; i++)
         {
-            BoundPoint diff2 = center.FUN_00439ef0(_vertices[i]);
-            float distanceSquared = diff2.FUN_004a7290();
+            NiPoint3 diff2 = center.operator-(_vertices[i]);
+            float distanceSquared = diff2.SqrLength();
             if (distanceSquared > radiusSquared8)
                 return 0;
         }
@@ -1398,14 +1345,14 @@ int BSMultiBoundSphere::FUN_00c4ff60(BSMultiBound* other)
     else if (type == 2)
     {
         BSMultiBoundOBB* box3 = static_cast<BSMultiBoundOBB*>(other->GetShape());
-        BoundPoint vertices5[8];
+        NiPoint3 vertices5[8];
         box3->FUN_00c37a00(vertices5);
         float radiusSquared = radius * radius;
         for (int i = 0; i < 8; i++)
         {
-            BoundPoint diff = center.FUN_00439ef0(vertices5[i]);
+            NiPoint3 diff = center.operator-(vertices5[i]);
             {
-                float distanceSquared = diff.FUN_004a7290();
+                float distanceSquared = diff.SqrLength();
                 if (distanceSquared > radiusSquared)
                     return 0;
             }
@@ -1416,9 +1363,9 @@ int BSMultiBoundSphere::FUN_00c4ff60(BSMultiBound* other)
     {
         BSMultiBoundSphere* sphere = static_cast<BSMultiBoundSphere*>(other->GetShape());
         {
-            BoundPoint diff3 = center.FUN_00439ef0(sphere->center);
+            NiPoint3 diff3 = center.operator-(sphere->center);
             {
-                float distance = diff3.FUN_00457990();
+                float distance = diff3.Length();
                 if (distance + sphere->radius - radius <= 0.0)
                     return 2;
             }
@@ -1426,43 +1373,27 @@ int BSMultiBoundSphere::FUN_00c4ff60(BSMultiBound* other)
     }
     return 0;
 }
-}  // namespace fnv_00c4ff60
 
-struct C50380_Point
-{
-    float x;
-    float y;
-    float z;
 
-    C50380_Point(float _x, float _y, float _z);
-    C50380_Point FUN_00439ef0(const C50380_Point& other) const
-    {
-        float dx = x - other.x;
-        float dy = y - other.y;
-        float dz = z - other.z;
-        return C50380_Point(dx, dy, dz);
-    }
-    float __thiscall FUN_00457990()
-    {
-        float len = x * x + y * y + z * z;
-        return len;
-    }
-};
 
+// BSMultiBoundSphere has no FUN_00c50380 point-containment declaration.
 struct C50380_Sphere
 {
     int unk00;
     int unk04;
     int unk08;
-    C50380_Point m_kCenter;
+    PodPoint3 m_kCenter;
     float m_fBoundRadius;
 
-    bool __thiscall FUN_00c50380(C50380_Point* other);
+    bool __thiscall FUN_00c50380(PodPoint3* other);
 };
 
+
 // @fnv 0x00c50380
-bool __thiscall C50380_Sphere::FUN_00c50380(C50380_Point* other)
+bool __thiscall C50380_Sphere::FUN_00c50380(PodPoint3* other)
 {
+    // Preserve the frame space reserved for the original inline point helpers.
+    DeadQ4();
     float fDist = other->FUN_00439ef0(m_kCenter).FUN_00457990();
     return (fDist < m_fBoundRadius) ? true : false;
 }
@@ -1511,6 +1442,7 @@ class NiMatrix3OB
     float m_afEntries[3][3];
 };
 
+// Moving this method to BSMultiBoundOBB::FUN_00c37a00(NiPoint3*) changes its stack layout.
 class NiOBBOB
 {
   public:
@@ -1543,11 +1475,8 @@ void NiOBBOB::FUN_00c37a00(NiPoint3OB* pkVerts)
     pkVerts[7] = m_kCenter - kX - kY - kZ;
 }
 
-struct C4F460_Pool
-{
-    void* __thiscall FUN_00aa3e40(unsigned int size);
-};
-extern C4F460_Pool DAT_011f6238;
+// 0x011f6238 is the MemoryManager; its allocator is bound at 0x00aa3e40.
+extern MemoryManager DAT_011f6238;
 struct FUN_00a5ecb0
 {
     virtual ~FUN_00a5ecb0();
@@ -1680,11 +1609,8 @@ C4F460_Node::C4F460_Node(int value) : FUN_00a5ecb0(0)
 }
 
 namespace fnv_00c4f550 {
-struct MemoryHeap_c4f550
-{
-    void FUN_00aa4060(void* pvMem);
-};
-extern MemoryHeap_c4f550 DAT_011f6238;
+// Other units bind 0x00aa4060 to MemoryManager::Deallocate on 0x011f6238.
+extern MemoryManager DAT_011f6238;
 
 struct FUN_00c47770
 {  // owned object; destructor at 0x00c47770
@@ -1693,7 +1619,7 @@ struct FUN_00c47770
     static void operator delete(void* pvMem)
     {
         int unused; /* frame space only */
-        DAT_011f6238.FUN_00aa4060(pvMem);
+        DAT_011f6238.Deallocate(pvMem);
     }
 };
 
@@ -1920,36 +1846,19 @@ void OBBox::FUN_00c39270(OBPoint* apCorners)
 
 namespace FrustumBoxTest {
 
-struct Point3
-{
-    float x, y, z;
-    Point3()
-    {}
-    Point3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    static const Point3 ZERO;
-    Point3 operator+(const Point3&) const;
-    Point3 operator-(const Point3&) const;
-    Point3& FUN_00439180(float);
-};
+
 
 struct Plane
 {
-    Point3 normal;
+    PodPoint3 normal;
     float distance;
-    int ClassifyPoint(const Point3&) const;
-};
-
-struct Frustum
-{
-    Plane planes[6];
-    unsigned int activePlanes;
+    int ClassifyPoint(const PodPoint3&) const;
 };
 
 struct FloatMatrix3
 {
     float entries[3][3];
-    void GetColumn(unsigned int column, Point3& result) const
+    void GetColumn(unsigned int column, PodPoint3& result) const
     {
         result.x = entries[0][column];
         result.y = entries[1][column];
@@ -1960,15 +1869,15 @@ struct FloatMatrix3
 struct OrientedBox
 {
     unsigned int unk00, unk04, unk08;
-    Point3 center;
-    Point3 extents;
+    PodPoint3 center;
+    PodPoint3 extents;
     FloatMatrix3 rotation;
 
-    void FUN_00c37a00(Point3* vertices)
+    void FUN_00c37a00(PodPoint3* vertices)
     {
-        Point3 axisX = Point3::ZERO;
-        Point3 axisY = Point3::ZERO;
-        Point3 axisZ = Point3::ZERO;
+        PodPoint3 axisX = PodPoint3::ZERO;
+        PodPoint3 axisY = PodPoint3::ZERO;
+        PodPoint3 axisZ = PodPoint3::ZERO;
         rotation.GetColumn(0, axisX);
         axisX.FUN_00439180(extents.x);
         rotation.GetColumn(1, axisY);
@@ -1978,34 +1887,35 @@ struct OrientedBox
         axisZ.z = rotation.entries[2][2];
         axisZ.FUN_00439180(extents.z);
         vertices[0] = center + axisX + axisY + axisZ;
-        vertices[1] = center + axisX + axisY - axisZ;
-        vertices[2] = center + axisX - axisY + axisZ;
-        vertices[3] = center + axisX - axisY - axisZ;
-        vertices[4] = center - axisX + axisY + axisZ;
-        vertices[5] = center - axisX + axisY - axisZ;
-        vertices[6] = center - axisX - axisY + axisZ;
-        vertices[7] = center - axisX - axisY - axisZ;
+        vertices[1] = (center + axisX + axisY).FUN_00439ef0(axisZ);
+        vertices[2] = (center + axisX).FUN_00439ef0(axisY) + axisZ;
+        vertices[3] = (center + axisX).FUN_00439ef0(axisY).FUN_00439ef0(axisZ);
+        vertices[4] = center.FUN_00439ef0(axisX) + axisY + axisZ;
+        vertices[5] = (center.FUN_00439ef0(axisX) + axisY).FUN_00439ef0(axisZ);
+        vertices[6] = center.FUN_00439ef0(axisX).FUN_00439ef0(axisY) + axisZ;
+        vertices[7] = center.FUN_00439ef0(axisX).FUN_00439ef0(axisY).FUN_00439ef0(axisZ);
     }
 
-    bool FUN_00c36f20(Frustum*);
+    bool FUN_00c36f20(NiFrustumPlanes*);
 };
 
 // @fnv 0x00c36f20
-bool OrientedBox::FUN_00c36f20(Frustum* frustum)
+bool OrientedBox::FUN_00c36f20(NiFrustumPlanes* frustum)
 {
-    Point3 vertices[8];
+    PodPoint3 vertices[8];
+    InitializePoint3Array(vertices, 8);
     bool flat = (extents.z == 0.0);
     FUN_00c37a00(vertices);
     for (int plane = 0; plane < 6; ++plane)
     {
-        if ((bool)(frustum->activePlanes & (1 << plane)))
+        if ((bool)(frustum->m_uiActivePlaneMask & (1 << plane)))
         {
             bool outside = true;
             for (int vertex = 0; vertex < 8; ++vertex)
             {
                 if (!flat || vertex % 2)
                 {
-                    if (frustum->planes[plane].ClassifyPoint(vertices[vertex]) != 2)
+                    if (reinterpret_cast<const Plane&>(frustum->m_akPlanes[plane]).ClassifyPoint(vertices[vertex]) != 2)
                         outside = false;
                 }
             }
@@ -2017,3 +1927,4 @@ bool OrientedBox::FUN_00c36f20(Frustum* frustum)
 }
 
 }
+

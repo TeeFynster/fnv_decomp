@@ -19,6 +19,8 @@ struct FUN_008133d0_shell
     void FUN_008133d0(int value);
 };
 
+// 0x00bc2360 indexes a 16-byte particle-position stream; NiPoint3 would change the stride to 12.
+struct EmitterPosition4View_00bc2360 { float x, y, z, w; };
 #include <stdlib.h>
 #include <math.h>
 double FUN_00ec9e10(double);
@@ -27,10 +29,6 @@ inline float rounded(float value)
     float result = (float)ceil(value);
     return result;
 }
-struct Vector
-{
-    float x, y, z, w;
-};
 inline float randomRange(const float& range)
 {
     float fraction = (float)(rand() / 32767.0);
@@ -62,7 +60,7 @@ struct Emitter
     unsigned int unk054;
     unsigned int unk058;
     unsigned int unk05c;
-    Vector* positions;
+    EmitterPosition4View_00bc2360* positions;
     unsigned int unk064;
     unsigned int unk068;
     unsigned int unk06c;

@@ -1,6 +1,8 @@
 // src/havok/physics/collide/agent/compoundagent/list/hkplistagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/compoundagent/list/hkplistagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkpListAgent.h"
+
 extern "C" void __cdecl FUN_00da3510(void*, void*);
 
 struct hkAgent1nMachine
@@ -8,16 +10,10 @@ struct hkAgent1nMachine
     void __thiscall InvalidateTim(void*);
 };
 
-struct hkpListAgent
-{
-    char m0[0x10];
-    void __thiscall FUN_00d36850(void* arg);
-};
-
 // @fnv 0x00d36850
-void __thiscall hkpListAgent::FUN_00d36850(void* arg)
+void __thiscall hkpListAgent::vf09(void* arg)
 {
-    FUN_00da3510((char*)this + 0x10, arg);
+    FUN_00da3510(&m0[4], arg);
 }
 
 extern "C" void __cdecl FUN_00d36990(int, int, int, int);
@@ -29,19 +25,13 @@ void __stdcall FUN_00d36b00(int aiArg1, int aiArg2, int aiArg3, int aiArg4)
 }
 
 extern "C" void __cdecl FUN_00da35f0(void*, float, float, int);
-struct Owner
-{
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    void FUN_00d36870(float a1, float a2, int a3);
-};
+// The shared class does not yet declare these method signatures. The unused
+// EDX parameter preserves their original ECX receiver and stack arguments.
 // Forwards the three arguments to FUN_00da35f0 with the object's field at offset 0x10 as its first argument.
 // @fnv 0x00d36870
-void Owner::FUN_00d36870(float afValue1, float afValue2, int aiValue)
+void __fastcall hkpListAgent_warpTime(hkpListAgent* agent, void*, float afValue1, float afValue2, int aiValue)
 {
-    FUN_00da35f0((char*)this + 0x10, afValue1, afValue2, aiValue);
+    FUN_00da35f0(&agent->m0[4], afValue1, afValue2, aiValue);
 }
 
 void __cdecl FUN_00d36920(void* a, void* b, void* c, void* d);
@@ -63,22 +53,13 @@ void __stdcall FUN_00d36960(int aiArg1, int aiArg2, int aiArg3, int aiArg4, int 
 
 extern "C" void __cdecl FUN_00da42b0(void* a, int b, int c, int d);
 
-struct FUN_00d36820_cls
-{
-    virtual void v00(int a);
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    void FUN_00d36820(int a1);
-};
-
-// Calls FUN_00da42b0 with &unk10, unk0C, unk08 and a1, then invokes v00(1).
+// Releases the agent track, then invokes the deleting destructor.
 // @fnv 0x00d36820
-void FUN_00d36820_cls::FUN_00d36820(int aiValue)
+void __fastcall hkpListAgent_cleanup(hkpListAgent* agent, void*, int aiValue)
 {
-    FUN_00da42b0(&unk10, unk0C, unk08, aiValue);
-    this->v00(1);
+    FUN_00da42b0(&agent->m0[4], *(int*)agent->m0, (int)agent->m_pContactManager, aiValue);
+    typedef void (__thiscall *DeletingDestructor)(hkpListAgent*, int);
+    (*(DeletingDestructor**)agent)[0](agent, 1);
 }
 
 struct S_00d368a0_Arg
@@ -90,21 +71,10 @@ struct S_00d368a0_Arg
 
 void __cdecl FUN_00d97250(void* sub, int field08, S_00d368a0_Arg* arg);
 
-struct S_00d368a0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int m_sub10;
-
-    void FUN_00d368a0(S_00d368a0_Arg* a, int unused);
-};
-
 // @fnv 0x00d368a0
-void S_00d368a0::FUN_00d368a0(S_00d368a0_Arg* a, int unused)
+void __fastcall hkpListAgent_updateShapeCollectionFilter(hkpListAgent* agent, void*, S_00d368a0_Arg* a, int unused)
 {
-    FUN_00d97250(&m_sub10, a->m_field08, a);
+    FUN_00d97250(&agent->m0[4], a->m_field08, a);
 }
 
 extern "C" void __cdecl FUN_00da48e0(void*, void*);
@@ -130,26 +100,17 @@ struct CallArgs
     int unk1C;
 };
 
-struct FUN_00d368c0_cls
-{
-    int unk00;
-    int unk04;
-    int m_08;
-    int unk0C;
-    int unk10;
-    void FUN_00d368c0(void* a1, void* a2, void* a3, void* a4);
-};
-// Builds a CallArgs from the four arguments and m_08, calls v10 on a2, then passes it to FUN_00da48e0 with this+0x10.
+// Builds the collision arguments and processes the agent track.
 // @fnv 0x00d368c0
-void FUN_00d368c0_cls::FUN_00d368c0(void* a1, void* a2, void* a3, void* a4)
+void __fastcall hkpListAgent_processCollision(hkpListAgent* agent, void*, void* a1, void* a2, void* a3, void* a4)
 {
     CallArgs s;
     s.unk00 = (int)a1;
     s.unk10 = (int)a3;
-    int iStored = m_08;
+    int iStored = (int)agent->m_pContactManager;
     s.unk04 = (int)a2;
     s.unk14 = iStored;
     s.unk18 = (int)a4;
     s.unk0C = (*(VirtTarget**)a2)->v10();
-    FUN_00da48e0((char*)this + 0x10, &s);
+    FUN_00da48e0(&agent->m0[4], &s);
 }

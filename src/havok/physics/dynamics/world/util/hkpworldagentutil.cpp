@@ -2,6 +2,8 @@
 // src/havok/physics/dynamics/world/util/hkpworldagentutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/util/hkpworldagentutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/BSAudio.h"
+
 struct S_00cc10b0_World
 {
     int unk00;
@@ -212,7 +214,8 @@ void __cdecl FUN_00cc10b0(S_00cc10b0_Agent* agent)
     listener->v24();
 }
 
-struct Interface
+// Exe 0x00cc1160: unit-local Interface view; declarations and layout are preserved.
+struct HkpworldagentutilInterfaceView
 {
     virtual void unk00();
     virtual void unk04();
@@ -230,7 +233,7 @@ struct Holder
 {
     int unk00;
     int unk04;
-    Interface* interfaceObject;
+    HkpworldagentutilInterfaceView* interfaceObject;
 };
 struct Entry
 {
@@ -317,7 +320,7 @@ void __cdecl FUN_00cc1160(Owner* owner)
     int iDisplacement = ((signed char*)pRootBase)[0x10];
     Entry* entry = *(Entry**)(pRootBase + iDisplacement + 0xcc);
     Holder* holder = entry->holder;
-    Interface* pInterface = holder->interfaceObject;
+    HkpworldagentutilInterfaceView* pInterface = holder->interfaceObject;
     pInterface->Invoke(pOwner);
     FUN_00cc10b0(pOwner);
 }
@@ -380,14 +383,6 @@ struct MemoryAllocator
     virtual void unk0c();
     virtual void Free(void* pointer, unsigned int bytes);
 };
-struct BSAudio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    MemoryAllocator* volatile allocator;
-};
 extern BSAudio* __cdecl FUN_00c85750();
 // @fnv 0x00cc1190
 void __cdecl DispatchEvents(EventSource* source, DispatchContext* context)
@@ -421,7 +416,7 @@ void __cdecl DispatchEvents(EventSource* source, DispatchContext* context)
         } while (index < events.count);
     }
     BSAudio* audio = FUN_00c85750();
-    MemoryAllocator* allocator = audio->allocator;
+    MemoryAllocator* allocator = reinterpret_cast<MemoryAllocator* volatile&>(audio->pListener);
     events.count = 0;
     if (!(events.capacity & (int)0x80000000))
         allocator->Free(events.data, (events.capacity & 0x3fffffff) * 8);

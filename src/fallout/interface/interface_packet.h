@@ -1,23 +1,9 @@
-// fallout/interface/interface_packet.h: declares EffectSetting, InterfaceManager
+#include "../../../include/InterfaceManager.h"
+// fallout/interface/interface_packet.h: declares InterfaceManager
 
 class Tile;
 class NiNode;
-class TESSound;
-class EffectSetting
-{
-  public:
-    TESSound* GetCastSound();
-};
-class InterfaceManager
-{
-  public:
-    char padding[0x4d0];
-    float screenAspectRatio;
-    static float UpdateInterfaceState();
-    Tile* FUN_00586150();
-    Tile* FUN_004fd400();
-    bool FUN_00706d90();
-};
+
 InterfaceManager* FUN_004b7210();
 float FUN_00715da0();
 float FUN_00706e20();

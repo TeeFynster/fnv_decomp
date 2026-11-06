@@ -1,3 +1,4 @@
+#include "../../../../include/NiTSet.h"
 // gamebryo2.2/corelibs/niconsolerenderer/nid3dpass_decls.h: declares BeamStage, SNAEntry, NiD3DPassPoolRecord, NiD3DPassAllocation, NiD3DPassPool and more
 #ifndef NID3DPASS_DECLS_H
 #define NID3DPASS_DECLS_H
@@ -76,9 +77,5 @@ struct NiD3DPassRefObject
 };
 void NiFree(void* pointer);
 template <class T> class NiTMallocInterface;
-template <class T, class A> class NiTSet
-{
-  public:
-    void Add(T& value);
-};
+
 #endif

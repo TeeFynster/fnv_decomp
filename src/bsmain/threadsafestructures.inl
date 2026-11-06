@@ -31,11 +31,11 @@ LockFreeQueue<bhkRigidBody*>::LockFreeQueue(unsigned int maxThreads, unsigned in
 
 template<>
 // @fnv 0x005289E0
-LockFreeMap<TESObjectREFR*, BSTreeNode*>::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
+LockFreeMap<unsigned int, NiPointer<ExteriorCellLoaderTask> >::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_TASK_OVERHEAD, true,
         kThreadSafeStructuresSourceFile, 912);
-    ItemUpdateArray = 0;
+    uiCount = 0;
     uiNumBuckets = numBuckets;
     m_pBuckets = new ThreadSafePointer<ThreadSafeHashTableNode>[uiNumBuckets];
     m_ppDeletedNodeBuffers = new ThreadSafeHashTableNode*[maxThreads * 3];
@@ -45,7 +45,7 @@ LockFreeMap<TESObjectREFR*, BSTreeNode*>::LockFreeMap(unsigned int maxThreads, u
 
 template<>
 // @fnv 0x0044F070
-void LockFreeMap<TESObjectREFR*, BSTreeNode*>::DeletedNodeScanner::ScanForDeletedNodes()
+void LockFreeMap<unsigned int, NiPointer<ExteriorCellLoaderTask> >::DeletedNodeScanner::ScanForDeletedNodes()
 {
     AutoMemContext kContext(MEM_CONTEXT_MEM_CONTEXT_TASK_OVERHEAD, true,
         kThreadSafeStructuresSourceFile, 866);
@@ -98,82 +98,72 @@ ThreadInterfaceManager<LockFreeQueue<bhkRigidBody*>::QueueDeleteManagerTag>::Thr
     uiTLSIndex = FUN_0044e330();
 }
 
-namespace ThreadSafeStructuresPC_0044b750 {
 template<>
 // @fnv 0x0044B750
-LockFreeMap<TESObjectREFR*, BSTreeNode*>::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
+LockFreeMap<TESObjectREFR*, NiPointer<QueuedReference> >::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_TASK_OVERHEAD, true,
         kThreadSafeStructuresSourceFile, 912);
-    ItemUpdateArray = 0;
+    uiCount = 0;
     uiNumBuckets = numBuckets;
-    m_pBuckets = new Bucket[uiNumBuckets];
+    m_pBuckets = new ThreadSafePointer<ThreadSafeHashTableNode>[uiNumBuckets];
     m_ppDeletedNodeBuffers = new ThreadSafeHashTableNode*[maxThreads * 3];
     uiDeleteBatchSize = deleteBatchSize;
     pManager = new Manager(maxThreads);
 }
-}
 
-namespace ThreadSafeStructuresPC_0044ba10 {
 template<>
 // @fnv 0x0044BA10
-LockFreeMap<TESObjectREFR*, BSTreeNode*>::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
+LockFreeMap<AnimIdle*, NiPointer<QueuedAnimIdle> >::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_TASK_OVERHEAD, true,
         kThreadSafeStructuresSourceFile, 912);
-    ItemUpdateArray = 0;
+    uiCount = 0;
     uiNumBuckets = numBuckets;
-    m_pBuckets = new Bucket[uiNumBuckets];
+    m_pBuckets = new ThreadSafePointer<ThreadSafeHashTableNode>[uiNumBuckets];
     m_ppDeletedNodeBuffers = new ThreadSafeHashTableNode*[maxThreads * 3];
     uiDeleteBatchSize = deleteBatchSize;
     pManager = new Manager(maxThreads);
 }
-}
 
-namespace ThreadSafeStructuresPC_0044bbe0 {
 template<>
 // @fnv 0x0044BBE0
-LockFreeMap<TESObjectREFR*, BSTreeNode*>::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
+LockFreeMap<Animation*, NiPointer<QueuedReplacementKFList> >::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_TASK_OVERHEAD, true,
         kThreadSafeStructuresSourceFile, 912);
-    ItemUpdateArray = 0;
+    uiCount = 0;
     uiNumBuckets = numBuckets;
-    m_pBuckets = new Bucket[uiNumBuckets];
+    m_pBuckets = new ThreadSafePointer<ThreadSafeHashTableNode>[uiNumBuckets];
     m_ppDeletedNodeBuffers = new ThreadSafeHashTableNode*[maxThreads * 3];
     uiDeleteBatchSize = deleteBatchSize;
     pManager = new Manager(maxThreads);
 }
-}
 
-namespace ThreadSafeStructuresPC_0044be80 {
 template<>
 // @fnv 0x0044BE80
-LockFreeMap<TESObjectREFR*, BSTreeNode*>::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
+LockFreeMap<TESObjectREFR*, NiPointer<QueuedHelmet> >::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_TASK_OVERHEAD, true,
         kThreadSafeStructuresSourceFile, 912);
-    ItemUpdateArray = 0;
+    uiCount = 0;
     uiNumBuckets = numBuckets;
-    m_pBuckets = new Bucket[uiNumBuckets];
+    m_pBuckets = new ThreadSafePointer<ThreadSafeHashTableNode>[uiNumBuckets];
     m_ppDeletedNodeBuffers = new ThreadSafeHashTableNode*[maxThreads * 3];
     uiDeleteBatchSize = deleteBatchSize;
     pManager = new Manager(maxThreads);
-}
 }
 
-namespace ThreadSafeStructuresPC_0044c040 {
 template<>
 // @fnv 0x0044C040
-LockFreeMap<TESObjectREFR*, BSTreeNode*>::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
+LockFreeMap<const char*, Model*>::LockFreeMap(unsigned int maxThreads, unsigned int numBuckets, unsigned int deleteBatchSize)
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_TASK_OVERHEAD, true,
         kThreadSafeStructuresSourceFile, 912);
-    ItemUpdateArray = 0;
+    uiCount = 0;
     uiNumBuckets = numBuckets;
-    m_pBuckets = new Bucket[uiNumBuckets];
+    m_pBuckets = new ThreadSafePointer<ThreadSafeHashTableNode>[uiNumBuckets];
     m_ppDeletedNodeBuffers = new ThreadSafeHashTableNode*[maxThreads * 3];
     uiDeleteBatchSize = deleteBatchSize;
     pManager = new Manager(maxThreads);
-}
 }

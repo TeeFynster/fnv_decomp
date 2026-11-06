@@ -1,6 +1,8 @@
 // fallout_shared/magic/magicformulas.cpp: FlaggedData (10 functions)
 
 #include "magicformulas_packet.h"
+#include "../../../include/Setting.h"
+#include "../../../include/SettingT_GameSettingCollection_.h"
 // @fnv 0x0040e210
 int FlaggedData::ContainsAnyFlag(unsigned int mask)
 {
@@ -11,20 +13,16 @@ int FlaggedData::ContainsAnyFlag(unsigned int mask)
 int FlaggedData::GetPlayerValue()
 {
     if (FUN_004b7210() && reinterpret_cast<QuestStage*>(FUN_004b7210())->GetIndex())
-        return FUN_004b7210()->FUN_00874480();
+        return reinterpret_cast<int>(FUN_004b7210()->FUN_00874480());
     return 0;
 }
 
-struct Setting_S
-{
-    float* Float();
-};
 float __cdecl FUN_00404010(float, float);
 float __cdecl FUN_004dd130(float, float);
-extern Setting_S originalRuntimeFloatSetting1116;
-extern Setting_S originalRuntimeFloatSetting1114;
-extern Setting_S originalRuntimeFloatSetting1209;
-extern Setting_S originalRuntimeFloatSetting1115;
+extern Setting originalRuntimeFloatSetting1116;
+extern Setting originalRuntimeFloatSetting1114;
+extern Setting originalRuntimeFloatSetting1209;
+extern Setting originalRuntimeFloatSetting1115;
 
 // Computes an effect cost from base cost, area, duration and magnitude, applying area, duration and magnitude modifiers and a range-target multiplier.
 // @fnv 0x006490b0
@@ -65,12 +63,8 @@ float FUN_006492a0(float a, float b)
     return fResult;
 }
 
-extern Setting_S originalRuntimeFloatSetting1183;
-struct GlobalObject_0045cfe0
-{
-    int* Int();
-};
-extern GlobalObject_0045cfe0 g_011d1a14;
+extern Setting originalRuntimeFloatSetting1183;
+extern Setting g_011d1a14;
 // Scales afMagnitude by a runtime float setting and returns true if the result reaches the global int threshold or is at least aiTargetLevel.
 // @fnv 0x006494d0
 bool FUN_006494d0(int aiTargetLevel, float afMagnitude)
@@ -83,13 +77,9 @@ bool FUN_006494d0(int aiTargetLevel, float afMagnitude)
         return aiTargetLevel <= fScaledMagnitude;
 }
 
-struct GlobalObject_0040e0b0
-{
-    float* Float();
-};
-extern GlobalObject_0040e0b0 g_011d1cd0;
-extern Setting_S originalRuntimeFloatSetting1132;
-extern Setting_S originalRuntimeFloatSetting1133;
+extern Setting g_011d1cd0;
+extern Setting originalRuntimeFloatSetting1132;
+extern Setting originalRuntimeFloatSetting1133;
 
 // @fnv 0x00649300
 float ComputeBlastPower(int aiCost, int aiAgility, float afDistance, int aiLuck, int aiArea, float afFatiguePercentage)
@@ -113,10 +103,10 @@ float ComputeBlastPower(int aiCost, int aiAgility, float afDistance, int aiLuck,
     return fblastPower;
 }
 
-extern GlobalObject_0040e0b0 g_011d1938;
-extern Setting_S originalRuntimeFloatSetting1161;
-extern Setting_S originalRuntimeFloatSetting1160;
-extern Setting_S originalRuntimeFloatSetting1159;
+extern Setting g_011d1938;
+extern Setting originalRuntimeFloatSetting1161;
+extern Setting originalRuntimeFloatSetting1160;
+extern Setting originalRuntimeFloatSetting1159;
 float FUN_006494b0(float f, float g);
 
 // Returns 0 outside [afStart, afEnd]; otherwise scales afBase by a curve from afTime, afSkill and settings, with flag-dependent multipliers.
@@ -146,17 +136,6 @@ float __cdecl FUN_00649390(float afBase, float afTime, float afStart, float afEn
     }
 }
 
-class GameSettingCollection;
-union SETTING_VALUE
-{
-    float value;
-};
-template <class T> class SettingT
-{
-  public:
-    SETTING_VALUE* Float();
-};
-
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting1117;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting1118;
 
@@ -165,13 +144,13 @@ extern SettingT<GameSettingCollection> originalRuntimeFloatSetting1118;
 float __cdecl ScaleBySettingBlend(float afValue, int aiPercent)
 {
     float quotient = (float)(aiPercent / g_d100);
-    float result = originalRuntimeFloatSetting1117.Float()->value +
-                   (1.0f - quotient) * originalRuntimeFloatSetting1118.Float()->value;
+    float result = *originalRuntimeFloatSetting1117.Float() +
+                   (1.0f - quotient) * *originalRuntimeFloatSetting1118.Float();
     return afValue * result;
 }
 
-extern GlobalObject_0040e0b0 g_011d158c;
-extern GlobalObject_0040e0b0 g_011d1b98;
+extern Setting g_011d158c;
+extern Setting g_011d1b98;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting1119;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting1120;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting1121;
@@ -182,28 +161,28 @@ int GetBandIndex(float afValue)
 {
     float f = *g_011d158c.Float() + *g_011d1b98.Float() * afValue;
     int r;
-    if (f < originalRuntimeFloatSetting1119.Float()->value)
+    if (f < *originalRuntimeFloatSetting1119.Float())
     {
         r = 0;
     }
     else
     {
         int b;
-        if (f < originalRuntimeFloatSetting1120.Float()->value)
+        if (f < *originalRuntimeFloatSetting1120.Float())
         {
             b = 1;
         }
         else
         {
             int c;
-            if (f < originalRuntimeFloatSetting1121.Float()->value)
+            if (f < *originalRuntimeFloatSetting1121.Float())
             {
                 c = 2;
             }
             else
             {
                 int d;
-                if (f < originalRuntimeFloatSetting1122.Float()->value)
+                if (f < *originalRuntimeFloatSetting1122.Float())
                     d = 3;
                 else
                     d = 4;

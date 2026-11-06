@@ -2,163 +2,83 @@
 // src/fallout/magic/disintegratearmoreffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/disintegratearmoreffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct DisintegrateArmorEffect
+#include "../../../include/DisintegrateArmorEffect.h"
+#include "../../../include/TESBoundObject.h"
+#include "../../../include/TESObjectARMO.h"
+#include "../../../include/TESSaveLoadGame.h"
+
+struct Node;
+class InventoryItem
 {
-    void FUN_0080d210();
-    void* Destroy(unsigned int flags);
+public:
+    ~InventoryItem();
+    TESBoundObject* FUN_0044ddc0();
+    int GetTargetFullName();
+    int FUN_004459e0(int);
 };
 
-// Calls FUN_0080d210, then deletes this if flags has bit 0 set, and returns this.
+// Destroys the effect, deletes this if flags has bit 0 set, and returns this.
 // @fnv 0x0080d1e0
 void* DisintegrateArmorEffect::Destroy(unsigned int flags)
 {
-    FUN_0080d210();
+    this->DisintegrateArmorEffect::~DisintegrateArmorEffect();
     if (flags & 1)
         operator delete(this);
     return this;
 }
 
-namespace fnv_0080d4f0 {
-struct Actor;
-struct ActiveEffect
-{
-    unsigned short GetSaveSize(Actor*);
-};
-struct TESSaveLoadGame
-{
-    unsigned char FUN_008df040();
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
-
-struct DisintegrateArmorEffect : ActiveEffect
-{
-    unsigned short FUN_0080d4f0(Actor* actor);
-};
 
 // Returns the save size: the base ActiveEffect size plus 4 when the save version is at least 0x37.
 // @fnv 0x0080d4f0
-unsigned short DisintegrateArmorEffect::FUN_0080d4f0(Actor* actor)
+unsigned short DisintegrateArmorEffect::GetSaveSize(Actor* actor)
 {
     unsigned short size = 0;
-    size += GetSaveSize(actor);
+    size += ActiveEffect::GetSaveSize(actor);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x37)
         size += 4;
     return size;
 }
-}  // namespace fnv_0080d4f0
 
-struct Temp
-{
-    void* vtable;
-    float value;
-    unsigned int unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c,
-        unk40, unk44, unk48;
-    Temp(unsigned int, unsigned int, unsigned int);
-};
-struct Owner
-{
-    unsigned int unk00, unk04, arg08, arg0c, unk10, unk14, unk18, unk1c, unk20, unk24, arg28;
-    void FUN_00804090(Temp*);
-    Temp* CreateTemp();
-};
-// Allocates a Temp from arg28, arg08 and arg0c, passes it to FUN_00804090, and returns it.
+// Copies this effect's source parameters and base effect data.
 // @fnv 0x0080d2a0
-Temp* Owner::CreateTemp()
+ActiveEffect* DisintegrateArmorEffect::Copy()
 {
-    Temp* p = new Temp(arg28, arg08, arg0c);
-    FUN_00804090(p);
+    DisintegrateArmorEffect* p = new DisintegrateArmorEffect(m_pEffectInstance, pSpell, pEffect);
+    ActiveEffect::CopyData(p);
     return p;
 }
 
-class Data80D
-{
-  public:
-    ~Data80D();
-};
-
-class Base80D
-{
-  public:
-    virtual ~Base80D();
-
-    int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20;
-    int unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40;
-    int unk44;
-};
-
-class FUN_0080d210 : public Base80D
-{
-  public:
-    virtual ~FUN_0080d210();
-
-    Data80D* m_pUserData;
-};
-
-// Destructor that deletes the owned Data80D object if the pointer is non-null.
+// Destructor that deletes the owned inventory item if the pointer is non-null.
 // @fnv 0x0080d210
-FUN_0080d210::~FUN_0080d210()
+DisintegrateArmorEffect::~DisintegrateArmorEffect()
 {
-    if (m_pUserData)
-        delete m_pUserData;
+    if (m_pItem)
+        delete m_pItem;
 }
 
-struct TESBoundObject
-{
-    virtual void v0();
-};
-struct TESObjectARMO : TESBoundObject
-{
-    virtual void v1();
-};
-extern void* DAT_011de45c;
 extern char DAT_01183108[];
 extern char DAT_01183a34[];
 
-struct GlobalMgr
-{
-    unsigned char FUN_008df040();
-    void FUN_008579b0(int* out, unsigned int n);
-};
-
-struct Holder48
-{
-    TESBoundObject* FUN_0044ddc0();
-};
-
-struct Sub70
-{
-    bool FUN_00480af0(unsigned int a, unsigned int b, unsigned int c);
-};
-
-struct FUN_0080d540_cls
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    unsigned int unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40, unk44;
-    Holder48* m_48;
-
-    void FUN_008050d0(unsigned int a);
-    void FUN_0080d540(unsigned int arg);
-};
-
 // @fnv 0x0080d540
-void FUN_0080d540_cls::FUN_0080d540(unsigned int arg)
+void DisintegrateArmorEffect::SaveGame(Actor* arg)
 {
     unsigned int i2;
     TESObjectARMO* obj;
     int result;
 
-    FUN_008050d0(arg);
-    if (((GlobalMgr*)DAT_011de45c)->FUN_008df040() >= 0x37)
+    ActiveEffect::SaveGame(arg);
+    if (g_TESSaveLoadGame->FUN_008df040() >= 0x37)
     {
         result = -1;
-        if (m_48 != 0 && m_48->FUN_0044ddc0() != 0)
+        if (m_pItem != 0 && m_pItem->FUN_0044ddc0() != 0)
         {
-            obj = dynamic_cast<TESObjectARMO*>(m_48->FUN_0044ddc0());
+            obj = dynamic_cast<TESObjectARMO*>(m_pItem->FUN_0044ddc0());
             if (obj != 0)
             {
                 for (i2 = 0; i2 < 0x14; i2++)
                 {
-                    if (((Sub70*)((char*)obj + 0x70))->FUN_00480af0(i2, 0, 0))
+                    if (obj->TESBipedModelForm::FUN_00480af0(i2, false, false))
                     {
                         result = i2;
                         break;
@@ -166,7 +86,7 @@ void FUN_0080d540_cls::FUN_0080d540(unsigned int arg)
                 }
             }
         }
-        ((GlobalMgr*)DAT_011de45c)->FUN_008579b0(&result, 4);
+        g_TESSaveLoadGame->FUN_008579b0(&result, 4);
     }
 }
 
@@ -175,15 +95,6 @@ struct Node;
 struct Hub;
 struct Effect;
 struct Other;
-struct Ctl
-{
-    void Apply(Node* n);
-};
-struct SysMgr
-{
-    unsigned char Check();
-    void Query(int* out, unsigned int n);
-};
 struct Node
 {
     Hub* Resolve();
@@ -201,47 +112,34 @@ struct Other
     void* Make(int one);
 };
 
-extern SysMgr* DAT_011de45c;
-
-struct FUN_0080d610_cls
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34,
-        unk38, unk3c, unk40, unk44;
-    void* unk48;
-    void FUN_0080d610(Node* arg);
-};
+}  // namespace fnv_0080d610
 
 // @fnv 0x0080d610
-void FUN_0080d610_cls::FUN_0080d610(Node* pNode)
+void DisintegrateArmorEffect::LoadGame(Actor* pNode)
 {
-    reinterpret_cast<Ctl*>(this)->Apply(pNode);
-    if (DAT_011de45c->Check() >= 0x37)
+    using namespace fnv_0080d610;
+    ActiveEffect::LoadGame(pNode);
+    if (g_TESSaveLoadGame->FUN_008df040() >= 0x37)
     {
         int handle;
-        DAT_011de45c->Query(&handle, 4);
+        g_TESSaveLoadGame->FUN_008579e0(&handle, 4);
         if (handle != -1)
         {
-            Effect* fx = pNode->Resolve()->Find();
+            Effect* fx = reinterpret_cast<fnv_0080d610::Node*>(pNode)->Resolve()->Find();
             if (fx != 0)
             {
-                unk48 = fx->Create(handle, 1);
+                m_pItem = static_cast<InventoryItem*>(fx->Create(handle, 1));
             }
             void* obj;
             {
-                void* cur = unk48;
+                void* cur = m_pItem;
                 obj = cur;
             }
             obj != 0 ? reinterpret_cast<Other*>(obj)->Make(1) : 0;
         }
     }
 }
-}  // namespace fnv_0080d610
 
-struct Sub
-{
-    int GetTargetFullName();
-    int FUN_004459e0(int a);
-};
 struct Result
 {
     virtual void v000();
@@ -487,7 +385,7 @@ struct Result
     virtual void v0f0();
     virtual void v0f1();
     virtual void FUN_slot242(void* a, float b);
-    Sub* FUN_0089d8b0(unsigned int flags);
+    InventoryItem* FUN_0089d8b0(unsigned int flags);
     int FUN_0055d520();
 };
 struct Node
@@ -496,37 +394,26 @@ struct Node
 };
 bool FUN_005b6f70();
 int FUN_00703c00(const char* fmt, ...);
-struct FUN_0080d340_cls
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34,
-        unk38, unk3c, unk40, unk44;
-    Sub* m_48;
-    Node* FUN_0059bb30();
-    float GetFloatAtOffset1C(int a);
-    float GetFloatAtOffset1C();
-    void FUN_0080d340();
-};
-
 // @fnv 0x0080d340
-void FUN_0080d340_cls::FUN_0080d340()
+void DisintegrateArmorEffect::Start()
 {
     Result* p;
-    Sub* t;
-    Sub* u;
-    p = this->FUN_0059bb30() ? this->FUN_0059bb30()->FUN_00822b40() : 0;
+    InventoryItem* t;
+    InventoryItem* u;
+    p = this->FUN_0059bb30() ? reinterpret_cast<::Node*>(this->FUN_0059bb30())->FUN_00822b40() : 0;
     if (p == 0)
         return;
     {
-        this->m_48 = (Sub*)p->FUN_0089d8b0(0);
-        if (this->m_48 != 0)
+        this->m_pItem = p->FUN_0089d8b0(0);
+        if (this->m_pItem != 0)
         {
-            p->FUN_slot242((void*)this->m_48, this->GetFloatAtOffset1C(1));
+            p->FUN_slot242((void*)this->m_pItem, this->GetFloatAtOffset1C(1));
             if (FUN_005b6f70())
             {
                 FUN_00703c00("%s's %s takes %0.2f disintegrate armor damage!", p->FUN_0055d520(),
-                             this->m_48->GetTargetFullName(), this->GetFloatAtOffset1C());
+                             this->m_pItem->GetTargetFullName(), this->GetFloatAtOffset1C());
             }
-            t = this->m_48;
+            t = this->m_pItem;
             u = t;
             (void)((u != 0) ? u->FUN_004459e0(1) : 0);
         }

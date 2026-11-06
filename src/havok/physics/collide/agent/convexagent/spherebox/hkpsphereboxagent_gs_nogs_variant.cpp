@@ -5,6 +5,9 @@
 
 // src/havok/physics/collide/agent/convexagent/spherebox/hkpsphereboxagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/spherebox/hkpsphereboxagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkpSymmetricAgentFlipCollector.h"
+
 extern void __cdecl FUN_00d3c440(int a, int b, int c, int d);
 void __stdcall ForwardToD3C440(int a, int b, int c, int d);
 struct Conversion
@@ -31,12 +34,6 @@ void FUN_00daf8e0();
 void __cdecl FUN_00d3cef0(Registry* registry);
 extern float DAT_0104da48;
 extern void __cdecl FUN_00d3cc00(void*, void*, int, void*);
-struct hkpSymmetricAgentFlipCollector
-{
-    virtual void unk00();
-    float unk04;
-    int unk08;
-};
 void __cdecl FlipAndDispatchCollector(void* arg1, void* arg2, int arg3, int arg4);
 struct S_00d3c3c0_Holder
 {
@@ -55,14 +52,6 @@ struct S_00d3c3c0_Obj
     unsigned short unk0c;
     void FUN_00d3c3c0(int arg);
 };
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pAllocator;
-};
 struct ObjAllocator
 {
     virtual void unk00();
@@ -77,7 +66,7 @@ struct SmallRecord
     unsigned short m_w0C;
 };
 extern char DAT_010cf018[];
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 void __cdecl FUN_00d3c400(int a, int b, int c, int d);
 class D3CF80CollectorBase
 {

@@ -6,6 +6,17 @@
 // src/staging/blk_00b00000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/BSWin32TaskletManager.h"
+#include "../../include/Mat3.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/CVec3.h"
+// The former Vector3 stand-in defined these constructors inline in its class.
+inline CVec3::CVec3()
+{
+}
+inline CVec3::CVec3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{
+}
 struct FUN_00b007d0_shell
 {
     int FUN_00b007d0();
@@ -55,20 +66,11 @@ struct TaskletManager
 };
 TaskletManager& __cdecl GetTaskletManager();
 char QueueTasklet(int param_1);
-struct FUN_00b12af0_shell
-{
-    void __thiscall FUN_00b12af0();
-};
 struct FUN_00b130a0
 {
     float a, b, c;
     float d, e, f;
     FUN_00b130a0();
-};
-struct FUN_00b0cf90_class
-{
-    float x, y, z;
-    float* __thiscall AddVector(float* pDest, const float* pSource);
 };
 struct FUN_00afeac0_shell
 {
@@ -91,10 +93,6 @@ struct FUN_00b00cf0_vt
 struct FUN_00b00cf0_shell
 {
     void __thiscall CallVirtualOnAllEntries();
-};
-struct FUN_00b12b50_class
-{
-    float* TransformVector(float* dst, const float* src) const;
 };
 struct FUN_00b008b0_t
 {
@@ -127,10 +125,6 @@ extern "C" __declspec(dllimport) void __stdcall DestroyWindow(void*);
 struct FUN_00b01f00_class
 {
     void DestroyAndFreeLibraries();
-};
-struct MemoryManager
-{
-    void Deallocate(void*);
 };
 extern MemoryManager g_memoryManager;
 struct FUN_00b02970
@@ -165,31 +159,6 @@ struct FUN_00b008a0_cls
     int unk00;
     void FUN_00b008a0();
 };
-class BSWin32TaskletManager
-{
-  public:
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual bool vf10(int& value);
-
-    unsigned char unk04;
-
-    bool __thiscall GetTaskletValue(void* result);
-};
-inline void BSWin32TaskletManager::vf00()
-{}
-inline void BSWin32TaskletManager::vf04()
-{}
-inline void BSWin32TaskletManager::vf08()
-{}
-inline void BSWin32TaskletManager::vf0c()
-{}
-inline bool BSWin32TaskletManager::vf10(int&)
-{
-    return false;
-}
 struct FUN_00b00ae0_class
 {
     virtual void virtual0();
@@ -376,11 +345,7 @@ struct FUN_00b10490_class
     int second;
     bool __thiscall FUN_00b10490(const FUN_00b10490_class* rhs);
 };
-struct FUN_00b108e0_pool
-{
-    void* FUN_00aa3e40(unsigned int size);
-};
-extern "C" FUN_00b108e0_pool DAT_011f6238;
+extern "C" MemoryManager DAT_011f6238;
 extern "C" char DAT_010176f8[];
 extern "C" char DAT_01140ef8[];
 extern "C" void __stdcall FUN_00ec7894(void* err2, const char* msg);
@@ -392,20 +357,11 @@ struct FUN_00b108e0_err
     void FUN_00ec78f1(unsigned int* out);
 };
 void* __cdecl AllocatePoolArray(unsigned int count);
-struct Mat3
-{
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
-    Mat3();
-    Mat3 Multiply(const Mat3& rhs) const;
-};
 extern "C" double __cdecl sin(double);
 extern "C" double __cdecl cos(double);
 extern double DAT_010a4d90;
-struct RotationMatrix
+struct RotationMatrix : Mat3
 {
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
     void __thiscall SetRotationAxisAngle(float angle, float x, float y, float z);
 };
 struct Vec3f
@@ -429,9 +385,9 @@ struct ScratchResult
 };
 struct ScratchHelper
 {
-    ScratchResult* Compute(float* out, FUN_00b0cf90_class* owner, Vec3f* tmp, float scale);
+    ScratchResult* Compute(float* out, CVec3* owner, Vec3f* tmp, float scale);
 };
-float* FUN_00b13000(float* dst, FUN_00b0cf90_class* p1, ScratchHelper* p2, float s);
+float* FUN_00b13000(float* dst, CVec3* p1, ScratchHelper* p2, float s);
 void __cdecl FUN_00b17b40(int, int, int, int, unsigned char, unsigned char);
 struct Flag
 {
@@ -716,7 +672,8 @@ struct Container470
 {
     Aux470* proxy;
 };
-struct Vector470 : Container470
+// VC9 secure sequence: proxy/allocator state precedes record pointers at +0x0c/+0x10; not the SIMD Vector.
+struct SecureRecordSequence : Container470
 {
     unsigned allocator04, allocator08;
     Element470* first;
@@ -747,7 +704,7 @@ Iterator470& Iterator470::FUN_00b0eb30()
     do
     {
     } while (false);
-    if (!(pointer < static_cast<const Vector470*>(GetContainer())->last))
+    if (!(pointer < static_cast<const SecureRecordSequence*>(GetContainer())->last))
         FUN_00ec7c56();
     do
     {
@@ -775,7 +732,7 @@ struct StorageBase
 struct EmptyTag
 {
 };
-template <class T> struct Allocator
+template <class T> struct TreeAllocator
 {
     __forceinline void deallocate(T* pointer, unsigned int count)
     {
@@ -799,7 +756,7 @@ struct OtherEntry
 struct VectorStorage : StorageBase
 {
     int unk04;
-    Allocator<TreeEntry> allocator;
+    TreeAllocator<TreeEntry> allocator;
     TreeEntry* first;
     TreeEntry* last;
     TreeEntry* end;
@@ -836,7 +793,7 @@ struct VectorStorage : StorageBase
 struct OtherStorage : StorageBase
 {
     int unk04;
-    Allocator<OtherEntry> allocator;
+    TreeAllocator<OtherEntry> allocator;
     OtherEntry* first;
     OtherEntry* last;
     OtherEntry* end;
@@ -2457,7 +2414,7 @@ struct ByteAllocator
     }
     __forceinline void deallocate(char* _Ptr, unsigned int _Count)
     {
-        ((MemoryManager*)&DAT_011f6238)->Deallocate(_Ptr);
+        DAT_011f6238.Deallocate(_Ptr);
     }
 };
 struct ScalarTag
@@ -3716,27 +3673,29 @@ void Mat3Rot::FUN_00b12c00(float a, float b)
     *(Mat3*)this = rot.Multiply(*this);
 }
 
-struct FUN_00b13040_class
-{
-    float x;
-    float y;
-    float z;
 
 // @fnv 0x00b13040
-    FUN_00b13040_class()
-    {}
-    FUN_00b13040_class(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    FUN_00b13040_class FUN_00b13040(const FUN_00b13040_class& pt) const;
-};
-
-FUN_00b13040_class FUN_00b13040_class::FUN_00b13040(const FUN_00b13040_class& pt) const
+inline CVec3 CVec3::FUN_00b13040(const CVec3& pt) const
 {
-    return FUN_00b13040_class(x - pt.x, y - pt.y, z - pt.z);
+    return CVec3(x - pt.x, y - pt.y, z - pt.z);
+}
+
+extern "C" double __cdecl FUN_00ec6054(double);
+inline CVec3 CVec3::AddVector(const CVec3& other) const
+{
+    return CVec3(other.x + x, other.y + y, other.z + z);
+}
+inline CVec3 CVec3::ScaleSwizzled(float scale) const
+{
+    return CVec3(scale * x, scale * y, scale * z);
+}
+inline void CVec3::FUN_00b12790()
+{
+    float lengthSquared = x * x + y * y + z * z;
+    float inverseLength = 1.0f / (float)FUN_00ec6054(lengthSquared);
+    x *= inverseLength;
+    y *= inverseLength;
+    z *= inverseLength;
 }
 
 namespace fnv_00b13100 {
@@ -3749,48 +3708,22 @@ template <class T> inline const T& max_value(const T& _Left, const T& _Right)
 {
     return _Left < _Right ? _Right : _Left;
 }
-struct Vector3
+inline void InitializeVector(CVec3* vector)
 {
-    float x, y, z;
-    Vector3()
-    {
-        z = 0.0f;
-        y = 0.0f;
-        x = 0.0f;
-    }
-    Vector3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Vector3 AddVector(const Vector3& other) const
-    {
-        return Vector3(other.x + x, other.y + y, other.z + z);
-    }
-    Vector3 ScaleSwizzled(float scale) const
-    {
-        return Vector3(scale * x, scale * y, scale * z);
-    }
-    Vector3 FUN_00b13040(const Vector3& other) const
-    {
-        return Vector3(x - other.x, y - other.y, z - other.z);
-    }
-    Vector3 FUN_00b12890(const struct FloatMatrix3&) const;
-    void FUN_00b12790()
-    {
-        float lengthSquared = x * x + y * y + z * z;
-        float inverseLength = 1.0f / (float)FUN_00ec6054(lengthSquared);
-        x *= inverseLength;
-        y *= inverseLength;
-        z *= inverseLength;
-    }
-};
+    vector->z = 0.0f;
+    vector->y = 0.0f;
+    vector->x = 0.0f;
+}
+}  // namespace fnv_00b13100
 struct FloatMatrix3
 {
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    Vector3 TransformVector(const Vector3& v) const
+    CVec3 TransformVector(const CVec3& v) const
     {
-        return Vector3(v.z * m02 + (v.y * m01 + v.x * m00), v.z * m12 + (v.y * m11 + v.x * m10),
+        return CVec3(v.z * m02 + (v.y * m01 + v.x * m00), v.z * m12 + (v.y * m11 + v.x * m10),
                        v.z * m22 + (v.y * m21 + v.x * m20));
     }
-    void FUN_00b12d50(float, Vector3);
+    void FUN_00b12d50(float, CVec3);
     FloatMatrix3() : m00(1), m01(0), m02(0), m10(0), m11(1), m12(0), m20(0), m21(0), m22(1)
     {}
     FloatMatrix3 Multiply(const FloatMatrix3&) const;
@@ -3811,22 +3744,26 @@ struct FloatMatrix3
         *this = spin.Multiply(*this);
     }
 };
-inline Vector3 Vector3::FUN_00b12890(const FloatMatrix3& m) const
+inline CVec3 CVec3::FUN_00b12890(const FloatMatrix3& m) const
 {
-    return Vector3(m.m20 * z + (m.m10 * y + m.m00 * x), m.m21 * z + (m.m11 * y + m.m01 * x),
+    return CVec3(m.m20 * z + (m.m10 * y + m.m00 * x), m.m21 * z + (m.m11 * y + m.m01 * x),
                    m.m22 * z + (m.m12 * y + m.m02 * x));
 }
+namespace fnv_00b13100 {
 namespace TransformRecord {
 struct TransformData
 {
-    Vector3 direction;
-    Vector3 position;
+    CVec3 direction;
+    CVec3 position;
     float scale;
     FloatMatrix3 rotation;
     float extent;
     float weight;
     TransformData()
-    {}
+    {
+        InitializeVector(&direction);
+        InitializeVector(&position);
+    }
 };
 }
 struct Curve
@@ -3868,7 +3805,7 @@ struct RandomSource
     float FUN_00b3f130(float, float);
 };
 extern RandomSource DAT_011f8c05;
-extern Vector3 DAT_011f8c40;
+extern CVec3 DAT_011f8c40;
 struct ParentNode
 {
     ParentNode* parent;
@@ -3888,13 +3825,13 @@ inline void DeadEnd()
 }
 struct Effect
 {
-    void FUN_00b13100(ParentNode*, float, unsigned int, const Vector3&, float, const FloatMatrix3&, const Vector3&, int,
+    void FUN_00b13100(ParentNode*, float, unsigned int, const CVec3&, float, const FloatMatrix3&, const CVec3&, int,
                       float, int);
-    void FUN_00b13c10(const Vector3&, float, Effect*, const Vector3&, const Vector3&, float, int, int);
+    void FUN_00b13c10(const CVec3&, float, Effect*, const CVec3&, const CVec3&, float, int, int);
 };
 // @fnv 0x00b13100
-void Effect::FUN_00b13100(ParentNode* node, float amount, unsigned int index, const Vector3& position, float time,
-                          const FloatMatrix3& rotation, const Vector3& axis, int flags, float speed, int mode)
+void Effect::FUN_00b13100(ParentNode* node, float amount, unsigned int index, const CVec3& position, float time,
+                          const FloatMatrix3& rotation, const CVec3& axis, int flags, float speed, int mode)
 {
     Config* profile = DAT_011f8c58[index];
     float arc = 60.0f;
@@ -3903,7 +3840,7 @@ void Effect::FUN_00b13100(ParentNode* node, float amount, unsigned int index, co
     float distance = profile->GetCurve()->FUN_00b37ad0(time) * amount;
     float step = max_value(distance / profile->count, 0.01f);
     float randomAngle = DAT_011f8c05.FUN_00b3f130(-180.0f, 180.0f);
-    Vector3 rotated = rotation.TransformVector(axis);
+    CVec3 rotated = rotation.TransformVector(axis);
     TransformRecord::TransformData* from = &transforms[0];
     from->position = position;
     from->rotation = rotation;
@@ -3912,16 +3849,17 @@ void Effect::FUN_00b13100(ParentNode* node, float amount, unsigned int index, co
     from->direction = DAT_011f8c40.FUN_00b12890(from->rotation);
     TransformRecord::TransformData* pOther = &transforms[1];
     pOther->position = from->position.AddVector(from->direction.ScaleSwizzled(step));
-    Vector3 forward = transforms[1].position.FUN_00b13040(transforms[0].position);
+    CVec3 forward = transforms[1].position.FUN_00b13040(transforms[0].position);
     forward.FUN_00b12790();
-    Vector3 towardParent;
+    CVec3 towardParent;
+    InitializeVector(&towardParent);
     if (!node || !node->enabled)
     {
         towardParent = forward;
     }
     else
     {
-        Vector3 origin = node->transform->position;
+        CVec3 origin = node->transform->position;
         if (DAT_011f8bf4->parentDepth != 0)
         {
             int level = 0;
@@ -11541,35 +11479,15 @@ extern double DAT_010a4d90;
 double __cdecl FUN_00ec9f30(double value);
 double __cdecl FUN_00eca060(double value);
 
-struct S_00b134d0_Mat : FUN_00b12af0_shell
+struct YRotationMatrix : Mat3
 {
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
-
-    S_00b134d0_Mat Multiply(const S_00b134d0_Mat& rhs) const
-    {
-        S_00b134d0_Mat kResult;
-        kResult.m00 = m00 * rhs.m00 + m01 * rhs.m10 + m02 * rhs.m20;
-        kResult.m01 = m00 * rhs.m01 + m01 * rhs.m11 + m02 * rhs.m21;
-        kResult.m02 = m00 * rhs.m02 + m01 * rhs.m12 + m02 * rhs.m22;
-        kResult.m10 = m10 * rhs.m00 + m11 * rhs.m10 + m12 * rhs.m20;
-        kResult.m11 = m10 * rhs.m01 + m11 * rhs.m11 + m12 * rhs.m21;
-        kResult.m12 = m10 * rhs.m02 + m11 * rhs.m12 + m12 * rhs.m22;
-        kResult.m20 = m20 * rhs.m00 + m21 * rhs.m10 + m22 * rhs.m20;
-        kResult.m21 = m20 * rhs.m01 + m21 * rhs.m11 + m22 * rhs.m21;
-        kResult.m22 = m20 * rhs.m02 + m21 * rhs.m12 + m22 * rhs.m22;
-        return kResult;
-    }
-
     void FUN_00b134d0(float angle);
 };
 
 // @fnv 0x00b134d0
-void S_00b134d0_Mat::FUN_00b134d0(float angle)
+void YRotationMatrix::FUN_00b134d0(float angle)
 {
-    S_00b134d0_Mat kRotationBasis;
-    kRotationBasis.FUN_00b12af0();
+    Mat3 kRotationBasis;
 
     float fCos = +((float)FUN_00ec9f30((double)(float)(angle / DAT_010a4d90)));
     float fSin = +((float)FUN_00eca060((double)(float)(angle / DAT_010a4d90)));
@@ -11584,7 +11502,7 @@ void S_00b134d0_Mat::FUN_00b134d0(float angle)
     kRotationBasis.m21 = 0.0f;
     kRotationBasis.m22 = fCos;
 
-    *this = kRotationBasis.Multiply(*this);
+    *(Mat3*)this = kRotationBasis.Multiply(*this);
 }
 
 namespace fnv_00b167e0 {
@@ -14640,16 +14558,17 @@ template <class T> inline void destroyElements(T* first, T* last)
     EmptyTag tag;
     destroyRange(first, last, tag);
 }
-template <class T> struct VectorLike : VectorStorage<T>
+// VC9 sequence storage: allocator/proxy base and three T* bounds; 0x00b0e730 allocates capacity, not SIMD lanes.
+template <class T> struct SecureSequence : VectorStorage<T>
 {
     T* first;
     T* last;
     T* end;
-    VectorLike() : VectorStorage<T>()
+    SecureSequence() : VectorStorage<T>()
     {
         FUN_00b0e730(0);
     }
-    ~VectorLike()
+    ~SecureSequence()
     {
         Tidy();
     }
@@ -14692,7 +14611,7 @@ template <class T> struct VectorLike : VectorStorage<T>
     }
 };
 
-template struct VectorLike<int>;
+template struct SecureSequence<int>;
 }  // namespace fnv_00b0e730
 
 namespace fnv_00b16950 {
@@ -14989,25 +14908,16 @@ inline void DeadQ9_b12d50()
 {
     int a[9];
 }
-struct M3_00b12af0
+struct MatrixOwner : Mat3
 {
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
-    M3_00b12af0();
-    M3_00b12af0 Multiply(const M3_00b12af0& rhs) const;
-};
-struct MatrixOwner
-{
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
+    // This call must remain out of line; the local Mat3::Multiply body is inline.
+    Mat3 Multiply(const Mat3& rhs) const;
     void FUN_00b12d50(float angle, float x, float y, float z);
 };
 // @fnv 0x00b12d50
 void MatrixOwner::FUN_00b12d50(float angle, float x, float y, float z)
 {
-    M3_00b12af0 rot;
+    MatrixOwner rot;
     float s = (double)(float)FUN_00eca060((double)(float)(angle / DAT_010a4d90));
     float CD = (double)(float)FUN_00ec9f30((double)(float)(angle / DAT_010a4d90));
     float TQ = 1.0f - CD;
@@ -15023,7 +14933,7 @@ void MatrixOwner::FUN_00b12d50(float angle, float x, float y, float z)
     rot.m20 = TQ * u * RW + s * v;
     rot.m21 = TQ * v * RW - s * u;
     rot.m22 = TQ * RW * RW + CD;
-    *(M3_00b12af0*)this = M3_00b12af0(rot.Multiply(*(M3_00b12af0*)this));
+    *(Mat3*)this = Mat3(rot.Multiply(*(Mat3*)this));
     DeadQ9_b12d50();
 }
 
@@ -15330,7 +15240,8 @@ struct AllocQ
     }
 };
 
-struct Vector_b17f50
+// VC9 pointer sequence: three pointer bounds at +0x0c/+0x10/+0x14; 0x00b17f50 also binds stl::vector::_Tidy.
+struct OwnedPointerSequence
 {
     int unk00;
     int unk04;
@@ -15347,7 +15258,7 @@ struct Vector_b17f50
 };
 
 // @fnv 0x00b17f50
-void Vector_b17f50::FUN_00b17f50()
+void OwnedPointerSequence::FUN_00b17f50()
 {
     if (_Myfirst != 0)
     {
@@ -15377,16 +15288,17 @@ template <class T> struct VectorAllocStorage : ProxyStorage<std::allocator<T> >
     VectorAllocStorage(std::allocator<T> a = std::allocator<T>()) : ProxyStorage<std::allocator<T> >(a), allocator(a)
     {}
 };
-template <class T> struct VectorLike : VectorAllocStorage<T>
+// VC9 sequence storage: allocator/proxy base and three T* bounds; Buy/Tidy allocate/free elements, not SIMD lanes.
+template <class T> struct SecureSequence : VectorAllocStorage<T>
 {
     T* first;
     T* last;
     T* end;
-    VectorLike() : VectorAllocStorage<T>()
+    SecureSequence() : VectorAllocStorage<T>()
     {
         Buy(0);
     }
-    ~VectorLike()
+    ~SecureSequence()
     {
         Tidy();
     }
@@ -15431,9 +15343,9 @@ struct PointEntry
 {
     float x, y, z;
 };
-typedef VectorLike<TreeEntry> SplineMember08;
-typedef VectorLike<OtherEntry> SplineMember20;
-typedef VectorLike<PointEntry> SplineMember50;
+typedef SecureSequence<TreeEntry> SplineMember08;
+typedef SecureSequence<OtherEntry> SplineMember20;
+typedef SecureSequence<PointEntry> SplineMember50;
 struct SplineCurve
 {
     int unk00;

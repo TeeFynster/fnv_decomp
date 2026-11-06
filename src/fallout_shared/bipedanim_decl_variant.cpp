@@ -21,7 +21,7 @@ void BipedAnim::FUN_004abd30(IO_TASK_PRIORITY priority, NiPointer<QueuedHelmet>&
             if (object[i].m_pModel && object[i].m_pModel != (TESModel*)-1)
             {
                 modelFlags |= object[i].m_pModel->FUN_004abf80();
-                if (IsSlotHidden((BIPED_OBJECT)i) && DAT_011c5ef0.Bool()->b && FUN_0043faf0() &&
+                if (IsSlotHidden((BIPED_OBJECT)i) && *DAT_011c5ef0.Bool() && FUN_0043faf0() &&
                     CanLoadHiddenBipedObjects())
                 {
                     RequestModelLoad(priority, file, pHelmetQueueEntry, (BIPED_OBJECT)i);
@@ -38,7 +38,7 @@ void BipedAnim::FUN_004abd30(IO_TASK_PRIORITY priority, NiPointer<QueuedHelmet>&
                     TESBipedModelForm* biped = TESBipedModelForm::GetFormAsBipedModel(object[i].pParent);
                     if (biped)
                     {
-                        const char* path = biped->FUN_00480ce0();
+                        const char* path = reinterpret_cast<const char*>(biped->FUN_00480ce0());
                         if (*path)
                             g_modelLoader->QueueFile(path, priority, file, 3, true, false, false);
                     }

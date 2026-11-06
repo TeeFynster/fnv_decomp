@@ -1,23 +1,10 @@
-// fallout_shared/distant terrain system/bgsterrainmanager_decls.h: declares NiFile, BSFile, FileFinder
+// fallout_shared/distant terrain system/bgsterrainmanager_decls.h: declares FileFinder
 #ifndef FNV_BGSTERRAINMANAGER_DECLS_H
 #define FNV_BGSTERRAINMANAGER_DECLS_H
 
 
-class NiFile
-{
-  public:
-    enum OpenMode
-    {
-        READ_ONLY,
-        WRITE_ONLY,
-        APPEND_ONLY
-    };
-};
-
-class BSFile : public NiFile
-{
-  public:
-};
+#include "../../../include/BSFile.h"
+#include "../../../include/BGSTerrainManager.h"
 
 class FileFinder
 {
@@ -36,7 +23,6 @@ class FileFinder
     static FILE_LOCATION __cdecl Exist(const char*, char*, unsigned int, unsigned int);
 };
 
-class BGSTerrainManager;
 
 BGSTerrainManager* ReadAnimationFromStream(BSFile*);
 

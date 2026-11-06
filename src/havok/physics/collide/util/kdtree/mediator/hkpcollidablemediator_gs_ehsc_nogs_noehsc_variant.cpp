@@ -1,3 +1,6 @@
+#include "../../../../../../../include/hkAabb.h"
+#include "../../../../../../../include/hkAabbUint32.h"
+
 
 // src/havok/physics/collide/util/kdtree/mediator/hkpcollidablemediator_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/collide/util/kdtree/mediator/hkpcollidablemediator.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -104,25 +107,9 @@ struct FUN_00d9e010_cls {
 extern const __m128 DAT_011b6d70;
 extern const __m128 DAT_01267e30;
 
-struct hkAabbQ
-{
-    __m128 m_kMinimumCorner;
-    __m128 m_kMaximumCorner;
-};
+__forceinline hkAabb::hkAabb() {}
 
-struct __declspec(align(16)) hkAabbUint32Q
-{
-    unsigned int m_kMinimumCorner[3];
-    unsigned char m_ucExpansionMin[3];
-    unsigned char m_ucExpansionShift;
-    unsigned int m_kMaximumCorner[3];
-    unsigned char m_ucExpansionMax[3];
-    unsigned char m_expansionMaxXYZ;
-
-    __forceinline bool isValid() const { return m_kMinimumCorner[0] <= m_kMaximumCorner[0]; }
-};
-
-__declspec(noalias) void __cdecl FUN_00cf8690(hkAabbUint32Q* dst, const hkAabbUint32Q* src);
+__declspec(noalias) void __cdecl FUN_00cf8690(hkAabbUint32* dst, const hkAabbUint32* src);
 
 class ShapeQ
 {
@@ -134,7 +121,7 @@ public:
     virtual void v10();
     virtual void v14();
     virtual void v18();
-    virtual void getAabb(const void* localToWorld, float tolerance, hkAabbQ& out) const;
+    virtual void getAabb(const void* localToWorld, float tolerance, hkAabb& out) const;
 };
 
 struct BroadPhaseQ
@@ -207,7 +194,7 @@ struct CollidableQ
     int unk14;
     int unk18;
     int unk1c;
-    hkAabbUint32Q m_kBoundingVolumeData;
+    hkAabbUint32 m_kBoundingVolumeData;
 
     WorldObjectQ* getOwner() const { return (WorldObjectQ*)((char*)this + m_iOwnerOffset); }
 };
@@ -236,21 +223,21 @@ static __forceinline void convertToUint32WithClip(const __m128& in, const __m128
 // @fnv 0x00d9e020
 void __stdcall FUN_00d9e020(const CollidableQ* collidable, __m128i* out)
 {
-    hkAabbUint32Q aabb32;
-    const hkAabbUint32Q& bv = collidable->m_kBoundingVolumeData;
-    if (bv.isValid())
+    hkAabbUint32 aabb32;
+    const hkAabbUint32& bv = collidable->m_kBoundingVolumeData;
+    if (bv.m_kMinimumCorner[0] <= bv.m_kMaximumCorner[0])
     {
         FUN_00cf8690(&aabb32, &collidable->m_kBoundingVolumeData);
     }
     else
     {
-        hkAabbQ aabb;
+        hkAabb aabb;
         WorldQ* world = collidable->getOwner()->m_pOwningWorld;
         collidable->m_pCollisionShape->getAabb(collidable->m_pMotionState, 0.0f, aabb);
         BroadPhaseQ* bp = world->m_pJobSemaphore;
         __m128 maxVal = DAT_011b6d70;
-        convertToUint32WithClip(aabb.m_kMinimumCorner, bp->m_kVectorAt40, bp->m_vScale, maxVal, DAT_01267e30, aabb32.m_kMinimumCorner);
-        convertToUint32WithClip(aabb.m_kMaximumCorner, bp->m_kVectorAt50, bp->m_vScale, maxVal, DAT_01267e30, aabb32.m_kMaximumCorner);
+        convertToUint32WithClip(aabb.m_kMinimumCorner.m_vComponents, bp->m_kVectorAt40, bp->m_vScale, maxVal, DAT_01267e30, aabb32.m_kMinimumCorner);
+        convertToUint32WithClip(aabb.m_kMaximumCorner.m_vComponents, bp->m_kVectorAt50, bp->m_vScale, maxVal, DAT_01267e30, aabb32.m_kMaximumCorner);
         aabb32.m_ucExpansionShift = 0;
         aabb32.m_ucExpansionMin[0] = 0;
         aabb32.m_ucExpansionMin[1] = 0;

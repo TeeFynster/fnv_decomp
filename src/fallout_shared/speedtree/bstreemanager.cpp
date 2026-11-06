@@ -1,6 +1,43 @@
 // fallout_shared/speedtree/bstreemanager.cpp: BSTreeManager, LFFreeList, TreeManager (27 functions)
 
-#include "bstreemanager_decls.h"
+#include "../../../include/NiPointer.h"
+#include "../../../include/NiMemObject.h"
+#include "../../../include/NP.h"
+#include "../../../include/NiFixedString.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiColor.h"
+#include "../../../include/NiPixelFormat.h"
+#include "../../../include/NiPixelData.h"
+#include "../../../include/NiPosData.h"
+#include "../../../include/NiProperty.h"
+#include "../../../include/NiTexture.h"
+#include "../../../include/BSTreeModel.h"
+#include "../../../include/Sky.h"
+#include "../../../include/TESFile.h"
+#include "../../../include/TESModel.h"
+#include "../../../include/TESObjectTREE.h"
+#include "../../../include/Setting.h"
+
+#include <new>
+#include "../../../include/TES.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/NiTPointerMap.h"
+
+#include "../../../include/MEM_CONTEXT.h"
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/BSShaderNoLightingProperty.h"
+#include "../../../include/BSTreeManager.h"
+
+class LockFreeMap_TESObjectREFR___BSTreeNode___;
+extern BSTreeManager* DAT_011d5c48;
+extern TES* g_TES;
+void FUN_00664940();
+void* FUN_00664840(bool);
+void SetGlobalValue(bool);
+void SetGlobalFloatFromUInt(unsigned int);
+void ClampAndStoreValue(float);
+extern float DAT_011fd890;
+extern float DAT_011adce0;
 
 // @fnv 0x00664870
 void BSTreeManager::Create(bool create)
@@ -71,10 +108,6 @@ void ClampAndStoreValue(float value)
     DAT_011adce0 = fClampedResult;
 }
 
-struct NP
-{
-    NP& operator=(void*);
-};
 
 extern NP DAT_011f95e4;
 
@@ -84,43 +117,22 @@ void SetGlobalValue(unsigned int value)
     DAT_011f95e4 = (void*)value;
 }
 
-struct FUN_006652c0_shell
-{
-    void SetByteAtOffset44(unsigned char value);
-};
-
 // @fnv 0x006652c0
-void FUN_006652c0_shell::SetByteAtOffset44(unsigned char value)
+void BSTreeModel::SetByteAtOffset44(unsigned char value)
 {
-    *reinterpret_cast<unsigned char*>(this + 0x44) = value;
+    *reinterpret_cast<unsigned char*>(&unk44) = value;
 }
 
-struct Setting_S
-{
-    float* Float(void);
-    float f;
-};
-
-struct originalRuntimeFloatSetting1295_t
-{
-    Setting_S* Float(void);
-};
-
-extern originalRuntimeFloatSetting1295_t originalRuntimeFloatSetting1295;
+extern Setting originalRuntimeFloatSetting1295;
 
 // @fnv 0x006655a0
 float FUN_006655a0()
 {
-    return originalRuntimeFloatSetting1295.Float()->f;
+    return *originalRuntimeFloatSetting1295.Float();
 }
 
 namespace fnv_006655f0 {
-struct Setting_S
-{
-    float* Float();
-};
-
-Setting_S originalRuntimeFloatSetting1296;
+extern Setting originalRuntimeFloatSetting1296;
 
 // @fnv 0x006655f0
 float GetOriginalRuntimeFloatSetting1296()
@@ -185,7 +197,7 @@ void* FUN_00664990_shell::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-extern Setting_S DAT_011f9158;
+extern Setting DAT_011f9158;
 // Returns the result of FUN_006655a0 multiplied by the float value stored in DAT_011f9158.
 // @fnv 0x00665570
 float FUN_00665570()
@@ -194,7 +206,7 @@ float FUN_00665570()
 }
 
 double GetOriginalRuntimeFloatSetting1296();
-extern Setting_S DAT_011f9158;
+extern Setting DAT_011f9158;
 // Returns the value from GetOriginalRuntimeFloatSetting1296 multiplied by the float stored in DAT_011f9158.
 // @fnv 0x006655c0
 float FUN_006655c0()
@@ -232,28 +244,11 @@ void C665b80::FUN_00665b80(int aiValue, I2_665b80* pObject)
     }
 }
 
-namespace fnv_006652e0 {
 struct NiStream;
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+class GameTimerRecord;
+namespace fnv_006652e0 {
+using ::NiMemObject;
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct NiColor
-{
-    void Clamp();
-    void Scale();
-    static void LoadBinary(NiStream*, NiColor*, unsigned int);
-    void LoadBinary(NiStream*);
-    static void SaveBinary(NiStream*, NiColor*, unsigned int);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    float Luminance();
-    void __dflt_ctor_closure();
-    float r;
-    float g;
-    float b;
-};
 typedef char _sizecheck_NiColor[sizeof(NiColor) == 12 ? 1 : -1];
 
 struct B006815c0
@@ -263,44 +258,18 @@ struct B006815c0
     float y;
     float z;
 };
-struct NiAVObject
-{
-    NiPoint3 GetWorldTranslation();
-};
-struct NiPosData
-{
-    static B006815c0 __cdecl ComputePositionAtTime(float, const NiPoint3&);
-};
 NiPoint3* __fastcall FUN_0045bb80(NiAVObject*);
 struct Twin_0084d030
 {
     float GetStoredFloatValue();
 };
-struct GameTimerRecord;
 extern GameTimerRecord g_timeGlobal;
 extern float DAT_011d5dd4;
 void FUN_00b07060(float);
 void FUN_00b06c10(float*, float*);
-struct NiTexture;
-struct BSShaderNoLightingProperty
-{
-    NiTexture* GetBaseTexture();
-};
 struct CP_008c48d0
 {
     int GetPrevPath();
-};
-struct Sky
-{
-    float GetFieldCC();
-};
-struct Flt
-{
-    operator unsigned int();
-};
-struct TESFile
-{
-    const char* GetName();
 };
 struct FUN_00450570_shell
 {
@@ -310,21 +279,12 @@ struct FUN_004534f0_shell
 {
     void FUN_004534f0(unsigned int);
 };
-struct NiProperty
-{
-    void FUN_004bc450(const NiColor*);
-};
 struct FUN_006658b0_shell
 {
     void Update();
 };
-struct GlobalObject_0045cfe0
-{
-    int* Int();
-};
-extern GlobalObject_0045cfe0 g_011d5d98;
-struct GlobalObject_0044f440;
-extern GlobalObject_0044f440 g_011d5d4c;
+extern Setting g_011d5d98;
+extern Setting g_011d5d4c;
 
 // @fnv 0x006652e0
 void FUN_006652e0(NiAVObject* apCamera, bool abMenuMode)
@@ -342,7 +302,7 @@ void FUN_006652e0(NiAVObject* apCamera, bool abMenuMode)
         fcamLoc[0] = FUN_0045bb80(apCamera)->x;
         fcamLoc[1] = FUN_0045bb80(apCamera)->y;
         fcamLoc[2] = FUN_0045bb80(apCamera)->z;
-        vecTemp = NiPosData::ComputePositionAtTime(-1.0f, apCamera->GetWorldTranslation());
+        vecTemp = (const B006815c0&)NiPosData::ComputePositionAtTime(-1.0f, apCamera->GetWorldTranslation());
         fcamDir[0] = vecTemp.x;
         fcamDir[1] = vecTemp.y;
         fcamDir[2] = vecTemp.z;
@@ -357,22 +317,21 @@ void FUN_006652e0(NiAVObject* apCamera, bool abMenuMode)
             else
                 *(float*)(_FUN_00664840(1) + 0x14) =
                     ((Sky*)((BSShaderNoLightingProperty*)g_TES)->GetBaseTexture())->GetFieldCC();
-            if ((unsigned int)*(Flt*)(_FUN_00664840(1) + 8) &&
+            if ((unsigned int)(NiProperty*)*(NiPointer<NiProperty>*)(_FUN_00664840(1) + 8) &&
                 ((FUN_00450570_shell*)((BSShaderNoLightingProperty*)g_TES)->GetBaseTexture())->FUN_00450570())
             {
-                NiColor col;
-                col = *(const NiColor*)((FUN_00450570_shell*)((BSShaderNoLightingProperty*)g_TES)->GetBaseTexture())
+                NiColor col = *(const NiColor*)((FUN_00450570_shell*)((BSShaderNoLightingProperty*)g_TES)->GetBaseTexture())
                            ->FUN_00450570()
                            ->GetName();
-                ((FUN_004534f0_shell*)(unsigned int)*(Flt*)(_FUN_00664840(1) + 8))->FUN_004534f0((unsigned int)&col);
-                ((FUN_004534f0_shell*)(unsigned int)*(Flt*)(_FUN_00664840(1) + 8))->FUN_004534f0((unsigned int)&col);
-                ((NiProperty*)(unsigned int)*(Flt*)(_FUN_00664840(1) + 8))->FUN_004bc450(&col);
+                ((FUN_004534f0_shell*)(unsigned int)(NiProperty*)*(NiPointer<NiProperty>*)(_FUN_00664840(1) + 8))->FUN_004534f0((unsigned int)&col);
+                ((FUN_004534f0_shell*)(unsigned int)(NiProperty*)*(NiPointer<NiProperty>*)(_FUN_00664840(1) + 8))->FUN_004534f0((unsigned int)&col);
+                ((NiProperty*)(unsigned int)(NiProperty*)*(NiPointer<NiProperty>*)(_FUN_00664840(1) + 8))->FUN_004bc450(&col);
             }
         }
         ((FUN_006658b0_shell*)_FUN_00664840(1))->Update();
     }
     SetGlobalFloatFromUInt(*g_011d5d98.Int());
-    ClampAndStoreValue(*((Setting_S*)&g_011d5d4c)->Float());
+    ClampAndStoreValue(*((Setting*)&g_011d5d4c)->Float());
 }
 }  // namespace fnv_006652e0
 
@@ -383,67 +342,31 @@ struct TreeLockObj
 };
 extern TreeLockObj g_treeLock;
 
-class TreeModel664b50
-{
-  public:
-    TreeModel664b50();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int GetKey() const;
-    static void* operator new(unsigned int size);
-    static void operator delete(void*, unsigned int);
-};
-
-struct TreeModelPtr
-{
-    TreeModel664b50* m_pObject;
-    TreeModelPtr(TreeModel664b50* p = 0);
-    ~TreeModelPtr();
-    TreeModelPtr& operator=(TreeModel664b50* p);
-    TreeModelPtr& operator=(const TreeModelPtr& p);
-    operator TreeModel664b50*() const;
-};
+// The shared class has no key getter; this declaration preserves its ECX-only call.
+int __fastcall GetTreeModelKey(const BSTreeModel* model);
 
 struct TreeMgr664b50
 {
-    TreeModelPtr* GetEntry(TESObjectTREE* tree);
-    void GetOrCreateModel(TESObjectTREE* tree, int key, TreeModelPtr& out);
+    NiPointer<BSTreeModel>* GetEntry(TESObjectTREE* tree);
+    void GetOrCreateModel(TESObjectTREE* tree, int key, NiPointer<BSTreeModel>& out);
 };
 
 // @fnv 0x00664b50
-void TreeMgr664b50::GetOrCreateModel(TESObjectTREE* tree, int key, TreeModelPtr& out)
+void TreeMgr664b50::GetOrCreateModel(TESObjectTREE* tree, int key, NiPointer<BSTreeModel>& out)
 {
     g_treeLock.Lock(0);
-    TreeModelPtr spModel3(0);
+    NiPointer<BSTreeModel> spModel3(0);
     if (tree)
     {
-        TreeModelPtr* entries3 = GetEntry(tree);
+        NiPointer<BSTreeModel>* entries3 = GetEntry(tree);
         int freeIdx3 = -1;
         bool found3 = false;
         for (int i3 = 0; i3 < 1; i3++)
         {
-            TreeModel664b50* model = entries3[i3];
+            BSTreeModel* model = entries3[i3];
             if (model)
             {
-                if (model->GetKey() == key)
+                if (GetTreeModelKey(model) == key)
                 {
                     spModel3 = model;
                     found3 = true;
@@ -463,7 +386,7 @@ void TreeMgr664b50::GetOrCreateModel(TESObjectTREE* tree, int key, TreeModelPtr&
             }
             else
             {
-                spModel3 = new TreeModel664b50;
+                spModel3 = new BSTreeModel;
                 entries3[freeIdx3] = spModel3;
             }
         }
@@ -594,24 +517,16 @@ class Child664
     virtual ~Child664();
 };
 
-class String664
-{
-  public:
-    ~String664();
-
-    char* m_pString;
-};
-
 class FUN_00664740
 {
   public:
     ~FUN_00664740();
 
     int unk00;
-    String664 m_kFirst;
-    String664 m_kSecond;
-    String664 m_kThird;
-    String664 m_kFourth;
+    NiPointer<NiTexture> m_kFirst;
+    NiPointer<NiMaterialProperty> m_kSecond;
+    NiPointer<NiAlphaProperty> m_kThird;
+    NiPointer<BSXFlags> m_kFourth;
     int unk14;
     int unk18;
     Child664* m_pkChild;
@@ -629,12 +544,6 @@ FUN_00664740::~FUN_00664740()
     delete m_pkChild;
 }
 
-class NiTexture
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
 
 class FUN_00665c50
 {
@@ -671,70 +580,11 @@ NiPointer<NiTexture>* Mgr6649c0::GetOrCreateTexturePointer(unsigned int key)
     return value2;
 }
 
-class NiFixedString
-{
-  public:
-    const char* value;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
-class NiAVObject
-{
-  public:
-    void SetName(const NiFixedString&);
-};
-class TESModel
-{
-  public:
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual const char* GetModelPath();
-    unsigned int GetModelLength();
-};
-class TESObjectTREE : public TESForm
-{
-  public:
-    int unk18, unk1c, unk20, unk24, unk28, unk2c;
-    TESModel model;
-};
 class TreeReference : public TESObjectREFR
 {
   public:
     unsigned int FUN_005692d0();
-    float GetScale();
-};
-class BSTreeModel
-{
-  public:
-    virtual ~BSTreeModel();
-    virtual void f1();
-    virtual void f2();
-    virtual NiAVObject* CreateInstance(float);
-    unsigned int FUN_00726070();
-    bool FUN_0066ac40(TESObjectTREE*, unsigned int);
-    bool CloneFromModel(BSTreeModel*);
-    void SetByteAtOffset44(unsigned char);
-};
-template <> class NiPointer<BSTreeModel>
-{
-  public:
-    BSTreeModel* m_pObject;
-    NiPointer(BSTreeModel* = 0);
-    ~NiPointer();
-    operator BSTreeModel*() const;
-};
-class FUN_00666650 : public BSTreeModel
-{
-  public:
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    int unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40;
-    int unk44, unk48, unk4c;
-    FUN_00666650();
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
+    float FUN_00567400();
 };
 class LockFreeMap_TESObjectREFR___BSTreeNode___
 {
@@ -762,7 +612,7 @@ NiAVObject* TreeManager::CreateTreeInstance(TreeReference* reference, TESObjectT
                           "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\SpeedTree\\BSTreeManager.cpp", 462);
     NiPointer<BSTreeModel> scale(0);
     BSTreeModel* model = 0;
-    if (!GetFirstProcessListByte() || !tree || !tree->model.GetModelPath() || !tree->model.GetModelLength() ||
+    if (!GetFirstProcessListByte() || !tree || !tree->GetModelFilePath() || !tree->TESModel::GetModelLength() ||
         (reference && reference->GetObjectReference() != (TESBoundObject*)tree))
         return 0;
     NiAVObject* m_uiMemoryContext = 0;
@@ -779,7 +629,7 @@ NiAVObject* TreeManager::CreateTreeInstance(TreeReference* reference, TESObjectT
         return 0;
     if (((BSTreeModel*)scale)->FUN_00726070() > 2)
     {
-        model = new FUN_00666650;
+        model = new BSTreeModel;
         if (!model->CloneFromModel(scale))
         {
             delete model;
@@ -794,78 +644,24 @@ NiAVObject* TreeManager::CreateTreeInstance(TreeReference* reference, TESObjectT
     }
     float key = 1.0f;
     if (reference)
-        key = reference->GetScale();
+        key = reference->FUN_00567400();
     NiAVObject* instanceModel = model->CreateInstance(key);
     if (instanceModel)
-        instanceModel->SetName(NiFixedString(tree->model.GetModelPath()));
+        instanceModel->SetName(NiFixedString(tree->GetModelFilePath()));
     model->SetByteAtOffset44(1);
     return instanceModel;
 }
 
 namespace fnv_00665610 {
-class NiPixelFormat;
-class NiPixelData
-{
-  public:
-    static void* operator new(unsigned int size);
-    static void operator delete(void*, unsigned int);
-    NiPixelData(unsigned int width, unsigned int height, const NiPixelFormat& format, unsigned int mipLevels,
-                unsigned int faces);
-    unsigned char* FUN_0064dac0(unsigned int level, unsigned int face);
-    void FUN_004f31b0();
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-};
 extern const NiPixelFormat DAT_011aa2e8;
-class NiFixedString
-{
-  public:
-    const char* text;
-    NiFixedString(const char* text);
-    ~NiFixedString();
-    operator const char*() const;
-};
-struct TexturePointer
-{
-    NiSourceTexture* object;
-    NiSourceTexture* FUN_00559450() const;
-    TexturePointer& FUN_0066b0d0(NiSourceTexture* texture);
-};
 struct TreeTextureState
 {
     unsigned int unk00;
-    TexturePointer shadow;
+    NiPointer<NiSourceTexture> shadow;
 };
 struct TextureLoader
 {
-    void FUN_004568c0(const char* filename, TexturePointer& texture, bool first, bool second);
+    void FUN_004568c0(const char* filename, NiPointer<NiSourceTexture>& texture, bool first, bool second);
 };
 struct TextureFormatPrefs
 {
@@ -882,20 +678,20 @@ NiSourceTexture* FUN_00665610()
 {
     AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_TREEART, true,
                            "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\SpeedTree\\BSTreeManager.cpp", 629);
-    if (!((TreeTextureState*)FUN_00664840(true))->shadow.FUN_00559450())
+    if (!((TreeTextureState*)FUN_00664840(true))->shadow.operator NiSourceTexture*())
     {
         if (g_TES)
             ((TextureLoader*)g_TES)
                 ->FUN_004568c0("Data\\Textures\\Trees\\CanopyShadow.dds",
                                ((TreeTextureState*)FUN_00664840(true))->shadow, true, false);
         else
-            ((TreeTextureState*)FUN_00664840(true))->shadow.FUN_0066b0d0(0);
-        SetGlobalValue((unsigned int)((TreeTextureState*)FUN_00664840(true))->shadow.FUN_00559450());
+            ((TreeTextureState*)FUN_00664840(true))->shadow.operator=(0);
+        SetGlobalValue((unsigned int)((TreeTextureState*)FUN_00664840(true))->shadow.operator NiSourceTexture*());
     }
-    if (!((TreeTextureState*)FUN_00664840(true))->shadow.FUN_00559450())
+    if (!((TreeTextureState*)FUN_00664840(true))->shadow.operator NiSourceTexture*())
     {
-        NiPixelData* pixels = new NiPixelData(16, 16, DAT_011aa2e8, 1, 1);
-        unsigned char* pPixelBytes = pixels->FUN_0064dac0(0, 0);
+        NiPixelData* pixels = new NiPixelData(16, 16, &DAT_011aa2e8, 1, 1);
+        unsigned char* pPixelBytes = pixels->FUN_0064dac0(0u, 0u);
         for (unsigned int y = 0; y < 16; ++y)
         {
             for (unsigned int x = 0; x < 16; ++x)
@@ -907,29 +703,24 @@ NiSourceTexture* FUN_00665610()
         }
         pixels->FUN_004f31b0();
         ((TreeTextureState*)FUN_00664840(true))
-            ->shadow.FUN_0066b0d0(FUN_00a5ff10(pixels, NiFixedString("CanopyShadowTexture"), DAT_011a9598));
-        SetGlobalValue((unsigned int)((TreeTextureState*)FUN_00664840(true))->shadow.FUN_00559450());
+            ->shadow.operator=(FUN_00a5ff10(pixels, NiFixedString("CanopyShadowTexture"), DAT_011a9598));
+        SetGlobalValue((unsigned int)((TreeTextureState*)FUN_00664840(true))->shadow.operator NiSourceTexture*());
     }
-    return ((TreeTextureState*)FUN_00664840(true))->shadow.FUN_00559450();
+    return ((TreeTextureState*)FUN_00664840(true))->shadow.operator NiSourceTexture*();
 }
 }  // namespace fnv_00665610
 
-struct Obj664
+// The compiler's array-deletion entry is absent from the shared template's public API.
+// Keep its ECX entry as a deletion helper; the elements use the shared NiPointer layout.
+struct TreeModelPointerArrayDeleter
 {
-    unsigned int FUN_00726070();
-};
-struct Ref664
-{
-    int p;
-    Obj664* FUN_00559450();
-    void FUN_0066b0d0(void*);
-    void* FUN_00667120(unsigned int);
+    void* Delete(unsigned int flags);
 };
 struct Map664
 {
     virtual void* Destroy(unsigned int);
     void* FUN_004b9ba0();
-    void FUN_006b7f20(void*&, unsigned int&, Ref664*&);
+    void FUN_006b7f20(void*&, unsigned int&, NiPointer<BSTreeModel>*&);
     bool RemoveKey(unsigned int);
     bool IsFieldCZero();
     void FUN_00438af0();
@@ -947,15 +738,15 @@ struct Entry664
 // @fnv 0x00664cd0
 void Entry664::FUN_00664cd0(bool partial)
 {
-    Ref664* p;
+    NiPointer<BSTreeModel>* p;
     void* h;
     unsigned int a;
     bool i;
     int s;
     void* f;
-    Ref664* eb;
+    NiPointer<BSTreeModel>* eb;
     unsigned int cf;
-    Ref664 *b, *q, *c, *l;
+    NiPointer<BSTreeModel> *b, *q, *c, *l;
     Map664 *k, *ba, *j, *e;
     if (!*(Map664**)_FUN_00664840(true))
         return;
@@ -971,10 +762,10 @@ void Entry664::FUN_00664cd0(bool partial)
                 i = true;
                 for (s = 0; s < 1; ++s)
                 {
-                    if (p[s].FUN_00559450())
+                    if (p[s].operator BSTreeModel*())
                     {
-                        if (p[s].FUN_00559450()->FUN_00726070() <= 1)
-                            p[s].FUN_0066b0d0(0);
+                        if (p[s].operator BSTreeModel*()->FUN_00726070() <= 1)
+                            p[s].operator=(0);
                         else
                             i = false;
                     }
@@ -983,7 +774,7 @@ void Entry664::FUN_00664cd0(bool partial)
                 {
                     b = p;
                     q = b;
-                    q ? q->FUN_00667120(3) : 0;
+                    q ? reinterpret_cast<TreeModelPointerArrayDeleter*>(q)->Delete(3) : 0;
                     p = 0;
                     (*(Map664**)_FUN_00664840(true))->RemoveKey(a);
                     h = (*(Map664**)_FUN_00664840(true))->FUN_004b9ba0();
@@ -1007,7 +798,7 @@ void Entry664::FUN_00664cd0(bool partial)
             (*(Map664**)_FUN_00664840(true))->FUN_006b7f20(f, cf, eb);
             c = eb;
             l = c;
-            l ? l->FUN_00667120(3) : 0;
+            l ? reinterpret_cast<TreeModelPointerArrayDeleter*>(l)->Delete(3) : 0;
         }
         (*(Map664**)_FUN_00664840(true))->FUN_00438af0();
         j = *(Map664**)_FUN_00664840(true);
@@ -1024,11 +815,8 @@ struct Time6658
 {
     float FUN_0084d030();
 };
-struct Setting6658
-{
-    float* FUN_00403e20();
-};
-struct Pair6658
+// Wind update reads two float frequencies per entry; shared Pair stores two integers.
+struct WindFrequency
 {
     float x, y;
 };
@@ -1062,8 +850,8 @@ void C6658::Update()
         if (value != 0.0)
             ((float*)&DAT_011d5dd8)[i] = ((float*)&DAT_011d5dd8)[i] * (*(float*)&DAT_011d5de8) / value;
         float speed4 = value * 20.0;
-        float s7 = FUN_0063c600(speed4 * ((Pair6658*)&DAT_0119b8cc)[i].x * ((float*)&DAT_011d5dd8)[i]);
-        float c = FUN_0057e960(speed4 * ((Pair6658*)&DAT_0119b8cc)[i].y * ((float*)&DAT_011d5dd8)[i]);
+        float s7 = FUN_0063c600(speed4 * ((WindFrequency*)&DAT_0119b8cc)[i].x * ((float*)&DAT_011d5dd8)[i]);
+        float c = FUN_0057e960(speed4 * ((WindFrequency*)&DAT_0119b8cc)[i].y * ((float*)&DAT_011d5dd8)[i]);
         if (i == 2)
         {
             sum += std::abs(s7);
@@ -1071,17 +859,17 @@ void C6658::Update()
         }
         FUN_00bb2fc0(i, amplitudeB * s7, amplitudeB * c);
     }
-    float a7 = (1.0 - *((Setting6658*)&DAT_011d5dc4)->FUN_00403e20()) +
-               *((Setting6658*)&DAT_011d5dc4)->FUN_00403e20() * sum / 2.0;
-    float b = (1.0 - *((Setting6658*)&DAT_011d5d3c)->FUN_00403e20()) +
-              *((Setting6658*)&DAT_011d5d3c)->FUN_00403e20() * sum / 2.0;
-    float outerc4 = (1.0 - *((Setting6658*)&DAT_011d5c68)->FUN_00403e20()) +
-                    *((Setting6658*)&DAT_011d5c68)->FUN_00403e20() * sum / 2.0;
-    float d9 = (1.0 - *((Setting6658*)&DAT_011d5c74)->FUN_00403e20()) +
-               *((Setting6658*)&DAT_011d5c74)->FUN_00403e20() * sum / 2.0;
+    float a7 = (1.0 - *((Setting*)&DAT_011d5dc4)->Float()) +
+               *((Setting*)&DAT_011d5dc4)->Float() * sum / 2.0;
+    float b = (1.0 - *((Setting*)&DAT_011d5d3c)->Float()) +
+              *((Setting*)&DAT_011d5d3c)->Float() * sum / 2.0;
+    float outerc4 = (1.0 - *((Setting*)&DAT_011d5c68)->Float()) +
+                    *((Setting*)&DAT_011d5c68)->Float() * sum / 2.0;
+    float d9 = (1.0 - *((Setting*)&DAT_011d5c74)->Float()) +
+               *((Setting*)&DAT_011d5c74)->Float() * sum / 2.0;
     FUN_00bb1390(value * a7, value * b,
-                 ((Time6658*)&DAT_011f6394)->FUN_0084d030() * *((Setting6658*)&DAT_011d5cdc)->FUN_00403e20() * outerc4,
-                 ((Time6658*)&DAT_011f6394)->FUN_0084d030() * *((Setting6658*)&DAT_011d5c5c)->FUN_00403e20() * d9);
+                 ((Time6658*)&DAT_011f6394)->FUN_0084d030() * *((Setting*)&DAT_011d5cdc)->Float() * outerc4,
+                 ((Time6658*)&DAT_011f6394)->FUN_0084d030() * *((Setting*)&DAT_011d5c5c)->Float() * d9);
     (*(float*)&DAT_011d5de8) = value;
 }
 
@@ -1091,20 +879,14 @@ struct xMemObj
     static void operator delete(void* p, unsigned int);
 };
 
-class RGBColorValue
-{
-  public:
-    float r, g, b;
-    RGBColorValue(float fR, float fG, float fB);
-};
 
 class xMatProp : public xMemObj
 {
   public:
     int m_ai[0x13];
     xMatProp();
-    void SetAmbient(const RGBColorValue& kColor);
-    void SetEmittance(const RGBColorValue& kColor);
+    void SetAmbient(const NiColor& kColor);
+    void SetEmittance(const NiColor& kColor);
 };
 
 class xAlphaProp : public xMemObj
@@ -1132,26 +914,8 @@ class xMapObj
     xMapObj(int a, int b, int c);
 };
 
-template <class T> class xPtr
-{
-  public:
-    T* m_pObject;
-    xPtr(T* p = 0);
-    ~xPtr();
-    xPtr& operator=(T* p);
-    T* operator->() const;
-};
-
-struct xGBool
-{
-    bool* Bool();
-};
-struct xGInt
-{
-    int* Int();
-};
-extern xGBool xGB5d00;
-extern xGInt xGI5d98;
+extern Setting xGB5d00;
+extern Setting xGI5d98;
 
 void xF_b07db0(int i);
 void xF_b084f0(unsigned char uc);
@@ -1162,10 +926,10 @@ class FUN_00664440
 {
   public:
     int m_i0;
-    xPtr<xMemObj> m_sp4;
-    xPtr<xMatProp> m_spMat;
-    xPtr<xAlphaProp> m_spAlpha;
-    xPtr<xFlagsObj> m_spFlags;
+    NiPointer<xMemObj> m_sp4;
+    NiPointer<xMatProp> m_spMat;
+    NiPointer<xAlphaProp> m_spAlpha;
+    NiPointer<xFlagsObj> m_spFlags;
     float m_f14;
     bool m_b18;
     bool m_b19;
@@ -1178,6 +942,7 @@ class FUN_00664440
 // Initializes material, alpha, and flag properties with default values, then creates a map object and calls global setup functions.
 // @fnv 0x00664440
 FUN_00664440::FUN_00664440()
+    : m_sp4(0), m_spMat(0), m_spAlpha(0), m_spFlags(0)
 {
     m_i0 = 0;
     m_f14 = 0.0f;
@@ -1186,9 +951,9 @@ FUN_00664440::FUN_00664440()
     m_b1a = false;
     m_b1b = *xGB5d00.Bool();
     m_spMat = new xMatProp();
-    m_spMat->SetAmbient(RGBColorValue(1.0f, 1.0f, 1.0f));
-    m_spMat->SetAmbient(RGBColorValue(1.0f, 1.0f, 1.0f));
-    m_spMat->SetEmittance(RGBColorValue(1.0f, 1.0f, 1.0f));
+    m_spMat->SetAmbient(NiColor(1.0f, 1.0f, 1.0f));
+    m_spMat->SetAmbient(NiColor(1.0f, 1.0f, 1.0f));
+    m_spMat->SetEmittance(NiColor(1.0f, 1.0f, 1.0f));
     m_spAlpha = new xAlphaProp();
     m_spAlpha->SetAlphaBlending(true);
     m_spAlpha->SetSrcBlendMode(4);
@@ -1202,29 +967,27 @@ FUN_00664440::FUN_00664440()
     m_pMapObject = new xMapObj(2, 0x25, 0xc);
 }
 
-struct PointerDtor667
-{
-    void FUN_0045cec0();
-};
+// The array iterator needs the existing destructor entry as a callback.
+void __fastcall DestroyTreeModelPointer(NiPointer<BSTreeModel>* pointer);
 struct PointerArrayCount667
 {
     unsigned int count;
 };
-void __stdcall FUN_00ec5fce(void*, unsigned int, int, void (PointerDtor667::*)());
+void __stdcall FUN_00ec5fce(void*, unsigned int, int, void (__thiscall*)(NiPointer<BSTreeModel>*));
 
 // Destroys the object or its array elements, optionally frees the allocation, and returns this or the preceding count header.
 // @fnv 0x00667120
-void* Ref664::FUN_00667120(unsigned int flags)
+void* TreeModelPointerArrayDeleter::Delete(unsigned int flags)
 {
     if (flags & 2)
     {
         FUN_00ec5fce(this, 4, (reinterpret_cast<PointerArrayCount667*>(this) - 1)->count,
-                     &PointerDtor667::FUN_0045cec0);
+                     reinterpret_cast<void (__thiscall*)(NiPointer<BSTreeModel>*)>(&DestroyTreeModelPointer));
         if (flags & 1)
             ::operator delete(reinterpret_cast<PointerArrayCount667*>(this) - 1);
         return reinterpret_cast<PointerArrayCount667*>(this) - 1;
     }
-    reinterpret_cast<PointerDtor667*>(this)->FUN_0045cec0();
+    reinterpret_cast<NiPointer<BSTreeModel>*>(this)->~NiPointer();
     if (flags & 1)
         ::operator delete(this);
     return this;

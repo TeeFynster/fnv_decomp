@@ -2,23 +2,17 @@
 // src/fallout/ai/combat/combatplanner.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatplanner.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AStarNodeData
-{
-    int m_iNodeIndex;
-};
-struct AStarNode
+#include "../../../../include/CombatPlanner.h"
+
+template <class NodeDataType, class LinkDataType> struct AStarNode
 {
     int m_i;
     int m_iUnknownValue;
-    AStarNodeData* m_p;
-};
-struct CombatPlanner
-{
-    bool FUN_00995800(const AStarNode* p);
+    NodeDataType m_p;
 };
 // Returns true when the int at offset 0xdc of the node's m_p is zero, otherwise false.
 // @fnv 0x00995800
-bool CombatPlanner::FUN_00995800(const AStarNode* apNode)
+bool CombatPlanner::FUN_00995800(const AStarNode<CombatPlanNode*, CombatPlanLink*>* apNode)
 {
     if (*(const int*)((const char*)apNode->m_p + 0xdc) == 0)
         return true;
@@ -30,12 +24,6 @@ void operator delete(void* pvMem, void* pvWhere);
 
 extern unsigned int DAT_010a2720;
 extern const float DAT_0108dbf0;  // FLT_MAX
-
-struct CPScrapHeap
-{
-    int unk00;
-    void* FUN_00aa54a0(unsigned int uiSize, unsigned int uiAlign);
-};
 
 class CPTarget;
 
@@ -78,11 +66,6 @@ class CPNode
     CPNode* FUN_0044edb0();
 };
 
-struct CPWorldState
-{
-    int unk00[23];
-};
-
 class CPGoals
 {
   public:
@@ -98,7 +81,7 @@ class CPOwner
 class CPAction
 {
   public:
-    virtual bool IsValid(CPOwner* pkOwner, CPWorldState* pkState, CPTarget* pkTarget);
+    virtual bool IsValid(CPOwner* pkOwner, CombatPlanner::WorldState* pkState, CPTarget* pkTarget);
     virtual void v01();
     virtual void v02();
     virtual float GetCost(CPOwner* pkOwner, CPTarget* pkTarget);
@@ -140,7 +123,7 @@ class FUN_00994e60_State
 {
   public:
     int unk00[57];
-    FUN_00994e60_State(CPWorldState* pkState);
+    FUN_00994e60_State(CombatPlanner::WorldState* pkState);
     int FUN_009947f0(CPTarget* pkFrom, CPTarget* pkTo);
     void FUN_009aae10(int iCond, int iCondValue);
     bool FUN_009aadc0(int iCond, int iCondValue);
@@ -173,21 +156,8 @@ class CPOutArray
     void FUN_008454f0(bool bFree);
 };
 
-class CPPlanner
-{
-  public:
-    int unk0000[0x816];
-    CPOwner* m_pkOwnerManager;   // +0x2058
-    CPWorldState m_kWorldState;  // +0x205c
-    CPScrapHeap m_kHeap;         // +0x20b8
-
-    int FUN_009950a0(FUN_00994e60_State** ppkState);
-    int FUN_006b8fe0(int iState, float m_fPathingCostCur, CPOutItem** ppkItem);
-    bool ExpandNode(CPNode* pkNode, CPOutArray* pkOut);
-};
-
 // @fnv 0x009950c0
-bool CPPlanner::ExpandNode(CPNode* pkNode, CPOutArray* pkOut)
+bool CombatPlanner::ExpandNode(CPNode* pkNode, CPOutArray* pkOut)
 {
     float m_fPathingCostCur = pkNode->m_fCost;
     bool bFirst = (pkNode->FUN_0044edb0() == 0) ? true : false;
@@ -209,17 +179,17 @@ bool CPPlanner::ExpandNode(CPNode* pkNode, CPOutArray* pkOut)
                 if (IsValidCode(pkTarget))
                     pkTarget = pkNode->m_pUserData->GetCombatGoal(pkTarget);
                 FUN_00995760_Aim kAim;
-                m_pkOwnerManager->FUN_005e3fc0()->FUN_006ecd40(&kAim);
+                ((CPOwner*)field_2058)->FUN_005e3fc0()->FUN_006ecd40(&kAim);
                 if (bValid)
                 {
-                    if (pkAction->IsValid(m_pkOwnerManager, &m_kWorldState, pkTarget))
+                    if (pkAction->IsValid(((CPOwner*)field_2058), &field_205c, pkTarget))
                     {
-                        float fActionCost = pkAction->GetCost(m_pkOwnerManager, pkTarget);
+                        float fActionCost = pkAction->GetCost(((CPOwner*)field_2058), pkTarget);
                         if (fActionCost < DAT_0108dbf0)
                         {
                             FUN_00994e60_State* pkState =
-                                new (m_kHeap.FUN_00aa54a0(sizeof(FUN_00994e60_State), DAT_010a2720))
-                                    FUN_00994e60_State(&m_kWorldState);
+                                new (field_20b8.FUN_00aa54a0(sizeof(FUN_00994e60_State), DAT_010a2720))
+                                    FUN_00994e60_State(&field_205c);
 
                             CPCondList* pkEffect = pkAction->FUN_007d6bb0();
                             while (pkEffect && *pkEffect->FUN_006815c0())
@@ -245,7 +215,7 @@ bool CPPlanner::ExpandNode(CPNode* pkNode, CPOutArray* pkOut)
                                 int iCondValue = pkState->FUN_009947f0(pkGoalCond->FUN_00726070(), pkTarget);
                                 if (!pkState->FUN_009aadc0(pkGoalCond->FUN_00559450(), iCondValue))
                                     pkState->AppendPair(
-                                        new (m_kHeap.FUN_00aa54a0(sizeof(FUN_004b0680_Pair), DAT_010a2720))
+                                        new (field_20b8.FUN_00aa54a0(sizeof(FUN_004b0680_Pair), DAT_010a2720))
                                             FUN_004b0680_Pair(pkGoalCond->FUN_00559450(), iCondValue),
                                         pkNode->m_pUserData->m_aEntries[j].m_pAssociatedData);
                             }
@@ -257,7 +227,7 @@ bool CPPlanner::ExpandNode(CPNode* pkNode, CPOutArray* pkOut)
                                 int iCondValue = pkState->FUN_009947f0(pkPreCond->FUN_00726070(), pkTarget);
                                 if (!pkState->FUN_009aadc0(pkPreCond->FUN_00559450(), iCondValue))
                                     pkState->AppendPair(
-                                        new (m_kHeap.FUN_00aa54a0(sizeof(FUN_004b0680_Pair), DAT_010a2720))
+                                        new (field_20b8.FUN_00aa54a0(sizeof(FUN_004b0680_Pair), DAT_010a2720))
                                             FUN_004b0680_Pair(pkPreCond->FUN_00559450(), iCondValue),
                                         pkState);
                                 pkRequire = pkRequire->FUN_0062d990();
@@ -274,7 +244,7 @@ bool CPPlanner::ExpandNode(CPNode* pkNode, CPOutArray* pkOut)
                                 pkResult->m_fCost = 0.0f;
                             case 1: {
                                 FUN_00995780_Plan* pkPlan =
-                                    new (m_kHeap.FUN_00aa54a0(sizeof(FUN_00995780_Plan), DAT_010a2720))
+                                    new (field_20b8.FUN_00aa54a0(sizeof(FUN_00995780_Plan), DAT_010a2720))
                                         FUN_00995780_Plan(pkAction, pkTarget,
                                                           pkNode->m_pUserData->m_aEntries[i].m_pAssociatedData);
                                 pkPlan->m_iAim = kAim.m_iValue;

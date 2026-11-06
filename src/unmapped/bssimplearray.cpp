@@ -1,3 +1,24 @@
+#include "../../include/NiPoint3.h"
+#include "../../include/PathingLocation.h"
+#include "../../include/BSScrapArray.h"
+#include "../../include/PathingAvoidNode.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/PathingGraphNode.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiColorA.h"
+#include "../../include/PathBuilder.h"
+#include "../../include/CombatSearchDoor.h"
+
+// Owner of the nested element type needed in this unit.
+class PathSmoother
+{
+public:
+    struct AvoidNode;
+};
+
+// 0x006a8500 releases pBuffer through virtual _Deallocate (slot 2), then clears it.
+// Keep this ECX-only helper declaration here until the shared array declares it.
+void __fastcall FreeSimpleArrayStorage(void* array);
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -155,17 +176,13 @@ void FUN_006e9260Class::FUN_006e9260()
     FUN_006cf120(true);
 }
 
-struct BSSimpleArray_006e93c0
-{
-    void* AllocateElements(int count);
-};
-
 // Allocates count * 0x3c bytes with operator new and returns the resulting pointer.
 // @fnv 0x006e93c0
-void* BSSimpleArray_006e93c0::AllocateElements(int count)
+template <>
+PathingGraphNode* BSSimpleArray<PathingGraphNode, 1024>::_Allocate(unsigned int count)
 {
-    void* result = operator new(count * 0x3c);
-    return result;
+    void* result = operator new(count * sizeof(PathingGraphNode));
+    return static_cast<PathingGraphNode*>(result);
 }
 
 void* __cdecl Reallocate(void* p, int size);
@@ -181,11 +198,6 @@ void* __thiscall FUN_006e93f0::FUN_006e93f0_(void* p, int aiCount)
     return Reallocate(p, aiCount * 0x3c);
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    bool FUN_004390c0(const NiPoint3& a);
-};
 // Returns true if this point's x, y and z are all equal to the corresponding components of a.
 // @fnv 0x004390c0
 bool NiPoint3::FUN_004390c0(const NiPoint3& aPoint)
@@ -193,10 +205,6 @@ bool NiPoint3::FUN_004390c0(const NiPoint3& aPoint)
     return x == aPoint.x && y == aPoint.y && z == aPoint.z;
 }
 
-struct FUN_00692290_class
-{
-    void FUN_005ef650(unsigned int count, unsigned int growBy);
-};
 struct FUN_00691820_arr
 {
     int m0;
@@ -208,37 +216,25 @@ struct FUN_00691820_arr
 unsigned int FUN_00691820_arr::Append(const unsigned short* aValue)
 {
     unsigned int iElementIndex = GetNextPosition();
-    ((FUN_00692290_class*)this)->FUN_005ef650((unsigned int)pBuffer + iElementIndex * 2, 1);
+    ((BSSimpleArray<unsigned short, 1024>*)this)->InitializeItems((unsigned short*)((unsigned int)pBuffer + iElementIndex * 2), 1);
     pBuffer[iElementIndex] = *aValue;
     return iElementIndex;
 }
 
-struct NavMeshSearchLOSArray
-{
-    void FUN_006a8500();
-};
 struct PacketNodeRecord
 {
     void FUN_006a8500();
 };
-struct BSSimpleArray_006cefa0
-{
-    void* vfptr;
-    PacketNodeRecord* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-    void ReleaseElements(PacketNodeRecord* pItems, unsigned int ItemUpdateArray);
-    void FreeArray(bool abFreeMemory);
-};
 // @fnv 0x006cefa0
-void BSSimpleArray_006cefa0::FreeArray(bool abFreeMemory)
+template <>
+void BSSimpleArray<PacketNodeRecord, 1024>::Clear(bool abFreeMemory)
 {
     if (pBuffer)
     {
         ReleaseElements(pBuffer, iSize);
         if (abFreeMemory)
         {
-            ((NavMeshSearchLOSArray*)this)->FUN_006a8500();
+            FreeSimpleArrayStorage(this);
             pBuffer = 0;
             SimpleArrayStorage = 0;
         }
@@ -246,72 +242,48 @@ void BSSimpleArray_006cefa0::FreeArray(bool abFreeMemory)
     }
 }
 
-namespace fnv_006cf120 {
-struct PathingGraphNode;
-struct NavMeshSearchLOSArray
-{
-    void FUN_006a8500();
-};
-template <class T, int N> struct BSSimpleArray
-{
-    int m_00;
-    T* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-    void ReleaseElements(T* pItems, unsigned int ItemUpdateArray);
-    void FUN_006cf120(bool bFreeStorage);
-};
 // @fnv 0x006cf120
-void BSSimpleArray<PathingGraphNode, 1024>::FUN_006cf120(bool bFreeStorage)
+template <>
+void BSSimpleArray<PathingGraphNode, 1024>::Clear(bool bFreeStorage)
 {
     if (pBuffer)
     {
         ReleaseElements(pBuffer, iSize);
         if (bFreeStorage)
         {
-            ((NavMeshSearchLOSArray*)this)->FUN_006a8500();
+            FreeSimpleArrayStorage(this);
             pBuffer = 0;
             SimpleArrayStorage = 0;
         }
         iSize = 0;
     }
 }
-}  // namespace fnv_006cf120
 
-struct PathingLocation
-{
-    PathingLocation& operator=(const PathingLocation&);
-};
-struct PathingLocationArray
-{
-    void* m_pBase;
-    void* m_pItems;
-    unsigned int m_uiCount;
-    void ConstructItems(PathingLocation* pItems, unsigned int ItemUpdateArray);
-    unsigned int AppendSlot();
-    unsigned int FUN_006cf1b0(const PathingLocation& aValue);
-};
+
 // Appends a copy of aValue to the array at the next free index and returns that index.
 // @fnv 0x006cf1b0
-unsigned int PathingLocationArray::FUN_006cf1b0(const PathingLocation& aValue)
+template <>
+unsigned int BSSimpleArray<PathingLocation, 1024>::Append(const PathingLocation& aValue)
 {
-    unsigned int uiIndex = AppendSlot();
-    ConstructItems((PathingLocation*)((char*)m_pItems + uiIndex * 0x28), 1);
-    ((PathingLocation*)((char*)m_pItems + uiIndex * 0x28))[0] = aValue;
+    unsigned int uiIndex = ReserveIndex();
+    InitializeItems((PathingLocation*)((char*)pBuffer + uiIndex * 0x28), 1);
+    ((PathingLocation*)((char*)pBuffer + uiIndex * 0x28))[0] = aValue;
     return uiIndex;
 }
 
-struct PathBuilderDetailedPathInfos
+// PolyDetailedPathInfos: unit-local; the base 0x006cf340 tears down is polymorphic (its virtual destructor), unlike the
+// shared PathBuilderDetailedPathInfos: with the shared class 0x006cf340 compiles 6 bytes longer
+struct PolyDetailedPathInfos
 {
     int* vfptr;
     void Clear(bool);
-    virtual ~PathBuilderDetailedPathInfos();
+    virtual ~PolyDetailedPathInfos();
 };
-struct FUN_006cf340 : PathBuilderDetailedPathInfos
+struct FUN_006cf340 : PolyDetailedPathInfos
 {
     virtual ~FUN_006cf340();
 };
-// Destructor that calls Clear(true) on the PathBuilderDetailedPathInfos base.
+// Destructor that calls Clear(true) on the PolyDetailedPathInfos base.
 // @fnv 0x006cf340
 FUN_006cf340::~FUN_006cf340()
 {
@@ -388,52 +360,34 @@ struct ScrapHeapBuffer
     void* Allocate(unsigned int, unsigned int);
     void Deallocate(void*);
 };
-struct ArrSI
+// Exe 0x006cf6a0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BssimplearrayOffset08View
 {
     unsigned int GetFlags();
 };
 extern unsigned int DAT_010a2720;
 void* __cdecl __memcpy(void* dst, const void* src, unsigned int size);
-struct FUN_006cf6a0_Class
-{
-    void* __thiscall CopyAndFreeBuffer(void* src, unsigned int size);
-};
 // Allocates size bytes from the allocator at this+0x10, copies GetFlags() bytes from src into it, frees src, and returns the new buffer.
 // @fnv 0x006cf6a0
-void* __thiscall FUN_006cf6a0_Class::CopyAndFreeBuffer(void* src, unsigned int size)
+template <>
+unsigned char* BSScrapArray<unsigned char>::_Reallocate(unsigned char* src, unsigned int size)
 {
-    void* result = reinterpret_cast<ScrapHeapBuffer*>(*(void**)((char*)this + 0x10))->Allocate(size, DAT_010a2720);
-    __memcpy(result, src, reinterpret_cast<ArrSI*>(this)->GetFlags());
-    reinterpret_cast<ScrapHeapBuffer*>(*(void**)((char*)this + 0x10))->Deallocate(src);
-    return result;
+    void* result = m_pPoolBase->Allocate(size, DAT_010a2720);
+    __memcpy(result, src, reinterpret_cast<BssimplearrayOffset08View*>(this)->GetFlags());
+    m_pPoolBase->Deallocate(src);
+    return static_cast<unsigned char*>(result);
 }
 
-namespace fnv_006cfc20 {
-struct ScrapHeapBuffer
-{
-    void* Allocate(unsigned int size, unsigned int align);
-    void Deallocate(void* p);
-};
-struct ArrSI
-{
-    unsigned int GetFlags();
-};
-extern unsigned int DAT_010a2720;
-void* __cdecl __memcpy(void* dst, const void* src, unsigned int count);
-struct BSScrapArray_006cfc20
-{
-    void* ReallocateCopy(const void* src, unsigned int count);
-};
 // Allocates count*4 bytes, copies GetFlags()*4 bytes from src, frees src, and returns the new buffer.
 // @fnv 0x006cfc20
-void* BSScrapArray_006cfc20::ReallocateCopy(const void* src, unsigned int count)
+template <>
+unsigned int* BSScrapArray<unsigned int>::_Reallocate(unsigned int* src, unsigned int count)
 {
-    void* p = ((ScrapHeapBuffer*)*(void**)((char*)this + 0x10))->Allocate(count * 4, DAT_010a2720);
-    __memcpy(p, src, ((ArrSI*)this)->GetFlags() * 4);
-    ((ScrapHeapBuffer*)*(void**)((char*)this + 0x10))->Deallocate((void*)src);
-    return p;
+    void* p = m_pPoolBase->Allocate(count * 4, DAT_010a2720);
+    __memcpy(p, src, ((BssimplearrayOffset08View*)this)->GetFlags() * 4);
+    m_pPoolBase->Deallocate((void*)src);
+    return static_cast<unsigned int*>(p);
 }
-}  // namespace fnv_006cfc20
 
 void __cdecl Deallocate(void* p);
 
@@ -567,10 +521,6 @@ struct FUN_007a63b0_holder
 {
     void FUN_007a63b0(FUN_007a86b0_Item*, unsigned int);
 };
-struct NavMeshSearchLOSArray
-{
-    void FUN_006a8500(void);
-};
 struct FUN_007a1c30_holder
 {
     int pad;
@@ -587,7 +537,7 @@ void FUN_007a1c30_holder::ClearBuffer(bool freeStorage)
         ((FUN_007a63b0_holder*)this)->FUN_007a63b0(pBuffer, iSize);
         if (freeStorage)
         {
-            ((NavMeshSearchLOSArray*)this)->FUN_006a8500();
+            FreeSimpleArrayStorage(this);
             pBuffer = 0;
             SimpleArrayStorage = 0;
         }
@@ -597,10 +547,6 @@ void FUN_007a1c30_holder::ClearBuffer(bool freeStorage)
 }  // namespace fnv_007a1c30
 
 namespace fnv_008454f0 {
-struct NavMeshSearchLOSArray
-{
-    void FUN_006a8500();
-};
 struct FUN_0072ba80_shell
 {
     void FUN_0072ba80(void* p, unsigned int n);
@@ -621,7 +567,7 @@ void FUN_008454f0::Clear(bool freeStorage)
         ((FUN_0072ba80_shell*)this)->FUN_0072ba80(pBuffer, iSize);
         if (freeStorage)
         {
-            ((NavMeshSearchLOSArray*)this)->FUN_006a8500();
+            FreeSimpleArrayStorage(this);
             pBuffer = 0;
             SimpleArrayStorage = 0;
         }
@@ -677,10 +623,6 @@ struct TypeValueCount
     int a;
     float b;
 };
-struct FUN_006c8a30_Class
-{
-    void FUN_006a8500();
-};
 struct FUN_006dc590
 {
     int* vfptr;
@@ -704,7 +646,7 @@ void __thiscall FUN_006dc590::FUN_006dc590_(unsigned int aiNewSize, unsigned int
             TypeValueCount* pnewBuffer =
                 (TypeValueCount*)((void*(__thiscall*)(void*, unsigned int))vfptr[1])(this, aiNewSize);
             ((FUN_006dc6e0_Class*)this)->FUN_006dc6e0((char*)pnewBuffer, (char*)pBuffer, aiCopyCount);
-            ((FUN_006c8a30_Class*)this)->FUN_006a8500();
+            FreeSimpleArrayStorage(this);
             pBuffer = pnewBuffer;
         }
     }
@@ -814,10 +756,6 @@ void FUN_009a4320_arr::FUN_009a4320(unsigned int aiIndex, unsigned int aiHowMany
 }  // namespace fnv_009a4320
 
 namespace fnv_009f6540 {
-struct FUN_006c8a30_Class
-{
-    void FUN_006a8500();
-};
 struct FUN_006c8bd0_Class
 {
     void FUN_006c8bd0(const char*, const char*, unsigned int);
@@ -846,7 +784,7 @@ void FUN_009f6540_Class::FUN_009f6540(unsigned int aiNewSize, unsigned int aiCop
         {
             unsigned int pnewBuffer = (unsigned int)FUN_009f6540_1(aiNewSize);
             ((FUN_006c8bd0_Class*)this)->FUN_006c8bd0((const char*)pnewBuffer, (const char*)pBuffer, aiCopyCount);
-            ((FUN_006c8a30_Class*)this)->FUN_006a8500();
+            FreeSimpleArrayStorage(this);
             pBuffer = (void*)pnewBuffer;
         }
     }
@@ -883,26 +821,10 @@ int __thiscall FUN_006cf520_Class::FUN_006cf520(const unsigned char* aValue)
     return iVar1;
 }
 
-struct BSSimpleArrayActor
-{
-    virtual ~BSSimpleArrayActor();
-    virtual unsigned short* Allocate(unsigned int count);
-
-    unsigned short* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-
-    void Clear(bool abFreeMemory);
-    void FUN_005eee80(unsigned int aiNewSize, bool abFreeMemory);
-};
-
-struct FUN_005ef6a0Class
-{
-    void __thiscall SetOrReplace(unsigned int newSize, int oldSize);
-};
 
 // @fnv 0x005eee80
-void BSSimpleArrayActor::FUN_005eee80(unsigned int aiNewSize, bool abFreeMemory)
+template <>
+void BSSimpleArray<unsigned short, 1024>::SetSize(unsigned int aiNewSize, bool abFreeMemory)
 {
     if (aiNewSize == 0)
     {
@@ -912,32 +834,32 @@ void BSSimpleArrayActor::FUN_005eee80(unsigned int aiNewSize, bool abFreeMemory)
     {
         if (SimpleArrayStorage == 0)
         {
-            pBuffer = Allocate(aiNewSize);
+            pBuffer = _Allocate(aiNewSize);
             SimpleArrayStorage = aiNewSize;
         }
         else
         {
-            ((FUN_005ef6a0Class*)this)->SetOrReplace(aiNewSize, iSize);
+            ReallocateStorage(aiNewSize, iSize);
             SimpleArrayStorage = aiNewSize;
         }
 
-        ((FUN_00692290_class*)this)->FUN_005ef650((int)(pBuffer + iSize), aiNewSize - iSize);
+        InitializeItems(pBuffer + iSize, aiNewSize - iSize);
         iSize = aiNewSize;
     }
     else if (aiNewSize < iSize)
     {
-        ((FUN_0072ba80_shell*)this)->FUN_0072ba80((char*)(pBuffer + aiNewSize), iSize - aiNewSize);
+        ReleaseElements(pBuffer + aiNewSize, iSize - aiNewSize);
         iSize = aiNewSize;
 
         if (abFreeMemory && aiNewSize <= (SimpleArrayStorage >> 2))
         {
-            ((FUN_005ef6a0Class*)this)->SetOrReplace(aiNewSize, aiNewSize);
+            ReallocateStorage(aiNewSize, aiNewSize);
             SimpleArrayStorage = aiNewSize;
         }
     }
     else
     {
-        ((FUN_00692290_class*)this)->FUN_005ef650((int)(pBuffer + iSize), aiNewSize - iSize);
+        InitializeItems(pBuffer + iSize, aiNewSize - iSize);
         iSize = aiNewSize;
     }
 }
@@ -945,13 +867,14 @@ void BSSimpleArrayActor::FUN_005eee80(unsigned int aiNewSize, bool abFreeMemory)
 void* __cdecl operator new(unsigned int, void*);
 
 // @fnv 0x005ef650
-void FUN_00692290_class::FUN_005ef650(unsigned int count, unsigned int growBy)
+template <>
+void BSSimpleArray<unsigned short, 1024>::InitializeItems(unsigned short* items, unsigned int growBy)
 {
     unsigned int i;
     void* p2;
     for (i = 0; i < growBy; ++i)
     {
-        p2 = operator new(2, (void*)(count + i * 2));
+        p2 = operator new(2, (void*)((unsigned int)items + i * 2));
     }
 }
 
@@ -976,20 +899,11 @@ struct FUN_00869600_Class
     unsigned int FUN_00869600();
 };
 
-struct FUN_0061bf70_Class
-{
-    virtual void FUN_0061bf70_vtable0();
-    virtual NavMeshEdgeReference* FUN_0061bf70_alloc(unsigned int count);
+typedef BSSimpleArray<NavMeshEdgeReference, 1024> FUN_0061bf70_Class;
 
-    NavMeshEdgeReference* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-
-    void FUN_0061bf70(unsigned int aiIndex, bool abShrink);
-};
 
 // @fnv 0x0061bf70
-void FUN_0061bf70_Class::FUN_0061bf70(unsigned int aiIndex, bool abShrink)
+template <> void BSSimpleArray<NavMeshEdgeReference, 1024>::RemoveAt(unsigned int aiIndex, bool abShrink)
 {
     unsigned int inewSize;
     NavMeshEdgeReference* pnewBuffer;
@@ -997,7 +911,7 @@ void FUN_0061bf70_Class::FUN_0061bf70(unsigned int aiIndex, bool abShrink)
     if (abShrink && reinterpret_cast<FUN_006f3170_Class*>(this)->FUN_006f3170())
     {
         inewSize = reinterpret_cast<FUN_00869600_Class*>(this)->FUN_00869600();
-        pnewBuffer = this->FUN_0061bf70_alloc(inewSize);
+        pnewBuffer = this->_Allocate(inewSize);
 
         reinterpret_cast<FUN_006dc6e0_Class*>(this)->FUN_006dc6e0(reinterpret_cast<char*>(pnewBuffer),
                                                                   reinterpret_cast<char*>(this->pBuffer), aiIndex);
@@ -1008,7 +922,7 @@ void FUN_0061bf70_Class::FUN_0061bf70(unsigned int aiIndex, bool abShrink)
                                                                   reinterpret_cast<char*>(this->pBuffer + aiIndex + 1),
                                                                   this->iSize - 1);
 
-        reinterpret_cast<FUN_006c8a30_Class*>(this)->FUN_006a8500();
+        FreeSimpleArrayStorage(this);
 
         this->pBuffer = pnewBuffer;
         this->SimpleArrayStorage = inewSize;
@@ -1025,154 +939,94 @@ void FUN_0061bf70_Class::FUN_0061bf70(unsigned int aiIndex, bool abShrink)
     --this->iSize;
 }
 
-namespace fnv_0069cea0 {
-struct CombatSearchDoor
-{
-    void* pPathNodeDoor;
-    void* m_pLinkedDoorReference;
-    unsigned char m_bReserved;
-    unsigned char padding[3];
-};
 
-struct BSSimpleArrayActor
-{
-    virtual void* FUN_0069cea0_Filler() = 0;
-    virtual CombatSearchDoor* Allocate(unsigned int size) = 0;
-    void __thiscall Clear(bool abFreeMemory);
-};
 
-struct FUN_0049f8f0_class
-{
-    void __thiscall ConstructEntries(int, unsigned int);
-};
-
-struct FUN_0069cea0_class : BSSimpleArrayActor
-{
-    CombatSearchDoor* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-
-    void __thiscall FUN_0069cea0(unsigned int aiNewSize, bool abFreeMemory);
-};
 
 // @fnv 0x0069cea0
-void __thiscall FUN_0069cea0_class::FUN_0069cea0(unsigned int aiNewSize, bool abFreeMemory)
+template <>
+void __thiscall BSSimpleArray<CombatSearchDoor, 1024>::SetSize(unsigned int aiNewSize, bool abFreeMemory)
 {
     if (aiNewSize == 0)
     {
-        ((BSSimpleArrayActor*)this)->Clear(abFreeMemory);
+        Clear(abFreeMemory);
     }
     else if (aiNewSize > SimpleArrayStorage)
     {
         if (SimpleArrayStorage == 0)
         {
-            pBuffer = Allocate(aiNewSize);
+            pBuffer = _Allocate(aiNewSize);
             SimpleArrayStorage = aiNewSize;
         }
         else
         {
-            ((FUN_006dc590*)this)->FUN_006dc590_(aiNewSize, iSize);
+            ReallocateStorage(aiNewSize, iSize);
             SimpleArrayStorage = aiNewSize;
         }
 
-        ((FUN_0049f8f0_class*)this)
-            ->ConstructEntries((int)((char*)pBuffer + iSize * sizeof(CombatSearchDoor)), aiNewSize - iSize);
+        InitializeItems((CombatSearchDoor*)((char*)pBuffer + iSize * sizeof(CombatSearchDoor)), aiNewSize - iSize);
         iSize = aiNewSize;
     }
     else if (aiNewSize < iSize)
     {
-        ((FUN_0072ba80_shell*)this)
-            ->FUN_0072ba80((char*)pBuffer + aiNewSize * sizeof(CombatSearchDoor), iSize - aiNewSize);
+        ReleaseElements((CombatSearchDoor*)((char*)pBuffer + aiNewSize * sizeof(CombatSearchDoor)), iSize - aiNewSize);
         iSize = aiNewSize;
 
         if (abFreeMemory && aiNewSize <= SimpleArrayStorage / 4)
         {
-            ((FUN_006dc590*)this)->FUN_006dc590_(aiNewSize, aiNewSize);
+            ReallocateStorage(aiNewSize, aiNewSize);
             SimpleArrayStorage = aiNewSize;
         }
     }
     else
     {
-        ((FUN_0049f8f0_class*)this)
-            ->ConstructEntries((int)((char*)pBuffer + iSize * sizeof(CombatSearchDoor)), aiNewSize - iSize);
+        InitializeItems((CombatSearchDoor*)((char*)pBuffer + iSize * sizeof(CombatSearchDoor)), aiNewSize - iSize);
         iSize = aiNewSize;
     }
 }
-}  // namespace fnv_0069cea0
 
-namespace fnv_006a6660 {
-struct BSSimpleArrayActor
-{
-    void Clear(bool freeMemory);
-};
-
-struct S5460ResizeHelper
-{
-    void __thiscall FUN_009f6540(unsigned int newSize, unsigned int oldSize);
-};
-
-struct FUN_006a69b0_Item
-{
-    unsigned char data[16];
-};
-
-struct FUN_006a69b0_Class
-{
-    virtual void FUN_virtual0();
-    virtual FUN_006a69b0_Item* FUN_allocate(unsigned int count);
-
-    FUN_006a69b0_Item* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-
-    void __thiscall ConstructParams(int item, int count);
-    void __thiscall FUN_006a6660(unsigned int newSize, bool freeMemory);
-};
 
 // @fnv 0x006a6660
-void FUN_006a69b0_Class::FUN_006a6660(unsigned int newSize, bool freeMemory)
+template <>
+void BSSimpleArray<NiColorA, 1024>::SetSize(unsigned int newSize, bool freeMemory)
 {
     if (newSize == 0)
     {
-        reinterpret_cast<BSSimpleArrayActor*>(this)->Clear(freeMemory);
+        Clear(freeMemory);
     }
     else if (newSize > SimpleArrayStorage)
     {
         if (SimpleArrayStorage == 0)
         {
-            pBuffer = FUN_allocate(newSize);
+            pBuffer = _Allocate(newSize);
             SimpleArrayStorage = newSize;
         }
         else
         {
-            reinterpret_cast<S5460ResizeHelper*>(this)->FUN_009f6540(newSize, iSize);
+            ReallocateStorage(newSize, iSize);
             SimpleArrayStorage = newSize;
         }
 
-        ConstructParams(static_cast<int>(reinterpret_cast<unsigned int>(pBuffer + iSize)),
-                        static_cast<int>(newSize - iSize));
+        InitializeItems(pBuffer + iSize, newSize - iSize);
         iSize = newSize;
     }
     else if (newSize < iSize)
     {
-        reinterpret_cast<FUN_0072ba80_shell*>(this)->FUN_0072ba80(reinterpret_cast<char*>(pBuffer + newSize),
-                                                                  iSize - newSize);
+        ReleaseElements(pBuffer + newSize, iSize - newSize);
         iSize = newSize;
 
         if (freeMemory && newSize <= SimpleArrayStorage / 4)
         {
-            reinterpret_cast<S5460ResizeHelper*>(this)->FUN_009f6540(newSize, newSize);
+            ReallocateStorage(newSize, newSize);
             SimpleArrayStorage = newSize;
         }
     }
     else
     {
-        ConstructParams(static_cast<int>(reinterpret_cast<unsigned int>(pBuffer + iSize)),
-                        static_cast<int>(newSize - iSize));
+        InitializeItems(pBuffer + iSize, newSize - iSize);
         iSize = newSize;
     }
 }
-}  // namespace fnv_006a6660
+
 
 extern int DAT_0106c954;
 struct FUN_006d0310_Class
@@ -1192,42 +1046,22 @@ FUN_006cf200::FUN_006cf200()
     ((FUN_006d0310_Class*)this)->FUN_006d0310(0, 0);
 }
 
-struct BSScrapArray
-{
-    void* vfptr;
-    void* field04;
-    void* field08;
-    void* field0c;
-    ScrapHeapBuffer* m_pPoolBase;
-    void* __thiscall FUN_006cf670(unsigned int size);
-};
-
 // @fnv 0x006cf670
-void* __thiscall BSScrapArray::FUN_006cf670(unsigned int size)
+template <>
+void* __thiscall BSScrapArray<unsigned char>::FUN_006cf670(unsigned int size)
 {
     void* result;
     result = m_pPoolBase->Allocate(size, DAT_010a2720);
     return result;
 }
 
-namespace fnv_006cf820 {
-extern int DAT_0106c9b8;
-struct BSSimpleArrayActor
-{
-    void Clear(bool);
-};
-struct FUN_006cf820_StandIn
-{
-    int* vfptr;
-    void FUN_006cf820();
-};
 // @fnv 0x006cf820
-void FUN_006cf820_StandIn::FUN_006cf820()
+template <>
+BSSimpleArray<PathBuilder::VirtualNodeSegment, 1024>::~BSSimpleArray()
 {
-    vfptr = &DAT_0106c9b8;
-    ((BSSimpleArrayActor*)this)->Clear(true);
+    Clear(true);
 }
-}  // namespace fnv_006cf820
+
 
 struct EH
 {
@@ -1274,20 +1108,11 @@ struct S5460Helper
     void __thiscall FUN_006cfe70(unsigned int aiNewSize, unsigned int uiOldSize);
 };
 
-struct FUN_006e90a0_class
-{
-    virtual ~FUN_006e90a0_class();
-    virtual PacketNodeRecord* Allocate(unsigned int size);
+typedef BSSimpleArray<PacketNodeRecord, 1024> FUN_006e90a0_class;
 
-    PacketNodeRecord* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-
-    void FUN_006e90a0(unsigned int aiNewSize, bool abFreeMemory);
-};
 
 // @fnv 0x006e90a0
-void FUN_006e90a0_class::FUN_006e90a0(unsigned int aiNewSize, bool abFreeMemory)
+template <> void BSSimpleArray<PacketNodeRecord, 1024>::SetSize(unsigned int aiNewSize, bool abFreeMemory)
 {
     if (aiNewSize == 0)
     {
@@ -1297,7 +1122,7 @@ void FUN_006e90a0_class::FUN_006e90a0(unsigned int aiNewSize, bool abFreeMemory)
     {
         if (this->SimpleArrayStorage == 0)
         {
-            this->pBuffer = this->Allocate(aiNewSize);
+            this->pBuffer = this->_Allocate(aiNewSize);
             this->SimpleArrayStorage = aiNewSize;
         }
         else
@@ -1312,7 +1137,7 @@ void FUN_006e90a0_class::FUN_006e90a0(unsigned int aiNewSize, bool abFreeMemory)
     }
     else if (aiNewSize < this->iSize)
     {
-        reinterpret_cast<BSSimpleArray_006cefa0*>(this)->ReleaseElements(this->pBuffer + aiNewSize * 0x30,
+        reinterpret_cast<BSSimpleArray<PacketNodeRecord, 1024>*>(this)->ReleaseElements(this->pBuffer + aiNewSize * 0x30,
                                                                          this->iSize - aiNewSize);
         this->iSize = aiNewSize;
 
@@ -1347,50 +1172,11 @@ void* FUN_006e94d0::FUN_006e94d0_006e94d0(unsigned int flags)
     return this;
 }
 
-namespace fnv_006f2290 {
-struct NavMeshInfo;
-
-struct CtorHelper
-{
-    void InitializeItems(NavMeshInfo** pItems, unsigned int ItemUpdateArray);
-};
-
-struct FUN_0042fc00_shell : public CtorHelper
-{
-    virtual ~FUN_0042fc00_shell();
-    virtual NavMeshInfo** AllocateItems(unsigned int size);
-    void FUN_0042fc00(void* p, unsigned int size);
-};
-
-struct BSSimpleArrayActor : public FUN_0042fc00_shell
-{
-    NavMeshInfo** pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-
-    void Clear(bool abFreeMemory);
-    void FUN_006f2290(unsigned int aiNewSize, bool abFreeMemory);
-};
-
-void CtorHelper::InitializeItems(NavMeshInfo** pItems, unsigned int ItemUpdateArray)
-{}
-
-FUN_0042fc00_shell::~FUN_0042fc00_shell()
-{}
-
-NavMeshInfo** FUN_0042fc00_shell::AllocateItems(unsigned int size)
-{
-    return 0;
-}
-
-void FUN_0042fc00_shell::FUN_0042fc00(void* p, unsigned int size)
-{}
-
-void BSSimpleArrayActor::Clear(bool abFreeMemory)
-{}
+class NavMeshInfo;
 
 // @fnv 0x006f2290
-void BSSimpleArrayActor::FUN_006f2290(unsigned int aiNewSize, bool abFreeMemory)
+template <>
+void BSSimpleArray<NavMeshInfo*, 1024>::SetSize(unsigned int aiNewSize, bool abFreeMemory)
 {
     if (aiNewSize == 0)
     {
@@ -1400,69 +1186,41 @@ void BSSimpleArrayActor::FUN_006f2290(unsigned int aiNewSize, bool abFreeMemory)
     {
         if (SimpleArrayStorage == 0)
         {
-            pBuffer = AllocateItems(aiNewSize);
+            pBuffer = _Allocate(aiNewSize);
             SimpleArrayStorage = aiNewSize;
         }
         else
         {
-            FUN_0042fc00((void*)aiNewSize, iSize);
+            ReallocateStorage(aiNewSize, iSize);
             SimpleArrayStorage = aiNewSize;
         }
 
-        reinterpret_cast<CtorHelper*>(this)->InitializeItems(pBuffer + iSize, aiNewSize - iSize);
+        InitializeItems(pBuffer + iSize, aiNewSize - iSize);
         iSize = aiNewSize;
     }
     else if (aiNewSize < iSize)
     {
-        reinterpret_cast<FUN_0072ba80_shell*>(this)->FUN_0072ba80((char*)(pBuffer + aiNewSize), iSize - aiNewSize);
+        ReleaseElements(pBuffer + aiNewSize, iSize - aiNewSize);
         iSize = aiNewSize;
 
         if (abFreeMemory && aiNewSize <= SimpleArrayStorage / 4)
         {
-            FUN_0042fc00((void*)aiNewSize, aiNewSize);
+            ReallocateStorage(aiNewSize, aiNewSize);
             SimpleArrayStorage = aiNewSize;
         }
     }
     else
     {
-        reinterpret_cast<CtorHelper*>(this)->InitializeItems(pBuffer + iSize, aiNewSize - iSize);
+        InitializeItems(pBuffer + iSize, aiNewSize - iSize);
         iSize = aiNewSize;
     }
 }
-}  // namespace fnv_006f2290
 
-namespace fnv_006f4480 {
-struct Entry16
-{
-    char data[16];
-};
-
-struct SizeState
-{
-    void FUN_006dbcf0(int* pItems, int count);
-};
-
-struct S5460_009f6540
-{
-    void FUN_009f6540(unsigned int count, unsigned int oldSize);
-};
-
-struct BSSimpleArrayActor
-{
-    virtual ~BSSimpleArrayActor();
-    virtual Entry16* Allocate(unsigned int count);
-
-    Entry16* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-
-    void Clear(bool freeMemory);
-    void FUN_006f4480(unsigned int count, bool freeMemory);
-};
 
 // Resizes the array to count elements: clears when count is 0, grows the buffer when needed, shrinks and optionally frees excess capacity.
 // @fnv 0x006f4480
-void BSSimpleArrayActor::FUN_006f4480(unsigned int count, bool freeMemory)
+template <>
+void BSSimpleArray<PathSmoother::AvoidNode, 1024>::SetSize(unsigned int count, bool freeMemory)
 {
     if (count == 0)
     {
@@ -1472,39 +1230,39 @@ void BSSimpleArrayActor::FUN_006f4480(unsigned int count, bool freeMemory)
     {
         if (SimpleArrayStorage == 0)
         {
-            pBuffer = Allocate(count);
+            pBuffer = _Allocate(count);
             SimpleArrayStorage = count;
         }
         else
         {
-            reinterpret_cast<S5460_009f6540*>(this)->FUN_009f6540(count, iSize);
+            ReallocateStorage(count, iSize);
             SimpleArrayStorage = count;
         }
 
-        reinterpret_cast<SizeState*>(this)->FUN_006dbcf0(
-            reinterpret_cast<int*>(reinterpret_cast<char*>(pBuffer) + iSize * 16), count - iSize);
+        InitializeItems(
+            reinterpret_cast<PathSmoother::AvoidNode*>(reinterpret_cast<char*>(pBuffer) + iSize * 16), count - iSize);
         iSize = count;
     }
     else if (count < iSize)
     {
-        reinterpret_cast<FUN_0072ba80_shell*>(this)->FUN_0072ba80(reinterpret_cast<char*>(pBuffer) + count * 16,
-                                                                  iSize - count);
+        ReleaseElements(reinterpret_cast<PathSmoother::AvoidNode*>(reinterpret_cast<char*>(pBuffer) + count * 16),
+                        iSize - count);
         iSize = count;
 
         if (freeMemory && count <= SimpleArrayStorage / 4)
         {
-            reinterpret_cast<S5460_009f6540*>(this)->FUN_009f6540(count, count);
+            ReallocateStorage(count, count);
             SimpleArrayStorage = count;
         }
     }
     else
     {
-        reinterpret_cast<SizeState*>(this)->FUN_006dbcf0(
-            reinterpret_cast<int*>(reinterpret_cast<char*>(pBuffer) + iSize * 16), count - iSize);
+        InitializeItems(
+            reinterpret_cast<PathSmoother::AvoidNode*>(reinterpret_cast<char*>(pBuffer) + iSize * 16), count - iSize);
         iSize = count;
     }
 }
-}  // namespace fnv_006f4480
+
 
 struct FUN_0042fb60_shell
 {
@@ -1542,7 +1300,7 @@ void __thiscall FUN_006bf8f0_Class::FUN_006bf8f0(unsigned int aiIndex, bool abSh
         reinterpret_cast<FUN_0042fb60_shell*>(this)->FUN_0042fb60(pnewBuffer + aiIndex * 4, pBuffer + aiIndex * 4 + 4,
                                                                   iSize - 1);
 
-        reinterpret_cast<FUN_006c8a30_Class*>(this)->FUN_006a8500();
+        FreeSimpleArrayStorage(this);
 
         pBuffer = pnewBuffer;
         SimpleArrayStorage = inewSize;
@@ -1558,60 +1316,39 @@ void __thiscall FUN_006bf8f0_Class::FUN_006bf8f0(unsigned int aiIndex, bool abSh
     iSize--;
 }
 
-class PathingGraphNode
-{
-    unsigned char m_data[0x3c];
-};
-
-template <class T, unsigned int Capacity> struct BSSimpleArray
-{
-    void ReleaseElements(T* pItems, unsigned int ItemUpdateArray);
-};
-
 struct FUN_006a2270_class
 {
     void FUN_006a2270(char* pDest, char* pSource, unsigned int ItemUpdateArray);
 };
 
-struct FUN_006cf000_Class
-{
-    virtual void FUN_006cf000_Dummy() = 0;
-    virtual PathingGraphNode* FUN_006cf000_Reallocate(unsigned int uiSize) = 0;
-
-    PathingGraphNode* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-
-    void RemoveAt(unsigned int uiIndex, bool bCondition);
-};
-
 // @fnv 0x006cf000
-void FUN_006cf000_Class::RemoveAt(unsigned int uiIndex, bool bCondition)
+template <>
+void BSSimpleArray<PathingGraphNode, 1024>::RemoveAt(unsigned int uiIndex, bool bCondition)
 {
     PathingGraphNode* newBuffer;
 
     if (bCondition && reinterpret_cast<FUN_006f3170_Class*>(this)->FUN_006f3170())
     {
         unsigned int newSize = reinterpret_cast<FUN_00869600_Class*>(this)->FUN_00869600();
-        newBuffer = this->FUN_006cf000_Reallocate(newSize);
+        newBuffer = this->_Allocate(newSize);
 
         reinterpret_cast<FUN_006a2270_class*>(this)->FUN_006a2270(reinterpret_cast<char*>(newBuffer),
                                                                   reinterpret_cast<char*>(this->pBuffer), uiIndex);
 
-        reinterpret_cast<BSSimpleArray<PathingGraphNode, 1024>*>(this)->ReleaseElements(this->pBuffer + uiIndex, 1);
+        ReleaseElements(this->pBuffer + uiIndex, 1);
 
         reinterpret_cast<FUN_006a2270_class*>(this)->FUN_006a2270(reinterpret_cast<char*>(newBuffer + uiIndex),
                                                                   reinterpret_cast<char*>(this->pBuffer + uiIndex + 1),
                                                                   this->iSize - 1);
 
-        reinterpret_cast<FUN_006c8a30_Class*>(this)->FUN_006a8500();
+        FreeSimpleArrayStorage(this);
 
         this->pBuffer = newBuffer;
         this->SimpleArrayStorage = newSize;
     }
     else
     {
-        reinterpret_cast<BSSimpleArray<PathingGraphNode, 1024>*>(this)->ReleaseElements(this->pBuffer + uiIndex, 1);
+        ReleaseElements(this->pBuffer + uiIndex, 1);
 
         reinterpret_cast<FUN_006a2270_class*>(this)->FUN_006a2270(reinterpret_cast<char*>(this->pBuffer + uiIndex),
                                                                   reinterpret_cast<char*>(this->pBuffer + uiIndex + 1),
@@ -1620,13 +1357,6 @@ void FUN_006cf000_Class::RemoveAt(unsigned int uiIndex, bool bCondition)
 
     this->iSize = this->iSize - 1;
 }
-
-struct PathingAvoidanceNode
-{
-    NiPoint3 m_kLocation;
-    NiPoint3 TwoComponentVector;
-    char Padding[12];
-};
 
 struct S5460_FUN_006e3d30_Helper
 {
@@ -1638,11 +1368,11 @@ struct BSSimpleArray_PathingAvoidNode_1024
     virtual void* Dummy();
     virtual void* Allocate(unsigned int newSize);
 
-    PathingAvoidanceNode* pBuffer;
+    PathingAvoidNode* pBuffer;
     unsigned int iSize;
     unsigned int SimpleArrayStorage;
 
-    void InitializeItems(PathingAvoidanceNode* pItems, unsigned int ItemUpdateArray);
+    void InitializeItems(PathingAvoidNode* pItems, unsigned int ItemUpdateArray);
     void SetSize(unsigned int aiNewSize, bool abFreeMemory);
 };
 
@@ -1651,7 +1381,7 @@ void BSSimpleArray_PathingAvoidNode_1024::SetSize(unsigned int aiNewSize, bool a
 {
     if (aiNewSize == 0)
     {
-        ((BSSimpleArrayActor*)this)->Clear(abFreeMemory);
+        ((BSSimpleArray<PathingAvoidNode, 1024>*)this)->Clear(abFreeMemory);
         return;
     }
 
@@ -1659,7 +1389,7 @@ void BSSimpleArray_PathingAvoidNode_1024::SetSize(unsigned int aiNewSize, bool a
     {
         if (SimpleArrayStorage == 0)
         {
-            pBuffer = (PathingAvoidanceNode*)Allocate(aiNewSize);
+            pBuffer = (PathingAvoidNode*)Allocate(aiNewSize);
             SimpleArrayStorage = aiNewSize;
         }
         else
@@ -1692,6 +1422,8 @@ void BSSimpleArray_PathingAvoidNode_1024::SetSize(unsigned int aiNewSize, bool a
     }
 }
 
+class SandBoxChoiceListItem;
+
 struct FUN_009f6540_Helper
 {
     void __thiscall FUN_009f6540(unsigned int, unsigned int);
@@ -1719,7 +1451,7 @@ void FUN_009f6200_Class::FUN_009f6200(unsigned int aiNewSize, bool abFreeMemory)
 {
     if (aiNewSize == 0)
     {
-        reinterpret_cast<BSSimpleArrayActor*>(this)->Clear(abFreeMemory);
+        reinterpret_cast<BSSimpleArray<SandBoxChoiceListItem, 1024>*>(this)->Clear(abFreeMemory);
         return;
     }
 
@@ -2062,7 +1794,6 @@ struct FUN_006d0540_shell
     int unk0c;
 
     void __thiscall FUN_006d0540(void* newItem, void* oldItem, unsigned int count);
-    void __thiscall FUN_006a8500();
 };
 
 struct FUN_006cfe70_Class : public FUN_006d0540_shell
@@ -2083,7 +1814,7 @@ void __thiscall FUN_006cfe70_Class::FUN_006cfe70(int value, int count)
         {
             void* newItem = this->vf04(value);
             this->FUN_006d0540(newItem, this->unk04, count);
-            this->FUN_006a8500();
+            FreeSimpleArrayStorage(this);
             this->unk04 = newItem;
         }
     }
@@ -2220,16 +1951,6 @@ FUN_006cf230::~FUN_006cf230()
     Clear(true);
 }
 
-class Allocator6CF;
-
-class MemoryManager6CF
-{
-  public:
-    Allocator6CF* GetDefaultAllocator();
-};
-
-MemoryManager6CF* __cdecl GetMemoryManager6CF();
-
 class ContainerBase6CF
 {
   public:
@@ -2244,19 +1965,19 @@ class ContainerBase6CF
 class FUN_006cf780_Pool : public ContainerBase6CF
 {
   public:
-    FUN_006cf780_Pool(int iCapacity, int iGrowBy, Allocator6CF* pkAllocator);
+    FUN_006cf780_Pool(int iCapacity, int iGrowBy, ScrapHeapBuffer* pkAllocator);
     virtual ~FUN_006cf780_Pool();
 
     void Initialize(int iCapacity, int iGrowBy);
 
-    Allocator6CF* m_pHeapAllocator;
+    ScrapHeapBuffer* m_pHeapAllocator;
 };
 
 // Stores the given allocator, or the memory manager's default allocator when none is given, then initializes the pool with the capacity and grow-by values.
 // @fnv 0x006cf780
-FUN_006cf780_Pool::FUN_006cf780_Pool(int iCapacity, int iGrowBy, Allocator6CF* pkAllocator)
+FUN_006cf780_Pool::FUN_006cf780_Pool(int iCapacity, int iGrowBy, ScrapHeapBuffer* pkAllocator)
 {
-    m_pHeapAllocator = pkAllocator ? pkAllocator : GetMemoryManager6CF()->GetDefaultAllocator();
+    m_pHeapAllocator = pkAllocator ? pkAllocator : MemoryManager::GetSingleton().GetGeneralAllocator();
     Initialize(iCapacity, iGrowBy);
 }
 

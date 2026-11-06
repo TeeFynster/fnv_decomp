@@ -1,10 +1,22 @@
+#include "../../../../include/NiTArray.h"
 // gamebryo2.2/corelibs/nimain/niskinpartition.cpp: NiAccumulator, Partition, Holder, MyCls and more (36 functions)
 
-#include "niskinpartition_decls.h"
+#include "../../../../include/NiAccumulator.h"
+#include "../../../../include/NiSkinPartition.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiRenderer.h"
+#include "../../../../include/NiTMapItem.h"
+#include "../../../../include/NiTMapBase.h"
+#include "../../../../include/NiTMap.h"
+#include "../../../../include/NiTPointerMap.h"
+#include "../../../../include/RecursiveSpinLock.h"
+
 // @fnv 0x00d47a40
 void NiAccumulator::SetSortingCamera(const NiCamera* camera)
 {
-    m_pkAccumulationCamera = camera;
+    m_pkCamera = camera;
 }
 // Sums the strip lengths in m_pusStripLengths over m_usStrips entries and returns the total.
 // @fnv 0x00a81c20
@@ -25,10 +37,12 @@ const void* __cdecl FUN_00a820d0()
 }
 
 // @fnv 0x00a82600
-void __stdcall FUN_00a82600(int pTarget, int b, float c)
+template <>
+void NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, float>::SetValue(
+    NiTMapItem<unsigned int, float>* pkItem, unsigned int b, float c)
 {
-    *(float*)(pTarget + 8) = c;
-    *(int*)(pTarget + 4) = b;
+    pkItem->m_val = c;
+    pkItem->m_key = b;
 }
 
 struct Holder
@@ -55,14 +69,6 @@ bool Holder::ContainsSortedSubset(const Holder* pkOther)
     return true;
 }
 
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-};
-struct NiRenderer
-{
-    static NiRenderer* ms_pRenderer;
-};
 extern int DAT_0109e47c;
 struct P03MM
 {
@@ -71,7 +77,6 @@ struct P03MM
 extern P03MM g_memoryManager;
 struct S : NiRefObject
 {
-    int f4;
     int f8;
     void* fC;
     void __thiscall FUN_00a824d0();
@@ -95,62 +100,48 @@ void __thiscall S::FUN_00a824d0()
     ((NiRefObject*)this)->NiRefObject::~NiRefObject();
 }
 
-struct NiTAbstractPoolAllocator_unsigned_int
-{
-    struct LinkedListEntry* ms_pFreeList;
-    struct RecursiveSpinLock* ms_kPoolState;
-};
-struct RecursiveSpinLock
-{
-    void __thiscall Lock(const char*);
-};
-extern RecursiveSpinLock g_011c5f80;
-extern unsigned int DAT_011c5f84;
-extern NiTAbstractPoolAllocator_unsigned_int NiTAbstractPoolAllocator_unsigned_int_instance;
 // @fnv 0x00a82620
-void __stdcall PoolFreeUIntNode(void* apNode)
+template <>
+void NiTPointerMap<unsigned int, float>::DeleteItem(NiTMapItem<unsigned int, float>* apNode)
 {
-    *(float*)((char*)apNode + 8) = 0.0f;
-    g_011c5f80.Lock(0);
-    *(int*)((char*)apNode + 4) = 0;
-    *(void***)apNode = *(void***)&NiTAbstractPoolAllocator_unsigned_int_instance.ms_pFreeList;
-    --DAT_011c5f84;
-    *(void***)&NiTAbstractPoolAllocator_unsigned_int_instance.ms_pFreeList = (void**)apNode;
-    if (!DAT_011c5f84)
-        *(unsigned int*)&g_011c5f80 = 0;
+    apNode->m_val = 0.0f;
+    NiTPointerAllocator<unsigned int>::ms_kCriticalSection.Lock(0);
+    apNode->m_key = 0;
+    apNode->m_pkNext = (NiTMapItem<unsigned int, float>*)NiTPointerAllocator<unsigned int>::ms_pkFreeMem;
+    --NiTPointerAllocator<unsigned int>::ms_kCriticalSection.m_uiRecursionCount;
+    NiTPointerAllocator<unsigned int>::ms_pkFreeMem =
+        (NiTAbstractPoolAllocator<unsigned int>::AllocNode*)apNode;
+    if (!NiTPointerAllocator<unsigned int>::ms_kCriticalSection.m_uiRecursionCount)
+        NiTPointerAllocator<unsigned int>::ms_kCriticalSection.m_uiOwningThreadID = 0;
 }
 
-namespace fnv_00a82670 {
-struct NiTMapBaseStub
-{
-    void RemoveAll();
-};
-void _NiFreeAlias(void*);
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
-extern MemoryManager g_memoryManager;
-extern int DAT_0109e50c;
-struct S0082670
-{
-    void* Destroy(unsigned int);
-};
-// Sets the vtable, removes all map entries, frees the pointer at offset 8, and deallocates this when f has bit 0 set.
-// @fnv 0x00a82670
-void* S0082670::Destroy(unsigned int auiFlags)
-{
-    *(void**)this = (void*)&DAT_0109e50c;
-    ((NiTMapBaseStub*)this)->RemoveAll();
-    _NiFreeAlias(*(void**)((char*)this + 8));
-    if (auiFlags & 1)
-        g_memoryManager.Deallocate(this);
-    return this;
-}
-}  // namespace fnv_00a82670
+__declspec(nothrow) void __cdecl NiFreeAlias(void*);
+extern MemoryManager _g_memoryManager;
 
-void* __cdecl NiMalloc(unsigned int);
-void __cdecl NiFreeAlias(void*);
+// The map templates use the game's global deallocator.
+__forceinline void __cdecl operator delete(void* p)
+{
+    _g_memoryManager.Deallocate(p);
+}
+
+template <>
+__declspec(nothrow) void NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, float>::RemoveAll();
+
+template <>
+__declspec(nothrow) __forceinline NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, float>::~NiTMapBase()
+{
+    RemoveAll();
+    NiFreeAlias(m_ppkHashTable);
+}
+
+template <>
+__declspec(nothrow) __forceinline NiTPointerMap<unsigned int, float>::~NiTPointerMap()
+{
+    RemoveAll();
+}
+
+__declspec(nothrow) void* __cdecl NiMalloc(unsigned int);
+__declspec(nothrow) void __cdecl NiFreeAlias(void*);
 
 struct FUN_00a82710_shell
 {
@@ -211,38 +202,6 @@ void* FUN_00a82c70_holder::DestroyIfFlagged(unsigned int auiFlags)
         _delete(this, 0x10);
     return this;
 }
-
-namespace fnv_00a82cf0 {
-struct NiTMapBaseStub
-{
-    void RemoveAll();
-};
-extern int DAT_0109e50c;
-extern int DAT_0109e52c;
-void __cdecl _NiFreeAlias(void*);
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
-extern MemoryManager g_memoryManager;
-struct S_00a82cf0
-{
-    void* FUN_00a82cf0(unsigned int);
-};
-// Resets two vtable pointers, clears both maps, frees the pointer at offset 8, and deallocates this when f has bit 0 set.
-// @fnv 0x00a82cf0
-void* S_00a82cf0::FUN_00a82cf0(unsigned int auiFlags)
-{
-    *(void**)this = (void*)&DAT_0109e52c;
-    ((NiTMapBaseStub*)this)->RemoveAll();
-    *(void**)this = (void*)&DAT_0109e50c;
-    ((NiTMapBaseStub*)this)->RemoveAll();
-    _NiFreeAlias(*(void**)((char*)this + 8));
-    if (auiFlags & 1)
-        g_memoryManager.Deallocate(this);
-    return this;
-}
-}  // namespace fnv_00a82cf0
 
 struct C082d30
 {
@@ -398,66 +357,33 @@ bool FUN_00a81ff0_cls::Equals(const FUN_00a81ff0_cls* other)
     return true;
 }
 
-struct S_00a82050_Node
-{
-    S_00a82050_Node* pNext;
-    int iValue;
-    float fValue;
-};
-
-struct S_00a82050_Base
-{
-    virtual ~S_00a82050_Base();
-};
-
-struct S_00a82050_Class : S_00a82050_Base
-{
-    void* p04;
-    S_00a82050_Node** ppNodes;
-    unsigned int uCount;
-
-    virtual int __thiscall GetIndex(int);
-    virtual bool __thiscall Compare(int, int);
-    virtual void __thiscall Initialize(S_00a82050_Node*, int, float);
-    virtual void Unknown();
-    virtual S_00a82050_Node* __thiscall GetNode();
-
-    void __thiscall FUN_00a82050(int, float);
-};
-
-S_00a82050_Base::~S_00a82050_Base()
-{}
-
-// Looks up the node matching iArg in the bucket at GetIndex(iArg) and sets its fValue to fArg, or inserts a new node at the bucket head and increments uCount.
+// Updates the matching weight or inserts a new map node.
 // @fnv 0x00a82050
-void __thiscall S_00a82050_Class::FUN_00a82050(int aiKey, float afValue)
+template <>
+void NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, float>::SetAt(unsigned int aiKey, float afValue)
 {
     int iIndex;
-    S_00a82050_Node* pNode;
+    NiTMapItem<unsigned int, float>* pNode;
 
-    iIndex = GetIndex(aiKey);
-
-    pNode = ppNodes[iIndex];
+    iIndex = KeyToHashIndex(aiKey);
+    pNode = m_ppkHashTable[iIndex];
     if (pNode != 0)
     {
         do
         {
-            if (Compare(aiKey, pNode->iValue))
+            if (IsKeysEqual(aiKey, pNode->m_key))
             {
-                pNode->fValue = afValue;
+                pNode->m_val = afValue;
                 return;
             }
-
-            pNode = pNode->pNext;
+            pNode = pNode->m_pkNext;
         } while (pNode != 0);
     }
-
-    pNode = GetNode();
-    Initialize(pNode, aiKey, afValue);
-
-    pNode->pNext = ppNodes[iIndex];
-    ppNodes[iIndex] = pNode;
-    ++uCount;
+    pNode = NewItem();
+    SetValue(pNode, aiKey, afValue);
+    pNode->m_pkNext = m_ppkHashTable[iIndex];
+    m_ppkHashTable[iIndex] = pNode;
+    ++m_kItemCount.m_uiCount;
 }
 
 // Candidate reconstruction of ContainsAllValues (0x00a821f0, 83 bytes).
@@ -535,7 +461,7 @@ char __thiscall FNV_This_821f0::ContainsAllValues(FNV_Arg_821f0* pArg)
     return 1;
 }
 
-void* __cdecl NiMalloc(unsigned int);
+__declspec(nothrow) void* __cdecl NiMalloc(unsigned int);
 
 struct TriIndexList
 {
@@ -645,24 +571,9 @@ struct EntryGroup
     unsigned int unk04;
     unsigned int count;
 };
-struct WeightedMapNode
-{
-    WeightedMapNode* next;
-    void* key;
-    float weight;
-};
-struct WeightedMap
-{
-    virtual void ReservedVirtual();
-    virtual unsigned int HashKey(void* key);
-    virtual bool KeysEqual(void* left, void* right);
-    unsigned int unk04;
-    WeightedMapNode** buckets;
-    void FUN_00a82050(void* key, float weight);
-};
 // For each of three group indices, inserts each entry's key and weight into the map only if the key is absent or its stored weight is lower.
 // @fnv 0x00a82530
-void __stdcall MergeGroupWeights(WeightedMap* map, const unsigned short* groupIndices, EntryGroup* __restrict groups)
+void __stdcall MergeGroupWeights(NiTPointerMap<unsigned int, float>* map, const unsigned short* groupIndices, EntryGroup* __restrict groups)
 {
     for (unsigned int groupIndex = 0; groupIndex < 3; ++groupIndex)
     {
@@ -670,20 +581,20 @@ void __stdcall MergeGroupWeights(WeightedMap* map, const unsigned short* groupIn
         unsigned int itemCount = group->count;
         for (unsigned int itemIndex = 0; itemIndex < itemCount; ++itemIndex)
         {
-            void* key = group->entries[itemIndex].key;
-            WeightedMapNode* node = map->buckets[map->HashKey(key)];
+            unsigned int key = (unsigned int)group->entries[itemIndex].key;
+            NiTMapItem<unsigned int, float>* node = map->m_ppkHashTable[map->KeyToHashIndex(key)];
             while (node)
             {
-                if (map->KeysEqual(key, node->key))
+                if (map->IsKeysEqual(key, node->m_key))
                 {
-                    volatile float previousWeight = node->weight;
+                    volatile float previousWeight = node->m_val;
                     if (!(previousWeight < group->entries[itemIndex].weight))
                         goto nextItem;
                     break;
                 }
-                node = node->next;
+                node = node->m_pkNext;
             }
-            map->FUN_00a82050(key, group->entries[itemIndex].weight);
+            map->SetAt(key, group->entries[itemIndex].weight);
         nextItem:;
         }
     }
@@ -952,7 +863,7 @@ inline bool Degenerate(const unsigned short* indices)
         return true;
     return false;
 }
-extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int) throw();
+extern "C" __declspec(nothrow) void* __cdecl fnv_zlib_memset(void*, int, unsigned int) throw();
 
 struct SkinGeom
 {
@@ -1031,53 +942,53 @@ struct SkinItems
     unsigned int capacity;
     unsigned int count;
 };
-struct SkinMapNode
+// RTTI vftables 0x0101ee20 / 0x0101ee00 identify this map as NiTMap<int, int>.
+template <>
+__declspec(nothrow) void NiTMapBase<DFALL<NiTMapItem<int, int> >, int, int>::RemoveAll();
+template <>
+__declspec(nothrow) void NiTMapBase<DFALL<NiTMapItem<int, int> >, int, int>::SetAt(int key, int value);
+template <>
+__declspec(nothrow) bool NiTMapBase<DFALL<NiTMapItem<int, int> >, int, int>::GetAt(int key, int& value) const;
+
+template <>
+__declspec(nothrow) __forceinline NiTMapBase<DFALL<NiTMapItem<int, int> >, int, int>::NiTMapBase(unsigned int uiHashSize)
 {
-    SkinMapNode* next;
-    int key;
-    int value;
-};
-struct SkinMap
+    m_uiHashSize = uiHashSize;
+    m_kItemCount.m_uiCount = 0;
+    m_ppkHashTable = (NiTMapItem<int, int>**)NiMalloc(m_uiHashSize * sizeof(NiTMapItem<int, int>*));
+    fnv_zlib_memset(m_ppkHashTable, 0, m_uiHashSize * sizeof(NiTMapItem<int, int>*));
+}
+
+template <>
+__declspec(nothrow) __forceinline NiTMapBase<DFALL<NiTMapItem<int, int> >, int, int>::~NiTMapBase()
 {
-    virtual ~SkinMap() throw()
-    {
-        FUN_00438af0();
-        NiFreeAlias(buckets);
-    }
-    virtual __declspec(nothrow) unsigned int Hash(int key) throw();
-    virtual __declspec(nothrow) bool Equal(int left, int right) throw();
-    unsigned int size;
-    SkinMapNode** buckets;
-    unsigned int count;
-    SkinMap() throw() : size(37), count(0)
-    {
-        buckets = (SkinMapNode**)NiMalloc(size * sizeof(SkinMapNode*));
-        fnv_zlib_memset(buckets, 0, size * sizeof(SkinMapNode*));
-    }
-    __declspec(nothrow) void FUN_00438af0() throw();
-    __declspec(nothrow) void InsertOrUpdate(int key, int value) throw();
-    __declspec(nothrow) bool FUN_00a53c30(int key, int& value) throw();
-    __declspec(nothrow) int Lookup(int key) throw()
-    {
-        SkinMapNode* node = buckets[Hash(key)];
-        while (node)
-        {
-            if (Equal(key, node->key))
-                return node->value;
-            node = node->next;
-        }
-        return -1;
-    }
-};
-struct SkinPointerMap : SkinMap
+    RemoveAll();
+    NiFreeAlias(m_ppkHashTable);
+}
+
+template <>
+__declspec(nothrow) __forceinline NiTMap<int, int>::NiTMap(unsigned int uiHashSize)
+    : NiTMapBase<DFALL<NiTMapItem<int, int> >, int, int>(uiHashSize)
+{}
+
+template <>
+__declspec(nothrow) __forceinline NiTMap<int, int>::~NiTMap()
 {
-    SkinPointerMap() throw()
-    {}
-    ~SkinPointerMap() throw()
+    RemoveAll();
+}
+
+__declspec(nothrow) __forceinline int LookupSkinSet(NiTMap<int, int>& map, int key) throw()
+{
+    NiTMapItem<int, int>* node = map.m_ppkHashTable[map.KeyToHashIndex(key)];
+    while (node)
     {
-        FUN_00438af0();
+        if (map.IsKeysEqual(key, node->m_key))
+            return node->m_val;
+        node = node->m_pkNext;
     }
-};
+    return -1;
+}
+
 struct SkinBuilder
 {
     int unk00;
@@ -1101,9 +1012,9 @@ bool SkinBuilder::BuildTriangleSetMapping(SkinGeom* geom, void* unused, unsigned
     unsigned short indices[3];
     if (groupIDs)
     {
-        SkinPointerMap map;
+        NiTMap<int, int> map;
         for (unsigned int k = 0; k < sets->count; k++)
-            map.InsertOrUpdate(sets->items[k]->key, k);
+            map.SetAt(sets->items[k]->key, k);
         for (unsigned int tri = 0; tri < triangles; tri++)
         {
             int found = -1;
@@ -1111,7 +1022,7 @@ bool SkinBuilder::BuildTriangleSetMapping(SkinGeom* geom, void* unused, unsigned
             if (groupIDs[indices[0]] == groupIDs[indices[1]] && groupIDs[indices[1]] == groupIDs[indices[2]] &&
                 groupIDs[indices[0]] == groupIDs[indices[2]])
             {
-                map.FUN_00a53c30(groupIDs[indices[0]], found);
+                map.GetAt(groupIDs[indices[0]], found);
                 if (found != -1)
                     (*mapping)[tri] = found;
             }
@@ -1124,7 +1035,7 @@ bool SkinBuilder::BuildTriangleSetMapping(SkinGeom* geom, void* unused, unsigned
                 int high = a > highBC ? a : highBC;
                 if (high > 100)
                     low = high;
-                int selected = map.Lookup(low);
+                int selected = LookupSkinSet(map, low);
                 if (selected != -1)
                     (*mapping)[tri] = selected;
             }
@@ -1171,19 +1082,8 @@ bool SkinBuilder::BuildTriangleSetMapping(SkinGeom* geom, void* unused, unsigned
     return true;
 }
 
-template <class T> class SkinTArray
+template <class T, class TAlloc> inline void NiTArray<T, TAlloc>::SetAt(unsigned int uiIndex, const T& element)
 {
-  public:
-    virtual ~SkinTArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, const T& element)
-    {
         if (uiIndex >= m_usSize)
         {
             m_usSize = (unsigned short)(uiIndex + 1);
@@ -1205,19 +1105,18 @@ template <class T> class SkinTArray
         }
         m_pBase[uiIndex] = element;
     }
-    unsigned int SetAtGrow(unsigned int uiIndex, const T& element)
-    {
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
+{
         if (uiIndex >= m_usMaxSize)
             SetSize(uiIndex + m_usGrowBy);
         SetAt(uiIndex, element);
         return uiIndex;
     }
-    unsigned int Add(const T& element)
-    {
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
         return SetAtGrow(m_usSize, element);
     }
-};
-typedef SkinTArray<char*> SkinViewerStrings;
+typedef NiTArray<char*, NiTMallocInterface<char*> > SkinViewerStrings;
 
 struct SkinRTTI
 {
@@ -1265,62 +1164,41 @@ void SkinPartitionOwner::FUN_00a846e0(SkinViewerStrings* pkStrings)
     }
 }
 
-struct NiBinaryStreamFake
+// Keep the transfer bodies here because the shared header only declares them.
+inline unsigned int NiBinaryStream::BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes,
+                                                unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-    int unk00;
-    unsigned int m_uiStreamFlags;
-    void* m_pfnRead;
-    unsigned int(__cdecl* m_pfnWrite)(NiBinaryStreamFake* pkThis, const void* pvBuffer, unsigned int uiBytes,
-                                      unsigned int* puiComponentSizes, unsigned int uiNumComponents);
+    unsigned int uiBytesWritten = m_pfnWrite(
+        this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    m_uiAbsoluteCurrentPos += uiBytesWritten;
+    return uiBytesWritten;
+}
 
-    unsigned int BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                             unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesWritten = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesWritten;
-        return uiBytesWritten;
-    }
-};
-
-struct NiStreamFake
-{
-    int u000, u004, u008, u00c, u010, u014, u018, u01c, u020, u024, u028, u02c, u030, u034, u038, u03c;
-    int u040, u044, u048, u04c, u050, u054, u058, u05c, u060, u064, u068, u06c, u070, u074, u078, u07c;
-    int u080, u084, u088, u08c, u090, u094, u098, u09c, u0a0, u0a4, u0a8, u0ac, u0b0, u0b4, u0b8, u0bc;
-    int u0c0, u0c4, u0c8, u0cc, u0d0, u0d4, u0d8, u0dc, u0e0, u0e4, u0e8, u0ec, u0f0, u0f4, u0f8, u0fc;
-    int u100, u104, u108, u10c, u110, u114, u118, u11c, u120, u124, u128, u12c, u130, u134, u138, u13c;
-    int u140, u144, u148, u14c, u150, u154, u158, u15c, u160, u164, u168, u16c, u170, u174, u178, u17c;
-    int u180, u184, u188, u18c, u190, u194, u198, u19c, u1a0, u1a4, u1a8, u1ac, u1b0, u1b4, u1b8, u1bc;
-    int u1c0, u1c4, u1c8, u1cc, u1d0, u1d4, u1d8, u1dc, u1e0, u1e4, u1e8, u1ec, u1f0, u1f4, u1f8, u1fc;
-    int u200, u204, u208, u20c, u210, u214, u218, u21c, u220, u224, u228, u22c, u230, u234, u238, u23c;
-    int u240, u244, u248, u24c;
-    NiBinaryStreamFake* m_pBackingStream;
-};
 
 template <class T>
-inline unsigned int SerializeValue(NiBinaryStreamFake& binstream, const T* pvValue, unsigned int uiNumEls)
+inline unsigned int SerializeValue(NiBinaryStream& binstream, const T* pvValue, unsigned int uiNumEls)
 {
     unsigned int uiSize = sizeof(T);
     return binstream.BinaryWrite(pvValue, uiNumEls * uiSize, &uiSize, 1);
 }
 
-template <class T> inline unsigned int SerializeValue(NiStreamFake& bstream, const T& value)
+template <class T> inline unsigned int SerializeValue(NiStream& bstream, const T& value)
 {
-    return SerializeValue(*bstream.m_pBackingStream, &value, 1);
+    return SerializeValue(*bstream.m_pkOstr, &value, 1);
 }
 
-template <class T> inline unsigned int SerializeValue(NiStreamFake& bstream, const T* pvValue, unsigned int uiNumEls)
+template <class T> inline unsigned int SerializeValue(NiStream& bstream, const T* pvValue, unsigned int uiNumEls)
 {
-    return SerializeValue(*bstream.m_pBackingStream, pvValue, uiNumEls);
+    return SerializeValue(*bstream.m_pkOstr, pvValue, uiNumEls);
 }
 
 struct PartitionSave : NiSkinPartition::Partition
 {
-    void WriteToStream(NiStreamFake& kStream);
+    void WriteToStream(NiStream& kStream);
 };
 
 // @fnv 0x00a830d0
-void PartitionSave::WriteToStream(NiStreamFake& kStream)
+void PartitionSave::WriteToStream(NiStream& kStream)
 {
     SerializeValue(kStream, m_usVertices);
     SerializeValue(kStream, m_usTriangles);
@@ -1513,184 +1391,31 @@ void Skp_00a828d0_cls::PopulateSkinData(GeomData* pkData, Skp_00a828d0_src* pkSr
     }
 }
 
-void* __cdecl NiMalloc(unsigned int);
+__declspec(nothrow) void* __cdecl NiMalloc(unsigned int);
 
-struct NiBinaryStream;
-
-typedef unsigned int(__cdecl* NiBinaryStreamReadFn)(NiBinaryStream* pkThis, void* pvBuffer, unsigned int uiBytes,
-                                                    unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-struct NiBinaryStream
+template <class T> inline unsigned int NiBinaryStream::BinaryRead(T* pvBuffer, unsigned int auiCount)
 {
-    int unk000;
-    unsigned int m_uiStreamFlags;
-    NiBinaryStreamReadFn m_pfnRead;
+    unsigned int uiComponentSize = sizeof(T);
+    unsigned int uiTotal = auiCount * sizeof(T);
+    unsigned int uiBytesRead = m_pfnRead(
+        this, pvBuffer, uiTotal, &uiComponentSize, 1);
+    m_uiAbsoluteCurrentPos += uiBytesRead;
+    return uiBytesRead;
+}
 
-    template <class T> inline unsigned int BinaryRead(T* pvBuffer, unsigned int auiCount = 1)
-    {
-        unsigned int uiComponentSize = sizeof(T);
-        unsigned int uiTotal = auiCount * sizeof(T);
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotal, &uiComponentSize, 1);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
-
-struct NiStream
+inline unsigned int NiStream::GetFileVersion() const
 {
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    unsigned int m_uiFormatVersion;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    NiBinaryStream* m_pkBinaryStream;
-};
+    return m_uiNifFileVersion;
+}
+
+inline NiBinaryStream* NiStream::GetBinaryStream()
+{
+    return m_pkIstr;
+}
 
 template <class T> inline void ReadBinaryValue(NiStream& kStream, T* ptVal, unsigned int auiCount = 1)
 {
-    kStream.m_pkBinaryStream->BinaryRead(ptVal, auiCount);
+    kStream.GetBinaryStream()->BinaryRead(ptVal, auiCount);
 }
 
 struct PartitionLoader : NiSkinPartition::Partition
@@ -1712,7 +1437,7 @@ void PartitionLoader::FUN_00a82d90(NiStream& kStream)
     ReadBinaryValue(kStream, m_pusBonePalette, m_usBoneCount);
 
     bool bHasVertexMap;
-    if (kStream.m_uiFormatVersion >= 0x0a000112)
+    if (kStream.GetFileVersion() >= 0x0a000112)
     {
         ReadBinaryValue(kStream, &bHasVertexMap);
     }
@@ -1728,7 +1453,7 @@ void PartitionLoader::FUN_00a82d90(NiStream& kStream)
 
     unsigned int bHasTriList = m_usWeightsPerVertex * m_usVertices;
     bool bHasWeights;
-    if (kStream.m_uiFormatVersion >= 0x0a000112)
+    if (kStream.GetFileVersion() >= 0x0a000112)
     {
         ReadBinaryValue(kStream, &bHasWeights);
     }
@@ -1755,7 +1480,7 @@ void PartitionLoader::FUN_00a82d90(NiStream& kStream)
     }
 
     bool uiNumWeights;
-    if (kStream.m_uiFormatVersion >= 0x0a000112)
+    if (kStream.GetFileVersion() >= 0x0a000112)
     {
         ReadBinaryValue(kStream, &uiNumWeights);
     }
@@ -1778,76 +1503,29 @@ void PartitionLoader::FUN_00a82d90(NiStream& kStream)
     }
 }
 
-class NiBinaryStreamA83C
-{
-  public:
-    typedef unsigned int (*NIBINARYSTREAM_READFN)(NiBinaryStreamA83C* pkThis, void* pvBuffer, unsigned int uiBytes,
-                                                  unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    virtual ~NiBinaryStreamA83C();
-
-    unsigned int m_uiStreamFlags;
-    void* m_pfnWrite;
-    NIBINARYSTREAM_READFN m_pfnRead;
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
-
-class NiStreamA83C
-{
-  public:
-    virtual ~NiStreamA83C();
-
-    unsigned char m_auPad[0x24c];
-    NiBinaryStreamA83C* m_pUnderlyingStream;
-};
-
-template <class T> inline void NiBinaryStreamLoad(NiBinaryStreamA83C& is, T* pValue, unsigned int uiNumEls)
-{
-    unsigned int uiSize = sizeof(T);
-    is.BinaryRead(pValue, sizeof(T) * uiNumEls, &uiSize, 1);
-}
-
-template <class T> inline void ReadBinaryValue(NiStreamA83C& kStream, T& value)
-{
-    NiBinaryStreamLoad(*kStream.m_pUnderlyingStream, &value, 1);
-}
-
 class FUN_00a89af0_helper
 {
   public:
-    void FUN_00a89af0(NiStreamA83C& kStream);
+    void FUN_00a89af0(NiStream& kStream);
 };
 
-class ElemA83C
-{
-  public:
-    void WriteToStream(NiStreamA83C& kStream);
-    int unk00[11];
-};
 
 class SaverA83C : public FUN_00a89af0_helper
 {
   public:
     int m_unk00[2];
     unsigned int m_uiCount;
-    ElemA83C* m_pkElems;
+    PartitionSave* m_pkElems;
 
-    void FUN_00a83ce0(NiStreamA83C& kStream);
+    void FUN_00a83ce0(NiStream& kStream);
 };
 
-// Calls FUN_00a89af0, reads m_uiCount, then calls WriteToStream on each element.
+// Calls the base serialization method, writes m_uiCount, then serializes each partition.
 // @fnv 0x00a83ce0
-void SaverA83C::FUN_00a83ce0(NiStreamA83C& kStream)
+void SaverA83C::FUN_00a83ce0(NiStream& kStream)
 {
     FUN_00a89af0(kStream);
-    ReadBinaryValue(kStream, m_uiCount);
+    SerializeValue(kStream, m_uiCount);
     for (unsigned int i = 0; i < m_uiCount; i++)
         m_pkElems[i].WriteToStream(kStream);
 }
@@ -1941,13 +1619,8 @@ struct ScriptProgram
     unsigned short triangles;
 };
 
-void* __cdecl NiMalloc(unsigned int);
-void __cdecl NiFreeAlias(void*);
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-    void Deallocate(void*);
-};
+__declspec(nothrow) void* __cdecl NiMalloc(unsigned int);
+__declspec(nothrow) void __cdecl NiFreeAlias(void*);
 extern MemoryManager _g_memoryManager;
 int __cdecl FUN_00a81b80(const unsigned short*, const unsigned short*);
 void __cdecl FUN_00ec6f20(void*, unsigned int, unsigned int,
@@ -2021,9 +1694,26 @@ struct BoneWeights
     unsigned int capacity;
     unsigned int count;
 };
-struct NiStreamLinkIDSet
+// NiStreamLinkIDSet_niskinpartition: local type (was include/NiStreamLinkIDSet.h, which had no evidence of one real class); its methods are 0x00a311e0 NiTSet<NiScreenGeometryData::ScreenElement *,NiTMallocInterface<NiScreenGeometryData::ScreenElement *> >::Add, 0x00a543b0 NiTSet::Ptr::Add
+class Item;
+class NiGeomMorpherUpdateTask;
+class D3DRenderStateGroup;
+
+class NiStreamLinkIDSet_niskinpartition
 {
+public:
+    void* m_kPointA;
+    unsigned int m_uiItemCount;
+    unsigned int m_pRayCursor;
+
     void Realloc(unsigned int);
+    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    unsigned int Find(Item* item);
+    int Find(unsigned int value);
+    void Add(Item* item);
+    void Add(NiGeomMorpherUpdateTask* pkTask);
+    void Add(D3DRenderStateGroup* p);
+    void AddUnique(Item* item);
 };
 // Builds and deduplicates BoneLODControllerArray sets from mesh triangles and vertex bone weights, optionally remapping vertex indices.
 // @fnv 0x00a83d40
@@ -2123,7 +1813,7 @@ void __stdcall BuildBoneLODControllerSets(ScriptProgram* mesh, BoneWeights* weig
                 if (index == sets->count)
                 {
                     if (sets->count == sets->capacity)
-                        ((NiStreamLinkIDSet*)sets)->Realloc(sets->capacity > 0 ? 2 * sets->capacity : 1);
+                        ((NiStreamLinkIDSet_niskinpartition*)sets)->Realloc(sets->capacity > 0 ? 2 * sets->capacity : 1);
                     sets->data[sets->count++] = set;
                 }
             }
@@ -2226,6 +1916,58 @@ void ListMerge::Merge(const ListMerge* pkOther)
     m_uiCount = ItemUpdateArray;
 }
 
+template <>
+__declspec(nothrow) __forceinline NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, float>::NiTMapBase(unsigned int uiHashSize)
+{
+    m_uiHashSize = uiHashSize;
+    m_kItemCount.m_uiCount = 0;
+    m_ppkHashTable = (NiTMapItem<unsigned int, float>**)NiMalloc(uiHashSize * 4);
+    fnv_zlib_memset(m_ppkHashTable, 0, m_uiHashSize * 4);
+}
+
+template <>
+__declspec(nothrow) __forceinline NiTPointerMap<unsigned int, float>::NiTPointerMap(unsigned int uiHashSize)
+    : NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, float>(uiHashSize)
+{}
+
+template <>
+__declspec(nothrow) __forceinline void* NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, float>::GetFirstPos() const
+{
+    for (unsigned int i = 0; i < m_uiHashSize; ++i)
+        if (m_ppkHashTable[i])
+            return m_ppkHashTable[i];
+    return 0;
+}
+
+template <>
+__declspec(nothrow) __forceinline void NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, float>::GetNext(
+    void*& position, unsigned int& bone, float& weight) const
+{
+    NiTMapItem<unsigned int, float>* current = (NiTMapItem<unsigned int, float>*)position;
+    weight = current->m_val;
+    bone = current->m_key;
+    if (current->m_pkNext)
+    {
+        position = current->m_pkNext;
+        return;
+    }
+    unsigned int bucket = KeyToHashIndex(bone) + 1;
+    if (bucket < m_uiHashSize)
+    {
+        do
+        {
+            NiTMapItem<unsigned int, float>* next = m_ppkHashTable[bucket];
+            if (next)
+            {
+                position = next;
+                return;
+            }
+            ++bucket;
+        } while (bucket < m_uiHashSize);
+    }
+    position = 0;
+}
+
 namespace SkinWeights {
 
 extern "C" __declspec(nothrow) void* __cdecl NiMalloc(unsigned int);
@@ -2268,11 +2010,23 @@ struct Group
 
     __forceinline bool SameBones(const Group& other) const
     {
-        if (other.count != count)
+        unsigned int size = other.count;
+        if (size != count)
             return false;
-        for (unsigned int i = 0; i < other.count; ++i)
-            if (other.entries[i].bone != entries[i].bone)
-                return false;
+        unsigned int i = 0;
+        if (size > 0)
+        {
+            const Weight* first = entries;
+            const Weight* second = other.entries;
+            do
+            {
+                if ((int)second->bone != (int)first->bone)
+                    return false;
+                ++i;
+                ++first;
+                ++second;
+            } while (i < size);
+        }
         return true;
     }
 };
@@ -2311,84 +2065,6 @@ struct IndexList
         if (count == capacityRef)
             Resize(capacityRef > 0 ? capacityRef * 2 : 1, capacityRef);
         data[count++] = value;
-    }
-};
-
-struct Node
-{
-    Node* next;
-    unsigned int bone;
-    float weight;
-};
-struct WeightMap;
-struct MapVTable
-{
-    void* destroy;
-    unsigned int(__thiscall* hash)(WeightMap*, unsigned int);
-    void* equal;
-};
-extern MapVTable DAT_0109e50c, DAT_0109e52c;
-
-struct WeightMap
-{
-    MapVTable* table;
-    unsigned int bucketsCount;
-    Node** buckets;
-    unsigned int count;
-
-    __forceinline void Initialize()
-    {
-        table = &DAT_0109e50c;
-        bucketsCount = 37;
-        count = 0;
-        buckets = (Node**)NiMalloc(37 * 4);
-        FUN_00ec61c0(buckets, 0, bucketsCount * 4);
-        table = &DAT_0109e52c;
-    }
-
-    __declspec(nothrow) void FUN_00b601a0() throw();
-    __forceinline void Cleanup()
-    {
-        table = &DAT_0109e52c;
-        FUN_00b601a0();
-        table = &DAT_0109e50c;
-        FUN_00b601a0();
-        NiFreeAlias(buckets);
-    }
-
-    __forceinline Node* Begin()
-    {
-        for (unsigned int i = 0; i < bucketsCount; i++)
-            if (buckets[i])
-                return buckets[i];
-        return 0;
-    }
-
-    __forceinline void Next(Node*& position, unsigned int& bone, float& weight)
-    {
-        Node* current = position;
-        weight = current->weight;
-        bone = current->bone;
-        if (current->next)
-        {
-            position = current->next;
-            return;
-        }
-        unsigned int bucket = table->hash(this, bone) + 1;
-        if (bucket < bucketsCount)
-        {
-            do
-            {
-                Node* next = buckets[bucket];
-                if (next)
-                {
-                    position = next;
-                    return;
-                }
-                ++bucket;
-            } while (bucket < bucketsCount);
-        }
-        position = 0;
     }
 };
 
@@ -2440,6 +2116,13 @@ struct Geometry
     __declspec(nothrow) virtual void GetTriangle(unsigned int, unsigned short&, unsigned short&,
                                                  unsigned short&) throw();
 
+    // Keep the nonthrowing triangle callback contract through MSVC's virtual-call inlining.
+    __declspec(nothrow) __forceinline void GetTriangleNoThrow(unsigned int triangle,
+        unsigned short& a, unsigned short& b, unsigned short& c) throw()
+    {
+        GetTriangle(triangle, a, b, c);
+    }
+
     int unk04;
     unsigned short vertices, unk0a;
     int unk0c;
@@ -2463,7 +2146,7 @@ struct Geometry
 
 struct Processor
 {
-    __declspec(nothrow) void MergeGroupWeights(WeightMap*, const unsigned short*, Group*) throw();
+    __declspec(nothrow) void MergeGroupWeights(NiTPointerMap<unsigned int, float>*, const unsigned short*, Group*) throw();
     bool ReduceGroupWeights(Geometry*, unsigned char, unsigned char, Group*);
 };
 
@@ -2481,8 +2164,7 @@ bool Processor::ReduceGroupWeights(Geometry* geometry, unsigned char maxTriangle
     State state;
     unsigned int vertices = geometry->vertices;
     state.triangles = geometry->triangles;
-    WeightMap map;
-    map.Initialize();
+    NiTPointerMap<unsigned int, float> map;
     unsigned int triangle, corner;
     IndexList linkedVertices;
     unsigned short* order;
@@ -2492,23 +2174,23 @@ bool Processor::ReduceGroupWeights(Geometry* geometry, unsigned char maxTriangle
     for (triangle = 0; triangle < state.triangles; triangle++)
     {
         unsigned short indices[3];
-        geometry->GetTriangle(triangle, indices[0], indices[1], indices[2]);
+        geometry->GetTriangleNoThrow(triangle, indices[0], indices[1], indices[2]);
         if (indices[0] != indices[1] && indices[1] != indices[2] && indices[2] != indices[0])
         {
             MergeGroupWeights(&map, indices, groups);
-            unsigned int count = map.count;
+            unsigned int count = map.m_kItemCount.m_uiCount;
             if (count > maxTriangle)
             {
                 for (;;)
                 {
-                    Node* position = map.Begin();
+                    void* position = map.GetFirstPos();
                     float least = DAT_01016970;
                     unsigned int remove = 0;
                     do
                     {
                         float weight;
                         unsigned int bone;
-                        map.Next(position, bone, weight);
+                        map.GetNext(position, bone, weight);
                         if (weight < least)
                         {
                             least = weight;
@@ -2549,7 +2231,6 @@ bool Processor::ReduceGroupWeights(Geometry* geometry, unsigned char maxTriangle
                                     NiFreeAlias(order);
                                     NiFreeAlias(reverse);
                                     NiFreeAlias(linkedVertices.data);
-                                    map.Cleanup();
                                     return false;
                                 }
                                 group->NormalizeWeights();
@@ -2559,11 +2240,11 @@ bool Processor::ReduceGroupWeights(Geometry* geometry, unsigned char maxTriangle
                     }
                     if (--count == maxTriangle)
                         break;
-                    map.FUN_00b601a0();
+                    map.RemoveAll();
                     MergeGroupWeights(&map, indices, groups);
                 }
             }
-            map.FUN_00b601a0();
+            map.RemoveAll();
         }
     }
 
@@ -2580,7 +2261,6 @@ bool Processor::ReduceGroupWeights(Geometry* geometry, unsigned char maxTriangle
     NiFreeAlias(order);
     NiFreeAlias(reverse);
     NiFreeAlias(linkedVertices.data);
-    map.Cleanup();
     return true;
 }
 

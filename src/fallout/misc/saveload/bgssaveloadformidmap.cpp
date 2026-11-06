@@ -71,10 +71,6 @@ struct FUN_00846e70_shell : public FormIDConverter
     void LoadFormIDMap(SaveLoadFile*);
 };
 
-struct DummyPointerMap
-{
-    void SetAt(unsigned int, unsigned int);
-};
 struct FUN_00846d80_cls
 {
     unsigned int RemapFormID(unsigned int);
@@ -93,8 +89,8 @@ void FUN_00846e70_shell::LoadFormIDMap(SaveLoadFile* apFile)
         ReadFileIntoBuffer(apFile, &iformID, 4);
         unsigned int uiConvertedFormID = ((FUN_00846d80_cls*)this)->RemapFormID(iformID);
         if (uiConvertedFormID)
-            ((DummyPointerMap*)this)->SetAt(uiConvertedFormID, m_uiFormIDCount);
-        ((DummyPointerMap*)&m_kTargetToSourceFormIDMap)->SetAt(m_uiFormIDCount, uiConvertedFormID);
+            m_kSourceToTargetFormIDMap.SetAt(uiConvertedFormID, m_uiFormIDCount);
+        m_kTargetToSourceFormIDMap.SetAt(m_uiFormIDCount, uiConvertedFormID);
         m_uiFormIDCount++;
     }
 }
@@ -183,8 +179,8 @@ void FUN_0044ee40_cls::ClearSlots()
     TailClear(m_pTailObj);
 }
 
+class BSFile;
 namespace fnv_00846e00 {
-struct BSFile;
 struct SaveLoadFile
 {
     unsigned int Read(void*, unsigned int);

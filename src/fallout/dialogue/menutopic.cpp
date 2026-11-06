@@ -1,8 +1,22 @@
+#include "../../../include/BSSimpleList.h"
 // fallout/dialogue/menutopic.cpp: TopicMenuController, MenuTopic, TESTopicInfo, TopicHolder and more (33 functions)
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "menutopic_layout.h"
+#include "../../../include/Actor.h"
+#include "../../../include/ActorValueOwner.h"
+#include "../../../include/TESFullName.h"
+#include "../../../include/TESObjectCELL.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESTopicInfoData.h"
+#include "../../../include/TESQuest.h"
+#include "../../../include/TESResponseList.h"
+#include "../../../include/TESResponse.h"
 #include "menutopic_decls.h"
 #include "menutopic_types_MenuTopic.h"
 #include "menutopic_types_MenuTopicManager.h"
+#include "../../../include/TESSaveLoadGame.h"
 
 // @fnv 0x0083e170
 DialogueResponse* MenuTopic::GetActiveResponse()
@@ -162,14 +176,14 @@ MenuTopic::MenuTopic(TESQuest* quest, TESTopic* topic, TESTopicInfo* info, Mobil
         }
         else
             m_bIsRefusal = info->IsRefusal();
-        if (((MenuTopicPlayer*)g_thePlayer)->actorValues.GetActorValue(9) <= *g_011d0dc8.Int() &&
+        if (((Actor*)g_thePlayer)->GetActorValue((ActorValue::Index)9) <= *g_011d0dc8.Int() &&
             topic->HasDummyPrompt())
-            m_kPrompt.FUN_00438470(topic->GetDummyPrompt());
+            m_kPrompt.Set(topic->GetDummyPrompt());
         else if (info->HasPrompt())
-            m_kPrompt.FUN_00438470(info->GetPrompt());
+            m_kPrompt.Set(info->GetPrompt());
         else
-            m_kPrompt.Set(topic->tESFullNameComponent.GetFullName());
-        m_kPrompt.FUN_00438470(FUN_0083d8b0());
+            m_kPrompt.Set(topic->GetFullName());
+        m_kPrompt.Set(FUN_0083d8b0());
         if (!m_bIsRemappedRumor)
             m_bFirstFlag = pInfo->GetConversationData() && !pInfo->GetConversationData()->GetLinkToList()->IsEmpty();
         if (topic->IsPersuasion())
@@ -456,15 +470,14 @@ BSSimpleList<MenuTopic*>* FUN_0083f1d0_t::PopTopicList()
     return m_kTopicListStack.GetItem();
 }
 
-struct FormIDEntry
+// The 0x004fd3e0 accessor returns this change record: form ID +0, type +4, flags +5, version +9.
+// Retained locally until include/ supplies SaveFormHeader.
+struct SaveFormHeader
 {
-    unsigned int iFormID;
-    unsigned char m_ucFormType;
-};
-struct TESSaveLoadGame
-{
-    bool FUN_00862110();
-    FormIDEntry* GetCurrentFormHeader();
+    unsigned int formID;
+    unsigned char kind;
+    unsigned char flagsLow, flagsByte1, flagsByte2, flagsHigh;
+    unsigned char version;
 };
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 struct GlobalObject_0045cf30
@@ -472,16 +485,13 @@ struct GlobalObject_0045cf30
     unsigned char* Bool();
 };
 extern GlobalObject_0045cf30 g_011de4e8;
-struct Interface
+// Exe 0x0083f280: unit-local MenutopicInterfaceView view used by this matched implementation.
+struct MenutopicInterfaceView
 {
     static void PrintDebugMessage(const char*, ...);
 };
 unsigned int BSStringLength(const char*);
 TESForm* GetFormByID(unsigned int);
-struct FUN_0083f280_str : BSStringT<char>
-{
-    operator const char*() const;
-};
 struct FUN_0083f280_t : MenuTopic
 {
     unsigned short FUN_0083f280();
@@ -499,7 +509,7 @@ unsigned short FUN_0083f280_t::FUN_0083f280()
             isize += 4;
             isize += 2;
         }
-        const char* ptext = (const FUN_0083f280_str&)m_kPrompt;
+        const char* ptext = (const BSStringT<char>&)m_kPrompt;
         isize += 1;
         isize += BSStringLength(ptext);
         isize += 1;
@@ -510,18 +520,18 @@ unsigned short FUN_0083f280_t::FUN_0083f280()
         isize += 4;
         if (*g_011de4e8.Bool())
         {
-            FormIDEntry* pheader = g_TESSaveLoadGame->GetCurrentFormHeader();
+            SaveFormHeader* pheader = (SaveFormHeader*)g_TESSaveLoadGame->FUN_004fd3e0();
             if (pheader)
             {
-                TESForm* pform = GetFormByID(pheader->iFormID);
-                Interface::PrintDebugMessage(
+                TESForm* pform = GetFormByID(pheader->formID);
+                MenutopicInterfaceView::PrintDebugMessage(
                     "GetSaveSize(): %-5i for form %08X %s with flags %08X ending at line %i in file %s",
-                    isize - itempStartSize, pheader->iFormID, pform->GetName(), *(unsigned int*)((char*)pheader + 5),
+                    isize - itempStartSize, pheader->formID, pform->GetName(), *(unsigned int*)((char*)pheader + 5),
                     729, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Dialogue\\MenuTopic.cpp");
             }
             else
             {
-                Interface::PrintDebugMessage(
+                MenutopicInterfaceView::PrintDebugMessage(
                     "GetSaveSize(): %-5i ending at line %i in file %s", isize - itempStartSize, 729,
                     "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Dialogue\\MenuTopic.cpp");
             }
@@ -605,14 +615,8 @@ void Owner83F1A0::AddHeadIfNotNull(int* a1)
     }
 }
 
-class Actor : public TESObjectREFR
-{
-};
-
-struct ActorProxy
-{
-    bool HasNoRumors();
-};
+// Shared Actor does not yet declare this nonvirtual method. Its only argument is in ECX.
+bool __fastcall HasNoRumors(Actor* actor);
 
 struct FUN_00619df0_shell
 {
@@ -699,7 +703,7 @@ void FUN_0083ed50_shell::BuildMenuTopics(BSSimpleList<TESTopic*>* apList, bool a
             continue;
 
         int iTypeValue = ((FUN_0083f0d0_shell*)pTopic)->FUN_0083f0d0();
-        if (((MenuTopicPlayer*)g_thePlayer)->actorValues.GetActorValue(9) <= *g_011d0dc8.Int())
+        if (((Actor*)g_thePlayer)->GetActorValue((ActorValue::Index)9) <= *g_011d0dc8.Int())
         {
             if (iTypeValue == 3)
                 continue;
@@ -710,7 +714,7 @@ void FUN_0083ed50_shell::BuildMenuTopics(BSSimpleList<TESTopic*>* apList, bool a
                 continue;
         }
 
-        if (((FUN_00619df0_shell*)pTopic)->FUN_00619df0() && !((ActorProxy*)pActorCur)->HasNoRumors())
+        if (((FUN_00619df0_shell*)pTopic)->FUN_00619df0() && !HasNoRumors(pActorCur))
         {
             MenuTopic* pExisting = 0;
             pExisting = FUN_005d43c0(m_pDialogueSpeaker)->FUN_0042df90(m_pDialogueSpeaker);
@@ -733,7 +737,7 @@ void FUN_0083ed50_shell::BuildMenuTopics(BSSimpleList<TESTopic*>* apList, bool a
             bool bCreate5 = true;
             if (((FUN_00619df0_shell*)pTopic)->FUN_00619df0())
             {
-                if (!bStateChanged && !((ActorProxy*)pActorCur)->HasNoRumors())
+                if (!bStateChanged && !HasNoRumors(pActorCur))
                     bSave = true;
                 else
                     bCreate5 = false;
@@ -762,19 +766,12 @@ void FUN_0083ed50_shell::BuildMenuTopics(BSSimpleList<TESTopic*>* apList, bool a
         ((FUN_005f65d0_list*)FUN_0083f260())->SortItems(FUN_0083f110);
 }
 
-struct LoadHeader
-{
-    unsigned int formID;
-    unsigned char kind;
-    unsigned char flagsLow, flagsByte1, flagsByte2, flagsHigh;
-    unsigned char version;
-};
 struct TopicLoader
 {
     bool IsLoading();
     void Read(void*, unsigned int);
     void ReadID(unsigned int*, unsigned int);
-    LoadHeader* Header();
+    SaveFormHeader* Header();
     unsigned int Position();
     unsigned char Version();
 };
@@ -782,10 +779,6 @@ struct TopicLoader
 TESForm* GetFormByID(unsigned int);
 void FNV_Warning(const char*, ...);
 void* memset(void*, int, unsigned int);
-struct TopicText : BSStringT<char>
-{
-    bool Set(const char*, unsigned int);
-};
 struct TopicLoad : MenuTopic
 {
     void LoadFromSave(void*);
@@ -803,7 +796,7 @@ void TopicLoad::LoadFromSave(void*)
             ((TopicLoader*)g_TESSaveLoadGame)->Read(&tag, 4);
             if (tag != 0x424c4f4b)
             {
-                LoadHeader* header = ((TopicLoader*)g_TESSaveLoadGame)->Header();
+                SaveFormHeader* header = ((TopicLoader*)g_TESSaveLoadGame)->Header();
                 if (header)
                 {
                     TESForm* form = GetFormByID(header->formID);
@@ -828,7 +821,7 @@ void TopicLoad::LoadFromSave(void*)
         if (length)
         {
             ((TopicLoader*)g_TESSaveLoadGame)->Read(text, length);
-            ((TopicText*)&m_kPrompt)->Set(text, 0);
+            m_kPrompt.Set(text, 0);
         }
         ((TopicLoader*)g_TESSaveLoadGame)->Read(&m_bFirstFlag, 1);
         ((TopicLoader*)g_TESSaveLoadGame)->Read(&m_bIsRemappedRumor, 1);
@@ -842,7 +835,7 @@ void TopicLoad::LoadFromSave(void*)
         if (((TopicLoader*)g_TESSaveLoadGame)->IsLoading())
         {
             unsigned int end = ((TopicLoader*)g_TESSaveLoadGame)->Position();
-            LoadHeader* current = ((TopicLoader*)g_TESSaveLoadGame)->Header();
+            SaveFormHeader* current = ((TopicLoader*)g_TESSaveLoadGame)->Header();
             if (current)
             {
                 TESForm* form2 = GetFormByID(current->formID);
@@ -878,12 +871,6 @@ void TopicLoad::LoadFromSave(void*)
     }
 }
 
-class MenuTopic;
-class TESTopic;
-class TESTopicInfo;
-class TESQuest;
-class MobileObject;
-class PlayerCharacter;
 
 extern "C" char DAT_0107dd28;
 
@@ -1195,11 +1182,8 @@ struct ProcShell
     int GetProcessLevel();
 };
 
-struct MenuList
-{
-    void AddTail(MenuTopic*& item);
-    void AddTail(MenuTopic* const& item);
-};
+// Exe 0x0083e850: unit-local MenuList view; declarations and layout are preserved.
+
 
 struct ListShell
 {
@@ -1213,17 +1197,6 @@ class FloatSetting
 };
 extern FloatSetting g_011d0a24;
 
-class AvOwner
-{
-  public:
-    float FUN_0066ef50(int a);
-};
-class MenuPlayer
-{
-  public:
-    char pad[0xa4];
-    AvOwner actorValues;
-};
 
 int FUN_006705b0(int a, int b);
 unsigned int DialogueRandom();
@@ -1254,7 +1227,7 @@ bool Mgr::CheckTopicInfoChance(MenuTopic* pTopic)
 {
     if (pTopic && ((InfoShell*)pTopic->GetTopicInfo())->IsChallengeFlagSet())
     {
-        int iChance2 = ComputeWeightedValue(((MenuPlayer*)g_thePlayer)->actorValues.FUN_0066ef50(0x2b),
+        int iChance2 = ComputeWeightedValue(((Actor*)g_thePlayer)->GetActorValueFloatByIndex(0x2b),
                                             m_pDialogueSpeaker->v64() ? (float)m_pDialogueSpeaker->v209(g_thePlayer, 0)
                                                                       : *g_011d0a24.Float(),
                                             ((InfoShell*)pTopic->GetTopicInfo())->FUN_0061f2b0());
@@ -1289,8 +1262,8 @@ bool Mgr::CheckTopicInfoChance(MenuTopic* pTopic)
                     }
                     FUN_0083f260(&pTopic)->FUN_00905330();
                 }
-                ((MenuList*)pList)->AddTail(FUN_0083e4f0());
-                ((MenuList*)pList)->AddTail(pNew);
+                ((BSSimpleList<MenuTopic*>*)pList)->AddTail(FUN_0083e4f0());
+                ((BSSimpleList<MenuTopic*>*)pList)->AddTail(pNew);
                 AddHeadIfNotNull(pList);
                 FUN_0083e370(1);
             }
@@ -1308,21 +1281,6 @@ bool Mgr::CheckTopicInfoChance(MenuTopic* pTopic)
 namespace fnv_0083f3e0 {
 template <class T> unsigned int BSStringLength(const T* pString);
 
-struct SaveFormHeader83f3
-{
-    unsigned int auiFormId;
-    unsigned char ucType;
-    unsigned char aucFlags[4];  // unaligned (byte-packed) change flags
-};
-
-struct TESSaveLoadGame
-{
-    char* FUN_00825c00();
-    bool FUN_00862110();
-    void FUN_008579b0(void* pData, int iSize);
-    void FUN_00857a10(void* pData, int iSize);
-    SaveFormHeader83f3* FUN_004fd3e0();
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct GlobalObject_0045cf30
@@ -1331,75 +1289,67 @@ struct GlobalObject_0045cf30
 };
 extern GlobalObject_0045cf30 g_011de4e8;
 
-struct NamedForm83f3
-{
-    unsigned int FUN_0084e3a0();
-};
-
 TESForm* __cdecl FUN_004839c0(unsigned int auiFormId);
 void __cdecl FUN_0040fbe0(const char* pcFormat, ...);
 void __cdecl FUN_005b5e40(const char* pcFormat, ...);
 
-class MenuTopic83f3 : public MenuTopic
-{
-  public:
-    void SaveTopic();
-};
+}  // namespace fnv_0083f3e0
 
 // Writes a BLOK record for this topic to the save stream: text length and string, three bytes, quest/topic/info form IDs, and patches the block size.
 // @fnv 0x0083f3e0
-void MenuTopic83f3::SaveTopic()
+void MenuTopic::SaveTopic()
 {
+    using namespace fnv_0083f3e0;
     unsigned short usLen = 0;
     char* pcSizeLoc = 0;
-    char* pcStart = g_TESSaveLoadGame->FUN_00825c00();
-    if (*g_011de4e8.FUN_00408d60())
-        pcStart = g_TESSaveLoadGame->FUN_00825c00();
-    if (g_TESSaveLoadGame->FUN_00862110())
+    char* pcStart = (char*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_00825c00();
+    if (*fnv_0083f3e0::g_011de4e8.FUN_00408d60())
+        pcStart = (char*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_00825c00();
+    if (fnv_0083f3e0::g_TESSaveLoadGame->FUN_00862110())
     {
         unsigned int uiTag = 'BLOK';
-        g_TESSaveLoadGame->FUN_008579b0(&uiTag, 4);
-        pcSizeLoc = g_TESSaveLoadGame->FUN_00825c00();
-        g_TESSaveLoadGame->FUN_008579b0(&usLen, 2);
+        fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&uiTag, 4);
+        pcSizeLoc = (char*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_00825c00();
+        fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&usLen, 2);
     }
     const char* pcTopic = m_kPrompt.String();
-    unsigned char ucTextLen = BSStringLength(pcTopic);
-    g_TESSaveLoadGame->FUN_008579b0(&ucTextLen, 1);
+    unsigned char ucTextLen = fnv_0083f3e0::BSStringLength(pcTopic);
+    fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&ucTextLen, 1);
     if (ucTextLen)
-        g_TESSaveLoadGame->FUN_008579b0((void*)pcTopic, ucTextLen);
-    g_TESSaveLoadGame->FUN_008579b0(&m_bFirstFlag, 1);
-    g_TESSaveLoadGame->FUN_008579b0(&m_bIsRemappedRumor, 1);
-    g_TESSaveLoadGame->FUN_008579b0(&m_bInfoHasBeenRead, 1);
+        fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0((void*)pcTopic, ucTextLen);
+    fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&m_bFirstFlag, 1);
+    fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&m_bIsRemappedRumor, 1);
+    fnv_0083f3e0::g_TESSaveLoadGame->FUN_008579b0(&m_bInfoHasBeenRead, 1);
     unsigned int uiQuestID = 0;
     if (pQuest)
-        uiQuestID = ((NamedForm83f3*)pQuest)->FUN_0084e3a0();
-    g_TESSaveLoadGame->FUN_00857a10(&uiQuestID, 4);
+        uiQuestID = pQuest->FUN_0084e3a0();
+    fnv_0083f3e0::g_TESSaveLoadGame->FUN_00857a10((void*)&uiQuestID, 4);
     unsigned int uiID2 = 0;
     if (pTopic)
-        uiID2 = ((NamedForm83f3*)pTopic)->FUN_0084e3a0();
-    g_TESSaveLoadGame->FUN_00857a10(&uiID2, 4);
+        uiID2 = pTopic->FUN_0084e3a0();
+    fnv_0083f3e0::g_TESSaveLoadGame->FUN_00857a10((void*)&uiID2, 4);
     unsigned int uiResp = 0;
     if (pInfo)
-        uiResp = ((NamedForm83f3*)pInfo)->FUN_0084e3a0();
-    g_TESSaveLoadGame->FUN_00857a10(&uiResp, 4);
-    if (*g_011de4e8.FUN_00408d60())
+        uiResp = pInfo->FUN_0084e3a0();
+    fnv_0083f3e0::g_TESSaveLoadGame->FUN_00857a10((void*)&uiResp, 4);
+    if (*fnv_0083f3e0::g_011de4e8.FUN_00408d60())
     {
-        char* pcEnd = g_TESSaveLoadGame->FUN_00825c00();
-        SaveFormHeader83f3* pkHeader = g_TESSaveLoadGame->FUN_004fd3e0();
+        char* pcEnd = (char*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_00825c00();
+        SaveFormHeader* pkHeader = (SaveFormHeader*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_004fd3e0();
         if (pkHeader)
         {
-            TESForm* pkForm = FUN_004839c0(pkHeader->auiFormId);
+            TESForm* pkForm = FUN_004839c0(pkHeader->formID);
             FUN_0040fbe0("SaveGame(): %-5i for form %08X %s with flags %08X ending at line %i in file %s",
-                         pcEnd - pcStart, pkHeader->auiFormId, pkForm->GetName(), *(unsigned int*)pkHeader->aucFlags,
+                         pcEnd - pcStart, pkHeader->formID, pkForm->GetName(), *(unsigned int*)&pkHeader->flagsLow,
                          0x2ff, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Dialogue\\MenuTopic.cpp");
         }
         else
             FUN_0040fbe0("SaveGame(): %-5i ending at line %i in file %s", pcEnd - pcStart, 0x2ff,
                          "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Dialogue\\MenuTopic.cpp");
     }
-    if (g_TESSaveLoadGame->FUN_00862110())
+    if (fnv_0083f3e0::g_TESSaveLoadGame->FUN_00862110())
     {
-        char* pcNow = g_TESSaveLoadGame->FUN_00825c00();
+        char* pcNow = (char*)fnv_0083f3e0::g_TESSaveLoadGame->FUN_00825c00();
         char* pcMark = pcSizeLoc;
         if (pcNow > pcMark + 0xffff)
             FUN_005b5e40("SAVELOAD: Save Game Block in file %s on line %i is greater than maximum short size",
@@ -1407,42 +1357,14 @@ void MenuTopic83f3::SaveTopic()
         *(unsigned short*)pcSizeLoc = pcNow - pcMark;
     }
 }
-}  // namespace fnv_0083f3e0
 
-struct TESResponse;
-struct TESResponseList
-{
-    TESResponse* QResponseList();
-    void AddTail(TESResponse*);
-    void Remove(TESResponse*);
-    unsigned int GetListCount();
-    void ClearResponses();
-    void SetResponseList(TESResponse*);
-    void ResetFaceGen();
-    void InsertBefore(TESResponse*, TESResponse*);
-    void InsertAfter(TESResponse*, TESResponse*);
-    void* __vecDelDtor(unsigned int);
-    TESResponse* pHead;
-};
+
 typedef char _sizecheck_ResponseListWrapper[sizeof(TESResponseList) == 4 ? 1 : -1];
 struct FUN_0083df80_shell : public MenuTopic
 {
     void FUN_0083df80(TESObjectREFR*);
 };
 
-struct TESResponse;
-
-struct TESResponse
-{
-    int GetLength();
-    TESResponse* GetNext();
-};
-struct ResponseFillList : TESResponseList
-{
-    ResponseFillList();
-    ~ResponseFillList();
-    operator TESResponse*() const;
-};
 struct FUN_0061e760_shell
 {
     TESResponseList* FUN_0061e760(TESResponseList*);
@@ -1472,12 +1394,12 @@ struct ResponseFillOwner : MenuTopic
 void ResponseFillOwner::FUN_0083df80(TESQuest* apQuest, TESTopic* apTopic, TESTopicInfo* apInfo,
                                      TESObjectREFR* apSpeaker)
 {
-    ResponseFillList lResponseList;
+    TESResponseList lResponseList;
     int i;
     TESResponse* presponse;
 
     ((FUN_0061e760_shell*)pInfo)->FUN_0061e760(&lResponseList);
-    presponse = lResponseList;
+    presponse = (TESResponse*)(unsigned int)lResponseList;
     i = 0;
     while (presponse)
     {

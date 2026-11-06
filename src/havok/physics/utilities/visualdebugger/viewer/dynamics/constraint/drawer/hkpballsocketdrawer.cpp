@@ -2,14 +2,8 @@
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkpballsocketdrawer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkpballsocketdrawer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct __declspec(align(16)) hkVector4
-{
-    float x, y, z, w;
-};
-struct hkTransform
-{
-    hkVector4 c0, c1, c2, t;
-};
+#include "../../../../../../../../../include/hkTransform.h"
+#include "../../../../../../../../../include/hkVector4.h"
 
 struct Motion
 {
@@ -32,11 +26,6 @@ struct Body
     int unk08;
     Shape* shape;
 };
-struct Vec
-{
-    hkVector4 v;
-    void FUN_00c7f640(const void* m, const hkVector4& p);
-};
 struct Sub
 {
     void FUN_00e10a10(void* a);
@@ -52,13 +41,13 @@ struct Listener
     virtual void v18();
     virtual void v1c();
     virtual void v20();
-    virtual void Fire(Vec* a, Vec* b, unsigned c, int d, int e);
+    virtual void Fire(hkVector4* a, hkVector4* b, unsigned c, int d, int e);
 };
 struct Obj
 {
     char pad[0x40];
-    Vec m40;
-    Vec m50;
+    hkVector4 m40;
+    hkVector4 m50;
     char pad2[0x60];
     Sub mC0;
     void FUN_00de47e0(Body* b, hkTransform* t, hkTransform* r);
@@ -73,15 +62,18 @@ void Obj::FireMotionEvent(Body* apBody, Listener* apListener, int aiArg, int aiA
 {
     Motion* pMotion = &apBody->shape->motion;
     mC0.FUN_00e10a10(apListener);
-    hkTransform r;
-    hkTransform t;
+    // Preserve uninitialized aligned storage; pointer arrays avoid adding a /GS cookie.
+    __declspec(align(16)) void* rStorage[sizeof(hkTransform) / sizeof(void*)];
+    __declspec(align(16)) void* tStorage[sizeof(hkTransform) / sizeof(void*)];
+    hkTransform& r = *reinterpret_cast<hkTransform*>(rStorage);
+    hkTransform& t = *reinterpret_cast<hkTransform*>(tStorage);
     FUN_00de47e0(apBody, &t, &r);
-    Vec* pVec40;
-    Vec* pVec50;
+    hkVector4* pVec40;
+    hkVector4* pVec50;
     pVec50 = &m50;
-    pVec50->FUN_00c7f640(&t, pMotion->v20);
+    pVec50->FUN_00c7f640(t, pMotion->v20);   // 0x00c7f640 = hkVector4::_setTransformedPos
     pVec40 = &m40;
-    pVec40->FUN_00c7f640(&r, pMotion->v10);
+    pVec40->FUN_00c7f640(r, pMotion->v10);
     FUN_00de44c0(aiArg, aiArg2);
     FUN_00de4530(aiArg, aiArg2);
     apListener->Fire(pVec40, pVec50, 0xffff0000, aiArg, aiArg2);

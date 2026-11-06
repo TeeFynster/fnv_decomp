@@ -1,3 +1,7 @@
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTPointerListBase.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTPointerListBase.h"
 
 // src/staging/blk_00c20000_od_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/staging/blk_00c20000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,7 +9,139 @@
 
 // src/staging/blk_00c20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+// The empty forwarding destructor must leave the BSTask vtable installation to its base.
+class __declspec(novtable) IOTask;
+#include "../../include/AutoMemContext.h"
+#include "../../include/BSMultiBoundNode.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/IOManager.h"
+#include "../../include/IOTask.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiCamera.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiPlane.h"
+#include "../../include/NiPoint3.h"
+// LocalPoint: unit-local copy of the former shared stand-in Point. Same layout as NiPoint3 with the stand-in's own inline operators; with NiPoint3, FUN_00c358a0/FUN_00c33870 (Point by value, /Ob1) do not match.
+class Scalar;
+class Vector;
+
+class LocalPoint
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    __forceinline LocalPoint()
+    {
+    }
+    __forceinline LocalPoint(float px, float py, float pz)
+        : x(px), y(py), z(pz)
+    {
+    }
+
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    LocalPoint operator+(const LocalPoint& other) const;
+    LocalPoint operator-(const LocalPoint& other) const;
+    inline LocalPoint operator-() const
+    {
+        return LocalPoint(-x, -y, -z);
+    }
+    __forceinline LocalPoint operator*(float scalar) const
+    {
+        return LocalPoint(scalar * x, scalar * y, scalar * z);
+    }
+    __forceinline LocalPoint operator/(float scalar) const
+    {
+        float inverse = 1.0f / scalar;
+        return LocalPoint(x * inverse, y * inverse, z * inverse);
+    }
+    __forceinline LocalPoint& operator+=(const LocalPoint& other)
+    {
+        x = (float)(other.x + x);
+        y = (float)(other.y + y);
+        z = (float)(other.z + z);
+        return *this;
+    }
+    __forceinline LocalPoint& operator*=(float scalar)
+    {
+        x = scalar * x;
+        y = scalar * y;
+        z = scalar * z;
+        return *this;
+    }
+    inline bool operator==(const LocalPoint& other) const
+    {
+        return other.x == x && other.y == y && other.z == z;
+    }
+
+    LocalPoint ApplyScaled(float scalar);
+    LocalPoint Cross(const LocalPoint& other) const;
+    float Dot(const LocalPoint& other) const;
+    double DotProduct(const LocalPoint& other);
+    float Length() const;
+    float Distance(LocalPoint* other);
+    float GetX();
+    float GetY();
+
+    bool FUN_004390c0(const LocalPoint& other) const;
+    LocalPoint FUN_00439ef0(const LocalPoint& other);
+    LocalPoint FUN_00439e90(const LocalPoint& other);
+    void FUN_004a0c10();
+    char* FUN_00a59af0(const char* text);
+    float FUN_004a7290() const;
+    float FUN_00435e00();
+    float FUN_006a7f50();
+
+    float& at(int index);
+    float at(int index) const;
+    void add(const LocalPoint& a, const LocalPoint& b);
+    void difference(const LocalPoint& a, const LocalPoint& b);
+    void absolute();
+    void scale(float scalar);
+
+    void flip();
+    void setZero4();
+    void setSub4(const LocalPoint& a, const LocalPoint& b);
+    void setAdd4(const LocalPoint& a, const LocalPoint& b);
+    void setMul4(const Scalar& scalar, const LocalPoint& point);
+    void addMul4(const Scalar& scalar, const LocalPoint& point);
+    void setCross(const LocalPoint& a, const LocalPoint& b);
+    Scalar dot3(const LocalPoint& point) const;
+    Scalar lengthSquared3() const;
+    Scalar length3() const;
+    const Vector& pos() const;
+    const Vector& dir() const;
+};
+
+namespace loader
+{
+    struct LocalPoint
+    {
+        float x;
+        float y;
+        float z;
+
+        LocalPoint(float x, float y, float z);
+    };
+}
+#include "../../include/NiRefObject.h"
+#include "../../include/QueuedFile.h"
+#include "../../include/QueuedParents.h"
+#include "../../include/Setting.h"
+#include "../../include/BSCoreMessage.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/MessageHandler.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTArray.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/RecursiveSpinLock.h"
 struct FUN_00c3a090_Class
 {
     char __thiscall FUN_00c3a090(void* arg);
@@ -16,11 +152,7 @@ struct FUN_00c3a610_Class
 {
     void* __thiscall FUN_00c3a610();
 };
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
-extern P03MM g_memoryManager;
+extern MemoryManager g_memoryManager;
 struct FUN_00c3a640_Class
 {
     void* FUN_00c3a640(unsigned int size);
@@ -44,29 +176,10 @@ struct FUN_00c3c520_class
     void __thiscall FUN_00c3c520();
 };
 extern int DAT_010c1510;
-struct QueuedParents
-{
-    void __thiscall FUN_00c3d930();
-    void __thiscall FUN_00c3c570();
-};
 extern int DAT_010c14fc;
-struct FUN_00c3d930_Class
-{
-    void* vftable;
-    void __thiscall FUN_00c3d980(int);
-    void __thiscall FUN_00c3d930();
-};
 struct FUN_00c3f6f0_Class
 {
     void FUN_00c3f6f0();
-};
-struct FUN_00c3f710_Class
-{
-    void IncrementRefCount();
-};
-struct FUN_00c3f730_Class
-{
-    void __thiscall DecrementRefCount();
 };
 struct FUN_00c3fc80_class
 {
@@ -79,10 +192,6 @@ struct FUN_00c35980_Class
 struct FUN_00c3a080_Class
 {
     void* __thiscall FUN_00c3a080(int arg);
-};
-struct NiTPrimitiveArray_unsigned_int_
-{
-    void AddFirstEmpty(unsigned int const&);
 };
 void* __cdecl FUN_00a7d330(void*);
 struct FUN_00c3a0c0_Class
@@ -112,24 +221,9 @@ struct FUN_00c3a140_Class
     void __thiscall FUN_00c39770();
     void* __thiscall FUN_00c3a140(unsigned int flags);
 };
-struct NiUpdateData
-{
-};
-struct NiNode
-{
-    void __thiscall UpdateDownwardPass(NiUpdateData&, unsigned int);
-};
-struct BSMultiBoundNode : NiNode
-{
-    void __thiscall FUN_00c3a5b0(NiUpdateData& data, unsigned int flags);
-};
 struct FUN_00c3a620_Class
 {
     void __thiscall FUN_00c3a620();
-};
-struct MemoryManager
-{
-    void Deallocate(void*);
 };
 struct FUN_00c3a6a0_Class
 {
@@ -137,24 +231,11 @@ struct FUN_00c3a6a0_Class
 };
 extern char DAT_01202c50[260];
 extern char DAT_01202fa0[];
-void __cdecl strcpy_s(char* dst, unsigned int dstsz, const char* src);
-void __cdecl strcat_s(char* dst, unsigned int dstsz, const char* src);
 void FUN_00c3bb90(const char* src);
 extern char DAT_01202a40[0x104];
 extern char DAT_01202fa0[0x104];
-void __cdecl strcpy_s(char* dst, unsigned int n, const char* src);
-void strcat_s(char* dst, unsigned int n, const char* src);
 void __cdecl FUN_00c3bc30(const char* p);
 extern const void* DAT_010c14a8;
-struct MessageHandler;
-struct MessageHandler
-{
-    const void* vtbl;
-    bool bStatic;
-    static MessageHandler* pHandler;
-    void* __thiscall FUN_00aa4c60();
-    MessageHandler* __thiscall FUN_00c3bcf0(bool b);
-};
 MessageHandler* MessageHandler::pHandler;
 struct FUN_00c3c070_Class
 {
@@ -188,17 +269,10 @@ extern int DAT_01202d70;
 void __cdecl FUN_00c3c250();
 void __cdecl FUN_00c3c280();
 void* __cdecl FUN_00c3c100(void* a, void* b, unsigned int c);
-struct NiObject
-{
-};
 struct FUN_00c465a0;
 struct FUN_00c4fb10_shell;
 struct FUN_00c61b10;
 typedef NiObject*(__cdecl* PFN_NiObjectLoader)(void);
-struct NiStream
-{
-    static int __cdecl RegisterObjectLoader(char const* name, PFN_NiObjectLoader loader);
-};
 NiObject* __cdecl FUN_00c64810();
 NiObject* __cdecl FUN_00c649f0();
 NiObject* __cdecl FUN_00c537f0();
@@ -267,25 +341,13 @@ struct GlobalObject_00c3bcf0
     ~GlobalObject_00c3bcf0();
     void* __thiscall DestroyAndFree(unsigned int flags);
 };
-struct QueuedParents;
-extern P03MM g_memoryManager;
-struct FUN_00c3d3b0_Class : QueuedParents
-{
-    void* __thiscall FUN_00c3d3b0(unsigned int flags);
-};
+extern MemoryManager g_memoryManager;
 struct FUN_00c42f00_Class
 {
     void __thiscall DestroyResources();
     void* __thiscall FUN_00c3f130(unsigned int flags);
 };
 int __cdecl FUN_00ec6130(int value);
-struct FUN_00c32fb0_cls
-{
-    int m_00;
-    int m_04;
-    const char* m_08;
-    int GetFormatSize();
-};
 struct StateVec3
 {
     unsigned int x, y, z;
@@ -490,7 +552,7 @@ struct FUN_00c3a4b0_cls
     FUN_00c3a4b0_node* m_00;
     void* m_04;
     FUN_00c3a4b0_sub m_08;
-    unsigned int __thiscall FUN_00c3a4b0();
+    unsigned int __thiscall RemoveHead();
 };
 struct FUN_00c3a530_node
 {
@@ -508,7 +570,7 @@ struct FUN_00c3a530_cls
     FUN_00c3a530_node* m_00;
     FUN_00c3a530_node* m_04;
     FUN_00c3a530_alloc m_08;
-    void* FUN_00c3a530();
+    void* RemoveTail();
 };
 struct FUN_00c3a530_pad
 {
@@ -573,8 +635,6 @@ extern "C" unsigned int __cdecl strlen(const char*);
 extern "C" __declspec(dllimport) unsigned long __stdcall GetPrivateProfileStringA(
     const char* lpAppName, const char* lpKeyName, const char* lpDefault, char* lpReturnedString, unsigned long nSize,
     const char* lpFileName);
-void __cdecl strcpy_s(char* dst, unsigned int dstsz, const char* src);
-void __cdecl strcat_s(char* dst, unsigned int dstsz, const char* src);
 PFN_NiObjectLoader __cdecl FUN_00c3b3c0(const char* name);
 static const char kLoadersSection[] = "Loaders";
 static const char kNoDefault[] = "";
@@ -582,7 +642,6 @@ static const char kBackslash[] = "\\";
 static const char kIniName[] = "Loaders.ini";
 static const char kSpace[] = " ";
 void __cdecl LoadObjectLoadersFromIni(const char* dir);
-extern "C" char* __cdecl strrchr(const char* s, int c);
 extern "C" int __cdecl _strnicmp(const char* a, const char* b, unsigned int n);
 void __cdecl BuildDataPath(char* out, const char* path, const char* suffix);
 extern "C" unsigned char DAT_01202b48;
@@ -605,29 +664,16 @@ void __cdecl FUN_00c3bd30(unsigned char a, unsigned char b, unsigned char c, uns
 int* __cdecl FUN_00c3bb80();
 int __cdecl FUN_00aff0b0(const char* p);
 int __cdecl GetFileSize(int* buf, int* out);
-struct BSCoreMessage
-{
-    virtual ~BSCoreMessage();
-};
 struct FUN_00c3bda0_Class : BSCoreMessage
 {
     ~FUN_00c3bda0_Class();
 };
 int FUN_00c3be40();
 int __cdecl FUN_00c3c220();
-typedef unsigned long DWORD;
-typedef unsigned long WPARAM;
-typedef long LPARAM;
-typedef void* HINSTANCE;
-typedef void* HHOOK;
-typedef void (*HOOKPROC)(int code, WPARAM wParam, LPARAM lParam);
 extern "C" __declspec(dllimport) DWORD __stdcall GetCurrentThreadId();
-extern "C" __declspec(dllimport) int __stdcall SetWindowsHookExA(int idHook, HOOKPROC lpfn, HINSTANCE hMod,
-                                                                 DWORD dwThreadId);
 extern "C" void __cdecl CbtHookProc(int code, WPARAM wParam, LPARAM lParam);
 extern int DAT_01202d70;
 void __cdecl FUN_00c3c250();
-extern "C" __declspec(dllimport) int __stdcall UnhookWindowsHookEx(void* hhk);
 void __cdecl FUN_00c3c280();
 extern "C" void* fnv_zlib_memset(void* pvDest, int iValue, int iSize);
 typedef void* C3C2B0HWND;
@@ -635,10 +681,6 @@ extern int(__stdcall* g_pfnC3C2B0GetClassName)(C3C2B0HWND hWnd, char* pcClassNam
 extern int(__stdcall* g_pfnC3C2B0GetWindowText)(C3C2B0HWND hWnd, char* pcString, int m_iMaximumCount);
 int C3C2B0StrCmp(const char* pcA, const char* pcB);
 int __stdcall FindFirstNonCancelButton(C3C2B0HWND hWnd, long lParam);
-extern "C" __declspec(dllimport) int __stdcall CallNextHookEx(void* hhk, int code, unsigned int wParam, int lParam);
-extern "C" __declspec(dllimport) int __stdcall EnumChildWindows(void* parent, int(__stdcall* callback)(void*, int),
-                                                                int lParam);
-extern "C" __declspec(dllimport) int __stdcall SetWindowTextA(void* hwnd, const char* text);
 int __stdcall FindFirstNonCancelButton(void* hwnd, int lParam);
 int __stdcall CbtHookProc(int code, unsigned int wParam, int lParam);
 struct FUN_00c3c540_Class
@@ -646,45 +688,6 @@ struct FUN_00c3c540_Class
     int* unk00;
     void __thiscall Resize(int a, int b);
     int* __thiscall FUN_00c3c540();
-};
-class C3CAE0Task
-{
-  public:
-    virtual void vfunc00();
-    virtual void vfunc01();
-    virtual void vfunc02();
-    virtual void vfunc03();
-    virtual void vfunc04();
-    virtual void vfunc05();
-    virtual void vfunc06();
-    virtual void Notify(int iStatus);
-};
-struct C3CAE0TaskArray
-{
-    int unk00;
-    C3CAE0Task** m_ppkData;
-    unsigned int m_uiSize;
-};
-class C3CAE0Manager
-{
-  public:
-    void FUN_00c3df40(void* pvTask, int iStatus);
-};
-extern C3CAE0Manager* g_pkC3CAE0Manager;
-class C3CAE0Request
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    C3CAE0TaskArray* m_pkTasks;
-
-    void NotifyTasks(int iStatus);
 };
 struct C3D3E0Heap
 {
@@ -728,57 +731,6 @@ class FUN_00c3d870_cls
     void* m_04;
     unsigned int unk08;
     void* m_0c;
-};
-struct S_00c3db60_Item
-{
-    virtual ~S_00c3db60_Item();
-};
-struct S_00c3db60_Base
-{
-    S_00c3db60_Base();
-    virtual ~S_00c3db60_Base();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-};
-struct FUN_00c3db60 : S_00c3db60_Base
-{
-    S_00c3db60_Item* unk64;
-    virtual ~FUN_00c3db60();
-};
-struct FUN_00c3df40_Param1
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    __int64 unk10;
-};
-struct FUN_00c3df40_Class
-{
-    void __thiscall FUN_00c3e690(FUN_00c3df40_Param1* a1, __int64 a2);
-    void __thiscall FUN_00c3df40(FUN_00c3df40_Param1* a1, int a2);
 };
 struct FUN_00c3f650_cls
 {
@@ -846,10 +798,6 @@ struct FUN_00c3fa70_cls : public TeardownBase
     virtual ~FUN_00c3fa70_cls();
 };
 struct NiCullingProcess;
-struct NiAVObject
-{
-    void Cull(NiCullingProcess& kCuller);
-};
 struct BoundShape
 {
     void AddRef();
@@ -919,90 +867,22 @@ struct CullerData
     int unkBC;
     BoundShape* pBound;
 };
-struct MultiBoundNodeStandIn
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    NiAVObject** m_ppObjects;
-    unsigned short unkA4;
-    unsigned short m_usSize;
-    unsigned short m_usElementCount;
-    unsigned short unkAA;
-    BoundHolder* pHolder;
-    int iCullMode;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    BoundShape* pBound;
 
-    void FUN_00c39890(NiCullingProcess& kCuller);
-};
-
-struct FNVVec3
+inline NiPoint3 NiPoint3::FUN_00439ef0(const NiPoint3& other)
 {
-    float x, y, z;
-    FNVVec3(float x, float y, float z);
-    FNVVec3 FUN_00439ef0(const FNVVec3& other) const
-    {
-        FNVVec3 result(x - other.x, y - other.y, z - other.z);
-        return result;
-    }
-    FNVVec3 FUN_00439e90(const FNVVec3& other) const
-    {
-        FNVVec3 result(x + other.x, y + other.y, z + other.z);
-        return result;
-    }
-    FNVVec3 ApplyScaled(float scale) const
-    {
-        FNVVec3 result(scale * x, scale * y, scale * z);
-        return result;
-    }
-    float DotProduct(const FNVVec3& other) const;
-};
+    return NiPoint3(x - other.x, y - other.y, z - other.z);
+}
+inline NiPoint3 NiPoint3::FUN_00439e90(const NiPoint3& other)
+{
+    return NiPoint3(x + other.x, y + other.y, z + other.z);
+}
+inline NiPoint3 NiPoint3::ApplyScaled(float scale) const
+{
+    return NiPoint3(scale * x, scale * y, scale * z);
+}
 struct FNVPlane
 {
-    FNVVec3 normal;
+    NiPoint3 normal;
     float distance;
     float GetPlaneConstant() const
     {
@@ -1016,16 +896,16 @@ struct FNVPlaneSet
 };
 struct FNVClip
 {
-    bool FUN_00c35ae0(FNVVec3* begin, FNVVec3* end, FNVPlane* face, FNVPlaneSet* region);
+    bool FUN_00c35ae0(NiPoint3* begin, NiPoint3* end, FNVPlane* face, FNVPlaneSet* region);
 };
 extern const double DAT_01012060;
 extern const double DAT_01012070;
 extern const double DAT_010c0f58;
 // @fnv 0x00c35ae0
-bool FNVClip::FUN_00c35ae0(FNVVec3* begin, FNVVec3* end, FNVPlane* face, FNVPlaneSet* region)
+bool FNVClip::FUN_00c35ae0(NiPoint3* begin, NiPoint3* end, FNVPlane* face, FNVPlaneSet* region)
 {
-    FNVVec3 direction = end->FUN_00439ef0(*begin);
-    FNVVec3 normal = face->normal;
+    NiPoint3 direction = end->FUN_00439ef0(*begin);
+    NiPoint3 normal = face->normal;
     float denom = normal.DotProduct(direction);
     float fraction;
     if (denom == DAT_01012060)
@@ -1034,7 +914,7 @@ bool FNVClip::FUN_00c35ae0(FNVVec3* begin, FNVVec3* end, FNVPlane* face, FNVPlan
         fraction = (face->GetPlaneConstant() - normal.DotProduct(*begin)) / denom;
         if (fraction >= DAT_01012060 && fraction <= DAT_01012070)
         {
-            FNVVec3 result = begin->FUN_00439e90(direction.ApplyScaled(fraction));
+            NiPoint3 result = begin->FUN_00439e90(direction.ApplyScaled(fraction));
             for (int i = 0; i < 6; ++i)
             {
                 if ((bool)((1 << i) & region->enabledFlags))
@@ -1094,26 +974,11 @@ PFN_NiObjectLoader __cdecl FUN_00c3b3c0(const char* pcName)
     return pfnLoader;
 }
 
-extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
-struct Point
-{
-    float x, y, z;
-    inline Point(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Point operator+(const Point&) const;
-    Point operator-(const Point&) const;
-    inline Point()
-    {}
-    inline bool operator==(const Point& b) const
-    {
-        return b.x == x && b.y == y && b.z == z;
-    }
-};
 struct FUN_00a699d0
 {
     float x, y, z, w;
-    FUN_00a699d0(const Point&, const Point&, const Point&);
-    int ClassifyPoint(const Point*);
+    FUN_00a699d0(const LocalPoint&, const LocalPoint&, const LocalPoint&);
+    int ClassifyPoint(const LocalPoint*);
 };
 struct FUN_00a699d0s
 {
@@ -1131,32 +996,32 @@ struct FUN_00a699d0s
 struct CornerMatrix
 {
     float entries[9];
-    Point operator*(const Point&) const;
+    LocalPoint operator*(const LocalPoint&) const;
 };
 struct Builder
 {
     int unk00;
     int unk04;
-    Point center;
+    LocalPoint center;
     float halfWidth;
     float halfHeight;
     CornerMatrix rotation;
     int unk40;
     FUN_00a699d0s cached;
-    Point cachedCorners[4];
-    Point last;
+    LocalPoint cachedCorners[4];
+    LocalPoint last;
     bool cornersDirty;
     bool dirty;
     unsigned char disabled[4];
-    inline void FUN_00c35c10(Point* out)
+    inline void FUN_00c35c10(LocalPoint* out)
     {
         if (!cornersDirty)
         {
             memcpy(out, cachedCorners, 48);
             return;
         }
-        Point right(halfWidth, 0, 0);
-        Point up(0, 0, halfHeight);
+        LocalPoint right(halfWidth, 0, 0);
+        LocalPoint up(0, 0, halfHeight);
         CornerMatrix* transform = &rotation;
         right = (*transform) * right;
         up = (*transform) * up;
@@ -1167,17 +1032,17 @@ struct Builder
         memcpy(cachedCorners, out, 48);
         cornersDirty = false;
     }
-    void FUN_00c33870(Point eye, FUN_00a699d0s* out);
+    void FUN_00c33870(LocalPoint eye, FUN_00a699d0s* out);
 };
 // @fnv 0x00c33870
-void Builder::FUN_00c33870(Point eye, FUN_00a699d0s* out)
+void Builder::FUN_00c33870(LocalPoint eye, FUN_00a699d0s* out)
 {
     if (!dirty && last == eye)
     {
         *out = cached;
         return;
     }
-    Point corners5[4];
+    LocalPoint corners5[4];
     FUN_00c35c10(corners5);
     out->active = 63;
     FUN_00a699d0 test7(corners5[0], corners5[1], corners5[2]);
@@ -1215,18 +1080,21 @@ struct FUN_00c46970
     FUN_00c46970();
     virtual ~FUN_00c46970();
 };
-template <class T> struct ArrX
+// 0x00c39640 initializes these by-value buffers at +0xb4, +0xc0 and +0xd0.
+// Each occupies 12 bytes with no vptr; NiTPrimitiveArray would occupy 16 and
+// move the following members (including the scalar at +0xcc). Keep this layout.
+template <class T> struct RoomValueBuffer
 {
     T* m_pBase;
     unsigned int m_uiSize;
     unsigned int m_uiMax;
-    ArrX()
+    RoomValueBuffer()
     {
         m_uiMax = 0;
         m_pBase = 0;
         m_uiSize = 0;
     }
-    ~ArrX();
+    ~RoomValueBuffer();
 };
 struct MemberX
 {
@@ -1237,10 +1105,10 @@ struct FUN_00c39640 : FUN_00c46970
     char pad04[0x2c];
     unsigned int m_uiValue1;
     char pad34[0x80];
-    ArrX<int> m_kA;
-    ArrX<int> m_kB;
+    RoomValueBuffer<int> m_kA;
+    RoomValueBuffer<int> m_kB;
     unsigned int m_uiCC;
-    ArrX<int> m_kC;
+    RoomValueBuffer<int> m_kC;
     MemberX m_kCubicCoefficient;
     void SetBit(unsigned int uiMask, bool bVal)
     {
@@ -1312,30 +1180,6 @@ struct TexturePtr
 bool __cdecl FindTextureByPath(char*, TexturePtr*);
 void __cdecl FUN_00a61c50(TextureObject*, int);
 char* __cdecl FUN_00a5b690(const char*);
-struct StringHeader
-{
-    volatile long refs;
-    unsigned int length;
-};
-class NiFixedString
-{
-  public:
-    const char* text;
-    __forceinline NiFixedString(const char* source)
-    {
-        if (source == 0)
-            text = DAT_0109b220;
-        else
-            text = FUN_00a5b690(source);
-    }
-    __forceinline ~NiFixedString()
-    {
-        if (text == DAT_0109b220)
-            return;
-        volatile long* refs = &((StringHeader*)text)[-1].refs;
-        InterlockedDecrement(refs);
-    }
-};
 TextureObject* __cdecl FUN_00a5fd70(const NiFixedString&, int&, bool, bool);
 struct TextureLoader
 {
@@ -1352,7 +1196,7 @@ void TextureLoader::FUN_00c3b5e0(const char* path)
         FindTextureByPath(filename, &texture);
         if (!texture.object && FUN_00aa1a30(filename, 0))
         {
-            texture.FUN_0066b0d0(FUN_00a5fd70(NiFixedString(filename), DAT_011a9598, true, false));
+            texture.FUN_0066b0d0(FUN_00a5fd70(NiFixedString((const char*)filename), DAT_011a9598, true, false));
             if (texture.object)
                 FUN_00a61c50(texture.object, 0);
         }
@@ -1365,9 +1209,6 @@ inline void* __cdecl operator new(unsigned int, void* p) throw()
     return p;
 }
 
-struct QueuedFile : RefObject
-{
-};
 
 struct QueuedPointer
 {
@@ -1377,7 +1218,7 @@ struct QueuedPointer
         if (pointer)
         {
             QueuedFile* object = pointer;
-            InterlockedIncrement(&object->refCount);
+            InterlockedIncrement((volatile long*)&object->BackgroundTask);
         }
     }
 };
@@ -1744,13 +1585,6 @@ struct ScopedHeap_c3f530
     }
 };
 
-struct Point3_c3f530
-{
-    float x;
-    float y;
-    float z;
-};
-
 struct Owner_c3f530;
 
 struct Item_c3f530
@@ -1808,7 +1642,7 @@ struct SPX
     {
         int aiD[2];
         m_pObject = kOther.m_pObject;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~SPX()
@@ -1822,7 +1656,7 @@ struct LockX
 {
     int m_iOwner;
     int m_iArrayLength;
-    void Wait(int i);
+    void FUN_0040fbf0(int i);
     void Unlock()
     {
         if (--m_iArrayLength == 0)
@@ -1843,7 +1677,7 @@ struct ListQ
 bool ListQ::FUN_00c3f960(SPX pSceneObject)
 {
     bool bFound = false;
-    m_kLock.Wait(0);
+    m_kLock.FUN_0040fbf0(0);
     for (unsigned int i = 0; i < m_uiCount && !bFound; i++)
         bFound = Test(i, pSceneObject);
     m_kLock.Unlock();
@@ -1851,23 +1685,22 @@ bool ListQ::FUN_00c3f960(SPX pSceneObject)
 }
 
 #include <math.h>
-extern "C" void* __cdecl memcpy(void*, const void*, unsigned);
 
-class NiPoint3
+inline NiPoint3::NiPoint3(float x0, float y0, float z0) : x(x0), y(y0), z(z0)
+{}
+inline int NiPlane::Side(const FNVVec3& point) const
 {
-  public:
-    float x, y, z;
-    __forceinline NiPoint3()
-    {}
-    NiPoint3(float x0, float y0, float z0) : x(x0), y(y0), z(z0)
-    {}
-    NiPoint3 operator-(const NiPoint3& other) const;
-    NiPoint3 operator+(const NiPoint3&) const;
-    inline float Dot(const NiPoint3& other) const
-    {
-        return x * other.x + y * other.y + z * other.z;
-    }
-};
+    float distance = x * reinterpret_cast<const NiPoint3&>(point).x +
+                     y * reinterpret_cast<const NiPoint3&>(point).y +
+                     z * reinterpret_cast<const NiPoint3&>(point).z - c;
+    if (distance < 0.0)
+        return 2;
+    else if (distance > 0.0)
+        return 1;
+    else
+        return 0;
+}
+namespace fnv_00c33cf0 {
 extern const NiPoint3 NiPoint3_ZERO;
 struct ClipMatrix
 {
@@ -1885,23 +1718,9 @@ struct ClipMatrix
         out.z = values[row][2];
     }
 };
-struct NiCamera
-{
-    float x, y, z, w;
-    inline int ClassifyPoint(const NiPoint3* point)
-    {
-        float distance = x * point->x + y * point->y + z * point->z - w;
-        if (distance < 0.0)
-            return 2;
-        else if (distance > 0.0)
-            return 1;
-        else
-            return 0;
-    }
-};
 struct ClipVolume
 {
-    NiCamera planes[6];
+    NiPlane planes[6];
     unsigned mask;
 };
 struct RectangleClip
@@ -1962,10 +1781,6 @@ struct RectangleClip
     bool FUN_00c35ae0(NiPoint3*, NiPoint3*, void*, void*);
     bool FUN_00c33cf0(ClipVolume* volume, bool testCenter, NiPoint3 point);
 };
-inline NiPoint3 NiPoint3::operator-(const NiPoint3& other) const
-{
-    return NiPoint3(x - other.x, y - other.y, z - other.z);
-}
 // @fnv 0x00c33cf0
 bool RectangleClip::FUN_00c33cf0(ClipVolume* volume, bool testCenter, NiPoint3 point)
 {
@@ -1980,7 +1795,7 @@ bool RectangleClip::FUN_00c33cf0(ClipVolume* volume, bool testCenter, NiPoint3 p
             bool outside = true;
             for (int vertex = 0; vertex < 4; vertex++)
             {
-                if (volume->planes[plane].ClassifyPoint(&corners[vertex]) != 2)
+                if (volume->planes[plane].Side(reinterpret_cast<const FNVVec3&>(corners[vertex])) != 2)
                 {
                     outside = false;
                 }
@@ -2080,23 +1895,8 @@ bool RectangleClip::FUN_00c33cf0(ClipVolume* volume, bool testCenter, NiPoint3 p
     return true;
 }
 
+}  // namespace fnv_00c33cf0
 namespace fnv_00c34350 {
-extern "C" void* __cdecl memcpy(void*, const void*, unsigned);
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    __forceinline NiPoint3()
-    {}
-    NiPoint3(float x0, float y0, float z0) : x(x0), y(y0), z(z0)
-    {}
-    NiPoint3 operator-(const NiPoint3& other) const;
-    NiPoint3 operator+(const NiPoint3&) const;
-};
-inline NiPoint3 NiPoint3::operator-(const NiPoint3& other) const
-{
-    return NiPoint3(x - other.x, y - other.y, z - other.z);
-}
 struct ClipMatrix
 {
     float values[3][3];
@@ -2107,23 +1907,9 @@ struct ClipMatrix
                         values[2][0] * point.x + values[2][1] * point.y + values[2][2] * point.z);
     }
 };
-struct NiCamera
-{
-    float x, y, z, w;
-    inline int ClassifyPoint(const NiPoint3* point)
-    {
-        float distance = x * point->x + y * point->y + z * point->z - w;
-        if (distance < 0.0)
-            return 2;
-        else if (distance > 0.0)
-            return 1;
-        else
-            return 0;
-    }
-};
 struct ClipVolume
 {
-    NiCamera planes[6];
+    NiPlane planes[6];
     unsigned mask;
 };
 struct RectangleClip
@@ -2173,7 +1959,7 @@ unsigned char RectangleClip::FUN_00c34350(ClipVolume* volume)
             bool outside = true;
             for (int vertex = 0; vertex < 4; vertex++)
             {
-                if (volume->planes[plane].ClassifyPoint(&corners[vertex]) != 2)
+                if (volume->planes[plane].Side(reinterpret_cast<const FNVVec3&>(corners[vertex])) != 2)
                     outside = false;
                 else
                     masks[vertex] |= 1 << plane;
@@ -2192,47 +1978,7 @@ unsigned char RectangleClip::FUN_00c34350(ClipVolume* volume)
 
 namespace fnv_00c344c0 {
 extern "C" double __cdecl sqrt(double);
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    inline float Dot(const NiPoint3& p) const
-    {
-        return x * p.x + y * p.y + z * p.z;
-    }
-    inline NiPoint3 operator-(const NiPoint3& p) const
-    {
-        return NiPoint3(x - p.x, y - p.y, z - p.z);
-    }
-    inline float Length() const
-    {
-        return (float)sqrt(x * x + y * y + z * z);
-    }
-    inline NiPoint3 operator/(float s) const
-    {
-        float inv = 1.0f / s;
-        return NiPoint3(x * inv, y * inv, z * inv);
-    }
-    inline NiPoint3 CrossProduct(const NiPoint3& p) const
-    {
-        NiPoint3 cross(y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x);
-        float length = cross.Length();
-        if (length > 1e-6)
-            return cross / length;
-        else
-            return NiPoint3(0.0f, 0.0f, 0.0f);
-    }
-    inline NiPoint3 operator+(const NiPoint3& p) const
-    {
-        return NiPoint3(x + p.x, y + p.y, z + p.z);
-    }
-};
 extern const NiPoint3 NiPoint3_ZERO;
-NiPoint3 __cdecl operator*(float, const NiPoint3&);
 extern "C" double __cdecl fabs(double);
 inline float fabs(float f)
 {
@@ -2265,7 +2011,6 @@ struct ClipMatrix
 };
 extern const double DAT_01072f80;
 extern int g_012030b0;
-extern "C" void* __cdecl memmove(void*, const void*, unsigned int);
 struct SSNode
 {
     virtual void v0();
@@ -2346,50 +2091,27 @@ bool SSNode::FUN_00c344c0(void* planes, const NiPoint3& point)
 }
 }  // namespace fnv_00c344c0
 
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& pt) const
+{
+    return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
+}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& pt) const
+{
+    return NiPoint3(x + pt.x, y + pt.y, z + pt.z);
+}
+inline NiPoint3 NiPoint3::operator*(float f) const
+{
+    return NiPoint3(x * f, y * f, z * f);
+}
+inline const NiPoint3& NiPlane::GetPlaneNormal() const
+{
+    return *(const NiPoint3*)&x;
+}
+inline float NiPlane::GetPlaneConstant() const
+{
+    return c;
+}
 namespace fnv_00c359d0 {
-class NiPoint3
-{
-  public:
-    float x;
-    float y;
-    float z;
-    __forceinline NiPoint3()
-    {}
-    NiPoint3(float x0, float y0, float z0) : x(x0), y(y0), z(z0)
-    {}
-    inline NiPoint3 operator-(const NiPoint3& pt) const
-    {
-        return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
-    }
-    inline NiPoint3 operator+(const NiPoint3& pt) const
-    {
-        return NiPoint3(x + pt.x, y + pt.y, z + pt.z);
-    }
-    inline NiPoint3 operator*(float f) const
-    {
-        return NiPoint3(x * f, y * f, z * f);
-    }
-    inline float Dot(const NiPoint3& pt) const
-    {
-        return x * pt.x + y * pt.y + z * pt.z;
-    }
-};
-
-class NiPlane
-{
-  public:
-    NiPoint3 m_kPlaneNormal;
-    float m_fPlaneConstant;
-    inline const NiPoint3& GetPlaneNormal() const
-    {
-        return m_kPlaneNormal;
-    }
-    inline float GetPlaneConstant() const
-    {
-        return m_fPlaneConstant;
-    }
-};
-
 class SegmentPlaneTester
 {
   public:
@@ -2402,7 +2124,8 @@ bool SegmentPlaneTester::FUN_00c359d0(const NiPoint3& kStart, const NiPoint3& kE
                                       const NiPlane& kBound0, const NiPlane& kBound1)
 {
     NiPoint3 kDir4 = kEnd - kStart;
-    NiPoint3 kNormal2 = m_kFogPlane.GetPlaneNormal();
+    NiPoint3 kNormal2;
+    *(StateVec3*)&kNormal2 = *(const StateVec3*)&m_kFogPlane.GetPlaneNormal();
     float fDenom = kNormal2.Dot(kDir4);
     if (fDenom == 0.0)
         return false;
@@ -2421,24 +2144,33 @@ bool SegmentPlaneTester::FUN_00c359d0(const NiPoint3& kStart, const NiPoint3& kE
 }
 }  // namespace fnv_00c359d0
 
-class NiRefObject
-{
-  public:
-    virtual void v00();
-    virtual void DeleteThis();
-    virtual ~NiRefObject();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    __forceinline void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement((volatile long*)&m_uiRefCount);
+}
+__forceinline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
 class MbShape : public NiRefObject
 {
 };
@@ -2458,14 +2190,6 @@ FUN_00c35eb0::~FUN_00c35eb0()
 }
 
 namespace fnv_00c39560 {
-class NiPoint3
-{
-  public:
-    float x;
-    float y;
-    float z;
-    NiPoint3 operator-(const NiPoint3& rhs) const;
-};
 
 extern "C" double __cdecl _fabs(double);
 extern const double DAT_01016408;
@@ -2489,7 +2213,7 @@ class FUN_00c39560_Class
 // @fnv 0x00c39560
 bool FUN_00c39560_Class::FUN_00c39560(NiPoint3 point)
 {
-    NiPoint3 pointDelta = point - center;
+    NiPoint3 pointDelta = point.Sub(center);
     float uX;
     float sZ;
     float xY;
@@ -2593,9 +2317,9 @@ struct List_c0 : List_c0_base
 {
     inline ~List_c0()
     {
-        RemoveAll();
+        FUN_004ed900();
     }
-    void RemoveAll();
+    void FUN_004ed900();
     void DeleteItem(ListItem*);
 };
 
@@ -2637,7 +2361,7 @@ inline void List_b4::FUN_00b71300()
     head = 0;
     tail = 0;
 }
-inline void List_c0::RemoveAll()
+inline void List_c0::FUN_004ed900()
 {
     ListItem* current = head;
     while (current)
@@ -2704,7 +2428,7 @@ class FUN_00c39770 : public Base_00c46af0
 FUN_00c39770::~FUN_00c39770()
 {
     m_b4.FUN_00b71300();
-    m_c0.RemoveAll();
+    m_c0.FUN_004ed900();
     m_d0.FUN_00c3a2e0();
     m_dc.FUN_00b5af80(true);
     if (m_c0.unk0C)
@@ -2866,15 +2590,10 @@ class HolderC39B
     TargetC39B* m_pkTarget;
 };
 
-template <class T> struct NiTListItemC39B
-{
-    NiTListItemC39B* m_pkNext;
-    NiTListItemC39B* m_pkPrev;
-    T m_element;
-};
 typedef void* NiTListIteratorC39B;
 
-template <class T> class NiTPointerListC39B
+// Unlike NiTPointerList (12 bytes), this list has a leading word: head +4, tail +8, count +12 in 0x00c39bb0.
+template <class T> class ChildHolderList
 {
   public:
     bool IsEmpty() const
@@ -2887,13 +2606,13 @@ template <class T> class NiTPointerListC39B
     }
     T GetNext(NiTListIteratorC39B& kPos) const
     {
-        T* element = &((NiTListItemC39B<T>*)kPos)->m_element;
-        kPos = ((NiTListItemC39B<T>*)kPos)->m_pkNext;
+        T* element = &((NiTListItem<T>*)kPos)->m_element;
+        kPos = ((NiTListItem<T>*)kPos)->m_pkNext;
         return *element;
     }
     void* m_pVTable;
-    NiTListItemC39B<T>* m_pkHead;
-    NiTListItemC39B<T>* m_pkTail;
+    NiTListItem<T>* m_pkHead;
+    NiTListItem<T>* m_pkTail;
     unsigned int m_uiCount;
 };
 
@@ -2958,7 +2677,7 @@ class OwnerC39B
     int unkc0;
     int unkc4;
     int unkc8;
-    NiTPointerListC39B<HolderC39B*> m_kChildList;
+    ChildHolderList<HolderC39B*> m_kChildList;
 };
 
 // @fnv 0x00c39bb0
@@ -2979,16 +2698,10 @@ int OwnerC39B::FUN_00c39bb0(void* pvArg)
     return iResult;
 }
 
-struct Bound144
+inline NiBound::NiBound()
 {
-    struct Point
-    {
-        float x, y, z;
-    } center;
-    float radius;
-    void Merge(const Bound144&);
-};
-extern Bound144 DAT_011f4288;
+}
+extern NiBound DAT_011f4288;
 struct BoundProvider144
 {
     virtual void slot0();
@@ -3032,7 +2745,7 @@ struct BoundProvider144
     virtual void slot38();
     virtual void slot39();
     virtual void slot40();
-    virtual void GetBound(Bound144&);
+    virtual void GetBound(NiBound&);
 };
 struct Controller144
 {
@@ -3055,7 +2768,7 @@ struct Node144
     unsigned int unk14;
     unsigned int unk18;
     unsigned int unk1c;
-    Bound144* bound;
+    NiBound* bound;
     unsigned int unk24;
     unsigned int unk28;
     unsigned int unk2c;
@@ -3111,18 +2824,18 @@ struct Node144
 // @fnv 0x00c39d50
 void Node144::FUN_00c39d50()
 {
-    const Bound144* a0;
+    const NiBound* a0;
     float aAcoustic;
     Node144** aATmp;
-    Bound144* a2;
+    NiBound* a2;
     float aAction;
-    const Bound144* aA6;
+    const NiBound* aA6;
     int a114;
     int a3;
     int aActorList;
     float aActive;
     Node144** aAct;
-    Bound144* a4;
+    NiBound* a4;
     BoundProvider144* a2_3;
     Controller144* a1c8;
     Controller144** aAVal;
@@ -3136,7 +2849,7 @@ void Node144::FUN_00c39d50()
     Node144* a7;
     unsigned int a8;
     unsigned int aA5;
-    Bound144 aA;
+    NiBound aA;
     Link144* aA2;
     BoundProvider144* aAa;
     bool first;
@@ -3163,7 +2876,7 @@ void Node144::FUN_00c39d50()
                     a2_3 = a1c8->provider;
                     aAa = a2_3;
                     aAa->GetBound(aA);
-                    bound->Merge(aA);
+                    bound->FUN_00a7f3f0(&aA);
                 }
             }
             first = false;
@@ -3187,7 +2900,7 @@ void Node144::FUN_00c39d50()
                 aA6 = a7->bound ? a7->bound : &DAT_011f4288;
                 a2 = bound;
                 aAction = aA6->radius;
-                a2->center = aA6->center;
+                a2->m_kCenter = aA6->m_kCenter;
                 a2->radius = aAction;
                 ++aA5;
                 break;
@@ -3200,7 +2913,7 @@ void Node144::FUN_00c39d50()
             if (a7 && ((a7->bound && ((aAcoustic = a7->bound->radius), (double)aAcoustic != 0.0)) ? 1 : 0))
             {
                 a0 = a7->bound ? a7->bound : &DAT_011f4288;
-                bound->Merge(*a0);
+                bound->FUN_00a7f3f0(a0);
             }
         }
     }
@@ -3213,7 +2926,7 @@ struct S00c3a180_cls
     unsigned int unk08;
     unsigned int unk0C;
 
-    void RemoveAll();
+    void FUN_004ed900();
     void FUN_00c3a180();
 };
 
@@ -3232,7 +2945,7 @@ struct S00c3a180_Scope
 void S00c3a180_cls::FUN_00c3a180()
 {
     S00c3a180_Scope s;
-    RemoveAll();
+    FUN_004ed900();
 }
 
 struct ScopeGuardA3a1
@@ -3255,36 +2968,25 @@ void FUN_00c3a1d0_cls::FUN_00c3a1d0()
     FUN_00c3a2e0();
 }
 
-struct Node250
-{
-    Node250* m_pkNext;
-    Node250* m_pkPrev;
-    void* m_element;
-};
+typedef NiTListItem<void* > Node250;
 
 struct Alloc250
 {
-    unsigned int m_uiCount;
+
     void Deallocate(void* p);
 };
 
-struct List250
+typedef NiTPointerListBase<Alloc250, void* > List250;
+template <> inline void* NiTListBase<Alloc250, void* >::GetHeadPos() const
 {
-    Node250* m_pkHead;
-    Node250* m_pkTail;
-    Alloc250 m_kItemCount;
-
-    inline Node250* GetHeadPos() const
-    {
         return m_pkHead;
     }
-
-    inline void* FindPos(void*& element, void* kStart = 0) const
-    {
+template <> inline void* NiTPointerListBase<Alloc250, void* >::FindPos(void* const& element, void* kStart) const
+{
         void* kPrevNode;
         if (kStart == 0)
         {
-            Node250* head = GetHeadPos();
+            Node250* head = (Node250*)GetHeadPos();
             kStart = head;
         }
         while (kStart)
@@ -3297,9 +2999,8 @@ struct List250
         }
         return 0;
     }
-
-    inline void* RemoveHead()
-    {
+template <> inline void* NiTPointerListBase<Alloc250, void* >::RemoveHead()
+{
         Node250* pkItem = m_pkHead;
         m_pkHead = m_pkHead->m_pkNext;
         if (m_pkHead)
@@ -3312,9 +3013,8 @@ struct List250
         m_kItemCount.m_uiCount--;
         return element;
     }
-
-    inline void* RemoveTail()
-    {
+template <> inline void* NiTPointerListBase<Alloc250, void* >::RemoveTail()
+{
         Node250* pkItem = m_pkTail;
         m_pkTail = m_pkTail->m_pkPrev;
         if (m_pkTail)
@@ -3327,9 +3027,8 @@ struct List250
         m_kItemCount.m_uiCount--;
         return element;
     }
-
-    inline void* RemovePos(void*& kPos)
-    {
+template <> inline void* NiTPointerListBase<Alloc250, void* >::RemovePos(void*& kPos)
+{
         int slot0 = 0;
         int slot1 = 0;
         int slot2 = 0;
@@ -3369,17 +3068,19 @@ struct List250
         return element;
     }
 
-    void* FUN_00c3a250(void*& element);
-};
-
 // @fnv 0x00c3a250
-void* List250::FUN_00c3a250(void*& element)
+template <> void* NiTPointerListBase<Alloc250, void* >::Remove(void* const& element)
 {
     void* kPos = FindPos(element);
     return kPos ? RemovePos(kPos) : element;
 }
 
-template <class T> inline void NiTPointerAllocator<T>::Deallocate(void* pointer)
+template <class T> class StagingPointerAllocator
+{
+public:
+    void Deallocate(void* pointer);
+};
+template <class T> inline void StagingPointerAllocator<T>::Deallocate(void* pointer)
 {
     unsigned a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12;
     a0 = 1;
@@ -3402,30 +3103,24 @@ template <class T> inline void NiTPointerAllocator<T>::Deallocate(void* pointer)
     Deallocate((void*)((char*)pointer + a0));
 }
 
-struct FUN_00c3a3f0_cls
-{
-    FNVPointerListItem* m_pkHead;
-    FNVPointerListItem* m_pkTail;
-    FNVPointerListBase::MapEntryCount m_kItemCount;
+typedef NiTListItem<void* > FNVPointerListItem;
+typedef NiTListBase<StagingPointerAllocator<unsigned int>, void*> FNVPointerListBase;
+typedef NiTPointerListBase<StagingPointerAllocator<unsigned int>, void* > FUN_00c3a3f0_cls;
 
-    void* __thiscall FUN_00c3a4b0();
-    void* __thiscall FUN_00c3a530();
-    void* __thiscall FUN_00c3a3f0(void*& position);
-};
 
 // @fnv 0x00c3a3f0
-void* FUN_00c3a3f0_cls::FUN_00c3a3f0(void*& position)
+template <> void* NiTPointerListBase<StagingPointerAllocator<unsigned int>, void* >::RemovePos(void*& position)
 {
     FNVPointerListItem* node = (FNVPointerListItem*)position;
     if (node == m_pkHead)
     {
         position = node->m_pkNext;
-        return FUN_00c3a4b0();
+        return RemoveHead();
     }
     if (node == m_pkTail)
     {
         position = 0;
-        return FUN_00c3a530();
+        return RemoveTail();
     }
     FNVPointerListItem* link = node->m_pkPrev;
     FNVPointerListItem* pkNext = node->m_pkNext;
@@ -3480,51 +3175,32 @@ S_X* S_X::FUN_00c3b9f0(unsigned int flags)
     return this;
 }
 
-namespace fnv_00c3bab0 {
 void __cdecl NiFree(void*);
 
-class NiMemObject
+template <class T> inline void NiTMallocInterface<T>::Deallocate(T* pArray)
 {
-};
-class NiRefObject : public NiMemObject
-{
-  public:
-    virtual ~NiRefObject();
-    unsigned int m_uiRefCount;
-};
+    NiFree(pArray);
+}
 
-struct NodeRef;
-struct NodeArrayAlloc
+template <class T, class TAlloc> inline NiTArray<T, TAlloc>::~NiTArray()
 {
-    static inline void Deallocate(void* p)
-    {
-        NiFree(p);
-    }
-};
-struct NodeArray
+    TAlloc::Deallocate(m_pBase);
+}
+
+template <class T, class TAlloc> inline void NiTArray<T, TAlloc>::RemoveAll()
 {
-    virtual ~NodeArray()
-    {
-        NodeArrayAlloc::Deallocate(m_pBase);
-    }
-    NodeRef** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    inline void RemoveAll()
-    {
-        for (unsigned short i = 0; i < m_usSize; ++i)
-            m_pBase[i] = 0;
-        m_usSize = 0;
-        m_usESize = 0;
-    }
-};
+    for (unsigned short i = 0; i < m_usSize; ++i)
+        m_pBase[i] = 0;
+    m_usSize = 0;
+    m_usESize = 0;
+}
+
+namespace fnv_00c3bab0 {
 
 class FUN_00c3bab0 : public NiRefObject
 {
   public:
-    NodeArray m_aiIndexedValues;
+    NiTArray<NiAVObject*, NiTMallocInterface<NiAVObject*> > m_aiIndexedValues;
     ~FUN_00c3bab0();
 };
 
@@ -3557,61 +3233,32 @@ void __cdecl FUN_00c3c460()
 
 extern long volatile DAT_01202d94;
 
-struct QfObj
-{
-    void IncRefCount();
-    void DecRefCount();
-};
-
-template <class T> struct QfPointer
-{
-    T* m_pObject;
-
-    ~QfPointer()
-    {
-        int spareA;
-        int spareB;
-        int spareC;
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-};
-
 struct QfDeletable
 {
     virtual ~QfDeletable();
 };
 
-struct QfBase
+template <class T> inline BSTask<T>::~BSTask()
 {
-    virtual void vf();
+    InterlockedDecrement(&DAT_01202d94);
+}
+inline IOTask::~IOTask()
+{}
 
-    ~QfBase()
-    {
-        InterlockedDecrement(&DAT_01202d94);
-    }
-};
-
-struct FUN_00c3c620 : QfBase
+template <> inline NiPointer<QueuedFile>::~NiPointer()
 {
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    QfPointer<QfObj> m_sp1c;
-    QfDeletable* m_p20;
-    QfDeletable* m_p24;
-
-    virtual ~FUN_00c3c620();
-};
+    int spareA;
+    int spareB;
+    int spareC;
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
 
 // @fnv 0x00c3c620
-FUN_00c3c620::~FUN_00c3c620()
+QueuedFile::~QueuedFile()
 {
-    delete m_p20;
-    delete m_p24;
+    delete (QfDeletable*)pChildren;
+    delete pAdditionalParents;
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
@@ -3755,30 +3402,19 @@ struct OwnArr
         return index;
     }
 };
-struct IOTask
-{
-    void* vtbl;
-    int m_04;
-    long m_08;
-    long m_0c;
-    int m_10, m_14, m_18;
-    RefObj* m_1c;
-    void* m_20;
-    OwnArr* m_24;
-    void FUN_00c3c7e0(RefObj* obj);
-};
+// The legacy IOTask entry points operate on QueuedFile parent-link storage.
 // @fnv 0x00c3c7e0
 void IOTask::FUN_00c3c7e0(RefObj* obj)
 {
-    if (!m_24)
+    if (!((OwnArr*&)((QueuedFile*)this)->pAdditionalParents))
     {
-        m_24 = new OwnArr;
+        ((OwnArr*&)((QueuedFile*)this)->pAdditionalParents) = new OwnArr;
     }
-    else if (m_24->Find(obj) != -1)
+    else if (((OwnArr*&)((QueuedFile*)this)->pAdditionalParents)->Find(obj) != -1)
     {
         return;
     }
-    m_24->FUN_00c3d4f0(obj);
+    ((OwnArr*&)((QueuedFile*)this)->pAdditionalParents)->FUN_00c3d4f0(obj);
     obj->FUN_00c3c700(this);
 }
 
@@ -3797,17 +3433,6 @@ inline void Dead9()
 }
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedCompareExchange(long volatile*, long, long);
-struct RefObj
-{
-    void* vtbl;
-    int m_04;
-    long m_08;
-    void AcquireReference()
-    {
-        InterlockedIncrement(&m_08);
-    }
-    void FUN_0044dd60();
-};
 struct RefPtr
 {
     RefObj* m_p;
@@ -3863,99 +3488,65 @@ struct OwnArr
     }
     void FUN_00c3d5e0(unsigned, int);
 };
-struct IOManager
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48(void*);
-    void FUN_0044ac40(RefObj*, void*);
-};
 extern IOManager* DAT_01202d98;
-struct IOTask
+}  // namespace fnv_00c3cb70
+inline RefObj* IOTask::GetCur()
 {
-    void* vtbl;
-    int m_04;
-    long m_08;
-    long m_0c;
-    int m_10, m_14, m_18;
-    RefPtr m_1c;
-    PtrArr* m_20;
-    OwnArr* m_24;
-    RefObj* GetCur()
-    {
-        return m_1c.m_p;
-    }
-    void SetState(long v)
-    {
-        long old = m_0c;
-        bool r = InterlockedCompareExchange(&m_0c, v, old) == old;
-    }
-    void FUN_0044dd60();
-    void FUN_00c3cb70(int state, RefObj* obj);
-};
+    return (RefObj*)((QueuedFile*)this)->m_pParent.m_pObject;
+}
+inline void IOTask::SetState(long v)
+{
+    long old = eState;
+    bool r = InterlockedCompareExchange((volatile long*)&eState, v, old) == old;
+}
 // @fnv 0x00c3cb70
 void IOTask::FUN_00c3cb70(int state, RefObj* obj)
 {
-    InterlockedIncrement(&m_08);
+    using namespace fnv_00c3cb70;
+    ::InterlockedIncrement((volatile long*)&BackgroundTask);
     if (obj)
     {
         if (GetCur() == obj)
         {
-            m_1c.Clear();
+            ((fnv_00c3cb70::RefPtr&)((QueuedFile*)this)->m_pParent).Clear();
         }
-        else if (m_24)
+        else if (((fnv_00c3cb70::OwnArr*&)((QueuedFile*)this)->pAdditionalParents))
         {
-            for (unsigned i = 0; i < m_24->GetCount(); i++)
+            for (unsigned i = 0; i < ((fnv_00c3cb70::OwnArr*&)((QueuedFile*)this)->pAdditionalParents)->GetCount(); i++)
             {
-                if (m_24->GetAt(i) == obj)
+                if (((fnv_00c3cb70::OwnArr*&)((QueuedFile*)this)->pAdditionalParents)->GetAt(i) == obj)
                 {
-                    m_24->FUN_00c3d5e0(i, 1);
+                    ((fnv_00c3cb70::OwnArr*&)((QueuedFile*)this)->pAdditionalParents)->FUN_00c3d5e0(i, 1);
                     break;
                 }
             }
             Dead5();
-            if (m_24->GetCount() == 0)
+            if (((fnv_00c3cb70::OwnArr*&)((QueuedFile*)this)->pAdditionalParents)->GetCount() == 0)
             {
-                delete m_24;
-                m_24 = 0;
+                delete ((fnv_00c3cb70::OwnArr*&)((QueuedFile*)this)->pAdditionalParents);
+                ((fnv_00c3cb70::OwnArr*&)((QueuedFile*)this)->pAdditionalParents) = 0;
             }
         }
     }
     else
     {
-        m_1c.Clear();
-        delete m_24;
-        m_24 = 0;
+        ((fnv_00c3cb70::RefPtr&)((QueuedFile*)this)->m_pParent).Clear();
+        delete ((fnv_00c3cb70::OwnArr*&)((QueuedFile*)this)->pAdditionalParents);
+        ((fnv_00c3cb70::OwnArr*&)((QueuedFile*)this)->pAdditionalParents) = 0;
     }
-    if (GetCur() || m_24)
+    if (GetCur() || ((fnv_00c3cb70::OwnArr*&)((QueuedFile*)this)->pAdditionalParents))
     {
         if (state == 1)
-            DAT_01202d98->v48(this);
+            DAT_01202d98->AddTask((QIOTask*)this);
         else
             SetState(state);
     }
-    else if (m_20)
+    else if (((fnv_00c3cb70::PtrArr*&)((QueuedFile*)this)->pChildren))
     {
-        unsigned n = m_20->m_uiItemCount;
+        unsigned n = ((fnv_00c3cb70::PtrArr*&)((QueuedFile*)this)->pChildren)->m_uiItemCount;
         for (unsigned j = 0; j < n; j++)
         {
-            RefObj* o = m_20->ElementAt(j);
+            RefObj* o = ((fnv_00c3cb70::PtrArr*&)((QueuedFile*)this)->pChildren)->ElementAt(j);
             if (o)
                 DAT_01202d98->FUN_0044ac40(o, this);
         }
@@ -3963,7 +3554,7 @@ void IOTask::FUN_00c3cb70(int state, RefObj* obj)
     FUN_0044dd60();
     Dead9();
 }
-}  // namespace fnv_00c3cb70
+
 
 extern int __cdecl FUN_00406d00(char*, unsigned int, const char*, ...);
 struct QEntry
@@ -4238,6 +3829,23 @@ void C3D980Cls::FUN_00c3d980(bool bFree)
     }
 }
 
+namespace fnv_00c3dbf0 { struct TaskPtr; }
+struct IOQueue
+{
+    virtual void v00();
+    virtual void v04();
+    virtual void v08();
+    virtual unsigned Count();
+    void FUN_00c3e420(fnv_00c3dbf0::TaskPtr& out);
+};
+inline unsigned IOManager::QueuedCount()
+{
+    return m_queue->Count();
+}
+inline void IOTask::AcquireReference()
+{
+    InterlockedIncrement((volatile long*)&BackgroundTask);
+}
 namespace fnv_00c3dbf0 {
 inline void Dead3()
 {
@@ -4256,38 +3864,8 @@ extern unsigned DAT_01202800;
 extern unsigned char DAT_01202dd8;
 extern float DAT_011ac39c;
 __int64 FUN_00aa4d80();
-struct Setting
-{
-    void* vtbl;
-    unsigned m_uiFilterValue;
-    unsigned* GetPtr()
-    {
-        return this ? &m_uiFilterValue : (DAT_01202800 = 0, &DAT_01202800);
-    }
-    unsigned GetUInt()
-    {
-        unsigned* p = GetPtr();
-        return *p;
-    }
-};
 extern Setting DAT_01202da8;
 extern Setting DAT_01202db4;
-struct IOTask
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void Run();
-    int m_04;
-    long m_iObjectReferenceCount;
-    void AcquireReference()
-    {
-        InterlockedIncrement(&m_iObjectReferenceCount);
-    }
-    void FUN_0044dd60();
-};
 struct TaskPtr
 {
     IOTask* m_p;
@@ -4322,23 +3900,20 @@ struct TaskPtr
         return m_p;
     }
 };
-struct IOQueue
+}  // namespace fnv_00c3dbf0
+inline unsigned* Setting::GetPtr()
 {
-    void FUN_00c3e420(TaskPtr& out);
-};
-struct IOManager
+    return this ? (unsigned*)&uValue.f : (fnv_00c3dbf0::DAT_01202800 = 0, &fnv_00c3dbf0::DAT_01202800);
+}
+inline unsigned Setting::GetUInt()
 {
-    char pad00[0x64];
-    IOQueue* m_queue;
-    int m_uiContentCount;
-    int m_6c;
-    void (*m_idleFn)();
-    bool (*m_canRunFn)();
-    bool FUN_00c3dbf0();
-};
+    unsigned* p = GetPtr();
+    return *p;
+}
 // @fnv 0x00c3dbf0
 bool IOManager::FUN_00c3dbf0()
 {
+    using namespace fnv_00c3dbf0;
     if (DAT_01202dd8)
         return true;
     bool result2 = true;
@@ -4359,7 +3934,7 @@ bool IOManager::FUN_00c3dbf0()
     while (taskA)
     {
         Dead16();
-        taskA->Run();
+        taskA->ProcessLoadedAnimIdle();
         if (m_idleFn)
             m_idleFn();
         if (!(bool)(FUN_00aa4d80() - start > limit5 ? 1 : 0))
@@ -4375,7 +3950,7 @@ bool IOManager::FUN_00c3dbf0()
     Dead3();
     return result2;
 }
-}  // namespace fnv_00c3dbf0
+
 
 extern volatile long DAT_01202d9c;
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* value);
@@ -4385,74 +3960,33 @@ inline int S00c3de80_Zero()
     return 0;
 }
 
-struct S00c3de80_Key
+// These task-submission entry points are absent from IOManager's shared interface.
+// Keep their thiscall ABI here while using the shared manager and task storage.
+struct TaskSubmissionEntry
 {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-
-    int unk08;
-    int unk0c;
-    __int64 value;
-};
-
-struct S00c3de80_Obj
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-
-    bool __thiscall FUN_00c3fb50(S00c3de80_Key* object);
-    bool __thiscall FUN_00c3de80(S00c3de80_Key* object);
+    bool __thiscall FUN_00c3fb50(IOTask* object);
+    bool __thiscall FUN_00c3de80(IOTask* object);
 };
 
 // @fnv 0x00c3de80
-bool S00c3de80_Obj::FUN_00c3de80(S00c3de80_Key* object)
+bool TaskSubmissionEntry::FUN_00c3de80(IOTask* object)
 {
-    S00c3de80_Key* self = object;
-    if (unk68 != 6)
+    IOTask* self = object;
+    if (((IOManager*)this)->m_uiContentCount != 6)
     {
-        if ((unsigned char)(self->value >> 16) <= unk68)
+        if ((unsigned char)(self->Key >> 16) <= ((IOManager*)this)->m_uiContentCount)
         {
-            self->value = (self->value & 0xffffffffff00ffffLL) + ((__int64)S00c3de80_Zero() << 16);
+            self->Key = (self->Key & 0xffffffffff00ffffLL) + ((__int64)S00c3de80_Zero() << 16);
         }
     }
 
-    self->v6();
+    self->GenerateKey();
 
     while (!FUN_00c3fb50(self))
     {
         __declspec(align(2)) unsigned short serial = (unsigned short)InterlockedIncrement(&DAT_01202d9c);
 
-        self->value = (self->value & 0xffffffffffff0000LL) + (int)serial;
+        self->Key = (self->Key & 0xffffffffffff0000LL) + (int)serial;
     }
 
     return true;
@@ -4460,32 +3994,6 @@ bool S00c3de80_Obj::FUN_00c3de80(S00c3de80_Key* object)
 
 extern "C" __declspec(dllimport) void __stdcall Sleep(unsigned long);
 extern char DAT_011af70c;
-struct IOQueue
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual unsigned Count();
-};
-struct IOManager
-{
-    char pad00[0x18];
-    unsigned m_18;
-    char pad1c[0x64 - 0x1c];
-    IOQueue* m_queue;
-    int m_uiContentCount;
-    unsigned (*m_pendingFn)();
-    char pad70[0x78 - 0x70];
-    void (*m_progressFn)(float);
-    unsigned QueuedCount()
-    {
-        return m_queue->Count();
-    }
-    void FUN_00c3e1b0(int, int);
-    unsigned SumArrayUpToCount(int);
-    bool FUN_00c3dbf0();
-    void FUN_00c3dfa0(int mode);
-};
 // @fnv 0x00c3dfa0
 void IOManager::FUN_00c3dfa0(int mode)
 {
@@ -4672,40 +4180,36 @@ struct QueueC3
     bool Next(unsigned, void*, RefPtr_c3e1b0*);
 };
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
-struct IOMgr_c3e1b0;
+struct TaskManagerQueueState;
 struct QueueRegistryC3
 {
     int unk00;
     unsigned tlsIndex;
-    QueueC3* Create(IOMgr_c3e1b0*);
-    inline QueueC3* Get(IOMgr_c3e1b0* mgr)
+    QueueC3* Create(TaskManagerQueueState*);
+    inline QueueC3* Get(TaskManagerQueueState* mgr)
     {
         unsigned index = tlsIndex;
         void* value = TlsGetValue(index);
         return value ? (QueueC3*)value : Create(mgr);
     }
 };
-struct IOMgr_c3e1b0
+// Queue traversal helpers are not exposed by the shared BSTaskManager interface.
+// This adapter has no storage; it accesses the shared IOManager base storage.
+struct TaskManagerQueueState
 {
-    int unk00, unk04;
-    unsigned count;
-    int unk0c, unk10;
-    QueueRegistryC3* registry;
-    int unk18, unk1c;
-    NextLockC3 nextLock;
     inline unsigned Count() const
     {
-        return count;
+        return *(const unsigned*)(((const IOManager*)this)->unk04 + 4);
     }
     inline QueueC3* GetQueue()
     {
-        return registry->Get(this);
+        return (*(QueueRegistryC3**)(((IOManager*)this)->unk04 + 0x10))->Get(this);
     }
     void Lock();
     void Unlock();
     inline bool Next(Stream_c3e1b0* s, __int64* key, RefPtr_c3e1b0* p, bool flag)
     {
-        nextLock.Lock(0);
+        ((NextLockC3*)(((IOManager*)this)->unk1C + 4))->Lock(0);
         bool result = false;
         if (s->Finished())
             result = false;
@@ -4736,33 +4240,32 @@ struct IOMgr_c3e1b0
                 break;
             }
         }
-        nextLock.Unlock();
+        ((NextLockC3*)(((IOManager*)this)->unk1C + 4))->Unlock();
         return result;
     }
-    void FUN_00c3e1b0(int maxPriority, int arg);
 };
 
 // @fnv 0x00c3e1b0
-void IOMgr_c3e1b0::FUN_00c3e1b0(int maxPriority, int arg)
+void IOManager::FUN_00c3e1b0(int maxPriority, int arg)
 {
     if (maxPriority <= arg)
         return;
     {
-        Lock();
+        ((TaskManagerQueueState*)this)->Lock();
         Stream_c3e1b0 stream;
         stream.Reserve(arg * 4 + 4);
         while (!bool(stream.flags & 2))
         {
             __int64 key = 0;
             RefPtr_c3e1b0 item3;
-            if (Next(&stream, &key, &item3, 1))
+            if (((TaskManagerQueueState*)this)->Next(&stream, &key, &item3, 1))
             {
                 if ((unsigned char)(key >> 16) > maxPriority)
                     break;
                 item3->Run(arg);
             }
         }
-        Unlock();
+        ((TaskManagerQueueState*)this)->Unlock();
     }
 }
 
@@ -4780,7 +4283,7 @@ struct Q
     virtual int v9(int x, int y);
 };
 
-struct H
+struct TaskMapHandle
 {
     Q* q;
     bool __thiscall FUN_00c3fe80(int key, int a, int b, int c);
@@ -4790,7 +4293,7 @@ struct LockObj
 {
     void* owner;
     int count;
-    void __thiscall Wait(const char* name);
+    void __thiscall FUN_0040fbf0(const char* name);
     __forceinline void Unlock()
     {
         count = count - 1;
@@ -4803,8 +4306,8 @@ struct Owner
 {
     int u0, u1, u2, u3, u4, u5, u6, u7;
     LockObj lock;
-    H* __thiscall FUN_00c3f750();
-    __forceinline bool pass(H* node, int a, int b, int c)
+    TaskMapHandle* __thiscall FUN_00c3f750();
+    __forceinline bool pass(TaskMapHandle* node, int a, int b, int c)
     {
         return node->FUN_00c3fe80(node->q->v9(a, b), a, b, c);
     }
@@ -4817,8 +4320,8 @@ bool Owner::FUN_00c3f160(int a, int b, int c)
     int local4, local5, local6, receiver, answer;
     int extra14, done, status, extra4, extra5;
     int slot2, spare4, spare5, spare6, spare8, spare9, extra15;
-    lock.Wait(0);
-    H* node = FUN_00c3f750();
+    lock.FUN_0040fbf0(0);
+    TaskMapHandle* node = FUN_00c3f750();
     bool found = pass(node, a, b, c);
     lock.Unlock();
     return found;
@@ -4836,19 +4339,6 @@ struct Inner
     virtual int v7();
     virtual int v8();
     virtual int v9(int a, int b);
-};
-class RecursiveSpinLock
-{
-  public:
-    volatile long threadID;
-    volatile long lockCount;
-    void Lock(const char* name);
-    inline void Unlock()
-    {
-        lockCount = lockCount - 1;
-        if (lockCount == 0)
-            threadID = 0;
-    }
 };
 struct WeightedMapNode
 {
@@ -5128,23 +4618,17 @@ struct FUN_00c3f7a0_Class
 
 extern __declspec(thread) int DAT_tls_field;
 
-class AutoMemContext_00c3f7a0
+inline AutoMemContext::AutoMemContext(int aeMemoryContext)
 {
-  public:
-    AutoMemContext_00c3f7a0(int aeMemoryContext)
-    {
-        int iOld = DAT_tls_field;
-        m_iOld = iOld;
-        DAT_tls_field = aeMemoryContext;
-    }
-    ~AutoMemContext_00c3f7a0()
-    {
-        int iSaved = m_iOld;
-        DAT_tls_field = iSaved;
-    }
-
-    int m_iOld;
-};
+    int iOld = DAT_tls_field;
+    m_eMemoryContext = (MEM_CONTEXT)iOld;
+    DAT_tls_field = aeMemoryContext;
+}
+inline AutoMemContext::~AutoMemContext()
+{
+    int iSaved = m_eMemoryContext;
+    DAT_tls_field = iSaved;
+}
 
 struct Item_00c3f7a0
 {
@@ -5164,7 +4648,7 @@ struct Item_00c3f7a0
 // @fnv 0x00c3f7a0
 void* FUN_00c3f7a0_Class::FUN_00c3f7a0(int index)
 {
-    AutoMemContext_00c3f7a0 kContext(6);
+    AutoMemContext kContext(6);
     return new Item_00c3f7a0(this, m_pValues10 + index * 2, m_pValues10 + index * 2 + 1);
 }
 
@@ -5430,36 +4914,12 @@ bool SearchC3::FUN_00c3ffb0(int index, KeyC3 key, RefC3* value, bool replace)
 }
 
 namespace fnv_00c35c10 {
-extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-
-    NiPoint3 operator+(const NiPoint3& other) const
-    {
-        return NiPoint3(x + other.x, y + other.y, z + other.z);
-    }
-    NiPoint3 operator-(const NiPoint3& other) const
-    {
-        return NiPoint3(x - other.x, y - other.y, z - other.z);
-    }
-};
-struct NiPoint3b : NiPoint3
-{
-    NiPoint3b(float a, float b, float c) : NiPoint3(a, b, c)
-    {}
-};
 struct M_004b4500
 {
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    NiPoint3b FUN_004b4500(const NiPoint3* p)
+    NiPoint3 FUN_004b4500(const NiPoint3* p)
     {
-        return NiPoint3b(m00 * p->x + m01 * p->y + m02 * p->z, m10 * p->x + m11 * p->y + m12 * p->z,
+        return NiPoint3(m00 * p->x + m01 * p->y + m02 * p->z, m10 * p->x + m11 * p->y + m12 * p->z,
                          m20 * p->x + m21 * p->y + m22 * p->z);
     }
 };
@@ -5524,52 +4984,53 @@ struct RefObj_c3d4
     }
 };
 
-template <class T> class NiPointerC3D4
+template <class T> inline NiPointer<T>::NiPointer()
 {
-  public:
-    NiPointerC3D4(T* pObject = 0) : m_pObject(pObject)
+    m_pObject = 0;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::NiPointer(T* pObject) : m_pObject(pObject)
+{
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer& ptr)
+{
+    if (m_pObject != ptr.m_pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = ptr.m_pObject;
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
-    NiPointerC3D4& operator=(const NiPointerC3D4& ptr)
-    {
-        if (m_pObject != ptr.m_pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = ptr.m_pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    T* m_pObject;
-};
+    return *this;
+}
 
-inline void* operator new(unsigned int, NiPointerC3D4<RefObj_c3d4>* p)
+inline void* operator new(unsigned int, NiPointer<RefObj_c3d4>* p)
 {
     return p;
 }
 
-__forceinline void ConstructC3D4(NiPointerC3D4<RefObj_c3d4>* pkData, unsigned int ItemUpdateArray)
+__forceinline void ConstructC3D4(NiPointer<RefObj_c3d4>* pkData, unsigned int ItemUpdateArray)
 {
     for (unsigned int i = 0; i < ItemUpdateArray; i++)
-        NiPointerC3D4<RefObj_c3d4>* pkNew = new (&pkData[i]) NiPointerC3D4<RefObj_c3d4>;
+        NiPointer<RefObj_c3d4>* pkNew = new (&pkData[i]) NiPointer<RefObj_c3d4>;
 }
 
 struct PtrArray_c3d4
 {
     void* m_vtbl;
-    NiPointerC3D4<RefObj_c3d4>* m_pBase;
+    NiPointer<RefObj_c3d4>* m_pBase;
     unsigned int m_uiSize;
     unsigned int m_uiMax;
     unsigned int FUN_00c3d6c0();
-    unsigned int FUN_00c3d4f0(const NiPointerC3D4<RefObj_c3d4>& element);
+    unsigned int FUN_00c3d4f0(const NiPointer<RefObj_c3d4>& element);
 };
 
 // @fnv 0x00c3d4f0
-unsigned int PtrArray_c3d4::FUN_00c3d4f0(const NiPointerC3D4<RefObj_c3d4>& element)
+unsigned int PtrArray_c3d4::FUN_00c3d4f0(const NiPointer<RefObj_c3d4>& element)
 {
     unsigned int uiIndex = FUN_00c3d6c0();
     ConstructC3D4(m_pBase + uiIndex, 1);
@@ -5743,7 +5204,7 @@ struct F1f0Lock
 {
     unsigned int m_pOwnerObject;
     unsigned int m_lLockCount;
-    void __thiscall Wait(unsigned int);
+    void __thiscall FUN_0040fbf0(unsigned int);
     void Unlock()
     {
         m_lLockCount = m_lLockCount - 1;
@@ -5794,7 +5255,7 @@ struct F1f0Cls
 // @fnv 0x00c3f1f0
 bool F1f0Cls::FUN_00c3f1f0(int a1, int a2, int a3, bool a4)
 {
-    m_lock.Wait(0);
+    m_lock.FUN_0040fbf0(0);
     Dead34();
     bool r = FUN_00c3f750()->Test(a1, a2, a3, a4);
     m_lock.Unlock();
@@ -5809,7 +5270,7 @@ struct SpinLockS
 {
     unsigned int owningThread;
     unsigned int lockCount;
-    void __thiscall Wait(const char* name)
+    void __thiscall FUN_0040fbf0(const char* name)
     {
         unsigned int threadID = FUN_0040fc90();
         if (owningThread == threadID)
@@ -5863,7 +5324,7 @@ static __forceinline void Dead35()
 // @fnv 0x00c3f430
 bool ManagerS::FUN_00c3f430(int a, int b, int c, int d, unsigned char e)
 {
-    lock.Wait(0);
+    lock.FUN_0040fbf0(0);
     bool result = FUN_00c3f750()->FUN_00c3ffb0(a, b, c, d, e);
     Dead35();
     lock.Unlock();
@@ -5905,16 +5366,15 @@ FUN_00c3f8c0::~FUN_00c3f8c0()
 }
 }  // namespace fnv_00c3f8c0
 
-extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
 
 struct FUN_0045c620
 {
-    NiCamera plane0;
-    NiCamera plane1;
-    NiCamera plane2;
-    NiCamera plane3;
-    NiCamera plane4;
-    NiCamera plane5;
+    NiPlane plane0;
+    NiPlane plane1;
+    NiPlane plane2;
+    NiPlane plane3;
+    NiPlane plane4;
+    NiPlane plane5;
     unsigned int active;
     FUN_0045c620();
 };
@@ -5924,24 +5384,24 @@ struct MatrixC358
     float m00, m01, m02;
     float m10, m11, m12;
     float m20, m21, m22;
-    Point FUN_004b4500(const Point&);
+    LocalPoint FUN_004b4500(const LocalPoint&);
 };
 
 struct OccluderC358
 {
     int unk00;
     int unk04;
-    Point center;
+    LocalPoint center;
     float halfWidth;
     float halfHeight;
     MatrixC358 rotation;
     int unk40;
     FUN_00a699d0s cached;
-    Point corner0;
-    Point corner1;
-    Point corner2;
-    Point corner3;
-    Point last;
+    LocalPoint corner0;
+    LocalPoint corner1;
+    LocalPoint corner2;
+    LocalPoint corner3;
+    LocalPoint last;
     bool cornersDirty;
     bool dirty;
     unsigned char disabled0;
@@ -5949,16 +5409,16 @@ struct OccluderC358
     unsigned char disabled2;
     unsigned char disabled3;
     unsigned char unkEA;
-    inline void FUN_00c35c10(Point* out)
+    inline void FUN_00c35c10(LocalPoint* out)
     {
         if (!cornersDirty)
         {
             memcpy(out, &corner0, 48);
             return;
         }
-        Point horizontal(halfWidth, 0, 0);
-        Point vertical(0, 0, halfHeight);
-        Point c0, c1, c2, c3;
+        LocalPoint horizontal(halfWidth, 0, 0);
+        LocalPoint vertical(0, 0, halfHeight);
+        LocalPoint c0, c1, c2, c3;
         horizontal = rotation.FUN_004b4500(horizontal);
         vertical = rotation.FUN_004b4500(vertical);
         c3 = center - horizontal + vertical;
@@ -5972,15 +5432,15 @@ struct OccluderC358
         memcpy(&corner0, out, 48);
         cornersDirty = false;
     }
-    bool FUN_00c358a0(Point point);
+    bool FUN_00c358a0(LocalPoint point);
 };
 
 // @fnv 0x00c358a0
-bool OccluderC358::FUN_00c358a0(Point point)
+bool OccluderC358::FUN_00c358a0(LocalPoint point)
 {
     if (unkEA != 0)
         return true;
-    Point verts[4];
+    LocalPoint verts[4];
     FUN_0045c620 frustum;
     ((Builder*)this)->FUN_00c33870(point, (FUN_00a699d0s*)&frustum);
     FUN_00c35c10(verts);

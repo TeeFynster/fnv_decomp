@@ -1,3 +1,4 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
 
 // src/havok/common/base/math/qstransform/hkqstransform.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/math/qstransform/hkqstransform.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -41,40 +42,25 @@ struct S_00ce5070_Vector4
 
 extern const S_00ce5070_Vector4 DAT_010c7170;
 
-struct S_00ce5070_Rotation
-{
-    S_00ce5070_Vector4 m_kColumn0;
-    S_00ce5070_Vector4 m_kColumn1;
-    S_00ce5070_Vector4 m_kColumn2;
-};
 
-struct S_00ce5070_Transform
-{
-    S_00ce5070_Rotation m_rotation;
-    S_00ce5070_Vector4 m_vTranslation;
-};
+#include "../../../../../../include/hkRotation.h"
 
-struct S_00ce5070_Quaternion
-{
-    S_00ce5070_Vector4 m_vec;
-    void FUN_00cb26e0(const S_00ce5070_Rotation& r);
-};
 
-struct S_00ce5070_QsTransform
-{
-    S_00ce5070_Vector4 m_vTranslation;
-    S_00ce5070_Quaternion m_rotation;
-    S_00ce5070_Vector4 m_vScale;
 
-    void FUN_00ce5070(const S_00ce5070_Transform& t);
-};
+
+
+
+
+#include "../../../../../../include/hkQsTransform.h"
+#include "../../../../../../include/hkTransform.h"
+
 
 // Copies rotation and translation from a Transform into the QsTransform, and sets scale to the constant DAT_010c7170.
 // @fnv 0x00ce5070
-void S_00ce5070_QsTransform::FUN_00ce5070(const S_00ce5070_Transform& akTransform)
+void hkQsTransform::FUN_00ce5070(const hkTransform& akTransform)
 {
     m_rotation.FUN_00cb26e0(akTransform.m_rotation);
-    m_vTranslation.m_vComponents = akTransform.m_vTranslation.m_vComponents;
+    m_vTranslation.m_vComponents = akTransform.m_vTranslation;
     m_vScale.m_vComponents = DAT_010c7170.m_vComponents;
 }
 
@@ -99,35 +85,33 @@ void FUN_00ce50b0_cls::FUN_00ce50b0(CB2FC0Object* target)
     _mm_store_ps((float*)((char*)target + 0x30), vMatrix);
 }
 
-struct __declspec(align(16)) Vector
-{
-    float x, y, z, w;
-};
+#include "../../../../../../include/hkVector4.h"
 struct FUN_008cd6a0_Class
 {
-    Vector row0, row1, row2;
+    hkVector4 row0, row1, row2;
     void FUN_00cb2d90(void*);
 };
 struct FUN_00cdf250_class
 {
-    Vector row0, row1, row2;
+    hkVector4 row0, row1, row2;
     void FUN_00cd55b0(int*, int);
 };
 struct TransformMatrix
 {
-    Vector row0, row1, row2, row3;
+    hkVector4 row0, row1, row2, row3;
     void FUN_00cb2050(int);
 };
-struct Transform
+// hkQsTransform layout with float rotation/scale lanes (0x00ce51f0 builds an hkTransform from it); kept local because the body reads the lanes as floats.
+struct QsTransformFloats
 {
-    Vector position;
+    hkVector4 position;
     float rotationX, rotationY, rotationZ, rotationW;
     float scaleX, scaleY, scaleZ;
     void FUN_00ce51f0(int);
 };
 // Builds a matrix from rotation, scale, and position, then passes out to FUN_00cb2050.
 // @fnv 0x00ce51f0
-void Transform::FUN_00ce51f0(int out)
+void QsTransformFloats::FUN_00ce51f0(int out)
 {
     FUN_008cd6a0_Class rotMatrix;
     rotMatrix.FUN_00cb2d90(&rotationX);

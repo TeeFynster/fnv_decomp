@@ -22,8 +22,8 @@ bool LipSyncAnimation::ApplyToAnimationData(BSFaceGenAnimationData* animation, f
 
     if (endDelay > 0.0)
     {
-        animation->AddKeyframe(BS_FACEGEN_MORPH_PHONEME, endDelay, true);
-        animation->AddKeyframe(BS_FACEGEN_MORPH_MODIFIER, endDelay, true);
+        animation->AddKeyframe(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_PHONEME, endDelay, true);
+        animation->AddKeyframe(BS_FACEGEN_MORPH_TYPE_BS_FG_MORPH_MODIFIER, endDelay, true);
     }
     return true;
 }

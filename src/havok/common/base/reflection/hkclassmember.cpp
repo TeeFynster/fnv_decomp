@@ -2,22 +2,13 @@
 // src/havok/common/base/reflection/hkclassmember.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/reflection/hkclassmember.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkClassMember.h"
+#include "../../../../../include/hkClass.h"
+#include "../../../../../include/hkClassMember.h"
+#include "../../../../../include/hkCustomAttributes.h"
 
-struct hkCustomAttributes
-{
-    const hkVariant* getAttribute(const char* name) const;
-};
-
-struct hkClassMember_FUN_00d86960
-{
-    char _pad[0x14];
-    const hkCustomAttributes* m_pCustomAttributes;
-    const hkVariant* FUN_00d86960(const char* name) const;
-};
 
 // @fnv 0x00d86960
-const hkVariant* hkClassMember_FUN_00d86960::FUN_00d86960(const char* name) const
+const hkVariant* hkClassMember::FUN_00d86960(const char* name) const throw()
 {
     if (m_pCustomAttributes)
         return m_pCustomAttributes->getAttribute(name);
@@ -67,44 +58,23 @@ void dummy(hkClassMember::Type x)
     FUN_00d868b0(x);
 }
 
-struct TestClass : public hkClassMember
-{
-    const hkClass* FUN_00d86910() const;
-};
-
 // @fnv 0x00d86910
-const hkClass* TestClass::FUN_00d86910() const
+__declspec(noinline) const hkClass* hkClassMember::GetClass() const
 {
     return this->m_class;
 }
 
-struct Struct_d86920
-{
-    int unk00;
-    int unk04;
-    int FUN_00d86920();
-};
-
 // @fnv 0x00d86920
-int Struct_d86920::FUN_00d86920()
+const hkClass* hkClassMember::FUN_00d86920() const throw()
 {
-    return unk04;
+    return m_class;
 }
 
-class FUN_00d86930_StandIn
-{
-  public:
-    void* unk00;
-    void* unk04;
-    hkClassEnum* unk08;
-
-    hkClassEnum* FUN_00d86930();
-};
-
+// Missing zero-argument methods use ECX-only helpers, matching the original member-call convention.
 // @fnv 0x00d86930
-hkClassEnum* FUN_00d86930_StandIn::FUN_00d86930()
+hkClassEnum* __fastcall GetMemberEnum(const hkClassMember* member)
 {
-    return unk08;
+    return member->m_pClassEnum;
 }
 
 struct FUN_00dba990_Obj
@@ -112,34 +82,28 @@ struct FUN_00dba990_Obj
     int FUN_00dba990();
 };
 
-struct FUN_00d86bc0_Obj
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    unsigned char unk0C;
-    void FUN_00d86bc0(int a, int b);
-};
+// The shared header lacks the setter; this call type supplies its original ECX this argument.
+typedef void (__thiscall* MemberValueSetter)(hkClassMember*, int, int);
 
 // @fnv 0x00dc1bf0
 unsigned int __stdcall FUN_00dc1bf0(int aiArg, int pMember, int pSource, int aiUnused)
 {
-    FUN_00d86bc0_Obj* member = (FUN_00d86bc0_Obj*)pMember;
-    unsigned int type = member->unk0C;
+    hkClassMember* member = (hkClassMember*)pMember;
+    unsigned int type = member->m_type;
 
     switch (type)
     {
     case 0x18:
-        if (member->unk08 != 0)
+        if (member->m_pClassEnum != 0)
         {
             int result = ((FUN_00dba990_Obj*)pSource)->FUN_00dba990();
-            member->FUN_00d86bc0(aiArg, result);
+            ((MemberValueSetter)&FUN_00d86bc0)(member, aiArg, result);
         }
         return 0;
     case 0x1f:
-        if (member->unk08 != 0)
+        if (member->m_pClassEnum != 0)
         {
-            member->FUN_00d86bc0(aiArg, ((FUN_00dba990_Obj*)pSource)->FUN_00dba990());
+            ((MemberValueSetter)&FUN_00d86bc0)(member, aiArg, ((FUN_00dba990_Obj*)pSource)->FUN_00dba990());
         }
         return 0;
     }
@@ -154,58 +118,24 @@ struct NativeTypePropertyD86A
     short m_usFlags;
 };
 
-class hkClassD86A;
-
-class hkClassMemberD86A
-{
-  public:
-    enum Type
-    {
-        TYPE_ENUM = 0x18,
-        TYPE_STRUCT = 0x19,
-        TYPE_FLAGS = 0x1f
-    };
-    enum Flags
-    {
-        ALIGN_8 = 0x80,
-        ALIGN_16 = 0x100
-    };
-
-    const char* m_name;
-    const hkClassD86A* m_class;
-    const void* m_pClassEnum;
-    unsigned char m_type;
-    unsigned char m_eSubtype;
-    short m_iArraySize;
-    unsigned short m_flags;
-    unsigned short m_offset;
-
-    int GetAlignment() const;
-};
-
-class hkClassD86A
-{
-  public:
-    int FUN_00d46f00() const;
-    const hkClassMemberD86A& FUN_00d46f20(int i) const;
-};
+int __fastcall GetNumMembers(const hkClass* klass);
 
 // Returns the memory alignment of this class member, derived from its type, struct member alignments, or explicit ALIGN_8/ALIGN_16 flags.
 // @fnv 0x00d86a90
-int hkClassMemberD86A::GetAlignment() const
+int __fastcall GetMemberAlignment(const hkClassMember* member)
 {
-    int type = m_type;
-    if (type == TYPE_ENUM || type == TYPE_FLAGS)
-        type = m_eSubtype;
+    int type = member->m_type;
+    if (type == hkClassMember::TYPE_ENUM || type == hkClassMember::TYPE_FLAGS)
+        type = member->m_eSubtype;
 
     int align;
-    if (type == TYPE_STRUCT)
+    if (type == hkClassMember::TYPE_STRUCT)
     {
         int structAlign = 1;
-        for (int i = 0; i < m_class->FUN_00d46f00(); i++)
+        for (int i = 0; i < GetNumMembers(member->m_class); i++)
         {
-            if (m_class->FUN_00d46f20(i).GetAlignment() > structAlign)
-                structAlign = m_class->FUN_00d46f20(i).GetAlignment();
+            if (GetMemberAlignment(&member->m_class->FUN_00d46f20(i)) > structAlign)
+                structAlign = GetMemberAlignment(&member->m_class->FUN_00d46f20(i));
         }
         align = structAlign;
     }
@@ -214,9 +144,9 @@ int hkClassMemberD86A::GetAlignment() const
         align = ((const NativeTypePropertyD86A*)&DAT_011b6ab0)[type].m_usFlags;
     }
 
-    if (m_flags & (ALIGN_8 | ALIGN_16))
+    if (member->m_flags & (hkClassMember::ALIGN_8 | hkClassMember::ALIGN_16))
     {
-        int required = (bool)((m_flags >> 8) & 1) ? 16 : 8;
+        int required = (bool)((member->m_flags >> 8) & 1) ? 16 : 8;
         if (required > align)
             align = required;
     }
@@ -250,21 +180,10 @@ void formatTypeName(TypeNameOutput* output, const char* detail, int type)
     FUN_00d868e0(output, detail, type);
 }
 
-class OwnerD869
-{
-  public:
-    int FUN_00d86940() const;
-    int unk00;
-    int unk04;
-    int unk08;
-    short unk0c;
-    short m_sValue;
-};
-
 // @fnv 0x00d86940
-int OwnerD869::FUN_00d86940() const
+__declspec(noinline) int hkClassMember::FUN_00d86940() const throw()
 {
-    return m_sValue;
+    return m_iArraySize;
 }
 
 struct TypeProps_d869
@@ -275,27 +194,7 @@ struct TypeProps_d869
     short m_usFlags;
 };
 
-class hkClass_d869
-{
-  public:
-    int GetObjectAlignment() const;
-};
-
-struct ClassMember_d869 : public hkClassMember
-{
-    int GetMemberOffset() const;
-    const hkClass_d869& GetReferencedClass() const;
-    int FUN_00d86980() const;
-};
-
-__declspec(noinline) int ClassMember_d869::GetMemberOffset() const
-{
-    return m_iArraySize;
-}
-__declspec(noinline) const hkClass_d869& ClassMember_d869::GetReferencedClass() const
-{
-    return *(const hkClass_d869*)m_class;
-}
+int __fastcall GetObjectSize(const hkClass* klass);
 
 static inline const TypeProps_d869* typeProps_d869()
 {
@@ -304,56 +203,56 @@ static inline const TypeProps_d869* typeProps_d869()
 
 // For handled types, multiplies the selected type-property value or referenced class alignment by the member count; otherwise returns -1.
 // @fnv 0x00d86980
-int ClassMember_d869::FUN_00d86980() const
+int __fastcall GetMemberSize(const hkClassMember* member)
 {
     int size = -1;
-    switch (m_type)
+    switch (member->m_type)
     {
-    case TYPE_BOOL:
-    case TYPE_CHAR:
-    case TYPE_INT8:
-    case TYPE_UINT8:
-    case TYPE_INT16:
-    case TYPE_UINT16:
-    case TYPE_INT32:
-    case TYPE_UINT32:
-    case TYPE_INT64:
-    case TYPE_UINT64:
-    case TYPE_REAL:
-    case TYPE_VECTOR4:
-    case TYPE_QUATERNION:
-    case TYPE_MATRIX3:
-    case TYPE_ROTATION:
-    case TYPE_QSTRANSFORM:
-    case TYPE_MATRIX4:
-    case TYPE_TRANSFORM:
-    case TYPE_POINTER:
-    case TYPE_FUNCTIONPOINTER:
-    case TYPE_ARRAY:
-    case TYPE_SIMPLEARRAY:
-    case TYPE_HOMOGENEOUSARRAY:
-    case TYPE_VARIANT:
-    case TYPE_CSTRING:
-    case TYPE_ULONG:
-    case TYPE_HALF:
-    case TYPE_STRINGPTR: {
-        int nelem = GetMemberOffset() ? GetMemberOffset() : 1;
-        size = nelem * typeProps_d869()[m_type].m_iElementCount;
+    case hkClassMember::TYPE_BOOL:
+    case hkClassMember::TYPE_CHAR:
+    case hkClassMember::TYPE_INT8:
+    case hkClassMember::TYPE_UINT8:
+    case hkClassMember::TYPE_INT16:
+    case hkClassMember::TYPE_UINT16:
+    case hkClassMember::TYPE_INT32:
+    case hkClassMember::TYPE_UINT32:
+    case hkClassMember::TYPE_INT64:
+    case hkClassMember::TYPE_UINT64:
+    case hkClassMember::TYPE_REAL:
+    case hkClassMember::TYPE_VECTOR4:
+    case hkClassMember::TYPE_QUATERNION:
+    case hkClassMember::TYPE_MATRIX3:
+    case hkClassMember::TYPE_ROTATION:
+    case hkClassMember::TYPE_QSTRANSFORM:
+    case hkClassMember::TYPE_MATRIX4:
+    case hkClassMember::TYPE_TRANSFORM:
+    case hkClassMember::TYPE_POINTER:
+    case hkClassMember::TYPE_FUNCTIONPOINTER:
+    case hkClassMember::TYPE_ARRAY:
+    case hkClassMember::TYPE_SIMPLEARRAY:
+    case hkClassMember::TYPE_HOMOGENEOUSARRAY:
+    case hkClassMember::TYPE_VARIANT:
+    case hkClassMember::TYPE_CSTRING:
+    case hkClassMember::TYPE_ULONG:
+    case hkClassMember::TYPE_HALF:
+    case hkClassMember::TYPE_STRINGPTR: {
+        int nelem = member->FUN_00d86940() ? member->FUN_00d86940() : 1;
+        size = nelem * typeProps_d869()[member->m_type].m_iElementCount;
     }
     break;
-    case TYPE_ENUM:
-    case TYPE_FLAGS: {
-        int nelem = GetMemberOffset() ? GetMemberOffset() : 1;
-        size = nelem * typeProps_d869()[m_eSubtype].m_iElementCount;
+    case hkClassMember::TYPE_ENUM:
+    case hkClassMember::TYPE_FLAGS: {
+        int nelem = member->FUN_00d86940() ? member->FUN_00d86940() : 1;
+        size = nelem * typeProps_d869()[member->m_eSubtype].m_iElementCount;
     }
     break;
-    case TYPE_STRUCT: {
-        int nelem = GetMemberOffset() ? GetMemberOffset() : 1;
-        size = nelem * GetReferencedClass().GetObjectAlignment();
+    case hkClassMember::TYPE_STRUCT: {
+        int nelem = member->FUN_00d86940() ? member->FUN_00d86940() : 1;
+        size = nelem * GetObjectSize(member->GetClass());
     }
     break;
-    case TYPE_ZERO:
-    case TYPE_INPLACEARRAY:
+    case hkClassMember::TYPE_ZERO:
+    case hkClassMember::TYPE_INPLACEARRAY:
         break;
     }
     return size;

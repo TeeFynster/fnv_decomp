@@ -1,41 +1,11 @@
-// gamebryo2.2/corelibs/niconsolerenderer/nid3dshaderfactory_decls.h: declares NiShaderFactory, NiD3DShaderFactory, NiMemObject, NiStringMapStorage
+// gamebryo2.2/corelibs/niconsolerenderer/nid3dshaderfactory_decls.h: the shared shader factory classes plus NiStringMapStorage
 #ifndef FNV_NID3DSHADERFACTORY_DECLS_H
 #define FNV_NID3DSHADERFACTORY_DECLS_H
 
-class IMemoryHeap;
-#include "MemoryManager.h"
-class NiShaderFactory
-{
-  public:
-    void* m_ppVirtualMethodTable;
-    bool m_shutdown;
-    unsigned char m_ucUnknownByte[31];
-};
-class NiD3DShaderFactory : public NiShaderFactory
-{
-  public:
-    void* m_pOwnerShader;
-    void* m_pShaderMapStorage;
-    void* m_pShaderLibraryIterator;
-    void* m_pShaderLibraryStorage;
-    unsigned char m_padding34[76];
-    unsigned char m_kShaderMap[128];
-    void ShutdownPoint3();
-    void InitializePoint3();
-    void UpdateShaderMaterialCache(void*);
-    void FUN_00aa0390();
-    NiShaderFactory* Create();
-};
-class NiMemObject
-{
-  public:
-    static void* __cdecl operator new(unsigned int);
-};
-class NiD3DDefaultShader
-{
-  public:
-    static void __cdecl SetShaderName(const char*);
-};
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiD3DShaderFactory.h"
+#include "../../../../include/NiD3DDefaultShader.h"
 struct NiStringMapStorage
 {
     void* m_ppVirtualMethodTable;

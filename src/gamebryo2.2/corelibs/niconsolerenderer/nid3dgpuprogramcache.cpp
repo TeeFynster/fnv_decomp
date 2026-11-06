@@ -1,6 +1,9 @@
 // gamebryo2.2/corelibs/niconsolerenderer/nid3dgpuprogramcache.cpp: NiD3DGPUProgramCache, NiFixedString, Holder, ShaderLoader8e (15 functions)
 
 #include "nid3dgpuprogramcache_decls.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiFile.h"
+#include "../../../../include/NiFixedString.h"
 // Returns the vertex shader profile string matching fnv_particle_shader_renderer_level, or null for other values.
 // @fnv 0x00b4f3e0
 const char* NiD3DGPUProgramCache::GetVertexShaderProfile()
@@ -47,10 +50,6 @@ const char* NiD3DGPUProgramCache::GetPixelShaderProfile(bool usePixelLevel)
 
 __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern char* EmptyFS;
-struct MemoryManager
-{
-    void _DeallocateAlias(void*);
-};
 extern MemoryManager g_memoryManager;
 
 // @fnv 0x00a644a0
@@ -359,88 +358,44 @@ __declspec(nothrow) int FUN_00aa1360(const char*, const char*);
 __declspec(dllimport) __declspec(nothrow) long __stdcall InterlockedDecrement(volatile long*);
 __declspec(dllimport) __declspec(nothrow) long __stdcall InterlockedIncrement(volatile long*);
 extern char* EmptyFS;
-__declspec(nothrow) inline long NiAtomicSubtract(volatile long* value)
+inline NiFixedString& NiFixedString::operator=(const char* text)
 {
-    return InterlockedDecrement(value);
+    if (m_kHandle != text)
+    {
+        char* old = m_kHandle;
+        m_kHandle = NiGlobalStringTable::AddString(text);
+        NiGlobalStringTable::DecRefCount(old);
+    }
+    return *this;
 }
-struct StringHeader
-{
-    volatile long refs;
-    unsigned int length;
-};
-struct NiGlobalStringTable
-{
-    __declspec(nothrow) static char* AddString(const char*);
-    __declspec(nothrow) static volatile long* GetRefCount(char*& h)
-    {
-        return &((StringHeader*)h - 1)->refs;
-    }
-    __declspec(nothrow) static void IncRefCount(char*& h)
-    {
-        if (h == EmptyFS)
-            return;
-        InterlockedIncrement(GetRefCount(h));
-    }
-    __declspec(nothrow) static void DecRefCount(char*& h)
-    {
-        if (h == EmptyFS)
-            return;
-        volatile long* count = GetRefCount(h);
-        NiAtomicSubtract(count);
-    }
-};
-class NiFixedString
-{
-  public:
-    char* data;
-    __declspec(nothrow) NiFixedString() : data(EmptyFS)
-    {}
-    __declspec(nothrow) NiFixedString(const char* text);
-    __declspec(nothrow) ~NiFixedString();
-    NiFixedString& operator=(const char* text)
-    {
-        if (data != text)
-        {
-            char* old = data;
-            data = NiGlobalStringTable::AddString(text);
-            if (old != EmptyFS)
-                InterlockedDecrement(&((StringHeader*)old - 1)->refs);
-        }
-        return *this;
-    }
-    NiFixedString& operator=(const NiFixedString& other)
-    {
-        char* incoming = other.data;
-        if (data != incoming)
-        {
-            NiGlobalStringTable::IncRefCount(incoming);
-            char* outgoing = data;
-            NiGlobalStringTable::DecRefCount(outgoing);
-            data = incoming;
-        }
-        return *this;
-    }
-    bool operator==(const char* text) const
-    {
-        if (data == text)
-            return true;
-        if (!text || !data)
-            return false;
-        return FUN_00aa1360(data, text) == 0;
-    }
-};
 
-__declspec(nothrow) NiFixedString::NiFixedString(const char* text)
+inline NiFixedString& NiFixedString::operator=(const NiFixedString& other)
 {
-    if (!text)
-        data = EmptyFS;
-    else
-        data = NiGlobalStringTable::AddString(text);
+    char* incoming = other.m_kHandle;
+    if (m_kHandle != incoming)
+    {
+        NiGlobalStringTable::IncRefCount(incoming);
+        char* outgoing = m_kHandle;
+        NiGlobalStringTable::DecRefCount(outgoing);
+        m_kHandle = incoming;
+    }
+    return *this;
 }
-__declspec(nothrow) NiFixedString::~NiFixedString()
+
+inline bool NiFixedString::operator==(const char* text) const
 {
-    NiGlobalStringTable::DecRefCount(data);
+    if (m_kHandle == text)
+        return true;
+    if (!text || !m_kHandle)
+        return false;
+    return FUN_00aa1360(m_kHandle, text) == 0;
 }
+
+inline NiFixedString::operator const char*() const
+{
+    return m_kHandle;
+}
+
 
 struct W20Profiles
 {
@@ -485,8 +440,8 @@ __declspec(nothrow) FUN_00e8e450::FUN_00e8e450(int a, const char* apcSource, int
     type = kind;
     suffix = apcPath;
     char filename[260];
-    FUN_00a305b0(filename, 260, "%s_%s_%s.cache", apcPath, arRequested.data, "DX9");
-    name = filename;
+    FUN_00a305b0(filename, 260, "%s_%s_%s.cache", apcPath, arRequested.m_kHandle, "DX9");
+    name = (const char*)filename;
     SetString(apcSource);
     profile = arRequested;
     if (kind == 0)
@@ -607,14 +562,6 @@ struct ShaderBuffer8e
     virtual void* __stdcall GetBufferPointer();
     virtual unsigned long __stdcall GetBufferSize();
 };
-struct FixedString8e
-{
-    const char* m_kHandle;
-    operator const char*() const
-    {
-        return m_kHandle;
-    }
-};
 struct ShaderProgram8e;
 struct ShaderFactory8e
 {
@@ -669,15 +616,15 @@ struct ShaderLoader8e
     virtual void v18();
     virtual void v19();
     virtual void v20();
-    virtual const FixedString8e& GetLoaderName();
+    virtual const NiFixedString& GetLoaderName();
 
     void FUN_00ee92d0(ShaderStream8e* pkStream, char* pcBuffer, unsigned int uiMaxLen);
-    bool LoadShaderProgram(ShaderStream8e* pkStream, const FixedString8e& kName, ShaderProgram8e** ppkProgram,
+    bool LoadShaderProgram(ShaderStream8e* pkStream, const NiFixedString& kName, ShaderProgram8e** ppkProgram,
                            bool bSkip);
 };
 
 // @fnv 0x00e8e000
-bool ShaderLoader8e::LoadShaderProgram(ShaderStream8e* pkStream, const FixedString8e& kName,
+bool ShaderLoader8e::LoadShaderProgram(ShaderStream8e* pkStream, const NiFixedString& kName,
                                        ShaderProgram8e** ppkProgram, bool bSkip)
 {
     *ppkProgram = 0;
@@ -730,35 +677,14 @@ void __cdecl fnv_StandardizeFilePath(char* path);
 bool __cdecl FUN_00aa1ab0(const char* dir);
 bool __cdecl FUN_00aa1bb0(const char* dir);
 
-class NiBinaryStream
+inline unsigned int NiBinaryStream::Write(const void* pvBuffer, unsigned int uiBytes)
 {
-  public:
-    virtual ~NiBinaryStream();
-
-    unsigned int Write(const void* pvBuffer, unsigned int uiBytes)
-    {
-        unsigned int uiSize = 1;
-        unsigned int uiBytesWritten = m_pfnWrite(this, pvBuffer, uiBytes, &uiSize, 1);
-        m_uiStreamFlags += uiBytesWritten;
-        return uiBytesWritten;
-    }
-
-    unsigned int m_uiStreamFlags;
-    unsigned int (*m_pfnRead)(NiBinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int (*m_pfnWrite)(NiBinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-};
-
-class NiFile : public NiBinaryStream
-{
-  public:
-    enum OpenMode
-    {
-        READ_ONLY,
-        WRITE_ONLY,
-        APPEND_ONLY
-    };
-    static NiFile* GetFile(const char* pcName, OpenMode eMode, unsigned int uiBufferSize);
-};
+    unsigned int uiSize = 1;
+    unsigned int uiBytesWritten =
+        (*(NIBINARYSTREAM_WRITEFN*)((char*)this + 0x0c))(this, pvBuffer, uiBytes, &uiSize, 1);
+    *(unsigned int*)((char*)this + 4) += uiBytesWritten;
+    return uiBytesWritten;
+}
 
 // Writes pcText to pcFileName if the preceding checks pass and the file opens, then returns true.
 // @fnv 0x00e8dd70
@@ -856,8 +782,9 @@ struct NiPointerVal
     }
 };
 
-struct ShaderMap
-{
+// Exe 0x00e8eb80: unit-local ShaderMap view; declarations and layout are preserved.
+struct ShaderCacheHashMap
+{ // distinct from NiTexturingProperty::ShaderMap: insertion 0x00e8e1d0 operates on buckets/count at +4/+8/+12 with two virtual slots, not texture-map vftable 0x0109c4ec.
     virtual void vf0();
     virtual ShaderNode* Alloc();
     unsigned int nBuckets;
@@ -918,7 +845,7 @@ class S00e8eb80_Obj
     virtual void vfn98(const char* path, const char* text);
 
     int unk04;
-    ShaderMap m_08;
+    ShaderCacheHashMap m_08;
     unsigned int unk18;
     unsigned int unk1C;
     unsigned int unk20;

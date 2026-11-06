@@ -20,7 +20,7 @@ bool TESRegionDataSound::LoadRegionSoundData(TESFile* file)
             if (id)
             {
                 if (file->IsEndianConversionRequired())
-                    Data.Endian();
+                    reinterpret_cast<RegionDataEntry&>(sounds.pType).Endian();
                 TESForm::RemapFormIDForFile(id, file);
                 BGSMusicType* music = dynamic_cast<BGSMusicType*>(TESForm::GetFormByID(id));
                 if (!music)
@@ -34,13 +34,13 @@ bool TESRegionDataSound::LoadRegionSoundData(TESFile* file)
         unsigned int id = 0;
         file->GetChunkData(&id);
         if (id)
-            incidental = id;
+            sounds.uiIncidentalMediaSet = id;
         break;
     }
     case 0x42534452: {
         unsigned int id = 0;
         file->GetChunkData(&id);
-        reinterpret_cast<BSSimpleList<ScriptVariableInfo*>*>(&Battle)->AddTail(
+        reinterpret_cast<BSSimpleList<ScriptVariableInfo*>*>(&sounds.battleMediaSetList)->AddTail(
             reinterpret_cast<ScriptVariableInfo* const&>(id));
         break;
     }
@@ -68,7 +68,7 @@ bool TESRegionDataSound::LoadRegionSoundData(TESFile* file)
                         {
                             sound = g_dataHandler->FUN_004615d0(entry->sound);
                             entry->sound = sound;
-                            reinterpret_cast<BSSimpleList<ScriptVariableInfo*>*>(&Sounds)->AddTail(
+                            reinterpret_cast<BSSimpleList<ScriptVariableInfo*>*>(&sounds.soundList)->AddTail(
                                 reinterpret_cast<ScriptVariableInfo* const&>(entry));
                         }
                         else
@@ -215,19 +215,20 @@ void* F4390_standin::FUN_004f4390(unsigned int flags)
     return this;
 }
 
-struct SL
+// Not SL: a 12-byte member of the 0x004f43c0 object; built and destroyed by the folded BSSimpleList ctor 0x0096a2d0 / dtor 0x0046ffb0.
+struct FUN_004f43c0_List
 {
     int _00;
     int _04;
     int _08;
-    SL();
-    ~SL();
+    FUN_004f43c0_List();
+    ~FUN_004f43c0_List();
 };
 struct FUN_004f43c0
 {
     int _00;
-    SL _04;
-    SL _10;
+    FUN_004f43c0_List _04;
+    FUN_004f43c0_List _10;
     FUN_004f43c0();
 };
 // @fnv 0x004f43c0
@@ -414,7 +415,7 @@ struct RegionSoundWriter : TESRegionDataSound
 {
     void WriteRegionSoundData();
 };
-// Serializes the region's music type, incidental sound, battle music IDs and sound records through FUN_00485910/AppendChunk.
+// Serializes the region's music type, sounds.uiIncidentalMediaSet sound, battle music IDs and sound records through FUN_00485910/AppendChunk.
 // @fnv 0x004f4590
 void RegionSoundWriter::WriteRegionSoundData()
 {
@@ -424,13 +425,13 @@ void RegionSoundWriter::WriteRegionSoundData()
         unsigned int musicID = ((C0084e3a0*)GetMusicType())->_ref_0084e3a0();
         FUN_00485910(0x4f4d4452, musicID);
     }
-    if (incidental)
-        FUN_00485910(0x49534452, incidental);
+    if (sounds.uiIncidentalMediaSet)
+        FUN_00485910(0x49534452, sounds.uiIncidentalMediaSet);
     unsigned int battleID = 0;
-    unsigned int count = ((RegionListAccess<unsigned int>*)&Battle)->FUN_005ae380();
+    unsigned int count = ((RegionListAccess<unsigned int>*)&sounds.battleMediaSetList)->FUN_005ae380();
     if (count)
     {
-        RegionListAccess<unsigned int>* node = (RegionListAccess<unsigned int>*)&Battle;
+        RegionListAccess<unsigned int>* node = (RegionListAccess<unsigned int>*)&sounds.battleMediaSetList;
         for (unsigned int i = 0; node && node->FUN_006815c0() && i < count; i++)
         {
             FUN_00485910(0x42534452, node->FUN_006815c0());
@@ -438,10 +439,10 @@ void RegionSoundWriter::WriteRegionSoundData()
         }
     }
     RegionSoundEntry* sound = 0;
-    count = ((RegionListAccess<RegionSoundEntry*>*)&Sounds)->FUN_005ae380();
+    count = ((RegionListAccess<RegionSoundEntry*>*)&sounds.soundList)->FUN_005ae380();
     if (count)
     {
-        RegionListAccess<RegionSoundEntry*>* records = (RegionListAccess<RegionSoundEntry*>*)&Sounds;
+        RegionListAccess<RegionSoundEntry*>* records = (RegionListAccess<RegionSoundEntry*>*)&sounds.soundList;
         RegionSoundEntry* node = new RegionSoundEntry[count];
         for (unsigned int i = 0; records && records->FUN_006815c0() && i < count; i++)
         {

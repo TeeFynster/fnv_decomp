@@ -1,14 +1,37 @@
 // gamebryo2.2/corelibs/niparticle/nipsyspositionmodifier.cpp: NiPSysPositionModifier, Helper, NiPSysModifier (9 functions)
 
-#include "nipsyspositionmodifier_decls.h"
+#include "../../../../include/NiPSysModifier.h"
+#include "../../../../include/StrArr.h"
+#include <string.h>
+
+extern NiFixedString EmptyFS;
+extern void* g_modifierVtable;
+extern void* g_positionModifierVtable;
+void __cdecl ConstructNiObject();
+
+// The shared base supplies the layout. These entry points provide the
+// constructor and viewer-string operations absent from its declaration.
+class PositionModifierOperations : public NiPSysModifier
+{
+public:
+    __declspec(noinline) PositionModifierOperations* Initialize() throw();
+    void AppendString(StrArr* strings);
+    void AppendModifierStrings(StrArr* strings);
+    PositionModifierOperations* Clone(CloningProcess& process);
+    void CopyPositionMembers(PositionModifierOperations* destination, CloningProcess& process);
+};
 
 // @fnv 0x00c31720
-NiPSysPositionModifier::NiPSysPositionModifier()
+PositionModifierOperations* PositionModifierOperations::Initialize() throw()
 {
-    m_kName = EmptyFS;
-    m_uiUpdateOrder = 0;
-    m_pkTarget = 0;
+    typedef void (__thiscall *ObjectConstructor)(NiObject*);
+    reinterpret_cast<ObjectConstructor>(&ConstructNiObject)(this);
+    *(void**)this = &g_modifierVtable;
+    m_kName.m_kHandle = EmptyFS.m_kHandle;
+    memset(&m_uiUpdateOrder, 0,
+        reinterpret_cast<char*>(&m_pkTarget + 1) - reinterpret_cast<char*>(&m_uiUpdateOrder));
     m_bModifierActive = true;
+    return this;
 }
 
 extern "C" void* g_012026b8;
@@ -36,32 +59,14 @@ void* Helper::DestroyIfFlagged(unsigned int flags)
 }
 
 char* __cdecl FUN_00a7d330(const char*);
-struct StrArr
-{
-    char _pad[8];
-    unsigned short _s8;
-    unsigned short _sa;
-    unsigned short _sc;
-    unsigned short _se;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
-struct Base00c319e0
-{
-    void FUN_00c319e0(StrArr*);
-};
-struct Holder00c28cb0 : Base00c319e0
-{
-    void AppendString(StrArr*);
-};
 // @fnv 0x00c28cb0
-void Holder00c28cb0::AppendString(StrArr* pkStrings)
+void PositionModifierOperations::AppendString(StrArr* pkStrings)
 {
-    FUN_00c319e0(pkStrings);
+    AppendModifierStrings(pkStrings);
     char* pcStr = FUN_00a7d330((const char*)g_012026b8);
-    unsigned int uiIdx = pkStrings->_sa;
-    if (uiIdx >= pkStrings->_s8)
-        pkStrings->SetSize(uiIdx + pkStrings->_se);
+    unsigned int uiIdx = pkStrings->m_usSize;
+    if (uiIdx >= pkStrings->m_usMaxSize)
+        pkStrings->SetSize(uiIdx + pkStrings->m_usGrowBy);
     pkStrings->SetAt(uiIdx, pcStr);
 }
 
@@ -188,53 +193,27 @@ void __stdcall IntegrateParticlePositions(float fTime, FnvMod* pMod)
     }
 }
 
-class BC28C60CloningProcess;
-
-class BC28C60Modifier
+inline PositionModifierOperations* ConstructPositionModifier(void* memory) throw()
 {
-  public:
-    static void* operator new(unsigned int uiSize);
-
-    BC28C60Modifier() throw();
-    virtual ~BC28C60Modifier();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class BC28C60GravityModifier : public BC28C60Modifier
-{
-  public:
-    __forceinline BC28C60GravityModifier()
-    {}
-    virtual ~BC28C60GravityModifier();
-
-    void CopyMemberData(BC28C60GravityModifier* pkDest, BC28C60CloningProcess& kCloning);
-    BC28C60GravityModifier* FUN_00c28c60(BC28C60CloningProcess& kCloning);
-};
+    PositionModifierOperations* object = static_cast<PositionModifierOperations*>(memory);
+    object->Initialize();
+    *(void**)object = &g_positionModifierVtable;
+    return object;
+}
 
 // @fnv 0x00c28c60
-BC28C60GravityModifier* BC28C60GravityModifier::FUN_00c28c60(BC28C60CloningProcess& kCloning)
+PositionModifierOperations* PositionModifierOperations::Clone(CloningProcess& kCloning)
 {
-    BC28C60GravityModifier* pkClone = new BC28C60GravityModifier;
-    CopyMemberData(pkClone, kCloning);
+    void* memory = NiPSysModifier::operator new(sizeof(NiPSysModifier));
+    PositionModifierOperations* pkClone = memory ? ConstructPositionModifier(memory) : 0;
+    CopyPositionMembers(pkClone, kCloning);
     return pkClone;
 }
 
-class NiStream;
-class NiPSysModifier
-{
-  public:
-    void LoadBinary(NiStream& stream);
-    void FUN_00c28b50(NiStream& a1);
-};
 // @fnv 0x00c28b50
 void NiPSysModifier::FUN_00c28b50(NiStream& a1)
 {
-    LoadBinary(a1);
+    NiPSysModifier::LoadBinary(a1);
 }
 
 void __cdecl FUN_00c31830();

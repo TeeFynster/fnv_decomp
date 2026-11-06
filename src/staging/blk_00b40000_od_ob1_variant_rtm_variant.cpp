@@ -8,17 +8,12 @@
 // src/staging/blk_00b40000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-struct NiPoint3
+// BaseTag_blk_00b40000_od_ob1_variant_rtm_variant: local type (was include/BaseTag.h, which had no evidence of one real class); no method of it is bound to a named game function
+class BaseTag_blk_00b40000_od_ob1_variant_rtm_variant
 {
-    float x;
-    float y;
-    float z;
 };
-struct CIdvCamera
-{
-    CIdvCamera& FUN_00b3f0c0(CIdvCamera const&);
-    CIdvCamera& FUN_00b402d0(CIdvCamera const& src);
-};
+#include "../../include/CIdvCamera.h"
+#include "../../include/NiPoint3.h"
 struct FUN_00ec7c56_t
 {
     static void FUN_00ec7c56();
@@ -30,17 +25,6 @@ struct FUN_00b42980
     FUN_00b42980& Set(unsigned int v, FUN_00b42980 const& src);
 };
 void* operator new(unsigned int);
-struct FUN_00b40150 : CIdvCamera
-{
-    unsigned char data[76];
-    FUN_00b40150();
-};
-FUN_00b40150::FUN_00b40150()
-{}
-struct FUN_00b403a0_t : CIdvCamera
-{
-    CIdvCamera& CloneCamera();
-};
 void FUN_00ec7c56();
 struct FUN_00b40800_t
 {
@@ -48,44 +32,14 @@ struct FUN_00b40800_t
     int pad;
     char GetNextChar();
 };
-struct FUN_00b40070_Point
-{
-    float x;
-    float y;
-    float z;
-};
 extern int DAT_010a58fc;
-struct FUN_00b40070_Class
-{
-    void* unk00;
-    NiPoint3 unk04;
-    unsigned char unk10;
-    int unk14;
-    unsigned char unk18;
-    FUN_00b40070_Point unk1C;
-    FUN_00b40070_Point unk28;
-    FUN_00b40070_Point unk34;
-    unsigned char unk40;
-    float unk44;
-    int unk48;
-
-    void FUN_00b3f030();
-    FUN_00b40070_Class* __thiscall FUN_00b40070(NiPoint3* position, unsigned char value18, unsigned char value10,
-                                                float value, int result);
-};
 extern float DAT_01016248;
-struct S_00b40850_P3
-{
-    float x;
-    float y;
-    float z;
-};
 struct FUN_00b40850
 {
     float unk00;
     float unk04;
     float unk08;
-    S_00b40850_P3 unk0C;
+    NiPoint3 unk0C;
     float unk18;
     FUN_00b40850();
 };
@@ -1809,16 +1763,13 @@ struct ValueTag
 struct MoveTag
 {
 };
-struct BaseTag
-{
-};
-template <class I> inline I checked_base2(I& _It, BaseTag)
+template <class I> inline I checked_base2(I& _It, BaseTag_blk_00b40000_od_ob1_variant_rtm_variant)
 {
     return _It;
 }
 template <class I> inline I checked_base(I& _It)
 {
-    BaseTag _Base_tag;
+    BaseTag_blk_00b40000_od_ob1_variant_rtm_variant _Base_tag;
     return checked_base2(_It, _Base_tag);
 }
 // VC-style vector insertion, with scalar record destruction and exception rollback.
@@ -2723,49 +2674,6 @@ struct FUN_00b418b0 : VecContainerAlloc_Z<bool>
     FUN_00b418b0(unsigned int n, bool val);
 };
 struct P133Pair;
-struct P133Point
-{
-    float x, y, z;
-    P133Point()
-    {}
-    P133Point(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {}
-    P133Point operator+(P133Point const& other) const
-    {
-        return P133Point(x + other.x, y + other.y, z + other.z);
-    }
-    P133Point operator*(float scale) const
-    {
-        return P133Point(x * scale, y * scale, z * scale);
-    }
-    float& operator[](int index)
-    {
-        return (&x)[index];
-    }
-};
-struct P133Camera
-{
-    int unk00;
-    P133Point position;
-    int unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
-    unsigned char kind;
-    int unk44, unk48;
-    P133Camera* CloneCamera();
-    P133Point const& GetPos() const
-    {
-        return position;
-    }
-    int GetKindHalf() const
-    {
-        return kind / 2;
-    }
-    P133Point FUN_00b40430();
-    void FUN_00b404c0(P133Point const&, bool);
-    void SetPos(P133Point const& p)
-    {
-        position = p;
-    }
-};
 struct FUN_00b3f100
 {
     int state;
@@ -2784,8 +2692,8 @@ struct P133Frame
 };
 struct P133Pair
 {
-    P133Camera* first;
-    P133Camera* second;
+    CIdvCamera* first;
+    CIdvCamera* second;
 };
 struct P133Pairs;
 struct P133ConstIter : IteratorBaseAuxB42
@@ -2874,13 +2782,13 @@ struct P133Scene
     int unk00, unk04, unk08, unk0c;
     stl::vector<P133Frame> frames;
 };
-struct P133List : stl::_Container_base_aux_alloc_real<stl::allocator<P133Camera*> >
+struct P133List : stl::_Container_base_aux_alloc_real<stl::allocator<CIdvCamera*> >
 {
-    stl::allocator<P133Camera*> alval;
-    P133Camera** first;
-    P133Camera** last;
-    P133Camera** end;
-    P133List() : stl::_Container_base_aux_alloc_real<stl::allocator<P133Camera*> >(stl::allocator<P133Camera*>())
+    stl::allocator<CIdvCamera*> alval;
+    CIdvCamera** first;
+    CIdvCamera** last;
+    CIdvCamera** end;
+    P133List() : stl::_Container_base_aux_alloc_real<stl::allocator<CIdvCamera*> >(stl::allocator<CIdvCamera*>())
     {
         _Buy(0);
     }
@@ -2889,7 +2797,7 @@ struct P133List : stl::_Container_base_aux_alloc_real<stl::allocator<P133Camera*
     {
         FUN_00b17f50();
     }
-    void _Destroy(P133Camera** a, P133Camera** b)
+    void _Destroy(CIdvCamera** a, CIdvCamera** b)
     {
         p133_destroy(a, b, alval);
     }
@@ -2910,7 +2818,7 @@ struct P133List : stl::_Container_base_aux_alloc_real<stl::allocator<P133Camera*
     {
         return first == 0 ? 0 : end - first;
     }
-    P133Camera** _Ufill(P133Camera** p, unsigned count, P133Camera* const& val)
+    CIdvCamera** _Ufill(CIdvCamera** p, unsigned count, CIdvCamera* const& val)
     {
         stl::_Uninit_fill_n(p, count, val, alval);
         return p + count;
@@ -2918,15 +2826,15 @@ struct P133List : stl::_Container_base_aux_alloc_real<stl::allocator<P133Camera*
     struct OutIter
     {
         void* owner;
-        P133Camera** ptr;
-        OutIter(P133Camera**, P133List const*);
+        CIdvCamera** ptr;
+        OutIter(CIdvCamera**, P133List const*);
     };
     OutIter end_iter()
     {
         return OutIter(last, this);
     }
-    void InsertAt(OutIter, P133Camera* const&);
-    void FUN_00b15390(P133Camera* const& val)
+    void InsertAt(OutIter, CIdvCamera* const&);
+    void FUN_00b15390(CIdvCamera* const& val)
     {
         if (size() < capacity())
             last = _Ufill(last, 1, val);

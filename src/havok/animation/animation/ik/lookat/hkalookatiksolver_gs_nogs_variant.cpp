@@ -286,6 +286,7 @@ __forceinline void S00ce0290_hkVector4::SetRotatedDirection(const S00ce0290_hkQu
     this->setAdd4(ret, ret);
 }
 
+// local form of hkMatrix3: 0x00ce0290 needs inline matrix construction/setCols and QsTransform getters; shared out-of-line calls do not reproduce exe bytes.
 class S00ce0290_hkMatrix3
 {
   public:
@@ -304,6 +305,7 @@ class S00ce0290_hkMatrix3
     S00ce0290_hkVector4 m_kColumn2;
 };
 
+// local form of hkQsTransform: 0x00ce0290 needs inline matrix construction/setCols and QsTransform getters; shared out-of-line calls do not reproduce exe bytes.
 class S00ce0290_hkQsTransform
 {
   public:

@@ -1,6 +1,7 @@
 // fallout_shared/pathfinding/navmeshedgeextrainfo.cpp: EdgeExtraInfo, EdgeHolder (2 functions)
 
 #include "navmeshedgeextrainfo_decls.h"
+#include "../../../include/TES.h"
 
 // @fnv 0x00694de0
 EdgeExtraInfo* EdgeExtraInfo::DeserializeFromFile()
@@ -10,10 +11,6 @@ EdgeExtraInfo* EdgeExtraInfo::DeserializeFromFile()
     return this;
 }
 
-struct TES
-{
-    void* GetActiveCell(void* a, void* b);
-};
 extern TES* g_TES;
 struct PortalHolder
 {

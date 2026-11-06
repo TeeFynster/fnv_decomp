@@ -2,6 +2,9 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <math.h>
+#include "../../include/ImageSpaceManager.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiDX9Renderer.h"
 extern int(__stdcall* DAT_00fdf1c0)(void*);
 __declspec(dllimport) int __stdcall InterlockedDecrement(long*);
 struct RefObject
@@ -135,55 +138,8 @@ struct Color
         channels[3] = a;
     }
 };
-struct NiRenderer
-{
-    virtual void r0();
-    virtual void r1();
-    virtual void r2();
-    virtual void r3();
-    virtual void r4();
-    virtual void r5();
-    virtual void r6();
-    virtual void r7();
-    virtual void r8();
-    virtual void r9();
-    virtual void r10();
-    virtual void r11();
-    virtual void r12();
-    virtual void r13();
-    virtual void r14();
-    virtual void r15();
-    virtual void r16();
-    virtual void r17();
-    virtual void r18();
-    virtual void r19();
-    virtual void r20();
-    virtual void r21();
-    virtual void r22();
-    virtual void r23();
-    virtual void r24();
-    virtual void r25();
-    virtual void r26();
-    virtual void r27();
-    virtual void r28();
-    virtual void r29();
-    virtual void r30();
-    virtual void r31();
-    virtual void r32();
-    virtual void r33();
-    virtual void r34();
-    virtual void r35();
-    virtual void r36();
-    virtual void r37();
-    virtual void r38();
-    virtual void r39();
-    virtual void r40();
-    virtual void r41();
-    virtual void r42();
-    virtual void SetColor(const Color&);
-    virtual void r44();
-    virtual void GetColor(Color&);
-};
+
+
 struct Scene : RefObject
 {
     virtual void s2();
@@ -535,10 +491,6 @@ inline void S00bd7bb0_SetRow(GlobalObjectO2_00b8a9e0& p, int row, float x, const
 {
     p.FUN_00b8a760(row, x, y, 0.0f, 0.0f);
 }
-struct ImageSpaceManager
-{
-    void FUN_00b975f0(int, NiRenderer*, void*, RenderTexture*, GlobalObjectO2_00b8a9e0*, int);
-};
 extern NiRenderer* DAT_011f9508;
 extern int DAT_011a9bd0, DAT_011a9bd4, DAT_011a9bd8, DAT_011a9bdc;
 extern unsigned DAT_011f91b8;
@@ -658,12 +610,12 @@ void Camera::FUN_00bd7bb0(int aiFace)
     *(int*)&savedColor.channels[2] = DAT_011a9bd8;
     *(int*)&savedColor.channels[3] = DAT_011a9bdc;
     unsigned short mask = 0;
-    DAT_011f9508->GetColor(savedColor);
+    static_cast<NiDX9Renderer*>(DAT_011f9508)->GetBackgroundColor(reinterpret_cast<NiVector4*>(&savedColor));
     if (scene->mode == Scene::special)
     {
         mask = water->mask;
         Color c(4096.0f, 4096.0f, 4096.0f, 1.0f);
-        DAT_011f9508->SetColor(c);
+        static_cast<NiDX9Renderer*>(DAT_011f9508)->SetBackgroundColor(reinterpret_cast<NiVector4*>(&c));
     }
     for (int face = 0; face < 6; ++face)
     {
@@ -779,5 +731,5 @@ void Camera::FUN_00bd7bb0(int aiFace)
         FUN_00b97fa0(0, 0);
         FUN_00b6b790();
     }
-    DAT_011f9508->SetColor(savedColor);
+    static_cast<NiDX9Renderer*>(DAT_011f9508)->SetBackgroundColor(reinterpret_cast<NiVector4*>(&savedColor));
 }

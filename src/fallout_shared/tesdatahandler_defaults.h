@@ -1,13 +1,9 @@
-// fallout_shared/tesdatahandler_defaults.h: declares ActorValue, CameraPathManager, TESGlobalMap, Sky, MagicSystem and more
+// Unit declarations for default-object initialization.
 #ifndef FNV_TESDATAHANDLER_DEFAULTS_H
 #define FNV_TESDATAHANDLER_DEFAULTS_H
 
 
-class ActorValue
-{
-  public:
-    static void LoadActorValueDefinitions();
-};
+namespace ActorValue { void LoadActorValueDefinitions(); }
 class CameraPathManager
 {
   public:
@@ -19,23 +15,7 @@ class TESGlobalMap
   public:
     void SetAt(const char*, TESGlobal*);
 };
-class Sky
-{
-  public:
-    static Sky* GetInstance();
-    void SetCurrentClimate(TESClimate*, bool);
-};
-class MagicSystem
-{
-  public:
-    static void InitializeMagicSystem();
-};
-class BGSDefaultObjectManager : public TESForm
-{
-  public:
-    static BGSDefaultObjectManager* Instance();
-    static TESForm* GetDefaultObjectByIndex(int);
-};
+namespace MagicSystem { void InitializeMagicSystem(); }
 void CreateDefaultTopics();
 void FUN_00479570();
 void RegisterEffectSetting(EffectSetting*);

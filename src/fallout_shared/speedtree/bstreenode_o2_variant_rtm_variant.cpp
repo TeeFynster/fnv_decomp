@@ -1,3 +1,21 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
+#include "../../../include/NiTArray.h"
+#include "../../../include/BSFadeNode.h"
+#include "../../../include/BSTreeNode.h"
+#include "../../../include/NiTransform.h"
+#include "../../../include/bhkCapsuleShape.h"
+#include "../../../include/bhkSphereShape.h"
+#include "../../../include/hkMemoryAllocator.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/NiCollisionObject.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiRTTI.h"
+#include "../../../include/NiStream.h"
+#include "../../../include/StrArr.h"
+#include "../../../include/NiPoint3.h"
 // src/fallout_shared/speedtree/bstreenode_o2_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/fallout_shared/speedtree/bstreenode_o2_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -10,22 +28,11 @@ struct FUN_00622430_shell
 {
     unsigned int __thiscall FUN_00622430();
 };
-struct NiRTTI;
 extern NiRTTI g_011d5e70;
 struct FUN_0066b5b0_shell
 {
     const NiRTTI* __thiscall GetNiRTTI();
 };
-struct NiAVObject;
-struct NiNode
-{
-    NiAVObject* __thiscall GetAt(unsigned int);
-};
-struct BSTreeNode : NiNode
-{
-    NiAVObject* __thiscall GetFirstChild();
-};
-struct NiCullingProcess;
 extern "C" unsigned char __cdecl FUN_0054ee20();
 struct DummyNode
 {
@@ -39,9 +46,6 @@ struct FUN_00c6c290_holder
 struct FUN_0066d410_shell : public FUN_00c6c290_holder
 {
     void FUN_0066d410();
-};
-struct NiRTTI
-{
 };
 extern const NiRTTI g_012683d0;
 struct FUN_0066d430_shell
@@ -78,10 +82,6 @@ struct FUN_0066d610_shell
 {
     GlobalObjectO2_00a7b610* GetGlobalObject();
 };
-struct bhkCapsuleShape
-{
-    unsigned int __thiscall FUN_0066d730() const;
-};
 struct FUN_0066da50_t
 {
     void FUN_0066da50();
@@ -96,7 +96,6 @@ struct Flt
 {
     operator unsigned int() const;
 };
-struct NiTriBasedGeom;
 struct FUN_0066b620_shell
 {
     NiTriBasedGeom* __thiscall GetTriBasedGeom();
@@ -106,7 +105,6 @@ struct FUN_0066d400_shell
 {
     const char* const* GetArg1Ptr();
 };
-struct NiStream;
 struct HC1Base
 {
     bool FUN_00aa0ad0(NiStream*);
@@ -176,28 +174,12 @@ struct H_00c8c810
     void __thiscall FUN_00c8c810(bool);
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct Buf00cb7750
-{
-    int m00;
-    int m04;
-    int m08;
-    int m0C;
-    int m10;
-    int m14;
-    int m18;
-    int m1C;
-    int m20;
-    int m24;
-    int m28;
-    int m2C;
-    int m30;
-};
 struct Inner00cb7750
 {
     int _00;
     int _04;
     int m_08;
-    void __thiscall FUN_00c9ec60(Buf00cb7750*);
+    void __thiscall FUN_00c9ec60(NiTransform*);
 };
 struct S00cb7750
 {
@@ -293,7 +275,7 @@ struct S00cb7750
     {}
     virtual void a45()
     {}
-    virtual void f46(Buf00cb7750*)
+    virtual void f46(NiTransform*)
     {}
     int _04;
     int _08;
@@ -303,17 +285,6 @@ struct S00cb7750
 };
 void* __fastcall FUN_00c6b910(void*);
 extern int DAT_01066b94;
-struct BSFadeNode
-{
-    void* vf;
-    char pad[16];
-    static void* __cdecl operator new(unsigned int);
-    BSFadeNode()
-    {
-        FUN_00c6b910(this);
-        vf = (void*)&DAT_01066b94;
-    }
-};
 BSFadeNode* FUN_00c87fc0();
 struct Middle
 {
@@ -327,15 +298,6 @@ struct This
     int unk04;
     Middle* middle;
     void FUN_00c84e20(unsigned int* output);
-};
-struct NiStream
-{
-    int unk00;
-    unsigned int version;
-};
-struct NiCollisionObject
-{
-    void LinkObject(NiStream&);
 };
 struct LegacyLinker : NiCollisionObject
 {
@@ -457,33 +419,6 @@ struct C8CA60Owner
     void FUN_00c8c410(C8CA60Child* pkChild);
     C8CA60Child* FUN_00c8ca60(bool* pbCreated);
 };
-struct StrArr
-{
-    void* unk00;
-    char** data;
-    unsigned short capacity, size, live, growBy;
-    void FUN_0096ad30(unsigned int);
-    void FUN_0096ae90(unsigned int, char* const&);
-    void append(char* const& text)
-    {
-        unsigned int index = size;
-        if (index >= capacity)
-            FUN_0096ad30(index + growBy);
-        FUN_0096ae90(index, text);
-    }
-};
-struct NiPoint3
-{
-    float x, y, z;
-    char* FUN_00a59af0(const char*);
-};
-struct NiTransform
-{
-    float rotation[9];
-    NiPoint3 translate;
-    float scale;
-    char* ToString(const char*);
-};
 struct NativeTransform
 {
     float rotation[12];
@@ -495,19 +430,6 @@ extern NativeTransform DAT_01268370;
 char* __cdecl FUN_00a7d330(void*);
 extern unsigned int DAT_0126fd98;
 extern __declspec(thread) unsigned int currentTask;
-struct AutoMemContext
-{
-    unsigned int ePreviousContext;
-    AutoMemContext()
-    {
-        ePreviousContext = currentTask;
-        currentTask = 16;
-    }
-    ~AutoMemContext()
-    {
-        currentTask = ePreviousContext;
-    }
-};
 struct Component
 {
     virtual void v00();
@@ -581,32 +503,19 @@ struct CB7800RTTI
         return m_pcName;
     }
 };
-struct CB7800StringArray
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-    virtual ~CB7800StringArray();
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
+    return SetAtGrow(m_usSize, element);
+}
 
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char*& element);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char*& element)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
-    }
-
-    unsigned int Add(char*& element)
-    {
-        return SetAtGrow(m_usSize, element);
-    }
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > CB7800StringArray;
 extern "C" char* __cdecl FUN_00a7d330(const char* pcText);
 extern __declspec(thread) int g_CB7800AllocTag;
 struct CB7800AllocTagScope
@@ -740,13 +649,7 @@ struct S_00cb79d0
     S_00cb79d0_C* FUN_00cb79d0(int arg);
 };
 void SwapByteQuadWords(void* buffer, int words);
-struct Vector3
-{
-    float x;
-    float y;
-    float z;
-};
-void __cdecl FUN_00cf0930(void* buffer, int bytes, Vector3* vector);
+void __cdecl FUN_00cf0930(void* buffer, int bytes, NiPoint3* vector);
 struct TlsBlock_t
 {
     int unk000;
@@ -960,31 +863,7 @@ struct BC882C0AllocTagScope
         g_iC882C0AllocTag = m_iSaved;
     }
 };
-class BC882C0StringArray
-{
-  public:
-    virtual ~BC882C0StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > BC882C0StringArray;
 extern const char* g_pcC882C0Name;
 char* __cdecl FUN_00a7d330(const char* pcString);
 class FUN_00c882c0_cls
@@ -1461,7 +1340,7 @@ struct FUN_00cb7790_node
     unsigned int unk5C;
     unsigned int unk60;
     unsigned int unk64;
-    Buf00cb7750 transform;
+    NiTransform transform;
     void __thiscall FUN_00a68bf0();
 };
 struct FUN_00cb7790_receiver
@@ -1469,13 +1348,13 @@ struct FUN_00cb7790_receiver
     unsigned int unk00;
     unsigned int unk04;
     void* object;
-    void __thiscall FUN_0056df20(Buf00cb7750*);
+    void __thiscall FUN_0056df20(NiTransform*);
 };
 struct FUN_00cb7790_state
 {
     unsigned int owner;
     unsigned int depth;
-    void __thiscall Wait(int);
+    void __thiscall FUN_0040fbf0(int);
 };
 extern FUN_00cb7790_state DAT_01267b80;
 struct FUN_00cb7790_class
@@ -1714,22 +1593,6 @@ struct A1Owner
     unsigned int unk1E0;
     unsigned char m1E4;
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 struct Triple
 {
     unsigned int m00;
@@ -1757,12 +1620,12 @@ struct TmpGuard
     }
     ~TmpGuard()
     {
-        AudioHolder* pHolder = reinterpret_cast<AudioHolder*>(FUN_00c85750());
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         m1 = 0;
         if ((m2 & 0x80000000u) == 0)
         {
-            pAllocator->Free((void*)m0, (m2 & 0x3fffffffu) * 16u);
+            pAllocator->blockFree((void*)m0, (m2 & 0x3fffffffu) * 16u);
         }
     }
 };
@@ -2427,121 +2290,107 @@ struct LegacyCollisionLoader : CollisionStreamLoader
 #include <xmmintrin.h>
 #include <math.h>
 
-struct __declspec(align(16)) Vector
-{
-    union
-    {
-        __m128 v;
-        float f[4];
-    };
-    __forceinline void xyz(const __m128& input)
-    {
-        __m128 hi = _mm_unpackhi_ps(input, v);
-        v = _mm_shuffle_ps(input, hi, 0xc4);
-    }
-};
+#include "../../../include/hkVector4.h"
+__forceinline void hkVector4::xyz(const LocalM128& input) { LocalM128 hi = _mm_unpackhi_ps(input, v); v = _mm_shuffle_ps(input, hi, 0xc4); }
 struct CapsuleData
 {
     unsigned int unk00, unk04, unk08, unk0C;
     float radius;
     unsigned int unk14, unk18, unk1C;
-    Vector endpoints[2];
+    hkVector4 endpoints[2];
 };
 struct Matrix
 {
-    __m128 c[4];
+    LocalM128 c[4];
 };
 struct Contact
 {
-    Vector position, normal;
+    hkVector4 position, normal;
 };
 struct Sphere
 {
-    Vector center;
+    hkVector4 center;
 };
-struct Capsule
-{
-    unsigned int unk00, unk04;
-    CapsuleData* data;
-    bool FUN_00cab3c0(Sphere*, Matrix*, Contact*);
-};
-extern "C" void __cdecl FUN_00d230e0(Sphere*, __m128*, __m128*, __m128*);
+extern "C" void __cdecl FUN_00d230e0(const Sphere*, LocalM128*, LocalM128*, LocalM128*);
 extern const float DAT_01011d78;
 extern const float DAT_01017718;
 extern const float DAT_01016248;
-__forceinline float scalar(__m128 v)
+__forceinline float scalar(LocalM128 v)
 {
     float x;
     _mm_store_ss(&x, v);
     return x;
 }
-__forceinline __m128 sum3(const __m128& input)
+__forceinline LocalM128 sum3(const LocalM128& input)
 {
-    __m128 v = input;
-    __m128 y = _mm_shuffle_ps(v, v, 0x55);
+    LocalM128 v = input;
+    LocalM128 y = _mm_shuffle_ps(v, v, 0x55);
     y = _mm_add_ss(y, v);
     v = _mm_shuffle_ps(v, v, 0xaa);
     return _mm_add_ss(v, y);
 }
-__forceinline __m128 inverseRoot(__m128 v)
+__forceinline LocalM128 inverseRoot(LocalM128 v)
 {
-    __m128 r = _mm_rsqrt_ss(v);
-    __m128 t = _mm_mul_ss(_mm_mul_ss(v, r), r);
-    __m128 mask = _mm_cmpeq_ss(v, _mm_set_ss(DAT_01011d78));
-    __m128 error = _mm_sub_ss(_mm_set_ss(DAT_01017718), t);
-    __m128 result = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(DAT_01016248), r), error);
+    LocalM128 r = _mm_rsqrt_ss(v);
+    LocalM128 t = _mm_mul_ss(_mm_mul_ss(v, r), r);
+    LocalM128 mask = _mm_cmpeq_ss(v, _mm_set_ss(DAT_01011d78));
+    LocalM128 error = _mm_sub_ss(_mm_set_ss(DAT_01017718), t);
+    LocalM128 result = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(DAT_01016248), r), error);
     return _mm_andnot_ps(mask, result);
 }
-__forceinline __m128 normalize(__m128 v)
+__forceinline LocalM128 normalize(LocalM128 v)
 {
-    __m128 s = inverseRoot(sum3(_mm_mul_ps(v, v)));
+    LocalM128 s = inverseRoot(sum3(_mm_mul_ps(v, v)));
     return _mm_mul_ps(_mm_shuffle_ps(s, s, 0), v);
 }
 inline float square(float x)
 {
     return x * x;
 }
-inline float squaredNorm(const __m128& v)
+inline float squaredNorm(const LocalM128& v)
 {
-    __m128 y = _mm_shuffle_ps(v, v, 0x55);
-    __m128 z = _mm_shuffle_ps(v, v, 0xaa);
+    LocalM128 y = _mm_shuffle_ps(v, v, 0x55);
+    LocalM128 z = _mm_shuffle_ps(v, v, 0xaa);
     return scalar(_mm_add_ss(z, _mm_add_ss(y, v)));
 }
 // @fnv 0x00cab3c0
-bool Capsule::FUN_00cab3c0(Sphere* sphere, Matrix* matrix, Contact* contact)
+bool bhkCapsuleShape::GetClosestPoints(const hkSphere& sphereArg, const hkTransform& matrixArg, hkContactPoint& contactArg)
 {
-    CapsuleData* shape = this ? data : 0;
-    __m128 endpoints[2];
-    __m128 m0 = matrix->c[0], m1 = matrix->c[1], m2 = matrix->c[2], m3 = matrix->c[3];
+    const Sphere* sphere = reinterpret_cast<const Sphere*>(&sphereArg);
+    const Matrix* matrix = reinterpret_cast<const Matrix*>(&matrixArg);
+    Contact* contact = reinterpret_cast<Contact*>(&contactArg);
+    CapsuleData* shape = this ? reinterpret_cast<CapsuleData*>(m_pHavokObject) : 0;
+    LocalM128 endpoints[2];
+    LocalM128 m0 = matrix->c[0], m1 = matrix->c[1], m2 = matrix->c[2], m3 = matrix->c[3];
     for (int i = 1; i >= 0; --i)
     {
-        __m128 v = shape->endpoints[i].v;
-        __m128 y = _mm_shuffle_ps(v, v, 0x55);
-        __m128 x = _mm_shuffle_ps(v, v, 0);
+        LocalM128 v = shape->endpoints[i].v;
+        LocalM128 y = _mm_shuffle_ps(v, v, 0x55);
+        LocalM128 x = _mm_shuffle_ps(v, v, 0);
         x = _mm_mul_ps(x, m0);
         y = _mm_mul_ps(y, m1);
         y = _mm_add_ps(y, x);
-        __m128 z = _mm_shuffle_ps(v, v, 0xaa);
+        LocalM128 z = _mm_shuffle_ps(v, v, 0xaa);
         z = _mm_mul_ps(z, m2);
         z = _mm_add_ps(z, m3);
         endpoints[i] = _mm_add_ps(y, z);
     }
-    __m128 closest;
+    LocalM128 closest;
     FUN_00d230e0(sphere, &endpoints[0], &endpoints[1], &closest);
     float totalRadius = sphere->center.f[3] + shape->radius;
-    __m128 delta = _mm_sub_ps(sphere->center.v, closest);
+    LocalM128 delta = _mm_sub_ps(sphere->center.v, closest);
 
     // Preserve the complete squared vector for the later reciprocal-square-root path.
-    __m128 squares = _mm_mul_ps(delta, delta);
+    LocalM128 squares = _mm_mul_ps(delta, delta);
     float squaredDistance = squaredNorm(squares);
     if (squaredDistance >= square(totalRadius))
         return false;
     float distance;
-    __m128 normal;
+    LocalM128 normal;
     if (squaredDistance > 0.0f)
     {
         distance = sqrtf(squaredDistance);
-        __m128 s = inverseRoot(sum3(_mm_load_ps(squares.m128_f32)));
+        LocalM128 s = inverseRoot(sum3(_mm_load_ps(squares.m128_f32)));
         normal = _mm_mul_ps(_mm_shuffle_ps(s, s, 0), delta);
         contact->normal.xyz(normal);
     }
@@ -2549,7 +2398,7 @@ bool Capsule::FUN_00cab3c0(Sphere* sphere, Matrix* matrix, Contact* contact)
     {
         distance = 0.0f;
         // At zero separation, choose a perpendicular to the capsule segment.
-        __m128 delta = _mm_sub_ps(endpoints[1], endpoints[0]);
+        LocalM128 delta = _mm_sub_ps(endpoints[1], endpoints[0]);
         float ax = fabsf(delta.m128_f32[0]);
         float ay = fabsf(delta.m128_f32[1]);
         float az = fabsf(delta.m128_f32[2]);
@@ -2562,7 +2411,7 @@ bool Capsule::FUN_00cab3c0(Sphere* sphere, Matrix* matrix, Contact* contact)
         }
         if (az < ax)
             third = minimum;
-        __m128 perpendicular;
+        LocalM128 perpendicular;
         perpendicular = _mm_setzero_ps();
         perpendicular.m128_f32[other] = delta.m128_f32[third];
         perpendicular.m128_f32[third] = -delta.m128_f32[other];
@@ -2571,10 +2420,10 @@ bool Capsule::FUN_00cab3c0(Sphere* sphere, Matrix* matrix, Contact* contact)
     }
 
     float projection = shape->radius - distance;
-    __m128 p = _mm_load_ss(&projection);
+    LocalM128 p = _mm_load_ss(&projection);
     p = _mm_shuffle_ps(p, p, 0);
-    __m128 n = contact->normal.v;
-    __m128 result = _mm_mul_ps(p, n);
+    LocalM128 n = contact->normal.v;
+    LocalM128 result = _mm_mul_ps(p, n);
     result = _mm_add_ps(result, sphere->center.v);
     contact->position.v = result;
     float* depth = &contact->normal.f[3];
@@ -2601,62 +2450,11 @@ struct BhkVecArray
     BhkVec4* m_pVecs;
     unsigned int m_uCount;
 };
-struct bhkSphereShape
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual BhkVecArray* v45(unsigned char*);
-    void __thiscall FUN_00c84df0(void*, ArgB*);
-    void FUN_00cb7a90(void*, ArgB*);
-};
 // @fnv 0x00cb7a90
 void bhkSphereShape::FUN_00cb7a90(void* a1, ArgB* a2)
 {
-    unsigned char flag;
-    BhkVecArray* arr = this->v45(&flag);
+    char flag;
+    BhkVecArray* arr = reinterpret_cast<BhkVecArray*>(this->slotB4(&flag));
     float f = a2->unk10;
     if (f != 1.0f)
     {
@@ -2667,38 +2465,27 @@ void bhkSphereShape::FUN_00cb7a90(void* a1, ArgB* a2)
             do
             {
                 --n;
-                __m128 b = _mm_load_ss(&f);
+                LocalM128 b = _mm_load_ss(&f);
                 off -= 16;
                 float* p = (float*)((char*)arr->m_pVecs + off);
                 _mm_store_ps(p, _mm_mul_ps(_mm_shuffle_ps(b, b, 0), _mm_load_ps(p)));
             } while (n != 0);
         }
     }
-    this->FUN_00c84df0(a1, a2);
+    this->bhkSphereShape::FUN_00c84df0(a1, a2);
 }
 
 #include <xmmintrin.h>
 namespace fnv_00c88020 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float lanes[4];
-    unsigned __int64 unsigned64[2];
-    __int8 signed8[16];
-    __int16 signed16[8];
-    __int32 signed32[4];
-    __int64 signed64[2];
-    unsigned __int8 unsigned8[16];
-    unsigned __int16 unsigned16[8];
-    unsigned __int32 unsigned32[4];
-};
+typedef ::__m128 LocalM128;
 
 extern "C"
 {
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
+using ::_mm_load_ss;
+using ::_mm_shuffle_ps;
+using ::_mm_sub_ps;
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
 }
 
 extern "C" const float DAT_01016248 = 0.5f;
@@ -2728,20 +2515,21 @@ struct CollisionBoundsUpdater : S00cb7750
 
 struct Amount
 {
-    __m128 lane;
+    LocalM128 lane;
     Amount(float value)
     {
         lane = _mm_load_ss(&value);
     }
-    __m128 broadcast() const
+    LocalM128 broadcast() const
     {
         return _mm_shuffle_ps(lane, lane, 0);
     }
 };
-struct Vector4f
+// Exe 0x00c88020: unit-local Vector4f view; declarations and layout are preserved.
+struct BstreenodeVector4fView
 {
-    __m128 value;
-    void subtract(const Vector4f& other)
+    LocalM128 value;
+    void subtract(const BstreenodeVector4fView& other)
     {
         value = _mm_sub_ps(value, other.value);
     }
@@ -2749,7 +2537,7 @@ struct Vector4f
     {
         value = _mm_mul_ps(factor.broadcast(), value);
     }
-    void add(const Vector4f& other)
+    void add(const BstreenodeVector4fView& other)
     {
         value = _mm_add_ps(value, other.value);
     }
@@ -2764,20 +2552,22 @@ void CollisionBoundsUpdater::FUN_00c88020()
         BoundsTarget* target = shape->target;
         if (target == 0)
             return;
-        NiTransform transform;
-        __m128 box[2];
-        transform.rotation[0] = 1.0f;
-        transform.rotation[1] = 0.0f;
-        transform.rotation[2] = 0.0f;
-        transform.rotation[3] = 0.0f;
-        transform.rotation[5] = 0.0f;
-        transform.rotation[6] = 0.0f;
-        transform.rotation[7] = 0.0f;
-        transform.rotation[4] = 1.0f;
-        transform.rotation[8] = 1.0f;
-        transform.scale = 1.0f;
+        // The original initializes this transform directly, without a constructor call.
+        float transformStorage[sizeof(NiTransform) / sizeof(float)];
+        NiTransform& transform = *reinterpret_cast<NiTransform*>(transformStorage);
+        LocalM128 box[2];
+        transform.m_Rotate.m_pEntry[0][0] = 1.0f;
+        transform.m_Rotate.m_pEntry[0][1] = 0.0f;
+        transform.m_Rotate.m_pEntry[0][2] = 0.0f;
+        transform.m_Rotate.m_pEntry[1][0] = 0.0f;
+        transform.m_Rotate.m_pEntry[1][2] = 0.0f;
+        transform.m_Rotate.m_pEntry[2][0] = 0.0f;
+        transform.m_Rotate.m_pEntry[2][1] = 0.0f;
+        transform.m_Rotate.m_pEntry[1][1] = 1.0f;
+        transform.m_Rotate.m_pEntry[2][2] = 1.0f;
+        transform.m_fScale = 1.0f;
         target->v18((float*)box);
-        Vector4f a, b;
+        BstreenodeVector4fView a, b;
         a.value = box[0];
         b.value = box[1];
         b.subtract(a);
@@ -2785,8 +2575,8 @@ void CollisionBoundsUpdater::FUN_00c88020()
         box[1] = b.value;
         a.add(b);
         box[0] = a.value;
-        FUN_00458620(&transform.translate, (const float*)&box[1]);
-        f46(reinterpret_cast<Buf00cb7750*>(&transform));
+        FUN_00458620(&transform.m_Translate, (const float*)&box[1]);
+        f46(&transform);
     }
 }
 }  // namespace fnv_00c88020

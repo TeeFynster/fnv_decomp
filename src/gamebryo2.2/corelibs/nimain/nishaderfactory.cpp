@@ -1,6 +1,17 @@
 // gamebryo2.2/corelibs/nimain/nishaderfactory.cpp: NiShaderFactory, NiRefObject (11 functions)
 
-#include "nishaderfactory_types.h"
+#include "layout_support.h"
+#include "../../../../include/NiFixedString.h"
+#include "../../../../include/NiShaderFactory.h"
+#include "../../../../include/NiD3DShaderProgram.h"
+#include "../../../../include/NiGPUProgram.h"
+#include "../../../../include/NiFile.h"
+
+inline NiRefObject::NiRefObject()
+{
+    m_uiRefCount = 0;
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&ms_lObjectCount));
+}
 
 // @fnv 0x00a9fff0
 NiShaderFactory* __cdecl NiShaderFactory::GetInstance()
@@ -9,131 +20,36 @@ NiShaderFactory* __cdecl NiShaderFactory::GetInstance()
 }
 
 void __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
-struct FUN_00aa06c0
-{
-    void FUN_00aa05a0();
-    FUN_00aa06c0* FUN_00aa06c0_impl(unsigned int flags);
-};
 // @fnv 0x00aa06c0
-FUN_00aa06c0* FUN_00aa06c0::FUN_00aa06c0_impl(unsigned int flags)
+NiShaderFactory* __fastcall DestroyShaderFactory(NiShaderFactory* pkFactory, void*, unsigned int flags)
 {
-    FUN_00aa05a0();
+    pkFactory->NiShaderFactory::~NiShaderFactory();
     if (flags & 1)
-        __Dummy_00b6fef0(this, 0x24);
-    return this;
+        __Dummy_00b6fef0(pkFactory, 0x24);
+    return pkFactory;
 }
-
-struct BSFadeNode;
-struct BSMultiBoundNode;
-struct BSResizableTriShape;
-struct BSSegmentedTriShape;
-struct Direct3DDeviceInterface;
-struct NiD3DShaderProgramCreator;
-struct NiGeometry;
-struct NiLines;
-struct NiNode;
-struct NiParticles;
-struct NiShaderConstantMapEntry;
-struct NiTriBasedGeom;
-struct NiTriShape;
-struct NiTriStrips;
-struct ShaderPassRenderer;
-struct GraphicsRenderer;
-struct bhkBlendCollisionObject;
-struct bhkLimitedHingeConstraint;
-struct bhkNiCollisionObject;
-struct bhkRigidBody;
-struct NiGPUProgram : public NiRefObject
-{
-    virtual void __vslot_0();
-    virtual void* GetRTTI();
-    virtual NiNode* IsSceneNode();
-    virtual BSFadeNode* IsFadeNode();
-    virtual BSMultiBoundNode* IsMultiBoundNode();
-    virtual NiGeometry* IsGeometry();
-    virtual NiTriBasedGeom* IsTriBasedGeom();
-    virtual NiTriStrips* IsTriStrips();
-    virtual NiTriShape* IsTriShape();
-    virtual BSSegmentedTriShape* IsSegmentedTriShape();
-    virtual BSResizableTriShape* IsResizableTriShape();
-    virtual NiParticles* IsParticlesGeom();
-    virtual NiLines* IsLineGeometry();
-    virtual bhkNiCollisionObject* IsBhkNiCollisionObject();
-    virtual bhkBlendCollisionObject* IsBhkBlendCollisionObject();
-    virtual bhkRigidBody* IsBhkRigidBody();
-    virtual bhkLimitedHingeConstraint* IsBhkLimitedHingeConstraint();
-    virtual unsigned int GetNumberOfVariables();
-    virtual char* GetVariableName(unsigned int);
-    bool IsExactKindOf(void*);
-    static bool IsExactKindOf(void*, void*);
-    bool IsKindOfType(void*);
-    static bool IsKindOfType(void*, void*);
-    NiGPUProgram* DynamicCast(void*);
-    static NiGPUProgram* DynamicCast(void*, void*);
-    int GetProgramType();
-    int m_iProgramType;
-};
-typedef char _sizecheck_NiGPUProgram[sizeof(NiGPUProgram) == 12 ? 1 : -1];
-struct NiD3DShaderProgram : public NiGPUProgram
-{
-    virtual void __vslot_0();
-    virtual char* GetName();
-    virtual void SetName(char*);
-    virtual char* GetProgramProfile();
-    virtual void SetShaderProfile(char*);
-    virtual unsigned int GetCodeSize();
-    virtual void* GetCode();
-    virtual void SetProgramCode(unsigned int, void*);
-    virtual NiD3DShaderProgramCreator* GetCreator();
-    virtual void SetCreator(NiD3DShaderProgramCreator*);
-    virtual bool SetShaderConstant(NiShaderConstantMapEntry*, void*, unsigned int);
-    virtual bool SetShaderConstantArray(NiShaderConstantMapEntry*, void*, unsigned int, unsigned int, unsigned short*);
-    virtual void* GetRTTI();
-    void SetD3DDevice(Direct3DDeviceInterface*);
-    void SetD3DRenderState(ShaderPassRenderer*);
-    void SetShaderObject(GraphicsRenderer*);
-    void SetVertexShaderConstant(int, int, float*);
-    void SetPixelShaderConstant(int, int, float*);
-    char* m_pcProgramName;
-    char* m_pcProfile;
-    unsigned int m_uiProgramCodeSize;
-    void* m_pProgramCode;
-    NiD3DShaderProgramCreator* m_pCreator;
-    Direct3DDeviceInterface* m_pD3DDevice;
-    GraphicsRenderer* m_pShaderObject;
-    ShaderPassRenderer* m_pRenderState;
-};
-typedef char _sizecheck_NiD3DShaderProgram[sizeof(NiD3DShaderProgram) == 44 ? 1 : -1];
-struct FUN_00e89830_shell : public NiD3DShaderProgram
-{
-    void* FUN_00e89830();
-};
 
 extern char const* const g_0126f9ac_arg1;
 // @fnv 0x00e89830
-void* FUN_00e89830_shell::FUN_00e89830()
+const NiRTTI* NiD3DShaderProgram::GetRTTI() const
 {
-    return (void*)&g_0126f9ac_arg1;
+    return (const NiRTTI*)&g_0126f9ac_arg1;
 }
 
-struct NiFileHack
-{
-    unsigned int FileRead(void*, unsigned int);
-};
 int __cdecl SwapBufferBySizes(void*, unsigned int, void*, void*);
 // @fnv 0x00aa19e0
 unsigned int __cdecl FUN_00aa19e0(NiFile* apFile, void* apBuffer, unsigned int auiSize, void* apArg4, void* apArg5)
 {
     if (auiSize <= 0)
         return 0;
-    unsigned int r = ((NiFileHack*)apFile)->FileRead(apBuffer, auiSize);
+    unsigned int r = apFile->FileRead(apBuffer, auiSize);
     SwapBufferBySizes(apBuffer, auiSize, apArg4, apArg5);
     return r;
 }
 
 extern char* _EmptyFS;
 
-struct ShaderConstantMap : NiTFixedStringMap_NiGlobalConstantEntry___
+struct ShaderConstantMap : NiTFixedStringMap<NiGlobalConstantEntry*>
 {
     void SetAt(NiFixedString* pkKey, NiGlobalConstantEntry* pkValue);
 };
@@ -146,18 +62,27 @@ struct ShaderFactorySlot : NiShaderFactory
     }
 };
 
-struct NiGlobalConstantEntryView : NiRefObject
+// Constructor 0x00aa00d0 and deleting destructor 0x00aa0190 identify this 24-byte NiRefObject; no shared header exists yet.
+class NiGlobalConstantEntry : public NiRefObject
 {
-    unsigned int unk08;
-    unsigned int unk0C;
-};
+public:
+    NiGlobalConstantEntry(const char* pcName, unsigned int uiValue, unsigned int uiSize, const void* pvData) throw();
+    void* Destroy(int flag);
 
-struct NiGlobalConstantEntryStub
-{
-    NiGlobalConstantEntry* Init(unsigned int uiKey, unsigned int a2, unsigned int a3, unsigned int a4);
+    NiFixedString m_kName;
+    unsigned int m_uiCurrentValue;
+    unsigned int m_uiSize;
+    void* m_pResource;
 };
 
 void* __cdecl FUN_00aa13e0(unsigned int uiSize);
+
+// The bare handle of an NiFixedString whose constructor and destructor these functions spell out inline (NiMain
+// has no exception frames; a real NiFixedString local would add one to this /EHsc unit).
+struct FixedStringHandle
+{
+    char* m_kHandle;
+};
 
 // @fnv 0x00aa0400
 bool __cdecl AcquireGlobalConstantEntry(const NiFixedString* pkName, unsigned int a2, unsigned int a3, unsigned int a4)
@@ -165,7 +90,7 @@ bool __cdecl AcquireGlobalConstantEntry(const NiFixedString* pkName, unsigned in
     if (ShaderFactorySlot::Get() == 0)
         return false;
     NiShaderFactory* pkFactory = ShaderFactorySlot::Get();
-    NiFixedString kLocal;
+    FixedStringHandle kLocal;
     NiTMapItem<NiFixedString, NiGlobalConstantEntry*>* pkItem =
         pkFactory->m_kGlobalConstantEntryMap
             .m_ppkHashTable[(unsigned int)pkName->m_kHandle % pkFactory->m_kGlobalConstantEntryMap.m_uiHashSize];
@@ -173,10 +98,10 @@ bool __cdecl AcquireGlobalConstantEntry(const NiFixedString* pkName, unsigned in
     {
         if ((unsigned int)pkName->m_kHandle == (unsigned int)pkItem->m_key.m_kHandle)
         {
-            NiGlobalConstantEntryView* pkEntry = (NiGlobalConstantEntryView*)pkItem->m_val;
+            NiGlobalConstantEntry* pkEntry = pkItem->m_val;
             if (pkEntry == 0)
                 break;
-            if (pkEntry->unk0C != a2)
+            if (pkEntry->m_uiCurrentValue != a2)
                 return false;
             InterlockedIncrement((long*)&pkEntry->m_uiRefCount);
             return true;
@@ -187,19 +112,19 @@ bool __cdecl AcquireGlobalConstantEntry(const NiFixedString* pkName, unsigned in
     void* pvMem = FUN_00aa13e0(0x18);
     if (pvMem == 0)
         return false;
-    unsigned int uiKey = (unsigned int)pkName->m_kHandle;
-    NiGlobalConstantEntry* pkNew = ((NiGlobalConstantEntryStub*)pvMem)->Init(uiKey, a2, a3, a4);
+    const char* pcName = pkName->m_kHandle;
+    NiGlobalConstantEntry* pkNew = new (pvMem) NiGlobalConstantEntry(pcName, a2, a3, (const void*)a4);
     if (pkNew == 0)
         return false;
 
-    InterlockedIncrement((long*)&((NiRefObject*)pkNew)->m_uiRefCount);
+    InterlockedIncrement((long*)&pkNew->m_uiRefCount);
     if (pkName->m_kHandle != _EmptyFS)
         InterlockedIncrement((long*)(pkName->m_kHandle - 8));
 
     char* pcHandle = pkName->m_kHandle;
     NiShaderFactory* pkMapOwner = ShaderFactorySlot::Get();
     kLocal.m_kHandle = pcHandle;
-    ((ShaderConstantMap*)&pkMapOwner->m_kGlobalConstantEntryMap)->SetAt(&kLocal, pkNew);
+    ((ShaderConstantMap*)&pkMapOwner->m_kGlobalConstantEntryMap)->SetAt(reinterpret_cast<NiFixedString*>(&kLocal), pkNew);
 
     if (pcHandle != _EmptyFS)
         InterlockedDecrement((long*)(pcHandle - 8));
@@ -248,7 +173,7 @@ FUN_00e897d0::FUN_00e897d0(int a1, int aiArg) throw() : SpawnedArgBase(aiArg)
 
 inline NiRefObject::~NiRefObject()
 {
-    NiAtomicSubtract(ms_lObjectCount);
+    InterlockedDecrement(reinterpret_cast<volatile long*>(&ms_lObjectCount));
 }
 
 void NiFree(void* p) throw();
@@ -269,30 +194,14 @@ struct FixedStr
     }
 };
 
-struct GlobalConstantEntry;
-struct GlobalConstantItem
+// These operations are not yet declared by the shared map headers.
+struct GlobalConstantMapOperations : NiTFixedStringMap<NiGlobalConstantEntry*>
 {
-    GlobalConstantItem* m_pkNext;
-    FixedStr m_key;
-    GlobalConstantEntry* m_val;
-};
-
-struct GlobalConstantMapBase
-{
-    unsigned int m_uiHashSize;
-    GlobalConstantItem** m_ppkHashTable;
-    unsigned int m_uiCount;
-
-    virtual ~GlobalConstantMapBase()
-    {
-        RemoveAll();
-        NiFree(m_ppkHashTable);
-    }
-    void RemoveAll() throw();
-    void GetNext(void*& rkPos, FixedStr& rkKey, GlobalConstantEntry*& rkVal) const throw();
+    void GetNext(void*& rkPos, FixedStr& rkKey, NiGlobalConstantEntry*& rkVal) const throw();
     void* GetFirstPos() const
     {
-        for (unsigned int i = 0; i < m_uiHashSize; i++)
+        unsigned int uiHashSize = m_uiHashSize;
+        for (unsigned int i = 0; i < uiHashSize; i++)
         {
             if (m_ppkHashTable[i])
                 return m_ppkHashTable[i];
@@ -301,61 +210,44 @@ struct GlobalConstantMapBase
     }
 };
 
-struct GlobalConstantMap : public GlobalConstantMapBase
+// The member map's two destructor stages, inlined into ~NiShaderFactory: NiTFixedStringMap<NiGlobalConstantEntry *>
+// (vftable 0x010a2154), then NiTFixedStringMapBase (vftable 0x010a2138), which also frees the table.
+template <>
+__forceinline NiTFixedStringMap<NiGlobalConstantEntry*>::~NiTFixedStringMap()
 {
-    virtual ~GlobalConstantMap()
-    {
-        RemoveAll();
-    }
-};
+    RemoveAll();
+}
+template <>
+__forceinline NiTFixedStringMapBase<DFALL<NiTMapItem<NiFixedString, NiGlobalConstantEntry*> >, NiGlobalConstantEntry*>::~NiTFixedStringMapBase()
+{
+    RemoveAll();
+    NiFree(m_ppkHashTable);
+}
 
 void __cdecl RemoveGlobalConstant(char** pkName) throw();
 
-struct FUN_00aa05a0 : public NiRefObject
-{
-    virtual void v2() throw();
-    virtual void v3() throw();
-    virtual void v4() throw();
-    virtual void v5() throw();
-    virtual void v6() throw();
-    virtual void v7() throw();
-    virtual void ReleaseAllLibraries() throw();
-    virtual void v9() throw();
-    virtual void v10() throw();
-    virtual void v11() throw();
-    virtual void v12() throw();
-    virtual void ClearLibraries() throw();
-
-    GlobalConstantMap m_kGlobalConstantEntryMap;
-    void* m_pFindGlobalConstantEntry;
-    void* GlobalConstantEntryRegistry;
-    void* GlobalConstantMapContext;
-
-    static FUN_00aa05a0* ms_pShaderFactory;
-
-    virtual ~FUN_00aa05a0() throw();
-};
-
 // @fnv 0x00aa05a0
-FUN_00aa05a0::~FUN_00aa05a0() throw()
+NiShaderFactory::~NiShaderFactory() throw()
 {
     if (ms_pShaderFactory)
-        ms_pShaderFactory->ReleaseAllLibraries();
+        ms_pShaderFactory->v8();
     if (ms_pShaderFactory)
-        ms_pShaderFactory->ClearLibraries();
+        ms_pShaderFactory->v13();
 
-    void* pos = m_kGlobalConstantEntryMap.GetFirstPos();
+    GlobalConstantMapOperations& kMap = static_cast<GlobalConstantMapOperations&>(m_kGlobalConstantEntryMap);
+    void* pos = kMap.GetFirstPos();
     while (pos)
     {
         FixedStr kName;
-        GlobalConstantEntry* pkEntry = 0;
-        m_kGlobalConstantEntryMap.GetNext(pos, kName, pkEntry);
+        NiGlobalConstantEntry* pkEntry = 0;
+        kMap.GetNext(pos, kName, pkEntry);
         if (pkEntry)
             RemoveGlobalConstant(&kName.m_kHandle);
     }
 
     if (ms_pShaderFactory == this)
         ms_pShaderFactory = 0;
+
 }
 
 // @fnv 0x00a38de0
@@ -375,33 +267,21 @@ extern FUN_00aa0190_Decrement DAT_00fdf1c4;
 void __cdecl FUN_00aa10f0(void* p);
 void __cdecl FUN_00aa1460(void* p, unsigned int size);
 
-struct FUN_00aa0190_Obj
-{
-    int* vptr;
-    int unk04;
-    void* unk08;
-    int unk0C;
-    int unk10;
-    void* unk14;
-
-    void* __thiscall Destroy(int flag);
-};
-
 // @fnv 0x00aa0190
-void* __thiscall FUN_00aa0190_Obj::Destroy(int aiFlags)
+void* __thiscall NiGlobalConstantEntry::Destroy(int aiFlags)
 {
-    void* saved = unk14;
-    vptr = &DAT_010a2148;
+    void* saved = m_pResource;
+    *(int**)this = &DAT_010a2148;
     FUN_00aa10f0(saved);
 
-    void* head = unk08;
+    void* head = m_kName.m_kHandle;
     FUN_00aa0190_Decrement decrement = DAT_00fdf1c4;
     if (head != DAT_0109b220)
     {
         decrement(static_cast<char*>(head) - 8);
     }
 
-    vptr = &DAT_0101dce4;
+    *(int**)this = &DAT_0101dce4;
     decrement(&DAT_011f4400);
 
     if ((aiFlags & 1) != 0)
@@ -454,12 +334,12 @@ bool RemoveGlobalConstant(const NiFixedString* pkName)
         InterlockedIncrement((long*)(pkName->m_kHandle - 8));
     pkFactory = ShaderFactorySlot::Get();
 
-    NiFixedString kLocal;
+    FixedStringHandle kLocal;
     char* pcHandle = pkName->m_kHandle;
     kLocal.m_kHandle = pcHandle;
     if (pkEntry->m_uiRefCount == 1)
     {
-        ((Stub*)&pkFactory->m_kGlobalConstantEntryMap)->FUN_00aa0250(&kLocal);
+        ((Stub*)&pkFactory->m_kGlobalConstantEntryMap)->FUN_00aa0250(reinterpret_cast<NiFixedString*>(&kLocal));
         if (InterlockedDecrement((long*)&pkEntry->m_uiRefCount) == 0)
             pkEntry->DeleteThis();
     }

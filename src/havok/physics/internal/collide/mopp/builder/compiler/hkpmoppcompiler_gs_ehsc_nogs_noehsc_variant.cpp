@@ -5,6 +5,117 @@
 // src/havok/physics/internal/collide/mopp/builder/compiler/hkpmoppcompiler.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/builder/compiler/hkpmoppcompiler.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 #include <xmmintrin.h>
+// local form of hkVector4: 0x00dd4cb0 needs its original packet form (compiled function extent differs: 1106 vs 1088).
+
+
+#if !defined(FNV_FOURFLOATVECTOR_NO_SSE)
+#include <xmmintrin.h>
+#else
+union __m128;
+#endif
+
+class SimdReal;
+class SimdScalar;
+class ScalarValue;
+class Transform;
+class NiPoint3;
+
+#pragma pack(push, 4)
+
+class PacketCallLocal_00dd4cb0
+{
+public:
+#if defined(FNV_FOURFLOATVECTOR_NO_SSE)
+    union Components
+    {
+        float m128_f32[4];
+        unsigned __int64 m128_u64[2];
+        signed char m128_i8[16];
+        short m128_i16[8];
+        int m128_i32[4];
+        __int64 m128_i64[2];
+        unsigned char m128_u8[16];
+        unsigned short m128_u16[8];
+        unsigned int m128_u32[4];
+    };
+#else
+    typedef __declspec(align(4)) __m128 Components;
+#endif
+
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+        Components m_vComponents;
+        Components m;
+        float f[4];
+        Components values;
+        Components q;
+        Components value;
+        Components quad;
+        float elements[4];
+        float m_fComponents[4];
+    };
+
+    PacketCallLocal_00dd4cb0();
+    PacketCallLocal_00dd4cb0(float x, float y, float z, float w);
+    PacketCallLocal_00dd4cb0(const __m128& vector);
+
+    PacketCallLocal_00dd4cb0* FUN_005532a0(float x, float y, float z, float w);
+    void FUN_004a3f10(PacketCallLocal_00dd4cb0* vector);
+    void __thiscall FUN_004b4db0(const PacketCallLocal_00dd4cb0* vector);
+    PacketCallLocal_00dd4cb0& FUN_00e531a0(int parameter);
+    PacketCallLocal_00dd4cb0 FUN_00e53260(int parameter);
+    void FUN_005611c0();
+
+    void operator=(const PacketCallLocal_00dd4cb0& vector);
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    float& component(int index);
+    float& At(int index);
+    const float& At(int index) const;
+
+    __m128 length3() const;
+    float getW() const;
+    ScalarValue Dot(const PacketCallLocal_00dd4cb0& vector) const;
+    ScalarValue LengthSq() const;
+    ScalarValue Length() const;
+    ScalarValue InverseLength() const;
+    void Normalize();
+    bool NormalizeNonzero();
+    void Mul(const ScalarValue& scalar);
+    void Add(const PacketCallLocal_00dd4cb0& vector);
+    void Sub(const PacketCallLocal_00dd4cb0& vector);
+    void Cross(const PacketCallLocal_00dd4cb0& a, const PacketCallLocal_00dd4cb0& b);
+
+    void setAbs4(const PacketCallLocal_00dd4cb0& vector);
+    void setMul4(const SimdReal& scalar, const PacketCallLocal_00dd4cb0& vector);
+    void addMul4(const SimdReal& scalar, const PacketCallLocal_00dd4cb0& vector);
+    void setAddMul4(const PacketCallLocal_00dd4cb0& a, const PacketCallLocal_00dd4cb0& b, const SimdReal& scalar);
+    SimdReal getSimdAt3() const;
+    SimdReal lengthSquared3() const;
+    void setXYZ_W(__m128 xyz, __m128 w);
+    void setSqrtInverse4(const PacketCallLocal_00dd4cb0& vector);
+    void setAddMul(const PacketCallLocal_00dd4cb0& a, const PacketCallLocal_00dd4cb0& b, const SimdScalar& scalar);
+    void addMul(const float& scalar, const PacketCallLocal_00dd4cb0& vector);
+    void transformed(const Transform& transform, const PacketCallLocal_00dd4cb0& vector);
+    void addScaled(const PacketCallLocal_00dd4cb0& base, const PacketCallLocal_00dd4cb0& direction, float amount);
+    void* AddVector(void*, NiPoint3*, void*, float);
+    void* AddVector(void*, void*);
+    void* ScaleSwizzled();
+};
+
+#pragma pack(pop)
+
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../../include/hkpMoppCode.h"
 struct InitArg;
 struct SubFirst
 {
@@ -85,10 +196,6 @@ struct Destination
 
 extern "C" void _ReadWriteBarrier(void);
 extern "C" void* __cdecl FUN_00ec61c0(void*, int, unsigned int);
-struct FourFloatVector
-{
-    __m128 q;
-};
 struct Allocator
 {
     virtual void slot0() throw();
@@ -97,44 +204,10 @@ struct Allocator
     virtual void slotC() throw();
     virtual void freeBlock(void*, int) throw();
 };
-struct MemoryRouter
-{
-    int unk00, unk04, unk08, unk0C;
-    Allocator* m_pStreamAllocator;
-    Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-MemoryRouter* __cdecl FUN_00c85750() throw();
 void* __cdecl FUN_00c85690(Allocator*, int) throw();
 void __cdecl FUN_00c856c0(Allocator*, void*) throw();
 void __cdecl FUN_00c908c0(Allocator*, void*, int, int) throw();
 void __cdecl FUN_00cb1260(void*, const void*, int) throw();
-class hkBaseObject
-{
-  public:
-    virtual ~hkBaseObject() throw()
-    {}
-};
-class hkReferencedObject : public hkBaseObject
-{
-  public:
-    unsigned short memSizeAndFlags;
-    short referenceCount;
-    hkReferencedObject() throw()
-    {
-        referenceCount = 1;
-    }
-    static void* operator new(unsigned int n) throw()
-    {
-        hkReferencedObject* b = (hkReferencedObject*)FUN_00c85750()->heap().allocate(n);
-        b->memSizeAndFlags = (unsigned short)n;
-        return b;
-    }
-    static void operator delete(void*) throw()
-    {}
-};
 template <class T> struct MergeArray
 {
     T* data;
@@ -158,7 +231,7 @@ template <class T> struct MergeArray
     }
     void reserve(int n)
     {
-        Allocator& a = FUN_00c85750()->heap();
+        Allocator& a = reinterpret_cast<Allocator&>(reinterpret_cast<Allocator&>((&hkMemoryRouter::getInstance())->heap()));
         int cap = getCapacity();
         if (cap < n)
         {
@@ -168,7 +241,7 @@ template <class T> struct MergeArray
     }
     void reserveExactly(int n)
     {
-        Allocator& a = FUN_00c85750()->heap();
+        Allocator& a = reinterpret_cast<Allocator&>((&hkMemoryRouter::getInstance())->heap());
         if (getCapacity() < n)
             FUN_00c908c0(&a, this, n, sizeof(T));
     }
@@ -185,7 +258,7 @@ template <class T> struct MergeArray
     }
     void ClearAndRelease()
     {
-        Allocator& a = FUN_00c85750()->heap();
+        Allocator& a = reinterpret_cast<Allocator&>(hkMemoryRouter::getInstance().heap());
         size = 0;
         if ((capacity & 0x80000000) == 0)
             a.freeBlock(data, (capacity & 0x3fffffff) * sizeof(T));
@@ -194,21 +267,23 @@ template <class T> struct MergeArray
     }
 };
 extern char DAT_0102e368;
-class hkpMoppCode : public hkReferencedObject
+inline void* hkpMoppCode::operator new(std::size_t n)
 {
-  public:
-    FourFloatVector info;
-    MergeArray<unsigned char> code;
-    unsigned char buildType;
-    hkpMoppCode() throw()
-    {
-        *(void**)this = &DAT_0102e368;
-        code.init();
-        info.q = _mm_setzero_ps();
-        buildType = 2;
-    }
-    virtual ~hkpMoppCode() throw();
-};
+    hkReferencedObject* b = (hkReferencedObject*)(&hkMemoryRouter::getInstance())->heap().blockAlloc(n);
+    b->m_usMemSizeAndFlags = (unsigned short)n;
+    return b;
+}
+template <typename ENUM, typename STORAGE>
+inline hkEnum<ENUM, STORAGE>::hkEnum()
+{}
+template <typename ENUM, typename STORAGE>
+inline hkEnum<ENUM, STORAGE>::hkEnum(ENUM value) : m_kStorage((STORAGE)value)
+{}
+inline hkpMoppCode::hkpMoppCode() throw()
+{
+    m_info.m_offset.m_vComponents = _mm_setzero_ps();
+    m_eBuildType = hkEnum<BuildType, hkInt8>(BUILD_NOT_SET);
+}
 struct PrimitiveSource
 {
     virtual void slot0() throw();
@@ -227,7 +302,6 @@ struct hkpMoppCodeGenerator : hkReferencedObject
     hkpMoppCodeGenerator(int) throw();
     hkpMoppCode* FUN_00e064f0() throw();
     ~hkpMoppCodeGenerator() throw();
-    void FUN_00c905b0() throw();
 };
 struct CostSettings
 {
@@ -281,7 +355,7 @@ struct AssemblerInterface
     virtual int outputSize() throw();
     virtual void* output() throw();
     virtual void slot14() throw();
-    virtual void finalize(int, FourFloatVector*) throw();
+    virtual void finalize(int, PacketCallLocal_00dd4cb0*) throw();
 };
 struct hkpMoppDefaultAssembler : AssemblerInterface
 {
@@ -292,7 +366,7 @@ struct hkpMoppDefaultAssembler : AssemblerInterface
     int unk40, unk44, unk48;
     int unk4C;
     float unk50, unk54, unk58, unk5C;
-    FourFloatVector unk60;
+    PacketCallLocal_00dd4cb0 unk60;
     int unk70, unk74, unk78, unk7C;
     hkpMoppDefaultAssembler(AssemblerSettings*, hkpMoppCodeGenerator*, PrimitiveSource*) throw();
     ~hkpMoppDefaultAssembler() throw();
@@ -338,7 +412,7 @@ static __declspec(noinline) void StoreBigEndian(EncodedReference* reference, int
 }
 inline void* allocateScratch(int n)
 {
-    Allocator* heap = &FUN_00c85750()->heap();
+    Allocator* heap = reinterpret_cast<Allocator*>(&(&hkMemoryRouter::getInstance())->heap());
     return FUN_00c85690(heap, n);
 }
 struct MoppBuilder
@@ -379,7 +453,7 @@ hkpMoppCode* MoppBuilder::FUN_00dd4cb0(PrimitiveSource* source, void* buffer, in
     }
     if (scratch != buffer)
     {
-        Allocator* heap = &FUN_00c85750()->heap();
+        Allocator* heap = reinterpret_cast<Allocator*>(&(&hkMemoryRouter::getInstance())->heap());
         FUN_00c856c0(heap, scratch);
     }
     result = status;
@@ -417,19 +491,19 @@ hkpMoppCode* MoppBuilder::FUN_00dd4cb0(PrimitiveSource* source, void* buffer, in
         }
         int totalSize = offsets.data[offsets.size - 1];
         code = new hkpMoppCode;
-        MergeArray<unsigned char>& bytes = code->code;
+        MergeArray<unsigned char>& bytes = *(MergeArray<unsigned char>*)&code->m_data;
         bytes.reserveExactly(totalSize);
         bytes.setSizeFill(totalSize);
         for (int i = 0; i < chunks->count; ++i)
         {
             unsigned char* dest = bytes.data + offsets.data[i];
             hkpMoppCode* part = chunks->at(i).generator->FUN_00e064f0();
-            FUN_00cb1260(dest, part->code.data, part->code.size);
+            FUN_00cb1260(dest, part->m_data.m_data, part->m_data.m_iElementCount);
             delete part;
-            chunks->at(i).generator->FUN_00c905b0();
+            chunks->at(i).generator->removeReference();
         }
         offsets.ClearAndRelease();
     }
-    outputInterface->finalize(status, &code->info);
+    outputInterface->finalize(status, (PacketCallLocal_00dd4cb0*)&code->m_info);
     return code;
 }

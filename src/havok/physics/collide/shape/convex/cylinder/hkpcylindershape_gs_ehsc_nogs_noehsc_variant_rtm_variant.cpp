@@ -1,34 +1,40 @@
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 // src/havok/physics/collide/shape/convex/cylinder/hkpcylindershape_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/shape/convex/cylinder/hkpcylindershape_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
-
 
 // src/havok/physics/collide/shape/convex/cylinder/hkpcylindershape_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/collide/shape/convex/cylinder/hkpcylindershape.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 // src/havok/physics/collide/shape/convex/cylinder/hkpcylindershape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/cylinder/hkpcylindershape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpCylinderShape.h"
+#include "../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/hkpConvexShape.h"
+#include "../../../../../../../include/hkpShape.h"
+#include "../../../../../../../include/hkpSphereRepShape.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkStackMemory.h"
+#include "../../../../../../../include/hkSimdReal.h"
+#include "../../../../../../../include/hkAabb.h"
+#include "../../../../../../../include/hkVector4_S.h"
+#include "../../../../../../../include/hkpCapsuleShape.h"
+#include "../../../../../../../include/hkpCylinderShape.h"
+#include "../../../../../../../include/hkThreadLocalData.h"
+#include "../../../../../../../include/hkTransform.h"
+#include <string.h>
+__forceinline hkVector4::hkVector4(const hkVector4& v) { memcpy(this, &v, sizeof(*this)); }
+
 int __cdecl FUN_00d571b0();
 // FUN_00d571a0: __thiscall getter returning the float at this+0x14,
 // which is hkpCylinderShape::m_fCylinderRadius in the pack's layout
 //  m_type 0xC, m_fSphereRadius 0x10, m_fCylinderRadius 0x14).
-class hkpCylinderShapeGetCylRadius : public hkpCylinderShape {
-public:
-    hkReal FUN_00d571a0();
-};
 extern char DAT_01268940[];
 void __cdecl FUN_00c90360(void* item, const char* type);
 void __cdecl FUN_00d571c0(void* item, const char*);
-struct C00d573e0 {
-    char  pad00[0x10];
-    volatile float f10;
-    float f14;
-    char  pad18[0x2c - 0x18];
-    float f2c;
-    char  pad30[0x3c - 0x30];
-    float f3c;
-    void SetValue(float v);
-};
+
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 extern char DAT_010305a8;
 extern char DAT_010d0f1c;
@@ -37,14 +43,7 @@ static __declspec(noinline) float FUN_00d571d0()
 {
     return 0.0f;
 }
-struct S00d57b20_Obj {
-    void* unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
 
-    S00d57b20_Obj* __thiscall FUN_00d57b20(int condition);
-};
 #include <xmmintrin.h>
 
 #include <xmmintrin.h>
@@ -335,11 +334,6 @@ struct __declspec(align(16)) hkVector4A {
     }
 };
 
-struct hkAabb {
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
-};
-
 struct Lane61 {
     __m128 value;
     Lane61(const float& f) { value = _mm_load_ss(&f); }
@@ -364,17 +358,14 @@ struct __declspec(align(16)) Vector61 {
         value = _mm_mul_ps(y, v);
     }
 };
-struct CylinderShape_d57b70 : hkpCylinderShape {
-    void FUN_00d57b70(const hkTransform* localToWorld, hkReal tolerance, hkAabb* out) const;
-};
 
 // @fnv 0x00d57b70
-void CylinderShape_d57b70::FUN_00d57b70(const hkTransform* localToWorld, hkReal tolerance, hkAabb* out) const
+void hkpCylinderShape::CalculateAabb(const hkTransform& localToWorld, hkReal tolerance, hkAabb& out) const
 {
-    hkVector4 c0 = localToWorld->m_rotation.m_kColumn0;
-    hkVector4 c1 = localToWorld->m_rotation.m_kColumn1;
-    hkVector4 c2 = localToWorld->m_rotation.m_kColumn2;
-    hkVector4 tr = localToWorld->m_vTranslation;
+    hkVector4 c0 = reinterpret_cast<const hkVector4&>(localToWorld.m_row0);
+    hkVector4 c1 = reinterpret_cast<const hkVector4&>(localToWorld.m_row1);
+    hkVector4 c2 = reinterpret_cast<const hkVector4&>(localToWorld.m_row2);
+    hkVector4 tr = reinterpret_cast<const hkVector4&>(localToWorld.m_row3);
 
     __declspec(align(16)) hkVector4A transVertices[2];
 
@@ -427,14 +418,16 @@ void CylinderShape_d57b70::FUN_00d57b70(const hkTransform* localToWorld, hkReal 
     Vector61 expansion;
     expansion.sum(Lane61(total), normDir);
 
-    ((hkVector4A*)&out->m_kMinimumCorner)->setMin4(transVertices[0], transVertices[1]);
-    ((hkVector4A*)&out->m_kMinimumCorner)->sub4(*(hkVector4A*)&expansion);
-    ((hkVector4A*)&out->m_kMaximumCorner)->setMax4(transVertices[0], transVertices[1]);
-    ((hkVector4A*)&out->m_kMaximumCorner)->add4(*(hkVector4A*)&expansion);
+    ((hkVector4A*)&out.m_kMinimumCorner)->setMin4(transVertices[0], transVertices[1]);
+    ((hkVector4A*)&out.m_kMinimumCorner)->sub4(*(hkVector4A*)&expansion);
+    ((hkVector4A*)&out.m_kMaximumCorner)->setMax4(transVertices[0], transVertices[1]);
+    ((hkVector4A*)&out.m_kMaximumCorner)->add4(*(hkVector4A*)&expansion);
 }
 
 #include <math.h>
 #include <xmmintrin.h>
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
 
 // Cylinder tessellation factor, its reciprocal, and the fistp rounding bias.
 // factor/inv are filled by the shape's static init; bias starts negative and
@@ -560,151 +553,20 @@ typedef unsigned char hkUint8_S;
 typedef unsigned short hkUint16_S;
 typedef unsigned int hkUint32_S;
 typedef unsigned long __w64 hkUlong_S;
-typedef unsigned __w64 hk_size_t;class FinishingFlag
-{
-public:
-FinishingFlag():m_bFinishing(0){}
-int m_bFinishing;
-};
-class hkClass_S;
-class hkBool_S
-{
-public:
-typedef char CompileTimeTrueType;inline hkBool_S(bool b)
-{
-m_cBooleanValue=static_cast<char>(b);
-}
-inline operator bool()const
-{
-return m_cBooleanValue !=0;
-}
-private:
-char m_cBooleanValue;};template<typename ENUM,typename STORAGE>
-class hkEnum
-{
-public:
-hkEnum()
-{
-}
-hkEnum(ENUM e)
-{
-m_kStorage=static_cast<STORAGE>(e);
-}
-private:
-STORAGE m_kStorage;};
-template<typename TYPE>
-class ValueWrapper
-{
-public:
-__forceinline ValueWrapper(){}
-__forceinline void operator=(TYPE e)
-{
-m_kStorage=e;
-}
-__forceinline TYPE val()const
-{
-return m_kStorage;
-}
-private:
-TYPE m_kStorage;};
-extern "C"{
-__declspec(dllimport)void*_stdcall TlsGetValue(unsigned long dwTlsIndex);}
-template<typename T>
-class hkThreadLocalData
-{
-public:
-hkThreadLocalData()
-{
-m_slotID=TlsAlloc();
-}
-__forceinline T getData()const
-{
-return(T)(hkUlong_S)TlsGetValue(m_slotID);
-}
-unsigned long m_slotID;};
+typedef unsigned __w64 hk_size_t;
 
-
-
-
-class hkMemoryAllocator
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}
-virtual void*AllocateMemoryBlock(int numBytes)=0;
-virtual void ReleaseBlock(void*p,int numBytes)=0;public:
-enum MemoryState
-{
-MEMORY_STATE_OK,
-MEMORY_STATE_OUT_OF_MEMORY
-};};struct StringPointerTriple
-{
-public:
-__forceinline StringPointerTriple();protected:
-ValueWrapper<void*>m_next;};
-class NineIntegerRecord
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}
-typedef hkMemoryAllocator Allocator;
-static NineIntegerRecord&__cdecl GetMonitorStream();inline Allocator&heap(){return*m_pStreamAllocator;}
-protected:
-StringPointerTriple m_aiEntries;
-Allocator*m_pTemp;
-Allocator*m_pStreamAllocator;};
-class hkBaseObject_S
-{
-public:
-static const struct ClassMemberDescriptor Members[];public:
-__forceinline hkBaseObject_S(){}
-};
-class hkStatisticsCollector;
-class hkReferencedObject_S:public hkBaseObject_S
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;hkReferencedObject_S*b=static_cast<hkReferencedObject_S*>(NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));b->m_usMemSizeAndFlags=static_cast<hkUint16_S>(nbytes);;return b;}
-public:
-enum
-{
-MASK_MEMSIZE=0x7fff
-};
-hkUint16_S m_usMemSizeAndFlags;
-public:
-hkReferencedObject_S(class FinishingFlag flag){}
-};typedef float hkReal_S;
+typedef float hkReal_S;
 
 ;
 typedef __m128 hkQuadReal;
 extern const __m128 DAT_010ec7f0;
-class hkVector4_S;
-typedef const hkVector4_S&hkVector4Parameter;
-class VectorComponentValue
-{
-public:
-VectorComponentValue(const hkQuadReal&x)
-:m_vValue(x)
-{
-}
-VectorComponentValue(hkReal_S x)
-{
-m_vValue=_mm_load_ss(&x);
-}
-operator hkReal_S()const
-{
-hkReal_S s;
-_mm_store_ss(&s,m_vValue);
-return s;
-}
-__forceinline hkQuadReal broadcast()const
-{
-return _mm_shuffle_ps(m_vValue,m_vValue,0);
-}
-__forceinline const hkQuadReal&getQuad()const
-{
-return m_vValue;
-}
-private:
-hkQuadReal m_vValue;};
-typedef const VectorComponentValue&hkSimdRealParameter;class Vector4Comparison;
+
+inline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x) {}
+inline hkSimdReal::hkSimdReal(float x) { m_vValue = _mm_load_ss(&x); }
+inline hkSimdReal::operator float() const { float s; _mm_store_ss(&s, m_vValue); return s; }
+__forceinline __m128 hkSimdReal::broadcast() const { return _mm_shuffle_ps(m_vValue, m_vValue, 0); }
+__forceinline const __m128& hkSimdReal::getQuad() const { return m_vValue; }
+typedef const hkSimdReal&hkSimdRealParameter;class Vector4Comparison;
 typedef const Vector4Comparison&hkVector4ComparisonParameter;extern "C"{
 double __cdecl sqrt([SA_Pre(Null=SA_No)][SA_Pre(Deref=1,Valid=SA_Yes,Access=SA_Read)]double _X);
 }
@@ -712,58 +574,32 @@ namespace MathUtilities
 {
 inline hkReal_S __cdecl sqrt(hkReal_S r){return::sqrtf(r);}
 }
-class hkTransform_S;
-class hkVector4_S
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
-__forceinline void operator=(const hkVector4_S&v);
-__forceinline void setAdd4(const hkVector4_S&a,const hkVector4_S&b);
-__forceinline void setSub4(const hkVector4_S&a,const hkVector4_S&b);
-__forceinline void mul4(hkSimdRealParameter a);
-__forceinline void setMul4(hkSimdRealParameter r,const hkVector4_S&a);
-__forceinline void setAddMul4(const hkVector4_S&a,const hkVector4_S&b,hkSimdRealParameter r);
-__forceinline void setCross(const hkVector4_S&a,const hkVector4_S&b);
-__forceinline void setInterpolate4(const hkVector4_S&a,const hkVector4_S&b,hkSimdRealParameter t);
-__forceinline VectorComponentValue dot3(const hkVector4_S&a)const;
-__forceinline VectorComponentValue length3()const;
-__forceinline VectorComponentValue lengthSquared3()const;
-__forceinline VectorComponentValue lengthInverse3()const;
-__forceinline void normalize3();
-__forceinline VectorComponentValue normalizeWithLength3();
-private:
-hkQuadReal m_vComponents;
-public:
-operator hkQuadReal()const
-{
-return m_vComponents;
-}
-};inline void hkVector4_S::operator=(const hkVector4_S&v)
+__forceinline void hkVector4_S::operator=(const hkVector4_S&v)
 {
 m_vComponents=v.m_vComponents;
 }
-inline void hkVector4_S::setAdd4(const hkVector4_S&v0,const hkVector4_S&v1)
+__forceinline void hkVector4_S::setAdd4(const hkVector4_S&v0,const hkVector4_S&v1)
 {
 m_vComponents=_mm_add_ps(v0.m_vComponents,v1.m_vComponents);
 }
-inline void hkVector4_S::setSub4(const hkVector4_S&v0,const hkVector4_S&v1)
+__forceinline void hkVector4_S::setSub4(const hkVector4_S&v0,const hkVector4_S&v1)
 {
 m_vComponents=_mm_sub_ps(v0.m_vComponents,v1.m_vComponents);
 }
-inline void hkVector4_S::mul4(hkSimdRealParameter s)
+__forceinline void hkVector4_S::mul4(hkSimdRealParameter s)
 {
 m_vComponents=_mm_mul_ps(s.broadcast(),m_vComponents);
 }
-inline void hkVector4_S::setMul4(hkSimdRealParameter r,const hkVector4_S&v1)
+__forceinline void hkVector4_S::setMul4(hkSimdRealParameter r,const hkVector4_S&v1)
 {
 m_vComponents=_mm_mul_ps(r.broadcast(),v1.m_vComponents);
 }
-inline void hkVector4_S::setAddMul4(const hkVector4_S&a,const hkVector4_S&b,hkSimdRealParameter r)
+__forceinline void hkVector4_S::setAddMul4(const hkVector4_S&a,const hkVector4_S&b,hkSimdRealParameter r)
 {
 m_vComponents=_mm_add_ps(a.m_vComponents,
 _mm_mul_ps(r.broadcast(),b.m_vComponents));
 }
-inline void hkVector4_S::setCross(const hkVector4_S&v0,const hkVector4_S&v1)
+__forceinline void hkVector4_S::setCross(const hkVector4_S&v0,const hkVector4_S&v1)
 {
 hkQuadReal cross0;
 cross0=_mm_mul_ps(
@@ -774,27 +610,28 @@ cross1=_mm_mul_ps(
 _mm_shuffle_ps(v0.m_vComponents,v0.m_vComponents,(((3)<<6)|((1)<<4)|((0)<<2)|((2)))),
 _mm_shuffle_ps(v1.m_vComponents,v1.m_vComponents,(((3)<<6)|((0)<<4)|((2)<<2)|((1)))));
 m_vComponents=_mm_sub_ps(cross0,cross1);}
-inline void hkVector4_S::setInterpolate4(const hkVector4_S&v0,const hkVector4_S&v1,hkSimdRealParameter _t)
+__forceinline void hkVector4_S::setInterpolate4(const hkVector4_S&v0,const hkVector4_S&v1,hkSimdRealParameter _t)
 {
-hkQuadReal t=_t.broadcast();
-hkQuadReal s=_mm_sub_ps(DAT_010ec7f0,t);
-m_vComponents=_mm_add_ps(
-_mm_mul_ps(s,v0.m_vComponents),
-_mm_mul_ps(t,v1.m_vComponents));}
-inline VectorComponentValue hkVector4_S::dot3(const hkVector4_S&a)const
+hkQuadReal t = _t.broadcast();
+hkQuadReal s = _mm_sub_ps(DAT_010ec7f0, t);
+hkQuadReal p0 = _mm_mul_ps(s, v0.m_vComponents);
+hkQuadReal p1 = _mm_mul_ps(t, v1.m_vComponents);
+m_vComponents = _mm_add_ps(p0, p1);
+}
+__forceinline hkSimdReal hkVector4_S::dot3(const hkVector4_S&a)const
 {
 hkQuadReal x2=_mm_mul_ps(m_vComponents,a.m_vComponents);
 hkQuadReal xySum=_mm_add_ss(_mm_shuffle_ps(x2,x2,(((1)<<6)|((1)<<4)|((1)<<2)|((1)))),x2);
 return _mm_add_ss(_mm_shuffle_ps(x2,x2,(((2)<<6)|((2)<<4)|((2)<<2)|((2)))),xySum);}
-inline VectorComponentValue hkVector4_S::length3()const
+__forceinline hkSimdReal hkVector4_S::length3()const
 {
 return _mm_sqrt_ss(this->dot3(*this).getQuad());
 }
-inline VectorComponentValue hkVector4_S::lengthSquared3()const
+__forceinline hkSimdReal hkVector4_S::lengthSquared3()const
 {
 return this->dot3(*this);
 }
-inline VectorComponentValue hkVector4_S::lengthInverse3()const
+__forceinline hkSimdReal hkVector4_S::lengthInverse3()const
 {
 const hkQuadReal half=_mm_set_ss(0.5f);
 const hkQuadReal three=_mm_set_ss(3.0f);
@@ -806,218 +643,46 @@ const hkQuadReal refined=_mm_mul_ss(
 _mm_mul_ss(half,approx),
 _mm_sub_ss(three,_mm_mul_ss(_mm_mul_ss(len2,approx),approx)));
 return _mm_andnot_ps(len2EqualsZero,refined);}
-inline void hkVector4_S::normalize3()
+__forceinline void hkVector4_S::normalize3()
 {
 hkQuadReal lenInv=lengthInverse3().broadcast();
 m_vComponents=_mm_mul_ps(lenInv,m_vComponents);
 }
-inline VectorComponentValue hkVector4_S::normalizeWithLength3()
+__forceinline hkSimdReal hkVector4_S::normalizeWithLength3()
 {
 hkQuadReal len2=this->dot3(*this).getQuad();
 hkQuadReal lenInv=lengthInverse3().broadcast();
 m_vComponents=_mm_mul_ps(lenInv,m_vComponents);
 return _mm_mul_ss(len2,lenInv);
 }
-class StringCursor
+
+inline hkMonitorStream& hkMonitorStream::getInstance()
 {
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}static StringCursor&GetMonitorStream()
-{
-extern hkThreadLocalData<StringCursor*>g_pMonitorStream;
-return*g_pMonitorStream.getData();
+    extern hkThreadLocalData<hkMonitorStream*> g_pMonitorStream;
+    return *g_pMonitorStream.getData();
 }
-public:
-__forceinline char*__cdecl GetStreamStart(){return m_kRayStart.val();}
-__forceinline char*__cdecl GetStreamEnd(){return m_kRayEnd.val();}
-__forceinline char*__cdecl getCapacityMinus16(){return m_pCurrentCommand.val();}
-__forceinline hkBool_S __cdecl memoryAvailable()
-{
-return GetStreamEnd()<getCapacityMinus16();
-}
-__forceinline void __cdecl setEnd(char*ptr){m_kRayEnd=ptr;}
-public:
-static void __cdecl init();
-public:
-ValueWrapper<char*>m_kRayStart;
-ValueWrapper<char*>m_kRayEnd;
-ValueWrapper<char*>m_pRayCursor;
-ValueWrapper<char*>m_pCurrentCommand;
-public:
-struct Command
-{
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(StringCursor::Command));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-const char*m_pCommandName;
-};
-struct CommandTimingEntry:public StringCursor::Command
-{
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(StringCursor::CommandTimingEntry));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-hkUint32_S m_uiStartTicks;
-hkUint32_S m_uiEndTicks;
-__forceinline void setTime();
-};};
-void StringCursor::CommandTimingEntry::setTime()
+__forceinline char* __cdecl hkMonitorStream::getEnd() { return m_end.val(); }
+__forceinline char* __cdecl hkMonitorStream::getCapacityMinus16() { return m_capacityMinus16.val(); }
+__forceinline hkBool __cdecl hkMonitorStream::memoryAvailable() { return getEnd() < getCapacityMinus16(); }
+__forceinline void __cdecl hkMonitorStream::setEnd(char* ptr) { m_end = ptr; }
+__forceinline void hkMonitorStream::TimerCommand::setTime()
 {
 hkUint32_S ticks;
 __asm{
 rdtsc
 mov dword ptr[ticks],eax
 }
-m_uiStartTicks=ticks;
+m_time0=ticks;
 }
 class Vector4WithInt24W:public hkVector4_S
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}};
-enum CollisionShapeType
-{
-HK_SHAPE_INVALID=0,
-HK_SHAPE_SPHERE,
-HK_FIRST_SHAPE_TYPE=HK_SHAPE_SPHERE,
-HK_SHAPE_CYLINDER,
-HK_SHAPE_TRIANGLE,
-HK_SHAPE_BOX,
-HK_SHAPE_CAPSULE,
-HK_SHAPE_CONVEX_VERTICES,
-HK_SHAPE_COLLECTION,
-HK_SHAPE_BV_TREE,
-HK_SHAPE_LIST,
-HK_SHAPE_MOPP,
-HK_SHAPE_CONVEX_TRANSLATE,
-HK_SHAPE_CONVEX_TRANSFORM,
-HK_SHAPE_SAMPLED_HEIGHT_FIELD,
-HK_SHAPE_EXTENDED_MESH,
-HK_SHAPE_TRANSFORM,
-HK_SHAPE_COMPRESSED_MESH,
-HK_SHAPE_MAX_ID_SPU=HK_SHAPE_COMPRESSED_MESH+1,
-HK_SHAPE_CONVEX,
-HK_SHAPE_PACKED_CONVEX_VERTICES,
-HK_SHAPE_MOPP_EMBEDDED,
-HK_SHAPE_CONVEX_PIECE,
-HK_SHAPE_MULTI_SPHERE,
-HK_SHAPE_CONVEX_LIST,
-HK_SHAPE_TRIANGLE_COLLECTION,
-HK_SHAPE_MULTI_RAY,
-HK_SHAPE_HEIGHT_FIELD,
-HK_SHAPE_SPHERE_REP,
-HK_SHAPE_BV,
-HK_SHAPE_PLANE,
-HK_SHAPE_PHANTOM_CALLBACK,
-HK_SHAPE_USER0,
-HK_SHAPE_USER1,
-HK_SHAPE_USER2,
-HK_SHAPE_MAX_ID,
-HK_SHAPE_ALL=-1
-};
-enum hkpBufferSize
-{
-HK_SHAPE_BUFFER_SIZE=512
-};
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}};
+#include "../../../../../../../include/hkpBufferSize.h"
 typedef __declspec(align(16))char hkpShapeBuffer[HK_SHAPE_BUFFER_SIZE];
-class hkAabb;
-struct ShapeRayCastQuery;
-struct ShapeRayCastOutput;
-struct ShapeRayBundleCastInput;
-struct ShapeRayCastOutputArray;
-class hkpRayHitCollector;
-class hkpCdBody;
-class hkpShapeContainer;
-class hkSphere;
-typedef hkUint16_S hkpVertexId;
+
 typedef hkUint32_S hkpShapeKey;
-class hkpConvexShape_S;
-class hkpShape_S:public hkReferencedObject_S
-{
-public:
-static const struct ClassMemberDescriptor Members[];static const hkClass_S&__cdecl staticClass();struct DefaultStruct;
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;hkReferencedObject_S*b=static_cast<hkReferencedObject_S*>(NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));b->m_usMemSizeAndFlags=static_cast<hkUint16_S>(nbytes);;return b;}__forceinline void __cdecl operator delete(void*p){hkReferencedObject_S*b=static_cast<hkReferencedObject_S*>(p);;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,b->m_usMemSizeAndFlags);}__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-__forceinline hkpShape_S(CollisionShapeType type);
-__forceinline CollisionShapeType getType()const;
-__forceinline void getAabb(const hkTransform_S&localToWorld,hkReal_S tolerance,hkAabb&out)const;
-virtual hkReal_S getMaximumProjection(const hkVector4_S&direction)const;
-inline hkUlong_S getUserData()const;
-inline void setUserData(hkUlong_S data);
-__forceinline hkBool_S RayCast(const ShapeRayCastQuery&input,ShapeRayCastOutput&output)const;
-__forceinline Vector4Comparison castRayBundle(const ShapeRayBundleCastInput&input,ShapeRayCastOutputArray&output)const;
-__forceinline Vector4Comparison castRayBundle(const ShapeRayBundleCastInput&input,ShapeRayCastOutputArray&output,hkVector4ComparisonParameter mask)const;
-__forceinline void castRayWithCollector(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkpRayHitCollector&collector)const;
-virtual const hkpShapeContainer*GetShapeContainer()const{return 0;}
-virtual bool isConvex()const{return false;}
-struct PhysicsShape
-{
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(hkpShape_S::PhysicsShape));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-bool m_bIsConvex;
-bool m_bIsConvexPiece;
-bool m_bIsComposite;
-};
-virtual int CalcSizeForSpu(const PhysicsShape&input,int spuBufferSizeLeft)const;
-protected:
-virtual void CalculateAabb(const hkTransform_S&localToWorld,hkReal_S tolerance,hkAabb&out)const=0;
-virtual hkBool_S FUN_00d57d50(const ShapeRayCastQuery&input,ShapeRayCastOutput&output)const=0;
-virtual void CastRayWithCollector(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkpRayHitCollector&collector)const=0;
-virtual Vector4Comparison CastRayBundle(const ShapeRayBundleCastInput&input,ShapeRayCastOutputArray&output,hkVector4ComparisonParameter mask)const;
-public:
-static void __cdecl resetShapeFunctions();
-static void __cdecl verifyShapeFunctions();
-typedef void(__cdecl*GetSupportingVertexFunc)(const void*thisObj,hkVector4Parameter direction,Vector4WithInt24W&supportVertex);
-typedef void(__cdecl*ConvertVertexIdsToVerticesFunc)(const void*thisObj,const hkpVertexId*ids,int numIds,class Vector4WithInt24W*verticesOut);
-typedef int(__cdecl*WeldContactPointFunc)(const void*thisObj,hkpVertexId*featurePoints,hkUint8_S&numFeaturePoints,hkVector4_S&contactPointWs,const hkTransform_S*thisObjTransform,const hkpConvexShape_S*collidingShape,const hkTransform_S*collidingTransform,hkVector4_S&separatingNormalInOut);
-typedef void(__cdecl*GetCentreFunc)(const void*thisObj,hkVector4_S&centreOut);
-typedef int(__cdecl*GetNumCollisionSpheresFunc)(const void*thisObj);
-typedef const hkSphere*(__cdecl*GetCollisionSpheresFunc)(const void*thisObj,hkSphere*sphereBuffer);
-typedef void(__cdecl*GetAabbFunc)(const void*thisObj,const hkTransform_S&localToWorld,hkReal_S tolerance,hkAabb&out);
-typedef hkBool_S(__cdecl*CastRayFunc)(const void*thisObj,const ShapeRayCastQuery&input,ShapeRayCastOutput&output);
-typedef void(__cdecl*CastRayWithCollectorFunc)(const void*thisObj,const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkpRayHitCollector&collector);
-typedef Vector4Comparison(__cdecl*CastRayBundleFunc)(const void*thisObj,const ShapeRayBundleCastInput&input,ShapeRayCastOutputArray&output,hkVector4ComparisonParameter mask);
-typedef const hkpShape_S*(__cdecl*GetChildShapeFunc)(const void*thisObj,hkpShapeKey key,hkpShapeBuffer&buffer);
-typedef hkUint32_S(__cdecl*GetCollisionFilterInfoFunc)(const void*thisObj,hkpShapeKey key);
-struct ShapeCallbackDispatchTable
-{
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(hkpShape_S::ShapeCallbackDispatchTable));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-ValueWrapper<GetSupportingVertexFunc>m_kGetSupportingVertexFunction;
-ValueWrapper<ConvertVertexIdsToVerticesFunc>m_kConvertVertexIdsToVerticesFunction;
-ValueWrapper<WeldContactPointFunc>m_kWeldContactPointFunction;
-ValueWrapper<GetCentreFunc>m_kGetCentreFunction;
-ValueWrapper<GetNumCollisionSpheresFunc>m_kGetNumCollisionSpheresFunction;
-ValueWrapper<GetCollisionSpheresFunc>m_kGetCollisionSpheresFunction;
-ValueWrapper<GetAabbFunc>m_kGetAabbFunction;
-ValueWrapper<CastRayFunc>m_kCastRayFunction;
-ValueWrapper<CastRayWithCollectorFunc>m_kCastRayWithCollectorFunction;
-ValueWrapper<CastRayBundleFunc>m_kCastRayBundleFunction;
-ValueWrapper<GetChildShapeFunc>m_kGetChildShapeFunction;
-ValueWrapper<GetCollisionFilterInfoFunc>m_kGetCollisionFilterInfoFunction;
-void reset();
-};
-struct AlignedShapeCallbackTable
-{
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(hkpShape_S::AlignedShapeCallbackTable));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-__declspec(align(64))GetSupportingVertexFunc m_kGetSupportingVertexFunction;
-ConvertVertexIdsToVerticesFunc m_kConvertVertexIdsToVerticesFunction;
-WeldContactPointFunc m_kWeldContactPointFunction;
-GetCentreFunc m_kGetCentreFunction;
-GetNumCollisionSpheresFunc m_kGetNumCollisionSpheresFunction;
-GetCollisionSpheresFunc m_kGetCollisionSpheresFunction;
-GetAabbFunc m_kGetAabbFunction;
-CastRayFunc m_kCastRayFunction;
-CastRayWithCollectorFunc m_kCastRayWithCollectorFunction;
-CastRayBundleFunc m_kCastRayBundleFunction;
-GetChildShapeFunc m_kGetChildShapeFunction;
-GetCollisionFilterInfoFunc m_kGetCollisionFilterInfoFunction;
-};
-typedef void(__cdecl*RegisterFunc)(ShapeCallbackDispatchTable&sf);
-public:
-public:
-hkUlong_S m_ulUserData;
-public:
-hkEnum<CollisionShapeType,hkUint32_S>m_type;
-public:
-hkpShape_S(class FinishingFlag flag):hkReferencedObject_S(flag)
-{
-if(flag.m_bFinishing)
-{
-m_type=HK_SHAPE_INVALID;
-}
-}
-};struct RayCastHitResult
+struct RayCastHitResult
 {
 hkVector4_S m_vHitNormal;
 hkReal_S m_fHitFraction;};struct ShapeRayCastOutput:public RayCastHitResult
@@ -1025,7 +690,7 @@ hkReal_S m_fHitFraction;};struct ShapeRayCastOutput:public RayCastHitResult
 public:
 enum{MAX_HIERARCHY_DEPTH=8};
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 __forceinline void setKey(hkpShapeKey key);
 private:
 __forceinline void _reset();
@@ -1036,146 +701,35 @@ int m_uiShapeKeyIndex;};inline void ShapeRayCastOutput::setKey(hkpShapeKey key)
 {
 m_uiShapeKeys[m_uiShapeKeyIndex]=key;
 }
-class hkpSphereRepShape_S:public hkpShape_S
+
+const hkVector4& hkpCylinderShape::getVertex(int i) const
 {
-public:
-static const struct ClassMemberDescriptor Members[];
-protected:
-virtual int GetNumCollisionSpheres()const=0;
-public:
-hkpSphereRepShape_S(CollisionShapeType type):hkpShape_S(type){}
-hkpSphereRepShape_S(FinishingFlag flag):hkpShape_S(flag){m_type=HK_SHAPE_SPHERE_REP;}
-};
-extern hkReal_S g_fDefaultConvexRadius;
-class hkpConvexShape_S:public hkpSphereRepShape_S
-{
-public:
-static const struct ClassMemberDescriptor Members[];
-protected:
-virtual void GetSupportVertex(hkVector4Parameter direction,Vector4WithInt24W&supportingVertexOut)const=0;
-protected:
-inline hkpConvexShape_S(CollisionShapeType type,hkReal_S radius);
-hkReal_S m_fSphereRadius;
-public:
-hkpConvexShape_S(FinishingFlag flag):hkpSphereRepShape_S(flag){m_type=HK_SHAPE_CONVEX;}
-};
-class hkpCylinderShape_S:public hkpConvexShape_S
-{
-public:
-static const struct ClassMemberDescriptor Members[];static const hkClass_S&__cdecl staticClass();struct DefaultStruct;
-int CalcSizeForSpu(const PhysicsShape&input,int spuBufferSizeLeft)const{return sizeof(*this);};
-hkpCylinderShape_S(const hkVector4_S&vertexA,
-const hkVector4_S&vertexB,
-hkReal_S cylinderRadius,
-hkReal_S paddingRadius=g_fDefaultConvexRadius);
-inline const hkVector4_S*GetIndexedVertices()const;
-__forceinline const hkVector4_S&getVertex(int i)const;
-__forceinline void setVertex(int i,const hkVector4_S&position);
-hkReal_S GetCylinderRadius()const;
-void setCylinderRadius(const hkReal_S radius);
-hkReal_S getCylinderBaseRadiusFactorForHeightfieldCollisions(hkReal_S radiusFactor){return m_fCylinderRadiusSquared;}
-inline void setCylinderBaseRadiusFactorForHeightfieldCollisions(hkReal_S radiusFactor){m_fCylinderRadiusSquared=radiusFactor;}
-virtual void GetSupportVertex(hkVector4Parameter direction,Vector4WithInt24W&supportingVertexOut)const;
-virtual void GetVerticesFromIds(const hkpVertexId*ids,int numIds,Vector4WithInt24W*verticesOut)const;
-virtual void GetCentre(hkVector4_S&centreOut)const;
-virtual int GetNumCollisionSpheres()const;
-virtual const hkSphere*GetCollisionSpheres(hkSphere*sphereBuffer)const;
-virtual void CalculateAabb(const hkTransform_S&localToWorld,hkReal_S tolerance,hkAabb&out)const;
-virtual hkBool_S FUN_00d57d50(const ShapeRayCastQuery&input,ShapeRayCastOutput&results)const;
-virtual void GetFirstVertex(hkVector4_S&v)const;
-static void __cdecl registerSimulationFunctions(ShapeCallbackDispatchTable&sf);
-static void __cdecl registerCollideQueryFunctions(ShapeCallbackDispatchTable&sf);
-static void __cdecl registerRayCastFunctions(ShapeCallbackDispatchTable&sf);
-static void __cdecl registerGetAabbFunction(ShapeCallbackDispatchTable&sf);
-virtual void CalcContentStatistics(hkStatisticsCollector*collector,const hkClass_S*cls)const;
-static void __cdecl setNumberOfVirtualSideSegements(int numSegments);
-public:
-void presetPerpendicularVector();
-private:
-__forceinline static void __cdecl initRoundUpThreshold();
-__forceinline
-void decodeVertexId(hkpVertexId code,hkVector4_S&result)const;
-protected:
-hkReal_S m_fCylinderRadius;
-hkReal_S m_fCylinderRadiusSquared;
-hkVector4_S m_kVertexA;
-hkVector4_S m_kVertexB;
-hkVector4_S m_kPerpendicular1;
-hkVector4_S m_kPerpendicular2;
-public:
-hkpCylinderShape_S(FinishingFlag flag);
-enum VertexIdEncoding_S
-{
-VERTEX_ID_ENCODING_IS_BASE_A_SHIFT=7,
-VERTEX_ID_ENCODING_SIN_SIGN_SHIFT=6,
-VERTEX_ID_ENCODING_COS_SIGN_SHIFT=5,
-VERTEX_ID_ENCODING_IS_SIN_LESSER_SHIFT=4,
-VERTEX_ID_ENCODING_VALUE_MASK=0x0f
-};
-private:
-static hkReal_S ms_fVirtualSideSegments;
-static hkReal_S ms_fRoundUpThreshold;
-static hkReal_S ms_fRoundUpThresholdInverse;
-};const hkVector4_S*hkpCylinderShape_S::GetIndexedVertices()const
-{
-return&m_kVertexA;
+    return GetIndexedVertices()[i];
 }
-const hkVector4_S&hkpCylinderShape_S::getVertex(int i)const
-{
-;
-return(GetIndexedVertices())[i];
-}
-class hkpCapsuleShape:public hkpConvexShape_S
-{
-public:
-static const struct ClassMemberDescriptor Members[];static const hkClass_S&__cdecl staticClass();struct DefaultStruct;
-enum RayHitType
-{
-HIT_CAP0,
-HIT_CAP1,
-HIT_BODY,
-};
-hkpCapsuleShape(const hkVector4_S&vertexA,const hkVector4_S&vertexB,hkReal_S radius);
-inline const hkVector4_S*GetIndexedVertices()const;
-__forceinline const hkVector4_S&getVertex(int i)const;
-__forceinline void setVertex(int i,const hkVector4_S&position);
-virtual void GetSupportVertex(hkVector4Parameter direction,Vector4WithInt24W&supportingVertexOut)const;
-virtual void GetVerticesFromIds(const hkpVertexId*ids,int numIds,Vector4WithInt24W*verticesOut)const;
-virtual void GetCentre(hkVector4_S&centreOut)const;
-int CalcSizeForSpu(const PhysicsShape&input,int spuBufferSizeLeft)const{return sizeof(*this);};
-virtual int GetNumCollisionSpheres()const;
-virtual const hkSphere*GetCollisionSpheres(hkSphere*sphereBuffer)const;
-virtual void CalculateAabb(const hkTransform_S&localToWorld,hkReal_S tolerance,hkAabb&out)const;
-virtual hkBool_S FUN_00d57d50(const ShapeRayCastQuery&input,ShapeRayCastOutput&results)const;
-virtual void GetFirstVertex(hkVector4_S&v)const;
-static void __cdecl registerSimulationFunctions(ShapeCallbackDispatchTable&sf);
-static void __cdecl registerCollideQueryFunctions(ShapeCallbackDispatchTable&sf);
-static void __cdecl registerRayCastFunctions(ShapeCallbackDispatchTable&sf);
-static void __cdecl registerGetAabbFunction(ShapeCallbackDispatchTable&sf);
-virtual void CalcContentStatistics(hkStatisticsCollector*collector,const hkClass_S*cls)const;
-public:
-hkpCapsuleShape(FinishingFlag flag):hkpConvexShape_S(flag){m_type=HK_SHAPE_CAPSULE;}
-static void __cdecl GetClosestPointOnLineSegment(const hkVector4_S&A,const hkVector4_S&B,const hkVector4_S&B2,hkVector4_S&pt);
-static void __cdecl GetClosestPointsBetweenInfiniteLines(const hkVector4_S&A,const hkVector4_S&dA,const hkVector4_S&B,const hkVector4_S&dB,hkReal_S&distSquared,hkReal_S&t,hkReal_S&u,hkVector4_S&p,hkVector4_S&q);
-protected:
-hkVector4_S m_kVertexA;
-hkVector4_S m_kVertexB;
-};
+
+// The shared capsule header declares the hkVector4 helpers. This unit calls
+// the distinct SIMD-vector implementations, retained here as free declarations.
+void __cdecl CapsuleClosestPointOnLineSegment(const hkVector4_S& A, const hkVector4_S& B,
+                                              const hkVector4_S& B2, hkVector4_S& pt);
+void __cdecl CapsuleClosestPointsBetweenInfiniteLines(const hkVector4_S& A, const hkVector4_S& dA,
+                                                       const hkVector4_S& B, const hkVector4_S& dB,
+                                                       float& distSquared, float& t, float& u,
+                                                       hkVector4_S& p, hkVector4_S& q);
 struct ShapeRayCastQuery
 {
 hkVector4_S m_vFrom;
 // @fnv 0x00d57d50
-hkVector4_S m_vTo;};hkBool_S hkpCylinderShape_S::FUN_00d57d50(const ShapeRayCastQuery&input,ShapeRayCastOutput&results)const
+hkVector4_S m_vTo;};hkBool hkpCylinderShape::IntersectRayWithShape(const ShapeRayCastQuery&input,ShapeRayCastOutput&results)const
 {
-const hkpCylinderShape_S*thisObj=this;
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="T" "t" "rcCylinder";h->setTime();mStream.setEnd((char*)(h+1));}};
-hkVector4_S radiusAxis;radiusAxis.setCross(thisObj->m_kPerpendicular2,thisObj->m_kPerpendicular1);
+const hkpCylinderShape*thisObj=this;
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="T" "t" "rcCylinder";h->setTime();mStream.setEnd((char*)(h+1));}};
+hkVector4_S radiusAxis;radiusAxis.setCross(reinterpret_cast<const hkVector4_S&>(thisObj->m_kPerpendicular2),reinterpret_cast<const hkVector4_S&>(thisObj->m_kPerpendicular1));
 radiusAxis.mul4(thisObj->m_fSphereRadius);
-hkVector4_S vertex0;vertex0.setAdd4(thisObj->getVertex(0),radiusAxis);
-hkVector4_S vertex1;vertex1.setSub4(thisObj->getVertex(1),radiusAxis);
+hkVector4_S vertex0;vertex0.setAdd4(reinterpret_cast<const hkVector4_S&>(thisObj->getVertex(0)),radiusAxis);
+hkVector4_S vertex1;vertex1.setSub4(reinterpret_cast<const hkVector4_S&>(thisObj->getVertex(1)),radiusAxis);
 hkReal_S cylTotalRadius=thisObj->m_fSphereRadius+thisObj->m_fCylinderRadius;
 {
-hkVector4_S res;hkpCapsuleShape::GetClosestPointOnLineSegment(input.m_vFrom,vertex0,vertex1,res);
+hkVector4_S res;CapsuleClosestPointOnLineSegment(input.m_vFrom,vertex0,vertex1,res);
 hkVector4_S join;join.setSub4(input.m_vFrom,res);
 hkReal_S sToCylDist=join.length3();
 if(sToCylDist<cylTotalRadius)
@@ -1200,7 +754,7 @@ hkReal_S t,u;
 hkVector4_S p,q;
 hkVector4_S dA;dA.setSub4(input.m_vTo,input.m_vFrom);
 hkVector4_S dB;dB.setSub4(vertex1,vertex0);
-hkpCapsuleShape::GetClosestPointsBetweenInfiniteLines(input.m_vFrom,dA,vertex0,dB,infInfDistSquared,t,u,p,q);
+CapsuleClosestPointsBetweenInfiniteLines(input.m_vFrom,dA,vertex0,dB,infInfDistSquared,t,u,p,q);
 if(infInfDistSquared>cylTotalRadius*cylTotalRadius)
 {
 goto returnFalse;
@@ -1248,7 +802,7 @@ normal.normalize3();
 results.m_vHitNormal=normal;
 results.m_fHitFraction=ipT;
 results.setKey(0xffffffff);
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return true;
 }
 else
@@ -1298,11 +852,11 @@ goto returnFalse;
 results.m_vHitNormal.setMul4(axisSign,axis);
 results.m_fHitFraction=hitFract;
 results.setKey(0xffffffff);
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return true;
 }
 }
 returnFalse:
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return false;
 }

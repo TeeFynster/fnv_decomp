@@ -1,3 +1,8 @@
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiObjectNET.h"
+#include "../../../../include/NiPSysModifier.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/StrArr.h"
 
 // src/gamebryo2.2/corelibs/niparticle/nipsysgravitystrengthctlr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysgravitystrengthctlr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -10,19 +15,7 @@ void* __cdecl FUN_00c2a8a0()
     return &g_01202700;
 }
 
-struct NiRTTI
-{
-    const char* m_pcName;
-    NiRTTI* m_pkBase;
-};
 extern NiRTTI g_01202548;
-struct NiObject
-{
-    virtual ~NiObject();
-    virtual void _a();
-    virtual const NiRTTI* GetRTTI() const;
-    bool IsKindOfType(const NiRTTI* pkRTTI) const;
-};
 inline bool NiObject::IsKindOfType(const NiRTTI* pkRTTI) const
 {
     const NiRTTI* pkMy = GetRTTI();
@@ -32,16 +25,10 @@ inline bool NiObject::IsKindOfType(const NiRTTI* pkRTTI) const
     {
         if (pkMy == pkRTTI)
             return true;
-        pkMy = pkMy->m_pkBase;
+        pkMy = pkMy->m_pBaseRTTI;
     } while (pkMy);
     return false;
 }
-struct NiPSysModifier : NiObject
-{
-};
-struct NiObjectNET
-{
-};
 struct B00c1bff0
 {
     void* FUN_00c1b0f0(void*);
@@ -68,16 +55,6 @@ bool NiPSysGravityStrengthCtlr::FUN_00c2a910(NiObjectNET* pkTarget)
 }
 
 namespace fnv_00c2a960 {
-struct StrArr
-{
-    unsigned char _pad[8];
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short _pad2;
-    unsigned short m_usGrowSize;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 void __stdcall FUN_00c32f60(StrArr*);
 char* __cdecl _FUN_00a7d330(void*);
 struct NiPSysGravityStrengthCtlr
@@ -92,7 +69,7 @@ void NiPSysGravityStrengthCtlr::FUN_00c2a960(StrArr* pkStrings)
     char* pStr = _FUN_00a7d330(g_01202700);
     unsigned int uiSize = pkStrings->m_usSize;
     if (uiSize >= pkStrings->m_usMaxSize)
-        pkStrings->SetSize(uiSize + pkStrings->m_usGrowSize);
+        pkStrings->SetSize(uiSize + pkStrings->m_usGrowBy);
     pkStrings->SetAt(uiSize, pStr);
 }
 }  // namespace fnv_00c2a960

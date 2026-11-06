@@ -1,48 +1,182 @@
+#include "../../../../../../../include/hkArray.h"
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 
 // src/havok/physics/collide/shape/convex/convexvertices/hkpconvexverticesshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/convexvertices/hkpconvexverticesshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpConvexVerticesShape.h"
+// Keep the original float-only intrinsic representation: byte-array lanes in
+// the compiler header introduce /GS buffers into the original SIMD routines.
+#define _INCLUDED_MM2
+// Exe 0x00d58d80 GetCollisionSpheres: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4]; unsigned __int64 m128_u64[2]; } __m128, LocalM128;
+extern "C" LocalM128 _mm_rcp_ps(LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
 
-struct FUN_00d58d60_t
+#include "../../../../../../../include/V4.h"
+// local form of hkVector4: 0x00d59cc0 needs its original packet form (compiled function extent differs: 808 vs 633).
+
+
+#if !defined(FNV_FOURFLOATVECTOR_NO_SSE)
+#include <xmmintrin.h>
+#else
+union __m128;
+#endif
+
+class SimdReal;
+class SimdScalar;
+class ScalarValue;
+class Transform;
+class NiPoint3;
+
+#pragma pack(push, 4)
+
+class PacketCallLocal_00d59cc0
 {
-    char pad[0x40];
-    float* m;
-    void FUN_00d58d60(float* out);
+public:
+#if defined(FNV_FOURFLOATVECTOR_NO_SSE)
+    union Components
+    {
+        float m128_f32[4];
+        unsigned __int64 m128_u64[2];
+        signed char m128_i8[16];
+        short m128_i16[8];
+        int m128_i32[4];
+        __int64 m128_i64[2];
+        unsigned char m128_u8[16];
+        unsigned short m128_u16[8];
+        unsigned int m128_u32[4];
+    };
+#else
+    typedef __declspec(align(4)) __m128 Components;
+#endif
+
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+        Components m_vComponents;
+        Components m;
+        float f[4];
+        Components values;
+        Components q;
+        Components value;
+        Components quad;
+        float elements[4];
+        float m_fComponents[4];
+    };
+
+    PacketCallLocal_00d59cc0();
+    PacketCallLocal_00d59cc0(float x, float y, float z, float w);
+    PacketCallLocal_00d59cc0(const __m128& vector);
+
+    PacketCallLocal_00d59cc0* FUN_005532a0(float x, float y, float z, float w);
+    void FUN_004a3f10(PacketCallLocal_00d59cc0* vector);
+    void __thiscall FUN_004b4db0(const PacketCallLocal_00d59cc0* vector);
+    PacketCallLocal_00d59cc0& FUN_00e531a0(int parameter);
+    PacketCallLocal_00d59cc0 FUN_00e53260(int parameter);
+    void FUN_005611c0();
+
+    void operator=(const PacketCallLocal_00d59cc0& vector);
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    float& component(int index);
+    float& At(int index);
+    const float& At(int index) const;
+
+    __m128 length3() const;
+    float getW() const;
+    ScalarValue Dot(const PacketCallLocal_00d59cc0& vector) const;
+    ScalarValue LengthSq() const;
+    ScalarValue Length() const;
+    ScalarValue InverseLength() const;
+    void Normalize();
+    bool NormalizeNonzero();
+    void Mul(const ScalarValue& scalar);
+    void Add(const PacketCallLocal_00d59cc0& vector);
+    void Sub(const PacketCallLocal_00d59cc0& vector);
+    void Cross(const PacketCallLocal_00d59cc0& a, const PacketCallLocal_00d59cc0& b);
+
+    void setAbs4(const PacketCallLocal_00d59cc0& vector);
+    void setMul4(const SimdReal& scalar, const PacketCallLocal_00d59cc0& vector);
+    void addMul4(const SimdReal& scalar, const PacketCallLocal_00d59cc0& vector);
+    void setAddMul4(const PacketCallLocal_00d59cc0& a, const PacketCallLocal_00d59cc0& b, const SimdReal& scalar);
+    SimdReal getSimdAt3() const;
+    SimdReal lengthSquared3() const;
+    void setXYZ_W(__m128 xyz, __m128 w);
+    void setSqrtInverse4(const PacketCallLocal_00d59cc0& vector);
+    void setAddMul(const PacketCallLocal_00d59cc0& a, const PacketCallLocal_00d59cc0& b, const SimdScalar& scalar);
+    void addMul(const float& scalar, const PacketCallLocal_00d59cc0& vector);
+    void transformed(const Transform& transform, const PacketCallLocal_00d59cc0& vector);
+    void addScaled(const PacketCallLocal_00d59cc0& base, const PacketCallLocal_00d59cc0& direction, float amount);
+    void* AddVector(void*, NiPoint3*, void*, float);
+    void* AddVector(void*, void*);
+    void* ScaleSwizzled();
 };
 
+#pragma pack(pop)
+
+#include "../../../../../../../include/MemoryManager.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../include/hkSimdRealq.h"
+#include "../../../../../../../include/hkVector4q.h"
+#include "../../../../../../../include/hkpConvexShape.h"
+#include "../../../../../../../include/hkpConvexVerticesShape.h"
+#include "../../../../../../../include/hkpShape.h"
+#include "../../../../../../../include/hkpSphereRepShape.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkTransform.h"
+#include "../../../../../../../include/hkSphere.h"
+
+// 0x00c85750 supplies the same heap-at-0x10 router used by the other shared-array helpers.
+hkMemoryRouter* GetMemoryRouter_c85750();
+
 // @fnv 0x00d58d60
-void FUN_00d58d60_t::FUN_00d58d60(float* out)
+void hkpConvexVerticesShape::GetFirstVertex(hkVector4& vertex) const
 {
-    float* p = m;
+    float* out = reinterpret_cast<float*>(&vertex);
+    float* p = reinterpret_cast<float*>(m_kRotatedVertices.m_data);
     out[0] = p[0];
     out[1] = p[4];
     out[2] = p[8];
     out[3] = 0.0f;
 }
 
-struct FUN_00d591d0_class
-{
-    void FUN_00d591d0(void*, float, int);
-};
-
 void __cdecl FUN_00d26230(void*, void*, void*, float, int);
 
 // Calls FUN_00d26230 with this+0x20, this+0x30, the float at this+0x10 plus b, and c.
 // @fnv 0x00d591d0
-void FUN_00d591d0_class::FUN_00d591d0(void* a, float afDelta, int c)
+void hkpConvexVerticesShape::CalculateAabb(const hkTransform& a, float afDelta, hkAabb& c) const
 {
     FUN_00d26230(
-        a,
-        reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x20),
-        reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x30),
-        *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x10) + afDelta,
-        c
+        const_cast<hkTransform*>(&a),
+        reinterpret_cast<void*>(reinterpret_cast<char*>(const_cast<hkpConvexVerticesShape*>(this)) + 0x20),
+        reinterpret_cast<void*>(reinterpret_cast<char*>(const_cast<hkpConvexVerticesShape*>(this)) + 0x30),
+        m_fSphereRadius + afDelta,
+        reinterpret_cast<int>(&c)
     );
 }
 
 struct RefObj { void RetainReference(); void removeReference(); };
 struct DDCC60World { void removeReference(); };
+// Local fallback: shared hkpConvexVerticesShape lacks AssignReference and FUN_00d59f40.
 struct FUN_00d5a320 {
     void FUN_00d59f40();
     void AssignReference(RefObj* p, bool b);
@@ -57,19 +191,9 @@ void FUN_00d5a320::AssignReference(RefObj* apRef, bool b)
     if (b && apRef) FUN_00d59f40();
 }
 
-struct MemoryManager {
-    virtual void Method0();
-    virtual void Method1();
-    virtual void Free(void* object, unsigned short size);
-};
+hkMemoryRouter* _D1A0E0GetMemoryRouter();
 
-struct MemoryRouter {
-    unsigned char m_auiShapeKeys[0x10];
-    MemoryManager* m_pMemoryManager;
-};
-
-MemoryRouter* _D1A0E0GetMemoryRouter();
-
+// Local fallback: shared shape has no explicit deleting-destructor wrapper.
 struct FUN_00d5a4e0_Base {
     void FUN_00d59870();
 };
@@ -86,16 +210,14 @@ FUN_00d5a4e0_StandIn* FUN_00d5a4e0_StandIn::FUN_00d5a4e0(unsigned char deleting)
     this->FUN_00d59870();
 
     if (deleting & 1) {
-        MemoryRouter* router = _D1A0E0GetMemoryRouter();
+        hkMemoryRouter* router = _D1A0E0GetMemoryRouter();
         unsigned short size = m_iElementCount;
-        MemoryManager* manager = router->m_pMemoryManager;
-        manager->Free(this, size);
+        hkMemoryAllocator* manager = reinterpret_cast<hkMemoryAllocator*>(router->m_heap);
+        manager->blockFree(this, size);
     }
 
     return this;
 }
-
-struct Vec4 { float x, y, z, w; };
 
 // @fnv 0x00d58d40
 static Vec4* __cdecl FUN_00d58d40(Vec4* base, int index)
@@ -108,40 +230,16 @@ Vec4* caller_d58d40(Vec4* base, int index)
     return FUN_00d58d40(base, index);
 }
 
-struct FnvCpu_FUN_00d58d10_CpuObject {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    int value;
-    int FUN_00d58d10();
-};
 // @fnv 0x00d58d10
-int FnvCpu_FUN_00d58d10_CpuObject::FUN_00d58d10()
+int hkpConvexVerticesShape::GetNumCollisionSpheres() const
 {
-    return value;
+    return m_iStridedVertexCount;
 }
 
-struct FnvCpu_FUN_00d58d50_CpuObject { char* FUN_00d58d50(); };
 // @fnv 0x00d58d50
-char* FnvCpu_FUN_00d58d50_CpuObject::FUN_00d58d50()
+const hkArray<hkVector4>& hkpConvexVerticesShape::GetPlaneEquations() const
 {
-    return reinterpret_cast<char*>(this) + 84;
+    return m_kVertexPositions;
 }
 
 struct CallTarget_00d5a410 { int FUN_00d5a410(int, int, int, int, int); };
@@ -155,115 +253,84 @@ int SearchObject::FUN_00d5a4c0(unsigned int arg0, unsigned int arg1, unsigned in
     return (int)uiCallResult;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; unsigned __int64 m128_u64[2]; };
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-struct hkVec4Q {
-    __m128 m_vComponents;
-    void set(float a, float b, float c, float d) { m_vComponents = _mm_setr_ps(a, b, c, d); }
-    const float& operator()(int i) const { return ((const float*)&m_vComponents)[i]; }
-};
-struct hkSphereQ {
-    hkVec4Q m_pos;
-    hkVec4Q& getPositionAndRadius() { return m_pos; }
-};
-struct FourVectorsQ { hkVec4Q m_uiX; hkVec4Q m_uiY; hkVec4Q m_uiZ; };
-struct ConvexVertsQ : public hkpShape {
-    float m_fSphereRadius;
-    int unk14;
-    int unk18;
-    int unk1c;
-    hkVector4 m_kAabbHalfExtents;
-    hkVector4 m_kAabbCenter;
-    FourVectorsQ* m_kRotatedVertices;
-    int m_rotatedSize;
-    int m_rotatedCapacity;
-    int m_iStridedVertexCount;
-    hkSphereQ* FillSphereBuffer(hkSphereQ* sphereBuffer) const;
-};
-// Writes m_kRotatedVertices positions and m_fSphereRadius into sphereBuffer as hkSphereQ entries, returning sphereBuffer.
-// @fnv 0x00d58d80
-hkSphereQ* ConvexVertsQ::FillSphereBuffer(hkSphereQ* sphereBuffer) const
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
+
+__forceinline const float& hkVector4q::operator()(int i) const { return ((const float*)&m_vComponents)[i]; }
+
+__forceinline void hkVector4_S::set(float x, float y, float z, float w)
 {
-    hkSphereQ* out = sphereBuffer;
-    const FourVectorsQ* fv = m_kRotatedVertices;
+    m_vComponents = _mm_setr_ps(x, y, z, w);
+}
+struct FourVectorsQ { hkVector4q m_uiX; hkVector4q m_uiY; hkVector4q m_uiZ; };
+
+// Writes m_kRotatedVertices positions and m_fSphereRadius into sphereBuffer as hkSphere entries, returning sphereBuffer.
+// @fnv 0x00d58d80
+const hkSphere* hkpConvexVerticesShape::GetCollisionSpheres(hkSphere* sphereBuffer) const
+{
+    hkSphere* out = sphereBuffer;
+    const FourVectorsQ* fv = reinterpret_cast<const FourVectorsQ*>(m_kRotatedVertices.m_data);
     int i = m_iStridedVertexCount - 1;
     for (; i >= 3; i -= 4)
     {
-        (out++)->getPositionAndRadius().set(fv->m_uiX(0), fv->m_uiY(0), fv->m_uiZ(0), m_fSphereRadius);
-        (out++)->getPositionAndRadius().set(fv->m_uiX(1), fv->m_uiY(1), fv->m_uiZ(1), m_fSphereRadius);
-        (out++)->getPositionAndRadius().set(fv->m_uiX(2), fv->m_uiY(2), fv->m_uiZ(2), m_fSphereRadius);
-        (out++)->getPositionAndRadius().set(fv->m_uiX(3), fv->m_uiY(3), fv->m_uiZ(3), m_fSphereRadius);
+        (out++)->m_pos.set(fv->m_uiX(0), fv->m_uiY(0), fv->m_uiZ(0), m_fSphereRadius);
+        (out++)->m_pos.set(fv->m_uiX(1), fv->m_uiY(1), fv->m_uiZ(1), m_fSphereRadius);
+        (out++)->m_pos.set(fv->m_uiX(2), fv->m_uiY(2), fv->m_uiZ(2), m_fSphereRadius);
+        (out++)->m_pos.set(fv->m_uiX(3), fv->m_uiY(3), fv->m_uiZ(3), m_fSphereRadius);
         fv++;
     }
-    if (i >= 0) (out++)->getPositionAndRadius().set(fv->m_uiX(0), fv->m_uiY(0), fv->m_uiZ(0), m_fSphereRadius);
-    if (i >= 1) (out++)->getPositionAndRadius().set(fv->m_uiX(1), fv->m_uiY(1), fv->m_uiZ(1), m_fSphereRadius);
-    if (i >= 2) (out++)->getPositionAndRadius().set(fv->m_uiX(2), fv->m_uiY(2), fv->m_uiZ(2), m_fSphereRadius);
+    if (i >= 0) (out++)->m_pos.set(fv->m_uiX(0), fv->m_uiY(0), fv->m_uiZ(0), m_fSphereRadius);
+    if (i >= 1) (out++)->m_pos.set(fv->m_uiX(1), fv->m_uiY(1), fv->m_uiZ(1), m_fSphereRadius);
+    if (i >= 2) (out++)->m_pos.set(fv->m_uiX(2), fv->m_uiY(2), fv->m_uiZ(2), m_fSphereRadius);
     return sphereBuffer;
 }
 
-namespace fnv_00d59cc0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; unsigned __int64 m128_u64[2]; };
 extern "C" {
-__m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-__m128 _mm_mul_ps(__m128, __m128);
-__m128 _mm_add_ps(__m128, __m128);
-__m128 _mm_add_ss(__m128, __m128);
-__m128 _mm_xor_ps(__m128, __m128);
-__m128 _mm_unpacklo_ps(__m128, __m128);
-__m128 _mm_unpackhi_ps(__m128, __m128);
-__m128 _mm_movelh_ps(__m128, __m128);
-__m128 _mm_movehl_ps(__m128, __m128);
+LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+LocalM128 _mm_add_ps(LocalM128, LocalM128);
+LocalM128 _mm_add_ss(LocalM128, LocalM128);
+LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
 }
 
-typedef __m128 hkQuadReal;
+
+typedef LocalM128 hkQuadReal;
 
 extern const hkQuadReal hkQuadRealSignMask;
 
-struct hkSimdRealq
+struct hkMatrix3;
+
+__forceinline void hkVector4q::setNeg4(const hkVector4q& v) { m_vComponents = _mm_xor_ps(v.m_vComponents, hkQuadRealSignMask); }
+__forceinline hkSimdRealq hkVector4q::dot4xyz1(const hkVector4q& a) const
 {
-    hkQuadReal m_vValue;
-};
-
-struct hkMatrix3q;
-
-struct hkVector4q
+    const hkQuadReal xx = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    const hkQuadReal x2 = _mm_add_ss(_mm_shuffle_ps(xx, xx, 0x55), xx);
+    const hkQuadReal x3 = _mm_add_ss(_mm_shuffle_ps(xx, xx, 0xaa), _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff));
+    hkSimdRealq r;
+    r.m_vValue = _mm_add_ps(x3, x2);
+    return r;
+}
+__forceinline void hkVector4q::setW(const hkSimdRealq& w)
 {
-    hkQuadReal m_vComponents;
+    const hkQuadReal ww = _mm_shuffle_ps(w.m_vValue, w.m_vValue, 0);
+    m_vComponents = _mm_shuffle_ps(m_vComponents, _mm_unpackhi_ps(m_vComponents, ww), 0xc4);
+}
 
-    __forceinline void operator=(const hkVector4q& v) { m_vComponents = v.m_vComponents; }
-    __forceinline void setNeg4(const hkVector4q& v) { m_vComponents = _mm_xor_ps(v.m_vComponents, hkQuadRealSignMask); }
-    __forceinline void _setRotatedInverseDir(const hkMatrix3q& r, const hkVector4q& b);
-    void SetRotatedDirection(const hkMatrix3q& r, const hkVector4q& b) throw();
-    __forceinline hkSimdRealq dot4xyz1(const hkVector4q& a) const
-    {
-        const hkQuadReal xx = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        const hkQuadReal x2 = _mm_add_ss(_mm_shuffle_ps(xx, xx, 0x55), xx);
-        const hkQuadReal x3 = _mm_add_ss(_mm_shuffle_ps(xx, xx, 0xaa), _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff));
-        hkSimdRealq r;
-        r.m_vValue = _mm_add_ps(x3, x2);
-        return r;
-    }
-    __forceinline void setW(const hkSimdRealq& w)
-    {
-        const hkQuadReal ww = _mm_shuffle_ps(w.m_vValue, w.m_vValue, 0);
-        m_vComponents = _mm_shuffle_ps(m_vComponents, _mm_unpackhi_ps(m_vComponents, ww), 0xc4);
-    }
-};
 
-struct hkMatrix3q
-{
-    hkVector4q m_kColumn0;
-    hkVector4q m_kColumn1;
-    hkVector4q m_kColumn2;
-};
+#include "../../../../../../../include/hkMatrix3.h"
+__forceinline hkMatrix3::hkMatrix3() {}
+
 
 struct hkTransformq
 {
-    hkMatrix3q m_rotation;
+    hkMatrix3 m_rotation;
     hkVector4q m_vTranslation;
 };
 
-__forceinline void hkVector4q::_setRotatedInverseDir(const hkMatrix3q& r, const hkVector4q& b)
+__forceinline void ConvexInverseDir(hkVector4q& out, const hkMatrix3& r, const hkVector4q& b)
 {
     hkQuadReal c0 = r.m_kColumn0.m_vComponents;
     hkQuadReal c1 = r.m_kColumn1.m_vComponents;
@@ -279,77 +346,60 @@ __forceinline void hkVector4q::_setRotatedInverseDir(const hkMatrix3q& r, const 
     const hkQuadReal r1 = _mm_mul_ps(c1, b1);
     const hkQuadReal b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
     const hkQuadReal r2 = _mm_mul_ps(c2, b2);
-    m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
+    out.m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
+
+#pragma pack(push, 1)
+struct VectorComponents { float x, y, z, w; };
+#pragma pack(pop)
 
 union hkVector4U
 {
-    hkVector4 m_vec;
+    VectorComponents m_vec;
     hkQuadReal m_vComponents;
 };
 
-struct hkMemoryAllocatorq
-{
-    virtual void v00() throw();
-    virtual void v01() throw();
-    virtual void v02() throw();
-    virtual void v03() throw();
-    virtual void ReturnMemory(void* p, int numBytes) throw();
-};
+void* __cdecl GetThreadMemoryQ() throw();
 
-struct hkThreadMemoryq
-{
-    char* m_stackTop;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorq* m_pStreamAllocator;
-
-    __forceinline hkMemoryAllocatorq& heap() { return *m_pStreamAllocator; }
-};
-
-void* __cdecl FUN_00c85750() throw();
-
-static __forceinline hkThreadMemoryq* hkGetThreadMemory() { return (hkThreadMemoryq*)FUN_00c85750(); }
+static __forceinline hkMemoryRouter* hkGetThreadMemory() { return (hkMemoryRouter*)GetThreadMemoryQ(); }
 
 template <class T>
-struct hkArrayq
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+static __forceinline void hkArrayq_destroy(hkArrayBase<T>& self);
 
-    __forceinline hkArrayq() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
-    __forceinline ~hkArrayq()
-    {
-        hkMemoryAllocatorq& alloc = hkGetThreadMemory()->heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
+template <class T>
+static __forceinline void hkArrayq_destroy(hkArrayBase<T>& self)
+{
+        hkMemoryAllocator& alloc = hkGetThreadMemory()->heap();
+        self.m_iElementCount = 0;
+        if ((self.m_iCapacityState & 0x80000000) == 0)
         {
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
+            alloc.bufFree(self.m_data, (self.m_iCapacityState & 0x3fffffff) * sizeof(T));
         }
     }
-    __forceinline T* begin() { return m_data; }
-    __forceinline int GetLogicalSize() const { return m_iElementCount; }
+
+struct hkArrayqPolicy
+{
+    template <class T>
+    static __forceinline void destroy(hkArrayBase<T>& self) { hkArrayq_destroy(self); }
 };
 
 template <class T>
 __forceinline T* hkAllocateStack(int n)
 {
-    hkThreadMemoryq* mem = hkGetThreadMemory();
-    char* p = mem->m_stackTop;
-    mem->m_stackTop = p + ((n * sizeof(T) + 127) & ~127);
+    hkMemoryRouter* mem = hkGetThreadMemory();
+    char* p = static_cast<char*>(mem->m_stack.m_next.m_storage);
+    mem->m_stack.m_next.m_storage = p + ((n * sizeof(T) + 127) & ~127);
     return (T*)p;
 }
 
 template <class T>
 __forceinline void hkDeallocateStack(T* p)
 {
-    hkGetThreadMemory()->m_stackTop = (char*)p;
+    hkGetThreadMemory()->m_stack.m_next.m_storage = (char*)p;
 }
 
 template <class T>
-struct hkLocalArrayq : public hkArrayq<T>
+struct hkLocalArrayq : public hkArray<T, hkArrayqPolicy>
 {
     T* m_pStackAllocation;
 
@@ -372,13 +422,13 @@ struct hkLocalArrayq : public hkArrayq<T>
 static __forceinline void hkTransformPoints(const hkTransform& t, const hkVector4q* vectorsIn, int numVectors, hkVector4q* vectorsOut)
 {
     hkVector4U c0;
-    c0.m_vec = t.m_rotation.m_kColumn0;
+    c0.m_vec = reinterpret_cast<const VectorComponents*>(&t)[0];
     hkVector4U c1;
-    c1.m_vec = t.m_rotation.m_kColumn1;
+    c1.m_vec = reinterpret_cast<const VectorComponents*>(&t)[1];
     hkVector4U c2;
-    c2.m_vec = t.m_rotation.m_kColumn2;
+    c2.m_vec = reinterpret_cast<const VectorComponents*>(&t)[2];
     hkVector4U trans;
-    trans.m_vec = t.m_vTranslation;
+    trans.m_vec = reinterpret_cast<const VectorComponents*>(&t)[3];
     int i = numVectors - 1;
     do
     {
@@ -396,14 +446,14 @@ static __forceinline void hkTransformPoints(const hkTransform& t, const hkVector
 
 static __forceinline void hkTransformPlaneEquations(const hkTransformq& t, const hkVector4q* planes, int numPlanes, hkVector4q* planesOut)
 {
-    hkMatrix3q rotation;
+    hkMatrix3 rotation;
     rotation.m_kColumn0 = t.m_rotation.m_kColumn0;
     rotation.m_kColumn1 = t.m_rotation.m_kColumn1;
     rotation.m_kColumn2 = t.m_rotation.m_kColumn2;
     hkVector4q tr;
     tr.setNeg4(t.m_vTranslation);
     hkVector4q pivotShift;
-    pivotShift._setRotatedInverseDir(rotation, tr);
+    ConvexInverseDir(pivotShift, rotation, tr);
 
     int i = numPlanes - 1;
     do
@@ -417,22 +467,12 @@ static __forceinline void hkTransformPlaneEquations(const hkTransformq& t, const
     while (--i >= 0);
 }
 
-class hkpConvexVerticesShapeq : public hkpShape
+// Local fallback: shared shape lacks Transform, FUN_00d59200 and FUN_00d59900.
+class hkpConvexVerticesShapeq : public hkpConvexShape
 {
 public:
-    virtual void v01() throw();
-    virtual void v02() throw();
-    virtual void v03() throw();
-    virtual void v04() throw();
-    virtual void v05() throw();
-    virtual void v06() throw();
-    virtual void v07() throw();
-    virtual void v08() throw();
-    virtual void v09() throw();
-    virtual void v0a() throw();
-    virtual int getNumCollisionSpheres() const throw();
 
-    float m_fSphereRadius;
+    virtual int GetNumCollisionSpheres() const throw();
     int unk14;
     int unk18;
     int unk1c;
@@ -447,7 +487,7 @@ public:
     int m_iPlaneCount;
     int m_planeCapacity;
 
-    void FUN_00d59200(hkArrayq<hkVector4q>& vertices) const throw();
+    void FUN_00d59200(hkArray<hkVector4q, hkArrayqPolicy>& vertices) const throw();
     void FUN_00d59900(const float* vertices, int striding, int numVertices) throw();
     void Transform(const hkTransform& t);
 };
@@ -456,62 +496,53 @@ public:
 // @fnv 0x00d59cc0
 void hkpConvexVerticesShapeq::Transform(const hkTransform& t)
 {
-    hkLocalArrayq<hkVector4q> vertices(getNumCollisionSpheres());
+    hkLocalArrayq<hkVector4q> vertices(GetNumCollisionSpheres());
     FUN_00d59200(vertices);
     hkTransformPoints(t, vertices.begin(), vertices.GetLogicalSize(), vertices.begin());
     FUN_00d59900((const float*)vertices.begin(), sizeof(hkVector4q), vertices.GetLogicalSize());
     hkTransformPlaneEquations((const hkTransformq&)t, m_planeData, m_iPlaneCount, m_planeData);
 }
-}  // namespace fnv_00d59cc0
 
-struct AllocatorD5A360 {
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void* AllocateBufferWithSize(int& iNumBytesInOut);
-    virtual void ReturnMemory(void* p, int iNumBytes);
-};
-struct RouterD5A360 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    AllocatorD5A360* m_pkHeap;
-};
-RouterD5A360* GetRouterD5A360();
 struct __declspec(align(16)) Vector4D5A360 {
     float x;
     float y;
     float z;
     float w;
-    void operator=(const Vector4D5A360& v) { *reinterpret_cast<__m128*>(this) = *reinterpret_cast<const __m128*>(&v); }
+    void operator=(const Vector4D5A360& v) { *reinterpret_cast<LocalM128*>(this) = *reinterpret_cast<const LocalM128*>(&v); }
 };
 template <class T> __forceinline void CopyD5A360(T* pDst, const T* pSrc, int iEntryIndex)
 {
     for (int i = 0; i < iEntryIndex; i++)
         pDst[i] = pSrc[i];
 }
-template <class T> struct ArrayD5A360 {
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    __forceinline ArrayD5A360& operator=(const ArrayD5A360& a)
-    {
-        AllocatorD5A360& kAlloc = *GetRouterD5A360()->m_pkHeap;
-        if (getCapacity() < a.m_iElementCount)
+template <class T>
+static __forceinline hkArrayBase<T>& ArrayD5A360_assign(hkArrayBase<T>& self, const hkArrayBase<T>& a);
+
+template <class T>
+static __forceinline hkArrayBase<T>& ArrayD5A360_assign(hkArrayBase<T>& self, const hkArrayBase<T>& a)
+{
+        hkMemoryAllocator& kAlloc = *GetMemoryRouter_c85750()->m_heap;
+        if (self.getCapacity() < a.m_iElementCount)
         {
-            if ((m_iCapacityState & 0x80000000) == 0)
-                kAlloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
+            if ((self.m_iCapacityState & 0x80000000) == 0)
+                kAlloc.bufFree(self.m_data, self.getCapacity() * sizeof(T));
             int iNumBytes = a.m_iElementCount * sizeof(T);
-            m_data = static_cast<T*>(kAlloc.AllocateBufferWithSize(iNumBytes));
-            m_iCapacityState = iNumBytes / (int)sizeof(T);
+            self.m_data = static_cast<T*>(kAlloc.bufAlloc(iNumBytes));
+            self.m_iCapacityState = iNumBytes / (int)sizeof(T);
         }
-        m_iElementCount = a.m_iElementCount;
-        CopyD5A360(m_data, a.m_data, m_iElementCount);
-        return *this;
+        self.m_iElementCount = a.m_iElementCount;
+        CopyD5A360(self.m_data, a.m_data, self.m_iElementCount);
+        return *(&self);
     }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+
+struct ArrayD5A360Policy
+{
+    template <class T>
+    static __forceinline void destroy(hkArrayBase<T>& self) { }
+    template <class T>
+    static __forceinline void assign(hkArrayBase<T>& self, const hkArrayBase<T>& other) { ArrayD5A360_assign(self, other); }
 };
+// Local fallback: shared shape lacks SetVertices and FUN_00d59f40.
 struct ConvexD5A360 {
     int unk00;
     int unk04;
@@ -534,32 +565,25 @@ struct ConvexD5A360 {
     int unk48;
     int unk4C;
     int unk50;
-    ArrayD5A360<Vector4D5A360> m_kVertices;
+    hkArray<Vector4D5A360, ArrayD5A360Policy> m_kVertices;
     int m_iConnectivity;
     void FUN_00d59f40();
-    void SetVertices(const ArrayD5A360<Vector4D5A360>& kVertices);
+    void SetVertices(const hkArray<Vector4D5A360, ArrayD5A360Policy>& kVertices);
 };
 
 // Copies kVertices into m_kVertices and calls FUN_00d59f40 if m_iConnectivity is nonzero.
 // @fnv 0x00d5a360
-void ConvexD5A360::SetVertices(const ArrayD5A360<Vector4D5A360>& kVertices)
+void ConvexD5A360::SetVertices(const hkArray<Vector4D5A360, ArrayD5A360Policy>& kVertices)
 {
     m_kVertices = kVertices;
     if (m_iConnectivity)
         FUN_00d59f40();
 }
 
-struct FUN_00d58d20
-{
-    char pad[0x30];
-    __m128 m_kAabbCenter; // +0x30
-    void GetCentre(__m128* out);
-};
-
 // @fnv 0x00d58d20
-void FUN_00d58d20::GetCentre(__m128* out)
+void hkpConvexVerticesShape::GetCentre(LocalM128* out)
 {
-    *out = m_kAabbCenter;
+    *out = *reinterpret_cast<const LocalM128*>(&unk30);
 }
 
 class hkpConvexVerticesShapeFourVectors
@@ -583,15 +607,9 @@ struct Vector4WithInt24W
 
 typedef hkUint16 hkpVertexId;
 
-class hkpConvexVerticesShapeImpl : public hkpConvexVerticesShape
-{
-public:
-    void FUN_00d59060(const hkpVertexId* ids, int numIds, Vector4WithInt24W* verticesOut) const;
-};
-
 // Copies numIds rotated vertex positions from m_kRotatedVertices into verticesOut, packing each vertexId into the w field.
 // @fnv 0x00d59060
-void hkpConvexVerticesShapeImpl::FUN_00d59060(const hkpVertexId* ids, int numIds, Vector4WithInt24W* verticesOut) const
+void hkpConvexVerticesShape::GetVerticesFromIds(const hkpVertexId* ids, int numIds, Vector4WithInt24W* verticesOut) const
 {
     int i = numIds - 1;
     __assume(i >= 0);
@@ -611,7 +629,7 @@ void hkpConvexVerticesShapeImpl::FUN_00d59060(const hkpVertexId* ids, int numIds
 }
 
 class SpliceAllocator;
-struct AlignedSpliceVector {__m128 value;};
+struct AlignedSpliceVector {LocalM128 value;};
 void __cdecl FUN_00c908c0(SpliceAllocator& allocator,void* array,int capacity,int elementBytes);
 void __cdecl FUN_00d2cc70(void* destination,const void* source,unsigned bytes);
 struct VectorSpliceArray {
@@ -633,120 +651,58 @@ void VectorSpliceArray::FUN_00d5a410(SpliceAllocator& allocator,int first,int re
     FUN_00d2cc70(data+first+insertCount,data+first+removeCount,tailCount*sizeof(AlignedSpliceVector));
     AlignedSpliceVector* destination=data+first;
     for(int i=0;i<insertCount;++i) {
-        __m128 value=source[i].value;
+        LocalM128 value=source[i].value;
         destination[i].value=value;
     }
     size=newSize;
 }
 
-class hkMemoryAllocatorD598 {
-public:
-    virtual ~hkMemoryAllocatorD598() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void unk08() throw();
-    virtual void unk0C() throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 
-struct hkMemoryRouterD598 {
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorD598* m_pStreamAllocator;
-
-    hkMemoryAllocatorD598& heap() { return *m_pStreamAllocator; }
-};
-
-extern "C" hkMemoryRouterD598& __cdecl FUN_00c85750() throw();
-
-template <class T>
-class hkArrayD598 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    ~hkArrayD598() throw()
-    {
-        hkMemoryAllocatorD598& kAlloc = FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReleaseBlock(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
-
-namespace hkD598 {
-    class hkBaseObject {
-    public:
-        virtual ~hkBaseObject() throw() {}
-    };
-
-    class hkReferencedObject : public hkBaseObject {
-    public:
-        unsigned short m_usMemSizeAndFlags;
-        short m_sReferenceCount;
-        void FUN_00c905b0() throw();
-    };
-
-    class hkpShape : public hkReferencedObject {
-    public:
-        unsigned long m_ulUserData;
-        int m_type;
-    };
-
-    class hkpSphereRepShape : public hkpShape {
-    };
-
-    class hkpConvexShape : public hkpSphereRepShape {
-    public:
-        float m_fSphereRadius;
-    };
-
-    struct hkVector4D598 {
-        float x, y, z, w;
-    };
-
-    struct hkFourTransposedPointsD598 {
-        hkVector4D598 m_uiX, m_uiY, m_uiZ;
-    };
+// hkArray<T>::~hkArray() = clearAndDeallocate() on the heap allocator (slot 4 of hkMemoryAllocator is ReturnMemory).
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+    return FUN_00c85750().heap();
 }
+template <typename T> __forceinline void hkArrayBase<T>::clear()
+{
+    m_iElementCount = 0;
+}
+template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
+{
+    clear();
+    if ((m_iCapacityState & 0x80000000) == 0)
+        alloc.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
+template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
+{ __if_exists(A::destroy) { A::destroy(*this); } __if_not_exists(A::destroy) {
+    clearAndDeallocate();
+} }
 
-namespace FUN_00d59870 {
-    class hkpConvexVerticesShape : public hkD598::hkpConvexShape {
-    public:
-        virtual ~hkpConvexVerticesShape();
 
-        int unk14, unk18, unk1C, unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C;
-        hkArrayD598<hkD598::hkFourTransposedPointsD598> m_kRotatedVertices;
-        int m_iStridedVertexCount;
-        int unk50;
-        hkArrayD598<hkD598::hkVector4D598> m_kVertexPositions;
-        hkD598::hkReferencedObject* m_pConnectivity;
-    };
-
-// Releases the m_pConnectivity referenced object by calling FUN_00c905b0 if it is not null.
 // @fnv 0x00d59870
-    hkpConvexVerticesShape::~hkpConvexVerticesShape()
-    {
-        if (m_pConnectivity)
-            m_pConnectivity->FUN_00c905b0();
-    }
+hkpConvexVerticesShape::~hkpConvexVerticesShape() throw()
+{
+    if (m_pConnectivity)
+        m_pConnectivity->removeReference();
 }
 
-extern "C" __m128 _mm_load_ps(const float*);
-struct SelectBits { __m128 v; };
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_cmplt_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_and_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_andnot_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_or_ps(__m128 a, __m128 b);
+extern "C" LocalM128 _mm_load_ps(const float*);
+struct SelectBits { LocalM128 v; };
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_cmplt_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_and_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_or_ps(LocalM128 a, LocalM128 b);
 
 struct MatchVector
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 
     MatchVector() {}
  SelectBits compare(const MatchVector& a) const { SelectBits result; result.v=_mm_cmplt_ps(m_vComponents,a.m_vComponents); return result; }
@@ -779,19 +735,17 @@ struct hkFourTransposedPointsQ
     MatchVector m_uiZ;
 };
 
+// Local fallback: the shared GetSupportVertex signature changes the generated code.
 struct MatchShape : public hkpShape
 {
     float m_fSphereRadius;
-    int unk14;
-    int unk18;
-    int unk1c;
+    int unk14, unk18, unk1c;
     hkVector4 m_kAabbHalfExtents;
     hkVector4 m_kAabbCenter;
     hkFourTransposedPointsQ* m_kRotatedVertices;
     int m_rotatedSize;
     int m_rotatedCapacity;
     int m_iStridedVertexCount;
-
     void FUN_00d58ee0(const MatchVector& direction, MatchVector& supportingVertexOut) const;
 };
 
@@ -842,7 +796,6 @@ void MatchShape::FUN_00d58ee0(const MatchVector& direction, MatchVector& support
 extern void* DAT_010d0fc4;
 extern "C" void _ReadWriteBarrier();
 
-
 struct InputValues {
     int x;
     int y;
@@ -854,25 +807,25 @@ struct FinalCall {
 };
 
 __forceinline void AllocateVectors(
-    AllocatorD5A360& allocator,
+    hkMemoryAllocator& allocator,
     int count,
     Vector4D5A360*& data,
     int& capacity)
 {
     int bytes = count * 16;
-    data = static_cast<Vector4D5A360*>(allocator.AllocateBufferWithSize(bytes));
+    data = static_cast<Vector4D5A360*>(allocator.bufAlloc(bytes));
     capacity = bytes / 16;
 }
 
 __forceinline void ResizePlanes(
-    ArrayD5A360<Vector4D5A360>& planes,
-    const ArrayD5A360<Vector4D5A360>& source)
+    hkArray<Vector4D5A360, ArrayD5A360Policy>& planes,
+    const hkArray<Vector4D5A360, ArrayD5A360Policy>& source)
 {
-    AllocatorD5A360& allocator = reinterpret_cast<AllocatorD5A360&>(FUN_00c85750().heap());
+    hkMemoryAllocator& allocator = FUN_00c85750().heap();
 
     if ((planes.m_iCapacityState & 0x3fffffff) < source.m_iElementCount) {
         if ((planes.m_iCapacityState & 0x80000000) == 0)
-            allocator.ReturnMemory(
+            allocator.bufFree(
                 planes.m_data,
                 (planes.m_iCapacityState & 0x3fffffff) * 16);
 
@@ -887,15 +840,15 @@ __forceinline void ResizePlanes(
     CopyD5A360(planes.m_data, source.m_data, planes.m_iElementCount);
 }
 
-
-template<class T> struct ConstructedArray : ArrayD5A360<T> {
-    __forceinline ConstructedArray() : ArrayD5A360<T>() {
+template<class T> struct ConstructedArray : hkArray<T, ArrayD5A360Policy> {
+    __forceinline ConstructedArray() : hkArray<T, ArrayD5A360Policy>() {
         m_data = 0;
         m_iElementCount = 0;
         m_iCapacityState = 0x80000000;
     }
 };
 
+// Local constructor fallback: shared shape lacks this constructor and its inline base initialization.
 struct RefPart {
     void** m_ppVirtualMethodTable;
     unsigned short unk04;
@@ -928,37 +881,36 @@ struct FUN_00d59bd0 : ConvexPart {
 
     FUN_00d59bd0(
         InputValues* input,
-        const ArrayD5A360<Vector4D5A360>& source,
+        const hkArray<Vector4D5A360, ArrayD5A360Policy>& source,
         float r);
 };
 
-
 // Constructs the base with type 6 and radius r, copies source into planes, then calls FUN_00d59900 with input->x, input->z and input->y.
 // @fnv 0x00d59bd0
-FUN_00d59bd0::FUN_00d59bd0(InputValues* input, const ArrayD5A360<Vector4D5A360>& source, float r)
+FUN_00d59bd0::FUN_00d59bd0(InputValues* input, const hkArray<Vector4D5A360, ArrayD5A360Policy>& source, float r)
     : ConvexPart(6, r), convexPiece(0), connectivity(0)
 {
     ResizePlanes(planes, source);
     ((FinalCall*)this)->FUN_00d59900(input->x, input->z, input->y);
 }
 
-extern "C" __m128 _mm_set_ss(float);
-extern "C" float _mm_cvtss_f32(__m128);
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" __m128 _mm_loadu_ps(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_sub_ss(__m128, __m128);
-extern "C" __m128 _mm_mul_ss(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_rsqrt_ss(__m128);
-extern "C" __m128 _mm_cmpeq_ss(__m128, __m128);
-extern "C" __m128 _mm_andnot_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
+extern "C" LocalM128 _mm_set_ss(float);
+extern "C" float _mm_cvtss_f32(LocalM128);
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" LocalM128 _mm_loadu_ps(const float*);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_rsqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
 extern "C" void _ReadWriteBarrier(void);
 extern "C" void _ReadBarrier(void);
 extern "C" void _WriteBarrier(void);
@@ -969,11 +921,10 @@ extern "C" unsigned long DAT_0126835c;
 extern float DAT_01011d78;
 extern float DAT_01017718;
 extern float DAT_01016248;
-extern __m128 DAT_010c7160;
+extern LocalM128 DAT_010c7160;
 extern float DAT_01012054;
 
 struct ConvexPiece;
-
 
 struct TimerRec { const char* m_name; unsigned int m_uiCommandId; unsigned int unk08; };
 struct TimerStream { int unk00; TimerRec* m_cur; int unk08; TimerRec* m_kRayEnd; };
@@ -1010,17 +961,16 @@ __forceinline void TimerMarkOut(const char* name, int kind)
     }
 }
 
-struct hkBoolRet {
-    char m_cBooleanValue;
-    hkBoolRet(bool b) { m_cBooleanValue = (char)b; }
-};
+struct hkBoolRet { char m_cBooleanValue; hkBoolRet(bool b) { m_cBooleanValue = (char)b; } };
 
-struct __declspec(align(16)) V4 { float x, y, z, w; };
+// Preserve the original uninitialized scratch vectors.
+__forceinline V4::V4() {}
+
 struct FourVecs { float xs[4]; float ys[4]; float zs[4]; };
 
 void __cdecl ResizeAudioStream(void*, void*, int);
 
-struct PlaneArr { V4* m_data; int m_iElementCount; int m_iCapacityState; };
+
 
 struct ConvexPiece {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
@@ -1039,19 +989,7 @@ struct RayOutput {
     int m_uiShapeKeyIndex;
 };
 
-struct ConvexVertsShape {
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
-    FourVecs* m_rotated;
-    int m_rotatedSize;
-    int m_rotatedCap;
-    int m_iStridedVertexCount;
-    ConvexPiece* m_piece;
-    PlaneArr m_kPlaneArray;
-    hkBoolRet FUN_00d592a0(const RayInput& input, RayOutput& results);
-};
-
-static __forceinline float LowFloat(__m128 a) { float x; _mm_store_ss(&x, a); return x; }
+static __forceinline float LowFloat(LocalM128 a) { float x; _mm_store_ss(&x, a); return x; }
 
 static __forceinline void GetVert(V4& p, const FourVecs* fv, unsigned int b)
 {
@@ -1064,14 +1002,27 @@ static __forceinline void GetVert(V4& p, const FourVecs* fv, unsigned int b)
 
 static __forceinline float Dot4xyz1(const V4& p, const V4& v)
 {
-    __m128 q = *(const __m128*)&p;
-    __m128 xx = _mm_mul_ps(q, *(const __m128*)&v);
-    __m128 xy = _mm_add_ss(_mm_shuffle_ps(xx, xx, 0x55), xx);
-    __m128 zw = _mm_add_ss(_mm_shuffle_ps(xx, xx, 0xaa), _mm_shuffle_ps(q, q, 0xff));
+    LocalM128 q = *(const LocalM128*)&p;
+    LocalM128 xx = _mm_mul_ps(q, *(const LocalM128*)&v);
+    LocalM128 xy = _mm_add_ss(_mm_shuffle_ps(xx, xx, 0x55), xx);
+    LocalM128 zw = _mm_add_ss(_mm_shuffle_ps(xx, xx, 0xaa), _mm_shuffle_ps(q, q, 0xff));
     float r;
     _mm_store_ss(&r, _mm_add_ps(xy, zw));
     return r;
 }
+
+// Local fallback: the shared IntersectRayWithShape signature changes the generated code.
+struct ConvexVertsShape {
+    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
+    int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
+    FourVecs* m_rotated;
+    int m_rotatedSize;
+    int m_rotatedCap;
+    int m_iStridedVertexCount;
+    ConvexPiece* m_piece;
+    hkArrayBase<V4> m_kPlaneArray;
+    hkBoolRet FUN_00d592a0(const RayInput& input, RayOutput& results);
+};
 
 // @fnv 0x00d592a0
 hkBoolRet ConvexVertsShape::FUN_00d592a0(const RayInput& input, RayOutput& results)
@@ -1083,41 +1034,41 @@ hkBoolRet ConvexVertsShape::FUN_00d592a0(const RayInput& input, RayOutput& resul
             const unsigned short* face = buildPiece->m_kIndices;
             int n = buildPiece->m_numFaces - 1;
             if (n > 0) {
-                struct FaceScratch { V4 p1, p0, p2, plane; __m128 zero, three, half; };
+                struct FaceScratch { V4 p1, p0, p2, plane; LocalM128 zero, three, half; };
                 FaceScratch scratch;
                 scratch.zero = _mm_set_ss(DAT_01011d78);
                 scratch.three = _mm_set_ss(DAT_01017718);
                 scratch.half = _mm_set_ss(DAT_01016248);
-                PlaneArr* arr = &m_kPlaneArray;
+                hkArrayBase<V4>* arr = &m_kPlaneArray;
                 int count = n;
                 do {
                     const unsigned char* tri = buildPiece->m_bytes + *face;
                     GetVert(scratch.p0, m_rotated, tri[0]);
                     GetVert(scratch.p1, m_rotated, tri[1]);
                     GetVert(scratch.p2, m_rotated, tri[2]);
-                    __m128 a = *(__m128*)&scratch.p0;
-                    __m128 d1 = _mm_sub_ps(*(__m128*)&scratch.p1, a);
-                    __m128 d2 = _mm_sub_ps(*(__m128*)&scratch.p2, a);
-                    __m128 cross = _mm_sub_ps(
+                    LocalM128 a = *(LocalM128*)&scratch.p0;
+                    LocalM128 d1 = _mm_sub_ps(*(LocalM128*)&scratch.p1, a);
+                    LocalM128 d2 = _mm_sub_ps(*(LocalM128*)&scratch.p2, a);
+                    LocalM128 cross = _mm_sub_ps(
                         _mm_mul_ps(_mm_shuffle_ps(d1, d1, 0xc9), _mm_shuffle_ps(d2, d2, 0xd2)),
                         _mm_mul_ps(_mm_shuffle_ps(d1, d1, 0xd2), _mm_shuffle_ps(d2, d2, 0xc9)));
-                    __m128 sq = _mm_mul_ps(cross, cross);
-                    __m128 len = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
+                    LocalM128 sq = _mm_mul_ps(cross, cross);
+                    LocalM128 len = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
                     len = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), len);
-                    __m128 r = _mm_rsqrt_ss(len);
-                    __m128 scale = _mm_mul_ss(_mm_mul_ss(scratch.half, r),
+                    LocalM128 r = _mm_rsqrt_ss(len);
+                    LocalM128 scale = _mm_mul_ss(_mm_mul_ss(scratch.half, r),
                         _mm_sub_ss(scratch.three, _mm_mul_ss(_mm_mul_ss(len, r), r)));
                     scale = _mm_andnot_ps(_mm_cmpeq_ss(len, scratch.zero), scale);
-                    *(__m128*)&scratch.plane = _mm_mul_ps(_mm_shuffle_ps(scale, scale, 0), cross);
-                    __m128 pd = _mm_mul_ps(*(__m128*)&scratch.plane, a);
-                    __m128 dot = _mm_add_ss(_mm_shuffle_ps(pd, pd, 0x55), pd);
+                    *(LocalM128*)&scratch.plane = _mm_mul_ps(_mm_shuffle_ps(scale, scale, 0), cross);
+                    LocalM128 pd = _mm_mul_ps(*(LocalM128*)&scratch.plane, a);
+                    LocalM128 dot = _mm_add_ss(_mm_shuffle_ps(pd, pd, 0x55), pd);
                     dot = _mm_add_ss(_mm_shuffle_ps(pd, pd, 0xaa), dot);
                     scratch.plane.w = LowFloat(_mm_sub_ss(DAT_010c7160, dot));
-                    hkMemoryRouterD598& router = FUN_00c85750();
+                    hkMemoryRouter& router = FUN_00c85750();
                     if (arr->m_iElementCount == (arr->m_iCapacityState & 0x3fffffff)) {
-                        ResizeAudioStream(router.m_pStreamAllocator, arr, 0x10);
+                        ResizeAudioStream(router.m_heap, arr, 0x10);
                     }
-                    *(__m128*)&arr->m_data[arr->m_iElementCount] = *(__m128*)&scratch.plane;
+                    *(LocalM128*)&arr->m_data[arr->m_iElementCount] = *(LocalM128*)&scratch.plane;
                     arr->m_iElementCount++;
                     ++face;
                 } while (--count != 0);
@@ -1127,23 +1078,23 @@ hkBoolRet ConvexVertsShape::FUN_00d592a0(const RayInput& input, RayOutput& resul
 
     float lo = -1.0f;
     float hi = results.m_fHitFraction;
-    __m128 best = _mm_setzero_ps();
+    LocalM128 best = _mm_setzero_ps();
     int i = m_kPlaneArray.m_iElementCount - 1;
     if (i >= 0) {
     ConvexPiece* piece = m_piece;
-    __m128 from = *(const __m128*)&input.m_vFrom;
-    __m128 to = *(const __m128*)&input.m_vTo;
+    LocalM128 from = *(const LocalM128*)&input.m_vFrom;
+    LocalM128 to = *(const LocalM128*)&input.m_vTo;
     do {
-        __m128 q;
-        if(piece) q = *(const __m128*)&m_kPlaneArray.m_data[i];
+        LocalM128 q;
+        if(piece) q = *(const LocalM128*)&m_kPlaneArray.m_data[i];
         else q = _mm_load_ps(&m_kPlaneArray.m_data[i].x);
-        __m128 a = _mm_mul_ps(q, from);
-        __m128 axy = _mm_add_ss(_mm_shuffle_ps(a, a, 0x55), a);
-        __m128 azw = _mm_add_ss(_mm_shuffle_ps(a, a, 0xaa), _mm_shuffle_ps(q, q, 0xff));
+        LocalM128 a = _mm_mul_ps(q, from);
+        LocalM128 axy = _mm_add_ss(_mm_shuffle_ps(a, a, 0x55), a);
+        LocalM128 azw = _mm_add_ss(_mm_shuffle_ps(a, a, 0xaa), _mm_shuffle_ps(q, q, 0xff));
         float d0 = LowFloat(_mm_add_ps(axy, azw));
-        __m128 b = _mm_mul_ps(q, to);
-        __m128 bxy = _mm_add_ss(_mm_shuffle_ps(b, b, 0x55), b);
-        __m128 bzw = _mm_add_ss(_mm_shuffle_ps(b, b, 0xaa), _mm_shuffle_ps(q, q, 0xff));
+        LocalM128 b = _mm_mul_ps(q, to);
+        LocalM128 bxy = _mm_add_ss(_mm_shuffle_ps(b, b, 0x55), b);
+        LocalM128 bzw = _mm_add_ss(_mm_shuffle_ps(b, b, 0xaa), _mm_shuffle_ps(q, q, 0xff));
         float d1 = LowFloat(_mm_add_ps(bxy, bzw));
         if (d0 >= 0.0f) {
             if (d1 >= 0.0f) {
@@ -1176,119 +1127,104 @@ hkBoolRet ConvexVertsShape::FUN_00d592a0(const RayInput& input, RayOutput& resul
         return false;
     }
     results.m_fHitFraction = lo;
-    *(__m128*)&results.m_vHitNormal = best;
+    *(LocalM128*)&results.m_vHitNormal = best;
     results.m_uiShapeKeys[results.m_uiShapeKeyIndex] = -1;
     TimerMarkOut("Et", 0);
     return true;
 }
 
-struct VertArray96Q {
-    hkVec4Q* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+static __forceinline void VertArray96Q_SetSizeAndGrow(hkArrayBase<hkVector4q>& self, int n);
 
-    hkVec4Q& operator[](int i) { return m_data[i]; }
-    void SetSizeAndGrow(int n)
-    {
-        hkMemoryAllocatorD598& alloc = FUN_00c85750().heap();
-        int cap = m_iCapacityState & 0x3fffffff;
+static __forceinline void VertArray96Q_SetSizeAndGrow(hkArrayBase<hkVector4q>& self, int n)
+{
+        hkMemoryAllocator& alloc = FUN_00c85750().heap();
+        int cap = self.m_iCapacityState & 0x3fffffff;
         if (cap < n)
         {
             int cap2 = cap + cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(reinterpret_cast<SpliceAllocator&>(alloc), this, newSize, sizeof(hkVec4Q));
+            FUN_00c908c0(reinterpret_cast<SpliceAllocator&>(alloc), (&self), newSize, sizeof(hkVector4q));
         }
-        m_iElementCount = n;
+        self.m_iElementCount = n;
     }
-};
-
-struct ConvexVertsQ_d59200 : ConvexVertsQ {
-    void FUN_00d59200(VertArray96Q& vertices) const;
-};
 
 // @fnv 0x00d59200
-void ConvexVertsQ_d59200::FUN_00d59200(VertArray96Q& vertices) const
+void hkpConvexVerticesShape::GetOriginalVertices(hkArray<hkVector4>& output) const
 {
-    vertices.SetSizeAndGrow(m_iStridedVertexCount);
+    hkArrayBase<hkVector4q>& vertices = reinterpret_cast<hkArrayBase<hkVector4q>&>(output);
+    VertArray96Q_SetSizeAndGrow(vertices, m_iStridedVertexCount);
     for (int i = 0; i < m_iStridedVertexCount; i++)
     {
         int a = i / 4;
         int b = i & 3;
-        vertices[i].set(m_kRotatedVertices[a].m_uiX(b), m_kRotatedVertices[a].m_uiY(b), m_kRotatedVertices[a].m_uiZ(b), 0.0f);
+        vertices[i].set(reinterpret_cast<const FourVectorsQ*>(m_kRotatedVertices.m_data)[a].m_uiX(b), reinterpret_cast<const FourVectorsQ*>(m_kRotatedVertices.m_data)[a].m_uiY(b), reinterpret_cast<const FourVectorsQ*>(m_kRotatedVertices.m_data)[a].m_uiZ(b), 0.0f);
     }
 }
 
-extern __m128 DAT_010c71d0;
+extern LocalM128 DAT_010c71d0;
 
-struct hkMemoryAllocator;
-struct NineIntegerRecord
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* m_pStreamAllocator;
-    __forceinline hkMemoryAllocator& heap() { return *m_pStreamAllocator; }
-};
-NineIntegerRecord* GetMemoryRouter_c85750();
+
 void __cdecl ArrayUtilReserve_c908c0(hkMemoryAllocator& alloc, void* array, int numElements, int sizeElem);
 
-struct FourFloatVector
-{
-    __m128 m_vComponents;
-    __forceinline float& operator()(int i) { return m_vComponents.m128_f32[i]; }
-};
+__forceinline float& PacketCallLocal_00d59cc0::operator()(int i) { return m_vComponents.m128_f32[i]; }
 
 struct FourVectors
 {
-    FourFloatVector m_uiX;
-    FourFloatVector m_uiY;
-    FourFloatVector m_uiZ;
+    PacketCallLocal_00d59cc0 m_uiX;
+    PacketCallLocal_00d59cc0 m_uiY;
+    PacketCallLocal_00d59cc0 m_uiZ;
 };
 
-template <class T> struct Array
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+template <class T>
+static __forceinline void Array_GrowArrayCapacity(hkArrayBase<T>& self, hkMemoryAllocator& alloc, int n);
 
-    __forceinline int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    __forceinline void GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
-    {
-        const int capacity = getCapacity();
+template <class T>
+static __forceinline void Array__setSize(hkArrayBase<T>& self, hkMemoryAllocator& alloc, int n);
+
+template <class T>
+static __forceinline void Array_SetSizeAndGrow(hkArrayBase<T>& self, int n);
+
+template <class T>
+static __forceinline void Array_GrowArrayCapacity(hkArrayBase<T>& self, hkMemoryAllocator& alloc, int n)
+{
+        const int capacity = self.getCapacity();
         if (capacity < n)
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            ArrayUtilReserve_c908c0(alloc, this, newSize, sizeof(T));
+            ArrayUtilReserve_c908c0(alloc, (&self), newSize, sizeof(T));
         }
     }
-    __forceinline void _setSize(hkMemoryAllocator& alloc, int n)
-    {
-        GrowArrayCapacity(alloc, n);
-        m_iElementCount = n;
+
+template <class T>
+static __forceinline void Array__setSize(hkArrayBase<T>& self, hkMemoryAllocator& alloc, int n)
+{
+        Array_GrowArrayCapacity(self, alloc, n);
+        self.m_iElementCount = n;
     }
-    __forceinline void SetSizeAndGrow(int n) { _setSize(GetMemoryRouter_c85750()->heap(), n); }
-    __forceinline T& operator[](int i) { return m_data[i]; }
-};
+
+template <class T>
+static __forceinline void Array_SetSizeAndGrow(hkArrayBase<T>& self, int n)
+{ Array__setSize(self, GetMemoryRouter_c85750()->heap(), n); }
 
 struct Aabb
 {
-    FourFloatVector m_kMinimumCorner;
-    FourFloatVector m_kMaximumCorner;
+    LocalM128 m_kMinimumCorner;
+    LocalM128 m_kMaximumCorner;
 
-    __forceinline void getCenter(FourFloatVector& center) const
+    __forceinline void getCenter(PacketCallLocal_00d59cc0& center) const
     {
-        center.m_vComponents = _mm_mul_ps(_mm_add_ps(m_kMinimumCorner.m_vComponents, m_kMaximumCorner.m_vComponents), DAT_010c71d0);
+        center.m_vComponents = _mm_mul_ps(_mm_add_ps(m_kMinimumCorner, m_kMaximumCorner), DAT_010c71d0);
     }
-    __forceinline void getHalfExtents(FourFloatVector& halfExtents) const
+    __forceinline void getHalfExtents(PacketCallLocal_00d59cc0& halfExtents) const
     {
-        halfExtents.m_vComponents = _mm_mul_ps(_mm_sub_ps(m_kMaximumCorner.m_vComponents, m_kMinimumCorner.m_vComponents), DAT_010c71d0);
+        halfExtents.m_vComponents = _mm_mul_ps(_mm_sub_ps(m_kMaximumCorner, m_kMinimumCorner), DAT_010c71d0);
     }
 };
 
 void __cdecl CalcAabb_cbeaf0(const float* vertexArray, int numVertices, int striding, Aabb& aabbOut);
 
+// Local fallback: shared shape lacks FUN_00d59900 and named AABB members.
 struct ConvexVerticesShape
 {
     void* vtable;
@@ -1300,9 +1236,9 @@ struct ConvexVerticesShape
     float unk14;
     float unk18;
     float unk1C;
-    FourFloatVector m_kAabbHalfExtents;
-    FourFloatVector m_kAabbCenter;
-    Array<FourVectors> m_kRotatedVertices;
+    PacketCallLocal_00d59cc0 m_kAabbHalfExtents;
+    PacketCallLocal_00d59cc0 m_kAabbCenter;
+    hkArrayBase<FourVectors> m_kRotatedVertices;
     int m_iStridedVertexCount;
 
     void FUN_00d59900(const float* vertexIn, int byteStriding, int numVertices);
@@ -1314,7 +1250,7 @@ void ConvexVerticesShape::FUN_00d59900(const float* vertexIn, int byteStriding, 
 {
     m_iStridedVertexCount = numVertices;
     int paddedSize = (numVertices + 3) & ~3;
-    m_kRotatedVertices.SetSizeAndGrow(paddedSize / 4);
+    Array_SetSizeAndGrow(m_kRotatedVertices, paddedSize / 4);
 
     const float* v = vertexIn;
     int i;
@@ -1345,4 +1281,10 @@ void ConvexVerticesShape::FUN_00d59900(const float* vertexIn, int byteStriding, 
     CalcAabb_cbeaf0(vertexIn, numVertices, byteStriding, aabb);
     aabb.getHalfExtents(m_kAabbHalfExtents);
     aabb.getCenter(m_kAabbCenter);
+}
+
+template <class T, class A> __forceinline hkArray<T, A>& hkArray<T, A>::operator=(const hkArray<T, A>& other)
+{
+    A::assign(*this, other);
+    return *this;
 }

@@ -2,7 +2,26 @@
 // src/havok/animation/animation/mapper/hkaskeletonmapper.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/mapper/hkaskeletonmapper.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkaSkeletonMapper.h"
+#include <new>
+#include "../../../../../include/hkError.h"
+#include "../../../../../include/hkOstream.h"
+#include "../../../../../include/hkaBone.h"
+// Retain the unit's intrinsic declarations when the shared math headers include xmmintrin.h.
+#define _INCLUDED_MM2
+// Exe 0x00ce2ae0 ValidateRagdollMapping: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" void _mm_store_ss(float*, LocalM128);
+
+#include "../../../../../include/hkQsTransform.h"
+#include "../../../../../include/hkaSkeletonMapperData.h"
 
 struct FUN_00ce4ab0Allocator
 {
@@ -42,34 +61,9 @@ FUN_00ce4ab0Class* FUN_00ce4ab0Class::Destroy(unsigned int flags)
     return this;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_sqrt_ss(__m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" void _mm_store_ss(float*, __m128);
-
-struct hkaBone
-{
-    hkStringPtr m_name;
-    hkBool m_bLockTranslation;
-};
-
-class hkaSkeleton : public hkReferencedObject
-{
-  public:
-    hkStringPtr m_name;
-    hkArray<hkInt16> m_kParentIndices;
-    hkArray<hkaBone> m_kBones;
-};
-
 class hkaSkeletonMapperDataSimpleMapping
 {
-  public:
+    public:
     hkInt16 m_sBoneA;
     hkInt16 m_sBoneB;
     int unk04;
@@ -78,34 +72,12 @@ class hkaSkeletonMapperDataSimpleMapping
     hkQsTransform m_kAFromBTransform;
 };
 
-struct hkOstream
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkOstream* FUN_00cb1600(void* buf, int size);
-    void FUN_00cc00e0();
-    hkOstream& FUN_00cc01c0(const char*);
-    hkOstream& WriteName(const hkStringPtr&);
-    hkOstream& WriteFloat(hkReal);
-};
-
-struct hkError
-{
-    virtual void unk00() = 0;
-    virtual void unk04() = 0;
-    virtual void unk08() = 0;
-    virtual int message(int type, int id, const char* description, const char* file, int line) = 0;
-};
-
-extern int DAT_01268360;
-
 static inline float getTranslationError(const hkVector4& t)
 {
-    __m128 v = *(const __m128*)&t;
-    __m128 v2 = _mm_mul_ps(v, v);
-    __m128 v1 = _mm_shuffle_ps(v2, v2, 0x55);
-    __m128 v0 = _mm_shuffle_ps(v2, v2, 0xaa);
+    LocalM128 v = t.m_vComponents;
+    LocalM128 v2 = _mm_mul_ps(v, v);
+    LocalM128 v1 = _mm_shuffle_ps(v2, v2, 0x55);
+    LocalM128 v0 = _mm_shuffle_ps(v2, v2, 0xaa);
     v1 = _mm_add_ss(v1, v2);
     v0 = _mm_add_ss(v0, v1);
     v0 = _mm_sqrt_ss(v0);
@@ -126,14 +98,16 @@ void ValidateRagdollMapping(hkaSkeletonMapperData* apMapperData)
             const hkaBone& boneA = apMapperData->m_pSkeletonA->m_kBones.m_data[mapping.m_sBoneA];
             const hkaBone& boneB = apMapperData->m_pSkeletonB->m_kBones.m_data[mapping.m_sBoneB];
 
-            if (boneB.m_bLockTranslation)
+            if (boneB.m_bLockTranslation.m_cBooleanValue)
             {
                 float len = getTranslationError(mapping.m_kAFromBTransform.m_vTranslation);
                 if (len > 0.01f)
                 {
                     int buf[128];
-                    hkOstream str;
-                    str.FUN_00cb1600(buf, sizeof(buf));
+                    // Explicit lifetime preserves the original absence of exception unwind cleanup.
+                    int streamStorage[sizeof(hkOstream) / sizeof(int)];
+                    ::new (streamStorage) hkOstream(static_cast<void*>(buf), sizeof(buf));
+                    hkOstream& str = *reinterpret_cast<hkOstream*>(streamStorage);
                     str.FUN_00cc01c0("Bones A:")
                         .WriteName(boneA.m_name)
                         .FUN_00cc01c0(" and B:")
@@ -141,9 +115,8 @@ void ValidateRagdollMapping(hkaSkeletonMapperData* apMapperData)
                         .FUN_00cc01c0(" are not fully aligned (error :")
                         .WriteFloat(len)
                         .FUN_00cc01c0(").");
-                    ((hkError*)DAT_01268360)
-                        ->message(1, 0xabbaefbf, (char*)buf, ".\\Mapper\\hkaSkeletonMapper.cpp", 499);
-                    str.FUN_00cc00e0();
+                    hkError::s_instance->message(1, 0xabbaefbf, (char*)buf, ".\\Mapper\\hkaSkeletonMapper.cpp", 499);
+                    str.hkOstream::~hkOstream();
                 }
             }
         }
@@ -154,17 +127,18 @@ void ValidateRagdollMapping(hkaSkeletonMapperData* apMapperData)
         hkaSkeleton* skeletonB = apMapperData->m_pSkeletonB;
         for (int iIndex = 0; iIndex < skeletonB->m_kBones.m_iElementCount; ++iIndex)
         {
-            if (skeletonB->m_kBones.m_data[iIndex].m_bLockTranslation)
+            if (skeletonB->m_kBones.m_data[iIndex].m_bLockTranslation.m_cBooleanValue)
                 return;
         }
 
         int buf[128];
-        hkOstream str;
-        str.FUN_00cb1600(buf, sizeof(buf));
+        int streamStorage[sizeof(hkOstream) / sizeof(int)];
+        ::new (streamStorage) hkOstream(static_cast<void*>(buf), sizeof(buf));
+        hkOstream& str = *reinterpret_cast<hkOstream*>(streamStorage);
         str.FUN_00cc01c0(
             "None of the bones in skeleton have translations locked - did you forget to lock translations ?.");
-        ((hkError*)DAT_01268360)->message(1, 0xabba77a5, (char*)buf, ".\\Mapper\\hkaSkeletonMapper.cpp", 521);
-        str.FUN_00cc00e0();
+        hkError::s_instance->message(1, 0xabba77a5, (char*)buf, ".\\Mapper\\hkaSkeletonMapper.cpp", 521);
+        str.hkOstream::~hkOstream();
     }
 }
 

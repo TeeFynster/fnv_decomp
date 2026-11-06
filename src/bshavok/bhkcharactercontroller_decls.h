@@ -1,24 +1,19 @@
-// bshavok/bhkcharactercontroller_decls.h: declares bhkCharacterController, MobileObject
 #ifndef BHKCHARACTERCONTROLLER_PACKET_DECLS_H
 #define BHKCHARACTERCONTROLLER_PACKET_DECLS_H
 
-class GlobalObject_008c71b0
+#include "../../include/MobileObject.h"
+#include "../../include/bhkCharacterController.h"
+
+class CharacterControllerValue
 {
   public:
     int value;
-    GlobalObject_008c71b0(int initial);
+    CharacterControllerValue(int initial);
 };
-class bhkCharacterController
+
+struct CollisionFilter
 {
-  public:
-    float components[4];
-    float& GetVectorElement(int index);
-    GlobalObject_008c71b0 FUN_0070c440();
+    int value;
 };
-class MobileObject
-{
-  public:
-    bhkCharacterController* GetPhysicsCharacterController();
-    GlobalObject_008c71b0 GetVectorElement();
-};
+
 #endif

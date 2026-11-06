@@ -1,5 +1,22 @@
-// gamebryo2.2/corelibs/nianimation/nipoint3interpolator.cpp: NiPoint3Interpolator, NiPoint3InterpolatorRange, PosInterpEq (24 functions)
+// gamebryo2.2/corelibs/nianimation/nipoint3interpolator.cpp: NiPoint3Interpolator (24 functions)
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "NiRefObject_inline.h"
 
+#include "../../../../include/Actor.h"
+#include "../../../../include/ExtraDataList.h"
+#include "../../../../include/HUDMainMenu.h"
+#include "../../../../include/ImageSpaceModifierInstanceDOF.h"
+#include "../../../../include/NiInterpolator.h"
+#include "../../../../include/NiKeyBasedInterpolator.h"
+#include "../../../../include/NiPoint2.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPoint3Interpolator.h"
+#include <new>
+#include "../../../../include/NiPointLight.h"
+#include "../../../../include/NiPosData.h"
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/NiColor.h"
+#include "../../../../include/NiStream.h"
 #include "nipoint3interpolator_unit.h"
 
 // Samples the interpolator's position data at the given time into m_kValue and returns whether the value differs from the default point.
@@ -18,7 +35,7 @@ bool NiPoint3Interpolator::Update(float time, NiObjectNET* target, NiPoint3& val
     if (pData)
     {
         unsigned int numKeys = pData->m_uiNumKeys;
-        AnimationKey::KeyType type = pData->m_eRequestType;
+        NiAnimationKey::KeyType type = pData->m_eRequestType;
         unsigned char keySize = pData->m_ucKeyDataSize;
         PositionKeyInterpolator* keys = pData->m_pKeyArray;
         if (numKeys > 0)
@@ -59,7 +76,7 @@ void NiPoint3Interpolator::CreateObject(int state, bool force)
         case 2:
             state40 = 0;
             state44 = 0;
-            Interface::GetVATSEffect()->FUN_008009d0();
+            GetVATSEffect()->FUN_008009d0();
             if (!reinterpret_cast<VATS*>(&g_011f2250)->FUN_005d8710())
             {
                 NiPointLight* pPointLight = new NiPointLight;
@@ -157,7 +174,7 @@ void NiPoint3Interpolator::CreateObject(int state, bool force)
         {
             reinterpret_cast<ExtraDataList*>(FUN_00450b80(0))
                 ->Set3DObject(reinterpret_cast<VATS*>(&g_011f2250)->FUN_005d8710()->FUN_004e6540());
-            FUN_00450b80(0)->vfn_e8(reinterpret_cast<VATS*>(&g_011f2250)->FUN_005d8710()->FUN_004e6540());
+            static_cast<NiNode*>(FUN_00450b80(0))->RemoveObject(reinterpret_cast<VATS*>(&g_011f2250)->FUN_005d8710()->FUN_004e6540());
             reinterpret_cast<VATS*>(&g_011f2250)->SetLight(0, true);
         }
         break;
@@ -165,41 +182,12 @@ void NiPoint3Interpolator::CreateObject(int state, bool force)
 }
 #pragma optimize("", on)
 
-struct NiAVObject;
-struct NiBinaryStream;
-struct NiFixedString;
-struct NiObjectGroup;
-struct NiSearchPath;
-struct NiStream;
-struct NiTexture;
-struct NiThread;
-struct FUN_00a49530_shell : public NiPoint3Interpolator
-{
-    void FUN_00a49530(NiStream*);
-};
-
-class NiColor
-{
-  public:
-    void LoadBinary(NiStream&);
-};
-
-struct NiStream
-{
-    NiObject* DeserializeObject(void);
-};
-
-struct NiKeyBasedInterpolator_LoadBinary_Helper : public NiKeyBasedInterpolator
-{
-    virtual void LoadBinary(NiStream&);
-};
-
 // Loads the base interpolator and a NiColor from the stream, then reads a NiObject and stores it as a ref-counted member.
 // @fnv 0x00a49530
-void FUN_00a49530_shell::FUN_00a49530(NiStream* pkStream)
+void NiPoint3Interpolator::LoadBinary(NiStream& kStream)
 {
-    reinterpret_cast<NiKeyBasedInterpolator_LoadBinary_Helper*>(this)
-        ->NiKeyBasedInterpolator_LoadBinary_Helper::LoadBinary(*pkStream);
+    NiStream* pkStream = &kStream;
+    NiKeyBasedInterpolator::LoadBinary(*pkStream);
     reinterpret_cast<NiColor*>(reinterpret_cast<char*>(this) + 0x0c)->LoadBinary(*pkStream);
     NiObject* pkData = pkStream->DeserializeObject();
     NiObject*& rspData = *reinterpret_cast<NiObject**>(reinterpret_cast<char*>(this) + 0x18);
@@ -271,19 +259,6 @@ unsigned char __fastcall FUN_00a49440(char* self, int, int)
     return *((unsigned char*)d + 0x14);
 }
 
-struct NiAVObject;
-struct NiBinaryStream;
-struct NiFixedString;
-struct NiObjectGroup;
-struct NiSearchPath;
-struct NiStream;
-struct NiTexture;
-struct NiThread;
-struct FUN_00a49590_shell : public NiPoint3Interpolator
-{
-    bool FUN_00a49590(NiStream*);
-};
-
 struct HC1Base
 {
     bool FUN_00aa0ad0(NiStream*);
@@ -316,8 +291,9 @@ struct HC1Data
 
 // Calls FUN_00aa0ad0 on this as HC1Base; if it succeeds, registers the HC1Data at offset 0x18 with the stream and returns true.
 // @fnv 0x00a49590
-bool FUN_00a49590_shell::FUN_00a49590(NiStream* kStream)
+bool NiPoint3Interpolator::RegisterStreamables(NiStream& stream)
 {
+    NiStream* kStream = &stream;
     if (!reinterpret_cast<HC1Base*>(this)->FUN_00aa0ad0(kStream))
         return false;
     HC1Data* d = *reinterpret_cast<HC1Data**>(reinterpret_cast<char*>(this) + 0x18);
@@ -326,49 +302,17 @@ bool FUN_00a49590_shell::FUN_00a49590(NiStream* kStream)
     return true;
 }
 
-struct NiAVObject;
-struct NiBinaryStream;
-struct NiFixedString;
-struct NiObjectGroup;
-struct NiSearchPath;
-struct NiStream;
-struct NiTexture;
-struct NiThread;
-struct FUN_00a495c0_shell : public NiPoint3Interpolator
-{
-    void FUN_00a495c0(NiStream*);
-};
-
 struct FUN_00a95ca0_helper
 {
     void FUN_00a95ca0(NiStream*);
 };
-struct NiColorSaveHelper
-{
-    void SaveBinary(NiStream&);
-};
-struct NiStreamLinkHelper
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void SaveLinkID(void*);
-};
 // @fnv 0x00a495c0
-void FUN_00a495c0_shell::FUN_00a495c0(NiStream* stream)
+void NiPoint3Interpolator::SaveBinary(NiStream& kStream)
 {
+    NiStream* stream = &kStream;
     ((FUN_00a95ca0_helper*)this)->FUN_00a95ca0(stream);
-    ((NiColorSaveHelper*)(char*)this + 0xc)->SaveBinary(*stream);
-    ((NiStreamLinkHelper*)stream)->SaveLinkID(*(void**)((char*)this + 0x18));
+    reinterpret_cast<NiColor*>(reinterpret_cast<char*>(this) + 0xc)->SaveBinary(*stream);
+    stream->SaveLinkID(reinterpret_cast<const NiObject*>(*(void**)((char*)this + 0x18)));
 }
 
 struct GlobalObjectO2_00a7b610;
@@ -383,18 +327,13 @@ extern float DAT_011a9424;
 extern float DAT_011a9428;
 extern float DAT_011a942c;
 
-struct NiPoint3Interpolator_shell
-{
-    bool __thiscall FUN_00a49460(unsigned short channel);
-};
-
 // @fnv 0x00a49460
-bool NiPoint3Interpolator_shell::FUN_00a49460(unsigned short channel)
+bool __fastcall FUN_00a49460(NiPoint3Interpolator* self, int, unsigned short channel)
 {
-    if (*(int*)((char*)this + 0x18))
+    if (*(int*)((char*)self + 0x18))
         return false;
-    if (*(float*)((char*)this + 0x0c) != DAT_011a9424 || *(float*)((char*)this + 0x10) != DAT_011a9428 ||
-        *(float*)((char*)this + 0x14) != DAT_011a942c)
+    if (*(float*)((char*)self + 0x0c) != DAT_011a9424 || *(float*)((char*)self + 0x10) != DAT_011a9428 ||
+        *(float*)((char*)self + 0x14) != DAT_011a942c)
         return true;
     return false;
 }
@@ -403,13 +342,9 @@ struct FUN_00a48f70_shell
 {
     void FUN_00a48f70(float m_fStartTime, float m_fMaximumDistance);
 };
-struct FUN_00a49500_shell
-{
-    void FUN_00a49500(float m_fStartTime, float m_fMaximumDistance);
-};
 // Retrieves the object stored at offset 0x18 and, if non-null, forwards the two float arguments to its FUN_00a48f70 method.
 // @fnv 0x00a49500
-void FUN_00a49500_shell::FUN_00a49500(float afArg1, float afArg2)
+void NiPoint3Interpolator::SetActiveTimeRange(float afArg1, float afArg2)
 {
     FUN_00a48f70_shell* p = *(FUN_00a48f70_shell**)((char*)this + 0x18);
     if (p)
@@ -422,79 +357,30 @@ struct RefObj00
     virtual void F1();
     long ref;
 };
-struct Vec12
-{
-    int x;
-    int y;
-    int z;
-};
-struct Holder00
-{
-    char _pad[12];
-    Vec12 v;
-    RefObj00* p;
-    void FUN_00a494b0(Vec12 x);
-};
 // @fnv 0x00a494b0
-void Holder00::FUN_00a494b0(Vec12 aVec)
+void NiPoint3Interpolator::FUN_00a494b0(NiPoint3 aVec)
 {
-    RefObj00* pRef = p;
+    RefObj00* pRef = reinterpret_cast<RefObj00*>(m_spPosData);
     if (pRef)
     {
         if (InterlockedDecrement(&pRef->ref) == 0)
             pRef->F1();
-        p = 0;
+        m_spPosData = 0;
     }
-    v = aVec;
+    m_kValue = aVec;
 }
-
-class A495F0PosData
-{
-  public:
-    virtual ~A495F0PosData();
-    virtual void DeleteThis();
-
-    unsigned int m_uiRefCount;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
-            DeleteThis();
-    }
-};
-
-class A495F0KeyBasedInterpolator
-{
-  public:
-    A495F0KeyBasedInterpolator();
-    virtual ~A495F0KeyBasedInterpolator();
-
-    int unk04;
-    int unk08;
-};
 
 extern const NiPoint3 g_kA495F0InvalidPoint;
 
-// NiPoint3Interpolator::NiPoint3Interpolator(NiPosData*)
-class FUN_00a495f0 : public A495F0KeyBasedInterpolator
-{
-  public:
-    NiPoint3 m_kPoint3Value;
-    NiPointer<A495F0PosData> m_spPoint3Data;
-    unsigned int m_uiLastKeyIndex;
-
-    FUN_00a495f0(A495F0PosData* pkPosData);
-    virtual ~FUN_00a495f0();
-};
-
 // @fnv 0x00a495f0
-FUN_00a495f0::FUN_00a495f0(A495F0PosData* pkPosData)
-    : m_kPoint3Value(g_kA495F0InvalidPoint), m_spPoint3Data(pkPosData), m_uiLastKeyIndex(0)
-{}
+NiPoint3Interpolator::NiPoint3Interpolator(NiPosData* pkPosData)
+    : m_kValue(g_kA495F0InvalidPoint)
+{
+    m_spPosData = pkPosData;
+    if (pkPosData)
+        pkPosData->IncRefCount();
+    m_uiLastKeyIndex = 0;
+}
 
 struct NiPosDataRangeHelper : NiPosData
 {
@@ -515,14 +401,9 @@ inline void AssignPosData(NiPosData*& destination, NiPosData* nextData)
     }
 }
 
-struct NiPoint3InterpolatorRange : NiPoint3Interpolator
-{
-    NiPoint3Interpolator* CreateRangeInterpolator(float startTime, float endTime);
-};
-
 // Creates a point3 interpolator for the given time range and copies the extracted position data from m_spPosData into it.
 // @fnv 0x00a497b0
-NiPoint3Interpolator* NiPoint3InterpolatorRange::CreateRangeInterpolator(float startTime, float endTime)
+NiPoint3Interpolator* NiPoint3Interpolator::CreateRangeInterpolator(float startTime, float endTime)
 {
     NiPoint3Interpolator* result = FUN_00a57050(startTime, endTime);
     if (m_spPosData)
@@ -537,95 +418,37 @@ NiPoint3Interpolator* NiPoint3InterpolatorRange::CreateRangeInterpolator(float s
     return result;
 }
 
-struct A499A0CloningProcess;
-
-struct A499A0Point3
-{
-    float x;
-    float y;
-    float z;
-};
-
-class A499A0Interpolator
+class InterpolatorCloning : public NiInterpolator
 {
   public:
-    int unk00;
-    int unk04;
-    int unk08;
 
-    void CopyMemberData(A499A0Interpolator* pkDest, A499A0CloningProcess& kCloning);
-};
-
-class A499A0PointInterpolator : public A499A0Interpolator
-{
-  public:
-    A499A0Point3 m_kValue;
-    NiPointer<NiRefObject> m_spTransformData;
-    unsigned int m_uiLastKeyIndex;
-
-    void CloneTo(A499A0PointInterpolator* pkDest, A499A0CloningProcess& kCloning);
+    void CopyMemberData(InterpolatorCloning* pkDest, CloningProcess& kCloning);
 };
 
 // @fnv 0x00a499a0
-void A499A0PointInterpolator::CloneTo(A499A0PointInterpolator* pkDest, A499A0CloningProcess& kCloning)
+void NiPoint3Interpolator::CloneTo(NiPoint3Interpolator* pkDest, CloningProcess& kCloning)
 {
-    A499A0Interpolator::CopyMemberData(pkDest, kCloning);
+    reinterpret_cast<InterpolatorCloning*>(this)->CopyMemberData(reinterpret_cast<InterpolatorCloning*>(pkDest), kCloning);
     pkDest->m_kValue = m_kValue;
-    pkDest->m_spTransformData = m_spTransformData;
+    reinterpret_cast<NiPointer<NiRefObject>&>(pkDest->m_spPosData) = reinterpret_cast<NiPointer<NiRefObject>&>(m_spPosData);
     pkDest->m_uiLastKeyIndex = m_uiLastKeyIndex;
 }
 
-struct A49B30Point3
-{
-    float x;
-    float y;
-    float z;
-};
-
 extern "C" float DAT_011a9424;
 
-class A49B30DataPtr
+inline NiPoint3Interpolator::NiPoint3Interpolator() throw()
+: m_kValue(reinterpret_cast<const NiPoint3&>(DAT_011a9424))
 {
-  public:
-    A49B30DataPtr() throw() : m_pObject(0)
-    {}
-
-    void* m_pObject;
-};
-
-class A49B30KeyBasedInterpolator
-{
-  public:
-    A49B30KeyBasedInterpolator() throw();
-    virtual ~A49B30KeyBasedInterpolator();
-
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem);
-
-    int unk04;
-    int unk08;
-};
-
-class A49B30Point3Interpolator : public A49B30KeyBasedInterpolator
-{
-  public:
-    A49B30Point3Interpolator() throw()
-        : m_kPoint3Value(reinterpret_cast<const A49B30Point3&>(DAT_011a9424)), m_uiLastKeyIndex(0)
-    {}
-    virtual ~A49B30Point3Interpolator();
-
-    void CopyMemberData(A49B30Point3Interpolator* pkDest, void* pvCloning);
-    A49B30Point3Interpolator* FUN_00a49b30(void* pvCloning);
-
-    A49B30Point3 m_kPoint3Value;
-    A49B30DataPtr m_spPoint3Data;
-    unsigned int m_uiLastKeyIndex;
-};
+    m_spPosData = 0;
+    // Keep VC9's stores ordered as in the original smart-pointer constructor.
+    reinterpret_cast<unsigned int volatile&>(m_uiLastKeyIndex) = 0;
+}
 
 // @fnv 0x00a49b30
-A49B30Point3Interpolator* A49B30Point3Interpolator::FUN_00a49b30(void* pvCloning)
+NiPoint3Interpolator* NiPoint3Interpolator::FUN_00a49b30(void* pvCloning)
 {
-    A49B30Point3Interpolator* pkClone = new A49B30Point3Interpolator;
+    // The original point3 allocation is 0x20 bytes; the shared union also describes VATS state.
+    NiPoint3Interpolator* pkClone = ::new (NiPoint3Interpolator::operator new(0x20)) NiPoint3Interpolator;
     CopyMemberData(pkClone, pvCloning);
     return pkClone;
 }
@@ -650,29 +473,23 @@ struct Sub0cHelper
     unsigned int FUN_00a59af0(const char* name);
 };
 
-class FUN_00a49bb0_cls
-{
-  public:
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    Sub0cHelper m_sub0c;
-    unsigned int m_val18;
-    void FUN_00a3cbf0(StrArrList* list);
-    void AppendPoint3Fields(StrArrList* list);
-};
-
 extern "C" unsigned int DAT_011f3f70;
 unsigned int __cdecl FUN_00a7d330(unsigned int v);
 unsigned int __cdecl FUN_00a7d5a0(const char* name, unsigned int v);
 
-// Appends three values to list: a value derived from DAT_011f3f70, the result of FUN_00a59af0("m_kPoint3Value"), and FUN_00a7d5a0("m_spPoint3Data", m_val18).
-// @fnv 0x00a49bb0
-void FUN_00a49bb0_cls::AppendPoint3Fields(StrArrList* list)
+// The shared base does not declare its viewer-string helper.
+struct InterpolatorViewerHelper
 {
+    void GetViewerStrings(StrArrList*);
+};
+
+// @fnv 0x00a49bb0
+void NiPoint3Interpolator::GetViewerStrings(NiViewerStringsArray* strings)
+{
+    StrArrList* list = reinterpret_cast<StrArrList*>(strings);
     unsigned int value;
 
-    FUN_00a3cbf0(list);
+    reinterpret_cast<InterpolatorViewerHelper*>(this)->GetViewerStrings(list);
     value = FUN_00a7d330(DAT_011f3f70);
     {
         unsigned int count = list->count;
@@ -683,7 +500,7 @@ void FUN_00a49bb0_cls::AppendPoint3Fields(StrArrList* list)
         list->SetAt(count, &value);
     }
 
-    value = m_sub0c.FUN_00a59af0("m_kPoint3Value");
+    value = reinterpret_cast<Sub0cHelper*>(&m_kValue)->FUN_00a59af0("m_kPoint3Value");
     {
         unsigned int count = list->count;
         if (count >= list->cap)
@@ -693,7 +510,7 @@ void FUN_00a49bb0_cls::AppendPoint3Fields(StrArrList* list)
         list->SetAt(count, &value);
     }
 
-    unsigned int v18 = m_val18;
+    unsigned int v18 = reinterpret_cast<unsigned int>(m_spPosData);
     value = FUN_00a7d5a0("m_spPoint3Data", v18);
     {
         unsigned int count = list->count;
@@ -711,59 +528,19 @@ unsigned int __stdcall FUN_00d46c90(unsigned int a1)
     return 1;
 }
 
-struct BA49650Point3
-{
-    float x;
-    float y;
-    float z;
-};
-
-struct BA49650Pointer
-{
-    BA49650Pointer() : m_pObject(0)
-    {}
-
-    void* m_pObject;
-};
-
-class BA49650KeyBasedInterpolator
-{
-  public:
-    BA49650KeyBasedInterpolator() throw();
-    virtual ~BA49650KeyBasedInterpolator();
-
-    int unk04;
-    int unk08;
-};
-
-class FUN_00a49650_cls : public BA49650KeyBasedInterpolator
-{
-  public:
-    FUN_00a49650_cls(BA49650Point3 kPoseValue) throw();
-    virtual ~FUN_00a49650_cls();
-
-    BA49650Point3 m_kPoseValue;
-    BA49650Pointer m_spTransformData;
-    unsigned int m_uiLastKeyIndex;
-};
-
 // @fnv 0x00a49650
-FUN_00a49650_cls::FUN_00a49650_cls(BA49650Point3 kPoseValue) throw() : m_kPoseValue(kPoseValue), m_uiLastKeyIndex(0)
-{}
-
-struct PosValue496
+NiPoint3Interpolator::NiPoint3Interpolator(NiPoint3 kPoseValue) throw()
+    : m_kValue(kPoseValue)
 {
-    float x;
-    float y;
-    float z;
-
-    bool FUN_00439090(const NiPoint3& kOther);
-};
+    // Keep VC9's stores ordered as in the original smart-pointer constructor.
+    reinterpret_cast<NiPosData* volatile&>(m_spPosData) = 0;
+    m_uiLastKeyIndex = 0;
+}
 
 struct PosKeyValue496
 {
     float m_fTime;
-    PosValue496 m_kPos;
+    NiPoint3 m_kPos;
 };
 
 __forceinline void ClearPosData(NiPosData*& rpkData)
@@ -778,7 +555,7 @@ __forceinline void ClearPosData(NiPosData*& rpkData)
 
 struct PosDataView496 : NiPosData
 {
-    __forceinline PositionKeyInterpolator* ComputePositionAtTime(unsigned int& uiNumKeys, AnimationKey::KeyType& eType,
+    __forceinline PositionKeyInterpolator* ComputePositionAtTime(unsigned int& uiNumKeys, NiAnimationKey::KeyType& eType,
                                                                  unsigned char& ucSize) const
     {
         uiNumKeys = m_uiNumKeys;
@@ -788,21 +565,16 @@ struct PosDataView496 : NiPosData
     }
 };
 
-struct FUN_00a49690_shell : NiPoint3Interpolator
-{
-    void CollapseConstantPosData();
-};
-
 // If the position data has zero keys, clears it and resets m_kValue; if all keys share one value, clears the data and stores that value in m_kValue.
 // @fnv 0x00a49690
-void FUN_00a49690_shell::CollapseConstantPosData()
+void NiPoint3Interpolator::CollapseConstantPosData()
 {
     NiPosData* pkData = m_spPosData;
     if (!pkData)
         return;
 
     unsigned int uiNumKeys;
-    AnimationKey::KeyType eType;
+    NiAnimationKey::KeyType eType;
     unsigned char ucSize;
     PositionKeyInterpolator* pkKeys = ((PosDataView496*)pkData)->ComputePositionAtTime(uiNumKeys, eType, ucSize);
 
@@ -817,12 +589,12 @@ void FUN_00a49690_shell::CollapseConstantPosData()
         NiPoint3 kValue = (NiPoint3&)((PosKeyValue496*)pkKeys)->m_kPos;
         if (uiNumKeys != 1)
         {
-            if (eType != AnimationKey::LINKEY && eType != AnimationKey::STEPKEY)
+            if (eType != NiAnimationKey::LINKEY && eType != NiAnimationKey::STEPKEY)
                 return;
             bool bAllEqual = true;
             for (unsigned int i = 1; bAllEqual && i < uiNumKeys; i++)
             {
-                if (((PosKeyValue496*)((char*)pkKeys + ucSize * i))->m_kPos.FUN_00439090(kValue))
+                if (((PosKeyValue496*)((char*)pkKeys + ucSize * i))->m_kPos.operator!=(kValue))
                     bAllEqual = false;
             }
             if (!bAllEqual)
@@ -834,58 +606,25 @@ void FUN_00a49690_shell::CollapseConstantPosData()
     }
 }
 
-// Allocates and returns a new A49B30Point3Interpolator object.
+// Allocates and returns a point3 interpolator.
 // @fnv 0x00a49a30
-A49B30Point3Interpolator* __cdecl FUN_00a49a30()
+NiPoint3Interpolator* __cdecl FUN_00a49a30()
 {
-    return new A49B30Point3Interpolator();
+    return ::new (NiPoint3Interpolator::operator new(0x20)) NiPoint3Interpolator();
 }
 
-struct NiPosDataVirt
+struct InterpolatorComparisonBase
 {
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual bool v23(NiPosData* other);
-};
-
-struct Call_439090_tgt
-{
-    bool Call_439090(const NiPoint3& other);
-};
-
-struct PosInterpEq : public NiPoint3Interpolator
-{
-    bool FUN_00c85800(NiPoint3Interpolator* other);
-    bool FUN_00a49a80(NiPoint3Interpolator* other);
+    bool IsEqual(NiObject*);
 };
 
 // @fnv 0x00a49a80
-bool PosInterpEq::FUN_00a49a80(NiPoint3Interpolator* other)
+bool NiPoint3Interpolator::IsEqual(NiObject* object) const
 {
-    if (!FUN_00c85800(other))
+    NiPoint3Interpolator* other = static_cast<NiPoint3Interpolator*>(object);
+    if (!reinterpret_cast<InterpolatorComparisonBase*>(const_cast<NiPoint3Interpolator*>(this))->IsEqual(other))
         return false;
-    if (reinterpret_cast<Call_439090_tgt*>(&m_kValue)->Call_439090(other->m_kValue))
+    if (const_cast<NiPoint3&>(m_kValue).operator!=(other->m_kValue))
         return false;
     if ((m_spPosData != 0 && other->m_spPosData == 0) || (m_spPosData == 0 && other->m_spPosData != 0))
         return false;
@@ -893,7 +632,7 @@ bool PosInterpEq::FUN_00a49a80(NiPoint3Interpolator* other)
     if (pPosData != 0)
     {
         NiPosData* pOtherPosData = other->m_spPosData;
-        if (!reinterpret_cast<NiPosDataVirt*>(pPosData)->v23(pOtherPosData))
+        if (!pPosData->IsEqual(pOtherPosData))
             return false;
     }
     return true;

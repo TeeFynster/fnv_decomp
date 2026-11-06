@@ -4,6 +4,7 @@
 
 // src/havok/physics/internal/collide/mopp/machine/hkpmoppobbvirtualmachine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/machine/hkpmoppobbvirtualmachine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../include/HitArray.h"
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 struct GridSource {
     int unk00;
@@ -105,7 +106,6 @@ struct CodeData {
  float f10;float f14;float f18;float f1c;
  union {unsigned char* code;unsigned char* p20;};
 };
-struct HitArray { int* data; int size; unsigned capacity; };
 struct AllocatorContext { int field00, field04, field08, field0c; void* allocator; };
 extern AllocatorContext* __cdecl FUN_00c85750();
 extern void __cdecl ResizeAudioStream(void*, void*, int);
@@ -134,34 +134,36 @@ struct VirtualMachine {
  __forceinline void AddHit(int value) {
   HitArray* out=hits;AllocatorContext* context=FUN_00c85750();
   if(out->size==(out->capacity&0x3fffffff)) ResizeAudioStream(context->allocator,out,4);
-  int* destination=&out->data[out->size]; ++out->size; *destination=value; }
+  int* destination=&reinterpret_cast<int*>(out->data)[out->size]; ++out->size; *destination=value; }
 };
 
 #ifndef _INCLUDED_MM2
-union __declspec(intrin_type) __declspec(align(16)) __m128 {
+// Exe 0x00dd1bf0 FUN_00dd1bf0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 
 extern "C" {
-__m128 _mm_load_ss(const float*);
-__m128 _mm_set_ss(float);
-__m128 _mm_add_ps(__m128, __m128);
-__m128 _mm_sub_ps(__m128, __m128);
-__m128 _mm_mul_ps(__m128, __m128);
-__m128 _mm_and_ps(__m128, __m128);
-__m128 _mm_xor_ps(__m128, __m128);
-__m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-__m128 _mm_set_ps1(float);
+LocalM128 _mm_load_ss(const float*);
+LocalM128 _mm_set_ss(float);
+LocalM128 _mm_add_ps(LocalM128, LocalM128);
+LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+LocalM128 _mm_and_ps(LocalM128, LocalM128);
+LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+LocalM128 _mm_set_ps1(float);
 }
 
 #endif
 
-extern "C" __m128 DAT_01017d10;
-extern "C" __m128 DAT_010c44d0;
+extern "C" LocalM128 DAT_01017d10;
+extern "C" LocalM128 DAT_010c44d0;
 
 namespace ObbQueryDetail {
-struct LowScalar { __m128 low; __forceinline LowScalar(float v):low(_mm_load_ss(&v)) {} __forceinline __m128 broadcast() const { return _mm_shuffle_ps(low,low,0); } };
+struct LowScalar { LocalM128 low; __forceinline LowScalar(float v):low(_mm_load_ss(&v)) {} __forceinline LocalM128 broadcast() const { return _mm_shuffle_ps(low,low,0); } };
 
 struct ObbVector {
 
@@ -174,7 +176,7 @@ struct ObbVector {
     __forceinline void scaleBy(const LowScalar& f) { m_vComponents=_mm_mul_ps(f.broadcast(),m_vComponents); }
     template<int i> __forceinline void splat(const ObbVector& a) { m_vComponents=_mm_shuffle_ps(a.m_vComponents,a.m_vComponents,i); }
     __forceinline void setFloat(float f) { m_vComponents=_mm_set_ps1(f); }
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     __forceinline float getComponent(int i) const { return m_vComponents.m128_f32[i]; }
 };
 

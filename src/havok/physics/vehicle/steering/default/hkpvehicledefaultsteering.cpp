@@ -1,23 +1,26 @@
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
 
 // src/havok/physics/vehicle/steering/default/hkpvehicledefaultsteering.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/steering/default/hkpvehicledefaultsteering.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include "havok/hkpVehicleDefaultSteering.h"
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_load_ps(const float* p);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" void _mm_store_ss(float* p, __m128 a);
+// Exe 0x00e43f70 FUN_00e43f70: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+
+extern "C" LocalM128 _mm_load_ps(const float* p);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
 
 struct S00e43f70_Vec
 {
-    __m128 q;
+    LocalM128 q;
     void FUN_00c7f700(const void* a, const void* b);
 };
 
@@ -37,10 +40,10 @@ void S00e43f70_Obj::FUN_00e43f70(int aiUnused, char* a1, S00e43f70_Obj* apOther,
     *apResult = apOther->unk08 * unk08;
     S00e43f70_Vec v;
     v.FUN_00c7f700(*(char**)(a1 + 0x18) + 0xf0, *(char**)(a1 + 0x1c) + 0x40);
-    __m128 w = _mm_load_ps((const float*)(*(char**)(a1 + 0x18) + 0x1b0));
-    __m128 p = _mm_mul_ps(w, v.q);
-    __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
-    __m128 vDot = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
+    LocalM128 w = _mm_load_ps((const float*)(*(char**)(a1 + 0x18) + 0x1b0));
+    LocalM128 p = _mm_mul_ps(w, v.q);
+    LocalM128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    LocalM128 vDot = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
     float dot;
     _mm_store_ss(&dot, vDot);
     if (dot > unk0c)

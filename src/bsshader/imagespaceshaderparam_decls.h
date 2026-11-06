@@ -12,13 +12,9 @@ class NiD3DShaderConstantMap;
 extern GraphicsRenderer* g_pkRenderer;
 extern MemoryManager g_memoryManager;
 
-template <> class NiPointer<NiD3DShaderConstantMap>
+#include "../../include/NiPointer.h"
+template <> inline NiPointer<NiD3DShaderConstantMap>& NiPointer<NiD3DShaderConstantMap>::operator=(NiD3DShaderConstantMap* object)
 {
-  public:
-    NiD3DShaderConstantMap* m_pObject;
-    ~NiPointer();
-    NiPointer& operator=(NiD3DShaderConstantMap* object)
-    {
         if (m_pObject != object)
         {
             if (m_pObject)
@@ -29,7 +25,6 @@ template <> class NiPointer<NiD3DShaderConstantMap>
         }
         return *this;
     }
-};
 
 struct ImageSpaceShaderParamFloat
 {

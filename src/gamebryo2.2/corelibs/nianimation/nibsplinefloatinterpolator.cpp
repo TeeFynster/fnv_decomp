@@ -1,13 +1,42 @@
 // gamebryo2.2/corelibs/nianimation/nibsplinefloatinterpolator.cpp: NiBSplineFloatInterpolator (12 functions)
 
-#include "nibsplinefloatinterpolator_decls.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/StrArr.h"
+#include "../../../../include/NiBSplineFloatInterpolator.h"
+#include "../../../../include/NiBSplineInterpolator.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiStream.h"
+
+// Adapt declarations missing from the shared headers to the original member-call ABI.
+// A single-inheritance member pointer holds the function address on the target compiler.
+// ThisCallStub has no bases, so its member pointers are one code address on every compiler (NiRefObject's
+// NiMemObject base makes Ni class member pointers carry a this-adjustment).
+struct ThisCallStub
+{
+};
+template <class Member, class Function> inline Member MemberCall(Function function)
+{
+    union
+    {
+        Function function;
+        Member member;
+    } call;
+    call.function = function;
+    return call.member;
+}
+
+template <class T> void NiBinaryStream::Read(T& value)
+{
+    unsigned int size = sizeof(T);
+    m_uiAbsoluteCurrentPos += m_pfnRead(this, &value, sizeof(T), &size, 1);
+}
 // Calls the base NiBSplineInterpolator::LoadBinary, then reads m_fFloatValue and m_kFloatCPHandle from the stream input.
 // @fnv 0x00a50cd0
 void NiBSplineFloatInterpolator::LoadBinary(NiStream& stream)
 {
     NiBSplineInterpolator::LoadBinary(stream);
-    stream.input->Read(m_fFloatValue);
-    stream.input->Read(m_kFloatCPHandle);
+    stream.m_pkIstr->Read(m_fFloatValue);
+    stream.m_pkIstr->Read(m_kFloatCPHandle);
 }
 
 // @fnv 0x00a50a20
@@ -17,53 +46,32 @@ int __stdcall FUN_00a50a20(unsigned short v)
     return z == v;
 }
 
-struct CPX
-{
-    unsigned char pad[0x20];
-    unsigned int handle;
-};
 // @fnv 0x00a50a60
-unsigned int __fastcall GetHandleByIndex(CPX* self, int, unsigned short idx)
+unsigned int __fastcall GetHandleByIndex(NiBSplineFloatInterpolator* self, int, unsigned short idx)
 {
     unsigned int r = 0xffff;
     if (idx == 0)
-        r = self->handle;
+        r = self->m_kFloatCPHandle;
     return r;
 }
 
-namespace fnv_00a50a80 {
-struct CPX
-{
-    unsigned char pad[0x20];
-    unsigned int handle;
-};
 // @fnv 0x00a50a80
-void __fastcall SetHandleIfFirstIndex(CPX* self, int, unsigned int h, unsigned short idx)
+void __fastcall SetHandleIfFirstIndex(NiBSplineFloatInterpolator* self, int, unsigned int h, unsigned short idx)
 {
     if (idx == 0)
-        self->handle = h;
+        self->m_kFloatCPHandle = h;
 }
-}  // namespace fnv_00a50a80
 
-struct IsEqX
-{
-    bool FUN_00a57e90(void*);
-};
-struct FInterpX
-{
-    unsigned char pad[0x1c];
-    float f1c;
-    unsigned int h;
-};
-// Returns true when FUN_00a57e90 matches other and both f1c and h are equal; otherwise false.
+bool __fastcall IsBSplineInterpolatorEqual(NiBSplineInterpolator* self, int, NiObject* other);
+
 // @fnv 0x00a50b30
-bool __fastcall IsInterpEqual(FInterpX* self, int, FInterpX* other)
+bool __fastcall IsInterpEqual(NiBSplineFloatInterpolator* self, int, NiBSplineFloatInterpolator* other)
 {
-    if (!reinterpret_cast<IsEqX*>(self)->FUN_00a57e90(other))
+    if (!(((ThisCallStub*)self)->*MemberCall<bool (ThisCallStub::*)(NiObject*)>(IsBSplineInterpolatorEqual))(other))
         return false;
-    if (self->f1c != other->f1c)
+    if (self->m_fFloatValue != other->m_fFloatValue)
         return false;
-    return other->h == self->h ? true : false;
+    return other->m_kFloatCPHandle == self->m_kFloatCPHandle ? true : false;
 }
 
 struct GlobalObjX
@@ -77,48 +85,29 @@ GlobalObjX* FUN_00a50b70()
     return &g_011f401c_arg1;
 }
 
-void __fastcall FUN_00a57f80(void*);
+__declspec(noinline) void __fastcall DestroyBSplineInterpolator(NiBSplineInterpolator* self, int);
 void __cdecl __Dummy_00b6fef0(void*, unsigned int);
 // @fnv 0x00a50b80
 void* __fastcall FUN_00a50b80(void* self, int, unsigned int flags)
 {
-    FUN_00a57f80(self);
+    (((ThisCallStub*)static_cast<NiBSplineInterpolator*>(self))->*MemberCall<void (ThisCallStub::*)()>(DestroyBSplineInterpolator))();
     if (flags & 1)
         __Dummy_00b6fef0(self, 0x24);
     return self;
 }
 
-struct CloningProcess
-{
-};
-struct FUN_00a57f20_shell
-{
-    void FUN_00a57f20(int, int);
-};
-struct FUN_00a50110_obj
-{
-    void FUN_00a57fd0(FUN_00a50110_obj*, CloningProcess&);
-};
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
+void __fastcall InitializeBSplineInterpolator(NiBSplineInterpolator* self, int, int, int);
+void __fastcall CopyBSplineInterpolator(NiBSplineInterpolator* self, int, NiBSplineInterpolator* object,
+                                       CloningProcess& cloning);
 extern int DAT_010997f4;
-struct FUN_00a50c20Cls
-{
-    char _pad[0x1c];
-    float m_fFloatValue;
-    unsigned int m_kFloatCPHandle;
-    FUN_00a50c20Cls* Clone(CloningProcess&);
-};
 // Allocates a new object, initialises it, copies the float value and handle from this, and returns the clone.
 // @fnv 0x00a50c20
-FUN_00a50c20Cls* FUN_00a50c20Cls::Clone(CloningProcess& kCloning)
+NiBSplineFloatInterpolator* __fastcall CloneFloatInterpolator(NiBSplineFloatInterpolator* self, int, CloningProcess& kCloning)
 {
-    FUN_00a50c20Cls* pkObject = (FUN_00a50c20Cls*)BSFadeNode::operator new(0x24);
+    NiBSplineFloatInterpolator* pkObject = (NiBSplineFloatInterpolator*)BSFadeNode::operator new(0x24);
     if (pkObject)
     {
-        ((FUN_00a57f20_shell*)pkObject)->FUN_00a57f20(0, 0);
+        (((ThisCallStub*)pkObject)->*MemberCall<void (ThisCallStub::*)(int, int)>(InitializeBSplineInterpolator))(0, 0);
         *(void**)pkObject = (void*)&DAT_010997f4;
         pkObject->m_kFloatCPHandle = 0xffff;
     }
@@ -126,199 +115,112 @@ FUN_00a50c20Cls* FUN_00a50c20Cls::Clone(CloningProcess& kCloning)
     {
         pkObject = 0;
     }
-    ((FUN_00a50110_obj*)this)->FUN_00a57fd0((FUN_00a50110_obj*)pkObject, kCloning);
-    pkObject->m_fFloatValue = m_fFloatValue;
-    pkObject->m_kFloatCPHandle = m_kFloatCPHandle;
+    (((ThisCallStub*)self)->*MemberCall<void (ThisCallStub::*)(NiBSplineInterpolator*, CloningProcess&)>(CopyBSplineInterpolator))(pkObject, kCloning);
+    pkObject->m_fFloatValue = self->m_fFloatValue;
+    pkObject->m_kFloatCPHandle = self->m_kFloatCPHandle;
     return pkObject;
 }
 
-struct StrArr
-{
-    unsigned char pad[8];
-    unsigned short m_usSize;
-    unsigned short m_usElementCount;
-    unsigned char pad2[2];
-    unsigned short m_usGrowth;
-
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int index, char*& value);
-};
-
-struct Base
-{
-    unsigned char pad[0x1c];
-
-    void FUN_00a58200(StrArr* strings);
-};
+void __fastcall GetBSplineInterpolatorStrings(NiBSplineInterpolator* self, int, StrArr* strings);
 
 char* __cdecl _FUN_00a7d330(char const* value);
 char* __cdecl FUN_00a7d550(char const* name, float value);
 char* __cdecl FUN_00a7d510(char const* name, char const* value);
 
-struct FUN_00a50d30_shell : Base
-{
-    float m_fFloatValue;
-    unsigned int m_kFloatCPHandle;
-
-    void SerializeToStrings(StrArr* strings);
-};
-
 // @fnv 0x00a50d30
-void FUN_00a50d30_shell::SerializeToStrings(StrArr* strings)
+void __fastcall SerializeToStrings(NiBSplineFloatInterpolator* self, int, StrArr* strings)
 {
-    this->FUN_00a58200(strings);
+    (((ThisCallStub*)self)->*MemberCall<void (ThisCallStub::*)(StrArr*)>(GetBSplineInterpolatorStrings))(strings);
 
     char* value = _FUN_00a7d330(reinterpret_cast<char const*>(g_011f401c_arg1.x));
 
-    unsigned int index = strings->m_usElementCount;
-    if (index >= strings->m_usSize)
-        strings->SetSize(index + strings->m_usGrowth);
+    unsigned int index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
 
     strings->SetAt(index, value);
 
-    value = FUN_00a7d550("m_fFloatValue", m_fFloatValue);
+    value = FUN_00a7d550("m_fFloatValue", self->m_fFloatValue);
 
-    index = strings->m_usElementCount;
-    if (index >= strings->m_usSize)
-        strings->SetSize(index + strings->m_usGrowth);
+    index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
 
     strings->SetAt(index, value);
 
-    value = FUN_00a7d510("m_kFloatCPHandle", reinterpret_cast<char const*>(m_kFloatCPHandle));
+    value = FUN_00a7d510("m_kFloatCPHandle", reinterpret_cast<char const*>(self->m_kFloatCPHandle));
 
-    index = strings->m_usElementCount;
-    if (index >= strings->m_usSize)
-        strings->SetSize(index + strings->m_usGrowth);
+    index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
 
     strings->SetAt(index, value);
 }
 
-struct NiBSplineEvalTarget
-{
-    void FUN_00a52550(float t, float* out, int one, unsigned int m18, unsigned int handle);
-};
+void __fastcall EvaluateSpline(NiBSplineData* self, int, float t, float* out, int one,
+                               NiBSplineBasisData* basis, unsigned int handle);
 
-struct FUN_00a50ba0_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    float m08;
-    float m0c;
-    float m10;
-    NiBSplineEvalTarget* m14;
-    unsigned int m18;
-    float m1c;
-    unsigned int m20;
-    bool EvaluateAt(float v, unsigned int unused, float* out);
-};
-
-// If v differs from m08, computes t from m0c/m10 and evaluates the spline into m1c, then writes m1c to out and caches v in m08.
 // @fnv 0x00a50ba0
-bool FUN_00a50ba0_cls::EvaluateAt(float afTime, unsigned int unused, float* pfOut)
+bool __fastcall EvaluateAt(NiBSplineFloatInterpolator* self, int, float afTime, unsigned int unused, float* pfOut)
 {
     float t;
-    if (m08 == afTime)
+    if (self->m_fLastTime == afTime)
     {
-        *pfOut = m1c;
+        *pfOut = self->m_fFloatValue;
         return true;
     }
-    unsigned int handle = m20;
+    unsigned int handle = self->m_kFloatCPHandle;
     if (handle != 0xffff)
     {
-        t = (afTime - m0c) / (m10 - m0c);
-        m14->FUN_00a52550(t, &m1c, 1, m18, handle);
+        t = (afTime - self->m_fStartTime) / (self->m_fEndTime - self->m_fStartTime);
+        (((ThisCallStub*)self->m_spTransformData.m_pObject)->*MemberCall<void (ThisCallStub::*)(float, float*, int, NiBSplineBasisData*, unsigned int)>(EvaluateSpline))(
+            t, &self->m_fFloatValue, 1, self->m_spSplineBasisData.m_pObject, handle);
     }
-    *pfOut = m1c;
-    m08 = afTime;
+    *pfOut = self->m_fFloatValue;
+    self->m_fLastTime = afTime;
     return true;
 }
 
-struct FloatInterpStreamBinaryView
+template <class T> inline void WriteValue(NiBinaryStream* stream, T* value)
 {
-    void* vtable;
-    unsigned int absolutePosition;
-    unsigned int unk08;
-    unsigned int(__cdecl* read)(FloatInterpStreamBinaryView* stream, void* buffer, unsigned int totalBytes,
-                                unsigned int* componentSizes, unsigned int componentCount);
+    unsigned int size = sizeof(T);
+    stream->m_uiAbsoluteCurrentPos += stream->m_pfnWrite(stream, value, sizeof(T), &size, 1);
+}
 
-    template <class T> void Load(T* value)
-    {
-        unsigned int size = sizeof(T);
-        absolutePosition += read(this, value, sizeof(T), &size, 1);
-    }
-};
+void __fastcall SaveBSplineInterpolator(NiBSplineInterpolator* self, int, NiStream& stream);
 
-struct FloatInterpStreamView
-{
-    void* vtable;
-    unsigned int version;
-    char unk08[0x248];
-    FloatInterpStreamBinaryView* m_pUnderlyingStream;
-};
-
-struct NiBSplineInterpolatorStand
-{
-    void* vtable;
-    char unk04[0x18];
-    void LoadStream(NiStream& stream);
-};
-
-struct FUN_00a50c70_cls : NiBSplineFloatInterpolator
-{
-    void LoadFloatInterpolator(NiStream& stream);
-};
-
-// Loads the base interpolator stream, then reads m_fFloatValue and m_kFloatCPHandle from the stream's binary view.
 // @fnv 0x00a50c70
-void FUN_00a50c70_cls::LoadFloatInterpolator(NiStream& stream)
+void __fastcall SaveFloatInterpolator(NiBSplineFloatInterpolator* self, int, NiStream& stream)
 {
-    reinterpret_cast<NiBSplineInterpolatorStand*>(this)->LoadStream(stream);
-    FloatInterpStreamView* s = reinterpret_cast<FloatInterpStreamView*>(&stream);
-    s->m_pUnderlyingStream->Load(&m_fFloatValue);
-    s->m_pUnderlyingStream->Load(&m_kFloatCPHandle);
+    (((ThisCallStub*)self)->*MemberCall<void (ThisCallStub::*)(NiStream&)>(SaveBSplineInterpolator))(stream);
+    WriteValue(stream.m_pkOstr, &self->m_fFloatValue);
+    WriteValue(stream.m_pkOstr, &self->m_kFloatCPHandle);
 }
 
 #include <windows.h>
-struct SpawnedRef
-{
-    virtual void Vslot00();
-    virtual void DeleteThis();
-    long m_iObjectReferenceCount;
-};
 
 extern int DAT_0109ae8c;
+void __fastcall DestroyInterpolator(NiInterpolator* self, int);
 
-struct FUN_00a57f80_cls
-{
-    void* m_vptr00;
-    unsigned int unk04, unk08, unk0C, unk10;
-    SpawnedRef* m_14;
-    SpawnedRef* m_18;
-
-    void BaseTeardown();
-    void FUN_00a57f80();
-};
-
-// Releases the two SpawnedRef pointers m_14 and m_18 via InterlockedDecrement and DeleteThis, then calls BaseTeardown.
 // @fnv 0x00a57f80
-void FUN_00a57f80_cls::FUN_00a57f80()
+__declspec(noinline) void __fastcall DestroyBSplineInterpolator(NiBSplineInterpolator* self, int)
 {
-    *(void* volatile*)&m_vptr00 = (void*)&DAT_0109ae8c;
-    SpawnedRef* second = *(SpawnedRef* volatile*)&m_18;
+    *(void* volatile*)self = (void*)&DAT_0109ae8c;
+    NiBSplineBasisData* second = *(NiBSplineBasisData* volatile*)&self->m_spSplineBasisData.m_pObject;
     if (second != 0)
     {
-        if (InterlockedDecrement(&second->m_iObjectReferenceCount) == 0)
+        if (InterlockedDecrement(reinterpret_cast<long*>(&second->m_uiRefCount)) == 0)
         {
             second->DeleteThis();
         }
     }
-    SpawnedRef* first = m_14;
+    NiBSplineData* first = self->m_spTransformData.m_pObject;
     if (first != 0)
     {
-        if (InterlockedDecrement(&first->m_iObjectReferenceCount) == 0)
+        if (InterlockedDecrement(reinterpret_cast<long*>(&first->m_uiRefCount)) == 0)
         {
             first->DeleteThis();
         }
     }
-    BaseTeardown();
+    (((ThisCallStub*)self)->*MemberCall<void (ThisCallStub::*)()>(DestroyInterpolator))();
 }

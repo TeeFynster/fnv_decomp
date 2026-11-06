@@ -1,6 +1,11 @@
 // fallout_shared/magic/spellitem.cpp: SpellItem, MagicItem (15 functions)
 
-#include "spellitem_decls.h"
+#include "../../../include/SpellItem.h"
+#include "../../../include/ActorValues.h"
+#include "../../../include/IngredientItem.h"
+#include "../../../include/MagicItem.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESTopicInfo.h"
 
 // Resets spellType, cost, level and flags to 0, -1, 0 and 0.
 // @fnv 0x0040e330
@@ -13,64 +18,27 @@ void SpellItem::ResetFormData()
 }
 
 // @fnv 0x0040e280
-int __fastcall FUN_0040e280(int thisPtr)
+unsigned int MagicItem::GetChunkID()
 {
     return 0x54495053;
 }
 
-struct FUN_0040e500_shell
-{
-    void SetValue(int value);
-};
-
 // @fnv 0x0040e500
-void FUN_0040e500_shell::SetValue(int value)
+void SpellItem::SetValue(int value)
 {
-    *reinterpret_cast<int*>(this + 0x38) = value;
+    cost = value;
 }
-
-void __cdecl _Deallocate(void* p);
-
-struct FUN_0040e290_shell
-{
-    void FUN_0040e2c0();
-    void* DestroyIfFlagged(unsigned int flags);
-};
-
-// Calls FUN_0040e2c0, frees this via _Deallocate when flags has bit 0 set, and returns this.
-// @fnv 0x0040e290
-void* FUN_0040e290_shell::DestroyIfFlagged(unsigned int flags)
-{
-    FUN_0040e2c0();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct FlaggedData
-{
-    int __thiscall ContainsAnyFlag(unsigned int);
-};
-
-struct FUN_0040e670_shell
-{
-    void FUN_0040e670();
-};
 
 // @fnv 0x0040e670
-void FUN_0040e670_shell::FUN_0040e670()
+bool MagicItem::GetNoAbsorbOrReflect()
 {
-    ((FlaggedData*)((char*)this - 0x18))->ContainsAnyFlag(0x40);
+    return ((SpellItem*)((char*)this - 0x18))->FUN_0040e210(0x40);
 }
 
 struct Base5a
 {
     virtual ~Base5a();
     char _pad[20];
-};
-struct IngredientItem
-{
-    virtual ~IngredientItem();
 };
 struct FUN_00409210
 {
@@ -83,80 +51,25 @@ struct FUN_00409210
 FUN_00409210::~FUN_00409210()
 {}
 
-struct FUN_0040e1e0_shell
-{
-    bool FUN_0040e1e0();
-};
 // Returns true when the object at this-0x18 reports false for the argument 1.
 // @fnv 0x0040e1e0
-bool __thiscall FUN_0040e1e0_shell::FUN_0040e1e0()
+bool MagicItem::IsAutoCalculated()
 {
-    return !(unsigned char)((FlaggedData*)((char*)this - 0x18))->ContainsAnyFlag(1);
+    return !(unsigned char)((SpellItem*)((char*)this - 0x18))->ContainsAnyFlag(1);
 }
 
-struct FUN_0040e650_shell : FlaggedData
-{
-    void FUN_0040e650();
-};
 // @fnv 0x0040e650
-void FUN_0040e650_shell::FUN_0040e650()
+bool MagicItem::IgnoreResistance()
 {
-    ((FlaggedData*)((char*)this - 0x18))->ContainsAnyFlag(0x20);
+    return ((SpellItem*)((char*)this - 0x18))->FUN_0040e210(0x20);
 }
 
-class TESForm40E
-{
-  public:
-    virtual ~TESForm40E();
-    void SetFormType(int eType);
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class TESFullName40E
-{
-  public:
-    virtual ~TESFullName40E();
-
-    int unk04;
-    int unk08;
-};
-
-class MagicItem40E
-{
-  public:
-    virtual ~MagicItem40E();
-
-    int unk04;
-    int unk08;
-};
-
-class MagicItemForm40E : public TESForm40E, public TESFullName40E, public MagicItem40E
-{
-  public:
-    MagicItemForm40E();
-    virtual ~MagicItemForm40E();
-};
-
-class FUN_0040e160 : public MagicItemForm40E
-{
-  public:
-    FUN_0040e160();
-    virtual ~FUN_0040e160();
-
-    void InitItem();
-};
-
-// Sets the form type to 0x14 and calls InitItem to initialize the magic item form.
+// Sets the form type to 0x14 and resets the spell data.
 // @fnv 0x0040e160
-FUN_0040e160::FUN_0040e160()
+SpellItem::SpellItem()
 {
-    SetFormType(0x14);
-    InitItem();
+    SetFormType(static_cast<ENUM_FORM_ID>(0x14));
+    ResetFormData();
 }
 
 // Secondary-interface override: the speaker sound when the info is flagged, otherwise a sound picked
@@ -206,66 +119,11 @@ E600Sound* E600TopicInfo::FUN_0040e600()
         return E600PickSound(GetValue(0));
 }
 
-class FormPart40E
-{
-  public:
-    virtual ~FormPart40E();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class NamePart40E
-{
-  public:
-    virtual void GetName();
-
-    int unk04;
-    int unk08;
-};
-
-class EffectPart40E
-{
-  public:
-    virtual void GetEffects();
-
-    int unk04;
-};
-
-class MagicItemObject40E : public FormPart40E, public NamePart40E, public EffectPart40E
-{
-  public:
-    virtual ~MagicItemObject40E();
-
-    void ClearData();
-};
-
-class FUN_0040e2c0 : public MagicItemObject40E
-{
-  public:
-    virtual ~FUN_0040e2c0();
-};
-
 // @fnv 0x0040e2c0
-FUN_0040e2c0::~FUN_0040e2c0()
+SpellItem::~SpellItem()
 {
-    ClearData();
+    SpellItem::ClearData();
 }
-
-struct TESForm
-{
-    virtual ~TESForm();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int GetA();
-    int GetB();
-};
 
 struct MagicBase
 {
@@ -276,7 +134,7 @@ struct MagicBase
     virtual void s4();
     virtual void s5();
     virtual int s6();
-    virtual bool FUN_0040e3c0(class MagicItem* p);
+    virtual bool FUN_0040e3c0(MagicItem* p);
     int unk04;
     int unk08;
     int unk0C;
@@ -288,14 +146,8 @@ struct MagicBase
     int unk24;
 };
 
-class MagicItem : public TESForm, public MagicBase
-{
-  public:
-    unsigned char m_40;
-    bool FUN_0040e3c0(MagicItem* p);
-};
-
-// Casts p to SpellItem and returns true if it is null or differs from this item in s6, GetA, GetB or m_40; otherwise false.
+// Returns true if the other spell is absent or differs in type, cost, level or flags.
+// RTTI returns the containing spell; this points to its secondary interface at offset 0x18.
 // @fnv 0x0040e3c0
 bool MagicItem::FUN_0040e3c0(MagicItem* apItem)
 {
@@ -304,7 +156,10 @@ bool MagicItem::FUN_0040e3c0(MagicItem* apItem)
     {
         return true;
     }
-    if (a->s6() != s6() || a->GetA() != GetA() || a->GetB() != GetB() || a->m_40 != m_40)
+    if (reinterpret_cast<MagicBase*>(reinterpret_cast<char*>(a) + 0x18)->s6() != reinterpret_cast<MagicBase*>(reinterpret_cast<char*>(this) - 0x18 + 0x18)->s6() ||
+        reinterpret_cast<TESForm*>(a)->GetA() != reinterpret_cast<TESForm*>(reinterpret_cast<char*>(this) - 0x18)->GetA() ||
+        reinterpret_cast<TESForm*>(a)->GetB() != reinterpret_cast<TESForm*>(reinterpret_cast<char*>(this) - 0x18)->GetB() ||
+        reinterpret_cast<SpellItem*>(a)->flags != *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x28))
     {
         return true;
     }
@@ -356,7 +211,6 @@ void ObjE360::FUN_0040e360()
         m_sub.FUN_005a6b10();
 }
 
-struct Actor;
 struct MagicEffectKind
 {
     virtual void slot0();
@@ -366,15 +220,6 @@ struct MagicEffectKind
     virtual void slot4();
     virtual void slot5();
     virtual int GetType();
-};
-struct SpellData
-{
-    bool FUN_0040e210(int flag);
-    int GetField38();
-};
-struct ActorValues
-{
-    int FUN_0066ef20(int id);
 };
 float __cdecl ScaleBySettingBlend(float cost, int value, int adjustment);
 struct FUN_0040e520_shell
@@ -391,9 +236,9 @@ float FUN_0040e520_shell::FUN_0040e520(Actor* caster)
                               ((MagicEffectKind*)((char*)this - 12))->GetType() == 3)
                                  ? 0
                                  : caster;
-    if (((SpellData*)((char*)this - 36))->FUN_0040e210(1))
+    if (((SpellItem*)((char*)this - 36))->FUN_0040e210(1))
     {
-        cost = (float)((SpellData*)((char*)this - 36))->GetField38();
+        cost = (float)((SpellItem*)((char*)this - 36))->GetField38();
         if (effectiveCaster)
         {
             cost =
@@ -411,23 +256,11 @@ float FUN_0040e520_shell::FUN_0040e520(Actor* caster)
 extern char DAT_01183060;
 extern char DAT_01183140;
 extern "C" void* __cdecl _FNV_DynamicCast(void*, int, void*, void*, int);
-class TESActorBase;
-class TESTopicInfo
-{
-  public:
-    TESActorBase* GetSpeaker();
-};
 struct SpeakerSink40E
 {
     void FUN_00409480(TESActorBase* value);
 };
 
-struct CopySource40E : TESForm, MagicBase
-{
-    unsigned char flags;
-    int GetField38();
-};
-struct CopyOwner40E;
 struct CopyPart40E
 {
     virtual void slot0();
@@ -452,11 +285,11 @@ struct CopyOwner40E : TESForm, CopyPart40E
 // @fnv 0x0040e470
 void CopyOwner40E::FUN_0040e470(MagicItem* apSource)
 {
-    CopySource40E* source = static_cast<CopySource40E*>(_FNV_DynamicCast(apSource, 0, &DAT_01183140, &DAT_01183060, 0));
+    SpellItem* source = static_cast<SpellItem*>(_FNV_DynamicCast(apSource, 0, &DAT_01183140, &DAT_01183060, 0));
     if (source == 0)
         return;
-    FUN_008d7dc0(source->s6());
-    reinterpret_cast<FUN_0040e500_shell*>(this)->SetValue(source->GetField38());
+    FUN_008d7dc0(reinterpret_cast<MagicBase*>(reinterpret_cast<char*>(source) + 0x18)->s6());
+    reinterpret_cast<SpellItem*>(this)->SetValue(source->GetField38());
     reinterpret_cast<SpeakerSink40E*>(this)->FUN_00409480(reinterpret_cast<TESTopicInfo*>(source)->GetSpeaker());
     flags = source->flags;
 }

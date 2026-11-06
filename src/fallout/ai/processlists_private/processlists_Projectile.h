@@ -71,8 +71,8 @@ class Projectile : public MobileObject
     NiPointer<NiRefObject> m_pExplosionEffect;
     NiPointer<ActorCause> m_pActorCause;
     float m_fLifetime;
-    SoundPlaybackHandle kSound;
-    SoundPlaybackHandle kCountdownSound;
+    BSSoundHandle kSound;
+    BSSoundHandle kCountdownSound;
     ProjectileSupportData* pProjectileTarget;
     InventoryStackRecord* pRockItLauncherEntry;
     bool m_bHasTarget;

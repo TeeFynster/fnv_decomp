@@ -1,11 +1,239 @@
-// bsaudio/bsgamesound.cpp: BSGameSound, SoundView, AudioPathFixer (24 functions)
+// bsaudio/bsgamesound.cpp: BSGameSound, BSGameSoundOperations, AudioPathFixer (24 functions)
 
-#include "bsgamesound_decls.h"
+#include "../../include/BSWin32Audio.h"
+#include "../../include/BSAudioManager.h"
+#include "../../include/BSGameSound.h"
+#include "../../include/MemoryManager.h"
+// LocalVec: unit-local copy of the former shared stand-in Vec. Its default constructor fills x/y/z with FLT_MAX here, unlike NiPoint3's empty one.
+#include <xmmintrin.h>
+class Matrix;
+class Scalar;
+class Simd;
+class Tok;
+class Mask;
+class Elem;
+class Iter;
+class CIter;
+class CMutIter;
+class Mat3;
+class Mat4;
+class hkVector4;
+class hkQuaternion;
+
+class LocalVec
+{
+public:
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+        };
+        struct
+        {
+            void* m_pData;
+            int m_iArrayLength;
+            int m_iCapacity;
+        };
+    };
+
+    LocalVec();
+    LocalVec(float a, float b, float c);
+    // Keep the implicit copy constructor, copy assignment and destructor trivial.
+
+    void negative(const LocalVec& n);
+    void inv(const Matrix& m, const LocalVec& n);
+    void point(const Matrix& m, const LocalVec& b);
+    void difference(const LocalVec& a, const LocalVec& b);
+    Scalar dot(const LocalVec& n) const;
+    Scalar at(int i) const;
+    void set(float a, float b, float c, float d);
+
+    Simd lengthSquared() const;
+    void mul(const Simd& factor);
+    void SetProduct(const Simd& factor, const LocalVec& v);
+
+    void resize(unsigned n);
+    Tok& operator[](unsigned i);
+    void release(int elemSize);
+
+    LocalVec& operator-=(const LocalVec& v);
+    LocalVec& operator+=(const LocalVec& v);
+    LocalVec operator*(float scale) const;
+    LocalVec operator+(const LocalVec& v) const;
+    LocalVec operator-(const LocalVec& v) const;
+    float Squared() const;
+    float Length() const;
+    float Normalize();
+    float Dot(const LocalVec& v) const;
+    LocalVec Cross(const LocalVec& v) const;
+    LocalVec ApplyScaled(float scale);
+    LocalVec ApplyScaled(float scale) const;
+    void FUN_00acf580(unsigned n, Tok value);
+    LocalVec FUN_004a0bd0();
+    LocalVec FUN_004a0bd0() const;
+    LocalVec FUN_0053d1a0(const LocalVec& v);
+    LocalVec FUN_004b3800(const LocalVec& v);
+    LocalVec FUN_004b3800(const LocalVec& v) const;
+    LocalVec FUN_00439e90(const LocalVec& v);
+    LocalVec FUN_00439e90(const LocalVec& v) const;
+    LocalVec FUN_00439ef0(const LocalVec& v);
+    LocalVec FUN_00439ef0(const LocalVec& v) const;
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    void FUN_006815c0();
+    void FUN_00439180(float scale);
+    LocalVec& FUN_0063c8a0(const LocalVec& v);
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    void FUN_004b4db0(const float* values);
+    void FUN_00a38560();
+    void FUN_004f0180(void* value);
+
+    LocalVec& ScaleByInverse(float divisor);
+    float FUN_00457910();
+    LocalVec* FUN_006a6eb0();
+    bool FUN_004390c0(const LocalVec& v);
+
+    __m128 get() const;
+    void set(__m128 value);
+    void operator=(const __m128& value);
+    operator __m128() const;
+    __m128& getQuad();
+    const __m128& getQuad() const;
+    __m128& quad();
+    const __m128& quad() const;
+    float& operator()(int component);
+    const float& operator()(int component) const;
+    void setZero4();
+    void setSub4(const LocalVec& a, const LocalVec& b);
+    void setAdd4(const LocalVec& a, const LocalVec& b);
+    void setMul4(const LocalVec& a, const LocalVec& b);
+    void setMul4(const Scalar& a, const LocalVec& b);
+    void add4(const LocalVec& v);
+    void mul4(const LocalVec& v);
+    void mul4(const Scalar& value);
+    void add3clobberW(const LocalVec& v);
+    void sub3clobberW(const LocalVec& v);
+    void setBroadcast3clobberW(const LocalVec& v, int component);
+    Scalar horizontalAdd3() const;
+    void setCross(const LocalVec& a, const LocalVec& b);
+    Scalar dot3(const LocalVec& v) const;
+    Scalar lengthSquared3() const;
+    Scalar lengthInverse3() const;
+    void normalize3();
+    Scalar getSimdAt(int component) const;
+    void setInterpolate4(const LocalVec& a, const LocalVec& b, const Scalar& fraction);
+    void setAddMul4(const LocalVec& a, const LocalVec& b, const Scalar& scale);
+    void setNeg4(const LocalVec& v);
+    Mask compareLessThanZero4() const;
+    void SetRotatedDirection(const hkQuaternion& rotation, const LocalVec& direction);
+    void setRotatedTranslation(const hkQuaternion& rotation, const LocalVec& direction);
+    void cross(const LocalVec& a, const LocalVec& b);
+    Scalar squared() const;
+    Scalar inverseLength() const;
+    void normalize();
+    void negate(const LocalVec& v);
+
+    void FUN_00c7f640(const void* matrix, const hkVector4& point);
+    void FUN_00c7f640(Mat4* matrix, void* point);
+    void FUN_00c7f640(const void* matrix, const LocalVec* point);
+    void FUN_00c7f640(const void* matrix, const void* point);
+    void FUN_00c7f700(Mat3* matrix, void* point);
+    void FUN_00c7f700(const void* matrix, const LocalVec* point);
+    void FUN_00b12790();
+    void FUN_00b13040(LocalVec* out, const LocalVec* v);
+    LocalVec* ScaleSwizzled(LocalVec* out, float factor);
+    void AddVector(LocalVec* out, const LocalVec* v);
+    float Dot(const LocalVec& v);
+    LocalVec* FUN_004a3c90(const LocalVec* v);
+    LocalVec* FUN_0062b0a0(LocalVec* out, LocalVec* v);
+    LocalVec* FUN_0062af00(LocalVec* target);
+
+    void FUN_00cf7690(Elem* value);
+    void FUN_00b1e970();
+    Iter begin();
+    Iter end();
+    CIter FUN_00b33030(CIter first, CIter last);
+    void FUN_00b32120();
+    unsigned int size() const;
+    unsigned int capacity() const;
+    void FUN_00b2df90();
+    void FUN_00b2e140(Elem* first, Elem* last);
+    bool InitBuffer(unsigned int count);
+    Elem* _Ucopy(Elem* first, Elem* last, Elem* out);
+    LocalVec& FUN_00b2db10(const LocalVec& v);
+    CMutIter FUN_00aceb80(CMutIter first, CMutIter last);
+    void FUN_00acac40();
+    LocalVec& FUN_00ad61e0(const LocalVec& v);
+};
+#include "../../include/NiPoint3.h"
+
+extern MemoryManager g_memoryManager;
+
+inline LocalVec::LocalVec()
+{
+    x = 3.402823466e+38F;
+    y = 3.402823466e+38F;
+    z = 3.402823466e+38F;
+}
+
+class MersenneTwister
+{
+  public:
+    MersenneTwister();
+    unsigned int GetRandomUInt(unsigned int);
+    static __forceinline MersenneTwister& GetRandomGenerator()
+    {
+        static MersenneTwister random;
+        return random;
+    }
+};
+
+// Operations not yet declared by the shared interface add no fields or virtual slots.
+struct BSGameSoundOperations : BSGameSound
+{
+    bool SetFlagState(bool value);
+    void SetFlag(bool value);
+    bool IsSameSound(BSGameSound* sound);
+    bool IsSameSound(unsigned int priority);
+    bool UpdateDistance(float);
+    bool Flag100() { return (iSoundTypeFlags & 0x100) != 0; }
+    bool State20000() { return (iStateFlags & 0x20000) != 0; }
+    bool Flag2000000() { return (iSoundTypeFlags & 0x2000000) != 0; }
+    bool IsSpatial()
+    {
+        return (iSoundTypeFlags & 0x10) || (iSoundTypeFlags & 0x4000000) || (iSoundTypeFlags & 0x2000000);
+    }
+    // Slot 0x14 takes a bool here; the shared v14 declaration has no parameter yet.
+    __forceinline void SetVirtualFlag(bool value)
+    {
+        ((void (__thiscall*)(BSGameSound*, bool))(*(void***)this)[5])(this, value);
+    }
+};
+
+extern "C" unsigned int __cdecl strlen(const char*);
+extern "C" int __cdecl strcpy_s(char*, unsigned int, const char*);
+
+extern BSAudio* DAT_011f6d98;
+
+inline BSAudio* BSAudio::GetRandomGenerator()
+{
+    return DAT_011f6d98;
+}
+
+inline void(__cdecl* BSAudio::GetCallback())(char*)
+{
+    return (void(__cdecl*)(char*))pfnRandomFilenameCallback;
+}
 
 // @fnv 0x00ae9cf0
 bool BSGameSound::HasSoundFlagTwo()
 {
-    return (m_uiSoundFlags & 2) != 0;
+    return (iSoundTypeFlags & 2) != 0;
 }
 
 // Computes a hash from the characters of pName after the first, returning 0 when pName is null.
@@ -38,51 +266,51 @@ bool BSGameSound::LoadFromFilename(bool resolve)
 // @fnv 0x00ae9d10
 bool BSGameSound::CanStartPlayback()
 {
-    return (m_uiSoundFlags & 1) && (m_uiSoundFlags & 0x08000000);
+    return (iSoundTypeFlags & 1) && (iSoundTypeFlags & 0x08000000);
 }
 
 // @fnv 0x00ae9de0
 bool BSGameSound::Prepare()
 {
-    if (m_uiSoundParameter11 & 2)
+    if (iModifierFlags & 2)
     {
-        unsigned int duration = m_iSoundType;
+        unsigned int duration = iDurationInMS;
         unsigned int zlimit = duration;
         unsigned int time = MersenneTwister::GetRandomGenerator().GetRandomUInt(zlimit);
         Seek(time);
     }
-    uiSoundFlags = true ? (uiSoundFlags | 0x800) : (uiSoundFlags & ~0x800);
+    iStateFlags = true ? (iStateFlags | 0x800) : (iStateFlags & ~0x800);
     return true;
 }
 
 // @fnv 0x00ae97a0
 void BSGameSound::Copy(BSGameSound* source, bool)
 {
-    m_uiSoundParameter12 = source->m_uiSoundParameter12;
-    m_uiSoundParameter3 = source->m_uiSoundParameter3;
+    iSoundHash = source->iSoundHash;
+    iDirectoryHash = source->iDirectoryHash;
     HasMaster(source->pFilename, false);
-    m_uiSoundResourceID = BSAudioManager::GetRandomGenerator().GetNextID();
-    uiSoundFlags = source->uiSoundFlags;
-    m_uiSoundParameter11 = source->m_uiSoundParameter11;
-    m_iSoundType = source->m_iSoundType;
-    m_uiSoundParameterA = source->m_uiSoundParameterA;
-    m_uiReverbAttenuation = source->m_uiReverbAttenuation;
-    m_uiSoundParameterB = source->m_uiSoundParameterB;
-    m_uiSoundParameter6 = source->m_uiSoundParameter6;
-    m_fRolloff = source->m_fRolloff;
-    m_fMinimumDistance = source->m_fMinimumDistance;
-    m_fMaximumDistance = source->m_fMaximumDistance;
-    m_uiSoundCategory = source->m_uiSoundCategory;
-    m_uiSoundParameter4 = source->m_uiSoundParameter4;
-    m_uiSoundParameter10 = source->m_uiSoundParameter10;
-    afValueAfterThirdFloat = source->afValueAfterThirdFloat;
-    m_uiSoundParameter13 = source->m_uiSoundParameter13;
-    m_uiSoundParameter9 = source->m_uiSoundParameter9;
-    m_uiTrailingValue2 = source->m_uiTrailingValue2;
-    m_pfnBooleanCallback = source->m_pfnBooleanCallback;
-    m_pfnIntegerCallback = source->m_pfnIntegerCallback;
-    m_pAudioSource = source->m_pAudioSource;
-    m_pAudioData = source->m_pAudioData;
+    iSoundID = BSAudioManager::GetRandomGenerator().GetNextID();
+    iStateFlags = source->iStateFlags;
+    iModifierFlags = source->iModifierFlags;
+    iDurationInMS = source->iDurationInMS;
+    iStaticAttenuation = source->iStaticAttenuation;
+    iReverbAttenuation = source->iReverbAttenuation;
+    iSystemAttenuation = source->iSystemAttenuation;
+    iDistanceAttenuation = source->iDistanceAttenuation;
+    fCurrentVolume = source->fCurrentVolume;
+    fBeginTime = source->fBeginTime;
+    fEndTime = source->fEndTime;
+    iWeatherFlags = source->iWeatherFlags;
+    iSamplesPerSecond = source->iSamplesPerSecond;
+    iModSamplesPerSecond = source->iModSamplesPerSecond;
+    fMaxDist = source->fMaxDist;
+    iSoundSize = source->iSoundSize;
+    iLoopStart = source->iLoopStart;
+    iLoopEnd = source->iLoopEnd;
+    fnCompletionCallback = source->fnCompletionCallback;
+    fnPlayedCallback = source->fnPlayedCallback;
+    pSoundCompletionContext = source->pSoundCompletionContext;
+    pSoundPlayContext = source->pSoundPlayContext;
 }
 
 // @fnv 0x00ae9460
@@ -93,23 +321,23 @@ bool BSGameSound::HasMaster(const char* filename, bool resolve)
         return false;
     if (pFilename != filename)
         strcpy_s(pFilename, 260, filename);
-    BSAudio::GetRandomGenerator().vfn_18(pFilename);
-    void(__cdecl * pfnCallback)(char*) = BSAudio::GetRandomGenerator().GetCallback();
+    BSAudio::GetRandomGenerator()->vfn_18(pFilename);
+    void(__cdecl * pfnCallback)(char*) = BSAudio::GetRandomGenerator()->GetCallback();
     unsigned int iLength = strlen(pFilename);
     bool bDirectory = pFilename[iLength - 1] == '\\' || pFilename[iLength - 1] == '/';
-    if (bDirectory && !m_uiSoundParameter3)
-        m_uiSoundParameter3 = ComputeSoundNameHash(pFilename);
+    if (bDirectory && !iDirectoryHash)
+        iDirectoryHash = ComputeSoundNameHash(pFilename);
     if (resolve && bDirectory && pfnCallback)
     {
         pfnCallback(pFilename);
-        BSAudio::GetRandomGenerator().vfn_18(pFilename);
+        BSAudio::GetRandomGenerator()->vfn_18(pFilename);
     }
     else if (bDirectory && !resolve)
         bResult = false;
     if (!bDirectory || resolve)
-        m_uiSoundParameter12 = ComputeSoundNameHash(pFilename);
+        iSoundHash = ComputeSoundNameHash(pFilename);
     else
-        m_uiSoundParameter12 = 0;
+        iSoundHash = 0;
     return bResult;
 }
 
@@ -117,81 +345,74 @@ extern float const g_011c7374_arg1;
 
 // Initializes the object's fields to zero/default values, sets flags at offset 0x10, and clears bit 0x8000.
 // @fnv 0x00ae95e0
-void __fastcall FUN_00ae95e0(char* pObject)
+void __fastcall FUN_00ae95e0(BSGameSound* pObject)
 {
-    *(int*)(pObject + 0x4) = 0;
-    *(int*)(pObject + 0x8) = 0;
-    *(int*)(pObject + 0xc) = 0;
-    *(int*)(pObject + 0x10) = 0;
-    *(int*)(pObject + 0x10) |= 0x100;
-    *(int*)(pObject + 0x14) = 0;
-    *(short*)(pObject + 0x18) = 0;
-    *(short*)(pObject + 0x1a) = 0;
-    *(short*)(pObject + 0x1c) = 0;
-    *(short*)(pObject + 0x1e) = 0;
-    *(short*)(pObject + 0x20) = 0;
-    *(float*)(pObject + 0x24) = 1.0f;
-    *(float*)(pObject + 0x28) = 0.0f;
-    *(float*)(pObject + 0x2c) = 0.0f;
-    *(int*)(pObject + 0x30) = 0;
-    *(short*)(pObject + 0x34) = 0;
-    *(float*)(pObject + 0x13c) = g_011c7374_arg1;
-    *(float*)(pObject + 0x140) = 50.0f;
-    *(int*)(pObject + 0x14c) = 0;
-    *(int*)(pObject + 0x154) = 0;
-    *(int*)(pObject + 0x160) = 0;
-    *(int*)(pObject + 0x15c) = 0;
-    *(int*)(pObject + 0x144) = 0;
-    *(int*)(pObject + 0x148) = 0;
-    *(float*)(pObject + 0x150) = 3.4028234663852886e+38f;
-    *(char*)(pObject + 0x158) = 0;
-    *(short*)(pObject + 0x15a) = 0;
-    *(int*)(pObject + 0x174) = 0;
-    *(int*)(pObject + 0x178) = 0;
-    *(int*)(pObject + 0x164) = 0;
-    *(int*)(pObject + 0x168) = 0;
-    *(int*)(pObject + 0x16c) = 0;
-    *(int*)(pObject + 0x170) = 0;
-    *(int*)(pObject + 0x10) = false ? (*(int*)(pObject + 0x10) | 0x8000) : (*(int*)(pObject + 0x10) & ~0x8000);
+    pObject->iSoundID = 0;
+    pObject->iSoundTypeFlags = 0;
+    pObject->iModifierFlags = 0;
+    pObject->iStateFlags = 0;
+    pObject->iStateFlags |= 0x100;
+    pObject->iDurationInMS = 0;
+    pObject->iStaticAttenuation = 0;
+    pObject->iReverbAttenuation = 0;
+    pObject->iSystemAttenuation = 0;
+    pObject->iDistanceAttenuation = 0;
+    pObject->iFaderAttenuation = 0;
+    pObject->fCurrentVolume = 1.0f;
+    pObject->fBeginTime = 0.0f;
+    pObject->fEndTime = 0.0f;
+    pObject->iWeatherFlags = 0;
+    pObject->iSamplesPerSecond = 0;
+    pObject->fMaxDist = g_011c7374_arg1;
+    pObject->fMinDist = 50.0f;
+    pObject->iSoundSize = 0;
+    pObject->iEnvironmentType = 0;
+    pObject->iCleanupDelayInMS = 0;
+    pObject->iSynchStartTime = 0;
+    pObject->iSoundHash = 0;
+    pObject->iDirectoryHash = 0;
+    pObject->fDistanceToListener = 3.4028234663852886e+38f;
+    pObject->iFreqVariance = 0;
+    pObject->iModSamplesPerSecond = 0;
+    pObject->iLoopStart = 0;
+    pObject->iLoopEnd = 0;
+    pObject->fnCompletionCallback = 0;
+    pObject->fnPlayedCallback = 0;
+    pObject->pSoundCompletionContext = 0;
+    pObject->pSoundPlayContext = 0;
+    pObject->iStateFlags = false ? (pObject->iStateFlags | 0x8000) : (pObject->iStateFlags & ~0x8000);
 }
 
 // If a callback pointer at offset 0x168 is set, calls it with the value at 0x170 and the id at 0x14, then clears both fields.
 // @fnv 0x00ae9af0
-void __fastcall ClearCallback(char* pObject)
+void __fastcall ClearCallback(BSGameSound* pObject)
 {
-    if (*(void**)(pObject + 0x168) != 0)
+    if (pObject->fnPlayedCallback != 0)
     {
-        int id = *(int*)(pObject + 0x14);
-        (*(void(__cdecl**)(int, int))(pObject + 0x168))(*(int*)(pObject + 0x170), id);
-        *(int*)(pObject + 0x170) = 0;
-        *(int*)(pObject + 0x168) = 0;
+        int id = pObject->iDurationInMS;
+        ((void(__cdecl*)(void*, int))pObject->fnPlayedCallback)(pObject->pSoundPlayContext, id);
+        pObject->pSoundPlayContext = 0;
+        pObject->fnPlayedCallback = 0;
     }
 }
 
-struct FUN_00ae9c50_s
-{
-    int a, b, c, d;
-    unsigned flags;
-    int e;
-    bool SetFlagState(bool v);
-};
-// Sets or clears bits in flags depending on v, and when v is false also sets bit 0x10 and sets e to 1; returns v.
+// Sets or clears bits in flags depending on v, and when v is false also sets bit 0x10 and sets iDurationInMS to 1; returns v.
 // @fnv 0x00ae9c50
-bool FUN_00ae9c50_s::SetFlagState(bool v)
+bool BSGameSoundOperations::SetFlagState(bool v)
 {
     if (v)
     {
-        flags |= 1;
-        flags |= 0x100;
-        flags &= 0xffffefff;
+        iStateFlags |= 1;
+        iStateFlags |= 0x100;
+        iStateFlags &= 0xffffefff;
     }
     else
     {
-        flags &= 0xfffffeff;
-        flags |= 1;
-        flags &= 0xffffefff;
-        flags |= 0x10;
-        e = 1;
+        iStateFlags &= 0xfffffeff;
+        iStateFlags |= 1;
+        iStateFlags &= 0xffffefff;
+        iStateFlags |= 0x10;
+        iDurationInMS = 1;
     }
     return v;
 }
@@ -218,127 +439,92 @@ struct OL4List : NiTPointerListBase_NiTPointerAllocator_unsigned_int__Tile__Tile
     ~OL4List()
     {}
 };
-struct FUN_00ae93f0
-{
-    virtual ~FUN_00ae93f0();
-    char pad[0x188];
-    OL4List list;
-};
+// The shared interface stores the message list as raw bytes.
 // @fnv 0x00ae93f0
-FUN_00ae93f0::~FUN_00ae93f0()
+BSGameSound::~BSGameSound()
 {
     int unused[5];
+    ((OL4List*)QueuedMessages)->OL4List::~OL4List();
 }
 
 extern double _gModifierZero;
 
-struct SoundRange_00ae9b50
-{
-    char pad[0x28];
-    float fStart;
-    float m_fEndValue;
-    unsigned int uiFlags;
-    bool FUN_00ae9b50(unsigned int mask, float t);
-};
-
 // @fnv 0x00ae9b50
-bool SoundRange_00ae9b50::FUN_00ae9b50(unsigned int mask, float afTime)
+bool BSGameSound::FUN_00ae9b50(int mask, float afTime)
 {
-    if ((uiFlags & mask) == 0 && uiFlags != 0 && mask != 0)
+    if ((iWeatherFlags & mask) == 0 && iWeatherFlags != 0 && mask != 0)
         return false;
-    float fSpan = m_fEndValue - fStart;
+    float fSpan = fEndTime - fBeginTime;
     fSpan = (fSpan < _gModifierZero) ? fSpan * -1.0 : fSpan;
     if (fSpan >= 0.09375)
     {
-        if ((fStart < m_fEndValue && (fStart > afTime || m_fEndValue < afTime)) ||
-            (fStart > m_fEndValue && fStart > afTime && m_fEndValue < afTime))
+        if ((fBeginTime < fEndTime && (fBeginTime > afTime || fEndTime < afTime)) ||
+            (fBeginTime > fEndTime && fBeginTime > afTime && fEndTime < afTime))
             return false;
     }
     return true;
 }
 
 namespace fnv_00ae9ec0 {
-struct FUN_00ae93f0
-{
-    virtual ~FUN_00ae93f0();
-};
-struct MemoryManager
-{
-    void _DeallocateAlias(void* p);
-};
-extern MemoryManager g_memoryManager;
-struct FUN_00ae9ec0 : FUN_00ae93f0
+struct BSGameSoundDeletion : BSGameSound
 {
     void* DeleteThis(unsigned int flags);
 };
 // Destroys the base object and, when bit 0 of flags is set, deallocates this via g_memoryManager, returning this.
 // @fnv 0x00ae9ec0
-void* FUN_00ae9ec0::DeleteThis(unsigned int flags)
+void* BSGameSoundDeletion::DeleteThis(unsigned int flags)
 {
-    this->FUN_00ae93f0::~FUN_00ae93f0();
+    this->BSGameSound::~BSGameSound();
     if (flags & 1)
         g_memoryManager._DeallocateAlias(this);
     return this;
 }
 }  // namespace fnv_00ae9ec0
 
-struct FUN_00ae9f70 : BSGameSound
-{
-    void SetFlag(bool abSet);
-};
 // @fnv 0x00ae9f70
-void FUN_00ae9f70::SetFlag(bool abSet)
+void BSGameSoundOperations::SetFlag(bool abSet)
 {
-    *(unsigned int*)((char*)this + 0x10) =
-        abSet ? (*(unsigned int*)((char*)this + 0x10) | 0x20000) : (*(unsigned int*)((char*)this + 0x10) & 0xfffdffff);
+    iStateFlags = abSet ? (iStateFlags | 0x20000) : (iStateFlags & 0xfffdffff);
 }
 
-struct FUN_00ae9fd0 : BSGameSound
-{
-    bool IsSameSound(BSGameSound* apSound);
-};
 // Returns true when this sound's value at offset 0x188 is less than the other sound's value at offset 0x188.
 // @fnv 0x00ae9fd0
-bool FUN_00ae9fd0::IsSameSound(BSGameSound* apSound)
+bool BSGameSoundOperations::IsSameSound(BSGameSound* apSound)
 {
-    return *(unsigned int*)((char*)this + 0x188) < *(unsigned int*)((char*)apSound + 0x188);
+    return iPriority < apSound->iPriority;
 }
 
-struct FUN_00aea000 : BSGameSound
-{
-    bool IsSameSound(unsigned int aiToCompare);
-};
 // @fnv 0x00aea000
-bool FUN_00aea000::IsSameSound(unsigned int aiToCompare)
+bool BSGameSoundOperations::IsSameSound(unsigned int aiToCompare)
 {
-    return *(unsigned int*)((char*)this + 0x188) < aiToCompare;
+    return iPriority < aiToCompare;
 }
 
-struct Interface
+// Exe 0x00aea590: unit-local BsgamesoundInterfaceView view used by this matched implementation.
+struct BsgamesoundInterfaceView
 {
     static void __cdecl PrintDebugMessage(const char*);
 };
 
-struct FUN_00aea590_shell
+// Initialization methods absent from the shared interface live in this extension.
+// It adds no fields and uses BSWin32Audio's shared layout.
+struct BSWin32AudioInitialization : BSWin32Audio
 {
-    bool __thiscall FUN_00aea590(int param, int unused);
+    bool CheckResult(int result, const char* context);
+    void SetWindow(int window);
+    void FUN_00ad7020(int);
 };
 
 // Returns true when param is non-negative; otherwise logs "Audio system could not be initialized." and returns false.
 // @fnv 0x00aea590
-bool __thiscall FUN_00aea590_shell::FUN_00aea590(int aiResult, int unused)
+bool BSWin32AudioInitialization::CheckResult(int aiResult, const char* unused)
 {
     if (aiResult >= 0)
         return true;
-    Interface::PrintDebugMessage("Audio system could not be initialized.");
+    BsgamesoundInterfaceView::PrintDebugMessage("Audio system could not be initialized.");
     return false;
 }
 
-struct P03MM
-{
-    void* Allocate(unsigned int size);
-};
-extern P03MM g_memoryManager;
 struct FUN_00aeac20
 {
     FUN_00aeac20(unsigned int a);
@@ -359,11 +545,6 @@ FUN_00aeac20* FUN_00aea5c0::Create(unsigned int auiValue)
 }
 
 namespace fnv_00aea700 {
-struct MemoryManager
-{
-    void _DeallocateAlias(void* p);
-};
-extern MemoryManager g_memoryManager;
 struct FUN_00aea700;
 void __fastcall FUN_00aea210(FUN_00aea700* p);
 struct FUN_00aea700
@@ -381,160 +562,39 @@ void* FUN_00aea700::DeleteThis(unsigned int flags)
 }
 }  // namespace fnv_00aea700
 
-struct Point3
+struct BSWin32GameSoundPosition : BSGameSound
 {
-    float x, y, z;
-    Point3(float ax, float ay, float az) : x(ax), y(ay), z(az)
-    {}
+    NiPoint3* GetPos(NiPoint3* output);
 };
-struct FUN_00aefd20 : BSGameSound
-{
-    Point3 GetPos();
-};
-// Returns the sound's position at offset 0x218 when either of the two checks passes, otherwise the origin (0,0,0).
+// Returns the position through the caller-provided return storage.
 // @fnv 0x00aefd20
-Point3 FUN_00aefd20::GetPos()
+NiPoint3* BSWin32GameSoundPosition::GetPos(NiPoint3* output)
 {
     if (HasSoundFlagTwo() || CanStartPlayback())
-        return *(Point3*)((char*)this + 0x218);
-    return Point3(0.0f, 0.0f, 0.0f);
+    {
+        *output = *(NiPoint3*)((char*)this + 0x218);
+        return output;
+    }
+    output->x = 0.0f;
+    output->y = 0.0f;
+    output->z = 0.0f;
+    return output;
 }
 
-struct SoundView
-{
-    virtual void v00();
-    virtual bool v04();
-    virtual void v08();
-    virtual bool v0c();
-    virtual void v10();
-    virtual void v14(bool);
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30(bool);
-    virtual void v34();
-    virtual void v38();
-    unsigned int unk4;
-    unsigned int unk8;
-    unsigned int unkc;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    unsigned int unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
-    unsigned int unkc4;
-    unsigned int unkc8;
-    unsigned int unkcc;
-    unsigned int unkd0;
-    unsigned int unkd4;
-    unsigned int unkd8;
-    unsigned int unkdc;
-    unsigned int unke0;
-    unsigned int unke4;
-    unsigned int unke8;
-    unsigned int unkec;
-    unsigned int unkf0;
-    unsigned int unkf4;
-    unsigned int unkf8;
-    unsigned int unkfc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    float unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    float unk150;
-    bool Flag100()
-    {
-        return (unk8 & 0x100) != 0;
-    }
-    bool State20000()
-    {
-        return (unk10 & 0x20000) != 0;
-    }
-    bool Flag2000000()
-    {
-        return (unk8 & 0x2000000) != 0;
-    }
-    bool IsSpatial()
-    {
-        return (unk8 & 0x10) || (unk8 & 0x4000000) || (unk8 & 0x2000000);
-    }
-    bool FUN_00ae9cf0();
-    bool FUN_00ae9d10();
-    bool FUN_00ae9960(float);
-};
-// Checks spatial and state flags to toggle v14/v30 and call v38 based on comparing unk150 against unk13c, then returns true.
+// Checks spatial and state flags to toggle v14/v30 and call v38 based on comparing fDistanceToListener against fMaxDist, then returns true.
 // @fnv 0x00ae9960
-bool SoundView::FUN_00ae9960(float unused)
+bool BSGameSoundOperations::UpdateDistance(float unused)
 {
     float distance2, maximum2, distance, maximum;
-    if ((FUN_00ae9cf0() || FUN_00ae9d10()) && !Flag100() && !State20000() && v04() && IsSpatial() && !Flag2000000() &&
-        (distance2 = unk150, maximum2 = unk13c, maximum2 < distance2))
+    if ((HasSoundFlagTwo() || CanStartPlayback()) && !Flag100() && !State20000() && IsPlaying() && IsSpatial() && !Flag2000000() &&
+        (distance2 = fDistanceToListener, maximum2 = fMaxDist, maximum2 < distance2))
     {
         v38();
-        v14(true);
+        SetVirtualFlag(true);
     }
-    else if (State20000() && !v0c() && (distance = unk150, maximum = unk13c, distance < maximum))
+    else if (State20000() && !IsPaused() && (distance = fDistanceToListener, maximum = fMaxDist, distance < maximum))
     {
-        v14(false);
+        SetVirtualFlag(false);
         v30(true);
     }
     return true;
@@ -558,54 +618,32 @@ struct BSAudioSink
     virtual void __stdcall FUN_00f8();
 };
 
-struct BSWin32Audio
-{
-    int unk00;
-    unsigned char unk04;
-    unsigned char unk05;
-    unsigned short unk06;
-    int unk08;
-    int unk0c;
-    BSAudioVoice* unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    BSAudioSink* unk38;
-    BSAudioSink* unk3c;
-    void FUN_00ad7150();
-    void Shutdown();
-};
+extern "C" void FUN_00ad7150();
 
 extern void(__cdecl* g_pAudioShutdownCallback)();
 
 // @fnv 0x00aea4d0
 void BSWin32Audio::Shutdown()
 {
-    this->unk05 = 0;
-    this->FUN_00ad7150();
+    this->bInitialized = 0;
+    ((void(__thiscall*)(BSAudio*))FUN_00ad7150)(this);
     g_pAudioShutdownCallback();
-    if (this->unk10)
+    if (this->pListener)
     {
-        BSAudioVoice* pVoice = this->unk10;
+        BSAudioVoice* pVoice = (BSAudioVoice*)this->pListener;
         BSAudioVoice* pVoiceChecked = pVoice;
         (pVoiceChecked != 0) ? pVoiceChecked->FUN_00f0(1) : 0;
-        this->unk10 = 0;
+        this->pListener = 0;
     }
-    if (this->unk3c)
+    if (this->pPrimaryBuffer)
     {
-        this->unk3c->FUN_00f8();
-        this->unk3c = 0;
+        ((BSAudioSink*)this->pPrimaryBuffer)->FUN_00f8();
+        this->pPrimaryBuffer = 0;
     }
-    if (this->unk38)
+    if (this->pDirectSound)
     {
-        this->unk38->FUN_00f8();
-        this->unk38 = 0;
+        ((BSAudioSink*)this->pDirectSound)->FUN_00f8();
+        this->pDirectSound = 0;
     }
 }
 
@@ -614,30 +652,11 @@ extern "C" char DAT_010a3b10, DAT_010a3ae0, DAT_010a3a78, DAT_010a3a38, DAT_010a
 extern "C" __declspec(dllimport) void* __stdcall GetModuleHandleA(const char*);
 extern "C" int __stdcall FUN_00ee81e0(int, void*, int);
 extern "C" void* __cdecl FUN_00ec61c0(void*, int, unsigned);
-struct Heap
-{
-    void* FUN_00aa3e40(unsigned);
-};
-struct Manager
-{
-    void FUN_00ad9640();
-};
-extern "C" Manager* __cdecl FUN_00ad9060();
-struct Vec
-{
-    float x, y, z;
-    Vec()
-    {
-        x = 3.402823466e+38F;
-        y = 3.402823466e+38F;
-        z = 3.402823466e+38F;
-    }
-};
 struct Sound
 {
     virtual void s0();
     virtual void s1();
-    virtual void s2(Vec*);
+    virtual void s2(LocalVec*);
     virtual void s3();
     virtual void s4();
     virtual void s5();
@@ -655,7 +674,7 @@ struct FUN_00aea730_Class : Sound
     FUN_00aea730_Class(int);
     static void* operator new(unsigned n)
     {
-        return ((Heap*)&DAT_011f6238)->FUN_00aa3e40(n);
+        return ((MemoryManager*)&DAT_011f6238)->FUN_00aa3e40(n);
     }
     static void operator delete(void*);
 };
@@ -687,60 +706,46 @@ struct Text
         return Get2();
     }
 };
-struct C
-{
-    char pad0[4];
-    unsigned char flag4, flag5;
-    char pad6[10];
-    Sound* sound;
-    char pad14[36];
-    Com* com;
-    Com* buffer;
-    char capsdata[96];
-    int window;
-    bool FUN_00aea590(int, const char*);
-    void FUN_00ad7020(int);
-    void SetWindow(int);
-};
+// The shared header does not yet declare this initialization entry point.
 // @fnv 0x00aea230
-void C::SetWindow(int aiWindow)
+void BSWin32AudioInitialization::SetWindow(int aiWindow)
 {
     Desc desc;
     int iResult;
     int iInterface;
-    window = aiWindow;
-    if (flag5)
+    this->hWnd = (void*)aiWindow;
+    if (this->bInitialized)
         return;
     if (*(const unsigned char*)((Text*)&DAT_011f6d9c)->Get())
     {
         GetModuleHandleA(0);
-        iResult = FUN_00ee81e0(0, &com, 0);
-        if (!FUN_00aea590(iResult, &DAT_010a3b10))
+        iResult = FUN_00ee81e0(0, &this->pDirectSound, 0);
+        if (!CheckResult(iResult, &DAT_010a3b10))
             return;
-        iResult = com->coop(window, 2);
-        FUN_00aea590(iResult, &DAT_010a3ae0);
-        *(int*)capsdata = 96;
-        iResult = com->caps(capsdata);
-        FUN_00aea590(iResult, &DAT_010a3a78);
+        iResult = ((Com*)this->pDirectSound)->coop((int)this->hWnd, 2);
+        CheckResult(iResult, &DAT_010a3ae0);
+        *(int*)this->Caps = 96;
+        iResult = ((Com*)this->pDirectSound)->caps(this->Caps);
+        CheckResult(iResult, &DAT_010a3a78);
         FUN_00ec61c0(&desc, 0, 36);
         desc.size = 36;
         desc.flags = 145;
-        iResult = com->create(&desc, &buffer, 0);
-        if (!FUN_00aea590(iResult, &DAT_010a3a38))
+        iResult = ((Com*)this->pDirectSound)->create(&desc, (Com**)&this->pPrimaryBuffer, 0);
+        if (!CheckResult(iResult, &DAT_010a3a38))
             return;
-        iResult = buffer->q(&DAT_01100fa4, &iInterface);
-        if (!FUN_00aea590(iResult, &DAT_010a39f8))
+        iResult = ((Com*)this->pPrimaryBuffer)->q(&DAT_01100fa4, &iInterface);
+        if (!CheckResult(iResult, &DAT_010a39f8))
             return;
-        sound = new FUN_00aea730_Class(iInterface);
+        this->pListener = (BSAudioListener*)new FUN_00aea730_Class(iInterface);
     }
-    if (sound)
+    if (this->pListener)
     {
-        sound->s2(&Vec());
-        sound->s12(1.0f);
+        ((Sound*)this->pListener)->s2(&LocalVec());
+        ((Sound*)this->pListener)->s12(1.0f);
     }
-    flag5 = 1;
-    flag4 = 1;
-    FUN_00ad9060()->FUN_00ad9640();
+    this->bInitialized = 1;
+    this->bAudioEnabled = 1;
+    BSAudioManager::GetRandomGenerator().FUN_00ad9640();
     FUN_00ad7020(0);
 }
 

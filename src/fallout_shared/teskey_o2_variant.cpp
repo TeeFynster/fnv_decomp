@@ -4,38 +4,10 @@
 
 // src/fallout_shared/teskey.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/teskey.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-extern "C" void __cdecl _Deallocate(void*);
-struct TESKey
-{
-    void* Destroy(unsigned int flags);
-    void FUN_0050a6a0();
-};
+#include "../../include/TESKey.h"
 
-// FUN_0050a760 : MSVC this-adjusting thunk  (sub ecx, 0x3c ; jmp <impl>)
-struct A1_0050a760
-{
-    A1_0050a760();
-    virtual void FUN_0050a760();
-    char pad[0x38];
-};
-struct A2_0050a760
-{
-    A2_0050a760();
-    virtual void FUN_0050a760();
-};
-struct Own_0050a760 : A1_0050a760, A2_0050a760
-{
-    Own_0050a760();
-    virtual void key_fn();
+// Constructing TESKey emits its deleting-destructor adjustor thunk for the
+// TESModelTextureSwap subobject at offset 0x3c.
 // @fnv 0x0050a760
-    void FUN_0050a760();
-};
-Own_0050a760::Own_0050a760()
+TESKey::TESKey()
 {}
-void Own_0050a760::key_fn()
-{}
-Own_0050a760* make_0050a760()
-{
-    static Own_0050a760 o;
-    return &o;
-}

@@ -2,7 +2,16 @@
 // src/havok/physics/dynamics/constraint/chain/hkpconstraintchaininstance.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/chain/hkpconstraintchaininstance.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpConstraintChainInstance.h"
+#include "../../../../../../include/hkStringPtr.h"
+#include "../../../../../../include/hkpAction.h"
+#include "../../../../../../include/hkpConstraintChainData.h"
+#include "../../../../../../include/hkpConstraintChainInstanceAction.h"
+#include "../../../../../../include/hkpConstraintInstance.h"
+#include "../../../../../../include/hkpConstraintChainInstance.h"
+#include "../../../../../../include/hkaAnimation.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkMemoryRouter.h"
 
 struct FUN_00c91120
 {
@@ -20,16 +29,12 @@ struct FUN_00cb3da0
 {
     static void AddConstraintToCriticalLockedIsland(void*, void*);
 };
-struct FUN_00dd0460
-{
-    void EntityRemovedCallback(void*);
-};
 // @fnv 0x00dd0460
-void FUN_00dd0460::EntityRemovedCallback(void* a)
+void hkpConstraintChainInstance::EntityRemovedCallback(void* a)
 {
     FUN_00c97510* w = *(FUN_00c97510**)((char*)a + 8);
     ++*(int*)((char*)w + 0x94);
-    FUN_00c97510* w2 = *(FUN_00c97510**)((char*)this + 0x44);
+    FUN_00c97510* w2 = (FUN_00c97510*)m_pAction;
     w->ProcessPointer(w2);
     FUN_00cb3da0::AddConstraintToCriticalLockedIsland(w, this);
     if (--*(int*)((char*)w + 0x94) == 0 && !*(char*)((char*)w + 0x9c))
@@ -41,320 +46,89 @@ void FUN_00dd0460::EntityRemovedCallback(void* a)
     }
 }
 
-class hkMemoryAllocatorDD04;
+// hkMemoryRouter is the shared router: GetMonitorStream binds to 0x00c85750, heap is at +0x10.
 
-struct hkMemoryRouterDD04
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorDD04* m_pStreamAllocator;
-    hkMemoryAllocatorDD04& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterDD04& __cdecl FUN_00c85750();
+    return hkMemoryRouter::getInstance().heap();
+}
 
-void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iElemSize);
-
-template <class T> __forceinline void constructWithCopyDD04(T* p, int n, const T& t)
+template <class T> __forceinline void hkArrayUtil::constructWithCopy(T* p, int n, const T& t, hkTypeIsPod)
 {
     for (int i = 0; i < n; i++)
         p[i] = t;
 }
 
-template <class T> class hkArrayDD04
+template <class T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& t)
 {
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void AddBack(const T& t)
-    {
-        hkMemoryAllocatorDD04& kAlloc = FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&kAlloc, this, sizeof(T));
-        constructWithCopyDD04(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-};
-
-class hkReferencedObjectDD04
-{
-  public:
-    void FUN_00c90510() throw();
-};
-
-class hkpPhantomOverlapDD04
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    hkReferencedObjectDD04* m_pHeadNode[2];
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    hkArrayDD04<hkReferencedObjectDD04*> m_kTrackedObjects;
-
-    void AddReferencedObject(hkReferencedObjectDD04* pkObject);
-};
+    if (m_iElementCount == getCapacity())
+        hkArrayUtil::_reserveMore(alloc, this, sizeof(T));
+    hkArrayUtil::constructWithCopy(m_data + m_iElementCount, 1, t, hkTypeIsPod());
+    m_iElementCount++;
+}
 
 // @fnv 0x00dd04d0
-void hkpPhantomOverlapDD04::AddReferencedObject(hkReferencedObjectDD04* pkObject)
+void hkpConstraintChainInstance::AddReferencedObject(hkpEntity* pkObject)
 {
-    int iSlot = m_kTrackedObjects.m_iElementCount;
-    if (iSlot < 2 && m_pHeadNode[iSlot] == 0)
+    int iSlot = m_ppRigidBodies.m_iElementCount;
+    if (iSlot < 2 && m_kActorEntries[iSlot] == 0)
     {
-        m_pHeadNode[iSlot] = pkObject;
-        pkObject->FUN_00c90510();
+        m_kActorEntries[iSlot] = pkObject;
+        ((hkReferencedObject*)pkObject)->addReference();
     }
-    m_kTrackedObjects.AddBack(pkObject);
-    pkObject->FUN_00c90510();
+    m_ppRigidBodies.pushBack(pkObject);
+    ((hkReferencedObject*)pkObject)->addReference();
 }
 
-class hkMemoryAllocatorDD05
+template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
 {
-  public:
-    virtual ~hkMemoryAllocatorDD05() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void* AllocateBufferWithSize(int& iNumBytes) throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterDD05
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorDD05* m_pStreamAllocator;
-    hkMemoryAllocatorDD05& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-namespace hkRouterDD05 {
-extern "C" hkMemoryRouterDD05& __cdecl FUN_00c85750() throw();
+    m_iElementCount = 0;
+    if ((m_iCapacityState & 0x80000000) == 0)
+        alloc.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
 }
-
-template <class T> class hkArrayDD05
+template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
 {
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    ~hkArrayDD05() throw()
-    {
-        hkMemoryAllocatorDD05& kAlloc = hkRouterDD05::FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
-
-class FUN_00d1df70 : public hkReferencedObject
-{
-  public:
-    void removeReference();
-};
-
-class FUN_00cf40b0
-{
-  public:
-    virtual ~FUN_00cf40b0() throw();
-    int unk04[13];
-};
-
-class FUN_00dd05c0 : public FUN_00cf40b0
-{
-  public:
-    hkArrayDD05<FUN_00d1df70*> m_children;
-    FUN_00d1df70* m_pOwnerObject;
-
-    virtual ~FUN_00dd05c0() throw();
-};
+    clearAndDeallocate();
+}
 
 // @fnv 0x00dd05c0
-FUN_00dd05c0::~FUN_00dd05c0() throw()
+hkpConstraintChainInstance::~hkpConstraintChainInstance() throw()
 {
-    for (int i = 0; i < m_children.m_iElementCount; i++)
-        m_children.m_data[i]->removeReference();
-    m_pOwnerObject->removeReference();
+    for (int i = 0; i < m_ppRigidBodies.m_iElementCount; i++)
+        ((hkReferencedObject*)m_ppRigidBodies.m_data[i])->removeReference();
+    m_pAction->removeReference();
 }
 
-namespace fnv_00dd0630 {
-struct FnvCpu_FUN_00dd0630_CpuAllocator
-{
-    virtual void slot00();
-    virtual void slot04();
-    virtual void Invoke(void* block, unsigned int size);
-};
-struct FnvCpu_FUN_00dd0630_CpuAllocatorHolder
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    FnvCpu_FUN_00dd0630_CpuAllocator* allocator;
-};
-FnvCpu_FUN_00dd0630_CpuAllocatorHolder* __cdecl FUN_00c85750();
-struct FnvCpu_FUN_00dd0630_CpuObject
-{
-    unsigned int unk00;
-    unsigned short size;
-    void FUN_00dd05c0();
-    FnvCpu_FUN_00dd0630_CpuObject* Destroy(unsigned int flags);
-};
-// Calls FUN_00dd05c0, and if flags has bit 0 set, frees this via the allocator from FUN_00c85750, then returns this.
-// @fnv 0x00dd0630
-FnvCpu_FUN_00dd0630_CpuObject* FnvCpu_FUN_00dd0630_CpuObject::Destroy(unsigned int flags)
-{
-    FUN_00dd05c0();
-    if (flags & 1)
-    {
-        FnvCpu_FUN_00dd0630_CpuAllocatorHolder* holder = FUN_00c85750();
-        holder->allocator->Invoke(this, size);
-    }
-    return this;
-}
-}  // namespace fnv_00dd0630
 
-namespace fnv_00dd0530 {
-class hkMemoryAllocatorDD05
+
+inline void* hkReferencedObject::operator new(std::size_t nbytes) throw()
 {
-  public:
-    virtual ~hkMemoryAllocatorDD05() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterDD05
-{
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorDD05* m_pStreamAllocator;
-
-    hkMemoryAllocatorDD05& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" hkMemoryRouterDD05& __cdecl FUN_00c85750() throw();
-
-namespace hkDD05 {
-class hkRefObj
-{
-  public:
-    hkRefObj() throw()
-    {
-        m_sReferenceCount = 1;
-    }
-    virtual void unkVirtual00();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    static void* operator new(unsigned int nbytes)
-    {
-        hkRefObj* b = static_cast<hkRefObj*>(FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
-        b->m_usMemSizeAndFlags = (unsigned short)nbytes;
-        return b;
-    }
-};
-
-class hkpConstraintChainData : public hkRefObj
-{
-  public:
-    void FUN_00c90510() throw();
-};
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(
+        hkMemoryRouter::getInstance().heap().blockAlloc(nbytes));
+    b->m_usMemSizeAndFlags = (unsigned short)nbytes;
+    return b;
 }
 
-namespace FUN_00cb0a60 {
-class hkStringPtr
+inline void hkReferencedObject::operator delete(void* p)
 {
-  public:
-    hkStringPtr() throw();
-    const char* m_pcText;
-};
+    hkReferencedObject* object = static_cast<hkReferencedObject*>(p);
+    hkMemoryRouter::getInstance().heap().blockFree(p, object->m_usMemSizeAndFlags);
 }
 
-namespace FUN_00cf3f40 {
-class hkpConstraintInstance : public hkDD05::hkRefObj
-{
-  public:
-    hkpConstraintInstance(int iPriority) throw();
-    int unk08;
-    hkDD05::hkpConstraintChainData* m_data;
-    int unk10;
-    void* m_kActorEntries[2];
-    int unk1C, unk20, unk24, unk28, unk2C, unk30, unk34;
-};
-}
+inline hkpAction::hkpAction() throw()
+    : m_pOwningWorld(0), m_pCurrentSimulationIsland(0), m_ulUserData(0)
+{}
 
-class hkpAction : public hkDD05::hkRefObj
-{
-  public:
-    hkpAction() throw() : m_pOwningWorld(0), m_pCurrentSimulationIsland(0), m_ulUserData(0)
-    {}
-    void* m_pOwningWorld;
-    void* m_pCurrentSimulationIsland;
-    unsigned long m_ulUserData;
-    FUN_00cb0a60::hkStringPtr m_name;
-};
+inline hkpConstraintChainInstanceAction::hkpConstraintChainInstanceAction(
+    hkpConstraintInstance* pkInstance) throw()
+    : m_pConstraintChainInstance(static_cast<hkpConstraintChainInstance*>(pkInstance))
+{}
 
-class hkpConstraintChainInstanceAction : public hkpAction
-{
-  public:
-    hkpConstraintChainInstanceAction(FUN_00cf3f40::hkpConstraintInstance* pkInstance) throw()
-        : m_pConstraintChainInstance(pkInstance)
-    {}
-    virtual void unkVirtual00();
-    FUN_00cf3f40::hkpConstraintInstance* m_pConstraintChainInstance;
-};
-
-template <class T> class hkArrayDD05
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArrayDD05() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
-
-namespace FUN_00dd0530 {
-class hkpConstraintChainInstance : public FUN_00cf3f40::hkpConstraintInstance
-{
-  public:
-    hkpConstraintChainInstance(hkDD05::hkpConstraintChainData* pkData);
-    virtual void unkVirtual00();
-
-    hkArrayDD05<void*> m_ppRigidBodies;
-    hkpConstraintChainInstanceAction* m_pAction;
-};
-
-// Constructs a constraint chain instance from pkData, nulls actor entries, and creates its owning hkpConstraintChainInstanceAction.
 // @fnv 0x00dd0530
-hkpConstraintChainInstance::hkpConstraintChainInstance(hkDD05::hkpConstraintChainData* pkData)
-    : FUN_00cf3f40::hkpConstraintInstance(1)
+hkpConstraintChainInstance::hkpConstraintChainInstance(hkpConstraintChainData* pkData)
+    : hkpConstraintInstance(1)
 {
     m_data = pkData;
     pkData->FUN_00c90510();
@@ -362,5 +136,3 @@ hkpConstraintChainInstance::hkpConstraintChainInstance(hkDD05::hkpConstraintChai
     m_kActorEntries[1] = 0;
     m_pAction = new hkpConstraintChainInstanceAction(this);
 }
-}
-}  // namespace fnv_00dd0530

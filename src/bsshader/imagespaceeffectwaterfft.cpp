@@ -2,25 +2,21 @@
 // src/bsshader/imagespaceeffectwaterfft.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/imagespaceeffectwaterfft.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct ImageSpaceTexture
-{
-    void* GetTexture();
-    void AddRenderedTexture();
-};
+#include "../../include/MemoryManager.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiRenderTargetGroup.h"
+#include "../../include/ImageSpaceTexture.h"
+#include "../../include/ImageSpaceEffectParam.h"
 
 struct ImageSpaceTextureSet
 {
     char _0[0x58];
     ImageSpaceTexture m_kTextureSlot0;
-    char _1[0x0f];
     ImageSpaceTexture m_kTextureSlot1;
-    char _2[0x0f];
     ImageSpaceTexture m_kTextureSlot2;
-    char _3[0x0f];
     ImageSpaceTexture m_kTextureSlot3;
-    char _4[0x0f];
     ImageSpaceTexture m_kTextureSlot4;
-    char _5[0x1f];
+    char _5[0x10];
     bool m_bHeaderParsed;
     void FUN_00ba1250();
 };
@@ -41,17 +37,7 @@ void ImageSpaceTextureSet::FUN_00ba1250()
     m_bHeaderParsed = false;
 }
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int size);
-    void Deallocate(void* p);
-};
 extern MemoryManager g_memoryManager;
-
-struct ImageSpaceEffectParam
-{
-    int unk00;
-};
 
 struct ImageSpaceShaderParam : ImageSpaceEffectParam
 {
@@ -69,26 +55,8 @@ struct ImageSpaceShaderParam : ImageSpaceEffectParam
         g_memoryManager.Deallocate(p);
     }
 
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
+    // Preserve the unmodeled prefix through offset 0x53 after the shared base.
+    int unkBaseTail[0x15 - sizeof(ImageSpaceEffectParam) / sizeof(int)];
     char unk54;
     bool bFlag55;
     bool bFlag56;
@@ -112,102 +80,6 @@ struct ShaderParamArray
     __declspec(noalias) void SetAt(unsigned int idx, ImageSpaceEffectParam* const& val);
 };
 
-struct RenderTarget
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual unsigned int GetWidth(int i);
-    virtual unsigned int GetHeight(int i);
-};
-
-class NiRenderer
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual RenderTarget* GetDefaultRenderTarget();
-};
 extern NiRenderer* DAT_011f9508;
 
 extern const float DAT_011add48[16];
@@ -231,7 +103,9 @@ struct EffectSource
     TextureArray textures;
 };
 
-struct ImageSpaceEffectX
+// These calls bind to ImageSpaceEffect methods: SetTextureArraySize 0x00ba3f90, SetTexture 0x00ba3c70.
+// Retained locally because include/ImageSpaceEffect.h is not available.
+struct ImageSpaceEffect
 {
     int unk00;
     int unk04;
@@ -252,11 +126,11 @@ struct ImageSpaceEffectX
 
 // Configures four shader passes with textures and parameters from src, using the default render target dimensions for inverse scale factors.
 // @fnv 0x00bd6bb0
-void ImageSpaceEffectX::SetupShaderPasses(EffectSource* apSource, int unused)
+void ImageSpaceEffect::SetupShaderPasses(EffectSource* apSource, int unused)
 {
     SetTextureArraySize(4);
-    float width = DAT_011f9508->GetDefaultRenderTarget()->GetWidth(0);
-    float height = DAT_011f9508->GetDefaultRenderTarget()->GetHeight(0);
+    float width = DAT_011f9508->GetDefaultRT()->Unk_23(0);
+    float height = reinterpret_cast<unsigned int>(DAT_011f9508->GetDefaultRT()->vf36(0));
     {
         ImageSpaceShaderParam* param = new ImageSpaceShaderParam;
         param->SetSizeEx(0, 0x18);

@@ -4,7 +4,7 @@
 
 #include "testopicinfo_topicinfo_layout_support.h"
 #include "testopicinfo_topicinfo_TESCondition.h"
-#include "testopicinfo_topicinfo_TESForm.h"
+#include "../../include/TESForm.h"
 #include "TopicInfoData.h"
 class TESTopicInfo : public TESForm
 {

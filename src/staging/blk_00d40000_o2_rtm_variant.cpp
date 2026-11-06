@@ -1,3 +1,4 @@
+#include "../../include/hkArray.h"
 // src/staging/blk_00d40000_o2_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00d40000_o2.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -5,6 +6,37 @@
 // src/staging/blk_00d40000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiTMap.h"
+#include "../../include/NiTMapItem.h"
+#include "../../include/bhkListShape.h"
+#include "../../include/bhkRefObject.h"
+#include "../../include/bhkWorldObject.h"
+#include "../../include/hkAabb.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/FinishingFlag.h"
+#include "../../include/NiStream.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkError.h"
+#include "../../include/hkRotation.h"
+#include "../../include/hkpConstraintData.h"
+#include "../../include/hkpWorld.h"
+
+#include "../../include/hkReferencedObject.h"
+#include "../../include/hkStringPtr.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkBaseObject.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkMemoryRouter.h"
+
+// The shared router and finish-loaded flag retain their checked canonical names.
+
+__forceinline void hkVector4::set(float x, float y, float z, float w)
+{
+    m_vComponents = _mm_setr_ps(x, y, z, w);
+}
+
 struct FUN_00c9ce00_cls
 {
     void __thiscall FUN_00c9ce00(int);
@@ -13,10 +45,6 @@ extern int DAT_010c7888;
 void __cdecl FUN_00d49530(FUN_00c9ce00_cls* pObject, int aiValue);
 extern "C" void __cdecl AppendEventRecord(int, int, int, int);
 void __stdcall FUN_00d4de30(int a, int b);
-struct NiStream
-{
-    unsigned int ReadUnsignedInteger();
-};
 struct FUN_00d53200_class
 {
     void FUN_00c8a230(NiStream& stream);
@@ -128,14 +156,6 @@ struct FUN_00d532a0_cls
 // global allocator holder. A non-zero flag selects the large object (0x80 bytes,
 // constructor takes the flag, then the vtable is stored); zero selects the small
 // object (0x30 bytes, constructor returns the object).
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    void* m_pAllocator;
-};
 struct ObjAllocator
 {
     virtual void unk00();
@@ -154,7 +174,7 @@ struct SpawnLarge
     void __thiscall FUN_00dacbd0(int, int, int);
 };
 extern char DAT_010ceb94[];
-AllocHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 void* __cdecl CreateSpawnObject(int a1, int a2, int a3, int a4);
 struct FNVDispatchType
 {
@@ -915,19 +935,6 @@ struct ScopedMemoryContextD53
         g_tlsMemContext = iOldContext;
     }
 };
-class hkBool
-{
-  public:
-    char m_cBooleanValue;
-    __forceinline hkBool(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-    __forceinline operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
 class FUN_00cc0500
 {
   public:
@@ -939,15 +946,7 @@ struct OstreamD53
 {
     OstreamD53& FUN_00cc01c0(const char* pcText);
 };
-class hkErrorD53
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual int message(int iType, int aiSoundId, const char* pcDescription, const char* pcFile, int iLine);
-};
-extern hkErrorD53* DAT_01268360;
+extern hkError* DAT_01268360;
 struct WorldObjD53
 {
     char pad00[0x24];
@@ -1193,26 +1192,40 @@ struct D53970HeapAlloc
         return GetMemoryRouter().Heap();
     }
 };
-struct D53970Array
+static __forceinline int D53970Array_GetCapacity(hkArrayBase<int>& self);
+
+void __cdecl FUN_00c908c0(D53970Alloc* alloc, hkArrayBase<int>* arr, int n, int elemSize);
+static __forceinline void D53970Array_Reserve(hkArrayBase<int>& self, D53970Alloc& alloc, int n);
+
+static __forceinline void D53970Array_SetSizeA(hkArrayBase<int>& self, D53970Alloc& alloc, int n);
+
+static __forceinline void D53970Array_SetSize(hkArrayBase<int>& self, int n);
+
+static __forceinline int D53970Array_GetCapacity(hkArrayBase<int>& self)
 {
-    int* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int GetCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
+        return self.m_iCapacityState & 0x3fffffff;
     }
-    void Reserve(D53970Alloc& alloc, int n);
-    void SetSizeA(D53970Alloc& alloc, int n)
+
+static __forceinline void D53970Array_Reserve(hkArrayBase<int>& self, D53970Alloc& alloc, int n)
+{
+    if (D53970Array_GetCapacity(self) < n)
     {
-        Reserve(alloc, n);
-        m_iElementCount = n;
+        int cap2 = 2 * D53970Array_GetCapacity(self);
+        int newSize = (n < cap2) ? cap2 : n;
+        FUN_00c908c0(&alloc, (&self), newSize, 4);
     }
-    void SetSize(int n)
-    {
-        SetSizeA(D53970HeapAlloc().Get(), n);
+}
+
+static __forceinline void D53970Array_SetSizeA(hkArrayBase<int>& self, D53970Alloc& alloc, int n)
+{
+        D53970Array_Reserve(self, alloc, n);
+        self.m_iElementCount = n;
     }
-};
+
+static __forceinline void D53970Array_SetSize(hkArrayBase<int>& self, int n)
+{
+        D53970Array_SetSizeA(self, D53970HeapAlloc().Get(), n);
+    }
 struct D53970Scope
 {
     int m_saved;
@@ -1228,16 +1241,8 @@ struct D53970Scope
         *m_pVar = m_saved;
     }
 };
-void __cdecl FUN_00c908c0(D53970Alloc* alloc, D53970Array* arr, int n, int elemSize);
-inline void D53970Array::Reserve(D53970Alloc& alloc, int n)
-{
-    if (GetCapacity() < n)
-    {
-        int cap2 = 2 * GetCapacity();
-        int newSize = (n < cap2) ? cap2 : n;
-        FUN_00c908c0(&alloc, this, newSize, 4);
-    }
-}
+void __cdecl FUN_00c908c0(D53970Alloc* alloc, hkArrayBase<int>* arr, int n, int elemSize);
+
 struct D53970BaseA
 {
     virtual void unk00();
@@ -1251,7 +1256,7 @@ struct D53970BaseB
 };
 struct D53970Data : D53970BaseA, D53970BaseB
 {
-    D53970Array m_ppData;
+    hkArrayBase<int> m_ppData;
 };
 struct D53970Obj
 {
@@ -1315,23 +1320,22 @@ inline void* operator new(unsigned int, void* p, PlaceTag)
 }
 inline void operator delete(void*, void*, PlaceTag)
 {}
-AllocHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void*, void*, int);
 namespace d51 {
-template <class T> struct hkArray
+template <class T> struct AddBackArg
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    void AddBack(const T& e)
-    {
-        AllocHolder* a = FUN_00c85750();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(a->m_pAllocator, this, sizeof(T));
-        new (&m_data[m_iElementCount], PlaceTag()) T(e);
-        m_iElementCount++;
-    }
+    typedef T Type;
 };
+// hkArray<T>::pushBack as this unit's original inlines it (the router's allocator is read only on the grow path).
+template <class T> inline void AddBack(hkArray<T>& a, const typename AddBackArg<T>::Type& e)
+{
+    hkMemoryRouter* h = FUN_00c85750();
+    if (a.m_iElementCount == (a.m_iCapacityState & 0x3fffffff))
+        ResizeAudioStream(h->m_heap, &a, sizeof(T));
+    ::new (&a.m_data[a.m_iElementCount], PlaceTag()) T(e);
+    a.m_iElementCount++;
+}
 struct Writer
 {
     int unk;
@@ -1357,8 +1361,8 @@ struct Owner
 // @fnv 0x00d51ef0
 void Owner::AppendPairAndAdvance(int aiValue)
 {
-    m_pkWriter->m_kArr.AddBack(0xc);
-    m_pkWriter->m_kArr.AddBack(aiValue);
+    AddBack(m_pkWriter->m_kArr, 0xc);
+    AddBack(m_pkWriter->m_kArr, aiValue);
     m_pkWriter->Add();
     m_pkWriter->Add();
 }
@@ -1467,14 +1471,10 @@ struct FUN_00d47fe0_cls
     void __thiscall Destroy(int value);
 };
 void __cdecl FUN_00d47fd0(FUN_00d47fe0_cls* object);
-struct hkFinishLoadedObjectFlagD483
-{
-    int m_bFinishing;
-};
 class FUN_00d48320
 {
   public:
-    FUN_00d48320(hkFinishLoadedObjectFlagD483 flag);
+    FUN_00d48320(FinishingFlag flag);
 };
 class FUN_00dcc160_cls
 {
@@ -1503,55 +1503,14 @@ struct FUN_00d53290_cls
 {
     void __thiscall FUN_00d53290(int a);
 };
-class hkMemoryAllocatorD539;
-struct hkMemoryRouterD539
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorD539* m_pStreamAllocator;
-
-    hkMemoryAllocatorD539& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
 namespace hkRouterD539 {
-extern "C" hkMemoryRouterD539& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
-void __cdecl FUN_00c908c0(hkMemoryAllocatorD539& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
-template <class T> class hkArrayD539
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void reserve(hkMemoryAllocatorD539& kAlloc, int n)
-    {
-        const int iCap = getCapacity();
-        if (iCap < n)
-        {
-            int iCap2 = 2 * iCap;
-            int iNewCap = (n < iCap2) ? iCap2 : n;
-            FUN_00c908c0(kAlloc, this, iNewCap, sizeof(T));
-        }
-    }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        reserve(hkRouterD539::FUN_00c85750().heap(), n);
-        m_iElementCount = n;
-    }
-};
+void __cdecl FUN_00c908c0(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
 struct hkInfoD539
 {
     int unk00[5];
-    hkArrayD539<int> m_keys;
+    hkArray<int> m_keys;
 };
 struct hkContainerD539
 {
@@ -1690,74 +1649,6 @@ struct FUN_00d5d660_cls
     int m_i00;
     int m_i04;
     void __thiscall NextFloat4(float* pOut);
-};
-class hkMemoryAllocatorD5E0
-{
-  public:
-    virtual ~hkMemoryAllocatorD5E0() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-struct hkMemoryRouterD5E0
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorD5E0* m_pStreamAllocator;
-    hkMemoryAllocatorD5E0& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-class hkReferencedObject
-{
-  public:
-    void removeReference() throw();
-};
-class hkReferencedObjectD5E0
-{
-  public:
-    virtual ~hkReferencedObjectD5E0() throw()
-    {}
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    static void operator delete(void* p) throw()
-    {
-        reinterpret_cast<hkMemoryRouterD5E0*>(FUN_00c85750())
-            ->heap()
-            .ReleaseBlock(p, static_cast<hkReferencedObjectD5E0*>(p)->m_usMemSizeAndFlags);
-    }
-};
-class hkpShapeD5E0 : public hkReferencedObjectD5E0
-{
-  public:
-    unsigned long m_ulUserData;
-    unsigned int m_type;
-    int m_10;
-};
-class hkpShapeContainerD5E0
-{
-  public:
-    virtual ~hkpShapeContainerD5E0() throw()
-    {}
-};
-class hkpSingleShapeContainerD5E0 : public hkpShapeContainerD5E0
-{
-  public:
-    hkReferencedObject* m_pContainedShape;
-
-    ~hkpSingleShapeContainerD5E0() throw()
-    {
-        if (m_pContainedShape)
-            m_pContainedShape->removeReference();
-    }
-};
-class hkpTransformShapeD5E0 : public hkpShapeD5E0, public hkpSingleShapeContainerD5E0
-{
-  public:
-    hkpTransformShapeD5E0* FUN_00d5e070(unsigned int uiFlags) throw();
 };
 struct FUN_00d5e0c0_Obj
 {
@@ -1981,14 +1872,10 @@ class hkpD500Object
     void FUN_00c8a280(hkpD500Stream* pkStream);
     void FUN_00d50010(hkpD500Stream* pkStream);
 };
-struct hkFinishLoadedObjectFlagD50
-{
-    int m_bFinishing;
-};
 class FUN_00d21ce0_cls
 {
   public:
-    FUN_00d21ce0_cls(hkFinishLoadedObjectFlagD50 flag)
+    FUN_00d21ce0_cls(FinishingFlag flag)
     {
         if (flag.m_bFinishing)
             FUN_00d21ce0(m_pOwnerObject);
@@ -2009,7 +1896,7 @@ class FUN_00dd0420_Class
 class FUN_00d50c00
 {
   public:
-    FUN_00d50c00(hkFinishLoadedObjectFlagD50 flag);
+    FUN_00d50c00(FinishingFlag flag);
     virtual ~FUN_00d50c00();
 
     int unk04;
@@ -2081,222 +1968,7 @@ class ObjD534
     bool FUN_00d534e0(ObjD534* other);
 };
 extern __declspec(thread) unsigned int t_uiMemContextD53;
-class AutoMemContextD53
-{
-  public:
-    AutoMemContextD53(unsigned int m_uiGeometryShaderFlags)
-    {
-        m_uiPrevious = t_uiMemContextD53;
-        t_uiMemContextD53 = m_uiGeometryShaderFlags;
-    }
-    ~AutoMemContextD53()
-    {
-        t_uiMemContextD53 = m_uiPrevious;
-    }
-    unsigned int m_uiPrevious;
-};
-class hkMemoryAllocatorD53
-{
-  public:
-    virtual void v00();
-    virtual void* AllocateMemoryBlock(int iNumBytes);
-    virtual void ReleaseBlock(void* p, int iNumBytes);
-    virtual void* AllocateBufferWithSize(int& iReqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int iNumBytes);
-};
-struct hkMemoryRouterD53
-{
-    void* m_aiEntries;
-    void* m_stackStart;
-    void* m_stackEnd;
-    hkMemoryAllocatorD53* m_pTemp;
-    hkMemoryAllocatorD53* m_pStreamAllocator;
-    hkMemoryAllocatorD53& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-hkMemoryRouterD53& __cdecl GetMemoryRouterD53();
-struct hkArrayUtilD53
-{
-    static void __cdecl GrowArrayCapacity(hkMemoryAllocatorD53& kAlloc, void* apvArray, int iNumElements,
-                                          int iSizeElem);
-};
-template <typename T> struct hkArrayD53
-{
-    hkArrayD53() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    __forceinline ~hkArrayD53()
-    {
-        hkMemoryAllocatorD53& kAlloc = GetMemoryRouterD53().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    void clear()
-    {
-        m_iElementCount = 0;
-    }
-    __forceinline void reserve(hkMemoryAllocatorD53& kAlloc, int n)
-    {
-        const int iCap = getCapacity();
-        if (iCap < n)
-        {
-            int iCap2 = 2 * iCap;
-            int iNewSize = (n < iCap2) ? iCap2 : n;
-            hkArrayUtilD53::GrowArrayCapacity(kAlloc, this, iNewSize, sizeof(T));
-        }
-    }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        reserve(GetMemoryRouterD53().heap(), n);
-        m_iElementCount = n;
-    }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-class NiCloningProcessD53;
-class hkpShapeContainerD53;
-class NiObjectD53
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual NiObjectD53* MakeClone(NiCloningProcessD53& kCloning);
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c();
-    virtual void v90();
-    virtual void v94();
-    virtual void v98();
-    virtual void v9c();
-    virtual void va0();
-    virtual void va4();
-    virtual void va8();
-    virtual void vac();
-    virtual void vb0();
-    virtual hkpShapeContainerD53* GetContainer(char* pcOut);
-};
-template <class K, class V> struct NiTMapItemD53
-{
-    NiTMapItemD53* m_pkNext;
-    K m_key;
-    V m_val;
-};
-template <class K, class V> class NiTMapD53
-{
-  public:
-    virtual void v00();
-    virtual unsigned int KeyToHashIndex(K key) const;
-    virtual bool IsKeysEqual(K key1, K key2) const;
-    bool GetAt(K key, V& val) const
-    {
-        unsigned int uiIndex = KeyToHashIndex(key);
-        NiTMapItemD53<K, V>* pkItem = m_ppkHashTable[uiIndex];
-        while (pkItem)
-        {
-            if (IsKeysEqual(key, pkItem->m_key))
-            {
-                val = pkItem->m_val;
-                return true;
-            }
-            pkItem = pkItem->m_pkNext;
-        }
-        return false;
-    }
-    unsigned int m_uiHashSize;
-    NiTMapItemD53<K, V>** m_ppkHashTable;
-};
-class NiCloningProcessD53
-{
-  public:
-    NiTMapD53<NiObjectD53*, NiObjectD53*>* m_pCloneMap;
-};
-class bhkRefObjectD53 : public NiObjectD53
-{
-  public:
-    unsigned int m_uiRefCount;
-    void* m_phkObject;
-};
-class hkpShapeD53
-{
-  public:
-    virtual void v00();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    unsigned int m_ulUserData;
-    bhkRefObjectD53* m_pkWrapper;
-};
-class hkpShapeContainerD53
-{
-  public:
-    virtual void v00();
-};
-class hkpListShapeD53
-{
-  public:
-    unsigned int unk00;
-    hkpShapeContainerD53 m_kContainer;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    hkArrayD53<hkpShapeD53*> m_kChildShapes;
-};
-class bhkListShapeD53 : public NiObjectD53
-{
-  public:
-    void CopyMembersBase(NiObjectD53* pkDest, NiCloningProcessD53& kCloning);
-    void FUN_00d53a80(NiObjectD53* pkDest, NiCloningProcessD53& kCloning);
-};
-inline hkpListShapeD53* ToListShapeD53(hkpShapeContainerD53* pkContainer)
-{
-    return pkContainer ? reinterpret_cast<hkpListShapeD53*>(reinterpret_cast<char*>(pkContainer) - 4) : 0;
-}
+hkMemoryRouter& __cdecl GetMemoryRouterD53();
 class hkRefObjD549
 {
   public:
@@ -2402,13 +2074,6 @@ struct S_00d49660_Foo
 extern int DAT_010cfb34;
 extern double DAT_01012070;
 int __cdecl FUN_00ec62c0();
-class hkMemoryAllocatorD539
-{
-  public:
-    virtual ~hkMemoryAllocatorD539();
-    virtual void* AllocateMemoryBlock(int);
-    virtual void ReleaseBlock(void*, int);
-};
 struct AllocatorD500
 {
     virtual void v00();
@@ -2432,13 +2097,13 @@ class FUN_00d50c90
     FUN_00d50c90();
     static void* operator new(unsigned int bytes)
     {
-        FUN_00d50c90* p = (FUN_00d50c90*)hkRouterD539::FUN_00c85750().heap().AllocateMemoryBlock(bytes);
+        FUN_00d50c90* p = (FUN_00d50c90*)hkRouterD539::FUN_00c85750().heap().blockAlloc(bytes);
         p->sizeAndFlags = (unsigned short)bytes;
         return p;
     }
     static void operator delete(void* p)
     {
-        hkRouterD539::FUN_00c85750().heap().ReleaseBlock(p, sizeof(FUN_00d50c90));
+        hkRouterD539::FUN_00c85750().heap().blockFree(p, sizeof(FUN_00d50c90));
     }
 };
 struct OwnerD500
@@ -2514,22 +2179,6 @@ struct Mem_d51b
     virtual void v00();
 };
 void __cdecl ResizeAudioStream(void* mem, void* array, int sizeOfElement);
-template <class T> struct hkArray_d51b
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    void AddBack(const T& t)
-    {
-        AllocHolder* router = FUN_00c85750();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(router->m_pAllocator, this, sizeof(T));
-        T* p = &m_data[m_iElementCount];
-        __assume(p != 0);
-        new (p) T(t);
-        m_iElementCount++;
-    }
-};
 struct Info_d51b
 {
     int unk00;
@@ -2537,7 +2186,7 @@ struct Info_d51b
     int m_iSolverResultCount;
     int m_iSolverElementTemporaryCount;
     int unk10, unk14, unk18;
-    hkArray_d51b<int> m_kBridgeAtoms;
+    hkArray<int> m_kBridgeAtoms;
     void add(int schema, int results, int temps)
     {
         m_iSchemaByteSize += schema;
@@ -2759,8 +2408,8 @@ struct FUN_00dd0530
     }
     static void* operator new(unsigned int n)
     {
-        AllocHolder* h = FUN_00c85750();
-        return ((FUN_00dd0530*)((ObjAllocator*)h->m_pAllocator)->Alloc(n))->SetSizeAndGrow(n);
+        hkMemoryRouter* h = FUN_00c85750();
+        return ((FUN_00dd0530*)((ObjAllocator*)h->m_heap)->Alloc(n))->SetSizeAndGrow(n);
     }
     static void operator delete(void*);
 };
@@ -2833,24 +2482,6 @@ inline void SetMemContext35D0(unsigned int m_uiGeometryShaderFlags)
 {
     t_uiMemContext35D0 = m_uiGeometryShaderFlags;
 }
-class AutoMemContext35D0
-{
-  public:
-    AutoMemContext35D0(unsigned int m_uiGeometryShaderFlags)
-    {
-        m_uiPrevious = GetMemContext35D0();
-        SetMemContext35D0(m_uiGeometryShaderFlags);
-    }
-    ~AutoMemContext35D0()
-    {
-        SetMemContext35D0(m_uiPrevious);
-    }
-    unsigned int m_uiPrevious;
-};
-struct hkpWorld35D0
-{
-    bool UpdateEntity(void* m_pHavokObject);
-};
 struct Entity35D0
 {
     int unk000;
@@ -3065,89 +2696,14 @@ struct Entity35D0
     int unk344;
     int unk348;
     int unk34c;
-    hkpWorld35D0* GetWorld() const
+    hkpWorld* GetWorld() const
     {
         return m_pkWorld;
     }
-    hkpWorld35D0* m_pkWorld;
-};
-class bhkWorldObject35D0
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c();
-    virtual void v90();
-    virtual Entity35D0* GetEntity();
-    virtual void v98();
-    virtual void v9c();
-    virtual void va0();
-    virtual void va4();
-    virtual void va8();
-    virtual void vac();
-    virtual void vb0();
-    virtual void vb4();
-    virtual void vb8();
-    virtual void vbc();
-    virtual void vc0();
-    virtual void vc4();
-    virtual void vc8();
-    virtual void vcc();
-    virtual void vd0();
-    virtual void vd4();
-    virtual void OnRemoved(hkpWorld35D0* pkWorld, int iFlags);
-    bool FUN_00d535d0();
-    int unk04;
-    void* m_phkObject;
-};
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-struct hkVector4
-{
-    __m128 m_vComponents;
+    hkpWorld* m_pkWorld;
 };
 typedef signed char hkInt8;
 typedef unsigned char hkUint8;
-struct FinishingFlag
-{
-    int m_bFinishing;
-};
 template <typename ENUM, typename STORAGE> struct hkEnumF
 {
     STORAGE m_kStorage;
@@ -3171,95 +2727,17 @@ __forceinline void memCpyOneAligned(void* dst, const void* src)
         static_cast<unsigned __int64*>(dst)[i] = static_cast<const unsigned __int64*>(src)[i];
     }
 }
-struct hkMemoryAllocatorF
+__forceinline hkMemoryRouter* getRouter()
 {
-    virtual ~hkMemoryAllocatorF();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-};
-struct hkMemoryRouterF
-{
-    int m_unk00;
-    int m_unk04;
-    int m_unk08;
-    int m_unk0C;
-    hkMemoryAllocatorF* m_pStreamAllocator;
-
-    __forceinline hkMemoryAllocatorF& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-__forceinline hkMemoryRouterF* getRouter()
-{
-    return (hkMemoryRouterF*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
-template <typename T> struct hkArrayF
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline hkArrayF(FinishingFlag)
-    {}
-    __forceinline int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline T& operator[](int i)
-    {
-        return m_data[i];
-    }
-
-    __forceinline void _clearAndDeallocate(hkMemoryAllocatorF& alloc)
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-        {
-            alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-        }
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    __forceinline void ClearAndRelease()
-    {
-        _clearAndDeallocate(getRouter()->heap());
-    }
-
-    __forceinline void setDataUserFree(T* p, int size, int capacity)
-    {
-        m_data = p;
-        m_iElementCount = size;
-        m_iCapacityState = capacity | 0x80000000;
-    }
-};
-class hkBaseObjectF
-{
-  public:
-    virtual void __vecDelDtor(unsigned int);
-};
-class hkReferencedObjectF : public hkBaseObjectF
-{
-  public:
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    __forceinline hkReferencedObjectF(FinishingFlag)
-    {}
-};
-class hkpShapeF : public hkReferencedObjectF
+class hkpShapeF : public hkReferencedObject
 {
   public:
     unsigned int m_ulUserData;
     int m_type;
 
-    __forceinline hkpShapeF(FinishingFlag flag) : hkReferencedObjectF(flag)
+    __forceinline hkpShapeF(FinishingFlag flag) : hkReferencedObject(flag)
     {
         if (flag.m_bFinishing)
         {
@@ -3371,8 +2849,8 @@ class FUN_00d56f10 : public hkpShapeCollectionF
     int m_unkA8;
     int m_unkAC;
     int m_unkB0;
-    hkArrayF<TrianglesSubpart> m_kTrianglesSubparts;
-    hkArrayF<ShapesSubpart> m_kShapesSubparts;
+    hkArray<TrianglesSubpart> m_kTrianglesSubparts;
+    hkArray<ShapesSubpart> m_kShapesSubparts;
     int m_unkCC;
     int m_unkD0;
     int m_unkD4;
@@ -3381,7 +2859,7 @@ class FUN_00d56f10 : public hkpShapeCollectionF
     int m_iFinishingFlag;
 
     FUN_00d56f10(FinishingFlag flag);
-    virtual void __vecDelDtor(unsigned int);
+    virtual ~FUN_00d56f10();
 };
 struct InputBuffer
 {
@@ -3412,37 +2890,9 @@ struct LoadResult
 };
 void FUN_00d5a630(InputBuffer*, LoadResult*, unsigned int);
 void LoadIntoArray(const InputBuffer* src, unsigned int flags, ArrayData* dst);
-class hkMemoryAllocatorD47F
-{
-  public:
-    virtual ~hkMemoryAllocatorD47F() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void* AllocateBufferWithSize(int& iReqNumBytes) throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
-struct hkMemoryRouterD47F
-{
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorD47F* m_pStreamAllocator;
-    hkMemoryAllocatorD47F& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
 namespace hkRouterD47F {
-extern "C" hkMemoryRouterD47F& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
-class hkStringPtrD47F
-{
-  public:
-    const char* m_pcText;
-    void FUN_00cb0c00() throw();
-    ~hkStringPtrD47F()
-    {
-        FUN_00cb0c00();
-    }
-};
 template <class T> class hkRefPtrD47F
 {
   public:
@@ -3456,8 +2906,8 @@ template <class T> class hkRefPtrD47F
 };
 struct hkNamedVariantD47F
 {
-    hkStringPtrD47F m_name;
-    hkStringPtrD47F m_pClassName;
+    hkStringPtr m_name;
+    hkStringPtr m_pClassName;
     hkRefPtrD47F<hkReferencedObject> m_pReferencedResource;
 };
 namespace hkArrayUtilD47F {
@@ -3467,46 +2917,6 @@ template <class T> __forceinline void destruct(T* t, int numElements)
         t[i].~T();
 }
 }
-template <class T> class hkArrayD47F
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    enum
-    {
-        CAPACITY_MASK = 0x3fffffff,
-        DONT_DEALLOCATE_FLAG = 0x80000000
-    };
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & CAPACITY_MASK;
-    }
-
-    __forceinline void _clearAndDeallocate(hkMemoryAllocatorD47F& alloc)
-    {
-        hkArrayUtilD47F::destruct(m_data, m_iElementCount);
-        m_iElementCount = 0;
-        if ((m_iCapacityState & DONT_DEALLOCATE_FLAG) == 0)
-            alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = DONT_DEALLOCATE_FLAG;
-    }
-
-    ~hkArrayD47F()
-    {
-        _clearAndDeallocate(hkRouterD47F::FUN_00c85750().heap());
-    }
-
-    static void operator delete(void* p, unsigned int nbytes)
-    {
-        hkRouterD47F::FUN_00c85750().heap().ReleaseBlock(p, nbytes);
-    }
-
-    hkArrayD47F* Destroy(unsigned int uiFlags);
-};
 struct C
 {
     C();
@@ -3566,14 +2976,6 @@ struct C
     short unkb2;
     volatile unsigned short fb4;
 };
-struct FnvCpu_FUN_00d541b0_CpuData0
-{
-    __m128 field00;
-};
-struct FnvCpu_FUN_00d541b0_CpuData1
-{
-    __m128 field00;
-};
 struct FnvCpu_FUN_00d541b0_CpuObject
 {
     unsigned int unk00;
@@ -3586,16 +2988,12 @@ struct FnvCpu_FUN_00d541b0_CpuObject
     unsigned int unk1c;
     __m128 field20;
     __m128 field30;
-    void FUN_00d541b0(FnvCpu_FUN_00d541b0_CpuData0* input0, FnvCpu_FUN_00d541b0_CpuData1* input1);
-};
-struct FnvCpu_FUN_00d54e40_CpuData0
-{
-    __m128 field00;
+    void FUN_00d541b0(hkVector4* input0, hkVector4* input1);
 };
 struct FnvCpu_FUN_00d54e40_CpuObject
 {
     __m128 field00;
-    void CopyFrom(FnvCpu_FUN_00d54e40_CpuData0* input0);
+    void CopyFrom(hkVector4* input0);
 };
 // sub ecx,0x10; jmp FUN_00d57120
 // MSVC adjustor thunk: a class derives from two bases that both declare the same
@@ -3620,34 +3018,27 @@ struct Derived : PrimaryBase, SecondaryBase
 };
 Derived::Derived()
 {}
-struct VectorS
-{
-    __m128 m_vComponents;
-    VectorS(const VectorS& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-struct DataS
+// Constraint command storage has vector/command arrays at 0x10/0x1c; shared Data is 0x10 bytes.
+struct ConstraintCommandStorage
 {
     int unk00;
     int unk04;
     int unk08;
     int unk0c;
-    d51::hkArray<VectorS> vectors;
-    d51::hkArray<int> commands;
+    hkArray<hkVector4> vectors;
+    hkArray<int> commands;
 };
 struct OwnerS
 {
     int unk00;
-    DataS* data;
+    ConstraintCommandStorage* data;
     int unk08;
     int unk0c;
     char unk10;
     char unk11;
     char unk12;
     unsigned char flags[5];
-    int FUN_00d51970(const VectorS& value, int index);
+    int FUN_00d51970(const hkVector4& value, int index);
 };
 struct S
 {
@@ -3661,13 +3052,6 @@ volatile S* g_src;
 volatile int g_b;
 volatile int g_c;
 void caller();
-class hkStringPtr
-{
-  public:
-    const char* m_pcText;
-
-    void operator=(const char* pcString) throw();
-};
 class FUN_00cb0a60 : public hkStringPtr
 {
   public:
@@ -3716,20 +3100,6 @@ class FUN_00d48250
 
     FUN_00d48250(const char* pcName, int iParam) throw();
 };
-namespace SpringSimd {
-union __declspec(intrin_type) __m128
-{
-    struct
-    {
-        float x;
-        float y;
-        float z;
-        float w;
-    } lanes;
-};
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" void _mm_store_ps(float*, __m128);
-}
 struct S_00d4f0f0_B1
 {
     virtual void v0();
@@ -3774,62 +3144,15 @@ struct FUN_00d4f0f0 : S_00d4f0f0_B2
     FUN_00d4f0f0();
     virtual void v0();
 };
-namespace D4F2A0Simd {
-union __declspec(intrin_type) __m128
+inline void setZero4(hkVector4& v)
 {
-    struct
-    {
-        float x, y, z, w;
-    };
-};
-extern "C" __m128 _mm_setzero_ps();
-extern "C" void _mm_store_ps(float*, __m128);
+    _mm_store_ps(&v.x, _mm_setzero_ps());
 }
-struct __declspec(align(16)) D4F2A0Vector
-{
-    float x, y, z, w;
-};
-struct hkBaseObjectS
-{
-    virtual void unk00();
-};
-struct hkReferencedObjectS : hkBaseObjectS
-{
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    hkReferencedObjectS() : m_sReferenceCount(1)
-    {}
-};
-struct hkpConstraintDataS : hkReferencedObjectS
-{
-    unsigned int m_ulUserData;
-    hkpConstraintDataS() : m_ulUserData(0)
-    {}
-};
-inline void setZero4(D4F2A0Vector& v)
-{
-    D4F2A0Simd::_mm_store_ps(&v.x, D4F2A0Simd::_mm_setzero_ps());
-}
-struct hkRotationS
-{
-    D4F2A0Vector m_kColumn0;
-    D4F2A0Vector m_kColumn1;
-    D4F2A0Vector m_kColumn2;
-    void setIdentity()
-    {
-        setZero4(m_kColumn0);
-        setZero4(m_kColumn1);
-        setZero4(m_kColumn2);
-        m_kColumn0.x = 1.0f;
-        m_kColumn1.y = 1.0f;
-        m_kColumn2.z = 1.0f;
-    }
-};
 struct hkpSetLocalRotationsAtomS
 {
     unsigned short m_type;
-    hkRotationS m_kRotationA;
-    hkRotationS m_kRotationB;
+    hkRotation m_kRotationA;
+    hkRotation m_kRotationB;
     hkpSetLocalRotationsAtomS()
     {
         m_type = 4;
@@ -3877,7 +3200,7 @@ struct hkpRagdollAtomsS
     hkpRagdollAtomsS()
     {}
 };
-struct hkpRagdollDataS : hkpConstraintDataS
+struct hkpRagdollDataS : hkpConstraintData
 {
     void setConeStab(hkBool b);
 };
@@ -3898,9 +3221,9 @@ struct Matrix
     float m20, m21, m22, m23;
     __forceinline void setZero()
     {
-        ::D4F2A0Simd::_mm_store_ps(&m00, ::D4F2A0Simd::_mm_setzero_ps());
-        ::D4F2A0Simd::_mm_store_ps(&m10, ::D4F2A0Simd::_mm_setzero_ps());
-        ::D4F2A0Simd::_mm_store_ps(&m20, ::D4F2A0Simd::_mm_setzero_ps());
+        ::_mm_store_ps(&m00, ::_mm_setzero_ps());
+        ::_mm_store_ps(&m10, ::_mm_setzero_ps());
+        ::_mm_store_ps(&m20, ::_mm_setzero_ps());
     }
     __forceinline void setDiagonal(float x, float y, float z)
     {
@@ -3967,7 +3290,6 @@ struct FUN_00d54290
     volatile float m_float44;
     FUN_00d54290();
 };
-extern "C" ::D4F2A0Simd::__m128 _mm_setr_ps(float x, float y, float z, float w);
 static const float DAT_010181bc = 0.05f;
 static const float DAT_01011d78 = 0.0f;
 static const float DAT_01017870 = 0.3f;
@@ -3982,7 +3304,7 @@ struct FUN_00d54de0
 {
     FUN_00d54de0();
 
-    ::D4F2A0Vector m_vector;
+    ::hkVector4 m_vector;
     float m_value10;
     float m_value14;
     float m_value18;
@@ -3991,41 +3313,6 @@ struct FUN_00d54de0
     char m_flag1E;
     char m_flag1F;
     char m_flag20;
-};
-
-namespace N {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_setr_ps(float, float, float, float);
-}
-}
-
-struct RecordVector
-{
-    union
-    {
-        N::__m128 quad;
-        float component[4];
-    };
-    __forceinline void set(float x, float y, float z, float w)
-    {
-        quad = N::_mm_setr_ps(x, y, z, w);
-    }
-    __forceinline RecordVector()
-    {}
-    __forceinline RecordVector(const RecordVector& other)
-    {
-        quad = other.quad;
-    }
-    __forceinline void operator=(const RecordVector& other)
-    {
-        quad = other.quad;
-    }
 };
 
 template <class T> __forceinline void CopyItems(T* destination, int count, const T& item)
@@ -4044,9 +3331,9 @@ template <class T> struct RecordQueue
     }
     __forceinline void AddBack(const T& item)
     {
-        AllocHolder* arena = FUN_00c85750();
+        hkMemoryRouter* arena = FUN_00c85750();
         if (count == (capacity & 0x3fffffff))
-            ResizeAudioStream(arena->m_pAllocator, this, sizeof(T));
+            ResizeAudioStream(arena->m_heap, this, sizeof(T));
         CopyItems(data + count, 1, item);
         ++count;
     }
@@ -4054,7 +3341,7 @@ template <class T> struct RecordQueue
 struct ConstraintState
 {
     int unk00, unk04, unk08, unk0C;
-    RecordQueue<RecordVector> values;
+    RecordQueue<hkVector4> values;
     RecordQueue<int> events;
 };
 struct ConstraintBuilder
@@ -4069,21 +3356,13 @@ int ConstraintBuilder::FUN_00d52ae0(float value)
 {
     ++count;
     state->events.AddBack(0x16);
-    RecordVector record;
+    hkVector4 record;
     record.set(value, 0.0f, 0.0f, 0.0f);
     int result = state->values.GetLogicalSize();
     state->values.AddBack(record);
     return result;
 }
 
-extern "C"
-{
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-}
 extern const void* DAT_010d0fc4[];
 extern "C" void _ReadWriteBarrier();
 struct Scalar380
@@ -4098,26 +3377,10 @@ struct Scalar380
         return _mm_shuffle_ps(value, value, 0);
     }
 };
-struct Vector380
+inline void MultiplyVector(hkVector4& vector, const Scalar380& scalar)
 {
-    __m128 value;
-    void SetSub(const Vector380& a, const Vector380& b)
-    {
-        value = _mm_sub_ps(a.value, b.value);
-    }
-    void SetAdd(const Vector380& a, const Vector380& b)
-    {
-        value = _mm_add_ps(a.value, b.value);
-    }
-    void Multiply(const Scalar380& scalar)
-    {
-        value = _mm_mul_ps(scalar.Broadcast(), value);
-    }
-};
-struct Bounds380
-{
-    Vector380 minimum, maximum;
-};
+    vector.m_vComponents = _mm_mul_ps(scalar.Broadcast(), vector.m_vComponents);
+}
 struct ConvexBase380
 {
     const void** vtable;
@@ -4137,7 +3400,7 @@ template <class T> struct Array380
 };
 struct TransposedPoints380
 {
-    Vector380 x, y, z;
+    hkVector4 x, y, z;
 };
 struct PointArray380
 {
@@ -4154,41 +3417,26 @@ struct PointArray380
 
 struct FUN_00d59760 : ConvexBase380
 {
-    Vector380 halfExtents, center;
+    hkVector4 halfExtents, center;
     PointArray380 vertices;
     int vertexCount;
     unsigned int unk50;
-    Array380<Vector380> planes;
+    Array380<hkVector4> planes;
     void* connectivity;
 
-    FUN_00d59760(TransposedPoints380*, int, Vector380*, int, const Bounds380&, float);
+    FUN_00d59760(TransposedPoints380*, int, hkVector4*, int, const hkAabb&, float);
 };
 // @fnv 0x00d59760
-FUN_00d59760::FUN_00d59760(TransposedPoints380* vertexData, int count, Vector380* planeData, int planeCount,
-                           const Bounds380& bounds, float r)
+FUN_00d59760::FUN_00d59760(TransposedPoints380* vertexData, int count, hkVector4* planeData, int planeCount,
+                           const hkAabb& bounds, float r)
     : ConvexBase380(r), vertices((vtable = DAT_010d0fc4, references = 1, vertexData), count), vertexCount(count),
       unk50(0), planes(planeData, planeCount), connectivity(0)
 {
-    halfExtents.SetSub(bounds.maximum, bounds.minimum);
-    halfExtents.Multiply(0.5f);
-    center.SetAdd(bounds.minimum, bounds.maximum);
-    center.Multiply(0.5f);
+    halfExtents.setSub4(bounds.m_kMaximumCorner, bounds.m_kMinimumCorner);
+    MultiplyVector(halfExtents, 0.5f);
+    center.setAdd4(bounds.m_kMinimumCorner, bounds.m_kMaximumCorner);
+    MultiplyVector(center, 0.5f);
 }
-
-namespace AngularFrictionIntrinsics {
-extern "C" ::D4F2A0Simd::__m128 _mm_setr_ps(float, float, float, float);
-extern "C" ::D4F2A0Simd::__m128 _mm_load_ps(const float*);
-}
-
-struct AngularFrictionRecord : ::D4F2A0Vector
-{
-    AngularFrictionRecord()
-    {}
-    AngularFrictionRecord(const AngularFrictionRecord& other)
-    {
-        ::D4F2A0Simd::_mm_store_ps(&x, AngularFrictionIntrinsics::_mm_load_ps(&other.x));
-    }
-};
 
 struct AngularFrictionBudget
 {
@@ -4206,8 +3454,8 @@ struct AngularFrictionBudget
 struct AngularFrictionState
 {
     AngularFrictionBudget budget;
-    d51::hkArray<AngularFrictionRecord> records;
-    d51::hkArray<int> values;
+    hkArray<hkVector4> records;
+    hkArray<int> values;
 };
 struct AngularFrictionWriter
 {
@@ -4218,19 +3466,39 @@ struct AngularFrictionWriter
 // @fnv 0x00d528e0
 int AngularFrictionWriter::FUN_00d528e0(unsigned char value, float f)
 {
-    state->values.AddBack(0x14);
-    state->values.AddBack(value);
-    AngularFrictionRecord tmp;
-    ::D4F2A0Simd::_mm_store_ps(&tmp.x, AngularFrictionIntrinsics::_mm_setr_ps(f, 0.0f, 0.0f, 0.0f));
+    d51::AddBack(state->values, 0x14);
+    d51::AddBack(state->values, value);
+    __declspec(align(16)) struct { unsigned __int64 low, high; } tmpStorage;
+    hkVector4& tmp = *reinterpret_cast<hkVector4*>(&tmpStorage);
+    ::_mm_store_ps(&tmp.x, _mm_setr_ps(f, 0.0f, 0.0f, 0.0f));
     int result = state->records.m_iElementCount;
-    state->records.AddBack(tmp);
+    d51::AddBack(state->records, tmp);
     state->budget.add(0x30, 1, 2);
     return result;
 }
 
+
+// The MOPP path still needs this scalar-field representation: adopting hkVector4
+// changes FUN_00d54a40 from 642 bytes to 679 bytes with VC9 RTM.
+namespace D4F2A0Simd {
+// Exe 0x00d54a40 FUN_00d54a40: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) {
+    struct
+    {
+        float x, y, z, w;
+    };
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setzero_ps();
+extern "C" void _mm_store_ps(float*, LocalM128);
+}
+struct __declspec(align(16)) D4F2A0Vector
+{
+    float x, y, z, w;
+};
 namespace MoppBuildSimd {
-extern "C" ::D4F2A0Simd::__m128 _mm_load_ps(const float*);
-extern "C" ::D4F2A0Simd::__m128(_mm_setr_ps)(float, float, float, float);
+extern "C" ::D4F2A0Simd::LocalM128 _mm_load_ps(const float*);
+extern "C" ::D4F2A0Simd::LocalM128(_mm_setr_ps)(float, float, float, float);
 }
 
 typedef ::D4F2A0Vector hkQuadReal;
@@ -4260,7 +3528,7 @@ struct Sub3
 
     __forceinline Sub3() : f0(0.5f), f1(0.2f), f2(1.0f), i20(5), b24(true)
     {
-        __declspec(align(16))::D4F2A0Simd::__m128 q = MoppBuildSimd::_mm_setr_ps(0.2f, 0.2f, 0.05f, 0.0f);
+        __declspec(align(16))::D4F2A0Simd::LocalM128 q = MoppBuildSimd::_mm_setr_ps(0.2f, 0.2f, 0.05f, 0.0f);
         v = *reinterpret_cast<const hkQuadReal*>(&q);
     }
 };
@@ -4320,13 +3588,6 @@ struct StackAllocator
     virtual void deallocate(void* ptr, int size);
 };
 
-class MyHkError : public ::hkErrorD53
-{
-  public:
-    virtual void SetErrorCodeEnabled(int id, ::hkBool enable);
-    virtual ::hkBool isEnabled(int id);
-};
-
 __forceinline void DisableSub2Tail(FUN_00dd5150_Class& sub2, ::hkBool bNoFirst, const Arg2Struct* arg2)
 {
     if (bNoFirst || arg2->m_1e)
@@ -4342,13 +3603,8 @@ struct SearchCall_d54a40
 
 __forceinline void ReportResults(::SearchObject* s3, int* data, int size)
 {
-    ::AllocHolder* alloc = FUN_00c85750();
-    ((SearchCall_d54a40*)s3)->Search((unsigned int)alloc->m_pAllocator, 0, (unsigned int)data, size);
-}
-
-__forceinline MyHkError& GetHkError()
-{
-    return *(MyHkError*)DAT_01268360;
+    ::hkMemoryRouter* alloc = FUN_00c85750();
+    ((SearchCall_d54a40*)s3)->Search((unsigned int)alloc->m_heap, 0, (unsigned int)data, size);
 }
 
 // @fnv 0x00d54a40
@@ -4399,8 +3655,8 @@ void* __cdecl FUN_00d54a40(void* arg0, void* arg1, Arg2Struct* arg2, ::SearchObj
     }
 
     int size = big_obj.ComputeRequiredSize(arg0);
-    ::AllocHolder* a = FUN_00c85750();
-    buffer = ((StackAllocator*)a->unk0c)->allocate(size);
+    ::hkMemoryRouter* a = FUN_00c85750();
+    buffer = ((StackAllocator*)a->m_temp)->allocate(size);
 
     FUN_00d549d0_Class struct4c;
     struct4c.m_00 = 0x200;
@@ -4418,12 +3674,13 @@ void* __cdecl FUN_00d54a40(void* arg0, void* arg1, Arg2Struct* arg2, ::SearchObj
         big_obj.m_ptr4 = &struct4c;
     }
 
-    ::hkBool prevWarning = ((MyHkError*)DAT_01268360)->isEnabled(0x7dd65995);
-    GetHkError().SetErrorCodeEnabled(0x7dd65995, false);
+    ::hkBool prevWarning = DAT_01268360->isEnabled(0x7dd65995);
+    hkError* error = DAT_01268360;
+    error->setEnabled(0x7dd65995, false);
 
     void* retVal = big_obj.FUN_00dd4cb0(arg0, buffer, size);
 
-    ((MyHkError*)DAT_01268360)->SetErrorCodeEnabled(0x7dd65995, prevWarning);
+    DAT_01268360->setEnabled(0x7dd65995, prevWarning);
 
     ::SearchObject* s3 = arg3;
     if (s3 != 0)
@@ -4431,8 +3688,8 @@ void* __cdecl FUN_00d54a40(void* arg0, void* arg1, Arg2Struct* arg2, ::SearchObj
         ReportResults(s3, struct4c.m_arr1_data, struct4c.m_arr1_size);
     }
 
-    ::AllocHolder* a2 = FUN_00c85750();
-    ((StackAllocator*)a2->unk0c)->deallocate(buffer, size);
+    ::hkMemoryRouter* a2 = FUN_00c85750();
+    ((StackAllocator*)a2->m_temp)->deallocate(buffer, size);
 
     struct4c.ClearArrays();
     big_obj.FUN_00dd4b00();

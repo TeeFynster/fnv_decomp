@@ -1,11 +1,8 @@
+#include "../../../../../include/hkStringPtr.h"
 
 // src/havok/common/compat/deprecated/hkserializedeprecated.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/compat/deprecated/hkserializedeprecated.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkStringPtr
-{
-    void operator=(const char*);
-};
 // @fnv 0x00dba5f0
 int __stdcall FUN_00dba5f0(int aiUnused1, int aiUnused2, int c)
 {

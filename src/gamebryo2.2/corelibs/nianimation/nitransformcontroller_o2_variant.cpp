@@ -2,12 +2,43 @@
 // src/gamebryo2.2/corelibs/nianimation/nitransformcontroller_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/nianimation/nitransformcontroller.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/StrArr.h"
+#define FNV_V4_UNALIGNED
+#include "../../../../include/V4.h"
+#include <string.h>
+
+// The generated animation headers must use the shared base and container types.
+#define FNV_LAYOUT_SUPPORT_H
+#define FNV_NIOBJECT_H
+#define FNV_NIOBJECTNET_H
+#define FNV_NIPOINT3_H
+#define FNV_NIFIXEDSTRING_H
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+template <class K, class V> class NiTPointerMap;
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
+
 #include "nitransformcontroller_nimemobject_decl.h"
 #include "nitransformcontroller_types_NiCloningProcess.h"
 #include "nitransformcontroller_types_NiBoolInterpController.h"
 #include "nitransformcontroller_types_NiTransformInterpolator.h"
 #include "nitransformcontroller_types_NiControllerSequence__IDTag.h"
 #include "nitransformcontroller_stream_decl.h"
+
+// Preserve the generated animation code's inline reference-count operations.
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
 
 struct RefObj
 {
@@ -76,16 +107,6 @@ void* __cdecl FUN_00a36580()
 }
 
 namespace fnv_00a36840 {
-struct StrArr
-{
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-    char _pad[8];
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usPad;
-    unsigned short m_usGrowBy;
-};
 void __stdcall FUN_00a390a0(StrArr*);
 char* __cdecl FUN_00a7d330(const char*);
 extern const char* g_011f36ec;
@@ -101,24 +122,19 @@ void __stdcall FUN_00a36840(StrArr* pkStrings)
 }
 }  // namespace fnv_00a36840
 
-class ThreeByThreeMatrix
+// NiQuatTransform parts copied as plain words, as the POD assignments of the original do.
+struct Point3Words
 {
-    float m_afEntries[3][3];
+    unsigned int w[3];
 };
-
-struct NiAVObject
+struct QuatWords
 {
-    char _pad[0x34];
-    ThreeByThreeMatrix m_kRotate;
-    NiPoint3 m_kTranslate;
-    float m_fScale;
+    unsigned int w[4];
 };
-
-struct BSFadeNode
-{
-    static void* operator new(unsigned int size);
-};
-
+__forceinline NiQuaternion::NiQuaternion()
+{}
+__forceinline NiQuatTransform::NiQuatTransform()
+{}
 struct S00a36100
 {
     char _pad[0x2c];
@@ -132,21 +148,13 @@ NiTransformInterpolator* S00a36100::FUN_00a36100(unsigned short usIndex)
 {
     NiAVObject* pkTarget = m_spReferencedObject;
     NiQuaternion kRotate;
-    kRotate.FromRotationMatrix(pkTarget->m_kRotate);
+    kRotate.FromRotationMatrix(pkTarget->m_kLocal.m_Rotate);
     NiQuatTransform kTransform;
-    kTransform.m_fScale = pkTarget->m_fScale;
-    kTransform.m_kTranslate = pkTarget->m_kTranslate;
-    kTransform.m_kRotate = kRotate;
+    kTransform.scale = pkTarget->m_kLocal.m_fScale;
+    *reinterpret_cast<Point3Words*>(&kTransform.x) = *reinterpret_cast<const Point3Words*>(&pkTarget->m_kLocal.m_Translate);
+    *reinterpret_cast<QuatWords*>(&kTransform.qx) = *reinterpret_cast<const QuatWords*>(&kRotate);
 
-    NiTransformInterpolator* pInterp =
-        (NiTransformInterpolator*)BSFadeNode::operator new(sizeof(NiTransformInterpolator));
-    if (pInterp)
-    {
-        typedef NiTransformInterpolator* (__thiscall NiTransformInterpolator::*CtorFn)(NiQuatTransform);
-        CtorFn pfn = reinterpret_cast<CtorFn>(&NiTransformInterpolator::FUN_00a3fae0);
-        return (pInterp->*pfn)(kTransform);
-    }
-    return 0;
+    return new NiTransformInterpolator(kTransform);
 }
 
 struct FUN_00a2f8a0_Holder
@@ -174,10 +182,10 @@ void FUN_00a38ef0_Class::FUN_00a38ef0(FUN_00a38ef0_Class* pkDest, CloningProcess
         if (pkOld != pkNew)
         {
             if (pkOld != 0)
-                pkOld->DecRefCount();
+                pkOld->NiRefObject::DecRefCount();
             pkDest->m_spControllerInterpolator = pkNew;
             if (pkNew != 0)
-                pkNew->IncRefCount();
+                pkNew->NiRefObject::IncRefCount();
         }
     }
 }
@@ -257,14 +265,6 @@ struct V3
     float f2;
 };
 
-struct V4
-{
-    float f0;
-    float f1;
-    float f2;
-    float f3;
-};
-
 struct FUN_00a364b0_cls
 {
     virtual void vf00();
@@ -283,7 +283,7 @@ void FUN_00a364b0_cls::FUN_00a364b0(V3 aT0, V4 aR0, float fScale)
 {
     if (aR0.f1 != DAT_010241b0)
     {
-        m_r = aR0;
+        memcpy(&m_r, &aR0, sizeof(m_r));
         _ReadWriteBarrier();
         if (unk2c)
             unk2c->FUN_00a4e2e0(0, 0, 0);
@@ -328,6 +328,7 @@ struct A36590Matrix3
     float m_pEntry22;
 };
 
+// local form of NiQuaternion: 0x00a36590 needs the local ctor/assignment split; the shared form changes bytes.
 struct A36590Quaternion
 {
     float m_fVectorX;
@@ -350,27 +351,6 @@ class A36590Object
     A36590Object* DynamicCast(const A36590RTTI* pkRTTI);
 };
 
-class A36590AVObject : public A36590Object
-{
-  public:
-    void* m_pVtbl;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    A36590Matrix3 m_kRotate;
-    A36590Point3 m_kTranslate;
-    float m_fScale;
-};
-
 class A36590Node : public A36590Object
 {
   public:
@@ -391,7 +371,7 @@ class A36590Controller
     int unk20;
     int unk24;
     int unk28;
-    A36590AVObject* m_pkSource;
+    NiAVObject* m_pkSource;
 
     void FUN_00a36590(A36590Object* pkObject, int iUnused);
 };
@@ -400,15 +380,15 @@ class A36590Controller
 void A36590Controller::FUN_00a36590(A36590Object* pkObject, int iUnused)
 {
     A36590Node* pkNode = !pkObject ? 0 : (A36590Node*)pkObject->DynamicCast(&g_kA36590NodeRTTI);
-    A36590AVObject* pkSource = m_pkSource;
+    NiAVObject* pkSource = m_pkSource;
 
     A36590Quaternion kRotate;
-    kRotate.FromRotationMatrix(pkSource->m_kRotate);
+    kRotate.FromRotationMatrix(reinterpret_cast<const A36590Matrix3&>(pkSource->m_kLocal.m_Rotate));
 
     A36590QuatTransform kTransform;
-    kTransform.m_kTranslate = pkSource->m_kTranslate;
+    kTransform.m_kTranslate = reinterpret_cast<const A36590Point3&>(pkSource->m_kLocal.m_Translate);
     kTransform.m_kRotate = kRotate;
-    kTransform.m_fScale = pkSource->m_fScale;
+    kTransform.m_fScale = pkSource->m_kLocal.m_fScale;
     pkNode->SetTargetTransform(kTransform);
 }
 
@@ -568,17 +548,17 @@ void TransformCtl_t::FUN_00a36680(UpdData_00a36680& UpdateData)
     {
         QuatXf_00a36680 kTransform;
         kTransform.m_kTranslate = DAT_011a8400;
-        kTransform.m_kRotate = DAT_011f3704;
+        *reinterpret_cast<QuatWords*>(&kTransform.m_kRotate) = *reinterpret_cast<const QuatWords*>(&DAT_011f3704);
         kTransform.m_fScale = DAT_01096b8c;
         if (spInterp->Update(*(float*)((char*)this + 0x28), *(void**)((char*)this + 0x2c), &kTransform))
         {
             NiAVObject* pkTarget = *(NiAVObject**)((char*)this + 0x2c);
             if (kTransform.m_kTranslate.x != -3.4028234663852886e+38)
-                pkTarget->m_kTranslate = kTransform.m_kTranslate;
+                pkTarget->m_kLocal.m_Translate = kTransform.m_kTranslate;
             if (kTransform.m_kRotate.m_fVectorY != -3.4028234663852886e+38)
-                kTransform.m_kRotate.ToRotationMatrix(pkTarget->m_kRotate);
+                kTransform.m_kRotate.ToRotationMatrix(pkTarget->m_kLocal.m_Rotate);
             if (kTransform.m_fScale != -3.4028234663852886e+38)
-                pkTarget->m_fScale = fabs(kTransform.m_fScale);
+                pkTarget->m_kLocal.m_fScale = fabs(kTransform.m_fScale);
         }
     }
 }

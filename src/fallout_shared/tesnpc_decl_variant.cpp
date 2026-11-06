@@ -1,9 +1,67 @@
+// the shared NiTArray first: NiNode.h then takes it (its own copy is only for units without one)
+#include "../../include/NiTArray.h"
 
 // src/fallout_shared/tesnpc_decl_variant.cpp - declaration variant unit created 2026-10-26 by decl_variants.py for paused function 0x006047c0: the skeleton of src/fallout_shared/tesnpc.cpp
-// with declarations corrected to what the original code does (tesnpc_pc_decls.h: TESNPC += void FUN_006047c0(TESObjectREFR* pRef, bool b1, bool b2, bool b3, bool b4);). Move the function to its real unit once
+// with declarations corrected to what the original code does (TESNPC += void FUN_006047c0(TESObjectREFR* pRef, bool b1, bool b2, bool b3, bool b4);). Move the function to its real unit once
 // that unit declares it this way.
 
-#include "tesnpc_pc_decls_decl_tesnpc.h"
+// Shared headers use the Windows types.
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "../../include/BaseProcess.h"
+#include "../../include/Actor.h"
+#include "../../include/ActorBaseAttributes.h"
+#include "../../include/ActorSkillData.h"
+#include "../../include/BGSBipedModelList.h"
+#include "../../include/BGSDestructibleObjectForm.h"
+#include "../../include/BGSHeadPart.h"
+#include "../../include/BGSListForm.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/BGSTouchSpellForm.h"
+#include "../../include/BSFaceGenAnimationData.h"
+#include "../../include/BSFaceGenNiNode.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/CombatController.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/ExtraDismemberedLimbs.h"
+#include "../../include/MagicCaster.h"
+#include "../../include/MobileObject.h"
+#include "../../include/NiControllerManager.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/TESAIForm.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESAnimation.h"
+#include "../../include/TESAttributes.h"
+#include "../../include/TESBipedModelForm.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESClass.h"
+#include "../../include/TESCombatStyle.h"
+#include "../../include/TESContainer.h"
+#include "../../include/TESEyes.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESHair.h"
+#include "../../include/TESHealthForm.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESNPC.h"
+#include "../../include/TESObjectARMO.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESObjectWEAP.h"
+#include "../../include/TESPackage.h"
+#include "../../include/TESRace.h"
+#include "../../include/TESRaceForm.h"
+#include "../../include/TESScriptableForm.h"
+#include "../../include/TESSpellList.h"
+#include "../../include/TESTopic.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/InventoryChanges.h"
+#include "../../include/InventoryStackRecord.h"
+
+extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
 // @fnv 0x006047c0
 void TESNPC::FUN_006047c0(TESObjectREFR* a2, bool a3, bool a4, bool a5, bool a6)

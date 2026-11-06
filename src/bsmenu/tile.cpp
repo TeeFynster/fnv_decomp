@@ -1,14 +1,37 @@
-// bsmenu/tile.cpp: Tile, Tile__FloatAction, LoadingMenu, TileListBoxCalls and more (86 functions)
+#include "../../include/BSSimpleArray.h"
+// bsmenu/tile.cpp: Tile, Tile__FloatAction, LoadingMenu, TileListBoxCalls_tile and more (86 functions)
+#include "../../include/Tile__FloatAction.h"
+// TileListBoxCalls_tile: local type (was include/TileListBoxCalls.h, which had no evidence of one real class); its methods are 0x00a011b0 Tile::GetFloat
+#include "../../include/Tile.h"
+#include "../../include/Tile3D.h"
+#include "../../include/NiTMapItem.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTPointerAllocator.h"
+#include "../../include/NiTPointerListBase.h"
+#include "../../include/NiTPointerList.h"
 
-#include "Tile__FloatAction.h"
+class TileListBoxCalls_tile : public Tile
+{
+  public:
+    float GetFloat(int trait);
+};
+#include "../../include/NiColorA.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/StrMem.h"
+#include "../../include/TileText.h"
+#include "../../include/Menu.h"
+#include "../../include/LoadingMenu.h"
+#include "../../include/VATSMenu.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiFixedString.h"
+
+struct _RTL_CRITICAL_SECTION;
 
 // @fnv 0x00a0c000
 float Tile__FloatAction::GetStoredFloatValue()
 {
     return fValue;
 }
-
-#include "tile_packet_decls.h"
 
 // @fnv 0x00a01530
 float Tile::GetInterfaceScale()
@@ -47,16 +70,17 @@ bool Tile::IsMenuRendered()
     Menu* menu=GetMenu(); bool rendered=menu->m_bIsSpecial; return rendered;
 }
 
-// Returns true if the bit at position trait is set in floatFlags.
+// Returns true if the bit at position trait is set in usFlags.
 // @fnv 0x00458110
-bool LoadingMenu::GetFloat(int trait) { return (floatFlags & (1 << trait)) != 0; }
+bool LoadingMenu::GetFloat(int trait) { return (usFlags & (1 << trait)) != 0; }
 
 // Returns the element of the given list item and advances pos to the item's previous node.
 // @fnv 0x00683520
-Tile*& NiTPointerList<Tile*>::GetPrev(NiTListItem<Tile*>*& pos)
+template <>
+Tile* const& NiTPointerListBase<NiTPointerAllocator<unsigned int>, Tile*>::GetPrev(void*& pos) const
 {
-    Tile*& result=pos->m_element;
-    pos=pos->m_pkPrev;
+    Tile* const& result=static_cast<NiTListItem<Tile*>*>(pos)->m_element;
+    pos=static_cast<NiTListItem<Tile*>*>(pos)->m_pkPrev;
     return result;
 }
 
@@ -69,49 +93,23 @@ void Tile::Set(int trait,unsigned int value)
 
 // Returns the float value of the tile's value for the given trait, or 0.0f if no such value exists.
 // @fnv 0x00a011b0
-float TileListBoxCalls::GetFloat(int trait)
+float TileListBoxCalls_tile::GetFloat(int trait)
 {
-    Tile::Value* value=((Tile*)this)->GetValue(trait);
+    Tile::Value* value=GetValue(trait);
     if (value) { float result=value->fValue; return result; }
     return 0.0f;
 }
 
-struct NiStream;
-struct blob8 { char b[8]; };
-struct NiPoint2 {
-    static struct blob8 ComponentProduct(void*, void*);
-    float Length();
-    float SqrLength();
-    float Dot(void*);
-    float Unitize();
-    static void LoadBinary(NiStream*, NiPoint2*, unsigned int);
-    void LoadBinary(NiStream*);
-    static void SaveBinary(NiStream*, NiPoint2*, unsigned int);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    float x;
-    float y;
-};
 typedef char _sizecheck_NiPoint2[sizeof(NiPoint2) == 8 ? 1 : -1];
-struct FUN_004e8880_shell : public NiPoint2 {
-    struct blob8 Subtract();
-};
-
-namespace fnv_anon_tile {} using namespace fnv_anon_tile; namespace fnv_anon_tile {
-struct NiPoint2_Sub : public NiPoint2 {
-    NiPoint2* Subtract(NiPoint2* __ret, const NiPoint2& pt) const;
-};
-}
 
 // Returns a copy of this NiPoint2 with pt's x and y subtracted from it.
 // @fnv 0x004e8880
-NiPoint2* NiPoint2_Sub::Subtract(NiPoint2* pResult, const NiPoint2& aPoint) const
+NiPoint2 NiPoint2::Subtract(const NiPoint2& aPoint) const
 {
     NiPoint2 result = *this;
     result.x -= aPoint.x;
     result.y -= aPoint.y;
-    *pResult = result;
-    return pResult;
+    return result;
 }
 
 void* __cdecl operator new(unsigned int);
@@ -264,14 +262,14 @@ int __cdecl ParseTextAndParams(const char* apText, char* apParam)
     return FUN_00a01860(text);
 }
 
-const char* __cdecl strrchr(const char*, int);
+namespace tile_crt { const char* __cdecl strrchr(const char*, int); }
 long __cdecl FUN_00eca6d3(const char*);
 
 // Finds the last '_' in apTraitName and returns FUN_00eca6d3 of the text after it, -1 if that text is empty, or 0 if there is no '_'.
 // @fnv 0x00a01a20
 int __cdecl FUN_00a01a20(const char* apTraitName)
 {
-    const char* plast_ = strrchr(apTraitName, '_');
+    const char* plast_ = tile_crt::strrchr(apTraitName, '_');
     if (plast_) {
         return *(plast_ + 1) ? FUN_00eca6d3(plast_ + 1) : -1;
     } else {
@@ -446,26 +444,19 @@ bool FUN_00a07fc0_shell::FUN_00a07fc0(int aiTrait)
 }
 }  // namespace fnv_00a07fc0
 
-struct NiNode;
-struct TileX {
-    char pad[0x28];
-    TileX* pParent;
-    NiNode* m_pRenderedNodeEntry;
-    NiNode* GetNiNode();
-};
 // Walks up the parent chain until a tile with a non-null NiNode is found and returns that NiNode, or null if none exists.
 // @fnv 0x00a089c0
-NiNode* TileX::GetNiNode()
+NiNode* Tile::GetUnderlyingNode()
 {
-    TileX* ptile = this;
+    Tile* ptile = this;
     NiNode* m;
-    while (ptile && (m = ptile->m_pRenderedNodeEntry, !m)) {
+    while (ptile && (m = ptile->m_pRenderedNodeEntry.m_pObject, !m)) {
         ptile = ptile->pParent;
     }
     if (ptile) {
-        NiNode* a = ptile->m_pRenderedNodeEntry;
+        NiNode* a = ptile->m_pRenderedNodeEntry.m_pObject;
         if (a) {
-            NiNode* b = ptile->m_pRenderedNodeEntry;
+            NiNode* b = ptile->m_pRenderedNodeEntry.m_pObject;
             return b;
         }
     }
@@ -490,20 +481,17 @@ void* FUN_00a0a0b0_shell::FUN_00a0a0b0(int aiBaseTrait, int aiID)
     return GetValue(FUN_00a01860(strValueName));
 }
 
-struct MemoryManager { void Deallocate(void* p); };
 extern MemoryManager g_memoryManager;
-struct Tile3DStub {
-    void FUN_00a20650();
-    Tile3DStub* FUN_00a0bde0(unsigned int flags);
-};
+// A one-word aggregate keeps the deleting-destructor flag on the stack in the thiscall ABI.
+struct TileDeletionFlags { unsigned int value; };
 // Calls FUN_00a20650, deallocates this via g_memoryManager when flags has bit 1 set, and returns this.
 // @fnv 0x00a0bde0
-Tile3DStub* Tile3DStub::FUN_00a0bde0(unsigned int flags)
+Tile3D* __fastcall DeleteTile3D(Tile3D* self, TileDeletionFlags flags)
 {
-    FUN_00a20650();
-    if (flags & 1)
-        g_memoryManager.Deallocate(this);
-    return this;
+    self->Tile3D::~Tile3D();
+    if (flags.value & 1)
+        g_memoryManager.Deallocate(self);
+    return self;
 }
 
 namespace fnv_00a0be10 {
@@ -512,18 +500,15 @@ struct MenuValueDescriptor {
     unsigned int m_uiValueId;
     char* m_pName;
 };
-typedef char _sizecheck_XMLStorage[sizeof(MenuValueDescriptor) == 8 ? 1 : -1];
-struct FUN_00a0be10_shell : public MenuValueDescriptor {
-    void FUN_00a0be10();
-};
+typedef char _sizecheck_MenuValueDescriptor[sizeof(MenuValueDescriptor) == 8 ? 1 : -1];
 
-struct MemoryManager { void Deallocate(void*); };
 extern MemoryManager g_memoryManager;
-struct XMLStorageX : public MenuValueDescriptor {
+// 0x00a0be10 frees the +4 buffer of an eight-byte XML record (XmlFile in tile_ob1_variant), not an XMLStorage class.
+struct OwnedXmlBuffer : public MenuValueDescriptor {
     MenuValueDescriptor* FUN_00a0be10(unsigned int flags);
 };
 // @fnv 0x00a0be10
-MenuValueDescriptor* XMLStorageX::FUN_00a0be10(unsigned int flags)
+MenuValueDescriptor* OwnedXmlBuffer::FUN_00a0be10(unsigned int flags)
 {
     if (m_pName) {
         char* p = m_pName;
@@ -592,7 +577,6 @@ void FUN_00a079d0_shell::UpdateTileChildren()
 }
 
 namespace fnv_00a0a270 {
-struct MemoryManager { void Deallocate(void*); };
 extern MemoryManager g_memoryManager;
 struct VX { char pad[8]; float fValue; void* ptr; void RemoveFromReactions(); void FUN_00a09410(bool); };
 struct BW { bool v; };
@@ -618,7 +602,6 @@ struct FUN_009ff600_shell : public Tile {
     void InitTile(Tile*, char*, Tile*);
 };
 
-struct StrMem { bool Set(const char*, unsigned int); };
 struct NP_0081c630 { NP_0081c630& operator=(void*); };
 struct TileStandIn_009ff600 { void SetParent(Tile*, Tile*); };
 
@@ -682,7 +665,6 @@ struct FUN_00a01000_shell : public Tile {
     void* GetOrCreateTraitValue(int);
 };
 
-struct MemoryManager { void* Allocate(unsigned int); };
 extern MemoryManager g_memoryManager;
 struct P09Value { int m_uiSoundID; void* pParent; float fValue; void* p0c; void* p10; };
 int __cdecl FUN_00a01160(const void*, const void*);
@@ -845,8 +827,8 @@ Tile* FUN_00a03d40_shell::FUN_00a03d40()
 }
 
 namespace fnv_00a077c0 {
-struct NiTPointerListBase_00a077c0 { int iVal; void* AddHead(); };
-extern NiTPointerListBase_00a077c0 DAT_011f332c;
+// 0x011f332c is the list count/allocator at list+8; 0x0043a010 is NiTPointerAllocator::Allocate.
+extern NiTListBase<NiTPointerAllocator<unsigned int>, Tile*>::AntiBloatAllocator DAT_011f332c;
 struct FUN_004ed8c0_shell_00a077c0 { void FUN_00559a70(void*); };
 extern FUN_004ed8c0_shell_00a077c0 DAT_011f3324;
 extern int DAT_011f32d8;
@@ -868,10 +850,10 @@ void FUN_00a077c0(Tile* apTile)
     {
     unsigned int uiFlags2;
     if (apTile && !(bool)(int)((*(unsigned int*)((char*)apTile + 0x30) & 0x800) != 0)
-        && ((bool)(int)(DAT_011f332c.iVal == 0) || apTile != DAT_011f3328[2]))
+        && ((bool)(int)(DAT_011f332c.m_uiCount == 0) || apTile != DAT_011f3328[2]))
     {
         DAT_011f32d8++;
-        pNode = DAT_011f332c.AddHead();
+        pNode = DAT_011f332c.Allocate();
         ((void**)pNode)[2] = apTile;
         DAT_011f3324.FUN_00559a70(pNode);
         pTile1 = apTile;
@@ -910,7 +892,6 @@ struct FUN_00a07c60_shell : public Tile {
     void StartFade(int, float, float, float, int);
 };
 
-struct MemoryManager { void* Allocate(unsigned int); };
 extern MemoryManager g_memoryManager;
 struct P09Fade { float fStart; float m_fEndValue; unsigned long m_uiState; float fScaleMultiplier; int m_iValueId; Tile* pTile; int eType; };
 struct FUN_00a0c7c0_Helper { void AddToHead(P09Fade**); };
@@ -966,7 +947,6 @@ struct FUN_00a07dc0_shell : public Tile {
     void RemoveFadeItemsForTile(int);
 };
 
-class MemoryManager { public: void Deallocate(void*); };
 extern MemoryManager g_memoryManager;
 struct P03FadeItem { char pad[0x10]; int m_iValueId; Tile* pTile; };
 struct P03FadeNode { P03FadeItem* item; P03FadeNode* next; };
@@ -1032,7 +1012,6 @@ Tile* __cdecl FindTileByName(Tile* apTarget, const char* apName)
 extern MemoryManager g_memoryManager;
 extern void* DAT_01094c2c;
 extern void* DAT_01094c38;
-struct P03MM { void* Allocate(unsigned int); };
 struct P03Value { void AppendFloatAction(int aiActionType, float afValue); };
 // Allocates a Tile__FloatAction with the given action type and value, then appends it to the end of the action list at this+0x10 or sets it as the head.
 // @fnv 0x00a09080
@@ -1040,14 +1019,14 @@ void P03Value::AppendFloatAction(int aiActionType, float afValue)
 {
     Tile__Action* pNew = *(Tile__Action**)((char*)this + 0x10);
     Tile__FloatAction* pMem;
-    void* ptail = ((P03MM*)&g_memoryManager)->Allocate(0x10);
+    void* ptail = g_memoryManager.Allocate(0x10);
     Tile__FloatAction* pnewAction = ptail ? (((Tile__Action*)ptail)->m_ppVirtualMethodTable = (void**)&DAT_01094c38,
-        ((Tile__Action*)ptail)->eActionType = (Tile__VALUE_ACTION)2000,
+        ((Tile__Action*)ptail)->eActionType = (Tile::VALUE_ACTION)2000,
         ((Tile__Action*)ptail)->m_pActionSuccessor = 0,
         ((Tile__Action*)ptail)->m_ppVirtualMethodTable = (void**)&DAT_01094c2c,
         (Tile__FloatAction*)ptail) : 0;
     pMem = pnewAction;
-    pMem->eActionType = (Tile__VALUE_ACTION)aiActionType;
+    pMem->eActionType = (Tile::VALUE_ACTION)aiActionType;
     pMem->fValue = afValue;
     if (pNew) {
         while (pNew->m_pActionSuccessor)
@@ -1059,8 +1038,7 @@ void P03Value::AppendFloatAction(int aiActionType, float afValue)
 }
 
 namespace fnv_00a09200 {
-struct MemoryManager_00a09200 { void Deallocate(void*); };
-extern MemoryManager_00a09200 g_memoryManager;
+extern MemoryManager g_memoryManager;
 struct Value_00a09200;
 struct Reaction_00a09200 { Value_00a09200* pValue; Reaction_00a09200* pNext; };
 struct Action_00a09200 {
@@ -1148,9 +1126,7 @@ void Value_00a09200::RemoveFromReactions()
 }  // namespace fnv_00a09200
 
 namespace fnv_00a0ab70 {
-struct MemoryManager { void Deallocate(void*); };
 extern MemoryManager g_memoryManager;
-struct StrMem { bool Set(char const*, unsigned int); char pad[8]; };
 struct SoundMessageRecord {
     char pad[8];
     StrMem str;
@@ -1186,11 +1162,9 @@ void OH2TileTemplate::ClearList()
 }
 }  // namespace fnv_00a0ab70
 
-__declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-struct NiGlobalStringTable { static char* __cdecl AddString(const char*); };
 int __cdecl FUN_00ec6da0(const char*, const char*);
-extern char* EmptyFS;
-struct TileTemplate_00a0af10 { char* m_kName; };
+extern NiFixedString EmptyFS;
+struct TileTemplate_00a0af10 { NiFixedString m_kName; };
 struct TemplateList_00a0af10 { TileTemplate_00a0af10* pItem; TemplateList_00a0af10* pNext; };
 
 struct BuildStorage_00a0af10
@@ -1203,7 +1177,7 @@ struct BuildStorage_00a0af10
 // @fnv 0x00a0af10
 TileTemplate_00a0af10* BuildStorage_00a0af10::FindTemplateByName(const char* pName)
 {
-    char* nm;
+    GlobalStringHandle nm;
     {
     TemplateList_00a0af10* pNode;
     {
@@ -1211,7 +1185,7 @@ TileTemplate_00a0af10* BuildStorage_00a0af10::FindTemplateByName(const char* pNa
     {
     TileTemplate_00a0af10* pZero;
     {
-    char* pOther;
+    GlobalStringHandle pOther;
     {
     TileTemplate_00a0af10* pTemplate;
     {
@@ -1222,13 +1196,13 @@ TileTemplate_00a0af10* BuildStorage_00a0af10::FindTemplateByName(const char* pNa
     long* pRef2;
     pNode = (TemplateList_00a0af10*)((char*)this + 4);
     if (!pName)
-        nm = EmptyFS;
+        nm = EmptyFS.m_kHandle;
     else
         nm = NiGlobalStringTable::AddString(pName);
     while (pNode && pNode->pItem)
     {
         pTemplate = pNode->pItem;
-        pOther = pTemplate->m_kName;
+        pOther = pTemplate->m_kName.m_kHandle;
         if (nm == pOther)
             bEqual = true;
         else if (!pOther || !nm)
@@ -1238,7 +1212,7 @@ TileTemplate_00a0af10* BuildStorage_00a0af10::FindTemplateByName(const char* pNa
         if (bEqual)
         {
             pResult = pNode->pItem;
-            if (nm == EmptyFS)
+            if (nm == EmptyFS.m_kHandle)
             {
             }
             else
@@ -1251,7 +1225,7 @@ TileTemplate_00a0af10* BuildStorage_00a0af10::FindTemplateByName(const char* pNa
         pNode = pNode->pNext;
     }
     pZero = 0;
-    if (nm == EmptyFS)
+    if (nm == EmptyFS.m_kHandle)
     {
     }
     else
@@ -1270,24 +1244,22 @@ TileTemplate_00a0af10* BuildStorage_00a0af10::FindTemplateByName(const char* pNa
     }
 }
 
-struct RgbaColor;
 struct NiNode;
 struct NiStream;
 struct NiTexture;
 struct TileShaderProperty;
 struct blob4 { char b[4]; };
 struct FUN_00a0b280_shell : public Tile {
-    void ApplyAlphaAndColorToChildren(NiNode*, float, void*);
+    void ApplyAlphaAndColorToChildren(NiNode*, float, NiColorA*);
 };
 
 struct PropHelper { void* GetProperty(unsigned int); };
-struct OH3Color { float r, g, b, a; };
 struct OH3Child {
     virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
     virtual void v4(); virtual void v5(); virtual PropHelper* v6();
 };
 // @fnv 0x00a0b280
-void FUN_00a0b280_shell::ApplyAlphaAndColorToChildren(NiNode* apNode, float afAlpha, void* apColor)
+void FUN_00a0b280_shell::ApplyAlphaAndColorToChildren(NiNode* apNode, float afAlpha, NiColorA* apColor)
 {
     if (!apNode)
         return;
@@ -1309,7 +1281,7 @@ void FUN_00a0b280_shell::ApplyAlphaAndColorToChildren(NiNode* apNode, float afAl
                 pprop = pgeom->GetProperty(3);
                 ptsp = (char*)pprop;
                 *(float*)(ptsp + 0x78) = afAlpha;
-                *(OH3Color*)(ptsp + 0x68) = *(OH3Color*)apColor;
+                *(NiColorA*)(ptsp + 0x68) = *apColor;
             }
         }
     }
@@ -1332,11 +1304,7 @@ extern float DAT_011f337c;
 extern int DAT_011f3380;
 extern int DAT_011f3384;
 
-template<> class BSSimpleArray<Tile::Value*,8> {
-public:
-    void** m_ppVirtualMethodTable; Tile::Value** pBuffer; unsigned int iSize; unsigned int SimpleArrayStorage;
-    unsigned int BinarySearch(Tile::Value*&, int (__cdecl*)(const void*, const void*));
-};
+
 
 // Locks a global, stores aiTrait in it, looks up the matching Tile::Value in the array at offset 0x10 and returns it, or null if not found.
 // @fnv 0x00a00f30
@@ -1366,7 +1334,6 @@ void* FUN_00a00f30_shell::FUN_00a00f30(int aiTrait)
 }
 
 namespace fnv_00a09330 {
-class MemoryManager { public: void Deallocate(void*); };
 extern MemoryManager g_memoryManager;
 struct ScrapHeapBuffer;
 template<class K, class V> struct BSMapBase {
@@ -1424,15 +1391,13 @@ void FUN_00a09330_shell::ClearActionsAndFreeBuffer()
 }
 }  // namespace fnv_00a09330
 
-template<> class NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*> { public: void* AddHead(); };
-struct NiTMapItem_00a0c900 { NiTMapItem_00a0c900* m_pkNext; const char* m_key; int m_val; };
 struct FUN_00a0c900_shell {
     virtual void v0();
     virtual unsigned int KeyToHashIndex(const char*);
     virtual bool IsKeysEqual(const char*, const char*);
-    virtual void SetValue(NiTMapItem_00a0c900*, const char*, int);
+    virtual void SetValue(NiTMapItem<const char*, int>*, const char*, int);
     unsigned int m_uiHashSize;
-    NiTMapItem_00a0c900** m_ppkHashTable;
+    NiTMapItem<const char*, int>** m_ppkHashTable;
     unsigned int m_uiCount;
     bool m_bCopy;
     void FUN_00a0c900(const char* pcKey, int val);
@@ -1441,7 +1406,7 @@ struct FUN_00a0c900_shell {
 void FUN_00a0c900_shell::FUN_00a0c900(const char* pcKey, int val)
 {
     unsigned int uiIndex = KeyToHashIndex(pcKey);
-    NiTMapItem_00a0c900* pkItem = m_ppkHashTable[uiIndex];
+    NiTMapItem<const char*, int>* pkItem = m_ppkHashTable[uiIndex];
     unsigned int uiDepth = 0;
     while (pkItem) {
         uiDepth++;
@@ -1454,7 +1419,7 @@ void FUN_00a0c900_shell::FUN_00a0c900(const char* pcKey, int val)
         }
         pkItem = pkItem->m_pkNext;
     }
-    pkItem = (NiTMapItem_00a0c900*)((NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>*)&m_uiCount)->AddHead();
+    pkItem = (NiTMapItem<const char*, int>*)((NiTPointerAllocator<unsigned int>*)&m_uiCount)->Allocate();
     SetValue(pkItem, pcKey, val);
     pkItem->m_pkNext = m_ppkHashTable[uiIndex];
     m_ppkHashTable[uiIndex] = pkItem;
@@ -1491,16 +1456,12 @@ bool FUN_007000f0_shell::HasFlag(int mask)
 }
 
 int __cdecl GetTileValueID(const char* apName, int aiIndex);
-struct VATSMenu {
-    int GetSelectedTargetIndex();
-    int FUN_007267c0();
-};
 
 // @fnv 0x007267c0
 int VATSMenu::FUN_007267c0()
 {
     static int iNumFilteredTrait = GetTileValueID("_num_filtered", -1);
-    return GetSelectedTargetIndex() - (unsigned int)(*(Tile**)((char*)this + 0xc))->GetFloat(iNumFilteredTrait);
+    return GetSelectedTargetIndex() - (unsigned int)reinterpret_cast<Tile*>(m_kTileTemplateList.m_pkNext)->GetFloat(iNumFilteredTrait);
 }
 
 // @fnv 0x00a01160
@@ -1527,21 +1488,11 @@ void FUN_00a0baf0_class::FUN_00a0baf0()
     FUN_00a04500();
 }
 
-struct TileText {
-    const char* FUN_00a0bbe0();
-};
-
 // @fnv 0x00a0bbe0
 const char* TileText::FUN_00a0bbe0()
 {
     return "TEXT";
 }
-
-struct Tile3D
-{
-    virtual ~Tile3D();
-    const char* __thiscall FUN_00a0bdd0();
-};
 
 // @fnv 0x00a0bdd0
 const char* __thiscall Tile3D::FUN_00a0bdd0()
@@ -1850,10 +1801,11 @@ extern InventoryMenuSetting DAT_011d40b4;
 extern InventoryMenuSetting DAT_011d2acc;
 extern GlobalObject_0040c150 g_011d4918;
 int __cdecl FUN_00408b20(const char*, const char*);
-int __cdecl strcpy_s(char*, unsigned int, const char*);
+namespace tile_crt { int __cdecl strcpy_s(char*, unsigned int, const char*); }
 void __cdecl FUN_00730490(char*, int);
 struct FUN_0055d520_shell { char* FUN_0055d520(); };
-struct Menu_007301f0 {
+// 0x007301f0 is bound as BarterMenu::UpdateTileText by bartermenu.cpp; +0x34/+0x9c/+0xa0 are barter category fields, not base Menu fields.
+struct BarterCategoryLabelView {
     int unk00;
     int unk04;
     int unk08;
@@ -1899,7 +1851,7 @@ struct Menu_007301f0 {
 };
 
 // @fnv 0x007301f0
-void Menu_007301f0::UpdateTileText(P09TileS* tile)
+void BarterCategoryLabelView::UpdateTileText(P09TileS* tile)
 {
     char text[260];
     int selection = tile == primaryTile ? primaryCategory : secondaryCategory;
@@ -1907,35 +1859,35 @@ void Menu_007301f0::UpdateTileText(P09TileS* tile)
     switch (selection) {
     case 0:
         if (tile == primaryTile) {
-            strcpy_s(text, 260, g_011d4378.FUN_00403df0());
+            tile_crt::strcpy_s(text, 260, g_011d4378.FUN_00403df0());
             if (!isLocalized)
                 FUN_00730490(text, 260);
         } else {
-            strcpy_s(text, 260, selectedObject->FUN_0055d520());
+            tile_crt::strcpy_s(text, 260, selectedObject->FUN_0055d520());
         }
         break;
     case 1:
-        strcpy_s(text, 260, DAT_011d29b8.FUN_00403df0());
+        tile_crt::strcpy_s(text, 260, DAT_011d29b8.FUN_00403df0());
         if (!isLocalized)
             FUN_00730490(text, 260);
         break;
     case 2:
-        strcpy_s(text, 260, DAT_011d4d50.FUN_00403df0());
+        tile_crt::strcpy_s(text, 260, DAT_011d4d50.FUN_00403df0());
         if (!isLocalized)
             FUN_00730490(text, 260);
         break;
     case 3:
-        strcpy_s(text, 260, DAT_011d40b4.FUN_00403df0());
+        tile_crt::strcpy_s(text, 260, DAT_011d40b4.FUN_00403df0());
         if (!isLocalized)
             FUN_00730490(text, 260);
         break;
     case 4:
-        strcpy_s(text, 260, DAT_011d2acc.FUN_00403df0());
+        tile_crt::strcpy_s(text, 260, DAT_011d2acc.FUN_00403df0());
         if (!isLocalized)
             FUN_00730490(text, 260);
         break;
     case 5:
-        strcpy_s(text, 260, g_011d4918.FUN_00403df0());
+        tile_crt::strcpy_s(text, 260, g_011d4918.FUN_00403df0());
         if (!isLocalized)
             FUN_00730490(text, 260);
         break;
@@ -2418,7 +2370,7 @@ struct UpdateTreeNode {
  MenuDepthController* FUN_00a03c90();
  UpdateTreeNode* FUN_00a03d40();
  void SetChangeFlag(int);
- void SetFloat(int,float,bool);
+ void FUN_00a012d0(int,float,bool);
  UpdateTreeNode* FUN_00a037e0(int, float, int);
 };
 // @fnv 0x00a037e0
@@ -2456,7 +2408,7 @@ UpdateTreeNode* UpdateTreeNode::FUN_00a037e0(int trait, float value, int unused)
   while (aBipedNode) {
    aLocation = &aBipedNode->data;
    aBipedNode = aBipedNode->next;
-   (*aLocation)->SetFloat(0xfae,FUN_00a011b0(0xfae),true);
+   (*aLocation)->FUN_00a012d0(0xfae,FUN_00a011b0(0xfae),true);
   }
   return this;
  }
@@ -2508,7 +2460,7 @@ void TileValueStr::SetString(const char* apString, bool abUpdate)
     }
     if (apString) {
         uiLen6 = strlen(apString);
-        pNew3 = (char*)((P03MM*)&g_memoryManager)->Allocate(uiLen6 + 1);
+        pNew3 = (char*)g_memoryManager.Allocate(uiLen6 + 1);
         pString = pNew3;
         pDest4 = pString;
         strcpy_s(pDest4, uiLen6 + 1, apString);

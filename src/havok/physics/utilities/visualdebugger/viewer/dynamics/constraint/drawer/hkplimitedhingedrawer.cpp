@@ -2,11 +2,12 @@
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkplimitedhingedrawer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkplimitedhingedrawer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../../../include/hkMemoryRouter.h"
+
 extern const double DAT_01097800;
-struct __declspec(intrin_type) __declspec(align(16)) __m128
-{
+typedef struct __declspec(intrin_type) __declspec(align(16)) {
     float x, y, z, w;
-};
+} __m128, LocalM128;
 extern "C"
 {
     __m128 _mm_set_ss(float);
@@ -23,23 +24,24 @@ extern "C"
     __m128 _mm_shuffle_ps(__m128, __m128, int);
 }
 struct Matrix;
-struct __declspec(align(16)) Vector
+// local form of hkVector4: 0x00de7a70 needs a trivial packet in DrawWork's union; the shared copy constructor makes that union ill-formed.
+struct __declspec(align(16)) HingeVectorStorageLocal_00de
 {
     __m128 value;
-    void FUN_00c7f640(const Matrix*, const Vector*);
-    void FUN_00c7f700(const void*, const Vector*);
+    void FUN_00c7f640(const Matrix*, const HingeVectorStorageLocal_00de*);
+    void FUN_00c7f700(const void*, const HingeVectorStorageLocal_00de*);
 };
 struct AxisPair
 {
-    Vector axis, other;
+    HingeVectorStorageLocal_00de axis, other;
 };
 struct Matrix
 {
-    Vector x, y, z, t;
+    HingeVectorStorageLocal_00de x, y, z, t;
 };
 struct Shape
 {
-    void FUN_00de4950(float, float, float, int, const Vector*, const Vector*, const Vector*);
+    void FUN_00de4950(float, float, float, int, const HingeVectorStorageLocal_00de*, const HingeVectorStorageLocal_00de*, const HingeVectorStorageLocal_00de*);
 };
 struct Array
 {
@@ -49,7 +51,7 @@ struct Array
 };
 struct LineScratch
 {
-    Vector end, base, axis;
+    HingeVectorStorageLocal_00de end, base, axis;
 };
 union DrawWork
 {
@@ -64,12 +66,6 @@ struct Allocator
     virtual void v3();
     virtual void freeBuffer(void*, int);
 };
-struct Router
-{
-    int a, b, c, d;
-    Allocator* allocator;
-};
-Router* __cdecl FUN_00c85750();
 void __cdecl FUN_00c908c0(Allocator*, Array*, int, int);
 unsigned __cdecl PackColorBigEndian(float, float, float, float);
 struct Display
@@ -83,7 +79,7 @@ struct Display
     virtual void v6();
     virtual void v7();
     virtual void v8();
-    virtual void line(const Vector*, const Vector*, unsigned, int, int);
+    virtual void line(const HingeVectorStorageLocal_00de*, const HingeVectorStorageLocal_00de*, unsigned, int, int);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -95,16 +91,17 @@ struct DisplayContext
     int a, b, c, d;
     void FUN_00e10a10(Display*);
 };
-struct Data
+// hkpLimitedHingeConstraintData seen as 16-byte rows (constraint instance +0xc): header row, atom transforms/axes, angle-limit enable byte, min/max angle
+struct LimitedHingeDataView
 {
-    Vector v00, v10, v20, v30, v40, v50, v60, v70, v80, v90, va0, vb0;
+    HingeVectorStorageLocal_00de v00, v10, v20, v30, v40, v50, v60, v70, v80, v90, va0, vb0;
     char c0, c1, enabled, c3;
     float minimum, maximum;
 };
 struct Input
 {
     int a, b, c;
-    Data* data;
+    LimitedHingeDataView* data;
 };
 struct Viewer
 {
@@ -112,8 +109,8 @@ struct Viewer
     int f08, f0c, f10, f14, flags;
     float multiplier;
     int f20, f24, f28, f2c, f30, f34, f38, f3c;
-    Vector pivot, origin;
-    Vector m60, m70, m80, m90, ma0, mb0;
+    HingeVectorStorageLocal_00de pivot, origin;
+    HingeVectorStorageLocal_00de m60, m70, m80, m90, ma0, mb0;
     DisplayContext context;
     Shape shape;
     void FUN_00de47e0(Input*, Matrix*, Matrix*);
@@ -136,7 +133,7 @@ __forceinline __m128 broadcastScalar(float value)
 // @fnv 0x00de7a70
 void Viewer::FUN_00de7a70(Input* input, Display* display, int id, int tag)
 {
-    Data* data = input->data;
+    LimitedHingeDataView* data = input->data;
     context.FUN_00e10a10(display);
     Matrix first, second;
     FUN_00de47e0(input, &first, &second);
@@ -175,8 +172,8 @@ void Viewer::FUN_00de7a70(Input* input, Display* display, int id, int tag)
             scratch.shapes.data = 0;
             scratch.shapes.size = 0;
             scratch.shapes.capacity = 0x80000000;
-            Router* router = FUN_00c85750();
-            Allocator* allocator = router->allocator;
+            hkMemoryRouter* router = &hkMemoryRouter::getInstance();
+            Allocator* allocator = reinterpret_cast<Allocator*>(router->m_heap);
             int capacity = scratch.shapes.capacity & 0x3fffffff;
             if (capacity < 1)
             {
@@ -188,8 +185,8 @@ void Viewer::FUN_00de7a70(Input* input, Display* display, int id, int tag)
             scratch.shapes.size = 1;
             scratch.shapes.data[0] = &shape;
             display->geometry(&scratch.shapes, 0xffffffff, id, tag);
-            router = FUN_00c85750();
-            allocator = router->allocator;
+            router = &hkMemoryRouter::getInstance();
+            allocator = reinterpret_cast<Allocator*>(router->m_heap);
             scratch.shapes.size = 0;
             if ((scratch.shapes.capacity & 0x80000000) == 0)
                 allocator->freeBuffer(scratch.shapes.data, (scratch.shapes.capacity & 0x3fffffff) * 4);

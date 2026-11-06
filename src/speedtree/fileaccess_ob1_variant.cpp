@@ -1,3 +1,4 @@
+#include "../../include/CVec3.h"
 
 // src/speedtree/fileaccess_ob1_variant.cpp - flag-variant unit created 2026-10-25 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/speedtree/fileaccess.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -15,16 +16,12 @@ struct FUN_00b3ede0_shell
     void* FUN_00b3ede0();
 };
 unsigned int __cdecl FUN_00ec7c56(void);
-struct Vector3D
-{
-    float m_fComponents[3];
-};
 struct FUN_00b3ef80_shell
 {
     int m_iValueAt00;
     void* m_pObjectAt04;
     float FUN_00b3ed20();
-    Vector3D GetVector3();
+    CVec3 GetVector3();
 };
 struct FUN_00b3ed20_range
 {
@@ -70,9 +67,9 @@ struct FUN_00b40150_cls : public FUN_00b40150_base
     unsigned char m_unk10;
     int m_i14;
     unsigned char m_unk18;
-    Vector3D m_vec1;
-    Vector3D m_vec2;
-    Vector3D m_vec3;
+    CVec3 m_vec1;
+    CVec3 m_vec2;
+    CVec3 m_vec3;
     unsigned char m_unk40;
     float m_f44;
     int m_i48;
@@ -142,7 +139,8 @@ struct Buf_00b3ee40
         return first[i];
     }
 };
-struct Reader_00b3ee40
+// SpeedTree string input: cursor +0, byte buffer +4; GetNextElement binds to the 32-bit read at 0x00b3ed80.
+struct SpeedTreeFileInput
 {
     unsigned int pos;
     Buf_00b3ee40 buf;
@@ -150,7 +148,7 @@ struct Reader_00b3ee40
     Str_00b3ee40 FUN_00b3ee40();
 };
 // @fnv 0x00b3ee40
-Str_00b3ee40 Reader_00b3ee40::FUN_00b3ee40()
+Str_00b3ee40 SpeedTreeFileInput::FUN_00b3ee40()
 {
     Str_00b3ee40 s;
     int count4 = GetNextElement();

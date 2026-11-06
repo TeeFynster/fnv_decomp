@@ -1,3 +1,23 @@
+#include "../../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../../include/hkMemoryRouter.h"
+// Preserve this unit's intrinsic type: the SDK union's byte lanes change VC9 alias analysis.
+#ifndef _INCLUDED_MM2
+#define _INCLUDED_MM2
+// Exe 0x00dd5b00 ComputeAxisRanges: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_load_ps(float const* p);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
+#endif
+
+#include "../../../../../../../../../include/Vec4.h"
+
 
 // src/havok/physics/internal/collide/mopp/builder/mediator/cachedshape/hkpmoppcachedshapemediator.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/builder/mediator/cachedshape/hkpmoppcachedshapemediator.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -92,25 +112,7 @@ S_00d54cd0_Result* FUN_00d54cd0(void* world, S_00d54cd0_Input* pInput, void* out
     return r;
 }
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiBytes) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct Record
 {
@@ -151,12 +153,12 @@ struct RecordArray
 
     ~RecordArray() throw()
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
         if ((uCapacity & 0x80000000) == 0)
-            pAllocator->FreeArray(m_pRecords, (uCapacity & 0x3fffffff) * sizeof(Record));
+            pAllocator->bufFree(m_pRecords, (uCapacity & 0x3fffffff) * sizeof(Record));
         m_pRecords = 0;
         m_uCapacity = 0x80000000;
     }
@@ -306,25 +308,6 @@ int FUN_00dd5660_cls::FUN_00dd5660()
     return unk18;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_load_ps(float const* p);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-
-struct Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-
 struct Vec4Bits
 {
     unsigned int u0;
@@ -333,7 +316,7 @@ struct Vec4Bits
     unsigned int u3;
 };
 
-void __cdecl ResizeAudioStream(AudioAllocator* apAllocator, void* apVector, int aiElemSize);
+void __cdecl ResizeAudioStream(hkMemoryAllocator* apAllocator, void* apVector, int aiElemSize);
 
 struct Src_00dd5b00
 {
@@ -386,13 +369,13 @@ struct Obj_00dd5b00
     void ComputeAxisRanges(Src_00dd5b00* apSource, int aiId, Item_00dd5b00* apItems, int aiCount);
 };
 
-inline float Dot3_00dd5b00(const __m128& a, const __m128& b)
+inline float Dot3_00dd5b00(const LocalM128& a, const LocalM128& b)
 {
-    __m128 m = _mm_mul_ps(a, b);
-    __m128 y = _mm_shuffle_ps(m, m, 0x55);
-    __m128 yx = _mm_add_ss(y, m);
-    __m128 z = _mm_shuffle_ps(m, m, 0xaa);
-    __m128 s = _mm_add_ss(z, yx);
+    LocalM128 m = _mm_mul_ps(a, b);
+    LocalM128 y = _mm_shuffle_ps(m, m, 0x55);
+    LocalM128 yx = _mm_add_ss(y, m);
+    LocalM128 z = _mm_shuffle_ps(m, m, 0xaa);
+    LocalM128 s = _mm_add_ss(z, yx);
     float f;
     _mm_store_ss(&f, s);
     return f;
@@ -403,16 +386,16 @@ inline float Dot3_00dd5b00(const __m128& a, const __m128& b)
 void Obj_00dd5b00::ComputeAxisRanges(Src_00dd5b00* apSource, int aiId, Item_00dd5b00* apItems, int aiCount)
 {
     int nVerts = apSource->v2c();
-    AudioHolder* pHolder = FUN_00c85750();
-    Vec4* m_pkDeltas = (Vec4*)pHolder->unk00;
-    pHolder->unk00 = (int)m_pkDeltas + ((nVerts * sizeof(Vec4) + 0x7f) & ~0x7f);
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    Vec4* m_pkDeltas = (Vec4*)pHolder->m_stack.m_next.m_storage;
+    pHolder->m_stack.m_next.m_storage = (void*)((int)m_pkDeltas + ((nVerts * sizeof(Vec4) + 0x7f) & ~0x7f));
     apSource->v30(m_pkDeltas);
 
     Vec_00dd5b00* pList = &m_kNode;
-    AudioHolder* pGrow = FUN_00c85750();
+    hkMemoryRouter* pGrow = FUN_00c85750();
     if (pList->m_iArrayLength == (int)(pList->m_uCapFlags & 0x3fffffff))
     {
-        ResizeAudioStream(pGrow->m_pAllocator, pList, 0x6c);
+        ResizeAudioStream(reinterpret_cast<hkMemoryAllocator*>(pGrow->m_heap), pList, 0x6c);
     }
     Entry_00dd5b00* pEntry = &pList->m_pData[pList->m_iArrayLength++];
     pEntry->m_iOwnerObjectOffset = aiId;
@@ -428,7 +411,7 @@ void Obj_00dd5b00::ComputeAxisRanges(Src_00dd5b00* apSource, int aiId, Item_00dd
             float r = m_pkDeltas->w;
             __declspec(align(16)) Vec4Bits kBits;
             kBits = apItems[i].m_kAxisEndPoints;
-            __m128 p = _mm_load_ps((const float*)&kBits);
+            LocalM128 p = _mm_load_ps((const float*)&kBits);
             float fDot = Dot3_00dd5b00(_mm_load_ps((const float*)m_pkDeltas), p);
             lo = fDot - r;
             hi = fDot + r;
@@ -464,32 +447,16 @@ void Obj_00dd5b00::ComputeAxisRanges(Src_00dd5b00* apSource, int aiId, Item_00dd
     }
 
     pHolder = FUN_00c85750();
-    pHolder->unk00 = (int)m_pkDeltas;
+    pHolder->m_stack.m_next.m_storage = (void*)((int)m_pkDeltas);
 }
 
-struct FUN_00dd5de0_Allocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-
-struct FUN_00dd5de0_MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    FUN_00dd5de0_Allocator* m_pStreamAllocator;
-
-    FUN_00dd5de0_Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
 namespace fnvc_adapt {
-extern "C" FUN_00dd5de0_MemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+
+inline hkMemoryAllocator& heap(hkMemoryRouter& holder)
+{
+    return *reinterpret_cast<hkMemoryAllocator*>(holder.m_heap);
+}
 }
 
 struct FUN_00dd5de0
@@ -503,7 +470,7 @@ struct FUN_00dd5de0
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00dd5de0* b = static_cast<FUN_00dd5de0*>(p);
-        fnvc_adapt::FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        fnvc_adapt::heap(fnvc_adapt::FUN_00c85750()).blockFree(p, b->m_usMemSizeAndFlags);
     }
 };
 

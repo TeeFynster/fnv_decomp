@@ -3,6 +3,307 @@
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiBoundingVolume.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/Pair.h"
+#include "../../include/NiPoint3.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3/CVec3; this unit's code depends on the stand-in's own overload set and inline bodies (its own NiPoint3/CVec3 bodies differ), so the shared class cannot replace it.
+#include "../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+// LocalVector3: unit-local copy of the former shared stand-in Vector3. Same layout as NiPoint3 but with the stand-in's inline bodies (constructor, operator-, SquaredLength); with NiPoint3, DistanceSquaredToSegment (0x00eaf1f0) does not match.
+class FloatMatrix3;
+
+class LocalVector3
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    LocalVector3()
+    {
+    }
+    LocalVector3(float x, float y, float z) : x(x), y(y), z(z)
+    {}
+    LocalVector3(float x, int y, int z);
+
+    LocalVector3 AddVector(const LocalVector3& other) const;
+    LocalVector3 ScaleSwizzled(float scale) const;
+    LocalVector3 operator*(double multiplier) const;
+    LocalVector3 operator*(float multiplier) const;
+    LocalVector3 operator+(const LocalVector3& right) const;
+    LocalVector3 operator-(const LocalVector3& right) const
+    {
+        return LocalVector3(x - right.x, y - right.y, z - right.z);
+    }
+    LocalVector3& operator-=(const LocalVector3& right);
+    LocalVector3& operator+=(const LocalVector3& right);
+    float& operator[](int index);
+    float Dot(const LocalVector3& right) const;
+    float SquaredLength() const
+    {
+        return x * x + y * y + z * z;
+    }
+    void Normalize();
+    float Length() const;
+
+    LocalVector3 FUN_00b13040(const LocalVector3& other) const;
+    LocalVector3 FUN_00b12890(const FloatMatrix3& matrix) const;
+    LocalVector3 FUN_00b12810(const LocalVector3& other) const;
+    void FUN_00b12790();
+    void __thiscall FUN_00439ef0(LocalVector3* dest, void* context);
+    void __thiscall FUN_004a0c10();
+    LocalVector3 FUN_00439ef0(const LocalVector3& other) const
+    {
+        return LocalVector3(x - other.x, y - other.y, z - other.z);
+    }
+    float FUN_004a7290() const
+    {
+        return x * x + y * y + z * z;
+    }
+};
+#include <math.h>
+#include <string.h>
+
+// Preserve the arithmetic implementations used by this unit with the shared types.
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& pt) const
+{
+    return NiPoint3(pt.x + x, pt.y + y, pt.z + z);
+}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& pt) const
+{
+    NiPoint3 kResult;
+    kResult.x = x - pt.x;
+    kResult.y = y - pt.y;
+    kResult.z = z - pt.z;
+    return kResult;
+}
+inline NiPoint3 NiPoint3::Sub(const NiPoint3& pt) const
+{
+    return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
+}
+inline NiPoint3 NiPoint3::CrossProduct(const NiPoint3& pt) const
+{
+    return NiPoint3(y * pt.z - pt.y * z, z * pt.x - x * pt.z, x * pt.y - pt.x * y);
+}
+inline float NiPoint3::operator*(const NiPoint3& pt) const
+{
+    return x * pt.x + y * pt.y + z * pt.z;
+}
+inline float NiPoint3::DotProduct(const NiPoint3& pt)
+{
+    float fDot = x * pt.x + y * pt.y + z * pt.z;
+    return fDot;
+}
+inline float NiPoint3::DotProduct(const NiPoint3& pt) const
+{
+    float fDot = x * pt.x + y * pt.y + z * pt.z;
+    return fDot;
+}
+inline float NiPoint3::SqrLength() const
+{
+    return x * x + y * y + z * z;
+}
+inline float NiPoint3::Length() const
+{
+    return sqrtf(x * x + y * y + z * z);
+}
+inline NiPoint3 NiPoint3::Cross(const NiPoint3& pt) const
+{
+    return NiPoint3(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
+}
+inline LocalVector3& LocalVector3::operator-=(const LocalVector3& r)
+{
+    x -= r.x;
+    y -= r.y;
+    z -= r.z;
+    return *this;
+}
+inline LocalVector3 LocalVector3::operator*(float s) const
+{
+    return LocalVector3(x * s, y * s, z * s);
+}
+inline float LocalVector3::Dot(const LocalVector3& r) const
+{
+    return x * r.x + y * r.y + z * r.z;
+}
+inline float& NiPoint3::operator[](int i)
+{
+    return components[i];
+}
+inline const float& NiPoint3::operator[](int i) const
+{
+    return components[i];
+}
+inline LocalVec3::LocalVec3()
+{}
+inline Pair::Pair() throw()
+{}
+
+static inline NiPoint3 AddPointCoordinates(const NiPoint3& a, const NiPoint3& b)
+{
+    // Preserve the original operand loads using the vector view without a union.
+    const LocalVector3& left = reinterpret_cast<const LocalVector3&>(a);
+    const LocalVector3& right = reinterpret_cast<const LocalVector3&>(b);
+    return NiPoint3(left.x + right.x, left.y + right.y, left.z + right.z);
+}
+static inline NiPoint3 AddTriangleVertices(const NiPoint3& a, const NiPoint3& b)
+{
+    NiPoint3 r;
+    r.x = a.x;
+    r.x += b.x;
+    r.y = a.y;
+    r.y += b.y;
+    r.z = a.z;
+    r.z += b.z;
+    return r;
+}
 
 struct FUN_00eae690_Class
 {
@@ -36,10 +337,6 @@ int __fastcall FUN_00eb60e0(FUN_00eb60e0_t* p, int, FUN_00eb60e0_t* q)
     return 0;
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager _g_memoryManager;
 struct Isect
 {
@@ -254,10 +551,6 @@ float __cdecl GetSqrDistanceToOrientedBox(const BoxVec3* point, const OrientedBo
     return sqrDist;
 }
 
-struct S_00eb5e30_V3
-{
-    float x, y, z;
-};
 struct S_00eb5e30_Obj
 {
     int unk00;
@@ -287,29 +580,29 @@ struct S_00eb5e30_Base
 struct FUN_00eb5e30 : S_00eb5e30_Base
 {
     S_00eb5e30_Obj* unk38;
-    S_00eb5e30_V3 unk3c;
-    S_00eb5e30_V3 unk48;
-    S_00eb5e30_V3 unk54;
+    NiPoint3 unk3c;
+    NiPoint3 unk48;
+    NiPoint3 unk54;
     float unk60;
     float unk64;
     float unk68;
-    FUN_00eb5e30(S_00eb5e30_Obj* o, const S_00eb5e30_V3* p0, const S_00eb5e30_V3* p1, const S_00eb5e30_V3* p2, float a,
+    FUN_00eb5e30(S_00eb5e30_Obj* o, const NiPoint3* p0, const NiPoint3* p1, const NiPoint3* p2, float a,
                  float b, float c, int d);
 };
 static float DAT_010f1b24 = 3.4028234663852886e+38f;
 // @fnv 0x00eb5e30
-FUN_00eb5e30::FUN_00eb5e30(S_00eb5e30_Obj* pObj, const S_00eb5e30_V3* pOrigin, const S_00eb5e30_V3* pPoint1,
-                           const S_00eb5e30_V3* pPoint2, float a, float b, float c, int d)
+FUN_00eb5e30::FUN_00eb5e30(S_00eb5e30_Obj* pObj, const NiPoint3* pOrigin, const NiPoint3* pPoint1,
+                           const NiPoint3* pPoint2, float a, float b, float c, int d)
     : S_00eb5e30_Base(a, b, c, d)
 {
     unk38 = pObj;
     unk3c = *pOrigin;
-    S_00eb5e30_V3 vEdge1;
+    NiPoint3 vEdge1;
     vEdge1.x = pPoint1->x - pOrigin->x;
     vEdge1.y = pPoint1->y - pOrigin->y;
     vEdge1.z = pPoint1->z - pOrigin->z;
     unk48 = vEdge1;
-    S_00eb5e30_V3 vEdge2;
+    NiPoint3 vEdge2;
     vEdge2.x = pPoint2->x - pOrigin->x;
     vEdge2.y = pPoint2->y - pOrigin->y;
     vEdge2.z = pPoint2->z - pOrigin->z;
@@ -400,46 +693,30 @@ FUN_00eb8ab0::~FUN_00eb8ab0()
     }
 }
 
-class PointEAE
+// 0x00eae520 uses center +0x00, axes +0x0C and three extents +0x30; shared Transform starts with rotation and has one scale.
+class OrientedBoxBounds
 {
   public:
-    float x, y, z;
+    NiPoint3 m_kCenter;
+    float m_afAxes[3][3];
+    float m_afExtents[3];
 
-    bool operator==(const PointEAE& pt) const
-    {
-        return x == pt.x && y == pt.y && z == pt.z;
-    }
+    bool FUN_00eae520(const OrientedBoxBounds& kOther) const;
 };
 
-class MatrixEAE
-{
-  public:
-    float m_afEntries[3][3];
-};
-
-class TransformEAE
-{
-  public:
-    PointEAE m_kTranslate;
-    MatrixEAE m_kRotate;
-    float m_afScale[3];
-
-    bool FUN_00eae520(const TransformEAE& kOther) const;
-};
-
-// Compares translation, rotation rows and scale against kOther and returns true only if all components match.
+// Compares center, axes and extents against kOther and returns true only if all components match.
 // @fnv 0x00eae520
-bool TransformEAE::FUN_00eae520(const TransformEAE& kOther) const
+bool OrientedBoxBounds::FUN_00eae520(const OrientedBoxBounds& kOther) const
 {
-    if (!(m_kTranslate == kOther.m_kTranslate))
+    if (!(kOther.m_kCenter == m_kCenter))
         return false;
 
     for (int i = 0; i < 3; i++)
     {
-        const float* pfOtherRow = kOther.m_kRotate.m_afEntries[i];
-        const float* pfRow = m_kRotate.m_afEntries[i];
+        const float* pfOtherRow = kOther.m_afAxes[i];
+        const float* pfRow = m_afAxes[i];
         if (pfRow[0] != pfOtherRow[0] || pfRow[1] != pfOtherRow[1] || pfRow[2] != pfOtherRow[2] ||
-            m_afScale[i] != kOther.m_afScale[i])
+            m_afExtents[i] != kOther.m_afExtents[i])
             return false;
     }
     return true;
@@ -473,55 +750,17 @@ void Isect::FUN_00eae6d0()
 }
 }  // namespace fnv_00eae6d0
 
-struct Vector3
-{
-    float x, y, z;
-
-    Vector3()
-    {}
-    Vector3(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {}
-
-    Vector3 operator-(const Vector3& r) const
-    {
-        return Vector3(x - r.x, y - r.y, z - r.z);
-    }
-
-    Vector3& operator-=(const Vector3& r)
-    {
-        x -= r.x;
-        y -= r.y;
-        z -= r.z;
-        return *this;
-    }
-
-    Vector3 operator*(float s) const
-    {
-        return Vector3(x * s, y * s, z * s);
-    }
-
-    float Dot(const Vector3& r) const
-    {
-        return x * r.x + y * r.y + z * r.z;
-    }
-
-    float SquaredLength() const
-    {
-        return x * x + y * y + z * z;
-    }
-};
-
 struct Segment3
 {
-    Vector3 Origin;
-    Vector3 Direction;
+    LocalVector3 Origin;
+    LocalVector3 Direction;
 };
 
 // Projects a point onto a segment, clamps the parameter to [0,1] in pfT, and returns the squared distance from the point to the closest segment point.
 // @fnv 0x00eaf1f0
-float __cdecl DistanceSquaredToSegment(const Vector3& rkPoint, const Segment3& rkSegment, float* pfT)
+float __cdecl DistanceSquaredToSegment(const LocalVector3& rkPoint, const Segment3& rkSegment, float* pfT)
 {
-    Vector3 kDiff = rkPoint - rkSegment.Origin;
+    LocalVector3 kDiff = rkPoint - rkSegment.Origin;
     *pfT = rkSegment.Direction.Dot(kDiff);
     if (*pfT <= 0.0f)
     {
@@ -545,29 +784,30 @@ float __cdecl DistanceSquaredToSegment(const Vector3& rkPoint, const Segment3& r
 }
 
 namespace fnv_00eb3230 {
-struct Vec3
+static __forceinline void assignVec(LocalVec3& target, const LocalVec3& source)
 {
-    float x, y, z;
-};
-static __forceinline Vec3 sumVec(const Vec3& a, const Vec3& b)
+    memcpy(&target, &source, sizeof(LocalVec3));
+}
+
+static __forceinline LocalVec3 sumVec(const LocalVec3& a, const LocalVec3& b)
 {
-    Vec3 r;
+    LocalVec3 r;
     r.x = a.x + b.x;
     r.y = a.y + b.y;
     r.z = a.z + b.z;
     return r;
 }
-static __forceinline Vec3 diffVec(const Vec3& a, const Vec3& b)
+static __forceinline LocalVec3 diffVec(const LocalVec3& a, const LocalVec3& b)
 {
-    Vec3 r;
+    LocalVec3 r;
     r.x = a.x - b.x;
     r.y = a.y - b.y;
     r.z = a.z - b.z;
     return r;
 }
-static __forceinline Vec3 sumVecB(const Vec3& a, const Vec3& b)
+static __forceinline LocalVec3 sumVecB(const LocalVec3& a, const LocalVec3& b)
 {
-    Vec3 r;
+    LocalVec3 r;
     const volatile float& first = a.x;
     r.x = first + b.x;
     r.y = a.y + b.y;
@@ -576,11 +816,11 @@ static __forceinline Vec3 sumVecB(const Vec3& a, const Vec3& b)
 }
 struct Triangle3
 {
-    Vec3 origin, edge0, edge1;
+    LocalVec3 origin, edge0, edge1;
 };
 struct Segment3
 {
-    Vec3 origin, direction;
+    LocalVec3 origin, direction;
 };
 extern float __cdecl FUN_00eaff20(const Segment3*, const Triangle3*, float*, float*, float*);
 extern float __cdecl FUN_00eb1d20(const Segment3*, const Triangle3*, float*, float*, float*);
@@ -589,85 +829,83 @@ float __cdecl TriangleTriangleDistance(const Triangle3* aTriA, const Triangle3* 
                                        float* bV)
 {
     Segment3 segEdge;
-    segEdge.origin = aTriA->origin;
-    segEdge.direction = aTriA->edge0;
+    assignVec(segEdge.origin, aTriA->origin);
+    assignVec(segEdge.direction, aTriA->edge0);
     float fBestDist = FUN_00eaff20(&segEdge, aTriB, aU, bU, bV);
     *aV = 0.0f;
 
     float av, au;
-    struct Pair
-    {
-        float bv, bu;
-    } baryB;
-    segEdge.direction = aTriA->edge1;
-    float candidate = FUN_00eaff20(&segEdge, aTriB, &av, &baryB.bu, &baryB.bv);
+    // Barycentric coordinates use the two Pair slots as float storage.
+    Pair baryB;
+    assignVec(segEdge.direction, aTriA->edge1);
+    float candidate = FUN_00eaff20(&segEdge, aTriB, &av, &reinterpret_cast<float&>(baryB.b), &reinterpret_cast<float&>(baryB.a));
     au = 0.0f;
     if (candidate < fBestDist)
     {
         fBestDist = candidate;
         *aU = au;
         *aV = av;
-        *bU = baryB.bu;
-        *bV = baryB.bv;
+        *bU = reinterpret_cast<float&>(baryB.b);
+        *bV = reinterpret_cast<float&>(baryB.a);
     }
-    segEdge.origin = sumVec(aTriA->edge0, segEdge.origin);
-    segEdge.direction = diffVec(segEdge.direction, aTriA->edge0);
-    candidate = FUN_00eaff20(&segEdge, aTriB, &av, &baryB.bu, &baryB.bv);
+    assignVec(segEdge.origin, sumVec(aTriA->edge0, segEdge.origin));
+    assignVec(segEdge.direction, diffVec(segEdge.direction, aTriA->edge0));
+    candidate = FUN_00eaff20(&segEdge, aTriB, &av, &reinterpret_cast<float&>(baryB.b), &reinterpret_cast<float&>(baryB.a));
     au = 1.0f - av;
     if (candidate < fBestDist)
     {
         fBestDist = candidate;
         *aU = au;
         *aV = av;
-        *bU = baryB.bu;
-        *bV = baryB.bv;
+        *bU = reinterpret_cast<float&>(baryB.b);
+        *bV = reinterpret_cast<float&>(baryB.a);
     }
 
-    segEdge.origin = aTriB->origin;
-    segEdge.direction = aTriB->edge0;
-    candidate = FUN_00eb1d20(&segEdge, aTriA, &baryB.bu, &au, &av);
-    baryB.bv = 0.0f;
+    assignVec(segEdge.origin, aTriB->origin);
+    assignVec(segEdge.direction, aTriB->edge0);
+    candidate = FUN_00eb1d20(&segEdge, aTriA, &reinterpret_cast<float&>(baryB.b), &au, &av);
+    reinterpret_cast<float&>(baryB.a) = 0.0f;
     if (candidate < fBestDist)
     {
         fBestDist = candidate;
         *aU = au;
         *aV = av;
-        *bU = baryB.bu;
-        *bV = baryB.bv;
+        *bU = reinterpret_cast<float&>(baryB.b);
+        *bV = reinterpret_cast<float&>(baryB.a);
     }
-    segEdge.direction = aTriB->edge1;
-    candidate = FUN_00eb1d20(&segEdge, aTriA, &baryB.bv, &au, &av);
-    baryB.bu = 0.0f;
+    assignVec(segEdge.direction, aTriB->edge1);
+    candidate = FUN_00eb1d20(&segEdge, aTriA, &reinterpret_cast<float&>(baryB.a), &au, &av);
+    reinterpret_cast<float&>(baryB.b) = 0.0f;
     if (candidate < fBestDist)
     {
         fBestDist = candidate;
         *aU = au;
         *aV = av;
-        *bU = baryB.bu;
-        *bV = baryB.bv;
+        *bU = reinterpret_cast<float&>(baryB.b);
+        *bV = reinterpret_cast<float&>(baryB.a);
     }
-    segEdge.origin = sumVecB(aTriB->edge1, aTriB->origin);
-    segEdge.direction = aTriB->edge0;
-    candidate = FUN_00eb1d20(&segEdge, aTriA, &baryB.bu, &au, &av);
-    baryB.bv = 1.0f;
+    assignVec(segEdge.origin, sumVecB(aTriB->edge1, aTriB->origin));
+    assignVec(segEdge.direction, aTriB->edge0);
+    candidate = FUN_00eb1d20(&segEdge, aTriA, &reinterpret_cast<float&>(baryB.b), &au, &av);
+    reinterpret_cast<float&>(baryB.a) = 1.0f;
     if (candidate < fBestDist)
     {
         fBestDist = candidate;
         *aU = au;
         *aV = av;
-        *bU = baryB.bu;
-        *bV = baryB.bv;
+        *bU = reinterpret_cast<float&>(baryB.b);
+        *bV = reinterpret_cast<float&>(baryB.a);
     }
-    segEdge.origin = sumVec(aTriB->origin, aTriB->edge0);
-    segEdge.direction = aTriB->edge1;
-    candidate = FUN_00eb1d20(&segEdge, aTriA, &baryB.bv, &au, &av);
+    assignVec(segEdge.origin, sumVec(aTriB->origin, aTriB->edge0));
+    assignVec(segEdge.direction, aTriB->edge1);
+    candidate = FUN_00eb1d20(&segEdge, aTriA, &reinterpret_cast<float&>(baryB.a), &au, &av);
     if (candidate < fBestDist)
     {
         fBestDist = candidate;
         *aU = au;
         *aV = av;
         *bU = 1.0f;
-        *bV = baryB.bv;
+        *bV = reinterpret_cast<float&>(baryB.a);
     }
     return fBestDist;
 }
@@ -749,7 +987,7 @@ FUN_00eb5f10_Class* FUN_00eb5f10_Class::InitFromKind(unsigned short kind, int ar
 
 struct SphereBound
 {
-    Vector3 center;
+    LocalVector3 center;
     float radius;
 };
 extern SphereBound DAT_011f4288;
@@ -758,17 +996,17 @@ struct BoundedObject
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
     SphereBound* bound;
 };
-inline float my_dot(const Vector3& a, const Vector3& b)
+inline float my_dot(const LocalVector3& a, const LocalVector3& b)
 {
     double x = a.x * b.x;
     return (float)(x + a.y * b.y + a.z * b.z);
 }
 // Tests whether a ray from origin along direction hits the object's sphere bound, returning true if the origin is inside or the ray intersects it.
 // @fnv 0x00eada70
-bool RayIntersectsBound(BoundedObject* object, const Vector3& origin, const Vector3& direction)
+bool RayIntersectsBound(BoundedObject* object, const LocalVector3& origin, const LocalVector3& direction)
 {
     SphereBound bound = object->bound ? *object->bound : DAT_011f4288;
-    Vector3 delta = origin - bound.center;
+    LocalVector3 delta = origin - bound.center;
     float deltaSquared = delta.SquaredLength();
     float distance = deltaSquared - bound.radius * bound.radius;
     if (distance <= 0.0f)
@@ -868,38 +1106,6 @@ S_00eaedc0_Class* S_00eaedc0_Class::Initialize(int a1, int a2, float a3, float a
     return this;
 }
 
-#include <math.h>
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    NiPoint3 operator+(const NiPoint3& pt) const
-    {
-        return NiPoint3(x + pt.x, y + pt.y, z + pt.z);
-    }
-    NiPoint3 operator-(const NiPoint3& pt) const
-    {
-        NiPoint3 kResult;
-        kResult.x = x - pt.x;
-        kResult.y = y - pt.y;
-        kResult.z = z - pt.z;
-        return kResult;
-    }
-    float Dot(const NiPoint3& pt) const
-    {
-        float fDot = x * pt.x + y * pt.y + z * pt.z;
-        return fDot;
-    }
-    NiPoint3 Cross(const NiPoint3& pt) const
-    {
-        NiPoint3 kResult(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
-        return kResult;
-    }
-};
 class OriginDirectionPair
 {
   public:
@@ -1518,7 +1724,7 @@ float __cdecl FUN_00eaff20(const OriginDirectionPair& kSeg, const TrianglePointS
         fS = fS0;
         fT = fT0;
     }
-    kPnt = kSeg.m_kStartPoint + kSeg.m_kLightVector;
+    kPnt = AddPointCoordinates(kSeg.m_kStartPoint, kSeg.m_kLightVector);
     fSqrDist0 = FUN_00eb6150(kPnt, kPgm, fS0, fT0);
     fR0 = 1.0f;
     if (fSqrDist0 < fSqrDist)
@@ -1534,46 +1740,6 @@ float __cdecl FUN_00eaff20(const OriginDirectionPair& kSeg, const TrianglePointS
 namespace fnv_00eb1d20 {
 // FUN_00eb1d20: squared distance between a segment and a triangle (Eberly's
 // Segment3/Triangle3 SqrDistance), returning the segment and triangle params.
-
-class NiPoint3
-{
-  public:
-    float x, y, z;
-
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-
-    NiPoint3 operator+(const NiPoint3& pt) const
-    {
-        return NiPoint3(x + pt.x, y + pt.y, z + pt.z);
-    }
-    NiPoint3 operator-(const NiPoint3& pt) const
-    {
-        return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
-    }
-    float operator*(const NiPoint3& pt) const
-    {
-        return x * pt.x + y * pt.y + z * pt.z;
-    }
-    float SqrLength() const
-    {
-        return x * x + y * y + z * z;
-    }
-    float Length() const
-    {
-        return sqrtf(x * x + y * y + z * z);
-    }
-    NiPoint3 Cross(const NiPoint3& pt) const
-    {
-        return NiPoint3(y * pt.z - pt.y * z, z * pt.x - x * pt.z, x * pt.y - pt.x * y);
-    }
-};
 
 struct OriginDirectionPair
 {
@@ -1597,7 +1763,7 @@ float GetSquaredDistanceToTriangle(const NiPoint3& kPnt, const Triangle3D& kTri,
 // @fnv 0x00eb1d20
 float FUN_00eb1d20(const OriginDirectionPair& kSeg, const Triangle3D& kTri, float& fR, float& fS, float& fT)
 {
-    NiPoint3 kDiff = kTri.m_kStartPoint - kSeg.m_kStartPoint;
+    NiPoint3 kDiff = kTri.m_kStartPoint.Sub(kSeg.m_kStartPoint);
     float fA00 = kSeg.m_kLightVector * kSeg.m_kLightVector;
     float fA01 = -(kSeg.m_kLightVector * kTri.m_kPoint1);
     float fA02 = -(kSeg.m_kLightVector * kTri.m_kPoint2);
@@ -1612,12 +1778,12 @@ float FUN_00eb1d20(const OriginDirectionPair& kSeg, const Triangle3D& kTri, floa
     NiPoint3 kPt;
     float fSqrDist, fSqrDist0, fR0, fS0, fT0;
 
-    NiPoint3 kN(kTri.m_kPoint1.Cross(kTri.m_kPoint2));
+    NiPoint3 kN(kTri.m_kPoint1.CrossProduct(kTri.m_kPoint2));
     double dY = kSeg.m_kLightVector.y;
     double dX = kSeg.m_kLightVector.x;
     double dZ = kSeg.m_kLightVector.z;
     float fDot = fabsf(kN * kSeg.m_kLightVector);
-    float fNLen = kN.Length();
+    float fNLen = static_cast<const NiPoint3&>(kN).Length();
     float fDLen = sqrtf((float)(dX * dX + dY * dY + dZ * dZ));
     float fTol = (float)(fDLen * fNLen * DAT_0101dae8);
 
@@ -2170,22 +2336,10 @@ float ClampDist(ClampPoint* p, ClampBox* b)
     return s;
 }
 
-struct S00eb4de0_V
-{
-    float m_afTuple[3];
-    float& operator[](int i)
-    {
-        return m_afTuple[i];
-    }
-    float operator[](int i) const
-    {
-        return m_afTuple[i];
-    }
-};
 struct S00eb4de0_Box
 {
-    S00eb4de0_V center;
-    S00eb4de0_V axis[3];
+    NiPoint3 center;
+    NiPoint3 axis[3];
     float extent[3];
     const float& Extent(int i) const
     {
@@ -2196,12 +2350,12 @@ struct S00eb4de0_Box
 // Clamps a point into a box along a direction, accumulating squared distance and computing the line parameter.
 // @fnv 0x00eb4de0
 static __declspec(noinline) void FUN_00eb4de0(const S00eb4de0_Box& rkBox, int aiAxis0, int aiAxis1, int aiAxis2,
-                                              S00eb4de0_V& rkPnt, const S00eb4de0_V& rkDir, float* pfLParam,
+                                              NiPoint3& rkPnt, const NiPoint3& rkDir, float* pfLParam,
                                               float& rfSqrDistance)
 {
     float fPmE0 = rkPnt[aiAxis0] - rkBox.extent[aiAxis0];
     float fPmE1 = rkPnt[aiAxis1] - rkBox.extent[aiAxis1];
-    float fProd0 = rkDir.m_afTuple[aiAxis1] * fPmE0;
+    float fProd0 = rkDir.components[aiAxis1] * fPmE0;
     float fProd1 = rkDir[aiAxis0] * fPmE1;
     float fTimeSinceScaleStart, fInvLSqr, fInv;
 
@@ -2268,19 +2422,19 @@ static __declspec(noinline) void FUN_00eb4de0(const S00eb4de0_Box& rkBox, int ai
 
 struct S00eb4de0_Line
 {
-    S00eb4de0_V origin;
-    S00eb4de0_V direction;
+    NiPoint3 origin;
+    NiPoint3 direction;
 };
-static inline float S00eb4de0_Dot(const S00eb4de0_V& a, const S00eb4de0_V& b)
+static inline float S00eb4de0_Dot(const NiPoint3& a, const NiPoint3& b)
 {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 float S00eb4de0_Caller(const S00eb4de0_Line& rkLine, const S00eb4de0_Box& rkBox, float* pfLParam)
 {
-    S00eb4de0_V kDiff;
+    NiPoint3 kDiff;
     for (int k = 0; k < 3; k++)
         kDiff[k] = rkLine.origin[k] - rkBox.center[k];
-    S00eb4de0_V kPnt, kWorldPosition;
+    NiPoint3 kPnt, kWorldPosition;
     kPnt[0] = S00eb4de0_Dot(kDiff, rkBox.axis[0]);
     kPnt[1] = S00eb4de0_Dot(kDiff, rkBox.axis[1]);
     kPnt[2] = S00eb4de0_Dot(kDiff, rkBox.axis[2]);
@@ -2412,49 +2566,15 @@ struct Alloc139
 
 void* NiMalloc(unsigned int);
 void NiFreeAlias(void*);
-struct Point139
+inline void* __cdecl operator new[](size_t n)
 {
-    float x, y, z;
-    Point139()
-    {}
-    Point139(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {}
-    static void* operator new[](unsigned int n)
-    {
-        return ((Alloc139&)DAT_011f6238).FUN_00aa3e40(n);
-    }
-    static void operator delete[](void* p)
-    {
-        DAT_011f6238.FUN_00aa4060(p);
-    };
-    Point139 operator-(const Point139& b) const
-    {
-        return Point139(x - b.x, y - b.y, z - b.z);
-    }
-    friend Point139 operator+(const Point139& a, const Point139& b)
-    {
-        Point139 r;
-        r.x = a.x;
-        r.x += b.x;
-        r.y = a.y;
-        r.y += b.y;
-        r.z = a.z;
-        r.z += b.z;
-        return r;
-    }
-    Point139 operator*(double f) const
-    {
-        return Point139(x * f, y * f, z * f);
-    }
-    Point139 Cross(const Point139& b) const
-    {
-        return Point139(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
-    }
-    float Length() const
-    {
-        return sqrtf(x * x + y * y + z * z);
-    }
-};
+    return ((Alloc139&)DAT_011f6238).FUN_00aa3e40(n);
+}
+inline NiPoint3 NiPoint3::operator*(double f) const
+{
+    return NiPoint3(x * f, y * f, z * f);
+}
+
 struct FUN_00eba1b0
 {
     virtual ~FUN_00eba1b0();
@@ -2492,32 +2612,33 @@ struct FUN_00eba1b0
     int unk80;
     int unk84;
     int unk88;
-    FUN_00eba1b0(int, unsigned short, const unsigned short*, const Point139*, int, int);
-    void BuildNode(int, const unsigned short*, const Point139*, int, float*, Point139*, int, int, int*, int*, int);
+    FUN_00eba1b0(int, unsigned short, const unsigned short*, const NiPoint3*, int, int);
+    void BuildNode(int, const unsigned short*, const NiPoint3*, int, float*, NiPoint3*, int, int, int*, int*, int);
 };
 // Computes each triangle's area and centroid from indices and vertices, then calls BuildNode with them plus temporary order and scratch arrays.
 // @fnv 0x00eba1b0
-FUN_00eba1b0::FUN_00eba1b0(int arg1, unsigned short count, const unsigned short* indices, const Point139* vertices,
+FUN_00eba1b0::FUN_00eba1b0(int arg1, unsigned short count, const unsigned short* indices, const NiPoint3* vertices,
                            int arg5, int arg6)
 {
     unk7c = 0;
     float* areas = (float*)NiMalloc(count * sizeof(float));
-    Point139* centers = new Point139[count];
+    NiPoint3* centers = new NiPoint3[count];
     unsigned short cursor = 0;
     for (unsigned short i = 0; i < count; i++)
     {
         unsigned short i0 = indices[cursor++];
         unsigned short i1 = indices[cursor++];
         unsigned short i2 = indices[cursor++];
-        const Point139& a = vertices[i0];
-        const Point139& b = vertices[i1];
-        const Point139& c = vertices[i2];
-        Point139 edge0 = b - a;
-        Point139 edge1 = c - a;
-        Point139 normal = edge0.Cross(edge1);
-        float length = normal.Length();
+        const NiPoint3& a = vertices[i0];
+        const NiPoint3& b = vertices[i1];
+        const NiPoint3& c = vertices[i2];
+        NiPoint3 edge0 = b - a;
+        NiPoint3 edge1 = c - a;
+        NiPoint3 normal = edge0.Cross(edge1);
+        float length = static_cast<const NiPoint3&>(normal).Length();
         areas[i] = 0.5 * length;
-        centers[i] = (vertices[i0] + vertices[i1] + vertices[i2]) * (1.0f / 3.0f);
+        centers[i] = AddTriangleVertices(AddTriangleVertices(vertices[i0], vertices[i1]), vertices[i2]) *
+                     static_cast<double>(1.0f / 3.0f);
     }
     int* order = (int*)NiMalloc(count * sizeof(int));
     for (int i = 0; i < count; i++)
@@ -2526,7 +2647,7 @@ FUN_00eba1b0::FUN_00eba1b0(int arg1, unsigned short count, const unsigned short*
     BuildNode(arg1, indices, vertices, arg5, areas, centers, 0, count - 1, order, scratch, arg6);
     NiFreeAlias(scratch);
     NiFreeAlias(order);
-    delete[] centers;
+    DAT_011f6238.FUN_00aa4060(centers);
     NiFreeAlias(areas);
     unk88 = 0;
 }
@@ -2863,12 +2984,12 @@ float __cdecl DistanceSquaredToSegment(const NiPoint3&, const OriginDirectionPai
 float __cdecl FUN_00eb6150(const NiPoint3& kPnt, const TrianglePointSet& kPgm, float& fS, float& fT)
 {
     NiPoint3 kDiff = kPgm.m_kStartPoint - kPnt;
-    float fA00 = kPgm.m_kPoint1.Dot(kPgm.m_kPoint1);
-    float fA01 = kPgm.m_kPoint1.Dot(kPgm.m_kPoint2);
-    float fA11 = kPgm.m_kPoint2.Dot(kPgm.m_kPoint2);
-    float fB0 = kPgm.m_kPoint1.Dot(kDiff);
-    float fB1 = kPgm.m_kPoint2.Dot(kDiff);
-    float fC = kDiff.Dot(kDiff);
+    float fA00 = kPgm.m_kPoint1.DotProduct(kPgm.m_kPoint1);
+    float fA01 = kPgm.m_kPoint1.DotProduct(kPgm.m_kPoint2);
+    float fA11 = kPgm.m_kPoint2.DotProduct(kPgm.m_kPoint2);
+    float fB0 = kPgm.m_kPoint1.DotProduct(kDiff);
+    float fB1 = kPgm.m_kPoint2.DotProduct(kDiff);
+    float fC = kDiff.DotProduct(kDiff);
     float fDet = fA00 * fA11 - fA01 * fA01;
     fDet = (float)fabs(fDet);
     float fTmp;
@@ -3993,26 +4114,6 @@ extern NiPoint3 DAT_011a946c;
 extern NiPoint3 DAT_011a9478;
 extern NiPoint3 DAT_011a9484;
 
-struct NiBoundingVolume
-{
-    virtual void LoadBinary(void* apStream);
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-};
-
 class Helper
 {
   public:
@@ -4033,6 +4134,6 @@ NiBoundingVolume* __cdecl FUN_00ea7490(void* apStream)
     Helper* pkHelper = (Helper*)((MemoryManagerAllocHelper*)&_g_memoryManager)->Allocate(0x40);
     NiBoundingVolume* pkVolume =
         pkHelper ? pkHelper->FUN_00ea0820(DAT_011a9490, DAT_011f426c, DAT_011a946c, DAT_011a9478, DAT_011a9484) : 0;
-    pkVolume->LoadBinary(apStream);
+    pkVolume->LoadBinary(*static_cast<NiStream*>(apStream));
     return pkVolume;
 }

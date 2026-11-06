@@ -1,13 +1,12 @@
+#include "../../include/BSStringT.h"
 // fallout_shared/tesidleform.cpp: TESIdleForm, IdleCopy, IdleFormDetach, IdleInit (29 functions)
 
 #include "tesidleform_match_decls.h"
-class LowProcess
-{
-  public:
-    TESObjectREFR* GetActiveCombatTarget();
-};
+// layout_support.h already provides BSSimpleList.
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/LowProcess.h"
 
-extern "C" char* __cdecl strrchr(const char* string, int character);
+// strrchr comes from <string.h> (read through include/TESFile.h)
 extern "C" int __cdecl stricmp(const char* string1, const char* string2);
 
 // @fnv 0x005fe3b0
@@ -39,9 +38,9 @@ bool TESIdleForm::IsValidForReferences(TESObjectREFR* actionRef, TESObjectREFR* 
     if (reinterpret_cast<PerkEntryConditionSet*>(reinterpret_cast<TESTopicInfo*>(this)->GetAddTopicList())
             ->ContainsTrait(actionRef, targetRef))
     {
-        if (recurseUp && reinterpret_cast<LowProcess*>(this)->GetActiveCombatTarget())
+        if (recurseUp && reinterpret_cast<LowProcess*>(this)->LowProcess::GetActiveCombatTarget())
         {
-            conditionsMet = reinterpret_cast<TESIdleForm*>(reinterpret_cast<LowProcess*>(this)->GetActiveCombatTarget())
+            conditionsMet = reinterpret_cast<TESIdleForm*>(reinterpret_cast<LowProcess*>(this)->LowProcess::GetActiveCombatTarget())
                                 ->IsValidForReferences(actionRef, targetRef, recurseUp);
         }
         else
@@ -129,7 +128,7 @@ void TESIdleForm::BuildIdleParentPath(NiFormArray* array)
     orderState.next = 0;
     for (unsigned int i = 0; i < orderState.size; ++i)
     {
-        TESIdleForm* idle = dynamic_cast<TESObjectANIO*>(array->FUN_00877a30(i));
+        TESIdleForm* idle = reinterpret_cast<TESIdleForm*>(dynamic_cast<TESObjectANIO*>(array->FUN_00877a30(i)));
         if (idle)
         {
             if (idle == this)
@@ -232,9 +231,9 @@ bool TESIdleForm::HasMissingPathArray()
 
 // Reads the idle form's chunk stream (EDID, OBND, MODL/MODT, DATA, CTDA, ANAM), applying each subrecord and returning true on success.
 // @fnv 0x005fe810
-bool TESIdleForm::Load(TESFile* file)
+bool TESIdleForm::LoadForm(TESFile* file)
 {
-    if (reinterpret_cast<TESFileFormInt*>(file)->GetTESForm() != 0x48)
+    if (reinterpret_cast<TESFileFormInt_tesidleform*>(file)->GetTESForm() != 0x48)
         return false;
     LoadRecordHeader(file);
     struct ReferenceItemCountEntry
@@ -499,11 +498,7 @@ struct TaskQueueInterface
 {
     static void __cdecl CopyStringToBuffer(char* dest, unsigned int size, const char* src);
 };
-struct BSStr
-{
-    int StrCmp(const char* str, bool caseSensitive) const;
-    bool Set(const char* str, unsigned int len);
-};
+
 struct FUN_005ff7f0_shell
 {
     bool SetStringIfChanged(const char* str);
@@ -514,9 +509,9 @@ bool FUN_005ff7f0_shell::SetStringIfChanged(const char* str)
     unsigned int len = _BSStringLength(str) + 1;
     char* buf = (char*)_alloca(len);
     TaskQueueInterface::CopyStringToBuffer(buf, len, str);
-    if (((BSStr*)((char*)this + 0x4c))->StrCmp(buf, true) == 0)
+    if (((::BSStringT<char>*)((char*)this + 0x4c))->StrCmp(buf, true) == 0)
         return false;
-    ((BSStr*)((char*)this + 0x4c))->Set(buf, 0);
+    ((::BSStringT<char>*)((char*)this + 0x4c))->Set(buf, 0);
     return true;
 }
 
@@ -598,11 +593,12 @@ struct Idle_008b2010
     Idle_008b2010* GetState();
 };
 
-struct TESConditionSave
+// TESConditionSave_tesidleform: local type (was include/TESConditionSave.h, which had no evidence of one real class); its methods are 0x00680910 TESCondition::Save
+class TESConditionSave_tesidleform
 {
+public:
     void ProcessItems();
 };
-
 struct FUN_00485e00_shell
 {
     void FUN_00485e20(int, int);
@@ -623,7 +619,7 @@ void FUN_005fea50_shell::FUN_005fea50()
 
     reinterpret_cast<FUN_004891d0_obj*>(reinterpret_cast<char*>(this) + 0x18)->WriteToBuffer(0x4c444f4d, 0x54444f4d);
 
-    reinterpret_cast<TESConditionSave*>(reinterpret_cast<TESTopicInfo*>(this)->GetAddTopicList())->ProcessItems();
+    reinterpret_cast<TESConditionSave_tesidleform*>(reinterpret_cast<TESTopicInfo*>(this)->GetAddTopicList())->ProcessItems();
 
     FUN_005a71d0 a;
     BGSImpactData* pImpactData;
@@ -700,7 +696,7 @@ void FUN_005fe470_shell::CopyFromIdleForm(TESForm* apForm)
 
 struct FormCopyMap
 {
-    bool Lookup(TESForm* key, TESForm*& value);
+    bool FUN_00853130(TESForm* key, TESForm*& value);
 };
 struct IdleArrayMethods
 {
@@ -735,12 +731,12 @@ TESIdleForm* IdleCopy::CopyIdleForm(unsigned char flag, FormCopyMap* map)
     TESForm* k;
     i = dynamic_cast<TESIdleForm*>(FUN_004867a0(flag, map));
     h = 0;
-    if (!map->Lookup(m_pParentIdleForm, h) || !h)
+    if (!map->FUN_00853130(m_pParentIdleForm, h) || !h)
         h = m_pParentIdleForm;
     s = static_cast<TESIdleForm*>(h);
     static_cast<IdleCopy*>(i)->FUN_008d8040(s);
     h = 0;
-    if (!map->Lookup(m_pIdleForm, h) || !h)
+    if (!map->FUN_00853130(m_pIdleForm, h) || !h)
         h = m_pIdleForm;
     p = static_cast<TESIdleForm*>(h);
     static_cast<IdleCopy*>(i)->FUN_00673400(p);
@@ -971,13 +967,19 @@ FUN_005fe180::~FUN_005fe180()
     }
 }
 
-struct TESConditionInit
+// TESConditionInit_tesidleform: local type (was include/TESConditionInit.h, which had no evidence of one real class); its methods are 0x00680a20 TESCondition::InitItem
+#include "../../include/PerkEntryConditionSet.h"
+
+class TESForm;
+
+class TESConditionInit_tesidleform : public PerkEntryConditionSet
 {
-    void InitItem(TESForm*);
+public:
+    void InitItem(TESForm* form);
 };
 struct IdleInit : TESIdleForm
 {
-    TESConditionInit* GetAddTopicList();
+    TESConditionInit_tesidleform* GetAddTopicList();
     int GetFlagsMasked();
     void FUN_005ff190(int);
     void FUN_008d8040(TESIdleForm*);

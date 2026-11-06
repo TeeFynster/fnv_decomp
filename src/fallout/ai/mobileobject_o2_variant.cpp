@@ -10,7 +10,7 @@ class bhkCharacterController;
 #include "mobileobject_private/mobileobject_types_TESPackage.h"
 #include "mobileobject_private/mobileobject_interface.h"
 #include "../../../include/BSAudio.h"
-#include "../../../include/SoundPlaybackHandle.h"
+#include "../../../include/BSSoundHandle.h"
 extern TESDataHandler* g_dataHandler;
 #include "mobileobject_private/mobileobject_packet.h"
 bhkCharacterController* CopyCharacterControllerVector(bhkCharacterController* output, const NiPoint3& point);

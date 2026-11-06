@@ -2,6 +2,9 @@
 // src/havok/common/base/container/string/hkstring.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/container/string/hkstring.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/BSAudio.h"
+#include "../../../../../../include/hkBool.h"
+
 extern "C" void __cdecl FUN_00ecc7b0(char* dest, const char* src, int count);
 
 // @fnv 0x00cb10b0
@@ -19,22 +22,13 @@ void __cdecl CallWithZeroMiddleArg(int aiFirst, int aiThird)
     FUN_00ec8d33(aiFirst, 0, aiThird);
 }
 
-struct BSAudio;
-struct UnkRet
-{
-    void* p;
-};
-struct UnkHolder
-{
-    UnkRet* FUN_00c85750();
-};
 extern "C" BSAudio* __cdecl FUN_00c85750();
 extern "C" void __cdecl CallSwappedArgs(BSAudio*, int);
 
 // @fnv 0x00cb13c0
 void __cdecl FUN_00cb13c0(int aiAudio)
 {
-    CallSwappedArgs((BSAudio*)aiAudio, *(int*)((char*)FUN_00c85750() + 0x10));
+    CallSwappedArgs((BSAudio*)aiAudio, (int)FUN_00c85750()->pListener);
 }
 
 double __cdecl FUN_00ecdf2d(unsigned int value, int mode);
@@ -43,16 +37,6 @@ float __cdecl ConvertToFloat(unsigned int value)
 {
     return FUN_00ecdf2d(value, 0);
 }
-
-class hkBool
-{
-  public:
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    char m_cBooleanValue;
-};
 
 // Returns true if str begins with prefix by comparing characters until the prefix's null terminator.
 // @fnv 0x00cb1310
@@ -94,28 +78,19 @@ bool* __cdecl EndsWith(bool* result, const char* text, const char* suffix)
     return result;
 }
 
-class NineIntegerRecord
-{
-  public:
-    NineIntegerRecord();
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-};
 
-struct BSAudio
-{
-    int unk00, unk04, unk08, unk0c;
-    int unk10;
-};
-
-BSAudio* FUN_00c85750();
+// hkMemoryRouter (Havok 7.1 Common/Base/Memory/Router/hkMemoryRouter.h), 0x24 bytes: the ctor 0x00c85770 clears
+// m_stack (3 words) and the temp/heap/debug/solver/global allocators, not m_userData. (The shared hkMemoryRouter.h
+// stand-in models only its first 0x14 bytes.)
+#include "../../../../../../include/hkMemoryRouter.h"
 void __cdecl FUN_00cb11b0(int a, int b, int c);
 
-// Reads unk10 from the BSAudio returned by FUN_00c85750 and passes it with a and b to FUN_00cb11b0.
+// Reads pListener from the BSAudio returned by FUN_00c85750 and passes it with a and b to FUN_00cb11b0.
 // @fnv 0x00cb13e0
 void __cdecl FUN_00cb13e0(int aiArg1, int aiArg2)
 {
-    NineIntegerRecord router;
-    int c = FUN_00c85750()->unk10;
+    hkMemoryRouter router;
+    int c = (int)FUN_00c85750()->pListener;
     FUN_00cb11b0(aiArg1, aiArg2, c);
 }
 
@@ -183,27 +158,14 @@ int __cdecl FUN_00cb1390(const char* str, char acChar)
     return p ? (int)(p - str) : -1;
 }
 
-struct S_00cb1410_Buf
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    S_00cb1410_Buf();
-};
 int __cdecl FUN_00cb1160(int a, int b);
 
-// Constructs a local S_00cb1410_Buf, reads unk10 from FUN_00c85750()'s result, and passes it with a to FUN_00cb1160.
+// Constructs a local hkMemoryRouter, reads pListener from FUN_00c85750()'s result, and passes it with a to FUN_00cb1160.
 // @fnv 0x00cb1410
 void __cdecl FUN_00cb1410(int aiValue)
 {
-    S_00cb1410_Buf buf;
-    int r = FUN_00c85750()->unk10;
+    hkMemoryRouter buf;
+    int r = (int)FUN_00c85750()->pListener;
     FUN_00cb1160(aiValue, r);
 }
 

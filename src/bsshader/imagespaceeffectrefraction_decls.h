@@ -1,51 +1,52 @@
-// bsshader/imagespaceeffectrefraction_decls.h: declares RgbaColor, WaterTintRecord, ImageSpaceShaderParam, ImageSpaceTexture, ImageSpaceManager and more
+// bsshader/imagespaceeffectrefraction_decls.h: local image-space effect declarations
 #ifndef IMAGESPACEEFFECTREFRACTION_DECLS_H
 #define IMAGESPACEEFFECTREFRACTION_DECLS_H
 
 #include "layout_support.h"
 #include "MemoryManager.h"
+#include "../../include/BSTextureManager.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiColorA.h"
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "NiRefObject_inline.h"
+#include "../../include/ImageSpaceTexture.h"
+// WaterTintRecord_imagespaceeffectrefraction_decls: local type (was include/WaterTintRecord.h, which had no evidence of one real class); no method of it is bound to a named game function
+struct WaterTintRecord_imagespaceeffectrefraction_decls
+{
+    float r;
+    float g;
+    float b;
+    float a;
+
+    WaterTintRecord_imagespaceeffectrefraction_decls(float fR, float fG, float fB, float fA)
+        : r(fR), g(fG), b(fB), a(fA)
+    {}
+};
 
 class ImageSpaceEffect;
-class ImageSpaceEffectParam;
 class ImageSpaceManager;
-class ImageSpaceTexture;
 class NiTexture;
-class BSRenderedTexture;
-class NiRenderer;
 extern MemoryManager g_memoryManager;
 
-template <class T> class NiTPrimitiveArray : public NiTArray<T, NiTMallocInterface<T> >
-{
-  public:
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int index, const T& value);
-};
+#include "../../include/NiTPrimitiveArray.h"
 
-class RgbaColor
-{
-  public:
-    float r, g, b, a;
-};
-struct WaterTintRecord
-{
-    float r, g, b, a;
-};
-extern WaterTintRecord g_waterTintRecords[];
+extern WaterTintRecord_imagespaceeffectrefraction_decls g_waterTintRecords[];
 
-class ImageSpaceEffectParam
-{
+// The approved shared RefractionEffectParamLocalForm lacks the 0x24-byte data layout used here.
+class RefractionEffectParamLocalForm
+{ // local form of ImageSpaceEffectParam: 0x00bd9420 needs the 0x24-byte vtable/two-array base; the frozen shared size-1 declaration fails the exe-derived size/offset assertions.
   public:
     void** m_ppVirtualMethodTable;
     NiTPrimitiveArray<int> m_kTextureTypes;
     NiTPrimitiveArray<int> m_kFilterModes;
 };
 
-class ImageSpaceShaderParam : public ImageSpaceEffectParam
+class ImageSpaceShaderParam : public RefractionEffectParamLocalForm
 {
   public:
     int m_eShaderFilterMode;
     unsigned int m_eClearFlags;
-    RgbaColor m_eTextureClampMode;
+    NiColorA m_eTextureClampMode;
     float* m_pfVertexShaderConstants;
     int m_iVertexShaderConstantCount;
     float* m_pfPixelShaderConstants;
@@ -73,11 +74,11 @@ class ImageSpaceShaderParam : public ImageSpaceEffectParam
 class ImageSpaceEffect
 {
   public:
-    void** m_ppVirtualMethodTable;
+    virtual ~ImageSpaceEffect();
     bool bIsActive;
     bool bParamsChanged;
     NiTPrimitiveArray<ImageSpaceEffect*> pEffectList;
-    NiTPrimitiveArray<ImageSpaceEffectParam*> pEffectParamList;
+    NiTPrimitiveArray<RefractionEffectParamLocalForm*> pEffectParamList;
     NiTPrimitiveArray<ImageSpaceTexture*> pTextures;
     NiTPrimitiveArray<void*> pEffectInputs;
     NiTPrimitiveArray<int> pEffectOutput;
@@ -85,68 +86,23 @@ class ImageSpaceEffect
     ImageSpaceEffect();
     void SetTextureArrayCount(int count);
     void SetTextureArrayAt(int index, int first, int second, int firstFilter, int secondFilter);
-    void SetEffectAt(int index, ImageSpaceEffect* effect, ImageSpaceEffectParam* param, int output);
-};
-
-class ImageSpaceTexture
-{
-  public:
-    bool m_bTextureFlag1;
-    bool m_bTextureFlag2;
-    bool m_bTextureFlag3;
-    void* pTexture;
-    int m_eTextureFilterMode;
-    int m_eClampMode;
-    NiTexture* GetTexture();
-    BSRenderedTexture* FUN_00ba3770();
-    void FUN_00ba37a0(BSRenderedTexture* texture);
+    void SetEffectAt(int index, ImageSpaceEffect* effect, RefractionEffectParamLocalForm* param, int output);
 };
 
 class RefractionImageSpaceEffect : public ImageSpaceEffect
 {
   public:
     RefractionImageSpaceEffect();
+    virtual ~RefractionImageSpaceEffect();
     ImageSpaceTexture m_kRefractionTexture;
-    void Setup(ImageSpaceManager* manager, ImageSpaceEffectParam* param);
+    void Setup(ImageSpaceManager* manager, RefractionEffectParamLocalForm* param);
     BSRenderedTexture* GetRefractionTexture(bool create);
 };
 
-class ImageSpaceManager
-{
-  public:
-    BSRenderedTexture* m_pCurrentRenderedTexture;
-    NiTPrimitiveArray<ImageSpaceEffect*> pEffectList;
-};
+#include "../../include/ImageSpaceManager.h"
 
-class NiRenderer
-{
-  public:
-    static NiRenderer* ms_pRenderer;
-    char _pdbpad_1[7];
-    char m_spAccum_pad7_pad7[4];
-    void* m_pCamera;
-    void* m_pActiveRenderTargetGroup;
-    char m_acRendererDataB[4];
-    char _pdbpad_18[104];
-    char m_acRendererDataC[128];
-    char m_acRendererDataD[128];
-    char m_acRendererDataE[128];
-    int m_iRendererState;
-    unsigned int m_uiRendererFlags;
-    bool m_bRendererFlagA;
-    bool m_bRendererFlagB;
-    char _pdbpad_20a[118];
-};
-
-class BSTextureManager
-{
-  public:
-    BSRenderedTexture* CreateRenderTargetTexture(NiRenderer* renderer, int type, unsigned int flags,
-                                                 BSRenderedTexture* alias, unsigned int aliasOffset);
-};
 extern BSTextureManager* DAT_011f91a8;
 extern int DAT_011bf400;
-extern void* DAT_010bc560[];
 
 FNV_STATIC_ASSERT(sizeof(ImageSpaceShaderParam) == 0x88);
 FNV_STATIC_ASSERT(sizeof(ImageSpaceEffect) == 0x58);

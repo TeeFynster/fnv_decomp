@@ -1,6 +1,9 @@
 // gamebryo2.2/corelibs/niparticle/nipsysmodifieractivectlr.cpp: NiPSysAirFieldAirFrictionCtlr, StandIn, NiPSysModifierActiveCtlr (13 functions)
 
-#include "nipsysmodifieractivectlr_decls.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiPSysAirFieldAirFrictionCtlr.h"
+#include "../../../../include/NiPSysModifierBoolCtlr.h"
+#include "../../../../include/StrArr.h"
 
 // @fnv 0x00c32de0
 void NiPSysAirFieldAirFrictionCtlr::CopyMemberData(NiPSysAirFieldAirFrictionCtlr* destination, CloningProcess& cloning)
@@ -19,32 +22,7 @@ void* __fastcall FUN_00c32b60(void* pThis)
     return pThis;
 }
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
-
-struct Dummy_00a532d0
-{
-    void* __thiscall FUN_00a532d0(bool bValue);
-};
-
-static void* (__thiscall Dummy_00a532d0::*const pfn_00a532d0)(bool) = &Dummy_00a532d0::FUN_00a532d0;
-
 void* __fastcall FUN_00a532d0(void* p, int, bool bValue);
-
-struct Wrap_00a532d0
-{
-    char pad[0x18];
-    static void* __cdecl operator new(unsigned int s)
-    {
-        return BSFadeNode::operator new(s);
-    }
-    Wrap_00a532d0(bool bValue)
-    {
-        ((void*(__thiscall*)(void*, bool))FUN_00a532d0)(this, bValue);
-    }
-};
 
 // Reads a bool via virtual call at offset 0xf0, allocates a 0x18-byte BSFadeNode, and constructs it with that bool, returning null on allocation failure.
 // @fnv 0x00c32b80
@@ -92,8 +70,6 @@ const char* __cdecl FUN_00c32be0()
     return reinterpret_cast<const char*>(&g_012026d0_arg1);
 }
 
-struct NiObjectNET;
-struct NiPSysModifier;
 struct BaseStandIn
 {
     bool IsTargetParticleSystem(NiObjectNET*);
@@ -119,28 +95,26 @@ bool StandIn::FUN_00c29dd0(NiObjectNET* pkTarget)
 extern "C" void* __cdecl FUN_00a7d330(const void*);
 struct GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_012026d0;
-struct StrArr
+class NiPSysModifierActiveCtlr : public NiPSysModifierBoolCtlr
 {
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
-struct NiPSysModifierBoolCtlr
-{
-    void __thiscall FUN_00c32d30(StrArr*);
-};
-struct NiPSysModifierActiveCtlr : NiPSysModifierBoolCtlr
-{
+public:
+    NiPSysModifierActiveCtlr() throw()
+    {}
+    virtual ~NiPSysModifierActiveCtlr();
+
     void __thiscall FUN_00c29e00(StrArr*);
+    void CopyMemberData(NiPSysModifierActiveCtlr* destination, void* cloning);
+    NiPSysModifierActiveCtlr* FUN_00c29d80(void* cloning);
 };
 // @fnv 0x00c29e00
 void __thiscall NiPSysModifierActiveCtlr::FUN_00c29e00(StrArr* pArray)
 {
-    FUN_00c32d30(pArray);
+    AppendModifierInfo(pArray);
     char* p = (char*)FUN_00a7d330((const void*)*(void**)(void*)&g_012026d0);
-    unsigned int uiIndex = *(unsigned short*)((char*)pArray + 0x0a);
-    unsigned int n = *(unsigned short*)((char*)pArray + 0x08);
+    unsigned int uiIndex = pArray->m_usSize;
+    unsigned int n = pArray->m_usMaxSize;
     if (uiIndex >= n)
-        pArray->SetSize(*(unsigned short*)((char*)pArray + 0x0e) + uiIndex);
+        pArray->SetSize(pArray->m_usGrowBy + uiIndex);
     pArray->SetAt(uiIndex, p);
 }
 
@@ -248,47 +222,10 @@ void FNV_C29D60_Owner::FUN_00c29d60(unsigned int nValue)
     }
 }
 
-class C29D80Base
-{
-  public:
-    C29D80Base() throw();
-    virtual ~C29D80Base();
-
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem);
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-};
-
-class C29D80Object : public C29D80Base
-{
-  public:
-    C29D80Object() throw()
-    {}
-    virtual ~C29D80Object();
-
-    void CopyMemberData(C29D80Object* pkDest, void* pvCloning);
-    C29D80Object* FUN_00c29d80(void* pvCloning);
-};
-
 // @fnv 0x00c29d80
-C29D80Object* C29D80Object::FUN_00c29d80(void* pvCloning)
+NiPSysModifierActiveCtlr* NiPSysModifierActiveCtlr::FUN_00c29d80(void* pvCloning)
 {
-    C29D80Object* pkClone = new C29D80Object;
+    NiPSysModifierActiveCtlr* pkClone = new NiPSysModifierActiveCtlr;
     CopyMemberData(pkClone, pvCloning);
     return pkClone;
 }
@@ -323,21 +260,13 @@ struct ArgStandIn
     void* FUN_00a63430();
 };
 
-class FUN_00c32bf0_cls
-{
-  public:
-    void FUN_00c32bf0(ArgStandIn* arg);
-    void FUN_00a57630(ArgStandIn* arg);
-
-    char unk00[0x34];
-    RefCountedStandIn* m_34;
-};
-
-// Calls FUN_00a57630, allocates an object using the returned pointer, and replaces m_34 while updating reference counts.
+// The shared header does not declare the bool-controller LinkObject override.
+// This fastcall helper preserves its thiscall ABI while using the shared layout.
 // @fnv 0x00c32bf0
-void FUN_00c32bf0_cls::FUN_00c32bf0(ArgStandIn* arg)
+void __fastcall FUN_00c32bf0(NiPSysModifierBoolCtlr* controller, int, ArgStandIn* arg)
 {
-    FUN_00a57630(arg);
+    controller->NiPSysModifierCtlr::LinkObject(*reinterpret_cast<NiStream*>(arg));
+    RefCountedStandIn*& interpolator = *reinterpret_cast<RefCountedStandIn**>(&controller->m_spControllerInterpolator);
     if (arg->m_d8 >= 0xa010068)
     {
         return;
@@ -353,7 +282,7 @@ void FUN_00c32bf0_cls::FUN_00c32bf0(ArgStandIn* arg)
     {
         pNew = 0;
     }
-    RefCountedStandIn* pOld = m_34;
+    RefCountedStandIn* pOld = interpolator;
     if (pOld != pNew)
     {
         if (pOld != 0)
@@ -363,7 +292,7 @@ void FUN_00c32bf0_cls::FUN_00c32bf0(ArgStandIn* arg)
                 pOld->DeleteThis();
             }
         }
-        m_34 = pNew;
+        interpolator = pNew;
         if (pNew != 0)
         {
             InterlockedIncrement((LONG*)&pNew->m_uiRefCount);

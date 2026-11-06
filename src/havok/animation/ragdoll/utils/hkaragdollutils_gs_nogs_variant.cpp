@@ -5,6 +5,11 @@
 
 // src/havok/animation/ragdoll/utils/hkaragdollutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/ragdoll/utils/hkaragdollutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include <new>
+
+#include "../../../../../include/hkErrStream.h"
+#include "../../../../../include/hkError.h"
+
 extern "C"
 {
     int __cdecl FUN_00cea030(void*, void*);
@@ -62,23 +67,6 @@ struct Obj
     char pad0[0xc];
     Inner* inner;
 };
-struct hkErrStream
-{
-    void* p1;
-    void* p2;
-    void* p3;
-    hkErrStream(void* buf, int size) throw();
-    ~hkErrStream() throw();
-    hkErrStream& operator<<(const char* str) throw();
-};
-struct hkError
-{
-    virtual ~hkError() throw();
-    virtual void unk0();
-    virtual void unk1();
-    virtual int message(int type, int id, const char* desc, const char* file, int line) throw();
-};
-extern hkError* DAT_01268360;
 static bool IsSupportedRagdollConstraint(Obj* obj, bool reportError) throw();
 void caller(Obj* obj);
 struct SpawnedAllocator
@@ -118,13 +106,6 @@ struct SourceRecord
 };
 int __cdecl SpawnObjectFromRecord(SourceRecord* src);
 
-struct Builder390
-{
-    unsigned int unk00, unk04, unk08;
-    void FUN_00cb1600(void*, int);
-    void FUN_00cc01c0(const char*);
-    void FUN_00cc00e0();
-};
 struct Constraint390
 {
     virtual void v00();
@@ -201,11 +182,17 @@ static __declspec(noinline) void* FUN_00ce9cf0(Owner390* owner)
     case 5:
     default: {
         char message[512];
-        Builder390 stream;
-        stream.FUN_00cb1600(message, sizeof(message));
-        stream.FUN_00cc01c0("Unsupported type of constraint in rag doll.");
-        DAT_01268360->message(1, 0xabbabf3b, message, ".\\Utils\\hkaRagdollUtils.cpp", 230);
-        stream.FUN_00cc00e0();
+        // Preserve the explicit stream lifetime without adding exception cleanup.
+        union
+        {
+            void* alignment;
+            char bytes[sizeof(hkErrStream)];
+        } streamStorage;
+        ::new (streamStorage.bytes) hkErrStream(message, sizeof(message));
+        hkErrStream& stream = *reinterpret_cast<hkErrStream*>(streamStorage.bytes);
+        stream << "Unsupported type of constraint in rag doll.";
+        hkError::s_instance->message(1, 0xabbabf3b, message, ".\\Utils\\hkaRagdollUtils.cpp", 230);
+        stream.hkErrStream::~hkErrStream();
         return 0;
     }
     }
@@ -216,7 +203,8 @@ void* ConstraintData390(Owner390* owner)
 }
 
 #include <xmmintrin.h>
-__declspec(align(16)) struct Vec4
+// local form of Vec4: 0x00ce9e90 needs aligned integer POD copies; the shared hkVector4 SIMD copy yields 230 instead of 258 bytes.
+__declspec(align(16)) struct RagdollVectorWords
 {
     int x;
     int y;
@@ -226,7 +214,7 @@ __declspec(align(16)) struct Vec4
 
 struct Target
 {
-    void FUN_00c7f690(void* where, Vec4* v);
+    void FUN_00c7f690(void* where, RagdollVectorWords* v);
 };
 
 struct Body : public Obj
@@ -250,17 +238,17 @@ static __declspec(noinline) bool IsSupportedRagdollConstraint(Obj* obj, bool rep
         return true;
     if (reportError)
     {
-        DAT_01268360->message(1, 0, 0, 0, 0);
+        hkError::s_instance->message(1, 0, 0, 0, 0);
     }
     return false;
 }
 
-static __declspec(noinline) Vec4* FUN_00ce9c40(Obj* obj) throw()
+static __declspec(noinline) RagdollVectorWords* FUN_00ce9c40(Obj* obj) throw()
 {
     Inner* inner = obj->inner;
     int t = inner->getSomething();
     if (t <= 8)
-        return (Vec4*)((char*)inner + 0x20);
+        return (RagdollVectorWords*)((char*)inner + 0x20);
     return 0;
 }
 
@@ -285,8 +273,8 @@ extern "C" int __cdecl FUN_00ce9e90(void* p)
         {
             char* shape = b->shape;
             char* owner = b->owner;
-            Vec4 v = *(Vec4*)(shape + 0x120);
-            Vec4* vel = FUN_00ce9c40(b);
+            RagdollVectorWords v = *(RagdollVectorWords*)(shape + 0x120);
+            RagdollVectorWords* vel = FUN_00ce9c40(b);
             *(__m128*)vel = _mm_setzero_ps();
             Target* target = FUN_00ce9cf0(b);
             target->FUN_00c7f690(owner + 0xf0, &v);
@@ -296,7 +284,7 @@ extern "C" int __cdecl FUN_00ce9e90(void* p)
             int buf[0x80];
             hkErrStream stream(buf, 0x200);
             stream << "Unusual : Aligning constraint spaces of a stiff spring.";
-            DAT_01268360->message(1, 0xabba876d, (const char*)buf, ".\\Utils\\hkaRagdollUtils.cpp", 0x134);
+            hkError::s_instance->message(1, 0xabba876d, (const char*)buf, ".\\Utils\\hkaRagdollUtils.cpp", 0x134);
         }
     }
     return 0;

@@ -2,7 +2,10 @@
 // src/havok/physics/collide/agent3/machine/nn/hkplinkedcollidable.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent3/machine/nn/hkplinkedcollidable.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpLinkedCollidable.h"
+#include "../../../../../../../include/hkpLinkedCollidable.h"
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
 
 struct FUN_00d08210_Entry
 {
@@ -44,24 +47,7 @@ inline void* operator new(unsigned int, void* p)
 inline void operator delete(void*, void*)
 {}
 
-class hkMemoryAllocatorD082;
-
-struct hkMemoryRouterD082
-{
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorD082* m_pStreamAllocator;
-
-    hkMemoryAllocatorD082& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-namespace hkRouterD082 {
-extern "C" hkMemoryRouterD082& __cdecl FUN_00c85750() throw();
-}
-
-void __cdecl FUN_00c908c0(hkMemoryAllocatorD082& kAlloc, void* pArray, int iNumElements, int iSizeElem);
+// The router accessor is 0x00c85750, also bound to hkMemoryRouter::GetMonitorStream in other units.
 
 struct ItemD082
 {
@@ -84,48 +70,36 @@ template <class T> __forceinline void constructWithArrayD082(T* pDst, int n, con
         new (pDst + i) T(pSrc[i]);
 }
 
-template <class T> class hkArrayD082
+template <typename T>
+__forceinline hkArrayBase<T>& hkArrayBase<T>::copyFromArray(hkMemoryAllocator& kAlloc,
+                                                         const hkArrayBase<T>& a, hkTypeIsClass)
 {
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+    const int iSize = m_iElementCount;
+    const int iSrcSize = a.m_iElementCount;
+    int iCopiedCount = (iSrcSize > iSize) ? iSize : iSrcSize;
+    if (getCapacity() < iSrcSize)
+    {
+        int iCap2 = 2 * getCapacity();
+        int iNewCap = (iSrcSize < iCap2) ? iCap2 : iSrcSize;
+        hkArrayUtil::_reserve(kAlloc, this, iNewCap, sizeof(T));
+    }
+    copyD082(m_data, a.m_data, iCopiedCount);
+    constructWithArrayD082(m_data + iCopiedCount, iSrcSize - iCopiedCount, a.m_data + iCopiedCount);
+    m_iElementCount = iSrcSize;
+    return *this;
+}
 
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    T* begin()
-    {
-        return m_data;
-    }
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+    return hkMemoryRouter::getInstance().heap();
+}
 
-    __forceinline void _copyFromArray(hkMemoryRouterD082& kRouter, const hkArrayD082& a)
-    {
-        hkMemoryAllocatorD082& kAlloc = kRouter.heap();
-        const int iSize = m_iElementCount;
-        const int iSrcSize = a.m_iElementCount;
-        int iCopiedCount = (iSrcSize > iSize) ? iSize : iSrcSize;
-        if (getCapacity() < iSrcSize)
-        {
-            int iCap2 = 2 * getCapacity();
-            int iNewCap = (iSrcSize < iCap2) ? iCap2 : iSrcSize;
-            FUN_00c908c0(kAlloc, this, iNewCap, sizeof(T));
-        }
-        copyD082(m_data, a.m_data, iCopiedCount);
-        constructWithArrayD082(m_data + iCopiedCount, iSrcSize - iCopiedCount, a.m_data + iCopiedCount);
-        m_iElementCount = iSrcSize;
-    }
-    __forceinline hkArrayD082& operator=(const hkArrayD082& a)
-    {
-        _copyFromArray(hkRouterD082::FUN_00c85750(), a);
-        return *this;
-    }
-};
+template <typename T, typename Allocator>
+__forceinline hkArray<T, Allocator>& hkArray<T, Allocator>::operator=(const hkArray& a)
+{
+    copyFromArray(Allocator().get(this), a, hkTypeIsClass());
+    return *this;
+}
 
 template <class T> inline void quickSortD082(T* pArr, int iSize, bool(__cdecl* pfnCmp)(const T&, const T&))
 {
@@ -139,18 +113,18 @@ class ContainerD082
     int unk00, unk04, unk08, unk0C;
     signed char m_cIndex;
     char unk11[0x3f];
-    hkArrayD082<ItemD082> m_kUnsortedGeometryList;
+    hkArray<ItemD082> m_kUnsortedGeometryList;
     int unk5C, unk60, unk64, unk68, unk6C, unk70, unk74, unk78, unk7C, unk80, unk84, unk88;
     int unk8C, unk90, unk94, unk98, unk9C, unkA0, unkA4, unkA8, unkAC, unkB0, unkB4, unkB8;
     int unkBC, unkC0, unkC4, unkC8, unkCC, unkD0, unkD4, unkD8, unkDC, unkE0, unkE4;
     unsigned char m_aucTypes[8];
 
-    void CopyAndSortGeometryList(hkArrayD082<ItemD082>& kOut) const;
+    void CopyAndSortGeometryList(hkArray<ItemD082>& kOut) const;
 };
 
 // Copies m_kUnsortedGeometryList into kOut and quick-sorts it by nested value when m_aucTypes[m_cIndex] is 5.
 // @fnv 0x00d08260
-void ContainerD082::CopyAndSortGeometryList(hkArrayD082<ItemD082>& kOut) const
+void ContainerD082::CopyAndSortGeometryList(hkArray<ItemD082>& kOut) const
 {
     kOut = m_kUnsortedGeometryList;
     if (m_aucTypes[m_cIndex] == 5)

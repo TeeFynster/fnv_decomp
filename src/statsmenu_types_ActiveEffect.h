@@ -43,7 +43,7 @@ class ActiveEffect
     MagicTarget* pTarget;                           // +0x24, 4 bytes
     MagicCaster* m_pEffectInstance;                           // +0x28, 4 bytes
     MagicSystem__SpellType m_eSpellType;            // +0x2C, 4 bytes
-    SoundPlaybackHandle m_kSoundHandle;                   // +0x30, 12 bytes
+    BSSoundHandle m_kSoundHandle;                   // +0x30, 12 bytes
     TESBoundObject* pSource;                        // +0x3C, 4 bytes
     BSSimpleList<MagicHitEffect*>* pHitEffectList;  // +0x40, 4 bytes
     MagicItem* pMagicItem;                          // +0x44, 4 bytes

@@ -1,35 +1,30 @@
-// Source layout: ListBox<int>. PC corrections are in generate_headers.py.
-#ifndef FNV_LISTBOX_INT__H
-#define FNV_LISTBOX_INT__H
-#include "layout_support.h"
+#pragma once
+
 #include "ListBoxBase.h"
-#pragma pack(push, 4)
+#include "MagicTarget.h"
+
+class ListBoxItem_int_;
+class Tile;
+
 class ListBox_int_ : public ListBoxBase
 {
-  public:
-    BSSimpleList<ListBoxItem_int_*> bSSimpleList_ListBoxItem_int____Component;  // +0x4
-    Tile* m_pListTile;                                                          // +0xC
-    Tile* m_pSelectedTile;                                                      // +0x10
-    Tile* m_pHighlightedTile;                                                   // +0x14
-    const char* pTemplateName;                                                  // +0x18
-    unsigned short m_usSelectedIndex;                                           // +0x1C
+public:
+    BSSimpleList<ListBoxItem_int_*> bSSimpleList_ListBoxItem_int____Component;
+    Tile* m_pListTile;
+    Tile* m_pSelectedTile;
+    Tile* m_pHighlightedTile;
+    const char* pTemplateName;
+    unsigned short m_usSelectedIndex;
     unsigned short layoutPadding1E;
-    float m_fFirstListValue;   // +0x20
-    float m_fSecondListValue;  // +0x24
-    float m_fThirdListValue;   // +0x28
-    unsigned short usFlags;    // +0x2C
+    float m_fFirstListValue;
+    float m_fSecondListValue;
+    float m_fThirdListValue;
+    unsigned short usFlags;
     unsigned short layoutPadding2E;
+
+    Tile* AddItem(int, const char*, int (*)(ListBoxItem_int_*, ListBoxItem_int_*), const char*);
+    void Synchronize();
+    void Initialize(Tile*, const char*);
+    bool ContainsKey(Tile*);
+    bool SetTileSelection(Tile*, int);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(ListBox_int_) == 0x30);
-FNV_STATIC_ASSERT(offsetof(ListBox_int_, bSSimpleList_ListBoxItem_int____Component) == 0x4);
-FNV_STATIC_ASSERT(offsetof(ListBox_int_, m_pListTile) == 0xC);
-FNV_STATIC_ASSERT(offsetof(ListBox_int_, m_pSelectedTile) == 0x10);
-FNV_STATIC_ASSERT(offsetof(ListBox_int_, m_pHighlightedTile) == 0x14);
-FNV_STATIC_ASSERT(offsetof(ListBox_int_, pTemplateName) == 0x18);
-FNV_STATIC_ASSERT(offsetof(ListBox_int_, m_usSelectedIndex) == 0x1C);
-FNV_STATIC_ASSERT(offsetof(ListBox_int_, m_fFirstListValue) == 0x20);
-FNV_STATIC_ASSERT(offsetof(ListBox_int_, m_fSecondListValue) == 0x24);
-FNV_STATIC_ASSERT(offsetof(ListBox_int_, m_fThirdListValue) == 0x28);
-FNV_STATIC_ASSERT(offsetof(ListBox_int_, usFlags) == 0x2C);
-#endif

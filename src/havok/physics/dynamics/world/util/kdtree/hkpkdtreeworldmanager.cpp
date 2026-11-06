@@ -1,3 +1,22 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#include "../../../../../../../include/hkVector4.h"
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/BSAudio.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/hkpEntityListener.h"
+#include "../../../../../../../include/hkpPhantomListener.h"
+
+// These vectors have no default initialization in the original code.
+inline hkVector4::hkVector4() {}
+
+template <typename T> inline T& routerHeap(hkMemoryRouter& router)
+{
+    return *reinterpret_cast<T*>(router.m_heap);
+}
 
 // src/havok/physics/dynamics/world/util/kdtree/hkpkdtreeworldmanager.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/util/kdtree/hkpkdtreeworldmanager.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -346,53 +365,26 @@ struct D0A6A0_World
     D0A6A0_EntityArray m_kPhantoms;
 };
 
-struct D0A6A0_Allocator;
-void FUN_00c908c0(D0A6A0_Allocator& alloc, void* arr, int numElem, int sizeElem);
+void FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
 
-struct D0A6A0_CollidableArray
+static __forceinline void D0A6A0_CollidableArray_reserve(hkArrayBase<D0A6A0_Collidable*>& self, hkMemoryAllocator& alloc, int n)
 {
-    D0A6A0_Collidable** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void reserve(D0A6A0_Allocator& alloc, int n)
-    {
-        const int capacity = getCapacity();
+        const int capacity = self.getCapacity();
         if (capacity < n)
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(alloc, this, newSize, 4);
+            FUN_00c908c0(alloc, (&self), newSize, 4);
         }
     }
-    void pushBackUnchecked(D0A6A0_Collidable* c)
-    {
-        D0A6A0_constructWithCopy<D0A6A0_Collidable*>(m_data + m_iElementCount, 1, c);
-        m_iElementCount++;
-    }
-};
 
-struct D0A6A0_Allocator;
-
-struct D0A6A0_Router
+static __forceinline void D0A6A0_CollidableArray_pushBackUnchecked(hkArrayBase<D0A6A0_Collidable*>& self, D0A6A0_Collidable* c)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    D0A6A0_Allocator* m_pStreamAllocator;
-
-    D0A6A0_Allocator& heap()
-    {
-        return *m_pStreamAllocator;
+        D0A6A0_constructWithCopy<D0A6A0_Collidable*>(self.m_data + self.m_iElementCount, 1, c);
+        self.m_iElementCount++;
     }
-};
 
-D0A6A0_Router& FUN_00c85750();
+hkMemoryRouter& FUN_00c85750();
 
 struct D0A6A0_Manager
 {
@@ -405,15 +397,15 @@ struct D0A6A0_Manager
     int unk18;
     D0A6A0_World* m_pOwningWorld;
 
-    void CollectCollidables(D0A6A0_CollidableArray& out);
+    void CollectCollidables(hkArrayBase<D0A6A0_Collidable*>& out);
 };
 
 // @fnv 0x00d0a6a0
-void D0A6A0_Manager::CollectCollidables(D0A6A0_CollidableArray& aCollidables)
+void D0A6A0_Manager::CollectCollidables(hkArrayBase<D0A6A0_Collidable*>& aCollidables)
 {
     aCollidables.m_iElementCount = 0;
     int n = m_pOwningWorld->m_pJobSemaphore->GetBroadphaseType();
-    aCollidables.reserve(FUN_00c85750().heap(), n);
+    D0A6A0_CollidableArray_reserve(aCollidables, routerHeap<hkMemoryAllocator>(FUN_00c85750()), n);
 
     {
         D0A6A0_IslandArray& islands = m_pOwningWorld->m_activeIslands;
@@ -421,7 +413,7 @@ void D0A6A0_Manager::CollectCollidables(D0A6A0_CollidableArray& aCollidables)
         {
             for (int j = 0; j < islands.m_data[i]->m_iActorEntryCount; j++)
             {
-                aCollidables.pushBackUnchecked(&islands.m_data[i]->m_kActorEntries[j]->m_kCollidable);
+                D0A6A0_CollidableArray_pushBackUnchecked(aCollidables, &islands.m_data[i]->m_kActorEntries[j]->m_kCollidable);
             }
         }
     }
@@ -431,7 +423,7 @@ void D0A6A0_Manager::CollectCollidables(D0A6A0_CollidableArray& aCollidables)
         {
             for (int j = 0; j < islands.m_data[i]->m_iActorEntryCount; j++)
             {
-                aCollidables.pushBackUnchecked(&islands.m_data[i]->m_kActorEntries[j]->m_kCollidable);
+                D0A6A0_CollidableArray_pushBackUnchecked(aCollidables, &islands.m_data[i]->m_kActorEntries[j]->m_kCollidable);
             }
         }
     }
@@ -442,7 +434,7 @@ void D0A6A0_Manager::CollectCollidables(D0A6A0_CollidableArray& aCollidables)
             D0A6A0_Collidable* c = &phantoms.m_data[i]->m_kCollidable;
             if (c->unk00 != 0)
             {
-                aCollidables.pushBackUnchecked(c);
+                D0A6A0_CollidableArray_pushBackUnchecked(aCollidables, c);
             }
         }
     }
@@ -454,7 +446,7 @@ void D0A6A0_Manager::CollectCollidables(D0A6A0_CollidableArray& aCollidables)
             D0A6A0_Entity* pEntity = pFixedIsland->m_kActorEntries[i];
             if (pEntity != fixedBody)
             {
-                aCollidables.pushBackUnchecked(&pEntity->m_kCollidable);
+                D0A6A0_CollidableArray_pushBackUnchecked(aCollidables, &pEntity->m_kCollidable);
             }
         }
     }
@@ -481,29 +473,7 @@ void FUN_00d0ac40_Owner::FUN_00d0ac40(int aiArg1, int aiArg2, int aiArg3, int ai
 }
 
 namespace fnv_00d0adc0 {
-class hkMemoryAllocatorD0A
-{
-  public:
-    virtual ~hkMemoryAllocatorD0A() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterD0A
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorD0A* m_pStreamAllocator;
-
-    hkMemoryAllocatorD0A& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" hkMemoryRouterD0A& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 
 class hkObjD0AD : public FUN_00d0a4f0
 {
@@ -512,7 +482,7 @@ class hkObjD0AD : public FUN_00d0a4f0
 
     static void operator delete(void* p) throw()
     {
-        FUN_00c85750().heap().ReleaseBlock(p, static_cast<hkObjD0AD*>(p)->GetAllocationSize());
+        routerHeap<hkMemoryAllocator>(FUN_00c85750()).blockFree(p, static_cast<hkObjD0AD*>(p)->GetAllocationSize());
     }
     int GetAllocationSize() const
     {
@@ -532,40 +502,18 @@ hkObjD0AD* hkObjD0AD::FUN_00d0adc0(unsigned int uiFlags) throw()
 }  // namespace fnv_00d0adc0
 
 namespace fnv_00d9d800 {
-struct BSAudioVtbl
-{
-    virtual void unk00();
-    virtual int unk04(int size);
-};
-
-struct BSAudio
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0C;
-    BSAudioVtbl* unk10;
-};
-
 BSAudio* __cdecl FUN_00c85750();
 
-// Calls FUN_00c85750 twice and stores the result of unk10->unk04(index * 16) into out[0] and out[1].
+// Allocates two buffers of index * 16 bytes through the router heap and stores their addresses in paiOut.
 // @fnv 0x00d9d800
 void __cdecl GetAudioPair(int* paiOut, int index)
 {
     BSAudio* a = FUN_00c85750();
-    paiOut[0] = a->unk10->unk04(index * 16);
+    paiOut[0] = reinterpret_cast<int>(reinterpret_cast<hkMemoryAllocator*>(a->pListener)->blockAlloc(index * 16));
     BSAudio* b = FUN_00c85750();
-    paiOut[1] = b->unk10->unk04(index * 16);
+    paiOut[1] = reinterpret_cast<int>(reinterpret_cast<hkMemoryAllocator*>(b->pListener)->blockAlloc(index * 16));
 }
 }  // namespace fnv_00d9d800
-
-struct hkResultD0A3
-{
-    int m_pClassEnum;
-    hkResultD0A3()
-    {}
-};
 
 struct hkBase0D0A3
 {
@@ -610,7 +558,8 @@ class hkCollectorD0A3
     int m_bHasHit;
 };
 
-hkResultD0A3 __cdecl FUN_00d98ca0(void* world, hkInputD0A3* input, int* inputBody, hkCollectorD0A3* collector);
+// This is the same hkBool-returning query used by CastRay below; hkResult is an enum, with a different return ABI.
+hkBool __cdecl FUN_00d98ca0(void* world, hkInputD0A3* input, int* inputBody, hkCollectorD0A3* collector);
 
 class hkQueryD0A3
 {
@@ -629,18 +578,6 @@ void hkQueryD0A3::RayCast(hkInputD0A3* input, hkPhantomD0A3* phantom, int filter
     FUN_00d98ca0(m_pOwningWorld, input, &input->m_10, &collector);
 }
 
-struct __declspec(align(16)) hkVector4D0A4
-{
-    float x, y, z, w;
-};
-
-struct hkBoolD0A4
-{
-    hkBoolD0A4()
-    {}
-    char m_cBooleanValue;
-};
-
 struct __declspec(align(16)) RayCastOutputD0A4
 {
     RayCastOutputD0A4()
@@ -651,7 +588,7 @@ struct __declspec(align(16)) RayCastOutputD0A4
         m_uiShapeKeyIndex = 0;
         m_pRootCollidable = 0;
     }
-    hkVector4D0A4 m_vHitNormal;
+    __declspec(align(16)) hkVector4 m_vHitNormal;
     float m_fHitFraction;
     int m_iExtraInfo;
     int unk18;
@@ -685,8 +622,8 @@ struct QueryD0A4 : QueryOwnerD0A4, CdBodyD0A4, QueryFilterD0A4
 
 struct RayInputD0A4
 {
-    hkVector4D0A4 m_vFrom;
-    hkVector4D0A4 m_vTo;
+    __declspec(align(16)) hkVector4 m_vFrom;
+    __declspec(align(16)) hkVector4 m_vTo;
 };
 
 class RayCollectorD0A4
@@ -708,7 +645,7 @@ class RayCollectorD0A4
     int m_iUser;
 };
 
-hkBoolD0A4 __cdecl FUN_00d98ca0(void* pkShape, const RayInputD0A4* pkInput, const hkVector4D0A4* pkTo,
+hkBool __cdecl FUN_00d98ca0(void* pkShape, const RayInputD0A4* pkInput, const hkVector4* pkTo,
                                 RayCollectorD0A4* pkCollector);
 
 struct RayCasterD0A4
@@ -765,24 +702,8 @@ struct D0ARange
     int m_kPointB;
     int m_iThirdValue;
 };
-struct D0AHeap
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void bufDealloc(void* p, int bytes);
-};
-struct D0ARouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    D0AHeap* m_pStreamAllocator;
-};
 namespace fnvc_adapt {
-D0ARouter* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 }
 struct D0ASub
 {
@@ -857,54 +778,32 @@ void D0AObj::CollectAndProcessCollidables(int a, int b)
             mon->m_kRayEnd = pos + sizeof(D0ATimer12);
         }
     }
-    D0ARouter* router = fnvc_adapt::FUN_00c85750();
-    D0AHeap* heap = router->m_pStreamAllocator;
+    hkMemoryRouter* router = fnvc_adapt::FUN_00c85750();
+    hkMemoryAllocator* heap = reinterpret_cast<hkMemoryAllocator*>(router->m_heap);
     int cap = r.m_iThirdValue;
     r.m_kPointB = 0;
     if ((cap & 0x80000000) == 0)
-        heap->bufDealloc(r.m_kPointA, (cap & 0x3fffffff) * 4);
+        heap->bufFree(r.m_kPointA, (cap & 0x3fffffff) * 4);
 }
 
-class hkReferencedObjectD0A
-{
-  public:
-    hkReferencedObjectD0A() throw()
-    {
-        m_sReferenceCount = 1;
-    }
-    virtual ~hkReferencedObjectD0A() throw();
 
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
 
 class FUN_00d0a2d0;
 
-class hkpActionD0A : public hkReferencedObjectD0A
+// The primary base ends at 0x14 (entity-listener vfptr); hkpAction has an additional name field at 0x14.
+class KdTreeStorageBase : public hkReferencedObject
 {
   public:
-    hkpActionD0A() throw() : m_pCurrentSimulationIsland(0), m_ulUserData(0)
+    KdTreeStorageBase() throw() : m_pCurrentSimulationIsland(0), m_ulUserData(0)
     {}
-    virtual ~hkpActionD0A() throw();
+    virtual ~KdTreeStorageBase() throw();
 
     FUN_00d0a2d0* m_pOwningWorld;
     void* m_pCurrentSimulationIsland;
     unsigned int m_ulUserData;
 };
 
-class hkpEntityListenerD0A
-{
-  public:
-    virtual ~hkpEntityListenerD0A() throw();
-};
-
 class WorldD0A;
-
-class hkpPhantomListenerD0A
-{
-  public:
-    virtual ~hkpPhantomListenerD0A() throw();
-};
 
 class WorldHolderD0A
 {
@@ -918,15 +817,15 @@ class WorldHolderD0A
 class WorldD0A
 {
   public:
-    void FUN_00c93820(hkpEntityListenerD0A* pkListener);
-    void FUN_00c93860(hkpPhantomListenerD0A* pkListener);
+    void FUN_00c93820(hkpEntityListener* pkListener);
+    void FUN_00c93860(hkpPhantomListener* pkListener);
 };
 
 class FUN_00d0a2d0 : public WorldD0A
 {
 };
 
-class ListenerMgrD0A : public hkpActionD0A, public hkpEntityListenerD0A, public hkpPhantomListenerD0A
+class ListenerMgrD0A : public KdTreeStorageBase, public hkpEntityListener, public hkpPhantomListener
 {
   public:
     ListenerMgrD0A(FUN_00d0a2d0* pkWorld, bool bFlag) throw();
@@ -947,13 +846,6 @@ ListenerMgrD0A::ListenerMgrD0A(FUN_00d0a2d0* pkWorld, bool bFlag) throw()
 }
 
 namespace fnv_00d0a560 {
-struct Iface_d0a560A
-{
-    virtual void slot0();
-    virtual int slot1(int n);
-    virtual void slot2(void* p, int n);
-};
-
 struct S00d0a560_IfaceB
 {
     virtual void slot0();
@@ -975,18 +867,10 @@ struct S00d0a560_IfaceB
     virtual void slot16(void* a, void* b);
 };
 
-struct BSAudio
+inline hkMemoryAllocator& audioHeap(BSAudio* audio)
 {
-    Iface_d0a560A& heap()
-    {
-        return *unk10;
-    }
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    Iface_d0a560A* unk10;
-};
+    return *reinterpret_cast<hkMemoryAllocator*>(audio->pListener);
+}
 
 namespace fnvc_adapt {
 BSAudio* __cdecl FUN_00c85750(void);
@@ -1133,14 +1017,14 @@ void S00d0a560_Owner::FUN_00d0a560(int* out, int ch)
     if (v != 0)
     {
         v->ClearBuffers();
-        fnvc_adapt::FUN_00c85750()->heap().slot2(v, 0x50);
+        audioHeap(fnvc_adapt::FUN_00c85750()).blockFree(v, 0x50);
     }
     int t2 = f.s24.FUN_00d9e000();
     ((FUN_00d976d0_Obj*)&f.s30)->FUN_00d976d0();
     unk1C->unk58->slot16(&f.s44, &f.s50);
     f.s30.unk00 = t2;
     f.s30.unk05 = 0;
-    FUN_00d97970_Obj* p = (FUN_00d97970_Obj*)fnvc_adapt::FUN_00c85750()->heap().slot1(0x50);
+    FUN_00d97970_Obj* p = (FUN_00d97970_Obj*)audioHeap(fnvc_adapt::FUN_00c85750()).blockAlloc(0x50);
     *out = p ? p->Init(&f.s30) : 0;
     S00d0a560_TimerBuf* pTimerBuf = (S00d0a560_TimerBuf*)TlsGetValue(DAT_0126835c);
     S00d0a560_Timer* c = pTimerBuf->cur;
@@ -1218,41 +1102,26 @@ struct ThunkOwner : ThunkPrim, ThunkSec
 
 static ThunkOwner g_thunk;
 
-struct __declspec(align(16)) FourFloatVector
+// Adds typed-array helpers to the shared allocator without redeclaring its virtual interface.
+struct IntArrayAllocator : hkMemoryAllocator
 {
-    float x, y, z, w;
-};
-
-struct Allocator
-{
-    __forceinline Allocator* same()
+    __forceinline IntArrayAllocator* same()
     {
         return this;
     }
-    virtual void ReportDiagnostic();
-    virtual void* allocate(int bytes);
-    virtual void freeBlock(void* block, int bytes);
-    virtual void* allocateBuffer(int& bytes);
-    virtual void freeBuffer(void* block, int bytes);
     int* allocArray(int& bytes, int n)
     {
-        return static_cast<int*>(allocateBuffer(bytes = n * 4));
+        return static_cast<int*>(bufAlloc(bytes = n * 4));
     }
     void freeArray(int*& data, int& cap)
     {
         if ((cap & 0x80000000) == 0)
-            freeBuffer(data, (cap & 0x3fffffff) * 4);
+            bufFree(data, (cap & 0x3fffffff) * 4);
     }
 };
-struct Router
+__forceinline hkMemoryRouter* getRouter()
 {
-    int field00, field04, field08;
-    Allocator* stack;
-    Allocator* heap;
-};
-__forceinline Router* getRouter()
-{
-    return reinterpret_cast<Router*>(&::FUN_00c85750());
+    return reinterpret_cast<hkMemoryRouter*>(&::FUN_00c85750());
 }
 struct TreeInfo
 {
@@ -1260,7 +1129,7 @@ struct TreeInfo
     unsigned char mode, enabled;
     short field06;
     int field08, field0c;
-    FourFloatVector minimum, maximum;
+    __declspec(align(16)) hkVector4 minimum, maximum;
     void FUN_00d976d0();
 };
 struct Tree
@@ -1276,7 +1145,9 @@ struct Tree
     void ClearBuffers();
     Tree* Init(TreeInfo*);
 };
-struct Bounds
+// hkpWorld::m_broadPhase (World +0x58): an hkpBroadPhase seen through its extents getter (virtual slot 16,
+// getExtents(min, max)) with this unit's hkVector4. Not the shared AABB Bounds.
+struct BroadPhaseView
 {
     virtual void slot00();
     virtual void slot01();
@@ -1294,14 +1165,14 @@ struct Bounds
     virtual void slot13();
     virtual void slot14();
     virtual void slot15();
-    virtual void getBounds(FourFloatVector*, FourFloatVector*);
+    virtual void getBounds(hkVector4*, hkVector4*);
 };
 struct World
 {
     int field00, field04, field08, field0c, field10, field14, field18, field1c;
     int field20, field24, field28, field2c, field30, field34, field38, field3c;
     int field40, field44, field48, field4c, field50, field54;
-    Bounds* bounds;
+    BroadPhaseView* bounds;
     int field5c, field60, field64, field68, field6c, field70, field74;
     void* context;
 };
@@ -1404,21 +1275,21 @@ struct IntBuffer
     void allocate(int count)
     {
         int bytes = count * 4;
-        data = static_cast<int*>(getRouter()->stack->allocateBuffer(bytes));
+        data = static_cast<int*>(reinterpret_cast<hkMemoryAllocator*>(getRouter()->m_temp)->bufAlloc(bytes));
         capacity = bytes / 4;
         if (capacity == 0)
             capacity = 0x80000000;
     }
     void release()
     {
-        Allocator* allocator = getRouter()->stack;
+        hkMemoryAllocator* allocator = reinterpret_cast<hkMemoryAllocator*>(getRouter()->m_temp);
         if (capacity >= 0)
-            allocator->freeBuffer(data, (capacity & 0x3fffffff) * 4);
+            allocator->bufFree(data, (capacity & 0x3fffffff) * 4);
     }
 };
 __forceinline int* AllocateBufferWithSize(int& bytes, int n)
 {
-    return static_cast<int*>(getRouter()->stack->allocArray(bytes, n));
+    return static_cast<int*>(reinterpret_cast<IntArrayAllocator*>(getRouter()->m_temp)->allocArray(bytes, n));
 }
 __forceinline void bufCap(int& cap, int bytes)
 {
@@ -1428,7 +1299,7 @@ __forceinline void bufCap(int& cap, int bytes)
 }
 __forceinline void ReturnMemory(int*& data, int& cap)
 {
-    getRouter()->stack->freeArray(data, cap);
+    reinterpret_cast<IntArrayAllocator*>(getRouter()->m_temp)->freeArray(data, cap);
 }
 struct Manager
 {
@@ -1443,7 +1314,7 @@ void Manager::FUN_00d0a810(Tree** tree, Input* input, Queue* queue, Workers* wor
     if (oldTree)
     {
         oldTree->ClearBuffers();
-        getRouter()->heap->freeBlock(oldTree, 0x50);
+        reinterpret_cast<hkMemoryAllocator*>(getRouter()->m_heap)->blockFree(oldTree, 0x50);
     }
     struct Frame
     {
@@ -1474,22 +1345,22 @@ void Manager::FUN_00d0a810(Tree** tree, Input* input, Queue* queue, Workers* wor
     job.count = count;
     job.enabled = 1;
     world->bounds->getBounds(&job.minimum, &job.maximum);
-    void* storage = getRouter()->heap->allocate(0x50);
+    void* storage = reinterpret_cast<hkMemoryAllocator*>(getRouter()->m_heap)->blockAlloc(0x50);
     *tree = storage ? static_cast<Tree*>(storage)->Init(&job) : 0;
     Scratch& scratch = early.scratch;
     GetAudioPair(&scratch, count);
-    Counter* counter = static_cast<Counter*>(getRouter()->heap->allocate(16));
+    Counter* counter = static_cast<Counter*>(reinterpret_cast<hkMemoryAllocator*>(getRouter()->m_heap)->blockAlloc(16));
     tail.counter = counter;
     counter->value = 4;
-    Allocator* __restrict firstAllocator = getRouter()->stack->same();
+    IntArrayAllocator* __restrict firstAllocator = reinterpret_cast<IntArrayAllocator*>(getRouter()->m_temp)->same();
     int* firstData = firstAllocator->allocArray(early.firstBytes, 4);
     tail.firstData = firstData;
     bufCap(early.firstCap, early.firstBytes);
-    Allocator* __restrict secondAllocator = getRouter()->stack->same();
+    IntArrayAllocator* __restrict secondAllocator = reinterpret_cast<IntArrayAllocator*>(getRouter()->m_temp)->same();
     early.secondData = secondAllocator->allocArray(early.secondBytes, 4);
     bufCap(early.secondCap, early.secondBytes);
     Semaphore* semaphore;
-    storage = getRouter()->heap->allocate(4);
+    storage = reinterpret_cast<hkMemoryAllocator*>(getRouter()->m_heap)->blockAlloc(4);
     if (storage)
         semaphore = static_cast<Semaphore*>(storage)->Create(0, 1000);
     else
@@ -1554,11 +1425,11 @@ void Manager::FUN_00d0a810(Tree** tree, Input* input, Queue* queue, Workers* wor
     FUN_00d9d950(*tree, count2 = const_cast<const int&>(tail.count), info.first, info.second);
     timerEvent(str_01076f38);
     FreeBufferPair(&scratch, count2);
-    getRouter()->heap->freeBlock(const_cast<Counter* const&>(tail.counter), 16);
+    reinterpret_cast<hkMemoryAllocator*>(getRouter()->m_heap)->blockFree(const_cast<Counter* const&>(tail.counter), 16);
     if (semaphore)
     {
         semaphore->FUN_00d04370();
-        getRouter()->heap->freeBlock(semaphore, 4);
+        reinterpret_cast<hkMemoryAllocator*>(getRouter()->m_heap)->blockFree(semaphore, 4);
     }
     ReturnMemory(early.secondData, early.secondCap);
     ReturnMemory(const_cast<int*&>(tail.firstData), early.firstCap);

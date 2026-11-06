@@ -2,7 +2,18 @@
 // src/staging/blk_00c20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/BSMultiBoundNode.h"
+#include "../../include/NiObject.h"
+#include "../../include/MessageHandler.h"
+#include "../../include/QueuedParents.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/NiUpdateData.h"
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 
 struct FUN_00c3a090_Class
 {
@@ -31,11 +42,7 @@ void* __thiscall FUN_00c3a610_Class::FUN_00c3a610()
     return &g_01202828;
 }
 
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
-extern P03MM g_memoryManager;
+extern MemoryManager g_memoryManager;
 
 struct FUN_00c3a640_Class
 {
@@ -51,10 +58,6 @@ void* FUN_00c3a640_Class::FUN_00c3a640(unsigned int size)
 }
 
 namespace fnv_00c3a670 {
-struct MemoryManager
-{
-    void* Reallocate(void* p, unsigned int size);
-};
 extern MemoryManager g_memoryManager;
 
 struct FUN_00c3a670_Class
@@ -119,11 +122,6 @@ void __thiscall FUN_00c3c520_class::FUN_00c3c520()
 }
 
 extern int DAT_010c1510;
-struct QueuedParents
-{
-    void __thiscall FUN_00c3d930();
-    void __thiscall FUN_00c3c570();
-};
 // @fnv 0x00c3c570
 void __thiscall QueuedParents::FUN_00c3c570()
 {
@@ -220,10 +218,6 @@ void* FUN_00c3a080_Class::FUN_00c3a080(int arg)
     return 0;
 }
 
-struct NiTPrimitiveArray_unsigned_int_
-{
-    void AddFirstEmpty(unsigned int const&);
-};
 void* __cdecl FUN_00a7d330(void*);
 struct FUN_00c3a0c0_Class
 {
@@ -242,7 +236,7 @@ void __thiscall FUN_00c3a0c0_Class::AddFirstEmptyFromGlobal(unsigned int pArray)
     FUN_00c46e70(pArray);
     locals.p = g_01202828;
     locals.u = (unsigned int)FUN_00a7d330(locals.p);
-    ((NiTPrimitiveArray_unsigned_int_*)pArray)->AddFirstEmpty(locals.u);
+    ((NiTPrimitiveArray<unsigned int>*)pArray)->AddFirstEmpty(locals.u);
 }
 
 struct FUN_00c3a100_Class
@@ -298,32 +292,17 @@ void* FUN_00c3a140_Class::FUN_00c3a140(unsigned int flags)
     return this;
 }
 
-struct NiUpdateData
-{
-};
-struct NiNode
-{
-    void __thiscall UpdateDownwardPass(NiUpdateData&, unsigned int);
-};
-struct BSMultiBoundNode : NiNode
-{
-    void __thiscall FUN_00c3a5b0(NiUpdateData& data, unsigned int flags);
-};
 // Calls UpdateDownwardPass with data and flags, then invokes the object's virtual method at vtable slot 47 on this.
 // @fnv 0x00c3a5b0
 void __thiscall BSMultiBoundNode::FUN_00c3a5b0(NiUpdateData& aUpdateData, unsigned int flags)
 {
-    UpdateDownwardPass(aUpdateData, flags);
-    ((void(__thiscall*)(void*))(*(void***)this)[47])(this);
+    NiNode::UpdateDownwardPass(aUpdateData, flags);
+    UpdateWorldBound();
 }
 
 struct FUN_00c3a620_Class
 {
     void __thiscall FUN_00c3a620();
-};
-struct MemoryManager
-{
-    void Deallocate(void*);
 };
 struct FUN_00c3a6a0_Class
 {
@@ -340,8 +319,6 @@ void* __thiscall FUN_00c3a6a0_Class::FUN_00c3a6a0(unsigned int flags)
 
 extern char DAT_01202c50[260];
 extern char DAT_01202fa0[];
-void __cdecl strcpy_s(char* dst, unsigned int dstsz, const char* src);
-void __cdecl strcat_s(char* dst, unsigned int dstsz, const char* src);
 // @fnv 0x00c3bb90
 void FUN_00c3bb90(const char* src)
 {
@@ -364,8 +341,6 @@ void __cdecl FUN_00c3bbe0(const char* pcSuffix)
 
 extern char DAT_01202a40[0x104];
 extern char DAT_01202fa0[0x104];
-void __cdecl strcpy_s(char* dst, unsigned int n, const char* src);
-void strcat_s(char* dst, unsigned int n, const char* src);
 // Copies DAT_01202fa0 into DAT_01202a40, then appends p to it.
 // @fnv 0x00c3bc30
 void __cdecl FUN_00c3bc30(const char* pcSuffix)
@@ -389,15 +364,6 @@ void __cdecl FUN_00c3bc80(const char* pcSuffix)
 }  // namespace fnv_00c3bc80
 
 extern const void* DAT_010c14a8;
-struct MessageHandler;
-struct MessageHandler
-{
-    const void* vtbl;
-    bool bStatic;
-    static MessageHandler* pHandler;
-    void* __thiscall FUN_00aa4c60();
-    MessageHandler* __thiscall FUN_00c3bcf0(bool b);
-};
 MessageHandler* MessageHandler::pHandler;
 // Calls FUN_00aa4c60, sets the vtable to DAT_010c14a8, stores b in bStatic, sets MessageHandler::pHandler to this and returns this.
 // @fnv 0x00c3bcf0
@@ -432,10 +398,6 @@ void __cdecl FUN_00c3c0c0()
 }
 
 namespace fnv_00c3d380 {
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 struct FUN_00c3d380_Class : public FUN_00c3c520_class
 {
     void* __thiscall FUN_00c3d380(unsigned int flags);
@@ -451,10 +413,6 @@ void* __thiscall FUN_00c3d380_Class::FUN_00c3d380(unsigned int flags)
 }  // namespace fnv_00c3d380
 
 namespace fnv_00c3d410 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 struct _Base_00441d20
 {
     ~_Base_00441d20();
@@ -475,10 +433,6 @@ void* __thiscall FUN_00c3d410_Class::DestroySelf(unsigned int flags)
 }  // namespace fnv_00c3d410
 
 namespace fnv_00c3d950 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 struct FUN_00c3d950_Class
 {
     void* __thiscall FUN_00c3d950(unsigned int flags);
@@ -664,19 +618,12 @@ void* __cdecl FUN_00c3c100(void* a, void* b, unsigned int auiFlags)
     return r;
 }
 
-struct NiObject
-{
-};
 struct FUN_00c465a0;
 struct FUN_00c4fb10_shell;
 struct FUN_00c61b10;
 
 typedef NiObject*(__cdecl* PFN_NiObjectLoader)(void);
 
-struct NiStream
-{
-    static int __cdecl RegisterObjectLoader(char const* name, PFN_NiObjectLoader loader);
-};
 
 NiObject* __cdecl FUN_00c64810();
 NiObject* __cdecl FUN_00c649f0();
@@ -806,29 +753,19 @@ void* __cdecl FUN_00c3c1c0(void* a)
     return result;
 }
 
-struct GlobalObject_00c3bcf0
-{
-    ~GlobalObject_00c3bcf0();
-    void* __thiscall DestroyAndFree(unsigned int flags);
-};
 // @fnv 0x00c3c430
-void* GlobalObject_00c3bcf0::DestroyAndFree(unsigned int flags)
+void* MessageHandler::DestroyAndFree(unsigned int flags)
 {
-    this->GlobalObject_00c3bcf0::~GlobalObject_00c3bcf0();
+    this->MessageHandler::~MessageHandler();
     if (flags & 1)
         ((MemoryManager*)&g_memoryManager)->Deallocate(this);
     return this;
 }
 
-struct QueuedParents;
-extern P03MM g_memoryManager;
-struct FUN_00c3d3b0_Class : QueuedParents
-{
-    void* __thiscall FUN_00c3d3b0(unsigned int flags);
-};
+extern MemoryManager g_memoryManager;
 // Calls FUN_00c3c570, then deallocates this via g_memoryManager when flags has bit 0 set, and returns this.
 // @fnv 0x00c3d3b0
-void* FUN_00c3d3b0_Class::FUN_00c3d3b0(unsigned int flags)
+void* QueuedParents::FUN_00c3d3b0(unsigned int flags)
 {
     FUN_00c3c570();
     if (flags & 1)
@@ -1291,66 +1228,12 @@ void* FUN_00c3a530_cls::FUN_00c3a530()
     return p;
 }
 
-struct S_00c3a5e0
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    void FUN_00a5db30();
-    void FUN_00c3a5e0();
-};
-
-// Calls FUN_00a5db30 then invokes the last virtual method v2f.
+// Calls the base upward pass, then updates the world bound through the shared virtual declaration.
 // @fnv 0x00c3a5e0
-void S_00c3a5e0::FUN_00c3a5e0()
+void BSMultiBoundNode::UpdateUpwardPass()
 {
-    FUN_00a5db30();
-    v2f();
+    NiNode::UpdateUpwardPass();
+    UpdateWorldBound();
 }
 
 namespace fnv_00c3a620 {
@@ -1386,8 +1269,7 @@ extern "C" __declspec(dllimport) unsigned long __stdcall GetPrivateProfileString
     const char* lpAppName, const char* lpKeyName, const char* lpDefault, char* lpReturnedString, unsigned long nSize,
     const char* lpFileName);
 
-void __cdecl strcpy_s(char* dst, unsigned int dstsz, const char* src);
-void __cdecl strcat_s(char* dst, unsigned int dstsz, const char* src);
+
 
 PFN_NiObjectLoader __cdecl FUN_00c3b3c0(const char* name);
 
@@ -1445,7 +1327,6 @@ void __cdecl LoadObjectLoadersFromIni(const char* dir)
     }
 }
 
-extern "C" char* __cdecl strrchr(const char* s, int c);
 extern "C" int __cdecl _strnicmp(const char* a, const char* b, unsigned int n);
 
 // Copies path into a buffer, splits off extension and trailing underscore suffix, and writes a DATA\-prefixed or plain path plus suffix and extension to out.
@@ -1554,18 +1435,9 @@ int* __cdecl FUN_00c3bb80();
 int __cdecl FUN_00aff0b0(const char* p);
 int __cdecl GetFileSize(int* buf, int* out);
 
-struct BSCoreMessage
-{
-    virtual ~BSCoreMessage();
-};
-
-struct FUN_00c3bda0_Class : BSCoreMessage
-{
-    ~FUN_00c3bda0_Class();
-};
 
 // @fnv 0x00c3bda0
-FUN_00c3bda0_Class::~FUN_00c3bda0_Class()
+MessageHandler::~MessageHandler()
 {
     int info[9];
     if (GetFileSize(FUN_00c3bb80(), &info[7]) == 0)
@@ -1573,7 +1445,7 @@ FUN_00c3bda0_Class::~FUN_00c3bda0_Class()
         if (info[7] == 0x46 && info[8] == 0)
             FUN_00aff0b0((const char*)FUN_00c3bb80());
     }
-    if (MessageHandler::pHandler == (MessageHandler*)this)
+    if (MessageHandler::pHandler == this)
         MessageHandler::pHandler = 0;
 }
 
@@ -1589,16 +1461,7 @@ int __cdecl FUN_00c3c220()
     return 0;
 }
 
-typedef unsigned long DWORD;
-typedef unsigned long WPARAM;
-typedef long LPARAM;
-typedef void* HINSTANCE;
-typedef void* HHOOK;
-typedef void (*HOOKPROC)(int code, WPARAM wParam, LPARAM lParam);
 
-extern "C" __declspec(dllimport) DWORD __stdcall GetCurrentThreadId();
-extern "C" __declspec(dllimport) int __stdcall SetWindowsHookExA(int idHook, HOOKPROC lpfn, HINSTANCE hMod,
-                                                                 DWORD dwThreadId);
 
 extern "C" void __cdecl CbtHookProc(int code, WPARAM wParam, LPARAM lParam);
 
@@ -1613,7 +1476,7 @@ void __cdecl FUN_00c3c250()
     }
 }
 
-extern "C" __declspec(dllimport) int __stdcall UnhookWindowsHookEx(void* hhk);
+
 
 // If the global hook handle DAT_01202d70 is set, unhooks it with UnhookWindowsHookEx and clears the handle.
 // @fnv 0x00c3c280
@@ -1621,7 +1484,7 @@ void __cdecl FUN_00c3c280()
 {
     if (DAT_01202d70 != 0)
     {
-        UnhookWindowsHookEx((void*)DAT_01202d70);
+        UnhookWindowsHookEx((HHOOK)DAT_01202d70);
         DAT_01202d70 = 0;
     }
 }
@@ -1659,10 +1522,6 @@ int __stdcall FindFirstNonCancelButton(C3C2B0HWND hWnd, long lParam)
     return bContinueSearch;
 }
 
-extern "C" __declspec(dllimport) int __stdcall CallNextHookEx(void* hhk, int code, unsigned int wParam, int lParam);
-extern "C" __declspec(dllimport) int __stdcall EnumChildWindows(void* parent, int(__stdcall* callback)(void*, int),
-                                                                int lParam);
-extern "C" __declspec(dllimport) int __stdcall SetWindowTextA(void* hwnd, const char* text);
 
 int __stdcall FindFirstNonCancelButton(void* hwnd, int lParam);
 
@@ -1671,35 +1530,28 @@ int __stdcall CbtHookProc(int code, unsigned int wParam, int lParam)
 {
     if (code < 0)
     {
-        return CallNextHookEx((void*)DAT_01202d70, code, wParam, lParam);
+        return CallNextHookEx((HHOOK)DAT_01202d70, code, wParam, lParam);
     }
     switch (code)
     {
     case 5: {
         void* owner = (void*)wParam;
         void* found = 0;
-        EnumChildWindows(owner, FindFirstNonCancelButton, (int)&found);
+        EnumChildWindows((HWND)owner, (WNDENUMPROC)(int(__stdcall*)(void*, int))FindFirstNonCancelButton, (int)&found);
         if (found != 0)
         {
-            SetWindowTextA(found, "Yes to all");
+            SetWindowTextA((HWND)found, "Yes to all");
             FUN_00c3c280();
         }
         break;
     }
     }
-    return CallNextHookEx((void*)DAT_01202d70, code, wParam, lParam);
+    return CallNextHookEx((HHOOK)DAT_01202d70, code, wParam, lParam);
 }
 
-struct FUN_00c3c540_Class
-{
-    int* unk00;
-    void __thiscall Resize(int a, int b);
-    int* __thiscall FUN_00c3c540();
-};
-
-// Sets unk00 to DAT_010c14fc, calls Resize(5, 0), then sets unk00 to DAT_010c1510 and returns this.
+// Sets the vtable to DAT_010c14fc, calls Resize(5, 0), then sets it to DAT_010c1510 and returns this.
 // @fnv 0x00c3c540
-int* __thiscall FUN_00c3c540_Class::FUN_00c3c540()
+int* __thiscall QueuedParents::FUN_00c3c540()
 {
     int unused04;
     int unused08;
@@ -1707,9 +1559,9 @@ int* __thiscall FUN_00c3c540_Class::FUN_00c3c540()
     int unused10;
     int unused14;
 
-    this->unk00 = &DAT_010c14fc;
+    *reinterpret_cast<int**>(this) = &DAT_010c14fc;
     this->Resize(5, 0);
-    this->unk00 = &DAT_010c1510;
+    *reinterpret_cast<int**>(this) = &DAT_010c1510;
 
     return reinterpret_cast<int*>(this);
 }
@@ -2081,11 +1933,6 @@ FUN_00c3fa70_cls::~FUN_00c3fa70_cls()
     DAT_011f6238.FUN_00aa4060(pTail2);
 }
 
-struct NiCullingProcess;
-struct NiAVObject
-{
-    void Cull(NiCullingProcess& kCuller);
-};
 struct BoundShape
 {
     void AddRef();
@@ -2301,8 +2148,6 @@ void __cdecl FUN_00c3c0b0()
 void __cdecl FUN_00c3c240()
 {}
 
-void __cdecl strcpy_s(char* dst, unsigned int dstsz, const char* src);
-void __cdecl strcat_s(char* dst, unsigned int dstsz, const char* src);
 int __cdecl FUN_00c33090(const char* p);
 unsigned int __cdecl FUN_00a7d370(const char* buf, bool v);
 unsigned int __cdecl FormatStringAssignment(const char* buf, char v);
@@ -2327,12 +2172,12 @@ struct FUN_00c33280_Class
     unsigned int m_00;
     SettingValue value;
     const char* m_08;
-    void __thiscall FUN_00c33280(NiTPrimitiveArray_unsigned_int_* arr);
+    void __thiscall FUN_00c33280(NiTPrimitiveArray<unsigned int>* arr);
 };
 
 // Builds two spaces plus m_08 in a 256-byte buffer, formats value by the type from FUN_00c33090(m_08), and adds the helper's result to arr via AddFirstEmpty.
 // @fnv 0x00c33280
-void __thiscall FUN_00c33280_Class::FUN_00c33280(NiTPrimitiveArray_unsigned_int_* arr)
+void __thiscall FUN_00c33280_Class::FUN_00c33280(NiTPrimitiveArray<unsigned int>* arr)
 {
     char aBuf[256];
     unsigned int ai;
@@ -2485,8 +2330,6 @@ void S00c3a2e0_Cls::FUN_00c3a2e0()
 void FUN_00c3bcc0()
 {}
 
-extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
-extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
 extern int DAT_01202d78;
 extern char* DAT_01202d58;
 extern bool DAT_01202d90;
@@ -2509,7 +2352,7 @@ bool __cdecl FUN_00c3be50(const char* path, const char* text, bool flush)
     return true;
     if (!path)
         return true;
-    EnterCriticalSection(&DAT_01202d78);
+    EnterCriticalSection((LPCRITICAL_SECTION)&DAT_01202d78);
     if (DAT_01202d58 && !DAT_01202d90)
     {
         DAT_01202d90 = true;
@@ -2521,7 +2364,7 @@ bool __cdecl FUN_00c3be50(const char* path, const char* text, bool flush)
         FUN_00c3be50(path, buffer, false);
         DAT_01202d90 = false;
     }
-    LeaveCriticalSection(&DAT_01202d78);
+    LeaveCriticalSection((LPCRITICAL_SECTION)&DAT_01202d78);
     bool success = false;
     C3BEFile file(path, 1, 1, 0);
     if (file.m_00 == 0)

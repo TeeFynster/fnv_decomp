@@ -1,10 +1,14 @@
-// fallout_shared/tesland.cpp: TESPackage (7 functions)
+// fallout_shared/tesland.cpp: TESLandFlagsView (7 functions)
 
 #include "tesland_decls.h"
+#include "../../include/BSStringT.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/PathingActorData.h"
+#include "../../include/TESForm.h"
 #pragma optimize("", off)
 int TruncateFloatToInt(float value);
 // @fnv 0x005394a0
-bool TESPackage::FUN_005394a0()
+bool TESLandFlagsView::FUN_005394a0()
 {
     if (flags & 8)
         return true;
@@ -27,31 +31,12 @@ FUN_00533240_helper* FUN_00533240_helper::InitVtable()
     return this;
 }
 
-class PathingActorData
-{
-  public:
-    PathingActorData();
-};
-
 // @fnv 0x00534550
 void* __fastcall FUN_00534550(PathingActorData* pThis)
 {
     pThis->PathingActorData::PathingActorData();
     return pThis;
 }
-
-template <typename T> struct BSStringT
-{
-    operator const char*() const;
-};
-
-struct TESFile;
-template <typename T> struct BSSimpleList;
-
-struct TESForm
-{
-    BSSimpleList<TESFile*>* GetSourceFiles();
-};
 
 // Reads a BSStringT at thisPtr+0xb8, treats it as a TESForm and returns that form's source file list.
 // @fnv 0x00537b10
@@ -90,14 +75,12 @@ struct NiCamera;
 struct NiColor;
 struct NiNode;
 struct NiPick;
-struct NiPoint3;
 struct NiRenderedTexture;
 struct SeenData;
 struct TESActorBase;
 struct TESBoundObject;
 struct TESClimate;
 struct TESFile;
-struct TESForm;
 struct TESFullName;
 struct TESGlobal;
 struct TESImageSpace;
@@ -145,21 +128,9 @@ void __fastcall SetVtable(FUN_00538e30_class* this_ptr)
     this_ptr->vtable = (int)&DAT_0102e388;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3(float fx, float fy, float afDepth);
-};
-
-struct Point3_0053d280
-{
-    float x, y, z;
-    NiPoint3 FUN_0053d280(float denom) const;
-};
-
 // Returns a new NiPoint3 with each component divided by denom.
 // @fnv 0x0053d280
-NiPoint3 Point3_0053d280::FUN_0053d280(float denom) const
+NiPoint3 NiPoint3::FUN_0053d280(float denom) const
 {
     float inv = 1.0f / denom;
     return NiPoint3(inv * this->x, inv * this->y, inv * this->z);

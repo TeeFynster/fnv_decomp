@@ -1,3 +1,4 @@
+#define FNV64_HKVECTOR4_OWN_ASSIGN
 
 // src/staging/blk_00c80000_od_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHsc /Gy (unit src/staging/blk_00c80000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,7 +6,74 @@
 
 // src/staging/blk_00c80000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/hkVector4.h"
+#include "../../include/StrArr.h"
+#include "../../include/hkMatrix4.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/Transform.h"
+#include "../../include/NiTransform.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/hkRotation.h"
+#include "../../include/hkTransform.h"
+#include "../../include/hkVector4.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiTimeController.h"
+// BaseCall_blk_00c80000_od_o2_nood_variant: local type (was include/BaseCall.h, which had no evidence of one real class); its methods are 0x00a51ca0 NiBSplineColorInterpolator::SaveBinary, 0x00a6d0f0 NiTimeController::RegisterStreamables, 0x00a6d290 NiTimeController::~NiTimeController, 0x00a6d830 NiTimeController::GetViewerStrings
+#include "../../include/NiStream.h"
+#include "../../include/StrArr.h"
+
+class BaseCall_blk_00c80000_od_o2_nood_variant
+{
+public:
+    void** vtable;
+    unsigned int unk04;
+    unsigned int unk08;
+    unsigned int unk0c;
+    unsigned int unk10;
+    unsigned int unk14;
+    unsigned int unk18;
+    unsigned int unk1c;
+    unsigned int unk20;
+    unsigned int unk24;
+    unsigned int unk28;
+    unsigned int unk2c;
+    unsigned int unk30;
+    unsigned int unk34;
+    unsigned int unk38;
+
+    void FUN_00a6d830(StrArr*);
+    void FUN_00a51ca0(NiStream&);
+    int Destroy();
+    void FUN_00aa09a0();
+};
+#include "../../include/bhkFilter.h"
+// bhkLimitedHingeVector_blk_00c80000_od_o2_nood_variant: local type (was include/bhkLimitedHingeVector.h, which had no evidence of one real class); its methods are 0x004b4db0 bhkVector4::operator=
+class bhkLimitedHingeVector_blk_00c80000_od_o2_nood_variant
+{
+public:
+    union
+    {
+        struct
+        {
+            int unk00;
+            int unk04;
+            int unk08;
+            int unk0C;
+        };
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+        float value[4];
+        unsigned char vecData[16];
+    };
+
+    void FUN_004b4db0(const float*);
+};
 
 #include <xmmintrin.h>
 struct ScalarFactor
@@ -310,16 +378,6 @@ FUN_00c86660_cls* FUN_00c86660_cls::FUN_00c86660(const FUN_00c86660_cls* src)
     return this;
 }
 
-class bhkLimitedHingeVector
-{
-  public:
-    float x;
-    float y;
-    float z;
-    float w;
-    void FUN_004b4db0(const float* p);
-};
-
 class Vec4Tmp
 {
   public:
@@ -330,17 +388,17 @@ class Vec4Tmp
 class bhkLimitedHingeVectorSet
 {
   public:
-    bhkLimitedHingeVector m_v0;
-    bhkLimitedHingeVector m_v1;
-    bhkLimitedHingeVector m_v2;
+    bhkLimitedHingeVector_blk_00c80000_od_o2_nood_variant m_v0;
+    bhkLimitedHingeVector_blk_00c80000_od_o2_nood_variant m_v1;
+    bhkLimitedHingeVector_blk_00c80000_od_o2_nood_variant m_v2;
     void FUN_00c8bf50();
 };
 
 // @fnv 0x00c8bf50
 void bhkLimitedHingeVectorSet::FUN_00c8bf50()
 {
-    bhkLimitedHingeVector& v1 = m_v1;
-    bhkLimitedHingeVector& v2 = m_v2;
+    bhkLimitedHingeVector_blk_00c80000_od_o2_nood_variant& v1 = m_v1;
+    bhkLimitedHingeVector_blk_00c80000_od_o2_nood_variant& v2 = m_v2;
     Vec4Tmp a;
     a.v = _mm_setr_ps(m_v0.x, m_v0.y, m_v0.z, m_v0.w);
     Vec4Tmp b;
@@ -380,13 +438,6 @@ FUN_00c99ff0_cls* FUN_00c99ff0_cls::FUN_00c99ff0(void* a1, __m128* a2, __m128* a
     return this;
 }
 
-struct FnvMat4
-{
-    __m128 m_uiX;
-    __m128 m_uiY;
-    __m128 m_uiZ;
-    __m128 m_w;
-};
 
 struct Obj00c9ec00
 {
@@ -434,7 +485,7 @@ struct Obj00c9ec00
     int unka4;
     int unka8;
     int unkac;
-    FnvMat4 m_mat;
+    hkMatrix4 m_mat;
 };
 
 struct Owner00c9ec00
@@ -443,11 +494,11 @@ struct Owner00c9ec00
     int unk04;
     Obj00c9ec00* unk08;
     void Noop00a29680();
-    void FUN_00c9ec00(FnvMat4* out);
+    void FUN_00c9ec00(hkMatrix4* out);
 };
 
 // @fnv 0x00c9ec00
-void Owner00c9ec00::FUN_00c9ec00(FnvMat4* out)
+void Owner00c9ec00::FUN_00c9ec00(hkMatrix4* out)
 {
     if (!this)
         return;
@@ -455,97 +506,29 @@ void Owner00c9ec00::FUN_00c9ec00(FnvMat4* out)
     if (!p)
         return;
     Noop00a29680();
-    out->m_uiX = p->m_mat.m_uiX;
-    out->m_uiY = p->m_mat.m_uiY;
-    out->m_uiZ = p->m_mat.m_uiZ;
-    out->m_w = p->m_mat.m_w;
+    out->m_kColumn0.m_vComponents = p->m_mat.m_kColumn0.m_vComponents;
+    out->m_kColumn1.m_vComponents = p->m_mat.m_kColumn1.m_vComponents;
+    out->m_kColumn2.m_vComponents = p->m_mat.m_kColumn2.m_vComponents;
+    out->m_kColumn3.m_vComponents = p->m_mat.m_kColumn3.m_vComponents;
     Noop00a29680();
 }
 
-struct __declspec(align(16)) hkVector4C9E
-{
-    __m128 m_vComponents;
-};
-
-struct hkRotationC9E
-{
-    hkVector4C9E m_kColumn0;
-    hkVector4C9E m_kColumn1;
-    hkVector4C9E m_kColumn2;
-};
-
-struct hkTransformC9E
-{
-    hkRotationC9E m_rotation;
-    hkVector4C9E m_vTranslation;
-};
-
-struct NiMatrix3C9E
-{
-    float m_afEntries[3][3];
-};
-
-struct NiPoint3C9E
-{
-    float x, y, z;
-};
-
-struct NiTransformC9E
-{
-    NiMatrix3C9E m_kOrientation;
-    NiPoint3C9E m_kTranslation;
-    float m_fScale;
-};
-
-void __stdcall FUN_00c9ec00(hkTransformC9E* pkTransform);
-void __cdecl FUN_00624b10(NiMatrix3C9E* pkOut, const hkRotationC9E* pkRotation);
-void __cdecl FUN_00458620(NiPoint3C9E* pkOut, const hkVector4C9E* pkVector);
+void __stdcall FUN_00c9ec00(hkTransform* pkTransform);
+void __cdecl FUN_00624b10(NiMatrix3* pkOut, const hkRotation* pkRotation);
+void __cdecl FUN_00458620(NiPoint3* pkOut, const hkVector4* pkVector);
 
 // @fnv 0x00c9ec60
-void __stdcall FUN_00c9ec60(NiTransformC9E* pkOut)
+void __stdcall FUN_00c9ec60(NiTransform* pkOut)
 {
-    hkTransformC9E kTransform;
+    // The output callee fills the transform without a constructor call.
+    __m128 transformStorage[sizeof(hkTransform) / sizeof(__m128)];
+    hkTransform& kTransform = reinterpret_cast<hkTransform&>(transformStorage);
     FUN_00c9ec00(&kTransform);
-    FUN_00624b10(&pkOut->m_kOrientation, &kTransform.m_rotation);
-    FUN_00458620(&pkOut->m_kTranslation, &kTransform.m_vTranslation);
+    FUN_00624b10(&pkOut->m_Rotate, &kTransform.m_rotation);
+    FUN_00458620(&pkOut->m_Translate, reinterpret_cast<const hkVector4*>(&kTransform.m_vTranslation));
 }
 
 namespace fnv_00c9ecb0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int8 m128_i8[16];
-    __int16 m128_i16[8];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int8 m128_u8[16];
-    unsigned __int16 m128_u16[8];
-    unsigned __int32 m128_u32[4];
-};
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-};
-
-struct hkMatrix4
-{
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-    hkVector4 m_kColumn3;
-};
-
-struct bhkLimitedHingeVector
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void FUN_004b4db0(const float* v);
-};
-
 struct HingeVectorSet
 {
     int unk00;
@@ -556,7 +539,7 @@ struct HingeVectorSet
     int unk14;
     int unk18;
     int unk1C;
-    bhkLimitedHingeVector m_akVectors[4];
+    bhkLimitedHingeVector_blk_00c80000_od_o2_nood_variant m_akVectors[4];
 };
 
 struct FUN_00c9ecb0_cls
@@ -566,50 +549,32 @@ struct FUN_00c9ecb0_cls
     void FUN_00c9ecb0(HingeVectorSet* set);
 };
 
+// The original local SIMD representation triggered /GS for this function.
+#pragma strict_gs_check(push, on)
 // @fnv 0x00c9ecb0
 void FUN_00c9ecb0_cls::FUN_00c9ecb0(HingeVectorSet* set)
 {
     FillOutputFromState(set);
-    hkMatrix4 m;
+    // The callee fills this scratch matrix without constructing its columns.
+    __m128 matrixStorage[4];
+    hkMatrix4& m = reinterpret_cast<hkMatrix4&>(matrixStorage);
     FUN_00c9ec00(m);
-    bhkLimitedHingeVector* vectors = set->m_akVectors;
+    bhkLimitedHingeVector_blk_00c80000_od_o2_nood_variant* vectors = set->m_akVectors;
     vectors[0].FUN_004b4db0(m.m_kColumn0.m_vComponents.m128_f32);
     vectors[1].FUN_004b4db0(m.m_kColumn1.m_vComponents.m128_f32);
     vectors[2].FUN_004b4db0(m.m_kColumn2.m_vComponents.m128_f32);
     vectors[3].FUN_004b4db0(m.m_kColumn3.m_vComponents.m128_f32);
 }
+#pragma strict_gs_check(pop)
 }  // namespace fnv_00c9ecb0
 
 #include <xmmintrin.h>
 extern "C" void _ReadWriteBarrier(void);
 namespace fnv_00c88520 {
-struct FnvMat4
-{
-    __m128 m_uiX;
-    __m128 m_uiY;
-    __m128 m_uiZ;
-    __m128 m_w;
-};
-struct Vec3
-{
-    float x, y, z;
-};
-struct Transform
-{
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    Vec3 translate;
-    float scale;
-    Transform FUN_0062c250(const Transform& rhs) const;
-};
 struct Quaternion
 {
     float w, x, y, z;
-    void FUN_00a6df40(const Transform& matrix);
-};
-struct __declspec(align(16)) FourFloatVector
-{
-    float elements[4];
-    void FUN_005611c0();
+    void FUN_00a6df40(const NiTransform& matrix);
 };
 struct SceneObject;
 struct CastObject
@@ -657,7 +622,7 @@ struct LockObject
 {
     unsigned int owner;
     unsigned int count;
-    void Wait(const char*);
+    void FUN_0040fbf0(const char*);
 };
 
 extern char DAT_012043f8;
@@ -665,9 +630,9 @@ extern unsigned int DAT_01267b80;
 extern unsigned int DAT_01267b84;
 
 Wrapper* __cdecl FUN_00c802d0(SceneObject*);
-void __cdecl AccumulateParentTransforms(SceneObject*, SceneObject*, Transform*);
-void __cdecl FUN_00624ad0(Transform*, FnvMat4*);
-void __cdecl FUN_004a3e00(FourFloatVector&, const Vec3&);
+void __cdecl AccumulateParentTransforms(SceneObject*, SceneObject*, NiTransform*);
+void __cdecl FUN_00624ad0(NiTransform*, hkMatrix4*);
+void __cdecl FUN_004a3e00(hkVector4&, const NiPoint3&);
 
 // @fnv 0x00c88520
 void __cdecl FUN_00c88520(SceneObject* a0, SceneObject* a1)
@@ -681,27 +646,32 @@ void __cdecl FUN_00c88520(SceneObject* a0, SceneObject* a1)
     SceneObject* body = cast->GetBody();
     if (destination && body && source && a1 && a1->unk18)
     {
-        FnvMat4 world;
-        Transform converted;
-        Transform relative;
-        ((void(__thiscall*)(SceneObject*, FnvMat4*))body->vtable[61])(body, &world);
+        // Keep the SIMD scratch storage trivial for the original stack layout.
+        __m128 worldStorage[4];
+        hkMatrix4& world = reinterpret_cast<hkMatrix4&>(worldStorage);
+        // Both output transforms are filled by the callees without construction.
+        float convertedStorage[sizeof(NiTransform) / sizeof(float)];
+        float relativeStorage[sizeof(NiTransform) / sizeof(float)];
+        NiTransform& converted = reinterpret_cast<NiTransform&>(convertedStorage);
+        NiTransform& relative = reinterpret_cast<NiTransform&>(relativeStorage);
+        ((void(__thiscall*)(SceneObject*, hkMatrix4*))body->vtable[61])(body, &world);
         FUN_00624ad0(&converted, &world);
-        converted.scale = a1->unk98;
+        converted.m_fScale = a1->unk98;
         AccumulateParentTransforms(source, a1, &relative);
-        Transform combined = converted.FUN_0062c250(relative);
+        NiTransform combined = converted.FUN_0062c250(relative);
         Quaternion q;
         q.FUN_00a6df40(combined);
         __m128 position;
-        FUN_004a3e00(*reinterpret_cast<FourFloatVector*>(&position), combined.translate);
+        FUN_004a3e00(*reinterpret_cast<hkVector4*>(&position), reinterpret_cast<const NiPoint3&>(combined.m_Translate));
         __m128 rotation;
         rotation.m128_f32[0] = q.x;
         rotation.m128_f32[1] = q.y;
         rotation.m128_f32[2] = q.z;
         rotation.m128_f32[3] = q.w;
-        reinterpret_cast<FourFloatVector*>(&rotation)->FUN_005611c0();
-        reinterpret_cast<LockObject*>(&DAT_01267b80)->Wait(0);
-        ((void(__thiscall*)(SceneObject*, FourFloatVector*, FourFloatVector*))destination->vtable[58])(
-            destination, reinterpret_cast<FourFloatVector*>(&position), reinterpret_cast<FourFloatVector*>(&rotation));
+        reinterpret_cast<hkVector4*>(&rotation)->FUN_005611c0();
+        reinterpret_cast<LockObject*>(&DAT_01267b80)->FUN_0040fbf0(0);
+        ((void(__thiscall*)(SceneObject*, hkVector4*, hkVector4*))destination->vtable[58])(
+            destination, reinterpret_cast<hkVector4*>(&position), reinterpret_cast<hkVector4*>(&rotation));
         if (--DAT_01267b84 == 0)
             DAT_01267b80 = 0;
     }
@@ -709,6 +679,11 @@ void __cdecl FUN_00c88520(SceneObject* a0, SceneObject* a1)
 }  // namespace fnv_00c88520
 
 #include <string.h>
+#include "../../include/MemoryManager.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/hkSerializableCinfo.h"
 extern __declspec(thread) int g_tlsMemContext;
 inline int GetMemContext()
 {
@@ -731,56 +706,38 @@ struct MemContextGuard
         SetMemContext(m_iSaved);
     }
 };
-struct StrArr
+__forceinline unsigned int StrArr::AddInline(char* value)
 {
-    void** vtable;
-    char** data;
-    unsigned short capacity, size, used, growBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-    __forceinline void Add(char* value)
+    unsigned int index = m_usSize;
+    if (index >= m_usMaxSize)
+        SetSize(index + m_usGrowBy);
+    SetAt(index, value);
+    return index;
+}
+
+__forceinline void StrArr::AppendInline(char* value)
+{
+    unsigned int index = m_usSize;
+    if (index >= m_usMaxSize)
+        SetSize(index + m_usGrowBy);
+    if (index >= m_usSize)
     {
-        unsigned int index = size;
-        if (index >= capacity)
-            SetSize(index + growBy);
-        SetAt(index, value);
+        m_usSize = (unsigned short)(index + 1);
+        if (value)
+            ++m_usESize;
     }
-    __forceinline void Append(char* value)
+    else if (value)
     {
-        unsigned int index = size;
-        if (index >= capacity)
-            SetSize(index + growBy);
-        if (index >= size)
-        {
-            size = (unsigned short)(index + 1);
-            if (value)
-                ++used;
-        }
-        else if (value)
-        {
-            if (!data[index])
-                ++used;
-        }
-        else if (data[index])
-        {
-            --used;
-        }
-        data[index] = value;
+        if (!m_pBase[index])
+            ++m_usESize;
     }
-};
-struct BaseCall
-{
-    void** vtable;
-    unsigned int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    unsigned int unk20, unk24, unk28, unk2c, unk30, unk34, unk38;
-    void FUN_00a6d830(StrArr*);
-};
-class NiPoint3
-{
-  public:
-    float x, y, z;
-};
-struct KeyData : BaseCall
+    else if (m_pBase[index])
+    {
+        --m_usESize;
+    }
+    m_pBase[index] = value;
+}
+struct KeyData : BaseCall_blk_00c80000_od_o2_nood_variant
 {
     NiPoint3* keys;
     unsigned int unk40, unk44;
@@ -797,11 +754,6 @@ char* FUN_00a7d330(const char*);
 char* FUN_00a7d510(const char*, unsigned int);
 int _sprintf_s(char*, unsigned int, const char*, ...);
 int _strcpy_s(char*, unsigned int, const char*);
-class MemoryManager
-{
-  public:
-    void* Allocate(unsigned int);
-};
 extern MemoryManager g_memoryManager;
 
 // @fnv 0x00c9bbb0
@@ -809,9 +761,9 @@ void KeyData::FUN_00c9bbb0(StrArr* strings)
 {
     MemContextGuard kGuard(16);
     FUN_00a6d830(strings);
-    strings->Add(FUN_00a7d330(g_012681f0.name));
+    strings->AddInline(FUN_00a7d330(g_012681f0.name));
     unsigned int uiNumKeys = count;
-    strings->Add(FUN_00a7d510("iKeys", uiNumKeys));
+    strings->AddInline(FUN_00a7d510("iKeys", uiNumKeys));
     for (unsigned int i = 0; i < count; ++i)
     {
         char buffer[64];
@@ -820,7 +772,7 @@ void KeyData::FUN_00c9bbb0(StrArr* strings)
         unsigned int length = strlen(buffer) + 1;
         char* copy = (char*)g_memoryManager.Allocate(length);
         _strcpy_s(copy, length, buffer);
-        strings->Append(copy);
+        strings->AppendInline(copy);
     }
 }
 
@@ -1205,38 +1157,6 @@ extern TypeInfo DAT_0126818c, DAT_01268158, DAT_012681f0, DAT_01267e64;
 
 extern const float DAT_01050de4, DAT_0101e2bc, DAT_01016248, DAT_01017718, DAT_01011d78;
 
-struct __declspec(align(16)) Transform
-{
-
-    __m128 rotation0, rotation1, rotation2, translation;
-
-    Transform()
-    {}
-
-    __forceinline Transform(const Transform& r)
-    {
-        __m128 a = r.rotation0, b = r.rotation1, c = r.rotation2, d = r.translation;
-        rotation0 = a;
-        rotation1 = b;
-        rotation2 = c;
-        translation = d;
-    }
-
-    void FUN_00cb2fc0();
-};
-
-struct Point3
-{
-    float x, y, z;
-};
-
-struct NiTransformLocal
-{
-    float r00, r01, r02, r10, r11, r12, r20, r21, r22;
-    Point3 translation;
-    float scale;
-};
-
 struct Backend
 {
     unsigned int unk000;
@@ -1359,7 +1279,7 @@ struct Backend
 
     unsigned int unk0ec;
 
-    Transform transform;
+    __declspec(align(16)) Transform transform;
 };
 
 struct PhysicsObject;
@@ -1629,7 +1549,7 @@ struct SceneNode
 
     unsigned int unk064;
 
-    NiTransformLocal transform;
+    NiTransform transform;
 
     Controller* FUN_00a5c570(TypeInfo*);
 };
@@ -1742,17 +1662,6 @@ struct ConstraintData
     void FUN_00cb8b60(Transform*, Transform*, __m128*, __m128*);
 };
 
-class hkSerializableCinfo
-{
-
-  public:
-    ConstraintData* data;
-
-    int references, unkc, unk10;
-
-    __forceinline hkSerializableCinfo() : data(0), references(1), unkc(0), unk10(0)
-    {}
-};
 
 struct hkConstraintCinfo : hkSerializableCinfo
 {
@@ -1815,7 +1724,7 @@ CollisionWrapper* FUN_00c802d0(SceneNode*);
 
 __declspec(noalias) unsigned char FUN_00c8cce0(int*);
 
-Transform* FUN_0056df80(Transform*, NiTransformLocal*);
+Transform* FUN_0056df80(Transform*, NiTransform*);
 
 World* FUN_00621480(World*);
 
@@ -1989,11 +1898,32 @@ void __cdecl FUN_00c88a40(bool create, Filter filter, SceneNode* first, SceneNod
 
                 info.FUN_009ba320(sourceBody, targetBody);
 
-                Transform sourceTransform = (sourceBody ? sourceBody->underlying : 0)->transform;
+                __m128 sourceStorage[4];
+                const Transform& sourceBodyTransform = (sourceBody ? sourceBody->underlying : 0)->transform;
+                {
+                    __m128 a = sourceBodyTransform.r[0], b = sourceBodyTransform.r[1],
+                           c = sourceBodyTransform.r[2], d = sourceBodyTransform.r[3];
+                    sourceStorage[0] = a;
+                    sourceStorage[1] = b;
+                    sourceStorage[2] = c;
+                    sourceStorage[3] = d;
+                }
+                Transform& sourceTransform = reinterpret_cast<Transform&>(sourceStorage);
 
-                Transform targetTransform = (targetBody ? targetBody->underlying : 0)->transform;
+                __m128 targetStorage[4];
+                const Transform& targetBodyTransform = (targetBody ? targetBody->underlying : 0)->transform;
+                {
+                    __m128 a = targetBodyTransform.r[0], b = targetBodyTransform.r[1],
+                           c = targetBodyTransform.r[2], d = targetBodyTransform.r[3];
+                    targetStorage[0] = a;
+                    targetStorage[1] = b;
+                    targetStorage[2] = c;
+                    targetStorage[3] = d;
+                }
+                Transform& targetTransform = reinterpret_cast<Transform&>(targetStorage);
 
-                Transform convertedTransform;
+                __m128 convertedStorage[4];
+                Transform& convertedTransform = reinterpret_cast<Transform&>(convertedStorage);
 
                 FUN_0056df80(&convertedTransform, &first->transform);
 
@@ -2007,13 +1937,13 @@ void __cdecl FUN_00c88a40(bool create, Filter filter, SceneNode* first, SceneNod
 
                 info.data->strength = 1.0f;
 
-                Point3 direction;
+                NiPoint3 direction;
 
-                direction.x = resolvedFirst->host->transform.r00;
+                direction.x = resolvedFirst->host->transform.m_Rotate.m_pEntry[0][0];
 
-                direction.y = resolvedFirst->host->transform.r10;
+                direction.y = resolvedFirst->host->transform.m_Rotate.m_pEntry[1][0];
 
-                direction.z = resolvedFirst->host->transform.r20;
+                direction.z = resolvedFirst->host->transform.m_Rotate.m_pEntry[2][0];
 
                 AxisVector axis;
 
@@ -2027,7 +1957,7 @@ void __cdecl FUN_00c88a40(bool create, Filter filter, SceneNode* first, SceneNod
 
                 Normalize3(axis.q);
 
-                info.data->FUN_00cb8b60(&sourceTransform, &targetTransform, &sourceTransform.translation, &axis.q);
+                info.data->FUN_00cb8b60(&sourceTransform, &targetTransform, &sourceTransform.r[3], &axis.q);
 
                 FUN_00c88380* newConstraint = new FUN_00c88380(&info);
 
@@ -2079,27 +2009,12 @@ void __cdecl FUN_00c88a40(bool create, Filter filter, SceneNode* first, SceneNod
     }
 }
 
-class NiAVObject;
 struct KnockDownNode;
 struct CollisionObject;
 struct RigidBody;
-class NiTimeController;
 struct PhysicsBody;
 class NiRTTI;
 
-struct hkVector4
-{
-    __m128 v;
-};
-class NiPoint3_helper : public NiPoint3
-{
-  public:
-    NiPoint3 operator*(float scale) const;
-};
-struct bhkFilter
-{
-    unsigned int value;
-};
 struct VirtualObject
 {
     virtual void VirtualUnknown00();
@@ -2189,23 +2104,6 @@ struct CollisionObject : public VirtualObject
     float beginValue, endValue;
     void ApplyMotion();
 };
-class NiObject : public VirtualObject
-{
-  public:
-    NiObject* DynamicCast(const NiRTTI* rtti);
-};
-class NiAVObject : public VirtualObject
-{
-  public:
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    NiObject* collision;
-    NiTimeController* GetController(const NiRTTI* rtti);
-};
 struct KnockDownNode
 {
     unsigned int unk00;
@@ -2263,24 +2161,13 @@ struct ControllerKeys
     unsigned int capacity, size, effectiveSize, growBy;
     void Reserve(unsigned int count);
 };
-class NiTimeController : public VirtualObject
+// Key storage belongs to the concrete controller, after the shared base.
+struct KeyedTimeController : public NiTimeController
 {
-  public:
-    unsigned int unk04;
-    unsigned short flags, unk0a;
-    float frequency, phase, startTime, stopTime;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
     unsigned int unk34;
     ControllerKeys keys;
     float unk50, unk54;
     unsigned int mode;
-    void Reset();
-    void AddKey(const NiInterpControllerTriple& key);
 };
 struct BodyState
 {
@@ -2325,7 +2212,7 @@ struct PlainKey
 union KeyVectorStorage
 {
     PlainKey keys[2];
-    hkVector4 vector;
+    __m128 vector;
 };
 // @fnv 0x00c9b670
 void __cdecl FUN_00c9b670(NiAVObject* object, const NiPoint3& velocity, unsigned int context, float time, bool disable)
@@ -2335,8 +2222,8 @@ void __cdecl FUN_00c9b670(NiAVObject* object, const NiPoint3& velocity, unsigned
     if (object)
     {
         CollisionObject* collision = 0;
-        if (object->collision)
-            collision = (CollisionObject*)object->collision->DynamicCast((const NiRTTI*)&DAT_01267e64);
+        if (object->m_spCollisionObject.m_pObject)
+            collision = (CollisionObject*)((NiObject*)object->m_spCollisionObject.m_pObject)->DynamicCast((const NiRTTI*)&DAT_01267e64);
         if (collision)
         {
             collision->ApplyMotion();
@@ -2344,7 +2231,7 @@ void __cdecl FUN_00c9b670(NiAVObject* object, const NiPoint3& velocity, unsigned
             if (collision->rigidBody)
                 filter = collision->rigidBody->GetFilter();
             float speed = DAT_011b1210[(filter >> 8) & 31];
-            NiTimeController* controller = object->GetController((const NiRTTI*)&DAT_012681f0);
+            KeyedTimeController* controller = static_cast<KeyedTimeController*>(object->GetController((const NiRTTI*)&DAT_012681f0));
             if (controller && speed >= 0.0f)
             {
                 if (!disable)
@@ -2370,19 +2257,19 @@ void __cdecl FUN_00c9b670(NiAVObject* object, const NiPoint3& velocity, unsigned
                             controller->AddKey(*p);
                             ++p;
                         } while (--count != 0);
-                        controller->startTime = time;
-                        controller->stopTime = speed;
-                        controller->flags = (controller->flags & 0xfef5) | 0xc5;
-                        controller->phase = 0.0f;
-                        controller->frequency = 1.0f;
-                        controller->Update(DAT_01015f5c);
+                        controller->m_fLoKeyTime = time;
+                        controller->m_fHiKeyTime = speed;
+                        controller->m_uiObjectFlags = (controller->m_uiObjectFlags & 0xfef5) | 0xc5;
+                        controller->m_fPhase = 0.0f;
+                        controller->m_fFrequency = 1.0f;
+                        controller->Start(DAT_01015f5c);
                     }
                     NiAVObject* active = const_cast<NiAVObject* volatile&>(object);
                     if (!active->GetController((const NiRTTI*)&DAT_012683f4))
                     {
-                        new (&sharedPoint) NiPoint3(static_cast<const NiPoint3_helper&>(velocity) * DAT_011b0f88);
+                        new (&sharedPoint) NiPoint3(reinterpret_cast<const NiPoint3&>(velocity) * DAT_011b0f88);
                         NiPoint3& scaled = sharedPoint;
-                        FUN_00cb94a0(active, FUN_004a3e00(work.vector, scaled), DAT_011b0f8c);
+                        FUN_00cb94a0(active, FUN_004a3e00(reinterpret_cast<hkVector4&>(work.vector), scaled), DAT_011b0f8c);
                     }
                 }
                 else
@@ -2391,9 +2278,9 @@ void __cdecl FUN_00c9b670(NiAVObject* object, const NiPoint3& velocity, unsigned
                 }
             }
         }
-        else if (object->collision)
+        else if (object->m_spCollisionObject.m_pObject)
         {
-            CollisionObject* fallback = (CollisionObject*)object->collision->DynamicCast((const NiRTTI*)&DAT_012043f8);
+            CollisionObject* fallback = (CollisionObject*)((NiObject*)object->m_spCollisionObject.m_pObject)->DynamicCast((const NiRTTI*)&DAT_012043f8);
             if (fallback && fallback->rigidBody)
             {
                 RigidBody* body = fallback->rigidBody;
@@ -2404,14 +2291,14 @@ void __cdecl FUN_00c9b670(NiAVObject* object, const NiPoint3& velocity, unsigned
                     body->SetBodyMotion(1);
                     if (!disable)
                     {
-                        new (&sharedPoint) NiPoint3(static_cast<const NiPoint3_helper&>(velocity) * DAT_011b0f88);
+                        new (&sharedPoint) NiPoint3(reinterpret_cast<const NiPoint3&>(velocity) * DAT_011b0f88);
                         NiPoint3& scaled = sharedPoint;
-                        ((PhysicsMotion*)body->body)->ApplyImpulse(DAT_011afe64, FUN_004a3e00(work.vector, scaled));
+                        ((PhysicsMotion*)body->body)->ApplyImpulse(DAT_011afe64, FUN_004a3e00(reinterpret_cast<hkVector4&>(work.vector), scaled));
                     }
                 }
             }
         }
-        KnockDownNode* node = object->GetNode();
+        KnockDownNode* node = (KnockDownNode*)object->IsSceneNode();
         if (node)
         {
             for (unsigned int i = 0; i < node->childCount; ++i)

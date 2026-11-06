@@ -1,6 +1,9 @@
 // fallout/ai/followerbarks.cpp: BarkPlaybackEntry (2 functions)
 
+#include "../../../include/Actor.h"
+#include "../../../include/BSSimpleList.h"
 #include "followerbarks_decls.h"
+#include "../../../include/TESTopic.h"
 // @fnv 0x008d5bc0
 void BarkPlaybackEntry::UpdateBarks()
 {
@@ -38,14 +41,6 @@ void BarkPlaybackEntry::UpdateBarks()
     }
 }
 
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
-class TESTopic : public TESForm
-{
-};
 extern TESForm* __cdecl FUN_00483a00(const char*);
 
 // Returns the TESTopic form mapped to kind, or null when no form is returned.

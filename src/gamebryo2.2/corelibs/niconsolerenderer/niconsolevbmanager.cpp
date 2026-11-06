@@ -8,54 +8,9 @@
 // NiD3DHLSLVertexShader, i.e. immediately after the 60-byte NiD3DVertexShader
 // base object.
 
-typedef unsigned int NiUInt32;
-
-// A D3DX constant table is referenced by pointer only in this build.
-class ID3DXConstantTable;
-
-// Nivid3D vertex shader base. Reconstructed to exactly 60 bytes: a 4-byte
-// vtable pointer (the class owns a 41-slot vtable) plus 56 bytes of data.
-// and GetSoftwareVertexProcessing/SetSoftwareVertexProcessing; the matching
-// data members are named after them. The remaining data is unattested, so it
-// is carried as a clearly marked 10-pointer reconstruction block whose only
-// job is to bring the base object to exactly 60 bytes. Only the base total
-// size (60) and the derived-class offsets matter for the matched span.
-class NiD3DVertexShader
-{
-public:
-    virtual ~NiD3DVertexShader()
-    {
-    }
-
-    virtual void UnloadShader()
-    {
-    }
-
-    virtual void BuildVertexShader()
-    {
-    }
-
-protected:
-    NiUInt32 m_uiShaderUsage;
-    void* m_pShaderHandle;
-    void* m_pkVertexDeclaration;         // GetVertexDeclaration / SetVertexDeclaration
-    NiUInt32 m_uiSoftwareVertexProcessing; // GetSoftwareVertexProcessing / SetSoftwareVertexProcessing
-    // Unattested base data members (reconstruction): ten pointer slots that
-    // bring the base object to exactly 60 bytes. Their real names are unknown.
-    void* m_unattested[10];
-};
-
-// Nivid3D HLSL vertex shader program.
-class NiD3DHLSLVertexShader : public NiD3DVertexShader
-{
-public:
-    const char* GetEntryPoint();
-
-protected:
-    char* m_pcShaderEntryPoint;
-    char* m_pcShaderProfile;
-    ID3DXConstantTable* m_pShaderConstantTable;
-};
+#include "../../../../include/NiD3DHLSLVertexShader.h"
+#include "../../../../include/NiGeometryData.h"
+#include "../../../../include/NiPoint2.h"
 
 // @fnv 0x00E8BF90
 const char* NiD3DHLSLVertexShader::GetEntryPoint()
@@ -147,7 +102,7 @@ bool S_00e8c0d0::CopyAndRelease(void* apObj)
 extern unsigned int DAT_011bf558;
 
 // @fnv 0x00e8c120
-void __stdcall FUN_00e8c120(Outer* p1, Outer* p2, unsigned int* flags, unsigned int* auiOffset, int* p5,
+void __stdcall FUN_00e8c120(NiGeometryData* p1, Outer* p2, unsigned int* flags, unsigned int* auiOffset, int* p5,
                             unsigned int* p6, unsigned int* p7, unsigned int* p8, unsigned int* p9)
 {
     unsigned int cnt;
@@ -166,17 +121,17 @@ void __stdcall FUN_00e8c120(Outer* p1, Outer* p2, unsigned int* flags, unsigned 
         *flags = 0xa;
         *auiOffset += 0xc;
     }
-    if (p1->_24 != 0) {
+    if (p1->m_pkNormal != 0) {
         *flags |= 0x10;
         *p7 = *auiOffset;
         *auiOffset += 0xc;
     }
-    if (p1->m28 != 0) {
+    if (p1->m_pkColor != 0) {
         *flags |= 0x40;
         *p8 = *auiOffset;
         *auiOffset += 4;
     }
-    unsigned int n = *(unsigned short*)&p1->_0C[0] & 1;
+    unsigned int n = p1->m_usDataFlags & 1;
     if (n == 0) {
         n = 1;
     } else if (n > DAT_011bf558) {
@@ -264,56 +219,6 @@ struct C_00e8f010 {
     VertexRecord** records;
     void FUN_00e8f010(int);
 };
-struct NiPoint2 { float x,y; };
-struct Color { float r,g,b,a; };
-struct NiGeometryData {
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual void f6();
-    virtual void f7();
-    virtual void f8();
-    virtual void f9();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual unsigned short GetVertexCount();
-    unsigned int unk04, unk08;
-    unsigned short flags, unk0e;
-    unsigned int unk10, unk14, unk18, unk1c;
-    float* positions;
-    float* normals;
-    Color* colors;
-    unsigned int unk2c, unk30;
-    C_00e8f010* bufferData;
-    NiPoint2* FUN_00a66960(unsigned short);
-};
 struct Class87d40 { void ForwardActorBaseData(void*, int, int, int, int, int); };
 struct CriticalSection { unsigned int debug, lock, recursion, owner, semaphore, spin; };
 struct Renderer {
@@ -366,16 +271,16 @@ VertexRecord* Renderer::FUN_00e8c1e0(NiGeometryData* data, Class87d40* transform
     VertexRecord* record;
     unsigned short count = data->GetVertexCount();
     if (!count) return existing;
-    float* positions = data->positions;
-    float* normals = data->normals;
-    Color* colors = data->colors;
+    NiPoint3* positions = data->m_pkVertex;
+    NiPoint3* normals = data->m_pkNormal;
+    NiColorA* colors = data->m_pkColor;
     unsigned int maxTextures = DAT_011bf558;
-    unsigned int textureCount = data->flags & 1;
+    unsigned int textureCount = data->m_usDataFlags & 1;
     if (textureCount > maxTextures) textureCount = maxTextures;
     unsigned int fvf = 0, stride = 0;
     unsigned int positionOffset, normalOffset, colorOffset, textureOffset, unusedOffset;
     FUN_00e8c120(data, 0, &fvf, &stride, &positionOffset, &unusedOffset, &normalOffset, &colorOffset, &textureOffset);
-    C_00e8f010* bufferData = data->bufferData;
+    C_00e8f010* bufferData = static_cast<C_00e8f010*>(data->m_pkBuffData);
     bufferData->FUN_00e8f010(fvf);
     if (bufferData->count > 0) bufferData->strides[0] = stride;
     bool unlock = true;

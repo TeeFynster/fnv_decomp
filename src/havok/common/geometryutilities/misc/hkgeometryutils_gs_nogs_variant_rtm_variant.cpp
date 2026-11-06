@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 // src/havok/common/geometryutilities/misc/hkgeometryutils_gs_nogs_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/geometryutilities/misc/hkgeometryutils_gs_nogs_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -9,6 +11,10 @@
 
 #include <xmmintrin.h>
 #include <math.h>
+#include "../../../../../include/hkThreadMemory.h"
+#include "../../../../../include/hkGeometry.h"
+#include "../../../../../include/hkRotation.h"
+#include "../../../../../include/hkTransform.h"
 struct hkMemory
 {
     virtual ~hkMemory() throw();
@@ -16,14 +22,6 @@ struct hkMemory
     virtual void* unk_slot2() throw();
     virtual void* allocateChunk(int* inoutSize) throw();
     virtual void deallocate(void* p, int size) throw();
-};
-struct hkThreadMemory
-{
-    int pad00;
-    int pad04;
-    int pad08;
-    int pad0c;
-    hkMemory* m_pMemoryAllocator;
 };
 void* __cdecl FUN_00c85750() throw();
 __forceinline hkThreadMemory* getThreadMemory() throw()
@@ -38,169 +36,120 @@ extern const float DAT_01011d78;
 extern const __m128 DAT_010c71a0;
 extern const __m128 DAT_010c71e0;
 
-class CapsuleScalar
+__forceinline hkSimdReal::hkSimdReal() {}
+__forceinline hkSimdReal::hkSimdReal(float x)
 {
-    __m128 value;
-
-  public:
-    CapsuleScalar()
-    {}
-    CapsuleScalar(float x)
-    {
-        value = _mm_load_ss(&x);
-    }
-    CapsuleScalar(const __m128& x) : value(x)
-    {}
-    operator float() const
-    {
-        float x;
-        _mm_store_ss(&x, value);
-        return x;
-    }
-    __forceinline __m128 splat() const
-    {
-        return _mm_shuffle_ps(value, value, 0);
-    }
-    __forceinline const __m128& quad() const
-    {
-        return value;
-    }
-};
-
-struct hkTransform;
-struct hkQuaternion;
-struct __declspec(align(16)) hkVector4
+    m_vValue = _mm_load_ss(&x);
+}
+__forceinline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x) {}
+__forceinline hkSimdReal::operator float() const
 {
-    __m128 m_vComponents;
-    hkVector4() throw()
-    {}
-    __forceinline void broadcast(int i)
-    {
-        m_vComponents = _mm_shuffle_ps(m_vComponents, m_vComponents, 0);
-    }
-    __forceinline void multiply(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void accumulate(const hkVector4& a, const hkVector4& c)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, c.m_vComponents));
-    }
-    __forceinline void scaledAdd(const hkVector4& a, const hkVector4& c, const hkVector4& s)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(c.m_vComponents, s.m_vComponents));
-    }
+    float x;
+    _mm_store_ss(&x, m_vValue);
+    return x;
+}
+__forceinline __m128 hkSimdReal::broadcast() const
+{
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+__forceinline const __m128& hkSimdReal::getQuad() const { return m_vValue; }
 
-    __forceinline void set(float x, float y, float z, float w = 0)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-    __forceinline void scaledAdd(const hkVector4& a, const hkVector4& b, const CapsuleScalar& s)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(s.splat(), b.m_vComponents));
-    }
-
-    hkVector4(__m128 q) throw() : m_vComponents(q)
-    {}
-    __forceinline hkVector4(const hkVector4& r) throw() : m_vComponents(r.m_vComponents)
-    {}
-    __forceinline hkVector4& operator=(const hkVector4& r) throw()
-    {
-        _mm_store_ps((float*)&m_vComponents, r.m_vComponents);
-        return *this;
-    }
-    void FUN_00c7f640(const hkTransform& t, const hkVector4& v) throw();
-    __forceinline void SetTransformedPoint(const hkTransform& t, const hkVector4& v) throw()
-    {
-        FUN_00c7f640(t, v);
-    }
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b) throw()
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setAdd4(const hkVector4& a, const hkVector4& b) throw()
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void mul4(float s) throw()
-    {
-        __m128 scalar = _mm_load_ss(&s);
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(scalar, scalar, 0), m_vComponents);
-    }
-    __forceinline void mulReal(float s) throw()
-    {
-        float scalarValue = (float)(double)s;
-        __m128 scalar = _mm_load_ss(&scalarValue);
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(scalar, scalar, 0), m_vComponents);
-    }
-    __forceinline CapsuleScalar dot3(const hkVector4& a) const throw()
-    {
-        __m128 m = _mm_mul_ps(_mm_load_ps((const float*)&m_vComponents), a.m_vComponents);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m);
-        sum = _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), sum);
-        return CapsuleScalar(sum);
-    }
-    __forceinline float length3() const throw()
-    {
-        __m128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 xY = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), xY);
-        sum = _mm_sqrt_ss(sum);
-        float res;
-        _mm_store_ss(&res, sum);
-        return res;
-    }
-    __forceinline void normalize3() throw()
-    {
-        __m128 lenSq = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(lenSq, lenSq, 0x55), lenSq);
-        sum = _mm_add_ss(_mm_shuffle_ps(lenSq, lenSq, 0xaa), sum);
-        __m128 r = _mm_rsqrt_ss(sum);
-        __m128 nr = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), r),
-                               _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(sum, r), r)));
-        __m128 zero = _mm_set_ss(0.0f);
-        __m128 mask = _mm_cmpeq_ss(sum, zero);
-        nr = _mm_andnot_ps(mask, nr);
-        nr = _mm_shuffle_ps(nr, nr, 0);
-        m_vComponents = _mm_mul_ps(m_vComponents, nr);
-    }
-    __forceinline void setCross(const hkVector4& a, const hkVector4& b) throw()
-    {
-        __m128 a1 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9);
-        __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2);
-        __m128 a2 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2);
-        __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9);
-        m_vComponents = _mm_sub_ps(_mm_mul_ps(a1, b1), _mm_mul_ps(a2, b2));
-    }
-    __forceinline void setRotatedCached(const hkQuaternion& q, const hkVector4& v, const __m128& yz,
-                                        const __m128& zx) throw();
-    __forceinline void SetRotatedDirection(const hkQuaternion& q, const hkVector4& v) throw();
-};
-struct __declspec(align(16)) hkQuaternion
+__forceinline hkVector4::hkVector4(__m128 q) : m_vComponents(q) {}
+__forceinline hkVector4::hkVector4(const hkVector4& r) : m_vComponents(r.m_vComponents) {}
+__forceinline void hkVector4::operator=(const hkVector4& r)
+{
+    _mm_store_ps((float*)&m_vComponents, r.m_vComponents);
+}
+__forceinline void hkVector4::broadcast(int i)
+{
+    m_vComponents = _mm_shuffle_ps(m_vComponents, m_vComponents, 0);
+}
+__forceinline void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& c, const hkVector4& scale)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(c.m_vComponents, scale.m_vComponents));
+}
+__forceinline void hkVector4::set(float x, float y, float z, float w)
+{
+    m_vComponents = _mm_setr_ps(x, y, z, w);
+}
+__forceinline void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b, const hkSimdReal& scale)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(scale.broadcast(), b.m_vComponents));
+}
+__forceinline void hkVector4::SetTransformedPoint(const hkTransform& t, const hkVector4& v)
+{
+    FUN_00c7f640(t, v);
+}
+static __forceinline void capsuleMul4(hkVector4& vector, float s) throw()
+{
+    __m128 scalar = _mm_load_ss(&s);
+    vector.m_vComponents = _mm_mul_ps(_mm_shuffle_ps(scalar, scalar, 0), vector.m_vComponents);
+}
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    __m128 m = _mm_mul_ps(_mm_load_ps((const float*)&m_vComponents), a.m_vComponents);
+    __m128 sum = _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m);
+    sum = _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), sum);
+    return hkSimdReal(sum);
+}
+static __forceinline float capsuleLength3(const hkVector4& vector) throw()
+{
+    __m128 sq = _mm_mul_ps(vector.m_vComponents, vector.m_vComponents);
+    __m128 xY = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
+    __m128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), xY);
+    sum = _mm_sqrt_ss(sum);
+    float res;
+    _mm_store_ss(&res, sum);
+    return res;
+}
+__forceinline void hkVector4::normalize3()
+{
+    __m128 lenSq = _mm_mul_ps(m_vComponents, m_vComponents);
+    __m128 sum = _mm_add_ss(_mm_shuffle_ps(lenSq, lenSq, 0x55), lenSq);
+    sum = _mm_add_ss(_mm_shuffle_ps(lenSq, lenSq, 0xaa), sum);
+    __m128 r = _mm_rsqrt_ss(sum);
+    __m128 nr = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), r),
+                           _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(sum, r), r)));
+    __m128 zero = _mm_set_ss(0.0f);
+    __m128 mask = _mm_cmpeq_ss(sum, zero);
+    nr = _mm_andnot_ps(mask, nr);
+    nr = _mm_shuffle_ps(nr, nr, 0);
+    m_vComponents = _mm_mul_ps(m_vComponents, nr);
+}
+__forceinline void hkVector4::setCross(const hkVector4& a, const hkVector4& b)
+{
+    __m128 a1 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9);
+    __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2);
+    __m128 a2 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2);
+    __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9);
+    m_vComponents = _mm_sub_ps(_mm_mul_ps(a1, b1), _mm_mul_ps(a2, b2));
+}
+// local form of hkQuaternion: 0x00da16d0 needs the aligned m_vec type and no-throw call surface; canonical form changes size/scheduling (3603 vs 3551 bytes).
+struct __declspec(align(16)) GeometryQuaternionLocal_00da16d0
 {
     hkVector4 m_vec;
     void FUN_00cb2450(const hkVector4& axis, float angle) throw();
 };
-__forceinline void hkVector4::SetRotatedDirection(const hkQuaternion& q, const hkVector4& v) throw()
+__forceinline void hkVector4::SetRotatedDirection(const GeometryQuaternionLocal_00da16d0& q, const hkVector4& v)
 {
     hkVector4 offset;
     offset.m_vComponents = DAT_010c71e0;
     hkVector4 real;
     real.m_vComponents = _mm_shuffle_ps(q.m_vec.m_vComponents, q.m_vec.m_vComponents, 0xff);
     hkVector4 factor;
-    factor.scaledAdd(offset, real, real);
+    factor.setAddMul4(offset, real, real);
     hkVector4 result;
-    result.multiply(v, factor);
+    result.setMul4(v, factor);
     hkVector4 dot;
-    dot.m_vComponents = q.m_vec.dot3(v).quad();
+    dot.m_vComponents = q.m_vec.dot3(v).getQuad();
     dot.broadcast(0);
-    result.accumulate(dot, q.m_vec);
+    result.addMul4(dot, q.m_vec);
     hkVector4 cross;
     cross.setCross(q.m_vec, v);
-    result.accumulate(real, cross);
+    result.addMul4(real, cross);
     setAdd4(result, result);
 }
-__forceinline void hkVector4::setRotatedCached(const hkQuaternion& q, const hkVector4& v, const __m128& yz,
+__forceinline void hkVector4::setRotatedCached(const GeometryQuaternionLocal_00da16d0& q, const hkVector4& v, const __m128& yz,
                                                const __m128& zx) throw()
 {
     hkVector4 offset;
@@ -208,148 +157,116 @@ __forceinline void hkVector4::setRotatedCached(const hkQuaternion& q, const hkVe
     hkVector4 real;
     real.m_vComponents = _mm_shuffle_ps(q.m_vec.m_vComponents, q.m_vec.m_vComponents, 0xff);
     hkVector4 factor;
-    factor.scaledAdd(offset, real, real);
+    factor.setAddMul4(offset, real, real);
     hkVector4 result;
-    result.multiply(v, factor);
+    result.setMul4(v, factor);
     hkVector4 dot;
-    dot.m_vComponents = q.m_vec.dot3(v).quad();
+    dot.m_vComponents = q.m_vec.dot3(v).getQuad();
     dot.broadcast(0);
-    result.accumulate(dot, q.m_vec);
+    result.addMul4(dot, q.m_vec);
     hkVector4 cross;
     __m128 qY = _mm_shuffle_ps(q.m_vec.m_vComponents, q.m_vec.m_vComponents, 0xc9);
     __m128 qZ = _mm_shuffle_ps(q.m_vec.m_vComponents, q.m_vec.m_vComponents, 0xd2);
     cross.m_vComponents = _mm_sub_ps(_mm_mul_ps(qY, zx), _mm_mul_ps(qZ, yz));
-    result.accumulate(real, cross);
+    result.addMul4(real, cross);
     setAdd4(result, result);
 }
-struct __declspec(align(16)) hkRotation
+__forceinline hkRotation::hkRotation() {}
+__forceinline void hkRotation::setIdentity()
 {
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-    __forceinline void setIdentity() throw()
-    {
-        __m128 zero = _mm_setzero_ps();
-        m_kColumn0.m_vComponents = zero;
-        ((float*)&m_kColumn0)[0] = 1.0f;
-        m_kColumn1.m_vComponents = zero;
-        ((float*)&m_kColumn1)[1] = 1.0f;
-        m_kColumn2.m_vComponents = zero;
-        ((float*)&m_kColumn2)[2] = 1.0f;
-    }
-};
-struct __declspec(align(16)) hkTransform
-{
-    hkRotation m_rotation;
-    hkVector4 m_vTranslation;
-};
+    __m128 zero = _mm_setzero_ps();
+    m_kColumn0.m_vComponents = zero;
+    ((float*)&m_kColumn0)[0] = 1.0f;
+    m_kColumn1.m_vComponents = zero;
+    ((float*)&m_kColumn1)[1] = 1.0f;
+    m_kColumn2.m_vComponents = zero;
+    ((float*)&m_kColumn2)[2] = 1.0f;
+}
+__forceinline hkTransform::hkTransform() {}
 
-template <typename T> struct hkArray
+// FUN_00da16d0 reads its arrays through this plain layout view of hkArray (m_data, size, capacityAndFlags),
+// reinterpreted straight from hkGeometry's hkArray members: any derived-to-hkArrayBase conversion in the body makes VC9
+// order two hoisted unitX shuffles of the bottom-hemisphere loop the other way round (4 bytes at +2033).
+template <typename T> struct CapsuleArrayView
 {
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
-    hkArray() throw()
-    {
-        m_data = 0;
-        m_iElementCount = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    __forceinline void release(hkMemory& memory) throw()
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            memory.deallocate(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-    }
-    ~hkArray() throw()
-    {
-        release(*getThreadMemory()->m_pMemoryAllocator);
-    }
-    __forceinline void reserve(int n) throw()
-    {
-        hkThreadMemory* memory = getThreadMemory();
-        if ((m_iCapacityState & 0x3fffffff) < n)
-        {
-            FUN_00c908c0(memory->m_pMemoryAllocator, this, n, sizeof(T));
-        }
-    }
-    __forceinline T& AllocatePair() throw()
-    {
-        hkThreadMemory* memory = getThreadMemory();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-        {
-            FUN_00c90940(memory->m_pMemoryAllocator, this, sizeof(T));
-        }
-        return m_data[m_iElementCount];
-    }
-    static __forceinline void fillOne(T* dst, int n, const T& val)
-    {
-        for (int i = 0; i < n; ++i)
-            dst[i] = val;
-    }
-    __forceinline void AddBack(const T& val) throw()
-    {
-        hkThreadMemory* memory = getThreadMemory();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            FUN_00c90940(memory->m_pMemoryAllocator, this, sizeof(T));
-        fillOne(m_data + m_iElementCount, 1, val);
-        ++m_iElementCount;
-    }
-    static __forceinline void copyItems(T* dst, const T* src, int n)
-    {
-        for (int i = 0; i < n; ++i)
-        {
-            dst[i].m_vComponents = src[i].m_vComponents;
-        }
-    }
-    __forceinline hkArray& operator=(const hkArray& other) throw()
-    {
-        hkMemory* memory = getThreadMemory()->m_pMemoryAllocator;
-        if ((m_iCapacityState & 0x3fffffff) < other.m_iElementCount)
-        {
-            if ((m_iCapacityState & 0x80000000) == 0)
-            {
-                memory->deallocate(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-            }
-            int reqBytes = other.m_iElementCount * sizeof(T);
-            m_data = (T*)memory->allocateChunk(&reqBytes);
-            m_iCapacityState = reqBytes / (int)sizeof(T);
-        }
-        m_iElementCount = other.m_iElementCount;
-        T* dst = m_data;
-        const T* src = other.m_data;
-        copyItems(dst, src, m_iElementCount);
-        return *this;
-    }
 };
-struct Triangle
+
+template <typename T> static __forceinline void releaseArray(CapsuleArrayView<T>& array, hkMemory& memory) throw()
 {
-    int m_kPointA;
-    int m_kPointB;
-    int m_iThirdValue;
-    int m_iMaterialIndex;
-    __forceinline void set(int a, int b, int c) throw()
-    {
-        m_kPointA = a;
-        m_kPointB = b;
-        m_iThirdValue = c;
-        m_iMaterialIndex = -1;
-    }
-};
-struct hkGeometry
+    array.m_iElementCount = 0;
+    if ((array.m_iCapacityState & 0x80000000) == 0)
+        memory.deallocate(array.m_data, (array.m_iCapacityState & 0x3fffffff) * sizeof(T));
+}
+template <typename T> static __forceinline void reserveArray(CapsuleArrayView<T>& array, int n) throw()
 {
-    hkArray<hkVector4> m_kVertices;
-    hkArray<Triangle> m_uiTriangleCount;
-    void* operator new(size_t size) throw()
+    hkThreadMemory* memory = getThreadMemory();
+    if ((array.m_iCapacityState & 0x3fffffff) < n)
+        FUN_00c908c0(memory->m_pMemoryAllocator, &array, n, sizeof(T));
+}
+template <typename T> static __forceinline void fillOne(T* dst, int n, const T& val)
+{
+    for (int i = 0; i < n; ++i)
+        dst[i] = val;
+}
+template <typename T> static __forceinline void addBack(CapsuleArrayView<T>& array, const T& val) throw()
+{
+    hkThreadMemory* memory = getThreadMemory();
+    if (array.m_iElementCount == (array.m_iCapacityState & 0x3fffffff))
+        FUN_00c90940(memory->m_pMemoryAllocator, &array, sizeof(T));
+    fillOne(array.m_data + array.m_iElementCount, 1, val);
+    ++array.m_iElementCount;
+}
+template <typename T> static __forceinline void copyItems(T* dst, const T* src, int n)
+{
+    for (int i = 0; i < n; ++i)
+        dst[i].m_vComponents = src[i].m_vComponents;
+}
+template <typename T> static __forceinline void assignArray(CapsuleArrayView<T>& array, const CapsuleArrayView<T>& other) throw()
+{
+    hkMemory* memory = getThreadMemory()->m_pMemoryAllocator;
+    if ((array.m_iCapacityState & 0x3fffffff) < other.m_iElementCount)
     {
-        return getThreadMemory()->m_pMemoryAllocator->allocate(size);
+        if ((array.m_iCapacityState & 0x80000000) == 0)
+            memory->deallocate(array.m_data, (array.m_iCapacityState & 0x3fffffff) * sizeof(T));
+        int reqBytes = other.m_iElementCount * sizeof(T);
+        array.m_data = (T*)memory->allocateChunk(&reqBytes);
+        array.m_iCapacityState = reqBytes / (int)sizeof(T);
     }
+    array.m_iElementCount = other.m_iElementCount;
+    T* dst = array.m_data;
+    const T* src = other.m_data;
+    copyItems(dst, src, array.m_iElementCount);
+}
+
+
+__forceinline hkGeometry::hkGeometry()
+{
+}
+
+// The temporary vertex buffer: a plain array the function initialises and frees itself.
+struct CapsuleVertices
+{
+    CapsuleArrayView<hkVector4> array;
+    CapsuleVertices() throw()
+    {
+        array.m_data = 0;
+        array.m_iElementCount = 0;
+        array.m_iCapacityState = 0x80000000;
+    }
+    ~CapsuleVertices() throw() { releaseArray(array, *getThreadMemory()->m_pMemoryAllocator); }
 };
-static __forceinline void appendCapsuleEnd(hkGeometry* geom, int numSides, int startVertex, Triangle& tri)
+__forceinline void* hkGeometry::operator new(size_t size) throw()
+{
+    return getThreadMemory()->m_pMemoryAllocator->allocate(size);
+}
+static __forceinline void appendCapsuleEnd(hkGeometry* geom, int numSides, int startVertex, hkGeometry::Triangle& tri)
 {
     if (numSides > 0)
     {
-        hkArray<Triangle>& triangles = geom->m_uiTriangleCount;
+        CapsuleArrayView<hkGeometry::Triangle>& triangles = reinterpret_cast<CapsuleArrayView<hkGeometry::Triangle>&>(geom->m_uiTriangleCount);
         int i = 1;
         int remaining = numSides;
         do
@@ -357,7 +274,7 @@ static __forceinline void appendCapsuleEnd(hkGeometry* geom, int numSides, int s
             tri.m_kPointB = startVertex + i - 1;
             tri.m_kPointA = startVertex + i % numSides;
             tri.m_iThirdValue = startVertex + numSides;
-            triangles.AddBack(tri);
+            addBack(triangles, tri);
             ++i;
         } while (--remaining);
     }
@@ -367,10 +284,11 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
                           int numSides, const hkTransform& transform, hkGeometry*& outGeom) throw()
 {
     const int halfSides = numSides >> 1;
-    hkArray<hkVector4> localVertices;
+    CapsuleVertices vertexBuffer;
+    CapsuleArrayView<hkVector4>& localVertices = vertexBuffer.array;
     hkVector4 axis;
     axis.setSub4(bottom, top);
-    float len = axis.length3();
+    float len = capsuleLength3(axis);
     hkTransform localTransform;
     if (len > 0.0f)
     {
@@ -383,23 +301,23 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
             hkVector4 yAxis;
             yAxis.setCross(axis, zAxis);
             yAxis.normalize3();
-            localTransform.m_rotation.m_kColumn0.setCross(yAxis, axis);
-            localTransform.m_rotation.m_kColumn1.m_vComponents = yAxis.m_vComponents;
-            localTransform.m_rotation.m_kColumn2.m_vComponents = axis.m_vComponents;
+            reinterpret_cast<hkRotation&>(localTransform).m_kColumn0.setCross(yAxis, axis);
+            reinterpret_cast<hkRotation&>(localTransform).m_kColumn1.m_vComponents = yAxis.m_vComponents;
+            reinterpret_cast<hkRotation&>(localTransform).m_kColumn2.m_vComponents = axis.m_vComponents;
         }
         else
         {
-            localTransform.m_rotation.setIdentity();
+            reinterpret_cast<hkRotation&>(localTransform).setIdentity();
         }
     }
     else
     {
-        localTransform.m_rotation.setIdentity();
+        reinterpret_cast<hkRotation&>(localTransform).setIdentity();
     }
     hkVector4 center;
     center.setAdd4(bottom, top);
-    center.mul4(0.5f);
-    localTransform.m_vTranslation = center;
+    capsuleMul4(center, 0.5f);
+    localTransform.position = center;
     double halfLen;
     int numVerts = (numHeightSegments + halfSides * 2 - 1) * numSides + 2;
     hkVector4 topCenter;
@@ -421,7 +339,7 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
     unitX.set(1.0f, 0.0f, 0.0f, 0.0f);
     hkVector4 negUnitY;
     negUnitY.set(0.0f, -1.0f, 0.0f, 0.0f);
-    localVertices.reserve(numVerts);
+    reserveArray(localVertices, numVerts);
     hkVector4 pt;
     double apexHeight = halfLen + radius;
     // Top apex
@@ -429,14 +347,14 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
         float apex = (float)apexHeight;
         pt.set(0.0f, 0.0f, apex, 0.0f);
         pt.SetTransformedPoint(localTransform, pt);
-        localVertices.AddBack(pt);
+        addBack(localVertices, pt);
     }
     int i, j;
     // Top hemisphere rings
     for (i = halfSides - 1; i >= 0; --i)
     {
         float angle = (float)((float)i / (float)halfSides * 3.1415927410125732421875 * 0.5);
-        hkQuaternion qY;
+        GeometryQuaternionLocal_00da16d0 qY;
         qY.FUN_00cb2450(negUnitY, angle);
         hkVector4 v3;
         v3.SetRotatedDirection(qY, unitX);
@@ -451,15 +369,15 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
             for (; j < numSides; ++j)
             {
                 float sideAngle = (float)((float)j / (float)numSides * 3.1415927410125732421875 * 2.0);
-                hkQuaternion sideRotation;
+                GeometryQuaternionLocal_00da16d0 sideRotation;
                 sideRotation.FUN_00cb2450(unitZ, sideAngle);
                 hkVector4 radial;
                 radial.setRotatedCached(sideRotation, v3, yz, zx);
 
                 float radiusScale = radius;
-                pt.scaledAdd(bottomCenter, radial, radiusScale);
+                pt.setAddMul4(bottomCenter, radial, hkSimdReal(radiusScale));
                 pt.SetTransformedPoint(localTransform, pt);
-                localVertices.AddBack(pt);
+                addBack(localVertices, pt);
             }
         }
     }
@@ -470,40 +388,40 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
         for (i = 0; i < numSides; ++i)
         {
             float sideAngle = (float)((float)i / (float)numSides * 3.1415927410125732421875 * 2.0);
-            hkQuaternion sideRotation;
+            GeometryQuaternionLocal_00da16d0 sideRotation;
             sideRotation.FUN_00cb2450(unitZ, sideAngle);
             hkVector4 radial;
             radial.SetRotatedDirection(sideRotation, cylinderAxis);
 
             float vRing = (float)j / (float)numHeightSegments;
             hkVector4 segCenter;
-            segCenter.scaledAdd(topCenter, axisDelta, vRing);
+            segCenter.setAddMul4(topCenter, axisDelta, hkSimdReal(vRing));
             float radiusScale = radius;
-            pt.scaledAdd(segCenter, radial, radiusScale);
+            pt.setAddMul4(segCenter, radial, hkSimdReal(radiusScale));
             pt.SetTransformedPoint(localTransform, pt);
-            localVertices.AddBack(pt);
+            addBack(localVertices, pt);
         }
     }
     // Bottom hemisphere
     for (i = 0; i < halfSides; ++i)
     {
         float angle = (float)(-(float)i / (float)halfSides * 3.1415927410125732421875 * 0.5);
-        hkQuaternion qY;
+        GeometryQuaternionLocal_00da16d0 qY;
         qY.FUN_00cb2450(negUnitY, angle);
         hkVector4 v3;
         v3.SetRotatedDirection(qY, unitX);
         for (j = 0; j < numSides; ++j)
         {
             float sideAngle = (float)((float)j / (float)numSides * 3.1415927410125732421875 * 2.0);
-            hkQuaternion sideRotation;
+            GeometryQuaternionLocal_00da16d0 sideRotation;
             sideRotation.FUN_00cb2450(unitZ, sideAngle);
             hkVector4 radial;
             radial.SetRotatedDirection(sideRotation, v3);
 
             float radiusScale = radius;
-            pt.scaledAdd(topCenter, radial, radiusScale);
+            pt.setAddMul4(topCenter, radial, hkSimdReal(radiusScale));
             pt.SetTransformedPoint(localTransform, pt);
-            localVertices.AddBack(pt);
+            addBack(localVertices, pt);
         }
     }
     // Bottom apex
@@ -511,20 +429,20 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
         float apex = (float)(-apexHeight);
         pt.set(0.0f, 0.0f, apex, 0.0f);
         pt.SetTransformedPoint(localTransform, pt);
-        localVertices.AddBack(pt);
+        addBack(localVertices, pt);
     }
     hkGeometry* geom = new hkGeometry();
-    geom->m_kVertices = localVertices;
-    for (int i = 0; i < geom->m_kVertices.m_iElementCount; ++i)
+    assignArray(reinterpret_cast<CapsuleArrayView<hkVector4>&>(geom->m_kVertices), localVertices);
+    for (int i = 0; i < reinterpret_cast<CapsuleArrayView<hkVector4>&>(geom->m_kVertices).m_iElementCount; ++i)
     {
-        geom->m_kVertices.m_data[i].SetTransformedPoint(transform, geom->m_kVertices.m_data[i]);
+        reinterpret_cast<CapsuleArrayView<hkVector4>&>(geom->m_kVertices).m_data[i].SetTransformedPoint(transform, reinterpret_cast<CapsuleArrayView<hkVector4>&>(geom->m_kVertices).m_data[i]);
     }
-    Triangle tri;
+    hkGeometry::Triangle tri;
     tri.m_iMaterialIndex = -1;
     int startVertex = 1;
     if (numSides > 0)
     {
-        hkArray<Triangle>& triangles = geom->m_uiTriangleCount;
+        CapsuleArrayView<hkGeometry::Triangle>& triangles = reinterpret_cast<CapsuleArrayView<hkGeometry::Triangle>&>(geom->m_uiTriangleCount);
         int i = 1;
         int remaining = numSides;
         do
@@ -532,7 +450,7 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
             tri.m_kPointA = 0;
             tri.m_kPointB = i;
             tri.m_iThirdValue = i % numSides + 1;
-            triangles.AddBack(tri);
+            addBack(triangles, tri);
             ++i;
         } while (--remaining);
     }
@@ -541,7 +459,7 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
         {
             if (numSides > 0)
             {
-                hkArray<Triangle>& triangles = geom->m_uiTriangleCount;
+                CapsuleArrayView<hkGeometry::Triangle>& triangles = reinterpret_cast<CapsuleArrayView<hkGeometry::Triangle>&>(geom->m_uiTriangleCount);
                 int i = 1;
                 int remaining = numSides;
                 do
@@ -549,11 +467,11 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
                     tri.m_kPointA = startVertex + i - 1;
                     tri.m_kPointB = startVertex + i - 1 + numSides;
                     tri.m_iThirdValue = startVertex + i % numSides + numSides;
-                    triangles.AddBack(tri);
+                    addBack(triangles, tri);
                     tri.m_kPointB = startVertex + i - 1;
                     tri.m_kPointA = startVertex + i % numSides;
                     tri.m_iThirdValue = startVertex + numSides + i % numSides;
-                    triangles.AddBack(tri);
+                    addBack(triangles, tri);
                     ++i;
                 } while (--remaining);
             }
@@ -563,3 +481,5 @@ void __cdecl FUN_00da16d0(const hkVector4& top, const hkVector4& bottom, float r
     appendCapsuleEnd(geom, numSides, startVertex, tri);
     outGeom = geom;
 }
+
+

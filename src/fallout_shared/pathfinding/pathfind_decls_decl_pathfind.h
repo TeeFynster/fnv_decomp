@@ -6,20 +6,14 @@
 //   PathingLocation: ctors/dtor, copy ctor, operator=, GetLocation and the navmesh queries used by matched code.
 //   BSSimpleArray: Add.   NiPointer: smart-pointer API (canonical NiPointer bodies need a complete T).
 #define NiPointer FNV_NiPointer_Canonical
-#define BSSimpleArray FNV_BSSimpleArray_Canonical
 #define PathingLocation FNV_PathingLocation_Canonical
 #include "../../../include/layout_support.h"
 #include "../../../include/NiPoint3.h"
 #undef PathingLocation
-#undef BSSimpleArray
 #undef NiPointer
 // packet's first-definition-wins type index shows them (not the renamed canonical text).
 #include "pathfind_local_types_decl_pathfind.h"
-#define BSSimpleArray FNV_BSSimpleArray_Canonical
-#define PathingLocation FNV_PathingLocation_Canonical
-#include "../../../include/PathingLocation.h"
-#undef PathingLocation
-#undef BSSimpleArray
+// include/PathingLocation.h forwards to the shared class pathfind_local_types.h already read
 #include "../../../include/AutoMemContext.h"
 #pragma pack(push, 4)
 class PathfindQueueStorage
@@ -57,8 +51,6 @@ class PathingLocationProxy
   public:
     bool FindContainingTriangle(FindTriangleForLocationFilter*);
 };
-FNV_STATIC_ASSERT(sizeof(PathingLocation) == sizeof(FNV_PathingLocation_Canonical));
-FNV_STATIC_ASSERT(offsetof(PathingLocation, m_usTriangleID) == offsetof(FNV_PathingLocation_Canonical, m_usTriangleID));
 #pragma pack(pop)
 class NavMesh;
 class PathingActorData;

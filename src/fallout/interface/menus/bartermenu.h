@@ -1,7 +1,6 @@
 #ifndef FNV_BARTERMENU_H
 #define FNV_BARTERMENU_H
 
-#include "bartermenu_decls.h"
 
 // @fnv 0x0072d040
 void MapMenu::AssignTileByID(int index, Tile* tile)

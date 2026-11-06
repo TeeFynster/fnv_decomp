@@ -3,9 +3,15 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /GF /Ob1 (unit src/fallout_shared/bgsdecalmanager.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "bgsdecalmanager_decls.h"
-#include "bgsdecalmanager_types_BGSDecalManager.h"
-#include "bgsdecalmanager_types_BSTempEffectSimpleDecal.h"
+#include "../../include/BSCullingProcess.h"
+#include "../../include/NiCullingProcess.h"
+#include "../../include/NiAccumulator.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiCamera.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiPointer.h"
 
 struct HostV;
 struct ObjV
@@ -87,248 +93,89 @@ void HostV::FUN_00c4ee90(ObjV* pkObj)
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-class NiCullingProcess;
-class NiNodeX;
-class NiObj
+__forceinline void NiRefObject::IncRefCount()
 {
-  public:
-    virtual void vf00();
-    virtual void DeleteThis();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1c();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2c();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void vf38();
-    virtual void vf3c();
-    virtual void vf40();
-    virtual void vf44();
-    virtual void vf48();
-    virtual void vf4c();
-    virtual void vf50();
-    virtual void vf54();
-    virtual void vf58();
-    virtual void vf5c();
-    virtual void vf60();
-    virtual void vf64();
-    virtual void vf68();
-    virtual void vf6c();
-    virtual void vf70();
-    virtual void vf74();
-    virtual void vf78();
-    virtual void vf7c();
-    virtual void vf80();
-    virtual void vf84();
-    virtual void vf88();
-    virtual void vf8c(NiNodeX* n);
-    long m_uiRefCount;
-    __forceinline void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    __forceinline void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-class NiNodeX : public NiObj
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+
+__forceinline void NiRefObject::DecRefCount()
 {
-  public:
-};
-class NiAVObject
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+
+inline NiAccumulator* GetRoot()
 {
-  public:
-    void Cull(NiCullingProcess& p);
-};
-class SceneMgr;
-extern SceneMgr* DAT_011f4748;
-class SceneMgr
-{
-  public:
-    int unk00;
-    int unk04;
-    NiNodeX* unk08;
-};
-inline NiNodeX* GetRoot()
-{
-    SceneMgr* m = DAT_011f4748;
+    NiRenderer* m = NiRenderer::ms_pRenderer;
     int u1;
     int u2;
-    return m->unk08;
+    return *reinterpret_cast<NiAccumulator**>(m->m_spAccum);
 }
-class Accum : public NiObj
-{
-};
-class AccPtr
-{
-  public:
-    NiObj* m_pObject;
-    __forceinline AccPtr(NiObj* o = 0)
-    {
-        m_pObject = o;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    __forceinline ~AccPtr()
-    {
-        int u3;
-        int u4;
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    __forceinline NiObj* operator->()
-    {
-        return m_pObject;
-    }
-    __forceinline operator NiObj*()
-    {
-        return m_pObject;
-    }
-    void AssignRefCounted(void* src);
-    AccPtr& FUN_0066b0d0(NiNodeX* p);
-};
-class NiCullingProcess
-{
-  public:
-    virtual void vf00();
-    int unk04;
-    int unk08;
-    NiNodeX* unk0c;
-    void FUN_00a694a0(void* p);
-    void FUN_00c4f070(NiNodeX* a, NiAVObject* b, int c);
-};
 
+template <> __forceinline NiPointer<NiAccumulator>::NiPointer()
+{
+    m_pObject = 0;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+
+template <> __forceinline NiPointer<NiAccumulator>::~NiPointer()
+{
+    int u3;
+    int u4;
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+
+template <> __forceinline NiAccumulator* NiPointer<NiAccumulator>::operator->() const
+{
+    return m_pObject;
+}
+
+template <> __forceinline NiPointer<NiAccumulator>::operator NiAccumulator*() const
+{
+    return m_pObject;
+}
+
+// The shared declaration retains an opaque NiNodeX*: this parameter is a camera, while renderer +8 is an accumulator.
 // @fnv 0x00c4f070
 void NiCullingProcess::FUN_00c4f070(NiNodeX* a, NiAVObject* b, int c)
 {
     if (!a || !b)
         return;
-    unk0c = a;
-    FUN_00a694a0((char*)unk0c + 0xdc);
-    int saved = 0;
+    m_pkCamera = (const NiCamera*)a;
+    FUN_00a694a0((char*)m_pkCamera + 0xdc);
+    void* saved = 0;
     if (c)
     {
-        saved = unk08;
-        unk08 = c;
+        saved = m_pkVisibleSet;
+        m_pkVisibleSet = (void*)c;
     }
-    AccPtr sp;
-    if (!unk08)
+    NiPointer<NiAccumulator> sp;
+    if (!m_pkVisibleSet)
     {
-        sp.AssignRefCounted((char*)this + 0xc4);
+        sp = *reinterpret_cast<NiPointer<NiAccumulator>*>((char*)this + 0xc4);
         if (!sp)
-            sp.FUN_0066b0d0(GetRoot());
+            sp = GetRoot();
         if (sp)
-            sp->vf8c(a);
+            sp->StartAccumulating(reinterpret_cast<const NiCamera*>(a));
     }
     b->Cull(*this);
     if (c)
-        unk08 = saved;
+        m_pkVisibleSet = saved;
 }
 
 void __cdecl FUN_00a29680(const char* pcFormat, ...);
 
-class NiFixedString
+inline NiFixedString::operator const char*() const
 {
-  public:
-    const char* m_kHandle;
-    operator const char*() const
-    {
-        return m_kHandle;
-    }
-};
+    return m_kHandle;
+}
 
-class NiGeometry
+inline const char* NiGeometry::GetName() const
 {
-  public:
-    unsigned int unk00;
-    unsigned int unk04;
-    NiFixedString m_kName;
-    const char* GetName() const
-    {
-        return m_kName;
-    }
-};
-
-class NiAccumulator
-{
-  public:
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1c();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2c();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void vf38();
-    virtual void vf3c();
-    virtual void vf40();
-    virtual void vf44();
-    virtual void vf48();
-    virtual void vf4c();
-    virtual void vf50();
-    virtual void vf54();
-    virtual void vf58();
-    virtual void vf5c();
-    virtual void vf60();
-    virtual void vf64();
-    virtual void vf68();
-    virtual void vf6c();
-    virtual void vf70();
-    virtual void vf74();
-    virtual void vf78();
-    virtual void vf7c();
-    virtual void vf80();
-    virtual void vf84();
-    virtual void vf88();
-    virtual void vf8c();
-    virtual void vf90();
-    virtual void vf94();
-    virtual bool RegisterObject(NiGeometry* pkGeom);
-};
-
-template <class T> class NiPtr
-{
-  public:
-    T* m_pObject;
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-};
-
-class BSCullingProcess : public NiCullingProcess
-{
-  public:
-    int unk10, unk14, unk18, unk1c;
-    int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
-    int unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c;
-    int unk60, unk64, unk68, unk6c, unk70, unk74, unk78, unk7c;
-    int unk80, unk84, unk88, unk8c, unk90, unk94, unk98, unk9c;
-    int unkA0, unkA4, unkA8, unkAc, unkB0, unkB4, unkB8, unkBc;
-    int unkC0;
-    NiPtr<NiAccumulator> m_acRendererDataA;
-
-    void FUN_00c4f1d0(NiGeometry& kVisible);
-};
+    return m_kName;
+}
 
 // @fnv 0x00c4f1d0
 void BSCullingProcess::FUN_00c4f1d0(NiGeometry& kVisible)

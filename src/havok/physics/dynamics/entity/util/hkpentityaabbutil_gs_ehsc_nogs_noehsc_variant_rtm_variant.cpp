@@ -1,3 +1,5 @@
+#include "../../../../../../include/Vec4.h"
+#include <string.h>
 
 // src/havok/physics/dynamics/entity/util/hkpentityaabbutil_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/dynamics/entity/util/hkpentityaabbutil_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
@@ -47,39 +49,37 @@ public:
     __forceinline __m128 quad() const { return data; }
     __forceinline __m128 spread() const { return _mm_shuffle_ps(data,data,0); }
 };
-struct Mat4Like;
-class Vec4 {
-    __m128 data;
-public:
-    __forceinline Vec4() {}
-    __forceinline void operator=(const Vec4& input) { data=input.data; }
-    __forceinline void operator=(const __m128& input) { data=input; }
-    __forceinline operator __m128() const { return data; }
-    __forceinline __m128& getQuad() { return data; }
-    __forceinline const __m128& getQuad() const { return data; }
-    __forceinline float getSimdAt(int index) const { return reinterpret_cast<const float*>(&data)[index]; }
-    __forceinline ScalarLane lane(int index) const { return _mm_shuffle_ps(data,data,0xff); }
-    __forceinline void difference(const Vec4& left,const Vec4& right) { data=_mm_sub_ps(left.data,right.data); }
-    __forceinline void sum(const Vec4& left,const Vec4& right) { data=_mm_add_ps(left.data,right.data); }
-    __forceinline void add(const Vec4& input) { data=_mm_add_ps(data,input.data); }
-    __forceinline void multiply(const ScalarLane& input) { data=_mm_mul_ps(input.spread(),data); }
-    __forceinline void multiply(const Vec4& input) { data=_mm_mul_ps(data,input.data); }
-    __forceinline void lower(const Vec4& left,const Vec4& right) { data=_mm_min_ps(left.data,right.data); }
-    __forceinline void upper(const Vec4& left,const Vec4& right) { data=_mm_max_ps(left.data,right.data); }
-    __forceinline void blend(const Vec4& left,const Vec4& right,const ScalarLane& ratio) {
-        __m128 amount=ratio.spread();
-        __m128 complement=_mm_sub_ps(_mm_load_ps(DAT_010ec7f0),amount);
-        data=_mm_add_ps(_mm_mul_ps(complement,left.data),_mm_mul_ps(amount,right.data));
-    }
-    __forceinline void transform(const Mat4Like& matrix,const Vec4& input);
-    __forceinline ScalarLane radius() const {
-        __m128 squares=_mm_mul_ps(data,data);
-        __m128 sumxy=_mm_add_ss(_mm_shuffle_ps(squares,squares,0x55),squares);
-        return _mm_sqrt_ss(_mm_add_ss(_mm_shuffle_ps(squares,squares,0xaa),sumxy));
-    }
-    __forceinline void fill(const ScalarLane& input) { data=input.spread(); }
-    __forceinline void addScaled(const ScalarLane& scale,const Vec4& input) { data=_mm_add_ps(data,_mm_mul_ps(scale.spread(),input.data)); }
-};
+__forceinline Vec4::Vec4(const Vec4& input) { memcpy(this,&input,sizeof(*this)); }
+// An aliased SIMD source preserves scratch storage until the bounds writer fills it.
+__forceinline Vec4::Vec4(const __m128& input) {
+    if (static_cast<const void*>(this)!=static_cast<const void*>(&input))
+        getQuad()=input;
+}
+__forceinline void Vec4::operator=(const __m128& input) { reinterpret_cast<__m128&>(*this)=input; }
+__forceinline Vec4::operator __m128() const { return reinterpret_cast<const __m128&>(*this); }
+__forceinline __m128& Vec4::getQuad() { return *reinterpret_cast<__m128*>(this); }
+__forceinline const __m128& Vec4::getQuad() const { return *reinterpret_cast<const __m128*>(this); }
+__forceinline float Vec4::getSimdAt(int index) const { return reinterpret_cast<const float*>(this)[index]; }
+__forceinline ScalarLane Vec4::lane(int index) const { return _mm_shuffle_ps(reinterpret_cast<const __m128&>(*this),reinterpret_cast<const __m128&>(*this),0xff); }
+__forceinline void Vec4::difference(const Vec4& left,const Vec4& right) { reinterpret_cast<__m128&>(*this)=_mm_sub_ps(reinterpret_cast<const __m128&>(left),reinterpret_cast<const __m128&>(right)); }
+__forceinline void Vec4::sum(const Vec4& left,const Vec4& right) { reinterpret_cast<__m128&>(*this)=_mm_add_ps(reinterpret_cast<const __m128&>(left),reinterpret_cast<const __m128&>(right)); }
+__forceinline void Vec4::add(const Vec4& input) { reinterpret_cast<__m128&>(*this)=_mm_add_ps(reinterpret_cast<__m128&>(*this),reinterpret_cast<const __m128&>(input)); }
+__forceinline void Vec4::multiply(const ScalarLane& input) { reinterpret_cast<__m128&>(*this)=_mm_mul_ps(input.spread(),reinterpret_cast<__m128&>(*this)); }
+__forceinline void Vec4::multiply(const Vec4& input) { reinterpret_cast<__m128&>(*this)=_mm_mul_ps(reinterpret_cast<__m128&>(*this),reinterpret_cast<const __m128&>(input)); }
+__forceinline void Vec4::lower(const Vec4& left,const Vec4& right) { reinterpret_cast<__m128&>(*this)=_mm_min_ps(reinterpret_cast<const __m128&>(left),reinterpret_cast<const __m128&>(right)); }
+__forceinline void Vec4::upper(const Vec4& left,const Vec4& right) { reinterpret_cast<__m128&>(*this)=_mm_max_ps(reinterpret_cast<const __m128&>(left),reinterpret_cast<const __m128&>(right)); }
+__forceinline void Vec4::blend(const Vec4& left,const Vec4& right,const ScalarLane& ratio) {
+    __m128 amount=ratio.spread();
+    __m128 complement=_mm_sub_ps(_mm_load_ps(DAT_010ec7f0),amount);
+    reinterpret_cast<__m128&>(*this)=_mm_add_ps(_mm_mul_ps(complement,reinterpret_cast<const __m128&>(left)),_mm_mul_ps(amount,reinterpret_cast<const __m128&>(right)));
+}
+__forceinline ScalarLane Vec4::radius() const {
+    __m128 squares=_mm_mul_ps(reinterpret_cast<const __m128&>(*this),reinterpret_cast<const __m128&>(*this));
+    __m128 sumxy=_mm_add_ss(_mm_shuffle_ps(squares,squares,0x55),squares);
+    return _mm_sqrt_ss(_mm_add_ss(_mm_shuffle_ps(squares,squares,0xaa),sumxy));
+}
+__forceinline void Vec4::fill(const ScalarLane& input) { reinterpret_cast<__m128&>(*this)=input.spread(); }
+__forceinline void Vec4::addScaled(const ScalarLane& scale,const Vec4& input) { reinterpret_cast<__m128&>(*this)=_mm_add_ps(reinterpret_cast<__m128&>(*this),_mm_mul_ps(scale.spread(),reinterpret_cast<const __m128&>(input))); }
 
 
 struct IVec4 { int x, y, z; union { int w; struct { unsigned char b0,b1,b2,b3; } packed; }; };
@@ -90,7 +90,7 @@ struct __declspec(align(16)) BoundsRecord {
     union { unsigned int word; struct { unsigned char expansion[3]; unsigned char key; } bytes; } maxExtra;
 };
 
-struct Mat4Like { Vec4 r0,r1,r2,r3; };
+struct __declspec(align(16)) Mat4Like { Vec4 r0,r1,r2,r3; };
 struct FloatBounds;
 struct __declspec(align(16)) ShapeStorage { unsigned char bytes[512]; };
 struct Shape;
@@ -108,7 +108,7 @@ virtual const ShapeParts* GetShapeContainer() const;
 virtual void slot14(); virtual void slot18();
 virtual void getAabb(const Mat4Like&,float,FloatBounds&) const;
 };
-struct SweptData { Vec4 center0,center1,rotation0,rotation1,localCenter; };
+struct __declspec(align(16)) SweptData { Vec4 center0,center1,rotation0,rotation1,localCenter; };
 struct MotionData {
 Mat4Like matrix;
 SweptData sweep;
@@ -168,7 +168,7 @@ MotionBox m_pMotionState;
 __forceinline const Shape* getShape() const {return shape;}
 __forceinline const EntityNode* getCollidable() const {return this;}
 };
-struct QuantizationInfo { Vec4 low,high,scale; };
+struct __declspec(align(16)) QuantizationInfo { Vec4 low,high,scale; };
 struct CollisionContext {
 unsigned int unk00,unk04;
 float tolerance;
@@ -191,18 +191,29 @@ Mat4Like start,inverseEnd;
 extern "C" void* FUN_00c85750();
 extern "C" void FUN_00cbec90(void*,void*);
 __forceinline void Vec4::transform(const Mat4Like& matrix,const Vec4& input) {
-    __m128 x=_mm_shuffle_ps(input.data,input.data,0);
+    __m128 x=_mm_shuffle_ps(reinterpret_cast<const __m128&>(input),reinterpret_cast<const __m128&>(input),0);
     __m128 rowx=_mm_mul_ps(matrix.r0.getQuad(),x);
-    __m128 y=_mm_shuffle_ps(input.data,input.data,0x55);
+    __m128 y=_mm_shuffle_ps(reinterpret_cast<const __m128&>(input),reinterpret_cast<const __m128&>(input),0x55);
     __m128 rowy=_mm_mul_ps(matrix.r1.getQuad(),y);
-    __m128 z=_mm_shuffle_ps(input.data,input.data,0xaa);
+    __m128 z=_mm_shuffle_ps(reinterpret_cast<const __m128&>(input),reinterpret_cast<const __m128&>(input),0xaa);
     __m128 rowz=_mm_mul_ps(matrix.r2.getQuad(),z);
-    data=_mm_add_ps(_mm_add_ps(rowx,rowy),_mm_add_ps(rowz,matrix.r3.getQuad()));
+    reinterpret_cast<__m128&>(*this)=_mm_add_ps(_mm_add_ps(rowx,rowy),_mm_add_ps(rowz,matrix.r3.getQuad()));
 }
 
 static __forceinline const Vec4& ZeroVector() { return *reinterpret_cast<const Vec4*>(DAT_01267e30); }
 
-struct UpperVector : Vec4 { using Vec4::operator=; }; struct FloatBounds { Vec4 minimum; UpperVector maximum; };
+// Preserve the original no-initialization bounds and whole-record copy behavior.
+struct UpperVector : Vec4 {
+    using Vec4::operator=;
+    __forceinline UpperVector() : Vec4(*reinterpret_cast<const __m128*>(this)) {}
+};
+struct __declspec(align(16)) FloatBounds {
+    Vec4 minimum;
+    UpperVector maximum;
+    __forceinline FloatBounds() :
+        minimum(*reinterpret_cast<const __m128*>(&minimum)) {}
+    __forceinline FloatBounds(const FloatBounds& input) { memcpy(this,&input,sizeof(*this)); }
+};
 
 static __forceinline __m128 TransformPosition(__m128 point, const Vec4* rows) {
     __m128 p0 = _mm_mul_ps(_mm_shuffle_ps(point,point,0),rows[0].getQuad());
@@ -230,7 +241,6 @@ static __forceinline void ConvertAabb(const FloatBounds& aabb, const Vec4& offse
     ConvertToUint32(maxVal,ZeroVector().getQuad(),aabb.maximum,offsetHigh,scale,out.maximum);
 }
 
-struct AabbHolder { FloatBounds box; };
 static __forceinline void CompressExpanded(const BoundsRecord& expanded, BoundsRecord& out) {
     int mix = out.minimum[0] - expanded.minimum[0];
     int miy = out.minimum[1] - expanded.minimum[1];
@@ -295,9 +305,9 @@ static __forceinline void SweepSingle(const MotionData* motion, float tolerance,
     swept.maximum=_mm_add_ps(aabb.maximum,angular);
     {
         float boundRadius=motion->objectRadius+tolerance;
-        __m128 radius=_mm_set1_ps(boundRadius);
-        __m128 upper=_mm_add_ps(motion->getSweptTransform().center1.getQuad(),radius);
-        __m128 lower=_mm_sub_ps(motion->getSweptTransform().center1.getQuad(),radius);
+        Vec4 radius; radius.fill(ScalarLane(boundRadius));
+        __m128 upper=_mm_add_ps(motion->getSweptTransform().center1.getQuad(),radius.getQuad());
+        __m128 lower=_mm_sub_ps(motion->getSweptTransform().center1.getQuad(),radius.getQuad());
         swept.minimum.getQuad()=_mm_max_ps(swept.minimum.getQuad(),lower);
         swept.minimum.getQuad()=_mm_min_ps(swept.minimum.getQuad(),aabb.minimum.getQuad());
         swept.maximum=_mm_min_ps(swept.maximum,upper);
@@ -337,12 +347,13 @@ extern "C" void FUN_00d1a330(const CollisionContext* context,EntityNode*const* o
             stack=(int*)FUN_00c85750();
             unsigned int* keys=(unsigned int*)*stack;
             *stack+=(n*4+127)&~127;
-            OffsetInput sweepInput;
+            __declspec(align(16)) unsigned char sweepStorage[sizeof(OffsetInput)];
+            OffsetInput& sweepInput=*reinterpret_cast<OffsetInput*>(sweepStorage);
             FUN_00cbec90(object->m_pMotionState.GetMotionState(),&sweepInput);
             FloatBounds total;
             const Vec4& position=object->m_pMotionState.GetMotionState()->getSweptTransform().center1;
-            total.minimum=position;
-            total.maximum=position;
+            total.minimum.getQuad()=position.getQuad();
+            total.maximum.getQuad()=position.getQuad();
             FloatBounds totalSweep=total;
             BoundsRecord* cursor=bounds;
             unsigned int* keyCursor=keys;
@@ -405,7 +416,7 @@ extern "C" void FUN_00d1a330(const CollisionContext* context,EntityNode*const* o
             *(int*)FUN_00c85750()=(int)keys;
             *(int*)FUN_00c85750()=(int)bounds;
         } else {
-            AabbHolder holder; FloatBounds& box=holder.box;
+            FloatBounds box;
             geometry->getAabb(object->m_pMotionState.getTransform(),slack,reinterpret_cast<FloatBounds&>(box));
             FloatBounds expandedBox;
             SweepSingle(object->m_pMotionState.GetMotionState(),slack,box,expandedBox);

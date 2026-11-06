@@ -2,11 +2,11 @@
 // src/havok/common/serialize/resource/hkobjectresource.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/resource/hkobjectresource.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkReferencedObject
-{
-    void RetainReference();
-    void removeReference();
-};
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+
 
 struct FUN_00e04eb0_class
 {
@@ -19,19 +19,13 @@ struct FUN_00e04eb0_class
 void FUN_00e04eb0_class::FUN_00e04eb0(hkReferencedObject* apObject)
 {
     if (apObject)
-        apObject->RetainReference();
+        apObject->addReference();
     if (m_p)
         m_p->removeReference();
     m_p = apObject;
 }
 
 namespace fnv_00e04ee0 {
-struct hkReferencedObject
-{
-    void RetainReference();
-    void removeReference();
-};
-
 struct FUN_00e04ee0_class
 {
     void __thiscall FUN_00e04ee0(hkReferencedObject* p);
@@ -43,7 +37,7 @@ struct FUN_00e04ee0_class
 void __thiscall FUN_00e04ee0_class::FUN_00e04ee0(hkReferencedObject* apObject)
 {
     if (apObject)
-        apObject->RetainReference();
+        apObject->addReference();
     if (m_p)
         m_p->removeReference();
     m_p = apObject;
@@ -68,26 +62,6 @@ const char* FUN_00e04ea0_class::FUN_00e04ea0()
     return p->getName();
 }
 
-struct FUN_00e05090_class;
-
-struct FUN_00e05090_manager
-{
-    // Virtual destructor for the manager class; performs no work.
-// @fnv 0x00e05090
-    virtual ~FUN_00e05090_manager()
-    {}
-    virtual void FUN_00e05090_other();
-    virtual void FUN_00e05090_free(FUN_00e05090_class* pObject, unsigned short resourceId);
-};
-
-struct FUN_00e05090_router
-{
-    char _pad[0x10];
-    FUN_00e05090_manager* m_pManager;
-};
-
-extern FUN_00e05090_router* _D1A0E0GetMemoryRouter();
-
 struct FUN_00e05090_class
 {
     virtual FUN_00e05090_class* FUN_00e05090(int flags);
@@ -101,8 +75,8 @@ FUN_00e05090_class* FUN_00e05090_class::FUN_00e05090(int flags)
 
     if (flags & 1)
     {
-        FUN_00e05090_router* pRouter = _D1A0E0GetMemoryRouter();
-        pRouter->m_pManager->FUN_00e05090_free(this, m_resourceId);
+        hkMemoryRouter& router = hkMemoryRouter::getInstance();
+        reinterpret_cast<hkMemoryAllocator*>(router.m_heap)->blockFree(this, m_resourceId);
     }
 
     return this;
@@ -110,26 +84,17 @@ FUN_00e05090_class* FUN_00e05090_class::FUN_00e05090(int flags)
 
 int __cdecl FUN_00cb0fa0(int, int);
 
-struct hkBoolD46D
-{
-    char m_cBooleanValue;
-    hkBoolD46D(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-
 class FUN_00d46d40_s
 {
   public:
     const char* FUN_00d46d40();
     FUN_00d46d40_s* FUN_00d46d50();
 
-    hkBoolD46D FUN_00d46d80(FUN_00d46d40_s* pkNode);
+    hkBool FUN_00d46d80(FUN_00d46d40_s* pkNode);
 };
 
 // @fnv 0x00d46d80
-hkBoolD46D FUN_00d46d40_s::FUN_00d46d80(FUN_00d46d40_s* pkNode)
+hkBool FUN_00d46d40_s::FUN_00d46d80(FUN_00d46d40_s* pkNode)
 {
     while (pkNode)
     {
@@ -174,18 +139,13 @@ int FUN_00e04e70_class::FUN_00e04e70(void* first, void* second)
     return result;
 }
 
-struct FUN_00e04f10_Resource
-{
-    int refs;
-};
-extern "C" void __fastcall FUN_00c90510(FUN_00e04f10_Resource* resource);
 struct FUN_00e04f10_Manager
 {
     virtual void slot00();
     virtual void slot04();
     virtual void slot08();
-    virtual FUN_00e04f10_Resource* GetSecond();
-    virtual FUN_00e04f10_Resource* GetFirst();
+    virtual hkReferencedObject* GetSecond();
+    virtual hkReferencedObject* GetFirst();
 };
 extern "C" FUN_00e04f10_Manager* DAT_01268b08;
 extern "C" void* DAT_010ea4dc[];
@@ -199,8 +159,8 @@ class FUN_00e04f10_Class
     void** vtable;
     unsigned short unk04, refCount;
     FUN_00e04f10_Values values;
-    FUN_00e04f10_Resource* first;
-    FUN_00e04f10_Resource* second;
+    hkReferencedObject* first;
+    hkReferencedObject* second;
     FUN_00e04f10_Class* Initialize(const FUN_00e04f10_Values* init);
 };
 // @fnv 0x00e04f10
@@ -209,13 +169,13 @@ FUN_00e04f10_Class* FUN_00e04f10_Class::Initialize(const FUN_00e04f10_Values* pI
     refCount = 1;
     vtable = DAT_010ea4dc;
     values = *pInitValues;
-    FUN_00e04f10_Resource* resource = DAT_01268b08->GetFirst();
+    hkReferencedObject* resource = DAT_01268b08->GetFirst();
     if (resource)
-        FUN_00c90510(resource);
+        resource->addReference();
     first = resource;
     resource = DAT_01268b08->GetSecond();
     if (resource)
-        FUN_00c90510(resource);
+        resource->addReference();
     second = resource;
     return this;
 }
@@ -227,17 +187,12 @@ struct Resource_00e04f80
     unsigned int FUN_00d470d0();
 };
 
-struct Referenced_00e04f80
-{
-    void FUN_00c905b0();
-};
-
 struct ListenerVTable_00e04f80;
 struct Listener_00e04f80
 {
     ListenerVTable_00e04f80* methods;
 };
-typedef void (Listener_00e04f80::*ResourceCallback_00e04f80)(Referenced_00e04f80*, const char*);
+typedef void (Listener_00e04f80::*ResourceCallback_00e04f80)(hkReferencedObject*, const char*);
 struct ListenerVTable_00e04f80
 {
     ResourceCallback_00e04f80 vfunc00;
@@ -248,22 +203,6 @@ struct ListenerVTable_00e04f80
     ResourceCallback_00e04f80 onResourceRemoved;
 };
 
-struct Manager_00e04f80
-{
-    virtual void vfunc00();
-    virtual void vfunc04();
-    virtual void removeResource(Referenced_00e04f80* owner, unsigned int resourceId);
-};
-
-struct Router_00e04f80
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    Manager_00e04f80* manager;
-};
-
 struct Registry_00e04f80
 {
     char* FUN_00d46d80(char* status, Resource_00e04f80* resource);
@@ -272,16 +211,15 @@ struct Registry_00e04f80
 extern Registry_00e04f80 DAT_01268748;
 extern char DAT_010ea4dc;
 extern char DAT_0102e388;
-extern Router_00e04f80* __cdecl FUN_00c85750();
 
 struct FUN_00e04f80_class
 {
     void* vtable;
     unsigned short resourceId;
     unsigned short unk06;
-    Referenced_00e04f80* owner;
+    hkReferencedObject* owner;
     Resource_00e04f80* resource;
-    Referenced_00e04f80* context;
+    hkReferencedObject* context;
     Listener_00e04f80* listener;
 
     void ReleaseResource();
@@ -297,7 +235,7 @@ void FUN_00e04f80_class::ReleaseResource()
         char status;
         if (*DAT_01268748.FUN_00d46d80(&status, oldResource))
         {
-            owner->FUN_00c905b0();
+            owner->removeReference();
         }
         else
         {
@@ -311,31 +249,25 @@ void FUN_00e04f80_class::ReleaseResource()
             }
 
             unsigned int uiResourceId = resource->FUN_00d470d0();
-            Referenced_00e04f80* savedOwner = owner;
-            Router_00e04f80* router = FUN_00c85750();
-            router->manager->removeResource(savedOwner, uiResourceId);
+            hkReferencedObject* savedOwner = owner;
+            hkMemoryRouter& router = hkMemoryRouter::getInstance();
+            reinterpret_cast<hkMemoryAllocator*>(router.m_heap)->blockFree(savedOwner, uiResourceId);
         }
     }
 
     if (listener)
-        ((Referenced_00e04f80*)listener)->FUN_00c905b0();
+        ((hkReferencedObject*)listener)->removeReference();
     ((volatile FUN_00e04f80_class*)this)->listener = 0;
 
-    Referenced_00e04f80* pRemainingContext = ((volatile FUN_00e04f80_class*)this)->context;
+    hkReferencedObject* pRemainingContext = ((volatile FUN_00e04f80_class*)this)->context;
     if (pRemainingContext)
-        pRemainingContext->FUN_00c905b0();
+        pRemainingContext->removeReference();
     ((volatile FUN_00e04f80_class*)this)->context = 0;
     ((volatile FUN_00e04f80_class*)this)->vtable = &DAT_0102e388;
 }
 }  // namespace fnv_00e04f80
 
 namespace fnv_00e05030 {
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool();
-};
-
 struct FUN_00d46d40_s
 {
     const char* FUN_00d46d40();

@@ -1,3 +1,4 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/physics/vehicle/brake/default/hkpvehicledefaultbrakeclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/brake/default/hkpvehicledefaultbrakeclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -46,28 +47,31 @@ struct S_00dfc080_Elem
     int unk8;
 };
 
-template <class T> struct S_00dfc080_Array
+template <class T>
+static __forceinline void S_00dfc080_Array__clearAndDeallocate(hkArrayBase<T>& self, S_00dfc080_Allocator& alloc)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    void _clearAndDeallocate(S_00dfc080_Allocator& alloc)
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
+        self.m_iElementCount = 0;
+        if ((self.m_iCapacityState & 0x80000000) == 0)
+            alloc.ReturnMemory(self.m_data, (self.m_iCapacityState & 0x3fffffff) * sizeof(T));
+        self.m_data = 0;
+        self.m_iCapacityState = 0x80000000;
     }
-    ~S_00dfc080_Array() throw()
-    {
-        _clearAndDeallocate(FUN_00c85750()->heap());
+
+template <class T>
+static __forceinline void S_00dfc080_Array_destroy(hkArrayBase<T>& self) throw()
+{
+        S_00dfc080_Array__clearAndDeallocate(self, FUN_00c85750()->heap());
     }
+
+struct S_00dfc080_ArrayPolicy
+{
+    template <class T>
+    static __forceinline void destroy(hkArrayBase<T>& self) { S_00dfc080_Array_destroy(self); }
 };
 
 struct __declspec(novtable) S_00dfc080 : S_00dfc080_RefObj
 {
-    S_00dfc080_Array<S_00dfc080_Elem> m_ppData;
+    hkArray<S_00dfc080_Elem, S_00dfc080_ArrayPolicy> m_ppData;
     virtual ~S_00dfc080() throw()
     {}
     S_00dfc080* DestroyAndFree(unsigned int flags);
@@ -81,4 +85,10 @@ S_00dfc080* S_00dfc080::DestroyAndFree(unsigned int flags)
     if (flags & 1)
         operator delete(this, sizeof(S_00dfc080));
     return this;
+}
+
+
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
+{
+    A::destroy(*this);
 }

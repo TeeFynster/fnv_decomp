@@ -3,16 +3,12 @@
 // byte only under /MT /O2 /GS /Gy (unit src/gamebryo2.2/corelibs/nianimation/niblendinterpolator.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
+#include "../../../../include/MemoryManager.h"
 #include "niblendinterpolator_types_NiBlendInterpolator.h"
 #include "niblendinterpolator_types_NiBlendInterpolator__InterpArrayItem.h"
 #include "niblendinterpolator_types_NiCloningProcess.h"
 
-class MemoryManagerAllocHelper
-{
-  public:
-    void* Allocate(unsigned int size);
-};
-extern MemoryManagerAllocHelper g_memoryManager;
+extern MemoryManager g_memoryManager;
 
 void* operator new[](size_t size)
 {
@@ -84,17 +80,7 @@ void BlendCopy::FUN_00a37510(NiBlendInterpolator* destination, CloningProcess* p
 
 extern unsigned char DAT_011a83ff;
 
-struct MM
-{
-    void Deallocate(void* pvMem);
-};
-extern MM _g_memoryManager;
-
-class MemoryManager
-{
-  public:
-    void* Allocate(unsigned int uiSize);
-};
+extern MemoryManager _g_memoryManager;
 
 class FUN_00a370a0 : public NiBlendInterpolator__InterpArrayItem
 {
@@ -102,7 +88,7 @@ class FUN_00a370a0 : public NiBlendInterpolator__InterpArrayItem
     __declspec(nothrow) FUN_00a370a0();
     static void* operator new[](unsigned int uiSize)
     {
-        return ((MemoryManager*)&_g_memoryManager)->Allocate(uiSize);
+        return _g_memoryManager.Allocate(uiSize);
     }
     static void operator delete[](void* pvMem)
     {
@@ -141,11 +127,7 @@ bool NiBlendInterpolatorW::FUN_00a37690()
 
 namespace fnv_00a37980 {
 struct Stream100;
-struct Memory100
-{
-    void* FUN_00aa3e40(unsigned int);
-};
-extern Memory100 DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 
 struct FUN_00a370a0
 {

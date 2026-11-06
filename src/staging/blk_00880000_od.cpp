@@ -2,13 +2,20 @@
 // src/staging/blk_00880000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/Bound.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TESObject.h"
+#include "../../include/TESPackage.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESCreature.h"
+#include "../../include/Actor.h"
+#include "../../include/TESObjectREFR.h"
 
-struct Actor
-{
-    void StopMoving();
-    void FUN_00884c60();
-};
+// Intrinsic copies preserve the original point-copy instructions in this /Od unit.
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+#pragma intrinsic(memcpy)
+
 // @fnv 0x00884c60
 void Actor::FUN_00884c60()
 {
@@ -79,11 +86,6 @@ void FUN_00891130_class::FUN_00891130(unsigned char aValue)
     ((FUN_00620760_class*)((char*)this + 0x10))->SetFlags(1, (int)aValue);
 }
 
-struct TESObject
-{
-    TESObject* GetNext();
-    unsigned int __thiscall FNV_GetFormType();
-};
 
 struct FUN_008859e0_Class
 {
@@ -124,19 +126,6 @@ void* operator new(unsigned int);
 
 void* __fastcall FUN_008b3ad0(void*);
 
-struct TESObjectREFR;
-struct LocationDescriptor;
-
-struct TESPackage
-{
-    static TESPackage* CreatePackageForType(int);
-    void SetPackageType(int);
-    void FUN_00671d30(LocationDescriptor*);
-    void SetTargetFromReference(TESObjectREFR*);
-    void SetMustReachLocation(bool);
-    void SetMustComplete(bool);
-};
-
 struct LocationDescriptor
 {
     int m_iWordAt00;
@@ -146,392 +135,6 @@ struct LocationDescriptor
     LocationDescriptor();
     ~LocationDescriptor();
     void FUN_0067f3c0(TESObjectREFR*);
-};
-
-struct TESObjectREFR
-{
-    virtual void v000()
-    {}
-    virtual void v001()
-    {}
-    virtual void v002()
-    {}
-    virtual void v003()
-    {}
-    virtual void v004()
-    {}
-    virtual void v005()
-    {}
-    virtual void v006()
-    {}
-    virtual void v007()
-    {}
-    virtual void v008()
-    {}
-    virtual void v009()
-    {}
-    virtual void v010()
-    {}
-    virtual void v011()
-    {}
-    virtual void v012()
-    {}
-    virtual void v013()
-    {}
-    virtual void v014()
-    {}
-    virtual void v015()
-    {}
-    virtual void v016()
-    {}
-    virtual void v017()
-    {}
-    virtual void v018()
-    {}
-    virtual void v019()
-    {}
-    virtual void v020()
-    {}
-    virtual void v021()
-    {}
-    virtual void v022()
-    {}
-    virtual void v023()
-    {}
-    virtual void v024()
-    {}
-    virtual void v025()
-    {}
-    virtual void v026()
-    {}
-    virtual void v027()
-    {}
-    virtual void v028()
-    {}
-    virtual void v029()
-    {}
-    virtual void v030()
-    {}
-    virtual void v031()
-    {}
-    virtual void v032()
-    {}
-    virtual void v033()
-    {}
-    virtual void v034()
-    {}
-    virtual void v035()
-    {}
-    virtual void v036()
-    {}
-    virtual void v037()
-    {}
-    virtual void v038()
-    {}
-    virtual void v039()
-    {}
-    virtual void v040()
-    {}
-    virtual void v041()
-    {}
-    virtual void v042()
-    {}
-    virtual void v043()
-    {}
-    virtual void v044()
-    {}
-    virtual void v045()
-    {}
-    virtual void v046()
-    {}
-    virtual void v047()
-    {}
-    virtual void v048()
-    {}
-    virtual void v049()
-    {}
-    virtual void v050()
-    {}
-    virtual void v051()
-    {}
-    virtual void v052()
-    {}
-    virtual void v053()
-    {}
-    virtual void v054()
-    {}
-    virtual void v055()
-    {}
-    virtual void v056()
-    {}
-    virtual void v057()
-    {}
-    virtual void v058()
-    {}
-    virtual void v059()
-    {}
-    virtual void v060()
-    {}
-    virtual void v061()
-    {}
-    virtual void v062()
-    {}
-    virtual void v063()
-    {}
-    virtual void v064()
-    {}
-    virtual void v065()
-    {}
-    virtual void v066()
-    {}
-    virtual void v067()
-    {}
-    virtual void v068()
-    {}
-    virtual void v069()
-    {}
-    virtual void v070()
-    {}
-    virtual void v071()
-    {}
-    virtual void v072()
-    {}
-    virtual void v073()
-    {}
-    virtual void v074()
-    {}
-    virtual void v075()
-    {}
-    virtual void v076()
-    {}
-    virtual void v077()
-    {}
-    virtual void v078()
-    {}
-    virtual void v079()
-    {}
-    virtual void v080()
-    {}
-    virtual void v081()
-    {}
-    virtual void v082()
-    {}
-    virtual void v083()
-    {}
-    virtual void v084()
-    {}
-    virtual void v085()
-    {}
-    virtual void v086()
-    {}
-    virtual void v087()
-    {}
-    virtual void v088()
-    {}
-    virtual void v089()
-    {}
-    virtual void v090()
-    {}
-    virtual void v091()
-    {}
-    virtual void v092()
-    {}
-    virtual void v093()
-    {}
-    virtual void v094()
-    {}
-    virtual void v095()
-    {}
-    virtual void v096()
-    {}
-    virtual void v097()
-    {}
-    virtual void v098()
-    {}
-    virtual void v099()
-    {}
-    virtual void v100()
-    {}
-    virtual void v101()
-    {}
-    virtual void v102()
-    {}
-    virtual void v103()
-    {}
-    virtual void v104()
-    {}
-    virtual void v105()
-    {}
-    virtual void v106()
-    {}
-    virtual void v107()
-    {}
-    virtual void v108()
-    {}
-    virtual void v109()
-    {}
-    virtual void v110()
-    {}
-    virtual void v111()
-    {}
-    virtual void v112()
-    {}
-    virtual void v113()
-    {}
-    virtual void v114()
-    {}
-    virtual void v115()
-    {}
-    virtual void v116()
-    {}
-    virtual void v117()
-    {}
-    virtual void v118()
-    {}
-    virtual void v119()
-    {}
-    virtual void v120()
-    {}
-    virtual void v121()
-    {}
-    virtual void v122()
-    {}
-    virtual void v123()
-    {}
-    virtual void v124()
-    {}
-    virtual void v125()
-    {}
-    virtual void v126()
-    {}
-    virtual void v127()
-    {}
-    virtual void v128()
-    {}
-    virtual void v129()
-    {}
-    virtual void v130()
-    {}
-    virtual void v131()
-    {}
-    virtual void v132()
-    {}
-    virtual void v133()
-    {}
-    virtual void v134()
-    {}
-    virtual void v135()
-    {}
-    virtual void v136()
-    {}
-    virtual void v137()
-    {}
-    virtual void v138()
-    {}
-    virtual void v139()
-    {}
-    virtual void v140()
-    {}
-    virtual void v141()
-    {}
-    virtual void v142()
-    {}
-    virtual void v143()
-    {}
-    virtual void v144()
-    {}
-    virtual void v145()
-    {}
-    virtual void v146()
-    {}
-    virtual void v147()
-    {}
-    virtual void v148()
-    {}
-    virtual void v149()
-    {}
-    virtual void v150()
-    {}
-    virtual void v151()
-    {}
-    virtual void v152()
-    {}
-    virtual void v153()
-    {}
-    virtual void v154()
-    {}
-    virtual void v155()
-    {}
-    virtual void v156()
-    {}
-    virtual void v157()
-    {}
-    virtual void v158()
-    {}
-    virtual void v159()
-    {}
-    virtual void v160()
-    {}
-    virtual void v161()
-    {}
-    virtual void v162()
-    {}
-    virtual void v163()
-    {}
-    virtual void v164()
-    {}
-    virtual void v165()
-    {}
-    virtual void v166()
-    {}
-    virtual void v167()
-    {}
-    virtual void v168()
-    {}
-    virtual void v169()
-    {}
-    virtual void v170()
-    {}
-    virtual void v171()
-    {}
-    virtual void v172()
-    {}
-    virtual void v173()
-    {}
-    virtual void v174()
-    {}
-    virtual void v175()
-    {}
-    virtual void v176()
-    {}
-    virtual void v177()
-    {}
-    virtual void v178()
-    {}
-    virtual void v179()
-    {}
-    virtual void v180()
-    {}
-    virtual void v181()
-    {}
-    virtual void v182()
-    {}
-    virtual void v183()
-    {}
-    virtual void v184()
-    {}
-    virtual void v185()
-    {}
-    virtual void v186()
-    {}
-    virtual void v187()
-    {}
-    virtual void v188()
-    {}
-    virtual void v189(TESPackage*, int, int)
-    {}
-
-    void FUN_008984c0();
 };
 
 // @fnv 0x008984c0
@@ -551,7 +154,8 @@ void TESObjectREFR::FUN_008984c0()
     delete package;
 
     packageLocation->SetTargetFromReference(0);
-    v189(packageLocation, 1, 1);
+    // The package virtual at 0x2f4 is not declared by the shared header.
+    (*(void (__thiscall**)(TESObjectREFR*, TESPackage*, int, int))(*(char**)this + 0x2f4))(this, packageLocation, 1, 1);
 }
 
 class B5512Target;
@@ -889,32 +493,7 @@ void __thiscall FUN_008885a0_Class::FUN_008885a0()
         result->UpdateAnimationForRef(this);
 }
 
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-    NiPoint3(float, float, float);
-    NiPoint3 operator-(const NiPoint3&) const;
-    NiPoint3 operator+(const NiPoint3&) const;
-    NiPoint3 FUN_0053d280(float) const;
-    NiPoint3 FUN_004a0bd0() const;
-};
-class NiFixedString
-{
-  public:
-    const char* value;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
 const NiFixedString& FUN_004ab220();
-struct Bound
-{
-    NiPoint3 center;
-    float radius;
-    float FUN_0084d030();
-    NiPoint3& FUN_006815c0();
-};
 struct MeshPart
 {
     unsigned short count, unk02;
@@ -963,13 +542,14 @@ struct EffectView
     bool FUN_004a4140();
     unsigned int GetNextFromSubobject();
 };
-struct ProjectileView : EffectView
+// 0x0058e9d0 selects BGSImpactData by material; 0x006733e0 returns its decal texture set.
+struct MaterialImpactRecord : EffectView
 {
     EffectView* FUN_006733e0();
 };
 struct EffectList
 {
-    ProjectileView* FUN_0058e9d0(int);
+    MaterialImpactRecord* FUN_0058e9d0(int);
 };
 struct WeaponView
 {
@@ -1132,44 +712,6 @@ struct FUN_004a37b0
     unsigned char f70, f71, f72, f73, f74, f75, f76, f77, f78, f79, f7a, f7b;
     int unk7c;
     FUN_004a37b0();
-};
-struct AttributeView
-{
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual int get();
-};
-class TESActorBase
-{
-  public:
-    virtual void baseVirtual();
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
-    AttributeView attributes;
-};
-class TESCreature : public TESActorBase
-{
-  public:
-    bool FUN_005fbf20() const;
 };
 struct BaseData
 {
@@ -1568,11 +1110,11 @@ void SpellActor::FUN_0088fb00(float distance, HitSource* hit, SpellActor* target
     ProcessView* process = FUN_008d8520();
     bool alternateVal = hit && (hit->kind == 1 || hit->kind == 2);
     bool invalid3 = alternateVal ? ((TargetView*)target)->FUN_008ba470() : ((TargetView*)target)->FUN_008ba410();
-    int type = invalid3 ? 4 : ((AttributeView*)((char*)target->FUN_004181e0() + 0x30))->get();
+    int type = invalid3 ? 4 : ((const TESActorBaseData*)((char*)target->FUN_004181e0() + 0x30))->GetBloodImpactMaterial();
     EquipmentView* equipment3 = target ? ((TargetView*)target)->FUN_004181e0()->equipment() : 0;
     InventoryView* item = equipment3 ? equipment3->GetValueByIndex(hit->kind) : 0;
     EffectList* effects2 = item ? item->FUN_004fd400() : 0;
-    ProjectileView* _projectile = effects2 ? effects2->FUN_0058e9d0(type) : 0;
+    MaterialImpactRecord* _projectile = effects2 ? effects2->FUN_0058e9d0(type) : 0;
     EffectView* effect = _projectile ? _projectile->FUN_006733e0() : 0;
     if (hit && target && effect && !invalid3 && !process->blocked())
     {
@@ -1587,7 +1129,7 @@ void SpellActor::FUN_0088fb00(float distance, HitSource* hit, SpellActor* target
             if (this == DAT_011dea3c)
             {
                 NodeView* bipedNode5 = DAT_011dea3c->FUN_00950b00(true, true)->FUN_004ab230();
-                point = (node2->FUN_0045bb80() - GetNodePosition(true)).FUN_0053d280(2.0f);
+                memcpy(&point, &(node2->FUN_0045bb80() - GetNodePosition(true)).FUN_0053d280(2.0f), sizeof(point));
                 other_2 = DAT_011dea3c->FUN_004eaf60() ? bipedNode5 : node2;
                 node2 = DAT_011dea3c->FUN_004eaf60() ? node2 : bipedNode5;
                 Bound bound = node2->FUN_0043d450();
@@ -1612,8 +1154,8 @@ void SpellActor::FUN_0088fb00(float distance, HitSource* hit, SpellActor* target
                 if (parts3 && h < parts3->count)
                 {
                     unsigned int choice = FUN_00944460(0, parts3->entries[h]->count - 1);
-                    point = parts3->entries[h]->positions[choice];
-                    playerNormal4 = parts3->entries[h]->normals[choice];
+                    memcpy(&point, &parts3->entries[h]->positions[choice], sizeof(point));
+                    memcpy(&playerNormal4, &parts3->entries[h]->normals[choice], sizeof(playerNormal4));
                 }
                 else
                     return;
@@ -1624,7 +1166,7 @@ void SpellActor::FUN_0088fb00(float distance, HitSource* hit, SpellActor* target
                 if (s && s->FUN_00491040(4))
                 {
                     int h = s->FUN_00491040(4)->FUN_0048f7f0()->FUN_008905f0();
-                    point = node2->FUN_0045bb80() + (GetNodePosition(false) - node2->FUN_0045bb80()).FUN_0053d280(2.0f);
+                    memcpy(&point, &(node2->FUN_0045bb80() + (GetNodePosition(false) - node2->FUN_0045bb80()).FUN_0053d280(2.0f)), sizeof(point));
                 }
             }
             char randomIndex2 = (char)(int)FUN_00406cc0(FUN_00476b70(0.0f, 4.0f));
@@ -1632,12 +1174,12 @@ void SpellActor::FUN_0088fb00(float distance, HitSource* hit, SpellActor* target
             float size = FUN_00476b70(_projectile->FUN_004a40a0(), _projectile->GetModifierValue());
             NiPoint3 normal9;
             if (this == DAT_011dea3c)
-                normal9 = playerNormal4;
+                memcpy(&normal9, &playerNormal4, sizeof(normal9));
             else
-                normal9 = hit->normal.FUN_004a0bd0();
+                memcpy(&normal9, &hit->normal.FUN_004a0bd0(), sizeof(normal9));
             FUN_004a37b0 data;
-            data.point = point;
-            data.normal = normal9;
+            memcpy(&data.point, &point, sizeof(data.point));
+            memcpy(&data.normal, &normal9, sizeof(data.normal));
             data.node = node2;
             data.index = index7;
             data.other = other_2;
@@ -1654,10 +1196,9 @@ void SpellActor::FUN_0088fb00(float distance, HitSource* hit, SpellActor* target
             data.f77 = 1;
             data.f74 = _projectile->CallMemberAtOffset54();
             data.f75 = _projectile->FUN_004a4140();
-            data.color =
-                NiPoint3((unsigned char)(_projectile->GetNextFromSubobject() & 0xff) / 255.0,
-                         (unsigned char)(((unsigned short)_projectile->GetNextFromSubobject() >> 8) & 0xff) / 255.0,
-                         (unsigned char)((_projectile->GetNextFromSubobject() >> 16) & 0xff) / 255.0);
+            memcpy(&data.color, &NiPoint3((unsigned char)(_projectile->GetNextFromSubobject() & 0xff) / 255.0,
+                                        (unsigned char)(((unsigned short)_projectile->GetNextFromSubobject() >> 8) & 0xff) / 255.0,
+                                        (unsigned char)((_projectile->GetNextFromSubobject() >> 16) & 0xff) / 255.0), sizeof(data.color));
             data.f78 = 1;
             if (specialTmp)
             {
@@ -2325,7 +1866,7 @@ struct Refr
     Cell* __thiscall FUN_008d6f30();
     World* __thiscall FUN_00575d70();
     float __thiscall FUN_008a0b10();
-    float __thiscall GetScale();
+    float __thiscall FUN_00567400();
     unsigned int __thiscall GetVtbl20Result();
     void __thiscall FUN_008855f0(float* a, float b, float c);
 };
@@ -2349,7 +1890,7 @@ void __thiscall Refr::FUN_008855f0(float* pfValue, float b, float c)
         float f7 = FUN_00643f90(b);
         float fd0 = AddRuntimeFloatSetting(b);
         float scale = obj3->fn64() ? obj3->FUN_008a0b10() : 0.0f;
-        scale = (obj3->GetScale() / GetScale()) * scale;
+        scale = (obj3->FUN_00567400() / FUN_00567400()) * scale;
         int mask9 = 0x20f;
         bool flag = (GetVtbl20Result() & mask9) == mask9;
         float out28 = *pfValue * (flag ? *DAT_011cd744.FUN_00403e20() : *DAT_011cd9b4.FUN_00403e20());

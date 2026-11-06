@@ -1,3 +1,6 @@
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#include "../../../../../../include/hkVector4.h"
+
 
 // src/havok/physics/constraintsolver/constraint/chain/hkppoweredchainsolverutil_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-30 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/constraintsolver/constraint/chain/hkppoweredchainsolverutil.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -29,6 +32,7 @@ struct FUN_00df0810_Dest
 };
 void __cdecl CopyChannelValue(int index, int channel, FUN_00df0810_Source* sources, FUN_00df0810_Dest* dests);
 #include <xmmintrin.h>
+#include "../../../../../../include/hkAabb.h"
 static __forceinline void CopyHelper(__m128* d, const void* s)
 {
     d[0] = ((__m128*)s)[0];
@@ -490,25 +494,6 @@ extern void __cdecl FUN_00e29380(void* a, void* b);
 extern void __cdecl FUN_00e298f0(void* a, void* b);
 extern float DAT_0104da4c;
 void __cdecl FUN_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3, int* arg4);
-struct hkVector4
-{
-    union
-    {
-        __m128 m_vComponents;
-        struct
-        {
-            float x;
-            float y;
-            float z;
-            float w;
-        };
-    };
-};
-struct hkAabb
-{
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
-};
 struct MatrixGroup
 {
     char data0[0xc0];
@@ -552,25 +537,21 @@ template <class T> inline T largerOf(T x, T y)
     return x > y ? x : y;
 }
 
-class Vector4f
-{
-  public:
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline void setSub4(const Vector4f& a, const Vector4f& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline float& operator()(int i)
-    {
-        return ((float*)&m_vComponents)[i];
-    }
 
-  private:
-    __m128 m_vComponents;
-};
+__forceinline void hkVector4::setZero4()
+{
+    m_vComponents = _mm_setzero_ps();
+}
+
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline float& hkVector4::operator()(int i)
+{
+    return ((float*)&m_vComponents)[i];
+}
 
 class Quad8
 {
@@ -585,22 +566,23 @@ class Quad8
         m_vLinearConstraint.setSub4(a.m_vLinearConstraint, b.m_vLinearConstraint);
         m_vAngularConstraint.setSub4(a.m_vAngularConstraint, b.m_vAngularConstraint);
     }
-    Vector4f m_vLinearConstraint;
-    Vector4f m_vAngularConstraint;
+    hkVector4 m_vLinearConstraint;
+    hkVector4 m_vAngularConstraint;
 };
 
-struct Mat3
+// hkMatrix3 block of the powered-chain 6x6 matrix (Mat6), kept POD with no constructor so the aggregates copy as the original does.
+struct ChainMatrix3
 {
-    Vector4f m_kColumn0;
-    Vector4f m_kColumn1;
-    Vector4f m_kColumn2;
+    hkVector4 m_kColumn0;
+    hkVector4 m_kColumn1;
+    hkVector4 m_kColumn2;
 };
 struct Mat6
 {
-    Mat3 m_00;
-    Mat3 m_01;
-    Mat3 m_10;
-    Mat3 m_11;
+    ChainMatrix3 m_00;
+    ChainMatrix3 m_01;
+    ChainMatrix3 m_10;
+    ChainMatrix3 m_11;
 };
 
 struct MotorAxis

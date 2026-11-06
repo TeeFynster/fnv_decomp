@@ -3,11 +3,6 @@
 #define FNV_RENDERER_PACKET_H
 
 extern const char DAT_010ae590[];
-class NiD3DDefaultShader
-{
-  public:
-    static void SetShaderName(const char*);
-};
 extern "C" __declspec(dllimport) void __stdcall fnv_EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall fnv_LeaveCriticalSection(void*);
 class NiConsoleRendererPacketVTable

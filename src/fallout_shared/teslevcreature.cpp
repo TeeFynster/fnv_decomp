@@ -1,5 +1,6 @@
 // fallout_shared/teslevcreature.cpp: Entry, TESLevCreature (7 functions)
 
+#include "../../include/TESLevCreature.h"
 #include "teslevcreature_decls.h"
 // @fnv 0x0050af60
 bool TESLevCreature::Load(TESFile* file)
@@ -15,11 +16,11 @@ bool TESLevCreature::Load(TESFile* file)
         case 0x44494445: {
             char* uiGlobalId = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(uiGlobalId, 512);
-            SetEditorID(uiGlobalId);
+            SetEditorID_AtRuntime(uiGlobalId);
             break;
         }
         case 0x444e424f:
-            LoadBounds(file);
+            readOBNDSubRecord(file);
             break;
         case 0x4f4c564c:
         case 0x44454f43:
@@ -53,12 +54,12 @@ bool TESLevCreature::Load(TESFile* file)
             break;
         }
         case 0x464c564c:
-            file->GetChunkData(&flags, 0);
+            file->GetChunkData(&m_ucChanceNone, 0);
             break;
         case 0x474c564c: {
             unsigned int uiGlobalId = 0;
             file->GetChunkData(&uiGlobalId);
-            global = (TESForm*)uiGlobalId;
+            m_pLevelGlobal = (TESGlobal*)uiGlobalId;
             break;
         }
         case 0x4c444f4d:
@@ -85,146 +86,57 @@ bool TESLevCreature::Load(TESFile* file)
     return true;
 }
 
-struct B1_4fe : public TESForm
-{
-    B1_4fe();
-    ~B1_4fe();
-    void SetFormType(int);
-    void ClearData();
-};
-struct FUN_00487650
-{
-    FUN_00487650();
-    ~FUN_00487650();
-    virtual void vf();
-    int v[6];
-};
-struct B2_4fe
-{
-    B2_4fe();
-    ~B2_4fe();
-    virtual void vf2();
-    int w;
-};
-struct FUN_0050adf0 : public B1_4fe, public FUN_00487650, public B2_4fe
-{
-    FUN_0050adf0();
-    ~FUN_0050adf0();
-};
 // @fnv 0x0050adf0
-FUN_0050adf0::FUN_0050adf0()
+TESLevCreature::TESLevCreature()
 {
-    SetFormType(0x2c);
-    ClearData();
+    SetFormType((ENUM_FORM_ID)0x2c);
+    TESForm::ClearData();
     SetInitializationState(true);
 }
 
-struct FUN_0050aea0_shell : public FUN_0050adf0
+// @fnv 0x0050aed0
+TESLevCreature::~TESLevCreature()
+{}
+
+struct LevCreatureDeletion : public TESLevCreature
 {
-    void FUN_0050aed0();
-    void* FUN_0050aea0(unsigned int flags);
+    void* Destroy(unsigned int flags);
 };
 
-// Calls FUN_0050aed0, then deletes this if flags has bit 0 set, and returns this.
 // @fnv 0x0050aea0
-void* FUN_0050aea0_shell::FUN_0050aea0(unsigned int flags)
+void* LevCreatureDeletion::Destroy(unsigned int flags)
 {
-    FUN_0050aed0();
+    TESLevCreature::~TESLevCreature();
     if (flags & 1)
         operator delete(this);
     return this;
 }
 
-struct Date
+// The three-chunk serialization overload is not declared by the shared header.
+struct ModelTextureSwapSerialization : public TESModelTextureSwap
 {
-    ~Date();
-};
-struct FUN_004855a0
-{
-    void M();
-};
-struct FUN_00485680
-{
-    void M();
-};
-struct FUN_00488400_shell
-{
-    void SaveLeveledList();
-};
-struct DoorPart3c
-{
-    void ProcessAndFreeData(unsigned int, unsigned int, unsigned int);
+    void WriteChunks(unsigned int, unsigned int, unsigned int);
 };
 
-struct FUN_0050a8e0_shell
+struct LevCreatureSerialization : public TESLevCreature
 {
-    void FUN_0050a8e0();
+    void SaveForm();
 };
 
-// Calls M and the Date destructor on the object at offset 0, then SaveLeveledList at 0x30, ProcessAndFreeData at 0x4c, and M at offset 0.
 // @fnv 0x0050a8e0
-void FUN_0050a8e0_shell::FUN_0050a8e0()
+void LevCreatureSerialization::SaveForm()
 {
-    ((FUN_004855a0*)((char*)this + 0x00))->M();
-    ((Date*)((char*)this + 0x00))->Date::~Date();
-    ((FUN_00488400_shell*)((char*)this + 0x30))->SaveLeveledList();
-    ((DoorPart3c*)((char*)this + 0x4c))->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    ((FUN_00485680*)((char*)this + 0x00))->M();
+    TESForm::FUN_004855a0();
+    TESForm::ClearData();
+    TESLeveledList::Save();
+    ((ModelTextureSwapSerialization*)((char*)this + 0x4c))->WriteChunks(0x4c444f4d, 0x54444f4d, 0x53444f4d);
+    TESForm::FUN_00485680();
 }
-
-// Destructor of a form component with three polymorphic bases; the bases clean up in reverse order.
-
-class AED0Primary
-{
-  public:
-    virtual ~AED0Primary();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-};
-
-class AED0Model
-{
-  public:
-    virtual ~AED0Model();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-};
-
-class AED0TextureSwap
-{
-  public:
-    virtual ~AED0TextureSwap();
-};
-
-class FUN_0050aed0 : public AED0Primary, public AED0Model, public AED0TextureSwap
-{
-  public:
-    virtual ~FUN_0050aed0();
-};
-
-// Destructor for a class combining AED0Primary, AED0Model and AED0TextureSwap; it performs no work.
-// @fnv 0x0050aed0
-FUN_0050aed0::~FUN_0050aed0()
-{}
 
 namespace LevCreatureCopyImplementation {
 
 struct Entry : public TESLevCreature
 {
-    void FUN_004851b0(TESForm*);
     void FUN_0050b2e0(TESForm*);
 };
 
@@ -236,7 +148,7 @@ void Entry::FUN_0050b2e0(TESForm* source)
     creature = dynamic_cast<TESLevCreature*>(source);
     if (!creature)
         return;
-    FUN_004851b0(source);
+    TESForm::CopyFrom(source);
 }
 
 }
@@ -245,7 +157,6 @@ namespace LevCreatureComparisonImplementation {
 
 struct Entry : public TESLevCreature
 {
-    bool FUN_00485270(TESForm*);
     bool FUN_0050b320(TESForm*);
 };
 
@@ -257,7 +168,7 @@ bool Entry::FUN_0050b320(TESForm* other)
     creature = dynamic_cast<TESLevCreature*>(other);
     if (!creature)
         return true;
-    if (FUN_00485270(creature))
+    if (TESForm::Compare(creature))
         return true;
     return false;
 }

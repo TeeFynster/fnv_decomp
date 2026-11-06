@@ -1,6 +1,7 @@
 // bssystemutilities/bscachedrivesystemutility.cpp: BSCacheDriveSystemUtility (3 functions)
 
 #include "BSCacheDriveSystemUtility.h"
+#include "../../include/MemoryManager.h"
 
 // @fnv 0x00af3940
 void BSCacheDriveSystemUtility::Destroy()
@@ -24,10 +25,6 @@ void FUN_00af3920_shell::FUN_00af3920()
     reinterpret_cast<VTableHelper_00af3920*>(this)->v2();
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct Host03950
 {

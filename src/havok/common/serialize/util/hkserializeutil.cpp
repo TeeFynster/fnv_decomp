@@ -1,6 +1,11 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/common/serialize/util/hkserializeutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/util/hkserializeutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/Pair.h"
+#include "../../../../../include/hkStringPtr.h"
 
 void __cdecl FUN_00d48620(int a, int b, int c);
 
@@ -20,11 +25,6 @@ void __cdecl FUN_00d48660(int a, int b, int c)
 
 extern int DAT_0102e388;
 extern int DAT_010d7540;
-
-struct hkReferencedObject
-{
-    void removeReference();
-};
 
 struct FUN_00dcc160_cls
 {
@@ -241,7 +241,7 @@ S_00d49310_Result FUN_00d49310(void* stream)
 
 int FUN_00cb0fa0(const char* a, const char* b);
 
-static inline int S_00d49350_Compare(const char* a, const char* b)
+static inline int StringCompare(const char* a, const char* b)
 {
     if (a)
     {
@@ -252,22 +252,11 @@ static inline int S_00d49350_Compare(const char* a, const char* b)
     return b ? -1 : 0;
 }
 
-struct S_00d49350
-{
-    unsigned int m_pcText;
-
-    const char* cString() const
-    {
-        return (const char*)(m_pcText & ~1u);
-    }
-    int Equals(const char* s) const;
-};
-
-// Compares the stored string with s using S_00d49350_Compare and returns whether they are equal.
+// The unused EDX argument keeps the original ECX string / stack text calling convention.
 // @fnv 0x00d49350
-int S_00d49350::Equals(const char* aString) const
+int __fastcall StringEquals(const hkStringPtr* text, void*, const char* aString)
 {
-    return S_00d49350_Compare(cString(), aString) == 0;
+    return StringCompare(reinterpret_cast<const char*>(reinterpret_cast<std::size_t>(text->m_pcText) & ~std::size_t(1)), aString) == 0;
 }
 
 struct FUN_00d493a0_cls
@@ -328,12 +317,6 @@ D493E0Ref D493E0Loader::FindObject(const void* key, int flags) const
         return D493E0Ref(m_registry->find(key, flags));
     return D493E0Ref(0);
 }
-
-struct Pair
-{
-    void* first;
-    void* second;
-};
 
 struct Vt4Obj
 {
@@ -400,21 +383,22 @@ Obj1* FUN_00d49420_cls::ProcessPair(Obj1* apArg1, Obj2* apArg2)
         if (apArg2->FUN_00dba980() == 0)
         {
             Obj5 local28;
-            Pair pair;
+            int pairStorage[sizeof(Pair) / sizeof(int)];
+            Pair& pair = *reinterpret_cast<Pair*>(pairStorage);
             apArg2->GetObjectValue(&local28);
             Vt4Obj* v = reinterpret_cast<GlobalObj*>(DAT_01268b08)->unk10();
             void** pVtableSlot = *(void***)v + 4;
             void* arg = local28.FUN_00dba680();
             void* pSecond = reinterpret_cast<void*(__thiscall*)(void*, void*)>(*pVtableSlot)(v, arg);
             apArg2->GetSourcePair(&pair);
-            void* first = pair.first;
-            if (pair.second != 0)
+            void* first = reinterpret_cast<void*>(pair.a);
+            if (pair.b != 0)
             {
-                pSecond = pair.second;
+                pSecond = reinterpret_cast<void*>(pair.b);
             }
             void* second = pSecond;
             m_08->unk0c(&first, &second);
-            if (first == pair.first && second == pSecond)
+            if (first == reinterpret_cast<void*>(pair.a) && second == pSecond)
             {
                 local28.FUN_00dba660();
             }
@@ -500,12 +484,6 @@ struct S00d48d30_Stream
     virtual void v1();
     virtual void v2();
     virtual S00d48d30_Bool IsStreamValid() const;
-};
-
-struct hkStringPtr
-{
-    void* m_pcText;
-    void operator=(const char* s);
 };
 
 struct S00d48d30_Result
@@ -805,10 +783,6 @@ struct ClassRegistry
 };
 struct Resource : hkReferencedObject
 {
-    void FUN_00c905b0() const throw();
-    virtual void v0() throw();
-    virtual void v1() throw();
-    virtual void v2() throw();
     virtual void v3() throw();
     virtual void v4() throw();
     virtual void v5() throw();
@@ -823,7 +797,7 @@ struct ResourceRef
     void clear() throw()
     {
         if (ptr)
-            ptr->FUN_00c905b0();
+            ptr->removeReference();
         ptr = 0;
     }
     Resource* operator->() const
@@ -833,7 +807,7 @@ struct ResourceRef
     void take(Resource* p) throw()
     {
         if (ptr && ptr != p)
-            ptr->FUN_00c905b0();
+            ptr->removeReference();
         ptr = p;
     }
 };
@@ -898,7 +872,7 @@ extern "C" ObjectResource* __cdecl FUN_00dc32c0(const RootObject&, const ClassRe
 struct LoadFormat
 {
     int type;
-    S_00d49350 version;
+    hkStringPtr version;
     unsigned int layout;
 };
 struct LoadError
@@ -951,7 +925,7 @@ static __declspec(noinline) __declspec(nothrow) Resource* FUN_00d48760(LoadStrea
     {
         if (FUN_00cb1290(&format.layout, &DAT_011b7b88, 4) == 0)
         {
-            if (format.version.Equals(FUN_00dc0fb0()))
+            if (StringEquals(&format.version, 0, FUN_00dc0fb0()))
             {
                 LoadBuffer buffer;
                 buffer.data = 0;
@@ -1027,12 +1001,7 @@ struct S00d48950_Item
     virtual void* GetIteratorKey();
     virtual int GetNumOwnMembers();
 };
-struct S00d48950_ItemArray
-{
-    S00d48950_Item** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+typedef hkArrayBase<S00d48950_Item*> S00d48950_ItemArray;
 struct S00d48950_Root
 {
     virtual void v00();
@@ -1071,7 +1040,7 @@ struct S00d48950_Target
 struct S00d48950_Result
 {
     int m_pMoppCode;
-    char m_message[1];
+    hkStringPtr m_message;
 };
 struct S00d48950_Heap
 {
@@ -1090,7 +1059,6 @@ struct S00d48950_Sys
         return *m_pStreamAllocator;
     }
 };
-void __cdecl FUN_00cb0c70(char* buf, const char* fmt, ...);
 
 // For each root item, checks lookup and adds it to target's set when versions differ; returns 0 with result code 4 on failure, otherwise 1.
 // @fnv 0x00d48950
@@ -1115,7 +1083,7 @@ static __declspec(noinline) int FUN_00d48950(S00d48950_Result* result, S00d48950
         if (target->m_set.FUN_00cb1cb0(id, -1, -1) == -1)
         {
             result->m_pMoppCode = 4;
-            FUN_00cb0c70(result->m_message, str_010cf9f4, key, version);
+            result->m_message.FUN_00cb0c70(str_010cf9f4, key, version);
             S00d48950_Heap& heap = *((S00d48950_Sys*)FUN_00c85750())->m_pStreamAllocator;
             items.m_iElementCount = 0;
             if ((items.m_iCapacityState & 0x80000000) == 0)

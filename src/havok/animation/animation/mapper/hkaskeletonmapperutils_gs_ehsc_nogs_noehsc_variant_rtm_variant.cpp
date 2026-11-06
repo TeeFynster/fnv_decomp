@@ -1,3 +1,20 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkStringPtr.h"
+#include "../../../../../include/hkaBone.h"
+#include "../../../../../include/hkaSkeleton.h"
+#include "../../../../../include/hkaSkeletonMapperData.h"
+#include "../../../../../include/hkError.h"
+#include "../../../../../include/hkOstream.h"
+#include "../../../../../include/hkReferencedObject.h"
+
+// Keep the original inline behavior while using the shared class declarations.
+inline const char* hkStringPtr::cString() const
+{
+    return reinterpret_cast<char*>((unsigned long)(m_pcText) & ~1);
+}
+
 // src/havok/animation/animation/mapper/hkaskeletonmapperutils_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/animation/animation/mapper/hkaskeletonmapperutils_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -17,105 +34,25 @@ void __cdecl FUN_00ce5a70(CE5F90QsTransform* out, const CE5F90QsTransform* a, co
 void __cdecl FUN_00ce5f90(CE5F90QsTransform* out, const CE5F90QsTransform* poseA, short boneA,
                           const CE5F90QsTransform* poseB, short boneB, int mode, float weightA, float weightB);
 extern "C" void _ReadBarrier();
-struct hkStringPtr
-{
-    const char* m_pcText;
-};
-struct hkaBone
-{
-    hkStringPtr m_name;
-    char m_bLockTranslation;
-};
-template <typename T> struct hkArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    const T& operator[](int i) const
-    {
-        return m_data[i];
-    }
-};
-struct hkReferencedObject
-{
-    virtual ~hkReferencedObject();
-    unsigned short memSizeAndFlags;
-    unsigned short referenceCount;
-};
-struct hkaSkeleton : hkReferencedObject
-{
-    hkStringPtr m_name;
-    hkArray<short> m_kParentIndices;
-    hkArray<hkaBone> m_kBones;
-};
-struct __declspec(align(16)) MapperQsTransform
-{
-    float translation[4];
-    float rotation[4];
-    float scale[4];
-};
-struct hkaSkeletonMapperDataSimpleMapping
-{
-    short m_sBoneA;
-    short m_sBoneB;
-    MapperQsTransform transform;
-};
-struct hkaSkeletonMapperData
-{
-    hkaSkeleton* m_pSkeletonA;
-    hkaSkeleton* m_pSkeletonB;
-    hkArray<hkaSkeletonMapperDataSimpleMapping> m_kSimpleMappings;
-};
-struct hkOstream : hkReferencedObject
-{
-    void* m_pStreamWriter;
-    hkOstream(char* buf, int bufLen);
-    virtual ~hkOstream();
-    hkOstream& operator<<(const char* str);
-    hkOstream& operator<<(const hkStringPtr& str);
-};
-struct hkError
-{
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void message(int kind, int id, const char* text, const char* file, int line);
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void beginSection(int id, const char* name);
-    virtual void endSection();
-};
-extern hkError* DAT_01268360;
-int __cdecl FUN_00ce5840(hkaSkeletonMapperData* mapping);
-
 #include <xmmintrin.h>
 
-extern const __m128 DAT_010c71e0;
-extern const __m128 DAT_010c71b0;
-extern const __m128 DAT_010c7170;
-extern const __m128 DAT_010c44d0;
-extern const __m128 DAT_010c4c00;
-extern const __m128 DAT_010c4c10;
+extern const LocalM128 DAT_010c71e0;
+extern const LocalM128 DAT_010c71b0;
+extern const LocalM128 DAT_010c7170;
+extern const LocalM128 DAT_010c44d0;
+extern const LocalM128 DAT_010c4c00;
+extern const LocalM128 DAT_010c4c10;
 
-__forceinline __m128 hkQuadRecip(__m128 r)
+__forceinline LocalM128 hkQuadRecip(LocalM128 r)
 {
-    __m128 e = _mm_rcp_ps(r);
+    LocalM128 e = _mm_rcp_ps(r);
     return _mm_sub_ps(_mm_add_ps(e, e), _mm_mul_ps(_mm_mul_ps(e, r), e));
 }
 
 class HkSimd
 {
   public:
-    HkSimd(const __m128& x) : m_vValue(x)
+    HkSimd(const LocalM128& x) : m_vValue(x)
     {}
     HkSimd(float x)
     {
@@ -129,17 +66,17 @@ class HkSimd
         _mm_store_ss(&s, m_vValue);
         return s;
     }
-    __forceinline __m128 broadcast() const
+    __forceinline LocalM128 broadcast() const
     {
         return _mm_shuffle_ps(m_vValue, m_vValue, 0);
     }
-    __forceinline const __m128& getQuad() const
+    __forceinline const LocalM128& getQuad() const
     {
         return m_vValue;
     }
 
   private:
-    __m128 m_vValue;
+    LocalM128 m_vValue;
 };
 
 struct HkQuat;
@@ -151,15 +88,15 @@ class HkVec4
     {
         m_vComponents = v.m_vComponents;
     }
-    __forceinline void operator=(const __m128& v)
+    __forceinline void operator=(const LocalM128& v)
     {
         m_vComponents = v;
     }
-    __forceinline __m128& getQuad()
+    __forceinline LocalM128& getQuad()
     {
         return m_vComponents;
     }
-    __forceinline const __m128& getQuad() const
+    __forceinline const LocalM128& getQuad() const
     {
         return m_vComponents;
     }
@@ -206,10 +143,10 @@ class HkVec4
     }
     __forceinline void setCross(const HkVec4& v0, const HkVec4& v1)
     {
-        __m128 cross0;
+        LocalM128 cross0;
         cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
                             _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
-        __m128 cross1;
+        LocalM128 cross1;
         cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
                             _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
         m_vComponents = _mm_sub_ps(cross0, cross1);
@@ -297,8 +234,8 @@ class HkVec4
     }
     __forceinline HkSimd dot3(const HkVec4& a) const
     {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+        LocalM128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+        LocalM128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
         return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
     }
     __forceinline HkSimd lengthSquared3() const
@@ -309,10 +246,10 @@ class HkVec4
     __forceinline void setRotatedInverseDir(const HkQuat& quat, const HkVec4& direction);
 
   private:
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 
   public:
-    operator __m128() const
+    operator LocalM128() const
     {
         return m_vComponents;
     }
@@ -394,6 +331,7 @@ __forceinline void HkVec4::setRotatedInverseDir(const HkQuat& quat, const HkVec4
     this->setAdd4(ret, ret);
 }
 
+// local form of hkQsTransform: 0x00ce61c0 needs inline QsTransform operations; shared form gives 10941 bytes vs exe 13246.
 struct HkQs
 {
     __forceinline HkQs()
@@ -442,29 +380,6 @@ struct HkQs
     HkVec4 m_vScale;
 };
 
-class HkBoolean
-{
-  public:
-    inline HkBoolean()
-    {}
-    inline HkBoolean(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-    inline operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    inline HkBoolean& operator=(bool e)
-    {
-        m_cBooleanValue = static_cast<char>(e);
-        return *this;
-    }
-
-  private:
-    char m_cBooleanValue;
-};
-
 template <typename E, typename S> class HkEnumValue
 {
   public:
@@ -476,7 +391,7 @@ template <typename E, typename S> class HkEnumValue
     {
         m_kStorage = static_cast<S>(e);
     }
-    HkBoolean operator==(E e) const
+    hkBool operator==(E e) const
     {
         return m_kStorage == static_cast<S>(e);
     }
@@ -721,11 +636,11 @@ template <typename T> __forceinline void HkArrUtil::constructWithArray(T* t, int
     }
 }
 
-template <typename T> class HkArrBase
-{
+template <typename T> class HkArrBaseLocalForm
+{ // local form of hkArrayBase: 0x00ce61c0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
   public:
-    __forceinline HkArrBase();
-    __forceinline ~HkArrBase()
+    __forceinline HkArrBaseLocalForm();
+    __forceinline ~HkArrBaseLocalForm()
     {}
     __forceinline T& operator[](int i)
     {
@@ -824,7 +739,7 @@ template <typename T> class HkArrBase
     }
 
   protected:
-    __forceinline HkArrBase<T>& copyFromArray(HkHeap& alloc, const HkArrBase<T>& a, HkClassTag)
+    __forceinline HkArrBaseLocalForm<T>& copyFromArray(HkHeap& alloc, const HkArrBaseLocalForm<T>& a, HkClassTag)
     {
         int oldSize = m_iElementCount;
         int newSize = a.GetLogicalSize();
@@ -851,32 +766,32 @@ template <typename T> class HkArrBase
 };
 
 template <typename T>
-__forceinline HkArrBase<T>::HkArrBase() : m_data(0), m_iElementCount(0), m_iCapacityState(DONT_DEALLOCATE_FLAG)
+__forceinline HkArrBaseLocalForm<T>::HkArrBaseLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(DONT_DEALLOCATE_FLAG)
 {}
 
-template <typename T> class HkArr : public HkArrBase<T>
+template <typename T> class HkArr : public HkArrBaseLocalForm<T>
 {
   public:
-    __forceinline HkArr() : HkArrBase<T>()
+    __forceinline HkArr() : HkArrBaseLocalForm<T>()
     {}
     __forceinline ~HkArr();
-    __forceinline HkArr& operator=(const HkArrBase<T>& a);
+    __forceinline HkArr& operator=(const HkArrBaseLocalForm<T>& a);
     __forceinline HkArr& operator=(const HkArr& a);
     __forceinline void ClearAndRelease()
     {
-        HkArrBase<T>::_clearAndDeallocate(HkHeapAllocator().get(this));
+        HkArrBaseLocalForm<T>::_clearAndDeallocate(HkHeapAllocator().get(this));
     }
     __forceinline void AddBack(const T& e)
     {
-        HkArrBase<T>::_pushBack(HkHeapAllocator().get(this), e);
+        HkArrBaseLocalForm<T>::_pushBack(HkHeapAllocator().get(this), e);
     }
     __forceinline void SetSizeAndGrow(int size, const T& fill)
     {
-        HkArrBase<T>::_setSize(HkHeapAllocator().get(this), size, fill);
+        HkArrBaseLocalForm<T>::_setSize(HkHeapAllocator().get(this), size, fill);
     }
     __forceinline T& AllocatePair()
     {
-        return HkArrBase<T>::_expandOne(HkHeapAllocator().get(this));
+        return HkArrBaseLocalForm<T>::_expandOne(HkHeapAllocator().get(this));
     }
 };
 
@@ -885,7 +800,7 @@ template <typename T> __forceinline HkArr<T>::~HkArr()
     ClearAndRelease();
 }
 
-template <typename T> __forceinline HkArr<T>& HkArr<T>::operator=(const HkArrBase<T>& a)
+template <typename T> __forceinline HkArr<T>& HkArr<T>::operator=(const HkArrBaseLocalForm<T>& a)
 {
     this->copyFromArray(HkHeapAllocator().get(this), a, typename HkPodTrait<T>::type());
     return *this;
@@ -906,7 +821,7 @@ template <typename T> class HkLocalArr : public HkArr<T>
         this->m_iCapacityState = capacity | HkArr<T>::DONT_DEALLOCATE_FLAG;
         m_pStackAllocation = this->m_data;
     }
-    __forceinline HkBoolean wasReallocated() const
+    __forceinline hkBool wasReallocated() const
     {
         return m_pStackAllocation != this->m_data;
     }
@@ -921,83 +836,6 @@ template <typename T> class HkLocalArr : public HkArr<T>
     T* m_pStackAllocation;
 };
 
-class HkBaseObj
-{
-  public:
-    __forceinline virtual ~HkBaseObj()
-    {}
-};
-
-class HkRefObj : public HkBaseObj
-{
-  public:
-    __forceinline HkRefObj()
-    {}
-    __declspec(nothrow) virtual ~HkRefObj() throw()
-    {}
-    __declspec(nothrow) virtual const void* GetClassType() const throw();
-    __declspec(nothrow) virtual void CalcContentStatistics(void* collector, const void* cls) const throw();
-    __declspec(nothrow) void RetainReference() const throw();
-    __declspec(nothrow) void removeReference() const throw();
-    unsigned short m_usMemSizeAndFlags;
-    mutable short m_sReferenceCount;
-};
-
-class HkStrPtr
-{
-  public:
-    enum StringFlags
-    {
-        OWNED_FLAG = 0x1,
-    };
-    __declspec(nothrow) HkStrPtr() throw();
-    __declspec(nothrow) HkStrPtr(const char* string) throw();
-    __declspec(nothrow) HkStrPtr(const HkStrPtr& strRef) throw();
-    __declspec(nothrow) ~HkStrPtr() throw();
-    __declspec(nothrow) HkStrPtr& operator=(const char* s) throw();
-    __declspec(nothrow) HkStrPtr& operator=(const HkStrPtr& s) throw();
-    inline const char* cString() const;
-    inline operator const char*() const;
-
-  private:
-    const char* m_pcText;
-};
-
-inline const char* HkStrPtr::cString() const
-{
-    return reinterpret_cast<char*>((unsigned long)(m_pcText) & ~OWNED_FLAG);
-}
-
-inline HkStrPtr::operator const char*() const
-{
-    return cString();
-}
-
-class HkBone
-{
-  public:
-    __forceinline HkBone() : m_bLockTranslation(false)
-    {}
-    __forceinline HkBone(const HkBone& other)
-    {
-        *this = other;
-    }
-    __forceinline HkBone& operator=(const HkBone& other)
-    {
-        if (this == &other)
-        {
-            return *this;
-        }
-        m_name = other.m_name;
-        m_bLockTranslation = other.m_bLockTranslation;
-        return *this;
-    }
-
-  public:
-    HkStrPtr m_name;
-    HkBoolean m_bLockTranslation;
-};
-
 template <class TYPE> class HkRef
 {
   public:
@@ -1005,7 +843,7 @@ template <class TYPE> class HkRef
     {
         if (e)
         {
-            e->RetainReference();
+            e->addReference();
         }
         if (m_pRetainedObject)
         {
@@ -1018,7 +856,8 @@ template <class TYPE> class HkRef
 
 class HkLocalFrame;
 
-class HkSkeleton : public HkRefObj
+// The shared hkaSkeleton does not yet declare m_kReferencePose.
+class HkSkeleton : public hkReferencedObject
 {
   public:
     struct LocalFrameOnBone
@@ -1028,25 +867,27 @@ class HkSkeleton : public HkRefObj
     };
     __forceinline HkSkeleton()
     {}
-    HkStrPtr m_name;
+    hkStringPtr m_name;
     HkArr<short> m_kParentIndices;
-    HkArr<HkBone> m_kBones;
+    HkArr<hkaBone> m_kBones;
     HkArr<HkQs> m_kReferencePose;
-    HkArr<HkStrPtr> m_kBoneNames;
+    HkArr<hkStringPtr> m_kBoneNames;
     HkArr<LocalFrameOnBone> m_kLocalFrames;
 };
 
 __forceinline hkError& hkErrorInstance()
 {
-    return *DAT_01268360;
+    return *hkError::s_instance;
 }
 
-class FUN_00cc00e0 : public HkRefObj
+// Using shared hkOstream here changes FUN_00ce61c0 from 13246 to 13278 bytes.
+// Retain this stream interface until the shared declaration preserves that code.
+class FUN_00cc00e0 : public hkReferencedObject
 {
   public:
     __declspec(nothrow) ~FUN_00cc00e0() throw();
     __declspec(nothrow) FUN_00cc00e0& FUN_00cc01c0(const char* s) throw();
-    __declspec(nothrow) FUN_00cc00e0& WriteName(const HkStrPtr& s) throw();
+    __declspec(nothrow) FUN_00cc00e0& WriteName(const hkStringPtr& s) throw();
 
   protected:
     void* m_pStreamWriter;
@@ -1147,22 +988,10 @@ struct HkMapperParams
     HkArr<HkUserChain> m_kUserChainList;
     HkArr<HkUserMapping> m_kFirstUserMappingList;
     HkArr<HkUserMapping> m_kSecondUserMappingList;
-    HkBoolean m_bFirstMappingOption;
-    HkBoolean m_bSecondMappingOption;
+    hkBool m_bFirstMappingOption;
+    hkBool m_bSecondMappingOption;
     HkEnumValue<HkMappingType, int> m_eMappingType;
     HkMotionParams m_kMotionParams;
-};
-
-struct HkMapperData
-{
-    HkRef<const HkSkeleton> m_pSkeletonA;
-    HkRef<const HkSkeleton> m_pSkeletonB;
-    HkArr<HkSimpleMapping> m_kSimpleMappings;
-    HkArr<HkChainMapping> m_kChainMappings;
-    HkArr<short> m_kUnmappedBones;
-    HkQs m_kExtractedMotionMapping;
-    HkBoolean m_bKeepUnmappedLocal;
-    HkEnumValue<HkMappingType, int> m_eMappingType;
 };
 
 struct Match
@@ -1173,7 +1002,7 @@ struct Match
 
 __declspec(nothrow) short __cdecl FUN_00cdd390(const HkSkeleton& skeleton, const char* name,
                                                HkCompareFunc compare) throw();
-__declspec(nothrow) HkBoolean
+__declspec(nothrow) hkBool
     __cdecl FUN_00cde3d0(const HkSkeleton& skeleton, short startBone, short endBone, HkArr<short>& bonesOut) throw();
 __declspec(nothrow) void __cdecl FUN_00cddcf0(int numTransforms, const short* parentIndices, const HkQs* poseLocal,
                                               HkQs* poseModelOut) throw();
@@ -1192,8 +1021,8 @@ __forceinline bool __cdecl checkRotation(const HkMapperParams& params, short bon
 }
 
 // @fnv 0x00ce61c0
-__declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalParams, HkMapperData& originalAToB,
-                                              HkMapperData& originalBToA) throw()
+__declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalParams, hkaSkeletonMapperData& originalAToB,
+                                              hkaSkeletonMapperData& originalBToA) throw()
 {
     hkErrorInstance().beginSection(0x54e4323e, "hkaSkeletonMapperUtils::createMapping");
 
@@ -1212,8 +1041,8 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
         switchedOrder = true;
     }
 
-    HkMapperData& aToB = switchedOrder ? originalBToA : originalAToB;
-    HkMapperData& bToA = switchedOrder ? originalAToB : originalBToA;
+    hkaSkeletonMapperData& aToB = switchedOrder ? originalBToA : originalAToB;
+    hkaSkeletonMapperData& bToA = switchedOrder ? originalAToB : originalBToA;
 
     const int numBonesA = params.m_pSkeletonA->m_kBones.GetLogicalSize();
     const int numBonesB = params.m_pSkeletonB->m_kBones.GetLogicalSize();
@@ -1244,11 +1073,11 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
     aToB.m_eMappingType = params.m_eMappingType;
     bToA.m_eMappingType = params.m_eMappingType;
 
-    aToB.m_pSkeletonA = params.m_pSkeletonA;
-    aToB.m_pSkeletonB = params.m_pSkeletonB;
+    reinterpret_cast<HkRef<const HkSkeleton>&>(aToB.m_pSkeletonA) = params.m_pSkeletonA;
+    reinterpret_cast<HkRef<const HkSkeleton>&>(aToB.m_pSkeletonB) = params.m_pSkeletonB;
 
-    bToA.m_pSkeletonA = params.m_pSkeletonB;
-    bToA.m_pSkeletonB = params.m_pSkeletonA;
+    reinterpret_cast<HkRef<const HkSkeleton>&>(bToA.m_pSkeletonA) = params.m_pSkeletonB;
+    reinterpret_cast<HkRef<const HkSkeleton>&>(bToA.m_pSkeletonB) = params.m_pSkeletonA;
 
     {
         const int numMappings = params.m_kFirstUserMappingList.GetLogicalSize();
@@ -1268,7 +1097,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 FUN_00ce5f90(params.m_eMappingType, poseA, boneIn, poseB, boneOut, simpleMapping.m_kAFromBTransform,
                              params.m_fFirstMappingTolerance, params.m_fSecondMappingTolerance);
 
-                aToB.m_kSimpleMappings.AddBack(simpleMapping);
+                reinterpret_cast<HkArr<HkSimpleMapping>&>(aToB.m_kSimpleMappings).AddBack(simpleMapping);
 
                 map_BtoA[boneOut] = boneIn;
             }
@@ -1308,7 +1137,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
 
                 FUN_00ce5f90(params.m_eMappingType, poseB, boneIn, poseA, boneOut, simpleMapping.m_kAFromBTransform);
 
-                bToA.m_kSimpleMappings.AddBack(simpleMapping);
+                reinterpret_cast<HkArr<HkSimpleMapping>&>(bToA.m_kSimpleMappings).AddBack(simpleMapping);
 
                 map_AtoB[boneOut] = boneIn;
             }
@@ -1391,8 +1220,8 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
 
             HkArr<short> chainA;
             HkArr<short> chainB;
-            const HkBoolean chainAok = FUN_00cde3d0(*params.m_pSkeletonA, startChainA, endChainA, chainA);
-            const HkBoolean chainBok = FUN_00cde3d0(*params.m_pSkeletonB, startChainB, endChainB, chainB);
+            const hkBool chainAok = FUN_00cde3d0(*params.m_pSkeletonA, startChainA, endChainA, chainA);
+            const hkBool chainBok = FUN_00cde3d0(*params.m_pSkeletonB, startChainB, endChainB, chainB);
 
             if (!chainAok || !chainBok)
             {
@@ -1506,7 +1335,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                     chainMappingAtoB.m_kEndAFromBTransform.SetMulInverse(transformEndA, transformEndB);
                     chainMappingAtoB.m_kStartAFromBTransform.SetMulInverse(transformStartA, transformStartB);
 
-                    aToB.m_kChainMappings.AddBack(chainMappingAtoB);
+                    reinterpret_cast<HkArr<HkChainMapping>&>(aToB.m_kChainMappings).AddBack(chainMappingAtoB);
                 }
 
                 {
@@ -1519,7 +1348,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                     chainMappingBtoA.m_kEndAFromBTransform.SetMulInverse(transformEndB, transformEndA);
                     chainMappingBtoA.m_kStartAFromBTransform.SetMulInverse(transformStartB, transformStartA);
 
-                    bToA.m_kChainMappings.AddBack(chainMappingBtoA);
+                    reinterpret_cast<HkArr<HkChainMapping>&>(bToA.m_kChainMappings).AddBack(chainMappingBtoA);
                 }
 
                 for (int a = 1; a < chainLengthA - 1; a++)
@@ -1586,8 +1415,8 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
 
             HkArr<short> chainABones;
             HkArr<short> chainBBones;
-            const HkBoolean chainAok = FUN_00cde3d0(*params.m_pSkeletonA, startChainA, endChainA, chainABones);
-            const HkBoolean chainBok = FUN_00cde3d0(*params.m_pSkeletonB, startChainB, endChainB, chainBBones);
+            const hkBool chainAok = FUN_00cde3d0(*params.m_pSkeletonA, startChainA, endChainA, chainABones);
+            const hkBool chainBok = FUN_00cde3d0(*params.m_pSkeletonB, startChainB, endChainB, chainBBones);
 
             if (!chainAok)
             {
@@ -1737,8 +1566,8 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 FUN_00ce5fe0(params.m_eMappingType, params.m_pSkeletonB, poseB, startChainB, endChainB,
                              params.m_pSkeletonA, poseA, startChainA, endChainA, chainMappingBFromA);
 
-                bToA.m_kChainMappings.AddBack(chainMappingBFromA);
-                aToB.m_kChainMappings.AddBack(chainMappingAFromB);
+                reinterpret_cast<HkArr<HkChainMapping>&>(bToA.m_kChainMappings).AddBack(chainMappingBFromA);
+                reinterpret_cast<HkArr<HkChainMapping>&>(aToB.m_kChainMappings).AddBack(chainMappingAFromB);
 
                 for (int a = 0; a < chainLengthA; a++)
                 {
@@ -1781,8 +1610,8 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
             {
                 for (int idxB = 0; idxB < numBonesB; idxB++)
                 {
-                    const char* nameA = params.m_pSkeletonA->m_kBones[idxA].m_name;
-                    const char* nameB = params.m_pSkeletonB->m_kBones[idxB].m_name;
+                    const char* nameA = params.m_pSkeletonA->m_kBones[idxA].m_name.cString();
+                    const char* nameB = params.m_pSkeletonB->m_kBones[idxB].m_name.cString();
 
                     if (compare(nameA, nameB) == 0)
                     {
@@ -1836,13 +1665,13 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 simpleMappingAtoB.m_sBoneA = boneA;
                 simpleMappingAtoB.m_sBoneB = boneB;
 
-                const char* boneAName = params.m_pSkeletonA->m_kBones[boneA].m_name;
-                const char* boneBName = params.m_pSkeletonB->m_kBones[boneB].m_name;
+                const char* boneAName = params.m_pSkeletonA->m_kBones[boneA].m_name.cString();
+                const char* boneBName = params.m_pSkeletonB->m_kBones[boneB].m_name.cString();
 
                 FUN_00ce5f90(params.m_eMappingType, poseA, boneA, poseB, boneB, simpleMappingAtoB.m_kAFromBTransform,
                              params.m_fFirstMappingTolerance, 1.0f);
 
-                aToB.m_kSimpleMappings.AddBack(simpleMappingAtoB);
+                reinterpret_cast<HkArr<HkSimpleMapping>&>(aToB.m_kSimpleMappings).AddBack(simpleMappingAtoB);
             }
 
             {
@@ -1850,17 +1679,17 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                 simpleMappingBtoA.m_sBoneA = boneB;
                 simpleMappingBtoA.m_sBoneB = boneA;
 
-                const char* boneAName = params.m_pSkeletonA->m_kBones[boneA].m_name;
-                const char* boneBName = params.m_pSkeletonB->m_kBones[boneB].m_name;
+                const char* boneAName = params.m_pSkeletonA->m_kBones[boneA].m_name.cString();
+                const char* boneBName = params.m_pSkeletonB->m_kBones[boneB].m_name.cString();
 
                 FUN_00ce5f90(params.m_eMappingType, poseB, boneB, poseA, boneA, simpleMappingBtoA.m_kAFromBTransform,
                              params.m_fFirstMappingTolerance, 1.0f);
 
-                bToA.m_kSimpleMappings.AddBack(simpleMappingBtoA);
+                reinterpret_cast<HkArr<HkSimpleMapping>&>(bToA.m_kSimpleMappings).AddBack(simpleMappingBtoA);
             }
 
-            checkRotation(params, boneA, boneB, aToB.m_kSimpleMappings.back().m_kAFromBTransform,
-                          bToA.m_kSimpleMappings.back().m_kAFromBTransform);
+            checkRotation(params, boneA, boneB, reinterpret_cast<HkArr<HkSimpleMapping>&>(aToB.m_kSimpleMappings).back().m_kAFromBTransform,
+                          reinterpret_cast<HkArr<HkSimpleMapping>&>(bToA.m_kSimpleMappings).back().m_kAFromBTransform);
 
             map_AtoB[boneA] = boneB;
             map_BtoA[boneB] = boneA;
@@ -1905,8 +1734,8 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
 
             HkArr<short> chainA;
             HkArr<short> chainB;
-            const HkBoolean chainAok = FUN_00cde3d0(*params.m_pSkeletonA, startChainA, endChainA, chainA);
-            const HkBoolean chainBok = FUN_00cde3d0(*params.m_pSkeletonB, startChainB, endChainB, chainB);
+            const hkBool chainAok = FUN_00cde3d0(*params.m_pSkeletonA, startChainA, endChainA, chainA);
+            const hkBool chainBok = FUN_00cde3d0(*params.m_pSkeletonB, startChainB, endChainB, chainB);
 
             if (!chainAok || !chainBok)
             {
@@ -1966,7 +1795,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                     chainMappingAtoB.m_kEndAFromBTransform.SetMulInverse(transformEndA, transformEndB);
                     chainMappingAtoB.m_kStartAFromBTransform.SetMulInverse(transformStartA, transformStartB);
 
-                    aToB.m_kChainMappings.AddBack(chainMappingAtoB);
+                    reinterpret_cast<HkArr<HkChainMapping>&>(aToB.m_kChainMappings).AddBack(chainMappingAtoB);
                 }
 
                 {
@@ -1979,7 +1808,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
                     chainMappingBtoA.m_kEndAFromBTransform.SetMulInverse(transformEndB, transformEndA);
                     chainMappingBtoA.m_kStartAFromBTransform.SetMulInverse(transformStartB, transformStartA);
 
-                    bToA.m_kChainMappings.AddBack(chainMappingBtoA);
+                    reinterpret_cast<HkArr<HkChainMapping>&>(bToA.m_kChainMappings).AddBack(chainMappingBtoA);
                 }
 
                 for (int a = 1; a < chainLengthA - 1; a++)
@@ -1998,7 +1827,7 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
     {
         if (UNMATCHED == map_BtoA[b])
         {
-            aToB.m_kUnmappedBones.AddBack((short)b);
+            reinterpret_cast<HkArr<short>&>(aToB.m_kUnmappedBones).AddBack((short)b);
         }
     }
 
@@ -2006,21 +1835,21 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
     {
         if (UNMATCHED == map_AtoB[a])
         {
-            bToA.m_kUnmappedBones.AddBack((short)a);
+            reinterpret_cast<HkArr<short>&>(bToA.m_kUnmappedBones).AddBack((short)a);
         }
     }
 
-    aToB.m_bKeepUnmappedLocal = true;
-    bToA.m_bKeepUnmappedLocal = true;
+    aToB.m_bKeepUnmappedLocal.m_cBooleanValue = true;
+    bToA.m_bKeepUnmappedLocal.m_cBooleanValue = true;
 
-    originalAToB.m_kExtractedMotionMapping.setIdentity();
-    originalBToA.m_kExtractedMotionMapping.setIdentity();
+    reinterpret_cast<HkQs&>(originalAToB.m_kExtractedMotionMapping).setIdentity();
+    reinterpret_cast<HkQs&>(originalBToA.m_kExtractedMotionMapping).setIdentity();
 
     if (params.m_eMappingType == HK_RETARGETING_MAPPING)
     {
         params.m_kMotionParams.FUN_00ce55d0(params.m_eMappingType, modelPoseA.begin(), numBonesA, modelPoseB.begin(),
-                                           numBonesB, originalAToB.m_kExtractedMotionMapping,
-                                           originalBToA.m_kExtractedMotionMapping);
+                                           numBonesB, reinterpret_cast<HkQs&>(originalAToB.m_kExtractedMotionMapping),
+                                           reinterpret_cast<HkQs&>(originalBToA.m_kExtractedMotionMapping));
     }
 
     hkErrorInstance().endSection();
@@ -2028,45 +1857,35 @@ __declspec(nothrow) void __cdecl FUN_00ce61c0(const HkMapperParams& originalPara
 
 #include <xmmintrin.h>
 namespace fnv_00ce5a70 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_rcp_ps(__m128);
-    __m128 _mm_sqrt_ss(__m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_load_ss(const float*);
-    void _mm_store_ss(float*, __m128);
+using ::_mm_add_ss;
+using ::_mm_add_ps;
+using ::_mm_sub_ps;
+using ::_mm_mul_ps;
+using ::_mm_and_ps;
+using ::_mm_xor_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_rcp_ps;
+using ::_mm_sqrt_ss;
+using ::_mm_unpackhi_ps;
+using ::_mm_unpacklo_ps;
+using ::_mm_movelh_ps;
+using ::_mm_load_ss;
+using ::_mm_store_ss;
 }
 
-extern const __m128 DAT_010c71e0;
-extern const __m128 DAT_010c7170;
-extern const __m128 DAT_010c44d0;
-extern const __m128 DAT_010c4c00;
-extern const __m128 DAT_010c4c10;
-
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool()
-    {}
-};
+extern const LocalM128 DAT_010c71e0;
+extern const LocalM128 DAT_010c7170;
+extern const LocalM128 DAT_010c44d0;
+extern const LocalM128 DAT_010c4c00;
+extern const LocalM128 DAT_010c4c10;
 
 struct HkQuat;
 struct HkVec
 {
-    __m128 m;
+    LocalM128 m;
     __forceinline void setRotatedInverseDir(const HkQuat& q, const HkVec& v);
     __forceinline void SetRotatedDirection(const HkQuat& q, const HkVec& v);
     __forceinline void setReciprocal3(const HkVec& v);
@@ -2078,6 +1897,7 @@ struct HkQuat
     void FUN_00c66320(const HkQuat& a, const HkQuat& b) throw();
     void FUN_00c74ac0(const HkQuat& a, const HkQuat& b) throw();
 };
+// local form of hkQsTransform: 0x00ce5a70 needs inline SetConjugate/SetProduct and original scalar aliases; shared form gives 667 bytes vs exe 999.
 struct HkQs
 {
     HkVec m_vTranslation;
@@ -2100,32 +1920,32 @@ struct HkQs
     }
 };
 
-static __forceinline __m128 dot3_from_prod(__m128 prod)
+static __forceinline LocalM128 dot3_from_prod(LocalM128 prod)
 {
-    __m128 y = _mm_shuffle_ps(prod, prod, 0x55);
-    __m128 d = _mm_add_ss(y, prod);
-    __m128 z = _mm_shuffle_ps(prod, prod, 0xAA);
+    LocalM128 y = _mm_shuffle_ps(prod, prod, 0x55);
+    LocalM128 d = _mm_add_ss(y, prod);
+    LocalM128 z = _mm_shuffle_ps(prod, prod, 0xAA);
     return _mm_add_ss(z, d);
 }
 
 __forceinline void HkVec::setRotatedInverseDir(const HkQuat& quat, const HkVec& vec)
 {
-    __m128 q = quat.v.m;
-    __m128 v = vec.m;
-    __m128 qw = _mm_shuffle_ps(quat.v.m, quat.v.m, 0xFF);
-    __m128 prod = _mm_mul_ps(v, q);
-    __m128 dot = dot3_from_prod(prod);
-    __m128 v_yzx = _mm_shuffle_ps(v, v, 0xC9);
-    __m128 q_zxy = _mm_shuffle_ps(q, q, 0xD2);
-    __m128 cross = _mm_mul_ps(v_yzx, q_zxy);
-    __m128 v_zxy = _mm_shuffle_ps(v, v, 0xD2);
-    __m128 q_yzx = _mm_shuffle_ps(q, q, 0xC9);
+    LocalM128 q = quat.v.m;
+    LocalM128 v = vec.m;
+    LocalM128 qw = _mm_shuffle_ps(quat.v.m, quat.v.m, 0xFF);
+    LocalM128 prod = _mm_mul_ps(v, q);
+    LocalM128 dot = dot3_from_prod(prod);
+    LocalM128 v_yzx = _mm_shuffle_ps(v, v, 0xC9);
+    LocalM128 q_zxy = _mm_shuffle_ps(q, q, 0xD2);
+    LocalM128 cross = _mm_mul_ps(v_yzx, q_zxy);
+    LocalM128 v_zxy = _mm_shuffle_ps(v, v, 0xD2);
+    LocalM128 q_yzx = _mm_shuffle_ps(q, q, 0xC9);
     cross = _mm_sub_ps(cross, _mm_mul_ps(v_zxy, q_yzx));
     cross = _mm_mul_ps(cross, qw);
-    __m128 qw2 = _mm_mul_ps(qw, qw);
+    LocalM128 qw2 = _mm_mul_ps(qw, qw);
     qw2 = _mm_add_ps(qw2, DAT_010c71e0);
-    __m128 term = _mm_mul_ps(qw2, v);
-    __m128 qdot = _mm_mul_ps(_mm_shuffle_ps(dot, dot, 0), q);
+    LocalM128 term = _mm_mul_ps(qw2, v);
+    LocalM128 qdot = _mm_mul_ps(_mm_shuffle_ps(dot, dot, 0), q);
     term = _mm_add_ps(term, qdot);
     term = _mm_add_ps(cross, term);
     m = _mm_add_ps(term, term);
@@ -2133,22 +1953,22 @@ __forceinline void HkVec::setRotatedInverseDir(const HkQuat& quat, const HkVec& 
 
 __forceinline void HkVec::SetRotatedDirection(const HkQuat& quat, const HkVec& vec)
 {
-    __m128 q = quat.v.m;
-    __m128 v = vec.m;
-    __m128 qw = _mm_shuffle_ps(quat.v.m, quat.v.m, 0xFF);
-    __m128 prod = _mm_mul_ps(v, q);
-    __m128 dot = dot3_from_prod(prod);
-    __m128 q_zxy = _mm_shuffle_ps(q, q, 0xD2);
-    __m128 v_yzx = _mm_shuffle_ps(v, v, 0xC9);
-    __m128 cross = _mm_mul_ps(v_yzx, q_zxy);
-    __m128 v_zxy = _mm_shuffle_ps(v, v, 0xD2);
-    __m128 q_yzx = _mm_shuffle_ps(q, q, 0xC9);
+    LocalM128 q = quat.v.m;
+    LocalM128 v = vec.m;
+    LocalM128 qw = _mm_shuffle_ps(quat.v.m, quat.v.m, 0xFF);
+    LocalM128 prod = _mm_mul_ps(v, q);
+    LocalM128 dot = dot3_from_prod(prod);
+    LocalM128 q_zxy = _mm_shuffle_ps(q, q, 0xD2);
+    LocalM128 v_yzx = _mm_shuffle_ps(v, v, 0xC9);
+    LocalM128 cross = _mm_mul_ps(v_yzx, q_zxy);
+    LocalM128 v_zxy = _mm_shuffle_ps(v, v, 0xD2);
+    LocalM128 q_yzx = _mm_shuffle_ps(q, q, 0xC9);
     cross = _mm_sub_ps(_mm_mul_ps(v_zxy, q_yzx), cross);
     cross = _mm_mul_ps(cross, qw);
-    __m128 qw2 = _mm_mul_ps(qw, qw);
+    LocalM128 qw2 = _mm_mul_ps(qw, qw);
     qw2 = _mm_add_ps(qw2, DAT_010c71e0);
-    __m128 term = _mm_mul_ps(qw2, v);
-    __m128 qdot = _mm_mul_ps(_mm_shuffle_ps(dot, dot, 0), q);
+    LocalM128 term = _mm_mul_ps(qw2, v);
+    LocalM128 qdot = _mm_mul_ps(_mm_shuffle_ps(dot, dot, 0), q);
     term = _mm_add_ps(term, qdot);
     term = _mm_add_ps(cross, term);
     m = _mm_add_ps(term, term);
@@ -2157,18 +1977,18 @@ __forceinline void HkVec::SetRotatedDirection(const HkQuat& quat, const HkVec& v
 static __forceinline HkVec quadReciprocal(const HkVec& v)
 {
     HkVec result;
-    __m128 r = _mm_rcp_ps(v.m);
-    __m128 e = _mm_mul_ps(r, v.m);
+    LocalM128 r = _mm_rcp_ps(v.m);
+    LocalM128 e = _mm_mul_ps(r, v.m);
     e = _mm_mul_ps(e, r);
     result.m = _mm_sub_ps(_mm_add_ps(r, r), e);
     return result;
 }
 __forceinline void HkVec::setReciprocal3(const HkVec& vec)
 {
-    __m128 s = vec.m;
-    __m128 ones = DAT_010c7170;
-    __m128 hi = _mm_unpackhi_ps(s, ones);
-    __m128 mixed = _mm_shuffle_ps(s, hi, 0xC4);
+    LocalM128 s = vec.m;
+    LocalM128 ones = DAT_010c7170;
+    LocalM128 hi = _mm_unpackhi_ps(s, ones);
+    LocalM128 mixed = _mm_shuffle_ps(s, hi, 0xC4);
     HkVec v;
     v.m = mixed;
     HkVec result = quadReciprocal(v);
@@ -2177,9 +1997,9 @@ __forceinline void HkVec::setReciprocal3(const HkVec& vec)
 
 __forceinline float HkVec::length3() const
 {
-    __m128 v = m;
-    __m128 sq = _mm_mul_ps(v, v);
-    __m128 d = dot3_from_prod(sq);
+    LocalM128 v = m;
+    LocalM128 sq = _mm_mul_ps(v, v);
+    LocalM128 d = dot3_from_prod(sq);
     d = _mm_sqrt_ss(d);
     float out;
     _mm_store_ss(&out, d);
@@ -2188,20 +2008,20 @@ __forceinline float HkVec::length3() const
 
 __declspec(noinline) void HkQuat::FUN_00c66320(const HkQuat& a, const HkQuat& b) throw()
 {
-    __m128 av = a.v.m, bv = b.v.m;
-    __m128 ax = _mm_shuffle_ps(av, av, 0), ay = _mm_shuffle_ps(av, av, 0x55);
-    __m128 az = _mm_shuffle_ps(av, av, 0xaa), aw = _mm_shuffle_ps(av, av, 0xff);
-    __m128 bx = _mm_shuffle_ps(bv, bv, 0), by = _mm_shuffle_ps(bv, bv, 0x55);
-    __m128 bz = _mm_shuffle_ps(bv, bv, 0xaa), bw = _mm_shuffle_ps(bv, bv, 0xff);
-    __m128 x = _mm_add_ps(_mm_add_ps(_mm_sub_ps(_mm_mul_ps(ay, bz), _mm_mul_ps(az, by)), _mm_mul_ps(aw, bx)),
+    LocalM128 av = a.v.m, bv = b.v.m;
+    LocalM128 ax = _mm_shuffle_ps(av, av, 0), ay = _mm_shuffle_ps(av, av, 0x55);
+    LocalM128 az = _mm_shuffle_ps(av, av, 0xaa), aw = _mm_shuffle_ps(av, av, 0xff);
+    LocalM128 bx = _mm_shuffle_ps(bv, bv, 0), by = _mm_shuffle_ps(bv, bv, 0x55);
+    LocalM128 bz = _mm_shuffle_ps(bv, bv, 0xaa), bw = _mm_shuffle_ps(bv, bv, 0xff);
+    LocalM128 x = _mm_add_ps(_mm_add_ps(_mm_sub_ps(_mm_mul_ps(ay, bz), _mm_mul_ps(az, by)), _mm_mul_ps(aw, bx)),
                           _mm_mul_ps(bw, ax));
-    __m128 y = _mm_add_ps(_mm_add_ps(_mm_sub_ps(_mm_mul_ps(az, bx), _mm_mul_ps(ax, bz)), _mm_mul_ps(aw, by)),
+    LocalM128 y = _mm_add_ps(_mm_add_ps(_mm_sub_ps(_mm_mul_ps(az, bx), _mm_mul_ps(ax, bz)), _mm_mul_ps(aw, by)),
                           _mm_mul_ps(bw, ay));
-    __m128 z = _mm_add_ps(_mm_add_ps(_mm_sub_ps(_mm_mul_ps(ax, by), _mm_mul_ps(ay, bx)), _mm_mul_ps(aw, bz)),
+    LocalM128 z = _mm_add_ps(_mm_add_ps(_mm_sub_ps(_mm_mul_ps(ax, by), _mm_mul_ps(ay, bx)), _mm_mul_ps(aw, bz)),
                           _mm_mul_ps(bw, az));
-    __m128 sum = _mm_add_ps(_mm_add_ps(_mm_mul_ps(ay, by), _mm_mul_ps(ax, bx)), _mm_mul_ps(az, bz));
-    __m128 w = _mm_sub_ps(_mm_mul_ps(aw, bw), sum);
-    __m128 xy = _mm_unpacklo_ps(x, y), zw = _mm_unpacklo_ps(z, w);
+    LocalM128 sum = _mm_add_ps(_mm_add_ps(_mm_mul_ps(ay, by), _mm_mul_ps(ax, bx)), _mm_mul_ps(az, bz));
+    LocalM128 w = _mm_sub_ps(_mm_mul_ps(aw, bw), sum);
+    LocalM128 xy = _mm_unpacklo_ps(x, y), zw = _mm_unpacklo_ps(z, w);
     v.m = _mm_movelh_ps(xy, zw);
 }
 
@@ -2210,7 +2030,7 @@ static __forceinline void warnAlways(int id, const char* text, int line)
     char assertBuf[512];
     hkOstream ostr(assertBuf, 512);
     ostr << text;
-    DAT_01268360->message(1, id, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", line);
+    hkError::s_instance->message(1, id, assertBuf, ".\\Mapper\\hkaSkeletonMapperUtils.cpp", line);
 }
 
 // @fnv 0x00ce5a70
@@ -2256,14 +2076,14 @@ void __cdecl FUN_00ce5a70(CE5F90QsTransform* mappingType, const CE5F90QsTransfor
             scale = defaultScale;
             break;
         }
-        __m128 sv = _mm_load_ss(&scale);
+        LocalM128 sv = _mm_load_ss(&scale);
         sv = _mm_shuffle_ps(sv, sv, 0);
         out->m_vScale.m = sv;
         out->m_rotation.FUN_00c74ac0(b->m_rotation, a->m_rotation);
         float neg = -scale;
-        __m128 ns = _mm_load_ss(&neg);
+        LocalM128 ns = _mm_load_ss(&neg);
         ns = _mm_shuffle_ps(ns, ns, 0);
-        __m128 tr = _mm_mul_ps(ns, a->m_vTranslation.m);
+        LocalM128 tr = _mm_mul_ps(ns, a->m_vTranslation.m);
         tr = _mm_add_ps(tr, b->m_vTranslation.m);
         out->m_vTranslation.m = tr;
     }

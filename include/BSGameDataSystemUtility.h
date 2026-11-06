@@ -1,30 +1,23 @@
-// Source layout: BSGameDataSystemUtility. PC corrections are in generate_headers.py.
-#ifndef FNV_BSGAMEDATASYSTEMUTILITY_H
-#define FNV_BSGAMEDATASYSTEMUTILITY_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+#include "GAMEDATA_STATUS.h"
+
 class BSGameDataSystemUtility
 {
-  public:
-    void** m_ppVirtualMethodTable;       // +0x0
-    bool bIsActive;        // +0x4
-    bool m_bGameDataFlag;  // +0x5
+public:
+    virtual void* vf00(unsigned int flags);
+    virtual void vf04();
+    virtual void Destroy();
+    virtual void vf0C();
+    virtual void vf10();
+    virtual void vf14();
+
+    bool bIsActive;
+    bool m_bGameDataFlag;
     unsigned short layoutPadding6;
-    GAMEDATA_STATUS m_eGameDataStatus;  // +0x8
-    char m_acFirstLargeBuffer[1055];    // +0xC
-    char m_acSecondaryPath[1055];       // +0x42B
+    GAMEDATA_STATUS m_eGameDataStatus;
+    char m_acFirstLargeBuffer[1055];
+    char m_acSecondaryPath[1055];
     unsigned short layoutPadding84A;
-    int m_iBufferValue;  // +0x84C
-    void Destroy();
+    int m_iBufferValue;
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BSGameDataSystemUtility) == 0x850);
-FNV_STATIC_ASSERT(offsetof(BSGameDataSystemUtility, m_ppVirtualMethodTable) == 0x0);
-FNV_STATIC_ASSERT(offsetof(BSGameDataSystemUtility, bIsActive) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BSGameDataSystemUtility, m_bGameDataFlag) == 0x5);
-FNV_STATIC_ASSERT(offsetof(BSGameDataSystemUtility, m_eGameDataStatus) == 0x8);
-FNV_STATIC_ASSERT(offsetof(BSGameDataSystemUtility, m_acFirstLargeBuffer) == 0xC);
-FNV_STATIC_ASSERT(offsetof(BSGameDataSystemUtility, m_acSecondaryPath) == 0x42B);
-FNV_STATIC_ASSERT(offsetof(BSGameDataSystemUtility, m_iBufferValue) == 0x84C);
-#endif

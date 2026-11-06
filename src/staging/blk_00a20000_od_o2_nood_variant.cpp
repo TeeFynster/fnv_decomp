@@ -1,3 +1,4 @@
+#include "../../include/BSStringT.h"
 
 // src/staging/blk_00a20000_od_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_moves.py: the bytes and the matched neighbours of these functions
 // say /MT /O2 /GS /EHsc /Gy (unit src/staging/blk_00a20000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions to their real
@@ -6,6 +7,7 @@
 // src/staging/blk_00a20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/NiAllocator.h"
 struct FUN_00a23a30_Class
 {
     unsigned int GetField1B08();
@@ -145,10 +147,7 @@ struct FUN_00a26310_Class
     int m_30;
     void FUN_00a26310(int a, FUN_00a26480_class* b);
 };
-struct BSStr
-{
-    bool Set(const char*, unsigned int);
-};
+
 struct FUN_00a22640_Class
 {
     int m_00;
@@ -165,7 +164,7 @@ struct FUN_00a22640_Class
     int m_2c;
     int m_30;
     int m_34;
-    BSStr m_38;
+    ::BSStringT<char> m_38;
     void FUN_00a22640();
 };
 struct FUN_00a24b70_Class
@@ -257,10 +256,6 @@ struct InputInterface
     virtual unsigned long __stdcall QueryInterface() = 0;
     virtual unsigned long __stdcall AddRef() = 0;
     virtual unsigned long __stdcall Release() = 0;
-};
-struct NiAllocator
-{
-    void __thiscall FUN_00aa4060(void*);
 };
 extern NiAllocator DAT_011f6238;
 struct InputManagerClose

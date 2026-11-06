@@ -2,16 +2,12 @@
 // src/havok/physics/collide/dispatch/broadphase/hkptypedbroadphasedispatcher.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/dispatch/broadphase/hkptypedbroadphasedispatcher.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/Pair.h"
+#include "../../../../../../include/hkBool.h"
 struct Body
 {
     int m_auiShapeKeys;
     signed char m_type;
-};
-
-struct Pair
-{
-    Body* a;
-    Body* b;
 };
 
 struct Handler
@@ -33,17 +29,13 @@ void Dispatcher::DispatchPairs(Pair* pairs, int aiCount)
 {
     while (--aiCount >= 0)
     {
-        Body* a = pairs->a;
-        Body* b = pairs->b;
+        Body* a = reinterpret_cast<Body*>(pairs->a);
+        Body* b = reinterpret_cast<Body*>(pairs->b);
         m_table[a->m_type * 8 + b->m_type]->Process(pairs);
         pairs++;
     }
 }
 
-struct hkBoolCF7080
-{
-    char m_cBooleanValue;
-};
 struct HandleCF7080
 {
     unsigned int m_iOwnerObjectOffset;
@@ -54,39 +46,34 @@ struct HandleCF7080
         return reinterpret_cast<const char*>(this) + m_iOwnerOffset;
     }
 };
-struct PairCF7080
-{
-    HandleCF7080* m_kPointA;
-    HandleCF7080* m_kPointB;
-};
 struct FilterCF7080
 {
     virtual ~FilterCF7080();
-    virtual hkBoolCF7080 IsCollisionEnabled(const void* a, const void* b) const;
+    virtual hkBool IsCollisionEnabled(const void* a, const void* b) const;
 };
 struct HandlerCF7080
 {
     virtual ~HandlerCF7080();
-    virtual void addPair(PairCF7080& pair);
+    virtual void addPair(Pair& pair);
 };
 struct DispatcherCF7080
 {
     HandlerCF7080* m_handlers[8][8];
-    void FUN_00cf7080(PairCF7080* pairs, int numPairs, const FilterCF7080* filter);
+    void FUN_00cf7080(Pair* pairs, int numPairs, const FilterCF7080* filter);
 };
 
 // Iterates over collision pairs, filters them with filter->IsCollisionEnabled, and forwards accepted pairs to the handler for each type combination.
 // @fnv 0x00cf7080
-void DispatcherCF7080::FUN_00cf7080(PairCF7080* pairs, int numPairs, const FilterCF7080* filter)
+void DispatcherCF7080::FUN_00cf7080(Pair* pairs, int numPairs, const FilterCF7080* filter)
 {
     while (--numPairs >= 0)
     {
-        const void* a = pairs->m_kPointA->getOwner();
-        const void* b = pairs->m_kPointB->getOwner();
+        const void* a = reinterpret_cast<HandleCF7080*>(pairs->a)->getOwner();
+        const void* b = reinterpret_cast<HandleCF7080*>(pairs->b)->getOwner();
         if (filter->IsCollisionEnabled(a, b).m_cBooleanValue)
         {
-            int typeA = pairs->m_kPointA->m_type;
-            int typeB = pairs->m_kPointB->m_type;
+            int typeA = reinterpret_cast<HandleCF7080*>(pairs->a)->m_type;
+            int typeB = reinterpret_cast<HandleCF7080*>(pairs->b)->m_type;
             m_handlers[typeA][typeB]->addPair(*pairs);
         }
         pairs++;

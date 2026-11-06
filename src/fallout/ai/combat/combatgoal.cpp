@@ -1,6 +1,25 @@
 // fallout/ai/combat/combatgoal.cpp: CombatGoal (22 functions)
 
-#include "combatgoal.h"
+#include "../../../../include/CombatGoal.h"
+#include "../../../../include/CombatGoalActivateCombatItem.h"
+#include "../../../../include/CombatGoalAdvance.h"
+#include "../../../../include/CombatGoalAmbush.h"
+#include "../../../../include/CombatGoalAvoidThreats.h"
+#include "../../../../include/CombatGoalCluster.h"
+#include "../../../../include/CombatGoalFallBack.h"
+#include "../../../../include/CombatGoalFindTarget.h"
+#include "../../../../include/CombatGoalFlank.h"
+#include "../../../../include/CombatGoalFlee.h"
+#include "../../../../include/CombatGoalFlushTarget.h"
+#include "../../../../include/CombatGoalGuard.h"
+#include "../../../../include/CombatGoalHideFromTarget.h"
+#include "../../../../include/CombatGoalKillTarget.h"
+#include "../../../../include/CombatGoalReachDestination.h"
+#include "../../../../include/CombatGoalStayInCombatArea.h"
+#include "../../../../include/CombatGoalUseCombatItem.h"
+#include "../../../../include/CombatWorldStateListNode.h"
+
+int Warning(const char* format, ...);
 
 // Creates and returns a new CombatGoal subclass instance matching eType, or warns and returns 0 for an unknown type.
 // @fnv 0x00984490
@@ -417,8 +436,6 @@ void InitCombatGoalTable()
         DAT_011f17a0[i] = pCombatGoal;
     }
 }
-
-struct CombatGoal;
 
 struct FUN_00984470_Class
 {

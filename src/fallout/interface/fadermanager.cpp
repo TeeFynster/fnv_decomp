@@ -1,5 +1,28 @@
 // fallout/interface/fadermanager.cpp: FaderManager, FM7 (10 functions)
 
+// Keep the unit's fixed-string helpers out of line.
+#define FNV64_NIFIXEDSTRING_OWN_BODIES
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/BSFadeNode.h"
+#include "../../../include/BSShaderManager.h"
+#include "../../../include/BSStringT.h"
+#include "../../../include/NiAlphaProperty.h"
+#include "../../../include/NiBound.h"
+#include "../../../include/NiDirectionalLight.h"
+#include "../../../include/NiLight.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiObject.h"
+#include "../../../include/NiObjectNET.h"
+#include "../../../include/NiPoint2.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiRefObject.h"
+#include "../../../include/NiSortAdjustNode.h"
+#include "../../../include/NiTexture.h"
+#include "../../../include/NiTriShape.h"
+#include "../../../include/NiUpdateData.h"
+#include "../../../include/TES.h"
+#include "../../../include/TileShaderProperty.h"
+#include "../../../include/GameTimerRecord.h"
 #include "fadermanager_object_decls.h"
 
 // Returns true if the fader's fade node exists, its flag is set, and its alpha equals 1.0.
@@ -48,7 +71,7 @@ static signed char s_iFadeDelay;
 // @fnv 0x007011d0
 void FaderManager::AdvanceFaders(bool bUpdate)
 {
-    AutoMemContext context(MEM_CONTEXT_INTERFACE, true,
+    AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_INTERFACE, true,
                            "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Interface\\FaderManager.cpp", 266);
     for (int i = 0; i < FADER_ENUM_FADER_COUNT; ++i)
     {
@@ -96,7 +119,7 @@ void FaderManager::AdvanceFaders(bool bUpdate)
 // @fnv 0x00700960
 void FaderManager::AddFader(FADER_ENUM eFader, float fDuration, bool bFadeOut)
 {
-    AutoMemContext kAllocationContext(MEM_CONTEXT_INTERFACE, true,
+    AutoMemContext kAllocationContext(MEM_CONTEXT_MEM_CONTEXT_INTERFACE, true,
                                       "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Interface\\FaderManager.cpp",
                                       135);
     if (s_faders[eFader].pFadeNode)
@@ -132,7 +155,7 @@ void FaderManager::AddFader(FADER_ENUM eFader, float fDuration, bool bFadeOut)
     pBlendingProperty->FUN_0049ed90(true);
     s_faders[eFader].pFadeNode->AttachProperty(pBlendingProperty);
     NiTriShape* faderShape = new NiTriShape(4, pScreenVertices, 0, 0, surface.pTexCoords, 1, 0, 2, pTriangles);
-    s_faders[eFader].pFadeNode->AddObject(faderShape, true);
+    s_faders[eFader].pFadeNode->AttachChildInAvailableSlot(faderShape, true);
     BSStringT<char> textureName;
     textureName.PrintfString("Data\\Textures\\Interface\\Faders\\%s", s_faders[eFader].pTextureName);
     faderShape->SetName(NiFixedString(textureName.String()));
@@ -155,7 +178,7 @@ void FaderManager::AddFader(FADER_ENUM eFader, float fDuration, bool bFadeOut)
     NiNode* pRoot = m_pRootAboveMenus;
     if (s_faders[eFader].m_bUseAlternateRoot)
         pRoot = m_pRootBelowMenus;
-    pRoot->AddObject(s_faders[eFader].pFadeNode, true);
+    pRoot->AttachChildInAvailableSlot((NiAVObject*)s_faders[eFader].pFadeNode, true);
     pRoot->UpdateSceneObject();
     NiUpdateData updateParams(0.0f, false, false);
     pRoot->Update(updateParams);
@@ -167,7 +190,7 @@ void FaderManager::AddFader(FADER_ENUM eFader, float fDuration, bool bFadeOut)
 // @fnv 0x007006c0
 void FaderManager::AddRoot(NiNode* pParent, float m_fProjectionDepth, bool abBelowMenus)
 {
-    AutoMemContext kContext(MEM_CONTEXT_INTERFACE, true,
+    AutoMemContext kContext(MEM_CONTEXT_MEM_CONTEXT_INTERFACE, true,
                             "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Interface\\FaderManager.cpp", 80);
     NiSortAdjustNode* pSortAdjustNode = new NiSortAdjustNode(0);
     if (abBelowMenus)
@@ -183,10 +206,10 @@ void FaderManager::AddRoot(NiNode* pParent, float m_fProjectionDepth, bool abBel
     }
     NiDirectionalLight* apTargetLight = new NiDirectionalLight;
     apTargetLight->SetName(NiFixedString("FaderNodeLight"));
-    apTargetLight->FUN_004bc280(NiPoint3(1.0f, 1.0f, 1.0f));
+    apTargetLight->SetAmbientColor(NiColor(1.0f, 1.0f, 1.0f));
     // This helper's canonical binding is a folded NiObject::LinkObject alias.
     apTargetLight->NiObject::LinkObject(*(NiStream*)pSortAdjustNode);
-    pSortAdjustNode->AddObject(apTargetLight, true);
+    pSortAdjustNode->AttachChildInAvailableSlot(apTargetLight, true);
     float m_fGlyphWidthInPixels = (float)FUN_004dc1f0();
     float halfHeight = (float)FUN_004dc200();
     float fScale = 1.0f;
@@ -198,54 +221,15 @@ void FaderManager::AddRoot(NiNode* pParent, float m_fProjectionDepth, bool abBel
         fScale = 1.0f;
     pSortAdjustNode->FUN_00440490(fScale);
     pSortAdjustNode->FUN_00440460(NiPoint3(0.0f, m_fProjectionDepth, 0.0f));
-    pParent->AddObject(pSortAdjustNode, true);
+    pParent->AttachChildInAvailableSlot((NiAVObject*)pSortAdjustNode, true);
 }
 
-struct GameTimerRecord
-{
-    void Update();
-    void Update(unsigned int);
-    float GetSeconds();
-    float GetUnmodifiedSeconds();
-    unsigned int GetTime();
-    unsigned int GetStartTime();
-    void ClampAt(unsigned int);
-    bool QEnabled();
-    bool GetSecondsIsZero();
-    void SetGlobalTimeMultiplier(float, bool);
-    static void SetGlobalTimeMultiplierCache();
-    void RestoreGlobalTimeMultiplierCache();
-    static float QGlobalTimeMultiplier();
-    static float QGlobalTimeMultiplierTarget();
-    static void UpdateGlobalTimeMultiplier();
-    void SetUseGlobalTimeMultiplierTarget(bool);
-    bool QUseGlobalTimeMultiplierTarget();
-    float GetRealTimeSeconds();
-    void Enable();
-    void Disable();
-    void Init(unsigned int);
-    unsigned char m_ucFirstTimerByte;
-    char _pad_1[3];
-    float m_fFirstTimerValue;
-    float m_fSecondTimerValue;
-    float fTimeSinceScaleStart;
-    float m_fFourthTimerValue;
-    unsigned int m_uiFirstTimerValue;
-    unsigned int m_uiSecondTimerValue;
-    bool m_bFirstTimerFlag;
-    bool m_bSecondTimerFlag;
-    char _pad_1e[2];
-};
 typedef char _sizecheck_BSTimer[sizeof(GameTimerRecord) == 32 ? 1 : -1];
-struct FUN_007013e0_shell : public GameTimerRecord
-{
-    float FUN_007013e0();
-};
 
 extern float DAT_011ac3a0;
 
 // @fnv 0x007013e0
-float FUN_007013e0_shell::FUN_007013e0()
+float GameTimerRecord::GetRealTimeSeconds()
 {
     return fTimeSinceScaleStart / DAT_011ac3a0;
 }

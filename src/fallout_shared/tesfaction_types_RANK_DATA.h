@@ -3,7 +3,7 @@
 #define FNV_RANK_DATA_H
 
 #include "layout_support.h"
-#include "TESTexture.h"
+#include "../../include/TESTexture.h"
 #include "layout_support.h"
 class FactionRankPresentation;
 #pragma pack(push, 4)

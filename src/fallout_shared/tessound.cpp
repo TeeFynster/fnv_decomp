@@ -1,7 +1,15 @@
 // fallout_shared/tessound.cpp: TESSound (4 functions)
 
+#define FNV_TESFILE_H  // the shared TESFile below replaces layout_support.h's stub
+#include "../../include/NiFile.h"
 #include "tessound.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/TESBoundAnimObject.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESSoundFile.h"
+#include "../../include/TESSound__SOUND_DATA.h"
 #include <malloc.h>
+#include "../../include/TESFile.h"
 
 const char kTESSoundFileLabel[] = "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESSound.cpp";
 
@@ -14,22 +22,22 @@ enum
 // @fnv 0x005e2ef0
 void TESSound::ResetFormData()
 {
-    data.iFlags = 0;
-    data.iMax = 0;
-    data.iMin = 0;
-    data.m_cPitchAdjustment = 0;
-    data.m_uiFrequency = 0;
-    data.m_ucUnused = 0;
-    data.m_aucAttenuationBytes = 0;
-    data.m_auiAttenuationCurve[0] = 100;
-    data.m_auiAttenuationCurve[1] = 50;
-    data.m_auiAttenuationCurve[2] = 20;
-    data.m_auiAttenuationCurve[3] = 5;
-    data.m_auiAttenuationCurve[4] = 0;
-    data.m_uiReverbAttenuation = 80;
-    data.m_uiTrailingValue1 = 0;
-    data.m_uiTrailingValue2 = 0;
-    data.iPriority = 128;
+    data.soundFlags = 0;
+    data.maxAttenuation = 0;
+    data.minAttenuation = 0;
+    data.frequencyAdjustment = 0;
+    data.staticAttenuation = 0;
+    data.unk03 = 0;
+    data.stopTime = 0;
+    data.attenuationCurve[0] = 100;
+    data.attenuationCurve[1] = 50;
+    data.attenuationCurve[2] = 20;
+    data.attenuationCurve[3] = 5;
+    data.attenuationCurve[4] = 0;
+    data.reverbAttenuation = 80;
+    data.unk1c = 0;
+    data.unk20 = 0;
+    data.unk18 = 128;
 }
 
 // @fnv 0x005e3600
@@ -73,14 +81,15 @@ bool TESSound::Load(TESFile* file)
         {
             char* pChunkBuffer = static_cast<char*>(_alloca(file->GetChunkSize()));
             file->GetChunkData(pChunkBuffer, 0);
-            SetSoundFile(pChunkBuffer);
+            SetSoundFile(static_cast<const char*>(pChunkBuffer));
             break;
         }
         case 0x4D414E52:  // RNAM
             ReadTypedData(file, &m_cSoundFlag, sizeof(m_cSoundFlag));
             break;
         case 0x44444E53:  // SNDD
-            ReadTypedData(file, &data, sizeof(data));
+            // SNDD stores the 36-byte prefix, before frequencyVariance.
+            ReadTypedData(file, &data, offsetof(TESSound__SOUND_DATA, frequencyVariance));
             if (file->IsEndianConversionRequired())
                 data.Endian();
             break;
@@ -90,40 +99,40 @@ bool TESSound::Load(TESFile* file)
             ReadTypedData(file, &oldSoundData, sizeof(oldSoundData));
             if (file->IsEndianConversionRequired())
                 oldSoundData.Endian();
-            data.iMin = oldSoundData.iMin;
-            data.iMax = oldSoundData.iMax;
-            data.m_cPitchAdjustment = oldSoundData.m_cPitchAdjustment;
-            data.iFlags = oldSoundData.iFlags;
-            data.m_uiFrequency = oldSoundData.m_uiFrequency;
-            data.m_aucAttenuationBytes = oldSoundData.m_aucAttenuationBytes;
+            data.minAttenuation = oldSoundData.iMin;
+            data.maxAttenuation = oldSoundData.iMax;
+            data.frequencyAdjustment = oldSoundData.m_cPitchAdjustment;
+            data.soundFlags = oldSoundData.iFlags;
+            data.staticAttenuation = oldSoundData.m_uiFrequency;
+            data.stopTime = oldSoundData.m_aucAttenuationBytes;
             break;
         }
         case 0x4D414E41:  // ANAM
-            ReadTypedData(file, data.m_auiAttenuationCurve, sizeof(data.m_auiAttenuationCurve));
+            ReadTypedData(file, data.attenuationCurve, sizeof(data.attenuationCurve));
             if (file->IsEndianConversionRequired())
             {
-                BSEndian(&data.m_auiAttenuationCurve[0], EndianSizeTag<2>());
-                BSEndian(&data.m_auiAttenuationCurve[1], EndianSizeTag<2>());
-                BSEndian(&data.m_auiAttenuationCurve[2], EndianSizeTag<2>());
-                BSEndian(&data.m_auiAttenuationCurve[3], EndianSizeTag<2>());
-                BSEndian(&data.m_auiAttenuationCurve[4], EndianSizeTag<2>());
+                BSEndian(&data.attenuationCurve[0], EndianSizeTag<2>());
+                BSEndian(&data.attenuationCurve[1], EndianSizeTag<2>());
+                BSEndian(&data.attenuationCurve[2], EndianSizeTag<2>());
+                BSEndian(&data.attenuationCurve[3], EndianSizeTag<2>());
+                BSEndian(&data.attenuationCurve[4], EndianSizeTag<2>());
             }
-            if (data.m_auiAttenuationCurve[0] == 100 && data.m_auiAttenuationCurve[1] == 75 &&
-                data.m_auiAttenuationCurve[2] == 50 && data.m_auiAttenuationCurve[3] == 25 &&
-                data.m_auiAttenuationCurve[4] == 0)
+            if (data.attenuationCurve[0] == 100 && data.attenuationCurve[1] == 75 &&
+                data.attenuationCurve[2] == 50 && data.attenuationCurve[3] == 25 &&
+                data.attenuationCurve[4] == 0)
             {
-                data.m_auiAttenuationCurve[0] = 100;
-                data.m_auiAttenuationCurve[1] = 50;
-                data.m_auiAttenuationCurve[2] = 20;
-                data.m_auiAttenuationCurve[3] = 5;
-                data.m_auiAttenuationCurve[4] = 0;
+                data.attenuationCurve[0] = 100;
+                data.attenuationCurve[1] = 50;
+                data.attenuationCurve[2] = 20;
+                data.attenuationCurve[3] = 5;
+                data.attenuationCurve[4] = 0;
             }
             break;
         case 0x4D414E47:  // GNAM
-            ReadTypedData(file, &data.m_uiReverbAttenuation, sizeof(data.m_uiReverbAttenuation));
+            ReadTypedData(file, &data.reverbAttenuation, sizeof(data.reverbAttenuation));
             break;
         case 0x4D414E48:  // HNAM
-            ReadTypedData(file, &data.iPriority, sizeof(data.iPriority));
+            ReadTypedData(file, &data.unk18, sizeof(data.unk18));
             break;
         }
         if (!file->NextChunk())

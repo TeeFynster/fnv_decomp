@@ -1,3 +1,6 @@
+#include "../../../../../include/BSPackedAdditionalGeometryData.h"
+#include "../../../../../include/NiAdditionalGeometryData.h"
+#include "../../../../../include/NiRenderer.h"
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -34,10 +37,6 @@ NiAGDDataBlock* __cdecl CreateNiAGDDataBlock()
     return 0;
 }
 
-struct NiRenderer
-{
-    static NiRenderer* ms_pRenderer;
-};
 
 struct NiAGDDataBlockFreeBuffer
 {
@@ -56,246 +55,57 @@ void __thiscall NiAGDDataBlockFreeBuffer::FreeBuffer(void* pvBuffer)
     ((void(__thiscall*)(NiRenderer*, void*))pVt[0x138 / 4])(pRenderer, pVal);
 }
 
-struct RendererCall
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual void f6();
-    virtual void f7();
-    virtual void f8();
-    virtual void f9();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-    virtual void f38();
-    virtual void f39();
-    virtual void f40();
-    virtual void f41();
-    virtual void f42();
-    virtual void f43();
-    virtual void f44();
-    virtual void f45();
-    virtual void f46();
-    virtual void f47();
-    virtual void f48();
-    virtual void f49();
-    virtual void f50();
-    virtual void f51();
-    virtual void f52();
-    virtual void f53();
-    virtual void f54();
-    virtual void f55();
-    virtual void f56();
-    virtual void f57();
-    virtual void f58();
-    virtual void f59();
-    virtual void f60();
-    virtual void f61();
-    virtual void f62();
-    virtual void f63();
-    virtual void f64();
-    virtual void f65();
-    virtual void f66();
-    virtual void f67();
-    virtual void f68();
-    virtual void f69();
-    virtual void f70();
-    virtual void f71();
-    virtual void f72();
-    virtual void f73();
-    virtual void f74();
-    virtual void f75();
-    virtual void Call130(void*, unsigned int);
-};
-struct BSPackedAdditionalGeometryData
-{
-    struct NiBSPackedAGDDataBlock
-    {
-        unsigned int _0;
-        unsigned int _4;
-        void* _8;
-        unsigned char _12;
-        unsigned char _13;
-        void FUN_00a7f570(void* pvBuffer, unsigned int uiBufferSize);
-    };
-};
-// If pvBuffer is null and _12 is set, substitutes _8/_4; then, unless _13 is set, calls Call130 on the renderer with the buffer and size.
+// The shared block has no buffer methods yet. Explicit ECX and unused EDX
+// parameters retain the original thiscall argument layout.
+// If pvBuffer is null and unk0C is set, substitutes unk08/unk04; unless
+// unk0D is set, calls the renderer slot at 0x130 with the buffer and size.
 // @fnv 0x00a7f570
-void BSPackedAdditionalGeometryData::NiBSPackedAGDDataBlock::FUN_00a7f570(void* pvBuffer, unsigned int uiBufferSize)
+void __fastcall FreePackedAGDBuffer(BSPackedAdditionalGeometryData::NiBSPackedAGDDataBlock* pBlock,
+                                  void*, void* pvBuffer, unsigned int uiBufferSize)
 {
-    if (!pvBuffer && _12)
+    if (!pvBuffer && pBlock->unk0C)
     {
-        pvBuffer = _8;
-        uiBufferSize = _4;
+        pvBuffer = pBlock->unk08;
+        uiBufferSize = pBlock->unk04;
     }
-    if (!_13)
+    if (!pBlock->unk0D)
     {
-        ((RendererCall*)NiRenderer::ms_pRenderer)->Call130(pvBuffer, uiBufferSize);
+        NiRenderer* pRenderer = NiRenderer::ms_pRenderer;
+        void** pVt = *(void***)pRenderer;
+        ((void(__thiscall*)(NiRenderer*, void*, unsigned int))pVt[0x130 / 4])(pRenderer, pvBuffer, uiBufferSize);
     }
 }
 
-struct FakeRenderer
-{
-    virtual void d00();
-    virtual void d01();
-    virtual void d02();
-    virtual void d03();
-    virtual void d04();
-    virtual void d05();
-    virtual void d06();
-    virtual void d07();
-    virtual void d08();
-    virtual void d09();
-    virtual void d10();
-    virtual void d11();
-    virtual void d12();
-    virtual void d13();
-    virtual void d14();
-    virtual void d15();
-    virtual void d16();
-    virtual void d17();
-    virtual void d18();
-    virtual void d19();
-    virtual void d20();
-    virtual void d21();
-    virtual void d22();
-    virtual void d23();
-    virtual void d24();
-    virtual void d25();
-    virtual void d26();
-    virtual void d27();
-    virtual void d28();
-    virtual void d29();
-    virtual void d30();
-    virtual void d31();
-    virtual void d32();
-    virtual void d33();
-    virtual void d34();
-    virtual void d35();
-    virtual void d36();
-    virtual void d37();
-    virtual void d38();
-    virtual void d39();
-    virtual void d40();
-    virtual void d41();
-    virtual void d42();
-    virtual void d43();
-    virtual void d44();
-    virtual void d45();
-    virtual void d46();
-    virtual void d47();
-    virtual void d48();
-    virtual void d49();
-    virtual void d50();
-    virtual void d51();
-    virtual void d52();
-    virtual void d53();
-    virtual void d54();
-    virtual void d55();
-    virtual void d56();
-    virtual void d57();
-    virtual void d58();
-    virtual void d59();
-    virtual void d60();
-    virtual void d61();
-    virtual void d62();
-    virtual void d63();
-    virtual void d64();
-    virtual void d65();
-    virtual void d66();
-    virtual void d67();
-    virtual void d68();
-    virtual void d69();
-    virtual void d70();
-    virtual void d71();
-    virtual void d72();
-    virtual void d73();
-    virtual void d74();
-    virtual void d75();
-    virtual void d76();
-    virtual void Func(void*, unsigned int);
-};
-struct BlockHolder
-{
-    int _00;
-    unsigned int m4;
-    void* m8;
-    unsigned char mc;
-    unsigned char md;
-    void __thiscall FUN_00a7f5b0(void* pvBuffer, unsigned int uiBufferSize);
-};
 // @fnv 0x00a7f5b0
-void __thiscall BlockHolder::FUN_00a7f5b0(void* pvBuffer, unsigned int uiBufferSize)
+void __fastcall ReleasePackedAGDBuffer(BSPackedAdditionalGeometryData::NiBSPackedAGDDataBlock* pBlock,
+                                     void*, void* pvBuffer, unsigned int uiBufferSize)
 {
-    if (!pvBuffer && mc)
+    if (!pvBuffer && pBlock->unk0C)
     {
-        pvBuffer = m8;
-        uiBufferSize = m4;
+        pvBuffer = pBlock->unk08;
+        uiBufferSize = pBlock->unk04;
     }
-    if (!md)
+    if (!pBlock->unk0D)
     {
-        ((FakeRenderer*)NiRenderer::ms_pRenderer)->Func(pvBuffer, uiBufferSize);
+        NiRenderer* pRenderer = NiRenderer::ms_pRenderer;
+        void** pVt = *(void***)pRenderer;
+        ((void(__thiscall*)(NiRenderer*, void*, unsigned int))pVt[0x134 / 4])(pRenderer, pvBuffer, uiBufferSize);
     }
 }
 
-namespace fnv_00a7f620 {
-struct NiAdditionalGeometryData
-{
-    bool __thiscall FUN_00a727f0(const NiAdditionalGeometryData*);
-    char _pad_0[0x2c];
-    unsigned int m_uiShaderDeclarationIndex;
-    unsigned int m_uiUnknownValue;
-};
-struct BSPackedAdditionalGeometryData : NiAdditionalGeometryData
-{
-    bool __thiscall FUN_00a7f620(const NiAdditionalGeometryData* pkObject);
-};
 // @fnv 0x00a7f620
-bool __thiscall BSPackedAdditionalGeometryData::FUN_00a7f620(const NiAdditionalGeometryData* pkObject)
+bool __fastcall IsPackedAdditionalGeometryDataEqual(BSPackedAdditionalGeometryData* pData,
+                                                   void*, const NiAdditionalGeometryData* pkObject)
 {
-    if (FUN_00a727f0(pkObject) && m_uiShaderDeclarationIndex == pkObject->m_uiShaderDeclarationIndex &&
-        m_uiUnknownValue == pkObject->m_uiUnknownValue)
+    if (pData->FUN_00a727f0(pkObject) && pData->m_uiShaderDeclarationIndex == pkObject->m_uiShaderDeclarationIndex &&
+        pData->m_uiUnknownValue == pkObject->m_uiUnknownValue)
         return true;
     return false;
 }
-}  // namespace fnv_00a7f620
-
-struct FUN_00a7f560_shell
-{
-    void* __thiscall FUN_00a7f560(unsigned int uiBufferSize);
-};
 
 // @fnv 0x00a7f560
-void* FUN_00a7f560_shell::FUN_00a7f560(unsigned int uiBufferSize)
+void* __fastcall AllocatePackedAGDBuffer(BSPackedAdditionalGeometryData::NiBSPackedAGDDataBlock*,
+                                       void*, unsigned int uiBufferSize)
 {
     void* p = NiRenderer::ms_pRenderer;
     void** vtbl = *(void***)p;
@@ -523,12 +333,12 @@ struct Sphere
 {
     NiPt3 center;
     float radius;
-    void Merge(const Sphere& other);
+    void FUN_00a7f3f0(const Sphere& other);
 };
 
 // Sets this sphere to the other when it contains this; otherwise adjusts center and radius to enclose both.
 // @fnv 0x00a7f3f0
-void Sphere::Merge(const Sphere& other)
+void Sphere::FUN_00a7f3f0(const Sphere& other)
 {
     NiPt3 vDelta = center - other.center;
     float distSq = vDelta.SqrLength();

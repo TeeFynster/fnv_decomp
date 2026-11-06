@@ -2,6 +2,10 @@
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
+#include "../../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../../include/Vec4.h"
+
 int __stdcall InitIntToZero(int, int* piValue);
 void __stdcall CopyFivePointers(const void* apSource, void* apUnused1, void* apUnused2, void* apUnused3, void* apDest);
 struct S_00d54cd0_Base
@@ -59,23 +63,7 @@ struct S_00d54cd0_Result
 };
 S_00d54cd0_Result* FUN_00d54a40(S_00d54cd0_Base* col, void* world, S_00d54cd0_Input* in, void* out) throw();
 S_00d54cd0_Result* FUN_00d54cd0(void* world, S_00d54cd0_Input* pInput, void* out);
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiBytes) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct Record
 {
     int m_i00;
@@ -114,12 +102,12 @@ struct RecordArray
 
     ~RecordArray() throw()
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
         if ((uCapacity & 0x80000000) == 0)
-            pAllocator->FreeArray(m_pRecords, (uCapacity & 0x3fffffff) * sizeof(Record));
+            pAllocator->bufFree(m_pRecords, (uCapacity & 0x3fffffff) * sizeof(Record));
         m_pRecords = 0;
         m_uCapacity = 0x80000000;
     }
@@ -215,31 +203,7 @@ struct FUN_00dd5660_cls
     int unk18;
     int FUN_00dd5660();
 };
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_load_ps(float const* p);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-struct Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct Vec4Bits
-{
-    unsigned int u0;
-    unsigned int u1;
-    unsigned int u2;
-    unsigned int u3;
-};
-void __cdecl ResizeAudioStream(AudioAllocator* apAllocator, void* apVector, int aiElemSize);
+void __cdecl ResizeAudioStream(hkMemoryAllocator* apAllocator, void* apVector, int aiElemSize);
 struct Src_00dd5b00
 {
     virtual void v00();
@@ -268,8 +232,8 @@ struct Entry_00dd5b00
 };
 struct Item_00dd5b00
 {
-    Vec4Bits m_kAxisEndPoints;
-    Vec4Bits m_extra;
+    Vec4 m_kAxisEndPoints;
+    Vec4 m_extra;
 };
 struct Vec_00dd5b00
 {
@@ -296,28 +260,6 @@ inline float Dot3_00dd5b00(const __m128& a, const __m128& b)
     _mm_store_ss(&f, s);
     return f;
 }
-struct FUN_00dd5de0_Allocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-struct FUN_00dd5de0_MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    FUN_00dd5de0_Allocator* m_pStreamAllocator;
-
-    FUN_00dd5de0_Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-namespace fnvc_adapt {
-extern "C" FUN_00dd5de0_MemoryRouter& __cdecl FUN_00c85750();
-}
 struct FUN_00dd5de0
 {
     unsigned short m_usMemSizeAndFlags;
@@ -329,7 +271,7 @@ struct FUN_00dd5de0
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00dd5de0* b = static_cast<FUN_00dd5de0*>(p);
-        fnvc_adapt::FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->m_heap)->bufFree(p, static_cast<int>(b->m_usMemSizeAndFlags));
     }
 };
 struct OutCollection

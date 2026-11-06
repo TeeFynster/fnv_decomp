@@ -2,6 +2,8 @@
 // src/havok/physics/collide/agent/convexagent/spherecapsule/hkpspherecapsuleagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/spherecapsule/hkpspherecapsuleagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkMemoryRouter.h"
+
 struct S_00d3ef70_CdBody;
 struct S_00d3ef70_Input;
 struct S_00d3ef70_Agent;
@@ -97,14 +99,6 @@ void FUN_00d3e2b0_cls::FUN_00d3e2b0(int a1)
     v0(1);
 }
 
-struct AllocHolder {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pAllocator;
-};
-
 struct ObjAllocator {
     virtual void unk00();
     virtual void* Alloc(unsigned int size);
@@ -120,12 +114,12 @@ struct SmallRecord {
 
 extern char DAT_010cf018[];
 
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 
 // @fnv 0x00d3e2f0
 void __cdecl FUN_00d3e2f0(int aiUnused1, int aiUnused2, int aiUnused3, int aiValue) {
-    AllocHolder* pAllocHolder = FUN_00c85750();
-    ObjAllocator* allocator = (ObjAllocator*)pAllocHolder->m_pAllocator;
+    hkMemoryRouter* pAllocHolder = FUN_00c85750();
+    ObjAllocator* allocator = (ObjAllocator*)pAllocHolder->m_heap;
     SmallRecord* pRecord = (SmallRecord*)allocator->Alloc(0x10);
     pRecord->m_w04 = 0x10;
     pRecord->m_w06 = 1;
@@ -184,17 +178,19 @@ void CollisionDispatcher::FUN_00d3f000(void* bodyA, void* bodyB, void* volatile 
     FUN_00d3e510(bodyB, bodyA, input, &descriptor);
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128 {
+// Exe 0x00d3e330 FUN_00d3e330: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" void _mm_store_ss(float* p, __m128 a);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern "C" unsigned __int64 __rdtsc(void);
@@ -218,7 +214,7 @@ struct SphCap_Timer {
 };
 
 struct SphCap_Vector4 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 
 struct SphCap_Transform {
@@ -327,16 +323,16 @@ t->m_ticks = ticks; }
         group1.t1 = *(const SphCap_Vector4F*)&tin.m_kColumn1;
         group2.t2 = *(const SphCap_Vector4F*)&tin.m_kColumn2;
         group2.t3 = *(const SphCap_Vector4F*)&tin.m_vTranslation;
-        __m128 c0 = _mm_load_ps((const float*)&group1.t0);
-        __m128 c1 = _mm_load_ps((const float*)&group1.t1);
-        __m128 c2 = _mm_load_ps((const float*)&group2.t2);
-        __m128 c3 = _mm_load_ps((const float*)&group2.t3);
+        LocalM128 c0 = _mm_load_ps((const float*)&group1.t0);
+        LocalM128 c1 = _mm_load_ps((const float*)&group1.t1);
+        LocalM128 c2 = _mm_load_ps((const float*)&group2.t2);
+        LocalM128 c3 = _mm_load_ps((const float*)&group2.t3);
         const SphCap_Vector4* in = &capsule->m_kVertexA;
         for (int i = 1; i >= 0; i--) {
-            __m128 v = in[i].m_vComponents;
-            __m128 b = _mm_shuffle_ps(v, v, 0x55);
-            __m128 a = _mm_shuffle_ps(v, v, 0);
-            __m128 c = _mm_shuffle_ps(v, v, 0xaa);
+            LocalM128 v = in[i].m_vComponents;
+            LocalM128 b = _mm_shuffle_ps(v, v, 0x55);
+            LocalM128 a = _mm_shuffle_ps(v, v, 0);
+            LocalM128 c = _mm_shuffle_ps(v, v, 0xaa);
             points[i].m_vComponents = _mm_add_ps(_mm_add_ps(_mm_mul_ps(b, c1), _mm_mul_ps(a, c0)), _mm_add_ps(_mm_mul_ps(c, c2), c3));
         }
     }
@@ -345,9 +341,9 @@ t->m_ticks = ticks; }
         FUN_00d230e0(spherePos, points[0], points[1], closest);
 
         float radiusSum = capsule->m_fSphereRadius + sphere->m_fSphereRadius;
-        __m128 d = _mm_sub_ps(closest.m_kClosestPoint.m_vComponents, spherePos.m_vComponents);
+        LocalM128 d = _mm_sub_ps(closest.m_kClosestPoint.m_vComponents, spherePos.m_vComponents);
         d = _mm_mul_ps(d, d);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(d, d, 0x55), d);
+        LocalM128 s = _mm_add_ss(_mm_shuffle_ps(d, d, 0x55), d);
         s = _mm_add_ss(_mm_shuffle_ps(d, d, 0xaa), s);
         float rr = radiusSum * radiusSum;
         float distSq;

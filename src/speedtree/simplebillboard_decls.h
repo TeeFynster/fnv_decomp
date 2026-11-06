@@ -1,6 +1,8 @@
-// speedtree/simplebillboard_decls.h: declares RotationMatrix3x3, Vector3D, SimpleBillboard
+// speedtree/simplebillboard_decls.h: declares RotationMatrix3x3 and SimpleBillboard
 #ifndef SIMPLEBILLBOARD_DECLS_H
 #define SIMPLEBILLBOARD_DECLS_H
+
+#include "../../include/CVec3.h"
 
 class RotationMatrix3x3
 {
@@ -20,40 +22,29 @@ class RotationMatrix3x3
     }
     void FUN_00b273d0(float);
 };
-class Vector3D
+// These methods are inlined in this unit's original debug build.
+__forceinline CVec3::CVec3()
 {
-  public:
-    float x, y, z;
-    __forceinline Vector3D()
-    {
-        z = 0.0f;
-        y = 0.0f;
-        x = 0.0f;
-    }
-    __forceinline Vector3D(const float* p)
-    {
-        x = p[0];
-        y = p[1];
-        z = p[2];
-    }
-    __forceinline Vector3D(float a, float b, float c)
-    {
-        x = a;
-        y = b;
-        z = c;
-    }
-    __forceinline const float& operator[](int i) const
-    {
-        return (&x)[i];
-    }
-    __forceinline void Set(const float& a, const float& b, const float& c)
-    {
-        x = a;
-        y = b;
-        z = c;
-    }
-    Vector3D operator*(const RotationMatrix3x3&) const;
-};
+    z = 0.0f;
+    y = 0.0f;
+    x = 0.0f;
+}
+__forceinline CVec3::CVec3(float a, float b, float c)
+{
+    x = a;
+    y = b;
+    z = c;
+}
+__forceinline const float& CVec3::operator[](int i) const
+{
+    return (&x)[i];
+}
+__forceinline void CVec3::Set(const float& a, const float& b, const float& c)
+{
+    x = a;
+    y = b;
+    z = c;
+}
 class SimpleBillboard
 {
   public:
@@ -68,5 +59,5 @@ __forceinline void ReserveBillboardWorkspace()
 }
 #include <math.h>
 extern const double DAT_010a4d90;
-extern Vector3D DAT_011f8d08, DAT_011f8d14, DAT_011f8d20, DAT_011f8d2c;
+extern CVec3 DAT_011f8d08, DAT_011f8d14, DAT_011f8d20, DAT_011f8d2c;
 #endif

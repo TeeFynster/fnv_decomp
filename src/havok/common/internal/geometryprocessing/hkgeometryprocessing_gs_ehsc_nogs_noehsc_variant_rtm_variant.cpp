@@ -1,3 +1,10 @@
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/NiPoint3.h"
+#include "../../../../../include/hkSimdReal.h"
+#include "../../../../../include/hkVector4.h"
 
 // src/havok/common/internal/geometryprocessing/hkgeometryprocessing_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/geometryprocessing/hkgeometryprocessing_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
@@ -23,21 +30,7 @@ struct FUN_00dee6b0_Class
     float FUN_00dee6b0(int testFlag);
 };
 extern int DAT_010cd664;
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00dee6c0_cls
 {
     int m_vptr;
@@ -47,54 +40,45 @@ struct FUN_00dee6c0_cls
 #include <xmmintrin.h>
 #include <math.h>
 double __cdecl Atan2(float y, float x);
-struct Vector3
+void FUN_00de98c0(const NiPoint3* v, __m128* out);
+__forceinline hkSimdReal::hkSimdReal()
+{}
+__forceinline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x)
+{}
+__forceinline hkSimdReal::operator float() const
 {
-    float x, y, z;
-};
-void FUN_00de98c0(const Vector3* v, __m128* out);
-class VectorComponentValue
+    float s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
+__forceinline hkVector4::hkVector4(const hkVector4& o)
 {
-  public:
-    __forceinline VectorComponentValue()
-    {}
-    __forceinline VectorComponentValue(const __m128& x) : m_vValue(x)
-    {}
-    __forceinline operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-    __m128 m_vValue;
-};
-class hkVector4
+    _mm_store_ps(&x, _mm_load_ps(&o.x));
+}
+__forceinline void hkVector4::operator=(const hkVector4& o)
 {
-  public:
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setCross(const hkVector4& v1, const hkVector4& v2)
-    {
-        m_vComponents =
-            _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)),
-                                  _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2))),
-                       _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)),
-                                  _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1))));
-    }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        const __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
-        const __m128 z = _mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2));
-        return _mm_add_ss(z, xySum);
-    }
-    __m128 m_vComponents;
-};
+    _mm_store_ps(&x, _mm_load_ps(&o.x));
+}
+__forceinline void hkVector4::setCross(const hkVector4& v1, const hkVector4& v2)
+{
+    m_vComponents =
+        _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)),
+                              _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2))),
+                   _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)),
+                              _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1))));
+}
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    const __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
+    const __m128 z = _mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2));
+    return _mm_add_ss(z, xySum);
+}
+
 struct Interval
 {
-    VectorComponentValue m_kMinimumCorner;
-    VectorComponentValue m_kMaximumCorner;
+    hkSimdReal m_kMinimumCorner;
+    hkSimdReal m_kMaximumCorner;
 };
 static __forceinline void projectTriangle(const hkVector4* tri, const hkVector4& axis, Interval& out)
 {
@@ -102,7 +86,7 @@ static __forceinline void projectTriangle(const hkVector4* tri, const hkVector4&
     out.m_kMinimumCorner = out.m_kMaximumCorner;
     for (int i = 1; i < 3; i++)
     {
-        VectorComponentValue d = tri[i].dot3(axis);
+        hkSimdReal d = tri[i].dot3(axis);
         if (d < out.m_kMinimumCorner)
         {
             out.m_kMinimumCorner = d;
@@ -163,38 +147,14 @@ struct FourPointArray
     int size;
     int capacity;
 };
-void __cdecl FUN_00c908c0(AudioAllocator*, void*, int, int);
+void __cdecl FUN_00c908c0(hkMemoryAllocator*, void*, int, int);
 void __cdecl FUN_00dedcf0(const VertexArray& vertices, FourPointArray& output);
 
 #include <math.h>
 #include <xmmintrin.h>
 
-struct __declspec(align(16)) S_V4
-{
-    union
-    {
-        __m128 q;
-        float data[4];
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-    void FUN_00c7f700(const struct S_Rot* r, const S_V4* v);
-    S_V4()
-    {}
-    S_V4(const S_V4& o)
-    {
-        _mm_store_ps(&x, _mm_load_ps(&o.x));
-    }
-    S_V4& operator=(const S_V4& o)
-    {
-        _mm_store_ps(&x, _mm_load_ps(&o.x));
-        return *this;
-    }
-};
 
-static __forceinline void perpendicular(S_V4& out, const S_V4& src, S_V4& scratch)
+static __forceinline void perpendicular(hkVector4& out, const hkVector4& src, hkVector4& scratch)
 {
     float a = fabs(src.x);
     float b = fabs(src.y);
@@ -211,8 +171,8 @@ static __forceinline void perpendicular(S_V4& out, const S_V4& src, S_V4& scratc
         k = i;
     }
     _mm_store_ps(&out.x, _mm_setzero_ps());
-    out.data[j] = src.data[k];
-    out.data[k] = -src.data[j];
+    out.m_f[j] = src.m_f[k];
+    out.m_f[k] = -src.m_f[j];
     scratch = out;
     __m128 m = _mm_load_ps(&scratch.x);
     __m128 sq = _mm_mul_ps(m, m);
@@ -229,10 +189,10 @@ static __forceinline void perpendicular(S_V4& out, const S_V4& src, S_V4& scratc
 
 struct S_Rot
 {
-    S_V4 r0;
-    S_V4 r1;
-    S_V4 r2;
-    S_V4 translation;
+    hkVector4 r0;
+    hkVector4 r1;
+    hkVector4 r2;
+    hkVector4 translation;
 };
 
 struct S_Body
@@ -289,8 +249,8 @@ struct S_Body
     int unkc4;
     int unkc8;
     int unkcc;
-    S_V4 velocity;
-    S_V4 axis;  // 0xe0
+    hkVector4 velocity;
+    hkVector4 axis;  // 0xe0
     int unkf0;
     int unkf4;
     int unkf8;
@@ -350,15 +310,15 @@ struct S_Self
 
 struct AxisOwner : S_Self
 {
-    S_V4 FUN_00d76d90();
+    hkVector4 FUN_00d76d90();
 };
 
 // @fnv 0x00d76d90
-S_V4 AxisOwner::FUN_00d76d90()
+hkVector4 AxisOwner::FUN_00d76d90()
 {
-    S_V4 out;
+    hkVector4 out;
     _mm_store_ps(&out.x, _mm_setzero_ps());
-    S_V4 zero;
+    hkVector4 zero;
     _mm_store_ps(&zero.x, _mm_setzero_ps());
     S_Body* bd = body;
     switch (bd->type)
@@ -379,10 +339,10 @@ S_V4 AxisOwner::FUN_00d76d90()
             idx = (d[2] > d[0]) ? 0 : 2;
         else
             idx = (d[2] > d[1]) ? 1 : 2;
-        S_V4 v;
+        hkVector4 v;
         v = zero;
         ((float*)&v)[idx] = 1.0f;
-        out.FUN_00c7f700(&rot, &v);
+        out.FUN_00c7f700(reinterpret_cast<const hkRotation*>(&rot), &v);
         break;
     }
     }

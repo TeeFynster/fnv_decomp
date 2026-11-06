@@ -23,28 +23,16 @@ void FUN_00cb0da0(S_00cb0da0* p)
 //   +0x0c  m_0c  end - 0x20 (the reserved tail)
 //   +0x10  m_10  "the allocation is live" flag
 //
-// FUN_00c85750 hands back the thread's audio system; its +0x14 member is the
-// byte allocator whose virtual 4 allocates (through an in/out size) and whose
-// virtual 5 releases a block.
+// FUN_00c85750 is hkMemoryRouter::getInstancePtr(); the router's debug allocator
+// (+0x14) grows the buffer with bufAlloc (slot 3, in/out size) and releases it
+// with bufFree (slot 4).
 
-struct ByteAllocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void* Alloc(unsigned int* count);
-    virtual void Free(void* p, unsigned int size);
-};
+#include "../../../../../include/hkMemoryAllocator.h"
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    ByteAllocator* m_14;
-};
+// hkMemoryRouter (Havok 7.1 Common/Base/Memory/Router/hkMemoryRouter.h): m_stack (3 words), then the temp, heap,
+// debug, solver and global allocators and m_userData (0x24 bytes). No shared header has it (the hkMemoryRouter.h
+// and hkMemoryRouter.h stand-ins model only part of it).
+#include "../../../../../include/hkMemoryRouter.h"
 
 struct SpawnedBuffer
 {
@@ -55,7 +43,7 @@ struct SpawnedBuffer
     unsigned char m_10;
 };
 
-char* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();  // hkMemoryRouter::getInstancePtr (TLS slot read)
 void FUN_00cb0df0(SpawnedBuffer* buf);
 
 // @fnv 0x00cb0e50
@@ -71,15 +59,15 @@ void ResizeBuffer(SpawnedBuffer* pBuffer, int iSize)
     {
         if (begin != 0 && pBuffer->m_10 != 0)
         {
-            AllocHolder* h = (AllocHolder*)FUN_00c85750();
-            h->m_14->Free(begin, end - begin);
+            hkMemoryRouter* h = FUN_00c85750();
+            h->m_debug->bufFree(begin, end - begin);
         }
         pBuffer->m_10 = 1;
-        AllocHolder* h2 = (AllocHolder*)FUN_00c85750();
-        ByteAllocator* pAllocator = h2->m_14;
+        hkMemoryRouter* h2 = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = h2->m_debug;
         {
-            unsigned int count = iSize;
-            char* p = (char*)pAllocator->Alloc(&count);
+            int count = iSize;
+            char* p = (char*)pAllocator->bufAlloc(count);
             pBuffer->m_00 = p;
             pBuffer->m_04 = p;
             pBuffer->m_08 = p + count;
@@ -96,24 +84,9 @@ void ResizeBuffer(SpawnedBuffer* pBuffer, int iSize)
 namespace fnv_00cb0db0 {
 extern DWORD DAT_0126835c;
 
-class SpawnedAllocator
-{
-  public:
-    virtual void vSlot0();
-    virtual void* Alloc(unsigned int size);
-};
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    SpawnedAllocator* m_14;
-};
 
-AllocHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct SpawnedObject
 {
@@ -124,13 +97,13 @@ struct SpawnedObject
     unsigned char m_10;
 };
 
-// Allocates a SpawnedObject via the AllocHolder's SpawnedAllocator, stores it in TLS, and zeroes its fields.
+// Allocates a SpawnedObject from the router's debug allocator (blockAlloc), stores it in TLS, and zeroes its fields.
 // @fnv 0x00cb0db0
 void __cdecl FUN_00cb0db0()
 {
-    AllocHolder* holder = FUN_00c85750();
-    SpawnedAllocator* alloc = holder->m_14;
-    SpawnedObject* obj = (SpawnedObject*)alloc->Alloc(0x14);
+    hkMemoryRouter* holder = FUN_00c85750();
+    hkMemoryAllocator* alloc = holder->m_debug;
+    SpawnedObject* obj = (SpawnedObject*)alloc->blockAlloc(0x14);
     TlsSetValue(DAT_0126835c, obj);
     obj->m_10 = 0;
     obj->m_00 = 0;
@@ -143,26 +116,9 @@ void __cdecl FUN_00cb0db0()
 namespace fnv_00cb0df0 {
 extern DWORD DAT_0126835c;
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize);
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, int aiSize);
-};
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    AudioAllocator* m_pAllocator;
-};
 
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct GrowBuffer
 {
@@ -173,7 +129,7 @@ struct GrowBuffer
     char m_bOwned;
 };
 
-// Frees the owned record buffer and the TLS audio holder block, then clears the TLS slot.
+// Frees the owned record buffer (bufFree) and the TLS block (blockFree) through the debug allocator, then clears the TLS slot.
 // @fnv 0x00cb0df0
 void __cdecl FUN_00cb0df0(GrowBuffer* apBuffer)
 {
@@ -183,14 +139,14 @@ void __cdecl FUN_00cb0df0(GrowBuffer* apBuffer)
     if (pBegin != 0 && apBuffer->m_bOwned != 0)
     {
         char* pEnd = apBuffer->m_pRecordEnd;
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->FreeArray(pBegin, (int)(pEnd - pBegin));
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = pHolder->m_debug;
+        pAllocator->bufFree(pBegin, (int)(pEnd - pBegin));
     }
 
-    AudioHolder* pHolder2 = FUN_00c85750();
-    AudioAllocator* pAllocator2 = pHolder2->m_pAllocator;
-    pAllocator2->Free(pThreadData, 0x14);
+    hkMemoryRouter* pHolder2 = FUN_00c85750();
+    hkMemoryAllocator* pAllocator2 = pHolder2->m_debug;
+    pAllocator2->blockFree(pThreadData, 0x14);
 
     TlsSetValue(DAT_0126835c, 0);
 }

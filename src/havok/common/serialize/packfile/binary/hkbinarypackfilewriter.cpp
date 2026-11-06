@@ -1,6 +1,11 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/common/serialize/packfile/binary/hkbinarypackfilewriter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/packfile/binary/hkbinarypackfilewriter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/Pair.h"
+
 
 struct GlobalObjectO2_00d472a0
 {
@@ -329,10 +334,10 @@ void FUN_00dbd820_cls::AppendPair(FUN_00dbd820_pair aPair)
     FUN_00dbd820_pair entry;
     entry.first = aPair.first;
     entry.second = *(volatile unsigned int*)&aPair.second;
-    void* holder = FUN_00c85750();
+    hkMemoryRouter* holder = (hkMemoryRouter*)FUN_00c85750();
     if (m_iElementCount == (int)(m_flags & 0x3fffffffu))
     {
-        ResizeAudioStream(*(void**)((char*)holder + 0x10), this, 8);
+        ResizeAudioStream(holder->m_heap, this, 8);
     }
     int idx = m_iElementCount;
     FUN_00dbd820_pair* slot = m_data + idx;
@@ -410,22 +415,8 @@ class BDBD910Allocator
     virtual void ReturnMemory(void* pvData, int iNumBytes);
 };
 
-class BDBD910Router
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    BDBD910Allocator* m_pkHeap;
 
-    BDBD910Allocator& heap()
-    {
-        return *m_pkHeap;
-    }
-};
-
-BDBD910Router* BDBD910GetRouter();
+hkMemoryRouter* BDBD910GetRouter();
 
 template <class T> __forceinline void BDBD910Destruct(T* pkData, int iCount)
 {
@@ -433,24 +424,17 @@ template <class T> __forceinline void BDBD910Destruct(T* pkData, int iCount)
         pkData[i].~T();
 }
 
-template <class T> class BDBD910Array
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline ~BDBD910Array()
-    {
-        BDBD910Allocator& kAlloc = BDBD910GetRouter()->heap();
+        BDBD910Allocator& kAlloc = (BDBD910Allocator&)BDBD910GetRouter()->heap();
         BDBD910Destruct(m_data, m_iElementCount);
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             kAlloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-};
+    
+}
 
 struct BDBD910Entry48
 {
@@ -521,12 +505,12 @@ class FUN_00dbd910_cls
     ~FUN_00dbd910_cls() throw();
 
     int unk00;
-    BDBD910Array<BDBD910Entry48> m_kArray04;
-    BDBD910Array<BDBD910Entry8> m_kArray10;
+    hkArray<BDBD910Entry48> m_kArray04;
+    hkArray<BDBD910Entry8> m_kArray10;
     int unk1C;
     BDBD910Member20 m_kMember20;
     BDBD910Member30 m_kMember30;
-    BDBD910Array<BDBD910Entry52> m_kArray40;
+    hkArray<BDBD910Entry52> m_kArray40;
 };
 
 // Destructor for the container class; the member arrays and members are destroyed automatically by their own destructors.
@@ -665,23 +649,11 @@ struct S_00db8670_Heap
     virtual void ReturnMemory(void* p, int numBytes);
 };
 
-struct S_00db8670_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00db8670_Heap* m_pStreamAllocator;
-    S_00db8670_Heap& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
 
 extern void* __cdecl FUN_00c85750();
-__forceinline S_00db8670_Router& S_GetRouter() throw()
+__forceinline hkMemoryRouter& S_GetRouter() throw()
 {
-    return *(S_00db8670_Router*)FUN_00c85750();
+    return *(hkMemoryRouter*)FUN_00c85750();
 }
 void __cdecl FUN_00c908c0(S_00db8670_Heap& alloc, void* array, int reqCapacity, int sizeElem) throw();
 
@@ -691,17 +663,17 @@ template <typename T> __forceinline void S_ConstructWithCopy(T* p, int n, const 
         p[i] = fill;
 }
 
-template <typename T> struct S_00db8670_Array
-{
+template <typename T> struct S_00db8670_ArrayLocalForm
+{ // local form of hkArray: 0x00db8670 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    S_00db8670_Array() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
+    S_00db8670_ArrayLocalForm() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {}
-    ~S_00db8670_Array() throw()
+    ~S_00db8670_ArrayLocalForm() throw()
     {
-        _clearAndDeallocate(S_GetRouter().heap());
+        _clearAndDeallocate((S_00db8670_Heap&)S_GetRouter().heap());
     }
 
     int GetLogicalSize() const throw()
@@ -754,15 +726,15 @@ template <typename T> struct S_00db8670_Array
     }
     void SetSizeAndGrow(int n) throw()
     {
-        _setSize(S_GetRouter().heap(), n);
+        _setSize((S_00db8670_Heap&)S_GetRouter().heap(), n);
     }
     void SetSizeAndGrow(int n, const T& fill) throw()
     {
-        _setSize(S_GetRouter().heap(), n, fill);
+        _setSize((S_00db8670_Heap&)S_GetRouter().heap(), n, fill);
     }
 
     // copy assignment (out of line)
-    void SwapThreeInts(const S_00db8670_Array& other) throw();
+    void SwapThreeInts(const S_00db8670_ArrayLocalForm& other) throw();
 };
 
 struct S_00db8670_MapBase64
@@ -787,11 +759,11 @@ struct S_00db8670_Map64 : S_00db8670_MapBase64
 {
     S_00db8670_Map64() throw()
     {
-        ResizeToFit(S_GetRouter().heap(), 0);
+        ResizeToFit((S_00db8670_Heap&)S_GetRouter().heap(), 0);
     }
     ~S_00db8670_Map64() throw()
     {
-        FUN_00cb1e40(S_GetRouter().heap());
+        FUN_00cb1e40((S_00db8670_Heap&)S_GetRouter().heap());
     }
 
     void clear() throw()
@@ -804,8 +776,8 @@ struct S_00db8670_Map64 : S_00db8670_MapBase64
     }
     void insert(S_00db8670_Uint64 key, const int& val) throw()
     {
-        S_00db8670_Router& router = S_GetRouter();
-        InsertKeyValue(router.heap(), key, val);
+        hkMemoryRouter& router = S_GetRouter();
+        InsertKeyValue((S_00db8670_Heap&)router.heap(), key, val);
     }
     S_00db8670_Uint64 FindValueForKey(S_00db8670_Uint64 key, S_00db8670_Uint64 def) const throw()
     {
@@ -815,11 +787,6 @@ struct S_00db8670_Map64 : S_00db8670_MapBase64
 
 struct S_00db8670_MapBaseUlong
 {
-    struct Pair
-    {
-        S_00db8670_Ulong key;
-        S_00db8670_Ulong val;
-    };
     Pair* m_kPrimitiveElement;
     int m_iCapacityFlags;
     int m_iPairCount;
@@ -838,7 +805,7 @@ struct S_00db8670_MapBaseUlong
         int i;
         for (i = 0; i <= m_iPairCount; i++)
         {
-            if (m_kPrimitiveElement[i].key != S_00db8670_Ulong(-1))
+            if (m_kPrimitiveElement[i].a != S_00db8670_Ulong(-1))
             {
                 break;
             }
@@ -850,7 +817,7 @@ struct S_00db8670_MapBaseUlong
         int i;
         for (i = it + 1; i <= m_iPairCount; i++)
         {
-            if (m_kPrimitiveElement[i].key != S_00db8670_Ulong(-1))
+            if (m_kPrimitiveElement[i].a != S_00db8670_Ulong(-1))
             {
                 break;
             }
@@ -863,7 +830,7 @@ struct S_00db8670_MapBaseUlong
     }
     S_00db8670_Ulong GetIteratorKey(int it) const throw()
     {
-        return m_kPrimitiveElement[it].key;
+        return m_kPrimitiveElement[it].a;
     }
 };
 
@@ -871,11 +838,11 @@ struct S_00db8670_MapUlong : S_00db8670_MapBaseUlong
 {
     S_00db8670_MapUlong() throw()
     {
-        EnsureCapacity(S_GetRouter().heap(), 0);
+        EnsureCapacity((S_00db8670_Heap&)S_GetRouter().heap(), 0);
     }
     ~S_00db8670_MapUlong() throw()
     {
-        ProcessArgument(S_GetRouter().heap());
+        ProcessArgument((S_00db8670_Heap&)S_GetRouter().heap());
     }
 };
 
@@ -887,7 +854,7 @@ struct S_00db8670_ChainValue
 
 struct S_00db8670_MultiMap64
 {
-    S_00db8670_Array<S_00db8670_ChainValue> m_kChainValues;
+    S_00db8670_ArrayLocalForm<S_00db8670_ChainValue> m_kChainValues;
     S_00db8670_Map64 m_pHashFunction;
     int m_iFreeListHead;
 
@@ -909,7 +876,7 @@ struct S_00db8670_MultiMap64
 
 struct S_00db8670_MultiMapUlong
 {
-    S_00db8670_Array<S_00db8670_ChainValue> m_kChainValues;
+    S_00db8670_ArrayLocalForm<S_00db8670_ChainValue> m_kChainValues;
     S_00db8670_MapUlong m_pHashFunction;
     int m_iFreeListHead;
 
@@ -935,7 +902,7 @@ __declspec(noinline) void S_00db8670_MultiMap64::Insert(S_00db8670_Uint64 key, c
     int newHead = AllocateSlot();
     m_kChainValues[newHead].value = value;
     m_kChainValues[newHead].next = oldHead;
-    m_pHashFunction.InsertKeyValue(S_GetRouter().heap(), key, newHead);
+    m_pHashFunction.InsertKeyValue((S_00db8670_Heap&)S_GetRouter().heap(), key, newHead);
 }
 __declspec(noinline) void S_00db8670_MultiMapUlong::FUN_00dc9ec0(S_00db8670_Ulong key, const int& value) throw()
 {
@@ -943,7 +910,7 @@ __declspec(noinline) void S_00db8670_MultiMapUlong::FUN_00dc9ec0(S_00db8670_Ulon
     int newHead = AllocateSlot();
     m_kChainValues[newHead].value = value;
     m_kChainValues[newHead].next = oldHead;
-    m_pHashFunction.FUN_00cb1870(S_GetRouter().heap(), key, newHead);
+    m_pHashFunction.FUN_00cb1870((S_00db8670_Heap&)S_GetRouter().heap(), key, newHead);
 }
 
 struct S_00db8670_StringMapOps
@@ -1009,16 +976,16 @@ __declspec(noinline) int __cdecl FUN_00db7cb0(const S_00db8670_PatchInfo* p) thr
 }
 int __cdecl FUN_00cb0fa0(const char* a, const char* b) throw();
 int __cdecl FUN_00db7e70(int from, int to, const S_00db8670_MultiMapUlong& deps, S_00db8670_MapUlong& visited) throw();
-int __cdecl FUN_00db83c0(int index, S_00db8670_Array<int>& order, const S_00db8670_MultiMapUlong& deps, int next,
-                         S_00db8670_Array<int>& stack,
-                         const S_00db8670_Array<const S_00db8670_PatchInfo*>& patches) throw();
+int __cdecl FUN_00db83c0(int index, S_00db8670_ArrayLocalForm<int>& order, const S_00db8670_MultiMapUlong& deps, int next,
+                         S_00db8670_ArrayLocalForm<int>& stack,
+                         const S_00db8670_ArrayLocalForm<const S_00db8670_PatchInfo*>& patches) throw();
 
 struct S_00db8670_PatchManager
 {
     int unk00;
     int unk04;
     S_00db8670_UidFromClassVersion* m_pUidFromClassVersion;
-    S_00db8670_Array<const S_00db8670_PatchInfo*> m_kPatchInfos;
+    S_00db8670_ArrayLocalForm<const S_00db8670_PatchInfo*> m_kPatchInfos;
     S_00db8670_Map64 m_kPatchInfoIndexMap;
 
     int FindEntry(S_00db8670_Uint64 uid, int flag) throw();
@@ -1182,11 +1149,11 @@ int S_00db8670_PatchManager::FUN_00db8670() throw()
         }
     }
 
-    S_00db8670_Array<const S_00db8670_PatchInfo*> sorted;
+    S_00db8670_ArrayLocalForm<const S_00db8670_PatchInfo*> sorted;
     sorted.SwapThreeInts(m_kPatchInfos);
-    S_00db8670_Array<int> newIndex;
+    S_00db8670_ArrayLocalForm<int> newIndex;
     newIndex.SetSizeAndGrow(sorted.GetLogicalSize(), -1);
-    S_00db8670_Array<int> stack;
+    S_00db8670_ArrayLocalForm<int> stack;
     int next = 0;
     for (int i = 0; i < sorted.GetLogicalSize(); i++)
     {
@@ -1355,18 +1322,6 @@ struct S00dbcdd0_Alloc
     virtual void Free(void* p, unsigned int n);
 };
 
-struct S00dbcdd0_Holder
-{
-    int u00;
-    int u04;
-    int u08;
-    int u0C;
-    S00dbcdd0_Alloc* m_pAllocator;
-    S00dbcdd0_Alloc& heap()
-    {
-        return *m_pAllocator;
-    }
-};
 
 struct S00dbcdd0_Arr
 {
@@ -1403,7 +1358,7 @@ static __declspec(noinline) void FUN_00dbcdd0(S00dbcdd0_Obj* obj, unsigned int c
     arr.m_data = &arr.u0;
     arr.m_iElementCount = 0;
     arr.m_capFlags = 0x80000020;
-    S00dbcdd0_Alloc& heap = ((S00dbcdd0_Holder*)FUN_00c85750())->heap();
+    S00dbcdd0_Alloc& heap = (S00dbcdd0_Alloc&)((hkMemoryRouter*)FUN_00c85750())->heap();
     int cap = (int)(arr.m_capFlags & 0x3fffffff);
     if (cap < (int)count)
     {
@@ -1421,7 +1376,7 @@ static __declspec(noinline) void FUN_00dbcdd0(S00dbcdd0_Obj* obj, unsigned int c
     {
         obj->unk10(arr.m_data, count - r);
     }
-    S00dbcdd0_Alloc& heap2 = ((S00dbcdd0_Holder*)FUN_00c85750())->heap();
+    S00dbcdd0_Alloc& heap2 = (S00dbcdd0_Alloc&)((hkMemoryRouter*)FUN_00c85750())->heap();
     unsigned int capFlags = arr.m_capFlags;
     arr.m_iElementCount = 0;
     if ((capFlags & 0x80000000u) == 0)
@@ -1442,19 +1397,7 @@ struct S_00dbd7f0_Allocator
     virtual void vfn_04();
     virtual void ReleaseBlock(void* p, int numBytes);
 };
-struct S_00dbd7f0_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00dbd7f0_Allocator* m_pStreamAllocator;
-    S_00dbd7f0_Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-S_00dbd7f0_Router* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 
 struct S_00dbd7f0_RefObj
 {
@@ -1464,7 +1407,7 @@ struct S_00dbd7f0_RefObj
     void operator delete(void* p)
     {
         S_00dbd7f0_RefObj* b = static_cast<S_00dbd7f0_RefObj*>(p);
-        FUN_00c85750()->heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        ((S_00dbd7f0_Allocator&)FUN_00c85750()->heap()).ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 
@@ -1690,18 +1633,6 @@ struct ReserveAllocator
     virtual void v0c();
     virtual void release(void*, int);
 };
-struct ReserveRouter
-{
-    int a00;
-    int a04;
-    int a08;
-    int a0c;
-    ReserveAllocator* allocator;
-    ReserveAllocator& heap()
-    {
-        return *allocator;
-    }
-};
 template <class T> __forceinline void ArrayBase<T>::reserve(ReserveAllocator& allocator, int wanted)
 {
     int cap = capacity & 0x3fffffff;
@@ -1713,7 +1644,7 @@ template <class T> __forceinline void ArrayBase<T>::reserve(ReserveAllocator& al
 }
 template <class T> __forceinline void ArrayBase<T>::resize(int wanted, const int& value)
 {
-    reserve(((ReserveRouter*)FUN_00c85750())->heap(), wanted);
+    reserve((ReserveAllocator&)((hkMemoryRouter*)FUN_00c85750())->heap(), wanted);
     int remaining = wanted - size;
     T* fill = data + size;
     for (int n = 0; n < remaining; n++)
@@ -1722,12 +1653,12 @@ template <class T> __forceinline void ArrayBase<T>::resize(int wanted, const int
 }
 template <class T> __forceinline void ArrayBase<T>::resize(int wanted)
 {
-    reserve(((ReserveRouter*)FUN_00c85750())->heap(), wanted);
+    reserve((ReserveAllocator&)((hkMemoryRouter*)FUN_00c85750())->heap(), wanted);
     size = wanted;
 }
 template <class T> __forceinline void ArrayBase<T>::clear()
 {
-    ReserveAllocator& allocator = ((ReserveRouter*)FUN_00c85750())->heap();
+    ReserveAllocator& allocator = (ReserveAllocator&)((hkMemoryRouter*)FUN_00c85750())->heap();
     size = 0;
     if ((capacity & 0x80000000) == 0)
         allocator.release(data, (capacity & 0x3fffffff) * sizeof(T));
@@ -1736,7 +1667,7 @@ template <class T> __forceinline void ArrayBase<T>::clear()
 }
 template <class T> __forceinline void ArrayBase<T>::releaseOnly()
 {
-    ReserveAllocator& allocator = ((ReserveRouter*)FUN_00c85750())->heap();
+    ReserveAllocator& allocator = (ReserveAllocator&)((hkMemoryRouter*)FUN_00c85750())->getHeap();
     size = 0;
     if ((capacity & 0x80000000) == 0)
         allocator.release(data, (capacity & 0x3fffffff) * sizeof(T));
@@ -2086,18 +2017,6 @@ void* FUN_00c85750();
 extern void __cdecl ResizeAudioStream(void* allocator, void* vec, unsigned int elemSize);
 extern void __cdecl FUN_00c908c0(void* a, void* vec, int n, int elem);
 extern int __cdecl FUN_00cb10d0(void* p);
-struct Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    BDBD910Allocator* heap;
-    __forceinline BDBD910Allocator& getHeap()
-    {
-        return *heap;
-    }
-};
 extern void* __cdecl memset(void*, int, unsigned int);
 extern "C" void _ReadWriteBarrier();
 
@@ -2110,7 +2029,7 @@ static __declspec(noinline) void FUN_00dbcdd0(ClockObj* obj0, unsigned int count
     arr.m_data = &arr.u0;
     arr.m_iElementCount = 0;
     arr.m_capFlags = 0x80000020;
-    S00dbcdd0_Alloc& heap = ((S00dbcdd0_Holder*)FUN_00c85750())->heap();
+    S00dbcdd0_Alloc& heap = (S00dbcdd0_Alloc&)((hkMemoryRouter*)FUN_00c85750())->heap();
     int cap = (int)(arr.m_capFlags & 0x3fffffff);
     if (cap < (int)count)
     {
@@ -2133,7 +2052,7 @@ static __declspec(noinline) void FUN_00dbcdd0(ClockObj* obj0, unsigned int count
     {
         obj->unk10(arr.m_data, count - r);
     }
-    S00dbcdd0_Alloc& heap2 = ((S00dbcdd0_Holder*)FUN_00c85750())->heap();
+    S00dbcdd0_Alloc& heap2 = (S00dbcdd0_Alloc&)((hkMemoryRouter*)FUN_00c85750())->heap();
     unsigned int capFlags = arr.m_capFlags;
     arr.m_iElementCount = 0;
     if ((capFlags & 0x80000000u) == 0)
@@ -2177,7 +2096,7 @@ template <class T> __forceinline void Construct(T* p, int count)
 }
 __forceinline void Resize52(Arr52& a, int n)
 {
-    BDBD910Allocator& alloc = ((Router*)FUN_00c85750())->getHeap();
+    BDBD910Allocator& alloc = (BDBD910Allocator&)((hkMemoryRouter*)FUN_00c85750())->heap();
     Reserve(a, alloc, n, 52);
     Destroy(a.m_data + n, a.m_iElementCount - n);
     Construct(a.m_data + a.m_iElementCount, n - a.m_iElementCount);
@@ -2185,7 +2104,7 @@ __forceinline void Resize52(Arr52& a, int n)
 }
 __forceinline void Resize8(Arr8& a, int n)
 {
-    BDBD910Allocator& alloc = ((Router*)FUN_00c85750())->getHeap();
+    BDBD910Allocator& alloc = (BDBD910Allocator&)((hkMemoryRouter*)FUN_00c85750())->heap();
     Reserve(a, alloc, n, 8);
     a.m_iElementCount = n;
 }
@@ -2199,10 +2118,10 @@ template <unsigned Bytes> __forceinline void CopyWords(void* dst, const void* sr
 }
 
 typedef void* MapIter;
-__forceinline Pair8& ExpandOne(Arr8& a, Router& router)
+__forceinline Pair8& ExpandOne(Arr8& a, hkMemoryRouter& router)
 {
     if (a.m_iElementCount == (a.m_cap & 0x3fffffff))
-        ResizeAudioStream(router.heap, &a, 8);
+        ResizeAudioStream(router.m_heap, &a, 8);
     return a.m_data[a.m_iElementCount++];
 }
 __forceinline void RemoveAt(Vec<Record16>& a, int index, int byteOffset)
@@ -2347,7 +2266,7 @@ void ThisCls::FUN_00dbcea0(Src* apSrc)
                     if (found != 0)
                     {
                         Record16* elem = (Record16*)((char*)work.a2.m_data + objectBytes);
-                        Pair8* out = &ExpandOne(work.a4, *(Router*)FUN_00c85750());
+                        Pair8* out = &ExpandOne(work.a4, *(hkMemoryRouter*)FUN_00c85750());
                         out->p0 = elem->value - stats->start;
                         out->p1 = found;
                         RemoveAt(work.a2, jfix, objectBytes);
@@ -2486,7 +2405,7 @@ void Writer::FUN_00dbc7a0(Context* context)
 {
     HeaderArray* headers = &context->headers;
     int count = tagCount;
-    BDBD910Allocator& allocator = ((Router*)FUN_00c85750())->getHeap();
+    BDBD910Allocator& allocator = (BDBD910Allocator&)((hkMemoryRouter*)FUN_00c85750())->heap();
     if (headers->getCapacity() < count)
     {
         int capacity = 2 * headers->getCapacity();

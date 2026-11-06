@@ -1,208 +1,63 @@
-// fallout/ai/highprocess.h: declares BaseProcess, HighProcess
+// fallout/ai/highprocess.h: definitions for shared HighProcess declarations
 #ifndef FNV_LUNA_HIGH_PROCESS_H
 #define FNV_LUNA_HIGH_PROCESS_H
 
-
+#include "../../../include/BaseProcess.h"
+#include "../../../include/HighProcess.h"
 #include "highprocess_packet_decls.h"
 
-class MobileObject;
-class TESIdleForm;
-class MuzzleFlash;
-class DetectionEvent;
-class LipSyncAnimation;
-class DialogueItem;
-class TESObjectREFR;
-typedef int DIALOGUE_EMOTION;
-class BaseProcess
-{
-  public:
-    enum POSTANIM_ACTION
-    {
-        PostAnimNone = 0
-    };
-    enum FADE_STATE
-    {
-        FadeNone = 0
-    };
-};
-
-class HighProcess
-{
-  public:
-    unsigned char layoutGap_0[564];
-    float m_kTenthUnshownMember;
-    unsigned char layoutGap_238[144];
-    float fSocialTalkTimer;
-    unsigned char layoutGap_2cc[44];
-    float m_fSocialTalkDelay;
-    unsigned char layoutGap_2fc[16];
-    TESObjectREFR* m_pSocialTalkTarget;
-    float m_fReferenceTimer;
-    SoundPlaybackHandle AudioPlaybackHandle[2];
-    bool iProcessIndex;
-    unsigned char layoutGap_32d[3];
-    float m_fFirstProcessValue;
-    float m_fSecondProcessValue;
-    unsigned char layoutGap_338[4];
-    float m_fAwarenessValue;
-    unsigned char layoutGap_340[8];
-    bool m_bAlertState;
-    bool bDetectAlert;
-    unsigned char layoutGap_34a[2];
-    float fAwarePlayerTimer;
-    TESIdleForm* m_pCurrentIdleForm;
-    unsigned char layoutGap_354[16];
-    bool bTalkingtoPC;
-    unsigned char layoutGap_365[7];
-    int m_iProcessState;
-    MobileObject* m_pSavedReference;
-    bool m_bSavedReferenceFlag;
-    bool m_bDialogueFlag;
-    unsigned char layoutGap_376[42];
-    bool bMovementStoped;
-    unsigned char layoutGap_3a1[24];
-    bool iLocalState;
-    unsigned char layoutGap_3ba[6];
-    float m_fSecondLipSyncParameter;
-    float m_fLipSyncTimer;
-    float m_fLipSyncValue;
-    LipSyncAnimation* pLipSyncAnimation;
-    bool m_bLipSyncEnabled;
-    bool m_bLipSyncPlaying;
-    unsigned char layoutGap_3d2[2];
-    MuzzleFlash* m_pMuzzleFlash;
-    unsigned char layoutGap_3d8[4];
-    DetectionEvent* m_pDetectionEvent;
-    bool m_bTrackedReferenceFlag;
-    unsigned char layoutGap_3e1[7];
-    BaseProcess::FADE_STATE m_iSecondSerializedValue;
-    unsigned char layoutGap_3ec[44];
-    float fHeadTrackChangeTimer;
-    TESObjectREFR* coordinate;
-    bool m_bDetectionFlag;
-    unsigned char layoutGap_421[3];
-    BaseProcess::POSTANIM_ACTION ePostAnimAction;
-    unsigned char layoutGap_428[24];
-    float m_fSecondReferenceValue;
-    bool iCount;
-    bool pTargetObject;
-    unsigned char layoutGap_446[14];
-    DialogueItem* pSubtitleItem;
-    unsigned char layoutGap_458[1];
-    bool m_bSubtitleActive;
-
-    void SetActorSoundHandle(ACTOR_SOUND_HANDLE index, SoundPlaybackHandle handle);
-    SoundPlaybackHandle GetActorSoundHandle(ACTOR_SOUND_HANDLE index);
-    void StopAllActorSounds();
-    float GetProcessBlendAmount(void);
-    BaseProcess::POSTANIM_ACTION GetPostAnimationAction(void);
-    MobileObject* GetMobileObject(void);
-    float GetProcessBlendWeight(void);
-    bool IsDetectionEnabled(void);
-    TESIdleForm* GetSelectedIdleForm(void);
-    BaseProcess::FADE_STATE GetCurrentFadeState(void);
-    void ClearPostAnimActions(void);
-    MuzzleFlash* GetMuzzleFlash(void);
-    float GetLightLevel(void);
-    void SetLightLevel(float value);
-    void SetFloatProperty(float value);
-    float GetCurrentAlpha(void);
-    float GetRadiationRate(void);
-    void SetRadiationRate(float value);
-    bool IsProcessStateActive(void);
-    float GetControllerPhase(void);
-    void UpdateActorLighting(float value);
-    bool IsAsleep(void);
-    float GetDetectionStrength(void);
-    bool IsCurrentlyDetected(void);
-    bool IsDetecting(void);
-    bool HasAssignedAnimation(void);
-    bool IsMovementStopped(void);
-    float GetDetectionProgress(void);
-    void SetDetectionLevel(float value);
-    DIALOGUE_EMOTION GetCurrentDialogueEmotion(void);
-    bool GetPlantedExplosive(void);
-    float UpdateProcessTiming(void);
-    DetectionEvent* FindDetectionEventForActor(int index);
-    void SetEssentialFlag(bool value);
-    void SetAnimationEnabled(bool value);
-    float GetFirstProcessFloat(void);
-    void SetCurrentDialogueItem(DialogueItem* value);
-    void SetIdleForm(TESIdleForm* value);
-    void ResetMovementState(void);
-    void SetSubtitleActive(bool value);
-    void SetActorProcessEnabled(bool value);
-    LipSyncAnimation* GetLipSync(void);
-    bool IsActorTalking(void);
-    void SetDialogueState(bool value);
-    void SetDialogueEmotion(DIALOGUE_EMOTION value);
-    void AssignLipSyncAnimation(LipSyncAnimation* value);
-    void SetLipSyncValue(float value);
-    void SetTalkingState(bool value);
-    void UpdateActorProcess(float value);
-    TESObjectREFR* GetRelatedReference(void);
-    TESObjectREFR* GetPreviousReference(void);
-    bool HasCombatStarted(void);
-    bool IsCombatTargetValid(void);
-    void SetActorTargetReference(TESObjectREFR* value);
-    bool CanFireWeapon(void);
-    DialogueItem* GetCurrentDialogueItem(void);
-    void SetCombatEnabled(bool value);
-    void SetCombatAlerted(bool value);
-};
-
 // @fnv 0x008d9090
-float HighProcess::GetProcessBlendAmount(void)
+float HighProcess::GetProcessBlendAmount() const
 {
     return fAwarePlayerTimer;
 }
 
 // @fnv 0x004727d0
-BaseProcess::POSTANIM_ACTION HighProcess::GetPostAnimationAction(void)
+unsigned int HighProcess::GetPostAnimationAction() const
 {
-    return ePostAnimAction;
+    return m_ePendingPostAnimationActions;
 }
 
 // @fnv 0x0051f510
-MobileObject* HighProcess::GetMobileObject(void)
+MobileObject* HighProcess::GetMobileObject() const
 {
     return m_pSavedReference;
 }
 
 // @fnv 0x008d94b0
-float HighProcess::GetProcessBlendWeight(void)
+float HighProcess::GetProcessBlendWeight() const
 {
     return m_fLipSyncTimer;
 }
 
 // @fnv 0x008d9530
-bool HighProcess::IsDetectionEnabled(void)
+bool HighProcess::IsDetectionEnabled() const
 {
-    return bTalkingtoPC;
+    return m_bSpellState;
 }
 
 // @fnv 0x006214b0
-TESIdleForm* HighProcess::GetSelectedIdleForm(void)
+TESIdleForm* HighProcess::GetSelectedIdleForm() const
 {
-    return m_pCurrentIdleForm;
+    return iAnimationStateCode;
 }
 
 // @fnv 0x008d9610
-BaseProcess::FADE_STATE HighProcess::GetCurrentFadeState(void)
+BaseProcess::FadeState HighProcess::GetCurrentFadeState() const
 {
-    return m_iSecondSerializedValue;
+    return (BaseProcess::FadeState)m_iSecondSerializedValue;
 }
 
 // @fnv 0x008d96b0
-void HighProcess::ClearPostAnimActions(void)
+void HighProcess::ClearPostAnimActions()
 {
-    ePostAnimAction = BaseProcess::PostAnimNone;
+    m_ePendingPostAnimationActions = BaseProcess::POSTANIM_ACTION_NONE;
 }
 
 // @fnv 0x008d9300
-MuzzleFlash* HighProcess::GetMuzzleFlash(void)
+NiObjectNET* HighProcess::GetMuzzleFlash() const
 {
-    return m_pMuzzleFlash;
+    return (NiObjectNET*)m_pMuzzleFlash;
 }
 
 // @fnv 0x008d94f0
@@ -224,13 +79,13 @@ void HighProcess::SetFloatProperty(float value)
 }
 
 // @fnv 0x008d95b0
-float HighProcess::GetCurrentAlpha(void)
+float HighProcess::GetCurrentAlpha() const
 {
     return m_fSecondLipSyncParameter;
 }
 
 // @fnv 0x008d9010
-float HighProcess::GetRadiationRate(void)
+float HighProcess::GetRadiationRate() const
 {
     return m_fSecondProcessValue;
 }
@@ -242,13 +97,13 @@ void HighProcess::SetRadiationRate(float value)
 }
 
 // @fnv 0x008d91e0
-bool HighProcess::IsProcessStateActive(void)
+bool HighProcess::IsProcessStateActive() const
 {
     return iLocalState;
 }
 
 // @fnv 0x008d97a0
-float HighProcess::GetControllerPhase(void)
+float HighProcess::GetControllerPhase() const
 {
     return m_fSecondReferenceValue > m_kTenthUnshownMember ? m_fSecondReferenceValue : m_kTenthUnshownMember;
 }
@@ -260,31 +115,31 @@ void HighProcess::UpdateActorLighting(float value)
 }
 
 // @fnv 0x008d8da0
-bool HighProcess::IsAsleep(void)
+bool HighProcess::IsAsleep() const
 {
     return m_bSubtitleActive;
 }
 
 // @fnv 0x008d93f0
-float HighProcess::GetDetectionStrength(void)
+double HighProcess::GetDetectionStrength(void)
 {
     return m_fSocialTalkDelay;
 }
 
 // @fnv 0x008d9650
-bool HighProcess::IsCurrentlyDetected(void)
+bool HighProcess::IsCurrentlyDetected() const
 {
     return pTargetObject;
 }
 
 // @fnv 0x008d8f10
-bool HighProcess::IsDetecting(void)
+bool HighProcess::IsDetecting() const
 {
     return iProcessIndex;
 }
 
 // @fnv 0x008d9050
-bool HighProcess::HasAssignedAnimation(void)
+bool HighProcess::HasAssignedAnimation() const
 {
     return m_bSavedReferenceFlag;
 }
@@ -292,41 +147,41 @@ bool HighProcess::HasAssignedAnimation(void)
 // @fnv 0x008d9180
 bool HighProcess::IsMovementStopped(void)
 {
-    return bMovementStoped;
+    return bStop;
 }
 
 // @fnv 0x008d9740
-float HighProcess::GetDetectionProgress(void)
+float HighProcess::GetDetectionProgress() const
 {
-    return fHeadTrackChangeTimer;
+    return m_fReferencePriority;
 }
 
 // @fnv 0x008d9760
 void HighProcess::SetDetectionLevel(float value)
 {
-    fHeadTrackChangeTimer = value;
+    m_fReferencePriority = value;
 }
 
 // @fnv 0x008d8de0
-DIALOGUE_EMOTION HighProcess::GetCurrentDialogueEmotion(void)
+DIALOGUE_EMOTION HighProcess::GetCurrentDialogueEmotion() const
 {
     return m_iProcessState;
 }
 
 // @fnv 0x008d9720
-bool HighProcess::GetPlantedExplosive(void)
+bool HighProcess::GetPlantedExplosive() const
 {
     return iCount;
 }
 
 // @fnv 0x008d9100
-float HighProcess::UpdateProcessTiming(void)
+float HighProcess::UpdateProcessTiming() const
 {
     return m_fAwarenessValue;
 }
 
 // @fnv 0x008d9390
-DetectionEvent* HighProcess::FindDetectionEventForActor(int index)
+DetectionEvent* HighProcess::FindDetectionEventForActor(Actor* index)
 {
     return m_pDetectionEvent;
 }
@@ -334,7 +189,7 @@ DetectionEvent* HighProcess::FindDetectionEventForActor(int index)
 // @fnv 0x008d8ff0
 void HighProcess::SetEssentialFlag(bool value)
 {
-    bDetectAlert = value;
+    bWeaponAlertDrawn = value;
 }
 
 // @fnv 0x008d9070
@@ -344,27 +199,27 @@ void HighProcess::SetAnimationEnabled(bool value)
 }
 
 // @fnv 0x008d9320
-float HighProcess::GetFirstProcessFloat(void)
+float HighProcess::GetFirstProcessFloat() const
 {
-    return fSocialTalkTimer;
+    return m_fImpactValue;
 }
 
 // @fnv 0x008d9690
 void HighProcess::SetCurrentDialogueItem(DialogueItem* value)
 {
-    pSubtitleItem = value;
+    m_pCurrentDialogueItem = value;
 }
 
 // @fnv 0x008d9410
 void HighProcess::SetIdleForm(TESIdleForm* value)
 {
-    m_pCurrentIdleForm = value;
+    iAnimationStateCode = value;
 }
 
 // @fnv 0x008d91a0
 void HighProcess::ResetMovementState(void)
 {
-    bMovementStoped = BaseProcess::PostAnimNone;
+    bStop = BaseProcess::POSTANIM_ACTION_NONE;
 }
 
 // @fnv 0x008d9160
@@ -376,17 +231,17 @@ void HighProcess::SetSubtitleActive(bool value)
 // @fnv 0x008d9550
 void HighProcess::SetActorProcessEnabled(bool value)
 {
-    bTalkingtoPC = value;
+    m_bSpellState = value;
 }
 
 // @fnv 0x008d9240
-LipSyncAnimation* HighProcess::GetLipSync(void)
+LipSyncAnimation* HighProcess::GetLipSync() const
 {
     return pLipSyncAnimation;
 }
 
 // @fnv 0x008d92a0
-bool HighProcess::IsActorTalking(void)
+bool HighProcess::IsActorTalking() const
 {
     return m_bLipSyncPlaying;
 }
@@ -428,25 +283,25 @@ void HighProcess::UpdateActorProcess(float value)
 }
 
 // @fnv 0x008d9830
-TESObjectREFR* HighProcess::GetRelatedReference(void)
+TESObjectREFR* HighProcess::GetRelatedReference() const
 {
     return coordinate;
 }
 
 // @fnv 0x008d8e20
-TESObjectREFR* HighProcess::GetPreviousReference(void)
+TESObjectREFR* HighProcess::GetPreviousReference() const
 {
     return m_pSocialTalkTarget;
 }
 
 // @fnv 0x008d9430
-bool HighProcess::HasCombatStarted(void)
+bool HighProcess::HasCombatStarted()
 {
     return m_bTrackedReferenceFlag;
 }
 
 // @fnv 0x008d9810
-bool HighProcess::IsCombatTargetValid(void)
+bool HighProcess::IsCombatTargetValid() const
 {
     return m_bDetectionFlag;
 }
@@ -464,9 +319,9 @@ bool HighProcess::CanFireWeapon(void)
 }
 
 // @fnv 0x008d9670
-DialogueItem* HighProcess::GetCurrentDialogueItem(void)
+DialogueItem* HighProcess::GetCurrentDialogueItem() const
 {
-    return pSubtitleItem;
+    return m_pCurrentDialogueItem;
 }
 
 // @fnv 0x008d8dc0
@@ -484,17 +339,17 @@ void HighProcess::SetCombatAlerted(bool value)
 // @fnv 0x008d9570
 void HighProcess::StopAllActorSounds()
 {
-    m_fSecondLipSyncParameter = originalRuntimeFloatSetting244.Float()->f;
+    m_fSecondLipSyncParameter = *originalRuntimeFloatSetting244.Float();
 }
 
 // @fnv 0x008d8e60
-SoundPlaybackHandle HighProcess::GetActorSoundHandle(ACTOR_SOUND_HANDLE index)
+BSSoundHandle HighProcess::GetActorSoundHandle(unsigned int index)
 {
     return AudioPlaybackHandle[index];
 }
 
 // @fnv 0x008d8ea0
-void HighProcess::SetActorSoundHandle(ACTOR_SOUND_HANDLE index, SoundPlaybackHandle handle)
+void HighProcess::SetActorSoundHandle(unsigned int index, BSSoundHandle handle)
 {
     AudioPlaybackHandle[index] = handle;
 }

@@ -1,6 +1,66 @@
 // fallout_shared/tesland_od_variant_ctx_variant.cpp: GeometryOwner (2 functions)
 
 #include <string.h>
+#include "../../include/AutoMemContext.h"
+#include "../../include/BGSQuestObjective.h"
+#include "../../include/BGSTextureSet.h"
+#include "../../include/BSAudio.h"
+#include "../../include/Bound.h"
+#include "../../include/Data.h"
+#include "../../include/MagicCaster.h"
+#include "../../include/NiAdditionalGeometryData.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiGeometryData.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+// In-class bodies of the former NiPoint3_ext stand-in.
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x - kRhs.x, y - kRhs.y, z - kRhs.z);
+}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x + kRhs.x, y + kRhs.y, z + kRhs.z);
+}
+inline float NiPoint3::operator*(const NiPoint3& point) const
+{
+    return x * point.x + y * point.y + z * point.z;
+}
+inline NiPoint3 operator*(float scalar, const NiPoint3& point)
+{
+    return NiPoint3(scalar * point.x, scalar * point.y, scalar * point.z);
+}
+#include "../../include/NiPoint3.h"
+#include "../../include/NiTimeController.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiColorA.h"
+#include "../../include/ShadowSceneNode.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectLAND.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESRaceForm.h"
+#include "../../include/NiPoint3.h"
 // tesland_od_variant_ctx_variant.cpp: context variant of src/fallout_shared/tesland_od_variant.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
 // src/fallout_shared/tesland_od_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/tesland.cpp functions whose prologue its flags cannot
@@ -29,11 +89,9 @@ struct FUN_00534080_Class {
     int FUN_00534010();
     double FUN_00534080();
 };
-struct TESWorldSpace;
-struct DoorH { TESWorldSpace* GetParentWorldSpace(); };
 struct FUN_005340b0_Class {
     int m_auiShapeKeys[8];
-    DoorH* m_pDoor;
+    TESObjectREFR* m_pDoor;
     TESWorldSpace* FUN_005340b0();
 };
 struct FUN_00534140_Class {
@@ -59,8 +117,7 @@ struct FUN_00534200_Class {
     int m_1c;
     void FUN_00534200(bool value);
 };
-struct NiPoint3 { float x; float y; float z; };
-struct TESForm { void Revert(unsigned int); };
+
 struct FUN_00534570_shell { char* m_pkDeltas; unsigned int stride; void FUN_00534570(unsigned int index, NiPoint3& vertex); };
 template<int> struct EndianSizeTag {};
 void BSEndian(int*, EndianSizeTag<2>);
@@ -82,9 +139,7 @@ struct FUN_00537ca0_class
 };
 struct FUN_00a73080_holder { void FUN_00a73080(); };
 void __cdecl operator delete(void* p, unsigned int size);
-struct NiAdditionalGeometryData {
-    void* FUN_00537cb0(unsigned int flags);
-};
+
 struct FUN_00540800_Class {
     void FUN_00540800();
     void FUN_00537ce0();
@@ -99,12 +154,10 @@ struct FUN_00537d10_Class {
     static void operator delete(void* p, unsigned int size);
 };
 struct QuantityData { void SetQuantity(unsigned int); };
-struct TESRaceForm { void Initialize(unsigned int); };
-struct TESObjectREFR { void SetFlags(unsigned int); };
-struct MagicCaster { void SetSelectedMagicItem(int); };
-struct TESConditionItem { void SetObjectType(int); };
+
+#include "../../include/TESConditionItem.h"
 struct TESQuest;
-struct BGSQuestObjective { void SetOwner(TESQuest*); };
+
 struct FUN_00537e30_cls { char _pad[24]; int _m18; int _m1c; FUN_00537e30_cls* FUN_00537e30(); };
 struct FUN_00537e90 {
     unsigned int quantity;
@@ -171,15 +224,14 @@ struct FUN_00539fd0 : public FUN_0053a000 {
 struct FUN_0053a070_Class {
     void __thiscall FUN_0053a070(int a, int b);
 };
-struct B006815c0 { B006815c0(); };
 struct FUN_0053a510 {
-    B006815c0 m0;
+    NiPoint3 m0;
     char _p1[7];
-    B006815c0 m1;
+    NiPoint3 m1;
     char _p2[19];
-    B006815c0 m2;
+    NiPoint3 m2;
     char _p3[19];
-    B006815c0 m3;
+    NiPoint3 m3;
     FUN_0053a510();
 };
 struct FUN_0053a760_Class {
@@ -271,25 +323,13 @@ struct FUN_0053e260_Class {
     unsigned char FUN_0053e260(int index, int offset);
 };
 struct NiAVObject;
-struct NiNode { NiAVObject* FUN_0045bc00(unsigned int); };
+
 struct FUN_0053f120_Param { unsigned char _pad[0x18]; unsigned int idx; };
 struct FUN_0053f120_Holder { unsigned char _pad[0x28]; NiNode*** fld28; NiAVObject* FUN_0053f120(FUN_0053f120_Param*); };
-struct LandscapeColorData
-{
-    int m00,m04,m08,m0C,m10,m14,m18,m1C,m20,m24,m28,m2C,m30,m34,m38,m3C,m40,m44,m48,m4C;
-    void __thiscall FUN_0053a510();
-};
-struct TESObjectLAND
-{
-    bool __thiscall FUN_0053b550(LandscapeColorData&, const LandscapeColorData&, int);
-    float __thiscall FUN_0053a550();
-    bool __thiscall FUN_0053f1e0(LandscapeColorData&, float&);
-    bool __thiscall FUN_0053f180(const LandscapeColorData&, float&);
-};
+#include "../../include/LandscapeColorData.h"
+
 struct QueuedFile;
-struct BGSTextureSet {
-    void LoadTextures(int, QueuedFile*, bool);
-};
+
 struct FUN_00541540_Class {
     void FUN_00541540(int a, QueuedFile* b);
 };
@@ -311,7 +351,7 @@ struct Param5380d0 {
 struct This5380d0 {
 	bool FUN_005380d0(Param5380d0* p);
 };
-struct BSAudio { void* GetAudioBackendData(); };
+
 BSAudio* _FUN_00c85750();
 struct Topic
 {
@@ -409,20 +449,19 @@ struct FUN_00533120_cls : FUN_00483370 {
     FUN_00533120_cls();
     void FUN_004f15a0(int value);
 };
-struct AutoMemContext {
-    int ctx;
-    AutoMemContext(int memContext, bool push, const char* file, int line);
-    ~AutoMemContext();
-};
+
 bool IsLandLoadBlocked();
 struct TESFile;
-struct LandData {
+// LandData_tesland_od_variant_ctx_variant: local type (was include/LandData.h, which had no evidence of one real class); no method of it is bound to a named game function
+class LandData_tesland_od_variant_ctx_variant
+{
+public:
     int unk00;
 };
-struct LandForm : TESPackage {
+struct LandForm : TESLandFlagsView {
     int unk20;
     int unk24;
-    LandData* unk28;
+    LandData_tesland_od_variant_ctx_variant* unk28;
 
     bool FUN_00535b90(bool bFlag);
     bool IsLoaded();
@@ -496,13 +535,13 @@ struct FUN_00485680_shell { void FUN_00485680(); };
 extern double DAT_0102dfe0;
 extern double DAT_0101e568;
 extern double DAT_01012060;
-struct Elem16 { float x; float y; float z; float w; };
-struct FUN_004a0c10_Class { float x; float y; float z; void FUN_004a0c10(); };
-struct Data538110 {
+
+// Terrain render arrays at +0x04/+0x08/+0x0c and quadrant tables at +0x20/+0x30/+0x40, unlike Data's skill/category record.
+struct TerrainRenderArrays {
     void* m_00;
     NiPoint3** m_04;
     NiPoint3** m_08;
-    Elem16** m_0c;
+    NiColorA** m_0c;
     int m_10;
     int m_14;
     int m_18;
@@ -539,7 +578,7 @@ struct This538110 {
     int m_1c;
     int m_20;
     int m_24;
-    Data538110* m_28;
+    TerrainRenderArrays* m_28;
     void FUN_00538110();
 };
 struct Base8ef0 { virtual void v0(); int a; int b; int c; Base8ef0(); ~Base8ef0(); };
@@ -634,8 +673,7 @@ struct S_00539280_Owner {
     S_00539280_Obj* FUN_007af430();
     bool FUN_00539280(S_00539280_Arg* a, bool b, bool c);
 };
-struct Mem960 {int value;Mem960(int,bool,const char*,int);~Mem960();};
-struct Color960 {float r,g,b,a;Color960(float,float,float,float);};
+
 struct Texture960 {Texture960* FUN_009611e0();void* FUN_00592cf0();unsigned char FUN_00541590();};
 struct Property960 {virtual void v000();virtual void v004();virtual void v008();virtual void v00c();virtual void v010();virtual void v014();virtual void v018();virtual void v01c();virtual void v020();virtual void v024();virtual void v028();virtual void v02c();virtual void v030();virtual void v034();virtual void v038();virtual void v03c();virtual void v040();virtual void v044();virtual void v048();virtual void v04c();virtual void v050();virtual void v054();virtual void v058();virtual void v05c();virtual void v060();virtual void v064();virtual void v068();virtual void v06c();virtual void v070();virtual void v074();virtual void v078();virtual void v07c();virtual void v080();virtual void v084();virtual void v088();virtual void v08c();virtual void v090();virtual void v094();virtual void v098();virtual void v09c();virtual void v0a0();virtual void v0a4();virtual void v0a8();virtual void v0ac();virtual void v0b0();virtual void v0b4();virtual void v0b8();virtual void v0bc();virtual void v0c0();virtual void v0c4();virtual void v0c8();virtual void v0cc();virtual void v0d0();virtual void* vd4(void*);unsigned unk004;unsigned unk008;unsigned unk00c;unsigned unk010;unsigned unk014;unsigned unk018;unsigned unk01c;unsigned unk020;unsigned unk024;unsigned unk028;unsigned unk02c;unsigned unk030;unsigned unk034;unsigned unk038;unsigned unk03c;unsigned unk040;unsigned unk044;unsigned unk048;unsigned unk04c;unsigned unk050;unsigned unk054;unsigned unk058;unsigned unk05c;unsigned unk060;unsigned unk064;unsigned unk068;unsigned unk06c;unsigned unk070;unsigned unk074;unsigned unk078;unsigned unk07c;unsigned unk080;unsigned unk084;unsigned unk088;unsigned unk08c;unsigned unk090;unsigned unk094;unsigned unk098;unsigned unk09c;unsigned unk0a0;unsigned unk0a4;unsigned unk0a8;unsigned unk0ac;unsigned unk0b0;unsigned unk0b4;unsigned unk0b8;unsigned unk0bc;unsigned unk0c0;unsigned unk0c4;unsigned unk0c8;unsigned unk0cc;unsigned unk0d0;unsigned unk0d4;unsigned unk0d8;unsigned unk0dc;unsigned unk0e0;unsigned unk0e4;unsigned unk0e8;unsigned unk0ec;unsigned unk0f0;unsigned unk0f4;unsigned unk0f8;unsigned unk0fc;unsigned unk100;Property960();static void* operator new(unsigned); static void operator delete(void*, unsigned int);void FUN_005a8060(int);void FUN_00b68660(int,void*);void FUN_00b66640(unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,int,int,int);void FUN_00539f20(void*);};
 struct Binary960 {unsigned unk00,unk04,unk08,unk0c,unk10;Binary960(unsigned,unsigned char*);static void* operator new(unsigned); static void operator delete(void*, unsigned int);};
@@ -644,8 +682,9 @@ struct Geometry960 {void FUN_00539ef0(void*);void FUN_00439410(Property960*);};
 struct Node960 {void FUN_00a5bc40(const char*,Binary960*);Geometry960* FUN_0045bc00(unsigned);};
 void* __cdecl FUN_00b54b60(Geometry960*);
 void __cdecl FUN_00b57e30(Node960*,int,int);
-struct Data960 {Node960** nodes;unsigned unk04,unk08;Color960** colors;unsigned unk10,unk14,unk18,unk1c;Texture960* base[4];Texture960** layers[4];unsigned char** binary[4];};
-struct Host960 {unsigned unk00,unk04,unk08,unk0c,unk10,unk14,unk18,flags,unk20,unk24;Data960* data;void FUN_005394c0(bool);bool FUN_00539960();};
+// Terrain nodes/colors and quadrant texture/layer arrays at +0x20/+0x30, unlike Data's skill/category record.
+struct TerrainMaterialArrays {Node960** nodes;unsigned unk04,unk08;NiColorA** colors;unsigned unk10,unk14,unk18,unk1c;Texture960* base[4];Texture960** layers[4];unsigned char** binary[4];};
+struct Host960 {unsigned unk00,unk04,unk08,unk0c,unk10,unk14,unk18,flags,unk20,unk24;TerrainMaterialArrays* data;void FUN_005394c0(bool);bool FUN_00539960();};
 void __cdecl NiFree(void* pvMem);
 class B53A000ExtraData {
 public:
@@ -904,22 +943,11 @@ public:
 };
 extern float DAT_01015f5c;
 extern float DAT_01016970;
-struct FUN_0053f390_v2 {
-    float x;
-    float y;
-    void FUN_00452dc0(float a, float b);
-};
-struct FUN_0053f390_v3 {
-    float x;
-    float y;
-    float z;
-    void FUN_006815c0();
-};
+
 struct FUN_0053f390_cls {
-    void FUN_00534240(int n, int i, FUN_0053f390_v3* out);
-    FUN_0053f390_v2* FUN_0053f390(FUN_0053f390_v2* out, int n);
+    void FUN_00534240(int n, int i, NiPoint3* out);
+    NiPoint2* FUN_0053f390(NiPoint2* out, int n);
 };
-class NiPoint2 { public: float x,y; NiPoint2(float,float); };
 struct UVBounds { float x,y,z,w; };
 extern NiPoint3 DAT_011f426c;
 extern NiPoint2 DAT_011f4980;
@@ -1099,7 +1127,7 @@ struct FUN_00538ef0 {
     FUN_00538ef0();
 };
 struct FUN_0056d640 : FUN_00538ef0 {
-    B006815c0 m_quantity;
+    NiPoint3 m_quantity;
     FUN_0056d640(unsigned int quantity);
 };
 struct LandFormBase {
@@ -1111,42 +1139,47 @@ struct LandFormBase {
     virtual ~LandFormBase();
     void ReleaseLand();
 };
-struct LandChildCell {
-    virtual void* GetPersistentCell() = 0;
-};
+#include "../../include/TESChildCell.h"
 struct LandMember24 {
     int unk00;
     ~LandMember24();
 };
-struct LandSharedObject {
+// Freed through its virtual destructor (slot 4) when the last land form goes away.
+struct LandVirtualResource {
     virtual void v00();
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual ~LandSharedObject();
+    virtual ~LandVirtualResource();
 };
-struct LandNiPointer {
-    LandNiPointer& operator=(void* p);
+// LandNiPointer_tesland_od_variant_ctx_variant: local type (was include/LandNiPointer.h, which had no evidence of one real class); no method of it is bound to a named game function
+class LandNiPointer_tesland_od_variant_ctx_variant
+{
+public:
+    LandNiPointer_tesland_od_variant_ctx_variant& operator=(void* p);
 };
-struct LandBuffer {
+// LandBuffer_tesland_od_variant_ctx_variant: local type (was include/LandBuffer.h, which had no evidence of one real class); no method of it is bound to a named game function
+class LandBuffer_tesland_od_variant_ctx_variant
+{
+public:
     int unk00;
 };
 extern int g_landRefCount;
-extern LandBuffer* g_landBuf0;
-extern LandBuffer* g_landBuf1;
-extern LandBuffer* g_landBuf2;
-extern LandBuffer* g_landBuf3;
-extern LandBuffer* g_landBuf4;
-extern LandBuffer* g_landBufArray[4];
+extern LandBuffer_tesland_od_variant_ctx_variant* g_landBuf0;
+extern LandBuffer_tesland_od_variant_ctx_variant* g_landBuf1;
+extern LandBuffer_tesland_od_variant_ctx_variant* g_landBuf2;
+extern LandBuffer_tesland_od_variant_ctx_variant* g_landBuf3;
+extern LandBuffer_tesland_od_variant_ctx_variant* g_landBuf4;
+extern LandBuffer_tesland_od_variant_ctx_variant* g_landBufArray[4];
 extern bool g_landBuffersReady;
-extern LandNiPointer g_landNiPointer;
-extern LandSharedObject* g_landShared0;
-extern LandSharedObject* g_landShared1;
-struct FUN_00533260 : LandFormBase, LandChildCell {
+extern LandNiPointer_tesland_od_variant_ctx_variant g_landNiPointer;
+extern LandVirtualResource* g_landShared0;
+extern LandVirtualResource* g_landShared1;
+struct FUN_00533260 : LandFormBase, TESChildCell {
     int unk1C;
     int unk20;
     LandMember24 unk24;
-    virtual void* GetPersistentCell();
+    virtual TESObjectCELL* GetSaveParentCell();
     virtual ~FUN_00533260();
     void ClearData();
 };
@@ -1156,26 +1189,76 @@ struct LandPoint3 {
     float z;
     LandPoint3(float fx, float fy, float afDepth);
 };
-struct LandGeomData {
-    LandPoint3* GetNext();
+// LandGeomData_tesland_od_variant_ctx_variant: local type (was include/LandGeomData.h, which had no evidence of one real class); its methods are 0x0049ec60 NiGeometry::GetVertices
+#include "../../include/NiPoint3.h"
+
+class LandGeomData_tesland_od_variant_ctx_variant
+{
+public:
+    NiPoint3* GetNext();
 };
-struct LandNode {
-    LandGeomData* GetAt(int index);
+// LandNode_tesland_od_variant_ctx_variant: local type (was include/LandNode.h, which had no evidence of one real class); its methods are 0x0043b4a0 NiNode::GetAt
+class LandGeomData_tesland_od_variant_ctx_variant;
+
+class LandNode_tesland_od_variant_ctx_variant
+{
+public:
+    LandGeomData_tesland_od_variant_ctx_variant* GetAt(int index);
 };
-struct LandLoadedData {
-    LandNode** m_ppLandNodes;
-    LandPoint3** m_ppLandPoints;
-    int unk08; int unk0C; int unk10; int unk14; int unk18; int unk1C;
-    int unk20; int unk24; int unk28; int unk2C; int unk30; int unk34; int unk38; int unk3C;
-    int unk40; int unk44; int unk48; int unk4C; int unk50; int unk54; int unk58; int unk5C;
-    int unk60; int unk64; int unk68; int unk6C; int unk70; int unk74; int unk78; int unk7C;
-    int unk80; int unk84; int unk88; int unk8C; int unk90; int unk94; int unk98; int unk9C;
+// LandLoadedData_tesland_od_variant_ctx_variant: local type (was include/LandLoadedData.h, which had no evidence of one real class); no method of it is bound to a named game function
+#include "../../include/NiPoint3.h"
+
+class LandNode_tesland_od_variant_ctx_variant;
+
+class LandLoadedData_tesland_od_variant_ctx_variant
+{
+public:
+    LandNode_tesland_od_variant_ctx_variant** m_ppLandNodes;
+    NiPoint3** m_ppLandPoints;
+    int unk08;
+    int unk0C;
+    int unk10;
+    int unk14;
+    int unk18;
+    int unk1C;
+    int unk20;
+    int unk24;
+    int unk28;
+    int unk2C;
+    int unk30;
+    int unk34;
+    int unk38;
+    int unk3C;
+    int unk40;
+    int unk44;
+    int unk48;
+    int unk4C;
+    int unk50;
+    int unk54;
+    int unk58;
+    int unk5C;
+    int unk60;
+    int unk64;
+    int unk68;
+    int unk6C;
+    int unk70;
+    int unk74;
+    int unk78;
+    int unk7C;
+    int unk80;
+    int unk84;
+    int unk88;
+    int unk8C;
+    int unk90;
+    int unk94;
+    int unk98;
+    int unk9C;
     float m_fTrailingValue;
 };
 struct LandObject : TESObjectLAND {
     int unk00; int unk04; int unk08; int unk0C; int unk10; int unk14; int unk18; int unk1C;
     int unk20; int unk24;
-    LandLoadedData* m_pRenderData;
+    LandLoadedData_tesland_od_variant_ctx_variant* m_pRenderData;
     bool IsLoaded();
     void FUN_00534240(int quadrant, int index, LandPoint3* vertex);
 };
@@ -1224,14 +1307,13 @@ struct VertOwner {
     bool IsLoaded();
     void FUN_00534390(unsigned int index, unsigned int vert, VertPt& out);
 };
-struct Color_5345c0 { float r, g, b, a; };
-extern Color_5345c0 DAT_011a9be0;
+extern NiColorA DAT_011a9be0;
 struct Buffer_5345c0 {
     void* data;
     unsigned int stride;
     unsigned int unk08;
     void FUN_00534550();
-    void FUN_00534780(unsigned int, Color_5345c0&);
+    void FUN_00534780(unsigned int, NiColorA&);
 };
 struct Format_5345c0 {
     virtual void v0();
@@ -1271,23 +1353,17 @@ struct Format_5345c0 {
     virtual void v34();
     virtual bool HasColor();
 };
-struct Data_5345c0 {
-    Format_5345c0* FUN_004a8a90();
-    bool FUN_00a67360(int);
-    void FUN_00a67660(Buffer_5345c0*);
-    void FUN_00a673d0();
-};
 struct Geometry_5345c0 {
     unsigned int FUN_004a8030();
-    Color_5345c0* GetNextProc();
-    Data_5345c0* FUN_005495f0();
+    NiColorA* GetNextProc();
+    NiGeometryData* FUN_005495f0();
 };
 struct Node_5345c0 { Geometry_5345c0* FUN_0043b4a0(unsigned int); };
 struct Store_5345c0 {
     Node_5345c0** nodes;
     int unk04;
     int unk08;
-    Color_5345c0** colors;
+    NiColorA** colors;
 };
 struct FUN_005345c0_shell {
     int unk00;
@@ -1302,30 +1378,31 @@ struct FUN_005345c0_shell {
     int unk24;
     Store_5345c0* store;
     bool FUN_0045cb90();
-    void FUN_005345c0(unsigned int group, unsigned int index, Color_5345c0& out);
+    void FUN_005345c0(unsigned int group, unsigned int index, NiColorA& out);
 };
-struct RgbaColor {
-    float r;
-    float g;
-    float b;
-    float a;
-};
+
 struct FUN_00534780_Class {
     int m_00;
     int m_04;
     unsigned char m_08;
     void __thiscall FUN_004534f0(int index);
-    void FUN_00534780(int index, RgbaColor* out);
+    void FUN_00534780(int index, NiColorA* out);
 };
 extern int FNV_RTTI_TESForm;
 extern int FNV_RTTI_TESObjectLAND;
 extern "C" void* __cdecl FNV_DynamicCast(void*, int, const void*, const void*, int);
 void* __cdecl memcpy(void*, const void*, unsigned int);
-struct LandCopyData {
+// LandCopyData_tesland_od_variant_ctx_variant: local type (was include/LandCopyData.h, which had no evidence of one real class); no method of it is bound to a named game function
+#include "../../include/NiPoint3.h"
+
+
+class LandCopyData_tesland_od_variant_ctx_variant
+{
+public:
     void* nodes;
     NiPoint3** vertices;
     NiPoint3** normals;
-    Elem16** colors;
+    NiColorA** colors;
     unsigned char** textureIndices;
     int unk14;
     int cellX;
@@ -1334,10 +1411,10 @@ struct LandCopyData {
     int* textureLayers[4];
     void** weights[4];
 };
-struct LandCopy : TESPackage {
+struct LandCopy : TESLandFlagsView {
     void* cell;
     int unk24;
-    LandCopyData* data;
+    LandCopyData_tesland_od_variant_ctx_variant* data;
     void FUN_00535b90(int);
     void* FUN_007af430();
     void FUN_00539500(LandCopy*);
@@ -1384,14 +1461,13 @@ struct CleanupOwner {
 };
 void* __cdecl operator new(unsigned int);
 void __cdecl FUN_00403d30(void*, int, unsigned int);
-struct Point { float x,y,z; Point(float,float,float); };
+
 extern NiPoint3 DAT_011f426c;
-struct Range {float x,y;};
 extern float DAT_01016970, DAT_01015f5c, DAT_010236e0;
 struct UpdateData {float time; bool a,b; int c; UpdateData(float,bool,bool);};
 struct Shape;
 struct GeomData {void FUN_00a67090(int); void FUN_00a67050(int); void FUN_004410f0(bool); void SetByteAtOffset38(int);};
-struct Bound {void Calculate(unsigned short,void*);};
+
 struct Property {int FUN_008d8520(); void* GetStringAtOffset();};
 struct Model {struct Scene* FUN_0043b230();};
 struct Scene {
@@ -1459,7 +1535,7 @@ virtual void vf0();
 virtual void vf4();
 virtual void Attach(int,Shape*);
 bool FUN_00456610(); void FUN_00450f90(bool); void AttachProperty(void*);
-Model* FUN_006629f0(); void FUN_00439680(const Point&);
+Model* FUN_006629f0(); void FUN_00439680(const NiPoint3&);
 void Update(UpdateData&); void FUN_00a5a040();
 };
 struct Shape {unsigned short FUN_00456650(); void* FUN_0049ec60(); Bound* GetSourceFilesFromForm(); GeomData* FUN_005495f0(); Property* FUN_004030b0();};
@@ -1532,45 +1608,7 @@ struct Mopp {void Clear(); void FUN_00621f60(Shape**,int,float);};
 Mopp* __fastcall GetCellMopp(Cell*);
 struct Scratch {int a,b,c,d; Scratch();};
 struct Other {bool FUN_00537b50(); bool FUN_00544590(int);};
-struct Data {Scene** nodes; int unk04;
-int unk08;
-int unk0c;
-int unk10;
-int unk14;
-int unk18;
-int unk1c;
-int unk20;
-int unk24;
-int unk28;
-int unk2c;
-int unk30;
-int unk34;
-int unk38;
-int unk3c;
-int unk40;
-int unk44;
-int unk48;
-int unk4c;
-int unk50;
-int unk54;
-int unk58;
-int unk5c;
-int unk60;
-int unk64;
-int unk68;
-int unk6c;
-int unk70;
-int unk74;
-int unk78;
-int unk7c;
-int unk80;
-int unk84;
-int unk88;
-int unk8c;
-int unk90;
-int unk94;
-int unk98;
-int unk9c; float scale;};
+
 struct Land {int unk00;
 int unk04;
 int unk08;
@@ -1580,7 +1618,7 @@ int unk14;
 int unk18;
 int unk1c; Cell* cell; int unk24; Data* data;
 Scene* FUN_00535af0(int); Shape* FUN_005371b0(unsigned char);
-Range* FUN_0053f390(Range*,int); float FUN_00534050(); double FUN_00534080();
+NiPoint2* FUN_0053f390(NiPoint2*,int); float FUN_00534050(); double FUN_00534080();
 void FUN_0053bc10(); void FUN_0053aeb0(); void FUN_00539960();
 Other* FUN_007af430(); bool FUN_00534140(); void FUN_005374f0();};
 struct SceneObject {
@@ -1717,9 +1755,7 @@ struct SceneCleanup {
     BoneTransformData* data;
     void FUN_00537eb0();
 };
-struct ShadowSceneNode {
-    void FUN_00b5b1c0(SceneObject* object);
-};
+
 ShadowSceneNode* __cdecl FUN_00450b80(int index);
 void* __cdecl FUN_0056d280(unsigned int size);
 void* __cdecl FUN_00401460(void* destination, const void* source, unsigned int size);
@@ -1778,52 +1814,7 @@ struct Buffer53 { void ComputeBoundingSphere(); };
 struct Texture53Data { void* FUN_00592cf0(); };
 struct Texture53 { Texture53Data* FUN_009611e0(); unsigned char FUN_00541590(); };
 struct GeoData53 { void* FUN_0059bb30(); void FUN_00a67090(int); void FUN_00a66a60(int); };
-struct NiTimeController {
- int FUN_00441110();
- virtual void slot0();
- virtual void slot1();
- virtual void slot2();
- virtual void slot3();
- virtual void slot4();
- virtual void slot5();
- virtual void slot6();
- virtual void slot7();
- virtual void slot8();
- virtual void slot9();
- virtual void slot10();
- virtual void slot11();
- virtual void slot12();
- virtual void slot13();
- virtual void slot14();
- virtual void slot15();
- virtual void slot16();
- virtual void slot17();
- virtual void slot18();
- virtual void slot19();
- virtual void slot20();
- virtual void slot21();
- virtual void slot22();
- virtual void slot23();
- virtual void slot24();
- virtual void slot25();
- virtual void slot26();
- virtual void slot27();
- virtual void slot28();
- virtual void slot29();
- virtual void slot30();
- virtual void slot31();
- virtual void slot32();
- virtual void slot33();
- virtual void slot34();
- virtual void slot35();
- virtual void slot36();
- virtual void slot37();
- virtual void slot38();
- virtual void SetGeometry(Mesh53*);
- void FUN_00b68660(int, void*);
- void FUN_00b66640(char,char,char,char,char,char,char,int,int,int);
- void FUN_00baa000();
-};
+
 struct Mesh53 {
  virtual void slot0();
  virtual void slot1();
@@ -1877,12 +1868,6 @@ struct xPoint3 {
     xPoint3();
     xPoint3(float qpqRa, float qsSDDgz, float fZ);
     xPoint3 operator+(const xPoint3& kOther) const;
-};
-struct xPoint2 {
-    float x, y;
-    xPoint2(float qpqRa, float qsSDDgz);
-    xPoint2 operator-(const xPoint2& kOther) const;
-    float Length() const;
 };
 struct xCoordData {
     float fX;
@@ -2125,7 +2110,7 @@ struct NormalData {
  int unk0c;
  unsigned char** flags;
 };
-struct NormalLand : TESPackage {
+struct NormalLand : TESLandFlagsView {
  int unk20;
  int unk24;
  NormalData* data;
@@ -2138,7 +2123,9 @@ struct LandVertex {
     float z;
     LandVertex();
 };
-struct LandCoord {
+// LandCoord_tesland_od_variant_ctx_variant: local type (was include/LandCoord.h, which had no evidence of one real class); no method of it is bound to a named game function
+class LandCoord_tesland_od_variant_ctx_variant {
+public:
     int unk00;
     int unk04;
     int unk08;
@@ -2160,15 +2147,11 @@ struct LandCoord {
     int vertex2;
     bool upperTriangle;
     bool swapAxes;
-};
-struct LandHeights {
-    float z0;
-    float z1;
-    float z2;
+    unsigned char unk4E[2];
 };
 struct LandStandIn {
     void GetVertex(int cell, int index, LandVertex* out);
-    bool FUN_0053f1e0(LandCoord& coord, float& height);
+    bool FUN_0053f1e0(LandCoord_tesland_od_variant_ctx_variant& coord, float& height);
 };
 extern const double DAT_010231b0;
 extern const double DAT_010241b0;
@@ -2191,12 +2174,6 @@ struct FUN_0053f440_shell
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 int __cdecl FUN_00406d90(float fValue);
 namespace TESLandInit {
-
-struct LandMemContext {
-    int iOldContext;
-    LandMemContext(int aiContext, bool abPush, const char* apFile, int aiLine);
-    ~LandMemContext();
-};
 
 struct LandMemObject {
     static void* operator new(unsigned int auiSize);
@@ -2270,11 +2247,6 @@ struct LandFloatSetting {
     float* FUN_00403e20();
 };
 
-struct LandColor {
-    float r, g, b, a;
-    LandColor();
-    LandColor(float afR, float afG, float afB, float afA);
-};
 
 struct LandPoint3 {
     float x, y, z;
@@ -2296,7 +2268,7 @@ extern LandStringSetting DAT_011ca004;
 extern LandStringSetting DAT_011c9f8c;
 extern LandFloatSetting DAT_011c9f2c;
 extern unsigned short* DAT_011c9ee8;
-extern LandColor* DAT_011c9eec;
+extern NiColorA* DAT_011c9eec;
 extern LandPoint3* DAT_011c9ef0;
 extern unsigned char* DAT_011c9ef8;
 extern LandPoint2* DAT_011c9ef4;
@@ -2314,7 +2286,7 @@ static const char s_szTilingWarning[] = "DEFAULT: INI setting fLandTextureTiling
 
 // @fnv 0x00533420
 void __cdecl FUN_00533420() {
-    LandMemContext kMemContext(0x1b, true, s_szSourceFile, 0xc6);
+    AutoMemContext kMemContext(0x1b, true, s_szSourceFile, 0xc6);
     DAT_011c9f08 = new LandTexturing();
     char acPath[260];
     FUN_00406d00(acPath, 260, s_szLandscapeFormat, DAT_011ca004.FUN_00403df0());
@@ -2387,14 +2359,14 @@ void __cdecl FUN_00533420() {
         fTiling = 16.0f;
     }
     fTiling = 4.0 / fTiling;
-    DAT_011c9eec = new LandColor[0x121];
+    DAT_011c9eec = new NiColorA[0x121];
     DAT_011c9ef0 = new LandPoint3[0x121];
     DAT_011c9ef8 = new unsigned char[0x121];
     DAT_011c9ef4 = new LandPoint2[0x121];
     iIndex = 0;
     for (iVal = 0; iVal < 17; iVal++) {
         for (jPtr = 0; jPtr < 17; jPtr++) {
-            DAT_011c9eec[iIndex] = LandColor(1.0f, 1.0f, 1.0f, 0.0f);
+            DAT_011c9eec[iIndex] = NiColorA(1.0f, 1.0f, 1.0f, 0.0f);
             DAT_011c9ef0[iIndex] = LandPoint3(0.0f, 0.0f, 1.0f);
             DAT_011c9ef8[iIndex] = 1;
             DAT_011c9ef4[iIndex] = LandPoint2(jPtr / fTiling, iVal / fTiling);
@@ -2420,26 +2392,13 @@ void __cdecl FUN_00533420() {
 }
 
 }
-struct Vec3 {
-    float x, y, z;
-    Vec3();
-    Vec3(float afX, float afY, float afZ);
-    void FUN_0063c8a0(const Vec3* apOther);
-    Vec3 FUN_0053d280(float afDivisor);
-};
-struct CoordProcessor { int x, y, z; Vec3 FUN_00439e90(const Vec3& arOrigin); };
-struct Grid53 { int count; CoordProcessor** processors; Vec3** positions; int unknown0c; unsigned char** evaluated; };
-struct FNV53WorkerProxy { bool FUN_0053d2e0(Vec3* apCoord, Vec3* apAxis, Vec3* apAux); bool FUN_0053e210(Vec3* apCoord); };
+
+struct CoordProcessor { int x, y, z; NiPoint3 FUN_00439e90(const NiPoint3& arOrigin); };
+struct Grid53 { int count; CoordProcessor** processors; NiPoint3** positions; int unknown0c; unsigned char** evaluated; };
+struct FNV53WorkerProxy { bool FUN_0053d2e0(NiPoint3* apCoord, NiPoint3* apAxis, NiPoint3* apAux); bool FUN_0053e210(NiPoint3* apCoord); };
 struct WorkerTable53 { FNV53WorkerProxy* southwest; FNV53WorkerProxy* northwest; FNV53WorkerProxy* southeast; FNV53WorkerProxy* northCount; FNV53WorkerProxy* east; FNV53WorkerProxy* west; FNV53WorkerProxy* upper; FNV53WorkerProxy* northeast; };
-struct Region53 { int m00,m04,m08,m0c,m10,m14,m18,m1c,m20,m24; Grid53* grid; float FUN_00534080(); float FUN_00534050(); void FUN_0053e290(int,int,Vec3*,WorkerTable53*); };
-struct NiP2 { float x, y; NiP2(); };
-struct NiPoint3_ext { float x, y, z; NiPoint3_ext(); };
-class NiFixedString {
-public:
-    const char* value;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
+struct Region53 { int m00,m04,m08,m0c,m10,m14,m18,m1c,m20,m24; Grid53* grid; float FUN_00534080(); float FUN_00534050(); void FUN_0053e290(int,int,NiPoint3*,WorkerTable53*); };
+
 struct Geometry5371 {
     unsigned int unk00;
     unsigned int unk04;
@@ -2491,15 +2450,15 @@ struct Geometry5371 {
     unsigned int unkbc;
     unsigned int unkc0;
     static void* operator new(unsigned int); static void operator delete(void*, unsigned int);
-    Geometry5371(unsigned short, NiPoint3*, NiPoint3_ext*, void*, NiP2*, unsigned short, unsigned short, unsigned short, unsigned short, unsigned short*, unsigned short*);
+    Geometry5371(unsigned short, NiPoint3*, NiPoint3*, void*, NiPoint2*, unsigned short, unsigned short, unsigned short, unsigned short, unsigned short*, unsigned short*);
     void FUN_00440460(const NiPoint3&);
     void SetName(const NiFixedString&);
 };
 struct MeshData5371 {
     void* unk00;
     NiPoint3** vertices;
-    NiPoint3_ext** normals;
-    NiP2** texcoords;
+    NiPoint3** normals;
+    NiPoint2** texcoords;
 };
 struct Land5371 {
     int unk00; int unk04; int unk08; int unk0c; int unk10;
@@ -2508,30 +2467,23 @@ struct Land5371 {
     void FUN_00535b30(NiPoint3*, unsigned char);
     Geometry5371* FUN_005371b0(unsigned char index);
 };
-extern NiP2* DAT_011c9ef4;
+extern NiPoint2* DAT_011c9ef4;
 extern unsigned short DAT_0118ae90[];
 void* FUN_00aa1070(unsigned int);
 int FUN_00406d00(char*, int, const char*, ...);
-class NiPoint3LD {
-public:
-    NiPoint3LD();
-    void Unitize();
-    float x;
-    float y;
-    float z;
-};
+
 void* __cdecl FUN_00401460(void* pvDest, const void* pvSrc, unsigned int uiSize);
 struct LandDataLD {
     unsigned int unk00;
     unsigned int unk04;
-    NiPoint3LD** m_apkNormals;
+    NiPoint3** m_apkNormals;
 };
 class LandLD {
 public:
     bool IsLoaded();
     bool IsBusy();
     void GetNeighbors(LandLD** ppkNeighbors, int iValue, bool* pbChanged);
-    NiPoint3LD** GetNormals();
+    NiPoint3** GetNormals();
     void SetNormalsDirty(int iValue);
     void SetupNeighbors(LandLD** ppkNeighbors, int iValue);
     void UpdateNormals();
@@ -2549,16 +2501,6 @@ public:
     LandDataLD* m_pUserData;
 };
 
-struct FUN_006815c0 {
-    float x, y, z;
-    FUN_006815c0();
-};
-
-struct FUN_004a7800 {
-    float x, y, z, w;
-    FUN_004a7800();
-};
-
 struct Resource {
     void* FUN_00544c30();
     void* FUN_00544c60();
@@ -2566,9 +2508,9 @@ struct Resource {
 
 struct FUN_005405a0 {
     void* unknown00;
-    FUN_006815c0** positions;
-    FUN_006815c0** normals;
-    FUN_004a7800** transforms;
+    NiPoint3** positions;
+    NiPoint3** normals;
+    NiColorA** transforms;
     unsigned char** tags;
     int unknown14;
     int unknown18;
@@ -2613,16 +2555,16 @@ bool GeometryOwner::FUN_00539500(GeometryOwner* source)
     geometry->initialValue98 = resource->FUN_00544c30();
     geometry->initialValue9c = resource->FUN_00544c60();
 
-    geometry->positions = new FUN_006815c0*[4];
-    geometry->transforms = new FUN_004a7800*[4];
-    geometry->normals = new FUN_006815c0*[4];
+    geometry->positions = new NiPoint3*[4];
+    geometry->transforms = new NiColorA*[4];
+    geometry->normals = new NiPoint3*[4];
     geometry->tags = new unsigned char*[4];
 
     float height = FUN_0053a550();
     for (int i = 0; i < 4; ++i) {
-        geometry->positions[i] = new FUN_006815c0[0x121];
-        geometry->transforms[i] = new FUN_004a7800[0x121];
-        geometry->normals[i] = new FUN_006815c0[0x121];
+        geometry->positions[i] = new NiPoint3[0x121];
+        geometry->transforms[i] = new NiColorA[0x121];
+        geometry->normals[i] = new NiPoint3[0x121];
         geometry->tags[i] = new unsigned char[0x121];
         geometry->vertexRows[i] = new float*[0x121];
         geometry->resources[i] = (void*)FUN_00535ae0();

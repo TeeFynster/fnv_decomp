@@ -7,18 +7,24 @@
 // marked in the header. This translation unit only forces the covered
 // COMDATs to be emitted so their bytes can be compared.
 #include "nitarray.inl"
+#include "../../../../include/StrArr.h"
 
-struct StrArr
+inline unsigned int AddViewerString(StrArr* array, char* const& element)
 {
-    unsigned char m_auiShapeKeys[8];
-    unsigned short m_iElementCount;
-    unsigned short m_uiItemCount;
-    unsigned short m_pAuxiliaryObject;
-    unsigned short m_growth;
+    unsigned int index = array->m_usSize;
+    if (index >= array->m_usMaxSize)
+        array->SetSize(index + array->m_usGrowBy);
+    array->SetAt(index, element);
+    return index;
+}
 
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int index, char*& value);
-};
+inline unsigned int SetViewerStringAtGrow(StrArr* array, unsigned int index, char* const& element)
+{
+    if (index >= array->m_usMaxSize)
+        array->SetSize(index + array->m_usGrowBy);
+    array->SetAt(index, const_cast<char*&>(element));
+    return index;
+}
 
 struct FUN_00cc6540_Class
 {
@@ -40,54 +46,43 @@ void FUN_00cc6540_Class::FUN_00cc6540(StrArr* array)
     if (data)
     {
         char* value = FUN_00a7d550("ConeMinAngle", *reinterpret_cast<float*>(data + 0xa0));
-        unsigned int index = array->m_uiItemCount;
-        unsigned int size = array->m_iElementCount;
+        unsigned int index = array->m_usSize;
+        unsigned int size = array->m_usMaxSize;
         if (index >= size)
-            array->SetSize(index + array->m_growth);
+            array->SetSize(index + array->m_usGrowBy);
         array->SetAt(index, value);
 
         value = FUN_00a7d550("PlaneMinAngle", *reinterpret_cast<float*>(data + 0xb0));
-        index = array->m_uiItemCount;
-        size = array->m_iElementCount;
+        index = array->m_usSize;
+        size = array->m_usMaxSize;
         if (index >= size)
-            array->SetSize(index + array->m_growth);
+            array->SetSize(index + array->m_usGrowBy);
         array->SetAt(index, value);
 
         value = FUN_00a7d550("PlaneMaxAngle", *reinterpret_cast<float*>(data + 0xb4));
-        index = array->m_uiItemCount;
-        size = array->m_iElementCount;
+        index = array->m_usSize;
+        size = array->m_usMaxSize;
         if (index >= size)
-            array->SetSize(index + array->m_growth);
+            array->SetSize(index + array->m_usGrowBy);
         array->SetAt(index, value);
 
         value = FUN_00a7d550("TwistMinAngle", *reinterpret_cast<float*>(data + 0x88));
-        index = array->m_uiItemCount;
-        size = array->m_iElementCount;
+        index = array->m_usSize;
+        size = array->m_usMaxSize;
         if (index >= size)
-            array->SetSize(index + array->m_growth);
+            array->SetSize(index + array->m_usGrowBy);
         array->SetAt(index, value);
 
         value = FUN_00a7d550("TwistMaxAngle", *reinterpret_cast<float*>(data + 0x8c));
-        index = array->m_uiItemCount;
-        size = array->m_iElementCount;
+        index = array->m_usSize;
+        size = array->m_usMaxSize;
         if (index >= size)
-            array->SetSize(index + array->m_growth);
+            array->SetSize(index + array->m_usGrowBy);
         array->SetAt(index, value);
     }
 }
 
 namespace fnv_00cf46e0 {
-struct StrArr
-{
-    unsigned char _pad[8];
-    unsigned short m_008;
-    unsigned short m_00a;
-    unsigned short m_00c;
-    unsigned short m_00e;
-
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int index, char*& value);
-};
 
 struct GlobalObjectO2_00a7b610
 {
@@ -120,48 +115,36 @@ void __stdcall FUN_00cf46e0(StrArr* array)
 {
     TLSGuard guard;
     char* value = _FUN_00a7d330(g_01268740);
-    unsigned int index = array->m_00a;
+    unsigned int index = array->m_usSize;
 
-    if (index >= array->m_008)
-        array->SetSize(static_cast<unsigned int>(index + array->m_00e));
+    if (index >= array->m_usMaxSize)
+        array->SetSize(static_cast<unsigned int>(index + array->m_usGrowBy));
 
     array->SetAt(index, value);
 }
 }  // namespace fnv_00cf46e0
 
-struct CharPtrArr
-{
-    int unk00;
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short unk0C;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int index, char*& value);
-    int FUN_00a5b4b0(char*& value);
-};
-
+// Keep the index-returning variant local; shared AddFirstEmpty returns void.
+// The explicit ECX receiver and unused EDX argument preserve the original member ABI.
 // @fnv 0x00a5b4b0
-int CharPtrArr::FUN_00a5b4b0(char*& value)
+int __fastcall FUN_00a5b4b0(StrArr* array, void*, char*& value)
 {
     if (value == 0)
         return -1;
     unsigned short i = 0;
-    for (; i < m_usSize; i++)
+    for (; i < array->m_usSize; i++)
     {
-        if (m_pBase[i] == 0)
+        if (array->m_pBase[i] == 0)
         {
-            m_pBase[i] = value;
-            unk0C++;
+            array->m_pBase[i] = value;
+            array->m_usESize++;
             return i;
         }
     }
-    unsigned int count = m_usSize;
-    if (count >= m_usMaxSize)
-        SetSize(m_usGrowBy + count);
-    SetAt(count, value);
+    unsigned int count = array->m_usSize;
+    if (count >= array->m_usMaxSize)
+        array->SetSize(array->m_usGrowBy + count);
+    array->SetAt(count, value);
     return count;
 }
 
@@ -182,32 +165,6 @@ struct BC8AD40AllocTagScope
     }
 };
 
-class BC8AD40StringArray
-{
-  public:
-    virtual ~BC8AD40StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
-
 extern const char* g_pcC8AD40Name;
 
 char* __cdecl FUN_00a7d330(const char* pcString);
@@ -215,17 +172,17 @@ char* __cdecl FUN_00a7d330(const char* pcString);
 class FUN_00c8ad40_cls
 {
   public:
-    void C8AD40BaseGetViewerStrings(BC8AD40StringArray* pkArray);
-    void FUN_00c8ad40(BC8AD40StringArray* pkArray);
+    void C8AD40BaseGetViewerStrings(StrArr* pkArray);
+    void FUN_00c8ad40(StrArr* pkArray);
 };
 
 // @fnv 0x00c8ad40
-void FUN_00c8ad40_cls::FUN_00c8ad40(BC8AD40StringArray* pkArray)
+void FUN_00c8ad40_cls::FUN_00c8ad40(StrArr* pkArray)
 {
     BC8AD40AllocTagScope kScope(0x10);
     C8AD40BaseGetViewerStrings(pkArray);
     char* pcName = FUN_00a7d330(g_pcC8AD40Name);
-    pkArray->Add(pcName);
+    AddViewerString(pkArray, pcName);
 }
 
 namespace fnv_00cc31c0 {
@@ -250,42 +207,19 @@ class CC31C0MemContext
 extern const char* g_pcCC31C0ClassName;
 extern "C" char* __cdecl FUN_00a7d330(const char* pcName);
 
-class CC31C0StrArray
-{
-  public:
-    void SetSize(unsigned int uiSize);
-    void SetAt(unsigned int uiIndex, const char* const& pcValue);
-
-    unsigned int Add(const char* const& pcValue)
-    {
-        unsigned int uiIndex = m_usSize;
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcValue);
-        return uiIndex;
-    }
-
-    void* m_ppVirtualMethodTable;
-    const char** m_ppcBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
-
 class CC31C0Object
 {
   public:
-    void GetViewerStringsBase(CC31C0StrArray* pkStrings);
-    void FUN_00cc31c0(CC31C0StrArray* pkStrings);
+    void GetViewerStringsBase(StrArr* pkStrings);
+    void FUN_00cc31c0(StrArr* pkStrings);
 };
 
 // @fnv 0x00cc31c0
-void CC31C0Object::FUN_00cc31c0(CC31C0StrArray* pkStrings)
+void CC31C0Object::FUN_00cc31c0(StrArr* pkStrings)
 {
     CC31C0MemContext kContext(0x10);
     GetViewerStringsBase(pkStrings);
-    pkStrings->Add(FUN_00a7d330(g_pcCC31C0ClassName));
+    AddViewerString(pkStrings, FUN_00a7d330(g_pcCC31C0ClassName));
 }
 }  // namespace fnv_00cc31c0
 
@@ -312,10 +246,10 @@ struct ViewerConstraint
     int priority;
     void* entityA;
     void* entityB;
-    void FUN_00c8a560(BC8AD40StringArray* array);
+    void FUN_00c8a560(StrArr* array);
 };
 // @fnv 0x00c8a560
-void ViewerConstraint::FUN_00c8a560(BC8AD40StringArray* array)
+void ViewerConstraint::FUN_00c8a560(StrArr* array)
 {
     BC8AD40AllocTagScope scope(16);
     char* text;
@@ -323,16 +257,16 @@ void ViewerConstraint::FUN_00c8a560(BC8AD40StringArray* array)
     if (object)
     {
         text = MakeViewerString("Type", TypeName(object->GetType()));
-        array->Add(text);
+        AddViewerString(array, text);
     }
     FormatViewer(buffer, 32, "0x%8X", entityA);
     text = MakeViewerString("hkpEntityA", buffer);
-    array->Add(text);
+    AddViewerString(array, text);
     FormatViewer(buffer, 32, "0x%8X", entityB);
     text = MakeViewerString("hkpEntityB", buffer);
-    array->Add(text);
+    AddViewerString(array, text);
     text = FUN_00a7d4d0("ePriority", priority);
-    array->Add(text);
+    AddViewerString(array, text);
 }
 
 // Appends this class name to the viewer strings after the base entries, under the Havok allocation tag.
@@ -354,32 +288,6 @@ struct BCC4740AllocTagScope
     }
 };
 
-class BCC4740StringArray
-{
-  public:
-    virtual ~BCC4740StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
-
 extern const char* g_pcCC4740Name;
 
 char* __cdecl FUN_00a7d330(const char* pcString);
@@ -387,22 +295,22 @@ char* __cdecl FUN_00a7d330(const char* pcString);
 class CC4740Base
 {
   public:
-    void GetViewerStrings(BCC4740StringArray* pkArray);
+    void GetViewerStrings(StrArr* pkArray);
 };
 
 class CC4740Derived : public CC4740Base
 {
   public:
-    void FUN_00cc4740(BCC4740StringArray* pkArray);
+    void FUN_00cc4740(StrArr* pkArray);
 };
 
 // @fnv 0x00cc4740
-void CC4740Derived::FUN_00cc4740(BCC4740StringArray* pkArray)
+void CC4740Derived::FUN_00cc4740(StrArr* pkArray)
 {
     BCC4740AllocTagScope kScope(0x10);
     CC4740Base::GetViewerStrings(pkArray);
     char* pcName = FUN_00a7d330(g_pcCC4740Name);
-    pkArray->Add(pcName);
+    AddViewerString(pkArray, pcName);
 }
 
 extern __declspec(thread) int g_iCC4740AllocTag;
@@ -421,31 +329,12 @@ struct CF4520AllocTagScope
 };
 extern const char* DAT_01268738;
 char* __cdecl FUN_00a7d330(const char* name);
-struct CF4520Array
-{
-    void* vtable;
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void FUN_0096ad30(unsigned int size);
-    void FUN_0096ae90(unsigned int index, char* const& item);
-    unsigned int Add(char* const& item)
-    {
-        unsigned int index = m_usSize;
-        if (index >= m_usMaxSize)
-            FUN_0096ad30(index + m_usGrowBy);
-        FUN_0096ae90(index, item);
-        return index;
-    }
-};
 // @fnv 0x00cf4520
-void __stdcall FUN_00cf4520(CF4520Array* array)
+void __stdcall FUN_00cf4520(StrArr* array)
 {
     CF4520AllocTagScope tag(16);
     char* element = FUN_00a7d330(DAT_01268738);
-    array->Add(element);
+    AddViewerString(array, element);
 }
 
 extern __declspec(thread) int g_iCCCFD0AllocTag;
@@ -464,52 +353,26 @@ struct BCCCFD0AllocTagScope
     }
 };
 
-class BCCCFD0StringArray
-{
-  public:
-    virtual ~BCCCFD0StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
-
 extern const char* g_pcCCCFD0Name;
 
 class CCCFD0Base
 {
   public:
-    void GetViewerStrings(BCCCFD0StringArray* pkStrings);
+    void GetViewerStrings(StrArr* pkStrings);
 };
 
 class CCCFD0Derived : public CCCFD0Base
 {
   public:
-    void FUN_00cccfd0(BCCCFD0StringArray* pkStrings);
+    void FUN_00cccfd0(StrArr* pkStrings);
 };
 
 // @fnv 0x00cccfd0
-void CCCFD0Derived::FUN_00cccfd0(BCCCFD0StringArray* pkStrings)
+void CCCFD0Derived::FUN_00cccfd0(StrArr* pkStrings)
 {
     BCCCFD0AllocTagScope kScope(0x10);
     CCCFD0Base::GetViewerStrings(pkStrings);
-    pkStrings->Add(FUN_00a7d330(g_pcCCCFD0Name));
+    AddViewerString(pkStrings, FUN_00a7d330(g_pcCCCFD0Name));
 }
 
 extern "C" void _ReadWriteBarrier();
@@ -533,7 +396,7 @@ struct CAA010Shell
     virtual void OpC();
     virtual void OpD();
     virtual void OpE();
-    virtual void PassArray(struct CAA010Arr* array);
+    virtual void PassArray(StrArr* array);
     void SetChildObject(CAA010Inner* inner);
 };
 
@@ -565,45 +428,26 @@ struct CAA010TagScope
     }
 };
 
-struct CAA010Arr
-{
-    int unk00;
-    int unk04;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int index, char*& value);
-    unsigned int SetAtGrow(unsigned int index, char* const& value)
-    {
-        if (index >= m_usMaxSize)
-            SetSize(index + m_usGrowBy);
-        SetAt(index, (char*&)value);
-        return index;
-    }
-};
-
 CAA010Shell* __cdecl CreateSaver(void* p);
 
 struct CAA010This
 {
     int unk00;
     void* m_pUserData;
-    void FUN_00c8a560(CAA010Arr* array);
+    void FUN_00c8a560(StrArr* array);
     CAA010Inner* GetObj()
     {
         return m_pUserData ? ((CAA010Data*)m_pUserData)->m_obj : 0;
     }
-    void FUN_00caa010(CAA010Arr* array);
+    void FUN_00caa010(StrArr* array);
 };
 
 // @fnv 0x00caa010
-void CAA010This::FUN_00caa010(CAA010Arr* array)
+void CAA010This::FUN_00caa010(StrArr* array)
 {
     CAA010TagScope scope(16);
     FUN_00c8a560(array);
-    array->SetAtGrow(array->m_usSize, FUN_00a7d550("Strength", m_pUserData ? ((CAA010Data*)m_pUserData)->m_f : 0.0f));
+    SetViewerStringAtGrow(array, array->m_usSize, FUN_00a7d550("Strength", m_pUserData ? ((CAA010Data*)m_pUserData)->m_f : 0.0f));
     CAA010Inner* inner = GetObj();
     _ReadWriteBarrier();
     if (inner)
@@ -622,7 +466,7 @@ void CAA010This::FUN_00caa010(CAA010Arr* array)
 
 extern const char* DAT_01268730;
 // @fnv 0x00cf4300
-void __stdcall FUN_00cf4300(CF4520Array* pkArray)
+void __stdcall FUN_00cf4300(StrArr* pkArray)
 
 {
 
@@ -630,5 +474,5 @@ void __stdcall FUN_00cf4300(CF4520Array* pkArray)
 
     char* pcElement = FUN_00a7d330(DAT_01268730);
 
-    pkArray->Add(pcElement);
+    AddViewerString(pkArray, pcElement);
 }

@@ -1,3 +1,19 @@
+#include "../../../../include/NiRangeLODData.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiLODData.h"
+
+struct LODObject;
+class D60Stream;
+
+// These methods are not declared by the shared header. This adapter adds no data;
+// the shared NiRangeLODData remains the sole definition of the object layout.
+class RangeLODDataOperations : public NiRangeLODData
+{
+  public:
+    void UpdateWorldRanges(const LODObject* pkLOD);
+    void SaveRanges(D60Stream& kStream);
+};
 
 // src/gamebryo2.2/corelibs/nimain/nirangeloddata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nirangeloddata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -12,36 +28,6 @@ GlobalObjectO2_00a7b610* __cdecl FUN_00a976f0()
 {
     return &g_011f5ef8;
 }
-
-struct NiPoint3
-{
-    float x, y, z;
-};
-
-struct NiLODData
-{
-    int m_base;
-    int m_ucUnknownByte;
-};
-
-struct NiRangeLODData_Range
-{
-};
-
-struct CloningProcess
-{
-};
-
-struct NiRangeLODData
-{
-    NiLODData m_base;
-    NiPoint3 m_kCenter;
-    NiPoint3 m_kWorldCenter;
-    unsigned int m_uiRangeCount;
-    NiRangeLODData_Range* m_pRanges;
-    void SetRangeCount(unsigned int uiNumRanges);
-    void CopyTo(NiRangeLODData* pkDest, CloningProcess* kCloning);
-};
 
 extern "C" void* __cdecl _memmove(void* dst, const void* src, unsigned int size);
 
@@ -70,7 +56,7 @@ void NiRangeLODData::SetRangeCount(unsigned int uiNumRanges)
             m_uiRangeCount = 0;
             return;
         }
-        NiRangeLODData_Range* pkNewRanges = (NiRangeLODData_Range*)NiMalloc(uiNumRanges << 4);
+        NiRangeLODData::Range* pkNewRanges = (NiRangeLODData::Range*)NiMalloc(uiNumRanges << 4);
         if (m_pRanges)
             _memmove(pkNewRanges, m_pRanges,
                      ((int)m_uiRangeCount < (int)uiNumRanges ? m_uiRangeCount : uiNumRanges) << 4);
@@ -80,33 +66,18 @@ void NiRangeLODData::SetRangeCount(unsigned int uiNumRanges)
     }
 }
 
-class NiObject;
-struct LODRange
-{
-    float m_fNearPlane;
-    float m_fFarPlane;
-    int _a;
-    int _b;
-};
-struct FakeLOD
-{
-    char _pad[0x20];
-    unsigned int m_uiRangeCount;
-    LODRange* m_pRanges;
-    bool Equals(NiObject* pkObject);
-};
 // @fnv 0x00a97690
-bool FakeLOD::Equals(NiObject* pkObject)
+bool __fastcall RangeLODDataEquals(NiRangeLODData* self, int, NiObject* pkObject)
 {
-    if (m_uiRangeCount != ((FakeLOD*)pkObject)->m_uiRangeCount)
+    if (self->m_uiRangeCount != ((NiRangeLODData*)pkObject)->m_uiRangeCount)
         return false;
-    FakeLOD* pkLOD = (FakeLOD*)pkObject;
+    NiRangeLODData* pkLOD = (NiRangeLODData*)pkObject;
     unsigned int i;
-    for (i = 0; i < m_uiRangeCount; i++)
+    for (i = 0; i < self->m_uiRangeCount; i++)
     {
-        if (pkLOD->m_pRanges[i].m_fNearPlane != m_pRanges[i].m_fNearPlane)
+        if (pkLOD->m_pRanges[i].m_fNearPlane != self->m_pRanges[i].m_fNearPlane)
             return false;
-        if (pkLOD->m_pRanges[i].m_fFarPlane != m_pRanges[i].m_fFarPlane)
+        if (pkLOD->m_pRanges[i].m_fFarPlane != self->m_pRanges[i].m_fFarPlane)
             return false;
     }
     return true;
@@ -118,19 +89,15 @@ struct BaseCall
 {
     void FUN_00aa09a0();
 };
-struct StandIn
-{
-    StandIn* InitializeRangeLODData();
-};
 // Calls the base initializer, installs the vtable, resets m_kCenter to zero and clears two fields, then returns this.
 // @fnv 0x00a97700
-StandIn* StandIn::InitializeRangeLODData()
+NiRangeLODData* NiRangeLODData::InitializeRangeLODData()
 {
     ((BaseCall*)this)->FUN_00aa09a0();
     *(int*)this = (int)&DAT_010a073c;
-    ((NiRangeLODData*)this)->m_kCenter = _NiPoint3_ZERO;
-    ((NiRangeLODData*)this)->m_uiRangeCount = 0;
-    ((NiRangeLODData*)this)->m_pRanges = 0;
+    m_kCenter = *(const NiPoint3*)&_NiPoint3_ZERO;
+    m_uiRangeCount = 0;
+    m_pRanges = 0;
     return this;
 }
 
@@ -141,27 +108,19 @@ struct FUN_00aa09c0_shell
 {
     void __thiscall FUN_00aa09c0();
 };
-struct FUN_00a97740_shell : NiRangeLODData
-{
-    void* __thiscall DestroyRangeLODData(unsigned int);
-};
 // Restores the base vtable, frees the stored pointer, runs base cleanup, and optionally deletes the object when flag bit 0 is set.
 // @fnv 0x00a97740
-void* __thiscall FUN_00a97740_shell::DestroyRangeLODData(unsigned int auiFlags)
+void* __fastcall DestroyRangeLODData(NiRangeLODData* self, int, unsigned int auiFlags)
 {
-    void* pk = m_pRanges;
-    *(void**)this = (void*)&DAT_010a073c;
+    void* pk = self->m_pRanges;
+    *(void**)self = (void*)&DAT_010a073c;
     _NiFreeAlias(pk);
-    ((FUN_00aa09c0_shell*)this)->FUN_00aa09c0();
+    ((FUN_00aa09c0_shell*)self)->FUN_00aa09c0();
     if (auiFlags & 1)
-        _delete(this, 0x28);
-    return this;
+        _delete(self, 0x28);
+    return self;
 }
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 struct Base00aa09a0
 {
     void FUN_00aa09a0();
@@ -176,7 +135,7 @@ NiRangeLODData* CreateRangeLODData()
     {
         ((Base00aa09a0*)p)->FUN_00aa09a0();
         *(int*)p = (int)&DAT_010a073c;
-        p->m_kCenter = _NiPoint3_ZERO;
+        p->m_kCenter = *(const NiPoint3*)&_NiPoint3_ZERO;
         p->m_uiRangeCount = 0;
         p->m_pRanges = 0;
         return p;
@@ -192,7 +151,7 @@ NiRangeLODData* __fastcall CopyRangeLODData(NiRangeLODData* self, int)
     {
         ((BaseCall*)pkData)->FUN_00aa09a0();
         *(int*)((char*)pkData + 0) = (int)&DAT_010a073c;
-        pkData->m_kCenter = _NiPoint3_ZERO;
+        pkData->m_kCenter = *(const NiPoint3*)&_NiPoint3_ZERO;
         pkData->m_uiRangeCount = 0;
         pkData->m_pRanges = 0;
     }
@@ -206,79 +165,40 @@ NiRangeLODData* __fastcall CopyRangeLODData(NiRangeLODData* self, int)
 
 const float DAT_01015f5c = -3.402823466e+38F;
 const float DAT_010a0730 = 3.402823466e+38F;
-struct RangeSelector : NiRangeLODData
-{
-    int SelectLODRange(int rank);
-};
 // @fnv 0x00a979e0
-int RangeSelector::SelectLODRange(int rank)
+int __fastcall SelectLODRange(NiRangeLODData* self, int, int rank)
 {
     if (rank <= 0)
         rank = 0;
-    rank = rank < static_cast<int>(m_uiRangeCount) - 1 ? rank : static_cast<int>(m_uiRangeCount) - 1;
+    rank = rank < static_cast<int>(self->m_uiRangeCount) - 1 ? rank : static_cast<int>(self->m_uiRangeCount) - 1;
     float threshold = DAT_01015f5c;
     int selected = -1;
     for (int step = 0; step <= rank; ++step)
     {
         float nearest = DAT_010a0730;
-        for (int index = 0; index < static_cast<int>(m_uiRangeCount); ++index)
+        for (int index = 0; index < static_cast<int>(self->m_uiRangeCount); ++index)
         {
-            if (reinterpret_cast<LODRange*>(m_pRanges)[index].m_fNearPlane > threshold &&
-                reinterpret_cast<LODRange*>(m_pRanges)[index].m_fNearPlane <= nearest)
+            if (self->m_pRanges[index].m_fNearPlane > threshold &&
+                self->m_pRanges[index].m_fNearPlane <= nearest)
             {
-                threshold = reinterpret_cast<LODRange*>(m_pRanges)[index].m_fNearPlane;
+                threshold = self->m_pRanges[index].m_fNearPlane;
                 selected = index;
-                nearest = reinterpret_cast<LODRange*>(m_pRanges)[index].m_fNearPlane;
+                nearest = self->m_pRanges[index].m_fNearPlane;
             }
         }
     }
     return selected;
 }
 
-class BA97CE0Cloning;
+extern const NiPoint3 g_kA97CE0Zero;
 
-struct BA97CE0Point3
-{
-    float x;
-    float y;
-    float z;
-};
-
-extern const BA97CE0Point3 g_kA97CE0Zero;
-
-class BA97CE0Object
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-
-    BA97CE0Object() throw();
-    virtual ~BA97CE0Object();
-
-    int m_iRefCount;
-};
-
-class BA97CE0Controller : public BA97CE0Object
-{
-  public:
-    BA97CE0Controller() throw() : m_kOffset(g_kA97CE0Zero), m_pkFirst(0), m_pkSecond(0)
-    {}
-    virtual ~BA97CE0Controller();
-
-    BA97CE0Point3 m_kOffset;
-    int unk14;
-    int unk18;
-    int unk1C;
-    void* m_pkFirst;
-    void* m_pkSecond;
-
-    void CopyMemberData(BA97CE0Controller* pkDest, BA97CE0Cloning& kCloning);
-    BA97CE0Object* FUN_00a97ce0(BA97CE0Cloning& kCloning);
-};
+inline NiRangeLODData::NiRangeLODData() throw() : m_kCenter(g_kA97CE0Zero), m_uiRangeCount(0), m_pRanges(0)
+{}
 
 // @fnv 0x00a97ce0
-BA97CE0Object* BA97CE0Controller::FUN_00a97ce0(BA97CE0Cloning& kCloning)
+NiObject* NiRangeLODData::FUN_00a97ce0(CloningProcess& kCloning)
 {
-    BA97CE0Controller* pkClone = new BA97CE0Controller;
+    NiRangeLODData* pkClone = new NiRangeLODData;
     CopyMemberData(pkClone, kCloning);
     return pkClone;
 }
@@ -479,14 +399,6 @@ struct A97E20Point3
     void LoadBinary(A97E20Stream& kStream);
 };
 
-struct A97E20Range
-{
-    float m_fNearPlane;
-    float m_fFarPlane;
-    int unk08;
-    int unk0C;
-};
-
 class A97E20LODData
 {
   public:
@@ -496,53 +408,23 @@ class A97E20LODData
     void LoadBinary(A97E20Stream& kStream);
 };
 
-class A97E20RangeLODData : public A97E20LODData
-{
-  public:
-    A97E20Point3 m_kWorldCenter;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    A97E20Range* m_pRanges;
-
-    void AllocateRanges(unsigned int uiNumRanges);
-    void FUN_00a97e20(A97E20Stream& kStream);
-};
-
 // @fnv 0x00a97e20
-void A97E20RangeLODData::FUN_00a97e20(A97E20Stream& kStream)
+void __fastcall LoadRangeLODData(NiRangeLODData* self, int, A97E20Stream& kStream)
 {
-    A97E20LODData::LoadBinary(kStream);
-    m_kWorldCenter.LoadBinary(kStream);
+    ((A97E20LODData*)self)->LoadBinary(kStream);
+    ((A97E20Point3*)&self->m_kCenter)->LoadBinary(kStream);
     unsigned int uiNumRanges;
     A97E20LoadBinary(kStream, uiNumRanges);
-    AllocateRanges(uiNumRanges);
+    self->SetRangeCount(uiNumRanges);
     for (unsigned int i = 0; i < uiNumRanges; i++)
     {
-        A97E20LoadBinary(kStream, m_pRanges[i].m_fNearPlane);
-        A97E20LoadBinary(kStream, m_pRanges[i].m_fFarPlane);
+        A97E20LoadBinary(kStream, self->m_pRanges[i].m_fNearPlane);
+        A97E20LoadBinary(kStream, self->m_pRanges[i].m_fFarPlane);
     }
 }
 
-class A09A0Object
-{
-  public:
-    A09A0Object();
-    virtual void vfunc00();
-
-    int m_uiRefCount;
-};
-
-class FUN_00aa09a0 : public A09A0Object
-{
-  public:
-    FUN_00aa09a0();
-    virtual void vfunc00();
-};
-
 // @fnv 0x00aa09a0
-FUN_00aa09a0::FUN_00aa09a0()
+__declspec(noinline) NiLODData::NiLODData()
 {}
 
 // SaveBinary: base data, the color, the key count, then the first two words of each 16-byte key.
@@ -736,61 +618,27 @@ class D60Color
     float a;
 };
 
-struct D60Key
-{
-    float m_fTime;
-    float m_fValue;
-    int unk08;
-    int unk0C;
-};
-
 class D60Base
 {
   public:
     void SaveBinary(D60Stream& kStream);
 };
 
-class D60Data : public D60Base
-{
-  public:
-    int unk00;
-    int unk04;
-    D60Color m_kFogTint;
-    int unk18;
-    int unk1C;
-    unsigned int m_uiNumKeys;
-    D60Key* m_pKeyArray;
-
-    void FUN_00a97d60(D60Stream& kStream);
-};
-
 // Saves the base data, color, key count and each key's time and value to the stream.
 // @fnv 0x00a97d60
-void D60Data::FUN_00a97d60(D60Stream& kStream)
+void RangeLODDataOperations::SaveRanges(D60Stream& kStream)
 {
-    D60Base::SaveBinary(kStream);
-    m_kFogTint.SaveBinary(kStream);
-    D60SaveBinary(*kStream.m_pBackingStream, m_uiNumKeys);
-    for (unsigned int i = 0; i < m_uiNumKeys; i++)
+    ((D60Base*)this)->SaveBinary(kStream);
+    ((D60Color*)&m_kCenter)->SaveBinary(kStream);
+    D60SaveBinary(*kStream.m_pBackingStream, m_uiRangeCount);
+    for (unsigned int i = 0; i < m_uiRangeCount; i++)
     {
-        D60SaveBinary(*kStream.m_pBackingStream, m_pKeyArray[i].m_fTime);
-        D60SaveBinary(*kStream.m_pBackingStream, m_pKeyArray[i].m_fValue);
+        D60SaveBinary(*kStream.m_pBackingStream, m_pRanges[i].m_fNearPlane);
+        D60SaveBinary(*kStream.m_pBackingStream, m_pRanges[i].m_fFarPlane);
     }
 }
 
 extern const char* DAT_011f5ef8;
-struct A97EF0Point3
-{
-    float x, y, z;
-    char* FormatToBuffer(const char* pcPrefix) const;
-};
-struct A97EF0Range
-{
-    float m_fNearPlane;
-    float m_fFarPlane;
-    int unk08;
-    int unk0C;
-};
 struct A97EF0Strings
 {
     void* m_vtbl;
@@ -843,28 +691,18 @@ struct A97EF0Strings
 };
 char* A97EF0GetViewerString(const char* pcName);
 int A97EF0Sprintf(char* buf, unsigned int size, const char* fmt, ...);
-struct A97EF0RangeLODData
-{
-    int m_base;
-    int m_ucUnknownByte;
-    A97EF0Point3 m_kCenter;
-    A97EF0Point3 m_kWorldCenter;
-    unsigned int m_uiRangeCount;
-    A97EF0Range* m_pRanges;
-    void FUN_00a97ef0(A97EF0Strings* pkStrings);
-};
 
 // Appends formatted strings for m_kCenter, m_kWorldCenter, and each range entry to pkStrings.
 // @fnv 0x00a97ef0
-void A97EF0RangeLODData::FUN_00a97ef0(A97EF0Strings* pkStrings)
+void __fastcall GetRangeLODDataViewerStrings(NiRangeLODData* self, int, A97EF0Strings* pkStrings)
 {
     pkStrings->Add(A97EF0GetViewerString(DAT_011f5ef8));
-    pkStrings->Add(m_kCenter.FormatToBuffer("m_kCenter"));
-    pkStrings->Add(m_kWorldCenter.FormatToBuffer("m_kWorldCenter"));
-    for (unsigned int i = 0; i < m_uiRangeCount; i++)
+    pkStrings->Add(((const NiPoint3*)&self->m_kCenter)->FormatToBuffer("m_kCenter"));
+    pkStrings->Add(static_cast<const NiRangeLODData*>(self)->GetWorldCenter().FormatToBuffer("m_kWorldCenter"));
+    for (unsigned int i = 0; i < self->m_uiRangeCount; i++)
     {
         char* pcRange = (char*)NiMalloc(0x80);
-        A97EF0Sprintf(pcRange, 0x80, "range[%d] = %g   %g", i, m_pRanges[i].m_fNearPlane, m_pRanges[i].m_fFarPlane);
+        A97EF0Sprintf(pcRange, 0x80, "range[%d] = %g   %g", i, self->m_pRanges[i].m_fNearPlane, self->m_pRanges[i].m_fFarPlane);
         pkStrings->AddInline(pcRange);
     }
 }
@@ -952,45 +790,21 @@ struct LODObject
         return m_kWorldSpaceTransform.m_fScale;
     }
 };
-struct WorldRange
-{
-    float m_fNearPlane;
-    float m_fFarPlane;
-    float m_fThirdWorldRangeValue;
-    float m_fFourthWorldRangeValue;
-};
-struct WorldRangeLODData
-{
-    int unk00;
-    int unk04;
-    WPoint3 m_kCenter;
-    WPoint3 m_kWorldCenter;
-    unsigned int m_uiRangeCount;
-    WorldRange* m_pRanges;
-    void FUN_00a97780(const LODObject* pkLOD);
-};
 
 // Transforms m_kCenter into m_kWorldCenter and scales each range's near and far planes by the LOD object's world scale.
 // @fnv 0x00a97780
-void WorldRangeLODData::FUN_00a97780(const LODObject* pkLOD)
+void RangeLODDataOperations::UpdateWorldRanges(const LODObject* pkLOD)
 {
     const WTransform& kWorld = pkLOD->m_kWorldSpaceTransform;
-    m_kWorldCenter = kWorld.m_kOrientation * (kWorld.m_fScale * m_kCenter) + kWorld.m_kTranslation;
+    *(WPoint3*)&GetWorldCenter() = kWorld.m_kOrientation * (kWorld.m_fScale * *(const WPoint3*)&m_kCenter) + kWorld.m_kTranslation;
     for (unsigned int i = 0; i < m_uiRangeCount; i++)
     {
-        m_pRanges[i].m_fThirdWorldRangeValue = m_pRanges[i].m_fNearPlane * kWorld.m_fScale;
-        m_pRanges[i].m_fFourthWorldRangeValue = m_pRanges[i].m_fFarPlane * kWorld.m_fScale;
+        ((float*)&m_pRanges[i])[2] = m_pRanges[i].m_fNearPlane * kWorld.m_fScale;
+        ((float*)&m_pRanges[i])[3] = m_pRanges[i].m_fFarPlane * kWorld.m_fScale;
     }
 }
 
 #include <math.h>
-struct S_00a97910_Range
-{
-    int unk00;
-    int unk04;
-    float unk08;
-    float unk0c;
-};
 
 struct S_00a97910_Object
 {
@@ -1065,34 +879,18 @@ struct S_00a97910_Object
     float unk110;
 };
 
-struct S_00a97910
-{
-    int unk00;
-    int unk04;
-    float unk08;
-    float unk0c;
-    float unk10;
-    float unk14;
-    float unk18;
-    float unk1c;
-    unsigned int unk20;
-    S_00a97910_Range* unk24;
-
-    int FindRangeIndex(S_00a97910_Object* object, float unused);
-};
-
 struct S_P3
 {
     float x, y, z;
 };
 // Computes a scaled absolute dot product and returns the first index whose lower bound is at most it and upper bound is greater.
 // @fnv 0x00a97910
-int S_00a97910::FindRangeIndex(S_00a97910_Object* object, float unused)
+int __fastcall FindRangeIndex(NiRangeLODData* self, int, S_00a97910_Object* object, float unused)
 {
     S_P3 vOffset;
-    vOffset.x = unk14 - object->unk8c;
-    vOffset.y = unk18 - object->unk90;
-    vOffset.z = unk1c - object->unk94;
+    vOffset.x = self->GetWorldCenter().x - object->unk8c;
+    vOffset.y = self->GetWorldCenter().y - object->unk90;
+    vOffset.z = self->GetWorldCenter().z - object->unk94;
     S_P3 r;
     r.x = object->unk68;
     r.y = object->unk74;
@@ -1100,12 +898,12 @@ int S_00a97910::FindRangeIndex(S_00a97910_Object* object, float unused)
     float distance = r.y * vOffset.y + r.x * vOffset.x + r.z * vOffset.z;
     distance *= object->unk110;
     distance = fabs(distance);
-    for (unsigned int i = 0; i < unk20; ++i)
+    for (unsigned int i = 0; i < self->m_uiRangeCount; ++i)
     {
-        S_00a97910_Range* range = unk24 + i;
-        if (!(range->unk08 <= distance))
+        NiRangeLODData::Range* range = self->m_pRanges + i;
+        if (!(*(float*)&range->unusedA <= distance))
             continue;
-        if (range->unk0c > distance)
+        if (*(float*)&range->unusedB > distance)
             return (int)i;
     }
     return -1;

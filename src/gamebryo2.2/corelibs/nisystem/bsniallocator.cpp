@@ -1,12 +1,9 @@
+#include "../../../../include/MemoryManager.h"
 
 // src/gamebryo2.2/corelibs/nisystem/bsniallocator.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nisystem/bsniallocator.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct MM
-{
-    void _DeallocateAlias(void*);
-};
-extern MM g_memoryManager;
+extern MemoryManager g_memoryManager;
 struct BSNiAllocator
 {
     void FUN_00aa22b0(void* pvMemory, int aiAllocationType, unsigned int stSizeInBytes);
@@ -30,10 +27,6 @@ void BSNiAllocator::FUN_00aa22b0(void* pvMemory, int aiAllocationType, unsigned 
 }
 
 namespace fnv_00aa23e0 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 // @fnv 0x00aa23e0
 void __stdcall FUN_00aa23e0(void* pvMemory, int aiAllocationType, unsigned int stSizeInBytes)
@@ -51,10 +44,6 @@ void __stdcall FUN_00aa23e0(void* pvMemory, int aiAllocationType, unsigned int s
 }  // namespace fnv_00aa23e0
 
 namespace fnv_00aa24a0 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 extern int DAT_010a24d0;
 struct BSNiAllocator
@@ -72,20 +61,11 @@ void* BSNiAllocator::Destroy(unsigned int flags)
 }
 }  // namespace fnv_00aa24a0
 
-struct SpawnHeap_cls
-{
-    char* __thiscall FUN_00aa4150(char* pBase, int iSize);
-    char* __thiscall FUN_00aa4200(char* pBlock, int a2, int a3, int a4, int a5);
-};
-
-extern MM g_memoryManager;
-
-// For eType 8, reallocates pBlock with extra *pAdjust bytes and fixes the header offset; otherwise forwards to FUN_00aa4200.
+// For eType 8, reallocates pBlock with extra *pAdjust bytes and fixes the header offset; otherwise uses tracked reallocation.
 // @fnv 0x00aa22f0
 char* __stdcall ResizeHeapBlock(char* pBlock, int* pSize, unsigned char* pAdjust, int eType, int a5, int a6, int a7,
                                 int a8, int a9)
 {
-    SpawnHeap_cls* heap = reinterpret_cast<SpawnHeap_cls*>(&g_memoryManager);
     if (eType == 8)
     {
         int sz = *pSize;
@@ -94,7 +74,7 @@ char* __stdcall ResizeHeapBlock(char* pBlock, int* pSize, unsigned char* pAdjust
         {
             unsigned char ucHeader = (unsigned char)pBlock[-1];
             char* base = pBlock - ucHeader;
-            char* r = heap->FUN_00aa4150(base, ucAdjust + sz);
+            char* r = (char*)g_memoryManager.Reallocate(base, ucAdjust + sz);
             unsigned char adj = ucAdjust - (unsigned char)((ucAdjust - 1) & (unsigned char)(unsigned long)r);
             r += adj;
             r[-1] = (char)adj;
@@ -102,17 +82,8 @@ char* __stdcall ResizeHeapBlock(char* pBlock, int* pSize, unsigned char* pAdjust
         }
         return 0;
     }
-    return heap->FUN_00aa4200(pBlock, *pSize, a7, a8, a9);
+    return (char*)g_memoryManager.Reallocate(pBlock, *pSize, (char*)a7, a8, (char*)a9);
 }
-
-struct NiAllocGlobal
-{
-    int unk00;
-    unsigned int FUN_00aa3e40(unsigned int size);
-    unsigned int FUN_00aa4030(unsigned int size, int a5, int a6, int a7);
-};
-
-extern NiAllocGlobal DAT_011f6238;
 
 void FUN_00ec61c0(unsigned int p, int zero, unsigned int v);
 
@@ -125,29 +96,20 @@ unsigned int __stdcall AllocateAlignedBuffer(unsigned int* puiSize, unsigned cha
     {
         unsigned int uiSize = *puiSize;
         unsigned char ucAlignByte = *pucAlignByte;
-        unsigned int base = DAT_011f6238.FUN_00aa3e40(uiSize + ucAlignByte);
+        unsigned int base = (unsigned int)g_memoryManager.Allocate(uiSize + ucAlignByte);
         unsigned char adj = (unsigned char)(ucAlignByte - ((ucAlignByte - 1) & (unsigned char)base));
         *(unsigned char*)(base + adj - 1) = adj;
         r = base + adj;
     }
     else
     {
-        r = DAT_011f6238.FUN_00aa4030(*puiSize, a5, a6, a7);
+        r = (unsigned int)g_memoryManager.Allocate(*puiSize, (const char*)a5, a6, (const char*)a7);
     }
     FUN_00ec61c0(r, 0, *puiSize);
     return r;
 }
 
 extern "C" void* __cdecl MemSetAA2(void* pvDest, int iValue, unsigned int uiSize);
-
-class MemoryManagerAA2
-{
-  public:
-    void* RawAllocate(unsigned int uiSize);
-    void* Allocate(unsigned int uiSize, const char* pcFile, int iLine, const char* pcFunction);
-};
-
-extern MemoryManagerAA2 g_kMemoryManagerAA2;
 
 enum NiMemEventTypeAA2
 {
@@ -161,7 +123,7 @@ enum NiMemEventTypeAA2
     NI_ALIGNEDMALLOC
 };
 
-// Allocates memory (aligned or plain) via g_kMemoryManagerAA2, zeroes stSizeInBytes bytes, and returns the pointer.
+// Allocates memory (aligned or plain) via g_memoryManager, zeroes stSizeInBytes bytes, and returns the pointer.
 // @fnv 0x00aa2240
 void* __stdcall AllocateZeroedMemory(unsigned int& stSizeInBytes, unsigned int& stAlignment,
                                      NiMemEventTypeAA2 eMemEventType, bool bProvideAccurateSizeOnDeallocate,
@@ -172,7 +134,7 @@ void* __stdcall AllocateZeroedMemory(unsigned int& stSizeInBytes, unsigned int& 
     {
         unsigned int stSize = stSizeInBytes;
         unsigned char ucAlignment = (unsigned char)stAlignment;
-        char* pcMem = (char*)g_kMemoryManagerAA2.RawAllocate(stSize + ucAlignment);
+        char* pcMem = (char*)g_memoryManager.Allocate(stSize + ucAlignment);
         unsigned char ucOffset = ucAlignment - ((ucAlignment - 1) & (unsigned char)(unsigned int)pcMem);
         pcMem += ucOffset;
         pcMem[-1] = ucOffset;
@@ -180,20 +142,11 @@ void* __stdcall AllocateZeroedMemory(unsigned int& stSizeInBytes, unsigned int& 
     }
     else
     {
-        pvMem = g_kMemoryManagerAA2.Allocate(stSizeInBytes, pcFile, iLine, pcFunction);
+        pvMem = g_memoryManager.Allocate(stSizeInBytes, pcFile, iLine, pcFunction);
     }
     MemSetAA2(pvMem, 0, stSizeInBytes);
     return pvMem;
 }
-
-class BAA2420MemoryManager
-{
-  public:
-    void* Reallocate(void* pvMem, unsigned int uiSize);
-    void* ReallocateTracked(void* pvMem, unsigned int uiSize, const char* pcFile, int iLine, const char* pcFunction);
-};
-
-extern BAA2420MemoryManager g_kAA2420MemoryManager;
 
 // @fnv 0x00aa2420
 void* __stdcall FUN_00aa2420(void* pvMem, unsigned int& uiSize, unsigned char& ucAlignment, int aiAllocationType,
@@ -207,7 +160,7 @@ void* __stdcall FUN_00aa2420(void* pvMem, unsigned int& uiSize, unsigned char& u
         if (pvMem)
         {
             char* pcBase = (char*)pvMem - ((unsigned char*)pvMem)[-1];
-            char* pcNew = (char*)g_kAA2420MemoryManager.Reallocate(pcBase, ucAlign + uiNewSize);
+            char* pcNew = (char*)g_memoryManager.Reallocate(pcBase, ucAlign + uiNewSize);
             unsigned char ucOffset = ucAlign - ((ucAlign - 1) & (unsigned char)(unsigned int)pcNew);
             pcNew += ucOffset;
             pcNew[-1] = ucOffset;
@@ -215,5 +168,5 @@ void* __stdcall FUN_00aa2420(void* pvMem, unsigned int& uiSize, unsigned char& u
         }
         return 0;
     }
-    return g_kAA2420MemoryManager.ReallocateTracked(pvMem, uiSize, pcFile, iLine, pcFunction);
+    return g_memoryManager.Reallocate(pvMem, uiSize, const_cast<char*>(pcFile), iLine, const_cast<char*>(pcFunction));
 }

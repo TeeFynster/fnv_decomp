@@ -1,7 +1,37 @@
 // fallout/interface/menuconsole.cpp: ConsoleManager, ListHead, ConsoleDisplay, DumpConsole (13 functions)
 
+#include "menuconsole_support.h"
+#include "../../../include/BSFaceGenNiNode.h"
+#include "../../../include/BookMenu.h"
+#include "../../../include/DebugText.h"
+#include "../../../include/FontManager.h"
+#include "../../../include/Menu.h"
+#include "../../../include/NiCamera.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/Script.h"
+#include "../../../include/ScriptCompiler.h"
+#include "../../../include/SkyObject.h"
+#include "../../../include/StartMenu.h"
+#include "../../../include/TESDataHandler.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESObjectBOOK.h"
+#include "../../../include/TESObjectCELL.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESResponse.h"
+#include "../../../include/TESTopicInfo.h"
+#include "../../../include/Tile.h"
+// TileListBoxCalls_menuconsole: local type (was include/TileListBoxCalls.h, which had no evidence of one real class); its methods are 0x00a011b0 Tile::GetFloat
+#include "../../../include/Tile.h"
+
+class TileListBoxCalls_menuconsole : public Tile
+{
+  public:
+    float GetFloat(int trait);
+};
+#include "../../../include/TileMenu.h"
 #include "menuconsole_idle.h"
 #include "menuconsole_decls.h"
+#include "../../../include/Font.h"
 
 ConsoleManager* ConsoleManager::pInstance = 0;
 
@@ -105,13 +135,13 @@ bool ConsoleManager::Idle(int aiKeyCode)
                     sscanf(text, "dof %f", &distance);
                     NiFrustum frustum =
                         reinterpret_cast<NiCamera*>(
-                            reinterpret_cast<BSFaceGenNiNode*>(reinterpret_cast<SkyObject*>(manager)->GetRoot())
-                                ->GetAnimationData())
+                            reinterpret_cast<BSFaceGenNiNode*>(reinterpret_cast<SkyObject*>(manager)->SkyObject::GetRoot())
+                                ->BSFaceGenNiNode::GetAnimationData())
                             ->GetViewFrustum();
                     frustum.m_fFarPlane = distance;
                     reinterpret_cast<NiCamera*>(
-                        reinterpret_cast<BSFaceGenNiNode*>(reinterpret_cast<SkyObject*>(manager)->GetRoot())
-                            ->GetAnimationData())
+                        reinterpret_cast<BSFaceGenNiNode*>(reinterpret_cast<SkyObject*>(manager)->SkyObject::GetRoot())
+                            ->BSFaceGenNiNode::GetAnimationData())
                         ->UpdateViewFrustum(frustum);
                 }
                 else if (!FUN_0071cff0(text, "usz", 3))
@@ -140,9 +170,9 @@ bool ConsoleManager::Idle(int aiKeyCode)
                     {
                         BSStringT<char> label;
                         label.PrintfString("\"%s\" (%08x)", reference->GetFullName(), reference->GetFormID());
-                        void* node = DynamicCastByRTTI(&DAT_011f4428, reference->GetNiNode_v());
+                        void* node = DynamicCastByRTTI(&DAT_011f4428, reference->GetNiNode());
                         if (!node)
-                            node = DynamicCastByRTTI(&DAT_011f4428, reference->GetNiNode_v()->GetParent());
+                            node = DynamicCastByRTTI(&DAT_011f4428, reference->GetNiNode()->GetParent());
                         DebugText::FUN_00a10c00(node, label.String(), 0, -1.0f);
                     }
                 }
@@ -256,7 +286,7 @@ bool ConsoleManager::Idle(int aiKeyCode)
                 {
                     FUN_0071d030(this, "Max Depth: %i", (int)Tile::GetInterfaceScale());
                     FUN_0071d030(this, "Cursor Depth: %i",
-                                 (int)reinterpret_cast<TileListBoxCalls*>(
+                                 (int)reinterpret_cast<TileListBoxCalls_menuconsole*>(
                                      reinterpret_cast<TESResponse*>(FUN_004b7210())->GetNext())
                                      ->GetFloat(4013));
                 }
@@ -314,10 +344,10 @@ bool ConsoleManager::Idle(int aiKeyCode)
                                 char alternateName[260];
                                 alternateName[0] = ""[0];
                                 fnv_zlib_memset(alternateName + 1, 0, 259);
-                                strcat_s(primaryName, 260, filename);
+                                console_crt::strcat_s(primaryName, 260, filename);
                                 batch.file = new BSFile(primaryName, NiFile::READ_ONLY, 16384, false);
                                 batch.filenameLength = BSStringLength(filename);
-                                if (!batch.file || !batch.file->vfn_20(false, false))
+                                if (!batch.file || !batch.file->Open(false, false))
                                 {
                                     if (batch.filenameLength <= 4 ||
                                         _mbsnicmp((const unsigned char*)(filename + batch.filenameLength - 4),
@@ -325,11 +355,11 @@ bool ConsoleManager::Idle(int aiKeyCode)
                                     {
                                         delete batch.file;
                                         TaskQueueInterface::CopyStringToBuffer(alternateName, 260, primaryName);
-                                        strcat_s(alternateName, 260, ".txt");
+                                        console_crt::strcat_s(alternateName, 260, ".txt");
                                         batch.file = new BSFile(alternateName, NiFile::READ_ONLY, 16384, false);
                                     }
                                 }
-                                if (!batch.file || !batch.file->vfn_20(false, false))
+                                if (!batch.file || !batch.file->Open(false, false))
                                 {
                                     if (BSStringLength(alternateName))
                                         DebugLog("Neither file '%s' or '%s' could be opened.", primaryName,
@@ -340,7 +370,7 @@ bool ConsoleManager::Idle(int aiKeyCode)
                                 else
                                 {
                                     char batchLine[2600];
-                                    while (batch.file->vfn_34(batchLine, 2600, '\r'))
+                                    while (batch.file->GetLine(batchLine, 2600, '\r'))
                                     {
                                         for (int i = 0; i < strlen(batchLine); i++)
                                             if (batchLine[i] == '\n')
@@ -351,7 +381,7 @@ bool ConsoleManager::Idle(int aiKeyCode)
                                             Script script;
                                             script.NotifySaveLoadGameOfFormChange();
                                             script.SetText(batchLine);
-                                            script.CompileScriptText(m_pScriptCompiler, COMPILER_NAME_CONSOLE,
+                                            script.CompileScriptText(m_pScriptCompiler, COMPILER_NAME_SYSTEM_WINDOW_COMPILER,
                                                                      FUN_004b7210()->FUN_007031c0());
                                         }
                                     }
@@ -386,7 +416,7 @@ bool ConsoleManager::Idle(int aiKeyCode)
                         else
                         {
                             BSFile* file = new BSFile(filename, NiFile::WRITE_ONLY, 4096, true);
-                            if (!file || !file->vfn_20(false, false))
+                            if (!file || !file->Open(false, false))
                                 DebugLog("The file '%s' could not be opened.", filename);
                             else
                             {
@@ -394,7 +424,7 @@ bool ConsoleManager::Idle(int aiKeyCode)
                                 {
                                     char batchLine[100];
                                     sprintf_s(batchLine, 100, "%s\r\n", m_aacCommandHistory[i]);
-                                    file->FUN_00473180(batchLine, BSStringLength(batchLine));
+                                    file->FUN_00473180(static_cast<const void*>(batchLine), BSStringLength(batchLine));
                                 }
                                 file->Close();
                                 DebugLog("Batch file '%s' created.", filename);
@@ -424,7 +454,7 @@ bool ConsoleManager::Idle(int aiKeyCode)
                     Script script;
                     script.NotifySaveLoadGameOfFormChange();
                     script.SetText(text);
-                    script.CompileScriptText(m_pScriptCompiler, COMPILER_NAME_CONSOLE, FUN_004b7210()->FUN_007031c0());
+                    script.CompileScriptText(m_pScriptCompiler, COMPILER_NAME_SYSTEM_WINDOW_COMPILER, FUN_004b7210()->FUN_007031c0());
                 }
             }
         }
@@ -616,18 +646,6 @@ class GlobalObject_0048f200
     ~GlobalObject_0048f200();
 };
 
-struct DummyFont
-{
-    float FUN_005bd580();
-};
-
-struct DummyFontManager
-{
-    DummyFont* FUN_005bd5c0(int);
-};
-
-DummyFontManager* __cdecl FUN_005bd5b0();
-
 struct GlobalObject_0048f200_d0071b020 : GlobalObject_0048f200
 {
     ~GlobalObject_0048f200_d0071b020();
@@ -663,7 +681,7 @@ FUN_0071af10::FUN_0071af10()
     f24 = 0;
     f38 = 0;
     f1c = 0;
-    f2c = (int)FUN_005bd5b0()->FUN_005bd5c0(DAT_011d8d38.Int()->i - 1)->FUN_005bd580() + 3;
+    f2c = (int)FontManager::Instance()->GetFont(DAT_011d8d38.Int()->i - 1)->GetHeight() + 3;
     f30 = g_011d8d44.Int()->i;
     f34 = g_011d8d08.Int()->i;
     f3a = 0;
@@ -682,25 +700,25 @@ void FUN_0071d750_shell::ClearField()
     ((int*)this)[0x3c] = 0;
 }
 
-struct ListNode
+struct ConsoleListNode
 {
-    ListNode* next;
+    ConsoleListNode* next;
 };
 struct ListHead
 {
-    ListNode* head;
-    ListNode* tail;
+    ConsoleListNode* head;
+    ConsoleListNode* tail;
     int count;
     void Clear();
-    void FUN_0071e0f0(ListNode*);
+    void FUN_0071e0f0(ConsoleListNode*);
 };
 // @fnv 0x0071e070
 void ListHead::Clear()
 {
-    ListNode* pkNode = head;
+    ConsoleListNode* pkNode = head;
     while (pkNode != 0)
     {
-        ListNode* pkTemp = pkNode;
+        ConsoleListNode* pkTemp = pkNode;
         pkNode = pkNode->next;
         FUN_0071e0f0(pkTemp);
     }
@@ -722,7 +740,8 @@ void __thiscall FUN_0071b020_shell::FUN_0071b020()
 }
 
 void FUN_00703310(int);
-struct ArrSI
+// Exe 0x0071d770: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct MenuconsoleOffset08View
 {
     unsigned int GetFlags();
 };
@@ -737,26 +756,30 @@ void FUN_0071d770_shell::FUN_0071d770()
     {
         DebugText::Instance(true)->Print("|", (float)m_iConsoleX, (float)m_iConsoleY, 1, -1, -1.0f,
                                          DAT_011d8d38.Int()->i, 0);
-        ((InterfaceManager*)this)->SetNamedMenuOption(((ArrSI*)((char*)this + 4))->GetFlags());
+        ((InterfaceManager*)this)->SetNamedMenuOption(((MenuconsoleOffset08View*)((char*)this + 4))->GetFlags());
         ResetOutputState();
         FUN_00703310(0);
     }
 }
 
+// Console-only API absent from the shared DebugText declaration.
+class ConsoleDebugText : public DebugText
+{
+  public:
+    void ClearConsoleLines();
+};
+
 namespace fnv_0071d620 {
-struct Interface
+// Exe 0x0071d620: unit-local MenuconsoleInterfaceView view used by this matched implementation.
+struct MenuconsoleInterfaceView
 {
     static void __cdecl PrintDebugMessage();
 };
 
-struct ArrSI
+// Exe 0x0071d620: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct MenuconsoleOffset08View
 {
     unsigned int GetFlags();
-};
-
-struct FUN_00a0de80_shell
-{
-    void FUN_00a0de80();
 };
 
 struct FUN_0071d750_shell
@@ -764,11 +787,9 @@ struct FUN_0071d750_shell
     void ClearField();
 };
 
-extern const char $SG3295[];
-
 InterfaceManager* __cdecl _FUN_004b7210();
 
-struct FUN_0071d620_shell : public InterfaceManager
+struct FUN_0071d620_shell
 {
     unsigned char layoutPadding[0x30];
     int m_iConsoleX;
@@ -789,26 +810,26 @@ void FUN_0071d620_shell::FUN_0071d620(char acState)
     {
         if (acState > 0)
         {
-            Interface::PrintDebugMessage();
+            MenuconsoleInterfaceView::PrintDebugMessage();
 
             if (_FUN_004b7210()->FUN_007023a0())
             {
                 DebugText::Instance(true)->Print("|", (float)m_iConsoleX, (float)m_iConsoleY, 1, -1, -1.0f,
                                                  DAT_011d8d38.Int()->i, 0);
 
-                SetNamedMenuOption(reinterpret_cast<ArrSI*>(reinterpret_cast<char*>(this) + 4)->GetFlags());
+                reinterpret_cast<InterfaceManager*>(this)->SetNamedMenuOption(reinterpret_cast<MenuconsoleOffset08View*>(reinterpret_cast<char*>(this) + 4)->GetFlags());
             }
             else
             {
-                DebugText::Instance(true)->Print($SG3295, (float)m_iConsoleX, (float)m_iConsoleY, 1, -1, -1.0f, 0, 0);
+                DebugText::Instance(true)->Print("", (float)m_iConsoleX, (float)m_iConsoleY, 1, -1, -1.0f, 0, 0);
             }
 
             reinterpret_cast<ConsoleManager*>(this)->ResetOutputState();
         }
         else
         {
-            Interface::PrintDebugMessage();
-            reinterpret_cast<FUN_00a0de80_shell*>(DebugText::Instance(true))->FUN_00a0de80();
+            MenuconsoleInterfaceView::PrintDebugMessage();
+            static_cast<ConsoleDebugText*>(DebugText::Instance(true))->ClearConsoleLines();
             reinterpret_cast<FUN_0071d750_shell*>(_FUN_004b7210())->ClearField();
         }
     }
@@ -1037,15 +1058,9 @@ struct DumpWorld
     int unk00, unk04, unk08, unk0c, unk10, unk14;
     DumpFullName name;
 };
-struct DumpCell
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14;
-    DumpFullName name;
-    DumpWorld* FUN_0054ddd0();
-};
 struct DumpTES
 {
-    DumpCell* FUN_00457070();
+    TESObjectCELL* FUN_00457070();
     int FUN_0059bb30();
     int FUN_0045cd60();
 };
@@ -1098,7 +1113,7 @@ void DumpConsole::DumpLoadedTextures()
             a1 = a1->FUN_0055b980();
         }
         a8 = new BSFile("textures.txt", NiFile::WRITE_ONLY, 0x1000, true);
-        if (!a8 || !a8->vfn_20(false, false))
+        if (!a8 || !a8->Open(false, false))
         {
             DebugLog("The file textures.txt could not be opened.");
             return;
@@ -1109,13 +1124,13 @@ void DumpConsole::DumpLoadedTextures()
             sprintf_s(
                 buffer, 1024,
                 "Texture dump for cell: %s grid: (%d, %d) worldspace: %s \n---------------------------------------\n",
-                g_TES->FUN_00457070() ? g_TES->FUN_00457070()->name.FUN_00408da0() : "{unknown}", g_TES->FUN_0059bb30(),
+                g_TES->FUN_00457070() ? g_TES->FUN_00457070()->TESFullName::GetFullName() : "{unknown}", g_TES->FUN_0059bb30(),
                 g_TES->FUN_0045cd60(),
-                g_TES->FUN_00457070() ? (g_TES->FUN_00457070()->FUN_0054ddd0()
-                                             ? g_TES->FUN_00457070()->FUN_0054ddd0()->name.FUN_00408da0()
+                g_TES->FUN_00457070() ? (g_TES->FUN_00457070()->GetParentWorldSpace()
+                                             ? reinterpret_cast<DumpWorld*>(g_TES->FUN_00457070()->GetParentWorldSpace())->name.FUN_00408da0()
                                              : "{unknown}")
                                       : "{unknown}");
-            a8->FUN_00473180(buffer, BSStringLength(buffer));
+            a8->FUN_00473180(static_cast<const void*>(buffer), BSStringLength(buffer));
             {
                 for (int k = 0; k < 200 && a0[k]; k++)
                 {
@@ -1123,11 +1138,11 @@ void DumpConsole::DumpLoadedTextures()
                     unsigned int name;
                     name = a0[k]->FUN_0059bb30();
                     a7 = a0[k]->v9c()->FUN_0043b1b0();
-                    a8->FUN_00473180(buffer, BSStringLength(buffer));
+                    a8->FUN_00473180(static_cast<const void*>(buffer), BSStringLength(buffer));
                 }
             }
             sprintf_s(buffer, 1024, "---------------------------------------\nTotal memory: %dkb", a6);
-            a8->FUN_00473180(buffer, BSStringLength(buffer));
+            a8->FUN_00473180(static_cast<const void*>(buffer), BSStringLength(buffer));
             a8->Close();
             DebugLog("200 largest loaded textures dumped to the file textures.txt.");
         }

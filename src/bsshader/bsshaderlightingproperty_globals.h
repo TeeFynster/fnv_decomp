@@ -1,12 +1,7 @@
 #ifndef BSSHADERLIGHTINGPROPERTY_GLOBALS_H
 #define BSSHADERLIGHTINGPROPERTY_GLOBALS_H
 
-class RecursiveSpinLock
-{
-  public:
-    unsigned int m_lock;
-    void Lock(const char* name);
-};
+#include "../../include/RecursiveSpinLock.h"
 extern unsigned int DAT_011c5f84;
 inline bool bsshaderlightingproperty_IsActive(ShadowSceneLight* light)
 {

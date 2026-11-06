@@ -1,6 +1,8 @@
+#include "../../../../../include/hkArray.h"
 // havok/common/serialize/copier/hkobjectcopier.cpp: Object, Host (12 functions)
 
 #include "fnv_asm_helpers.h"
+#include "../../../../../include/Pair.h"
 // src/havok/common/serialize/copier/hkobjectcopier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/copier/hkobjectcopier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -53,21 +55,22 @@ struct E04A00Entry {
     void* m_iFourthElementInteger;
 };
 
-struct E04A00EntryArray {
-    E04A00Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+typedef hkArray<E04A00Entry> E04A00EntryArray;
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+return reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap());
+}
+template<> __forceinline void hkArrayBase<E04A00Entry>::_pushBack(hkMemoryAllocator& sharedAlloc, E04A00Entry const& e)
+{
+E04A00Allocator& alloc = reinterpret_cast<E04A00Allocator&>(sharedAlloc);
 
-    void _pushBack(E04A00Allocator& alloc, const E04A00Entry& e)
-    {
         if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
             ResizeAudioStream(&alloc, this, sizeof(E04A00Entry));
         m_data[m_iElementCount] = e;
         m_iElementCount++;
-    }
+    
+}
 
-    void AddBack(const E04A00Entry& e) { _pushBack(FUN_00c85750().heap(), e); }
-};
 
 struct E04A00Registry {
     int unk00;
@@ -87,7 +90,7 @@ void E04A00Registry::AddEntry(void* a, void* b, void* c, void* d)
     e.m_kPointB = b;
     e.m_iThirdValue = c;
     e.m_iFourthElementInteger = d;
-    m_entries.AddBack(e);
+    m_entries.pushBack(e);
 }
 
 // FUN_00e03100
@@ -145,14 +148,9 @@ struct Writer {
     void write(const void* data, int elemSize, int count);
 };
 
-struct Pair {
-    unsigned int lo;
-    unsigned int hi;
-};
-
 extern "C" unsigned int* __cdecl FNV_e03300_arena();
 
-// Writes count unsigned ints to w; when elemSize is not 4, widens each into a Pair (lo=data[i], hi=0) from arena memory and writes that instead.
+// Writes count unsigned ints to w; when elemSize is not 4, widens each into a Pair (a=data[i], b=0) from arena memory and writes that instead.
 // @fnv 0x00e03300
 static __declspec(noinline) void WriteUIntArray(const unsigned int* data, int count,
                                              Writer* pWriter, int elemSize)
@@ -166,8 +164,8 @@ static __declspec(noinline) void WriteUIntArray(const unsigned int* data, int co
     *pArena = base + (((unsigned int)count * 8 + 0x7f) & 0xffffff80u);
     Pair* pPairs = (Pair*)base;
     for (int i = 0; i < count; i++) {
-        pPairs[i].lo = data[i];
-        pPairs[i].hi = 0;
+        pPairs[i].a = data[i];
+        pPairs[i].b = 0;
     }
     pWriter->write(pPairs, elemSize, count);
     *FNV_e03300_arena() = base;
@@ -354,13 +352,13 @@ struct Reader
     virtual int GetReadOffset();
 };
 
-struct CharArray
-{
+struct CharArrayLocalForm
+{ // local form of hkArray: 0x00e03360 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     char* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    CharArray() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
+    CharArrayLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
     __forceinline void destroy(HeapAlloc* h)
     {
         m_iElementCount = 0;
@@ -384,7 +382,7 @@ struct CharArray
     }
 };
 
-struct LocalCharArray : CharArray
+struct LocalCharArray : CharArrayLocalForm
 {
     char* m_localMem;
 
@@ -647,8 +645,8 @@ static __declspec(noinline) void WriteUIntArray(int count, const unsigned int* d
         *arena += (count * 8 + 127) & ~127;
         Pair* output = (Pair*)saved;
         for (int index = 0; index < count; ++index) {
-            output[index].lo = data[index];
-            output[index].hi = 0;
+            output[index].a = data[index];
+            output[index].b = 0;
         }
         w->write(output, elemSize, count);
         *FNV_e03300_arena() = saved;

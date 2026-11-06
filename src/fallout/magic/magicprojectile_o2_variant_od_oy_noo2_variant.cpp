@@ -16,11 +16,8 @@ struct FUN_0081aa80_shell
 };
 
 #include <xmmintrin.h>
-class Point80F
-{
-  public:
-    float x, y, z;
-};
+#include "../../../include/NiPoint3.h"
+#include "../../../include/Actor.h"
 
 class Filter80F
 {
@@ -123,7 +120,7 @@ class ControllerInfo80F
     ~ControllerInfo80F();
     void SetScale(float fScale);
     void SetNode(Node80F* pkNode);
-    void SetPosition(const Point80F* pkPos);
+    void SetPosition(const NiPoint3* pkPos);
     void SetWorld(World80F* pkWorld);
     void SetHeight(float m_fGlyphExtent);
     void SetShape(Shape80F* pkShape);
@@ -144,7 +141,7 @@ class ControllerInfo80F
     __m128 m_qb0;
 };
 
-class Actor80F;
+class BallProjectilePhysicsView;
 
 class Controller80F
 {
@@ -204,17 +201,17 @@ class Controller80F
     virtual void SetState(int iState);
     static void* operator new(unsigned int uiSize);
     static void operator delete(void* pvMem);
-    Controller80F(ControllerInfo80F& kInfo, Actor80F* pkActor);
+    Controller80F(ControllerInfo80F& kInfo, BallProjectilePhysicsView* pkActor);
     void SetGravity(float afGravity);
     void SetEnabled(bool bEnabled);
     void SetMode(int iMode);
-    void SetActor(Actor80F* pkActor);
+    void SetActor(BallProjectilePhysicsView* pkActor);
     void SetFallDistance(float fDistance);
     World80F* GetWorld();
     void SetWorld(World80F* pkWorld);
     Node80F* GetNode();
     void SetNode(Node80F* pkNode);
-    void SetPosition(Point80F& kPos);
+    void SetPosition(NiPoint3& kPos);
     Filter80F GetFilter();
     unsigned int unk04;
     unsigned int unk08;
@@ -952,7 +949,8 @@ class Owner80F
     virtual Target80F* GetTarget();
 };
 
-class Actor80F
+// Physics view of MagicBallProjectile: original RTTI vtable 0x0107A554 binds FUN_0080feb0 at slot 0x1C4, not Actor.
+class BallProjectilePhysicsView
 {
   public:
     virtual void v000();
@@ -1080,7 +1078,7 @@ class Actor80F
     virtual void v1e8();
     virtual void v1ec();
     virtual void v1f0();
-    virtual const Point80F* GetPos();
+    virtual const NiPoint3* GetPos();
     Controller80F* GetController();
     Middle80F* GetMiddle();
     Owner80F* GetOwner();
@@ -1130,7 +1128,7 @@ void __cdecl FUN_00c69ee0(Node80F* pkNode, int iA, int iB);
 void __cdecl FUN_00c69f50(Node80F* pkNode, int iA, int iB);
 
 // @fnv 0x0080feb0
-void Actor80F::FUN_0080feb0()
+void BallProjectilePhysicsView::FUN_0080feb0()
 {
     if (!m_pkProcess || m_pkProcess->IsDead())
         return;
@@ -1206,7 +1204,7 @@ void Actor80F::FUN_0080feb0()
             FUN_00c6a350(pkNode, 4, 1, 0, 1);
             bReset = true;
         }
-        Point80F kPos = *GetPos();
+        NiPoint3 kPos = *GetPos();
         if (pkOldWorld != pkWorld)
         {
             if (pkOldWorld)
@@ -1232,11 +1230,6 @@ void Actor80F::FUN_0080feb0()
 }
 
 namespace fnv_00813f30 {
-class Point80F
-{
-  public:
-    float x, y, z;
-};
 
 class Filter80F
 {
@@ -1339,7 +1332,7 @@ class ControllerInfo80F
     ~ControllerInfo80F();
     void SetScale(float fScale);
     void SetNode(Node80F* pkNode);
-    void SetPosition(const Point80F* pkPos);
+    void SetPosition(const NiPoint3* pkPos);
     void SetWorld(World80F* pkWorld);
     void SetHeight(float m_fGlyphExtent);
     void SetShape(Shape80F* pkShape);
@@ -1360,7 +1353,7 @@ class ControllerInfo80F
     __m128 m_qb0;
 };
 
-class Actor80F;
+class BoltProjectilePhysicsView;
 
 class Controller80F
 {
@@ -1420,17 +1413,17 @@ class Controller80F
     virtual void SetState(int iState);
     static void* operator new(unsigned int uiSize);
     static void operator delete(void* pvMem);
-    Controller80F(ControllerInfo80F& kInfo, Actor80F* pkActor);
+    Controller80F(ControllerInfo80F& kInfo, BoltProjectilePhysicsView* pkActor);
     void SetGravity(float afGravity);
     void SetEnabled(bool bEnabled);
     void SetMode(int iMode);
-    void SetActor(Actor80F* pkActor);
+    void SetActor(BoltProjectilePhysicsView* pkActor);
     void SetFallDistance(float fDistance);
     World80F* GetWorld();
     void SetWorld(World80F* pkWorld);
     Node80F* GetNode();
     void SetNode(Node80F* pkNode);
-    void SetPosition(Point80F& kPos);
+    void SetPosition(NiPoint3& kPos);
     Filter80F GetFilter();
     unsigned int unk04;
     unsigned int unk08;
@@ -2168,7 +2161,8 @@ class Owner80F
     virtual Target80F* GetTarget();
 };
 
-class Actor80F
+// Physics view of MagicBoltProjectile: original RTTI vtable 0x0107A8F4 binds FUN_00813f30 at slot 0x1C4, not Actor.
+class BoltProjectilePhysicsView
 {
   public:
     virtual void v000();
@@ -2296,7 +2290,7 @@ class Actor80F
     virtual void v1e8();
     virtual void v1ec();
     virtual void v1f0();
-    virtual const Point80F* GetPos();
+    virtual const NiPoint3* GetPos();
     Controller80F* GetController();
     Middle80F* GetMiddle();
     Owner80F* GetOwner();
@@ -2346,7 +2340,7 @@ void __cdecl FUN_00c69ee0(Node80F* pkNode, int iA, int iB);
 void __cdecl FUN_00c69f50(Node80F* pkNode, int iA, int iB);
 
 // @fnv 0x00813f30
-void Actor80F::FUN_00813f30()
+void BoltProjectilePhysicsView::FUN_00813f30()
 {
     if (!m_pkProcess || m_pkProcess->IsDead())
         return;
@@ -2422,7 +2416,7 @@ void Actor80F::FUN_00813f30()
             FUN_00c6a350(pkNode, 4, 1, 0, 1);
             bReset = true;
         }
-        Point80F kPos = *GetPos();
+        NiPoint3 kPos = *GetPos();
         if (pkOldWorld != pkWorld)
         {
             if (pkOldWorld)
@@ -2449,14 +2443,9 @@ void Actor80F::FUN_00813f30()
 }  // namespace fnv_00813f30
 
 namespace fnv_00819ca0 {
-struct Actor;
 struct Visual;
 struct Scene;
 struct Resource;
-struct Vector3
-{
-    float x, y, z;
-};
 struct Handle
 {
     void* p;
@@ -2520,7 +2509,7 @@ struct __declspec(align(16)) FxState
     ~FxState();
     void FUN_00810550(float);
     void SetWaterForm(void*);
-    void FUN_00810510(Vector3*);
+    void FUN_00810510(NiPoint3*);
     void SetSound(Scene*);
     void FUN_00407860(float);
     void SetPointer(void*);
@@ -3308,239 +3297,10 @@ struct Visual
     void FUN_00c70c90(Scene*);
     void* FUN_00810660();
     void FUN_00c6d7a0(void*);
-    void FUN_005620e0(Vector3*);
+    void FUN_005620e0(NiPoint3*);
     Handle FUN_0070c440();
 };
-struct Actor
-{
-    virtual void slot000();
-    virtual void slot004();
-    virtual void slot008();
-    virtual void slot00c();
-    virtual void slot010();
-    virtual void slot014();
-    virtual void slot018();
-    virtual void slot01c();
-    virtual void slot020();
-    virtual void slot024();
-    virtual void slot028();
-    virtual void slot02c();
-    virtual void slot030();
-    virtual void slot034();
-    virtual void slot038();
-    virtual void slot03c();
-    virtual void slot040();
-    virtual void slot044();
-    virtual void slot048();
-    virtual void slot04c();
-    virtual void slot050();
-    virtual void slot054();
-    virtual void slot058();
-    virtual void slot05c();
-    virtual void slot060();
-    virtual void slot064();
-    virtual void slot068();
-    virtual void slot06c();
-    virtual void slot070();
-    virtual void slot074();
-    virtual void slot078();
-    virtual void slot07c();
-    virtual void slot080();
-    virtual void slot084();
-    virtual void slot088();
-    virtual void slot08c();
-    virtual void slot090();
-    virtual void slot094();
-    virtual void slot098();
-    virtual void slot09c();
-    virtual void slot0a0();
-    virtual void slot0a4();
-    virtual void slot0a8();
-    virtual void slot0ac();
-    virtual void slot0b0();
-    virtual void slot0b4();
-    virtual void slot0b8();
-    virtual void slot0bc();
-    virtual void slot0c0();
-    virtual void slot0c4();
-    virtual void slot0c8();
-    virtual void slot0cc();
-    virtual void slot0d0();
-    virtual void slot0d4();
-    virtual void slot0d8();
-    virtual void slot0dc();
-    virtual void slot0e0();
-    virtual void slot0e4();
-    virtual void slot0e8();
-    virtual void slot0ec();
-    virtual void slot0f0();
-    virtual void slot0f4();
-    virtual void slot0f8();
-    virtual void slot0fc();
-    virtual void slot100();
-    virtual void slot104();
-    virtual void slot108();
-    virtual void slot10c();
-    virtual void slot110();
-    virtual void slot114();
-    virtual void slot118();
-    virtual void slot11c();
-    virtual void slot120();
-    virtual void slot124();
-    virtual void slot128();
-    virtual void slot12c();
-    virtual void slot130();
-    virtual void slot134();
-    virtual void slot138();
-    virtual void slot13c();
-    virtual void slot140();
-    virtual void slot144();
-    virtual void slot148();
-    virtual void slot14c();
-    virtual void slot150();
-    virtual void slot154();
-    virtual void slot158();
-    virtual void slot15c();
-    virtual void slot160();
-    virtual void slot164();
-    virtual void slot168();
-    virtual void slot16c();
-    virtual void slot170();
-    virtual void slot174();
-    virtual void slot178();
-    virtual void slot17c();
-    virtual void slot180();
-    virtual void slot184();
-    virtual void slot188();
-    virtual void slot18c();
-    virtual void slot190();
-    virtual void slot194();
-    virtual void slot198();
-    virtual void slot19c();
-    virtual void slot1a0();
-    virtual void slot1a4();
-    virtual void slot1a8();
-    virtual void slot1ac();
-    virtual void slot1b0();
-    virtual void slot1b4();
-    virtual void slot1b8();
-    virtual void slot1bc();
-    virtual void slot1c0();
-    virtual void slot1c4();
-    virtual void slot1c8();
-    virtual void slot1cc();
-    virtual void* GetUnderlyingObject();
-    virtual void slot1d4();
-    virtual void slot1d8();
-    virtual void slot1dc();
-    virtual void slot1e0();
-    virtual void slot1e4();
-    virtual void slot1e8();
-    virtual void slot1ec();
-    virtual void slot1f0();
-    virtual Vector3* getPosition();
-    virtual void slot1f8();
-    virtual void slot1fc();
-    virtual void slot200();
-    virtual void slot204();
-    virtual void slot208();
-    virtual void slot20c();
-    virtual void slot210();
-    virtual void slot214();
-    virtual void slot218();
-    virtual void slot21c();
-    virtual void slot220();
-    virtual void slot224();
-    virtual void slot228();
-    virtual void slot22c();
-    virtual void slot230();
-    virtual void slot234();
-    virtual void slot238();
-    virtual void slot23c();
-    virtual void slot240();
-    virtual void slot244();
-    virtual void slot248();
-    virtual void slot24c();
-    virtual void slot250();
-    virtual void slot254();
-    virtual void slot258();
-    virtual void slot25c();
-    virtual void slot260();
-    virtual void slot264();
-    virtual void slot268();
-    virtual void slot26c();
-    virtual void slot270();
-    virtual void slot274();
-    virtual void slot278();
-    virtual void slot27c();
-    virtual void slot280();
-    virtual void slot284();
-    virtual void slot288();
-    virtual void slot28c();
-    virtual void slot290();
-    virtual void slot294();
-    virtual void slot298();
-    virtual void slot29c();
-    virtual void slot2a0();
-    virtual void slot2a4();
-    virtual void slot2a8();
-    virtual void slot2ac();
-    virtual void slot2b0();
-    virtual void slot2b4();
-    virtual void slot2b8();
-    virtual void slot2bc();
-    virtual void slot2c0();
-    virtual void slot2c4();
-    virtual void slot2c8();
-    virtual void slot2cc();
-    virtual void slot2d0();
-    virtual void slot2d4();
-    virtual void slot2d8();
-    virtual void slot2dc();
-    virtual void slot2e0();
-    virtual float getIntensity();
-    virtual void slot2e8();
-    virtual void slot2ec();
-    virtual void slot2f0();
-    virtual void slot2f4();
-    virtual void slot2f8();
-    virtual void slot2fc();
-    virtual void slot300();
-    virtual void slot304();
-    virtual void slot308();
-    virtual void slot30c();
-    virtual void notifyChanged();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    Scene* scene;
-    Visual* FUN_009306d0();
-    Scene* FUN_008d6f30();
-    Scene* FUN_009185e0();
-    void FUN_00819ca0();
-};
+
 struct RenderGlobals
 {
     bool FUN_0047c850();
@@ -3557,20 +3317,28 @@ extern void __cdecl CopyBlock48(void*, int);
 extern void __cdecl FUN_00c6a350(void*, int, int, int, int);
 extern void __cdecl FUN_00c69ee0(void*, int, int);
 extern void __cdecl FUN_00c69f50(void*, int, int);
+}  // namespace fnv_00819ca0
+
 // @fnv 0x00819ca0
 void Actor::FUN_00819ca0()
 {
-    if (!scene || scene->FUN_0045cd60())
+    using namespace fnv_00819ca0;
+    using fnv_00819ca0::Scene;
+    using fnv_00819ca0::Handle;
+    using fnv_00819ca0::FUN_005dbe10;
+    using fnv_00819ca0::FUN_00525420;
+    if (!m_pBaseProcess || reinterpret_cast<Scene*>(m_pBaseProcess)->FUN_0045cd60())
         return;
-    Visual* active = FUN_009306d0();
-    Scene* parent = FUN_008d6f30();
+    Visual* active = reinterpret_cast<Visual*>(FUN_009306d0());
+    Scene* parent = reinterpret_cast<Scene*>(FUN_008d6f30());
     Scene* target = parent ? parent->FUN_004543c0() : 0;
     if (!active)
     {
         FxState state(1);
-        state.FUN_00810550(getIntensity());
-        state.SetWaterForm(GetUnderlyingObject());
-        state.FUN_00810510(getPosition());
+        // Unk_B9 is declared void in the shared header; this slot returns the float used here.
+        state.FUN_00810550(reinterpret_cast<float (__thiscall*)(Actor*)>((*reinterpret_cast<void***>(this))[0xB9])(this));
+        state.SetWaterForm(GetNiNode());
+        state.FUN_00810510(reinterpret_cast<NiPoint3*>(static_cast<const Actor*>(this)->GetPos()));
         state.SetSound(target);
         state.FUN_00407860(0.0f);
         state.SetPointer(new ColorData(1.0f, 1));
@@ -3578,7 +3346,7 @@ void Actor::FUN_00819ca0()
         Resource* texture = 0;
         if (FUN_009185e0())
         {
-            Scene* sceneObject = FUN_009185e0();
+            Scene* sceneObject = reinterpret_cast<Scene*>(FUN_009185e0());
             texture = sceneObject->getTexture();
         }
         if (!DAT_011de45c->FUN_0047c850())
@@ -3601,7 +3369,7 @@ void Actor::FUN_00819ca0()
             }
             else
             {
-                Resource* base = FUN_004b5260(GetUnderlyingObject());
+                Resource* base = FUN_004b5260(GetNiNode());
                 Resource* material = base ? base->FUN_006fa820() : 0;
                 Handle temporary;
                 state.FUN_00810590(7, material ? material->FUN_0043b4f0(&temporary)->FUN_004a3a20() : FUN_005dbe10());
@@ -3614,7 +3382,7 @@ void Actor::FUN_00819ca0()
         active->FUN_008106b0(1.0f);
         active->FUN_00810610(FUN_00525420());
         active->FUN_008105e0(1);
-        scene->add(active);
+        reinterpret_cast<Scene*>(m_pBaseProcess)->add(active);
         active->FUN_00810640(this);
     }
     if (active)
@@ -3625,7 +3393,7 @@ void Actor::FUN_00819ca0()
             active->FUN_0057b1d0(DAT_01015f5c);
         Scene* initial = active->FUN_00621ad0();
         active->FUN_00c70c90(target);
-        void* expected = GetUnderlyingObject();
+        void* expected = GetNiNode();
         void* actual = active->FUN_00810660();
         bool dirty = true;
         if (actual != expected)
@@ -3635,12 +3403,12 @@ void Actor::FUN_00819ca0()
             {
                 active->updateSwitch(0);
                 CopyBlock48(active->FUN_00810660(), 1);
-                notifyChanged();
+                Unk_C4();
             }
             FUN_00c6a350(expected, 4, 1, 0, 1);
             dirty = true;
         }
-        Vector3 position = *getPosition();
+        NiPoint3 position = *reinterpret_cast<NiPoint3*>(static_cast<const Actor*>(this)->GetPos());
         if (initial != target)
         {
             if (initial)
@@ -3662,4 +3430,3 @@ void Actor::FUN_00819ca0()
         }
     }
 }
-}  // namespace fnv_00819ca0

@@ -1,4 +1,7 @@
+#include "../../include/SettingT.h"
+#include "../../include/SETTING_VALUE.h"
 // fallout_shared/tesobjectrefr_decls.h: declares TESObjectREFR, DurationData
+#include "../../include/TESObjectREFR.h"
 #ifndef FNV_TESOBJECTREFR_DECLS_H
 #define FNV_TESOBJECTREFR_DECLS_H
 
@@ -6,17 +9,10 @@
 // Signatures follow the canonical bindings from IDENTITIES.md / lookup sym;
 // layouts here are minimal and private to this translation unit.
 
-union SETTING_VALUE
-{
-    float f;
-};
+
 
 class GameSettingCollection;
-template <class T> class SettingT
-{
-  public:
-    SETTING_VALUE* Float();
-};
+
 extern SettingT<GameSettingCollection> DAT_011f6da8;
 extern SettingT<GameSettingCollection> DAT_011f6db4;
 
@@ -48,16 +44,6 @@ extern BGSEncounterZone* DAT_011c9520;
 extern unsigned char DAT_011c7a58;
 extern unsigned char DAT_011dd435;
 
-class TESObjectREFR
-{
-  public:
-    virtual ~TESObjectREFR();  // polymorphic: its RTTI is used (rtti_fix.py)
-  public:
-    unsigned char pad[0x38];
-    float m_fObjectScale;  // +0x3C
-    static BGSEncounterZone* FindEncounterZone();
-    float GetScale();
-};
 
 class DurationData
 {

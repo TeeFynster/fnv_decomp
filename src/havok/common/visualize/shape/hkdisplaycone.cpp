@@ -1,3 +1,4 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/common/visualize/shape/hkdisplaycone.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/shape/hkdisplaycone.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -11,18 +12,12 @@ struct Edge
 {
     int polygon, end, start, adjacent;
 };
-template <class T> struct DynamicArray
-{
-    T* data;
-    int size;
-    unsigned int capacityAndFlags;
-    DynamicArray() : data(0), size(0), capacityAndFlags(0x80000000u)
-    {}
-};
+// Exe 0x00de57a0: three-word Havok owning arrays, initialized with DONT_DEALLOCATE_FLAG.
+
 struct GeometryBuffers
 {
-    DynamicArray<Vertex> vertices;
-    DynamicArray<Edge> edges;
+    hkArray<Vertex> vertices;
+    hkArray<Edge> edges;
     GeometryBuffers() : vertices(), edges()
     {}
     static void* operator new(unsigned int, void* position)
@@ -41,8 +36,8 @@ struct GlobalContext
     Allocator* allocator;
 };
 extern "C" GlobalContext* __cdecl FUN_00c85750();
-extern "C" void __cdecl ResizeAudioStream(Allocator*, DynamicArray<Vertex>*, int);
-extern "C" void __cdecl FUN_00c908c0(Allocator*, DynamicArray<Edge>*, int, int);
+extern "C" void __cdecl ResizeAudioStream(Allocator*, hkArray<Vertex>*, int);
+extern "C" void __cdecl FUN_00c908c0(Allocator*, hkArray<Edge>*, int, int);
 struct ForwardArg
 {
     GeometryBuffers* value;
@@ -92,20 +87,20 @@ void __thiscall MeshBuilder::InitializeGeometry()
     ForwardArg arg;
     arg.value = buffers;
     FUN_00de54b0(this, arg);
-    DynamicArray<Vertex>& vertices = geometry->vertices;
+    hkArray<Vertex>& vertices = geometry->vertices;
     GlobalContext* manager = FUN_00c85750();
-    if (vertices.size == (vertices.capacityAndFlags & 0x3fffffffu))
+    if (vertices.m_iElementCount == (vertices.m_iCapacityState & 0x3fffffffu))
     {
         ResizeAudioStream(manager->allocator, &vertices, sizeof(Vertex));
     }
     __m128 value = _mm_load_ps(reinterpret_cast<const float*>(&initialVertex));
-    _mm_store_ps(reinterpret_cast<float*>(&vertices.data[vertices.size]), value);
-    ++vertices.size;
-    DynamicArray<Edge>& edges = geometry->edges;
+    _mm_store_ps(reinterpret_cast<float*>(&vertices.m_data[vertices.m_iElementCount]), value);
+    ++vertices.m_iElementCount;
+    hkArray<Edge>& edges = geometry->edges;
     int required = segmentCount;
     GlobalContext* manager2 = FUN_00c85750();
     Allocator* edgeAllocator = manager2->allocator;
-    int capacity = edges.capacityAndFlags & 0x3fffffffu;
+    int capacity = edges.m_iCapacityState & 0x3fffffffu;
     if (capacity < required)
     {
         int newCapacity = capacity * 2;
@@ -113,7 +108,7 @@ void __thiscall MeshBuilder::InitializeGeometry()
             newCapacity = required;
         FUN_00c908c0(edgeAllocator, &edges, newCapacity, sizeof(Edge));
     }
-    edges.size = required;
+    edges.m_iElementCount = required;
     int index = 0;
     int noAdjacent = -1;
     int initialCount = segmentCount;
@@ -122,7 +117,7 @@ void __thiscall MeshBuilder::InitializeGeometry()
     {
         do
         {
-            Edge& entry = geometry->edges.data[index];
+            Edge& entry = geometry->edges.m_data[index];
             entry.polygon = segmentCount;
             entry.end = index + 1;
             entry.start = index;
@@ -130,7 +125,7 @@ void __thiscall MeshBuilder::InitializeGeometry()
             ++index;
         } while (index < segmentCount - 1);
     }
-    Edge& last = geometry->edges.data[index];
+    Edge& last = geometry->edges.m_data[index];
     last.polygon = segmentCount;
     last.adjacent = noAdjacent;
     last.end = 0;

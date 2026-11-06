@@ -1,8 +1,12 @@
 // gamebryo2.2/corelibs/nianimation/bsmultitargettreadtransfcontroller.cpp: Holder, BSMultiTargetTreadTransfController, TreadController (20 functions)
 
 #include "bsmultitargettreadtransfcontroller_decls.h"
+#include "../../../../include/NiQuaternion.h"
+#include "../../../../include/NiQuatTransform.h"
+#include <string.h>
+#include "../../../../include/NiInterpController.h"
 // @fnv 0x00a358a0
-NiInterpolator* BSMultiTargetTreadTransfController::GetInterpolator(unsigned short index)
+NiInterpolator* BSMultiTargetTreadTransfController::GetInterpolator(unsigned short index) const
 {
     return reinterpret_cast<NiInterpolator*>(&entries[index]);
 }
@@ -56,11 +60,6 @@ void __thiscall FUN_00a35fc0_shell::SetSlotValue(unsigned short usIndex, void* p
     if (pValue)
         *(int*)((char*)pValue + 0x30) |= 0x80;
 }
-
-struct NiInterpController
-{
-    static unsigned short INVALID_INDEX;
-};
 
 struct FUN_00a35910_shell
 {
@@ -317,25 +316,9 @@ TreadEntry* FUN_00a35900_cls::FUN_00a35900(unsigned short usIndex, int aParam1, 
 extern char DAT_01096694;
 void* __cdecl FUN_00aa13e0(unsigned int size) throw();
 
-struct FUN_00a2f8c0
-{
-    void* vtable;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    FUN_00a2f8c0() throw();
-};
+void* __fastcall FUN_00a2f8c0(void* controller) throw();
 
-struct TreadInterpolator : FUN_00a2f8c0
+struct TreadInterpolator : NiInterpController
 {
     unsigned int unk34;
     unsigned short unk38;
@@ -343,19 +326,6 @@ struct TreadInterpolator : FUN_00a2f8c0
     unsigned int unk3c;
     unsigned short unk40;
     unsigned short unk42;
-
-    static void* operator new(unsigned int size) throw()
-    {
-        return FUN_00aa13e0(size);
-    }
-    TreadInterpolator() throw()
-    {
-        vtable = &DAT_01096694;
-        unk34 = 0;
-        unk38 = 0;
-        unk40 = 0;
-        unk3c = 0;
-    }
 };
 
 struct TreadController
@@ -367,7 +337,23 @@ struct TreadController
 // @fnv 0x00a35a10
 TreadInterpolator* TreadController::CreateInterpolator(unsigned int index)
 {
-    TreadInterpolator* interp = new TreadInterpolator;
+    TreadInterpolator* interp;
+    TreadInterpolator* storage = static_cast<TreadInterpolator*>(FUN_00aa13e0(sizeof(TreadInterpolator)));
+    if (storage)
+    {
+        // The shared base has no declaration for the original constructor yet.
+        FUN_00a2f8c0(storage);
+        *reinterpret_cast<void**>(storage) = &DAT_01096694;
+        storage->unk34 = 0;
+        storage->unk38 = 0;
+        storage->unk40 = 0;
+        storage->unk3c = 0;
+        interp = storage;
+    }
+    else
+    {
+        interp = 0;
+    }
     FUN_00a2f8a0(interp, index);
     return interp;
 }
@@ -524,22 +510,22 @@ template <class T> class SmartPtr
   public:
     SmartPtr(T* p = 0) throw() : m_pObject(p)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~SmartPtr() throw()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     SmartPtr& operator=(const SmartPtr& ptr) throw()
     {
         if (m_pObject != ptr.m_pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = ptr.m_pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -613,24 +599,16 @@ struct Mat112
 {
     float xx, xy, xz, yx, yy, yz, zx, zy, zz;
 };
-class NiQuaternion
-{
-  public:
-    float w, x, y, z;
-    void Slerp(float, const NiQuaternion&, const NiQuaternion&);
-    void FUN_004f0180(Mat112*);
-};
 extern Vec112 DAT_011a8400;
 extern NiQuaternion DAT_011f3704;
 extern float DAT_01096b8c;
-struct Transform112
+// This unit inlines the invalid-value constructor; keep its definition here because the shared header only declares it.
+inline NiQuatTransform::NiQuatTransform()
 {
-    Vec112 position;
-    NiQuaternion rotation;
-    float scale;
-    Transform112() : position(DAT_011a8400), rotation(DAT_011f3704), scale(DAT_01096b8c)
-    {}
-};
+    *reinterpret_cast<Vec112*>(&x) = DAT_011a8400;
+    memcpy(&qx, &DAT_011f3704, sizeof(DAT_011f3704));
+    scale = DAT_01096b8c;
+}
 struct Blend112
 {
     virtual void v00();
@@ -668,7 +646,7 @@ struct Blend112
     virtual void v32();
     virtual void v33();
     virtual void v34();
-    virtual bool Update(float, void*, Transform112&);
+    virtual bool Update(float, void*, NiQuatTransform&);
     int field04, field08, field0c, field10, field14, field18, field1c, field20, field24, field28, field2c;
     float weight;
 };
@@ -683,7 +661,8 @@ struct Node112
     Mat112 matrix;
     Vec112 position;
 };
-struct Data112
+// Two endpoint poses occupy 0x3C bytes (second translation at 0x20); include/Data.h is a 0x10-byte skill/category record.
+struct TreadEndpointPoses
 {
     Vec112 position0;
     NiQuaternion rotation0;
@@ -695,7 +674,7 @@ struct Link112
 {
     unsigned short index;
     Node112* node;
-    Data112* data;
+    TreadEndpointPoses* data;
 };
 struct Controller112
 {
@@ -719,7 +698,7 @@ void Controller112::FUN_00a35c00(float* time)
 {
     if (Active() & 1)
     {
-        Transform112 value;
+        NiQuatTransform value;
         for (int i = 0; i < count; ++i)
         {
             if (blends[i].Update(*time, 0, value))
@@ -737,7 +716,9 @@ void Controller112::FUN_00a35c00(float* time)
                         NiQuaternion rotation1 = links[j]->data->rotation1;
                         float complement = 1.0f - weight;
                         Vec112 position = position0 * complement + weighted;
-                        NiQuaternion rotation;
+                        // Slerp fills the quaternion without calling its default constructor.
+                        float rotationStorage[4];
+                        NiQuaternion& rotation = *reinterpret_cast<NiQuaternion*>(rotationStorage);
                         rotation.Slerp(1.0f - weight, rotation1, rotation0);
                         links[j]->node->position = position;
                         rotation.FUN_004f0180(&links[j]->node->matrix);
@@ -762,7 +743,7 @@ struct S00a35960_Obj
     virtual void __thiscall Dtor(unsigned int flags);
 };
 
-struct S00a35960_Cls : FUN_00a2f8c0
+struct S00a35960_Cls : NiInterpController
 {
     S00a35960_Obj* m34;
     unsigned short m38;
@@ -779,7 +760,7 @@ struct S00a35960_Cls : FUN_00a2f8c0
 void S00a35960_Cls::FUN_00a35960()
 {
     S00a35960_Obj* pObj = m34;
-    vtable = &DAT_01096694;
+    *reinterpret_cast<void**>(this) = &DAT_01096694;
     if (pObj != 0)
     {
         int* h = (int*)pObj - 1;

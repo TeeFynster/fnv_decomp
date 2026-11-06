@@ -1,6 +1,27 @@
+#include "../../include/BSStringT.h"
 // bscore/bssimplelist_h_unit.cpp: RangeConsumer, CopyOwner, Thing (41 functions)
 
+#include "bssimplelist_decls.h"
+
+// Use this unit's complete list declaration in the shared magic headers.
+#define FNV64_BSSIMPLELIST_DEFINED
+
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSHeadPart.h"
+#include "../../include/BGSTerminal.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESObjectDOOR.h"
+#include "../../include/TESTopicInfoData.h"
+#include "../../include/TESWeather.h"
 #include "bssimplelist.inl"
+
+#include "../../include/EnchantmentItem.h"
+#include "../../include/MagicItem.h"
+#include "../../include/SL.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESEnchantableForm.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESModelTextureSwap.h"
 
 struct ListX
 {
@@ -20,15 +41,6 @@ FUN_00408b60::~FUN_00408b60()
     DestroyAllItems();
 }
 
-struct List_009e03e0
-{
-    void RemoveAll();
-};
-struct SL : List_009e03e0
-{
-    SL();
-    ~SL();
-};
 struct FUN_004b0880 : SL
 {
     FUN_004b0880();
@@ -66,27 +78,23 @@ void FUN_004ee7d0()
     }
 }
 
-struct FUN_004f66c0_item
-{
-    int _ref_0084e3a0();
-};
 struct FUN_004f66c0_node
 {
-    FUN_004f66c0_item** _ref_006815c0();
+    TESForm** _ref_006815c0();
     FUN_004f66c0_node* FUN_00726070();
 };
 struct FUN_004f66c0_shell
 {
-    FUN_004f66c0_item* FUN_004f66c0(int id);
+    TESForm* FUN_004f66c0(int id);
 };
-// Walks the node chain starting at this+4 and returns the first item whose _ref_0084e3a0() equals id, or 0 if none matches.
+// Walks the node chain starting at this+4 and returns the first item whose FUN_0084e3a0() equals id, or 0 if none matches.
 // @fnv 0x004f66c0
-FUN_004f66c0_item* FUN_004f66c0_shell::FUN_004f66c0(int id)
+TESForm* FUN_004f66c0_shell::FUN_004f66c0(int id)
 {
     FUN_004f66c0_node* node = this ? (FUN_004f66c0_node*)((char*)this + 4) : 0;
     while (node)
     {
-        if (*node->_ref_006815c0() && (*node->_ref_006815c0())->_ref_0084e3a0() == id)
+        if (*node->_ref_006815c0() && (*node->_ref_006815c0())->FUN_0084e3a0() == id)
             return *node->_ref_006815c0();
         node = node->FUN_00726070();
     }
@@ -147,30 +155,26 @@ void FUN_0060f3a0_shell::FUN_0060f3a0()
     }
 }
 
-struct FUN_006137b0_obj
-{
-    int _ref_0084e3a0();
-};
 struct FUN_006137b0_node
 {
-    FUN_006137b0_obj** _ref_006815c0();
+    TESForm** _ref_006815c0();
     FUN_006137b0_node* FUN_00726070();
 };
 struct FUN_006137b0_shell;
 FUN_006137b0_node* __fastcall FUN_0045bb80(FUN_006137b0_shell*);
 struct FUN_006137b0_shell
 {
-    FUN_006137b0_obj* FindByKey(int key);
+    TESForm* FindByKey(int key);
 };
 
-// Walks the node chain from this shell and returns the first object whose _ref_0084e3a0() equals key, or 0 if none is found.
+// Walks the node chain from this shell and returns the first object whose FUN_0084e3a0() equals key, or 0 if none is found.
 // @fnv 0x006137b0
-FUN_006137b0_obj* FUN_006137b0_shell::FindByKey(int key)
+TESForm* FUN_006137b0_shell::FindByKey(int key)
 {
     FUN_006137b0_node* node = FUN_0045bb80(this);
     while (node && *node->_ref_006815c0() != 0)
     {
-        if ((*node->_ref_006815c0())->_ref_0084e3a0() == key)
+        if ((*node->_ref_006815c0())->FUN_0084e3a0() == key)
             return *node->_ref_006815c0();
         node = node->FUN_00726070();
     }
@@ -180,10 +184,6 @@ FUN_006137b0_obj* FUN_006137b0_shell::FindByKey(int key)
 struct SoundListView
 {
     void AddTail(char* const&);
-};
-struct FUN_00613810_item
-{
-    int _ref_0084e3a0();
 };
 struct FUN_00613810_shell
 {
@@ -196,33 +196,29 @@ SoundListView* __fastcall FUN_0045bb80(FUN_00613810_shell*);
 // @fnv 0x00613810
 void FUN_00613810_shell::FUN_00613810(char* item)
 {
-    if (item == 0 || FindByKey(((FUN_00613810_item*)item)->_ref_0084e3a0()))
+    if (item == 0 || FindByKey(((TESForm*)item)->FUN_0084e3a0()))
         return;
     FUN_0045bb80(this)->AddTail(item);
 }
 
-struct FUN_006138b0_item
-{
-    int _ref_0084e3a0();
-};
 struct FUN_006138b0_node
 {
-    FUN_006138b0_item** _ref_006815c0();
+    TESForm** _ref_006815c0();
     FUN_006138b0_node* FUN_00726070();
 };
 struct FUN_006138b0_shell
 {
     FUN_006138b0_node* GetBGSRecipeCategoryList();
-    FUN_006138b0_item* FindRecipeCategoryById(int id);
+    TESForm* FindRecipeCategoryById(int id);
 };
 // Walks the recipe category list and returns the item whose referenced id equals id, or null if none matches.
 // @fnv 0x006138b0
-FUN_006138b0_item* FUN_006138b0_shell::FindRecipeCategoryById(int id)
+TESForm* FUN_006138b0_shell::FindRecipeCategoryById(int id)
 {
     FUN_006138b0_node* node = GetBGSRecipeCategoryList();
     while (node && *node->_ref_006815c0())
     {
-        if ((*node->_ref_006815c0())->_ref_0084e3a0() == id)
+        if ((*node->_ref_006815c0())->FUN_0084e3a0() == id)
             return *node->_ref_006815c0();
         node = node->FUN_00726070();
     }
@@ -234,10 +230,6 @@ struct SoundListView
 {
     void AddTail(char* const&);
 };
-struct FUN_00613910_item
-{
-    int _ref_0084e3a0();
-};
 struct FUN_00613910_shell
 {
     int FindRecipeCategoryById(int);
@@ -245,11 +237,11 @@ struct FUN_00613910_shell
 };
 SoundListView* __fastcall FUN_00503650(FUN_00613910_shell*);
 
-// Adds item to the list returned by FUN_00503650 unless item is null or FindRecipeCategoryById on its _ref_0084e3a0 result is nonzero.
+// Adds item to the list returned by FUN_00503650 unless item is null or FindRecipeCategoryById on its FUN_0084e3a0 result is nonzero.
 // @fnv 0x00613910
 void FUN_00613910_shell::FUN_00613910(char* item)
 {
-    if (item == 0 || FindRecipeCategoryById(((FUN_00613910_item*)item)->_ref_0084e3a0()))
+    if (item == 0 || FindRecipeCategoryById(((TESForm*)item)->FUN_0084e3a0()))
         return;
     FUN_00503650(this)->AddTail(item);
 }
@@ -261,12 +253,6 @@ struct FUN_006234b0
     FUN_006234b0();
     ~FUN_006234b0();
     virtual void Run();
-};
-struct SL
-{
-    SL();
-    ~SL();
-    void RemoveAll();
 };
 struct FUN_00623430 : FUN_006234b0
 {
@@ -605,11 +591,11 @@ struct RegionList : public FUN_004f66c0_node
 bool FUN_005a6280(void* apUnused, void* apRegion, void* apUnused2, double& result)
 {
     result = 0.0;
-    FUN_004f66c0_item* region = (FUN_004f66c0_item*)apRegion;
+    TESForm* region = (TESForm*)apRegion;
     RegionList* iter = (RegionList*)_g_thePlayer->FUN_004f2770();
     while (iter && *iter->_ref_006815c0())
     {
-        if ((*iter->_ref_006815c0())->_ref_0084e3a0() == region->_ref_0084e3a0())
+        if ((*iter->_ref_006815c0())->FUN_0084e3a0() == region->FUN_0084e3a0())
         {
             result = 1.0;
             return true;
@@ -766,11 +752,7 @@ void FUN_008363a0_shell::FUN_008363a0(BGSLoadFormBuffer* pBuffer)
     }
 }
 
-struct BSS
-{
-    char pad[0xc];
-    ~BSS();
-};
+
 
 struct FUN_0083dec0_item
 {
@@ -784,8 +766,9 @@ struct FUN_0083dec0_node
     void _ref_0063f7b0();
 };
 
-struct FUN_0083dec0 : BSS
+struct FUN_0083dec0 : ::BSStringT<char>
 {
+    char stringTailPadding[4];
     ListX m_kNode;
     char m_pad14[0x10];
     bool m_flag;
@@ -1300,28 +1283,6 @@ void FUN_00832010()
     g_011dd59c.RemoveAll();
 }
 
-class Actor;
-struct TESBoundObject
-{
-    virtual ~TESBoundObject();
-};
-struct FUN_0095ec40_FormData
-{
-    char data[0x18];
-};
-struct MagicItem
-{
-    void* pVtbl;
-};
-struct EnchantmentItem : FUN_0095ec40_FormData, MagicItem
-{
-};
-class TESEnchantableForm
-{
-  public:
-    virtual ~TESEnchantableForm();
-    EnchantmentItem* FUN_00726070();
-};
 struct FUN_0095ec40_Effects
 {
     virtual void Unk_00();
@@ -1550,18 +1511,10 @@ void FUN_004d65a0_Class::FUN_004d65a0(unsigned int key)
     }
 }
 
-struct TextureSwapEntry;
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
-class TESModelTextureSwap
-{
-  public:
-    BSSimpleList<TextureSwapEntry*>* FUN_00500940();
-};
 
+// The original texture-list getter shares the no-argument thiscall body at 0x00500940.
+// The shared class has no declaration for it; fastcall passes the model in ECX.
+BSSimpleList<TESModelTextureSwap::Texture*>* __fastcall GetTextureSwapList(TESModelTextureSwap* model);
 TESModelTextureSwap* __cdecl FUN_00481010(void* form, int variant);
 
 // @fnv 0x0048b310
@@ -1571,7 +1524,7 @@ bool FUN_0048b310(void* form, int variant)
     TESModelTextureSwap* pkPath = FUN_00481010(form, variant);
     if (!pkPath)
         pkPath = dynamic_cast<TESModelTextureSwap*>(static_cast<TESForm*>(form));
-    if (pkPath && !pkPath->FUN_00500940()->IsEmpty())
+    if (pkPath && !GetTextureSwapList(pkPath)->IsEmpty())
         bFound = true;
     return bFound;
 }

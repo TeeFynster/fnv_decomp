@@ -1,10 +1,8 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiD3DShaderConstantMap
-{
-    void* __thiscall Destroy(unsigned int flags);
-};
+#include "../../../../include/NiD3DShader.h"
+#include "../../../../include/NiD3DShaderConstantMap.h"
 
 extern "C" void __cdecl FUN_00e87690();
 extern "C" void __cdecl __Dummy_00b6fef0(NiD3DShaderConstantMap* p, unsigned int flags);
@@ -23,16 +21,11 @@ void* __thiscall NiD3DShaderConstantMap::Destroy(unsigned int flags)
 
 extern int DAT_0126f74c;
 
-struct FUN_00e80610_shell
-{
-    void __thiscall FUN_00e80610();
-};
-
 // @fnv 0x00e80610
-void __thiscall FUN_00e80610_shell::FUN_00e80610()
+void __thiscall NiD3DShader::ResetPasses()
 {
     DAT_0126f74c = 0;
-    *(int*)((char*)this + 0x38) = 0;
+    m_uiCurrentPass = 0;
 }
 
 extern "C" const char* const g_0126f554_arg1;
@@ -43,11 +36,6 @@ const char* const* __cdecl FUN_00e7c680()
     return &g_0126f554_arg1;
 }
 
-struct NiD3DShader
-{
-    void FUN_00e806c0();
-    void* DestroyIfFlagged(unsigned int);
-};
 void __cdecl _delete(void*, unsigned int);
 // @fnv 0x00e7c690
 void* NiD3DShader::DestroyIfFlagged(unsigned int flags)

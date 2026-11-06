@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
 // src/staging/blk_00de0000_o2_gs_nogs_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00de0000_o2_gs_nogs_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -8,16 +10,21 @@
 // src/staging/blk_00de0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkMonitorStream.h"
+#include "../../include/hkMonitorStream.h"
+#include "../../include/hkReferencedObject.h"
+#include "../../include/hkMatrix3.h"
+#include "../../include/hkVector4.h"
+#include "../../include/Vec4.h"
+#include <emmintrin.h>
 void __cdecl FUN_00df64d0(void* p, int b);
 struct FUN_00cb0c00_class
 {
     void __thiscall FUN_00cb0c00();
 };
 void FUN_00dfb490(FUN_00cb0c00_class* self);
-struct hkReferencedObject
-{
-    void removeReference();
-};
 void FUN_00dfb9d0(hkReferencedObject** p);
 extern int DAT_010cc2fc;
 extern int DAT_010df34c;
@@ -488,23 +495,7 @@ void __cdecl FUN_00dffe60(FUN_00dffe60_vt* p);
 typedef void(__thiscall* Vfn0)(void*, int);
 void __cdecl FUN_00dfff00(void* p);
 extern int DAT_0102e388;
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00de10e0_cls
 {
     int m_vptr;
@@ -802,13 +793,6 @@ struct FUN_00de4910_cls
 };
 // CopyVec4ToBuffer: copies the 16-byte vector stored at this+0x80 into the
 // 4-int block pointed to by the stack parameter.
-struct Vec4
-{
-    int m_uiX;
-    int m_uiY;
-    int m_uiZ;
-    int m_w;
-};
 struct FUN_00de4920_cls
 {
     int m_i00;
@@ -887,17 +871,10 @@ struct FUN_00de4e10_cls
 
     char* FUN_00de4e10();
 };
-struct FUN_00de5320_vec4
-{
-    int m_uiX;
-    int m_uiY;
-    int m_uiZ;
-    int m_w;
-};
 class FUN_00de5320_cls
 {
   public:
-    FUN_00de5320_vec4 GetVec4At70();
+    Vec4 GetVec4At70();
 };
 struct FUN_00de5350_cls
 {
@@ -2433,16 +2410,6 @@ struct DFFA90FinishFlag
 {
     int m_bFinishing;
 };
-class DFFA90ReferencedObject
-{
-  public:
-    DFFA90ReferencedObject(DFFA90FinishFlag)
-    {}
-    virtual ~DFFA90ReferencedObject();
-
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
 class DFFA90ListenerA
 {
   public:
@@ -2485,7 +2452,7 @@ class DFFA90ListenerE
     {}
     virtual ~DFFA90ListenerE();
 };
-class FUN_00dffa90 : public DFFA90ReferencedObject,
+class FUN_00dffa90 : public hkReferencedObject,
                      public DFFA90ListenerA,
                      public DFFA90ListenerB,
                      public DFFA90ListenerC,
@@ -2572,72 +2539,12 @@ extern int g_target_00dfffd0;
 void* FUN_00dfffd0();
 extern void* DAT_010e80b4;
 void** __cdecl FUN_00dffff0();
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    signed char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_setzero_ps(void);
-class hkVector4_de1210
-{
-  public:
-    __m128 m_vComponents;
-    __forceinline void operator=(const hkVector4_de1210& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setZero()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline float& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-};
-class hkMatrix3_de1210
-{
-  public:
-    hkVector4_de1210 m_kColumn0;
-    hkVector4_de1210 m_kColumn1;
-    hkVector4_de1210 m_kColumn2;
-    __forceinline void setIdentity()
-    {
-        hkVector4_de1210 zero;
-        zero.setZero();
-        const float one = 1.0f;
-        m_kColumn0 = zero;
-        m_kColumn1 = zero;
-        m_kColumn2 = zero;
-        m_kColumn0(0) = one;
-        m_kColumn1(1) = one;
-        m_kColumn2(2) = one;
-    }
-};
-class hkReferencedObject_de1210
-{
-  public:
-    virtual void v00();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    hkReferencedObject_de1210()
-    {
-        m_sReferenceCount = 1;
-    }
-};
-class Base_de1210 : public hkReferencedObject_de1210
+class Base_de1210 : public hkReferencedObject
 {
   public:
     int m_iUnk08;
-    hkMatrix3_de1210 m_kRotationMatrix;
-    hkVector4_de1210 m_kVec40;
+    hkMatrix3 m_kRotationMatrix;
+    hkVector4 m_kVec40;
     int m_iUnk50;
 
     Base_de1210()
@@ -2645,61 +2552,20 @@ class Base_de1210 : public hkReferencedObject_de1210
         m_iUnk08 = 0;
         m_iUnk50 = 3;
         m_kRotationMatrix.setIdentity();
-        m_kVec40.setZero();
+        m_kVec40.m_vComponents = _mm_setzero_ps();
     }
     virtual void v00();
 };
 class FUN_00de1210 : public Base_de1210
 {
   public:
-    hkVector4_de1210 m_kVec60;
-    hkVector4_de1210 m_kVec70;
+    hkVector4 m_kVec60;
+    hkVector4 m_kVec70;
 
     FUN_00de1210();
     virtual void v00();
 };
-struct DE1FC0Vector4
-{
-    __m128 m_vComponents;
-
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    float& operator()(int i)
-    {
-        return reinterpret_cast<float*>(&m_vComponents)[i];
-    }
-};
-struct DE1FC0Rotation
-{
-    DE1FC0Vector4 m_kColumn0;
-    DE1FC0Vector4 m_kColumn1;
-    DE1FC0Vector4 m_kColumn2;
-
-    void setIdentity()
-    {
-        m_kColumn0.setZero4();
-        m_kColumn1.setZero4();
-        m_kColumn2.setZero4();
-        m_kColumn0(0) = 1.0f;
-        m_kColumn1(1) = 1.0f;
-        m_kColumn2(2) = 1.0f;
-    }
-};
-class DE1FC0ReferencedObject
-{
-  public:
-    DE1FC0ReferencedObject()
-    {
-        m_sReferenceCount = 1;
-    }
-    virtual void vfunc00();
-
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-class DE1FC0Transform : public DE1FC0ReferencedObject
+class DE1FC0Transform : public hkReferencedObject
 {
   public:
     DE1FC0Transform()
@@ -2707,13 +2573,13 @@ class DE1FC0Transform : public DE1FC0ReferencedObject
         m_ulUserData = 0;
         m_type = 2;
         m_rotation.setIdentity();
-        m_vTranslation.setZero4();
+        m_vTranslation.m_vComponents = _mm_setzero_ps();
     }
 
     int m_ulUserData;
     int unk0C;
-    DE1FC0Rotation m_rotation;
-    DE1FC0Vector4 m_vTranslation;
+    hkMatrix3 m_rotation;
+    hkVector4 m_vTranslation;
     int m_type;
     int unk54;
     int unk58;
@@ -2725,16 +2591,9 @@ class FUN_00de1fc0 : public DE1FC0Transform
     FUN_00de1fc0();
     virtual void vfunc01();
 
-    DE1FC0Vector4 m_extra;
+    hkVector4 m_extra;
 };
 // Return a copy of the stored 4-float value.
-struct DE5300Vector4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
 class DE5300Object
 {
   public:
@@ -2762,56 +2621,29 @@ class DE5300Object
     int unk54;
     int unk58;
     int unk5C;
-    DE5300Vector4 m_kValue;
+    hkVector4 m_kValue;
 
-    DE5300Vector4 GetValue() const;
-};
-struct DE5450Vector4
-{
-    __m128 m_vComponents;
-
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    float& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-    void operator=(const DE5450Vector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
+    hkVector4 GetValue() const;
 };
 struct DE5450Transform
 {
-    DE5450Vector4 m_kColumn0;
-    DE5450Vector4 m_kColumn1;
-    DE5450Vector4 m_kColumn2;
-    DE5450Vector4 m_vTranslation;
+    hkVector4 m_kColumn0;
+    hkVector4 m_kColumn1;
+    hkVector4 m_kColumn2;
+    hkVector4 m_vTranslation;
 
     void setIdentity()
     {
-        m_kColumn0.setZero4();
-        m_kColumn1.setZero4();
-        m_kColumn2.setZero4();
-        m_kColumn0(0) = 1.0f;
-        m_kColumn1(1) = 1.0f;
-        m_kColumn2(2) = 1.0f;
-        m_vTranslation.setZero4();
+        m_kColumn0.m_vComponents = _mm_setzero_ps();
+        m_kColumn1.m_vComponents = _mm_setzero_ps();
+        m_kColumn2.m_vComponents = _mm_setzero_ps();
+        m_kColumn0.x = 1.0f;
+        m_kColumn1.y = 1.0f;
+        m_kColumn2.z = 1.0f;
+        m_vTranslation.m_vComponents = _mm_setzero_ps();
     }
 };
-class DE5450ReferencedObject
-{
-  public:
-    DE5450ReferencedObject() : m_sReferenceCount(1)
-    {}
-    virtual void unk00();
-
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-class DE5450Shape : public DE5450ReferencedObject
+class DE5450Shape : public hkReferencedObject
 {
   public:
     DE5450Shape() : m_ulUserData(0), m_type(4)
@@ -2833,25 +2665,21 @@ class FUN_00de5450 : public DE5450Shape
     FUN_00de5450();
     virtual void unk00();
 
-    DE5450Vector4 m_vecA;
-    DE5450Vector4 m_vecB;
+    hkVector4 m_vecA;
+    hkVector4 m_vecB;
     int m_uiItemCount;
     float m_valueA;
     float m_valueB;
 };
-struct FourFloatVector
-{
-    float x, y, z, w;
-};
 struct Matrix64
 {
-    FourFloatVector a, b, c, d;
+    hkVector4 a, b, c, d;
 };
 struct Input
 {
     int count;
     float a, b;
-    FourFloatVector vector;
+    hkVector4 vector;
     unsigned* values;
     void* source;
     Matrix64* matrices;
@@ -2869,7 +2697,7 @@ struct Header
     unsigned flags, unk0c, size;
     float scale, a, b;
 };
-void FUN_00df19e0(int, FourFloatVector*, Matrix64*, void*, void*, void*, void*, void*, int);
+void FUN_00df19e0(int, hkVector4*, Matrix64*, void*, void*, void*, void*, void*, int);
 void WriteInputHeader(Input* input, void*, Header** cursor);
 extern "C" const __m128 DAT_011b9490;
 // @fnv 0x00df2740
@@ -3144,13 +2972,6 @@ extern "C" void _ReadWriteBarrier(void);
 extern unsigned long DAT_0126835c;
 extern char DAT_010dba3c[];
 extern char DAT_010c41f8[];
-struct MonitorStreamKd
-{
-    int unk00;
-    char* m_kRayEnd;
-    int unk08;
-    char* m_capacityEnd;
-};
 struct TimerCommandKd
 {
     const char* m_name;
@@ -3159,15 +2980,15 @@ struct TimerCommandKd
 };
 static inline void TimerCommandKdWrite(const char* name)
 {
-    MonitorStreamKd* s = (MonitorStreamKd*)TlsGetValue(DAT_0126835c);
-    if (s->m_kRayEnd < s->m_capacityEnd)
+    hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (s->m_end.m_storage < s->m_capacityMinus16.m_storage)
     {
-        TimerCommandKd* h = (TimerCommandKd*)s->m_kRayEnd;
+        TimerCommandKd* h = (TimerCommandKd*)s->m_end.m_storage;
         h->m_name = name;
         _ReadWriteBarrier();
         volatile unsigned int t = (unsigned int)__rdtsc();
         h->m_uiCommandId = t;
-        s->m_kRayEnd = (char*)(h + 1);
+        s->m_end.m_storage = (char*)(h + 1);
     }
 }
 struct KdPair
@@ -3373,15 +3194,8 @@ struct d540_cls
 extern "C" d540_cls* d540_target(void);
 static void FUN_00def540(float a, float b, d540_cls* t);
 void d540_caller(float fa, float fb);
-struct def550_vec4
-{
-    float m_iWordAt00;
-    float m_iWordAt04;
-    float m_8;
-    float m_iThirdValue;
-};
-extern "C" def550_vec4* def550_target(void);
-static void SetVec4(float a, float b, float c, float d, def550_vec4* t);
+extern "C" hkVector4* def550_target(void);
+static void SetVec4(float a, float b, float c, float d, hkVector4* t);
 void def550_caller(float a, float b, float c, float d);
 void FUN_00df0690();
 static void FUN_00df30a0(int* piTarget, int iValue);
@@ -3429,35 +3243,21 @@ int __cdecl FUN_00d1b930(void* processor, WorkItem* item, unsigned int* value, i
 void __cdecl ProcessWorkQueue(ExecutionContext* context, WorkQueue* queue);
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 extern "C" unsigned long DAT_0126835c;
-struct CommandTimingEntry
+inline hkMonitorStream& hkMonitorStream::getInstance()
 {
-    const char* m_pCommandName;
-    unsigned int m_uiStartTicks;
-    unsigned int m_uiEndTicks;
-};
-struct MonitorStream
-{
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    char* m_pRayCursor;
-    char* m_pCurrentCommand;
-
-    static MonitorStream* GetMonitorStream()
-    {
-        return (MonitorStream*)TlsGetValue(DAT_0126835c);
-    }
-};
+    return *(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+}
 static inline void TimerMark(const char* name)
 {
-    MonitorStream* s = MonitorStream::GetMonitorStream();
-    if (s->m_kRayEnd < s->m_pCurrentCommand)
+    hkMonitorStream* s = &hkMonitorStream::getInstance();
+    if (s->m_end.m_storage < s->m_capacityMinus16.m_storage)
     {
-        CommandTimingEntry* h = (CommandTimingEntry*)s->m_kRayEnd;
-        h->m_pCommandName = name;
+        hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)s->m_end.m_storage;
+        h->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         volatile unsigned int t = (unsigned int)__rdtsc();
-        h->m_uiStartTicks = t;
-        s->m_kRayEnd = (char*)(h + 1);
+        h->m_time0 = t;
+        s->m_end.m_storage = (char*)(h + 1);
     }
 }
 struct Key
@@ -3507,7 +3307,7 @@ static __declspec(noinline) float FUN_00df9ae0(void)
 }
 static void WriteFloatToVector(float a, float b, float* out);
 void dummy_caller(void);
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00dfb5a0_cls
 {
     int unk00;
@@ -3536,22 +3336,6 @@ struct ElemDFB5A0
 extern "C" void* df3210_target(void);
 static void FUN_00df3210(__m128* p);
 void df3210_caller(void);
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128i
-{
-    __int64 m128i_i64[2];
-    int m128i_i32[4];
-} __m128i;
-extern "C" __m128i _mm_setzero_si128(void);
-extern "C" __m128i _mm_loadu_si128(const __m128i*);
-extern "C" __m128i _mm_unpackhi_epi16(__m128i, __m128i);
-extern "C" __m128i _mm_unpacklo_epi16(__m128i, __m128i);
-extern "C" __m128i _mm_slli_epi32(__m128i, int);
-extern "C" __m128i _mm_srli_epi32(__m128i, int);
-extern "C" __m128 _mm_cvtepi32_ps(__m128i);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_load_ps(const float*);
 extern const float DAT_010cd644;
 struct Dst
 {
@@ -3560,13 +3344,6 @@ struct Dst
 static void FUN_00df3170(const unsigned short* src, Dst* d);
 void CallerStandIn(Dst* d, const unsigned short* src);
 
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-extern "C" int _mm_movemask_ps(__m128);
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" __m128 _mm_load_ss(const float*);
 
 class KdSimdReal
 {

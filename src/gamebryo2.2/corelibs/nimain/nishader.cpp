@@ -1,23 +1,26 @@
 // gamebryo2.2/corelibs/nimain/nishader.cpp: NiShader (10 functions)
 
-#include "nishader_decls.h"
+#include "../../../../include/NiShader.h"
+#include "../../../../include/NiPointer.h"
+#include "../../../../include/NiAVObject.h"
 // @fnv 0x00a8f3d0
 bool NiShader::Initialize()
 {
-    return m_bShaderEnabled = true;
+    return m_bInitialized = true;
 }
 
 #pragma optimize("", off)
 // @fnv 0x0066b0d0
+template <>
 NiPointer<NiAVObject>& NiPointer<NiAVObject>::operator=(NiAVObject* object)
 {
     if (m_pObject != object)
     {
         if (m_pObject)
-            reinterpret_cast<WaitableObject*>(m_pObject)->FUN_00401970();
+            m_pObject->DecRefCount();
         m_pObject = object;
         if (m_pObject)
-            reinterpret_cast<WaitableObject*>(m_pObject)->FUN_0040f6e0();
+            m_pObject->IncRefCount();
     }
     return *this;
 }
@@ -30,26 +33,19 @@ extern volatile long DAT_011f4400;
 __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 void __cdecl FUN_00aa1460(void*, unsigned int);
 
-struct FUN_00a8f4d0_shell
-{
-    int* volatile vtable;
-    unsigned int instanceId;
-    char* volatile text;
-    FUN_00a8f4d0_shell* FUN_00a8f4d0(unsigned char flags);
-};
-
+// Preserve the scalar deleting destructor's register ABI using the shared layout.
 // @fnv 0x00a8f4d0
-FUN_00a8f4d0_shell* FUN_00a8f4d0_shell::FUN_00a8f4d0(unsigned char flags)
+NiShader* __fastcall DestroyShader(NiShader* shader, void*, unsigned char flags)
 {
-    vtable = &DAT_0109f584;
-    char* stringData = text;
+    *reinterpret_cast<int* volatile*>(shader) = &DAT_0109f584;
+    char* stringData = static_cast<volatile NiShader*>(shader)->m_kName.m_kHandle;
     if (stringData != DAT_0109b220)
         InterlockedDecrement(reinterpret_cast<volatile long*>(stringData - 8));
-    vtable = &DAT_0101dce4;
+    *reinterpret_cast<int* volatile*>(shader) = &DAT_0101dce4;
     InterlockedDecrement(&DAT_011f4400);
     if (flags & 1)
-        FUN_00aa1460(this, 20);
-    return this;
+        FUN_00aa1460(shader, sizeof(NiShader));
+    return shader;
 }
 
 // @fnv 0x00a8f3e0

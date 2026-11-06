@@ -1,111 +1,37 @@
+#include "../../../include/hkMemoryAllocator.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/BSAudio.h"
+#include "../../../include/BSTreeNode.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/NiCollisionObject.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiRTTI.h"
+#include "../../../include/NiStream.h"
+#include "../../../include/NiTransform.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/StrArr.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/bhkCapsuleShape.h"
+#include "../../../include/hkMemoryAllocator.h"
+
+
+inline void* AllocateHavokMemory(hkMemoryRouter* router, unsigned int size)
+{
+    return router->m_heap->blockAlloc(size);
+}
 
 // src/fallout_shared/speedtree/bstreenode_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/speedtree/bstreenode.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 // src/fallout_shared/speedtree/bstreenode.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/speedtree/bstreenode.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct FUN_00622430_shell
-{
-    unsigned int __thiscall FUN_00622430();
-};
-struct NiRTTI;
-extern NiRTTI g_011d5e70;
-struct FUN_0066b5b0_shell
-{
-    const NiRTTI* __thiscall GetNiRTTI();
-};
-struct NiAVObject;
-struct NiNode
-{
-    NiAVObject* __thiscall GetAt(unsigned int);
-};
-struct BSTreeNode : NiNode
-{
-    NiAVObject* __thiscall GetFirstChild();
-};
-struct NiCullingProcess;
-extern "C" unsigned char __cdecl FUN_0054ee20();
-struct DummyNode
-{
-    void __thiscall FUN_00a5dbe0(NiCullingProcess* arCuller);
-    void __thiscall FUN_0066bf50(NiCullingProcess* arCuller);
-};
-struct FUN_00c6c290_holder
-{
-    void FUN_00c6c290();
-};
-struct FUN_0066d410_shell : public FUN_00c6c290_holder
-{
-    void FUN_0066d410();
-};
-struct NiRTTI
-{
-};
-extern const NiRTTI g_012683d0;
-struct FUN_0066d430_shell
-{
-    const NiRTTI* GetRTTI() const;
-};
-void __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
-struct FUN_0066d440_shell
-{
-    void FUN_0066d470();
-    void* FUN_0066d440(unsigned int flags);
-};
-struct FUN_0066d470_shell
-{
-    void FUN_0066d410();
-    void FUN_0066d470();
-};
-struct FUN_0066d510_shell
-{
-    const void* FUN_0066d510();
-};
-extern const void* g_012683e0;
-struct FUN_0066d520_shell
-{
-    void FUN_00cb78b0();
-    void* FUN_0066d520(unsigned int flags);
-};
-void __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
 struct GlobalObjectO2_00a7b610
 {
 };
 GlobalObjectO2_00a7b610 g_012681b4;
-struct FUN_0066d610_shell
-{
-    GlobalObjectO2_00a7b610* GetGlobalObject();
-};
-struct bhkCapsuleShape
-{
-    unsigned int __thiscall FUN_0066d730() const;
-};
-struct FUN_0066da50_t
-{
-    void FUN_0066da50();
-};
-struct FUN_0066d7a0_shell
-{
-    int m0;
-    FUN_0066da50_t m1;
-    void RunInner();
-};
-struct Flt
-{
-    operator unsigned int() const;
-};
-struct NiTriBasedGeom;
-struct FUN_0066b620_shell
-{
-    NiTriBasedGeom* __thiscall GetTriBasedGeom();
-};
-extern const char* const g_012683d0_arg1;
-struct FUN_0066d400_shell
-{
-    const char* const* GetArg1Ptr();
-};
 
-struct NiStream;
 struct HC1Base
 {
     bool FUN_00aa0ad0(NiStream*);
@@ -352,31 +278,31 @@ void __thiscall S00cb7750::FUN_00cb7750()
 
 void* __fastcall FUN_00c6b910(void*);
 extern int DAT_01066b94;
-struct BSFadeNode
+struct CollisionNodeStub
 {
     void* vf;
     char pad[16];
     static void* __cdecl operator new(unsigned int);
-    BSFadeNode()
+    CollisionNodeStub()
     {
         FUN_00c6b910(this);
         vf = (void*)&DAT_01066b94;
     }
 };
 // @fnv 0x00c87fc0
-BSFadeNode* FUN_00c87fc0()
+CollisionNodeStub* FUN_00c87fc0()
 {
-    return new BSFadeNode;
+    return new CollisionNodeStub;
 }
 
 namespace fnv_00cb7640 {
-struct BSFadeNode
+struct CollisionNodeStub
 {
     static void* __cdecl operator new(unsigned int);
 };
 void* __fastcall FUN_00c6b910(void*);
 extern int DAT_01066acc;
-struct NewObjA : BSFadeNode
+struct NewObjA : CollisionNodeStub
 {
     int a;
     int b;
@@ -415,15 +341,6 @@ void This::FUN_00c84e20(unsigned int* output)
     *output = (this != 0 && middle != 0) ? middle->value : 0;
 }
 
-struct NiStream
-{
-    int unk00;
-    unsigned int version;
-};
-struct NiCollisionObject
-{
-    void LinkObject(NiStream&);
-};
 struct LegacyLinker : NiCollisionObject
 {
     void FUN_00c6bb70(NiStream*);
@@ -432,7 +349,7 @@ struct LegacyLinker : NiCollisionObject
 // @fnv 0x00c87f80
 void LegacyLinker::FUN_00c87f80(NiStream* stream)
 {
-    if (stream->version >= 0x15)
+    if (stream->m_kHeader.m_uiVersion >= 0x15)
         FUN_00c6bb70(stream);
     else
         NiCollisionObject::LinkObject(*stream);
@@ -527,23 +444,6 @@ struct C8CA60MemoryManager
 };
 extern C8CA60MemoryManager g_C8CA60MemoryManager;
 
-extern __declspec(thread) int g_C8CA60AllocTag;
-
-struct C8CA60AllocTagScope
-{
-    int m_iSaved;
-
-    C8CA60AllocTagScope(int aiAllocationTag)
-    {
-        m_iSaved = g_C8CA60AllocTag;
-        g_C8CA60AllocTag = aiAllocationTag;
-    }
-    ~C8CA60AllocTagScope()
-    {
-        g_C8CA60AllocTag = m_iSaved;
-    }
-};
-
 inline void* C8CA60AlignedAlloc(unsigned int uiSize)
 {
     char* pcMem = (char*)g_C8CA60MemoryManager.Allocate(uiSize);
@@ -577,7 +477,7 @@ struct C8CA60Owner
 // @fnv 0x00c8ca60
 C8CA60Child* C8CA60Owner::FUN_00c8ca60(bool* pbCreated)
 {
-    C8CA60AllocTagScope kScope(0x10);
+    AutoMemContext kScope(0x10);
     *pbCreated = (m_pkChild == 0);
     if (*pbCreated)
     {
@@ -588,33 +488,6 @@ C8CA60Child* C8CA60Owner::FUN_00c8ca60(bool* pbCreated)
     return m_pkChild;
 }
 
-struct StrArr
-{
-    void* unk00;
-    char** data;
-    unsigned short capacity, size, live, growBy;
-    void FUN_0096ad30(unsigned int);
-    void FUN_0096ae90(unsigned int, char* const&);
-    void append(char* const& text)
-    {
-        unsigned int index = size;
-        if (index >= capacity)
-            FUN_0096ad30(index + growBy);
-        FUN_0096ae90(index, text);
-    }
-};
-struct NiPoint3
-{
-    float x, y, z;
-    char* FUN_00a59af0(const char*);
-};
-struct NiTransform
-{
-    float rotation[9];
-    NiPoint3 translate;
-    float scale;
-    char* ToString(const char*);
-};
 struct NativeTransform
 {
     float rotation[12];
@@ -626,19 +499,40 @@ extern NativeTransform DAT_01268370;
 char* __cdecl FUN_00a7d330(void*);
 extern unsigned int DAT_0126fd98;
 extern __declspec(thread) unsigned int currentTask;
-struct AutoMemContext
+inline AutoMemContext::AutoMemContext()
 {
-    unsigned int ePreviousContext;
-    AutoMemContext()
-    {
-        ePreviousContext = currentTask;
-        currentTask = 16;
-    }
-    ~AutoMemContext()
-    {
-        currentTask = ePreviousContext;
-    }
-};
+    m_eMemoryContext = static_cast<MEM_CONTEXT>(currentTask);
+    currentTask = 16;
+}
+inline AutoMemContext::AutoMemContext(int context)
+{
+    m_eMemoryContext = static_cast<MEM_CONTEXT>(currentTask);
+    currentTask = context;
+}
+inline AutoMemContext::~AutoMemContext()
+{
+    currentTask = m_eMemoryContext;
+}
+inline NiTransform::NiTransform() {}
+inline unsigned int StrArr::SetAtGrow(unsigned int index, char*& text)
+{
+    if (index >= m_usMaxSize)
+        SetSize(index + m_usGrowBy);
+    SetAt(index, text);
+    return index;
+}
+inline unsigned int StrArr::Add(char*& text)
+{
+    return SetAtGrow(m_usSize, text);
+}
+inline void StrArr::append(char* const& text)
+{
+    unsigned int index = m_usSize;
+    if (index >= m_usMaxSize)
+        SetSize(index + m_usGrowBy);
+    SetAt(index, text);
+}
+
 struct Component
 {
     virtual void v00();
@@ -711,8 +605,8 @@ void Object::FUN_00c8cb20(StrArr* output)
     const NativeTransform* world = this && state ? &state->world : &DAT_01268370;
     NiTransform transform;
     FUN_00624b10(&transform, (NiPoint3*)world);
-    FUN_00458620(&transform.translate, world->translation);
-    output->append(transform.translate.FUN_00a59af0("Trans"));
+    FUN_00458620(&transform.m_Translate, world->translation);
+    output->append(transform.m_Translate.FUN_00a59af0("Trans"));
     output->append(transform.ToString("Rot"));
     Component* component = getComponent();
     if (component)
@@ -730,71 +624,27 @@ struct CB7800RTTI
     }
 };
 
-struct CB7800StringArray
-{
-    virtual ~CB7800StringArray();
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char*& element);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char*& element)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
-    }
-
-    unsigned int Add(char*& element)
-    {
-        return SetAtGrow(m_usSize, element);
-    }
-};
-
 extern "C" char* __cdecl FUN_00a7d330(const char* pcText);
-
-extern __declspec(thread) int g_CB7800AllocTag;
-
-struct CB7800AllocTagScope
-{
-    int m_iSaved;
-
-    CB7800AllocTagScope(int aiAllocationTag)
-    {
-        m_iSaved = g_CB7800AllocTag;
-        g_CB7800AllocTag = aiAllocationTag;
-    }
-    ~CB7800AllocTagScope()
-    {
-        g_CB7800AllocTag = m_iSaved;
-    }
-};
 
 struct CB7800Base
 {
-    void GetViewerStrings(CB7800StringArray* pkStrings);
+    void GetViewerStrings(StrArr* pkStrings);
 };
 
 struct CB7800Object : CB7800Base
 {
     static CB7800RTTI ms_kRTTI;
 
-    void FUN_00cb7800(CB7800StringArray* pkStrings);
+    void FUN_00cb7800(StrArr* pkStrings);
 };
 
 // @fnv 0x00cb7800
-void CB7800Object::FUN_00cb7800(CB7800StringArray* pkStrings)
+void CB7800Object::FUN_00cb7800(StrArr* pkStrings)
 {
-    CB7800AllocTagScope kScope(0x10);
+    AutoMemContext kScope(0x10);
     CB7800Base::GetViewerStrings(pkStrings);
     char* pcString = FUN_00a7d330(ms_kRTTI.GetName());
-    pkStrings->Add(pcString);
+    (pkStrings->*static_cast<unsigned int (StrArr::*)(char*&)>(&StrArr::Add))(pcString);
 }
 
 struct S_00cb78b0_Base
@@ -930,277 +780,32 @@ S_00cb79d0_C* S_00cb79d0::FUN_00cb79d0(int arg)
 }
 
 void SwapByteQuadWords(void* buffer, int words);
-struct Vector3
-{
-    float x;
-    float y;
-    float z;
-};
 // @fnv 0x00cf0930
-void __cdecl FUN_00cf0930(void* buffer, int bytes, Vector3* vector)
+void __cdecl FUN_00cf0930(void* buffer, int bytes, NiPoint3* vector)
 {
     int words = bytes / 4;
     SwapByteQuadWords(buffer, words);
-    char savedBytes[sizeof(Vector3)];
-    Vector3* saved = reinterpret_cast<Vector3*>(savedBytes);
+    char savedBytes[sizeof(NiPoint3)];
+    NiPoint3* saved = reinterpret_cast<NiPoint3*>(savedBytes);
     *saved = *vector;
     SwapByteQuadWords(buffer, words);
     *vector = *saved;
 }
 
-struct TlsBlock_t
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28C;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29C;
-    int unk2A0;
-    int unk2A4;
-    int unk2A8;
-    int unk2AC;
-    int unk2B0;
-    int m_2b4;
-};
-
-__declspec(thread) TlsBlock_t g_tlsBlock;
-
-struct TlsGuard_t
-{
-    int m_saved;
-
-    TlsGuard_t()
-    {
-        m_saved = g_tlsBlock.m_2b4;
-        g_tlsBlock.m_2b4 = 0x10;
-    }
-
-    ~TlsGuard_t()
-    {
-        g_tlsBlock.m_2b4 = m_saved;
-    }
-};
-
 struct FUN_00c88210_cls
 {
-    void __thiscall FUN_00c6ba30(BSFadeNode* node, unsigned int flags);
-    BSFadeNode* FUN_00c88210(unsigned int flags);
+    void __thiscall FUN_00c6ba30(CollisionNodeStub* node, unsigned int flags);
+    CollisionNodeStub* FUN_00c88210(unsigned int flags);
 };
 
 // @fnv 0x00c88210
-BSFadeNode* FUN_00c88210_cls::FUN_00c88210(unsigned int flags)
+CollisionNodeStub* FUN_00c88210_cls::FUN_00c88210(unsigned int flags)
 {
-    TlsGuard_t guard;
-    BSFadeNode* node = new BSFadeNode;
+    AutoMemContext guard(0x10);
+    CollisionNodeStub* node = new CollisionNodeStub;
     this->FUN_00c6ba30(node, flags);
     return node;
 }
-
-extern __declspec(thread) int g_iC882C0AllocTag;
-
-struct BC882C0AllocTagScope
-{
-    int m_iSaved;
-
-    BC882C0AllocTagScope(int aiAllocationTag)
-    {
-        m_iSaved = g_iC882C0AllocTag;
-        g_iC882C0AllocTag = aiAllocationTag;
-    }
-    ~BC882C0AllocTagScope()
-    {
-        g_iC882C0AllocTag = m_iSaved;
-    }
-};
-
-class BC882C0StringArray
-{
-  public:
-    virtual ~BC882C0StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
 
 extern const char* g_pcC882C0Name;
 
@@ -1209,17 +814,17 @@ char* __cdecl FUN_00a7d330(const char* pcString);
 class FUN_00c882c0_cls
 {
   public:
-    void C882C0BaseGetViewerStrings(BC882C0StringArray* pkArray);
-    void FUN_00c882c0(BC882C0StringArray* pkArray);
+    void C882C0BaseGetViewerStrings(StrArr* pkArray);
+    void FUN_00c882c0(StrArr* pkArray);
 };
 
 // @fnv 0x00c882c0
-void FUN_00c882c0_cls::FUN_00c882c0(BC882C0StringArray* pkArray)
+void FUN_00c882c0_cls::FUN_00c882c0(StrArr* pkArray)
 {
-    BC882C0AllocTagScope kScope(0x10);
+    AutoMemContext kScope(0x10);
     C882C0BaseGetViewerStrings(pkArray);
     char* pcName = FUN_00a7d330(g_pcC882C0Name);
-    pkArray->Add(pcName);
+    pkArray->append(static_cast<char* const&>(pcName));
 }
 
 struct ScaleMatrix
@@ -1317,199 +922,6 @@ void FUN_00caaea0_shell::FUN_00caaea0(void* context, SourceObject* source)
     FUN_00c84df0(context, source);
 }
 
-struct S_00caaf40_Tls
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28c;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29c;
-    int unk2a0;
-    int unk2a4;
-    int unk2a8;
-    int unk2ac;
-    int unk2b0;
-    int ctx;
-};
-__declspec(thread) S_00caaf40_Tls DAT_tls;
-
-struct S_00caaf40_Ctx
-{
-    int saved;
-    __forceinline S_00caaf40_Ctx(int c)
-    {
-        saved = DAT_tls.ctx;
-        DAT_tls.ctx = c;
-    }
-    __forceinline ~S_00caaf40_Ctx()
-    {
-        DAT_tls.ctx = saved;
-    }
-};
-
 void FUN_00c876f0();
 void FUN_00c87700();
 
@@ -1582,7 +994,7 @@ struct S_00caaf40
 // @fnv 0x00caaf40
 S_00caaf40_Obj* S_00caaf40::FUN_00caaf40(int a)
 {
-    S_00caaf40_Ctx ctx(0x10);
+    AutoMemContext ctx(0x10);
     FUN_00c876f0();
     S_00caaf40_Obj* o = new S_00caaf40_Obj;
     vfn_c4(o, a);
@@ -1593,222 +1005,9 @@ S_00caaf40_Obj* S_00caaf40::FUN_00caaf40(int a)
 namespace fnv_00cab000 {
 // FUN_00cab000 - bhkCapsuleShape::FUN_00cab000 (vtable slot 46 of .?AVbhkCapsuleShape@@)
 //
-// The function is a __thiscall member with one 4-byte stack argument (a bool* out flag).
-// It runs under the per-thread recursion guard that lives in the thread-local block at
-// offset +0x2b4, allocates a 0x30 byte object from the memory manager on first use,
-// fills in the object's matrix area and then hands the object to FUN_00caade0.
-
-// ---------------------------------------------------------------------------
-// The thread-local block.  Only the guard word at +0x2b4 is touched; the rest of
-// the block is padding so that the guard word sits at its original offset.
-// ---------------------------------------------------------------------------
-struct TlsBlock_t
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28c;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29c;
-    int unk2a0;
-    int unk2a4;
-    int unk2a8;
-    int unk2ac;
-    int unk2b0;
-    int unk2b4;
-};
-
-__declspec(thread) TlsBlock_t g_tlsBlock;
-
-// The recursion guard: remember the old guard word, then mark the slot busy.
-// The compiler keeps the guard word in a frame slot and restores it in the
-// destructor, which is also what produces the exception-handling frame.
-struct TlsGuard_t
-{
-    int m_saved;
-
-    TlsGuard_t()
-    {
-        m_saved = g_tlsBlock.unk2b4;
-        g_tlsBlock.unk2b4 = 0x10;
-    }
-
-    ~TlsGuard_t()
-    {
-        g_tlsBlock.unk2b4 = m_saved;
-    }
-};
-
-// ---------------------------------------------------------------------------
-// The memory manager that hands out the object's memory.
-// ---------------------------------------------------------------------------
-struct MemoryManager
-{
-    void* Allocate(unsigned int size);
-};
-
+// The original thiscall entry takes one bool* stack argument.  The unused EDX
+// parameter lets this free helper retain the same ECX receiver and stack layout.
+// AutoMemContext preserves the thread's allocation context around initialization.
 extern MemoryManager g_memoryManager;
 
 // The game's default radius (0.1f) lives in this float table.
@@ -1836,25 +1035,22 @@ struct BhkAllocObj
     volatile float unk2c;
 };
 
-// ---------------------------------------------------------------------------
-// The shape itself.
-// ---------------------------------------------------------------------------
-struct BhkCap_00cab000
+// The shared class has no declaration for the cinfo update helper.  Keep its
+// call here through a member-function pointer, with the original thiscall ABI.
+extern void __cdecl FUN_00caade0();
+
+// ThisCallStub has no bases, so its member pointers are one code address (bhkCapsuleShape's NiRefObject base
+// derives NiMemObject, which makes its member pointers carry a this-adjustment).
+struct ThisCallStub
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    void FUN_00caade0(BhkAllocObj* p);
-    int FUN_00cab000(bool* out);
 };
 
 // @fnv 0x00cab000
-int BhkCap_00cab000::FUN_00cab000(bool* out)
+int __fastcall FUN_00cab000(bhkCapsuleShape* shape, void*, bool* out)
 {
-    TlsGuard_t guard;
+    AutoMemContext guard(0x10);
 
-    bool b = (unk0c == 0);
+    bool b = (shape->m_0c == 0);
     *out = b;
     if (b)
     {
@@ -1880,62 +1076,23 @@ int BhkCap_00cab000::FUN_00cab000(bool* out)
         {
             p = 0;
         }
-        unk0c = (int)p;
-        if (unk08 != 0)
+        shape->m_0c = (int)p;
+        if (shape->m_pHavokObject != 0)
         {
-            FUN_00caade0(p);
+            union
+            {
+                void (__cdecl* address)();
+                void (ThisCallStub::*member)(BhkAllocObj*);
+            } update;
+            update.address = &FUN_00caade0;
+            (((ThisCallStub*)shape)->*update.member)(p);
         }
     }
-    return unk0c;
+    return shape->m_0c;
 }
 }  // namespace fnv_00cab000
 
-struct AudioTlsState
-{
-    char* GetBlock();
-};
-
-struct MemoryContext
-{
-    int unk2b4;
-};
-
-extern __declspec(thread) int g_memoryContext;
-
-struct ScopedContext
-{
-    int old;
-    ScopedContext(int value)
-    {
-        old = g_memoryContext;
-        g_memoryContext = value;
-    }
-    ~ScopedContext()
-    {
-        g_memoryContext = old;
-    }
-};
-
-struct Pool
-{
-    virtual void f00();
-    virtual void* Alloc(unsigned int size);
-};
-
-struct Heap
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    Pool* unk10;
-    void* Alloc(unsigned int size)
-    {
-        return unk10->Alloc(size);
-    }
-};
-
-Heap* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 
 struct FUN_00d22590
 {
@@ -1960,7 +1117,7 @@ struct FUN_00d22590
     void FUN_00c905b0();
     static void* operator new(unsigned int size)
     {
-        FUN_00d22590* p = (FUN_00d22590*)FUN_00c85750()->Alloc(size);
+        FUN_00d22590* p = (FUN_00d22590*)AllocateHavokMemory(FUN_00c85750(), size);
         p->unk04 = (short)size;
         return p;
     }
@@ -2011,432 +1168,35 @@ struct Owner
 // @fnv 0x00cab0e0
 void Owner::FUN_00cab0e0(int a, int b, float c)
 {
-    ScopedContext scope(0x10);
+    AutoMemContext scope(0x10);
     FUN_00d22590* e = new FUN_00d22590(a, b, c);
     AddElement(e);
     e->FUN_00c905b0();
 }
 
 namespace fnv_00cab8c0 {
-struct S_00cab8c0_Tls
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28c;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29c;
-    int unk2a0;
-    int unk2a4;
-    int unk2a8;
-    int unk2ac;
-    int unk2b0;
-    int ctx;
-};
-__declspec(thread) S_00cab8c0_Tls DAT_tls;
 
-struct S_00cab8c0_Ctx
-{
-    int saved;
-    __forceinline S_00cab8c0_Ctx(int c)
-    {
-        saved = DAT_tls.ctx;
-        DAT_tls.ctx = c;
-    }
-    __forceinline ~S_00cab8c0_Ctx()
-    {
-        DAT_tls.ctx = saved;
-    }
-};
-struct S_00cab8c0_Arr
-{
-    int unk00;
-    int unk04;
-    unsigned short m_iElementCount;
-    unsigned short m_uiItemCount;
-    unsigned short unk0c;
-    unsigned short m_grow;
-    void SetSize(unsigned n);
-    void SetAt(unsigned i, char* const& e);
-};
 extern int DAT_0126832c;
 char* FUN_00a7d330(int s);
 struct S_00cab8c0_Owner
 {
-    void FUN_00c9fc50(S_00cab8c0_Arr* a);
-    void FUN_00cab8c0(S_00cab8c0_Arr* a);
+    void FUN_00c9fc50(StrArr* a);
+    void FUN_00cab8c0(StrArr* a);
 };
 // @fnv 0x00cab8c0
-void S_00cab8c0_Owner::FUN_00cab8c0(S_00cab8c0_Arr* a)
+void S_00cab8c0_Owner::FUN_00cab8c0(StrArr* a)
 {
-    S_00cab8c0_Ctx guard(0x10);
+    AutoMemContext guard(0x10);
     FUN_00c9fc50(a);
     char* s = FUN_00a7d330(DAT_0126832c);
-    unsigned idx = a->m_uiItemCount;
-    if (idx >= a->m_iElementCount)
-        a->SetSize(idx + a->m_grow);
+    unsigned idx = a->m_usSize;
+    if (idx >= a->m_usMaxSize)
+        a->SetSize(idx + a->m_usGrowBy);
     a->SetAt(idx, s);
 }
 }  // namespace fnv_00cab8c0
 
 namespace fnv_00cb76a0 {
-struct TlsBlock_t
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28C;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29C;
-    int unk2A0;
-    int unk2A4;
-    int unk2A8;
-    int unk2AC;
-    int unk2B0;
-    int m_2b4;
-};
-
-__declspec(thread) TlsBlock_t g_tlsBlock;
-
-struct TlsGuard_t
-{
-    int m_saved;
-
-    TlsGuard_t()
-    {
-        m_saved = g_tlsBlock.m_2b4;
-        g_tlsBlock.m_2b4 = 0x10;
-    }
-
-    ~TlsGuard_t()
-    {
-        g_tlsBlock.m_2b4 = m_saved;
-    }
-};
 
 extern int DAT_01066acc;
 
@@ -2462,7 +1222,7 @@ struct FUN_00cb76a0_cls
 // @fnv 0x00cb76a0
 void* FUN_00cb76a0_cls::FUN_00cb76a0(unsigned int arg)
 {
-    TlsGuard_t guard;
+    AutoMemContext guard(0x10);
     SpawnedFade* obj = new SpawnedFade;
     this->FUN_00c657f0(obj, arg);
     return obj;
@@ -2513,7 +1273,7 @@ struct FUN_00cb7790_state
 {
     unsigned int owner;
     unsigned int depth;
-    void __thiscall Wait(int);
+    void __thiscall FUN_0040fbf0(int);
 };
 extern FUN_00cb7790_state DAT_01267b80;
 
@@ -2538,7 +1298,7 @@ void FUN_00cb7790_class::FUN_00cb7790()
         if (target && target->object)
         {
             Buf00cb7750 transform = source->transform;
-            DAT_01267b80.Wait(0);
+            DAT_01267b80.FUN_0040fbf0(0);
             target->FUN_0056df20(&transform);
             if (--DAT_01267b80.depth == 0)
                 DAT_01267b80.owner = 0;
@@ -2696,222 +1456,14 @@ void Shader::FUN_00cb7b20(Pass* pass)
 }
 
 namespace fnv_00cb7b80 {
-struct TlsBlock_t
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28C;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29C;
-    int unk2A0;
-    int unk2A4;
-    int unk2A8;
-    int unk2AC;
-    int unk2B0;
-    int m_2b4;
-};
 
 extern "C" void* __cdecl FUN_00c85750();
-
-__declspec(thread) TlsBlock_t g_tlsBlock;
-
-struct TlsGuard
-{
-    int m_saved;
-    TlsGuard()
-    {
-        m_saved = g_tlsBlock.m_2b4;
-        g_tlsBlock.m_2b4 = 0x10;
-    }
-    ~TlsGuard()
-    {
-        g_tlsBlock.m_2b4 = m_saved;
-    }
-};
 
 struct SpawnArgs
 {
     int unk00;
     unsigned int m_kPointA;
     unsigned int m_kPointB;
-};
-
-struct SpawnAllocator
-{
-    virtual void v00();
-    virtual void* Alloc(unsigned int size);
-};
-
-struct SpawnHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    SpawnAllocator* m_alloc;
 };
 
 struct SpawnedNode
@@ -2963,8 +1515,8 @@ struct SpawnedNode
     {}
     static void* operator new(unsigned int size) throw()
     {
-        SpawnHolder* h = (SpawnHolder*)FUN_00c85750();
-        void* p = h->m_alloc->Alloc(size);
+        hkMemoryRouter* h = (hkMemoryRouter*)FUN_00c85750();
+        void* p = reinterpret_cast<hkMemoryAllocator*>(h->m_heap)->blockAlloc(size);
         ((SpawnedNode*)p)->m_iElementCount = (unsigned short)size;
         return p;
     }
@@ -3026,7 +1578,7 @@ struct FUN_00cb7b80_cls
 // @fnv 0x00cb7b80
 void FUN_00cb7b80_cls::FUN_00cb7b80(SpawnArgs* a)
 {
-    TlsGuard guard;
+    AutoMemContext guard(0x10);
     unsigned int b, c;
     SpawnedNode* n = new SpawnedNode(c = a->m_kPointA, b = a->m_kPointB);
     this->v35(n);
@@ -3036,26 +1588,7 @@ void FUN_00cb7b80_cls::FUN_00cb7b80(SpawnArgs* a)
 }  // namespace fnv_00cb7b80
 
 namespace fnv_00cb8150 {
-struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
-
-struct CbAlloc8150
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct BSAudio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    CbAlloc8150* m_pAllocator;
-};
 
 struct CbArr8150
 {
@@ -3068,13 +1601,13 @@ struct CbArr8150
     {}
     ~CbArr8150()
     {
-        BSAudio* pHolder = FUN_00c85750();
-        CbAlloc8150* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         m_iArrayLength = 0;
         unsigned int uCapBits = m_uCapBits;
         if ((uCapBits & 0x80000000u) == 0)
         {
-            pAllocator->FreeArray(m_pData, (uCapBits & 0x3fffffffu) * 16);
+            pAllocator->bufFree(m_pData, (uCapBits & 0x3fffffffu) * 16);
         }
         m_pData = 0;
         m_uCapBits = 0x80000000u;
@@ -3110,221 +1643,8 @@ unsigned char FUN_00cb8150_cls::FUN_00cb8150(void* a1)
 }  // namespace fnv_00cb8150
 
 namespace fnv_00cb8330 {
-struct TlsBlock_t
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28C;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29C;
-    int unk2A0;
-    int unk2A4;
-    int unk2A8;
-    int unk2AC;
-    int unk2B0;
-    int m_2b4;
-};
 
-__declspec(thread) TlsBlock_t g_tlsBlock;
-
-struct TlsGuard
-{
-    int m_saved;
-    TlsGuard()
-    {
-        m_saved = g_tlsBlock.m_2b4;
-        g_tlsBlock.m_2b4 = 0x10;
-    }
-    ~TlsGuard()
-    {
-        g_tlsBlock.m_2b4 = m_saved;
-    }
-};
-
-struct S_00cb8330_Heap
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10(void* p, int bytes) throw();
-};
-struct S_00cb8330_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00cb8330_Heap* m_pStreamAllocator;
-    S_00cb8330_Heap& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" S_00cb8330_Router* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
 struct S_00cb8330_Pool
 {
     void FUN_00aa4060(void* p);
@@ -3348,17 +1668,17 @@ struct S_00cb8330_cls
 // @fnv 0x00cb8330
 void S_00cb8330_cls::FUN_00cb8330(bool bFree)
 {
-    TlsGuard guard;
+    AutoMemContext guard(0x10);
     if (bFree)
     {
         S_00cb8330_Obj* p = m_0c;
         if (p)
         {
-            S_00cb8330_Heap& h = FUN_00c85750()->heap();
+            hkMemoryAllocator& h = FUN_00c85750()->heap();
             int cap = p->m_cap;
             p->m_iElementCount = 0;
             if ((cap & 0x80000000) == 0)
-                h.v10(p->m_data, (cap & 0x3fffffff) * 16);
+                h.bufFree(p->m_data, (cap & 0x3fffffff) * 16);
             p->m_data = 0;
             p->m_cap = 0x80000000;
             DAT_011f6238.FUN_00aa4060(p);
@@ -3494,24 +1814,6 @@ struct A1Owner
     unsigned char m1E4;
 };
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
 struct Triple
 {
     unsigned int m00;
@@ -3542,12 +1844,12 @@ struct TmpGuard
     }
     ~TmpGuard()
     {
-        AudioHolder* pHolder = reinterpret_cast<AudioHolder*>(FUN_00c85750());
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         m1 = 0;
         if ((m2 & 0x80000000u) == 0)
         {
-            pAllocator->Free((void*)m0, (m2 & 0x3fffffffu) * 16u);
+            pAllocator->bufFree((void*)m0, (m2 & 0x3fffffffu) * 16u);
         }
     }
 };
@@ -4321,7 +2623,7 @@ typedef void(__thiscall* ReleaseFn_t)(S_00c8c810_A* apObj);
 // @fnv 0x00c8c770
 void H_00c8c810::FUN_00c8c770()
 {
-    TlsGuard_t guard;
+    AutoMemContext guard(0x10);
     if (this != 0)
     {
         S_00c8c810_C* pC = this->p;
@@ -4525,201 +2827,6 @@ complete:
 }  // namespace fnv_00c8c130
 
 namespace fnv_00c8c4d0 {
-struct TlsBlock_t
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28C;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29C;
-    int unk2A0;
-    int unk2A4;
-    int unk2A8;
-    int unk2AC;
-    int unk2B0;
-    int m_2b4;
-};
-
-__declspec(thread) TlsBlock_t g_tlsBlock;
-
-struct TlsGuard_t
-{
-    int m_saved;
-
-    TlsGuard_t()
-    {
-        m_saved = g_tlsBlock.m_2b4;
-        g_tlsBlock.m_2b4 = 0x10;
-    }
-
-    ~TlsGuard_t()
-    {
-        g_tlsBlock.m_2b4 = m_saved;
-    }
-};
 
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
 extern "C" void __cdecl FUN_00c876f0();
@@ -4811,7 +2918,7 @@ struct FUN_00c8c4d0_cls
 // @fnv 0x00c8c4d0
 SpawnedObject* FUN_00c8c4d0_cls::FUN_00c8c4d0(int a1)
 {
-    TlsGuard_t guard;
+    AutoMemContext guard(0x10);
     FUN_00c876f0();
     SpawnedObject* p = new SpawnedObject();
     this->v49(p, a1);
@@ -4821,7 +2928,6 @@ SpawnedObject* FUN_00c8c4d0_cls::FUN_00c8c4d0(int a1)
 }  // namespace fnv_00c8c4d0
 
 namespace fnv_00cb8270 {
-extern __declspec(thread) int g_tlsMemContext;
 
 struct S_00cb8270_MM
 {
@@ -4845,20 +2951,6 @@ struct S_00cb8270_Array
 
     S_00cb8270_Array() : unk00(0), unk04(0), unk08(0), unk0C(0x80000000)
     {}
-};
-
-struct AutoMemContext
-{
-    int m_oldContext;
-    AutoMemContext(int newContext)
-    {
-        m_oldContext = g_tlsMemContext;
-        g_tlsMemContext = newContext;
-    }
-    ~AutoMemContext()
-    {
-        g_tlsMemContext = m_oldContext;
-    }
 };
 
 struct S_00cb8270
@@ -4907,7 +2999,7 @@ struct LegacyCollisionLoader : CollisionStreamLoader
 // @fnv 0x00c87f60
 void __thiscall LegacyCollisionLoader::FUN_00c87f60(NiStream& stream)
 {
-    if (stream.version >= 0x15)
+    if (stream.m_kHeader.m_uiVersion >= 0x15)
     {
         FUN_00c6c330(stream);
     }

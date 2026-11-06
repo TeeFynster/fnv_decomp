@@ -1,3 +1,6 @@
+#include "../../../include/NiTransform.h"
+#include "../../../include/hkpIslandActivationListener.h"
+
 
 // src/fallout_shared/havok/foislandactivationlistener_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy /Oy- (unit src/fallout_shared/havok/foislandactivationlistener_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -7,26 +10,11 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 // src/fallout_shared/havok/foislandactivationlistener.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/foislandactivationlistener.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct hkpIslandActivationListener
-{
-    void InitPtr();
-    void* FUN_006241e0(unsigned int);
-};
 extern "C" void __cdecl _Deallocate(void*);
 extern int DAT_0104de10;
-struct FUN_00624210_shell
-{
-    int* m_ptr;
-    void InitPtr();
-};
 extern int DAT_011f942c;
 void FUN_00624bd0();
-struct NiPoint3
-{
-    float x, y, z;
-};
 struct hkVector4;
-struct NiTransform;
 struct TopicH
 {
     NiPoint3* GetAddTopicList();
@@ -269,13 +257,6 @@ struct FUN_0056ded0
     __m128 x, y, z, position;
     FUN_0056ded0();
 };
-struct NiTransform
-{
-    float a00, a01, a02, a10, a11, a12, a20, a21, a22;
-    NiPoint3 translation;
-    float scale;
-    NiTransform* FUN_00476a80();
-};
 struct Geometry96
 {
     virtual void slot000();
@@ -476,7 +457,6 @@ void Manager96::FUN_00624720(Input96* input)
                     body->FUN_00573f00(true);
                     FUN_0056ded0 transform;
                     NiTransform niTransform;
-                    niTransform.FUN_00476a80();
                     target->GetTransform(&transform);
                     FUN_00624ad0(&niTransform, (TopicH*)&transform);
                     body->SetTransform(&niTransform);

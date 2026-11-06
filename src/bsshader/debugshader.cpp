@@ -1,38 +1,128 @@
 // bsshader/debugshader.cpp: BloodSplatterBeamShader, SpeedTreeFrondShaderX, DebugShaderLoader, DebugShaderInit and more (15 functions)
+#include "NiRefObject_inline.h"
 
 #include "debugshader_local.h"
+#include "../../include/NiD3DGPUProgramCache.h"
+#include "../../include/NiRTTI.h"
+
+inline void NiObjectNET::IncRefCount()
+{
+    NiRefObject::IncRefCount();
+}
+
+inline void NiObjectNET::DecRefCount()
+{
+    NiRefObject::DecRefCount();
+}
+
+inline void NiTexture::IncRefCount()
+{
+    NiRefObject::IncRefCount();
+}
+
+inline void NiTexture::DecRefCount()
+{
+    NiRefObject::DecRefCount();
+}
+
+inline void NiD3DVertexShader::IncRefCount()
+{
+    NiRefObject::IncRefCount();
+}
+
+inline void NiD3DVertexShader::DecRefCount()
+{
+    NiRefObject::DecRefCount();
+}
+
+inline void NiD3DPixelShader::IncRefCount()
+{
+    NiRefObject::IncRefCount();
+}
+
+inline void NiD3DPixelShader::DecRefCount()
+{
+    NiRefObject::DecRefCount();
+}
+
+inline void NiAVObject::IncRefCount()
+{
+    NiRefObject::IncRefCount();
+}
+
+inline void NiAVObject::DecRefCount()
+{
+    NiRefObject::DecRefCount();
+}
+
+inline void NiD3DShaderConstantMap::IncRefCount()
+{
+    NiRefObject::IncRefCount();
+}
+
+inline void NiD3DShaderConstantMap::DecRefCount()
+{
+    NiRefObject::DecRefCount();
+}
+
+inline void NiD3DPass::SetVertexShader(NiD3DVertexShader* shader)
+{
+    m_spVertexShader = shader;
+}
+
+inline void NiD3DPass::SetPixelShader(NiD3DPixelShader* shader)
+{
+    m_spPixelShader = shader;
+}
+
+inline void NiD3DPass::SetRenderState(unsigned int state, unsigned int value, bool save)
+{
+    if (!m_pkRenderStateGroup)
+        m_pkRenderStateGroup = D3DRenderStateGroup::GetCurrentRenderStateGroup();
+    m_pkRenderStateGroup->SetRenderState(state, value, save);
+}
+
+inline NiScreenElementsData* NiScreenElements::GetData()
+{
+    return static_cast<NiScreenElementsData*>(m_spModelData.m_pObject);
+}
+
+inline const NiRTTI* NiRTTI::GetBaseRTTI() const
+{
+    return m_pBaseRTTI;
+}
 
 // @fnv 0x00bd1950
 BloodSplatterBeamShader::BloodSplatterBeamShader()
 {
-    m_iPassId = 10;
+    iShaderType = 10;
     m_spTreeVertexShader = NULL;
     for (int i = 0; i < 2; i++)
         m_spPixelShaderVariants[i] = NULL;
     m_pMenuBackgroundScreenGeometry = NULL;
     for (int j = 0; j < 16; j++)
         m_pTextures[j] = NULL;
-    m_bIsInitialized = true;
+    m_bUsesNiRenderState = true;
 }
 
 // @fnv 0x00bd20e0
 bool BloodSplatterBeamShader::ConfigureShaderPass()
 {
-    NiD3DPass::CreateD3DPass(spRenderPass);
+    NiD3DPass::CreateD3DPass(spPass[0]);
     NiPointer<BeamStage> stage;
     BeamStage::CreateNewStage(stage);
     ConfigureBeamStage(stage.m_pObject, 0, 3, 2, true);
     stage.m_pObject->FUN_00e7def0(0);
-    spRenderPass.m_pObject->FUN_00e802b0(spRenderPass.m_pObject->m_uiStageMask, stage.m_pObject);
-    spRenderPass.m_pObject->SetVertexShader(m_spTreeVertexShader.m_pObject);
-    spRenderPass.m_pObject->SetPixelShader(m_spPixelShaderVariants[0].m_pObject);
-    spRenderPass.m_pObject->SetRenderState(7, 0, true);
-    spRenderPass.m_pObject->SetRenderState(14, 0, true);
-    spRenderPass.m_pObject->SetRenderState(27, 0, true);
-    NiD3DPass* pass = spRenderPass.m_pObject;
+    spPass[0].m_pObject->FUN_00e802b0(spPass[0].m_pObject->m_uiCurrentStage, stage.m_pObject);
+    spPass[0].m_pObject->SetVertexShader(m_spTreeVertexShader.m_pObject);
+    spPass[0].m_pObject->SetPixelShader(m_spPixelShaderVariants[0].m_pObject);
+    spPass[0].m_pObject->SetRenderState(7, 0, true);
+    spPass[0].m_pObject->SetRenderState(14, 0, true);
+    spPass[0].m_pObject->SetRenderState(27, 0, true);
+    NiD3DPass* pass = spPass[0].m_pObject;
     pass->SetRenderState(19, 2, true);
     pass->SetRenderState(20, 2, true);
-    spRenderPass.m_pObject->SetRenderState(168, 15, true);
+    spPass[0].m_pObject->SetRenderState(168, 15, true);
     return true;
 }
 
@@ -40,9 +130,9 @@ bool BloodSplatterBeamShader::ConfigureShaderPass()
 BSShader* BloodSplatterBeamShader::CreateShader()
 {
     NiD3DVertexDeclaration* decl = NiD3DVertexDeclaration::Create(DAT_011f9508, 2, 1);
-    decl->SetEntry(0, 0, 0, 2, 0);
-    decl->SetEntry(1, 7, 5, 1, 0);
-    decl->vfn_b4();
+    decl->SetEntry(0, 0, NiShaderDeclaration::SHADERPARAM_NI_POSITION, NiShaderDeclaration::SPTYPE_FLOAT3, 0);
+    decl->SetEntry(1, 7, NiShaderDeclaration::SHADERPARAM_NI_TEXCOORD0, NiShaderDeclaration::SPTYPE_FLOAT2, 0);
+    decl->GetD3DDeclaration();
     BloodSplatterBeamShader* shader = new BloodSplatterBeamShader;
     shader->Initialize();
     shader->InitializeShaderData();
@@ -112,50 +202,9 @@ void FUN_00bd2b40_class::CallVirtualWithMember()
     ((Fn)vtbl[0x128 / 4])(this, arg);
 }
 
-struct FUN_00bd1ab0_Base
-{
-    virtual ~FUN_00bd1ab0_Base();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-};
-
-struct FUN_00bd1ab0 : public FUN_00bd1ab0_Base
-{
-    NiPointer<NiTexture> m_pTextures[16];
-    NiPointer<NiScreenElements> m_pMenuBackgroundScreenGeometry;
-    NiPointer<NiD3DVertexShader> m_spTreeVertexShader;
-    NiPointer<NiD3DPixelShader> m_spPixelShaderVariants[2];
-    unsigned int m_uiShaderState;
-    virtual ~FUN_00bd1ab0();
-};
-
 // Clears the vertex shader, both pixel shaders, the screen elements and all 16 texture pointers.
 // @fnv 0x00bd1ab0
-FUN_00bd1ab0::~FUN_00bd1ab0()
+BloodSplatterBeamShader::~BloodSplatterBeamShader()
 {
     m_spTreeVertexShader = 0;
     for (int i = 0; i < 2; i++)
@@ -164,40 +213,6 @@ FUN_00bd1ab0::~FUN_00bd1ab0()
     for (int i = 0; i < 16; i++)
         m_pTextures[i] = 0;
 }
-
-struct FUN_00bd1c50_inner
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int m_08;
-};
-
-struct FUN_00bd1c50_holder
-{
-    FUN_00bd1c50_inner* m_00;
-};
-
-struct FUN_00bd1c50_owner
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    FUN_00bd1c50_holder* m_24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    NiPointer<NiRefObject> m_44;
-};
 
 extern unsigned int DAT_01202338;
 extern void* DAT_0126f74c;
@@ -288,7 +303,7 @@ class FUN_00bd1c50_cls
     unsigned int unk50;
     unsigned int unk54;
     unsigned int unk58;
-    FUN_00bd1c50_owner* m_5c;
+    NiD3DPass* m_5c;
     unsigned int unk60;
     unsigned int unk64;
     unsigned int unk68;
@@ -298,14 +313,14 @@ class FUN_00bd1c50_cls
     int FUN_00bd1c50(int a1, int a2, int a3, int a4, int a5, int a6, int a7);
 };
 
-// Copies the slot at m_bc into m_5c->m_24->m_00->m_08, stores the object at m_6c[18 + DAT_01202338] into m_5c->m_44, sets DAT_0126f74c to m_5c and returns 0.
+// Updates the first texture stage and pixel shader, then selects this render pass.
 // @fnv 0x00bd1c50
 int FUN_00bd1c50_cls::FUN_00bd1c50(int a1, int a2, int a3, int a4, int a5, int a6, int a7)
 {
     v59();
-    m_5c->m_24->m_00->m_08 = m_6c[m_bc];
-    NiRefObject* pObject = reinterpret_cast<NiRefObject*>(m_6c[18 + DAT_01202338]);
-    m_5c->m_44 = pObject;
+    m_5c->m_kStages.m_pBase[0].m_pObject->m_uiTextureStage = m_6c[m_bc];
+    NiD3DPixelShader* pObject = reinterpret_cast<NiD3DPixelShader*>(m_6c[18 + DAT_01202338]);
+    m_5c->m_spPixelShader = pObject;
     DAT_0126f74c = m_5c;
     return 0;
 }
@@ -325,12 +340,6 @@ struct ShaderDescX
 void* FUN_00ec61c0(void* apDst, int aiValue, unsigned int auiSize);
 void FUN_00be0c00(const char* apFile, char* apPath);
 int sprintf_s(char* apBuffer, unsigned int auiSize, const char* apFormat, ...);
-
-class NiD3DGPUProgramCache
-{
-  public:
-    static const char* GetPixelShaderProfile(bool abHighest);
-};
 
 class SpeedTreeFrondShaderX
 {
@@ -477,42 +486,6 @@ void DebugShaderLoader::LoadDebugShaders()
     m_spPixelShaderVariants[1] = FUN_00be1750(path, maskedPixelDesc.kMacros, profile, name);
 }
 
-struct QuadData : NiMemObject
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    QuadData(bool, bool, unsigned short, int, int, int, int, int, int);
-    bool FUN_00a87ae0(int, int, int);
-    bool SetRectangle(int, float, float, float, float);
-    bool FUN_00a88130(int, int, float, float, float, float);
-    void FUN_00a87900();
-};
 struct QuadUpdate
 {
     float time;
@@ -526,101 +499,32 @@ struct QuadUpdate
           updateCollision(false)
     {}
 };
-struct ScreenQuad : NiScreenElements
+
+inline bool InsertScreenElement(NiScreenElements* geometry, int a, int b, int c)
 {
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    QuadData* data;
-    unsigned int unkbc;
-    unsigned int unkc0;
-    ScreenQuad(QuadData*);
-    QuadData* GetData() const
-    {
-        return data;
-    }
-    bool Insert(int a, int b, int c)
-    {
-        return GetData()->FUN_00a87ae0(a, b, c);
-    }
-    bool Rectangle(int a, float b, float c, float d, float e)
-    {
-        return GetData()->SetRectangle(a, b, c, d, e);
-    }
-    bool Texture(int a, int b, float c, float d, float e, float f)
-    {
-        return GetData()->FUN_00a88130(a, b, c, d, e, f);
-    }
-    void Finish()
-    {
-        GetData()->FUN_00a87900();
-    }
-    void FUN_00a5a040();
-    void Update(QuadUpdate&);
-};
-struct PixelConstantMap : NiD3DShaderConstantMap
+    return geometry->GetData()->FUN_00a87ae0(a, b, c);
+}
+
+inline bool SetScreenElementRectangle(NiScreenElements* geometry, int a, float b, float c, float d, float e)
 {
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    PixelConstantMap(void*, int);
-    virtual int AddEntry(const char*, unsigned int, unsigned int, unsigned int, unsigned int, const char*, unsigned int,
-                         unsigned int, const void*, unsigned int);
-};
+    return geometry->GetData()->SetRectangle(a, b, c, d, e);
+}
+
+inline bool SetScreenElementTexture(NiScreenElements* geometry, int a, int b, float c, float d, float e, float f)
+{
+    return geometry->GetData()->FUN_00a88130(a, b, c, d, e, f);
+}
+
+inline void FinishScreenElement(NiScreenElements* geometry)
+{
+    geometry->GetData()->FUN_00a87900();
+}
+
 struct DebugShaderInit : BloodSplatterBeamShader
 {
-    ScreenQuad* GetScreenQuad() const
+    NiScreenElements* GetNiScreenElements() const
     {
-        return static_cast<ScreenQuad*>(m_pMenuBackgroundScreenGeometry.m_pObject);
+        return m_pMenuBackgroundScreenGeometry.m_pObject;
     }
     bool FUN_00be0870();
     bool InitDebugShader();
@@ -631,18 +535,18 @@ bool DebugShaderInit::InitDebugShader()
 {
     bool result = FUN_00be0870();
     QuadUpdate update;
-    m_pMenuBackgroundScreenGeometry = new ScreenQuad(new QuadData(false, false, 1, 1, 1, 4, 1, 2, 1));
-    static_cast<ScreenQuad*>(m_pMenuBackgroundScreenGeometry.m_pObject)->Insert(4, 0, 0);
-    static_cast<ScreenQuad*>(m_pMenuBackgroundScreenGeometry.m_pObject)->Rectangle(0, -1.0f, 1.0f, 2.0f, -2.0f);
-    static_cast<ScreenQuad*>(m_pMenuBackgroundScreenGeometry.m_pObject)->Texture(0, 0, 0.0f, 0.0f, 1.0f, 1.0f);
-    static_cast<ScreenQuad*>(m_pMenuBackgroundScreenGeometry.m_pObject)->Finish();
-    static_cast<ScreenQuad*>(m_pMenuBackgroundScreenGeometry.m_pObject)->FUN_00a5a040();
-    GetScreenQuad()->Update(update);
-    if (!m_spFirstShaderConstantMap.m_pObject)
+    m_pMenuBackgroundScreenGeometry = new NiScreenElements(new NiScreenElementsData(false, false, 1, 1, 1, 4, 1, 2, 1));
+    InsertScreenElement(m_pMenuBackgroundScreenGeometry.m_pObject, 4, 0, 0);
+    SetScreenElementRectangle(m_pMenuBackgroundScreenGeometry.m_pObject, 0, -1.0f, 1.0f, 2.0f, -2.0f);
+    SetScreenElementTexture(m_pMenuBackgroundScreenGeometry.m_pObject, 0, 0, 0.0f, 0.0f, 1.0f, 1.0f);
+    FinishScreenElement(m_pMenuBackgroundScreenGeometry.m_pObject);
+    m_pMenuBackgroundScreenGeometry.m_pObject->FUN_00a5a040();
+    GetNiScreenElements()->Update(&update);
+    if (!m_spPixelConstantMap.m_pObject)
     {
-        m_spFirstShaderConstantMap = new PixelConstantMap(m_pShaderObject, 2);
-        static_cast<PixelConstantMap*>(m_spFirstShaderConstantMap.m_pObject)
-            ->AddEntry("ChannelMask", 0x10000007, 0, 5, 1, "", 16, 4, &DAT_011ae620, 0);
+        m_spPixelConstantMap = new NiD3DShaderConstantMap(static_cast<void*>(m_pkD3DRenderer), 2);
+        m_spPixelConstantMap.m_pObject
+            ->SetConstant("ChannelMask", 0x10000007, 0, 5, 1, "", 16, 4, &DAT_011ae620, 0);
     }
     return result;
 }
@@ -995,7 +899,7 @@ struct RenderOwner
     unsigned int unk64;
     unsigned int unk68;
     NiPointer<RenderResource> slots[16];
-    FNV_STUB_NiPointer<RenderContext> context;
+    NiPointer<RenderContext> context;
     unsigned int unkb0, unkb4, unkb8;
     unsigned int index;
 
@@ -1054,7 +958,7 @@ void RenderOwner::DrawSlots(void* destination)
     float vertical = 1.0f / Second(1.0f, ratio);
     RenderRectangle viewportRect = {DAT_010181bc, horizontal, vertical - 0.0500000007450580596923828125, 0.0f};
 
-    FNV_STUB_NiPointer<RenderContext> context;
+    NiPointer<RenderContext> context;
     context = this->context;
     for (GetIndex() = 0; GetIndex() < 16; ++GetIndex())
     {
@@ -1088,18 +992,6 @@ void RenderOwner::DrawSlots(void* destination)
         }
     }
 }
-
-class NiRTTI
-{
-  public:
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-
-    const NiRTTI* GetBaseRTTI() const
-    {
-        return m_pBaseRTTI;
-    }
-};
 
 class NiRTTIObject : public NiTexture
 {

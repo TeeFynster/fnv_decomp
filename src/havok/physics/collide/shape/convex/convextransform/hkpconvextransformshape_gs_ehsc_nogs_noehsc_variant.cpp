@@ -5,7 +5,12 @@
 
 // src/havok/physics/collide/shape/convex/convextransform/hkpconvextransformshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/convextransform/hkpconvextransformshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpConvexTransformShape.h"
+#include "../../../../../../../include/V4.h"
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkpConvexTransformShape.h"
+#include "../../../../../../../include/hkVector4.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkVector4q.h"
 extern const char* const g_01268970_arg1;
 struct FUN_00d5d730_class
 {
@@ -88,53 +93,12 @@ struct Cls_00d5d800
     hkTransform m_kMotionTransform;
     void GetAabb(const hkTransform& t, float tol, Aabb_00d5d800& out);
 };
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_load_ps(const float*);
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-}
 extern "C" unsigned long DAT_0126835c;
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern "C" unsigned __int64 __rdtsc(void);
 extern "C" void _ReadWriteBarrier(void);
 extern const char str_010d1074[];
 extern const char str_010c41f8[];
-struct StringCursor
-{
-    int unk0;
-    char* m_ptr;
-    int unk8;
-    char* m_kRayEnd;
-};
-struct hkBoolResult
-{
-    char m_cBooleanValue;
-    hkBoolResult()
-    {}
-    hkBoolResult(const hkBoolResult& o) : m_cBooleanValue(o.m_cBooleanValue)
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-struct hkVector4q
-{
-    __m128 m_vComponents;
-};
 struct hkVector4Rot : public hkVector4
 {
     void SetRotatedDirection(const hkRotation& r, const hkVector4& v);
@@ -194,24 +158,24 @@ struct RtChild : public hkpShape
     virtual void v4();
     virtual void v5();
     virtual void v6();
-    virtual hkBoolResult RayCast(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
+    virtual hkBool RayCast(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
 };
 struct RtStandin : public hkpConvexTransformShape
 {
-    hkBoolResult FUN_00d5d940(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
+    hkBool FUN_00d5d940(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
 };
 static __forceinline void timer_begin(const char* name)
 {
-    StringCursor* stream = (StringCursor*)TlsGetValue(DAT_0126835c);
-    char* ptr = stream->m_ptr;
-    if (ptr < stream->m_kRayEnd)
+    hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* ptr = stream->m_end.m_storage;
+    if (ptr < stream->m_capacityMinus16.m_storage)
     {
         *(const char**)ptr = name;
         _ReadWriteBarrier();
         volatile unsigned int t = (unsigned int)__rdtsc();
         *(unsigned int*)(ptr + 4) = t;
         ptr += 12;
-        stream->m_ptr = ptr;
+        stream->m_end.m_storage = ptr;
     }
 }
 struct FUN_00d5de40_Child
@@ -273,11 +237,6 @@ struct FUN_00d5de40_Obj
     void FUN_00d5de40(hkVector4* value);
 };
 
-struct __declspec(align(16)) V4
-{
-    float x, y, z, w;
-};
-
 struct ChildShape
 {
     virtual void v00();
@@ -317,12 +276,14 @@ void XformShape::FUN_00d5dc70(const V4& dir, V4& out)
     b = _mm_shuffle_ps(tmp, c, 0xd4);
     c = ctmp;
     __m128 d = *(const __m128*)&dir;
-    V4 localDir;
+    __m128 localDirStorage;
+    V4& localDir = reinterpret_cast<V4&>(localDirStorage);
     *(__m128*)&localDir =
         _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(*(const __m128*)&dir, *(const __m128*)&dir, 0x00), a),
                               _mm_mul_ps(_mm_shuffle_ps(d, d, 0x55), b)),
                    _mm_mul_ps(_mm_shuffle_ps(d, d, 0xaa), c));
-    V4 v;
+    __m128 supportStorage;
+    V4& v = reinterpret_cast<V4&>(supportStorage);
     m_pChildAtom->GetSupportPoint(localDir, v);
     __m128 s = *(__m128*)&v;
     __m128 r = _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(s, s, 0x55), _mm_load_ps((const float*)&m_c1)),

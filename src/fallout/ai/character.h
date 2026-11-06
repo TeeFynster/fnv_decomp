@@ -1,5 +1,3 @@
-#include "character_packet.h"
-
 // @fnv 0x008d1ed0
 bool Character::GetActorGuard()
 {
@@ -7,7 +5,7 @@ bool Character::GetActorGuard()
 }
 
 // @fnv 0x008d83c0
-float MiddleHighProcess::GetVisibilityAlpha()
+float MiddleHighProcess::GetVisibilityAlpha() const
 {
     return m_fAnimationSpeed;
 }

@@ -1,5 +1,51 @@
+#include "../../../../include/NiTArray.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiBlendAccumTransformInterpolator.h"
+#include "../../../../include/NiQuatTransform.h"
+#include <string.h>
+#include <math.h>
 
-#include "niblendaccumtransforminterpolator_decls.h"
+extern NiPoint3 DAT_011a8400;
+extern NiQuaternion DAT_011f3704;
+extern float DAT_01096b8c;
+extern float DAT_0109696c;
+extern MemoryManager g_memoryManager;
+// Preserve the original inline value copies and invalid-component tests.
+inline NiQuatTransform& NiQuatTransform::operator=(const NiQuatTransform& other)
+{
+    memcpy(this, &other, sizeof(*this));
+    return *this;
+}
+inline NiQuaternion& NiQuaternion::operator=(const NiQuaternion& other)
+{
+    memcpy(this, &other, sizeof(*this));
+    return *this;
+}
+inline bool NiQuatTransform::IsMarkedInvalid() const
+{
+    return scale == -3.4028234663852886e38 && qy == -3.4028234663852886e38 && x == -3.4028234663852886e38;
+}
+inline bool NiQuatTransform::IsMarkedInvalid()
+{
+    return static_cast<const NiQuatTransform&>(*this).IsMarkedInvalid();
+}
+struct AccumItem
+{
+    float time;
+    NiQuatTransform value, accum;
+    float rotation[9];
+    AccumItem() throw();
+    static void* operator new[](unsigned int size)
+    {
+        return g_memoryManager.Allocate(size);
+    }
+    AccumItem& operator=(const AccumItem& other)
+    {
+        memcpy(this, &other, sizeof(*this));
+        return *this;
+    }
+};
 // @fnv 0x00a397b0
 bool NiBlendAccumTransformInterpolator::UpdateAccumulatedTransform(float time, NiObjectNET* target,
                                                                    NiQuatTransform& result)
@@ -11,10 +57,12 @@ bool NiBlendAccumTransformInterpolator::UpdateAccumulatedTransform(float time, N
     UpdateAccumulation(time, target);
     if (m_bHasAccumulation || m_kAccumulatedTransform.IsMarkedInvalid())
     {
-        NiQuatTransform inverse;
-        inverse.m_kTranslate = DAT_011a8400;
-        inverse.m_kRotate = DAT_011f3704;
-        inverse.m_fScale = DAT_01096b8c;
+        // The scratch transform is fully initialized below, without a default-constructor call.
+        float inverseStorage[sizeof(NiQuatTransform) / sizeof(float)];
+        NiQuatTransform& inverse = *reinterpret_cast<NiQuatTransform*>(inverseStorage);
+        *reinterpret_cast<NiPoint3*>(&inverse.x) = DAT_011a8400;
+        *reinterpret_cast<NiQuaternion*>(&inverse.qx) = DAT_011f3704;
+        inverse.scale = DAT_01096b8c;
         m_pAccumulationData[m_ucSingleIdx].value.TransformBy(inverse);
         if (m_kAccumulatedTransform.IsMarkedInvalid())
             m_kAccumulatedTransform = inverse;
@@ -33,99 +81,56 @@ struct Q
     float w, x, y, z;
     bool FUN_00a92660(const Q&) const;
 };
-struct T
-{
-    float tx, ty, tz;
-    Q rot;
-    float scale;
-    bool Equals(const T& o) const;
-};
+// The shared transform has no equality declaration; retain the implementation as a free function.
 // @fnv 0x00a391c0
-bool T::Equals(const T& aOther) const
+bool __fastcall EqualQuatTransforms(const NiQuatTransform* self, int, const NiQuatTransform& other)
 {
-    return tx == aOther.tx && ty == aOther.ty && tz == aOther.tz && rot.FUN_00a92660(aOther.rot) &&
-           scale == aOther.scale;
+    return self->x == other.x && self->y == other.y && self->z == other.z &&
+           reinterpret_cast<const Q*>(&self->qx)->FUN_00a92660(*reinterpret_cast<const Q*>(&other.qx)) &&
+           self->scale == other.scale;
 }
 
 extern int DAT_01096784;
 extern int DAT_011a8404, DAT_011a8408, DAT_011f3708, DAT_011f370c, DAT_011f3710;
 void __fastcall FUN_00a36890(void*);
-struct Obj
-{
-    void* vt;
-    char base[0x2c];
-    int a, b, c, d, e, f, g;
-    float h;
-    int i;
-    char j;
-};
-// Calls FUN_00a36890, sets the vtable pointer and initialises fields a-j from global data and constants, then returns o.
+// Initialize the base, vtable, accumulated transform and accumulation array.
 // @fnv 0x00a39230
-Obj* __fastcall FUN_00a39230(Obj* pObj)
+__declspec(noinline) NiBlendAccumTransformInterpolator* __fastcall ConstructAccumulatedTransform(NiBlendAccumTransformInterpolator* pObj)
 {
     FUN_00a36890(pObj);
-    pObj->vt = &DAT_01096784;
-    pObj->a = *(int*)&DAT_011a8400;
-    pObj->b = DAT_011a8404;
-    pObj->c = DAT_011a8408;
-    pObj->d = *(int*)&DAT_011f3704;
-    pObj->e = DAT_011f3708;
-    pObj->f = DAT_011f370c;
-    pObj->g = DAT_011f3710;
-    pObj->h = DAT_01096b8c;
-    pObj->i = 0;
-    pObj->j = 0;
+    *reinterpret_cast<void**>(pObj) = &DAT_01096784;
+    *reinterpret_cast<int*>(&pObj->m_kAccumulatedTransform.x) = *(int*)&DAT_011a8400;
+    *reinterpret_cast<int*>(&pObj->m_kAccumulatedTransform.y) = DAT_011a8404;
+    *reinterpret_cast<int*>(&pObj->m_kAccumulatedTransform.z) = DAT_011a8408;
+    *reinterpret_cast<int*>(&pObj->m_kAccumulatedTransform.qx) = *(int*)&DAT_011f3704;
+    *reinterpret_cast<int*>(&pObj->m_kAccumulatedTransform.qy) = DAT_011f3708;
+    *reinterpret_cast<int*>(&pObj->m_kAccumulatedTransform.qz) = DAT_011f370c;
+    *reinterpret_cast<int*>(&pObj->m_kAccumulatedTransform.qw) = DAT_011f3710;
+    pObj->m_kAccumulatedTransform.scale = DAT_01096b8c;
+    pObj->m_pAccumulationData = 0;
+    pObj->m_bHasAccumulation = 0;
     return pObj;
 }
 
-struct MemoryManager
-{
-    void Deallocate(void* p);
-};
-extern MemoryManager g_memoryManager;
-extern int DAT_01096784;
 void __fastcall DestroyInterpolatorArray(void*);
 // @fnv 0x00a39290
-void __fastcall FUN_00a39290(void* apObject, int unused)
+void __fastcall FUN_00a39290(NiBlendAccumTransformInterpolator* apObject, int unused)
 {
-    ((void**)apObject)[0] = &DAT_01096784;
-    g_memoryManager.Deallocate(((void**)apObject)[0x14]);
+    *reinterpret_cast<void**>(apObject) = &DAT_01096784;
+    g_memoryManager.Deallocate(apObject->m_pAccumulationData);
     DestroyInterpolatorArray(apObject);
 }
 
-struct QT
-{
-    float t[3];
-    float r[4];
-    float s;
-    QT CombineTransforms(const QT&) const;
-};
-struct Item
-{
-    int h;
-    QT a;
-    char rest[0x44];
-};
-struct Self
-{
-    char d0[0xe];
-    unsigned char count;
-    unsigned char idx;
-    char d1[0x20];
-    QT acc;
-    Item* items;
-    bool FUN_00a394b0(QT* kValue);
-};
 extern double _DAT_010241b0;
 // @fnv 0x00a394b0
-bool Self::FUN_00a394b0(QT* kValue)
+bool NiBlendAccumTransformInterpolator::vf59(NiQuatTransform* kValue)
 {
-    const QT* pAcc = &acc;
-    if (pAcc->s == _DAT_010241b0 && pAcc->r[1] == _DAT_010241b0 && pAcc->t[0] == _DAT_010241b0)
+    const NiQuatTransform* pAcc = &m_kAccumulatedTransform;
+    if (pAcc->scale == _DAT_010241b0 && pAcc->qy == _DAT_010241b0 && pAcc->x == _DAT_010241b0)
         return false;
-    if (count == 1)
+    if (m_ucInterpCount == 1)
     {
-        *kValue = acc.CombineTransforms(items[idx].a);
+        *kValue = m_kAccumulatedTransform.CombineTransforms(m_pAccumulationData[m_ucSingleIdx].value);
         return true;
     }
     *kValue = *pAcc;
@@ -133,373 +138,172 @@ bool Self::FUN_00a394b0(QT* kValue)
 }
 
 namespace fnv_00a39700 {
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
-
-struct Obj
-{
-    void* __thiscall FUN_00a39230();
-};
-
 // @fnv 0x00a39700
 void* __cdecl FUN_00a39700()
 {
-    void* p = BSFadeNode::operator new(0x58);
+    void* p = BSFadeNode::operator new(sizeof(NiBlendAccumTransformInterpolator));
     if (p)
     {
-        Obj* o = (Obj*)p;
-        return o->FUN_00a39230();
+        return reinterpret_cast<void* (__thiscall*)(NiBlendAccumTransformInterpolator*)>(&ConstructAccumulatedTransform)(
+            static_cast<NiBlendAccumTransformInterpolator*>(p));
     }
     return 0;
 }
 }  // namespace fnv_00a39700
 
-struct NiAVObject;
-struct NiBinaryStream;
-struct NiFixedString;
-struct NiObject;
-struct NiObjectGroup;
-struct NiSearchPath;
-struct NiStream;
-struct NiTexture;
-struct NiThread;
-struct FUN_00a39720_shell : public NiBlendAccumTransformInterpolator
-{
-    void FUN_00a39720(NiStream*);
-};
-
-struct FUN_00a37ec0_tgt
-{
-    void FUN_00a37ec0(NiStream*);
-};
-struct FUN_00a38b60_tgt
-{
-    void FUN_00a38b60(NiStream*);
-};
-struct FUN_00a59a90_tgt
-{
-    void ReadMatrixFromStream(NiStream*);
-};
+// Keep undeclared methods as free functions, using the original member-call ABI at call sites.
+void __fastcall SaveBlendInterpolator(NiBlendInterpolator*, int, NiStream*);
 
 // @fnv 0x00a39720
-void FUN_00a39720_shell::FUN_00a39720(NiStream* kStream)
+void __fastcall SaveAccumulatedTransform(NiBlendAccumTransformInterpolator* self, int, NiStream* kStream)
 {
-    ((FUN_00a37ec0_tgt*)this)->FUN_00a37ec0(kStream);
+    reinterpret_cast<void (__thiscall*)(NiBlendInterpolator*, NiStream*)>(&SaveBlendInterpolator)(self, kStream);
     unsigned char uc;
-    for (uc = 0; uc < *((unsigned char*)this + 0xd); uc++)
+    for (uc = 0; uc < self->m_ucArraySize; uc++)
     {
-        char* p = *(char**)((char*)this + 0x50) + uc * 0x68;
-        ((FUN_00a38b60_tgt*)(p + 4))->FUN_00a38b60(kStream);
-        ((FUN_00a38b60_tgt*)(p + 0x24))->FUN_00a38b60(kStream);
-        ((FUN_00a59a90_tgt*)(p + 0x44))->ReadMatrixFromStream(kStream);
+        AccumItem* item = &self->m_pAccumulationData[uc];
+        item->value.SaveBinary(kStream);
+        item->accum.SaveBinary(kStream);
+        reinterpret_cast<NiMatrix3*>(item->rotation)->SaveBinary(*kStream);
     }
-    ((FUN_00a38b60_tgt*)((char*)this + 0x30))->FUN_00a38b60(kStream);
+    self->m_kAccumulatedTransform.SaveBinary(kStream);
 }
-
-struct NiObject;
-struct NiMemObject
-{
-    char _pad_0[1];
-};
-typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct FUN_00a39780_shell : public NiBlendAccumTransformInterpolator
-{
-    bool FUN_00a39780(NiObject*);
-};
-
-struct STUB_6FD0
-{
-    bool FUN_00a36fd0(NiObject*);
-};
-struct STUB_91C0
-{
-    char Equals(void*);
-};
 
 // @fnv 0x00a39780
-bool FUN_00a39780_shell::FUN_00a39780(NiObject* pkObject)
+bool __fastcall IsAccumulatedTransformEqual(NiBlendAccumTransformInterpolator* self, int, NiObject* pkObject)
 {
-    if (!((STUB_6FD0*)this)->FUN_00a36fd0(pkObject))
+    if (!self->NiBlendInterpolator::IsEqual(pkObject))
         return false;
-    return ((STUB_91C0*)((char*)this + 0x30))->Equals((char*)pkObject + 0x30);
+    return reinterpret_cast<char (__thiscall*)(const NiQuatTransform*, const NiQuatTransform&)>(&EqualQuatTransforms)(
+        &self->m_kAccumulatedTransform,
+        reinterpret_cast<NiBlendAccumTransformInterpolator*>(pkObject)->m_kAccumulatedTransform);
 }
 
-namespace fnv_00a39ec0 {
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-    void Deallocate(void*);
-};
-extern MemoryManager g_memoryManager;
-struct Item
-{
-    char d[0x68];
-    Item() throw();
-    static void* operator new[](unsigned int n)
-    {
-        return g_memoryManager.Allocate(n);
-    }
-};
-struct Base
-{
-    char d[0xd];
-    unsigned char count;
-    char e[2];
-    bool FUN_00a37690();
-};
-struct Self : Base
-{
-    char pad[0x40];
-    Item* items;
-    bool ResizeItems();
-};
-// Calls FUN_00a37690; if it succeeds, allocates a new Item array of size count, copies the old items over, frees the old array and stores the new one.
 // @fnv 0x00a39ec0
-bool Self::ResizeItems()
+bool __fastcall ResizeAccumulationItems(NiBlendAccumTransformInterpolator* self, int)
 {
-    unsigned char ucOldCount = count;
-    bool bResized = FUN_00a37690();
+    unsigned char ucOldCount = self->m_ucArraySize;
+    bool bResized = self->NiBlendInterpolator::GrowInterpolatorArray();
     if (bResized)
     {
-        Item* pkNewAccumArray = new Item[count];
+        AccumItem* pkNewAccumArray = new AccumItem[self->m_ucArraySize];
         for (unsigned char uc = 0; uc < ucOldCount; uc++)
-            pkNewAccumArray[uc] = items[uc];
-        g_memoryManager.Deallocate(items);
-        items = pkNewAccumArray;
+            pkNewAccumArray[uc] = self->m_pAccumulationData[uc];
+        g_memoryManager.Deallocate(self->m_pAccumulationData);
+        self->m_pAccumulationData = pkNewAccumArray;
     }
     return bResized;
 }
-}  // namespace fnv_00a39ec0
 
-namespace fnv_00a3a450 {
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
-extern MemoryManager g_memoryManager;
-struct QT
-{
-    char d[0x20];
-};
-struct Item
-{
-    char d[0x68];
-    Item() throw();
-    static void* operator new[](unsigned int n)
-    {
-        return g_memoryManager.Allocate(n);
-    }
-};
-struct Base
-{
-    char d[0xd];
-    unsigned char count;
-    char e[2];
-    void FUN_00a37510(void*, void*);
-};
-struct Self : Base
-{
-    char pad[0x20];
-    QT acc;
-    Item* items;
-    void FUN_00a3a450(Self* dest, void* arg);
-};
-// Calls FUN_00a37510, allocates a new Item array of count elements, copies items into dest, and copies acc.
+// This base helper is not declared by the approved shared header yet.
+void __fastcall CopyBlendInterpolatorMembers(NiBlendInterpolator*, int, void*, void*);
+
 // @fnv 0x00a3a450
-void Self::FUN_00a3a450(Self* dest, void* arg)
+void __fastcall CopyAccumulationMembers(NiBlendAccumTransformInterpolator* self, int,
+                                      NiBlendAccumTransformInterpolator* dest, void* arg)
 {
-    FUN_00a37510(dest, arg);
-    dest->items = new Item[count];
-    for (unsigned char i = 0; i < count; i++)
-        dest->items[i] = items[i];
-    dest->acc = acc;
+    reinterpret_cast<void (__thiscall*)(NiBlendInterpolator*, void*, void*)>(
+        &CopyBlendInterpolatorMembers)(self, dest, arg);
+    dest->m_pAccumulationData = new AccumItem[self->m_ucArraySize];
+    for (unsigned char i = 0; i < self->m_ucArraySize; i++)
+        dest->m_pAccumulationData[i] = self->m_pAccumulationData[i];
+    dest->m_kAccumulatedTransform = self->m_kAccumulatedTransform;
 }
-}  // namespace fnv_00a3a450
 
-namespace fnv_00a3a4f0 {
-struct NiStream;
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
-extern MemoryManager g_memoryManager;
-struct QT
-{
-    char d[0x20];
-    void LoadBinary(NiStream&);
-};
-struct ThreeByThreeMatrix
-{
-    char d[0x24];
-    void LoadBinary(NiStream&);
-};
-struct Item
-{
-    char h[4];
-    QT a;
-    QT b;
-    ThreeByThreeMatrix m;
-    Item() throw();
-    static void* operator new[](unsigned int n)
-    {
-        return g_memoryManager.Allocate(n);
-    }
-};
-struct NiBlendInterpolator
-{
-    virtual void LoadBinary(NiStream&);
-    char d[0x9];
-    unsigned char count;
-    char e[2];
-};
-struct FUN_00a3a4f0 : NiBlendInterpolator
-{
-    char pad[0x20];
-    QT acc;
-    Item* items;
-    virtual void LoadBinary(NiStream& s);
-};
-// Calls the base LoadBinary, allocates an Item array sized by count, loads each item's a, b and m, then loads acc.
 // @fnv 0x00a3a4f0
-void FUN_00a3a4f0::LoadBinary(NiStream& s)
+void __fastcall LoadAccumulatedTransform(NiBlendAccumTransformInterpolator* self, int, NiStream& stream)
 {
-    NiBlendInterpolator::LoadBinary(s);
-    items = new Item[count];
-    for (unsigned char i = 0; i < count; i++)
+    self->NiBlendInterpolator::LoadBinary(stream);
+    self->m_pAccumulationData = new AccumItem[self->m_ucArraySize];
+    for (unsigned char i = 0; i < self->m_ucArraySize; i++)
     {
-        Item* p = &items[i];
-        p->a.LoadBinary(s);
-        p->b.LoadBinary(s);
-        p->m.LoadBinary(s);
+        AccumItem* item = &self->m_pAccumulationData[i];
+        item->value.LoadBinary(stream);
+        item->accum.LoadBinary(stream);
+        reinterpret_cast<NiMatrix3*>(item->rotation)->LoadBinary(stream);
     }
-    acc.LoadBinary(s);
+    self->m_kAccumulatedTransform.LoadBinary(stream);
 }
-}  // namespace fnv_00a3a4f0
 
-namespace fnv_00a3a580 {
-struct NiObjectNET;
-struct NiQuatTransform;
-extern float DAT_0109696c;
-struct Item
+struct InterpItem
 {
-    void* interp;
-    int a;
-    float weight;
-    int b;
-    int c;
-    float time;
+    NiInterpolator* m_pkInterpolator;
+    float m_fWeight;
+    float m_fNormalizedWeight;
+    int m_iPriority;
+    float m_fEaseSpinner;
+    float m_fUpdateTime;
 };
-struct Self
-{
-    void* vt;
-    int pad4;
-    float lastTime;
-    unsigned char flags, count, interpCount, x;
-    int y;
-    Item* items;
-    int z[8];
-    void NormalizeWeights();
-    bool UpdateAccumulatedTransform(float, NiObjectNET*, NiQuatTransform&);
-    void FUN_00a39f60(unsigned char, float, NiObjectNET*);
-    bool FUN_00a39960(float, NiObjectNET*, NiQuatTransform&);
-    bool UpdateInterpolators(float fTime, NiObjectNET* pkInterpTarget, NiQuatTransform& kValue);
-};
+
+void __fastcall UpdateAccumulationItem(NiBlendAccumTransformInterpolator*, int, unsigned char, float, NiObjectNET*);
+bool __fastcall BlendAccumulatedValues(NiBlendAccumTransformInterpolator*, int, float, NiObjectNET*, NiQuatTransform&);
+
 // @fnv 0x00a3a580
-bool Self::UpdateInterpolators(float fTime, NiObjectNET* pkInterpTarget, NiQuatTransform& kValue)
+bool __fastcall UpdateAccumulationInterpolators(NiBlendAccumTransformInterpolator* self, int,
+                                              float fTime, NiObjectNET* pkInterpTarget, NiQuatTransform& kValue)
 {
     bool bResult = false;
     unsigned char uc;
     float fUpdateTime;
-    if (interpCount == 1)
+    if (self->m_ucInterpCount == 1)
     {
-        bResult = UpdateAccumulatedTransform(fTime, pkInterpTarget, kValue);
+        bResult = self->UpdateAccumulatedTransform(fTime, pkInterpTarget, kValue);
     }
-    else if (interpCount > 0)
+    else if (self->m_ucInterpCount > 0)
     {
-        NormalizeWeights();
-        for (uc = 0; uc < count; uc++)
+        self->NormalizeWeights();
+        for (uc = 0; uc < self->m_ucArraySize; uc++)
         {
             fUpdateTime = fTime;
-            Item* pItem = &items[uc];
-            if (pItem->interp && pItem->weight != 0.0f)
+            InterpItem* pItem = &reinterpret_cast<InterpItem*>(self->m_pInterpArray)[uc];
+            if (pItem->m_pkInterpolator && pItem->m_fNormalizedWeight != 0.0f)
             {
-                if (flags & 1)
-                    fUpdateTime = pItem->time;
+                if (self->m_uiObjectFlags & 1)
+                    fUpdateTime = pItem->m_fUpdateTime;
                 if (fUpdateTime != DAT_0109696c)
-                    FUN_00a39f60(uc, fUpdateTime, pkInterpTarget);
+                    reinterpret_cast<void (__thiscall*)(NiBlendAccumTransformInterpolator*, unsigned char, float, NiObjectNET*)>(
+                        &UpdateAccumulationItem)(self, uc, fUpdateTime, pkInterpTarget);
             }
         }
-        bResult = FUN_00a39960(fTime, pkInterpTarget, kValue);
+        bResult = reinterpret_cast<bool (__thiscall*)(NiBlendAccumTransformInterpolator*, float, NiObjectNET*, NiQuatTransform&)>(
+            &BlendAccumulatedValues)(self, fTime, pkInterpTarget, kValue);
     }
-    lastTime = fTime;
+    self->m_fLastTime = fTime;
     return bResult;
 }
-}  // namespace fnv_00a3a580
 
-namespace fnv_00a3a660 {
-struct BSFadeNode
-{
-    static void* operator new(unsigned int);
-};
-struct FUN_00a39230 : BSFadeNode
-{
-    FUN_00a39230() throw();
-    int members[22];
-};
-struct Holder
-{
-    void FUN_00a3a450(FUN_00a39230*, void*);
-};
-// Allocates a FUN_00a39230, passes it with p to Holder::FUN_00a3a450, and returns the new object.
 // @fnv 0x00a3a660
-FUN_00a39230* __fastcall FUN_00a3a660(Holder* self, int unused, void* p)
+NiBlendAccumTransformInterpolator* __fastcall CloneAccumulatedTransform(NiBlendAccumTransformInterpolator* self,
+                                                                      int, void* process)
 {
-    FUN_00a39230* o = new FUN_00a39230;
-    self->FUN_00a3a450(o, p);
-    return o;
+    void* storage = BSFadeNode::operator new(sizeof(NiBlendAccumTransformInterpolator));
+    NiBlendAccumTransformInterpolator* result = storage
+        ? reinterpret_cast<NiBlendAccumTransformInterpolator* (__thiscall*)(NiBlendAccumTransformInterpolator*)>(
+            &ConstructAccumulatedTransform)(static_cast<NiBlendAccumTransformInterpolator*>(storage))
+        : 0;
+    reinterpret_cast<void (__thiscall*)(NiBlendAccumTransformInterpolator*, NiBlendAccumTransformInterpolator*, void*)>(
+        &CopyAccumulationMembers)(self, result, process);
+    return result;
 }
-}  // namespace fnv_00a3a660
 
 namespace fnv_00a3a6b0 {
-struct Arr
-{
-    void* vt;
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
-struct Sub
-{
-    void FUN_00a38cb0(Arr*);
-};
-struct Base
-{
-    void FUN_00a38080(Arr*);
-};
-struct Self : Base
-{
-    char pad[0x30];
-    Sub sub;
-};
+
+void __fastcall AppendQuatTransformStrings(NiQuatTransform*, int, NiTArray<char*, NiTMallocInterface<char*> >*);
+void __fastcall AppendBlendInterpolatorStrings(NiBlendInterpolator*, int, NiTArray<char*, NiTMallocInterface<char*> >*);
 extern int g_011f371c;
 char* FUN_00a7d330(int);
-// Calls FUN_00a38080, appends the string from FUN_00a7d330(g_011f371c) to strs (growing if full), then calls sub.FUN_00a38cb0.
+// Append base strings, the class name and the accumulated transform strings.
 // @fnv 0x00a3a6b0
-void __fastcall FUN_00a3a6b0(Self* self, int unused, Arr* strs)
+void __fastcall FUN_00a3a6b0(NiBlendAccumTransformInterpolator* self, int unused, NiTArray<char*, NiTMallocInterface<char*> >* strs)
 {
-    self->FUN_00a38080(strs);
+    reinterpret_cast<void (__thiscall*)(NiBlendInterpolator*, NiTArray<char*, NiTMallocInterface<char*> >*)>(&AppendBlendInterpolatorStrings)(self, strs);
     char* s = FUN_00a7d330(g_011f371c);
     unsigned int n = strs->m_usSize;
     if (n >= strs->m_usMaxSize)
         strs->SetSize(n + strs->m_usGrowBy);
     strs->SetAt(n, s);
-    self->sub.FUN_00a38cb0(strs);
+    reinterpret_cast<void (__thiscall*)(NiQuatTransform*, NiTArray<char*, NiTMallocInterface<char*> >*)>(&AppendQuatTransformStrings)(
+        &self->m_kAccumulatedTransform, strs);
 }
 }  // namespace fnv_00a3a6b0
 
@@ -512,163 +316,70 @@ char* CopyFilePath(char* pcDestination, unsigned int uiDestinationSize, const ch
     return pcDestination;
 }
 
-struct Transform395
-{
-    float tx, ty, tz, qw, qx, qy, qz, scale;
-    Transform395();
-    void TransformBy(Transform395&);
-    Transform395 CombineTransforms(const Transform395&) const;
-    bool IsInvalid() const
-    {
-        return scale == -3.4028234663852886e38 && qx == -3.4028234663852886e38 && tx == -3.4028234663852886e38;
-    }
-};
-struct Interpolator395
-{
-    virtual void unk000();
-    virtual void unk004();
-    virtual void unk008();
-    virtual void unk00c();
-    virtual void unk010();
-    virtual void unk014();
-    virtual void unk018();
-    virtual void unk01c();
-    virtual void unk020();
-    virtual void unk024();
-    virtual void unk028();
-    virtual void unk02c();
-    virtual void unk030();
-    virtual void unk034();
-    virtual void unk038();
-    virtual void unk03c();
-    virtual void unk040();
-    virtual void unk044();
-    virtual void unk048();
-    virtual void unk04c();
-    virtual void unk050();
-    virtual void unk054();
-    virtual void unk058();
-    virtual void unk05c();
-    virtual void unk060();
-    virtual void unk064();
-    virtual void unk068();
-    virtual void unk06c();
-    virtual void unk070();
-    virtual void unk074();
-    virtual void unk078();
-    virtual void unk07c();
-    virtual void unk080();
-    virtual void unk084();
-    virtual void unk088();
-    virtual void Update(float, void*, Transform395&);
-    virtual void unk090();
-    virtual void unk094();
-    virtual void unk098();
-    virtual void unk09c();
-    virtual void unk0a0();
-    virtual void unk0a4();
-    virtual void unk0a8();
-    virtual void unk0ac();
-    virtual void unk0b0();
-    virtual void unk0b4();
-    virtual void unk0b8();
-    virtual void unk0bc();
-    virtual void Range(float&, float&);
-};
-struct Entry395
-{
-    Interpolator395* object;
-    int unk04, unk08, unk0c, unk10, unk14;
-};
-struct Item395
-{
-    float time;
-    Transform395 value, accum;
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-};
-struct Target395
-{
-    int unk00, unk04, unk08;
-    unsigned char flags, size, count, index;
-    int unk10;
-    Entry395* entries;
-    int unk18, unk1c, unk20, unk24, unk28, unk2c;
-    Transform395 accumulated;
-    Item395* items;
-    void UpdateInterpolator(float, void*);
-};
 // Updates the interpolator at the current index with the given time and object, accumulating a cycle transform when time moves backwards.
 // @fnv 0x00a39530
-void Target395::UpdateInterpolator(float time, void* object)
+void NiBlendAccumTransformInterpolator::UpdateAccumulation(float time, NiObjectNET* object)
 {
-    Interpolator395* interp = entries[index].object;
-    Item395& item = items[index];
+    NiInterpolator* interp = reinterpret_cast<InterpItem*>(m_pInterpArray)[m_ucSingleIdx].m_pkInterpolator;
+    AccumItem& item = m_pAccumulationData[m_ucSingleIdx];
     if (item.time != time)
     {
         if (item.time > time)
         {
-            Transform395& cycle = item.accum;
-            if (cycle.IsInvalid())
+            NiQuatTransform& cycle = item.accum;
+            if (cycle.IsMarkedInvalid())
             {
                 float begin, end;
-                interp->Range(begin, end);
-                Transform395 first;
-                interp->Update(begin, object, first);
-                Transform395 last;
-                interp->Update(end, object, last);
-                Transform395 inverse;
+                interp->GetInterpolatorTimeRange(begin, end);
+                NiQuatTransform first;
+                interp->UpdateTransform(begin, object, first);
+                NiQuatTransform last;
+                interp->UpdateTransform(end, object, last);
+                NiQuatTransform inverse;
                 first.TransformBy(inverse);
                 cycle = last.CombineTransforms(inverse);
             }
-            if (!accumulated.IsInvalid())
-                accumulated = accumulated.CombineTransforms(cycle);
+            if (!m_kAccumulatedTransform.IsMarkedInvalid())
+                m_kAccumulatedTransform = m_kAccumulatedTransform.CombineTransforms(cycle);
         }
-        interp->Update(time, object, item.value);
+        interp->UpdateTransform(time, object, item.value);
     }
     item.time = time;
 }
 
-#include <string.h>
-class NiInterpolator;
 extern unsigned char DAT_01096968;
 extern float g_011a9448[9];
 
-extern const float DAT_01015f5c;
 __forceinline void InvalidateAccumulatedValue(AccumItem& item)
 {
-    item.accum.m_fScale = item.accum.m_kRotate.x = item.accum.m_kTranslate.x = item.value.m_fScale =
-        item.value.m_kRotate.x = item.value.m_kTranslate.x = item.time = -3.4028234663852886e38f;
+    item.accum.scale = item.accum.qy = item.accum.x = item.value.scale =
+        item.value.qy = item.value.x = item.time = -3.4028234663852886e38f;
     memcpy(item.rotation, g_011a9448, sizeof(item.rotation));
 }
 
-struct AccumulationQuery : NiBlendAccumTransformInterpolator
-{
-    unsigned char FUN_00a36970(NiInterpolator*, float, unsigned char, float);
-    unsigned char FUN_00a392b0(NiInterpolator*, float, unsigned char, float);
-};
-
 // Invalidates the selected slot and, with two interpolators, may combine and invalidate the old slot.
 // @fnv 0x00a392b0
-unsigned char AccumulationQuery::FUN_00a392b0(NiInterpolator* interpolator, float weight, unsigned char priority,
-                                              float ease)
+unsigned char __fastcall AddAccumulationInterpolator(NiBlendAccumTransformInterpolator* self, int,
+                                                      NiInterpolator* interpolator, float weight, unsigned char priority,
+                                                      float ease)
 {
-    unsigned char oldIndex = m_ucSingleIdx;
-    unsigned char newIndex = FUN_00a36970(interpolator, weight, priority, ease);
+    unsigned char oldIndex = self->m_ucSingleIdx;
+    unsigned char newIndex = self->NiBlendInterpolator::AddInterpolatorItem(interpolator, weight, static_cast<char>(priority), ease);
     if (newIndex != DAT_01096968)
     {
-        InvalidateAccumulatedValue(m_pAccumulationData[newIndex]);
-        if (m_ucInterpCount == 1)
+        InvalidateAccumulatedValue(self->m_pAccumulationData[newIndex]);
+        if (self->m_ucInterpCount == 1)
         {
-            m_bHasAccumulation = true;
+            self->m_bHasAccumulation = true;
         }
-        else if (m_ucInterpCount == 2)
+        else if (self->m_ucInterpCount == 2)
         {
-            if (!m_kAccumulatedTransform.IsMarkedInvalid() && !m_pAccumulationData[oldIndex].value.IsMarkedInvalid())
+            if (!self->m_kAccumulatedTransform.IsMarkedInvalid() && !self->m_pAccumulationData[oldIndex].value.IsMarkedInvalid())
             {
-                m_kAccumulatedTransform =
-                    m_kAccumulatedTransform.CombineTransforms(m_pAccumulationData[oldIndex].value);
+                self->m_kAccumulatedTransform =
+                    self->m_kAccumulatedTransform.CombineTransforms(self->m_pAccumulationData[oldIndex].value);
             }
-            InvalidateAccumulatedValue(m_pAccumulationData[oldIndex]);
+            InvalidateAccumulatedValue(self->m_pAccumulationData[oldIndex]);
         }
     }
     return newIndex;
@@ -689,185 +400,92 @@ struct MatrixAccum
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
     NiPoint3 FUN_004b4500(const NiPoint3*);
 };
-struct QXform
+__forceinline void SetTransformTranslationAndRotation(NiQuatTransform& value)
 {
-    NiPoint3 translate;
-    QQuatOps rotate;
-    float scale;
-    bool FUN_00a39180() const;
-    void InvertTransform(QXform&);
-    QXform FUN_00a38a00(const QXform&) const;
-    void SetTR()
-    {
-        translate = DAT_011f426c;
-        rotate = DAT_011a9ea4;
-    }
-};
-void __fastcall FUN_00494260(QXform*);
-struct AccumInterpolator
-{
-    virtual void slot00();
-    virtual void slot04();
-    virtual void slot08();
-    virtual void slot0c();
-    virtual void slot10();
-    virtual void slot14();
-    virtual void slot18();
-    virtual void slot1c();
-    virtual void slot20();
-    virtual void slot24();
-    virtual void slot28();
-    virtual void slot2c();
-    virtual void slot30();
-    virtual void slot34();
-    virtual void slot38();
-    virtual void slot3c();
-    virtual void slot40();
-    virtual void slot44();
-    virtual void slot48();
-    virtual void slot4c();
-    virtual void slot50();
-    virtual void slot54();
-    virtual void slot58();
-    virtual void slot5c();
-    virtual void slot60();
-    virtual void slot64();
-    virtual void slot68();
-    virtual void slot6c();
-    virtual void slot70();
-    virtual void slot74();
-    virtual void slot78();
-    virtual void slot7c();
-    virtual void slot80();
-    virtual void slot84();
-    virtual void slot88();
-    virtual bool Update(float, NiObjectNET*, QXform&);
-    virtual void slot90();
-    virtual void slot94();
-    virtual void slot98();
-    virtual void slot9c();
-    virtual void slota0();
-    virtual void slota4();
-    virtual void slota8();
-    virtual void slotac();
-    virtual void slotb0();
-    virtual void slotb4();
-    virtual void slotb8();
-    virtual void slotbc();
-    virtual void Range(float&, float&);
-};
-struct AccumEntry
-{
-    AccumInterpolator* object;
-    float weight, normalizedWeight;
-    int priority;
-    float ease, updateTime;
-};
-struct AccumState
-{
-    float time;
-    QXform value, delta;
-    MatrixAccum rotation;
-};
-struct AccumTarget
-{
-    int unk00, unk04, unk08;
-    unsigned char flags, arraySize, count, singleIndex;
-    float threshold;
-    AccumEntry* entries;
-    float highWeight, secondWeight, highSum, nextSum, highEase, singleTime;
-    QXform accumulated;
-    AccumState* states;
-    bool reset;
-    void FUN_00a39f60(unsigned char, float, NiObjectNET*);
-};
+    *reinterpret_cast<NiPoint3*>(&value.x) = DAT_011f426c;
+    *reinterpret_cast<QQuatOps*>(&value.qx) = DAT_011a9ea4;
+}
 // Updates the indexed state from the interpolator at time, computing transform deltas and rotation data when needed.
 // @fnv 0x00a39f60
-void AccumTarget::FUN_00a39f60(unsigned char index, float time, NiObjectNET* target)
+void __fastcall UpdateAccumulationItem(NiBlendAccumTransformInterpolator* self, int,
+                                       unsigned char index, float time, NiObjectNET* target)
 {
-    AccumInterpolator* interpolator = entries[index].object;
-    AccumState* state = states + index;
+    NiInterpolator* interpolator = reinterpret_cast<InterpItem*>(self->m_pInterpArray)[index].m_pkInterpolator;
+    AccumItem* state = self->m_pAccumulationData + index;
     if (!interpolator || state->time == time)
     {
-        state->delta.SetTR();
-        state->delta.scale = 1.0f;
+        SetTransformTranslationAndRotation(state->accum);
+        state->accum.scale = 1.0f;
         state->time = time;
         return;
     }
-    if (reset || state->value.FUN_00a39180())
+    if (self->m_bHasAccumulation || state->value.IsInvalid())
     {
-        interpolator->Update(time, target, state->value);
+        interpolator->UpdateTransform(time, target, state->value);
         QQuatOps firstRotation = DAT_011a9ea4;
-        if (accumulated.rotate.x != -3.4028234663852886e38)
-            firstRotation = accumulated.rotate;
+        if (self->m_kAccumulatedTransform.qy != -3.4028234663852886e38)
+            firstRotation = *reinterpret_cast<QQuatOps*>(&self->m_kAccumulatedTransform.qx);
         QQuatOps secondRotation = DAT_011a9ea4;
-        if (state->value.rotate.x != -3.4028234663852886e38)
+        if (state->value.qy != -3.4028234663852886e38)
         {
             QQuatOps result;
-            QQuatOps* __restrict source = FUN_00a6dc00(&result, state->value.rotate);
+            QQuatOps* __restrict source = FUN_00a6dc00(&result, *reinterpret_cast<QQuatOps*>(&state->value.qx));
             secondRotation = *source;
         }
         QQuatOps productRotation = firstRotation.FUN_00a2bcf0(secondRotation);
-        productRotation.FUN_004f0180(&state->rotation);
+        productRotation.FUN_004f0180(reinterpret_cast<MatrixAccum*>(state->rotation));
     }
-    if (time < state->time && !reset)
+    if (time < state->time && !self->m_bHasAccumulation)
     {
         float begin, end;
-        interpolator->Range(begin, end);
-        QXform last;
-        FUN_00494260(&last);
-        interpolator->Update(end, target, last);
-        QXform first;
-        FUN_00494260(&first);
-        interpolator->Update(begin, target, first);
-        QXform current;
-        FUN_00494260(&current);
-        interpolator->Update(time, target, current);
-        QXform inverse;
-        FUN_00494260(&inverse);
-        state->value.InvertTransform(inverse);
-        state->delta = inverse.FUN_00a38a00(last);
-        if (state->delta.translate.x != -3.4028234663852886e38)
-            state->delta.translate = state->rotation.FUN_004b4500(&state->delta.translate);
+        interpolator->GetInterpolatorTimeRange(begin, end);
+        NiQuatTransform last;
+        interpolator->UpdateTransform(end, target, last);
+        NiQuatTransform first;
+        interpolator->UpdateTransform(begin, target, first);
+        NiQuatTransform current;
+        interpolator->UpdateTransform(time, target, current);
+        NiQuatTransform inverse;
+        state->value.Invert(&inverse);
+        state->accum = inverse.CombineTransforms(static_cast<void*>(&last));
+        if (state->accum.x != -3.4028234663852886e38)
+            *reinterpret_cast<NiPoint3*>(&state->accum.x) = reinterpret_cast<MatrixAccum*>(state->rotation)->FUN_004b4500(reinterpret_cast<NiPoint3*>(&state->accum.x));
         {
             QQuatOps secondRotation = DAT_011a9ea4;
-            if (accumulated.rotate.x != -3.4028234663852886e38)
-                secondRotation = accumulated.rotate;
+            if (self->m_kAccumulatedTransform.qy != -3.4028234663852886e38)
+                secondRotation = *reinterpret_cast<QQuatOps*>(&self->m_kAccumulatedTransform.qx);
             QQuatOps firstRotation = DAT_011a9ea4;
-            if (first.rotate.x != -3.4028234663852886e38)
+            if (first.qy != -3.4028234663852886e38)
             {
                 QQuatOps result;
-                QQuatOps* __restrict source = FUN_00a6dc00(&result, first.rotate);
+                QQuatOps* __restrict source = FUN_00a6dc00(&result, *reinterpret_cast<QQuatOps*>(&first.qx));
                 firstRotation = *source;
             }
             QQuatOps productRotation = secondRotation.FUN_00a2bcf0(firstRotation);
-            productRotation.FUN_004f0180(&state->rotation);
+            productRotation.FUN_004f0180(reinterpret_cast<MatrixAccum*>(state->rotation));
         }
-        first.InvertTransform(inverse);
-        state->value = inverse.FUN_00a38a00(current);
-        if (state->value.translate.x != -3.4028234663852886e38)
-            state->value.translate = state->rotation.FUN_004b4500(&state->value.translate);
-        state->delta = state->delta.FUN_00a38a00(state->value);
+        first.Invert(&inverse);
+        state->value = inverse.CombineTransforms(static_cast<void*>(&current));
+        if (state->value.x != -3.4028234663852886e38)
+            *reinterpret_cast<NiPoint3*>(&state->value.x) = reinterpret_cast<MatrixAccum*>(state->rotation)->FUN_004b4500(reinterpret_cast<NiPoint3*>(&state->value.x));
+        state->accum = state->accum.CombineTransforms(static_cast<void*>(&state->value));
         state->value = current;
     }
     else
     {
-        QXform current;
-        FUN_00494260(&current);
-        interpolator->Update(time, target, current);
-        QXform inverse;
-        FUN_00494260(&inverse);
-        state->value.InvertTransform(inverse);
-        state->delta = inverse.FUN_00a38a00(current);
-        if (state->delta.translate.x != -3.4028234663852886e38)
-            state->delta.translate = state->rotation.FUN_004b4500(&state->delta.translate);
+        NiQuatTransform current;
+        interpolator->UpdateTransform(time, target, current);
+        NiQuatTransform inverse;
+        state->value.Invert(&inverse);
+        state->accum = inverse.CombineTransforms(static_cast<void*>(&current));
+        if (state->accum.x != -3.4028234663852886e38)
+            *reinterpret_cast<NiPoint3*>(&state->accum.x) = reinterpret_cast<MatrixAccum*>(state->rotation)->FUN_004b4500(reinterpret_cast<NiPoint3*>(&state->accum.x));
         state->value = current;
     }
-    reset = false;
+    self->m_bHasAccumulation = false;
     state->time = time;
 }
 
-#include <math.h>
 struct Inner_00a6db50
 {
     float w, x, y, z;
@@ -902,33 +520,10 @@ struct PositionOps
         return *this;
     }
 };
-extern NiPoint3 DAT_011f426c;
-struct InterpItem
-{
-    void* m_pkInterpolator;
-    float m_fNormalizedWeight;
-    float m_fWeight;
-    float m_fLastEvaluationTime;
-    float m_fEaseSpinner;
-    int m_iValueAt14;
-};
-struct BlendAccumState
-{
-    int unk00, unk04, unk08;
-    unsigned char m_uiObjectFlags, m_ucArraySize, m_ucInterpCount, m_ucSingleIdx;
-    int unk10;
-    InterpItem* m_pInterpArray;
-    int unk18, unk1c;
-    float m_fSingleInterpolatorTime;
-    int unk24, unk28, unk2c;
-    NiQuatTransform m_kAccumulatedTransform;
-    AccumItem* m_pAccumulationData;
-    bool m_bHasAccumulation;
-    bool FUN_00a39960(float time, void* target, NiQuatTransform& output);
-};
 // Combines available accumulated transform components, copies the result to output, and returns false if none are available or the result is invalid.
 // @fnv 0x00a39960
-bool BlendAccumState::FUN_00a39960(float time, void* target, NiQuatTransform& output)
+bool __fastcall BlendAccumulatedValues(NiBlendAccumTransformInterpolator* self, int, float time,
+                                      NiObjectNET* target, NiQuatTransform& output)
 {
     float positionWeight = 1.0f;
     float current = 1.0f;
@@ -939,31 +534,33 @@ bool BlendAccumState::FUN_00a39960(float time, void* target, NiQuatTransform& ou
     bool hasRotation = false;
     float z = 0.0f;
     bool item = false;
-    bool j = m_kAccumulatedTransform.IsMarkedInvalid();
+    bool j = self->m_kAccumulatedTransform.IsMarkedInvalid();
     if (j)
     {
-        m_kAccumulatedTransform.m_kTranslate = DAT_011f426c;
-        NiQuaternion& positionSum = m_kAccumulatedTransform.m_kRotate;
+        *reinterpret_cast<NiPoint3*>(&self->m_kAccumulatedTransform.x) = DAT_011f426c;
+        NiQuaternion& positionSum = *reinterpret_cast<NiQuaternion*>(&self->m_kAccumulatedTransform.qx);
         positionSum = *reinterpret_cast<const NiQuaternion*>(&DAT_011a9ea4);
-        m_kAccumulatedTransform.m_fScale = 1.0f;
+        self->m_kAccumulatedTransform.scale = 1.0f;
     }
     bool bFirstRotation = true;
-    for (unsigned char i = 0; i < m_ucArraySize; ++i)
+    for (unsigned char i = 0; i < self->m_ucArraySize; ++i)
     {
-        InterpItem& kInterpItem = m_pInterpArray[i];
-        AccumItem& b = m_pAccumulationData[i];
-        if (!kInterpItem.m_pkInterpolator || !(kInterpItem.m_fWeight > 0.00001f))
+        InterpItem& kInterpItem = reinterpret_cast<InterpItem*>(self->m_pInterpArray)[i];
+        AccumItem& b = self->m_pAccumulationData[i];
+        if (!kInterpItem.m_pkInterpolator || !(kInterpItem.m_fNormalizedWeight > 0.00001f))
             continue;
-        NiQuatTransform kSourceTransform;
-        const float& temp = kInterpItem.m_fWeight;
+        // Select a complete transform without invoking the default constructor.
+        float kSourceTransformStorage[sizeof(NiQuatTransform) / sizeof(float)];
+        NiQuatTransform& kSourceTransform = *reinterpret_cast<NiQuatTransform*>(kSourceTransformStorage);
+        const float& temp = kInterpItem.m_fNormalizedWeight;
         if (j)
             kSourceTransform = b.value;
         else
             kSourceTransform = b.accum;
-        if (kSourceTransform.m_kTranslate.x != -3.4028234663852886e38)
+        if (kSourceTransform.x != -3.4028234663852886e38)
         {
             rot = true;
-            PositionOps kWeightedPosition = *reinterpret_cast<PositionOps*>(&kSourceTransform.m_kTranslate) * temp;
+            PositionOps kWeightedPosition = *reinterpret_cast<PositionOps*>(&kSourceTransform.x) * temp;
             kAccumulatedPosition.x = kAccumulatedPosition.x + kWeightedPosition.x;
             kAccumulatedPosition.y += kWeightedPosition.y;
             kAccumulatedPosition.z += kWeightedPosition.z;
@@ -972,10 +569,10 @@ bool BlendAccumState::FUN_00a39960(float time, void* target, NiQuatTransform& ou
         {
             positionWeight -= temp;
         }
-        if (kSourceTransform.m_kRotate.x != -3.4028234663852886e38)
+        if (kSourceTransform.qy != -3.4028234663852886e38)
         {
             Inner_00a6db50 kSourceRotation;
-            kSourceRotation = *reinterpret_cast<Inner_00a6db50*>(&kSourceTransform.m_kRotate);
+            kSourceRotation = *reinterpret_cast<Inner_00a6db50*>(&kSourceTransform.qx);
             if (!bFirstRotation)
             {
                 double x = kSourceRotation.x * firstRotation.x;
@@ -992,10 +589,10 @@ bool BlendAccumState::FUN_00a39960(float time, void* target, NiQuatTransform& ou
             firstRotation += kSourceRotation;
             hasRotation = true;
         }
-        if (kSourceTransform.m_fScale != -3.4028234663852886e38)
+        if (kSourceTransform.scale != -3.4028234663852886e38)
         {
             item = true;
-            z += temp * kSourceTransform.m_fScale;
+            z += temp * kSourceTransform.scale;
         }
         else
         {
@@ -1004,10 +601,11 @@ bool BlendAccumState::FUN_00a39960(float time, void* target, NiQuatTransform& ou
     }
     if (rot || hasRotation || item)
     {
-        NiQuatTransform kIter;
-        kIter.m_fScale = DAT_01096b8c;
-        kIter.m_kTranslate = DAT_011a8400;
-        kIter.m_kRotate = DAT_011f3704;
+        float kIterStorage[sizeof(NiQuatTransform) / sizeof(float)];
+        NiQuatTransform& kIter = *reinterpret_cast<NiQuatTransform*>(kIterStorage);
+        kIter.scale = DAT_01096b8c;
+        *reinterpret_cast<NiPoint3*>(&kIter.x) = DAT_011a8400;
+        *reinterpret_cast<NiQuaternion*>(&kIter.qx) = DAT_011f3704;
         if (rot)
         {
             const float fInvPositionWeight = 1.0f / positionWeight;
@@ -1015,7 +613,7 @@ bool BlendAccumState::FUN_00a39960(float time, void* target, NiQuatTransform& ou
             const double inv = fInvPositionWeight;
             kAccumulatedPosition.y = inv * kAccumulatedPosition.y;
             kAccumulatedPosition.z = inv * kAccumulatedPosition.z;
-            kIter.m_kTranslate = *reinterpret_cast<NiPoint3*>(&kAccumulatedPosition);
+            *reinterpret_cast<NiPoint3*>(&kIter.x) = *reinterpret_cast<NiPoint3*>(&kAccumulatedPosition);
         }
         if (hasRotation)
         {
@@ -1029,19 +627,17 @@ bool BlendAccumState::FUN_00a39960(float time, void* target, NiQuatTransform& ou
             firstRotation.x = inv * firstRotation.x;
             firstRotation.y = firstRotation.y * inv;
             firstRotation.z = firstRotation.z * inv;
-            kIter.m_kRotate = *reinterpret_cast<NiQuaternion*>(&firstRotation);
+            *reinterpret_cast<NiQuaternion*>(&kIter.qx) = *reinterpret_cast<NiQuaternion*>(&firstRotation);
         }
         if (item)
         {
             if (current > 0.00001f)
-                kIter.m_fScale = (1.0f / current) * z;
+                kIter.scale = (1.0f / current) * z;
         }
-        *reinterpret_cast<QXform*>(&m_kAccumulatedTransform) =
-            reinterpret_cast<const QXform*>(&m_kAccumulatedTransform)
-                ->FUN_00a38a00(*reinterpret_cast<const QXform*>(&kIter));
-        if (m_kAccumulatedTransform.IsMarkedInvalid())
+        self->m_kAccumulatedTransform = self->m_kAccumulatedTransform.CombineTransforms(static_cast<void*>(&kIter));
+        if (self->m_kAccumulatedTransform.IsMarkedInvalid())
             return false;
-        output = m_kAccumulatedTransform;
+        output = self->m_kAccumulatedTransform;
         return true;
     }
     return false;

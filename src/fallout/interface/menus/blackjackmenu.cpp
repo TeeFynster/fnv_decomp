@@ -1,3 +1,36 @@
+// the shared NiTArray first: NiNode.h then takes it (its own copy is only for units without one)
+#include "../../../../include/NiTArray.h"
+// BSShaderRenderUtility_blackjackmenu: local type (was include/BSShaderRenderUtility.h, which had no evidence of one real class); its methods are 0x00469860 TESDataHandler::IsFormIDCreated, 0x00b6ba70 BSShaderUtil::InitSDM, 0x00b6bb30 BSShaderUtil::RecursiveSetPropertyFadeAlpha, 0x00b6c0d0 BSShaderUtil::RenderScene
+class AnimIdle;
+class BSShaderAccumulator;
+class NiCamera;
+class NiNode;
+
+class BSShaderRenderUtility_blackjackmenu
+{
+public:
+    bool IsRenderTargetId(unsigned int value);
+    static void InitializeMultiBounds();
+    static void SetRenderCamera(NiCamera* camera, BSShaderAccumulator* accumulator, bool unused);
+    static void SetRenderCamera(AnimIdle* camera, AnimIdle* accumulator, bool unused);
+    static void SetRenderCamera(void* camera, unsigned int accumulator, bool unused);
+    static void SetAlphaOnNode(NiNode* node, float alpha);
+};
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiNode.h"
+#include "../../../../include/NiBound.h"
+#include "../../../../include/ShadowSceneNode.h"
+#include "../../../../include/NiSourceTexture.h"
+#include "../../../../include/BSSoundHandle.h"
+#include "../../../../include/GO.h"
+#include "../../../../include/BlackJackMenu.h"
+#include "../../../../include/InterfaceManager.h"
+#include "../../../../include/NiUpdateData.h"
+// Load the primary array definition before Tile adds its pointer specialization.
+#include "../../../../include/BSSimpleArray.h"
+#include "../../../../include/BSSimpleList.h"
+#include "../../../../include/StartMenu.h"
+#include "../../../../include/Tile.h"
 
 // src/fallout/interface/menus/blackjackmenu.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/interface/menus/blackjackmenu.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -13,25 +46,11 @@ void FUN_007316f0_shell::ClearField()
     ((int*)this)[0xdb0 / 4] = 0;
 }
 
-struct BlackJackMenu
-{
-    int __thiscall FUN_00731790();
-};
-
 // @fnv 0x00731790
 int __thiscall BlackJackMenu::FUN_00731790()
 {
     return 0x439;
 }
-
-namespace fnv_007317a0 {
-struct Tile;
-struct BlackJackMenu
-{
-    char mBase[0x34];
-    Tile* m_pTiles[40];
-    void SetTile(int aiID, Tile* apTile);
-};
 
 // Stores apTile into the tile slot array at index aiID when aiID is in [0,10).
 // @fnv 0x007317a0
@@ -42,7 +61,6 @@ void BlackJackMenu::SetTile(int aiID, Tile* apTile)
         m_pTiles[aiID] = apTile;
     }
 }
-}  // namespace fnv_007317a0
 
 // @fnv 0x00733f80
 int __cdecl FUN_00733f80()
@@ -94,10 +112,6 @@ void* __thiscall FUN_007317d0_shell::DestroyIfFlagged(unsigned int flags)
 struct Proc_S
 {
     void* GetNext();
-};
-struct Tile
-{
-    void Set(int, float, bool);
 };
 void* __cdecl FUN_004b7210();
 struct DAT_011d9050_S
@@ -194,10 +208,6 @@ int FUN_00738fb0_shell::GetAdjustedValue(int aiValue)
     }
 }
 
-struct NiAVObject
-{
-    void __thiscall SetAppCulled(bool);
-};
 struct SceneObjectLookup
 {
     static NiAVObject* __cdecl GetObjectByName(NiAVObject*, char const*);
@@ -246,15 +256,6 @@ void FUN_00734d50_holder::SetFlag(int flag, bool value)
 }
 
 class AnimIdle;
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-    NiPointer(T*);
-    ~NiPointer();
-    NiPointer& operator=(T*);
-    operator T*() const;
-};
 struct S148c0
 {
     void FUN_007148c0(int, int);
@@ -280,10 +281,6 @@ struct Mgr_00733500
 void __cdecl UpdateCameraFrustum(AnimIdle*, float);
 void* __cdecl FUN_00450b80(int);
 void __cdecl FUN_00b6bee0(AnimIdle*, void*, Accum_00733500*);
-struct BSShaderRenderUtility
-{
-    static void __cdecl SetRenderCamera(AnimIdle*, AnimIdle*, bool);
-};
 extern const float g_011db5ec_arg1;
 extern NiPointer<AnimIdle> g_011d90bc;
 
@@ -300,7 +297,7 @@ void __cdecl FUN_00733500()
     pAccumulator->FUN_004a0fd0(m_pParentNode);
     AnimIdle* pRenderCamera = pCamera ? pCamera : pPlayerNode->GetAnimationData();
     FUN_00b6bee0(pRenderCamera, FUN_00450b80(1), pAccumulator);
-    BSShaderRenderUtility::SetRenderCamera(pRenderCamera, m_pParentNode, false);
+    BSShaderRenderUtility_blackjackmenu::SetRenderCamera(pRenderCamera, m_pParentNode, false);
     pAccumulator->FUN_004a0fd0(0);
     m_pParentNode = 0;
     pAccumulator->FUN_00c4f2d0();
@@ -333,30 +330,10 @@ bool FUN_00739650_shell::FUN_00739650(bool bFlag)
     return bResult;
 }
 
-struct NiUpdateData
-{
-    float m_fTime;
-    bool m_bUpdate;
-    bool m_bForce;
-    unsigned char _padding[6];
 
-    NiUpdateData(float, bool, bool);
-};
 
-struct NiNode
-{
-    void __thiscall Update(NiUpdateData const&);
-};
 
-struct LodObject
-{
-    void __thiscall SetAppCulled(bool);
-};
 
-struct GO
-{
-    operator unsigned int() const;
-};
 
 extern GO g_011d9098;
 
@@ -398,13 +375,13 @@ void FUN_00738270_shell::UncullCardObjects()
         _sprintf_s(shadowRefName, 30, str_01070e0c, i);
 
         pavobj = SceneObjectLookup::GetObjectByName(m_pCardObject1, cardRefName);
-        reinterpret_cast<LodObject*>(pavobj)->SetAppCulled(false);
+        pavobj->SetAppCulled(false);
 
         pavobj = SceneObjectLookup::GetObjectByName(m_pCardObject1, cardBackRefName);
-        reinterpret_cast<LodObject*>(pavobj)->SetAppCulled(false);
+        pavobj->SetAppCulled(false);
 
         pavobj = SceneObjectLookup::GetObjectByName(m_pCardObject1, shadowRefName);
-        reinterpret_cast<LodObject*>(pavobj)->SetAppCulled(false);
+        pavobj->SetAppCulled(false);
     }
 
     for (int i = 1; i <= 7; ++i)
@@ -414,13 +391,13 @@ void FUN_00738270_shell::UncullCardObjects()
         _sprintf_s(shadowRefName, 30, str_01070dd4, i);
 
         pavobj = SceneObjectLookup::GetObjectByName(m_pCardObject3, cardRefName);
-        reinterpret_cast<LodObject*>(pavobj)->SetAppCulled(false);
+        pavobj->SetAppCulled(false);
 
         pavobj = SceneObjectLookup::GetObjectByName(m_pCardObject3, cardBackRefName);
-        reinterpret_cast<LodObject*>(pavobj)->SetAppCulled(false);
+        pavobj->SetAppCulled(false);
 
         pavobj = SceneObjectLookup::GetObjectByName(m_pCardObject3, shadowRefName);
-        reinterpret_cast<LodObject*>(pavobj)->SetAppCulled(false);
+        pavobj->SetAppCulled(false);
     }
 
     for (int i = 1; i <= 7; ++i)
@@ -430,63 +407,32 @@ void FUN_00738270_shell::UncullCardObjects()
         _sprintf_s(shadowRefName, 30, str_01070d9c, i);
 
         pavobj = SceneObjectLookup::GetObjectByName(m_pCardObject2, cardRefName);
-        reinterpret_cast<LodObject*>(pavobj)->SetAppCulled(false);
+        pavobj->SetAppCulled(false);
 
         pavobj = SceneObjectLookup::GetObjectByName(m_pCardObject2, cardBackRefName);
-        reinterpret_cast<LodObject*>(pavobj)->SetAppCulled(false);
+        pavobj->SetAppCulled(false);
 
         pavobj = SceneObjectLookup::GetObjectByName(m_pCardObject2, shadowRefName);
-        reinterpret_cast<LodObject*>(pavobj)->SetAppCulled(false);
+        pavobj->SetAppCulled(false);
     }
 
     reinterpret_cast<NiNode*>(g_011d9098.operator unsigned int())->Update(NiUpdateData(0.0f, false, false));
 }
 
-struct StartMenu
-{
-    char const* __thiscall GetMenuTitle();
-};
-
-extern StartMenu g_011d25ec;
-extern StartMenu g_011d30fc;
-extern StartMenu g_011d3354;
-extern StartMenu g_011d33fc;
-extern StartMenu g_011d37f8;
-extern StartMenu g_011d3da8;
-extern StartMenu g_011d4234;
-extern StartMenu g_011d487c;
-extern StartMenu g_011d4c78;
-extern StartMenu g_011d4e28;
-
-struct FUN_00a01290_shell
-{
-    void __thiscall SetTraitAndReset(int, float);
-};
-
-struct P09TileS
-{
-    void __thiscall Set(int, char const*, bool);
-};
-
-struct Tile2
-{
-    void __thiscall Set(int, int);
-};
+extern const StartMenu g_011d25ec;
+extern const StartMenu g_011d30fc;
+extern const StartMenu g_011d3354;
+extern const StartMenu g_011d33fc;
+extern const StartMenu g_011d37f8;
+extern const StartMenu g_011d3da8;
+extern const StartMenu g_011d4234;
+extern const StartMenu g_011d487c;
+extern const StartMenu g_011d4c78;
+extern const StartMenu g_011d4e28;
 
 struct FUN_00738c30_shell
 {
     void __thiscall FUN_00738c30(int, float);
-};
-
-struct BlackJackMenu_Layout
-{
-    char _pad[0x40];
-    Tile* m40;
-    Tile* m44;
-    Tile* m48;
-    Tile* m4C;
-    Tile* m50;
-    Tile* m54;
 };
 
 // @fnv 0x00738cc0
@@ -494,66 +440,66 @@ void __cdecl UpdateBetTiles(bool bBetTiles)
 {
     if (!bBetTiles)
     {
-        reinterpret_cast<FUN_00a01290_shell*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m44)
-            ->SetTraitAndReset(0xfc4, 1.0f);
-        reinterpret_cast<P09TileS*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m44)
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[4]
+            ->SetTraitFloat(0xfc4, 1.0f);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[4]
             ->Set(0xfc4, g_011d4c78.GetMenuTitle(), true);
 
-        reinterpret_cast<FUN_00a01290_shell*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m48)
-            ->SetTraitAndReset(0xfc4, 1.0f);
-        reinterpret_cast<P09TileS*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m48)
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[5]
+            ->SetTraitFloat(0xfc4, 1.0f);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[5]
             ->Set(0xfc4, g_011d4234.GetMenuTitle(), true);
 
-        reinterpret_cast<FUN_00a01290_shell*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m4C)
-            ->SetTraitAndReset(0xfc4, 1.0f);
-        reinterpret_cast<P09TileS*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m4C)
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[6]
+            ->SetTraitFloat(0xfc4, 1.0f);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[6]
             ->Set(0xfc4, g_011d4e28.GetMenuTitle(), true);
 
-        reinterpret_cast<FUN_00a01290_shell*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m50)
-            ->SetTraitAndReset(0xfc4, 1.0f);
-        reinterpret_cast<P09TileS*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m50)
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[7]
+            ->SetTraitFloat(0xfc4, 1.0f);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[7]
             ->Set(0xfc4, g_011d25ec.GetMenuTitle(), true);
 
-        reinterpret_cast<FUN_00a01290_shell*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m54)
-            ->SetTraitAndReset(0xfc4, 1.0f);
-        reinterpret_cast<P09TileS*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m54)
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[8]
+            ->SetTraitFloat(0xfc4, 1.0f);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[8]
             ->Set(0xfc4, g_011d30fc.GetMenuTitle(), true);
 
-        reinterpret_cast<Tile2*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m40)->Set(0xfa3, 1);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[3]->Set(0xfa3, 1);
     }
     else
     {
-        reinterpret_cast<FUN_00a01290_shell*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m44)
-            ->SetTraitAndReset(0xfc4, 1.0f);
-        reinterpret_cast<P09TileS*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m44)
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[4]
+            ->SetTraitFloat(0xfc4, 1.0f);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[4]
             ->Set(0xfc4, g_011d3da8.GetMenuTitle(), true);
         reinterpret_cast<FUN_00738c30_shell*>(DAT_011d9050)->FUN_00738c30(4, 255.0f);
 
-        reinterpret_cast<FUN_00a01290_shell*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m48)
-            ->SetTraitAndReset(0xfc4, 1.0f);
-        reinterpret_cast<P09TileS*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m48)
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[5]
+            ->SetTraitFloat(0xfc4, 1.0f);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[5]
             ->Set(0xfc4, g_011d3354.GetMenuTitle(), true);
         reinterpret_cast<FUN_00738c30_shell*>(DAT_011d9050)->FUN_00738c30(5, 255.0f);
 
-        reinterpret_cast<FUN_00a01290_shell*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m4C)
-            ->SetTraitAndReset(0xfc4, 1.0f);
-        reinterpret_cast<P09TileS*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m4C)
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[6]
+            ->SetTraitFloat(0xfc4, 1.0f);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[6]
             ->Set(0xfc4, g_011d487c.GetMenuTitle(), true);
         reinterpret_cast<FUN_00738c30_shell*>(DAT_011d9050)->FUN_00738c30(6, 255.0f);
 
-        reinterpret_cast<FUN_00a01290_shell*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m50)
-            ->SetTraitAndReset(0xfc4, 1.0f);
-        reinterpret_cast<P09TileS*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m50)
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[7]
+            ->SetTraitFloat(0xfc4, 1.0f);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[7]
             ->Set(0xfc4, g_011d37f8.GetMenuTitle(), true);
         reinterpret_cast<FUN_00738c30_shell*>(DAT_011d9050)->FUN_00738c30(7, 255.0f);
 
-        reinterpret_cast<FUN_00a01290_shell*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m54)
-            ->SetTraitAndReset(0xfc4, 1.0f);
-        reinterpret_cast<P09TileS*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m54)
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[8]
+            ->SetTraitFloat(0xfc4, 1.0f);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[8]
             ->Set(0xfc4, g_011d33fc.GetMenuTitle(), true);
         reinterpret_cast<FUN_00738c30_shell*>(DAT_011d9050)->FUN_00738c30(8, 255.0f);
 
-        reinterpret_cast<Tile2*>(reinterpret_cast<BlackJackMenu_Layout*>(DAT_011d9050)->m40)->Set(0xfa3, 0);
+        reinterpret_cast<BlackJackMenu*>(DAT_011d9050)->m_pTiles[3]->Set(0xfa3, 0);
     }
 }
 
@@ -626,12 +572,6 @@ struct Padding16ByteBlock
     int m_uiFilterValue;
 };
 
-struct BSSimpleList
-{
-    Padding16ByteBlock** __thiscall _ref_006815c0();
-    BSSimpleList* __thiscall _ref_00726070();
-};
-
 struct FUN_007395a0_shell
 {
     unsigned char _pad00[0x6C];
@@ -639,7 +579,7 @@ struct FUN_007395a0_shell
     unsigned char _pad70[4];
     int m_iValueAtOffset74;
     unsigned char _pad78[0xD94 - 0x78];
-    BSSimpleList* m_pSimpleList;
+    BSSimpleList<Padding16ByteBlock*>* m_pSimpleList;
 
     bool __thiscall FUN_007395a0();
 };
@@ -648,7 +588,7 @@ struct FUN_007395a0_shell
 bool __thiscall FUN_007395a0_shell::FUN_007395a0()
 {
     int numCards;
-    BSSimpleList* clist;
+    BSSimpleList<Padding16ByteBlock*>* clist;
     Padding16ByteBlock* cd;
     bool bCanSplit;
 
@@ -657,15 +597,15 @@ bool __thiscall FUN_007395a0_shell::FUN_007395a0()
     numCards = 0;
     bCanSplit = false;
 
-    while (clist && *clist->_ref_006815c0())
+    while (clist && clist->GetItem())
     {
         if (numCards == 0)
         {
-            cd = *clist->_ref_006815c0();
+            cd = clist->GetItem();
         }
         else if (numCards == 1)
         {
-            if (cd->m_uiFilterValue == (*clist->_ref_006815c0())->m_uiFilterValue)
+            if (cd->m_uiFilterValue == clist->GetItem()->m_uiFilterValue)
             {
                 if (m_iValueAtOffset74 >= m_iValueAtOffset6C * 2)
                     bCanSplit = true;
@@ -677,7 +617,7 @@ bool __thiscall FUN_007395a0_shell::FUN_007395a0()
             break;
         }
 
-        clist = clist->_ref_00726070();
+        clist = clist->GetNext();
         ++numCards;
     }
 
@@ -687,34 +627,20 @@ bool __thiscall FUN_007395a0_shell::FUN_007395a0()
 }  // namespace fnv_007395a0
 
 namespace fnv_0073ab40 {
-struct StartMenu
-{
-    char const* __thiscall GetMenuTitle();
-};
-
-struct GlobalObject_0040c150 : public StartMenu
-{
-};
-
 struct FNStub
 {
     char* __thiscall GetFullName();
 };
 
-struct TileHelper
-{
-    void Set(int, char const*, bool);
-};
-
 struct FUN_0073ab40_shell
 {
     unsigned char _pad[0x3C];
-    TileHelper* m_tile;
+    Tile* m_tile;
 
     void __thiscall UpdateTileText();
 };
 
-extern GlobalObject_0040c150 g_011d3e08;
+extern const StartMenu g_011d3e08;
 extern int* DAT_011d9054;
 extern void* DAT_011d9058;
 extern int DAT_011d9044;
@@ -885,6 +811,8 @@ FUN_00731710_cls::FUN_00731710_cls() : m_08(0), m_0c(0)
     m_04 = 5;
 }
 
+
+#include "../../../../include/NiPointer.h"
 namespace fnv_00731800 {
 struct PlayerStub
 {
@@ -892,18 +820,9 @@ struct PlayerStub
 };
 extern PlayerStub* g_thePlayer;
 
-struct NiNodeStub
-{
-    void DetachAllChildren();
-};
-template <class T> struct NiPtr
-{
-    T* m_pObject;
-    NiPtr& operator=(T*);
-    operator T*() const;
-};
-extern NiPtr<NiNodeStub> g_rootA;
-extern NiPtr<NiNodeStub> g_rootB;
+using ::NiPointer;
+extern NiPointer<NiNode> g_rootA;
+extern NiPointer<NiNode> g_rootB;
 
 struct PathObj
 {
@@ -988,7 +907,7 @@ struct SSNStub
     virtual void v55();
     virtual void v56();
     virtual void v57();
-    virtual void AttachNode(NiNodeStub*);
+    virtual void AttachNode(NiNode*);
     void FUN_00b5d180();
 };
 
@@ -1097,7 +1016,7 @@ FUN_00731800::~FUN_00731800()
     g_modelLoader->FUN_0045a5e0(str_01070950);
     ((SSNStub*)FUN_00450b80(1))->AttachNode(g_rootB);
     ((SSNStub*)FUN_00450b80(1))->FUN_00b5d180();
-    ((NiNodeStub*)g_rootB)->DetachAllChildren();
+    ((NiNode*)g_rootB)->DetachAllChildren();
     g_rootB = 0;
     m_db4 = 0;
     m_db8 = 0;
@@ -1156,9 +1075,6 @@ FUN_00731800::~FUN_00731800()
 }  // namespace fnv_00731800
 
 namespace fnv_00731d70 {
-class NiSourceTexture
-{
-};
 struct VObj731
 {
     virtual void u00();
@@ -1191,11 +1107,13 @@ unsigned int __cdecl FUN_0044a670(const char* aStr);
 char* __cdecl FUN_004812f0(const char* aStr, const char* aSub);
 extern const char DAT_01013444[];
 void __cdecl FUN_004b7240(char* aDst, char* aSrc, unsigned int aSize);
-struct ModelLoader731
+// ModelLoader::LoadFile is 0x00447080 (also bound by camerashake.cpp); no shared ModelLoader.h exists yet.
+class ModelLoader
 {
+public:
     NiNode* __thiscall LoadFile(const char* aName, int a2, bool a3, bool a4, bool a5, bool a6);
 };
-extern ModelLoader731* g_modelLoader;
+extern ModelLoader* g_modelLoader;
 struct NiPtrC731
 {
     NiSourceTexture* m_pObject;
@@ -1375,10 +1293,6 @@ struct Local12_cls
     void __thiscall FUN_0043d410(float a1, int a2, int a3);
 };
 
-struct Node_cls
-{
-    void __thiscall FUN_00450f90(int);
-};
 
 struct Tail2_cls
 {
@@ -1399,7 +1313,7 @@ extern Mgr_cls DAT_011d9098;
 extern char str_01070e58[];
 extern char str_01070e44[];
 
-Node_cls* __cdecl FUN_004aae30(int value, char const* name);
+NiAVObject* __cdecl FUN_004aae30(int value, char const* name);
 
 struct FUN_007399f0_cls
 {
@@ -1414,48 +1328,31 @@ struct FUN_007399f0_cls
 void __thiscall FUN_007399f0_cls::FUN_007399f0()
 {
     Local12_cls tmp;
-    Node_cls* node;
+    NiAVObject* node;
 
     if (HasFlag(0x10))
     {
         node = FUN_004aae30(m_db4, str_01070e58);
-        node->FUN_00450f90(1);
+        node->FUN_00450f90(true);
         node = FUN_004aae30(m_db4, str_01070e44);
-        node->FUN_00450f90(0);
+        node->FUN_00450f90(false);
     }
     else
     {
         node = FUN_004aae30(m_db4, str_01070e58);
-        node->FUN_00450f90(0);
+        node->FUN_00450f90(false);
         node = FUN_004aae30(m_db4, str_01070e44);
-        node->FUN_00450f90(1);
+        node->FUN_00450f90(true);
     }
 
     tmp.FUN_0043d410(0.0f, 0, 0);
     DAT_011d9098.FUN_00559450(1, &tmp)->FUN_0043b4a0()->FUN_00a59c60();
 }
 
-struct ChipNodeX
-{
-    void SetLocalRotation(float afX, float afY, float afZ);
-};
-struct UpdateDataX
-{
-    float fTime;
-    bool m_bUpdateEnabled;
-    bool bIsMultiThreaded;
-    short sPad;
-    int iActionIndex;
-    UpdateDataX(float afTime, bool abUpdateControllers, bool abIsMultiThreaded);
-};
-struct RootNodeX
-{
-    void Update(const UpdateDataX& arData);
-};
 struct RootPtrX
 {
-    RootNodeX* m_pObject;
-    operator RootNodeX*() const;
+    NiNode* m_pObject;
+    operator NiNode*() const;
 };
 extern RootPtrX xspTableRoot;
 struct BlackJackChipsX
@@ -1463,7 +1360,7 @@ struct BlackJackChipsX
     char _pad00[0x6c];
     int iBet;
     char _pad70[0xdc4 - 0x70];
-    ChipNodeX* apChips[12];
+    NiAVObject* apChips[12];
     void UpdateChipPositions();
 };
 // Positions the twelve chip nodes along Z according to the bet amount, then updates the table root node with a zero-time update.
@@ -1472,157 +1369,136 @@ void BlackJackChipsX::UpdateChipPositions()
 {
     if (iBet < 7)
     {
-        apChips[0]->SetLocalRotation(0.0f, 0.0f, iBet * 0.18000000000000002);
-        apChips[1]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[2]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[3]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[4]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[5]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[6]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[7]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[8]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[9]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[10]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[11]->SetLocalRotation(0.0f, 0.0f, -5.0f);
+        apChips[0]->FUN_004bc1f0(0.0f, 0.0f, iBet * 0.18000000000000002);
+        apChips[1]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[2]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[3]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[4]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[5]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[6]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[7]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[8]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[9]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[10]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[11]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
     }
     else if (iBet < 40)
     {
-        apChips[0]->SetLocalRotation(0.0f, 0.0f, (iBet % 5 + 5) * 0.18000000000000002);
-        apChips[1]->SetLocalRotation(0.0f, 0.0f, (iBet / 5 - 1) * 0.18000000000000002);
-        apChips[2]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[3]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[4]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[5]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[6]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        iBet > 10 ? apChips[7]->SetLocalRotation(0.0f, 0.0f, 0.0f) : apChips[7]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[8]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[9]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[10]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[11]->SetLocalRotation(0.0f, 0.0f, -5.0f);
+        apChips[0]->FUN_004bc1f0(0.0f, 0.0f, (iBet % 5 + 5) * 0.18000000000000002);
+        apChips[1]->FUN_004bc1f0(0.0f, 0.0f, (iBet / 5 - 1) * 0.18000000000000002);
+        apChips[2]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[3]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[4]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[5]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[6]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        iBet > 10 ? apChips[7]->FUN_004bc1f0(0.0f, 0.0f, 0.0f) : apChips[7]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[8]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[9]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[10]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[11]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
     }
     else if (iBet <= 100)
     {
-        apChips[0]->SetLocalRotation(0.0f, 0.0f, 0.9f);
-        apChips[1]->SetLocalRotation(0.0f, 0.0f, 0.9f);
-        apChips[2]->SetLocalRotation(0.0f, 0.0f, (iBet / 10 - 3) * 0.18000000000000002);
-        apChips[3]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[4]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[5]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[6]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[7]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[8]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[9]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[10]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[11]->SetLocalRotation(0.0f, 0.0f, -5.0f);
+        apChips[0]->FUN_004bc1f0(0.0f, 0.0f, 0.9f);
+        apChips[1]->FUN_004bc1f0(0.0f, 0.0f, 0.9f);
+        apChips[2]->FUN_004bc1f0(0.0f, 0.0f, (iBet / 10 - 3) * 0.18000000000000002);
+        apChips[3]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[4]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[5]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[6]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[7]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[8]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[9]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[10]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[11]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
     }
     else if (iBet <= 300)
     {
-        apChips[0]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[1]->SetLocalRotation(0.0f, 0.0f, 1.44f);
-        apChips[2]->SetLocalRotation(0.0f, 0.0f, (iBet % 25 / 10 + 5) * 0.18000000000000002);
-        apChips[3]->SetLocalRotation(0.0f, 0.0f, (iBet / 25 - 4) * 0.18000000000000002);
-        apChips[4]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[5]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[6]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[7]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[8]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        iBet / 25 - 4 ? apChips[9]->SetLocalRotation(0.0f, 0.0f, 0.0f)
-                      : apChips[9]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[10]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[11]->SetLocalRotation(0.0f, 0.0f, -5.0f);
+        apChips[0]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[1]->FUN_004bc1f0(0.0f, 0.0f, 1.44f);
+        apChips[2]->FUN_004bc1f0(0.0f, 0.0f, (iBet % 25 / 10 + 5) * 0.18000000000000002);
+        apChips[3]->FUN_004bc1f0(0.0f, 0.0f, (iBet / 25 - 4) * 0.18000000000000002);
+        apChips[4]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[5]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[6]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[7]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[8]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        iBet / 25 - 4 ? apChips[9]->FUN_004bc1f0(0.0f, 0.0f, 0.0f)
+                      : apChips[9]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[10]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[11]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
     }
     else if (iBet <= 500)
     {
-        apChips[0]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[1]->SetLocalRotation(0.0f, 0.0f, 1.44f);
-        apChips[2]->SetLocalRotation(0.0f, 0.0f, 0.9f);
-        apChips[4]->SetLocalRotation(0.0f, 0.0f, 0.36f);
-        apChips[3]->SetLocalRotation(0.0f, 0.0f, (iBet / 25 - 12) * 0.18000000000000002);
-        apChips[5]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[6]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[7]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[8]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[9]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[10]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[11]->SetLocalRotation(0.0f, 0.0f, -5.0f);
+        apChips[0]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[1]->FUN_004bc1f0(0.0f, 0.0f, 1.44f);
+        apChips[2]->FUN_004bc1f0(0.0f, 0.0f, 0.9f);
+        apChips[4]->FUN_004bc1f0(0.0f, 0.0f, 0.36f);
+        apChips[3]->FUN_004bc1f0(0.0f, 0.0f, (iBet / 25 - 12) * 0.18000000000000002);
+        apChips[5]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[6]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[7]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[8]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[9]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[10]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[11]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
     }
     else if (iBet < 1000)
     {
-        apChips[0]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[1]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[2]->SetLocalRotation(0.0f, 0.0f, 1.62f);
-        apChips[3]->SetLocalRotation(0.0f, 0.0f, (iBet % 100 / 25 + 6) * 0.18000000000000002);
-        apChips[4]->SetLocalRotation(0.0f, 0.0f, (iBet / 100 - 3) * 0.18000000000000002);
-        apChips[5]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[6]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[7]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[8]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[9]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        iBet / 100 - 3 ? apChips[10]->SetLocalRotation(0.0f, 0.0f, 0.0f)
-                       : apChips[10]->SetLocalRotation(0.0f, 0.0f, -5.0f);
-        apChips[10]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[11]->SetLocalRotation(0.0f, 0.0f, -5.0f);
+        apChips[0]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[1]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[2]->FUN_004bc1f0(0.0f, 0.0f, 1.62f);
+        apChips[3]->FUN_004bc1f0(0.0f, 0.0f, (iBet % 100 / 25 + 6) * 0.18000000000000002);
+        apChips[4]->FUN_004bc1f0(0.0f, 0.0f, (iBet / 100 - 3) * 0.18000000000000002);
+        apChips[5]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[6]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[7]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[8]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[9]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        iBet / 100 - 3 ? apChips[10]->FUN_004bc1f0(0.0f, 0.0f, 0.0f)
+                       : apChips[10]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
+        apChips[10]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[11]->FUN_004bc1f0(0.0f, 0.0f, -5.0f);
     }
     else if (iBet < 1500)
     {
-        apChips[0]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[1]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[2]->SetLocalRotation(0.0f, 0.0f, 1.62f);
-        apChips[3]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[5]->SetLocalRotation(0.0f, 0.0f, 0.18f);
-        apChips[4]->SetLocalRotation(0.0f, 0.0f, (iBet / 100 - 9) * 0.18000000000000002);
-        apChips[6]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[7]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[8]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[9]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[10]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[11]->SetLocalRotation(0.0f, 0.0f, 0.0f);
+        apChips[0]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[1]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[2]->FUN_004bc1f0(0.0f, 0.0f, 1.62f);
+        apChips[3]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[5]->FUN_004bc1f0(0.0f, 0.0f, 0.18f);
+        apChips[4]->FUN_004bc1f0(0.0f, 0.0f, (iBet / 100 - 9) * 0.18000000000000002);
+        apChips[6]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[7]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[8]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[9]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[10]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[11]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
     }
     else
     {
         int iStackCount = iBet / 500 - 3 > 10 ? 10 : iBet / 500 - 3;
-        apChips[0]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[1]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[2]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[3]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[4]->SetLocalRotation(0.0f, 0.0f, 1.8f);
-        apChips[5]->SetLocalRotation(0.0f, 0.0f, iStackCount * 0.18000000000000002);
-        apChips[6]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[7]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[8]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[9]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        apChips[10]->SetLocalRotation(0.0f, 0.0f, 0.0f);
-        iBet == 1500 ? apChips[11]->SetLocalRotation(0.0f, 0.0f, -5.0f)
-                     : apChips[11]->SetLocalRotation(0.0f, 0.0f, 0.0f);
+        apChips[0]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[1]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[2]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[3]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[4]->FUN_004bc1f0(0.0f, 0.0f, 1.8f);
+        apChips[5]->FUN_004bc1f0(0.0f, 0.0f, iStackCount * 0.18000000000000002);
+        apChips[6]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[7]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[8]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[9]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        apChips[10]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
+        iBet == 1500 ? apChips[11]->FUN_004bc1f0(0.0f, 0.0f, -5.0f)
+                     : apChips[11]->FUN_004bc1f0(0.0f, 0.0f, 0.0f);
     }
-    UpdateDataX kData(0.0f, false, false);
-    ((RootNodeX*)xspTableRoot)->Update(kData);
+    const NiUpdateData kData(0.0f, false, false);
+    ((NiNode*)xspTableRoot)->Update(kData);
 }
 
-namespace fnv_007c06f0 {
-struct Menu
-{
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    Menu();
-    virtual ~Menu();
-};
-class NiNode;
-template <class T> class NiPtr
-{
-  public:
-    T* m_pObject;
-    NiPtr();
-    ~NiPtr();
-};
 class TESForm;
+namespace fnv_007c06f0 {
+using ::NiPointer;
 struct PlayerStandIn
 {
     int GetField630();
@@ -1698,7 +1574,7 @@ struct FUN_007c06f0 : Menu
     int unk108;
     int unk10C;
     int unk110;
-    NiPtr<NiNode> nodes[8];
+    NiPointer<NiNode> nodes[8];
     int unk134;
     int unk138;
     int unk13C;
@@ -1740,16 +1616,8 @@ struct Bound90
 {
     float FUN_0084d030();
 };
-struct Update90
-{
-    float time;
-    bool update, force;
-    unsigned short unk06;
-    int unk08;
-    Update90(float, bool, bool);
-};
-struct Property90;
-struct Node90
+// Shader property operations used by the card texture updates.
+struct Property90
 {
     virtual void v000();
     virtual void v004();
@@ -1806,79 +1674,29 @@ struct Node90
     virtual void v0d0();
     virtual void v0d4();
     virtual void v0d8();
-    virtual void v0dc(Node90*, int);
+    virtual void v0dc();
     virtual void v0e0();
     virtual void v0e4();
     virtual void v0e8();
     virtual void v0ec();
-    virtual void v0f0(int, int, Node90*);
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    Node90(int);
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    void FUN_00a59c60(const Update90&);
-    Controller90* FUN_00a5c570(const void*);
-    Node90* FUN_00a59d30(int);
+    virtual void SetTexture(int, int, NiSourceTexture*);
     int FUN_00441110();
-    Bound90* FUN_0043d450();
-    void FUN_00b5ca70(Node90*, float);
 };
-struct Pointer90
+template <class T> struct Pointer90
 {
-    Node90* p;
-    Pointer90& FUN_0066b0d0(Node90*);
-    Node90* FUN_00559450();
+    T* p;
+    Pointer90& FUN_0066b0d0(T*);
+    T* FUN_00559450();
 };
-extern Pointer90 DAT_011d90bc;
+extern Pointer90<NiAVObject> DAT_011d90bc;
 extern int DAT_011f36ac;
 struct Loader90
 {
-    Node90* LoadModel(const char*, int, int, int, int, int);
+    NiNode* LoadModel(const char*, int, int, int, int, int);
 };
 extern Loader90* DAT_011c3b3c;
-Node90* __cdecl FUN_004aae30(Node90*, const char*);
-void __cdecl FUN_00a6d2d0(Node90*);
+NiAVObject* __cdecl FUN_004aae30(NiAVObject*, const char*);
+void __cdecl FUN_00a6d2d0(NiNode*);
 struct Menu90
 {
     int unk000;
@@ -1920,7 +1738,7 @@ struct Menu90
     int unk090;
     int unk094;
     int unk098;
-    Pointer90 scene;
+    Pointer90<NiSourceTexture> scene;
     int unk0a0;
     int unk0a4;
     int unk0a8;
@@ -2758,12 +2576,12 @@ struct Menu90
     int unkda8;
     int unkdac;
     int unkdb0;
-    Node90* rootdb4;
-    Node90* rootdb8;
-    Node90* rootdbc;
-    Node90* rootdc0;
-    Node90* cards[6];
-    Node90* backs[6];
+    NiNode* rootdb4;
+    NiNode* rootdb8;
+    NiNode* rootdbc;
+    NiNode* rootdc0;
+    NiNode* cards[6];
+    NiNode* backs[6];
     Controller90* ctrldf4;
     Controller90* ctrldf8;
     Controller90* ctrldfc;
@@ -2799,7 +2617,7 @@ struct Menu90
     void UpdateChipPositions();
     void FUN_00739970(int);
     void HideArrowNodes();
-    Node90* FUN_007c2180();
+    NiAVObject* FUN_007c2180();
 };
 // @fnv 0x00732540
 void Menu90::InitBlackjackScene()
@@ -2807,24 +2625,24 @@ void Menu90::InitBlackjackScene()
     rootdb8 = DAT_011c3b3c->LoadModel("Meshes\\Terminals\\NV_BlackJack\\NV_Blackjack-Hand1.NIF", 0, 1, 0, 0, 0);
     rootdbc = DAT_011c3b3c->LoadModel("Meshes\\Terminals\\NV_BlackJack\\NV_Blackjack-Hand2.NIF", 0, 1, 0, 0, 0);
     rootdc0 = DAT_011c3b3c->LoadModel("Meshes\\Terminals\\NV_BlackJack\\NV_Blackjack-Dealer.NIF", 0, 1, 0, 0, 0);
-    Node90* root8 = rootdb4;
+    NiNode* root8 = rootdb4;
     DAT_011d90bc.FUN_0066b0d0(FUN_004aae30(rootdb4, "object1"));
-    ((Pointer90*)&DAT_011d9098)->FUN_0066b0d0(new Node90(0));
-    ((Pointer90*)&DAT_011d9098)->FUN_00559450()->v0dc(rootdb4, 1);
-    ((Pointer90*)&DAT_011d9098)->FUN_00559450()->v0dc(rootdb8, 1);
-    ((Pointer90*)&DAT_011d9098)->FUN_00559450()->v0dc(rootdbc, 1);
-    ((Pointer90*)&DAT_011d9098)->FUN_00559450()->v0dc(rootdc0, 1);
+    ((Pointer90<NiNode>*)&DAT_011d9098)->FUN_0066b0d0(new NiNode(0));
+    ((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450()->AttachChildInAvailableSlot(static_cast<NiAVObject*>(rootdb4), true);
+    ((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450()->AttachChildInAvailableSlot(static_cast<NiAVObject*>(rootdb8), true);
+    ((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450()->AttachChildInAvailableSlot(static_cast<NiAVObject*>(rootdbc), true);
+    ((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450()->AttachChildInAvailableSlot(static_cast<NiAVObject*>(rootdc0), true);
     for (int i = 0; i < 6; i++)
     {
-        ((Pointer90*)&DAT_011d9098)->FUN_00559450()->v0dc(cards[i], 1);
-        ((Pointer90*)&DAT_011d9098)->FUN_00559450()->v0dc(backs[i], 1);
+        ((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450()->AttachChildInAvailableSlot(static_cast<NiAVObject*>(cards[i]), true);
+        ((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450()->AttachChildInAvailableSlot(static_cast<NiAVObject*>(backs[i]), true);
     }
     UpdateChipPositions();
     FUN_00739970(0);
     HideArrowNodes();
-    Update90 update110(0.0f, false, false);
-    ((Pointer90*)&DAT_011d9098)->FUN_00559450()->FUN_00a59c60(update110);
-    Controller90* controller158 = rootdb4->FUN_00a5c570(&DAT_011f36ac);
+    const NiUpdateData update110(0.0f, false, false);
+    ((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450()->Update(update110);
+    Controller90* controller158 = reinterpret_cast<Controller90*>(rootdb4->FUN_00a5c570(reinterpret_cast<NiRTTI*>(&DAT_011f36ac)));
     if (controller158)
     {
         ctrldf4 = controller158;
@@ -2833,7 +2651,7 @@ void Menu90::InitBlackjackScene()
         ctrldf4->FUN_0048fef0(0.0f);
         FUN_00a6d2d0(rootdb4);
     }
-    Controller90* controller217 = rootdb8->FUN_00a5c570(&DAT_011f36ac);
+    Controller90* controller217 = reinterpret_cast<Controller90*>(rootdb8->FUN_00a5c570(reinterpret_cast<NiRTTI*>(&DAT_011f36ac)));
     if (controller217)
     {
         ctrldf8 = controller217;
@@ -2848,7 +2666,7 @@ void Menu90::InitBlackjackScene()
         ctrldf8->FUN_0048fef0(0.0f);
         FUN_00a6d2d0(rootdb8);
     }
-    Controller90* controller321 = rootdbc->FUN_00a5c570(&DAT_011f36ac);
+    Controller90* controller321 = reinterpret_cast<Controller90*>(rootdbc->FUN_00a5c570(reinterpret_cast<NiRTTI*>(&DAT_011f36ac)));
     if (controller321)
     {
         ctrldfc = controller321;
@@ -2863,7 +2681,7 @@ void Menu90::InitBlackjackScene()
         ctrldfc->FUN_0048fef0(0.0f);
         FUN_00a6d2d0(rootdbc);
     }
-    Controller90* controller415 = rootdc0->FUN_00a5c570(&DAT_011f36ac);
+    Controller90* controller415 = reinterpret_cast<Controller90*>(rootdc0->FUN_00a5c570(reinterpret_cast<NiRTTI*>(&DAT_011f36ac)));
     if (controller415)
     {
         ctrle00 = controller415;
@@ -2879,21 +2697,21 @@ void Menu90::InitBlackjackScene()
         ctrle00->FUN_0048fef0(0.0f);
         FUN_00a6d2d0(rootdc0);
     }
-    Update90 update210(0.0f, false, false);
-    ((Pointer90*)&DAT_011d9098)->FUN_00559450()->FUN_00a59c60(update210);
+    const NiUpdateData update210(0.0f, false, false);
+    ((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450()->Update(update210);
     if (!DAT_011d90bc.FUN_00559450())
         DAT_011d90bc.FUN_0066b0d0(FUN_007c2180());
-    Node90* object33 = FUN_004aae30(rootdb4, "Deck:0");
-    Node90* property2 = (!object33->FUN_00a59d30(3) ? false
-                                                    : (object33->FUN_00a59d30(3)->FUN_00441110() >= 8 &&
-                                                       object33->FUN_00a59d30(3)->FUN_00441110() <= 12))
-                            ? object33->FUN_00a59d30(3)
+    NiAVObject* object33 = FUN_004aae30(rootdb4, "Deck:0");
+    Property90* property2 = (!reinterpret_cast<Property90*>(object33->GetProperty(3)) ? false
+                                                    : (reinterpret_cast<Property90*>(object33->GetProperty(3))->FUN_00441110() >= 8 &&
+                                                       reinterpret_cast<Property90*>(object33->GetProperty(3))->FUN_00441110() <= 12))
+                            ? reinterpret_cast<Property90*>(object33->GetProperty(3))
                             : 0;
     if (property2)
-        property2->v0f0(0, 0, scene.FUN_00559450());
-    ((Node90*)FUN_00450b80(1))->v0dc(((Pointer90*)&DAT_011d9098)->FUN_00559450(), 1);
-    float scale18 = ((Pointer90*)&DAT_011d9098)->FUN_00559450()->FUN_0043d450()->FUN_0084d030() * 3.0;
-    ((Node90*)FUN_00450b80(1))->FUN_00b5ca70(((Pointer90*)&DAT_011d9098)->FUN_00559450(), scale18);
+        property2->SetTexture(0, 0, scene.FUN_00559450());
+    ((NiNode*)FUN_00450b80(1))->AttachChildInAvailableSlot(static_cast<NiAVObject*>(((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450()), true);
+    float scale18 = ((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450()->FUN_0043d450()->FUN_0084d030() * 3.0;
+    ((ShadowSceneNode*)FUN_00450b80(1))->FUN_00b5ca70(((Pointer90<NiNode>*)&DAT_011d9098)->FUN_00559450(), scale18);
 }
 
 struct FUN_00733f50
@@ -2915,17 +2733,9 @@ struct Settings129
 {
     const char* FUN_00403df0();
 };
-struct BSSoundHandleEx
-{
-    int id;
-    int flags;
-    int state;
-    ~BSSoundHandleEx();
-    bool FUN_00ad8830(bool);
-};
 struct Audio129
 {
-    BSSoundHandleEx FUN_00ad7550(const char*, int);
+    BSSoundHandle FUN_00ad7550(const char*, int);
 };
 Audio129* FUN_00453a70();
 struct Stats129
@@ -3034,76 +2844,7 @@ struct Casino129
     int FUN_0084e3a0();
     Stats129* FUN_00504e60();
 };
-struct Tile129
-{
-    float FUN_00a011b0(int);
-    void SetFloat(int, float);
-    void FUN_00a01350(int, const char*, bool);
-    void SetTraitAndReset(int, float);
-    void FUN_00700320(int, int);
-    struct Menu129* FUN_00a03c90();
-};
-Tile129* FUN_00a08b20(Tile129*, const char*);
-struct Xml129
-{
-    Tile129* FUN_00a01b00();
-};
-struct Interface129
-{
-    Xml129* FUN_00586150(const char*);
-};
-struct Menu129
-{
-    virtual ~Menu129();
-    virtual int v04();
-    virtual int v08();
-    virtual int v0C();
-    virtual int v10();
-    virtual int v14();
-    virtual int v18();
-    virtual int v1C();
-    virtual int v20();
-    virtual int v24();
-    virtual int v28();
-    virtual int v2C();
-    virtual int v30();
-    virtual int GetID();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    Tile129* tile34;
-    Tile129* tile38;
-    Tile129* tile3C;
-    Tile129* tile40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int setting;
-    int bet;
-    void FUN_00a1dc70(Tile129*, int);
-    bool FUN_00733f90();
-    void UpdateTileText();
-    bool LoadCardDeckResources();
-    void InitBlackjackScene();
-    void FUN_00a1dc20(int);
-    void ClearField();
-    Tile129* FUN_00726070();
-};
+Tile* FUN_00a08b20(Tile*, const char*);
 struct Mode129
 {
     int FUN_0066ef20(int);
@@ -3164,7 +2905,7 @@ extern const float DAT_010162c0;
 extern const double DAT_010704f0, DAT_010704e8;
 extern const char DAT_01070c58[], DAT_01049638[], DAT_01025cc4[], DAT_01070c38[], DAT_01070be0[], DAT_01070bc0[],
     DAT_01012058[], DAT_01070ba8[];
-Menu129* FUN_00a09030(int);
+Menu* FUN_00a09030(int);
 int FUN_00406d00(char*, unsigned int, const char*, ...);
 void DispatchMessageToSink(const char*, int, const char*, int, float, int);
 void FUN_005b5e40(const char*);
@@ -3173,10 +2914,10 @@ int FUN_0044a670(const char*);
 
 // Validates the player's casino entry against limits and required amount, then opens and initializes the casino bet menu, returning its tile or null on failure.
 // @fnv 0x00733630
-Tile129* FUN_00733630(SetMgr* casino, int minimum, int maximum, int required)
+Tile* FUN_00733630(SetMgr* casino, int minimum, int maximum, int required)
 {
-    Menu129* oldMenu = FUN_00a09030(0x439);
-    Interface129* pInterface = (Interface129*)FUN_004b7210();
+    Menu* oldMenu = FUN_00a09030(0x439);
+    InterfaceManager* pInterface = (InterfaceManager*)FUN_004b7210();
     DAT_011d9058 = casino;
     DAT_0119fe40 = minimum;
     DAT_0119fe3c = maximum;
@@ -3211,7 +2952,7 @@ Tile129* FUN_00733630(SetMgr* casino, int minimum, int maximum, int required)
         FUN_00406d00(message, 260, DAT_01070c58, DAT_011d451c.FUN_00403df0(),
                      ((Player129*)DAT_011dea3c)->FUN_00969b40());
         DispatchMessageToSink(message, 0, DAT_01049638, 0, DAT_010162c0, 0);
-        FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121).FUN_00ad8830(false);
+        FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121).Play(false);
         return 0;
     }
     if (DAT_011d9054->amount >= ((Casino129*)DAT_011d9058)->FUN_00504e60()->limit)
@@ -3219,7 +2960,7 @@ Tile129* FUN_00733630(SetMgr* casino, int minimum, int maximum, int required)
         char message[260];
         FUN_00406d00(message, 260, DAT_011d3abc.FUN_00403df0());
         DispatchMessageToSink(message, 0, DAT_01049638, 0, DAT_010162c0, 0);
-        FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121).FUN_00ad8830(false);
+        FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121).Play(false);
         return 0;
     }
     if (DAT_011dea3c->FUN_00575610((int)DAT_011d9058->FUN_007316d0()) < DAT_0119fe40)
@@ -3227,7 +2968,7 @@ Tile129* FUN_00733630(SetMgr* casino, int minimum, int maximum, int required)
         char message[260];
         FUN_00406d00(message, 260, DAT_011d2424.FUN_00403df0());
         DispatchMessageToSink(message, 0, DAT_01049638, 0, DAT_010162c0, 0);
-        FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121).FUN_00ad8830(false);
+        FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121).Play(false);
         return 0;
     }
     if (DAT_011d9054->amount < required && required != 0)
@@ -3235,32 +2976,32 @@ Tile129* FUN_00733630(SetMgr* casino, int minimum, int maximum, int required)
         char message[260];
         FUN_00406d00(message, 260, DAT_011d3594.FUN_00403df0());
         DispatchMessageToSink(message, 0, DAT_01049638, 0, DAT_010162c0, 0);
-        FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121).FUN_00ad8830(false);
+        FUN_00453a70()->FUN_00ad7550(DAT_01025cc4, 0x121).Play(false);
         return 0;
     }
     if (oldMenu)
         delete oldMenu;
-    Tile129* pTile = pInterface->FUN_00586150(DAT_01070c38)->FUN_00a01b00();
+    Tile* pTile = pInterface->FUN_00586150()->FUN_00a01b00(DAT_01070c38);
     DAT_011d9050 = (DAT_011d9050_S*)pTile->FUN_00a03c90();
-    if (DAT_011d9050 && ((Menu129*)DAT_011d9050)->GetID() == FUN_00733f80())
+    if (DAT_011d9050 && ((BlackJackMenu*)DAT_011d9050)->GetClass() == FUN_00733f80())
     {
-        ((Menu129*)DAT_011d9050)->FUN_00a1dc70(pTile, 0);
-        if (!((Menu129*)DAT_011d9050)->FUN_00733f90())
+        ((BlackJackMenu*)DAT_011d9050)->FUN_00a1dc70((TileMenu*)pTile, false);
+        if (!static_cast<unsigned char>(((BlackJackMenu*)DAT_011d9050)->FUN_00733f90()))
         {
             FUN_005b5e40(DAT_01070be0);
             return 0;
         }
         if (pTile->FUN_00a011b0(0xfa7) == DAT_010704f0 || pTile->FUN_00a011b0(0xfa7) == DAT_010704e8)
-            pTile->SetFloat(0xfad, FUN_00a01530(1));
-        FUN_00453a70()->FUN_00ad7550(DAT_01070bc0, 0x121).FUN_00ad8830(false);
-        ((Menu129*)DAT_011d9050)->setting = ((Player129*)DAT_011dea3c)->mode.FUN_0066ef20(11);
-        ((Menu129*)DAT_011d9050)->bet = DAT_0119fe40;
-        ((Menu129*)DAT_011d9050)->tile34->FUN_00a01350((int)DAT_011d9044, DAT_011d3804.FUN_00403df0(), true);
-        ((Menu129*)DAT_011d9050)->tile34->SetTraitAndReset((int)DAT_011d9048, 1.0f);
-        ((Menu129*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, DAT_0119fe40);
-        ((Menu129*)DAT_011d9050)->tile38->FUN_00a01350((int)DAT_011d9044, DAT_011d3300.FUN_00403df0(), true);
-        ((Menu129*)DAT_011d9050)->tile38->SetTraitAndReset((int)DAT_011d9048, 1.0f);
-        ((Menu129*)DAT_011d9050)
+            pTile->FUN_00a012d0(0xfad, FUN_00a01530(1));
+        FUN_00453a70()->FUN_00ad7550(DAT_01070bc0, 0x121).Play(false);
+        ((BlackJackMenu*)DAT_011d9050)->setting = ((Player129*)DAT_011dea3c)->mode.FUN_0066ef20(11);
+        ((BlackJackMenu*)DAT_011d9050)->bet = DAT_0119fe40;
+        ((BlackJackMenu*)DAT_011d9050)->tile34->FUN_00a01350((int)DAT_011d9044, DAT_011d3804.FUN_00403df0(), true);
+        ((BlackJackMenu*)DAT_011d9050)->tile34->SetTraitFloat((int)DAT_011d9048, 1.0f);
+        ((BlackJackMenu*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, DAT_0119fe40);
+        ((BlackJackMenu*)DAT_011d9050)->tile38->FUN_00a01350((int)DAT_011d9044, DAT_011d3300.FUN_00403df0(), true);
+        ((BlackJackMenu*)DAT_011d9050)->tile38->SetTraitFloat((int)DAT_011d9048, 1.0f);
+        ((BlackJackMenu*)DAT_011d9050)
             ->tile38->FUN_00700320((int)DAT_011d9048, DAT_011dea3c->FUN_00575610((int)DAT_011d9058->FUN_007316d0()));
         char label[64];
         if (FUN_0044a670(((Casino129*)DAT_011d9058)->name.FUN_00408da0()))
@@ -3268,915 +3009,30 @@ Tile129* FUN_00733630(SetMgr* casino, int minimum, int maximum, int required)
                          DAT_011d3e08.FUN_00403df0());
         else
             FUN_00406d00(label, 64, DAT_01012058, ((Casino129*)DAT_011d9058)->GetName(), DAT_011d3e08.FUN_00403df0());
-        ((Menu129*)DAT_011d9050)->tile3C->FUN_00a01350((int)DAT_011d9044, label, true);
-        ((Menu129*)DAT_011d9050)->tile3C->SetTraitAndReset((int)DAT_011d9048, 1.0f);
-        ((Menu129*)DAT_011d9050)->tile3C->FUN_00700320((int)DAT_011d9048, DAT_011d9054->amount);
-        FUN_00a08b20(((Menu129*)DAT_011d9050)->tile3C, DAT_01070ba8)->FUN_00700320(0xfa3, 0);
-        ((Menu129*)DAT_011d9050)->UpdateTileText();
-        ((Menu129*)DAT_011d9050)->tile40->SetTraitAndReset(0xfc4, 1.0f);
-        ((Menu129*)DAT_011d9050)->tile40->FUN_00a01350(0xfc4, DAT_011d4c84.FUN_00403df0(), true);
-        if (!((Menu129*)DAT_011d9050)->LoadCardDeckResources())
+        ((BlackJackMenu*)DAT_011d9050)->message->FUN_00a01350((int)DAT_011d9044, label, true);
+        ((BlackJackMenu*)DAT_011d9050)->message->SetTraitFloat((int)DAT_011d9048, 1.0f);
+        ((BlackJackMenu*)DAT_011d9050)->message->FUN_00700320((int)DAT_011d9048, DAT_011d9054->amount);
+        FUN_00a08b20(((BlackJackMenu*)DAT_011d9050)->message, DAT_01070ba8)->FUN_00700320(0xfa3, 0);
+        ((BlackJackMenu*)DAT_011d9050)->UpdateTileText();
+        ((BlackJackMenu*)DAT_011d9050)->tile40->SetTraitFloat(0xfc4, 1.0f);
+        ((BlackJackMenu*)DAT_011d9050)->tile40->FUN_00a01350(0xfc4, DAT_011d4c84.FUN_00403df0(), true);
+        if (!((BlackJackMenu*)DAT_011d9050)->LoadCardDeckResources())
             return 0;
         UpdateBetTiles(true);
-        ((Menu129*)DAT_011d9050)->InitBlackjackScene();
-        ((Menu129*)DAT_011d9050)->FUN_00a1dc20(0);
-        ((Menu129*)DAT_011d9050)->tile40->FUN_00700320(0xfa3, 0);
-        ((Menu129*)DAT_011d9050)->ClearField();
+        ((BlackJackMenu*)DAT_011d9050)->InitBlackjackScene();
+        ((BlackJackMenu*)DAT_011d9050)->FUN_00a1dc20(0);
+        ((BlackJackMenu*)DAT_011d9050)->tile40->FUN_00700320(0xfa3, 0);
+        ((BlackJackMenu*)DAT_011d9050)->ClearField();
         return pTile;
     }
-    else if (DAT_011d9050 && ((Menu129*)DAT_011d9050)->FUN_00726070())
-        delete (Menu129*)DAT_011d9050;
+    else if (DAT_011d9050 && ((BlackJackMenu*)DAT_011d9050)->FUN_00726070())
+        delete (BlackJackMenu*)DAT_011d9050;
     return 0;
 }
 
 NiAVObject* __cdecl FUN_004aae30(NiAVObject*, const char*);
-struct Menu737e50
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28c;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29c;
-    int unk2a0;
-    int unk2a4;
-    int unk2a8;
-    int unk2ac;
-    int unk2b0;
-    int unk2b4;
-    int unk2b8;
-    int unk2bc;
-    int unk2c0;
-    int unk2c4;
-    int unk2c8;
-    int unk2cc;
-    int unk2d0;
-    int unk2d4;
-    int unk2d8;
-    int unk2dc;
-    int unk2e0;
-    int unk2e4;
-    int unk2e8;
-    int unk2ec;
-    int unk2f0;
-    int unk2f4;
-    int unk2f8;
-    int unk2fc;
-    int unk300;
-    int unk304;
-    int unk308;
-    int unk30c;
-    int unk310;
-    int unk314;
-    int unk318;
-    int unk31c;
-    int unk320;
-    int unk324;
-    int unk328;
-    int unk32c;
-    int unk330;
-    int unk334;
-    int unk338;
-    int unk33c;
-    int unk340;
-    int unk344;
-    int unk348;
-    int unk34c;
-    int unk350;
-    int unk354;
-    int unk358;
-    int unk35c;
-    int unk360;
-    int unk364;
-    int unk368;
-    int unk36c;
-    int unk370;
-    int unk374;
-    int unk378;
-    int unk37c;
-    int unk380;
-    int unk384;
-    int unk388;
-    int unk38c;
-    int unk390;
-    int unk394;
-    int unk398;
-    int unk39c;
-    int unk3a0;
-    int unk3a4;
-    int unk3a8;
-    int unk3ac;
-    int unk3b0;
-    int unk3b4;
-    int unk3b8;
-    int unk3bc;
-    int unk3c0;
-    int unk3c4;
-    int unk3c8;
-    int unk3cc;
-    int unk3d0;
-    int unk3d4;
-    int unk3d8;
-    int unk3dc;
-    int unk3e0;
-    int unk3e4;
-    int unk3e8;
-    int unk3ec;
-    int unk3f0;
-    int unk3f4;
-    int unk3f8;
-    int unk3fc;
-    int unk400;
-    int unk404;
-    int unk408;
-    int unk40c;
-    int unk410;
-    int unk414;
-    int unk418;
-    int unk41c;
-    int unk420;
-    int unk424;
-    int unk428;
-    int unk42c;
-    int unk430;
-    int unk434;
-    int unk438;
-    int unk43c;
-    int unk440;
-    int unk444;
-    int unk448;
-    int unk44c;
-    int unk450;
-    int unk454;
-    int unk458;
-    int unk45c;
-    int unk460;
-    int unk464;
-    int unk468;
-    int unk46c;
-    int unk470;
-    int unk474;
-    int unk478;
-    int unk47c;
-    int unk480;
-    int unk484;
-    int unk488;
-    int unk48c;
-    int unk490;
-    int unk494;
-    int unk498;
-    int unk49c;
-    int unk4a0;
-    int unk4a4;
-    int unk4a8;
-    int unk4ac;
-    int unk4b0;
-    int unk4b4;
-    int unk4b8;
-    int unk4bc;
-    int unk4c0;
-    int unk4c4;
-    int unk4c8;
-    int unk4cc;
-    int unk4d0;
-    int unk4d4;
-    int unk4d8;
-    int unk4dc;
-    int unk4e0;
-    int unk4e4;
-    int unk4e8;
-    int unk4ec;
-    int unk4f0;
-    int unk4f4;
-    int unk4f8;
-    int unk4fc;
-    int unk500;
-    int unk504;
-    int unk508;
-    int unk50c;
-    int unk510;
-    int unk514;
-    int unk518;
-    int unk51c;
-    int unk520;
-    int unk524;
-    int unk528;
-    int unk52c;
-    int unk530;
-    int unk534;
-    int unk538;
-    int unk53c;
-    int unk540;
-    int unk544;
-    int unk548;
-    int unk54c;
-    int unk550;
-    int unk554;
-    int unk558;
-    int unk55c;
-    int unk560;
-    int unk564;
-    int unk568;
-    int unk56c;
-    int unk570;
-    int unk574;
-    int unk578;
-    int unk57c;
-    int unk580;
-    int unk584;
-    int unk588;
-    int unk58c;
-    int unk590;
-    int unk594;
-    int unk598;
-    int unk59c;
-    int unk5a0;
-    int unk5a4;
-    int unk5a8;
-    int unk5ac;
-    int unk5b0;
-    int unk5b4;
-    int unk5b8;
-    int unk5bc;
-    int unk5c0;
-    int unk5c4;
-    int unk5c8;
-    int unk5cc;
-    int unk5d0;
-    int unk5d4;
-    int unk5d8;
-    int unk5dc;
-    int unk5e0;
-    int unk5e4;
-    int unk5e8;
-    int unk5ec;
-    int unk5f0;
-    int unk5f4;
-    int unk5f8;
-    int unk5fc;
-    int unk600;
-    int unk604;
-    int unk608;
-    int unk60c;
-    int unk610;
-    int unk614;
-    int unk618;
-    int unk61c;
-    int unk620;
-    int unk624;
-    int unk628;
-    int unk62c;
-    int unk630;
-    int unk634;
-    int unk638;
-    int unk63c;
-    int unk640;
-    int unk644;
-    int unk648;
-    int unk64c;
-    int unk650;
-    int unk654;
-    int unk658;
-    int unk65c;
-    int unk660;
-    int unk664;
-    int unk668;
-    int unk66c;
-    int unk670;
-    int unk674;
-    int unk678;
-    int unk67c;
-    int unk680;
-    int unk684;
-    int unk688;
-    int unk68c;
-    int unk690;
-    int unk694;
-    int unk698;
-    int unk69c;
-    int unk6a0;
-    int unk6a4;
-    int unk6a8;
-    int unk6ac;
-    int unk6b0;
-    int unk6b4;
-    int unk6b8;
-    int unk6bc;
-    int unk6c0;
-    int unk6c4;
-    int unk6c8;
-    int unk6cc;
-    int unk6d0;
-    int unk6d4;
-    int unk6d8;
-    int unk6dc;
-    int unk6e0;
-    int unk6e4;
-    int unk6e8;
-    int unk6ec;
-    int unk6f0;
-    int unk6f4;
-    int unk6f8;
-    int unk6fc;
-    int unk700;
-    int unk704;
-    int unk708;
-    int unk70c;
-    int unk710;
-    int unk714;
-    int unk718;
-    int unk71c;
-    int unk720;
-    int unk724;
-    int unk728;
-    int unk72c;
-    int unk730;
-    int unk734;
-    int unk738;
-    int unk73c;
-    int unk740;
-    int unk744;
-    int unk748;
-    int unk74c;
-    int unk750;
-    int unk754;
-    int unk758;
-    int unk75c;
-    int unk760;
-    int unk764;
-    int unk768;
-    int unk76c;
-    int unk770;
-    int unk774;
-    int unk778;
-    int unk77c;
-    int unk780;
-    int unk784;
-    int unk788;
-    int unk78c;
-    int unk790;
-    int unk794;
-    int unk798;
-    int unk79c;
-    int unk7a0;
-    int unk7a4;
-    int unk7a8;
-    int unk7ac;
-    int unk7b0;
-    int unk7b4;
-    int unk7b8;
-    int unk7bc;
-    int unk7c0;
-    int unk7c4;
-    int unk7c8;
-    int unk7cc;
-    int unk7d0;
-    int unk7d4;
-    int unk7d8;
-    int unk7dc;
-    int unk7e0;
-    int unk7e4;
-    int unk7e8;
-    int unk7ec;
-    int unk7f0;
-    int unk7f4;
-    int unk7f8;
-    int unk7fc;
-    int unk800;
-    int unk804;
-    int unk808;
-    int unk80c;
-    int unk810;
-    int unk814;
-    int unk818;
-    int unk81c;
-    int unk820;
-    int unk824;
-    int unk828;
-    int unk82c;
-    int unk830;
-    int unk834;
-    int unk838;
-    int unk83c;
-    int unk840;
-    int unk844;
-    int unk848;
-    int unk84c;
-    int unk850;
-    int unk854;
-    int unk858;
-    int unk85c;
-    int unk860;
-    int unk864;
-    int unk868;
-    int unk86c;
-    int unk870;
-    int unk874;
-    int unk878;
-    int unk87c;
-    int unk880;
-    int unk884;
-    int unk888;
-    int unk88c;
-    int unk890;
-    int unk894;
-    int unk898;
-    int unk89c;
-    int unk8a0;
-    int unk8a4;
-    int unk8a8;
-    int unk8ac;
-    int unk8b0;
-    int unk8b4;
-    int unk8b8;
-    int unk8bc;
-    int unk8c0;
-    int unk8c4;
-    int unk8c8;
-    int unk8cc;
-    int unk8d0;
-    int unk8d4;
-    int unk8d8;
-    int unk8dc;
-    int unk8e0;
-    int unk8e4;
-    int unk8e8;
-    int unk8ec;
-    int unk8f0;
-    int unk8f4;
-    int unk8f8;
-    int unk8fc;
-    int unk900;
-    int unk904;
-    int unk908;
-    int unk90c;
-    int unk910;
-    int unk914;
-    int unk918;
-    int unk91c;
-    int unk920;
-    int unk924;
-    int unk928;
-    int unk92c;
-    int unk930;
-    int unk934;
-    int unk938;
-    int unk93c;
-    int unk940;
-    int unk944;
-    int unk948;
-    int unk94c;
-    int unk950;
-    int unk954;
-    int unk958;
-    int unk95c;
-    int unk960;
-    int unk964;
-    int unk968;
-    int unk96c;
-    int unk970;
-    int unk974;
-    int unk978;
-    int unk97c;
-    int unk980;
-    int unk984;
-    int unk988;
-    int unk98c;
-    int unk990;
-    int unk994;
-    int unk998;
-    int unk99c;
-    int unk9a0;
-    int unk9a4;
-    int unk9a8;
-    int unk9ac;
-    int unk9b0;
-    int unk9b4;
-    int unk9b8;
-    int unk9bc;
-    int unk9c0;
-    int unk9c4;
-    int unk9c8;
-    int unk9cc;
-    int unk9d0;
-    int unk9d4;
-    int unk9d8;
-    int unk9dc;
-    int unk9e0;
-    int unk9e4;
-    int unk9e8;
-    int unk9ec;
-    int unk9f0;
-    int unk9f4;
-    int unk9f8;
-    int unk9fc;
-    int unka00;
-    int unka04;
-    int unka08;
-    int unka0c;
-    int unka10;
-    int unka14;
-    int unka18;
-    int unka1c;
-    int unka20;
-    int unka24;
-    int unka28;
-    int unka2c;
-    int unka30;
-    int unka34;
-    int unka38;
-    int unka3c;
-    int unka40;
-    int unka44;
-    int unka48;
-    int unka4c;
-    int unka50;
-    int unka54;
-    int unka58;
-    int unka5c;
-    int unka60;
-    int unka64;
-    int unka68;
-    int unka6c;
-    int unka70;
-    int unka74;
-    int unka78;
-    int unka7c;
-    int unka80;
-    int unka84;
-    int unka88;
-    int unka8c;
-    int unka90;
-    int unka94;
-    int unka98;
-    int unka9c;
-    int unkaa0;
-    int unkaa4;
-    int unkaa8;
-    int unkaac;
-    int unkab0;
-    int unkab4;
-    int unkab8;
-    int unkabc;
-    int unkac0;
-    int unkac4;
-    int unkac8;
-    int unkacc;
-    int unkad0;
-    int unkad4;
-    int unkad8;
-    int unkadc;
-    int unkae0;
-    int unkae4;
-    int unkae8;
-    int unkaec;
-    int unkaf0;
-    int unkaf4;
-    int unkaf8;
-    int unkafc;
-    int unkb00;
-    int unkb04;
-    int unkb08;
-    int unkb0c;
-    int unkb10;
-    int unkb14;
-    int unkb18;
-    int unkb1c;
-    int unkb20;
-    int unkb24;
-    int unkb28;
-    int unkb2c;
-    int unkb30;
-    int unkb34;
-    int unkb38;
-    int unkb3c;
-    int unkb40;
-    int unkb44;
-    int unkb48;
-    int unkb4c;
-    int unkb50;
-    int unkb54;
-    int unkb58;
-    int unkb5c;
-    int unkb60;
-    int unkb64;
-    int unkb68;
-    int unkb6c;
-    int unkb70;
-    int unkb74;
-    int unkb78;
-    int unkb7c;
-    int unkb80;
-    int unkb84;
-    int unkb88;
-    int unkb8c;
-    int unkb90;
-    int unkb94;
-    int unkb98;
-    int unkb9c;
-    int unkba0;
-    int unkba4;
-    int unkba8;
-    int unkbac;
-    int unkbb0;
-    int unkbb4;
-    int unkbb8;
-    int unkbbc;
-    int unkbc0;
-    int unkbc4;
-    int unkbc8;
-    int unkbcc;
-    int unkbd0;
-    int unkbd4;
-    int unkbd8;
-    int unkbdc;
-    int unkbe0;
-    int unkbe4;
-    int unkbe8;
-    int unkbec;
-    int unkbf0;
-    int unkbf4;
-    int unkbf8;
-    int unkbfc;
-    int unkc00;
-    int unkc04;
-    int unkc08;
-    int unkc0c;
-    int unkc10;
-    int unkc14;
-    int unkc18;
-    int unkc1c;
-    int unkc20;
-    int unkc24;
-    int unkc28;
-    int unkc2c;
-    int unkc30;
-    int unkc34;
-    int unkc38;
-    int unkc3c;
-    int unkc40;
-    int unkc44;
-    int unkc48;
-    int unkc4c;
-    int unkc50;
-    int unkc54;
-    int unkc58;
-    int unkc5c;
-    int unkc60;
-    int unkc64;
-    int unkc68;
-    int unkc6c;
-    int unkc70;
-    int unkc74;
-    int unkc78;
-    int unkc7c;
-    int unkc80;
-    int unkc84;
-    int unkc88;
-    int unkc8c;
-    int unkc90;
-    int unkc94;
-    int unkc98;
-    int unkc9c;
-    int unkca0;
-    int unkca4;
-    int unkca8;
-    int unkcac;
-    int unkcb0;
-    int unkcb4;
-    int unkcb8;
-    int unkcbc;
-    int unkcc0;
-    int unkcc4;
-    int unkcc8;
-    int unkccc;
-    int unkcd0;
-    int unkcd4;
-    int unkcd8;
-    int unkcdc;
-    int unkce0;
-    int unkce4;
-    int unkce8;
-    int unkcec;
-    int unkcf0;
-    int unkcf4;
-    int unkcf8;
-    int unkcfc;
-    int unkd00;
-    int unkd04;
-    int unkd08;
-    int unkd0c;
-    int unkd10;
-    int unkd14;
-    int unkd18;
-    int unkd1c;
-    int unkd20;
-    int unkd24;
-    int unkd28;
-    int unkd2c;
-    int unkd30;
-    int unkd34;
-    int unkd38;
-    int unkd3c;
-    int unkd40;
-    int unkd44;
-    int unkd48;
-    int unkd4c;
-    int unkd50;
-    int unkd54;
-    int unkd58;
-    int unkd5c;
-    int unkd60;
-    int unkd64;
-    int unkd68;
-    int unkd6c;
-    int unkd70;
-    int unkd74;
-    int unkd78;
-    int unkd7c;
-    int unkd80;
-    int unkd84;
-    int unkd88;
-    int unkd8c;
-    int unkd90;
-    int unkd94;
-    int unkd98;
-    int unkd9c;
-    int unkda0;
-    int unkda4;
-    int unkda8;
-    int unkdac;
-    int unkdb0;
-    int unkdb4;
-    NiAVObject* table;
-    NiAVObject* hand;
-    NiAVObject* split;
-    void UpdateCulledNodes();
-};
 // @fnv 0x00737e50
-void Menu737e50::UpdateCulledNodes()
+void BlackJackMenu::UpdateCulledNodes()
 {
     char p[30];
     char h[30];
@@ -4188,7 +3044,7 @@ void Menu737e50::UpdateCulledNodes()
         _sprintf_s(i, 30, str_01070e20, j);
         _sprintf_s(p, 30, str_01070e0c, j);
         a = FUN_004aae30(table, h);
-        if (j >= unk084)
+        if (j >= arr84[0])
         {
             a->SetAppCulled(true);
             a = FUN_004aae30(table, i);
@@ -4210,21 +3066,21 @@ void Menu737e50::UpdateCulledNodes()
         _sprintf_s(h, 30, str_01070dfc, k);
         _sprintf_s(i, 30, str_01070de8, k);
         _sprintf_s(p, 30, str_01070dd4, k);
-        a = FUN_004aae30(split, h);
-        if (k >= unk08c)
+        a = FUN_004aae30(dealerHand, h);
+        if (k >= arr84[2])
         {
             a->SetAppCulled(true);
-            a = FUN_004aae30(split, i);
+            a = FUN_004aae30(dealerHand, i);
             a->SetAppCulled(true);
-            a = FUN_004aae30(split, p);
+            a = FUN_004aae30(dealerHand, p);
             a->SetAppCulled(true);
         }
         else
         {
             a->SetAppCulled(false);
-            a = FUN_004aae30(split, i);
+            a = FUN_004aae30(dealerHand, i);
             a->SetAppCulled(false);
-            a = FUN_004aae30(split, p);
+            a = FUN_004aae30(dealerHand, p);
             a->SetAppCulled(false);
         }
     }
@@ -4233,21 +3089,21 @@ void Menu737e50::UpdateCulledNodes()
         _sprintf_s(h, 30, str_01070dc4, l, l - 1);
         _sprintf_s(i, 30, str_01070db0, l);
         _sprintf_s(p, 30, str_01070d9c, l);
-        a = FUN_004aae30(hand, h);
-        if (l >= unk088)
+        a = FUN_004aae30(splitHand, h);
+        if (l >= arr84[1])
         {
             a->SetAppCulled(true);
-            a = FUN_004aae30(hand, i);
+            a = FUN_004aae30(splitHand, i);
             a->SetAppCulled(true);
-            a = FUN_004aae30(hand, p);
+            a = FUN_004aae30(splitHand, p);
             a->SetAppCulled(true);
         }
         else
         {
             a->SetAppCulled(false);
-            a = FUN_004aae30(hand, i);
+            a = FUN_004aae30(splitHand, i);
             a->SetAppCulled(false);
-            a = FUN_004aae30(hand, p);
+            a = FUN_004aae30(splitHand, p);
             a->SetAppCulled(false);
         }
     }
@@ -4492,26 +3348,26 @@ int BJDeck::DrawCard(void* hand, bool useSkill, bool split)
 }
 
 class TESObjectREFR;
-template <class C> class BSStringT
+namespace blackjack_reference_list {
+// BSStringTView: unit-local view (declares only what blackjack_reference_list calls), not the shared BSStringT; renamed so no local type keeps the shared name
+template <class C> class BSStringTView
 {
   public:
     operator const C*() const;
 };
-template <class T> class NiTPointerList
+// NiTPointerListView: unit-local view (declares only what blackjack_reference_list calls), not the shared NiTPointerList; renamed so no local type keeps the shared name
+template <class T> class NiTPointerListView
 {
   public:
     T& AddEight(void* pos) const;
     void* DereferenceIfNotNull(void* pos) const;
     int* FUN_0073ac90();
 };
-struct FUN_00a012d0_t
-{
-    void SetFloat(int, float, bool);
-};
+}  // namespace blackjack_reference_list
 struct Entry738c
 {
     int m_00;
-    NiTPointerList<TESObjectREFR*> m_kList;
+    blackjack_reference_list::NiTPointerListView<TESObjectREFR*> m_kList;
 };
 struct Table738c
 {
@@ -4519,15 +3375,15 @@ struct Table738c
     Entry738c* m_apEntries[1];
 };
 
-// Iterates the reference list of entry iIndex in table DAT_011d9050 and calls SetFloat(0xfa9, fValue, true) on each element.
+// Iterates the reference list of entry iIndex in table DAT_011d9050 and calls FUN_00a012d0(0xfa9, fValue, true) on each element.
 // @fnv 0x00738c30
 void FUN_00738c30_shell::FUN_00738c30(int iIndex, float fValue)
 {
-    void* pos = (void*)(const char*)*(BSStringT<char>*)&((Table738c*)DAT_011d9050)->m_apEntries[iIndex]->m_kList;
-    NiTPointerList<TESObjectREFR*>* pkList = &((Table738c*)DAT_011d9050)->m_apEntries[iIndex]->m_kList;
+    void* pos = (void*)(const char*)*(blackjack_reference_list::BSStringTView<char>*)&((Table738c*)DAT_011d9050)->m_apEntries[iIndex]->m_kList;
+    blackjack_reference_list::NiTPointerListView<TESObjectREFR*>* pkList = &((Table738c*)DAT_011d9050)->m_apEntries[iIndex]->m_kList;
     while (pos && pkList && *pkList->FUN_0073ac90())
     {
-        ((FUN_00a012d0_t*)pkList->AddEight(pos))->SetFloat(0xfa9, fValue, true);
+        ((Tile*)pkList->AddEight(pos))->FUN_00a012d0(0xfa9, fValue, true);
         pos = pkList->DereferenceIfNotNull(pos);
     }
 }
@@ -4536,18 +3392,13 @@ struct CardInfo
 {
     int unk00;
     int unk04;
-    Pointer90 unk08;
-    Pointer90 unk0c;
-};
-
-struct TableNode : Node90
-{
-    Node90* __thiscall FUN_0043b4a0(int index);
+    Pointer90<NiSourceTexture> unk08;
+    Pointer90<NiSourceTexture> unk0c;
 };
 
 struct GlobalPtr
 {
-    TableNode* FUN_00559450();
+    NiNode* FUN_00559450();
 };
 
 struct BlackjackMenuShell
@@ -4558,9 +3409,9 @@ struct BlackjackMenuShell
 // @fnv 0x007396e0
 void BlackjackMenuShell::FUN_007396e0(int a1, int aiIndex, CardInfo* apCardInfo)
 {
-    Node90* _prop;
+    Property90* _prop;
     char aBuf1[30];
-    Node90* node2;
+    NiAVObject* node2;
     char buf2[30];
 
     a1++;
@@ -4586,25 +3437,25 @@ void BlackjackMenuShell::FUN_007396e0(int a1, int aiIndex, CardInfo* apCardInfo)
     }
 
     node2 = FUN_004aae30(((GlobalPtr*)&g_011d9098)->FUN_00559450()->FUN_0043b4a0(a1), aBuf1);
-    _prop = (!node2->FUN_00a59d30(3)
+    _prop = (!reinterpret_cast<Property90*>(node2->GetProperty(3))
                  ? 0
-                 : (node2->FUN_00a59d30(3)->FUN_00441110() >= 8 && node2->FUN_00a59d30(3)->FUN_00441110() <= 12))
-                ? node2->FUN_00a59d30(3)
+                 : (reinterpret_cast<Property90*>(node2->GetProperty(3))->FUN_00441110() >= 8 && reinterpret_cast<Property90*>(node2->GetProperty(3))->FUN_00441110() <= 12))
+                ? reinterpret_cast<Property90*>(node2->GetProperty(3))
                 : 0;
     if (_prop)
     {
-        _prop->v0f0(0, 0, apCardInfo->unk08.FUN_00559450());
+        _prop->SetTexture(0, 0, apCardInfo->unk08.FUN_00559450());
     }
 
     node2 = FUN_004aae30(((GlobalPtr*)&g_011d9098)->FUN_00559450()->FUN_0043b4a0(a1), buf2);
-    _prop = (!node2->FUN_00a59d30(3)
+    _prop = (!reinterpret_cast<Property90*>(node2->GetProperty(3))
                  ? 0
-                 : (node2->FUN_00a59d30(3)->FUN_00441110() >= 8 && node2->FUN_00a59d30(3)->FUN_00441110() <= 12))
-                ? node2->FUN_00a59d30(3)
+                 : (reinterpret_cast<Property90*>(node2->GetProperty(3))->FUN_00441110() >= 8 && reinterpret_cast<Property90*>(node2->GetProperty(3))->FUN_00441110() <= 12))
+                ? reinterpret_cast<Property90*>(node2->GetProperty(3))
                 : 0;
     if (_prop)
     {
-        _prop->v0f0(0, 0, apCardInfo->unk0c.FUN_00559450());
+        _prop->SetTexture(0, 0, apCardInfo->unk0c.FUN_00559450());
     }
 }
 
@@ -4648,9 +3499,6 @@ struct CardHand
     void FUN_005ae3d0(CardInfo* const&);
     void FUN_00905820(CardInfo* const&);
 };
-struct MenuGlobalView : Menu129
-{
-};
 extern const char DAT_01070cc0[], DAT_01070ca4[], DAT_01070c88[];
 struct InputMenu
 {
@@ -4676,7 +3524,7 @@ struct InputMenu
     int unk4c;
     int unk50;
     int unk54;
-    P09TileS* text;
+    Tile* text;
     int unk5c;
     int unk60;
     int unk64;
@@ -4824,8 +3672,8 @@ void InputMenu::HandleAction(int action, void* tile)
                         FUN_00739650(false);
                     state = 2;
                     SetFlag(1, true);
-                    ((Menu129*)DAT_011d9050)->tile34->SetTraitAndReset((int)DAT_011d9048, 1.0f);
-                    ((Menu129*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, splitBet + bet);
+                    ((BlackJackMenu*)DAT_011d9050)->tile34->SetTraitFloat((int)DAT_011d9048, 1.0f);
+                    ((BlackJackMenu*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, splitBet + bet);
                     int aDoubleTotal = FUN_00738ff0(hand);
                     if (aDoubleTotal > 21)
                         result = 4;
@@ -4855,10 +3703,10 @@ void InputMenu::HandleAction(int action, void* tile)
                 if (bet > DAT_0119fe3c)
                     bet = DAT_0119fe3c;
                 if (oldIncreaseTmp < bet)
-                    FUN_00453a70()->FUN_00ad7550(DAT_01070ca4, 0x121).FUN_00ad8830(false);
+                    FUN_00453a70()->FUN_00ad7550(DAT_01070ca4, 0x121).Play(false);
                 UpdateChipPositions();
-                ((Menu129*)DAT_011d9050)->tile34->SetTraitAndReset((int)DAT_011d9048, 1.0f);
-                ((Menu129*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, bet);
+                ((BlackJackMenu*)DAT_011d9050)->tile34->SetTraitFloat((int)DAT_011d9048, 1.0f);
+                ((BlackJackMenu*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, bet);
             }
             else if (state == 4)
             {
@@ -4899,8 +3747,8 @@ void InputMenu::HandleAction(int action, void* tile)
                     SetFlag(4, false);
                     FUN_007399f0();
                     UpdateButtonState(10);
-                    ((Menu129*)DAT_011d9050)->tile34->SetTraitAndReset((int)DAT_011d9048, 1.0f);
-                    ((Menu129*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, splitBet + bet);
+                    ((BlackJackMenu*)DAT_011d9050)->tile34->SetTraitFloat((int)DAT_011d9048, 1.0f);
+                    ((BlackJackMenu*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, splitBet + bet);
                 }
             }
             break;
@@ -4923,10 +3771,10 @@ void InputMenu::HandleAction(int action, void* tile)
                 if (bet < DAT_0119fe40)
                     bet = DAT_0119fe40;
                 if (kOldDecrease > bet)
-                    FUN_00453a70()->FUN_00ad7550(DAT_01070c88, 0x121).FUN_00ad8830(false);
+                    FUN_00453a70()->FUN_00ad7550(DAT_01070c88, 0x121).Play(false);
                 UpdateChipPositions();
-                ((Menu129*)DAT_011d9050)->tile34->SetTraitAndReset((int)DAT_011d9048, 1.0f);
-                ((Menu129*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, bet);
+                ((BlackJackMenu*)DAT_011d9050)->tile34->SetTraitFloat((int)DAT_011d9048, 1.0f);
+                ((BlackJackMenu*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, bet);
             }
             else if (state == 4)
             {
@@ -4949,8 +3797,8 @@ void InputMenu::HandleAction(int action, void* tile)
                 if (bet > funds)
                     bet = funds;
                 UpdateChipPositions();
-                ((Menu129*)DAT_011d9050)->tile34->SetTraitAndReset((int)DAT_011d9048, 1.0f);
-                ((Menu129*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, bet);
+                ((BlackJackMenu*)DAT_011d9050)->tile34->SetTraitFloat((int)DAT_011d9048, 1.0f);
+                ((BlackJackMenu*)DAT_011d9050)->tile34->FUN_00700320((int)DAT_011d9048, bet);
             }
             if (state == 4)
             {

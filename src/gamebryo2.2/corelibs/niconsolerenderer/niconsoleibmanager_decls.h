@@ -1,6 +1,8 @@
 #ifndef NICONSOLEIBMANAGER_DECLS_H
 #define NICONSOLEIBMANAGER_DECLS_H
 
+#include <stddef.h>
+#include "../../../../include/NiTPointerMap.h"
 #include "NiRefObject.h"
 
 struct _D3DINDEXBUFFER_DESC
@@ -79,15 +81,10 @@ class IndexBufferManager : public NiRefObject
     COMBaseInterface* PackBuffer(const unsigned short*, unsigned int, unsigned int, COMBaseInterface*, unsigned int&,
                                  unsigned long, unsigned int);
 };
-FNV_STATIC_ASSERT(sizeof(IndexBufferManager) == 76);
-FNV_STATIC_ASSERT(offsetof(IndexBufferManager, m_pDirect3DDevice) == 8);
-FNV_STATIC_ASSERT(sizeof(_D3DINDEXBUFFER_DESC) == 20);
+typedef char IndexBufferManager_size_check[(sizeof(IndexBufferManager) == 76) ? 1 : -1];
+typedef char IndexBufferManager_device_offset_check[(offsetof(IndexBufferManager, m_pDirect3DDevice) == 8) ? 1 : -1];
+typedef char D3DINDEXBUFFER_DESC_size_check[(sizeof(_D3DINDEXBUFFER_DESC) == 20) ? 1 : -1];
 
-class NiD3DDefaultShader
-{
-  public:
-    static void SetShaderName(const char*);
-};
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 extern "C" void* __cdecl fnv_zlib_memcpy(void*, const void*, unsigned int);
 #endif

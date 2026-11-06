@@ -2,6 +2,9 @@
 // src/gamebryo2.2/corelibs/nianimation/nitransformcontroller_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHsc /Gy (unit src/gamebryo2.2/corelibs/nianimation/nitransformcontroller.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
+// The NiPointer assignment in 0x00a361c0 is inlined (Gamebryo NiSmartPointer.inl bodies).
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "NiRefObject_inline.h"
 
 #include "nitransformcontroller_nimemobject_decl.h"
 #include "nitransformcontroller_types_NiCloningProcess.h"
@@ -9,6 +12,15 @@
 #include "nitransformcontroller_types_NiTransformInterpolator.h"
 #include "nitransformcontroller_types_NiControllerSequence__IDTag.h"
 #include "nitransformcontroller_stream_decl.h"
+// NiInterpolator re-declares the reference-count helpers; they are NiRefObject's inline bodies.
+__forceinline void NiInterpolator::IncRefCount()
+{
+    NiRefObject::IncRefCount();
+}
+__forceinline void NiInterpolator::DecRefCount()
+{
+    NiRefObject::DecRefCount();
+}
 
 struct FUN_00a38e00 : NiSingleInterpController
 {

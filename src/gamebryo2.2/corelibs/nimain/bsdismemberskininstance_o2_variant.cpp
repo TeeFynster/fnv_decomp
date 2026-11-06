@@ -2,17 +2,26 @@
 // src/gamebryo2.2/corelibs/nimain/bsdismemberskininstance_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/nimain/bsdismemberskininstance.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "original_bsdismemberskininstance.h"
-const NiRTTI BSDismemberSkinInstance::ms_kRTTI;
+#include "../../../../include/BSDismemberSkinInstance.h"
+#include "../../../../include/NiSkinInstance.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiTPointerMap.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/BSFadeNode.h"
 
-struct BSFadeNode
+struct A6C900Stream;
+struct OutputStream;
+
+// Method-only adapter for declarations absent from the shared header; all object storage comes from BSDismemberSkinInstance.
+struct DismemberOperations : BSDismemberSkinInstance
 {
-    static void* __cdecl operator new(unsigned int);
+    void CopyPartitions(BSDismemberSkinInstance* dest, CloningProcess& cloning);
+    BSDismemberSkinInstance* Clone(CloningProcess& cloning);
+    void LoadPartitions(A6C900Stream& stream);
+    void SavePartitions(OutputStream& stream);
+    void AppendViewerStrings(NiTPrimitiveArray<char*>* strings);
 };
-struct _Call_a5d3a0
-{
-    _Call_a5d3a0();
-};
+
 extern int DAT_01069a84;
 inline void* __cdecl operator new(unsigned int, void* p)
 {
@@ -21,22 +30,22 @@ inline void* __cdecl operator new(unsigned int, void* p)
 // @fnv 0x00a6c8a0
 BSDismemberSkinInstance* FUN_00a6c8a0()
 {
-    BSDismemberSkinInstance* p = (BSDismemberSkinInstance*)BSFadeNode::operator new(0x40);
+    BSDismemberSkinInstance* p = (BSDismemberSkinInstance*)BSFadeNode::operator new(sizeof(BSDismemberSkinInstance));
     if (p)
     {
-        new (p) _Call_a5d3a0;
-        *(int*)((char*)p + 8) = 0;
-        *(int*)((char*)p + 12) = 0;
-        *(int*)((char*)p + 16) = 0;
-        *(int*)((char*)p + 20) = 0;
-        *(int*)((char*)p + 28) = 0;
-        *(int*)((char*)p + 32) = 0;
-        *(int*)((char*)p + 36) = 0;
-        *(int*)((char*)p + 40) = 0;
-        *(int*)((char*)p + 48) = 0;
-        *(int*)((char*)p + 52) = 0;
-        *(int*)((char*)p + 56) = 0;
-        *(int*)((char*)p + 24) = -1;
+        ::new (p) NiObject;
+        p->m_pSkinData.m_pObject = 0;
+        p->m_pkSkinMeshPartition.m_pObject = 0;
+        p->m_pRootParent = 0;
+        p->m_ppBones = 0;
+        p->unk1C = 0;
+        p->unk20 = 0;
+        p->unk24 = 0;
+        p->unk28 = 0;
+        p->unk30 = 0;
+        p->unk34 = 0;
+        p->unk38 = 0;
+        p->unk18 = -1;
         *(void**)p = (void*)&DAT_01069a84;
         return p;
     }
@@ -50,60 +59,38 @@ struct P03MM
 
 extern P03MM _g_memoryManager;
 
-struct BytePairWord
+inline void* __cdecl operator new[](unsigned int size)
 {
-    unsigned char uc1;
-    unsigned char uc2;
-    unsigned short m_usTrailingValue;
-
-    static void* operator new[](unsigned int size)
-    {
-        return _g_memoryManager.Allocate(size);
-    }
-};
-
-struct S00a6c720
-{
-    char _pad[0x34];
-    unsigned int m_uiNumEntries;
-    BytePairWord* m_pEntries;
-    bool m_bStateFlag;
-
-    void CopyRefCountedPointers(S00a6c720* pkDest, void* kCloning);
-    void FUN_00a6c720(S00a6c720* pkDest, void* kCloning);
-};
+    return _g_memoryManager.Allocate(size);
+}
 
 // @fnv 0x00a6c720
-void S00a6c720::FUN_00a6c720(S00a6c720* pkDest, void* kCloning)
+void DismemberOperations::CopyPartitions(BSDismemberSkinInstance* pkDest, CloningProcess& kCloning)
 {
-    CopyRefCountedPointers(pkDest, kCloning);
+    NiSkinInstance::CopyMemberData(pkDest, kCloning);
 
-    pkDest->m_uiNumEntries = m_uiNumEntries;
-    if (m_uiNumEntries > 0)
+    pkDest->unk34 = unk34;
+    if (unk34 > 0)
     {
-        pkDest->m_pEntries = new BytePairWord[m_uiNumEntries];
-        for (unsigned int ui = 0; ui < m_uiNumEntries; ++ui)
+        pkDest->unk38 = new Partition[unk34];
+        for (unsigned int ui = 0; ui < unk34; ++ui)
         {
-            pkDest->m_pEntries[ui].uc1 = m_pEntries[ui].uc1;
-            pkDest->m_pEntries[ui].uc2 = m_pEntries[ui].uc2;
-            pkDest->m_pEntries[ui].m_usTrailingValue = m_pEntries[ui].m_usTrailingValue;
+            pkDest->unk38[ui].enabled = unk38[ui].enabled;
+            pkDest->unk38[ui].unk01 = unk38[ui].unk01;
+            pkDest->unk38[ui].bodyPart = unk38[ui].bodyPart;
         }
     }
     else
     {
-        pkDest->m_pEntries = 0;
+        pkDest->unk38 = 0;
     }
-    pkDest->m_bStateFlag = m_bStateFlag;
+    pkDest->unk3C = unk3C;
 }
 
-struct NiTStringPointerMap_00e93020
-{
-    bool GetAt(void*, void*&);
-};
-
+// Clone lookup uses object-pointer keys; 0x00a53c30 is also bound to NiTMapBase's pointer-key GetAt in nitimecontroller.cpp.
 struct CloningProcess
 {
-    NiTStringPointerMap_00e93020* m_pCloneMap;
+    NiTPointerMap<void*, void*>* m_pCloneMap;
 };
 
 void* _NiMalloc(unsigned int);
@@ -114,72 +101,46 @@ struct SkinData
     unsigned int m_uiBoneCount;
 };
 
-struct S00a6c7c0 : _Call_a5d3a0
+// Inline constructor body until the shared header declares the default constructor.
+static inline BSDismemberSkinInstance* InitializeDismember(BSDismemberSkinInstance* p)
 {
-    void* m_pvtable;              // +0x00
-    void* m_pv4;                  // +0x04
-    SkinData* m_pSkinData;        // +0x08
-    void* m_pkSkinMeshPartition;  // +0x0c
-    void* m_spRootParent;         // +0x10
-    void** m_ppBones;             // +0x14
-    int m_iIndex;                 // +0x18
-    void* m_pv1c;                 // +0x1c
-    void* m_pv20;                 // +0x20
-    void* m_pv24;                 // +0x24
-    void* m_pv28;                 // +0x28
-    int m_i2c;                    // +0x2c
-    void* m_pv30;                 // +0x30
-    unsigned int m_uiNumEntries;  // +0x34
-    void* m_pEntries;             // +0x38
-    int m_i3c;                    // +0x3c
-
-    S00a6c7c0() throw();
-
-    static void* operator new(unsigned int size) throw()
-    {
-        return BSFadeNode::operator new(size);
-    }
-
-    void FUN_00a6c720(S00a6c7c0* pkDest, CloningProcess& kCloning);
-    S00a6c7c0* FUN_00a6c7c0(CloningProcess& kCloning);
-};
-
-S00a6c7c0::S00a6c7c0() throw()
-    : m_pSkinData(0), m_pkSkinMeshPartition(0), m_spRootParent(0), m_ppBones(0), m_iIndex(-1), m_pv1c(0), m_pv20(0),
-      m_pv24(0), m_pv28(0), m_pv30(0)
-{
-    m_pvtable = &DAT_01069a84;
-    m_uiNumEntries = 0;
-    m_pEntries = 0;
+    ::new (p) NiObject;
+    p->m_pSkinData.m_pObject = 0;
+    p->m_pkSkinMeshPartition.m_pObject = 0;
+    p->m_pRootParent = 0;
+    p->m_ppBones = 0;
+    p->unk18 = -1;
+    p->unk1C = 0;
+    p->unk20 = 0;
+    p->unk24 = 0;
+    p->unk28 = 0;
+    p->unk30 = 0;
+    *(void**)p = &DAT_01069a84;
+    p->unk34 = 0;
+    p->unk38 = 0;
+    return p;
 }
 
 // @fnv 0x00a6c7c0
-S00a6c7c0* S00a6c7c0::FUN_00a6c7c0(CloningProcess& kCloning)
+BSDismemberSkinInstance* DismemberOperations::Clone(CloningProcess& kCloning)
 {
-    S00a6c7c0* pkSkinInstance = new S00a6c7c0();
-    FUN_00a6c720(pkSkinInstance, kCloning);
+    BSDismemberSkinInstance* allocated = (BSDismemberSkinInstance*)BSFadeNode::operator new(sizeof(BSDismemberSkinInstance));
+    BSDismemberSkinInstance* pkSkinInstance = allocated ? InitializeDismember(allocated) : 0;
+    CopyPartitions(pkSkinInstance, kCloning);
 
     void* pkClone = 0;
-    pkSkinInstance->m_spRootParent = kCloning.m_pCloneMap->GetAt(m_spRootParent, pkClone) ? pkClone : m_spRootParent;
+    pkSkinInstance->m_pRootParent = (NiObject*)(kCloning.m_pCloneMap->GetAt(m_pRootParent, pkClone) ? pkClone : m_pRootParent);
 
-    unsigned int uiBoneCount = m_pSkinData->m_uiBoneCount;
-    pkSkinInstance->m_ppBones = (void**)_NiMalloc(uiBoneCount * sizeof(void*));
+    unsigned int uiBoneCount = ((SkinData*)m_pSkinData.m_pObject)->m_uiBoneCount;
+    pkSkinInstance->m_ppBones = (NiObject**)_NiMalloc(uiBoneCount * sizeof(void*));
 
     for (unsigned int i = 0; i < uiBoneCount; ++i)
     {
-        pkSkinInstance->m_ppBones[i] = kCloning.m_pCloneMap->GetAt(m_ppBones[i], pkClone) ? pkClone : m_ppBones[i];
+        pkSkinInstance->m_ppBones[i] = (NiObject*)(kCloning.m_pCloneMap->GetAt(m_ppBones[i], pkClone) ? pkClone : m_ppBones[i]);
     }
 
     return pkSkinInstance;
 }
-
-class A6C900Heap
-{
-  public:
-    void* Allocate(unsigned int uiSize);
-};
-
-extern A6C900Heap g_memoryManager;
 
 struct A6C900BinaryStream
 {
@@ -360,18 +321,6 @@ template <class T> inline void A6C900LoadBinary(A6C900Stream& kStream, T& value)
     A6C900BinaryStreamLoad(*kStream.m_pUnderlyingStream, &value);
 }
 
-struct A6C900Partition
-{
-    unsigned char m_ucFlags;
-    unsigned char m_ucBones;
-    unsigned short m_usVertices;
-
-    static void* operator new[](unsigned int uiSize)
-    {
-        return g_memoryManager.Allocate(uiSize);
-    }
-};
-
 template <class T>
 inline void A6C900BinaryStreamLoad(A6C900BinaryStream& kIstr, T* pValue, unsigned int uiNumEls,
                                    unsigned int* puiComponentSizes, unsigned int uiNumComponents)
@@ -379,46 +328,17 @@ inline void A6C900BinaryStreamLoad(A6C900BinaryStream& kIstr, T* pValue, unsigne
     kIstr.BinaryRead(pValue, uiNumEls * sizeof(T), puiComponentSizes, uiNumComponents);
 }
 
-class A6C900SkinBase
-{
-  public:
-    void LoadBinary(A6C900Stream& kStream);
-};
-
-class A6C900Skin : public A6C900SkinBase
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    unsigned int m_uiPartitionCount;
-    A6C900Partition* m_pPartitions;
-    unsigned char m_ucFlags;
-
-    void FUN_00a6c900(A6C900Stream& kStream);
-};
-
 // @fnv 0x00a6c900
-void A6C900Skin::FUN_00a6c900(A6C900Stream& kStream)
+void DismemberOperations::LoadPartitions(A6C900Stream& kStream)
 {
-    A6C900SkinBase::LoadBinary(kStream);
-    A6C900LoadBinary(kStream, m_uiPartitionCount);
-    m_pPartitions = new A6C900Partition[m_uiPartitionCount];
+    NiSkinInstance::LoadBinary((NiStream&)kStream);
+    A6C900LoadBinary(kStream, unk34);
+    unk38 = new Partition[unk34];
     unsigned int auiComponentSizes[3] = {1, 1, 2};
-    A6C900BinaryStreamLoad(*kStream.m_pUnderlyingStream, m_pPartitions, m_uiPartitionCount, auiComponentSizes, 3);
-    m_ucFlags = 0;
-    for (unsigned int i = 0; i < m_uiPartitionCount; i++)
-        m_ucFlags |= m_pPartitions[i].m_ucFlags;
+    A6C900BinaryStreamLoad(*kStream.m_pUnderlyingStream, unk38, unk34, auiComponentSizes, 3);
+    unk3C = 0;
+    for (unsigned int i = 0; i < unk34; i++)
+        unk3C |= unk38[i].enabled;
 }
 
 int sprintf_s(char* buffer, unsigned int size, const char* format, ...);
@@ -426,29 +346,19 @@ char* CreateDebugString(const char* pcName);
 char* CreateDebugString(const char* pcName, unsigned int uiValue);
 char* CreateDebugString(const char* pcName, bool bValue);
 
-template <class T> class NiTPrimitiveArray
+#include "../../../../include/NiTMallocInterface.h"
+#include "../../../../include/NiTPrimitiveArray.h"
+// Gamebryo NiTArray.inl bodies this unit's original inlines (the shared NiTArray declares them):
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
 {
-  public:
-    virtual ~NiTPrimitiveArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
+    unsigned int uiIndex = m_usSize;
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
 
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, const T& element);
-    unsigned int Add(const T& element)
-    {
-        unsigned int uiIndex = m_usSize;
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
-    }
-};
-
-template <class T> inline void NiTPrimitiveArray<T>::SetAt(unsigned int uiIndex, const T& element)
+template <class T, class TAlloc> inline void NiTArray<T, TAlloc>::SetAt(unsigned int uiIndex, const T& element)
 {
     if (uiIndex >= m_usSize)
     {
@@ -474,55 +384,21 @@ template <class T> inline void NiTPrimitiveArray<T>::SetAt(unsigned int uiIndex,
 
 extern NiRTTI g_kDismemberSkinRTTI;
 
-struct BodyPartData
-{
-    unsigned char ucEnabled;
-    unsigned char ucStartNetBoneSet;
-    unsigned short usPartID;
-};
-
-struct NiSkinInstanceStub
-{
-    void GetViewerStrings(NiTPrimitiveArray<char*>* pkStrings);
-};
-
-struct BSDismemberSkinInstanceStub : NiSkinInstanceStub
-{
-    void* m_pvtable;
-    void* m_pv04;
-    void* m_pSkinData;
-    void* m_pkSkinMeshPartition;
-    void* m_pRootParent;
-    void** m_ppBones;
-    int m_iIndex;
-    void* m_pv1c;
-    void* m_pv20;
-    void* m_pv24;
-    void* m_pv28;
-    int m_i2c;
-    void* m_pv30;
-    unsigned int m_uiNumEntries;
-    BodyPartData* m_pEntries;
-    bool m_bStateFlag;
-
-    void FUN_00a6cac0(NiTPrimitiveArray<char*>* pkStrings);
-};
-
 // @fnv 0x00a6cac0
-void BSDismemberSkinInstanceStub::FUN_00a6cac0(NiTPrimitiveArray<char*>* pkStrings)
+void DismemberOperations::AppendViewerStrings(NiTPrimitiveArray<char*>* pkStrings)
 {
-    NiSkinInstanceStub::GetViewerStrings(pkStrings);
+    NiSkinInstance::GetViewerStrings((NiViewerStringsArray*)pkStrings);
 
     pkStrings->Add(CreateDebugString(g_kDismemberSkinRTTI.m_pcName));
-    pkStrings->Add(CreateDebugString("Num Partitions", m_uiNumEntries));
-    pkStrings->Add(CreateDebugString("Visible", m_bStateFlag));
+    pkStrings->Add(CreateDebugString("Num Partitions", unk34));
+    pkStrings->Add(CreateDebugString("Visible", reinterpret_cast<const bool&>(unk3C)));
 
-    for (unsigned int i = 0; i < m_uiNumEntries; i++)
+    for (unsigned int i = 0; i < unk34; i++)
     {
-        BodyPartData& kData = m_pEntries[i];
+        BSDismemberSkinInstance::Partition& kData = unk38[i];
         char acTemp[64];
-        sprintf_s(acTemp, 64, "%d = BodyPart %d [%s%s]", i, kData.usPartID, kData.ucEnabled ? "Enabled" : "Disabled",
-                  kData.ucStartNetBoneSet ? ", State Change" : "");
+        sprintf_s(acTemp, 64, "%d = BodyPart %d [%s%s]", i, kData.bodyPart, kData.enabled ? "Enabled" : "Disabled",
+                  kData.unk01 ? ", State Change" : "");
         pkStrings->Add(CreateDebugString(acTemp));
     }
 }
@@ -704,44 +580,39 @@ static inline void Swap16(unsigned short& value)
 {
     value = _byteswap_ushort(value);
 }
-static inline void Swap32(BodyPartData& value)
+static inline void Swap32(BSDismemberSkinInstance::Partition& value)
 {
     unsigned int* p = reinterpret_cast<unsigned int*>(&value);
     unsigned int in = *p;
     _ReadWriteBarrier();
     *p = _byteswap_ulong(in);
 }
-struct DismemberOutput : BSDismemberSkinInstanceStub
-{
-    void SaveSkinInstance(OutputStream&);
-    void FUN_00a6c9c0(OutputStream&);
-};
 // @fnv 0x00a6c9c0
-void DismemberOutput::FUN_00a6c9c0(OutputStream& stream)
+void DismemberOperations::SavePartitions(OutputStream& stream)
 {
-    SaveSkinInstance(stream);
+    NiSkinInstance::SaveBinary((NiStream&)stream);
     {
-        stream.m_pRayCastOutput->Write(&m_uiNumEntries, 4);
+        stream.m_pRayCastOutput->Write(&unk34, 4);
     }
     if (stream.m_bLittleEndian != 1)
     {
-        for (unsigned int i = 0; i < m_uiNumEntries;)
+        for (unsigned int i = 0; i < unk34;)
         {
             unsigned int j = i;
-            Swap16(m_pEntries[j].usPartID);
+            Swap16(unk38[j].bodyPart);
             ++i;
-            Swap32(m_pEntries[j]);
+            Swap32(unk38[j]);
         }
     }
     {
-        stream.m_pRayCastOutput->Write(m_pEntries, m_uiNumEntries * 4);
+        stream.m_pRayCastOutput->Write(unk38, unk34 * 4);
     }
     if (stream.m_bLittleEndian != 1)
     {
-        for (unsigned int i = 0; i < m_uiNumEntries; ++i)
+        for (unsigned int i = 0; i < unk34; ++i)
         {
-            Swap32(m_pEntries[i]);
-            Swap16(m_pEntries[i].usPartID);
+            Swap32(unk38[i]);
+            Swap16(unk38[i].bodyPart);
         }
     }
 }

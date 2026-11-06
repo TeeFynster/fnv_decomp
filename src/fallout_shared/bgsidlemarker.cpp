@@ -1,75 +1,77 @@
 // fallout_shared/bgsidlemarker.cpp: BGSIdleMarker, FakeMarker, BGSIdleMarkerImpl, IdleMarkerComparison (9 functions)
 
-#include "bgsidlemarker_decls.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/BGSIdleCollection.h"
+#include "../../include/TESFile.h"
+#include "../../include/BGSIdleMarker.h"
+#include "../../include/BGSQuestPerkEntry.h"
 
-// Calls FUN_005e9530, installs the BGSQuestPerkEntry_vtbl vtable pointer, and zeroes the fields at offsets 8 and 12.
-// @fnv 0x005e9800
-BGSIdleMarker::BGSIdleMarker()
+class TESFile;
+class TESIdleForm;
+
+class TESFormInitFlag
 {
-    FUN_005e9530();
-    *reinterpret_cast<unsigned int*>(this) = reinterpret_cast<unsigned int>(&BGSQuestPerkEntry_vtbl);
-    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 8) = 0;
-    *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 12) = 0;
+  public:
+    bool IsFormInitialized() const;
+};
+
+
+
+class ChunkPayload16
+{
+  public:
+    unsigned int data[4];
+    void FUN_0067ff10();
+};
+
+class ChunkPayloadWrapper16
+{
+  public:
+    unsigned int data[4];
+    void LoadFromPTFile(ChunkPayload16* payload);
+};
+
+template <int N> struct EndianSizeTag
+{
+};
+
+void BSEndian(unsigned int* value, EndianSizeTag<4> tag);
+void* __cdecl operator new[](unsigned int size);
+void __cdecl operator delete[](void* pointer);
+extern "C" void* __cdecl memset(void* destination, int value, unsigned int size);
+extern "C" void* __cdecl _alloca(unsigned int size);
+#pragma intrinsic(_alloca)
+
+// @fnv 0x005e9800
+BGSQuestPerkEntry::BGSQuestPerkEntry()
+{
+    Data.pQuest = 0;
+    Data.stage = 0;
 }
 
 // If the form is not yet initialized, initializes the BGSIdleCollection at offset 0x30 and marks the form as initialized.
 // @fnv 0x005e7bb0
 void BGSIdleMarker::InitItem()
 {
-    if (reinterpret_cast<TESFormInitFlag*>(this)->IsFormInitialized())
+    if (IsFormInitialized())
     {
     }
     else
     {
-        reinterpret_cast<BGSIdleCollection*>(reinterpret_cast<char*>(this) + 0x30)
-            ->InitItem(reinterpret_cast<TESForm*>(this));
-        reinterpret_cast<TESForm*>(this)->SetInitializationState(true);
+        BGSIdleCollection::InitItem(this);
+        SetInitializationState(true);
     }
 }
 
-struct TESBoundObject
-{
-    TESBoundObject();
-    ~TESBoundObject();
-    virtual void vfn_0();
-    char pad[0x2c];
-};
-struct FUN_00479790
-{
-    FUN_00479790();
-    ~FUN_00479790();
-    virtual void vfn_1();
-    int pad2[2];
-};
-struct SoundPlaybackHandle
-{
-    void SetFormType(int);
-};
-struct FUN_005e7a90 : public TESBoundObject, public FUN_00479790
-{
-    FUN_005e7a90();
-};
 // Constructs the object and sets its form type to 0x30.
 // @fnv 0x005e7a90
-FUN_005e7a90::FUN_005e7a90()
+BGSIdleMarker::BGSIdleMarker()
 {
-    ((SoundPlaybackHandle*)this)->SetFormType(0x30);
+    SetFormType(static_cast<ENUM_FORM_ID>(0x30));
 }
 
-void __cdecl _Deallocate(void*);
-struct FakeMarker
-{
-    void FUN_005e7b40();
-    void* DestroyIfFlagged(unsigned int);
-};
-// @fnv 0x005e7b10
-void* FakeMarker::DestroyIfFlagged(unsigned int flags)
-{
-    FUN_005e7b40();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
+// 0x005e7b10 is the compiler's scalar deleting destructor of BGSIdleMarker (vftable 0x0104664c slot 4).
 
 struct FUN_004855a0
 {
@@ -113,14 +115,8 @@ void FUN_005e7f00_t::CopyFrom(TESForm* apCopy)
     ((FUN_005e78f0_t*)this)->FUN_004851b0((TESForm*)pcopy);
 }
 
-struct FUN_005e7b40 : public TESBoundObject, public FUN_00479790
-{
-    ~FUN_005e7b40();
-};
-
-// Empty destructor for a TESBoundObject-derived type; performs no work.
 // @fnv 0x005e7b40
-FUN_005e7b40::~FUN_005e7b40()
+BGSIdleMarker::~BGSIdleMarker()
 {}
 
 void BSEndian(int* value, EndianSizeTag<4> tag);
@@ -133,11 +129,6 @@ struct IdlePayloadWrapper : public ChunkPayloadWrapper16
 
 struct BGSIdleMarkerImpl : public TESForm
 {
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
     int unk18;
     int unk1C;
     int unk20;

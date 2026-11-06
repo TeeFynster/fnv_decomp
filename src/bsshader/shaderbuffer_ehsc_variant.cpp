@@ -1,3 +1,4 @@
+#include "../../include/NiTStringPointerMap.h"
 
 // src/bsshader/shaderbuffer_ehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHsc /Gy (unit src/bsshader/shaderbuffer.cpp lists /MT /O2 /GS /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,18 +6,8 @@
 
 #include "shaderbuffer_tables.h"
 #include "MemoryManager.h"
+#include "../../include/NiTStringPointerMap.h"
 class ShaderBufferRecord;
-template <class T> class NiTStringPointerMap
-{
-  public:
-    ~NiTStringPointerMap();
-    bool GetAt(const char* key, T& value);
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiHashSize;
-    void* m_ppkHashTable;
-    unsigned int m_uiAllocatorCount;
-    unsigned int m_uiCount;
-};
 class ShaderBufferCollection
 {
   public:

@@ -3,6 +3,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <windows.h>
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkMonitorStream.h"
 extern DWORD DAT_0126835c;
 extern LPVOID(WINAPI* DAT_00fdf044)(DWORD);
 extern const char str_010d3824[];
@@ -11,20 +13,7 @@ extern const char str_010c41f8[];
 unsigned __int64 __cdecl __rdtsc(void);
 extern "C" void _ReadWriteBarrier(void);
 
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
 
-struct ProfBuf
-{
-    DWORD unk00;
-    ProfRec* m_pCur;
-    DWORD unk08;
-    ProfRec* m_pRecordEnd;
-};
 
 struct ListenerOwner;
 
@@ -78,28 +67,28 @@ void __cdecl FUN_00d85ef0(ListenerOwner* pOwner)
         {
             if (pArr->m_ppItems[i] != 0)
             {
-                ProfBuf* pBuf = (ProfBuf*)pfnTls(DAT_0126835c);
-                ProfRec* cur = pBuf->m_pCur;
-                if (cur < pBuf->m_pRecordEnd)
+                hkMonitorStream* pBuf = (hkMonitorStream*)pfnTls(DAT_0126835c);
+                hkMonitorStream::TimerCommand* cur = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+                if (reinterpret_cast<char*>(cur) < pBuf->m_capacityMinus16.m_storage)
                 {
-                    cur->m_pName = str_010d3824;
+                    cur->m_commandAndMonitor = str_010d3824;
                     _ReadWriteBarrier();
                     ticks[0] = (DWORD)__rdtsc();
-                    cur->m_iTick = ticks[0];
+                    cur->m_time0 = ticks[0];
                     cur++;
-                    pBuf->m_pCur = cur;
+                    pBuf->m_end.m_storage = reinterpret_cast<char*>(cur);
                 }
                 pArr->m_ppItems[i]->v03(pOwner);
-                pBuf = (ProfBuf*)pfnTls(DAT_0126835c);
-                cur = pBuf->m_pCur;
-                if (cur < pBuf->m_pRecordEnd)
+                pBuf = (hkMonitorStream*)pfnTls(DAT_0126835c);
+                cur = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+                if (reinterpret_cast<char*>(cur) < pBuf->m_capacityMinus16.m_storage)
                 {
-                    cur->m_pName = str_010c41f8;
+                    cur->m_commandAndMonitor = str_010c41f8;
                     _ReadWriteBarrier();
                     ticks[1] = (DWORD)__rdtsc();
-                    cur->m_iTick = ticks[1];
+                    cur->m_time0 = ticks[1];
                     cur++;
-                    pBuf->m_pCur = cur;
+                    pBuf->m_end.m_storage = reinterpret_cast<char*>(cur);
                 }
             }
             i--;

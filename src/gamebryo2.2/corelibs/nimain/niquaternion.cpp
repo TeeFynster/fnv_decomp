@@ -1,6 +1,14 @@
-// gamebryo2.2/corelibs/nimain/niquaternion.cpp: NiQuaternion, RgbaColor, NiQuaternionA6E (15 functions)
+// gamebryo2.2/corelibs/nimain/niquaternion.cpp: NiQuaternion, NiColorA (15 functions)
 
-#include "niquaternion_decls.h"
+#include "../../../../include/NiQuaternion.h"
+#include "../../../../include/NiColorA.h"
+#include "../../../../include/NiMatrix3.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiBinaryStream.h"
+
+extern "C" double __cdecl sqrt(double);
+extern "C" double __cdecl cos(double);
+extern "C" double __cdecl sin(double);
 
 // Normalizes the quaternion by computing the reciprocal of the square root of the sum of squares and scaling all four components by it.
 // @fnv 0x00a38560
@@ -17,27 +25,27 @@ void NiQuaternion::MakeUnitLength()
 
 // Reads four 4-byte values (r, g, b, a) from the stream's binary reader, advancing the stream position by the bytes read.
 // @fnv 0x00a69800
-void RgbaColor::LoadBinary(NiStream& arStream)
+void NiColorA::LoadBinary(NiStream& arStream)
 {
-    NiBinaryStream* pkStream = arStream.m_pUnderlyingStream;
+    NiBinaryStream* pkStream = arStream.m_pkIstr;
     {
         unsigned int uiBytesRead = 4;
-        pkStream->m_uiStreamFlags += pkStream->m_pfnRead(pkStream, &r, 4, &uiBytesRead, 1);
+        pkStream->m_uiAbsoluteCurrentPos += pkStream->m_pfnRead(pkStream, &r, 4, &uiBytesRead, 1);
     }
-    pkStream = arStream.m_pUnderlyingStream;
+    pkStream = arStream.m_pkIstr;
     {
         unsigned int uiBytesRead = 4;
-        pkStream->m_uiStreamFlags += pkStream->m_pfnRead(pkStream, &g, 4, &uiBytesRead, 1);
+        pkStream->m_uiAbsoluteCurrentPos += pkStream->m_pfnRead(pkStream, &g, 4, &uiBytesRead, 1);
     }
-    pkStream = arStream.m_pUnderlyingStream;
+    pkStream = arStream.m_pkIstr;
     {
         unsigned int uiBytesRead = 4;
-        pkStream->m_uiStreamFlags += pkStream->m_pfnRead(pkStream, &b, 4, &uiBytesRead, 1);
+        pkStream->m_uiAbsoluteCurrentPos += pkStream->m_pfnRead(pkStream, &b, 4, &uiBytesRead, 1);
     }
-    pkStream = arStream.m_pUnderlyingStream;
+    pkStream = arStream.m_pkIstr;
     {
         unsigned int uiBytesRead = 4;
-        pkStream->m_uiStreamFlags += pkStream->m_pfnRead(pkStream, &a, 4, &uiBytesRead, 1);
+        pkStream->m_uiAbsoluteCurrentPos += pkStream->m_pfnRead(pkStream, &a, 4, &uiBytesRead, 1);
     }
 }
 
@@ -69,37 +77,40 @@ inline float QuaternionSqrt(float value)
     return result;
 }
 extern const unsigned int DAT_011a9e98[3];
+__forceinline NiQuaternion::NiQuaternion()
+{}
 // Builds the quaternion components from a rotation matrix, using the trace branch or the largest-diagonal branch.
 // @fnv 0x00a6df40
-void NiQuaternion::FromRotationMatrix(const ThreeByThreeMatrix& matrix)
+void NiQuaternion::FromRotationMatrix(const NiMatrix3& akMatrix)
 {
-    float root = matrix.m[0][0] + matrix.m[1][1] + matrix.m[2][2];
+    const float (*matrix)[3] = reinterpret_cast<const float (*)[3]>(&akMatrix);
+    float root = akMatrix.m_pEntry[0][0] + akMatrix.m_pEntry[1][1] + akMatrix.m_pEntry[2][2];
     if (root > 0.0f)
     {
         root = QuaternionSqrt(root + 1.0f);
         m_fVectorX = root * 0.5;
         root = 0.5 / root;
-        m_fVectorY = (matrix.m[2][1] - matrix.m[1][2]) * root;
-        m_fVectorZ = (matrix.m[0][2] - matrix.m[2][0]) * root;
-        m_fScalarPart = (matrix.m[1][0] - matrix.m[0][1]) * root;
+        m_fVectorY = (matrix[2][1] - matrix[1][2]) * root;
+        m_fVectorZ = (matrix[0][2] - matrix[2][0]) * root;
+        m_fScalarPart = (matrix[1][0] - matrix[0][1]) * root;
     }
     else
     {
         unsigned int uiAxis = 0;
-        if (matrix.m[1][1] > matrix.m[0][0])
+        if (matrix[1][1] > matrix[0][0])
             uiAxis = 1;
-        if (matrix.m[2][2] > matrix.m[uiAxis][uiAxis])
+        if (matrix[2][2] > matrix[uiAxis][uiAxis])
             uiAxis = 2;
         unsigned int uiNextAxis = DAT_011a9e98[uiAxis];
         unsigned int uiLastAxis = DAT_011a9e98[uiNextAxis];
-        root = QuaternionSqrt(matrix.m[uiAxis][uiAxis] - matrix.m[uiNextAxis][uiNextAxis] -
-                              matrix.m[uiLastAxis][uiLastAxis] + 1.0f);
+        root = QuaternionSqrt(matrix[uiAxis][uiAxis] - matrix[uiNextAxis][uiNextAxis] -
+                              matrix[uiLastAxis][uiLastAxis] + 1.0f);
         float* apComponents[3] = {&m_fVectorY, &m_fVectorZ, &m_fScalarPart};
         *apComponents[uiAxis] = root * 0.5;
         root = 0.5 / root;
-        m_fVectorX = (matrix.m[uiLastAxis][uiNextAxis] - matrix.m[uiNextAxis][uiLastAxis]) * root;
-        *apComponents[uiNextAxis] = (matrix.m[uiAxis][uiNextAxis] + matrix.m[uiNextAxis][uiAxis]) * root;
-        *apComponents[uiLastAxis] = (matrix.m[uiAxis][uiLastAxis] + matrix.m[uiLastAxis][uiAxis]) * root;
+        m_fVectorX = (matrix[uiLastAxis][uiNextAxis] - matrix[uiNextAxis][uiLastAxis]) * root;
+        *apComponents[uiNextAxis] = (matrix[uiAxis][uiNextAxis] + matrix[uiNextAxis][uiAxis]) * root;
+        *apComponents[uiLastAxis] = (matrix[uiAxis][uiLastAxis] + matrix[uiLastAxis][uiAxis]) * root;
     }
 }
 
@@ -135,16 +146,6 @@ unsigned char* __cdecl FUN_00a4ffe0()
     return &DAT_011F3FE4;
 }
 
-struct FourComponentNumericValue
-{
-    char u[16];
-};
-typedef char _sizecheck___vector4[sizeof(FourComponentNumericValue) == 16 ? 1 : -1];
-struct FUN_00a4ff00_shell : public NiQuaternion
-{
-    void NormalizeQuaternion();
-};
-
 extern float DAT_011F3FEC;
 extern float DAT_011F3FF0;
 
@@ -154,7 +155,7 @@ static inline float isqrt_approx_in_neighborhood(float s)
 }
 
 // @fnv 0x00a4ff00
-void FUN_00a4ff00_shell::NormalizeQuaternion()
+void NiQuaternion::EnsureCanonicalSign()
 {
     float s =
         m_fVectorZ * m_fVectorZ + m_fVectorY * m_fVectorY + m_fScalarPart * m_fScalarPart + m_fVectorX * m_fVectorX;
@@ -173,38 +174,25 @@ void FUN_00a4ff00_shell::NormalizeQuaternion()
     m_fVectorX = m_fVectorX * fScale;
 }
 
-struct Standin_NiBinaryStream
+template <class T> inline unsigned int BinaryWriteValue(NiBinaryStream* pkStream, const T& value)
 {
-    char pad00[4];
-    unsigned int m_uiStreamFlags;
-    char pad08[4];
-    unsigned int(__cdecl* m_pfnWrite)(Standin_NiBinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-
-    template <class T> unsigned int BinaryWrite(const T& value)
-    {
-        unsigned int uiComponentSize = sizeof(T);
-        unsigned int uiBytes = m_pfnWrite(this, &value, sizeof(T), &uiComponentSize, 1);
-        m_uiStreamFlags += uiBytes;
-        return uiBytes;
-    }
-};
+    unsigned int uiComponentSize = sizeof(T);
+    unsigned int uiBytes = pkStream->m_pfnWrite(pkStream, &value, sizeof(T), &uiComponentSize, 1);
+    pkStream->m_uiAbsoluteCurrentPos += uiBytes;
+    return uiBytes;
+}
 
 template <class T> inline void SerializeValue(NiStream& kStream, const T& value)
 {
-    Standin_NiBinaryStream* pkStream = *(Standin_NiBinaryStream**)((char*)&kStream + 0x250);
-    pkStream->BinaryWrite(value);
+    NiBinaryStream* pkStream = kStream.m_pkOstr;
+    BinaryWriteValue(pkStream, value);
 }
 
-struct FUN_00a6e4a0_shell : public NiQuaternion
-{
-    void SnapSmallComponentsToZero();
-    void FUN_00a6e4a0(NiStream& kStream);
-};
-
 // @fnv 0x00a6e4a0
-void FUN_00a6e4a0_shell::FUN_00a6e4a0(NiStream& kStream)
+void NiQuaternion::SaveBinary(NiStream* stream)
 {
-    SnapSmallComponentsToZero();
+    NiStream& kStream = *stream;
+    Snap();
     SerializeValue(kStream, m_fVectorX);
     SerializeValue(kStream, m_fVectorY);
     SerializeValue(kStream, m_fVectorZ);
@@ -218,16 +206,11 @@ extern double DAT_0101a6b0;
 extern float DAT_0109c9c4;
 static const float epsilon = 0.001f;
 
-struct FUN_00a6de50_shell
-{
-    float m_fVectorX, m_fVectorY, m_fVectorZ, m_fScalarPart;
-    void GetAngleAndAxis(float* angle, float* axis);
-};
-
 // Computes the rotation angle from the quaternion's w component and normalizes the xyz vector into an axis, zeroing both when the vector length is below epsilon.
 // @fnv 0x00a6de50
-void FUN_00a6de50_shell::GetAngleAndAxis(float* angle, float* axis)
+void NiQuaternion::GetAngleAxis(float* angle, NiPoint3* axisPoint)
 {
+    float* axis = axisPoint->components;
     float fSquaredLength = m_fVectorY * m_fVectorY + m_fVectorZ * m_fVectorZ + m_fScalarPart * m_fScalarPart;
     volatile float root = (float)sqrt(fSquaredLength);
     float length = root;
@@ -276,20 +259,9 @@ inline float NiAbsA6E(float fValue)
 
 static const float g_fSnapEpsilonA6E = 1e-08f;
 
-class NiQuaternionA6E
-{
-  public:
-    void SnapSmallComponentsToZero();
-
-    float m_fVectorX;
-    float m_fVectorY;
-    float m_fVectorZ;
-    float m_fScalarPart;
-};
-
 // Sets each quaternion component to zero when its absolute value is at most g_fSnapEpsilonA6E but not already zero.
 // @fnv 0x00a6e0f0
-void NiQuaternionA6E::SnapSmallComponentsToZero()
+void NiQuaternion::Snap()
 {
     if (NiAbsA6E(m_fVectorY) <= g_fSnapEpsilonA6E && m_fVectorY != 0.0f)
         m_fVectorY = 0.0f;
@@ -395,14 +367,9 @@ NiQuaternion __cdecl FUN_00a6dc90(const NiQuaternion& q)
     return kResult;
 }
 
-struct FUN_00a6e1f0_shell : public NiQuaternion
-{
-    void SetFromEulerAngles(float, float, float);
-};
-
 // Computes a quaternion from three Euler angles (afXAngle, afYAngle, afZAngle) and stores the result in the vector and scalar parts.
 // @fnv 0x00a6e1f0
-void FUN_00a6e1f0_shell::SetFromEulerAngles(float afXAngle, float afYAngle, float afZAngle)
+void NiQuaternion::SetRotationFromEulerXYZ(float afXAngle, float afYAngle, float afZAngle)
 {
     afXAngle = -afXAngle * 0.5;
     float cx = (float)cos(afXAngle);
@@ -425,21 +392,12 @@ void FUN_00a6e1f0_shell::SetFromEulerAngles(float afXAngle, float afYAngle, floa
 extern char* __cdecl NiSprintf(char*, unsigned int, const char*, ...);
 extern void* __cdecl _NiMalloc(unsigned int);
 
-struct FUN_00a6e190_shell
-{
-    float f0;
-    float f4;
-    float f8;
-    float fc;
-    char* __thiscall FUN_00a6e190(const char* pcPrefix);
-};
-
-// Allocates a buffer and writes pcPrefix and f0, f4, f8, and fc using the shown format string.
+// Allocates a buffer and writes the prefix and quaternion components using the shown format string.
 // @fnv 0x00a6e190
-char* __thiscall FUN_00a6e190_shell::FUN_00a6e190(const char* pcPrefix)
+char* NiQuaternion::FormatToBuffer(char* pcPrefix)
 {
     unsigned int uiLen = strlen(pcPrefix) + 0x80;
     char* pcString = (char*)_NiMalloc(uiLen);
-    NiSprintf(pcString, uiLen, "%s: (w=%g,x=%g,y=%g,z=%g)", pcPrefix, f0, f4, f8, fc);
+    NiSprintf(pcString, uiLen, "%s: (w=%g,x=%g,y=%g,z=%g)", pcPrefix, m_fVectorX, m_fVectorY, m_fVectorZ, m_fScalarPart);
     return pcString;
 }

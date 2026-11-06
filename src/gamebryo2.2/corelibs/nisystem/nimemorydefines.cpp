@@ -1,46 +1,29 @@
-// gamebryo2.2/corelibs/nisystem/nimemorydefines.cpp: NiFixedAllocatorStub (8 functions)
+// gamebryo2.2/corelibs/nisystem/nimemorydefines.cpp: NiFixedAllocator (8 functions)
 
+#include "../../../../include/NiAllocator.h"
 #include "nimemorydefines_decls.h"
 
 void* NiAlignedAlloc(unsigned int size, unsigned int alignment);
 
 void* _NiMalloc(unsigned int size);
 
-struct NiAllocSlots
-{
-    virtual void s0();
-    virtual void s1();
-    virtual void s2();
-    virtual void s3();
-    virtual void s4();
-    virtual void Free(void* p, int event, int size);
-};
 // @fnv 0x00aa1170
 void FreeAlignedBlock(void* apBlock)
 {
     if (apBlock)
     {
-        NiAllocSlots* a = reinterpret_cast<NiAllocSlots*>(DAT_011f6080->allocator);
+        NiAllocator* a = DAT_011f6080->allocator;
         a->Free(apBlock, 0xf, -1);
     }
 }
 
 namespace fnv_00aa1190 {
-struct NiAllocSlots
-{
-    virtual void s0();
-    virtual void s1();
-    virtual void s2();
-    virtual void s3();
-    virtual void s4();
-    virtual void Free(void* p, int event, int size);
-};
 // @fnv 0x00aa1190
 void FreeAllocatorBlock(void* apBlock)
 {
     if (apBlock)
     {
-        NiAllocSlots* a = reinterpret_cast<NiAllocSlots*>(DAT_011f6080->allocator);
+        NiAllocator* a = DAT_011f6080->allocator;
         a->Free(apBlock, 0x10, -1);
     }
 }
@@ -58,50 +41,28 @@ void* FUN_00aa1070(unsigned int uiSize)
     return alloc->vfn_04(size, uiSize, 5, false, 0, -1, 0);
 }
 
-struct FUN_00aa1130_alloc
-{
-    virtual void s0();
-    virtual void s1();
-    virtual void s2();
-    virtual void s3();
-    virtual void* s4(unsigned int& size, unsigned int& alignment, int event, bool accurateSize, const char* file,
-                     int line, const char* function);
-};
 
-// Allocates a block of at least p1 bytes with alignment p2 through the global allocator's s4 virtual method.
+// Allocates a block of at least uiSize bytes with uiAlignment through the global allocator.
 // @fnv 0x00aa1130
 void* __cdecl FUN_00aa1130(unsigned int uiSize, unsigned int uiAlignment)
 {
     unsigned int size = uiSize != 0 ? uiSize : 1;
     uiSize = uiAlignment;
-    FUN_00aa1130_alloc* alloc = (FUN_00aa1130_alloc*)DAT_011f6080->allocator;
+    NiAllocator* alloc = DAT_011f6080->allocator;
     uiAlignment = size;
 
-    return alloc->s4(uiAlignment, uiSize, 13, false, 0, -1, 0);
+    return alloc->Allocate(uiAlignment, uiSize, 13, false, 0, -1, 0);
 }
 
-class S_AllocVt
-{
-  public:
-    virtual void s0();
-    virtual void s1();
-    virtual void s2();
-    virtual void s3();
-    virtual void* Alloc(unsigned int& size, unsigned int& alignment, int event, bool accurateSize, const char* file,
-                        int line, const char* function);
-    virtual void Free(void* p, int event, int size);
-    virtual void* Realloc(void* p, unsigned int& oldSize, unsigned int& newSize, int event, int a4, int a5, int a6,
-                          int a7, int a8);
-};
 
 // @fnv 0x00aa1250
 void* FUN_00aa1250(void* apMemory, unsigned int size, unsigned int alignment)
 {
     unsigned int uiOldSize;
-    S_AllocVt* pAllocator;
+    NiAllocator* pAllocator;
     if (size == 0 && apMemory != 0)
     {
-        pAllocator = (S_AllocVt*)DAT_011f6080->allocator;
+        pAllocator = DAT_011f6080->allocator;
         pAllocator->Free(apMemory, 0x10, -1);
         return 0;
     }
@@ -111,13 +72,13 @@ void* FUN_00aa1250(void* apMemory, unsigned int size, unsigned int alignment)
         if (r == 0)
             r = 1;
         size = alignment;
-        pAllocator = (S_AllocVt*)DAT_011f6080->allocator;
+        pAllocator = DAT_011f6080->allocator;
         uiOldSize = r;
-        return pAllocator->Alloc(uiOldSize, size, 0xd, false, 0, -1, 0);
+        return pAllocator->Allocate(uiOldSize, size, 0xd, false, 0, -1, 0);
     }
     uiOldSize = size;
     size = alignment;
-    pAllocator = (S_AllocVt*)DAT_011f6080->allocator;
+    pAllocator = DAT_011f6080->allocator;
     return pAllocator->Realloc(apMemory, uiOldSize, size, 0xe, 0, -1, 0, -1, 0);
 }
 
@@ -148,7 +109,7 @@ void* FUN_00aa10b0(unsigned int stSizeInBytes, unsigned int stAlignment)
 
 struct ReallocMemMgr
 {
-    S_AllocVt* m_pHeapAllocator;
+    NiAllocator* m_pHeapAllocator;
     static ReallocMemMgr* Get()
     {
         return (ReallocMemMgr*)DAT_011f6080;
@@ -156,7 +117,7 @@ struct ReallocMemMgr
     void* Allocate(unsigned int stSizeInBytes, unsigned int stAlignment, int aiAllocationType, bool bAccurate,
                    const char* pcFile, int iLine, const char* pcFunction)
     {
-        return m_pHeapAllocator->Alloc(stSizeInBytes, stAlignment, aiAllocationType, bAccurate, pcFile, iLine,
+        return m_pHeapAllocator->Allocate(stSizeInBytes, stAlignment, aiAllocationType, bAccurate, pcFile, iLine,
                                        pcFunction);
     }
     void* Reallocate(void* pvMem, unsigned int stSizeInBytes, unsigned int stAlignment, int aiAllocationType,
@@ -232,7 +193,8 @@ struct FixedChunk
     }
 };
 
-struct NiFixedAllocatorStub
+// 0x00aa35a0 is NiFixedAllocator::Allocate; retain its local layout until include/NiFixedAllocator.h exists.
+struct NiFixedAllocator
 {
     unsigned int blockSize;
     unsigned char numBlocks;
@@ -268,12 +230,12 @@ struct NiFixedAllocatorStub
     int unk7C;
     CRITICAL_SECTION cs;
 
-    void* FUN_00aa35a0();
+    void* Allocate();
 };
 
 // Locks cs, picks or creates a FixedChunk with free blocks, allocates one block from it, and returns the block pointer.
 // @fnv 0x00aa35a0
-void* NiFixedAllocatorStub::FUN_00aa35a0()
+void* NiFixedAllocator::Allocate()
 {
     EnterCriticalSection(&cs);
     if (allocChunk && allocChunk->blocksAvailable == 0)

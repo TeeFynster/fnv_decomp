@@ -1,6 +1,74 @@
-// fallout_shared/pathfinding/navmeshinfosearch.cpp: NavMeshInfoSearch, StandInSearch (8 functions)
+#include "../../../include/AStarSearch.h"
+#include "../../../include/NavMeshInfo.h"
+// fallout_shared/pathfinding/navmeshinfosearch.cpp: NavMeshInfoSearch, NavMeshInfoMap (8 functions)
 
-#include "navmeshinfosearch_decls.h"
+#include <stddef.h>
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+#pragma pack(push, 4)
+#include "../../../include/NavMeshInfoMap.h"
+
+#include "../../../include/PathingActorData.h"
+#include "../../../include/DoorAccessData.h"
+#include "../../../include/ExtraDataList.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/TES.h"
+#include "../../../include/TESObjectDOOR.h"
+#include "../../../include/TESObjectREFR.h"
+
+// The approved AStarSearch header lacks the constructor and virtual interface
+// used by this specialization. Retain only that interface locally; the shared
+// NavMeshInfoSearch supplies the complete search storage.
+
+#include "../../../include/NavMeshInfoSearch.h"
+
+// PC NiPoint3 layout with the out-of-line arithmetic used by this search.
+FNV_STATIC_ASSERT(sizeof(NiPoint3) == 12);
+FNV_STATIC_ASSERT(offsetof(NiPoint3, x) == 0);
+FNV_STATIC_ASSERT(offsetof(NiPoint3, y) == 4);
+FNV_STATIC_ASSERT(offsetof(NiPoint3, z) == 8);
+
+
+class NavMeshPortalData
+{
+  public:
+    char extraDataPrefix[12];
+    unsigned int m_uiNavMeshID;
+};
+class TeleportableReference
+{
+  public:
+    TESObjectREFR* GetLinkedDoor();
+    const NiPoint3& GetPosition();
+};
+extern TES* g_TES;
+void __cdecl FUN_005330e0(float&, float, float);
+template <class NodeDataType, class LinkDataType> class AStarNode
+{
+  public:
+    float m_fPathingCostCur;
+    float m_fCost;
+    NodeDataType ObjectResolver;
+    float GetHeuristic() const;
+    LinkDataType m_kOpenListLink;
+    AStarNode* m_pParentNode;
+    AStarNode** m_ppPreviousNodeLink;
+    AStarNode* pListNode;
+    unsigned int iKey;
+    AStarNode* m_pNextHashNode;
+};
+template <class NodeDataType, class LinkDataType> class AStarOpenList
+{
+  public:
+    float m_fValue;
+    AStarNode<NodeDataType, LinkDataType>* m_ppNodes[20];
+    AStarOpenList();
+};
+typedef AStarOpenList<const NavMeshInfo*, TESObjectREFR*> NavMeshInfoQueue;
+FNV_STATIC_ASSERT(sizeof(NavMeshInfoQueue) == 0x54);
+FNV_STATIC_ASSERT(offsetof(NavMeshInfoSearch, m_pGoalNavMeshInfo) == 0x2074);
+extern "C" void* __cdecl memset(void*, int, unsigned int);
 
 // The legacy destructor label is contradicted by the queue member initialization
 // at AStarSearch construction: the receiver is this + 0x1ff4.
@@ -27,10 +95,10 @@ bool NavMeshInfoSearch::CollectConnections(const AStarNodeType* pNode,
     const NavMeshInfo* m_pNavigationMesh = pNode->ObjectResolver;
     float fCostMultiplier = 1.0f - m_pNavigationMesh->FUN_007df1f0() * 100.0;
     FUN_005330e0(fCostMultiplier, 0.1f, 1.0f);
-    unsigned int ItemUpdateArray = m_pNavigationMesh->m_kConnectedNavMeshInfos.GetSize();
+    unsigned int ItemUpdateArray = const_cast<NavMeshInfo*>(m_pNavigationMesh)->m_kConnectedNavMeshInfos.GetSize();
     for (unsigned int i = 0; i < ItemUpdateArray; ++i)
     {
-        const NavMeshInfo* pNextMesh = m_pNavigationMesh->m_kConnectedNavMeshInfos.GetAt(i);
+        const NavMeshInfo* pNextMesh = const_cast<NavMeshInfo*>(m_pNavigationMesh)->m_kConnectedNavMeshInfos.GetAt(i);
         if (!pNextMesh)
             continue;
         NiPoint3 Start =
@@ -52,10 +120,10 @@ bool NavMeshInfoSearch::CollectConnections(const AStarNodeType* pNode,
             break;
         }
     }
-    unsigned int uiPreferredConnections = m_pNavigationMesh->m_kPreferredConnections.GetSize();
+    unsigned int uiPreferredConnections = const_cast<NavMeshInfo*>(m_pNavigationMesh)->m_kPreferredConnections.GetSize();
     for (unsigned int i = 0; i < uiPreferredConnections; ++i)
     {
-        const NavMeshInfo* pNextMesh = m_pNavigationMesh->m_kPreferredConnections.GetAt(i);
+        const NavMeshInfo* pNextMesh = const_cast<NavMeshInfo*>(m_pNavigationMesh)->m_kPreferredConnections.GetAt(i);
         if (!pNextMesh)
             continue;
         NiPoint3 Start =
@@ -77,12 +145,12 @@ bool NavMeshInfoSearch::CollectConnections(const AStarNodeType* pNode,
             break;
         }
     }
-    if (m_pPathingActorData || m_eDoorLockDisposition == Pathing::ALLOW_LOCKS)
+    if (m_pPathingActorData || m_eDoorLockDisposition == Pathing::IGNORE_LOCKS)
     {
-        ItemUpdateArray = m_pNavigationMesh->m_kDoorReferences.GetSize();
+        ItemUpdateArray = const_cast<NavMeshInfo*>(m_pNavigationMesh)->m_kDoorReferences.GetSize();
         for (unsigned int i = 0; i < ItemUpdateArray; ++i)
         {
-            TESObjectREFR* pPathNodeDoor = m_pNavigationMesh->m_kDoorReferences.GetAt(i);
+            TESObjectREFR* pPathNodeDoor = const_cast<NavMeshInfo*>(m_pNavigationMesh)->m_kDoorReferences.GetAt(i);
             if (!pPathNodeDoor)
                 continue;
             if (pPathNodeDoor->GetDisabled())
@@ -95,18 +163,18 @@ bool NavMeshInfoSearch::CollectConnections(const AStarNodeType* pNode,
             {
                 switch (m_eDoorLockDisposition)
                 {
-                case Pathing::ALLOW_LOCKS:
+                case Pathing::IGNORE_LOCKS:
                     break;
-                case Pathing::PENALIZE_LOCKS:
+                case Pathing::LOCKS_UNUSED:
                     fDoorCost = 409600.0f;
                     break;
-                case Pathing::IGNORE_LOCKS:
+                case Pathing::DEFAULT_LOCKS:
                     continue;
                 }
             }
             if (reinterpret_cast<TESObjectDOOR*>(pPathNodeDoor->GetObjectReference())->IsTeleportDoor())
                 fDoorCost = 409600.0f;
-            if (m_eDoorLockDisposition == Pathing::PENALIZE_LOCKS && pPathNodeDoor->GetIsHiddenDoor())
+            if (m_eDoorLockDisposition == Pathing::LOCKS_UNUSED && pPathNodeDoor->GetIsHiddenDoor())
                 continue;
             if (!pPathNodeDoor->Set3DObject())
                 continue;
@@ -151,204 +219,92 @@ bool NavMeshInfoSearch::CollectConnections(const AStarNodeType* pNode,
     return true;
 }
 
-struct RefA
+// The shared types provide storage; only their missing out-of-line default initialization is declared here.
+struct NiPoint3DefaultConstruction : public NiPoint3
 {
-    char b[12];
-    RefA();
+    NiPoint3DefaultConstruction();
 };
-struct FUN_00501cd0
+struct DoorAccessDataDefaultConstruction : public DoorAccessData
 {
-    char b[8];
-    FUN_00501cd0();
+    DoorAccessDataDefaultConstruction();
 };
-struct FUN_006b8d90
+// NiPoint3's shared default constructor is inline, and DoorAccessData has no default constructor.
+// These constructor-only wrappers preserve the required out-of-line initialization calls.
+struct NavMeshInfoSearchConstruction : public AStarSearch<const NavMeshInfo*, TESObjectREFR*>
 {
-    virtual ~FUN_006b8d90();
-    char pad[0x2054];
-    FUN_006b8d90();
-};
-struct FUN_006b8340 : public FUN_006b8d90
-{
-    RefA a;
+    unsigned char m_kSearchStorage[0x2054];
+    NiPoint3DefaultConstruction a;
     int i1;
-    RefA b;
+    NiPoint3DefaultConstruction b;
     int i2;
     int i3;
     char pad2[8];
-    FUN_00501cd0 c;
-    FUN_006b8340();
-    virtual ~FUN_006b8340();
+    DoorAccessDataDefaultConstruction c;
+    NavMeshInfoSearchConstruction();
+    virtual ~NavMeshInfoSearchConstruction();
 };
+FNV_STATIC_ASSERT(sizeof(NavMeshInfoSearchConstruction) == sizeof(NavMeshInfoSearch));
+FNV_STATIC_ASSERT(offsetof(NavMeshInfoSearchConstruction, a) == offsetof(NavMeshInfoSearch, m_kPathStartPosition));
+FNV_STATIC_ASSERT(offsetof(NavMeshInfoSearchConstruction, c) == offsetof(NavMeshInfoSearch, m_kDoorAccessData));
+// The shared headers lack the out-of-line default constructors used here.
 // Initializes the three integer members i1, i2 and i3 to zero.
 // @fnv 0x006b8340
-FUN_006b8340::FUN_006b8340()
+NavMeshInfoSearchConstruction::NavMeshInfoSearchConstruction()
 {
     i3 = 0;
     i1 = 0;
     i2 = 0;
 }
 
-struct DoorLockX
-{
-    char b[8];
-    ~DoorLockX();
-};
-struct FUN_006b8e40
-{
-    virtual ~FUN_006b8e40();
-    char pad[0x2080];
-};
-struct FUN_006b8420 : public FUN_006b8e40
-{
-    DoorLockX lock;
-    virtual ~FUN_006b8420();
-};
-// Destructor for FUN_006b8420; destroys the embedded lock member and the base FUN_006b8e40.
+// Destroys the shared door-access state and the A* search base.
 // @fnv 0x006b8420
-FUN_006b8420::~FUN_006b8420()
+NavMeshInfoSearch::~NavMeshInfoSearch()
 {}
 
 extern "C" void __cdecl Deallocate(void*);
 
-struct FUN_006b83f0_shell : public FUN_006b8420
-{
-    void* DestroyAndFree(unsigned int flags);
-};
-
 // Runs the base destructor, then frees this object with Deallocate when flags has bit 0 set, and returns this.
 // @fnv 0x006b83f0
-void* FUN_006b83f0_shell::DestroyAndFree(unsigned int flags)
+void* NavMeshInfoSearch::DestroyAndFree(unsigned int flags)
 {
-    FUN_006b8420::~FUN_006b8420();
+    NavMeshInfoSearch::~NavMeshInfoSearch();
     if (flags & 1)
         Deallocate(this);
     return this;
 }
 
-struct NavMeshInfo;
-struct NavMeshInfoMap
-{
-    virtual void d00();
-    virtual void d01();
-    virtual void d02();
-    virtual void d03();
-    virtual void d04();
-    virtual void d05();
-    virtual void d06();
-    virtual void d07();
-    virtual void d08();
-    virtual void d09();
-    virtual void d10();
-    virtual void d11();
-    virtual void d12();
-    virtual void d13();
-    virtual void d14();
-    virtual void d15();
-    virtual void d16();
-    virtual void d17();
-    virtual void d18();
-    virtual void d19();
-    virtual void d20();
-    virtual void d21();
-    virtual void d22();
-    virtual void d23();
-    virtual void d24();
-    virtual void d25();
-    virtual void d26();
-    virtual void d27();
-    virtual void d28();
-    virtual void d29();
-    virtual void d30();
-    virtual void d31();
-    virtual void d32();
-    virtual void d33();
-    virtual void d34();
-    virtual void d35();
-    virtual void d36();
-    virtual void d37();
-    virtual void d38();
-    virtual void d39();
-    virtual void d40();
-    virtual void d41();
-    virtual void d42();
-    virtual void d43();
-    virtual void d44();
-    virtual void d45();
-    virtual void d46();
-    virtual void d47();
-    virtual void d48();
-    virtual void d49();
-    virtual void virtC8(int);
-    void InsertNavMeshInfo(NavMeshInfo*);
-};
-struct DummyPointerMap
-{
-    void SetAt(unsigned int, unsigned int);
-};
-struct StandInSearch : public NavMeshInfoMap
-{
-    char pad[0x18];
-    DummyPointerMap map;
-    void RegisterNavMeshInfo(TeleportableReference*);
-};
 // @fnv 0x006b6940
-void StandInSearch::RegisterNavMeshInfo(TeleportableReference* pInfo)
+void NavMeshInfoMap::RegisterNavMeshInfo(TeleportableReference* pInfo)
 {
-    map.SetAt((unsigned int)pInfo->GetLinkedDoor(), (unsigned int)pInfo);
+    m_kNavMeshInfosByFormID.SetAt((unsigned int)pInfo->GetLinkedDoor(), (NavMeshInfo*)pInfo);
     InsertNavMeshInfo((NavMeshInfo*)pInfo);
-    virtC8(1);
+    SetAltered(true);
 }
 
-namespace fnv_006b8c50 {
-struct InventoryChanges;
-struct TESActorBase;
-struct PathingActorData
-{
-    TESActorBase* m_pActorBaseFormItem;
-    InventoryChanges* m_pInventoryChangesValue;
-    bool m_bCanIgnoreLocks;
-    char _pad_9[3];
-};
-typedef char _sizecheck_ActorLockData[sizeof(PathingActorData) == 12 ? 1 : -1];
-struct FUN_006b8c50_shell : public NavMeshInfoSearch
-{
-    bool SetupNavMeshSearch(PathingActorData*, void*, void*, void*, void*, void*, void*, int);
-};
-
-class TESWorldSpace;
 TESWorldSpace* __fastcall FUN_00690800(const NavMeshInfo*);
-struct NavSearch_S
-{
-    void FUN_006b8ec0(void*, void**, float);
-    bool ProcessWithFallback(void*, void*, bool);
-};
 // @fnv 0x006b8c50
-bool FUN_006b8c50_shell::SetupNavMeshSearch(PathingActorData* apActorLockData, void* aStartLocation, void* apStartMesh,
-                                            void* aGoalLocation, void* apGoalMesh, void* apReturnNodes,
-                                            void* apReturnLinks, int aeDoorLockDisposition)
+bool NavMeshInfoSearch::SetupNavMeshSearch(PathingActorData* apActorLockData, void* aStartLocation, void* apStartMesh,
+                                           void* aGoalLocation, void* apGoalMesh, void* apReturnNodes,
+                                           void* apReturnLinks, int aeDoorLockDisposition)
 {
-    *(NiPoint3*)((char*)this + 0x2058) = *(const NiPoint3*)aStartLocation;
-    *(void**)((char*)this + 0x2064) = apStartMesh;
-    *(NiPoint3*)((char*)this + 0x2068) = *(const NiPoint3*)aGoalLocation;
-    *(void**)((char*)this + 0x2074) = apGoalMesh;
-    *(PathingActorData**)((char*)this + 0x2078) = apActorLockData;
-    *(int*)((char*)this + 0x207c) = aeDoorLockDisposition;
-    *(bool*)((char*)this + 0x2080) = false;
+    m_kPathStartPosition = *static_cast<const NiPoint3*>(aStartLocation);
+    m_pStartNavMeshInfo = static_cast<const NavMeshInfo*>(apStartMesh);
+    m_kGoalPosition = *static_cast<const NiPoint3*>(aGoalLocation);
+    m_pGoalNavMeshInfo = static_cast<const NavMeshInfo*>(apGoalMesh);
+    m_pPathingActorData = apActorLockData;
+    m_eDoorLockDisposition = static_cast<Pathing::DOOR_LOCK_DISPOSITION>(aeDoorLockDisposition);
+    m_bUseGoalDistanceHeuristic = false;
     if (FUN_00690800((const NavMeshInfo*)apStartMesh) &&
         FUN_00690800((const NavMeshInfo*)apStartMesh) == FUN_00690800((const NavMeshInfo*)apGoalMesh))
-        *(bool*)((char*)this + 0x2080) = true;
+        m_bUseGoalDistanceHeuristic = true;
     float fstartheuristic = 3.402823466e+38F;
-    if (*(bool*)((char*)this + 0x2080))
-        fstartheuristic = ((NiPoint3*)((char*)this + 0x2068))
-                              ->
-                              operator-((*(const NavMeshInfo**)((char*)this + 0x2064))->m_kNavMeshPosition)
-                              .Length() *
-                          (double)0.1f;
+    if (m_bUseGoalDistanceHeuristic)
+        fstartheuristic = m_kGoalPosition.operator-(m_pStartNavMeshInfo->m_kNavMeshPosition).Length() * (double)0.1f;
     else
         fstartheuristic = 1.0f;
-    ((NavSearch_S*)this)->FUN_006b8ec0(apStartMesh, &apStartMesh, fstartheuristic);
-    if (!((NavSearch_S*)this)->ProcessWithFallback(apReturnNodes, apReturnLinks, true))
+    FindOrCreateSearchNode(reinterpret_cast<unsigned int>(apStartMesh),
+                           reinterpret_cast<const NavMeshInfo* const&>(apStartMesh), fstartheuristic);
+    if (!Search(reinterpret_cast<unsigned int>(apReturnNodes), reinterpret_cast<unsigned int>(apReturnLinks), true))
         return false;
     return true;
 }
-}  // namespace fnv_006b8c50

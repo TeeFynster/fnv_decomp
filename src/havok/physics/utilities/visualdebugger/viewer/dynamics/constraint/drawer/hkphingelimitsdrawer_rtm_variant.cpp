@@ -5,30 +5,31 @@
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkphingelimitsdrawer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkphingelimitsdrawer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00de6d80 FUN_00de6d80: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-} __m128;
+} __m128, LocalM128;
 
 extern "C"
 {
-    __m128 __cdecl _mm_add_ps(__m128, __m128);
-    __m128 __cdecl _mm_mul_ps(__m128, __m128);
-    __m128 __cdecl _mm_load_ss(const float*);
-    __m128 __cdecl _mm_shuffle_ps(__m128, __m128, int);
-    void __cdecl _mm_store_ps(float*, __m128);
+    LocalM128 __cdecl _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 __cdecl _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 __cdecl _mm_load_ss(const float*);
+    LocalM128 __cdecl _mm_shuffle_ps(LocalM128, LocalM128, int);
+    void __cdecl _mm_store_ps(float*, LocalM128);
 }
 
-static __forceinline __m128 splat(const float& f)
+static __forceinline LocalM128 splat(const float& f)
 {
-    __m128 t = _mm_load_ss(&f);
+    LocalM128 t = _mm_load_ss(&f);
     return _mm_shuffle_ps(t, t, 0);
 }
 
-static __forceinline __m128 splatRounded(double f)
+static __forceinline LocalM128 splatRounded(double f)
 {
     float scalar = (float)f;
-    __m128 t = _mm_load_ss(&scalar);
+    LocalM128 t = _mm_load_ss(&scalar);
     return _mm_shuffle_ps(t, t, 0);
 }
 
@@ -47,19 +48,16 @@ struct Src
 
 struct Mat4
 {
-    __m128 r0, r1, r2, r3;
+    LocalM128 r0, r1, r2, r3;
 };
-struct Mat3
+// hkRotation (passed to 0x00c7f700 = hkVector4::setRotatedDir) over this unit's own __m128 typedef.
+struct HingeDrawRotation
 {
-    __m128 r0, r1, r2;
+    LocalM128 r0, r1, r2;
 };
 
-struct Vec
-{
-    __m128 v;
-    void FUN_00c7f640(Mat4* m, void* p);
-    void FUN_00c7f700(Mat3* m, void* p);
-};
+// The unit keeps its own __m128 (float lanes only, so /GS adds no cookie); hkVector4.h uses it.
+#include "../../../../../../../../../include/hkVector4.h"
 
 struct Holder
 {
@@ -74,12 +72,12 @@ struct T
     float f00;
     float u04, u08, u0c, u10, u14, u18;
     float f1c;
-    __m128 m20;
-    __m128 m30;
-    Vec m40;
-    Vec m50;
-    Mat3 m60;
-    Mat3 m90;
+    LocalM128 m20;
+    LocalM128 m30;
+    hkVector4 m40;
+    hkVector4 m50;
+    HingeDrawRotation m60;
+    HingeDrawRotation m90;
     Holder mc;
     void FUN_00de47e0(Src* a, Mat4* b, Mat4* c);
     void FUN_00de44c0(int a, int b);
@@ -96,34 +94,36 @@ void T::FUN_00de6d80(Src* a1, Visitor* a2, int a3, int a4)
 {
     struct Work
     {
-        Vec va;
-        Vec vb;
+        hkVector4 va;
+        hkVector4 vb;
         Mat4 matA;
         Mat4 matB;
-        __m128 buf[12];
+        LocalM128 buf[12];
     } w;
     unsigned char* e = a1->m0c;
     mc.FUN_00e10a10(a2);
     FUN_00de47e0(a1, &w.matA, &w.matB);
-    m50.FUN_00c7f640(&w.matA, e + 0x90);
-    m40.FUN_00c7f640(&w.matB, e + 0x50);
+    // Mat4 has the hkTransform layout, HingeDrawRotation the hkRotation one; 0x00c7f640 = hkVector4::_setTransformedPos,
+    // 0x00c7f700 = hkVector4::_setRotatedDir.
+    m50.FUN_00c7f640(reinterpret_cast<const hkTransform&>(w.matA), *reinterpret_cast<const hkVector4*>(e + 0x90));
+    m40.FUN_00c7f640(reinterpret_cast<const hkTransform&>(w.matB), *reinterpret_cast<const hkVector4*>(e + 0x50));
     FUN_00de44c0(a3, a4);
     FUN_00de4530(a3, a4);
-    w.vb.FUN_00c7f700(&m90, e + ((((int)e[0xa2] + 1) % 3) + 6) * 16);
-    w.va.FUN_00c7f700(&m90, e + ((((int)e[0xa2] + 2) % 3) + 6) * 16);
+    w.vb.FUN_00c7f700(reinterpret_cast<const hkRotation*>(&m90), reinterpret_cast<const hkVector4*>(e + ((((int)e[0xa2] + 1) % 3) + 6) * 16));
+    w.va.FUN_00c7f700(reinterpret_cast<const hkRotation*>(&m90), reinterpret_cast<const hkVector4*>(e + ((((int)e[0xa2] + 2) % 3) + 6) * 16));
     float s = f1c * f00;
     float t = s;
     float sd = s + t;
     float s2 = (float)(DAT_0106d4c8 * s);
-    __m128 base = m50.v;
+    LocalM128 base = m50.v;
     for (int i = 0; i < 2; ++i)
     {
         for (int j = -1; j <= 1; ++j)
         {
-            __m128 x = i ? w.vb.v : w.va.v;
-            __m128* __restrict ptry = i ? &w.va.v : &w.vb.v;
-            __m128 y = *ptry;
-            __m128* p = &w.buf[i * 6 + (j + 1) * 2 + 1];
+            LocalM128 x = i ? w.vb.v : w.va.v;
+            LocalM128* __restrict ptry = i ? &w.va.v : &w.vb.v;
+            LocalM128 y = *ptry;
+            LocalM128* p = &w.buf[i * 6 + (j + 1) * 2 + 1];
             _mm_store_ps((float*)(p - 1), base);
             _mm_store_ps((float*)p, base);
             float ty = (float)((double)j * 1.4f * s);
@@ -133,7 +133,7 @@ void T::FUN_00de6d80(Src* a1, Visitor* a2, int a3, int a4)
             _mm_store_ps((float*)p, _mm_add_ps(_mm_mul_ps(splatRounded(ty), y), p[0]));
         }
     }
-    __m128* q = w.buf;
+    LocalM128* q = w.buf;
     int n = 6;
     do
     {

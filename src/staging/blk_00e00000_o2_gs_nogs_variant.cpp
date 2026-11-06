@@ -410,22 +410,8 @@ struct FUN_00e11d60_class
     int m_30;
     void __thiscall FUN_00e11d60(int val);
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkMemoryRouter.h"
 struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
 extern int DAT_0102e388;

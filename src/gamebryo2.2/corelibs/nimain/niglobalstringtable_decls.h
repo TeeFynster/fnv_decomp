@@ -1,25 +1,18 @@
+#include "../../../../include/NiPixelData.h"
+#include "../../../../include/NiGlobalStringTable.h"
 // gamebryo2.2/corelibs/nimain/niglobalstringtable_decls.h: declares NiGlobalStringTable, NiPlaybackStat, NiPlaybackTimestamp, NiPlaybackManager, NiPlaybackFile
 #ifndef NIGLOBALSTRINGTABLE_DECLS_H
 #define NIGLOBALSTRINGTABLE_DECLS_H
 
 #include <string.h>
-class NiGlobalStringTable
-{
-  public:
-    void AddString();
-    static char* AddString(const char*);
-    char* FUN_00a5b300(const char*, unsigned);
-    void FUN_00a5b5a0(char**, unsigned);
-    unsigned char padding[0x68];
-    unsigned m_uiLockCount;
-};
+
 extern NiGlobalStringTable* DAT_011f42c0;
 extern "C" volatile unsigned _tls_index;
 extern "C" unsigned long __readfsdword(unsigned long);
 #pragma intrinsic(__readfsdword)
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 void* _NiMalloc(unsigned);
 struct NiPlaybackStat
 {

@@ -1,25 +1,193 @@
-// fallout/ai/processlists.cpp: ProcessLists, ProcessListsEx, TESObjectREFR, BGSProjectile and more (133 functions)
+#include "processlists_private/processlists_layout_support.h"
+#include "../../../include/Actor.h"
+#include "../../../include/ActorBaseAttributes.h"
+#include "../../../include/ActorPackageContext.h"
+#include "../../../include/ActorTaskManager.h"
+#include "../../../include/ActorUpdateTaskData.h"
+#include "../../../include/ActorValueModifierList.h"
+#include "../../../include/ActorValueOwner.h"
+#include "../../../include/ActorsScriptTaskData.h"
+#include "../../../include/AnimationTaskData.h"
+#include "../../../include/BGSDestructibleObjectForm.h"
+#include "../../../include/BGSOpenCloseForm.h"
+#include "../../../include/BGSPreloadable.h"
+#include "../../../include/BGSProjectile.h"
+#include "../../../include/BGSTalkingActivator.h"
+#include "../../../include/BGSTerrainManager.h"
+#include "../../../include/BGSTouchSpellForm.h"
+#include "../../../include/BSScrapArray.h"
+#include "../../../include/BSSimpleArray.h"
+#include "../../../include/BSTaskletData.h"
+#include "../../../include/BSTempEffect.h"
+#include "../../../include/BSWin32TaskletData.h"
+#include "../../../include/BaseExtraList.h"
+#include "../../../include/BaseFormComponent.h"
+#include "../../../include/BaseProcess.h"
+#include "../../../include/CachedValuesOwner.h"
+#include "../../../include/Character.h"
+#include "../../../include/CombatActor.h"
+#include "../../../include/CombatController.h"
+#include "../../../include/LipSyncBackgroundManager.h"
+#include "../../../include/LockFreeMap.h"
+#include "../../../include/RecursiveSpinLock.h"
+#include "../../../include/AlarmPackage.h"
+#include "../../../include/CountingSemaphore.h"
+#include "../../../include/DetectionTaskData.h"
+#include "../../../include/DialogueTopicData.h"
+#include "../../../include/Explosion.h"
+#include "../../../include/ExtraDataList.h"
+#include "../../../include/FOPipboyManager.h"
+#include "../../../include/FileEntryList.h"
+#include "../../../include/InterfacedClass.h"
+#include "../../../include/LockPrimitive.h"
+#include "../../../include/MagicCaster.h"
+#include "../../../include/MagicTarget.h"
+#include "../../../include/MapEntryCount.h"
+#include "../../../include/MobileObject.h"
+#include "../../../include/MobileObjectProcessArray.h"
+#include "../../../include/MobileObjectTaskletData.h"
+#include "../../../include/MovementTaskData.h"
+#include "../../../include/NiObject.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiRefObject.h"
+#include "../../../include/NiTLargePrimitiveArray.h"
+#include "../../../include/NiTMap.h"
+#include "../../../include/NiTransform.h"
+#include "../../../include/PackageList.h"
+#include "../../../include/PackageUpdateTaskData.h"
+#include "../../../include/InterfaceManager.h"
+#include "../../../include/TESSaveLoadGame.h"
+// PathfindQueueStorage_processlists: local type (was include/PathfindQueueStorage.h, which had no evidence of one real class); its methods are 0x0096aaf0 ProcessArray::RemoveActor
+class MobileObject;
 
-#include "processlists_private/processlists_ProcessLists.h"
-#include "processlists_private/processlists_Actor.h"
-#include "processlists_private/processlists_BGSTalkingActivator.h"
-#include "processlists_private/processlists_BGSProjectile.h"
-#include "processlists_private/processlists_Projectile.h"
-#include "processlists_private/processlists_Explosion.h"
-#include "processlists_private/processlists_BaseProcess.h"
-#include "processlists_private/processlists_PlayerCharacter.h"
+class PathfindQueueStorage_processlists
+{
+public:
+    void FUN_0096aaf0(MobileObject* apObject, int aeLevel);
+};
+#include "../../../include/PerkEntryConditionSet.h"
+#include "../../../include/PlacedObjectInfo.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/Projectile.h"
+#include "../../../include/ProjectileProperties.h"
+#include "../../../include/Script.h"
+#include "../../../include/ScriptHeaderData.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/TESAIForm.h"
+#include "../../../include/TESActorBase.h"
+#include "../../../include/TESActorBaseData.h"
+#include "../../../include/TESAnimation.h"
+#include "../../../include/TESAttributes.h"
+#include "../../../include/TESBoundAnimObject.h"
+#include "../../../include/TESBoundObject.h"
+#include "../../../include/TESChildCell.h"
+#include "../../../include/TESContainer.h"
+#include "../../../include/TESDataHandler.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESFullName.h"
+#include "../../../include/TESHealthForm.h"
+#include "../../../include/TESModel.h"
+#include "../../../include/TESModelTextureSwap.h"
+#include "../../../include/TESObject.h"
+#include "../../../include/TESObjectACTI.h"
+#include "../../../include/TESObjectCELL.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESPackage.h"
+#include "../../../include/TESScriptableForm.h"
+#include "../../../include/TESSpellList.h"
+#include "../../../include/TESTopic.h"
+#include "../../../include/bhkWorld.h"
+
+// fallout/ai/processlists.cpp: ProcessLists, TESObjectREFR, BGSProjectile and more (133 functions)
+
+#include "../../../include/ProcessLists.h"
+extern ProcessLists g_kProcessLists;
 #include "processlists_private/processlists_types_TESPackage.h"
-#include "processlists_private/processlists_BSTempEffect.h"
+template <> NiPointer<BSTempEffect>::~NiPointer();
 #include "processlists_private/processlists_GarbageCollector.h"
 #include "processlists_private/processlists_dead_animation_actorbase.h"
 #include "processlists_private/processlists_decls.h"
+#include "../../../include/GO.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/SL.h"
+#include "../../../include/ArrowProjectile.h"
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/BSFadeNode.h"
+#include "../../../include/BSTempEffectGeometryDecal.h"
+#include "../../../include/BSTempEffectParticle.h"
+#include "../../../include/EffectSetting.h"
+#include "../../../include/ExtraFollower.h"
+#include "../../../include/GameTimerRecord.h"
+#include "../../../include/HighProcess.h"
+#include "../../../include/LowProcess.h"
+#include "../../../include/MagicHitEffect.h"
+#include "../../../include/MagicProjectile.h"
+#include "../../../include/MagicShaderHitEffect.h"
+#include "../../../include/MiddleHighProcess.h"
+#include "../../../include/NiAdditionalGeometryData.h"
+#include "../../../include/Setting.h"
+#include "../../../include/SettingT_GameSettingCollection_.h"
+#include "../../../include/ShadowSceneNode.h"
+#include "../../../include/TES.h"
+#include "../../../include/TESChallenge.h"
+#include "../../../include/TESTopicInfo.h"
+#include "../../../include/TopicInfoArray.h"
+// API-only extensions for declarations not yet provided by the shared headers.
+struct ProcessListsActorMethods : Actor
+{
+    bool FUN_00565450();
+    int FUN_008a81e0(Actor*);
+};
+struct ProcessListsCombatMethods : CombatController
+{
+    bool FUN_009818b0();
+};
+
+// Extra declarations needed by this unit; the shared classes remain authoritative.
+struct ProcessListsLowProcessAccess : LowProcess
+{
+    float FUN_007df1f0();
+};
+struct ProcessListsMiddleHighProcessAccess : MiddleHighProcess
+{
+    void FUN_00929260(unsigned char);
+};
+struct ProcessListsHighProcessAccess : HighProcess
+{
+    void ProcessDetectionStateLists(Actor*);
+    void FUN_008ff030(Actor*);
+};
+struct ProcessListsMagicHitEffectAccess : MagicHitEffect
+{
+    char* GetData();
+};
+// Unit-specific methods absent from the shared interfaces; all layouts come from their checked bases.
+struct ProcessListsActorDialogueAccess : Actor
+{
+    void SelectTopic(TESTopic*);
+};
+struct ProcessListsActorLightAccess : Actor
+{
+    void SetActorLightFlag(unsigned char);
+};
+struct ProcessListsPathfindAccess : PathfindQueueStorage_processlists
+{
+    int FindKeyIndex(int, int);
+    void RemoveIndex(int);
+};
+
+__forceinline Actor* ActorValueOwner::GetActorOwner()
+{
+    return static_cast<Actor*>(this);
+}
+
 extern PlayerCharacter* pPlayer;
 
 // Returns the extra data of the given type from the reference's extra data list.
 // @fnv 0x00527080
 BSExtraData* TESObjectREFR::GetExtraData(unsigned char type) const
 {
-    return GetExtra()->GetExtraData(type);
+    return const_cast<ExtraDataList*>(GetExtra())->GetExtraData(type);
 }
 
 // @fnv 0x00975300
@@ -64,7 +232,7 @@ void ProcessLists::CalculateAliveActorList()
         if (object && object->IsActor())
         {
             Actor* actor = static_cast<Actor*>(object);
-            if (!actor->IsDead(false))
+            if (!actor->HasHealth(false))
                 m_kAliveActorList.AddHead(actor);
         }
     }
@@ -82,7 +250,7 @@ void ProcessLists::RunActorUpdates()
         {
             Actor* actor = static_cast<Actor*>(object);
             if (actor->m_bFirstActorFlag)
-                actor->Update(0.0f);
+                static_cast<MobileObject*>(actor)->Update(0.0f);
         }
     }
 }
@@ -99,7 +267,7 @@ bool ProcessLists::IsActorTalkingThroughActivator(Actor* actor)
         if (object && object->IsTalkingActivator())
         {
             BGSTalkingActivator* activator = static_cast<BGSTalkingActivator*>(object->GetObjectReference());
-            if (activator->GetTempRef() == actor)
+            if (activator->GetTempRef() == reinterpret_cast<RefStub*>(actor))
                 return true;
         }
     }
@@ -120,9 +288,9 @@ void ProcessLists::AddMobileObjectToList(MobileObject* object)
         {
             if (!object->GetCurrentAIProcess())
                 return;
-            PROCESS_TYPE currentLevel = object->GetCurrentAIProcess()->GetProcessLevel();
-            PROCESS_TYPE desiredLevel = object->GetProcessTier();
-            if (object->IsDead(false) || currentLevel != desiredLevel ||
+            PROCESS_TYPE currentLevel = static_cast<PROCESS_TYPE>(object->GetCurrentAIProcess()->GetProcessLevel());
+            PROCESS_TYPE desiredLevel = static_cast<PROCESS_TYPE>(object->GetProcessTier());
+            if (object->HasHealth(false) || currentLevel != desiredLevel ||
                 object->GetCurrentAIProcess()->IsCurrentProcessComplete() || object->GetDeleted() ||
                 pPlayer->IsSleepingOrResting())
             {
@@ -148,7 +316,7 @@ void ProcessLists::UpdateMagicTempEffects(float timeDelta)
             if (object->IsProjectile())
             {
                 Projectile* projectile = static_cast<Projectile*>(object);
-                projectile->ProcessProjectile();
+                projectile->ProcessImpact();
             }
             else if (object->IsExplosion())
             {
@@ -169,11 +337,11 @@ void ProcessLists::UpdateFollowerTempList()
         if (current->GetItem()->IsActor())
             actor = static_cast<Actor*>(current->GetItem());
         if (actor && !actor->IsStillLoading() && actor->GetCurrentAIProcess() &&
-            actor->GetCurrentAIProcess()->GetOneTimePackage())
+            static_cast<const BaseProcess*>(actor->GetCurrentAIProcess())->GetOneTimePackage())
         {
             TESObjectREFR* target = actor->GetCombatOpponent();
-            TESPackage* package = actor->GetCurrentAIProcess()->GetOneTimePackage();
-            if (package && package->GetPackType() == _PackageType::ESCORT)
+            TESPackage* package = static_cast<const BaseProcess*>(actor->GetCurrentAIProcess())->GetOneTimePackage();
+            if (package && package->GetPackType() == static_cast<PACKAGE_TYPE>(2))
             {
                 TESObjectREFR* escortTarget = actor->GetCombatOpponent();
                 if (escortTarget && escortTarget->IsActor())
@@ -254,16 +422,16 @@ void ProcessLists::UpdateHighProcess()
         if (object && object->IsActor())
             actor = static_cast<Actor*>(object);
 
-        if (actor && actor->IsDead(false))
+        if (actor && actor->HasHealth(false))
         {
-            if (actor->GetActorBase()->GetHealth() > 0 && !actor->GetHavokDeath())
+            if (static_cast<const TESActorBase*>(actor->GetActorBase())->GetHealth() > 0 && !actor->GetHavokDeath())
                 actor->GetCurrentAIProcess()->IsFurnitureMarkerValid(actor);
         }
-        else if (actor && actor->GetFatiguePercentage() <= 0.0 && actor->GetActorBase()->GetFatigue() > 0)
+        else if (actor && actor->GetFatiguePercentage() <= 0.0 && static_cast<const TESActorBase*>(actor->GetActorBase())->GetFatigue() > 0)
         {
             BaseProcess* process = actor->GetCurrentAIProcess();
             if (process)
-                process->ApplyKnockback(actor, *actor->GetPos(), 0.0f);
+                process->PushActorAway(actor, *static_cast<const Actor*>(actor)->GetPos(), 0.0f);
         }
     }
 }
@@ -271,7 +439,7 @@ void ProcessLists::UpdateHighProcess()
 // @fnv 0x00974d90
 bool FOPipboyManager::IsUnk28Set()
 {
-    return bUnk28;
+    return bInitialized;
 }
 
 // @fnv 0x0096c950
@@ -282,11 +450,11 @@ bool Actor::FUN_0096c950()
 
 // Returns a pointer to this setting's value, or to a static default value set to false when this is null.
 // @fnv 0x00408d60
-template <> SETTING_VALUE* SettingT<INISettingCollection>::Bool()
+bool* Setting::Bool()
 {
     SETTING_VALUE* value =
         this ? &this->uValue : (((SETTING_VALUE*)&DAT_01202800)->b = false, (SETTING_VALUE*)&DAT_01202800);
-    return value;
+    return reinterpret_cast<bool*>(value);
 }
 
 // @fnv 0x0096f400
@@ -303,9 +471,9 @@ void ProcessLists::RemoveMobileObjectFromList(MobileObject* object)
 // @fnv 0x00c68f00
 void bhkWorld::SetWorldActive(bool arg)
 {
-    if (unk1C > 0u)
+    if (m_uiReferenceCount > 0u)
     {
-        if (--unk1C == 0)
+        if (--m_uiReferenceCount == 0)
         {
             ProcessPendingItems();
             ReleaseBodies();
@@ -316,7 +484,7 @@ void bhkWorld::SetWorldActive(bool arg)
                 ClearEntries();
         }
     }
-    else if (unk50 > 0u && !arg)
+    else if (m_uiValueAt50 > 0u && !arg)
     {
         ClearEntries();
     }
@@ -385,7 +553,7 @@ void ProcessLists::Revert(BGSLoadGameBuffer* buffer)
     current = &m_kTemporaryEffectList2;
     while (current && !current->IsEmpty())
         current->RemoveHead();
-    NiTMap<TESGlobal*, bool>::NewItem();
+    FUN_00975cf0();
     FUN_004ee7d0();
     bsrandom_singleton::MersenneTwister::GetRandomGenerator();
     FUN_004a42a0();
@@ -410,11 +578,11 @@ MagicShaderHitEffect* ProcessLists::FindMagicShaderHitEffect(TESObjectREFR* targ
                 MagicShaderHitEffect* shader = reinterpret_cast<MagicShaderHitEffect*>(effect);
                 if (reinterpret_cast<BGSTerrainManager*>(shader)->GetMinLevel() ==
                         reinterpret_cast<unsigned int>(target) &&
-                    m_fFirstFloatValue > reinterpret_cast<ActorPackageContext*>(shader)->FUN_00621b00() &&
+                    m_fFirstFloatValue > shader->GetTimeLeft() &&
                     !reinterpret_cast<FOPipboyManager*>(shader)->IsUnk28Set())
                 {
                     result = shader;
-                    m_fFirstFloatValue = reinterpret_cast<ActorPackageContext*>(shader)->FUN_00621b00();
+                    m_fFirstFloatValue = shader->GetTimeLeft();
                 }
             }
             current = current->GetNext();
@@ -458,18 +626,13 @@ void FUN_0096bbc0_cls::ProcessMobileObjects(FUN_0096bbc0_list* apList)
     }
 }
 
-struct FUN_008f63e0_wrap
-{
-    void ProcessDetectionStateLists(MobileObject* pActor);
-};
-
 // Updates the player's current AI process, then calls ProcessDetectionStateLists on each actor's AI process in the high-process list.
 // @fnv 0x0096c710
 void __fastcall FUN_0096c710(ProcessLists* pProcessLists)
 {
     if (pPlayer->GetCurrentAIProcess())
     {
-        ((FUN_008f63e0_wrap*)pPlayer->GetCurrentAIProcess())->ProcessDetectionStateLists(pPlayer);
+        ((ProcessListsHighProcessAccess*)pPlayer->GetCurrentAIProcess())->ProcessDetectionStateLists(pPlayer);
     }
 
     for (unsigned int i =
@@ -479,83 +642,11 @@ void __fastcall FUN_0096c710(ProcessLists* pProcessLists)
         MobileObject* pObject = ((MobileObjectProcessArray*)((char*)pProcessLists + 4))->GetItem(i);
         if (pObject && pObject->IsActor())
         {
-            ((FUN_008f63e0_wrap*)pObject->GetCurrentAIProcess())->ProcessDetectionStateLists(pObject);
+            ((ProcessListsHighProcessAccess*)pObject->GetCurrentAIProcess())->ProcessDetectionStateLists(static_cast<Actor*>(pObject));
         }
     }
 }
 
-struct FUN_0096cfa0_proc
-{
-    void FUN_008ff030(MobileObject*);
-};
-struct FUN_0096cfa0_virt
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool vlast();
-};
 struct FUN_0096cfa0_cls
 {
     char pad[4];
@@ -570,8 +661,8 @@ void FUN_0096cfa0_cls::FUN_0096cfa0()
     for (unsigned int i = 0; i < pa.GetTail((PROCESS_TYPE)0); i++)
     {
         pmob = pa.GetItem(i);
-        if (pmob && ((FUN_0096cfa0_virt*)pmob)->vlast())
-            ((FUN_0096cfa0_proc*)pmob->GetCurrentAIProcess())->FUN_008ff030(pmob);
+        if (pmob && ((::TESForm*)pmob)->IsActor())
+            ((ProcessListsHighProcessAccess*)pmob->GetCurrentAIProcess())->FUN_008ff030(static_cast<Actor*>(pmob));
     }
 }
 
@@ -591,11 +682,7 @@ struct FUN_0096e570_shell : public ProcessLists
     void FUN_0096e570();
 };
 
-struct GlobalObject2_0040c150
-{
-    int* Int();
-};
-extern GlobalObject2_0040c150 g_011cde2c;
+extern Setting g_011cde2c;
 int __cdecl FUN_00970ee0(Actor*, Actor*);
 
 // Locks the list, shell-sorts the Actor pointers at offset 0x88 by FUN_00970ee0, then clears and shrinks the count at 0x150 down to *g_011cde2c.Int().
@@ -633,7 +720,7 @@ void FUN_0096e570_shell::FUN_0096e570()
         *(int*)((char*)this + 0x150) = *(int*)((char*)this + 0x150) - 1;
     }
 
-    ((RecursiveSpinLock*)((char*)this + 0x10300))->Unlock();
+    ((RecursiveSpinLock*)((char*)this + 0x10300))->Leave();
 }
 
 struct FUN_0096e6f0_shell : public ProcessLists
@@ -662,228 +749,14 @@ void FUN_0096e6f0_shell::RemoveActor(Actor* pactor)
             break;
         }
     }
-    reinterpret_cast<RecursiveSpinLock*>(reinterpret_cast<char*>(this) + 0x10300)->Unlock();
+    reinterpret_cast<RecursiveSpinLock*>(reinterpret_cast<char*>(this) + 0x10300)->Leave();
 }
 
 extern double DAT_0102c188;
-struct FUN_00973de0_virt
+
+struct ProcessListsPlayerDialogueAccess : PlayerCharacter
 {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool vlast();
-};
-struct FUN_00973de0_act
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual bool vlast(int);
-    bool IsPlayerTeammate();
-    void SetSpeakingState(bool);
-    void FUN_008ad910(void*, bool, bool);
-};
-struct FUN_00973de0_player
-{
-    bool FUN_009549a0(FUN_00973de0_act*);
-    float GetDistanceToReference(void*, bool, bool);
+    bool CanAddressActor(Actor*);
 };
 struct BGSMessageInitAccess
 {
@@ -902,13 +775,13 @@ void FUN_00973de0_cls::FUN_00973de0()
     for (unsigned int i = 0; i < ((BGSMessageInitAccess*)&pa)->GetIconFormID(); i++)
     {
         pmob = pa.GetItem(i);
-        FUN_00973de0_act* a = 0;
-        if (pmob && ((FUN_00973de0_virt*)pmob)->vlast())
-            a = (FUN_00973de0_act*)pmob;
-        if (a && !a->vlast(0))
+        ::Actor* a = 0;
+        if (pmob && ((::TESForm*)pmob)->IsActor())
+            a = (::Actor*)pmob;
+        if (a && !a->HasHealth(false))
         {
-            if ((((FUN_00973de0_player*)pPlayer)->FUN_009549a0(a) &&
-                 ((FUN_00973de0_player*)pPlayer)->GetDistanceToReference(a, false, false) > DAT_0102c188) ||
+            if ((((ProcessListsPlayerDialogueAccess*)pPlayer)->CanAddressActor(a) &&
+                 ((ProcessListsPlayerDialogueAccess*)pPlayer)->GetDistanceToReference(a, false, false) > DAT_0102c188) ||
                 a->IsPlayerTeammate())
             {
                 a->SetSpeakingState(false);
@@ -925,7 +798,8 @@ struct TESFormList
     void _ref_00905330(MobileObject**);
     TESFormList* GetFirst();
 };
-struct MobileObjectStub
+// 009bec50 tests projectile flag 0x80 and calls Projectile slot 0x2f8 (staging/blk_009a0000_od.cpp).
+struct ProjectileRemovalMethods : Projectile
 {
     bool FUN_009bec50(float);
 };
@@ -946,7 +820,7 @@ void __fastcall FUN_00975080(char* self)
                 Projectile* pProjectile = dynamic_cast<Projectile*>(ref);
                 if (pProjectile)
                 {
-                    b = ((MobileObjectStub*)pProjectile)->FUN_009bec50(0.0f);
+                    b = ((ProjectileRemovalMethods*)pProjectile)->FUN_009bec50(0.0f);
                 }
             }
             if (b)
@@ -964,217 +838,6 @@ void __fastcall FUN_00975080(char* self)
     }
 }
 
-struct FUN_00975f90_virt
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool vlast();
-};
-struct FUN_00975f90_act
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual bool vlast(int);
-};
 struct FUN_00975f90_cls
 {
     char pad[4];
@@ -1188,10 +851,10 @@ void FUN_00975f90_cls::ClearMobileObjectData()
     for (unsigned int i = 0; i < pa.GetTail((PROCESS_TYPE)0); i++)
     {
         pmob = pa.GetItem(i);
-        FUN_00975f90_act* a = 0;
-        if (pmob && ((FUN_00975f90_virt*)pmob)->vlast() && !((FUN_00975f90_act*)pmob)->vlast(0))
+        ::Actor* a = 0;
+        if (pmob && ((::TESForm*)pmob)->IsActor() && !((::Actor*)pmob)->HasHealth(false))
         {
-            a = (FUN_00975f90_act*)pmob;
+            a = (::Actor*)pmob;
             if (a)
                 ((TESForm*)a)->TESForm::ClearData();
         }
@@ -1201,8 +864,16 @@ void FUN_00975f90_cls::ClearMobileObjectData()
 struct NiAVObject;
 struct TESObjectLIGH;
 struct TESObjectWEAP;
+// No checked include/MuzzleFlash.h exists yet; its former extension declarations are consolidated here.
+struct MuzzleOwnerRef;
+struct MuzzleProjectileRef;
 struct MuzzleFlash
 {
+    MuzzleFlash(MuzzleOwnerRef*, MuzzleProjectileRef*);
+    void* GetSource();
+    int GetStamp();
+    MuzzleProjectileRef* GetProjectileRef();
+    void Activate();
     void Init(TESObjectREFR*);
     void Update(float, TESObjectREFR*);
     void SetParentRef(TESObjectREFR*);
@@ -1294,11 +965,6 @@ void FUN_00978890_cls::UpdateMuzzleFlashes(float dt)
 
 extern int DAT_0108c23c;
 class NavMeshInfo;
-template <> class BSSimpleArray<NavMeshInfo*, 1024>
-{
-  public:
-    void FUN_006b3eb0(unsigned int, bool);
-};
 
 // @fnv 0x00978e70
 void* __fastcall FUN_00978e70(void* pThis)
@@ -1308,11 +974,6 @@ void* __fastcall FUN_00978e70(void* pThis)
     return pThis;
 }
 
-struct _LARGE_INTEGER
-{
-    long HighPart;
-    unsigned long LowPart;
-};
 typedef char _sizecheck__LARGE_INTEGER[sizeof(_LARGE_INTEGER) == 8 ? 1 : -1];
 struct FUN_0096b050_shell : public ProcessLists
 {
@@ -1477,29 +1138,10 @@ struct MobileObjectExt
     void FUN_00565870();
 };
 
-class LowProcess
-{
-  public:
-    float FUN_007df1f0();
-    void ResetPackageState();
-};
-
 class Calendar
 {
   public:
     float GetGameTime();
-};
-
-struct SettingT_GameSettingCollection_
-{
-    void* vptr_;
-    SETTING_VALUE uValue;
-    SETTING_VALUE* Int();
-};
-
-struct PathfindQueueStorage
-{
-    void FUN_0096aaf0(MobileObject* apObject, int aeLevel);
 };
 
 __declspec(dllimport) int __stdcall QueryPerformanceCounter(__int64* apCount);
@@ -1567,10 +1209,10 @@ void FUN_0096b050_shell::UpdateLowProcesses(float afDelta, bool abSleeping)
                 {
                     if (FUN_00437bb0(pmob))
                     {
-                        float flastprocesstime = ((LowProcess*)pproc)->FUN_007df1f0();
+                        float flastprocesstime = ((ProcessListsLowProcessAccess*)pproc)->FUN_007df1f0();
                         if (flastprocesstime == -1.0)
                         {
-                            ((LowProcess*)pproc)->ResetPackageState();
+                            ((LowProcess*)pproc)->LowProcess::ResetPackageState();
                         }
                         else
                         {
@@ -1593,7 +1235,7 @@ void FUN_0096b050_shell::UpdateLowProcesses(float afDelta, bool abSleeping)
                     }
                     else
                     {
-                        ((LowProcess*)pproc)->ResetPackageState();
+                        ((LowProcess*)pproc)->LowProcess::ResetPackageState();
                     }
                 }
             }
@@ -1604,14 +1246,14 @@ void FUN_0096b050_shell::UpdateLowProcesses(float afDelta, bool abSleeping)
     while (plisttemp && plisttemp->GetItem())
     {
         pmob = plisttemp->GetItem();
-        ((PathfindQueueStorage*)&((ProcessLists*)this)->m_kMobileObjectProcessList)
+        ((PathfindQueueStorage_processlists*)&((ProcessLists*)this)->m_kMobileObjectProcessList)
             ->FUN_0096aaf0(pmob, PROCESS_TYPE_PROCESS_TYPE_LOW);
         if (pmob->GetDisabled())
         {
-            DAT_011f11a0.Lock();
+            DAT_011f11a0.Lock(0);
             delete pmob->GetCurrentAIProcess();
             ((MobileObjectExt*)pmob)->SetCurrentProcess(0);
-            DAT_011f11a0.Unlock();
+            DAT_011f11a0.Leave();
         }
         plisttemp = plisttemp->GetNext();
     }
@@ -1620,21 +1262,7 @@ void FUN_0096b050_shell::UpdateLowProcesses(float afDelta, bool abSleeping)
 }
 
 namespace fnv_0096bcd0 {
-namespace lc1 {
-struct AutoMemContext
-{
-    AutoMemContext(int aeContext, bool abFlag, const char* apFile, int aiLine);
-    ~AutoMemContext();
-    int m_eMemoryContext;
-};
-}
-struct ExtraFollower
-{
-    void* pVtbl;
-    unsigned char m_ucExtraDataType;
-    BSExtraData* pNext;
-    BSSimpleList<Actor*>* pFollowers;
-};
+
 struct ExtraFollowerList
 {
     TESPackage* GetPackageOverride();
@@ -1696,7 +1324,7 @@ struct ProcessListsHigh : public ProcessLists
 // @fnv 0x0096bcd0
 void ProcessListsHigh::FUN_0096bcd0(float afDelta, bool abSleeping)
 {
-    lc1::AutoMemContext tempMemContext(0x2a, true,
+    AutoMemContext tempMemContext(0x2a, true,
                                        "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\ai\\ProcessLists.cpp", 0x235);
     FUN_008c8bd0();
     int iupdated = 0;
@@ -1750,7 +1378,7 @@ void ProcessListsHigh::FUN_0096bcd0(float afDelta, bool abSleeping)
                         pTempList = new BSSimpleList<Actor*>;
                         pHead = new BSSimpleList<Actor*>;
                         pCurrentElementNext = pHead;
-                        ptemp = pfollow->pFollowers;
+                        ptemp = pfollow->list;
                         while (ptemp && ptemp->GetItem())
                         {
                             pHead->AddTail(ptemp->GetItem());
@@ -1796,7 +1424,7 @@ void ProcessListsHigh::FUN_0096bcd0(float afDelta, bool abSleeping)
                         delete pTempList;
                         pHead->RemoveAll();
                         delete pHead;
-                        if (pfollow->pFollowers->IsEmpty())
+                        if (pfollow->list->IsEmpty())
                             ((ExtraFollowerList*)pmob->GetExtra())->FUN_00422720();
                     }
                 }
@@ -1817,23 +1445,11 @@ struct FUN_00977cb0_shell : public ProcessLists
     void StartActorDialogue(int, TESObjectREFR*, bool);
 };
 
-struct Setting_S
-{
-    float* Float();
-};
-struct BSSpinLockS
-{
-    void Lock(const char*);
-    void Unlock();
-};
 struct PCH
 {
     bool HasCombatState();
 };
-struct Ref_S
-{
-    float GetDistanceToReference(void*, bool, bool);
-};
+
 struct RefUse
 {
     bool CanBeUsed(Actor*, bool);
@@ -1847,10 +1463,7 @@ struct FUN_00884480_shell
 {
     bool FUN_00884480();
 };
-struct FUN_008bc3d0_shell
-{
-    void FUN_008bc3d0(TESTopic*);
-};
+
 bool __fastcall FUN_008a67f0(Actor*);
 struct ProcStub
 {
@@ -2323,8 +1936,8 @@ struct PC7d
     virtual Actor* GetDialogueTarget();
 };
 extern double _gModifierZero;
-extern Setting_S originalRuntimeFloatSetting1062;
-extern Setting_S originalRuntimeFloatSetting1060;
+extern Setting originalRuntimeFloatSetting1062;
+extern Setting originalRuntimeFloatSetting1060;
 extern PC7d* g_thePlayer;
 
 // Picks a nearby actor for the given dialogue action, validates it, and starts a topic on it, resetting the cooldown timer.
@@ -2345,10 +1958,10 @@ void FUN_00977cb0_shell::StartActorDialogue(int eaction, TESObjectREFR* apObject
             pTalk = g_thePlayer->GetDialogueTarget();
             if (pTalk)
             {
-                if (pTalk->Unk_85() == 9 || !((FUN_00884480_shell*)pTalk)->FUN_00884480() || pTalk->IsDead(false) ||
+                if (pTalk->GetSitSleepState() == 9 || !((FUN_00884480_shell*)pTalk)->FUN_00884480() || pTalk->HasHealth(false) ||
                     ((PCH*)pTalk)->HasCombatState() ||
                     (((ActorDetect*)pTalk)->UpdateActorPackageState(4) && !pTalk->IsPlayerTeammate()) ||
-                    ((Ref_S*)pTalk)->GetDistanceToReference(g_thePlayer, false, false) > idistance)
+                    ((::TESObjectREFR*)pTalk)->GetDistanceToReference(reinterpret_cast<TESObjectREFR*>(g_thePlayer), false, false) > idistance)
                     pTalk = 0;
                 else if (FUN_008a67f0(pTalk) && ((ProcStub*)pTalk->GetCurrentAIProcess())->IsInDialogue() &&
                          ((ActorDetect*)pTalk)
@@ -2359,21 +1972,21 @@ void FUN_00977cb0_shell::StartActorDialogue(int eaction, TESObjectREFR* apObject
         }
         else
         {
-            ((BSSpinLockS*)((char*)this + 0x10300))->Lock(0);
+            ((RecursiveSpinLock*)((char*)this + 0x10300))->Lock(0);
             int icurActor = 0;
             while (icurActor < *(int*)((char*)this + 0x150) && !pTalk)
             {
                 Actor* pact = ((Actor**)((char*)this + 0x88))[icurActor];
                 bool bsetactor = true;
                 bool bisTeammate = pact ? pact->IsPlayerTeammate() : false;
-                if (pact && pact->GetCurrentAIProcess() && pact->Unk_85() != 9 &&
+                if (pact && pact->GetCurrentAIProcess() && pact->GetSitSleepState() != 9 &&
                     ((FUN_00884480_shell*)pact)->FUN_00884480() && !FUN_008a67f0(pact) &&
                     !((ProcStub*)pact->GetCurrentAIProcess())->IsInDialogue() &&
                     ((ActorDetect*)pact)
                             ->CalculateDetectionLevel(0, (Actor*)g_thePlayer, &blineofsight, false, 0, false, 0) > 0 &&
                     (!((ActorDetect*)pact)->UpdateActorPackageState(4) || bisTeammate) &&
-                    ((Ref_S*)pact)->GetDistanceToReference(g_thePlayer, false, false) < idistance &&
-                    !pact->IsDead(false) && !((PCH*)pact)->HasCombatState())
+                    ((::TESObjectREFR*)pact)->GetDistanceToReference(reinterpret_cast<TESObjectREFR*>(g_thePlayer), false, false) < idistance &&
+                    !pact->HasHealth(false) && !((PCH*)pact)->HasCombatState())
                 {
                     if (eaction == 7 || eaction == 5)
                     {
@@ -2393,7 +2006,7 @@ void FUN_00977cb0_shell::StartActorDialogue(int eaction, TESObjectREFR* apObject
                     idistance += 200;
                 }
             }
-            ((BSSpinLockS*)((char*)this + 0x10300))->Unlock();
+            ((RecursiveSpinLock*)((char*)this + 0x10300))->Leave();
         }
         switch (eaction)
         {
@@ -2440,7 +2053,7 @@ void FUN_00977cb0_shell::StartActorDialogue(int eaction, TESObjectREFR* apObject
         if (pTalk)
         {
             TESTopic* pTopic = TESTopic::GetAudioBackendData(DIALOGUE_TYPE_DT_TOPIC, iElementIndex);
-            ((FUN_008bc3d0_shell*)pTalk)->FUN_008bc3d0(pTopic);
+            ((ProcessListsActorDialogueAccess*)pTalk)->SelectTopic(pTopic);
             *(float*)((char*)this + 0x154) = *originalRuntimeFloatSetting1060.Float();
         }
     }
@@ -2470,16 +2083,16 @@ void __thiscall FUN_0096cc80_shell::SetByte50(unsigned char value)
     m_50 = value;
 }
 
-struct FUN_00973a90_shell
+struct ProcessListsPlayerDetectionAccess : PlayerCharacter
 {
-    char pad[0x66d];
-    unsigned char GetByteAtOffset();
+    unsigned char GetDetectionFlag();
+    void SetDetectionFlag(char);
 };
 
 // @fnv 0x00973a90
-unsigned char FUN_00973a90_shell::GetByteAtOffset()
+unsigned char ProcessListsPlayerDetectionAccess::GetDetectionFlag()
 {
-    return pad[0x66c];
+    return reinterpret_cast<unsigned char*>(this)[0x66c];
 }
 
 // @fnv 0x00978400
@@ -2488,27 +2101,12 @@ char __fastcall GetField18Byte(char* thisPtr)
     return thisPtr[0x18];
 }
 
-struct FUN_0096abc0_stub
-{
-    int __thiscall FindKeyIndex(int, int);
-};
-
-struct FUN_0096aa40_stub
-{
-    void __thiscall FUN_0096aa40(int);
-};
-
-struct FUN_0096aaf0_shell
-{
-    void FUN_0096aaf0(int arg1, int arg2);
-};
-
 // Calls FindKeyIndex with arg1 and arg2, then passes its result to FUN_0096aa40.
 // @fnv 0x0096aaf0
-void FUN_0096aaf0_shell::FUN_0096aaf0(int arg1, int arg2)
+void PathfindQueueStorage_processlists::FUN_0096aaf0(MobileObject* arg1, int arg2)
 {
-    int r = ((FUN_0096abc0_stub*)this)->FindKeyIndex(arg1, arg2);
-    ((FUN_0096aa40_stub*)this)->FUN_0096aa40(r);
+    int r = ((ProcessListsPathfindAccess*)this)->FindKeyIndex(reinterpret_cast<int>(arg1), arg2);
+    ((ProcessListsPathfindAccess*)this)->RemoveIndex(r);
 }
 
 struct BGSLoadFormBuffer;
@@ -2699,31 +2297,12 @@ struct FUN_0096c970_shell : public ProcessLists
     void FUN_0096c970();
 };
 
-template <class T, unsigned int N> class BSScrapArray
-{
-  public:
-    BSScrapArray();
-    virtual ~BSScrapArray();
-    unsigned int Add(T& item);
-    unsigned int GetTarget();
-    T* pBuffer;
-    unsigned int uiSize;
-    unsigned int uiAllocSize;
-    unsigned int uiGrowSize;
-};
 struct GlobalObject_0045cf30
 {
     bool* GetLifeStateControlFlag();
 };
 extern GlobalObject_0045cf30 g_011f1260;
-struct ShadowSceneNode
-{
-    void RemoveSceneObject(NiAVObject*, bool);
-};
-struct NiAdditionalGeometryData
-{
-    static ShadowSceneNode* GetShadowSceneNodeForIndex(int);
-};
+
 struct AnimUpdateHelper
 {
     bool FUN_00493930();
@@ -2796,10 +2375,7 @@ struct RagH
     bool FUN_00552490();
     void SetByte50(unsigned char);
 };
-struct BSFadeNode
-{
-    bool FUN_00552470() const;
-};
+
 struct ActorDialogueHelper
 {
     bool IsInDialogueWithPlayer() const;
@@ -2842,10 +2418,6 @@ void FUN_009707f0_shell::FUN_009707f0(int value)
     *(int*)((char*)this + 0xfc) = value;
 }
 
-struct ActorAnimHelper
-{
-    void PickAnimations(float, float);
-};
 struct FUN_00971ba0_shell
 {
     void FUN_00971ba0();
@@ -2865,7 +2437,7 @@ void FUN_00971ba0_shell::FUN_00971ba0()
         if (pactor)
         {
             pactor->Unk_81(1);
-            ((ActorAnimHelper*)pactor)->PickAnimations(1.0f, 1.0f);
+            ((::Actor*)pactor)->PickAnimations(1.0f, 1.0f);
         }
     }
 }
@@ -2877,7 +2449,8 @@ class TESFormList
     MobileObject** _ref_006815c0();
     TESFormList* GetFirst();
 };
-struct TESResponse
+// 0x0045cd60 is a folded +0x28 getter (also TESResponse::GetNext); the object read here is not a TESResponse
+struct Getter28View
 {
     int GetNext();
 };
@@ -2900,7 +2473,7 @@ MobileObject* FUN_009724e0_shell::FindMobileObjectByValue(int iList, int iValue)
     {
         MobileObject* pObject = *pCurrent->_ref_006815c0();
         pCurrent = pCurrent->GetFirst();
-        if (((TESResponse*)pObject)->GetNext() == iValue)
+        if (((Getter28View*)pObject)->GetNext() == iValue)
             pRet = pObject;
     }
     return pRet;
@@ -2914,11 +2487,7 @@ class TESFormList
     NiPointer<BSTempEffect>* _ref_006815c0();
     TESFormList* GetFirst();
 };
-struct MagicHitEffect
-{
-    char* GetData();
-    void SetByteAt24(unsigned char);
-};
+
 struct FUN_00974af0_shell
 {
     void FUN_00974af0(char*);
@@ -2936,8 +2505,8 @@ void FUN_00974af0_shell::FUN_00974af0(char* apTarget)
             if (pEffect && FUN_0043b300((const NiRTTI*)&g_011dc804, (NiAVObject*)pEffect))
             {
                 MagicHitEffect* pHitEffect = (MagicHitEffect*)pEffect;
-                if (pHitEffect->GetData() == apTarget)
-                    pHitEffect->SetByteAt24(1);
+                if (static_cast<ProcessListsMagicHitEffectAccess*>(pHitEffect)->GetData() == apTarget)
+                    pHitEffect->SetByteAt24((unsigned char)1);
             }
             pIter = pIter->GetFirst();
         }
@@ -2951,20 +2520,12 @@ struct FUN_00977660_shell : public ProcessLists
     void FUN_00977660();
 };
 
-struct Setting_S
-{
-    float* Float();
-};
-struct Ref_S
-{
-    float GetDistanceToReference(void*, bool, bool);
-};
 struct FUN_0096e570_shell
 {
     void FUN_0096e570();
 };
 void* __cdecl MemsetWrapper(void*, int, unsigned int);
-extern Setting_S originalRuntimeFloatSetting248;
+extern Setting originalRuntimeFloatSetting248;
 struct ProcessListsInsertHelper
 {
     void FUN_0096e3c0(Actor*);
@@ -2976,7 +2537,7 @@ void FUN_00977660_shell::FUN_00977660()
     ((RecursiveSpinLock*)((char*)this + 0x10300))->Lock(0);
     *(unsigned int*)((char*)this + 0x150) = 0;
     MemsetWrapper((char*)this + 0x88, 0, 200);
-    ((RecursiveSpinLock*)((char*)this + 0x10300))->Unlock();
+    ((RecursiveSpinLock*)((char*)this + 0x10300))->Leave();
     MobileObject* pCurrentObject = 0;
     Actor* pactor = 0;
     for (unsigned int i = 0;
@@ -2987,7 +2548,7 @@ void FUN_00977660_shell::FUN_00977660()
             pactor = (Actor*)pCurrentObject;
         if (pactor)
         {
-            float fdistancefromplayer = ((Ref_S*)pactor)->GetDistanceToReference(pPlayer, false, false);
+            float fdistancefromplayer = ((::TESObjectREFR*)pactor)->GetDistanceToReference(pPlayer, false, false);
             if (fdistancefromplayer < *originalRuntimeFloatSetting248.Float())
                 ((ProcessListsInsertHelper*)&g_kProcessLists)->FUN_0096e3c0(pactor);
         }
@@ -2996,10 +2557,6 @@ void FUN_00977660_shell::FUN_00977660()
 }
 }  // namespace fnv_00977660
 
-struct ActorMagicHelper
-{
-    void ConfigureActorState(bool, bool);
-};
 struct FUN_009784c0_shell
 {
     void FUN_009784c0();
@@ -3016,18 +2573,13 @@ void FUN_009784c0_shell::FUN_009784c0()
         if (pObject && pObject->IsActor())
         {
             Actor* pActor = (Actor*)pObject;
-            ((ActorMagicHelper*)pActor)->ConfigureActorState(false, false);
+            ((::Actor*)pActor)->ConfigureActorState(false, false);
         }
     }
 }
 
-struct FUN_00973a70_shell
-{
-    void __thiscall SetByteAt66c(char arg);
-};
-
 // @fnv 0x00973a70
-void __thiscall FUN_00973a70_shell::SetByteAt66c(char acValue)
+void __thiscall ProcessListsPlayerDetectionAccess::SetDetectionFlag(char acValue)
 {
     ((char*)this)[0x66c] = acValue;
 }
@@ -3126,18 +2678,7 @@ struct C00493930
 {
     bool FUN_00493930();
 };
-struct FUN_00496960_shell
-{
-    void SetByteAt14E(unsigned char);
-};
-struct NiAdditionalGeometryData
-{
-    static NiAVObject* GetShadowSceneNodeForIndex(int);
-};
-struct ShadowSceneNode
-{
-    void RemoveSceneObject(NiAVObject*, bool);
-};
+
 struct FUN_0096c860_shell : ProcessLists
 {
     void FUN_0096c860();
@@ -3159,7 +2700,7 @@ void FUN_0096c860_shell::FUN_0096c860()
             {
                 ((ShadowSceneNode*)NiAdditionalGeometryData::GetShadowSceneNodeForIndex(0))
                     ->RemoveSceneObject((NiAVObject*)pMobile->GetNiNode(), false);
-                ((FUN_00496960_shell*)pMobile)->SetByteAt14E(0);
+                ((ProcessListsActorLightAccess*)pMobile)->SetActorLightFlag(false);
             }
         }
     }
@@ -3171,15 +2712,7 @@ struct Flt
     operator unsigned int();
 };
 extern const NiRTTI g_011d6b04;
-struct MiddleHighProcess
-{
-    void FUN_00929260(unsigned char);
-};
-struct BSTempEffectGeometryDecal
-{
-    NiPointer<BSTempEffect> operator*();
-    void FUN_00929260(unsigned char);
-};
+
 struct FUN_00974c30_shell
 {
     BSSimpleList<NiPointer<BSTempEffect> > effects;
@@ -3197,7 +2730,7 @@ void FUN_00974c30_shell::FUN_00974c30()
             BSTempEffectGeometryDecal* decal = (BSTempEffectGeometryDecal*)(unsigned int)(*(Flt*)&list->GetItem());
             if (decal && FUN_0043b300(&g_011d6b04, (NiAVObject*)decal))
             {
-                MiddleHighProcess* target = (MiddleHighProcess*)decal;
+                ProcessListsMiddleHighProcessAccess* target = (ProcessListsMiddleHighProcessAccess*)decal;
                 target->FUN_00929260(1);
             }
             list = list->GetNext();
@@ -3234,230 +2767,14 @@ void FUN_00978550_shell::FUN_00978550()
 }
 }  // namespace fnv_00978550
 
-struct Dummy_96cf60
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void Exec();
-};
-// Retrieves the element at index b from the array and calls Exec on it.
+// Retrieves the actor at the given array index and invokes its update callback.
 // @fnv 0x0096cf60
 void ExecElementAt(BSSimpleArray<unsigned int, 0x400>* apArray, int aiIndex)
 {
     BSSimpleArray<unsigned int, 0x400>* arr = apArray;
     {
-        Dummy_96cf60* obj = reinterpret_cast<Dummy_96cf60*>(arr->GetAt(aiIndex));
-        obj->Exec();
+        Actor* obj = reinterpret_cast<Actor*>(arr->GetAt(aiIndex));
+        obj->Unk_D4();
     }
 }
 
@@ -3478,12 +2795,11 @@ struct TESFormList
 {
     void* GetFirst();
 };
-struct TESTopicInfoData;
-struct TESTopicInfo
+struct ProcessListsTopicInfoAccess : TESTopicInfo
 {
-    TESTopicInfoData* GetConversationData();
     CTSHelper FUN_008bcc60();
 };
+
 struct TESObjectREFR_GetFlags_Helper
 {
     unsigned int CallGetFlags();
@@ -3506,10 +2822,6 @@ struct List_009e03e0
     void* pItem;
     void* pNext;
 };
-struct SL : List_009e03e0
-{
-    SL();
-};
 struct G2
 {
     void AddHead(int*);
@@ -3531,7 +2843,7 @@ SL* FUN_00971fd0_shell::FUN_00971fd0(float afTime)
         while (pIter && !pIter->_ref_008256d0() && !bPickResultFound)
         {
             TESTopicInfo* pItem = *(TESTopicInfo**)pIter->_ref_006815c0();
-            if (pItem->FUN_008bcc60().GetElapsedTime() <= afTime)
+            if (((ProcessListsTopicInfoAccess*)pItem)->FUN_008bcc60().GetElapsedTime() <= afTime)
             {
                 {
                     NodeS* pNode = (NodeS*)pItem->GetConversationData();
@@ -3573,29 +2885,29 @@ SL* FUN_00971fd0_shell::FUN_00971fd0(float afTime)
 }
 }  // namespace fnv_00971fd0
 
+struct NiStream;
+class bhkCharacterProxy;
+class bhkSerializable;
+class hkReferencedObject;
+class hkSerializableCinfo;
+class hkStatisticsCollector;
+class hkStepInfo;
+class hkVector4;
+class hkpCharacterProxyListener;
+class hkpPhantom;
+class hkpShapePhantom;
+class hkpSurfaceInfo;
+class hkpWorld;
 namespace fnv_0096e3c0 {
 struct CloningProcess;
-struct NiStream;
 struct ahkpCharacterProxy;
-struct bhkCharacterProxy;
 struct BhkPhysicsObject;
-struct bhkSerializable;
 struct bhkShapePhantom;
 struct PhysicsSimulationContext;
-struct hkReferencedObject;
-struct hkSerializableCinfo;
-struct hkStatisticsCollector;
-struct hkStepInfo;
-struct hkVector4;
 struct CharacterProxyConfiguration;
 struct Vector4Data;
 struct hkpCharacterProxy;
-struct hkpCharacterProxyListener;
-struct hkpPhantom;
-struct hkpShapePhantom;
 struct CharacterPhysicsController;
-struct hkpSurfaceInfo;
-struct hkpWorld;
 struct blob1
 {
     char b[1];
@@ -3609,16 +2921,8 @@ struct bhkCharacterController_shell
 {
     float FUN_008a3b50() const;
 };
-struct SettingInt
-{
-    int* Int();
-};
-extern SettingInt g_011cde2c;
+extern Setting g_011cde2c;
 void __cdecl FUN_008661e0(void*, unsigned int, const void*, unsigned int);
-struct MobileCharHelper
-{
-    bhkCharacterController* GetPhysicsCharacterController();
-};
 
 // @fnv 0x0096e3c0
 void FUN_0096e3c0_shell::FUN_0096e3c0(Actor* apActor)
@@ -3626,7 +2930,7 @@ void FUN_0096e3c0_shell::FUN_0096e3c0(Actor* apActor)
     if (!apActor)
         return;
     float fdist = 3.402823466e+38F;
-    bhkCharacterController* pcon = ((MobileCharHelper*)apActor)->GetPhysicsCharacterController();
+    bhkCharacterController* pcon = ((::MobileObject*)apActor)->GetPhysicsCharacterController();
     if (pcon)
     {
         fdist = ((bhkCharacterController_shell*)pcon)->FUN_008a3b50();
@@ -3646,7 +2950,7 @@ void FUN_0096e3c0_shell::FUN_0096e3c0(Actor* apActor)
             for (ilocToInsert = 0; ilocToInsert < m_iActorCount; ++ilocToInsert)
             {
                 bhkCharacterController* potherCon =
-                    ((MobileCharHelper*)m_apActorCache[ilocToInsert])->GetPhysicsCharacterController();
+                    ((::MobileObject*)m_apActorCache[ilocToInsert])->GetPhysicsCharacterController();
                 if (!potherCon)
                     continue;
                 if (fdist < ((bhkCharacterController_shell*)potherCon)->FUN_008a3b50())
@@ -3675,10 +2979,6 @@ struct TESFormList
 
 Crime** __fastcall _ref_006815c0(void*);
 
-struct Crime_Standin : Crime
-{
-    TESObjectREFR* GetTarget();
-};
 
 struct FUN_00972570_shell
 {
@@ -3702,7 +3002,7 @@ Crime* FUN_00972570_shell::FindCrime(unsigned int formID, TESObjectREFR* target,
     {
         Crime* pItem = *_ref_006815c0(pNode);
         pNode = pNode->GetFirst();
-        if (((TESForm*)pItem)->GetFormID() == formID && ((Crime_Standin*)pItem)->GetTarget() == target)
+        if (((TESForm*)pItem)->GetFormID() == formID && pItem->GetTarget() == target)
         {
             pInventoryObject = pItem;
         }
@@ -3719,17 +3019,10 @@ struct Flt
 
 Flt* __fastcall _ref_006815c0(void*);
 
-struct MagicHitEffect
-{
-    void SetByteAt24(unsigned int);
-};
-
 struct TESFormList
 {
     TESFormList* GetFirst();
 };
-
-class MagicShaderHitEffect;
 
 struct FUN_00974a50_shell
 {
@@ -3754,7 +3047,7 @@ void FUN_00974a50_shell::FUN_00974a50(TESObjectREFR* apEffectTarget, void* apSha
                 if (((BGSTerrainManager*)pshaderEffect)->GetMinLevel() == (unsigned int)apEffectTarget &&
                     ((Script*)pshaderEffect)->GetData() == (char*)apShader)
                 {
-                    ((MagicHitEffect*)pshaderEffect)->SetByteAt24(1);
+                    ((MagicHitEffect*)pshaderEffect)->SetByteAt24((unsigned int)1);
                 }
             }
             pelist = pelist->GetFirst();
@@ -3763,58 +3056,57 @@ void FUN_00974a50_shell::FUN_00974a50(TESObjectREFR* apEffectTarget, void* apSha
 }
 }  // namespace fnv_00974a50
 
+class ActorPackageData;
+class AnimIdle;
+class BGSBodyPartData;
+class BGSListForm;
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
+class BSAnimGroupSequence;
+class BSBound;
+class BSFaceGenAnimationData;
+class BSFaceGenNiNode;
+class BSShaderPPLightingProperty;
+class ActorCombatGroup;
+class DialogueItem;
+class FurnitureMark;
+class GuardActorPackageData;
+class InventoryStackRecord;
+class MagicItem;
+class MiddleLowProcess;
+class NiAVObject;
+class NiBSBoneLODController;
+class NiBillboardNode;
+class NiControllerManager;
+class NiNode;
+class PackageTargetRecord;
+class PathingAvoidNodeArray;
+class PathingLocation;
+class PatrolActorPackageData;
+class SpellItem;
+class TESEffectShader;
+class TESFaction;
+class TESIdleForm;
+class TESObjectSTAT;
+class TESObjectWEAP;
+class TESWorldSpace;
+class bhkCharacterController;
 namespace fnv_00977130 {
-struct ActorPackageData;
 struct ActorValueStore;
-struct AnimIdle;
 struct Animation;
-struct ArrowProjectile;
-struct BGSBodyPartData;
-struct BGSListForm;
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
-struct BSAnimGroupSequence;
-struct BSBound;
-struct BSFaceGenAnimationData;
-struct BSFaceGenNiNode;
-struct BSShaderPPLightingProperty;
+
 struct BipedAnim;
-struct ActorCombatGroup;
 struct DetectionEvent;
 struct DetectionViewData;
-struct DialogueItem;
 struct DetectionParameters;
-struct FurnitureMark;
-struct GuardActorPackageData;
-struct HighProcess;
 struct BooleanFloatQuery;
-struct InventoryStackRecord;
 struct KFModel;
 struct LipSyncAnimation;
-struct LowProcess;
-struct MagicItem;
-struct MiddleHighProcess;
-struct MiddleLowProcess;
+
+
 struct DetectionEventData;
 struct MuzzleFlash;
-struct NiAVObject;
-struct NiBSBoneLODController;
-struct NiBillboardNode;
-struct NiControllerManager;
-struct NiNode;
 struct TargetDoorController;
-struct PackageTargetRecord;
-struct PathingAvoidNodeArray;
-struct PathingLocation;
-struct PatrolActorPackageData;
-struct SpellItem;
-struct TESEffectShader;
-struct TESFaction;
-struct TESIdleForm;
-struct TESObjectSTAT;
-struct TESObjectWEAP;
-struct TESWorldSpace;
-struct bhkCharacterController;
 struct bhkSimpleShapePhantom;
 struct blob4
 {
@@ -3829,28 +3121,18 @@ struct FUN_00977130_shell : public ProcessLists
     void FUN_00977130(float);
 };
 
-struct ActorQuery_00977130
-{
-    int FUN_004f8960();
-};
+
 bool FUN_00525420();
 bool __fastcall FUN_00577de0(Actor*);
 extern double _gModifierZero;
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting1023;
-extern Setting_S originalRuntimeFloatSetting1024;
-struct GlobalObject2_0040c150
-{
-    int* Int();
-};
-extern GlobalObject2_0040c150 g_011d08f8;
-extern GlobalObject2_0040c150 g_011d0964;
-extern GlobalObject2_0040c150 g_011d09a0;
-extern GlobalObject2_0040c150 g_011d0cd8;
-struct TESResponse
+extern Setting originalRuntimeFloatSetting1023;
+extern Setting originalRuntimeFloatSetting1024;
+extern Setting g_011d08f8;
+extern Setting g_011d0964;
+extern Setting g_011d09a0;
+extern Setting g_011d0cd8;
+// 0x0045cd60 is a folded +0x28 getter (also TESResponse::GetNext); the object read here is not a TESResponse
+struct Getter28View
 {
     int GetNext();
 };
@@ -3858,10 +3140,7 @@ struct Fn56ac90
 {
     void* FUN_0056ac90();
 };
-struct FUN_005722c0_shell
-{
-    bool FUN_005722c0(int);
-};
+
 struct ActorV_S
 {
     virtual void V000();
@@ -3954,399 +3233,6 @@ struct ActorV_S
     virtual void V087();
     virtual bool IsDisabledOrDeleted();
 };
-struct HighProcess
-{
-    virtual void V000();
-    virtual void V001();
-    virtual void V002();
-    virtual void V003();
-    virtual void V004();
-    virtual void V005();
-    virtual void V006();
-    virtual void V007();
-    virtual void V008();
-    virtual void V009();
-    virtual void V010();
-    virtual void V011();
-    virtual void V012();
-    virtual void V013();
-    virtual void V014();
-    virtual void V015();
-    virtual void V016();
-    virtual void V017();
-    virtual void V018();
-    virtual void V019();
-    virtual void V020();
-    virtual void V021();
-    virtual void V022();
-    virtual void V023();
-    virtual void V024();
-    virtual void V025();
-    virtual void V026();
-    virtual void V027();
-    virtual void V028();
-    virtual void V029();
-    virtual void V030();
-    virtual void V031();
-    virtual void V032();
-    virtual void V033();
-    virtual void V034();
-    virtual void V035();
-    virtual void V036();
-    virtual void V037();
-    virtual void V038();
-    virtual void V039();
-    virtual void V040();
-    virtual void V041();
-    virtual void V042();
-    virtual void V043();
-    virtual void V044();
-    virtual void V045();
-    virtual void V046();
-    virtual void V047();
-    virtual void V048();
-    virtual void V049();
-    virtual void V050();
-    virtual void V051();
-    virtual void V052();
-    virtual void V053();
-    virtual void V054();
-    virtual void V055();
-    virtual void V056();
-    virtual void V057();
-    virtual void V058();
-    virtual void V059();
-    virtual void V060();
-    virtual void V061();
-    virtual void V062();
-    virtual void V063();
-    virtual void V064();
-    virtual void V065();
-    virtual void V066();
-    virtual void V067();
-    virtual void V068();
-    virtual void V069();
-    virtual void V070();
-    virtual void V071();
-    virtual void V072();
-    virtual void V073();
-    virtual void V074();
-    virtual void V075();
-    virtual void V076();
-    virtual void V077();
-    virtual void V078();
-    virtual void V079();
-    virtual void V080();
-    virtual void V081();
-    virtual void V082();
-    virtual void V083();
-    virtual void V084();
-    virtual void V085();
-    virtual void V086();
-    virtual void V087();
-    virtual void V088();
-    virtual void V089();
-    virtual void V090();
-    virtual void V091();
-    virtual void V092();
-    virtual void V093();
-    virtual void V094();
-    virtual void V095();
-    virtual void V096();
-    virtual void V097();
-    virtual void V098();
-    virtual void V099();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual void V125();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
-    virtual void V144();
-    virtual void V145();
-    virtual void V146();
-    virtual void V147();
-    virtual void V148();
-    virtual void V149();
-    virtual void V150();
-    virtual void V151();
-    virtual void V152();
-    virtual void V153();
-    virtual void V154();
-    virtual void V155();
-    virtual void V156();
-    virtual void V157();
-    virtual void V158();
-    virtual void V159();
-    virtual void V160();
-    virtual void V161();
-    virtual void V162();
-    virtual void V163();
-    virtual void V164();
-    virtual void V165();
-    virtual void V166();
-    virtual void V167();
-    virtual void V168();
-    virtual void V169();
-    virtual void V170();
-    virtual void V171();
-    virtual void V172();
-    virtual void V173();
-    virtual void V174();
-    virtual void V175();
-    virtual void V176();
-    virtual void V177();
-    virtual void V178();
-    virtual void V179();
-    virtual void V180();
-    virtual void V181();
-    virtual void V182();
-    virtual void V183();
-    virtual void V184();
-    virtual void V185();
-    virtual void V186();
-    virtual void V187();
-    virtual void V188();
-    virtual void V189();
-    virtual void V190();
-    virtual void V191();
-    virtual void V192();
-    virtual void V193();
-    virtual void V194();
-    virtual void V195();
-    virtual void V196();
-    virtual void V197();
-    virtual void V198();
-    virtual void V199();
-    virtual void V200();
-    virtual void V201();
-    virtual void V202();
-    virtual void V203();
-    virtual void V204();
-    virtual void V205();
-    virtual void V206();
-    virtual void V207();
-    virtual void V208();
-    virtual void V209();
-    virtual void V210();
-    virtual void V211();
-    virtual void V212();
-    virtual void V213();
-    virtual void V214();
-    virtual void V215();
-    virtual void V216();
-    virtual void V217();
-    virtual void V218();
-    virtual void V219();
-    virtual void V220();
-    virtual void V221();
-    virtual void V222();
-    virtual void V223();
-    virtual void V224();
-    virtual void V225();
-    virtual void V226();
-    virtual void V227();
-    virtual void V228();
-    virtual void V229();
-    virtual void V230();
-    virtual void V231();
-    virtual void V232();
-    virtual void V233();
-    virtual void V234();
-    virtual void V235();
-    virtual void V236();
-    virtual void V237();
-    virtual void V238();
-    virtual void V239();
-    virtual void V240();
-    virtual void V241();
-    virtual void V242();
-    virtual void V243();
-    virtual void V244();
-    virtual void V245();
-    virtual void V246();
-    virtual void V247();
-    virtual void V248();
-    virtual void V249();
-    virtual void V250();
-    virtual void V251();
-    virtual void V252();
-    virtual void V253();
-    virtual void V254();
-    virtual void V255();
-    virtual void V256();
-    virtual void V257();
-    virtual void V258();
-    virtual void V259();
-    virtual void V260();
-    virtual void V261();
-    virtual void V262();
-    virtual void V263();
-    virtual void V264();
-    virtual void V265();
-    virtual void V266();
-    virtual void V267();
-    virtual void V268();
-    virtual void V269();
-    virtual void V270();
-    virtual void V271();
-    virtual void V272();
-    virtual void V273();
-    virtual void V274();
-    virtual void V275();
-    virtual void V276();
-    virtual void V277();
-    virtual void V278();
-    virtual void V279();
-    virtual void V280();
-    virtual void V281();
-    virtual void V282();
-    virtual void V283();
-    virtual void V284();
-    virtual void V285();
-    virtual void V286();
-    virtual void V287();
-    virtual void V288();
-    virtual void V289();
-    virtual void V290();
-    virtual void V291();
-    virtual void V292();
-    virtual void V293();
-    virtual void V294();
-    virtual void V295();
-    virtual void V296();
-    virtual void V297();
-    virtual void V298();
-    virtual void V299();
-    virtual float GetDeadTimer();
-    virtual void V301();
-    virtual void V302();
-    virtual void V303();
-    virtual void V304();
-    virtual void V305();
-    virtual void V306();
-    virtual void V307();
-    virtual void V308();
-    virtual void V309();
-    virtual void V310();
-    virtual void V311();
-    virtual void V312();
-    virtual void V313();
-    virtual void V314();
-    virtual void V315();
-    virtual void V316();
-    virtual void V317();
-    virtual void V318();
-    virtual void V319();
-    virtual void V320();
-    virtual void V321();
-    virtual void V322();
-    virtual void V323();
-    virtual void V324();
-    virtual void V325();
-    virtual void V326();
-    virtual void V327();
-    virtual void V328();
-    virtual void V329();
-    virtual void V330();
-    virtual void V331();
-    virtual void V332();
-    virtual void V333();
-    virtual void V334();
-    virtual void V335();
-    virtual void V336();
-    virtual void V337();
-    virtual void V338();
-    virtual void V339();
-    virtual void V340();
-    virtual void V341();
-    virtual void V342();
-    virtual void V343();
-    virtual void V344();
-    virtual void V345();
-    virtual void V346();
-    virtual void V347();
-    virtual void V348();
-    virtual void V349();
-    virtual void V350();
-    virtual void V351();
-    virtual void V352();
-    virtual void V353();
-    virtual void V354();
-    virtual void V355();
-    virtual void V356();
-    virtual void V357();
-    virtual void V358();
-    virtual void V359();
-    virtual void V360();
-    virtual void V361();
-    virtual void V362();
-    virtual void V363();
-    virtual void V364();
-    virtual void V365();
-    virtual void V366();
-    virtual void V367();
-    virtual void V368();
-    virtual void V369();
-    virtual void V370();
-    virtual void V371();
-    virtual void V372();
-    virtual void V373();
-    virtual void V374();
-    virtual void V375();
-    virtual void V376();
-    virtual void V377();
-    virtual void V378();
-    virtual void V379();
-    virtual void V380();
-    virtual void V381();
-    virtual void V382();
-    virtual void V383();
-    virtual void V384();
-    virtual void V385();
-    virtual void V386();
-    virtual void V387();
-    virtual int IsInDialogue();
-    void FUN_008feb60(Actor*);
-};
 
 // @fnv 0x00977130
 void FUN_00977130_shell::FUN_00977130(float afDeltaTime)
@@ -4371,15 +3257,15 @@ void FUN_00977130_shell::FUN_00977130(float afDeltaTime)
             {
                 iactorCount++;
                 Actor* pactor = (Actor*)pCurrentObject;
-                if (reinterpret_cast<ActorQuery_00977130*>(pactor)->FUN_004f8960() == 2)
+                if (reinterpret_cast<::PlayerCharacter*>(pactor)->FUN_004f8960() == 2)
                 {
                     BaseProcess* pprocess = pactor->GetCurrentAIProcess();
-                    if (pprocess && !((TESResponse*)pprocess)->GetNext())
+                    if (pprocess && !((Getter28View*)pprocess)->GetNext())
                     {
                         HighProcess* phigh = (HighProcess*)pprocess;
-                        if (!phigh->IsInDialogue() && !((ActorV_S*)pactor)->IsDisabledOrDeleted() &&
-                            !FUN_00577de0(pactor) && !((FUN_005722c0_shell*)pactor)->FUN_005722c0(0) &&
-                            ((HighProcess*)pprocess)->GetDeadTimer() < _gModifierZero)
+                        if (!static_cast<BaseProcess*>(phigh)->GetCurrentFadeState() && !((ActorV_S*)pactor)->IsDisabledOrDeleted() &&
+                            !FUN_00577de0(pactor) && !((::Actor*)pactor)->FUN_005722c0(0) &&
+                            ((HighProcess*)pprocess)->GetMovementTimer() < _gModifierZero)
                         {
                             if (!((Fn56ac90*)pactor)->FUN_0056ac90() ||
                                 ((BSSimpleList<Actor*>*)((Fn56ac90*)pactor)->FUN_0056ac90())->IsEmpty())
@@ -4430,10 +3316,10 @@ void FUN_00977130_shell::FUN_00977130(float afDeltaTime)
                 if (pactor)
                 {
                     if (!poldestDeadActor ||
-                        ((HighProcess*)pactor->GetCurrentAIProcess())->GetDeadTimer() < foldestDeadTime)
+                        ((HighProcess*)pactor->GetCurrentAIProcess())->GetMovementTimer() < foldestDeadTime)
                     {
                         poldestDeadActor = pactor;
-                        foldestDeadTime = ((HighProcess*)pactor->GetCurrentAIProcess())->GetDeadTimer();
+                        foldestDeadTime = ((HighProcess*)pactor->GetCurrentAIProcess())->GetMovementTimer();
                     }
                 }
                 pCurrentElementNext = pCurrentElementNext->GetNext();
@@ -4527,14 +3413,7 @@ struct TESFormList
 {
     void* GetFirst();
 };
-struct GO
-{
-    operator unsigned int();
-};
-struct MagicHitEffect
-{
-    void SetByteAt24(unsigned int);
-};
+
 struct ScriptText
 {
     char* GetText();
@@ -4560,7 +3439,7 @@ void FUN_00974b80_shell::FUN_00974b80(unsigned int uiMinLevel, char* pText)
                 MagicHitEffect* pEffect = (MagicHitEffect*)(void*)effect;
                 if (((BGSTerrainManager*)pEffect)->GetMinLevel() == uiMinLevel &&
                     !FUN_00408b20(((ScriptText*)pEffect)->GetText(), pText))
-                    pEffect->SetByteAt24(1);
+                    pEffect->SetByteAt24((unsigned int)1);
             }
             node = (BSSimpleList<NiPointer<BSTempEffect> >*)((TESFormList*)node)->GetFirst();
         }
@@ -4600,11 +3479,6 @@ void __cdecl FUN_00703c00(char const* text, char const* context)
 namespace fnv_009721f0 {
 extern unsigned int _data_011c16bc;
 
-struct MemoryManager
-{
-    static void* __cdecl Allocate(unsigned int);
-};
-
 struct TESFormList
 {
     void* GetFirst();
@@ -4618,14 +3492,6 @@ struct LH
 struct G2
 {
     void __thiscall AddHead(int* value);
-};
-
-struct SL
-{
-    int field0;
-    int field4;
-
-    SL();
 };
 
 struct FUN_009721f0_layout
@@ -4666,15 +3532,7 @@ void FUN_009721f0_shell::AddObjectToList(TESFormList* objectList)
 
 namespace fnv_009754f0 {
 struct SaveManager;
-struct GameTimerRecord
-{
-    unsigned int* GetTime() const;
-};
 
-struct TESSaveLoadGame
-{
-    void FUN_008579b0(void* data, int type);
-};
 
 struct TESFormList
 {
@@ -4713,7 +3571,7 @@ void FUN_009754f0_shell::FUN_009754f0()
     for (i = 0; i < 5; ++i)
     {
         unsigned short count = 0;
-        time = reinterpret_cast<GameTimerRecord*>(DAT_011de45c)->GetTime();
+        time = reinterpret_cast<unsigned int*>(reinterpret_cast<const GameTimerRecord*>(DAT_011de45c)->GetTime());
         reinterpret_cast<TESSaveLoadGame*>(DAT_011de45c)->FUN_008579b0(&count, 2);
         list = lists[i];
 
@@ -4761,7 +3619,7 @@ void FUN_00975ea0_shell::FUN_00975ea0()
             {
                 if (object->IsActor())
                 {
-                    if (!object->IsDead(false))
+                    if (!object->HasHealth(false))
                     {
                         MobileObject* target = object;
                         (reinterpret_cast<void(__thiscall*)(MobileObject*, int)>(
@@ -4775,195 +3633,7 @@ void FUN_00975ea0_shell::FUN_00975ea0()
 
 bool FUN_009336c0(MobileObject* pCurrentObject);
 
-struct FUN_009336c0_shell
-{
-    bool FUN_009336c0() const;
-};
-
 PlayerCharacter* _g_thePlayer;
-
-struct FUN_00974fc0_V178
-{
-    virtual void f000() = 0;
-    virtual void f001() = 0;
-    virtual void f002() = 0;
-    virtual void f003() = 0;
-    virtual void f004() = 0;
-    virtual void f005() = 0;
-    virtual void f006() = 0;
-    virtual void f007() = 0;
-    virtual void f008() = 0;
-    virtual void f009() = 0;
-    virtual void f010() = 0;
-    virtual void f011() = 0;
-    virtual void f012() = 0;
-    virtual void f013() = 0;
-    virtual void f014() = 0;
-    virtual void f015() = 0;
-    virtual void f016() = 0;
-    virtual void f017() = 0;
-    virtual void f018() = 0;
-    virtual void f019() = 0;
-    virtual void f020() = 0;
-    virtual void f021() = 0;
-    virtual void f022() = 0;
-    virtual void f023() = 0;
-    virtual void f024() = 0;
-    virtual void f025() = 0;
-    virtual void f026() = 0;
-    virtual void f027() = 0;
-    virtual void f028() = 0;
-    virtual void f029() = 0;
-    virtual void f030() = 0;
-    virtual void f031() = 0;
-    virtual void f032() = 0;
-    virtual void f033() = 0;
-    virtual void f034() = 0;
-    virtual void f035() = 0;
-    virtual void f036() = 0;
-    virtual void f037() = 0;
-    virtual void f038() = 0;
-    virtual void f039() = 0;
-    virtual void f040() = 0;
-    virtual void f041() = 0;
-    virtual void f042() = 0;
-    virtual void f043() = 0;
-    virtual void f044() = 0;
-    virtual void f045() = 0;
-    virtual void f046() = 0;
-    virtual void f047() = 0;
-    virtual void f048() = 0;
-    virtual void f049() = 0;
-    virtual void f050() = 0;
-    virtual void f051() = 0;
-    virtual void f052() = 0;
-    virtual void f053() = 0;
-    virtual void f054() = 0;
-    virtual void f055() = 0;
-    virtual void f056() = 0;
-    virtual void f057() = 0;
-    virtual void f058() = 0;
-    virtual void f059() = 0;
-    virtual void f060() = 0;
-    virtual void f061() = 0;
-    virtual void f062() = 0;
-    virtual void f063() = 0;
-    virtual void f064() = 0;
-    virtual void f065() = 0;
-    virtual void f066() = 0;
-    virtual void f067() = 0;
-    virtual void f068() = 0;
-    virtual void f069() = 0;
-    virtual void f070() = 0;
-    virtual void f071() = 0;
-    virtual void f072() = 0;
-    virtual void f073() = 0;
-    virtual void f074() = 0;
-    virtual void f075() = 0;
-    virtual void f076() = 0;
-    virtual void f077() = 0;
-    virtual void f078() = 0;
-    virtual void f079() = 0;
-    virtual void f080() = 0;
-    virtual void f081() = 0;
-    virtual void f082() = 0;
-    virtual void f083() = 0;
-    virtual void f084() = 0;
-    virtual void f085() = 0;
-    virtual void f086() = 0;
-    virtual void f087() = 0;
-    virtual void f088() = 0;
-    virtual void f089() = 0;
-    virtual void f090() = 0;
-    virtual void f091() = 0;
-    virtual void f092() = 0;
-    virtual void f093() = 0;
-    virtual void f094() = 0;
-    virtual void f095() = 0;
-    virtual void f096() = 0;
-    virtual void f097() = 0;
-    virtual void f098() = 0;
-    virtual void f099() = 0;
-    virtual void f100() = 0;
-    virtual void f101() = 0;
-    virtual void f102() = 0;
-    virtual void f103() = 0;
-    virtual void f104() = 0;
-    virtual void f105() = 0;
-    virtual void f106() = 0;
-    virtual void f107() = 0;
-    virtual void f108() = 0;
-    virtual void f109() = 0;
-    virtual void f110() = 0;
-    virtual void f111() = 0;
-    virtual void f112() = 0;
-    virtual void f113() = 0;
-    virtual void f114() = 0;
-    virtual void f115() = 0;
-    virtual void f116() = 0;
-    virtual void f117() = 0;
-    virtual void f118() = 0;
-    virtual void f119() = 0;
-    virtual void f120() = 0;
-    virtual void f121() = 0;
-    virtual void f122() = 0;
-    virtual void f123() = 0;
-    virtual void f124() = 0;
-    virtual void f125() = 0;
-    virtual void f126() = 0;
-    virtual void f127() = 0;
-    virtual void f128() = 0;
-    virtual void f129() = 0;
-    virtual void f130() = 0;
-    virtual void f131() = 0;
-    virtual void f132() = 0;
-    virtual void f133() = 0;
-    virtual void f134() = 0;
-    virtual void f135() = 0;
-    virtual void f136() = 0;
-    virtual void f137() = 0;
-    virtual void f138() = 0;
-    virtual void f139() = 0;
-    virtual void f140() = 0;
-    virtual void f141() = 0;
-    virtual void f142() = 0;
-    virtual void f143() = 0;
-    virtual void f144() = 0;
-    virtual void f145() = 0;
-    virtual void f146() = 0;
-    virtual void f147() = 0;
-    virtual void f148() = 0;
-    virtual void f149() = 0;
-    virtual void f150() = 0;
-    virtual void f151() = 0;
-    virtual void f152() = 0;
-    virtual void f153() = 0;
-    virtual void f154() = 0;
-    virtual void f155() = 0;
-    virtual void f156() = 0;
-    virtual void f157() = 0;
-    virtual void f158() = 0;
-    virtual void f159() = 0;
-    virtual void f160() = 0;
-    virtual void f161() = 0;
-    virtual void f162() = 0;
-    virtual void f163() = 0;
-    virtual void f164() = 0;
-    virtual void f165() = 0;
-    virtual void f166() = 0;
-    virtual void f167() = 0;
-    virtual void f168() = 0;
-    virtual void f169() = 0;
-    virtual void f170() = 0;
-    virtual void f171() = 0;
-    virtual void f172() = 0;
-    virtual void f173() = 0;
-    virtual void f174() = 0;
-    virtual void f175() = 0;
-    virtual void f176() = 0;
-    virtual void f177() = 0;
-    virtual PlayerCharacter* Unk_B2() = 0;
-};
 
 struct FUN_00974fc0_shell
 {
@@ -4986,331 +3656,13 @@ void FUN_00974fc0_shell::FUN_00974fc0()
         pactor = 0;
         if (i8 && i8->IsActor())
             pactor = (Actor*)i8;
-        if (pactor && ((FUN_009336c0_shell*)pactor)->FUN_009336c0() &&
-            ((FUN_00974fc0_V178*)pactor)->Unk_B2() != _g_thePlayer)
+        if (pactor && ((::MobileObject*)pactor)->FUN_009336c0() &&
+            ((::MobileObject*)pactor)->GetPackageTargetRef() != _g_thePlayer)
         {
             pactor->Unk_A2();
         }
     }
 }
-
-struct FUN_00978420_actor_base
-{
-    virtual void M0()
-    {}
-    virtual void M1()
-    {}
-    virtual void M2()
-    {}
-    virtual void M3()
-    {}
-    virtual void M4()
-    {}
-    virtual void M5()
-    {}
-    virtual void M6()
-    {}
-    virtual void M7()
-    {}
-    virtual void M8()
-    {}
-    virtual void M9()
-    {}
-    virtual void M10()
-    {}
-    virtual void M11()
-    {}
-    virtual void M12()
-    {}
-    virtual void M13()
-    {}
-    virtual void M14()
-    {}
-    virtual void M15()
-    {}
-    virtual void M16()
-    {}
-    virtual void M17()
-    {}
-    virtual void M18()
-    {}
-    virtual void M19()
-    {}
-    virtual void M20()
-    {}
-    virtual void M21()
-    {}
-    virtual void M22()
-    {}
-    virtual void M23()
-    {}
-    virtual void M24()
-    {}
-    virtual void M25()
-    {}
-    virtual void M26()
-    {}
-    virtual void M27()
-    {}
-    virtual void M28()
-    {}
-    virtual void M29()
-    {}
-    virtual void M30()
-    {}
-    virtual void M31()
-    {}
-    virtual void M32()
-    {}
-    virtual void M33()
-    {}
-    virtual void M34()
-    {}
-    virtual void M35()
-    {}
-    virtual void M36()
-    {}
-    virtual void M37()
-    {}
-    virtual void M38()
-    {}
-    virtual void M39()
-    {}
-    virtual void M40()
-    {}
-    virtual void M41()
-    {}
-    virtual void M42()
-    {}
-    virtual void M43()
-    {}
-    virtual void M44()
-    {}
-    virtual void M45()
-    {}
-    virtual void M46()
-    {}
-    virtual void M47()
-    {}
-    virtual void M48()
-    {}
-    virtual void M49()
-    {}
-    virtual void M50()
-    {}
-    virtual void M51()
-    {}
-    virtual void M52()
-    {}
-    virtual void M53()
-    {}
-    virtual void M54()
-    {}
-    virtual void M55()
-    {}
-    virtual void M56()
-    {}
-    virtual void M57()
-    {}
-    virtual void M58()
-    {}
-    virtual void M59()
-    {}
-    virtual void M60()
-    {}
-    virtual void M61()
-    {}
-    virtual void M62()
-    {}
-    virtual void M63()
-    {}
-    virtual void M64()
-    {}
-    virtual void M65()
-    {}
-    virtual void M66()
-    {}
-    virtual void M67()
-    {}
-    virtual void M68()
-    {}
-    virtual void M69()
-    {}
-    virtual void M70()
-    {}
-    virtual void M71()
-    {}
-    virtual void M72()
-    {}
-    virtual void M73()
-    {}
-    virtual void M74()
-    {}
-    virtual void M75()
-    {}
-    virtual void M76()
-    {}
-    virtual void M77()
-    {}
-    virtual void M78()
-    {}
-    virtual void M79()
-    {}
-    virtual void M80()
-    {}
-    virtual void M81()
-    {}
-    virtual void M82()
-    {}
-    virtual void M83()
-    {}
-    virtual void M84()
-    {}
-    virtual void M85()
-    {}
-    virtual void M86()
-    {}
-    virtual void M87()
-    {}
-    virtual void M88()
-    {}
-    virtual void M89()
-    {}
-    virtual void M90()
-    {}
-    virtual void M91()
-    {}
-    virtual void M92()
-    {}
-    virtual void M93()
-    {}
-    virtual void M94()
-    {}
-    virtual void M95()
-    {}
-    virtual void M96()
-    {}
-    virtual void M97()
-    {}
-    virtual void M98()
-    {}
-    virtual void M99()
-    {}
-    virtual void M100()
-    {}
-    virtual void M101()
-    {}
-    virtual void M102()
-    {}
-    virtual void M103()
-    {}
-    virtual void M104()
-    {}
-    virtual void M105()
-    {}
-    virtual void M106()
-    {}
-    virtual void M107()
-    {}
-    virtual void M108()
-    {}
-    virtual void M109()
-    {}
-    virtual void M110()
-    {}
-    virtual void M111()
-    {}
-    virtual void M112()
-    {}
-    virtual void M113()
-    {}
-    virtual void M114()
-    {}
-    virtual void M115()
-    {}
-    virtual void M116()
-    {}
-    virtual void M117()
-    {}
-    virtual void M118()
-    {}
-    virtual void M119()
-    {}
-    virtual void M120()
-    {}
-    virtual void M121()
-    {}
-    virtual void M122()
-    {}
-    virtual void M123()
-    {}
-    virtual void M124()
-    {}
-    virtual void M125()
-    {}
-    virtual void M126()
-    {}
-    virtual void M127()
-    {}
-    virtual void M128()
-    {}
-    virtual void M129()
-    {}
-    virtual void M130()
-    {}
-    virtual void M131()
-    {}
-    virtual void M132()
-    {}
-    virtual void M133()
-    {}
-    virtual void M134()
-    {}
-    virtual void M135()
-    {}
-    virtual void M136()
-    {}
-    virtual void M137()
-    {}
-    virtual void M138()
-    {}
-    virtual void M139()
-    {}
-    virtual void M140()
-    {}
-    virtual void M141()
-    {}
-    virtual void M142()
-    {}
-    virtual void M143()
-    {}
-    virtual void M144()
-    {}
-    virtual void M145()
-    {}
-    virtual void M146()
-    {}
-    virtual void M147()
-    {}
-    virtual void M148()
-    {}
-    virtual void M149()
-    {}
-    virtual void M150()
-    {}
-    virtual void M151()
-    {}
-    virtual void M152()
-    {}
-    virtual void M153()
-    {}
-};
-
-struct FUN_00978420_actor : public FUN_00978420_actor_base
-{
-    virtual void M154(float f)
-    {}
-};
 
 struct FUN_00978420_shell
 {
@@ -5335,7 +3687,7 @@ void FUN_00978420_shell::FUN_00978420(float f, int unused)
         if (pObject5 != 0 && pObject5->IsActor())
         {
             pActor2 = pObject5;
-            reinterpret_cast<FUN_00978420_actor*>(pActor2)->M154(f);
+            reinterpret_cast<MobileObject*>(pActor2)->Unk_9A(f);
         }
     }
 }
@@ -5547,7 +3899,7 @@ class ProcessLoopObject
     unsigned int unk10;
     unsigned int unk14;
     unsigned int unk18;
-    unsigned int unk1C;
+    unsigned int m_uiReferenceCount;
     unsigned int unk20;
     unsigned int unk24;
     unsigned int unk28;
@@ -5560,7 +3912,7 @@ class ProcessLoopObject
     unsigned int unk44;
     unsigned int unk48;
     unsigned int unk4C;
-    unsigned int unk50;
+    unsigned int m_uiValueAt50;
     unsigned int unk54;
     unsigned int unk58;
     unsigned int unk5C;
@@ -5850,7 +4202,7 @@ struct ProcActorStub
     int unk10;
     int unk14;
     int unk18;
-    int unk1C;
+    int m_uiReferenceCount;
     int unk20;
     int unk24;
     int unk28;
@@ -5863,7 +4215,7 @@ struct ProcActorStub
     int unk44;
     int unk48;
     int unk4C;
-    int unk50;
+    int m_uiValueAt50;
     int unk54;
     int unk58;
     int unk5C;
@@ -5910,11 +4262,7 @@ struct ProcTaskManager
     void Queue(ProcParallelTask*);
 };
 extern ProcTaskManager* DAT_01202df4_mgr;
-struct SettingBoolStub
-{
-    bool* Bool();
-};
-extern SettingBoolStub g_011f126c;
+extern Setting g_011f126c;
 struct ProcScrapArray
 {
     ProcScrapArray();
@@ -6085,20 +4433,9 @@ extern float DAT_011e0358;
 extern int DAT_011e035c;
 extern int DAT_011a39c4;
 extern bool DAT_011e0360;
-struct Actor970d50 : Actor
-{
-    void* FUN_005d43c0();
-    bool FUN_00440d80();
-    int FUN_007af430();
-    void FUN_008a1800(int);
-    int FUN_008d8520();
-    void FUN_00893340(bool);
-};
-void __cdecl DoCheckScriptRunnerAndRun(Actor970d50*, void*);
-struct ProcessQueue970d50
-{
-    void FUN_0096aaf0(MobileObject*, int);
-};
+
+void __cdecl DoCheckScriptRunnerAndRun(::Actor*, void*);
+
 struct Lists970d50 : ProcessLists
 {
     void FUN_00970d50();
@@ -6114,10 +4451,10 @@ void Lists970d50::FUN_00970d50()
     for (unsigned int index = m_kMobileObjectProcessList.GetHead((PROCESS_TYPE)3);
          index < m_kMobileObjectProcessList.GetTail((PROCESS_TYPE)3); ++index)
     {
-        Actor970d50* actor = 0;
+        ::Actor* actor = 0;
         object = m_kMobileObjectProcessList.GetItem(index);
         if (object && object->IsActor())
-            actor = (Actor970d50*)object;
+            actor = (::Actor*)object;
         if (actor)
         {
             DoCheckScriptRunnerAndRun(actor, actor->FUN_005d43c0());
@@ -6128,7 +4465,7 @@ void Lists970d50::FUN_00970d50()
                     actor->FUN_008a1800(2);
                 }
                 if (actor->FUN_008d8520())
-                    ((ProcessQueue970d50*)&m_kMobileObjectProcessList)->FUN_0096aaf0(object, 3);
+                    ((::PathfindQueueStorage_processlists*)&m_kMobileObjectProcessList)->FUN_0096aaf0(object, 3);
             }
             else
             {
@@ -6138,18 +4475,14 @@ void Lists970d50::FUN_00970d50()
     }
 }
 
-struct FUN_005723b0_Obj
-{
-    float FUN_005723b0(void* a1, unsigned char a2, int a3);
-};
 extern void* DAT_011dea3c;
 
 // Compares the values returned by FUN_005723b0 for pA and pB, returning -1, 0 or 1.
 // @fnv 0x00970ee0
 int __cdecl FUN_00970ee0(Actor* apActorA, Actor* apActorB)
 {
-    float fB = ((FUN_005723b0_Obj*)apActorA)->FUN_005723b0(DAT_011dea3c, 0, 0);
-    float fA = ((FUN_005723b0_Obj*)apActorB)->FUN_005723b0(DAT_011dea3c, 0, 0);
+    float fB = ((::TESObjectREFR*)apActorA)->FUN_005723b0(static_cast<TESObjectREFR*>(DAT_011dea3c), 0, 0);
+    float fA = ((::TESObjectREFR*)apActorB)->FUN_005723b0(static_cast<TESObjectREFR*>(DAT_011dea3c), 0, 0);
     int result;
     if (fB < fA)
         result = -1;
@@ -6288,28 +4621,18 @@ struct ExtraList_973590
 {
     Extra_973590* FUN_00422700();
 };
-struct Actor_973590
-{
-    ExtraList_973590* FUN_005d43c0();
-    TESPackage* FUN_009344a0();
-    Actor* FUN_00881650();
-};
-struct Array_973590
-{
-    unsigned int FUN_005be5c0(int);
-    MobileObject* FUN_00968670(unsigned int);
-};
+
 struct FUN_00973590_shell
 {
     int unk00;
-    Array_973590 processes;
+    ::MobileObjectProcessArray processes;
     void FUN_00973590(Actor* target, List_973590* output);
 };
 // Recursively collects followers and actors whose package targets the given actor into output, skipping already-listed ones.
 // @fnv 0x00973590
 void FUN_00973590_shell::FUN_00973590(Actor* target, List_973590* output)
 {
-    Extra_973590* extra = ((Actor_973590*)target)->FUN_005d43c0()->FUN_00422700();
+    Extra_973590* extra = reinterpret_cast<ExtraList_973590*>(((::Actor*)target)->FUN_005d43c0())->FUN_00422700();
     if (extra)
     {
         Node_973590* node = extra->followers;
@@ -6332,10 +4655,10 @@ void FUN_00973590_shell::FUN_00973590(Actor* target, List_973590* output)
         if (mobile && mobile->IsActor())
         {
             actor = (Actor*)mobile;
-            if (((Actor_973590*)actor)->FUN_009344a0() &&
-                (((Actor_973590*)actor)->FUN_009344a0()->GetPackType() == 2 ||
-                 ((Actor_973590*)actor)->FUN_009344a0()->GetPackType() == 7) &&
-                ((Actor_973590*)actor)->FUN_00881650() == target && !output->FUN_005f65d0(actor))
+            if (((::Actor*)actor)->FUN_009344a0() &&
+                (reinterpret_cast<TESPackage*>(((::Actor*)actor)->FUN_009344a0())->GetPackType() == 2 ||
+                 reinterpret_cast<TESPackage*>(((::Actor*)actor)->FUN_009344a0())->GetPackType() == 7) &&
+                ((::Actor*)actor)->GetCombatOpponent() == target && !output->FUN_005f65d0(actor))
             {
                 output->FUN_005ae3d0(actor);
                 FUN_00973590(actor, output);
@@ -6438,7 +4761,7 @@ struct S973_Base
     int unk10;
     int unk14;
     int unk18;
-    int unk1C;
+    int m_uiReferenceCount;
     int unk20;
     int unk24;
     int unk28;
@@ -6451,7 +4774,7 @@ struct S973_Base
     int unk44;
     int unk48;
     int unk4C;
-    int unk50;
+    int m_uiValueAt50;
     int unk54;
     int unk58;
     int unk5C;
@@ -6636,7 +4959,7 @@ class FUN_00973fd0_cls
     int unk10;
     int unk14;
     int unk18;
-    int unk1C;
+    int m_uiReferenceCount;
     int unk20;
     int unk24;
     int unk28;
@@ -6649,7 +4972,7 @@ class FUN_00973fd0_cls
     int unk44;
     int unk48;
     int unk4C;
-    int unk50;
+    int m_uiValueAt50;
     int unk54;
     FnvSubObj m_58;
     FnvSubObj m_60;
@@ -6686,14 +5009,6 @@ struct ParticleObj
     void SetAppCulled(bool abCulled);
 };
 struct ParticleSource;
-
-class BSTempEffectParticle : public BSTempEffect
-{
-  public:
-    ParticleObj* GetParticleObject();
-    ParticleSource* GetSource();
-    void SetParentCell(TESObjectCELL* apCell);
-};
 
 struct TempEffectListOwner : public ProcessLists
 {
@@ -6748,9 +5063,6 @@ void TempEffectListOwner::RemoveParticleEffectsBySource(ParticleSource* apSource
     }
 }
 
-struct TESObjectREFR_9749
-{
-};
 struct ObjV
 {
     virtual void v0();
@@ -6861,23 +5173,17 @@ struct ShaderHitTarget
 {
     ShaderHitTargetForm* GetForm();
 };
-class MagicShaderHitEffect : public BSTempEffect
-{
-  public:
-    virtual void v31();
-    ShaderHitTarget* GetHitTarget();
-    float GetTimeLeft();
-    void Finish();
-};
+
 bool __cdecl IsValidShaderHitTarget(int aTarget);
 
-struct ProcessListsEx : public ProcessLists
+// Shared ProcessLists lacks this effect-selection method; this extension adds no layout or virtual slots.
+struct EffectSelectionMethods : public ProcessLists
 {
     bool FUN_00974e90(int aiKind, int aTarget);
 };
 
 // @fnv 0x00974e90
-bool ProcessListsEx::FUN_00974e90(int aiKind, int aTarget)
+bool EffectSelectionMethods::FUN_00974e90(int aiKind, int aTarget)
 {
     if (!m_kTemporaryEffectList2.IsEmpty())
     {
@@ -6902,7 +5208,7 @@ bool ProcessListsEx::FUN_00974e90(int aiKind, int aTarget)
         }
         if (pBest2)
         {
-            pBest2->v31();
+            pBest2->Init();
             pBest2->Finish();
             return true;
         }
@@ -6910,11 +5216,6 @@ bool ProcessListsEx::FUN_00974e90(int aiKind, int aTarget)
     return false;
 }
 
-struct TESSaveLoadGame
-{
-    unsigned short* GetSaveCountPtr();
-    void SaveData(void* data, int size);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct PLTempEffectSaver : public ProcessLists
@@ -6938,7 +5239,7 @@ void PLTempEffectSaver::SaveTempEffects()
         {
             char type = effect8->GetType();
             g_TESSaveLoadGame->SaveData(&type, 1);
-            effect8->SaveGameTES();
+            effect8->SaveGame();
             count++;
         }
         _iter = _iter->GetNext();
@@ -6951,7 +5252,7 @@ void PLTempEffectSaver::SaveTempEffects()
         {
             char type2 = effect4->GetType();
             g_TESSaveLoadGame->SaveData(&type2, 1);
-            effect4->SaveGameTES();
+            effect4->SaveGame();
             count++;
         }
         _iter = _iter->GetNext();
@@ -7544,11 +5845,12 @@ struct ArrObj
     unsigned int FUN_005be5c0(unsigned int a);
     Obj* FUN_00968670(unsigned int a);
 };
-struct ListNode
+// Exe 0x00976680: unit-local ListNode view; declarations and layout are preserved.
+struct ProcesslistsListNodeView
 {
     bool FUN_008256d0();
     Obj** FUN_006815c0();
-    ListNode* FUN_00726070();
+    ProcesslistsListNodeView* FUN_00726070();
 };
 extern Obj* DAT_011f1958;
 extern Obj* DAT_011dea3c;
@@ -7569,7 +5871,7 @@ struct Host
     int p6c;
     int p70;
     int p74;
-    ListNode node78;
+    ProcesslistsListNodeView node78;
     void RemoveActor(Obj* a);
     void FUN_00976680(Obj* param);
 };
@@ -7602,7 +5904,7 @@ void Host::FUN_00976680(Obj* apObject)
     Obj* extra;
     Obj* baseB;
     Obj* objB4;
-    ListNode* node7;
+    ProcesslistsListNodeView* node7;
     Obj* objA6;
     int i8;
 
@@ -8473,7 +6775,7 @@ struct ActStub
     int unk10;
     int unk14;
     int unk18;
-    int unk1C;
+    int m_uiReferenceCount;
     int unk20;
     int unk24;
     int unk28;
@@ -8486,7 +6788,7 @@ struct ActStub
     int unk44;
     int unk48;
     int unk4C;
-    int unk50;
+    int m_uiValueAt50;
     int unk54;
     int unk58;
     int unk5C;
@@ -8592,10 +6894,7 @@ void PLStub::FUN_009781d0(float dt)
 }
 
 namespace fnv_009eb500 {
-struct RefObj
-{
-    void FUN_00564db0(int);
-};
+
 struct DispatchMembers
 {
     unsigned int unk00;
@@ -8630,7 +6929,7 @@ struct FUN_009eb500
 {
     int field00;
     unsigned int field04;
-    RefObj* field08;
+    ::TESObjectREFR* field08;
     unsigned int field0c;
     bool field10;
     unsigned int field14;
@@ -8638,11 +6937,11 @@ struct FUN_009eb500
     DispatchMembers members;
     FloatValue point;
     unsigned int field38;
-    FUN_009eb500(unsigned int, RefObj*, unsigned int, unsigned int, unsigned int, unsigned int);
+    FUN_009eb500(unsigned int, ::TESObjectREFR*, unsigned int, unsigned int, unsigned int, unsigned int);
 };
 // Initializes the object's fields from the arguments, sets up members with a singleton value and random bits, and stores a float from FUN_00435dd0.
 // @fnv 0x009eb500
-FUN_009eb500::FUN_009eb500(unsigned int arg1, RefObj* arg2, unsigned int uiField0c, unsigned int arg4,
+FUN_009eb500::FUN_009eb500(unsigned int arg1, ::TESObjectREFR* arg2, unsigned int uiField0c, unsigned int arg4,
                            unsigned int arg5, unsigned int uiMemberField08)
     : members(), point()
 {
@@ -8798,28 +7097,16 @@ unsigned int OwnerStub::UpdateDetectionFlags(unsigned int aFlags, float afValue,
     return uiResult6;
 }
 
-struct SoundHandleStub
-{
-    unsigned int m_uiSoundResourceID;
-    bool m_bLooping;
-    int eState;
-    SoundHandleStub();
-    ~SoundHandleStub();
-    SoundHandleStub& operator=(const SoundHandleStub& rhs);
-    bool IsPlaying();
-    bool Play(bool abUnk);
-};
-
 struct AudioStub
 {
     static AudioStub* GetSingleton();
-    SoundHandleStub GetSoundHandleByEditorID(const char* apEditorID, unsigned int auiFlags);
+    ::BSSoundHandle GetSoundHandleByEditorID(const char* apEditorID, unsigned int auiFlags);
 };
 
 struct ActorSoundStub
 {
     const char* GetSoundName(int aiType, bool abA, bool abB);
-    SoundHandleStub PlaySoundAt(const char* apName, int aiUnk, unsigned int auiFlags, bool abUnk);
+    ::BSSoundHandle PlaySoundAt(const char* apName, int aiUnk, unsigned int auiFlags, bool abUnk);
     void PlayActorSound(int aiType, bool abA, bool abB);
 };
 
@@ -8830,7 +7117,7 @@ void ActorSoundStub::PlayActorSound(int aiType, bool abA, bool abB)
 {
     if (!aiType)
         return;
-    SoundHandleStub kSound;
+    ::BSSoundHandle kSound;
     const char* pName4 = 0;
     pName4 = GetSoundName(aiType, abA, abB);
     if (this == _g_thePlayerStub)
@@ -8892,7 +7179,7 @@ void LowListProcessLists::UpdateLowListProcessLists(float delta, bool)
                 }
                 else
                 {
-                    float lastTime = ((LowProcess*)tail->GetCurrentAIProcess())->FUN_007df1f0();
+                    float lastTime = ((ProcessListsLowProcessAccess*)tail->GetCurrentAIProcess())->FUN_007df1f0();
                     float currentTime = g_calendar.GetGameTime();
                     if (lastTime == -1.0)
                     {
@@ -8926,7 +7213,7 @@ void LowListProcessLists::UpdateLowListProcessLists(float delta, bool)
             DAT_011f11a0.Lock(0);
             delete tail->GetCurrentAIProcess();
             ((MobileObjectExt*)tail)->SetCurrentProcess(0);
-            DAT_011f11a0.Unlock();
+            DAT_011f11a0.Leave();
         }
         head = head->GetNext();
     }
@@ -9326,14 +7613,14 @@ void Shell96::FUN_0096b810(float delta, int unused)
         {
             DAT_011f11a0.Lock(0);
             delete h;
-            DAT_011f11a0.Unlock();
+            DAT_011f11a0.Leave();
         }
         else if (((Obj96*)h)->FUN_00440da0())
         {
             DAT_011f11a0.Lock(0);
             delete (BaseProcess*)((Obj96*)h)->FUN_008d8520();
             ((Obj96*)h)->FUN_00407800(0);
-            DAT_011f11a0.Unlock();
+            DAT_011f11a0.Leave();
         }
         s = s->GetNext();
     }
@@ -9775,14 +8062,6 @@ namespace fnv_0096d810 {
 extern const double DAT_01012060;
 extern const double DAT_01011590;
 
-class AutoMemContext
-{
-  public:
-    AutoMemContext(MEM_CONTEXT aeContext, bool abPush, const char* apFile, int aiLine);
-    ~AutoMemContext();
-    int aiMemoryContext;
-};
-
 struct FUN_0084d030_timer
 {
     float FUN_0084d030();
@@ -9798,7 +8077,7 @@ struct FUN_009640b0_player
 struct FUN_0040fbf0_lock
 {
     bool FUN_0078d200();
-    void Wait(char* apName);
+    void FUN_0040fbf0(char* apName);
     void Leave();
 };
 
@@ -9848,7 +8127,7 @@ void FUN_0096d810_shell::FUN_0096d810()
     FUN_0096d4b0(fDiff + FUN_0096d490());
     int iFrameRate = 1.0f / fDiff;
     bool bProcess = true;
-    m_iMobileObjectCount = ((Array_973590*)&m_kMobileObjectProcessList)->FUN_005be5c0(0);
+    m_iMobileObjectCount = ((::MobileObjectProcessArray*)&m_kMobileObjectProcessList)->FUN_005be5c0(0);
     m_fProcessListValue1 += fDiff;
     if (iFrameRate < 50)
     {
@@ -9883,13 +8162,13 @@ void FUN_0096d810_shell::FUN_0096d810()
         }
         if (m_bUpdateLowListProcessLists && !FUN_00525420())
         {
-            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->Wait(0);
+            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->FUN_0040fbf0(0);
             UpdateLowListProcessLists(0.0f, false);
             ((FUN_0040fbf0_lock*)&DAT_011f11a0)->Leave();
         }
         if (m_bRunSecondProcessUpdate)
         {
-            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->Wait(0);
+            ((FUN_0040fbf0_lock*)&DAT_011f11a0)->FUN_0040fbf0(0);
             FUN_0096b810(0.0f, false);
             ((FUN_0040fbf0_lock*)&DAT_011f11a0)->Leave();
         }
@@ -10144,10 +8423,7 @@ struct FUN_009bec10_shell
 {
     void FUN_009bec10(float);
 };
-struct FUN_009ae580_shell
-{
-    void FUN_009ae580(float);
-};
+
 struct Target96
 {
     void FUN_0096db30(float delta, bool flag, int level);
@@ -10182,7 +8458,7 @@ void Target96::FUN_0096db30(float delta, bool flag, int level)
         }
         else if (object->V136())
         {
-            FUN_009ae580_shell* explosion = (FUN_009ae580_shell*)object;
+            ::Explosion* explosion = (::Explosion*)object;
             explosion->FUN_009ae580(0.0f);
         }
     }
@@ -10430,13 +8706,7 @@ FUN_0096a2d0* Target96::FUN_0096f450(unsigned int uiControllerId, Actor96* pExcl
 }
 
 namespace fnv_0096f600 {
-struct ExtraFollower
-{
-    int f0;
-    int f4;
-    int f8;
-    BSSimpleList<TESObjectREFR*>* pNext;
-};
+
 struct FUN_00422700_shell
 {
     ExtraFollower* FUN_00422700();
@@ -10445,32 +8715,13 @@ struct FUN_00422690_shell
 {
     void FUN_00422690(Actor*);
 };
-struct EffectSettingShell
-{
-    TESObjectLIGH* GetLight();
-};
-struct EffectSetting
-{
-    void SetLight(TESObjectLIGH*);
-};
+
 struct DetEv18
 {
     char pad[0x18];
     Actor* p18;
 };
-struct TopicInfoArray
-{
-    unsigned int FUN_005be5c0(int);
-    Actor* FUN_00968670(unsigned int);
-};
-struct TESChallenge
-{
-    Actor* GetProgressValue();
-};
-struct InterfaceManager
-{
-    Actor* FUN_00874480();
-};
+
 struct FUN_008b3200_shell
 {
     void FUN_008b3200(Actor*);
@@ -10483,22 +8734,13 @@ struct FUN_00419dc0_shell
 {
     void FUN_00419dc0(int);
 };
-struct FUN_0044ddc0_shell
+
+
+struct ProcessListsPackageTargetAccess : TESPackage
 {
-    Actor* FUN_0044ddc0();
+    Actor* GetSandboxActor();
 };
-struct FUN_0041ca90
-{
-    int get();
-};
-struct FUN_008d80e0_shell
-{
-    Actor* FUN_008d80e0();
-};
-struct FUN_00881680_shell
-{
-    void FUN_00881680(int);
-};
+
 struct Extra19
 {
     char pad[0x14];
@@ -10508,10 +8750,7 @@ struct Holder00420dd0
 {
     Extra19* GetExtraData(unsigned char);
 };
-struct FUN_008a6650_shell
-{
-    bool FUN_008a6650(int);
-};
+
 struct SandboxTargetInfo;
 struct ActorTargetSource
 {
@@ -10529,10 +8768,7 @@ struct FUN_0098420_shell
 {
     void FUN_009f8420(Actor*);
 };
-struct FUN_008a6730_Actor
-{
-    void FUN_008a6730(Actor*);
-};
+
 bool __fastcall IsInPackageType(Actor*);
 struct IdleForm67
 {
@@ -10552,18 +8788,12 @@ struct FUN_00674d40_shell
 {
     bool FUN_00674d40();
 };
-struct FUN_009336c0_shell
-{
-    bool FUN_009336c0();
-};
+
 struct Host00881620
 {
     void FUN_00881620(int);
 };
-struct FUN_00881650_shell
-{
-    Actor* FUN_00881650();
-};
+
 struct FUN_0097f9c0_shell
 {
     void FUN_0097f9c0(Actor*);
@@ -10592,132 +8822,6 @@ struct FurnMarkShell
     void FUN_0098ddd0(void*);
 };
 extern int DAT_011f426c;
-struct ActorView : public TESObjectREFR
-{
-    virtual void a144();
-    virtual void a145();
-    virtual void a146();
-    virtual void a147();
-    virtual void a148();
-    virtual void a149();
-    virtual void a150();
-    virtual void a151();
-    virtual void a152();
-    virtual void a153();
-    virtual void a154();
-    virtual void a155();
-    virtual void a156();
-    virtual void a157();
-    virtual void a158();
-    virtual void a159();
-    virtual void a160();
-    virtual void a161();
-    virtual void a162();
-    virtual void a163();
-    virtual void a164();
-    virtual void a165();
-    virtual void a166();
-    virtual void a167();
-    virtual void a168();
-    virtual void a169();
-    virtual void c0();
-    virtual void c1();
-    virtual void c2();
-    virtual void c3();
-    virtual void c4();
-    virtual void c5();
-    virtual void c6();
-    virtual void c7();
-    virtual Actor* v2c8();
-    virtual void b171();
-    virtual void b172();
-    virtual void b173();
-    virtual void b174();
-    virtual void b175();
-    virtual void b176();
-    virtual void b177();
-    virtual void b178();
-    virtual void b179();
-    virtual void b180();
-    virtual void b181();
-    virtual void b182();
-    virtual void b183();
-    virtual void b184();
-    virtual void b185();
-    virtual void b186();
-    virtual void b187();
-    virtual void b188();
-    virtual void b189();
-    virtual void b190();
-    virtual void b191();
-    virtual void b192();
-    virtual void b193();
-    virtual void b194();
-    virtual void b195();
-    virtual void b196();
-    virtual void b197();
-    virtual void b198();
-    virtual void b199();
-    virtual void b200();
-    virtual void b201();
-    virtual void b202();
-    virtual void b203();
-    virtual void b204();
-    virtual void b205();
-    virtual void b206();
-    virtual void b207();
-    virtual void b208();
-    virtual void b209();
-    virtual void b210();
-    virtual void b211();
-    virtual void b212();
-    virtual void b213();
-    virtual void b214();
-    virtual void b215();
-    virtual void b216();
-    virtual void b217();
-    virtual void b218();
-    virtual void b219();
-    virtual void b220();
-    virtual void b221();
-    virtual void b222();
-    virtual void b223();
-    virtual void b224();
-    virtual void b225();
-    virtual void b226();
-    virtual void b227();
-    virtual void b228();
-    virtual void b229();
-    virtual void b230();
-    virtual void b231();
-    virtual void b232();
-    virtual void b233();
-    virtual void b234();
-    virtual void b235();
-    virtual void b236();
-    virtual void b237();
-    virtual void b238();
-    virtual void b239();
-    virtual void b240();
-    virtual void b241();
-    virtual void b242();
-    virtual void b243();
-    virtual void b244();
-    virtual void b245();
-    virtual void b246();
-    virtual void b247();
-    virtual void b248();
-    virtual void b249();
-    virtual void b250();
-    virtual void b251();
-    virtual void b252();
-    virtual void b253();
-    virtual void b254();
-    virtual void b255();
-    virtual void b256();
-    virtual void b257();
-    virtual void* v428();
-};
 struct PlayerView : public MobileObject
 {
     virtual void c193();
@@ -10833,9 +8937,9 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
     {
         if (((FUN_00422700_shell*)pPlayer->GetExtraData())->FUN_00422700() != 0)
         {
-            if (((FUN_00422700_shell*)pPlayer->GetExtraData())->FUN_00422700()->pNext != 0)
+            if (((FUN_00422700_shell*)pPlayer->GetExtraData())->FUN_00422700()->list != 0)
             {
-                ((FUN_00422700_shell*)pPlayer->GetExtraData())->FUN_00422700()->pNext->Remove(arg1);
+                reinterpret_cast<BSSimpleList<TESObjectREFR*>*>(((FUN_00422700_shell*)pPlayer->GetExtraData())->FUN_00422700()->list)->Remove(arg1);
             }
         }
         if (0 != pPlayer->GetCurrentAIProcess())
@@ -10844,7 +8948,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
         }
         FUN_0096e2f0(arg1);
     }
-    if (((EffectSettingShell*)pPlayer)->GetLight() == (TESObjectLIGH*)arg1)
+    if (((EffectSetting*)pPlayer)->GetLight() == (TESObjectLIGH*)arg1)
     {
         ((EffectSetting*)pPlayer)->SetLight((TESObjectLIGH*)0);
     }
@@ -10901,7 +9005,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                 }
                 if (c != 0)
                 {
-                    folNode = c->pNext;
+                    folNode = reinterpret_cast<BSSimpleList<TESObjectREFR*>*>(c->list);
                 }
                 if (bed1 != 0)
                 {
@@ -10925,7 +9029,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                 {
                     if (((TESChallenge*)kIter)->GetProgressValue() != 0)
                     {
-                        if (arg1 == ((TESChallenge*)kIter)->GetProgressValue())
+                        if (arg1 == reinterpret_cast<Actor*>(((TESChallenge*)kIter)->GetProgressValue()))
                         {
                             kIter->Unk_A2();
                         }
@@ -10944,7 +9048,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                             }
                         }
                         BaseProcess* mainProc = bed1->GetCurrentAIProcess();
-                        if (((EffectSettingShell*)bed1)->GetLight() == (TESObjectLIGH*)arg1)
+                        if (((EffectSetting*)bed1)->GetLight() == (TESObjectLIGH*)arg1)
                         {
                             ((EffectSetting*)bed1)->SetLight((TESObjectLIGH*)0);
                             if (mainProc != 0)
@@ -10983,16 +9087,16 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                                 TESPackage* ed = mainProc->GetRunOncePackage();
                                 if (ed != 0)
                                 {
-                                    ActorPackageContext* proc2 = mainProc->GetCurrentProcessData();
-                                    if (proc2 != 0 && ((FUN_0044ddc0_shell*)proc2)->FUN_0044ddc0() == arg1)
+                                    ActorPackageContext* proc2 = static_cast<const BaseProcess*>(mainProc)->GetCurrentProcessData();
+                                    if (proc2 != 0 && proc2->GetTarget() == arg1)
                                     {
-                                        ((FUN_00881680_shell*)bed1)->FUN_00881680(0);
+                                        ((::Actor*)bed1)->FUN_00881680(0);
                                     }
-                                    else if (((FUN_0041ca90*)ed)->get() == 0x1c)
+                                    else if (((::TESPackage*)ed)->GetPackType() == 0x1c)
                                     {
-                                        FUN_0041ca90* ac2;
-                                        ac2 = (FUN_0041ca90*)ed;
-                                        if (((FUN_008d80e0_shell*)ac2)->FUN_008d80e0() == arg1)
+                                        ::TESPackage* ac2;
+                                        ac2 = (::TESPackage*)ed;
+                                        if (((ProcessListsPackageTargetAccess*)ac2)->GetSandboxActor() == arg1)
                                         {
                                             bed1->Unk_A2();
                                         }
@@ -11009,14 +9113,14 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                                     unit19->p14 = 0;
                                 }
                             }
-                            if (((FUN_008a6650_shell*)bed1)->FUN_008a6650(0))
+                            if (((::Actor*)bed1)->FUN_008a6650(0))
                             {
                                 SandboxTargetInfo* mainInfo;
                                 mainInfo = ((ActorTargetSource*)bed1)->GetProcessTarget();
                                 FUN_005e3fc0_shell* pkg2b = 0;
                                 if (mainInfo != 0)
                                 {
-                                    if (((FUN_0041ca90*)mainInfo)->get() == 0x16)
+                                    if (((::TESPackage*)mainInfo)->GetPackType() == 0x16)
                                     {
                                         pkg2b = (FUN_005e3fc0_shell*)mainInfo;
                                     }
@@ -11028,7 +9132,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                                         ((FUN_00994ef0_Class*)pkg2b)->Set(0);
                                     }
                                 }
-                                ((FUN_008a6730_Actor*)bed1)->FUN_008a6730(arg1);
+                                ((::Actor*)bed1)->FUN_008a6730(arg1);
                             }
                             else if (IsInPackageType(bed1))
                             {
@@ -11040,7 +9144,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                                     v428 = 0;
                                     if (0 != ti2)
                                     {
-                                        if (((FUN_0041ca90*)ti2)->get() == 0x18)
+                                        if (((::TESPackage*)ti2)->GetPackType() == 0x18)
                                         {
                                             v428 = (FUN_0098420_shell*)ti2;
                                         }
@@ -11080,7 +9184,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                             {
                                 mainProc->AdvanceProcess();
                             }
-                            if (((EffectSettingShell*)bed1)->GetLight() == (TESObjectLIGH*)arg1)
+                            if (((EffectSetting*)bed1)->GetLight() == (TESObjectLIGH*)arg1)
                             {
                                 ((EffectSetting*)bed1)->SetLight((TESObjectLIGH*)0);
                             }
@@ -11111,7 +9215,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                                 }
                             }
                             void* i;
-                            i = ((ActorView*)bed1)->v428();
+                            i = ((Actor*)bed1)->GetCombatController();
                             if (i != 0)
                             {
                                 ((FUN_0097f9c0_shell*)i)->FUN_0097f9c0(arg1);
@@ -11120,17 +9224,17 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                             {
                                 mainProc->SetTarget(0);
                             }
-                            if (((ActorView*)bed1)->v2c8() == arg1)
+                            if (((Actor*)bed1)->GetPackageTargetRef() == arg1)
                             {
                                 ((Host00881620*)bed1)->FUN_00881620(0);
                             }
                             TESPackage* ac;
                             ac = mainProc->GetRunOncePackage();
-                            if (((FUN_00881650_shell*)bed1)->FUN_00881650() == arg1 ||
+                            if (((::Actor*)bed1)->GetCombatOpponent() == arg1 ||
                                 (ac != 0 && ((ScriptGetText*)ac)->GetData() != 0 &&
                                  ((FUN_00680020_shell*)((ScriptGetText*)ac)->GetData())->FUN_00680020() == arg1))
                             {
-                                if (((FUN_009336c0_shell*)bed1)->FUN_009336c0())
+                                if (((::MobileObject*)bed1)->FUN_009336c0())
                                 {
                                     bed1->Unk_A2();
                                 }
@@ -11139,7 +9243,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                                     if (((FUN_00674d40_shell*)((ActorTargetSource*)bed1)->GetProcessTarget())
                                             ->FUN_00674d40())
                                     {
-                                        ((FUN_00881680_shell*)bed1)->FUN_00881680(0);
+                                        ((::Actor*)bed1)->FUN_00881680(0);
                                     }
                                     else
                                     {
@@ -11208,7 +9312,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                 }
                 if (!!blkE)
                 {
-                    linkX = blkE->pNext;
+                    linkX = reinterpret_cast<BSSimpleList<TESObjectREFR*>*>(blkE->list);
                 }
                 if (0 != gren)
                 {
@@ -11221,7 +9325,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                 {
                     BaseProcess* s;
                     s = ti6->GetCurrentAIProcess();
-                    if (((EffectSettingShell*)ti6)->GetLight() == (TESObjectLIGH*)arg1)
+                    if (((EffectSetting*)ti6)->GetLight() == (TESObjectLIGH*)arg1)
                     {
                         ((EffectSetting*)ti6)->SetLight((TESObjectLIGH*)0);
                         if (0 != s)
@@ -11246,7 +9350,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                                 argCopy->p14 = 0;
                             }
                         }
-                        if (((FUN_008a6650_shell*)ti6)->FUN_008a6650(0))
+                        if (((::Actor*)ti6)->FUN_008a6650(0))
                         {
                             SandboxTargetInfo* copy2;
                             copy2 = ((ActorTargetSource*)ti6)->GetProcessTarget();
@@ -11254,7 +9358,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                             rr = 0;
                             if (copy2 != 0)
                             {
-                                if (((FUN_0041ca90*)copy2)->get() == 0x16)
+                                if (((::TESPackage*)copy2)->GetPackType() == 0x16)
                                 {
                                     rr = (FUN_005e3fc0_shell*)copy2;
                                 }
@@ -11266,7 +9370,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                                     ((FUN_00994ef0_Class*)rr)->Set(0);
                                 }
                             }
-                            ((FUN_008a6730_Actor*)ti6)->FUN_008a6730(arg1);
+                            ((::Actor*)ti6)->FUN_008a6730(arg1);
                         }
                         if (arg1->IsActor())
                         {
@@ -11283,7 +9387,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                         {
                             s->AdvanceProcess();
                         }
-                        if (((EffectSettingShell*)ti6)->GetLight() == (TESObjectLIGH*)arg1)
+                        if (((EffectSetting*)ti6)->GetLight() == (TESObjectLIGH*)arg1)
                         {
                             ((EffectSetting*)ti6)->SetLight((TESObjectLIGH*)0);
                         }
@@ -11310,7 +9414,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                                 }
                             }
                         }
-                        void* B2 = ((ActorView*)ti6)->v428();
+                        void* B2 = ((Actor*)ti6)->GetCombatController();
                         if (!!B2)
                         {
                             ((FUN_0097f9c0_shell*)B2)->FUN_0097f9c0(arg1);
@@ -11319,16 +9423,16 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                         {
                             s->SetTarget(0);
                         }
-                        if (((ActorView*)ti6)->v2c8() == arg1)
+                        if (((Actor*)ti6)->GetPackageTargetRef() == arg1)
                         {
                             ((Host00881620*)ti6)->FUN_00881620(0);
                         }
                         TESPackage* pkgOnce = s->GetRunOncePackage();
-                        if (((FUN_00881650_shell*)ti6)->FUN_00881650() == arg1 ||
+                        if (((::Actor*)ti6)->GetCombatOpponent() == arg1 ||
                             (pkgOnce != 0 && ((ScriptGetText*)pkgOnce)->GetData() != 0 &&
                              ((FUN_00680020_shell*)((ScriptGetText*)pkgOnce)->GetData())->FUN_00680020() == arg1))
                         {
-                            if (((FUN_009336c0_shell*)ti6)->FUN_009336c0())
+                            if (((::MobileObject*)ti6)->FUN_009336c0())
                             {
                                 ti6->Unk_A2();
                             }
@@ -11337,7 +9441,7 @@ void FUN_0096f600_shell::FUN_0096f600(Actor* arg1, bool abClearPackageTargets)
                                 if (((FUN_00674d40_shell*)((ActorTargetSource*)ti6)->GetProcessTarget())
                                         ->FUN_00674d40())
                                 {
-                                    ((FUN_00881680_shell*)ti6)->FUN_00881680(0);
+                                    ((::Actor*)ti6)->FUN_00881680(0);
                                 }
                                 else
                                 {
@@ -11399,379 +9503,7 @@ struct Z9715
 {
     W9715* FUN_00559450();
 };
-struct Proc9715
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void EnterCombatV(Obj9715*, Obj9715*, bool, bool, void*, bool, bool, bool, bool, bool, bool, bool, void*);
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual void v213();
-    virtual void v214();
-    virtual void v215();
-    virtual void v216();
-    virtual void v217();
-    virtual void v218();
-    virtual void v219();
-    virtual void v220();
-    virtual void v221();
-    virtual void v222();
-    virtual void v223();
-    virtual void v224();
-    virtual void v225();
-    virtual void v226();
-    virtual void v227();
-    virtual void v228();
-    virtual void v229();
-    virtual void v230();
-    virtual void v231();
-    virtual void v232();
-    virtual void v233();
-    virtual void v234();
-    virtual void v235();
-    virtual void v236();
-    virtual void v237();
-    virtual void v238();
-    virtual void v239();
-    virtual void v240();
-    virtual void v241();
-    virtual void v242();
-    virtual void v243();
-    virtual void v244();
-    virtual void v245();
-    virtual void v246();
-    virtual void v247();
-    virtual void v248();
-    virtual void v249();
-    virtual void v250();
-    virtual void v251();
-    virtual void v252();
-    virtual void v253();
-    virtual void v254();
-    virtual void v255();
-    virtual void v256();
-    virtual void v257();
-    virtual void v258();
-    virtual void v259();
-    virtual void v260();
-    virtual void v261();
-    virtual void v262();
-    virtual void v263();
-    virtual void v264();
-    virtual void v265();
-    virtual void v266();
-    virtual void v267();
-    virtual void v268();
-    virtual void v269();
-    virtual void v270();
-    virtual void v271();
-    virtual void v272();
-    virtual void v273();
-    virtual void v274();
-    virtual void v275();
-    virtual void v276();
-    virtual void v277();
-    virtual void v278();
-    virtual void v279();
-    virtual void v280();
-    virtual void v281();
-    virtual void v282();
-    virtual void v283();
-    virtual void v284();
-    virtual void v285();
-    virtual void v286();
-    virtual void v287();
-    virtual void v288();
-    virtual void v289();
-    virtual void v290();
-    virtual void v291();
-    virtual void v292();
-    virtual void v293();
-    virtual void v294();
-    virtual void v295();
-    virtual void v296();
-    virtual void v297();
-    virtual void v298();
-    virtual void v299();
-    virtual void v300();
-    virtual void v301();
-    virtual void v302();
-    virtual void v303();
-    virtual void v304();
-    virtual void v305();
-    virtual void v306();
-    virtual void v307();
-    virtual void v308();
-    virtual void v309();
-    virtual void v310();
-    virtual void v311();
-    virtual void v312();
-    virtual void v313();
-    virtual void v314();
-    virtual void v315();
-    virtual void v316();
-    virtual void v317();
-    virtual void v318();
-    virtual void v319();
-    virtual void v320();
-    virtual void v321();
-    virtual void v322();
-    virtual void v323();
-    virtual void v324();
-    virtual void v325();
-    virtual void v326();
-    virtual void v327();
-    virtual void v328();
-    virtual void v329();
-    virtual void v330();
-    virtual void v331();
-    virtual void v332();
-    virtual void v333();
-    virtual void v334();
-    virtual void v335();
-    virtual void v336();
-    virtual void v337();
-    virtual void v338();
-    virtual void v339();
-    virtual void v340();
-    virtual void v341();
-    virtual void v342();
-    virtual void v343();
-    virtual void v344();
-    virtual void v345();
-    virtual void v346();
-    virtual void v347();
-    virtual void v348();
-    virtual void v349();
-    virtual void v350();
-    virtual void v351();
-    virtual void v352();
-    virtual void v353();
-    virtual void v354();
-    virtual void v355();
-    virtual void v356();
-    virtual void v357();
-    virtual void v358();
-    virtual void v359();
-    virtual void v360();
-    virtual void v361();
-    virtual void v362();
-    virtual void v363();
-    virtual void v364();
-    virtual void v365();
-    virtual void v366();
-    virtual void v367();
-    virtual int GetNumV();
-    virtual void ModNumV(int);
-};
+
 struct Obj9715 : Mob9715
 {
     virtual void v1();
@@ -11971,7 +9703,7 @@ struct Obj9715 : Mob9715
     int FUN_00575d70();
     bool FUN_00493bb0();
     float FUN_005723b0(void*, int, int);
-    Proc9715* FUN_008d8520();
+    ::BaseProcess* FUN_008d8520();
     Z9715* FUN_00568e50();
 };
 struct Node9715
@@ -11979,11 +9711,7 @@ struct Node9715
     Obj9715** FUN_006815c0();
     Node9715* FUN_00726070();
 };
-struct G9715
-{
-    int* FUN_0043d4d0();
-};
-extern G9715 g_011cdbec;
+extern Setting g_011cdbec;
 extern Obj9715* DAT_011dea3c;
 extern float DAT_01016970;
 struct RetCls
@@ -12013,8 +9741,8 @@ RetCls* Cls9715::CollectCombatTargets(Obj9715* arg1, Node9715* apNodeList)
     int num = q->FUN_00575d70();
     if (!q)
         return acc;
-    int cnt = DAT_011dea3c->FUN_008d8520()->GetNumV();
-    DAT_011dea3c->FUN_008d8520()->ModNumV((cnt - 1) * -1);
+    int cnt = DAT_011dea3c->FUN_008d8520()->GetProcessIndex();
+    DAT_011dea3c->FUN_008d8520()->SetProcessIndex((cnt - 1) * -1);
     Obj9715* sel = 0;
     unsigned int z = 0;
     for (; z < m_04.FUN_005be5c0(3); z++)
@@ -12039,7 +9767,7 @@ RetCls* Cls9715::CollectCombatTargets(Obj9715* arg1, Node9715* apNodeList)
                         val = ptr->FUN_005723b0(q, 0, 0);
                         if (val <= *g_011cdbec.FUN_0043d4d0())
                         {
-                            ptr->FUN_008d8520()->EnterCombatV(ptr, q, false, false, 0, false, false, false, false,
+                            ptr->FUN_008d8520()->ShouldAttackTarget(reinterpret_cast<Actor*>(ptr), reinterpret_cast<Actor*>(q), false, false, 0, false, false, false, false,
                                                               false, false, true, 0);
                             acc->FUN_005ae3d0(ptr);
                         }
@@ -12063,7 +9791,7 @@ RetCls* Cls9715::CollectCombatTargets(Obj9715* arg1, Node9715* apNodeList)
                                         val = ptr->FUN_005723b0(obj4c, 0, 0);
                                         if (val <= *g_011cdbec.FUN_0043d4d0())
                                         {
-                                            ptr->FUN_008d8520()->EnterCombatV(ptr, q, false, false, 0, false, false,
+                                            ptr->FUN_008d8520()->ShouldAttackTarget(reinterpret_cast<Actor*>(ptr), reinterpret_cast<Actor*>(q), false, false, 0, false, false,
                                                                               false, false, false, false, true, 0);
                                             acc->FUN_005ae3d0(ptr);
                                             break;
@@ -12099,7 +9827,8 @@ class Actor_ext : public Actor
     TESPackage* GetCurrentPackage();
 };
 
-class DialoguePackageStub : public TESPackage
+// 009ec810 and 009ec850 are AlarmPackage methods in alarmpackage.cpp; only their missing declarations are local.
+class AlarmSpeakerMethods : public AlarmPackage
 {
   public:
     bool IsSpeakerTarget(TESObjectREFR* apTarget);
@@ -12138,10 +9867,10 @@ BSSimpleList<Actor*>* ActorQueryOwner::FindDialogueSpeakers(TESObjectREFR* apTar
                 pActor = (Actor_ext*)pRef;
             if (pActor)
             {
-                DialoguePackageStub* pDialoguePackage = 0;
+                AlarmSpeakerMethods* pDialoguePackage = 0;
                 TESPackage* pCurrentPackage = pActor->GetCurrentPackage();
                 if (pCurrentPackage && pCurrentPackage->GetPackType() == 0x15)
-                    pDialoguePackage = (DialoguePackageStub*)pCurrentPackage;
+                    pDialoguePackage = (AlarmSpeakerMethods*)pCurrentPackage;
                 if (pDialoguePackage && pDialoguePackage->IsSpeakerTarget(apTarget))
                 {
                     if (!pList)
@@ -12176,7 +9905,7 @@ struct FUN_009722e0_shell
     int unk10;
     int unk14;
     int unk18;
-    int unk1C;
+    int m_uiReferenceCount;
     int unk20;
     int unk24;
     int unk28;
@@ -12261,7 +9990,7 @@ struct S_972aa0_Owner
     int unk10;
     int unk14;
     int unk18;
-    int unk1C;
+    int m_uiReferenceCount;
     int unk20;
     int unk24;
     int unk28;
@@ -12383,11 +10112,7 @@ void ProcessListsCellAccess::FUN_009740a0(TESObjectCELL* apCell)
     }
 }
 
-struct EffectThreadSetting
-{
-    unsigned char* Bool();
-};
-extern EffectThreadSetting g_011f127c;
+extern Setting g_011f127c;
 struct EffectListCount
 {
     unsigned int CountReferencedNodes();
@@ -12493,26 +10218,11 @@ void EffectProcessLists::FUN_009746c0(float delta)
     }
 }
 
-class ProjectileBaseStub
-{
-  public:
-    bool GetHasExplosionAltTrigger() const;
-    bool GetHasExplosionDetonates() const;
-};
-
 class ProjectileExt : public Projectile
 {
   public:
-    ProjectileBaseStub* GetProjectileBase() const;
+    ::BGSProjectile* GetProjectileBase() const;
     void Detonate();
-};
-
-class MagicProjectile : public Projectile
-{
-};
-
-class ArrowProjectile : public Projectile
-{
 };
 
 struct ProcessListsShell : public ProcessLists
@@ -12659,12 +10369,6 @@ unsigned int SaveProcessLists::FUN_009755b0()
 
 extern bool _s_bAllowDetach;
 
-class TES
-{
-  public:
-    bool FUN_004511e0(TESObjectCELL* pCell, bool bArg);
-    void ProcessItemNodes();
-};
 extern TES* g_TES;
 
 class ModelLoader
@@ -12726,16 +10430,11 @@ void ProcessListsSub::UpdateActor3D()
     FUN_00972d30();
 }
 
-struct Actor976030 : Actor
-{
-    bool FUN_00565450();
-    const char* FUN_005715d0();
-};
 int __cdecl FUN_00404dc0(const char*, const char*);
 struct Lists976030
 {
     int unk00;
-    Array_973590 processes;
+    ::MobileObjectProcessArray processes;
     void FUN_00976030(int mode);
 };
 // @fnv 0x00976030
@@ -12743,29 +10442,30 @@ void Lists976030::FUN_00976030(int mode)
 {
     BSSimpleList<Actor*>* i = new BSSimpleList<Actor*>;  // Nearby actors.
     BSSimpleList<Actor*>* h = new BSSimpleList<Actor*>;  // Distant actors.
-    Actor976030* p = 0;                                  // Current actor.
-    Actor976030* a = 0;                                  // Nearby actor with a potentially matching name.
+    Actor* p = 0;                                  // Current actor.
+    Actor* a = 0;                                  // Nearby actor with a potentially matching name.
     MobileObject* s = 0;
     for (unsigned int f = 0; f < processes.FUN_005be5c0(0); f++)
     {
         s = processes.FUN_00968670(f);
         p = 0;
         if (s && s->IsActor())
-            p = (Actor976030*)s;
-        if (p && !((Actor976030*)p)->FUN_00565450())
+            p = (Actor*)s;
+        if (p && !((ProcessListsActorMethods*)p)->FUN_00565450())
         {
             if (mode != 2)
             {
-                if (((FUN_005723b0_Obj*)p)->FUN_005723b0(DAT_011dea3c, 0, 0) > 3000.0)
-                    h->AddHead((Actor*)p);
+                // Pass pointer values to the const-reference list overloads, as the original base conversions did.
+                if (((::TESObjectREFR*)p)->FUN_005723b0(static_cast<TESObjectREFR*>(DAT_011dea3c), 0, 0) > 3000.0)
+                    h->AddHead(static_cast<Actor*>(p + 0));
                 else
-                    i->AddHead((Actor*)p);
+                    i->AddHead(static_cast<Actor*>(p + 0));
             }
             else
             {
                 DAT_011f11a0.Lock(0);
                 delete p;
-                DAT_011f11a0.Unlock();
+                DAT_011f11a0.Leave();
                 f = 0;
             }
         }
@@ -12784,21 +10484,21 @@ void Lists976030::FUN_00976030(int mode)
             b = h;
         while (b && b->GetItem())
         {
-            p = (Actor976030*)b->GetItem();
-            if (p->Unk_87() && !ba)
+            p = (Actor*)b->GetItem();
+            if (p->IsCreature() && !ba)
             {
                 q = i;
                 while (q && q->GetItem())
                 {
-                    a = (Actor976030*)q->GetItem();
-                    if (!FUN_00404dc0(((Actor976030*)a)->FUN_005715d0(), ((Actor976030*)p)->FUN_005715d0()))
+                    a = (Actor*)q->GetItem();
+                    if (!FUN_00404dc0(a->GetModelFilePath(), p->GetModelFilePath()))
                     {
-                        i->Remove((Actor*)a);
-                        q->Remove((Actor*)a);
+                        i->Remove(static_cast<Actor*>(a + 0));
+                        q->Remove(static_cast<Actor*>(a + 0));
                         q = i;
                         DAT_011f11a0.Lock(0);
                         delete a;
-                        DAT_011f11a0.Unlock();
+                        DAT_011f11a0.Leave();
                     }
                     else
                         q = q->GetNext();
@@ -12807,18 +10507,18 @@ void Lists976030::FUN_00976030(int mode)
             b->RemoveHead();
             DAT_011f11a0.Lock(0);
             delete p;
-            DAT_011f11a0.Unlock();
+            DAT_011f11a0.Leave();
         }
     }
     else if (mode == 0)
     {
         while (h && h->GetItem())
         {
-            p = (Actor976030*)h->GetItem();
+            p = (Actor*)h->GetItem();
             h->RemoveHead();
             DAT_011f11a0.Lock(0);
             delete p;
-            DAT_011f11a0.Unlock();
+            DAT_011f11a0.Leave();
         }
     }
     h->RemoveAll();
@@ -12826,12 +10526,8 @@ void Lists976030::FUN_00976030(int mode)
     i->RemoveAll();
 }
 
-struct DetectionSetting
-{
-    SETTING_VALUE* FUN_00403e20();
-};
-extern DetectionSetting g_011d0bb4;
-extern DetectionSetting g_011d04b4;
+extern Setting g_011d0bb4;
+extern Setting g_011d04b4;
 struct DetectionActor : public MobileObject
 {
     virtual void Unk_C1();
@@ -12867,11 +10563,11 @@ struct DetectionList : public ProcessLists
 // @fnv 0x009764a0
 bool DetectionList::HasNearbyDetectedActor(bool differentDistance)
 {
-    float threshold3 = g_011d0bb4.FUN_00403e20()->f;
+    float threshold3 = *g_011d0bb4.FUN_00403e20();
     bool found7 = false;
     if (differentDistance)
     {
-        threshold3 = g_011d04b4.FUN_00403e20()->f;
+        threshold3 = *g_011d04b4.FUN_00403e20();
     }
     float distance8 = 0.0f;
     DetectionActor* actor = 0;
@@ -12885,14 +10581,14 @@ bool DetectionList::HasNearbyDetectedActor(bool differentDistance)
         {
             current = actor;
         }
-        if (current && current != reinterpret_cast<DetectionActor*>(pPlayer) && !current->IsDead(false) &&
+        if (current && current != reinterpret_cast<DetectionActor*>(pPlayer) && !current->HasHealth(false) &&
             !current->FUN_00440da0())
         {
             if (current->FUN_008d8520() && current->FUN_008d8520()->GetCurrentTalkTarget())
             {
                 current = reinterpret_cast<DetectionActor*>(current->FUN_008d8520()->GetCurrentTalkTarget());
             }
-            distance8 = reinterpret_cast<FUN_00973de0_player*>(pPlayer)->GetDistanceToReference(current, false, false);
+            distance8 = reinterpret_cast<ProcessListsPlayerDialogueAccess*>(pPlayer)->GetDistanceToReference(current, false, false);
             if (distance8 <= threshold3)
             {
                 int result = current->FUN_D1(pPlayer, false);
@@ -12944,7 +10640,7 @@ class F8660Owner
     int unk10;
     int unk14;
     int unk18;
-    int unk1C;
+    int m_uiReferenceCount;
     int unk20;
     int unk24;
     int unk28;
@@ -12957,7 +10653,7 @@ class F8660Owner
     int unk44;
     int unk48;
     int unk4C;
-    int unk50;
+    int m_uiValueAt50;
     int unk54;
     int unk58;
     int unk5C;
@@ -13008,14 +10704,6 @@ struct MuzzleProjectileRef
 {
     void SetMuzzleFlashSpawned(bool);
 };
-struct MuzzleFlashEx : public MuzzleFlash
-{
-    MuzzleFlashEx(MuzzleOwnerRef* parent, MuzzleProjectileRef* projectile);
-    void* GetSource();
-    int GetStamp();
-    MuzzleProjectileRef* GetProjectileRef();
-    void Activate();
-};
 
 struct FUN_00978740_shell : public ProcessLists
 {
@@ -13033,9 +10721,9 @@ void FUN_00978740_shell::ActivateMuzzleFlash(MuzzleOwnerRef* pOwner, MuzzleProje
         while (!pFlash && pIter && !pIter->IsEmpty())
         {
             MuzzleFlash* flash = pIter->GetItem();
-            if (flash && ((MuzzleFlashEx*)flash)->GetSource() == pOwner->GetFlashSource() &&
-                ((MuzzleFlashEx*)flash)->GetStamp() == pOwner->GetFlashStamp() &&
-                ((MuzzleFlashEx*)flash)->GetProjectileRef() == projectile)
+            if (flash && ((MuzzleFlash*)flash)->GetSource() == pOwner->GetFlashSource() &&
+                ((MuzzleFlash*)flash)->GetStamp() == pOwner->GetFlashStamp() &&
+                ((MuzzleFlash*)flash)->GetProjectileRef() == projectile)
             {
                 pFlash = flash;
             }
@@ -13043,13 +10731,13 @@ void FUN_00978740_shell::ActivateMuzzleFlash(MuzzleOwnerRef* pOwner, MuzzleProje
         }
         if (!pFlash)
         {
-            pFlash = new MuzzleFlashEx(pOwner, projectile);
+            pFlash = new MuzzleFlash(pOwner, projectile);
             projectile->SetMuzzleFlashSpawned(true);
             m_kMuzzleFlashList.AddHead(pFlash);
         }
         if (pFlash)
         {
-            ((MuzzleFlashEx*)pFlash)->Activate();
+            ((MuzzleFlash*)pFlash)->Activate();
         }
     }
 }
@@ -13063,15 +10751,12 @@ class CrimeFull
     void FUN_009eba30();
 };
 
-class ProcessListsEx : public ProcessLists
-{
-  public:
-    void UpdateCrimeLists();
-};
+}  // namespace fnv_009723f0
 
 // @fnv 0x009723f0
-void ProcessListsEx::UpdateCrimeLists()
+void ProcessLists::UpdateCrimeLists()
 {
+    using namespace fnv_009723f0;
     BSSimpleList<CrimeFull*>* p = 0;
     BSSimpleList<CrimeFull*>* t = 0;
     for (int i = 0; i < 5; i++)
@@ -13096,7 +10781,6 @@ void ProcessListsEx::UpdateCrimeLists()
     }
     m_fCrimeListUpdateTimer = (float)m_iMobileObjectCount + 10.0;
 }
-}  // namespace fnv_009723f0
 
 namespace fnv_0096dcb0 {
 extern "C" char DAT_011dea3c;
@@ -13412,83 +11096,41 @@ void Owner96::UpdateActorsFromList(FUN_0096a2d0* pInputList)
 }
 }  // namespace fnv_0096dcb0
 
-template <int N> struct Slot970
-{
-};
-template <int N> struct ProcessSlots970 : ProcessSlots970<N - 1>
-{
-    virtual void pad(Slot970<N>*);
-};
-template <> struct ProcessSlots970<0>
-{
-};
-template <> struct ProcessSlots970<211> : ProcessSlots970<210>
-{
-    virtual void SetCount(int);
-};
-struct Process970 : ProcessSlots970<368>
-{
-    virtual int GetCount();
-};
-template <int N> struct ActorSlots970 : ActorSlots970<N - 1>
-{
-    virtual void pad(Slot970<N>*);
-};
-template <> struct ActorSlots970<0>
-{
-};
-template <> struct ActorSlots970<65> : ActorSlots970<64>
-{
-    virtual bool IsActor();
-};
-template <> struct ActorSlots970<140> : ActorSlots970<139>
-{
-    virtual bool Check(int);
-};
-struct Actor970 : ActorSlots970<141>
-{
-    virtual bool Check2();
-    bool FUN_00440da0();
-    bool FUN_00440d80();
-    char FUN_00437bd0();
-    Process970* FUN_008d8520();
-    int FUN_008a0d10(int, Actor970*, bool*, int, int, int, int);
-};
 struct Input970
 {
-    Actor970* FUN_0084e3a0();
+    Actor* FUN_0084e3a0();
 };
 struct List970
 {
     int x[2];
     List970();
     unsigned FUN_005ae380();
-    void FUN_005ae3d0(Actor970**);
+    void FUN_005ae3d0(Actor**);
     void SortItems(void*);
 };
 struct Array970
 {
     unsigned FUN_005be5c0(int);
-    Actor970* FUN_00968670(unsigned);
+    Actor* FUN_00968670(unsigned);
 };
 extern "C" char DAT_00970ee0;
 struct C970
 {
     int unused;
     Array970 array;
-    List970* CollectActorsByPackage(Actor970*, int, int);
+    List970* CollectActorsByPackage(Actor*, int, int);
     List970* FUN_00970f60(Input970* input);
 };
 // @fnv 0x00970f60
 List970* C970::FUN_00970f60(Input970* input)
 {
     List970* result9 = 0;
-    Actor970* actor = input->FUN_0084e3a0();
-    if (actor && (actor->FUN_00440da0() || actor->FUN_00440d80() || actor->Check(1)))
+    Actor* actor = input->FUN_0084e3a0();
+    if (actor && (actor->FUN_00440da0() || actor->FUN_00440d80() || actor->HasHealth(1)))
         return 0;
     int count4 = 0;
     if (actor)
-        count4 = actor->FUN_008d8520()->GetCount();
+        count4 = actor->GetCurrentAIProcess()->GetProcessIndex();
     if (count4 > 0)
     {
         List970* list = CollectActorsByPackage(actor, 21, 0);
@@ -13496,24 +11138,24 @@ List970* C970::FUN_00970f60(Input970* input)
             count4 = list->FUN_005ae380();
         else
             count4 = 0;
-        actor->FUN_008d8520()->SetCount(count4);
+        actor->GetCurrentAIProcess()->SetCrimeCategory(count4);
     }
-    Actor970* entry3 = 0;
+    Actor* entry3 = 0;
     for (unsigned index2 = 0; index2 < array.FUN_005be5c0(0); ++index2)
     {
-        Actor970* other5 = 0;
+        Actor* other5 = 0;
         entry3 = array.FUN_00968670(index2);
         if (entry3 && entry3->IsActor())
             other5 = entry3;
         bool flag;
-        if (other5 && !(unsigned char)other5->FUN_00437bd0() && !other5->Check2() && other5 != actor &&
-            !other5->Check(0) && !other5->FUN_00440da0())
+        if (other5 && !(unsigned char)other5->FUN_00437bd0() && !other5->GetIsParalyzed() && other5 != actor &&
+            !other5->HasHealth(0) && !other5->FUN_00440da0())
         {
-            if (other5->FUN_008a0d10(0, actor, &flag, 0, 0, 0, 0) > 0)
+            if (other5->CalculateDetectionLevel(0, actor, &flag, false, 0, false, 0) > 0)
             {
                 if (!result9)
                     result9 = new List970;
-                result9->FUN_005ae3d0((Actor970**)&(Actor970* const&)(other5 + 0));
+                result9->FUN_005ae3d0((Actor**)&(Actor* const&)(other5 + 0));
             }
         }
     }
@@ -13967,7 +11609,6 @@ BSSimpleList<Actor*>* ZOwner::CollectActorsByPackage(int arg1, int arg2, bool ar
     return result2;
 }
 
-struct CombatActor;
 struct FactionView;
 struct ProcessView
 {
@@ -14419,288 +12060,7 @@ struct ActorBaseView
     int unk2c;
     BaseFactionView factions;
 };
-struct CombatActor
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual bool HasFactions();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual void v213();
-    virtual void v214();
-    virtual void v215();
-    virtual void v216();
-    virtual void v217();
-    virtual void v218();
-    virtual void v219();
-    virtual void v220();
-    virtual void v221();
-    virtual void v222();
-    virtual void v223();
-    virtual void v224();
-    virtual void v225();
-    virtual void v226();
-    virtual void v227();
-    virtual void v228();
-    virtual void v229();
-    virtual void v230();
-    virtual void v231();
-    virtual void v232();
-    virtual void v233();
-    virtual void v234();
-    virtual void v235();
-    virtual void v236();
-    virtual void v237();
-    virtual void v238();
-    virtual void v239();
-    virtual void v240();
-    virtual void v241();
-    virtual void v242();
-    virtual void v243();
-    virtual void v244();
-    virtual void v245();
-    virtual void v246();
-    virtual void v247();
-    virtual void v248();
-    virtual void v249();
-    virtual void v250();
-    virtual void v251();
-    virtual void v252();
-    virtual void v253();
-    virtual void v254();
-    virtual void v255();
-    virtual void v256();
-    virtual void v257();
-    virtual void v258();
-    virtual void v259();
-    virtual void v260();
-    virtual void v261();
-    virtual void v262();
-    virtual void v263();
-    virtual void v264();
-    virtual void v265();
-    virtual void v266();
-    virtual void v267();
-    virtual void v268();
-    virtual void StopTarget(CombatActor*);
-    bool HasTarget(CombatActor*);
-    bool HasPackage();
-    PackageView* Package();
-    void Stop(int);
-    ProcessView* Process();
-    void Reset();
-    ExtraView* Extra();
-    ActorBaseView* Base();
-    unsigned Gather(FactionView**, unsigned, void*, void*);
-};
+
 struct ActorArrayView
 {
     unsigned Begin(int);
@@ -14722,12 +12082,12 @@ void ListsView::FUN_00972840(CombatActor* target, bool skip)
     {
         CombatActor* entryB = actorsB->At(index4);
         CombatActor* actor = 0;
-        if (entryB && entryB->IsActor())
+        if (entryB && reinterpret_cast<Actor*>(entryB)->IsActor())
             actor = entryB;
         if (actor)
         {
             if (actor->HasTarget(target))
-                actor->StopTarget(target);
+                reinterpret_cast<Actor*>(actor)->Unk_10D(reinterpret_cast<Actor*>(target));
             else if (actor && !skip && actor->HasPackage() && actor->Package()->Data() &&
                      (actor->Package()->Data()->Target() == target || !target))
             {
@@ -14738,7 +12098,7 @@ void ListsView::FUN_00972840(CombatActor* target, bool skip)
             {
                 actor->Reset();
                 actor->Extra()->Clear(actor);
-                if (actor->HasFactions())
+                if (reinterpret_cast<Actor*>(actor)->IsCreature())
                 {
                     void* baseListTmp = actor->Base()->factions.List();
                     FactionChanges* changes = actor->Extra()->Changes();
@@ -14757,98 +12117,9 @@ void ListsView::FUN_00972840(CombatActor* target, bool skip)
     }
 }
 
-struct CombatController9734
-{
-    Actor* FUN_004030b0();
-    bool FUN_009818b0();
-};
 
 // Actor's primary vtable seen through MobileObject; slot 266 returns the combat controller
-class ActorView9734 : public MobileObject
-{
-  public:
-    virtual void V193();
-    virtual void V194();
-    virtual void V195();
-    virtual void V196();
-    virtual void V197();
-    virtual void V198();
-    virtual void V199();
-    virtual void V200();
-    virtual void V201();
-    virtual void V202();
-    virtual void V203();
-    virtual void V204();
-    virtual void V205();
-    virtual void V206();
-    virtual void V207();
-    virtual void V208();
-    virtual void V209();
-    virtual void V210();
-    virtual void V211();
-    virtual void V212();
-    virtual void V213();
-    virtual void V214();
-    virtual void V215();
-    virtual void V216();
-    virtual void V217();
-    virtual void V218();
-    virtual void V219();
-    virtual void V220();
-    virtual void V221();
-    virtual void V222();
-    virtual void V223();
-    virtual void V224();
-    virtual void V225();
-    virtual void V226();
-    virtual void V227();
-    virtual void V228();
-    virtual void V229();
-    virtual void V230();
-    virtual void V231();
-    virtual void V232();
-    virtual void V233();
-    virtual void V234();
-    virtual void V235();
-    virtual void V236();
-    virtual void V237();
-    virtual void V238();
-    virtual void V239();
-    virtual void V240();
-    virtual void V241();
-    virtual void V242();
-    virtual void V243();
-    virtual void V244();
-    virtual void V245();
-    virtual void V246();
-    virtual void V247();
-    virtual void V248();
-    virtual void V249();
-    virtual void V250();
-    virtual void V251();
-    virtual void V252();
-    virtual void V253();
-    virtual void V254();
-    virtual void V255();
-    virtual void V256();
-    virtual void V257();
-    virtual void V258();
-    virtual void V259();
-    virtual void V260();
-    virtual void V261();
-    virtual void V262();
-    virtual void V263();
-    virtual void V264();
-    virtual void V265();
-    virtual CombatController9734* GetCombatController();
-};
 
-class Actor9734 : public Actor
-{
-  public:
-    int FUN_008a81e0(Actor* pkTarget);
-    bool FUN_00493bb0();
-};
 
 struct ActorArray9734
 {
@@ -14869,17 +12140,17 @@ bool ActorGroup9734::FUN_00973460(Actor* pkTarget)
 {
     bool bFound = false;
     TESObjectREFR* pkMember = 0;
-    Actor9734* pkActor = 0;
+    Actor* pkActor = 0;
     for (unsigned int i = 0; i < kActors.FUN_005be5c0(0) && !bFound; ++i)
     {
         pkMember = kActors.FUN_00968670(i);
         if (pkMember && pkMember->IsActor())
-            pkActor = (Actor9734*)pkMember;
-        if (pkActor && pkActor->IsCharacter() && pkActor->FUN_008a81e0(pkTarget) == 3)
+            pkActor = (Actor*)pkMember;
+        if (pkActor && pkActor->IsCharacter() && ((ProcessListsActorMethods*)pkActor)->FUN_008a81e0(pkTarget) == 3)
         {
-            if (!pkActor->FUN_00493bb0() || !((ActorView9734*)pkActor)->GetCombatController() ||
-                ((ActorView9734*)pkActor)->GetCombatController()->FUN_004030b0() != pkTarget ||
-                !((ActorView9734*)pkActor)->GetCombatController()->FUN_009818b0())
+            if (!pkActor->FUN_00493bb0() || !((Actor*)pkActor)->GetCombatController() ||
+                (Actor*)((Actor*)pkActor)->GetCombatController()->FUN_004030b0() != pkTarget ||
+                !((ProcessListsCombatMethods*)pkActor->GetCombatController())->FUN_009818b0())
                 bFound = true;
         }
     }
@@ -14887,513 +12158,42 @@ bool ActorGroup9734::FUN_00973460(Actor* pkTarget)
 }
 
 namespace fnv_00973710 {
-struct ActorX;
-struct Process;
-struct Combat
+// PlayerCharacter owns the detection flag; these two method declarations are absent from its shared header.
+struct DetectionPlayerMethods : PlayerCharacter
 {
-    ActorX* FUN_004030b0();
-    bool FUN_009818b0();
-};
-struct Process
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual int detect(ActorX*, int);
-};
-struct ActorX
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool isActorXor();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual bool isDead(int);
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual void v213();
-    virtual void v214();
-    virtual void v215();
-    virtual void v216();
-    virtual void v217();
-    virtual void v218();
-    virtual void v219();
-    virtual void v220();
-    virtual void v221();
-    virtual void v222();
-    virtual void v223();
-    virtual void v224();
-    virtual void v225();
-    virtual void v226();
-    virtual void v227();
-    virtual void v228();
-    virtual void v229();
-    virtual void v230();
-    virtual void v231();
-    virtual void v232();
-    virtual void v233();
-    virtual void v234();
-    virtual void v235();
-    virtual void v236();
-    virtual void v237();
-    virtual void v238();
-    virtual void v239();
-    virtual void v240();
-    virtual void v241();
-    virtual void v242();
-    virtual void v243();
-    virtual void v244();
-    virtual void v245();
-    virtual void v246();
-    virtual void v247();
-    virtual void v248();
-    virtual void v249();
-    virtual void v250();
-    virtual void v251();
-    virtual void v252();
-    virtual void v253();
-    virtual void v254();
-    virtual void v255();
-    virtual void v256();
-    virtual void v257();
-    virtual void v258();
-    virtual void v259();
-    virtual void v260();
-    virtual void v261();
-    virtual void v262();
-    virtual void v263();
-    virtual void v264();
-    virtual void v265();
-    virtual Combat* combat();
-    bool IsPlayerTeammate();
-    bool GetDisabled();
-    bool FUN_00437bd0();
     void SetByteAt66c(char);
     unsigned char GetByteAtOffset();
-    float FUN_005723b0(ActorX*, int, int);
-    bool FUN_00493bb0();
-    bool FUN_008a61b0();
-    ActorX* FUN_00881650();
-    Process* FUN_008d8520();
-    bool IsHostileTo(ActorX*, int, float*, int);
-    void FUN_008c8bb0(int);
 };
 typedef BSSimpleList<Actor*> List;
 struct MyArray
 {
     unsigned int FUN_005be5c0(int);
-    ActorX* FUN_00968670(unsigned int);
+    Actor* FUN_00968670(unsigned int);
 };
-struct Setting
-{
-    int* FUN_0043d4d0();
-};
+
 extern Setting DAT_011cd850;
-extern ActorX* _g_thePlayer;
+extern PlayerCharacter* _g_thePlayer;
 struct Shell
 {
     int unk00;
     MyArray unk04;
-    void FUN_00973590(ActorX*, List*);
-    int GetHighestDetectionValue(ActorX*, bool);
+    void FUN_00973590(Actor*, List*);
+    int GetHighestDetectionValue(Actor*, bool);
 };
 // Scans the array for live, enabled actors, clamps each one's detect() result to [-100,100], and returns the highest value found (0 if none).
 // @fnv 0x00973710
-int Shell::GetHighestDetectionValue(ActorX* apObserver, bool abSkipListCheck)
+int Shell::GetHighestDetectionValue(Actor* apObserver, bool abSkipListCheck)
 {
     int unused = 0;
     int value = -100;
     int best2 = 0x7fffffff;
-    _g_thePlayer->SetByteAt66c(0);
-    ActorX* ref2 = 0;
+    ((DetectionPlayerMethods*)_g_thePlayer)->SetByteAt66c(0);
+    Actor* ref2 = 0;
     for (unsigned int i = 0; i < unk04.FUN_005be5c0(0); i++)
     {
         ref2 = unk04.FUN_00968670(i);
-        ActorX* actor = 0;
-        if (ref2 && ref2->isActorXor())
+        Actor* actor = 0;
+        if (ref2 && ref2->IsActor())
             actor = ref2;
         bool skip = false;
         if (!abSkipListCheck && actor)
@@ -15405,23 +12205,23 @@ int Shell::GetHighestDetectionValue(ActorX* apObserver, bool abSkipListCheck)
         }
         if (!skip && actor)
         {
-            if (actor && !actor->isDead(0) && !actor->GetDisabled() && !actor->FUN_00437bd0())
+            if (actor && !actor->HasHealth(false) && !actor->GetDisabled() && !actor->FUN_00437bd0())
             {
-                if (apObserver == _g_thePlayer && !_g_thePlayer->GetByteAtOffset())
+                if (apObserver == _g_thePlayer && !((DetectionPlayerMethods*)_g_thePlayer)->GetByteAtOffset())
                 {
                     float f = apObserver->FUN_005723b0(actor, 0, 0);
                     if (f <= (float)*DAT_011cd850.FUN_0043d4d0())
-                        _g_thePlayer->SetByteAt66c(1);
+                        ((DetectionPlayerMethods*)_g_thePlayer)->SetByteAt66c(1);
                 }
-                if (actor->FUN_00493bb0() || actor->FUN_008a61b0())
+                if (actor->FUN_00493bb0() || actor->IsInDeadState())
                 {
-                    if (actor->FUN_00493bb0() && actor->combat() && actor->combat()->FUN_004030b0() == apObserver &&
-                        !actor->combat()->FUN_009818b0())
+                    if (actor->FUN_00493bb0() && actor->GetCombatController() && (Actor*)actor->GetCombatController()->FUN_004030b0() == apObserver &&
+                        !((ProcessListsCombatMethods*)actor->GetCombatController())->FUN_009818b0())
                         return 100;
-                    else if (actor->FUN_008a61b0() && actor->FUN_00881650() == _g_thePlayer)
+                    else if (actor->IsInDeadState() && actor->GetCombatOpponent() == _g_thePlayer)
                         return 100;
                 }
-                value = actor->FUN_008d8520()->detect(apObserver, 0);
+                value = actor->GetCurrentAIProcess()->GetDetectionCount(apObserver, (BaseProcess::DetectionListType)0);
                 if (value == 0x7fffffff)
                     value = 0;
                 if (value > 100)
@@ -15429,7 +12229,7 @@ int Shell::GetHighestDetectionValue(ActorX* apObserver, bool abSkipListCheck)
                 else if (value < -100)
                     value = -100;
                 float distance;
-                if (value > 0 && actor->IsHostileTo(_g_thePlayer, 0, &distance, 0))
+                if (value > 0 && actor->IsHostileToActor(_g_thePlayer, 0, (int*)&distance, false))
                     _g_thePlayer->FUN_008c8bb0(1);
             }
         }
@@ -15612,18 +12412,7 @@ struct Sh008d8520
 {
     void* FUN_008d8520();
 };
-struct Sh0045cd60
-{
-    int FUN_0045cd60();
-};
-struct Sh00576d30
-{
-    bool FUN_00576d30();
-};
-struct Sh005d43c0
-{
-    void* FUN_005d43c0();
-};
+
 struct Sh0041cb10
 {
     void* FUN_0041cb10();
@@ -15636,18 +12425,7 @@ struct Sh0042ce10
 {
     bool FUN_0042ce10();
 };
-struct Sh005de0f0
-{
-    int FUN_005de0f0(int a);
-};
-struct Sh005be5c0
-{
-    unsigned int FUN_005be5c0(int a);
-};
-struct Sh00968670
-{
-    void* FUN_00968670(unsigned int i);
-};
+
 struct Sh00717e50
 {
     void* FUN_00717e50();
@@ -15665,15 +12443,15 @@ struct Menu75x
 void Menu75x::FUN_00970810(int arg)
 {
     void* list = ((Sh00717e50*)&DAT_011e0e80)->FUN_00717e50();
-    for (unsigned int i = ((Sh005de0f0*)list)->FUN_005de0f0(0); i < ((Sh005be5c0*)list)->FUN_005be5c0(3); ++i)
+    for (unsigned int i = ((::MobileObjectProcessArray*)list)->FUN_005de0f0(0); i < ((::MobileObjectProcessArray*)list)->FUN_005be5c0(3); ++i)
     {
-        void* a = ((Sh00968670*)list)->FUN_00968670(i);
+        void* a = ((::MobileObjectProcessArray*)list)->FUN_00968670(i);
         void* p = 0;
         if (a != 0)
         {
             if (((Vt75*)a)->v40())
             {
-                if (!((Sh00576d30*)a)->FUN_00576d30())
+                if (!((::Actor*)a)->FUN_00576d30())
                 {
                     p = a;
                 }
@@ -15693,7 +12471,7 @@ void Menu75x::FUN_00970810(int arg)
                     void* q = 0;
                     if (((Sh008d8520*)p)->FUN_008d8520() != 0)
                     {
-                        switch (((Sh0045cd60*)((Sh008d8520*)p)->FUN_008d8520())->FUN_0045cd60())
+                        switch (((::BaseProcess*)((Sh008d8520*)p)->FUN_008d8520())->FUN_0045cd60())
                         {
                         case 0:
                         case 1:
@@ -15717,9 +12495,9 @@ void Menu75x::FUN_00970810(int arg)
                     }
                 }
             }
-            if (((Sh0041cb10*)((Sh005d43c0*)p)->FUN_005d43c0())->FUN_0041cb10() == (void*)arg)
+            if (((Sh0041cb10*)((::TESObjectREFR*)p)->FUN_005d43c0())->FUN_0041cb10() == (void*)arg)
             {
-                ((Sh0041c930*)((Sh005d43c0*)p)->FUN_005d43c0())->FUN_0041c930(0, 0, 0, 0, 0, 0);
+                ((Sh0041c930*)((::TESObjectREFR*)p)->FUN_005d43c0())->FUN_0041c930(0, 0, 0, 0, 0, 0);
             }
             p = 0;
         }
@@ -17209,11 +13987,10 @@ void FUN_0096eb40_cls::FUN_0096eb40()
 
 struct WeaponShaderEffectAccess : public ::MagicShaderHitEffect
 {
+    char* GetData();
     unsigned int FUN_00441110();
     bool IsUnk28Set();
     unsigned char GetField24();
-    char* FUN_00671d10();
-    void SetByteAt24(unsigned int);
 };
 struct WeaponShaderCleanup : public ::ProcessLists
 {
@@ -17237,10 +14014,10 @@ struct WeaponShaderCleanup : public ::ProcessLists
                 if (current->FUN_00441110() == reinterpret_cast<unsigned int>(target) && current->IsUnk28Set() &&
                     !current->GetField24())
                 {
-                    if (current->FUN_00671d10() == reinterpret_cast<char*>(shader) && !result)
+                    if (current->GetData() == reinterpret_cast<char*>(shader) && !result)
                         result = current;
                     else
-                        current->SetByteAt24(1);
+                        current->SetByteAt24((unsigned int)1);
                 }
             }
             node = node->GetNext();

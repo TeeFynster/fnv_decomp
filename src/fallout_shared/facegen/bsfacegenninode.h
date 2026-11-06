@@ -3,9 +3,7 @@
 #define FNV_BSFACEGENNINODE_H
 
 
-#define NiPointer FNV_NiPointer_Dummy
 #include "layout_support.h"
-#undef NiPointer
 
 class NiRTTI;
 
@@ -23,7 +21,7 @@ template <class T> class NiPointer
 
     ~NiPointer()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     NiPointer<T>& operator=(T* object)
@@ -32,7 +30,7 @@ template <class T> class NiPointer
         {
             if (object)
                 object->IncRefCount();
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = object;
         }

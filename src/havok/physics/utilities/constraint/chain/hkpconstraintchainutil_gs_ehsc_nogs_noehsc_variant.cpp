@@ -1,3 +1,4 @@
+#include "../../../../../../include/hkArray.h"
 // src/havok/physics/utilities/constraint/chain/hkpconstraintchainutil_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-31 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/utilities/constraint/chain/hkpconstraintchainutil.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
@@ -5,6 +6,11 @@
 
 // src/havok/physics/utilities/constraint/chain/hkpconstraintchainutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/constraint/chain/hkpconstraintchainutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/Pair.h"
+#include "../../../../../../include/V4.h"
+
 struct CallTarget_00e5c370
 {
     int InsertAndDelete(int, int, int, int, int);
@@ -13,23 +19,7 @@ struct SearchObject
 {
     int FUN_00e5c420(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct DispatchTarget
 {
     void CallWithFlag(void* aValue, int aZero, void* aOut);
@@ -134,7 +124,7 @@ struct KeyOwnerA
 };
 struct Sub18
 {
-    void FUN_00e5c440(AudioAllocator* a, int b, Pair32* c);
+    void FUN_00e5c440(hkMemoryAllocator* a, int b, Pair32* c);
 };
 struct OwnerC
 {
@@ -176,83 +166,44 @@ inline void* operator new(unsigned int, void* p)
 }
 inline void operator delete(void*, void*)
 {}
-struct S_00e5c370_Alloc;
-struct __declspec(align(16)) S_00e5c370_Vec
-{
-    float x, y, z, w;
-};
 struct S_00e5c370_Elem
 {
-    S_00e5c370_Vec a;
-    S_00e5c370_Vec b;
+    V4 a;
+    V4 b;
     S_00e5c370_Elem(const S_00e5c370_Elem& o)
     {
         reinterpret_cast<__m128&>(a) = reinterpret_cast<const __m128&>(o.a);
         reinterpret_cast<__m128&>(b) = reinterpret_cast<const __m128&>(o.b);
     }
 };
-void __cdecl FUN_00c908c0(S_00e5c370_Alloc& alloc, void* arr, int numElem, int sizeElem);
+void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
 void __cdecl FUN_00d2cc70(void* dst, const void* src, int nbytes);
-template <typename T> struct S_00e5c370_ArrayBase
+template <class T>
+static __forceinline void S_00e5c370_ArrayBase_GrowArrayCapacity(hkArrayBase<T>& self, hkMemoryAllocator& a, int n);
+
+template <class T>
+static __forceinline void S_00e5c370_ArrayBase_GrowArrayCapacity(hkArrayBase<T>& self, hkMemoryAllocator& a, int n)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void GrowArrayCapacity(S_00e5c370_Alloc& a, int n)
-    {
-        const int cap = getCapacity();
+        const int cap = self.getCapacity();
         if (cap < n)
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(a, this, newSize, sizeof(T));
+            FUN_00c908c0(a, (&self), newSize, sizeof(T));
         }
     }
-// @fnv 0x00e5c370
-    void InsertAndDelete(S_00e5c370_Alloc& alloc, int index, int numdel, const T* p, int numtoinsert)
-    {
-        int newsize = m_iElementCount + numtoinsert - numdel;
-        int numtomove = m_iElementCount - index - numdel;
-        if (newsize > getCapacity())
-            GrowArrayCapacity(alloc, newsize);
-        FUN_00d2cc70(m_data + index + numtoinsert, m_data + index + numdel, numtomove * sizeof(T));
-        T* dst = m_data + index;
-        for (int i = 0; i < numtoinsert; i++)
-            new (dst + i) T(p[i]);
-        m_iElementCount = newsize;
-    }
-};
-template struct S_00e5c370_ArrayBase<S_00e5c370_Elem>;
 
-class __declspec(align(16)) V4
+
+__forceinline V4::V4()
+{}
+__forceinline V4::V4(const V4& other)
 {
-    __m128 value;
-
-  public:
-    __forceinline V4()
-    {}
-    __forceinline V4(const V4& other)
-    {
-        value = other.value;
-    }
-    __forceinline void operator=(const V4& other)
-    {
-        value = other.value;
-    }
-    __forceinline void operator=(const __m128& other)
-    {
-        value = other;
-    }
-    operator __m128() const
-    {
-        return value;
-    }
-    void FUN_00c74b70(const V4*, const V4*);
-};
+    m = other.m;
+}
+__forceinline void V4::operator=(const V4& other)
+{
+    m = other.m;
+}
 template <class T> struct ArrayView
 {
     T* data;
@@ -350,20 +301,10 @@ struct Record
     Body* third;
     unsigned char reversed;
 };
-struct Alloc
-{
-    virtual void v00();
-    virtual void* allocate(int);
-};
-struct MemoryHolder
-{
-    int unk00, unk04, unk08, unk0c;
-    Alloc* allocator;
-};
 inline void* allocateObject(unsigned int size)
 {
-    MemoryHolder* holder = reinterpret_cast<MemoryHolder*>(FUN_00c85750());
-    void* memory = holder->allocator->allocate(size);
+    hkMemoryRouter* holder = FUN_00c85750();
+    void* memory = reinterpret_cast<hkMemoryAllocator*>(holder->m_heap)->blockAlloc(size);
     static_cast<RefObject*>(memory)->sizeFlags = (unsigned short)size;
     return memory;
 }
@@ -429,7 +370,8 @@ struct Buffer
         return reinterpret_cast<char*>(words);
     }
 };
-inline void V4::FUN_00c74b70(const V4* left, const V4* right)
+// Preserve the original helper's ECX result pointer and two stack arguments.
+inline void __fastcall SetRelativeRotation(V4* result, void*, const V4* left, const V4* right)
 {
     const __m128 a = reinterpret_cast<const __m128&>(*left);
     const __m128 b = reinterpret_cast<const __m128&>(*right);
@@ -443,7 +385,7 @@ inline void V4::FUN_00c74b70(const V4* left, const V4* right)
     dot = _mm_add_ps(dot, _mm_shuffle_ps(dot, dot, 0xb1));
     dot = _mm_shuffle_ps(dot, dot, 0);
     __m128 high = _mm_unpackhi_ps(imag, dot);
-    reinterpret_cast<__m128&>(*this) = _mm_shuffle_ps(imag, high, 0xc4);
+    result->m = _mm_shuffle_ps(imag, high, 0xc4);
 }
 
 // @fnv 0x00e5b510
@@ -495,7 +437,8 @@ FUN_00dd0530* __cdecl FUN_00e5b510(Edges& edges, ByteFlag clone)
             }
         }
         V4 rotation;
-        rotation.FUN_00c74b70(&edges[i]->getA()->position, &edges[i]->getB()->position);
+        reinterpret_cast<void (__thiscall*)(V4*, const V4*, const V4*)>(SetRelativeRotation)(
+            &rotation, &edges[i]->getA()->position, &edges[i]->getB()->position);
         GetConstraintMotorValues(edges[i]->data, a, b, c);
         if (!a)
         {
@@ -539,45 +482,25 @@ enum S5ba30_Result
     S5ba30_FAILURE = 1
 };
 
-struct S_00e5c370_Alloc
+inline hkMemoryRouter& GetAudioHolder()
 {
-    virtual ~S_00e5c370_Alloc();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-    template <typename T> inline void _bufFree(void* p, int numElem)
-    {
-        ReturnMemory(p, numElem * (int)sizeof(T));
-    }
-};
+    return *FUN_00c85750();
+}
 
-struct S5ba30_Router
+inline hkMemoryAllocator& GetAudioHolderAllocator(hkMemoryRouter& holder)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00e5c370_Alloc* m_pStreamAllocator;
-    S_00e5c370_Alloc& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    static S5ba30_Router& GetMonitorStream()
-    {
-        return *reinterpret_cast<S5ba30_Router*>(FUN_00c85750());
-    }
-};
+    return *reinterpret_cast<hkMemoryAllocator*>(holder.m_heap);
+}
 
 struct S5ba30_HeapAllocator
 {
-    S_00e5c370_Alloc& get(const void*)
+    hkMemoryAllocator& get(const void*)
     {
-        return S5ba30_Router::GetMonitorStream().heap();
+        return GetAudioHolderAllocator(GetAudioHolder());
     }
 };
 
-void __cdecl ResizeAudioStream(S_00e5c370_Alloc& alloc, void* arr, int sizeElem);
+void __cdecl ResizeAudioStream(hkMemoryAllocator& alloc, void* arr, int sizeElem);
 
 struct S5ba30_IsPod
 {
@@ -597,8 +520,9 @@ struct S5ba30_ArrayUtil
     }
 };
 
-template <typename T> struct S5ba30_ArrayOps
-{
+template <typename T>
+struct S5ba30_ArrayOps
+{ // local form of hkArrayBase: 0x00e5ba30 needs the local helper inline/out-of-line split; the shared form changes extent from 2363 to 1869 bytes.
     enum
     {
         CAPACITY_MASK = 0x3fffffff,
@@ -638,7 +562,7 @@ template <typename T> struct S5ba30_ArrayOps
         S5ba30_ArrayUtil::destruct(m_data + m_iElementCount - numToRemove, numToRemove, S5ba30_IsPod());
         m_iElementCount -= numToRemove;
     }
-    __forceinline void GrowArrayCapacity(S_00e5c370_Alloc& alloc, int n)
+    __forceinline void GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
     {
         const int capacity = getCapacity();
         if (capacity < n)
@@ -648,14 +572,14 @@ template <typename T> struct S5ba30_ArrayOps
             FUN_00c908c0(alloc, this, newSize, sizeof(T));
         }
     }
-    __forceinline void _setSize(S_00e5c370_Alloc& alloc, int n)
+    __forceinline void _setSize(hkMemoryAllocator& alloc, int n)
     {
         GrowArrayCapacity(alloc, n);
         S5ba30_ArrayUtil::destruct(m_data + n, m_iElementCount - n, S5ba30_IsPod());
         S5ba30_ArrayUtil::construct(m_data + m_iElementCount, n - m_iElementCount, S5ba30_IsPod());
         m_iElementCount = n;
     }
-    __forceinline void _pushBack(S_00e5c370_Alloc& alloc, const T& t)
+    __forceinline void _pushBack(hkMemoryAllocator& alloc, const T& t)
     {
         if (m_iElementCount == getCapacity())
         {
@@ -664,12 +588,12 @@ template <typename T> struct S5ba30_ArrayOps
         S5ba30_ArrayUtil::constructWithCopy(m_data + m_iElementCount, 1, t, S5ba30_IsPod());
         m_iElementCount++;
     }
-    __forceinline void _clearAndDeallocate(S_00e5c370_Alloc& alloc)
+    __forceinline void _clearAndDeallocate(hkMemoryAllocator& alloc)
     {
         clear();
         if ((m_iCapacityState & DONT_DEALLOCATE_FLAG) == 0)
         {
-            alloc._bufFree<T>(m_data, getCapacity());
+            alloc.bufFree(m_data, getCapacity() * (int)sizeof(T));
         }
         m_data = 0;
         m_iCapacityState = DONT_DEALLOCATE_FLAG;
@@ -767,11 +691,6 @@ class S5ba30_Bool
 
 struct S5ba30_MapBase
 {
-    struct Pair
-    {
-        unsigned long key;
-        unsigned long val;
-    };
     typedef S5ba30_Dummy* Iterator;
     Pair* m_kPrimitiveElement;
     int m_iCapacityFlags;
@@ -783,7 +702,7 @@ struct S5ba30_MapBase
     unsigned long getValue(Iterator it) const
     {
         int i = (int)(unsigned long)it;
-        return m_kPrimitiveElement[i].val;
+        return m_kPrimitiveElement[i].b;
     }
     S5ba30_Bool isValid(Iterator it) const
     {
@@ -791,9 +710,9 @@ struct S5ba30_MapBase
         return i <= m_iPairCount;
     }
     Iterator FindSlot(unsigned long key) const;
-    int FUN_00cb1870(S_00e5c370_Alloc& a, unsigned long key, unsigned long val);
-    void ProcessArgument(S_00e5c370_Alloc& a);
-    void EnsureCapacity(S_00e5c370_Alloc& a, int numElements);
+    int FUN_00cb1870(hkMemoryAllocator& a, unsigned long key, unsigned long val);
+    void ProcessArgument(hkMemoryAllocator& a);
+    void EnsureCapacity(hkMemoryAllocator& a, int numElements);
     __forceinline Iterator findKey(unsigned long key) const
     {
         return FindSlot(key);
@@ -1053,3 +972,18 @@ S5ba30_Result __cdecl FUN_00e5ba30(const S5ba30_Array<S5ba30_ConstraintInstance*
     constraintsOut.popBack(1);
     return S5ba30_SUCCESS;
 }
+
+
+template <>
+void hkArrayBase<S_00e5c370_Elem>::_spliceInto(hkMemoryAllocator& alloc, int index, int numdel, const S_00e5c370_Elem* p, int numtoinsert)
+{
+        int newsize = m_iElementCount + numtoinsert - numdel;
+        int numtomove = m_iElementCount - index - numdel;
+        if (newsize > getCapacity())
+            S_00e5c370_ArrayBase_GrowArrayCapacity(*this, alloc, newsize);
+        FUN_00d2cc70(m_data + index + numtoinsert, m_data + index + numdel, numtomove * sizeof(S_00e5c370_Elem));
+        S_00e5c370_Elem* dst = m_data + index;
+        for (int i = 0; i < numtoinsert; i++)
+            new (dst + i) S_00e5c370_Elem(p[i]);
+        m_iElementCount = newsize;
+    }

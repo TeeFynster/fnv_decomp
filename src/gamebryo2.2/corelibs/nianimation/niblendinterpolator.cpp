@@ -1,8 +1,27 @@
 // gamebryo2.2/corelibs/nianimation/niblendinterpolator.cpp: NiBlendInterpolator, InterpItem, LoadInterpItem, BlendSerializer and more (19 functions)
 
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiStream.h"
+
 #include "niblendinterpolator_types_NiBlendInterpolator.h"
 #include "niblendinterpolator_types_NiBlendInterpolator__InterpArrayItem.h"
 #include "niblendinterpolator_types_NiCloningProcess.h"
+
+// Stream accessors stay inline here to preserve the original field reads.
+inline NiBinaryStream* NiStream::GetBinaryStream()
+{
+    return *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(this) + 0x250);
+}
+
+inline NiBinaryStream& NiStream::Istr()
+{
+    return **reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(this) + 0x24c);
+}
+
+inline unsigned int NiStream::GetFileVersion() const
+{
+    return *reinterpret_cast<const unsigned int*>(reinterpret_cast<const char*>(this) + 0xd8);
+}
 
 // @fnv 0x00a371f0
 NiBlendInterpolator__InterpArrayItem& NiBlendInterpolator__InterpArrayItem::operator=(
@@ -263,11 +282,6 @@ void NiBlendInterpolator::ProcessClone(CloningProcess& aCloneProcess)
 
 extern int DAT_0109697c;
 
-class MemoryManager
-{
-  public:
-    void Deallocate(void* p);
-};
 extern MemoryManager g_memoryManager;
 
 void __fastcall FUN_00a57010(void* pThis);
@@ -477,7 +491,6 @@ const char* const* __cdecl FUN_00a36960()
     return &g_011f371c_arg1;
 }
 
-struct StreamS;
 struct InterpS
 {
     virtual void v0();
@@ -501,7 +514,7 @@ struct InterpS
     virtual void v18();
     virtual void v19();
     virtual void v20();
-    virtual bool RegisterStreamables(StreamS& s);
+    virtual bool RegisterStreamables(NiStream& s);
     virtual void v22();
     virtual void v23();
     virtual void v24();
@@ -652,11 +665,10 @@ void __fastcall FUN_00a36e10(BlendInterpS* self, int, float m_fStartTime, float 
 }  // namespace fnv_00a36e10
 
 namespace fnv_00a36f80 {
-struct StreamS;
 struct InterpS
 {
     virtual void v0();
-    bool FUN_00a81fe0(StreamS& s);
+    bool FUN_00a81fe0(NiStream& s);
     virtual void v1();
     virtual void v2();
     virtual void v3();
@@ -677,7 +689,7 @@ struct InterpS
     virtual void v18();
     virtual void v19();
     virtual void v20();
-    virtual bool RegisterStreamables(StreamS& s);
+    virtual bool RegisterStreamables(NiStream& s);
     virtual void v22();
     virtual void v23();
     virtual void v24();
@@ -722,7 +734,7 @@ struct BlendInterpS : InterpS
 };
 // Registers the base streamables, then registers each item's interpolator when the flag bit is clear; returns false if the base call fails.
 // @fnv 0x00a36f80
-bool __fastcall FUN_00a36f80(BlendInterpS* self, int, StreamS& kStream)
+bool __fastcall FUN_00a36f80(BlendInterpS* self, int, NiStream& kStream)
 {
     if (!self->FUN_00a81fe0(kStream))
         return false;
@@ -911,22 +923,6 @@ struct ObjectWriter
     void* auxPtr;
     WriteItemFn write;
 };
-struct StreamS
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void WriteInterpolator(void* p);
-};
 struct InterpItem
 {
     void* interpolator;
@@ -936,13 +932,13 @@ struct InterpItem
     char unk0d, unk0e, unk0f;
     float easeSpinner;
     float updateTime;
-    void WriteToStream(StreamS* stream);
+    void WriteToStream(NiStream* stream);
 };
 // Writes the interpolator, weight, normalizedWeight, priority and easeSpinner to the stream via its writer, accumulating byte counts.
 // @fnv 0x00a378d0
-void InterpItem::WriteToStream(StreamS* stream)
+void InterpItem::WriteToStream(NiStream* stream)
 {
-    stream->WriteInterpolator(interpolator);
+    stream->SaveLinkID(reinterpret_cast<const NiObject*>(interpolator));
     ObjectWriter* writer = *reinterpret_cast<ObjectWriter**>(reinterpret_cast<char*>(stream) + 0x250);
     {
         unsigned int bytes = 4;
@@ -980,158 +976,6 @@ struct LoadBinStream
     }
 };
 
-struct LoadStream
-{
-    NiObject* GetLoadedObject();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    unsigned int m_uiNifVersion;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    LoadBinStream* m_pUnderlyingStream;
-};
 
 template <class T> inline void LoadStreamBinary(LoadBinStream* s, T& val)
 {
@@ -1148,13 +992,13 @@ struct LoadInterpItem
     char unk0d, unk0e, unk0f;
     float m_fEaseSpinner;
     float m_fLastEvaluationTime;
-    void LoadFromStream(LoadStream* stream);
+    void LoadFromStream(NiStream* stream);
 };
 
 // @fnv 0x00a377b0
-void LoadInterpItem::LoadFromStream(LoadStream* stream)
+void LoadInterpItem::LoadFromStream(NiStream* stream)
 {
-    NiInterpolator* pInterpolator = (NiInterpolator*)stream->GetLoadedObject();
+    NiInterpolator* pInterpolator = (NiInterpolator*)stream->DeserializeObject();
     if (m_spControllerInterpolator != pInterpolator)
     {
         if (m_spControllerInterpolator)
@@ -1163,12 +1007,12 @@ void LoadInterpItem::LoadFromStream(LoadStream* stream)
         if (pInterpolator)
             pInterpolator->IncRefCount();
     }
-    LoadStreamBinary(stream->m_pUnderlyingStream, m_fWeight);
-    LoadStreamBinary(stream->m_pUnderlyingStream, m_fNormalizedWeight);
-    if (stream->m_uiNifVersion < 0x0a01006e)
+    LoadStreamBinary(reinterpret_cast<LoadBinStream*>(&stream->Istr()), m_fWeight);
+    LoadStreamBinary(reinterpret_cast<LoadBinStream*>(&stream->Istr()), m_fNormalizedWeight);
+    if (stream->GetFileVersion() < 0x0a01006e)
     {
         int priority;
-        LoadStreamBinary(stream->m_pUnderlyingStream, priority);
+        LoadStreamBinary(reinterpret_cast<LoadBinStream*>(&stream->Istr()), priority);
         if (priority == 0x80000000)
             m_cPriority = (char)0x80;
         else
@@ -1176,32 +1020,24 @@ void LoadInterpItem::LoadFromStream(LoadStream* stream)
     }
     else
     {
-        LoadStreamBinary(stream->m_pUnderlyingStream, m_cPriority);
+        LoadStreamBinary(reinterpret_cast<LoadBinStream*>(&stream->Istr()), m_cPriority);
     }
-    LoadStreamBinary(stream->m_pUnderlyingStream, m_fEaseSpinner);
+    LoadStreamBinary(reinterpret_cast<LoadBinStream*>(&stream->Istr()), m_fEaseSpinner);
 }
 
 struct InterpolatorRegistry;
-class NiStream
+#include "../../../../include/NiTMallocInterface.h"
+#include "../../../../include/NiTPrimitiveArray.h"
+// Gamebryo NiTArray.inl: the original inlines Add (SetAtGrow) and calls SetSize (0x0096ad30) / SetAt (0x0096ae90)
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
 {
-  public:
-    unsigned int m_header0;
-    unsigned int m_header4;
-    unsigned short m_pRayCursor;
-    unsigned short m_uiBufferCapacity;
-    unsigned short m_unusedC;
-    unsigned short m_growth;
-    void func_0x0096ad30(unsigned int required);
-    void func_0x0096ae90(unsigned int index, const unsigned int* value);
-    void AppendValue(const unsigned int& value)
-    {
-        unsigned int index = m_uiBufferCapacity;
-        unsigned int capacity = m_pRayCursor;
-        if (index >= capacity)
-            func_0x0096ad30(index + m_growth);
-        func_0x0096ae90(index, &value);
-    }
-};
+    unsigned int index = m_usSize;
+    unsigned int capacity = m_usMaxSize;
+    if (index >= capacity)
+        SetSize(index + m_usGrowBy);
+    SetAt(index, element);
+    return index;
+}
 struct LinkedInterpolator
 {
     unsigned int m_pHeadNode;
@@ -1218,21 +1054,21 @@ extern "C" char UNK_01096af4, UNK_01096adc, UNK_01096ac4;
 extern "C" char UNK_01096ab4, UNK_01096aa4;
 extern "C" char UNK_01095dbc, UNK_01096a98, UNK_01096a8c;
 extern "C" char UNK_01096a78, UNK_01096a68;
-extern "C" unsigned int __cdecl FUN_00a7d330(void*);
-extern "C" unsigned int __cdecl FUN_00a7d410(const void*, unsigned int);
+extern "C" const char* __cdecl FUN_00a7d330(void*);
+extern "C" const char* __cdecl FUN_00a7d410(const void*, unsigned int);
 struct ViewerBool
 {
     bool flag;
 };
 union ViewerValue
 {
-    unsigned int value;
+    const char* value;
     ViewerBool boolean;
 };
-extern "C" unsigned int __cdecl FUN_00a7d370(const void*, ViewerBool);
-extern "C" unsigned int __cdecl FUN_00a7d4d0(const void*, int);
-extern "C" unsigned int __cdecl FUN_00a7d550(const void*, float);
-extern "C" unsigned int __cdecl FUN_00a7d5e0(const void*, void*);
+extern "C" const char* __cdecl FUN_00a7d370(const void*, ViewerBool);
+extern "C" const char* __cdecl FUN_00a7d4d0(const void*, int);
+extern "C" const char* __cdecl FUN_00a7d550(const void*, float);
+extern "C" const char* __cdecl FUN_00a7d5e0(const void*, void*);
 struct InterpolatorRegistry
 {
     LinkedInterpolator* func_0x00a2e570(NiInterpolator*, unsigned int);
@@ -1240,42 +1076,42 @@ struct InterpolatorRegistry
 class BlendSerializer : public NiBlendInterpolator
 {
   public:
-    void FUN_00a38080(NiStream* stream);
+    void FUN_00a38080(NiViewerStringsArray* stream);
 };
 // Appends viewer strings for the blend interpolator's fields and, for each array entry with a linked interpolator, its priority, weights and interpolator strings.
 // @fnv 0x00a38080
-void BlendSerializer::FUN_00a38080(NiStream* stream)
+void BlendSerializer::FUN_00a38080(NiViewerStringsArray* stream)
 {
-    this->NiInterpolator::GetViewerStrings((NiViewerStringsArray*)stream);
-    unsigned int uiValue;
+    this->NiInterpolator::GetViewerStrings(stream);
+    const char* uiValue;
     {
         ViewerValue temp;
         temp.value = FUN_00a7d330(DAT_011f36fc);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.value = FUN_00a7d410(&UNK_01096b68, this->m_ucArraySize);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.value = FUN_00a7d410(&UNK_01096b54, DAT_011a83ff);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.boolean.flag = (this->m_uiObjectFlags & 1) != 0;
         temp.value = FUN_00a7d370(&UNK_01096b40, temp.boolean);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.value = FUN_00a7d550(&UNK_01096b2c, this->m_fWeightThreshold);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.value = FUN_00a7d4d0(&UNK_01096b1c, this->m_cHighPriority);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.value = FUN_00a7d4d0(&UNK_01096b08, this->m_cNextHighPriority);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.value = FUN_00a7d550(&UNK_01096af4, this->m_fHighSumOfWeights);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.value = FUN_00a7d550(&UNK_01096adc, this->m_fNextHighSumOfWeights);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.boolean.flag = ((this->m_uiObjectFlags >> 1) & 1) != 0;
         temp.value = FUN_00a7d370(&UNK_01096ac4, temp.boolean);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.value = FUN_00a7d410(&UNK_01096ab4, this->m_ucInterpCount);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
         temp.value = FUN_00a7d410(&UNK_01096aa4, this->m_ucSingleIdx);
-        stream->AppendValue(temp.value);
+        stream->Add(temp.value);
     }
     for (unsigned int index = 0; index < this->m_ucArraySize; ++index)
     {
@@ -1292,17 +1128,17 @@ void BlendSerializer::FUN_00a38080(NiStream* stream)
             {
                 void* linkedObject = linked->m_object;
                 uiValue = FUN_00a7d5e0(&UNK_01095dbc, linkedObject);
-                stream->AppendValue(uiValue);
+                stream->Add(uiValue);
                 uiValue = FUN_00a7d410(&UNK_01096a98, (unsigned char)this->m_pInterpArray[index].m_cPriority);
-                stream->AppendValue(uiValue);
+                stream->Add(uiValue);
                 uiValue = FUN_00a7d550(&UNK_01096a8c, this->m_pInterpArray[index].m_fWeight);
-                stream->AppendValue(uiValue);
+                stream->Add(uiValue);
                 uiValue = FUN_00a7d550(&UNK_01096a78, this->m_pInterpArray[index].m_fNormalizedWeight);
-                stream->AppendValue(uiValue);
+                stream->Add(uiValue);
                 uiValue = FUN_00a7d550(&UNK_01096a68, this->m_pInterpArray[index].m_fEaseSpinner);
-                stream->AppendValue(uiValue);
+                stream->Add(uiValue);
                 NiInterpolator* finalInterpolator = this->m_pInterpArray[index].m_spControllerInterpolator.m_pObject;
-                finalInterpolator->GetViewerStrings((NiViewerStringsArray*)stream);
+                finalInterpolator->GetViewerStrings(stream);
             }
         }
     }
@@ -1325,174 +1161,10 @@ struct SBBinaryStream
     }
 };
 
-struct SBStream
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2C();
-    virtual void SaveLinkID(const void* apObject);
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    SBBinaryStream* m_pBackingStream;
-};
 
-template <class T> inline void SBStreamSaveBinary(SBStream& arStream, const T& arValue)
+template <class T> inline void SBStreamSaveBinary(NiStream& arStream, const T& arValue)
 {
-    arStream.m_pBackingStream->BinaryWrite(&arValue, sizeof(T));
+    reinterpret_cast<SBBinaryStream*>(arStream.GetBinaryStream())->BinaryWrite(&arValue, sizeof(T));
 }
 
 struct SBEntry
@@ -1504,7 +1176,7 @@ struct SBEntry
     int unk10;
     int unk14;
 
-    void SaveBinary(SBStream& arStream);
+    void SaveBinary(NiStream& arStream);
 };
 
 struct SBBase
@@ -1513,7 +1185,7 @@ struct SBBase
     int unk04;
     int unk08;
 
-    void SaveBinary(SBStream& arStream);
+    void SaveBinary(NiStream& arStream);
 };
 
 struct SBObject : SBBase
@@ -1532,12 +1204,12 @@ struct SBObject : SBBase
     int m_iValue28;
     int m_iValue2C;
 
-    void FUN_00a37ec0(SBStream& arStream);
+    void FUN_00a37ec0(NiStream& arStream);
 };
 
 // Serializes the base fields, then unless flag bit 1 is set writes the extra bytes and values, each entry, and the link ID.
 // @fnv 0x00a37ec0
-void SBObject::FUN_00a37ec0(SBStream& arStream)
+void SBObject::FUN_00a37ec0(NiStream& arStream)
 {
     SBBase::SaveBinary(arStream);
     SBStreamSaveBinary(arStream, m_ucFlags);
@@ -1556,7 +1228,7 @@ void SBObject::FUN_00a37ec0(SBStream& arStream)
     SBStreamSaveBinary(arStream, m_iValue2C);
     for (unsigned char i = 0; i < m_ucEntryCount; i++)
         m_pkEntryArray[i].SaveBinary(arStream);
-    arStream.SaveLinkID(m_pkLinked);
+    arStream.SaveLinkID(reinterpret_cast<const NiObject*>(m_pkLinked));
 }
 
 // The engine replaces the global deallocation function with a sized variant;

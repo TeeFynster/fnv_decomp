@@ -11,6 +11,7 @@
 // src/staging/blk_00da0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/FinishingFlag.h"
 struct ScratchBlock
 {
     unsigned int unk00;
@@ -40,10 +41,6 @@ class ScratchOwner
     void AddEntry(ScratchBlock* block, int a, int b);
 };
 void __cdecl FUN_00da7020(ScratchOwner* owner);
-struct FinishingFlag
-{
-    int m_bFinishing;
-};
 struct S00da0780_Member
 {
     S00da0780_Member(FinishingFlag flag);  // FUN_00cb0a70

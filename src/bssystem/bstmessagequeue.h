@@ -4,7 +4,7 @@ template <>
 // @fnv 0x00905770
 bool BSTCommonLLMessageQueue<QueuedMessage>::RemoveMessage(QueuedMessage& output)
 {
-    BSTFreeListElement<QueuedMessage>* pElem = pHead;
+    BSTFreeListElem<QueuedMessage>* pElem = pHead;
     bool bResult;
     if (pElem)
     {
@@ -21,7 +21,7 @@ template <>
 // @fnv 0x009056f0
 bool BSTCommonLLMessageQueue<QueuedMessage>::EnqueueMessage(const QueuedMessage& input)
 {
-    BSTFreeListElement<QueuedMessage>* pElem;
+    BSTFreeListElem<QueuedMessage>* pElem;
     bool bResult;
     if (pSizeClassFreeList && pSizeClassFreeList->FUN_00905aa0(pElem, input))
     {

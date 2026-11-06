@@ -1,5 +1,90 @@
-// bsshader/imagespacemanager.cpp: ImageSpaceManager, Derived, Host, ImageSpaceManager_b8b and more (60 functions)
+#include "../../include/NiTMapItem.h"
+// bsshader/imagespacemanager.cpp: ImageSpaceManager and image-space helpers (60 functions)
 
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "../../include/NiPointer.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTNewInterface.h"
+#include "../../include/NiTArray.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/ImageSpaceManager.h"
+#include "../../include/ImageSpaceTexture.h"
+#include "../../include/NiGlobalStringTable.h"
+#include "../../include/BSTextureManager.h"
+#include "../../include/ImageSpaceModifierParameterData.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/NiScreenElements.h"
+#include "../../include/NiScreenElementsData.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/NiColorA.h"
+#include "NiObject.h"
+#include "NiRefObject_inline.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiCamera.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/PointStorage.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/Vec4.h"
+
+#include <math.h>
+
+inline NiColorA::NiColorA(float fR, float fG, float fB, float fA)
+{
+    r = fR;
+    g = fG;
+    b = fB;
+    a = fA;
+}
+inline NiUpdateData::NiUpdateData() {}
+inline NiUpdateData::NiUpdateData(float time)
+    : fTime(time), pad1(false), pad2(false), pad3(false), pad4(false), pad5(false)
+{}
+
+inline NiScreenElementsData* NiScreenElements::GetData()
+{
+    return static_cast<NiScreenElementsData*>(m_spModelData.m_pObject);
+}
+
+inline void NiAVObject::IncRefCount()
+{
+    NiRefObject::IncRefCount();
+}
+
+inline void NiAVObject::DecRefCount()
+{
+    NiRefObject::DecRefCount();
+}
+
+inline void NiGeometryData::IncRefCount()
+{
+    NiRefObject::IncRefCount();
+}
+
+inline void NiGeometryData::DecRefCount()
+{
+    NiRefObject::DecRefCount();
+}
+
+inline float NiPoint3::Length() const
+{
+    return sqrtf(x * x + y * y + z * z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator-(const NiPoint3& o) const
+{
+    NiPoint3 r;
+    r.x = x - o.x;
+    r.y = y - o.y;
+    r.z = z - o.z;
+    return r;
+}
+
+extern __declspec(thread) int BSAudioThreadContext;
+
+// ImageSpaceManager keeps several fields opaque in the shared layout. Cast those
+// fields to their shared value types at use sites without introducing local layouts.
 #include "imagespacemanager_geometry.h"
 #include "imagespacemanager_types_ImageSpaceManager.h"
 #include "imagespacemanager_effect.h"
@@ -9,14 +94,14 @@
 void ImageSpaceManager::SetRadialBlurParameters(float strength, float rampUp, float start, float rampDown,
                                                 float downStart, const NiPoint2& arCenter)
 {
-    if (strength > m_fRadialBlurStrength)
+    if (strength > fHighestRadialBlurStrengthValue)
     {
-        m_fRadialBlurStrength = strength;
-        m_fRadialBlurRampUp = rampUp;
-        m_fRadialBlurStart = start;
-        m_fRadialBlurRampDown = rampDown;
-        m_fRadialBlurDownStart = downStart;
-        m_kRadialBlurCenter = arCenter;
+        fHighestRadialBlurStrengthValue = strength;
+        fCurrentRadialBlurRampupValue = rampUp;
+        fCurrentRadialBlurStartValue = start;
+        fCurrentRadialBlurRampDownValue = rampDown;
+        fCurrentRadialBlurDownStartValue = downStart;
+        fCurrentRadialBlurCenter = arCenter;
     }
 }
 
@@ -25,19 +110,19 @@ void ImageSpaceManager::SetRadialBlurParameters(float strength, float rampUp, fl
 void ImageSpaceManager::SetDepthOfFieldParameters(float strength, unsigned int mode, float maskConst, float distance,
                                                   float range)
 {
-    if (strength > m_fDepthOfFieldStrength)
+    if (strength > fHighestDOFStrengthValue)
     {
-        m_fDepthOfFieldStrength = strength;
-        m_bDepthOfFieldUsesObject = false;
+        fHighestDOFStrengthValue = strength;
+        bCurrentDOFUseMask = false;
         if (mode > 2)
         {
-            m_bDepthOfFieldUsesObject = true;
+            bCurrentDOFUseMask = true;
             mode -= 3;
         }
-        m_eDepthOfFieldMode = (ImageSpaceEffectDepthOfField__DepthOfFieldMode)mode;
-        m_fDepthOfFieldMaskConstant = distance;
-        m_fDepthOfFieldDistance = range;
-        m_fDepthOfFieldRange = maskConst;
+        fCurrentDOFMode = (ImageSpaceEffectDepthOfField__DepthOfFieldMode)mode;
+        fCurrentDOFDistanceValue = distance;
+        fCurrentDOFRangeValue = range;
+        fCurrentDOFMaskConst = maskConst;
     }
 }
 
@@ -54,22 +139,22 @@ ImageSpaceManager* ImageSpaceManager::FUN_004e3270()
 // @fnv 0x00b8c170
 void ImageSpaceManager::CreateMenuBackgroundGeometry()
 {
-    m_pMenuBackgroundScreenElementsData = new NiScreenElementsData(false, false, 1, 1, 1, 4, 1, 2, 1);
-    m_pMenuBackgroundScreenGeometry = new NiScreenElements(m_pMenuBackgroundScreenElementsData);
-    m_pMenuBackgroundScreenGeometry->GetData()->FUN_00a87ae0(4, 0, 0);
-    m_pMenuBackgroundScreenGeometry->GetData()->SetRectangleBounds(0, DAT_01012054, 1.0f, DAT_010162c0, DAT_0104a494);
-    m_pMenuBackgroundScreenGeometry->GetData()->FUN_00a88130(0, 0, 0.0f, 0.0f, 1.0f, 1.0f);
-    m_pMenuBackgroundScreenGeometry->GetData()->FUN_00a87900();
-    m_pMenuBackgroundScreenGeometry->SetName(GeometryString("Imagespace Effect Geometry"));
-    m_pMenuBackgroundScreenGeometry->UpdateSceneObject();
+    (*reinterpret_cast<NiPointer<NiScreenElementsData>*>(spScreenTriShapeData)) = new NiScreenElementsData(false, false, 1, 1, 1, 4, 1, 2, 1);
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spScreenTriShape)) = new NiScreenElements((*reinterpret_cast<NiPointer<NiScreenElementsData>*>(spScreenTriShapeData)));
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spScreenTriShape))->GetData()->FUN_00a87ae0(4, 0, 0);
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spScreenTriShape))->GetData()->SetRectangleBounds(0, DAT_01012054, 1.0f, DAT_010162c0, DAT_0104a494);
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spScreenTriShape))->GetData()->FUN_00a88130(0, 0, 0.0f, 0.0f, 1.0f, 1.0f);
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spScreenTriShape))->GetData()->FUN_00a87900();
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spScreenTriShape))->NiAVObject::SetName(::NiFixedString("Imagespace Effect Geometry"));
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spScreenTriShape))->UpdateSceneObject();
     NiUpdateData update;
-    update.time = 0.0f;
-    update.a = false;
-    update.b = false;
-    update.c = false;
-    update.d = false;
-    update.e = false;
-    m_pMenuBackgroundScreenGeometry->Update(update);
+    update.fTime = 0.0f;
+    update.pad1 = false;
+    update.pad2 = false;
+    update.pad3 = false;
+    update.pad4 = false;
+    update.pad5 = false;
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spScreenTriShape))->NiAVObject::Update(update);
 }
 
 // @fnv 0x00b8b200
@@ -82,19 +167,19 @@ void __stdcall FUN_00b8b200(bool value)
 void ImageSpaceManager::ApplyDepthOfFieldParamModifierWeather(float strength, unsigned int mode, float maskConst,
                                                               float distance, float range)
 {
-    m_bMenuBackgroundBlendEnabled = false;
-    m_fDepthOfFieldEffectStrength += strength;
-    m_eDepthOfFieldTargetMode = (ImageSpaceEffectDepthOfField__DepthOfFieldMode)mode;
-    m_fDepthOfFieldEffectDistance += distance;
-    m_fDepthOfFieldEffectRange += range;
-    m_fDepthOfFieldMaskValue += maskConst;
+    bWeatherDOFUseMask = false;
+    fWeatherDOFStrengthValue += strength;
+    fWeatherDOFMode = (ImageSpaceEffectDepthOfField__DepthOfFieldMode)mode;
+    fWeatherDOFDistanceValue += distance;
+    fWeatherDOFRangeValue += range;
+    fWeatherDOFMaskConst += maskConst;
 }
 
 // Adds the r, g, b and a components of color to the tint color stored in the manager.
 // @fnv 0x00b8b5c0
-void ImageSpaceManager::ApplyTintColorParamModifierWeather(RgbaColor& color)
+void ImageSpaceManager::ApplyTintColorParamModifierWeather(NiColorA& color)
 {
-    RgbaColor& tint = m_kPartialRenderColor;
+    NiColorA& tint = kWeatherTintColor;
     tint.r += color.r;
     tint.g += color.g;
     tint.b += color.b;
@@ -103,9 +188,9 @@ void ImageSpaceManager::ApplyTintColorParamModifierWeather(RgbaColor& color)
 
 // Adds the r, g, b and a components of color to the fade color stored in the manager.
 // @fnv 0x00b8b690
-void ImageSpaceManager::ApplyFadeColorParamModifierWeather(RgbaColor& color)
+void ImageSpaceManager::ApplyFadeColorParamModifierWeather(NiColorA& color)
 {
-    RgbaColor* fade = &m_kWeatherFadeColor;
+    NiColorA* fade = &kWeatherFadeColor;
     fade->r += color.r;
     fade->g += color.g;
     fade->b += color.b;
@@ -114,34 +199,34 @@ void ImageSpaceManager::ApplyFadeColorParamModifierWeather(RgbaColor& color)
 
 // Accumulates the alpha-weighted RGB of color into a running tint sum and tracks the maximum alpha seen.
 // @fnv 0x00b8b540
-void ImageSpaceManager::ApplyTintColorParamModifier(RgbaColor& color)
+void ImageSpaceManager::ApplyTintColorParamModifier(NiColorA& color)
 {
-    if (color.a > m_fPartialRenderBlend)
-        m_fPartialRenderBlend = color.a;
+    if (color.a > fHighestTintValue)
+        fHighestTintValue = color.a;
     float r = color.r * color.a;
     color.r = r;
     color.g = color.g * color.a;
     color.b = color.b * color.a;
-    m_kModifierColor.r += r;
-    m_kModifierColor.g += color.g;
-    m_kModifierColor.b += color.b;
-    m_kModifierColor.a += color.a;
+    kTintColor.r += r;
+    kTintColor.g += color.g;
+    kTintColor.b += color.b;
+    kTintColor.a += color.a;
 }
 
 // Tracks the maximum alpha seen and adds the alpha-premultiplied color into the accumulator, scaling r, g and b by a.
 // @fnv 0x00b8b610
-void ImageSpaceManager::SetFadeColorParamModifier(RgbaColor& color)
+void ImageSpaceManager::SetFadeColorParamModifier(NiColorA& color)
 {
-    if (color.a > m_fFadeColorAlpha)
-        m_fFadeColorAlpha = color.a;
+    if (color.a > fHighestFadeValue)
+        fHighestFadeValue = color.a;
     float r = color.r * color.a;
     color.r = r;
     color.g = color.g * color.a;
     color.b = color.b * color.a;
-    m_kAccumulatedColor.r += r;
-    m_kAccumulatedColor.g += color.g;
-    m_kAccumulatedColor.b += color.b;
-    m_kAccumulatedColor.a += color.a;
+    kFadeColor.r += r;
+    kFadeColor.g += color.g;
+    kFadeColor.b += color.b;
+    kFadeColor.a += color.a;
 }
 
 // Adds the given radial blur parameters and center offset into the manager's accumulated weather values.
@@ -149,12 +234,12 @@ void ImageSpaceManager::SetFadeColorParamModifier(RgbaColor& color)
 void ImageSpaceManager::ApplyRadialBlurParamModifierWeather(float strength, float rampUp, float start, float rampDown,
                                                             float downStart, const NiPoint2& center)
 {
-    m_fWeatherRadialBlurStrength += strength;
-    m_fWeatherRadialBlurRampUp += rampUp;
-    m_fWeatherRadialBlurStart += start;
-    m_fWeatherRadialBlurRampDown += rampDown;
-    m_fWeatherRadialBlurDownStart += downStart;
-    NiPoint2& weather = m_kWeatherRadialBlurCenter;
+    fWeatherRadialBlurStrengthValue += strength;
+    fWeatherRadialBlurRampupValue += rampUp;
+    fWeatherRadialBlurStartValue += start;
+    fWeatherRadialBlurRampDownValue += rampDown;
+    fWeatherRadialBlurDownStartValue += downStart;
+    NiPoint2& weather = fWeatherRadialBlurCenter;
     weather.x += center.x;
     weather.y += center.y;
 }
@@ -165,7 +250,7 @@ void ImageSpaceManager::SetupEffects()
 {
     for (int i = 0; i < ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_TOP_LEVEL_END; i++)
     {
-        ImageSpaceEffect* effect = pEffectList.m_pBase[i];
+        ImageSpaceEffect* effect = (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase[i];
         if (effect)
             effect->Setup(this, 0);
     }
@@ -174,7 +259,7 @@ void ImageSpaceManager::SetupEffects()
 // @fnv 0x00b8b390
 bool ImageSpaceManager::IsEffectActive(ImageSpaceManager__ImageSpaceEffectEnum index)
 {
-    ImageSpaceEffect* effect = pEffectList.m_pBase[index];
+    ImageSpaceEffect* effect = (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase[index];
     if (effect)
         return effect->IsActive();
     return false;
@@ -184,19 +269,19 @@ bool ImageSpaceManager::IsEffectActive(ImageSpaceManager__ImageSpaceEffectEnum i
 // @fnv 0x00b8b3f0
 void ImageSpaceManager::PrepareEndOfFrameEffects()
 {
-    m_eEndOfFrameEffect = ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_NONE;
-    m_iEndOfFrameEffectCount = 0;
+    iLastEffect = ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_NONE;
+    iActiveEffectsCount = 0;
     if (m_bHasEndOfFrameEffects)
     {
         for (int i = 0; i < ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_ENDOFFRAME_END; i++)
         {
-            ImageSpaceEffect* effect = pEffectList.m_pBase[i];
+            ImageSpaceEffect* effect = (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase[i];
             if (!effect)
                 continue;
             if (!effect->IsActive())
                 continue;
-            m_iEndOfFrameEffectCount++;
-            m_eEndOfFrameEffect = (ImageSpaceManager__ImageSpaceEffectEnum)i;
+            iActiveEffectsCount++;
+            iLastEffect = (ImageSpaceManager__ImageSpaceEffectEnum)i;
         }
     }
 }
@@ -204,6 +289,7 @@ void ImageSpaceManager::PrepareEndOfFrameEffects()
 #include "imagespacemanager_array.h"
 
 // @fnv 0x00b8b270
+template <>
 void NiTArray<bool, NiTMallocInterface<bool> >::SetAt(unsigned int index, const bool& value)
 {
     if (index >= m_usSize)
@@ -228,9 +314,9 @@ void NiTArray<bool, NiTMallocInterface<bool> >::SetAt(unsigned int index, const 
 // @fnv 0x00b8b190
 BSRenderedTexture* ImageSpaceManager::GetDepthRenderedTexture()
 {
-    const ImageSpaceTexture& depth = m_kDepthTexture;
+    const ImageSpaceTexture& depth = (*reinterpret_cast<ImageSpaceTexture*>(DepthTexture));
     if (!depth.GetTexture())
-        m_kDepthTexture.CreateRenderTargetTexture(BSTextureManager::BSTM_RT_SCENE_DEPTH_BUFFER);
+        (*reinterpret_cast<ImageSpaceTexture*>(DepthTexture)).CreateRenderTargetTexture(BSTextureManager::BSTM_RT_SCENE_DEPTH_BUFFER);
     return depth.GetRenderedTexture();
 }
 
@@ -239,143 +325,119 @@ extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
 // @fnv 0x00b8b9a0
 void ImageSpaceManager::BeginParamModifiers()
 {
-    float alpha = m_kBlendedParameterData.m_afColorAndAlphaParameters[7];
-    m_fPartialRenderBlend = alpha;
-    m_kModifierColor.r = m_kBlendedParameterData.m_afColorAndAlphaParameters[4] * alpha;
-    m_kModifierColor.g = m_kBlendedParameterData.m_afColorAndAlphaParameters[5] * alpha;
-    m_kModifierColor.b = m_kBlendedParameterData.m_afColorAndAlphaParameters[6] * alpha;
-    m_kModifierColor.a = m_kBlendedParameterData.m_afColorAndAlphaParameters[7];
+    float alpha = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[7];
+    fHighestTintValue = alpha;
+    kTintColor.r = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[4] * alpha;
+    kTintColor.g = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[5] * alpha;
+    kTintColor.b = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[6] * alpha;
+    kTintColor.a = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[7];
     {
-        RgbaColor clear;
+        NiColorA clear;
         clear.r = 0.0f;
         clear.g = 0.0f;
         clear.b = 0.0f;
         clear.a = 0.0f;
-        m_kPartialRenderColor = clear;
+        kWeatherTintColor = clear;
     }
-    m_fFadeColorAlpha = 0.0f;
-    m_kAccumulatedColor.r = 0.0f;
-    m_kAccumulatedColor.g = 0.0f;
-    m_kAccumulatedColor.b = 0.0f;
-    m_kAccumulatedColor.a = 0.0f;
-    m_kWeatherFadeColor.r = 0.0f;
-    m_kWeatherFadeColor.g = 0.0f;
-    m_kWeatherFadeColor.b = 0.0f;
-    m_kWeatherFadeColor.a = 0.0f;
-    m_fDoubleVisionStrength = 0.0f;
-    m_fWeatherDoubleVisionStrength = 0.0f;
-    m_fRadialBlurStrength = 0.0f;
-    m_fRadialBlurRampUp = 0.0f;
-    m_fRadialBlurStart = 0.0f;
-    m_fRadialBlurRampDown = 0.0f;
-    m_fRadialBlurDownStart = 0.0f;
+    fHighestFadeValue = 0.0f;
+    kFadeColor.r = 0.0f;
+    kFadeColor.g = 0.0f;
+    kFadeColor.b = 0.0f;
+    kFadeColor.a = 0.0f;
+    kWeatherFadeColor.r = 0.0f;
+    kWeatherFadeColor.g = 0.0f;
+    kWeatherFadeColor.b = 0.0f;
+    kWeatherFadeColor.a = 0.0f;
+    fHighestBlurValue = 0.0f;
+    fHighestDoubleValue = 0.0f;
+    fHighestRadialBlurStrengthValue = 0.0f;
+    fCurrentRadialBlurRampupValue = 0.0f;
+    fCurrentRadialBlurStartValue = 0.0f;
+    fCurrentRadialBlurRampDownValue = 0.0f;
+    fCurrentRadialBlurDownStartValue = 0.0f;
     {
         NiPoint2 clear;
         clear.x = 0.0f;
         clear.y = 0.0f;
-        m_kRadialBlurCenter = clear;
+        fCurrentRadialBlurCenter = clear;
     }
-    m_fDepthOfFieldStrength = 0.0f;
-    m_fDepthOfFieldMaskConstant = 0.0f;
-    m_fDepthOfFieldDistance = 0.0f;
-    m_fDepthOfFieldRange = 0.0f;
-    m_eDepthOfFieldMode = (ImageSpaceEffectDepthOfField__DepthOfFieldMode)3;
-    m_bDepthOfFieldUsesObject = false;
-    m_fBlurRadius = 0.0f;
-    m_fMenuBackgroundBlendValue = 0.0f;
-    m_fWeatherBlurRadius = 0.0f;
-    m_fAdditionalImageSpaceValue = 0.0f;
-    m_fWeatherRadialBlurStrength = 0.0f;
-    m_fWeatherRadialBlurRampUp = 0.0f;
-    m_fWeatherRadialBlurStart = 0.0f;
-    m_fWeatherRadialBlurRampDown = 0.0f;
-    m_fWeatherRadialBlurDownStart = 0.0f;
+    fHighestDOFStrengthValue = 0.0f;
+    fCurrentDOFDistanceValue = 0.0f;
+    fCurrentDOFRangeValue = 0.0f;
+    fCurrentDOFMaskConst = 0.0f;
+    fCurrentDOFMode = (ImageSpaceEffectDepthOfField__DepthOfFieldMode)3;
+    bCurrentDOFUseMask = false;
+    fHighestDepthRadialBlurStrengthValue = 0.0f;
+    fHighestMotionBlurStrengthValue = 0.0f;
+    fWeatherBlurValue = 0.0f;
+    fWeatherDoubleValue = 0.0f;
+    fWeatherRadialBlurStrengthValue = 0.0f;
+    fWeatherRadialBlurRampupValue = 0.0f;
+    fWeatherRadialBlurStartValue = 0.0f;
+    fWeatherRadialBlurRampDownValue = 0.0f;
+    fWeatherRadialBlurDownStartValue = 0.0f;
     {
         NiPoint2 clear;
         clear.x = 0.0f;
         clear.y = 0.0f;
-        m_kWeatherRadialBlurCenter = clear;
+        fWeatherRadialBlurCenter = clear;
     }
-    m_fDepthOfFieldEffectStrength = 0.0f;
-    m_fDepthOfFieldEffectDistance = 0.0f;
-    m_fDepthOfFieldEffectRange = 0.0f;
-    m_fDepthOfFieldMaskValue = 0.0f;
-    m_eDepthOfFieldTargetMode = (ImageSpaceEffectDepthOfField__DepthOfFieldMode)3;
-    m_bMenuBackgroundBlendEnabled = false;
-    m_fMenuBackgroundBlendTarget = 0.0f;
-    fnv_zlib_memset(m_kModifierParameterData, 0, sizeof(m_kModifierParameterData));
+    fWeatherDOFStrengthValue = 0.0f;
+    fWeatherDOFDistanceValue = 0.0f;
+    fWeatherDOFRangeValue = 0.0f;
+    fWeatherDOFMaskConst = 0.0f;
+    fWeatherDOFMode = (ImageSpaceEffectDepthOfField__DepthOfFieldMode)3;
+    bWeatherDOFUseMask = false;
+    fWeatherMotionBlurStrengthValue = 0.0f;
+    fnv_zlib_memset((*reinterpret_cast<ImageSpaceModifierParameterData (*)[2]>(WeatherParameterData)), 0, sizeof((*reinterpret_cast<ImageSpaceModifierParameterData (*)[2]>(WeatherParameterData))));
 }
 
-struct FUN_00b8af10_shell : public ImageSpaceManager
-{
-    void RaiseHighestBlurRadius(float);
-};
 
 // If afBlurRadius exceeds the stored highest blur value at offset 0x25c, it stores afBlurRadius there.
 // @fnv 0x00b8af10
-void FUN_00b8af10_shell::RaiseHighestBlurRadius(float afBlurRadius)
+void ImageSpaceManager::RaiseHighestBlurRadius(float afBlurRadius)
 {
     float& fHighestBlur = *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x25c);
     if (afBlurRadius > fHighestBlur)
         fHighestBlur = afBlurRadius;
 }
 
-struct FUN_00b8af40_shell : public ImageSpaceManager
-{
-    void FUN_00b8af40(float);
-};
 
 // @fnv 0x00b8af40
-void FUN_00b8af40_shell::FUN_00b8af40(float afBlurRadius)
+void ImageSpaceManager::FUN_00b8af40(float afBlurRadius)
 {
-    m_fWeatherBlurRadius += afBlurRadius;
+    fWeatherBlurValue += afBlurRadius;
 }
 
-struct FUN_00b8af60_shell : public ImageSpaceManager
-{
-    void RaiseBlurRadius(float);
-};
 
 // Raises the float at offset 0x2f0 to afBlurRadius if afBlurRadius is greater than its current value.
 // @fnv 0x00b8af60
-void FUN_00b8af60_shell::RaiseBlurRadius(float afBlurRadius)
+void ImageSpaceManager::RaiseBlurRadius(float afBlurRadius)
 {
     float& val = *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x2f0);
     if (afBlurRadius > val)
         val = afBlurRadius;
 }
 
-struct FUN_00b8af90_shell : public ImageSpaceManager
-{
-    void FUN_00b8af90(float);
-};
 
 // @fnv 0x00b8af90
-void FUN_00b8af90_shell::FUN_00b8af90(float afBlurRadius)
+void ImageSpaceManager::FUN_00b8af90(float afBlurRadius)
 {
     *(float*)((char*)this + 0x2f4) += afBlurRadius;
 }
 
-struct FUN_00b8afb0_shell : public ImageSpaceManager
-{
-    void FUN_00b8afb0(float);
-};
 
 // Raises the stored double-vision value to afDoubleVision when the new value is greater.
 // @fnv 0x00b8afb0
-void FUN_00b8afb0_shell::FUN_00b8afb0(float afDoubleVision)
+void ImageSpaceManager::FUN_00b8afb0(float afDoubleVision)
 {
-    if (afDoubleVision > m_fWeatherDoubleVisionStrength)
-        m_fWeatherDoubleVisionStrength = afDoubleVision;
+    if (afDoubleVision > fHighestDoubleValue)
+        fHighestDoubleValue = afDoubleVision;
 }
 
-struct FUN_00b8afe0_shell : public ImageSpaceManager
-{
-    void AddDoubleVision(float);
-};
 
 // @fnv 0x00b8afe0
-void FUN_00b8afe0_shell::AddDoubleVision(float afDoubleVision)
+void ImageSpaceManager::AddDoubleVision(float afDoubleVision)
 {
     *(float*)((char*)this + 0x268) += afDoubleVision;
 }
@@ -421,8 +483,9 @@ struct PtrTable
 };
 
 // @fnv 0x00b8b440
-void __fastcall FUN_00b8b440(char* pThis, int, bool bFlag)
+void ImageSpaceManager::ApplyCurrentParameterData(bool bFlag)
 {
+    char* pThis = reinterpret_cast<char*>(this);
     PtrTable** ppTable = (PtrTable**)(pThis + 8);
     if ((*ppTable)->p00)
     {
@@ -526,8 +589,6 @@ struct Obj_00b8c0e0
     Vtable_00b8c0e0* vt;
 };
 
-static const char* const unused_str_order_00b8c0e0 = "TV";
-
 // Fills vertex and pixel shader init blocks with the TV shader paths, calls the vtable init with "TV", "vs_1_1", "ps_2_0", then the vtable finalize.
 // @fnv 0x00b8c0e0
 void __fastcall InitTVShader(Obj_00b8c0e0* pObj, int)
@@ -573,8 +634,9 @@ extern float _DAT_01202400;
 
 // Copies 0x98 bytes from the object's source pointer at 0xb0 or 0xac into offset 0x14, falling back to DAT_011ff940, then zeroes two floats.
 // @fnv 0x00b8b500
-void __fastcall FUN_00b8b500(void* thisPtr, int aiUnused)
+void ImageSpaceManager::ResetToBaseParameterData()
 {
+    void* thisPtr = this;
     char* pSource = *(char**)((char*)thisPtr + 0xb0);
     if (pSource)
     {
@@ -618,9 +680,14 @@ struct ImageSpaceEffectShader
     ~ImageSpaceEffectShader();
 };
 
-struct NiTPrimitiveArray_ImageSpaceTexture___
+// These shader receivers expose storage already initialized by ImageSpaceEffectShader's
+// constructor. A by-value NiTPrimitiveArray<ImageSpaceTexture*> adds a second array
+// construction and cleanup: rebind reports 118 bytes instead of the original 98 at
+// 0x00b8bce0, 0x00b8bea0 and 0x00b8c070. Keep passive storage and use the shared
+// template for every array operation.
+struct ShaderTextureArrayStorage
 {
-    void __thiscall SetSize(unsigned int);
+    unsigned char bytes[sizeof(NiTPrimitiveArray<ImageSpaceTexture*>)];
 };
 
 extern int DAT_010affa0;
@@ -632,7 +699,7 @@ struct FUN_00b8bce0 : ImageSpaceEffectShader
     char pad1[0x68];
     void* m_6c;
     char pad2[0x24];
-    NiTPrimitiveArray_ImageSpaceTexture___ m_ppData;
+    ShaderTextureArrayStorage m_ppData;
     FUN_00b8bce0();
 };
 
@@ -641,7 +708,7 @@ FUN_00b8bce0::FUN_00b8bce0()
 {
     m_vtbl = &DAT_010affc0;
     m_6c = &DAT_010affa0;
-    m_ppData.SetSize(5);
+    reinterpret_cast<NiTPrimitiveArray<ImageSpaceTexture*>*>(&m_ppData)->SetSize(5);
 }
 
 extern const char g_011fed88_arg1[];
@@ -653,10 +720,7 @@ const char* __cdecl GetArg1String()
 }
 
 namespace fnv_00b8bea0 {
-struct NiTPrimitiveArray_ImageSpaceTexture___
-{
-    void __thiscall SetSize(unsigned int);
-};
+
 struct ImageSpaceEffectShader
 {
     ImageSpaceEffectShader();
@@ -670,7 +734,7 @@ struct FUN_00b8bea0 : ImageSpaceEffectShader
     char pad1[0x68];
     int* v6c;
     char pad2[0x24];
-    NiTPrimitiveArray_ImageSpaceTexture___ arr;
+    ShaderTextureArrayStorage arr;
     FUN_00b8bea0();
 };
 // Initializes the object's two pointers to DAT_010b0198 and DAT_010b0174 and sets the texture array size to 2.
@@ -679,7 +743,7 @@ FUN_00b8bea0::FUN_00b8bea0()
 {
     v0 = &DAT_010b0198;
     v6c = &DAT_010b0174;
-    arr.SetSize(2);
+    reinterpret_cast<NiTPrimitiveArray<ImageSpaceTexture*>*>(&arr)->SetSize(2);
 }
 }  // namespace fnv_00b8bea0
 
@@ -724,14 +788,10 @@ struct ImageSpaceEffectShader
     char pad[0x94];
 };
 
-struct NiTPrimitiveArray_ImageSpaceTexture___
-{
-    void __thiscall SetSize(unsigned int);
-};
 
 struct FUN_00b8c070 : ImageSpaceEffectShader
 {
-    NiTPrimitiveArray_ImageSpaceTexture___ m;
+    ShaderTextureArrayStorage m;
     FUN_00b8c070();
 };
 
@@ -740,7 +800,7 @@ FUN_00b8c070::FUN_00b8c070()
 {
     *(int**)this = &DAT_010b0338;
     *(int**)((char*)this + 0x6c) = &DAT_010b0318;
-    m.SetSize(4);
+    reinterpret_cast<NiTPrimitiveArray<ImageSpaceTexture*>*>(&m)->SetSize(4);
 }
 }  // namespace fnv_00b8c070
 
@@ -842,25 +902,14 @@ struct Obj
     virtual void f71();
     virtual void f72();
 };
-struct Container
-{
-    char pad[136];
-    char* arr[82];
-};
-struct Host
-{
-    char pad[8];
-    Container* ptr;
-    void FUN_00b8b3b0();
-};
 // @fnv 0x00b8b3b0
-void Host::FUN_00b8b3b0()
+void ImageSpaceManager::SetupShader()
 {
     for (unsigned int i = 0x88; i < 0x1D0; i += 4)
     {
-        if (*(char**)((char*)ptr + i))
+        if (*(char**)((char*)(*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase + i))
         {
-            char* pEntry = *(char**)((char*)ptr + i);
+            char* pEntry = *(char**)((char*)(*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase + i);
             Obj* o = pEntry ? (Obj*)(pEntry - 0x6C) : 0;
             o->f72();
         }
@@ -888,8 +937,9 @@ void* UnkClass::DestroyIfFlagged(unsigned int auiFlags)
 }
 
 // @fnv 0x00b8aea0
-void __fastcall FUN_00b8aea0(char* self)
+void ImageSpaceManager::ResetWeatherData()
 {
+    char* self = reinterpret_cast<char*>(this);
     float* p = (float*)(self + 0x14c);
     int i = 0xf;
     for (; i; --i)
@@ -915,35 +965,20 @@ void __fastcall FUN_00b8aea0(char* self)
 
 extern "C" unsigned long __cdecl _byteswap_ulong(unsigned long ulValue);
 
-class B8AD00Header
-{
-  public:
-    unsigned int m_auiFields[15];
-    unsigned int m_auiA[3];
-    unsigned int m_auiB[3];
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int m_auiC[12];
-    unsigned int m_uiLast;
-
-    void SwapEndian();
-};
 
 // Swap the header from big-endian.
 // @fnv 0x00b8ad00
-void B8AD00Header::SwapEndian()
+void ImageSpaceModifierParameterData::Endian()
 {
     for (int i = 0; i < 15; i++)
-        m_auiFields[i] = _byteswap_ulong(m_auiFields[i]);
+        reinterpret_cast<unsigned int*>(m_afFirstParameterSet)[i] = _byteswap_ulong(reinterpret_cast<unsigned int*>(m_afFirstParameterSet)[i]);
     for (int j = 0; j < 3; j++)
-        m_auiA[j] = _byteswap_ulong(m_auiA[j]);
+        reinterpret_cast<unsigned int*>(m_afSecondParameterSet)[j] = _byteswap_ulong(reinterpret_cast<unsigned int*>(m_afSecondParameterSet)[j]);
     for (int j = 0; j < 3; j++)
-        m_auiB[j] = _byteswap_ulong(m_auiB[j]);
+        reinterpret_cast<unsigned int*>(m_afThirdParameterSet)[j] = _byteswap_ulong(reinterpret_cast<unsigned int*>(m_afThirdParameterSet)[j]);
     for (int j = 0; j < 12; j++)
-        m_auiC[j] = _byteswap_ulong(m_auiC[j]);
-    m_uiLast = _byteswap_ulong(m_uiLast);
+        reinterpret_cast<unsigned int*>(m_afColorAndAlphaParameters)[j] = _byteswap_ulong(reinterpret_cast<unsigned int*>(m_afColorAndAlphaParameters)[j]);
+    ShaderConstantData = _byteswap_ulong(ShaderConstantData);
 }
 
 extern ImageSpaceModifierParameterData DAT_011ff940;
@@ -989,290 +1024,39 @@ void __cdecl FUN_00b8ad70()
     DAT_011ff940.m_afColorAndAlphaParameters[11] = 0.0f;
 }
 
-struct B8B060Pair
-{
-    int m_iFirst;
-    int m_iSecond;
-};
-
-class B8B060Request
-{
-  public:
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28C;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29C;
-    int unk2A0;
-    int unk2A4;
-    int unk2A8;
-    int unk2AC;
-    int unk2B0;
-    int unk2B4;
-    int unk2B8;
-    int unk2BC;
-    int unk2C0;
-    int unk2C4;
-    int unk2C8;
-    int unk2CC;
-    float m_fTopicParamB;
-    float m_fParamC;
-    float m_fParamD;
-    float m_fParamA;
-    float m_fParamB;
-    B8B060Pair m_kPair;
-    int m_iType;
-
-    void SetIfHigherPriority(float fPriority, int iType, float fA, float fB, float fC, float fD,
-                             const B8B060Pair& kPair);
-};
 
 // If fPriority exceeds the stored priority, stores the priority, type, four float parameters and the pair.
 // @fnv 0x00b8b060
-void B8B060Request::SetIfHigherPriority(float fPriority, int iType, float fA, float fB, float fC, float fD,
-                                        const B8B060Pair& kPair)
+void ImageSpaceManager::SetIfHigherPriority(float fPriority, unsigned int iType, float fA, float fB, float fC, float fD,
+                                           const NiPoint2& kPair)
 {
-    if (fPriority > m_fTopicParamB)
+    if (fPriority > fHighestDepthRadialBlurStrengthValue)
     {
-        m_fTopicParamB = fPriority;
-        m_fParamC = fC;
-        m_fParamD = fD;
-        m_kPair = kPair;
-        m_fParamA = fA;
-        m_iType = iType;
-        m_fParamB = fB;
+        fHighestDepthRadialBlurStrengthValue = fPriority;
+        fCurrentDepthRadialBlurRampupValue = fC;
+        fCurrentDepthRadialBlurStartValue = fD;
+        fCurrentDepthRadialBlurCenter = kPair;
+        fCurrentDepthRadialBlurDistance = fA;
+        fCurrentDepthRadialBlurMode = iType;
+        fCurrentDepthRadialBlurRange = fB;
     }
 }
 
-struct Vec3_b8b7d0
-{
-    float x;
-    float y;
-    float z;
-};
-
-struct NiPosGlobal_b8b7d0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    Vec3_b8b7d0 m8c;
-};
-
-extern NiPosGlobal_b8b7d0* DAT_011f917c;
-extern "C" double __cdecl sqrt(double);
+extern ::NiCamera* DAT_011f917c;
+using ::sqrt;
 
 int __cdecl FUN_00b59d30(int, int, int*);
 
-struct FUN_00b8b7d0_cls
-{
-    void SetIfHigherPriority(float, int, float, float, float, float, int*);
-    void FUN_00b8b7d0(float a0, int a1, float a2, float a3, Vec3_b8b7d0* p);
-};
 
 // @fnv 0x00b8b7d0
-void FUN_00b8b7d0_cls::FUN_00b8b7d0(float afParam0, int aiParam1, float afParam2, float afParam3,
-                                    Vec3_b8b7d0* pPosition)
+void ImageSpaceManager::ApplyDepthOfFieldModifier(float afParam0, unsigned int aiParam1, float afParam2, float afParam3,
+                                                 const NiBound& bound)
 {
-    NiPosGlobal_b8b7d0* g = DAT_011f917c;
-    Vec3_b8b7d0 gp = g->m8c;
-    Vec3_b8b7d0 pos = *pPosition;
-    Vec3_b8b7d0 d;
+    const ::NiPoint3* pPosition = reinterpret_cast<const ::NiPoint3*>(&bound);
+    ::NiCamera* g = DAT_011f917c;
+    ::NiPoint3 gp = *reinterpret_cast<const ::NiPoint3*>(&g->m_kWorld.m_Translate);
+    ::NiPoint3 pos = *pPosition;
+    ::NiPoint3 d = pos;
     d.x = pos.x - gp.x;
     d.y = pos.y - gp.y;
     d.z = pos.z - gp.z;
@@ -1281,7 +1065,7 @@ void FUN_00b8b7d0_cls::FUN_00b8b7d0(float afParam0, int aiParam1, float afParam2
     float dist = t;
     FUN_00b59d30((int)pPosition, (int)&pos, (int*)&t);
     t = t + afParam3;
-    SetIfHigherPriority(afParam0, aiParam1, dist, dist, afParam2, t, (int*)&pos);
+    SetIfHigherPriority(afParam0, aiParam1, dist, dist, afParam2, t, *reinterpret_cast<const NiPoint2*>(&pos));
 }
 
 extern "C" void FUN_00ec61c0(void* a, unsigned int b, unsigned int c);
@@ -1453,11 +1237,7 @@ void FUN_00b8bdb0_cls::InitScanBlendPass()
     b->m_30->SetNodeValue(0x14, 6, 1);
 }
 
-struct MemoryManager
-{
-    void Deallocate(void* p);
-};
-extern MemoryManager _g_memoryManager;
+extern ::MemoryManager _g_memoryManager;
 inline void MemFree(void* p)
 {
     _g_memoryManager.Deallocate(p);
@@ -1476,19 +1256,14 @@ class CachedEntry : public NiRefObject
     NiPointer<NiRefObject> spObj24;
 };
 
-struct CachedEntryMapItem
-{
-    CachedEntryMapItem* m_pkNext;
-    const char* m_key;
-    NiPointer<CachedEntry> m_val;
-};
+
 
 class CachedEntryMap
 {
   public:
     void** m_ppVirtualMethodTable;
     unsigned int m_uiHashSize;
-    CachedEntryMapItem** m_ppkHashTable;
+    NiTMapItem<const char*, NiPointer<CachedEntry> >** m_ppkHashTable;
     unsigned int m_uiCount;
 
     void* GetFirstPos() const
@@ -1506,7 +1281,7 @@ class CachedEntryMap
     }
     __declspec(noinline) void GetNext(void*& pos, const char*& key, NiPointer<CachedEntry>& val) const
     {
-        CachedEntryMapItem* pItem = (CachedEntryMapItem*)pos;
+        NiTMapItem<const char*, NiPointer<CachedEntry> >* pItem = (NiTMapItem<const char*, NiPointer<CachedEntry> >*)pos;
         key = pItem->m_key;
         val = pItem->m_val;
         pos = pItem->m_pkNext;
@@ -1545,70 +1320,30 @@ void __cdecl ClearCachedEntryMap()
     }
 }
 
-template <> class NiTArray<ImageSpaceEffectParam*, NiTMallocInterface<ImageSpaceEffectParam*> > : public NiMemObject
-{
-  public:
-    virtual ~NiTArray();
-    ImageSpaceEffectParam** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetAt(unsigned int uiIndex, ImageSpaceEffectParam* const& element);
-};
 typedef NiTArray<ImageSpaceEffectParam*, NiTMallocInterface<ImageSpaceEffectParam*> > ParamArray_b8b;
 
-struct ImageSpaceManager_b8b
-{
-    int unk;
-    NiTPrimitiveArray_ImageSpaceEffect___ m_kEffects;
-    void ShutdownAllEffects();
-};
 
-// Shuts down and destroys each effect in m_kEffects, clears the array entries, and resets its size counters to zero.
+// Shuts down and destroys each effect, clears the array entries, and resets its size counters.
 // @fnv 0x00b8b2e0
-void ImageSpaceManager_b8b::ShutdownAllEffects()
+void ImageSpaceManager::ShutdownEffects()
 {
     for (int i = 0; i < ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_COUNT; i++)
     {
-        ImageSpaceEffect* pkEffect = m_kEffects.m_pBase[i];
+        ImageSpaceEffect* pkEffect = (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase[i];
         if (pkEffect)
         {
             pkEffect->Shutdown();
             pkEffect->Destroy(true);
             ImageSpaceEffectParam* pkNull = 0;
-            ((ParamArray_b8b*)&m_kEffects)->SetAt(i, pkNull);
+            ((ParamArray_b8b*)&(*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)))->SetAt(i, pkNull);
         }
     }
-    for (unsigned short j = 0; j < m_kEffects.m_usSize; j++)
-        m_kEffects.m_pBase[j] = 0;
-    m_kEffects.m_usSize = 0;
-    m_kEffects.m_usESize = 0;
+    for (unsigned short j = 0; j < (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_usSize; j++)
+        (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase[j] = 0;
+    (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_usSize = 0;
+    (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_usESize = 0;
 }
 
-extern __declspec(thread) unsigned int g_uiTlsAllocState;
-
-struct TlsAllocStateGuard
-{
-    unsigned int uiSaved;
-    TlsAllocStateGuard(unsigned int uiState)
-    {
-        uiSaved = g_uiTlsAllocState;
-        g_uiTlsAllocState = uiState;
-    }
-    ~TlsAllocStateGuard()
-    {
-        g_uiTlsAllocState = uiSaved;
-    }
-};
-
-struct ImageSpaceManagerHelper : public ImageSpaceManager
-{
-    void InitShaders();
-    void InitTextures();
-    void InitParams();
-    void FUN_00b977d0();
-};
 
 struct ImageSpaceShaderParamGlobal
 {
@@ -1616,36 +1351,33 @@ struct ImageSpaceShaderParamGlobal
 };
 extern ImageSpaceShaderParamGlobal g_01202410;
 
-struct BSTextureManagerStub
-{
-    BSRenderedTexture* CreateRenderedTexture(int, int, int, int, int);
-};
-extern BSTextureManagerStub* DAT_011f91a8;
+extern ::BSTextureManager* DAT_011f91a8;
 extern int DAT_011f4748;
 
 // Initializes shaders, textures, effects, params and a rendered texture once, guarded by a TLS alloc-state guard and a one-time flag.
 // @fnv 0x00b977d0
-void ImageSpaceManagerHelper::FUN_00b977d0()
+void ImageSpaceManager::Initialize()
 {
-    TlsAllocStateGuard kGuard(0x27);
-    if (!m_bEndOfFrameEffectsEnabled)
+    ::AutoMemContext kGuard(0x27);
+    if (!bIsReady)
     {
-        InitShaders();
-        InitTextures();
-        m_bEndOfFrameEffectsEnabled = true;
+        InitEffects();
+        CreateMenuBackgroundGeometry();
+        bIsReady = true;
         SetupEffects();
         g_01202410.Init(0, 0);
-        InitParams();
-        RgbaColor kTint;
+        InitDefaultParameter();
+        NiColorA kTint;
         kTint.b = kTint.g = kTint.r = 0.0f;
         kTint.a = 0.3f;
-        m_kMenuBackgroundTint = kTint;
-        m_kMenuBackgroundRect.m_fMinimumU = 0.0f;
-        m_kMenuBackgroundRect.m_fMaximumU = 1.0f;
-        m_kMenuBackgroundRect.m_fMinimumV = 1.0f;
-        m_kMenuBackgroundRect.m_fMaximumV = 0.0f;
-        m_pCurrentRenderedTexture = 0;
-        m_pMenuBackgroundTexture = DAT_011f91a8->CreateRenderedTexture(DAT_011f4748, 3, 0, 0, 0);
+        kRefractionTint = kTint;
+        (*reinterpret_cast<NiRect<float>*>(CustomViewPort)).m_fMinimumU = 0.0f;
+        (*reinterpret_cast<NiRect<float>*>(CustomViewPort)).m_fMaximumU = 1.0f;
+        (*reinterpret_cast<NiRect<float>*>(CustomViewPort)).m_fMinimumV = 1.0f;
+        (*reinterpret_cast<NiRect<float>*>(CustomViewPort)).m_fMaximumV = 0.0f;
+        pEOFDest = 0;
+        pSwapTarget = reinterpret_cast<BSRenderedTexture*>(
+            DAT_011f91a8->CreateRenderTargetTexture(reinterpret_cast<::NiRenderer*>(DAT_011f4748), 3, 0, 0, 0));
     }
 }
 
@@ -1663,49 +1395,29 @@ unsigned char C00b8bda0::FUN_00b8bda0()
     return m4;
 }
 
-extern __declspec(thread) int g_tlsMemContext;
 
-struct ScopedMemoryContext
+__declspec(noinline) void ImageSpaceManager::FUN_00b8b540(NiColorA& color)
 {
-    int iOldContext;
-    ScopedMemoryContext(int aiContext)
-    {
-        iOldContext = g_tlsMemContext;
-        g_tlsMemContext = aiContext;
-    }
-    ~ScopedMemoryContext()
-    {
-        g_tlsMemContext = iOldContext;
-    }
-};
-
-__declspec(noinline) void ImageSpaceManager::FUN_00b8b540(RgbaColor& color)
-{
-    m_fPartialRenderBlend = color.a;
+    fHighestTintValue = color.a;
 }
 
-__declspec(noinline) void ImageSpaceManager::FUN_00b8b610(RgbaColor& color)
+__declspec(noinline) void ImageSpaceManager::FUN_00b8b610(NiColorA& color)
 {
-    m_fFadeColorAlpha = color.a;
+    fHighestFadeValue = color.a;
 }
 
-class DerivedImageSpaceManager : public ImageSpaceManager
-{
-  public:
-    void FUN_00b8ccb0();
-};
 
 // Blends weather values into image-space settings and raises blur, radial blur, depth-of-field and motion-blur strengths to their maxima.
 // @fnv 0x00b8ccb0
-void DerivedImageSpaceManager::FUN_00b8ccb0()
+void ImageSpaceManager::EndWeatherModifiers()
 {
     for (int i = 0; i < 15; i++)
     {
         float afWeatherValues[2];
-        afWeatherValues[0] = m_kModifierParameterData[0].m_afFirstParameterSet[i];
-        afWeatherValues[1] = m_kModifierParameterData[1].m_afFirstParameterSet[i];
-        ScopedMemoryContext ctx(0x27);
-        float val = m_kBlendedParameterData.m_afFirstParameterSet[i];
+        afWeatherValues[0] = (*reinterpret_cast<ImageSpaceModifierParameterData (*)[2]>(WeatherParameterData))[0].m_afFirstParameterSet[i];
+        afWeatherValues[1] = (*reinterpret_cast<ImageSpaceModifierParameterData (*)[2]>(WeatherParameterData))[1].m_afFirstParameterSet[i];
+        ::AutoMemContext ctx(0x27);
+        float val = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afFirstParameterSet[i];
         for (int j = 0; j < 2; j++)
         {
             float elem = afWeatherValues[j];
@@ -1721,17 +1433,17 @@ void DerivedImageSpaceManager::FUN_00b8ccb0()
             }
             val = result;
         }
-        float diff = m_kBlendedParameterData.m_afFirstParameterSet[i] - val;
-        m_kBlendedParameterData.m_afFirstParameterSet[i] -= diff;
+        float diff = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afFirstParameterSet[i] - val;
+        (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afFirstParameterSet[i] -= diff;
     }
 
     for (int i = 0; i < 3; i++)
     {
         float afWeatherValues[2];
-        afWeatherValues[0] = m_kModifierParameterData[0].m_afSecondParameterSet[i];
-        afWeatherValues[1] = m_kModifierParameterData[1].m_afSecondParameterSet[i];
-        ScopedMemoryContext ctx(0x27);
-        float val = m_kBlendedParameterData.m_afSecondParameterSet[i];
+        afWeatherValues[0] = (*reinterpret_cast<ImageSpaceModifierParameterData (*)[2]>(WeatherParameterData))[0].m_afSecondParameterSet[i];
+        afWeatherValues[1] = (*reinterpret_cast<ImageSpaceModifierParameterData (*)[2]>(WeatherParameterData))[1].m_afSecondParameterSet[i];
+        ::AutoMemContext ctx(0x27);
+        float val = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afSecondParameterSet[i];
         for (int j = 0; j < 2; j++)
         {
             float elem = afWeatherValues[j];
@@ -1747,17 +1459,17 @@ void DerivedImageSpaceManager::FUN_00b8ccb0()
             }
             val = result;
         }
-        float diff = m_kBlendedParameterData.m_afSecondParameterSet[i] - val;
-        m_kBlendedParameterData.m_afSecondParameterSet[i] -= diff;
+        float diff = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afSecondParameterSet[i] - val;
+        (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afSecondParameterSet[i] -= diff;
     }
 
     for (int i = 0; i < 12; i++)
     {
         float afWeatherValues[2];
-        afWeatherValues[0] = m_kModifierParameterData[0].m_afColorAndAlphaParameters[i];
-        afWeatherValues[1] = m_kModifierParameterData[1].m_afColorAndAlphaParameters[i];
-        ScopedMemoryContext ctx(0x27);
-        float val = m_kBlendedParameterData.m_afColorAndAlphaParameters[i];
+        afWeatherValues[0] = (*reinterpret_cast<ImageSpaceModifierParameterData (*)[2]>(WeatherParameterData))[0].m_afColorAndAlphaParameters[i];
+        afWeatherValues[1] = (*reinterpret_cast<ImageSpaceModifierParameterData (*)[2]>(WeatherParameterData))[1].m_afColorAndAlphaParameters[i];
+        ::AutoMemContext ctx(0x27);
+        float val = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[i];
         for (int j = 0; j < 2; j++)
         {
             float elem = afWeatherValues[j];
@@ -1773,60 +1485,60 @@ void DerivedImageSpaceManager::FUN_00b8ccb0()
             }
             val = result;
         }
-        float diff = m_kBlendedParameterData.m_afColorAndAlphaParameters[i] - val;
-        m_kBlendedParameterData.m_afColorAndAlphaParameters[i] -= diff;
+        float diff = (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[i] - val;
+        (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[i] -= diff;
     }
 
-    FUN_00b8b540(m_kPartialRenderColor);
-    FUN_00b8b610(m_kWeatherFadeColor);
+    FUN_00b8b540(kWeatherTintColor);
+    FUN_00b8b610(kWeatherFadeColor);
 
-    float fBlurStrength = m_fWeatherBlurRadius;
-    if (fBlurStrength > m_fDoubleVisionStrength)
+    float fBlurStrength = fWeatherBlurValue;
+    if (fBlurStrength > fHighestBlurValue)
     {
-        m_fDoubleVisionStrength = fBlurStrength;
+        fHighestBlurValue = fBlurStrength;
     }
 
-    float fWeatherDouble = m_fAdditionalImageSpaceValue;
-    if (fWeatherDouble > m_fWeatherDoubleVisionStrength)
+    float fWeatherDouble = fWeatherDoubleValue;
+    if (fWeatherDouble > fHighestDoubleValue)
     {
-        m_fWeatherDoubleVisionStrength = fWeatherDouble;
+        fHighestDoubleValue = fWeatherDouble;
     }
 
-    float fWeatherRadialBlurStrength = m_fWeatherRadialBlurStrength;
-    if (fWeatherRadialBlurStrength > m_fRadialBlurStrength)
+    float fWeatherRadialBlurStrength = fWeatherRadialBlurStrengthValue;
+    if (fWeatherRadialBlurStrength > fHighestRadialBlurStrengthValue)
     {
-        m_fRadialBlurStrength = fWeatherRadialBlurStrength;
-        m_fRadialBlurRampUp = m_fWeatherRadialBlurRampUp;
-        m_fRadialBlurStart = m_fWeatherRadialBlurStart;
-        m_fRadialBlurRampDown = m_fWeatherRadialBlurRampDown;
-        m_fRadialBlurDownStart = m_fWeatherRadialBlurDownStart;
-        m_kRadialBlurCenter = m_kWeatherRadialBlurCenter;
+        fHighestRadialBlurStrengthValue = fWeatherRadialBlurStrength;
+        fCurrentRadialBlurRampupValue = fWeatherRadialBlurRampupValue;
+        fCurrentRadialBlurStartValue = fWeatherRadialBlurStartValue;
+        fCurrentRadialBlurRampDownValue = fWeatherRadialBlurRampDownValue;
+        fCurrentRadialBlurDownStartValue = fWeatherRadialBlurDownStartValue;
+        fCurrentRadialBlurCenter = fWeatherRadialBlurCenter;
     }
 
-    float fDOFStrength = m_fDepthOfFieldEffectStrength;
-    float fDOFDistance = m_fDepthOfFieldEffectDistance;
-    float fDOFRange = m_fDepthOfFieldEffectRange;
-    unsigned int dofMode = m_eDepthOfFieldTargetMode;
+    float fDOFStrength = fWeatherDOFStrengthValue;
+    float fDOFDistance = fWeatherDOFDistanceValue;
+    float fDOFRange = fWeatherDOFRangeValue;
+    unsigned int dofMode = fWeatherDOFMode;
 
-    if (fDOFStrength > m_fDepthOfFieldStrength)
+    if (fDOFStrength > fHighestDOFStrengthValue)
     {
-        m_fDepthOfFieldStrength = fDOFStrength;
-        m_bDepthOfFieldUsesObject = false;
+        fHighestDOFStrengthValue = fDOFStrength;
+        bCurrentDOFUseMask = false;
         if (dofMode > 2)
         {
-            m_bDepthOfFieldUsesObject = true;
+            bCurrentDOFUseMask = true;
             dofMode -= 3;
         }
-        m_eDepthOfFieldMode = (ImageSpaceEffectDepthOfField__DepthOfFieldMode)dofMode;
-        m_fDepthOfFieldMaskConstant = fDOFDistance;
-        m_fDepthOfFieldDistance = fDOFRange;
-        m_fDepthOfFieldRange = 0.0f;
+        fCurrentDOFMode = (ImageSpaceEffectDepthOfField__DepthOfFieldMode)dofMode;
+        fCurrentDOFDistanceValue = fDOFDistance;
+        fCurrentDOFRangeValue = fDOFRange;
+        fCurrentDOFMaskConst = 0.0f;
     }
 
-    float fMotionBlurStrength = m_fMenuBackgroundBlendTarget;
-    if (fMotionBlurStrength > m_fMenuBackgroundBlendValue)
+    float fMotionBlurStrength = fWeatherMotionBlurStrengthValue;
+    if (fMotionBlurStrength > fHighestMotionBlurStrengthValue)
     {
-        m_fMenuBackgroundBlendValue = fMotionBlurStrength;
+        fHighestMotionBlurStrengthValue = fMotionBlurStrength;
     }
 }
 
@@ -2057,62 +1769,57 @@ struct ImageSpaceModifierStrengthState
     }
 };
 
-class FUN_00b8d020_class : public ImageSpaceManager
-{
-  public:
-    void FUN_00b8d020();
-};
 
 // @fnv 0x00b8d020
-void FUN_00b8d020_class::FUN_00b8d020()
+void ImageSpaceManager::EndParamModifiers()
 {
-    if (m_kModifierColor.a > 0.0f)
+    if (kTintColor.a > 0.0f)
     {
-        float a = m_kModifierColor.a;
-        m_kModifierColor.r /= a;
-        m_kModifierColor.g /= a;
-        m_kModifierColor.b /= a;
-        m_kModifierColor.a /= a;
+        float a = kTintColor.a;
+        kTintColor.r /= a;
+        kTintColor.g /= a;
+        kTintColor.b /= a;
+        kTintColor.a /= a;
     }
-    float tint = m_fPartialRenderBlend;
-    m_kModifierColor.a = tint;
-    m_kBlendedParameterData.m_afColorAndAlphaParameters[4] = m_kModifierColor.r;
-    m_kBlendedParameterData.m_afColorAndAlphaParameters[5] = m_kModifierColor.g;
-    m_kBlendedParameterData.m_afColorAndAlphaParameters[6] = m_kModifierColor.b;
-    m_kBlendedParameterData.m_afColorAndAlphaParameters[7] = tint;
+    float tint = fHighestTintValue;
+    kTintColor.a = tint;
+    (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[4] = kTintColor.r;
+    (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[5] = kTintColor.g;
+    (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[6] = kTintColor.b;
+    (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[7] = tint;
 
-    if (m_kAccumulatedColor.a > 0.0f)
+    if (kFadeColor.a > 0.0f)
     {
-        float a = m_kAccumulatedColor.a;
-        m_kAccumulatedColor.r /= a;
-        m_kAccumulatedColor.g /= a;
-        m_kAccumulatedColor.b /= a;
-        m_kAccumulatedColor.a /= a;
+        float a = kFadeColor.a;
+        kFadeColor.r /= a;
+        kFadeColor.g /= a;
+        kFadeColor.b /= a;
+        kFadeColor.a /= a;
     }
-    float fade = m_fFadeColorAlpha;
-    m_kAccumulatedColor.a = fade;
-    m_kBlendedParameterData.m_afColorAndAlphaParameters[8] = m_kAccumulatedColor.r;
-    m_kBlendedParameterData.m_afColorAndAlphaParameters[9] = m_kAccumulatedColor.g;
-    m_kBlendedParameterData.m_afColorAndAlphaParameters[10] = m_kAccumulatedColor.b;
-    m_kBlendedParameterData.m_afColorAndAlphaParameters[11] = fade;
+    float fade = fHighestFadeValue;
+    kFadeColor.a = fade;
+    (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[8] = kFadeColor.r;
+    (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[9] = kFadeColor.g;
+    (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[10] = kFadeColor.b;
+    (*reinterpret_cast<ImageSpaceModifierParameterData*>(CurrentParameterData)).m_afColorAndAlphaParameters[11] = fade;
 
-    DAT_01202400 = m_fWeatherDoubleVisionStrength;
-    DAT_012003d0 = m_fDoubleVisionStrength;
+    DAT_01202400 = fHighestDoubleValue;
+    DAT_012003d0 = fHighestBlurValue;
 
     ImageSpaceModifierRampState* pRadialBlur =
-        (ImageSpaceModifierRampState*)pEffectList.m_pBase[ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_RADIAL_BLUR];
-    pRadialBlur->SetParams(m_fRadialBlurStrength, m_fRadialBlurRampUp, m_fRadialBlurStart, m_fRadialBlurRampDown,
-                           m_fRadialBlurDownStart, m_kRadialBlurCenter);
+        (ImageSpaceModifierRampState*)(*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase[ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_RADIAL_BLUR];
+    pRadialBlur->SetParams(fHighestRadialBlurStrengthValue, fCurrentRadialBlurRampupValue, fCurrentRadialBlurStartValue, fCurrentRadialBlurRampDownValue,
+                           fCurrentRadialBlurDownStartValue, fCurrentRadialBlurCenter);
 
     ImageSpaceEffectDepthOfFieldParams* pDOF =
         (ImageSpaceEffectDepthOfFieldParams*)
-            pEffectList.m_pBase[ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_DEPTH_OF_FIELD];
-    pDOF->SetStrength(m_fDepthOfFieldStrength);
-    pDOF->SetDistance(m_fDepthOfFieldMaskConstant);
-    pDOF->SetRange(m_fDepthOfFieldDistance);
-    pDOF->m_fMaskConstant = m_fDepthOfFieldRange;
-    pDOF->SetMode(m_eDepthOfFieldMode);
-    if (m_bDepthOfFieldUsesObject)
+            (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase[ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_DEPTH_OF_FIELD];
+    pDOF->SetStrength(fHighestDOFStrengthValue);
+    pDOF->SetDistance(fCurrentDOFDistanceValue);
+    pDOF->SetRange(fCurrentDOFRangeValue);
+    pDOF->m_fMaskConstant = fCurrentDOFMaskConst;
+    pDOF->SetMode(static_cast<ImageSpaceEffectDepthOfField__DepthOfFieldMode>(fCurrentDOFMode));
+    if (bCurrentDOFUseMask)
     {
         pDOF->FUN_00b8bc80();
     }
@@ -2123,22 +1830,22 @@ void FUN_00b8d020_class::FUN_00b8d020()
 
     ImageSpaceEffectDepthRadialBlurParams* pDepthRadialBlur =
         (ImageSpaceEffectDepthRadialBlurParams*)
-            pEffectList.m_pBase[ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_DEPTH_RADIAL_BLUR];
-    pDepthRadialBlur->SetStrength(m_fBlurRadius);
-    pDepthRadialBlur->SetDistance(m_fRadialBlurDistance);
-    pDepthRadialBlur->SetRange(m_fRadialBlurRange);
-    pDepthRadialBlur->FUN_00b8b210(m_eRadialBlurMode);
-    pDepthRadialBlur->SetParams(m_fBlurRadius, m_fRadialBlurTransition, m_fRadialBlurStartValue);
+            (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase[ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_DEPTH_RADIAL_BLUR];
+    pDepthRadialBlur->SetStrength(fHighestDepthRadialBlurStrengthValue);
+    pDepthRadialBlur->SetDistance(fCurrentDepthRadialBlurDistance);
+    pDepthRadialBlur->SetRange(fCurrentDepthRadialBlurRange);
+    pDepthRadialBlur->FUN_00b8b210(static_cast<ImageSpaceEffectDepthRadialBlur__RadialBlurMode>(fCurrentDepthRadialBlurMode));
+    pDepthRadialBlur->SetParams(fHighestDepthRadialBlurStrengthValue, fCurrentDepthRadialBlurRampupValue, fCurrentDepthRadialBlurStartValue);
 
     ImageSpaceModifierStrengthState* pMotionBlur =
         (ImageSpaceModifierStrengthState*)
-            pEffectList.m_pBase[ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_MOTION_BLUR];
-    pMotionBlur->SetStrength(m_fMenuBackgroundBlendValue);
+            (*reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)).m_pBase[ImageSpaceManager__ImageSpaceEffectEnum_EFFECT_MOTION_BLUR];
+    pMotionBlur->SetStrength(fHighestMotionBlurStrengthValue);
 }
 
 #include <math.h>
-extern "C" double __cdecl sqrt(double);
-extern "C" double __cdecl fabs(double);
+using ::sqrt;
+using ::fabs;
 
 extern "C" void* __cdecl memmove(void*, const void*, unsigned);
 
@@ -2162,78 +1869,21 @@ struct Vec2
         return sqrt(x * x + y * y);
     }
 };
-struct Vec3
-{
-    float x, y, z;
-};
-struct Vec4
-{
-    float x, y, z, r;
-};
 struct Matrix
 {
     float m[4][4];
 };
-struct Viewport
-{
-    float left, right, top, bottom;
-};
-struct Camera
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    Matrix unk9C;
-    int unkDC, unkE0, unkE4, unkE8, unkEC, unkF0, unkF4, unkF8, unkFC;
-    Viewport unk100;
-};
-extern Camera* DAT_011f9684;
+extern ::NiCamera* DAT_011f9684;
 // Transforms a 3D position with the camera matrix, maps it through the viewport, and computes a capped radius from the input r offset.
 // @fnv 0x00b59d30
-NiPoint2* FUN_00b59d30(Vec4* apPoint, NiPoint2* apScreenPos, float* radius)
+NiPoint2* FUN_00b59d30(::Vec4* apPoint, NiPoint2* apScreenPos, float* radius)
 {
-    Camera* camera = DAT_011f9684;
-    Vec3 position = *(Vec3*)apPoint;
-    Viewport vViewport = camera->unk100;
+    ::NiCamera* camera = DAT_011f9684;
+    ::NiPoint3 position = *(::NiPoint3*)apPoint;
+    NiRect<float> vViewport = camera->m_kPort;
     bool bBehindCamera = false;
     Matrix matrix;
-    memmove(&matrix, &camera->unk9C, sizeof(matrix));
+    memmove(&matrix, &camera->m_aafWorldToCam, sizeof(matrix));
     float w = position.x * matrix.m[3][0] + position.y * matrix.m[3][1] + position.z * matrix.m[3][2] + matrix.m[3][3];
     if (w < 0.0f)
         bBehindCamera = true;
@@ -2245,7 +1895,7 @@ NiPoint2* FUN_00b59d30(Vec4* apPoint, NiPoint2* apScreenPos, float* radius)
     y *= fInvW;
     if ((x >= -1.0f && x <= 1.0f && y >= -1.0f && y <= 1.0f) || !bBehindCamera)
     {
-        position.z += apPoint->r;
+        position.z += apPoint->w;
         float newW =
             position.x * matrix.m[3][0] + position.y * matrix.m[3][1] + position.z * matrix.m[3][2] + matrix.m[3][3];
         Vec2 vInitial(x, 1.0f - y);
@@ -2268,11 +1918,11 @@ NiPoint2* FUN_00b59d30(Vec4* apPoint, NiPoint2* apScreenPos, float* radius)
     {
         *radius = 0.3f;
     }
-    position.x = (vViewport.right - vViewport.left) * 0.5 * x;
+    position.x = (vViewport.m_fMaximumU - vViewport.m_fMinimumU) * 0.5 * x;
     NiPoint2 result;
-    result.x = position.x + (vViewport.right + vViewport.left) * 0.5;
-    position.x = (vViewport.top - vViewport.bottom) * 0.5 * y;
-    result.y = position.x + (vViewport.top + vViewport.bottom) * 0.5;
+    result.x = position.x + (vViewport.m_fMaximumU + vViewport.m_fMinimumU) * 0.5;
+    position.x = (vViewport.m_fMinimumV - vViewport.m_fMaximumV) * 0.5 * y;
+    result.y = position.x + (vViewport.m_fMinimumV + vViewport.m_fMaximumV) * 0.5;
     result.y = 1.0f - result.y;
     if (result.x > 1.0f)
         result.x = 1.0f;
@@ -2294,135 +1944,58 @@ NiPoint2* FUN_00b59d30(Vec4* apPoint, NiPoint2* apScreenPos, float* radius)
 }
 
 void __cdecl FUN_00b59d30(int a1, int* a2, float* a3);
-class FUN_00b8b760_cls
-{
-  public:
-    int unk00;
-    void FUN_00b8b000(float a1, float a2, float a3, float a4, float a5, int* out);
-    void FUN_00b8b760(float a1, float a2, float a3, float a4, float a5, int a6);
-};
-// Calls FUN_00b59d30 with a6 and local, then passes a3 and a5 adjusted by a6's float bits to FUN_00b8b000.
+// Projects the bound and applies its projected radius to the radial-blur start and down-start.
+// The original reuses the bound argument slot for the radius output.
 // @fnv 0x00b8b760
-void FUN_00b8b760_cls::FUN_00b8b760(float a1, float a2, float a3, float a4, float a5, int a6)
+void ImageSpaceManager::FUN_00b8b760(float a1, float a2, float a3, float a4, float a5, const NiBound& bound)
 {
     int local[2];
-    FUN_00b59d30(a6, local, &a5 + 1);
-    FUN_00b8b000(a1, a2, *(float*)&a6 + a3, a4, *(float*)&a6 + a5, local);
+    FUN_00b59d30(reinterpret_cast<int>(&bound), local, &a5 + 1);
+    SetRadialBlurParameters(a1, a2, *(&a5 + 1) + a3, a4, *(&a5 + 1) + a5,
+                            *reinterpret_cast<const NiPoint2*>(local));
 }
 
-namespace fnv_00b8b8d0 {
-struct Point3
-{
-    float x, y, z;
-    float Length() const
-    {
-        return sqrtf(x * x + y * y + z * z);
-    }
-};
-extern char* DAT_011f917c;
-struct ImageSpaceDistanceEffect
-{
-    void FUN_00b8b0d0(float strength, int mode, float duration, float nearDistance, float farDistance);
-    void SetDistanceEffect(float strength, int mode, float duration, const Point3* position);
-};
-// Computes the distance from the position at DAT_011f917c + 0x8c and passes it as both bounds to FUN_00b8b0d0.
+extern ::NiCamera* DAT_011f917c;
+// Computes the distance from the camera world position and passes it as both depth-of-field bounds.
 // @fnv 0x00b8b8d0
-void ImageSpaceDistanceEffect::SetDistanceEffect(float strength, int mode, float duration, const Point3* position)
+void ImageSpaceManager::SetDistanceEffect(float strength, unsigned int mode, float duration, const NiBound& bound)
 {
-    const Point3 worldPosition = *reinterpret_cast<const Point3*>(DAT_011f917c + 0x8c);
-    const volatile Point3 sample = *position;
-    const Point3 delta = {sample.x - worldPosition.x, sample.y - worldPosition.y, sample.z - worldPosition.z};
-    const float distance = delta.Length();
-    FUN_00b8b0d0(strength, mode, duration, distance, distance);
+    const ::NiPoint3* position = reinterpret_cast<const ::NiPoint3*>(&bound);
+    const ::NiPoint3 worldPosition = *reinterpret_cast<const ::NiPoint3*>(&DAT_011f917c->m_kWorld.m_Translate);
+    const volatile ::NiPoint3 sample = *position;
+    // Built as plain data (the original constructs no NiPoint3 here).
+    const PointStorage delta = {sample.x - worldPosition.x, sample.y - worldPosition.y, sample.z - worldPosition.z};
+    const float distance = reinterpret_cast<const ::NiPoint3&>(delta).Length();
+    SetDepthOfFieldParameters(strength, mode, duration, distance, distance);
 }
-}  // namespace fnv_00b8b8d0
 
 namespace fnv_00b8bb70 {
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    __forceinline NiPoint3 operator-(const NiPoint3& o) const
-    {
-        NiPoint3 r;
-        r.x = x - o.x;
-        r.y = y - o.y;
-        r.z = z - o.z;
-        return r;
-    }
-};
 
-class NiCamera
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    NiPoint3 pos;
-};
-
-extern NiCamera* DAT_011f917c;
-static __forceinline float Dot(NiPoint3 a, NiPoint3 b)
+extern ::NiCamera* DAT_011f917c;
+static __forceinline float Dot(::NiPoint3 a, ::NiPoint3 b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 // Computes the distance between the camera position and a given point, storing the result in both elements of the output array.
 // @fnv 0x00b8bb70
-void __stdcall FUN_00b8bb70(NiPoint3* apPoint, float* out)
+void __stdcall FUN_00b8bb70(::NiPoint3* apPoint, float* out)
 {
-    NiPoint3 g = DAT_011f917c->pos;
-    NiPoint3 pPoint = *apPoint;
-    NiPoint3 d = pPoint - g;
+    ::NiPoint3 g;
+    g = DAT_011f917c->m_kWorld.m_Translate;
+    ::NiPoint3 pPoint;
+    pPoint = *apPoint;
+    ::NiPoint3 d = pPoint - g;
     float l = sqrtf(Dot(d, d));
     out[0] = l;
     out[1] = l;
 }
 }  // namespace fnv_00b8bb70
 
-extern __declspec(thread) int BSAudioThreadContext;
-
-class FUN_00b8cb30_cls
-{
-  public:
-    void FUN_00b8cb30(int mode, int idx, float* arr, float w);
-};
 
 // Sets BSAudioThreadContext to 0x27, selects a float by mode, applies two operations from arr and blends toward the result using w, then restores the context.
 // @fnv 0x00b8cb30
-void FUN_00b8cb30_cls::FUN_00b8cb30(int mode, int aiIndex, float* apValues, float afWeight)
+void ImageSpaceManager::FUN_00b8cb30(int mode, int aiIndex, float* apValues, float afWeight)
 {
     int iSavedContext = BSAudioThreadContext;
     BSAudioThreadContext = 0x27;
@@ -2573,12 +2146,14 @@ Derived::Derived()
 {}
 }  // namespace fnv_00b8bfd0
 
+
 void* __cdecl FUN_00aa13e0(unsigned int size);
 inline void* __cdecl operator new(unsigned int size)
 {
     return FUN_00aa13e0(size);
 }
 void __cdecl operator delete(void*);
+
 struct TLSData
 {
     int unk000;
@@ -2759,46 +2334,38 @@ struct TLSData
 
 extern __declspec(thread) TLSData g_tlsData;
 
-class AutoMemContext
+inline AutoMemContext::AutoMemContext(int newTag)
 {
-  public:
-    int m_iOldTag;
+    m_eMemoryContext = static_cast<MEM_CONTEXT>(g_tlsData.currentHeap);
+    g_tlsData.currentHeap = newTag;
+}
 
-    AutoMemContext(int newTag)
-    {
-        m_iOldTag = g_tlsData.currentHeap;
-        g_tlsData.currentHeap = newTag;
-    }
-
-    ~AutoMemContext()
-    {
-        g_tlsData.currentHeap = m_iOldTag;
-    }
-};
-
-class PartialScreenGeometryReceiver : public ImageSpaceManager
+inline AutoMemContext::~AutoMemContext()
 {
-  public:
-    void FUN_00b8c3b0(float a1, float a2, NiPointer<NiScreenElements>& a3);
-};
+    g_tlsData.currentHeap = m_eMemoryContext;
+}
+
 
 // Creates NiScreenElements, sets rectangle bounds and data using a1 and a2, then assigns the elements to a3.
 // @fnv 0x00b8c3b0
-void PartialScreenGeometryReceiver::FUN_00b8c3b0(float afWidth, float afHeight,
-                                                 NiPointer<NiScreenElements>& apScreenElements)
+void ImageSpaceManager::SetMenuBackgroundBlend(float afWidth, float afHeight,
+                                                 void* screenElements)
 {
-    AutoMemContext memContext(0x27);
+    NiPointer<NiScreenElements>& apScreenElements = *static_cast<NiPointer<NiScreenElements>*>(screenElements);
+    ::AutoMemContext memContext(0x27);
     NiPointer<NiScreenElementsData> spScreenData(new NiScreenElementsData(false, false, 1, 1, 1, 4, 1, 2, 1));
-    this->m_pMenuBackgroundScreenElements = ::new NiScreenElements(spScreenData);
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spPartialScreenTriShape)) = ::new NiScreenElements(spScreenData);
     float width = afWidth * 2.0f;
     float height = afHeight * -2.0;
-    this->m_pMenuBackgroundScreenElements->GetData()->FUN_00a87ae0(4, 0, 0);
-    this->m_pMenuBackgroundScreenElements->GetData()->SetRectangleBounds(0, DAT_01012054, 1.0f, width, height);
-    this->m_pMenuBackgroundScreenElements->GetData()->FUN_00a87900();
-    this->m_pMenuBackgroundScreenElements->GetData()->FUN_00a88130(0, 0, 0.0f, 0.0f, afWidth, afHeight);
-    this->m_pMenuBackgroundScreenElements->UpdateSceneObject();
-    NiUpdateData updateData = {0.0f, false, false, false, false, false};
-    this->m_pMenuBackgroundScreenElements->Update(updateData);
-    this->m_pMenuBackgroundScreenElements->SetName(GeometryString("Interface Effect Partial Screen Trishape"));
-    apScreenElements = this->m_pMenuBackgroundScreenElements;
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spPartialScreenTriShape))->GetData()->FUN_00a87ae0(4, 0, 0);
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spPartialScreenTriShape))->GetData()->SetRectangleBounds(0, DAT_01012054, 1.0f, width, height);
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spPartialScreenTriShape))->GetData()->FUN_00a87900();
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spPartialScreenTriShape))->GetData()->FUN_00a88130(0, 0, 0.0f, 0.0f, afWidth, afHeight);
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spPartialScreenTriShape))->UpdateSceneObject();
+    NiUpdateData updateData(0.0f);
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spPartialScreenTriShape))->NiAVObject::Update(updateData);
+    (*reinterpret_cast<NiPointer<NiScreenElements>*>(spPartialScreenTriShape))->NiAVObject::SetName(::NiFixedString("Interface Effect Partial Screen Trishape"));
+    apScreenElements = (*reinterpret_cast<NiPointer<NiScreenElements>*>(spPartialScreenTriShape));
 }
+
+

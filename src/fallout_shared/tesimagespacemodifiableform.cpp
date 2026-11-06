@@ -1,6 +1,12 @@
 // fallout_shared/tesimagespacemodifiableform.cpp: TESImageSpaceModifiableForm (5 functions)
 
-#include "tesimagespacemodifiableform_decls.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESImageSpaceModifiableForm.h"
+#include "../../include/TESImageSpaceModifier.h"
+
+int Warning(const char*, ...);
 
 // Resolves the stored form ID to a TESImageSpaceModifier via the owner's file and warns if it cannot be found.
 // @fnv 0x00487490
@@ -18,7 +24,7 @@ void TESImageSpaceModifiableForm::InitItem(TESForm* owner)
             {
                 if (((BGSCameraPath*)owner)->HasNameForWarning())
                     Warning("MASTERFILE: Unable to find imagespacemodifier (%08X) on owner object \"%s\".", formID,
-                            owner->GetEditorID());
+                            owner->GetName());
                 else
                     Warning("MASTERFILE: Unable to find imagespacemodifier (%08X) on owner object (%08X).", formID,
                             owner->GetFormID());
@@ -29,88 +35,46 @@ void TESImageSpaceModifiableForm::InitItem(TESForm* owner)
     }
 }
 
-struct BaseFormComponent
-{
-    virtual ~BaseFormComponent()
-    {}
-    int __thiscall _ref_00726070();
-};
-struct FUN_004875c0_shell : BaseFormComponent
-{
-    bool __thiscall FUN_004875c0(BaseFormComponent* apCompareFC);
-};
-
-extern int DAT_0101cbd8;
-void __fastcall FUN_008c6060(void* pThis);
-
-// Initialises the BaseFormComponent base, installs the vtable from DAT_0101cbd8, calls FUN_008c6060, and returns pThis.
+// Initialises the base component and clears the image space modifier.
 // @fnv 0x00487420
-void* __fastcall FUN_00487420(void* pThis)
+TESImageSpaceModifiableForm::TESImageSpaceModifiableForm()
 {
-    ((BaseFormComponent*)pThis)->BaseFormComponent::BaseFormComponent();
-    *(int**)pThis = &DAT_0101cbd8;
-    FUN_008c6060(pThis);
-    return pThis;
+    ClearComponent();
 }
 
 extern "C" void FUN_00485910(unsigned int, unsigned int);
 
-struct FUN_00487450_shell
-{
-    int m_auiShapeKeys;
-    TESForm* m_field_4;
-    void FUN_00487450();
-};
-
 // @fnv 0x00487450
-void FUN_00487450_shell::FUN_00487450()
+void TESImageSpaceModifiableForm::Save()
 {
-    if (m_field_4)
+    if (m_pImageSpaceModifier)
     {
-        unsigned int id = m_field_4->GetFormID();
+        unsigned int id = m_pImageSpaceModifier->GetFormID();
         FUN_00485910(0x4D414E4D, id);
     }
 }
 
-extern int DAT_01186ae8;
-extern int DAT_01183040;
-extern "C" void* FUN_00ec43fb(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-
-class SpawnedHelper
-{
-  public:
-    void* Get();
-};
-
-class FUN_00487570_cls
-{
-  public:
-    void FUN_00487570(unsigned int a1);
-    void Apply(void* p);
-};
-
 // @fnv 0x00487570
-void FUN_00487570_cls::FUN_00487570(unsigned int a1)
+void TESImageSpaceModifiableForm::CopyFromBase(BaseFormComponent* component)
 {
-    SpawnedHelper* pHelper =
-        (SpawnedHelper*)FUN_00ec43fb(a1, 0, (unsigned int)&DAT_01183040, (unsigned int)&DAT_01186ae8, 0);
+    TESImageSpaceModifiableForm* pHelper = dynamic_cast<TESImageSpaceModifiableForm*>(component);
     if (pHelper == 0)
     {
     }
     else
     {
-        this->Apply(pHelper->Get());
+        this->SetFormImageSpaceModifying(pHelper->GetFormImageSpaceModifying());
     }
 }
 
-// Returns true if the cast fails or the two calls to _ref_00726070() return different values.
+// Returns true if the cast fails or the two modifier getters return different values.
 // @fnv 0x004875c0
-bool __thiscall FUN_004875c0_shell::FUN_004875c0(BaseFormComponent* apCompareFC)
+bool TESImageSpaceModifiableForm::CompareWithBase(BaseFormComponent* apCompareFC)
 {
     TESImageSpaceModifiableForm* pCompareImageSpaceForm = dynamic_cast<TESImageSpaceModifiableForm*>(apCompareFC);
     if (!pCompareImageSpaceForm)
         return true;
-    if (this->_ref_00726070() != reinterpret_cast<BaseFormComponent*>(pCompareImageSpaceForm)->_ref_00726070())
+    if (this->GetFormImageSpaceModifying() != pCompareImageSpaceForm->GetFormImageSpaceModifying())
         return true;
     return false;
 }

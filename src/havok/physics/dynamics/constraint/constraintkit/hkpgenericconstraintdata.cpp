@@ -1,8 +1,65 @@
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 
 // src/havok/physics/dynamics/constraint/constraintkit/hkpgenericconstraintdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/constraintkit/hkpgenericconstraintdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+// The reflected headers use packed POD math types.
+// Preserve the scalar copy form of the former reflection-only POD view.
+struct ReflectionScalarCopy { float a, b, c, d; };
+__forceinline void CopyReflectionQuad(void* destination, const void* source)
+{
+    *static_cast<ReflectionScalarCopy*>(destination) = *static_cast<const ReflectionScalarCopy*>(source);
+}
+
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkHalf.h"
+#include "../../../../../../include/hkStringPtr.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkQuaternion.h"
+#include "../../../../../../include/hkMatrix3.h"
+#include "../../../../../../include/hkRotation.h"
+#include "../../../../../../include/hkTransform.h"
+#include "../../../../../../include/hkQsTransform.h"
+#include "../../../../../../include/hkMatrix4.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkVariant.h"
+#include "../../../../../../include/hkHomogeneousArray.h"
+#include "../../../../../../include/hkBaseObject.h"
+#include "../../../../../../include/hkClass.h"
+#include "../../../../../../include/hkpBridgeAtoms.h"
+#include "../../../../../../include/hkpConstraintData.h"
+#include "havok/hkBase.h"
+#include "../../../../../../include/hkpConstraintMotor.h"
+namespace reflection {
+using ::hkpConstraintMotor;
 #include "havok/hkpGenericConstraintData.h"
+}
+using ::hkReal;
+using ::hkpConstraintData;
+using ::hkpBridgeAtoms;
+using reflection::hkpGenericConstraintDataScheme;
+using reflection::hkpGenericConstraintDataSchemeConstraintInfo;
+using ::hkpConstraintMotor;
+
+// Exe 0x00d503c0 FUN_00d503c0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+#define _INCLUDED_MM2
+#include "../../../../../../include/Pair.h"
+#include "../../../../../../include/hkVector4q.h"
+
 
 struct FUN_00d503a0_class
 {
@@ -791,19 +848,16 @@ void* CFoo::FUN_00d504f0()
     return (void*)((char*)this + 0x18);
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
+
 struct FUN_00d50570_class
 {
     char pad[0x28];
-    __m128* m_items;
-    void CopyItems(int start, int count, const __m128* src);
+    LocalM128* m_items;
+    void CopyItems(int start, int count, const LocalM128* src);
 };
 // Copies count __m128 values from src into m_items starting at index start.
 // @fnv 0x00d50570
-void FUN_00d50570_class::CopyItems(int start, int count, const __m128* src)
+void FUN_00d50570_class::CopyItems(int start, int count, const LocalM128* src)
 {
     int end = start + count;
     if (start < end)
@@ -812,7 +866,7 @@ void FUN_00d50570_class::CopyItems(int start, int count, const __m128* src)
         int n = end - start;
         do
         {
-            *(__m128*)((char*)m_items + off) = *src;
+            *(LocalM128*)((char*)m_items + off) = *src;
             off += 16;
             ++src;
             --n;
@@ -962,22 +1016,14 @@ FnvCpu_FUN_00d516f0_CpuObject* FnvCpu_FUN_00d516f0_CpuObject::FUN_00d516f0(unsig
 }
 }  // namespace fnv_00d516f0
 
-union FUN_00d503c0_vec
-{
-    __m128 v;
-    struct
-    {
-        float x, y, z, w;
-    };
-};
 struct FUN_00d503c0_m
 {
-    FUN_00d503c0_vec r0, r1, r2;
+    hkVector4q r0, r1, r2;
 };
 struct FUN_00d503c0_src
 {
-    FUN_00d503c0_vec r0;
-    FUN_00d503c0_vec r1;
+    hkVector4q r0;
+    hkVector4q r1;
     int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     int unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c;
     int unk60, unk64, unk68, unk6c, unk70, unk74, unk78, unk7c;
@@ -985,7 +1031,7 @@ struct FUN_00d503c0_src
     int unkA0, unkA4, unkA8, unkAc, unkB0, unkB4, unkB8;
 };
 
-extern "C" __m128 __cdecl _mm_setzero_ps(void);
+extern "C" LocalM128 __cdecl _mm_setzero_ps(void);
 void __cdecl FUN_00dcf280(FUN_00d503c0_m* m, void* obj, void* out);
 
 // Copies two vectors from src, sets a third to each unit axis in turn calling FUN_00dcf280 each time, then adds 3 to src->unkB8.
@@ -993,16 +1039,16 @@ void __cdecl FUN_00dcf280(FUN_00d503c0_m* m, void* obj, void* out);
 void __stdcall FUN_00d503c0(int a, int b, int c, FUN_00d503c0_src* src, void* obj, void* out)
 {
     FUN_00d503c0_m m;
-    m.r0.v = src->r0.v;
-    m.r1.v = src->r1.v;
-    m.r2.v = _mm_setzero_ps();
-    m.r2.x = 1.0f;
+    m.r0.m_vComponents = src->r0.m_vComponents;
+    m.r1.m_vComponents = src->r1.m_vComponents;
+    m.r2.m_vComponents = _mm_setzero_ps();
+    m.r2.m_vec.x = 1.0f;
     FUN_00dcf280(&m, obj, out);
-    m.r2.x = 0.0f;
-    m.r2.y = 1.0f;
+    m.r2.m_vec.x = 0.0f;
+    m.r2.m_vec.y = 1.0f;
     FUN_00dcf280(&m, obj, out);
-    m.r2.y = 0.0f;
-    m.r2.z = 1.0f;
+    m.r2.m_vec.y = 0.0f;
+    m.r2.m_vec.z = 1.0f;
     FUN_00dcf280(&m, obj, out);
     src->unkB8 += 3;
 }
@@ -1038,7 +1084,7 @@ template <class T> struct ConstraintArray
 struct ConstraintScheme
 {
     hkpGenericConstraintDataSchemeConstraintInfo info;
-    ConstraintArray<hkVector4> data;
+    ConstraintArray<::hkVector4> data;
     ConstraintArray<int> commands;
     ConstraintArray<void*> modifiers;
     ConstraintArray<hkpConstraintMotor*> motors;
@@ -1065,9 +1111,9 @@ FUN_00d50c90::FUN_00d50c90()
 
 struct S00d50e10_Rows
 {
-    __m128 v0;
-    __m128 v1;
-    __m128 v2;
+    LocalM128 v0;
+    LocalM128 v1;
+    LocalM128 v2;
 };
 
 void __cdecl FUN_00dcee80(S00d50e10_Rows* out, int d, int e);
@@ -1080,17 +1126,17 @@ void __stdcall FUN_00d50e10(int a0, int a1, int a2, void* p, int d, int e)
     S00d50e10_Rows out1;
     S00d50e10_Rows out;
 
-    out1.v0 = (*reinterpret_cast<const __m128*>(base + 0x14));
-    out1.v2 = (*reinterpret_cast<const __m128*>(base + 0x24));
-    out1.v1 = (*reinterpret_cast<const __m128*>(base + 0x1C));
+    out1.v0 = (*reinterpret_cast<const LocalM128*>(base + 0x14));
+    out1.v2 = (*reinterpret_cast<const LocalM128*>(base + 0x24));
+    out1.v1 = (*reinterpret_cast<const LocalM128*>(base + 0x1C));
     FUN_00dcee80(&out1, d, e);
 
-    out.v0 = (*reinterpret_cast<const __m128*>(base + 0x18));
-    out.v2 = (*reinterpret_cast<const __m128*>(base + 0x28));
+    out.v0 = (*reinterpret_cast<const LocalM128*>(base + 0x18));
+    out.v2 = (*reinterpret_cast<const LocalM128*>(base + 0x28));
     out.v1 = out1.v0;
     FUN_00dcee80(&out, d, e);
 
-    out.v2 = (*reinterpret_cast<const __m128*>(base + 0x20));
+    out.v2 = (*reinterpret_cast<const LocalM128*>(base + 0x20));
     out.v1 = out.v0;
     out.v0 = out1.v1;
     FUN_00dcee80(&out, d, e);
@@ -1098,14 +1144,10 @@ void __stdcall FUN_00d50e10(int a0, int a1, int a2, void* p, int d, int e)
     *reinterpret_cast<int*>(reinterpret_cast<char*>(p) + 0xB8) += 3;
 }
 
-struct __declspec(align(16)) hkVector4D510
-{
-    float x, y, z, w;
-};
 
 struct SolverInfoD510
 {
-    hkVector4D510 m_jacobian;
+    hkVector4q m_jacobian;
     float m_f0;
     float m_f1;
     float m_out;
@@ -1163,8 +1205,8 @@ struct SolverStateD510
     int m_numJacobians;
 };
 
-void __cdecl FUN_00dcfec0(const hkVector4D510* pkLinA, const hkVector4D510* pkAngA, const hkVector4D510* pkLinB,
-                          const hkVector4D510* pkAngB, hkVector4D510* pkJac, float* pfOut);
+void __cdecl FUN_00dcfec0(const hkVector4q* pkLinA, const hkVector4q* pkAngA, const hkVector4q* pkLinB,
+                          const hkVector4q* pkAngB, hkVector4q* pkJac, float* pfOut);
 void __cdecl FUN_00d6cb30(const SolverInfoD510* pkInfo, void* pvA, void* pvB);
 
 // Reads two indices from ppSchema, computes a Jacobian via FUN_00dcfec0, stores it with two floats from ppData, and calls FUN_00d6cb30.
@@ -1178,7 +1220,7 @@ void __stdcall FUN_00d51060(const char** ppSchema, const float** ppData, void* p
     *ppSchema += 4;
     int iIndexB = *(const int*)*ppSchema;
     kInfo.m_vScale = 0.5f;
-    const hkVector4D510* pkVecs = (const hkVector4D510*)pkState;
+    const hkVector4q* pkVecs = (const hkVector4q*)pkState;
     FUN_00dcfec0(&pkVecs[iIndexA + 5], &pkVecs[iIndexA + 8], &pkVecs[iIndexB + 5], &pkVecs[iIndexB + 8],
                  &kInfo.m_jacobian, &kInfo.m_out);
     const float* pVector4 = *ppData;
@@ -1189,17 +1231,10 @@ void __stdcall FUN_00d51060(const char** ppSchema, const float** ppData, void* p
     pkState->m_numJacobians++;
 }
 
-struct d51390_rec
-{
-    float r0;
-    float r1;
-    float r2;
-    float r3;
-};
 
 struct d51390_pool
 {
-    d51390_rec recs[11];
+    hkVector4q recs[11];
     int unkB0;
     int unkB4;
     int unkB8;
@@ -1237,7 +1272,7 @@ struct d51390_ctx
 
 struct d51390_item
 {
-    d51390_rec* rec;
+    hkVector4q* rec;
     int dest;
     float val;
     int flag;
@@ -1265,41 +1300,23 @@ void __stdcall FUN_00d51390(int** stream, float** cursor, int a3, d51390_pool* p
 
 extern "C"
 {
-    __m128 _mm_add_ss(__m128 a, __m128 b);
-    __m128 _mm_mul_ps(__m128 a, __m128 b);
-    __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-    void _mm_store_ss(float* p, __m128 a);
+    LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+    void _mm_store_ss(float* p, LocalM128 a);
 }
 
-struct VectorComponentValue
+__forceinline float hkVector4q::dot3(const hkVector4q& a) const
 {
-    __m128 m_vValue;
+    const LocalM128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    const LocalM128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    const LocalM128 z = _mm_shuffle_ps(x2, x2, 0xaa);
+    float result;
+    _mm_store_ss(&result, _mm_add_ss(z, xySum));
+    return result;
+}
 
-    VectorComponentValue()
-    {}
-    VectorComponentValue(const __m128& r) : m_vValue(r)
-    {}
-    operator float() const
-    {
-        float f;
-        _mm_store_ss(&f, m_vValue);
-        return f;
-    }
-};
-
-struct hkVector4q
-{
-    __m128 m_vComponents;
-
-    __forceinline VectorComponentValue dot3(const hkVector4q& a) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        const __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        const __m128 z = _mm_shuffle_ps(x2, x2, 0xaa);
-        return _mm_add_ss(z, xySum);
-    }
-};
-
+// local form of hkRotation: 0x00d50450 needs inline column access/reduction; shared form gives 181 bytes vs exe 147.
 struct hkRotationq
 {
     hkVector4q m_kColumn0;
@@ -1343,12 +1360,12 @@ float calcAngleForAxis(const AngularFrames* frames, int axis)
     return FUN_00d50450(frames, axis);
 }
 
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
 
 struct S00d505c0_Blk
 {
-    __m128 diff;
-    __m128 v;
+    LocalM128 diff;
+    LocalM128 v;
     float fb;
     int idx;
 };
@@ -1364,11 +1381,11 @@ void __stdcall FUN_00d505c0(int** a, int* b, void* unused, int* c, int* basePtr,
     (*a)++;
     int val = **a;
 
-    __m128 lo = *(__m128*)c;
+    LocalM128 lo = *(LocalM128*)c;
     S00d505c0_Blk blk;
-    blk.v = *(__m128*)((char*)c + ((val + 2) << 4));
+    blk.v = *(LocalM128*)((char*)c + ((val + 2) << 4));
 
-    blk.diff = _mm_sub_ps(lo, *((__m128*)c + 1));
+    blk.diff = _mm_sub_ps(lo, *((LocalM128*)c + 1));
     float* bv = *(float**)b;
     *(float**)b = bv + 4;
     blk.fb = *bv;
@@ -1381,33 +1398,25 @@ void __stdcall FUN_00d505c0(int** a, int* b, void* unused, int* c, int* basePtr,
 }
 
 namespace fnv_00d50d60 {
-extern "C" __m128 __cdecl _mm_load_ps(const float*);
-extern "C" void __cdecl _mm_store_ps(float*, __m128);
-extern "C" __m128 __cdecl _mm_xor_ps(__m128, __m128);
+extern "C" LocalM128 __cdecl _mm_load_ps(const float*);
+extern "C" void __cdecl _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 __cdecl _mm_xor_ps(LocalM128, LocalM128);
 
-union D50D60_Vec
-{
-    __m128 v;
-};
 
 struct D50D60_Stream
 {
-    D50D60_Vec vecs[11];  // vector data the code indexes
+    hkVector4q vecs[11];  // vector data the code indexes
     int unkB0;
     int unkB4;
     int numDecoded;  // +0xB8
 };
 
-struct D50D60_OF
-{
-    float x, y, z, w;
-};
 
 struct D50D60_Out
 {
-    D50D60_OF a;
-    D50D60_OF b;
-    D50D60_OF c;
+    hkVector4q a;
+    hkVector4q b;
+    hkVector4q c;
 };
 
 extern unsigned int DAT_011b5a90;
@@ -1423,14 +1432,14 @@ void __stdcall FUN_00d50d60(unsigned int** a0, int aiUnused1, int aiUnused2, D50
     D50D60_Out out;
     ++*a0;
     unsigned int idx = **a0;
-    _mm_store_ps(&out.b.x, apStream->vecs[(&DAT_011b5a90)[idx] + 5].v);
-    _mm_store_ps(&out.a.x, apStream->vecs[(&DAT_011b5a94)[idx] + 5].v);
-    _mm_store_ps(&out.c.x, apStream->vecs[idx + 8].v);
+    _mm_store_ps(&out.b.m_vec.x, apStream->vecs[(&DAT_011b5a90)[idx] + 5].m_vComponents);
+    _mm_store_ps(&out.a.m_vec.x, apStream->vecs[(&DAT_011b5a94)[idx] + 5].m_vComponents);
+    _mm_store_ps(&out.c.m_vec.x, apStream->vecs[idx + 8].m_vComponents);
     FUN_00dcee80(&out, a4, a5);
-    __m128 cur = _mm_load_ps(&out.b.x);
-    __m128 t = _mm_xor_ps(_mm_load_ps((const float*)&DAT_010c44d0), cur);
-    _mm_store_ps(&out.b.x, _mm_load_ps(&out.a.x));
-    _mm_store_ps(&out.a.x, t);
+    LocalM128 cur = _mm_load_ps(&out.b.m_vec.x);
+    LocalM128 t = _mm_xor_ps(_mm_load_ps((const float*)&DAT_010c44d0), cur);
+    _mm_store_ps(&out.b.m_vec.x, _mm_load_ps(&out.a.m_vec.x));
+    _mm_store_ps(&out.a.m_vec.x, t);
     FUN_00dcee80(&out, a4, a5);
     apStream->numDecoded += 2;
 }
@@ -1438,19 +1447,19 @@ void __stdcall FUN_00d50d60(unsigned int** a0, int aiUnused1, int aiUnused2, D50
 
 extern "C"
 {
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_load_ps(const float*);
-    void _mm_store_ps(float*, __m128);
-    void _mm_store_ss(float*, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_set_ss(float);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_load_ps(const float*);
+    void _mm_store_ps(float*, LocalM128);
+    void _mm_store_ss(float*, LocalM128);
+    LocalM128 _mm_rsqrt_ss(LocalM128);
+    LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+    LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+    LocalM128 _mm_set_ss(float);
 }
 
 struct __declspec(align(16)) hkVec4A
@@ -1460,11 +1469,11 @@ struct __declspec(align(16)) hkVec4A
 
 struct hkSchemeVecs
 {
-    hkVector4 m_v0;
-    hkVector4 m_v1;
-    hkVector4 m_v2;
-    hkVector4 m_v3;
-    hkVector4 m_v4;
+    ::hkVector4 m_v0;
+    ::hkVector4 m_v1;
+    ::hkVector4 m_v2;
+    ::hkVector4 m_v3;
+    ::hkVector4 m_v4;
     hkVec4A m_colsA[3];
     hkVec4A m_colsB[3];
     int unkb0;
@@ -1481,7 +1490,7 @@ struct hkAngInfo
     float m_fTau;
 };
 
-static inline float hkToReal(__m128 v)
+static inline float hkToReal(LocalM128 v)
 {
     float s;
     _mm_store_ss(&s, v);
@@ -1490,16 +1499,16 @@ static inline float hkToReal(__m128 v)
 
 extern "C" void FUN_00d6cb30(hkAngInfo* info, int p1, int p2);
 
-static inline __m128 hkLenSq3(__m128 v)
+static inline LocalM128 hkLenSq3(LocalM128 v)
 {
-    __m128 len = _mm_mul_ps(v, v);
-    __m128 r = _mm_add_ss(_mm_shuffle_ps(len, len, 0x55), len);
+    LocalM128 len = _mm_mul_ps(v, v);
+    LocalM128 r = _mm_add_ss(_mm_shuffle_ps(len, len, 0x55), len);
     return _mm_add_ss(_mm_shuffle_ps(len, len, 0xaa), r);
 }
 
 // Builds a normalized cross product and dot of m_colsA[idx] and m_colsB[idx] with two floats from data and calls FUN_00d6cb30, unless the cross is near zero.
 // @fnv 0x00d50ec0
-void __stdcall FUN_00d50ec0(int** cmds, hkVector4** data, int unused, hkSchemeVecs* apSchemeVecs, int p5, int p6)
+void __stdcall FUN_00d50ec0(int** cmds, ::hkVector4** data, int unused, hkSchemeVecs* apSchemeVecs, int p5, int p6)
 {
     float lenSq;
     int idx = *++*cmds;
@@ -1507,24 +1516,24 @@ void __stdcall FUN_00d50ec0(int** cmds, hkVector4** data, int unused, hkSchemeVe
     hkVec4A b = apSchemeVecs->m_colsB[idx];
     hkAngInfo info;
     info.m_fTau = 0.5f;
-    __m128 vb = _mm_load_ps(&b.x);
-    __m128 va = _mm_load_ps(&a.x);
-    __m128 c0 = _mm_mul_ps(_mm_shuffle_ps(va, va, 0xc9), _mm_shuffle_ps(vb, vb, 0xd2));
-    __m128 c1 = _mm_mul_ps(_mm_shuffle_ps(va, va, 0xd2), _mm_shuffle_ps(vb, vb, 0xc9));
-    __m128 cross = _mm_sub_ps(c0, c1);
+    LocalM128 vb = _mm_load_ps(&b.x);
+    LocalM128 va = _mm_load_ps(&a.x);
+    LocalM128 c0 = _mm_mul_ps(_mm_shuffle_ps(va, va, 0xc9), _mm_shuffle_ps(vb, vb, 0xd2));
+    LocalM128 c1 = _mm_mul_ps(_mm_shuffle_ps(va, va, 0xd2), _mm_shuffle_ps(vb, vb, 0xc9));
+    LocalM128 cross = _mm_sub_ps(c0, c1);
     lenSq = hkToReal(hkLenSq3(cross));
     if (lenSq < 1.192092896e-07f)
         return;
     info.m_dot = b.x * a.x + b.y * a.y + b.z * a.z;
-    __m128 r = hkLenSq3(cross);
-    __m128 e = _mm_rsqrt_ss(r);
-    __m128 isZero = _mm_cmpeq_ss(r, _mm_set_ss(0.0f));
-    __m128 ree = _mm_mul_ss(_mm_mul_ss(r, e), e);
-    __m128 threeMinus = _mm_sub_ss(_mm_set_ss(3.0f), ree);
-    __m128 res = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e), threeMinus);
-    __m128 inv = _mm_andnot_ps(isZero, res);
+    LocalM128 r = hkLenSq3(cross);
+    LocalM128 e = _mm_rsqrt_ss(r);
+    LocalM128 isZero = _mm_cmpeq_ss(r, _mm_set_ss(0.0f));
+    LocalM128 ree = _mm_mul_ss(_mm_mul_ss(r, e), e);
+    LocalM128 threeMinus = _mm_sub_ss(_mm_set_ss(3.0f), ree);
+    LocalM128 res = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e), threeMinus);
+    LocalM128 inv = _mm_andnot_ps(isZero, res);
     _mm_store_ps(&info.m_kAxisEndPoints.x, _mm_mul_ps(_mm_shuffle_ps(inv, inv, 0), cross));
-    hkVector4* v = (*data)++;
+    ::hkVector4* v = (*data)++;
     info.m_kPointA = v->x;
     info.m_kPointB = v->y;
     FUN_00d6cb30(&info, p5, p6);
@@ -1533,9 +1542,9 @@ void __stdcall FUN_00d50ec0(int** cmds, hkVector4** data, int unused, hkSchemeVe
 
 struct S00d51100_Blk
 {
-    __m128 a;
-    __m128 b;
-    __m128 v;
+    LocalM128 a;
+    LocalM128 b;
+    LocalM128 v;
     float f0;
     float f1;
 };
@@ -1549,9 +1558,9 @@ void __stdcall FUN_00d51100(int** a, int* b, void* unused, int* c, int* basePtr,
     int val = **a;
 
     S00d51100_Blk blk;
-    blk.v = *(__m128*)((char*)c + ((val + 2) << 4));
-    blk.a = *(__m128*)c;
-    blk.b = *((__m128*)c + 1);
+    blk.v = *(LocalM128*)((char*)c + ((val + 2) << 4));
+    blk.a = *(LocalM128*)c;
+    blk.b = *((LocalM128*)c + 1);
     float* bv = *(float**)b;
     *(float**)b = bv + 4;
     blk.f0 = bv[0];
@@ -1567,20 +1576,20 @@ extern float DAT_01016248;
 
 struct AnglePool
 {
-    __m128 vectors[11];
+    LocalM128 vectors[11];
     int unkB0, unkB4, unkB8;
 };
-extern "C" __m128 __cdecl _mm_mul_ps(__m128, __m128);
-extern "C" __m128 __cdecl _mm_add_ss(__m128, __m128);
-extern "C" __m128 __cdecl _mm_shuffle_ps(__m128, __m128, int);
-extern "C" void __cdecl _mm_store_ss(float*, __m128);
+extern "C" LocalM128 __cdecl _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 __cdecl _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 __cdecl _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" void __cdecl _mm_store_ss(float*, LocalM128);
 extern int DAT_011b5a90[];
 extern float Atan2(float, float);
-extern float dotAngle(__m128, __m128);
+extern float dotAngle(LocalM128, LocalM128);
 static __declspec(noinline) float FUN_00d50450(AnglePool* pool, int index)
 {
-    __m128 first = pool->vectors[DAT_011b5a90[index] + 5];
-    __m128 basis[3] = {pool->vectors[8], pool->vectors[9], pool->vectors[10]};
+    LocalM128 first = pool->vectors[DAT_011b5a90[index] + 5];
+    LocalM128 basis[3] = {pool->vectors[8], pool->vectors[9], pool->vectors[10]};
     float x = dotAngle(first, basis[DAT_011b5a90[index]]);
     float y = dotAngle(first, basis[DAT_011b5a90[index + 1]]);
     return Atan2(y, x);
@@ -1599,7 +1608,7 @@ void __stdcall FUN_00d51170(int** __restrict stream, AngleRecord** cursor, int u
     ++*stream;
     int index = **stream;
     info.m_vScale = DAT_01016248;
-    (__m128&)info.m_jacobian = pool->vectors[index + 5];
+    (LocalM128&)info.m_jacobian = pool->vectors[index + 5];
     info.m_out = FUN_00d50450(pool, index);
     AngleRecord* pRecord = *cursor;
     info.m_f0 = pRecord->x;
@@ -1625,12 +1634,12 @@ void __stdcall FUN_00d51170(int** __restrict stream, AngleRecord** cursor, int u
 
 extern "C"
 {
-    __m128 _mm_sub_ps(__m128 a, __m128 b);
-    __m128 _mm_mul_ps(__m128 a, __m128 b);
-    __m128 _mm_add_ss(__m128 a, __m128 b);
-    __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-    __m128 _mm_load_ps(float const* p);
-    void _mm_store_ss(float* p, __m128 a);
+    LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+    LocalM128 _mm_load_ps(float const* p);
+    void _mm_store_ss(float* p, LocalM128 a);
 }
 
 struct ContactImpulseInfo
@@ -1671,7 +1680,7 @@ struct SixteenWordFloatRecord
 
 struct GenericConstraintRuntime
 {
-    hkVector4 m_kShapeVectorData[11];
+    ::hkVector4 m_kShapeVectorData[11];
     int unkB0;
     int unkB4;
     int m_solverResultIndex;
@@ -1702,20 +1711,20 @@ struct SixIntegerData
     int unk14;
 };
 
-void __cdecl ComputeJacobian(const hkVector4* axis, const hkVector4* posB, SixteenWordFloatRecord* in,
+void __cdecl ComputeJacobian(const ::hkVector4* axis, const ::hkVector4* posB, SixteenWordFloatRecord* in,
                              void* currentSchema, SolverElementTemp* input);
 void __cdecl FUN_00dcfff0(const hkpConstraintMotor* motor, const SolverElementTemp* input, SixIntegerData* output);
 void __cdecl FUN_00dd03c0(SixIntegerData* output, SixteenWordFloatRecord* in, void* currentSchema, void** schemaPtr);
 
 // Advances the command and data pointers, computes a dot product for a motor constraint, and updates the solver state if a motor is present.
 // @fnv 0x00d51270
-void __stdcall FUN_00d51270(const int** commands, const hkVector4** data, hkpGenericConstraintDataScheme* scheme,
+void __stdcall FUN_00d51270(const int** commands, const ::hkVector4** data, hkpGenericConstraintDataScheme* scheme,
                             GenericConstraintRuntime* runtime, SixteenWordFloatRecord* apStepInfo, void** schema)
 {
     *commands += 1;
     int axisIdx = **commands;
 
-    const hkVector4* currentData = *data;
+    const ::hkVector4* currentData = *data;
     ContactImpulseInfo* p = apStepInfo->m_pSolverResults;
     *data = currentData + 1;
     int motorIdx = (int)currentData->x;
@@ -1723,18 +1732,19 @@ void __stdcall FUN_00d51270(const int** commands, const hkVector4** data, hkpGen
     hkpConstraintMotor* motor = scheme->m_ppMotors.m_data[motorIdx];
 
     int axisIndex = axisIdx + 2;
-    __m128 v1 = (__m128&)runtime->m_kShapeVectorData[1];
-    __m128 v0 = (__m128&)runtime->m_kShapeVectorData[0];
+    LocalM128 v1 = (LocalM128&)runtime->m_kShapeVectorData[1];
+    LocalM128 v0 = (LocalM128&)runtime->m_kShapeVectorData[0];
 
-    hkVector4 axis = runtime->m_kShapeVectorData[axisIndex];
-    __m128 diff = _mm_sub_ps(v0, v1);
-    __m128 ax = _mm_load_ps((const float*)&axis);
+    ::hkVector4 axis;
+    CopyReflectionQuad(&axis, &runtime->m_kShapeVectorData[axisIndex]);
+    LocalM128 diff = _mm_sub_ps(v0, v1);
+    LocalM128 ax = _mm_load_ps((const float*)&axis);
 
-    __m128 mul = _mm_mul_ps(diff, ax);
-    __m128 shuf1 = _mm_shuffle_ps(mul, mul, 0x55);
-    __m128 add1 = _mm_add_ss(shuf1, mul);
-    __m128 shuf2 = _mm_shuffle_ps(mul, mul, 0xaa);
-    __m128 add2 = _mm_add_ss(shuf2, add1);
+    LocalM128 mul = _mm_mul_ps(diff, ax);
+    LocalM128 shuf1 = _mm_shuffle_ps(mul, mul, 0x55);
+    LocalM128 add1 = _mm_add_ss(shuf1, mul);
+    LocalM128 shuf2 = _mm_shuffle_ps(mul, mul, 0xaa);
+    LocalM128 add2 = _mm_add_ss(shuf2, add1);
 
     float dot;
     _mm_store_ss(&dot, add2);
@@ -1759,26 +1769,21 @@ void __stdcall FUN_00d51270(const int** commands, const hkVector4** data, hkpGen
     runtime->m_solverResultIndex += 1;
 }
 
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-extern "C" __m128 _mm_load_ss(float const*);
-extern "C" __m128 _mm_unpacklo_ps(__m128, __m128);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_load_ss(float const*);
+extern "C" LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
 
 struct Motor;
 
 union Vec
 {
-    __m128 m;
+    LocalM128 m;
     struct
     {
         float x, y, z, w;
     };
 };
 
-struct Pair
-{
-    int a;
-    int b;
-};
 
 struct QueryIn
 {
@@ -1867,10 +1872,10 @@ extern "C" void __cdecl FUN_00d6cd70(Vec* axis, QueryIn* in, void* schema, Motor
 void __cdecl FUN_00dcfff0(Motor* motor, MotorStuff* input, float* output);
 extern "C" void __cdecl FUN_00d6ce70(float* negAndOut, QueryIn* in, void* schema, void** out);
 
-static __forceinline __m128 dot3(__m128 p, __m128 q)
+static __forceinline LocalM128 dot3(LocalM128 p, LocalM128 q)
 {
-    __m128 m = _mm_mul_ps(p, q);
-    __m128 s = _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m);
+    LocalM128 m = _mm_mul_ps(p, q);
+    LocalM128 s = _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m);
     return _mm_add_ss(_mm_shuffle_ps(m, m, 0xAA), s);
 }
 
@@ -1952,21 +1957,12 @@ void __stdcall FUN_00d51410(int** cmdPtr, Vec** dataPtr, Scheme* scheme, Runtime
     runtime->m_iFirstInteger++;
 }
 
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
 
-struct VecD506
-{
-    __m128 v;
-    __forceinline void operator=(const VecD506& a)
-    {
-        v = a.v;
-    }
-    void FUN_00c7f640(const void*, const VecD506*);
-};
 struct FUN_00cdf250_class
 {
-    __m128 c0, c1, c2;
+    LocalM128 c0, c1, c2;
     __forceinline void operator=(const FUN_00cdf250_class& m)
     {
         c0 = m.c0;
@@ -1991,56 +1987,57 @@ struct __declspec(align(16)) InputD506
 };
 struct StateD506
 {
-    VecD506 pivotA, pivotB;
-    VecD506 axes[3];
+    hkVector4q pivotA, pivotB;
+    hkVector4q axes[3];
     FUN_00cdf250_class basisA, basisB;
     FUN_00cdf250_class* transformA;
     FUN_00cdf250_class* transformB;
     int count;
 };
-struct ModifierD506;
-typedef void(__thiscall* ApplyD506)(ModifierD506*, StateD506*, int);
-struct ModifierVTableD506
+// Command 24 calls vtable slot +4 with constraint state; actor-value Modifier instead stores a key at +0 and value at +4.
+struct ConstraintCommandCallback;
+typedef void(__thiscall* ApplyConstraintCommand)(ConstraintCommandCallback*, StateD506*, int);
+struct ConstraintCommandCallbackVTable
 {
     void* unknown;
-    ApplyD506 apply;
+    ApplyConstraintCommand apply;
 };
-struct ModifierD506
+struct ConstraintCommandCallback
 {
-    ModifierVTableD506* vtable;
+    ConstraintCommandCallbackVTable* vtable;
 };
 extern "C" void FUN_00c7f640();
-typedef void(__thiscall* PivotD506)(VecD506*, const void*, const VecD506*);
+typedef void(__thiscall* PivotD506)(hkVector4q*, const void*, const hkVector4q*);
 struct InterpreterD506
 {
     void FUN_00d50640(hkpGenericConstraintDataScheme*, const InputD506*, void*);
-    void FUN_00d50d00(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d503c0(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d50d60(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d50e10(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51100(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51170(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d50ec0(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51060(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51410(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51270(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d51390(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
-    void FUN_00d505c0(int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d50d00(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d503c0(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d50d60(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d50e10(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d51100(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d51170(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d50ec0(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d51060(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d51410(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d51270(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d51390(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
+    void FUN_00d505c0(int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*, InputD506*, void*);
 };
-typedef void(__thiscall* HandlerD506)(InterpreterD506*, int**, VecD506**, hkpGenericConstraintDataScheme*, StateD506*,
+typedef void(__thiscall* HandlerD506)(InterpreterD506*, int**, hkVector4q**, hkpGenericConstraintDataScheme*, StateD506*,
                                       InputD506*, void*);
 
-static __forceinline void rotateD506(VecD506& out, const FUN_00cdf250_class* m, const VecD506& vec)
+static __forceinline void rotateD506(hkVector4q& out, const FUN_00cdf250_class* m, const hkVector4q& vec)
 {
-    const __m128& v = vec.v;
-    __m128 y = _mm_shuffle_ps(v, v, 0x55);
-    __m128 x = _mm_shuffle_ps(v, v, 0);
-    __m128 z = _mm_shuffle_ps(v, v, 0xaa);
+    const LocalM128& v = vec.m_vComponents;
+    LocalM128 y = _mm_shuffle_ps(v, v, 0x55);
+    LocalM128 x = _mm_shuffle_ps(v, v, 0);
+    LocalM128 z = _mm_shuffle_ps(v, v, 0xaa);
     y = _mm_mul_ps(y, m->c1);
     x = _mm_mul_ps(x, m->c0);
     y = _mm_add_ps(y, x);
     z = _mm_mul_ps(z, m->c2);
-    out.v = _mm_add_ps(y, z);
+    out.m_vComponents = _mm_add_ps(y, z);
 }
 
 // Executes a byte-code program from a constraint scheme, dispatching on command codes to update state and call handler functions.
@@ -2052,9 +2049,9 @@ void InterpreterD506::FUN_00d50640(hkpGenericConstraintDataScheme* scheme, const
     state.transformA = localInput.transformA;
     state.transformB = localInput.transformB;
     state.count = 0;
-    VecD506* data = (VecD506*)scheme->m_data.m_data;
+    hkVector4q* data = (hkVector4q*)scheme->m_data.m_data;
     int* command = scheme->m_commands.m_data;
-    ModifierD506** modifiers = (ModifierD506**)scheme->m_ppModifiers.m_data;
+    ConstraintCommandCallback** modifiers = (ConstraintCommandCallback**)scheme->m_ppModifiers.m_data;
     for (;;)
     {
         int* __restrict op = command;
@@ -2063,40 +2060,40 @@ void InterpreterD506::FUN_00d50640(hkpGenericConstraintDataScheme* scheme, const
         case 0:
             return;
         case 3: {
-            __m128 v = data->v;
+            LocalM128 v = data->m_vComponents;
             const FUN_00cdf250_class* __restrict m = state.transformA;
-            __m128 y = _mm_shuffle_ps(v, v, 0x55);
-            __m128 x = _mm_shuffle_ps(v, v, 0);
+            LocalM128 y = _mm_shuffle_ps(v, v, 0x55);
+            LocalM128 x = _mm_shuffle_ps(v, v, 0);
             y = _mm_mul_ps(y, m->c1);
             x = _mm_mul_ps(x, m->c0);
             y = _mm_add_ps(y, x);
-            VecD506& out = state.axes[*++command];
-            __m128 z = _mm_shuffle_ps(v, v, 0xaa);
+            hkVector4q& out = state.axes[*++command];
+            LocalM128 z = _mm_shuffle_ps(v, v, 0xaa);
             z = _mm_mul_ps(z, m->c2);
-            out.v = _mm_add_ps(y, z);
+            out.m_vComponents = _mm_add_ps(y, z);
             ++data;
             break;
         }
         case 4: {
-            __m128 v = data->v;
+            LocalM128 v = data->m_vComponents;
             const FUN_00cdf250_class* __restrict m = state.transformB;
-            __m128 y = _mm_shuffle_ps(v, v, 0x55);
-            __m128 x = _mm_shuffle_ps(v, v, 0);
+            LocalM128 y = _mm_shuffle_ps(v, v, 0x55);
+            LocalM128 x = _mm_shuffle_ps(v, v, 0);
             y = _mm_mul_ps(y, m->c1);
             x = _mm_mul_ps(x, m->c0);
             y = _mm_add_ps(y, x);
             ++command;
             int* __restrict axisCommand = command;
-            VecD506& out = state.axes[*axisCommand];
-            __m128 z = _mm_shuffle_ps(v, v, 0xaa);
+            hkVector4q& out = state.axes[*axisCommand];
+            LocalM128 z = _mm_shuffle_ps(v, v, 0xaa);
             z = _mm_mul_ps(z, m->c2);
-            out.v = _mm_add_ps(y, z);
+            out.m_vComponents = _mm_add_ps(y, z);
             ++data;
             break;
         }
         case 5: {
-            VecD506 v;
-            v.v = data->v;
+            hkVector4q v;
+            v.m_vComponents = data->m_vComponents;
             state.axes[*++command] = v;
             ++data;
             break;
@@ -2156,15 +2153,15 @@ void InterpreterD506::FUN_00d50640(hkpGenericConstraintDataScheme* scheme, const
             FUN_00d505c0(&command, &data, scheme, &state, &localInput, output);
             break;
         case 1:
-            state.pivotA.FUN_00c7f640(state.transformA, data);
+            state.pivotA.FUN_00c7f640(*(const hkTransform*)state.transformA, *data);
             ++data;
             break;
         case 2:
-            state.pivotB.FUN_00c7f640(state.transformB, data);
+            state.pivotB.FUN_00c7f640(*(const hkTransform*)state.transformB, *data);
             ++data;
             break;
         case 22: {
-            float scale = ((hkVector4*)data)->x;
+            float scale = ((::hkVector4*)data)->x;
             ++data;
             localInput.factor.real *= scale;
             break;
@@ -2173,8 +2170,8 @@ void InterpreterD506::FUN_00d50640(hkpGenericConstraintDataScheme* scheme, const
             localInput.factor.bits = input->factor.bits;
             break;
         case 24: {
-            ModifierD506* pModifier = *modifiers;
-            ApplyD506 apply = pModifier->vtable->apply;
+            ConstraintCommandCallback* pModifier = *modifiers;
+            ApplyConstraintCommand apply = pModifier->vtable->apply;
             apply(pModifier, &state, *++command);
             ++modifiers;
             break;
@@ -2190,9 +2187,9 @@ void __stdcall FUN_00d50d00(int** commands, int unusedData, int unusedScheme, Ru
 {
     ++*commands;
     FUN_00d503c0_m packet;
-    packet.r2.v = runtime->v[**commands + 2].m;
-    packet.r0.v = runtime->v[0].m;
-    packet.r1.v = runtime->v[1].m;
+    packet.r2.m_vComponents = runtime->v[**commands + 2].m;
+    packet.r0.m_vComponents = runtime->v[0].m;
+    packet.r1.m_vComponents = runtime->v[1].m;
     FUN_00dcf280(&packet, input, output);
     ++runtime->m_iFirstInteger;
 }

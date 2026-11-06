@@ -1,10 +1,25 @@
 // fallout_shared/pathfinding/pathmanager.cpp: PathManager, PathingTaskData, Pathing, DelStandIn and more (65 functions)
 
+#include "../../../include/ActorPathingMessageQueue.h"
+#include "../../../include/SettingT.h"
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/PathingSolution.h"
+#include "../../../include/PathingTaskData.h"
+#include "../../../include/TESObjectREFR.h"
+
+// The unit-local declarations.
 #include "pathmanager_decls.h"
+#include "../../../include/BSWin32TaskletManager.h"
+#include "../../../include/GO.h"
+#include "../../../include/TESRaceForm.h"
+#include "../../../include/PatrolActorPackageData.h"
+#include "../../../include/PathingSearchRayCast.h"
+#include "../../../include/BSTaskletData.h"
+#include "../../../include/NiAVObject.h"
 
 // Copies the two fields of source into this object and returns a reference to this object.
 // @fnv 0x006e9c60
-QueuedMessage& QueuedMessage::operator=(const QueuedMessage& source)
+ActorPathingMessage& ActorPathingMessage::operator=(const ActorPathingMessage& source)
 {
     m_eMessageType = source.m_eMessageType;
     m_pPathingSolution = source.m_pPathingSolution;
@@ -18,7 +33,7 @@ bool PathingTaskData::HasPendingMessages()
     ((RecursiveSpinLock*)((char*)this + 0x20))->Lock(0);
     for (unsigned int i = 0; i < ((BSSimpleArray<ParentSpaceNode, 1024>*)((char*)this + 0x50))->GetSize(); ++i)
     {
-        if (((NiTArray<TESObjectREFR*, NiTNewInterface<TESObjectREFR*> >*)((char*)this + 0x50))->GetAt(i)->state == 0)
+        if (*(int*)((char*)((NiTArray<TESObjectREFR*, NiTNewInterface<TESObjectREFR*> >*)((char*)this + 0x50))->GetAt(i) + 4) == 0)
         {
             ((RecursiveSpinLock*)((char*)this + 0x20))->Unlock();
             return false;
@@ -48,7 +63,7 @@ bool PathManager::Initialize()
 bool PathManager::BuildPath(NiPointer<PathingRequest> m_pPathingRequest, NiPointer<ActorPathingMessageQueue> spQueue,
                             bool bAsync)
 {
-    if (g_011d77cc.Bool()->b && bAsync)
+    if (*g_011d77cc.Bool() && bAsync)
     {
         return m_pPathManagerImpl->BuildPath(m_pPathingRequest, spQueue);
     }
@@ -79,13 +94,13 @@ void PathingTaskData::Process()
     {
         if (!HasPendingMessages())
         {
-            FUN_006ea330();
+            SetTaskYielded();
         }
         else
         {
             m_pPathingSolution = new PathingSolution();
             bool bSuccess = Pathing::BuildPath(m_pPathingRequest, m_pPathingSolution);
-            if (FUN_005dc980())
+            if (GetByteAtOffset64())
             {
                 int unk18 = 0;
             }
@@ -93,9 +108,9 @@ void PathingTaskData::Process()
             {
                 if (bSuccess)
                 {
-                    if (bFlag04)
+                    if (m_bTaskYielded)
                     {
-                        bFlag04 = false;
+                        m_bTaskYielded = false;
                     }
                     ((ActorPathingMessageQueue*)spQueue)
                         ->Push(QueuedMessage(PATHING_MESSAGE_TYPE_PMT_OK, m_pPathingSolution));
@@ -121,7 +136,7 @@ void PathingTaskData::Process()
         }
         else
         {
-            FUN_006ea330();
+            SetTaskYielded();
         }
     }
 
@@ -252,11 +267,13 @@ FUN_006e9e20::~FUN_006e9e20()
     }
 }
 
-struct FormChangeMask
+// The 4-byte head at +0 of the object built by 0x006eaa30 and torn down by 0x006eab30, not FormChangeMask: its constructor
+// is the folded zero-the-first-dword body 0x0044dee0, its destructor the folded empty 0x00483710; its real class is unknown.
+struct PathManagerHead_0044dee0
 {
     int v;
-    FormChangeMask();
-    ~FormChangeMask();
+    PathManagerHead_0044dee0();
+    ~PathManagerHead_0044dee0();
 };
 struct PM1
 {
@@ -300,7 +317,7 @@ struct PMA
     char pad[0x1c];
     PMA(int, int, int);
 };
-struct FUN_006eaa30 : public FormChangeMask
+struct FUN_006eaa30 : public PathManagerHead_0044dee0
 {
     PM1 m1;
     PM2 m2;
@@ -327,10 +344,6 @@ struct FUN_006eabe0_shell : public PathManagerImpl
     bool FUN_006eabe0();
 };
 
-struct BSWin32TaskletManager
-{
-    bool GetTaskletValue(void*);
-};
 BSWin32TaskletManager& __cdecl GetTaskletManager(void);
 bool __fastcall FUN_006c08e0(void*);
 
@@ -473,11 +486,6 @@ S006ebf30* S006ebf30::FUN_006ebf30(S006ebf30* apSource)
     return this;
 }
 
-class NiAVObject
-{
-  public:
-    void FUN_00401970();
-};
 
 // If the stored pointer is non-null, calls FUN_00401970 on the NiAVObject at offset 0x14 of it.
 // @fnv 0x006ebf90
@@ -800,10 +808,6 @@ S_006eaa00* S_006eaa00::FUN_006eaa00(S_006eaa00* apSource)
 
 namespace fnv_006eac40 {
 void __fastcall FUN_006c09d0(void*);
-struct BSWin32TaskletManager
-{
-    void ReleaseItem(void*);
-};
 BSWin32TaskletManager& __cdecl GetTaskletManager(void);
 struct FUN_006eac40_Holder
 {
@@ -842,12 +846,6 @@ bool HostA::DispatchToInner(int aiValue, bool abUseFirst)
     return true;
 }
 
-struct PatrolActorPackageData
-{
-    virtual void vf0();
-    virtual void vf1(bool);
-    bool IsPatrolling();
-};
 struct FUN_006eb670_Holder
 {
     PatrolActorPackageData* field0;
@@ -860,7 +858,7 @@ void FUN_006eb670_Holder::FUN_006eb670(bool a1)
     {
         if (!field0->IsPatrolling())
         {
-            field0->vf1(a1);
+            field0->SetReferenceTarget(reinterpret_cast<TESObjectREFR*>(a1));
         }
     }
 }
@@ -974,23 +972,14 @@ struct FUN_006ebf30
     ~FUN_006ebf30();
     void* m_pObject;
 };
-struct GO
-{
-    ~GO();
-    void* m_pObject;
-};
 struct Ptr2_006e9e20 : FUN_006ebf30
 {
     ~Ptr2_006e9e20();
 };
-struct BSTaskletData
-{
-    virtual ~BSTaskletData();
-};
 struct FUN_006e9cc0 : BSTaskletData
 {
     FUN_006e9cc0(const GO&, FUN_006ebf30);
-    char pad[0x7c];
+    char pad[0x78];
 };
 struct FUN_006c5e70
 {
@@ -998,10 +987,6 @@ struct FUN_006c5e70
     int a, b;
 };
 FUN_006c5e70 __fastcall FUN_006c5e40();
-struct TESRaceForm
-{
-    void Initialize(unsigned int);
-};
 int __fastcall FUN_00559450(int*);
 struct Queue_006eac70
 {
@@ -1066,51 +1051,6 @@ struct SearchItem
     int unk00;
     int flags;
 };
-struct PathingSearchRayCast
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    PathingSearchRayCast();
-    ~PathingSearchRayCast();
-    void ProcessRayCast(SearchItem*, SearchItem*);
-    int FUN_004fd3e0();
-};
 struct SearchArray
 {
     int unk00;
@@ -1130,7 +1070,7 @@ struct SearchLock
     int unk14;
     int unk18;
     int unk1c;
-    void Wait(const char*);
+    void FUN_0040fbf0(const char*);
     void Leave();
 };
 struct ManagerView
@@ -1152,7 +1092,7 @@ struct ManagerView
 int ManagerView::FUN_006ea350()
 {
     int total = 0;
-    lock.Wait(0);
+    lock.FUN_0040fbf0(0);
     for (unsigned int i = 0; i < first.FUN_0044ddc0(); i++)
     {
         if (second.FUN_00877a30(i)->flags == 0)
@@ -1167,12 +1107,6 @@ int ManagerView::FUN_006ea350()
     lock.Leave();
     return total;
 }
-
-struct BGSChangeFlags_6eab30
-{
-    int unk00;
-    ~BGSChangeFlags_6eab30();
-};
 
 struct PM1_6eab30
 {
@@ -2517,7 +2451,7 @@ struct PMA_6eab30
     ~PMA_6eab30();
 };
 
-struct FUN_006eab30_cls : public BGSChangeFlags_6eab30
+struct FUN_006eab30_cls : public PathManagerHead_0044dee0
 {
     PM1_6eab30 m_04;
     PM2_6eab30 m_c10;
@@ -5783,7 +5717,7 @@ struct RequestManager
 unsigned int FUN_006ea780_Obj::RequestLocationStatus(int pShape, int iLocation, int a3, int bTypeFlag)
 {
     unsigned int status = 0;
-    ((RequestManager*)this)->lock.Wait(0);
+    ((RequestManager*)this)->lock.FUN_0040fbf0(0);
     for (unsigned int i = 0; i < ((RequestManager*)this)->statuses.FUN_0044ddc0(); i++)
     {
         if (((RequestManager*)this)->statuses.FUN_00877a30(i)->type == !(unsigned char)bTypeFlag &&
@@ -5855,12 +5789,13 @@ struct TaskView
     int unk5c;
     RefView queue;
 };
-struct MessageView
+// Task-completion record: 0x006ea9d0 initializes {type=-1, task=0}; 0x006eb440 consumes completed pathing tasks.
+struct PathTaskCompletionRecord
 {
     int type;
     TaskView* task;
-    MessageView();
-    ~MessageView();
+    PathTaskCompletionRecord();
+    ~PathTaskCompletionRecord();
 };
 struct IteratorView
 {
@@ -5890,7 +5825,7 @@ struct QueueView
     virtual void v1();
     virtual void v2();
     virtual void v3();
-    virtual bool Pop(MessageView&);
+    virtual bool Pop(PathTaskCompletionRecord&);
     virtual void Remove(QueueTarget*);
     bool Next(IteratorView&, int*, TaskView**, bool);
     void Clear(int);
@@ -7234,7 +7169,7 @@ void DrainManager::Drain()
     EnterTasks(this);
     active = true;
     ((FUN_006eb670_Holder*)this)->FUN_006eb670(false);
-    MessageView message;
+    PathTaskCompletionRecord message;
     while (incoming.Pop(message))
     {
         switch (message.type)

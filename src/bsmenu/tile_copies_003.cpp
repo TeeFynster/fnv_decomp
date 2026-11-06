@@ -3,7 +3,7 @@
 // Twin_<addr>/FUN_<addr> are placeholder names; the original identities of these functions are unknown.
 #include "Tile__FloatAction.h"
 
-#include "tile_packet_decls.h"
+#include "../../include/Tile.h"
 
 struct Twin_0080f7d0 : public Tile
 {

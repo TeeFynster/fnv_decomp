@@ -5,6 +5,8 @@
 // src/staging/blk_00b20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/Random.h"
 extern "C" void __cdecl FUN_00b02c90();
 struct FUN_00b274a0_class
 {
@@ -27,13 +29,6 @@ extern int DAT_010a5890;
 struct FUN_00b3f0a0_Class
 {
     void __thiscall FUN_00b3f0a0();
-};
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    NiPoint3& __thiscall FUN_00b2a1c0(const NiPoint3& other);
 };
 unsigned int __cdecl FUN_00ec7c56();
 struct FUN_00b393b0_Class
@@ -141,11 +136,6 @@ struct FUN_00b3f030_Class
 {
     int* vtbl;
     FUN_00b3f030_Class();
-};
-struct Random
-{
-    void* vtbl;
-    void* __thiscall DestroyRandom(unsigned int flags);
 };
 extern const int vftable_Random[];
 void _Deallocate(void*);
@@ -739,7 +729,8 @@ struct Tag32780
 {
     unsigned char v;
 };
-struct Vec32780
+// 20-byte item-array storage; 0x00b1f590 allocates 24-byte elements and 0x00b32c60 cleans them up.
+struct ItemArrayStorage
 {
     int m_00, m_04, m_08;
     Item32780* m_0c;

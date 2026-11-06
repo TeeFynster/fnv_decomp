@@ -3,7 +3,11 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/fallout_shared/tempeffects/bstempeffectsimpledecal.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "original_bstempeffectsimpledecal.h"
+#include "../../../include/BSTempEffectSimpleDecal.h"
+#include "../../../include/Mat3.h"
+#include "../../../include/QueuedFile.h"
+
+
 // Original PC source filename label passed to the preload memory context;
 // contents and target are verified against the engine data section.
 const char kBSTempEffectSimpleDecalFileLabel[] =
@@ -59,16 +63,16 @@ struct Pt
     }
 };
 
-struct Mat3
+inline Mat3::Mat3()
 {
-    float m_afEntries[3][3];
-    void SetRow(unsigned int uiRow, const Pt& kRow)
-    {
-        m_afEntries[uiRow][0] = kRow.x;
-        m_afEntries[uiRow][1] = kRow.y;
-        m_afEntries[uiRow][2] = kRow.z;
-    }
-};
+}
+
+inline void Mat3::SetRow(unsigned int uiRow, const Pt& kRow)
+{
+    reinterpret_cast<float (*)[3]>(&m00)[uiRow][0] = kRow.x;
+    reinterpret_cast<float (*)[3]>(&m00)[uiRow][1] = kRow.y;
+    reinterpret_cast<float (*)[3]>(&m00)[uiRow][2] = kRow.z;
+}
 
 inline float NiAbs(float fValue)
 {

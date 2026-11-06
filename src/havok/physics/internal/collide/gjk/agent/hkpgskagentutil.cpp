@@ -2,17 +2,24 @@
 // src/havok/physics/internal/collide/gjk/agent/hkpgskagentutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/gjk/agent/hkpgskagentutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Retain the float-only intrinsic type: the CRT byte arrays change VC9 /GS
+// parameter handling and stack layout in this unit.
+#define _INCLUDED_MM2
+// Exe 0x00db4180 ProcessCollision: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef struct __declspec(intrin_type) __declspec(align(16)) {
     float f[4];
-};
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_xor_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern const __m128 DAT_010c4c00;
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+
+#include "../../../../../../../include/Vec4.h"
+
+extern const LocalM128 DAT_010c4c00;
 struct Node
 {
     virtual void s00();
@@ -152,10 +159,6 @@ struct Head
     void* m_0c;
     float m_10;
 };
-struct Vec4
-{
-    __declspec(align(16)) float f[4];
-};
 struct UnVec
 {
     float f[4];
@@ -168,7 +171,7 @@ struct Pt
 {
     __declspec(align(16)) float f[4];
 };
-struct OutRec
+struct __declspec(align(16)) OutRec
 {
     Vec4 v_00;
     Vec4 v_10;
@@ -178,7 +181,7 @@ struct OutRec
 struct Work
 {
     Pt points[16];
-    Vec4 vcopy;
+    __declspec(align(16)) Vec4 vcopy;
     float ta;
     float tb;
     float tc;
@@ -3342,20 +3345,20 @@ static __forceinline void XformReverse(Pt* pts, Mat* m, int n)
     __declspec(align(16)) UnVec row1 = m->r[1];
     __declspec(align(16)) UnVec row2 = m->r[2];
     __declspec(align(16)) UnVec row3 = m->r[3];
-    __m128 a = _mm_load_ps(row0.f);
-    __m128 b = _mm_load_ps(row1.f);
-    __m128 c = _mm_load_ps(row2.f);
-    __m128 d = _mm_load_ps(row3.f);
+    LocalM128 a = _mm_load_ps(row0.f);
+    LocalM128 b = _mm_load_ps(row1.f);
+    LocalM128 c = _mm_load_ps(row2.f);
+    LocalM128 d = _mm_load_ps(row3.f);
     int i = n - 1;
     do
     {
-        __m128 v = _mm_load_ps(pts[i].f);
-        __m128 y = _mm_shuffle_ps(v, v, 0x55);
-        __m128 xx = _mm_shuffle_ps(v, v, 0);
+        LocalM128 v = _mm_load_ps(pts[i].f);
+        LocalM128 y = _mm_shuffle_ps(v, v, 0x55);
+        LocalM128 xx = _mm_shuffle_ps(v, v, 0);
         xx = _mm_mul_ps(xx, a);
         y = _mm_mul_ps(y, b);
         y = _mm_add_ps(y, xx);
-        __m128 z = _mm_shuffle_ps(v, v, 0xaa);
+        LocalM128 z = _mm_shuffle_ps(v, v, 0xaa);
         z = _mm_mul_ps(z, c);
         z = _mm_add_ps(z, d);
         y = _mm_add_ps(y, z);
@@ -3366,10 +3369,14 @@ static __forceinline void XformReverse(Pt* pts, Mat* m, int n)
 // @fnv 0x00db4180
 void ProcessCollision(In* in, void* p1, Arg2* p2, Arg3* p3, Arg4* p4, VecS* p5, Arg6* p6)
 {
-    Work x;
-    Vec4 vec;
+    // Scratch values are filled before use, without invoking Vec4's zeroing constructor.
+    LocalM128 workStorage[sizeof(Work) / sizeof(LocalM128)];
+    Work& x = *(Work*)workStorage;
+    LocalM128 vecStorage;
+    Vec4& vec = *(Vec4*)&vecStorage;
     Head head;
-    Vec4 out;
+    LocalM128 outStorage;
+    Vec4& out = *(Vec4*)&outStorage;
     float sum;
     VecS* p5c = p5;
     head.m_08 = in->m_00->m_00;
@@ -3402,10 +3409,10 @@ void ProcessCollision(In* in, void* p1, Arg2* p2, Arg3* p3, Arg4* p4, VecS* p5, 
             goto AfterV;
         if (host->m_16 == 6)
             goto AfterV;
-        _mm_store_ps(vec.f, _mm_xor_ps(_mm_load_ps(vec.f), DAT_010c4c00));
+        _mm_store_ps(&vec.x, _mm_xor_ps(_mm_load_ps(&vec.x), DAT_010c4c00));
         iSupport =
             QuerySupport((Node*)host, p3, (unsigned char*)p3 + 8, &out, in->m_00->m_08, hr, in->m_04->m_08, &vec);
-        _mm_store_ps(vec.f, _mm_xor_ps(_mm_load_ps(vec.f), DAT_010c4c00));
+        _mm_store_ps(&vec.x, _mm_xor_ps(_mm_load_ps(&vec.x), DAT_010c4c00));
     }
     if (!iSupport)
     {
@@ -3427,11 +3434,11 @@ AfterV:
         ObjN* bodyA = in->m_00;
         x.tc = *(float*)&in->m_0c->m_08;
         ObjN* shapeA = (ObjN*)bodyA->m_00;
-        __m128 normalCopy = _mm_load_ps(vec.f);
+        LocalM128 normalCopy = _mm_load_ps(&vec.x);
         ObjN* shapeB = (ObjN*)bodyB->m_00;
         x.ta = *(float*)&shapeA->m_10;
         x.tb = *(float*)&shapeB->m_10;
-        _mm_store_ps(x.vcopy.f, normalCopy);
+        _mm_store_ps(&x.vcopy.x, normalCopy);
         sum = x.ta + x.tc + x.tb;
         x.sq = sum * sum;
         if (countByte)
@@ -3450,8 +3457,8 @@ AfterV:
         (void)res;
     }
     OutRec* outRec = (OutRec*)p6->m_00;
-    _mm_store_ps(outRec->v_00.f, _mm_load_ps(out.f));
-    _mm_store_ps(outRec->v_10.f, _mm_load_ps(vec.f));
+    _mm_store_ps(&outRec->v_00.x, _mm_load_ps(&out.x));
+    _mm_store_ps(&outRec->v_10.x, _mm_load_ps(&vec.x));
     if ((bool)tailTest)
     {
         outRec->m_20 = p4->m_06;

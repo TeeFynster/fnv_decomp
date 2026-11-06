@@ -8,51 +8,12 @@
 // that unit declares it this way.
 // src/havok/common/base/reflection/hkclassenum.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/reflection/hkclassenum.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../include/hkOArchive.h"
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkClass.h"
+// The shared headers supply the base types used by the legacy enum declaration.
+#define FNV_HAVOK_HKBASE_H
 #include "havok/hkClassEnum_decl_hkclassenum.h"
-extern "C" int __cdecl FUN_00d86980();
-int __stdcall ReadSignedValueBySize(const void* p);
-struct hkCustomAttributes
-{
-    void* __thiscall getAttribute(void* arg);
-};
-struct FUN_00db76a0_Class
-{
-    void* __thiscall GetAttribute(void* arg);
-};
-struct FUN_00db7860
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    ~FUN_00db7860() throw();
-};
-struct FUN_00db7870 : public FUN_00db7860
-{
-    FUN_00db7870(int n) throw();
-};
-struct hkObjDB76
-{
-    void FUN_00db7600(FUN_00db7860* p) throw();
-    void FUN_00db76c0();
-};
-
-class hkReferencedObject : public hkBaseObject
-{
-  public:
-    unsigned short memSizeAndFlags;
-    short referenceCount;
-};
-class hkStreamWriter;
-class hkOArchive : public hkReferencedObject
-{
-  public:
-    hkStreamWriter* writer;
-    hkBool byteSwap;
-    hkOArchive(hkStreamWriter*, hkBool);
-    virtual ~hkOArchive();
-    void FUN_00d607b0(const void*, int);
-    void WriteInt(unsigned int);
-};
 class hkClassEnumItem
 {
   public:
@@ -65,13 +26,13 @@ void hkClassEnum::FUN_00db7600(hkStreamWriter* writer) const
 {
     hkOArchive archive(writer, false);
     const char* name = m_name;
-    archive.FUN_00d607b0(name, FUN_00cb10d0(name));
+    archive.WriteRaw(name, FUN_00cb10d0(name));
     int count = m_items.m_iElementCount;
     for (int i = 0; i < count; ++i)
     {
         const hkClassEnumItem& item = m_items.m_data[i];
         const char* itemName = item.name;
-        archive.FUN_00d607b0(itemName, FUN_00cb10d0(itemName));
+        archive.WriteRaw(itemName, FUN_00cb10d0(itemName));
         archive.WriteInt(item.value);
     }
     archive.WriteInt(count);

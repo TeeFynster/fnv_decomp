@@ -1,3 +1,4 @@
+#include "../../../../../include/hkArrayBase.h"
 
 // src/havok/physics/dynamics/action/hkpbinaryaction.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/action/hkpbinaryaction.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -231,26 +232,15 @@ extern "C" hkMemoryRouterXcf4e30& __cdecl FUN_00c85750() throw();
 }
 void __cdecl ResizeAudioStream(void* m_pPoolBase, void* pArray, int iSizeElem);
 
-template <class T> class hkArrayXcf4e30
+template <class T>
+static __forceinline void hkArrayXcf4e30_AddBack(hkArrayBase<T>& self, const T& e)
 {
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void AddBack(const T& e)
-    {
         hkMemoryRouterXcf4e30& router = hkRouterXcf4e30::FUN_00c85750();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(router.m_pStreamAllocator, this, sizeof(T));
-        memCpyOneAlignedXcf4e30<sizeof(T)>(m_data + m_iElementCount, &e);
-        m_iElementCount++;
+        if (self.m_iElementCount == self.getCapacity())
+            ResizeAudioStream(router.m_pStreamAllocator, (&self), sizeof(T));
+        memCpyOneAlignedXcf4e30<sizeof(T)>(self.m_data + self.m_iElementCount, &e);
+        self.m_iElementCount++;
     }
-};
 
 class hkOwnerXcf4e30
 {
@@ -259,12 +249,12 @@ class hkOwnerXcf4e30
     void* m_kPointA;
     void* m_kPointB;
 
-    void GetPointers(hkArrayXcf4e30<void*>& out);
+    void GetPointers(hkArrayBase<void*>& out);
 };
 
 // @fnv 0x00cf4e30
-void hkOwnerXcf4e30::GetPointers(hkArrayXcf4e30<void*>& out)
+void hkOwnerXcf4e30::GetPointers(hkArrayBase<void*>& out)
 {
-    out.AddBack(m_kPointA);
-    out.AddBack(m_kPointB);
+    hkArrayXcf4e30_AddBack(out, m_kPointA);
+    hkArrayXcf4e30_AddBack(out, m_kPointB);
 }

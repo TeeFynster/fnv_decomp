@@ -1,3 +1,4 @@
+#include "../../../include/TESRegionList.h"
 
 // src/fallout_shared/region system/tesregionlist.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/region system/tesregionlist.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -12,10 +13,6 @@ struct LH
     bool IsInList(TESRegion* const&) const;
 };
 
-struct TESRegionList
-{
-    bool AddRegion(TESRegion* apRegion);
-};
 
 // Returns false if apRegion is null; otherwise adds it to the list at offset 4 if not already present and returns true.
 // @fnv 0x004f6600

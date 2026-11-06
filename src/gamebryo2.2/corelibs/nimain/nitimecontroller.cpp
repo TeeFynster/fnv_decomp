@@ -3,6 +3,8 @@
 // NiTimeController: base timing/update functionality for animation controllers.
 // FNV 2.2 branch revision (thread-local scale cache, legacy flag conversion,
 // geometry consistency fixup on attach/link).
+#include "../../../../include/NiTMapBase.h"
+#include "../../../../include/NiTMapItem.h"
 #include "nitimecontroller.h"
 #include "nitimecontroller_decls.h"
 
@@ -48,7 +50,7 @@ void NiTimeController::SetTarget(NiObjectNET* pkTarget)
         if (IsGeometryController())
         {
             NiGeometry* pkGeometry = (NiGeometry*)m_pkTarget;
-            pkGeometry->GetModelData()->SetDataConsistency(NiGeometryData::STATIC);
+            pkGeometry->GetModelData()->SetDataConsistency(NiGeometryData::MUTABLE);
         }
     }
 
@@ -76,7 +78,7 @@ void NiTimeController::LinkObject(NiStream& kStream)
         if (IsGeometryController() && m_pkTarget)
         {
             NiGeometry* pkGeometry = (NiGeometry*)m_pkTarget;
-            pkGeometry->GetModelData()->SetDataConsistency(NiGeometryData::STATIC);
+            pkGeometry->GetModelData()->SetDataConsistency(NiGeometryData::MUTABLE);
         }
     }
 }
@@ -99,22 +101,11 @@ int* __cdecl CopyGlobalsToBuffer(int, int, int, int* pDest)
     return pDest;
 }
 
-struct TCEq : NiObject
-{
-    bool IsSameAs(NiObject* pkObject);
-    unsigned short m_uiObjectFlags;
-    char pad[2];
-    float m_fFrequency;
-    float m_fPhase;
-    float m_fLoKeyTime;
-    float m_fHiKeyTime;
-    char pad2[0x2c - 0x1c];
-    NiObject* m_pkTarget;
-};
+
 // @fnv 0x00a6cc80
-bool __fastcall FUN_00a6cc80(TCEq* pThis, int edx, NiObject* pkObject)
+bool __fastcall FUN_00a6cc80(NiTimeController* pThis, int edx, NiObject* pkObject)
 {
-    TCEq* pkControl = (TCEq*)pkObject;
+    NiTimeController* pkControl = (NiTimeController*)pkObject;
     if (pThis->IsSameAs(pkObject) && pThis->m_uiObjectFlags == pkControl->m_uiObjectFlags &&
         pThis->m_fFrequency == pkControl->m_fFrequency && pThis->m_fPhase == pkControl->m_fPhase &&
         pThis->m_fLoKeyTime == pkControl->m_fLoKeyTime && pThis->m_fHiKeyTime == pkControl->m_fHiKeyTime)
@@ -126,34 +117,23 @@ bool __fastcall FUN_00a6cc80(TCEq* pThis, int edx, NiObject* pkObject)
     return false;
 }
 
-struct TCChain
-{
-    char pad[0x30];
-    TCChain* m_pNext;
-};
+
 // @fnv 0x00a6cd00
-unsigned int __fastcall FUN_00a6cd00(TCChain* p, int edx)
+unsigned int __fastcall FUN_00a6cd00(NiTimeController* p, int edx)
 {
     unsigned int n = 0;
     while (p)
     {
         ++n;
-        p = p->m_pNext;
+        p = p->m_spNextController.m_pObject;
     }
     return n;
 }
 
 extern const float DAT_01015f5c;
-struct TCStart
-{
-    char pad[8];
-    unsigned short m_uiObjectFlags;
-    char pad2[0x1c - 0xa];
-    float m_fStartTime;
-    float m_fLastTime;
-};
+
 // @fnv 0x00a6cd10
-void __fastcall InitStartTime(TCStart* p, int edx, float fTime)
+void __fastcall InitStartTime(NiTimeController* p, int edx, float fTime)
 {
     p->m_uiObjectFlags |= 8;
     p->m_fLastTime = DAT_01015f5c;
@@ -161,18 +141,14 @@ void __fastcall InitStartTime(TCStart* p, int edx, float fTime)
         p->m_fStartTime = fTime;
 }
 
-struct TCReg : NiObject
-{
-    char pad[0x30 - 8];
-    NiObject* m_spNextController;
-};
+
 // Registers the object's streamables with kStream, then registers the streamables of the stored NiObject if present; returns false if the base registration fails.
 // @fnv 0x00a6d0f0
-bool __fastcall FUN_00a6d0f0(TCReg* p, int edx, NiStream& kStream)
+bool __fastcall FUN_00a6d0f0(NiTimeController* p, int edx, NiStream& kStream)
 {
     if (!p->NiObject::RegisterStreamables(kStream))
         return false;
-    NiObject* n = p->m_spNextController;
+    NiObject* n = p->m_spNextController.m_pObject;
     if (n)
         n->RegisterStreamables(kStream);
     return true;
@@ -183,25 +159,10 @@ bool __fastcall FUN_00a6d0f0(TCReg* p, int edx, NiStream& kStream)
 // init-type controllers, to the start time as well.
 static const float kNegInfinity = -3.402823466e+38f;
 
-class FUN_00a6cd30_cls
-{
-  public:
-    unsigned int m_unk00;
-    unsigned int m_unk04;
-    unsigned short m_uiObjectFlags;
-    unsigned short m_unk0A;
-    unsigned int m_unk0C;
-    unsigned int m_unk10;
-    unsigned int m_unk14;
-    unsigned int m_unk18;
-    float m_fStartTime;
-    float m_fLastTime;
 
-    void ResetTiming();
-};
 
 // @fnv 0x00a6cd30
-void FUN_00a6cd30_cls::ResetTiming()
+void NiTimeController::Stop()
 {
     m_uiObjectFlags &= 0xfff7;
     m_fLastTime = kNegInfinity;
@@ -490,291 +451,68 @@ after_list:
 }
 }  // namespace fnv_00a6d2d0
 
-struct NiTimeController_Luna : NiTimeController
-{
-    void FUN_00a6d5e0(NiStream& kStream);
-};
+
 // Loads a time controller from a stream: base object, flags, frequency, phase, key times, and version-dependent flag fixups.
 // @fnv 0x00a6d5e0
-void NiTimeController_Luna::FUN_00a6d5e0(NiStream& kStream)
+void NiTimeController::LoadBinary(NiStream& kIn)
 {
-    NiObject::LoadBinary(kStream);
-    kStream.ResetStreamState();
-    ReadBinaryValue(kStream, m_uiObjectFlags);
-    ReadBinaryValue(kStream, m_fFrequency);
-    ReadBinaryValue(kStream, m_fPhase);
-    ReadBinaryValue(kStream, m_fLoKeyTime);
-    ReadBinaryValue(kStream, m_fHiKeyTime);
-    kStream.ResetStreamState();
-    if (kStream.GetFileVersion() < 0x0A000101)
+    NiObject::LoadBinary(kIn);
+    kIn.ResetStreamState();
+    ReadBinaryValue(kIn, m_uiObjectFlags);
+    ReadBinaryValue(kIn, m_fFrequency);
+    ReadBinaryValue(kIn, m_fPhase);
+    ReadBinaryValue(kIn, m_fLoKeyTime);
+    ReadBinaryValue(kIn, m_fHiKeyTime);
+    kIn.ResetStreamState();
+    if (kIn.GetFileVersion() < 0x0A000101)
     {
         unsigned short preserved = m_uiObjectFlags;
         m_uiObjectFlags &= 0xFFF0;
         m_uiObjectFlags *= 2;
         m_uiObjectFlags |= preserved & 0xF;
     }
-    if (kStream.GetFileVersion() < 0x0A000103)
+    if (kIn.GetFileVersion() < 0x0A000103)
     {
-        kStream.m_usTimeControllerFlags = m_uiObjectFlags;
+        kIn.m_usNiTimeControllerFlags = m_uiObjectFlags;
         m_uiObjectFlags &= 0x001F;
     }
-    if (kStream.GetFileVersion() < 0x0A01006D)
+    if (kIn.GetFileVersion() < 0x0A01006D)
         m_uiObjectFlags &= 0xFFDF;
     m_uiObjectFlags = (m_uiObjectFlags & 0xFF7F) | 0x40;
 }
 
-struct Binary_a6d730
-{
-    int unk00;
-    unsigned int position;
-    void* readFn;
-    unsigned int(__cdecl* writeFn)(Binary_a6d730*, const void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int Write(const void* data, unsigned int bytes, unsigned int* sizes, unsigned int count)
-    {
-        unsigned int written = writeFn(this, data, bytes, sizes, count);
-        position += written;
-        return written;
-    }
-};
-struct Stream_a6d730
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void Link(void*);
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    Binary_a6d730* output;
-};
-struct Probe_a6d730
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual bool IsGeometryController();
-};
-template <class T> inline void BinarySave_a6d730(Binary_a6d730& binary, T* value, unsigned int count = 1)
+
+
+
+template <class T> inline void BinarySave_a6d730(NiBinaryStream& binary, T* value, unsigned int count = 1)
 {
     unsigned int size = sizeof(T);
-    binary.Write(value, sizeof(T) * count, &size, 1);
+    binary.BinaryWrite(value, sizeof(T) * count, &size, 1);
 }
-template <class T> inline void Save_a6d730(Stream_a6d730& stream, T& value)
+template <class T> inline void Save_a6d730(NiStream& stream, T& value)
 {
-    BinarySave_a6d730(*stream.output, &value, 1);
+    BinarySave_a6d730(*stream.m_pkOstr, &value, 1);
 }
-struct FUN_00a6d730_shell : NiTimeController
-{
-    void FUN_00a89af0(Stream_a6d730&);
-    void FUN_00a6d730(Stream_a6d730&);
-};
+
 // @fnv 0x00a6d730
-void FUN_00a6d730_shell::FUN_00a6d730(Stream_a6d730& stream)
+inline bool CanSaveController(NiTimeController* controller)
 {
-    FUN_00a89af0(stream);
-    NiTimeController* next = m_spNextController.m_pObject;
-    while (next && !((Probe_a6d730*)next)->IsGeometryController())
+    typedef bool (__thiscall* Query)(NiTimeController*);
+    return reinterpret_cast<Query>((*reinterpret_cast<void***>(controller))[43])(controller);
+}
+void __fastcall SaveTimeController(NiTimeController* controller, int, NiStream& stream)
+{
+    controller->NiObject::SaveBinary(stream);
+    NiTimeController* next = controller->m_spNextController.m_pObject;
+    while (next && !CanSaveController(next))
         next = next->m_spNextController.m_pObject;
-    stream.Link(next);
-    Save_a6d730(stream, m_uiObjectFlags);
-    Save_a6d730(stream, m_fFrequency);
-    Save_a6d730(stream, m_fPhase);
-    Save_a6d730(stream, m_fLoKeyTime);
-    Save_a6d730(stream, m_fHiKeyTime);
-    stream.Link(m_pkTarget);
+    stream.SaveLinkID(next);
+    Save_a6d730(stream, controller->m_uiObjectFlags);
+    Save_a6d730(stream, controller->m_fFrequency);
+    Save_a6d730(stream, controller->m_fPhase);
+    Save_a6d730(stream, controller->m_fLoKeyTime);
+    Save_a6d730(stream, controller->m_fHiKeyTime);
+    stream.SaveLinkID(controller->m_pkTarget);
 }
 
 extern const char* DAT_011f49e4;
@@ -786,50 +524,39 @@ char* __cdecl BuildAppTimeOrInitString(const char*, int);
 char* __cdecl FUN_00a6d190(const char*, int);
 char* __cdecl FUN_00a7d370(const char*, bool);
 
-template <class T, class Allocator = NiTMallocInterface<T> > class NiTPrimitiveArray : public NiTArray<T, Allocator>
+#include "../../../../include/NiTPrimitiveArray.h"
+// Gamebryo NiTArray.inl: the original inlines Add (SetAtGrow) and calls SetSize / SetAt out of line
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
 {
-  public:
-    void SetSize(unsigned int uiNewSize);
-    void SetAt(unsigned int uiIndex, T& element);
+    unsigned int uiSize = m_usSize;
+    if (uiSize >= m_usMaxSize)
+        SetSize(uiSize + m_usGrowBy);
+    SetAt(uiSize, element);
+    return uiSize;
+}
 
-    unsigned int Add(T const& element)
-    {
-        unsigned int uiSize = this->m_usSize;
-        if (uiSize >= this->m_usMaxSize)
-            this->SetSize(uiSize + this->m_usGrowBy);
-        this->SetAt(uiSize, (T&)element);
-        return uiSize;
-    }
-};
 
-class NiViewerStringsArray : public NiTPrimitiveArray<char*>
-{
-};
 
-class TCController : public NiTimeController
-{
-  public:
-    void FUN_00a6d830(NiViewerStringsArray* pkViewerStrings);
-};
+
 
 // @fnv 0x00a6d830
-void TCController::FUN_00a6d830(NiViewerStringsArray* pkViewerStrings)
+void __fastcall GetTimeControllerViewerStrings(NiTimeController* controller, int, NiViewerStringsArray* pkViewerStrings)
 {
     pkViewerStrings->Add(FUN_00a7d330(DAT_011f49e4));
-    pkViewerStrings->Add(FUN_00a7d550("m_fFrequency", m_fFrequency));
-    pkViewerStrings->Add(FUN_00a7d550("m_fPhase", m_fPhase));
-    pkViewerStrings->Add(FUN_00a7d550("m_fLoKeyTime", m_fLoKeyTime));
-    pkViewerStrings->Add(FUN_00a7d550("m_fHiKeyTime", m_fHiKeyTime));
-    pkViewerStrings->Add(FUN_00a7d550("m_fStartTime", m_fStartTime));
-    pkViewerStrings->Add(FUN_00a7d550("m_fLastTime", m_fLastTime));
-    pkViewerStrings->Add(FUN_00a7d5a0("m_pkTarget", m_pkTarget));
-    int iAnimType = m_uiObjectFlags & 1;
+    pkViewerStrings->Add(FUN_00a7d550("m_fFrequency", controller->m_fFrequency));
+    pkViewerStrings->Add(FUN_00a7d550("m_fPhase", controller->m_fPhase));
+    pkViewerStrings->Add(FUN_00a7d550("m_fLoKeyTime", controller->m_fLoKeyTime));
+    pkViewerStrings->Add(FUN_00a7d550("m_fHiKeyTime", controller->m_fHiKeyTime));
+    pkViewerStrings->Add(FUN_00a7d550("m_fStartTime", controller->m_fStartTime));
+    pkViewerStrings->Add(FUN_00a7d550("m_fLastTime", controller->m_fLastTime));
+    pkViewerStrings->Add(FUN_00a7d5a0("m_pkTarget", controller->m_pkTarget));
+    int iAnimType = controller->m_uiObjectFlags & 1;
     pkViewerStrings->Add(BuildAppTimeOrInitString("anim type", iAnimType));
-    int iCycleType = (m_uiObjectFlags >> 1) & 3;
+    int iCycleType = (controller->m_uiObjectFlags >> 1) & 3;
     pkViewerStrings->Add(FUN_00a6d190("cycle type", iCycleType));
-    bool bActive = (m_uiObjectFlags >> 3) & 1;
+    bool bActive = (controller->m_uiObjectFlags >> 3) & 1;
     pkViewerStrings->Add(FUN_00a7d370("Active", bActive));
-    bool bBack = (m_uiObjectFlags >> 4) & 1;
+    bool bBack = (controller->m_uiObjectFlags >> 4) & 1;
     pkViewerStrings->Add(FUN_00a7d370("Play Backwards", bBack));
 }
 
@@ -837,93 +564,20 @@ void TCController::FUN_00a6d830(NiViewerStringsArray* pkViewerStrings)
 void __cdecl FUN_00a29680()
 {}
 
-class NiTimeControllerA362
-{
-  public:
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    virtual void vfn_0c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual void vfn_8c();
-    virtual void vfn_90();
-    virtual void vfn_94();
-    virtual void vfn_98();
-    virtual void vfn_9c();
-    virtual void vfn_a0();
-    virtual float ComputeScaledTime(float fTime);
-    bool FUN_00a36250(float fTime);
 
-    unsigned int m_uiRefCount;
-    unsigned short m_uiObjectFlags;
-    bool GetActive() const
-    {
-        return (bool)((m_uiObjectFlags >> 3) & 1);
-    }
-    bool GetComputeScaledTime() const
-    {
-        return (bool)((m_uiObjectFlags >> 6) & 1);
-    }
-    bool GetForceUpdate() const
-    {
-        return (bool)((m_uiObjectFlags >> 7) & 1);
-    }
-    void SetControllerActive(bool b)
-    {
-        m_uiObjectFlags = (m_uiObjectFlags & ~0x80) | (b << 7);
-    }
-    float m_fFrequency;
-    float m_fPhase;
-    float m_fLoKeyTime;
-    float m_fHiKeyTime;
-    float m_fStartTime;
-    float m_fLastTime;
-    float m_fWeightAdjustedLastTime;
-    float m_fControllerTime;
-};
 
 // When active and time changed or force-update is set, it may return true if scaled time matches; otherwise it deactivates and returns false.
 // @fnv 0x00a36250
-bool NiTimeControllerA362::FUN_00a36250(float fTime)
+bool NiTimeController::FUN_00a36250(float fTime)
 {
-    if (GetActive())
+    if (GetControllerActive(this))
     {
-        if (m_fLastTime != fTime || GetForceUpdate())
+        if (m_fLastTime != fTime || GetControllerForceUpdate(this))
         {
-            if (GetComputeScaledTime())
+            if (GetControllerComputeScaledTime(this))
             {
                 float fScaledTime = ComputeScaledTime(fTime);
-                if (m_fControllerTime == fScaledTime && !GetForceUpdate())
+                if (m_fControllerTime == fScaledTime && !GetControllerForceUpdate(this))
                     return true;
                 m_fControllerTime = fScaledTime;
             }
@@ -1070,16 +724,7 @@ char* __cdecl FUN_00a6d190(const char* pcPrefix, int eType)
     return pcString;
 }
 
-template <class TPARENT, class TKEY, class TVAL> class NiTMapBase
-{
-  public:
-    virtual ~NiTMapBase();
-    virtual unsigned int KeyToHashIndex(TKEY key) const;
-    virtual bool IsKeysEqual(TKEY key1, TKEY key2) const;
-    unsigned int m_uiHashSize;
-    NiTMapItem<TKEY, TVAL>** m_ppkHashTable;
-    bool GetAt(TKEY key, TVAL& val) const;
-};
+
 
 template <class TPARENT, class TKEY, class TVAL> bool NiTMapBase<TPARENT, TKEY, TVAL>::GetAt(TKEY key, TVAL& val) const
 {
@@ -1103,52 +748,28 @@ class CloningProcess
     NiTMapBase<NiTPointerAllocator<unsigned int>, NiObject*, NiObject*>* m_pCloneMap;
 };
 
-class NiObjCM : public NiRefObject
-{
-  public:
-    virtual const NiRTTI* GetRTTI() const;
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual NiObjCM* MakeClone(CloningProcess& kCloning);
-};
 
-class NiTimeControllerCM : public NiTimeController
-{
-  public:
-    void FUN_00a6cfe0(NiTimeController* pkDest, CloningProcess& kCloning);
-};
+
+
 
 // @fnv 0x00a6cfe0
-void NiTimeControllerCM::FUN_00a6cfe0(NiTimeController* pkDest, CloningProcess& kCloning)
+void __fastcall CopyTimeControllerMembers(NiTimeController* controller, int, NiTimeController* pkDest, CloningProcess& kCloning)
 {
-    NiObject::CopyMemberData(pkDest, kCloning);
-    pkDest->m_uiObjectFlags = m_uiObjectFlags;
-    pkDest->m_fFrequency = m_fFrequency;
-    pkDest->m_fPhase = m_fPhase;
-    pkDest->m_fLoKeyTime = m_fLoKeyTime;
-    pkDest->m_fHiKeyTime = m_fHiKeyTime;
-    pkDest->m_fStartTime = m_fStartTime;
-    pkDest->m_fLastTime = m_fLastTime;
-    pkDest->m_fWeightAdjustedLastTime = m_fWeightAdjustedLastTime;
+    controller->NiObject::CreateVertexBufferSet(pkDest, kCloning);
+    pkDest->m_uiObjectFlags = controller->m_uiObjectFlags;
+    pkDest->m_fFrequency = controller->m_fFrequency;
+    pkDest->m_fPhase = controller->m_fPhase;
+    pkDest->m_fLoKeyTime = controller->m_fLoKeyTime;
+    pkDest->m_fHiKeyTime = controller->m_fHiKeyTime;
+    pkDest->m_fStartTime = controller->m_fStartTime;
+    pkDest->m_fLastTime = controller->m_fLastTime;
+    pkDest->m_fWeightAdjustedLastTime = controller->m_fWeightAdjustedLastTime;
 
-    if (m_pkTarget)
+    if (controller->m_pkTarget)
     {
         NiObject* pkClone;
-        bool bFound = kCloning.m_pCloneMap->GetAt(m_pkTarget, pkClone);
-        if (bFound && m_pkTarget->GetRTTI() == pkClone->GetRTTI())
+        bool bFound = kCloning.m_pCloneMap->GetAt(controller->m_pkTarget, pkClone);
+        if (bFound && controller->m_pkTarget->GetRTTI() == pkClone->GetRTTI())
         {
             pkDest->m_pkTarget = (NiObjectNET*)pkClone;
         }
@@ -1158,7 +779,7 @@ void NiTimeControllerCM::FUN_00a6cfe0(NiTimeController* pkDest, CloningProcess& 
         }
     }
 
-    NiObjCM* pkNext = (NiObjCM*)m_spNextController.m_pObject;
+    NiObject* pkNext = (NiObject*)controller->m_spNextController.m_pObject;
     if (pkNext)
         pkDest->m_spNextController = (NiTimeController*)pkNext->MakeClone(kCloning);
 }
@@ -1176,11 +797,7 @@ inline float AddLowKey(double remainder, float lowKey)
 }
 }
 
-class ScaledTimeController : public NiTimeController
-{
-  public:
-    float FUN_00a6cd60(float fTime);
-};
+
 
 __declspec(thread) float ts_fLastScaledTime = 0.0f;
 __declspec(thread) unsigned int ts_uiLastCycleType = 3;
@@ -1190,7 +807,7 @@ __declspec(thread) float ts_fLastHiKeyTime = 0.0f;
 
 // Computes a scaled time from fTime using frequency, phase, and cycle type, caching the result in thread-local storage when inputs are unchanged.
 // @fnv 0x00a6cd60
-float ScaledTimeController::FUN_00a6cd60(float fTime)
+float NiTimeController::ComputeScaledTime(float fTime)
 {
     if (m_fStartTime == -3.402823466e+38F)
         m_fStartTime = fTime;
@@ -1274,3 +891,4 @@ float ScaledTimeController::FUN_00a6cd60(float fTime)
     ts_fLastScaledTime = fScaledTime;
     return fScaledTime;
 }
+

@@ -1,42 +1,8 @@
-// gamebryo2.2/corelibs/nimain/nifixedstring_facegen.h: declares NiMemObject, TESRecipe, NiAVObject, FaceGenImageView, FaceGenColor and more
+// gamebryo2.2/corelibs/nimain/nifixedstring_facegen.h: declares FaceGenImageView, FaceGenColor and more
 #ifndef FNV_NIFIXEDSTRING_FACEGEN_H
 #define FNV_NIFIXEDSTRING_FACEGEN_H
 
-class NiTexture;
-template <class T> class NiPointer
-{
-  public:
-    T* pointer;
-    NiPointer(T*);
-    ~NiPointer();
-    operator T*() const;
-    NiPointer& operator=(T*);
-};
-template <class T> class BSStringT
-{
-  public:
-    T* text;
-    unsigned short length, capacity;
-    const T* String();
-};
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-class TESRecipe
-{
-  public:
-    void SetSkill(int);
-    void SetSkillLevel(int);
-};
-class NiNode;
-class NiAVObject
-{
-  public:
-    NiNode* GetParent();
-};
+#include "../../../../include/NiMemObject.h"
 class FaceGenImage;
 struct FaceGenImageView
 {
@@ -73,11 +39,6 @@ class FaceGenImage : public NiMemObject
     void FUN_0064db50(unsigned int, FaceGenColor*);
     FaceGenImageView _Doraise();
 };
-class NiTexture
-{
-  public:
-    NiTexture* FUN_0064ceb0(float, float, float, void*);
-};
 struct TextureChannel
 {
     unsigned char data[24];
@@ -113,31 +74,14 @@ struct FaceGenCoordinateBasis
     unsigned char data[32];
     FaceGenCoordinateValue FUN_0060b370(unsigned int, unsigned int);
 };
-struct FaceGenCoordinates
+class BSFaceGenTexture
 {
-    unsigned char data[64];
-    FaceGenCoordinateBasis basis[2];
-};
-struct BSFaceGenTexture
-{
+  public:
     BSStringT<char> m_kEGTFileName;
     FaceGenTextureFile* m_pTextureData;
     unsigned int GetCharacterSex();
 };
-class BSFaceGenModel
-{
-  public:
-    void* vtable;
-    unsigned int refCount;
-    void* m_pGeometryModel;
-    BSFaceGenTexture* m_kTextureSlots;
-    bool ApplyTextureCoordinate(FaceGenCoordinates*, NiPointer<NiTexture>&, unsigned int);
-    void ClearTextureData();
-};
-struct BSFaceGenManager
-{
-    static FaceGenCoordinates* GetFaceGenCoordinates();
-};
+#include "../../../../include/BSFaceGenModel.h"
 NiTexture* GetFaceGenManagerValue();
 FaceGenTextureFile* FUN_00659780(const char*);
 bool FUN_00652040(BSFaceGenModel*);

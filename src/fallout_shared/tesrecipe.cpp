@@ -1,7 +1,10 @@
 // fallout_shared/tesrecipe.cpp: TESRecipe, TESRecipeCategory (4 functions)
 
+#define FNV_TESFILE_H  // the shared TESFile below replaces layout_support.h's stub
+#include "../../include/NiFile.h"
 #include "tesrecipe.h"
 #include <malloc.h>
+#include "../../include/TESFile.h"
 
 static const char s_kRecipeCategoryWarning[] =
     "MASTERFILE: Recipe Category (%08X) not found in InitItem for Recipe (%08X) '%s'.";
@@ -17,7 +20,7 @@ void TESRecipe::ClearData()
     GetGarbageList()->RemoveAll();
     SetSkill(-1);
     SetSkillLevel(0);
-    SetCategory(0);
+    SetCategory(static_cast<TESRecipeCategory*>(0));
     SetSubCategory(0);
 }
 
@@ -34,7 +37,7 @@ void TESRecipe::InitItem()
     unsigned int id;
     if (static_cast<TESFormInitFlag*>(static_cast<TESForm*>(this))->IsFormInitialized())
         return;
-    static_cast<TESConditionInit*>(&RecipeItemProcessor)->InitItem(this);
+    kConditions.InitItem(this);
     level = GetData()->m_iRequiredLevel;
     category = 0;
     id = GetData()->CategoryID;
@@ -114,9 +117,9 @@ bool TESRecipe::Load(TESFile* file)
             TESFullNameLoader::LoadFullNameChunk(this, file);
             break;
         case 0x41544144:  // DATA
-            ReadTypedData(file, &data, sizeof(data));
+            ReadTypedData(file, &kData, sizeof(kData));
             if (file->IsEndianConversionRequired())
-                data.Endian();
+                reinterpret_cast<RecipeCraftingInfo*>(&kData)->Endian();
             break;
         case 0x41445443:  // CTDA
             GetConditions()->Load(file);

@@ -29,12 +29,15 @@ void TaskThreadManager::EndRenderingTaskThread()
 {
     NiRenderer* renderer = NiRenderer::ms_pRenderer;
     BSRenderedTexture::EndAll();
-    if (renderer->state == 1 && renderer->vfn_180())
-        renderer->state = 3;
-    if (renderer->state == 3 && renderer->vfn_184())
+    // Gamebryo NiRenderer::EndFrame/DisplayFrame: vtable slots 0x180 (Do_EndFrame) and 0x184 (Do_DisplayFrame), past the
+    // slots the shared header declares.
+    typedef bool(__thiscall * FrameStep)(NiRenderer*);
+    if (renderer->m_eFrameState == 1 && (*reinterpret_cast<FrameStep**>(renderer))[0x180 / 4](renderer))
+        renderer->m_eFrameState = 3;
+    if (renderer->m_eFrameState == 3 && (*reinterpret_cast<FrameStep**>(renderer))[0x184 / 4](renderer))
     {
-        ++renderer->frameCount;
-        renderer->state = 0;
+        ++renderer->m_uiFrameID;
+        renderer->m_eFrameState = 0;
     }
 }
 #pragma optimize("", off)

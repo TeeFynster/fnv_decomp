@@ -1,3 +1,11 @@
+#include "../../../../../../include/hkArrayBase.h"
+#include "../../../../../../include/Pair.h"
+#include "../../../../../../include/BSAudio.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkCharArray.h"
 
 // src/havok/common/serialize/tagfile/binary/hkbinarytagfilewriter_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/common/serialize/tagfile/binary/hkbinarytagfilewriter.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,35 +13,6 @@
 
 // src/havok/common/serialize/tagfile/binary/hkbinarytagfilewriter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/tagfile/binary/hkbinarytagfilewriter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct BSAudio
-{
-    int a;
-    int b;
-    int c;
-    int d;
-    int e;
-    int f;
-    int g;
-    int h;
-    int i;
-    int j;
-    int k;
-    int l;
-    int m;
-    int n;
-    int o;
-    int p;
-    int q;
-    int r;
-    int s;
-    int t;
-    int u;
-    int v;
-    int w;
-    int x;
-    int y;
-    int z;
-};
 BSAudio* __cdecl FUN_00c85750();
 struct UnkRet
 {
@@ -143,73 +122,10 @@ struct AudioResourceState
     SoundEntry** entries;
     void* __thiscall ResolveSound(Receiver* receiver, Description* description);
 };
-struct hkMemoryAllocator
+inline hkMemoryRouter* audio()
 {
-    virtual ~hkMemoryAllocator();
-};
-struct AudioMgr
-{
-    int unk00, unk04, unk08;
-    hkMemoryAllocator* unk0c;
-    hkMemoryAllocator& tempHeap()
-    {
-        return *unk0c;
-    }
-};
-inline AudioMgr* audio()
-{
-    return (AudioMgr*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
-void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
-void* __cdecl _fnv_zlib_memset(void* dst, int val, int n);
-struct hkCharArray
-{
-    char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void reserve(int n)
-    {
-        hkMemoryAllocator& alloc = audio()->tempHeap();
-        if (getCapacity() < n)
-        {
-            int cap = 2 * getCapacity();
-            FUN_00c908c0(alloc, this, n < cap ? cap : n, 1);
-        }
-    }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        reserve(n);
-        char* p = m_data + m_iElementCount;
-        int num = n - m_iElementCount;
-        if (num <= 0)
-        {
-            m_iElementCount = n;
-            return;
-        }
-        _fnv_zlib_memset(p, 0, num);
-        m_iElementCount = n;
-    }
-    __forceinline void setSizeUnchecked(int n)
-    {
-        reserve(n);
-        m_iElementCount = n;
-    }
-};
-struct FUN_00dbef20 : hkCharArray
-{
-    FUN_00dbef20(int n);
-};
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize);
-};
 struct ArrayDeallocator
 {
     virtual void v00();
@@ -217,14 +133,6 @@ struct ArrayDeallocator
     virtual void v08();
     virtual void v0c();
     virtual void FreeArray(void* apMemory, unsigned int auiSize);
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    ArrayDeallocator* m_pArrayDealloc;
-    AudioAllocator* m_pAllocator;
 };
 struct Element
 {
@@ -236,7 +144,7 @@ struct SubObject
     int m_i00;
     int m_i04;
     int m_i08;
-    void AllocBufferIfNotFlagged(AudioAllocator* apAllocator);
+    void AllocBufferIfNotFlagged(hkMemoryAllocator* apAllocator);
 };
 struct FUN_00dc03d0_cls
 {
@@ -396,66 +304,6 @@ struct DBED30Writer
     void WriteByteArray(const void* buf, int nbytes);
     void WriteString(const char* s);
 };
-struct S_dbefc0_Heap
-{
-    int unk;
-};
-struct S_dbefc0_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    S_dbefc0_Heap* unk0c;
-    S_dbefc0_Heap& heap()
-    {
-        return *unk0c;
-    }
-};
-void __cdecl FUN_00c908c0(S_dbefc0_Heap* heap, void* arr, int n, int elemSize);
-void* __cdecl FUN_00ec61c0(void* dst, int value, unsigned int count);
-static __forceinline S_dbefc0_Heap& S_dbefc0_GetHeap()
-{
-    return ((S_dbefc0_Router*)FUN_00c85750())->heap();
-}
-struct S_dbefc0_Bytes
-{
-    char* data;
-    int size;
-    int cap;
-
-    __forceinline void GrowArrayCapacity(S_dbefc0_Heap& heap, int n)
-    {
-        int c = cap & 0x3fffffff;
-        if (c < n)
-        {
-            int c2 = c + c;
-            FUN_00c908c0(&heap, this, (n < c2) ? c2 : n, 1);
-        }
-    }
-    __forceinline void _setSize(S_dbefc0_Heap& heap, int n)
-    {
-        GrowArrayCapacity(heap, n);
-        char* p = data + size;
-        int diff = n - size;
-        if (diff <= 0)
-        {
-            size = n;
-            return;
-        }
-        FUN_00ec61c0(p, 0, diff);
-        size = n;
-    }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        _setSize(S_dbefc0_GetHeap(), n);
-    }
-    __forceinline void trim(int n)
-    {
-        GrowArrayCapacity(S_dbefc0_GetHeap(), n);
-        size = n;
-    }
-    void FUN_00dbefc0(const unsigned char* bytes, int count);
-};
 struct Rec_00dbf0d0
 {
     unsigned char* unk00;  // data buffer
@@ -508,7 +356,7 @@ struct S_00dc0500_Holder : UnkHolder
         b = 0;
         c = -1;
         BSAudio* p = FUN_00c85750();
-        FUN_00dbedb0((UnkRet*)p->e, 0);
+        FUN_00dbedb0((UnkRet*)((hkMemoryRouter*)p)->m_heap, 0);
     }
 };
 struct S_00dc0500_Arr
@@ -580,19 +428,19 @@ struct hkTempAlloc : hkMemoryAllocator
 {
     virtual void* v04() throw();
     virtual void* v08() throw();
-    virtual void* AllocateBufferWithSize(int& numBytes) throw();
-    virtual void ReturnMemory(void* p, int numBytes) throw();
+    virtual void* bufAlloc(int& numBytes) throw();
+    virtual void bufFree(void* p, int numBytes) throw();
 
     template <typename T> __forceinline T* _bufAlloc(int& reqNumInOut) throw()
     {
         int n = reqNumInOut * (int)sizeof(T);
-        T* p = (T*)AllocateBufferWithSize(n);
+        T* p = (T*)bufAlloc(n);
         reqNumInOut = n / (int)sizeof(T);
         return p;
     }
     template <typename T> __forceinline void _bufFree(void* p, int numElem) throw()
     {
-        ReturnMemory(p, numElem * (int)sizeof(T));
+        bufFree(p, numElem * (int)sizeof(T));
     }
 };
 struct S_dbf1a0_Router
@@ -678,9 +526,8 @@ class hkPairMapDBE8
     void FUN_00dbec60(hkMemoryAllocatorDBE8& alloc, int iNewCap);
     int InsertOrUpdate(hkMemoryAllocatorDBE8& alloc, hkPairKeyDBE8 key, unsigned int uiValue);
 };
-struct Pair;
 struct ObjC;
-struct Arr;
+
 struct Rec
 {
     int key;
@@ -715,31 +562,12 @@ struct Node50
     int m_08;
     float m_0c;
 };
-struct Pair
-{
-    void* m_p;
-    int m_i;
-    __declspec(nothrow) Wrap FUN_00dbacd0();
-    __declspec(nothrow) StringHandle CreateValueInto();
-    __declspec(nothrow) Node50* DispatchToVTableSlot8(int mode);
-    __declspec(nothrow) int FUN_00dbac70();
-    __declspec(nothrow) float ApplyValue();
-    __declspec(nothrow) int CallVirtualWithArg();
-};
-struct Arr
-{
-    void* m_data;
-    int m_iElementCount;
-    int m_cap;
-    Arr()
-    {}
-    Arr(int n);
-};
+
 struct ObjC
 {
     void* m_00;
     __declspec(nothrow) int FUN_00dba730();
-    __declspec(nothrow) void DispatchItems(Arr& a);
+    __declspec(nothrow) void DispatchItems(hkArrayBase<Rec>& a);
     __declspec(nothrow) void FUN_00dba660();
     ~ObjC()
     {
@@ -773,23 +601,23 @@ static __forceinline Rec* allocateRecords(AllocV* allocator, int& capacity)
     }
     return 0;
 }
-__forceinline Arr::Arr(int n)
+__forceinline void initializeRecords(hkArrayBase<Rec>& out,int n)
 {
     int capacity = n;
-    m_data = 0;
-    m_iElementCount = 0;
-    m_cap = (int)0x80000000;
+    out.m_data = 0;
+    out.m_iElementCount = 0;
+    out.m_iCapacityState = (int)0x80000000;
     BSAudio* router = FUN_00c85750();
-    AllocV* allocator = (AllocV*)router->d;
+    AllocV* allocator = (AllocV*)&((hkMemoryRouter*)router)->temp();
     Rec* data = allocateRecords(allocator, capacity);
     int flags = capacity ? capacity : (int)0x80000000;
-    m_data = data;
-    m_iElementCount = capacity;
-    m_cap = flags;
+    out.m_data = data;
+    out.m_iElementCount = capacity;
+    out.m_iCapacityState = flags;
     for (int k = 0; k < capacity; ++k)
         new (data + k) Rec;
 }
-extern "C" void __cdecl FUN_00c908c0(void* owner, Arr* arr, int newCap, int stride);
+extern "C" void __cdecl FUN_00c908c0(void* owner, hkArrayBase<Rec>* arr, int newCap, int stride);
 struct Host
 {
     __declspec(nothrow) void WriteArray(const Wrap& arg0, int count);
@@ -925,8 +753,8 @@ template <typename T> __forceinline void constructWithCopy(T* p, int n, const T&
     for (int i = 0; i < n; i++)
         p[i] = t;
 }
-template <typename T> struct PtrArray
-{
+template <typename T> struct PtrArrayLocalForm
+{ // local form of hkArray: 0x00dbedd0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -958,7 +786,7 @@ struct ObjCloner
 {
     DataWorld* m_pOwningWorld;
     HandleMap m_kHandleMap;
-    PtrArray<DataObj*> m_objs;
+    PtrArrayLocalForm<DataObj*> m_objs;
     DataObj FUN_00dbedd0(const DataObj& src);
 };
 // @fnv 0x00dbedd0

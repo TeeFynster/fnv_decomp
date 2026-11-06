@@ -1,6 +1,11 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
 
 // src/havok/physics/dynamics/world/simulation/multithreaded/cpu/hkpcpuagentsectorjob.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/simulation/multithreaded/cpu/hkpcpuagentsectorjob.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../../../include/hkVector4.h"
+#include <string.h>
 
 struct FUN_00d93330 {
     void __thiscall UpdateConstraint(int);
@@ -79,7 +84,6 @@ extern "C" void _ReadWriteBarrier();
 extern "C" const char str_010cc54c[], str_010d3e28[], str_010cd440[], str_010d3e14[];
 
 
-struct FourFloatVector { float x, y, z, w; };
 struct __declspec(align(16)) AlignedVector { float x, y, z, w; };
 struct Input {
     void *dispatcher, *collisionFilter, *qualityLibrary, *shapeCollectionFilter;
@@ -87,7 +91,7 @@ struct Input {
     AlignedVector stepInfo, tolerance, configuration;
 };
 struct Context : Input {
-    FourFloatVector time;
+    hkVector4 time;
     void *quality;
     void *allocation;
     int field68;
@@ -97,12 +101,14 @@ struct Context : Input {
     int field74, field78, field7c;
     void FUN_00cfa7d0(const Input *);
 };
-struct Command { union { int type; char code; }; int object, value, extra; };
+// 16-byte hkpPhysicsCommand slot of the per-thread hkpPhysicsCommandQueue (type byte, object, value, extra);
+// AddCommand/RemoveCommand below are its typed forms. Not the console-command Command.
+struct PhysicsCommand { union { int type; char code; }; int object, value, extra; };
 struct CommandBuffer {
     int offset, size, capacity, field0c;
-    Command commands[16];
+    PhysicsCommand commands[16];
     void FUN_00d93310();
-    Command *end() { return (Command *)((char *)this + offset + size); }
+    PhysicsCommand *end() { return (PhysicsCommand *)((char *)this + offset + size); }
 };
 extern int DAT_010d3df8, DAT_0102e388;
 struct AddCommand { char type; int object, critical; };
@@ -178,7 +184,7 @@ struct Job {
     short index, field26;
     unsigned short count, stride;
     Entry **entries;
-    FourFloatVector time;
+    hkVector4 time;
     union { int sector; unsigned char useContinuousQuality; };
 };
 struct World {
@@ -242,8 +248,8 @@ __forceinline void storeResults(Statistics *s, Owner &owner) {
     s->maximum = owner.maximum; s->added = owner.added; s->removed = owner.removed; s->changed = owner.changed;
     int size = owner.commands.size;
     if (size) {
-        Command *src = (Command *)((char *)&owner.commands + owner.commands.offset);
-        CommandBuffer *b = &s->commands; Command *dst = (Command *)((char *)b + b->offset);
+        PhysicsCommand *src = (PhysicsCommand *)((char *)&owner.commands + owner.commands.offset);
+        CommandBuffer *b = &s->commands; PhysicsCommand *dst = (PhysicsCommand *)((char *)b + b->offset);
         int n = size >> 4; if (n > 0) do { *dst++ = *src++; } while (--n);
         s->commands.size = size;
     }
@@ -251,11 +257,13 @@ __forceinline void storeResults(Statistics *s, Owner &owner) {
 // @fnv 0x00d93380
 int FUN_00d93380(Globals *globals, Queue *queue, Job *job) {
     union WorkSlot { Island *savedIsland; int i; }; WorkSlot work;
-    Context context;
+    // The job initializes this context in place without constructing its time vector.
+    __declspec(align(16)) void *contextStorage[sizeof(Context) / sizeof(void *)];
+    Context &context = *(Context *)contextStorage;
     (Input &)context = (Input &)globals->input;
     context.allocation = 0;
     context.FUN_00cfa7d0(&globals->input);
-    context.time = job->time;
+    memcpy(&context.time, &job->time, sizeof(context.time));
     Owner owner;
     owner.references = 1;
     owner.dispatch = &DAT_010d3df8;

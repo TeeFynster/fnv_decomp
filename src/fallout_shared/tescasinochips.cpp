@@ -1,6 +1,9 @@
+#include "../../include/TESTexture.h"
 // fallout_shared/tescasinochips.cpp: TESCasinoChips, TESCasino, IntFieldContainer, CasinoAccess and more (24 functions)
 
 #include "tescasinochips_packet.h"
+#include "../../include/GO.h"
+#include "../../include/EndianConvertibleData.h"
 #include <malloc.h>
 
 // Constructor: sets the form type to ENUM_FORM_ID_CHIP_ID and clears the object's data.
@@ -31,7 +34,7 @@ void TESCasinoChips::InitItem()
 
 // Reads a TESFile record: checks form type 108, loads the record header, then dispatches chunk handlers until no more chunks, returning true.
 // @fnv 0x00503ef0
-bool TESCasinoChips::Load(TESFile* apFile)
+bool TESCasinoChips::LoadForm(TESFile* apFile)
 {
     unsigned char type = apFile->GetTESForm();
     if (type != 108)
@@ -107,7 +110,7 @@ bool TESCasinoChips::Load(TESFile* apFile)
 }
 
 // @fnv 0x005048d0
-bool TESCasino::Load(TESFile* apFile)
+bool TESCasino::LoadForm(TESFile* apFile)
 {
     unsigned char type = apFile->GetTESForm();
     if (type != 109)
@@ -346,30 +349,9 @@ struct FullNameEx
     unsigned int unk04;
     unsigned int unk08;
 };
-struct SoundPlaybackHandle
-{
-    void SetFormType(int);
-};
 struct FUN_005e78f0_t
 {
     void FUN_004851b0(TESForm*);
-};
-struct Data_504cc0
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
 };
 struct FUN_00504e00_shell
 {
@@ -388,6 +370,11 @@ struct FUN_00504e60_shell
     char* FUN_00504e60();
 };
 int __fastcall FNV_GetFormType(TESForm*);
+// 0x004f15a0 stores its argument byte at +4 (the form type here); the same folded code is BSSoundHandle::SetAssumeSuccess.
+struct FormTypeSetter_4f15a0
+{
+    void SetFormType(int);
+};
 
 struct Casino_504cc0
 {
@@ -402,7 +389,8 @@ struct Casino_504cc0
     unsigned int unk20;
     ModelElem_504cc0 m_kModelTextureSwaps[10];
     FullNameEx m_kIconTextures[11];
-    Data_504cc0 data;
+    // Casino record at +0x1E8 is 0x38 bytes with its form ID at +0x30, matching EndianConvertibleData.
+    EndianConvertibleData data;
     void CopyFromCasino(TESForm* apCopy);
 };
 
@@ -424,11 +412,11 @@ void Casino_504cc0::CopyFromCasino(TESForm* apCopy)
         m_kIconTextures[i].SetFullName(((FNStub*)((FUN_00504e20_shell*)pSourceCasino)->FUN_00504e20(i))->GetFullName());
     }
     if (((FUN_00504e40_shell*)pSourceCasino)->FUN_00504e40())
-        data.unk30 = ((FUN_00504e40_shell*)pSourceCasino)->FUN_00504e40()->GetFormID();
+        data.uiChunkType = ((FUN_00504e40_shell*)pSourceCasino)->FUN_00504e40()->GetFormID();
     else
-        data.unk30 = 0;
-    data = *(Data_504cc0*)((FUN_00504e60_shell*)pSourceCasino)->FUN_00504e60();
-    ((SoundPlaybackHandle*)this)->SetFormType(FNV_GetFormType(pSourceCasino));
+        data.uiChunkType = 0;
+    data = *(EndianConvertibleData*)((FUN_00504e60_shell*)pSourceCasino)->FUN_00504e60();
+    ((fnv_00504cc0::FormTypeSetter_4f15a0*)this)->SetFormType(fnv_00504cc0::FNV_GetFormType(pSourceCasino));
 }
 }  // namespace fnv_00504cc0
 
@@ -495,11 +483,6 @@ struct S7010
     unsigned int Length();
 };
 
-struct GO
-{
-    operator unsigned int() const;
-};
-
 struct FUN_00485680
 {
     void M();
@@ -515,7 +498,7 @@ void FUN_004856f0(unsigned int, void*, unsigned int);
 // @fnv 0x00504280
 void FUN_00504280_shell::FUN_00504280()
 {
-    reinterpret_cast<FUN_004855a0*>(this)->M();
+    reinterpret_cast<struct FUN_004855a0*>(this)->M();
     reinterpret_cast<DoorPart30*>(reinterpret_cast<char*>(this) + 0x30)->FUN_00487010();
     reinterpret_cast<DoorPart3c*>(reinterpret_cast<char*>(this) + 0x3c)
         ->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
@@ -528,11 +511,11 @@ void FUN_00504280_shell::FUN_00504280()
     {
         FUN_004856f0(0x4d414e4f,
                      reinterpret_cast<void*>(
-                         reinterpret_cast<GO*>(reinterpret_cast<char*>(this) + 0x94)->operator unsigned int()),
+                         reinterpret_cast<const GO*>(reinterpret_cast<char*>(this) + 0x94)->operator unsigned int()),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x94)->Length() + 1);
     }
 
-    reinterpret_cast<FUN_00485680*>(this)->M();
+    reinterpret_cast<struct FUN_00485680*>(this)->M();
 }
 
 extern "C" void* __cdecl memset(void* destination, int value, size_t count);
@@ -599,10 +582,7 @@ struct DoorPart3c
     void ProcessAndFreeData(unsigned int, unsigned int, unsigned int);
 };
 
-struct BGSTESTexture
-{
-    unsigned int GetModelLength() const;
-};
+
 
 struct FUN_0048e370_obj
 {
@@ -624,7 +604,7 @@ struct FUN_00504710_shell : public TESCasino
 // @fnv 0x00504710
 void FUN_00504710_shell::FUN_00504710()
 {
-    reinterpret_cast<FUN_004855a0*>(this)->M();
+    reinterpret_cast<struct FUN_004855a0*>(this)->M();
     reinterpret_cast<DoorPart30*>(reinterpret_cast<unsigned char*>(this) + 0x18)->FUN_00487010();
 
     if (_FUN_00401500())
@@ -645,8 +625,8 @@ void FUN_00504710_shell::FUN_00504710()
         int i;
         for (i = 0; i < 8; ++i)
         {
-            if (reinterpret_cast<BGSTESTexture*>(reinterpret_cast<unsigned char*>(this) + 0x24 + i * 0x20)
-                    ->GetModelLength())
+            if (reinterpret_cast<TESTexture*>(reinterpret_cast<unsigned char*>(this) + 0x24 + i * 0x20)
+                    ->GetTextureNameLength())
             {
                 reinterpret_cast<DoorPart3c*>(reinterpret_cast<unsigned char*>(this) + 0x24 + i * 0x20)
                     ->ProcessAndFreeData(0x4C444F4D, 0x54444F4D, 0x53444F4D);
@@ -654,19 +634,19 @@ void FUN_00504710_shell::FUN_00504710()
         }
     }
 
-    if (reinterpret_cast<BGSTESTexture*>(reinterpret_cast<unsigned char*>(this) + 0x104)->GetModelLength())
+    if (reinterpret_cast<TESTexture*>(reinterpret_cast<unsigned char*>(this) + 0x104)->GetTextureNameLength())
     {
         reinterpret_cast<DoorPart3c*>(reinterpret_cast<unsigned char*>(this) + 0x104)
             ->ProcessAndFreeData(0x32444F4D, 0x54444F4D, 0x53444F4D);
     }
 
-    if (reinterpret_cast<BGSTESTexture*>(reinterpret_cast<unsigned char*>(this) + 0x124)->GetModelLength())
+    if (reinterpret_cast<TESTexture*>(reinterpret_cast<unsigned char*>(this) + 0x124)->GetTextureNameLength())
     {
         reinterpret_cast<DoorPart3c*>(reinterpret_cast<unsigned char*>(this) + 0x124)
             ->ProcessAndFreeData(0x33444F4D, 0x54444F4D, 0x53444F4D);
     }
 
-    if (reinterpret_cast<BGSTESTexture*>(reinterpret_cast<unsigned char*>(this) + 0x144)->GetModelLength())
+    if (reinterpret_cast<TESTexture*>(reinterpret_cast<unsigned char*>(this) + 0x144)->GetTextureNameLength())
     {
         reinterpret_cast<DoorPart3c*>(reinterpret_cast<unsigned char*>(this) + 0x144)
             ->ProcessAndFreeData(0x34444F4D, 0x54444F4D, 0x53444F4D);
@@ -690,7 +670,7 @@ void FUN_00504710_shell::FUN_00504710()
         }
     }
 
-    reinterpret_cast<FUN_00485680*>(this)->M();
+    reinterpret_cast<struct FUN_00485680*>(this)->M();
 }
 }  // namespace fnv_00504710
 

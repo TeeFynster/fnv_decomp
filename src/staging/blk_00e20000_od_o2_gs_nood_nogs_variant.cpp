@@ -6,6 +6,9 @@
 // src/staging/blk_00e20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkTransform.h"
+#include "../../include/hkRotation.h"
+#include "../../include/hkVector4.h"
 
 #include <xmmintrin.h>
 struct ConvexShapeStub
@@ -34,26 +37,18 @@ struct SupportResult
     __m128 normal;
 };
 
-struct TransformStub
-{
-    __m128 col0;
-    __m128 col1;
-    __m128 col2;
-    __m128 translation;
-};
-
 static const __m128 kNegMask = {-0.0f, -0.0f, -0.0f, -0.0f};
 
 // @fnv 0x00e2da40
 static void FUN_00e2da40(ConvexShapeStub* self, ConvexShapeStub* other, SupportResult* result, const __m128* dir,
-                         const TransformStub* xf)
+                         const hkTransform* xf)
 {
     __m128 negDir = _mm_xor_ps(*dir, kNegMask);
     __m128 a;
     self->GetSupportingVertex(&negDir, &a);
-    __m128 c0 = xf->col0;
-    __m128 c2 = xf->col2;
-    __m128 c1 = xf->col1;
+    __m128 c0 = xf->m_kColumn0;
+    __m128 c2 = xf->m_kColumn2;
+    __m128 c1 = xf->m_kColumn1;
     {
         __m128 tmp = _mm_unpacklo_ps(c0, c1);
         __m128 ctmp = _mm_shuffle_ps(_mm_unpackhi_ps(c0, c1), c2, 0xe4);
@@ -68,8 +63,8 @@ static void FUN_00e2da40(ConvexShapeStub* self, ConvexShapeStub* other, SupportR
     __m128 b;
     other->GetSupportingVertex(&localDir, &b);
     __m128 bw = _mm_add_ps(
-        _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(b, b, 0x55), xf->col1), _mm_mul_ps(_mm_shuffle_ps(b, b, 0x00), xf->col0)),
-        _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(b, b, 0xaa), xf->col2), xf->translation));
+        _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(b, b, 0x55), xf->m_kColumn1), _mm_mul_ps(_mm_shuffle_ps(b, b, 0x00), xf->m_kColumn0)),
+        _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(b, b, 0xaa), xf->m_kColumn2), xf->m_vTranslation));
     __m128 d = _mm_mul_ps(_mm_sub_ps(a, bw), *dir);
     float dist;
     _mm_store_ss(&dist, _mm_add_ss(_mm_shuffle_ps(d, d, 0xaa), _mm_add_ss(_mm_shuffle_ps(d, d, 0x55), d)));
@@ -83,7 +78,7 @@ static void FUN_00e2da40(ConvexShapeStub* self, ConvexShapeStub* other, SupportR
     }
 }
 
-void CallerOfIt(ConvexShapeStub* s, ConvexShapeStub* o, SupportResult* r, const __m128* d, const TransformStub* x)
+void CallerOfIt(ConvexShapeStub* s, ConvexShapeStub* o, SupportResult* r, const __m128* d, const hkTransform* x)
 {
     FUN_00e2da40(s, o, r, d, x);
     FUN_00e2da40(o, s, r, d + 1, x);
@@ -97,44 +92,25 @@ void FUN_00e31180(const float* base, int stride, int count, int mul, int offset,
         (*dst)[i] = _mm_setr_ps(base[(stride * mul + offset) + i * stride], 0.0f, 0.0f, 0.0f);
 }
 
-class __declspec(align(16)) hkVector4E3B
+inline void hkVector4::setZero4()
 {
-  public:
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    float& operator()(int i)
-    {
-        return reinterpret_cast<float*>(&m_vComponents)[i];
-    }
+    m_vComponents = _mm_setzero_ps();
+}
 
-    __m128 m_vComponents;
-};
-
-class hkRotationE3B
+__forceinline float& hkVector4::operator()(int i)
 {
-  public:
-    void setIdentity()
-    {
-        m_kColumn0.setZero4();
-        m_kColumn1.setZero4();
-        m_kColumn2.setZero4();
-        m_kColumn0(0) = 1.0f;
-        m_kColumn1(1) = 1.0f;
-        m_kColumn2(2) = 1.0f;
-    }
+    return reinterpret_cast<float*>(&m_vComponents)[i];
+}
 
-    hkVector4E3B m_kColumn0;
-    hkVector4E3B m_kColumn1;
-    hkVector4E3B m_kColumn2;
-};
-
-class ChildE3B
+inline void hkRotation::setIdentity()
 {
-  public:
-    void FUN_00cb2d90(const void* pSource);
-};
+    m_kColumn0.setZero4();
+    m_kColumn1.setZero4();
+    m_kColumn2.setZero4();
+    m_kColumn0(0) = 1.0f;
+    m_kColumn1(1) = 1.0f;
+    m_kColumn2(2) = 1.0f;
+}
 
 class FrameE3B
 {
@@ -142,13 +118,14 @@ class FrameE3B
     void FUN_00e3b630(const void* pSource);
 
     int m_unk[8];
-    hkRotationE3B m_rotation;
-    ChildE3B m_pChildAtom;
+    hkRotation m_rotation;
+    // 0x00cb2d90 is hkRotation::FUN_00cb2d90 in the shared rotation bindings.
+    hkRotation m_pChildAtom;
 };
 
 // @fnv 0x00e3b630
 void FrameE3B::FUN_00e3b630(const void* pSource)
 {
     m_rotation.setIdentity();
-    m_pChildAtom.FUN_00cb2d90(pSource);
+    m_pChildAtom.FUN_00cb2d90(*static_cast<const hkQuaternion*>(pSource));
 }

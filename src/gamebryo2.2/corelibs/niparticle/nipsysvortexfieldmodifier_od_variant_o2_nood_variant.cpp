@@ -1,3 +1,4 @@
+#include "../../../../include/NiTransform.h"
 
 // src/gamebryo2.2/corelibs/niparticle/nipsysvortexfieldmodifier_od_variant_o2_nood_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHsc /Gy (unit src/gamebryo2.2/corelibs/niparticle/nipsysvortexfieldmodifier_od_variant.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -35,23 +36,6 @@ struct TPoint3
 };
 
 extern const TPoint3 DAT_011f426c;
-
-struct TMatrix3
-{
-    float m_afEntries[3][3];
-
-    TPoint3 FUN_004b4500(const TPoint3& kPt) const;
-};
-
-struct NiTransform
-{
-    TMatrix3 m_kOrientation;
-    TPoint3 m_kTranslation;
-    float m_fScale;
-
-    void FUN_004b4880(NiTransform& kDest) const;
-    NiTransform FUN_0062c250(const NiTransform& kXform) const;
-};
 
 struct TAVObject
 {
@@ -188,17 +172,26 @@ void TFieldModifier::FUN_00c26de0(float fTime, TPSysData* pkData)
         return;
     }
 
-    NiTransform kFieldXform = m_pkFieldObject->m_kWorldSpaceTransform;
-    NiTransform kInvPSys;
+    // The original temporaries are uninitialized; use aligned storage to avoid
+    // introducing constructor calls before the transform copies and inverse.
+    float fieldStorage[sizeof(NiTransform) / sizeof(float)];
+    NiTransform& kFieldXform = *reinterpret_cast<NiTransform*>(fieldStorage);
+    kFieldXform = m_pkFieldObject->m_kWorldSpaceTransform;
+    float inverseStorage[sizeof(NiTransform) / sizeof(float)];
+    NiTransform& kInvPSys = *reinterpret_cast<NiTransform*>(inverseStorage);
     {
-        NiTransform kPSysXform = m_pkTarget->m_kWorldSpaceTransform;
+        float targetStorage[sizeof(NiTransform) / sizeof(float)];
+        NiTransform& kPSysXform = *reinterpret_cast<NiTransform*>(targetStorage);
+        kPSysXform = m_pkTarget->m_kWorldSpaceTransform;
         kPSysXform.FUN_004b4880(kInvPSys);
     }
 
     {
         NiTransform kFieldToPSys = kInvPSys.FUN_0062c250(kFieldXform);
-        TPoint3 kFieldPos = kFieldToPSys.m_kTranslation;
-        TPoint3 kFieldDir = kFieldToPSys.m_kOrientation.FUN_004b4500(m_kLightVector);
+        TPoint3 kFieldPos = reinterpret_cast<const TPoint3&>(kFieldToPSys.m_Translate);
+        NiPoint3 kRotatedDir = static_cast<const NiMatrix3&>(kFieldToPSys.m_Rotate).operator*(
+            reinterpret_cast<const NiPoint3&>(m_kLightVector));
+        TPoint3& kFieldDir = reinterpret_cast<TPoint3&>(kRotatedDir);
         kFieldDir.FUN_004a0c10();
 
         for (unsigned short i = 0; i < pkData->GetShaderParticleCount(); i++)
@@ -208,7 +201,7 @@ void TFieldModifier::FUN_00c26de0(float fTime, TPSysData* pkData)
             if (fDeltaT != 0.0f)
             {
                 TPoint3 kPos = pkData->GetVertices()[i];
-                TPoint3 kDiff = kPos - kFieldToPSys.m_kTranslation;
+                TPoint3 kDiff = kPos - reinterpret_cast<const TPoint3&>(kFieldToPSys.m_Translate);
                 float fDist = kDiff.FUN_00457990();
                 if (fDist != 0.0f)
                 {

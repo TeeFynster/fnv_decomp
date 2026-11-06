@@ -1,3 +1,5 @@
+struct PlaneVector;
+#include "../../../../../../../include/hkArray.h"
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkpconvexradiusbuilder_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/utilities/visualdebugger/viewer/collide/hkpconvexradiusbuilder_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -6,10 +8,12 @@
 // to their real unit once identified.
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkpconvexradiusbuilder.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/collide/hkpconvexradiusbuilder.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../include/hkAabb.h"
+#include "../../../../../../../include/Transform.h"
 #include <xmmintrin.h>
 struct D31Arr
 {
-    void* data;                     // +0x00
+    void* m_data;                     // +0x00
     int count;                      // +0x04
     unsigned int capacityAndFlags;  // +0x08
 };
@@ -28,7 +32,7 @@ struct D31VtIface
     virtual void v1();
     virtual void v2();
     virtual void v3();
-    virtual void v4(void* buf, int size);  // vtable +0x10
+    virtual void v4(void* buf, int m_iElementCount);  // vtable +0x10
 };
 struct D31Tbl2
 {
@@ -58,7 +62,6 @@ extern "C" void _ReadWriteBarrier();
 extern "C" void _ReadBarrier();
 extern "C" void _WriteBarrier();
 struct Shape;
-struct Transform;
 struct ShapeBuffer
 {
     __m128 storage000;
@@ -112,7 +115,7 @@ struct ShapeVTable
     Collection*(__thiscall* getCollection)(Shape*);
     void(__thiscall* slot5)(Shape*);
     void(__thiscall* slot6)(Shape*);
-    void(__thiscall* getBounds)(Shape*, const Transform*, float, struct Bounds*);
+    void(__thiscall* getBounds)(Shape*, const Transform*, float, hkAabb*);
 };
 struct Shape
 {
@@ -137,14 +140,8 @@ struct Shape
     __m128 point30;
     __m128 point40;
     float FUN_00d571a0();
-    struct PlaneArray* FUN_00d58d50();
-    void FUN_00d59200(struct PlaneArray*);
-};
-struct Transform
-{
-    __m128 rotation0, rotation1, rotation2, translation;
-    void FUN_00cb2240(const Transform*, const Transform*);
-    void FUN_00c6cd60(const Transform*);
+    hkArrayBase<PlaneVector>* FUN_00d58d50();
+    void FUN_00d59200(hkArrayBase<PlaneVector>*);
 };
 struct VectorResult
 {
@@ -155,9 +152,9 @@ __declspec(noinline) void VectorResult::FUN_00c7f640(const Transform* transform,
 {
     __m128 p = *point;
     value =
-        _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p, p, 0x55), transform->rotation1),
-                              _mm_mul_ps(_mm_shuffle_ps(p, p, 0), transform->rotation0)),
-                   _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p, p, 0xaa), transform->rotation2), transform->translation));
+        _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p, p, 0x55), transform->r[1]),
+                              _mm_mul_ps(_mm_shuffle_ps(p, p, 0), transform->r[0])),
+                   _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p, p, 0xaa), transform->r[2]), transform->r[3]));
 }
 struct Allocator
 {
@@ -180,22 +177,24 @@ struct OutputShape
 };
 struct OutputArray
 {
-    OutputShape** data;
-    int size;
-    unsigned capacity;
+    OutputShape** m_data;
+    int m_iElementCount;
+    unsigned m_iCapacityState;
     __forceinline void append(OutputShape* shape)
     {
         D31Tbl2* holder = FUN_00c85750();
-        if (size == (capacity & 0x3fffffff))
+        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
             FUN_00c90940(reinterpret_cast<Allocator*>(holder->sub), this, 4);
-        OutputShape** slot = data + size;
+        OutputShape** slot = m_data + m_iElementCount;
         for (int i = 0; i < 1; ++i)
             slot[i] = shape;
-        ++size;
+        ++m_iElementCount;
     }
 };
 struct PlaneVector
 {
+    __forceinline operator __m128&() { return quad; }
+
     union
     {
         __m128 quad;
@@ -219,37 +218,32 @@ struct PlaneVector
                           _mm_mul_ps(_mm_shuffle_ps(a, a, 0xd2), _mm_shuffle_ps(b, b, 0xc9)));
     }
 };
-struct PlaneArray
+static __forceinline void PlaneArray_reserve(hkArrayBase<PlaneVector>& self, int count);
+
+static __forceinline void PlaneArray_release(hkArrayBase<PlaneVector>& self);
+
+static __forceinline void PlaneArray_reserve(hkArrayBase<PlaneVector>& self, int count)
 {
-    PlaneVector* data;
-    int size;
-    int capacity;
-    __forceinline __m128& operator[](int index)
-    {
-        return data[index].quad;
-    }
-    __forceinline void reserve(int count)
-    {
         D31Tbl2* holder = FUN_00c85750();
         Allocator* a = reinterpret_cast<Allocator*>(holder->sub);
-        int old = capacity & 0x3fffffff;
+        int old = self.m_iCapacityState & 0x3fffffff;
         if (old < count)
         {
             int wanted = 2 * old;
             if (wanted <= count)
                 wanted = count;
-            FUN_00c908c0(a, this, wanted, 16);
+            FUN_00c908c0(a, (&self), wanted, 16);
         }
     }
-    __forceinline void release()
-    {
+
+static __forceinline void PlaneArray_release(hkArrayBase<PlaneVector>& self)
+{
         D31Tbl2* holder = FUN_00c85750();
         Allocator* a = reinterpret_cast<Allocator*>(holder->sub);
-        size = 0;
-        if (!(unsigned(capacity) & 0x80000000))
-            a->freeChunk(data, (capacity & 0x3fffffff) * 16);
+        self.m_iElementCount = 0;
+        if (!(unsigned(self.m_iCapacityState) & 0x80000000))
+            a->freeChunk(self.m_data, (self.m_iCapacityState & 0x3fffffff) * 16);
     }
-};
 static __forceinline PlaneVector* allocatePlaneItems(Allocator& a, int& count)
 {
     int bytes = count * 16;
@@ -265,8 +259,8 @@ struct CallbackEntry
 struct CallbackList
 {
     int field00, field04;
-    CallbackEntry* data;
-    int size;
+    CallbackEntry* m_data;
+    int m_iElementCount;
 };
 extern CallbackList* DAT_01269ce4;
 extern bool* FUN_00ceb8d0(bool*, const __m128*, const __m128*, const __m128*, float);
@@ -341,69 +335,67 @@ static __forceinline float getReal(const __m128& value)
     _mm_store_ss(&scalar, value);
     return scalar;
 }
-static __forceinline void planeDistance(PlaneArray& planes, int index, __m128 p, const float& radius)
+static __forceinline void planeDistance(hkArrayBase<PlaneVector>& planes, int index, __m128 p, const float& radius)
 {
-    PlaneVector* plane = planes.data + index;
+    PlaneVector* plane = planes.m_data + index;
     const __m128& normal = *plane;
     __m128 scalar = _mm_load_ss(&radius);
     __m128 r = _mm_shuffle_ps(scalar, scalar, 0);
     __m128 point = _mm_add_ps(_mm_mul_ps(r, normal), p);
-    planes.data[index].m128_f32[3] =
+    planes.m_data[index].m128_f32[3] =
         getReal(_mm_sub_ss(*reinterpret_cast<const __m128*>(&DAT_010c7160), dot3(point, normal)));
 }
-struct Bounds
-{
-    __m128 minimum, maximum;
-};
 extern const Transform DAT_01268370;
 
 static __declspec(noinline) float FUN_00de3110(Shape* shape)
 {
-    PlaneArray* source = shape->FUN_00d58d50();
-    PlaneArray vertices;
-    vertices.data = 0;
-    vertices.size = 0;
-    vertices.capacity = 0x80000000;
+    hkArrayBase<PlaneVector>* source = shape->FUN_00d58d50();
+    hkArrayBase<PlaneVector> vertices(FinishingFlag(0));
+    vertices.m_data = 0;
+    vertices.m_iElementCount = 0;
+    vertices.m_iCapacityState = 0x80000000;
     shape->FUN_00d59200(&vertices);
     float maximum = DAT_0101b31c;
-    int count = source->size;
-    for (int v = 0; v < vertices.size; ++v)
+    int count = source->m_iElementCount;
+    for (int v = 0; v < vertices.m_iElementCount; ++v)
     {
-        __m128 point = vertices.data[v];
+        __m128 point = vertices.m_data[v];
         for (int p = 0; p < count; ++p)
         {
-            float distance = source->data[p].m128_f32[3] + _mm_cvtss_f32(dot3(source->data[p], point));
+            float distance = source->m_data[p].m128_f32[3] + _mm_cvtss_f32(dot3(source->m_data[p], point));
             if (distance > maximum)
                 maximum = distance;
         }
     }
-    vertices.release();
+    PlaneArray_release(vertices);
     return maximum;
 }
-static __declspec(noinline) void FUN_00de3200(Shape* shape, PlaneArray* planes, float radius)
+static __declspec(noinline) void FUN_00de3200(Shape* shape, hkArrayBase<PlaneVector>* planes, float radius)
 {
-    Bounds bounds;
+    __m128 boundsStorage[sizeof(hkAabb) / sizeof(__m128)];
+    hkAabb& bounds = *reinterpret_cast<hkAabb*>(boundsStorage);
     shape->vtable->getBounds(shape, &DAT_01268370, radius, &bounds);
-    planes->reserve(planes->size + 6);
-    int start = planes->size;
-    planes->size += 6;
-    planes->data[start] = _mm_setr_ps(1.0f, 0.0f, 0.0f, -bounds.maximum.m128_f32[0]);
-    planes->data[start + 1] = _mm_setr_ps(0.0f, 1.0f, 0.0f, -bounds.maximum.m128_f32[1]);
-    planes->data[start + 2] = _mm_setr_ps(0.0f, 0.0f, 1.0f, -bounds.maximum.m128_f32[2]);
-    planes->data[start + 3] = _mm_setr_ps(-1.0f, 0.0f, 0.0f, bounds.minimum.m128_f32[0]);
-    planes->data[start + 4] = _mm_setr_ps(0.0f, -1.0f, 0.0f, bounds.minimum.m128_f32[1]);
-    planes->data[start + 5] = _mm_setr_ps(0.0f, 0.0f, -1.0f, bounds.minimum.m128_f32[2]);
+    PlaneArray_reserve((*(planes)), planes->m_iElementCount + 6);
+    int start = planes->m_iElementCount;
+    planes->m_iElementCount += 6;
+    planes->m_data[start] = _mm_setr_ps(1.0f, 0.0f, 0.0f, -bounds.m_kMaximumCorner.x);
+    planes->m_data[start + 1] = _mm_setr_ps(0.0f, 1.0f, 0.0f, -bounds.m_kMaximumCorner.y);
+    planes->m_data[start + 2] = _mm_setr_ps(0.0f, 0.0f, 1.0f, -bounds.m_kMaximumCorner.z);
+    planes->m_data[start + 3] = _mm_setr_ps(-1.0f, 0.0f, 0.0f, bounds.m_kMinimumCorner.x);
+    planes->m_data[start + 4] = _mm_setr_ps(0.0f, -1.0f, 0.0f, bounds.m_kMinimumCorner.y);
+    planes->m_data[start + 5] = _mm_setr_ps(0.0f, 0.0f, -1.0f, bounds.m_kMinimumCorner.z);
 }
 struct StridedVertices
 {
-    PlaneVector* data;
-    int size, stride;
+    PlaneVector* m_data;
+    int m_iElementCount, stride;
 };
 struct Geometry
 {
-    PlaneArray vertices, triangles;
+    hkArrayBase<PlaneVector> vertices, triangles;
+    Geometry() : vertices(FinishingFlag(0)), triangles(FinishingFlag(0)) {}
 };
-extern void FUN_00d5a6a0(const PlaneArray*, PlaneArray*);
+extern void FUN_00d5a6a0(const hkArrayBase<PlaneVector>*, hkArrayBase<PlaneVector>*);
 extern void FUN_00d5a5e0(const StridedVertices*, Geometry*);
 struct ConvexOutput
 {
@@ -411,48 +403,48 @@ struct ConvexOutput
     unsigned short memorySize, references;
     OutputShape* FUN_00de1d20(Geometry*);
 };
-static __declspec(noinline) OutputShape* FUN_00de3360(PlaneArray* planes, const Transform* transform)
+static __declspec(noinline) OutputShape* FUN_00de3360(hkArrayBase<PlaneVector>* planes, const Transform* transform)
 {
-    PlaneArray vertices;
-    vertices.data = 0;
-    vertices.size = 0;
-    vertices.capacity = 0x80000000;
+    hkArrayBase<PlaneVector> vertices(FinishingFlag(0));
+    vertices.m_data = 0;
+    vertices.m_iElementCount = 0;
+    vertices.m_iCapacityState = 0x80000000;
     FUN_00d5a6a0(planes, &vertices);
-    int count = vertices.size;
+    int count = vertices.m_iElementCount;
     if (count < 1)
     {
-        vertices.release();
+        PlaneArray_release(vertices);
         return 0;
     }
-    PlaneArray transformed;
-    transformed.data = 0;
-    transformed.size = 0;
-    transformed.capacity = 0x80000000;
-    transformed.reserve(count);
-    transformed.size = count;
+    hkArrayBase<PlaneVector> transformed(FinishingFlag(0));
+    transformed.m_data = 0;
+    transformed.m_iElementCount = 0;
+    transformed.m_iCapacityState = 0x80000000;
+    PlaneArray_reserve(transformed, count);
+    transformed.m_iElementCount = count;
     for (int i = 0; i < count; ++i)
-        reinterpret_cast<VectorResult*>(&transformed.data[i])->FUN_00c7f640(transform, &vertices.data[i].quad);
+        reinterpret_cast<VectorResult*>(&transformed.m_data[i])->FUN_00c7f640(transform, &vertices.m_data[i].quad);
     Geometry* geometry = static_cast<Geometry*>(reinterpret_cast<Allocator*>(FUN_00c85750()->sub)->allocate(0x18));
     if (geometry)
     {
-        geometry->vertices.data = 0;
-        geometry->vertices.size = 0;
-        geometry->vertices.capacity = 0x80000000;
-        geometry->triangles.data = 0;
-        geometry->triangles.size = 0;
-        geometry->triangles.capacity = 0x80000000;
+        geometry->vertices.m_data = 0;
+        geometry->vertices.m_iElementCount = 0;
+        geometry->vertices.m_iCapacityState = 0x80000000;
+        geometry->triangles.m_data = 0;
+        geometry->triangles.m_iElementCount = 0;
+        geometry->triangles.m_iCapacityState = 0x80000000;
     }
     StridedVertices view;
-    view.data = transformed.data;
-    view.size = transformed.size;
+    view.m_data = transformed.m_data;
+    view.m_iElementCount = transformed.m_iElementCount;
     view.stride = 16;
     FUN_00d5a5e0(&view, geometry);
     ConvexOutput* allocation =
         static_cast<ConvexOutput*>(reinterpret_cast<Allocator*>(FUN_00c85750()->sub)->allocate(0x60));
     allocation->memorySize = 0x60;
     OutputShape* result = allocation->FUN_00de1d20(geometry);
-    transformed.release();
-    vertices.release();
+    PlaneArray_release(transformed);
+    PlaneArray_release(vertices);
     return result;
 }
 struct Processor
@@ -478,13 +470,13 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         return;
     case 11: {
         Transform local;
-        local.rotation0 = _mm_setzero_ps();
-        local.rotation0.m128_f32[0] = 1.0f;
-        local.rotation1 = _mm_setzero_ps();
-        local.rotation1.m128_f32[1] = 1.0f;
-        local.rotation2 = _mm_setzero_ps();
-        local.rotation2.m128_f32[2] = 1.0f;
-        local.translation = shape->point20;
+        local.r[0] = _mm_setzero_ps();
+        local.r[0].m128_f32[0] = 1.0f;
+        local.r[1] = _mm_setzero_ps();
+        local.r[1].m128_f32[1] = 1.0f;
+        local.r[2] = _mm_setzero_ps();
+        local.r[2].m128_f32[2] = 1.0f;
+        local.r[3] = shape->point20;
         combined.FUN_00cb2240(transform, &local);
         FUN_00de3520(shape->child18, &combined, output);
         return;
@@ -586,7 +578,7 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         return;
     }
     case 3: {
-        PlaneArray planes;
+        hkArrayBase<PlaneVector> planes(FinishingFlag(0));
         float radius = shape->radius;
         if (!(radius > threshold))
             return;
@@ -604,75 +596,75 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         __m128 edge1 = normalizedUsing(_mm_sub_ps(pointC, pointB), normZero, normThree, normHalf);
         __m128 edge2 = normalizedUsing(_mm_sub_ps(pointC, *a), normZero, normThree, normHalf);
         __m128 normal = cross3(edge0, edge2);
-        planes.data = 0;
-        planes.size = 0;
-        planes.capacity = 0x80000000;
+        planes.m_data = 0;
+        planes.m_iElementCount = 0;
+        planes.m_iCapacityState = 0x80000000;
         int count = 8;
         D31Tbl2* holder = FUN_00c85750();
         PlaneVector* allocation = count > 0 ? allocatePlaneItems(*reinterpret_cast<Allocator*>(holder->sub), count) : 0;
-        int capacity = count ? count : 0x80000000;
-        planes.data = allocation;
-        planes.size = count;
-        planes.capacity = capacity;
-        planes.reserve(8);
-        planes.size = 8;
-        planes.data[0] = normal;
+        int m_iCapacityState = count ? count : 0x80000000;
+        planes.m_data = allocation;
+        planes.m_iElementCount = count;
+        planes.m_iCapacityState = m_iCapacityState;
+        PlaneArray_reserve(planes, 8);
+        planes.m_iElementCount = 8;
+        planes.m_data[0] = normal;
         planeDistance(planes, 0, *a, radius);
-        planes.data[1] = _mm_xor_ps(normal, *reinterpret_cast<const __m128*>(&DAT_010c44d0));
+        planes.m_data[1] = _mm_xor_ps(normal, *reinterpret_cast<const __m128*>(&DAT_010c44d0));
         planeDistance(planes, 1, *a, radius);
-        planes.data[2].setCross(edge0, normal);
+        planes.m_data[2].setCross(edge0, normal);
         planeDistance(planes, 2, *a, radius);
-        planes.data[3].setCross(edge1, normal);
+        planes.m_data[3].setCross(edge1, normal);
         planeDistance(planes, 3, *b, radius);
-        planes.data[4].setCross(normal, edge2);
+        planes.m_data[4].setCross(normal, edge2);
         planeDistance(planes, 4, *c, radius);
-        planes.data[5] = _mm_add_ps(planes.data[3], planes.data[2]);
-        planes.data[5] = normalizedUsing(planes.data[5], normZero, normThree, normHalf);
+        planes.m_data[5] = _mm_add_ps(planes.m_data[3], planes.m_data[2]);
+        planes.m_data[5] = normalizedUsing(planes.m_data[5], normZero, normThree, normHalf);
         planeDistance(planes, 5, *b, radius);
-        planes.data[6] = _mm_add_ps(planes.data[4], planes.data[3]);
-        planes.data[6] = normalizedUsing(planes.data[6], normZero, normThree, normHalf);
+        planes.m_data[6] = _mm_add_ps(planes.m_data[4], planes.m_data[3]);
+        planes.m_data[6] = normalizedUsing(planes.m_data[6], normZero, normThree, normHalf);
         planeDistance(planes, 6, *c, radius);
-        planes.data[7] = _mm_add_ps(planes.data[4], planes.data[2]);
-        planes.data[7] = normalizedUsing(planes.data[7], normZero, normThree, normHalf);
+        planes.m_data[7] = _mm_add_ps(planes.m_data[4], planes.m_data[2]);
+        planes.m_data[7] = normalizedUsing(planes.m_data[7], normZero, normThree, normHalf);
         planeDistance(planes, 7, *a, radius);
         OutputShape* result = FUN_00de3360(&planes, transform);
         if (result)
             output->append(result);
-        planes.release();
+        PlaneArray_release(planes);
         return;
     }
     case 6: {
-        PlaneArray planes;
+        hkArrayBase<PlaneVector> planes(FinishingFlag(0));
         float radius = shape->radius;
         if (!(radius > threshold))
             return;
-        PlaneArray* source = shape->FUN_00d58d50();
+        hkArrayBase<PlaneVector>* source = shape->FUN_00d58d50();
         float limit = FUN_00de3110(shape);
-        planes.data = 0;
-        planes.size = 0;
-        planes.capacity = 0x80000000;
+        planes.m_data = 0;
+        planes.m_iElementCount = 0;
+        planes.m_iCapacityState = 0x80000000;
         D31Tbl2* holder = FUN_00c85750();
         Allocator* allocator = reinterpret_cast<Allocator*>(holder->sub);
-        if ((planes.capacity & 0x3fffffff) < source->size)
+        if ((planes.m_iCapacityState & 0x3fffffff) < source->m_iElementCount)
         {
-            if (!(unsigned(planes.capacity) & 0x80000000))
-                allocator->freeChunk(planes.data, (planes.capacity & 0x3fffffff) * 16);
-            int bytes = source->size * 16;
-            planes.data = static_cast<PlaneVector*>(allocator->allocateChunk(bytes));
-            planes.capacity = bytes / 16;
+            if (!(unsigned(planes.m_iCapacityState) & 0x80000000))
+                allocator->freeChunk(planes.m_data, (planes.m_iCapacityState & 0x3fffffff) * 16);
+            int bytes = source->m_iElementCount * 16;
+            planes.m_data = static_cast<PlaneVector*>(allocator->allocateChunk(bytes));
+            planes.m_iCapacityState = bytes / 16;
         }
         {
-            PlaneVector* dst = planes.data;
-            int count = source->size;
-            planes.size = count;
-            PlaneVector* src = source->data;
+            PlaneVector* dst = planes.m_data;
+            int count = source->m_iElementCount;
+            planes.m_iElementCount = count;
+            PlaneVector* src = source->m_data;
             for (int index = 0; index < count; ++index)
                 dst[index].quad = src[index].quad;
         }
         float permitted = float(DAT_01023b88 - radius);
         if (limit > permitted)
         {
-            int count = source->size;
+            int count = source->m_iElementCount;
             for (int i = 0; i < count; ++i)
             {
                 float& component = planes[i].m128_f32[3];
@@ -683,13 +675,13 @@ void Processor::FUN_00de3520(Shape* shape, const Transform* transform, OutputArr
         OutputShape* result = FUN_00de3360(&planes, transform);
         if (result)
             output->append(result);
-        planes.release();
+        PlaneArray_release(planes);
         return;
     }
     default:
-        for (int i = 0; i < DAT_01269ce4->size; ++i)
+        for (int i = 0; i < DAT_01269ce4->m_iElementCount; ++i)
         {
-            CallbackEntry* entry = &DAT_01269ce4->data[i];
+            CallbackEntry* entry = &DAT_01269ce4->m_data[i];
             if (entry->kind == shape->kind)
                 entry->callback(shape, transform, output, this);
         }

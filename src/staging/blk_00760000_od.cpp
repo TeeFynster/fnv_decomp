@@ -2,29 +2,23 @@
 // src/staging/blk_00760000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/Menu.h"
 
-extern int DAT_01072514;
-
-struct FUN_007614a0_class
-{
-    int* p;
-    void FUN_007615d0(int);
-    void InitializeWithGlobal();
-};
+template <>
+void BSSimpleArray<NiFixedString, 1024>::Clear(bool freeStorage);
 
 // @fnv 0x007614a0
-void FUN_007614a0_class::InitializeWithGlobal()
+template <>
+BSSimpleArray<NiFixedString, 1024>::~BSSimpleArray()
 {
-    p = &DAT_01072514;
-    FUN_007615d0(1);
+    Clear(true);
 }
 
-struct TESSound;
-struct EffectSetting
-{
-    TESSound* GetCastSound();
-};
 extern bool* DAT_011d9510;
 
 // @fnv 0x007624d0
@@ -46,16 +40,10 @@ bool FUN_0076b610_Class::FUN_0076b610()
     return *(int*)((char*)this + 8) == 0;
 }
 
-struct Flt
-{
-    operator unsigned int();
-    bool Equals(unsigned int value);
-};
-
 // @fnv 0x0076b780
-bool Flt::Equals(unsigned int value)
+bool BSSoundHandle::operator==(unsigned int value) const
 {
-    return value == (unsigned int)*this;
+    return value == GetID();
 }
 
 unsigned int __cdecl gm_GetTickCount();
@@ -97,82 +85,47 @@ void FUN_0077a450_class::SetFloats(float afValue1, float afValue2)
     *(float*)((char*)this + 0x80) = afValue2;
 }
 
-extern int DAT_010738cc;
-struct AX
-{
-    void FUN_006b3eb0(unsigned int a, unsigned int b);
-    void* vtable;
-    AX* FUN_0077f970();
-};
-// Sets the vtable to DAT_010738cc, calls FUN_006b3eb0 with 0 and 0, and returns this.
+// The HUD subtitle array stores pointers to the shared HUD subtitle record type.
+class HUDMainMenu__SubtitleData;
+
+template <>
+BSSimpleArray<HUDMainMenu__SubtitleData*, 1024>::~BSSimpleArray();
+
 // @fnv 0x0077f970
-AX* AX::FUN_0077f970()
+template <>
+BSSimpleArray<HUDMainMenu__SubtitleData*, 1024>::BSSimpleArray()
 {
-    vtable = &DAT_010738cc;
-    FUN_006b3eb0(0, 0);
-    return this;
+    _InitialSetup(0, 0);
 }
 
-void _Deallocate(void*);
-struct S00761510
-{
-    void* FUN_00761510(unsigned int);
-};
-// @fnv 0x00761510
-void* S00761510::FUN_00761510(unsigned int flags)
-{
-    ((FUN_007614a0_class*)this)->InitializeWithGlobal();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
+// 0x006a8500 frees pBuffer through virtual _Deallocate (slot 2), then clears it.
+// The shared array header does not yet declare this storage-release helper.
+void __fastcall ReleaseFixedStringArrayBuffer(BSSimpleArray<NiFixedString, 1024>*);
 
-struct NavMeshSearchLOSArray
-{
-    void FUN_006a8500();
-};
-struct FUN_00761760_class
-{
-    void FUN_00761760(int, int);
-};
-struct FUN_007615d0_class
-{
-    int pad;
-    int* data;
-    int size;
-    int capacity;
-    void FUN_007615d0(bool freeStorage);
-};
 // @fnv 0x007615d0
-void FUN_007615d0_class::FUN_007615d0(bool freeStorage)
+template <>
+void BSSimpleArray<NiFixedString, 1024>::Clear(bool freeStorage)
 {
-    if (data)
+    if (pBuffer)
     {
-        ((FUN_00761760_class*)this)->FUN_00761760((int)data, size);
+        ReleaseElements(pBuffer, iSize);
         if (freeStorage)
         {
-            ((NavMeshSearchLOSArray*)this)->FUN_006a8500();
-            data = 0;
-            capacity = 0;
+            ReleaseFixedStringArrayBuffer(this);
+            pBuffer = 0;
+            SimpleArrayStorage = 0;
         }
-        size = 0;
+        iSize = 0;
     }
 }
 
-struct Holder_004b9900
-{
-    int FUN_004b9900(int);
-};
-struct NiFixedString
-{
-    void FUN_00761760(int* data, unsigned int n);
-};
-// Calls FUN_004b9900(0) on each of n consecutive int slots starting at data.
+// Calls the deleting destructor with flag 0 for each fixed string.
 // @fnv 0x00761760
-void NiFixedString::FUN_00761760(int* data, unsigned int n)
+template <>
+void BSSimpleArray<NiFixedString, 1024>::ReleaseElements(NiFixedString* data, unsigned int n)
 {
     for (unsigned int i = 0; i < n; ++i)
-        ((Holder_004b9900*)(data + i))->FUN_004b9900(0);
+        (data + i)->FUN_004b9900(0);
 }
 
 struct GlobalObject_0076b930
@@ -190,13 +143,9 @@ GlobalObject_0076b930* __thiscall GlobalObject_0076b930::FUN_0076b870(unsigned i
     return this;
 }
 
-struct SoundPlaybackHandle
-{
-    ~SoundPlaybackHandle();
-};
 struct FUN_0076b8a0_class
 {
-    BSSimpleList<SoundPlaybackHandle> m_kNode;
+    BSSimpleList<BSSoundHandle> m_kNode;
     ~FUN_0076b8a0_class();
 };
 // Destructor that removes all elements from the contained BSSimpleList.
@@ -207,42 +156,28 @@ FUN_0076b8a0_class::~FUN_0076b8a0_class()
 }
 
 namespace fnv_0076b900 {
-struct SoundPlaybackHandle
-{
-    int m0;
-    int m4;
-    int m8;
-    SoundPlaybackHandle(SoundPlaybackHandle const&);
-};
-struct FUN_0076b900 : SoundPlaybackHandle
+struct FUN_0076b900 : BSSoundHandle
 {
     int fldC;
     FUN_0076b900(FUN_0076b900 const&);
 };
 // @fnv 0x0076b900
-FUN_0076b900::FUN_0076b900(FUN_0076b900 const& o) : SoundPlaybackHandle(o)
+FUN_0076b900::FUN_0076b900(FUN_0076b900 const& o) : BSSoundHandle(o)
 {
     fldC = 0;
 }
 }  // namespace fnv_0076b900
 
 namespace fnv_0076b930 {
-struct SoundPlaybackHandle
-{
-    int _00;
-    int _04;
-    int _08;
-    SoundPlaybackHandle(bool);
-};
 struct FUN_0076b930
 {
-    SoundPlaybackHandle _00;
+    BSSoundHandle _00;
     int _0C;
     FUN_0076b930();
 };
-// Initializes the object: constructs the first member with false and sets the field at offset 0x0C to 0.
+// Initializes the object: constructs the first member with sound ID zero and sets the field at offset 0x0C to 0.
 // @fnv 0x0076b930
-FUN_0076b930::FUN_0076b930() : _00(false)
+FUN_0076b930::FUN_0076b930() : _00(0u)
 {
     _0C = 0;
 }
@@ -295,93 +230,48 @@ int __cdecl FUN_0077f9c0(int a)
     return a * a;
 }
 
-void __cdecl operator delete(void*);
-struct FUN_0077f9d0_class
-{
-    void ClearActorArray();
-    void* FUN_0077f9d0(unsigned int flags);
-};
-// Calls ClearActorArray, frees this with operator delete when flags has bit 0 set, and returns this.
-// @fnv 0x0077f9d0
-void* FUN_0077f9d0_class::FUN_0077f9d0(unsigned int flags)
-{
-    ClearActorArray();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
-struct S2f850
-{
-    unsigned int FUN_00761540();
-};
-struct FUN_00761630_shell
-{
-    void ConstructSlotItems(int*, int);
-};
-struct FUN_0043ba10_shell
-{
-    FUN_0043ba10_shell* FUN_0043ba10(unsigned int);
-};
-
-struct FUN_007614c0_shell
-{
-    int m_iElementCount;
-    int* m_data;
-    unsigned int FUN_007614c0(unsigned int index);
-};
+template <>
+unsigned int BSSimpleArray<NiFixedString, 1024>::ReserveIndex();
+template <>
+void BSSimpleArray<NiFixedString, 1024>::InitializeItems(NiFixedString*, unsigned int);
 
 // @fnv 0x007614c0
-unsigned int FUN_007614c0_shell::FUN_007614c0(unsigned int index)
+template <>
+unsigned int BSSimpleArray<NiFixedString, 1024>::ReserveIndex(const NiFixedString& value)
 {
-    unsigned int size = ((S2f850*)this)->FUN_00761540();
-    ((FUN_00761630_shell*)this)->ConstructSlotItems(m_data + size, 1);
-    ((FUN_0043ba10_shell*)(m_data + size))->FUN_0043ba10(index);
+    unsigned int size = ReserveIndex();
+    InitializeItems(pBuffer + size, 1);
+    (pBuffer + size)->FUN_0043ba10(value);
     return size;
 }
 
-struct FUN_007616d0_class
-{
-    virtual void v0();
-    virtual int Write(unsigned int);
-    void ConstructSlotItems(int, unsigned int);
-    int iSize;
-    int iPosition;
-    int iDataLength;
-    void InitializeBuffer(unsigned int requested, unsigned int savedSize);
-};
 // @fnv 0x007616d0
-void FUN_007616d0_class::InitializeBuffer(unsigned int requested, unsigned int savedSize)
+template <>
+void BSSimpleArray<NiFixedString, 1024>::_InitialSetup(unsigned int requested, unsigned int savedSize)
 {
+    pBuffer = 0;
     iSize = 0;
-    iPosition = 0;
-    iDataLength = 0;
+    SimpleArrayStorage = 0;
     if (savedSize > requested)
     {
         requested = savedSize;
     }
     if (requested > 0)
     {
-        iSize = Write(requested);
-        iDataLength = requested;
+        pBuffer = _Allocate(requested);
+        SimpleArrayStorage = requested;
     }
     if (savedSize > 0)
     {
-        ConstructSlotItems(iSize, savedSize);
-        iPosition = savedSize;
+        InitializeItems(pBuffer, savedSize);
+        iSize = savedSize;
     }
 }
 
-struct GO
-{
-    operator unsigned int() const;
-    bool IsNotEqual(unsigned int value);
-};
-
 // @fnv 0x0076a3b0
-bool GO::IsNotEqual(unsigned int value)
+bool BSSoundHandle::operator!=(unsigned int value)
 {
-    return value != (unsigned int)*this;
+    return value != GetID();
 }
 
 struct TESFaction_RankDataView
@@ -395,86 +285,51 @@ bool TESFaction_RankDataView::HasFlag40()
     return (GetRankDataList()[0] & 0x40) != 0;
 }
 
-struct BSSimpleArrayActor
-{
-    void* vtbl;
-    void Clear(bool);
-};
-
-struct FUN_0077f9a0_class
-{
-    void* vtbl;
-    void ClearActorArray();
-};
-
 // @fnv 0x0077f9a0
-void FUN_0077f9a0_class::ClearActorArray()
+template <>
+BSSimpleArray<HUDMainMenu__SubtitleData*, 1024>::~BSSimpleArray()
 {
-    vtbl = &DAT_010738cc;
-    ((BSSimpleArrayActor*)this)->Clear(true);
+    Clear(true);
 }
 
-struct FUN_00761540_cls
-{
-    virtual void v0();
-    virtual int v1(int arg);
-    int m_04;
-    int m_08;
-    int m_0c;
-    bool FUN_00438b90();
-    int FUN_009a3910();
-    void FUN_0042fc00(int a, int b);
-    unsigned int FUN_00761540();
-};
+// These capacity-query helpers are not declared by the shared array header.
+bool __fastcall IsFixedStringArrayFull(BSSimpleArray<NiFixedString, 1024>*);
+unsigned int __fastcall NextFixedStringArrayCapacity(BSSimpleArray<NiFixedString, 1024>*);
 
 // @fnv 0x00761540
-unsigned int FUN_00761540_cls::FUN_00761540()
+template <>
+unsigned int BSSimpleArray<NiFixedString, 1024>::ReserveIndex()
 {
-    if (FUN_00438b90())
+    if (IsFixedStringArrayFull(this))
     {
-        if (m_0c == 0)
+        if (SimpleArrayStorage == 0)
         {
-            int v = 4;
-            m_04 = v1(v);
-            m_0c = v;
+            unsigned int v = 4;
+            pBuffer = _Allocate(v);
+            SimpleArrayStorage = v;
         }
         else
         {
-            int p = FUN_009a3910();
-            FUN_0042fc00(p, m_08);
-            m_0c = p;
+            unsigned int p = NextFixedStringArrayCapacity(this);
+            ReallocateStorage(p, iSize);
+            SimpleArrayStorage = p;
         }
     }
-    m_08 = m_08 + 1;
-    return m_08 - 1;
+    iSize = iSize + 1;
+    return iSize - 1;
 }
 
-struct SlotItem
-{
-    int m_iWordAt00;
-    SlotItem();
-    void* operator new(unsigned int size, void* where);
-    void operator delete(void* p, void* where);
-};
+void* __cdecl operator new(unsigned int size, void* where);
+void __cdecl operator delete(void* p, void* where);
 
-SlotItem::SlotItem()
-{}
-
-void* SlotItem::operator new(unsigned int size, void* where)
-{
-    return where;
-}
-
-void SlotItem::operator delete(void* p, void* where)
-{}
-
-// Placement-constructs count SlotItem objects into the array arr.
+// Placement-constructs count fixed strings into the array.
 // @fnv 0x00761630
-void FUN_00761630_shell::ConstructSlotItems(int* pItems, int count)
+template <>
+void BSSimpleArray<NiFixedString, 1024>::InitializeItems(NiFixedString* pItems, unsigned int count)
 {
-    for (unsigned int i = 0; i < (unsigned int)count; i++)
+    for (unsigned int i = 0; i < count; i++)
     {
-        new (&((SlotItem*)pItems)[i]) SlotItem;
+        ::new (&pItems[i]) NiFixedString;
     }
 }
 
@@ -608,84 +463,47 @@ FUN_0076b560::~FUN_0076b560()
 
 struct FUN_0076b900
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
+    BSSoundHandle sound;
     FUN_0076b900* next;
-    FUN_0076b900(GO* owner);
+    FUN_0076b900(const BSSoundHandle& owner);
 };
 
-struct Owner : GO
+struct Owner : BSSoundHandle
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
     FUN_0076b900* first;
 
-    void FUN_00418900(Flt* value);
-    void FUN_0076b6a0(Flt* value);
+    void FUN_0076b6a0(const BSSoundHandle* value);
 };
 
-// If value does not pass Equals(0) and IsNotEqual(0) is true, prepends a new FUN_0076b900 node to first, then calls FUN_00418900(value).
+// If value has a nonzero sound ID, saves the current nonzero handle in a new node, then copies value.
 // @fnv 0x0076b6a0
-void Owner::FUN_0076b6a0(Flt* value)
+void Owner::FUN_0076b6a0(const BSSoundHandle* value)
 {
-    if (value->Equals(0))
+    if (*value == 0)
     {
     }
     else
     {
-        if (IsNotEqual(0))
+        if (BSSoundHandle::operator!=(0))
         {
-            FUN_0076b900* entry = new FUN_0076b900(this);
+            FUN_0076b900* entry = new FUN_0076b900(*this);
             entry->next = first;
             first = entry;
-            FUN_00418900(value);
+            BSSoundHandle::operator=(*value);
         }
         else
         {
-            FUN_00418900(value);
+            BSSoundHandle::operator=(*value);
         }
     }
 }
 
-struct Menu
-{
-    Menu();
-    virtual ~Menu();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-};
 struct ListStub
 {
     int item;
     ListStub* next;
     ListStub();
     ~ListStub();
-};
-struct AXStub
-{
-    int a0;
-    int a4;
-    int a8;
-    int ac;
-    AXStub();
-    ~AXStub();
-};
-struct GO41a250
-{
-    int b0;
-    int b4;
-    int b8;
-    GO41a250();
-    ~GO41a250();
 };
 struct B6815c0
 {
@@ -822,9 +640,9 @@ struct FUN_0076bb40 : Menu
     float unk188;
     ListStub list18c;
     int unk194;
-    AXStub ax198;
+    BSSimpleArray<HUDMainMenu__SubtitleData*, 1024> ax198;
     int unk1a8;
-    GO41a250 go1ac;
+    BSSoundHandle go1ac;
     int unk1b8;
     int unk1bc;
     unsigned int flags1c0;
@@ -889,27 +707,6 @@ FUN_0076bb40::FUN_0076bb40()
 }
 
 namespace fnv_007617a0 {
-class Menu
-{
-  public:
-    Menu();
-    virtual ~Menu();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-};
 struct FUN_007642f0
 {
     int unk00;
@@ -927,14 +724,6 @@ struct FUN_007642f0
     FUN_007642f0();
     ~FUN_007642f0();
 };
-struct GlobalObject_0041a250
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    GlobalObject_0041a250();
-    ~GlobalObject_0041a250();
-};
 struct B006815c0
 {
     int unk00;
@@ -946,9 +735,15 @@ extern float DAT_011a008c;
 void* __cdecl GetInstance();
 struct FUN_007617a0 : Menu
 {
+    int unk28;
+    int unk2c;
+    int unk30;
+    int unk34;
+    int unk38;
+    int unk3c;
     FUN_007642f0 member40;
     void* unk70;
-    GlobalObject_0041a250 member74;
+    BSSoundHandle member74;
     int unk80;
     bool unk84;
     char unk85;
@@ -1569,7 +1364,7 @@ class HKTile
     float FUN_00a011b0(int m_iValueId);
     void FUN_00a01350(int m_iValueId, const char* pcValue, int iFlag);
     void FUN_00700320(int m_iValueId, int iValue);
-    void SetFloat(int m_iValueId, float fValue, int iFlag);
+    void FUN_00a012d0(int m_iValueId, float fValue, int iFlag);
 };
 
 struct HKScreen
@@ -1597,26 +1392,15 @@ struct HKOffsetMap
     int FUN_0049c680(unsigned int* puiOffset, int iFlag);
 };
 
-struct HKSoundHandle
-{
-    unsigned int m_uiID;
-    unsigned int m_uiState;
-    unsigned int m_uiValue1;
-    ~HKSoundHandle();
-    void FUN_00ad8d10();
-    bool IsNotEqual(int iFlag);
-    void FUN_00ad8870(int iDelay);
-    bool FUN_00ad8830(bool bLoop);
-};
 struct HKSoundNode
 {
-    HKSoundHandle* FUN_006815c0();
+    BSSoundHandle* FUN_006815c0();
     HKSoundNode* FUN_0084e3a0();
 };
 struct HKSoundList : HKSoundNode
 {
     void ClearQueue();
-    void FUN_0076b6a0(const HKSoundHandle& kSound);
+    void FUN_0076b6a0(const BSSoundHandle& kSound);
 };
 extern HKSoundList DAT_011d9604;
 
@@ -1624,7 +1408,7 @@ class HKAudio
 {
   public:
     static HKAudio* FUN_00ad9060();
-    HKSoundHandle ResolveAudioHandle(const char* pcName, int iFlags);
+    BSSoundHandle ResolveAudioHandle(const char* pcName, int iFlags);
 };
 
 int FUN_00ec86e1(int iChar);
@@ -1710,19 +1494,21 @@ void HKMenu::UpdateHighlight()
     if (m_kGuessed.FUN_0076a3d0(acWordNext))
     {
         m_kGuessed.AssignString(acWordNext);
-        for (HKSoundNode* pkSound = &DAT_011d9604; pkSound && pkSound->FUN_006815c0()->IsNotEqual(-1);
+        for (HKSoundNode* pkSound = &DAT_011d9604; pkSound && pkSound->FUN_006815c0()->operator!=(-1);
              pkSound = pkSound->FUN_0084e3a0())
-            pkSound->FUN_006815c0()->FUN_00ad8d10();
+            pkSound->FUN_006815c0()->Release();
         DAT_011d9604.ClearQueue();
         unsigned int ItemUpdateArray = FUN_0044a670(acWordNext);
         while (ItemUpdateArray--)
         {
-            HKSoundHandle kSound = HKAudio::FUN_00ad9060()->ResolveAudioHandle("UIHackingCharSingle", 0x121);
+            BSSoundHandle kSound = HKAudio::FUN_00ad9060()->ResolveAudioHandle("UIHackingCharSingle", 0x121);
             DAT_011d9604.FUN_0076b6a0(kSound);
             if (ItemUpdateArray)
-                kSound.FUN_00ad8870((int)(m_kGuessed.FUN_0044edb0(0) * ItemUpdateArray * 1.5));
+                // This original call to 0x00ad8870 passes only the delay; preserve its one-argument ABI.
+                (kSound.*reinterpret_cast<void (BSSoundHandle::*)(int)>(&BSSoundHandle::PlayAfter))(
+                    (int)(m_kGuessed.FUN_0044edb0(0) * ItemUpdateArray * 1.5));
             else
-                kSound.FUN_00ad8830(false);
+                kSound.Play(false);
         }
     }
     bool bFound = false;
@@ -1786,8 +1572,8 @@ void HKMenu::UpdateHighlight()
     if (!bFound)
     {
         m_pkHighlight->FUN_00a01350(0x1004, acWordNext, 1);
-        m_pkHighlight->SetFloat(0x1005, DAT_011d95bc->m_pkTextTile->FUN_00a011b0(0xfa1) + iPos * 0x11, 1);
-        m_pkHighlight->SetFloat(0x1006, DAT_011d95bc->m_pkTextTile->FUN_00a011b0(0xfa2), 1);
+        m_pkHighlight->FUN_00a012d0(0x1005, DAT_011d95bc->m_pkTextTile->FUN_00a011b0(0xfa1) + iPos * 0x11, 1);
+        m_pkHighlight->FUN_00a012d0(0x1006, DAT_011d95bc->m_pkTextTile->FUN_00a011b0(0xfa2), 1);
         m_pkHighlight->FUN_00700320(0x1008, -1);
     }
 }

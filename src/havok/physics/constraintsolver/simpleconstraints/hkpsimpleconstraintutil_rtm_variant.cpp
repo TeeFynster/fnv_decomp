@@ -1,3 +1,4 @@
+
 // src/havok/physics/constraintsolver/simpleconstraints/hkpsimpleconstraintutil_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/constraintsolver/simpleconstraints/hkpsimpleconstraintutil.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -6,12 +7,12 @@
 
 #include <math.h>
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe-matched intrinsic packet; __m128 remains an ABI compatibility alias.
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
     int m128_i32[4];
-};
+} __m128, LocalM128;
 
 extern "C" __m128 _mm_setzero_ps(void);
 extern "C" __m128 _mm_load_ss(const float*);
@@ -21,10 +22,8 @@ extern "C" __m128 _mm_sub_ps(__m128, __m128);
 extern "C" __m128 _mm_mul_ps(__m128, __m128);
 extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
 
-struct __declspec(align(16)) hkVector4
-{
-    __m128 m_vComponents;
-};
+#include "../../../../../include/hkVector4.h"
+
 
 struct ContactConstraint
 {

@@ -1,17 +1,35 @@
-// fallout_shared/testopicinfo.cpp: TESTopicInfo, DelStandIn, TopicLinkLists, TopicInfoCompare and more (52 functions)
+#include "../../include/BSStringT.h"
+// fallout_shared/testopicinfo.cpp: topic-info loading, responses and dialogue helpers.
 
+// Shared file and actor headers need the Windows types before the unit layout helpers.
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "testopicinfo_topicinfo_layout_support.h"
+#include "../../include/Actor.h"
+#include "../../include/ActorValueInfo.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSPerk.h"
+#include "../../include/MapEntryCount.h"
+#include "../../include/PerkEntryConditionSet.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESIdleForm.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESQuest.h"
+#include "../../include/TESResponse.h"
+#include "../../include/TESResponseList.h"
+#include "../../include/TESTopic.h"
+#include "../../include/TESTopicInfo.h"
+#include "../../include/TESTopicInfoData.h"
+#include "../../include/TopicInfoArray.h"
 #include "testopicinfo_topicinfo_helpers.h"
-#include "testopicinfo_topicinfo_TESTopicInfo.h"
-#include "testopicinfo_topicinfo_forms.h"
 #include "TESFile.h"
-#include "testopicinfo_topicinfo_TESTopic.h"
-#include "testopicinfo_topicinfo_TESConversationData.h"
-#include "Script.h"
+#include "../../include/Script.h"
+#include "../../include/TESForm.h"
 #include "ScriptVariableInfo.h"
 #include "ScriptReferencedObject.h"
 #include "ScriptHeaderData.h"
-#include "testopicinfo_topicinfo_ResponseListWrapper.h"
-#include "testopicinfo_topicinfo_TESResponse.h"
 #include "game_constants.h"
 #include "original_script.h"
 #include <malloc.h>
@@ -187,7 +205,7 @@ void TESTopicInfo::InitializeComponent()
     m_pResponseData = 0;
     m_pOwnerQuest = 0;
     SetPrompt(g_emptyTopicInfoPrompt);
-    SetSpeaker(0);
+    SetSpeaker(static_cast<TESActorBase*>(0));
     SetActorValue(0);
     SetPerk(0);
     SetDifficultyLevel(SPEECH_CHALLENGE_LEVEL_SCL_VERYEASY);
@@ -682,184 +700,50 @@ void TESTopicInfoData::InitItem(TESForm* owner)
     }
 }
 
-// @fnv 0x0061eb60
-Script* TESTopicInfo::GetResultScript(unsigned int onEnd)
-{
-    unsigned int resultIndex = onEnd;
-    if (this == g_cachedResultScriptInfo)
-        return &g_resultScripts[resultIndex];
-    g_cachedResultScriptInfo = this;
-    Script emptyScript;
-    g_resultScripts[0].CopyScriptContents(&emptyScript);
-    g_resultScripts[0].NotifySaveLoadGameOfFormChange();
-    g_resultScripts[0].GetHeader()->m_bQuest = false;
-    g_resultScripts[1].CopyScriptContents(&emptyScript);
-    g_resultScripts[1].NotifySaveLoadGameOfFormChange();
-    g_resultScripts[1].GetHeader()->m_bQuest = false;
-    if (!HasResultScript())
-        return &g_resultScripts[resultIndex];
-    g_resultScripts[0].SetInitializationState(false);
-    g_resultScripts[1].SetInitializationState(false);
-    TESFile* file = GetFile(-1);
-    if (!file || !m_ulTopicFlags)
-        return &g_resultScripts[resultIndex];
-    file = file->GetParentTESFile();
-    if (!file->SetOffset(m_ulTopicFlags))
-        return &g_resultScripts[resultIndex];
-    unsigned char form = file->GetTESForm();
-    if (form != kTopicInfoFormType)
-        return &g_resultScripts[resultIndex];
-    unsigned int scriptIndex = 0;
-    int chunk;
-    while (chunk = file->GetChunkID())
-    {
-        switch (chunk)
-        {
-        case kNextScriptChunk:
-            scriptIndex++;
-            break;
-        case kScriptVariableDataChunk:
-        case kScriptVariableNameChunk:
-            if (file->GetChunkID() == kScriptVariableDataChunk)
-            {
-                g_loadedScriptVariable = new ScriptVariableInfo;
-                g_loadedScriptVariable->Load(file);
-                g_resultScripts[scriptIndex].GetVariableList()->AddTail(g_loadedScriptVariable);
-            }
-            else if (g_loadedScriptVariable)
-            {
-                char* variableName = static_cast<char*>(_alloca(file->GetChunkSize()));
-                file->GetChunkData(variableName, kScriptVariableNameReadSize);
-                g_loadedScriptVariable->m_kName.Set(variableName, 0);
-            }
-            break;
-        case kScriptHeaderChunk:
-            file->GetChunkData(g_resultScripts[scriptIndex].GetHeader(), 0);
-            if (file->IsEndianConversionRequired())
-                g_resultScripts[scriptIndex].GetHeader()->Endian();
-            break;
-        case kScriptCompiledDataChunk: {
-            unsigned int size = file->GetChunkSize();
-            char* data = static_cast<char*>(_alloca(size));
-            memset(data, 0, size);
-            file->GetChunkData(data, 0);
-            g_resultScripts[scriptIndex].SetScriptData(size, data);
-            break;
-        }
-        case kScriptFormReferenceChunk: {
-            ScriptReferencedObject* reference = new ScriptReferencedObject;
-            unsigned int formID;
-            file->GetChunkData(&formID);
-            reference->pForm = reinterpret_cast<TESForm*>(formID);
-            g_resultScripts[scriptIndex].GetReferencedObjectList()->AddTail(reference);
-            break;
-        }
-        case kScriptVariableReferenceChunk: {
-            ScriptReferencedObject* reference = new ScriptReferencedObject;
-            unsigned int variableID;
-            file->GetChunkData(&variableID);
-            reference->m_uiFormID = variableID;
-            g_resultScripts[scriptIndex].GetReferencedObjectList()->AddTail(reference);
-            break;
-        }
-        }
-        if (!file->NextChunk())
-            break;
-    }
-    g_resultScripts[0].InitItem(this);
-    g_resultScripts[1].InitItem(this);
-    return &g_resultScripts[resultIndex];
-}
-
-struct FUN_00409480_shell : public TESTopicInfo
-{
-    void FUN_00409480(TESActorBase*);
-};
-
 // @fnv 0x00409480
-void FUN_00409480_shell::FUN_00409480(TESActorBase* apActor)
+void TESTopicInfo::SetSpeaker(TESActorBase* apActor)
 {
-    *reinterpret_cast<TESActorBase**>(reinterpret_cast<char*>(this) + 0x3C) = apActor;
+    m_pDialogueSpeaker = apActor;
 }
-
-struct FUN_00508d70_shell : public TESForm
-{
-    bool FUN_00508d70();
-};
 
 // @fnv 0x00508d70
-bool FUN_00508d70_shell::FUN_00508d70()
+bool TESTopicInfo::HasResultScript()
 {
-    return (m_uiFormFlags & 0x2000) ? true : false;
+    return (iFormFlags & 0x2000) ? true : false;
 }
 
 void __fastcall RemoveAllLists(void*);
 
-struct FUN_0061c190
-{
-    BSSimpleList<int> m_kLinkFromList;
-    BSSimpleList<int> m_kLinkToList;
-    BSSimpleList<int> m_kFollowUpInfoList;
-
-    ~FUN_0061c190();
-};
-
-// Destructor that calls RemoveAllLists on this object.
+// Clears the three conversation-link lists before destroying their list members.
 // @fnv 0x0061c190
-FUN_0061c190::~FUN_0061c190()
+TESTopicInfoData::~TESTopicInfoData()
 {
     RemoveAllLists(this);
 }
 
-struct FUN_0061cc60_node
-{
-    void AppendResponse(int);
-};
-struct FUN_0061cc60_holder
-{
-    FUN_0061cc60_node* head;
-    void AddNode(int a);
-};
 // If head is null, stores a as the head node; otherwise forwards a to head->AppendResponse.
 // @fnv 0x0061cc60
-void FUN_0061cc60_holder::AddNode(int pNode)
+void TESResponseList::AddTail(TESResponse* pNode)
 {
-    if (head == 0)
+    if (pHead == 0)
     {
-        head = (FUN_0061cc60_node*)pNode;
+        pHead = pNode;
     }
     else
     {
-        head->AppendResponse(pNode);
+        pHead->AppendResponse(pNode);
     }
 }
 
-struct RecursiveSpinLock
-{
-    int x[2];
-    RecursiveSpinLock();
-    ~RecursiveSpinLock();
-};
-struct FUN_0061ce40_holder
-{
-    RecursiveSpinLock a;
-    RecursiveSpinLock b;
-    RecursiveSpinLock c;
-    FUN_0061ce40_holder();
-};
+// Constructs the three lists (link-from, link-to, follow-up infos; BSSimpleList ctor 0x0096a2d0 each).
 // @fnv 0x0061ce40
-FUN_0061ce40_holder::FUN_0061ce40_holder()
+TESTopicInfoData::TESTopicInfoData()
 {}
 
-struct FUN_0061cfd0_shell : public TESTopicInfo
-{
-    void FUN_0061cfd0(char*);
-};
-
 // @fnv 0x0061cfd0
-void FUN_0061cfd0_shell::FUN_0061cfd0(char* apPrompt)
+void TESTopicInfo::SetPrompt(char* apPrompt)
 {
-    reinterpret_cast<BSStringT<char>*>(reinterpret_cast<char*>(this) + 0x28)->Set(apPrompt, 0);
+    m_kPrompt.Set(apPrompt, 0);
 }
 
 // Reads the flags byte at offset 0x26 and returns 1 if bit 0x10 is set, 3 if bit 0x20 is set, otherwise 2.
@@ -869,136 +753,64 @@ int __fastcall FUN_0061e720(const char* pThis)
     return (pThis[0x26] & 0x10) ? 1 : ((pThis[0x26] & 0x20) ? 3 : 2);
 }
 
-struct FUN_0061e760_shell : public TESTopicInfo
-{
-    TESResponseList* FUN_0061e760(TESResponseList* list);
-};
-
 // @fnv 0x0061e760
-TESResponseList* FUN_0061e760_shell::FUN_0061e760(TESResponseList* list)
+void TESTopicInfo::CloneResponseList(TESResponseList* list)
 {
-    return DuplicateResponseList(list);
+    DuplicateResponseList(list);
 }
-
-struct FUN_0061eb40_shell : public TESResponse
-{
-    void FUN_0061eb40(char*);
-};
 
 // @fnv 0x0061eb40
-void FUN_0061eb40_shell::FUN_0061eb40(char* apResponseText)
+void TESResponse::SetResponseText(const char* apResponseText)
 {
-    reinterpret_cast<BSStringT<char>*>(reinterpret_cast<char*>(this) + 0x18)->Set(apResponseText, 0);
+    m_kResponseText.Set(apResponseText, 0);
 }
-
-struct FUN_0061f260_shell : public TESTopicInfo
-{
-    bool FUN_0061f260();
-};
 
 // @fnv 0x0061f260
-bool FUN_0061f260_shell::FUN_0061f260()
+bool TESTopicInfo::IsSpeechChallenge()
 {
-    return (bool)(*reinterpret_cast<char*>(reinterpret_cast<char*>(this) + 0x25) & 0x10);
+    return (bool)(m_Data.flags & 0x10);
 }
 
-struct FUN_0061f340_shell : public TESTopicInfo
-{
-    void FUN_0061f340(unsigned short);
-};
-
 // @fnv 0x0061f340
-void FUN_0061f340_shell::FUN_0061f340(unsigned short usIndex)
+void TESTopicInfo::SetInfoIndex(unsigned short usIndex)
 {
-    *(unsigned short*)((char*)this + 0x20) = usIndex;
+    m_uiInfoIndex = usIndex;
 }
 
 void __cdecl Deallocate(void*);
-namespace p07 {
-struct DtorStandIn
-{
-    void FUN_0083dec0();
-};
-struct DelStandIn
+// ABI adapter for the scalar deleting destructor, which has no source-level TESResponse declaration.
+struct ResponseDeletion : TESResponse
 {
     void* DestroyAndFree(unsigned int flags);
 };
 // Runs the destructor on this, then frees this when flags has bit 0 set, and returns this.
 // @fnv 0x0061cb30
-void* DelStandIn::DestroyAndFree(unsigned int flags)
+void* ResponseDeletion::DestroyAndFree(unsigned int flags)
 {
-    ((DtorStandIn*)this)->FUN_0083dec0();
+    TESResponse::~TESResponse();
     if (flags & 1)
         Deallocate(this);
     return this;
 }
-}
-
-namespace fnv_0061d110 {
-void __cdecl Deallocate(void*);
-namespace p07 {
-struct DtorStandIn
-{
-    void FUN_0083dec0();
-};
-struct DelStandIn
-{
-    void* DestroyAndDeallocate(unsigned int flags);
-};
-// Calls the destructor on this object, then deallocates it when bit 0 of flags is set, and returns this.
-// @fnv 0x0061d110
-void* DelStandIn::DestroyAndDeallocate(unsigned int flags)
-{
-    ((DtorStandIn*)this)->FUN_0083dec0();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
-}
-}  // namespace fnv_0061d110
-
-struct List_009e03e0
-{
-    void RemoveAll();
-};
-
-struct FUN_0061c330_shell
-{
-    char pad0[8];
-    List_009e03e0 m_list8;
-    char pad16[8];
-    List_009e03e0 m_list16;
-    void RemoveAllLists();
-};
 
 // Calls RemoveAll on the list at offset 8, on this object's own list, and on the list at offset 0x10.
 // @fnv 0x0061c330
-void FUN_0061c330_shell::RemoveAllLists()
+void __fastcall RemoveAllLists(void* data)
 {
-    m_list8.RemoveAll();
-    ((List_009e03e0*)this)->RemoveAll();
-    ((List_009e03e0*)((char*)this + 0x10))->RemoveAll();
+    static_cast<TESTopicInfoData*>(data)->m_kLinkToList.RemoveAll();
+    static_cast<TESTopicInfoData*>(data)->m_kLinkFromList.RemoveAll();
+    static_cast<TESTopicInfoData*>(data)->m_kFollowUpInfoList.RemoveAll();
 }
-
-struct FUN_0061cc40_shell
-{
-    void FUN_0061cc40(int askilllevel);
-};
 
 // @fnv 0x0061cc40
-void FUN_0061cc40_shell::FUN_0061cc40(int askilllevel)
+void TESResponse::SetNext(TESResponse* next)
 {
-    reinterpret_cast<int*>(this)[10] = askilllevel;
+    pNext = next;
 }
-
-struct FUN_0061cc90_shell : TESResponse
-{
-    void AppendResponse(TESResponse* a);
-};
 
 // Walks the response chain to its last node and links the given response onto the end of it.
 // @fnv 0x0061cc90
-void __thiscall FUN_0061cc90_shell::AppendResponse(TESResponse* apResponse)
+void TESResponse::AppendResponse(TESResponse* apResponse)
 {
     TESResponse* next = this;
     while (next->GetNext() != 0)
@@ -1008,78 +820,40 @@ void __thiscall FUN_0061cc90_shell::AppendResponse(TESResponse* apResponse)
     next->pNext = apResponse;
 }
 
-struct FUN_0061e5e0_shell
-{
-    char _pad[0x20];
-    char _pad2[3];
-    char m_kMemberDescriptor;
-    char* GetFieldPtr();
-};
-
 // @fnv 0x0061e5e0
-char* FUN_0061e5e0_shell::GetFieldPtr()
+TopicInfoData* TESTopicInfo::GetData()
 {
-    return &m_kMemberDescriptor;
+    return &m_Data;
 }
-
-struct TESFormStub
-{
-    void __thiscall FUN_00484c50(unsigned int, unsigned int);
-};
-
-struct FUN_0061dad0_shell
-{
-    void __thiscall FUN_0061dad0(unsigned int aiFlags, unsigned int aiCurrentFlags);
-};
 
 // @fnv 0x0061dad0
-void __thiscall FUN_0061dad0_shell::FUN_0061dad0(unsigned int aiFlags, unsigned int aiCurrentFlags)
+void TESTopicInfo::LoadGameLegacy(unsigned int aiFlags, unsigned int aiCurrentFlags)
 {
-    ((TESFormStub*)this)->FUN_00484c50(aiFlags, aiCurrentFlags);
+    TESForm::LoadGameLegacy(aiFlags, aiCurrentFlags);
     if (aiFlags & 0x80000000)
-        ((unsigned char*)this)[0x22] = 1;
+        m_bGoodbye = true;
 }
-
-struct FUN_0061db00_shell : TESForm
-{
-    void Revert(unsigned int);
-};
 
 // Calls TESForm::Revert with the given buffer and, if the high bit of aiFlags is set, clears byte at offset 0x22.
 // @fnv 0x0061db00
-void FUN_0061db00_shell::Revert(unsigned int aiFlags)
+void TESTopicInfo::RevertLegacy(unsigned int aiFlags)
 {
-    TESForm::Revert((BGSLoadFormBuffer*)aiFlags);
+    TESForm::RevertLegacy(aiFlags);
     if (aiFlags & 0x80000000)
-        ((char*)this)[0x22] = 0;
+        m_bGoodbye = false;
 }
 
-struct TESRecipe
-{
-    void SetSkillLevel(int);
-};
-
-struct FUN_006174d0_shell
-{
-    void CopyResponse(TESResponse* source);
-};
-
-struct FUN_0061cb60_shell : TESResponseList
-{
-    void FUN_0061cb60(TESResponse* head);
-};
-
 // @fnv 0x0061cb60
-void FUN_0061cb60_shell::FUN_0061cb60(TESResponse* head)
+void TESResponseList::SetResponseList(TESResponse* head)
 {
     ClearResponses();
     TESResponse* previous = 0;
     while (head)
     {
         TESResponse* response = new TESResponse;
-        ((FUN_006174d0_shell*)response)->CopyResponse(head);
+        response->CopyResponse(head);
         if (previous)
-            ((TESRecipe*)previous)->SetSkillLevel((int)response);
+            previous->SetNext(response);
         else
             AddTail(response);
         previous = response;
@@ -1087,13 +861,8 @@ void FUN_0061cb60_shell::FUN_0061cb60(TESResponse* head)
     }
 }
 
-struct FUN_0061d6a0_shell : public TESTopicInfo
-{
-    void FUN_0061d6a0(bool set);
-};
-
 // @fnv 0x0061d6a0
-void FUN_0061d6a0_shell::FUN_0061d6a0(bool set)
+void TESTopicInfo::SetAltered(bool set)
 {
     if (!IsTemporary() && set && IsFormInitialized())
     {
@@ -1105,122 +874,51 @@ void FUN_0061d6a0_shell::FUN_0061d6a0(bool set)
 }
 
 extern "C" void* _data_011c16bc;
-struct FUN_00680a70_shell
-{
-    void __thiscall CopyConditions(PerkEntryConditionSet* dst, PerkEntryConditionSet* src);
-};
-struct FUN_0061e0f0_shell : TESTopicInfo
-{
-    void __thiscall FUN_0061e0f0(PerkEntryConditionSet* apCond);
-};
+
+
 // @fnv 0x0061e0f0
-void __thiscall FUN_0061e0f0_shell::FUN_0061e0f0(PerkEntryConditionSet* apCond)
+void TESTopicInfo::SetConditionList(PerkEntryConditionSet* apCond)
 {
     if (apCond)
-        ((FUN_00680a70_shell*)((char*)this + 0x18))->CopyConditions(apCond, (PerkEntryConditionSet*)this);
+        m_kInfoConditions.CopyConditions(apCond, (PerkEntryConditionSet*)this);
     else
     {
         PerkEntryConditionSet temp;
-        ((FUN_00680a70_shell*)((char*)this + 0x18))->CopyConditions(&temp, (PerkEntryConditionSet*)this);
+        m_kInfoConditions.CopyConditions(&temp, (PerkEntryConditionSet*)this);
     }
 }
 
-struct BSStr
-{
-    bool Set(const char*, unsigned int);
-};
-struct BSStringT_char
-{
-    BSStringT_char& operator+=(const char*);
-};
-struct TESResponse_shell : TESResponse
-{
-    const char* GetDialogueText();
-};
-struct FUN_0061e2b0_shell : TESTopicInfo
-{
-    void BuildResponseText(BSStringT<char>& text, bool firstOnly);
-};
+
+
+
 // @fnv 0x0061e2b0
-void FUN_0061e2b0_shell::BuildResponseText(BSStringT<char>& text, bool firstOnly)
+void TESTopicInfo::FormatDebugInfo(BSStringT<char>& text, bool firstOnly)
 {
-    ((BSStr*)&text)->Set(0, 0);
+    ((::BSStringT<char>*)&text)->Set(0, 0);
     TESResponse* response = DuplicateResponseList(0)->QResponseList();
     while (response)
     {
-        ((BSStringT_char*)&text)->operator+=(((TESResponse_shell*)response)->GetDialogueText());
+        ((::BSStringT<char>*)&text)->operator+=(response->GetDialogueText());
         if (response->GetNext())
-            ((BSStringT_char*)&text)->operator+=(" | ");
+            ((::BSStringT<char>*)&text)->operator+=(" | ");
         if (firstOnly)
             break;
         response = response->GetNext();
     }
 }
 
-struct FUN_0061cdc0_shell
-{
-    char pad1[0x25];
-    signed char m_flags;  // +0x25
-    void FUN_0061cdc0(bool value);
-};
-
 // @fnv 0x0061cdc0
-void FUN_0061cdc0_shell::FUN_0061cdc0(bool abSet)
+void TESTopicInfo::SetRandom(bool abSet)
 {
-    abSet ? m_flags |= 2 : m_flags &= ~2;
+    abSet ? m_Data.flags |= 2 : m_Data.flags &= ~2;
 }
 
-struct FUN_0061f280_This
-{
-    virtual void v00()
-    {}
-    virtual void v01()
-    {}
-    virtual void v02()
-    {}
-    virtual void v03()
-    {}
-    virtual void v04()
-    {}
-    virtual void v05()
-    {}
-    virtual void v06()
-    {}
-    virtual void v07()
-    {}
-    virtual void v08()
-    {}
-    virtual void v09()
-    {}
-    virtual void v10()
-    {}
-    virtual void v11()
-    {}
-    virtual void v12()
-    {}
-    virtual void v13()
-    {}
-    virtual void v14()
-    {}
-    virtual void v15()
-    {}
-    virtual void v16()
-    {}
-    virtual void v17()
-    {}
-    virtual void v18()
-    {}
-    virtual void v19(unsigned int)
-    {}
-    char _pad[30];
-    unsigned char field22;
-    void FUN_0061f280();
-};
+
 // @fnv 0x0061f280
-void FUN_0061f280_This::FUN_0061f280()
+void TESTopicInfo::ResetSaidOnceFlags()
 {
-    field22 = 0;
-    v19(0x80000000);
+    m_bGoodbye = false;
+    MarkAsUnmodified(0x80000000);
 }
 
 struct GlobalObject2_0040c150
@@ -1229,48 +927,26 @@ struct GlobalObject2_0040c150
 };
 extern GlobalObject2_0040c150 g_011d0dc8;
 int __fastcall FUN_0061e720(const char*);
-struct CondOps
-{
-    bool ContainsTrait(TESObjectREFR*, TESObjectREFR*, bool&, bool);
-};
-struct QuestOps
-{
-    CondOps* GetConditions();
-};
-struct AVOwner
-{
-    virtual void v0();
-    virtual void v1();
-    virtual int GetActorValue(int);
-};
-struct ActorS
-{
-    char pad[0xa4];
-    AVOwner avOwner;
-};
-struct FUN_0061e600_t : public TESTopicInfo
-{
-    bool FUN_00619b20();
-    bool IsNew();
-    bool FUN_0061e600(bool& rbDeferred, TESQuest* apQuest, TESObjectREFR* apSpeaker, TESObjectREFR* apListener);
-};
+
+
+
 
 // @fnv 0x0061e600
-bool FUN_0061e600_t::FUN_0061e600(bool& rbDeferred, TESQuest* apQuest, TESObjectREFR* apSpeaker,
+bool TESTopicInfo::IsInfoValidForDialogue(bool& rbDeferred, TESQuest* apQuest, TESObjectREFR* apSpeaker,
                                   TESObjectREFR* apListener)
 {
     bool bResult;
-    ActorS* pActor;
+    Actor* pActor;
     if (IsDeleted())
         return false;
-    if (FUN_00619b20() && IsNew())
+    if (IsSayOnce() && IsNew())
         return false;
     {
         int iType = FUN_0061e720((const char*)this);
         pActor = 0;
         if (apListener && ((TESForm*)apListener)->IsActor())
-            pActor = (ActorS*)apListener;
-        if (pActor && pActor->avOwner.GetActorValue(9) <= *g_011d0dc8.Int())
+            pActor = (Actor*)apListener;
+        if (pActor && pActor->GetActorValue(static_cast<ActorValue::Index>(9)) <= *g_011d0dc8.Int())
         {
             if (iType == 3)
                 return false;
@@ -1282,54 +958,26 @@ bool FUN_0061e600_t::FUN_0061e600(bool& rbDeferred, TESQuest* apQuest, TESObject
             bool bQuestOK = true;
             if (apQuest)
                 bQuestOK =
-                    ((QuestOps*)apQuest)->GetConditions()->ContainsTrait(apSpeaker, apListener, rbDeferred, false);
+                    apQuest->GetConditions()->ContainsTrait(apSpeaker, apListener, rbDeferred, false);
             if (bQuestOK)
                 bResult =
-                    ((CondOps*)((Script*)this)->GetHeader())->ContainsTrait(apSpeaker, apListener, rbDeferred, false);
+                    GetInfoConditions()->ContainsTrait(apSpeaker, apListener, rbDeferred, false);
         }
     }
     return bResult;
 }
 
-struct BSS
-{
-    virtual ~BSS();
-    unsigned long value;
-};
-
-struct ListX
-{
-    virtual ~ListX();
-    unsigned long value;
-};
-
-struct Base5a
-{
-    virtual ~Base5a();
-};
-
-struct FUN_0061ceb0 : public Base5a
-{
-    unsigned char basePadding[0x14];
-    PerkEntryConditionSet m_kInfoConditions;
-    unsigned char conditionPadding[8];
-    BSS m_kPrompt;
-    ListX m_kAddTopicList;
-
-    ~FUN_0061ceb0();
-};
-
 // @fnv 0x0061ceb0
-FUN_0061ceb0::~FUN_0061ceb0()
+TESTopicInfo::~TESTopicInfo()
 {
-    ((TESTopicInfo*)this)->TESTopicInfo::ClearData();
+    TESTopicInfo::ClearData();
 }
 
 extern unsigned int kGroupFormType;
 
-struct FUN_00485b60
+struct TopicGroupIdentity
 {
-    bool FUN_00485be0(unsigned int);
+    bool HasFormID(unsigned int);
 };
 
 struct GROUP_PARENT_CHECK
@@ -1405,13 +1053,13 @@ struct GROUP_PARENT_CHECK
     virtual bool CheckFormGRUP(FormRecordHeader*, bool, bool) = 0;
 };
 
-struct FUN_0061d820_shell
+struct TopicInfoGroupCheck
 {
     bool CheckGroupForm(FormRecordHeader*, bool, bool);
 };
 
 // @fnv 0x0061d820
-bool FUN_0061d820_shell::CheckGroupForm(FormRecordHeader* apGroupFORM, bool abAllowParentGroups, bool abCurrentOnly)
+bool TopicInfoGroupCheck::CheckGroupForm(FormRecordHeader* apGroupFORM, bool abAllowParentGroups, bool abCurrentOnly)
 {
     bool bretval;
     TESTopic* pparenttopic;
@@ -1432,8 +1080,8 @@ bool FUN_0061d820_shell::CheckGroupForm(FormRecordHeader* apGroupFORM, bool abAl
                 }
 
                 if (!bretval && reinterpret_cast<unsigned int*>(apGroupFORM)[3] == 7 &&
-                    reinterpret_cast<FUN_00485b60*>(pparenttopic)
-                        ->FUN_00485be0(reinterpret_cast<unsigned int*>(apGroupFORM)[2]))
+                    reinterpret_cast<TopicGroupIdentity*>(pparenttopic)
+                        ->HasFormID(reinterpret_cast<unsigned int*>(apGroupFORM)[2]))
                 {
                     bretval = true;
                 }
@@ -1444,47 +1092,38 @@ bool FUN_0061d820_shell::CheckGroupForm(FormRecordHeader* apGroupFORM, bool abAl
     return bretval;
 }
 
-struct TopicLinkLists
-{
-    BSSimpleList<int>* GetLinkFromList();
-    BSSimpleList<int>* GetLinkToList();
-    BSSimpleList<int>* GetFollowUpList();
-    void ClearLinks();
-    void CopyLinksFrom(int unused, TopicLinkLists* source);
-};
-
-// Clears this object's link lists, then copies the source's from-list, to-list and follow-up-list items into them.
+// Copies link-to, link-from and follow-up entries after clearing the destination lists.
 // @fnv 0x0061c210
-void TopicLinkLists::CopyLinksFrom(int unused, TopicLinkLists* source)
+void TESTopicInfoData::Copy(TESTopicInfo* unused, TESTopicInfoData* source)
 {
     if (!source)
         return;
-    ClearLinks();
-    int item9;
+    RemoveAllLists(this);
+    TESTopic* item9;
     {
-        BSSimpleList<int>* iter = 0;
+        BSSimpleList<TESTopic*>* iter = 0;
         item9 = 0;
-        for (iter = source->GetLinkFromList(); iter && iter->GetItem();)
-        {
-            item9 = iter->GetItem();
-            iter = iter->GetNext();
-            GetLinkFromList()->AddTail(item9);
-        }
-        iter = source->GetLinkToList();
-        item9 = 0;
-        for (; iter && iter->GetItem();)
+        for (iter = source->GetLinkToList(); iter && iter->GetItem();)
         {
             item9 = iter->GetItem();
             iter = iter->GetNext();
             GetLinkToList()->AddTail(item9);
         }
+        iter = source->GetLinkFromList();
+        item9 = 0;
+        for (; iter && iter->GetItem();)
+        {
+            item9 = iter->GetItem();
+            iter = iter->GetNext();
+            GetLinkFromList()->AddTail(item9);
+        }
     }
-    BSSimpleList<int>* follow2 = source->GetFollowUpList();
-    int followItem4;
+    BSSimpleList<TESTopicInfo*>* follow2 = source->GetFollowUpInfoList();
+    TESTopicInfo* followItem4;
     while (follow2 && (followItem4 = follow2->GetItem()) != 0)
     {
         follow2 = follow2->GetNext();
-        GetFollowUpList()->AddTail(followItem4);
+        GetFollowUpInfoList()->AddTail(followItem4);
     }
 }
 
@@ -1515,10 +1154,10 @@ TESTopic* FindTopicByInfo(TESForm*);
 struct TopicInfoCompare : TESTopicInfo
 {
     bool IsLessThan(TESForm*);
-    bool FUN_0061d710(TESForm*);
+    bool CompareTopicForm(TESForm*);
 };
 // @fnv 0x0061d710
-bool TopicInfoCompare::FUN_0061d710(TESForm* form)
+bool TopicInfoCompare::CompareTopicForm(TESForm* form)
 {
     bool bResult = false;
     switch (static_cast<DialogueFormType*>(form)->FUN_00401170())
@@ -1552,7 +1191,7 @@ bool TopicInfoCompare::FUN_0061d710(TESForm* form)
     return bResult;
 }
 
-struct FUN_0061d8c0_input
+struct TopicInfoGroupInput
 {
     unsigned int unk00;
     unsigned int unk04;
@@ -1560,7 +1199,7 @@ struct FUN_0061d8c0_input
     unsigned int unk0C;
 };
 
-struct FUN_0061d8c0_output
+struct TopicInfoGroupOutput
 {
     TESResponse* pResponse;
     unsigned int unk04;
@@ -1573,13 +1212,13 @@ extern TESTopicInfo* DAT_01187344;
 extern TESResponse* DAT_01187020;
 int __cdecl FindTopicByInfo(void* object);
 
-struct FUN_0061d8c0_shell
+struct TopicInfoGroupData
 {
-    void GetResponseForTopicInfo(FUN_0061d8c0_output* output, FUN_0061d8c0_input* input);
+    void GetResponseForTopicInfo(TopicInfoGroupOutput* output, TopicInfoGroupInput* input);
 };
 
 // @fnv 0x0061d8c0
-void FUN_0061d8c0_shell::GetResponseForTopicInfo(FUN_0061d8c0_output* output, FUN_0061d8c0_input* input)
+void TopicInfoGroupData::GetResponseForTopicInfo(TopicInfoGroupOutput* output, TopicInfoGroupInput* input)
 {
     int iVar1;
 
@@ -1612,19 +1251,10 @@ void FUN_0061d8c0_shell::GetResponseForTopicInfo(FUN_0061d8c0_output* output, FU
 struct DebugTextOut;
 int __cdecl DebugTextPrintf(DebugTextOut* out, const char* fmt, ...);
 
-struct TESResponseText : TESResponse
-{
-    const char* GetDialogueText();
-};
 
-struct ResponseListHolder
-{
-    TESResponseText* QHead();
-};
 
 struct TopicInfoDebug : TESTopicInfo
 {
-    ResponseListHolder* GetResponses(int list);
     const char* GetFormTypeName();
     const char* GetEditorIDText();
     void PrintDebugInfo(DebugTextOut* out);
@@ -1653,7 +1283,7 @@ void TopicInfoDebug::PrintDebugInfo(DebugTextOut* out)
     }
     char responseText9[260];
     responseText9[0] = 0;
-    TESResponseText* response = GetResponses(0)->QHead();
+    TESResponse* response = DuplicateResponseList(0)->QResponseList();
     if (response)
     {
         sprintf(responseText9, ", Text: \"%s\"", response->GetDialogueText());
@@ -1662,44 +1292,24 @@ void TopicInfoDebug::PrintDebugInfo(DebugTextOut* out)
                     topicText3, responseText9);
 }
 
-struct TopicInfoCopy : TESTopicInfo
+// The shared API returns the speech threshold from GetDifficultyLevel; this
+// unit also needs the original getter for the stored difficulty enum.
+struct TopicInfoDifficulty : TESTopicInfo
 {
-    void FUN_0061e330(TESForm* form);
-    void FUN_004851b0(TESForm* form);
-    TopicInfoData* GetFieldPtr();
-    void FUN_0061d250();
-    void FUN_0061d230();
-    TESResponseList* FUN_0061e780(int create);
-    BSStringT<char>* GetExtraDataList();
-    SPEECH_CHALLENGE_LEVEL FUN_008041a0();
-    PerkEntryConditionSet* FUN_00500940();
-    TESTopicInfoData* GetField38();
-    void FUN_0061e180(TESTopicInfoData* data);
-    TESQuest* FUN_006733e0();
-    void FUN_00673400(TESQuest* quest);
-    bool FUN_004013e0();
-    void FUN_00484ab0(bool value);
-};
-struct ResponseCopy : TESResponse
-{
-    void CopyResponse(TESResponse* source);
-};
-struct ScriptCopy : Script
-{
-    void CopyFromScript(Script* source);
+    SPEECH_CHALLENGE_LEVEL GetSpeechChallengeLevel();
 };
 // Copies topic info data from another TESTopicInfo: add-topic list, responses, prompt, perk/actor value, difficulty, speaker, result scripts and quest.
 // @fnv 0x0061e330
-void TopicInfoCopy::FUN_0061e330(TESForm* form)
+void TESTopicInfo::Copy(TESForm* form)
 {
     TESTopicInfo* topic = dynamic_cast<TESTopicInfo*>(form);
     if (!topic)
         return;
     BSSimpleList<TESTopic*>* source = 0;
     TESTopic* node = 0;
-    FUN_004851b0(form);
-    m_Data = static_cast<TopicInfoCopy*>(topic)->GetFieldPtr()[0];
-    FUN_0061d250();
+    TESForm::CopyFrom(form);
+    m_Data = *topic->GetData();
+    ResetResponseList();
     source = topic->GetAddTopicList();
     while (source && source->GetItem())
     {
@@ -1707,16 +1317,16 @@ void TopicInfoCopy::FUN_0061e330(TESForm* form)
         source = source->GetNext();
         GetAddTopicList()->AddTail(node);
     }
-    FUN_0061d230();
-    TESResponse* response = static_cast<TopicInfoCopy*>(topic)->FUN_0061e780(0)->QResponseList();
+    ClearResponses();
+    TESResponse* response = topic->DuplicateResponseList(0)->QResponseList();
     while (response)
     {
         TESResponse* copy = new TESResponse;
-        static_cast<ResponseCopy*>(copy)->CopyResponse(response);
-        FUN_0061e780(0)->AddTail(copy);
+        copy->CopyResponse(response);
+        DuplicateResponseList(0)->AddTail(copy);
         response = response->GetNext();
     }
-    SetPrompt(static_cast<TopicInfoCopy*>(topic)->GetExtraDataList()->String());
+    SetPrompt(topic->GetPrompt().String());
     if (topic->m_pPerkSkillStat)
     {
         switch (topic->m_pPerkSkillStat->GetFormType())
@@ -1735,36 +1345,28 @@ void TopicInfoCopy::FUN_0061e330(TESForm* form)
     {
         SetPerk(0);
     }
-    SetDifficultyLevel(static_cast<TopicInfoCopy*>(topic)->FUN_008041a0());
+    SetDifficultyLevel(static_cast<TopicInfoDifficulty*>(topic)->GetSpeechChallengeLevel());
     SetSpeaker(topic->GetSpeaker());
-    static_cast<ScriptCopy*>(GetResultScript(0))->CopyFromScript(topic->GetResultScript(0));
-    static_cast<ScriptCopy*>(GetResultScript(1))->CopyFromScript(topic->GetResultScript(1));
-    reinterpret_cast<FUN_0061f340_shell*>(this)->FUN_0061f340(topic->GetInfoIndex());
-    reinterpret_cast<FUN_0061e0f0_shell*>(this)->FUN_0061e0f0(static_cast<TopicInfoCopy*>(topic)->FUN_00500940());
-    if (static_cast<TopicInfoCopy*>(topic)->GetField38())
-        FUN_0061e180(static_cast<TopicInfoCopy*>(topic)->GetField38());
-    FUN_00673400(static_cast<TopicInfoCopy*>(topic)->FUN_006733e0());
-    FUN_00484ab0(static_cast<TopicInfoCopy*>(topic)->FUN_004013e0());
+    GetResultScript(0)->CopyScriptContents(topic->GetResultScript(0));
+    GetResultScript(1)->CopyScriptContents(topic->GetResultScript(1));
+    SetInfoIndex(topic->GetInfoIndex());
+    SetConditionList(topic->GetInfoConditions());
+    if (topic->GetConversationData())
+        SetTopicInfoData(topic->GetConversationData());
+    SetOwnerQuest(topic->GetParentQuest());
+    SetInitializationState(topic->IsFormInitialized());
 }
 
 extern "C" void* __cdecl _alloca(unsigned int);
 void FUN_00403d30(void*, int, unsigned int);
-struct ScriptOps : Script
-{
-    void FUN_00484490();
-    void FUN_00484ab0(int);
-};
 struct FileOps : TESFile
 {
     bool GetChunkData();
 };
-struct FUN_0061eb60_class : TESTopicInfo
-{
-    Script* FUN_0061eb60(unsigned int);
-};
+
 // Returns one of two cached result Script objects for this topic info, resetting and reloading them from the file's SC* chunks when the cache misses.
 // @fnv 0x0061eb60
-Script* FUN_0061eb60_class::FUN_0061eb60(unsigned int auiIndex)
+Script* TESTopicInfo::GetResultScript(unsigned int auiIndex)
 {
     unsigned int h = auiIndex;
     if (this == g_cachedResultScriptInfo)
@@ -1772,15 +1374,15 @@ Script* FUN_0061eb60_class::FUN_0061eb60(unsigned int auiIndex)
     g_cachedResultScriptInfo = this;
     Script i;
     g_resultScripts[0].CopyScriptContents(&i);
-    ((ScriptOps*)&g_resultScripts[0])->FUN_00484490();
+    g_resultScripts[0].NotifySaveLoadGameOfFormChange();
     g_resultScripts[0].GetHeader()->m_bQuest = false;
     g_resultScripts[1].CopyScriptContents(&i);
-    ((ScriptOps*)&g_resultScripts[1])->FUN_00484490();
+    g_resultScripts[1].NotifySaveLoadGameOfFormChange();
     g_resultScripts[1].GetHeader()->m_bQuest = false;
     if (!HasResultScript())
         return &g_resultScripts[h];
-    ((ScriptOps*)&g_resultScripts[0])->FUN_00484ab0(0);
-    ((ScriptOps*)&g_resultScripts[1])->FUN_00484ab0(0);
+    g_resultScripts[0].SetInitializationState(false);
+    g_resultScripts[1].SetInitializationState(false);
     TESFile* a = GetFile(-1);
     if (!a || !m_ulTopicFlags)
         return &g_resultScripts[h];
@@ -1811,7 +1413,7 @@ Script* FUN_0061eb60_class::FUN_0061eb60(unsigned int auiIndex)
             {
                 char* name = (char*)_alloca(a->GetChunkSize());
                 a->GetChunkData(name, 0x200);
-                g_loadedScriptVariable->m_kName.Set(name, 0);
+                g_loadedScriptVariable->name.Set(name, 0);
             }
             break;
         case 0x52484353:
@@ -1858,35 +1460,10 @@ extern GlobalObject2_0040c150 g_011cc058;
 extern GlobalObject2_0040c150 g_011cc024;
 extern GlobalObject2_0040c150 g_011cbf54;
 
-class B61F2B0Object
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int m_iZ;
-
-    int FUN_0061f2b0();
-};
-
 // @fnv 0x0061f2b0
-int B61F2B0Object::FUN_0061f2b0()
+int TESTopicInfo::GetDifficultyLevel()
 {
-    switch (m_iZ)
+    switch (m_eDifficultyLevel)
     {
     case 1:
         return *g_011cc06c.Int();
@@ -1904,36 +1481,20 @@ int B61F2B0Object::FUN_0061f2b0()
 
 extern unsigned int kGroupFormType;
 TESForm* FUN_004839c0(unsigned int id);
-struct S_00619510_Obj
+struct TopicGroupRecord
 {
     unsigned int unk00;
     int unk04;
     unsigned int unk08;
     int unk0C;
 };
-struct FUN_00619510_shell
+// CheckFormGRUP is not yet declared with this unit's group-record signature.
+struct TopicGroupCheck : TESTopic
 {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual bool v15(TESTopic* t);
-    bool IsFormTypeBelowThreshold(S_00619510_Obj* o);
-    bool IsFormInGroup(S_00619510_Obj* arg);
+    bool IsFormInGroup(TopicGroupRecord* arg);
 };
 // @fnv 0x00619510
-bool FUN_00619510_shell::IsFormInGroup(S_00619510_Obj* pGroupObj)
+bool TopicGroupCheck::IsFormInGroup(TopicGroupRecord* pGroupObj)
 {
     bool result = false;
     if (pGroupObj != 0 && pGroupObj->unk00 == kGroupFormType)
@@ -1941,7 +1502,7 @@ bool FUN_00619510_shell::IsFormInGroup(S_00619510_Obj* pGroupObj)
         switch (pGroupObj->unk0C)
         {
         case 0:
-            result = IsFormTypeBelowThreshold(pGroupObj);
+            result = TESForm::CheckFormGRUP(pGroupObj);
             break;
         case 1:
         case 2:
@@ -1954,7 +1515,7 @@ bool FUN_00619510_shell::IsFormInGroup(S_00619510_Obj* pGroupObj)
         case 7: {
             TESTopic* t = dynamic_cast<TESTopic*>(FUN_004839c0(pGroupObj->unk08));
             if (t)
-                result = v15(t);
+                result = Sort(t);
             break;
         }
         }
@@ -1962,11 +1523,3 @@ bool FUN_00619510_shell::IsFormInGroup(S_00619510_Obj* pGroupObj)
     return result;
 }
 
-struct FUN_0061ce10
-{
-    virtual ~FUN_0061ce10();
-};
-// Destructor for the FUN_0061ce10 class that performs no additional cleanup.
-// @fnv 0x0061ce10
-FUN_0061ce10::~FUN_0061ce10()
-{}

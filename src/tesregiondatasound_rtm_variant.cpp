@@ -24,7 +24,7 @@ struct FUN_004f4f90_shell : TESRegionDataSound
 int FUN_004f4f90_shell::FUN_004f4f90()
 {
     unsigned int found;
-    FUN_004f4f90_node* node7 = (FUN_004f4f90_node*)&Battle;
+    FUN_004f4f90_node* node7 = (FUN_004f4f90_node*)&sounds.battleMediaSetList;
     found = 0;
     if (node7 != 0 && *node7->FUN_006815c0() != 0)
     {
@@ -43,8 +43,8 @@ int FUN_004f4f90_shell::FUN_004f4f90()
     }
     if (found != 0)
     {
-        ((FUN_004f4f90_node*)&Battle)->FUN_00905330(&found);
-        ((FUN_004f4f90_node*)&Battle)->FUN_005ae3d0(&found);
+        ((FUN_004f4f90_node*)&sounds.battleMediaSetList)->FUN_00905330(&found);
+        ((FUN_004f4f90_node*)&sounds.battleMediaSetList)->FUN_005ae3d0(&found);
         return FUN_004839c0(found);
     }
     return 0;

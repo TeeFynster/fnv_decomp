@@ -1,11 +1,19 @@
+#include "../../include/BSStringT.h"
 // fallout_shared/teleportdata.cpp: BaseProcess, QuantityData, Thing, RefHandle and more (22 functions)
+// include/TESFile.h needs the Windows types before layout_support.h stubs them.
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "PointStorage.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/BSExtraData.h"
+#include "../../include/GO.h"
 #include "teleportdata_decls.h"
 #include "teleportdata_types_DoorTeleportData.h"
 
 // @fnv 0x00717e50
-ActorPackageContext* BaseProcess::GetCurrentProcessData(void)
+ActorPackageContext* BaseProcess::GetCurrentProcessData(void) const
 {
-    return &m_kProcessData;
+    return const_cast<ActorPackageContext*>(&m_kProcessData);
 }
 
 // @fnv 0x008b3bb0
@@ -54,7 +62,6 @@ void TeleportableReference::Load(TESFile* file)
     if (file && file->GetChunkID() == 0x4c455458)
     {
         DoorTeleportLoadData data;
-        data.FUN_0055a400();
         memset(&data, 0, 32);
         file->GetChunkData(&data, 32);
         if (file->IsEndianConversionRequired())
@@ -98,17 +105,10 @@ void FUN_00414030_shell::SwapEndian()
     BSEndian((int*)this + 6, EndianSizeTag<4>());
 }
 
-struct BSExtraData
+struct OwnershipExtraData : public BSExtraData
 {
-    int m_iType;
-    int m_uiLogicalSize;
-    int m_iValue;
-    int m_iPad;
-};
-
-struct FUN_00431ae0 : public BSExtraData
-{
-    FUN_00431ae0(int value);
+    int owner;
+    OwnershipExtraData(int value);
 };
 
 struct ExtraListRemover
@@ -134,12 +134,12 @@ void FUN_004197d0_shell::SetExtraDataValue(int value)
         }
         else
         {
-            *(int*)((char*)extra + 0xc) = value;
+            static_cast<OwnershipExtraData*>(extra)->owner = value;
         }
     }
     else if (value)
     {
-        extra = new FUN_00431ae0(value);
+        extra = new OwnershipExtraData(value);
         AddExtra(extra);
     }
 }
@@ -155,14 +155,14 @@ NiPoint3* __fastcall FUN_00416870(NiPoint3*, float, float, float);
 // @fnv 0x0043a160
 TeleportableReference* __fastcall FUN_0043a160(TeleportableReference* self)
 {
-    NiPoint3 a;
-    NiPoint3 b;
+    PointStorage a;
+    PointStorage b;
     ((R6815c0*)((char*)self + 4))->_ref_006815c0();
     ((R6815c0*)((char*)self + 0x10))->_ref_006815c0();
     *(int*)self = 0;
     ((char*)self)[0x1c] = 0;
-    *(NiPoint3*)((char*)self + 4) = *FUN_00416870(&a, DAT_01016450, DAT_01016450, DAT_01016450);
-    *(NiPoint3*)((char*)self + 0x10) = *FUN_00416870(&b, DAT_01016450, DAT_01016450, DAT_01016450);
+    *(NiPoint3*)((char*)self + 4) = *FUN_00416870(&reinterpret_cast<NiPoint3&>(a), DAT_01016450, DAT_01016450, DAT_01016450);
+    *(NiPoint3*)((char*)self + 0x10) = *FUN_00416870(&reinterpret_cast<NiPoint3&>(b), DAT_01016450, DAT_01016450, DAT_01016450);
     return self;
 }
 
@@ -180,23 +180,20 @@ void FUN_0043a280_shell::SetVec(const NiPoint3& arVec)
     m_vec = arVec;
 }
 
-struct BSStr
-{
-    bool Set(char const*, unsigned int);
-};
+
 extern const char $SG4382[];
 struct FUN_00578870_host
 {
-    void FUN_00578870(BSStr*);
+    void FUN_00578870(::BSStringT<char>*);
 };
 struct FUN_0043a2e0_host
 {
     FUN_00578870_host* m;
-    void SetString(BSStr*);
+    void SetString(::BSStringT<char>*);
 };
 // If m is non-null, calls m->FUN_00578870(a); otherwise calls a->Set($SG4382, 0).
 // @fnv 0x0043a2e0
-void FUN_0043a2e0_host::SetString(BSStr* apStr)
+void FUN_0043a2e0_host::SetString(::BSStringT<char>* apStr)
 {
     if (m)
         m->FUN_00578870(apStr);
@@ -213,17 +210,17 @@ struct UnkThis : BaseProcess
     int FUN_0043a3f0();
     UnkArg* FUN_0043a390(UnkArg*);
 };
-// Calls a->FUN_0043a3c0 with GetCurrentProcessData() and FUN_0043a3f0(), then returns a.
+// Calls a->FUN_0043a3c0 with BaseProcess::GetCurrentProcessData() and FUN_0043a3f0(), then returns a.
 // @fnv 0x0043a390
 UnkArg* UnkThis::FUN_0043a390(UnkArg* apArg)
 {
-    apArg->FUN_0043a3c0(GetCurrentProcessData(), FUN_0043a3f0());
+    apArg->FUN_0043a3c0(BaseProcess::GetCurrentProcessData(), FUN_0043a3f0());
     return apArg;
 }
 
 struct FUN_0043a3c0
 {
-    NiPoint3 Point;
+    PointStorage Point;  // the original constructor builds no point here
     TESForm* m_pPathingCell;
     FUN_0043a3c0(const NiPoint3& aPoint, TESForm* aSpace);
 };
@@ -231,7 +228,7 @@ struct FUN_0043a3c0
 // @fnv 0x0043a3c0
 FUN_0043a3c0::FUN_0043a3c0(const NiPoint3& aPoint, TESForm* aSpace)
 {
-    Point = aPoint;
+    reinterpret_cast<NiPoint3&>(Point) = aPoint;
     m_pPathingCell = aSpace;
 }
 
@@ -264,12 +261,10 @@ struct FUN_0043a420_shell : public DoorTeleportLoadData
 // @fnv 0x0043a420
 void FUN_0043a420_shell::FUN_0043a420()
 {
-    DoorTeleportLoadData data;
-
     if (!door)
         return;
 
-    data.FUN_0055a400();
+    DoorTeleportLoadData data;
     memset(&data, 0, sizeof(data));
 
     *reinterpret_cast<unsigned int*>(&data.door) = _FNV_GetFormID(door);
@@ -286,10 +281,6 @@ void FUN_0043a420_shell::FUN_0043a420()
         data.SwapEndian();
 }
 
-struct Flt
-{
-    operator unsigned int();
-};
 struct QuantityData
 {
     char _pad[0x1C];
@@ -302,16 +293,11 @@ struct QuantityData
 // @fnv 0x0043a810
 void QuantityData::CopyFrom(void* apOther)
 {
-    SetQuantity(((Flt*)apOther)->operator unsigned int());
-    FUN_006f4ed0(((BaseProcess*)apOther)->GetCurrentProcessData());
+    SetQuantity(reinterpret_cast<GO*>(apOther)->operator unsigned int());
+    FUN_006f4ed0(((BaseProcess*)apOther)->BaseProcess::GetCurrentProcessData());
     SetVec(((TESForm*)apOther)->GetSourceFiles());
     byte1C = ((QuantityData*)apOther)->byte1C;
 }
-
-struct GO
-{
-    operator unsigned int() const;
-};
 
 struct Call_439090
 {
@@ -327,12 +313,12 @@ struct FUN_0043a860_shell
 // @fnv 0x0043a860
 bool FUN_0043a860_shell::FUN_0043a860(TeleportableReference* apCompare)
 {
-    if (reinterpret_cast<GO*>(this)->operator unsigned int() !=
-        reinterpret_cast<GO*>(apCompare)->operator unsigned int())
+    if (reinterpret_cast<const GO*>(this)->operator unsigned int() !=
+        reinterpret_cast<const GO*>(apCompare)->operator unsigned int())
         return true;
 
-    if (reinterpret_cast<Call_439090*>(reinterpret_cast<BaseProcess*>(this)->GetCurrentProcessData())
-            ->_Call_439090(reinterpret_cast<BaseProcess*>(apCompare)->GetCurrentProcessData()))
+    if (reinterpret_cast<Call_439090*>(reinterpret_cast<BaseProcess*>(this)->BaseProcess::GetCurrentProcessData())
+            ->_Call_439090(reinterpret_cast<BaseProcess*>(apCompare)->BaseProcess::GetCurrentProcessData()))
         return true;
 
     if (reinterpret_cast<Call_439090*>(reinterpret_cast<TESForm*>(this)->GetSourceFiles())
@@ -367,13 +353,7 @@ class Other
     int FUN_0084e3a0();
 };
 
-class TESSaveLoadGame
-{
-  public:
-    void FUN_008579b0(void* data, int size);
-    void FUN_00857a10(void* data, int size);
-};
-
+#include "../../include/TESSaveLoadGame.h"
 extern TESSaveLoadGame* DAT_011de45c;
 
 struct Thing

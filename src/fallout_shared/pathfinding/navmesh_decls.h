@@ -1,25 +1,11 @@
-// fallout_shared/pathfinding/navmesh_decls.h: declares NiPoint3, NavMeshTriangle, NavMesh
+#include "../../../include/NavMeshTriangle.h"
+// fallout_shared/pathfinding/navmesh_decls.h: declares NavMeshTriangle
 #ifndef FNV_NAVMESH_DECLS_H
 #define FNV_NAVMESH_DECLS_H
 
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3& operator+=(const NiPoint3&);
-    NiPoint3& operator*=(float);
-};
-class NavMeshTriangle
-{
-  public:
-    unsigned short FUN_005582d0(int);
-};
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NavMesh.h"
+
+
 extern float DAT_0102f200;
-class NavMesh
-{
-  public:
-    NavMeshTriangle* GetTriangle(unsigned short);
-    const NiPoint3& FUN_0068f0a0(unsigned short);
-    NiPoint3 GetNavMeshData(unsigned short);
-};
 #endif

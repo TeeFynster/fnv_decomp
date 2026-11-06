@@ -5,6 +5,11 @@
 
 // src/havok/common/serialize/version/hkversionutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/version/hkversionutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../include/MemoryManager.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkClassMember.h"
+
 extern "C" void __cdecl VisitObjectList(int, int);
 struct FUN_00db7a80_Class
 {
@@ -16,21 +21,6 @@ struct FUN_00db7a80_Class
     int m_iFourthElementInteger;
     void EnsureInitialized();
 };
-struct MemoryManager
-{
-    virtual void FUN_00e00000() = 0;
-    virtual void FUN_00e00004() = 0;
-    virtual void FUN_00e00008(void*, unsigned short) = 0;
-};
-struct MemoryRouter
-{
-    void* m_p00;
-    void* m_p04;
-    void* m_p08;
-    void* m_p0C;
-    MemoryManager* m_pMemoryManager;
-};
-MemoryRouter* _D1A0E0GetMemoryRouter();
 struct Object
 {
     void FUN_00e03160();
@@ -71,49 +61,13 @@ class GlobalObjectO2_00d472a0 : public FUN_00d46d40_s
 };
 extern GlobalObjectO2_00d472a0 g_01268748;
 int __cdecl FUN_00cb0fa0(const char* pcA, const char* pcB) throw();
-class hkClassMemberDC11
-{
-  public:
-    enum Type
-    {
-        TYPE_POINTER = 0x14,
-        TYPE_ARRAY = 0x16,
-        TYPE_STRUCT = 0x19,
-        TYPE_SIMPLEARRAY = 0x1a,
-        TYPE_VARIANT = 0x1c,
-        TYPE_CSTRING = 0x1d,
-        TYPE_STRINGPTR = 0x21
-    };
-
-    const char* m_name;
-    const void* m_class;
-    const void* m_pClassEnum;
-    unsigned char m_type;
-    unsigned char m_eSubtype;
-
-    int FUN_00d86920() const throw();
-    const FUN_00d46d40_s& FUN_00d86910() const throw();
-};
 class hkVersionCheckDC11
 {
   public:
-    int FUN_00e032d0(const hkClassMemberDC11* pkOld, const hkClassMemberDC11* pkNew) throw();
-    int IsMemberCompatible(const hkClassMemberDC11* pkOld, const hkClassMemberDC11* pkNew) throw();
+    int FUN_00e032d0(const hkClassMember* pkOld, const hkClassMember* pkNew) throw();
+    int IsMemberCompatible(const hkClassMember* pkOld, const hkClassMember* pkNew) throw();
 };
 class hkMemoryAllocatorDC12;
-struct hkMemoryRouterDC12
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorDC12* m_pStreamAllocator;
-    hkMemoryAllocatorDC12& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterDC12& __cdecl FUN_00c85750();
 void __cdecl ProcessObjectArray(void* const* ppvList, int iFlags) throw();
 class hkPointerMapDC12
 {
@@ -152,20 +106,11 @@ extern "C" void __cdecl VisitObjectList(int iList, int iFlags)
     ProcessObjectArray(ppvList, iFlags);
     hkVisitorDC12 kVisitor;
     hkPointerMapDC12 kDone;
-    kDone.EnsureCapacity(FUN_00c85750().heap(), 0);
+    kDone.EnsureCapacity(*reinterpret_cast<hkMemoryAllocatorDC12*>((&hkMemoryRouter::getInstance())->m_heap), 0);
     for (int i = 0; ppvList[i]; i++)
         kVisitor.FUN_00dc1bb0(ppvList[i], kDone, 1);
-    kDone.ProcessArgument(FUN_00c85750().heap());
+    kDone.ProcessArgument(*reinterpret_cast<hkMemoryAllocatorDC12*>((&hkMemoryRouter::getInstance())->m_heap));
 }
-class hkBoolDC10
-{
-  public:
-    hkBoolDC10(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-    char m_cBooleanValue;
-};
 class FUN_00d27520
 {
   public:
@@ -182,7 +127,7 @@ class FUN_00d27520
 class FUN_00d274c0 : public FUN_00d27520
 {
   public:
-    FUN_00d274c0(void* pvMem, int m_uiSizeAndFlags, hkBoolDC10 bMemoryIsString) throw();
+    FUN_00d274c0(void* pvMem, int m_uiSizeAndFlags, hkBool bMemoryIsString) throw();
     int FUN_00d27380(int offset, int whence) throw();
 };
 struct EntryDC10
@@ -216,13 +161,6 @@ struct S00dc15a0_Buffer
     virtual void vf0C();
     virtual void vf10(int* indices, unsigned int size);
 };
-struct S00dc15a0_AudioSystem
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    S00dc15a0_Buffer* unk0C;
-};
 struct S00dc15a0_Params
 {
     void* unk00;
@@ -234,9 +172,6 @@ struct S00dc15a0_Array
     int m_iElementCount;
     int m_capFlags;
 };
-namespace fnvc_adapt {
-extern "C" S00dc15a0_AudioSystem* __cdecl FUN_00c85750();
-}
 extern "C" void __cdecl FUN_00c908c0(S00dc15a0_Buffer* buffer, int** indices, int size, int elementSize);
 static __declspec(noinline) int FUN_00dc12c0(S00dc15a0_Params* params, int value, int flags, S00dc15a0_Array* arr)
 {
@@ -289,15 +224,6 @@ struct CopyAllocator
     virtual void slot3() = 0;
     virtual void release(void* data, int size) = 0;
 };
-struct CopyRouter
-{
-    void* field00;
-    void* field04;
-    void* field08;
-    void* field0c;
-    CopyAllocator* allocator;
-};
-
 struct MapEntry
 {
     void* object;
@@ -314,7 +240,7 @@ struct OffsetMap
     void FUN_00a29680();
     ~OffsetMap()
     {
-        ProcessArgument(((CopyRouter*)&FUN_00c85750())->allocator);
+        ProcessArgument(reinterpret_cast<CopyAllocator*>((&hkMemoryRouter::getInstance())->m_heap));
         FUN_00a29680();
     }
 };
@@ -441,9 +367,9 @@ static __declspec(noinline) char* FUN_00dc12c0(IndexArray* indices, ObjectInput 
     map.entries = 0;
     map.size = 0;
     map.capacity = -1;
-    CopyRouter* mapRouter = (CopyRouter*)&FUN_00c85750();
+    hkMemoryRouter* mapRouter = (&hkMemoryRouter::getInstance());
     _ReadWriteBarrier();
-    map.EnsureCapacity(mapRouter->allocator, 0);
+    map.EnsureCapacity(reinterpret_cast<CopyAllocator*>(mapRouter->m_heap), 0);
     int i;
     for (i = 0; i < indices->size; ++i)
     {
@@ -459,17 +385,17 @@ static __declspec(noinline) char* FUN_00dc12c0(IndexArray* indices, ObjectInput 
         offsetInput.p->data[index].offset = buffer.size;
         int entryOffset = buffer.size;
         void* entryObject = object->object;
-        CopyRouter* entryRouter = (CopyRouter*)&FUN_00c85750();
+        hkMemoryRouter* entryRouter = (&hkMemoryRouter::getInstance());
         _ReadWriteBarrier();
-        map.FUN_00cb1870(entryRouter->allocator, entryObject, entryOffset);
+        map.FUN_00cb1870(reinterpret_cast<CopyAllocator*>(entryRouter->m_heap), entryObject, entryOffset);
         writer.FUN_00e04920(object->object, object->type, (int)stream.writer, type, &fixups);
     }
     int size = buffer.size;
     if (size)
     {
-        CopyRouter* allocationRouter = (CopyRouter*)&FUN_00c85750();
+        hkMemoryRouter* allocationRouter = (&hkMemoryRouter::getInstance());
         _ReadWriteBarrier();
-        char* result = allocationRouter->allocator->allocate(size);
+        char* result = reinterpret_cast<CopyAllocator*>(allocationRouter->m_heap)->allocate(size);
         listener->AddMemoryChunk(result, buffer.size, 5);
         FUN_00cb1260(result, buffer.data, buffer.size);
         for (i = 0; i < indices->size; ++i)
@@ -498,7 +424,7 @@ char* invoke_copy(ObjectInput a, OffsetInput b, ListenerInput c)
 
 inline ByteBuffer::~ByteBuffer()
 {
-    CopyAllocator* allocator = ((CopyRouter*)&FUN_00c85750())->allocator;
+    CopyAllocator* allocator = reinterpret_cast<CopyAllocator*>((&hkMemoryRouter::getInstance())->m_heap);
     size = 0;
     if ((capacity & (int)0x80000000u) == 0)
         allocator->release(data, capacity & 0x3fffffff);

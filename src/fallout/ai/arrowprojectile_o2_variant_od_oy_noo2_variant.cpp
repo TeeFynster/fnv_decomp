@@ -8,21 +8,13 @@
 // src/fallout/ai/arrowprojectile.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/arrowprojectile.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#define FNV_VEC4_SIMD
 #include <xmmintrin.h>
-struct Vec3
-{
-    float x, y, z;
-    Vec3 __thiscall ApplyScaled(float f);
-    Vec3 __thiscall FUN_00439e90(const Vec3& o);
-};
+#include "../../../include/Vec4.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiPoint3.h"
 
-struct __declspec(align(16)) Vec4
-{
-    __m128 quad;
-    Vec4();
-};
-
-void __cdecl FUN_004a3e00(Vec4* out, const Vec3& in);
+void __cdecl FUN_004a3e00(Vec4* out, const NiPoint3& in);
 
 struct Filter
 {
@@ -183,12 +175,6 @@ struct Shape
     ResObj* __thiscall FUN_004ae750();
 };
 
-struct NiNode
-{
-    unsigned int __thiscall FUN_0043b480();
-    void* __thiscall FUN_0043b4a0(unsigned int i);
-};
-
 struct P1Obj
 {
     virtual void slot00();
@@ -199,7 +185,7 @@ struct P1Obj
 };
 
 // @fnv 0x008cfbc0
-void* __cdecl FUN_008cfbc0(void* p1, Vec3 a, Vec3 b, float* p4, bool p5)
+void* __cdecl FUN_008cfbc0(void* p1, NiPoint3 a, NiPoint3 b, float* p4, bool p5)
 {
     bool flag = false;
     if (p1)

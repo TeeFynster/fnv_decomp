@@ -1,30 +1,122 @@
-// Source layout: InventoryMenu. PC corrections are in generate_headers.py.
-#ifndef FNV_INVENTORYMENU_H
-#define FNV_INVENTORYMENU_H
+#pragma once
 
-#include "layout_support.h"
-#include "HotkeyWheelDisplay.h"
+#include "Menu.h"
 #include "InventoryMenu__sPageState.h"
 #include "ListBox_ItemChange___.h"
-#include "Menu.h"
-#pragma pack(push, 4)
+#include "HotkeyWheelDisplay.h"
+
+class Tile;
+class TESBoundObject;
+class InventoryStackRecord;
+class MenuForm;
+class MenuReference;
+class MenuEntry;
+
+class MenuFormList
+{
+public:
+    int unk00;
+    int unk04;
+    MenuForm** FUN_006815c0();
+    MenuFormList* FUN_00726070();
+};
+
+class __declspec(novtable) MenuList
+{
+public:
+    virtual void slot0();
+    virtual void* GetSelected();
+    virtual void slot2();
+    virtual void slot3();
+    virtual void slot4();
+    virtual void slot5();
+    virtual void slot6();
+    virtual void Clear();
+    virtual void Sort(int (*)(Tile**, Tile**));
+
+    int unk04;
+    int unk08;
+    int unk0C;
+    int unk10;
+    int unk14;
+    int unk18;
+    int unk1C;
+    int unk20;
+    int unk24;
+    int unk28;
+    int unk2C;
+
+    void FUN_007312e0();
+    MenuEntry* FUN_0071a320(InventoryStackRecord*, const char*, int, int);
+    void PopulateInventoryList(MenuReference*, void (*)(), int, int, int, int);
+    void FUN_007314c0(void (*)(), int, int);
+    void ApplyFilter(void (*)());
+    unsigned int FUN_0071ae60();
+    void UpdateCurrentValueTile(int);
+    void* CallVirtualZero(int);
+};
+
 class InventoryMenu : public Menu
 {
-  public:
-    Tile* m_pTiles[23];                              // +0x28
-    int m_iCurrentTab;                               // +0x84
-    InventoryMenu__sPageState m_kPageStates[6];      // +0x88
-    ListBox_ItemChange___ m_kItemList;               // +0xB8
-    HotkeyWheelDisplay m_kMenuData;                        // +0xE8
-    BSSimpleList<TESBoundObject*> m_kHotkeyObjects;  // +0x11C
-    int GetClass();
+public:
+    virtual ~InventoryMenu();
+    virtual void AssignTileByID(int id, Tile* tile);
+    virtual void UpdateDialog();
+    virtual int GetClass();
+
+    union
+    {
+        struct
+        {
+            Tile* m_pTiles[23];                           // 0x28
+            int m_iCurrentTab;                            // 0x84
+            InventoryMenu__sPageState m_kPageStates[6];    // 0x88
+            ListBox_ItemChange___ m_kItemList;             // 0xB8
+            HotkeyWheelDisplay m_kMenuData;                // 0xE8
+            BSSimpleList<TESBoundObject*> m_kHotkeyObjects; // 0x11C
+        };
+        struct
+        {
+            unsigned char unk28[0x4C];
+            MenuReference* container;                    // 0x74
+            MenuFormList forms;                          // 0x78
+            int mode;                                    // 0x80
+            int unk84;
+            int unk88;
+            int unk8C;
+            int unk90;
+            int selection;                               // 0x94
+            unsigned char unk98[0x30];
+            unsigned char unkC8[0x30];
+            MenuList* active;                             // 0xF8
+        };
+    };
+
+    InventoryMenu();
+    Tile* FUN_00726070();
+    void FUN_00781680();
+    void ClearActionPointSource();
+    void UpdateItemDisplay(int, Tile*);
+    void Click(int, int);
+    void Select(int, int);
+    void AttachAndDeliver(MenuForm*, void*, MenuList*);
+    void FUN_0075c280(MenuForm*);
+    bool FUN_00782190(int input, int unused);
+    bool FUN_0077ff90();
+    void FUN_00867a20();
+
+    static Tile* Create();
+    static int FUN_0077ff80();
+    static void UpdateItemList();
+    static int ms_iValueTileID;
+    static int ms_iItemTypeTileID;
+    static int ms_iCurrentTabTileID;
+    static int ms_iKeyringOpenTileID;
+    static int ms_iEquippableItemTileID;
+    static InventoryMenu* ms_pInventoryMenu;
+    static InventoryStackRecord* ms_pActionPointSource;
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(InventoryMenu) == 0x124);
-FNV_STATIC_ASSERT(offsetof(InventoryMenu, m_pTiles) == 0x28);
-FNV_STATIC_ASSERT(offsetof(InventoryMenu, m_iCurrentTab) == 0x84);
-FNV_STATIC_ASSERT(offsetof(InventoryMenu, m_kPageStates) == 0x88);
-FNV_STATIC_ASSERT(offsetof(InventoryMenu, m_kItemList) == 0xB8);
-FNV_STATIC_ASSERT(offsetof(InventoryMenu, m_kMenuData) == 0xE8);
-FNV_STATIC_ASSERT(offsetof(InventoryMenu, m_kHotkeyObjects) == 0x11C);
-#endif
+
+// These views share storage without adding constructor or destructor calls.
+#define m_kList (*reinterpret_cast<MenuList*>(unk98))
+#define otherList (*reinterpret_cast<MenuList*>(unkC8))

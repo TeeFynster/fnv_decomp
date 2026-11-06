@@ -15,10 +15,10 @@
 #include "CachedValuesOwner.h"
 #include "MagicCaster.h"
 #include "MagicTarget.h"
-#include "actor_refr.h"
-#include "MobileObject.h"
+#include "../../../include/TESObjectREFR.h"
+#include "actor_rtti_character_mobileobject.h"
 #include "ActorValueModifierList.h"
-#include "NiPoint3.h"
+#include "../../../include/NiPoint3.h"
 #pragma pack(push, 4)
 class Actor : public MobileObject,
               public MagicCaster,

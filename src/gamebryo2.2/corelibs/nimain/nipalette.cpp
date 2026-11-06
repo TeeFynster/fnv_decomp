@@ -2,6 +2,9 @@
 // src/gamebryo2.2/corelibs/nimain/nipalette.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nipalette.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiPalette.h"
+
 extern "C" void* g_011f5c08;
 
 // @fnv 0x00a8b070
@@ -12,123 +15,84 @@ void* __cdecl FUN_00a8b070()
 
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
-struct FUN_00a8b010_Node
-{
-    char _pad[0x1c];
-    FUN_00a8b010_Node* _prev;
-    FUN_00a8b010_Node* _next;
-    void Unlink();
-};
-extern FUN_00a8b010_Node* DAT_011f5c00;
-extern FUN_00a8b010_Node* DAT_011f5c04;
+extern NiPalette* DAT_011f5c00;
+extern NiPalette* DAT_011f5c04;
 extern int DAT_011f5c80;
 // Under a critical section, removes this node from the doubly linked list, updating the head, tail and neighbouring links.
 // @fnv 0x00a8b010
-void FUN_00a8b010_Node::Unlink()
+void __fastcall UnlinkPalette(NiPalette* self)
 {
     EnterCriticalSection(&DAT_011f5c80);
-    if (DAT_011f5c00 == this)
-        DAT_011f5c00 = this->_next;
-    if (DAT_011f5c04 == this)
-        DAT_011f5c04 = this->_prev;
-    if (this->_prev)
-        this->_prev->_next = this->_next;
-    if (this->_next)
-        this->_next->_prev = this->_prev;
+    if (DAT_011f5c00 == self)
+        DAT_011f5c00 = reinterpret_cast<NiPalette*>(self->unk20);
+    if (DAT_011f5c04 == self)
+        DAT_011f5c04 = reinterpret_cast<NiPalette*>(self->unk1C);
+    if (reinterpret_cast<NiPalette*>(self->unk1C))
+        reinterpret_cast<NiPalette*>(self->unk1C)->unk20 = self->unk20;
+    if (reinterpret_cast<NiPalette*>(self->unk20))
+        reinterpret_cast<NiPalette*>(self->unk20)->unk1C = self->unk1C;
     LeaveCriticalSection(&DAT_011f5c80);
 }
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 extern int DAT_0109f3fc;
 void __fastcall _Call_a5d3a0(void*);
 void __fastcall FUN_00a8afc0(void*);
-struct MyObj
-{
-    void* v0;
-    int f04;
-    unsigned char f08;
-    char pad09[3];
-    void* f0C;
-    int f10;
-    int f14;
-    int f18;
-    int f1C;
-    int f20;
-};
 // @fnv 0x00a8b220
 void* FUN_00a8b220()
 {
-    MyObj* p = (MyObj*)BSFadeNode::operator new(0x24);
+    NiPalette* p = (NiPalette*)BSFadeNode::operator new(0x24);
     if (p)
     {
         _Call_a5d3a0(p);
-        p->v0 = (void*)&DAT_0109f3fc;
-        p->f08 = 0;
-        p->f0C = 0;
-        p->f14 = 0;
-        p->f10 = 1;
-        p->f18 = 0;
+        *(void**)p = (void*)&DAT_0109f3fc;
+        *(unsigned char*)&p->unk08 = 0;
+        p->unk0C = 0;
+        p->unk14 = 0;
+        p->unk10 = 1;
+        p->unk18 = 0;
         FUN_00a8afc0(p);
         return p;
     }
     return 0;
 }
 
-struct RendererData
+// Exe 0x00a8b270: unit-local RendererData view; declarations and layout are preserved.
+struct NipaletteRendererDataView
 {
-    virtual ~RendererData();
-};
-struct NiRefObject
-{
-    ~NiRefObject();
+    virtual ~NipaletteRendererDataView();
 };
 struct MM
 {
     void _DeallocateAlias(void*);
 };
 extern MM g_memoryManager;
-struct S_00a8b010
-{
-    void Unlink();
-};
 extern int DAT_0109f3fc;
 void _delete(void*, unsigned int);
-struct NiPalette
-{
-    void* vtable;
-    char pad[16];
-    void* m_pColorEntries;
-    RendererData* m_pTextureRendererData;
-    void* DestroyPalette(unsigned int);
-};
 // @fnv 0x00a8b270
 void* NiPalette::DestroyPalette(unsigned int auiFlags)
 {
     *(void**)this = (void*)&DAT_0109f3fc;
-    g_memoryManager._DeallocateAlias(m_pColorEntries);
-    delete m_pTextureRendererData;
-    ((S_00a8b010*)this)->Unlink();
-    ((NiRefObject*)this)->~NiRefObject();
+    g_memoryManager._DeallocateAlias((void*)unk14);
+    delete (NipaletteRendererDataView*)unk18;
+    UnlinkPalette(this);
+    this->NiRefObject::~NiRefObject();
     if (auiFlags & 1)
         _delete(this, 0x24);
     return this;
 }
 
-template <class T> struct NiTMallocInterface
+template <class T> struct PaletteStringAllocator
 {
 };
-template <class T, class A> struct NiTPrimitiveArray
+template <class T, class A> struct PaletteStringArray
 {
     void SetSize(unsigned int);
     void SetAt(unsigned int, T&);
 };
-void __stdcall AppendCameraPathEntries(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >*);
+void __stdcall AppendCameraPathEntries(PaletteStringArray<char*, PaletteStringAllocator<char*> >*);
 char* __cdecl _FUN_00a7d330(void*);
 // @fnv 0x00a8b460
-void __stdcall FUN_00a8b460(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >* pkStrings)
+void __stdcall FUN_00a8b460(PaletteStringArray<char*, PaletteStringAllocator<char*> >* pkStrings)
 {
     AppendCameraPathEntries(pkStrings);
     char* pszString = _FUN_00a7d330(g_011f5c08);
@@ -142,40 +106,28 @@ void __stdcall FUN_00a8b460(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >
     pkStrings->SetAt(uiSize, pszString);
 }
 
-struct FUN_00a8af40_cls
-{
-    char unk00[8];
-    unsigned char f08;
-    char unk09[3];
-    unsigned int f0C;
-    char unk10[4];
-    unsigned char* f14;
-
-    char Probe(void* p);
-    unsigned char Equals(FUN_00a8af40_cls* o);
-};
 
 // @fnv 0x00a8af40
-unsigned char FUN_00a8af40_cls::Equals(FUN_00a8af40_cls* apOther)
+unsigned char __fastcall PaletteEquals(NiPalette* self, void*, NiPalette* apOther)
 {
-    if (this->Probe(apOther) == 0)
+    if (self->NiObject::IsEqual(apOther) == 0)
     {
         return 0;
     }
-    if (this->f08 != apOther->f08)
+    if (*(unsigned char*)&self->unk08 != *(unsigned char*)&apOther->unk08)
     {
         return 0;
     }
-    if (this->f0C != apOther->f0C)
+    if (self->unk0C != apOther->unk0C)
     {
         return 0;
     }
-    unsigned int uiByteCount = this->f0C;
+    unsigned int uiByteCount = self->unk0C;
     uiByteCount += uiByteCount;
     uiByteCount += uiByteCount;
     unsigned int n = uiByteCount != 0;
-    unsigned char* pOtherData = apOther->f14;
-    unsigned char* pThisData = this->f14;
+    unsigned char* pOtherData = (unsigned char*)apOther->unk14;
+    unsigned char* pThisData = (unsigned char*)self->unk14;
     while (n >= 4)
     {
         if (*(unsigned int*)pThisData != *(unsigned int*)pOtherData)
@@ -314,37 +266,25 @@ struct A8b110Listener
 extern A8b110Listener* DAT_011f4748;
 void __cdecl FUN_00ec44d0(void* dst, void* src, unsigned int size);
 
-struct A8b110Owner
-{
-    void* vtable;
-    int unk04;
-    unsigned char m_08;
-    unsigned int m_0C;
-    int m_10;
-    A8b110Elem* m_14;
-    int m_18;
-
-    void* FUN_00a8b110(unsigned char a1, unsigned int a2, void* a3);
-};
 
 // Initializes the owner: stores the byte and count, allocates an element array, copies count*4 bytes from a3, and notifies DAT_011f4748.
 // @fnv 0x00a8b110
-void* A8b110Owner::FUN_00a8b110(unsigned char a1, unsigned int a2, void* pSrc)
+void* __fastcall FUN_00a8b110(NiPalette* self, void*, unsigned char a1, unsigned int a2, void* pSrc)
 {
-    _Call_a5d3a0(this);
-    m_08 = a1;
-    m_0C = a2;
-    vtable = (void*)&DAT_0109f3fc;
-    m_10 = 1;
-    m_14 = new A8b110Elem[a2];
-    FUN_00ec44d0(m_14, pSrc, m_0C * 4);
-    m_18 = 0;
+    _Call_a5d3a0(self);
+    *(unsigned char*)&self->unk08 = a1;
+    self->unk0C = a2;
+    *(void**)self = (void*)&DAT_0109f3fc;
+    self->unk10 = 1;
+    self->unk14 = (unsigned int)(new A8b110Elem[a2]);
+    FUN_00ec44d0((void*)self->unk14, pSrc, self->unk0C * 4);
+    self->unk18 = 0;
     if (DAT_011f4748)
     {
-        DAT_011f4748->v54(this);
+        DAT_011f4748->v54(self);
     }
-    FUN_00a8afc0(this);
-    return this;
+    FUN_00a8afc0(self);
+    return self;
 }
 
 namespace fnv_00a8b2c0 {
@@ -390,19 +330,9 @@ struct Observer
     void** vtable;
 };
 extern Observer* DAT_011f4748;
-struct DataArray
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    bool enabled;
-    unsigned int count;
-    unsigned int unk10;
-    MemoryBlock* values;
-    void ReadFromSource(DataSource* source);
-};
 // Reads an enabled flag and element count from the source's reader, reallocates values if the count changed, reads the values, then notifies the observer.
 // @fnv 0x00a8b2c0
-void DataArray::ReadFromSource(DataSource* source)
+void __fastcall ReadPaletteFromSource(NiPalette* self, void*, DataSource* source)
 {
     ReadGroup(source);
     ReadState readState;
@@ -410,24 +340,24 @@ void DataArray::ReadFromSource(DataSource* source)
     unsigned char enabledByte;
     BinaryReader* reader = source->reader();
     reader->readBlock(&enabledByte, 1, 1);
-    enabled = enabledByte != 0;
+    *(unsigned char*)&self->unk08 = enabledByte != 0;
 
     reader = source->reader();
     reader->readBlock(&readState.elementCount, 4, 4);
-    if (readState.elementCount != count)
+    if (readState.elementCount != self->unk0C)
     {
-        g_memoryManager._DeallocateAlias(values);
-        count = readState.elementCount;
-        values = new MemoryBlock[readState.elementCount];
+        g_memoryManager._DeallocateAlias((void*)self->unk14);
+        self->unk0C = readState.elementCount;
+        self->unk14 = (unsigned int)(new MemoryBlock[readState.elementCount]);
     }
 
     reader = source->reader();
-    reader->readBlock(values, count * sizeof(MemoryBlock), 1);
+    reader->readBlock((void*)self->unk14, self->unk0C * sizeof(MemoryBlock), 1);
     Observer* observer = DAT_011f4748;
     if (observer)
     {
-        typedef void(__thiscall * OnRead)(Observer*, DataArray*);
-        (reinterpret_cast<OnRead>(observer->vtable[0x150 / 4]))(observer, this);
+        typedef void(__thiscall * OnRead)(Observer*, NiPalette*);
+        (reinterpret_cast<OnRead>(observer->vtable[0x150 / 4]))(observer, self);
     }
 }
 }  // namespace fnv_00a8b2c0
@@ -626,32 +556,15 @@ template <class T> inline void A8B3C0SaveBinary(A8B3C0Stream& kStream, const T* 
     A8B3C0BinaryStreamSave(*kStream.m_pBackingStream, pValues, ItemUpdateArray);
 }
 
-class A8B3C0Base
-{
-  public:
-    void* m_pVtbl;
-    int unk04;
-    void SaveBinary(A8B3C0Stream& kStream);
-};
 
-class A8B3C0Data : public A8B3C0Base
-{
-  public:
-    bool m_bFlag;
-    unsigned int m_uiCount;
-    int unk10;
-    unsigned char* m_pCompressedData;
-
-    void FUN_00a8b3c0(A8B3C0Stream& kStream);
-};
 
 // @fnv 0x00a8b3c0
-void A8B3C0Data::FUN_00a8b3c0(A8B3C0Stream& kStream)
+void __fastcall FUN_00a8b3c0(NiPalette* self, void*, A8B3C0Stream& kStream)
 {
-    A8B3C0Base::SaveBinary(kStream);
-    A8B3C0SaveBinary<unsigned char>(kStream, m_bFlag);
-    A8B3C0SaveBinary(kStream, m_uiCount);
-    A8B3C0SaveBinary(kStream, m_pCompressedData, m_uiCount * 4);
+    self->NiObject::SaveBinary(reinterpret_cast<NiStream&>(kStream));
+    A8B3C0SaveBinary<unsigned char>(kStream, *reinterpret_cast<const bool*>(&self->unk08));
+    A8B3C0SaveBinary(kStream, self->unk0C);
+    A8B3C0SaveBinary(kStream, (unsigned char*)self->unk14, self->unk0C * 4);
 }
 
 struct PaletteElement : A8b110Elem
@@ -659,27 +572,23 @@ struct PaletteElement : A8b110Elem
     PaletteElement()
     {}
 };
-struct A8b080Owner : A8b110Owner
-{
-    void* FUN_00a8b080(const A8b080Owner& src);
-};
 
 // Copies m_08, m_0C and a deep copy of the m_14 element array from src, then calls FUN_00a8afc0.
 // @fnv 0x00a8b080
-void* A8b080Owner::FUN_00a8b080(const A8b080Owner& src)
+void* __fastcall FUN_00a8b080(NiPalette* self, void*, const NiPalette& src)
 {
-    _Call_a5d3a0(this);
-    this->vtable = &DAT_0109f3fc;
-    this->m_08 = src.m_08;
-    this->m_0C = src.m_0C;
-    this->m_10 = 1;
-    this->m_14 = new PaletteElement[this->m_0C];
-    FUN_00ec44d0(this->m_14, src.m_14, src.m_0C * 4);
-    this->m_18 = 0;
+    _Call_a5d3a0(self);
+    *(void**)self = &DAT_0109f3fc;
+    *(unsigned char*)&self->unk08 = *(const unsigned char*)&src.unk08;
+    self->unk0C = src.unk0C;
+    self->unk10 = 1;
+    self->unk14 = (unsigned int)(new PaletteElement[self->unk0C]);
+    FUN_00ec44d0((void*)self->unk14, (void*)src.unk14, src.unk0C * 4);
+    self->unk18 = 0;
     if (DAT_011f4748)
-        DAT_011f4748->v54(this);
-    FUN_00a8afc0(this);
-    return this;
+        DAT_011f4748->v54(self);
+    FUN_00a8afc0(self);
+    return self;
 }
 
 #include <string.h>
@@ -697,25 +606,25 @@ struct ArrayElement
 };
 // Copies the f08 scalar and the f14/f0C integer array from rhs, reallocating the array only when the element count differs.
 // @fnv 0x00a8b190
-MyObj* __fastcall FUN_00a8b190(MyObj* self, void*, const MyObj* rhs)
+NiPalette* __fastcall FUN_00a8b190(NiPalette* self, void*, const NiPalette* rhs)
 {
     if (self != rhs)
     {
-        if (self->f18)
+        if (self->unk18)
         {
-            delete reinterpret_cast<RendererData*>(self->f18);
-            self->f18 = 0;
+            delete reinterpret_cast<NipaletteRendererDataView*>(self->unk18);
+            self->unk18 = 0;
         }
-        self->f08 = rhs->f08;
-        self->f10 = 1;
-        if (self->f0C != rhs->f0C)
+        *(unsigned char*)&self->unk08 = *(const unsigned char*)&rhs->unk08;
+        self->unk10 = 1;
+        if (self->unk0C != rhs->unk0C)
         {
-            g_memoryManager._DeallocateAlias((void*)self->f14);
-            unsigned int count = (unsigned int)rhs->f0C;
-            self->f0C = (void*)count;
-            self->f14 = (int)(new ArrayElement[count]);
+            g_memoryManager._DeallocateAlias((void*)self->unk14);
+            unsigned int count = (unsigned int)rhs->unk0C;
+            self->unk0C = count;
+            self->unk14 = (unsigned int)(new ArrayElement[count]);
         }
-        memcpy((void*)self->f14, (void*)rhs->f14, (unsigned int)rhs->f0C * sizeof(int));
+        memcpy((void*)self->unk14, (void*)rhs->unk14, (unsigned int)rhs->unk0C * sizeof(int));
     }
     return self;
 }
@@ -724,20 +633,20 @@ MyObj* __fastcall FUN_00a8b190(MyObj* self, void*, const MyObj* rhs)
 // @fnv 0x00a8afc0
 void __fastcall FUN_00a8afc0(void* apNode)
 {
-    FUN_00a8b010_Node* node = static_cast<FUN_00a8b010_Node*>(apNode);
+    NiPalette* node = static_cast<NiPalette*>(apNode);
     EnterCriticalSection(&DAT_011f5c80);
     if (DAT_011f5c00 == 0)
         DAT_011f5c00 = node;
     if (DAT_011f5c04 != 0)
     {
-        DAT_011f5c04->_next = node;
-        node->_prev = DAT_011f5c04;
+        DAT_011f5c04->unk20 = (unsigned int)node;
+        node->unk1C = (unsigned int)DAT_011f5c04;
     }
     else
     {
-        node->_prev = 0;
+        node->unk1C = 0;
     }
     DAT_011f5c04 = node;
-    node->_next = 0;
+    node->unk20 = 0;
     LeaveCriticalSection(&DAT_011f5c80);
 }

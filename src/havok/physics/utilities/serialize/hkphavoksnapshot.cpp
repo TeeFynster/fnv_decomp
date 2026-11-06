@@ -2,6 +2,9 @@
 // src/havok/physics/utilities/serialize/hkphavoksnapshot.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/serialize/hkphavoksnapshot.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkBool.h"
+
 struct CallbackInterface
 {
     virtual void reserved0();
@@ -151,18 +154,6 @@ struct Allocator
     virtual void* allocate(unsigned int size);
 };
 
-struct hkBool
-{
-    char m_kPointB;
-    hkBool()
-    {}
-    hkBool(bool b) : m_kPointB(b)
-    {}
-    operator bool() const
-    {
-        return m_kPointB != 0;
-    }
-};
 
 struct PtrList;
 void __cdecl ResizeAudioStream(void* a, PtrList* l, unsigned int n);
@@ -329,16 +320,7 @@ struct FixedAllocator
     virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
 };
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    FixedAllocator* m_pAllocator;
-};
-
-AllocHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 extern int DAT_010c93e4;
 extern int DAT_0102e388;
 
@@ -366,8 +348,8 @@ void FUN_00cc0ae0_cls::FUN_00cc0ae0()
             item->v00(1);
         }
     }
-    AllocHolder* holder = FUN_00c85750();
-    FixedAllocator* alloc = holder->m_pAllocator;
+    hkMemoryRouter* holder = FUN_00c85750();
+    FixedAllocator* alloc = (FixedAllocator*)holder->m_heap;
     unsigned int cap = m_uCapBits;
     m_iArrayLength = 0;
     if ((cap & 0x80000000u) == 0)

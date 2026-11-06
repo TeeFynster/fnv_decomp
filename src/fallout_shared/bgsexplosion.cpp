@@ -1,5 +1,8 @@
 // fallout_shared/bgsexplosion.cpp: BGSExplosion, EffectSetting, ScalarHelper, BGSExplosionCompare and more (22 functions)
 
+#include "../../include/BGSExplosion.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESModel.h"
 #include "bgsexplosion_types_BGSExplosion.h"
 #include "bgsexplosion_decls.h"
 
@@ -56,7 +59,7 @@ void BGSExplosion::InitItem()
         FUN_004fb0b0(dynamic_cast<BGSImpactDataSet*>(TESFormInitFlag::GetFormByID(formID)));
         if (!FUN_00516bf0())
             Warning("MASTERFILE: Could not find impact data set (%08X) for explosion '%s' (%08X).", formID, GetName(),
-                    reinterpret_cast<unsigned int>(reinterpret_cast<MagicCaster*>(this)->GetSelectedMagicItem()));
+                    static_cast<TESForm*>(this)->FUN_0084e3a0());
     }
 
     formID = reinterpret_cast<unsigned int>(m_pExplosionBoundObject);
@@ -67,7 +70,7 @@ void BGSExplosion::InitItem()
         if (!m_pExplosionBoundObject)
             Warning("MASTERFILE: Could not find impact placed object (%08X) for explosion '%s' (%08X).", formID,
                     GetName(),
-                    reinterpret_cast<unsigned int>(reinterpret_cast<MagicCaster*>(this)->GetSelectedMagicItem()));
+                    static_cast<TESForm*>(this)->FUN_0084e3a0());
     }
 
     TESImageSpaceModifiableForm::InitItem(this);
@@ -76,7 +79,7 @@ void BGSExplosion::InitItem()
 }
 
 // @fnv 0x004fb0d0
-bool BGSExplosion::Load(TESFile* file)
+bool BGSExplosion::LoadForm(TESFile* file)
 {
     unsigned char formType = file->GetTESForm();
     if (formType != 0x51)
@@ -153,7 +156,7 @@ bool BGSExplosion::Load(TESFile* file)
 // @fnv 0x004fb090
 void EffectSetting::SetBoltSound(TESSound* sound)
 {
-    bgsexplosion_boltSound = sound;
+    data.m_pBoltSound = sound;
 }
 
 // @fnv 0x004fb0b0
@@ -165,7 +168,7 @@ void BGSExplosion::FUN_004fb0b0(BGSImpactDataSet* apImpactDataSet)
 // @fnv 0x004fb070
 TESSound* EffectSetting::GetCastSound()
 {
-    return bgsexplosion_castSound;
+    return data.m_pCastSound;
 }
 
 // @fnv 0x004fadc0
@@ -469,121 +472,45 @@ class FUN_004fad20_cls : public TESBoundObject,
 FUN_004fad20_cls::~FUN_004fad20_cls()
 {}
 
-class TESFormFB6
+// 0x00443d30 is ModelLoader::ProcessModelRequest in bgsdestructibleobjectform.cpp;
+// ModelLoader has no shared header yet.
+class ModelLoader
 {
   public:
-    virtual ~TESFormFB6();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
+    void ProcessModelRequest(TESModel* model, IO_TASK_PRIORITY priority, QueuedFile* file, int resourceType,
+                             bool flag, int unused, int unused2);
 };
 
-class TESSoundFileFB6
+extern ModelLoader* g_modelLoader;
+extern BGSExplosion* g_defaultExplosion;
+
+int __cdecl FUN_0045c6b0(TESBoundObject* object);
+
+// 0x004fb6a0 uses TESModel at 0x3c and the impact dataset at 0x90, identifying BGSExplosion.
+// Its QueueResourceLoad override is not yet declared by the shared BGSExplosion header.
+class ExplosionResourceQueue : public BGSExplosion
 {
   public:
-    virtual ~TESSoundFileFB6();
-    unsigned int GetSoundFileLength() const;
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
+    virtual void QueueResourceLoad(IO_TASK_PRIORITY priority, QueuedFile* file);
 };
 
-class AttachHandlerFB6
-{
-  public:
-    virtual void unkv00();
-    virtual void unkv04();
-    virtual void unkv08();
-    virtual void unkv0C();
-    virtual void Attach(int iA, int iB);
-};
-
-class AttachOwnerFB6
-{
-  public:
-    virtual ~AttachOwnerFB6();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class AttachTargetFB6 : public AttachOwnerFB6, public AttachHandlerFB6
+// The original dispatches through the inherited preloadable slot at +0x18.
+struct PreloadableFormView : TESForm, BGSPreloadable
 {
 };
 
-class LoaderClientFB6
-{
-  public:
-    virtual void unkv00();
-    virtual void AttachSoundAndTarget(int iA, int iB);
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-};
-
-class ExplosionFB6;
-
-class ModelLoaderFB6
-{
-  public:
-    void ProcessModelRequest(TESSoundFileFB6* pkSound, int iA, int iB, int iPriority, bool bFlag, int iUnk, int iUnk2);
-};
-
-extern ModelLoaderFB6* g_pkModelLoaderFB6;
-extern ExplosionFB6* g_pkDefaultExplosionFB6;
-
-int __cdecl FUN_0045c6b0(TESFormFB6* pkForm);
-
-class ExplosionFB6 : public TESFormFB6, public TESSoundFileFB6, public LoaderClientFB6
-{
-  public:
-    virtual void AttachSoundAndTarget(int iA, int iB);
-
-    AttachTargetFB6* m_pkTarget;
-};
-
-// If this explosion has a sound file, queues it with the model loader, attaches m_pkTarget, and queues the default explosion's sound file if it has one.
+// Queues the explosion model, impact dataset, and default explosion model.
 // @fnv 0x004fb6a0
-void ExplosionFB6::AttachSoundAndTarget(int iA, int iB)
+void ExplosionResourceQueue::QueueResourceLoad(IO_TASK_PRIORITY priority, QueuedFile* file)
 {
-    if (GetSoundFileLength())
-        g_pkModelLoaderFB6->ProcessModelRequest(this, iA, iB, FUN_0045c6b0(this), true, 0, 0);
+    if (TESModel::GetModelLength())
+        g_modelLoader->ProcessModelRequest(this, priority, file, FUN_0045c6b0(this), true, 0, 0);
 
-    if (m_pkTarget)
-        m_pkTarget->Attach(iA, iB);
+    if (Data.m_pImpactDataSet)
+        reinterpret_cast<PreloadableFormView*>(Data.m_pImpactDataSet)->QueueResourceLoad(priority, file);
 
-    if (g_pkDefaultExplosionFB6 && g_pkDefaultExplosionFB6->GetSoundFileLength())
-        g_pkModelLoaderFB6->ProcessModelRequest(g_pkDefaultExplosionFB6, iA, iB, FUN_0045c6b0(this), true, 0, 0);
+    if (g_defaultExplosion && g_defaultExplosion->TESModel::GetModelLength())
+        g_modelLoader->ProcessModelRequest(g_defaultExplosion, priority, file, FUN_0045c6b0(this), true, 0, 0);
 }
 
 class FNVArg

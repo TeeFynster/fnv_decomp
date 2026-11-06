@@ -3,7 +3,31 @@
 // say /MT /O2 /GS /EHsc /Gy /GF (unit src/fallout_shared/globalfunc.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions to their real
 // unit once identified.
 
+#include "../../include/ActorMover.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSSysInfoSystemUtility.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiControllerManager.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiProperty.h"
+#include "../../include/NiTexture.h"
+#include "../../include/NiTimeController.h"
+#include "../../include/SETTING_VALUE.h"
+#include "../../include/SettingT.h"
+#include "../../include/TES.h"
+#include "../../include/TESRecipe.h"
+#include "../../include/TESTopicInfoData.h"
+#include "../../include/bhkWorld.h"
 #include "globalfunc_decls.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/StrArr.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkVector4.h"
 bool ConvertLocalizedString(const char* input, char* output, unsigned int capacity);
 bool UpdateObjectVisibility(NiAVObject* object);
 bool RemoveInvalidChildNodes(NiNode* object);
@@ -15,12 +39,6 @@ int CountCollisionObjects(NiAVObject* object, bool skipPhantoms, bool skipBlendO
 LANGUAGE GetConfiguredLanguage();
 bool IsSettingEnabled();
 
-class NiRTTI
-{
-  public:
-    const char* name;
-    const NiRTTI* parent;
-};
 extern __declspec(thread) int g_tlsCur;
 struct MemoryContextScope
 {
@@ -34,14 +52,6 @@ struct MemoryContextScope
     {
         g_tlsCur = previous;
     }
-};
-struct StrArr
-{
-    void* vtable;
-    char** data;
-    unsigned short capacity, size, count, growBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
 };
 char* __cdecl FUN_00a7d330(const char*);
 char* __cdecl FUN_00a7d550(const char*, float);
@@ -71,9 +81,9 @@ struct MouseSpringDiagnostic
 };
 static void AppendString(StrArr* strings, char*& value)
 {
-    unsigned int index = strings->size;
-    if (index >= strings->capacity)
-        strings->SetSize(index + strings->growBy);
+    unsigned int index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 }
 // @fnv 0x00c873d0
@@ -126,36 +136,13 @@ struct MemContextGuard
     }
 };
 
-struct hkMemoryAllocator
-{
-    virtual void v00();
-    virtual void* allocateChunk(int nbytes);
-};
 
-struct hkMemoryRouterStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* m_pThreadAllocator;
-    hkMemoryAllocator& heap()
-    {
-        return *m_pThreadAllocator;
-    }
-};
-hkMemoryRouterStub* FUN_00c85750();
+// 0x00c85750 returns the shared router, whose heap allocator is at +0x10.
 
-struct hkVector4
+static inline const hkVector4& AsHkVector4(const __m128& components)
 {
-    __m128 m_vComponents;
-    hkVector4()
-    {}
-    hkVector4(float x, float y, float z, float w)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
+    return reinterpret_cast<const hkVector4&>(components);
+}
 
 struct MouseSpringInfo
 {
@@ -185,7 +172,7 @@ struct MouseSpringAction
 
     static void* operator new(unsigned int nbytes)
     {
-        MouseSpringAction* p = (MouseSpringAction*)FUN_00c85750()->heap().allocateChunk(nbytes);
+        MouseSpringAction* p = (MouseSpringAction*)hkMemoryRouter::getInstance().heap().blockAlloc(nbytes);
         p->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return p;
     }
@@ -278,8 +265,8 @@ void MouseSpringOwner::FUN_00c87260(MouseSpringInfo* pkInfo)
 {
     MemContextGuard kGuard(0x10);
     MouseSpringAction* pkAction = new MouseSpringAction(
-        hkVector4(pkInfo->m_f10, pkInfo->m_f14, pkInfo->m_f18, pkInfo->m_f1C),
-        hkVector4(pkInfo->m_f20, pkInfo->m_f24, pkInfo->m_f28, pkInfo->m_f2C), pkInfo->m_fSpringDamping,
+        AsHkVector4(_mm_setr_ps(pkInfo->m_f10, pkInfo->m_f14, pkInfo->m_f18, pkInfo->m_f1C)),
+        AsHkVector4(_mm_setr_ps(pkInfo->m_f20, pkInfo->m_f24, pkInfo->m_f28, pkInfo->m_f2C)), pkInfo->m_fSpringDamping,
         pkInfo->m_fSpringElasticity, pkInfo->m_fObjectDamping, pkInfo->m_pkBody, 0);
     pkAction->FUN_00cbb1b0(pkInfo->m_fMaxRelativeForce);
     RegisterAction(pkAction);

@@ -1,3 +1,4 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/common/base/system/error/hkdefaulterror.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/system/error/hkdefaulterror.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -139,32 +140,27 @@ struct D2B600Object
     int unk00;
 };
 
-struct D2B600ObjectArray
+static __forceinline void ConstructArray46(D2B600Object** p, int n, D2B600Object* const& e)
 {
-    D2B600Object** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    static void construct(D2B600Object** p, int n, D2B600Object* const& e)
-    {
         for (int i = 0; i < n; i++)
             p[i] = e;
     }
+typedef hkArray<D2B600Object*> D2B600ObjectArray;
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+return reinterpret_cast<hkMemoryAllocator&>(D2B600GetMemoryRouter().heap());
+}
+template<> __forceinline void hkArrayBase<D2B600Object*>::_pushBack(hkMemoryAllocator& sharedAlloc, D2B600Object* const& e)
+{
+D2B600Allocator& alloc = reinterpret_cast<D2B600Allocator&>(sharedAlloc);
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    void AddBack(D2B600Object* const& e)
-    {
-        D2B600Allocator& alloc = D2B600GetMemoryRouter().heap();
         if (m_iElementCount == getCapacity())
             ResizeAudioStream(&alloc, this, sizeof(D2B600Object*));
-        construct(m_data + m_iElementCount, 1, e);
+        ConstructArray46(m_data + m_iElementCount, 1, e);
         m_iElementCount++;
-    }
-};
+    
+}
+
 
 struct D2B600Container
 {
@@ -182,7 +178,7 @@ struct D2B600Container
 // @fnv 0x00d2b600
 void D2B600Container::AppendObject(D2B600Object* object, int iUnused)
 {
-    m_kTrackedObjects.AddBack(object);
+    m_kTrackedObjects.pushBack(object);
 }
 
 extern char DAT_010ce5d4[];

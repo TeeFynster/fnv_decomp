@@ -1,11 +1,55 @@
-// fallout_shared/pathfinding/pathbuilder.cpp: PathBuilder, PathBuilderCore, CheckLineOfSightFilterWater, NavMeshSearchLOSArray and more (60 functions)
+#include "../../../include/NavMeshInfo.h"
+// fallout_shared/pathfinding/pathbuilder.cpp: PathBuilder, PathBuilderCore, CheckLineOfSightFilterWater and shared pathing arrays (60 functions)
 
-#include "pathbuilder_types_FastNavMeshEdgeHandle.h"
-#include "pathbuilder_types_NavMesh.h"
+#include <stddef.h>
+#include "../../../include/SettingT.h"
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+#include "../../../include/BSStringT.h"
+#include "../../../include/BSSimpleList.h"
+#include "../../../include/BSSimpleArray.h"
+#include "../../../include/NiPointer.h"
+#include "../../../include/FindTriangleForLocationFilter.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/NavMesh.h"
+#include "../../../include/NavMeshEdgeData.h"
+#include "../../../include/NavMeshTriangleReference.h"
+#include "../../../include/NavMeshTriangleEdgeReference.h"
+#include "../../../include/NavMeshGrid.h"
+#include "../../../include/NavMeshPtr.h"
+#include "../../../include/PathingRequest.h"
+#include "../../../include/PathingSolution.h"
+#include "../../../include/TESRecipe.h"
+#include "../../../include/TESObjectCELL.h"
+class NavMeshInfo_const;
+#include "../../../include/NiTMap.h"
+
+#include "PointStorage.h"
+#include "../../../include/NiColor.h"
+
+#include "../../../include/NiPoint3.h"
+#include "../../../include/PathingLocation.h"
+
+#include "../../../include/NavMeshTriangle.h"
+#include "../../../include/PathingAvoidNode.h"
+#include "../../../include/NavMeshStaticAvoidNode.h"
+#include "../../../include/PathingGraphNode.h"
 #include "pathbuilder_types_CheckLineOfSightFilterWater.h"
 #include "pathbuilder_types_PathBuilder.h"
-#include "pathbuilder_types_PathingInfoItem.h"
+#include "../../../include/PathingInfoEntry.h"
+#include "../../../include/PathingInfoParams.h"
 #include "pathbuilder_decls.h"
+
+#include "../../../include/PathingSearchRayCast.h"
+
+__if_not_exists(BaseFormComponent::Init)
+{
+#include "../../../include/BaseFormComponent.h"
+}
+#include "../../../include/TESFullName.h"
+#include "../../../include/TESTexture.h"
+#include "../../../include/BSWin32TaskletManager.h"
 
 // @fnv 0x006cd5c0
 bool CheckLineOfSightFilterWater::IsLineOfSightClear(unsigned int firstMesh, unsigned int firstTriangle,
@@ -13,7 +57,7 @@ bool CheckLineOfSightFilterWater::IsLineOfSightClear(unsigned int firstMesh, uns
                                                      unsigned int secondTriangle, unsigned int secondEdge)
 {
     NavMeshTriangle* triangle =
-        ((PathingAvoidanceNode*)secondMesh)->GetAvoidanceAtPoint((unsigned short)secondTriangle);
+        ((PathingAvoidNode*)secondMesh)->GetAvoidanceAtPoint((unsigned short)secondTriangle);
     if (triangle->FUN_006a5ec0())
         return false;
     if (triangle->FUN_00693b90() && m_bCheckWater)
@@ -53,18 +97,18 @@ bool PathBuilder::BuildPath()
         const NavMeshInfo* requestInfo;
         conditionInfo = 0;
         requestInfo = 0;
-        if (((PathingLocationProxy&)pRequest->GetOffsetC()).FindContainingTriangle(&m_kTriangleLocationWaterFilter))
-            conditionInfo = ((PathingLocationProxy&)pRequest->GetOffsetC()).GetAssociatedNavMesh();
-        if (((PathingLocationProxy*)((TESRecipe*)pRequest)->GetConditions())
+        if (((PathingLocation&)pRequest->GetOffsetC()).FindContainingTriangle(&m_kTriangleLocationWaterFilter))
+            conditionInfo = (const NavMeshInfo*)((PathingLocation&)pRequest->GetOffsetC()).GetAssociatedNavMesh();
+        if (((PathingLocation*)((TESRecipe*)pRequest)->GetConditions())
                 ->FindContainingTriangle(&m_kTriangleLocationWaterFilter))
-            requestInfo = ((PathingLocationProxy*)((TESRecipe*)pRequest)->GetConditions())->GetAssociatedNavMesh();
+            requestInfo = (const NavMeshInfo*)((PathingLocation*)((TESRecipe*)pRequest)->GetConditions())->GetAssociatedNavMesh();
         if (!IsNavMeshInfoCompatible(conditionInfo, requestInfo) && !m_pOutputSolution->FUN_005a4320())
             return false;
     }
     else
     {
-        ((PathingLocationProxy&)pRequest->GetOffsetC()).FindContainingTriangle(&m_kTriangleLocationWaterFilter);
-        ((PathingLocationProxy*)((TESRecipe*)pRequest)->GetConditions())
+        ((PathingLocation&)pRequest->GetOffsetC()).FindContainingTriangle(&m_kTriangleLocationWaterFilter);
+        ((PathingLocation*)((TESRecipe*)pRequest)->GetConditions())
             ->FindContainingTriangle(&m_kTriangleLocationWaterFilter);
     }
     if (!BuildPathForActor(buildPathLocals.actor, 0))
@@ -76,7 +120,7 @@ bool PathBuilder::BuildPath()
 bool PathBuilder::BuildActorPathSegments(Actor* actor)
 {
     unsigned int unused;
-    BSSimpleArray<NavMeshEdgeData, 1024> segments(0, 0, m_pAllocator);
+    BSScrapArray<NavMeshEdgeData, 1024> segments(0, 0, reinterpret_cast<unsigned int>(m_pAllocator));
     if (!BuildPathSpans(segments))
         return false;
     bool allowIncomplete = pRequest->GetByteAtOffsetA1();
@@ -137,18 +181,13 @@ struct Item48
     Item48(const PathingInfoEntry&);
 };
 
-struct FUN_006c90d0_fix : public PathBuilder
-{
-    void* FUN_006c90d0(const PathingInfoEntry& aItem);
-};
-
 // @fnv 0x006c90d0
-void* FUN_006c90d0_fix::FUN_006c90d0(const PathingInfoEntry& aItem)
+PathingInfoEntry* PathingSolution::GetPathingInfoEntry(PathingInfoEntry& aItem)
 {
     void* v1 = ((PathBuilder*)((char*)this + 8))->AdvanceCounter();
     void* v2 = ((PathBuilder*)((char*)this + 8))->FUN_006e8f40(v1);
     new (v2) Item48(aItem);
-    return v1;
+    return (PathingInfoEntry*)v1;
 }
 
 struct Dummy_006cf120
@@ -174,15 +213,11 @@ void __fastcall FUN_006c93a0(Dummy_006c93a0* pThis)
 }
 
 struct PathingActorData;
-struct FUN_006c9900_shell : public PathingRequest
-{
-    PathingActorData* FUN_006c9900();
-};
 
 // @fnv 0x006c9900
-PathingActorData* FUN_006c9900_shell::FUN_006c9900()
+PathingActorData* PathingRequest::FUN_006c9900()
 {
-    return (PathingActorData*)((char*)this + 0x5c);
+    return &PathingActorState;
 }
 
 // @fnv 0x006ca4c0
@@ -228,60 +263,30 @@ struct blob24
 {
     char b[24];
 };
-struct PathingGraphNode
-{
-    PathingGraphNode* Copy();
-    void* GetLocation();
-    void* GetTangent();
-    struct blob24 GetSplineKey();
-    void CreateDrawNode(void*);
-    TESObjectCELL* GetContainingCell();
-    void SetTangent(void*);
-    bool IsTeleportDoorNode();
-    void SetTeleportDoor(TESObjectREFR*);
-    void SetTransitionFlag(bool);
-    bool IsTransitionNode();
-    bool IsValidForActor(Actor*);
-    TESObjectREFR* GetTeleportDoor();
-    void WriteDebugString(IDebugText*);
-    void SaveGame(BGSSaveFormBuffer*);
-    void LoadGame(BGSLoadFormBuffer*);
-    void* __vecDelDtor(unsigned int);
-    unsigned int iFlags;
-    PathingLocation Location;
-    NiPoint3 Tangent;
-    TESObjectREFR* m_pDoorRef;
-};
-typedef char _sizecheck_PathingNode[sizeof(PathingGraphNode) == 60 ? 1 : -1];
-struct FUN_006e2330_shell : public PathingGraphNode
-{
-    bool FUN_006e2330();
-};
-
 // @fnv 0x006e2330
-bool FUN_006e2330_shell::FUN_006e2330()
+bool PathingGraphNode::FUN_006e2330()
 {
     return (iFlags & 3) == 3;
 }
 
-namespace fnv_006c99c0 {
 struct BGSEncounterZone;
-struct BGSLoadFormBuffer;
+class BGSLoadFormBuffer;
 struct BGSMusicType;
-struct BGSSaveFormBuffer;
-struct BGSTerrainManager;
-struct BSPortalGraph;
-struct FormRecordHeader;
-struct IDebugText;
-struct ImpactSwap;
-struct TESClimate;
-struct TESFile;
-struct GlobalVariableForm;
+class BGSSaveFormBuffer;
+class BGSTerrainManager;
+class BSPortalGraph;
+class FormRecordHeader;
+class IDebugText;
+class TESClimate;
+class TESFile;
 struct TESImageSpace;
-struct TESObject;
-struct TESTerrainLODManager;
+class TESObject;
 struct TESWaterForm;
-struct TESWorldSpace;
+class TESWorldSpace;
+namespace fnv_006c99c0 {
+struct ImpactSwap;
+struct GlobalVariableForm;
+struct TESTerrainLODManager;
 struct PacketNodeRecord;
 struct PointerPairData;
 struct blob8
@@ -292,58 +297,8 @@ struct blob12
 {
     char b[12];
 };
-struct TESFullName : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetFullNameLength(TESForm*);
-    unsigned int GetFullNameLength();
-    static char* GetFullName(TESForm*);
-    char* GetFullName();
-    void SetFullName(char*);
-    static void LoadFullNameChunk(TESFullName*, TESFile*);
-    void* GetFullNameString();
-    void* __vecDelDtor(unsigned int);
-    char m_kName[8];
-};
 typedef char _sizecheck_TESFullName[sizeof(TESFullName) == 12 ? 1 : -1];
-struct TESTexture : public BaseFormComponent
-{
-    virtual unsigned int GetTexturePathLength();
-    virtual char* NormalizeTextureFilePath(void*);
-    virtual char* GetRegularTextureFilePath(void*);
-    virtual char* GetTextureResourcePath();
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save(int);
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetTextureNameLength(TESForm*);
-    unsigned int GetTextureNameLength();
-    static char* GetTextureResourceName(TESForm*, TESObjectREFR*);
-    char* GetTextureResourceName();
-    void AssignTextureName(char*);
-    static void NormalizeTextureFilePath(char*, char*);
-    static char* NormalizeTextureFilePath(void*, char*);
-    static char* NormalFileToRegularFile(void*, char*);
-    static void GetRegularTextureFilePath(char*, char*);
-    static char* GetRegularTextureFilePath(void*, char*);
-    static void ConvertTexturePath(char*, char*);
-    static bool IsTextureChunk(int);
-    static void ReadTextureData(TESTexture*, TESFile*);
-    static char* GetMessageIconName(TESForm*, TESObjectREFR*);
-    void* __vecDelDtor(unsigned int);
-    char FullNameComponent[8];
-};
 typedef char _sizecheck_TESTexture[sizeof(TESTexture) == 12 ? 1 : -1];
-struct FUN_006c99c0_shell : public PathingSolution
-{
-    unsigned int AddPathingItem(void*, TESObjectREFR*);
-};
-
 struct Item48
 {
     char data[0x30];
@@ -352,27 +307,22 @@ struct Item48
     static void operator delete(void*, void*);
 };
 
+}  // namespace fnv_006c99c0
+
 // Gets an index and memory from the PathBuilder at offset 8, constructs an Item48 in that memory from a and b, and returns the index.
 // @fnv 0x006c99c0
-unsigned int FUN_006c99c0_shell::AddPathingItem(void* a, TESObjectREFR* pRefr)
+unsigned int PathingSolution::AddPathingItem(void* a, TESObjectREFR* pRefr)
 {
     void* idx = ((PathBuilder*)((char*)this + 8))->AdvanceCounter();
     void* mem = ((PathBuilder*)((char*)this + 8))->FUN_006e8f40(idx);
-    new (mem) Item48(a, pRefr);
+    new (mem) fnv_006c99c0::Item48(a, pRefr);
     return (unsigned int)idx;
 }
-}  // namespace fnv_006c99c0
-
-struct PathingLocationX : PathingLocation
-{
-    PathingLocationX();
-    ~PathingLocationX();
-};
 
 struct FUN_006f4d00
 {
     unsigned int flags;
-    PathingLocationX loc;
+    PathingLocation loc;
     int pad[1];
     FUN_006f4d00(const PathingLocation& l);
 };
@@ -383,23 +333,14 @@ FUN_006f4d00::FUN_006f4d00(const PathingLocation& l)
     loc.PathingLocation::operator=(l);
     pad[0] = 0;
     flags = 2;
-    if (((PathingLocationProxy*)&loc)->FindContainingTriangle(0))
+    if (((PathingLocation*)&loc)->FindContainingTriangle(0))
         flags |= 1;
 }
 
-struct NavMeshSearchLOSArray
-{
-    void Clear(bool);
-    void FUN_006abfc0();
-};
-
-extern int DAT_0106b91c;
-
 // @fnv 0x006abfc0
-void NavMeshSearchLOSArray::FUN_006abfc0()
+template <> BSSimpleArray<PathingLocation, 1024>::~BSSimpleArray()
 {
-    *reinterpret_cast<int**>(this) = &DAT_0106b91c;
-    this->Clear(true);
+    Clear(true);
 }
 
 namespace fnv_006c93d0 {
@@ -419,15 +360,10 @@ int __fastcall FUN_006c93d0(Dummy_006c93a0* obj)
 }
 }  // namespace fnv_006c93d0
 
-struct FUN_006c9fa0_shell
-{
-    void __thiscall SetByteAtOffset40(unsigned char a);
-};
-
 // @fnv 0x006c9fa0
-void __thiscall FUN_006c9fa0_shell::SetByteAtOffset40(unsigned char aucValue)
+void __thiscall PathingSolution::SetByteAtOffset40(int aucValue)
 {
-    *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x40) = aucValue;
+    *reinterpret_cast<unsigned char*>(&m_bHasValidPath) = (unsigned char)aucValue;
 }
 
 struct FUN_006cc5a0_shell
@@ -467,10 +403,10 @@ char* __thiscall FUN_006cee10_shell::FUN_006cee10(int aiIndex)
     return *(char**)(this + 4) + aiIndex * 0x18;
 }
 
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
+class IDebugText;
 namespace fnv_006cc5e0 {
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
-struct IDebugText;
 struct PacketNodeRecord;
 struct blob8
 {
@@ -480,177 +416,32 @@ struct blob12
 {
     char b[12];
 };
-struct NavMeshTriangleReference
-{
-    NavMeshTriangle* GetTriangle();
-    struct blob12 GetNavMeshData();
-    struct blob8 GetCenter2D();
-    void SetGridPosition(void*);
-    NavMesh* m_pLocationNavMesh;
-    unsigned short m_usTriangleIdentifier;
-    char _pad_6[2];
-    float GetCenterX;
-    float m_fCenterY;
-    float m_fCenterZ;
-};
+
 typedef char _sizecheck_NavMeshSearchNode[sizeof(NavMeshTriangleReference) == 20 ? 1 : -1];
 struct FUN_006cc5e0_shell : public PathBuilder
 {
     int FUN_006cc5e0(PathingLocation*, PathingLocation*, unsigned int, unsigned int);
 };
 
-struct NavMeshTriangleEdgeReference;
-
-template <> class BSSimpleArray<NavMeshTriangleEdgeReference, 1024>
-{
-  public:
-    void* m_vtbl;
-    void* m_pBuffer;
-    unsigned int m_uiSize;
-    unsigned int m_uiAlloc;
-    BSSimpleArray(unsigned int, unsigned int);
-    ~BSSimpleArray();
-    bool FUN_0076b610() const;
-};
-
-template <> class BSSimpleArray<NavMeshTriangleReference, 1024>
-{
-  public:
-    void* m_vtbl;
-    void* m_pBuffer;
-    unsigned int m_uiSize;
-    unsigned int m_uiAlloc;
-    BSSimpleArray(unsigned int, unsigned int);
-    ~BSSimpleArray();
-    bool FUN_0076b610() const;
-    unsigned int GetSize();
-    const NavMeshTriangleReference& FUN_006b3160(unsigned int) const;
-    NavMeshTriangleReference& GetLastElement();
-};
-
-struct NavMeshArr
-{
-    void* m_vtbl;
-    void* m_pBuffer;
-    unsigned int m_uiSize;
-    unsigned int m_uiAlloc;
-    NavMeshArr();
-    ~NavMeshArr();
-    unsigned int GetSize();
-    NavMeshPtr& GetAt(unsigned int);
-};
-
-struct NavMeshPtrS
-{
-    NavMesh* m_pObject;
-    NavMeshPtrS();
-    ~NavMeshPtrS();
-    operator NavMesh*() const;
-};
-
-struct NP3S : public NiPoint3
-{
-    NP3S operator-(const NP3S&) const;
-    float GetSquaredXYLength() const;
-};
-
-struct PathingLocationS
-{
-    void* m_ppVirtualMethodTable;
-    NiPoint3 Location;
-    const NavMeshInfo* m_pLocationNavMesh;
-    const void* pNavMeshInfoArray;
-    TESObjectCELL* pCell;
-    TESWorldSpace* m_pContainingWorldspace;
-    unsigned int m_uiPathingFlags;
-    unsigned short m_usTriangleID;
-    unsigned char uiFlags;
-    unsigned char ucPad27;
-    PathingLocationS(const PathingLocation&);
-    PathingLocationS(const NiPoint3&, const NavMeshInfo*);
-    PathingLocationS(const NiPoint3&, const NavMeshInfo*, unsigned short);
-    ~PathingLocationS();
-    PathingLocationS& operator=(const PathingLocationS&);
-    bool ResolveNavMesh(NavMeshPtrS&);
-    NP3S GetLocation() const;
-};
-
-struct PathingGraphNode
-{
-    PathingLocationS& FUN_00717e50();
-    bool IsTransitionNode();
-};
-
 struct PacketNodeRecord : public PathingGraphNode
 {
 };
 
-struct ProcessLists
+// ProcessListsView: unit-local view (declares only what 0x006cc5e0 calls), not the shared ProcessLists; renamed so no local type keeps the shared name
+struct ProcessListsView
 {
     unsigned char* GetLifeStateControlFlag();
 };
-extern ProcessLists g_011d73d8;
+extern ProcessListsView g_011d73d8;
 extern const float g_011e024c_arg1;
 extern const NiPoint3 _NiPoint3_ZERO;
 
-struct PathingRequestS
-{
-    const void* GetString() const;
-    bool FUN_00505c00();
-    bool FUN_006a7980() const;
-    bool GetByteAtOffset9B();
-    float GetCenterRadius() const;
-    int FUN_008cdd90();
-    bool FUN_006cd1d0();
-};
-
-struct PathingSolutionS
-{
-    PacketNodeRecord* GetVirtualNode(unsigned int);
-    unsigned int FUN_00441110();
-    unsigned int GetObjectFlags();
-    void FUN_006c9350();
-    PathingGraphNode* FUN_006b05a0();
-    void ReserveIndex(const PathingLocationS&, const NiPoint3&);
-};
-
-struct PathBuilderS
-{
-    bool FUN_006cd1f0(PathingLocation*, PathingLocation*);
-    bool FindPath(PathingLocation*, PathingLocation*, BSSimpleArray<NavMeshTriangleEdgeReference, 1024>&,
-                  BSSimpleArray<NavMeshTriangleReference, 1024>&, BSSimpleArray<NavMeshTriangleEdgeReference, 1024>&,
-                  unsigned int, unsigned int);
-    bool FUN_006cd8a0(PathingLocationS&, PathingLocationS&, BSSimpleArray<NavMeshTriangleEdgeReference, 1024>&,
-                      BSSimpleArray<NavMeshTriangleReference, 1024>&,
-                      BSSimpleArray<NavMeshTriangleEdgeReference, 1024>&);
-};
-
-struct FUN_0068efb0_shell
-{
-    const NavMeshInfo* FUN_0068efb0();
-};
-struct NavMeshSearchNodeS
-{
-    NiPoint3 FUN_006a6eb0() const;
-};
-
-struct NavMeshInfoArrayS
-{
-    void Clear(bool);
-    unsigned int Add(const NavMeshInfo* const&);
-};
+// Local request declarations retained: shared header lacks max-pass and incomplete-path accessors.
 
 bool __cdecl FUN_0042ff10(const NavMeshPtr&, const NavMeshPtr&);
 
-struct NavMeshArrayS
-{
-    void FUN_0042f9c0(unsigned char);
-    unsigned int AppendValue(const NavMeshPtr&);
-    unsigned int Find(const NavMeshPtr&, unsigned int, bool(__cdecl*)(const NavMeshPtr&, const NavMeshPtr&));
-};
-
 void __cdecl ClampInt(int*, int, int);
-void __cdecl FUN_006d91d0(NavMeshArr*);
+void __cdecl FUN_006d91d0(BSSimpleArray<NavMeshPtr, 1024>*);
 
 namespace std {
 float __cdecl abs(float);
@@ -660,25 +451,25 @@ float __cdecl abs(float);
 int FUN_006cc5e0_shell::FUN_006cc5e0(PathingLocation* aStartLocation, PathingLocation* aGoalLocation,
                                      unsigned int aiFirstVirtualNodeIndex, unsigned int aiLastVirtualNodeIndex)
 {
-    if (*g_011d73d8.GetLifeStateControlFlag() && !((PathingRequestS*)pRequest)->GetString() &&
-        !((PathingRequestS*)pRequest)->FUN_00505c00() && !((PathingRequestS*)pRequest)->FUN_006a7980() &&
-        ((PathBuilderS*)this)->FUN_006cd1f0(aStartLocation, aGoalLocation))
+    if (*g_011d73d8.GetLifeStateControlFlag() && !((PathingRequest*)pRequest)->GetString() &&
+        !((PathingRequest*)pRequest)->FUN_00505c00() && !((PathingRequest*)pRequest)->FUN_006a7980() &&
+        ((::PathBuilder*)this)->FUN_006cd1f0(aStartLocation, aGoalLocation))
         return 0;
 
     BSSimpleArray<NavMeshTriangleEdgeReference, 1024> BadNodes(0x20, 0);
     bool bAddNodesFromNavMeshIncomplete = false;
-    int imaxPassCount = ((PathingRequestS*)pRequest)->FUN_008cdd90();
+    int imaxPassCount = ((PathingRequest*)pRequest)->FUN_008cdd90();
     ClampInt(&imaxPassCount, 1, 10);
-    ((NavMeshInfoArrayS*)((char*)this + 0x14))->Clear(false);
-    ((NavMeshArrayS*)((char*)this + 0x24))->FUN_0042f9c0(0);
+    ((BSSimpleArray<const NavMeshInfo*, 1024>*)((char*)this + 0x14))->Clear(false);
+    ((BSSimpleArray<NavMeshPtr, 1024>*)((char*)this + 0x24))->Clear(false);
 
     for (unsigned int i = 0; i < m_pOutputSolution->FUN_005a4320(); ++i)
     {
-        NavMeshPtrS spmesh;
-        if (((PathingSolutionS*)m_pOutputSolution)->GetVirtualNode(i)->FUN_00717e50().ResolveNavMesh(spmesh))
+        NavMeshPtr spmesh;
+        if (((PacketNodeRecord*)m_pOutputSolution->GetVirtualNode(i))->FUN_00717e50().ResolveNavMesh(spmesh))
         {
-            ((NavMeshArrayS*)((char*)this + 0x24))->AppendValue((NavMeshPtr&)spmesh);
-            ((NavMeshInfoArrayS*)((char*)this + 0x14))->Add(((FUN_0068efb0_shell*)(NavMesh*)spmesh)->FUN_0068efb0());
+            ((BSSimpleArray<NavMeshPtr, 1024>*)((char*)this + 0x24))->AppendValue((NavMeshPtr&)spmesh);
+            ((BSSimpleArray<const NavMeshInfo*, 1024>*)((char*)this + 0x14))->Add(((NavMesh*)(NavMesh*)spmesh)->FUN_0068efb0());
         }
     }
 
@@ -686,25 +477,25 @@ int FUN_006cc5e0_shell::FUN_006cc5e0(PathingLocation* aStartLocation, PathingLoc
     {
         if (pass == 1)
         {
-            NavMeshArr loadedNavmeshes;
+            BSSimpleArray<NavMeshPtr, 1024> loadedNavmeshes;
             FUN_006d91d0(&loadedNavmeshes);
             for (unsigned int i = 0; i < loadedNavmeshes.GetSize(); ++i)
             {
-                if (((NavMeshArrayS*)((char*)this + 0x24))->Find(loadedNavmeshes.GetAt(i), 0, FUN_0042ff10) == -1)
+                if (((BSSimpleArray<NavMeshPtr, 1024>*)((char*)this + 0x24))->Find(loadedNavmeshes.GetAt(i), 0, FUN_0042ff10) == -1)
                 {
-                    ((NavMeshArrayS*)((char*)this + 0x24))->AppendValue(loadedNavmeshes.GetAt(i));
-                    ((NavMeshInfoArrayS*)((char*)this + 0x14))
-                        ->Add(((FUN_0068efb0_shell*)(NavMesh*)(NavMeshPtrS&)loadedNavmeshes.GetAt(i))->FUN_0068efb0());
+                    ((BSSimpleArray<NavMeshPtr, 1024>*)((char*)this + 0x24))->AppendValue(loadedNavmeshes.GetAt(i));
+                    ((BSSimpleArray<const NavMeshInfo*, 1024>*)((char*)this + 0x14))
+                        ->Add(((NavMesh*)(NavMesh*)(NavMeshPtr&)loadedNavmeshes.GetAt(i))->FUN_0068efb0());
                 }
             }
         }
 
         BSSimpleArray<NavMeshTriangleReference, 1024> nodes(0x20, 0);
         BSSimpleArray<NavMeshTriangleEdgeReference, 1024> links(0x20, 0);
-        PathingLocationS smoothingStartLocation(*aStartLocation);
-        PathingLocationS smoothingGoalLocation(*aGoalLocation);
+        PathingLocation smoothingStartLocation(*aStartLocation);
+        PathingLocation smoothingGoalLocation(*aGoalLocation);
 
-        if (!((PathBuilderS*)this)
+        if (!((::PathBuilder*)this)
                  ->FindPath(aStartLocation, aGoalLocation, BadNodes, nodes, links, aiFirstVirtualNodeIndex,
                             aiLastVirtualNodeIndex))
         {
@@ -713,23 +504,23 @@ int FUN_006cc5e0_shell::FUN_006cc5e0(PathingLocation* aStartLocation, PathingLoc
             if (nodes.FUN_0076b610())
                 continue;
 
-            NavMeshTriangleReference* lastNode = &nodes.GetLastElement();
-            PathingLocationS lastLoc(((NavMeshSearchNodeS*)lastNode)->FUN_006a6eb0(),
-                                     ((FUN_0068efb0_shell*)lastNode->m_pLocationNavMesh)->FUN_0068efb0(),
+            const NavMeshTriangleReference* lastNode = &nodes.GetLastElement();
+            PathingLocation lastLoc(((NavMeshTriangleReference*)lastNode)->FUN_006a6eb0(),
+                                     ((NavMesh*)lastNode->m_pLocationNavMesh)->FUN_0068efb0(),
                                      lastNode->m_usTriangleIdentifier);
-            if (((PathingSolutionS*)m_pOutputSolution)->FUN_00441110() == aiLastVirtualNodeIndex)
+            if (m_pOutputSolution->FUN_00441110() == aiLastVirtualNodeIndex)
             {
                 PacketNodeRecord* plastVirtualNode =
-                    ((PathingSolutionS*)m_pOutputSolution)->GetVirtualNode(aiLastVirtualNodeIndex);
-                NP3S delta = lastLoc.GetLocation() - plastVirtualNode->FUN_00717e50().GetLocation();
+                    (PacketNodeRecord*)m_pOutputSolution->GetVirtualNode(aiLastVirtualNodeIndex);
+                NiPoint3 delta = lastLoc.GetLocation() - plastVirtualNode->FUN_00717e50().GetLocation();
                 float ftargetRadius;
                 if (plastVirtualNode->IsTransitionNode())
                     ftargetRadius = g_011e024c_arg1;
                 else
-                    ftargetRadius = ((PathingRequestS*)pRequest)->GetCenterRadius();
+                    ftargetRadius = ((PathingRequest*)pRequest)->GetCenterRadius();
                 if (delta.GetSquaredXYLength() < ftargetRadius * ftargetRadius && std::abs(delta.z) < 180.0)
                 {
-                    if (!((PathingRequestS*)pRequest)->GetByteAtOffset9B())
+                    if (!((PathingRequest*)pRequest)->GetByteAtOffset9B())
                         return 2;
                     else if (!plastVirtualNode->IsTransitionNode())
                     {
@@ -750,41 +541,41 @@ int FUN_006cc5e0_shell::FUN_006cc5e0(PathingLocation* aStartLocation, PathingLoc
                 bAddNodesFromNavMeshIncomplete = true;
                 m_pOutputSolution->SetByteAtOffset40(1);
             }
-            if (!((PathingRequestS*)pRequest)->GetByteAtOffset9B())
+            if (!((PathingRequest*)pRequest)->GetByteAtOffset9B())
                 return 2;
             else
                 smoothingGoalLocation = lastLoc;
         }
 
-        unsigned int icurrentNodeCount = ((PathingSolutionS*)m_pOutputSolution)->GetObjectFlags();
-        if (!((PathBuilderS*)this)->FUN_006cd8a0(smoothingStartLocation, smoothingGoalLocation, BadNodes, nodes, links))
+        unsigned int icurrentNodeCount = m_pOutputSolution->GetObjectFlags();
+        if (!((::PathBuilder*)this)->FUN_006cd8a0(smoothingStartLocation, smoothingGoalLocation, BadNodes, nodes, links))
         {
-            if (pass == imaxPassCount - 1 && ((PathingRequestS*)pRequest)->FUN_006cd1d0())
+            if (pass == imaxPassCount - 1 && ((PathingRequest*)pRequest)->FUN_006cd1d0())
             {
                 bAddNodesFromNavMeshIncomplete = true;
                 m_pOutputSolution->SetByteAtOffset40(1);
                 for (unsigned int i = 0; i < nodes.GetSize(); ++i)
                 {
-                    PathingLocationS loc(
-                        ((const NavMeshSearchNodeS*)&nodes.FUN_006b3160(i))->FUN_006a6eb0(),
-                        ((FUN_0068efb0_shell*)nodes.FUN_006b3160(i).m_pLocationNavMesh)->FUN_0068efb0());
-                    ((PathingSolutionS*)m_pOutputSolution)->ReserveIndex(loc, _NiPoint3_ZERO);
+                    PathingLocation loc(
+                        ((const NavMeshTriangleReference*)&nodes.FUN_006b3160(i))->FUN_006a6eb0(),
+                        ((NavMesh*)nodes.FUN_006b3160(i).m_pLocationNavMesh)->FUN_0068efb0());
+                    m_pOutputSolution->ReserveIndex(loc, _NiPoint3_ZERO);
                 }
             }
             else
             {
-                PathingGraphNode* plastNode = ((PathingSolutionS*)m_pOutputSolution)->FUN_006b05a0();
-                if (plastNode && ((PathingSolutionS*)m_pOutputSolution)->FUN_00441110() == aiLastVirtualNodeIndex)
+                PathingGraphNode* plastNode = (PathingGraphNode*)m_pOutputSolution->FUN_006b05a0();
+                if (plastNode && m_pOutputSolution->FUN_00441110() == aiLastVirtualNodeIndex)
                 {
                     PacketNodeRecord* plastVirtualNode =
-                        ((PathingSolutionS*)m_pOutputSolution)->GetVirtualNode(aiLastVirtualNodeIndex);
-                    NP3S delta =
+                        (PacketNodeRecord*)m_pOutputSolution->GetVirtualNode(aiLastVirtualNodeIndex);
+                    NiPoint3 delta =
                         plastNode->FUN_00717e50().GetLocation() - plastVirtualNode->FUN_00717e50().GetLocation();
                     float ftargetRadius;
                     if (plastVirtualNode->IsTransitionNode())
                         ftargetRadius = g_011e024c_arg1;
                     else
-                        ftargetRadius = ((PathingRequestS*)pRequest)->GetCenterRadius();
+                        ftargetRadius = ((PathingRequest*)pRequest)->GetCenterRadius();
                     if (delta.GetSquaredXYLength() < ftargetRadius * ftargetRadius && std::abs(delta.z) < 180.0)
                         break;
                 }
@@ -794,12 +585,12 @@ int FUN_006cc5e0_shell::FUN_006cc5e0(PathingLocation* aStartLocation, PathingLoc
                     {
                         bAddNodesFromNavMeshIncomplete = true;
                         m_pOutputSolution->SetByteAtOffset40(1);
-                        if (((PathingRequestS*)pRequest)->GetByteAtOffset9B())
+                        if (((PathingRequest*)pRequest)->GetByteAtOffset9B())
                             return 1;
                         else
                         {
-                            while (((PathingSolutionS*)m_pOutputSolution)->GetObjectFlags() != icurrentNodeCount)
-                                ((PathingSolutionS*)m_pOutputSolution)->FUN_006c9350();
+                            while (m_pOutputSolution->GetObjectFlags() != icurrentNodeCount)
+                                m_pOutputSolution->FUN_006c9350();
                             return 2;
                         }
                     }
@@ -810,8 +601,8 @@ int FUN_006cc5e0_shell::FUN_006cc5e0(PathingLocation* aStartLocation, PathingLoc
                 {
                     if (pass < imaxPassCount - 1)
                     {
-                        while (((PathingSolutionS*)m_pOutputSolution)->GetObjectFlags() != icurrentNodeCount)
-                            ((PathingSolutionS*)m_pOutputSolution)->FUN_006c9350();
+                        while (m_pOutputSolution->GetObjectFlags() != icurrentNodeCount)
+                            m_pOutputSolution->FUN_006c9350();
                     }
                     continue;
                 }
@@ -828,23 +619,18 @@ int FUN_006cc5e0_shell::FUN_006cc5e0(PathingLocation* aStartLocation, PathingLoc
 }  // namespace fnv_006cc5e0
 
 namespace fnv_006cb4a0 {
-struct NavMeshSearchLOSArray
-{
-    void FUN_006abfc0();
-};
-
 struct FUN_006cb4a0_shell
 {
     void* m_uiStandInValue;
     void* m_iValueAfterStandIn;
-    NavMeshSearchLOSArray m_losArray;
+    BSSimpleArray<PathingLocation, 1024> m_losArray;
     void ClearLOSArray();
 };
 
 // @fnv 0x006cb4a0
 void FUN_006cb4a0_shell::ClearLOSArray()
 {
-    m_losArray.FUN_006abfc0();
+    m_losArray.BSSimpleArray<PathingLocation, 1024>::~BSSimpleArray();
 }
 }  // namespace fnv_006cb4a0
 
@@ -862,20 +648,12 @@ char* FUN_006cee10_shell::GetFirstEntry()
 }
 }  // namespace fnv_006cedf0
 
-struct FUN_006cf000_This
-{
-    void RemoveAt(unsigned int, int);
-};
-struct FUN_006c9350_shell
-{
-    void FUN_006c9350();
-};
 // Calls RemoveAt on the object at this+0x20 with its current size minus one and 1.
 // @fnv 0x006c9350
-void FUN_006c9350_shell::FUN_006c9350()
+void PathingSolution::FUN_006c9350()
 {
-    ((FUN_006cf000_This*)((char*)this + 0x20))
-        ->RemoveAt(((GlobalObject_00869f00*)((char*)this + 0x20))->GetSize() - 1, 1);
+    ((BSSimpleArray<PathingGraphNode, 1024>*)((char*)this + 0x20))
+        ->RemoveAt(((BSSimpleArray<PathingGraphNode, 1024>*)((char*)this + 0x20))->GetSize() - 1, 1u);
 }
 
 struct FUN_006cf000_shell
@@ -952,24 +730,11 @@ void* FUN_006cd650_shell::SetVtable()
     return this;
 }
 
-union SETTING_VALUE;
 struct P4_6cb4c0
 {
     int a, b, c, d;
 };
-struct GlobalObject_0045cf30
-{
-    SETTING_VALUE* Bool();
-};
-extern GlobalObject_0045cf30 g_011d7404;
-class BSWin32TaskletManager
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual bool IsTaskletThread(unsigned int);
-};
+extern SettingT<INISettingCollection> g_011d7404;
 BSWin32TaskletManager& GetTaskletManager();
 unsigned int __cdecl gm_GetCurrentThreadId();
 class PathManager
@@ -1005,23 +770,9 @@ struct FUN_006cb480
     FUN_006cb480();
     ~FUN_006cb480();
 };
-struct FUN_006e61a0
-{
-    FUN_006e61a0();
-    virtual ~FUN_006e61a0();
-    int ProcessRayCast(FUN_006cb3a0*, FUN_006cb480*);
-    P4_6cb4c0 d0, d1, d2, d3, d4, d5, d6, d7, d8;
-    int e;
-};
-
-struct PathBuilder_6cb4c0
-{
-    void* pRequest;
-    int FUN_006cb4c0(PathingLocation& aStartLocation, PathingLocation& aGoalLocation, void* aRetPath);
-};
 
 // @fnv 0x006cb4c0
-int PathBuilder_6cb4c0::FUN_006cb4c0(PathingLocation& aStartLocation, PathingLocation& aGoalLocation, void* aRetPath)
+int PathBuilder::FUN_006cb4c0(PathingLocation& aStartLocation, PathingLocation& aGoalLocation, void* aRetPath)
 {
     if (*(unsigned char*)g_011d7404.Bool())
     {
@@ -1037,8 +788,8 @@ int PathBuilder_6cb4c0::FUN_006cb4c0(PathingLocation& aStartLocation, PathingLoc
             rayCastRequest.eType = 2;
             rayCastRequest.pRequest = pRequest;
             FUN_006cb480 retPath;
-            FUN_006e61a0 rayCastSearch;
-            if (rayCastSearch.ProcessRayCast(&rayCastRequest, &retPath) == 1)
+            PathingSearchRayCast rayCastSearch;
+            if (rayCastSearch.ProcessRayCast((RayCastParam*)&rayCastRequest, (PathingSolutionExt*)&retPath) == 1)
             {
                 retPath.kPath.FUN_006cf940(aRetPath);
                 return 1;
@@ -1092,19 +843,10 @@ unsigned int FUN_006cef10_shell::AdvanceCounter()
     return m_08 - 1;
 }
 
-struct BSSimpleArray_006cedd0
-{
-    void* m_virtual_table;
-    int m_unused;
-    int m_iElementCount;
-
-    NavMeshStaticAvoidNode* FUN_00691750(int index);
-};
-
 // @fnv 0x006cedd0
-void __fastcall FUN_006cedd0(BSSimpleArray_006cedd0* self)
+void __fastcall FUN_006cedd0(BSSimpleArray<NavMeshStaticAvoidNode, 1024>* self)
 {
-    self->FUN_00691750(self->m_iElementCount - 1);
+    self->GetAt((int)self->iSize - 1);
 }
 
 struct FUN_006c9920_sub08
@@ -1197,7 +939,7 @@ bool FUN_006c9fc0_cls::FindPathSegmentEnd(int aiStartIndex, int* piStartOut, int
     }
     *piStartOut = aiStartIndex;
     *piEndOut = *piStartOut + 1;
-    for (; *piEndOut < m_04->FUN_005a4320(); *piEndOut = *piEndOut + 1)
+    for (; *piEndOut < (int)m_04->FUN_005a4320(); *piEndOut = *piEndOut + 1)
     {
         void* item = reinterpret_cast<PathingStepC_006dd4f0*>(
                          reinterpret_cast<PathingStepB_00717e50*>(
@@ -1265,13 +1007,6 @@ struct VirtualNode
 
 bool __fastcall FUN_006cac70(VirtualNode* node);
 
-struct PathSolution
-{
-    VirtualNode* GetVirtualNode(unsigned int);
-    int FUN_005a4320();
-    int FUN_00441110();
-};
-
 struct PathRequest
 {
     float GetCenterRadius();
@@ -1297,7 +1032,7 @@ int __cdecl CollectNearbyEdges(PathLoc*, int, DoorEntryList*);
 struct PathBuilderCore
 {
     PathRequest* pRequest;
-    PathSolution* m_pOutputSolution;
+    PathingSolution* m_pOutputSolution;
     bool ComputePathingLocation(VirtualNode*, VirtualNode*, PathLoc&);
     int FUN_006cb050(PathLoc*, PathLocArray*, int, DoorEntryList*);
     int ProcessPathNode(int aIndex, PathLocArray* aArray, DoorEntryList* aDoors);
@@ -1306,11 +1041,11 @@ struct PathBuilderCore
 // @fnv 0x006cac90
 int PathBuilderCore::ProcessPathNode(int aIndex, PathLocArray* aArray, DoorEntryList* aDoors)
 {
-    VirtualNode* pNode = m_pOutputSolution->GetVirtualNode(aIndex);
-    if (aIndex != m_pOutputSolution->FUN_005a4320() - 1)
+    VirtualNode* pNode = (VirtualNode*)m_pOutputSolution->GetVirtualNode(aIndex);
+    if (aIndex != (int)m_pOutputSolution->FUN_005a4320() - 1)
     {
-        VirtualNode* pNext = m_pOutputSolution->GetVirtualNode(aIndex + 1);
-        if (aIndex < m_pOutputSolution->FUN_00441110())
+        VirtualNode* pNext = (VirtualNode*)m_pOutputSolution->GetVirtualNode(aIndex + 1);
+        if (aIndex < (int)m_pOutputSolution->FUN_00441110())
         {
             if (FUN_006cac70(pNext))
             {
@@ -1497,23 +1232,6 @@ S_006cb900& S_006cb900::FUN_006cb900(const S_006cb900* other)
     return *this;
 }
 
-struct NavMeshShell
-{
-    void FUN_0068f0c0(unsigned short a, int b, NiPoint3& c, NiPoint3& d);
-    void FUN_00558220(NiPoint3& out, unsigned short a);
-    NavMeshTriangle* FUN_005582f0(unsigned short a);
-    bool FUN_00697010(NiPoint3* pt, float radius, unsigned short* outW, int* outI, int zero);
-    void CollectTrianglesForDoor(void* p, void* arr);
-    void* FUN_0059bb30();
-    NavMeshInfo* FUN_0068efb0();
-};
-struct NavPtrLocal
-{
-    NavMeshShell* m_p;
-    NavPtrLocal();
-    ~NavPtrLocal();
-    NavMeshShell* FUN_00559450();
-};
 struct PLocShell
 {
     int m_00;
@@ -1539,7 +1257,7 @@ struct PtCtor
 };
 struct Inner2
 {
-    bool FUN_0069ad00(NavPtrLocal* p);
+    bool FUN_0069ad00(NavMeshPtr* p);
     int m_00;
     int m_04;
     int m_08;
@@ -1601,7 +1319,7 @@ struct ThisCls
 bool ThisCls::ComputePathingLocation(ArgObj* a0, ArgObj* a1, PathingLocation* apOutLocation)
 {
     a0->FUN_00717e50()->FUN_006de250();
-    NavPtrLocal navPtr;
+    NavMeshPtr navPtr;
     if (!a0->FUN_00717e50()->FUN_006dd540()->FUN_0069ad00(&navPtr))
         return false;
     if (FUN_006cac70((const int*)a0))
@@ -1612,16 +1330,16 @@ bool ThisCls::ComputePathingLocation(ArgObj* a0, ArgObj* a1, PathingLocation* ap
         zlen = (a1->FUN_00717e50()->FUN_005c3420() - a0->FUN_00717e50()->FUN_006dd540()->m_10).Length();
         wIdxW = 0xffff;
         iIdxT = -1;
-        if (navPtr.FUN_00559450()->FUN_00697010(&a1->FUN_00717e50()->FUN_005c3420(), zlen * 2.0, &wIdxW, &iIdxT, 0))
+        if (navPtr.FUN_00559450()->FUN_00697010(a1->FUN_00717e50()->FUN_005c3420(), zlen * 2.0, &wIdxW, &iIdxT, 0))
         {
             PtCtor upt4c;
             PtCtor pt34G;
             navPtr.FUN_00559450()->FUN_0068f0c0(wIdxW, iIdxT, (NiPoint3&)upt4c, (NiPoint3&)pt34G);
-            NiPoint3 wpt28;
-            navPtr.FUN_00559450()->FUN_00558220(wpt28, wIdxW);
-            NiPoint3 xtmp40 = (upt4c + pt34G) * DAT_0104e2b8 + wpt28 * DAT_0101e2bc;
+            PointStorage wpt28;
+            navPtr.FUN_00559450()->FUN_00558220(&reinterpret_cast<NiPoint3&>(wpt28), wIdxW);
+            NiPoint3 xtmp40 = (upt4c + pt34G) * DAT_0104e2b8 + reinterpret_cast<NiPoint3&>(wpt28) * DAT_0101e2bc;
             float vf50;
-            vf50 = DAT_011dea10->GetCellHeightAtPosition(&xtmp40, navPtr.FUN_00559450()->FUN_0059bb30());
+            vf50 = DAT_011dea10->GetCellHeightAtPosition(&xtmp40, navPtr.FUN_00559450()->GetParentCell());
             if (vf50 + DAT_0104f2f0 > xtmp40.z)
                 xtmp40.z = vf50;
             *apOutLocation = *(PathingLocation*)&PLocShell(xtmp40, navPtr.FUN_00559450()->FUN_0068efb0(), wIdxW);
@@ -1636,10 +1354,10 @@ bool ThisCls::ComputePathingLocation(ArgObj* a0, ArgObj* a1, PathingLocation* ap
         int ui;
         float tlen2;
         NavMeshTriangle* ttri;
-        NiPoint3 pt84S;
-        NiPoint3 pt90N;
+        PointStorage pt84S;
+        PointStorage pt90N;
         float rf94;
-        navPtr.FUN_00559450()->CollectTrianglesForDoor(a1->FUN_00717e50()->FUN_006dd540(), &zarr);
+        navPtr.FUN_00559450()->CollectTrianglesForDoor((unsigned int)a1->FUN_00717e50()->FUN_006dd540(), (BSSimpleArray<unsigned int, 1024>*)&zarr);
         bestIdxz = 0xffff;
         ubest = DAT_01016970;
         ui = 0;
@@ -1648,8 +1366,8 @@ bool ThisCls::ComputePathingLocation(ArgObj* a0, ArgObj* a1, PathingLocation* ap
             ttri = navPtr.FUN_00559450()->FUN_005582f0(*(unsigned short*)zarr.FUN_00877a30(ui));
             if (m_00->GetFloatAtOffset68() > DAT_0106c948 && ttri->FUN_00693b90())
                 continue;
-            navPtr.FUN_00559450()->FUN_00558220(pt84S, *(unsigned short*)zarr.FUN_00877a30(ui));
-            tlen2 = (pt84S - m_00->FUN_006a9540()->FUN_005c3420()).Length();
+            navPtr.FUN_00559450()->FUN_00558220(&reinterpret_cast<NiPoint3&>(pt84S), *(unsigned short*)zarr.FUN_00877a30(ui));
+            tlen2 = (reinterpret_cast<NiPoint3&>(pt84S) - m_00->FUN_006a9540()->FUN_005c3420()).Length();
             if (tlen2 < ubest)
             {
                 tlen2 = ubest;
@@ -1658,12 +1376,12 @@ bool ThisCls::ComputePathingLocation(ArgObj* a0, ArgObj* a1, PathingLocation* ap
         }
         if (bestIdxz != 0xffff)
         {
-            navPtr.FUN_00559450()->FUN_00558220(pt90N, (unsigned short)bestIdxz);
-            rf94 = DAT_011dea10->GetCellHeightAtPosition(&pt90N, navPtr.FUN_00559450()->FUN_0059bb30());
+            navPtr.FUN_00559450()->FUN_00558220(&reinterpret_cast<NiPoint3&>(pt90N), (unsigned short)bestIdxz);
+            rf94 = DAT_011dea10->GetCellHeightAtPosition(&reinterpret_cast<NiPoint3&>(pt90N), navPtr.FUN_00559450()->GetParentCell());
             if (rf94 + DAT_0104f2f0 > pt90N.z)
                 pt90N.z = rf94;
             *apOutLocation = *(PathingLocation*)&PLocShell(
-                pt90N, (const NavMeshInfo*)a0->FUN_00717e50()->FUN_006dd540(), (unsigned short)bestIdxz);
+                reinterpret_cast<NiPoint3&>(pt90N), (const NavMeshInfo*)a0->FUN_00717e50()->FUN_006dd540(), (unsigned short)bestIdxz);
             return true;
         }
     }
@@ -1764,12 +1482,7 @@ struct PathActor
     NiPoint3 GetPosition();
 };
 
-struct FloatSetting
-{
-    float* GetValue();
-};
-
-extern FloatSetting gSearchRadius;
+extern SettingT<INISettingCollection> gSearchRadius;
 extern float fCenterBias;
 
 void __cdecl CollectMeshes(PathActor* apActor, float afRadius, MeshList* apList);
@@ -1787,7 +1500,7 @@ int __cdecl CollectNearbyEdges(PathActor* apActor, unsigned int auiMax, EdgeHand
     {
         return 1;
     }
-    float fRadius = *gSearchRadius.GetValue();
+    float fRadius = *gSearchRadius.Float();
     float fRadiusSq2 = fRadius * fRadius;
     MeshList kMeshes5;
     CollectMeshes(apActor, fRadius, &kMeshes5);
@@ -1809,9 +1522,9 @@ int __cdecl CollectNearbyEdges(PathActor* apActor, unsigned int auiMax, EdgeHand
                         iNext2 = 0;
                     }
                     MeshVert* pV2 = spMesh_->GetVertex(pTri_->GetVertexIndex(iNext2));
-                    NiPoint3 kClosest5;
-                    ClosestPointOnSegment(&kClosest5, apActor->GetPosition(), _pV0, pV2);
-                    NiPoint3 kDiff_ = apActor->GetPosition() - kClosest5;
+                    PointStorage kClosest5;
+                    ClosestPointOnSegment(&reinterpret_cast<NiPoint3&>(kClosest5), apActor->GetPosition(), _pV0, pV2);
+                    NiPoint3 kDiff_ = apActor->GetPosition() - reinterpret_cast<NiPoint3&>(kClosest5);
                     float fDistA = static_cast<SegmentDelta&>(kDiff_).SqrLength();
                     if (fDistA < fRadiusSq2)
                     {
@@ -1820,7 +1533,7 @@ int __cdecl CollectNearbyEdges(PathActor* apActor, unsigned int auiMax, EdgeHand
                         kItem6.m_usTriangleID = (unsigned short)t3;
                         kItem6.m_iEdgeNumber = e9;
                         kItem6.kPoint =
-                            kClosest5 + (spMesh_->GetTriangleCenter((unsigned short)t3) - kClosest5) * fCenterBias;
+                            reinterpret_cast<NiPoint3&>(kClosest5) + (spMesh_->GetTriangleCenter((unsigned short)t3) - reinterpret_cast<NiPoint3&>(kClosest5)) * fCenterBias;
                         kItem6.fZ = kDiff_.z;
                         kItem6.fDist = fDistA;
                         kEdges.Add(kItem6);
@@ -1851,21 +1564,9 @@ int __cdecl CollectNearbyEdges(PathActor* apActor, unsigned int auiMax, EdgeHand
 
 struct PathingVirtualNode;
 
+// Retained only for TrimNodes (0x006c9380), which include/PathingSolution.h does not declare.
 struct PathingSolutionData : public PathingSolution
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    unsigned int m_uiFormIDCount;
-    int iTargetIndex;
-    unsigned int GetNodeCount();
-    int GetLastIndex();
-    PathingVirtualNode* GetVirtualNode(unsigned int index);
-    bool IsPathComplete();
-    void ResetNodes();
     void TrimNodes(int count);
 };
 
@@ -1908,7 +1609,7 @@ int PathBuilderUpdate::UpdatePathFromIndex(unsigned int index, const NiPoint3* p
     int iEnd = -1;
     if (!FindUpdateRange(index, &iStart, &iEnd))
     {
-        if (((PathingSolutionData*)m_pOutputSolution)->GetNodeCount() == 0)
+        if (m_pOutputSolution->GetObjectFlags() == 0)
         {
             return 0;
         }
@@ -1918,25 +1619,25 @@ int PathBuilderUpdate::UpdatePathFromIndex(unsigned int index, const NiPoint3* p
             return 1;
         }
     }
-    if (((PathingSolutionData*)m_pOutputSolution)->GetNodeCount() > 0)
+    if (m_pOutputSolution->GetObjectFlags() > 0)
     {
-        if (((PathingSolutionData*)m_pOutputSolution)->GetLastIndex() >= iEnd)
+        if ((int)m_pOutputSolution->FUN_00441110() >= iEnd)
         {
             return 0;
         }
-        ((PathingSolutionData*)m_pOutputSolution)->m_uiFormIDCount = index;
+        m_pOutputSolution->unk18 = index;
         PathingNodeLocation kTargetPoint(
-            point, ((PathingSolutionData*)m_pOutputSolution)->GetVirtualNode(index)->GetLocation());
-        ((PathingSolutionData*)m_pOutputSolution)->GetVirtualNode(index)->SetLocation((PathingLocation*)&kTargetPoint);
-        int iCount = ((PathingSolutionData*)m_pOutputSolution)->GetNodeCount() - 1;
-        ((PathingSolutionData*)m_pOutputSolution)->ResetNodes();
-        ((PathingSolutionData*)m_pOutputSolution)->iTargetIndex = iEnd;
+            point, ((PathingVirtualNode*)m_pOutputSolution->GetVirtualNode(index))->GetLocation());
+        ((PathingVirtualNode*)m_pOutputSolution->GetVirtualNode(index))->SetLocation((PathingLocation*)&kTargetPoint);
+        int iCount = m_pOutputSolution->GetObjectFlags() - 1;
+        m_pOutputSolution->FUN_006c9350();
+        m_pOutputSolution->unk1c = iEnd;
         m_bPathFound = true;
         if (!RebuildDetailedPath(false))
         {
             return -1;
         }
-        else if (((PathingSolutionData*)m_pOutputSolution)->IsPathComplete())
+        else if (m_pOutputSolution->FUN_006b05d0())
         {
             return -1;
         }
@@ -1982,7 +1683,7 @@ struct PathBuilderDirect : PathBuilderCore
 // @fnv 0x006cb050
 int PathBuilderCore::FUN_006cb050(PathLoc* start, PathLocArray* output, int allowPartial, DoorEntryList* doors)
 {
-    if (g_011d7404.Bool()->b)
+    if (*g_011d7404.Bool())
     {
         switch (CollectNearbyEdges(start, 10, doors))
         {
@@ -2008,11 +1709,11 @@ int PathBuilderCore::FUN_006cb050(PathLoc* start, PathLocArray* output, int allo
                         query.pRequest = pRequest;
                         reinterpret_cast<DoorListCopy*>(doors)->ProcessItems(&query.x1);
                         FUN_006cb480 result;
-                        FUN_006e61a0 search;
-                        status = search.ProcessRayCast(&query, &result);
+                        PathingSearchRayCast search;
+                        status = search.ProcessRayCast((RayCastParam*)&query, (PathingSolutionExt*)&result);
                         while (status == 0)
                         {
-                            status = search.ProcessRayCast(&query, &result);
+                            status = search.ProcessRayCast((RayCastParam*)&query, (PathingSolutionExt*)&result);
                         }
                         if (status == 1)
                         {
@@ -2046,18 +1747,9 @@ int PathBuilderCore::FUN_006cb050(PathLoc* start, PathLocArray* output, int allo
     }
 }
 
-struct Point501
-{
-    float x, y, z;
-    void FUN_006815c0();
-    Point501 operator-(const Point501&) const;
-    Point501 operator*(float) const;
-    Point501& operator+=(const Point501&);
-    float GetSquaredXYLength() const;
-};
 struct Info501
 {
-    bool FUN_0069ad00(NavPtrLocal*);
+    bool FUN_0069ad00(NavMeshPtr*);
 };
 struct Edge501
 {
@@ -2065,7 +1757,7 @@ struct Edge501
     unsigned short triangle;
     unsigned short flags;
     int edge;
-    Point501 position;
+    PointStorage position;
     Edge501& FUN_006cb900(const Edge501*);
 };
 struct EdgeInput501
@@ -2074,7 +1766,7 @@ struct EdgeInput501
 };
 struct Loc501
 {
-    Point501 FUN_005c3420() const;
+    NiPoint3 FUN_005c3420() const;
 };
 struct Node501
 {
@@ -2084,48 +1776,38 @@ struct Solution501
 {
     Node501* FUN_006e78b0(unsigned int);
 };
-struct Array501
-{
-    void FUN_006ac010(bool);
-    unsigned int FUN_006cf1b0(const PathLoc&);
-};
-struct Mesh501
-{
-    void FUN_0068f0c0(unsigned short, int, Point501&, Point501&);
-    void FUN_00558220(Point501&, unsigned short);
-};
 struct Builder501
 {
     PathRequest* request;
     Solution501* solution;
-    bool TryAddClosestPoint(unsigned int, EdgeInput501*, Array501*);
+    bool TryAddClosestPoint(unsigned int, EdgeInput501*, BSSimpleArray<PathingLocation, 1024>*);
 };
-void __cdecl GetClosestPointOnSegment(Point501*, const Point501&, const Point501&, const Point501&);
+void __cdecl GetClosestPointOnSegment(NiPoint3*, const NiPoint3&, const NiPoint3&, const NiPoint3&);
 // @fnv 0x006cb6a0
-bool Builder501::TryAddClosestPoint(unsigned int index, EdgeInput501* input, Array501* output)
+bool Builder501::TryAddClosestPoint(unsigned int index, EdgeInput501* input, BSSimpleArray<PathingLocation, 1024>* output)
 {
     Edge501 edge;
     edge.FUN_006cb900(input->GetFirstEntry());
-    Point501 mesh;
-    mesh.FUN_006815c0();
-    Point501 start;
-    start.FUN_006815c0();
-    NavPtrLocal end;
+    PointStorage mesh;
+    ((NiPoint3&)mesh).FUN_006815c0();
+    PointStorage start;
+    ((NiPoint3&)start).FUN_006815c0();
+    NavMeshPtr end;
     if (edge.info->FUN_0069ad00(&end))
     {
-        ((Mesh501*)end.FUN_00559450())->FUN_0068f0c0(edge.triangle, edge.edge, mesh, start);
-        Point501 position = solution->FUN_006e78b0(index)->FUN_00717e50()->FUN_005c3420();
-        Point501 closest;
-        GetClosestPointOnSegment(&closest, position, mesh, start);
-        if ((closest - position).GetSquaredXYLength() < request->GetCenterRadius() * request->GetCenterRadius() &&
-            (closest - position).z > -64.0 && (closest - position).z < 180.0)
+        end.FUN_00559450()->FUN_0068f0c0(edge.triangle, edge.edge, (NiPoint3&)mesh, (NiPoint3&)start);
+        NiPoint3 position = solution->FUN_006e78b0(index)->FUN_00717e50()->FUN_005c3420();
+        PointStorage closest;
+        GetClosestPointOnSegment((NiPoint3*)&closest, position, (NiPoint3&)mesh, (NiPoint3&)start);
+        if (((NiPoint3&)closest - position).GetSquaredXYLength() < request->GetCenterRadius() * request->GetCenterRadius() &&
+            ((NiPoint3&)closest - position).z > -64.0 && ((NiPoint3&)closest - position).z < 180.0)
         {
-            Point501 center;
-            ((Mesh501*)end.FUN_00559450())->FUN_00558220(center, edge.triangle);
-            closest += (center - closest) * DAT_0101e2bc;
-            output->FUN_006ac010(false);
+            PointStorage center;
+            end.FUN_00559450()->FUN_00558220((NiPoint3*)&center, edge.triangle);
+            ((NiPoint3&)closest).FUN_0063c8a0(((NiPoint3&)center - (NiPoint3&)closest) * DAT_0101e2bc);
+            output->Clear(false);
             PathLoc location((const PathPoint3&)closest, (const NavMeshInfo*)edge.info, edge.triangle);
-            output->FUN_006cf1b0(location);
+            output->AppendElement((const PathingLocation&)location);
             return true;
         }
     }
@@ -2208,11 +1890,7 @@ struct ReqX
 {
     float GetFloatAtOffset68() const;
 };
-struct SettingCollX
-{
-    float* Float();
-};
-extern SettingCollX DAT_011d6ef0;
+extern SettingT<GameSettingCollection> DAT_011d6ef0;
 struct _Mem_2064
 {
     void** vtable;
@@ -2289,7 +1967,7 @@ bool PathBuilder::TryConnectPathNodes(unsigned int a, unsigned int b)
     {
         struct FUN_006cf180 arrC;
         int res =
-            ((PathBuilder_6cb4c0*)this)
+            ((PathBuilder*)this)
                 ->FUN_006cb4c0(*(PathingLocation*)((NodeS*)((SolS*)m_pOutputSolution)->FUN_006e78b0(a))->FUN_00717e50(),
                                *(PathingLocation*)((NodeS*)((SolS*)m_pOutputSolution)->FUN_006e78b0(b))->FUN_00717e50(),
                                &arrC);
@@ -2364,7 +2042,7 @@ bool PathBuilder::TryConnectPathNodes(unsigned int a, unsigned int b)
             }
             struct FUN_006cf180 res3;  // Retry path.
             // Retry path result.
-            int arrD = ((PathBuilder_6cb4c0*)this)
+            int arrD = ((PathBuilder*)this)
                            ->FUN_006cb4c0(
                                *(PathingLocation*)((NodeS*)((SolS*)m_pOutputSolution)->FUN_006e78b0(a))->FUN_00717e50(),
                                *(PathingLocation*)((NodeS*)((SolS*)m_pOutputSolution)->FUN_006e78b0(b))->FUN_00717e50(),
@@ -4611,16 +4289,11 @@ struct SearchLocation
     ~SearchLocation();
     SearchLocation& operator=(const SearchLocation&);
     SearchPoint FUN_005c3420() const;
-    void FUN_006dd5c0(PathBuilderDetailedPathInfos&);
+    void FUN_006dd5c0(BSSimpleArray<const NavMeshInfo*, 1024>&);
 };
 struct MeshInfoSearch
 {
     bool FUN_0069ad00(SearchMeshPtr&);
-};
-struct MeshInfoArraySearch : PathBuilderDetailedPathInfos
-{
-    unsigned int FUN_0044ddc0();
-    MeshInfoSearch*& FUN_00877a30(unsigned int);
 };
 struct SearchEdge
 {
@@ -4649,13 +4322,13 @@ bool PathBuilderSearch::FindNearestMeshLocation(SearchLocation searchLocation, S
     unsigned int p = -1;
     unsigned short h = 0xffff;
     SearchPoint f = SearchPoint::ZERO;
-    PathBuilderDetailedPathInfos s;
+    BSSimpleArray<const NavMeshInfo*, 1024> s;
     searchLocation.FUN_006dd5c0(s);
-    unsigned int i = ((MeshInfoArraySearch&)s).FUN_0044ddc0();
+    unsigned int i = s.GetSize();
     for (unsigned int j = 0; j < i; ++j)
     {
         SearchMeshPtr mesh;
-        if (((MeshInfoArraySearch&)s).FUN_00877a30(j)->FUN_0069ad00(mesh))
+        if (((MeshInfoSearch*)s.GetAt(j))->FUN_0069ad00(mesh))
         {
             unsigned short q;
             unsigned int b;
@@ -4682,30 +4355,10 @@ bool PathBuilderSearch::FindNearestMeshLocation(SearchLocation searchLocation, S
     }
     if (p == -1)
         return false;
-    resultLocation = SearchLocation(f, (const NavMeshInfo*)((MeshInfoArraySearch&)s).FUN_00877a30(p), h);
+    resultLocation = SearchLocation(f, (const NavMeshInfo*)s.GetAt(p), h);
     return true;
 }
 
-struct Mesh152
-{
-    bool FUN_00697010(const NiPoint3&, float, unsigned short*, int*, int);
-    void FUN_0068f0c0(unsigned short, int, NiPoint3&, NiPoint3&);
-    NiPoint3 FUN_00558220(unsigned short);
-    NavMeshInfo* FUN_0068efb0();
-    void CollectTrianglesForDoor(Inner2*, TriArr*);
-    NavMeshTriangle* FUN_005582f0(unsigned short);
-};
-struct Nav152
-{
-    Mesh152* p;
-    Nav152();
-    ~Nav152();
-    Mesh152* FUN_00559450();
-};
-struct Point152 : NiPoint3
-{
-    Point152();
-};
 struct Loc152 : PLocShell
 {
     Loc152(const NiPoint3&, const NavMeshInfo*, unsigned short);
@@ -4730,7 +4383,7 @@ struct This152
 bool This152::FindNavMeshLocation(ArgObj* from, ArgObj* to, Out152* output)
 {
     to->FUN_00717e50()->FUN_006de250();
-    NavPtrLocal mesh;
+    NavMeshPtr mesh;
     if (!to->FUN_00717e50()->FUN_006dd540()->FUN_0069ad00(&mesh))
         return false;
     if (FUN_006cac70((const int*)to))
@@ -4738,34 +4391,34 @@ bool This152::FindNavMeshLocation(ArgObj* from, ArgObj* to, Out152* output)
         float edge = (from->FUN_00717e50()->FUN_005c3420() - to->FUN_00717e50()->FUN_006dd540()->m_10).Length();
         unsigned short triangle = 0xffff;
         int distance = -1;
-        if (((Mesh152*)mesh.FUN_00559450())
+        if (mesh.FUN_00559450()
                 ->FUN_00697010(from->FUN_00717e50()->FUN_005c3420(), edge * 2.0f, &triangle, &distance, 1))
         {
             PtCtor b;
             PtCtor a;
-            ((Mesh152*)mesh.FUN_00559450())->FUN_0068f0c0(triangle, distance, (NiPoint3&)b, (NiPoint3&)a);
-            NiPoint3 center = ((Mesh152*)mesh.FUN_00559450())->FUN_00558220(triangle);
+            mesh.FUN_00559450()->FUN_0068f0c0(triangle, distance, (NiPoint3&)b, (NiPoint3&)a);
+            NiPoint3 center = mesh.FUN_00559450()->FUN_00558220(triangle);
             output->FUN_006dcce0(Loc152((((NiPoint3&)b + (NiPoint3&)a) * DAT_0104e2b8) + center * DAT_0101e2bc,
-                                        ((Mesh152*)mesh.FUN_00559450())->FUN_0068efb0(), triangle));
+                                        mesh.FUN_00559450()->FUN_0068efb0(), triangle));
             return true;
         }
     }
     else
     {
         TriArr triangles(0, 0, field08);
-        ((Mesh152*)mesh.FUN_00559450())->CollectTrianglesForDoor(from->FUN_00717e50()->FUN_006dd540(), &triangles);
+        mesh.FUN_00559450()->CollectTrianglesForDoor((unsigned int)from->FUN_00717e50()->FUN_006dd540(), (BSSimpleArray<unsigned int, 1024>*)&triangles);
         unsigned int minDistance = 0xffff;
         float best = DAT_01016970;
         for (unsigned int i = 0; i < triangles.FUN_0044ddc0(); ++i)
         {
             float center;
             NavMeshTriangle* d =
-                ((Mesh152*)mesh.FUN_00559450())->FUN_005582f0((unsigned short)*triangles.FUN_00877a30(i));
+                mesh.FUN_00559450()->FUN_005582f0((unsigned short)*triangles.FUN_00877a30(i));
             if (request->GetFloatAtOffset68() > DAT_0106c948 && d->FUN_00693b90())
                 continue;
             {
                 NiPoint3 tri =
-                    ((Mesh152*)mesh.FUN_00559450())->FUN_00558220((unsigned short)*triangles.FUN_00877a30(i));
+                    mesh.FUN_00559450()->FUN_00558220((unsigned short)*triangles.FUN_00877a30(i));
                 center = (tri - request->GetOffsetC()->FUN_005c3420()).Length();
                 if (center < best)
                 {
@@ -4776,7 +4429,7 @@ bool This152::FindNavMeshLocation(ArgObj* from, ArgObj* to, Out152* output)
         }
         if (minDistance != 0xffff)
         {
-            output->FUN_006dcce0(Loc152(((Mesh152*)mesh.FUN_00559450())->FUN_00558220((unsigned short)minDistance),
+            output->FUN_006dcce0(Loc152(mesh.FUN_00559450()->FUN_00558220((unsigned short)minDistance),
                                         (NavMeshInfo*)to->FUN_00717e50()->FUN_006dd540(), (unsigned short)minDistance));
             return true;
         }
@@ -4823,10 +4476,9 @@ int FUN_006c93f0_Object::ProcessIndexRange(int index)
 }
 
 class NavMeshInfo_;
-class PathingLocationS;
-class VirtualPathingNodeS;
+
+class PathingGraphNode;
 class ScrapHeapBuffer;
-class PathingSolutionS;
 
 struct FNVHashMap
 {
@@ -4844,28 +4496,6 @@ class NavMeshInfo_
     char pad0[0x24];
     FNVHashMap map24;
     FNVHashMap map34;
-};
-
-class PathingLocationS
-{
-  public:
-    void FUN_006de250();
-    NavMeshInfo_* FUN_006dd540();
-};
-
-class VirtualPathingNodeS
-{
-  public:
-    PathingLocationS& GetLocation();
-};
-
-class PathingSolutionS
-{
-  public:
-    char pad0[0x18];
-    int iFirst;
-    int iLast;
-    VirtualPathingNodeS* GetVirtualNode(unsigned int);
 };
 
 struct ParentSpaceNode
@@ -4905,28 +4535,20 @@ bool __cdecl AreBytesEqual(const unsigned char*, const unsigned char*);
 bool __fastcall FUN_006ca830(const unsigned int*);
 bool __cdecl FUN_009a3830(NavMeshInfo_* const&, NavMeshInfo_* const&);
 
-struct PathBuilderX
-{
-    void* pRequest;
-    PathingSolutionS* m_pOutputSolution;
-    ScrapHeapBuffer* m_pAllocator;
-    bool BuildPathSpans(OutNodes& out);
-};
-
 // @fnv 0x006ca500
-bool PathBuilderX::BuildPathSpans(OutNodes& aOutNodes)
+bool PathBuilder::BuildPathSpans(OutNodes& aOutNodes)
 {
     aOutNodes.Clear(false);
 
-    int iFirstA = this->m_pOutputSolution->iFirst;
-    int iLastA = this->m_pOutputSolution->iLast;
+    int iFirstA = this->m_pOutputSolution->unk18;
+    int iLastA = this->m_pOutputSolution->unk1c;
 
     VisitedArray visited5(iLastA - iFirstA + 1, 0, this->m_pAllocator);
 
     {
         for (int i = iFirstA; i <= iLastA; i++)
         {
-            VirtualPathingNodeS* pNodeX = this->m_pOutputSolution->GetVirtualNode(i);
+            PathingGraphNode* pNodeX = (PathingGraphNode*)this->m_pOutputSolution->GetVirtualNode(i);
             visited5.Add(FUN_006ca830((const unsigned int*)pNodeX));
         }
     }
@@ -4958,15 +4580,15 @@ bool PathBuilderX::BuildPathSpans(OutNodes& aOutNodes)
                 int m2 = iOpen_2;
                 while (m2 + 1 <= iClose3)
                 {
-                    VirtualPathingNodeS* kPNode2;
-                    VirtualPathingNodeS* kPNode1;
-                    kPNode1 = this->m_pOutputSolution->GetVirtualNode(m2);
-                    kPNode2 = this->m_pOutputSolution->GetVirtualNode(m2 + 1);
+                    PathingGraphNode* kPNode2;
+                    PathingGraphNode* kPNode1;
+                    kPNode1 = (PathingGraphNode*)this->m_pOutputSolution->GetVirtualNode(m2);
+                    kPNode2 = (PathingGraphNode*)this->m_pOutputSolution->GetVirtualNode(m2 + 1);
 
-                    kPNode1->GetLocation().FUN_006de250();
-                    kPNode2->GetLocation().FUN_006de250();
-                    NavMeshInfo_* pInfo8 = kPNode1->GetLocation().FUN_006dd540();
-                    NavMeshInfo_* pInfoX = kPNode2->GetLocation().FUN_006dd540();
+                    kPNode1->FUN_00717e50().FUN_006de250();
+                    kPNode2->FUN_00717e50().FUN_006de250();
+                    NavMeshInfo_* pInfo8 = (NavMeshInfo_*)kPNode1->FUN_00717e50().GetAssociatedNavMesh();
+                    NavMeshInfo_* pInfoX = (NavMeshInfo_*)kPNode2->FUN_00717e50().GetAssociatedNavMesh();
 
                     if (pInfo8 == 0 || pInfoX == 0)
                         return false;
@@ -5012,13 +4634,6 @@ class VectorMethods : public NiPoint3
     NiPoint3 FUN_0053d1a0(const NiPoint3&) const;
 };
 
-class PathingLocationMethods : public PathingLocation
-{
-  public:
-    void* FUN_006dd4f0();
-    NiPoint3 FUN_005c3420();
-};
-
 class FUN_006dd0d0
 {
   public:
@@ -5043,27 +4658,12 @@ class FUN_006cd5a0
     FUN_006cd5a0();
 };
 
-class PathingRequestMethods : public PathingRequest
-{
-  public:
-    float GetFloatAtOffset68();
-};
-class PathingSolutionMethods : public PathingSolution
-{
-  public:
-    void FUN_0069f920(const PathingLocation*, const void*);
-};
-class GameSettings
-{
-  public:
-    float* FUN_00403e20();
-};
 class TESWorld
 {
   public:
     double GetCellHeightAtPosition(const NiPoint3&, void*);
 };
-extern GameSettings DAT_011d6ef0;
+extern SettingT<GameSettingCollection> DAT_011d6ef0;
 extern NiPoint3 DAT_011a9484;
 extern unsigned int DAT_011f426c;
 extern TESWorld* g_TES;
@@ -5079,39 +4679,39 @@ class PathBuilderMethods : public PathBuilder
 bool PathBuilderMethods::FUN_006cd1f0(PathingLocation* pStart, PathingLocation* pEndLocation)
 {
     FUN_006cd5a0 filter;
-    filter.m_bCheckWater = ((PathingRequestMethods*)pRequest)->GetFloatAtOffset68() > *DAT_011d6ef0.FUN_00403e20();
+    filter.m_bCheckWater = ((PathingRequest*)pRequest)->GetFloatAtOffset68() > *DAT_011d6ef0.FUN_00403e20();
     if (!FUN_006d7350(pStart, pEndLocation, 0, &filter))
         return false;
 
-    if (g_TES->GetCellHeightAtPosition(((PathingLocationMethods*)pStart)->FUN_005c3420(),
-                                       ((PathingLocationMethods*)pStart)->FUN_006dd4f0()) +
+    if (g_TES->GetCellHeightAtPosition(((PathingLocation*)pStart)->FUN_005c3420(),
+                                       ((PathingLocation*)pStart)->FUN_006dd4f0()) +
                 25.0 >
-            ((PathingLocationMethods*)pStart)->FUN_005c3420().z ||
-        g_TES->GetCellHeightAtPosition(((PathingLocationMethods*)pEndLocation)->FUN_005c3420(),
-                                       ((PathingLocationMethods*)pEndLocation)->FUN_006dd4f0()) +
+            ((PathingLocation*)pStart)->FUN_005c3420().z ||
+        g_TES->GetCellHeightAtPosition(((PathingLocation*)pEndLocation)->FUN_005c3420(),
+                                       ((PathingLocation*)pEndLocation)->FUN_006dd4f0()) +
                 25.0 >
-            ((PathingLocationMethods*)pEndLocation)->FUN_005c3420().z)
+            ((PathingLocation*)pEndLocation)->FUN_005c3420().z)
     {
-        ((PathingSolutionMethods*)m_pOutputSolution)->FUN_0069f920(pStart, &DAT_011f426c);
+        m_pOutputSolution->ReserveIndex(*pStart, *(const NiPoint3*)&DAT_011f426c);
         return true;
     }
 
     NiPoint3 kDelta =
-        ((PathingLocationMethods*)pEndLocation)->FUN_005c3420() - ((PathingLocationMethods*)pStart)->FUN_005c3420();
+        ((PathingLocation*)pEndLocation)->FUN_005c3420() - ((PathingLocation*)pStart)->FUN_005c3420();
     NiPoint3 sideOffset = ((VectorMethods*)&kDelta)->FUN_0053d1a0(DAT_011a9484) *
-                          (float)((PathingRequestMethods*)pRequest)->GetFloatAtOffset68();
+                          (float)((PathingRequest*)pRequest)->GetFloatAtOffset68();
 
-    FUN_006dd0d0 kEndPlus(((PathingLocationMethods*)pStart)->FUN_005c3420() - sideOffset, pStart);
-    FUN_006dd0d0 kStartMinus(((PathingLocationMethods*)pEndLocation)->FUN_005c3420() - sideOffset, pEndLocation);
+    FUN_006dd0d0 kEndPlus(((PathingLocation*)pStart)->FUN_005c3420() - sideOffset, pStart);
+    FUN_006dd0d0 kStartMinus(((PathingLocation*)pEndLocation)->FUN_005c3420() - sideOffset, pEndLocation);
     if (!FUN_006d7350((const PathingLocation*)&kEndPlus, (const PathingLocation*)&kStartMinus, 0, 0))
         return false;
 
-    FUN_006dd0d0 kStartPlus(((PathingLocationMethods*)pStart)->FUN_005c3420() + sideOffset, pStart);
-    FUN_006dd0d0 kEndMinus(((PathingLocationMethods*)pEndLocation)->FUN_005c3420() + sideOffset, pEndLocation);
+    FUN_006dd0d0 kStartPlus(((PathingLocation*)pStart)->FUN_005c3420() + sideOffset, pStart);
+    FUN_006dd0d0 kEndMinus(((PathingLocation*)pEndLocation)->FUN_005c3420() + sideOffset, pEndLocation);
     if (!FUN_006d7350((const PathingLocation*)&kStartPlus, (const PathingLocation*)&kEndMinus, 0, 0))
         return false;
 
-    ((PathingSolutionMethods*)m_pOutputSolution)->FUN_0069f920(pStart, &DAT_011f426c);
+    m_pOutputSolution->ReserveIndex(*pStart, *(const NiPoint3*)&DAT_011f426c);
     return true;
 }
 }  // namespace fnv_006cd1f0
@@ -5139,11 +4739,7 @@ struct RayCastItem
     RayCastItem(const RayCastItem& other);
 };
 
-class NavMeshInfo
-{
-  public:
-    bool ResolveNavMesh(NavMeshPtr& outMesh) const;
-};
+
 
 struct NavMeshExt : NavMesh
 {
@@ -5210,35 +4806,6 @@ struct PathingSolutionExt
     unsigned int unk00;
     unsigned int status;
     PathingLocationArray locations;
-};
-
-class PathingSearchRayCast
-{
-  public:
-    virtual ~PathingSearchRayCast();
-    PathingLocation loc04;
-    PathingLocation loc2C;
-    PathingRequest* pRequest;
-    unsigned int unk58;
-    NiPoint3 pt5C;
-    NiPoint3 pt68;
-    float f74;
-    void* unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    void* unk84;
-    int unk88;
-    float f8C;
-    float f90;
-
-    bool FUN_006c4000();
-    bool SetupFromCellWorld();
-    bool UpdateAndCheck(const NiPoint3& p1, const NiPoint3& p2);
-    bool CheckPathClear(const NiPoint3& p1, const NiPoint3& p2);
-    void ComputeBounds(BSSimpleArrayExt<RayCastItem, 1024>& arr);
-    void FUN_006e6db0();
-
-    unsigned int ProcessRayCast(RayCastParam* param1, PathingSolutionExt* param2);
 };
 
 // Sets up the ray cast from the request, then either handles the direct start/end case or walks the path array to build pathing locations and a status.
@@ -5351,9 +4918,9 @@ unsigned int PathingSearchRayCast::ProcessRayCast(RayCastParam* pRayCastParam, P
             if (item_.m_pNavigationMesh->ResolveNavMesh(spMesh8))
             {
                 NiPoint3 ptPos4 = item_.location;
-                NiPoint3 kKNormal;
-                ((NavMeshExt*)(NavMesh*)spMesh8)->FUN_00558220(kKNormal, item_.triangleIndex);
-                ptPos4 += (kKNormal - ptPos4) * 0.1f;
+                PointStorage kKNormal;
+                ((NavMeshExt*)(NavMesh*)spMesh8)->FUN_00558220(reinterpret_cast<NiPoint3&>(kKNormal), item_.triangleIndex);
+                ptPos4 += (reinterpret_cast<NiPoint3&>(kKNormal) - ptPos4) * 0.1f;
                 PathingLocationSub loc(ptPos4, item_.m_pNavigationMesh, item_.triangleIndex);
                 param2->locations.FUN_006cf1b0(this->loc2C);
                 param2->locations.FUN_006cf1b0(loc);
@@ -5393,11 +4960,7 @@ struct FormX
     int FUN_006dd540();
     int FUN_006dd4f0();
 };
-struct ActorX
-{
-    FormX* GetOffsetC();
-    FormX* FUN_006a9540();
-};
+
 struct ListX
 {
     void FreeArray(int i);
@@ -5414,7 +4977,7 @@ struct GlobX
 };
 struct DialX
 {
-    ActorX* m_pkActor;
+    PathingRequest* m_pkActor;
     GroupX* m_pkActorGroup;
     bool BuildRoute(void* pkA, void* pkB);
     bool FUN_006c9b20();
@@ -5429,8 +4992,8 @@ bool DialX::FUN_006c8f50(void* pkA, void* pkB)
     {
         if (pkA == pkB)
         {
-            m_pkActorGroup->FUN_006c90d0(m_pkActor->GetOffsetC());
-            m_pkActorGroup->FUN_006c90d0(m_pkActor->FUN_006a9540());
+            m_pkActorGroup->FUN_006c90d0((FormX*)&m_pkActor->GetOffsetC());
+            m_pkActorGroup->FUN_006c90d0((FormX*)m_pkActor->FUN_006a9540());
             bResult = true;
         }
         else if (BuildRoute(pkA, pkB))
@@ -5450,16 +5013,16 @@ bool DialX::FUN_006c8f50(void* pkA, void* pkB)
     }
     if (!bResult)
     {
-        if (m_pkActor->GetOffsetC()->FUN_00441110())
+        if (m_pkActor->GetOffsetC().FUN_00441110())
         {
-            if (m_pkActor->GetOffsetC()->FUN_00441110() == m_pkActor->FUN_006a9540()->FUN_00441110() &&
-                m_pkActor->GetOffsetC()->FUN_006dd540() && m_pkActor->FUN_006a9540()->FUN_006dd540())
+            if (m_pkActor->GetOffsetC().FUN_00441110() == m_pkActor->FUN_006a9540()->FUN_00441110() &&
+                m_pkActor->GetOffsetC().GetAssociatedNavMesh() && m_pkActor->FUN_006a9540()->GetAssociatedNavMesh())
                 return false;
         }
         else
         {
-            if (m_pkActor->GetOffsetC()->FUN_006dd4f0() == m_pkActor->FUN_006a9540()->FUN_006dd4f0() &&
-                m_pkActor->GetOffsetC()->FUN_006dd540() && m_pkActor->FUN_006a9540()->FUN_006dd540())
+            if (m_pkActor->GetOffsetC().FUN_006dd4f0() == m_pkActor->FUN_006a9540()->FUN_006dd4f0() &&
+                m_pkActor->GetOffsetC().GetAssociatedNavMesh() && m_pkActor->FUN_006a9540()->GetAssociatedNavMesh())
                 return false;
         }
         m_pkActorGroup->kList.FreeArray(0);
@@ -7733,13 +7296,10 @@ struct BoolSet
     bool* FUN_00408d60();
 };
 extern BoolSet DAT_011d7444, DAT_011d7434;
-struct ActorX
-{
-    float GetFloatAtOffset68();
-};
+
 struct PathX
 {
-    ActorX* m0;
+    PathingRequest* m0;
     int m4;
     int m8;
     char padc[8];
@@ -7808,28 +7368,6 @@ S6Point GetClosestPointOnSegment(const S6Point& point, const S6Point& start, con
 }
 
 namespace fnv_006ca0e0 {
-struct NiColor
-{
-    float r, g, b;
-};
-
-class PathingLocationExt
-{
-  public:
-    void** m_ppVirtualMethodTable;
-    NiPoint3 Location;
-    const NavMeshInfo* m_pLocationNavMesh;
-    const void* pNavMeshInfoArray;
-    TESObjectCELL* pCell;
-    TESWorldSpace* m_pContainingWorldspace;
-    unsigned int m_uiPathingFlags;
-    unsigned short m_usTriangleID;
-    unsigned char uiFlags;
-    unsigned char layoutPadding27;
-    PathingLocationExt(const PathingLocation&);
-    ~PathingLocationExt();
-    NiPoint3 FUN_005c3420() const;
-};
 
 class NiPoint3Ext : public NiPoint3
 {
@@ -7854,22 +7392,16 @@ class PathNodeExt
     void FUN_006b0570(NiColor*);
 };
 
+// Retained for reset (0x006c93a0) and current-node access (0x009611e0), absent from the shared header.
 class PathingSolutionExt : public PathingSolution
 {
   public:
-    int unk00, unk04, unk08, unk0C, unk10, unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-
     void FUN_006c93a0();
-    unsigned int GetObjectFlags();
     int FUN_009611e0();
-    PathNodeExt* FUN_006e7970(unsigned int);
-    int FUN_00441110();
 };
 
-void __cdecl FUN_006d99a0(NiColor*, float, PathingLocationExt&, PathingLocationExt&, float);
-void __cdecl FUN_006da420(NiColor*, float, PathingLocationExt&, float);
+void __cdecl FUN_006d99a0(NiColor*, float, PathingLocation&, PathingLocation&, float);
+void __cdecl FUN_006da420(NiColor*, float, PathingLocation&, float);
 
 class PathBuilder_Child : public PathBuilder
 {
@@ -7893,59 +7425,60 @@ bool PathBuilder_Child::FUN_006ca0e0(Actor* apActor, unsigned int aiSegmentIndex
             return true;
         }
 
-        ((PathingSolutionExt*)this->m_pOutputSolution)->unk18 = iStart;
-        ((PathingSolutionExt*)this->m_pOutputSolution)->unk1C = iEnd;
+        this->m_pOutputSolution->unk18 = iStart;
+        this->m_pOutputSolution->unk1c = iEnd;
     }
     {
 
         bool bResult = this->FUN_006ca850(apActor);
-        if (!bResult && ((PathingSolutionExt*)this->m_pOutputSolution)->GetObjectFlags() == 0)
+        if (!bResult && this->m_pOutputSolution->GetObjectFlags() == 0)
         {
             return false;
         }
 
         if (((PathingRequestExt*)this->pRequest)->FUN_006ca4c0() &&
             ((PathingSolutionExt*)this->m_pOutputSolution)->FUN_009611e0() == 0 &&
-            ((PathingSolutionExt*)this->m_pOutputSolution)->GetObjectFlags() >= 2)
+            this->m_pOutputSolution->GetObjectFlags() >= 2)
         {
-            PathNodeExt* node0 = ((PathingSolutionExt*)this->m_pOutputSolution)->FUN_006e7970(0);
-            PathNodeExt* node1 = ((PathingSolutionExt*)this->m_pOutputSolution)->FUN_006e7970(1);
+            PathNodeExt* node0 = (PathNodeExt*)this->m_pOutputSolution->FUN_006e7970(0);
+            PathNodeExt* node1 = (PathNodeExt*)this->m_pOutputSolution->FUN_006e7970(1);
             if (node0 && node1)
             {
-                PathingLocationExt kStart(node0->FUN_00717e50());
-                PathingLocationExt kNext(node1->FUN_00717e50());
+                PathingLocation kStart(node0->FUN_00717e50());
+                PathingLocation kNext(node1->FUN_00717e50());
                 if (((NiPoint3Ext&)(kNext.FUN_005c3420() - kStart.FUN_005c3420())).FUN_004a7290() > 4096.0)
                 {
-                    NiColor col;
-                    FUN_006d99a0(&col, ((PathingRequestExt*)this->pRequest)->GetField90Float(), kStart, kNext,
+                    // The callee fills this color; do not invoke the NiColor constructor.
+                    float col[sizeof(NiColor) / sizeof(float)];
+                    FUN_006d99a0((NiColor*)col, ((PathingRequestExt*)this->pRequest)->GetField90Float(), kStart, kNext,
                                  ((PathingRequestExt*)this->pRequest)->GetFloatAtOffset68());
-                    node0->FUN_006b0570(&col);
+                    node0->FUN_006b0570((NiColor*)col);
                 }
             }
         }
 
         if (bResult && ((PathingRequestExt*)this->pRequest)->FUN_00505c00() &&
-            ((PathingSolutionExt*)this->m_pOutputSolution)->FUN_00441110() ==
-                ((PathingSolutionExt*)this->m_pOutputSolution)->FUN_005a4320() - 1)
+            this->m_pOutputSolution->FUN_00441110() ==
+                this->m_pOutputSolution->FUN_005a4320() - 1)
         {
             PathNodeExt* nodeLast =
-                ((PathingSolutionExt*)this->m_pOutputSolution)
-                    ->FUN_006e7970(((PathingSolutionExt*)this->m_pOutputSolution)->GetObjectFlags() - 1);
+                (PathNodeExt*)this->m_pOutputSolution
+                    ->FUN_006e7970(this->m_pOutputSolution->GetObjectFlags() - 1);
             PathNodeExt* nodePrev =
-                ((PathingSolutionExt*)this->m_pOutputSolution)
-                    ->FUN_006e7970(((PathingSolutionExt*)this->m_pOutputSolution)->GetObjectFlags() - 2);
+                (PathNodeExt*)this->m_pOutputSolution
+                    ->FUN_006e7970(this->m_pOutputSolution->GetObjectFlags() - 2);
             if (nodeLast && nodePrev)
             {
-                PathingLocationExt locLast(nodeLast->FUN_00717e50());
-                PathingLocationExt locPrev(nodePrev->FUN_00717e50());
+                PathingLocation locLast(nodeLast->FUN_00717e50());
+                PathingLocation locPrev(nodePrev->FUN_00717e50());
                 if (((NiPoint3Ext&)(locLast.FUN_005c3420() - locPrev.FUN_005c3420())).FUN_004a7290() > 4096.0)
                 {
-                    NiColor kEndColor;
+                    float kEndColor[sizeof(NiColor) / sizeof(float)];
                     {
-                        PathingLocationExt kAdjustedLocation(nodeLast->FUN_00717e50());
-                        FUN_006da420(&kEndColor, ((PathingRequestExt*)this->pRequest)->FUN_00507e10(),
+                        PathingLocation kAdjustedLocation(nodeLast->FUN_00717e50());
+                        FUN_006da420((NiColor*)kEndColor, ((PathingRequestExt*)this->pRequest)->FUN_00507e10(),
                                      kAdjustedLocation, ((PathingRequestExt*)this->pRequest)->GetFloatAtOffset68());
-                        nodeLast->FUN_006b0570(&kEndColor);
+                        nodeLast->FUN_006b0570((NiColor*)kEndColor);
                     }
                 }
             }
@@ -7956,61 +7489,17 @@ bool PathBuilder_Child::FUN_006ca0e0(Actor* apActor, unsigned int aiSegmentIndex
 }
 }  // namespace fnv_006ca0e0
 
-struct FUN_006dcbb0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    FUN_006dcbb0();
-    ~FUN_006dcbb0();
-};
-struct FUN_006815c0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    FUN_006815c0();
-};
-struct GlobalFloatSetting
-{
-    float* FUN_00403e20();
-};
-extern GlobalFloatSetting DAT_011cff94;
+extern SettingT<GameSettingCollection> DAT_011cff94;
 extern float DAT_0101e340;
-struct HighProcessPart6e6
-{
-    FUN_006dcbb0 unk04;
-    FUN_006dcbb0 unk2c;
-    int unk54;
-    int unk58;
-    FUN_006815c0 unk5c;
-    FUN_006815c0 unk68;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    float unk8c;
-    float unk90;
-    HighProcessPart6e6();
-    virtual ~HighProcessPart6e6();
-};
 // Constructor that zeroes four integer fields and initializes two float fields from DAT_011cff94 and DAT_0101e340.
 // @fnv 0x006e61a0
-HighProcessPart6e6::HighProcessPart6e6()
+PathingSearchRayCast::PathingSearchRayCast()
 {
-    unk7c = 0;
+    // pt5C and pt68 are built by the out-of-line NiPoint3 constructor before this body.
+    unk7C = 0;
     unk84 = 0;
     unk80 = 0;
     unk88 = 0;
-    unk8c = *DAT_011cff94.FUN_00403e20();
-    unk90 = DAT_0101e340;
+    f8C = *DAT_011cff94.FUN_00403e20();
+    f90 = DAT_0101e340;
 }

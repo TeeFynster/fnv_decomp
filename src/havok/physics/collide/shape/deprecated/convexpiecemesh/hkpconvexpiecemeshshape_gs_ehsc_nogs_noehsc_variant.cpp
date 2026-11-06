@@ -5,7 +5,8 @@
 
 // src/havok/physics/collide/shape/deprecated/convexpiecemesh/hkpconvexpiecemeshshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/deprecated/convexpiecemesh/hkpconvexpiecemeshshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpConvexPieceMeshShape.h"
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkVector4.h"
 struct HkpStandIn;
 struct HkpAllocator
 {
@@ -129,112 +130,11 @@ struct D : P, S
     {}
     void FUN_00e490d0();
 };
-class GlobalObjectO2_00d472a0;
-extern GlobalObjectO2_00d472a0 g_01269198;
-int __cdecl FUN_00d06f80(const void* pvChunk, int iNumBytes) throw();
-template <class T> class hkArrayE494
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-};
-class hkStatisticsCollectorE494
-{
-  public:
-    virtual ~hkStatisticsCollectorE494() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual void addChildObject(const char* pcName, const void* pvObject, const void* pvClass) throw();
-    virtual void V4() throw();
-    virtual void AddMemoryChunk(int iType, const char* pcName, const void* pvChunk, int iUsedSize,
-                                int iAllocatedSize) throw();
-
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkBool m_countDontDeallocate;
-
-    template <class T> void addArray(const char* pcName, const hkArrayE494<T>& kArray)
-    {
-        if ((kArray.m_iCapacityState & 0x80000000) == 0 || m_countDontDeallocate)
-        {
-            const T* pData = kArray.m_data;
-            int iAllocated = FUN_00d06f80(pData, kArray.getCapacity() * sizeof(T));
-            AddMemoryChunk(3, pcName, kArray.m_data, kArray.GetLogicalSize() * sizeof(T), iAllocated);
-        }
-    }
-};
-class hkxStreamE494;
-class hkDisplayMeshE494;
-struct hkMeshSectionE494
-{
-    int unk00;
-    int unk04;
-    hkArrayE494<hkxStreamE494*> m_indexStreams;
-    hkArrayE494<hkxStreamE494*> m_vertexStreams;
-    hkArrayE494<hkxStreamE494*> m_materialStreams;
-};
-class hkReferencedObjectE494
-{
-  public:
-    virtual ~hkReferencedObjectE494() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-
-    void FUN_00d213e0(hkStatisticsCollectorE494* pkCollector, const GlobalObjectO2_00d472a0* pkClass) const throw();
-};
-class hkDisplayGeometryE494 : public hkReferencedObjectE494
-{
-  public:
-    hkMeshSectionE494* m_kCriticalSection;
-    hkDisplayMeshE494* m_pDisplayMesh;
-
-    void AddToStatisticsCollector(hkStatisticsCollectorE494* pkCollector, const GlobalObjectO2_00d472a0* pkClass) const
-        throw();
-};
-
 #include <xmmintrin.h>
 inline void* __cdecl operator new(unsigned int, void* pvWhere) throw()
 {
     return pvWhere;
 }
-
-class hkBoolE49
-{
-  public:
-    hkBoolE49(bool b) : m_cBooleanValue((char)b)
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
-
-struct hkVector4E49
-{
-    __m128 m_vComponents;
-
-    inline hkVector4E49& operator=(const hkVector4E49& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
-};
 
 struct ShapeBufferE49
 {
@@ -252,7 +152,7 @@ class TriangleShapeE49
     int unk14;
     int unk18;
     int unk1c;
-    hkVector4E49 m_kVertices[3];
+    hkVector4 m_kVertices[3];
 };
 
 class ShapeContainerE49
@@ -300,7 +200,7 @@ class FUN_00e607c0
     int unk0c;
     int unk10;
     int unk14;
-    hkVector4E49* m_pkVertices;
+    hkVector4* m_pkVertices;
     int m_iNumVertices;
     MeshShapeE49* m_pkMesh;
     int* m_piKeys;
@@ -331,7 +231,7 @@ class PieceAgentE49
 class PieceSourceE49 : public PieceBaseE49, public PieceAgentE49
 {
   public:
-    __declspec(noinline) hkBoolE49 FUN_00e49040(const int* piFace, int m_iEdgeNumber) const
+    __declspec(noinline) hkBool FUN_00e49040(const int* piFace, int m_iEdgeNumber) const
     {
         int iWord = m_iEdgeNumber / 31;
         int iBit = m_iEdgeNumber % 31;
@@ -353,7 +253,7 @@ FUN_00e607c0* PieceAgentE49::FUN_00e49120(unsigned int uiIndex, void* pvMemory)
         const int* j = &piData[iStart];
         pkPieces->m_iNumKeys = *j;
         pkPieces->m_piKeys = (int*)(j + 1);
-        hkVector4E49* pkOut = (hkVector4E49*)(((unsigned int)pvMemory + 0x3b) & ~15);
+        hkVector4* pkOut = (hkVector4*)(((unsigned int)pvMemory + 0x3b) & ~15);
         pkPieces->m_pkVertices = pkOut;
         pkPieces->m_iNumVertices = 0;
         for (int i = 0; i < pkPieces->m_iNumKeys; i++)
@@ -378,7 +278,7 @@ FUN_00e607c0* PieceAgentE49::FUN_00e49120(unsigned int uiIndex, void* pvMemory)
         pkPieces->m_iNumKeys = 1;
         int* piKeys = &m_pkFaces->m_piTriangleKeys[uiIndex - m_pkFaces->m_uiNumFaces];
         pkPieces->m_piKeys = piKeys;
-        hkVector4E49* pkOut = (hkVector4E49*)(((unsigned int)pvMemory + 0x3b) & ~15);
+        hkVector4* pkOut = (hkVector4*)(((unsigned int)pvMemory + 0x3b) & ~15);
         pkPieces->m_pkVertices = pkOut;
         pkPieces->m_iNumVertices = 3;
         int iKey = pkPieces->m_piKeys[0];
@@ -390,26 +290,22 @@ FUN_00e607c0* PieceAgentE49::FUN_00e49120(unsigned int uiIndex, void* pvMemory)
     return pkPieces;
 }
 
-struct xVec4
+__forceinline void hkVector4::set(float x, float y, float z, float w)
 {
-    __m128 m_vComponents;
-    __forceinline void set(float x, float y, float z, float w)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-    __forceinline void setMin4(const xVec4& a, const xVec4& b)
-    {
-        m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setMax4(const xVec4& a, const xVec4& b)
-    {
-        m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents);
-    }
-};
+    m_vComponents = _mm_setr_ps(x, y, z, w);
+}
+__forceinline void hkVector4::setMin4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
+}
+__forceinline void hkVector4::setMax4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents);
+}
 struct xAabb
 {
-    xVec4 m_kMinimumCorner;
-    xVec4 m_kMaximumCorner;
+    hkVector4 m_kMinimumCorner;
+    hkVector4 m_kMaximumCorner;
 };
 struct xTransform;
 typedef __declspec(align(16)) int xShapeBuffer[128];

@@ -1,3 +1,22 @@
+#include "../../../../../../../include/hkLargeBlockAllocator.h"
+#include "../../../../../../../include/hkIArchive.h"
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+
+inline unsigned int hkLargeBlockAllocator::Chunk::getChunkSize() const { return head & ~3u; }
+inline bool hkLargeBlockAllocator::Chunk::isPinuse() const { return (head & 1) != 0; }
+inline bool hkLargeBlockAllocator::Chunk::isCinuse() const { return (head & 2) != 0; }
+inline bool hkLargeBlockAllocator::Chunk::isInuse() const { return ((head >> 1) & 1) != 0; }
+inline hkLargeBlockAllocator::Chunk* hkLargeBlockAllocator::Chunk::chunkPlusOffset(unsigned int s) { return (Chunk*)((char*)this + s); }
+inline hkLargeBlockAllocator::Chunk* hkLargeBlockAllocator::Chunk::chunkMinusOffset(unsigned int s) { return (Chunk*)((char*)this - s); }
+inline void hkLargeBlockAllocator::Chunk::setSizeAndPinuseOfFreeChunk(unsigned int s) { head = s | 1; chunkPlusOffset(s)->m_uiPreviousChunkSize = s; }
+inline void hkLargeBlockAllocator::Chunk::setFreeWithPinuse(unsigned int s, Chunk* n) { n->head &= ~1u; setSizeAndPinuseOfFreeChunk(s); }
+inline void* hkLargeBlockAllocator::Chunk::getPayload() { return (void*)(this + 1); }
+inline unsigned int hkLargeBlockAllocator::Chunk::getPayloadSize() const { return getChunkSize() - sizeof(Chunk); }
+inline hkLargeBlockAllocator::Chunk* hkLargeBlockAllocator::Chunk::nextChunk() { return (Chunk*)((char*)this + getChunkSize()); }
+inline hkLargeBlockAllocator::Chunk* hkLargeBlockAllocator::Page::getFirstChunk() { return (Chunk*)m_kRayStart; }
+inline hkLargeBlockAllocator::Chunk* hkLargeBlockAllocator::Page::getFooter() { return (Chunk*)(m_kRayEnd - sizeof(Chunk)); }
 
 // src/havok/common/base/memory/allocator/freelist/hklargeblockallocator.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/memory/allocator/freelist/hklargeblockallocator.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -21,26 +40,19 @@ void* __stdcall FUN_00dd8a80(void* p, void* apUnused)
     return reinterpret_cast<char*>(reinterpret_cast<size_t*>(p)[-3] & 0xfffffffc) - 0x10;
 }
 
-struct hkReferencedObject
-{
-    void removeReference();
-};
 extern int DAT_0102e388;
 extern int DAT_010d7c80;
-struct hkLargeBlockAllocator
-{
-    int* m_p;
-    int* m_q;
-    hkReferencedObject* m_r;
-    void FUN_00dd91f0();
-};
+
+// Not an hkLargeBlockAllocator member: 0x00dd91f0 stores hkIArchive's vftable
+// (RTTI 0x010d7c80, base hkReferencedObject), releases m_streamReader at +8 and
+// restores hkBaseObject's vftable (0x0102e388), i.e. the hkIArchive destructor body.
 // @fnv 0x00dd91f0
-void hkLargeBlockAllocator::FUN_00dd91f0()
+void hkIArchive::FUN_00dd91f0()
 {
-    m_p = (int*)&DAT_010d7c80;
-    if (m_r)
-        m_r->removeReference();
-    m_p = (int*)&DAT_0102e388;
+    *(int**)this = (int*)&DAT_010d7c80;
+    if (m_streamReader)
+        m_streamReader->removeReference();
+    *(int**)this = (int*)&DAT_0102e388;
 }
 
 // Returns the value at a[-3] with the low two bits cleared.
@@ -50,38 +62,9 @@ int __stdcall FUN_00dd8a90(int* pValues, int iUnused)
     return (pValues[-3] & 0xfffffffc);
 }
 
-struct DD7F10ListNode
-{
-    DD7F10ListNode* m_next;
-    DD7F10ListNode* m_pSecondNode;
-};
-
-struct DD7F10Pool
-{
-    int unk00;
-    int unk04;
-    int m_numAllocated;
-    int m_numFree;
-    void** m_freeListPtr;
-    void* m_kFreeListEntries;
-    void* m_buckets[32];
-    int unk98;
-    void* m_freeHead;
-    int m_blockShift;
-    DD7F10ListNode m_kBlocks;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int m_totalBytes;
-    int m_peakBytes;
-
-    void FUN_00dd7f10();
-};
-
 // Clears the pool's counters, buckets, free list and sentinel node, then sets the block shift to 3.
 // @fnv 0x00dd7f10
-void DD7F10Pool::FUN_00dd7f10()
+void hkLargeBlockAllocator::FUN_00dd7f10()
 {
     m_peakBytes = 0;
     m_totalBytes = 0;
@@ -114,69 +97,21 @@ struct WorkProcessor
     virtual void process(WorkItem*, int);
 };
 
-struct QueueOwner
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    WorkProcessor* processor;
-    int unk9c;
-    int unka0;
-    WorkItem sentinel;
-    void ProcessAllItems();
-    void FUN_00dd7f10();
-};
-
 // Iterates the sentinel-linked list from sentinel.next, calling processor->process on each item with its value, then calls FUN_00dd7f10.
 // @fnv 0x00dd7fc0
-void QueueOwner::ProcessAllItems()
+void hkLargeBlockAllocator::ProcessAllItems()
 {
-    WorkItem* current = sentinel.next;
-    if (current != &sentinel)
+    WorkItem* current = ((WorkItem*)&m_kPage)->next;
+    if (current != (WorkItem*)&m_kPage)
     {
         do
         {
             int value = current->value;
-            WorkProcessor* pProcessor = processor;
+            WorkProcessor* pProcessor = (WorkProcessor*)m_provider;
             WorkItem* next = current->next;
             pProcessor->process(current, value);
             current = next;
-        } while (current != &sentinel);
+        } while (current != (WorkItem*)&m_kPage);
     }
     FUN_00dd7f10();
 }
@@ -204,24 +139,10 @@ unsigned int __stdcall GetMaxChunkSize(TreeChunk* apTreeChunk, unsigned int maxS
 
 int __cdecl FUN_00dd7e00(unsigned int size);
 
-struct FUN_00dd8350_Alloc
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    unsigned int unk14;
-    void* m_treeBins[32];
-
-    unsigned int GetMaxChunkSize(void* tree, unsigned int size);
-    unsigned int FUN_00dd8350();
-};
-
 // @fnv 0x00dd8350
-unsigned int FUN_00dd8350_Alloc::FUN_00dd8350()
+unsigned int hkLargeBlockAllocator::FUN_00dd8350()
 {
-    unsigned int size = unk14;
+    unsigned int size = m_uiChunkSize;
     int idx = FUN_00dd7e00(size);
     for (int i = 31; i >= idx; i--)
     {
@@ -232,111 +153,17 @@ unsigned int FUN_00dd8350_Alloc::FUN_00dd8350()
     return size;
 }
 
-struct DD89B0MemChunk
-{
-    unsigned int m_uiPreviousChunkSize;
-    unsigned int head;
-
-    unsigned int getChunkSize() const
-    {
-        return head & ~3u;
-    }
-    bool isPinuse() const
-    {
-        return (head & 1) != 0;
-    }
-    bool isCinuse() const
-    {
-        return (head & 2) != 0;
-    }
-    DD89B0MemChunk* chunkPlusOffset(unsigned int s)
-    {
-        return (DD89B0MemChunk*)((char*)this + s);
-    }
-    DD89B0MemChunk* chunkMinusOffset(unsigned int s)
-    {
-        return (DD89B0MemChunk*)((char*)this - s);
-    }
-    void setSizeAndPinuseOfFreeChunk(unsigned int s)
-    {
-        head = s | 1;
-        chunkPlusOffset(s)->m_uiPreviousChunkSize = s;
-    }
-    void setFreeWithPinuse(unsigned int s, DD89B0MemChunk* n)
-    {
-        n->head &= ~1u;
-        setSizeAndPinuseOfFreeChunk(s);
-    }
-};
-
-struct DD89B0LargeBlockAllocator
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    DD89B0MemChunk* m_fMinimumV;
-    unsigned int m_uiChunkSize;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    unsigned int m_uiBufferCapacity;
-    int m_overhead;
-
-    void _unlinkChunk(DD89B0MemChunk* p);
-    void _insertChunk(DD89B0MemChunk* p, unsigned int size);
-    void Free(void* mem);
-};
-
 // Frees a block: merges it with adjacent free chunks, updates the top chunk or inserts the merged chunk into the free list.
 // @fnv 0x00dd89b0
-void DD89B0LargeBlockAllocator::Free(void* mem)
+void hkLargeBlockAllocator::Free(void* mem)
 {
     if (!mem)
         return;
-    DD89B0MemChunk* p = (DD89B0MemChunk*)((char*)mem - 16);
+    hkLargeBlockAllocator::Chunk* p = (hkLargeBlockAllocator::Chunk*)((char*)mem - 16);
     unsigned int uiChunkSize = p->getChunkSize();
     m_uiBufferCapacity -= uiChunkSize;
     m_overhead += 16 - p->getChunkSize();
-    DD89B0MemChunk* next = p->chunkPlusOffset(uiChunkSize);
+    hkLargeBlockAllocator::Chunk* next = p->chunkPlusOffset(uiChunkSize);
     if (!p->isPinuse())
     {
         unsigned int prevsize = p->m_uiPreviousChunkSize;
@@ -367,112 +194,19 @@ void DD89B0LargeBlockAllocator::Free(void* mem)
 
 typedef void(__cdecl* S_00dd8aa0_Callback)(void* start, unsigned int size, void* param);
 
-struct S_00dd8aa0_Chunk
-{
-    unsigned int m_uiPreviousChunkSize;
-    unsigned int head;
-    S_00dd8aa0_Chunk* fd;
-    S_00dd8aa0_Chunk* bk;
-    unsigned int getChunkSize() const
-    {
-        return head & ~3u;
-    }
-    bool isInuse() const
-    {
-        return ((head >> 1) & 1) != 0;
-    }
-    void* getPayload()
-    {
-        return (void*)(this + 1);
-    }
-    unsigned int getPayloadSize() const
-    {
-        return getChunkSize() - sizeof(S_00dd8aa0_Chunk);
-    }
-    S_00dd8aa0_Chunk* nextChunk()
-    {
-        return (S_00dd8aa0_Chunk*)((char*)this + getChunkSize());
-    }
-};
-
-struct S_00dd8aa0_Page
-{
-    S_00dd8aa0_Page* m_pSecondNode;
-    S_00dd8aa0_Page* m_next;
-    int unk8;
-    int unkC;
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    S_00dd8aa0_Chunk* getFirstChunk()
-    {
-        return (S_00dd8aa0_Chunk*)m_kRayStart;
-    }
-    S_00dd8aa0_Chunk* getFooter()
-    {
-        return (S_00dd8aa0_Chunk*)(m_kRayEnd - sizeof(S_00dd8aa0_Chunk));
-    }
-};
-
-struct S_00dd8aa0_Allocator
-{
-    void* m_vtbl;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00dd8aa0_Chunk* m_fMinimumV;
-    unsigned int m_uiChunkSize;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    S_00dd8aa0_Page m_kPage;
-    void ForEachAllocatedBlock(S_00dd8aa0_Callback callback, void* param);
-};
-
 // @fnv 0x00dd8aa0
-void S_00dd8aa0_Allocator::ForEachAllocatedBlock(S_00dd8aa0_Callback callback, void* param)
+void hkLargeBlockAllocator::ForEachAllocatedBlock(S_00dd8aa0_Callback callback, void* param)
 {
     m_fMinimumV->head = m_uiChunkSize | 1;
-    for (S_00dd8aa0_Page* page = m_kPage.m_next; page != &m_kPage; page = page->m_next)
+    for (hkLargeBlockAllocator::Page* page = m_kPage.m_next; page != &m_kPage; page = page->m_next)
     {
-        S_00dd8aa0_Chunk* end = page->getFooter();
-        for (S_00dd8aa0_Chunk* cur = page->getFirstChunk(); cur != end;)
+        hkLargeBlockAllocator::Chunk* end = page->getFooter();
+        for (hkLargeBlockAllocator::Chunk* cur = page->getFirstChunk(); cur != end;)
         {
             unsigned int size = cur->getChunkSize();
             if (cur->isInuse())
                 callback(cur->getPayload(), cur->getPayloadSize(), param);
-            cur = (S_00dd8aa0_Chunk*)((char*)cur + size);
+            cur = (hkLargeBlockAllocator::Chunk*)((char*)cur + size);
         }
     }
 }
@@ -500,10 +234,11 @@ int __cdecl FUN_00dd7e70(int aiValue)
     return (int)(r + kIter);
 }
 
-struct ListNode
+// Exe 0x00dd7ec0: unit-local ListNode view; declarations and layout are preserved.
+struct HklargeblockallocatorListNodeView
 {
     int unk00;
-    ListNode* next;
+    HklargeblockallocatorListNodeView* next;
     int unk08;
     int value;
 };
@@ -517,74 +252,27 @@ struct ListTarget
     virtual void v04();
     virtual void v08();
     virtual void v0c();
-    virtual void v10(ListNode* node, int value);
-};
-
-struct FUN_00dd7ec0_cls
-{
-    int* m_vptr;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    ListTarget* m_98;
-    int unk9C;
-    int unkA0;
-    ListNode m_a4;
-    void FUN_00dd7ec0();
+    virtual void v10(HklargeblockallocatorListNodeView* node, int value);
 };
 
 // Sets the vtable, walks the m_a4 list calling m_98->v10 on each node, then sets the second vtable.
 // @fnv 0x00dd7ec0
-void FUN_00dd7ec0_cls::FUN_00dd7ec0()
+void hkLargeBlockAllocator::FUN_00dd7ec0()
 {
-    m_vptr = &DAT_010d7c34;
-    ListNode* sentinel = &m_a4;
-    ListNode* node = m_a4.next;
+    *(int**)this = &DAT_010d7c34;
+    ::HklargeblockallocatorListNodeView* sentinel = (::HklargeblockallocatorListNodeView*)&m_a4;
+    ::HklargeblockallocatorListNodeView* node = ((::HklargeblockallocatorListNodeView*)&m_a4)->next;
     if (node != sentinel)
     {
         do
         {
             int value = node->value;
-            ListNode* next = node->next;
-            m_98->v10(node, value);
+            ::HklargeblockallocatorListNodeView* next = node->next;
+            ((ListTarget*)m_provider)->v10(node, value);
             node = next;
         } while (node != sentinel);
     }
-    m_vptr = &DAT_010d7c10;
+    *(int**)this = &DAT_010d7c10;
 }
 
 struct tchunk
@@ -600,19 +288,9 @@ struct tchunk
 
 int __cdecl FUN_00dd7e00(int size);
 
-struct TargetClass
-{
-    char pad00[8];
-    unsigned int m_uiChunkCount;
-    char pad0c[0xc];
-    tchunk* m_apChunkLists[32];
-
-    void InsertChunk(tchunk* x, int size);
-};
-
 // Computes a bin index from size, then inserts chunk x into that bin's list or tree, splitting by size bits until a matching chunk or empty slot is found.
 // @fnv 0x00dd8010
-void TargetClass::InsertChunk(tchunk* pChunk, int size)
+void hkLargeBlockAllocator::InsertChunk(tchunk* pChunk, int size)
 {
     tchunk** ppBin;
     int index;
@@ -666,63 +344,39 @@ void TargetClass::InsertChunk(tchunk* pChunk, int size)
     }
 }
 
-struct FUN_00dd80d0_node
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    FUN_00dd80d0_node* m_pSecondNode;  // +0x08
-    FUN_00dd80d0_node* m_next;         // +0x0c
-    FUN_00dd80d0_node* m_fMinimumU;    // +0x10
-    FUN_00dd80d0_node* m_fMaximumU;    // +0x14
-    FUN_00dd80d0_node* m_parent;       // +0x18
-    unsigned int m_bin;                // +0x1c
-};
-
-struct FUN_00dd80d0_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int m_freeMask;  // +0x08
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    FUN_00dd80d0_node* m_bins[32];  // +0x18
-    void RemoveNode(FUN_00dd80d0_node* node);
-};
-
 // Unlinks node from its sibling list or replaces it with a successor in the tree, then detaches it from its bin and reattaches its children to the replacement.
 // @fnv 0x00dd80d0
-void FUN_00dd80d0_cls::RemoveNode(FUN_00dd80d0_node* node)
+void hkLargeBlockAllocator::RemoveNode(hkLargeBlockAllocator::TreeChunk* node)
 {
-    FUN_00dd80d0_node* next = node->m_next;
-    FUN_00dd80d0_node* tree = node->m_parent;
-    FUN_00dd80d0_node* r;
+    hkLargeBlockAllocator::TreeChunk* next = (TreeChunk*)node->bk;
+    hkLargeBlockAllocator::TreeChunk* tree = node->parent;
+    hkLargeBlockAllocator::TreeChunk* r;
 
     if (next != node)
     {
-        FUN_00dd80d0_node* prev = node->m_pSecondNode;
-        prev->m_next = next;
-        next->m_pSecondNode = prev;
+        hkLargeBlockAllocator::TreeChunk* prev = (TreeChunk*)node->fd;
+        prev->bk = next;
+        next->fd = prev;
         r = next;
     }
     else
     {
-        FUN_00dd80d0_node** slot = &node->m_fMaximumU;
-        r = node->m_fMaximumU;
+        hkLargeBlockAllocator::TreeChunk** slot = &node->child[1];
+        r = node->child[1];
         if (r == 0)
         {
-            r = node->m_fMinimumU;
-            slot = &node->m_fMinimumU;
+            r = node->child[0];
+            slot = &node->child[0];
         }
         if (r != 0)
         {
             for (;;)
             {
-                FUN_00dd80d0_node** cur = &r->m_fMaximumU;
-                if (r->m_fMaximumU == 0)
+                hkLargeBlockAllocator::TreeChunk** cur = &r->child[1];
+                if (r->child[1] == 0)
                 {
-                    cur = &r->m_fMinimumU;
-                    if (r->m_fMinimumU == 0)
+                    cur = &r->child[0];
+                    if (r->child[0] == 0)
                     {
                         *slot = 0;
                         break;
@@ -736,123 +390,58 @@ void FUN_00dd80d0_cls::RemoveNode(FUN_00dd80d0_node* node)
 
     if (tree != 0)
     {
-        unsigned int bin = node->m_bin;
-        FUN_00dd80d0_node** head = &this->m_bins[bin];
+        unsigned int bin = node->index;
+        hkLargeBlockAllocator::TreeChunk** head = &this->m_bins[bin];
         if (node == *head)
         {
             *head = r;
             if (r == 0)
             {
-                this->m_freeMask &= ~(1u << node->m_bin);
+                this->m_freeMask &= ~(1u << node->index);
                 return;
             }
         }
         else
         {
-            if (tree->m_fMinimumU == node)
+            if (tree->child[0] == node)
             {
-                tree->m_fMinimumU = r;
+                tree->child[0] = r;
             }
             else
             {
-                tree->m_fMaximumU = r;
+                tree->child[1] = r;
             }
             if (r == 0)
             {
                 return;
             }
         }
-        r->m_parent = tree;
-        FUN_00dd80d0_node* left = node->m_fMinimumU;
+        r->parent = tree;
+        hkLargeBlockAllocator::TreeChunk* left = node->child[0];
         if (left != 0)
         {
-            r->m_fMinimumU = left;
-            left->m_parent = r;
+            r->child[0] = left;
+            left->parent = r;
         }
-        FUN_00dd80d0_node* right = node->m_fMaximumU;
+        hkLargeBlockAllocator::TreeChunk* right = node->child[1];
         if (right != 0)
         {
-            r->m_fMaximumU = right;
-            right->m_parent = r;
+            r->child[1] = right;
+            right->parent = r;
         }
     }
 }
 
-struct FUN_00dd83a0_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned char* m_10;
-    unsigned int m_14;
-    void FUN_00dd83a0();
-};
-
 // @fnv 0x00dd83a0
-void FUN_00dd83a0_cls::FUN_00dd83a0()
+__declspec(noinline) void hkLargeBlockAllocator::FUN_00dd83a0()
 {
     *(unsigned int*)(m_10 + 4) = m_14 | 1;
     *(unsigned int*)(m_10 + m_14) = m_14;
 }
 
-struct hkBlockAllocator
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    char* m_next;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    void* AllocateBlock(int a);
-};
-
 // Advances the allocator's counters and next pointer by a, writes size and flags into the new block header, and returns the previous block's payload.
 // @fnv 0x00dd83c0
-void* hkBlockAllocator::AllocateBlock(int aiSize)
+void* hkLargeBlockAllocator::AllocateBlock(int aiSize)
 {
     unkBC += aiSize;
     unkC0 += aiSize - 0x10;
@@ -867,23 +456,11 @@ void* hkBlockAllocator::AllocateBlock(int aiSize)
     return pBlock + 0x10;
 }
 
-struct FUN_00dd8480_cls
-{
-    int unk00;
-    int unk04;
-    int m_08;
-    int unk0C;
-    int unk10;
-    unsigned int m_14;
-    int AllocSlow(int a);
-    int Allocate(int a);
-};
-
 int __stdcall ProbeSmall(int a);
 
 // Tries ProbeSmall when m_08 is set, then AllocSlow if a+0x100 is below m_14, otherwise returns 0.
 // @fnv 0x00dd8480
-int FUN_00dd8480_cls::Allocate(int aiSize)
+int hkLargeBlockAllocator::Allocate(int aiSize)
 {
     if (m_08 != 0)
     {
@@ -900,12 +477,6 @@ int FUN_00dd8480_cls::Allocate(int aiSize)
     return 0;
 }
 
-struct hkMemoryAllocator
-{
-    virtual void* unk00() = 0;
-    virtual void* allocate(unsigned int size) = 0;
-};
-
 struct hkMemoryManager
 {
     virtual void* unk00() = 0;
@@ -920,56 +491,12 @@ struct hkMemoryManager
     virtual void* allocate(unsigned int size) = 0;
 };
 
-struct FUN_00dd8700_cls : public hkMemoryAllocator
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    hkMemoryManager* unk98;
-
-    void* FUN_00dd8700(unsigned int size);
-};
-
 // Rounds size up to a 16-byte multiple, allocates it via this allocator or unk98, writes a tag at the start and returns the block offset by 0x10.
 // @fnv 0x00dd8700
-void* FUN_00dd8700_cls::FUN_00dd8700(unsigned int size)
+void* hkLargeBlockAllocator::FUN_00dd8700(unsigned int size)
 {
     unsigned int uiAlignedSize = (size + 0x1fu) & 0xfffffff0u;
-    void* block = allocate(uiAlignedSize);
+    void* block = vf01(uiAlignedSize);
 
     if (block != 0)
     {
@@ -1003,55 +530,8 @@ struct Heap
     virtual void V28(void* apBlock, unsigned int auiSize);
 };
 
-struct FUN_00dd8750_cls
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void V08(void* apBlock);
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    Heap* m_pHeap;
-
-    void FUN_00dd8750(void* apBlock, unsigned int auiSize);
-};
-
 // @fnv 0x00dd8750
-void FUN_00dd8750_cls::FUN_00dd8750(void* apBlock, unsigned int auiSize)
+void hkLargeBlockAllocator::FUN_00dd8750(void* apBlock, unsigned int auiSize)
 {
     int iCount = *(int*)((char*)apBlock - 0x10);
     switch (iCount)
@@ -1060,213 +540,112 @@ void FUN_00dd8750_cls::FUN_00dd8750(void* apBlock, unsigned int auiSize)
         m_pHeap->V28((char*)apBlock - 0x10, (auiSize + 0x1f) & 0xfffffff0);
         break;
     case 1:
-        V08((char*)apBlock - 0x10);
+        Free((char*)apBlock - 0x10);
         break;
     }
 }
 
-namespace fnv_00dd8790 {
-struct FUN_00dd8790_hdr
-{
-    unsigned int m_00;
-    unsigned int m_04;
-};
-struct FUN_00dd8790_node
-{
-    FUN_00dd8790_node* m_00;
-    FUN_00dd8790_node* m_04;
-    int unk08;
-    void* m_0c;
-    FUN_00dd8790_hdr* m_10;
-    char* m_14;
-};
 struct FUN_00dd8790_owner
 {
     virtual void v00();
     virtual unsigned char* v04(unsigned char* out);
     virtual void v08();
     virtual void v0c();
-    virtual void v10(FUN_00dd8790_node* node, void* data);
-};
-struct FUN_00dd8790_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    FUN_00dd8790_hdr* m_10;
-    unsigned int m_14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    FUN_00dd8790_owner* m_98;
-    int m_9c;
-    int unka0;
-    FUN_00dd8790_node m_a4;
-
-    void PurgeAndSelectBlock();
-};
-
-struct FUN_00dd83a0_cls
-{
-    void FUN_00dd83a0();
-};
-struct FUN_00dd80d0_cls
-{
-    void RemoveNode(FUN_00dd8790_hdr* h);
-};
-struct FUN_00dd8010_cls
-{
-    void InsertChunk(FUN_00dd8790_hdr* h, unsigned int n);
-};
-struct FUN_00dd8400_cls
-{
-    void ResizeSegment(unsigned char* p, unsigned int n);
+    virtual void v10(hkLargeBlockAllocator::Page* node, void* data);
 };
 
 // @fnv 0x00dd8790
-void FUN_00dd8790_cls::PurgeAndSelectBlock()
+void hkLargeBlockAllocator::PurgeAndSelectBlock()
 {
-    ((FUN_00dd83a0_cls*)this)->FUN_00dd83a0();
-    FUN_00dd8790_node* sentinel = &m_a4;
-    FUN_00dd8790_node* n = m_a4.m_04;
+    FUN_00dd83a0();
+    hkLargeBlockAllocator::Page* sentinel = &m_a4;
+    hkLargeBlockAllocator::Page* n = m_a4.m_next;
     if (n != sentinel)
     {
         do
         {
-            FUN_00dd8790_hdr* h = n->m_10;
-            unsigned int uSize = h->m_04;
+            hkLargeBlockAllocator::Chunk* h = n->m_10;
+            unsigned int uSize = h->head;
             if ((((unsigned char)(uSize >> 1)) & 1) == 0 && (char*)h + (uSize & 0xfffffffcu) == (char*)n->m_14 - 0x10)
             {
-                FUN_00dd8790_node* nx = n->m_04;
-                n->m_00->m_04 = nx;
-                n->m_04->m_00 = n->m_00;
-                if (h == m_10)
+                hkLargeBlockAllocator::Page* nx = n->m_next;
+                n->m_pSecondNode->m_next = nx;
+                n->m_next->m_pSecondNode = n->m_pSecondNode;
+                if (h == m_fMinimumV)
                 {
-                    m_10 = (FUN_00dd8790_hdr*)&m_9c;
+                    m_fMinimumV = (hkLargeBlockAllocator::Chunk*)&m_9c;
                     m_14 = 0;
                 }
                 else
                 {
-                    ((FUN_00dd80d0_cls*)this)->RemoveNode(h);
+                    RemoveNode(h);
                 }
-                m_98->v10(n, n->m_0c);
+                ((FUN_00dd8790_owner*)m_provider)->v10(n, n->m_0c);
                 n = nx;
             }
             else
             {
-                n = n->m_04;
+                n = n->m_next;
             }
         } while (n != sentinel);
     }
-    if (m_a4.m_04 == sentinel)
+    if (m_a4.m_next == sentinel)
     {
-        m_10 = (FUN_00dd8790_hdr*)&m_9c;
+        m_fMinimumV = (hkLargeBlockAllocator::Chunk*)&m_9c;
         m_14 = 0;
         return;
     }
     unsigned char b;
-    unsigned char* flag = m_98->v04(&b);
+    unsigned char* flag = ((FUN_00dd8790_owner*)m_provider)->v04(&b);
     if (*flag != 0)
     {
         if (m_14 < 0x8000)
         {
             return;
         }
-        FUN_00dd8790_node* head = m_a4.m_04;
-        ((FUN_00dd8400_cls*)this)->ResizeSegment(&b, (unsigned int)m_10 - (unsigned int)head->m_10 + 0x120);
+        hkLargeBlockAllocator::Page* head = m_a4.m_next;
+        ResizeSegment(&b, (unsigned int)m_fMinimumV - (unsigned int)head->m_10 + 0x120);
         return;
     }
-    FUN_00dd8790_hdr* cur = m_10;
-    if (cur != (FUN_00dd8790_hdr*)&m_9c)
+    hkLargeBlockAllocator::Chunk* cur = m_fMinimumV;
+    if (cur != (hkLargeBlockAllocator::Chunk*)&m_9c)
     {
-        ((FUN_00dd8010_cls*)this)->InsertChunk(cur, m_14);
-        m_10 = (FUN_00dd8790_hdr*)&m_9c;
+        InsertChunk(cur, m_14);
+        m_fMinimumV = (hkLargeBlockAllocator::Chunk*)&m_9c;
         m_14 = 0;
     }
-    n = m_a4.m_04;
-    FUN_00dd8790_hdr* best = 0;
+    n = m_a4.m_next;
+    hkLargeBlockAllocator::Chunk* best = 0;
     if (n != sentinel)
     {
         do
         {
-            FUN_00dd8790_hdr* h = (FUN_00dd8790_hdr*)((char*)n->m_14 - 0x10);
-            if ((h->m_04 & 1) == 0)
+            hkLargeBlockAllocator::Chunk* h = (hkLargeBlockAllocator::Chunk*)((char*)n->m_14 - 0x10);
+            if ((h->head & 1) == 0)
             {
-                h = (FUN_00dd8790_hdr*)((char*)h - h->m_00);
-                if (best == 0 || (h->m_04 & 0xfffffffcu) > (best->m_04 & 0xfffffffcu))
+                h = (hkLargeBlockAllocator::Chunk*)((char*)h - h->m_uiPreviousChunkSize);
+                if (best == 0 || (h->head & 0xfffffffcu) > (best->head & 0xfffffffcu))
                 {
                     best = h;
                 }
             }
-            n = n->m_04;
+            n = n->m_next;
         } while (n != sentinel);
     }
     if (best != 0)
     {
-        ((FUN_00dd80d0_cls*)this)->RemoveNode(best);
-        m_10 = best;
-        m_14 = best->m_04 & 0xfffffffcu;
+        RemoveNode(best);
+        m_fMinimumV = best;
+        m_14 = best->head & 0xfffffffcu;
         return;
     }
-    m_10 = (FUN_00dd8790_hdr*)&m_9c;
+    m_fMinimumV = (hkLargeBlockAllocator::Chunk*)&m_9c;
     m_14 = 0;
 }
-}  // namespace fnv_00dd8790
-
-struct BlockPage
-{
-    unsigned int unk00;
-    BlockPage* next;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int start;
-    unsigned int end;
-};
-
-struct FUN_00dd8910_cls
-{
-    unsigned int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24;
-    unsigned int unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C;
-    unsigned int unk50, unk54, unk58, unk5C, unk60, unk64, unk68, unk6C, unk70, unk74;
-    unsigned int unk78, unk7C, unk80, unk84, unk88, unk8C, unk90, unk94, unk98, unk9C;
-    unsigned int unkA0;
-    BlockPage m_kPage;
-    bool* IsChunkInPageList(bool* result, char* mem);
-};
 
 // Checks that mem is 16-byte aligned, its header flag is set, and the chunk lies in a listed page's chunk chain; writes the result to result.
 // @fnv 0x00dd8910
-bool* FUN_00dd8910_cls::IsChunkInPageList(bool* result, char* mem)
+bool* hkLargeBlockAllocator::IsChunkInPageList(bool* result, char* mem)
 {
     unsigned int addr = (unsigned int)mem;
     if ((addr & 0xf) != 0)
@@ -1282,8 +661,8 @@ bool* FUN_00dd8910_cls::IsChunkInPageList(bool* result, char* mem)
         *result = false;
         return result;
     }
-    BlockPage* page = m_kPage.next;
-    BlockPage* sentinel = &m_kPage;
+    hkLargeBlockAllocator::Page* page = m_kPage.next;
+    hkLargeBlockAllocator::Page* sentinel = &m_kPage;
     unsigned int start = 0;
     unsigned int end = 0;
     if (page == sentinel)
@@ -1326,82 +705,13 @@ ok:
     return result;
 }
 
-struct S_00dd8b20_Ref
-{
-    int unk00;
-    int unk04;
-};
-struct S_00dd8b20_Node
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int key;
-    int size;
-};
-struct S_00dd8b20_Ret
-{
-    int key;
-    S_00dd8b20_Node* node;
-    int size;
-    S_00dd8b20_Ret()
-    {}
-};
-struct FUN_00dd8b20_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00dd8b20_Ref* m10;
-    unsigned m14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    S_00dd8b20_Node* ma8;
-    S_00dd8b20_Ret FUN_00dd8b20();
-};
 // @fnv 0x00dd8b20
-S_00dd8b20_Ret FUN_00dd8b20_cls::FUN_00dd8b20()
+hkLargeBlockAllocator::PageRange hkLargeBlockAllocator::FUN_00dd8b20()
 {
-    S_00dd8b20_Ret r;
-    m10->unk04 = m14 | 1;
-    S_00dd8b20_Node* n = ma8;
-    if (n == (S_00dd8b20_Node*)&unka4)
+    hkLargeBlockAllocator::PageRange r;
+    m10->head = m14 | 1;
+    hkLargeBlockAllocator::Page* n = ma8;
+    if (n == (hkLargeBlockAllocator::Page*)&m_a4)
     {
         r.key = 0;
         return r;
@@ -1412,16 +722,8 @@ S_00dd8b20_Ret FUN_00dd8b20_cls::FUN_00dd8b20()
     return r;
 }
 
-struct FUN_00dd8df0_cls
-{
-    int unk00;
-
-    void FUN_00dd7ec0();
-    FUN_00dd8df0_cls* FUN_00dd8df0(int arg);
-};
-
 // @fnv 0x00dd8df0
-FUN_00dd8df0_cls* FUN_00dd8df0_cls::FUN_00dd8df0(int arg)
+hkLargeBlockAllocator* hkLargeBlockAllocator::FUN_00dd8df0(int arg)
 {
     FUN_00dd7ec0();
     return this;
@@ -1448,81 +750,24 @@ struct SpanServer
                                   unsigned int* newEnd);
 };
 
-struct hkBool
-{
-    bool m_cBooleanValue;
-    hkBool()
-    {}
-    hkBool(bool b) : m_cBooleanValue(b)
-    {}
-};
-
-struct FUN_00dd8400_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned char* m_base;
-    unsigned int m_fMinimumV;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    SpanServer* m_pServer;
-    unsigned int unk9C;
-    unsigned int unkA0;
-    unsigned int unkA4;
-    SpanSegment* m_seg;
-    hkBool ResizeSegment(unsigned int size);
-};
-
 // @fnv 0x00dd8400
-hkBool FUN_00dd8400_cls::ResizeSegment(unsigned int size)
+hkBool hkLargeBlockAllocator::ResizeSegment(unsigned int size)
 {
-    SpanSegment* seg = m_seg;
+    SpanSegment* seg = (SpanSegment*)m_seg;
     unsigned int slot;
     unsigned char* result = m_pServer->resize(&size, seg, seg->m_kRayEnd, size, &slot);
     if (*result == 0)
     {
         return hkBool(false);
     }
-    unsigned int header = *(unsigned int*)(m_base + m_fMinimumV + 4) & 0xfffffffcu;
+    unsigned int header = *(unsigned int*)(m_base + m_uiChunkSize + 4) & 0xfffffffcu;
     unsigned int delta = slot - seg->m_kRayEnd;
     delta &= 0xfffffff0u;
     unsigned int newEnd = slot;
-    m_fMinimumV = m_fMinimumV + delta;
+    m_uiChunkSize = m_uiChunkSize + delta;
     seg->m_iElementCount = seg->m_iElementCount + delta;
     seg->m_kRayEnd = newEnd;
-    *(unsigned int*)(m_base + m_fMinimumV + 4) = (header - delta) | 2u;
+    *(unsigned int*)(m_base + m_uiChunkSize + 4) = (header - delta) | 2u;
     return hkBool(true);
 }
 
@@ -1538,61 +783,7 @@ struct MemoryProvider
     virtual void v00() = 0;
     virtual hkBool canExtend() = 0;
     virtual unsigned int v08(unsigned int sizeNeeded) = 0;
-    virtual S_00dd8aa0_Page* v0c(unsigned int size, unsigned int* actualSize) = 0;
-};
-
-struct Allocator_dd84c0
-{
-    void* m_vtbl;
-    AllocatorListener* m_kListener;
-    int unk08;
-    int unk0c;
-    S_00dd8aa0_Chunk* m_fMinimumV;
-    unsigned int m_uiChunkSize;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    MemoryProvider* m_provider;
-    int unk9c;
-    int unka0;
-    S_00dd8aa0_Page m_kPage;
-
-    void* Allocate(unsigned int size);
-    hkBool ResizeSegment(unsigned int newSize);
-    void* AllocateBlock(unsigned int size);
-    void FUN_00dd83a0();
-    void InsertChunk(void* chunk, unsigned int size);
-
-    void* FUN_00dd84c0(unsigned int size);
+    virtual hkLargeBlockAllocator::Page* v0c(unsigned int size, unsigned int* actualSize) = 0;
 };
 
 inline char* alignUp(char* p)
@@ -1607,7 +798,7 @@ inline void alignEnd(char*& p)
 
 // Rounds the requested size, tries allocation, then may extend the segment or request a page before allocating.
 // @fnv 0x00dd84c0
-void* Allocator_dd84c0::FUN_00dd84c0(unsigned int size)
+void* hkLargeBlockAllocator::FUN_00dd84c0(unsigned int size)
 {
     unsigned int uiAlignedSize;
     uiAlignedSize = (size + 31) & ~15;
@@ -1625,7 +816,7 @@ void* Allocator_dd84c0::FUN_00dd84c0(unsigned int size)
 
     if (this->m_provider->canExtend().m_cBooleanValue)
     {
-        S_00dd8aa0_Page* pNextPage;
+        hkLargeBlockAllocator::Page* pNextPage;
         pNextPage = this->m_kPage.m_next;
         if (pNextPage != &this->m_kPage)
         {
@@ -1652,7 +843,7 @@ void* Allocator_dd84c0::FUN_00dd84c0(unsigned int size)
         }
     }
 
-    S_00dd8aa0_Page* pNewPage;
+    hkLargeBlockAllocator::Page* pNewPage;
     int i;
     i = uiAlignedSize + 0x138;
     unsigned int start;
@@ -1684,7 +875,7 @@ void* Allocator_dd84c0::FUN_00dd84c0(unsigned int size)
     }
 
     char* kIter = (char*)pNewPage + 0x18;
-    pNewPage->unk8 = 0;
+    pNewPage->unk08 = 0;
     pNewPage->unkC = start;
     pNewPage->m_kRayStart = kIter;
     kIter = alignUp(kIter);
@@ -1692,93 +883,58 @@ void* Allocator_dd84c0::FUN_00dd84c0(unsigned int size)
     pNewPage->m_kRayStart = kIter;
     *(unsigned int*)&pNewPage->m_kRayEnd &= ~15u;
 
-    S_00dd8aa0_Page* q;
+    hkLargeBlockAllocator::Page* q;
     q = this->m_kPage.m_next;
     while (q != &this->m_kPage && q < pNewPage)
     {
         q = q->m_next;
     }
     pNewPage->m_next = q;
-    S_00dd8aa0_Page* pPrev;
+    hkLargeBlockAllocator::Page* pPrev;
     pPrev = q->m_pSecondNode;
     pNewPage->m_pSecondNode = pPrev;
     pPrev->m_next = pNewPage;
     q->m_pSecondNode = pNewPage;
 
-    if (this->m_fMinimumV != (S_00dd8aa0_Chunk*)&this->unk9c)
+    if (this->m_fMinimumV != (hkLargeBlockAllocator::Chunk*)&this->m_9c)
     {
         this->FUN_00dd83a0();
         this->InsertChunk(this->m_fMinimumV, this->m_fMinimumV->head & ~3);
     }
 
     this->m_uiChunkSize = (pNewPage->m_kRayEnd - pNewPage->m_kRayStart) - 0x10;
-    this->m_fMinimumV = (S_00dd8aa0_Chunk*)pNewPage->m_kRayStart;
+    this->m_fMinimumV = (hkLargeBlockAllocator::Chunk*)pNewPage->m_kRayStart;
     this->FUN_00dd83a0();
 
-    S_00dd8aa0_Chunk* endChunk;
-    endChunk = (S_00dd8aa0_Chunk*)(pNewPage->m_kRayEnd - 0x10);
+    hkLargeBlockAllocator::Chunk* endChunk;
+    endChunk = (hkLargeBlockAllocator::Chunk*)(pNewPage->m_kRayEnd - 0x10);
     endChunk->head = 2;
     if (pNewPage->m_next != &this->m_kPage)
     {
         endChunk->head = (pNewPage->m_next->m_kRayStart - (char*)endChunk) | 2;
     }
 
-    S_00dd8aa0_Page* c;
+    hkLargeBlockAllocator::Page* c;
     c = pNewPage->m_pSecondNode;
     if (c != &this->m_kPage)
     {
-        S_00dd8aa0_Chunk* pPrevChunk;
-        pPrevChunk = (S_00dd8aa0_Chunk*)(c->m_kRayEnd - 0x10);
+        hkLargeBlockAllocator::Chunk* pPrevChunk;
+        pPrevChunk = (hkLargeBlockAllocator::Chunk*)(c->m_kRayEnd - 0x10);
         pPrevChunk->head = ((char*)this->m_fMinimumV - (char*)pPrevChunk) | (pPrevChunk->head & 3);
     }
 
     return this->AllocateBlock(uiAlignedSize);
 }
 
-struct S_dd8180_Chunk
-{
-    unsigned int unk00;
-    unsigned int head;
-    int unk08;
-    int unk0c;
-    S_dd8180_Chunk* child0;
-    S_dd8180_Chunk* child1;
-};
-
 int __cdecl FUN_00dd7e00(unsigned int size);
 int __cdecl FUN_00dd7e70(unsigned int bit);
 
-struct S_dd8180_Alloc
-{
-    int unk00;
-    int unk04;
-    unsigned int treemap;
-    int unk0c;
-    int unk10;
-    int unk14;
-    S_dd8180_Chunk* bins[32];
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    unsigned int footprint;
-    unsigned int used;
-    void RemoveNode(S_dd8180_Chunk* c);
-    void InsertChunk(S_dd8180_Chunk* c, unsigned int size);
-    void* FUN_00dd8180(unsigned int nb);
-};
-
 // Finds the best-fit free chunk for nb bytes, splits it if the remainder is large enough, and returns a pointer to the allocated block.
 // @fnv 0x00dd8180
-void* S_dd8180_Alloc::FUN_00dd8180(unsigned int uiSize)
+void* hkLargeBlockAllocator::FUN_00dd8180(unsigned int uiSize)
 {
-    S_dd8180_Chunk* t;
-    S_dd8180_Chunk* pBest = 0;
+    hkLargeBlockAllocator::TreeChunk* t;
+    hkLargeBlockAllocator::TreeChunk* pBest = 0;
     unsigned long uiRemainder = 0 - uiSize;
     int idx = 0;
     idx = FUN_00dd7e00(uiSize);
@@ -1786,7 +942,7 @@ void* S_dd8180_Alloc::FUN_00dd8180(unsigned int uiSize)
     if (t != 0)
     {
         unsigned int sizebits = uiSize << ((idx == 31) ? 0 : (25 - (idx >> 1)));
-        S_dd8180_Chunk* pRight = 0;
+        hkLargeBlockAllocator::TreeChunk* pRight = 0;
         for (;;)
         {
             unsigned int trem = (t->head & 0xfffffffc) - uiSize;
@@ -1797,8 +953,8 @@ void* S_dd8180_Alloc::FUN_00dd8180(unsigned int uiSize)
                 if (uiRemainder == 0)
                     break;
             }
-            S_dd8180_Chunk* right = t->child1;
-            t = (&t->child0)[(sizebits >> 31) & 1];
+            hkLargeBlockAllocator::TreeChunk* right = t->child[1];
+            t = (t->child)[(sizebits >> 31) & 1];
             if (right != 0 && right != t)
                 pRight = right;
             if (t == 0)
@@ -1827,17 +983,17 @@ void* S_dd8180_Alloc::FUN_00dd8180(unsigned int uiSize)
             uiRemainder = trem;
             pBest = t;
         }
-        t = t->child0 ? t->child0 : t->child1;
+        t = t->child[0] ? t->child[0] : t->child[1];
     }
     if (pBest == 0)
         return 0;
-    S_dd8180_Chunk* pRemainder = (S_dd8180_Chunk*)((char*)pBest + uiSize);
+    hkLargeBlockAllocator::TreeChunk* pRemainder = (hkLargeBlockAllocator::TreeChunk*)((char*)pBest + uiSize);
     RemoveNode(pBest);
     if (uiRemainder < 0x100)
     {
         unsigned int total = uiRemainder + uiSize;
         pBest->head = total | 3;
-        S_dd8180_Chunk* nx = (S_dd8180_Chunk*)((char*)pBest + total);
+        hkLargeBlockAllocator::TreeChunk* nx = (hkLargeBlockAllocator::TreeChunk*)((char*)pBest + total);
         nx->head |= 1;
         footprint += uiRemainder + uiSize;
         used += uiRemainder + uiSize - 0x10;
@@ -1849,18 +1005,25 @@ void* S_dd8180_Alloc::FUN_00dd8180(unsigned int uiSize)
         used += uiSize - 0x10;
         pRemainder->head = uiRemainder | 1;
         *(unsigned int*)((char*)pRemainder + uiRemainder) = uiRemainder;
-        InsertChunk(pRemainder, uiRemainder);
+        InsertChunk((Chunk*)pRemainder, uiRemainder);
     }
     return (char*)pBest + 0x10;
 }
 
-struct FUN_00dd7de0
+inline hkLargeBlockAllocator::~hkLargeBlockAllocator()
 {
-    virtual ~FUN_00dd7de0();
-};
+    *(int**)this = &DAT_010d7c10;
+}
+
+// Scalar deleting destructor entry: the shared destructor is nonvirtual.
 // @fnv 0x00dd7de0
-FUN_00dd7de0::~FUN_00dd7de0()
-{}
+void* __fastcall deleteLargeBlockAllocator(hkLargeBlockAllocator* allocator, void*, unsigned int flags)
+{
+    allocator->~hkLargeBlockAllocator();
+    if (flags & 1)
+        ::operator delete(allocator);
+    return allocator;
+}
 
 namespace fnv_00dd7e00 {
 // FUN_00dd7e00: fast 2*log2-style bit scan of (x >> 8).

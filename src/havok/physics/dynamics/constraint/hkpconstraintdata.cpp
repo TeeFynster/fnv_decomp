@@ -2,7 +2,10 @@
 // src/havok/physics/dynamics/constraint/hkpconstraintdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/hkpconstraintdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpConstraintData.h"
+#include "../../../../../include/hkpAngConstraintAtom.h"
+#include "../../../../../include/hkpAngFrictionConstraintAtom.h"
+#include "../../../../../include/hkpConstraintAtom.h"
+#include "../../../../../include/hkpSimpleContactConstraintAtom.h"
 
 extern "C" void __cdecl FUN_00cb1280(void* dst, int n, int len);
 
@@ -25,54 +28,6 @@ int __stdcall FUN_00d21a50(int a)
 }
 
 extern "C" void _ReadWriteBarrier(void);
-struct hkpConstraintAtom
-{
-    enum Type
-    {
-        INVALID = 0,
-        BRIDGE = 1,
-        SET_LOCAL_TRANSFORMS = 2,
-        SET_LOCAL_TRANSLATIONS = 3,
-        SET_LOCAL_ROTATIONS = 4,
-        BALL_SOCKET = 5,
-        STIFF_SPRING = 6,
-        LIN = 7,
-        LIN_SOFT = 8,
-        LIN_LIMIT = 9,
-        LIN_FRICTION = 10,
-        LIN_MOTOR = 11,
-        ANG_2D = 12,
-        ANG = 13,
-        ANG_LIMIT = 14,
-        TWIST_LIMIT = 15,
-        CONE_LIMIT = 16,
-        ANG_FRICTION = 17,
-        ANG_MOTOR = 18,
-        RAGDOLL_MOTOR = 19,
-        PULLEY = 20,
-        RACK_AND_PINION = 21,
-        CONTACT = 22,
-        MODIFIER_SOFT_CONTACT = 23,
-        MODIFIER_MASS_CHANGER = 24,
-        MODIFIER_VISCOUS_SURFACE = 25,
-        MODIFIER_MOVING_SURFACE = 26,
-        MODIFIER_IGNORE = 27
-    };
-    unsigned short type;
-};
-struct hkpSimpleContactConstraintAtom : hkpConstraintAtom
-{
-    unsigned short sizeOfAllAtoms;
-    unsigned short numContactPoints;
-};
-struct hkpAngConstraintAtom : hkpConstraintAtom
-{
-    unsigned char firstAxis, numAxes;
-};
-struct hkpAngFrictionConstraintAtom : hkpConstraintAtom
-{
-    unsigned char enabled, firstAxis, numAxes;
-};
 struct GenericConstraintAtomScheme
 {
     int maxSizeOfSchema, sizeOfSchemas, numSolverResults, numSolverElemTemps;
@@ -104,9 +59,9 @@ void __cdecl FUN_00d21a60(const hkpConstraintAtom* atoms, int sizeOfAllAtoms, Ge
     info->sizeOfSchemas = 0;
     info->numSolverResults = 0;
     info->numSolverElemTemps = 0;
-    if (atoms->type == hkpConstraintAtom::CONTACT)
+    if (atoms->m_type == hkpConstraintAtom::CONTACT)
     {
-        int iContactPoints = static_cast<const hkpSimpleContactConstraintAtom*>(atoms)->numContactPoints;
+        int iContactPoints = reinterpret_cast<const hkpSimpleContactConstraintAtom*>(atoms)->m_usNumContactPoints;
         int schema = 128 + 112 * (iContactPoints >> 1) + 48 * (iContactPoints & 1);
         info->sizeOfSchemas = schema;
         info->maxSizeOfSchema = schema + 32;
@@ -129,7 +84,7 @@ void __cdecl FUN_00d21a60(const hkpConstraintAtom* atoms, int sizeOfAllAtoms, Ge
 
     dispatchAlignedAtom:
         const hkpConstraintAtom* atom = reinterpret_cast<const hkpConstraintAtom*>(cursor);
-        switch (atom->type)
+        switch (atom->m_type)
         {
         case hkpConstraintAtom::INVALID:
             cursor = reinterpret_cast<const char*>((reinterpret_cast<unsigned long>(cursor) + 15) & ~15UL);
@@ -165,9 +120,9 @@ void __cdecl FUN_00d21a60(const hkpConstraintAtom* atoms, int sizeOfAllAtoms, Ge
             cursor += 4;
             break;
         case hkpConstraintAtom::ANG: {
-            addSolverSchema(info, 48 * static_cast<const hkpAngConstraintAtom*>(atom)->numAxes,
-                            static_cast<const hkpAngConstraintAtom*>(atom)->numAxes,
-                            static_cast<const hkpAngConstraintAtom*>(atom)->numAxes);
+            addSolverSchema(info, 48 * static_cast<const hkpAngConstraintAtom*>(atom)->m_ucNumConstrainedAxes,
+                            static_cast<const hkpAngConstraintAtom*>(atom)->m_ucNumConstrainedAxes,
+                            static_cast<const hkpAngConstraintAtom*>(atom)->m_ucNumConstrainedAxes);
             cursor += 4;
             break;
         }
@@ -181,8 +136,8 @@ void __cdecl FUN_00d21a60(const hkpConstraintAtom* atoms, int sizeOfAllAtoms, Ge
             cursor += 20;
             break;
         case hkpConstraintAtom::ANG_FRICTION: {
-            int axes = static_cast<const hkpAngFrictionConstraintAtom*>(atom)->numAxes;
-            int temps = 2 * static_cast<const hkpAngFrictionConstraintAtom*>(atom)->numAxes;
+            int axes = static_cast<const hkpAngFrictionConstraintAtom*>(atom)->m_ucNumFrictionAxes;
+            int temps = 2 * static_cast<const hkpAngFrictionConstraintAtom*>(atom)->m_ucNumFrictionAxes;
             addAngularFriction(info, 48 * axes, axes, temps);
             cursor += 12;
             break;

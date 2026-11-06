@@ -2,10 +2,7 @@
 // src/fallout_shared/pathfinding/pathingnode.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/pathfinding/pathingnode.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct TESObjectREFR
-{
-    bool __thiscall Activate(TESObjectREFR*, bool, TESObjectREFR*, int);
-};
+#include "../../../include/TESObjectREFR.h"
 
 struct FUN_006e2330_shell
 {
@@ -23,7 +20,7 @@ struct FUN_006e22f0_shell : public FUN_006e2330_shell
 bool __thiscall FUN_006e22f0_shell::FUN_006e22f0(TESObjectREFR* apActor)
 {
     if (FUN_006e2330())
-        return ((TESObjectREFR**)((char*)this + 0x38))[0]->Activate(apActor, false, 0, 1);
+        return ((TESObjectREFR**)((char*)this + 0x38))[0]->Activate(apActor, false, (TESObjectREFR*)0, 1);
     return false;
 }
 

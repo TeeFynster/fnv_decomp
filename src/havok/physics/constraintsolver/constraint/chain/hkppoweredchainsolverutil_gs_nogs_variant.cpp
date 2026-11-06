@@ -1,3 +1,9 @@
+#define FNV64_HKVECTOR4_OWN_COPY
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4
 
 // src/havok/physics/constraintsolver/constraint/chain/hkppoweredchainsolverutil_gs_nogs_variant.cpp - flag-variant unit created 2026-10-30 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/physics/constraintsolver/constraint/chain/hkppoweredchainsolverutil.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -29,6 +35,8 @@ struct FUN_00df0810_Dest
 };
 void __cdecl CopyChannelValue(int index, int channel, FUN_00df0810_Source* sources, FUN_00df0810_Dest* dests);
 #include <xmmintrin.h>
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkAabb.h"
 static __forceinline void CopyHelper(__m128* d, const void* s)
 {
     d[0] = ((__m128*)s)[0];
@@ -490,25 +498,6 @@ extern void __cdecl FUN_00e29380(void* a, void* b);
 extern void __cdecl FUN_00e298f0(void* a, void* b);
 extern float DAT_0104da4c;
 void __cdecl FUN_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3, int* arg4);
-struct hkVector4
-{
-    union
-    {
-        __m128 m_vComponents;
-        struct
-        {
-            float x;
-            float y;
-            float z;
-            float w;
-        };
-    };
-};
-struct hkAabb
-{
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
-};
 struct MatrixGroup
 {
     char data0[0xc0];
@@ -528,76 +517,54 @@ extern "C" void __cdecl FUN_00e29510(void* out, const void* matrix, const void* 
 void __cdecl FUN_00df11a0(InputStruct* a, hkAabb* out);
 
 extern "C" void _ReadBarrier(void);
-class ScalarValue
-{
-    __m128 value;
+__forceinline hkSimdReal::hkSimdReal(const __m128& v) : value(v) {}
+__forceinline hkSimdReal::operator float() const { float f; _mm_store_ss(&f,value); return f; }
 
-  public:
-    __forceinline ScalarValue(__m128 v) : value(v)
+__forceinline hkVector4::hkVector4(const hkVector4& v) : value(v.value)
     {}
-    __forceinline operator float() const
-    {
-        float f;
-        _mm_store_ss(&f, value);
-        return f;
-    }
-};
-class Vector4f
-{
-    __m128 value;
-
-  public:
-    __forceinline Vector4f()
+__forceinline hkVector4::hkVector4(__m128 v) : value(v)
     {}
-    __forceinline Vector4f(const Vector4f& v) : value(v.value)
-    {}
-    __forceinline Vector4f(const __m128& v) : value(v)
-    {}
-    __forceinline operator __m128() const
-    {
-        return value;
-    }
-    __forceinline void operator=(const Vector4f& v)
+__forceinline void hkVector4::operator=(const hkVector4& v)
     {
         value = v.value;
     }
-    __forceinline void operator=(const __m128& v)
+__forceinline void hkVector4::operator=(const __m128& v)
     {
         value = v;
     }
-    __forceinline float& operator()(int i)
+__forceinline float& hkVector4::operator()(int i)
     {
         return ((float*)&value)[i];
     }
-    __forceinline const float& operator()(int i) const
+__forceinline const float& hkVector4::operator()(int i) const
     {
         return ((const float*)&value)[i];
     }
-    __forceinline void setZero4()
+__forceinline void hkVector4::setZero4()
     {
         value = _mm_setzero_ps();
     }
-    __forceinline void setMul4(const Vector4f& a, const Vector4f& b)
+__forceinline void hkVector4::setMul4(const hkVector4& a, const hkVector4& b)
     {
         value = _mm_mul_ps(a, b);
     }
-    __forceinline void mul4(const Vector4f& b)
+__forceinline void hkVector4::mul4(const hkVector4& b)
     {
         value = _mm_mul_ps(value, b.value);
     }
-    __forceinline void add4(const Vector4f& b)
+__forceinline void hkVector4::add4(const hkVector4& b)
     {
         value = _mm_add_ps(value, b.value);
     }
-    __forceinline void sub4(const Vector4f& b)
+__forceinline void hkVector4::sub4(const hkVector4& b)
     {
         value = _mm_sub_ps(value, b.value);
     }
-    __forceinline void setBroadcast3clobberW(const Vector4f& a, int i)
+__forceinline void hkVector4::setBroadcast3clobberW(const hkVector4& a, int i)
     {
         setBroadcast(a, i);
     }
-    __forceinline void setBroadcast(const Vector4f& a, int i)
+__forceinline void hkVector4::setBroadcast(const hkVector4& a, int i)
     {
         if (i == 0)
             value = _mm_shuffle_ps(a.value, a.value, 0);
@@ -608,24 +575,24 @@ class Vector4f
         else if (i == 3)
             value = _mm_shuffle_ps(a.value, a.value, 255);
     }
-    __forceinline ScalarValue horizontalAdd3() const
+__forceinline hkSimdReal hkVector4::horizontalAdd3() const
     {
         __m128 xy = _mm_add_ss(_mm_shuffle_ps(value, value, 85), value);
         return _mm_add_ss(_mm_shuffle_ps(value, value, 170), xy);
     }
-};
-struct Mat3
+// hkMatrix3 (columns, operator(), _setTranspose) over this unit's hkVector4 stand-in.
+struct ChainMatrix3
 {
-    Vector4f m_kColumn0;
-    Vector4f m_kColumn1;
-    Vector4f m_kColumn2;
-    __forceinline Mat3()
+    hkVector4 m_kColumn0;
+    hkVector4 m_kColumn1;
+    hkVector4 m_kColumn2;
+    __forceinline ChainMatrix3()
     {}
-    __forceinline Vector4f& getColumn(int i)
+    __forceinline hkVector4& getColumn(int i)
     {
         return (&m_kColumn0)[i];
     }
-    __forceinline const Vector4f& getColumn(int i) const
+    __forceinline const hkVector4& getColumn(int i) const
     {
         return (&m_kColumn0)[i];
     }
@@ -639,15 +606,15 @@ struct Mat3
     }
     inline void setZero()
     {
-        Vector4f zero;
+        hkVector4 zero;
         zero.setZero4();
         m_kColumn0 = zero;
         m_kColumn1 = zero;
         m_kColumn2 = zero;
     }
-    inline void _setTranspose(const Mat3& s)
+    inline void _setTranspose(const ChainMatrix3& s)
     {
-        Mat3& dest = *this;
+        ChainMatrix3& dest = *this;
         dest(0, 0) = s(0, 0);
         dest(1, 1) = s(1, 1);
         dest(2, 2) = s(2, 2);
@@ -664,7 +631,7 @@ struct Mat3
 };
 struct Mat6
 {
-    Mat3 m_iUnknownValue2[2][2];
+    ChainMatrix3 m_iUnknownValue2[2][2];
     __forceinline Mat6()
     {}
     __forceinline void setZero()
@@ -687,11 +654,11 @@ struct BodyRecord
     unsigned char kind;
     unsigned int deactivation;
     float gravity;
-    Vector4f linearVelocity;
-    Vector4f angularVelocity;
-    Vector4f inertia;
-    Vector4f scratch;
-    Mat3 scratchBasis;
+    hkVector4 linearVelocity;
+    hkVector4 angularVelocity;
+    hkVector4 inertia;
+    hkVector4 scratch;
+    ChainMatrix3 scratchBasis;
 };
 struct OffsetRecord
 {
@@ -703,7 +670,7 @@ struct OffsetRecord
 };
 struct AngularJac
 {
-    Vector4f a, b;
+    hkVector4 a, b;
     __forceinline AngularJac()
     {}
     __forceinline AngularJac(const AngularJac& v)
@@ -714,9 +681,9 @@ struct AngularJac
     __forceinline float same(const BodyRecord& p, const BodyRecord& q, const AngularJac& j) const
     {
         const AngularJac& self = *this;
-        Vector4f aa;
+        hkVector4 aa;
         aa.setMul4(self.a, j.a);
-        Vector4f bb;
+        hkVector4 bb;
         bb.setMul4(self.b, j.b);
         aa.mul4(p.inertia);
         bb.mul4(q.inertia);
@@ -727,13 +694,13 @@ struct AngularJac
 };
 struct LinearJac
 {
-    Vector4f rows[3];
+    hkVector4 rows[3];
     inline AngularJac& angular()
     {
         return *(AngularJac*)&rows[1];
     }
 };
-static __forceinline float linearSame(const Vector4f& fixedL, const Vector4f& fixedA, const Vector4f& fixedB,
+static __forceinline float linearSame(const hkVector4& fixedL, const hkVector4& fixedA, const hkVector4& fixedB,
                                       const BodyRecord& p, const BodyRecord& q, const LinearJac& j)
 {
     __m128 qInitial;
@@ -741,19 +708,19 @@ static __forceinline float linearSame(const Vector4f& fixedL, const Vector4f& fi
     __m128 pInitial;
     _mm_store_ps((float*)&pInitial, p.inertia);
     _ReadBarrier();
-    Vector4f l;
+    hkVector4 l;
     l.setMul4(fixedL, j.rows[0]);
-    Vector4f aa;
+    hkVector4 aa;
     aa.setMul4(fixedA, j.rows[1]);
-    Vector4f bb;
+    hkVector4 bb;
     bb.setMul4(fixedB, j.rows[2]);
-    Vector4f pm;
+    hkVector4 pm;
     pm.setBroadcast3clobberW(pInitial, 3);
-    Vector4f qm;
+    hkVector4 qm;
     qm.setBroadcast3clobberW(qInitial, 3);
-    Vector4f pl;
+    hkVector4 pl;
     pl.setMul4(pm, l);
-    Vector4f ql;
+    hkVector4 ql;
     ql.setMul4(qm, l);
     aa.mul4(p.inertia);
     bb.mul4(q.inertia);
@@ -768,7 +735,7 @@ class __declspec(align(16)) CachedQuad
     __m128 value;
 
   public:
-    __forceinline CachedQuad(const Vector4f& q)
+    __forceinline CachedQuad(const hkVector4& q)
     {
         _mm_store_ps((float*)&value, q);
     }
@@ -777,13 +744,13 @@ class __declspec(align(16)) CachedQuad
         return value;
     }
 };
-static __forceinline float angularSame(const CachedQuad& fixedA, const Vector4f& fixedB, const BodyRecord& p,
+static __forceinline float angularSame(const CachedQuad& fixedA, const hkVector4& fixedB, const BodyRecord& p,
                                        const BodyRecord& q, const AngularJac& j)
 {
-    Vector4f aa;
+    hkVector4 aa;
     aa = j.a;
-    aa.mul4(Vector4f((__m128)fixedA));
-    Vector4f bb;
+    aa.mul4(hkVector4((__m128)fixedA));
+    hkVector4 bb;
     bb.setMul4(fixedB, j.b);
     aa.mul4(p.inertia);
     bb.mul4(q.inertia);
@@ -827,13 +794,13 @@ static __forceinline void diagonalAt(int row, const CfmRecord& cfm, const Linear
     {
         if (r < 3)
         {
-            Vector4f fl;
+            hkVector4 fl;
             _mm_store_ps((float*)&fl, j[index + r].rows[0]);
-            Vector4f fb;
+            hkVector4 fb;
             _mm_store_ps((float*)&fb, j[index + r].rows[2]);
-            Vector4f fa;
+            hkVector4 fa;
             _mm_store_ps((float*)&fa, j[index + r].rows[1]);
-            Vector4f ab = ja[index + r].b;
+            hkVector4 ab = ja[index + r].b;
             CachedQuad aa(ja[index + r].a);
             const BodyRecord& p = offsets[row].get(base);
             const BodyRecord& q = offsets[row + 1].get(base);
@@ -862,8 +829,8 @@ static __forceinline void diagonalAt(int row, const CfmRecord& cfm, const Linear
     }
     out.m_iUnknownValue2[0][1]._setTranspose(out.m_iUnknownValue2[1][0]);
 }
-static __forceinline void innerProducts(const Vector4f* nextPair, AngularJac* nextAngular,
-                                        const Vector4f& currentLinear, const Vector4f& jb, const Vector4f& ab,
+static __forceinline void innerProducts(const hkVector4* nextPair, AngularJac* nextAngular,
+                                        const hkVector4& currentLinear, const hkVector4& jb, const hkVector4& ab,
                                         const BodyRecord& q, Mat6& out, int r)
 {
     for (int c = 0; c < 3; c++)
@@ -879,18 +846,18 @@ static __forceinline void innerProducts(const Vector4f* nextPair, AngularJac* ne
         __m128 lm = _mm_mul_ps(initialMass, l);
         a = _mm_mul_ps(a, q.inertia);
         a = _mm_sub_ps(a, lm);
-        float linearSum = Vector4f(a).horizontalAdd3();
-        Vector4f al = nextAngular->a;
+        float linearSum = hkVector4(a).horizontalAdd3();
+        hkVector4 al = nextAngular->a;
         out.m_iUnknownValue2[0][0](r, c) = linearSum;
-        Vector4f aa;
+        hkVector4 aa;
         aa.setMul4(ab, al);
         aa.mul4(q.inertia);
         out.m_iUnknownValue2[1][1](r, c) = aa.horizontalAdd3();
-        Vector4f la;
+        hkVector4 la;
         la.setMul4(jb, al);
         la.mul4(q.inertia);
         out.m_iUnknownValue2[0][1](r, c) = la.horizontalAdd3();
-        Vector4f an;
+        hkVector4 an;
         an.setMul4(ab, na);
         an.mul4(q.inertia);
         out.m_iUnknownValue2[1][0](r, c) = an.horizontalAdd3();
@@ -906,8 +873,8 @@ static __forceinline void nextAt(int row, LinearJac* j, AngularJac* ja, OffsetRe
     const BodyRecord& q = offsets[row + 1].get(base);
     for (int r = 0; r < 3; r++)
     {
-        Vector4f jb = j[index + r].rows[2];
-        Vector4f ab = ja[index + r].b;
+        hkVector4 jb = j[index + r].rows[2];
+        hkVector4 ab = ja[index + r].b;
 
         innerProducts(&j[index + stride].rows[1], ja + index + stride, j[index + r].rows[0], jb, ab, q, out, r);
     }

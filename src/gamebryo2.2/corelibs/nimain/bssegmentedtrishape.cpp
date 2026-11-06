@@ -2,6 +2,8 @@
 // src/gamebryo2.2/corelibs/nimain/bssegmentedtrishape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/bssegmentedtrishape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/MemoryManager.h"
+
 extern "C" void* g_011f5b40;
 
 // @fnv 0x00a86fe0
@@ -39,13 +41,8 @@ void __thiscall FUN_00a86ff0_shell::SetEntryActive(unsigned int index)
 
 void __fastcall FUN_00a89760(void*);
 void __cdecl _delete(void*, unsigned int);
-extern "C" void* g_memoryManager;
+extern "C" MemoryManager g_memoryManager;
 extern "C" void* DAT_0109e834;
-
-struct MemoryManager
-{
-    void __thiscall DeallocateAlias(void* old);
-};
 
 struct FUN_00a87290_shell
 {
@@ -58,7 +55,7 @@ void* __thiscall FUN_00a87290_shell::FUN_00a87290(unsigned int flags)
 {
     void* old = *(void**)((char*)this + 0xc4);
     *(void**)this = &DAT_0109e834;
-    ((MemoryManager*)&g_memoryManager)->DeallocateAlias(old);
+    g_memoryManager.DeallocateAlias(old);
     FUN_00a89760(this);
     if (flags & 1)
         _delete(this, 0xd0);
@@ -248,13 +245,7 @@ void FUN_00a872d0_shell::ResetRecordSelection()
     dirty = false;
 }
 
-struct DynamicMemoryAllocator
-{
-    void* FUN_00aa3e40(unsigned int auiSize);
-    void Free(void* apPtr);
-};
-
-extern "C" DynamicMemoryAllocator DAT_011f6238;
+extern "C" MemoryManager DAT_011f6238;
 
 struct EntryPod70
 {
@@ -270,7 +261,7 @@ struct EntryPod70
     }
     static void operator delete[](void* apBlock)
     {
-        DAT_011f6238.Free(apBlock);
+        DAT_011f6238.Deallocate(apBlock);
     }
 };
 
@@ -286,7 +277,7 @@ void FUN_00a871a0_cls::CopyEntries(Target* apDst, unsigned int aFlag)
     FUN_00a744c0(apDst, aFlag);
     if (apDst->entries != 0)
     {
-        DAT_011f6238.Free(apDst->entries);
+        DAT_011f6238.Deallocate(apDst->entries);
     }
     if (entries != 0)
     {
@@ -501,12 +492,6 @@ struct S_a873b0_Stream
     int unk248;
     S_a873b0_Bin* istr;
 };
-struct S_a873b0_Alloc
-{
-    void* FUN_00aa3e40(unsigned int n);
-    void FUN_00aa4060(void* p);
-};
-extern S_a873b0_Alloc DAT_011f6238;
 struct S_a873b0_E : Entry
 {
     static void* operator new[](unsigned int n)
@@ -586,7 +571,7 @@ void S_a873b0_T::ReadFromStream(S_a873b0_Stream* pStream)
 {
     FUN_00a98ea0(pStream);
     if (entries)
-        DAT_011f6238.FUN_00aa4060(entries);
+        DAT_011f6238.Deallocate(entries);
     S_a873b0_BinRead(pStream->istr, &count, 4);
     entries = new S_a873b0_E[count];
     for (unsigned int i = 0; i < count; i++)

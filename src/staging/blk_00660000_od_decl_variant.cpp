@@ -5,7 +5,21 @@
 
 // src/staging/blk_00660000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/Actor.h"
+#include "../../include/Setting.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/bhkConvexShape.h"
+#include "../../include/ActorPackageData.h"
+#include "../../include/AutoMemHelper.h"
+#include "../../include/BGSLoadGameBuffer.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSSaveLoadChangesMap.h"
+#include "../../include/SL.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESPackage.h"
+#include "../../include/PackageList.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/bhkCharacterController.h"
 void __cdecl CopyConstructEntry(int a, int b);
 struct FUN_006601f0_Class
 {
@@ -41,16 +55,7 @@ struct FUN_00665f10_class
 {
     int __thiscall Identity(int a);
 };
-struct BGSSaveLoadChangesMap
-{
-    void Deallocate(void* p);
-    void FUN_00666050(void* p);
-};
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting1297;
+extern Setting originalRuntimeFloatSetting1297;
 float FUN_0066b0b0();
 extern "C" void* __cdecl FUN_00664840(int);
 struct Flt
@@ -75,11 +80,6 @@ struct FUN_0067ad70_Class
     void FUN_0067ad70();
 };
 extern int DAT_01068aa4;
-struct ActorPackageData
-{
-    ActorPackageData();
-    ActorPackageData* FUN_0067d920();
-};
 ActorPackageData::ActorPackageData()
 {}
 extern "C" int DAT_01068aa4;
@@ -184,10 +184,6 @@ struct T_
 {
     void FUN_004a3f10(void*);
 };
-struct bhkCharacterController
-{
-    float& GetVectorElement(int);
-};
 struct FUN_0066c9c0_Class
 {
     T_ a;
@@ -280,10 +276,6 @@ struct FUN_0067ad70_cls
     void* __thiscall DestroyAndFree(unsigned int);
 };
 void __cdecl _Deallocate(void*);
-struct BGSSaveFormBuffer
-{
-    void __thiscall SaveData(void*, unsigned int, int);
-};
 struct FUNObj
 {
     void __thiscall FUN_0067fb60(void*);
@@ -317,22 +309,6 @@ struct FUN_0067b170
     int pad2[3];
     FUN_0067b170();
 };
-struct TESPackage
-{
-    int GetPackType();
-    void* p;
-    void* q;
-    void* r;
-    void* s;
-    void* t;
-    void* u;
-    void* v;
-    void* w;
-    void* x;
-    void* y;
-    FUN_0067b170* e;
-    void SetPackageFlag(bool b);
-};
 void __cdecl BSEndian(unsigned char* p, EndianSizeTag<1>);
 struct FUN_0067b100_Class
 {
@@ -341,12 +317,6 @@ struct FUN_0067b100_Class
     unsigned char b0c;
     unsigned char b14;
     void __thiscall FUN_0067b100();
-};
-struct bhkConvexShape
-{
-    bhkConvexShape();
-    ~bhkConvexShape();
-    void FUN_00cab820(int a);
 };
 extern int DAT_01066e2c;
 extern int DAT_01268324;
@@ -370,19 +340,6 @@ struct FUN_00672c40_Class
     int GetPackType();
     void SetExtraValue(float value);
 };
-struct ListX
-{
-    ~ListX();
-};
-struct PackageList : ListX
-{
-    void ClearPackageList();
-    ~PackageList();
-};
-struct FUN_0067e3a0_Class : PackageList
-{
-    ~FUN_0067e3a0_Class();
-};
 // @fnv 0x00660400
 template <class T> struct BSSimpleList;
 BSSimpleList<int>* FUN_00660400(BSSimpleList<int>* a)
@@ -390,12 +347,6 @@ BSSimpleList<int>* FUN_00660400(BSSimpleList<int>* a)
     return a->GetNext();
 }
 void* __cdecl operator new(unsigned int);
-struct AutoMemHelper
-{
-    int pad;
-    AutoMemHelper(int context, bool flag, const char* file, int line);
-    ~AutoMemHelper();
-};
 struct FUN_0044d000
 {
     int pad[9];
@@ -421,19 +372,6 @@ struct G2 : public List_009e03e0
     bool IsEmpty();
     struct DetectionGroup*& FUN_006815c0();
     G2* FUN_00726070();
-};
-struct SL : public G2
-{
-    SL();
-};
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void* data, unsigned int size);
-    bool ReadFormIdentifier(void* formId);
-    int ReadElementCount();
-};
-struct BGSLoadGameBuffer : public BGSLoadFormBuffer
-{
 };
 struct DetectionViewData
 {
@@ -667,16 +605,9 @@ struct S_0066e2b0_Class : public FUN_0066df40_Class
 struct G2;
 extern G2 g_011d6124;
 DetectionViewData* __cdecl FindStateByValue(int value);
-struct SaveBufCls
-{
-    void __thiscall FUN_00865e50(void* data, unsigned int size, int z);
-    void __thiscall FUN_00865df0(void* data, unsigned int size);
-    unsigned int __thiscall FUN_00865f20();
-    void __thiscall FUN_00865ff0(unsigned int count, unsigned int pos);
-};
 struct SaveItemCls
 {
-    void __thiscall SaveDetectionState(SaveBufCls* buffer);
+    void __thiscall SaveDetectionState(BGSSaveFormBuffer* buffer);
 };
 struct SaveNodeCls
 {
@@ -689,7 +620,7 @@ struct DetClassCls
     SaveNodeCls* m_04;
     unsigned char m_08[12];
     unsigned int m_14;
-    void __thiscall WriteToSaveBuffer(SaveBufCls* buffer);
+    void __thiscall WriteToSaveBuffer(BGSSaveFormBuffer* buffer);
 };
 extern double DAT_01012060;
 extern double DAT_01017a40;
@@ -739,11 +670,10 @@ class D9B0Container
     void EraseByKey(int iKey);
 };
 // Save: write the header value, every queued item, then patch the item count in at the reserved position.
-class E6D0SaveBuffer;
 class E6D0Item
 {
   public:
-    void Save(E6D0SaveBuffer* pkBuffer);
+    void Save(BGSSaveFormBuffer* pkBuffer);
 };
 class E6D0Node
 {
@@ -751,16 +681,9 @@ class E6D0Node
     E6D0Item** GetItem();
     E6D0Node* GetNext();
 };
-class E6D0SaveBuffer
-{
-  public:
-    void SaveData(void* pvData, int iSize, int iFlags);
-    unsigned int GetPosition();
-    void WriteCountAt(int aiCountValue, unsigned int uiPosition);
-};
 extern int g_iE6D0Header;
 extern E6D0Node g_kE6D0Items;
-void SaveE6D0Items(E6D0SaveBuffer* pkBuffer);
+void SaveE6D0Items(BGSSaveFormBuffer* pkBuffer);
 struct ComparisonEntry
 {
     int FUN_00678ca0();
@@ -773,14 +696,6 @@ struct ComparisonOwner
     ComparisonEntry* FUN_0041d8a0();
     int CompareTo(ComparisonEntry* other);
 };
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
-class Actor : public TESForm
-{
-};
 TESForm* __cdecl FUN_004839c0(void* p);
 struct E640Item
 {
@@ -788,7 +703,7 @@ struct E640Item
 };
 struct E640Cls : DetClassCls
 {
-    void __thiscall FUN_0066e640(SaveBufCls* buffer);
+    void __thiscall FUN_0066e640(BGSSaveFormBuffer* buffer);
 };
 struct S_00660510_Context
 {
@@ -836,13 +751,7 @@ float __cdecl FUN_0066dc70(int value);
 float* __fastcall FUN_00403e20(void* object);
 extern unsigned char DAT_011d5f88;
 float __cdecl FUN_0066dca0(int value, bool unscaled);
-struct Vector3
-{
-    float x;
-    float y;
-    float z;
-};
-extern Vector3 DAT_011f426c;
+extern NiPoint3 DAT_011f426c;
 struct SaveNodeExtended : SaveNodeCls
 {
     bool FUN_008256d0();

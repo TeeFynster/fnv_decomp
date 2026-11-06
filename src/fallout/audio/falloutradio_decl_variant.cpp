@@ -2,25 +2,30 @@
 // src/fallout/audio/falloutradio_decl_variant.cpp - declaration variant unit created 2026-10-26 by decl_variants.py for paused function 0x00835be0: the skeleton of src/fallout/audio/falloutradio.cpp
 // that unit declares it this way.
 
-#include "falloutradio_private_decls_decl_falloutradio.h"
+#include "../../../include/BGSTalkingActivator.h"
+#include "../../../include/BSAudio.h"
+#include "../../../include/DialogueItem.h"
+#include "../../../include/FalloutRadio.h"
 
-class BGSTalkingActivator : public TESForm
-{
-};
-class DialogueResponse;
-class TESTopicInfo;
-class TESQuest;
-class DialogueItem
+#include "../../../include/MEDIATYPE.h"
+
+class FalloutAudioMedia
 {
   public:
-    BSSimpleList<DialogueResponse*> responses;
-    BSSimpleList<DialogueResponse*>* current;
-    TESTopicInfo* info;
-    TESTopic* topic;
-    TESQuest* quest;
-    TESObjectREFR* speaker;
-    bool FUN_0083c7b0();
+    static void PlayMedia(MEDIATYPE, const char*, unsigned int, bool, bool, float, unsigned int);
+    static void BeginMediaUpdate();
+    static void EndMediaUpdate();
+    static bool IsRadioPlaying();
 };
+
+extern FalloutRadio::RadioStationState* DAT_011dd42c;
+extern bool DAT_011dd434;
+extern unsigned char DAT_011dd436;
+extern BSSoundHandle DAT_011dd5bc;
+extern BSSimpleList<FalloutRadio::RadioStationState*> DAT_011dd554;
+
+void FUN_008325a0(bool);
+
 class Conversation
 {
   public:
@@ -32,7 +37,6 @@ class Conversation
     DialogueItem* FUN_0083c820();
     ~Conversation();
 };
-class TESTopic;
 TESTopic* GetTopicSubTypeName(int, int);
 FalloutRadio::RadioStationState* CreateRadioStationState(BGSTalkingActivator*, bool);
 void FUN_00834260(FalloutRadio::RadioStationState*);
@@ -47,12 +51,6 @@ class ATM
     void FUN_004538c0();
 };
 extern ATM g_011dd5e8;
-class BSAudio
-{
-  public:
-    unsigned int GetSynchTime();
-};
-BSAudio* FUN_00453a70();
 // @fnv 0x00835be0
 void FUN_00835be0(BGSTalkingActivator* form, TESTopic* topic)
 {
@@ -95,7 +93,7 @@ void FUN_00835be0(BGSTalkingActivator* form, TESTopic* topic)
         {
             FUN_008304a0();
             FUN_008325a0(true);
-            FalloutAudioMedia::PlayMedia(MEDIATYPE_RADIO, 0, 1000, false, false, 0.0f, 0);
+            FalloutAudioMedia::PlayMedia(MEDIATYPE_MEDIA_RADIO, 0, 1000, false, false, 0.0f, 0);
             FUN_008304c0();
         }
     }
@@ -127,15 +125,15 @@ void FUN_00835be0(BGSTalkingActivator* form, TESTopic* topic)
             {
                 FUN_008304a0();
                 FUN_008325a0(true);
-                FalloutAudioMedia::PlayMedia(MEDIATYPE_RADIO, 0, 1000, false, false, 0.0f, 0);
+                FalloutAudioMedia::PlayMedia(MEDIATYPE_MEDIA_RADIO, 0, 1000, false, false, 0.0f, 0);
                 FUN_008304c0();
             }
         }
-        station->station.conversation->FUN_0083c820()->FUN_0083c7b0();
+        station->station.conversation->FUN_0083c820()->SelectDefaultResponseList();
     }
     if (station->station.state > 1)
         station->station.state = 0;
-    station->station.nextUpdate = FUN_00453a70()->GetSynchTime() + 50;
+    station->station.nextUpdate = BSAudio::FUN_00453a70()->GetSynchTime() + 50;
     station->station.SetFlag80(true);
     station->station.FUN_00833100(f);
     g_011dd5e8.FUN_004538c0();

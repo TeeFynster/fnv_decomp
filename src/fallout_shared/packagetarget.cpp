@@ -1,10 +1,14 @@
-// fallout_shared/packagetarget.cpp: PackageTargetRecord, LocationDescriptor, Script, SaveDataStub (21 functions)
+// fallout_shared/packagetarget.cpp: PackageTargetRecord, LocationDescriptor, Script (21 functions)
 
+#include "../../include/layout_support.h"
 #include "Script.h"
+#include "../../include/BGSCameraPath.h"
 #include "packagetarget_decls.h"
 #include "packagetarget_types_PackageLocation.h"
-#include "packagetarget_types_PACK_TARG_TYPE.h"
-#include "packagetarget_types_PackageTarget.h"
+#include "../../include/PackageTargetRecord.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/TESSaveLoadGame.h"
 
 // @fnv 0x00519b00
 int PackageTargetRecord::GetTargetKind()
@@ -62,7 +66,7 @@ TESForm* PackageTargetRecord::GetTargetForm()
 }
 
 // @fnv 0x00680080
-PACKAGE_OBJECT_TYPE PackageTargetRecord::GetTargetObjectType()
+int PackageTargetRecord::GetTargetObjectType()
 {
     if (GetTargetKind() == PACK_TARG_TYPE_PTT_TYPE)
         return eObjType;
@@ -76,7 +80,7 @@ void LocationDescriptor::Copy(LocationDescriptor* source, bool copy)
 {
     if (source != 0)
     {
-        if (copy || source->GetLocType() != PACK_LOC_TYPE_INVALID)
+        if (copy || source->GetLocType() != PLT_NONE)
         {
             SetLocationType(source->GetLocType());
             switch (m_ucLocationType)
@@ -160,85 +164,53 @@ void PackageTargetRecord::InitItem(TESForm* owner)
     }
 }
 
-// Sets the byte at pThis to 2 and zeroes the int, int and float fields at offsets 4, 8 and 12, then returns pThis.
+// Initializes an object-type target with zeroed target data, value and radius.
 // @fnv 0x0067ff70
-void* __fastcall FUN_0067ff70(void* pThis)
+PackageTargetRecord::PackageTargetRecord()
 {
-    *(unsigned char*)pThis = 2;
-    *((int*)pThis + 1) = 0;
-    *((int*)pThis + 2) = 0;
-    *((float*)pThis + 3) = 0.0f;
-    return pThis;
+    m_uiTargetType = 2;
+    pTargetForm = 0;
+    iValue = 0;
+    m_fTargetValue = 0.0f;
 }
 
-struct PTFile
+// The shared Copy declaration returns void; this entry returns the target pointer.
+// A pointer aggregate stays on the stack under __fastcall, preserving the original thiscall ABI.
+struct PackageTargetCopySource
 {
-    unsigned char m_uiTargetType;
-    char pad[3];
-    unsigned int iFormID;
-    int iValue;
-    float m_fTargetValue;
+    PackageTargetRecord* record;
 };
-struct FUN_0067ffa0_cls
-{
-    unsigned char m_uiTargetType;
-    char pad[3];
-    unsigned int ref;
-    void SetTargetKind(int t);
-    void SetFlags(unsigned int v);
-    void FUN_0063f790(float f);
-    FUN_0067ffa0_cls* LoadFromPTFile(PTFile* f);
-};
+
 // @fnv 0x0067ffa0
-FUN_0067ffa0_cls* FUN_0067ffa0_cls::LoadFromPTFile(PTFile* apFile)
+PackageTargetRecord* __fastcall CopyPackageTargetRecord(PackageTargetRecord* target, PackageTargetCopySource source)
 {
-    SetTargetKind(apFile->m_uiTargetType);
-    SetFlags(apFile->iValue);
-    FUN_0063f790(apFile->m_fTargetValue);
-    switch (m_uiTargetType)
+    target->SetTargetKind(source.record->m_uiTargetType);
+    target->SetTargValue(source.record->iValue);
+    target->SetTargAcquireRadius(source.record->m_fTargetValue);
+    switch (target->m_uiTargetType)
     {
     case 0:
     case 1:
-        ref = apFile->iFormID;
+        target->pTargetForm = source.record->pTargetForm;
         break;
     case 2:
-        ref = apFile->iFormID;
+        target->pTargetForm = source.record->pTargetForm;
         break;
     }
-    return this;
+    return target;
 }
-
-struct FUN_00680140_shell : public PackageTargetRecord
-{
-    void SetObjectTarget(TESForm*);
-};
 
 // If the package target type is PTT_OBJECT, stores apObj in pObject.
 // @fnv 0x00680140
-void FUN_00680140_shell::SetObjectTarget(TESForm* apObj)
+void PackageTargetRecord::SetTargObject(TESForm* apObj)
 {
     if (GetTargetKind() == PACK_TARG_TYPE_PTT_OBJECT)
         pObject = apObj;
 }
 
-struct ArrSI
-{
-    unsigned int GetFlags(void);
-};
-
-struct Twin_0084d030
-{
-    float GetStoredFloatValue(void);
-};
-
-struct FUN_00680220_shell : PackageTargetRecord
-{
-    bool Compare(PackageTargetRecord* apCompare);
-};
-
 // Returns true if apCompare is null or any of the compared values differ; returns false when all compared values match.
 // @fnv 0x00680220
-bool FUN_00680220_shell::Compare(PackageTargetRecord* apCompare)
+bool PackageTargetRecord::Compare(PackageTargetRecord* apCompare)
 {
     if (apCompare == 0)
         return true;
@@ -250,9 +222,9 @@ bool FUN_00680220_shell::Compare(PackageTargetRecord* apCompare)
         return true;
     if (this->GetTargetObjectType() != apCompare->GetTargetObjectType())
         return true;
-    if (((ArrSI*)this)->GetFlags() != ((ArrSI*)apCompare)->GetFlags())
+    if (this->GetTargValue() != apCompare->GetTargValue())
         return true;
-    if (((Twin_0084d030*)this)->GetStoredFloatValue() != ((Twin_0084d030*)apCompare)->GetStoredFloatValue())
+    if (this->GetTargAcquireRadius() != apCompare->GetTargAcquireRadius())
         return true;
     return false;
 }
@@ -272,13 +244,8 @@ extern "C" void* __cdecl memset(void* dest, int value, unsigned int count);
 extern "C" bool __cdecl FUN_00401500();
 extern "C" void __cdecl AppendChunk(int id, FormValueEntry* data, unsigned int size);
 
-struct FUN_006802f0_shell : PackageTargetRecord
-{
-    void FUN_006802f0(int chunk);
-};
-
 // @fnv 0x006802f0
-void FUN_006802f0_shell::FUN_006802f0(int chunk)
+void PackageTargetRecord::FUN_006802f0(int chunk)
 {
     FormValueEntry record;
     memset(&record, 0, 16);
@@ -303,13 +270,8 @@ void FUN_006802f0_shell::FUN_006802f0(int chunk)
         ((ChunkPayload16*)&record)->FUN_0067ff10();
 }
 
-struct FUN_00680520_cls : public PackageTargetRecord
-{
-    unsigned short FUN_00680520();
-};
-
 // @fnv 0x00680520
-unsigned short FUN_00680520_cls::FUN_00680520()
+unsigned short PackageTargetRecord::GetSaveSize()
 {
     unsigned short usSize = 0;
     usSize += 1;
@@ -331,63 +293,28 @@ unsigned short FUN_00680520_cls::FUN_00680520()
     return usSize;
 }
 
-// Save-game write of a target record: type byte, two values, then the type-specific target.
-
-class C80720Form;
-
-class C80720SaveBuffer
-{
-  public:
-    void SaveData(void* pvData, int iSize, int iFlags);
-    void SerializeFormData(C80720Form* pkForm, int iFlags);
-};
-
-class C80720Target
-{
-  public:
-    unsigned char m_ucType;
-    union
-    {
-        C80720Form* m_pkForm;
-        int m_iValue;
-    };
-    int m_iData1;
-    int m_iData2;
-
-    void SaveToBuffer(C80720SaveBuffer* pkBuffer);
-};
-
-// Writes the type byte, m_iData1 and m_iData2 to the buffer, then saves the form, value or nothing depending on m_ucType.
+// Writes the target type, value and radius, then the type-specific target.
 // @fnv 0x00680720
-void C80720Target::SaveToBuffer(C80720SaveBuffer* pkBuffer)
+void PackageTargetRecord::SaveGame(BGSSaveFormBuffer* pkBuffer)
 {
     pkBuffer->SaveData(this, 1, 0);
-    pkBuffer->SaveData(&m_iData1, 4, 0);
-    pkBuffer->SaveData(&m_iData2, 4, 0);
-    switch (m_ucType)
+    pkBuffer->SaveData(&iValue, 4, 0);
+    pkBuffer->SaveData(&m_fTargetValue, 4, 0);
+    switch (m_uiTargetType)
     {
         break;
     case 0:
     case 1:
-        pkBuffer->SerializeFormData(m_pkForm, 0);
+        pkBuffer->SerializeFormData(pTargetForm, 0);
         break;
     case 2:
-        pkBuffer->SaveData(&m_iValue, 4, 0);
+        pkBuffer->SaveData(&eObjType, 4, 0);
         break;
     }
 }
 
-struct S_006807b0_Stream
-{
-    void FUN_00864980(void* data, unsigned int size);
-    void FUN_008648e0(void* data);
-};
-struct S_006807b0_Target : PackageTargetRecord
-{
-    void FUN_006807b0(S_006807b0_Stream* s);
-};
 // @fnv 0x006807b0
-void S_006807b0_Target::FUN_006807b0(S_006807b0_Stream* pStream)
+void PackageTargetRecord::LoadGame(BGSLoadFormBuffer* pStream)
 {
     pStream->FUN_00864980(this, 1);
     pStream->FUN_00864980(&iValue, 4);
@@ -405,13 +332,8 @@ void S_006807b0_Target::FUN_006807b0(S_006807b0_Stream* pStream)
     }
 }
 
-struct FUN_00680830_shell : PackageTargetRecord
-{
-    void FUN_00680830(void* unused);
-};
-
 // @fnv 0x00680830
-void FUN_00680830_shell::FUN_00680830(void* unused)
+void PackageTargetRecord::InitLoadGame(BGSLoadFormBuffer* unused)
 {
     switch (m_uiTargetType)
     {
@@ -422,76 +344,48 @@ void FUN_00680830_shell::FUN_00680830(void* unused)
     }
 }
 
-struct C680590Form
-{
-    unsigned int Deallocate();
-};
-
-struct TESSaveLoadGame
-{
-    void FUN_008579b0(void* pvData, unsigned int uiSize);
-    void FUN_00857a10(int iData, int iSize);
-};
-
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
-struct C680590Target
-{
-    unsigned char m_ucType;
-    union
-    {
-        C680590Form* m_pkForm;
-        int m_iValue;
-    };
-    int m_iData1;
-    int m_iData2;
-
-    void SaveLoad();
-};
-
+// Legacy save/load entry points have no declarations in the shared class.
+// __fastcall passes the explicit target in ECX, matching their original no-argument thiscall ABI.
 // @fnv 0x00680590
-void C680590Target::SaveLoad()
+void __fastcall SavePackageTargetRecordOLD(PackageTargetRecord* target)
 {
-    g_TESSaveLoadGame->FUN_008579b0(&m_ucType, 1);
-    g_TESSaveLoadGame->FUN_008579b0(&m_iData1, 4);
-    g_TESSaveLoadGame->FUN_008579b0(&m_iData2, 4);
+    g_TESSaveLoadGame->FUN_008579b0(&target->m_uiTargetType, 1);
+    g_TESSaveLoadGame->FUN_008579b0(&target->iValue, 4);
+    g_TESSaveLoadGame->FUN_008579b0(&target->m_fTargetValue, 4);
 
-    switch (m_ucType)
+    switch (target->m_uiTargetType)
     {
         break;
     case 0:
     case 1: {
         unsigned int uiResult = 0;
-        if (m_pkForm)
+        if (target->pTargetForm)
         {
-            uiResult = m_pkForm->Deallocate();
+            uiResult = target->pTargetForm->GetFormID();
         }
         g_TESSaveLoadGame->FUN_00857a10((int)&uiResult, 4);
     }
     break;
     case 2:
-        g_TESSaveLoadGame->FUN_008579b0(&m_iValue, 4);
+        g_TESSaveLoadGame->FUN_008579b0(&target->eObjType, 4);
         break;
     }
 }
 
 TESForm* FUN_004839c0(unsigned int formID);
 
-struct FUN_006806e0_target : PackageTargetRecord
-{
-    void ResolveTargetForm();
-};
-
 // For reference or object target types, replaces pTargetForm with the TESForm resolved from its formID via FUN_004839c0.
 // @fnv 0x006806e0
-void FUN_006806e0_target::ResolveTargetForm()
+void __fastcall ResolvePackageTargetForm(PackageTargetRecord* target)
 {
-    switch (m_uiTargetType)
+    switch (target->m_uiTargetType)
     {
     case PACK_TARG_TYPE_PTT_REFERENCE:
     case PACK_TARG_TYPE_PTT_OBJECT:
-        unsigned int formID = reinterpret_cast<unsigned int>(pTargetForm);
-        pTargetForm = FUN_004839c0(formID);
+        unsigned int formID = reinterpret_cast<unsigned int>(target->pTargetForm);
+        target->pTargetForm = FUN_004839c0(formID);
     }
 }
 
@@ -501,32 +395,24 @@ struct SaveLoadStub
     void FUN_00857aa0(void* data, int size);
 };
 extern SaveLoadStub* g_saveLoad_011de45c;
-struct SaveDataStub
-{
-    unsigned char type;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void FUN_00680640();
-};
 // @fnv 0x00680640
-void SaveDataStub::FUN_00680640()
+void __fastcall LoadPackageTargetRecordOLD(PackageTargetRecord* target)
 {
-    g_saveLoad_011de45c->FUN_008579e0(this, 1);
-    g_saveLoad_011de45c->FUN_008579e0(&unk08, 4);
-    g_saveLoad_011de45c->FUN_008579e0(&unk0C, 4);
-    switch (type)
+    g_saveLoad_011de45c->FUN_008579e0(target, 1);
+    g_saveLoad_011de45c->FUN_008579e0(&target->iValue, 4);
+    g_saveLoad_011de45c->FUN_008579e0(&target->m_fTargetValue, 4);
+    switch (target->m_uiTargetType)
     {
         break;
     case 0:
     case 1: {
         int value;
         g_saveLoad_011de45c->FUN_00857aa0(&value, 4);
-        unk04 = value;
+        target->eObjType = (PACKAGE_OBJECT_TYPE)value;
     }
     break;
     case 2:
-        g_saveLoad_011de45c->FUN_008579e0(&unk04, 4);
+        g_saveLoad_011de45c->FUN_008579e0(&target->eObjType, 4);
         break;
     }
 }

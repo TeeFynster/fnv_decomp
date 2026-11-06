@@ -1,16 +1,13 @@
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiProperty.h"
+#include "../../../../include/NiVertexColorProperty.h"
+#include "../../../../include/StrArr.h"
 
 // src/gamebryo2.2/corelibs/nimain/nivertexcolorproperty.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nivertexcolorproperty.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiProperty
-{
-    NiProperty();
-};
 
-struct BSFadeNode
-{
-    static void* operator new(unsigned int);
-};
 
 extern int DAT_0109b72c;
 
@@ -18,36 +15,29 @@ extern int DAT_0109b72c;
 // @fnv 0x00a5f280
 NiProperty* FUN_00a5f280()
 {
-    NiProperty* p = static_cast<NiProperty*>(BSFadeNode::operator new(0x1c));
+    NiVertexColorProperty* p = static_cast<NiVertexColorProperty*>(BSFadeNode::operator new(0x1c));
     if (p)
     {
         p->NiProperty::NiProperty();
-        *reinterpret_cast<short*>(reinterpret_cast<char*>(p) + 0x18) = 8;
+        p->m_uiObjectFlags = 8;
         *reinterpret_cast<int*>(p) = reinterpret_cast<int>(&DAT_0109b72c);
         return p;
     }
     return 0;
 }
 
-struct NiObject
+// Base routines not yet exposed by the shared NiProperty declaration.
+struct PropertyRoutines
 {
-    char _x;
-};
-struct EqBase
-{
-    char _pad[0x18];
-    bool FUN_00a62140(NiObject*);
-};
-struct NiVertexColorProperty : EqBase
-{
-    unsigned short m_uiObjectFlags;
-    bool IsVertexColorPropertyEqual(NiObject*);
+    bool IsEqual(NiObject*);
+    void CopyMembers(NiVertexColorProperty*, unsigned int);
+    void AppendString(StrArr*);
 };
 // @fnv 0x00a5f090
 bool NiVertexColorProperty::IsVertexColorPropertyEqual(NiObject* pkObject)
 {
     NiVertexColorProperty* pkVC;
-    if (EqBase::FUN_00a62140(pkObject))
+    if (reinterpret_cast<PropertyRoutines*>(this)->IsEqual(pkObject))
     {
         pkVC = (NiVertexColorProperty*)pkObject;
         if ((pkVC->m_uiObjectFlags & 0x30) == (m_uiObjectFlags & 0x30))
@@ -59,112 +49,66 @@ bool NiVertexColorProperty::IsVertexColorPropertyEqual(NiObject* pkObject)
     return false;
 }
 
-struct StrArr
-{
-    char _pad[0x08];
-    unsigned short _capacity;
-    unsigned short _count;
-    char _pad2[0x02];
-    unsigned short _growBy;
-
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int index, char*& value);
-};
-
-struct FUN_00a62a40_this
-{
-    void AppendString(StrArr* strings);
-};
-
 extern double* _g_011f4430;
 char* __cdecl _FUN_00a7d330(double* value);
 char* __cdecl BuildSourceString(const char* name, unsigned int value);
 char* __cdecl BuildLightingEnumString(const char* name, unsigned int value);
 
-struct FUN_00a5f3a0_shell : NiVertexColorProperty
-{
-    void AppendVertexColorProperties(StrArr* strings);
-};
-
+// For routines absent from the shared declaration, an unused EDX parameter
+// preserves the original member-function ABI while using the shared object layout.
 // @fnv 0x00a5f3a0
-void FUN_00a5f3a0_shell::AppendVertexColorProperties(StrArr* strings)
+void __fastcall AppendVertexColorProperties(NiVertexColorProperty* self, void*, StrArr* strings)
 {
-    reinterpret_cast<FUN_00a62a40_this*>(this)->AppendString(strings);
+    reinterpret_cast<PropertyRoutines*>(self)->AppendString(strings);
 
     char* value = _FUN_00a7d330(_g_011f4430);
-    unsigned int index = strings->_count;
-    if (index >= strings->_capacity)
-        strings->SetSize(index + strings->_growBy);
+    unsigned int index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    unsigned int sourceMode = (m_uiObjectFlags >> 4) & 3;
+    unsigned int sourceMode = (self->m_uiObjectFlags >> 4) & 3;
     value = BuildSourceString("Source Mode", sourceMode);
-    index = strings->_count;
-    if (index >= strings->_capacity)
-        strings->SetSize(index + strings->_growBy);
+    index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
-    unsigned int lightingMode = (m_uiObjectFlags >> 3) & 1;
+    unsigned int lightingMode = (self->m_uiObjectFlags >> 3) & 1;
     value = BuildLightingEnumString("Lighting Mode", lightingMode);
-    index = strings->_count;
-    if (index >= strings->_capacity)
-        strings->SetSize(index + strings->_growBy);
+    index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 }
 
 void* __cdecl FUN_00aa13e0(unsigned int size);
 void __stdcall CreateVertexBufferSet(void* self, unsigned int arg);
 
-struct NodeBase_b9855
-{
-    virtual void unk00();
-    unsigned int unk04[5];
-    unsigned short m_18;
-    unsigned short unk1a;
-    NodeBase_b9855() throw();
-};
-
-struct NodeObj_b9855 : NodeBase_b9855
-{
-    static void* operator new(unsigned int size) throw()
-    {
-        return FUN_00aa13e0(size);
-    }
-    virtual void unk00();
-    NodeObj_b9855() throw()
-    {
-        m_18 = 8;
-    }
-};
-
-struct FUN_00a5f210_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int m_0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned short m_18;
-
-    void FUN_00a5d7a0(NodeBase_b9855* p, unsigned int arg);
-    void* FUN_00a5f210(unsigned int a1);
-};
-
 // @fnv 0x00a5f210
-void* FUN_00a5f210_cls::FUN_00a5f210(unsigned int a1)
+void* __fastcall CloneVertexColorProperty(NiVertexColorProperty* self, void*, unsigned int a1)
 {
-    if (m_0c != 0)
+    if (self->m_spControllers != 0)
     {
-        NodeBase_b9855* p = new NodeObj_b9855();
-        FUN_00a5d7a0(p, a1);
-        p->m_18 = m_18;
+        NiVertexColorProperty* p = static_cast<NiVertexColorProperty*>(FUN_00aa13e0(0x1c));
+        if (p)
+        {
+            p->NiProperty::NiProperty();
+            *reinterpret_cast<int*>(p) = reinterpret_cast<int>(&DAT_0109b72c);
+            p->m_uiObjectFlags = 8;
+        }
+        else
+        {
+            p = 0;
+        }
+        reinterpret_cast<PropertyRoutines*>(self)->CopyMembers(p, a1);
+        p->m_uiObjectFlags = self->m_uiObjectFlags;
         return p;
     }
     else
     {
-        CreateVertexBufferSet(this, a1);
-        return this;
+        CreateVertexBufferSet(self, a1);
+        return self;
     }
 }
 
@@ -423,37 +367,25 @@ static __forceinline void SetBits(unsigned short& f, unsigned int v, unsigned in
 {
     f = (unsigned short)((f & ~mask) | (v << shift));
 }
-struct Prop
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned short m_usFlags;
-    void FUN_00a5d7f0(Stream* s);
-    void ReadFromStream(Stream* s);
-};
 // @fnv 0x00a5f2b0
-void Prop::ReadFromStream(Stream* apStream)
+void __fastcall ReadFromStream(NiVertexColorProperty* self, void*, Stream* apStream)
 {
-    FUN_00a5d7f0(apStream);
+    self->NiProperty::LoadBinary(*reinterpret_cast<NiStream*>(apStream));
     if (apStream->m_uiFormatVersion < 0xa000102)
-        m_usFlags = apStream->m_usFlags & 7;
+        self->m_uiObjectFlags = apStream->m_usFlags & 7;
     else
-        BinRead(apStream, &m_usFlags);
+        BinRead(apStream, &self->m_uiObjectFlags);
     if (apStream->m_uiFormatVersion < 0x14010002)
     {
         {
             unsigned int uiFlags;
             BinRead(apStream, &uiFlags);
-            SetBits(m_usFlags, uiFlags, 0x30, 4);
+            SetBits(self->m_uiObjectFlags, uiFlags, 0x30, 4);
         }
         {
             unsigned int b;
             BinRead(apStream, &b);
-            SetBits(m_usFlags, b, 0x08, 3);
+            SetBits(self->m_uiObjectFlags, b, 0x08, 3);
         }
     }
 }

@@ -9,9 +9,11 @@
 // did.
 //
 // Compiler: MSVC9 SP1 15.00.30729.01, flags /Od /Oy- /GS /EHsc /Gy
-#include "BSFaceGenMorphData.h"
-
-const NiRTTI BSFaceGenMorphDataHead::ms_kRTTI;
+#include "../../../include/BSFaceGenMorphData.h"
+#include "../../../include/BSFaceGenMorphDataHead.h"
+#include "../../../include/NiObject.h"
+#include "../../../include/NiRTTI.h"
+#include "../../../include/NiRefObject.h"
 
 // @fnv 0x00661d90
 const NiRTTI* BSFaceGenMorphDataHead::GetRTTI() const

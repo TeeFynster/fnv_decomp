@@ -1,3 +1,9 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
 
 // src/havok/physics/dynamics/constraint/chain/powered/hkppoweredchaindata_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-28 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/dynamics/constraint/chain/powered/hkppoweredchaindata.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,7 +11,13 @@
 
 // src/havok/physics/dynamics/constraint/chain/powered/hkppoweredchaindata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/chain/powered/hkppoweredchaindata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpPoweredChainData.h"
+#include "../../../../../../../include/hkpPoweredChainData.h"
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/Transform.h"
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkVector4.h"
+#include <string.h>
 struct FUN_00e3b720_s
 {
     int pad0[3];
@@ -64,19 +76,11 @@ struct FUN_00d21ce0_cls
     }
     void FUN_00d21ce0(void* owner) throw();
 };
-template <typename T> struct hkArrayE3B8
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    hkArrayE3B8() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
 class FUN_00e3b8f0 : public hkBaseE3B8
 {
   public:
     FUN_00d21ce0_cls m_link;
-    hkArrayE3B8<void*> m_items;
+    hkArray<void*> m_items;
     float m_24;
     float m_28;
     float m_2c;
@@ -100,20 +104,6 @@ class hkMemoryAllocatorXe3c210
     virtual void* AllocateMemoryBlock(int iNumBytes) throw();
     virtual void ReleaseBlock(void* p, int iNumBytes) throw();
 };
-struct hkMemoryRouterXe3c210
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorXe3c210* m_pStreamAllocator;
-
-    hkMemoryAllocatorXe3c210& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterXe3c210& __cdecl FUN_00c85750() throw();
 class hkObje3c210 : public FUN_00e3b9a0
 {
   public:
@@ -121,7 +111,8 @@ class hkObje3c210 : public FUN_00e3b9a0
 
     static void operator delete(void* p) throw()
     {
-        FUN_00c85750().heap().ReleaseBlock(p, static_cast<hkObje3c210*>(p)->GetAllocationSize());
+        reinterpret_cast<hkMemoryAllocatorXe3c210*>((&hkMemoryRouter::getInstance())->m_heap)
+            ->ReleaseBlock(p, static_cast<hkObje3c210*>(p)->GetAllocationSize());
     }
     int GetAllocationSize() const
     {
@@ -132,37 +123,32 @@ class hkObje3c210 : public FUN_00e3b9a0
 #include <xmmintrin.h>
 __declspec(align(16)) extern const float DAT_010c44d0[4];
 
-struct Vec4
-{
-    __m128 m_vComponents;
-};
-
 // @fnv 0x00e3b680
 static __declspec(noinline) void FUN_00e3b680(const Vec4& b, const Vec4& a, Vec4& r)
 {
     {
-        __m128 v1 = a.m_vComponents;
-        __m128 v2 = b.m_vComponents;
+        __m128 v1 = reinterpret_cast<const __m128&>(a);
+        __m128 v2 = reinterpret_cast<const __m128&>(b);
         __m128 c0 = _mm_mul_ps(_mm_shuffle_ps(v2, v2, 0xc9), _mm_shuffle_ps(v1, v1, 0xd2));
         __m128 c1 = _mm_mul_ps(_mm_shuffle_ps(v2, v2, 0xd2), _mm_shuffle_ps(v1, v1, 0xc9));
-        r.m_vComponents = _mm_sub_ps(c0, c1);
+        reinterpret_cast<__m128&>(r) = _mm_sub_ps(c0, c1);
     }
     {
-        __m128 aw = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xff);
+        __m128 aw = _mm_shuffle_ps(reinterpret_cast<const __m128&>(a), reinterpret_cast<const __m128&>(a), 0xff);
         aw = _mm_shuffle_ps(aw, aw, 0);
-        r.m_vComponents = _mm_add_ps(r.m_vComponents, _mm_mul_ps(aw, b.m_vComponents));
+        reinterpret_cast<__m128&>(r) = _mm_add_ps(reinterpret_cast<__m128&>(r), _mm_mul_ps(aw, reinterpret_cast<const __m128&>(b)));
     }
     {
-        __m128 bw = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xff);
+        __m128 bw = _mm_shuffle_ps(reinterpret_cast<const __m128&>(b), reinterpret_cast<const __m128&>(b), 0xff);
         bw = _mm_shuffle_ps(bw, bw, 0);
-        r.m_vComponents = _mm_sub_ps(r.m_vComponents, _mm_mul_ps(bw, a.m_vComponents));
+        reinterpret_cast<__m128&>(r) = _mm_sub_ps(reinterpret_cast<__m128&>(r), _mm_mul_ps(bw, reinterpret_cast<const __m128&>(a)));
     }
-    r.m_vComponents = _mm_add_ps(r.m_vComponents, r.m_vComponents);
-    __m128 p = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+    reinterpret_cast<__m128&>(r) = _mm_add_ps(reinterpret_cast<__m128&>(r), reinterpret_cast<__m128&>(r));
+    __m128 p = _mm_mul_ps(reinterpret_cast<const __m128&>(a), reinterpret_cast<const __m128&>(b));
     __m128 q = _mm_add_ps(_mm_shuffle_ps(p, p, 0x4e), p);
     __m128 w = _mm_add_ps(_mm_shuffle_ps(q, q, 0xb1), q);
     if (_mm_movemask_ps(w) & 1)
-        r.m_vComponents = _mm_xor_ps(r.m_vComponents, *(const __m128*)DAT_010c44d0);
+        reinterpret_cast<__m128&>(r) = _mm_xor_ps(reinterpret_cast<__m128&>(r), *(const __m128*)DAT_010c44d0);
 }
 
 volatile int g_a, g_b, g_r;
@@ -175,29 +161,11 @@ inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
-struct Vector
-{
-    union
-    {
-        __m128 simd;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-    void FUN_00cb26e0(const hkRotation*);
-    void FUN_00c66320(const Vector*, const Vector*);
-};
 extern const __m128 DAT_010c4c00;
 struct Rotation
 {
-    Vector col[3];
-    void FUN_00cb2d90(const Vector*);
-};
-struct Transform
-{
-    Rotation rotation;
-    Vector translation;
+    hkVector4 col[3];
+    void FUN_00cb2d90(const hkVector4*);
 };
 struct Entity;
 struct ConstraintRuntime
@@ -237,8 +205,8 @@ struct QueryOutput
 };
 struct ConstraintInfo
 {
-    Vector pivotA, pivotB;
-    Vector target, targetB;
+    hkVector4 pivotA, pivotB;
+    hkVector4 target, targetB;
     void* motors[3];
     unsigned char switched;
     unsigned char unk4d;
@@ -289,19 +257,14 @@ struct MemoryAllocator
     virtual void f3();
     virtual void freeBlock(void*, int);
 };
-struct MemoryRouter
-{
-    int unk00, unk04, unk08, unk0c;
-    MemoryAllocator* heap;
-};
 void __cdecl FUN_00c908c0(MemoryAllocator*, void*, int, int);
 void __cdecl ResizeAudioStream(void*, void*, int);
 extern "C" void __cdecl AppendEventRecord(const QueryInput*, QueryOutput*, char*, int);
 char* __cdecl FUN_00dd13d0(char*);
 char* __cdecl FUN_00dd13e0(char*, int);
 void __cdecl FUN_00dcee70(QueryInput*);
-void __cdecl FUN_00dcfc00(Vector*, Vector*, float, QueryInput*, char*);
-void __cdecl FUN_00d6cd70(Vector*, QueryInput*, char*, float*);
+void __cdecl FUN_00dcfc00(hkVector4*, hkVector4*, float, QueryInput*, char*);
+void __cdecl FUN_00d6cd70(hkVector4*, QueryInput*, char*, float*);
 void __cdecl FUN_00dcfff0(void*, MotorInput*, MotorOutput*);
 void __cdecl WriteInputHeader(BuildInfo*, const QueryInput*, QueryOutput*);
 struct Entity
@@ -368,32 +331,12 @@ struct Entity
     int unkec;
     Transform transform;
 };
-// Quaternion error, with sign chosen for the shortest arc.
-static __declspec(noinline) void FUN_00e3b680(const Vector& b, const Vector& a, Vector& out)
+static __forceinline void transformPoint(hkVector4& out, const Transform& t, const hkVector4& p)
 {
-    __m128 av = a.simd, bv = b.simd;
-    __m128 cross = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(bv, bv, 0xc9), _mm_shuffle_ps(av, av, 0xd2)),
-                              _mm_mul_ps(_mm_shuffle_ps(bv, bv, 0xd2), _mm_shuffle_ps(av, av, 0xc9)));
-    out.simd = cross;
-    __m128 aw = _mm_shuffle_ps(a.simd, a.simd, 0xff);
-    aw = _mm_shuffle_ps(aw, aw, 0);
-    out.simd = _mm_add_ps(_mm_mul_ps(aw, b.simd), cross);
-    __m128 bw = _mm_shuffle_ps(b.simd, b.simd, 0xff);
-    bw = _mm_shuffle_ps(bw, bw, 0);
-    __m128 error = _mm_sub_ps(out.simd, _mm_mul_ps(bw, a.simd));
-    out.simd = _mm_add_ps(error, error);
-    __m128 dot = _mm_mul_ps(a.simd, b.simd);
-    dot = _mm_add_ps(_mm_shuffle_ps(dot, dot, 0x4e), dot);
-    dot = _mm_add_ps(_mm_shuffle_ps(dot, dot, 0xb1), dot);
-    if (_mm_movemask_ps(dot) & 1)
-        out.simd = _mm_xor_ps(out.simd, _mm_set1_ps(-0.0f));
-}
-static __forceinline void transformPoint(Vector& out, const Transform& t, const Vector& p)
-{
-    out.simd = _mm_add_ps(
-        _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p.simd, p.simd, 0x55), t.rotation.col[1].simd),
-                   _mm_mul_ps(_mm_shuffle_ps(p.simd, p.simd, 0), t.rotation.col[0].simd)),
-        _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p.simd, p.simd, 0xaa), t.rotation.col[2].simd), t.translation.simd));
+    out.m_vComponents = _mm_add_ps(
+        _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p.m_vComponents, p.m_vComponents, 0x55), t.r[1]),
+                   _mm_mul_ps(_mm_shuffle_ps(p.m_vComponents, p.m_vComponents, 0), t.r[0])),
+        _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(p.m_vComponents, p.m_vComponents, 0xaa), t.r[2]), t.r[3]));
 }
 template <class T> __forceinline void copyConstruct(T* dest, int n, const T& x)
 {
@@ -409,8 +352,8 @@ template <class T, int N> struct InplaceArray
     {}
     __forceinline void SetSizeAndGrow(int n)
     {
-        hkMemoryRouterXe3c210* router = &FUN_00c85750();
-        MemoryAllocator* heap = reinterpret_cast<MemoryAllocator*>(router->m_pStreamAllocator);
+        hkMemoryRouter* router = (&hkMemoryRouter::getInstance());
+        MemoryAllocator* heap = reinterpret_cast<MemoryAllocator*>(router->m_heap);
         int c = capacity & 0x3fffffff;
         if (c < n)
         {
@@ -432,9 +375,9 @@ template <class T, int N> struct InplaceArray
     }
     __forceinline void AddBack(const T& x)
     {
-        hkMemoryRouterXe3c210* route = &FUN_00c85750();
+        hkMemoryRouter* route = (&hkMemoryRouter::getInstance());
         if (size == (capacity & 0x3fffffff))
-            ResizeAudioStream(route->m_pStreamAllocator, this, sizeof(T));
+            ResizeAudioStream(route->m_heap, this, sizeof(T));
         copyConstruct(data + size, 1, x);
         ++size;
     }
@@ -446,8 +389,8 @@ template <class T, int N> struct InplaceArray
     }
     __forceinline void clear()
     {
-        hkMemoryRouterXe3c210* router = &FUN_00c85750();
-        MemoryAllocator* heap = reinterpret_cast<MemoryAllocator*>(router->m_pStreamAllocator);
+        hkMemoryRouter* router = (&hkMemoryRouter::getInstance());
+        MemoryAllocator* heap = reinterpret_cast<MemoryAllocator*>(router->m_heap);
         deallocate(*heap);
     }
 };
@@ -457,26 +400,19 @@ __forceinline char* angularAndKeep(char* lin, QueryOutput& out, int n, char*& ke
     keep = lin;
     return FUN_00dd13e0(p, n);
 }
-struct PoweredChain : hkpPoweredChainData
+static __forceinline ConstraintInfo& getInfo(hkpPoweredChainData& chain, int i)
 {
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void* motorStep(char*);
-    __forceinline ConstraintInfo& getInfo(int i)
-    {
-        return reinterpret_cast<ConstraintInfo*>(m_pConstraintInfo.m_data)[i];
-    }
-    void FUN_00e3ba40(const QueryInput&, QueryOutput&);
-};
+    return reinterpret_cast<ConstraintInfo*>(chain.m_pConstraintInfo.m_data)[i];
+}
+// This unit calls the runtime accessor at vtable byte offset 0x28; the shared
+// header currently declares that slot as v0A(), without its typed signature.
+static __forceinline void* motorStep(hkpPoweredChainData* chain, char* solverResults)
+{
+    typedef void* (__thiscall *RuntimeAccessor)(hkpPoweredChainData*, char*);
+    return reinterpret_cast<RuntimeAccessor>((*reinterpret_cast<void***>(chain))[10])(chain, solverResults);
+}
 // @fnv 0x00e3ba40
-void PoweredChain::FUN_00e3ba40(const QueryInput& input, QueryOutput& output)
+void hkpPoweredChainData::FUN_00e3ba40(const QueryInput& input, QueryOutput& output)
 {
     AppendEventRecord(&input, &output, input.runtime, 8);
     QueryInput query = input;
@@ -507,63 +443,67 @@ void PoweredChain::FUN_00e3ba40(const QueryInput& input, QueryOutput& output)
         offsets.AddBack(offset);
         query.transformB = &next->transform;
         {
-            Vector pivotA, pivotB;
-            transformPoint(pivotA, *query.transformA, getInfo(i).pivotA);
-            transformPoint(pivotB, *query.transformB, getInfo(i).pivotB);
+            hkVector4 pivotA, pivotB;
+            transformPoint(pivotA, *query.transformA, getInfo(*this, i).pivotA);
+            transformPoint(pivotB, *query.transformB, getInfo(*this, i).pivotB);
             FUN_00dcee70(&query);
             FUN_00dcfc00(&pivotA, &pivotB, m_fMaximumAngularImpulse, &query, jacobian);
             jacobian += 0x90;
         }
-        Vector rotationA, rotationB;
-        rotationA.FUN_00cb26e0(reinterpret_cast<hkRotation*>(&query.transformA->rotation));
-        rotationB.FUN_00cb26e0(reinterpret_cast<hkRotation*>(&query.transformB->rotation));
-        if (getInfo(i).switched)
+        hkVector4 rotationA, rotationB;
+        rotationA.FUN_00cb26e0(reinterpret_cast<hkRotation*>(&query.transformA->r[0]));
+        rotationB.FUN_00cb26e0(reinterpret_cast<hkRotation*>(&query.transformB->r[0]));
+        if (getInfo(*this, i).switched)
         {
-            Vector tmp = rotationA;
-            rotationA.simd = rotationB.simd;
-            rotationB.simd = tmp.simd;
+            hkVector4 tmp;
+            memcpy(&tmp, &rotationA, sizeof(tmp));
+            rotationA.m_vComponents = rotationB.m_vComponents;
+            rotationB.m_vComponents = tmp.m_vComponents;
         }
         {
-            Vector product;
-            product.FUN_00c66320(&rotationB, &getInfo(i).targetB);
-            rotationB.simd = product.simd;
+            hkVector4 product;
+            product.FUN_00c66320(&rotationB, &getInfo(*this, i).targetB);
+            rotationB.m_vComponents = product.m_vComponents;
         }
-        Vector& target = getInfo(i).target;
+        hkVector4& target = getInfo(*this, i).target;
         int n = m_pConstraintInfo.m_iElementCount;
-        Vector* previous = reinterpret_cast<Vector*>(input.runtime + ((n + 3) & ~3) + (3 * n + i) * 16);
-        Vector previousTarget;
-        previousTarget.simd = _mm_setr_ps(previous->x, previous->y, previous->z, previous->w);
-        __m128 sq = _mm_mul_ps(previousTarget.simd, previousTarget.simd);
+        hkVector4* previous = reinterpret_cast<hkVector4*>(input.runtime + ((n + 3) & ~3) + (3 * n + i) * 16);
+        hkVector4 previousTarget;
+        previousTarget.m_vComponents = _mm_setr_ps(previous->x, previous->y, previous->z, previous->w);
+        __m128 sq = _mm_mul_ps(previousTarget.m_vComponents, previousTarget.m_vComponents);
         sq = _mm_add_ps(_mm_shuffle_ps(sq, sq, 0x4e), sq);
         sq = _mm_add_ps(_mm_shuffle_ps(sq, sq, 0xb1), sq);
         float squaredLength;
         _mm_store_ss(&squaredLength, sq);
         if (squaredLength == 0.0f)
-            previousTarget.simd = target.simd;
-        Vector targetWorld, oldTargetWorld;
+            previousTarget.m_vComponents = target.m_vComponents;
+        hkVector4 targetWorld, oldTargetWorld;
         targetWorld.FUN_00c66320(&rotationA, &target);
         oldTargetWorld.FUN_00c66320(&rotationA, &previousTarget);
         previous->x = target.x;
         previous->y = target.y;
         previous->z = target.z;
         previous->w = target.w;
-        Vector error, oldError;
-        FUN_00e3b680(rotationB, targetWorld, error);
-        FUN_00e3b680(rotationB, oldTargetWorld, oldError);
-        error.simd = _mm_sub_ps(error.simd, oldError.simd);
-        if (getInfo(i).switched)
+        hkVector4 error, oldError;
+        FUN_00e3b680(reinterpret_cast<const Vec4&>(rotationB), reinterpret_cast<const Vec4&>(targetWorld),
+                     reinterpret_cast<Vec4&>(error));
+        FUN_00e3b680(reinterpret_cast<const Vec4&>(rotationB), reinterpret_cast<const Vec4&>(oldTargetWorld),
+                     reinterpret_cast<Vec4&>(oldError));
+        error.m_vComponents = _mm_sub_ps(error.m_vComponents, oldError.m_vComponents);
+        if (getInfo(*this, i).switched)
         {
-            error.simd = _mm_xor_ps(error.simd, DAT_010c4c00);
-            oldError.simd = _mm_xor_ps(oldError.simd, DAT_010c4c00);
+            error.m_vComponents = _mm_xor_ps(error.m_vComponents, DAT_010c4c00);
+            oldError.m_vComponents = _mm_xor_ps(oldError.m_vComponents, DAT_010c4c00);
         }
         Rotation axes;
         axes.FUN_00cb2d90(&rotationB);
         for (int axis = 0; axis < 3; ++axis)
         {
-            Vector direction = axes.col[axis];
+            hkVector4 direction;
+            memcpy(&direction, &axes.col[axis], sizeof(direction));
             MotorInput motorInput;
             char* solverResults = chain->runtime->solverResults;
-            MotorState* __restrict motorStates = static_cast<MotorState*>(motorStep(solverResults));
+            MotorState* __restrict motorStates = static_cast<MotorState*>(motorStep(this, solverResults));
             motorInput.state.unk00 = 0.0f;
             motorInput.state.unk04 = 0.0f;
             FUN_00d6cd70(&direction, &query, states, &motorInput.currentVelocity);
@@ -572,7 +512,7 @@ void PoweredChain::FUN_00e3ba40(const QueryInput& input, QueryOutput& output)
             motorInput.step = &query;
             motorInput.state = motorStates[i * 6 + axis + 3];
             MotorOutput motorOutput;
-            FUN_00dcfff0(getInfo(i).motors[axis], &motorInput, &motorOutput);
+            FUN_00dcfff0(getInfo(*this, i).motors[axis], &motorInput, &motorOutput);
             float* dst = matrices.data[i].values + axis * 5;
             dst[0] = motorOutput.c * query.unk04;
             dst[1] = motorOutput.d * query.unk04;

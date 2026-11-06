@@ -2,11 +2,11 @@
 // src/havok/physics/internal/collide/mopp/machine/hkpmoppspherevirtualmachine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/machine/hkpmoppspherevirtualmachine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/HitArray.h"
+#include "../../../../../../../include/MemoryManager.h"
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), as in the other mopp machine units
 extern "C" void __debugbreak();
 struct MoppState { int axis[3]; int radius; int origin[3]; int offset; int shift; int properties[1]; };
-struct HitArray { int* data; int size; unsigned capacity; };
-struct MemoryManager { int unk00,unk04,unk08,unk0c; void* allocator; };
 MemoryManager* __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void*,HitArray*,int);
 extern unsigned char DAT_0126efbb;
@@ -244,7 +244,7 @@ void MoppMachine::FUN_00e64870(MoppState* state, const unsigned char* code) {
             HitArray* output=hits;
             MemoryManager* manager=FUN_00c85750();
             if(output->size==(output->capacity&0x3fffffff)) ResizeAudioStream(manager->allocator,output,4);
-            int* p = &output->data[output->size++];
+            int* p = &reinterpret_cast<int*>(output->data)[output->size++];
             *p = hit;
             return;
         }

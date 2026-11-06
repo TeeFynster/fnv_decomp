@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 // src/havok/common/internal/geometryprocessing/hkgeometryprocessing_ehsc_noehsc_variant_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/geometryprocessing/hkgeometryprocessing_ehsc_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS /EHs-c- /Gy (unit lists /MT /O2 /GS /EHs-c- /Gy). Declarations copied from that unit's skeleton.
 
@@ -7,6 +9,39 @@
 
 // src/havok/common/internal/geometryprocessing/hkgeometryprocessing.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/geometryprocessing/hkgeometryprocessing.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+// Keep this unit's float-only SIMD declaration: VC9 treats the byte arrays in
+// xmmintrin.h's union as /GS buffers, changing FUN_00dedf10's stack frame.
+// Exe 0x00dedf10 FUN_00dedf10: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
+#include "../../../../../include/hkSimdReal.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkVector4.h"
+#include <string.h>
+
+extern "C"
+{
+    LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_sub_ss(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_div_ss(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+    LocalM128 _mm_load_ps1(const float* p);
+    void _mm_store_ss(float* p, LocalM128 a);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_setr_ps(float, float, float, float);
+    LocalM128 _mm_sqrt_ss(LocalM128);
+    LocalM128 _mm_set_ps1(float);
+    LocalM128 _mm_load_ss(const float*);
+}
+
 extern "C" void __cdecl Deallocate(void*);
 extern int DAT_010d9fc4;
 struct FUN_00dee620
@@ -23,102 +58,57 @@ struct FUN_00dee6b0_Class
     float FUN_00dee6b0(int testFlag);
 };
 extern int DAT_010cd664;
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00dee6c0_cls
 {
     int m_vptr;
 
     FUN_00dee6c0_cls* FUN_00dee6c0(unsigned char acFlags);
 };
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_add_ss(__m128 a, __m128 b);
-    __m128 _mm_sub_ss(__m128 a, __m128 b);
-    __m128 _mm_div_ss(__m128 a, __m128 b);
-    __m128 _mm_add_ps(__m128 a, __m128 b);
-    __m128 _mm_sub_ps(__m128 a, __m128 b);
-    __m128 _mm_mul_ps(__m128 a, __m128 b);
-    __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-    __m128 _mm_load_ps1(const float* p);
-    void _mm_store_ss(float* p, __m128 a);
-}
-struct VectorComponentValue
-{
-    __m128 m_vValue;
+inline hkSimdReal::hkSimdReal()
+{}
 
-    VectorComponentValue()
-    {}
-    VectorComponentValue(const __m128& r) : m_vValue(r)
-    {}
-    operator float() const
-    {
-        float f;
-        _mm_store_ss(&f, m_vValue);
-        return f;
-    }
-};
-__forceinline VectorComponentValue operator/(const VectorComponentValue& a, const VectorComponentValue& b)
+inline hkSimdReal::hkSimdReal(const LocalM128& r) : m_vValue(r)
+{}
+
+inline hkSimdReal::operator float() const
+{
+    float f;
+    _mm_store_ss(&f, m_vValue);
+    return f;
+}
+
+__forceinline hkSimdReal operator/(const hkSimdReal& a, const hkSimdReal& b)
 {
     return _mm_div_ss(a.m_vValue, b.m_vValue);
 }
-struct hkVector4
+__forceinline void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b, const hkSimdReal& r)
 {
-    __m128 m_vComponents;
-
-    __forceinline void sub4(const hkVector4& a)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setAddMul4(const hkVector4& a, const hkVector4& b, const VectorComponentValue& r)
-    {
-        m_vComponents =
-            _mm_add_ps(a.m_vComponents, _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), b.m_vComponents));
-    }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        const __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        const __m128 z = _mm_shuffle_ps(x2, x2, 0xaa);
-        return _mm_add_ss(z, xySum);
-    }
-    __forceinline VectorComponentValue lengthSquared3() const
-    {
-        return dot3(*this);
-    }
-};
+    m_vComponents =
+        _mm_add_ps(a.m_vComponents, _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), b.m_vComponents));
+}
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    const LocalM128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    const LocalM128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    const LocalM128 z = _mm_shuffle_ps(x2, x2, 0xaa);
+    return _mm_add_ss(z, xySum);
+}
+__forceinline hkSimdReal hkVector4::lengthSquared3() const
+{
+    return dot3(*this);
+}
 extern const hkVector4 DAT_010c7160;
 float __cdecl FUN_00de94b0(const hkVector4& a, const hkVector4& b, const hkVector4& c, float* out);
-extern __m128 DAT_010c71d0;
+extern LocalM128 DAT_010c71d0;
 struct FUN_00dee640_cls
 {
     int unk00;
     int unk04;
     int unk08;
     int unk0C;
-    __m128 m_vec10;
+    LocalM128 m_vec10;
     float m_fDist20;
     int unk24;
     int unk28;
@@ -126,19 +116,19 @@ struct FUN_00dee640_cls
     void* m_pTag30;
     float UpdateNearestDistance(void* pair);
 };
-extern __m128 DAT_01267e30;
+extern LocalM128 DAT_01267e30;
 struct Vertex
 {
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0C;
-    __m128 m_vContactPosition;
+    LocalM128 m_vContactPosition;
     unsigned int unk20;
     unsigned int unk24;
     unsigned int unk28;
     unsigned int unk2C;
-    __m128 m_vHitNormal;
+    LocalM128 m_vHitNormal;
 };
 struct Triangle
 {
@@ -223,18 +213,13 @@ struct FUN_00e19200_cls
     unsigned int unk04;
     Sub08_cls m_08;
     Sub20_cls m_20;
-    void FUN_00e19200(Triangle* a, const __m128* b, int c);
+    void FUN_00e19200(Triangle* a, const LocalM128* b, int c);
 };
-extern "C"
-{
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_setr_ps(float, float, float, float);
-}
-extern __m128 DAT_01017d10;
+extern LocalM128 DAT_01017d10;
 extern float DAT_01011d78;
 struct CubeVector
 {
-    __m128 lanes;
+    LocalM128 lanes;
     __forceinline void sum(const CubeVector& lhs, const CubeVector& rhs)
     {
         lanes = _mm_add_ps(lhs.lanes, rhs.lanes);
@@ -243,7 +228,7 @@ struct CubeVector
     {
         lanes = _mm_sub_ps(lhs.lanes, rhs.lanes);
     }
-    __forceinline void scale(const __m128& k)
+    __forceinline void scale(const LocalM128& k)
     {
         lanes = _mm_mul_ps(k, lanes);
     }
@@ -280,9 +265,6 @@ void __cdecl FUN_00de9590(CubeBox* box);
 #include <math.h>
 extern const float DAT_0104da4c = 1.1920928955078125e-7f;
 extern float DAT_0104da48;
-extern "C" __m128 _mm_sqrt_ss(__m128);
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" __m128 _mm_load_ss(const float*);
 float __cdecl FUN_00dea450(const hkVector4& firstStart, const hkVector4& firstEnd, const hkVector4& secondStart,
                            const hkVector4& secondEnd, float* firstParameter, float* secondParameter);
 
@@ -346,8 +328,8 @@ template <typename T> __forceinline void Sdedf10_constructWithCopy(T* t, int n, 
     }
 }
 
-template <typename T, typename Tag> struct Sdedf10_ArrayBase
-{
+template <typename T, typename Tag> struct Sdedf10_ArrayBaseLocalForm
+{ // local form of hkArrayBase: 0x00dedf10 needs the original constructor stores; shared base construction changes bytes.
     enum
     {
         CAPACITY_MASK = 0x3FFFFFFF,
@@ -357,9 +339,9 @@ template <typename T, typename Tag> struct Sdedf10_ArrayBase
     int m_iElementCount;
     int m_iCapacityState;
 
-    __forceinline Sdedf10_ArrayBase() : m_data(0), m_iElementCount(0), m_iCapacityState(DONT_DEALLOCATE_FLAG)
+    __forceinline Sdedf10_ArrayBaseLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(DONT_DEALLOCATE_FLAG)
     {}
-    __forceinline ~Sdedf10_ArrayBase()
+    __forceinline ~Sdedf10_ArrayBaseLocalForm()
     {}
     __forceinline int GetLogicalSize() const
     {
@@ -431,7 +413,7 @@ template <typename T, typename Tag> struct Sdedf10_ArrayBase
     }
 };
 
-template <typename T, typename Tag = Sdedf10_TypeIsPod> struct Sdedf10_Array : Sdedf10_ArrayBase<T, Tag>
+template <typename T, typename Tag = Sdedf10_TypeIsPod> struct Sdedf10_Array : Sdedf10_ArrayBaseLocalForm<T, Tag>
 {
     __forceinline Sdedf10_Array()
     {}
@@ -453,53 +435,32 @@ template <typename T, typename Tag = Sdedf10_TypeIsPod> struct Sdedf10_Array : S
     }
 };
 
-class Sdedf10_SimdReal
+__forceinline hkSimdReal::hkSimdReal(float x)
 {
-  public:
-    __forceinline Sdedf10_SimdReal(float x)
-    {
-        m_vValue = _mm_load_ss(&x);
-    }
-    __forceinline ::__m128 broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
+    m_vValue = _mm_load_ss(&x);
+}
 
-  private:
-    ::__m128 m_vValue;
-};
-
-class Sdedf10_Vector4
+__forceinline LocalM128 hkSimdReal::broadcast() const
 {
-  public:
-    __forceinline Sdedf10_Vector4()
-    {}
-    __forceinline void SetAllComponents(float a)
-    {
-        m_vComponents = _mm_set_ps1(a);
-    }
-    __forceinline void add4(const Sdedf10_Vector4& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void setAdd4(const Sdedf10_Vector4& a, const Sdedf10_Vector4& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setSub4(const Sdedf10_Vector4& a, const Sdedf10_Vector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void mul4(const Sdedf10_SimdReal& s)
-    {
-        m_vComponents = _mm_mul_ps(s.broadcast(), m_vComponents);
-    }
-    __forceinline float& operator()(int a)
-    {
-        return reinterpret_cast<float*>(&m_vComponents)[a];
-    }
-    ::__m128 m_vComponents;
-};
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+
+__forceinline hkVector4::hkVector4(const hkVector4& vector)
+{
+    memcpy(this, &vector, sizeof(*this));
+}
+__forceinline void hkVector4::operator=(const hkVector4& vector)
+{
+    memcpy(this, &vector, sizeof(*this));
+}
+__forceinline void hkVector4::SetAllComponents(float a)
+{
+    m_vComponents = _mm_set_ps1(a);
+}
+__forceinline float& hkVector4::operator()(int a)
+{
+    return reinterpret_cast<float*>(&m_vComponents)[a];
+}
 
 class Sdedf10_Aabb
 {
@@ -512,13 +473,17 @@ class Sdedf10_Aabb
     {}
     __forceinline Sdedf10_Aabb()
     {}
-    Sdedf10_Vector4 m_kMinimumCorner;
-    Sdedf10_Vector4 m_kMaximumCorner;
+    __forceinline Sdedf10_Aabb(const Sdedf10_Aabb& box)
+    {
+        memcpy(this, &box, sizeof(*this));
+    }
+    hkVector4 m_kMinimumCorner;
+    hkVector4 m_kMaximumCorner;
 };
 
-__forceinline void Sdedf10_calcAabb(const Sdedf10_Vector4& center, float innerRadius, Sdedf10_Aabb& aabbOut)
+__forceinline void Sdedf10_calcAabb(const hkVector4& center, float innerRadius, Sdedf10_Aabb& aabbOut)
 {
-    Sdedf10_Vector4 ir;
+    hkVector4 ir;
     ir.SetAllComponents(innerRadius);
     aabbOut.m_kMinimumCorner.setSub4(center, ir);
     aabbOut.m_kMaximumCorner.setAdd4(center, ir);
@@ -532,14 +497,14 @@ struct Sdedf10_IFunction
     {}
     virtual ~Sdedf10_IFunction()
     {}
-    virtual float evaluate(const Sdedf10_Vector4&) const = 0;
+    virtual float evaluate(const hkVector4&) const = 0;
 };
 
 struct Sdedf10_ConstFunction : Sdedf10_IFunction
 {
     Sdedf10_ConstFunction(const float& value) : m_uiFilterValue(value)
     {}
-    float evaluate(const Sdedf10_Vector4&) const
+    float evaluate(const hkVector4&) const
     {
         return m_uiFilterValue;
     }
@@ -676,10 +641,10 @@ class Sdedf10_Tree
     unsigned int m_usManagerValue;
     int m_iNodeCount;
     Sdedf10_NodeManager m_kNodeManager;
-    Sdedf10_Vector4 m_kAabbMin;
-    Sdedf10_Vector4 m_kAabbMaximum;
-    Sdedf10_Vector4 m_kAabbScale;
-    Sdedf10_Vector4 m_kAabbInverseScale;
+    hkVector4 m_kAabbMin;
+    hkVector4 m_kAabbMaximum;
+    hkVector4 m_kAabbScale;
+    hkVector4 m_kAabbInverseScale;
 };
 
 struct Sdedf10_Collector
@@ -693,20 +658,20 @@ struct Sdedf10_Collector
 
 struct Sdedf10_ClosestPointCollector : Sdedf10_Collector
 {
-    __forceinline Sdedf10_ClosestPointCollector(const Sdedf10_Vector4& point, float initDistanceSquared)
+    __forceinline Sdedf10_ClosestPointCollector(const hkVector4& point, float initDistanceSquared)
         : m_kPoint(point), m_fValue(initDistanceSquared)
     {}
     virtual ~Sdedf10_ClosestPointCollector()
     {}
     virtual float GetHitDistance(const Sdedf10_TreeNode* leaf) = 0;
 
-    Sdedf10_Vector4 m_kPoint;
+    hkVector4 m_kPoint;
     float m_fValue;
 };
 
 struct Sdedf10_NearestFeaturePolicy : Sdedf10_ClosestPointCollector
 {
-    __forceinline Sdedf10_NearestFeaturePolicy(const Sdedf10_Vector4& point, float maxDistance)
+    __forceinline Sdedf10_NearestFeaturePolicy(const hkVector4& point, float maxDistance)
         : Sdedf10_ClosestPointCollector(point, maxDistance), m_nearest(0)
     {}
     virtual ~Sdedf10_NearestFeaturePolicy()
@@ -716,20 +681,26 @@ struct Sdedf10_NearestFeaturePolicy : Sdedf10_ClosestPointCollector
     const Sdedf10_TreeNode* m_nearest;
 };
 
-void __cdecl Sdedf10_queryClosestPoint(const Sdedf10_Tree* tree, const Sdedf10_Vector4& point,
+void __cdecl Sdedf10_queryClosestPoint(const Sdedf10_Tree* tree, const hkVector4& point,
                                        Sdedf10_Collector* collector);
 bool __cdecl Sdedf10_generateRandomDistribution(const Sdedf10_Mesh& mesh, int numPoints,
-                                                Sdedf10_Array<Sdedf10_Vector4>& points, Sdedf10_PseudoRandom& rng);
+                                                Sdedf10_Array<hkVector4>& points, Sdedf10_PseudoRandom& rng);
 
-// @fnv 0x00dedf10
-bool __cdecl FUN_00dedf10(const Sdedf10_Geometry& geometry, int numPoints, Sdedf10_Array<Sdedf10_Vector4>& points,
-                          int maxIterations, int seed, const Sdedf10_IFunction* densityFunction)
+__forceinline const Sdedf10_IFunction* Sdedf10_getUnityFunction()
 {
     static Sdedf10_ConstFunction unityFunction(1);
+    return &unityFunction;
+}
+
+// @fnv 0x00dedf10
+bool __cdecl FUN_00dedf10(const Sdedf10_Geometry& geometry, int numPoints, Sdedf10_Array<hkVector4>& points,
+                          int maxIterations, int seed, const Sdedf10_IFunction* densityFunction)
+{
+    const Sdedf10_IFunction* unityFunction = Sdedf10_getUnityFunction();
     Sdedf10_PseudoRandom rng(seed);
     if (!densityFunction)
     {
-        densityFunction = &unityFunction;
+        densityFunction = unityFunction;
     }
 
     Sdedf10_Mesh mesh;
@@ -745,7 +716,7 @@ bool __cdecl FUN_00dedf10(const Sdedf10_Geometry& geometry, int numPoints, Sdedf
 
     if (maxIterations > 0)
     {
-        Sdedf10_Vector4* pts = &points[base];
+        hkVector4* pts = &points[base];
         Sdedf10_Array<unsigned int> leaves;
         Sdedf10_Tree tree;
         leaves.SetSizeAndGrow(numPoints);
@@ -758,12 +729,12 @@ bool __cdecl FUN_00dedf10(const Sdedf10_Geometry& geometry, int numPoints, Sdedf
             aabbs.AddBack(box);
             datas.AddBack(&pts[i]);
             const float w = densityFunction->evaluate(pts[i]);
-            pts[i].mul4(w);
+            pts[i].mul4(hkSimdReal(w));
             pts[i](3) = w;
         }
         tree.build(aabbs.begin(), datas.begin(), aabbs.GetLogicalSize(), leaves);
 
-        Sdedf10_Array<Sdedf10_Vector4> samples;
+        Sdedf10_Array<hkVector4> samples;
         const int doubled = numPoints * 2;
         const int numSamples = doubled < 0x100 ? 0x100 : (doubled > 0x2000 ? 0x2000 : doubled);
         samples.reserveExactly(numSamples);
@@ -781,9 +752,9 @@ bool __cdecl FUN_00dedf10(const Sdedf10_Geometry& geometry, int numPoints, Sdedf
                 Sdedf10_queryClosestPoint(&tree, samples[j], &policy);
                 if (policy.m_nearest)
                 {
-                    Sdedf10_Vector4* target = policy.m_nearest->getLeafData<Sdedf10_Vector4*>();
+                    hkVector4* target = policy.m_nearest->getLeafData<hkVector4*>();
                     const float w = densityFunction->evaluate(samples[j]);
-                    samples[j].mul4(w);
+                    samples[j].mul4(hkSimdReal(w));
                     samples[j](3) = w;
                     target->add4(samples[j]);
                 }
@@ -791,12 +762,12 @@ bool __cdecl FUN_00dedf10(const Sdedf10_Geometry& geometry, int numPoints, Sdedf
             for (int k = 0; k < numPoints; ++k)
             {
                 const float invW = 1.0f / pts[k](3);
-                pts[k].mul4(invW);
+                pts[k].mul4(hkSimdReal(invW));
                 Sdedf10_Aabb box;
                 Sdedf10_calcAabb(pts[k], 0, box);
                 tree.update(leaves[k], box);
                 const float w = densityFunction->evaluate(pts[k]);
-                pts[k].mul4(w);
+                pts[k].mul4(hkSimdReal(w));
                 pts[k](3) = w;
             }
         }

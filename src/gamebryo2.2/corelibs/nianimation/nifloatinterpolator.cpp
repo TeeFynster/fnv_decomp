@@ -2,6 +2,7 @@
 // NiFloatInterpolator constructor and binary loading for
 // gamebryo2.2/corelibs/nianimation/nifloatinterpolator.cpp.
 #include "nifloatinterpolator.h"
+#include "../../../../include/NiFloatData.h"
 
 // NOTE (matcher worker): the constructor below compiles byte-identically for
 // its 57 bytes under /O2 /GS /EHsc /Gy except that MSVC 9 hoists the `fld`
@@ -15,7 +16,7 @@
 // from the function index, so no /Gy compilation can ever fill those 13
 // bytes. Full evidence is in this unit's matcher checks.
 NiFloatInterpolator::NiFloatInterpolator(NiFloatData* pkFloatData)
-    : m_fFloatValue(-FLT_MAX), m_spFloatData(pkFloatData), m_uiLastKeyIndex(0)
+    : value(-FLT_MAX), data(pkFloatData), lastIndex(0)
 {}
 
 // Loads the float value and a NiFloatData reference from the stream, releasing the old data and incrementing the new one's ref count.
@@ -24,18 +25,18 @@ void NiFloatInterpolator::LoadBinary(NiStream& kStream)
 {
     NiKeyBasedInterpolator::LoadBinary(kStream);
 
-    ReadBinaryValue(kStream, m_fFloatValue);
+    ReadBinaryValue(kStream, value);
 
     // FNV 2.2 NiPointer assignment order: release the old object before
     // retaining the new one (matches the original refcount sequence).
     NiFloatData* pkData = (NiFloatData*)kStream.DeserializeObject();
-    if (m_spFloatData.m_pObject != pkData)
+    if (data.m_pObject != pkData)
     {
-        if (m_spFloatData.m_pObject)
-            m_spFloatData.m_pObject->DecRefCount();
-        m_spFloatData.m_pObject = pkData;
-        if (m_spFloatData.m_pObject)
-            m_spFloatData.m_pObject->IncRefCount();
+        if (data.m_pObject)
+            data.m_pObject->DecRefCount();
+        data.m_pObject = pkData;
+        if (data.m_pObject)
+            data.m_pObject->IncRefCount();
     }
 }
 
@@ -69,7 +70,7 @@ const GlobalObjectO2_00a7b610* __cdecl FUN_00a3c380()
     return &g_011f3738;
 }
 
-struct FloatDataHelper
+struct FloatDataHelper : NiFloatData
 {
     void FUN_00a3cc40(float a, float b);
 };
@@ -169,44 +170,18 @@ struct NiFloatInterpolatorShell_00a3c3f0 : NiFloatInterpolator
 // @fnv 0x00a3c3f0
 unsigned char NiFloatInterpolatorShell_00a3c3f0::FUN_00a3c3f0(unsigned int unused) const
 {
-    if (m_spFloatData.m_pObject)
+    if (data.m_pObject)
         return 0;
-    if (m_fFloatValue == DAT_0109a918)
+    if (value == DAT_0109a918)
         return 0;
     return 1;
 }
 }  // namespace fnv_00a3c3f0
 
-struct NiBaseEqualityView
+// Base equality operation absent from the shared key-based declaration.
+struct KeyBasedInterpolatorEqualityOps : NiKeyBasedInterpolator
 {
     unsigned char FUN_00c85800(const NiObject* other);
-};
-struct NiFloatDataEqualityView
-{
-    virtual void ScalarDeletingDestructor();
-    virtual void DeleteThis();
-    virtual void LoadBinary();
-    virtual void GetRTTI();
-    virtual void MakeClone();
-    virtual void LinkObject();
-    virtual void RegisterStreamables();
-    virtual void SaveBinary();
-    virtual void GetViewerStrings();
-    virtual void AsNiNode();
-    virtual void AsNiAVObject();
-    virtual void AsNiGeometry();
-    virtual void AsNiTriBasedGeom();
-    virtual void AsNiTriShape();
-    virtual void AsNiTriStrips();
-    virtual void AsNiProperty();
-    virtual void AsNiTimeController();
-    virtual void AsNiTexture();
-    virtual void AsNiSourceTexture();
-    virtual void AsNiPixelData();
-    virtual void IsKindOfType();
-    virtual void IsExactKindOf();
-    virtual void IsDerivedKindOf();
-    virtual bool IsEqual(const NiFloatData* other);
 };
 struct NiFloatInterpolatorEquality : NiFloatInterpolator
 {
@@ -215,66 +190,29 @@ struct NiFloatInterpolatorEquality : NiFloatInterpolator
 // @fnv 0x00a3c5e0
 bool NiFloatInterpolatorEquality::FUN_00a3c5e0(const NiObject* otherObject)
 {
-    if (!reinterpret_cast<NiBaseEqualityView*>(this)->FUN_00c85800(otherObject))
+    if (!reinterpret_cast<KeyBasedInterpolatorEqualityOps*>(this)->FUN_00c85800(otherObject))
         return false;
     const NiFloatInterpolator* other = static_cast<const NiFloatInterpolator*>(otherObject);
-    if (m_fFloatValue != other->m_fFloatValue)
+    if (value != other->value)
         return false;
-    if ((m_spFloatData.m_pObject && !other->m_spFloatData.m_pObject) ||
-        (!m_spFloatData.m_pObject && other->m_spFloatData.m_pObject))
+    if ((data.m_pObject && !other->data.m_pObject) ||
+        (!data.m_pObject && other->data.m_pObject))
         return false;
-    if (m_spFloatData.m_pObject)
+    if (data.m_pObject)
     {
-        NiFloatDataEqualityView& data = *reinterpret_cast<NiFloatDataEqualityView*>(m_spFloatData.m_pObject);
-        NiFloatData* otherData = other->m_spFloatData.m_pObject;
+        NiFloatData& data = *this->data.m_pObject;
+        NiFloatData* otherData = other->data.m_pObject;
         if (!data.IsEqual(otherData))
             return false;
     }
     return true;
 }
 
-class A3C640FloatData
+// Additional float-data operations absent from the shared declaration.
+class FloatDataRangeOps : public NiFloatData
 {
   public:
-    virtual ~A3C640FloatData();
-    virtual void DeleteThis();
-
-    unsigned int m_uiRefCount;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
-            DeleteThis();
-    }
-};
-
-template <class T> class A3C640Pointer
-{
-  public:
-    T* m_pObject;
-
-    A3C640Pointer() : m_pObject(0)
-    {}
-    ~A3C640Pointer()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    operator T*() const
-    {
-        return m_pObject;
-    }
-};
-
-class A3C640FloatDataOps : public A3C640FloatData
-{
-  public:
-    void FUN_00a3ce20(float m_fStartTime, float m_fMaximumDistance, A3C640Pointer<A3C640FloatData>& spNewData) const
-        throw();
+    void FUN_00a3ce20(float m_fStartTime, float m_fMaximumDistance, NiPointer<NiFloatData>& spNewData) const throw();
 };
 
 class A3C640Interpolator
@@ -284,11 +222,11 @@ class A3C640Interpolator
     int unk04;
     int unk08;
     float m_fFloatValue;
-    A3C640FloatDataOps* m_spFloatData;
+    FloatDataRangeOps* m_spFloatData;
     unsigned int m_uiLastKeyIndex;
 
     A3C640Interpolator* FUN_00a57050(float m_fStartTime, float m_fMaximumDistance) const throw();
-    void SetFloatData(A3C640FloatData* pkFloatData) throw();
+    void SetFloatData(NiFloatData* pkFloatData) throw();
 
     A3C640Interpolator* FUN_00a3c640(float m_fStartTime, float m_fMaximumDistance) const;
 };
@@ -299,7 +237,7 @@ A3C640Interpolator* A3C640Interpolator::FUN_00a3c640(float m_fStartTime, float m
     A3C640Interpolator* pkSeqInterp = FUN_00a57050(m_fStartTime, m_fMaximumDistance);
     if (m_spFloatData && pkSeqInterp)
     {
-        A3C640Pointer<A3C640FloatData> spNewFloatData;
+        NiPointer<NiFloatData> spNewFloatData;
         m_spFloatData->FUN_00a3ce20(m_fStartTime, m_fMaximumDistance, spNewFloatData);
         pkSeqInterp->SetFloatData(spNewFloatData);
         pkSeqInterp->m_uiLastKeyIndex = 0;
@@ -313,24 +251,14 @@ struct BA3C6D0FloatKey
                                      unsigned int& uiLastIdx, unsigned char ucSize);
 };
 
-class BA3C6D0FloatData
+FNV_FORCEINLINE BA3C6D0FloatKey* GetFloatKeys(const NiFloatData& data, unsigned int& uiNumKeys,
+    unsigned int& eType, unsigned char& ucSize)
 {
-  public:
-    BA3C6D0FloatKey* ComputePositionAtTime(unsigned int& uiNumKeys, unsigned int& eType, unsigned char& ucSize) const
-    {
-        uiNumKeys = m_uiNumKeys;
-        eType = m_eRequestType;
-        ucSize = m_ucKeyDataSize;
-        return m_pKeyArray;
-    }
-
-    int unk00;
-    int unk04;
-    unsigned int m_uiNumKeys;
-    BA3C6D0FloatKey* m_pKeyArray;
-    unsigned int m_eRequestType;
-    unsigned char m_ucKeyDataSize;
-};
+    uiNumKeys = data.m_uiNumKeys;
+    eType = data.m_eRequestType;
+    ucSize = data.m_ucKeyDataSize;
+    return reinterpret_cast<BA3C6D0FloatKey*>(data.m_pKeyArray);
+}
 
 static const float NI_INFINITY = 3.402823466e+38f;
 static const float INVALID_FLOAT = -NI_INFINITY;
@@ -348,7 +276,7 @@ class BA3C6D0Interpolator
     int unk04;
     float m_fLastTime;
     float m_fFloatValue;
-    BA3C6D0FloatData* m_spFloatData;
+    NiFloatData* m_spFloatData;
     unsigned int m_uiLastKeyIndex;
 };
 
@@ -368,7 +296,7 @@ bool BA3C6D0Interpolator::EvaluateFloatAtTime(float fTime, void* pkInterpTarget,
         unsigned int uiNumKeys;
         unsigned int eType;
         unsigned char ucSize;
-        BA3C6D0FloatKey* pkKeys = m_spFloatData->ComputePositionAtTime(uiNumKeys, eType, ucSize);
+        BA3C6D0FloatKey* pkKeys = GetFloatKeys(*m_spFloatData, uiNumKeys, eType, ucSize);
         if (uiNumKeys > 0)
             m_fFloatValue =
                 BA3C6D0FloatKey::InterpolatePosition(fTime, pkKeys, eType, uiNumKeys, m_uiLastKeyIndex, ucSize);
@@ -392,22 +320,22 @@ struct FUN_00a3c780_cls : NiFloatInterpolator
 void FUN_00a3c780_cls::FUN_00a3c780(NiFloatInterpolator* dst, unsigned int uiArg)
 {
     CopyBase(dst, uiArg);
-    *(volatile float*)&dst->m_fFloatValue = m_fFloatValue;
-    NiFloatData* pOld = *(NiFloatData* volatile*)&dst->m_spFloatData.m_pObject;
-    if (pOld != m_spFloatData.m_pObject)
+    *(volatile float*)&dst->value = value;
+    NiFloatData* pOld = *(NiFloatData* volatile*)&dst->data.m_pObject;
+    if (pOld != data.m_pObject)
     {
         if (pOld)
         {
             pOld->DecRefCount();
         }
-        NiFloatData* pNew = m_spFloatData.m_pObject;
-        dst->m_spFloatData.m_pObject = pNew;
+        NiFloatData* pNew = data.m_pObject;
+        dst->data.m_pObject = pNew;
         if (pNew)
         {
             pNew->IncRefCount();
         }
     }
-    dst->m_uiLastKeyIndex = m_uiLastKeyIndex;
+    dst->lastIndex = lastIndex;
 }
 
 // GetViewerStrings: base strings, then the class name, m_fFloatValue and m_spFloatData.
@@ -449,7 +377,6 @@ template <class T> class C940Pointer
     T* m_pObject;
 };
 
-class C940FloatData;
 
 extern const char* g_pcC940ClassName;
 
@@ -464,7 +391,7 @@ class C940FloatInterpolator
     int unk04;
     int unk08;
     float m_fFloatValue;
-    C940Pointer<C940FloatData> m_spFloatData;
+    C940Pointer<NiFloatData> m_spFloatData;
 
     void BaseGetViewerStrings(C940StringArray* pkStrings);
     void FUN_00a3c940(C940StringArray* pkStrings);
@@ -480,86 +407,29 @@ void C940FloatInterpolator::FUN_00a3c940(C940StringArray* pkStrings)
     pkStrings->Add(C940GetViewerString("m_spFloatData", m_spFloatData));
 }
 
-class NiStreamW;
-
-class NiBinaryStreamW
-{
-  public:
-    typedef unsigned int (*NIBINARYSTREAM_WRITEFN)(NiBinaryStreamW* pkThis, const void* pvBuffer, unsigned int uiBytes,
-                                                   unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    virtual ~NiBinaryStreamW();
-
-    unsigned int m_uiStreamFlags;
-    void* m_pfnRead;
-    NIBINARYSTREAM_WRITEFN m_pfnWrite;
-
-    unsigned int BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                             unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesWritten = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesWritten;
-        return uiBytesWritten;
-    }
-};
-
-class NiStreamW
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void SaveLinkID(const void* pkObject);
-
-    unsigned char m_auPad[0x248];
-    NiBinaryStreamW* m_pUnderlyingStream;
-    NiBinaryStreamW* m_pBackingStream;
-};
-
-template <class T> inline void WriteBinaryArray(NiBinaryStreamW& os, const T* pValue, unsigned int uiNumEls)
+template <class T> inline void WriteBinaryArray(NiBinaryStream& os, const T* pValue, unsigned int uiNumEls)
 {
     unsigned int uiSize = sizeof(T);
     os.BinaryWrite(pValue, sizeof(T) * uiNumEls, &uiSize, 1);
 }
 
-template <class T> inline void SerializeValue(NiStreamW& kStream, const T& value)
+template <class T> inline void SerializeValue(NiStream& kStream, const T& value)
 {
-    WriteBinaryArray(*kStream.m_pBackingStream, &value, 1);
+    WriteBinaryArray(*kStream.m_pkOstr, &value, 1);
 }
 
-class FUN_00a95ca0_helper
+class NiFloatInterpolatorW : public NiFloatInterpolator
 {
   public:
-    void FUN_00a95ca0(NiStreamW* pkStream);
-};
-
-class NiFloatInterpolatorW : public FUN_00a95ca0_helper
-{
-  public:
-    int m_unk00;
-    int m_unk04;
-    int m_unk08;
-    float m_fFloatValue;
-    void* m_spFloatData;
-
-    void SaveToStream(NiStreamW& kStream);
+    void SaveToStream(NiStream& kStream);
 };
 
 // @fnv 0x00a3c880
-void NiFloatInterpolatorW::SaveToStream(NiStreamW& kStream)
+void NiFloatInterpolatorW::SaveToStream(NiStream& kStream)
 {
-    FUN_00a95ca0(&kStream);
-    SerializeValue(kStream, m_fFloatValue);
-    kStream.SaveLinkID(m_spFloatData);
+    NiObject::SaveBinary(kStream);
+    SerializeValue(kStream, value);
+    kStream.SaveLinkID(data.m_pObject);
 }
 
 class TimedAnimationKey
@@ -578,24 +448,20 @@ class TimedAnimationKey
     }
 };
 
-class NiFloatDataEx : public NiFloatData
+FNV_FORCEINLINE TimedAnimationKey* GetFloatKeys(const NiFloatData& data, unsigned int& uiNumKeys,
+    NiAnimationKey::KeyType& eType, unsigned char& ucSize)
 {
-  public:
-    FNV_FORCEINLINE TimedAnimationKey* ComputePositionAtTime(unsigned int& uiNumKeys, NiAnimationKey__KeyType& eType,
-                                                             unsigned char& ucSize) const
-    {
-        uiNumKeys = m_uiNumKeys;
-        eType = m_eRequestType;
-        ucSize = m_ucKeyDataSize;
-        return m_pKeyArray;
-    }
-};
+    uiNumKeys = data.m_uiNumKeys;
+    eType = data.m_eRequestType;
+    ucSize = data.m_ucKeyDataSize;
+    return data.m_pKeyArray;
+}
 
 template <class T> FNV_FORCEINLINE void NiPointerAssign(NiPointer<T>& sp, T* pObject)
 {
     if (sp.m_pObject != pObject)
     {
-        if (pObject)
+        if (pObject != 0)
             pObject->IncRefCount();
         if (sp.m_pObject)
             sp.m_pObject->DecRefCount();
@@ -615,24 +481,24 @@ class FUN_00a3c420_cls : public NiFloatInterpolator
 // @fnv 0x00a3c420
 void FUN_00a3c420_cls::CollapseConstantKeys()
 {
-    if (m_spFloatData.m_pObject)
+    if (data.m_pObject)
     {
         unsigned int uiNumKeys;
-        NiAnimationKey__KeyType eType;
+        NiAnimationKey::KeyType eType;
         unsigned char ucSize;
         TimedAnimationKey* pkKeys =
-            ((NiFloatDataEx*)m_spFloatData.m_pObject)->ComputePositionAtTime(uiNumKeys, eType, ucSize);
+            GetFloatKeys(*data.m_pObject, uiNumKeys, eType, ucSize);
         if (uiNumKeys == 0)
         {
-            NiPointerAssign<NiFloatData>(m_spFloatData, 0);
-            m_fFloatValue = DAT_0109a918;
+            NiPointerAssign<NiFloatData>(data, 0);
+            value = DAT_0109a918;
             return;
         }
 
         float fValue = pkKeys->GetKeyPointerByIndex(0, ucSize)->GetValue();
         if (uiNumKeys != 1)
         {
-            if (eType != NiAnimationKey__KeyType_LINKEY && eType != NiAnimationKey__KeyType_STEPKEY)
+            if (eType != NiAnimationKey::LINKEY && eType != NiAnimationKey::STEPKEY)
                 return;
             bool bPosed = true;
             for (unsigned int ui = 1; bPosed && ui < uiNumKeys; ui++)
@@ -643,22 +509,14 @@ void FUN_00a3c420_cls::CollapseConstantKeys()
             if (!bPosed)
                 return;
         }
-        NiPointerAssign<NiFloatData>(m_spFloatData, 0);
-        m_fFloatValue = fValue;
+        NiPointerAssign<NiFloatData>(data, 0);
+        value = fValue;
     }
 }
 
 void* __cdecl FUN_00aa13e0(unsigned int size);
 extern float DAT_0109a918;
-class FUN_00a3ca10
-{
-  public:
-    virtual void vf00();
-    int unk04;
-    int unk08;
-    FUN_00a3ca10() throw();
-};
-class A3C8D0_Object : public FUN_00a3ca10
+class A3C8D0_Object : public NiKeyBasedInterpolator
 {
   public:
     float m_0C;
@@ -672,6 +530,13 @@ class A3C8D0_Object : public FUN_00a3ca10
     A3C8D0_Object() : m_0C(DAT_0109a918), m_10(0)
     {}
     virtual void vf00();
+    virtual unsigned short GetKeyChannelCount() const;
+    virtual unsigned int GetColorKeyCount(unsigned short) const;
+    virtual void vf57();
+    virtual void vf58();
+    virtual NiAnimationKey* GetChannelKeys(unsigned short) const;
+    virtual unsigned char GetColorKeySize(unsigned short) const;
+    virtual void vf61(unsigned short);
 };
 struct A3C8D0_Owner
 {

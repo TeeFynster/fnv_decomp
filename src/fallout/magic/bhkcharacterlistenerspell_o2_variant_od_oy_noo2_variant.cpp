@@ -7,408 +7,23 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 // src/fallout/magic/bhkcharacterlistenerspell.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/bhkcharacterlistenerspell.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct NiRTTI
-{
-};
-struct bhkCharacterProxy
-{
-    virtual ~bhkCharacterProxy();
-    const NiRTTI* GetRTTI();
-};
+#include "../../../include/Actor.h"
+#include "../../../include/BaseProcess.h"
+#include "../../../include/Setting.h"
+#include "../../../include/hkTransform.h"
+#include "../../../include/hkRotation.h"
+#include "../../../include/hkVector4.h"
+#include "../../../include/MagicProjectile.h"
+#include "../../../include/NiRTTI.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/bhkCharacterProxy.h"
+
 extern const NiRTTI g_01268344;
-struct FUN_00806f10_shell
-{
-    unsigned int FUN_00806f10();
-};
-struct FUN_00cbe8d0_class
-{
-    void __thiscall FUN_00cbe8d0();
-};
-struct FUN_00c6d4a0_class
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28C;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29C;
-    int unk2A0;
-    int unk2A4;
-    int unk2A8;
-    int unk2AC;
-    int unk2B0;
-    int unk2B4;
-    int unk2B8;
-    int unk2BC;
-    int unk2C0;
-    int unk2C4;
-    int unk2C8;
-    int unk2CC;
-    int unk2D0;
-    int unk2D4;
-    int unk2D8;
-    int unk2DC;
-    int unk2E0;
-    int unk2E4;
-    int unk2E8;
-    int unk2EC;
-    int unk2F0;
-    int unk2F4;
-    int unk2F8;
-    int unk2FC;
-    int unk300;
-    int unk304;
-    int unk308;
-    int unk30C;
-    int unk310;
-    int unk314;
-    int unk318;
-    int unk31C;
-    int unk320;
-    int unk324;
-    int unk328;
-    int unk32C;
-    int unk330;
-    int unk334;
-    int unk338;
-    int unk33C;
-    int unk340;
-    int unk344;
-    int unk348;
-    int unk34C;
-    int unk350;
-    int unk354;
-    int unk358;
-    int unk35C;
-    int unk360;
-    int unk364;
-    int unk368;
-    int unk36C;
-    int unk370;
-    int unk374;
-    int unk378;
-    int unk37C;
-    int unk380;
-    int unk384;
-    int unk388;
-    int unk38C;
-    int unk390;
-    int unk394;
-    int unk398;
-    int unk39C;
-    int unk3A0;
-    int unk3A4;
-    int unk3A8;
-    int unk3AC;
-    int unk3B0;
-    int unk3B4;
-    int unk3B8;
-    int unk3BC;
-    int unk3C0;
-    int unk3C4;
-    int unk3C8;
-    int unk3CC;
-    int unk3D0;
-    int unk3D4;
-    int unk3D8;
-    int unk3DC;
-    int unk3E0;
-    int unk3E4;
-    int unk3E8;
-    int unk3EC;
-    int unk3F0;
-    int unk3F4;
-    int unk3F8;
-    int unk3FC;
-    int unk400;
-    int unk404;
-    int unk408;
-    int unk40C;
-    int unk410;
-    int unk414;
-    int unk418;
-    int unk41C;
-    int unk420;
-    int unk424;
-    int unk428;
-    int unk42C;
-    int unk430;
-    int unk434;
-    int unk438;
-    int unk43C;
-    int unk440;
-    int unk444;
-    int unk448;
-    int unk44C;
-    int unk450;
-    int unk454;
-    int unk458;
-    int unk45C;
-    int unk460;
-    int unk464;
-    int unk468;
-    int unk46C;
-    int unk470;
-    int unk474;
-    int unk478;
-    int unk47C;
-    int unk480;
-    int unk484;
-    int unk488;
-    int unk48C;
-    int unk490;
-    int unk494;
-    int unk498;
-    int unk49C;
-    int unk4A0;
-    int unk4A4;
-    int unk4A8;
-    int unk4AC;
-    int unk4B0;
-    int unk4B4;
-    int unk4B8;
-    int unk4BC;
-    int unk4C0;
-    int unk4C4;
-    int unk4C8;
-    int unk4CC;
-    int unk4D0;
-    int unk4D4;
-    int unk4D8;
-    int unk4DC;
-    int unk4E0;
-    int unk4E4;
-    int unk4E8;
-    int unk4EC;
-    int unk4F0;
-    int unk4F4;
-    int unk4F8;
-    int unk4FC;
-    int unk500;
-    int unk504;
-    int unk508;
-    int unk50C;
-    int unk510;
-    int unk514;
-    int unk518;
-    int unk51C;
-    int unk520;
-    int unk524;
-    int unk528;
-    int unk52C;
-    int unk530;
-    int unk534;
-    int unk538;
-    int unk53C;
-    int unk540;
-    int unk544;
-    int unk548;
-    int unk54C;
-    int unk550;
-    int unk554;
-    int unk558;
-    int unk55C;
-    int unk560;
-    int unk564;
-    int unk568;
-    int unk56C;
-    int unk570;
-    int unk574;
-    int unk578;
-    int unk57C;
-    int unk580;
-    int unk584;
-    int unk588;
-    int unk58C;
-    int unk590;
-    int unk594;
-    FUN_00cbe8d0_class* unk598;
-    void __thiscall FUN_00c6d4a0();
-};
 
 #include <xmmintrin.h>
-class hkVector4_807
-{
-  public:
-    __m128 m_vComponents;
-};
 
-class hkRotation_807
-{
-  public:
-    hkVector4_807 m_kCol0;
-    hkVector4_807 m_kCol1;
-    hkVector4_807 m_kCol2;
-};
 
-class Point807
-{
-  public:
-    Point807();
-    float x, y, z;
-};
+#include "../../../include/NiPoint3.h"
 
 class Matrix807
 {
@@ -440,7 +55,7 @@ class Line807
     static void operator delete(void* pvMem);
     Line807(int iType);
     void SetLocalRotation(Matrix807& kRot);
-    void GetTransformScale(Point807& kPos);
+    void GetTransformScale(NiPoint3& kPos);
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -545,25 +160,19 @@ class DebugNode807
     virtual void AttachLine(Line807* pkLine, const Color807& kColor);
 };
 
-class Transform807
-{
-  public:
-    const hkRotation_807& GetRotation();
-    const hkVector4_807& GetTranslation();
-};
 
 class Body807
 {
   public:
-    Transform807* GetTransform();
+    hkTransform* GetTransform();
     void* GetOwner();
 };
 
 class Event807
 {
   public:
-    const hkVector4_807& GetPosition();
-    hkVector4_807 m_kPathOffset;
+    const hkVector4& GetPosition();
+    hkVector4 m_kPathOffset;
     unsigned int unk10;
     unsigned int unk14;
     unsigned int unk18;
@@ -585,8 +194,8 @@ class EventCopy807
 {
   public:
     EventCopy807(Event807* pkEvent);
-    hkVector4_807 m_kPathOffset;
-    hkVector4_807 m_kPlaneNormal;
+    hkVector4 m_kPathOffset;
+    hkVector4 m_kPlaneNormal;
     Body807* m_pkBodyA;
     unsigned int unk24;
     unsigned int unk28;
@@ -609,425 +218,10 @@ class EventCopy807
     unsigned int unk6c;
 };
 
-class Process807;
 class Unk815;
 
-class TESObjectREFR
-{
-  public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual bool IsActor();
-};
 
-class Actor807 : public TESObjectREFR
-{
-  public:
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual int GetLifeState();
-    virtual void v218();
-    virtual void v21c();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual bool IsInState(int iState);
-    Process807* GetProcess();
-    bool IsStateActive();
-};
 
-class Process807
-{
-  public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual void v214();
-    virtual void v218();
-    virtual void v21c();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual void v22c();
-    virtual void v230();
-    virtual void v234();
-    virtual void v238();
-    virtual void v23c();
-    virtual void v240();
-    virtual void v244();
-    virtual void v248();
-    virtual void v24c();
-    virtual void v250();
-    virtual void v254();
-    virtual void v258();
-    virtual void v25c();
-    virtual void v260();
-    virtual void v264();
-    virtual void v268();
-    virtual void v26c();
-    virtual void v270();
-    virtual void v274();
-    virtual void v278();
-    virtual void v27c();
-    virtual void v280();
-    virtual void v284();
-    virtual void v288();
-    virtual void v28c();
-    virtual void v290();
-    virtual void v294();
-    virtual void v298();
-    virtual void v29c();
-    virtual void v2a0();
-    virtual void v2a4();
-    virtual void v2a8();
-    virtual void v2ac();
-    virtual void v2b0();
-    virtual void v2b4();
-    virtual void v2b8();
-    virtual void v2bc();
-    virtual void v2c0();
-    virtual void v2c4();
-    virtual void v2c8();
-    virtual void v2cc();
-    virtual void v2d0();
-    virtual void v2d4();
-    virtual void v2d8();
-    virtual void v2dc();
-    virtual void v2e0();
-    virtual void v2e4();
-    virtual void v2e8();
-    virtual void v2ec();
-    virtual void v2f0();
-    virtual void v2f4();
-    virtual void v2f8();
-    virtual void v2fc();
-    virtual void v300();
-    virtual void v304();
-    virtual void v308();
-    virtual void v30c();
-    virtual void v310();
-    virtual void v314();
-    virtual void v318();
-    virtual void v31c();
-    virtual void v320();
-    virtual void v324();
-    virtual void v328();
-    virtual void v32c();
-    virtual void v330();
-    virtual void v334();
-    virtual void v338();
-    virtual void v33c();
-    virtual void v340();
-    virtual void v344();
-    virtual void v348();
-    virtual void v34c();
-    virtual void v350();
-    virtual void v354();
-    virtual void v358();
-    virtual void v35c();
-    virtual void v360();
-    virtual void v364();
-    virtual void v368();
-    virtual void v36c();
-    virtual void v370();
-    virtual void v374();
-    virtual void v378();
-    virtual void v37c();
-    virtual void v380();
-    virtual void v384();
-    virtual void v388();
-    virtual void v38c();
-    virtual void v390();
-    virtual void v394();
-    virtual void v398();
-    virtual void v39c();
-    virtual void v3a0();
-    virtual void v3a4();
-    virtual void v3a8();
-    virtual void v3ac();
-    virtual void v3b0();
-    virtual void v3b4();
-    virtual void v3b8();
-    virtual void v3bc();
-    virtual void v3c0();
-    virtual void v3c4();
-    virtual void v3c8();
-    virtual void v3cc();
-    virtual void v3d0();
-    virtual void v3d4();
-    virtual void v3d8();
-    virtual void v3dc();
-    virtual void v3e0();
-    virtual void v3e4();
-    virtual void v3e8();
-    virtual void v3ec();
-    virtual void v3f0();
-    virtual void v3f4();
-    virtual void v3f8();
-    virtual void v3fc();
-    virtual void v400();
-    virtual void v404();
-    virtual void v408();
-    virtual int GetState();
-};
 
 class Caster807
 {
@@ -1041,142 +235,6 @@ class Effect807
     void* GetData();
 };
 
-class MagicProjectile : public TESObjectREFR
-{
-  public:
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual void v214();
-    virtual void v218();
-    virtual void v21c();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual void v22c();
-    virtual void v230();
-    virtual void v234();
-    virtual void v238();
-    virtual void v23c();
-    virtual void v240();
-    virtual void v244();
-    virtual void v248();
-    virtual void v24c();
-    virtual void v250();
-    virtual void v254();
-    virtual void v258();
-    virtual void v25c();
-    virtual void v260();
-    virtual void v264();
-    virtual void v268();
-    virtual void v26c();
-    virtual void v270();
-    virtual void v274();
-    virtual void v278();
-    virtual void v27c();
-    virtual void v280();
-    virtual void v284();
-    virtual void v288();
-    virtual void v28c();
-    virtual void v290();
-    virtual void v294();
-    virtual void v298();
-    virtual void v29c();
-    virtual void v2a0();
-    virtual void v2a4();
-    virtual void v2a8();
-    virtual void v2ac();
-    virtual void v2b0();
-    virtual void v2b4();
-    virtual void v2b8();
-    virtual void v2bc();
-    virtual void v2c0();
-    virtual void v2c4();
-    virtual void v2c8();
-    virtual void v2cc();
-    virtual void v2d0();
-    virtual void v2d4();
-    virtual void v2d8();
-    virtual void v2dc();
-    virtual void v2e0();
-    virtual void v2e4();
-    virtual void v2e8();
-    virtual void v2ec();
-    virtual void v2f0();
-    virtual void v2f4();
-    virtual void v2f8();
-    virtual void v2fc();
-    virtual void v300();
-    virtual void OnHit(Point807 kPos, void* pvTarget, TESObjectREFR* pkRef, int iFlags);
-    virtual void v308();
-    virtual bool IsActive();
-    Caster807* GetCaster();
-};
 
 class Unk815
 {
@@ -1191,12 +249,7 @@ class Player807
 };
 extern Player807* g_pkPlayer807;
 
-class Setting807
-{
-  public:
-    bool* GetBool();
-};
-extern Setting807 g_kDebugSetting807;
+extern Setting g_kDebugSetting807;
 
 class Debug807
 {
@@ -1206,8 +259,8 @@ class Debug807
 extern Debug807* g_pkDebug807;
 
 DebugNode807* __cdecl FUN_004a3a40(void* pvOwner);
-void __cdecl FUN_00624b10(Matrix807& kOut, const hkRotation_807& kIn);
-void __cdecl FUN_00458620(Point807& kOut, const hkVector4_807& kIn);
+void __cdecl FUN_00624b10(Matrix807& kOut, const hkRotation& kIn);
+void __cdecl FUN_00458620(NiPoint3& kOut, const hkVector4& kIn);
 void* __cdecl FUN_004b5950(void* pvCollidable);
 void* __cdecl FUN_004b59f0(void* pvCollidable);
 void* __cdecl FUN_004b5a80(void* pvEntry);
@@ -1625,6 +678,8 @@ class Listener807
     MagicProjectile* m_pkProjectile;
 };
 
+// Preserve the original stack protection for the address-taken collision/debug temporaries.
+#pragma strict_gs_check(push, on)
 // @fnv 0x008070d0
 void Listener807::FUN_008070d0(Event807* pkEvent)
 {
@@ -1634,26 +689,26 @@ void Listener807::FUN_008070d0(Event807* pkEvent)
     if (!pkProjectile->IsActive())
         return;
     TESObjectREFR* pkHit = GetRef(pkEvent->m_pvCollidableB);
-    Actor807* pkActor = pkHit && pkHit->IsActor() ? (Actor807*)pkHit : 0;
+    Actor* pkActor = pkHit && pkHit->IsActor() ? (Actor*)pkHit : 0;
     void* pvEntry = FUN_004b5950(pkEvent->m_pvCollidableB);
     if (pvEntry)
     {
         if (!pkActor)
             return;
-        else if (pkActor->IsInState(0))
+        else if (pkActor->HasHealth(0))
             return;
-        else if (pkActor->GetProcess() && pkActor->GetProcess()->GetState() && pkActor->GetProcess()->GetState() != 6)
+        else if (pkActor->GetProcess() && pkActor->GetProcess()->GetKnockedState() && pkActor->GetProcess()->GetKnockedState() != 6)
             return;
-        else if (pkActor->GetLifeState() == 4 || pkActor->GetLifeState() == 9)
+        else if (pkActor->GetSitSleepState() == 4 || pkActor->GetSitSleepState() == 9)
             return;
     }
     if (pkHit && pkHit == g_pkPlayer807->GetRef())
         return;
-    if (pkActor && pkActor->IsStateActive())
+    if (pkActor && pkActor->GetGhost())
         return;
-    if (*g_kDebugSetting807.GetBool())
+    if (*g_kDebugSetting807.Bool())
     {
-        Point807 kUnused;
+        NiPoint3 kUnused;
         EventCopy807 kCopy(pkEvent);
         DebugNode807* pkNodeA = FUN_004a3a40(kCopy.m_pkBodyA->GetOwner());
         if (pkNodeA)
@@ -1662,10 +717,10 @@ void Listener807::FUN_008070d0(Event807* pkEvent)
             Color807 kColorA(1.0f, 1.0f, 1.0f);
             pkNodeA->AttachLine(pkLineA, kColorA);
             Matrix807 kRotA;
-            FUN_00624b10(kRotA, kCopy.m_pkBodyA->GetTransform()->GetRotation());
+            FUN_00624b10(kRotA, kCopy.m_pkBodyA->GetTransform()->getRotation());
             pkLineA->SetLocalRotation(kRotA);
-            Point807 kPosA;
-            FUN_00458620(kPosA, kCopy.m_pkBodyA->GetTransform()->GetTranslation());
+            NiPoint3 kPosA;
+            FUN_00458620(kPosA, kCopy.m_pkBodyA->GetTransform()->getTranslation());
             pkLineA->GetTransformScale(kPosA);
         }
         DebugNode807* pkNodeB = FUN_004a3a40(kCopy.m_pkBodyB->GetOwner());
@@ -1675,16 +730,16 @@ void Listener807::FUN_008070d0(Event807* pkEvent)
             Color807 kColorB(1.0f, 1.0f, 1.0f);
             pkNodeB->AttachLine(pkLineB, kColorB);
             Matrix807 kRotB;
-            FUN_00624b10(kRotB, kCopy.m_pkBodyB->GetTransform()->GetRotation());
+            FUN_00624b10(kRotB, kCopy.m_pkBodyB->GetTransform()->getRotation());
             pkLineB->SetLocalRotation(kRotB);
-            Point807 kPosB;
-            FUN_00458620(kPosB, kCopy.m_pkBodyB->GetTransform()->GetTranslation());
+            NiPoint3 kPosB;
+            FUN_00458620(kPosB, kCopy.m_pkBodyB->GetTransform()->getTranslation());
             pkLineB->GetTransformScale(kPosB);
         }
     }
-    Point807 kPos;
+    NiPoint3 kPos;
     FUN_00458620(kPos, pkEvent->GetPosition());
-    if (*g_kDebugSetting807.GetBool())
+    if (*g_kDebugSetting807.Bool())
     {
         Line807* pkMarker = CreateOctahedron(5.0f, ColorA807(1.0f, 0.0f, 0.0f, 1.0f), 1);
         pkMarker->GetTransformScale(kPos);
@@ -1703,3 +758,5 @@ void Listener807::FUN_008070d0(Event807* pkEvent)
     void* pvTarget = pvHitEntry ? FUN_004b5a80(pvHitEntry) : 0;
     pkProjectile->OnHit(kPos, pvTarget, pkHit, 0);
 }
+
+#pragma strict_gs_check(pop)

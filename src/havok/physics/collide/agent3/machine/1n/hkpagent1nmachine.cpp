@@ -1,6 +1,31 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 
 // src/havok/physics/collide/agent3/machine/1n/hkpagent1nmachine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent3/machine/1n/hkpagent1nmachine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../../include/AgentSectorPointerArray.h"
+#include "../../../../../../../include/hkpAgent1nSector.h"
+// VC9's SDK __m128 adds byte arrays that trigger parameter shadowing under /GS.
+// Retain this unit's original intrinsic layout for the matching compiler.
+#if defined(_MSC_VER) && _MSC_VER == 1500 && !defined(_INCLUDED_MM2)
+#define _INCLUDED_MM2
+// Exe 0x00da3510 FUN_00da3510: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setzero_ps(void);
+#endif
+
+#include "../../../../../../../include/hkVector4.h"
 
 void ProcessEntryPair();
 void FUN_00da44d0(int, int, void*);
@@ -60,8 +85,8 @@ struct BlockPoolBlock
     }
 };
 
-struct BlockPoolArray
-{
+struct BlockPoolArrayLocalForm
+{ // local form of hkArrayBase: 0x00da4430 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     BlockPoolBlock** m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -92,7 +117,7 @@ struct BlockPoolArray
 
 // Resets the block array, reserves room for 4 entries, allocates a 0x200-byte block and initialises its fields.
 // @fnv 0x00da4430
-void __cdecl InitBlockPool(BlockPoolArray* blocks)
+void __cdecl InitBlockPool(BlockPoolArrayLocalForm* blocks)
 {
     blocks->m_iElementCount = 0;
     blocks->GrowArrayCapacity(FUN_00c85750().heap(), 4);
@@ -1890,24 +1915,12 @@ S_00da40e0_Entry* __cdecl ProcessEntryPair(const S_00da40e0_Input& in, S_00da40e
     return entry;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-
-extern "C" __m128 _mm_setzero_ps(void);
-
 extern const float DAT_01012054;
 
-struct hkVector4
+inline void hkVector4::setZero4()
 {
-    __m128 m_vComponents;
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-};
+    m_vComponents = _mm_setzero_ps();
+}
 
 struct FourByteState
 {
@@ -1932,27 +1945,15 @@ struct ByteStateWithMixedNumericData : public FourByteState
     hkVector4 m_vSeparatingNormal;
 };
 
-struct hkpAgent1nSector
+inline FourByteState* hkpAgent1nSector::getBegin()
 {
-    unsigned int m_uiAgentCount;
-    unsigned int m_unk04;
-    unsigned int m_unk08;
-    unsigned int m_unk0C;
+    return (FourByteState*)(this + 1);
+}
 
-    FourByteState* getBegin()
-    {
-        return (FourByteState*)(this + 1);
-    }
-    FourByteState* GetStreamEnd()
-    {
-        return (FourByteState*)((char*)(this + 1) + m_uiAgentCount);
-    }
-};
-
-struct AgentSectorPointerArray
+inline FourByteState* hkpAgent1nSector::GetStreamEnd()
 {
-    hkpAgent1nSector** m_kSectors;
-};
+    return (FourByteState*)((char*)(this + 1) + m_uiAgentCount);
+}
 
 struct CollisionAgentContext;
 typedef void(__cdecl* InvalidateTimFunc)(FourByteState* entry, void* agentData, CollisionAgentContext& input);
@@ -1966,7 +1967,7 @@ struct CollisionAgentContext
 // @fnv 0x00da3510
 void FUN_00da3510(AgentSectorPointerArray& agentTrack, CollisionAgentContext& input)
 {
-    hkpAgent1nSector* sector = agentTrack.m_kSectors[0];
+    hkpAgent1nSector* sector = agentTrack.m_kSectors.m_data[0];
     FourByteState* entry = sector->getBegin();
     FourByteState* end = sector->GetStreamEnd();
     int nextSector = 1;
@@ -2015,7 +2016,7 @@ void FUN_00da3510(AgentSectorPointerArray& agentTrack, CollisionAgentContext& in
                 continue;
             }
         } while (entry < end);
-        sector = agentTrack.m_kSectors[nextSector++];
+        sector = agentTrack.m_kSectors.m_data[nextSector++];
         entry = sector->getBegin();
         end = sector->GetStreamEnd();
     }
@@ -2023,22 +2024,14 @@ void FUN_00da3510(AgentSectorPointerArray& agentTrack, CollisionAgentContext& in
 
 typedef void(__cdecl* Da35FuncPtr)(void* entry, void* payload, float fa, float fb, void* holder);
 
-struct Da35Stream
-{
-    int m_iElementCount;
-    int unk04;
-    int unk08;
-    int unk0C;
-};
-
-// Iterates through Da35Stream chunks, dispatching commands via function pointers and updating float fields based on fa and fb.
+// Iterates through hkpAgent1nSector chunks, dispatching commands via function pointers and updating float fields based on fa and fb.
 // @fnv 0x00da35f0
-void __cdecl FUN_00da35f0(Da35Stream*** container, float fa, float fb, void** holder)
+void __cdecl FUN_00da35f0(hkpAgent1nSector*** container, float fa, float fb, void** holder)
 {
-    Da35Stream* stream = **container;
+    hkpAgent1nSector* stream = **container;
     unsigned char* p = (unsigned char*)stream + 0x10;
     unsigned char* end;
-    *(unsigned char* volatile*)&end = (unsigned char*)stream + stream->m_iElementCount + 0x10;
+    *(unsigned char* volatile*)&end = (unsigned char*)stream + stream->m_uiAgentCount + 0x10;
     int index = 4;
     for (;;)
     {
@@ -2091,19 +2084,19 @@ void __cdecl FUN_00da35f0(Da35Stream*** container, float fa, float fb, void** ho
                 break;
             }
         } while (p < end);
-        stream = *(Da35Stream**)((char*)*container + index);
-        unsigned char* pNewEnd = (unsigned char*)stream + stream->m_iElementCount + 0x10;
+        stream = *(hkpAgent1nSector**)((char*)*container + index);
+        unsigned char* pNewEnd = (unsigned char*)stream + stream->m_uiAgentCount + 0x10;
         p = (unsigned char*)stream + 0x10;
         *(unsigned char* volatile*)&end = pNewEnd;
         index += 4;
     }
 }
 
-static void* __cdecl Da35Search(Da35Stream*** container, int key1, int key2, void** out)
+static void* __cdecl Da35Search(hkpAgent1nSector*** container, int key1, int key2, void** out)
 {
-    Da35Stream** streams = *container;
-    Da35Stream* stream = *streams;
-    int size = stream->m_iElementCount;
+    hkpAgent1nSector** streams = *container;
+    hkpAgent1nSector* stream = *streams;
+    int size = stream->m_uiAgentCount;
     streams += 1;
     for (;;)
     {
@@ -2156,7 +2149,7 @@ static void* __cdecl Da35Search(Da35Stream*** container, int key1, int key2, voi
             }
         } while (p < end);
         stream = *streams;
-        size = stream->m_iElementCount;
+        size = stream->m_uiAgentCount;
         streams += 1;
     }
 }
@@ -2175,7 +2168,7 @@ __forceinline BlockPoolHeap& fullHeap()
 
 // Iterates over all agent entries in the block pool, dispatches their destroy functions, then releases the blocks and resets the array.
 // @fnv 0x00da42b0
-void FUN_00da42b0(BlockPoolArray* blocks, S_00da40e0_Dispatcher* dispatcher, S_00da40e0_ContactMgr* mgr,
+void FUN_00da42b0(BlockPoolArrayLocalForm* blocks, S_00da40e0_Dispatcher* dispatcher, S_00da40e0_ContactMgr* mgr,
                   S_00da40e0_ConstraintOwner& owner)
 {
     BlockPoolBlock** sectors = blocks->m_data;
@@ -2281,11 +2274,11 @@ __forceinline static void streamCopy(void* dst, const void* src, int count)
 }
 void __cdecl FUN_00d2cc70(void*, const void*, unsigned int);
 typedef unsigned char*(__cdecl* StreamTransform)(void*, unsigned char*, unsigned char*);
-// Walks records in the BlockPoolArray blocks, copies them into new 512-byte blocks, applies the callback to some record types, and replaces the array contents.
+// Walks records in the BlockPoolArrayLocalForm blocks, copies them into new 512-byte blocks, applies the callback to some record types, and replaces the array contents.
 // @fnv 0x00da44d0
 void FUN_00da44d0(int apBlocks, int apHeader, void* apTransform)
 {
-    BlockPoolArray* blocks = (BlockPoolArray*)apBlocks;
+    BlockPoolArrayLocalForm* blocks = (BlockPoolArrayLocalForm*)apBlocks;
     int outIndex = 0;
     BlockPoolBlock* input = blocks->m_data[0];
     BlockPoolBlock* previous = 0;
@@ -2403,19 +2396,19 @@ finish:
 
 extern "C"
 {
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
 }
 struct __declspec(align(16)) TOIBody
 {
-    __m128 m_pos;
-    __m128 m_dir;
+    LocalM128 m_pos;
+    LocalM128 m_dir;
     int unk20;
 };
 
@@ -2423,17 +2416,17 @@ struct __declspec(align(16)) TOIBody
 // @fnv 0x00da37d0
 static __declspec(noinline) int FUN_00da37d0(const TOIBody* b, const TOIBody* a, float p0, const float* p1, float p2)
 {
-    __m128 d = _mm_sub_ps(a->m_pos, b->m_pos);
-    __m128 m0 = _mm_mul_ps(b->m_dir, d);
-    __m128 m1 = _mm_mul_ps(a->m_dir, d);
-    __m128 m2 = _mm_mul_ps(a->m_dir, b->m_dir);
-    __m128 t0 = _mm_unpacklo_ps(m0, m1);
-    __m128 t1 = _mm_unpackhi_ps(m0, m1);
+    LocalM128 d = _mm_sub_ps(a->m_pos, b->m_pos);
+    LocalM128 m0 = _mm_mul_ps(b->m_dir, d);
+    LocalM128 m1 = _mm_mul_ps(a->m_dir, d);
+    LocalM128 m2 = _mm_mul_ps(a->m_dir, b->m_dir);
+    LocalM128 t0 = _mm_unpacklo_ps(m0, m1);
+    LocalM128 t1 = _mm_unpackhi_ps(m0, m1);
     m0 = _mm_movelh_ps(t0, m2);
     m1 = _mm_movehl_ps(m0, t0);
     m1 = _mm_shuffle_ps(m1, m2, 0xd4);
     m2 = _mm_shuffle_ps(t1, m2, 0xe4);
-    __m128 dots = _mm_add_ps(_mm_add_ps(m0, m1), m2);
+    LocalM128 dots = _mm_add_ps(_mm_add_ps(m0, m1), m2);
     float t4 = (dots.m128_f32[2] - 1.0f) * p0 + (-dots.m128_f32[1]);
     float t12 = dots.m128_f32[0] + (dots.m128_f32[2] - 1.0f) * p0;
     float t8 = p0 + p2;

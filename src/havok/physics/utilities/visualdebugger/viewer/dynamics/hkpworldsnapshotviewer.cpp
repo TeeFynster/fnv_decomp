@@ -2,6 +2,10 @@
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/hkpworldsnapshotviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/hkpworldsnapshotviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+
+
 extern int DAT_010d16f0;
 extern int DAT_010d1700;
 extern int DAT_010d1720;
@@ -61,15 +65,6 @@ void __cdecl RegisterSnapshotCommands()
 
 struct FUN_00c7be20_cls;
 
-struct FUN_00c7be20_holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pAllocator;
-};
-
 struct FUN_00c7be20_src
 {
     int unk00;
@@ -85,7 +80,7 @@ struct FUN_00c7be20_arr
     unsigned int m_capFlags;
 };
 
-void* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 void __cdecl FUN_00c908c0(void* allocator, FUN_00c7be20_arr* self, unsigned int newCap, int elemSize);
 
 struct FUN_00c7be20_cls
@@ -121,8 +116,8 @@ void FUN_00c7be20_cls::CopySourceArray(FUN_00c7be20_arr* out)
     if (pSource != 0)
     {
         int iCount = pSource->m_0c;
-        FUN_00c7be20_holder* pAllocHolder = reinterpret_cast<FUN_00c7be20_holder*>(FUN_00c85750());
-        void* allocator = pAllocHolder->m_pAllocator;
+        hkMemoryRouter* pAllocHolder = FUN_00c85750();
+        void* allocator = pAllocHolder->m_heap;
         unsigned int uiCapacity = out->m_capFlags & 0x3fffffffu;
         if ((int)uiCapacity < iCount)
         {
@@ -184,24 +179,6 @@ void __thiscall FUN_00d62fa0_class::ProcessContainerItems()
 }
 
 namespace fnv_00d63250 {
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
-
 struct FUN_00d63250_cls
 {
     int unk00;
@@ -221,9 +198,9 @@ FUN_00d63250_cls* FUN_00d63250_cls::Destroy(unsigned char acFlags)
     FUN_00d62fe0();
     if (acFlags & 1)
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(this, m_uSize);
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        pAllocator->blockFree(this, m_uSize);
     }
     return this;
 }

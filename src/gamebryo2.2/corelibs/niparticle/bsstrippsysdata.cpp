@@ -2,6 +2,9 @@
 // src/gamebryo2.2/corelibs/niparticle/bsstrippsysdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/bsstrippsysdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/NiPSysData.h"
+#include "../../../../include/NiStream.h"
+
 struct FUN_00c25dd0_shell
 {
     short __thiscall FUN_00c25dd0();
@@ -75,48 +78,31 @@ float __thiscall FUN_00c25de0_shell::GetEntryFloat(unsigned short usIndex)
     return *(float*)((char*)*(int**)((char*)this + 0x7c) + 0x1c + (int)usIndex * 32);
 }
 
-struct FUN_00a963f0
-{
-    virtual void Dummy()
-    {}
-    char _pad[0x6C];
-    FUN_00a963f0();
-};
-struct FUN_00c24c90 : FUN_00a963f0
-{
-    int m70;
-    int m74;
-    short m78;
-    short m7a;
-    FUN_00c24c90();
-};
-// Constructor that initializes m70, m74, m78 and m7a to zero.
 // @fnv 0x00c24c90
-FUN_00c24c90::FUN_00c24c90() : m70(0), m74(0), m78(0)
+__declspec(noinline) NiPSysData::NiPSysData() : m_pkParticleInfo(0), m_pfRotationSpeeds(0), m_usNumActive(0)
 {
-    m7a = 0;
+    m_usNumParticles = 0;
 }
 
-struct NiObject;
-struct BSStripPSysData
+// 0x00c25cd0 compares fields at +0x80/+0x84/+0x88/+0x8c after NiPSysData: particle strip data, not an 8-byte BSStringT<char>.
+struct ParticleStripData : NiPSysData
 {
-    bool __thiscall IsEqual(NiObject*);
-    char _pad[0x80];
+    void* pkStripPoints;
     unsigned short usMaxPointCount;
     float fStartCapSize;
     float fEndCapSize;
     bool bDoZPrePass;
 };
-struct FUN_00c25cd0_shell : BSStripPSysData
+struct FUN_00c25cd0_shell : ParticleStripData
 {
     bool __thiscall FUN_00c25cd0(NiObject* pkObject);
 };
-// Compares the base fields and then usMaxPointCount, fStartCapSize, fEndCapSize and bDoZPrePass against another BSStripPSysData, returning true if all match.
+// Compares the base fields and then usMaxPointCount, fStartCapSize, fEndCapSize and bDoZPrePass against another ParticleStripData, returning true if all match.
 // @fnv 0x00c25cd0
 bool __thiscall FUN_00c25cd0_shell::FUN_00c25cd0(NiObject* pkObject)
 {
-    BSStripPSysData* pkDest = (BSStripPSysData*)pkObject;
-    if (IsEqual(pkObject) && pkDest->usMaxPointCount == usMaxPointCount && pkDest->fStartCapSize == fStartCapSize &&
+    ParticleStripData* pkDest = (ParticleStripData*)pkObject;
+    if (NiPSysData::IsEqual(pkObject) && pkDest->usMaxPointCount == usMaxPointCount && pkDest->fStartCapSize == fStartCapSize &&
         pkDest->fEndCapSize == fEndCapSize && pkDest->bDoZPrePass == bDoZPrePass)
         return true;
     return false;
@@ -334,15 +320,8 @@ struct PointItem
     void* ptr;
     char pad[0x1c];
 };
-struct Base_c24ef0
+struct FUN_00c25ef0 : public NiPSysData
 {
-    unsigned int m_iObjectReferenceCount;
-    unsigned short m_usVertices;
-    virtual ~Base_c24ef0();
-};
-struct FUN_00c25ef0 : public Base_c24ef0
-{
-    char pad0a[0x70];
     PointItem* pkStripPoints;
     virtual ~FUN_00c25ef0();
 };
@@ -377,46 +356,9 @@ struct S_00c26000_Item
 struct S_00c26000_Proc;
 struct S_00c26000_Strip;
 
-struct S_00c26000_Base
+struct S_00c26000_Strip : NiPSysData
 {
-    int unk00;
-    int unk04;
-    unsigned short unk08;
-    unsigned short unk0a;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
     S_00c26000_Item* unk7c;
-    void FUN_00c24f20(S_00c26000_Strip* dest, S_00c26000_Proc* proc);
-};
-
-struct S_00c26000_Strip : S_00c26000_Base
-{
     unsigned short unk80;
     float unk84;
     float unk88;
@@ -431,12 +373,12 @@ void* FUN_00ec44d0(void* dst, const void* src, unsigned int n);
 // @fnv 0x00c26000
 void S_00c26000_Strip::CloneStrip(S_00c26000_Strip* dest, S_00c26000_Proc* proc)
 {
-    FUN_00c24f20(dest, proc);
+    NiPSysData::CopyMemberData(dest, *reinterpret_cast<CloningProcess*>(proc));
     dest->unk80 = unk80;
     dest->unk84 = unk84;
     dest->unk88 = unk88;
     dest->unk8c = unk8c;
-    unsigned short n = unk08;
+    unsigned short n = m_usVertices;
     S_00c26000_Item* items = (S_00c26000_Item*)FUN_00aa1070(n * 32);
     for (unsigned int i = 0; i < n; i++)
     {
@@ -618,53 +560,21 @@ struct StreamOwner
     StreamCtx* m_250;
 };
 
-class FUN_00c26570_cls
+class FUN_00c26570_cls : public NiPSysData
 {
   public:
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
     unsigned int unk7C;
     unsigned int m_80;
     unsigned int m_84;
     unsigned int m_88;
     unsigned int m_8C;
-    void FUN_00c25560(StreamOwner* a1);
     void FUN_00c26570(StreamOwner* a1);
 };
 
 // @fnv 0x00c26570
 void FUN_00c26570_cls::FUN_00c26570(StreamOwner* apOwner)
 {
-    FUN_00c25560(apOwner);
+    NiPSysData::SaveBinary(*reinterpret_cast<NiStream*>(apOwner));
     StreamCtx* s = apOwner->m_250;
     {
         unsigned int n = 2;
@@ -765,44 +675,12 @@ extern "C" void* __cdecl FUN_00a7d490(const char*, unsigned int);
 extern "C" void* __cdecl FUN_00a7d550(const char*, float);
 extern "C" void* __cdecl FUN_00a7d370(const char*, unsigned int);
 extern "C" char str_010be5ec[], str_010be5dc[], str_010be5d0[], str_010be5c4[];
-struct FUN_00c26630_cls
+struct FUN_00c26630_cls : NiPSysData
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
     unsigned int unk7c;
     unsigned short m80, unk82;
     float m84, m88;
     unsigned char m8c;
-    void FUN_00c255b0(struct ArrHdr* a);
     void FUN_00c26630(void* p);
 };
 // Calls FUN_00c255b0 on the array, then appends entries built from g_01202680, m80, m84, m88 and m8c via the FUN_00a7d3xx/d4xx/d5xx helpers.
@@ -810,7 +688,7 @@ struct FUN_00c26630_cls
 void FUN_00c26630_cls::FUN_00c26630(void* pArray)
 {
     ArrHdr* a = (ArrHdr*)pArray;
-    FUN_00c255b0(a);
+    NiPSysData::GetViewerStrings(reinterpret_cast<NiViewerStringsArray*>(a));
     pArray = FUN_00a7d330(g_01202680);
     a->Add(pArray);
     pArray = FUN_00a7d490(str_010be5ec, m80);
@@ -823,11 +701,6 @@ void FUN_00c26630_cls::FUN_00c26630(void* pArray)
     a->Add(pArray);
 }
 
-struct NiStream;
-struct NiPSysData
-{
-    bool __thiscall RegisterStreamables(NiStream&);
-};
 struct FUN_00a817b0_shell : NiPSysData
 {
     bool __thiscall FUN_00a817b0(NiStream& a);
@@ -835,48 +708,11 @@ struct FUN_00a817b0_shell : NiPSysData
 // @fnv 0x00a817b0
 bool __thiscall FUN_00a817b0_shell::FUN_00a817b0(NiStream& a)
 {
-    return RegisterStreamables(a);
+    return NiPSysData::RegisterStreamables(a);
 }
 
 #include <float.h>
 struct S_00c26410_Stream;
-struct S_00c26410_Base
-{
-    int unk00;
-    int unk04;
-    unsigned short m_08;
-    unsigned short unk0A;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    void FUN_00c25340(S_00c26410_Stream* pkStream);
-};
-
 struct S_00c26410_Bin
 {
     unsigned int unk00;
@@ -1063,7 +899,7 @@ struct S_00c26410_Elem
 static float DAT_01015f5c = -FLT_MAX;
 void* __cdecl FUN_00aa1070(unsigned int n);
 
-struct S_00c26410_Mid : S_00c26410_Base
+struct S_00c26410_Mid : NiPSysData
 {
     S_00c26410_Elem* m_7C;
     S_00c26410_Elem& At(unsigned short k)
@@ -1086,12 +922,12 @@ struct FUN_00c26410_cls : S_00c26410_Mid
 // @fnv 0x00c26410
 void FUN_00c26410_cls::FUN_00c26410(S_00c26410_Stream* pkStream)
 {
-    FUN_00c25340(pkStream);
+    NiPSysData::LoadBinary(*reinterpret_cast<NiStream*>(pkStream));
     S_BinRead(pkStream->m_pkBin, &m_80, 2);
     S_BinRead(pkStream->m_pkBin, &m_84, 4);
     S_BinRead(pkStream->m_pkBin, &m_88, 4);
     S_BinRead(pkStream->m_pkBin, &m_8C, 1);
-    unsigned short n = m_08;
+    unsigned short n = m_usVertices;
     m_7C = (S_00c26410_Elem*)FUN_00aa1070(n * sizeof(S_00c26410_Elem));
     for (unsigned int i = 0; i < n; i++)
     {
@@ -1110,17 +946,11 @@ void FUN_00c26410_cls::FUN_00c26410(S_00c26410_Stream* pkStream)
 extern const void* DAT_010be514[];
 void* __cdecl FUN_00aa13e0(unsigned int size);
 
-struct StripBaseConstructorC263
-{
-    void FUN_00c24c90();
-};
-
 struct StripCloneC263 : S_00c26000_Strip
 {
     StripCloneC263() throw()
     {
-        reinterpret_cast<StripBaseConstructorC263*>(this)->FUN_00c24c90();
-        unk00 = reinterpret_cast<int>(DAT_010be514);
+        *reinterpret_cast<const void***>(this) = DAT_010be514;
         unk7c = 0;
     }
 

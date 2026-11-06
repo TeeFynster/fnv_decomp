@@ -10,6 +10,7 @@ int __cdecl strcat_s(char*, unsigned int, const char*);
 unsigned int __cdecl BSStringLength(const char*);
 char* __cdecl FUN_00ecc104(char*, int, FILE*);
 extern char DAT_01082cb8[];
+class TESFile;
 struct PluginListEntry
 {
     void FUN_00471d00(bool);

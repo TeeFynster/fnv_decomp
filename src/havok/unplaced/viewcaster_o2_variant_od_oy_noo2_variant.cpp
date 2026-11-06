@@ -9,60 +9,28 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <xmmintrin.h>
-class Point631
-{
-  public:
-    Point631 operator+(const Point631& kPt) const;
-    Point631 operator*(float fScalar) const;
-    float x, y, z;
-};
-
-class hkSimdReal631
-{
-  public:
-    hkSimdReal631();
-    float GetReal() const;
-    __m128 m_vValue;
-};
-
-class Transform631;
-
-class hkVector4_631
-{
-  public:
-    hkVector4_631();
-    hkVector4_631& operator=(const hkVector4_631& kOther);
-    void SetTransformedInversePos(const Transform631& kXform, const hkVector4_631& kPos);
-    void SetSub(const hkVector4_631& kA, const hkVector4_631& kB);
-    void Normalize();
-    hkSimdReal631 Dot(const hkVector4_631& kOther) const;
-    void Mul(const hkSimdReal631& kScale);
-    hkSimdReal631 Length() const;
-    __m128 m_vComponents;
-};
-
-class hkBool631
-{
-  public:
-    hkBool631();
-    bool ContainsTrait() const;
-    char m_cBooleanValue;
-};
+// Point631 used NiPoint3 addition (0x00439e90) and scalar multiplication (0x0045bb20).
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/hkBool.h"
+// HitArray accessors bind to the shared FUN_00726070 (0x00726070) and GetEntryAt (0x00807770).
+#include "../../../include/HitArray.h"
+// Transform631 held four aligned Havok columns, rather than Transform.h's packed scene transform.
+#include "../../../include/hkTransform.h"
+// hkSimdReal631 was the vector scalar returned by hkVector4::dot3/length3; getReal binds to 0x004586d0.
+#include "../../../include/hkSimdReal.h"
+// This /Od unit calls the out-of-line assignment and subtraction copies.
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#include "../../../include/hkVector4.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESBoundObject.h"
+#include "../../../include/Actor.h"
 
 class Entity631
 {
   public:
-    const Transform631& GetTransform();
-};
-
-class Transform631
-{
-  public:
-    Transform631(const Transform631& kOther);
-    hkVector4_631 m_kCol0;
-    hkVector4_631 m_kCol1;
-    hkVector4_631 m_kCol2;
-    hkVector4_631 m_kTranslation;
+    const hkTransform& GetTransform();
 };
 
 class Filter631
@@ -79,8 +47,8 @@ class RayInput631
 {
   public:
     RayInput631();
-    hkVector4_631 m_kFrom;
-    hkVector4_631 m_kTo;
+    hkVector4 m_kFrom;
+    hkVector4 m_kTo;
     unsigned int m_uiFilter;
     int unk24;
     int unk28;
@@ -92,8 +60,8 @@ class RayOutput631
   public:
     RayOutput631();
     void Reset();
-    hkBool631 HasHit();
-    hkVector4_631 m_kPlaneNormal;
+    hkBool HasHit();
+    hkVector4 m_kPlaneNormal;
     float m_fHitFraction;
     unsigned int unk14;
     unsigned int unk18;
@@ -116,7 +84,7 @@ class Owner631
 {
   public:
     int GetType();
-    hkBool631 CastRay(RayInput631& kInput, RayOutput631& kOutput);
+    hkBool CastRay(RayInput631& kInput, RayOutput631& kOutput);
 };
 
 class Collidable631
@@ -130,9 +98,9 @@ class Hit631
 {
   public:
     Hit631(const Hit631& kOther);
-    const hkVector4_631& GetPosition();
-    hkVector4_631 m_kPathOffset;
-    hkVector4_631 m_kPlaneNormal;
+    const hkVector4& GetPosition();
+    hkVector4 m_kPathOffset;
+    hkVector4 m_kPlaneNormal;
     float m_fHitFraction;
     unsigned int unk24;
     unsigned int unk28;
@@ -155,21 +123,14 @@ class Hit631
     unsigned int unk6c;
 };
 
-class HitArray631
-{
-  public:
-    int GetSize();
-    Hit631& GetAt(int i);
-};
-
 class Query631
 {
   public:
     Query631();
     ~Query631();
-    hkBool631 HasHits();
+    hkBool HasHits();
     void Sort();
-    HitArray631* GetHits();
+    HitArray* GetHits();
     __m128 m_q00;
     __m128 m_q10;
     __m128 m_q20;
@@ -234,7 +195,7 @@ class CastInput631
 {
   public:
     CastInput631();
-    hkVector4_631 m_kTo;
+    hkVector4 m_kTo;
     float m_fRadiusA;
     float m_fRadiusB;
     int unk18;
@@ -245,7 +206,7 @@ class Shape631
 {
   public:
     Filter631 GetFilter();
-    void Cast(const hkVector4_631& kFrom, CastInput631& kInput, Query631& kQuery, int iFlags);
+    void Cast(const hkVector4& kFrom, CastInput631& kInput, Query631& kQuery, int iFlags);
 };
 
 class RayHit631
@@ -274,7 +235,7 @@ class RayHit631
     void* m_pvRootCollidable;
 };
 
-class RayHitArray631
+class RayHitArray
 {
   public:
     int GetSize();
@@ -293,7 +254,7 @@ class AllRayHits631 : public RayHitCollector631
   public:
     AllRayHits631();
     virtual ~AllRayHits631();
-    RayHitArray631* GetHits();
+    RayHitArray* GetHits();
     __m128 m_q10;
     __m128 m_q20;
     __m128 m_q30;
@@ -350,8 +311,8 @@ class Pick631
   public:
     Pick631();
     void SetFilter(Filter631 kFilter);
-    void SetFrom(const hkVector4_631& kFrom);
-    void SetTo(const hkVector4_631& kTo);
+    void SetFrom(const hkVector4& kFrom);
+    void SetTo(const hkVector4& kTo);
     void SetCollector(AllRayHits631* pkCollector);
     bool IsSingleHit();
     __m128 m_q00;
@@ -421,13 +382,6 @@ class Caster631
     virtual void v0c0();
     virtual void v0c4();
     virtual void CastRay(Pick631* pkPick);
-};
-
-class NiAVObject631
-{
-  public:
-    bool IsHidden();
-    NiAVObject631* GetParent();
 };
 
 class BaseForm631
@@ -753,131 +707,7 @@ class Controller631
     int GetMode();
 };
 
-class TESObjectREFR631
-{
-  public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual bool IsActor();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual NiAVObject631* Get3D();
-    BaseForm631* GetBaseForm();
-    Process631* GetProcess();
-    Controller631* GetController();
-};
-extern TESObjectREFR631* g_pkPlayer631;
+extern TESObjectREFR* g_pkPlayer631;
 
 class Result631
 {
@@ -941,47 +771,48 @@ extern IntSetting631 g_kMaxRays631;
 extern int g_iLine631;
 extern void* g_pvLastHit631;
 
-void __cdecl FUN_004a3e00(hkVector4_631& kOut, const Point631& kIn);
-NiAVObject631* __cdecl FUN_004b5820(Collidable631* pkCollidable);
-TESObjectREFR631* __cdecl FUN_0056f930(void* pvObject);
+void __cdecl FUN_004a3e00(hkVector4& kOut, const NiPoint3& kIn);
+NiAVObject* __cdecl FUN_004b5820(Collidable631* pkCollidable);
+TESObjectREFR* __cdecl FUN_0056f930(void* pvObject);
 Entity631* __cdecl FUN_004b59f0(Collidable631* pkCollidable);
 void* __cdecl FUN_004b5a80(Entity631* pkEntity);
-void __cdecl FUN_004b2780(List631* pkList, const Point631* pkOrigin, const Point631* pkDir, float fImpulseRadiusSquared,
-                          NiAVObject631* pkNode, int iFlags);
+void __cdecl FUN_004b2780(List631* pkList, const NiPoint3* pkOrigin, const NiPoint3* pkDir, float fImpulseRadiusSquared,
+                          NiAVObject* pkNode, int iFlags);
 float __cdecl FUN_004587d0(float fValue);
 
-class ViewCaster631
+// ViewCaster has no shared include/ header yet; retain its declaration with its real name.
+class ViewCaster
 {
   public:
     bool IsEnabled();
     Shape631* GetShape();
     Caster631* GetCaster();
     void Prepare();
-    TESObjectREFR631* FUN_00631d60(const Point631* pkOrigin, const Point631* pkDir, float fImpulseRadiusSquared, float* pfDistance,
+    TESObjectREFR* FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3* pkDir, float fImpulseRadiusSquared, float* pfDistance,
                                    bool* pbAlternate);
 };
 
 // @fnv 0x00631d60
-TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Point631* pkDir, float fImpulseRadiusSquared,
+TESObjectREFR* ViewCaster::FUN_00631d60(const NiPoint3* pkOrigin, const NiPoint3* pkDir, float fImpulseRadiusSquared,
                                               float* pfDistance, bool* pbAlternate)
 {
     Scope631 kScope(0x10, 1, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\Havok\\ViewCaster.cpp", 0x9b);
     g_pvLastHit631 = 0;
-    TESObjectREFR631* pkResult = 0;
+    TESObjectREFR* pkResult = 0;
     if (IsEnabled() && GetShape() && GetCaster())
     {
         Query631 kQuery;
         Caster631* pkCaster = GetCaster();
-        Point631 kEnd = *pkOrigin + *pkDir * fImpulseRadiusSquared;
+        NiPoint3 kEnd = *pkOrigin + *pkDir * fImpulseRadiusSquared;
         *pbAlternate = false;
         *pfDistance = 3.402823466e+38f;
         List631 kList(0, 8);
         kList.SetMode(0);
         kList.SetSorted(1);
         g_iLine631 = 0xdad;
-        hkVector4_631 kFrom;
+        hkVector4 kFrom;
         FUN_004a3e00(kFrom, *pkOrigin);
-        hkVector4_631 kTo;
+        hkVector4 kTo;
         FUN_004a3e00(kTo, kEnd);
         bool bHits = false;
         CastInput631 kInput;
@@ -990,14 +821,14 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
         kInput.m_kTo = kTo;
         Prepare();
         GetShape()->Cast(kFrom, kInput, kQuery, 0);
-        if (kQuery.HasHits().ContainsTrait())
+        if (kQuery.HasHits().operator bool())
         {
             kQuery.Sort();
             bHits = true;
         }
-        TESObjectREFR631* pkClosest = 0;
+        TESObjectREFR* pkClosest = 0;
         float fClosest = 3.402823466e+38f;
-        TESObjectREFR631* pkAlternate = 0;
+        TESObjectREFR* pkAlternate = 0;
         float fAlternateDistance = 3.402823466e+38f;
         float fAlternateOffset = 3.402823466e+38f;
         void* pvAlternateHit = 0;
@@ -1008,29 +839,29 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
         if (bHits)
         {
             g_iLine631 = 0xdae;
-            TESObjectREFR631* pkLast = 0;
-            TESObjectREFR631* pkRef = 0;
+            TESObjectREFR* pkLast = 0;
+            TESObjectREFR* pkRef = 0;
             Entity631* pkLastEntity = 0;
-            for (int i = 0; i < kQuery.GetHits()->GetSize(); i++)
+            for (int i = 0; i < kQuery.GetHits()->FUN_00726070(); i++)
             {
                 g_iLine631 = 0xdaf;
-                Hit631 kHit(kQuery.GetHits()->GetAt(i));
+                Hit631 kHit(*reinterpret_cast<Hit631*>(kQuery.GetHits()->GetEntryAt(i)));
                 if (kHit.m_pkCollidable)
                 {
                     g_iLine631 = 0xdb0;
-                    NiAVObject631* pkObject = FUN_004b5820(kHit.m_pkCollidable);
+                    NiAVObject* pkObject = FUN_004b5820(kHit.m_pkCollidable);
                     g_iLine631 = 0xdb1;
                     if (pkObject)
                         pkRef = FUN_0056f930(pkObject);
                     if (!pkRef || pkRef == g_pkPlayer631)
                         continue;
                     bool bHidden = false;
-                    NiAVObject631* pkWalk = pkObject;
-                    NiAVObject631* pkRoot = pkRef->Get3D();
+                    NiAVObject* pkWalk = pkObject;
+                    NiAVObject* pkRoot = reinterpret_cast<NiAVObject*>(pkRef->GetNiNode());
                     while (!bHidden && pkWalk && pkWalk != pkRoot)
                     {
-                        bHidden |= pkWalk->IsHidden();
-                        pkWalk = pkWalk->GetParent();
+                        bHidden |= pkWalk->FUN_00456610();
+                        pkWalk = reinterpret_cast<NiAVObject*>(pkWalk->GetParent());
                     }
                     if (bHidden)
                         continue;
@@ -1051,7 +882,7 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
                     }
                     break;
                     }
-                    if (pkRef->GetBaseForm() == g_pkSpecialBase631)
+                    if (reinterpret_cast<BaseForm631*>(pkRef->FUN_007af430()) == g_pkSpecialBase631)
                         bSolid = true;
                     if (pkEntity && pkEntity != pkLastEntity && bSolid)
                     {
@@ -1061,14 +892,14 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
                             iHits++;
                             RayInput631 kRay;
                             kRay.m_uiFilter = GetShape()->GetFilter().GetValue();
-                            Transform631 kXform(pkEntity->GetTransform());
-                            kRay.m_kFrom.SetTransformedInversePos(kXform, kFrom);
-                            kRay.m_kTo.SetTransformedInversePos(kXform, kTo);
+                            hkTransform kXform(pkEntity->GetTransform());
+                            kRay.m_kFrom.FUN_00c7f690(kXform, kFrom);
+                            kRay.m_kTo.FUN_00c7f690(kXform, kTo);
                             RayOutput631 kOut;
                             kOut.Reset();
                             Owner631* pkShape = kHit.m_pkCollidable->GetOwner();
                             pkShape->CastRay(kRay, kOut);
-                            if (kOut.HasHit().ContainsTrait())
+                            if (kOut.HasHit().operator bool())
                             {
                                 if (kOut.m_fHitFraction < fClosest)
                                 {
@@ -1081,10 +912,10 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
                     else
                     {
                         g_iLine631 = 0xdb2;
-                        if (pkLast != pkRef && pkRef->Get3D() && iTargets < *g_kMaxTargets631.GetInt())
+                        if (pkLast != pkRef && reinterpret_cast<NiAVObject*>(pkRef->GetNiNode()) && iTargets < *g_kMaxTargets631.GetInt())
                         {
                             iTargets++;
-                            FUN_004b2780(&kList, pkOrigin, pkDir, fImpulseRadiusSquared, pkRef->Get3D(), 0);
+                            FUN_004b2780(&kList, pkOrigin, pkDir, fImpulseRadiusSquared, reinterpret_cast<NiAVObject*>(pkRef->GetNiNode()), 0);
                         }
                     }
                     bool bValid = true;
@@ -1093,8 +924,8 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
                     case 30:
                         if (pkRef->IsActor())
                         {
-                            Process631* pkProcess = pkRef->GetProcess();
-                            Controller631* pkController = pkRef->GetController();
+                            Process631* pkProcess = reinterpret_cast<Process631*>(static_cast<Actor*>(pkRef)->GetProcess());
+                            Controller631* pkController = reinterpret_cast<Controller631*>(static_cast<Actor*>(pkRef)->FUN_009306d0());
                             if (pkProcess && pkController && pkController->GetMode() == 1)
                             {
                                 int iState = pkProcess->GetState();
@@ -1116,22 +947,22 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
                     }
                     if (bValid && bCheck && pkCaster)
                     {
-                        hkVector4_631 kIntersectionOffset;
-                        kIntersectionOffset.SetSub(kHit.GetPosition(), kFrom);
-                        hkVector4_631 kWorldPosition;
-                        kWorldPosition.SetSub(kTo, kFrom);
-                        kWorldPosition.Normalize();
-                        kWorldPosition.Mul(kWorldPosition.Dot(kIntersectionOffset));
-                        hkVector4_631 kPerp;
-                        kPerp.SetSub(kIntersectionOffset, kWorldPosition);
-                        float fProjectionAlongAim = FUN_004587d0(kPerp.Length().GetReal());
+                        hkVector4 kIntersectionOffset;
+                        kIntersectionOffset.setSub4(kHit.GetPosition(), kFrom);
+                        hkVector4 kWorldPosition;
+                        kWorldPosition.setSub4(kTo, kFrom);
+                        kWorldPosition.FUN_0062aea0();
+                        kWorldPosition.FUN_00627920(kWorldPosition.dot3(kIntersectionOffset));
+                        hkVector4 kPerp;
+                        kPerp.setSub4(kIntersectionOffset, kWorldPosition);
+                        float fProjectionAlongAim = FUN_004587d0(kPerp.length3().getReal());
                         if (fProjectionAlongAim < fAlternateOffset)
                         {
                             if (iRays < *g_kMaxRays631.GetInt())
                             {
                                 if (pkAlternate && pkAlternate == pkRef)
                                 {
-                                    fAlternateDistance = FUN_004587d0(kIntersectionOffset.Length().GetReal());
+                                    fAlternateDistance = FUN_004587d0(kIntersectionOffset.length3().getReal());
                                     fAlternateOffset = fProjectionAlongAim;
                                 }
                                 else
@@ -1148,16 +979,16 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
                                     {
                                         if (kRayHits.GetHits()->GetSize() > 0)
                                         {
-                                            NiAVObject631* pkHitObject = FUN_004b5820(
+                                            NiAVObject* pkHitObject = FUN_004b5820(
                                                 (Collidable631*)kRayHits.GetHits()->GetAt(0)->m_pvRootCollidable);
                                             if (pkHitObject)
                                             {
-                                                TESObjectREFR631* pkHitRef = FUN_0056f930(pkHitObject);
+                                                TESObjectREFR* pkHitRef = FUN_0056f930(pkHitObject);
                                                 if (pkHitRef && pkHitRef == pkRef)
                                                 {
                                                     pkAlternate = pkRef;
                                                     fAlternateDistance =
-                                                        FUN_004587d0(kIntersectionOffset.Length().GetReal());
+                                                        FUN_004587d0(kIntersectionOffset.length3().getReal());
                                                     fAlternateOffset = fProjectionAlongAim;
                                                     pvAlternateHit = FUN_004b5a80(pkEntity);
                                                 }
@@ -1166,7 +997,7 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
                                         else
                                         {
                                             pkAlternate = pkRef;
-                                            fAlternateDistance = FUN_004587d0(kIntersectionOffset.Length().GetReal());
+                                            fAlternateDistance = FUN_004587d0(kIntersectionOffset.length3().getReal());
                                             fAlternateOffset = fProjectionAlongAim;
                                             pvAlternateHit = FUN_004b5a80(pkEntity);
                                         }
@@ -1206,10 +1037,10 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
         if (bCheck)
         {
             bool bUseAlternate = true;
-            if (pkResult && pkResult->GetBaseForm())
+            if (pkResult && reinterpret_cast<BaseForm631*>(pkResult->FUN_007af430()))
             {
                 bUseAlternate = false;
-                switch (pkResult->GetBaseForm()->GetFormType())
+                switch (reinterpret_cast<BaseForm631*>(pkResult->FUN_007af430())->GetFormType())
                 {
                 case 0x20:
                 case 0x21:
@@ -1217,7 +1048,7 @@ TESObjectREFR631* ViewCaster631::FUN_00631d60(const Point631* pkOrigin, const Po
                     bUseAlternate = true;
                     break;
                 case 0x1e:
-                    if (!pkResult->GetBaseForm()->IsPlayable())
+                    if (!reinterpret_cast<BaseForm631*>(pkResult->FUN_007af430())->IsPlayable())
                         bUseAlternate = true;
                     break;
                 }

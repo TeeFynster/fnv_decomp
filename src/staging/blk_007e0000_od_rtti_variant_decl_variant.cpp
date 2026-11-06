@@ -1,19 +1,30 @@
+#include "../../include/BSStringT.h"
+#include "../../include/NiColorA.h"
 
 // src/staging/blk_007e0000_od_rtti_variant_decl_variant.cpp - declaration variant unit created 2026-10-26 by decl_variants.py for paused function 0x007e6320: the skeleton of src/staging/blk_007e0000_od_rtti_variant.cpp
-// with declarations corrected to what the original code does (unit: struct Menu { virtual ~Menu(); // the original class i -> struct Menu { virtual ~Menu(); // the original class i; unit: struct Tile { virtual ~Tile(); // the original class i -> struct Menu; struct Tile { virtual ~Tile(); // the ori; unit: struct RemoveInterface { void FUN_00715860(RemoveTile*). Move the function to its real unit once
-// that unit declares it this way.
+// Shared declarations now supply the corrected polymorphic bases; no private base definition remains.
 
 // src/staging/blk_007e0000_od_rtti_variant.cpp - RTTI variant unit created 2026-10-24 by rtti_variants.py for paused functions whose original code needs
 // polymorphic classes (Menu, Tile). The skeleton of src/staging/blk_007e0000_od.cpp with those classes made polymorphic; move the functions to
 // their real unit once its classes are.
 // src/staging/blk_007e0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiPointer.h"
+#include "../../include/ShadowSceneNode.h"
+#include "../../include/Tile.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/GO.h"
+#include "../../include/GameTimerRecord.h"
+#include "../../include/NavMeshPtr.h"
+#include "../../include/Menu.h"
+#include "../../include/TextEditMenu.h"
+#include "../../include/TextEditState.h"
+#include "../../include/RaceSexMenu.h"
+#include "../../include/TileMenu.h"
 const char* __cdecl FUN_007ab810();
-struct FUN_007e6760_cls
-{
-    bool __thiscall FUN_007e6760();
-};
 struct BSAudio_
 {
     void FUN_00ad8510(int, int);
@@ -29,11 +40,6 @@ extern float DAT_012007d0;
 extern float DAT_012007d4;
 extern char DAT_011ae5d4;
 void __cdecl FUN_007f7a50(float a, float b);
-struct FOPipboyManager
-{
-    void InitializeMenuLight();
-    void FUN_007fa200();
-};
 struct Flt
 {
     operator unsigned int();
@@ -42,45 +48,20 @@ struct FUN_007fa970_Class
 {
     unsigned int FUN_007fa970();
 };
-struct GO
-{
-    void* operator=(void*);
-};
 struct FUN_007fd620_Class
 {
     char _0[0x24];
     GO m_go;
     void SetGo(void* p);
 };
-struct RaceSexMenu
-{
-    void OnRaceSelected(void*);
-    void FUN_007fe910(void* apList);
-};
-struct NavMeshPtr
-{
-    void* FUN_00458b50();
-};
-struct BSStr
-{
-    bool Set(const char*, unsigned int);
-};
-extern BSStr g_011daed8;
+
+extern ::BSStringT<char> g_011daed8;
 void __cdecl FUN_007e65b0();
-struct FUN_007e66a0_cls
-{
-    char _0[0x28];
-    void __thiscall FUN_007e66a0(int a, int b);
-};
 void __cdecl DestroyList(void*);
 struct FUN_007f69d0_Class
 {
     void __thiscall DestroyList();
     void* __thiscall FUN_007f69d0(unsigned int flags);
-};
-struct GameTimerRecord
-{
-    unsigned int GetTime() const;
 };
 extern GameTimerRecord g_timeGlobal;
 struct FUN_007f7880_Class
@@ -138,40 +119,6 @@ struct FUN_007eb8d0_Class
     char _0[0x28];
     bool __thiscall HasAllSlotsSet(int* p);
 };
-struct Menu;
-struct Tile
-{
-    virtual ~Tile();  // the original class is polymorphic (rtti_variants.py)
-    void __thiscall Set(int, int);
-    Tile* FUN_00a01b00();
-    Menu* FUN_00a03c90();
-    float FUN_00a011b0(int id);
-    void SetFloat(int id, float value, bool a);
-    void FUN_00a01350(int id, const char* text, bool a);
-    const char* FUN_00a011f0(int id);
-};
-struct Menu
-{
-    virtual ~Menu();  // the original class is polymorphic (rtti_variants.py)
-    virtual void M01();
-    virtual void M02();
-    virtual void M03();
-    virtual void M04();
-    virtual void M05();
-    virtual void M06();
-    virtual void M07();
-    virtual void M08();
-    virtual void M09();
-    virtual void M10();
-    virtual void M11();
-    virtual void M12();
-    virtual int GetID();
-    char menuData[0x24];
-    void FUN_00a1dc70(class TileMenu* tile, bool a);
-    void FUN_00a1dc20(bool a);
-    int FUN_00726070();
-    void __thiscall LoadMenuData();
-};
 struct SimpleList
 {
     SimpleList* __thiscall GetNext();
@@ -187,11 +134,6 @@ struct FUN_007f6a00_Class
     char _0[8];
     ListX l;
     void __thiscall DestroyList();
-};
-struct NiPoint2
-{
-    float x;
-    float y;
 };
 extern NiPoint2 DAT_011f4980;
 struct FUN_007f78f0_Class
@@ -378,238 +320,18 @@ class FUN_007f7790_cls
     B7F7790Object* m_pPointer;
 };
 class NiColor;
-struct ImageSpaceEffectParam
-{
-    float unk00;
-    float unk04;
-    float unk08;
-    float unk0C;
-    ImageSpaceEffectParam(float a, float b, float c, float d);
-};
 struct Dummy_00718c90;
 struct SystemColorManager
 {
     bool GetColor(int id, NiColor& out);
 };
 Dummy_00718c90* __cdecl FUN_00718b60();
-struct PipboyStub : FOPipboyManager
-{
-    void SetQuad(ImageSpaceEffectParam* p);
-    void FUN_007f7fb0(ImageSpaceEffectParam* p);
-    void FUN_007f7f40();
-};
-struct FUN_007f7fb0_Value
-{
-    unsigned int field00;
-    unsigned int field04;
-    unsigned int field08;
-    unsigned int field0C;
-};
-struct FUN_007f7fb0_Class
-{
-    unsigned char unk00[0xC0];
-    FUN_007f7fb0_Value unkC0;
-
-    void __thiscall FUN_007f7fb0(const FUN_007f7fb0_Value* value);
-};
-struct Quad4
-{
-    unsigned int a;
-    unsigned int b;
-    unsigned int c;
-    unsigned int d;
-};
-struct FUN_007f7fe0_cls
-{
-    unsigned char _0[0xa8];
-    Quad4 m_q;
-    void __thiscall SetQuad(const Quad4* src);
-};
-struct SoundPlaybackHandle
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    SoundPlaybackHandle();
-    SoundPlaybackHandle& operator=(const SoundPlaybackHandle&);
-    ~SoundPlaybackHandle();
-};
-struct BSSoundHandleEx
-{
-    SoundPlaybackHandle base;
-    ~BSSoundHandleEx();
-    bool Play(bool);
-};
-struct BSAudio
-{
-    static BSAudio* GetSingleton();
-    BSSoundHandleEx GetSoundHandleByEditorID(const char*, unsigned int);
-};
 struct GlobalObject_0044f440
 {
     float* Float();
 };
 extern GlobalObject_0044f440 g_011db288;
 extern bool g_burstSoundEnabled;
-struct FUN_007fa0f0_Class
-{
-
-    unsigned int unk000;
-
-    unsigned int unk004;
-
-    unsigned int unk008;
-
-    unsigned int unk00C;
-
-    unsigned int unk010;
-
-    unsigned int unk014;
-
-    unsigned int unk018;
-
-    unsigned int unk01C;
-
-    unsigned int unk020;
-
-    unsigned int unk024;
-
-    unsigned int unk028;
-
-    unsigned int unk02C;
-
-    unsigned int unk030;
-
-    unsigned int unk034;
-
-    unsigned int unk038;
-
-    unsigned int unk03C;
-
-    unsigned int unk040;
-
-    unsigned int unk044;
-
-    unsigned int unk048;
-
-    unsigned int unk04C;
-
-    unsigned int unk050;
-
-    unsigned int unk054;
-
-    unsigned int unk058;
-
-    unsigned int unk05C;
-
-    unsigned int unk060;
-
-    unsigned int unk064;
-
-    unsigned int unk068;
-
-    unsigned int unk06C;
-
-    unsigned int unk070;
-
-    unsigned int unk074;
-
-    unsigned int unk078;
-
-    unsigned int unk07C;
-
-    unsigned int unk080;
-
-    unsigned int unk084;
-
-    unsigned int unk088;
-
-    unsigned int unk08C;
-
-    unsigned int unk090;
-
-    unsigned int unk094;
-
-    unsigned int unk098;
-
-    unsigned int unk09C;
-
-    unsigned int unk0A0;
-
-    unsigned int unk0A4;
-
-    unsigned int unk0A8;
-
-    unsigned int unk0AC;
-
-    unsigned int unk0B0;
-
-    unsigned int unk0B4;
-
-    unsigned int unk0B8;
-
-    unsigned int unk0BC;
-
-    unsigned int unk0C0;
-
-    unsigned int unk0C4;
-
-    unsigned int unk0C8;
-
-    unsigned int unk0CC;
-
-    unsigned int unk0D0;
-
-    unsigned int unk0D4;
-
-    unsigned int unk0D8;
-
-    unsigned int unk0DC;
-
-    unsigned int unk0E0;
-
-    unsigned int unk0E4;
-
-    unsigned int unk0E8;
-
-    unsigned int unk0EC;
-
-    unsigned int unk0F0;
-
-    unsigned int unk0F4;
-
-    unsigned int unk0F8;
-
-    unsigned int unk0FC;
-
-    unsigned int unk100;
-
-    unsigned int unk104;
-
-    unsigned int unk108;
-
-    unsigned int unk10C;
-
-    unsigned int unk110;
-
-    unsigned int unk114;
-
-    unsigned int unk118;
-
-    unsigned int unk11C;
-
-    float unk120;
-
-    float unk124;
-
-    float unk128;
-
-    float unk12c;
-
-    float values[1];
-
-    void __thiscall SetValue(int index, bool play);
-};
 struct FUN_007fb730_Class
 {
     float x;
@@ -618,29 +340,7 @@ struct FUN_007fb730_Class
 
     FUN_007fb730_Class* __thiscall Add(FUN_007fb730_Class* output, const FUN_007fb730_Class* input);
 };
-class NiBound7FD
-{
-  public:
-    float GetRadius() const;
-};
-class NiAVObject7FD
-{
-  public:
-    const NiBound7FD& GetBoundingVolume() const;
-};
-template <class T> class NiPointer7FD
-{
-  public:
-    T* Get() const;
-
-    T* m_pObject;
-};
-class ShadowSceneNode7FD
-{
-  public:
-    void GetShadowSceneLight(NiAVObject7FD* pkLight, float fRadius);
-};
-ShadowSceneNode7FD* __cdecl FUN_00450b80(unsigned int uiIndex);
+ShadowSceneNode* __cdecl FUN_00450b80(unsigned int uiIndex);
 class Light7FD
 {
   public:
@@ -654,10 +354,9 @@ class Light7FD
     int unk0A0, unk0A4, unk0A8, unk0AC, unk0B0, unk0B4, unk0B8, unk0BC;
     int unk0C0, unk0C4, unk0C8, unk0CC, unk0D0, unk0D4, unk0D8, unk0DC;
     int unk0E0, unk0E4, unk0E8, unk0EC, unk0F0, unk0F4, unk0F8;
-    NiPointer7FD<NiAVObject7FD> m_spNode;
-    NiPointer7FD<NiAVObject7FD> m_spLight;
+    NiPointer<NiAVObject> m_spNode;
+    NiPointer<NiAVObject> m_spLight;
 };
-struct NiNode;
 template <class T> class NiPtrS
 {
   public:
@@ -744,25 +443,12 @@ struct ValueX
     void SetFloat(int, float);
     void Finish(int);
 };
-struct MenuX
-{
-    struct TileX* Create(struct TileX*, const char*, int);
-};
-struct TileX
-{
-    MenuX* GetMenu();
-    void* GetValue(int);
-    void Set(int, int);
-    void Set(int, const char*, bool);
-    float GetFloat(int);
-    ValueX* GetAction(int);
-};
 struct Entry
 {
-    TileX* tile;
+    Tile* tile;
     int data;
     int extra;
-    Entry(TileX*, int*);
+    Entry(Tile*, int*);
 };
 struct Entries
 {
@@ -776,17 +462,17 @@ struct ListOwner
 {
     int unk00;
     Entries entries;
-    TileX* parent;
+    Tile* parent;
     int unk10;
     int unk14;
     const char* templateName;
     unsigned short count;
     bool Test(unsigned int);
     void Refresh();
-    void Select(TileX*);
+    void Select(Tile*);
     void Update();
     int Mode();
-    TileX* FUN_007e0e70(int data, const char* text, void* compare, const char* name);
+    Tile* FUN_007e0e70(int data, const char* text, void* compare, const char* name);
 };
 struct WXObject;
 template <class T> struct WXPointer
@@ -1061,13 +747,6 @@ struct Ref
     Ref& operator=(void*);
     operator Accum*() const;
 };
-struct Pair
-{
-    int value;
-    Ref node;
-    Pair();
-    ~Pair();
-};
 struct FloatSetting
 {
     float* Float();
@@ -1085,103 +764,11 @@ extern IntSetting g_011db75c;
 extern StringSetting g_011db744;
 extern "C" int __cdecl rand();
 void __cdecl LoadTexture(const char*, bool, Ref&, bool, bool);
-struct FUN_007ffec0
-{
-    int unk000;
-    Pair first;
-    int unk00c;
-    int unk010;
-    Pair entries[32];
-    Ref unk114;
-    bool unk118;
-    bool active[16];
-    bool unk129;
-    short unk12a;
-    int values[16];
-    int states[16];
-    bool flags[16];
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    int unk280;
-    bool unk284;
-    char unk285;
-    short unk286;
-    int unk288;
-    float unk28c;
-    float unk290;
-    float unk294;
-    bool unk298;
-    char unk299;
-    short unk29a;
-    int unk29c;
-    int unk2a0;
-    int unk2a4;
-    int unk2a8;
-    float unk2ac;
-    float unk2b0;
-    bool unk2b4;
-    bool unk2b5;
-    short unk2b6;
-    int unk2b8;
-    int unk2bc;
-    float unk2c0;
-    Ref unk2c4;
-    int unk2c8;
-    Ref unk2cc;
-    FUN_007ffec0();
-};
 struct RemoveTile
 {
     virtual void* Destroy(unsigned int);
     float FUN_00a011b0(int);
-    void SetFloat(int, float, bool);
+    void FUN_00a012d0(int, float, bool);
 };
 struct RemoveOwned
 {
@@ -1223,41 +810,16 @@ struct RemoveView : RemoveBase, RemoveNode
     bool RemoveNodeFromList(RemoveNode*, RemoveNode*);
 };
 
-class TileMenu;
-class TextEditMenu;
 
-class Menu;
 
-struct TextEditState
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    void FUN_00716aa0(int maxLength);
-    void SetBothStrings(const char* text);
-    void FUN_00717010(bool enabled);
-    void FUN_007e6580(bool foreground);
-};
 
 struct TextEditSetting
 {
     const char* FUN_00403df0();
 };
 
-class TileMenu : public Tile
-{
-  public:
-    virtual ~TileMenu();
-};
 
-class TextEditMenu : public Menu
-{
-  public:
-    Tile* input;
-    Tile* accept;
-    Tile* title;
-    TextEditState editor;
-    void(__cdecl* callback)(const char*);
-    void FUN_007e6700();
-};
+
 
 Menu* __cdecl FUN_00a09030(int menuID);
 RemoveInterface* __cdecl FUN_004b7210();
@@ -1276,12 +838,12 @@ bool __cdecl FUN_007e6320(const char* titleText, const char* initialText, void(_
     float depthA = FUN_00a01530();
     Tile* root2 = interfaceManager->FUN_00586150("Data\\Menus\\Dialog\\TextEditMenu.xml")->FUN_00a01b00();
     Menu* menu = root2->FUN_00a03c90();
-    if (menu && menu->GetID() == FUN_007e65a0())
+    if (menu && menu->GetClass() == FUN_007e65a0())
     {
         menu->FUN_00a1dc70(dynamic_cast<TileMenu*>(root2), false);
         g_011daec4 = dynamic_cast<TextEditMenu*>(menu);
         if (root2->FUN_00a011b0(0xfa7) == 6006.0 || root2->FUN_00a011b0(0xfa7) == 102.0)
-            root2->SetFloat(0xfad, depthA, true);
+            root2->FUN_00a012d0(0xfad, depthA, true);
 
         g_011daec4->title->FUN_00a01350(0xfc4, titleText, true);
         g_011daec4->input->FUN_00a01350(0xfc4, initialText, true);

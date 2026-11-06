@@ -1,25 +1,15 @@
-// fallout/ai/patrolpackage.cpp: PatrolActorPackageData, DelStandIn, PatrolData, PatrolData2 (13 functions)
-
-class TESObjectREFR;
-class Actor;
-class TESPackage;
-class TESPatrolPackageData;
-class NiPoint3;
-class BGSLoadFormBuffer;
-class TESForm;
-class TESObjectWEAP;
-class NavMeshInfo;
-
-class BSSimpleArray_TESObjectWEAP___1024_
-{
-  public:
-    void SetSize(unsigned int, bool);
-};
-class BSSimpleArray_NavMeshInfo___1024_
-{
-  public:
-    NavMeshInfo*& GetAt(int);
-};
+#include "../../../include/BGSLoadFormBuffer.h"
+#include "../../../include/BGSSaveFormBuffer.h"
+#include "../../../include/BSSimpleArray.h"
+#include "../../../include/BGSLoadGameBuffer.h"
+#include "../../../include/BGSSaveLoadGame.h"
+#include "../../../include/EscortActorPackageData.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/PatrolActorPackageData.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESPackage.h"
+// fallout/ai/patrolpackage.cpp: patrol package data (13 functions)
 
 class LocationDescriptor
 {
@@ -28,13 +18,6 @@ class LocationDescriptor
     TESObjectREFR* GetLocationReference();
 };
 
-class TESObjectREFR
-{
-  public:
-    virtual ~TESObjectREFR();  // polymorphic: its RTTI is used (rtti_fix.py)
-  public:
-    TESObjectREFR* GetLinkedRef();
-};
 
 class ArchiveManager
 {
@@ -42,62 +25,20 @@ class ArchiveManager
     void CopyArchiveName(char*, unsigned int);
 };
 
-class TESPackage
-{
-  public:
-    virtual ~TESPackage();  // polymorphic: its RTTI is used (rtti_fix.py)
-  public:
-    const TESPatrolPackageData* GetPackagePatrolData();
-};
 
-class BGSLoadGameBuffer
+struct PatrolPackage
 {
-  public:
-    void ReadDataBlock(void*, unsigned int);
-    unsigned int ReadFormIdentifier();
-};
-
-class BGSLoadFormBuffer
-{
-  public:
-    bool ReadFormIdentifier(void*);
-    int ReadElementCount();
-};
-
-class TESForm
-{
-  public:
-    virtual ~TESForm();  // polymorphic: its RTTI is used (rtti_fix.py)
-  public:
-    static TESForm* GetFormByID(unsigned int);
-};
-
-class PatrolActorPackageData
-{
-  public:
-    void* vtable;
-    bool flag;
-
-    bool IsPatrolling();
-    TESObjectREFR* GetPatrolReference(Actor*, TESPackage*);
-    bool Init(Actor*, TESPackage*);
-    void SetPatrolPosition(const NiPoint3&);
-    void LoadGame(BGSLoadFormBuffer*);
+    bool FUN_004f1540();
 };
 
 // @fnv 0x004f1540
-bool PatrolActorPackageData::IsPatrolling()
+bool PatrolPackage::FUN_004f1540()
 {
-    return flag;
+    return *reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 4);
 }
 
 extern int DAT_010933c8;
 
-class EscortActorPackageData
-{
-  public:
-    void FUN_0067d920();
-};
 
 // Calls FUN_0067d920, installs the vtable at DAT_010933c8, and zeroes fields at offsets 0x4 through 0x10 before returning thisPtr.
 // @fnv 0x009f27a0
@@ -112,113 +53,27 @@ void* __fastcall InitEscortPackageData(void* thisPtr)
     return thisPtr;
 }
 
-struct FUN_009f2a30_shell : public PatrolActorPackageData
-{
-    int FUN_009f2a30();
-};
 
 // @fnv 0x009f2a30
-int FUN_009f2a30_shell::FUN_009f2a30()
+PTYPE PatrolActorPackageData::GetPackageType()
 {
-    return 0xd;
+    return static_cast<PTYPE>(0xd);
 }
-
-struct ActiveEffect;
-struct Actor;
-struct ActorMover;
-struct ActorValueOwner;
-struct AlchemyItem;
-struct Animation;
-struct BGSImpactDataSet;
-struct BGSPerk;
-struct BGSPerkEntry;
-struct BGSSaveFormBuffer;
-struct BGSTextureSet;
-struct BSAnimGroupSequence;
-struct BSAnimNote;
-struct BSFaceGenAnimationData;
-struct SoundPlaybackHandle;
-struct BaseProcess;
-struct BipedAnim;
-struct CombatGroupCollection;
-struct CombatController;
-struct ActorCombatGroup;
-struct ContinuousBeamProjectile;
-struct Crime;
-struct DialogueResponse;
-struct DetectionParameters;
-struct EffectItem;
-struct ExtraDataList;
-struct FurnitureMark;
-struct BooleanFloatQuery;
-struct IDebugText;
-struct InventoryStackRecord;
-struct MagicCaster;
-struct MagicItem;
-struct MagicEffectCollection;
-struct MagicProjectile;
-struct MagicTarget;
-struct MobileObject;
-struct NiAVObject;
-struct NiNode;
-struct NiPoint3;
-struct PathingAvoidNodeArray;
-struct PathingLocation;
-struct PathingRequest;
-struct Projectile;
-struct QueuedFile;
-struct SpellItem;
-struct TESActorBase;
-struct TESBoundObject;
-struct TESClass;
-struct TESCombatStyle;
-struct TESFaction;
-struct TESIdleForm;
-struct TESObject;
-struct TESObjectBOOK;
-struct TESObjectCELL;
-struct TESObjectWEAP;
-struct TESRace;
-struct TESSkill;
-struct TESTopic;
-struct TESTopicInfo;
-struct TESWorldSpace;
-struct TargetEntry;
-struct TrapEntry;
-struct TrespassPackage;
-struct WeaponObject;
-struct bhkCharacterController;
-struct bhkRagdollController;
-struct bhkRagdollPenetrationUtil;
-struct bhkRigidBody;
-struct hkpRigidBody;
-struct blob4
-{
-    char b[4];
-};
-struct blob12
-{
-    char b[12];
-};
-struct FUN_009f2ba0_shell : public PatrolActorPackageData
-{
-    bool InitPatrolPackage(Actor*, TESPackage*);
-};
 
 // Stores the actor and package, resets counters, and if the package is valid and has patrol data, initializes the patrol from the actor's position.
 // @fnv 0x009f2ba0
-bool FUN_009f2ba0_shell::InitPatrolPackage(Actor* apActor, TESPackage* apPackage)
+bool PatrolActorPackageData::Init(Actor* apActor, TESPackage* apPackage)
 {
-    *(Actor**)((char*)this + 0x10) = apActor;
-    *(TESPackage**)((char*)this + 0x14) = apPackage;
-    *(const TESPatrolPackageData**)((char*)this + 0x18) = apPackage->GetPackagePatrolData();
-    *(int*)((char*)this + 0x34) = 0;
-    *(bool*)((char*)this + 0x0c) = true;
-    *(int*)((char*)this + 0x30) = 0;
+    pActor = apActor;
+    pPackage = apPackage;
+    m_pEscortPackageData = apPackage->GetPackagePatrolData();
+    m_uiSecondValueAfterReferenceFlag = 0;
+    m_bPatrolFlag = true;
+    m_uiValueAfterReferenceFlag = 0;
     bool bvalid = (((ArchiveManager*)this)->*(bool(ArchiveManager::*)()) & ArchiveManager::CopyArchiveName)();
     if (bvalid)
     {
-        if ((*(PatrolActorPackageData**)((char*)this + 0x18))->IsPatrolling())
+        if (((PatrolPackage*)m_pEscortPackageData)->FUN_004f1540())
         {
             SetPatrolPosition((*(const NiPoint3&(__thiscall**)(Actor*))(*(int*)apActor + 0x1f4))(apActor));
         }
@@ -234,12 +89,12 @@ class BGSMessageInitAccess
 
 // Returns the reference from the pack's icon form if it resolves to one, otherwise falls back to the actor's linked reference.
 // @fnv 0x009f2d40
-TESObjectREFR* __cdecl FUN_009f2d40(TESObjectREFR* apActor, BGSMessageInitAccess* apPack)
+TESObjectREFR* __cdecl PatrolActorPackageData::GetPatrolReference(Actor* apActor, TESPackage* apPack)
 {
     LocationDescriptor* ploc;
     TESObjectREFR* pinitialReference = 0;
 
-    ploc = reinterpret_cast<LocationDescriptor*>(apPack->GetIconFormID());
+    ploc = reinterpret_cast<LocationDescriptor*>(((BGSMessageInitAccess*)apPack)->GetIconFormID());
     if (ploc)
     {
         TESObjectREFR* plocRef = ploc->GetLocationReference();
@@ -251,7 +106,7 @@ TESObjectREFR* __cdecl FUN_009f2d40(TESObjectREFR* apActor, BGSMessageInitAccess
 
     if (!pinitialReference)
     {
-        TESObjectREFR* plinkedRef = apActor->GetLinkedRef();
+        TESObjectREFR* plinkedRef = ((TESObjectREFR*)apActor)->GetLinkedRef();
         if (plinkedRef)
         {
             pinitialReference = plinkedRef;
@@ -262,123 +117,6 @@ TESObjectREFR* __cdecl FUN_009f2d40(TESObjectREFR* apActor, BGSMessageInitAccess
 }
 
 namespace fnv_009f30d0 {
-struct Actor;
-struct ActorCause;
-struct ActorPackageData;
-struct AlchemyItem;
-struct Animation;
-struct TwoIntegerValues;
-struct MediaLocation;
-struct BGSAcousticSpace;
-struct BGSEncounterZone;
-struct BGSMusicType;
-struct BGSPrimitive;
-struct BGSSaveFormBuffer;
-struct BGSTalkingActivator;
-struct BSExtraData;
-struct BSMultiBound;
-struct BSMultiBoundRoom;
-struct BSOcclusionPlane;
-struct BSPortal;
-struct SoundPlaybackHandle;
-struct BaseExtraList;
-struct BipedAnim;
-struct CellMopp;
-struct CollisionData;
-struct Crime;
-struct TeleportableReference;
-struct ExtraAction;
-struct ExtraActorCause;
-struct ExtraAmmo;
-struct ExtraAnim;
-struct ExtraAshPileReference;
-struct ExtraAudioBuoyMarker;
-struct ExtraAudioMarker;
-struct ExtraCannotWearData;
-struct ExtraDataList;
-struct ExtraDismemberedLimbs;
-struct ExtraFactionChanges;
-struct ExtraFollower;
-struct ExtraFollowerSwimBreadcrumbs;
-struct ExtraLeveledItem;
-struct ExtraLight;
-struct ExtraLock;
-struct ExtraMapMarker;
-struct ExtraNavMeshPortal;
-struct ExtraRefractionProperty;
-struct ExtraSayToTopicInfo;
-struct ExtraSayTopicInfoOnceADay;
-struct ExtraStartingPosition;
-struct ExtraTalkingActor;
-struct ExtraTeleport;
-struct PositionRotation;
-struct ImpactSwap;
-struct InventoryChanges;
-struct MapMarkerData;
-struct MenuTopic;
-struct Point3Offset;
-struct NiNode;
-struct NiPoint3;
-struct NiRenderedTexture;
-struct PatrolReferenceData;
-struct PatrolRefData;
-struct LinkedReferencePair;
-struct RadioReferenceData;
-struct ReferenceLightData;
-struct LockExtraData;
-struct ReferenceFloatEntry;
-struct RagDollData;
-struct PointerFlagNode;
-struct TopicInfoVisitRecord;
-struct Script;
-struct ScriptLocals;
-struct SeenData;
-struct TESActorBase;
-struct TESAmmo;
-struct TESClimate;
-struct TESCombatStyle;
-struct TESFaction;
-struct TESFile;
-struct TESGlobal;
-struct TESImageSpace;
-struct TESModel;
-struct TESNPC;
-struct TESObject;
-struct TESObjectCELL;
-struct TESObjectLAND;
-struct TESRegionList;
-struct TESTopic;
-struct TESTopicInfo;
-struct TESWaterForm;
-struct TESWorldSpace;
-struct TrespassPackage;
-struct WorldLocation;
-struct WaterZone;
-struct _D3DLOCKED_RECT;
-struct bhkWorld;
-struct blob8
-{
-    char b[8];
-};
-struct blob12
-{
-    char b[12];
-};
-struct FUN_009f30d0_shell : public PatrolActorPackageData
-{
-    bool SetPatrolRefIndex(unsigned int);
-};
-
-struct NavMeshEdgeSegment;
-template <class T, int N> struct BSSimpleArray
-{
-    bool FUN_0076b610() const;
-    unsigned int& GetAt(unsigned int);
-};
-struct ArrFlagsHelper
-{
-    unsigned int GetFlags();
-};
 struct RefExtraHelper
 {
     const ExtraDataList* GetExtra() const;
@@ -394,29 +132,35 @@ struct PatrolHelper
 };
 void __cdecl ClampInt(unsigned int*, int, int);
 
+}  // namespace fnv_009f30d0
+using fnv_009f30d0::RefExtraHelper;
+using fnv_009f30d0::ExtraHelper;
+using fnv_009f30d0::PatrolHelper;
+using fnv_009f30d0::ClampInt;
+
 // @fnv 0x009f30d0
-bool FUN_009f30d0_shell::SetPatrolRefIndex(unsigned int aiRefIndex)
+bool PatrolActorPackageData::SetPatrolRefIndex(unsigned int aiRefIndex)
 {
-    if (((BSSimpleArray<NavMeshEdgeSegment, 1024>*)((char*)this + 0x1c))->FUN_0076b610() ||
-        !*(unsigned char*)((char*)this + 0x2c))
+    if (References.FUN_0076b610() ||
+        !m_bReferenceFlag)
     {
-        *(unsigned int*)((char*)this + 0x34) = aiRefIndex;
+        m_uiSecondValueAfterReferenceFlag = aiRefIndex;
         return true;
     }
     unsigned int aiclampedRefIndex = aiRefIndex;
-    int isize = ((ArrFlagsHelper*)((char*)this + 0x1c))->GetFlags() - 1;
+    int isize = References.GetSize() - 1;
     ClampInt(&aiclampedRefIndex, 0, isize);
     bool bsuccess = true;
     TESObjectREFR* pnewRef =
-        (TESObjectREFR*)((BSSimpleArray<unsigned int, 1024>*)((char*)this + 0x1c))->GetAt(aiclampedRefIndex);
+        (TESObjectREFR*)References.GetAt(aiclampedRefIndex);
     ExtraDataList* pnewExtra = pnewRef ? (ExtraDataList*)((RefExtraHelper*)pnewRef)->GetExtra() : 0;
     if (pnewExtra)
     {
-        if (((ExtraHelper*)pnewExtra)->FUN_0042f3d0(*(void**)((char*)this + 0x10)))
+        if (((ExtraHelper*)pnewExtra)->FUN_0042f3d0(pActor))
         {
             ((PatrolHelper*)this)->FUN_009f2b30();
-            ((ExtraHelper*)pnewExtra)->FUN_0042f300(*(void**)((char*)this + 0x10));
-            *(unsigned int*)((char*)this + 0x34) = aiclampedRefIndex;
+            ((ExtraHelper*)pnewExtra)->FUN_0042f300(pActor);
+            m_uiSecondValueAfterReferenceFlag = aiclampedRefIndex;
         }
         else
         {
@@ -425,35 +169,14 @@ bool FUN_009f30d0_shell::SetPatrolRefIndex(unsigned int aiRefIndex)
     }
     return bsuccess;
 }
-}  // namespace fnv_009f30d0
 
-struct FUN_009f3390_shell : public PatrolActorPackageData
-{
-    TESObjectREFR* FUN_009f3390();
-};
-
-template <class T, unsigned int N> class BSSimpleArray;
-class NavMeshEdgeSegment;
-
-template <> class BSSimpleArray<NavMeshEdgeSegment, 1024>
-{
-  public:
-    bool FUN_0076b610() const;
-};
-
-template <> class BSSimpleArray<unsigned int, 1024>
-{
-  public:
-    unsigned int& GetAt(unsigned int);
-};
 
 // @fnv 0x009f3390
-TESObjectREFR* FUN_009f3390_shell::FUN_009f3390()
+TESObjectREFR* PatrolActorPackageData::GetCurrentPatrolReference()
 {
-    if (!((BSSimpleArray<NavMeshEdgeSegment, 1024>*)((char*)this + 0x1c))->FUN_0076b610())
+    if (!References.FUN_0076b610())
     {
-        return (TESObjectREFR*)((BSSimpleArray<unsigned int, 1024>*)((char*)this + 0x1c))
-            ->GetAt(*(unsigned int*)((char*)this + 0x34));
+        return References.GetAt(m_uiSecondValueAfterReferenceFlag);
     }
     else
     {
@@ -461,106 +184,46 @@ TESObjectREFR* FUN_009f3390_shell::FUN_009f3390()
     }
 }
 
-void __cdecl Deallocate(void*);
-namespace p07 {
-struct DtorStandIn
-{
-    void FUN_0083dec0();
-};
-struct DelStandIn
-{
-    void* FUN_009f2a40(unsigned int flags);
-};
-// Runs the destructor, then frees this object when flags has bit 0 set, and returns this.
-// @fnv 0x009f2a40
-void* DelStandIn::FUN_009f2a40(unsigned int flags)
-{
-    ((DtorStandIn*)this)->FUN_0083dec0();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
-}
-
 struct DH
 {
     bool FUN_004226e0();
 };
 extern DH* g_dataHandler;
-struct _Mem_20a4
-{
-    ~_Mem_20a4();
-    void SetSize(unsigned int, bool);
-};
-struct P_009f2b30
+struct PatrolCleanupAccess
 {
     void FUN_009f2b30();
 };
-struct FUN_0067d970
-{
-    int mode;
-    int pad[2];
-    virtual ~FUN_0067d970();
-};
-struct FUN_009f2a70 : public FUN_0067d970
-{
-    int a;
-    int b;
-    int c;
-    _Mem_20a4 arr;
-    ~FUN_009f2a70();
-};
 // @fnv 0x009f2a70
-FUN_009f2a70::~FUN_009f2a70()
+PatrolActorPackageData::~PatrolActorPackageData()
 {
     if (!g_dataHandler->FUN_004226e0())
-        ((P_009f2b30*)this)->FUN_009f2b30();
-    arr.SetSize(0, true);
-    mode = 4;
-    a = 0;
-    b = 0;
-    c = 0;
+        ((PatrolCleanupAccess*)this)->FUN_009f2b30();
+    References.SetSize(0, true);
+    eState = PATROL_STATE_DEBUG_DESTRUCTED;
+    pActor = 0;
+    pPackage = 0;
+    m_pEscortPackageData = 0;
 }
 
-namespace fnv_009f33d0 {
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-    void SerializeFormData(void*, int);
-    void FUN_00865f60(unsigned int);
-};
-struct ArrSI
-{
-    unsigned int GetFlags();
-};
-struct BSSimpleArray
-{
-    unsigned int& GetAt(int);
-};
-struct FUN_009f33d0_shell
-{
-    void FUN_009f33d0(BGSSaveFormBuffer* apSaveGameBuffer);
-};
 
 // @fnv 0x009f33d0
-void FUN_009f33d0_shell::FUN_009f33d0(BGSSaveFormBuffer* apSaveGameBuffer)
+void PatrolActorPackageData::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
 {
-    apSaveGameBuffer->SaveData((char*)this + 0x4, 4, 0);
-    apSaveGameBuffer->SaveData((char*)this + 0x8, 4, 0);
-    apSaveGameBuffer->SaveData((char*)this + 0x34, 4, 0);
-    apSaveGameBuffer->SaveData((char*)this + 0xc, 1, 0);
-    apSaveGameBuffer->SaveData((char*)this + 0x2c, 1, 0);
-    apSaveGameBuffer->SaveData((char*)this + 0x30, 4, 0);
-    apSaveGameBuffer->SerializeFormData(*(void**)((char*)this + 0x14), 0);
-    unsigned int isaveGameCount = (ArrSI*)((char*)this + 0x1c) ? ((ArrSI*)((char*)this + 0x1c))->GetFlags() : 0;
+    apSaveGameBuffer->SaveData(&eState, 4, 0);
+    apSaveGameBuffer->SaveData(&m_fElapsedWaitTime, 4, 0);
+    apSaveGameBuffer->SaveData(&m_uiSecondValueAfterReferenceFlag, 4, 0);
+    apSaveGameBuffer->SaveData(&m_bPatrolFlag, 1, 0);
+    apSaveGameBuffer->SaveData(&m_bReferenceFlag, 1, 0);
+    apSaveGameBuffer->SaveData(&m_uiValueAfterReferenceFlag, 4, 0);
+    apSaveGameBuffer->SerializeFormData(pPackage, 0);
+    unsigned int isaveGameCount = (reinterpret_cast<BSSimpleArray<TESObjectREFR*, 1024>*>(reinterpret_cast<char*>(this) + offsetof(PatrolActorPackageData, References))) ? References.GetSize() : 0;
     apSaveGameBuffer->FUN_00865f60(isaveGameCount);
     for (unsigned int i = 0; i < isaveGameCount; ++i)
     {
-        TESObjectREFR** ppRefr = (TESObjectREFR**)&((BSSimpleArray*)((char*)this + 0x1c))->GetAt(i);
+        TESObjectREFR** ppRefr = (TESObjectREFR**)&reinterpret_cast<BSSimpleArray<unsigned int, 1024>&>(References).GetAt((int)i);
         apSaveGameBuffer->SerializeFormData(*ppRefr, 0);
     }
 }
-}  // namespace fnv_009f33d0
 
 struct PatrolTarget
 {
@@ -570,63 +233,33 @@ struct PatrolRef
 {
     PatrolTarget* FUN_005d43c0();
 };
-struct PatrolRefArray
-{
-    PatrolRef*& GetAt(unsigned int i);
-    unsigned int GetSize();
-};
-struct PatrolPackage
-{
-    bool FUN_004f1540();
-};
 
-class PatrolData
-{
-  public:
-    void* vtable;
-    int unk04;
-    int unk08;
-    bool bForward;
-    void* unk10;
-    int unk14;
-    PatrolPackage* unk18;
-    PatrolRefArray refs;
-    int unk20;
-    int unk24;
-    int unk28;
-    bool bRepeat;
-    int unk30;
-    int iCurrent;
 
-    bool SetPatrolRefIndex(int aiIndex);
-    bool AdvancePatrolIndex(bool abApply);
-};
-
-// Computes the next patrol index from iCurrent and bForward, wrapping or reversing at the ends, and applies it via SetPatrolRefIndex when abApply is set.
+// Computes the next patrol index from m_uiSecondValueAfterReferenceFlag and m_bPatrolFlag, wrapping or reversing at the ends, and applies it via SetPatrolRefIndex when abApply is set.
 // @fnv 0x009f2ea0
-bool PatrolData::AdvancePatrolIndex(bool abApply)
+bool PatrolActorPackageData::AdvanceToNextReference(bool abApply)
 {
-    int idx = iCurrent;
+    int idx = m_uiSecondValueAfterReferenceFlag;
     bool bResult = true;
-    bool bLoop = unk18 ? unk18->FUN_004f1540() : false;
-    if (bForward)
+    bool bLoop = m_pEscortPackageData ? ((PatrolPackage*)m_pEscortPackageData)->FUN_004f1540() : false;
+    if (m_bPatrolFlag)
     {
         idx++;
-        if (idx == refs.GetSize())
+        if (idx == References.GetSize())
         {
             if (bLoop)
             {
-                if (bRepeat)
+                if (m_bReferenceFlag)
                 {
-                    idx = unk30;
+                    idx = m_uiValueAfterReferenceFlag;
                 }
                 else
                 {
-                    if (refs.GetSize() == 1)
+                    if (References.GetSize() == 1)
                         idx = 0;
                     else
                         idx -= 2;
-                    bForward = !bForward;
+                    m_bPatrolFlag = !m_bPatrolFlag;
                 }
             }
             else
@@ -643,18 +276,18 @@ bool PatrolData::AdvancePatrolIndex(bool abApply)
         {
             if (bLoop)
             {
-                if (bRepeat)
+                if (m_bReferenceFlag)
                 {
                     idx = 0;
                     bResult = false;
                 }
                 else
                 {
-                    if (refs.GetSize() == 1)
+                    if (References.GetSize() == 1)
                         idx = 0;
                     else
                         idx = 1;
-                    bForward = !bForward;
+                    m_bPatrolFlag = !m_bPatrolFlag;
                 }
             }
             else
@@ -666,43 +299,35 @@ bool PatrolData::AdvancePatrolIndex(bool abApply)
     }
     if (abApply)
     {
-        if (idx != iCurrent)
+        if (idx != m_uiSecondValueAfterReferenceFlag)
         {
             bool bOk = SetPatrolRefIndex(idx);
             if (!bOk)
             {
-                unsigned int numRefs = refs.GetSize();
+                unsigned int numRefs = References.GetSize();
                 unsigned int uiValid = numRefs - 1;
                 for (unsigned int i = 0; i < numRefs; i++)
                 {
-                    PatrolRef* pRef = refs.GetAt(i);
+                    PatrolRef* pRef = (PatrolRef*)References.GetAt(i);
                     PatrolTarget* pTarget = pRef ? pRef->FUN_005d43c0() : 0;
-                    if (i == iCurrent)
+                    if (i == m_uiSecondValueAfterReferenceFlag)
                         continue;
-                    if (!pTarget || !pTarget->FUN_0042f3d0(unk10))
+                    if (!pTarget || !pTarget->FUN_0042f3d0(pActor))
                         uiValid--;
                 }
                 if (uiValid <= 0)
-                    return AdvancePatrolIndex(false);
+                    return AdvanceToNextReference(false);
             }
         }
     }
     else
     {
-        iCurrent = idx;
+        m_uiSecondValueAfterReferenceFlag = idx;
     }
     return bResult;
 }
 
 namespace fnv_009f31c0 {
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    NiPoint3 operator-(const NiPoint3& rhs) const;
-    float GetSquaredXYLength() const;
-};
 struct PatrolRefStub
 {
     virtual void v000();
@@ -833,26 +458,25 @@ struct PatrolRefStub
     virtual NiPoint3* GetPos();
     PatrolTarget* GetTarget();
 };
-struct PatrolData2 : public PatrolData
-{
-    PatrolRefStub* GetCurRef();
-    void SelectClosestPatrolPoint(const NiPoint3& arPoint);
-};
 extern float DAT_01016970;
 
+}  // namespace fnv_009f31c0
+using fnv_009f31c0::PatrolRefStub;
+using fnv_009f31c0::DAT_01016970;
+
 // @fnv 0x009f31c0
-void PatrolData2::SelectClosestPatrolPoint(const NiPoint3& arPoint)
+void PatrolActorPackageData::SelectClosestPatrolPoint(const NiPoint3& arPoint)
 {
-    if (!unk10)
+    if (!pActor)
         return;
-    int BackgroundTask = refs.GetSize();
+    int BackgroundTask = References.GetSize();
     SetPatrolRefIndex(0);
-    bForward = true;
+    m_bPatrolFlag = true;
     PatrolRefStub* pOld = 0;
     NiPoint3* pOrigPos = 0;
     int iPrevIdx = 0;
     bool bOldForward = true;
-    PatrolRefStub* pR = GetCurRef();
+    PatrolRefStub* pR = (PatrolRefStub*)GetCurrentPatrolReference();
     if (!pR)
         return;
     NiPoint3* pPt = pR->GetPos();
@@ -862,16 +486,16 @@ void PatrolData2::SelectClosestPatrolPoint(const NiPoint3& arPoint)
     bool bSuccess = false;
     for (int i = 0; i < BackgroundTask; i++)
     {
-        iPrevIdx = iCurrent;
-        bOldForward = bForward;
+        iPrevIdx = m_uiSecondValueAfterReferenceFlag;
+        bOldForward = m_bPatrolFlag;
         pOld = pR;
         pOrigPos = pPt;
-        AdvancePatrolIndex(false);
-        PatrolRefStub* pNext = GetCurRef();
+        AdvanceToNextReference(false);
+        PatrolRefStub* pNext = (PatrolRefStub*)GetCurrentPatrolReference();
         PatrolTarget* pData = pNext ? pNext->GetTarget() : 0;
-        if (!pData || pData->FUN_0042f3d0(unk10))
+        if (!pData || pData->FUN_0042f3d0(pActor))
         {
-            pR = GetCurRef();
+            pR = (PatrolRefStub*)GetCurrentPatrolReference();
             if (!pR)
                 break;
             pPt = pR->GetPos();
@@ -890,16 +514,11 @@ void PatrolData2::SelectClosestPatrolPoint(const NiPoint3& arPoint)
     if (bSuccess)
     {
         SetPatrolRefIndex(iWinner);
-        bForward = bBest;
+        m_bPatrolFlag = bBest;
     }
-    bForward = true;
+    m_bPatrolFlag = true;
 }
-}  // namespace fnv_009f31c0
 
-struct BGSSaveLoadGame
-{
-    bool FUN_0042ce10();
-};
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 struct PatrolReference
 {
@@ -1030,60 +649,41 @@ struct PatrolReference
     virtual void vf124();
     virtual const NiPoint3& GetPos();
 };
-struct ReferenceArray
+// The shared array does not yet declare this erase operation.
+struct PatrolReferenceArrayAccess : BSSimpleArray<unsigned int, 1024>
 {
-    void* vtable;
-    void* entries;
-    unsigned int capacity, used, elementSize, growth;
-    unsigned int FUN_0044ddc0();
-    int* FUN_00877a30(unsigned int);
-    void FUN_006bf8f0(unsigned int, bool);
-};
-struct FUN_009f2c30_Class
-{
-    void* vtable;
-    int state;
-    int unk08;
-    int unk0c;
-    PatrolReference* activeReference;
-    int unk14, unk18;
-    ReferenceArray references;
-    unsigned int referenceIndex;
-    void FUN_009f2b30();
-    bool SetPatrolRefIndex(unsigned int);
-    void SelectClosestPatrolPoint(const NiPoint3&);
-    void RemoveReference(PatrolReference*);
+    void RemoveAt(unsigned int, bool);
 };
 // Removes a patrol reference: if it is the active one, resets state; otherwise erases it from the array and adjusts the active index.
 // @fnv 0x009f2c30
-void FUN_009f2c30_Class::RemoveReference(PatrolReference* reference)
+void PatrolActorPackageData::SetReferenceTarget(TESObjectREFR* reference)
 {
-    if (reference == activeReference)
+    if (reference == (TESObjectREFR*)pActor)
     {
-        FUN_009f2b30();
-        state = 3;
-        activeReference = 0;
-        unk14 = 0;
-        unk18 = 0;
+        ((PatrolCleanupAccess*)this)->FUN_009f2b30();
+        eState = PATROL_STATE_DEBUG_ACTOR_DELETED;
+        pActor = 0;
+        pPackage = 0;
+        m_pEscortPackageData = 0;
     }
     else
     {
         unsigned int index;
-        for (index = 0; index < references.FUN_0044ddc0(); index++)
+        for (index = 0; index < References.GetSize(); index++)
         {
-            if (*references.FUN_00877a30(index) == (int)reference)
+            if (References.GetAt(index) == reference)
             {
-                references.FUN_006bf8f0(index, true);
-                if (referenceIndex >= index)
-                    referenceIndex--;
+                reinterpret_cast<PatrolReferenceArrayAccess&>(References).RemoveAt(index, true);
+                if (m_uiSecondValueAfterReferenceFlag >= index)
+                    m_uiSecondValueAfterReferenceFlag--;
                 index--;
             }
         }
-        if (activeReference && !g_BGSSaveLoadGame->FUN_0042ce10())
+        if (pActor && !g_BGSSaveLoadGame->FUN_0042ce10())
         {
-            if (!SetPatrolRefIndex(referenceIndex))
+            if (!SetPatrolRefIndex(m_uiSecondValueAfterReferenceFlag))
             {
-                SelectClosestPatrolPoint(activeReference->GetPos());
+                SelectClosestPatrolPoint(((PatrolReference*)pActor)->GetPos());
             }
         }
     }

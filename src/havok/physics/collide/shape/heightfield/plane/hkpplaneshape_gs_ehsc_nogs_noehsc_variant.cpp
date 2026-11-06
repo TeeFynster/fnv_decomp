@@ -5,81 +5,9 @@
 
 // src/havok/physics/collide/shape/heightfield/plane/hkpplaneshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/heightfield/plane/hkpplaneshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpPlaneShape.h"
-void __cdecl FUN_00d26230(void*, void*, void*, float, int);
-struct FUN_00d552c0_StandIn
-{
-    void FUN_00d552c0(void*, float, int);
-};
-class GlobalObjectO2_00d472a0;
-extern GlobalObjectO2_00d472a0 g_01269b84;
-class hkStatisticsCollectorD54F;
-class hkReferencedObjectD54F
-{
-  public:
-    virtual ~hkReferencedObjectD54F() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    void FUN_00c90360(hkStatisticsCollectorD54F* pkCollector, const GlobalObjectO2_00d472a0* pkClass) const;
-};
-class hkObjectD54F : public hkReferencedObjectD54F
-{
-  public:
-    void FUN_00d54f80(hkStatisticsCollectorD54F* pkCollector, const GlobalObjectO2_00d472a0* pkClass) const;
-};
-struct __declspec(align(16)) Vector4D54F90
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct RayCastOutputD54F90
-{
-    RayCastOutputD54F90() : m_iExtraInfo(-1), m_uiShapeKeyIndex(0)
-    {
-        m_uiShapeKeys[0] = -1;
-    }
-    Vector4D54F90 m_vHitNormal;
-    float m_fHitFraction;
-    int m_iExtraInfo;
-    int m_pad18;
-    int m_pad1C;
-    int m_uiShapeKeys[8];
-    int m_uiShapeKeyIndex;
-};
-struct BoolD54F90
-{
-    char m_cBooleanValue;
-};
-struct RayCastInputD54F90;
-struct CdBodyD54F90
-{
-    int unk00;
-    int unk04;
-    const void* m_pMotionState;
-};
-struct CollectorD54F90
-{
-    virtual void CollectRayHit(const CdBodyD54F90& kBody, const RayCastOutputD54F90& kOutput);
-    float m_fEarlyOutHitFraction;
-};
-void __stdcall FUN_00c7f750(const void* pkTransform, Vector4D54F90& kNormal);
-struct ShapeD54F90
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual BoolD54F90 RayCast(const RayCastInputD54F90& kInput, RayCastOutputD54F90& kOutput) const;
-    void FUN_00d54f90(const RayCastInputD54F90& kInput, const CdBodyD54F90& kBody, CollectorD54F90& kCollector) const;
-};
-
+#include "../../../../../../../include/hkpPlaneShape.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/Vec4.h"
 #include <xmmintrin.h>
 extern __m128 DAT_010ec7f0;
 extern __m128 DAT_01017d10;
@@ -104,40 +32,48 @@ struct VecCompare
     }
 };
 
-struct Vec4
+inline __m128& Vec4::getQuad()
 {
-    __m128 m_vComponents;
+    return *reinterpret_cast<__m128*>(this);
+}
 
-    SimdReal dot4xyz1(const Vec4& x) const
-    {
-        __m128 x2 = _mm_mul_ps(m_vComponents, x.m_vComponents);
-        __m128 w = _mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
-        __m128 r = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2)), w);
-        SimdReal s;
-        s.m_vValue = _mm_add_ps(r, _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2));
-        return s;
-    }
-    void setInterpolate4(const Vec4& a, const Vec4& b, float t)
-    {
-        __m128 tt = _mm_set1_ps(t);
-        m_vComponents =
-            _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, tt), a.m_vComponents), _mm_mul_ps(b.m_vComponents, tt));
-    }
-    void sub4(const Vec4& a)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, a.m_vComponents);
-    }
-    void setAbs4(const Vec4& a)
-    {
-        m_vComponents = _mm_and_ps(a.m_vComponents, DAT_01017d10);
-    }
-    VecCompare compareLessThanEqual4(const Vec4& a) const
-    {
-        VecCompare c;
-        c.m_uiMask = _mm_cmple_ps(m_vComponents, a.m_vComponents);
-        return c;
-    }
-};
+inline const __m128& Vec4::getQuad() const
+{
+    return *reinterpret_cast<const __m128*>(this);
+}
+
+inline SimdReal Vec4::dot4xyz1(const Vec4& x) const
+{
+    __m128 x2 = _mm_mul_ps(getQuad(), x.getQuad());
+    __m128 w = _mm_shuffle_ps(getQuad(), getQuad(), _MM_SHUFFLE(3, 3, 3, 3));
+    __m128 r = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2)), w);
+    SimdReal s;
+    s.m_vValue = _mm_add_ps(r, _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2));
+    return s;
+}
+
+inline void Vec4::setInterpolate4(const Vec4& a, const Vec4& b, float t)
+{
+    __m128 tt = _mm_set1_ps(t);
+    getQuad() = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, tt), a.getQuad()), _mm_mul_ps(b.getQuad(), tt));
+}
+
+inline void Vec4::sub4(const Vec4& a)
+{
+    getQuad() = _mm_sub_ps(getQuad(), a.getQuad());
+}
+
+inline void Vec4::setAbs4(const Vec4& a)
+{
+    getQuad() = _mm_and_ps(a.getQuad(), DAT_01017d10);
+}
+
+inline VecCompare Vec4::compareLessThanEqual4(const Vec4& a) const
+{
+    VecCompare c;
+    c.m_uiMask = _mm_cmple_ps(getQuad(), a.getQuad());
+    return c;
+}
 
 struct __declspec(align(16)) AlignedVec4
 {
@@ -217,14 +153,14 @@ void PlaneShapeStandIn::FUN_00d55000(const RayInput& input, const CdBody& body, 
         if (!(fromDist - toDist < input.m_fRayDistance))
         {
             float frac = (fromDist <= 0.0f) ? 0.0f : fromDist / (fromDist - toDist);
-            Vec4 hitPoint;
+            __declspec(align(16)) Vec4 hitPoint;
             hitPoint.setInterpolate4(input.m_vFrom, input.m_vTo, frac);
             hitPoint.sub4(m_kAabbCenter);
             hitPoint.setAbs4(hitPoint);
             if (hitPoint.compareLessThanEqual4(m_kAabbHalfExtents).allAreSetXYZ())
             {
                 RayOutput out;
-                _mm_store_ps(&out.m_vHitNormal.x, m_kTriangleNormal.m_vComponents);
+                _mm_store_ps(&out.m_vHitNormal.x, m_kTriangleNormal.getQuad());
                 out.m_fHitFraction = frac;
                 collector.CollectRayHit(body, out);
             }

@@ -2,6 +2,9 @@
 
 #include "nirotkey_decls.h"
 
+// The original interpolation temporaries leave their components uninitialized.
+inline NiQuaternion::NiQuaternion() {}
+
 #define KEY_TIME(keys, index, size)                                                                                    \
     (*reinterpret_cast<const float*>(reinterpret_cast<const char*>(keys) + (index) * (size)))
 #define KEY_AT(keys, index, size)                                                                                      \
@@ -9,17 +12,17 @@
 
 // @fnv 0x00a28740
 NiQuaternion __cdecl TimedRotationKey::InterpolatePosition(float fTime, TimedRotationKey* pkKeys,
-                                                           AnimationKey::KeyType eType, unsigned int uiNumKeys,
+                                                           NiAnimationKey::KeyType eType, unsigned int uiNumKeys,
                                                            unsigned int& ruiLastIndex, unsigned char ucKeySize)
 {
     NiQuaternion kEulerResult;
     NiQuaternion kResult;
     if (uiNumKeys == 1 || fTime == DAT_010241b0)
     {
-        if (eType != AnimationKey::EULERKEY)
+        if (eType != NiAnimationKey::EULERKEY)
             return pkKeys[0].m_kRotationValue;
     }
-    if (eType == AnimationKey::EULERKEY)
+    if (eType == NiAnimationKey::EULERKEY)
     {
         DAT_011f3cc0[eType](fTime, pkKeys, 0, &kEulerResult);
         return kEulerResult;

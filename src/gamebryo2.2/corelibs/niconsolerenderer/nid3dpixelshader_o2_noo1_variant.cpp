@@ -1,3 +1,8 @@
+#include "../../../../include/NiShaderConstantMapEntry.h"
+#include "../../../../include/NiD3DPixelShader.h"
+#include "../../../../include/NiD3DShaderProgram.h"
+#include "../../../../include/NiGPUProgram.h"
+#include "../../../../include/NiRefObject.h"
 
 // to their real unit once identified.
 
@@ -17,68 +22,11 @@ class GraphicsRenderer;
 class ShaderPassRenderer;
 typedef unsigned int NiUInt32;
 // Base of the engine allocation tracking; empty in this build.
-class NiMemObject
-{
-};
+#include "../../../../include/NiMemObject.h"
 // Reference counted engine object.
-class NiRefObject : public NiMemObject
-{
-  public:
-    NiRefObject() : m_uiRefCount(0)
-    {}
-
-    virtual ~NiRefObject()
-    {}
-
-    virtual void DeleteThis()
-    {
-        delete this;
-    }
-
-  protected:
-    NiUInt32 m_uiRefCount;
-};
 // GPU program base of the Nivid3D shader programs.
-class NiGPUProgram : public NiRefObject
-{
-  public:
-    enum ProgramType
-    {
-        PROGRAMTYPE_INVALID,
-        PROGRAMTYPE_VERTEX,
-        PROGRAMTYPE_PIXEL
-    };
-
-    ProgramType GetProgramType()
-    {
-        return m_iProgramType;
-    }
-
-  protected:
-    ProgramType m_iProgramType;
-};
 // Nivid3D shader program with its compiled D3D program state.
-class NiD3DShaderProgram : public NiGPUProgram
-{
-  protected:
-    char* m_pcProgramName;
-    char* m_pcProfile;
-    NiUInt32 m_uiProgramCodeSize;
-    void* m_pProgramCode;
-    NiD3DShaderProgramCreator* m_pCreator;
-    Direct3DDeviceInterface* m_pD3DDevice;
-    GraphicsRenderer* m_pShaderObject;
-    ShaderPassRenderer* m_pRenderState;
-};
 // Nivid3D pixel shader program.
-class NiD3DPixelShader : public NiD3DShaderProgram
-{
-  public:
-    void SetD3DPixelShader(GeometryRelatedType* pixelShader);
-
-  protected:
-    GeometryRelatedType* m_pD3DPixelShader;
-};
 struct NiD3DPixelShader;
 void __cdecl FUN_00e92f30(NiD3DPixelShader*);
 struct FUN_00e898d0_shell : NiD3DPixelShader
@@ -98,36 +46,29 @@ struct FUN_00e898c0_shell : NiD3DPixelShader
 
 extern "C" unsigned int DAT_011f5fc4[];
 
-struct S_00e89a40_Data
+inline ScriptAttributeTypes::AttributeType NiShaderConstantMapEntry::GetAttributeType() const
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    void* unk18;
-    void* unk1c;
-};
+    return static_cast<ScriptAttributeTypes::AttributeType>(DAT_011f5fc4[m_uiValue1 & 0xff]);
+}
 
 typedef void(__stdcall* S_00e89a40_Callback)(void* object, void* source, void* destination, unsigned int stride);
 
 struct S_00e89a40_Shell : NiD3DPixelShader
 {
-    bool FUN_00e89a40(S_00e89a40_Data* data, void* destination, unsigned int count, unsigned int stride,
+    bool FUN_00e89a40(NiShaderConstantMapEntry* data, void* destination, unsigned int count, unsigned int stride,
                       const unsigned short* indices);
 };
 
 // @fnv 0x00e89a40
-bool __thiscall S_00e89a40_Shell::FUN_00e89a40(S_00e89a40_Data* data, void* destination, unsigned int count,
+bool __thiscall S_00e89a40_Shell::FUN_00e89a40(NiShaderConstantMapEntry* data, void* destination, unsigned int count,
                                                unsigned int stride, const unsigned short* indices)
 {
-    unsigned int type = DAT_011f5fc4[data->unk14 & 0xff];
+    unsigned int type = DAT_011f5fc4[data->m_uiValue1 & 0xff];
 
     if (type != 8 && type != 9)
         return false;
 
-    void* source = data->unk1c;
+    void* source = reinterpret_cast<void*>(data->m_uiValue3);
 
     for (unsigned int index = 0; index < count; ++index)
     {
@@ -151,35 +92,6 @@ bool __thiscall S_00e89a40_Shell::FUN_00e89a40(S_00e89a40_Data* data, void* dest
 }
 
 namespace fnv_00e899a0 {
-struct ScriptAttributeTypes
-{
-    enum AttributeType
-    {
-        ATTRIB_TYPE_BOOL = 1,
-        ATTRIB_TYPE_INT = 3
-    };
-};
-
-extern int DAT_011f5fc4[];
-
-struct NiShaderConstantMapEntry
-{
-    unsigned int unk00[5];
-    unsigned int m_uiValue1;
-    unsigned int unk18;
-    unsigned int m_uiValue3;
-    unsigned int m_uiValue4;
-    unsigned int unk24;
-    unsigned int m_uiValue5;
-    unsigned int unk2c;
-    void* m_pConstantData;
-
-    ScriptAttributeTypes::AttributeType GetAttributeType() const
-    {
-        return static_cast<ScriptAttributeTypes::AttributeType>(DAT_011f5fc4[m_uiValue1 & 0xff]);
-    }
-};
-
 template <int N> struct ShaderDeviceSlots : ShaderDeviceSlots<N - 1>
 {
     virtual void Reserved(ShaderDeviceSlots<N>*);

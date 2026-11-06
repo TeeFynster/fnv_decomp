@@ -1,29 +1,28 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/animation/animation/animation/splinecompressed/hkasplinecompressedanimationctor.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/animation/splinecompressed/hkasplinecompressedanimationctor.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
+#include "../../../../../../include/hkThreadMemory.h"
 
-extern "C" __m128 _mm_load_ps(float const* p);
-extern "C" void _mm_store_ps(float* p, __m128 a);
+inline hkMemory& GetThreadHeap(hkThreadMemory* memory)
+{
+    return *memory->m_pMemoryAllocator;
+}
+
+typedef ::__m128 LocalM128;
+
+extern "C" LocalM128 _mm_load_ps(float const* p);
+extern "C" void _mm_store_ps(float* p, LocalM128 a);
 
 struct __declspec(align(16)) FUN_005611c0_t
 {
     float x, y, z, w;
     FUN_005611c0_t(const FUN_005611c0_t& o)
     {
-        *(__m128*)&x = *(const __m128*)&o.x;
+        *(LocalM128*)&x = *(const LocalM128*)&o.x;
     }
     void FUN_005611c0();
 };
@@ -94,53 +93,29 @@ void __cdecl WriteUInt16ToBuffer(unsigned short value, Buffer* buffer)
 }
 }  // namespace fnv_00e31ad0
 
-struct S_00e31ca0_Heap;
-struct S_00e31ca0_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00e31ca0_Heap* m_pStreamAllocator;
-    S_00e31ca0_Heap& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-S_00e31ca0_Router* FUN_00c85750();
-void ResizeAudioStream(S_00e31ca0_Heap& alloc, void* arr, int elemSize);
+void ResizeAudioStream(hkMemory& alloc, void* arr, int elemSize);
 template <typename T> inline void S_00e31ca0_constructWithCopy(T* p, int n, const T& t)
 {
     for (int i = 0; i < n; i++)
         p[i] = t;
 }
-struct S_00e31ca0_ByteArray
+typedef hkArray<unsigned char> S_00e31ca0_ByteArray;
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    unsigned char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void _pushBack(S_00e31ca0_Heap& alloc, const unsigned char& t)
-    {
+return reinterpret_cast<hkMemoryAllocator&>(GetThreadHeap(hkThreadMemory::GetMonitorStream()));
+}
+template<> __forceinline void hkArrayBase<unsigned char>::_pushBack(hkMemoryAllocator& sharedAlloc, unsigned char const& t)
+{
+hkMemory& alloc = reinterpret_cast<hkMemory&>(sharedAlloc);
+
         if (m_iElementCount == getCapacity())
             ResizeAudioStream(alloc, this, sizeof(unsigned char));
         S_00e31ca0_constructWithCopy<unsigned char>(m_data + m_iElementCount, 1, t);
         m_iElementCount++;
-    }
-    void AddBack(const unsigned char& t)
-    {
-        _pushBack(FUN_00c85750()->heap(), t);
-    }
-};
-struct S_00e31ca0_FloatArray
-{
-    float* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+
+}
+
+typedef hkArrayBase<float> S_00e31ca0_FloatArray;
 void WriteUInt16ToBuffer(int v, S_00e31ca0_ByteArray& out);
 void AppendChar(int v, S_00e31ca0_ByteArray& out);
 struct S_00e31ca0
@@ -186,63 +161,35 @@ void S_00e31ca0::AppendScaledValues(int aiFirst, int aiSecond, S_00e31ca0_FloatA
     for (int i = 0; i <= last; i++)
     {
         unsigned char ucScaled = (unsigned char)(int)(arValues.m_data[i] / unkC * (unk28 - 1) + 0.5);
-        m_out.AddBack(ucScaled);
+        m_out.pushBack(ucScaled);
     }
 }
 
-struct E317C0Allocator;
-
-struct E317C0MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    E317C0Allocator* m_pStreamAllocator;
-
-    E317C0Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-namespace fnvc_adapt {
-extern "C" E317C0MemoryRouter& __cdecl FUN_00c85750();
-}
 void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
 
-struct E317C0CharArray
+static __forceinline void ConstructArray13(char* p, int n, char const& e)
 {
-    char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    static void construct(char* p, int n, char const& e)
-    {
         for (int i = 0; i < n; i++)
             p[i] = e;
     }
+typedef hkArray<char> E317C0CharArray;
+template<> __forceinline void hkArrayBase<char>::_pushBack(hkMemoryAllocator& sharedAlloc, char const& e)
+{
+hkMemory& alloc = reinterpret_cast<hkMemory&>(sharedAlloc);
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    void AddBack(char const& e)
-    {
-        E317C0Allocator& alloc = fnvc_adapt::FUN_00c85750().heap();
         if (m_iElementCount == getCapacity())
             ResizeAudioStream(&alloc, this, sizeof(char));
-        construct(m_data + m_iElementCount, 1, e);
+        ConstructArray13(m_data + m_iElementCount, 1, e);
         m_iElementCount++;
-    }
-};
+
+}
+
 
 // Appends the character c to the E317C0CharArray out via its push-back method.
 // @fnv 0x00e317c0
 void __cdecl AppendChar(char acChar, E317C0CharArray& arOut)
 {
-    arOut.AddBack(acChar);
+    arOut.pushBack(acChar);
 }
 
 extern void __cdecl FUN_00e31800(int amount, struct MemWriter* writer);
@@ -325,31 +272,19 @@ struct hkMemory
     virtual void deallocateChunk(void* p, int nbytes) throw();
 };
 
-struct hkThreadMemory
+// ~hkArray (clearAndDeallocate) through the thread memory's heap.
+template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
 {
-    char pad[0x10];
-    hkMemory* m_pMemoryAllocator;
-};
-
-template <typename T> struct hkArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    ~hkArray() throw()
+    hkThreadMemory* tm = hkThreadMemory::GetMonitorStream();
+    hkMemory* mem = tm->m_pMemoryAllocator;
+    this->m_iElementCount = 0;
+    if (!(this->m_iCapacityState & (int)0x80000000))
     {
-        hkThreadMemory* tm = (hkThreadMemory*)FUN_00c85750();
-        hkMemory* mem = tm->m_pMemoryAllocator;
-        m_iElementCount = 0;
-        if (!(m_iCapacityState & (int)0x80000000))
-        {
-            mem->deallocateChunk(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        }
-        m_data = 0;
-        m_iCapacityState = (int)0x80000000;
+        mem->deallocateChunk(this->m_data, (this->m_iCapacityState & 0x3fffffff) * sizeof(T));
     }
-};
+    this->m_data = 0;
+    this->m_iCapacityState = (int)0x80000000;
+}
 
 struct Struct28
 {
@@ -441,50 +376,36 @@ void e319Cls::FUN_00e31900()
 // Havok-style constructor: base init from a1, five empty hkArray members, then a temporary set of
 // arrays (one 28-byte element from a2, two int arrays sized from a1 and zero-filled) handed to a
 // member initialiser together with a3.
-struct HeapL;
-struct RouterL
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    HeapL* m_pStreamAllocator;
-    HeapL& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-RouterL* GetRouterL() throw();
-void ReserveMoreL(HeapL& alloc, void* arr, int elemSize) throw();
-void ReserveL(HeapL& alloc, void* arr, int numElem, int elemSize) throw();
+void ReserveMoreL(hkMemory& alloc, void* arr, int elemSize) throw();
+void ReserveL(hkMemory& alloc, void* arr, int numElem, int elemSize) throw();
 inline void* operator new(unsigned int, void* p) throw()
 {
     return p;
 }
 
-template <class T> struct ArrL
-{
+template <class T> struct ArrLLocalForm
+{ // local form of hkArray: 0x00e32af0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
-    ArrL() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
+    ArrLLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {}
     int getCapacity() const
     {
         return m_iCapacityState & 0x3fffffff;
     }
-    void _pushBack(HeapL& alloc, const T& t)
+    void _pushBack(hkMemory& alloc, const T& t)
     {
         if (m_iElementCount == getCapacity())
             ReserveMoreL(alloc, this, sizeof(T));
         new (&m_data[m_iElementCount]) T(t);
         m_iElementCount++;
     }
-    void AddBack(const T& t)
+    void pushBack(const T& t)
     {
-        _pushBack(GetRouterL()->heap(), t);
+        _pushBack(GetThreadHeap(hkThreadMemory::GetMonitorStream()), t);
     }
-    void GrowArrayCapacity(HeapL& alloc, int n)
+    void GrowArrayCapacity(hkMemory& alloc, int n)
     {
         int cap = getCapacity();
         if (cap < n)
@@ -494,14 +415,14 @@ template <class T> struct ArrL
             ReserveL(alloc, this, newSize, sizeof(T));
         }
     }
-    void _setSize(HeapL& alloc, int n)
+    void _setSize(hkMemory& alloc, int n)
     {
         GrowArrayCapacity(alloc, n);
         m_iElementCount = n;
     }
     void SetSizeAndGrow(int n)
     {
-        _setSize(GetRouterL()->heap(), n);
+        _setSize(GetThreadHeap(hkThreadMemory::GetMonitorStream()), n);
     }
     T& operator[](int i)
     {
@@ -524,9 +445,9 @@ struct Elem28L
 };
 struct LocalArraysL
 {
-    ArrL<Elem28L> m_pElements;
-    ArrL<int> m_kPointA;
-    ArrL<int> m_kPointB;
+    ArrLLocalForm<Elem28L> m_pElements;
+    ArrLLocalForm<int> m_kPointA;
+    ArrLLocalForm<int> m_kPointB;
     ~LocalArraysL() throw();
 };
 struct BaseL
@@ -538,11 +459,11 @@ struct BaseL
 };
 struct FUN_00e32af0 : BaseL
 {
-    ArrL<int> m_arr44;
-    ArrL<int> m_arr50;
-    ArrL<int> m_arr5c;
-    ArrL<int> m_arr68;
-    ArrL<int> m_arr74;
+    ArrLLocalForm<int> m_arr44;
+    ArrLLocalForm<int> m_arr50;
+    ArrLLocalForm<int> m_arr5c;
+    ArrLLocalForm<int> m_arr68;
+    ArrLLocalForm<int> m_arr74;
     FUN_00e32af0(SrcL* src, const Elem28L* elem, void* arg3) throw();
     void InitL(SrcL* src, LocalArraysL* arrays, void* arg3) throw();
 };
@@ -552,7 +473,7 @@ struct FUN_00e32af0 : BaseL
 FUN_00e32af0::FUN_00e32af0(SrcL* pSource, const Elem28L* elem, void* arg3) throw() : BaseL(pSource)
 {
     LocalArraysL arrays;
-    arrays.m_pElements.AddBack(*elem);
+    arrays.m_pElements.pushBack(*elem);
     arrays.m_kPointA.SetSizeAndGrow(pSource->m_numA);
     arrays.m_kPointB.SetSizeAndGrow(pSource->m_numB);
     for (int i = 0; i < pSource->m_numA; i++)
@@ -638,15 +559,6 @@ void AnimationCompressor::WriteCompressedAnimation(unsigned char mask, int quant
 }
 
 namespace fnv_00e31800 {
-struct Holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pAllocator;
-};
-
 struct Buf
 {
     char* m_data;
@@ -656,7 +568,6 @@ struct Buf
 
 extern "C" void _ReadWriteBarrier(void);
 
-Holder* __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void* alloc, Buf* buf, int n);
 
 // Appends count zero bytes to buf, calling FUN_00c90940 when its length equals the masked capacity.
@@ -667,10 +578,10 @@ void __cdecl FUN_00e31800(int count, Buf* buf)
     {
         do
         {
-            Holder* h = FUN_00c85750();
+            hkThreadMemory* h = hkThreadMemory::GetMonitorStream();
             if (buf->m_len == (buf->m_cap & 0x3fffffff))
             {
-                ResizeAudioStream(h->m_pAllocator, buf, 1);
+                ResizeAudioStream(h->m_pMemoryAllocator, buf, 1);
             }
             char* slot = buf->m_data + buf->m_len;
             _ReadWriteBarrier();
@@ -690,12 +601,6 @@ struct BufferInfo
     unsigned int length;
     unsigned int capacity;
 };
-struct FourIntegerPointerRecord
-{
-    int unk00, unk04, unk08, unk0C;
-    void* unk10;
-};
-extern FourIntegerPointerRecord* __cdecl FUN_00c85750();
 extern void __cdecl ResizeAudioStream(void*, BufferInfo*, int);
 // Appends zero bytes until no bits selected by alignment minus one remain set in the buffer length.
 // @fnv 0x00e31850
@@ -704,9 +609,9 @@ void __cdecl FUN_00e31850(unsigned int alignment, BufferInfo* buffer)
     unsigned int mask = alignment - 1;
     while (buffer->length & mask)
     {
-        FourIntegerPointerRecord* alloc = FUN_00c85750();
+        hkThreadMemory* alloc = hkThreadMemory::GetMonitorStream();
         if (buffer->length == (buffer->capacity & 0x3fffffff))
-            ResizeAudioStream(alloc->unk10, buffer, 1);
+            ResizeAudioStream(alloc->m_pMemoryAllocator, buffer, 1);
         memset(buffer->data + buffer->length, 0, 1);
         ++buffer->length;
     }
@@ -723,16 +628,6 @@ struct FUN_00e318a0_buf
     unsigned int m_uCapacityFlags;
 };
 
-struct FUN_00e318a0_holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    void* m_pAllocator;
-};
-
-extern FUN_00e318a0_holder* __cdecl FUN_00c85750();
 extern void __cdecl ResizeAudioStream(void* apAllocator, FUN_00e318a0_buf* apBuf, int aiFlag);
 
 // @fnv 0x00e318a0
@@ -743,10 +638,10 @@ void __cdecl FUN_00e318a0(unsigned int auBit, FUN_00e318a0_buf* apBuf)
     {
         do
         {
-            FUN_00e318a0_holder* holder = FUN_00c85750();
+            hkThreadMemory* holder = hkThreadMemory::GetMonitorStream();
             if (apBuf->m_uLength == (apBuf->m_uCapacityFlags & 0x3fffffff))
             {
-                ResizeAudioStream(holder->m_pAllocator, apBuf, 1);
+                ResizeAudioStream(holder->m_pMemoryAllocator, apBuf, 1);
             }
             char* volatile* pp = &apBuf->m_pData;
             char* p = (char*)((unsigned int)*pp + apBuf->m_uLength);

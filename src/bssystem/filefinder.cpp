@@ -1,6 +1,18 @@
+#define FNV64_BSSIMPLELIST_CUSTOM_NEW
+#define FNV64_BSSIMPLELIST_CUSTOM_DELETE
+#include "../../include/BSSimpleList.h"
 // bssystem/filefinder.cpp: FileFinder, Loader_S (12 functions)
 
+#include "../../include/MemoryManager.h"
+#include "../../include/BSFile.h"
+#include "../../include/IOManager.h"
+#include "../../include/OSGlobals.h"
 #include "filefinder_filefinder_decls.h"
+
+__forceinline void* BSFile::operator new(size_t size)
+{
+    return g_memoryManager.Allocate(size);
+}
 
 // Returns the file location from g_fileFinder's lookup for fileName, or NOTFOUND when g_fileFinder is null.
 // @fnv 0x00456a20
@@ -69,7 +81,7 @@ NiFile* FileFinder::GetFile(const char* name, NiFile::OpenMode mode, unsigned in
     {
         if (mode == 1)
         {
-            pInputFile = new BSFile(name, mode, bufferSize, false);
+            pInputFile = new BSFile(name, (int)mode, bufferSize, false);
         }
         else
         {
@@ -86,8 +98,8 @@ NiFile* FileFinder::GetFile(const char* name, NiFile::OpenMode mode, unsigned in
                 }
                 else
                 {
-                    pInputFile = new BSFile(cFileName, mode, bufferSize, false);
-                    pInputFile->Open(false, false);
+                    pInputFile = new BSFile(cFileName, (int)mode, bufferSize, false);
+                    static_cast<BSFile*>(pInputFile)->Open(false, false);
                 }
             }
         }
@@ -165,17 +177,13 @@ int FUN_00afe220_shell::FUN_00afe220(char* apFilePath, unsigned int aiFlags, uns
 int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
 __declspec(dllimport) int __stdcall SetWindowTextA(void*, const char*);
 bool __cdecl FUN_00446e10();
-struct IOManager_S
-{
-    int GetParentNode();
-    int CallInnerF3();
-};
-struct OSGlobals_S
-{
-    void* GetFlags();
-};
-extern IOManager_S* DAT_01202d98;
-extern OSGlobals_S* g_osGlobals;
+// The shared classes lack these out-of-line accessors; a single fastcall argument preserves their ECX-only ABI.
+// IOManager's 0x18 getter and 0x64 queue call bind to 0x004491f0 and 0x00446da0; OSGlobals' window getter is 0x0044ddc0.
+int __fastcall GetBackgroundLoadingCount(IOManager* manager);
+int __fastcall GetPendingLoadingTaskCount(IOManager* manager);
+void* __fastcall GetLoadingStatusWindow(OSGlobals* globals);
+extern IOManager* DAT_01202d98;
+extern OSGlobals* g_osGlobals;
 extern const char* DAT_011a2fe8;
 extern bool DAT_011c3bfc;
 struct Loader_S
@@ -192,8 +200,8 @@ void Loader_S::UpdateLoadingStatus()
     {
         int iPost = CallVirtual17();
         int iRefs = FUN_00446dc0();
-        int iBackground = DAT_01202d98->GetParentNode();
-        int iTasks = DAT_01202d98->CallInnerF3();
+        int iBackground = GetBackgroundLoadingCount(DAT_01202d98);
+        int iTasks = GetPendingLoadingTaskCount(DAT_01202d98);
         if (iBackground || iRefs || iPost || iTasks)
         {
             char buffer[260];
@@ -205,7 +213,7 @@ void Loader_S::UpdateLoadingStatus()
         else if (DAT_011c3bfc)
         {
             DAT_011c3bfc = false;
-            SetWindowTextA(g_osGlobals->GetFlags(), DAT_011a2fe8);
+            SetWindowTextA(GetLoadingStatusWindow(g_osGlobals), DAT_011a2fe8);
         }
     }
 }
@@ -287,44 +295,17 @@ inline void DeadQ6()
     int a[6];
 }
 class Actor;
-struct MM
-{
-    void Deallocate(void*);
-};
 bool __cdecl FUN_00b01af0(const char*);
 unsigned int __cdecl strlen(const char*);
 const char* __cdecl strrchr(const char*, int);
 void* __cdecl _memmove(void*, const void*, unsigned int);
 void __cdecl strcat_s(char*, unsigned int, const char*);
-template <class T> class BSSimpleList
-{
-  public:
-    T m_item;
-    BSSimpleList<T>* m_pkNext;
-    BSSimpleList()
-    {
-        m_item = 0;
-        m_pkNext = 0;
-    }
-    ~BSSimpleList()
-    {
-        RemoveAll();
-    }
-    void AddHead(T const& item);
-    void RemoveAll();
-    bool IsEmpty()
-    {
-        return (m_pkNext == 0 && m_item == 0) ? 1 : 0;
-    }
-    static void* operator new(unsigned int size)
-    {
-        return g_memoryManager.Allocate(size);
-    }
-    static void operator delete(void* p)
-    {
-        ((MM*)&g_memoryManager)->Deallocate(p);
-    }
-};
+#include "../../include/BSSimpleList.h"
+template <class T> inline BSSimpleList<T>::BSSimpleList() { m_item = 0; m_pkNext = 0; }
+template <class T> inline BSSimpleList<T>::~BSSimpleList() { RemoveAll(); }
+template <class T> inline bool BSSimpleList<T>::IsEmpty() { return (m_pkNext == 0 && m_item == 0) ? 1 : 0; }
+template <class T> inline void* BSSimpleList<T>::operator new(unsigned int size) { return g_memoryManager.Allocate(size); }
+template <class T> inline void BSSimpleList<T>::operator delete(void* p) { g_memoryManager.Deallocate(p); }
 inline void* __cdecl operator new[](unsigned int n)
 {
     return g_memoryManager.Allocate(n);
@@ -375,10 +356,6 @@ BSSimpleList<Actor*>* __cdecl FUN_00afe5b0(const char* path, const char* name, i
 }
 
 char* __cdecl strstr(const char*, const char*);
-struct FinderMemory : MemoryManager
-{
-    void Deallocate(void*);
-};
 struct FileMatchList
 {
     void* data;
@@ -413,7 +390,7 @@ struct FileMatchList
     }
     static void operator delete(void* object)
     {
-        static_cast<FinderMemory*>(&g_memoryManager)->Deallocate(object);
+        g_memoryManager.Deallocate(object);
     }
 };
 FileMatchList* FUN_00afe5b0(const char*, const char*, unsigned int, FileMatchList*);

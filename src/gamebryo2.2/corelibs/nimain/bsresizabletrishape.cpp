@@ -1,3 +1,7 @@
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/BSResizableTriShape.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/StrArr.h"
 
 // src/gamebryo2.2/corelibs/nimain/bsresizabletrishape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/bsresizabletrishape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -11,18 +15,8 @@ GlobalObjectO2_00a7b610* __cdecl FUN_00a86d20()
     return &g_011f5b34;
 }
 
-struct NiBound;
-struct BSResizableTriShape
-{
-};
-
-struct FUN_00a86d30_shell : BSResizableTriShape
-{
-    NiBound* FUN_00a86d30();
-};
-
 // @fnv 0x00a86d30
-NiBound* __thiscall FUN_00a86d30_shell::FUN_00a86d30()
+void* BSResizableTriShape::GetBoundingVolume()
 {
     return (NiBound*)((char*)this + 0xc8);
 }
@@ -31,50 +25,35 @@ extern "C" void __cdecl _delete(void*, unsigned int);
 void __fastcall FUN_00a89760(void*);
 extern void* DAT_0109e704;
 
-struct FUN_00a86da0_shell : BSResizableTriShape
-{
-    void* FUN_00a86da0(unsigned int flags);
-};
+// Preserve the original x86 field offsets where shared headers expose no matching fields.
 
+// The shared class has no scalar deleting destructor declaration; use the original register ABI here.
 // Sets the vtable pointer, calls FUN_00a89760 on this, and if flags bit 0 is set deletes this with size 0xd8, returning this.
 // @fnv 0x00a86da0
-void* FUN_00a86da0_shell::FUN_00a86da0(unsigned int flags)
+void* __fastcall DestroyResizableTriShape(BSResizableTriShape* self, void*, unsigned int flags)
 {
-    ((void**)(this))[0] = &DAT_0109e704;
-    FUN_00a89760(this);
+    ((void**)(self))[0] = &DAT_0109e704;
+    FUN_00a89760(self);
     if (flags & 1)
-        _delete(this, 0xd8);
-    return this;
+        _delete(self, 0xd8);
+    return self;
 }
 
-struct NiRenderer;
-struct NiBound
-{
-    unsigned int m_uiX;
-    unsigned int m_uiY;
-    unsigned int m_uiZ;
-    float m_w;
-};
 struct FUN_00a74600_shell
 {
     void __thiscall FUN_00a74600(NiRenderer* apRenderer);
 };
 
-struct FUN_00a86e40_shell
-{
-    void __thiscall FUN_00a86e40(NiRenderer* apRenderer);
-};
-
 // Copies four dwords from offsets 0xc8-0xd4 into the NiBound at this+0x20, then calls FUN_00a74600 with the renderer.
 // @fnv 0x00a86e40
-void __thiscall FUN_00a86e40_shell::FUN_00a86e40(NiRenderer* apRenderer)
+void BSResizableTriShape::RenderWithRenderer(NiRenderer* apRenderer)
 {
-    float fW = *(float*)(this + 0xd4);
-    NiBound* pkDest = *(NiBound**)(this + 0x20);
-    pkDest->m_uiX = *(unsigned int*)(this + 0xc8);
-    pkDest->m_uiY = *(unsigned int*)(this + 0xcc);
-    pkDest->m_uiZ = *(unsigned int*)(this + 0xd0);
-    pkDest->m_w = fW;
+    float fW = *(float*)((char*)this + 0xd4);
+    NiBound* pkDest = *(NiBound**)((char*)this + 0x20);
+    *reinterpret_cast<unsigned int*>(&pkDest->m_kCenter.x) = *(unsigned int*)((char*)this + 0xc8);
+    *reinterpret_cast<unsigned int*>(&pkDest->m_kCenter.y) = *(unsigned int*)((char*)this + 0xcc);
+    *reinterpret_cast<unsigned int*>(&pkDest->m_kCenter.z) = *(unsigned int*)((char*)this + 0xd0);
+    pkDest->m_fRadius = fW;
     ((FUN_00a74600_shell*)this)->FUN_00a74600(apRenderer);
 }
 
@@ -82,36 +61,23 @@ struct FUN_00a74480_holder
 {
     void __thiscall FUN_00a74480(unsigned int);
 };
-struct FUN_00a86dd0
-{
-    FUN_00a86dd0(unsigned int);
-};
+// The shared class has no matching constructor declaration; initialise existing storage here.
 // Calls the base constructor with a, installs the vtable pointer, and zeroes the field at offset 0xC4.
 // @fnv 0x00a86dd0
-FUN_00a86dd0::FUN_00a86dd0(unsigned int a)
+BSResizableTriShape* __fastcall ConstructResizableTriShape(BSResizableTriShape* self, void*, unsigned int a)
 {
-    ((FUN_00a74480_holder*)this)->FUN_00a74480(a);
-    *(void**)this = (void*)&DAT_0109e704;
-    *(unsigned int*)((char*)this + 0xC4) = 0;
+    ((FUN_00a74480_holder*)self)->FUN_00a74480(a);
+    *(void**)self = (void*)&DAT_0109e704;
+    *(unsigned int*)((char*)self + 0xC4) = 0;
+    return self;
 }
 
-struct NiObject;
-struct CloningProcess;
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-    void __thiscall FUN_00a744a0();
-};
 struct FUN_00a744c0_holder
 {
     void __thiscall FUN_00a744c0(BSResizableTriShape* pkClone, CloningProcess& kCloning);
 };
-struct FUN_00a86e80_shell : BSResizableTriShape
-{
-    NiObject* __thiscall FUN_00a86e80(CloningProcess& kCloning);
-};
 // @fnv 0x00a86e80
-NiObject* __thiscall FUN_00a86e80_shell::FUN_00a86e80(CloningProcess& kCloning)
+NiObject* BSResizableTriShape::MakeClone(CloningProcess& kCloning)
 {
     BSResizableTriShape* pkObject;
     pkObject = (BSResizableTriShape*)BSFadeNode::operator new(0xD8);
@@ -129,67 +95,36 @@ NiObject* __thiscall FUN_00a86e80_shell::FUN_00a86e80(CloningProcess& kCloning)
     return (NiObject*)pkObject;
 }
 
-struct NiBinaryStream
-{
-    int _00;
-    int position;
-    int _08;
-    int(__cdecl* write)(NiBinaryStream*, void*, unsigned int, unsigned int*, int);
-};
-struct NiStream
-{
-    char _00[0x250];
-    NiBinaryStream* m_pBackingStream;
-};
+// NiStream has different class/struct declarations in the working and approved headers.
+// Keep the original pointer ABI for these stream entry points without a local stream definition.
 struct FUN_00a71d10_shell
 {
-    void __thiscall FUN_00a71d10(NiStream&);
-};
-struct FUN_00a86ed0_shell : BSResizableTriShape
-{
-    void __thiscall FUN_00a86ed0(NiStream&);
+    void __thiscall FUN_00a71d10(void*);
 };
 // @fnv 0x00a86ed0
-void __thiscall FUN_00a86ed0_shell::FUN_00a86ed0(NiStream& stream)
+void __fastcall SaveResizableTriShape(BSResizableTriShape* self, void*, void* stream)
 {
-    ((FUN_00a71d10_shell*)this)->FUN_00a71d10(stream);
-    NiBinaryStream* __restrict input = stream.m_pBackingStream;
+    ((FUN_00a71d10_shell*)self)->FUN_00a71d10(stream);
+    NiBinaryStream* __restrict input = *(NiBinaryStream**)((char*)stream + 0x250);
     unsigned int size = 4;
-    input->position += input->write(input, (void*)((char*)this + 0xc4), 4, &size, 1);
+    *(unsigned int*)((char*)input + 4) +=
+        (*(NiBinaryStream::WriteFunction*)((char*)input + 0xc))(input, (void*)((char*)self + 0xc4), 4, &size, 1);
 }
 
-namespace fnv_00a86f10 {
-struct NiBinaryStream
-{
-    unsigned int _m0;
-    unsigned int m_pos;
-    int(__cdecl* m_pfnRead)(NiBinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-};
-struct NiStream
-{
-    char _pad[0x24c];
-    NiBinaryStream* m_pUnderlyingStream;
-};
 struct BaseX86f10
 {
-    void __thiscall FUN_00a98ea0(NiStream&);
+    void __thiscall FUN_00a98ea0(void*);
 };
-struct FUN_00a86f10_shell : BaseX86f10
-{
-    char _pad[0xc4];
-    unsigned int m_val;
-    void __thiscall ReadValueFromStream(NiStream&);
-};
-// Calls FUN_00a98ea0, then reads 4 bytes from the stream's binary reader into m_val and advances the stream position.
+// Calls FUN_00a98ea0, then reads 4 bytes into this+0xc4 and advances the binary stream position.
 // @fnv 0x00a86f10
-void __thiscall FUN_00a86f10_shell::ReadValueFromStream(NiStream& stream)
+void __fastcall LoadResizableTriShape(BSResizableTriShape* self, void*, void* stream)
 {
-    FUN_00a98ea0(stream);
-    NiBinaryStream* __restrict input = stream.m_pUnderlyingStream;
+    ((BaseX86f10*)self)->FUN_00a98ea0(stream);
+    NiBinaryStream* __restrict input = *(NiBinaryStream**)((char*)stream + 0x24c);
     unsigned int size = 4;
-    input->m_pos += input->m_pfnRead(input, &m_val, 4, &size, 1);
+    *(unsigned int*)((char*)input + 4) +=
+        (*(NiBinaryStream::ReadFunction*)((char*)input + 8))(input, (char*)self + 0xc4, 4, &size, 1);
 }
-}  // namespace fnv_00a86f10
 
 struct P03MM
 {
@@ -241,13 +176,9 @@ struct WBHelper
     virtual void v29();
     virtual void SetWorldBound(NiBound*);
 };
-struct FUN_00c1a4a0_Shape
-{
-    void __thiscall UpdateWorldBound();
-};
 // Allocates and initialises the world bound if absent, then updates it from the object's bound and transform.
 // @fnv 0x00c1a4a0
-void __thiscall FUN_00c1a4a0_Shape::UpdateWorldBound()
+void BSResizableTriShape::UpdateWorldBound()
 {
     NiBound* kBound;
     if (!*(NiBound**)((char*)this + 0x20))
@@ -255,26 +186,14 @@ void __thiscall FUN_00c1a4a0_Shape::UpdateWorldBound()
         kBound = (NiBound*)g_memoryManager.Allocate(16);
         ((WBHelper*)this)->SetWorldBound(kBound);
         kBound = *(NiBound**)((char*)this + 0x20);
-        kBound->m_uiX = _NiPoint3_ZERO;
-        kBound->m_uiY = *(unsigned int*)&DAT_011f4270;
-        kBound->m_uiZ = *(unsigned int*)&DAT_011f4274;
-        kBound->m_w = 0.0f;
+        *reinterpret_cast<unsigned int*>(&kBound->m_kCenter.x) = _NiPoint3_ZERO;
+        *reinterpret_cast<unsigned int*>(&kBound->m_kCenter.y) = *(unsigned int*)&DAT_011f4270;
+        *reinterpret_cast<unsigned int*>(&kBound->m_kCenter.z) = *(unsigned int*)&DAT_011f4274;
+        kBound->m_fRadius = 0.0f;
     }
     ((NiBoundUpdateHelper*)*(NiBound**)((char*)this + 0x20))
         ->Update(*(NiBound*)((char*)this + 0xC8), *(NiTransformDummy*)((char*)this + 0x68));
 }
-
-struct StrArr
-{
-    unsigned char _00[8];
-    unsigned short _08;
-    unsigned short _0a;
-    unsigned short _0c;
-    unsigned short _0e;
-
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int index, char*& value);
-};
 
 struct Caller74690
 {
@@ -286,110 +205,53 @@ char* __cdecl FUN_00a7d510(char const* text, char const* value);
 
 extern char str_0109e800[];
 
-struct FUN_00a86f50_shell : Caller74690
-{
-    unsigned char _00[0xc3];
-    char* _c4;
-
-    void __thiscall FUN_00a86f50(StrArr* strings);
-};
-
 // @fnv 0x00a86f50
-void FUN_00a86f50_shell::FUN_00a86f50(StrArr* strings)
+void BSResizableTriShape::GetViewerStrings(NiViewerStringsArray* array)
 {
+    StrArr* strings = (StrArr*)array;
     char* value;
     unsigned int index;
     unsigned int count;
 
-    FUN_00a74690(strings);
+    ((Caller74690*)this)->FUN_00a74690(strings);
 
     value = _FUN_00a7d330(*reinterpret_cast<char**>(&g_011f5b34));
-    index = strings->_0a;
-    count = strings->_08;
+    index = strings->m_usSize;
+    count = strings->m_usMaxSize;
 
     if (index >= count)
-        strings->SetSize(static_cast<unsigned int>(strings->_0e) + index);
+        strings->SetSize(static_cast<unsigned int>(strings->m_usGrowBy) + index);
 
     strings->SetAt(index, value);
 
-    value = FUN_00a7d510(str_0109e800, _c4);
-    index = strings->_0a;
-    count = strings->_08;
+    value = FUN_00a7d510(str_0109e800, *(char**)((char*)this + 0xc4));
+    index = strings->m_usSize;
+    count = strings->m_usMaxSize;
 
     if (index >= count)
-        strings->SetSize(static_cast<unsigned int>(strings->_0e) + index);
+        strings->SetSize(static_cast<unsigned int>(strings->m_usGrowBy) + index);
 
     strings->SetAt(index, value);
 }
 
-struct FUN_00a86e00_cls
+struct TriShapeImmediateRenderer
 {
-    void* m_pVTable;
-    unsigned int m_i04;
-    unsigned int m_i08;
-    unsigned int m_i0c;
-    unsigned int m_i10;
-    unsigned int m_i14;
-    unsigned int m_i18;
-    unsigned int m_i1c;
-    NiBound* m_pBound;
-    unsigned int m_i24;
-    unsigned int m_i28;
-    unsigned int m_i2c;
-    unsigned int m_i30;
-    unsigned int m_i34;
-    unsigned int m_i38;
-    unsigned int m_i3c;
-    unsigned int m_i40;
-    unsigned int m_i44;
-    unsigned int m_i48;
-    unsigned int m_i4c;
-    unsigned int m_i50;
-    unsigned int m_i54;
-    unsigned int m_i58;
-    unsigned int m_i5c;
-    unsigned int m_i60;
-    unsigned int m_i64;
-    unsigned int m_i68;
-    unsigned int m_i6c;
-    unsigned int m_i70;
-    unsigned int m_i74;
-    unsigned int m_i78;
-    unsigned int m_i7c;
-    unsigned int m_i80;
-    unsigned int m_i84;
-    unsigned int m_i88;
-    unsigned int m_i8c;
-    unsigned int m_i90;
-    unsigned int m_i94;
-    unsigned int m_i98;
-    unsigned int m_i9c;
-    unsigned int m_ia0;
-    unsigned int m_ia4;
-    unsigned int m_ia8;
-    unsigned int m_iac;
-    unsigned int m_ib0;
-    unsigned int m_ib4;
-    unsigned int m_ib8;
-    unsigned int m_ibc;
-    unsigned int m_ic0;
-    unsigned int m_ic4;
-    NiBound m_bound;
     void FUN_00a745c0();
-    void FUN_00a86e00();
 };
 
-// Copies m_bound into the object pointed to by m_pBound, then calls FUN_00a745c0.
+// The shared class only declares RenderImmediate with a renderer argument.
+// Copies the local bound into the world bound, then calls the base immediate renderer.
 // @fnv 0x00a86e00
-void FUN_00a86e00_cls::FUN_00a86e00()
+void __fastcall RenderResizableTriShape(BSResizableTriShape* self, void*)
 {
-    NiBound* pBound = m_pBound;
-    float w = m_bound.m_w;
-    pBound->m_uiX = m_bound.m_uiX;
-    pBound->m_uiY = m_bound.m_uiY;
-    pBound->m_uiZ = m_bound.m_uiZ;
-    pBound->m_w = w;
-    FUN_00a745c0();
+    NiBound* pBound = *(NiBound**)((char*)self + 0x20);
+    NiBound& m_bound = *(NiBound*)((char*)self + 0xc8);
+    float w = m_bound.m_fRadius;
+    *reinterpret_cast<unsigned int*>(&pBound->m_kCenter.x) = *reinterpret_cast<unsigned int*>(&m_bound.m_kCenter.x);
+    *reinterpret_cast<unsigned int*>(&pBound->m_kCenter.y) = *reinterpret_cast<unsigned int*>(&m_bound.m_kCenter.y);
+    *reinterpret_cast<unsigned int*>(&pBound->m_kCenter.z) = *reinterpret_cast<unsigned int*>(&m_bound.m_kCenter.z);
+    pBound->m_fRadius = w;
+    ((TriShapeImmediateRenderer*)self)->FUN_00a745c0();
 }
 
 void __cdecl FUN_00a98eb0();
@@ -407,108 +269,39 @@ void __cdecl FUN_00a877f0()
     FUN_00a74510();
 }
 
-struct FUN_00a87190_shell : BSResizableTriShape
+struct TriShapePrimitiveSetter
 {
-    void __thiscall FUN_00a74500(unsigned int value);
-    void __thiscall FUN_00a87190(unsigned int value);
+    void FUN_00a74500(unsigned int value);
 };
 
 // @fnv 0x00a87190
-void __thiscall FUN_00a87190_shell::FUN_00a87190(unsigned int value)
+void BSResizableTriShape::SetNumPrimitives(unsigned int value)
 {
-    FUN_00a74500(value);
+    ((TriShapePrimitiveSetter*)this)->FUN_00a74500(value);
 }
 
-struct S_00a86d50_Bound
-{
-    unsigned int m_uiX;
-    unsigned int m_uiY;
-    unsigned int m_uiZ;
-    float m_w;
-};
-
-struct S_00a86d50_WR
+struct BoundRadiusValue
 {
     float v;
 };
 
-struct S_00a86d50_V3
+struct BoundCenterBits
 {
     int x;
     int y;
     int z;
 };
 
-struct S_00a86d50_Foo
-{
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    S_00a86d50_Bound* unk20;
-
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAc;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBc;
-    int unkC0;
-    int unkC4;
-
-    S_00a86d50_V3 unkC8;
-    float unkD4;
-
-    void __thiscall SetBounds(S_00a86d50_V3 p, S_00a86d50_WR rw);
-};
-
+// Keep the original centre/radius value arguments: the shared NiBound has a nontrivial copy constructor.
 // @fnv 0x00a86d50
-void __thiscall S_00a86d50_Foo::SetBounds(S_00a86d50_V3 p, S_00a86d50_WR rw)
+void __fastcall SetResizableTriShapeBounds(BSResizableTriShape* self, void*, BoundCenterBits p, BoundRadiusValue rw)
 {
-    this->unkD4 = rw.v;
+    *(float*)((char*)self + 0xd4) = rw.v;
     float t = rw.v;
-    this->unkC8 = p;
-    S_00a86d50_Bound* pBound = this->unk20;
-    pBound->m_uiX = p.x;
-    pBound->m_uiY = p.y;
-    pBound->m_uiZ = p.z;
-    pBound->m_w = t;
+    *(BoundCenterBits*)((char*)self + 0xc8) = p;
+    NiBound* pBound = *(NiBound**)((char*)self + 0x20);
+    *reinterpret_cast<unsigned int*>(&pBound->m_kCenter.x) = p.x;
+    *reinterpret_cast<unsigned int*>(&pBound->m_kCenter.y) = p.y;
+    *reinterpret_cast<unsigned int*>(&pBound->m_kCenter.z) = p.z;
+    pBound->m_fRadius = t;
 }

@@ -1,6 +1,81 @@
-// fallout_shared/facegen/bsfacegenmorphdata.cpp: BSFaceGenMorphDataHead, DifferentialArray, HolderDb0, BSFaceGenMorphDataHair (26 functions)
+#include "../../../include/BSFaceGenBaseMorphExtraData.h"
+#include "../../../include/FaceGenMatrix.h"
+// RTTI 0x0101dce4 and ctor 0x004968b0 identify the 8-byte NiRefObject base, not PathingInfo.
+#include "../../../include/NiRefObject.h"
+// fallout_shared/facegen/bsfacegenmorphdata.cpp: BSFaceGenMorphDataHead, DifferentialArray, BSFaceGenMorphDataHair (26 functions)
 
-#include "bsfacegenmorphdata_decls.h"
+#include "../../../include/FaceGenMatrix.h"
+#include "../../../include/BSFaceGenMorph.h"
+#include "../../../include/BSFaceGenMorphDifferential.h"
+#include "../../../include/BSFaceGenMorphStatistical.h"
+#include "../../../include/NiExtraData.h"
+#include "../../../include/NiGeometry.h"
+#include "../../../include/NiGeometryData.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/BSFaceGenMorphData.h"
+#include "../../../include/BSFaceGenMorphDataHead.h"
+#include "../../../include/BSFaceGenMorphDataHair.h"
+#include "../../../include/BSFadeNode.h"
+#include "../../../include/NiFixedString.h"
+
+void* __cdecl operator new(unsigned int);
+void* __cdecl operator new[](unsigned int);
+void __cdecl operator delete(void*);
+extern "C" void* __cdecl memset(void*, int, unsigned int);
+int __cdecl FUN_00404dc0(const char*, const char*);
+const char* __cdecl PrepareScriptMessage(const char*, bool);
+int __cdecl Warning(const char*, ...);
+const char* __cdecl FUN_005dd830(unsigned int);
+const char* __cdecl FUN_005dd840(unsigned int);
+const char* __cdecl FUN_005dd850(unsigned int);
+const char* __cdecl FUN_00661da0(unsigned int);
+extern const char DAT_01065e40[];
+extern const char DAT_01065dd0[];
+extern const char DAT_01065d60[];
+extern const char DAT_01065ce8[];
+class BGSPerkEntry;
+#include "../../../include/BSSimpleList.h"
+class MorphName
+{
+  public:
+    const char* FUN_0044a560();
+    unsigned int data[7];
+};
+class DifferentialEntry : public MorphName
+{
+  public:
+    unsigned int vertexData;
+};
+class StatisticalEntry : public MorphName
+{
+  public:
+    unsigned int columns;
+    FaceGenMatrix<float> matrix;
+};
+class DifferentialArray
+{
+  public:
+    unsigned int GetEntryCount();
+    DifferentialEntry* FUN_00662860(unsigned int);
+    unsigned int data[6];
+};
+class StatisticalArray
+{
+  public:
+    unsigned int FUN_0065cc30();
+    StatisticalEntry* FUN_00662890(unsigned int);
+    unsigned int data[6];
+};
+class FaceGenTriData
+{
+  public:
+    unsigned char prefix[0xc0];
+    DifferentialArray differential;
+    StatisticalArray statistical;
+    unsigned int FUN_0065c700();
+    NiPoint3& FUN_0065c720(unsigned int);
+};
+
 // Builds differential and statistical morph arrays for expressions, modifiers, phonemes and custom morphs from the given tri data.
 // @fnv 0x00660ba0
 BSFaceGenMorphDataHead::BSFaceGenMorphDataHead(FaceGenTriData* tri)
@@ -289,22 +364,16 @@ BSFaceGenMorphDataHead::BSFaceGenMorphDataHead(FaceGenTriData* tri)
 }
 
 void __cdecl FUN_00ec7c56();
-struct V_006578b0
-{
-    int pad[3];
-    unsigned int* first;
-    unsigned int* FUN_006578b0(unsigned int _Pos);
-};
 // Bounds-checks _Pos against the container size and returns a pointer to the element at that position.
 // @fnv 0x006578b0
-unsigned int* V_006578b0::FUN_006578b0(unsigned int _Pos)
+template <> float* FaceGenMatrix<float>::FUN_006578b0(unsigned int _Pos)
 {
-    if (_Pos >= (unsigned int)reinterpret_cast<FaceGenMatrix<float>*>(this)->FUN_00662820())
+    if (_Pos >= FUN_00662820())
         FUN_00ec7c56();
     do
     {
     } while (0);
-    return first + _Pos;
+    return m_pFirst + _Pos;
 }
 
 int __cdecl FUN_00ec7ce3(void* dst, unsigned int dstSize, const void* src, unsigned int count);
@@ -320,19 +389,13 @@ char* __cdecl FUN_00660270(const char* first, const char* last, char* dest)
     return result;
 }
 
-struct BSFadeNode
-{
-    int _pad;
-    BSFadeNode(char const*);
-};
-
 extern char const* const g_011d37c8_arg1;
-extern BSFadeNode* DAT_011d5b8c;
+extern NiFixedString* DAT_011d5b8c;
 
 // @fnv 0x00662760
 void __cdecl FUN_00662760()
 {
-    DAT_011d5b8c = new BSFadeNode((char const*)&g_011d37c8_arg1);
+    DAT_011d5b8c = new NiFixedString((char const*)&g_011d37c8_arg1);
 }
 
 void __cdecl FUN_00ec7c56();
@@ -349,20 +412,14 @@ DifferentialEntry* DifferentialArray::FUN_00662860(unsigned int _Pos)
     return (DifferentialEntry*)(data[3] + _Pos * 0x34);
 }
 
-extern int g_011d5ba8;
-
-struct FUN_00662390_shell
-{
-    int* __thiscall GetGlobalIntPtr();
-};
+extern NiRTTI g_011d5ba8;
 
 // @fnv 0x00662390
-int* FUN_00662390_shell::GetGlobalIntPtr()
+const NiRTTI* BSFaceGenMorphDataHair::GetRTTI() const
 {
     return &g_011d5ba8;
 }
 
-struct NiRTTI;
 extern NiRTTI g_011d5ba0;
 
 struct FUN_006626e0_shell
@@ -382,104 +439,54 @@ int __fastcall GetEntryCount(int* thisPtr)
     return (*(thisPtr + 4) - *(thisPtr + 3)) / 0x34;
 }
 
-struct EBase
-{
-    virtual ~EBase();
-};
-
-extern int DAT_01065f04;
-
-struct FUN_00661d40_shell : EBase
-{
-    void SetVTableAndDestroy();
-};
-
 // @fnv 0x00661d40
-void FUN_00661d40_shell::SetVTableAndDestroy()
+BSFaceGenMorphData::~BSFaceGenMorphData()
 {
-    *reinterpret_cast<int*>(this) = 0x01065f04;
-    EBase::~EBase();
 }
-
-struct FUN_00662820_shell
-{
-    int __thiscall FUN_00662820();
-};
 
 // @fnv 0x00662820
-int __thiscall FUN_00662820_shell::FUN_00662820()
+template <> unsigned int FaceGenMatrix<float>::FUN_00662820()
 {
-    return (*reinterpret_cast<int*>(this + 0x10) - *reinterpret_cast<int*>(this + 0xc)) >> 2;
+    return (reinterpret_cast<int>(m_pLast) - reinterpret_cast<int>(m_pFirst)) >> 2;
 }
 
-struct HolderDe0
-{
-    void FUN_00661de0();
-};
 void __cdecl _delete(void*, unsigned int);
-struct HolderDb0
-{
-    void* FUN_00661db0(unsigned int);
-};
-// Calls FUN_00661de0 on this, frees this with _delete when flags has bit 0 set, and returns this.
+// Destroys this head morph data, frees this with _delete when flags has bit 0 set, and returns this.
 // @fnv 0x00661db0
-void* HolderDb0::FUN_00661db0(unsigned int flags)
+void* BSFaceGenMorphDataHead::FUN_00661db0(unsigned int flags)
 {
-    reinterpret_cast<HolderDe0*>(this)->FUN_00661de0();
+    BSFaceGenMorphDataHead::~BSFaceGenMorphDataHead();
     if (flags & 1)
         _delete(this, 24);
     return this;
 }
 
-struct FUN_00662110_Holder
-{
-    char _pad[12];
-    int* m12;
-    int FUN_00662110(int);
-};
-// Returns m12[idx] when m12 is set and idx is in [0,16], otherwise returns 0.
+// Returns modifiers[idx] when modifiers is set and idx is in [0,16], otherwise returns 0.
 // @fnv 0x00662110
-int FUN_00662110_Holder::FUN_00662110(int aiIndex)
+int BSFaceGenMorphDataHead::FUN_00662110(int aiIndex)
 {
-    return m12 && aiIndex > -1 && aiIndex < 0x11 ? m12[aiIndex] : 0;
+    return modifiers && aiIndex > -1 && aiIndex < 0x11 ? (int)modifiers[aiIndex] : 0;
 }
 
-struct S_00662150
-{
-    char _00[16];
-    int* f10;
-    int FUN_00662150(int);
-};
-// Returns f10[idx] when f10 is set and idx is in [0, 16), otherwise returns 0.
+// Returns phonemes[idx] when phonemes is set and idx is in [0, 16), otherwise returns 0.
 // @fnv 0x00662150
-int S_00662150::FUN_00662150(int aiIndex)
+int BSFaceGenMorphDataHead::FUN_00662150(int aiIndex)
 {
-    return f10 && aiIndex > -1 && aiIndex < 0x10 ? f10[aiIndex] : 0;
+    return phonemes && aiIndex > -1 && aiIndex < 0x10 ? (int)phonemes[aiIndex] : 0;
 }
 
-struct FUN_00662190_This
-{
-    char _pad[0x14];
-    int* fld14;
-    int FUN_00662190(int);
-};
-// Returns fld14[a] when fld14 is non-null and a is in [0,1), otherwise returns 0.
+// Returns custom[a] when custom is non-null and a is in [0,1), otherwise returns 0.
 // @fnv 0x00662190
-int FUN_00662190_This::FUN_00662190(int aiIndex)
+int BSFaceGenMorphDataHead::FUN_00662190(int aiIndex)
 {
-    return fld14 && aiIndex > -1 && aiIndex < 1 ? fld14[aiIndex] : 0;
+    return custom && aiIndex > -1 && aiIndex < 1 ? (int)custom[aiIndex] : 0;
 }
 
-struct BSFaceGenMorphDataHair
-{
-    void FUN_006623d0();
-    void* FUN_006623a0(unsigned int);
-};
 void __cdecl _delete(void*, unsigned int);
 // @fnv 0x006623a0
 void* BSFaceGenMorphDataHair::FUN_006623a0(unsigned int flags)
 {
-    this->FUN_006623d0();
+    BSFaceGenMorphDataHair::~BSFaceGenMorphDataHair();
     if (flags & 1)
         _delete(this, 12);
     return this;
@@ -503,10 +510,6 @@ void* Host006626f0::FUN_006626f0(unsigned int flags)
 
 extern int DAT_01065fac;
 void __cdecl _Deallocate(void*);
-struct FUN_00a7b300_shell
-{
-    void _FUN_00a7b300();
-};
 struct FUN_00662720_shell
 {
     int f0;
@@ -524,27 +527,23 @@ void FUN_00662720_shell::FUN_00662720()
         void* tmp = f12;
         _Deallocate(tmp);
     }
-    ((FUN_00a7b300_shell*)this)->_FUN_00a7b300();
+    ((NiExtraData*)this)->FUN_00a7b300();
 }
 
 namespace fnv_006627e0 {
-struct S_004b9900
-{
-    int FUN_004b9900(int);
-};
-extern S_004b9900* DAT_011d5b8c;
+extern NiFixedString* DAT_011d5b8c;
 // Calls FUN_004b9900(1) on DAT_011d5b8c if non-null, then sets DAT_011d5b8c to null.
 // @fnv 0x006627e0
 void FUN_006627e0()
 {
-    S_004b9900* p2;
+    NiFixedString* p2;
     {
-        S_004b9900* p1 = DAT_011d5b8c;
+        NiFixedString* p1 = DAT_011d5b8c;
         p2 = p1;
         {
             int v;
             if (p2)
-                v = p2->FUN_004b9900(1);
+                v = (int)p2->FUN_004b9900(1);
             else
                 v = 0;
         }
@@ -553,32 +552,16 @@ void FUN_006627e0()
 }
 }  // namespace fnv_006627e0
 
-extern int DAT_01065f04;
-struct PathingInfo
-{
-    PathingInfo();
-};
-struct FUN_00661d10_shell : PathingInfo
-{
-    FUN_00661d10_shell();
-};
 // @fnv 0x00661d10
-FUN_00661d10_shell::FUN_00661d10_shell()
+BSFaceGenMorphData::BSFaceGenMorphData()
 {
-    *(int*)this = (int)&DAT_01065f04;
 }
 
-struct FUN_006620d0_Class
-{
-    char _pad[8];
-    int* m_aiIndexedValues;
-    int __thiscall FUN_006620d0(int idx);
-};
 // Returns the element at idx from the array, or 0 if the array is null or idx is out of range (0..14).
 // @fnv 0x006620d0
-int __thiscall FUN_006620d0_Class::FUN_006620d0(int aiIndex)
+int __thiscall BSFaceGenMorphDataHead::FUN_006620d0(int aiIndex)
 {
-    return m_aiIndexedValues == 0 || aiIndex <= -1 || aiIndex >= 0xf ? 0 : m_aiIndexedValues[aiIndex];
+    return expressions == 0 || aiIndex <= -1 || aiIndex >= 0xf ? 0 : (int)expressions[aiIndex];
 }
 
 extern double _gModifierZero;
@@ -587,66 +570,25 @@ struct FUN_00662460_iface
     virtual void v0();
     virtual void FUN_00662460(int a, int b, float c);
 };
-struct FUN_00662460_shell
-{
-    int f0;
-    int f1;
-    FUN_00662460_iface* p;
-    void FUN_00662460(int a, int b, float c);
-};
-// Forwards a, b and c to the interface's FUN_00662460 when p and a are set and c is not below _gModifierZero.
+// Forwards a, b and c to the hair morph when it and a are set and c is not below _gModifierZero.
 // @fnv 0x00662460
-void FUN_00662460_shell::FUN_00662460(int aiArg1, int aiArg2, float c)
+void BSFaceGenMorphDataHair::FUN_00662460(int aiArg1, int aiArg2, float c)
 {
-    if (!p || !aiArg1 || c < _gModifierZero)
+    if (!hairMorph || !aiArg1 || c < _gModifierZero)
         return;
-    p->FUN_00662460(aiArg1, aiArg2, c);
+    ((FUN_00662460_iface*)hairMorph)->FUN_00662460(aiArg1, aiArg2, c);
 }
-
-struct S_006623d0_Item
-{
-    virtual ~S_006623d0_Item();
-};
-
-struct S_006623d0_Base
-{
-    int unk04;
-    virtual ~S_006623d0_Base();
-};
-
-struct FUN_006623d0 : S_006623d0_Base
-{
-    S_006623d0_Item* unk08;
-    ~FUN_006623d0();
-};
 
 // @fnv 0x006623d0
-FUN_006623d0::~FUN_006623d0()
+BSFaceGenMorphDataHair::~BSFaceGenMorphDataHair()
 {
-    if (unk08)
-        delete unk08;
+    if (hairMorph)
+        delete (BSFaceGenMorph*)hairMorph;
 }
 
-struct MorphItem
-{
-    virtual ~MorphItem();
-};
-struct MorphBase
-{
-    virtual ~MorphBase();
-    unsigned int ref;
-};
-struct FUN_00661de0 : MorphBase
-{
-    MorphItem** expressions;
-    MorphItem** modifiers;
-    MorphItem** phonemes;
-    MorphItem** custom;
-    virtual ~FUN_00661de0();
-};
 // Frees each non-null entry in the expressions, modifiers, phonemes and custom arrays, then deletes the arrays themselves.
 // @fnv 0x00661de0
-FUN_00661de0::~FUN_00661de0()
+BSFaceGenMorphDataHead::~BSFaceGenMorphDataHead()
 {
     if (expressions)
     {
@@ -678,22 +620,10 @@ FUN_00661de0::~FUN_00661de0()
     }
 }
 
-struct MorphVt
-{
-    virtual void v0();
-    virtual void v1(int a, int b, float c);
-};
-struct FUN_00662030_cls
-{
-    int FUN_006620d0(int idx);
-    int FUN_00662110(int idx);
-    int FUN_00662150(int idx);
-    int FUN_00662190(int idx);
-    void FUN_00662030(int sel, int p2, int p3, int p4, float p5);
-};
+typedef void (__thiscall* MorphApplyFunction)(BSFaceGenMorph*, int, int, float);
 // Dispatches on sel to one of four lookup functions with p2, then if the result is non-null calls v1(p3, p4, p5) on it.
 // @fnv 0x00662030
-void FUN_00662030_cls::FUN_00662030(int aiSelector, int aiIndex, int aiArg1, int aiArg2, float p5)
+void BSFaceGenMorphDataHead::FUN_00662030(int aiSelector, int aiIndex, int aiArg1, int aiArg2, float p5)
 {
     int pMorph = 0;
     switch (aiSelector)
@@ -712,32 +642,21 @@ void FUN_00662030_cls::FUN_00662030(int aiSelector, int aiIndex, int aiArg1, int
         break;
     }
     if (pMorph != 0)
-        ((MorphVt*)pMorph)->v1(aiArg1, aiArg2, p5);
+        ((MorphApplyFunction*)*(void**)pMorph)[1]((BSFaceGenMorph*)pMorph, aiArg1, aiArg2, p5);
 }
 
-struct HairMorphPoints
-{
-    NiPoint3* FUN_00726070();
-};
-class FUN_006621d0 : public BSFaceGenMorphData
-{
-  public:
-    BSFaceGenMorph* m_pkDifferential;
-    FUN_006621d0(FaceGenTriData* pkTriData);
-    virtual ~FUN_006621d0();
-};
 // @fnv 0x006621d0
-FUN_006621d0::FUN_006621d0(FaceGenTriData* pkTriData)
+BSFaceGenMorphDataHair::BSFaceGenMorphDataHair(FaceGenTriData* pkTriData)
 {
-    m_pkDifferential = 0;
+    hairMorph = 0;
     if (!pkTriData)
         return;
     if (!FUN_00404dc0("HairMorph", pkTriData->differential.FUN_00662860(0)->FUN_0044a560()))
     {
         unsigned int uiCountCur =
             ((FaceGenTriData*)&pkTriData->differential.FUN_00662860(0)->vertexData)->FUN_0065c700();
-        m_pkDifferential = new BSFaceGenMorphDifferential(uiCountCur);
-        NiPoint3* pkPointsTmp = ((HairMorphPoints*)m_pkDifferential)->FUN_00726070();
+        hairMorph = new BSFaceGenMorphDifferential(uiCountCur);
+        NiPoint3* pkPointsTmp = (NiPoint3*)((BSSimpleList<BGSPerkEntry*>*)hairMorph)->GetNext();
         for (unsigned int i = 0; i < uiCountCur; i++)
             pkPointsTmp[i] =
                 NiPoint3(((FaceGenTriData*)&pkTriData->differential.FUN_00662860(0)->vertexData)->FUN_0065c720(i).x,
@@ -746,77 +665,46 @@ FUN_006621d0::FUN_006621d0(FaceGenTriData* pkTriData)
     }
 }
 
-class NiFixedString;
 const NiFixedString& __cdecl FUN_00653460();
-class NiExtraData
+class GeometryBufferView
 {
   public:
-    NiExtraData(const NiFixedString&);
-    virtual ~NiExtraData();
-    int refCount;
-    int name;
-};
-struct V3
-{
-    float x, y, z;
-    V3();
-};
-struct GeometryStream
-{
     int first, second, third;
-    GeometryStream();
+    GeometryBufferView();
     void* FUN_00559450();
-    void CopyV3(V3*);
+    void CopyV3(NiPoint3*);
     void AddToA();
 };
-struct GeometryData
-{
-    bool FUN_00a67360(int);
-    void FUN_00a67410(GeometryStream*);
-    void FUN_00a673d0();
-};
-struct NiGeometry
-{
-    GeometryData* FUN_005495f0();
-    unsigned short FUN_00456650();
-};
 void* __cdecl _memcpy(void*, const void*, unsigned int);
-struct FUN_006624c0 : NiExtraData
-{
-    V3* vertices;
-    unsigned int count;
-    unsigned int originalCount;
-    FUN_006624c0(NiGeometry*, V3*, unsigned int);
-    virtual ~FUN_006624c0();
-};
-// Copies the geometry's vertex stream into a new V3 array, appending extra vertices when provided, and stores the counts.
+
+// Copies the geometry's vertex stream into a new NiPoint3 array, appending extra vertices when provided, and stores the counts.
 // @fnv 0x006624c0
-FUN_006624c0::FUN_006624c0(NiGeometry* geometry, V3* apExtraVertices, unsigned int extraCount)
+BSFaceGenBaseMorphExtraData::BSFaceGenBaseMorphExtraData(NiGeometry* geometry, NiPoint3* apExtraVertices, unsigned int extraCount)
     : NiExtraData(FUN_00653460())
 {
-    GeometryStream geometryStream;
-    if (geometry && geometry->FUN_005495f0() && geometry->FUN_005495f0()->FUN_00a67360(1))
-        geometry->FUN_005495f0()->FUN_00a67410(&geometryStream);
+    GeometryBufferView geometryStream;
+    if (geometry && geometry->GetModelData() && geometry->GetModelData()->IsGeometryDataStreamable(true))
+        geometry->GetModelData()->FUN_00a67410(geometryStream);
     if (geometryStream.FUN_00559450())
     {
-        originalCount = geometry->FUN_00456650();
+        originalCount = geometry->GetVertexCount();
         count = originalCount;
         if (apExtraVertices && extraCount)
             count += extraCount;
-        vertices = new V3[count];
+        vertices = new NiPoint3[count];
         unsigned int i = 0;
-        V3* dest = vertices;
+        NiPoint3* dest = vertices;
         for (; i < originalCount; i++)
         {
-            V3 vertex;
+            NiPoint3 vertex;
             geometryStream.CopyV3(&vertex);
             *dest = vertex;
             dest++;
             geometryStream.AddToA();
         }
         if (apExtraVertices && extraCount)
-            _memcpy(vertices + originalCount, apExtraVertices, extraCount * sizeof(V3));
-        geometry->FUN_005495f0()->FUN_00a673d0();
+            _memcpy(vertices + originalCount, apExtraVertices, extraCount * sizeof(NiPoint3));
+        geometry->GetModelData()->FUN_00a673d0();
     }
     else
     {

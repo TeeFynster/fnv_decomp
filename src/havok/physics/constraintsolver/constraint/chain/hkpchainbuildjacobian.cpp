@@ -1,6 +1,29 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit defines its own form
 
 // src/havok/physics/constraintsolver/constraint/chain/hkpchainbuildjacobian.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/constraintsolver/constraint/chain/hkpchainbuildjacobian.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+// Preserve the original SIMD type and its aliasing behavior for this unit.
+#define _INCLUDED_MM2
+// Exe 0x00dd0ad0 _FUN_00dd0ad0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" void _mm_store_ss(float*, LocalM128);
+
+#include "../../../../../../include/hkSimdReal.h"
+#include "../../../../../../include/hkMatrix3.h"
 
 class ChainIndex
 {
@@ -24,167 +47,146 @@ class ChainIndex
         return before;
     }
 };
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" void _mm_store_ss(float*, __m128);
-
 typedef float hkReal;
 
-class VectorComponentValue
+__forceinline hkSimdReal::hkSimdReal(const LocalM128& x) : m_vValue(x)
+{}
+
+__forceinline hkSimdReal::operator hkReal() const
 {
-  public:
-    __forceinline VectorComponentValue(const __m128& x) : m_vValue(x)
-    {}
-    __forceinline operator hkReal() const
-    {
-        hkReal s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
+    hkReal s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
 
-  private:
-    __m128 m_vValue;
-};
 
-class hkVector4
+
+__forceinline void hkVector4::setZero4()
 {
-  public:
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline void add4(const hkVector4& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void sub4(const hkVector4& v)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void mul4(const hkVector4& v)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void setMul4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline VectorComponentValue horizontalAdd3() const
-    {
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55), m_vComponents);
-        return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa), xySum);
-    }
-    __forceinline void setBroadcast(const hkVector4& v, int i)
-    {
-        if (i == 0)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x00);
-        }
-        else if (i == 1)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55);
-        }
-        else if (i == 2)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xaa);
-        }
-        else if (i == 3)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
-        }
-    }
-    __forceinline void setBroadcast3clobberW(const hkVector4& v, int i)
-    {
-        setBroadcast(v, i);
-    }
-    __forceinline hkReal& operator()(int a)
-    {
-        return reinterpret_cast<hkReal*>(&m_vComponents)[a];
-    }
-    __forceinline const hkReal& operator()(int a) const
-    {
-        return reinterpret_cast<const hkReal*>(&m_vComponents)[a];
-    }
+    m_vComponents = _mm_setzero_ps();
+}
 
-    __m128 m_vComponents;
-};
-
-class hkMatrix3
+__forceinline void hkVector4::add4(const hkVector4& v)
 {
-  public:
-    __forceinline hkMatrix3()
-    {}
-    __forceinline hkVector4& getColumn(int x)
-    {
-        return (&m_kColumn0)[x];
-    }
-    __forceinline const hkVector4& getColumn(int x) const
-    {
-        return (&m_kColumn0)[x];
-    }
-    __forceinline hkReal& operator()(int r, int c)
-    {
-        return getColumn(c)(r);
-    }
-    __forceinline const hkReal& operator()(int r, int c) const
-    {
-        return getColumn(c)(r);
-    }
-    __forceinline void operator=(const hkMatrix3& a)
-    {
-        m_kColumn0 = a.getColumn(0);
-        m_kColumn1 = a.getColumn(1);
-        m_kColumn2 = a.getColumn(2);
-    }
-    __forceinline void _setTranspose(const hkMatrix3& s)
-    {
-        hkMatrix3& d = *this;
-        d(0, 0) = s(0, 0);
-        d(1, 1) = s(1, 1);
-        d(2, 2) = s(2, 2);
-        d(3, 0) = 0.0f;
-        d(3, 1) = 0.0f;
-        d(3, 2) = 0.0f;
-        d(1, 0) = s(0, 1);
-        d(0, 1) = s(1, 0);
-        d(2, 0) = s(0, 2);
-        d(0, 2) = s(2, 0);
-        d(2, 1) = s(1, 2);
-        d(1, 2) = s(2, 1);
-    }
-    __forceinline void _setMul(const hkMatrix3& aTb, const hkMatrix3& bTc);
-    __forceinline void _sub(const hkMatrix3& a)
-    {
-        getColumn(0).sub4(a.getColumn(0));
-        getColumn(1).sub4(a.getColumn(1));
-        getColumn(2).sub4(a.getColumn(2));
-    }
-    __forceinline void setZero()
-    {
-        hkVector4 zero;
-        zero.setZero4();
-        getColumn(0) = zero;
-        getColumn(1) = zero;
-        getColumn(2) = zero;
-    }
+    m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
+}
 
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-};
+__forceinline void hkVector4::sub4(const hkVector4& v)
+{
+    m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents);
+}
+
+__forceinline void hkVector4::mul4(const hkVector4& v)
+{
+    m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
+}
+
+__forceinline void hkVector4::setMul4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline hkSimdReal hkVector4::horizontalAdd3() const
+{
+    LocalM128 xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55), m_vComponents);
+    return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa), xySum);
+}
+
+__forceinline void hkVector4::setBroadcast(const hkVector4& v, int i)
+{
+    if (i == 0)
+    {
+        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x00);
+    }
+    else if (i == 1)
+    {
+        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55);
+    }
+    else if (i == 2)
+    {
+        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xaa);
+    }
+    else if (i == 3)
+    {
+        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
+    }
+}
+
+__forceinline void hkVector4::setBroadcast3clobberW(const hkVector4& v, int i)
+{
+    setBroadcast(v, i);
+}
+
+__forceinline hkReal& hkVector4::operator()(int a)
+{
+    return reinterpret_cast<hkReal*>(&m_vComponents)[a];
+}
+
+__forceinline const hkReal& hkVector4::operator()(int a) const
+{
+    return reinterpret_cast<const hkReal*>(&m_vComponents)[a];
+}
+
+__forceinline hkMatrix3::hkMatrix3()
+{}
+
+__forceinline hkVector4& hkMatrix3::getColumn(int x)
+{
+    return (&m_kColumn0)[x];
+}
+
+__forceinline const hkVector4& hkMatrix3::getColumn(int x) const
+{
+    return (&m_kColumn0)[x];
+}
+
+__forceinline hkReal& hkMatrix3::operator()(int r, int c)
+{
+    return getColumn(c)(r);
+}
+
+__forceinline const hkReal& hkMatrix3::operator()(int r, int c) const
+{
+    return getColumn(c)(r);
+}
+
+__forceinline void hkMatrix3::operator=(const hkMatrix3& a)
+{
+    m_kColumn0 = a.getColumn(0);
+    m_kColumn1 = a.getColumn(1);
+    m_kColumn2 = a.getColumn(2);
+}
+
+// transposed copy of the 3x3 block with the w row cleared; statements follow the exe's store order
+#define HKM3_FROM_TRANSPOSED(r, c) kDst(r, c) = kSrc(c, r);
+__forceinline void hkMatrix3::_setTranspose(const hkMatrix3& kSrc)  // src: HAVOK_SRC (name)
+{
+    hkMatrix3& kDst = *this;
+    HKM3_FROM_TRANSPOSED(0, 0) HKM3_FROM_TRANSPOSED(1, 1) HKM3_FROM_TRANSPOSED(2, 2)
+    kDst(3, 0) = 0.0f;
+    kDst(3, 1) = 0.0f;
+    kDst(3, 2) = 0.0f;
+    HKM3_FROM_TRANSPOSED(1, 0) HKM3_FROM_TRANSPOSED(0, 1)
+    HKM3_FROM_TRANSPOSED(2, 0) HKM3_FROM_TRANSPOSED(0, 2)
+    HKM3_FROM_TRANSPOSED(2, 1) HKM3_FROM_TRANSPOSED(1, 2)
+}
+#undef HKM3_FROM_TRANSPOSED
+
+__forceinline void hkMatrix3::_sub(const hkMatrix3& a)
+{
+    getColumn(0).sub4(a.getColumn(0));
+    getColumn(1).sub4(a.getColumn(1));
+    getColumn(2).sub4(a.getColumn(2));
+}
+
+__forceinline void hkMatrix3::setZero()
+{
+    hkVector4 zero;
+    zero.setZero4();
+    getColumn(0) = zero;
+    getColumn(1) = zero;
+    getColumn(2) = zero;
+}
 
 void __cdecl FUN_00cd5530(hkMatrix3* thisMatrix, const hkMatrix3& aTb, const hkMatrix3& bTc);
 void __cdecl FUN_00cd55a0(hkMatrix3& thisMatrix);
@@ -228,21 +230,7 @@ template <typename TYPE> __forceinline const TYPE* hkAddByteOffsetConst(const TY
     return ConstByteView<TYPE>(base).add(offset);
 }
 
-template <typename TYPE> class ValueWrapper
-{
-  public:
-    __forceinline void operator=(const TYPE& t)
-    {
-        m_kStorage = t;
-    }
-    __forceinline TYPE val() const
-    {
-        return m_kStorage;
-    }
-
-  private:
-    TYPE m_kStorage;
-};
+#include "../../../../../../include/hkPadSpu.h"   // Havok 7.1 hkPadSpu (was a unit-local ValueWrapper copy)
 
 class QuantizedBoundsData
 {
@@ -485,7 +473,7 @@ __forceinline void buildConstraintMatrixLuDecompositionForBallAndSocketChain(
 extern "C" void FUN_00dd0ad0(int numConstraints, hkReal tau, hkReal afMotorDamping, hkReal cfm,
                              QuantizedBoundsDataOffset* accumulatorOffsets, const QuantizedBoundsData* accumsBase,
                              Matrix3LowerDiagonalUpperFactors* tripleBuffer, int bufferSize,
-                             ValueWrapper<SolverSchemaHeader*>& schemaInOut)
+                             hkPadSpu<SolverSchemaHeader*>& schemaInOut)
 {
     BallSocketChainSchema* schema = static_cast<BallSocketChainSchema*>(schemaInOut.val());
     schema->initBallSocketChainSchema(numConstraints, accumulatorOffsets, tau, afMotorDamping);

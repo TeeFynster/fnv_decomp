@@ -9,6 +9,9 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
 #include <xmmintrin.h>
+#include "../../include/hkTransform.h"
+#include "../../include/hkRotation.h"
+#include "../../include/hkVector4.h"
 struct ConvexShapeStub
 {
     virtual void v00();
@@ -33,67 +36,20 @@ struct SupportResult
     __m128 pointB;
     __m128 normal;
 };
-struct TransformStub
-{
-    __m128 col0;
-    __m128 col1;
-    __m128 col2;
-    __m128 translation;
-};
 static const __m128 kNegMask = {-0.0f, -0.0f, -0.0f, -0.0f};
 static void FUN_00e2da40(ConvexShapeStub* self, ConvexShapeStub* other, SupportResult* result, const __m128* dir,
-                         const TransformStub* xf);
-void CallerOfIt(ConvexShapeStub* s, ConvexShapeStub* o, SupportResult* r, const __m128* d, const TransformStub* x);
+                         const hkTransform* xf);
+void CallerOfIt(ConvexShapeStub* s, ConvexShapeStub* o, SupportResult* r, const __m128* d, const hkTransform* x);
 void FUN_00e31180(const float* base, int stride, int count, int mul, int offset, __m128** dst);
-class __declspec(align(16)) hkVector4E3B
-{
-  public:
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    float& operator()(int i)
-    {
-        return reinterpret_cast<float*>(&m_vComponents)[i];
-    }
-
-    __m128 m_vComponents;
-};
-class hkRotationE3B
-{
-  public:
-    void setIdentity()
-    {
-        m_kColumn0.setZero4();
-        m_kColumn1.setZero4();
-        m_kColumn2.setZero4();
-        m_kColumn0(0) = 1.0f;
-        m_kColumn1(1) = 1.0f;
-        m_kColumn2(2) = 1.0f;
-    }
-
-    hkVector4E3B m_kColumn0;
-    hkVector4E3B m_kColumn1;
-    hkVector4E3B m_kColumn2;
-};
-class ChildE3B
-{
-  public:
-    void FUN_00cb2d90(const void* pSource);
-};
 class FrameE3B
 {
   public:
     void FUN_00e3b630(const void* pSource);
 
     int m_unk[8];
-    hkRotationE3B m_rotation;
-    ChildE3B m_pChildAtom;
-};
-
-struct hkVector4E33
-{
-    __m128 m_vComponents;
+    hkRotation m_rotation;
+    // Other units bind 0x00cb2d90 to hkRotation::FUN_00cb2d90(const hkQuaternion&).
+    hkRotation m_pChildAtom;
 };
 
 __forceinline float ReadScalar(const float& x)
@@ -101,8 +57,8 @@ __forceinline float ReadScalar(const float& x)
     return x;
 }
 // @fnv 0x00e33440
-void __cdecl FUN_00e33440(float u, int iDegree, const float* pfKnots, const hkVector4E33* pkControlPoints,
-                          hkVector4E33& kOut)
+void __cdecl FUN_00e33440(float u, int iDegree, const float* pfKnots, const hkVector4* pkControlPoints,
+                          hkVector4& kOut)
 {
     float N[4];
     float right[4];

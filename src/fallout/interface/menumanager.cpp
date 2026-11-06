@@ -1,6 +1,73 @@
+#include "../../../include/BSSimpleArray.h"
 // fallout/interface/menumanager.cpp: MenuSystem, TutorialMenu, QuantityMenu, StatsMenu and more (50 functions)
 
-#include "menumanager_decls.h"
+#include "../../../include/Menu.h"
+#include "../../../include/InventoryMenu.h"
+#include "../../../include/VATSMenu.h"
+#include "../../../include/BlackJackMenu.h"
+#include "../../../include/BookMenu.h"
+#include "../../../include/SleepWaitMenu.h"
+#include "../../../include/StatsMenu.h"
+#include "../../../include/TutorialMenu.h"
+#include "../../../include/CharGenMenu.h"
+#include "../../../include/Tile.h"
+#include "../../../include/RepairServicesMenu.h"
+#include "../../../include/SlotMachineMenu.h"
+#include "../../../include/RepairMenu.h"
+#include "../../../include/RecipeMenu.h"
+#include "../../../include/QuantityMenu.h"
+#include "../../../include/ComputersMenu.h"
+#include "../../../include/LockPickMenu.h"
+#include "../../../include/TraitMenu.h"
+#include "../../../include/TraitSelectMenu.h"
+#include "../../../include/TextEditMenu.h"
+#include "../../../include/SurgeryMenu.h"
+
+void* __cdecl operator new(unsigned int);
+void __cdecl operator delete(void*);
+int __cdecl Warning(const char*, ...);
+class MenuSystem
+{
+  public:
+    MenuSystem();
+    static MenuSystem* Instance(bool create);
+    Menu* GetMenuById(int menuClass);
+    void ResizeMenuByClassArray();
+};
+extern MenuSystem* DAT_011d8d54;
+class ActorCombatGroup;
+template <class T> class NiTMallocInterface;
+#include "../../../include/NiTArray.h"
+class MenuClassArray : public NiTArray<ActorCombatGroup*, NiTMallocInterface<ActorCombatGroup*> >
+{
+};
+extern MenuClassArray g_menuByClassArray;
+// GetMenuById (0x0071e420): each case's class is the one whose vftable its ctor installs (RTTI), at the size it allocates.
+#include "../../../include/ActorValueOwner.h"
+#include "../../../include/BSThread.h"
+#include "../../../include/BaseFormComponent.h"
+#include "../../../include/CachedValuesOwner.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/TESChildCell.h"
+#include "../../../include/BarterMenu.h"
+#include "../../../include/CaravanMenu.h"
+#include "../../../include/CompanionWheelMenu.h"
+#include "../../../include/MessageMenu.h"
+#include "../../../include/HackingMenu.h"
+#include "../../../include/ItemModMenu.h"
+#include "../../../include/LevelUpMenu.h"
+#include "../../../include/LoveTesterMenu.h"
+#include "../../../include/RouletteMenu.h"
+#include "../../../include/CreditsMenu.h"
+#include "../../../include/HUDMainMenu.h"
+#include "../../../include/LoadingMenu.h"
+#include "../../../include/ContainerMenu.h"
+#include "../../../include/DialogMenu.h"
+#include "../../../include/StartMenu.h"
+#include "../../../include/SPECIALBookMenu.h"
+#include "../../../include/RaceSexMenu.h"
+#include "../../../include/MapMenu.h"
+#include "../../../include/CombatManager.h"
 
 // Creates and returns a new menu instance matching the given menu class, warning and returning 0 for unknown classes.
 // @fnv 0x0071e420
@@ -9,35 +76,35 @@ Menu* MenuSystem::GetMenuById(int menuClass)
     switch (menuClass)
     {
     case 1047:
-        return new FUN_0075f070;
+        return new CreditsMenu;
     case 1001:
-        return new CompanionWheelMenu;
+        return new MessageMenu;
     case 1059:
-        return new ContainerMenu;
+        return new TutorialMenu;
     case 1023:
         return new MapMenu;
     case 1002:
         return new InventoryMenu;
     case 1003:
-        return new FUN_0071f340;
+        return new StatsMenu;
     case 1004:
-        return new FUN_0076bb40;
+        return new HUDMainMenu;
     case 1007:
-        return new FUN_00788440;
+        return new LoadingMenu;
     case 1008:
-        return new FUN_0075b0d0;
+        return new ContainerMenu;
     case 1053:
         return new BarterMenu;
     case 1009:
-        return new FUN_007617a0;
+        return new DialogMenu;
     case 1012:
         return new SleepWaitMenu;
     case 1013:
-        return new FUN_007cb330;
+        return new StartMenu;
     case 1014:
         return new LockPickMenu;
     case 1016:
-        return new FUN_00720a10;
+        return new QuantityMenu;
     case 1026:
         return new BookMenu;
     case 1027:
@@ -55,17 +122,17 @@ Menu* MenuSystem::GetMenuById(int menuClass)
     case 1057:
         return new ComputersMenu;
     case 1054:
-        return new FUN_0071fbf0;
+        return new SurgeryMenu;
     case 1056:
         return new VATSMenu;
     case 1048:
-        return new TraitMenu;
-    case 1060:
-        return new FUN_00720170;
-    case 1075:
         return new CharGenMenu;
+    case 1060:
+        return new SPECIALBookMenu;
+    case 1075:
+        return new CompanionWheelMenu;
     case 1074:
-        return new FUN_00720550;
+        return new LoveTesterMenu;
     case 1076:
         return new TraitSelectMenu;
     case 1080:
@@ -73,15 +140,15 @@ Menu* MenuSystem::GetMenuById(int menuClass)
     case 1081:
         return new BlackJackMenu;
     case 1084:
-        return new RouletteMenu;
+        return new TraitMenu;
     case 1082:
-        return new LoveTesterMenu;
+        return new RouletteMenu;
     case 1083:
         return new CaravanMenu;
     case 1077:
         return new RecipeMenu;
     case 1051:
-        return new MessageMenu;
+        return new TextEditMenu;
     default:
         Warning("MENUS: Unknown menu class!");
         return 0;
@@ -144,11 +211,6 @@ void FUN_0071e3f0()
     DAT_011d8d54 = 0;
 }
 
-struct StatsMenu
-{
-    void FUN_0071f700();
-    void* FUN_0071f6d0(unsigned int flags);
-};
 
 // Calls FUN_0071f700, then deletes this if bit 0 of flags is set, and returns this.
 // @fnv 0x0071f6d0
@@ -212,57 +274,26 @@ int __cdecl FUN_00720df0()
 
 int GetTileValueID(const char*, int);
 int __fastcall GetRaceCount(char*);
-struct TGF
-{
-    float GetFloat(int);
-};
-struct VATSMenuView
+// 0x00726710 counts a list at +0x04 and reads its tile at +0x0c; this is a list-box helper.
+struct FilteredListCounter
 {
     char pad[0xc];
-    TGF* tile;
+    Tile* tile;
     unsigned int FUN_00726710();
 };
 // Returns the result of GetRaceCount on this minus tile's float value at the _num_filtered setting.
 // @fnv 0x00726710
-unsigned int VATSMenuView::FUN_00726710()
+unsigned int FilteredListCounter::FUN_00726710()
 {
     static int numFiltered = GetTileValueID("_num_filtered", -1);
     return GetRaceCount((char*)this) - (unsigned int)tile->GetFloat(numFiltered);
 }
 
-struct Tile;
 struct NiNode;
-template <class T> class NiPointer
-{
-  public:
-    ~NiPointer();
-    NiPointer<T>& operator=(T* pObject);
-    T* m_pObject;
-};
-struct SoundPlaybackHandle
-{
-    ~SoundPlaybackHandle();
-    unsigned int uiSoundID;
-    bool m_bLooping;
-    unsigned int uiState;
-};
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-    Tile* pRootTile;
-    void* pExtraHead;
-    void* pExtraNext;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int uiMenuID;
-    unsigned int uiVisibility;
-};
 extern NiPointer<NiNode> g_011dadb4;
 extern NiPointer<NiNode> g_011dade8;
 extern NiPointer<NiNode> g_011dae5c;
-struct FUN_0071fef0 : public Menu_007a8b10
+struct FUN_0071fef0 : public Menu
 {
     Tile* tile028;
     Tile* tile02C;
@@ -291,8 +322,8 @@ struct FUN_0071fef0 : public Menu_007a8b10
     Tile* tile088;
     Tile* tile08C;
     Tile* tile090;
-    SoundPlaybackHandle kSound094;
-    SoundPlaybackHandle kSound0A0;
+    BSSoundHandle kSound094;
+    BSSoundHandle kSound0A0;
     unsigned int unk0AC;
     unsigned int unk0B0;
     unsigned int unk0B4;
@@ -319,31 +350,9 @@ FUN_0071fef0::~FUN_0071fef0()
     spNode0F0 = 0;
 }
 
+class NiNode;
 namespace fnv_00720170 {
 void* memset(void*, int, unsigned int);
-struct Tile;
-struct NiNode;
-template <class T> class NiPointer
-{
-  public:
-    NiPointer();
-    ~NiPointer();
-    T* m_pObject;
-};
-struct Menu_007a8b10
-{
-    Menu_007a8b10();
-    virtual ~Menu_007a8b10();
-    Tile* pRootTile;
-    void* pExtraHead;
-    void* pExtraNext;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int uiMenuID;
-    unsigned int uiVisibility;
-};
 struct FUN_007203c0
 {
     FUN_007203c0();
@@ -357,7 +366,7 @@ struct FUN_007203c0
     float fScaledValue;
     unsigned int uiFlags;
 };
-struct FUN_00720170_t : public Menu_007a8b10
+struct FUN_00720170_t : public Menu
 {
     Tile* m_pTiles[8];
     int iSelected;
@@ -381,7 +390,7 @@ struct FUN_00720170_t : public Menu_007a8b10
 // @fnv 0x00720170
 FUN_00720170_t::FUN_00720170_t()
 {
-    memset(m_pTiles, 0, sizeof(m_pTiles));
+    fnv_00720170::memset(m_pTiles, 0, sizeof(m_pTiles));
     pCurrent = 0;
     iSelected = 0;
     iCount = 1;
@@ -391,28 +400,8 @@ FUN_00720170_t::FUN_00720170_t()
 }
 }  // namespace fnv_00720170
 
+class NiNode;
 namespace fnv_00720420 {
-struct Tile;
-struct NiNode;
-template <class T> class NiPointer
-{
-  public:
-    ~NiPointer();
-    T* m_pObject;
-};
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-    Tile* pRootTile;
-    void* pExtraHead;
-    void* pExtraNext;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int uiMenuID;
-    unsigned int uiVisibility;
-};
 struct FUN_007203c0
 {
     ~FUN_007203c0();
@@ -425,7 +414,7 @@ struct FUN_007203c0
     float fScaledValue;
     unsigned int uiFlags;
 };
-struct FUN_00720420 : public Menu_007a8b10
+struct FUN_00720420 : public Menu
 {
     Tile* tile028;
     Tile* tile02C;
@@ -457,28 +446,8 @@ FUN_00720420::~FUN_00720420()
 {}
 }  // namespace fnv_00720420
 
+class NiNode;
 namespace fnv_00720860 {
-struct Tile;
-struct NiNode;
-template <class T> class NiPointer
-{
-  public:
-    ~NiPointer();
-    T* m_pObject;
-};
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-    Tile* pRootTile;
-    void* pExtraHead;
-    void* pExtraNext;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int uiMenuID;
-    unsigned int uiVisibility;
-};
 struct FUN_00723fd0
 {
     ~FUN_00723fd0();
@@ -507,7 +476,7 @@ struct FUN_00720800
     float fScaledValue;
     unsigned int uiFlags;
 };
-struct FUN_00720860 : public Menu_007a8b10
+struct FUN_00720860 : public Menu
 {
     Tile* tile028;
     Tile* tile02C;
@@ -544,32 +513,24 @@ FUN_00720860::~FUN_00720860()
 {}
 }  // namespace fnv_00720860
 
+class RecursiveLock;
+class NiAVObject;
+class NiNode;
+class TileShaderProperty;
+class TESObjectREFR;
 namespace fnv_00720e60 {
-struct RecursiveLock;
-struct NiAVObject;
-struct NiNode;
-struct Tile;
-struct TileShaderProperty;
 struct MenuValueDescriptor;
 struct FUN_00720e60_shell : public MenuSystem
 {
     Menu* FindTopMenu();
 };
 
-struct TGF
-{
-    float GetFloat(int);
-};
 struct FUN_006317a0_struct
 {
     int AddEight(int);
 };
 struct IMH;
 IMH* __cdecl FUN_004b7210(void);
-struct Tile
-{
-    Menu* GetMenu();
-};
 struct IMH
 {
     Tile* FUN_00586150();
@@ -578,18 +539,10 @@ struct Flt
 {
     operator unsigned int() const;
 };
-template <class T> struct NiTPointerList
+// Unit-local view of NiTPointerList for 0x00720e60 (namespace fnv_00720e60): built on the shared NiTPointerList, that code does not compile or does not match.
+template <class T> struct NiTPointerList_00720e60
 {
     void* DereferenceIfNotNull(void*) const;
-};
-class TESObjectREFR;
-struct FUN_004ee7d0_node
-{
-    FUN_004ee7d0_node* FUN_00726070();
-};
-struct BSThread
-{
-    unsigned int GetThreadID();
 };
 
 // @fnv 0x00720e60
@@ -605,28 +558,23 @@ Menu* FUN_00720e60_shell::FindTopMenu()
         Menu* pmenu = 0;
         if (pmenutile)
             pmenu = pmenutile->GetMenu();
-        if (pmenu && ((FUN_004ee7d0_node*)pmenu)->FUN_00726070())
+        if (pmenu && pmenu->FUN_00726070())
         {
-            if (((TGF*)((FUN_004ee7d0_node*)pmenu)->FUN_00726070())->GetFloat(0xfad) > fMaxDepth &&
-                ((TGF*)((FUN_004ee7d0_node*)pmenu)->FUN_00726070())->GetFloat(0xfa7) != 6008.0 &&
-                ((BSThread*)pmenu)->GetThreadID() != 2 && ((BSThread*)pmenu)->GetThreadID() != 4)
+            if (pmenu->FUN_00726070()->GetFloat(0xfad) > fMaxDepth &&
+                pmenu->FUN_00726070()->GetFloat(0xfa7) != 6008.0 &&
+                pmenu->GetVisibilityState() != 2 && pmenu->GetVisibilityState() != 4)
             {
-                fMaxDepth = ((TGF*)((FUN_004ee7d0_node*)pmenu)->FUN_00726070())->GetFloat(0xfad);
+                fMaxDepth = pmenu->FUN_00726070()->GetFloat(0xfad);
                 ptop = pmenu;
             }
         }
-        pListElem = ((NiTPointerList<TESObjectREFR*>*)((char*)FUN_004b7210()->FUN_00586150() + 4))
+        pListElem = ((NiTPointerList_00720e60<TESObjectREFR*>*)((char*)FUN_004b7210()->FUN_00586150() + 4))
                         ->DereferenceIfNotNull(pListElem);
     }
     return ptop;
 }
 }  // namespace fnv_00720e60
 
-struct Tile
-{
-    virtual ~Tile();  // polymorphic: its RTTI is used (rtti_fix.py)
-    void Set(int, int);
-};
 struct ListBoxItem_t
 {
     Tile* pTile;
@@ -677,13 +625,6 @@ void FUN_007254d0_t::FUN_007254d0()
 }
 
 namespace fnv_00726530 {
-struct Tile
-{
-    float GetFloat(int);
-    void Set(int, int);
-    void Set(int, float, bool);
-    static int __cdecl GetTraitID(const char*);
-};
 float __cdecl FUN_004e4430(float);
 int __cdecl FUN_00647b70(int, int);
 struct ListBoxBase_t
@@ -730,35 +671,15 @@ void FUN_00726530_t::FUN_00726530()
 }
 }  // namespace fnv_00726530
 
+class NiNode;
 namespace fnv_007b8d30 {
-struct Tile;
-struct NiNode;
-template <class T> class NiPointer
+// Unit-local view of NiPointer for 0x007b8d30 (namespace fnv_007b8d30): built on the shared NiPointer, that code does not compile or does not match.
+template <class T> class NiPointer_007b8d30
 {
   public:
-    NiPointer(T* pObject = 0);
-    ~NiPointer();
+    NiPointer_007b8d30(T* pObject = 0);
+    ~NiPointer_007b8d30();
     T* m_pObject;
-};
-template <class T> struct BSSimpleList
-{
-    BSSimpleList();
-    T m_item;
-    BSSimpleList<T>* m_pkNext;
-};
-struct Menu_007a8b10
-{
-    Menu_007a8b10();
-    virtual ~Menu_007a8b10();
-    Tile* pRootTile;
-    void* pExtraHead;
-    void* pExtraNext;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int uiMenuID;
-    unsigned int uiVisibility;
 };
 struct FUN_007b9000
 {
@@ -774,7 +695,7 @@ extern PC7d* g_thePlayer;
 int GetTileValueID(const char*, int);
 extern int DAT_011da86c;
 extern int DAT_011da870;
-struct FUN_007b8d30_t : public Menu_007a8b10
+struct FUN_007b8d30_t : public Menu
 {
     int iMode;
     Tile* m_pTiles[11];
@@ -785,7 +706,7 @@ struct FUN_007b8d30_t : public Menu_007a8b10
     int iSelected;
     Tile* pTile3F74;
     Tile* pTile3F78;
-    NiPointer<NiNode> m_pController;
+    NiPointer_007b8d30<NiNode> m_pController;
     Tile* pTiles3F80[4];
     float fScrollX;
     float fScrollY;
@@ -907,13 +828,6 @@ void* FUN_00720770_shell::FUN_00720770(unsigned int flags)
     return this;
 }
 
-struct Tile;
-struct TutorialMenu
-{
-    char _0x28[0x28];
-    Tile* m_pTiles[8];
-    void SetTile(int aiID, Tile* apTile);
-};
 
 // @fnv 0x007209e0
 void TutorialMenu::SetTile(int aiID, Tile* apTile)
@@ -921,11 +835,6 @@ void TutorialMenu::SetTile(int aiID, Tile* apTile)
     if (aiID >= 0 && aiID < 8)
         m_pTiles[aiID] = apTile;
 }
-
-struct QuantityMenu
-{
-    int FUN_00720a30();
-};
 
 // @fnv 0x00720a30
 int QuantityMenu::FUN_00720a30()
@@ -960,7 +869,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseProcess;
 struct BipedAnim;
 struct CHUNK;
@@ -1006,7 +914,7 @@ struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
+class NiMatrix3;
 struct NiNode;
 struct NiPoint3;
 struct NiPointLight;
@@ -1083,117 +991,10 @@ struct blob48
 {
     char b[48];
 };
-struct CombatManager
-{
-    void ResetFormData();
-    void ClearData(bool);
-    static void Create();
-    static void Destroy();
-    void Update(bool);
-    void UpdateCombatGroups(bool);
-    void UpdateCombatants();
-    void ResetTargetMap();
-    CombatController* AddCombatant(Actor*, Actor*, unsigned int, bool);
-    CombatController* AddCombatantToGroup(Actor*, ActorCombatGroup*);
-    CombatController* AddPretendCombatant(Actor*, TESPackage*);
-    unsigned int GetCombatGroupTargetCount(Actor*, unsigned int*);
-    bool CheckShouldFlee(Actor*, Actor*);
-    void AssignCombatTarget(Actor*, Actor*);
-    bool GetWanttoHelpGroup(Actor*, Actor*);
-    bool CanActorJoinCombat(Actor*, Actor*);
-    void AddCombatGroupTarget(ActorCombatGroup*, Actor*);
-    void NotifyCombatGroupRemovedTarget(ActorCombatGroup*, Actor*);
-    void AddCombatGroupMember(ActorCombatGroup*, Actor*);
-    void NotifyCombatGroupRemovedMember(ActorCombatGroup*, Actor*);
-    bool CanActorBeAffectedByExplosion(Actor*, BGSExplosion*, void*, float);
-    void SetActivatePickReference(TESObjectREFR*);
-    void DrawDebugText(IDebugText*);
-    void DisplayCombatGroupDebugText(IDebugText*, TESObjectREFR*);
-    void DisplaySpectatorDebugText(IDebugText*, TESObjectREFR*);
-    bool IsCombatActive();
-    void AddLocalActor(Actor*);
-    void RemoveLocalActor(Actor*);
-    void TargetLocalActor(Actor*, ActorCombatGroup*);
-    void UntargetLocalActor(Actor*, ActorCombatGroup*);
-    unsigned int FindCombatGroupForActor(struct blob12, float, float, Actor*, unsigned int*, unsigned int*,
-                                         unsigned int*, unsigned int*);
-    CombatThreatMap* GetThreatMap();
-    CombatCoverMap* GetCoverMap();
-    CombatTargetMap* GetTargetMap();
-    void SaveGame(BGSSaveGameBuffer*);
-    void LoadGame(BGSLoadGameBuffer*);
-    void InitLoadGame(BGSLoadGameBuffer*);
-    void ApplyLoadBuffer(BGSLoadGameBuffer*);
-    void Revert(BGSLoadGameBuffer*);
-    unsigned int GetCombatGroupCount();
-    ActorCombatGroup* GetCombatGroupByIndex(unsigned int);
-    ActorCombatGroup* GetCombatGroup(unsigned int);
-    ActorCombatGroup* GetPlayerCombatGroup();
-    ActorCombatGroup* SplitPlayerCombatGroup(Actor*);
-    void* __vecDelDtor(unsigned int);
-    char m_kCombatGroups[16];
-    void* m_pActorCombatGroupMap;
-    CombatThreatMap* m_pThreatMap;
-    CombatCoverMap* m_pCoverMap;
-    CombatTargetMap* m_pTargetMap;
-    char m_kFourByteManagerData[4];
-    char m_kFirstEightByteManagerData[8];
-    char m_kSecondEightByteManagerData[8];
-    unsigned int m_uiDebugFlags;
-    char m_spDebugRootNode[4];
-};
 typedef char _sizecheck_CombatManager[sizeof(CombatManager) == 60 ? 1 : -1];
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
-struct TESChildCell
-{
-    virtual TESObjectCELL* GetSaveParentCell();
-};
 typedef char _sizecheck_TESChildCell[sizeof(TESChildCell) == 4 ? 1 : -1];
-struct ActorValueOwner
-{
-    virtual int GetBaseActorValue(int);
-    virtual float GetBaseActorValueFloat(int);
-    virtual int GetActorValue(int);
-    virtual float GetCurrentActorValue(int);
-    virtual float GetPermanentActorValueFloat(int);
-    virtual float GetTemporaryActorValue(int);
-    virtual float GetDamageActorValue(int);
-    virtual int GetPermanentActorValue(int);
-    virtual float GetPermanentActorValueAdjustment(int);
-    virtual TESForm* GetActorValueOwnerForm();
-    virtual unsigned short GetActorValueOwnerType();
-    int GetActorValueAsInteger(int);
-    float GetActorValueFloatByIndex(int);
-};
 typedef char _sizecheck_ActorValueOwner[sizeof(ActorValueOwner) == 4 ? 1 : -1];
-struct CachedValuesOwner
-{
-    virtual float GetFloatValue0();
-    virtual float GetFloatValue1();
-    virtual float GetFloatValue2();
-    virtual float GetFloatValue3();
-    virtual float GetFloatValue4();
-    virtual float GetFloatValue5();
-    virtual float GetFloatValue6();
-    virtual float GetFloatValue7();
-    virtual float GetFloatValue8();
-    virtual float GetFloatValue9();
-    virtual float GetFloatValue10();
-    virtual float GetFloatValue11();
-    virtual int GetIntegerValue12();
-    virtual int GetIntegerValue13();
-    virtual float GetFloatValue14();
-    virtual float GetFloatValue15();
-    virtual bool GetBooleanValue16();
-    void PrecalculateCachedValues();
-};
 typedef char _sizecheck_CachedValuesOwner[sizeof(CachedValuesOwner) == 4 ? 1 : -1];
 struct FUN_008d0300_shell : public CombatManager
 {
@@ -1227,12 +1028,6 @@ void FUN_0071e360()
     }
 }
 
-namespace fnv_0071f2e0 {
-struct TutorialMenu
-{
-    void* DestroyTutorialMenu(unsigned int);
-    void DestroyMenu();
-};
 void __cdecl _Deallocate(void*);
 // Calls DestroyMenu, then frees this with _Deallocate when flags has bit 0 set, and returns this.
 // @fnv 0x0071f2e0
@@ -1243,7 +1038,6 @@ void* TutorialMenu::DestroyTutorialMenu(unsigned int flags)
         _Deallocate(this);
     return this;
 }
-}  // namespace fnv_0071f2e0
 
 void _Deallocate(void*);
 struct S0071f670
@@ -1385,13 +1179,6 @@ FUN_00720800::~FUN_00720800()
     m.FUN_00723fd0();
 }
 
-namespace fnv_00720a40 {
-void __cdecl _Deallocate(void*);
-struct QuantityMenu
-{
-    void FUN_00720a70();
-    void* FUN_00720a40(unsigned int);
-};
 // @fnv 0x00720a40
 void* QuantityMenu::FUN_00720a40(unsigned int flags)
 {
@@ -1400,33 +1187,20 @@ void* QuantityMenu::FUN_00720a40(unsigned int flags)
         _Deallocate(this);
     return this;
 }
-}  // namespace fnv_00720a40
 
 namespace fnv_00720a70 {
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-};
 extern int DAT_011da618;
-struct FUN_00720a70_Host
-{
-    void FUN_00720a70();
-};
-// Sets the object's first field to the string "@\nr", clears DAT_011da618, then calls the Menu_007a8b10 destructor on this.
+}  // namespace fnv_00720a70
+// Sets the object's first field to the string "@\nr", clears DAT_011da618, then calls the Menu destructor on this.
 // @fnv 0x00720a70
-void FUN_00720a70_Host::FUN_00720a70()
+void QuantityMenu::FUN_00720a70()
 {
     *(const char**)this = "@\nr";
-    DAT_011da618 = 0;
-    ((Menu_007a8b10*)this)->Menu_007a8b10::~Menu_007a8b10();
+    fnv_00720a70::DAT_011da618 = 0;
+    ((Menu*)this)->Menu::~Menu();
 }
-}  // namespace fnv_00720a70
 
 namespace fnv_00720e00 {
-struct Tile
-{
-    virtual ~Tile();
-};
 Tile* __cdecl FindMenuById(int);
 struct FakeMgr
 {
@@ -1446,7 +1220,6 @@ bool FakeMgr::DestroyMenuByClass(int aiMenuClass)
 }
 }  // namespace fnv_00720e00
 
-struct Tile;
 struct S0071
 {
     unsigned char _pad[0x2c];
@@ -1464,16 +1237,9 @@ void __thiscall S0071::FUN_0071ffe0(int aiID, Tile* apTile)
     }
 }
 
-struct Tile;
-struct FUN_00720140_Holder
-{
-    char _pad[0x28];
-    Tile* m_pTiles[32];
-    void FUN_00720140(int aiID, Tile* apTile);
-};
-// Stores apTile into the holder's tile slot indexed by aiID when aiID is between 1 and 0x1F.
+// Stores apTile into the menu tile slot indexed by aiID when aiID is between 1 and 0x1F.
 // @fnv 0x00720140
-void FUN_00720140_Holder::FUN_00720140(int aiID, Tile* apTile)
+void VATSMenu::FUN_00720140(int aiID, Tile* apTile)
 {
     if (aiID > 0 && aiID <= 0x1F)
     {
@@ -1513,18 +1279,11 @@ struct FUN_00720360 : public FUN_00723f50
 FUN_00720360::FUN_00720360()
 {}
 
-extern int DAT_010701c4;
 
-struct MenuBaseCtorCaller
-{
-    void InitBase();
-};
 
 // @fnv 0x00720a10
-FUN_00720a10::FUN_00720a10()
+QuantityMenu::QuantityMenu()
 {
-    reinterpret_cast<MenuBaseCtorCaller*>(this)->InitBase();
-    *(void**)this = (void*)&DAT_010701c4;
 }
 
 struct FUN_007df140_Sub
@@ -1563,102 +1322,26 @@ FUN_007df140_cls::FUN_007df140_cls(int aValue)
     m_00 = aValue;
 }
 
-struct FUN_00a1c4a0
-{
-    FUN_00a1c4a0();
-    ~FUN_00a1c4a0();
-    virtual void v00();
-    int unkCur;
-    int unkValue;
-    int unk0C;
-    int uNewnk;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-};
 
-struct FUN_00723750
-{
-    int unk;
-    int unkCur;
-    int unkValue;
-    int unk0C;
-    int uNewnk;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
 
-    FUN_00723750();
-    ~FUN_00723750();
-};
 
-struct FUN_009ca4a0
-{
-    int unk;
-
-    FUN_009ca4a0();
-    ~FUN_009ca4a0();
-};
-
-struct Tile;
 void FUN_00403d30(void* apDest, int aiValue, unsigned int auiSize);
 
-struct FUN_00720040 : public FUN_00a1c4a0
-{
-    Tile* m_pTiles[32];
-    int unkA;
-    int unkAC;
-    FUN_00723750 unkB;
-    bool unkF;
-    int unkFC;
-    int uTmpnk;
-    bool unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    FUN_009ca4a0 unk11C;
-
-    FUN_00720040();
-};
 
 // @fnv 0x00720040
-FUN_00720040::FUN_00720040()
+VATSMenu::VATSMenu()
 {
     FUN_00403d30(m_pTiles, 0, sizeof(m_pTiles));
-    unkF = false;
-    unk104 = false;
-    unk108 = 0;
+    m_bFirstFlag = false;
+    m_bStateFlag4 = false;
+    m_pSelectedChance = 0;
 }
 
 namespace fnv_00720550 {
 void* __cdecl FUN_00403d30(void*, int, unsigned int);
 namespace Reconstructed {
-struct Menu
-{
-    Menu();
-    virtual ~Menu();
-    unsigned int rootTile, extraHead, extraNext, state10, state14, state18, state1C, menuID, visibility;
-};
-struct MenuList
-{
-    unsigned int head, tail, count, capacity;
-    MenuList();
-    ~MenuList();
-};
+// Exe 0x00720550: unit-local MenuList view; declarations and layout are preserved.
+
 struct MenuSelection
 {
     unsigned int head, tail, count, selected;
@@ -1671,12 +1354,6 @@ struct MenuEntry
     MenuEntry();
     ~MenuEntry();
 };
-template <class T> struct NiPointer
-{
-    T* object;
-    NiPointer();
-    ~NiPointer();
-};
 struct SceneNode;
 struct FUN_00720550 : Menu
 {
@@ -1688,7 +1365,7 @@ struct FUN_00720550 : Menu
     unsigned int currentIndex;
     unsigned int currentObject;
     unsigned int currentTile;
-    MenuList list;
+    BSSimpleArray<LoveTesterMenu::LoveTesterTextItem*,1024> list;
     MenuSelection selection;
     MenuEntry entries[9];
     MenuEntry currentEntry;
@@ -1735,38 +1412,9 @@ struct ListStandIn
     int* FUN_0057cbe0(int** cursor);
 };
 
-struct VtMenu
-{
-    virtual void vt00();
-    virtual void vt01();
-    virtual void vt02();
-    virtual void vt03();
-    virtual void vt04();
-    virtual void vt05();
-    virtual void vt06();
-    virtual void vt07();
-    virtual void vt08();
-    virtual void vt09();
-    virtual void vt10();
-    virtual void vt11();
-    virtual void vt12();
-    virtual int vt13();
-};
 
-struct TileStub
-{
-    VtMenu* GetMenuOf();
-};
 
-struct GetKindStub
-{
-    int GetKind();
-};
 
-struct FUN_00a01230_shell
-{
-    bool IsTraitNonZero(int);
-};
 
 struct InterfaceManager_helper
 {
@@ -1783,17 +1431,17 @@ bool FUN_00720f90_shell::FUN_00720f90(int param_1)
     {
         int item = *((ListStandIn*)((char*)((InterfaceManager_helper*)FUN_004b7210())->FUN_00586150() + 4))
                         ->FUN_0057cbe0(&cursor);
-        VtMenu* menu = 0;
+        Menu* menu = 0;
         if (item)
-            menu = ((TileStub*)item)->GetMenuOf();
+            menu = ((Tile*)item)->GetMenu();
         if (menu)
         {
-            if (((FUN_004ee7d0_node*)menu)->FUN_00726070())
+            if (menu->FUN_00726070())
             {
-                if (menu->vt13() == param_1)
+                if (menu->GetClass() == param_1)
                 {
-                    if (((FUN_00a01230_shell*)((FUN_004ee7d0_node*)menu)->FUN_00726070())->IsTraitNonZero(0xfa3) &&
-                        ((GetKindStub*)menu)->GetKind() != 2)
+                    if (menu->FUN_00726070()->IsTraitNonZero(0xfa3) &&
+                        menu->GetVisibilityState() != 2)
                         return true;
                     else
                         return false;

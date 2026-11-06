@@ -1,21 +1,27 @@
+#include "../../../include/NiFrustum.h"
+#include "../../../include/InterfaceManager.h"
+#include "../../../include/BSAudio.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/ImageSpaceManager.h"
+#include "../../../include/NiColorA.h"
+#include "../../../include/Menu.h"
+#include "../../../include/RaceSexMenu.h"
+#include "../../../include/FORenderedMenuRaceSex.h"
+#include "../../../include/PlayerCharacter.h"
 
 // src/fallout/interface/forenderedmenuracesex.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/interface/forenderedmenuracesex.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct S16
-{
-    int a, b, c, d;
-};
 struct FUN_007feb40_This
 {
     char _pad[0xC0];
-    S16* GetValueAtC0(S16* p);
+    NiColorA* GetValueAtC0(NiColorA* p);
 };
 // Copies the 16-byte value at offset 0xC0 of this object into the caller-supplied struct and returns that pointer.
 // @fnv 0x007feb40
-S16* FUN_007feb40_This::GetValueAtC0(S16* pValue)
+NiColorA* FUN_007feb40_This::GetValueAtC0(NiColorA* pValue)
 {
-    *pValue = *(S16*)((char*)this + 0xC0);
+    *pValue = *(NiColorA*)((char*)this + 0xC0);
     return pValue;
 }
 
@@ -23,140 +29,8 @@ struct Animation
 {
     void FUN_008eeaa0(char);
 };
-struct PlayerCharacter
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v3a();
-    virtual void v3b();
-    virtual void v3c();
-    virtual void v3d();
-    virtual void v3e();
-    virtual void v3f();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v4a();
-    virtual void v4b();
-    virtual void v4c();
-    virtual void v4d();
-    virtual void v4e();
-    virtual void v4f();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v5a();
-    virtual void v5b();
-    virtual void v5c();
-    virtual void v5d();
-    virtual void v5e();
-    virtual void v5f();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v6a();
-    virtual void v6b();
-    virtual void v6c();
-    virtual void v6d();
-    virtual void v6e();
-    virtual void v6f();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void Refresh();
-    Animation* GetAnimation(bool);
-    void UpdateAnimationMovement(Animation*, float);
-};
 extern PlayerCharacter* g_thePlayer;
 void _FUN_007037e0();
-struct Menu
-{
-    bool IsUnk28Set();
-    bool UpdateScreenEffect();
-    bool FUN_007fe4e0();
-};
 // @fnv 0x007fe4e0
 bool Menu::FUN_007fe4e0()
 {
@@ -166,29 +40,20 @@ bool Menu::FUN_007fe4e0()
         return false;
     }
     g_thePlayer->GetAnimation(false)->FUN_008eeaa0(23);
-    g_thePlayer->Refresh();
+    g_thePlayer->Unk_78();
     g_thePlayer->UpdateAnimationMovement(g_thePlayer->GetAnimation(false), 0.0f);
     return UpdateScreenEffect();
 }
 
-struct RgbaColor
-{
-    float r, g, b, a;
-    RgbaColor(float, float, float, float);
-};
 struct SettingFloat
 {
     float* Float();
 };
 extern SettingFloat g_011db520, g_011db464;
 extern float g_011ae600, g_0120081c, g_011ae604, g_01200820, g_01200824, g_011ae608, g_01200828;
-extern RgbaColor g_0120082c;
+extern NiColorA g_0120082c;
 struct NiRenderer;
 NiRenderer* FUN_0043c4b0();
-struct ImageSpaceManager
-{
-    void FUN_00b97550(int, NiRenderer*, void*, void*, int, int);
-};
 ImageSpaceManager* FUN_004e3270();
 struct Effect
 {
@@ -283,7 +148,7 @@ struct Effect
     unsigned int unk15c;
     float secondary;
     float FUN_00507e10();
-    RgbaColor GetValueAtC0();
+    NiColorA GetValueAtC0();
     void FUN_007fe9c0(void*, void*, void*);
 };
 // @fnv 0x007fe9c0
@@ -305,7 +170,7 @@ void Effect::FUN_007fe9c0(void* apArg1, void* apArg2, void* unused)
         g_011ae604 = 0.0f;
         g_01200820 = -1.0f;
         g_011ae600 = 1.0f;
-        g_0120082c = RgbaColor(1.0f, 1.0f, 1.0f, 1.0f);
+        g_0120082c = NiColorA(1.0f, 1.0f, 1.0f, 1.0f);
     }
     if (enabled && active)
     {
@@ -481,15 +346,6 @@ void FUN_007fe560_cls::InitTerminalLight()
     }
 }
 
-struct NiNode;
-struct Menu;
-
-struct NodePtr
-{
-    NiNode* m_pObject;
-    operator NiNode*() const;
-};
-
 struct PickVec
 {
     float x;
@@ -528,11 +384,7 @@ struct GlobalObject_00e98f20
     PickRecord* FUN_00500940();
 };
 
-struct InterfaceManager
-{
-    float FUN_00792760();
-    float FUN_009a9350();
-};
+
 
 InterfaceManager* FUN_004b7210();
 
@@ -541,45 +393,12 @@ struct PickCamera
     void MapScreenToRay(int aiX, int aiY, PickVec* apOrigin, PickVec* apDir, int a5);
 };
 
-struct BSSoundHandleEx
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    ~BSSoundHandleEx();
-    bool Play(bool abUnk);
-};
 
-struct BSAudio
-{
-    static BSAudio* GetSingleton();
-    BSSoundHandleEx GetSoundHandleByEditorID(const char* apEditorID, unsigned int auiFlags);
-};
 
-struct RaceSexMenu
-{
-    void FUN_007fe910(int aiIndex);
-};
 
 struct MenuTile
 {
     RaceSexMenu* GetMenu();
-};
-
-struct FORenderedMenu
-{
-    bool FUN_007fb790(bool abDown, int a2, int a3);
-};
-
-struct FORenderedMenuRaceSex : FORenderedMenu
-{
-    int unk00[0x36];
-    NodePtr unkD8[4];
-    NodePtr unkE8[4];
-
-    MenuTile* FUN_009611e0();
-    PickCamera* FUN_008b6200();
-    bool HandleRaceSexMenuInput(bool abDown, int a2, int a3);
 };
 
 // @fnv 0x007fe6c0
@@ -606,7 +425,7 @@ bool FORenderedMenuRaceSex::HandleRaceSexMenuInput(bool abDown, int a2, int a3)
             for (int j = 0; iFound < 0 && j < 4; j++)
             {
                 pick.FUN_00705fc0(unkD8[j]);
-                FUN_008b6200()->MapScreenToRay((int)pInterface->FUN_009a9350(), (int)pInterface->FUN_00792760(),
+                GetPickCamera()->MapScreenToRay((int)pInterface->FUN_009a9350(), (int)pInterface->FUN_00792760(),
                                                &origin, &dir, 0);
                 if (pick.FUN_00e98e20(&origin, &dir, 0))
                 {
@@ -616,13 +435,23 @@ bool FORenderedMenuRaceSex::HandleRaceSexMenuInput(bool abDown, int a2, int a3)
             }
             if (iFound >= 0)
             {
-                BSAudio::GetSingleton()->GetSoundHandleByEditorID("UIMenuMode", 0x121).Play(false);
-                FUN_009611e0()->GetMenu()->FUN_007fe910(iFound);
+                (BSAudio::GetSingleton()->*reinterpret_cast<BSSoundHandle (BSAudio::*)(const char*, unsigned int)>(
+                    static_cast<BSSoundHandle (BSAudio::*)(const char*, unsigned int)>(
+                        &BSAudio::GetSoundHandleByEditorID)))("UIMenuMode", 0x121).Play(false);
+                GetMenuTile()->GetMenu()->FUN_007fe910(iFound);
                 return true;
             }
         }
     }
-    return FORenderedMenu::FUN_007fb790(abDown, a2, a3);
+    // The approved base header still names this virtual slot v6.
+    __if_exists(FORenderedMenu::FUN_007fb790)
+    {
+        return FORenderedMenu::FUN_007fb790(abDown, a2, a3);
+    }
+    __if_not_exists(FORenderedMenu::FUN_007fb790)
+    {
+        return FORenderedMenu::v6(abDown, a2, a3);
+    }
 }
 
 int __cdecl FUN_00ecadb8();
@@ -825,11 +654,6 @@ void Timer::FUN_007fec30(float now)
     }
 }
 
-struct xColorA
-{
-    xColorA(float, float, float, float);
-    float r, g, b, a;
-};
 struct xPoint3
 {
     xPoint3(float, float, float);
@@ -857,12 +681,7 @@ struct xUpdateData
     float m_t;
     bool m_kPointA, m_kPointB, m_iThirdValue, m_iFourthElementInteger, m_usTrailingValue;
 };
-struct xFrustum
-{
-    xFrustum(bool);
-    float m_fLeftBound, m_fRightBound, m_fTopBound, m_fBottomBound, m_fNearPlane, m_fFarPlane;
-    bool m_bOrthographic;
-};
+
 struct xBound
 {
     float FUN_0084d030();
@@ -947,10 +766,10 @@ struct xCam : xAV
     xCam();
     static void* operator new(unsigned int);
     static void operator delete(void*);
-    void FUN_00712e60(const xColorA&);
+    void FUN_00712e60(const NiColorA&);
     void FUN_00733fd0(float);
     void FUN_00507700(float);
-    void FUN_00a6faf0(const xFrustum&);
+    void FUN_00a6faf0(const ::NiFrustum&);
     int m_auiShapeKeys[(0x114 - 4) / 4];
 };
 struct xLight : xAV
@@ -976,7 +795,7 @@ struct xGO
 };
 struct xColorMgr
 {
-    bool FUN_00719060(int, xColorA&);
+    bool FUN_00719060(int, NiColorA&);
 };
 xColorMgr* xF718b60();
 struct ClockSource
@@ -1118,7 +937,7 @@ struct xRenderedMenu
     bool m_158;
     int m_15c, m_160;
     float m_164, m_168;
-    void FUN_007f7fb0(const xColorA&);
+    void FUN_007f7fb0(const NiColorA&);
     xT1* FUN_009611e0();
     void FUN_004dc540(xAV*);
     void FUN_007fae70(int);
@@ -1141,7 +960,7 @@ void xRenderedMenu::Init()
     m_158 = false;
     m_168 = (double)xg_timer_11f6394.FUN_00825c00() + xRand() % *xg_i_11db4f8.FUN_0043d4d0();
     m_164 = *xg_f_11db4d0.FUN_00403e20();
-    xColorA qHXYKT(0.0f, 0.0f, 0.0f, 0.0f);
+    NiColorA qHXYKT(0.0f, 0.0f, 0.0f, 0.0f);
     if (xF718b60()->FUN_00719060(3, qHXYKT))
         FUN_007f7fb0(qHXYKT);
     xAV* qdqWL = 0;
@@ -1193,7 +1012,7 @@ void xRenderedMenu::Init()
     xUpdateData qsSDDgz(0.0f, false, false);
     qdqWL->FUN_00a59c60(qsSDDgz);
     xCam* qSVM = new xCam();
-    xColorA qrEZrs(0.0f, 1.0f, 1.0f, 0.0f);
+    NiColorA qrEZrs(0.0f, 1.0f, 1.0f, 0.0f);
     qSVM->FUN_00712e60(qrEZrs);
     xMat3 qbGYp;
     qbGYp.SetElement(0, 0.0f, 0.0f, 1.0f);
@@ -1201,7 +1020,8 @@ void xRenderedMenu::Init()
     qbGYp.SetElement(2, 0.0f, 1.0f, 0.0f);
     qSVM->FUN_0043fa80(xg_m_11a9448);
     qSVM->FUN_00733fd0(1.0f);
-    xFrustum qnuVZg(false);
+    ::NiFrustum qnuVZg;
+    qnuVZg.Init(false);
     qnuVZg.m_fFarPlane = xF45c670()->GetFar();
     qnuVZg.m_fNearPlane = *xg_f_1203144.FUN_00403e20();
     qSVM->FUN_00507700(qnuVZg.m_fFarPlane / qnuVZg.m_fNearPlane);
@@ -1244,11 +1064,6 @@ void xRenderedMenu::Init()
 }
 
 namespace fnv_007fe1f0 {
-struct RtColor
-{
-    float r, g, b, a;
-    RtColor(float fR, float fG, float fB, float fA);
-};
 
 struct RtTexture;
 struct RtTarget
@@ -1301,9 +1116,9 @@ struct RtRenderer
     virtual void v040();
     virtual void v041();
     virtual void v042();
-    virtual void SetBackgroundColor(const RtColor& kColor);
+    virtual void SetBackgroundColor(const NiColorA& kColor);
     virtual void v044();
-    virtual void SetBorderColor(const RtColor& kColor);
+    virtual void SetBorderColor(const NiColorA& kColor);
 };
 RtRenderer* __cdecl FUN_0043c4b0();
 RtTarget* __stdcall FUN_004a0ea0(void* pkObject);
@@ -1352,7 +1167,7 @@ struct RenderToTextureImpl
     char pad000[0x104];
     RtPtr<RtNode> m_spScene;
 
-    const RtColor& FUN_00503650();
+    const NiColorA& FUN_00503650();
     void FUN_007fba00(int a1, int a2, RtTexture* pkTexture);
     void FUN_007fe1f0(int a1, int a2, int a3);
 };
@@ -1365,12 +1180,12 @@ void RenderToTextureImpl::FUN_007fe1f0(int aiUnk, int aiUnk2, int aiUnk3)
     bOverrideTmp = true;
     RtRenderer* pkRendererY = FUN_0043c4b0();
     RtPtr<RtTexture> spTarget5(FUN_004a0ea0(FUN_0043c4b0())->FUN_00b6e110(0x30, 0, 0, 0));
-    RtColor kKBorder(0.0f, 0.0f, 0.0f, 0.0f);
-    RtColor kBackgroundVal2(0.0f, 0.0f, 0.0f, 0.0f);
+    NiColorA kKBorder(0.0f, 0.0f, 0.0f, 0.0f);
+    NiColorA kBackgroundVal2(0.0f, 0.0f, 0.0f, 0.0f);
     kBackgroundVal2 = FUN_00503650();
     kBackgroundVal2.a = 1.0f;
     if (bOverrideTmp)
-        kBackgroundVal2 = RtColor(0.125f, 0.161f, 0.141f, 1.0f);
+        kBackgroundVal2 = NiColorA(0.125f, 0.161f, 0.141f, 1.0f);
     pkRendererY->SetBorderColor(kKBorder);
     pkRendererY->SetBackgroundColor(kBackgroundVal2);
     FUN_00b6b8d0(7, spTarget5.FUN_00559450()->FUN_00b6b260());

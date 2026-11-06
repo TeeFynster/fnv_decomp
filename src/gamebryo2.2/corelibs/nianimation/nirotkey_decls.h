@@ -1,37 +1,18 @@
-// gamebryo2.2/corelibs/nianimation/nirotkey_decls.h: declares NiQuaternion, AnimationKey, TimedRotationKey
+// gamebryo2.2/corelibs/nianimation/nirotkey_decls.h: declares NiAnimationKey, TimedRotationKey
 #ifndef ARMY_NIROTKEY_DECLS_H
 #define ARMY_NIROTKEY_DECLS_H
 
 
-struct NiQuaternion
-{
-    float m_fVectorX;
-    float m_fVectorY;
-    float m_fVectorZ;
-    float m_fScalarPart;
-};
+#include "../../../../include/NiQuaternion.h"
 
-class AnimationKey
-{
-  public:
-    enum KeyType
-    {
-        NOINTERP = 0,
-        LINKEY = 1,
-        BEZKEY = 2,
-        TCBKEY = 3,
-        EULERKEY = 4,
-        STEPKEY = 5,
-        NUMKEYTYPES = 6
-    };
-};
+#include "../../../../include/NiAnimationKey.h"
 
 struct TimedRotationKey
 {
     float m_fTime;
     NiQuaternion m_kRotationValue;
 
-    static NiQuaternion __cdecl InterpolatePosition(float fTime, TimedRotationKey* pkKeys, AnimationKey::KeyType eType,
+    static NiQuaternion __cdecl InterpolatePosition(float fTime, TimedRotationKey* pkKeys, NiAnimationKey::KeyType eType,
                                                     unsigned int uiNumKeys, unsigned int& ruiLastIndex,
                                                     unsigned char ucKeySize);
 };

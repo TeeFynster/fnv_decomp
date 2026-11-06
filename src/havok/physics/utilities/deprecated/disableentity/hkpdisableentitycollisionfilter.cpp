@@ -2,7 +2,56 @@
 // src/havok/physics/utilities/deprecated/disableentity/hkpdisableentitycollisionfilter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/deprecated/disableentity/hkpdisableentitycollisionfilter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpDisableEntityCollisionFilter.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkpCollidable.h"
+#include "../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../include/hkpCollidableCollidableFilter.h"
+#include "../../../../../../include/hkpShapeCollectionFilter.h"
+#include "../../../../../../include/hkpRayShapeCollectionFilter.h"
+#include "../../../../../../include/hkpRayCollidableFilter.h"
+#include "../../../../../../include/hkpEntity.h"
+#include "../../../../../../include/hkpEntityListener.h"
+#include "../../../../../../include/hkpRigidBody.h"
+
+// Retained locally: the shared header omits the +0x24..+0x2f storage, so
+// MSVC places a derived entity-listener base at +0x24 instead of +0x30.
+// local form of hkpCollisionFilter: 0x00e467d0/0x00e46820 need the post-type padding so derived filter members retain their exe offsets (shared form differs by 2/5 bytes).
+class __declspec(align(16)) CollisionFilterBaseLocal_00e467d0 : public hkReferencedObject,
+                                             public hkpCollidableCollidableFilter,
+                                             public hkpShapeCollectionFilter,
+                                             public hkpRayShapeCollectionFilter,
+                                             public hkpRayCollidableFilter
+{
+  public:
+    virtual hkBool IsCollisionEnabled(const CollisionAgentContext& input,
+                                      const hkpCdBody& a, const hkpCdBody& b,
+                                      const hkpShapeContainer& bContainer,
+                                      hkpShapeKey bKey) const = 0;
+    virtual hkBool IsCollisionEnabled(const CollisionAgentContext& input,
+                                      const hkpCdBody& a, const hkpCdBody& b,
+                                      const hkpShapeContainer& aContainer,
+                                      const hkpShapeContainer& bContainer,
+                                      hkpShapeKey aKey, hkpShapeKey bKey) const = 0;
+
+    unsigned int m_prepad0;
+    unsigned int m_prepad1;
+    unsigned int m_type;
+    unsigned int m_uiPostTypePadding[3];
+};
+
+// No approved include/ header exists for this class yet.
+class hkpDisableEntityCollisionFilter : public CollisionFilterBaseLocal_00e467d0, public hkpEntityListener
+{
+  public:
+    virtual ~hkpDisableEntityCollisionFilter() throw();
+    virtual hkBool IsCollisionEnabled(const hkpCollidable& a, const hkpCollidable& b) const;
+    virtual void EntityRemovedCallback(hkpEntity* entity);
+    hkBool removeEntity(hkpEntity* entity);
+    void* DeleteInstance(unsigned char flags);
+
+    hkArray<hkpEntity*> m_kDisabledEntities;
+};
 
 // @fnv 0x00e467b0
 void __stdcall FUN_00e467b0(char* flag, int a, int b)
@@ -30,11 +79,6 @@ void __stdcall FUN_00e467a0(char* flag, int a1, int a2, int a3, int a4, int a5, 
 
 void* __cdecl FUN_00c85750(void);
 
-struct FUN_00e46900_Obj
-{
-    void FUN_00e46900();
-};
-
 struct FUN_00dff930_Alloc
 {
     virtual void slot00();
@@ -51,15 +95,10 @@ struct FUN_00dff930_Mgr
     FUN_00dff930_Alloc* m_10;
 };
 
-struct FUN_00dff930_class : hkpDisableEntityCollisionFilter
-{
-    void* FUN_00dff930(unsigned char flag);
-};
-
 // @fnv 0x00dff930
-void* FUN_00dff930_class::FUN_00dff930(unsigned char uiFlags)
+void* hkpDisableEntityCollisionFilter::DeleteInstance(unsigned char uiFlags)
 {
-    reinterpret_cast<FUN_00e46900_Obj*>(this)->FUN_00e46900();
+    this->hkpDisableEntityCollisionFilter::~hkpDisableEntityCollisionFilter();
     if (uiFlags & 1)
     {
         FUN_00dff930_Mgr* mgr = reinterpret_cast<FUN_00dff930_Mgr*>(FUN_00c85750());
@@ -73,96 +112,26 @@ void* FUN_00dff930_class::FUN_00dff930(unsigned char uiFlags)
 void __stdcall FUN_00e467c0(unsigned int a1)
 {}
 
-struct hkBoolE467
-{
-    char m_cBooleanValue;
-    hkBoolE467(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-
-struct hkpCollidableE467
-{
-    int m_00;
-};
-
-class hkpRigidBodyE467
-{
-  public:
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkpCollidableE467 m_kCollidable;
-
-    const hkpCollidableE467* getCollidable() const
-    {
-        return &m_kCollidable;
-    }
-};
-
-template <class T> class hkArrayE467
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    const T& operator[](int i) const
-    {
-        return m_data[i];
-    }
-};
-
-class hkpProjectileGunE467
-{
-  public:
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_iMaxProjectiles;
-    hkReal m_fReloadTime;
-    hkReal m_fTimeSinceLastShot;
-    hkArrayE467<hkpRigidBodyE467*> m_kRigidBodies;
-
-    hkBoolE467 FUN_00e467d0(const hkpCollidableE467& kA, const hkpCollidableE467& kB) const;
-};
-
-// Returns false if either collidable is found among the rigid bodies' collidables in the array, otherwise true.
+// 0x00e467d0 uses this at the +0x08 collidable-filter base: its +0x2c array is the complete object's +0x34 disabled entities.
 // @fnv 0x00e467d0
-hkBoolE467 hkpProjectileGunE467::FUN_00e467d0(const hkpCollidableE467& kA, const hkpCollidableE467& kB) const
+hkBool hkpDisableEntityCollisionFilter::IsCollisionEnabled(const hkpCollidable& kA, const hkpCollidable& kB) const
 {
-    for (int i = 0; i < m_kRigidBodies.GetLogicalSize(); i++)
+    for (int i = 0; i < m_kDisabledEntities.GetLogicalSize(); i++)
     {
-        const hkpCollidableE467* pkCollidable = m_kRigidBodies[i]->getCollidable();
+        const hkpCollidable* pkCollidable = &m_kDisabledEntities[i]->m_kCollidable;
         if (pkCollidable == &kA || pkCollidable == &kB)
             return false;
     }
     return true;
 }
 
-struct FnvDisabledCollisionFilter : hkpDisableEntityCollisionFilter
-{
-    char* FUN_00e46820(char* wasRemoved, hkpEntity* entity);
-};
-// Removes the entity from the filter's array by swapping in the last element, writing 1 to wasRemoved if found, else 0.
+// Remove the entity by swapping in the last element; return whether it was found.
 // @fnv 0x00e46820
-char* FnvDisabledCollisionFilter::FUN_00e46820(char* wasRemoved, hkpEntity* entity)
+hkBool hkpDisableEntityCollisionFilter::removeEntity(hkpEntity* entity)
 {
     if (!entity)
     {
-        *wasRemoved = 0;
-        return wasRemoved;
+        return false;
     }
     for (int index = 0; index < m_kDisabledEntities.m_iElementCount; ++index)
     {
@@ -173,70 +142,20 @@ char* FnvDisabledCollisionFilter::FUN_00e46820(char* wasRemoved, hkpEntity* enti
             int last = count;
             if (last != index)
                 m_kDisabledEntities.m_data[index] = m_kDisabledEntities.m_data[last];
-            *wasRemoved = 1;
-            return wasRemoved;
+            return true;
         }
     }
-    *wasRemoved = 0;
-    return wasRemoved;
+    return false;
 }
 
-struct hkBoolE46
-{
-    char m_cBooleanValue;
-    hkBoolE46(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-
-class hkpEntityListenerE46;
-
-class hkpEntityE46
-{
-  public:
-    void FUN_00c9c670(hkpEntityListenerE46* listener);
-};
-
-class hkpCollisionFilterE46
-{
-  public:
-    virtual ~hkpCollisionFilterE46();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-};
-
-class hkpEntityListenerE46
-{
-  public:
-    virtual void EntityAddedCallback(hkpEntityE46* entity);
-    virtual void FUN_00e46880(hkpEntityE46* entity);
-};
-
-class hkpDisableEntityCollisionFilterE46 : public hkpCollisionFilterE46, public hkpEntityListenerE46
-{
-  public:
-    hkBoolE46 FUN_00e46820(hkpEntityE46* entity);
-    virtual void FUN_00e46880(hkpEntityE46* entity);
-};
-
-// If entity is non-null, calls FUN_00e46820(entity) and then FUN_00c9c670(this) on the entity.
+// Remove the disabled entity, then unregister this entity listener.
 // @fnv 0x00e46880
-void hkpDisableEntityCollisionFilterE46::FUN_00e46880(hkpEntityE46* entity)
+void hkpDisableEntityCollisionFilter::EntityRemovedCallback(hkpEntity* entity)
 {
     if (entity)
     {
-        FUN_00e46820(entity);
-        entity->FUN_00c9c670(this);
+        removeEntity(entity);
+        entity->removeEntityListener(this);
     }
 }
 

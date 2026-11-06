@@ -1,6 +1,44 @@
 // fallout_shared/bgsdestructibleobjectform.cpp: BGSDestructibleObjectForm, TESObjectREFR, ActorValueOwner, TargetLocation (35 functions)
 
+#include "../../include/Actor.h"
+#include "../../include/ActorValueOwner.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSDebris.h"
+#include "../../include/BGSDestructibleObjectForm.h"
+#include "../../include/BGSExplosion.h"
+#include "../../include/BGSReconstructFormsInAllFilesMap.h"
+#include "../../include/BSAudio.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/HUDMainMenu.h"
+#include "../../include/PatrolActorPackageData.h"
+#include "../../include/Setting.h"
+#include "../../include/TES.h"
+#include "../../include/TESAIForm.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESAttributes.h"
+#include "../../include/TESBipedModelForm.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESModelTextureSwap.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESObjectWEAP.h"
 #include "bgsdestructibleobjectform_decls.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/GO.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/bhkCollisionObject.h"
+
+// Call targets for operations not yet declared by the shared reference and extra-data headers.
+extern "C" void __cdecl ReadExtraHealth();
+extern "C" void __cdecl RemoveExtraHealth();
+extern "C" void __cdecl RemoveExtraModel();
+extern "C" void __cdecl HasReferenceDestruction();
+extern "C" void __cdecl RestoreReferenceEnabledState();
 
 // @fnv 0x007038b0
 void BGSDestructibleObjectForm::UpdateTargetHealthBar(TESObjectREFR* reference)
@@ -14,7 +52,7 @@ const char* TESObjectREFR::GetModelFilePath()
 {
     TESModel* model = GetTESModel();
     if (model)
-        return model->GetPath();
+        return model->GetModelFilePath();
     return 0;
 }
 
@@ -33,17 +71,16 @@ void BGSDestructibleObjectForm::UpdateDestructionMap()
 {
     void* pIterPos;
     float fTime = g_timeGlobal.FUN_0084d030();
-    pIterPos = ((BGSReconstructFormsInAllFilesMap*)&g_011c4104)->GetFirstPos();
+    pIterPos = g_011c4104.GetFirstPos();
     while (pIterPos)
     {
         TESForm* ref = 0;
         unsigned int value = 0;
-        ((BGSReconstructFormsInAllFilesMap*)&g_011c4104)
-            ->GetNext(pIterPos, (TESFile*&)ref, (BGSReconstructFormsInFileMap*&)value);
+        g_011c4104.GetNext(pIterPos, (TESFile*&)ref, (BGSReconstructFormsInFileMap*&)value);
         if (ref && !ref->GetDisabled() && !ref->IsDeleted())
         {
             float damage = value * fTime;
-            if (((SettingT_GameSettingCollection_*)&g_011c3ea4)->Int()->i == 1)
+            if (*g_011c3ea4.Int() == 1)
             {
                 if (ref->IsActor())
                 {
@@ -51,7 +88,7 @@ void BGSDestructibleObjectForm::UpdateDestructionMap()
                     actor->DamageHealthAndFatigue(damage, 0.0f, 0);
                 }
                 else
-                    ref->UpdateDestructibleObject(damage, true);
+                    ((TESObjectREFR*)ref)->DamageObject(damage, true);
             }
             else
                 TaskQueueInterface::GetSingleton()->QueueReferenceFloatTask(ref, damage, true);
@@ -65,7 +102,7 @@ TESModel* TESObjectREFR::GetTESModel()
     TESModel* model = GetExtraData()->FUN_0042e250();
     if (!model && GetObjectReference())
     {
-        if (GetObjectReference()->GetFormType() == 40)
+        if (static_cast<const TESForm*>(GetObjectReference())->GetFormType() == 40)
         {
             TESObjectWEAP* weapon = (TESObjectWEAP*)GetObjectReference();
             if (GetExtraData()->GetWeaponModIndex())
@@ -78,13 +115,13 @@ TESModel* TESObjectREFR::GetTESModel()
     }
     if (!model)
     {
-        TESBipedModelForm* biped = TESBipedModelForm::GetFormAsBipedModel(GetObjectReference());
+        TESBipedModelForm* biped = TESBipedModelForm::GetFormAsBipedModel(static_cast<TESForm*>(GetObjectReference()));
         if (biped)
         {
             TESForm* pActor;
-            int uiSex = kMale;
+            int uiSex = 0;
             pActor = GetOwner();
-            if (pActor && pActor->GetFormType() == 42)
+            if (pActor && static_cast<const TESForm*>(pActor)->GetFormType() == 42)
                 uiSex = ((TESActorBase*)pActor)->GetSex();
             model = biped->GetWeaponModel((SEX)uiSex);
         }
@@ -96,17 +133,17 @@ TESModel* TESObjectREFR::GetTESModel()
 // @fnv 0x00477640
 void BGSDestructibleObjectForm::QueueResourceLoad(TESBoundObject* object, IO_TASK_PRIORITY priority, QueuedFile* file)
 {
-    if (!data)
+    if (!reinterpret_cast<DestructibleData*>(pData))
         return;
-    for (unsigned int i = 0; i < data->count; i++)
+    for (unsigned int i = 0; i < reinterpret_cast<DestructibleData*>(pData)->count; i++)
     {
-        if (data->stages[i]->model)
-            g_modelLoader->ProcessModelRequest(data->stages[i]->model, priority, file,
+        if (reinterpret_cast<DestructibleData*>(pData)->stages[i]->model)
+            g_modelLoader->ProcessModelRequest(reinterpret_cast<DestructibleData*>(pData)->stages[i]->model, priority, file,
                                                TES::GetModelResourceType((TESObject*)object), true, false, false);
-        if (data->stages[i]->explosion)
-            data->stages[i]->explosion->model.QueueResourceLoad(priority, file);
-        if (data->stages[i]->debris)
-            data->stages[i]->debris->model.QueueResourceLoad(priority, file);
+        if (reinterpret_cast<DestructibleData*>(pData)->stages[i]->explosion)
+            reinterpret_cast<DestructibleData*>(pData)->stages[i]->explosion->QueueResourceLoad(priority, file);
+        if (reinterpret_cast<DestructibleData*>(pData)->stages[i]->debris)
+            reinterpret_cast<DestructibleData*>(pData)->stages[i]->debris->QueueResourceLoad(priority, file);
     }
 }
 
@@ -121,28 +158,28 @@ int ActorValueOwner::GetActorValue(ActorValue::Index value)
         result = ((TESAttributes*)((char*)this - 0x48))->GetAttributeValue5();
         break;
     case 6:
-        result = ((TESAttributes*)((char*)this - 0x48))->FUN_005f1210();
+        result = ((TESAttributes*)((char*)this - 0x48))->GetPerception();
         break;
     case 7:
         result = ((TESAttributes*)((char*)this - 0x48))->GetAttributeValue7();
         break;
     case 8:
-        result = ((TESAttributes*)((char*)this - 0x48))->FUN_005f1250();
+        result = ((TESAttributes*)((char*)this - 0x48))->GetCharisma();
         break;
     case 9:
-        result = ((TESAttributes*)((char*)this - 0x48))->FUN_005f1270();
+        result = ((TESAttributes*)((char*)this - 0x48))->GetIntelligence();
         break;
     case 10:
         result = ((TESAttributes*)((char*)this - 0x48))->GetAttributeValue10();
         break;
     case 11:
-        result = ((TESAttributes*)((char*)this - 0x48))->FUN_005f12b0();
+        result = ((TESAttributes*)((char*)this - 0x48))->GetLuck();
         break;
     case 16:
-        result = ((TESActorBase*)((char*)this - 0x100))->GetHealth();
+        result = ((TESActorBase*)((char*)this - 0x100))->FUN_005f0b00();
         break;
     case 22:
-        result = ((TESActorBaseData*)((char*)this - 0xd0))->vfn_060();
+        result = ((const TESActorBaseData*)((char*)this - 0xd0))->GetFatigue();
         break;
     case 0:
         result = ((PatrolActorPackageData*)((char*)this - 0x70))->IsPatrolling();
@@ -166,7 +203,7 @@ int ActorValueOwner::GetActorValue(ActorValue::Index value)
         result = ((TESActorBaseData*)((char*)this - 0xd0))->GetShortAtOffset12();
         break;
     case 23:
-        result = (int)((TESActorBaseData*)((char*)this - 0xd0))->vfn_064();
+        result = (int)((const TESActorBaseData*)((char*)this - 0xd0))->GetHealthRegeneration();
         break;
     }
     return result;
@@ -175,22 +212,22 @@ int ActorValueOwner::GetActorValue(ActorValue::Index value)
 // @fnv 0x00478be0
 void BGSDestructibleObjectForm::InitItem(TESForm* owner)
 {
-    if (data)
+    if (reinterpret_cast<DestructibleData*>(pData))
     {
-        for (unsigned int i = 0; i < data->count; i++)
+        for (unsigned int i = 0; i < reinterpret_cast<DestructibleData*>(pData)->count; i++)
         {
-            if (data->stages[i]->explosion)
+            if (reinterpret_cast<DestructibleData*>(pData)->stages[i]->explosion)
             {
-                unsigned int explosionID = (unsigned int)data->stages[i]->explosion;
+                unsigned int explosionID = (unsigned int)reinterpret_cast<DestructibleData*>(pData)->stages[i]->explosion;
                 TESForm::RemapFormIDForFile(explosionID, owner->GetFile(-1));
-                data->stages[i]->explosion = dynamic_cast<BGSExplosion*>(TESForm::GetFormByID(explosionID));
-                if (!data->stages[i]->explosion)
+                reinterpret_cast<DestructibleData*>(pData)->stages[i]->explosion = dynamic_cast<BGSExplosion*>(TESForm::GetFormByID(explosionID));
+                if (!reinterpret_cast<DestructibleData*>(pData)->stages[i]->explosion)
                 {
                     if (owner)
                     {
                         if (((BGSCameraPath*)owner)->HasNameForWarning())
                             Warning("MASTERFILE: Unable to find stage %i explosion (%08X) on owner object \"%s\".", i,
-                                    explosionID, owner->GetEditorID());
+                                    explosionID, owner->GetName());
                         else
                             Warning("MASTERFILE: Unable to find stage %i explosion (%08X) on owner object (%08X).", i,
                                     explosionID, owner->GetFormID());
@@ -200,18 +237,18 @@ void BGSDestructibleObjectForm::InitItem(TESForm* owner)
                                 explosionID);
                 }
             }
-            if (data->stages[i]->debris)
+            if (reinterpret_cast<DestructibleData*>(pData)->stages[i]->debris)
             {
-                unsigned int debrisID = (unsigned int)data->stages[i]->debris;
+                unsigned int debrisID = (unsigned int)reinterpret_cast<DestructibleData*>(pData)->stages[i]->debris;
                 TESForm::RemapFormIDForFile(debrisID, owner->GetFile(-1));
-                data->stages[i]->debris = dynamic_cast<BGSDebris*>(TESForm::GetFormByID(debrisID));
-                if (!data->stages[i]->debris)
+                reinterpret_cast<DestructibleData*>(pData)->stages[i]->debris = dynamic_cast<BGSDebris*>(TESForm::GetFormByID(debrisID));
+                if (!reinterpret_cast<DestructibleData*>(pData)->stages[i]->debris)
                 {
                     if (owner)
                     {
                         if (((BGSCameraPath*)owner)->HasNameForWarning())
                             Warning("MASTERFILE: Unable to find stage %i debris (%08X) on owner object \"%s\".", i,
-                                    debrisID, owner->GetEditorID());
+                                    debrisID, owner->GetName());
                         else
                             Warning("MASTERFILE: Unable to find stage %i debris (%08X) on owner object (%08X).", i,
                                     debrisID, owner->GetFormID());
@@ -220,15 +257,15 @@ void BGSDestructibleObjectForm::InitItem(TESForm* owner)
                         Warning("MASTERFILE: Unable to find stage %i debris (%08X) on unknown owner.", i, debrisID);
                 }
             }
-            if (data->stages[i]->model)
-                ((TESModelTextureSwap*)data->stages[i]->model)->InitItem(owner);
+            if (reinterpret_cast<DestructibleData*>(pData)->stages[i]->model)
+                ((TESModelTextureSwap*)reinterpret_cast<DestructibleData*>(pData)->stages[i]->model)->InitItem(owner);
         }
-        switch (owner->GetFormType())
+        switch (static_cast<const TESForm*>(owner)->GetFormType())
         {
         case 42:
         case 43: {
             TESActorBase* actor = (TESActorBase*)owner;
-            data->health = actor->GetHealth();
+            reinterpret_cast<DestructibleData*>(pData)->health = actor->FUN_005f0b00();
             break;
         }
         }
@@ -247,12 +284,6 @@ int __fastcall FUN_00461130(int pThis)
     return pThis + 0x68;
 }
 
-class BaseFormComponent
-{
-  public:
-    BaseFormComponent();
-};
-
 extern int DAT_0101a4c4;
 void __fastcall FUN_008c6060(void* pThis);
 
@@ -266,19 +297,10 @@ void* __fastcall FUN_00475350(void* pThis)
     return pThis;
 }
 
-struct FUN_00475380_shell : public BGSDestructibleObjectForm
-{
-    void FUN_00475380();
-};
-
-extern int DAT_0101a6a0;
-void __fastcall FUN_00478690(void* pThis);
-
 // @fnv 0x00475380
-void FUN_00475380_shell::FUN_00475380()
+BGSDestructibleObjectForm::~BGSDestructibleObjectForm()
 {
-    *reinterpret_cast<int**>(this) = &DAT_0101a6a0;
-    FUN_00478690(this);
+    FUN_00478690();
 }
 
 struct DestructionStageData
@@ -304,10 +326,6 @@ struct DestructionStageData
     TESModelTextureSwap* m_pReplacementModel;
 };
 typedef char _sizecheck_DestructibleObjectStage[sizeof(DestructionStageData) == 24 ? 1 : -1];
-struct FUN_00475a00_shell : public BGSDestructibleObjectForm
-{
-    bool FUN_00475a00();
-};
 
 struct DestructibleObjectData_local
 {
@@ -322,15 +340,15 @@ bool __fastcall IsFlag2Set(DestructionStageData*);
 
 // Returns true if any stage of the destructible object data has a model texture swap, explosion, debris, or passes IsFlag2Set.
 // @fnv 0x00475a00
-bool FUN_00475a00_shell::FUN_00475a00()
+bool BGSDestructibleObjectForm::HasValidStages()
 {
-    if (!*(DestructibleObjectData_local**)((char*)this + 4))
+    if (!reinterpret_cast<DestructibleObjectData_local*>(pData))
     {
         return false;
     }
-    for (unsigned int i = 0; i < (*(DestructibleObjectData_local**)((char*)this + 4))->m_ucStageCount; ++i)
+    for (unsigned int i = 0; i < reinterpret_cast<DestructibleObjectData_local*>(pData)->m_ucStageCount; ++i)
     {
-        DestructionStageData* pstage = (*(DestructibleObjectData_local**)((char*)this + 4))->pStageArray[i];
+        DestructionStageData* pstage = reinterpret_cast<DestructibleObjectData_local*>(pData)->pStageArray[i];
         if (pstage)
         {
             if (pstage->m_pReplacementModel || pstage->m_pDebrisObject || pstage->m_pDebris || IsFlag2Set(pstage))
@@ -426,15 +444,10 @@ float FUN_00476b90_shell::FUN_00476b90(float afMin, float afMax)
     return (float)(r * (afMax - afMin) / 4294967296.0 + afMin);
 }
 
-struct FUN_00477ba0_shell : public TESForm
-{
-    bool FUN_00477ba0();
-};
-
 // @fnv 0x00477ba0
-bool FUN_00477ba0_shell::FUN_00477ba0()
+bool __fastcall IsDestroyed(TESForm* form)
 {
-    return (*reinterpret_cast<const unsigned int*>(reinterpret_cast<const char*>(this) + 8) & 0x800000) ? true : false;
+    return (*reinterpret_cast<const unsigned int*>(reinterpret_cast<const char*>(form) + 8) & 0x800000) ? true : false;
 }
 
 struct FUN_005df560_S
@@ -453,45 +466,26 @@ void FUN_005df560_S::GetRowFloats(unsigned int row, float* pfOut0, float* pfOut1
 namespace fnv_004753d0 {
 extern "C" void* __cdecl FUN_00475400(void*);
 
-struct FUN_00475a00_shell
-{
-    bool FUN_00475a00(void);
-};
-
 // Looks up the destructible wrapper for apForm via FUN_00475400 and returns its FUN_00475a00 result, or false if no wrapper exists.
 // @fnv 0x004753d0
 bool FUN_004753d0(void* apForm)
 {
-    FUN_00475a00_shell* pWrapper = (FUN_00475a00_shell*)FUN_00475400(apForm);
+    BGSDestructibleObjectForm* pWrapper = (BGSDestructibleObjectForm*)FUN_00475400(apForm);
     if (!pWrapper)
     {
         return false;
     }
-    return pWrapper->FUN_00475a00();
+    return pWrapper->HasValidStages();
 }
 }  // namespace fnv_004753d0
-
-struct MapH
-{
-    bool RemoveAt(unsigned int);
-};
 
 // @fnv 0x00477410
 void FUN_00477410(unsigned int index)
 {
-    ((MapH*)&g_011c4104)->RemoveAt(index);
+    g_011c4104.RemoveAt(reinterpret_cast<TESFile*>(index));
 }
 
 namespace fnv_00477ce0 {
-struct MapH
-{
-    bool RemoveAt(unsigned int);
-};
-
-struct DummyPointerMap
-{
-    void SetAt(unsigned int, unsigned int);
-};
 
 // If a2 is zero, removes the entry for a1 from g_011c4104; otherwise sets a1 to a2 in that map.
 // @fnv 0x00477ce0
@@ -499,11 +493,11 @@ void __cdecl SetOrRemoveMapEntry(unsigned int uiKey, unsigned int uiValue)
 {
     if (uiValue == 0)
     {
-        ((MapH*)&g_011c4104)->RemoveAt(uiKey);
+        g_011c4104.RemoveAt(reinterpret_cast<TESFile*>(uiKey));
     }
     else
     {
-        ((DummyPointerMap*)&g_011c4104)->SetAt(uiKey, uiValue);
+        g_011c4104.SetAt(reinterpret_cast<TESFile*>(uiKey), reinterpret_cast<BGSReconstructFormsInFileMap*>(uiValue));
     }
 }
 }  // namespace fnv_00477ce0
@@ -519,19 +513,16 @@ struct FUN_004759a0_Mid
     unsigned char cnt;
     FUN_004759a0_Elem** arr;
 };
-struct FUN_004759a0_First
-{
-    FUN_004759a0_Mid* _ref_00726070();
-};
-FUN_004759a0_First* __cdecl FUN_00475400(void*);
+
+BGSDestructibleObjectForm* __cdecl FUN_00475400(void*);
 // @fnv 0x004759a0
 int __cdecl GetElementValue(void* a, int aiIndex)
 {
-    FUN_004759a0_First* pFirst = FUN_00475400(a);
+    BGSDestructibleObjectForm* pFirst = FUN_00475400(a);
     if (!pFirst || aiIndex == -1)
         return 0;
     {
-        FUN_004759a0_Mid* q = pFirst->_ref_00726070();
+        FUN_004759a0_Mid* q = reinterpret_cast<FUN_004759a0_Mid*>(pFirst->FUN_00726070());
         if (!q)
             return 0;
         if (aiIndex < q->cnt)
@@ -560,51 +551,31 @@ struct FUN_004778a0_Mid
         QIdlePtr q;
     };
 };
-struct FUN_004778a0_cls
-{
-    int _0;
-    FUN_004778a0_Mid* _4;
-    void ReleaseScriptRunLock();
-};
+
 // @fnv 0x004778a0
-void FUN_004778a0_cls::ReleaseScriptRunLock()
+void BGSDestructibleObjectForm::UnloadReplacementModels()
 {
-    if (!_4)
+    if (!reinterpret_cast<FUN_004778a0_Mid*>(pData))
         return;
-    if ((unsigned int)(_4->f))
+    if ((unsigned int)(reinterpret_cast<FUN_004778a0_Mid*>(pData)->f))
     {
-        FinishScriptRunLock(&(_4->lock));
-        if (_4->lock <= 0)
-            _4->q = 0;
+        FinishScriptRunLock(&(reinterpret_cast<FUN_004778a0_Mid*>(pData)->lock));
+        if (reinterpret_cast<FUN_004778a0_Mid*>(pData)->lock <= 0)
+            reinterpret_cast<FUN_004778a0_Mid*>(pData)->q = 0;
     }
 }
 
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting818;
-struct Standin77900
-{
-    bool HasAnyFlags(int);
-    float FUN_00477900();
-};
-// Returns the float at offset 0x7c, multiplied by originalRuntimeFloatSetting818.Float() when HasAnyFlags(1) is false.
+extern Setting originalRuntimeFloatSetting818;
+extern "C" void __cdecl ExplosionHasAnyFlags();
+// Returns the float at offset 0x7c, multiplied by originalRuntimeFloatSetting818.Float() when reinterpret_cast<bool (__thiscall*)(BGSExplosion*, int)>(&ExplosionHasAnyFlags)(explosion, 1) is false.
 // @fnv 0x00477900
-float Standin77900::FUN_00477900()
+float __fastcall GetExplosionRadius(BGSExplosion* explosion)
 {
-    return (float)(HasAnyFlags(1) ? (double)*(float*)((char*)this + 0x7c)
-                                  : (double)(*(float*)((char*)this + 0x7c) * *originalRuntimeFloatSetting818.Float()));
+    return (float)(reinterpret_cast<bool (__thiscall*)(BGSExplosion*, int)>(&ExplosionHasAnyFlags)(explosion, 1) ? (double)explosion->Data.fRadius
+                                  : (double)(explosion->Data.fRadius * *originalRuntimeFloatSetting818.Float()));
 }
 
-struct NiAVObject;
 struct bhkWorldObject;
-
-struct NiNode
-{
-    unsigned int GetNumChildren();
-    NiAVObject* GetAt(unsigned int index);
-};
 
 struct H0043b4d0
 {
@@ -615,25 +586,6 @@ struct H0043b4d0
 struct W_0043b4f0
 {
     H0043b4d0 FUN_0043b4f0();
-};
-
-struct bhkCollisionObject
-{
-    static bhkCollisionObject* __cdecl GetFromNiAVObject(NiAVObject* object);
-    bhkWorldObject* FUN_006fa820();
-};
-
-struct LodObject
-{
-    void SetAppCulled(bool culled);
-};
-
-struct NiAVObjectAccess
-{
-    virtual void FUN_00477560_dummy1() = 0;
-    virtual void FUN_00477560_dummy2() = 0;
-    virtual void FUN_00477560_dummy3() = 0;
-    virtual NiNode* FUN_00477560_GetNode() = 0;
 };
 
 // If object has a collision object whose world object type is 19, sets it app-culled and returns true; otherwise recurses into child nodes.
@@ -661,11 +613,11 @@ bool __cdecl FUN_00477560(NiAVObject* object)
         if (bIsLodObject)
         {
             result = true;
-            reinterpret_cast<LodObject*>(object)->SetAppCulled(true);
+            object->SetAppCulled(true);
         }
         else
         {
-            NiNode* node = reinterpret_cast<NiAVObjectAccess*>(object)->FUN_00477560_GetNode();
+            NiNode* node = object->IsSceneNode();
 
             if (node)
             {
@@ -683,62 +635,18 @@ bool __cdecl FUN_00477560(NiAVObject* object)
     return result;
 }
 
-class FUN_00475ab0_emb
-{
-  public:
-    virtual void v0();
-    virtual float v1(int);
-};
-
-struct FUN_00475ab0_ref
-{
-    char _pad0[0xa4];
-    FUN_00475ab0_emb m_a4;
-};
-
-struct FUN_00475ab0_data
-{
-    unsigned int health;
-};
-
-class FUN_00475ab0_cls
-{
-  public:
-    void* vtable;
-    FUN_00475ab0_data* data;
-    unsigned int FUN_00475ab0(TESForm* a1);
-};
-
 // @fnv 0x00475ab0
-unsigned int FUN_00475ab0_cls::FUN_00475ab0(TESForm* pForm)
+unsigned int BGSDestructibleObjectForm::GetMaxHealth(TESObjectREFR* pForm)
 {
     if (pForm->IsActor())
     {
-        FUN_00475ab0_ref* ref = reinterpret_cast<FUN_00475ab0_ref*>(pForm);
-        return (unsigned int)ref->m_a4.v1(0x10);
+        Actor* ref = reinterpret_cast<Actor*>(pForm);
+        return (unsigned int)reinterpret_cast<ActorValueOwner*>((char*)ref + 0xa4)->GetBaseActorValueFloat(static_cast<ActorValue::Index>(0x10));
     }
-    return data->health;
+    return reinterpret_cast<DestructibleData*>(pData)->health;
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    static const NiPoint3 ZERO;
-};
-
-struct NiBound
-{
-    const NiPoint3& GetNavMeshData() const;
-};
-
-struct NiAVObject
-{
-    const NiBound& GetBoundingVolume() const;
-};
-
-struct BSStringT
+struct TargetName
 {
     int unk00;
     operator const char*() const;
@@ -751,140 +659,10 @@ struct NamedTarget
 
 NamedTarget* __fastcall LookupNamedTarget(const char* pName);
 
-struct PosRef
-{
-    virtual void vfn_000();
-    virtual void vfn_004();
-    virtual void vfn_008();
-    virtual void vfn_00c();
-    virtual void vfn_010();
-    virtual void vfn_014();
-    virtual void vfn_018();
-    virtual void vfn_01c();
-    virtual void vfn_020();
-    virtual void vfn_024();
-    virtual void vfn_028();
-    virtual void vfn_02c();
-    virtual void vfn_030();
-    virtual void vfn_034();
-    virtual void vfn_038();
-    virtual void vfn_03c();
-    virtual void vfn_040();
-    virtual void vfn_044();
-    virtual void vfn_048();
-    virtual void vfn_04c();
-    virtual void vfn_050();
-    virtual void vfn_054();
-    virtual void vfn_058();
-    virtual void vfn_05c();
-    virtual void vfn_060();
-    virtual void vfn_064();
-    virtual void vfn_068();
-    virtual void vfn_06c();
-    virtual void vfn_070();
-    virtual void vfn_074();
-    virtual void vfn_078();
-    virtual void vfn_07c();
-    virtual void vfn_080();
-    virtual void vfn_084();
-    virtual void vfn_088();
-    virtual void vfn_08c();
-    virtual void vfn_090();
-    virtual void vfn_094();
-    virtual void vfn_098();
-    virtual void vfn_09c();
-    virtual void vfn_0a0();
-    virtual void vfn_0a4();
-    virtual void vfn_0a8();
-    virtual void vfn_0ac();
-    virtual void vfn_0b0();
-    virtual void vfn_0b4();
-    virtual void vfn_0b8();
-    virtual void vfn_0bc();
-    virtual void vfn_0c0();
-    virtual void vfn_0c4();
-    virtual void vfn_0c8();
-    virtual void vfn_0cc();
-    virtual void vfn_0d0();
-    virtual void vfn_0d4();
-    virtual void vfn_0d8();
-    virtual void vfn_0dc();
-    virtual void vfn_0e0();
-    virtual void vfn_0e4();
-    virtual void vfn_0e8();
-    virtual void vfn_0ec();
-    virtual void vfn_0f0();
-    virtual void vfn_0f4();
-    virtual void vfn_0f8();
-    virtual void vfn_0fc();
-    virtual void vfn_100();
-    virtual void vfn_104();
-    virtual void vfn_108();
-    virtual void vfn_10c();
-    virtual void vfn_110();
-    virtual void vfn_114();
-    virtual void vfn_118();
-    virtual void vfn_11c();
-    virtual void vfn_120();
-    virtual void vfn_124();
-    virtual void vfn_128();
-    virtual void vfn_12c();
-    virtual void vfn_130();
-    virtual void vfn_134();
-    virtual void vfn_138();
-    virtual void vfn_13c();
-    virtual void vfn_140();
-    virtual void vfn_144();
-    virtual void vfn_148();
-    virtual void vfn_14c();
-    virtual void vfn_150();
-    virtual void vfn_154();
-    virtual void vfn_158();
-    virtual void vfn_15c();
-    virtual void vfn_160();
-    virtual void vfn_164();
-    virtual void vfn_168();
-    virtual void vfn_16c();
-    virtual void vfn_170();
-    virtual void vfn_174();
-    virtual void vfn_178();
-    virtual void vfn_17c();
-    virtual void vfn_180();
-    virtual void vfn_184();
-    virtual void vfn_188();
-    virtual void vfn_18c();
-    virtual void vfn_190();
-    virtual void vfn_194();
-    virtual void vfn_198();
-    virtual void vfn_19c();
-    virtual void vfn_1a0();
-    virtual void vfn_1a4();
-    virtual void vfn_1a8();
-    virtual void vfn_1ac();
-    virtual void vfn_1b0();
-    virtual void vfn_1b4();
-    virtual void vfn_1b8();
-    virtual void vfn_1bc();
-    virtual void vfn_1c0();
-    virtual void vfn_1c4();
-    virtual void vfn_1c8();
-    virtual void vfn_1cc();
-    virtual NiAVObject* Get3D();
-    virtual void vfn_1d4();
-    virtual void vfn_1d8();
-    virtual void vfn_1dc();
-    virtual void vfn_1e0();
-    virtual void vfn_1e4();
-    virtual void vfn_1e8();
-    virtual void vfn_1ec();
-    virtual void vfn_1f0();
-    virtual const NiPoint3* GetPos();
-};
-
 struct TargetLocation
 {
-    PosRef* pRef;
-    BSStringT kName;
+    TESObjectREFR* pRef;
+    TargetName kName;
     int unk08;
     NiPoint3 GetTargetPosition();
 };
@@ -900,27 +678,28 @@ NiPoint3 TargetLocation::GetTargetPosition()
     }
     else if (pRef)
     {
-        if (pRef->Get3D())
+        if (pRef->GetNiNode())
         {
-            kPos = pRef->Get3D()->GetBoundingVolume().GetNavMeshData();
+            kPos = static_cast<const NiAVObject*>(pRef->GetNiNode())->GetBoundingVolume().GetNavMeshData();
         }
         else
         {
-            kPos = *pRef->GetPos();
+            kPos = *static_cast<const TESObjectREFR*>(pRef)->GetPos();
         }
     }
     return kPos;
 }
 
+// Leading layouts for form types whose shared definitions are outside this migration.
 struct Fields_c
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
 };
 struct Fields_54
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -944,7 +723,7 @@ struct Fields_54
 };
 struct Fields_58
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -969,7 +748,7 @@ struct Fields_58
 };
 struct Fields_64
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -997,7 +776,7 @@ struct Fields_64
 };
 struct Fields_68
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -1023,42 +802,10 @@ struct Fields_68
     unsigned int unk5c;
     unsigned int unk60;
     unsigned int unk64;
-};
-struct Fields_74
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
 };
 struct Fields_7c
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -1092,7 +839,7 @@ struct Fields_7c
 };
 struct Fields_84
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -1128,7 +875,7 @@ struct Fields_84
 };
 struct Fields_88
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -1165,7 +912,7 @@ struct Fields_88
 };
 struct Fields_94
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -1205,7 +952,7 @@ struct Fields_94
 };
 struct Fields_9c
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -1247,7 +994,7 @@ struct Fields_9c
 };
 struct Fields_a4
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -1288,126 +1035,10 @@ struct Fields_a4
     unsigned int unk98;
     unsigned int unk9c;
     unsigned int unka0;
-};
-struct Fields_b4
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-};
-struct Fields_104
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    unsigned int unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
-    unsigned int unkc4;
-    unsigned int unkc8;
-    unsigned int unkcc;
-    unsigned int unkd0;
-    unsigned int unkd4;
-    unsigned int unkd8;
-    unsigned int unkdc;
-    unsigned int unke0;
-    unsigned int unke4;
-    unsigned int unke8;
-    unsigned int unkec;
-    unsigned int unkf0;
-    unsigned int unkf4;
-    unsigned int unkf8;
-    unsigned int unkfc;
-    unsigned int unk100;
 };
 struct Fields_144
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -1491,7 +1122,7 @@ struct Fields_144
 };
 struct Fields_14c
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
@@ -1581,9 +1212,7 @@ struct Form1d : Fields_94, BGSDestructibleObjectForm
 struct Form2f : Fields_a4, BGSDestructibleObjectForm
 {
 };
-struct Form28 : Fields_b4, BGSDestructibleObjectForm
-{
-};
+
 struct Form1f : Fields_84, BGSDestructibleObjectForm
 {
 };
@@ -1623,7 +1252,7 @@ struct Form25 : Fields_54, BGSDestructibleObjectForm
 };
 struct Input26
 {
-    unsigned int unk00;
+    virtual void FormVtableSlot();
 };
 struct Form26 : Fields_c, Input26, Fields_64, BGSDestructibleObjectForm
 {
@@ -1640,20 +1269,15 @@ struct Form17 : Fields_68, BGSDestructibleObjectForm
 struct Form33 : Fields_58, BGSDestructibleObjectForm
 {
 };
-struct Form2a : Fields_104, BGSDestructibleObjectForm
-{
-};
-struct Form2b : Fields_104, BGSDestructibleObjectForm
-{
-};
+
 // Returns the form cast to BGSDestructibleObjectForm for supported form types, or null if the form is null or unsupported.
 // @fnv 0x00475400
-FUN_004759a0_First* __cdecl FUN_00475400(void* form)
+BGSDestructibleObjectForm* __cdecl FUN_00475400(void* form)
 {
     BGSDestructibleObjectForm* result = 0;
     if (form)
     {
-        switch (static_cast<TESForm*>(form)->GetFormType())
+        switch (static_cast<const TESForm*>(form)->GetFormType())
         {
         case 0x1d: {
             Form1d* object = static_cast<Form1d*>(form);
@@ -1666,7 +1290,7 @@ FUN_004759a0_First* __cdecl FUN_00475400(void* form)
             break;
         }
         case 0x28: {
-            Form28* object = static_cast<Form28*>(form);
+            TESObjectWEAP* object = static_cast<TESObjectWEAP*>(form);
             result = object;
             break;
         }
@@ -1754,30 +1378,30 @@ FUN_004759a0_First* __cdecl FUN_00475400(void* form)
             break;
         }
         case 0x2a: {
-            Form2a* object = static_cast<Form2a*>(form);
+            TESActorBase* object = static_cast<TESActorBase*>(form);
             result = object;
             break;
         }
         case 0x2b: {
-            Form2b* object = static_cast<Form2b*>(form);
+            TESActorBase* object = static_cast<TESActorBase*>(form);
             result = object;
             break;
         }
         }
     }
-    return reinterpret_cast<FUN_004759a0_First*>(result);
+    return reinterpret_cast<BGSDestructibleObjectForm*>(result);
 }
 
 // Looks up a1's owner, scans its list for an entry whose value equals a2, and returns its index or -1 if not found.
 // @fnv 0x00475920
 int FindIndexByValue(void* a1, unsigned int aiValue)
 {
-    FUN_004759a0_First* pOwner = FUN_00475400(a1);
+    BGSDestructibleObjectForm* pOwner = FUN_00475400(a1);
     if (pOwner == 0)
     {
         return -1;
     }
-    FUN_004759a0_Mid* pList = pOwner->_ref_00726070();
+    FUN_004759a0_Mid* pList = reinterpret_cast<FUN_004759a0_Mid*>(pOwner->FUN_00726070());
     if (pList == 0)
     {
         return -1;
@@ -1792,10 +1416,6 @@ int FindIndexByValue(void* a1, unsigned int aiValue)
     return -1;
 }
 
-struct FUN_0041b6b0_shell
-{
-    float FUN_0041b6b0();
-};
 float __cdecl FUN_00476b20(float);
 
 // @fnv 0x00477430
@@ -1804,15 +1424,15 @@ int __cdecl FUN_00477430(TESObjectREFR* ref)
     int iStage = -1;
     if (ref)
     {
-        FUN_004759a0_First* pForm = FUN_00475400(ref->GetObjectReference());
-        FUN_004759a0_Mid* pData = pForm ? pForm->_ref_00726070() : 0;
+        BGSDestructibleObjectForm* pForm = FUN_00475400(ref->GetObjectReference());
+        FUN_004759a0_Mid* pData = pForm ? reinterpret_cast<FUN_004759a0_Mid*>(pForm->FUN_00726070()) : 0;
         if (pData)
         {
-            float fExtraValue = ((FUN_0041b6b0_shell*)ref->GetExtraData())->FUN_0041b6b0();
+            float fExtraValue = reinterpret_cast<float (__thiscall*)(ExtraDataList*)>(&ReadExtraHealth)(ref->GetExtraData());
             if (fExtraValue != -1.0)
             {
                 unsigned char cPct = (unsigned char)FUN_00476b20(
-                    (float)(fExtraValue * 100.0 / ((FUN_00475ab0_cls*)pForm)->FUN_00475ab0((TESForm*)ref)));
+                    (float)(fExtraValue * 100.0 / pForm->GetMaxHealth(ref)));
                 iStage = pData->cnt;
                 for (int i = 0; i < pData->cnt; i++)
                 {
@@ -1843,146 +1463,14 @@ struct SceneObjectView
     virtual void slot08();
     virtual FadeNodeView* AsNode();
 };
-struct ReferenceView
-{
-    virtual void slot000();
-    virtual void slot004();
-    virtual void slot008();
-    virtual void slot00c();
-    virtual void slot010();
-    virtual void slot014();
-    virtual void slot018();
-    virtual void slot01c();
-    virtual void slot020();
-    virtual void slot024();
-    virtual void slot028();
-    virtual void slot02c();
-    virtual void slot030();
-    virtual void slot034();
-    virtual void slot038();
-    virtual void slot03c();
-    virtual void slot040();
-    virtual void slot044();
-    virtual void slot048();
-    virtual void slot04c();
-    virtual void slot050();
-    virtual void slot054();
-    virtual void slot058();
-    virtual void slot05c();
-    virtual void slot060();
-    virtual void slot064();
-    virtual void slot068();
-    virtual void slot06c();
-    virtual void slot070();
-    virtual void slot074();
-    virtual void slot078();
-    virtual void slot07c();
-    virtual void slot080();
-    virtual void slot084();
-    virtual void slot088();
-    virtual void slot08c();
-    virtual void slot090();
-    virtual void slot094();
-    virtual void slot098();
-    virtual void slot09c();
-    virtual void slot0a0();
-    virtual void slot0a4();
-    virtual void slot0a8();
-    virtual void slot0ac();
-    virtual void slot0b0();
-    virtual void slot0b4();
-    virtual void slot0b8();
-    virtual void slot0bc();
-    virtual void slot0c0();
-    virtual void slot0c4();
-    virtual void slot0c8();
-    virtual void slot0cc();
-    virtual void slot0d0();
-    virtual void slot0d4();
-    virtual void slot0d8();
-    virtual void slot0dc();
-    virtual void slot0e0();
-    virtual void slot0e4();
-    virtual void slot0e8();
-    virtual void slot0ec();
-    virtual void slot0f0();
-    virtual void slot0f4();
-    virtual void slot0f8();
-    virtual void slot0fc();
-    virtual void slot100();
-    virtual void slot104();
-    virtual void slot108();
-    virtual void slot10c();
-    virtual void slot110();
-    virtual void slot114();
-    virtual void slot118();
-    virtual void slot11c();
-    virtual void slot120();
-    virtual void slot124();
-    virtual void slot128();
-    virtual void slot12c();
-    virtual void slot130();
-    virtual void slot134();
-    virtual void slot138();
-    virtual void slot13c();
-    virtual void slot140();
-    virtual void slot144();
-    virtual void slot148();
-    virtual void slot14c();
-    virtual void slot150();
-    virtual void slot154();
-    virtual void slot158();
-    virtual void slot15c();
-    virtual void slot160();
-    virtual void slot164();
-    virtual void slot168();
-    virtual void slot16c();
-    virtual void slot170();
-    virtual void slot174();
-    virtual void slot178();
-    virtual void slot17c();
-    virtual void slot180();
-    virtual void slot184();
-    virtual void slot188();
-    virtual void slot18c();
-    virtual void slot190();
-    virtual void slot194();
-    virtual void slot198();
-    virtual void slot19c();
-    virtual void slot1a0();
-    virtual void slot1a4();
-    virtual void slot1a8();
-    virtual void slot1ac();
-    virtual void slot1b0();
-    virtual void slot1b4();
-    virtual void slot1b8();
-    virtual void slot1bc();
-    virtual void slot1c0();
-    virtual void slot1c4();
-    virtual void slot1c8();
-    virtual void Reset3D(int, bool);
-    virtual SceneObjectView* Get3D();
-    bool FUN_00452370() const;
-    ExtraDataList* FUN_005d43c0();
-    void FUN_00573f40();
-};
-struct ExtraHealthView
-{
-    float FUN_0041b6b0();
-    void RemoveExtraType86();
-    void RemoveExtra5B();
-};
+
 struct SaveLoadView
 {
     bool FUN_004623f0(bool);
 };
 struct WorldView
 {
-    void FUN_00451ef0(ReferenceView*, void*, int, int);
-};
-struct GlobalView
-{
-    void RemoveKey(ReferenceView*);
+    void FUN_00451ef0(TESObjectREFR*, void*, int, int);
 };
 struct FinalView
 {
@@ -1990,7 +1478,7 @@ struct FinalView
 };
 struct ManagerView
 {
-    FinalView* FUN_00825c00(ReferenceView*);
+    FinalView* FUN_00825c00(TESObjectREFR*);
 };
 extern SaveLoadView* DAT_011ddf38;
 extern WorldView* DAT_011dea10;
@@ -1998,43 +1486,30 @@ extern ManagerView* DAT_011f1958;
 void __cdecl FUN_00c6a270(SceneObjectView*, bool, bool, int);
 void __cdecl FUN_00476ec0(NiAVObject*, int);
 
-struct ParentCellView
-{
-    void* FUN_008d6f30();
-};
-struct Simple3DView
-{
-    NiAVObject* FUN_0043fcd0();
-};
-struct FormView
-{
-    void FUN_00484650(bool);
-};
-
 // @fnv 0x00477d10
-void __cdecl FUN_00477d10(ReferenceView* reference)
+void __cdecl FUN_00477d10(TESObjectREFR* reference)
 {
-    if (!reference->FUN_00452370())
+    if (!reinterpret_cast<bool (__thiscall*)(const TESObjectREFR*)>(&HasReferenceDestruction)(reference))
         return;
-    FUN_004759a0_First* destructible = FUN_00475400(reinterpret_cast<TESObjectREFR*>(reference)->GetObjectReference());
-    float health = reinterpret_cast<ExtraHealthView*>(reference->FUN_005d43c0())->FUN_0041b6b0();
+    BGSDestructibleObjectForm* destructible = FUN_00475400(reinterpret_cast<TESObjectREFR*>(reference)->GetObjectReference());
+    float health = reinterpret_cast<float (__thiscall*)(ExtraDataList*)>(&ReadExtraHealth)(reference->FUN_005d43c0());
     if (health == -1.0)
         return;
-    reinterpret_cast<ExtraHealthView*>(reference->FUN_005d43c0())->RemoveExtraType86();
-    if (reinterpret_cast<FUN_00477ba0_shell*>(reference)->FUN_00477ba0())
-        reinterpret_cast<FormView*>(reference)->FUN_00484650(false);
+    reinterpret_cast<void (__thiscall*)(ExtraDataList*)>(&RemoveExtraHealth)(reference->FUN_005d43c0());
+    if (IsDestroyed(reference))
+        reference->SetDestroyed(false);
     if (reference->FUN_005d43c0()->FUN_0042e250())
     {
-        reinterpret_cast<ExtraHealthView*>(reference->FUN_005d43c0())->RemoveExtra5B();
-        if (reference->Get3D())
+        reinterpret_cast<void (__thiscall*)(ExtraDataList*)>(&RemoveExtraModel)(reference->FUN_005d43c0());
+        if (reinterpret_cast<SceneObjectView*>(reference->GetNiNode()))
         {
             bool allowChanges = DAT_011ddf38->FUN_004623f0(false);
-            reference->Reset3D(0, true);
+            reference->Set3D(0, true);
             DAT_011ddf38->FUN_004623f0(allowChanges);
-            DAT_011dea10->FUN_00451ef0(reference, reinterpret_cast<ParentCellView*>(reference)->FUN_008d6f30(), 0, 0);
-            if (reference->Get3D())
+            DAT_011dea10->FUN_00451ef0(reference, reference->GetParentCell(), 0, 0);
+            if (reinterpret_cast<SceneObjectView*>(reference->GetNiNode()))
             {
-                SceneObjectView* object = reference->Get3D();
+                SceneObjectView* object = reinterpret_cast<SceneObjectView*>(reference->GetNiNode());
                 FadeNodeView* fade = object ? object->AsNode() : 0;
                 BSFadeNode_Dummy* node = fade ? fade->AsFadeNode() : 0;
                 if (node)
@@ -2043,13 +1518,13 @@ void __cdecl FUN_00477d10(ReferenceView* reference)
             }
         }
     }
-    else if (reference->Get3D())
+    else if (reinterpret_cast<SceneObjectView*>(reference->GetNiNode()))
     {
-        FUN_00476ec0(reinterpret_cast<Simple3DView*>(reference)->FUN_0043fcd0(), 0);
+        FUN_00476ec0(reference->Get3DSimple(), 0);
     }
     if (reinterpret_cast<TESForm*>(reference)->GetDisabled())
-        reference->FUN_00573f40();
-    reinterpret_cast<GlobalView*>(&g_011c4104)->RemoveKey(reference);
+        reinterpret_cast<void (__thiscall*)(TESObjectREFR*)>(&RestoreReferenceEnabledState)(reference);
+    g_011c4104.RemoveAt(reinterpret_cast<TESFile*>(reference));
     DAT_011f1958->FUN_00825c00(reference)->RemoveEntryForRef();
 }
 
@@ -2058,15 +1533,7 @@ void __cdecl AppendChunk(unsigned int auiType, char* apData, unsigned int auiSiz
 void __cdecl FUN_00403d30(void* apDst, int aiValue, unsigned int auiSize);
 void __cdecl FUN_004856d0(int aiType);
 
-struct FUN_0084e3a0_sound
-{
-    unsigned int FUN_0084e3a0();
-};
-
-struct FUN_0048a520_obj
-{
-    void ProcessAndFreeData(unsigned int a1, unsigned int a2, unsigned int a3);
-};
+extern "C" void __cdecl WriteReplacementModel();
 
 struct FUN_00477f20_src
 {
@@ -2075,10 +1542,10 @@ struct FUN_00477f20_src
     unsigned char ucByte2;
     unsigned char ucByte3;
     unsigned int uiValue4;
-    FUN_0084e3a0_sound* pSound8;
-    FUN_0084e3a0_sound* pSoundC;
+    TESForm* pSound8;
+    TESForm* pSoundC;
     unsigned int uiValue10;
-    FUN_0048a520_obj* pObj14;
+    TESModelTextureSwap* pObj14;
 };
 
 struct FUN_00477f20_data
@@ -2111,49 +1578,43 @@ struct FUN_00478130_entry
     void FUN_00478130();
 };
 
-struct FUN_00477f20_shell
-{
-    int iUnk0;
-    FUN_00477f20_data* pData;
-    void FUN_00477f20();
-};
-
 // @fnv 0x00477f20
-void FUN_00477f20_shell::FUN_00477f20()
+void BGSDestructibleObjectForm::Save()
 {
-    if (pData)
+    if (reinterpret_cast<FUN_00477f20_data*>(pData))
     {
         FUN_004781b0 kHeader;
-        kHeader.uiValue = pData->uiValue;
-        kHeader.ucCount = pData->ucCount;
-        kHeader.ucFlag = pData->ucFlag;
+        kHeader.uiValue = reinterpret_cast<FUN_00477f20_data*>(pData)->uiValue;
+        kHeader.ucCount = reinterpret_cast<FUN_00477f20_data*>(pData)->ucCount;
+        kHeader.ucFlag = reinterpret_cast<FUN_00477f20_data*>(pData)->ucFlag;
         if (FUN_00401500())
             kHeader.FUN_00503210();
         AppendChunk(0x54534544, (char*)&kHeader, 8);
         if (FUN_00401500())
             kHeader.FUN_00503210();
 
-        for (unsigned int i = 0; i < pData->ucCount; i++)
+        for (unsigned int i = 0; i < reinterpret_cast<FUN_00477f20_data*>(pData)->ucCount; i++)
         {
             FUN_00478130_entry kEntry;
             FUN_00403d30(&kEntry, 0, 0x14);
             kEntry.m_ucClipIdentifier = i;
-            kEntry.ucByte0 = pData->ppEntries[i]->ucByte1;
-            kEntry.uiValue4 = pData->ppEntries[i]->uiValue4;
-            kEntry.ucByte2 = pData->ppEntries[i]->ucByte0;
-            kEntry.ucByte3 = pData->ppEntries[i]->ucByte2;
-            kEntry.uiValue10 = pData->ppEntries[i]->uiValue10;
-            if (pData->ppEntries[i]->pSound8)
-                kEntry.uiSound8 = pData->ppEntries[i]->pSound8->FUN_0084e3a0();
-            if (pData->ppEntries[i]->pSoundC)
-                kEntry.uiSoundC = pData->ppEntries[i]->pSoundC->FUN_0084e3a0();
+            kEntry.ucByte0 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->ucByte1;
+            kEntry.uiValue4 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->uiValue4;
+            kEntry.ucByte2 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->ucByte0;
+            kEntry.ucByte3 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->ucByte2;
+            kEntry.uiValue10 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->uiValue10;
+            if (reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pSound8)
+                kEntry.uiSound8 = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pSound8->FUN_0084e3a0();
+            if (reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pSoundC)
+                kEntry.uiSoundC = reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pSoundC->FUN_0084e3a0();
             if (FUN_00401500())
                 kEntry.FUN_00478130();
             AppendChunk(0x44545344, (char*)&kEntry, 0x14);
             if (FUN_00401500())
                 kEntry.FUN_00478130();
-            if (pData->ppEntries[i]->pObj14)
-                pData->ppEntries[i]->pObj14->ProcessAndFreeData(0x4c444d44, 0x54444d44, 0x53444d44);
+            if (reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pObj14)
+                reinterpret_cast<void (__thiscall*)(TESModelTextureSwap*, unsigned int, unsigned int, unsigned int)>(&WriteReplacementModel)(
+                    reinterpret_cast<FUN_00477f20_data*>(pData)->ppEntries[i]->pObj14, 0x4c444d44, 0x54444d44, 0x53444d44);
             FUN_004856d0(0x46545344);
         }
     }
@@ -2184,13 +1645,7 @@ struct MyDestructibleData
     MyDestructionStage** stages;
 };
 
-struct DestructibleFormStandin
-{
-    MyDestructibleData* GetDestructibleData();
-    unsigned int GetHealth(TESObjectREFR* refr);
-};
-
-extern "C" DestructibleFormStandin* __cdecl FUN_00475400(TESBoundObject*);
+extern "C" BGSDestructibleObjectForm* __cdecl FUN_00475400(TESBoundObject*);
 float __cdecl FUN_00476b20(float);
 
 // @fnv 0x00477bc0
@@ -2199,15 +1654,15 @@ unsigned int __cdecl GetDestructionStageSelfDamage(TESObjectREFR* refr, float da
     if (refr == 0 || damage == DAT_01012060)
         return 0;
 
-    DestructibleFormStandin* aActorData = FUN_00475400(refr->GetObjectReference());
+    BGSDestructibleObjectForm* aActorData = FUN_00475400(refr->GetObjectReference());
     if (aActorData == 0)
         return 0;
 
-    MyDestructibleData* data = aActorData->GetDestructibleData();
+    MyDestructibleData* data = reinterpret_cast<MyDestructibleData*>(aActorData->FUN_00726070());
     if (data == 0)
         return 0;
 
-    unsigned int health = aActorData->GetHealth(refr);
+    unsigned int health = aActorData->GetMaxHealth(refr);
     unsigned char aAPGeom = (unsigned char)FUN_00476b20((damage * DAT_01017a40) / (float)health);
 
     unsigned int aActorMesh = 0;
@@ -2229,12 +1684,6 @@ unsigned int __cdecl GetDestructionStageSelfDamage(TESObjectREFR* refr, float da
 
 // A 40-byte allocation view for the queued-file constructor call.
 
-struct GO
-{
-    operator unsigned int() const;
-    int GetObjectFlags();
-};
-
 struct QIdlePtrSV : public GO
 {
     QIdlePtrSV& operator=(void*);
@@ -2250,38 +1699,33 @@ struct FUN_00c3c590_QueuedFile
 int __cdecl InitScriptRunLock(void*);
 void* __cdecl operator new(unsigned int);
 
-struct FUN_00477780_shell : public ::BGSDestructibleObjectForm
-{
-    void FUN_00477780(::TESBoundObject*);
-};
-
 // @fnv 0x00477780
-void FUN_00477780_shell::FUN_00477780(::TESBoundObject* apBoundObject)
+void BGSDestructibleObjectForm::PreloadReplacementModels(::TESBoundObject* apBoundObject)
 {
-    if (!data)
+    if (!reinterpret_cast<DestructibleData*>(pData))
         return;
 
-    if (!reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(data) + 0x10)->GO::operator unsigned int())
+    if (!reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(reinterpret_cast<DestructibleData*>(pData)) + 0x10)->GO::operator unsigned int())
     {
-        reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(data) + 0x10)
+        reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(reinterpret_cast<DestructibleData*>(pData)) + 0x10)
             ->
             operator=(new FUN_00c3c590_QueuedFile(5));
 
         QueueResourceLoad(apBoundObject, static_cast< ::IO_TASK_PRIORITY>(5),
                           reinterpret_cast< ::QueuedFile*>(
-                              reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(data) + 0x10)
+                              reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(reinterpret_cast<DestructibleData*>(pData)) + 0x10)
                                   ->GO::operator unsigned int()));
 
-        if (!reinterpret_cast<GO*>(reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(data) + 0x10)
+        if (!reinterpret_cast<GO*>(reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(reinterpret_cast<DestructibleData*>(pData)) + 0x10)
                                        ->GO::operator unsigned int())
                  ->GetObjectFlags())
         {
-            reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(data) + 0x10)->operator=(0);
+            reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(reinterpret_cast<DestructibleData*>(pData)) + 0x10)->operator=(0);
         }
     }
 
-    if (reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(data) + 0x10)->GO::operator unsigned int())
+    if (reinterpret_cast<QIdlePtrSV*>(reinterpret_cast<unsigned char*>(reinterpret_cast<DestructibleData*>(pData)) + 0x10)->GO::operator unsigned int())
     {
-        InitScriptRunLock(reinterpret_cast<void*>(reinterpret_cast<unsigned char*>(data) + 0xc));
+        InitScriptRunLock(reinterpret_cast<void*>(reinterpret_cast<unsigned char*>(reinterpret_cast<DestructibleData*>(pData)) + 0xc));
     }
 }

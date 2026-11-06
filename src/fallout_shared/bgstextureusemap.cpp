@@ -1,3 +1,13 @@
+#include "../../include/BSFile.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/GO.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiTMap.h"
+#include "../../include/SL.h"
+#include "../../include/StrMem.h"
+#include "../../include/TES.h"
 
 // src/fallout_shared/bgstextureusemap.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/bgstextureusemap.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -19,11 +29,7 @@ void FUN_004aa3d0_shell::SetValueAndCall(int aiArg, int aiValue, char c)
     FUN_004aa3d0(aiArg, c);
 }
 
-struct NiTMap
-{
-    void* GetFirstPos();
-    void GetNext(void*& pos, unsigned int& key, void*& value);
-};
+struct FUN_004aa830;
 
 struct UnsignedIntegerRecord
 {
@@ -34,7 +40,7 @@ struct UnsignedIntegerRecord
 struct NiTMapContainer
 {
     unsigned int m1;
-    NiTMap m_kEntryMap;
+    NiTMap<unsigned int, FUN_004aa830*> m_kEntryMap;
     unsigned long FUN_004aa890();
 };
 
@@ -47,7 +53,7 @@ unsigned long NiTMapContainer::FUN_004aa890()
     {
         unsigned int key = 0;
         UnsignedIntegerRecord* pdata = 0;
-        this->m_kEntryMap.GetNext(iter, key, (void*&)pdata);
+        this->m_kEntryMap.GetNext(iter, key, reinterpret_cast<FUN_004aa830*&>(pdata));
         if (pdata)
         {
             ulretsize += pdata->m_ulSecondValue;
@@ -56,15 +62,11 @@ unsigned long NiTMapContainer::FUN_004aa890()
     return ulretsize;
 }
 
-struct FUN_004a9850_shell
-{
-    ~FUN_004a9850_shell();
-};
 extern int _data_011c16bc;
 struct FUN_004aa340
 {
     int _m0;
-    FUN_004a9850_shell _m1;
+    NiTMap<unsigned int, FUN_004aa830*> _m1;
     void RemoveAllEntries();
     ~FUN_004aa340();
 };
@@ -105,19 +107,6 @@ void InvokeIfPresent(int aiArg1, int aiArg2, int apHolder)
     }
 }
 
-struct GO
-{
-    int m;
-    GO(int);
-    ~GO()
-    {}
-};
-struct SL
-{
-    int a;
-    int b;
-    SL();
-};
 struct FUN_004aa830
 {
     GO m0;
@@ -130,10 +119,6 @@ FUN_004aa830::FUN_004aa830() : m0(0)
 {}
 
 namespace fnv_004aa680 {
-struct GO
-{
-    virtual ~GO();
-};
 struct ListX
 {
     void RemoveAll();
@@ -155,28 +140,18 @@ FUN_004aa680_shell::~FUN_004aa680_shell()
 }
 }  // namespace fnv_004aa680
 
-struct MapX
-{
-    void* GetFirstPos();
-};
-
-struct MyMap
-{
-    void RemoveAll();
-};
-
 // Iterates the map at this+4, calls DestroyIfFlagged(1) on each value, then clears the map with RemoveAll.
 // @fnv 0x004aa5d0
 void FUN_004aa340::RemoveAllEntries()
 {
-    void* iter = reinterpret_cast<MapX*>(reinterpret_cast<unsigned char*>(this) + 4)->GetFirstPos();
+    void* iter = reinterpret_cast<NiTMap<unsigned int, FUN_004aa830*>*>(reinterpret_cast<unsigned char*>(this) + 4)->GetFirstPos();
 
     while (iter)
     {
         unsigned int pignore = 0;
         void* value = 0;
 
-        reinterpret_cast<NiTMap*>(reinterpret_cast<unsigned char*>(this) + 4)->GetNext(iter, pignore, value);
+        reinterpret_cast<NiTMap<unsigned int, FUN_004aa830*>*>(reinterpret_cast<unsigned char*>(this) + 4)->GetNext(iter, pignore, reinterpret_cast<FUN_004aa830*&>(value));
 
         UnsignedIntegerRecord* pdata = reinterpret_cast<UnsignedIntegerRecord*>(value);
         UnsignedIntegerRecord* key = pdata;
@@ -184,7 +159,7 @@ void FUN_004aa340::RemoveAllEntries()
         key ? reinterpret_cast<FUN_004aa650_shell*>(key)->DestroyIfFlagged(1) : 0;
     }
 
-    reinterpret_cast<MyMap*>(reinterpret_cast<unsigned char*>(this) + 4)->RemoveAll();
+    reinterpret_cast<NiTMap<unsigned int, FUN_004aa830*>*>(reinterpret_cast<unsigned char*>(this) + 4)->RemoveAll();
 }
 
 void* __cdecl operator new(unsigned int);
@@ -199,15 +174,6 @@ struct LH
     bool IsInList(int& value);
 };
 
-struct SetAtHelper
-{
-    void SetAt(unsigned int key, unsigned int value);
-};
-
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int key, unsigned int& value);
-};
 
 struct GO_operator
 {
@@ -224,14 +190,14 @@ void FUN_004aa720_shell::AddEntry(int aiKey, int aiValue, int aiItem)
     {
         p = 0;
 
-        if (!reinterpret_cast<DummyPointerMap*>(reinterpret_cast<char*>(this) + 4)
-                 ->GetAt(static_cast<unsigned int>(aiKey), reinterpret_cast<unsigned int&>(p)) ||
+        if (!reinterpret_cast<NiTMap<unsigned int, FUN_004aa830*>*>(reinterpret_cast<char*>(this) + 4)
+                 ->GetAt(static_cast<unsigned int>(aiKey), p) ||
             !p)
         {
             p = new FUN_004aa830;
 
-            reinterpret_cast<SetAtHelper*>(reinterpret_cast<char*>(this) + 4)
-                ->SetAt(static_cast<unsigned int>(aiKey), reinterpret_cast<unsigned int>(p));
+            reinterpret_cast<NiTMap<unsigned int, FUN_004aa830*>*>(reinterpret_cast<char*>(this) + 4)
+                ->SetAt(static_cast<unsigned int>(aiKey), p);
 
             reinterpret_cast<GO_operator*>(p)->operator=(reinterpret_cast<void*>(aiKey));
 
@@ -245,10 +211,6 @@ void FUN_004aa720_shell::AddEntry(int aiKey, int aiValue, int aiItem)
     }
 }
 
-struct NiNode
-{
-};
-
 struct LLD_Cell
 {
     NiNode* FUN_00545cb0();
@@ -257,16 +219,6 @@ struct LLD_Cell
 struct GridCell
 {
     LLD_Cell* m0;
-};
-
-struct CP_008c48d0
-{
-    LLD_Cell* GetPrevPath();
-};
-
-struct TES : public CP_008c48d0
-{
-    GridCell* FUN_00457050(int a, int b);
 };
 
 struct GlobalObject_0045cfe0
@@ -297,7 +249,7 @@ void FUN_004aabb0_shell::FUN_004aabb0(char a1)
 
     if (g_TES->GetPrevPath())
     {
-        inner5 = g_TES->GetPrevPath();
+        inner5 = reinterpret_cast<LLD_Cell*>(g_TES->GetPrevPath());
         this->SetValueAndCall(reinterpret_cast<int>(inner5->FUN_00545cb0()), reinterpret_cast<int>(inner5), a1);
     }
     else
@@ -321,20 +273,10 @@ void FUN_004aabb0_shell::FUN_004aabb0(char a1)
     }
 }
 
-struct NiRTTI
-{
-};
-struct NiAVObject
-{
-};
 NiAVObject* __cdecl NiDynamicCast(const NiRTTI*, NiAVObject*);
 extern int DAT_011f444c;
 extern const char str_0101f524[];
 
-struct BSFadeNode
-{
-    void* FUN_0043b1b0();
-};
 struct CastedObj
 {
     virtual void vt_00();
@@ -467,56 +409,20 @@ struct RefObj
     unsigned int _ref_0084e3a0();
 };
 struct TESRegionData;
-template <class T> struct BSSimpleList
+template <class T> struct TextureUserList
 {
     T* data;
-    BSSimpleList* next;
+    TextureUserList* next;
     bool FUN_008256d0();
     T& GetItem();
-    BSSimpleList* GetNext();
+    TextureUserList* GetNext();
     unsigned int ItemsInList();
 };
-struct StrMem
-{
-    char* m_buf;
-    int m_len;
-    StrMem();
-    ~StrMem();
-};
 int __cdecl FUN_00406f60(StrMem*, const char*, ...);
-struct BSFile
-{
-    virtual ~BSFile();
-    BSFile(const char*, bool, unsigned int, bool);
-    bool FUN_00aff300(bool, bool);
-    void FUN_00affd10();
-    void FUN_00affbb0(void*, int);
-    char m_fileName[0x104];
-    int m_108;
-    int m_10c;
-    int m_110;
-    int m_114;
-    int m_118;
-    int m_11c;
-    int m_120;
-    int m_124;
-    int m_128;
-    int m_12c;
-    int m_130;
-    int m_134;
-    int m_138;
-    int m_13c;
-    int m_140;
-    int m_144;
-    int m_148;
-    int m_14c;
-    int m_150;
-    int m_154;
-};
 struct TexUseMap
 {
     unsigned int m1;
-    NiTMap m_kEntryMap;
+    NiTMap<unsigned int, FUN_004aa830*> m_kEntryMap;
     bool FUN_004aa900(const char* name);
 };
 // @fnv 0x004aa900
@@ -532,16 +438,16 @@ bool TexUseMap::FUN_004aa900(const char* apFileName)
         {
             unsigned int key5 = 0;
             void* value9 = 0;
-            m_kEntryMap.GetNext(posVal, key5, value9);
+            m_kEntryMap.GetNext(posVal, key5, reinterpret_cast<FUN_004aa830*&>(value9));
             CastedObj* casted9 = (CastedObj*)NiDynamicCast((const NiRTTI*)&DAT_011f444c, (NiAVObject*)key5);
             if (casted9 && value9)
             {
                 StrMem str5;
                 FUN_00406f60(&str5, "%s\t%d bytes\t%i users\r\n", casted9->vt_9c()->FUN_0043b1b0(),
                              ((UnsignedIntegerRecord*)value9)->m_ulSecondValue,
-                             ((BSSimpleList<TESRegionData*>*)((char*)value9 + 8))->ItemsInList());
+                             ((TextureUserList<TESRegionData*>*)((char*)value9 + 8))->ItemsInList());
                 file9.FUN_00affbb0(&str5, 1);
-                BSSimpleList<TESRegionData*>* listA = (BSSimpleList<TESRegionData*>*)((char*)value9 + 8);
+                TextureUserList<TESRegionData*>* listA = (TextureUserList<TESRegionData*>*)((char*)value9 + 8);
                 while (listA && !listA->FUN_008256d0())
                 {
                     TESRegionData* elem9 = listA->GetItem();
@@ -559,10 +465,9 @@ bool TexUseMap::FUN_004aa900(const char* apFileName)
     return result5;
 }
 
+class TESForm;
 namespace fnv_004aa3d0 {
-struct TESForm;
 struct WalkRef;
-struct NiAVObject;
 
 struct FormTypeHolder
 {
@@ -572,20 +477,6 @@ struct WalkRef
 {
     FormTypeHolder* GetBase();
     bool IsDisabledRef();
-};
-struct WalkFadeNode
-{
-    WalkRef* GetRef();
-};
-struct WalkNode
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual int IsFadeNode();
-    unsigned int GetChildCount();
-    NiAVObject* GetChildAt(unsigned int i);
 };
 struct WalkProperty
 {
@@ -652,17 +543,6 @@ struct WalkGeometry
 {
     WalkTexVT* GetProperty(unsigned int idx);
 };
-struct NiAVObject
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual WalkNode* IsSceneNode();
-    virtual void v10();
-    virtual void v14();
-    virtual WalkGeometry* IsGeometry();
-    bool IsCulledFlag();
-};
 struct WalkRefMap
 {
     bool GetAt(WalkRef* key, bool* out);
@@ -690,17 +570,17 @@ void TextureWalker::FUN_004aa3d0(NiAVObject* obj, bool b)
 {
     if (obj && !obj->IsCulledFlag())
     {
-        WalkNode* node = obj->IsSceneNode();
+        NiNode* node = obj->IsSceneNode();
         if (node)
         {
             bool bSkip = false;
             bool bSet = false;
-            WalkFadeNode* fade = 0;
+            BSFadeNode* fade = 0;
             if (node->IsFadeNode())
-                fade = (WalkFadeNode*)node;
+                fade = (BSFadeNode*)node;
             if (fade)
             {
-                WalkRef* ref = fade->GetRef();
+                WalkRef* ref = reinterpret_cast<WalkRef*>(fade->FUN_009ad610());
                 if (g_walkRefMap)
                     g_walkRefMap->GetAt(ref, &bSkip);
                 if (ref && !bSkip)
@@ -722,10 +602,10 @@ void TextureWalker::FUN_004aa3d0(NiAVObject* obj, bool b)
             }
             if (!bSkip)
             {
-                unsigned int count = node->GetChildCount();
+                unsigned int count = node->FUN_0043b480();
                 for (unsigned int i = 0; i < count; i++)
                 {
-                    NiAVObject* child = node->GetChildAt(i);
+                    NiAVObject* child = node->FUN_0043b4a0(i);
                     FUN_004aa3d0(child, b);
                 }
             }
@@ -734,7 +614,7 @@ void TextureWalker::FUN_004aa3d0(NiAVObject* obj, bool b)
         }
         else
         {
-            WalkGeometry* geom = obj->IsGeometry();
+            WalkGeometry* geom = reinterpret_cast<WalkGeometry*>(obj->IsGeometry());
             if (geom)
             {
                 WalkTexVT* pProp = geom->GetProperty(3);

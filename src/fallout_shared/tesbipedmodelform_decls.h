@@ -14,32 +14,9 @@ class BSFaceGenModel;
 class BGSListForm;
 template <class T> class BSSimpleList;
 #include "tesbipedmodelform_types_BIPED_OBJECT.h"
-class BGSListForm
-{
-  public:
-    BSSimpleList<TESForm*>* FUN_00500940();
-    char _pdbpad_1[23];
-    char ListOfForms_pad17_pad17_pad17[8];
-    unsigned int m_uiFormCount;
-};
-class BSFaceGenModelExtraData
-{
-  public:
-    BSFaceGenModel* GetModelFilePath();
-};
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-    NiPointer(T*);
-    ~NiPointer();
-    T* operator->() const;
-};
-class NiNode
-{
-  public:
-    void ApplyRDTNodeScales();
-};
+#include "../../include/BGSListForm.h"
+#include "../../include/BSFaceGenModelExtraData.h"
+#include "../../include/NiNode.h"
 class BipedAnim
 {
   public:

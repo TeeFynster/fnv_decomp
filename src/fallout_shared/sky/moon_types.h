@@ -9,9 +9,7 @@
 // BSStringT, NiPoint3, AutoMemContext/MEM_CONTEXT come from canonical headers (explicit ../../../include/ path: src/fallout_shared shadows it).
 // NiPointer stays a unit-local superset (same layout): out-of-line ctor(T*)/dtor/operator=/T*/->/==/!= on NiNode/NiTriShape,
 // which have no canonical header yet (the canonical NiPointer bodies need a complete T).
-#define NiPointer FNV_NiPointer_Canonical
 #include "../../../include/layout_support.h"
-#undef NiPointer
 #include "../../../include/NiPoint3.h"
 #include "../../../include/AutoMemContext.h"
 class NiNode;

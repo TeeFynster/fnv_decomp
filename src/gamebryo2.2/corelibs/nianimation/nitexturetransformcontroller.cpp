@@ -1,11 +1,100 @@
 // gamebryo2.2/corelibs/nianimation/nitexturetransformcontroller.cpp: NiTextureTransformController, NiNIFImageReader, TextureTransformOwner (20 functions)
 
-#include "nitexturetransformcontroller_decls.h"
-#include "nitexturetransformcontroller_types_NiTextureTransformController.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiAlphaController.h"
+#include "../../../../include/BSFrustumFOVController.h"
+#include "../../../../include/NiUpdateData.h"
+#include "../../../../include/StrArr.h"
+#include "../../../../include/NiNIFImageReader.h"
+#include "../../../../include/NiPoint2.h"
+// NiStreamStandInW_nitexturetransformcontroller: local type (was include/NiStreamStandInW.h, which had no evidence of one real class); no method of it is bound to a named game function
+class NiBinaryStreamW;
+
+struct NiStreamStandInW_nitexturetransformcontroller
+{
+public:
+    char _000[0x250];
+    NiBinaryStreamW* m_pBackingStream;
+};
+
+#include "../../../../include/NiTextureTransformController.h"
+#include "../../../../include/MemoryManager.h"
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
+
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+
+int NiSprintf(char* buffer, unsigned int bufferSize, const char* format, ...);
+void* _NiMalloc(unsigned int size);
+void NiFree(void* pointer);
+
+
+extern MemoryManager g_memoryManager;
+extern const float DAT_01096324;
+
+struct TextureShaderMaps
+{
+    unsigned int pad;
+    NiTexturingProperty__Map** data;
+    unsigned short capacity, size;
+    NiTexturingProperty__Map* Get(unsigned int i)
+    {
+        return i < size ? data[i] : 0;
+    }
+};
+struct TexturePropertyLayout
+{
+    char pad[0x20];
+    NiTexturingProperty__Map** maps;
+    unsigned short capacity, size;
+    unsigned int pad28;
+    TextureShaderMaps* shaders;
+    unsigned int FUN_00a46410();
+    NiTexturingProperty__Map* GetGeometryShaderObject(unsigned int i)
+    {
+        return shaders ? shaders->Get(i) : 0;
+    }
+};
+inline NiPoint2::NiPoint2(float a, float b) : x(a), y(b)
+{}
+class TextureMapTransform
+{
+  public:
+    NiPoint2 translate;
+    float rotate;
+    NiPoint2 scale;
+    char pad[52];
+    static void* operator new(unsigned int, void* p) throw()
+    {
+        return p;
+    }
+    TextureMapTransform(const NiPoint2&, float, const NiPoint2&, const NiPoint2&, int) throw();
+    void UpdateFromPair(const NiPoint2&);
+    void SetValue(float);
+    void FUN_00a462b0(const NiPoint2&);
+};
+extern const float DAT_01016248;
+class NiTexturingProperty__Map
+{
+  public:
+    char pad[12];
+    TextureMapTransform* transform;
+};
+
 
 // Builds and caches a controller ID string from the transform member, formatting it as "%d-%d-<member>".
 // @fnv 0x00a46300
-const char* NiTextureTransformController::GetControllerID()
+const char* NiTextureTransformController::GetControllerID() const
 {
     char* pCachedID = m_pCachedControllerID;
     if (pCachedID)
@@ -94,19 +183,19 @@ NiTextureTransformController::NiTextureTransformController(NiObjectNET* property
 }
 
 // @fnv 0x00a46490
-void NiTextureTransformController::Update(NiUpdateData* data) throw()
+void NiTextureTransformController::Update(NiUpdateData& data)
 {
     if (((unsigned char)(m_uiObjectFlags >> 5)) & 1)
         m_fControllerTime = DAT_01096324;
-    else if (AdvanceController(data->fTime))
+    else if (AdvanceController(data.fTime))
     {
-        if (!m_spControllerInterpolator.m_pObject || !m_spControllerInterpolator.m_pObject->Unk_35())
+        if (!m_spControllerInterpolator.m_pObject || !m_spControllerInterpolator.m_pObject->AlwaysUpdate())
             return;
     }
     if (!m_spControllerInterpolator.m_pObject)
         return;
     float value;
-    if (!m_spControllerInterpolator.m_pObject->Unk_27(m_fControllerTime, m_pkTarget, value))
+    if (!m_spControllerInterpolator.m_pObject->UpdateFloat(m_fControllerTime, m_pkTarget, value))
         return;
     if (!IsTextureMapValid())
         return;
@@ -227,22 +316,17 @@ void S00a46220::UpdateFromPair(float* afPair)
     *(int*)&m_f1 = *((int*)afPair + 1);
 }
 
-struct S462b0
-{
-    float x;
-    float y;
-};
 struct C462b0
 {
     char _00[12];
-    S462b0 m_0c;
+    NiPoint2 m_0c;
     char _14[8];
     bool m_1c;
-    void __thiscall FUN_00a462b0(S462b0* p);
+    void __thiscall FUN_00a462b0(NiPoint2* p);
 };
 // Sets m_1c if the stored m_0c differs from p, then copies p into m_0c.
 // @fnv 0x00a462b0
-void __thiscall C462b0::FUN_00a462b0(S462b0* p)
+void __thiscall C462b0::FUN_00a462b0(NiPoint2* p)
 {
     m_1c = m_1c || m_0c.x != p->x || m_0c.y != p->y;
     m_0c = *p;
@@ -271,15 +355,6 @@ void* __thiscall FUN_00a463e0_Holder::GetElementAt(unsigned int index)
     return 0;
 }
 
-struct CloningProcess;
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
-struct NiAlphaController
-{
-    void CopyMemberData(NiAlphaController*, CloningProcess&);
-};
 inline void* __cdecl operator new(unsigned int, void* p)
 {
     return p;
@@ -296,7 +371,7 @@ NiTextureTransformController* __thiscall FUN_00a468f0_shell::Clone(CloningProces
     NiTextureTransformController* pkObject;
     pkObject = (NiTextureTransformController*)BSFadeNode::operator new(0x50);
     if (pkObject)
-        pkObject = new (pkObject) NiTextureTransformController(0, 0, (NiTextureTransformController__TransformMember)0);
+        pkObject = ::new (pkObject) NiTextureTransformController(0, 0, (NiTextureTransformController__TransformMember)0);
     else
         pkObject = 0;
     ((NiAlphaController*)this)->CopyMemberData((NiAlphaController*)pkObject, kCloning);
@@ -307,16 +382,6 @@ NiTextureTransformController* __thiscall FUN_00a468f0_shell::Clone(CloningProces
     return pkObject;
 }
 
-struct StrArr
-{
-    unsigned char _00[8];
-    unsigned short m_08;
-    unsigned short m_0A;
-    unsigned short _0C;
-    unsigned short m_0E;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 void __stdcall FUN_00a576c0(StrArr*);
 char* __cdecl _FUN_00a7d330(const char*);
 // Ensures pkStrings has room, then stores the string returned by _FUN_00a7d330 at index m_0A.
@@ -325,50 +390,30 @@ void __stdcall FUN_00a46ac0(StrArr* pkStrings)
 {
     FUN_00a576c0(pkStrings);
     char* pszString = _FUN_00a7d330(*(const char**)&g_011f3f20);
-    unsigned int uiIndex = pkStrings->m_0A;
-    if (uiIndex >= pkStrings->m_08)
-        pkStrings->SetSize(uiIndex + pkStrings->m_0E);
+    unsigned int uiIndex = pkStrings->m_usSize;
+    if (uiIndex >= pkStrings->m_usMaxSize)
+        pkStrings->SetSize(uiIndex + pkStrings->m_usGrowBy);
     pkStrings->SetAt(uiIndex, pszString);
 }
 
 void __fastcall UpdateMatrix(void*);
-struct NiNIFImageReader
-{
-    void* m_0x0;
-    void* m_0x4;
-    float m_0x8;
-    void* m_0xc;
-    void* m_0x10;
-    void* m_0x14;
-    void* m_0x18;
-    void* m_0x1c;
-    void* m_0x20;
-    void* m_0x24;
-    void* m_0x28;
-    void* m_0x2c;
-    void* m_0x30;
-    void* m_0x34;
-    void* m_0x38;
-    void* m_0x3c;
-    void* m_0x40;
-    void* m_0x44;
-    NiNIFImageReader* InitFromInputs(const NiNIFImageReader* s, float f, const NiNIFImageReader* t,
-                                     const NiNIFImageReader* u, NiNIFImageReader* d);
-};
+
 // Copies two fields each from s, t and u, stores f and d, calls UpdateMatrix on this, and returns this.
 // @fnv 0x00a88eb0
 NiNIFImageReader* NiNIFImageReader::InitFromInputs(const NiNIFImageReader* apSource, float afValue,
                                                    const NiNIFImageReader* apSecond, const NiNIFImageReader* apThird,
                                                    NiNIFImageReader* d)
 {
-    m_0x0 = apSource->m_0x0;
-    m_0x4 = apSource->m_0x4;
-    m_0x8 = afValue;
-    m_0xc = apSecond->m_0x0;
-    m_0x10 = apSecond->m_0x4;
-    m_0x14 = apThird->m_0x0;
-    m_0x18 = apThird->m_0x4;
-    m_0x44 = d;
+    // This entry point initializes transform storage at the original object offsets.
+    // NiNIFImageReader's inherited reader layout does not describe that storage.
+    reinterpret_cast<void**>(this)[0] = reinterpret_cast<void* const*>(apSource)[0];
+    reinterpret_cast<void**>(this)[1] = reinterpret_cast<void* const*>(apSource)[1];
+    reinterpret_cast<float*>(this)[2] = afValue;
+    reinterpret_cast<void**>(this)[3] = reinterpret_cast<void* const*>(apSecond)[0];
+    reinterpret_cast<void**>(this)[4] = reinterpret_cast<void* const*>(apSecond)[1];
+    reinterpret_cast<void**>(this)[5] = reinterpret_cast<void* const*>(apThird)[0];
+    reinterpret_cast<void**>(this)[6] = reinterpret_cast<void* const*>(apThird)[1];
+    reinterpret_cast<void**>(this)[17] = d;
     UpdateMatrix(this);
     return this;
 }
@@ -466,24 +511,18 @@ struct NiBinaryStreamW
     }
 };
 
-struct NiStreamStandInW
-{
-    char _000[0x250];
-    NiBinaryStreamW* m_pBackingStream;
-};
-
 struct FUN_00a46a30_Cls
 {
     char _00[0x40];
     unsigned char m_40;
     unsigned int m_44;
     unsigned int m_48;
-    void __thiscall FUN_00a57c00(NiStreamStandInW* pkStream);
-    void __thiscall WriteToStream(NiStreamStandInW* pkStream);
+    void __thiscall FUN_00a57c00(NiStreamStandInW_nitexturetransformcontroller* pkStream);
+    void __thiscall WriteToStream(NiStreamStandInW_nitexturetransformcontroller* pkStream);
 };
 
 // @fnv 0x00a46a30
-void __thiscall FUN_00a46a30_Cls::WriteToStream(NiStreamStandInW* pkStream)
+void __thiscall FUN_00a46a30_Cls::WriteToStream(NiStreamStandInW_nitexturetransformcontroller* pkStream)
 {
     FUN_00a57c00(pkStream);
     unsigned char ucFlag = m_40;
@@ -755,7 +794,7 @@ NiTextureTransformController* __cdecl FUN_00a46950()
 {
     void* storage = BSFadeNode::operator new(sizeof(NiTextureTransformController));
     if (storage != 0)
-        return new (storage)
+        return ::new (storage)
             NiTextureTransformController(0, 0, NiTextureTransformController__TransformMember_TT_TRANSLATE_U);
     return 0;
 }

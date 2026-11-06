@@ -6,17 +6,12 @@
 // src/staging/blk_00b40000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-struct NiPoint3
+// BaseTag_blk_00b40000_od_ob1_variant: local type (was include/BaseTag.h, which had no evidence of one real class); no method of it is bound to a named game function
+class BaseTag_blk_00b40000_od_ob1_variant
 {
-    float x;
-    float y;
-    float z;
 };
-struct CIdvCamera
-{
-    CIdvCamera& FUN_00b3f0c0(CIdvCamera const&);
-    CIdvCamera& FUN_00b402d0(CIdvCamera const& src);
-};
+#include "../../include/NiPoint3.h"
+#include "../../include/CIdvCamera.h"
 struct FUN_00ec7c56_t
 {
     static void FUN_00ec7c56();
@@ -28,29 +23,12 @@ struct FUN_00b42980
     FUN_00b42980& Set(unsigned int v, FUN_00b42980 const& src);
 };
 void* operator new(unsigned int);
-struct FUN_00b40150 : CIdvCamera
-{
-    unsigned char data[76];
-    FUN_00b40150();
-};
-FUN_00b40150::FUN_00b40150()
-{}
-struct FUN_00b403a0_t : CIdvCamera
-{
-    CIdvCamera& CloneCamera();
-};
 void FUN_00ec7c56();
 struct FUN_00b40800_t
 {
     int pos;
     int pad;
     char GetNextChar();
-};
-struct FUN_00b40070_Point
-{
-    float x;
-    float y;
-    float z;
 };
 extern int DAT_010a58fc;
 struct FUN_00b40070_Class
@@ -60,9 +38,9 @@ struct FUN_00b40070_Class
     unsigned char unk10;
     int unk14;
     unsigned char unk18;
-    FUN_00b40070_Point unk1C;
-    FUN_00b40070_Point unk28;
-    FUN_00b40070_Point unk34;
+    NiPoint3 unk1C;
+    NiPoint3 unk28;
+    NiPoint3 unk34;
     unsigned char unk40;
     float unk44;
     int unk48;
@@ -72,18 +50,12 @@ struct FUN_00b40070_Class
                                                 float value, int result);
 };
 extern float DAT_01016248;
-struct S_00b40850_P3
-{
-    float x;
-    float y;
-    float z;
-};
 struct FUN_00b40850
 {
     float unk00;
     float unk04;
     float unk08;
-    S_00b40850_P3 unk0C;
+    NiPoint3 unk0C;
     float unk18;
     FUN_00b40850();
 };
@@ -1952,16 +1924,13 @@ struct ValueTag
 struct MoveTag
 {
 };
-struct BaseTag
-{
-};
-template <class I> inline I checked_base2(I& _It, BaseTag)
+template <class I> inline I checked_base2(I& _It, BaseTag_blk_00b40000_od_ob1_variant)
 {
     return _It;
 }
 template <class I> inline I checked_base(I& _It)
 {
-    BaseTag _Base_tag;
+    BaseTag_blk_00b40000_od_ob1_variant _Base_tag;
     return checked_base2(_It, _Base_tag);
 }
 // VC-style vector insertion, with scalar record destruction and exception rollback.
@@ -3774,35 +3743,29 @@ FUN_00b418b0::FUN_00b418b0(unsigned int n, bool val)
 
 struct P133Pair;
 
-struct P133Point
+inline NiPoint3::NiPoint3(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
+{}
+inline NiPoint3 NiPoint3::operator+(NiPoint3 const& other) const
 {
-    float x, y, z;
-    P133Point()
-    {}
-    P133Point(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {}
-    P133Point operator+(P133Point const& other) const
-    {
-        return P133Point(x + other.x, y + other.y, z + other.z);
-    }
-    P133Point operator*(float scale) const
-    {
-        return P133Point(x * scale, y * scale, z * scale);
-    }
-    float& operator[](int index)
-    {
-        return (&x)[index];
-    }
-};
+    return NiPoint3(x + other.x, y + other.y, z + other.z);
+}
+inline NiPoint3 NiPoint3::operator*(float scale) const
+{
+    return NiPoint3(x * scale, y * scale, z * scale);
+}
+inline float& NiPoint3::operator[](int index)
+{
+    return (&x)[index];
+}
 struct P133Camera
 {
     int unk00;
-    P133Point position;
+    NiPoint3 position;
     int unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     unsigned char kind;
     int unk44, unk48;
     P133Camera* CloneCamera();
-    P133Point const& GetPos() const
+    NiPoint3 const& GetPos() const
     {
         return position;
     }
@@ -3810,9 +3773,9 @@ struct P133Camera
     {
         return kind / 2;
     }
-    P133Point FUN_00b40430();
-    void FUN_00b404c0(P133Point const&, bool);
-    void SetPos(P133Point const& p)
+    NiPoint3 FUN_00b40430();
+    void FUN_00b404c0(NiPoint3 const&, bool);
+    void SetPos(NiPoint3 const& p)
     {
         position = p;
     }
@@ -4003,7 +3966,7 @@ P133List P133Owner::FUN_00b40c80()
         if (probability < DAT_011f8f04.FUN_00b3f130(0.0f, 1.0f))
         {
             P133Camera* camera = iter->first->CloneCamera();
-            P133Point position3 = (iter->first->GetPos() + iter->second->GetPos()) * 0.5f;
+            NiPoint3 position3 = (iter->first->GetPos() + iter->second->GetPos()) * 0.5f;
             P133Frame* frameTmp = &scene->frames[iter->first->GetKindHalf()];
             float offset = (frameTmp->height - 0.5) * (scale * frameTmp->scale * 0.5);
             position3[2] += offset;

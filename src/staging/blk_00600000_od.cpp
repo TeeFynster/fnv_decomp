@@ -2,7 +2,17 @@
 // src/staging/blk_00600000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/Setting.h"
+#include "../../include/NiTArray.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESResponseList.h"
+#include "../../include/TESRaceForm.h"
+#include "../../include/TESTopicInfo.h"
+#include "../../include/TopicInfoArray.h"
+#include "../../include/StartMenu.h"
 
 extern "C" void __cdecl FUN_00600fd0(int, int);
 
@@ -292,10 +302,6 @@ bool FUN_0061f420(unsigned int auiValue, unsigned int auiOther)
     return false;
 }
 
-struct TESResponseList
-{
-    void ClearResponses();
-};
 
 struct FUN_0061f440 : TESResponseList
 {
@@ -620,11 +626,6 @@ void* __thiscall FUN_0060bcf0_class::FUN_0060bcf0(unsigned int flags)
     return this;
 }
 
-template <typename T, typename A> struct NiTArray;
-template <> struct NiTArray<int, int>
-{
-    void __thiscall SetSize(unsigned int);
-};
 struct FUN_0060bd90_cls
 {
     char _0[8];
@@ -640,7 +641,7 @@ unsigned int __thiscall FUN_0060bd90_cls::FUN_0060bd90(unsigned int uiIndex, uns
 {
     if (uiIndex >= m8)
     {
-        ((NiTArray<int, int>*)this)->SetSize((unsigned int)(mE + uiIndex));
+        ((NiTArray<int, NiTMallocInterface<int> >*)this)->SetSize((unsigned int)(mE + uiIndex));
     }
     FUN_0060c120(uiIndex, b);
     return uiIndex;
@@ -765,39 +766,13 @@ void* __thiscall FUN_0061bf50_class::FUN_0061c0f0(unsigned int flags)
     return this;
 }
 
-struct TESTopicInfo
-{
-    virtual void F00() = 0;
-    virtual void F01() = 0;
-    virtual void F02() = 0;
-    virtual void F03() = 0;
-    virtual void F04() = 0;
-    virtual void F05() = 0;
-    virtual void F06() = 0;
-    virtual void F07() = 0;
-    virtual void F08() = 0;
-    virtual void F09() = 0;
-    virtual void F10() = 0;
-    virtual void F11() = 0;
-    virtual void F12() = 0;
-    virtual void F13() = 0;
-    virtual void F14() = 0;
-    virtual void F15() = 0;
-    virtual void F16() = 0;
-    virtual void F17() = 0;
-    virtual void F18(unsigned int) = 0;
-    bool IsRefusal();
-    void __thiscall MarkAsRefusal();
-    char _pad[30];
-    unsigned char m_22;
-};
 // @fnv 0x0061f220
 void __thiscall TESTopicInfo::MarkAsRefusal()
 {
     if (!IsRefusal())
     {
-        m_22 = 1;
-        F18(0x80000000);
+        m_bGoodbye = 1;
+        MarkAsModified(0x80000000);
     }
 }
 
@@ -869,11 +844,7 @@ void* __thiscall FUN_0061fb70_Cls::FUN_0061fb70(unsigned int flags)
     return this;
 }
 
-struct ActorCombatGroup;
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short size);
-};
+class ActorCombatGroup;
 struct FUN_00601000
 {
     int* vft;
@@ -894,17 +865,12 @@ FUN_00601000::FUN_00601000(short x, short y)
     c = 0;
     b = 0;
     if (a > 0)
-        p = NiTMallocInterface_0096afc0::Allocate(a);
+        p = NiTMallocInterface<ActorCombatGroup*>::Allocate(a);
     else
         p = 0;
 }
 
 namespace fnv_0060bd20 {
-struct ActorCombatGroup;
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short);
-};
 extern int DAT_0104aae0;
 struct FUN_0060bd20_class
 {
@@ -925,22 +891,18 @@ FUN_0060bd20_class::FUN_0060bd20_class(unsigned short a, unsigned short b)
     m_kPointA = 0;
     m_iThirdValue = 0;
     if (m8 > 0)
-        m_p = NiTMallocInterface_0096afc0::Allocate(m8);
+        m_p = NiTMallocInterface<ActorCombatGroup*>::Allocate(m8);
     else
         m_p = 0;
 }
 }  // namespace fnv_0060bd20
 
-struct Setting_S
-{
-    float* __thiscall Float();
-};
 struct FUN_00616c20_cls
 {
     void __thiscall FUN_00615730(int, float);
 };
-extern Setting_S originalRuntimeFloatSetting51;
-extern Setting_S originalRuntimeFloatSetting50;
+extern Setting originalRuntimeFloatSetting51;
+extern Setting originalRuntimeFloatSetting50;
 struct FUN_00616c20_shell : FUN_00616c20_cls
 {
     void __thiscall FUN_00616c20(bool b);
@@ -988,11 +950,6 @@ void FUN_00619b60(int a)
 }
 
 namespace fnv_0061c120 {
-struct ActorCombatGroup;
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned int size);
-};
 extern int DAT_0104d448;
 struct FUN_0061c120
 {
@@ -1014,7 +971,7 @@ FUN_0061c120::FUN_0061c120(unsigned int size, unsigned int max)
     m_usAllocSize = 0;
     m_uiMaxSize = 0;
     if (m_usSize > 0)
-        m_pData = NiTMallocInterface_0096afc0::Allocate(m_usSize);
+        m_pData = NiTMallocInterface<ActorCombatGroup*>::Allocate(m_usSize);
     else
         m_pData = 0;
 }
@@ -1034,11 +991,6 @@ void* __cdecl FUN_0060c3c0(void* pBegin, void* pEnd, void* pDest)
     }
     return result;
 }
-
-struct StartMenu
-{
-    char const* GetMenuTitle();
-};
 
 struct GlobalObject_0040c150 : public StartMenu
 {
@@ -1066,7 +1018,7 @@ extern GlobalObject_0040c150 g_011cbd44;
 // @fnv 0x006167d0
 char const* GlobalObject_0040c150::FUN_006167d0()
 {
-    StartMenu* menuTable[4][4] = {{&g_011cbbfc, &g_011cbbcc, &g_011cbbaec, &g_011cbd44},
+    const StartMenu* menuTable[4][4] = {{&g_011cbbfc, &g_011cbbcc, &g_011cbbaec, &g_011cbd44},
                                   {&g_011cbcf0, &g_011cba4c, &g_011cbb4c, &g_011cbb8c},
                                   {&g_011cbb80, &g_011cba18, &g_011cbab0, &g_011cbd08},
                                   {&g_011cbb40, &g_011cbaa0, &g_011cba64, &g_011cbd38}};
@@ -2199,17 +2151,9 @@ FUN_00600e50_cls::~FUN_00600e50_cls()
     FUN_00438af0();
 }
 
-struct TopicInfoArray
-{
-    virtual ~TopicInfoArray();
-};
-struct FUN_006197f0 : TopicInfoArray
-{
-    virtual ~FUN_006197f0();
-};
-// Destructor of FUN_006197f0, which derives from TopicInfoArray; the body is empty.
+// Destructor with an empty body; the base array is destroyed implicitly.
 // @fnv 0x006197f0
-FUN_006197f0::~FUN_006197f0()
+TopicInfoArray::~TopicInfoArray()
 {}
 
 struct Path618
@@ -2243,27 +2187,9 @@ struct FUN_006188c0
 FUN_006188c0::~FUN_006188c0()
 {}
 
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
 
-class BaseFormComponent
-{
-  public:
-    virtual ~BaseFormComponent();
-};
 
-class TESRace;
-class TESRaceForm : public BaseFormComponent
-{
-  public:
-    TESRace* race;
-    TESRace* FUN_00726070();
-};
-
-// Casts the form to TESRaceForm and returns its race via FUN_00726070, or null if the cast fails.
+// Casts the form to TESRaceForm and returns its race via GetFormRace, or null if the cast fails.
 // @fnv 0x00617270
 TESRace* __cdecl FUN_00617270(TESForm* form)
 {
@@ -2272,7 +2198,7 @@ TESRace* __cdecl FUN_00617270(TESForm* form)
     {
         TESRace* result;
         if (pRaceForm)
-            result = pRaceForm->FUN_00726070();
+            result = pRaceForm->GetFormRace();
         else
             result = 0;
         return result;

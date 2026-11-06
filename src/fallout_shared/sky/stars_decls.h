@@ -1,15 +1,10 @@
-// fallout_shared/sky/stars_decls.h: declares SkyObject, Stars
+// Stars.h lacks the loader, update, destructor, and instance fields used by this unit.
 #ifndef FNV_STARS_DECLS_H
 #define FNV_STARS_DECLS_H
-class NiNode;
-class SkyObject
-{
-  public:
-    void Initialize(NiNode*);
-};
+#include "../../../include/SkyObject.h"
 class Stars : public SkyObject
 {
   public:
-    void Initialize(NiNode*);
+    void Initialize(NiNode*) override;
 };
 #endif

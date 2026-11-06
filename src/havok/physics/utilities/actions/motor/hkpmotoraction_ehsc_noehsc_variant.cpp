@@ -1,3 +1,4 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/physics/utilities/actions/motor/hkpmotoraction_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/physics/utilities/actions/motor/hkpmotoraction.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,7 +6,7 @@
 
 // src/havok/physics/utilities/actions/motor/hkpmotoraction.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/actions/motor/hkpmotoraction.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpMotorAction.h"
+#include "../../../../../../include/hkpMotorAction.h"
 
 class hkpRigidBody;
 class hkpPhantom;
@@ -31,20 +32,7 @@ struct hkMemoryRouterMA
 
 hkMemoryRouterMA& __cdecl FUN_00c85750();
 
-template <class T> struct hkArrayMA
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    const T& operator[](int i) const
-    {
-        return m_data[i];
-    }
-};
+
 
 class hkpMotorActionMA : public hkpMotorAction
 {
@@ -53,19 +41,19 @@ class hkpMotorActionMA : public hkpMotorAction
     {
         hkReferencedObject* b =
             static_cast<hkReferencedObject*>(FUN_00c85750().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));
-        b->m_usMemSizeAndFlags = static_cast<hkUint16>(nbytes);
+        b->m_usMemSizeAndFlags = static_cast<unsigned short>(nbytes);
         return b;
     }
     void operator delete(void*, unsigned int);
 
     hkpMotorActionMA(hkpRigidBody* body, const hkVector4& axis, hkReal spinRate, hkReal gain);
 
-    hkpAction* FUN_00d4d7f0(const hkArrayMA<hkpEntity*>& newEntities, const hkArrayMA<hkpPhantom*>& newPhantoms) const;
+    hkpAction* FUN_00d4d7f0(const hkArrayBase<hkpEntity*>& newEntities, const hkArrayBase<hkpPhantom*>& newPhantoms) const;
 };
 
 // @fnv 0x00d4d7f0
-hkpAction* hkpMotorActionMA::FUN_00d4d7f0(const hkArrayMA<hkpEntity*>& newEntities,
-                                          const hkArrayMA<hkpPhantom*>& newPhantoms) const
+hkpAction* hkpMotorActionMA::FUN_00d4d7f0(const hkArrayBase<hkpEntity*>& newEntities,
+                                          const hkArrayBase<hkpPhantom*>& newPhantoms) const
 {
     if (newEntities.GetLogicalSize() != 1)
         return 0;

@@ -2,13 +2,13 @@
 // src/bsshader/speedtreefrondshader.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/speedtreefrondshader.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/BSFadeNode.h"
+#include "../../include/NiD3DGPUProgramCache.h"
+#include "../../include/NiD3DShaderConstantMap.h"
+
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 struct NiRefObject_s
 {
     virtual ~NiRefObject_s();
@@ -24,14 +24,17 @@ struct NiRefObject_s
             DeleteThis();
     }
 };
-struct NiD3DShaderConstantMap : public BSFadeNode, public NiRefObject_s
+inline void NiD3DShaderConstantMap::IncRefCount()
 {
-    NiD3DShaderConstantMap(void*, int);
-    virtual int AddEntry(const char* pcKey, unsigned int uiFlags, unsigned int uiExtra, unsigned int uiShaderRegister,
-                         unsigned int uiRegisterCount, const char* pcVariableName, unsigned int uiConstantDataSize,
-                         unsigned int uiDataStride, const void* pvDataSource, bool bCopyData);
-    char pad[0x44 - 8];
-};
+    InterlockedIncrement((long volatile*)&m_uiRefCount);
+}
+
+inline void NiD3DShaderConstantMap::DecRefCount()
+{
+    if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+
 template <class T> class NiPointer_s
 {
   public:
@@ -40,10 +43,10 @@ template <class T> class NiPointer_s
     {
         if (m_pObject != pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -105,18 +108,18 @@ void SpeedTreeFrondShader_s::CreateConstantMap()
     unsigned int uiPoint1Flags = 0x10000004;
 
     m_spConstantMap = new NiD3DShaderConstantMap(m_pOwnerShader, 0);
-    m_spConstantMap->AddEntry(_DAT_010A1E50, idefinedMatrix4Flags, 0, 0, 4, 0, 0, 0, 0, false);
-    m_spConstantMap->AddEntry(_DAT_010AF568, uiPoint4Flags, 0, 5, 1, "", 0x10, 4, _DAT_011FA0C0, false);
-    m_spConstantMap->AddEntry(_DAT_010B92F8, uiPoint4Flags, 0, 6, 1, "", 0x10, 4, _DAT_011FA0D0, false);
-    m_spConstantMap->AddEntry(_DAT_010B92E8, uiPoint4Flags, 0, 7, 1, "", 0x10, 4, _DAT_011FA0E0, false);
-    m_spConstantMap->AddEntry("DirectronalLightDir", uiPoint4Flags, 0, 8, 1, "", 0x10, 4, m_kDirectionalLightDir,
+    m_spConstantMap->SetConstant(_DAT_010A1E50, idefinedMatrix4Flags, 0, 0, 4, 0, 0, 0, 0, false);
+    m_spConstantMap->SetConstant(_DAT_010AF568, uiPoint4Flags, 0, 5, 1, "", 0x10, 4, _DAT_011FA0C0, false);
+    m_spConstantMap->SetConstant(_DAT_010B92F8, uiPoint4Flags, 0, 6, 1, "", 0x10, 4, _DAT_011FA0D0, false);
+    m_spConstantMap->SetConstant(_DAT_010B92E8, uiPoint4Flags, 0, 7, 1, "", 0x10, 4, _DAT_011FA0E0, false);
+    m_spConstantMap->SetConstant("DirectronalLightDir", uiPoint4Flags, 0, 8, 1, "", 0x10, 4, m_kDirectionalLightDir,
                               false);
-    m_spConstantMap->AddEntry("PointLightPos", uiPoint4Flags, 0, 9, 1, "", 0x10, 4, m_kPointLightPos, false);
-    m_spConstantMap->AddEntry("LightRadius", uiPoint4Flags, 0, 10, 1, "", 0x10, 4, DAT_011fa1f0, false);
-    m_spConstantMap->AddEntry(_DAT_010AF60C, uiPoint4Flags, 0, 14, 1, "", 0x10, 4, _DAT_011FA280, false);
-    m_spConstantMap->AddEntry(_DAT_010AF5E4, uiPoint4Flags, 0, 15, 1, "", 0x10, 4, _DAT_011FA290, false);
+    m_spConstantMap->SetConstant("PointLightPos", uiPoint4Flags, 0, 9, 1, "", 0x10, 4, m_kPointLightPos, false);
+    m_spConstantMap->SetConstant("LightRadius", uiPoint4Flags, 0, 10, 1, "", 0x10, 4, DAT_011fa1f0, false);
+    m_spConstantMap->SetConstant(_DAT_010AF60C, uiPoint4Flags, 0, 14, 1, "", 0x10, 4, _DAT_011FA280, false);
+    m_spConstantMap->SetConstant(_DAT_010AF5E4, uiPoint4Flags, 0, 15, 1, "", 0x10, 4, _DAT_011FA290, false);
     if (_DAT_011F941E)
-        m_spConstantMap->AddEntry(_DAT_010B92DC, uiPoint1Flags, 0, 16, 1, "", 4, 4, &_DAT_011F918C, false);
+        m_spConstantMap->SetConstant(_DAT_010B92DC, uiPoint1Flags, 0, 16, 1, "", 4, 4, &_DAT_011F918C, false);
     SpeedTreeLeafShaderConstantMapSetup::ConfigureShaderConstantMap(m_spConstantMap, 0x11);
 }
 
@@ -217,11 +220,6 @@ extern float DAT_011adbcc;
 void __cdecl FUN_00be0c00(const char* name, char* outBuf);
 extern "C" void* __cdecl _fnv_zlib_memset(void* dst, int val, unsigned int size);
 int _sprintf_s(char* buf, unsigned int size, const char* fmt, ...);
-class NiD3DGPUProgramCache
-{
-  public:
-    static const char* GetPixelShaderProfile(bool bPS3);
-};
 struct Entry
 {
     const char* f00;

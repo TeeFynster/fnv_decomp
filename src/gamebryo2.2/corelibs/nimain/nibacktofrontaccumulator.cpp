@@ -1,12 +1,59 @@
-// gamebryo2.2/corelibs/nimain/nibacktofrontaccumulator.cpp: NiBackToFrontAccumulator, BackToFront_aa0 (12 functions)
+// gamebryo2.2/corelibs/nimain/nibacktofrontaccumulator.cpp: NiBackToFrontAccumulator (12 functions)
 
-#include "nibacktofrontaccumulator_decls.h"
+#include "../../../../include/BSFaceGenMorphData.h"
+#include "../../../../include/NiBackToFrontAccumulator.h"
+#include "../../../../include/NiBound.h"
+#include "../../../../include/NiCamera.h"
+#include "../../../../include/NiPoint3.h"
 
-// @fnv 0x00aa0fc0
-NiBackToFrontAccumulator::NiBackToFrontAccumulator()
+#include <new>
+
+#include "../../../../include/RecursiveSpinLock.h"
+
+template <class T> class PoolAllocatorBase
 {
-    *(volatile unsigned int*)this = 0x010a2304;
-    m_pkAccumulationCamera = 0;
+  public:
+    struct LinkedListEntry
+    {
+        LinkedListEntry* m_pkNext;
+    };
+
+    static RecursiveSpinLock ms_kPoolState;
+    static LinkedListEntry* ms_pFreeList;
+};
+
+class ItemListNode
+{
+  public:
+    ItemListNode* m_pkNext;
+    ItemListNode* m_pkPrevious;
+    void* m_pInventoryEntryData;
+};
+
+typedef PoolAllocatorBase<ItemListNode> NiBackToFrontItemPool;
+
+// Returns a list node to the item pool (its lock at 0x011c5f80, free list at 0x011c5f58).
+static inline void DeleteListItem(ItemListNode* pkNode)
+{
+    pkNode->m_pInventoryEntryData = 0;
+    NiBackToFrontItemPool::ms_kPoolState.Lock(0);
+    pkNode->m_pkPrevious = 0;
+    reinterpret_cast<NiBackToFrontItemPool::LinkedListEntry*>(pkNode)->m_pkNext = NiBackToFrontItemPool::ms_pFreeList;
+    NiBackToFrontItemPool::ms_pFreeList = reinterpret_cast<NiBackToFrontItemPool::LinkedListEntry*>(pkNode);
+    NiBackToFrontItemPool::ms_kPoolState.Unlock();
+}
+
+extern void NiFree(void*);
+
+// Initializes the accumulator base without introducing a second class definition.
+// @fnv 0x00aa0fc0
+NiAccumulator* __fastcall InitializeAccumulator(NiAccumulator* self, void*) throw()
+{
+    __assume(self != 0);
+    ::new (self) NiObject;
+    *(volatile unsigned int*)self = 0x010a2304;
+    self->m_pkCamera = 0;
+    return self;
 }
 
 // Returns the median of the three values at indices left, mid and right in the array.
@@ -14,19 +61,19 @@ NiBackToFrontAccumulator::NiBackToFrontAccumulator()
 float NiBackToFrontAccumulator::GetPivotValue(int left, int right)
 {
     int mid = (left + right) >> 1;
-    if (m_pfGeometrySortValues[left] < m_pfGeometrySortValues[mid])
+    if (m_pfDepths[left] < m_pfDepths[mid])
     {
-        if (m_pfGeometrySortValues[mid] < m_pfGeometrySortValues[right])
-            return m_pfGeometrySortValues[mid];
-        if (m_pfGeometrySortValues[left] < m_pfGeometrySortValues[right])
-            return m_pfGeometrySortValues[right];
-        return m_pfGeometrySortValues[left];
+        if (m_pfDepths[mid] < m_pfDepths[right])
+            return m_pfDepths[mid];
+        if (m_pfDepths[left] < m_pfDepths[right])
+            return m_pfDepths[right];
+        return m_pfDepths[left];
     }
-    if (m_pfGeometrySortValues[left] < m_pfGeometrySortValues[right])
-        return m_pfGeometrySortValues[left];
-    if (m_pfGeometrySortValues[mid] < m_pfGeometrySortValues[right])
-        return m_pfGeometrySortValues[right];
-    return m_pfGeometrySortValues[mid];
+    if (m_pfDepths[left] < m_pfDepths[right])
+        return m_pfDepths[left];
+    if (m_pfDepths[mid] < m_pfDepths[right])
+        return m_pfDepths[right];
+    return m_pfDepths[mid];
 }
 
 // @fnv 0x00aa0b40
@@ -42,19 +89,19 @@ void NiBackToFrontAccumulator::QuickSort(int left, int right)
             do
             {
                 --i;
-            } while (m_pfGeometrySortValues[i] > pivot);
+            } while (m_pfDepths[i] > pivot);
             do
             {
                 ++iLeft;
-            } while (m_pfGeometrySortValues[iLeft] < pivot);
+            } while (m_pfDepths[iLeft] < pivot);
             if (iLeft >= i)
                 break;
-            void* item = m_ppGeometries[iLeft];
-            m_ppGeometries[iLeft] = m_ppGeometries[i];
-            m_ppGeometries[i] = item;
-            float fTempDepth = m_pfGeometrySortValues[iLeft];
-            m_pfGeometrySortValues[iLeft] = m_pfGeometrySortValues[i];
-            m_pfGeometrySortValues[i] = fTempDepth;
+            NiGeometry* item = m_ppkItems[iLeft];
+            m_ppkItems[iLeft] = m_ppkItems[i];
+            m_ppkItems[i] = item;
+            float fTempDepth = m_pfDepths[iLeft];
+            m_pfDepths[iLeft] = m_pfDepths[i];
+            m_pfDepths[i] = fTempDepth;
         }
         if (i == right)
             QuickSort(left, i - 1);
@@ -66,7 +113,6 @@ void NiBackToFrontAccumulator::QuickSort(int left, int right)
     }
 }
 
-struct NiObject;
 unsigned char __stdcall FUN_00ba87d0(NiObject*);
 // @fnv 0x00aa0ae0
 unsigned char __stdcall FUN_00aa0ae0(NiObject* pkObject)
@@ -142,219 +188,91 @@ struct S_00aa0d00_Item
     virtual void vfn_36();
     virtual void vfn_37(S_00aa0d00_Renderer* r);
 };
-struct S_00aa0d00_Node
-{
-    S_00aa0d00_Node* next;
-    S_00aa0d00_Node* prev;
-    void* data;
-};
-struct S_00aa0d00_Pool
-{
-    S_00aa0d00_Node* head;
-};
-struct S_00aa0d00_Aux
-{
-    int unk00;
-    void Wait(int a);
-};
-extern S_00aa0d00_Aux DAT_011c5f80;
-extern S_00aa0d00_Node* DAT_011c5f58;
-extern unsigned int DAT_011c5f84;
 extern S_00aa0d00_Renderer* DAT_011f4748;
 
-struct S_00aa0d00_Base
-{
-    virtual void vfn_00();
-    virtual void vfn_01();
-    virtual void vfn_02();
-    virtual void vfn_03();
-    virtual void vfn_04();
-    virtual void vfn_05();
-    virtual void vfn_06();
-    virtual void vfn_07();
-    virtual void vfn_08();
-    virtual void vfn_09();
-    virtual void vfn_0a();
-    virtual void vfn_0b();
-    virtual void vfn_0c();
-    virtual void vfn_0d();
-    virtual void vfn_0e();
-    virtual void vfn_0f();
-    virtual void vfn_10();
-    virtual void vfn_11();
-    virtual void vfn_12();
-    virtual void vfn_13();
-    virtual void vfn_14();
-    virtual void vfn_15();
-    virtual void vfn_16();
-    virtual void vfn_17();
-    virtual void vfn_18();
-    virtual void vfn_19();
-    virtual void vfn_1a();
-    virtual void vfn_1b();
-    virtual void vfn_1c();
-    virtual void vfn_1d();
-    virtual void vfn_1e();
-    virtual void vfn_1f();
-    virtual void vfn_20();
-    virtual void vfn_21();
-    virtual void vfn_22();
-    virtual void vfn_23();
-    virtual void vfn_24();
-    virtual void vfn_25();
-    virtual void vfn_26();
-    virtual void vfn_27();
-    virtual void vfn_28();
-    virtual void vfn_a4();
-    int unk04;
-    int unk08;
-    S_00aa0d00_Node* head;
-    S_00aa0d00_Node* tail;
-    unsigned int count;
-    int unk18;
-    unsigned int numItems;
-    int unk20;
-    S_00aa0d00_Item** items;
-    int unk28;
-    unsigned int cur;
-    void FUN_00aa0fe0();
-    void ReleaseAllItems();
-};
+void __fastcall ResetBackToFrontAccumulator(NiBackToFrontAccumulator*, void*);
 
-// If a renderer is set, calls vfn_a4, releases each item via vfn_37, returns all nodes to the free list, then calls FUN_00aa0fe0.
+// Sorts and releases the items, returns their nodes to the free list, and resets the accumulator.
+// Free entry points retain the member-call ABI where the shared header has no declaration.
 // @fnv 0x00aa0d00
-void S_00aa0d00_Base::ReleaseAllItems()
+void __fastcall ReleaseAllItems(NiBackToFrontAccumulator* self, void*)
 {
     S_00aa0d00_Renderer* r = DAT_011f4748;
     if (r)
     {
-        vfn_a4();
-        cur = numItems;
+        self->Sort();
+        self->m_iCurrItem = self->m_iNumItems;
         S_00aa0d00_Item* item = 0;
-        if (cur)
+        if (self->m_iCurrItem)
         {
-            item = items[--cur];
+            item = (reinterpret_cast<S_00aa0d00_Item**>(self->m_ppkItems))[--self->m_iCurrItem];
         }
         while (item)
         {
             item->vfn_37(r);
             item = 0;
-            if (cur)
+            if (self->m_iCurrItem)
             {
-                item = items[--cur];
+                item = (reinterpret_cast<S_00aa0d00_Item**>(self->m_ppkItems))[--self->m_iCurrItem];
             }
         }
-        while (count)
+        while (self->m_kItems.m_kItemCount.m_uiCount)
         {
-            S_00aa0d00_Node* pNode = head;
-            head = pNode->next;
-            if (head)
-                head->prev = 0;
+            ItemListNode* pNode = self->m_kItems.m_pkHead;
+            self->m_kItems.m_pkHead = pNode->m_pkNext;
+            if (self->m_kItems.m_pkHead)
+                self->m_kItems.m_pkHead->m_pkPrevious = 0;
             else
-                tail = 0;
-            pNode->data = 0;
-            DAT_011c5f80.Wait(0);
-            pNode->prev = 0;
-            pNode->next = DAT_011c5f58;
-            --DAT_011c5f84;
-            DAT_011c5f58 = pNode;
-            if (DAT_011c5f84 == 0)
-                DAT_011c5f80.unk00 = 0;
-            count--;
+                self->m_kItems.m_pkTail = 0;
+            DeleteListItem(pNode);
+            self->m_kItems.m_kItemCount.m_uiCount--;
         }
-        FUN_00aa0fe0();
+        reinterpret_cast<void (__thiscall *)(NiBackToFrontAccumulator*)>(ResetBackToFrontAccumulator)(self);
     }
 }
 
 extern "C" void __cdecl AA0F30DeleteSized(void* pvMem, unsigned int uiSize);
 
-class AA0F30Object
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-
-    ~AA0F30Object();
-    AA0F30Object* DestroyAndFree(unsigned int uiFlags);
-};
+void __fastcall DestroyBackToFrontAccumulator(NiBackToFrontAccumulator*, void*);
 
 // Scalar deleting destructor.
-// Runs the destructor, then frees this object with AA0F30DeleteSized when uiFlags has bit 0 set, and returns this.
 // @fnv 0x00aa0f30
-AA0F30Object* AA0F30Object::DestroyAndFree(unsigned int uiFlags)
+NiBackToFrontAccumulator* __fastcall DestroyAndFree(NiBackToFrontAccumulator* self, void*, unsigned int uiFlags)
 {
-    this->~AA0F30Object();
+    reinterpret_cast<void (__thiscall *)(NiBackToFrontAccumulator*)>(DestroyBackToFrontAccumulator)(self);
     if (uiFlags & 1)
-        AA0F30DeleteSized(this, sizeof(AA0F30Object));
-    return this;
+        AA0F30DeleteSized(self, sizeof(NiBackToFrontAccumulator));
+    return self;
 }
 
-class BSFaceGenMorphData
-{
-  public:
-    static void* operator new(unsigned int auiSize);
-};
+extern int DAT_010a23ac;
 
-class CloningProcess;
-
-class FUN_00aa0fc0 : public BSFaceGenMorphData
+// The shared base has no declared constructor, so initialize it through its original entry point.
+static inline NiBackToFrontAccumulator* InitializeBackToFrontAccumulator(NiBackToFrontAccumulator* pkObject)
 {
-  public:
-    FUN_00aa0fc0() throw();
-    virtual void v00();
-    unsigned int m_uiRefCount;
-    void* m_pkAccumulationCamera;
-};
-
-struct ItemList_aa0
-{
-    void* m_pkHead;
-    void* m_pkTail;
-    unsigned int m_uiCount;
-    ItemList_aa0()
+    if (pkObject)
     {
-        m_uiCount = 0;
-        m_pkHead = 0;
-        m_pkTail = 0;
+        reinterpret_cast<NiAccumulator* (__thiscall *)(NiAccumulator*)>(InitializeAccumulator)(pkObject);
+        *(volatile unsigned int*)pkObject = (unsigned int)&DAT_010a23ac;
+        NiBackToFrontAccumulator::ItemList* pkList = &pkObject->m_kItems;
+        __assume(pkList != 0);
+        ::new (pkList) NiBackToFrontAccumulator::ItemList;
+        pkObject->m_kItemsToSortAndRender = 0;
+        pkObject->m_iNumItems = 0;
+        pkObject->m_iMaxItems = 0;
+        pkObject->m_ppkItems = 0;
+        pkObject->m_pfDepths = 0;
+        return pkObject;
     }
-};
-
-class BackToFront_aa0 : public FUN_00aa0fc0
-{
-  public:
-    ItemList_aa0 m_kUnsortedGeometryList;
-    ItemList_aa0* m_pkItemsToSortAndRender;
-    int m_iGeometryCount;
-    int m_iGeometryCapacity;
-    void** m_ppGeometries;
-    float* m_pfGeometrySortValues;
-    int m_iCurrentItem;
-
-    BackToFront_aa0()
-        : m_pkItemsToSortAndRender(0), m_iGeometryCount(0), m_iGeometryCapacity(0), m_ppGeometries(0),
-          m_pfGeometrySortValues(0)
-    {}
-    virtual void v00();
-
-    void FUN_00aa1000(BackToFront_aa0* pkClone, CloningProcess& kCloning);
-    BackToFront_aa0* FUN_00aa0f50(CloningProcess& kCloning);
-};
+    return 0;
+}
 
 // @fnv 0x00aa0f50
-BackToFront_aa0* BackToFront_aa0::FUN_00aa0f50(CloningProcess& kCloning)
+NiBackToFrontAccumulator* __fastcall CloneBackToFrontAccumulator(NiBackToFrontAccumulator* self, void*, CloningProcess& kCloning)
 {
-    BackToFront_aa0* pkObject = new BackToFront_aa0;
-    FUN_00aa1000(pkObject, kCloning);
+    NiBackToFrontAccumulator* pkObject = InitializeBackToFrontAccumulator(
+        static_cast<NiBackToFrontAccumulator*>(BSFaceGenMorphData::operator new(sizeof(NiBackToFrontAccumulator))));
+    self->FUN_00aa1000(pkObject, kCloning);
     return pkObject;
 }
 
@@ -365,224 +283,118 @@ void __cdecl FUN_00aa0ac0()
     FUN_00a88a40();
 }
 
-extern S_00aa0d00_Aux DAT_011c5f80;
-extern S_00aa0d00_Node* DAT_011c5f58;
-extern unsigned int DAT_011c5f84;
 
 extern int DAT_010a23ac;
 extern int DAT_010a2304;
 
 extern void NiFree(void*);
 
-struct C_00aa0dc0 : NiBackToFrontAccumulator
-{
-    void FUN_00aa0dc0();
-};
+void __fastcall ClearItemList(NiBackToFrontAccumulator::ItemList*, void*);
 
 // Frees geometry arrays, moves unsorted list nodes to a global free list, updates the vtable, and calls FUN_00a5d3d0.
 // @fnv 0x00aa0dc0
-void C_00aa0dc0::FUN_00aa0dc0()
+void __fastcall DestroyBackToFrontAccumulator(NiBackToFrontAccumulator* self, void*)
 {
-    NiBackToFrontAccumulator* self = this;
-
     *(unsigned int*)self = (unsigned int)&DAT_010a23ac;
-    NiFree(self->m_ppGeometries);
-    NiFree(self->m_pfGeometrySortValues);
+    NiFree(self->m_ppkItems);
+    NiFree(self->m_pfDepths);
 
-    while (self->m_kUnsortedGeometryList.m_uiCount != 0)
+    while (self->m_kItems.m_kItemCount.m_uiCount != 0)
     {
-        S_00aa0d00_Node* item = (S_00aa0d00_Node*)self->m_kUnsortedGeometryList.m_pkHead;
+        ItemListNode* item = self->m_kItems.m_pkHead;
 
-        self->m_kUnsortedGeometryList.m_pkHead = (NiBackToFrontListItem*)item->next;
-        if (self->m_kUnsortedGeometryList.m_pkHead != 0)
+        self->m_kItems.m_pkHead = item->m_pkNext;
+        if (self->m_kItems.m_pkHead != 0)
         {
-            self->m_kUnsortedGeometryList.m_pkHead->m_pkPrevious = 0;
+            self->m_kItems.m_pkHead->m_pkPrevious = 0;
         }
         else
         {
-            self->m_kUnsortedGeometryList.m_pkTail = 0;
+            self->m_kItems.m_pkTail = 0;
         }
 
-        item->data = 0;
-        DAT_011c5f80.Wait(0);
-        item->prev = 0;
-        item->next = DAT_011c5f58;
+        DeleteListItem(item);
 
-        --DAT_011c5f84;
-        DAT_011c5f58 = item;
-        if (DAT_011c5f84 == 0)
-        {
-            DAT_011c5f80.unk00 = 0;
-        }
-
-        --self->m_kUnsortedGeometryList.m_uiCount;
+        --self->m_kItems.m_kItemCount.m_uiCount;
     }
 
-    self->m_kUnsortedGeometryList.FUN_00b71300();
+    reinterpret_cast<void (__thiscall *)(NiBackToFrontAccumulator::ItemList*)>(ClearItemList)(&self->m_kItems);
     *(unsigned int*)self = (unsigned int)&DAT_010a2304;
     self->FUN_00a5d3d0();
 }
 
 void* NiMalloc(unsigned int uiSize);
 
-class NiPoint3
-{
-  public:
-    float x;
-    float y;
-    float z;
-
-    float operator*(const NiPoint3& pt) const
-    {
-        return x * pt.x + y * pt.y + z * pt.z;
-    }
-};
-
-class ThreeByThreeMatrix
-{
-  public:
-    float m_afEntries[3][3];
-
-    void GetCol(unsigned int uiCol, NiPoint3& col) const
-    {
-        col.x = m_afEntries[0][uiCol];
-        col.y = m_afEntries[1][uiCol];
-        col.z = m_afEntries[2][uiCol];
-    }
-};
-
-class NiTransform
-{
-  public:
-    ThreeByThreeMatrix m_kOrientation;
-    NiPoint3 m_kTranslation;
-    float m_fScale;
-};
-
-class NiBound
-{
-  public:
-    NiPoint3 m_kCenter;
-    float m_fBoundRadius;
-
-    const NiPoint3& GetNavMeshData() const
-    {
-        return m_kCenter;
-    }
-};
-
 extern NiBound DAT_011f4288;
 
-class NiAVObject
+inline const NiBound& NiAVObject::GetBoundingVolume() const
 {
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    NiBound* m_pWorldBound;
+    return m_kWorldBound ? *reinterpret_cast<const NiBound*>(m_kWorldBound) : DAT_011f4288;
+}
 
-    const NiBound& GetBoundingVolume() const
-    {
-        return m_pWorldBound ? *m_pWorldBound : DAT_011f4288;
-    }
-};
-
-class NiCamera
+inline const NiPoint3& NiBound::GetNavMeshData() const
 {
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    NiTransform m_kWorldSpaceTransform;
+    return m_kCenter;
+}
 
-    NiPoint3 GetWorldTranslation() const
-    {
-        NiPoint3 kDVector;
-        m_kWorldSpaceTransform.m_kOrientation.GetCol(0, kDVector);
-        return kDVector;
-    }
-};
-
-class FUN_00aa0c00_cls : public NiBackToFrontAccumulator
+inline void NiMatrix3::GetCol(unsigned int column, NiPoint3& point) const
 {
-  public:
-    void SortGeometriesBackToFront();
-    void FUN_00aa0b40(int iLeft, int iRight);
-};
+    const float* entries = reinterpret_cast<const float*>(this);
+    point.x = entries[column];
+    point.y = entries[3 + column];
+    point.z = entries[6 + column];
+}
 
-// Collects geometry pointers from m_pkGeometryList, computes their dot-product sort values against the camera view direction, and calls FUN_00aa0b40 to sort them.
+inline NiPoint3 NiCamera::GetWorldTranslation() const
+{
+    NiPoint3 direction;
+    m_kWorld.m_Rotate.GetCol(0U, direction);
+    return direction;
+}
+
+// Collects the geometry pointers, computes their camera-relative depths, and sorts them.
 // @fnv 0x00aa0c00
-void FUN_00aa0c00_cls::SortGeometriesBackToFront()
+void NiBackToFrontAccumulator::Sort()
 {
-    if (!m_pkGeometryList)
-        m_pkGeometryList = &m_kUnsortedGeometryList;
+    if (!m_kItemsToSortAndRender)
+        m_kItemsToSortAndRender = &m_kItems;
 
-    m_iGeometryCount = m_pkGeometryList->m_uiCount;
-    if (m_iGeometryCount == 0)
+    m_iNumItems = m_kItemsToSortAndRender->m_kItemCount.m_uiCount;
+    if (m_iNumItems == 0)
         return;
 
-    if (m_iGeometryCount > m_iGeometryCapacity)
+    if (m_iNumItems > m_iMaxItems)
     {
-        NiFree(m_ppGeometries);
-        m_iGeometryCapacity = m_iGeometryCount;
-        m_ppGeometries = (void**)NiMalloc(m_iGeometryCapacity * sizeof(void*));
-        NiFree(m_pfGeometrySortValues);
-        m_pfGeometrySortValues = (float*)NiMalloc(m_iGeometryCapacity * sizeof(float));
+        NiFree(m_ppkItems);
+        m_iMaxItems = m_iNumItems;
+        m_ppkItems = (NiGeometry**)NiMalloc(m_iMaxItems * sizeof(void*));
+        NiFree(m_pfDepths);
+        m_pfDepths = (float*)NiMalloc(m_iMaxItems * sizeof(float));
     }
 
-    NiBackToFrontListItem* pkPos = m_pkGeometryList->m_pkHead;
-    NiPoint3 kViewDir = ((NiCamera*)m_pkAccumulationCamera)->GetWorldTranslation();
+    ItemListNode* pkPos = m_kItemsToSortAndRender->m_pkHead;
+    NiPoint3 kViewDir = ((NiCamera*)m_pkCamera)->GetWorldTranslation();
 
-    for (int i = 0; i < m_iGeometryCount; i++)
+    for (int i = 0; i < m_iNumItems; i++)
     {
         void** ppkElement = &pkPos->m_pInventoryEntryData;
         pkPos = pkPos->m_pkNext;
-        m_ppGeometries[i] = *ppkElement;
-        m_pfGeometrySortValues[i] = ((NiAVObject*)m_ppGeometries[i])->GetBoundingVolume().GetNavMeshData() * kViewDir;
+        m_ppkItems[i] = static_cast<NiGeometry*>(*ppkElement);
+        m_pfDepths[i] = ((const NiAVObject*)m_ppkItems[i])->GetBoundingVolume().GetNavMeshData().Dot(kViewDir);
     }
 
-    FUN_00aa0b40(0, m_iGeometryCount - 1);
+    QuickSort(0, m_iNumItems - 1);
 }
 
 struct NiBackToFrontItemsArg
 {
-    void** m_ppGeometries;
+    void** m_ppkItems;
     int m_iArrayLength;
 };
 
-typedef PoolAllocatorBase<NiBackToFrontListItem> NiBackToFrontItemPool;
-
 void FUN_0043a080();
 
-static inline NiBackToFrontListItem* NewListItem()
+static inline ItemListNode* NewListItem()
 {
     NiBackToFrontItemPool::ms_kPoolState.Lock(0);
     NiBackToFrontItemPool::LinkedListEntry* pkReturn = NiBackToFrontItemPool::ms_pFreeList;
@@ -592,18 +404,15 @@ static inline NiBackToFrontListItem* NewListItem()
         pkReturn = NiBackToFrontItemPool::ms_pFreeList;
     }
     NiBackToFrontItemPool::ms_pFreeList = NiBackToFrontItemPool::ms_pFreeList->m_pkNext;
-    NiBackToFrontListItem* pkItem = reinterpret_cast<NiBackToFrontListItem*>(pkReturn);
+    ItemListNode* pkItem = reinterpret_cast<ItemListNode*>(pkReturn);
     pkItem->m_pInventoryEntryData = 0;
     pkItem->m_pkNext = 0;
     pkItem->m_pkPrevious = 0;
-    if (--NiBackToFrontItemPool::ms_kPoolState.m_uiCount == 0)
-    {
-        NiBackToFrontItemPool::ms_kPoolState.m_uiLock = 0;
-    }
+    NiBackToFrontItemPool::ms_kPoolState.Unlock();
     return pkItem;
 }
 
-static inline void AddNodeTail(NiBackToFrontGeometryList& kList, NiBackToFrontListItem* pkNode)
+static inline void AddNodeTail(NiBackToFrontAccumulator::ItemList& kList, ItemListNode* pkNode)
 {
     pkNode->m_pkNext = 0;
     pkNode->m_pkPrevious = kList.m_pkTail;
@@ -612,28 +421,23 @@ static inline void AddNodeTail(NiBackToFrontGeometryList& kList, NiBackToFrontLi
     else
         kList.m_pkHead = pkNode;
     kList.m_pkTail = pkNode;
-    kList.m_uiCount++;
+    kList.m_kItemCount.m_uiCount++;
 }
 
-static inline void AddTail(NiBackToFrontGeometryList& kList, void* element)
+static inline void AddTail(NiBackToFrontAccumulator::ItemList& kList, void* element)
 {
-    NiBackToFrontListItem* pkNode = NewListItem();
+    ItemListNode* pkNode = NewListItem();
     pkNode->m_pInventoryEntryData = element;
     AddNodeTail(kList, pkNode);
 }
 
-struct FUN_00aa0e60_cls : NiBackToFrontAccumulator
-{
-    void AddGeometries(NiBackToFrontItemsArg* pkArg);
-};
-
-// Appends each geometry pointer in pkArg->m_ppGeometries to m_kUnsortedGeometryList via AddTail.
+// Appends each geometry pointer in pkArg->m_ppkItems to m_kItems via AddTail.
 // @fnv 0x00aa0e60
-void FUN_00aa0e60_cls::AddGeometries(NiBackToFrontItemsArg* pkArg)
+void __fastcall AddGeometries(NiBackToFrontAccumulator* self, void*, NiBackToFrontItemsArg* pkArg)
 {
     unsigned int ItemUpdateArray = pkArg->m_iArrayLength;
     for (unsigned int uiIndex = 0; uiIndex < ItemUpdateArray; uiIndex++)
     {
-        AddTail(m_kUnsortedGeometryList, pkArg->m_ppGeometries[uiIndex]);
+        AddTail(self->m_kItems, pkArg->m_ppkItems[uiIndex]);
     }
 }

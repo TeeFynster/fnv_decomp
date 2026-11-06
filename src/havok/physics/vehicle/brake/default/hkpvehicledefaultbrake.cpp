@@ -87,9 +87,9 @@ void Brake_e398c0::UpdateBraking(const hkReal deltaTime, const Brk398_Instance* 
     for (int i = 0; i < vehicle->m_data->m_iWheelCount; ++i)
     {
         output.m_wheelsLocked.m_data[i] =
-            (m_kWheelBrakingProperties.m_data[i].m_bConnectedToHandbrake != 0) & (isHandbrake != 0);
+            ((*reinterpret_cast<hkpVehicleDefaultBrakeWheelBrakingProperties**>(&m_kWheelBrakingProperties))[i].m_bConnectedToHandbrake != 0) & (isHandbrake != 0);
 
-        if (brakingInput > m_kWheelBrakingProperties.m_data[i].m_fMinPedalInputToBlock)
+        if (brakingInput > (*reinterpret_cast<hkpVehicleDefaultBrakeWheelBrakingProperties**>(&m_kWheelBrakingProperties))[i].m_fMinPedalInputToBlock)
         {
             isAnyWheelBraking = true;
         }
@@ -100,7 +100,7 @@ void Brake_e398c0::UpdateBraking(const hkReal deltaTime, const Brk398_Instance* 
 
         const hkReal impulse = -(w * r * (fViscosityFriction * (1.0f / deltaTime)));
         hkReal torque = r * impulse;
-        const hkReal maxBrakingTorque = m_kWheelBrakingProperties.m_data[i].m_fMaxBrakingTorque;
+        const hkReal maxBrakingTorque = (*reinterpret_cast<hkpVehicleDefaultBrakeWheelBrakingProperties**>(&m_kWheelBrakingProperties))[i].m_fMaxBrakingTorque;
         const hkReal maxTorque = maxBrakingTorque * brakingInput;
         const hkReal absTorque = fabsf(torque);
 
@@ -125,7 +125,7 @@ void Brake_e398c0::UpdateBraking(const hkReal deltaTime, const Brk398_Instance* 
             const hkArray<hkpVehicleDefaultBrakeWheelBrakingProperties>& props = m_kWheelBrakingProperties;
             for (int i = 0; i < vehicle->m_data->m_iWheelCount; ++i)
             {
-                if (brakingInput > props.m_data[i].m_fMinPedalInputToBlock)
+                if (brakingInput > (*reinterpret_cast<hkpVehicleDefaultBrakeWheelBrakingProperties* const*>(&props))[i].m_fMinPedalInputToBlock)
                 {
                     output.m_wheelsLocked.m_data[i] = true;
                 }

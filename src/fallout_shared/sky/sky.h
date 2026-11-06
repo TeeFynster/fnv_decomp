@@ -1,7 +1,6 @@
 #ifndef FNV_FALLOUT_SHARED_SKY_SKY_H
 #define FNV_FALLOUT_SHARED_SKY_SKY_H
 
-#include "sky_SkyMatch.h"
 #include "sky_Dependencies.h"
 
 // @fnv 0x0046dd00

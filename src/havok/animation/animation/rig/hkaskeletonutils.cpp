@@ -1,20 +1,32 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit defines its own form
+// The original intrinsic exposes only float lanes. The VC9 CRT version adds
+// byte arrays, causing /GS to change the code of functions with SIMD locals.
+#define _INCLUDED_MM2
+// Exe 0x00cdd550 FUN_00cdd550: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+
+#include "../../../../../include/V4.h"
+#include "../../../../../include/Vec4.h"
+#include "../../../../../include/hkQsTransform.h"
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkaBone.h"
+#include "../../../../../include/hkaSkeleton.h"
+
+
 
 // src/havok/animation/animation/rig/hkaskeletonutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/rig/hkaskeletonutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct FUN_00cdd3f0_s
-{
-    int a[6];
-    int* field_0x18;
-    int field_0x1c;
-};
-
 // @fnv 0x00cdd3f0
-void FUN_00cdd3f0(struct FUN_00cdd3f0_s* pEntries)
+void FUN_00cdd3f0(hkaSkeleton* pEntries)
 {
-    int n = pEntries->field_0x1c;
+    int n = pEntries->m_kBones.m_iElementCount;
     for (int i = 0; i < n; ++i)
-        *(char*)((char*)pEntries->field_0x18 + i * 8 + 4) = 0;
+        pEntries->m_kBones.m_data[i].m_bLockTranslation.m_cBooleanValue = 0;
 }
 
 extern "C" void __cdecl FUN_00cddad0(int, int, int*, int, int);
@@ -46,76 +58,43 @@ void __cdecl FUN_00ce00f0(float afFirst, float afSecond)
 }
 
 int __cdecl CompareStringsCaseInsensitive(const void* pKey, const void* pItem);
-struct S_00cdd390_Entry
+static inline int GetBoneCount(const hkaSkeleton* skeleton)
 {
-    unsigned int m_uiTaggedItem;
-    int unk04;
-};
-struct S_00cdd390_Table
+    return skeleton->m_kBones.m_iElementCount;
+}
+
+static inline void* GetBoneName(const hkaSkeleton* skeleton, int index)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    S_00cdd390_Entry* m_pEntries;
-    int m_iArrayLength;
-    int GetCount() const
-    {
-        return m_iArrayLength;
-    }
-    void* GetAt(int i) const
-    {
-        return (void*)(m_pEntries[i].m_uiTaggedItem & ~1u);
-    }
-};
+    return (void*)((unsigned int)skeleton->m_kBones.m_data[index].m_name.m_pcText & ~1u);
+}
+
 // Searches the table's entries for one matching pKey via pfnCompare (default CompareStringsCaseInsensitive) and returns its index, or -1 if none match.
 // @fnv 0x00cdd390
-short __cdecl FindIndexByKey(S_00cdd390_Table* pSearchEntries, const void* pKey,
+short __cdecl FindIndexByKey(hkaSkeleton* pSearchEntries, const void* pKey,
                              int(__cdecl* pfnCompare)(const void*, const void*))
 {
-    int iCount = pSearchEntries->GetCount();
+    int iCount = GetBoneCount(pSearchEntries);
     if (!pfnCompare)
         pfnCompare = CompareStringsCaseInsensitive;
     for (short i = 0; i < iCount; i++)
     {
-        if (pfnCompare(pKey, pSearchEntries->GetAt(i)) == 0)
+        if (pfnCompare(pKey, GetBoneName(pSearchEntries, i)) == 0)
             return i;
     }
     return -1;
 }
 
 extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
-template <class T> struct Array
-{
-    T* data;
-    int size;
-    int capacity;
-    __forceinline T& operator[](int index)
-    {
-        return data[index];
-    }
-};
-struct Hierarchy
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    Array<short> parents;
-    void* nodes;
-    int count;
-};
 // Clears flags up to root, marks root, then sets each later node's flag from whether its parent is flagged, and finally sets root to finalValue.
 // @fnv 0x00cdd410
-void __cdecl MarkHierarchyDescendants(Hierarchy* hierarchy, int root, unsigned char* flags, unsigned char finalValue)
+void __cdecl MarkHierarchyDescendants(hkaSkeleton* hierarchy, int root, unsigned char* flags, unsigned char finalValue)
 {
     if (root > 0)
         fnv_zlib_memset(flags, 0, root);
     flags[root] = 1;
-    for (int i = root + 1; i < hierarchy->count; ++i)
+    for (int i = root + 1; i < hierarchy->m_kBones.m_iElementCount; ++i)
     {
-        short& parent = hierarchy->parents[i];
+        short& parent = hierarchy->m_kParentIndices.m_data[i];
         flags[i] = (parent >= 0 && flags[parent] != 0) ? 1 : 0;
     }
     flags[root] = finalValue;
@@ -130,15 +109,15 @@ struct Sequence
     short* values;
     int count;
 };
-// Checks every value in sequence->values against limits->field_0x1c, writing true to result if all are in [0, limit) and false otherwise.
+// Checks every value in sequence->values against limits->m_kBones.m_iElementCount, writing true to result if all are in [0, limit) and false otherwise.
 // @fnv 0x00cdd5b0
-bool* __cdecl AreSequenceValuesInRange(bool* pbInRange, FUN_00cdd3f0_s* limits, Sequence* sequence)
+bool* __cdecl AreSequenceValuesInRange(bool* pbInRange, hkaSkeleton* limits, Sequence* sequence)
 {
     int i = 0;
     for (; i < sequence->count; ++i)
     {
         short value = sequence->values[i];
-        if (value < 0 || value >= limits->field_0x1c)
+        if (value < 0 || value >= limits->m_kBones.m_iElementCount)
         {
             *pbInRange = false;
             return pbInRange;
@@ -166,12 +145,6 @@ struct Logger
     virtual void Report(int a, int code, void* msg, const char* file, int line);
 };
 extern Logger* DAT_01268360;
-struct Names
-{
-    int pad[6];
-    unsigned int* names;
-    int count;
-};
 struct Track
 {
     int pad[4];
@@ -198,7 +171,7 @@ typedef int(__cdecl* CmpFn)(unsigned int, unsigned int);
 
 // Validates that the binding and track names are initialized, then maps each track to a bone index by comparing names and writes the indices to dst->out.
 // @fnv 0x00cdd880
-int __cdecl MapTracksToBones(Names* names, Src* src, CmpFn cmp, Dst* dst)
+int __cdecl MapTracksToBones(hkaSkeleton* names, Src* src, CmpFn cmp, Dst* dst)
 {
     if (dst->cnt == 0 || dst->cnt != src->n)
     {
@@ -220,11 +193,11 @@ int __cdecl MapTracksToBones(Names* names, Src* src, CmpFn cmp, Dst* dst)
         m.Done();
         return 1;
     }
-    int cnt = names->count;
+    int cnt = names->m_kBones.m_iElementCount;
     int i;
     for (i = 0; i < cnt; i++)
     {
-        if ((names->names[i * 2] & ~1u) == 0)
+        if (((unsigned int)names->m_kBones.m_data[i].m_name.m_pcText & ~1u) == 0)
         {
             int buf[0x80];
             Msg m;
@@ -240,9 +213,9 @@ int __cdecl MapTracksToBones(Names* names, Src* src, CmpFn cmp, Dst* dst)
         bool found = false;
         unsigned int uiTrackKey = src->arr[t * 4] & ~1u;
         short j = 0;
-        for (; j < names->count; j++)
+        for (; j < names->m_kBones.m_iElementCount; j++)
         {
-            unsigned int uiBoneName = names->names[j * 2] & ~1u;
+            unsigned int uiBoneName = (unsigned int)names->m_kBones.m_data[j].m_name.m_pcText & ~1u;
             if (cmp(uiBoneName, uiTrackKey) == 0)
             {
                 found = true;
@@ -272,14 +245,6 @@ struct HolderRec
     int m_10;
 };
 
-struct ScanRec
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    unsigned short* m_0c;
-};
-
 struct ScanObj
 {
     void FUN_00cde940(int a, int b, void* c);
@@ -288,7 +253,7 @@ struct ScanObj
 HolderRec* FUN_00c85750();
 
 // @fnv 0x00cde3d0
-unsigned char* WalkChainUntilLimit(unsigned char* pabResult, ScanRec* rec, short asLimit, short asStart, ScanObj* obj)
+unsigned char* WalkChainUntilLimit(unsigned char* pabResult, hkaSkeleton* rec, short asLimit, short asStart, ScanObj* obj)
 {
     short s = asStart;
     int idx = (unsigned short)s;
@@ -302,7 +267,7 @@ unsigned char* WalkChainUntilLimit(unsigned char* pabResult, ScanRec* rec, short
                 break;
             HolderRec* h = FUN_00c85750();
             obj->FUN_00cde940(h->m_10, 0, &iCurrent);
-            idx = rec->m_0c[(short)idx];
+            idx = ((const unsigned short*)rec->m_kParentIndices.m_data)[(short)idx];
             iCurrent = idx;
         } while ((short)idx > 0);
     }
@@ -385,23 +350,11 @@ static __forceinline void S_00cde450_SetSize(S_00cde450_ByteArr& a, int n)
     a.m_iElementCount = n;
 }
 
-struct S_00cde450_Graph
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    unsigned short* parent;
-    int unk10;
-    int unk14;
-    int unk18;
-    int count;
-};
-
 // @fnv 0x00cde450
-void __cdecl CollectReachableNodes(S_00cde450_Graph* g, short asStartIndex, S_00cde450_UShortArr* pOutList,
+void __cdecl CollectReachableNodes(hkaSkeleton* g, short asStartIndex, S_00cde450_UShortArr* pOutList,
                                    bool abIncludeStart)
 {
-    int iNodeCount = g->count;
+    int iNodeCount = g->m_kBones.m_iElementCount;
     S_00cde450_ByteArr bits;
     bits.m_data = 0;
     bits.m_iElementCount = 0;
@@ -414,7 +367,7 @@ void __cdecl CollectReachableNodes(S_00cde450_Graph* g, short asStartIndex, S_00
         bits.m_data = top;
         bits.m_pTrailingData = top;
     }
-    int n = g->count;
+    int n = g->m_kBones.m_iElementCount;
     {
         S_00cde450_Heap& h = FUN_00c85750()->heap();
         int c = bits.m_cap & 0x3fffffff;
@@ -427,9 +380,9 @@ void __cdecl CollectReachableNodes(S_00cde450_Graph* g, short asStartIndex, S_00
         pOutList->AddBack(asStartIndex);
     bits.m_data[asStartIndex] = 1;
     short i = (unsigned short)(asStartIndex + 1);
-    for (; i < g->count; i++)
+    for (; i < g->m_kBones.m_iElementCount; i++)
     {
-        short p = g->parent[i];
+        short p = g->m_kParentIndices.m_data[i];
         if (p != -1 && bits.m_data[p])
         {
             bits.m_data[i] = 1;
@@ -448,15 +401,8 @@ void __cdecl CollectReachableNodes(S_00cde450_Graph* g, short asStartIndex, S_00
 }
 }  // namespace fnv_00cde450
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-extern "C" __m128 _mm_load_ss(const float* p);
-struct __declspec(align(16)) V4
-{
-    __m128 q;
-};
+extern "C" LocalM128 _mm_load_ss(const float* p);
+__forceinline V4::V4() {}
 extern "C" void __cdecl FUN_00cde740(void* a, void* b, V4* v, void* c);
 // For each of count entries, calls FUN_00cde740 on 0x30-byte slots at idx[i]*0x30 offsets in b1, b2, b3, passing w as a float vector.
 // @fnv 0x00cdd550
@@ -471,77 +417,65 @@ void __cdecl FUN_00cdd550(unsigned int count, const short* idx, char* b1, char* 
     }
 }
 
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
 
-extern const __m128 DAT_010c71e0;
+extern const LocalM128 DAT_010c71e0;
 
-struct hkVector4
+
+__forceinline void hkVector4::setCross(const hkVector4& v1, const hkVector4& v2)
 {
-    __m128 m_vComponents;
+    const LocalM128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
+                                     _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
+    const LocalM128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
+                                     _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(cross0, cross1);
+}
 
-    __forceinline void setCross(const hkVector4& v1, const hkVector4& v2)
-    {
-        const __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
-                                         _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        const __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
-                                         _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    __forceinline __m128 dot3(const hkVector4& b) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, b.m_vComponents);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2));
-    }
-    __forceinline void setMul4(__m128 r, const hkVector4& v)
-    {
-        m_vComponents = _mm_mul_ps(r, v.m_vComponents);
-    }
-    __forceinline void addMul4(__m128 r, const hkVector4& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(r, v.m_vComponents));
-    }
-    __forceinline void setAdd4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void SetRotatedDirection(const hkVector4& quat, const hkVector4& direction)
-    {
-        const hkVector4& imag = quat;
-        const __m128 qreal = _mm_shuffle_ps(quat.m_vComponents, quat.m_vComponents, 0xff);
-        const __m128 q2minus1 = _mm_add_ps(_mm_mul_ps(qreal, qreal), DAT_010c71e0);
-        hkVector4 ret;
-        ret.setMul4(q2minus1, direction);
-        const __m128 imagDotDir = imag.dot3(direction);
-        ret.addMul4(_mm_shuffle_ps(imagDotDir, imagDotDir, 0), imag);
-        hkVector4 imagCrossDir;
-        imagCrossDir.setCross(imag, direction);
-        ret.addMul4(qreal, imagCrossDir);
-        setAdd4(ret, ret);
-    }
-    __forceinline void SetTransformedPoint(const struct hkQsTransform& t, const hkVector4& v);
-    __forceinline hkVector4& operator=(const hkVector4& o)
-    {
-        m_vComponents = o.m_vComponents;
-        return *this;
-    }
-    __forceinline void add4(const hkVector4& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-};
-
-struct hkQsTransform
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& b) const
 {
-    hkVector4 m_vTranslation;
-    hkVector4 m_rotation;
-    hkVector4 m_vScale;
-};
+    const LocalM128 x2 = _mm_mul_ps(m_vComponents, b.m_vComponents);
+    hkSimdReal result;
+    result.m_vValue = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2));
+    return result;
+}
+
+__forceinline hkSimdReal::hkSimdReal() {}
+
+__forceinline void hkVector4::setMul4(LocalM128 r, const hkVector4& v)
+{
+    m_vComponents = _mm_mul_ps(r, v.m_vComponents);
+}
+
+__forceinline void hkVector4::addMul4(LocalM128 r, const hkVector4& v)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(r, v.m_vComponents));
+}
+
+__forceinline void hkVector4::setAdd4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4::SetRotatedDirection(const hkQuaternion& quat, const hkVector4& direction)
+{
+    const hkVector4& imag = reinterpret_cast<const hkVector4&>(quat);
+    const LocalM128 qreal = _mm_shuffle_ps(imag.m_vComponents, imag.m_vComponents, 0xff);
+    const LocalM128 q2minus1 = _mm_add_ps(_mm_mul_ps(qreal, qreal), DAT_010c71e0);
+    hkVector4 ret;
+    ret.setMul4(q2minus1, direction);
+    const LocalM128 imagDotDir = imag.dot3(direction).m_vValue;
+    ret.addMul4(_mm_shuffle_ps(imagDotDir, imagDotDir, 0), imag);
+    hkVector4 imagCrossDir;
+    imagCrossDir.setCross(imag, direction);
+    ret.addMul4(qreal, imagCrossDir);
+    setAdd4(ret, ret);
+}
 
 __forceinline void hkVector4::SetTransformedPoint(const hkQsTransform& t, const hkVector4& v)
 {
@@ -549,39 +483,32 @@ __forceinline void hkVector4::SetTransformedPoint(const hkQsTransform& t, const 
     add4(t.m_vTranslation);
 }
 
+
+__forceinline void hkVector4::add4(const hkVector4& v)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
+}
+
 typedef short hkInt16;
 
-struct hkaBone
+// The shared skeleton ends just before the reference-pose array.
+// Keep access to its data pointer here until that member is shared.
+static __forceinline hkQsTransform* GetReferencePose(const hkaSkeleton* skeleton)
 {
-    const char* m_name;
-    bool m_bLockTranslation;
-};
-
-struct hkaSkeleton
-{
-    void* vtbl;
-    int m_usMemSizeAndFlags;
-    const char* m_name;
-    short* m_kParentIndices;
-    int m_numParentIndices;
-    int m_parentCap;
-    hkaBone* m_kBones;
-    int m_iBoneCount;
-    int m_bonesCap;
-    hkQsTransform* m_kReferencePose;
-};
+    return skeleton->m_kReferencePose.m_data;
+}
 
 // For each bone with m_bLockTranslation, sets poseModel translation from the reference pose, rotated and offset by the parent's transform when a parent exists.
 // @fnv 0x00cde1d0
 void __cdecl FUN_00cde1d0(const hkaSkeleton* skeleton, hkQsTransform* poseModel)
 {
-    const int numBones = skeleton->m_iBoneCount;
+    const int numBones = skeleton->m_kBones.m_iElementCount;
     for (int i = 0; i < numBones; i++)
     {
-        const short parent = skeleton->m_kParentIndices[i];
-        if (skeleton->m_kBones[i].m_bLockTranslation)
+        const short parent = skeleton->m_kParentIndices.m_data[i];
+        if (skeleton->m_kBones.m_data[i].m_bLockTranslation.m_cBooleanValue)
         {
-            const hkVector4& refTranslation = skeleton->m_kReferencePose[i].m_vTranslation;
+            const hkVector4& refTranslation = GetReferencePose(skeleton)[i].m_vTranslation;
             hkQsTransform& out = poseModel[i];
             if (parent != -1)
             {
@@ -597,8 +524,8 @@ void __cdecl FUN_00cde1d0(const hkaSkeleton* skeleton, hkQsTransform* poseModel)
     }
 }
 
-extern "C" __m128 _mm_xor_ps(__m128, __m128);
-extern "C" const __m128 DAT_010c44d0;
+extern "C" LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+extern "C" const LocalM128 DAT_010c44d0;
 extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
@@ -672,17 +599,9 @@ struct HkWorld
     virtual void v3c();
     virtual HkEntity* GetEntity();
 };
-struct Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
 union __declspec(align(16)) VectorValue
 {
-    Vec4 scalar;
-    __m128 quad;
+    LocalM128 quad;
 };
 struct Allocator
 {
@@ -700,7 +619,7 @@ struct Property
     int unk04, unk08, unk0c;
     unsigned short size, unk12;
     int unk14, unk18, unk1c;
-    __m128 vector;
+    LocalM128 vector;
     static void* operator new(unsigned int bytes)
     {
         AllocationService* service = reinterpret_cast<AllocationService*>(FUN_00c85750());
@@ -725,7 +644,7 @@ void SetModifierConstraint(HkWorld* apWorld, int owner, HkObj* apObj, Vec4* apVe
         apObj->Begin();
         timer(DAT_010cb7dc);
         VectorValue t;
-        t.scalar = *apVec;
+        *reinterpret_cast<Vec4*>(&t.quad) = *apVec;
         if (e->owner == owner)
         {
             t.quad = _mm_xor_ps(t.quad, DAT_010c44d0);
@@ -745,68 +664,49 @@ void SetModifierConstraint(HkWorld* apWorld, int owner, HkObj* apObj, Vec4* apVe
     }
 }
 
-struct S_00cdd600_Obj
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    short* m0c;
-};
-struct S_00cdd600_Bone
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    float scale[4];
-};
-extern __m128 DAT_010c7170;
+extern LocalM128 DAT_010c7170;
 
 struct S_00cdd600_Out
 {
-    __m128* p;
-    __m128* val() const
+    LocalM128* p;
+    LocalM128* val() const
     {
         return p;
     }
 };
 // Multiplies the scale vectors of a chain of bones starting at idx into r, then stores the result in out.
 // @fnv 0x00cdd600
-void __cdecl MultiplyBoneScales(S_00cdd600_Obj* obj, S_00cdd600_Bone* bones, int aiStartIndex, S_00cdd600_Out out)
+void __cdecl MultiplyBoneScales(hkaSkeleton* obj, hkQsTransform* bones, int aiStartIndex, S_00cdd600_Out out)
 {
-    __m128 r = DAT_010c7170;
-    for (; aiStartIndex != -1; aiStartIndex = obj->m0c[aiStartIndex])
-        r = _mm_mul_ps(*(__m128*)bones[aiStartIndex].scale, r);
+    LocalM128 r = DAT_010c7170;
+    for (; aiStartIndex != -1; aiStartIndex = obj->m_kParentIndices.m_data[aiStartIndex])
+        r = _mm_mul_ps(bones[aiStartIndex].m_vScale.m_vComponents, r);
     *out.val() = r;
 }
 
 extern "C"
 {
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    void _mm_store_ss(float*, __m128);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_rsqrt_ps(__m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    void _mm_store_ss(float*, LocalM128);
+    LocalM128 _mm_load_ps(const float*);
+    LocalM128 _mm_rsqrt_ps(LocalM128);
+    LocalM128 _mm_set_ss(float);
+    LocalM128 _mm_rsqrt_ss(LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+    LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
     void _ReadWriteBarrier(void);
 }
 
-extern const __m128 DAT_010c71c0;
-extern const __m128 DAT_010c71d0;
+extern const LocalM128 DAT_010c71c0;
+extern const LocalM128 DAT_010c71d0;
 
 struct Simd
 {
-    __m128 m;
+    LocalM128 m;
     __forceinline float getReal() const
     {
         float f;
@@ -814,13 +714,14 @@ struct Simd
         return f;
     }
 };
-struct Vec
+// A 16-byte hkVector4/hkQuaternion lane of hkQsTransform (Item = translation, rotation, scale) with the unit's own inline lengthSquared4/mul4 forms; FUN_00cdd660 normalizes the rotations.
+struct QsVector4
 {
-    __m128 m;
+    LocalM128 m;
     __forceinline Simd lengthSquared() const
     {
-        __m128 d = _mm_mul_ps(m, m);
-        __m128 s = _mm_add_ps(d, _mm_shuffle_ps(d, d, 0x4e));
+        LocalM128 d = _mm_mul_ps(m, m);
+        LocalM128 s = _mm_add_ps(d, _mm_shuffle_ps(d, d, 0x4e));
         Simd r;
         r.m = _mm_add_ps(s, _mm_shuffle_ps(s, s, 0xb1));
         return r;
@@ -829,16 +730,16 @@ struct Vec
     {
         m = _mm_mul_ps(_mm_shuffle_ps(factor.m, factor.m, 0), m);
     }
-    __forceinline void SetProduct(const Simd& factor, const Vec& v)
+    __forceinline void SetProduct(const Simd& factor, const QsVector4& v)
     {
         m = _mm_mul_ps(factor.m, v.m);
     }
 };
 struct Item
 {
-    Vec translation;
-    Vec rot;
-    Vec scale;
+    QsVector4 translation;
+    QsVector4 rot;
+    QsVector4 scale;
 };
 
 // Normalizes the rot vectors of up to count Item entries in batches of four using SIMD, then handles any remaining items individually.
@@ -865,14 +766,14 @@ void FUN_00cdd660(Item* items, int count)
             _mm_store_ss(&a[3], sq3.m);
             d3[3] = a[3];
 
-            __m128 len = _mm_load_ps(d3);
-            __m128 x = _mm_rsqrt_ps(len);
-            __m128 r2 = _mm_mul_ps(x, len);
+            LocalM128 len = _mm_load_ps(d3);
+            LocalM128 x = _mm_rsqrt_ps(len);
+            LocalM128 r2 = _mm_mul_ps(x, len);
             r2 = _mm_mul_ps(r2, x);
-            __m128 sub;
+            LocalM128 sub;
             sub = _mm_sub_ps(DAT_010c71c0, r2);
-            __m128 j = _mm_mul_ps(DAT_010c71d0, x);
-            __m128 factor = _mm_mul_ps(sub, j);
+            LocalM128 j = _mm_mul_ps(DAT_010c71d0, x);
+            LocalM128 factor = _mm_mul_ps(sub, j);
 
             Simd sc0;
             sc0.m = factor;
@@ -882,7 +783,7 @@ void FUN_00cdd660(Item* items, int count)
             items[1].rot.mul(sc1);
             Simd sc2;
             sc2.m = _mm_shuffle_ps(factor, factor, 0xaa);
-            __m128 res2 = _mm_mul_ps(_mm_shuffle_ps(sc2.m, sc2.m, 0), items[2].rot.m);
+            LocalM128 res2 = _mm_mul_ps(_mm_shuffle_ps(sc2.m, sc2.m, 0), items[2].rot.m);
             Simd sc3;
             sc3.m = _mm_shuffle_ps(factor, factor, 0xff);
             items[2].rot.m = res2;
@@ -897,39 +798,39 @@ void FUN_00cdd660(Item* items, int count)
     int iRemainder = count % 4;
     if (iRemainder)
     {
-        __m128 pObj = _mm_set_ss(0.0f);
-        __m128 three = _mm_set_ss(3.0f);
-        __m128 half = _mm_set_ss(0.5f);
-        __m128* p = &items->rot.m;
+        LocalM128 pObj = _mm_set_ss(0.0f);
+        LocalM128 three = _mm_set_ss(3.0f);
+        LocalM128 half = _mm_set_ss(0.5f);
+        LocalM128* p = &items->rot.m;
         int remaining = iRemainder;
         do
         {
-            __m128 v;
+            LocalM128 v;
             v = *p;
-            __m128 d = _mm_mul_ps(v, v);
-            __m128 s = _mm_add_ps(d, _mm_shuffle_ps(d, d, 0x4e));
+            LocalM128 d = _mm_mul_ps(v, v);
+            LocalM128 s = _mm_add_ps(d, _mm_shuffle_ps(d, d, 0x4e));
             s = _mm_add_ps(s, _mm_shuffle_ps(s, s, 0xb1));
 
-            __m128 r = _mm_rsqrt_ss(s);
-            __m128 r2 = _mm_mul_ss(s, r);
+            LocalM128 r = _mm_rsqrt_ss(s);
+            LocalM128 r2 = _mm_mul_ss(s, r);
             r2 = _mm_mul_ss(r2, r);
-            __m128 j;
+            LocalM128 j;
             j = _mm_mul_ss(half, r);
-            __m128 sub = _mm_sub_ss(three, r2);
-            __m128 factor = _mm_mul_ss(j, sub);
+            LocalM128 sub = _mm_sub_ss(three, r2);
+            LocalM128 factor = _mm_mul_ss(j, sub);
 
-            __m128 zero = _mm_cmpeq_ss(s, pObj);
+            LocalM128 zero = _mm_cmpeq_ss(s, pObj);
             factor = _mm_andnot_ps(zero, factor);
-            __m128 d2 = _mm_shuffle_ps(factor, factor, 0x00);
+            LocalM128 d2 = _mm_shuffle_ps(factor, factor, 0x00);
             *p = _mm_mul_ps(d2, v);
             p = &(++items)->rot.m;
         } while (--remaining);
     }
 }
 
-extern "C" __m128 _mm_rcp_ps(__m128);
-extern "C" __m128 _mm_and_ps(__m128, __m128);
-extern "C" __m128 _mm_unpackhi_ps(__m128, __m128);
+extern "C" LocalM128 _mm_rcp_ps(LocalM128);
+extern "C" LocalM128 _mm_and_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
 
 extern "C"
 {
@@ -942,24 +843,24 @@ class SReal
   public:
     SReal()
     {}
-    SReal(const __m128& x) : m_vValue(x)
+    SReal(const LocalM128& x) : m_vValue(x)
     {}
-    __forceinline __m128 broadcast() const
+    __forceinline LocalM128 broadcast() const
     {
         return _mm_shuffle_ps(m_vValue, m_vValue, 0);
     }
-    __forceinline const __m128& getQuad() const
+    __forceinline const LocalM128& getQuad() const
     {
         return m_vValue;
     }
 
   private:
-    __m128 m_vValue;
+    LocalM128 m_vValue;
 };
 
-__forceinline __m128 approxReciprocal(__m128 r)
+__forceinline LocalM128 approxReciprocal(LocalM128 r)
 {
-    __m128 e = _mm_rcp_ps(r);
+    LocalM128 e = _mm_rcp_ps(r);
     return _mm_sub_ps(_mm_add_ps(e, e), _mm_mul_ps(_mm_mul_ps(e, r), e));
 }
 
@@ -970,7 +871,7 @@ class QVec
   public:
     QVec()
     {}
-    QVec(const __m128& q)
+    QVec(const LocalM128& q)
     {
         m_vComponents = q;
     }
@@ -982,19 +883,19 @@ class QVec
     {
         m_vComponents = v.m_vComponents;
     }
-    void operator=(const __m128& q)
+    void operator=(const LocalM128& q)
     {
         getQuad() = q;
     }
-    operator __m128() const
+    operator LocalM128() const
     {
         return m_vComponents;
     }
-    __m128& getQuad()
+    LocalM128& getQuad()
     {
         return m_vComponents;
     }
-    const __m128& getQuad() const
+    const LocalM128& getQuad() const
     {
         return m_vComponents;
     }
@@ -1048,11 +949,11 @@ class QVec
     }
     __forceinline void setNeg3(const QVec& v)
     {
-        m_vComponents = _mm_xor_ps(v.m_vComponents, *(const __m128*)&DAT_010c4c00);
+        m_vComponents = _mm_xor_ps(v.m_vComponents, *(const LocalM128*)&DAT_010c4c00);
     }
     __forceinline void setXYZ0(const QVec& xyz)
     {
-        m_vComponents = _mm_and_ps(xyz, *(const __m128*)&DAT_010c4c10);
+        m_vComponents = _mm_and_ps(xyz, *(const LocalM128*)&DAT_010c4c10);
     }
     __forceinline void setXYZW(const QVec& xyz, const QVec& w)
     {
@@ -1072,16 +973,16 @@ class QVec
     }
     __forceinline void setCross(const QVec& a, const QVec& b)
     {
-        __m128 c0 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9),
+        LocalM128 c0 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9),
                                _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2));
-        __m128 c1 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2),
+        LocalM128 c1 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2),
                                _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9));
         m_vComponents = _mm_sub_ps(c0, c1);
     }
     __forceinline SReal dot3(const QVec& a) const
     {
-        __m128 p = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 xy = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+        LocalM128 p = _mm_mul_ps(m_vComponents, a.m_vComponents);
+        LocalM128 xy = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
         return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), xy);
     }
     __forceinline void splat(int i)
@@ -1110,7 +1011,7 @@ class QVec
     void rotateInverse(const QRot& q, const QVec& d);
 
   private:
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 
 struct QRot
@@ -1181,6 +1082,7 @@ __forceinline void QVec::rotateInverse(const QRot& q, const QVec& d)
     setAdd4(out, out);
 }
 
+// local form of hkQsTransform: 0x00cddd20 needs inline SetMulInverse; shared call gives 86 bytes vs exe 462.
 struct QsXform
 {
     QVec m_vTranslation;

@@ -1,31 +1,13 @@
-// gamebryo2.2/corelibs/nianimation/niposkey_decls.h: declares AnimationKey, PositionKeyInterpolator
+// gamebryo2.2/corelibs/nianimation/niposkey_decls.h: declares NiAnimationKey, PositionKeyInterpolator
 #ifndef NIPOSKEY_DECLS_H
 #define NIPOSKEY_DECLS_H
 
 
 #include "NiPoint3.h"
 
-class AnimationKey
-{
-  public:
-    enum KeyType
-    {
-        NOINTERP,
-        LINKEY,
-        BEZKEY,
-        TCBKEY,
-        EULERKEY,
-        STEPKEY,
-        NUMKEYTYPES
-    };
-    float m_fTime;
-    float GetTime() const
-    {
-        return m_fTime;
-    }
-};
+#include "../../../../include/NiAnimationKey.h"
 
-class PositionKeyInterpolator : public AnimationKey
+class PositionKeyInterpolator : public NiAnimationKey
 {
   public:
     NiPoint3 m_kPositionValue;
@@ -41,8 +23,8 @@ class PositionKeyInterpolator : public AnimationKey
                                         unsigned int& lastIndex, unsigned char size);
 };
 
-typedef void(__cdecl* NiPosInterpFunction)(float, const AnimationKey*, const AnimationKey*, void*);
+typedef void(__cdecl* NiPosInterpFunction)(float, const NiAnimationKey*, const NiAnimationKey*, void*);
 extern "C" const double DAT_010241b0;
-extern NiPosInterpFunction DAT_011f3ca8[AnimationKey::NUMKEYTYPES];
+extern NiPosInterpFunction DAT_011f3ca8[NiAnimationKey::NUMKEYTYPES];
 
 #endif

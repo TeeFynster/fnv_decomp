@@ -1,3 +1,135 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+// Preserve this unit's original intrinsic union: RTM changes x87 load ordering
+// when the additional union views from xmmintrin.h are introduced.
+// Exe-matched intrinsic packet; __m128 remains an ABI compatibility alias.
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
+#define FNV_FOURFLOATVECTOR_NO_SSE
+
+#include "../../../../../../include/V4.h"
+// local form of hkVector4: 0x00d6d450 needs its original packet form (compiled function extent differs: 469 vs 372).
+
+
+#if !defined(FNV_FOURFLOATVECTOR_NO_SSE)
+#include <xmmintrin.h>
+#else
+#endif
+
+class SimdReal;
+class SimdScalar;
+class ScalarValue;
+class Transform;
+class NiPoint3;
+
+#pragma pack(push, 4)
+
+class PacketCallLocal_00d6d450
+{
+public:
+#if defined(FNV_FOURFLOATVECTOR_NO_SSE)
+    union Components
+    {
+        float m128_f32[4];
+        unsigned __int64 m128_u64[2];
+        signed char m128_i8[16];
+        short m128_i16[8];
+        int m128_i32[4];
+        __int64 m128_i64[2];
+        unsigned char m128_u8[16];
+        unsigned short m128_u16[8];
+        unsigned int m128_u32[4];
+    };
+#else
+    typedef __declspec(align(4)) __m128 Components;
+#endif
+
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+        Components m_vComponents;
+        Components m;
+        float f[4];
+        Components values;
+        Components q;
+        Components value;
+        Components quad;
+        float elements[4];
+        float m_fComponents[4];
+    };
+
+    PacketCallLocal_00d6d450();
+    PacketCallLocal_00d6d450(float x, float y, float z, float w);
+    PacketCallLocal_00d6d450(const __m128& vector);
+
+    PacketCallLocal_00d6d450* FUN_005532a0(float x, float y, float z, float w);
+    void FUN_004a3f10(PacketCallLocal_00d6d450* vector);
+    void __thiscall FUN_004b4db0(const PacketCallLocal_00d6d450* vector);
+    PacketCallLocal_00d6d450& FUN_00e531a0(int parameter);
+    PacketCallLocal_00d6d450 FUN_00e53260(int parameter);
+    void FUN_005611c0();
+
+    void operator=(const PacketCallLocal_00d6d450& vector);
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    float& component(int index);
+    float& At(int index);
+    const float& At(int index) const;
+
+    __m128 length3() const;
+    float getW() const;
+    ScalarValue Dot(const PacketCallLocal_00d6d450& vector) const;
+    ScalarValue LengthSq() const;
+    ScalarValue Length() const;
+    ScalarValue InverseLength() const;
+    void Normalize();
+    bool NormalizeNonzero();
+    void Mul(const ScalarValue& scalar);
+    void Add(const PacketCallLocal_00d6d450& vector);
+    void Sub(const PacketCallLocal_00d6d450& vector);
+    void Cross(const PacketCallLocal_00d6d450& a, const PacketCallLocal_00d6d450& b);
+
+    void setAbs4(const PacketCallLocal_00d6d450& vector);
+    void setMul4(const SimdReal& scalar, const PacketCallLocal_00d6d450& vector);
+    void addMul4(const SimdReal& scalar, const PacketCallLocal_00d6d450& vector);
+    void setAddMul4(const PacketCallLocal_00d6d450& a, const PacketCallLocal_00d6d450& b, const SimdReal& scalar);
+    SimdReal getSimdAt3() const;
+    SimdReal lengthSquared3() const;
+    void setXYZ_W(__m128 xyz, __m128 w);
+    void setSqrtInverse4(const PacketCallLocal_00d6d450& vector);
+    void setAddMul(const PacketCallLocal_00d6d450& a, const PacketCallLocal_00d6d450& b, const SimdScalar& scalar);
+    void addMul(const float& scalar, const PacketCallLocal_00d6d450& vector);
+    void transformed(const Transform& transform, const PacketCallLocal_00d6d450& vector);
+    void addScaled(const PacketCallLocal_00d6d450& base, const PacketCallLocal_00d6d450& direction, float amount);
+    void* AddVector(void*, NiPoint3*, void*, float);
+    void* AddVector(void*, void*);
+    void* ScaleSwizzled();
+};
+
+#pragma pack(pop)
+
+#include "../../../../../../include/hkSimdReal.h"
+#include "../../../../../../include/hkMatrix3.h"
+#include "../../../../../../include/hkRotation.h"
+#include "../../../../../../include/hkpTwistLimitConstraintAtom.h"
+
+__forceinline V4::V4() {}
+__forceinline PacketCallLocal_00d6d450::PacketCallLocal_00d6d450() {}
 
 // src/havok/physics/constraintsolver/constraint/atom/hkpbuildjacobianfromatoms.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/constraintsolver/constraint/atom/hkpbuildjacobianfromatoms.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -430,11 +562,6 @@ void Ea70_caller(Ea70Src* s, Ea70Obj* o, int* a)
     FUN_00d6ea70(s, o, a);
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
 extern "C" __m128 _mm_load_ss(const float* p);
 extern "C" void _mm_store_ps(float* p, __m128 a);
@@ -448,21 +575,11 @@ struct S6edf0_Vec
     }
 };
 
-struct S6edf0_Rot
-{
-    S6edf0_Vec c0;
-    S6edf0_Vec c1;
-    S6edf0_Vec c2;
-    void FUN_00cd4cc0(const S6edf0_Vec* q);
-    void FUN_00cd5610(const S6edf0_Rot* r, S6edf0_Rot* out);
-    void Multiply(const S6edf0_Vec* v);
-};
-
 struct S6edf0_Quat
 {
     S6edf0_Vec v;
     void FUN_00c7f700(unsigned int a, const S6edf0_Vec* b);
-    void FUN_00c7f750(const S6edf0_Rot* a, S6edf0_Vec* b);
+    void FUN_00c7f750(const hkMatrix3* a, S6edf0_Vec* b);
 };
 
 struct S6edf0_Motion
@@ -472,7 +589,7 @@ struct S6edf0_Motion
     S6edf0_Vec m20;
     S6edf0_Vec m30;
     S6edf0_Vec m40;
-    S6edf0_Rot m50;
+    hkMatrix3 m50;
     void FUN_00d71f90(unsigned int a);
 };
 
@@ -529,27 +646,19 @@ struct S6edf0_Ctx
 
 extern const float DAT_01012054;
 
-struct __declspec(align(16)) S6edf0_F4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-
 struct S6edf0_Frames
 {
-    S6edf0_Rot rb;
+    hkMatrix3 rb;
     S6edf0_Quat qb;
     S6edf0_Quat qa;
-    S6edf0_Rot ra;
+    hkMatrix3 ra;
 };
 
 struct S6edf0_Frames2
 {
-    S6edf0_Rot ga;
+    hkMatrix3 ga;
     S6edf0_Quat ib;
-    S6edf0_Rot gb;
+    hkMatrix3 gb;
     S6edf0_Quat ia;
 };
 
@@ -559,7 +668,7 @@ union S6edf0_Tag
     unsigned char b;
 };
 
-void WriteVector(S6edf0_Rot* a, S6edf0_Rot* b, unsigned int c);
+void WriteVector(hkMatrix3* a, hkMatrix3* b, unsigned int c);
 void FUN_00d72190(unsigned short* p, S6edf0_Blob* b, S6edf0_Tag t, unsigned int c);
 void FUN_00d6f460(unsigned short* p, S6edf0_Tag t, S6edf0_Blob* b, unsigned int c);
 
@@ -568,9 +677,9 @@ void FUN_00d6f460(unsigned short* p, S6edf0_Tag t, S6edf0_Blob* b, unsigned int 
 void FUN_00d6edf0(S6edf0_Ctx* ctx, S6edf0_Blob* src, unsigned int arg3)
 {
     S6edf0_Tag tag;
-    S6edf0_F4 neg;
+    __declspec(align(16)) PacketCallLocal_00d6d450 neg;
     S6edf0_Frames frames;
-    S6edf0_Rot tmp;
+    hkMatrix3 tmp;
     S6edf0_Frames2 gr;
     S6edf0_Motion ma;
     S6edf0_Motion mb;
@@ -589,28 +698,28 @@ void FUN_00d6edf0(S6edf0_Ctx* ctx, S6edf0_Blob* src, unsigned int arg3)
     blob.u30 = (unsigned int)&ma;
     blob.u34 = (unsigned int)&mb;
 
-    frames.ra.FUN_00cd4cc0(&frames.qa.v);
-    frames.rb.FUN_00cd4cc0(&frames.qb.v);
+    frames.ra.SetDiagonalElements(reinterpret_cast<const hkVector4&>(frames.qa.v));
+    frames.rb.SetDiagonalElements(reinterpret_cast<const hkVector4&>(frames.qb.v));
 
-    tmp.c0.m_vComponents = frames.ra.c0.m_vComponents;
-    tmp.c1.m_vComponents = frames.ra.c1.m_vComponents;
-    tmp.c2.m_vComponents = frames.ra.c2.m_vComponents;
-    frames.ra.FUN_00cd5610(&tmp, &ma.m50);
-    tmp.c0.m_vComponents = frames.rb.c0.m_vComponents;
-    tmp.c1.m_vComponents = frames.rb.c1.m_vComponents;
-    tmp.c2.m_vComponents = frames.rb.c2.m_vComponents;
-    frames.rb.FUN_00cd5610(&tmp, &mb.m50);
+    tmp.m_kColumn0.m_vComponents = frames.ra.m_kColumn0.m_vComponents;
+    tmp.m_kColumn1.m_vComponents = frames.ra.m_kColumn1.m_vComponents;
+    tmp.m_kColumn2.m_vComponents = frames.ra.m_kColumn2.m_vComponents;
+    frames.ra._setMul(tmp, ma.m50);
+    tmp.m_kColumn0.m_vComponents = frames.rb.m_kColumn0.m_vComponents;
+    tmp.m_kColumn1.m_vComponents = frames.rb.m_kColumn1.m_vComponents;
+    tmp.m_kColumn2.m_vComponents = frames.rb.m_kColumn2.m_vComponents;
+    frames.rb._setMul(tmp, mb.m50);
 
-    gr.ga.c0.m_vComponents = frames.ra.c0.m_vComponents;
-    gr.ga.c1.m_vComponents = frames.ra.c1.m_vComponents;
-    gr.ga.c2.m_vComponents = frames.ra.c2.m_vComponents;
+    gr.ga.m_kColumn0.m_vComponents = frames.ra.m_kColumn0.m_vComponents;
+    gr.ga.m_kColumn1.m_vComponents = frames.ra.m_kColumn1.m_vComponents;
+    gr.ga.m_kColumn2.m_vComponents = frames.ra.m_kColumn2.m_vComponents;
     _mm_store_ps(&neg.x, _mm_load_ss(&DAT_01012054));
-    gr.ga.Multiply((const S6edf0_Vec*)&neg);
-    gr.gb.c0.m_vComponents = frames.rb.c0.m_vComponents;
-    gr.gb.c1.m_vComponents = frames.rb.c1.m_vComponents;
-    gr.gb.c2.m_vComponents = frames.rb.c2.m_vComponents;
+    gr.ga.Multiply(reinterpret_cast<const hkSimdReal&>(neg));
+    gr.gb.m_kColumn0.m_vComponents = frames.rb.m_kColumn0.m_vComponents;
+    gr.gb.m_kColumn1.m_vComponents = frames.rb.m_kColumn1.m_vComponents;
+    gr.gb.m_kColumn2.m_vComponents = frames.rb.m_kColumn2.m_vComponents;
     _mm_store_ps(&neg.x, _mm_load_ss(&DAT_01012054));
-    gr.gb.Multiply((const S6edf0_Vec*)&neg);
+    gr.gb.Multiply(reinterpret_cast<const hkSimdReal&>(neg));
 
     gr.ia.FUN_00c7f750(&gr.ga, &ma.m20);
     gr.ib.FUN_00c7f750(&gr.gb, &mb.m20);
@@ -1022,7 +1131,8 @@ struct Body409
     unsigned unk40, unk44, unk48, unk4c;
     __m128 basisX, basisY, basisZ;
 };
-struct Pair409
+// Unlike include/Pair.h's two ints, this solver context has body pointers at +0x30 and +0x34.
+struct ConstraintBodyPairContext
 {
     unsigned unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
     unsigned unk20, unk24, unk28, unk2c;
@@ -1036,7 +1146,7 @@ struct Jacobian409
 // Adapted from another contributor's previously checked near-match.
 // Computes Jacobian rows for a pair of bodies from a vector, sums their inertia-weighted squares, and stores the reciprocal in outRecip.
 // @fnv 0x00d6cd70
-void FUN_00d6cd70(const __m128& in, const Pair409& xf, Jacobian409& out, float& outRecip)
+void FUN_00d6cd70(const __m128& in, const ConstraintBodyPairContext& xf, Jacobian409& out, float& outRecip)
 {
     const Body409* Q = xf.second;
     __m128 vNeg = _mm_xor_ps(in, DAT_010c44d0);
@@ -1087,90 +1197,68 @@ extern "C"
 extern const double DAT_010d33d0;
 extern float Atan2(float y, float x);
 
-struct VectorComponentValue
+__forceinline hkSimdReal::hkSimdReal() {}
+__forceinline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x) {}
+__forceinline hkSimdReal::hkSimdReal(float x)
 {
-    __m128 m_vValue;
-
-    __forceinline VectorComponentValue()
-    {}
-    __forceinline VectorComponentValue(const __m128& x) : m_vValue(x)
-    {}
-    __forceinline VectorComponentValue(float x)
-    {
-        m_vValue = _mm_load_ss(&x);
-    }
-    __forceinline operator float() const
-    {
-        float r;
-        _mm_store_ss(&r, m_vValue);
-        return r;
-    }
-    __forceinline __m128 getQuad() const
-    {
-        return m_vValue;
-    }
-    __forceinline __m128 broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-};
-
-struct hkVector4
+    m_vValue = _mm_load_ss(&x);
+}
+__forceinline hkSimdReal::operator float() const
 {
-    __m128 m_vComponents;
-
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setAdd4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void mul4(float s)
-    {
-        __m128 ss = _mm_load_ss(&s);
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(ss, ss, 0), m_vComponents);
-    }
-    __forceinline void setCross(const hkVector4& v0, const hkVector4& v1)
-    {
-        __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
-                                   _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
-        __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
-                                   _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
-    }
-    __forceinline VectorComponentValue length3() const
-    {
-        return _mm_sqrt_ss(this->dot3(*this).getQuad());
-    }
-};
-
-struct hkMatrix3
+    float r;
+    _mm_store_ss(&r, m_vValue);
+    return r;
+}
+__forceinline const __m128& hkSimdReal::getQuad() const
 {
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-
-    __forceinline hkVector4& getColumn(int x)
-    {
-        return (&m_kColumn0)[x];
-    }
-    __forceinline const hkVector4& getColumn(int x) const
-    {
-        return (&m_kColumn0)[x];
-    }
-};
-
-struct hkRotation : public hkMatrix3
+    return m_vValue;
+}
+__forceinline __m128 hkSimdReal::broadcast() const
 {
-};
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+
+__forceinline void hkVector4::setAdd4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
+}
+__forceinline void hkVector4::mul4(const float& s)
+{
+    __m128 ss = _mm_load_ss(&s);
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(ss, ss, 0), m_vComponents);
+}
+__forceinline void hkVector4::setCross(const hkVector4& v0, const hkVector4& v1)
+{
+    __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
+                               _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
+    __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
+                               _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(cross0, cross1);
+}
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
+}
+__forceinline hkSimdReal hkVector4::length3() const
+{
+    return _mm_sqrt_ss(this->dot3(*this).getQuad());
+}
+__forceinline hkMatrix3::hkMatrix3() {}
+__forceinline hkVector4& hkMatrix3::getColumn(int x)
+{
+    return (&m_kColumn0)[x];
+}
+__forceinline const hkVector4& hkMatrix3::getColumn(int x) const
+{
+    return (&m_kColumn0)[x];
+}
+__forceinline hkRotation::hkRotation() {}
+__forceinline const hkVector4& hkRotation::getColumn(int x) const
+{
+    return (&m_kColumn0)[x];
+}
 
 struct SixteenWordFloatRecord
 {
@@ -1191,19 +1279,6 @@ struct SixteenWordFloatRecord
     int unk38;
     int unk3c;
     float m_fThirdQueryValue;
-};
-
-struct hkpTwistLimitConstraintAtom
-{
-    unsigned short m_type;
-    unsigned char m_bLimitEnabled;
-    unsigned char m_ucTwistAxis;
-    unsigned char m_ucReferenceAxis;
-    unsigned char unk05;
-    unsigned short unk06;
-    float m_fMinAngle;
-    float m_fMaxAngle;
-    float m_fAngularLimitsTauFactor;
 };
 
 struct Vector4AndFourScalars
@@ -1235,9 +1310,9 @@ __forceinline void hkInternalConstraintUtils_inlineCalcRelativeAngle(
 
     hkRotation m_ws_us;
     {
-        hkVector4& c0 = m_ws_us.getColumn(0);
-        hkVector4& c1 = m_ws_us.getColumn(1);
-        hkVector4& c2 = m_ws_us.getColumn(2);
+        hkVector4& c0 = m_ws_us.m_kColumn0;
+        hkVector4& c1 = m_ws_us.m_kColumn1;
+        hkVector4& c2 = m_ws_us.m_kColumn2;
         c0 = twist_axis_ws;
         c1.setCross(twist_axis_ws, planeAxisBinWorld);
         c2.setCross(c1, c0);
@@ -1291,14 +1366,6 @@ extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
 extern const __m128 DAT_010c4c00;
 extern const __m128 DAT_010c44d0;
 
-struct S6f0c0_F4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-
 union S6f0c0_Arg
 {
     unsigned int i;
@@ -1331,7 +1398,7 @@ struct S6f0c0_Bone
     __m128 unk10;
     __m128 unk20;
     __m128 data;
-    S6f0c0_F4 axis;
+    PacketCallLocal_00d6d450 axis;
 };
 
 struct S6f0c0_Link
@@ -1343,7 +1410,6 @@ struct S6f0c0_Link
     union
     {
         __m128 vel;
-        S6f0c0_F4 components;
     };
     int unk20;
     int unk24;
@@ -1417,7 +1483,7 @@ struct S6f0c0_Ctx
     S6f0c0_Bone* bone;
     int unk18;
     int unk1c;
-    S6f0c0_F4 dir;
+    PacketCallLocal_00d6d450 dir;
 };
 
 union S6f0c0_Tag
@@ -1466,7 +1532,7 @@ void __cdecl FUN_00dcedd0(const __m128* value, unsigned int flag, S6f0c0_Rec** c
 static __declspec(noinline) void FUN_00d6f0c0(S6f0c0_Ctx* ctx, S6f0c0_Blob* src, S6f0c0_Rec** cursor)
 {
     __m128 v;
-    S6f0c0_F4 dir = ctx->dir;
+    PacketCallLocal_00d6d450 dir = ctx->dir;
     S6f0c0_Blob blobCopy = *src;
     S6f0c0_Bone* bone = ctx->bone;
     --*cursor;
@@ -1489,7 +1555,7 @@ static __declspec(noinline) void FUN_00d6f0c0(S6f0c0_Ctx* ctx, S6f0c0_Blob* src,
         src->link34 = lp;
         vDir = _mm_xor_ps(vDir, DAT_010c4c00);
     }
-    S6f0c0_F4 ax = bone->axis;
+    PacketCallLocal_00d6d450 ax = bone->axis;
     __m128 axis = *(__m128*)&ax;
     __m128 d = _mm_mul_ps(axis, vDir);
     __m128 t = _mm_add_ss(_mm_shuffle_ps(d, d, 0x55), d);
@@ -1749,14 +1815,9 @@ static __forceinline void relativeAngle(const MathVector& a, const MathVector& b
     angle = angleValue;
     axis = sum;
 }
-struct FourFloatVector
-{
-    float x, y, z, w;
-};
 union AlignedVector
 {
     __m128 vec;
-    FourFloatVector components;
 };
 struct Basis
 {
@@ -1779,7 +1840,6 @@ struct FnvSubObject
     union
     {
         __m128 vec;
-        FourFloatVector components;
     };
     int unk40;
     int unk44;
@@ -1848,7 +1908,6 @@ struct OutputRecord
     union
     {
         __m128 unused;
-        FourFloatVector fields;
     };
 };
 struct StreamRecord
@@ -1960,7 +2019,7 @@ static __declspec(noinline) void FUN_00d6dd60(FnvPacket* context, AxisRecord* re
                 input.deltaOld = previous[i] - oldAngle;
                 EvalOutput result;
                 FUN_00dcfff0(current, &input, &result);
-                out->second.components.w = context->scale2 * result.f00;
+                reinterpret_cast<PacketCallLocal_00d6d450&>(out->second.vec).w = context->scale2 * result.f00;
                 StreamRecord* __restrict emit = *cursor;
                 emit->stamp += 1.1920928955078125e-7;
                 emit->type = 15;
@@ -2006,22 +2065,6 @@ extern "C"
     int _mm_movemask_ps(__m128 a);
 }
 extern long(__stdcall* DAT_00fdf1ec)(long volatile*, long);
-union __declspec(align(16)) V4
-{
-    __m128& simd()
-    {
-        return *(__m128*)this;
-    }
-    const __m128& simd() const
-    {
-        return *(const __m128*)this;
-    }
-    struct
-    {
-        float x, y, z, w;
-    };
-    float component[4];
-};
 struct Rot
 {
     V4 col0;
@@ -2070,7 +2113,9 @@ struct Constraint
     int unk64;
     long* notifications;
 };
-struct Point
+// hkTransform layout: 3x hkVector4 rotation columns (+0x00..+0x2c, unread here) then the translation at +0x30,
+// the only member 0x00d6ced0 reads, represented here by the shared V4.
+struct AtomTransform
 {
     int unk00;
     int unk04;
@@ -2090,22 +2135,6 @@ struct Input
 {
     unsigned char b0, b1, b2, index;
     float threshold;
-};
-union __declspec(align(16)) FUN_004b4ab0_Class
-{
-    struct
-    {
-        float x, y, z, w;
-    };
-    __m128& simd()
-    {
-        return *(__m128*)this;
-    }
-    const __m128& simd() const
-    {
-        return *(const __m128*)this;
-    }
-    void FUN_004b4ab0(int, int);
 };
 struct Record
 {
@@ -2136,15 +2165,15 @@ static __forceinline float Dot3(__m128 a, __m128 b)
 }
 static __forceinline __m128 Rotate(const Rot& b, __m128 v)
 {
-    return _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), b.col1.simd()),
-                                 _mm_mul_ps(_mm_shuffle_ps(v, v, 0), b.col0.simd())),
-                      _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), b.col2.simd()));
+    return _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), b.col1.m),
+                                 _mm_mul_ps(_mm_shuffle_ps(v, v, 0), b.col0.m)),
+                      _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), b.col2.m));
 }
 static __forceinline float EffectiveMass(const V4& angularA, const V4& inertiaA, __m128 angularB, __m128 inertiaB)
 {
     __m128 mass = _mm_add_ps(_mm_mul_ps(_mm_mul_ps(angularB, angularB), inertiaB),
-                             _mm_mul_ps(_mm_mul_ps(angularA.simd(), angularA.simd()), inertiaA.simd()));
-    __m128 inertia = _mm_add_ps(inertiaA.simd(), inertiaB);
+                             _mm_mul_ps(_mm_mul_ps(angularA.m, angularA.m), inertiaA.m));
+    __m128 inertia = _mm_add_ps(inertiaA.m, inertiaB);
     __m128 high = _mm_unpackhi_ps(mass, inertia);
     __m128 total = _mm_shuffle_ps(mass, high, 0xc4);
     __m128 sum = _mm_add_ps(_mm_shuffle_ps(total, total, 0x4e), total);
@@ -2156,7 +2185,7 @@ static __forceinline float EffectiveMass(const V4& angularA, const V4& inertiaA,
 // Fills three Record entries for a constraint, computing angular terms and effective mass, and appends a notification if the speed limit is exceeded.
 // @fnv 0x00d6ced0
 static void __declspec(noinline)
-    FUN_00d6ced0(Input* input, Constraint* apConstraint, Point* apPointA, Point* apPointB, Record** cursor)
+    FUN_00d6ced0(Input* input, Constraint* apConstraint, AtomTransform* apPointA, AtomTransform* apPointB, Record** cursor)
 {
     Body* bodyA = apConstraint->bodyA;
     Body* bodyB = apConstraint->bodyB;
@@ -2164,26 +2193,26 @@ static void __declspec(noinline)
     float threshold = input->threshold;
     float inverse = DAT_010c7948[input->index] * (1.0f / apConstraint->timestep);
     V4 inverseV;
-    inverseV.simd() = _mm_load_ss(&inverse);
+    inverseV.m = _mm_load_ss(&inverse);
     V4 pa;
-    pa.simd() = apPointA->position.simd();
+    pa.m = apPointA->position.m;
     V4 ra;
-    ra.simd() = _mm_sub_ps(pa.simd(), bodyA->center.simd());
+    ra.m = _mm_sub_ps(pa.m, bodyA->center.m);
     V4 pb;
-    pb.simd() = apPointB->position.simd();
+    pb.m = apPointB->position.m;
     V4 rb;
-    rb.simd() = _mm_sub_ps(pb.simd(), bodyB->center.simd());
-    FUN_004b4ab0_Class wa, wb;
-    wa.FUN_004b4ab0((int)&bodyA->rot, (int)&bodyA->linear);
-    wb.FUN_004b4ab0((int)&bodyB->rot, (int)&bodyB->linear);
-    __m128 scale = _mm_shuffle_ps(inverseV.simd(), inverseV.simd(), 0);
+    rb.m = _mm_sub_ps(pb.m, bodyB->center.m);
+    hkVector4 wa, wb;
+    wa.FUN_004b4ab0(reinterpret_cast<const hkRotation&>(bodyA->rot), reinterpret_cast<const hkVector4&>(bodyA->linear));
+    wb.FUN_004b4ab0(reinterpret_cast<const hkRotation&>(bodyB->rot), reinterpret_cast<const hkVector4&>(bodyB->linear));
+    __m128 scale = _mm_shuffle_ps(inverseV.m, inverseV.m, 0);
     V4 velocity;
-    velocity.simd() =
-        _mm_sub_ps(_mm_add_ps(_mm_mul_ps(Cross(rb.simd(), wb.simd()), scale), _mm_sub_ps(pb.simd(), pa.simd())),
-                   _mm_mul_ps(Cross(ra.simd(), wa.simd()), scale));
+    velocity.m =
+        _mm_sub_ps(_mm_add_ps(_mm_mul_ps(Cross(rb.m, wb.m_vComponents), scale), _mm_sub_ps(pb.m, pa.m)),
+                   _mm_mul_ps(Cross(ra.m, wa.m_vComponents), scale));
     if (apConstraint->notifications)
     {
-        __m128 diff = _mm_sub_ss(apConstraint->speedLimit.simd(), Dot3V(velocity.simd(), velocity.simd()));
+        __m128 diff = _mm_sub_ss(apConstraint->speedLimit.m, Dot3V(velocity.m, velocity.m));
         if (_mm_movemask_ps(diff) & 1)
         {
             unsigned int n = (unsigned int)DAT_00fdf1ec(apConstraint->notifications, 1);
@@ -2196,17 +2225,17 @@ static void __declspec(noinline)
     {
         float strength = apConstraint->strength;
         float timestep = apConstraint->timestep;
-        out->axis.simd() = (*pAxis).simd();
-        __m128 rA = _mm_sub_ps(apPointA->position.simd(), bodyA->center.simd());
-        __m128 rB = _mm_sub_ps(apPointB->position.simd(), bodyB->center.simd());
-        __m128 vCrossA = Cross(rA, (*pAxis).simd());
-        __m128 vCrossB = Cross((*pAxis).simd(), rB);
-        out->angularA.simd() = Rotate(bodyA->rot, vCrossA);
-        out->angularB.simd() = Rotate(bodyB->rot, vCrossB);
-        __m128 angA = out->angularA.simd();
-        __m128 angB = out->angularB.simd();
-        __m128 vInertiaB = bodyB->inertia.simd();
-        __m128 vInertiaA = bodyA->inertia.simd();
+        out->axis.m = (*pAxis).m;
+        __m128 rA = _mm_sub_ps(apPointA->position.m, bodyA->center.m);
+        __m128 rB = _mm_sub_ps(apPointB->position.m, bodyB->center.m);
+        __m128 vCrossA = Cross(rA, (*pAxis).m);
+        __m128 vCrossB = Cross((*pAxis).m, rB);
+        out->angularA.m = Rotate(bodyA->rot, vCrossA);
+        out->angularB.m = Rotate(bodyB->rot, vCrossB);
+        __m128 angA = out->angularA.m;
+        __m128 angB = out->angularB.m;
+        __m128 vInertiaB = bodyB->inertia.m;
+        __m128 vInertiaA = bodyA->inertia.m;
         __m128 mass =
             _mm_add_ps(_mm_mul_ps(_mm_mul_ps(angB, angB), vInertiaB), _mm_mul_ps(_mm_mul_ps(angA, angA), vInertiaA));
         __m128 inertia = _mm_add_ps(vInertiaA, vInertiaB);
@@ -2220,8 +2249,8 @@ static void __declspec(noinline)
         out->angularB.w = denominator;
         out->angularA.w = strength / denominator;
         out->axis.w =
-            Dot3(_mm_sub_ps(apPointB->position.simd(), apPointA->position.simd()), (*pAxis).simd()) * timestep;
-        out->axis.w = velocity.component[i] * apConstraint->timestep;
+            Dot3(_mm_sub_ps(apPointB->position.m, apPointA->position.m), (*pAxis).m) * timestep;
+        out->axis.w = velocity.f[i] * apConstraint->timestep;
         if (threshold == 3.402820018375656e38)
         {
             out->axis.x += 1.1920928955078125e-7;
@@ -2239,8 +2268,8 @@ static void __declspec(noinline)
 }
 extern Input* volatile callInput;
 extern Constraint* volatile callObject;
-extern Point* volatile callA;
-extern Point* volatile callB;
+extern AtomTransform* volatile callA;
+extern AtomTransform* volatile callB;
 extern Record** volatile callCursor;
 void ConstraintWrite_use()
 {
@@ -2814,6 +2843,7 @@ struct hkTransF
         return (&m_kColumn0)[i];
     }
 };
+// local form of hkMatrix3: 0x00d6f460 needs inline column/copy operations with the original vector aliases; shared form gives 11040 bytes vs exe 11056.
 struct hkRot
 {
     hkVec4 m_kColumn0;
@@ -2957,14 +2987,7 @@ struct SchemaPulley
     hkVec4 m_angA;
     hkVec4 m_angB;
 };
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
+#include "../../../../../../include/hkBool.h"
 struct Atom
 {
     unsigned short m_type;
@@ -3317,10 +3340,10 @@ static __declspec(noinline) void FUN_00d6ced0(const BallSocketAtom* atom, const 
     rA.q = _mm_sub_ps(baseA->col(3).q, bodyA->m_kCenterPosition.q);
     hkVec4 rB;
     rB.q = _mm_sub_ps(baseB->col(3).q, bodyB->m_kCenterPosition.q);
-    FUN_004b4ab0_Class mA;
-    mA.FUN_004b4ab0((int)&bodyA->m_rot[0], (int)&bodyA->m_vAngularVelocity);
-    FUN_004b4ab0_Class mB;
-    mB.FUN_004b4ab0((int)&bodyB->m_rot[0], (int)&bodyB->m_vAngularVelocity);
+    hkVector4 mA;
+    mA.FUN_004b4ab0(reinterpret_cast<const hkRotation&>(bodyA->m_rot[0]), reinterpret_cast<const hkVector4&>(bodyA->m_vAngularVelocity));
+    hkVector4 mB;
+    mB.FUN_004b4ab0(reinterpret_cast<const hkRotation&>(bodyB->m_rot[0]), reinterpret_cast<const hkVector4&>(bodyB->m_vAngularVelocity));
     int handle = in->unk68;
     if (handle)
     {
@@ -4736,7 +4759,6 @@ union PulleyRowVector
 {
     void rotate(const PulleyRowBody& b, const PulleyRowVector& v);
     __m128 vec;
-    FourFloatVector components;
     PulleyRowVector()
     {}
     PulleyRowVector(const PulleyRowVector& other) : vec(other.vec)
@@ -4876,16 +4898,16 @@ __forceinline void makePulleyRow(const PulleyRowWork& work, PulleyRowSchema* out
     }
     float linearMass = work.leverage * work.leverage;
     linearMass =
-        (float)(linearMass * bodyB->invInertia.components.w + bodyA->invInertia.components.w + 1.1920928955078125e-7);
+        (float)(linearMass * reinterpret_cast<const PacketCallLocal_00d6d450&>(bodyB->invInertia.vec).w + reinterpret_cast<const PacketCallLocal_00d6d450&>(bodyA->invInertia.vec).w + 1.1920928955078125e-7);
     float invMass = linearMass + angMass;
     PulleyRowVector deltaA;
     deltaA.vec = _mm_sub_ps(work.r2.vec, work.r0.vec);
     PulleyRowVector deltaB;
     deltaB.vec = _mm_sub_ps(work.r1.vec, work.r3.vec);
-    out->angular0.components.w = work.virtMass / invMass;
+    reinterpret_cast<PacketCallLocal_00d6d450&>(out->angular0.vec).w = work.virtMass / invMass;
     float error = float(deltaA.length()) + float(deltaB.length()) * work.leverage;
     error = error - work.restLen;
-    out->linear0.components.w = error * work.tau;
+    reinterpret_cast<PacketCallLocal_00d6d450&>(out->linear0.vec).w = error * work.tau;
 }
 // Normalizes the two rope direction vectors, builds a pulley row from in and mat into *outCursor via makePulleyRow, and advances the cursor.
 // @fnv 0x00d6e300
@@ -4935,7 +4957,7 @@ static __declspec(noinline) void FUN_00d6e300(PulleyRowQuery* apQuery, PulleyRow
 
     PulleyRowSchema* cur = *outCursor;
     *outCursor = cur + 1;
-    cur->linear0.components.x = (float)(cur->linear0.components.x + 1.1920928955078125e-7);
+    reinterpret_cast<PacketCallLocal_00d6d450&>(cur->linear0.vec).x = (float)(reinterpret_cast<PacketCallLocal_00d6d450&>(cur->linear0.vec).x + 1.1920928955078125e-7);
     *(unsigned char*)cur = 0xb;
 }
 void PulleyRow_use(PulleyRowQuery* in, PulleyRowSchema** cursor, PulleyRowGeometry* mat)

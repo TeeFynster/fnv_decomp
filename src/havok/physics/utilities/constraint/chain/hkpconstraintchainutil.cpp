@@ -1,6 +1,10 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/physics/utilities/constraint/chain/hkpconstraintchainutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/constraint/chain/hkpconstraintchainutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
 
 struct CallTarget_00e5c370
 {
@@ -38,25 +42,7 @@ int SearchObject::FUN_00e5c440(unsigned int arg0, unsigned int arg1, unsigned in
 }
 }  // namespace fnv_00e5c440
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct DispatchTarget
 {
@@ -89,12 +75,12 @@ struct FUN_00e5c460_cls
     void FUN_00e5c460(OutObject* a1);
 };
 
-// Gets an AudioHolder, passes its allocator to m_38.CallWithFlag, then calls FUN_00c90510 on a1.
+// Gets an hkMemoryRouter, passes its allocator to m_38.CallWithFlag, then calls FUN_00c90510 on a1.
 // @fnv 0x00e5c460
 void FUN_00e5c460_cls::FUN_00e5c460(OutObject* pOutObject)
 {
-    AudioHolder* pHolder = FUN_00c85750();
-    void* pValue = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    void* pValue = pHolder->m_heap;
     m_38.CallWithFlag(pValue, 0, &pOutObject);
     pOutObject->FUN_00c90510();
 }
@@ -284,7 +270,7 @@ struct KeyOwnerA
 
 struct Sub18
 {
-    void FUN_00e5c440(AudioAllocator* a, int b, Pair32* c);
+    void FUN_00e5c440(hkMemoryAllocator* a, int b, Pair32* c);
 };
 
 struct OwnerC
@@ -355,8 +341,8 @@ int FUN_00e5b8f0(KeyOwnerA* a1, ListB* a2, OwnerC* a3, ...)
         Pair32 p;
         CopyTmp16(&p.lo, &keyPair.hi);
         CopyTmp16(&p.hi, &keyPair.lo);
-        AudioHolder* h = FUN_00c85750();
-        a3->m_18.FUN_00e5c440(h->m_pAllocator, 0, &p);
+        hkMemoryRouter* h = FUN_00c85750();
+        a3->m_18.FUN_00e5c440(reinterpret_cast<hkMemoryAllocator*>(h->m_heap), 0, &p);
         a2->FUN_00e5c460(a1->m_18);
         return 0;
     }
@@ -365,8 +351,8 @@ int FUN_00e5b8f0(KeyOwnerA* a1, ListB* a2, OwnerC* a3, ...)
         Pair32 p;
         CopyTmp16(&p.lo, &keyPair.lo);
         CopyTmp16(&p.hi, &keyPair.hi);
-        AudioHolder* h = FUN_00c85750();
-        a3->m_18.FUN_00e5c440(h->m_pAllocator, 0, &p);
+        hkMemoryRouter* h = FUN_00c85750();
+        a3->m_18.FUN_00e5c440(reinterpret_cast<hkMemoryAllocator*>(h->m_heap), 0, &p);
         a2->FUN_00e5c460(a1->m_14);
         return 0;
     }
@@ -398,38 +384,33 @@ struct S_00e5c370_Elem
 void __cdecl FUN_00c908c0(S_00e5c370_Alloc& alloc, void* arr, int numElem, int sizeElem);
 void __cdecl FUN_00d2cc70(void* dst, const void* src, int nbytes);
 
-template <typename T> struct S_00e5c370_ArrayBase
+template <class T>
+static __forceinline void S_00e5c370_ArrayBase_GrowArrayCapacity(hkArrayBase<T>& self, S_00e5c370_Alloc& a, int n);
+
+template <class T>
+static __forceinline void S_00e5c370_ArrayBase_GrowArrayCapacity(hkArrayBase<T>& self, S_00e5c370_Alloc& a, int n)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void GrowArrayCapacity(S_00e5c370_Alloc& a, int n)
-    {
-        const int cap = getCapacity();
+        const int cap = self.getCapacity();
         if (cap < n)
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(a, this, newSize, sizeof(T));
+            FUN_00c908c0(a, (&self), newSize, sizeof(T));
         }
     }
-    // Removes numdel elements at index, inserts numtoinsert elements from p, and shifts the remaining elements to keep the array contiguous.
-// @fnv 0x00e5c370
-    void InsertAndDelete(S_00e5c370_Alloc& alloc, int index, int numdel, const T* apElements, int numtoinsert)
-    {
+
+
+
+template <>
+void hkArrayBase<S_00e5c370_Elem>::_spliceInto(hkMemoryAllocator& alloc, int index, int numdel, const S_00e5c370_Elem* apElements, int numtoinsert)
+{
         int newsize = m_iElementCount + numtoinsert - numdel;
         int numtomove = m_iElementCount - index - numdel;
         if (newsize > getCapacity())
-            GrowArrayCapacity(alloc, newsize);
-        FUN_00d2cc70(m_data + index + numtoinsert, m_data + index + numdel, numtomove * sizeof(T));
-        T* dst = m_data + index;
+            S_00e5c370_ArrayBase_GrowArrayCapacity(*this, reinterpret_cast<S_00e5c370_Alloc&>(alloc), newsize);
+        FUN_00d2cc70(m_data + index + numtoinsert, m_data + index + numdel, numtomove * sizeof(S_00e5c370_Elem));
+        S_00e5c370_Elem* dst = m_data + index;
         for (int i = 0; i < numtoinsert; i++)
-            new (dst + i) T(apElements[i]);
+            new (dst + i) S_00e5c370_Elem(apElements[i]);
         m_iElementCount = newsize;
     }
-};
-template struct S_00e5c370_ArrayBase<S_00e5c370_Elem>;

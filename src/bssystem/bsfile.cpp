@@ -5,19 +5,27 @@
 // @fnv 0x00affc60
 bool BSFile::Write()
 {
-    return FUN_00ecbf05(pathStorage.pFileName, 0) != -1;
+    return FUN_00ecbf05(pFileName, 0) != -1;
 }
 
 // @fnv 0x00afb780
 unsigned int BSFile::GetFilePosition()
 {
-    return fileSizeAt154;
+    return m_uiValueId;
 }
 
-// @fnv 0x00afc0a0
-unsigned int BSFile::GetBufferValue()
+// Reads +0x168, past the end of BSFile (0x158 bytes): the owner is another class.
+struct FUN_00afc0a0_Owner
 {
-    return fileValueAt168;
+    unsigned char unk000[0x168];
+    unsigned int unk168;
+    unsigned int GetValue168();
+};
+
+// @fnv 0x00afc0a0
+unsigned int FUN_00afc0a0_Owner::GetValue168()
+{
+    return unk168;
 }
 
 // Flushes and closes m_pFile when m_bGood and m_pFile are set, then deallocates m_pBuffer and clears m_pBuffer and m_pFile.
@@ -47,24 +55,24 @@ void BSFile::SetEndianSwap(bool doSwap)
 {
     if (doSwap)
     {
-        readHandler = reinterpret_cast<void*>(0x00affa10);
-        writeHandler = reinterpret_cast<void*>(0x00affa60);
+        m_pfnRead = reinterpret_cast<NIBINARYSTREAM_READFN>(0x00affa10);
+        m_pfnWrite = reinterpret_cast<NIBINARYSTREAM_WRITEFN>(0x00affa60);
     }
     else
     {
-        readHandler = reinterpret_cast<void*>(0x00aff9d0);
-        writeHandler = reinterpret_cast<void*>(0x00aff9f0);
+        m_pfnRead = reinterpret_cast<NIBINARYSTREAM_READFN>(0x00aff9d0);
+        m_pfnWrite = reinterpret_cast<NIBINARYSTREAM_WRITEFN>(0x00aff9f0);
     }
 }
 
-// Opens the file if m_pFile is null, reads bytes into buffer via NiFile::FileRead, adds the result to fileOffsetAt150 and returns it.
+// Opens the file if m_pFile is null, reads bytes into buffer via NiFile::FileRead, adds the result to m_uiBufferSize and returns it.
 // @fnv 0x00b00650
 unsigned int BSFile::Read(void* buffer, unsigned int bytes)
 {
     if (!static_cast<bool>(static_cast<int>(m_pFile != 0)))
         Open(false, false);
     unsigned int result = NiFile::FileRead(buffer, bytes);
-    fileOffsetAt150 += result;
+    m_uiBufferSize += result;
     return result;
 }
 
@@ -75,34 +83,35 @@ bool BSFile::AttachFileStream(bool, bool)
     void* buffer;
     if (m_pBuffer)
         return true;
-    bufferEnd = 0;
-    bufferPosition = 0;
+    m_uiPos = 0;
+    m_uiBufferReadSize = 0;
     m_pBuffer = 0;
-    if (bufferSize > 0 && !m_pBuffer)
+    if (m_uiBufferAllocSize > 0 && !m_pBuffer)
     {
-        unsigned int uiSize = bufferSize;
+        unsigned int uiSize = m_uiBufferAllocSize;
         buffer = g_memoryManager.Allocate(uiSize);
-        m_pBuffer = buffer;
+        m_pBuffer = (char*)buffer;
     }
     m_bGood = true;
     return m_bGood;
 }
 
+// BSFile vftable slot 10.
 // @fnv 0x00b004e0
-unsigned int BSFile::GetFileSize()
+unsigned int BSFile::GetSize()
 {
-    fileSizeAt154 = 0;
-    if (openMode == 1)
+    m_uiValueId = 0;
+    if (m_eMode == 1)
         Flush();
     Open(false, false);
     if (static_cast<bool>(static_cast<int>(m_pFile != 0)))
     {
         long position = ftell(m_pFile);
         fseek(m_pFile, 0, 2);
-        fileSizeAt154 = ftell(m_pFile);
+        m_uiValueId = ftell(m_pFile);
         fseek(m_pFile, position, 0);
     }
-    return fileSizeAt154;
+    return m_uiValueId;
 }
 
 // @fnv 0x00aff300
@@ -110,12 +119,12 @@ bool BSFile::Open(bool, bool textMode)
 {
     if (static_cast<bool>(static_cast<int>(m_pFile != 0)))
         return true;
-    bufferEnd = 0;
-    bufferPosition = 0;
+    m_uiPos = 0;
+    m_uiBufferReadSize = 0;
     m_pBuffer = 0;
     const char* fallbackMode;
     const char* mode = 0;
-    switch (openMode)
+    switch (m_eMode)
     {
     case 0:
         mode = textMode ? "rt" : "rb";
@@ -128,19 +137,19 @@ bool BSFile::Open(bool, bool textMode)
         break;
     }
     m_pFile = 0;
-    fopen_s(&m_pFile, pathStorage.pFileName, mode);
-    if (!m_pFile && openMode == 1)
+    fopen_s(&m_pFile, pFileName, mode);
+    if (!m_pFile && m_eMode == 1)
     {
         m_pFile = 0;
         if (textMode)
             fallbackMode = "wt";
         else
             fallbackMode = "wb";
-        fopen_s(&m_pFile, pathStorage.pFileName, fallbackMode);
+        fopen_s(&m_pFile, pFileName, fallbackMode);
         if (m_pFile)
             _fclose_nolock(m_pFile);
         m_pFile = 0;
-        fopen_s(&m_pFile, pathStorage.pFileName, mode);
+        fopen_s(&m_pFile, pFileName, mode);
     }
     CheckIsGood();
     return m_bGood;
@@ -421,7 +430,7 @@ unsigned int FUN_00affaf0_cls::FUN_00affaf0(FUN_00affaf0_H* pEntry, bool bIncrem
     *(unsigned int*)((char*)this + 4) += r3;
     unsigned int t = r3;
     unsigned int s = t;
-    this->fileOffsetAt150 += s;
+    this->m_uiBufferSize += s;
     return s >> 1;
 }
 

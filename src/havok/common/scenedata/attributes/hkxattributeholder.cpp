@@ -1,3 +1,7 @@
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+
 
 // src/havok/common/scenedata/attributes/hkxattributeholder.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/attributes/hkxattributeholder.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -10,43 +14,24 @@ struct S_00e3eaa0_Allocator
     virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
     virtual void ReturnMemory(void* p, int numBytes);
 };
-struct S_00e3eaa0_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    S_00e3eaa0_Allocator* m_pStreamAllocator;
-    S_00e3eaa0_Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-S_00e3eaa0_Router* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 template <class T> __forceinline void destruct(T* t, int n)
 {
     for (int i = 0; i < n; ++i)
         t[i].~T();
 }
-template <class T> struct S_00e3eaa0_Array
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline void _clearAndDeallocate(S_00e3eaa0_Allocator& alloc)
-    {
+        { S_00e3eaa0_Allocator& alloc = *reinterpret_cast<S_00e3eaa0_Allocator*>(FUN_00c85750()->m_heap);
         destruct(m_data, m_iElementCount);
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-    __forceinline ~S_00e3eaa0_Array() throw()
-    {
-        _clearAndDeallocate(FUN_00c85750()->heap());
-    }
-};
+     }
+    
+}
 struct S_00e3eaa0_Elem
 {
     int unk00;
@@ -64,7 +49,7 @@ struct S_00e3eaa0_Base
 };
 struct FUN_00e3eaa0 : S_00e3eaa0_Base
 {
-    S_00e3eaa0_Array<S_00e3eaa0_Elem> m_ppData;
+    hkArray<S_00e3eaa0_Elem> m_ppData;
     virtual ~FUN_00e3eaa0() throw();
 };
 // Destructor for the container; the array member is destroyed automatically after this body runs.
@@ -78,20 +63,12 @@ inline void* __cdecl operator new(unsigned int, void* where) throw()
 }
 
 struct S_00e3e950_Heap;
-struct S_00e3e950_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    S_00e3e950_Heap* m_pStreamAllocator;
-    S_00e3e950_Heap& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
 namespace fnvc_adapt {
-S_00e3e950_Router& FUN_00c85750();
+hkMemoryRouter& FUN_00c85750();
+inline S_00e3e950_Heap& heap(hkMemoryRouter& holder)
+{
+    return *reinterpret_cast<S_00e3e950_Heap*>(holder.m_heap);
+}
 }
 int __cdecl FUN_00c908c0(S_00e3e950_Heap& alloc, void* array, int n, int elemSize);
 
@@ -149,13 +126,13 @@ struct S_00e3e950_ArrayUtil
     }
 };
 
-template <typename T> struct S_00e3e950_Array
-{
+template <typename T> struct S_00e3e950_ArrayLocalForm
+{ // local form of hkArray: 0x00e3e950 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    S_00e3e950_Array() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
+    S_00e3e950_ArrayLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {}
     int getCapacity() const
     {
@@ -172,7 +149,7 @@ template <typename T> struct S_00e3e950_Array
         }
     }
 
-    __forceinline void _copyFromArray(S_00e3e950_Heap& alloc, const S_00e3e950_Array<T>& a)
+    __forceinline void _copyFromArray(S_00e3e950_Heap& alloc, const S_00e3e950_ArrayLocalForm<T>& a)
     {
         int oldSize = m_iElementCount;
         int newSize = a.m_iElementCount;
@@ -187,9 +164,9 @@ template <typename T> struct S_00e3e950_Array
         m_iElementCount = newSize;
     }
 
-    __forceinline S_00e3e950_Array& operator=(const S_00e3e950_Array& a)
+    __forceinline S_00e3e950_ArrayLocalForm& operator=(const S_00e3e950_ArrayLocalForm& a)
     {
-        _copyFromArray(fnvc_adapt::FUN_00c85750().heap(), a);
+        _copyFromArray(fnvc_adapt::heap(fnvc_adapt::FUN_00c85750()), a);
         return *this;
     }
 };
@@ -206,7 +183,7 @@ struct S_00e3e950_RefObj
 
 struct FUN_00e3e950 : S_00e3e950_RefObj
 {
-    S_00e3e950_Array<S_00e3e950_Elem> m_aiIndexedValues;
+    S_00e3e950_ArrayLocalForm<S_00e3e950_Elem> m_aiIndexedValues;
 
     FUN_00e3e950(const FUN_00e3e950& o);
     virtual void vfn0();
@@ -219,26 +196,10 @@ FUN_00e3e950::FUN_00e3e950(const FUN_00e3e950& o)
     m_aiIndexedValues = o.m_aiIndexedValues;
 }
 
+
 namespace fnv_00dfe360 {
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct FUN_00dfe360_cls
 {
@@ -266,24 +227,24 @@ struct FUN_00dfe360_cls
 // @fnv 0x00dfe360
 void FUN_00dfe360_cls::FUN_00dfe360()
 {
-    AudioHolder* pHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uCapBits1 = m_uCapBits1;
     m_iCount1 = 0;
     if ((uCapBits1 & 0x80000000u) == 0)
     {
-        pAllocator->FreeArray(m_pData1, (uCapBits1 & 0x3fffffffu) * 4);
+        pAllocator->bufFree(m_pData1, (uCapBits1 & 0x3fffffffu) * 4);
     }
     m_pData1 = 0;
     m_uCapBits1 = 0x80000000u;
 
-    AudioHolder* pHolder2 = FUN_00c85750();
-    AudioAllocator* pAllocator2 = pHolder2->m_pAllocator;
+    hkMemoryRouter* pHolder2 = FUN_00c85750();
+    hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
     unsigned int uCapBits2 = m_uCapBits2;
     m_iCount2 = 0;
     if ((uCapBits2 & 0x80000000u) == 0)
     {
-        pAllocator2->FreeArray(m_pData2, (uCapBits2 & 0x3fffffffu) * 48);
+        pAllocator2->bufFree(m_pData2, (uCapBits2 & 0x3fffffffu) * 48);
     }
     m_pData2 = 0;
     m_uCapBits2 = 0x80000000u;

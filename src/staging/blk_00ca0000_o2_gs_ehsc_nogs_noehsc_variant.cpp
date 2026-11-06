@@ -1,3 +1,4 @@
+#include "../../include/NiTArray.h"
 
 // src/staging/blk_00ca0000_o2_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-28 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/staging/blk_00ca0000_o2.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,6 +7,50 @@
 // src/staging/blk_00ca0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/hkMemoryAllocator.h"
+// BaseCinfo_blk_00ca0000_o2_gs_ehsc_nogs_noehsc_variant: local type (was include/BaseCinfo.h, which had no evidence of one real class); no method of it is bound to a named game function
+#include <stddef.h>
+
+class NiStream;
+
+class BaseCinfo_blk_00ca0000_o2_gs_ehsc_nogs_noehsc_variant
+{
+public:
+    unsigned int unk00;
+    int m_iWordAt04;
+    int m_8;
+    int m_iThirdValue;
+    int m_10;
+
+    static void* operator new(size_t size) throw();
+    static void operator delete(void*);
+
+    __forceinline BaseCinfo_blk_00ca0000_o2_gs_ehsc_nogs_noehsc_variant()
+        : m_iWordAt04(0), m_8(1), m_iThirdValue(0), m_10(0)
+    {}
+
+    void v00();
+    void v04();
+    void LoadBinary(NiStream& kStream);
+};
+#include "../../include/LandTextureParameters.h"
+#include "../../include/CA0E60Array.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/StrArr.h"
+#include "../../include/bhkCapsuleShape.h"
+#include "../../include/bhkCharacterPointCollector.h"
+#include "../../include/bhkPackedNiTriStripsShape.h"
+#include "../../include/bhkSphereShape.h"
+#include "../../include/bhkRagdollTemplateData.h"
+#include "../../include/bhkRefObject.h"
+#include "../../include/bhkSerializable.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkReferencedObject.h"
+#include "../../include/hkpShapePhantom.h"
 void __cdecl FUN_00ca3570(void);
 void __cdecl _delete(void* p, int);
 struct FUN_00ca3980_class
@@ -83,28 +128,10 @@ struct FUN_00ca0d40_class
     void __thiscall FUN_00ca0d40();
 };
 void __cdecl FUN_00ca4490();
-struct MemoryManager
-{
-    void __thiscall Deallocate(void* p);
-};
 extern MemoryManager _g_memoryManager;
 struct FUN_00ca4a90_Class
 {
     FUN_00ca4a90_Class* __thiscall FUN_00ca4a90(int flags);
-};
-struct bhkRefObject
-{
-    int __thiscall Initialize();
-};
-struct bhkCapsuleShape : public bhkRefObject
-{
-    int a;
-    int b;
-    int c;
-    int d;
-    int e;
-    int f;
-    int __thiscall InitializeCapsuleShape();
 };
 extern int DAT_01030a24;
 extern int DAT_01030b0c;
@@ -212,47 +239,7 @@ struct S_00cb79d0_Base : public A51BF0Base
 
     S_00cb79d0_Base();
 };
-struct bhkPackedNiTriStripsShape : public S_00cb79d0_Base
-{
-    bhkPackedNiTriStripsShape()
-    {
-        int count = 1;
-        m_vptr = &DAT_01030bf4;
-        m_iThirdValue = 0;
-        m_10 = 0;
-        DAT_012680f8 += count;
-        m_vptr = &DAT_010c44e4;
-        DAT_012686d0 += count;
-        m_vptr = &DAT_010c761c;
-        DAT_012682d8 += count;
-    }
-};
 bhkPackedNiTriStripsShape* CreatePackedNiTriStripsShape();
-struct NiStream
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54(NiStream*);
-};
 struct HC1Base
 {
     bool FUN_00aa0ad0(NiStream*);
@@ -268,7 +255,6 @@ struct FUN_00ca9920_class
     void __thiscall FUN_00ca9860();
     FUN_00ca9920_class* __thiscall FUN_00ca9920(int flags);
 };
-struct NiStream;
 struct FUN_00cac980_Holder
 {
     void* FUN_00cac980();
@@ -283,10 +269,6 @@ struct BaseThunk
 struct FUN_00cac070_Stub : BaseThunk
 {
     void FUN_00cac070(NiStream&);
-};
-struct hkpShapePhantom
-{
-    void __thiscall SetWorldPosition(void* body, float pos);
 };
 struct FUN_00cac920_Class
 {
@@ -457,57 +439,6 @@ struct FUN_00ca0dc0_cls : GuardBase04
     FUN_00ca0dc0_cls();
 };
 // BSSimpleArray-style container of pointer-sized elements.
-class CA0E60Array
-{
-  public:
-    void** m_pBuffer;
-    unsigned int m_uiSize;
-    unsigned int m_uiCapacity;
-
-    virtual ~CA0E60Array();
-    virtual void** Allocate(unsigned int ItemUpdateArray);
-    virtual void Free(void** pBuffer);
-
-    void FUN_00cb9ce0(unsigned int uiNewAlloc, unsigned int uiCopyCount);
-
-    __forceinline void SetSize(unsigned int uiSize)
-    {
-        if (uiSize == 0)
-        {
-            if (m_pBuffer)
-            {
-                Free(m_pBuffer);
-                m_pBuffer = 0;
-                m_uiCapacity = 0;
-                m_uiSize = 0;
-            }
-        }
-        else if (uiSize > m_uiCapacity)
-        {
-            if (m_uiCapacity == 0)
-                m_pBuffer = Allocate(uiSize);
-            else
-                FUN_00cb9ce0(uiSize, m_uiSize);
-            m_uiCapacity = uiSize;
-            m_uiSize = uiSize;
-        }
-        else if (uiSize < m_uiSize)
-        {
-            m_uiSize = uiSize;
-            if (uiSize <= m_uiCapacity >> 2)
-            {
-                FUN_00cb9ce0(uiSize, uiSize);
-                m_uiCapacity = uiSize;
-            }
-        }
-        else
-        {
-            m_uiSize = uiSize;
-        }
-    }
-
-    void CopyTo(CA0E60Array& kDest) const;
-};
 struct CA1080_Shape
 {
     virtual void v00();
@@ -1854,63 +1785,6 @@ struct ArgB
     unsigned int unk00, unk04, unk08, unk0c;
     float f10;
 };
-struct ca6720Target
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    float f20, f24, f28, f2c;
-};
-class bhkSphereShape
-{
-  public:
-    virtual void vfn_00();
-    virtual void vfn_01();
-    virtual void vfn_02();
-    virtual void vfn_03();
-    virtual void vfn_04();
-    virtual void vfn_05();
-    virtual void vfn_06();
-    virtual void vfn_07();
-    virtual void vfn_08();
-    virtual void vfn_09();
-    virtual void vfn_10();
-    virtual void vfn_11();
-    virtual void vfn_12();
-    virtual void vfn_13();
-    virtual void vfn_14();
-    virtual void vfn_15();
-    virtual void vfn_16();
-    virtual void vfn_17();
-    virtual void vfn_18();
-    virtual void vfn_19();
-    virtual void vfn_20();
-    virtual void vfn_21();
-    virtual void vfn_22();
-    virtual void vfn_23();
-    virtual void vfn_24();
-    virtual void vfn_25();
-    virtual void vfn_26();
-    virtual void vfn_27();
-    virtual void vfn_28();
-    virtual void vfn_29();
-    virtual void vfn_30();
-    virtual void vfn_31();
-    virtual void vfn_32();
-    virtual void vfn_33();
-    virtual void vfn_34();
-    virtual void vfn_35();
-    virtual void vfn_36();
-    virtual void vfn_37();
-    virtual void vfn_38();
-    virtual void vfn_39();
-    virtual void vfn_40();
-    virtual void vfn_41();
-    virtual void vfn_42();
-    virtual void vfn_43();
-    virtual void vfn_44();
-    virtual ca6720Target* Target(char* out);
-    void FUN_00c84df0(void* a1, ArgB* a2);
-    void ScaleTarget(void* a1, ArgB* a2);
-};
 struct S_00ca6810_Callable
 {
     virtual void slot00();
@@ -2972,44 +2846,6 @@ extern int DAT_012680f8;
 extern int DAT_01268274;
 extern int DAT_01268250;
 extern int DAT_01268324;
-struct S_cb9a90_Base
-{
-    int unk04;
-    int unk08;
-    S_cb9a90_Base();
-    virtual ~S_cb9a90_Base();
-};
-struct S_cb9a90_A : S_cb9a90_Base
-{
-    int unk0c;
-    int unk10;
-    S_cb9a90_A()
-    {
-        unk0c = 0;
-        unk10 = 0;
-        DAT_012680f8++;
-    }
-};
-struct S_cb9a90_B : S_cb9a90_A
-{
-    S_cb9a90_B()
-    {
-        DAT_01268274++;
-    }
-};
-struct S_cb9a90_C : S_cb9a90_B
-{
-    S_cb9a90_C()
-    {
-        DAT_01268250++;
-    }
-};
-struct FUN_00cb9a90 : S_cb9a90_C
-{
-    void FUN_00cab0e0(int a, int b, float c);
-    FUN_00cb9a90(int a, int b, float c);
-    virtual ~FUN_00cb9a90();
-};
 class GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_0126864c;
 GlobalObjectO2_00a7b610* __cdecl FUN_00cb9b50();
@@ -3103,15 +2939,9 @@ class FUN_00cb9c70_cls
     bool Check(int a1);
     bool FUN_00cb9c70(int a1);
 };
-struct RefCountedStandIn
-{
-    virtual void Unk0();
-    virtual void DeleteThis();
-    volatile long m_uiRefCount;
-};
 struct ArgStandIn
 {
-    RefCountedStandIn* FUN_00a63430();
+    NiRefObject* FUN_00a63430();
 };
 class FUN_00cb9ee0_cls
 {
@@ -3120,7 +2950,7 @@ class FUN_00cb9ee0_cls
     void FUN_00a7b3b0(ArgStandIn* arg);
 
     char unk00[0x10];
-    RefCountedStandIn** m_10;
+    NiRefObject** m_10;
     unsigned int m_14;
 };
 class BCB9F60BinaryStream
@@ -3569,16 +3399,6 @@ class CBF490Lists
 
     void ClearLists();
 };
-class hkBool
-{
-  public:
-    hkBool(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-
-    char m_cBooleanValue;
-};
 class CBFC60Dispatcher
 {
   public:
@@ -3789,41 +3609,6 @@ struct GeomCollector
     void CollectShaderNodes(GeomNode* pObj, GeomArray* pArray);
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
-class NiRefObjectCA3
-{
-  public:
-    virtual ~NiRefObjectCA3();
-    virtual void DeleteThis();
-
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    unsigned int m_uiRefCount;
-};
-template <class T> class NiPointerCA3
-{
-  public:
-    ~NiPointerCA3()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    NiPointerCA3& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-        }
-        return *this;
-    }
-
-    T* m_pObject;
-};
 class PrimaryCA3
 {
   public:
@@ -3854,30 +3639,15 @@ class FUN_00ca3b90 : public BaseCA3
   public:
     virtual ~FUN_00ca3b90();
 
-    NiPointerCA3<NiRefObjectCA3> m_pReferencedObject;
+    NiPointer<NiRefObject> m_pReferencedObject;
 };
 // The pack prelude keeps only the declaration of this file-static helper (used by a
 // neighbouring function's function-pointer table); provide its body so the unit links.
 void* NiMalloc(unsigned int size);
 void NiFree(void* p);
-struct RefCounted
-{
-    virtual ~RefCounted();
-    virtual void DeleteThis();
-    volatile long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 struct PtrEntry
 {
-    NiPointer<RefCounted> m_pReferencedObject;
+    NiPointer<NiRefObject> m_pReferencedObject;
     int m_iValue;
     PtrEntry() : m_pReferencedObject(0), m_iValue(0)
     {}
@@ -4296,43 +4066,6 @@ class CA6E60Owner
 
     void ReleaseData(bool bRelease);
 };
-struct StrArr
-{
-    void* vtable;
-    char** m_pBase;
-    unsigned short m_usMaxSize, m_usSize, m_usESize, m_usGrowBy;
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int index, char*& value);
-    void AppendReference(char*& value)
-    {
-        unsigned int index = m_usSize;
-        if (index >= m_usMaxSize)
-            SetSize(index + m_usGrowBy);
-        SetAt(index, value);
-    }
-    __forceinline void Append(char* value)
-    {
-        unsigned int index = m_usSize;
-        if (index >= m_usMaxSize)
-            SetSize(index + m_usGrowBy);
-        if (index >= m_usSize)
-        {
-            m_usSize = (unsigned short)(index + 1);
-            if (value)
-                ++m_usESize;
-        }
-        else if (value)
-        {
-            if (!m_pBase[index])
-                ++m_usESize;
-        }
-        else if (m_pBase[index])
-        {
-            m_usESize += (unsigned short)-1;
-        }
-        m_pBase[index] = value;
-    }
-};
 extern char* DAT_012682e8;
 char* __cdecl FUN_00a7d330(char*);
 char* __cdecl FUN_00a7d510(const char*, unsigned int);
@@ -4385,74 +4118,6 @@ struct CAC300Allocator
 {
     virtual void fn00();
     virtual void* Alloc(unsigned int size);
-};
-struct hkReferencedObject
-{
-    void* vtbl;
-    unsigned short m_usMemSizeAndFlags;
-    unsigned short m_sReferenceCount;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-
-    hkReferencedObject(int arg);
-    void removeReference();
-
-    static void* operator new(unsigned int size)
-    {
-        FNVTaskMemoryRouter* router = FUN_00c85750();
-        hkReferencedObject* p = (hkReferencedObject*)((CAC300Allocator*)router->allocator)->Alloc(size);
-        p->m_usMemSizeAndFlags = (unsigned short)size;
-        return p;
-    }
-    static void operator delete(void* p);
 };
 struct CAC300Owner
 {
@@ -4572,31 +4237,19 @@ struct BCBEA40AllocTagScope
         g_iCBEA40AllocTag = m_iSaved;
     }
 };
-class BCBEA40StringArray
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-  public:
-    virtual ~BCBEA40StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
+    return SetAtGrow(m_usSize, element);
+}
 
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > BCBEA40StringArray;
 extern const char* g_pcCBEA40Name;
 char* __cdecl FUN_00a7d330(const char* pcString);
 class BCBEA40Owner
@@ -4725,53 +4378,6 @@ struct ThisCls046
     void FUN_00cd2fd0(SArr046* arr);
     void AppendSubpartNames(SArr046* arr);
 };
-struct bhkSerializable
-{
-    virtual ~bhkSerializable();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    int m_04;
-    int m_08;
-};
-struct bhkCharacterPointCollector
-{
-    ~bhkCharacterPointCollector();
-};
 extern int DAT_01268340;
 class FUN_00cabf50 : public bhkSerializable
 {
@@ -4789,11 +4395,6 @@ struct LinkedObject
 struct LinkStream
 {
     LinkedObject* FUN_00a63430();
-};
-struct LandTextureParameters
-{
-    int unk00[18];
-    int m_iValue;  // +0x48
 };
 class LinkBase
 {
@@ -4892,233 +4493,33 @@ struct FUN_00cb9d80_class
 
     void __thiscall ReadFromStream(void* context);
 };
-struct StandInBinaryStream
-{
-    int m_vtbl;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(StandInBinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
-template <class T> inline void BinaryStreamLoad(StandInBinaryStream& kIs, T* pValue, unsigned int uiNumEls)
-{
-    unsigned int uiComponentSize = sizeof(T);
-    kIs.BinaryRead(pValue, uiNumEls * sizeof(T), &uiComponentSize, 1);
-}
-struct StandInStream : public NiStream
-{
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    StandInBinaryStream* m_pkIStream;
-
-    void FUN_00a64df0(void* pLinkID);
-};
-template <class T> inline void StreamRead(StandInStream& kStream, T& val)
-{
-    BinaryStreamLoad(*kStream.m_pkIStream, &val, 1);
-}
-struct MemoryManager_t
-{
-    void* FUN_00aa3e40(unsigned int size);
-};
-struct BaseCinfo
-{
-    int m_iWordAt04;
-    int m_8;
-    int m_iThirdValue;
-    int m_10;
-
-    __forceinline void* operator new(size_t size) throw()
-    {
-        return ((MemoryManager_t*)&DAT_011f6238)->FUN_00aa3e40(size);
-    }
-    __forceinline void operator delete(void*)
-    {}
-
-    __forceinline BaseCinfo() : m_iWordAt04(0), m_8(1), m_iThirdValue(0), m_10(0)
-    {}
-
-    virtual void v00();
-    virtual void v04();
-    virtual void LoadBinary(NiStream& kStream);
-};
 extern int DAT_0108ff98;
 extern int DAT_010c5dc0;
-struct Cinfo_13 : public BaseCinfo
+struct Cinfo_13 : public BaseCinfo_blk_00ca0000_o2_gs_ehsc_nogs_noehsc_variant
 {
     __forceinline Cinfo_13()
     {}
     virtual void LoadBinary(NiStream& kStream);
 };
-struct Cinfo_0 : public BaseCinfo
+struct Cinfo_0 : public BaseCinfo_blk_00ca0000_o2_gs_ehsc_nogs_noehsc_variant
 {
     __forceinline Cinfo_0()
     {}
     virtual void LoadBinary(NiStream& kStream);
 };
-struct Cinfo_1 : public BaseCinfo
+struct Cinfo_1 : public BaseCinfo_blk_00ca0000_o2_gs_ehsc_nogs_noehsc_variant
 {
     __forceinline Cinfo_1()
     {}
     virtual void LoadBinary(NiStream& kStream);
 };
-struct Cinfo_2 : public BaseCinfo
+struct Cinfo_2 : public BaseCinfo_blk_00ca0000_o2_gs_ehsc_nogs_noehsc_variant
 {
     __forceinline Cinfo_2()
     {}
     virtual void LoadBinary(NiStream& kStream);
 };
-struct Cinfo_7 : public BaseCinfo
+struct Cinfo_7 : public BaseCinfo_blk_00ca0000_o2_gs_ehsc_nogs_noehsc_variant
 {
     __forceinline Cinfo_7()
     {}
@@ -5128,21 +4529,6 @@ struct RagdollBase
 {
     virtual ~RagdollBase();
     void ReadGroup(NiStream& kStream);
-};
-class bhkRagdollTemplateData : public RagdollBase
-{
-  public:
-    int unk04;
-    void* m_kName;
-    CA0E60Array m_kArray1;
-    CA0E60Array m_kArray2;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-
-    void FUN_00cba340(StandInStream& kStream);
 };
 struct FUN_00ca0ca0_Class
 {
@@ -6033,12 +5419,6 @@ struct FNV_OwnerObject
     FNV_InnerObject inner;
     void __fastcall FUN_00ca8940(int);
 };
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
 struct CA8B80Command;
 struct CA8B80Queue
 {
@@ -6194,49 +5574,6 @@ struct ShapeRefCAC4B0 : public RefObjectCAC4B0
 {
     void FUN_00cac4b0(bool bAdd);
 };
-extern __declspec(thread) unsigned int t_uiMemContextC5E0;
-inline unsigned int GetMemContextC5E0()
-{
-    return t_uiMemContextC5E0;
-}
-inline void SetMemContextC5E0(unsigned int m_uiGeometryShaderFlags)
-{
-    t_uiMemContextC5E0 = m_uiGeometryShaderFlags;
-}
-class AutoMemContextC5E0
-{
-  public:
-    AutoMemContextC5E0(unsigned int m_uiGeometryShaderFlags)
-    {
-        m_uiPrevious = GetMemContextC5E0();
-        SetMemContextC5E0(m_uiGeometryShaderFlags);
-    }
-    ~AutoMemContextC5E0()
-    {
-        SetMemContextC5E0(m_uiPrevious);
-    }
-    unsigned int m_uiPrevious;
-};
-class hkMemoryAllocatorC5E0
-{
-  public:
-    virtual ~hkMemoryAllocatorC5E0();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-struct hkMemoryRouterC5E0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocatorC5E0& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    hkMemoryAllocatorC5E0* m_pStreamAllocator;
-};
-hkMemoryRouterC5E0* __cdecl GetMemoryRouterC5E0();
 class BufferOwnerC5E0
 {
   public:

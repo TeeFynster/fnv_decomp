@@ -2,13 +2,8 @@
 // src/fallout_shared/pathfinding/navmeshobstaclecutter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/pathfinding/navmeshobstaclecutter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct ObstacleUndoData
-{
-    virtual ~ObstacleUndoData();
-    void* Destroy(unsigned int flags);
-};
+#include "../../../include/ObstacleUndoData.h"
 
-void __cdecl FUN_006bc330(ObstacleUndoData*);
 extern "C" void __cdecl _delete(void*, unsigned int);
 
 // Runs the destructor and, when flags has bit 0 set, frees this with _delete using size 0x70; returns this.

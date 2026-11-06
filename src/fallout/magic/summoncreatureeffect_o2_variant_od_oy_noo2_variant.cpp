@@ -1,3 +1,13 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+
+#include "../../../include/MobileObject.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/TES.h"
+#include "../../../include/SummonCreatureEffect.h"
+#include "../../../include/TESBoundObject.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/bhkSphereShape.h"
+#include "../../../include/hkBool.h"
 
 // src/fallout/magic/summoncreatureeffect_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy (unit src/fallout/magic/summoncreatureeffect_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -7,215 +17,29 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 // src/fallout/magic/summoncreatureeffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/summoncreatureeffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct SummonCreatureEffect
-{
-    virtual ~SummonCreatureEffect();
-    void FUN_00828590();
-    void* FUN_00828560(unsigned int flags);
-};
 void __cdecl _Deallocate(void*);
 struct FUN_00828da0_shell
 {
     int __thiscall GetZero(int a, int b, int c);
 };
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
+#include "../../../include/hkVector4.h"
 
-    NiPoint3(float fX, float fY, float fZ);
-    NiPoint3 operator+(const NiPoint3& kPt) const;
-};
-
-struct __declspec(align(16)) hkVector4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-
-    hkVector4();
-};
 
 hkVector4& __cdecl NiPoint3ToHkVector4(hkVector4& kOut, const NiPoint3& kIn);
 
-struct hkBool
-{
-    char m_cBooleanValue;
 
-    hkBool();
-    operator bool() const;
-};
 
-struct TESForm
-{
-    virtual ~TESForm();
-};
 
-struct TESBoundObject : TESForm
-{
-    float GetBoundSize();
-};
-
-struct TESObjectCELL;
 struct bhkWorld;
 
 bhkWorld* __fastcall GetHavokWorld(TESObjectCELL* pkCell);
-
-struct MobileObject
-{
-    virtual void Vfn000();
-    virtual void Vfn001();
-    virtual void Vfn002();
-    virtual void Vfn003();
-    virtual void Vfn004();
-    virtual void Vfn005();
-    virtual void Vfn006();
-    virtual void Vfn007();
-    virtual void Vfn008();
-    virtual void Vfn009();
-    virtual void Vfn00a();
-    virtual void Vfn00b();
-    virtual void Vfn00c();
-    virtual void Vfn00d();
-    virtual void Vfn00e();
-    virtual void Vfn00f();
-    virtual void Vfn010();
-    virtual void Vfn011();
-    virtual void Vfn012();
-    virtual void Vfn013();
-    virtual void Vfn014();
-    virtual void Vfn015();
-    virtual void Vfn016();
-    virtual void Vfn017();
-    virtual void Vfn018();
-    virtual void Vfn019();
-    virtual void Vfn01a();
-    virtual void Vfn01b();
-    virtual void Vfn01c();
-    virtual void Vfn01d();
-    virtual void Vfn01e();
-    virtual void Vfn01f();
-    virtual void Vfn020();
-    virtual void Vfn021();
-    virtual void Vfn022();
-    virtual void Vfn023();
-    virtual void Vfn024();
-    virtual void Vfn025();
-    virtual void Vfn026();
-    virtual void Vfn027();
-    virtual void Vfn028();
-    virtual void Vfn029();
-    virtual void Vfn02a();
-    virtual void Vfn02b();
-    virtual void Vfn02c();
-    virtual void Vfn02d();
-    virtual void Vfn02e();
-    virtual void Vfn02f();
-    virtual void Vfn030();
-    virtual void Vfn031();
-    virtual void Vfn032();
-    virtual void Vfn033();
-    virtual void Vfn034();
-    virtual void Vfn035();
-    virtual void Vfn036();
-    virtual void Vfn037();
-    virtual void Vfn038();
-    virtual void Vfn039();
-    virtual void Vfn03a();
-    virtual void Vfn03b();
-    virtual void Vfn03c();
-    virtual void Vfn03d();
-    virtual void Vfn03e();
-    virtual void Vfn03f();
-    virtual void Vfn040();
-    virtual void Vfn041();
-    virtual void Vfn042();
-    virtual void Vfn043();
-    virtual void Vfn044();
-    virtual void Vfn045();
-    virtual void Vfn046();
-    virtual void Vfn047();
-    virtual void Vfn048();
-    virtual void Vfn049();
-    virtual void Vfn04a();
-    virtual void Vfn04b();
-    virtual void Vfn04c();
-    virtual void Vfn04d();
-    virtual void Vfn04e();
-    virtual void Vfn04f();
-    virtual void Vfn050();
-    virtual void Vfn051();
-    virtual void Vfn052();
-    virtual void Vfn053();
-    virtual void Vfn054();
-    virtual void Vfn055();
-    virtual void Vfn056();
-    virtual void Vfn057();
-    virtual void Vfn058();
-    virtual void Vfn059();
-    virtual void Vfn05a();
-    virtual void Vfn05b();
-    virtual void Vfn05c();
-    virtual void Vfn05d();
-    virtual void Vfn05e();
-    virtual void Vfn05f();
-    virtual void Vfn060();
-    virtual void Vfn061();
-    virtual void Vfn062();
-    virtual void Vfn063();
-    virtual void Vfn064();
-    virtual void Vfn065();
-    virtual void Vfn066();
-    virtual void Vfn067();
-    virtual void Vfn068();
-    virtual void Vfn069();
-    virtual void Vfn06a();
-    virtual void Vfn06b();
-    virtual void Vfn06c();
-    virtual void Vfn06d();
-    virtual void Vfn06e();
-    virtual void Vfn06f();
-    virtual void Vfn070();
-    virtual void Vfn071();
-    virtual void Vfn072();
-    virtual void Vfn073();
-    virtual void Vfn074();
-    virtual void Vfn075();
-    virtual void Vfn076();
-    virtual void Vfn077();
-    virtual void Vfn078();
-    virtual void Vfn079();
-    virtual void Vfn07a();
-    virtual void Vfn07b();
-    virtual void Vfn07c();
-    virtual NiPoint3* GetPos();
-
-    TESObjectCELL* GetParentCell();
-    float GetRelevantWaterHeight();
-};
 
 struct EffectTarget
 {
     MobileObject* GetActor();
 };
 
-struct bhkSphereShape
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem);
-
-    bhkSphereShape(float fRadius, bool bFlag);
-    virtual ~bhkSphereShape();
-    void* GetHavokShape();
-};
 
 struct CollisionFilterInfo
 {
@@ -585,11 +409,6 @@ struct __declspec(align(16)) PickData
     void SetTo(const NiPoint3& kTo);
 };
 
-struct TES
-{
-    void Pick(PickData& kPick);
-};
-
 extern TES* g_TES;
 
 struct SummonCreatureEffectHelper : SummonCreatureEffect
@@ -634,14 +453,14 @@ bool SummonCreatureEffectHelper::FUN_00828f00(int iUnused, NiPoint3* pkPos)
 
     kPhantom.Remove();
     delete pkShape;
-    if (pkActor->GetRelevantWaterHeight() > pkActor->GetPos()->z)
+    if (pkActor->GetRelevantWaterHeight() > static_cast<const MobileObject*>(pkActor)->GetPos()->z)
         return false;
 
     PickData kPick;
     PickFilter kPickFilter(0);
     kPickFilter.SetLayer(0x26);
     kPick.SetFilter(kPickFilter);
-    NiPoint3 kStart = *pkActor->GetPos();
+    NiPoint3 kStart = *static_cast<const MobileObject*>(pkActor)->GetPos();
     kStart.z += 64.0;
     NiPoint3 kEnd = *pkPos;
     kEnd.z += 64.0;

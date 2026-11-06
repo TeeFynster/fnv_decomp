@@ -1,77 +1,41 @@
+#include "../../../../../../../../../include/hkArray.h"
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkppointtopathdrawer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkppointtopathdrawer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
+#include "../../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../../include/hkVector4.h"
+#include "../../../../../../../../../include/hkTransform.h"
 
-struct hkTransform;
-
-struct hkVector4
+inline hkMemoryAllocator& PointToPathHeap(hkMemoryRouter* record)
 {
-    __m128 m_vComponents;
-    hkVector4()
-    {}
-    hkVector4(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
+    return *record->m_heap;
+}
+
+
+inline hkVector4::hkVector4(const hkVector4& v)
+{
+    m_vComponents = v.m_vComponents;
+}
+
+inline void hkVector4::operator=(const hkVector4& v)
+{
+    m_vComponents = v.m_vComponents;
+}
+
+hkMemoryRouter* __cdecl FUN_00c85750();
+
+static __forceinline void hkVector4Array_ClearAndRelease(hkArrayBase<hkVector4>& self, hkMemoryAllocator& alloc);
+
+static __forceinline void hkVector4Array_ClearAndRelease(hkArrayBase<hkVector4>& self, hkMemoryAllocator& alloc)
+{
+        self.m_iElementCount = 0;
+        if ((self.m_iCapacityState & 0x80000000) == 0)
+            alloc.bufFree(self.m_data, (self.m_iCapacityState & 0x3fffffff) * sizeof(hkVector4));
     }
-    void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void FUN_00c7f640(const hkTransform& t, const hkVector4& v);
-};
-
-struct hkTransform
-{
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-    hkVector4 m_vTranslation;
-    void FUN_00cb2240(const hkTransform& a, const hkTransform& b);
-};
-
-struct hkMemoryAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void ReturnMemory(void* p, int numBytes);
-};
-
-struct NineIntegerRecord
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocator* m_pStreamAllocator;
-    hkMemoryAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-NineIntegerRecord* __cdecl FUN_00c85750();
-
-struct hkVector4Array
-{
-    hkVector4* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    hkVector4Array() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    void ClearAndRelease(hkMemoryAllocator& alloc)
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(hkVector4));
-    }
-};
 
 struct PointSource
 {
@@ -86,7 +50,7 @@ struct PointSource
     virtual void v20();
     virtual void v24();
     virtual void v28();
-    virtual void getPoints(hkVector4Array& points);
+    virtual void getPoints(hkArrayBase<hkVector4>& points);
 };
 
 struct BoneTransformData
@@ -277,13 +241,17 @@ struct Viewer
 void Viewer::FUN_00de7020(Input* input, LineDrawer* drawer, int id, int tag)
 {
     BoneTransformData* scene = input->m_scene;
-    hkTransform localTransform;
-    hkTransform worldTransform;
-    hkTransform extraTransform;
+    // Vector-backed storage preserves the original stack layout and /GS classification.
+    hkVector4 localTransformStorage[4] = { hkVector4(), hkVector4(), hkVector4(), hkVector4() };
+    hkVector4 worldTransformStorage[4] = { hkVector4(), hkVector4(), hkVector4(), hkVector4() };
+    hkVector4 extraTransformStorage[4] = { hkVector4(), hkVector4(), hkVector4(), hkVector4() };
+    hkTransform& localTransform = *reinterpret_cast<hkTransform*>(localTransformStorage);
+    hkTransform& worldTransform = *reinterpret_cast<hkTransform*>(worldTransformStorage);
+    hkTransform& extraTransform = *reinterpret_cast<hkTransform*>(extraTransformStorage);
 
     m_processor.FUN_00e10a10(drawer);
     FUN_00de47e0(input, &localTransform, &extraTransform);
-    m_vContactPosition = localTransform.m_vTranslation;
+    m_vContactPosition.m_vComponents = localTransform.m_vTranslation;
     scene->FUN_00dee820(&input->m_extra->m_endPoint, &m_endPoint);
     FUN_00de4530(id, tag);
     FUN_00de44c0(id, tag);
@@ -294,7 +262,7 @@ void Viewer::FUN_00de7020(Input* input, LineDrawer* drawer, int id, int tag)
         PointSource* source = scene->m_kPoints;
         if (source)
         {
-            hkVector4Array points;
+            hkArrayBase<hkVector4> points;
             source->getPoints(points);
             int numPoints = points.m_iElementCount;
             for (int i = 1; i < numPoints; i++)
@@ -307,7 +275,7 @@ void Viewer::FUN_00de7020(Input* input, LineDrawer* drawer, int id, int tag)
                 b.FUN_00c7f640(worldTransform, p);
                 drawer->drawLine(a, b, PackColorBigEndian(0.0f, DAT_0101622c, 1.0f, 1.0f), id, tag);
             }
-            points.ClearAndRelease(FUN_00c85750()->heap());
+            hkVector4Array_ClearAndRelease(points, PointToPathHeap(FUN_00c85750()));
         }
     }
 }

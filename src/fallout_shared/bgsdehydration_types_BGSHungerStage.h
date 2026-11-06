@@ -4,7 +4,7 @@
 
 class SpellItem;
 #include "layout_support.h"
-#include "TESForm.h"
+#include "../../include/TESForm.h"
 class BGSHungerStage;
 class HungerStageData;
 #pragma pack(push, 4)

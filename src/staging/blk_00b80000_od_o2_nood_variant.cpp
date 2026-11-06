@@ -6,6 +6,7 @@
 // src/staging/blk_00b80000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/NiPlane.h"
 
 struct FNVVec3
 {
@@ -35,28 +36,22 @@ inline FNVVec3 operator*(float s, const FNVVec3& b)
 {
     return FNVVec3(s * b.x, s * b.y, s * b.z);
 }
-struct NiPlane
+inline int NiPlane::Side(const FNVVec3& p) const
 {
-    FNVVec3 normal;
-    float constant;
-    NiPlane();
-    int Side(const FNVVec3& p) const
-    {
-        float d = normal.x * p.x + normal.y * p.y + normal.z * p.z - constant;
-        if (d < 0.0f)
-            return 2;
-        else if (d > 0.0f)
-            return 1;
-        return 0;
-    }
-    float Distance(const FNVVec3& p) const
-    {
-        return normal.x * p.x + normal.y * p.y + normal.z * p.z - constant;
-    }
-};
+    float d = x * p.x + y * p.y + z * p.z - c;
+    if (d < 0.0f)
+        return 2;
+    else if (d > 0.0f)
+        return 1;
+    return 0;
+}
+inline float NiPlane::Distance(const FNVVec3& p) const
+{
+    return x * p.x + y * p.y + z * p.z - c;
+}
 inline int Classify(const NiPlane& q, const FNVVec3& p)
 {
-    float d = q.normal.x * p.x + q.normal.y * p.y + q.normal.z * p.z - q.constant;
+    float d = q.x * p.x + q.y * p.y + q.z * p.z - q.c;
     if (d < 0.0f)
         return 2;
     else if (d > 0.0f)
@@ -259,8 +254,8 @@ unsigned char __stdcall FUN_00b9c020(FNVCuboid* p1, FNVCuboid* p2)
                 int r2 = active.faces[plane].Side(v2);
                 if (r1 != r2)
                 {
-                    FNVVec3 normal = active.faces[plane].normal;
-                    FNVVec3 delta = normal * active.faces[plane].constant - v1;
+                    FNVVec3 normal = *reinterpret_cast<const FNVVec3*>(&active.faces[plane].x);
+                    FNVVec3 delta = normal * active.faces[plane].c - v1;
                     FNVVec3 direction = v2 - v1;
                     float fraction = (normal * delta) / (normal * direction);
                     FNVVec3 point = v1 + fraction * (v2 - v1);

@@ -1,3 +1,15 @@
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+
+// hkMemoryRouter is the shared hkMemoryRouter: GetMonitorStream is bound to 0x00c85750.
+
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+    return hkMemoryRouter::getInstance().heap();
+}
+
 // src/havok/animation/animation/animation/util/hkatrackanalysis_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/animation/animation/animation/util/hkatrackanalysis_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -82,58 +94,6 @@ struct TrackStatistics
     float rate;
     void LogStatistics();
 };
-void* FUN_00c85750();
-struct hkMemoryAllocator_e50650;
-void FUN_00c908c0(hkMemoryAllocator_e50650& kAllocator, void* pkArray, int iNewCapacity, int iElementSize);
-struct hkMemoryRouter_e50650
-{
-    char m_acPad00[0x10];
-    hkMemoryAllocator_e50650* m_pkHeap;
-    hkMemoryAllocator_e50650& heap()
-    {
-        return *m_pkHeap;
-    }
-};
-struct hkContainerHeapAllocator_e50650
-{
-    hkMemoryAllocator_e50650& get(const void*)
-    {
-        return ((hkMemoryRouter_e50650*)FUN_00c85750())->heap();
-    }
-};
-template <class T> struct hkArray_e50650
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArray_e50650() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void reserve(hkMemoryAllocator_e50650& kAllocator, int n)
-    {
-        const int iCapacity = getCapacity();
-        if (iCapacity < n)
-        {
-            int iCap = 2 * iCapacity;
-            int iNewSize = (n < iCap) ? iCap : n;
-            FUN_00c908c0(kAllocator, this, iNewSize, sizeof(T));
-        }
-    }
-    void _setSize(hkMemoryAllocator_e50650& kAllocator, int n)
-    {
-        reserve(kAllocator, n);
-        m_iElementCount = n;
-    }
-    void SetSizeAndGrow(int n)
-    {
-        _setSize(hkContainerHeapAllocator_e50650().get(this), n);
-    }
-};
 struct TrackHeader_e50650
 {
     int m_iUnk00;
@@ -152,23 +112,15 @@ struct TrackSource_e50650
 struct TrackBuffers_e50650
 {
     TrackHeader_e50650 m_kHeader;
-    hkArray_e50650<float> m_kA;
-    hkArray_e50650<float> m_kB;
-    hkArray_e50650<float> m_kC;
-    hkArray_e50650<float> m_kCubicCoefficient;
-    hkArray_e50650<unsigned char> m_kE;
+    hkArray<float> m_kA;
+    hkArray<float> m_kB;
+    hkArray<float> m_kC;
+    hkArray<float> m_kCubicCoefficient;
+    hkArray<unsigned char> m_kE;
 
     void FUN_00e50ca0();
 };
-struct hkBool_e50650
-{
-    char m_cBooleanValue;
-    hkBool_e50650(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-void FUN_00e4f910(TrackBuffers_e50650* pkBuffers, void* pkArg, void* pkArgCur, hkBool_e50650 bFlag);
+void FUN_00e4f910(TrackBuffers_e50650* pkBuffers, void* pkArg, void* pkArgCur, hkBool bFlag);
 void ExpandTrackSource(const TrackSource_e50650* pkSource, void* pkArg, void* pkArgCur);
 struct StatsB0
 {
@@ -200,23 +152,7 @@ struct PerFloatIn
     const float* floatData;
     unsigned int numberOfFloatTracks;
     unsigned int numberOfPoses;
-    hkArray_e50650<float> absoluteTolerance;
-};
-struct hkMemoryAllocator_e50650
-{
-    virtual void AllocateMemoryBlock(int);
-    virtual void ReleaseBlock(void*, int);
-    virtual void* AllocateBufferWithSize(int&);
-    virtual void* BufRealloc(void*, int, int&);
-    virtual void ReturnMemory(void*, int);
-};
-struct E50920Router
-{
-    char* stackTop;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocator_e50650* heap;
+    hkArray<float> absoluteTolerance;
 };
 static __forceinline void ClearStatistics(TrackStatistics& s)
 {
@@ -235,40 +171,32 @@ static __forceinline void ClearStatistics(TrackStatistics& s)
     s.total1 = 0;
     s.rate = 0.0f;
 }
-struct PassBool
-{
-    unsigned char value;
-    PassBool(bool b) : value(b)
-    {}
-    PassBool(const PassBool& other) : value(other.value)
-    {}
-};
-typedef void(__cdecl* QsAnalyzeFn)(TrackBuffers_e50650*, void*, void*, PassBool);
+typedef void(__cdecl* QsAnalyzeFn)(TrackBuffers_e50650*, void*, void*, hkBool);
 void __cdecl FUN_00e4ead0(const unsigned short* mask, unsigned int count, TrackStatistics* result);
 void __cdecl FUN_00e4ebb0(const unsigned short* maskT, const unsigned short* maskF, unsigned int numT,
                           unsigned int numF, TrackStatistics* result);
 struct FloatLocalArray
 {
-    hkArray_e50650<float> values;
+    hkArray<float> values;
     float* localMemory;
 
     __forceinline void allocate(int n)
     {
-        E50920Router* router = (E50920Router*)FUN_00c85750();
-        char* block = router->stackTop;
-        router->stackTop = block + ((n * 4 + 127) & ~127);
+        hkMemoryRouter* router = &hkMemoryRouter::getInstance();
+        char* block = static_cast<char*>(router->m_stack.m_next.m_storage);
+        router->m_stack.m_next.m_storage = block + ((n * 4 + 127) & ~127);
         values.m_iCapacityState = n | 0x80000000;
         values.m_data = (float*)block;
         localMemory = (float*)block;
     }
 
-    __forceinline void freeStorage(hkMemoryAllocator_e50650& alloc)
+    __forceinline void freeStorage(hkMemoryAllocator& alloc)
     {
         int cap = values.m_iCapacityState;
         values.m_iElementCount = 0;
         if ((cap & 0x80000000) == 0)
         {
-            alloc.ReturnMemory(values.m_data, (cap & 0x3fffffff) * 4);
+            alloc.bufFree(values.m_data, (cap & 0x3fffffff) * 4);
         }
         values.m_data = 0;
         values.m_iCapacityState = 0x80000000;
@@ -281,12 +209,12 @@ struct FloatLocalArray
         {
             values.m_iElementCount = 0;
         }
-        ((E50920Router*)FUN_00c85750())->stackTop = (char*)saved;
-        freeStorage(hkContainerHeapAllocator_e50650().get(&values));
+        hkMemoryRouter::getInstance().m_stack.m_next.m_storage = (char*)saved;
+        freeStorage(hkContainerHeapAllocator().get(&values));
     }
 };
 void __cdecl FUN_00e50920(const PerTransformIn& input, const PerFloatIn& finput, unsigned short* staticMask,
-                          float* staticDOFs, hkBool_e50650 displayStatsReport);
+                          float* staticDOFs, hkBool displayStatsReport);
 
 extern const __m128 DAT_010c7160;
 extern const __m128 DAT_010c7170;
@@ -596,116 +524,71 @@ class TrackTransform
     }
 };
 
-class TrackFlag
-{
-    char value;
 
-  public:
-    inline TrackFlag()
-    {}
-    inline TrackFlag(bool input) : value(static_cast<char>(input))
-    {}
-    inline operator bool() const
-    {
-        return value != 0;
-    }
-    inline TrackFlag& operator=(bool input)
-    {
-        value = static_cast<char>(input);
-        return *this;
-    }
-};
 
-template <class T> struct TrackArrayBase
-{
-    T* data;
-    int size;
-    int capacity;
-    __forceinline TrackArrayBase() : data(0), size(0), capacity(0x80000000)
-    {}
-    __forceinline ~TrackArrayBase()
-    {}
-    __forceinline T& operator[](int index)
-    {
-        return data[index];
-    }
-    __forceinline const T& operator[](int index) const
-    {
-        return data[index];
-    }
-    __forceinline int getCapacity() const
-    {
-        return capacity & 0x3fffffff;
-    }
-    __forceinline void reserve(hkMemoryAllocator_e50650& allocator, int count)
-    {
-        const int oldCapacity = getCapacity();
-        if (oldCapacity < count)
-        {
-            int doubled = 2 * oldCapacity;
-            int grown = count < doubled ? doubled : count;
-            FUN_00c908c0(allocator, this, grown, sizeof(T));
-        }
-    }
-    __forceinline void resize(hkMemoryAllocator_e50650& allocator, int count)
-    {
-        reserve(allocator, count);
-        for (int n = count; n < size; ++n)
-            data[n].~T();
-        for (int n = size; n < count; ++n)
-            new (data + n) T;
-        size = count;
-    }
-    __forceinline void clear()
-    {
-        for (int n = 0; n < size; ++n)
-            data[n].~T();
-        size = 0;
-    }
-    __forceinline void release(hkMemoryAllocator_e50650& allocator)
-    {
-        clear();
-        if ((capacity & 0x80000000) == 0)
-            allocator.ReturnMemory(data, getCapacity() * sizeof(T));
-        data = 0;
-        capacity = 0x80000000;
-    }
-};
 
-template <class T> struct TrackArray : TrackArrayBase<T>
+template <class T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& allocator, int count)
 {
-    __forceinline TrackArray() : TrackArrayBase<T>()
-    {}
-    __forceinline ~TrackArray()
+    const int oldCapacity = getCapacity();
+    if (oldCapacity < count)
     {
-        release(hkContainerHeapAllocator_e50650().get(this));
+        int doubled = 2 * oldCapacity;
+        int grown = count < doubled ? doubled : count;
+        hkArrayUtil::_reserve(allocator, this, grown, sizeof(T));
     }
-    __forceinline void SetSizeAndGrow(int count)
-    {
-        resize(hkContainerHeapAllocator_e50650().get(this), count);
-    }
-};
+}
+
+template <class T> __forceinline void hkArrayBase<T>::_setSize(hkMemoryAllocator& allocator, int count)
+{
+    GrowArrayCapacity(allocator, count);
+    for (int n = count; n < m_iElementCount; ++n)
+        m_data[n].~T();
+    for (int n = m_iElementCount; n < count; ++n)
+        new (m_data + n) T;
+    m_iElementCount = count;
+}
+
+template <class T> __forceinline void hkArrayBase<T>::clear()
+{
+    for (int n = 0; n < m_iElementCount; ++n)
+        m_data[n].~T();
+    m_iElementCount = 0;
+}
+
+template <class T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& allocator)
+{
+    clear();
+    if ((m_iCapacityState & 0x80000000) == 0)
+        allocator.bufFree(m_data, getCapacity() * sizeof(T));
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
+
+template <class T, class Allocator> __forceinline hkArray<T, Allocator>::~hkArray()
+{
+    this->_clearAndDeallocate(Allocator().get(this));
+}
 
 template <class T> __forceinline void releaseTrackStack(T* memory)
 {
-    static_cast<E50920Router*>(FUN_00c85750())->stackTop = reinterpret_cast<char*>(memory);
+    hkMemoryRouter::getInstance().m_stack.m_next.m_storage = reinterpret_cast<char*>(memory);
 }
 
-template <class T> struct TrackLocalArray : TrackArray<T>
+template <class T> struct TrackLocalArray : hkArray<T>
 {
     T* localMemory;
     __forceinline TrackLocalArray(int count)
     {
-        E50920Router* router = static_cast<E50920Router*>(FUN_00c85750());
-        char* memory = router->stackTop;
-        router->stackTop = memory + ((count * sizeof(T) + 127) & ~127);
-        this->data = reinterpret_cast<T*>(memory);
-        this->capacity = count | 0x80000000;
-        localMemory = this->data;
+        hkMemoryRouter* router = &hkMemoryRouter::getInstance();
+        char* memory = static_cast<char*>(router->m_stack.m_next.m_storage);
+        router->m_stack.m_next.m_storage = memory + ((count * sizeof(T) + 127) & ~127);
+        this->m_data = reinterpret_cast<T*>(memory);
+        this->m_iCapacityState = count | 0x80000000;
+        localMemory = this->m_data;
     }
     __forceinline ~TrackLocalArray()
     {
-        if (localMemory == this->data)
+        if (localMemory == this->m_data)
             this->clear();
         releaseTrackStack(localMemory);
     }
@@ -716,11 +599,11 @@ struct TrackInput
     const TrackTransform* transforms;
     unsigned int tracks;
     unsigned int frames;
-    TrackArray<float> absolute;
-    TrackArray<float> relative;
-    TrackArray<float> rotation;
-    TrackArray<float> scale;
-    TrackArray<TrackFlag> special;
+    hkArray<float> absolute;
+    hkArray<float> relative;
+    hkArray<float> rotation;
+    hkArray<float> scale;
+    hkArray<hkBool> special;
 };
 
 struct TrackReport
@@ -740,10 +623,10 @@ struct TrackReport
 void FUN_00e4ead0(const unsigned short*, unsigned int, TrackReport&);
 
 static __forceinline void analyzeTransformTracks(const TrackInput& input, unsigned short* flags, float* output,
-                                                 const TrackFlag& report)
+                                                 const hkBool& report)
 {
     TrackLocalArray<TrackTransform> means(input.tracks);
-    means.SetSizeAndGrow(input.tracks);
+    means.setSize(input.tracks);
     TrackVector extent;
     extent.fill(0.0f);
     {
@@ -768,7 +651,7 @@ static __forceinline void analyzeTransformTracks(const TrackInput& input, unsign
         const float rotationTolerance = input.rotation[track];
         const float scaleTolerance = input.scale[track];
         float relativeSquared = relativeTolerance * relativeTolerance;
-        TrackFlag special = input.special[track];
+        hkBool special = input.special[track];
         const float hemisphereThreshold = 0.1f;
         if (extent.lengthSquared3() * TrackScalar(relativeSquared) < 1.1920928955078125e-7f)
         {
@@ -782,8 +665,8 @@ static __forceinline void analyzeTransformTracks(const TrackInput& input, unsign
             means[track].addWeighted(sample, 1.0f);
         }
         means[track].finish(float(input.frames));
-        TrackFlag positive = false;
-        TrackFlag negative = false;
+        hkBool positive = false;
+        hkBool negative = false;
         if (special)
         {
             float maxW = DAT_0104e148;
@@ -837,7 +720,7 @@ static __forceinline void analyzeTransformTracks(const TrackInput& input, unsign
             }
             if (rotationTolerance > 0.0f)
             {
-                const TrackFlag markFourth = special && (positive || negative);
+                const hkBool markFourth = special && (positive || negative);
                 for (unsigned int frame = 0; frame < input.frames; ++frame)
                 {
                     const TrackTransform& sample = input.transforms[frame * input.tracks + track];
@@ -971,8 +854,8 @@ static __forceinline void analyzeTransformTracks(const TrackInput& input, unsign
 }
 
 // @fnv 0x00e4f910
-void __cdecl FUN_00e4f910(TrackBuffers_e50650* buffers, void* masks, void* values, hkBool_e50650 report)
+void __cdecl FUN_00e4f910(TrackBuffers_e50650* buffers, void* masks, void* values, hkBool report)
 {
     analyzeTransformTracks(*reinterpret_cast<const TrackInput*>(buffers), static_cast<unsigned short*>(masks),
-                           static_cast<float*>(values), reinterpret_cast<const TrackFlag&>(report));
+                           static_cast<float*>(values), reinterpret_cast<const hkBool&>(report));
 }

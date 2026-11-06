@@ -2,7 +2,6 @@
 // src/gamebryo2.2/corelibs/nimain/nistream_od_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/nimain/nistream.cpp functions whose prologue its flags cannot
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "nistream_decls.h"
 
 extern "C" void __cdecl Clear();
 struct NiStream2

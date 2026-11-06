@@ -5,6 +5,9 @@
 
 // src/havok/physics/collide/agent/convexagent/capsulecapsule/hkpcapsulecapsuleagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/capsulecapsule/hkpcapsulecapsuleagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#define FNV_VEC4_SIMD
+#include "../../../../../../../include/Vec4.h"
+
 struct Callback
 {
     virtual void slot00();
@@ -60,12 +63,6 @@ struct ProfilerTls
     char* unk04;  // write cursor
     char* unk08;
     char* unk0C;  // end of the buffer
-};
-
-// A 16 byte aligned vector of four floats.
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
 };
 
 // One row of a 4x4 matrix.  The rows are copied as raw dwords, so the
@@ -271,10 +268,6 @@ void __cdecl FUN_00d3b420(Capsule* pFirst, Capsule* pSecond, void* pUnused, HitH
 
 #include <xmmintrin.h>
 namespace fnv_00d3b6f0 {
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
-};
 struct __declspec(align(16)) MatRow
 {
     unsigned int c0, c1, c2, c3;
@@ -448,7 +441,7 @@ struct BasisRows
 union EndpointScratch
 {
     MatRow row;
-    Vec4 endpoints[2];
+    __m128 endpoints[2];  // Raw scratch storage permits overlap with row without constructing Vec4.
 };
 struct ContactWorkspace
 {
@@ -600,7 +593,7 @@ void Agent::FUN_00d3c060(const CdBody* bodyA, const CdBody* bodyB, const Collisi
         }
     }
 
-    FUN_00cd58b0(contacts.verticesA, capA->m_fSphereRadius, scratch.endpoints, capB->m_fSphereRadius, contacts.results);
+    FUN_00cd58b0(contacts.verticesA, capA->m_fSphereRadius, (const Vec4*)scratch.endpoints, capB->m_fSphereRadius, contacts.results);
 
     Collector* output = collector;
     PointResult* res = contacts.results;

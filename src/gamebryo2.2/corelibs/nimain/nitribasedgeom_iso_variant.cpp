@@ -3,6 +3,7 @@
 // with VC9 SP1 and /MT /O2 /GS /EHsc /Gy (unit lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
 #include "nitribasedgeom_decls.h"
+#include "../../../../include/NiUpdateData.h"
 
 class GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f4a48;
@@ -27,13 +28,6 @@ extern "C" ::NiGeometry* __fastcall FUN_00a89790(::NiGeometry* geometry, void*, 
     return geometry;
 }
 
-struct NiUpdateData
-{
-    float time;
-    unsigned char unk04;
-    unsigned char deferUpdate;
-    unsigned char updateRequested;
-};
 struct FUN_00a59f90_holder
 {
     void __thiscall FUN_00a59f90(NiUpdateData& data, unsigned int value);
@@ -93,9 +87,9 @@ struct ParticleDownwardPassReceiver
 void ParticleDownwardPassReceiver::FUN_00c1ad90(void* data, unsigned int value)
 {
     NiUpdateData* update = (NiUpdateData*)data;
-    if (update->deferUpdate != 0)
+    if (update->pad2 != 0)
     {
-        update->updateRequested = 1;
+        update->pad3 = 1;
         return;
     }
     dispatch(data);

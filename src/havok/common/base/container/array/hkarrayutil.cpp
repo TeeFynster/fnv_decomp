@@ -2,7 +2,7 @@
 // src/havok/common/base/container/array/hkarrayutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/container/array/hkarrayutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct CB1BC0Allocator;
+#include "../../../../../../include/hkMemoryAllocator.h"
 
 typedef unsigned __int64 CB1BC0Key;
 
@@ -34,13 +34,13 @@ struct CB1BC0Map
     int m_iCapacityFlags;
     int m_iPairCount;
 
-    void ResizeStorage(CB1BC0Allocator& alloc, int capacity);
-    int InsertKeyValue(CB1BC0Allocator& alloc, CB1BC0Key key, CB1BC0Key val);
+    void ResizeStorage(hkMemoryAllocator& alloc, int capacity);
+    int InsertKeyValue(hkMemoryAllocator& alloc, CB1BC0Key key, CB1BC0Key val);
 };
 
 // Grows the table if needed, probes for the key, stores key/val, and returns whether the key was newly inserted.
 // @fnv 0x00cb1bc0
-int CB1BC0Map::InsertKeyValue(CB1BC0Allocator& alloc, CB1BC0Key key, CB1BC0Key val)
+int CB1BC0Map::InsertKeyValue(hkMemoryAllocator& alloc, CB1BC0Key key, CB1BC0Key val)
 {
     {
         int iCount = m_iCapacityFlags & 0x7fffffff;
@@ -67,16 +67,6 @@ int CB1BC0Map::InsertKeyValue(CB1BC0Allocator& alloc, CB1BC0Key key, CB1BC0Key v
     return isNewKey;
 }
 
-struct SpawnedObject
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual int v03(int* out);
-    virtual void v04();
-    virtual int v05(int a, int b, int* out);
-};
-
 struct SpawnedArray
 {
     int m_00;
@@ -87,18 +77,18 @@ struct SpawnedArray
 void __cdecl FUN_00ec44d0(int a, int b, int c);
 
 // @fnv 0x00c908c0
-void __cdecl FUN_00c908c0(SpawnedObject* apObject, SpawnedArray* apArray, int aiSize, int stride)
+void __cdecl FUN_00c908c0(hkMemoryAllocator* apObject, SpawnedArray* apArray, int aiSize, int stride)
 {
     int iNewSize = aiSize * stride;
     if ((apArray->m_08 & 0x80000000u) == 0)
     {
         int n = (int)(apArray->m_08 & 0x3fffffffu) * stride;
-        apArray->m_00 = apObject->v05(apArray->m_00, n, &iNewSize);
+        apArray->m_00 = (int)apObject->bufRealloc((void*)apArray->m_00, n, iNewSize);
         apArray->m_08 = (unsigned int)(iNewSize / stride);
     }
     else
     {
-        int pNewData = apObject->v03(&iNewSize);
+        int pNewData = (int)apObject->bufAlloc(iNewSize);
         FUN_00ec44d0(pNewData, apArray->m_00, apArray->m_04 * stride);
         apArray->m_00 = pNewData;
         apArray->m_08 = (unsigned int)(iNewSize / stride);
@@ -120,30 +110,20 @@ struct AudioStream
     int m_uCapacity;
 };
 
-struct AudioAllocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void* AllocBlock(int* pSize);
-    virtual void unk10();
-    virtual void* ResizeBlock(void* pData, int size, int* pSize);
-};
-
 extern "C" void* __cdecl FNV_block_copy(void* dst, const void* src, unsigned int size);
 
 // @fnv 0x00c90940
-void ResizeAudioStream(AudioAllocator* pAlloc, AudioStream* pStream, int elemSize)
+void ResizeAudioStream(hkMemoryAllocator* pAlloc, AudioStream* pStream, int elemSize)
 {
     int n = (pStream->m_iArrayLength ? pStream->m_iArrayLength * 2 : 1) * elemSize;
     if (!(pStream->m_uCapacity & 0x80000000))
     {
-        pStream->m_pData = pAlloc->ResizeBlock(pStream->m_pData, (pStream->m_uCapacity & 0x3fffffff) * elemSize, &n);
+        pStream->m_pData = pAlloc->bufRealloc(pStream->m_pData, (pStream->m_uCapacity & 0x3fffffff) * elemSize, n);
         pStream->m_uCapacity = n / elemSize;
     }
     else
     {
-        void* pBlock = pAlloc->AllocBlock(&n);
+        void* pBlock = pAlloc->bufAlloc(n);
         FNV_block_copy(pBlock, pStream->m_pData, pStream->m_iArrayLength * elemSize);
         pStream->m_pData = pBlock;
         pStream->m_uCapacity = n / elemSize;
@@ -307,27 +287,19 @@ FUN_00e108b0_cls* FUN_00e108b0_cls::FUN_00e108b0()
 #include <xmmintrin.h>
 extern __declspec(thread) int g_tlsMemContext;
 
-struct __declspec(align(16)) hkVector4
+// local form of hkVector4: 0x00c70de0 needs the trivial copy/default form and reference-returning assignment (shared form: 1042 bytes, exe: 828).
+struct __declspec(align(16)) ArrayVectorLocal_00c70de0
 {
     char storage[16];
     __forceinline float& component(unsigned i)
     {
         return reinterpret_cast<float*>(storage)[i];
     }
-    __forceinline hkVector4& operator=(const hkVector4& other)
+    __forceinline ArrayVectorLocal_00c70de0& operator=(const ArrayVectorLocal_00c70de0& other)
     {
         *reinterpret_cast<__m128*>(storage) = *reinterpret_cast<const __m128*>(other.storage);
         return *this;
     }
-};
-
-struct hkMemoryAllocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual void ReleaseBlock(void* p, int numBytes);
 };
 
 struct S00c70de0_Router
@@ -367,13 +339,13 @@ struct S00c70de0_Guard
     }
 };
 
-struct S00c70de0_Array
-{
-    hkVector4* m_data;
+struct S00c70de0_ArrayLocalForm
+{ // local form of hkArray: 0x00c70de0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
+    ArrayVectorLocal_00c70de0* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    __forceinline S00c70de0_Array()
+    __forceinline S00c70de0_ArrayLocalForm()
     {
         m_data = 0;
         m_iElementCount = 0;
@@ -391,7 +363,7 @@ struct S00c70de0_Array
         {
             int cap2 = cap * 2;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&a, this, newSize, sizeof(hkVector4));
+            FUN_00c908c0(&a, this, newSize, sizeof(ArrayVectorLocal_00c70de0));
         }
     }
     __forceinline void reserve(int n)
@@ -399,16 +371,16 @@ struct S00c70de0_Array
         GrowArrayCapacity(S00c70de0_getInstance()->heap(), n);
     }
 
-    __forceinline void _pushBack(hkMemoryAllocator& a, const hkVector4& val)
+    __forceinline void _pushBack(hkMemoryAllocator& a, const ArrayVectorLocal_00c70de0& val)
     {
         if (m_iElementCount == getCapacity())
         {
-            ResizeAudioStream(&a, this, sizeof(hkVector4));
+            ResizeAudioStream(&a, this, sizeof(ArrayVectorLocal_00c70de0));
         }
         m_data[m_iElementCount] = val;
         m_iElementCount++;
     }
-    __forceinline void AddBack(const hkVector4& val)
+    __forceinline void AddBack(const ArrayVectorLocal_00c70de0& val)
     {
         _pushBack(S00c70de0_getInstance()->heap(), val);
     }
@@ -418,10 +390,10 @@ struct S00c70de0_Array
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
         {
-            a.ReleaseBlock(m_data, getCapacity() * sizeof(hkVector4));
+            a.bufFree(m_data, getCapacity() * sizeof(ArrayVectorLocal_00c70de0));
         }
     }
-    __forceinline ~S00c70de0_Array()
+    __forceinline ~S00c70de0_ArrayLocalForm()
     {
         _clearAndDeallocate(S00c70de0_getInstance()->heap());
     }
@@ -433,11 +405,11 @@ int __cdecl FUN_00c70de0(float* end, float* start, float radius, float height)
 {
     S00c70de0_Guard memGuard(16);
     float fScaledRadius = radius * DAT_01267bcc;
-    S00c70de0_Array mesh;
+    S00c70de0_ArrayLocalForm mesh;
     mesh.reserve(18);
 
-    hkVector4 vertex;
-    hkVector4 ringVertex;
+    ArrayVectorLocal_00c70de0 vertex;
+    ArrayVectorLocal_00c70de0 ringVertex;
     vertex.component(0) = start[0] * DAT_01267bcc;
     vertex.component(1) = start[1] * DAT_01267bcc;
     vertex.component(2) = start[2] * DAT_01267bcc;
@@ -447,7 +419,7 @@ int __cdecl FUN_00c70de0(float* end, float* start, float radius, float height)
         hkMemoryAllocator& a = S00c70de0_getInstance()->heap();
         if (mesh.m_iElementCount == mesh.getCapacity())
         {
-            ResizeAudioStream(&a, &mesh, sizeof(hkVector4));
+            ResizeAudioStream(&a, &mesh, sizeof(ArrayVectorLocal_00c70de0));
         }
         double fTopZ = height + DAT_0101ffa0 + vertex.component(2);
         mesh.m_data[mesh.m_iElementCount] = vertex;
@@ -484,16 +456,6 @@ int __cdecl FUN_00c70de0(float* end, float* start, float radius, float height)
 }
 
 namespace fnv_00c909d0 {
-struct hkMemoryAllocator
-{
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-    virtual void* BufRealloc(void* p, int oldNumBytes, int& reqNumBytesInOut);
-};
-
 struct hkArrayVoid
 {
     void* m_data;
@@ -512,14 +474,14 @@ void __cdecl FUN_00c909d0(hkMemoryAllocator& alloc, void* array, int aiElementSi
     if (apInPlaceMemory && arr.m_iElementCount < requestedCapacity)
     {
         memcpy(apInPlaceMemory, arr.m_data, arr.m_iElementCount * aiElementSize);
-        alloc.ReturnMemory(arr.m_data, (arr.m_iCapacityState & 0x3fffffff) * aiElementSize);
+        alloc.bufFree(arr.m_data, (arr.m_iCapacityState & 0x3fffffff) * aiElementSize);
         arr.m_iCapacityState = requestedCapacity | 0x80000000;
         arr.m_data = apInPlaceMemory;
     }
     else
     {
         int iRequestedBytes = requestedCapacity * aiElementSize;
-        arr.m_data = alloc.BufRealloc(arr.m_data, arr.m_iCapacityState * aiElementSize, iRequestedBytes);
+        arr.m_data = alloc.bufRealloc(arr.m_data, arr.m_iCapacityState * aiElementSize, iRequestedBytes);
         arr.m_iCapacityState = iRequestedBytes / aiElementSize;
     }
 }
@@ -528,19 +490,10 @@ void __cdecl FUN_00c909d0(hkMemoryAllocator& alloc, void* array, int aiElementSi
 // Adapted from another contributor's verified-close draft (chk_8b483addbe354a1f8074),
 // merged onto the current pack unit (real __m128 from <xmmintrin.h>).
 
-struct MeshAllocator
-{
-    virtual void f0();
-    virtual void f4();
-    virtual void f8();
-    virtual void* allocate(int* bytes);
-    virtual void freeBlock(void* data, int bytes);
-};
-
-static __forceinline MeshAllocator* getMeshAllocator()
+static __forceinline hkMemoryAllocator* getMeshAllocator()
 {
     Holder* holder = FUN_00c85750();
-    return (MeshAllocator*)holder->unk10;
+    return (hkMemoryAllocator*)holder->unk10;
 }
 
 struct MeshVertex
@@ -582,7 +535,7 @@ template <class T> struct MeshArray
         return data[i];
     }
 
-    __forceinline void reserve(MeshAllocator* a, int n)
+    __forceinline void reserve(hkMemoryAllocator* a, int n)
     {
 
         int old = cap & 0x3fffffff;
@@ -600,12 +553,12 @@ template <class T> struct MeshArray
     __forceinline void reset()
     {
 
-        MeshAllocator* a = getMeshAllocator();
+        hkMemoryAllocator* a = getMeshAllocator();
 
         size = 0;
 
         if ((cap & 0x80000000) == 0)
-            a->freeBlock(data, (cap & 0x3fffffff) * sizeof(T));
+            a->bufFree(data, (cap & 0x3fffffff) * sizeof(T));
 
         data = 0;
         cap = 0x80000000;
@@ -613,24 +566,24 @@ template <class T> struct MeshArray
 
     __forceinline void destroy()
     {
-        MeshAllocator* a = getMeshAllocator();
+        hkMemoryAllocator* a = getMeshAllocator();
         size = 0;
         if ((cap & 0x80000000) == 0)
-            a->freeBlock(data, (cap & 0x3fffffff) * sizeof(T));
+            a->bufFree(data, (cap & 0x3fffffff) * sizeof(T));
     }
     __forceinline void copyFrom(const MeshArray& other)
     {
 
-        MeshAllocator* a = getMeshAllocator();
+        hkMemoryAllocator* a = getMeshAllocator();
 
         if ((cap & 0x3fffffff) < other.size)
         {
 
             if ((cap & 0x80000000) == 0)
-                a->freeBlock(data, (cap & 0x3fffffff) * sizeof(T));
+                a->bufFree(data, (cap & 0x3fffffff) * sizeof(T));
 
             int bytes = other.size * sizeof(T);
-            data = (T*)a->allocate(&bytes);
+            data = (T*)a->bufAlloc(bytes);
             cap = bytes / int(sizeof(T));
         }
 
@@ -712,7 +665,7 @@ void __cdecl FUN_00da12b0(ScriptProgram* mesh, float tolerance, bool unique, Mes
 
                 const MeshVertex& v = vertices.data[idx];
 
-                MeshAllocator* a = getMeshAllocator();
+                hkMemoryAllocator* a = getMeshAllocator();
 
                 if (compact.size == (compact.cap & 0x3fffffff))
                     ResizeAudioStream(a, &compact, sizeof(MeshVertex));

@@ -1,7 +1,20 @@
+#include "../../include/Pathing.h"
+#include "../../include/BSSimpleArray.h"
 // fallout_shared/bgstalkingactivator.cpp: BGSTalkingActivator, Pathing, TalkingActivatorComparison, TESObjectACTI and more (23 functions)
 
+#include "layout_support.h"
+// The shared actor hierarchy supplies the base form and reference declarations.
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/Actor.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/PlayerMover.h"
+// Suppress the companion header's older copies of the shared base classes.
+#define FNV_BASEFORMCOMPONENT_H
+#define FNV_TESFORM_H
 #include "bgstalkingactivator.h"
 #include <malloc.h>
+#include <float.h>
 
 static const char s_kTalkingVoiceTypeWarning[] =
     "MASTERFILE: Could not find voice type (%08X) for activator '%s' (%08X).";
@@ -32,7 +45,41 @@ void BGSTalkingActivator::InitItem()
     SetInitializationState(true);
 }
 
-#include "bgstalkingactivator_radio.h"
+// Radio path declarations not supplied by the shared actor and mover headers.
+class PathingActorData;
+
+#include "../../include/RADIO_RANGE_TYPE.h"
+
+
+class ParentSpaceNode
+{
+  public:
+    bool m_bIsWorldspace;
+    TESWorldSpace* m_pContainingWorldspace;
+    TESObjectCELL* m_pReferenceCell;
+};
+class TeleportLink
+{
+  public:
+    TESObjectREFR* pPathNodeDoor;
+    NiPoint3 m_kDestinationPosition;
+};
+// PathingPath with its real members (Spaces, Doors, Start, End); include/PathingPath.h carries placeholder fields
+class RadioPathingPath
+{
+  public:
+    BSSimpleArray<ParentSpaceNode, 1024> Spaces;
+    BSSimpleArray<TeleportLink, 1024> Doors;
+    NiPoint3 Start;
+    NiPoint3 End;
+    RadioPathingPath();
+    ~RadioPathingPath();
+};
+
+
+FNV_STATIC_ASSERT(sizeof(PathingLocation) == 40);
+FNV_STATIC_ASSERT(sizeof(RadioPathingPath) == 56);
+FNV_STATIC_ASSERT(sizeof(ParentSpaceNode) == 12);
 
 // @fnv 0x004ff1a0
 void BGSTalkingActivator::FindRadioStations(TESObjectREFR* ref, BSSimpleList<TESObjectREFR*>* stations,
@@ -56,7 +103,7 @@ void BGSTalkingActivator::FindRadioStations(TESObjectREFR* ref, BSSimpleList<TES
         {
             switch (pCurrentRadioStation->GetRadioRangeType())
             {
-            case RADIO_RADIUS: {
+            case RADIO_RANGE_TYPE_RADIO_RANGE_RADIUS: {
                 TESObjectREFR* pExteriorRef = pCurrentRadioStation->GetExteriorRadioReference();
                 if (!pExteriorRef)
                     pExteriorRef = pCurrentRadioStation;
@@ -67,7 +114,7 @@ void BGSTalkingActivator::FindRadioStations(TESObjectREFR* ref, BSSimpleList<TES
                 else
                 {
                     if (m_pContainingWorldspace && m_pContainingWorldspace == pStationWorldSpace)
-                        fDistance = ref->GetLightLevelAtPoint(*pExteriorRef->GetPos());
+                        fDistance = ref->GetLightLevelAtPoint(*static_cast<const TESObjectREFR*>(pExteriorRef)->GetPos());
                     else if (!m_pContainingWorldspace)
                         fDistance = Pathing::FindPathDistance(
                             PathingLocation(pCurrentRadioStation), PathingLocation(ref),
@@ -77,11 +124,11 @@ void BGSTalkingActivator::FindRadioStations(TESObjectREFR* ref, BSSimpleList<TES
                 }
             }
             break;
-            case RADIO_EVERYWHERE:
+            case RADIO_RANGE_TYPE_RADIO_RANGE_EVERYWHERE:
                 bReferencePresent = true;
                 fDistance = -1.0f;
                 break;
-            case RADIO_WORLDSPACE: {
+            case RADIO_RANGE_TYPE_RADIO_RANGE_WORLDSPACE: {
                 TESWorldSpace* pStationWorldSpace = pCurrentRadioStation->GetParentWorldSpace();
                 if (!pStationWorldSpace)
                     Warning(
@@ -97,7 +144,7 @@ void BGSTalkingActivator::FindRadioStations(TESObjectREFR* ref, BSSimpleList<TES
                 }
                 else
                 {
-                    PathingPath path;
+                    RadioPathingPath path;
                     if (Pathing::FindRouteBetweenLocations(PathingLocation(pCurrentRadioStation), PathingLocation(ref),
                                                            &path, Pathing::ONE_WORLDSPACE, 0.0f, 0,
                                                            Pathing::IGNORE_LOCKS))
@@ -118,10 +165,10 @@ void BGSTalkingActivator::FindRadioStations(TESObjectREFR* ref, BSSimpleList<TES
                 }
             }
             break;
-            case RADIO_INTERIORS:
+            case RADIO_RANGE_TYPE_RADIO_RANGE_LINKEDINT:
                 if (m_pReferenceCell)
                 {
-                    PathingPath path;
+                    RadioPathingPath path;
                     if ((ref->GetParentCell() && pCurrentRadioStation->GetParentCell() &&
                          ref->GetParentCell() == pCurrentRadioStation->GetParentCell()) ||
                         Pathing::FindRouteBetweenLocations(PathingLocation(pCurrentRadioStation), PathingLocation(ref),
@@ -142,7 +189,7 @@ void BGSTalkingActivator::FindRadioStations(TESObjectREFR* ref, BSSimpleList<TES
                     }
                 }
                 break;
-            case RADIO_CELL:
+            case RADIO_RANGE_TYPE_RADIO_RANGE_CURRENT_CELL:
                 if (ref->GetParentCell() && pCurrentRadioStation->GetParentCell() &&
                     ref->GetParentCell() == pCurrentRadioStation->GetParentCell())
                 {
@@ -275,16 +322,15 @@ void TESObjectACTI::SetLoopingSound(TESSound* sound)
 // @fnv 0x004febd0
 void EffectSetting::SetEnchantEffectShader(TESEffectShader* shader)
 {
-    pEnchantEffectShader = shader;
+    data.m_pEnchantEffectShader = shader;
 }
 
 // @fnv 0x004fedc0
 bool BGSTalkingActivator::IsRadioStation()
 {
-    return IsRadioStationObject();
+    return TESForm::IsRadioStationObject();
 }
 
-struct Actor;
 struct FUN_00516bf0_shell : public BGSTalkingActivator
 {
     Actor* FUN_00516bf0();
@@ -340,10 +386,6 @@ void* __thiscall FUN_004fe6e0_Class::FUN_004fe6e0(unsigned int flags)
     return this;
 }
 
-struct PlayerMover
-{
-    unsigned int GetActorStateFlags();
-};
 struct Proxy00511120
 {
     void FUN_00511120(TESForm*);
@@ -362,18 +404,16 @@ void FUN_004fecf0_::CopyVoiceTypeFromActivator(TESForm* apCopy)
     SetVoiceType((BGSVoiceType*)((PlayerMover*)acti)->GetActorStateFlags());
 }
 
-struct FormChangeMask
+// This call uses the game's trivial flag-result ABI. The shared FormChangeMask
+// has a destructor, so retain only this query declaration on a buffer extension.
+struct TalkingActivatorChangeMask
 {
-    int flags;
+    unsigned int flags;
     operator bool() const;
 };
-struct BGSLoadFormBuffer
+struct TalkingActivatorSaveBuffer : BGSSaveFormBuffer
 {
-    FormChangeMask GetChangeFlags(int);
-};
-struct BGSSaveFormBuffer : public BGSLoadFormBuffer
-{
-    void SerializeFormData(void*, int);
+    TalkingActivatorChangeMask GetChangeFlags(int flags);
 };
 struct FUN_00511860_shell
 {
@@ -387,21 +427,11 @@ struct FUN_004ff800_shell : public FUN_00511860_shell
 void FUN_004ff800_shell::FUN_004ff800(BGSSaveFormBuffer* apSaveGameBuffer)
 {
     FUN_00511860_shell::FUN_00511860(apSaveGameBuffer);
-    if (apSaveGameBuffer->GetChangeFlags(0x800000))
+    if (static_cast<TalkingActivatorSaveBuffer*>(apSaveGameBuffer)->GetChangeFlags(0x800000))
         apSaveGameBuffer->SerializeFormData(((void**)this)[36], 0);
 }
 
 namespace fnv_004ff850 {
-struct FormChangeMask
-{
-    int m_uiFileCount;
-    operator bool() const;
-};
-struct BGSLoadFormBuffer
-{
-    FormChangeMask GetChangeFlags(int);
-    bool ReadFormIdentifier(void*);
-};
 struct Base005118c0
 {
     void FUN_005118c0(BGSLoadFormBuffer*);
@@ -416,7 +446,7 @@ struct FUN_004ff850_shell
 void FUN_004ff850_shell::LoadForm(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     ((Base005118c0*)this)->FUN_005118c0(apLoadGameBuffer);
-    if (apLoadGameBuffer->GetChangeFlags(0x800000))
+    if (apLoadGameBuffer->GetChangeFlags(0x800000).operator bool())
     {
         apLoadGameBuffer->ReadFormIdentifier(&_90);
     }
@@ -424,15 +454,6 @@ void FUN_004ff850_shell::LoadForm(BGSLoadFormBuffer* apLoadGameBuffer)
 }  // namespace fnv_004ff850
 
 namespace fnv_004ff930 {
-struct FormChangeMask
-{
-    unsigned int m_flags;
-    operator bool() const;
-};
-struct BGSLoadFormBuffer
-{
-    FormChangeMask GetOldChangeFlags(unsigned int);
-};
 struct FUN_004ff930_shell : TESForm
 {
     void RevertAndClearField(BGSLoadFormBuffer*);
@@ -441,7 +462,7 @@ struct FUN_004ff930_shell : TESForm
 void FUN_004ff930_shell::RevertAndClearField(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     TESForm::Revert((unsigned int)apLoadGameBuffer);
-    if (apLoadGameBuffer->GetOldChangeFlags(0x800000))
+    if (apLoadGameBuffer->GetOldChangeFlags(0x800000).operator bool())
         *(int*)((char*)this + 0x90) = 0;
 }
 }  // namespace fnv_004ff930
@@ -519,7 +540,6 @@ struct FUN_004fe640 : public TESObjectACTI
 // @fnv 0x004fe640
 FUN_004fe640::FUN_004fe640()
 {
-    *(void**)((char*)this + 0x70) = &DAT_01025520;
     SetFormType((ENUM_FORM_ID)0x16);
     reinterpret_cast<BGSTalkingActivator*>(this)->BGSTalkingActivator::ResetFormData();
 }
@@ -608,35 +628,21 @@ FUN_004fe710::~FUN_004fe710()
     ClearData();
 }
 
-class Actor : public TESObjectREFR
-{
-  public:
-    virtual ~Actor();
-};
 struct FUN_004534f0_shell
 {
     void FUN_004534f0(void* a);
 };
-struct FUN_004280f0_shell
-{
-    bool FUN_004280f0();
-};
-struct FUN_00428110_shell
-{
-    FUN_004280f0_shell* FUN_00428110(unsigned int* a1, unsigned int a2);
-};
 TESForm* __cdecl FUN_004839c0(unsigned int a);
 struct FUN_004ff8a0_shell : public BGSTalkingActivator
 {
-    void FUN_004ff8a0(void* arg);
+    void FUN_004ff8a0(BGSLoadFormBuffer* arg);
 };
 // Calls FUN_004534f0, then conditionally replaces m_pTempRef with an Actor cast of the form returned by FUN_004839c0.
 // @fnv 0x004ff8a0
-void FUN_004ff8a0_shell::FUN_004ff8a0(void* arg)
+void FUN_004ff8a0_shell::FUN_004ff8a0(BGSLoadFormBuffer* arg)
 {
     ((FUN_004534f0_shell*)this)->FUN_004534f0(arg);
-    unsigned int local;
-    if (((FUN_00428110_shell*)arg)->FUN_00428110(&local, 0x800000)->FUN_004280f0())
+    if (arg->GetChangeFlags(0x800000).operator bool())
     {
         m_pTempRef =
             (TESObjectREFR*)(m_pTempRef != 0 ? dynamic_cast<Actor*>(FUN_004839c0((unsigned int)m_pTempRef)) : 0);

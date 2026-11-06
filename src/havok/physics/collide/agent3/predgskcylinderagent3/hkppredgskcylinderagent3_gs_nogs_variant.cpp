@@ -1,3 +1,5 @@
+#include "../../../../../../include/Transform.h"
+
 
 // src/havok/physics/collide/agent3/predgskcylinderagent3/hkppredgskcylinderagent3_gs_nogs_variant.cpp - flag-variant unit created 2026-10-30 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/physics/collide/agent3/predgskcylinderagent3/hkppredgskcylinderagent3.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -209,7 +211,8 @@ extern "C" unsigned __int64 __rdtsc(void);
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern "C" void _ReadWriteBarrier();
 
-struct Vec
+// POD hkVector4 (vertices, AABB bounds, transform columns): it sits in unions, which the shared hkVector4's declared constructors forbid.
+struct CylAgentVector4
 {
     union
     {
@@ -225,14 +228,10 @@ struct Vec
     };
 };
 
-struct Transform
-{
-    Vec x, y, z, w;
-};
 union RotationScratch
 {
-    Vec axis;
-    Vec translation;
+    CylAgentVector4 axis;
+    CylAgentVector4 translation;
 };
 
 struct ShapeHeader
@@ -257,7 +256,7 @@ struct ShapeHeader
     virtual void v34();
     virtual void v38();
 
-    virtual void vertices(const unsigned short*, int, Vec*);
+    virtual void vertices(const unsigned short*, int, CylAgentVector4*);
 
     unsigned short allocationSize, referenceCount;
     int unk08, unk0c;
@@ -267,11 +266,11 @@ struct ShapeHeader
 
 struct Shape : ShapeHeader
 {
-    Vec minBound, maxBound;
+    CylAgentVector4 minBound, maxBound;
 
     float FUN_00d571a0();
     void FUN_00c905b0();
-    Shape* FUN_00d22590(Vec*, Vec*, float);
+    Shape* FUN_00d22590(CylAgentVector4*, CylAgentVector4*, float);
 };
 
 struct Body
@@ -301,7 +300,8 @@ struct Info
     Settings* settings;
 };
 
-struct Pair
+// hkpAgent3ProcessInput (Havok hkpAgent3.h): bodyA/B +0, overrideBodyA +8, input +0xc, contactMgr +0x10, aTb +0x20, distAtT1 +0x60
+struct Agent3ProcessInput
 {
     Body* body[2];
     int unk08;
@@ -3523,33 +3523,34 @@ struct Frame
 
 struct VectorOps
 {
-    void FUN_00c7f700(Transform*, Vec*);
+    void FUN_00c7f700(Transform*, CylAgentVector4*);
 };
 
 void ReleaseAllEntries(void*, void*, void*);
 
-void FUN_00db60c0(Pair*, float, float, float, Cache*, Vec*, Output*);
+void FUN_00db60c0(Agent3ProcessInput*, float, float, float, Cache*, CylAgentVector4*, Output*);
 
 struct VertexData
 {
-    Vec vertices[16];
-    Vec normal;
+    CylAgentVector4 vertices[16];
+    CylAgentVector4 normal;
     float radiusA, radiusB, tolerance, radiusSquared;
 };
 
 void FUN_00dae3a0(unsigned char*, VertexData*, int, Output*, void*);
 
-void ProcessCollision(Pair*, State*, Cache*, Feature*, unsigned char*, Vec*, Output*);
+void ProcessCollision(Agent3ProcessInput*, State*, Cache*, Feature*, unsigned char*, CylAgentVector4*, Output*);
 
 float smaller(float a, float b)
 {
     return a < b ? a : b;
 }
 
-__forceinline void transformVertices(Vec* v, int n, Transform* t)
+__forceinline void transformVertices(CylAgentVector4* v, int n, Transform* t)
 {
 
-    Vec cx = t->x, cy = t->y, cz = t->z, cw = t->w;
+    CylAgentVector4 cx = *reinterpret_cast<const CylAgentVector4*>(&t->r[0]), cy = *reinterpret_cast<const CylAgentVector4*>(&t->r[1]),
+        cz = *reinterpret_cast<const CylAgentVector4*>(&t->r[2]), cw = *reinterpret_cast<const CylAgentVector4*>(&t->r[3]);
     __m128 x = cx.value, y = cy.value, z = cz.value, w = cw.value;
 
     int i = n - 1;
@@ -3568,20 +3569,20 @@ float absReal(float x)
 }
 struct VecArg
 {
-    Vec* ptr;
-    VecArg(Vec* p) : ptr(p)
+    CylAgentVector4* ptr;
+    VecArg(CylAgentVector4* p) : ptr(p)
     {}
-    operator Vec*() const
+    operator CylAgentVector4*() const
     {
         return ptr;
     }
-    Vec* operator->() const
+    CylAgentVector4* operator->() const
     {
         return ptr;
     }
 };
 // @fnv 0x00d40d80
-Cache* __cdecl FUN_00d40d80(Pair* pair, State* state, Cache* cache, VecArg normal, Output* output)
+Cache* __cdecl FUN_00d40d80(Agent3ProcessInput* pair, State* state, Cache* cache, VecArg normal, Output* output)
 {
     Trace* stampTrace;
     volatile unsigned int* stampCursor;
@@ -3616,27 +3617,27 @@ Cache* __cdecl FUN_00d40d80(Pair* pair, State* state, Cache* cache, VecArg norma
 
     union
     {
-        Vec axisWorld;
-        Vec cw1;
-        Vec cx2;
+        CylAgentVector4 axisWorld;
+        CylAgentVector4 cw1;
+        CylAgentVector4 cx2;
     } sharedAxis;
     union
     {
         Feature copy;
-        Vec cx1;
-        Vec cz2;
+        CylAgentVector4 cx1;
+        CylAgentVector4 cz2;
     } sharedCopy;
     union
     {
         int active[2];
-        Vec cy1;
-        Vec cw2;
+        CylAgentVector4 cy1;
+        CylAgentVector4 cw2;
     } sharedActive;
 
     union
     {
-        Vec cz1;
-        Vec cy2;
+        CylAgentVector4 cz1;
+        CylAgentVector4 cy2;
     } sharedThird;
     Body* saved[2];
     Body** bodies[2];
@@ -3660,7 +3661,7 @@ Cache* __cdecl FUN_00d40d80(Pair* pair, State* state, Cache* cache, VecArg norma
     saved[0] = 0;
     saved[1] = 0;
 
-    Vec direction;
+    CylAgentVector4 direction;
 
     FUN_00d41930(pair, state, cache, &direction);
 
@@ -3799,7 +3800,7 @@ Cache* __cdecl FUN_00d40d80(Pair* pair, State* state, Cache* cache, VecArg norma
         {
 
             VertexData tracker;
-            Pair* reloadPair = pair;
+            Agent3ProcessInput* reloadPair = pair;
             Body** bodyBSlot = &reloadPair->body[1];
             Info* workInfo = pair->info;
             Body* bodyA = pair->body[0];
@@ -3829,10 +3830,10 @@ Cache* __cdecl FUN_00d40d80(Pair* pair, State* state, Cache* cache, VecArg norma
                 {
                     Transform* __restrict localTransform = scalarScratch.b->transform;
 
-                    sharedCopy.cx1 = localTransform->x;
-                    sharedActive.cy1 = localTransform->y;
-                    sharedThird.cz1 = localTransform->z;
-                    sharedAxis.cw1 = localTransform->w;
+                    sharedCopy.cx1 = *reinterpret_cast<const CylAgentVector4*>(&localTransform->r[0]);
+                    sharedActive.cy1 = *reinterpret_cast<const CylAgentVector4*>(&localTransform->r[1]);
+                    sharedThird.cz1 = *reinterpret_cast<const CylAgentVector4*>(&localTransform->r[2]);
+                    sharedAxis.cw1 = *reinterpret_cast<const CylAgentVector4*>(&localTransform->r[3]);
                     __m128 x = sharedCopy.cx1.value, y = sharedActive.cy1.value, z = sharedThird.cz1.value,
                            w = sharedAxis.cw1.value;
 
@@ -3847,19 +3848,19 @@ Cache* __cdecl FUN_00d40d80(Pair* pair, State* state, Cache* cache, VecArg norma
                     } while (--i >= 0);
                 }
 
-                Vec* second = tracker.vertices + contact->numA;
+                CylAgentVector4* second = tracker.vertices + contact->numA;
 
                 shapeB->vertices(indices + contact->numA, contact->numB, second);
 
                 {
                     Transform* __restrict localTransform = lateScratch.otherBody->transform;
 
-                    sharedAxis.cx2 = localTransform->x;
+                    sharedAxis.cx2 = *reinterpret_cast<const CylAgentVector4*>(&localTransform->r[0]);
                     __m128 x = _mm_load_ps(&sharedAxis.cx2.x);
-                    sharedThird.cy2 = localTransform->y;
+                    sharedThird.cy2 = *reinterpret_cast<const CylAgentVector4*>(&localTransform->r[1]);
                     __m128 y = _mm_load_ps(&sharedThird.cy2.x);
-                    sharedCopy.cz2 = localTransform->z;
-                    sharedActive.cw2 = localTransform->w;
+                    sharedCopy.cz2 = *reinterpret_cast<const CylAgentVector4*>(&localTransform->r[2]);
+                    sharedActive.cw2 = *reinterpret_cast<const CylAgentVector4*>(&localTransform->r[3]);
                     __m128 z = _mm_load_ps(&sharedCopy.cz2.x);
                     __m128 w = _mm_load_ps(&sharedActive.cw2.x);
                     int i = contact->numB - 1;

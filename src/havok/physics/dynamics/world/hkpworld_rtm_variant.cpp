@@ -1,10 +1,99 @@
+#include "../../../../../include/BSThreadCriticalSectionPC.h"
+#include "../../../../../include/hkArray.h"
 // src/havok/physics/dynamics/world/hkpworld_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/dynamics/world/hkpworld.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
 // src/havok/physics/dynamics/world/hkpworld.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/hkpworld.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpWorld.h"
+// VC9 recognizes this intrinsic type and the declarations below directly.
+// Retain the unit's SIMD representation when shared headers request xmmintrin.h.
+#define _INCLUDED_MM2
+// Exe 0x00c95a80 FUN_00c95a80: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4]; } __m128, LocalM128;
+extern "C" {
+extern LocalM128 _mm_add_ps(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_add_ss(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_and_ps(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_andnot_ps(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_cmpeq_ss(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_load_ps(float const*_A);
+extern LocalM128 _mm_load_ss(float const*_A);
+extern LocalM128 _mm_max_ps(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_min_ps(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_mul_ps(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_mul_ss(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_rsqrt_ss(LocalM128 _A);
+extern LocalM128 _mm_set_ps1(float _A);
+extern LocalM128 _mm_set_ss(float _A);
+extern LocalM128 _mm_setr_ps(float _A, float _B, float _C, float _D);
+extern LocalM128 _mm_setzero_ps(void);
+extern LocalM128 _mm_shuffle_ps(LocalM128 _A, LocalM128 _B, int _Imm8);
+extern LocalM128 _mm_sqrt_ss(LocalM128 _A);
+extern void _mm_store_ps(float *_V, LocalM128 _A);
+extern void _mm_store_ss(float *_V, LocalM128 _A);
+extern LocalM128 _mm_sub_ps(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_sub_ss(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_unpackhi_ps(LocalM128 _A, LocalM128 _B);
+extern LocalM128 _mm_xor_ps(LocalM128 _A, LocalM128 _B);
+}
+#include "../../../../../include/AutoMemContext.h"
+#include "../../../../../include/hkBaseObject.h"
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkMultiThreadCheck.h"
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkQuaternion.h"
+#include "../../../../../include/hkQsTransform.h"
+
+#include "../../../../../include/hkMonitorStream.h"
+// hkpWorld_MemUsageOut_hkpworld_rtm_variant: local type (was include/hkpWorld_MemUsageOut.h, which had no evidence of one real class); no method of it is bound to a named game function
+class hkpWorld_MemUsageOut_hkpworld_rtm_variant {
+public:
+    int m_maxSize;
+    int m_totalSize;
+    void* m_maxObject;
+};
+#include "../../../../../include/FinishingFlag.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkMonitorStream.h"
+#include "../../../../../include/NiBinaryStream.h"
+#include "../../../../../include/NiObject.h"
+#include "../../../../../include/NiStream.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkStackMemory.h"
+#include "../../../../../include/bhkWorld.h"
+#include "../../../../../include/hkDebugDisplay.h"
+#include "../../../../../include/hkDebugDisplayHandler.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkSingleton.h"
+#include "../../../../../include/hkThreadMemory.h"
+#include "../../../../../include/hkpBroadPhaseHandle.h"
+#include "../../../../../include/hkpCdBody.h"
+#include "../../../../../include/hkpCollidableCollidableFilter.h"
+#include "../../../../../include/hkpCollisionFilter.h"
+#include "../../../../../include/hkpSimulationIsland.h"
+#include "../../../../../include/hkpWorld.h"
+#include "../../../../../include/hkRotation.h"
+#include "../../../../../include/hkSimdReal.h"
+#include "../../../../../include/Pair.h"
+#include "../../../../../include/NiPoint3.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkAabb.h"
+#include "../../../../../include/hkVector4_S.h"
+#include "../../../../../include/hkpAction.h"
+#include "../../../../../include/hkpEntity.h"
+#include "../../../../../include/hkpPhysicsSystem.h"
+#include "../../../../../include/hkpPhantom.h"
+#include "../../../../../include/hkpSimulation.h"
+#include "../../../../../include/hkpMotion.h"
+#include "../../../../../include/hkpBroadPhase.h"
+#include "../../../../../include/hkSmallArray.h"
+
+typedef short hkInt16;
+typedef unsigned short hkUint16;
+typedef unsigned int hkUint32;
+inline hkMultiThreadCheck::hkMultiThreadCheck() {}
 struct FUN_00cf7c10 {
     void __thiscall PerformThisObjectOperation();
 };
@@ -27,18 +116,6 @@ struct FUN_00cf6d30_Class {
 };
 struct FUN_00c91280_Class {
     void __thiscall FUN_00c91280(int);
-};
-struct NiBinaryStream {
-    void* m_vtbl;
-    unsigned int m_uiStreamFlags;
-    void* m_pfnRead;
-    unsigned int (__cdecl* m_pfnWrite)(NiBinaryStream* pThis, const void* pvBuffer, unsigned int uiBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-    unsigned int BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents)
-    {
-        unsigned int uiBytes = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytes;
-        return uiBytes;
-    }
 };
 struct Ctx_00caa840 {
     unsigned int unk00;
@@ -201,7 +278,8 @@ template <class T> inline void SerializeValue(Ctx_00caa840& kStream, const T& tV
 {
     WriteBinaryArray(*kStream.m_pBackingStream, &tValue, 1);
 }
-struct Data_00caa840 {
+// Shape serialization view: two 64-byte blocks at 0x20/0x60 and state through 0xc8; include/Data.h is a 16-byte actor-value record.
+struct SerializedShapeState {
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -229,7 +307,7 @@ struct Data_00caa840 {
 };
 struct FUN_00caa840_shell {
     void* m_iWordAt00;
-    Data_00caa840* m_data;
+    SerializedShapeState* m_data;
     void FUN_00c8a280(Ctx_00caa840* ctx);
     void SaveShape(int n, Ctx_00caa840* ctx);
     void WriteToStream(Ctx_00caa840* ctx);
@@ -325,11 +403,6 @@ extern void (__stdcall *DAT_00fdf05c)(void*);
 struct FUN_00c911f0_Class {
     void FUN_00c911f0(void*);
 };
-struct hkpAction;
-struct hkpPhysicsSystem
-{
-    void __thiscall FUN_00d06590(hkpAction* action);
-};
 struct FUN_00c928c0_ActionList
 {
     hkpAction** m_ppActions;
@@ -350,16 +423,11 @@ struct FUN_00c928c0_Context
     unsigned int m_ownerCount2;
 };
 void FUN_00c928c0( FUN_00c928c0_Context* context, hkpPhysicsSystem* physicsSystem);
-struct hkpWorld_MemUsageOut {
-    int m_maxSize;
-    int m_totalSize;
-    void* m_maxObject;
-};
 struct FUN_00c92b50_Class {
     char pad[0x28];
     void* m_data;   // +0x28
     int m_iElementCount;     // +0x2c
-    void __thiscall ComputeMemoryUsage(hkpWorld_MemUsageOut* out);
+    void __thiscall ComputeMemoryUsage(hkpWorld_MemUsageOut_hkpworld_rtm_variant* out);
 };
 struct CA8B80Command {
     unsigned char m_bType;
@@ -375,53 +443,19 @@ struct FUN_00c97f50_Class {
     void DispatchOrQueue(void* p);
 };
 extern int DAT_010c3bb8;
-struct FUN_00c98350_Class {
-    void* m_p;
-    void* __thiscall InitAndMaybeFree(int);
-};
 void __cdecl _Deallocate(void*);
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
-struct FUN_00c983e0_Class {
-    void ForEachCall(int a, int b, int c, int d, int e);
-};
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
-struct FUN_00c984a0_Class {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    void FUN_00c984a0(int a1, int a2, int a3);
-};
-struct FUN_00c98540_Class {
-    void CallAllWithArgs(int a, int b, int c);
-};
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* lpCriticalSection);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void* lpCriticalSection);
-struct FUN_00c98600_Class {
-    unsigned int unk00;
-    unsigned int unk04;
-    void* m_ppData;      // +0x08
-    int m_uiItemCount;        // +0x0C
-    unsigned int unk10;
-    void* m_cs;         // +0x14
-    void CallVirtualOnAll(int a, int b, int c, int d, int e, int f, int g, int h);
-};
-struct FUN_00c990b0_Class {
-    void FUN_00c990b0(int a, int b, int c, int d);
-};
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall FUN_00fdf05c(void*);
 extern "C" __declspec(dllimport) void __stdcall FUN_00fdf100(void*);
-struct FUN_00c995f0_Class {
-    void FUN_00c995f0();
-};
 struct FUN_00c90f30_Class {
     int unk00;
     void* __thiscall FUN_00c90f30();
@@ -643,82 +677,6 @@ extern float DAT_011ac3a0;
 extern float DAT_012677ac;
 extern float DAT_011afe64;
 extern char DAT_012677cd;
-struct bhkWorld {
-    virtual void v00() throw();
-    virtual void v01() throw();
-    virtual void v02() throw();
-    virtual void v03() throw();
-    virtual void v04() throw();
-    virtual void v05() throw();
-    virtual void v06() throw();
-    virtual void v07() throw();
-    virtual void v08() throw();
-    virtual void v09() throw();
-    virtual void v10() throw();
-    virtual void v11() throw();
-    virtual void v12() throw();
-    virtual void v13() throw();
-    virtual void v14() throw();
-    virtual void v15() throw();
-    virtual void v16() throw();
-    virtual void v17() throw();
-    virtual void v18() throw();
-    virtual void v19() throw();
-    virtual void v20() throw();
-    virtual void v21() throw();
-    virtual void v22() throw();
-    virtual void v23() throw();
-    virtual void v24() throw();
-    virtual void v25() throw();
-    virtual void v26() throw();
-    virtual void v27() throw();
-    virtual void v28() throw();
-    virtual void v29() throw();
-    virtual void v30() throw();
-    virtual void v31() throw();
-    virtual void v32() throw();
-    virtual void v33() throw();
-    virtual void v34() throw();
-    virtual void v35() throw();
-    virtual void v36() throw();
-    virtual WorldExt* GetHkpWorld() throw();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    char unk14;
-    char unk15;
-    char unk16;
-    char unk17;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    void** unk2C;
-    unsigned int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    unsigned int unk50;
-
-    void FUN_00c674d0(void* p, unsigned int count) throw();
-    void ProcessConstraints() throw();
-    void FUN_00c6aac0() throw();
-    void FUN_00c6a540(float f) throw();
-    void FUN_00c66a00() throw();
-    void FUN_00c66e20(float f) throw();
-    void FUN_00c68de0() throw();
-    void FlushEntries() throw();
-    void SetProcessEnabled(int arg) throw();
-
-    bool StepSimulation();
-};
 void __stdcall FUN_00c910a0(int);
 void FUN_00c911a0();
 extern void (__stdcall *DAT_00fdf100)(void*);
@@ -758,10 +716,6 @@ struct FilterOwner {
     void* unknown_00;
     void* unknown_04;
     FilterCore core;
-};
-struct Pair {
-    const void* left;
-    const void* right;
 };
 struct OpPacket {
     unsigned char opcode;
@@ -815,13 +769,6 @@ struct FUN_00c913b0_Class {
     void ProcessPair(const void* left, const void* right);
 };
 struct Sh00c91160 { void FUN_00c91160(void* rec); };
-struct QueuedOp
-{
-    unsigned char m_ucOperationType;      // +0x0
-    int m_p;                  // +0x4
-    short m_kPointA;                // +0x8
-    unsigned char m_kPointB;        // +0xa
-};
 struct SimVtbl
 {
     void* slot[12];
@@ -840,322 +787,26 @@ struct WorldQ
 
     void __thiscall DispatchOp(int a0, int a1, int a2);
 };
-class hkpWorldC914;
 class hkpMotionC914;
 void __cdecl FUN_00cf1480(float fA, float fB, int* piOut) throw();
 struct hkpCollidableQualityC914 {
     void SetFlagBits(unsigned char ucA, unsigned char ucB, unsigned char ucC) throw();
 };
-class hkpEntityC914 {
-public:
-    virtual void V00() throw();
-    virtual void V01() throw();
-    virtual void V02() throw();
-    virtual void V03() throw();
-    virtual hkpMotionC914* getMotion() throw();
 
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    hkpWorldC914* m_pOwningWorld;
-    int m_ulUserData;
-    const void* m_pCollisionShape;
-    int m_uiCollisionShapeKey;
-    hkpMotionC914* m_pMotionState;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-    int m_40;
-    int m_44;
-    int m_48;
-    int m_4c;
-    int m_50;
-    int m_54;
-    int m_58;
-    int m_5c;
-    int m_60;
-    int m_64;
-    int m_68;
-    int m_6c;
-    int m_70;
-    int m_74;
-    int m_78;
-    int m_7c;
-    int m_80;
-    int m_84;
-    int m_88;
-    int m_8c;
-    int m_90;
-    int m_94;
-    int m_98;
-    int m_9c;
-    int m_a0;
-    int m_a4;
-    int m_a8;
-    int m_ac;
-    int m_b0;
-    int m_b4;
-    int m_b8;
-    int m_bc;
-    int m_c0;
-    int m_c4;
-    int m_c8;
-    int m_cc;
-    int m_d0;
-    int m_uiUniqueId;
-    int m_d8;
-    int m_dc;
-    hkpCollidableQualityC914 m_e0;
-    int m_e4;
-    short m_e8;
-    unsigned short m_ea;
-    unsigned short m_ec;
-    short m_ee;
-    int m_f0;
-
-    void UpdateBoundingVolume(hkpWorldC914* pkWorld, const void* pvShape) throw();
-    void FUN_00c90510() throw();
-};
 struct hkWorldOperationBaseC914 {
     unsigned char m_type;
 };
 struct hkWorldOperationAddEntityC914 : public hkWorldOperationBaseC914 {
-    hkpEntityC914* m_pEntity;
+    hkpEntity* m_pEntity;
     int m_iActivationState;
 
     hkWorldOperationAddEntityC914() { m_type = 1; }
 };
-class hkpWorldC914 {
-public:
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-    int m_40;
-    int m_44;
-    int m_48;
-    int m_4c;
-    int m_50;
-    int m_54;
-    int m_58;
-    int m_5c;
-    int m_60;
-    int m_64;
-    int m_68;
-    int m_6c;
-    int m_70;
-    int m_74;
-    int m_78;
-    int m_7c;
-    int m_80;
-    int m_84;
-    int m_88;
-    int m_iPendingOperationCount;
-    int m_iQueuedOperationCount;
-    int m_iCriticalOperationsLockCount;
-    int m_98;
-    bool m_bBlockExecutingPendingOperations;
-    bool m_bBlockExecutingPendingOperationQueues;
-    char m_9e;
-    char m_9f;
-    int m_a0;
-    int m_iPendingOperationQueueCount;
-    int m_a8;
-    int m_ac;
-    int m_b0;
-    int m_b4;
-    int m_b8;
-    int m_bc;
-    int m_c0;
-    int m_c4;
-    int m_c8;
-    int m_cc;
-    int m_d0;
-    int m_d4;
-    int m_d8;
-    int m_dc;
-    int m_e0;
-    int m_e4;
-    int m_e8;
-    int m_ec;
-    int m_f0;
-    int m_f4;
-    int m_f8;
-    int m_fc;
-    int m_100;
-    int m_uiLastEntityUid;
-    int m_108;
-    int m_10c;
-    int m_110;
-    int m_114;
-    int m_118;
-    int m_11c;
-    int m_120;
-    int m_124;
-    int m_128;
-    int m_12c;
-    int m_130;
-    int m_134;
-    int m_138;
-    int m_13c;
-    int m_140;
-    int m_144;
-    int m_148;
-    int m_14c;
-    int m_150;
-    int m_154;
-    int m_158;
-    int m_15c;
-    int m_160;
-    int m_164;
-    int m_168;
-    int m_16c;
-    int m_170;
-    int m_174;
-    int m_178;
-    int m_17c;
-    int m_180;
-    int m_184;
-    int m_188;
-    int m_18c;
-    int m_190;
-    int m_194;
-    int m_198;
-    int m_19c;
-    int m_1a0;
-    int m_1a4;
-    int m_1a8;
-    int m_1ac;
-    int m_1b0;
-    int m_1b4;
-    int m_1b8;
-    int m_1bc;
-    int m_1c0;
-    int m_1c4;
-    int m_1c8;
-    int m_1cc;
-    int m_1d0;
-    int m_1d4;
-    int m_1d8;
-    int m_1dc;
-    int m_1e0;
-    int m_1e4;
-    int m_1e8;
-    int m_1ec;
-    int m_1f0;
-    int m_1f4;
-    int m_1f8;
-    int m_1fc;
-    int m_200;
-    int m_204;
-    int m_208;
-    int m_20c;
-    int m_210;
-    int m_214;
-    int m_218;
-    int m_21c;
-    int m_220;
-    int m_224;
-    int m_228;
-    int m_22c;
-    int m_230;
-    int m_234;
-    int m_238;
-    int m_23c;
-    int m_240;
-    int m_244;
-    int m_248;
-    int m_24c;
-    int m_250;
-    int m_254;
-    int m_258;
-    int m_25c;
-    int m_260;
-    int m_264;
-    int m_268;
-    int m_26c;
-    int m_270;
-    int m_274;
-    int m_278;
-    int m_27c;
-    int m_280;
-    int m_284;
-    int m_288;
-    int m_28c;
-    int m_290;
-    int m_294;
-    int m_298;
-    int m_29c;
-    int m_2a0;
-    int m_2a4;
-    int m_2a8;
-    int m_2ac;
-    int m_2b0;
-    int m_2b4;
-    int m_2b8;
-    int m_2bc;
-    int m_2c0;
-    int m_2c4;
-    int m_2c8;
-    int m_2cc;
-    int m_2d0;
-    int m_2d4;
-    int m_2d8;
-    int m_2dc;
-    int m_2e0;
-    int m_2e4;
-    int m_2e8;
-    int m_2ec;
-    int m_2f0;
-    int m_2f4;
-    int m_2f8;
-    int m_2fc;
-    int m_300;
-    char m_304;
-    unsigned char m_305;
-    unsigned char m_306;
-    unsigned char m_307;
 
-    bool areCriticalOperationsLocked() const { return m_iCriticalOperationsLockCount != 0; }
-    void lockCriticalOperations() { m_iCriticalOperationsLockCount++; }
-    void unlockAndAttemptToExecutePendingOperations()
-    {
-        m_iCriticalOperationsLockCount--;
-        if (m_iCriticalOperationsLockCount == 0 && !m_bBlockExecutingPendingOperations) {
-            if (m_iPendingOperationCount)
-                FUN_00c91120();
-            if (m_iPendingOperationQueueCount == 1 && m_iQueuedOperationCount)
-                FUN_00c91140();
-        }
-    }
-
-    void FUN_00c91120() throw();
-    void FUN_00c91140() throw();
-    void FUN_00c91160(const hkWorldOperationBaseC914& kOperation) throw();
-
-    hkpEntityC914* FUN_00c914d0(hkpEntityC914* pkEntity, int iInitialActivationState) throw();
-};
-void __cdecl FUN_00cb4640(hkpWorldC914* pkWorld, hkpEntityC914* pkEntity, int iInitialActivationState) throw();
-void __cdecl FUN_00cb59f0(hkpWorldC914* pkWorld, hkpEntityC914* pkEntity) throw();
-void __cdecl NotifyEntityAdded(hkpWorldC914* pkWorld, hkpEntityC914* pkEntity) throw();
-void __cdecl FUN_00cffa00(hkpEntityC914* pkEntity) throw();
+void __cdecl FUN_00cb4640(hkpWorld* pkWorld, hkpEntity* pkEntity, int iInitialActivationState) throw();
+void __cdecl FUN_00cb59f0(hkpWorld* pkWorld, hkpEntity* pkEntity) throw();
+void __cdecl NotifyEntityAdded(hkpWorld* pkWorld, hkpEntity* pkEntity) throw();
+void __cdecl FUN_00cffa00(hkpEntity* pkEntity) throw();
 struct PointerArray {
     void** elements;
     int size;
@@ -1413,10 +1064,10 @@ public:
     void FUN_00d06540(void* object);
 };
 void __cdecl FUN_00c927f0(hkWorldC927* world, hkSetC927* set);
-struct hkArrayRaw { void** m_data; int m_iElementCount; int m_iCapacityState; };
+// the pointer arrays below are hkArray<void*> (include/hkArray.h)
 struct PendingOps { 
     void* m_vtbl; void* m_04; void* m_08; void* m_0c; 
-    hkArrayRaw m_10; hkArrayRaw m_1c;
+    hkArray<void*> m_10; hkArray<void*> m_1c;
 };
 struct HandlerRegistration { void* data; void* other; HandlerRegistration* next; };
 struct WorldSave {
@@ -1424,9 +1075,9 @@ struct WorldSave {
     void* m_pSimulation; unsigned int m_unknown0c;
     hkVector4 m_kGravity;
     void* m_pFixedIsland; void* m_pFixedRigidBody;
-    hkArrayRaw m_kActiveSimulationIslands;
-    hkArrayRaw m_kInactiveSimulationIslands;
-    hkArrayRaw m_kDirtySimulationIslands;
+    hkArray<void*> m_kActiveSimulationIslands;
+    hkArray<void*> m_kInactiveSimulationIslands;
+    hkArray<void*> m_kDirtySimulationIslands;
     void* m_pMaintenanceManager; void* m_pMemoryWatchDog;
     unsigned char m_bAssertOnRunningOutOfSolverMemory;
     void* m_pJobSemaphore; void* m_pKdTreeManager;
@@ -1457,12 +1108,12 @@ struct WorldSave {
     float m_fSimplifiedToiPenetrationThreshold; float m_fToiPenetrationThreshold;
     float m_fHigherToiPenetrationThreshold; float m_fForcedToiPenetrationThreshold;
     unsigned int m_uiLastEntityUid; unsigned int m_uiLastIslandUid; unsigned int m_uiLastConstraintUid;
-    hkArrayRaw m_kPhantoms; hkArrayRaw m_kActionListeners; hkArrayRaw m_kEntityListenerArray;
-    hkArrayRaw m_kPhantomListeners; hkArrayRaw m_kConstraintListeners; hkArrayRaw m_kWorldDeletionListeners;
-    hkArrayRaw m_kIslandActivationListeners; hkArrayRaw m_kWorldPostSimulationListeners;
-    hkArrayRaw m_kWorldPostIntegrateListeners; hkArrayRaw m_kWorldPostCollideListeners;
-    hkArrayRaw m_kIslandPostIntegrateListeners; hkArrayRaw m_kIslandPostCollideListeners;
-    hkArrayRaw m_kContactListeners; hkArrayRaw m_kContactImpulseLimitBreachedListeners;
+    hkArray<void*> m_kPhantoms; hkArray<void*> m_kActionListeners; hkArray<void*> m_kEntityListenerArray;
+    hkArray<void*> m_kPhantomListeners; hkArray<void*> m_kConstraintListeners; hkArray<void*> m_kWorldDeletionListeners;
+    hkArray<void*> m_kIslandActivationListeners; hkArray<void*> m_kWorldPostSimulationListeners;
+    hkArray<void*> m_kWorldPostIntegrateListeners; hkArray<void*> m_kWorldPostCollideListeners;
+    hkArray<void*> m_kIslandPostIntegrateListeners; hkArray<void*> m_kIslandPostCollideListeners;
+    hkArray<void*> m_kContactListeners; hkArray<void*> m_kContactImpulseLimitBreachedListeners;
     void* m_pViolatedConstraintArray; void* m_pBroadPhaseBorder;
     void FUN_00c92db0(struct ObjectWriter* writer, void* unused);
 };
@@ -1521,7 +1172,7 @@ extern char str_010c64f4;
 extern char str_010c64e4;
 extern char str_010c64d4;
 extern char str_010c64c8;
-static __forceinline void SaveArray(ObjectWriter* writer,hkArrayRaw& array,char* name,unsigned int stride) {
+static __forceinline void SaveArray(ObjectWriter* writer,hkArray<void*>& array,char* name,unsigned int stride) {
     if ((array.m_iCapacityState & 0x80000000u) == 0 || writer->m_writeAll10) {
         void* ptr = array.m_data;
          unsigned int capacity = (array.m_iCapacityState & 0x3fffffff);
@@ -1537,7 +1188,6 @@ struct WorldWatchDogHolder : hkpWorld {
 };
 inline void* __cdecl operator new(unsigned int, void* p) { return p; }
 inline void __cdecl operator delete(void*, void*) { }
-struct hkpPhantom;
 struct ThreadMemHolder {
     int unk00;
     int unk04;
@@ -1555,20 +1205,6 @@ struct PendingOperation {
     unsigned char unk02;
     unsigned char unk03;
     hkpPhantom* m_pPhantom;
-};
-struct hkpPhantom : hkReferencedObject {
-    hkpWorld* m_pOwningWorld;
-    int unk0C;
-    int unk10;
-    int unk14;
-    void* unk18;
-
-    virtual ~hkpPhantom();
-    virtual void vfunc04();
-    virtual void vfunc08();
-    virtual void vfunc0C();
-    virtual void* vfunc10();
-    void FUN_00d07b90();
 };
 struct FUN_00c936a0_World : hkpWorld {
     void FUN_00c91160(PendingOperation* op);
@@ -1596,60 +1232,39 @@ struct FUN_00c93ae0_Pair {
 struct FUN_00c93ae0_class {
     void FUN_00c93ae0(void* p1, void* p2, float f);
 };
-template <class T>
-struct hkArrayC93D {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    hkArrayC93D() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
-};
-struct hkMultiThreadCheckC93D {
-    hkUint32 m_uiThreadId;
-    hkUint16 m_usMarkedForWrite;
-    hkUint16 m_usMarkCount;
 
-    hkMultiThreadCheckC93D() throw() : m_uiThreadId(0xfffffff1), m_usMarkedForWrite(0x8000) {}
-};
-class hkReferencedObjectC93D {
-public:
-    virtual void CalcContentStatistics() throw();
-    hkUint16 m_usMemSizeAndFlags;
-    hkInt16 m_sReferenceCount;
-
-    hkReferencedObjectC93D() throw() : m_sReferenceCount(1) {}
-};
-class FUN_00c93d10 : public hkReferencedObjectC93D {
+class FUN_00c93d10 : public hkReferencedObject {
 public:
     void* m_pSimulation;
     char m_padC[0x4];
     hkVector4 m_kGravity;
     void* m_pFixedIsland;
     void* m_pFixedRigidBody;
-    hkArrayC93D<void*> m_kActiveSimulationIslands;
-    hkArrayC93D<void*> m_kInactiveSimulationIslands;
-    hkArrayC93D<void*> m_kDirtySimulationIslands;
+    hkArray<void*> m_kActiveSimulationIslands;
+    hkArray<void*> m_kInactiveSimulationIslands;
+    hkArray<void*> m_kDirtySimulationIslands;
     void* m_pMaintenanceManager;
     void* m_pMemoryWatchDog;
     char m_pad54[0x54];
-    hkMultiThreadCheckC93D m_kMultiThreadCheck;
+    hkMultiThreadCheck m_kMultiThreadCheck;
     char m_padB0[0x6c];
-    hkArrayC93D<void*> m_kPhantoms;
-    hkArrayC93D<void*> m_kActionListeners;
-    hkArrayC93D<void*> m_kEntityListenerArray;
-    hkArrayC93D<void*> m_kPhantomListeners;
-    hkArrayC93D<void*> m_kConstraintListeners;
-    hkArrayC93D<void*> m_kWorldDeletionListeners;
-    hkArrayC93D<void*> m_kIslandActivationListeners;
-    hkArrayC93D<void*> m_kWorldPostSimulationListeners;
-    hkArrayC93D<void*> m_kWorldPostIntegrateListeners;
-    hkArrayC93D<void*> m_kWorldPostCollideListeners;
-    hkArrayC93D<void*> m_kIslandPostIntegrateListeners;
-    hkArrayC93D<void*> m_kIslandPostCollideListeners;
-    hkArrayC93D<void*> m_kContactListeners;
+    hkArray<void*> m_kPhantoms;
+    hkArray<void*> m_kActionListeners;
+    hkArray<void*> m_kEntityListenerArray;
+    hkArray<void*> m_kPhantomListeners;
+    hkArray<void*> m_kConstraintListeners;
+    hkArray<void*> m_kWorldDeletionListeners;
+    hkArray<void*> m_kIslandActivationListeners;
+    hkArray<void*> m_kWorldPostSimulationListeners;
+    hkArray<void*> m_kWorldPostIntegrateListeners;
+    hkArray<void*> m_kWorldPostCollideListeners;
+    hkArray<void*> m_kIslandPostIntegrateListeners;
+    hkArray<void*> m_kIslandPostCollideListeners;
+    hkArray<void*> m_kContactListeners;
 
     FUN_00c93d10(int iUnused) throw();
-    virtual void CalcContentStatistics() throw();
+    virtual void calcContentStatistics() throw();
 };
 struct SystemObject {
     unsigned int unk00;
@@ -1696,56 +1311,13 @@ class hkpConstraintInstanceC980;
 class hkpActionC980;
 class hkpRigidBodyC980;
 class hkpEntityC980;
-class hkpPhantomC980;
-template <class T>
-struct hkArrayC980 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int GetLogicalSize() const { return m_iElementCount; }
-    const T& operator[](int i) const { return m_data[i]; }
-    const T* begin() const { return m_data; }
-    int indexOf(const T& t, int startIdx = 0, int endIdx = -1) const
-    {
-        if (endIdx < 0)
-            endIdx = m_iElementCount;
-        for (int i = startIdx; i < endIdx; ++i) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 struct hkBoolRetC980 {
     char m_cBooleanValue;
     hkBoolRetC980() throw() {}
 };
-class hkpPhysicsSystemC980 {
-public:
-    void* m_ppVirtualMethodTable;
-    int m_usMemSizeAndFlags;
-    hkArrayC980<hkpRigidBodyC980*> m_ppRigidBodies;
-    hkArrayC980<hkpConstraintInstanceC980*> m_ppConstraints;
-    hkArrayC980<hkpActionC980*> m_ppActions;
-    hkArrayC980<hkpPhantomC980*> m_kPhantoms;
 
-    const hkArrayC980<hkpRigidBodyC980*>& getRigidBodies() const { return m_ppRigidBodies; }
-    const hkArrayC980<hkpConstraintInstanceC980*>& getConstraints() const { return m_ppConstraints; }
-    const hkArrayC980<hkpActionC980*>& getActions() const { return m_ppActions; }
-    const hkArrayC980<hkpPhantomC980*>& getPhantomArray() const { return m_kPhantoms; }
-};
-class hkpWorldC980 {
-public:
-    hkBoolRetC980 FUN_00c97e80(hkpConstraintInstanceC980* pkConstraint) throw();
-    void DispatchOrQueue(hkpActionC980* pkAction) throw();
-    void RemoveEntities(hkpEntityC980* const* ppkEntityBatch, int iNumEntities) throw();
-    hkBoolRetC980 ProcessTarget(hkpEntityC980* pkEntity) throw();
-    void FUN_00c95800(hkpPhantomC980* const* ppkPhantomBatch, int iNumPhantoms) throw();
-    void FUN_00c92c70(hkpPhantomC980* pkPhantom) throw();
 
-    void FUN_00c980d0(const hkpPhysicsSystemC980* pkSys) throw();
-};
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
 class hkListenerC984 {
 public:
@@ -1766,12 +1338,7 @@ public:
 };
 extern void(__stdcall* DAT_00fdf05c)(void* pvSection);
 extern void(__stdcall* DAT_00fdf100)(void* pvSection);
-class hkCriticalSectionC985 {
-public:
-    int m_kCriticalSection[6];
-    void enter() { DAT_00fdf05c(this); }
-    void leave() { DAT_00fdf100(this); }
-};
+
 struct hkVector3C985 {
     float x;
     float y;
@@ -1787,17 +1354,6 @@ public:
     virtual void unk14();
     virtual void notify(void* a, void* b, void* c, float x, float y, float z, void* d);
 };
-class hkDispatcherC985 {
-public:
-    int unk00;
-    int unk04;
-    hkListenerC985** m_kListeners;
-    int m_numListeners;
-    int unk10;
-    hkCriticalSectionC985* m_lock;
-
-    void FUN_00c98590(void* a, void* b, void* c, float x, float y, float z, void* d);
-};
 class hkpListenerC986 {
 public:
     virtual void V0() throw();
@@ -1809,17 +1365,6 @@ public:
     virtual void V6() throw();
     virtual void V7() throw();
     virtual void notify(int a, int b, int c, int d) throw();
-};
-class hkpListenerListC986 {
-public:
-    int unk00;
-    int unk04;
-    hkpListenerC986** m_data;
-    int m_iElementCount;
-    int unk10;
-    void* m_pWorldLock;
-
-    void FUN_00c98670(int a, int b, int c, int d);
 };
 class hkpListenerC98B {
 public:
@@ -1833,17 +1378,6 @@ public:
     virtual void V7() throw();
     virtual void V8() throw();
     virtual void notify(int a, int b, int c, int d, int e) throw();
-};
-class hkpListenerListC98B {
-public:
-    int unk00;
-    int unk04;
-    hkpListenerC98B** m_data;
-    int m_iElementCount;
-    int unk10;
-    void* m_pWorldLock;
-
-    void FUN_00c986c0(int a, int b, int c, int d, int e);
 };
 // 0x00c98720  unit_74447a602ec8.cpp  /MT /O2 /GS /EHsc /Gy
 // thiscall, 6 stack args (ret 0x18): lock pointer at this+0x14, walk the array at
@@ -1863,27 +1397,8 @@ struct Listener00c98720 {
     virtual void s24();
     virtual void s28(int, int, int, int, int, int);
 };
-struct C00c98720 {
-    char pad00[0x8];
-    Listener00c98720** arr08;
-    int count0c;
-    char pad10[0x4];
-    void* pCS14;
 
-    void FUN_00c98720(int a, int b, int c, int d, int e, int f);
-};
-union __declspec(intrin_type) __declspec(align(16)) __m128 {
-    float m128_f32[4];
-};
-extern "C" __m128 __cdecl _mm_setzero_ps(void);
-extern "C" __m128 __cdecl _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 __cdecl _mm_sub_ps(__m128 a, __m128 b);
-struct FUN_00c986c0_Obj {
-    void FUN_00c986c0(__m128* a, __m128* b, int c, int d, int e);
-};
-struct FUN_00c98b60_Class {
-    void FUN_00c98b60(__m128* v, float f, int c, int d, int e);
-};
+
 struct IListener {
     virtual void v00();
     virtual void v01();
@@ -1898,16 +1413,6 @@ struct IListener {
     virtual void v0a();
     virtual void v0b();
     virtual void v0c(void* a1, void* a2, void* a3, void* a4, void* a5);
-};
-struct ListenerManager {
-    int unk00;
-    int unk04;
-    IListener** m_kListeners;
-    int m_uiItemCount;
-    int unk10;
-    void* m_cs;
-
-    void FUN_00c99100(void* a1, void* a2, void* a3, void* a4, void* a5);
 };
 extern "C" __declspec(dllimport) void __stdcall FUN_00fdf05c(void*);
 extern "C" __declspec(dllimport) void __stdcall FUN_00fdf100(void*);
@@ -1929,15 +1434,6 @@ struct FUN_00c99160_Dispatch {
     virtual void fn38();
     virtual void fn3c(int a, int b, int c, int d, int e);
 };
-struct FUN_00c99160_Owner {
-    int unk00;
-    int unk04;
-    FUN_00c99160_Dispatch** listeners;
-    int listenerCount;
-    int unk10;
-    void* mutex;
-    void DispatchToListeners(int a, int b, int c, int d, int e);
-};
 struct FUN_00c991c0_Interface {
     virtual void vf00();
     virtual void vf04();
@@ -1955,22 +1451,8 @@ struct FUN_00c991c0_Interface {
     virtual void vf34();
     virtual void __thiscall slot38(int, int, int, int);
 };
-struct FUN_00c991c0_Class {
-    void* m_iWordAt00;
-    void* m_iWordAt04;
-    FUN_00c991c0_Interface** m_8;
-    int m_iThirdValue;
-    void* m_10;
-    void* m_14;
-
-    void __thiscall DispatchToSlots(int, int, int, int);
-};
 extern void (__stdcall *DAT_00fdf05c)(void*);
 extern void (__stdcall *DAT_00fdf100)(void*);
-struct HavokHelper {
-    void DrawAxes(const hkRotation& rot, float a2, int a3, int a4);
-    void FUN_00c99870(const hkQuaternion& a1, float a2, int a3, int a4);
-};
 struct __declspec(align(16)) AlignedRotation : hkRotation {
     void FUN_00ce52e0(const hkQuaternion& a1);
 };
@@ -2041,57 +1523,18 @@ struct hkVector3CA8A {
 struct hkWorldOperationBaseCA8A {
     unsigned char m_type;
 };
-class hkpEntityCA8A;
 struct hkSetVelocityOpCA8A : public hkWorldOperationBaseCA8A {
-    hkpEntityCA8A* m_pEntity;
+    hkpEntity* m_pEntity;
     float m_fVelocity[3];
 
     hkSetVelocityOpCA8A() { m_type = 0x1b; }
 };
-class hkpWorldCA8A {
-public:
-    int unk00[0x25];
-    int m_iCriticalOperationsLockCount;
 
-    bool areCriticalOperationsLocked() const { return m_iCriticalOperationsLockCount != 0; }
-    void FUN_00c91160(const hkWorldOperationBaseCA8A& kOperation) throw();
-};
 struct UnkCall {
     void FUN_00c9c1d0();
 };
-class hkpMotionCA8A {
-public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2C();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3C();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void SetTranslationalVelocity(const hkVector3CA8A& v);
-};
-class hkpEntityCA8A {
-public:
-    int unk00;
-    int unk04;
-    hkpWorldCA8A* m_pOwningWorld;
-    int unk0C[0x35];
-    hkpMotionCA8A m_pMotionState;
 
-    void FUN_00ca8a80(const hkVector3CA8A& v);
-};
+
 struct FUN_00ca94c0_Ctx {
     void* self;
     unsigned int arg;
@@ -2166,38 +1609,9 @@ extern "C" unsigned long __cdecl _byteswap_ulong(unsigned long);
 typedef unsigned int (__cdecl* ReadFn)(NiBinaryStream* pThis, void* pvBuffer, unsigned int uiBytes, unsigned int* puiComponentSizes, unsigned int uiNumComponents);
 inline unsigned int BinaryRead(NiBinaryStream* stream, void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes = 0, unsigned int uiNumComponents = 0)
 {
-    unsigned int uiBytes = ((ReadFn)stream->m_pfnRead)(stream, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-    stream->m_uiStreamFlags += uiBytes;
+    unsigned int uiBytes = stream->BinaryRead(pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
     return uiBytes;
 }
-struct NiStream {
-    void* m_vtbl;
-    unsigned int m_uiFormatVersion;
-    unsigned int unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24;
-    unsigned int unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44;
-    unsigned int unk48, unk4C, unk50, unk54, unk58, unk5C, unk60, unk64;
-    unsigned int unk68, unk6C, unk70, unk74, unk78, unk7C, unk80, unk84;
-    unsigned int unk88, unk8C, unk90, unk94, unk98, unk9C, unkA0, unkA4;
-    unsigned int unkA8, unkAC, unkB0, unkB4, unkB8, unkBC, unkC0, unkC4;
-    unsigned int unkC8, unkCC, unkD0, unkD4, unkD8, unkDC, unkE0, unkE4;
-    unsigned int unkE8, unkEC, unkF0, unkF4, unkF8, unkFC, unk100, unk104;
-    unsigned int unk108, unk10C, unk110, unk114, unk118, unk11C, unk120, unk124;
-    unsigned int unk128, unk12C, unk130, unk134, unk138, unk13C, unk140, unk144;
-    unsigned int unk148, unk14C, unk150, unk154, unk158, unk15C, unk160, unk164;
-    unsigned int unk168, unk16C, unk170, unk174, unk178, unk17C, unk180, unk184;
-    unsigned int unk188, unk18C, unk190, unk194, unk198, unk19C, unk1A0, unk1A4;
-    unsigned int unk1A8, unk1AC, unk1B0, unk1B4, unk1B8, unk1BC, unk1C0, unk1C4;
-    unsigned int unk1C8, unk1CC, unk1D0, unk1D4, unk1D8, unk1DC, unk1E0;
-    unsigned char unk1E4;
-    unsigned char m_bEndianSwap;
-    unsigned char unk1E6;
-    unsigned char unk1E7;
-    unsigned int unk1E8, unk1EC, unk1F0, unk1F4, unk1F8, unk1FC;
-    unsigned int unk200, unk204, unk208, unk20C, unk210, unk214, unk218, unk21C;
-    unsigned int unk220, unk224, unk228, unk22C, unk230, unk234, unk238, unk23C;
-    unsigned int unk240, unk244, unk248;
-    NiBinaryStream* m_pUnderlyingStream;
-};
 template <class T>
 inline unsigned int NiBinaryStreamLoad(NiBinaryStream* binstream, T* pValue, unsigned int uiNumEls = 1)
 {
@@ -2207,7 +1621,7 @@ inline unsigned int NiBinaryStreamLoad(NiBinaryStream* binstream, T* pValue, uns
 template <class T>
 inline void ReadBinaryValue(NiStream& stream, T& value)
 {
-    NiBinaryStreamLoad(stream.m_pUnderlyingStream, &value, 1);
+    NiBinaryStreamLoad(stream.GetBinaryStream(), &value, 1);
 }
 extern "C" void __cdecl SwapEndianBlocks(void* p);
 inline void SwapDword(unsigned long& val) {
@@ -2225,12 +1639,13 @@ inline void ByteSwapBlk(Blk40& blk)
 struct FUN_00d1df70 {
     void removeReference();
 };
-struct Data_caa6a0 : Data_00caa840 {
+// Shape serialization view with SetReferencedObject; inherits the 0xcc-byte state, unlike the 16-byte include/Data.h record.
+struct ReferencedShapeState : SerializedShapeState {
     void SetReferencedObject(hkReferencedObject* obj);
 };
 struct FUN_00d53200_class {
     void* m_unk00;
-    Data_caa6a0* m_data;
+    ReferencedShapeState* m_data;
 
     void FUN_00c8a230(NiStream& stream);
     hkReferencedObject* FUN_00c8a330(NiStream& stream);
@@ -2419,8 +1834,7 @@ struct MemoryScope {
  MemoryScope() {previous=threadData.unk2B4;threadData.unk2B4=16;}
  ~MemoryScope() {threadData.unk2B4=previous;}
 };
-struct Point3 { float x,y,z; char* FUN_00a59af0(const char*); };
-Point3& FUN_004a3970(Point3&,const hkVector4&);
+NiPoint3& FUN_004a3970(NiPoint3&,const hkVector4&);
 char* FUN_00a7d550(const char*,float);
 char* FUN_00a7d5e0(const char*,const char*);
 struct Strings {
@@ -2500,19 +1914,7 @@ class hkListenerDCBFB {
 public:
     virtual void d0() = 0;
 };
-class FUN_00cbfba0 : public hkRefObjCBFB, public hkListenerACBFB, public hkListenerBCBFB, public hkListenerCCBFB, public hkListenerDCBFB {
-public:
-    int unk18;
-    int unk1C;
-    int m_20;
 
-    FUN_00cbfba0() throw();
-    virtual ~FUN_00cbfba0() throw();
-    virtual void a0();
-    virtual void b0();
-    virtual void c0();
-    virtual void d0();
-};
 // Reconstructed ClearIndexedValues (FNV 1.4.0.525, /MT /O2 /GS /EHsc /Gy).
 // Stand-in declarations; unknown fields are named by their byte offset.
 // External callees keep the pack's FUN_ names and bind through relocations.
@@ -2707,10 +2109,10 @@ struct WorldC68BF0 {
 };
 struct FUN_00c91000_Class
 {
-    __m128 m_iWordAt00;
-    __m128 m_10;
+    LocalM128 m_iWordAt00;
+    LocalM128 m_10;
 
-    void __thiscall FUN_00c91000(const __m128* value);
+    void __thiscall FUN_00c91000(const LocalM128* value);
 };
 struct FUN_00c91620_Target;
 struct FUN_00c91620_Args {
@@ -2761,233 +2163,83 @@ void __cdecl FUN_00cb5c10(FUN_00c91620_Class* self, FUN_00c91620_Target* target)
 void __cdecl FUN_00d005a0(FUN_00c91620_Class* self, FUN_00c91620_Target* target);
 void __cdecl FUN_00cffab0(FUN_00c91620_Target* target);
 void __cdecl FUN_00cb4740(FUN_00c91620_Class* self, FUN_00c91620_Target* target);
-template <class T>
-class hkArrayXc91700 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 class hkWorldXc91700 {
 public:
     int unk000[71];
-    hkArrayXc91700<void*> m_entries;
+    hkArray<void*> m_entries;
 
     void FUN_00c91700(void* entry);
 };
-template <class T>
-class hkArrayC9175 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 class hkWorldC9175 {
 public:
     int unk000[80];
-    hkArrayC9175<void*> m_entries;
+    hkArray<void*> m_entries;
 
     void FUN_00c91750(void* entry);
 };
-template <class T>
-class hkArrayC917 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 class hkWorldC917 {
 public:
     int unk000[74];
-    hkArrayC917<void*> m_entries;
+    hkArray<void*> m_entries;
 
     void FUN_00c917a0(void* entry);
 };
-template <class T>
-class hkArrayC91F {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 class hkWorldC91F {
 public:
     int unk000[77];
-    hkArrayC91F<void*> m_entries;
+    hkArray<void*> m_entries;
 
     void FUN_00c917f0(void* entry);
 };
-template <class T>
-class hkArrayC918 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 class hkWorldC918 {
 public:
     int unk000[95];
-    hkArrayC918<void*> m_entries;
+    hkArray<void*> m_entries;
 
     void FUN_00c91890(void* entry);
 };
-template <class T>
-class hkArrayXc91930 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 class hkWorldXc91930 {
 public:
     int unk000[92];
-    hkArrayXc91930<void*> m_entries;
+    hkArray<void*> m_entries;
 
     void FUN_00c91930(void* entry);
 };
-template <class T>
-class hkArrayXc91980 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 class hkWorldXc91980 {
 public:
     int unk000[101];
-    hkArrayXc91980<void*> m_entries;
+    hkArray<void*> m_entries;
 
     void FUN_00c91980(void* entry);
 };
-template <class T>
-class hkArrayXc91a20 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 class hkWorldXc91a20 {
 public:
     int unk000[104];
-    hkArrayXc91a20<void*> m_entries;
+    hkArray<void*> m_entries;
 
     void FUN_00c91a20(void* entry);
 };
-template <class T>
-class hkArrayXc91a70 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 class hkWorldXc91a70 {
 public:
     int unk000[83];
-    hkArrayXc91a70<void*> m_entries;
+    hkArray<void*> m_entries;
 
     void FUN_00c91a70(void* entry);
 };
-template <class T>
-class hkArrayXc91ac0 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-};
 class hkWorldXc91ac0 {
 public:
     int unk000[107];
-    hkArrayXc91ac0<void*> m_entries;
+    hkArray<void*> m_entries;
 
     void FUN_00c91ac0(void* entry);
 };
@@ -3114,8 +2366,8 @@ extern const char str_010c64b8[];
 extern const char str_010c41f8[];
 extern void* DAT_010c6488;
 extern float DAT_0104da4c;
-struct TimerEntry { const char* name; unsigned int ticks; unsigned int unk08; };
-struct TimerBuffer { unsigned int unk00; TimerEntry* current; unsigned int unk08; TimerEntry* end; };
+
+
 struct __declspec(align(16)) LinearCaster {
     void* unk00;
     unsigned int unk04;
@@ -3213,20 +2465,7 @@ public:
     int unk00, unk04, unk08;
     IslandC92B* m_pSimulationIsland;
 };
-template <class T>
-struct hkSmallArrayC92B {
-    T* m_data;
-    unsigned short m_iElementCount;
-    unsigned short m_iCapacityState;
 
-    int getCapacity() const { return m_iCapacityState & 0x3fff; }
-    void AddBack(const T& e)
-    {
-        if (m_iElementCount == getCapacity())
-            FUN_00d06cb0(this, sizeof(T));
-        m_data[m_iElementCount++] = e;
-    }
-};
 class WorldC92B {
 public:
     int unk00[0xcc / 4];
@@ -3234,7 +2473,7 @@ public:
     int unkD0[(0xe8 - 0xd0) / 4];
     unsigned char m_iMaxEntriesPerNarrowphaseToiTask;
     unsigned char unkE9[0x208 - 0xe9];
-    hkSmallArrayC92B<EntityC92B*> m_kActorEntries;
+    hkSmallArray<EntityC92B*> m_kActorEntries;
 };
 class ListenerC92B {
 public:
@@ -3269,30 +2508,7 @@ public:
 
     void FUN_00d07b50();
 };
-template <class T>
-class hkArrayC92C {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t, int iStart = 0, int iEnd = -1) const
-    {
-        if (iEnd < 0)
-            iEnd = m_iElementCount;
-        for (int i = iStart; i < iEnd; ++i) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-    void removeAt(int iIndex)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != iIndex)
-            m_data[iIndex] = m_data[m_iElementCount];
-    }
-};
 class WorldC92C;
 void __cdecl FUN_00d00820(WorldC92C* pkWorld, ActionC92C* pkAction);
 void __cdecl FUN_00cb5d00(WorldC92C* pkWorld, ActionC92C* pkAction);
@@ -3316,7 +2532,7 @@ public:
     int unk0A8, unk0AC, unk0B0, unk0B4, unk0B8, unk0BC, unk0C0, unk0C4, unk0C8, unk0CC, unk0D0, unk0D4;
     int unk0D8, unk0DC, unk0E0, unk0E4, unk0E8, unk0EC, unk0F0, unk0F4, unk0F8, unk0FC, unk100, unk104;
     int unk108, unk10C;
-    hkArrayC92C<ActionC92C*> m_ppActions;
+    hkArray<ActionC92C*> m_ppActions;
 
     bool areCriticalOperationsLocked() const
     {
@@ -3347,83 +2563,24 @@ __forceinline void memCpyOneAlignedXc937a0(void* dst, const void* src)
         d[i] = s[i];
     } while (++i < SIZE / 4);
 }
-struct hkMemoryRouterXc937a0 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pStreamAllocator;
-};
+
 namespace hkRouterXc937a0 {
-    extern "C" hkMemoryRouterXc937a0& __cdecl FUN_00c85750() throw();
+    extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
 void __cdecl ResizeAudioStream(void* m_pPoolBase, void* pArray, int iSizeElem);
-template <class T>
-class hkArrayXc937a0 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    __forceinline void AddBack(const T& e)
-    {
-        hkMemoryRouterXc937a0& router = hkRouterXc937a0::FUN_00c85750();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(router.m_pStreamAllocator, this, sizeof(T));
-        memCpyOneAlignedXc937a0<sizeof(T)>(m_data + m_iElementCount, &e);
-        m_iElementCount++;
-    }
-};
 class hkOwnerXc937a0 {
 public:
     int unk00[71];
-    hkArrayXc937a0<void*> m_kNode;
+    hkArray<void*> m_kNode;
 
     void FUN_00c937a0(void* item);
 };
-class hkMemoryAllocatorC93 {
-public:
-    virtual void v00();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void* AllocateBufferWithSize(int& iReqNumBytesInOut) throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
-struct hkMemoryRouterC93 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocatorC93* m_pStreamAllocator;
-    hkMemoryAllocatorC93& heap() { return *m_pStreamAllocator; }
-};
-hkMemoryRouterC93& __cdecl GetMemoryRouterC93() throw();
-template <typename T> struct hkArrayC93 {
-    __forceinline ~hkArrayC93() throw()
-    {
-        hkMemoryAllocatorC93& kAlloc = GetMemoryRouterC93().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-class hkBaseObjectC93 {
-public:
-    virtual ~hkBaseObjectC93() throw() {}
-};
-class hkReferencedObjectC93 : public hkBaseObjectC93 {
-public:
-    void RetainReference() const throw();
-    void removeReference() const throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
+
+
+hkMemoryRouter& __cdecl GetMemoryRouterC93() throw();
+
+
 template <typename T> struct hkRefPtrC93 {
     __forceinline ~hkRefPtrC93() throw()
     {
@@ -3445,12 +2602,12 @@ public:
 struct ChunkBufferC93 {
     __forceinline ~ChunkBufferC93() throw()
     {
-        if (m_pBuffer) GetMemoryRouterC93().heap().ReleaseBlock(m_pBuffer, 0x200);
+        if (m_pBuffer) GetMemoryRouterC93().heap().blockFree(m_pBuffer, 0x200);
     }
     void* m_pBuffer;
 };
 struct MtSimulationJobDataC93 {
-    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().ReleaseBlock(p, sizeof(MtSimulationJobDataC93)); }
+    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().blockFree(p, sizeof(MtSimulationJobDataC93)); }
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -3525,14 +2682,14 @@ struct MtSimulationJobDataC93 {
     unsigned int unk11c;
 };
 struct CollisionAgentConfigC93 {
-    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().ReleaseBlock(p, sizeof(CollisionAgentConfigC93)); }
+    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().blockFree(p, sizeof(CollisionAgentConfigC93)); }
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0c;
 };
 struct ProcessCollisionInputC93 {
-    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().ReleaseBlock(p, sizeof(ProcessCollisionInputC93)); }
+    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().blockFree(p, sizeof(ProcessCollisionInputC93)); }
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -3566,22 +2723,15 @@ struct ProcessCollisionInputC93 {
     unsigned int unk78;
     unsigned int unk7c;
 };
-struct CriticalSectionDataC93 {
-    void* DebugInfo;
-    long LockCount;
-    long RecursionCount;
-    void* OwningThread;
-    void* LockSemaphore;
-    unsigned long SpinCount;
-};
-extern "C" __declspec(dllimport) void __stdcall DeleteCriticalSection(CriticalSectionDataC93* pkSection);
+
+extern "C" __declspec(dllimport) void __stdcall DeleteCriticalSection(BSThreadCriticalSectionPC* pkSection);
 struct CriticalSectionC93 {
-    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().ReleaseBlock(p, sizeof(CriticalSectionC93)); }
+    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().blockFree(p, sizeof(CriticalSectionC93)); }
     __forceinline ~CriticalSectionC93() throw() { DeleteCriticalSection(&m_kCriticalSection); }
-    CriticalSectionDataC93 m_kCriticalSection;
+    BSThreadCriticalSectionPC m_kCriticalSection;
 };
 struct BroadPhaseDispatcherC93 {
-    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().ReleaseBlock(p, sizeof(BroadPhaseDispatcherC93)); }
+    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().blockFree(p, sizeof(BroadPhaseDispatcherC93)); }
     ~BroadPhaseDispatcherC93() throw();
     unsigned int unk00;
     unsigned int unk04;
@@ -3652,7 +2802,7 @@ struct BroadPhaseDispatcherC93 {
     unsigned int unk108;
 };
 struct WorldOperationQueueC93 {
-    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().ReleaseBlock(p, sizeof(WorldOperationQueueC93)); }
+    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().blockFree(p, sizeof(WorldOperationQueueC93)); }
     ~WorldOperationQueueC93() throw();
     unsigned int unk00;
     unsigned int unk04;
@@ -3666,7 +2816,7 @@ struct WorldOperationQueueC93 {
     unsigned int unk24;
 };
 struct ViolatedConstraintArrayC93 {
-    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().ReleaseBlock(p, sizeof(ViolatedConstraintArrayC93)); }
+    __forceinline void operator delete(void* p) throw() { if (p) GetMemoryRouterC93().heap().blockFree(p, sizeof(ViolatedConstraintArrayC93)); }
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
@@ -3797,18 +2947,14 @@ struct ViolatedConstraintArrayC93 {
     unsigned int unk1fc;
     unsigned int unk200;
 };
-class hkBoolC93 {
-public:
-    hkBoolC93(bool b) throw() : m_cBooleanValue(b) {}
-    char m_cBooleanValue;
-};
-class FUN_00c93e50 : public hkReferencedObjectC93 {
+
+class FUN_00c93e50 : public hkReferencedObject {
 public:
     virtual ~FUN_00c93e50() throw();
     void FUN_00c93580() throw();
-    hkBoolC93 IsEntityAdded(void* pkEntity) throw();
+    hkBool IsEntityAdded(void* pkEntity) throw();
 
-    hkReferencedObjectC93* m_pSimulation;
+    hkReferencedObject* m_pSimulation;
     unsigned int unk0c;
     float m_gravityX;
     float m_gravityY;
@@ -3816,14 +2962,14 @@ public:
     float m_gravityW;
     WorldDeletableC93* m_pFixedIsland;
     void* m_pFixedRigidBody;
-    hkArrayC93<void*> m_kActiveSimulationIslands;
-    hkArrayC93<void*> m_kInactiveSimulationIslands;
-    hkArrayC93<void*> m_kDirtySimulationIslands;
-    hkReferencedObjectC93* m_pMaintenanceManager;
-    hkRefPtrC93<hkReferencedObjectC93> m_pMemoryWatchDog;
+    hkArray<void*> m_kActiveSimulationIslands;
+    hkArray<void*> m_kInactiveSimulationIslands;
+    hkArray<void*> m_kDirtySimulationIslands;
+    hkReferencedObject* m_pMaintenanceManager;
+    hkRefPtrC93<hkReferencedObject> m_pMemoryWatchDog;
     bool m_bAssertOnRunningOutOfSolverMemory;
-    hkReferencedObjectC93* m_pJobSemaphore;
-    hkReferencedObjectC93* m_pKdTreeManager;
+    hkReferencedObject* m_pJobSemaphore;
+    hkReferencedObject* m_pKdTreeManager;
     bool m_bUseKdTree;
     BroadPhaseDispatcherC93* m_pBroadPhaseDispatcher;
     WorldDeletableC93* m_pPhantomBroadPhaseListener;
@@ -3831,9 +2977,9 @@ public:
     WorldDeletableC93* m_pBroadPhaseBorderListener;
     MtSimulationJobDataC93* m_pMultithreadedSimulationJobData;
     ProcessCollisionInputC93* m_pCollisionInput;
-    hkReferencedObjectC93* m_pCollisionFilter;
-    hkReferencedObjectC93* m_pDispatcher;
-    hkReferencedObjectC93* m_pConvexListCollisionFilter;
+    hkReferencedObject* m_pCollisionFilter;
+    hkReferencedObject* m_pDispatcher;
+    hkReferencedObject* m_pConvexListCollisionFilter;
     WorldOperationQueueC93* m_pPendingOperations;
     int m_iPendingOperationCount;
     int m_iQueuedOperationCount;
@@ -3872,244 +3018,33 @@ public:
     unsigned int m_uiLastEntityUid;
     unsigned int m_uiLastIslandUid;
     unsigned int m_uiLastConstraintUid;
-    hkArrayC93<void*> m_kPhantoms;
-    hkArrayC93<void*> m_kActionListeners;
-    hkArrayC93<void*> m_kEntityListenerArray;
-    hkArrayC93<void*> m_kPhantomListeners;
-    hkArrayC93<void*> m_kConstraintListeners;
-    hkArrayC93<void*> m_kWorldDeletionListeners;
-    hkArrayC93<void*> m_kIslandActivationListeners;
-    hkArrayC93<void*> m_kWorldPostSimulationListeners;
-    hkArrayC93<void*> m_kWorldPostIntegrateListeners;
-    hkArrayC93<void*> m_kWorldPostCollideListeners;
-    hkArrayC93<void*> m_kIslandPostIntegrateListeners;
-    hkArrayC93<void*> m_kIslandPostCollideListeners;
-    hkArrayC93<void*> m_kContactListeners;
-    hkArrayC93<void*> m_kContactImpulseLimitBreachedListeners;
+    hkArray<void*> m_kPhantoms;
+    hkArray<void*> m_kActionListeners;
+    hkArray<void*> m_kEntityListenerArray;
+    hkArray<void*> m_kPhantomListeners;
+    hkArray<void*> m_kConstraintListeners;
+    hkArray<void*> m_kWorldDeletionListeners;
+    hkArray<void*> m_kIslandActivationListeners;
+    hkArray<void*> m_kWorldPostSimulationListeners;
+    hkArray<void*> m_kWorldPostIntegrateListeners;
+    hkArray<void*> m_kWorldPostCollideListeners;
+    hkArray<void*> m_kIslandPostIntegrateListeners;
+    hkArray<void*> m_kIslandPostCollideListeners;
+    hkArray<void*> m_kContactListeners;
+    hkArray<void*> m_kContactImpulseLimitBreachedListeners;
     ViolatedConstraintArrayC93* m_pViolatedConstraintArray;
-    hkReferencedObjectC93* m_pBroadPhaseBorder;
+    hkReferencedObject* m_pBroadPhaseBorder;
 };
 void __cdecl ClearSlotReference(FUN_00c93e50* pkWorld, WorldDeletableC93* pkIsland) throw();
 void __cdecl FUN_00d00e80(FUN_00c93e50* pkWorld) throw();
-class hkMemoryAllocatorC97 {
-public:
-    virtual void v00();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void* AllocateBufferWithSize(int& iReqNumBytesInOut) throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
-struct hkMemoryRouterC97 {
-    void* m_aiEntries;
-    void* m_stackStart;
-    void* m_stackEnd;
-    hkMemoryAllocatorC97* m_pTemp;
-    hkMemoryAllocatorC97* m_pStreamAllocator;
-    hkMemoryAllocatorC97& heap() { return *m_pStreamAllocator; }
-};
-hkMemoryRouterC97& __cdecl GetMemoryRouterC97() throw();
-template <typename T> struct hkArrayC97 {
-    int GetLogicalSize() const { return m_iElementCount; }
-    T& operator[](int i) { return m_data[i]; }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-template <typename T, int N> struct hkInplaceArrayC97 : public hkArrayC97<T> {
-    hkInplaceArrayC97() throw()
-    {
-        this->m_data = m_kStorage;
-        this->m_iElementCount = 0;
-        this->m_iCapacityState = N | 0x80000000;
-    }
-    __forceinline ~hkInplaceArrayC97() throw()
-    {
-        hkMemoryAllocatorC97& kAlloc = GetMemoryRouterC97().heap();
-        this->m_iElementCount = 0;
-        if ((this->m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReturnMemory(this->m_data, (this->m_iCapacityState & 0x3fffffff) * sizeof(T));
-    }
-    T m_kStorage[N];
-};
+
+
+hkMemoryRouter& __cdecl GetMemoryRouterC97() throw();
+
 struct hkSmallArrayUtilC97 {
     static void __cdecl GrowArray(void* apvArray, int iSizeElem) throw();
 };
-template <typename T> struct hkSmallArrayC97 {
-    int getCapacity() const { return m_iCapacityState & 0x3fff; }
-    void AddBack(const T& t) throw()
-    {
-        if (m_iElementCount == getCapacity())
-            hkSmallArrayUtilC97::GrowArray(this, sizeof(T));
-        m_data[m_iElementCount++] = t;
-    }
-    T* m_data;
-    unsigned short m_iElementCount;
-    unsigned short m_iCapacityState;
-};
-class hkpActionC97;
-class hkpWorldC97;
-class hkpSimulationIslandC97 {
-public:
-    bool isFixed() const { return m_usStorageIndex == 0xffff; }
-    void RegisterAction(hkpActionC97* pkAction) throw();
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned short m_usStorageIndex;
-};
-class hkpEntityC97 {
-public:
-    hkpSimulationIslandC97* GetSimulationIsland() const { return m_pSimulationIsland; }
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    unsigned int unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
-    unsigned int unkc4;
-    unsigned int unkc8;
-    hkpSimulationIslandC97* m_pSimulationIsland;
-    unsigned int unkd0;
-    unsigned int unkd4;
-    unsigned int unkd8;
-    unsigned int unkdc;
-    unsigned int unke0;
-    unsigned int unke4;
-    unsigned int unke8;
-    unsigned int unkec;
-    unsigned int unkf0;
-    unsigned int unkf4;
-    unsigned int unkf8;
-    unsigned int unkfc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    unsigned int unk15c;
-    unsigned int unk160;
-    unsigned int unk164;
-    unsigned int unk168;
-    unsigned int unk16c;
-    unsigned int unk170;
-    unsigned int unk174;
-    unsigned int unk178;
-    unsigned int unk17c;
-    unsigned int unk180;
-    unsigned int unk184;
-    unsigned int unk188;
-    unsigned int unk18c;
-    unsigned int unk190;
-    unsigned int unk194;
-    unsigned int unk198;
-    unsigned int unk19c;
-    unsigned int unk1a0;
-    unsigned int unk1a4;
-    unsigned int unk1a8;
-    unsigned int unk1ac;
-    unsigned int unk1b0;
-    unsigned int unk1b4;
-    unsigned int unk1b8;
-    unsigned int unk1bc;
-    unsigned int unk1c0;
-    unsigned int unk1c4;
-    unsigned int unk1c8;
-    unsigned int unk1cc;
-    unsigned int unk1d0;
-    unsigned int unk1d4;
-    unsigned int unk1d8;
-    unsigned int unk1dc;
-    unsigned int unk1e0;
-    unsigned int unk1e4;
-    unsigned int unk1e8;
-    unsigned int unk1ec;
-    unsigned int unk1f0;
-    unsigned int unk1f4;
-    unsigned int unk1f8;
-    unsigned int unk1fc;
-    unsigned int unk200;
-    unsigned int unk204;
-    hkSmallArrayC97<hkpActionC97*> m_ppActions;
-};
-class hkpActionC97 {
-public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void GetEntities(hkArrayC97<hkpEntityC97*>& kEntitiesOut) throw();
-    void RetainReference() const throw();
-    void setWorld(hkpWorldC97* pkWorld) { m_pOwningWorld = pkWorld; }
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    hkpWorldC97* m_pOwningWorld;
-};
+
 struct hkWorldOperationC97 {
     enum Type { ADD_ACTION = 0xa };
     struct TypeTag {
@@ -4118,100 +3053,11 @@ struct hkWorldOperationC97 {
     };
     struct AddActionCommand : public TypeTag {
         AddActionCommand() : TypeTag(ADD_ACTION) {}
-        hkpActionC97* m_pAction;
+        hkpAction* m_pAction;
     };
 };
-struct hkpWorldOperationUtilC97 {
-    static void __cdecl ReenableCollisionBetweenEntityPair(hkpWorldC97* pkWorld, hkpEntityC97* pkEntityA, hkpEntityC97* pkEntityB) throw();
-};
-struct hkpWorldCallbackUtilC97 {
-    static void __cdecl FireActionAdded(hkpWorldC97* pkWorld, hkpActionC97* pkAction) throw();
-};
-class hkpWorldC97 {
-public:
-    bool areCriticalOperationsLocked() const { return m_iCriticalOperationsLockCount != 0; }
-    void lockCriticalOperations() { m_iCriticalOperationsLockCount++; }
-    void unlockCriticalOperations() { m_iCriticalOperationsLockCount--; }
-    __forceinline void attemptToExecutePendingOperations()
-    {
-        if (m_iCriticalOperationsLockCount == 0 && !m_bBlockExecutingPendingOperations) {
-            if (m_iPendingOperationCount)
-                ExecutePendingOperations();
-            if (m_iPendingOperationQueueCount == 1 && m_iQueuedOperationCount)
-                ExecutePendingOperationQueues();
-        }
-    }
-    __forceinline void unlockAndAttemptToExecutePendingOperations()
-    {
-        unlockCriticalOperations();
-        attemptToExecutePendingOperations();
-    }
-    void AddWorldOperation(const hkWorldOperationC97::TypeTag& kOperation) throw();
-    void ExecutePendingOperations() throw();
-    void ExecutePendingOperationQueues() throw();
-    hkpActionC97* FUN_00c97370(hkpActionC97* pkAction) throw();
-
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    int m_iPendingOperationCount;
-    int m_iQueuedOperationCount;
-    int m_iCriticalOperationsLockCount;
-    int m_iCriticalOperationsLockCountForPhantoms;
-    bool m_bBlockExecutingPendingOperations;
-    bool m_bBlockExecutingPendingOperationQueues;
-    void* m_pPendingOperationQueues;
-    int m_iPendingOperationQueueCount;
-};
-class hkMemoryAllocatorC97E {
-public:
-    virtual ~hkMemoryAllocatorC97E() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-struct hkMemoryRouterC97E {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorC97E* m_pStreamAllocator;
-
-    hkMemoryAllocatorC97E& heap() { return *m_pStreamAllocator; }
-};
 namespace hkRouterC97E {
-    extern "C" hkMemoryRouterC97E& __cdecl FUN_00c85750() throw();
+    extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
 class hkRefObjC97E {
 public:
@@ -4221,7 +3067,7 @@ public:
 
     static void* operator new(unsigned int nbytes)
     {
-        hkRefObjC97E* b = static_cast<hkRefObjC97E*>(hkRouterC97E::FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
+        hkRefObjC97E* b = static_cast<hkRefObjC97E*>(hkRouterC97E::FUN_00c85750().heap().blockAlloc(nbytes));
         b->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return b;
     }
@@ -4293,12 +3139,6 @@ struct __declspec(align(16)) FUN_00c987e0_Pose {
     hkVector4 scale;
     void FUN_00ce52e0(int a1);
 };
-struct FUN_00c98780_Obj {
-    void FUN_00c98780(FUN_00c987e0_Pose* pose, int a2,int a3,int a4,int a5,int a6);
-};
-struct FUN_00c987e0_Cls {
-    void FUN_00c987e0(int a1,int a2,int a3,int a4,int a5,int a6);
-};
 struct __declspec(align(16)) EC98BE0Vector {
     float x;
     float y;
@@ -4306,48 +3146,17 @@ struct __declspec(align(16)) EC98BE0Vector {
     float w;
     void __thiscall FUN_00c7f7a0(int a, int b);
 };
-struct EC98BE0Owner {
-    void __thiscall FUN_00c98b60(EC98BE0Vector* position, float scalar, int a, int b, int c);
-    void __thiscall FUN_00c98be0(int x, int y, float scalar, int a, int b, int c);
-};
 struct __declspec(align(16)) FUN_00c7f640_Class {
     void FUN_00c7f640(const void* m, const void* p);
 };
-struct FUN_00c98c30_Class {
-    void FUN_00c98b60(const void* p, float c, int d, int e, int f);
-    void FUN_00c98c30(const void* a, const void* b, float c, int d, int e, int f);
-};
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
-template <class T>
-class hkArrayC995 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++) {
-            if (m_data[i] == t) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index) {
-            m_data[index] = m_data[m_iElementCount];
-        }
-    }
-};
 class hkListenerListC995 {
 public:
     int unk00;
     int unk04;
-    hkArrayC995<void*> m_kListeners;
+    hkArray<void*> m_kListeners;
     void* m_pWorldLock;
 
     void RemoveListener(void* listener);
@@ -4358,48 +3167,6 @@ public:
     void SetFromInput(int*, int);
     void FUN_00ce52e0(int a);
 };
-class hkpWorldD0AD;
-class hkMemberD0AD {
-public:
-    void FUN_00d9e280(hkpWorldD0AD* pkWorld);
-};
-class hkListenerAD0AD {
-public:
-    virtual void onA();
-};
-class hkListenerBD0AD {
-public:
-    virtual void onB();
-};
-class hkReferencedObjectD0AD {
-public:
-    virtual ~hkReferencedObjectD0AD();
-    int m_memSizeAndRefCount;
-    void FUN_00c905b0();
-};
-class hkSharedD0AD : public hkReferencedObjectD0AD, public hkListenerAD0AD, public hkListenerBD0AD {
-public:
-    int m_useCount;
-    hkMemberD0AD m_kMemberDescriptor;
-};
-class hkpWorldD0AD {
-public:
-    int unk000, unk004, unk008, unk00C, unk010, unk014, unk018, unk01C, unk020, unk024, unk028, unk02C;
-    int unk030, unk034, unk038, unk03C, unk040, unk044, unk048, unk04C, unk050, unk054, unk058, unk05C;
-    int unk060, unk064, unk068, unk06C, unk070, unk074, unk078, unk07C, unk080, unk084, unk088, unk08C;
-    int unk090, unk094, unk098, unk09C, unk0A0, unk0A4, unk0A8, unk0AC, unk0B0, unk0B4, unk0B8, unk0BC;
-    int unk0C0, unk0C4, unk0C8, unk0CC, unk0D0, unk0D4, unk0D8, unk0DC, unk0E0, unk0E4, unk0E8, unk0EC;
-    int unk0F0, unk0F4, unk0F8, unk0FC, unk100, unk104, unk108, unk10C, unk110, unk114, unk118, unk11C;
-    int unk120, unk124, unk128, unk12C, unk130, unk134, unk138, unk13C, unk140, unk144, unk148, unk14C;
-    int unk150, unk154, unk158, unk15C, unk160, unk164, unk168, unk16C, unk170, unk174, unk178, unk17C;
-    int unk180, unk184, unk188, unk18C, unk190, unk194, unk198, unk19C, unk1A0, unk1A4, unk1A8, unk1AC;
-    int unk1B0, unk1B4, unk1B8, unk1BC;
-    hkSharedD0AD* m_pSharedObject;
-
-    void FUN_00c91750(hkListenerAD0AD* pkListener);
-    void FUN_00c91a70(hkListenerBD0AD* pkListener);
-};
-void __cdecl ReleaseSharedObject(hkpWorldD0AD* pkWorld);
 class FlagState {
 public:
     unsigned int unk00, unk04;
@@ -4456,13 +3223,8 @@ struct Alloc {
     virtual void vfn0();
     virtual void* AllocateMemoryBlock(int n);
 };
-struct Router {
-    int unk0; int unk4; int unk8; int unkc;
-    Alloc* unk10;
-    Alloc& heap() { return *unk10; }
-};
 }
-namespace c912 { inline Router* router() { return (Router*)FUN_00c85750(); } }
+namespace c912 { inline hkMemoryRouter* router() { return (hkMemoryRouter*)FUN_00c85750(); } }
 extern int DAT_010c6420;
 extern int DAT_010c6378;
 struct CFB240ContactMgrFactory {
@@ -4470,7 +3232,7 @@ struct CFB240ContactMgrFactory {
     unsigned short m_usMemSizeAndFlags;
     short m_sReferenceCount;
     void* operator new(unsigned int n) {
-        CFB240ContactMgrFactory* b = static_cast<CFB240ContactMgrFactory*>(c912::router()->heap().AllocateMemoryBlock(n));
+        CFB240ContactMgrFactory* b = static_cast<CFB240ContactMgrFactory*>(c912::router()->heap().blockAlloc(n));
         b->m_usMemSizeAndFlags = (unsigned short)n;
         return b;
     }
@@ -4542,28 +3304,18 @@ static void FUN_00c92950(PhantomWorld* world, PhantomSink* out);
 PhantomWorld* volatile g_world;
 PhantomSink* volatile g_out;
 void invokePhantomCopy();
-struct MonitorStream {
-    char* start;
-    char* current;
-    char* saved;
-    char* end;
-};
-struct MonitorRecord {
-    const char* name;
-    unsigned int time;
-    unsigned int unused;
-};
+
 __forceinline void timer(const char* name, const char* first = 0) {
-    MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-    char* current = stream->current;
-    if (current < stream->end) {
-        volatile MonitorRecord* record = (volatile MonitorRecord*)current;
-        record->name = name;
-        if (first) *(const char* volatile*)(current + sizeof(MonitorRecord)) = first;
+    hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* current = stream->m_end.m_storage;
+    if (current < stream->m_capacityMinus16.m_storage) {
+        volatile hkMonitorStream::TimerCommand* record = (volatile hkMonitorStream::TimerCommand*)current;
+        record->m_commandAndMonitor = name;
+        if (first) *(const char* volatile*)(current + sizeof(hkMonitorStream::TimerCommand)) = first;
         _ReadWriteBarrier();
         volatile unsigned int stamp = (unsigned int)__rdtsc();
-        record->time = stamp;
-        stream->current = current + (first ? 16 : 12);
+        record->m_time0 = stamp;
+        stream->m_end.m_storage = current + (first ? 16 : 12);
     }
 }
 struct CollisionObject;
@@ -5163,13 +3915,6 @@ struct OverlapAllocator {
     virtual void unused08(); virtual void unused0c();
     virtual void freeBlock(void*, int);
 };
-struct MemoryRouter {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    OverlapAllocator* heap;
-};
 void ResizeAudioStream(void*, void*, int);
 static __declspec(noinline) void __cdecl SyncOverlap(PhantomInterface* phantom, CollisionObject* other, CollisionFilter* filter) {
     FilterBool overlapping = phantom->hasOverlap(other);
@@ -5207,15 +3952,15 @@ struct CallRet : hkpWorld {
     void FUN_00c91140();
 };
 __forceinline void releasePairs(PairArray& pairs) {
-MemoryRouter* router = (MemoryRouter*)FUN_00c85750();
-OverlapAllocator* heap = router->heap;
+hkMemoryRouter* router = (hkMemoryRouter*)FUN_00c85750();
+hkMemoryAllocator* heap = reinterpret_cast<hkMemoryAllocator*>(router->m_heap);
 pairs.size=0;
-if ((pairs.capacityAndFlags & 0x80000000)==0) heap->freeBlock(pairs.data,(pairs.capacityAndFlags & 0x3fffffff)*sizeof(OverlapPair));
+if ((pairs.capacityAndFlags & 0x80000000)==0) heap->bufFree(pairs.data,(pairs.capacityAndFlags & 0x3fffffff)*sizeof(OverlapPair));
 }
 __forceinline void constructPairs(OverlapPair* p,int n) { for(int j=0;j<n;++j) new(p+j) OverlapPair; }
 __forceinline OverlapPair& expandOverlapPair(PairArray& pairs) {
-MemoryRouter* router = (MemoryRouter*)FUN_00c85750();
-if (pairs.size == (pairs.capacityAndFlags & 0x3fffffff)) ResizeAudioStream(router->heap,&pairs,sizeof(OverlapPair));
+hkMemoryRouter* router = (hkMemoryRouter*)FUN_00c85750();
+if (pairs.size == (pairs.capacityAndFlags & 0x3fffffff)) ResizeAudioStream(router->m_heap,&pairs,sizeof(OverlapPair));
 constructPairs(pairs.data+pairs.size,1);
 return pairs.data[pairs.size++];
 }
@@ -5223,40 +3968,30 @@ PhantomInterface* volatile probePhantom;
 CollisionObject* volatile probeObject;
 CollisionFilter* volatile probeFilter;
 void probeOverlapCaller();
-extern "C" __m128 __cdecl _mm_mul_ps(__m128, __m128);
-extern "C" __m128 __cdecl _mm_add_ss(__m128, __m128);
-extern "C" __m128 __cdecl _mm_shuffle_ps(__m128, __m128, int);
-extern __m128 DAT_010c71e0;
+
+
+extern LocalM128 DAT_010c71e0;
 struct RotationInput {
-    __m128 translation;
-    __m128 rotation;
+    LocalM128 translation;
+    LocalM128 rotation;
 };
 struct VectorTemporary {
-    union { __m128 value; float components[4]; };
-    void FUN_00c7f7a0(const RotationInput*, const __m128*);
+    union { LocalM128 value; float components[4]; };
+    void FUN_00c7f7a0(const RotationInput*, const LocalM128*);
 };
-struct RotationOwner {
-    void FUN_00c98820(const VectorTemporary*, const __m128*, int, int, int);
-    void ApplyRotation(const RotationInput*, const __m128*, const __m128*, int, int, int);
-};
-extern "C" __m128 __cdecl _mm_setr_ps(float, float, float, float);
+
 struct hkTransformC997;
 struct __declspec(align(16)) hkVector4C997 {
     float x, y, z, w;
-    const __m128& getQuad() const { return *(const __m128*)&x; }
-    __m128& getQuad() { return *(__m128*)&x; }
+    const LocalM128& getQuad() const { return *(const LocalM128*)&x; }
+    LocalM128& getQuad() { return *(LocalM128*)&x; }
     void setZero4() { getQuad() = _mm_setzero_ps(); }
     void set(float a, float b, float c, float d = 0.0f)
     {
         getQuad() = _mm_setr_ps(a, b, c, d);
     }
-    void setSub4(const hkVector4C997& a, const hkVector4C997& b) { getQuad() = _mm_sub_ps(*(__m128*)&a.x, *(__m128*)&b.x); }
+    void setSub4(const hkVector4C997& a, const hkVector4C997& b) { getQuad() = _mm_sub_ps(*(LocalM128*)&a.x, *(LocalM128*)&b.x); }
     void FUN_00c7f7a0(const hkTransformC997& kTransform, const hkVector4C997& kVector) throw();
-};
-class hkDebugDisplayHandlerC997 {
-public:
-    void FUN_00c98880(const hkVector4C997& kFrom, const hkVector4C997& kWorldPosition, unsigned int uiColor, int aiSoundId, int aiAllocationTag) throw();
-    void DrawAxes(const hkTransformC997& kWorldFromLocal, float fSize, int aiSoundId, int aiAllocationTag) throw();
 };
 #include <stdarg.h>
 struct RigidBody_s {
@@ -5454,14 +4189,14 @@ struct Sub_08 {
 };
 struct Dst_00c91c50 {
     char pad00[0x10];
-    __m128 v10;
+    LocalM128 v10;
     int i_20;
     float f_24;
     unsigned char b_28;
     unsigned char b_29;
     char pad2a[0x06];
-    __m128 v30;
-    __m128 v40;
+    LocalM128 v30;
+    LocalM128 v40;
     unsigned char b_50;
     char pad51[0x02];
     unsigned char b_53;
@@ -5520,7 +4255,7 @@ struct Src_00c91c50 {
     char pad00[0x08];
     Sub_08* p08;
     char pad0c[0x04];
-    __m128 v10;
+    LocalM128 v10;
     char pad20[0x30];
     HkRefPtr p50;
     char pad54[0x08];
@@ -5576,8 +4311,8 @@ struct Src_00c91c50 {
     unsigned char b_307;
     float f_308;
     char pad30c[0x04];
-    __m128 v_310;
-    __m128 v_320;
+    LocalM128 v_310;
+    LocalM128 v_320;
     int i_330;
     int i_334;
     int i_338;
@@ -5704,7 +4439,7 @@ struct MatchWorld {
     void** phantoms;
     int phantomCount;
     MatchPhantoms* FUN_00c91110();
-    void __thiscall AddPhysicsSystem(hkArrayXc937a0<FUN_00d065e0*>* systems);
+    void __thiscall AddPhysicsSystem(hkArray<FUN_00d065e0*>* systems);
 };
 struct FUN_00d065e0Value { FUN_00d065e0* p; };
 MatchStatus __cdecl AddBodiesToSystem(MatchWorld*, FUN_00d065e0*);
@@ -5733,22 +4468,14 @@ extern const char str_010c6748[];
 extern const char str_010c6734[];
 extern const char str_010c6720[];
 extern const char str_01076f38[];
-struct TimerEntryC944 { const char* name; unsigned int ticks; unsigned int unk08; };
-struct TimerEntryC9442 { const char* name; unsigned int ticks; unsigned int unk08; const char* name2; };
-struct TimerBufferC944 { unsigned int unk00; void* current; unsigned int unk08; void* end; };
-struct AllocatorC944 {
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void Deallocate(void* p, int size);
-};
+
+
 struct ThreadAlloc {
     char* m_next;             // next free stack byte
     unsigned int unk04;
     unsigned int unk08;
     unsigned int unk0C;
-    AllocatorC944* m_pThreadAllocator;   // +0x10
+    hkMemoryAllocator* m_pThreadAllocator;   // +0x10
 };
 class BroadPhaseC944 {
 public:
@@ -5768,7 +4495,6 @@ struct HandleC944 {
     unsigned int m_uiCollisionFilterData;
     CollidableC944* getOwner() { return reinterpret_cast<CollidableC944*>(reinterpret_cast<char*>(this) + m_iOwnerOffset); }
 };
-struct hkpCdBody { void* m_pCollisionShape; unsigned int m_uiCollisionShapeKey; void* m_pMotionState; hkpCdBody* m_parent; };
 struct CollidableC944 : hkpCdBody {
     signed char m_iOwnerOffset;
     unsigned char m_uiForceCollideOntoPpu;
@@ -5783,14 +4509,6 @@ struct WorldObjectC944 : hkReferencedObject {
     CollidableC944 m_kCollidable;
     virtual void v04(); virtual void v08(); virtual void v0c(); virtual void v10();
     virtual void v14(); virtual void v18();
-};
-class PhantomC944 : public WorldObjectC944 {
-public:
-    virtual void AddOverlappingCollidable(CollidableC944*);
-    virtual FilterResult GetFilterResult(CollidableC944*);
-    virtual void RemoveOverlappingObject(CollidableC944*);
-    virtual void v28(); virtual void v2c();
-    virtual void ProcessContactPoints();
 };
 struct BroadPhaseC944HandlePair { HandleC944* first; HandleC944* second; };
 struct TempArray {
@@ -5811,10 +4529,10 @@ struct TempArray {
         if ((void*)oldTop == m_data) m_iElementCount = 0;
         ((ThreadAlloc*)FUN_00c85750())->m_next = oldTop;
     }
-    void releaseHeap(AllocatorC944& heap) {
+    void releaseHeap(hkMemoryAllocator& heap) {
         m_iElementCount = 0;
         if (!(m_iCapacityState & 0x80000000u))
-            heap.Deallocate(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(BroadPhaseC944HandlePair));
+            heap.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(BroadPhaseC944HandlePair));
         m_data = 0;
         m_iCapacityState = 0x80000000u;
     }
@@ -5824,30 +4542,25 @@ struct PendingOp {
     void* m_p;                 // +0x04
     unsigned char m_flag;      // +0x08
 };
-struct hkpCollidableCollidableFilter {
-    virtual ~hkpCollidableCollidableFilter();
-    virtual FilterResult IsCollisionEnabled(const CollidableC944*,const CollidableC944*);
-};
-struct hkpCollisionFilter : hkReferencedObject, hkpCollidableCollidableFilter {};
-static __declspec(noinline) void SyncOverlap(PhantomC944* phantom,CollidableC944* collidable,hkpCollisionFilter* filter)
+static __declspec(noinline) void SyncOverlap(hkpPhantom* phantom,CollidableC944* collidable,hkpCollisionFilter* filter)
 {
-    FilterResult added = phantom->GetFilterResult(collidable);
-    if (filter->IsCollisionEnabled(&phantom->m_kCollidable,collidable).value) {
-        if (!added.value) phantom->AddOverlappingCollidable(collidable);
+    OverlapResult added = phantom->overlaps(reinterpret_cast<OverlapCollidable*>(collidable));
+    if (static_cast<hkpCollidableCollidableFilter*>(filter)->IsCollisionEnabled(reinterpret_cast<const hkpCollidable&>(phantom->m_kCollidable), reinterpret_cast<const hkpCollidable&>(*collidable))) {
+        if (!added.value) phantom->add(reinterpret_cast<OverlapCollidable*>(collidable));
         if (collidable->m_kBroadPhaseHandle.m_type == 2) {
-            if (!static_cast<PhantomC944*>(collidable->getOwner())->GetFilterResult(&phantom->m_kCollidable).value)
-                static_cast<PhantomC944*>(collidable->getOwner())->AddOverlappingCollidable(&phantom->m_kCollidable);
+            if (!reinterpret_cast<hkpPhantom*>(collidable->getOwner())->overlaps(reinterpret_cast<OverlapCollidable*>(&phantom->m_kCollidable)).value)
+                reinterpret_cast<hkpPhantom*>(collidable->getOwner())->add(reinterpret_cast<OverlapCollidable*>(&phantom->m_kCollidable));
         }
     } else {
-        if (added.value) phantom->RemoveOverlappingObject(collidable);
+        if (added.value) phantom->remove(reinterpret_cast<OverlapCollidable*>(collidable));
         if (collidable->m_kBroadPhaseHandle.m_type == 2) {
-            if (static_cast<PhantomC944*>(collidable->getOwner())->GetFilterResult(&phantom->m_kCollidable).value)
-                static_cast<PhantomC944*>(collidable->getOwner())->RemoveOverlappingObject(&phantom->m_kCollidable);
+            if (reinterpret_cast<hkpPhantom*>(collidable->getOwner())->overlaps(reinterpret_cast<OverlapCollidable*>(&phantom->m_kCollidable)).value)
+                reinterpret_cast<hkpPhantom*>(collidable->getOwner())->remove(reinterpret_cast<OverlapCollidable*>(&phantom->m_kCollidable));
         }
     }
 }
-struct PhantomArgC944 { PhantomC944* p; PhantomArgC944(PhantomC944* q) : p(q) {} };
-struct WorldC944 : hkpWorld { void UpdatePhantom(PhantomC944*, int); void FUN_00c91160(PendingOp*); void FUN_00c91120(); void FUN_00c91140(); };
+struct PhantomArgC944 { hkpPhantom* p; PhantomArgC944(hkpPhantom* q) : p(q) {} };
+struct WorldC944 : hkpWorld { void UpdatePhantom(hkpPhantom*, int); void FUN_00c91160(PendingOp*); void FUN_00c91120(); void FUN_00c91140(); };
 extern "C" unsigned __int64 __rdtsc(void);
 extern "C" void _ReadWriteBarrier(void);
 inline void* getMemoryRouter() throw() { return &hkRouterXc937a0::FUN_00c85750(); }
@@ -5874,38 +4587,8 @@ struct MyExecPending {
 struct MyExecBodyPending {
     void __thiscall FUN_00c91140() throw();
 };
-class hkpSimulation_00c951b0 {
-public:
-    virtual ~hkpSimulation_00c951b0() throw();
-    virtual void slot04() throw();
-    virtual void slot08() throw();
-    virtual void slot0c() throw();
-    virtual void slot10() throw();
-    virtual void slot14() throw();
-    virtual void slot18() throw();
-    virtual void slot1c() throw();
-    virtual void removeEntities(void* const* entities, int numEntities, hkpWorld* world, int unk) throw();
-};
-class hkpBroadPhase_00c951b0 {
-public:
-    virtual ~hkpBroadPhase_00c951b0() throw();
-    virtual void slot04() throw();
-    virtual void slot08() throw();
-    virtual void slot0c() throw();
-    virtual void slot10() throw();
-    virtual void slot14() throw();
-    virtual void slot18() throw();
-    virtual void slot1c() throw();
-    virtual void DispatchCollisionPairs(void* array, void* pairs) throw();
-};
-class hkMemory_00c951b0 {
-public:
-    virtual ~hkMemory_00c951b0() throw();
-    virtual void slot04() throw();
-    virtual void slot08() throw();
-    virtual void slot0c() throw();
-    virtual void deallocate(void* p, int numBytes) throw();
-};
+
+
 struct DummyCollidable_00c951b0 {
     void* m_pCollisionShape;
     void* m_04;
@@ -5943,74 +4626,26 @@ struct WorldOp_00c951b0 {
     void* m_kActorEntries;
     short m_iActorEntryCount;
 };
-struct MonitorCommand {
-    const char* name;
-    unsigned int time;
-    unsigned int timeHigh;
-};
-struct MonitorBeginCommand : MonitorCommand {
-    const char* firstSub;
-};
-struct hkMonitorStream_00c951b0 {
-    int m_00;
-    char* m_commandPosition;
-    int m_08;
-    char* m_pCommandBufferEnd;
-    inline void timerBeginList(const char* name, const char* firstSub, volatile unsigned int& stamp) throw() {
-        MonitorBeginCommand* pos = (MonitorBeginCommand*)m_commandPosition;
-        if ((char*)pos < m_pCommandBufferEnd) {
-            pos->name = name;
-            pos->firstSub = firstSub;
-            _ReadWriteBarrier();
-            stamp = (unsigned int)__rdtsc();
-            pos->time = stamp;
-            m_commandPosition = (char*)(pos + 1);
-        }
-    }
-    inline void timerSplitList(const char* name) throw() {
-        MonitorCommand* pos = (MonitorCommand*)m_commandPosition;
-        if ((char*)pos < m_pCommandBufferEnd) {
-            pos->name = name;
-            _ReadWriteBarrier();
-            volatile unsigned int stamp = (unsigned int)__rdtsc();
-            pos->time = stamp;
-            m_commandPosition = (char*)(pos + 1);
-        }
-    }
-    inline void timerEndList(const char* name) throw() { timerSplitList(name); }
-};
-struct LocalMemoryRouter {
-    char* stack;
-    void* unk04;
-    void* unk08;
-    hkMemory_00c951b0* temporary;
-    hkMemory_00c951b0* heap;
-};
-template <class T>
-struct MyArrayBase {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    inline MyArrayBase() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
-};
+
+
 template <class T>
 struct MyArray {
     hkArray<T>& base;
     inline MyArray(hkArray<T>& b) throw() : base(b) { base.m_data=0; base.m_iElementCount=0; base.m_iCapacityState=0x80000000; }
 
     inline ~MyArray() throw() {
-        LocalMemoryRouter* tm = (LocalMemoryRouter*)getMemoryRouter();
-        hkMemory_00c951b0* memory = tm->temporary;
+        hkMemoryRouter* tm = (hkMemoryRouter*)getMemoryRouter();
+        hkMemoryAllocator* memory = &tm->temp();
         base.m_iElementCount = 0;
         if ((base.m_iCapacityState & 0x80000000) == 0) {
-            memory->deallocate(base.m_data, (base.m_iCapacityState & 0x3fffffff) * sizeof(T));
+            memory->ReturnMemory(base.m_data, (base.m_iCapacityState & 0x3fffffff) * sizeof(T));
         }
     }
 
     inline void reserve(void* tm, int num) throw() {
         if ((base.m_iCapacityState & 0x3fffffff) < num) {
-            FUN_00c908c0(((LocalMemoryRouter*)tm)->temporary, &base, num, sizeof(T));
+            FUN_00c908c0(&((hkMemoryRouter*)tm)->temp(), &base, num, sizeof(T));
         }
     }
 
@@ -6018,40 +4653,37 @@ struct MyArray {
         base.m_data[base.m_iElementCount++] = val;
     }
 };
-struct Pair_00c951b0 {
+// Two pointer fields used by MyLocalArray; include/Pair.h instead stores two integers and has value constructors.
+struct PointerPairRecord {
     void* a;
     void* b;
 };
-struct MyLocalArray : public MyArrayBase<Pair_00c951b0> {
-    Pair_00c951b0* m_savedStack;
+struct MyLocalArray : public hkArrayBase<PointerPairRecord> {
+    PointerPairRecord* m_savedStack;
 
     inline MyLocalArray(int capacity) throw() {
-        LocalMemoryRouter* tm = (LocalMemoryRouter*)getMemoryRouter();
-        char* cur = tm->stack;
-        tm->stack = cur + ((capacity * sizeof(Pair_00c951b0) + 127) & ~127);
-        this->m_data = (Pair_00c951b0*)cur;
-        this->m_savedStack = (Pair_00c951b0*)cur;
+        hkMemoryRouter* tm = (hkMemoryRouter*)getMemoryRouter();
+        char* cur = static_cast<char*>(tm->stack().m_next.val());
+        tm->stack().m_next = cur + ((capacity * sizeof(PointerPairRecord) + 127) & ~127);
+        this->m_data = (PointerPairRecord*)cur;
+        this->m_savedStack = (PointerPairRecord*)cur;
         this->m_iCapacityState = capacity | 0x80000000;
     }
 
     inline ~MyLocalArray() throw() {
-        Pair_00c951b0* savedStack = m_savedStack;
+        PointerPairRecord* savedStack = m_savedStack;
         if (savedStack == this->m_data) {
             this->m_iElementCount = 0;
         }
-        LocalMemoryRouter* stackRouter = (LocalMemoryRouter*)getMemoryRouter();
-        stackRouter->stack = (char*)savedStack;
-        LocalMemoryRouter* tm = (LocalMemoryRouter*)getMemoryRouter();
-        hkMemory_00c951b0* memory = tm->heap;
+        hkMemoryRouter* stackRouter = (hkMemoryRouter*)getMemoryRouter();
+        stackRouter->stack().m_next = savedStack;
+        hkMemoryRouter* tm = (hkMemoryRouter*)getMemoryRouter();
+        hkMemoryAllocator* memory = &tm->heap();
         this->m_iElementCount = 0;
         if ((this->m_iCapacityState & 0x80000000) == 0) {
-            memory->deallocate(this->m_data, (this->m_iCapacityState & 0x3fffffff) * sizeof(Pair_00c951b0));
+            memory->bufFree(this->m_data, (this->m_iCapacityState & 0x3fffffff) * sizeof(PointerPairRecord));
         }
     }
-};
-union PendingOrHandles {
-    WorldOp_00c951b0 operation;
-    hkArray<void*> handles;
 };
 union TimerOrEnd { volatile unsigned int stamp; void* const* end; };
 struct HostWorld_00c951b0 : hkpWorld {
@@ -6223,100 +4855,56 @@ template <class T> struct S97_PadSpu {
     __forceinline T operator->() const { return m_kStorage; }
     __forceinline void operator=(const T& t) { m_kStorage = t; }
 };
-struct S97_MonitorStream {
-    S97_PadSpu<char*> m_kRayStart;
-    S97_PadSpu<char*> m_kRayEnd;
-    S97_PadSpu<char*> m_pRayCursor;
-    S97_PadSpu<char*> m_pCurrentCommand;
 
-    static __forceinline S97_MonitorStream& GetMonitorStream() { return *(S97_MonitorStream*)TlsGetValue(DAT_0126835c); }
-    __forceinline char* GetStreamEnd() { return m_kRayEnd.val(); }
-    __forceinline char* getCapacityMinus16() { return m_pCurrentCommand.val(); }
-    __forceinline S97_Bool memoryAvailable() { return GetStreamEnd() < getCapacityMinus16(); }
-    __forceinline void setEnd(char* ptr) { m_kRayEnd = ptr; }
-
-    struct CommandTimingEntry {
-        const char* m_pCommandName;
-        unsigned int m_uiStartTicks;
-        unsigned int m_uiEndTicks;
-        __forceinline void setTime()
-        {
-            unsigned int ticks;
-            __asm {
-                rdtsc
-                mov dword ptr[ticks], eax
-            }
-            m_uiStartTicks = ticks;
-        }
-    };
-    struct TimedNameRecord : public CommandTimingEntry {
-        const char* m_pFirst;
-    };
-};
 static __forceinline void S97_timerList(const char* name1, const char* name2)
 {
-    S97_MonitorStream& mStream = S97_MonitorStream::GetMonitorStream();
-    if (mStream.memoryAvailable()) {
-        S97_MonitorStream::TimedNameRecord* h = reinterpret_cast<S97_MonitorStream::TimedNameRecord*>(mStream.GetStreamEnd());
-        h->m_pCommandName = name1;
-        h->m_pFirst = name2;
+    hkMonitorStream& mStream = *(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (mStream.m_end.m_storage < mStream.m_capacityMinus16.m_storage) {
+        hkMonitorStream::TimerBeginListCommand* h = reinterpret_cast<hkMonitorStream::TimerBeginListCommand*>(mStream.m_end.m_storage);
+        h->m_commandAndMonitor = name1;
+        h->m_nameOfFirstSplit = name2;
         h->setTime();
-        mStream.setEnd((char*)(h + 1));
+        mStream.m_end.m_storage = (char*)(h + 1);
     }
 }
 static __forceinline void S97_timer(const char* name)
 {
-    S97_MonitorStream& mStream = S97_MonitorStream::GetMonitorStream();
-    if (mStream.memoryAvailable()) {
-        S97_MonitorStream::CommandTimingEntry* h = reinterpret_cast<S97_MonitorStream::CommandTimingEntry*>(mStream.GetStreamEnd());
-        h->m_pCommandName = name;
+    hkMonitorStream& mStream = *(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (mStream.m_end.m_storage < mStream.m_capacityMinus16.m_storage) {
+        hkMonitorStream::TimerCommand* h = reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.m_end.m_storage);
+        h->m_commandAndMonitor = name;
         h->setTime();
-        mStream.setEnd((char*)(h + 1));
+        mStream.m_end.m_storage = (char*)(h + 1);
     }
 }
-struct S97_MemoryAllocator {
-    virtual ~S97_MemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-    template <typename T> inline void _bufFree(void* p, int numElem) { ReturnMemory(p, numElem * (int)sizeof(T)); }
-};
-struct S97_MemoryRouter {
-    int unk00; int unk04; int unk08;
-    S97_MemoryAllocator* m_pTemp;
-    S97_MemoryAllocator* m_pStreamAllocator;
-    static __forceinline S97_MemoryRouter& GetMonitorStream() { return *(S97_MemoryRouter*)FUN_00c85750(); }
-    __forceinline S97_MemoryAllocator& temp() { return *m_pTemp; }
-    __forceinline S97_MemoryAllocator& heap() { return *m_pStreamAllocator; }
-};
-struct S97_HeapAllocator { __forceinline S97_MemoryAllocator& get(const void*) { return S97_MemoryRouter::GetMonitorStream().heap(); } };
-struct S97_TempAllocator { __forceinline S97_MemoryAllocator& get(void*) { return S97_MemoryRouter::GetMonitorStream().temp(); } };
-template <typename T> struct S97_ArrayBase {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline S97_ArrayBase() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
-    __forceinline S97_ArrayBase(T* ptr, int size, int capacity) : m_data(ptr), m_iElementCount(size), m_iCapacityState(capacity | 0x80000000) {}
-    __forceinline int GetLogicalSize() const { return m_iElementCount; }
-    __forceinline int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    __forceinline T& operator[](int i) { return m_data[i]; }
-    __forceinline T* begin() { return m_data; }
-    __forceinline void clear() { m_iElementCount = 0; }
-    __forceinline void _clearAndDeallocate(S97_MemoryAllocator& alloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0) {
-            alloc._bufFree<T>(m_data, getCapacity());
+
+
+struct S97_HeapAllocator { __forceinline hkMemoryAllocator& get(const void*) { return hkMemoryRouter::getInstance().heap(); } };
+struct S97_TempAllocator { __forceinline hkMemoryAllocator& get(void*) { return hkMemoryRouter::getInstance().temp(); } };
+template <class T>
+static __forceinline void S97_ArrayBase_clear(hkArrayBase<T>& self);
+
+template <class T>
+static __forceinline void S97_ArrayBase__clearAndDeallocate(hkArrayBase<T>& self, hkMemoryAllocator& alloc);
+
+template <class T>
+static __forceinline void S97_ArrayBase_clear(hkArrayBase<T>& self)
+{ self.m_iElementCount = 0; }
+
+template <class T>
+static __forceinline void S97_ArrayBase__clearAndDeallocate(hkArrayBase<T>& self, hkMemoryAllocator& alloc)
+{
+        S97_ArrayBase_clear(self);
+        if ((self.m_iCapacityState & 0x80000000) == 0) {
+            alloc._bufFree<T>(self.m_data, self.getCapacity());
         }
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
+        self.m_data = 0;
+        self.m_iCapacityState = 0x80000000;
     }
-};
-template <typename T, typename A> struct S97_Array : public S97_ArrayBase<T> {
+template <typename T, typename A> struct S97_Array : public hkArrayBase<T> {
     __forceinline S97_Array() {}
-    __forceinline S97_Array(T* buffer, int size, int capacity) : S97_ArrayBase<T>(buffer, size, capacity) {}
-    __forceinline void ClearAndRelease() { S97_ArrayBase<T>::_clearAndDeallocate(A().get(this)); }
+    __forceinline S97_Array(T* buffer, int size, int capacity) : hkArrayBase<T>(buffer, size, capacity) {}
+    __forceinline void ClearAndRelease() { hkArrayBase<T>::_clearAndDeallocate(A().get(this)); }
 };
 template <typename T, unsigned N> struct S97_InplaceArray : public S97_Array<T, S97_HeapAllocator> {
     __forceinline explicit S97_InplaceArray(int size = 0) : S97_Array<T, S97_HeapAllocator>(m_kStorage, size, N) {}
@@ -6374,7 +4962,7 @@ struct S97_BroadPhase {
     virtual void v20(); virtual void v24(); virtual void v28(); virtual void v2C();
     virtual void v30(); virtual void v34(); virtual void v38(); virtual void v3C();
     virtual void v40();
-    virtual void FindOverlappingPairs(const S97_Aabb& aabb, S97_ArrayBase<S97_HandlePair>& pairsOut) const;
+    virtual void FindOverlappingPairs(const S97_Aabb& aabb, hkArrayBase<S97_HandlePair>& pairsOut) const;
 };
 struct S97_TreeWorldManager {
     virtual void v00(); virtual void v04(); virtual void v08(); virtual void v0C();
@@ -6383,8 +4971,8 @@ struct S97_TreeWorldManager {
     __forceinline const void* getAabbTree() const { return m_pRayQueryAabbTree; }
     __forceinline const void* getKdTree() const { return m_pKdTree; }
 };
-void __cdecl FUN_00d1c560(const void* tree, const S97_Aabb* aabb, void* callback, S97_ArrayBase<void*>* hits, void* mask, void* context);
-__declspec(noinline) void __cdecl CallWithDefaults(const void* tree, const S97_Aabb& aabb, S97_ArrayBase<void*>& hits) {
+void __cdecl FUN_00d1c560(const void* tree, const S97_Aabb* aabb, void* callback, hkArrayBase<void*>* hits, void* mask, void* context);
+__declspec(noinline) void __cdecl CallWithDefaults(const void* tree, const S97_Aabb& aabb, hkArrayBase<void*>& hits) {
     if (tree) FUN_00d1c560(tree, &aabb, 0, &hits, 0, 0);
 }
 void __cdecl FUN_00d1b850(const void* tree, const S97_Aabb& aabb, S97_Array<unsigned long, S97_TempAllocator>& hits);
@@ -6695,7 +5283,7 @@ template<typename K,typename V,typename Allocator=TCHA>class TPM;
 class TVCR;
 class TRV;
 typedef float TR;
-typedef __m128 TQR;
+typedef LocalM128 TQR;
 class TV4;
 typedef const TV4&TV4P;
 union TQRU;
@@ -6956,7 +5544,7 @@ class TCD1;
 class TE;
 class TRB;
 class TCO;
-class FUN_00d07830;
+
 class TCL;
 class TW;
 extern const TC1 TCIC1;
@@ -7009,7 +5597,7 @@ class TEL;
 class TEAL;
 class TCL1;
 class TM5;
-class FUN_00d07830;
+
 class TW;
 class TCI2;
 class TA1;
@@ -7026,12 +5614,12 @@ protected:class TM1 vm; protected:friend class TWCU1; public:public:class SmallA
 TU16 vs4; TU16 vcAF; } ;
 public:void*vlCIU; TR vdM; TBB*vbB; public:TU32 vsD1;
 public:TOI vsI5; protected:TU16 vcPCD; protected:TSA1<struct TCI3>vcM; protected:TA2<TCI2*>vcS;
-protected:TA2<TU8>vcR1; FUN_00d07830*vsI; public:TI8 vaRL; TU8 vnSKICPP;
+protected:TA2<TU8>vcR1; hkpSimulationIsland*vsI; public:TI8 vaRL; TU8 vnSKICPP;
 TU8 vrMF; TU32 vu; public:struct SpuCollisionCallback{ public:TSCCU1*vu1;
 TU16 vc; TU8 veF; TU8 vuF; }
 ; struct ExtendedListeners{ TSA1<TEAL*>vaL1; TSA1<TEL*>veL;
 } ; public:struct SpuCollisionCallback vsCC; public:class TMSM vm3;
-protected:friend class TECU; friend class TWCU; friend class TW; friend class FUN_00d07830;
+protected:friend class TECU; friend class TWCU; friend class TW; 
 friend class TWOU; TSA1<TCL1*>vcL1; protected:TSA1<TA1*>va1; public:TRP<TLF>vlF;
 protected:mutable ExtendedListeners*veL1; } ;
 inline TM5*TE::getMotion()throw(){
@@ -7044,30 +5632,20 @@ class TS;
 typedef TS TSBW;
 class TW;
 class TSI1;
-class FUN_00d07830;
+
 class TE;
 class TB;
 struct TTD;
-class TMS{ public:static TMS&GetMonitorStream()throw(){ extern TTLD<TMS*>OptMonitorStream__DAT_0126835c; return*OptMonitorStream__DAT_0126835c.getData();
-} public:__forceinline char*__cdecl GetStreamEnd()throw(){ return ve.val(); }
-__forceinline char*__cdecl getCapacityMinus16()throw(){ return vcM16.val(); } __forceinline char*__cdecl getCapacity()throw(){
-return vc.val(); } __forceinline TB __cdecl memoryAvailable()throw(){ return GetStreamEnd()<getCapacityMinus16();
-} __forceinline void __cdecl setEnd(char*ptr)throw(){ ve=ptr; }
-public:public:TPS<char*>vs7; TPS<char*>ve; TPS<char*>vc; TPS<char*>vcM16;
-TB viBAOTH; public:struct Command{ const char*vcAM; }
-; struct CommandFilterEntry:public TMS::Command{ float vv; }
-; struct CommandTimingEntry:public TMS::Command{ TU32 vt0; TU32 vt11;
-__forceinline void setTime()throw(); } ; struct TimedNameRecord:public TMS::CommandTimingEntry{
-const char*vnOFS; } ; struct CommandTimingStringEntry:public TMS::CommandTimingEntry{
-const char*voN; } ; struct PointerAndIntegerCommand:public TMS::Command{
-void*vp6; int vsAF; } ;
-} ;
-void TMS::CommandTimingEntry::setTime()throw(){ TU32 ticks;
-__asm {
-rdtsc
-mov dword ptr[ticks], eax
+
+inline void hkMonitorStream::TimerCommand::setTime()
+{
+    unsigned int ticks;
+    __asm {
+        rdtsc
+        mov dword ptr[ticks], eax
+    }
+    m_time0 = ticks;
 }
- vt0=ticks; }
 class TTFH;
 class TWMAWD;
 class TCB;
@@ -7152,7 +5730,7 @@ class TCI2;
 class TCD1;
 class TCL;
 class TPS1;
-class FUN_00d07830;
+
 class TCMF;
 struct TMTS;
 class TWPSL;
@@ -7194,13 +5772,13 @@ enum TSR2{ KSRS,KSRMFBI,KSRMFDC,KSRMFDTS,}
 ;
 class TW:public TRO{ public:void FUN_00c94bd0(TE*const*entityBatch,int numEntities,TEA initialActivationState=KEADA)throw(); enum ReintegrationRecollideMode{
 RR_MODE_REINTEGRATE=1,RR_MODE_RECOLLIDE_BROADPHASE=2,RR_MODE_RECOLLIDE_NARROWPHASE=4,RR_MODE_ALL=7} ; struct ReintegrationCollisionRequest{ int vmRBS;
-int vsRBS; FUN_00d07830*vlSI; } ;
+int vsRBS; hkpSimulationIsland*vlSI; } ;
 enum MtAccessChecking{ MT_ACCESS_CHECKING_ENABLED=0,MT_ACCESS_CHECKING_DISABLED} ; inline const EnumIntegerValue*getCollisionFilter()const throw();
-enum CachedAabbUpdate{ SHIFT_BROADPHASE_UPDATE_ENTITY_AABBS,SHIFT_BROADPHASE_IGNORE_ENTITY_AABBS} ; inline const TA2<FUN_00d07830*>&getActiveSimulationIslands()const throw();
+enum CachedAabbUpdate{ SHIFT_BROADPHASE_UPDATE_ENTITY_AABBS,SHIFT_BROADPHASE_IGNORE_ENTITY_AABBS} ; inline const TA2<hkpSimulationIsland*>&getActiveSimulationIslands()const throw();
 public:__forceinline void lockCriticalOperations()throw(); __forceinline void unlockCriticalOperations()throw(); __forceinline int areCriticalOperationsLocked()const throw(); __forceinline void unlockAndAttemptToExecutePendingOperations()throw();
 __forceinline void attemptToExecutePendingOperations(bool executeBodyOperations=true)throw(); void FUN_00c91160(const TWO1::TypeTag&operation)throw(); private:void FUN_00c91120()throw(); void FUN_00c91140()throw();
-public:public:TS2*vs3; TV4 vg1; FUN_00d07830*vfI; TRB*vfRB;
-TA2<FUN_00d07830*>vaSI; TA2<FUN_00d07830*>viSI; TA2<FUN_00d07830*>vdSI; TWMM*vmM;
+public:public:TS2*vs3; TV4 vg1; hkpSimulationIsland*vfI; TRB*vfRB;
+TA2<hkpSimulationIsland*>vaSI; TA2<hkpSimulationIsland*>viSI; TA2<hkpSimulationIsland*>vdSI; TWMM*vmM;
 TRP<TWMAWD>vmWD; TB vaOROOSM; TBP*vbP; class TTWM*vkTM;
 TB vaUT; TTBPD*vbPD; TPBPL*vpBPL; TEEBPL*veEBPL;
 TBPBL*vbPBL; TMTS*vmSJD; TPCI*vcI; EnumIntegerValue*vcF;
@@ -7224,7 +5802,7 @@ TA2<TCILBL*>vcILBL; TVCA*vvCA; class TBPB*vbPB; class TCCU*vcCU;
 class TdW*vdW; public:struct TWDSI vdSI1; TV4 vbPE[2]; int vbPNM;
 int vsOTEQ; TI32 vbPQS; TI32 vbPUS; TE1<TWC::ContactPointGeneration,TI8>vcPG;
 } ;
-const TA2<FUN_00d07830*>&TW::getActiveSimulationIslands()const throw(){ return vaSI;
+const TA2<hkpSimulationIsland*>&TW::getActiveSimulationIslands()const throw(){ return vaSI;
 }
 inline const EnumIntegerValue*TW::getCollisionFilter()const throw(){ ; return vcF;
 }
@@ -7247,7 +5825,7 @@ class TCI2;
 class TE;
 class TSI1;
 class TVA;
-class FUN_00d07830;
+
 class TVA;
 class TVA;
 class TCQSI;
@@ -7305,20 +5883,8 @@ class TBPHP;
 struct TCI;
 struct TPCO;
 extern const TC1 FUN_00d07830Class;
-class FUN_00d07830:public TCO{
-public:__forceinline void*__cdecl operator new(TS4 nbytes){ ; TRO*b=static_cast<TRO*>(TMR::FUN_00c85750().heap().AllocateMemoryBlock(static_cast<int>(nbytes))); b->vmSAF=static_cast<TU16>(nbytes);
-; return b; } __forceinline void*__cdecl operator new(TS4,void*p){
-return p; } inline TB isFixed()const throw(); virtual void vs9()const throw();
-protected:friend class TW; friend class TWOU; friend class TWCU; friend class TS2;
-friend class TCS; friend class TAMU; FUN_00d07830(TW*world)throw(); ~FUN_00d07830()throw();
-void FUN_00d07420(TE*entity)throw(); virtual void vs55()throw(); virtual void vs56()throw(); virtual void vs57()throw();
-protected:public:public:public:public:TW*vw; int vnC1; TOI vsI5; TOI vdLI;
-TU vsCFC; bool vsCR:2; bool vsE:2; bool vaLCN:2;
-bool vaIL:2; bool viIAIA:2; bool vaM:2; bool vtTIISM:2;
-bool viIJ:2; protected:mutable TMTC vmTC; public:TR vtSLHFC; TR vtSLLFC;
-TA2<TA1*>va1; TT vtOD; TIA<TE*,1>ve1; TANT vaT;
-; ; } ;
-inline TB FUN_00d07830::isFixed()const throw(){ return vsI5==0xffff; }
+
+
 class THC;
 class TLF;
 class TRBC;
@@ -7372,7 +5938,7 @@ class TSCCM;
 class TCE1;
 class TCP;
 class TCPP;
-class FUN_00d07830;
+
 class TCPE;
 class TC2;
 struct TCI;
@@ -7554,8 +6120,8 @@ extern "C" unsigned __int64 __rdtsc(void);
 extern "C" void __movsd(unsigned long*, unsigned long const*, size_t);
 extern const char str_010c68c8[];
 extern const char str_010c41f8[];
-struct Sbp_TimerEntry { const char* name; unsigned int tick; unsigned int unk08; };
-struct Sbp_Timer { void* unk00; Sbp_TimerEntry* unk04; void* unk08; Sbp_TimerEntry* unk0C; };
+
+
 struct Sbp_Allocator {
     virtual void slot0(); virtual void slot1(); virtual void slot2();
     virtual void* BufAlloc(int& bytes);
@@ -7574,7 +6140,7 @@ template <class T> struct Sbp_Array {
     }
 };
 struct Sbp_Vec {
-    __m128 q;
+    LocalM128 q;
     void add4(const Sbp_Vec& a) { q = _mm_add_ps(q, a.q); }
 };
 struct Sbp_BroadPhase {
@@ -7620,10 +6186,10 @@ struct Sbp_ShapePhantom : Sbp_Phantom {
 struct Sbp_Border {
     int unk00; int unk04; int unk08; int unk0C; int unk10; int unk14;
     Sbp_Phantom* m_kPhantoms[6];
-    void shiftPhantoms(__m128& raw);
+    void shiftPhantoms(LocalM128& raw);
 };
 static inline Sbp_Phantom* Sbp_getPhantom(Sbp_Border* b, const int& i) { return b->m_kPhantoms[i]; }
-__forceinline void Sbp_Border::shiftPhantoms(__m128& raw) { Sbp_Vec& effective=(Sbp_Vec&)raw;
+__forceinline void Sbp_Border::shiftPhantoms(LocalM128& raw) { Sbp_Vec& effective=(Sbp_Vec&)raw;
     Sbp_Phantom* const* phantoms = m_kPhantoms;
     for (int i = 0; i < 6; i++) {
         Sbp_Phantom* phantom = phantoms[i];
@@ -7667,227 +6233,47 @@ static __forceinline void Sbp_initArray(Sbp_Island**& data, int& size, int& cap,
     cap = size ? size : 0x80000000;
 }
 struct Sbp_World : hkpWorld {
-    void FUN_00c96a20(const __m128& rawShift, __m128& rawEffective, int update);
+    void FUN_00c96a20(const LocalM128& rawShift, LocalM128& rawEffective, int update);
     void FUN_00c91120();
     void FUN_00c91140();
 };
-static __forceinline void doShift(Sbp_World* self,const __m128& rawShift, __m128& rawEffective, int update);
+static __forceinline void doShift(Sbp_World* self,const LocalM128& rawShift, LocalM128& rawEffective, int update);
 typedef float hkReal_S;
 typedef signed short hkInt16_S;
 typedef unsigned short hkUint16_S;
 typedef unsigned long __w64 hkUlong_S;
 typedef unsigned __w64 hk_size_t;
-class FinishingFlag
-{
-public:
-FinishingFlag():m_bFinishing(0){}
-int m_bFinishing;
-};
-class hkBool_S
-{
-public:
-typedef char CompileTimeTrueType;inline hkBool_S(bool b)
-{
-m_cBooleanValue=static_cast<char>(b);
-}
-inline operator bool()const
-{
-return m_cBooleanValue !=0;
-}
-private:
-char m_cBooleanValue;};
-template<typename TYPE>
-class ValueWrapper
-{
-public:
-__forceinline ValueWrapper(){}
-private:
-TYPE m_kStorage;};
-class hkMemoryAllocator
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}
-virtual void*AllocateMemoryBlock(int numBytes)=0;
-virtual void ReleaseBlock(void*p,int numBytes)=0;public:
-enum MemoryState
-{
-MEMORY_STATE_OK,
-MEMORY_STATE_OUT_OF_MEMORY
-};};
-struct StringPointerTriple
-{
-public:
-__forceinline StringPointerTriple();protected:
-ValueWrapper<void*>m_next;};
-class NineIntegerRecord
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}
-typedef hkMemoryAllocator Allocator_S;
-static NineIntegerRecord&__cdecl GetMonitorStream();inline Allocator_S&heap(){return*m_pStreamAllocator;}
-protected:
-StringPointerTriple m_aiEntries;
-Allocator_S*m_pTemp;
-Allocator_S*m_pStreamAllocator;
-Allocator_S*m_pDebugAllocator;};
-class hkBaseObject_S
-{
-public:
-static const struct ClassMemberDescriptor Members[];public:
-__forceinline hkBaseObject_S(){}
-};
-class hkReferencedObject_S:public hkBaseObject_S
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;hkReferencedObject_S*b=static_cast<hkReferencedObject_S*>(NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));b->m_usMemSizeAndFlags=static_cast<hkUint16_S>(nbytes);;return b;}
-public:
-enum
-{
-MASK_MEMSIZE=0x7fff
-};
-hkUint16_S m_usMemSizeAndFlags;
-public:
-hkReferencedObject_S(class FinishingFlag flag){}
-};
-template<typename T>
-class hkSingleton
-{
-public:
-static T*s_instance;protected:
-hkSingleton(){}
-};
-template<bool N>struct BooleanTypeConstant{typedef BooleanTypeConstant<N>type;enum{result=N};};
-typedef BooleanTypeConstant<true>hkTypeIsPod;
-struct RouterHeapAllocatorProvider
-{
-hkMemoryAllocator&get(const void*){return NineIntegerRecord::GetMonitorStream().heap();}
-};
-template<typename T>
-class HavokElementArray
-{
-public:
-typedef HavokElementArray<T>ThisType;
-protected:
-__forceinline HavokElementArray(const HavokElementArray&a){;}
-public:
-__forceinline void _useExternalArray(T*,int cap);
-protected:
-__forceinline HavokElementArray<T>&copyFromArray(hkMemoryAllocator&,const HavokElementArray<T>&src,hkTypeIsPod);
-public:
-enum
-{
-CAPACITY_MASK=int(0x3FFFFFFF),
-FLAG_MASK=int(0xC0000000),
-DONT_DEALLOCATE_FLAG=int(0x80000000),
-FORCE_SIGNED=-1
-};
-protected:
-friend class hkStatisticsCollector;
-public:
-HavokElementArray(FinishingFlag f){}
-};
-template<typename T,typename Allocator_S=RouterHeapAllocatorProvider>
-class hkArray_S:public HavokElementArray<T>
-{
-public:
-typedef Allocator_S AllocatorType;protected:
-__forceinline hkArray_S(const hkArray_S&a);
-public:
-__forceinline hkArray_S&operator=(const HavokElementArray<T>&a);};
-extern "C"{
-extern __m128 _mm_add_ss(__m128 _A,__m128 _B);
-extern __m128 _mm_add_ps(__m128 _A,__m128 _B);
-extern __m128 _mm_sub_ps(__m128 _A,__m128 _B);
-extern __m128 _mm_mul_ps(__m128 _A,__m128 _B);
-extern __m128 _mm_sqrt_ss(__m128 _A);
-extern __m128 _mm_unpackhi_ps(__m128 _A,__m128 _B);
-extern __m128 _mm_setr_ps(float _A,float _B,float _C,float _D);
-extern void _mm_store_ss(float*_V,__m128 _A);}
+
+// BooleanTypeConstant / hkTypeIsPod: include/hkTypeTraits.h
+
 ;
-typedef __m128 hkQuadReal;
+typedef LocalM128 hkQuadReal;
 class hkVector4_S;
 typedef const hkVector4_S&hkVector4Parameter;
-class VectorComponentValue
+inline hkSimdReal::hkSimdReal() {}
+static __forceinline hkSimdReal makeVectorComponent(const LocalM128& value)
 {
-public:
-VectorComponentValue(const hkQuadReal&x)
-:m_vValue(x)
-{
+    hkSimdReal result;
+    result.m_vValue = value;
+    return result;
 }
-operator hkReal_S()const
+static __forceinline hkSimdReal makeScalarComponent(float value)
 {
-hkReal_S s;
-_mm_store_ss(&s,m_vValue);
-return s;
+    hkSimdReal result;
+    result.m_vValue = (_mm_load_ss)(&value);
+    return result;
 }
-__forceinline hkQuadReal broadcast()const
-{
-return _mm_shuffle_ps(m_vValue,m_vValue,0);
-}
-__forceinline const hkQuadReal&getQuad()const
-{
-return m_vValue;
-}
-private:
-hkQuadReal m_vValue;};
-typedef const VectorComponentValue&hkSimdRealParameter;
+inline hkSimdReal::operator float() const { float result; _mm_store_ss(&result, m_vValue); return result; }
+__forceinline LocalM128 hkSimdReal::broadcast() const { return _mm_shuffle_ps(m_vValue, m_vValue, 0); }
+__forceinline const LocalM128& hkSimdReal::getQuad() const { return m_vValue; }
+template <typename T> inline void hkMemoryAllocator::_bufFree(void* p, int count) { ReturnMemory(p, count * (int)sizeof(T)); }
+inline void hkStackMemory::deallocateStack(void* p) { m_next = p; }
+template <typename T> inline hkSingleton<T>::hkSingleton() {}
+typedef const hkSimdReal&hkSimdRealParameter;
 extern const hkQuadReal g_vQuadRealConstant;
-class hkQuaternion_S;
 class hkTransform_S;
-class hkQsTransform_S;
-class hkVector4_S
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
-__forceinline void operator=(const hkVector4_S&v);
-__forceinline void set(hkReal_S x,hkReal_S y,hkReal_S z,hkReal_S w=0);
-__forceinline void SetAllComponents(hkSimdRealParameter x);
-__forceinline void add4(const hkVector4_S&a);
-__forceinline void setAdd4(const hkVector4_S&a,const hkVector4_S&b);
-__forceinline void sub4(const hkVector4_S&a);
-__forceinline void setSub4(const hkVector4_S&a,const hkVector4_S&b);
-__forceinline void setMul4(hkVector4Parameter a,hkVector4Parameter b);
-__forceinline void addMul4(hkSimdRealParameter r,const hkVector4_S&a);
-__forceinline void addMul4(hkVector4Parameter a,hkVector4Parameter b);
-__forceinline void setAddMul4(const hkVector4_S&a,const hkVector4_S&x,const hkVector4_S&y);
-__forceinline void setCross(const hkVector4_S&a,const hkVector4_S&b);
-__forceinline void SetRotatedDirection(const hkQuaternion_S&q,const hkVector4_S&b);
-void SetTransformedPoint(const hkQsTransform_S&a,const hkVector4_S&b);
-__forceinline VectorComponentValue dot3(const hkVector4_S&a)const;
-__forceinline VectorComponentValue length3()const;
-__forceinline void setXYZW(const hkVector4_S&xyz,const hkVector4_S&w);
-__forceinline VectorComponentValue getSimdAt(int i)const;
-__forceinline void broadcast(int i);
-__forceinline void setBroadcast(hkVector4Parameter v,int i);
-__forceinline hkQuadReal&getQuad();
-private:
-hkQuadReal m_vComponents;
-public:
-operator hkQuadReal()const
-{
-return m_vComponents;
-}
-};
-class hkQuaternion_S
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
-inline void SetProduct(const hkQuaternion_S&q0,const hkQuaternion_S&q1);
-__forceinline const hkVector4_S&getImag()const;
-public:
-hkVector4_S m_vec;
-protected:
-void setFlippedRotation(const hkVector4_S&from);};
-class hkQsTransform_S
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
-__forceinline const hkVector4_S&getTranslation()const;
-__forceinline const hkQuaternion_S&getRotation()const;
-public:
-hkVector4_S m_vTranslation;
-hkQuaternion_S m_rotation;
-hkVector4_S m_vScale;};
+
+
 inline hkQuadReal&hkVector4_S::getQuad()
 {
 return m_vComponents;
@@ -7950,32 +6336,32 @@ cross1=_mm_mul_ps(
 _mm_shuffle_ps(v0.m_vComponents,v0.m_vComponents,(((3)<<6)|((1)<<4)|((0)<<2)|((2)))),
 _mm_shuffle_ps(v1.m_vComponents,v1.m_vComponents,(((3)<<6)|((0)<<4)|((2)<<2)|((1)))));
 m_vComponents=_mm_sub_ps(cross0,cross1);}
-inline VectorComponentValue hkVector4_S::dot3(const hkVector4_S&a)const
+inline hkSimdReal hkVector4_S::dot3(const hkVector4_S&a)const
 {
 hkQuadReal x2=_mm_mul_ps(m_vComponents,a.m_vComponents);
 hkQuadReal xySum=_mm_add_ss(_mm_shuffle_ps(x2,x2,(((1)<<6)|((1)<<4)|((1)<<2)|((1)))),x2);
-return _mm_add_ss(_mm_shuffle_ps(x2,x2,(((2)<<6)|((2)<<4)|((2)<<2)|((2)))),xySum);}
-inline VectorComponentValue hkVector4_S::length3()const
+return makeVectorComponent(_mm_add_ss(_mm_shuffle_ps(x2,x2,(((2)<<6)|((2)<<4)|((2)<<2)|((2)))),xySum));}
+inline hkSimdReal hkVector4_S::length3()const
 {
-return _mm_sqrt_ss(this->dot3(*this).getQuad());
+return makeVectorComponent(_mm_sqrt_ss(this->dot3(*this).getQuad()));
 }
 inline void hkVector4_S::setXYZW(const hkVector4_S&xyz,const hkVector4_S&w)
 {
 m_vComponents=_mm_shuffle_ps(xyz.m_vComponents,_mm_unpackhi_ps(xyz.m_vComponents,w.m_vComponents),(((3)<<6)|((0)<<4)|((1)<<2)|((0))));
 }
-inline VectorComponentValue hkVector4_S::getSimdAt(int i)const
+inline hkSimdReal hkVector4_S::getSimdAt(int i)const
 {
 switch(i)
 {
 case 0:
-return m_vComponents;
+return makeVectorComponent(m_vComponents);
 case 1:
-return _mm_shuffle_ps(m_vComponents,m_vComponents,(((1)<<6)|((1)<<4)|((1)<<2)|((1))));
+return makeVectorComponent(_mm_shuffle_ps(m_vComponents,m_vComponents,(((1)<<6)|((1)<<4)|((1)<<2)|((1)))));
 case 2:
-return _mm_shuffle_ps(m_vComponents,m_vComponents,(((2)<<6)|((2)<<4)|((2)<<2)|((2))));
+return makeVectorComponent(_mm_shuffle_ps(m_vComponents,m_vComponents,(((2)<<6)|((2)<<4)|((2)<<2)|((2)))));
 case 3:
 default:
-return _mm_shuffle_ps(m_vComponents,m_vComponents,(((3)<<6)|((3)<<4)|((3)<<2)|((3))));
+return makeVectorComponent(_mm_shuffle_ps(m_vComponents,m_vComponents,(((3)<<6)|((3)<<4)|((3)<<2)|((3)))));
 }
 }
 inline void hkVector4_S::broadcast(int i)
@@ -7996,199 +6382,22 @@ else if(i==3)
 m_vComponents=_mm_shuffle_ps(v.m_vComponents,v.m_vComponents,(((3)<<6)|((3)<<4)|((3)<<2)|((3))));
 }
 }
-__forceinline void hkVector4_S::SetRotatedDirection(const hkQuaternion_S&quat,const hkVector4_S&direction)
-{
-hkVector4_S minusHalf;minusHalf.getQuad()=g_vQuadRealConstant;
-hkVector4_S qreal;
-qreal.setBroadcast(quat.m_vec,3);
-hkVector4_S q2minus1;
-q2minus1.setAddMul4(minusHalf,qreal,qreal);
-hkVector4_S ret;
-ret.setMul4(direction,q2minus1);
-hkVector4_S imagDotDir;
-imagDotDir.getQuad()=quat.getImag().dot3(direction).getQuad();
-imagDotDir.broadcast(0);
-ret.addMul4(imagDotDir,quat.getImag());
-hkVector4_S imagCrossDir;
-imagCrossDir.setCross(quat.getImag(),direction);
-ret.addMul4(qreal,imagCrossDir);
-this->setAdd4(ret,ret);}
-inline const hkVector4_S&hkQuaternion_S::getImag()const
-{
-return m_vec;
-}
-inline void hkQuaternion_S::SetProduct(const hkQuaternion_S&q0,const hkQuaternion_S&q1)
-{
-hkVector4_S vec;
-vec.setCross(q0.getImag(),q1.getImag());
-vec.addMul4(q0.m_vec.getSimdAt(3),q1.getImag());
-hkVector4_S dot;
-dot.SetAllComponents(q0.m_vec.dot3(q1.m_vec));
-hkVector4_S w;
-w.sub4(dot);
-m_vec.setXYZW(vec,w);}
-const hkVector4_S&hkQsTransform_S::getTranslation()const
-{
-return m_vTranslation;
-}
-const hkQuaternion_S&hkQsTransform_S::getRotation()const
-{
-return m_rotation;
-}
-class hkDisplayGeometry;
-class hkDebugDisplayHandler
-{
-public:
-enum Command
-{
-HK_STEP=0x00,
-HK_ADD_GEOMETRY,
-HK_UPDATE_GEOMETRY,
-HK_SET_COLOR_GEOMETRY,
-HK_REMOVE_GEOMETRY,
-HK_DISPLAY_GEOMETRY_WITH_TRANSFORM,
-HK_DISPLAY_GEOMETRY,
-HK_DISPLAY_POINT,
-HK_DISPLAY_LINE,
-HK_DISPLAY_TEXT,
-HK_SEND_STATISTICS_DUMP_DEPRICATED,
-HK_HOLD_IMMEDIATE,
-HK_ADD_CAMERA,
-HK_UPDATE_CAMERA,
-HK_REMOVE_CAMERA,
-HK_SEND_MEMSTATS_DUMP,
-HK_ADD_GEOMETRY_INSTANCE,
-HK_DISPLAY_TEXT_3D,
-HK_UPDATE_BEHAVIOR,
-HK_LIST_BEHAVIORS,
-HK_DISPLAY_ANNOTATION,
-};};
-class hkDebugDisplay:public hkReferencedObject_S,public hkSingleton<hkDebugDisplay>
-{
-friend class hkSingleton<hkDebugDisplay>;
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;hkReferencedObject_S*b=static_cast<hkReferencedObject_S*>(NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));b->m_usMemSizeAndFlags=static_cast<hkUint16_S>(nbytes);;return b;}__forceinline void __cdecl operator delete(void*p){hkReferencedObject_S*b=static_cast<hkReferencedObject_S*>(p);;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,b->m_usMemSizeAndFlags);}__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-hkDebugDisplay();
-~hkDebugDisplay();
-void addDebugDisplayHandler(hkDebugDisplayHandler*debugDisplay);
-void removeDebugDisplayHandler(hkDebugDisplayHandler*debugDisplay);
-void clear();
-public:
-void AddDisplayGeometry(const hkArray_S<hkDisplayGeometry*>&geometries,const hkTransform_S&transform,hkUlong_S id,int tag,hkUlong_S shapeIdHint);
-void ReplaceGeometry(hkUlong_S origianalGeomId,const hkTransform_S&transform,hkUlong_S id,int tag,hkUlong_S shapeIdHint);
-void SetGeometryColor(int color,hkUlong_S id,int tag);
-void m_bUpdateGeometry(const hkTransform_S&transform,hkUlong_S id,int tag);
-void RemoveGeometry(hkUlong_S id,int tag,hkUlong_S shapeIdHint);
-void DisplayCamera(const hkVector4_S&from,const hkVector4_S&to,const hkVector4_S&up,hkReal_S nearPlane,hkReal_S farPlane,hkReal_S fov,const char*name);
-void DisplayBehaviorGraph(hkArray_S<int>&wordVarIdx,hkArray_S<int>&wordStack,hkArray_S<int>&quadVarIdx,hkArray_S<hkVector4_S>&quadStack,
-hkArray_S<char*>&activeNodes,hkArray_S<int>&activeStateIds,hkArray_S<int>&activeTransitions,hkArray_S<hkQsTransform_S>&transforms);
-void DisplayPoint(const hkVector4_S&position,int color,int id,int tag);
-void DisplayLine(const hkVector4_S&start,const hkVector4_S&end,int color,int id,int tag);
-void DisplayTriangle(const hkVector4_S&a,const hkVector4_S&b,const hkVector4_S&c,int color,int id,int tag);
-void displayLineModelSpace(const hkQsTransform_S&worldFromModel,const hkVector4_S&start,const hkVector4_S&end,int color,int id,int tag);
-void displayLineModelSpace(const hkTransform_S&worldFromModel,const hkVector4_S&start,const hkVector4_S&end,int color,int id,int tag);
-void displayRay(const hkVector4_S&start,const hkVector4_S&direction,int color,int id,int tag);
-void displayRayModelSpace(const hkQsTransform_S&worldFromModel,const hkVector4_S&start,const hkVector4_S&direction,int color,int id,int tag);
-void displayRayModelSpace(const hkTransform_S&worldFromModel,const hkVector4_S&start,const hkVector4_S&direction,int color,int id,int tag);
-void RenderLine(const hkVector4_S&start,const hkVector4_S&dir,int color,int id,int tag);
-void displayStar(const hkVector4_S&position,hkReal_S scale,int color,int id,int tag);
-void displayStarModelSpace(const hkQsTransform_S&worldFromModel,const hkVector4_S&position,hkReal_S scale,int color,int id,int tag);
-void displayStarModelSpace(const hkTransform_S&worldFromModel,const hkVector4_S&position,hkReal_S scale,int color,int id,int tag);
-void DisplayPlane(const hkVector4_S&plane,const hkVector4_S&offset,hkReal_S scale,int color,int id,int tag);
-void FUN_00c998b0(int numTransforms,const hkInt16_S*parentIndices,const hkQsTransform_S*modelSpacePose,const hkQsTransform_S&worldFromModel,int id,int tag,int color=0x7fffffff,hkReal_S boneAxisSize=0.25f,hkBool_S showRootTranslation=false);
-void displayLocalSpacePose(int numTransforms,const hkInt16_S*parentIndices,const hkQsTransform_S*localSpacePose,const hkQsTransform_S&worldFromModel,int id,int tag,int color=0x7fffffff,hkReal_S boneAxisSize=0.25f,hkBool_S showRootTranslation=false);
-void displayText(const char*text,int color,int id,int tag);
-void Display3DText(const char*text,const hkVector4_S&pos,int color,int id,int tag);
-void displayFrame(const hkQsTransform_S&worldFromLocal,hkReal_S size,int id,int tag);
-void displayFrame(const hkTransform_S&worldFromLocal,hkReal_S size,int id,int tag);
-void DisplayGeometryList(const HavokElementArray<hkDisplayGeometry*>&geometries,const hkTransform_S&transform,int color,int id,int tag);
-void DisplayGeometryList(const HavokElementArray<hkDisplayGeometry*>&geometries,int color,int id,int tag);
-void displayAabb(const class hkAabb&aabb,int color,int id,int tag);
-void displayLitTriangle(const hkVector4_S&a,const hkVector4_S&b,const hkVector4_S&c,int color);
-protected:
-hkArray_S<hkDebugDisplayHandler*>m_kDebugDisplayHandlers;
-mutable class PhysicsSimulationContext*m_pPhysicsSimulationContext;
-};
-extern "C" __m128 __cdecl _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 __cdecl _mm_add_ss(__m128 a, __m128 b);
-class hkQuaternionDAD;
-class __declspec(align(16)) hkVector4DAD {
-public:
-    __forceinline void SetRotatedDirection(const hkQuaternionDAD& quat, const hkVector4DAD& direction);
-    inline hkVector4DAD& operator=(const hkVector4DAD& v) { m_vComponents = v.m_vComponents; return *this; }
-    __forceinline void setAdd4(const hkVector4DAD& a, const hkVector4DAD& b) { m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void setMul4(const hkVector4DAD& a, const hkVector4DAD& b) { m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void addMul4(const hkVector4DAD& a, const hkVector4DAD& b) { m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents)); }
-    __forceinline void setCross(const hkVector4DAD& v1, const hkVector4DAD& v2)
-    {
-        const __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9), _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        const __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2), _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    __forceinline void setBroadcast3(const hkVector4DAD& v) { m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff); }
-    __forceinline __m128 dot3(const hkVector4DAD& v) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, v.m_vComponents);
-        const __m128 sum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), sum);
-    }
-
-    __m128 m_vComponents;
-};
-class hkQuaternionDAD {
-public:
-    void FUN_00c66320(const hkQuaternionDAD& q0, const hkQuaternionDAD& q1); // SetProduct
-    const hkVector4DAD& getImag() const { return m_vec; }
-
-    hkVector4DAD m_vec;
-};
-__forceinline void hkVector4DAD::SetRotatedDirection(const hkQuaternionDAD& quat, const hkVector4DAD& direction)
-{
-    hkVector4DAD qreal; qreal.setBroadcast3(quat.m_vec);
-    hkVector4DAD q2minus1; q2minus1.m_vComponents = _mm_add_ps(_mm_mul_ps(qreal.m_vComponents, qreal.m_vComponents), DAT_010c71e0);
-    hkVector4DAD ret; ret.setMul4(q2minus1, direction);
-    hkVector4DAD imagDotDir; imagDotDir.m_vComponents = quat.getImag().dot3(direction); imagDotDir.m_vComponents = _mm_shuffle_ps(imagDotDir.m_vComponents, imagDotDir.m_vComponents, 0);
-    hkVector4DAD imagCrossDir; imagCrossDir.setCross(quat.getImag(), direction);
-    ret.addMul4(imagDotDir, quat.getImag());
-    ret.addMul4(qreal, imagCrossDir);
-    setAdd4(ret, ret);
-}
-class hkQsTransformDAD {
-public:
-    __forceinline void SetProduct(const hkQsTransformDAD& t1, const hkQsTransformDAD& t2)
-    {
-        hkVector4DAD temp;
-        temp.SetRotatedDirection(t1.m_rotation, t2.m_vTranslation);
-        m_vTranslation.setAdd4(temp, t1.m_vTranslation);
-        m_rotation.FUN_00c66320(t1.m_rotation, t2.m_rotation);
-        m_vScale.setMul4(t1.m_vScale, t2.m_vScale);
-    }
-
-    hkVector4DAD m_vTranslation;
-    hkQuaternionDAD m_rotation;
-    hkVector4DAD m_vScale;
-};
-extern const hkQsTransformDAD DAT_01268700;
+extern const hkQsTransform DAT_01268700;
 struct hkStackDAD {
     char* m_cur;
 };
 struct hkRouterDAD {
     static hkStackDAD* __cdecl FUN_00c85750() throw();
 };
-__forceinline void transformLocalPoseToModelPoseDAD(int numTransforms, const short* parentIndices, const hkQsTransformDAD& worldFromModel, const hkQsTransformDAD* poseLocal, hkQsTransformDAD* poseModelOut)
+__forceinline void transformLocalPoseToModelPoseDAD(int numTransforms, const short* parentIndices, const hkQsTransform& worldFromModel, const hkQsTransform* poseLocal, hkQsTransform* poseModelOut)
 {
     for (int i = 0; i < numTransforms; i++)
     {
         const int parentId = parentIndices[i];
-        const hkQsTransformDAD& worldFromParent = (-1 != parentId) ? poseModelOut[parentId] : worldFromModel;
+        const hkQsTransform& worldFromParent = (-1 != parentId) ? poseModelOut[parentId] : worldFromModel;
         poseModelOut[i].SetProduct(worldFromParent, poseLocal[i]);
     }
 }
-class PoseUserDAD {
-public:
-    void FUN_00c998b0(int numBones, const short* parents, hkQsTransformDAD* poseModel, int a4, int a5, int a6, int a7, float a8, int a9);
-    void FUN_00c99d40(int numBones, const short* parents, const hkQsTransformDAD* poseLocal, int a4, int a5, int a6, int a7, float a8, int a9);
-};
 extern "C" void _ReadWriteBarrier();
 extern int DAT_0108febc;
 extern int DAT_01268188;
@@ -8379,27 +6588,6 @@ public:
     TlsGuard_caa4a0() { m_saved = g_tlsBlock.m_02b4; g_tlsBlock.m_02b4 = 0x10; }
     ~TlsGuard_caa4a0() { g_tlsBlock.m_02b4 = m_saved; }
 };
-class bhkRefObject {
-public:
-    int Initialize();
-    static void* operator new(unsigned int size) { return FUN_00aa13e0(size); }
-    const void* m_vtbl;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    bhkRefObject() {
-        Initialize();
-        m_vtbl = (const void*)&DAT_0108febc;
-        _ReadWriteBarrier();
-        const int inc = 1;
-        unk0c = 0;
-        DAT_01268188 += inc;
-        _ReadWriteBarrier();
-        m_vtbl = (const void*)0x10c5ce4;
-        _ReadWriteBarrier();
-        DAT_01268318 += inc;
-    }
-};
 struct caa4a0_TblHost { void* m_00; void* m_04; void* m_08; unsigned int* m_0c; };
 struct caa4a0_TblFirst { unsigned int* m_00; };
 class caa4a0_RefObj {
@@ -8474,13 +6662,6 @@ static inline void** AddBack(hkArray<void*>* arr, void* listener) {
 struct FUN_00c939a0_Class : hkpWorld {
     void** FUN_00c939a0(void* listener);
 };
-struct hkThreadMemory {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* unk10;
-};
 void ResizeAudioStream(void*, void*, int);
 struct hkpWorld_Listener : hkpWorld {
     void*& FUN_00c93a60(void* listener);
@@ -8491,18 +6672,14 @@ struct FUN_00c92c70_Class {
 struct FUN_00c936a0_Class {
     void __thiscall FUN_00c936a0(void* phantom);
 };
-struct NiRTTI;
-struct NiObject {
-    virtual const NiRTTI* GetStreamableRTTI();
-};
 union __declspec(align(16)) PositionQuad {
-    __m128 simd;
+    LocalM128 simd;
     signed char bytes[16];
 };
 struct __declspec(align(16)) SavedPosition {
     PositionQuad quad;
     SavedPosition() {}
-    SavedPosition(const SavedPosition& other) { quad.simd = *(const __m128*)&other.quad.bytes[0]; }
+    SavedPosition(const SavedPosition& other) { quad.simd = *(const LocalM128*)&other.quad.bytes[0]; }
 };
 struct ActionObj {
     virtual void v00();
@@ -8540,7 +6717,6 @@ struct ArgClass {
 };
 extern const SavedPosition zeroPosition;
 struct HostClass : NiObject {
-    void* unk04;
     FUN_00cac910_shell* unk08;
     __forceinline const SavedPosition& getPosition() {
         FUN_00cac910_shell* proxy = unk08;
@@ -8554,18 +6730,12 @@ struct HostClass : NiObject {
     }
     bool __thiscall FUN_00c6d3f0(ArgClass* a1, int a2);
 };
-struct hkThreadMemoryQ {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pMemoryAllocator;
-};
+
 void ResizeAudioStream(void*, void*, int);
 template <typename T>
-inline T* hkArrayPushBack(hkArray<T>& arr, hkThreadMemoryQ* mem, const T& t) {
+inline T* hkArrayPushBack(hkArray<T>& arr, hkMemoryRouter* mem, const T& t) {
     if (arr.m_iElementCount == (arr.m_iCapacityState & 0x3fffffff)) {
-        ResizeAudioStream(mem->m_pMemoryAllocator, &arr, sizeof(T));
+        ResizeAudioStream(mem->m_pStreamAllocator, &arr, sizeof(T));
     }
     T* p = &arr.m_data[arr.m_iElementCount];
     *p = t;
@@ -8589,26 +6759,7 @@ struct PhantomBatchRouter {
     void* unk0C;
     PhantomBatchAllocator* m_pStreamAllocator;
 };
-struct hkpBroadPhaseHandle {
-    unsigned char unk00;
-};
-struct hkpPhantom;
 void __cdecl FUN_00d00820(hkpWorld* world, hkpPhantom* phantom) throw();
-struct PhantomBatchAccess : hkpPhantom {
-    int unk1C;
-    int unk20;
-    hkpBroadPhaseHandle m_handle;
-    virtual void slot14() throw();
-    virtual void slot18() throw();
-    virtual void slot1C() throw();
-    virtual void slot20() throw();
-    virtual void slot24() throw();
-    virtual void slot28() throw();
-    virtual void slot2C() throw();
-    virtual void slot30() throw();
-    virtual void slot34() throw();
-    void FUN_00d07b50() throw();
-};
 struct BroadPhaseCastCollector {
     hkpBroadPhaseHandle* m_kPointA;
     hkpBroadPhaseHandle* m_kPointB;
@@ -8694,16 +6845,12 @@ struct World_RemovePhantomBatch : hkpWorld {
     void FUN_00c95800(hkpPhantom** phantomBatch, int numPhantoms);
 };
 struct __declspec(align(16)) Vec_00c98780 {
-    __m128 q;
+    LocalM128 q;
     void FUN_00c7f7a0(const hkTransform& tr, const hkVector4& v);
-};
-struct Cls_00c98780 {
-    void FUN_00c986c0(Vec_00c98780& a, Vec_00c98780& b, int x, int y, int z);
-    void __thiscall FUN_00c98780(const hkTransform& tr, const hkVector4& a, const hkVector4& b, int x, int y, int z);
 };
 extern const float DAT_01011d78;
 struct Vec_00c98c80 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     void set(const float& x, const float& y, const float& z, const float& w)
     {
         m_vComponents = _mm_setr_ps(x, y, z, w);
@@ -8717,19 +6864,11 @@ struct Line_00c98c80 {
     Vec_00c98c80 a;
     Vec_00c98c80 b;
 };
-struct Disp_00c98c80 {
-    void FUN_00c986c0(const Vec_00c98c80* a, const Vec_00c98c80* b, int p2, int p3, int p4);
-    void FUN_00c98c80(const Aabb_00c98c80* box, int p2, int p3, int p4);
-};
 struct Xf_00c996e0 {
-    __m128 c0;
-    __m128 c1;
-    __m128 c2;
+    LocalM128 c0;
+    LocalM128 c1;
+    LocalM128 c2;
     void FUN_00ce52e0(const hkQsTransform& a);
-};
-struct Pose_00c996e0 {
-    void ApplyRotation(const Xf_00c996e0& t, int b, int c, int d, int e, int g);
-    void FUN_00c996e0(const hkQsTransform& a, int b, int c, int d, int e, int g);
 };
 extern __declspec(thread) unsigned int t_uiMemContextCAA;
 inline unsigned int GetMemContextCAA()
@@ -8740,67 +6879,25 @@ inline void SetMemContextCAA(unsigned int m_uiGeometryShaderFlags)
 {
     t_uiMemContextCAA = m_uiGeometryShaderFlags;
 }
-class AutoMemContextCAA {
-public:
-    AutoMemContextCAA(unsigned int m_uiGeometryShaderFlags)
-    {
-        m_uiPrevious = GetMemContextCAA();
-        SetMemContextCAA(m_uiGeometryShaderFlags);
-    }
-    ~AutoMemContextCAA() { SetMemContextCAA(m_uiPrevious); }
-    unsigned int m_uiPrevious;
-};
-struct hkMemoryAllocatorCAA {
-    virtual void v00();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-struct hkMemoryRouterCAA {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorCAA* m_pStreamAllocator;
 
-    hkMemoryAllocatorCAA& heap() { return *m_pStreamAllocator; }
-};
+
 struct __declspec(align(16)) hkVector4CAA {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     inline hkVector4CAA& operator=(const hkVector4CAA& v) { m_vComponents = v.m_vComponents; return *this; }
 };
-class hkReferencedObjectCAA {
-public:
-    virtual ~hkReferencedObjectCAA();
 
-    void* operator new(unsigned int nbytes)
-    {
-        hkReferencedObjectCAA* b = static_cast<hkReferencedObjectCAA*>(((hkMemoryRouterCAA*)FUN_00c85750())->heap().AllocateMemoryBlock(nbytes));
-        b->m_usMemSizeAndFlags = static_cast<unsigned short>(nbytes);
-        return b;
-    }
-
-    void operator delete(void* p, unsigned int nbytes)
-    {
-        ((hkMemoryRouterCAA*)FUN_00c85750())->heap().ReleaseBlock(p, nbytes);
-    }
-
-    void FUN_00c905b0(); // removeReference
-
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
 class ShapeChildCAA {
 public:
     virtual void v00();
     virtual void v04();
     virtual void v08();
-    virtual hkReferencedObjectCAA* v0C();
+    virtual hkReferencedObject* v0C();
 };
-class ShapeCAA : public hkReferencedObjectCAA {
+class ShapeCAA : public hkReferencedObject {
 public:
     ShapeCAA(); // FUN_00cb9090
 
-    void SetReferencedObject(hkReferencedObjectCAA* obj);
+    void SetReferencedObject(hkReferencedObject* obj);
 
     int unk08;
     int unk0C;
@@ -8853,31 +6950,7 @@ public:
     ShapeCAA* m_pCollisionShape;
 };
 namespace BatchAdd {
-class hkMemory {
-public:
-    virtual ~hkMemory() throw();
-    virtual void m04() throw();
-    virtual void m08() throw();
-    virtual void m0C() throw();
-    virtual void deallocateChunk(void* p, int nbytes) throw();
-};
 
-struct hkThreadMemory {
-    void* m_aiEntries;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    hkMemory* m_pMemoryAllocator;
-
-    __forceinline void deallocateStack(void* ptr) throw() {
-        m_aiEntries = ptr;
-    }
-};
-
-struct hkAabb {
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
-};
 
 struct BroadPhaseCastCollector {
     void* m_kPointA;
@@ -8893,21 +6966,21 @@ public:
         this->m_data = 0;
         this->m_iElementCount = 0;
         this->m_iCapacityState = 0x80000000;
-        hkThreadMemory* tm = (hkThreadMemory*)::FUN_00c85750();
-        void* cur = tm->m_aiEntries;
+        hkMemoryRouter* tm = (hkMemoryRouter*)::FUN_00c85750();
+        void* cur = tm->stack().m_next;
         int numBytes = (capacity * sizeof(T) + 0x7f) & ~0x7f;
-        tm->m_aiEntries = (char*)cur + numBytes;
+        tm->stack().m_next = (char*)cur + numBytes;
         this->m_data = (T*)cur;
         this->m_iCapacityState = capacity | 0x80000000;
         this->m_initialBuffer = cur;
     }
 
-    __forceinline void ClearAndRelease(hkThreadMemory* tm) throw() {
-        hkMemory* mem = tm->m_pMemoryAllocator;
+    __forceinline void ClearAndRelease(hkMemoryRouter* tm) throw() {
+        hkMemoryAllocator* mem = tm->m_heap;
         int cap = this->m_iCapacityState;
         this->m_iElementCount = 0;
         if ((cap & 0x80000000) == 0) {
-            mem->deallocateChunk(this->m_data, (cap & 0x3fffffff) * sizeof(T));
+            mem->bufFree(this->m_data, (cap & 0x3fffffff) * sizeof(T));
         }
         this->m_data = 0;
         this->m_iCapacityState = 0x80000000;
@@ -8918,8 +6991,8 @@ public:
         if (initialBuffer == this->m_data) {
             this->m_iElementCount = 0;
         }
-        ((hkThreadMemory*)::FUN_00c85750())->deallocateStack(initialBuffer);
-        this->ClearAndRelease((hkThreadMemory*)::FUN_00c85750());
+        ((hkMemoryRouter*)::FUN_00c85750())->stack().deallocateStack(initialBuffer);
+        this->ClearAndRelease((hkMemoryRouter*)::FUN_00c85750());
     }
 
     __forceinline void setSizeUnchecked(int size) throw() {
@@ -8935,27 +7008,18 @@ __forceinline void hkConstructWithCopy(T* p, int n, const T& t) throw() {
 }
 
 template <typename T>
-struct hkArrayEx : public hkArray<T> {
-    __forceinline void AddBack(const T& t) throw() {
-        hkThreadMemory* tm = (hkThreadMemory*)::FUN_00c85750();
-        if (this->m_iElementCount == (this->m_iCapacityState & 0x3fffffff)) {
-            ::ResizeAudioStream(tm->m_pMemoryAllocator, this, sizeof(T));
-        }
-        hkConstructWithCopy(this->m_data + this->m_iElementCount, 1, t);
-        this->m_iElementCount++;
+__forceinline void AddBack(hkArray<T>& array, const T& t) throw() {
+    hkMemoryRouter* tm = (hkMemoryRouter*)::FUN_00c85750();
+    if (array.m_iElementCount == (array.m_iCapacityState & 0x3fffffff)) {
+        ::ResizeAudioStream(tm->m_heap, &array, sizeof(T));
     }
-};
+    hkConstructWithCopy(array.m_data + array.m_iElementCount, 1, t);
+    array.m_iElementCount++;
+}
 
-struct PhantomView : public ::hkpPhantom {
-    unsigned int unk1C;
-    unsigned int unk20;
-    int m_kBroadPhaseHandle;
-    virtual void* vfunc10() throw();
-    virtual void slot14() throw();
-    virtual void ComputeAabb(hkAabb* aabb) throw();
+// The shared class does not yet declare this AABB update operation.
+struct PhantomAabbOperations {
     void FUN_00d07950(hkAabb* aabb) throw();
-    void FUN_00c90510() throw();
-    void FUN_00d07b90() throw();
 };
 
 struct BroadPhase {
@@ -9009,18 +7073,18 @@ void WorldHelper::FUN_00c954e0(hkpPhantom* const* phantomBatch, int numPhantoms)
     handles.setSizeUnchecked(numPhantoms);
 
     for (int i = 0; i < numPhantoms; i++) {
-        hkArrayEx<hkpPhantom*>* const phantoms = (hkArrayEx<hkpPhantom*>*)&m_kPhantoms;
-        PhantomView* phantom = static_cast<PhantomView*>(phantomBatch[i]);
-        if (!phantom->unk18) {
-            phantom->unk18 = phantom->vfunc10();
+        hkArray<hkpPhantom*>* const phantoms = (hkArray<hkpPhantom*>*)&m_kPhantoms;
+        hkpPhantom* phantom = phantomBatch[i];
+        if (!phantom->m_kCollidable.m_pMotionState) {
+            phantom->m_kCollidable.m_pMotionState = (phantom->*reinterpret_cast<void* (hkpPhantom::*)()>(&hkpPhantom::vf06))();
         }
         phantom->m_pOwningWorld = this;
-        handles.m_data[i] = &phantom->m_kBroadPhaseHandle;
-        phantom->ComputeAabb(&aabbs.m_data[i]);
-        phantom->FUN_00d07950(&aabbs.m_data[i]);
-        phantom->FUN_00c90510();
+        handles.m_data[i] = &phantom->m_kCollidable.m_kBroadPhaseHandle;
+        (phantom->*reinterpret_cast<void (hkpPhantom::*)(hkAabb*)>(&hkpPhantom::overlaps))(&aabbs.m_data[i]);
+        reinterpret_cast<PhantomAabbOperations*>(phantom)->FUN_00d07950(&aabbs.m_data[i]);
+        phantom->addReference();
 
-        phantoms->AddBack(phantom);
+        AddBack(*phantoms, phantom);
 
         NotifyPhantomAdded(this, phantom);
         phantom->FUN_00d07b90();
@@ -9052,8 +7116,6 @@ struct hkAllocQ70 {
     virtual void unk0c();
     virtual void deallocate(void* p, int numBytes);
 };
-struct hkpEntity;
-struct hkpSimulationIsland;
 template <typename T>
 inline void ConstructWithCopyC97510(T* pDst, int iCount, const T& kItem)
 {
@@ -9063,9 +7125,9 @@ inline void ConstructWithCopyC97510(T* pDst, int iCount, const T& kItem)
 template <typename T>
 inline void PushBackC97510(::hkArray<T>& kArray, const T& kItem)
 {
-    ::hkThreadMemory* pkMemory = (::hkThreadMemory*)FUN_00c85750();
+    ::hkMemoryRouter* pkMemory = (::hkMemoryRouter*)FUN_00c85750();
     if (kArray.m_iElementCount == (kArray.m_iCapacityState & 0x3fffffff))
-        ResizeAudioStream(pkMemory->unk10, &kArray, sizeof(T));
+        ResizeAudioStream(pkMemory->m_pStreamAllocator, &kArray, sizeof(T));
     ConstructWithCopyC97510(kArray.m_data + kArray.m_iElementCount, 1, kItem);
     kArray.m_iElementCount++;
 }
@@ -9081,8 +7143,8 @@ struct InplaceArray4 : ::hkArray<T> {
     }
 
     void ClearAndRelease() {
-        ::hkThreadMemory* tm = (::hkThreadMemory*)FUN_00c85750();
-        hkAllocQ70* mem = (hkAllocQ70*)tm->unk10;
+        ::hkMemoryRouter* tm = (::hkMemoryRouter*)FUN_00c85750();
+        hkAllocQ70* mem = (hkAllocQ70*)tm->m_pStreamAllocator;
         int cap = this->m_iCapacityState;
         this->m_iElementCount = 0;
         if ((cap & 0x80000000) == 0) {
@@ -9107,55 +7169,6 @@ struct ResizableArray {
         m_iElementCount--;
         m_data[index] = m_data[m_iElementCount];
     }
-};
-struct hkpAction {
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void GetEntities(::hkArray<hkpEntity*>& entitiesOut);
-
-    int unk04;
-    ::hkpWorld* m_pOwningWorld;
-    hkpSimulationIsland* m_pCurrentSimulationIsland;
-
-    void FUN_00c90510();
-    void FUN_00c905b0();
-};
-struct hkpEntity {
-    unsigned int unk000, unk004, unk008, unk00c, unk010, unk014, unk018, unk01c;
-    unsigned int unk020, unk024, unk028, unk02c, unk030, unk034, unk038, unk03c;
-    unsigned int unk040, unk044, unk048, unk04c, unk050, unk054, unk058, unk05c;
-    unsigned int unk060, unk064, unk068, unk06c, unk070, unk074, unk078, unk07c;
-    unsigned int unk080, unk084, unk088, unk08c, unk090, unk094, unk098, unk09c;
-    unsigned int unk0a0, unk0a4, unk0a8, unk0ac, unk0b0, unk0b4, unk0b8, unk0bc;
-    unsigned int unk0c0, unk0c4, unk0c8, unk0cc, unk0d0, unk0d4, unk0d8, unk0dc;
-    unsigned int unk0e0, unk0e4, unk0e8, unk0ec, unk0f0, unk0f4, unk0f8, unk0fc;
-    unsigned int unk100, unk104, unk108, unk10c, unk110, unk114, unk118, unk11c;
-    unsigned int unk120, unk124, unk128, unk12c, unk130, unk134, unk138, unk13c;
-    unsigned int unk140, unk144, unk148, unk14c, unk150, unk154, unk158, unk15c;
-    unsigned int unk160, unk164, unk168, unk16c, unk170, unk174, unk178, unk17c;
-    unsigned int unk180, unk184, unk188, unk18c, unk190, unk194, unk198, unk19c;
-    unsigned int unk1a0, unk1a4, unk1a8, unk1ac, unk1b0, unk1b4, unk1b8, unk1bc;
-    unsigned int unk1c0, unk1c4, unk1c8, unk1cc, unk1d0, unk1d4, unk1d8, unk1dc;
-    unsigned int unk1e0, unk1e4, unk1e8, unk1ec, unk1f0, unk1f4, unk1f8, unk1fc;
-    unsigned int unk200, unk204;
-    ResizableArray<hkpAction*> m_ppActions;
-};
-struct hkpSimulationIsland {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    ::hkpWorld* m_pOwningWorld;
-    unsigned short unk1c;
-    unsigned short unk1e;
-    unsigned short unk20;
-    unsigned short m_bSplitCheckRequested;
-
-    void RemoveEntry(hkpAction* action);
 };
 void __cdecl NotifyActionRemoved(::hkpWorld* world, hkpAction* action);
 struct hkpWorldDecomp : ::hkpWorld {
@@ -9223,73 +7236,56 @@ int WorldFinishEntryC91C::FUN_00c91c00(void* queue, void* pool)
     return 0;
 }
 
-extern "C" {
-    __m128 __cdecl _mm_load_ps(float const*);
-    __m128 __cdecl _mm_load_ss(float const*);
-    void __cdecl _mm_store_ps(float*, __m128);
-    __m128 __cdecl _mm_mul_ps(__m128, __m128);
-    __m128 __cdecl _mm_add_ss(__m128, __m128);
-    __m128 __cdecl _mm_and_ps(__m128, __m128);
-    __m128 __cdecl _mm_rsqrt_ss(__m128);
+
+extern LocalM128 DAT_01017d10;
+
+// Exe 0x00c98e60: shared hkVector4 storage with the unit's checked SIMD expression order.
+static __forceinline void WorldVectorPlus(hkVector4& out, const hkVector4& a, const hkVector4& b) { out.m_vComponents=_mm_add_ps(a.m_vComponents,b.m_vComponents); }
+static __forceinline void WorldVectorMinus(hkVector4& out, const hkVector4& a, const hkVector4& b) { out.m_vComponents=_mm_sub_ps(a.m_vComponents,b.m_vComponents); }
+static __forceinline void WorldVectorScaled(hkVector4& out, LocalM128 scale, const hkVector4& value) { out.m_vComponents=_mm_mul_ps(_mm_shuffle_ps(scale,scale,0),value.m_vComponents); }
+static __forceinline void WorldVectorAdd(hkVector4& out, const hkVector4& value) { out.m_vComponents=_mm_add_ps(out.m_vComponents,value.m_vComponents); }
+static __forceinline void WorldVectorAbsolute(hkVector4& out, const hkVector4& value) { out.m_vComponents=_mm_and_ps(value.m_vComponents,DAT_01017d10); }
+static __forceinline void WorldVectorScale(hkVector4& out, LocalM128 scale) { out.m_vComponents=_mm_mul_ps(_mm_shuffle_ps(scale,scale,0),out.m_vComponents); }
+
+
+static __forceinline LocalM128 vload(const hkVector4& v)
+{
+    return v.m_vComponents;
 }
 
-extern __m128 DAT_01017d10;
-
-__declspec(align(16)) struct V4 {
-    union { __m128 q; float f[4]; };
-    V4() {}
-    V4(__m128 v) {q=v;}
-    void cross(const V4& a, const V4& b);
-    void normalize();
-    void plus(const V4& a,const V4& b) {q=_mm_add_ps(a.q,b.q);}
-    void minus(const V4& a,const V4& b) {q=_mm_sub_ps(a.q,b.q);}
-    void scaled(__m128 s, const V4& v) { q=_mm_mul_ps(_mm_shuffle_ps(s,s,0),v.q); }
-    void add(const V4& v) { q=_mm_add_ps(q,v.q); }
-    void absolute(const V4& a) { q = _mm_and_ps(a.q, DAT_01017d10); }
-    void scale(__m128 scalar) { q = _mm_mul_ps(_mm_shuffle_ps(scalar, scalar, 0), q); }
-};
-
-static __forceinline __m128 vload(const V4& v)
+static __forceinline void vstore(hkVector4& v, LocalM128 q)
 {
-    return v.q;
+    v.m_vComponents = q;
 }
 
-static __forceinline void vstore(V4& v, __m128 q)
+static __forceinline void WorldVectorCross(hkVector4& out, const hkVector4& a, const hkVector4& b)
 {
-    v.q = q;
+    LocalM128 left = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents,a.m_vComponents,0xC9), _mm_shuffle_ps(b.m_vComponents,b.m_vComponents,0xD2));
+    LocalM128 right = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents,a.m_vComponents,0xD2), _mm_shuffle_ps(b.m_vComponents,b.m_vComponents,0xC9));
+    out.m_vComponents = _mm_sub_ps(left,right);
 }
-
-__forceinline void V4::cross(const V4& a, const V4& b)
+static __forceinline void WorldVectorNormalize(hkVector4& out)
 {
-    __m128 left = _mm_mul_ps(_mm_shuffle_ps(a.q,a.q,0xC9), _mm_shuffle_ps(b.q,b.q,0xD2));
-    __m128 right = _mm_mul_ps(_mm_shuffle_ps(a.q,a.q,0xD2), _mm_shuffle_ps(b.q,b.q,0xC9));
-    q = _mm_sub_ps(left,right);
-}
-__forceinline void V4::normalize()
-{
-    __m128 sq = _mm_mul_ps(q,q);
-    __m128 sum = _mm_add_ss(_mm_shuffle_ps(sq,sq,0x55),sq);
+    LocalM128 sq = _mm_mul_ps(out.m_vComponents,out.m_vComponents);
+    LocalM128 sum = _mm_add_ss(_mm_shuffle_ps(sq,sq,0x55),sq);
     sum = _mm_add_ss(_mm_shuffle_ps(sq,sq,0xAA),sum);
-    __m128 r = _mm_rsqrt_ss(sum);
-    q = _mm_mul_ps(q,_mm_shuffle_ps(r,r,0));
+    LocalM128 r = _mm_rsqrt_ss(sum);
+    out.m_vComponents = _mm_mul_ps(out.m_vComponents,_mm_shuffle_ps(r,r,0));
 }
 
-struct PlaneDraw {
-    void FUN_00c986c0(const V4& a, const V4& b, int color, int id, int tag) throw();
-    void FUN_00c98880(const V4& a, const V4& b, int color, int id, int tag) throw();
-    void FUN_00c98e60(const V4& plane, const V4& offset, float scale, int color, int id, int tag) throw();
-};
 
 // @fnv 0x00c98e60
-void PlaneDraw::FUN_00c98e60(const V4& plane, const V4& offset, float scale, int color, int id, int tag) throw()
+void hkDebugDisplay::DisplayPlane(const hkVector4_S& planeValue, const hkVector4_S& offsetValue, float scale, int color, int id, int tag)
 {
+    const hkVector4& plane = reinterpret_cast<const hkVector4&>(planeValue);
+    const hkVector4& offset = reinterpret_cast<const hkVector4&>(offsetValue);
     float negW = -plane.f[3];
-    V4 base;
-    base.scaled(_mm_load_ss(&negW), plane);
-    base.add(offset);
+    hkVector4 base;
+    WorldVectorScaled(base, _mm_load_ss(&negW), plane);
+    WorldVectorAdd(base, offset);
 
-    V4 basis;
-    basis.absolute(plane);
+    hkVector4 basis;
+    WorldVectorAbsolute(basis, plane);
 
     int axis;
     if (basis.f[0] < basis.f[1]) {
@@ -9307,37 +7303,37 @@ void PlaneDraw::FUN_00c98e60(const V4& plane, const V4& offset, float scale, int
     vstore(basis, _mm_setzero_ps());
     basis.f[(axis + 1) % 3] = 1.0f;
 
-    basis.cross(plane, basis);
-    basis.normalize();
-    basis.scale(_mm_load_ss(&scale));
-    V4 side;
-    side.cross(basis,plane);
-    side.normalize();
-    side.scale(_mm_load_ss(&scale));
+    WorldVectorCross(basis,plane,basis);
+    WorldVectorNormalize(basis);
+    WorldVectorScale(basis, _mm_load_ss(&scale));
+    hkVector4 side;
+    WorldVectorCross(side,basis,plane);
+    WorldVectorNormalize(side);
+    WorldVectorScale(side, _mm_load_ss(&scale));
 
     int n = 1;
     int left = 4;
     do {
-        V4 a;
-        if ((n-1)&2) a.minus(base,side); else a.plus(side,base);
-        if ((n%4)/2) a.minus(a,basis); else a.plus(a,basis);
-        V4 c;
-        if ((n%4)/2) c.minus(base,side); else c.plus(side,base);
+        hkVector4 a;
+        if ((n-1)&2) WorldVectorMinus(a,base,side); else WorldVectorPlus(a,side,base);
+        if ((n%4)/2) WorldVectorMinus(a,a,basis); else WorldVectorPlus(a,a,basis);
+        hkVector4 c;
+        if ((n%4)/2) WorldVectorMinus(c,base,side); else WorldVectorPlus(c,side,base);
         int n1=n+1;
-        if ((n1%4)/2) c.minus(c,basis); else c.plus(c,basis);
-        FUN_00c986c0(a, c, color, id, tag);
+        if ((n1%4)/2) WorldVectorMinus(c,c,basis); else WorldVectorPlus(c,c,basis);
+        DisplayLine(reinterpret_cast<const hkVector4_S&>(a), reinterpret_cast<const hkVector4_S&>(c), color, id, tag);
         n = n1;
         --left;
     } while (left != 0);
 
-    FUN_00c98880(base, V4(_mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&scale), _mm_load_ss(&scale), 0), plane.q)), color, id, tag);
+    hkVector4 direction;
+    direction.m_vComponents = _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&scale), _mm_load_ss(&scale), 0), plane.m_vComponents);
+    RenderLine(reinterpret_cast<const hkVector4_S&>(base), reinterpret_cast<const hkVector4_S&>(direction), color, id, tag);
 }
 
 struct TierQuotientCtor { double denominator; float threshold; __forceinline float value() const { return denominator/threshold; } };
-extern "C" ::hkQuadReal (_mm_load_ps)(const float*);
-extern "C" void (_mm_store_ps)(float*,::hkQuadReal);
-extern "C" ::hkQuadReal (_mm_load_ss)(const float*);
-extern "C" ::hkQuadReal (_mm_xor_ps)(::hkQuadReal,::hkQuadReal);
+
+
 extern "C" void __debugbreak();
 struct WorldCtor;
 struct ObjectCtor;
@@ -10202,14 +8198,8 @@ WorldCtor* WorldCtor::FUN_00c95a80(WorldInfoCtor* info, int version) {
 
 namespace ArrowHeadRatios {extern const float DAT_010c69c4=0.14999997615814208984375f; extern const float DAT_010c69c0=-0.14999997615814208984375f;}
 namespace ArrowLengthLimit { extern const float DAT_0104da4c = 1.1920928955078125e-7f; }
-extern "C" ::hkQuadReal __cdecl _mm_load_ps(const float*);
-extern "C" ::hkQuadReal __cdecl _mm_sub_ss(::hkQuadReal,::hkQuadReal);
-extern "C" ::hkQuadReal __cdecl _mm_mul_ss(::hkQuadReal,::hkQuadReal);
-extern "C" ::hkQuadReal __cdecl _mm_cmpeq_ss(::hkQuadReal,::hkQuadReal);
-extern "C" ::hkQuadReal __cdecl _mm_andnot_ps(::hkQuadReal,::hkQuadReal);
-extern "C" ::hkQuadReal __cdecl _mm_rsqrt_ss(::hkQuadReal);
-extern "C" ::hkQuadReal __cdecl _mm_set_ss(float);
-extern "C" ::hkQuadReal __cdecl _mm_load_ss(const float*);
+
+
 __forceinline ::hkQuadReal arrowSplat(float t) { ::hkQuadReal q = _mm_load_ss(&t); return ::_mm_shuffle_ps(q,q,0); }
 struct ArrowVectorView {
     union { ::hkQuadReal q; float f[4]; };
@@ -10242,7 +8232,7 @@ __forceinline void arrowCross(ArrowVectorView& out,const ArrowVectorView& left,c
     ::hkQuadReal second=::_mm_mul_ps(::_mm_shuffle_ps(left.q,left.q,0xd2),::_mm_shuffle_ps(right.q,right.q,0xc9));
     out.q=::_mm_sub_ps(first,second);
 }
-__forceinline void drawDebugArrow(::FUN_00c986c0_Obj* drawer, ArrowVectorView* a, ArrowVectorView* v, int a3, int a4, int a5)
+__forceinline void drawDebugArrow(::hkDebugDisplay* drawer, ArrowVectorView* a, ArrowVectorView* v, int a3, int a4, int a5)
 {
     if (arrowScalar(arrowDot3(v->q,v->q)) < ArrowLengthLimit::DAT_0104da4c) return;
     ArrowVectorView sum;
@@ -10277,44 +8267,23 @@ __forceinline void drawDebugArrow(::FUN_00c986c0_Obj* drawer, ArrowVectorView* a
     o3.q = ::_mm_add_ps(base, ::_mm_mul_ps(arrowSplat(scaleValue3), cross.q));
     float scaleValue4 = ArrowHeadRatios::DAT_010c69c0;
     o4.q = ::_mm_add_ps(base, ::_mm_mul_ps(arrowSplat(scaleValue4), cross.q));
-    drawer->FUN_00c986c0(&a->q, &sum.q, a3, a4, a5);
-    drawer->FUN_00c986c0(&sum.q, &o1.q, a3, a4, a5);
-    drawer->FUN_00c986c0(&sum.q, &o2.q, a3, a4, a5);
-    drawer->FUN_00c986c0(&sum.q, &o3.q, a3, a4, a5);
-    drawer->FUN_00c986c0(&sum.q, &o4.q, a3, a4, a5);
+    drawer->DisplayLine(*reinterpret_cast<const hkVector4_S*>(&a->q), *reinterpret_cast<const hkVector4_S*>(&sum.q), a3, a4, a5);
+    drawer->DisplayLine(*reinterpret_cast<const hkVector4_S*>(&sum.q), *reinterpret_cast<const hkVector4_S*>(&o1.q), a3, a4, a5);
+    drawer->DisplayLine(*reinterpret_cast<const hkVector4_S*>(&sum.q), *reinterpret_cast<const hkVector4_S*>(&o2.q), a3, a4, a5);
+    drawer->DisplayLine(*reinterpret_cast<const hkVector4_S*>(&sum.q), *reinterpret_cast<const hkVector4_S*>(&o3.q), a3, a4, a5);
+    drawer->DisplayLine(*reinterpret_cast<const hkVector4_S*>(&sum.q), *reinterpret_cast<const hkVector4_S*>(&o4.q), a3, a4, a5);
 }
-struct DebugArrowEntry : ::hkDebugDisplay {
-    void FUN_00c98880(const ::hkVector4_S&, const ::hkVector4_S&, int, int, int);
-};
 // @fnv 0x00c98880
-void DebugArrowEntry::FUN_00c98880(const ::hkVector4_S& kFrom, const ::hkVector4_S& kWorldPosition, int uiColor, int aiSoundId, int aiAllocationTag)
+void hkDebugDisplay::RenderLine(const ::hkVector4_S& kFrom, const ::hkVector4_S& kWorldPosition, int uiColor, int aiSoundId, int aiAllocationTag)
 {
-    drawDebugArrow((::FUN_00c986c0_Obj*)this, (ArrowVectorView*)&kFrom, (ArrowVectorView*)&kWorldPosition, uiColor, aiSoundId, aiAllocationTag);
+    drawDebugArrow(this, (ArrowVectorView*)&kFrom, (ArrowVectorView*)&kWorldPosition, uiColor, aiSoundId, aiAllocationTag);
 }
 
 extern float DAT_010c6850;
-extern "C" ::hkQuadReal (_mm_min_ps)(::hkQuadReal, ::hkQuadReal);
-extern "C" ::hkQuadReal (_mm_max_ps)(::hkQuadReal, ::hkQuadReal);
-extern "C" ::hkQuadReal (_mm_sub_ss)(::hkQuadReal, ::hkQuadReal);
-extern "C" ::hkQuadReal (_mm_mul_ss)(::hkQuadReal, ::hkQuadReal);
-extern "C" ::hkQuadReal (_mm_rsqrt_ss)(::hkQuadReal);
-extern "C" ::hkQuadReal (_mm_cmpeq_ss)(::hkQuadReal, ::hkQuadReal);
-extern "C" ::hkQuadReal (_mm_andnot_ps)(::hkQuadReal, ::hkQuadReal);
-extern "C" ::hkQuadReal (_mm_set_ss)(float);
-extern "C" ::hkQuadReal (_mm_set_ps1)(float);
-extern "C" ::hkQuadReal (_mm_load_ss)(const float*);
 
-struct ScalarC992 {
-    ::hkQuadReal q;
-    ScalarC992() {}
-    ScalarC992(float f) { q = (_mm_load_ss)(&f); }
-    ScalarC992(const ::hkQuadReal& v) { q = v; }
-    ::hkQuadReal broadcast() const { return (::_mm_shuffle_ps)(q,q,0); }
-    const ::hkQuadReal& value() const { return q; }
-};
 
-inline ScalarC992 operator*(const ScalarC992& a,const ScalarC992& b) { return (_mm_mul_ss)(a.value(),b.value()); }
-inline ScalarC992 operator+(const ScalarC992& a,const ScalarC992& b) { return (::_mm_add_ss)(a.value(),b.value()); }
+inline hkSimdReal operator*(const hkSimdReal& a,const hkSimdReal& b) { return makeVectorComponent((_mm_mul_ss)(a.getQuad(),b.getQuad())); }
+inline hkSimdReal operator+(const hkSimdReal& a,const hkSimdReal& b) { return makeVectorComponent((::_mm_add_ss)(a.getQuad(),b.getQuad())); }
 struct Vec_c99210 {
     ::hkQuadReal m_vComponents;
     void setSub4(const Vec_c99210& a, const Vec_c99210& b) { m_vComponents = (::_mm_sub_ps)(a.m_vComponents, b.m_vComponents); }
@@ -10326,41 +8295,42 @@ struct Vec_c99210 {
         ::hkQuadReal cross1 = (::_mm_mul_ps)((::_mm_shuffle_ps)(v2.m_vComponents, v2.m_vComponents, 0xc9), (::_mm_shuffle_ps)(v1.m_vComponents, v1.m_vComponents, 0xd2));
         m_vComponents = (::_mm_sub_ps)(cross0, cross1);
     }
-    __forceinline ScalarC992 dot3(const Vec_c99210& b) const
+    __forceinline hkSimdReal dot3(const Vec_c99210& b) const
     {
         ::hkQuadReal x2 = (::_mm_mul_ps)(m_vComponents, b.m_vComponents);
         ::hkQuadReal xy = (::_mm_add_ss)((::_mm_shuffle_ps)(x2, x2, 0x55), x2);
-        return (::_mm_add_ss)((::_mm_shuffle_ps)(x2, x2, 0xaa), xy);
+        return makeVectorComponent((::_mm_add_ss)((::_mm_shuffle_ps)(x2, x2, 0xaa), xy));
     }
-    __forceinline ScalarC992 inverseLength3() const
+    __forceinline hkSimdReal inverseLength3() const
     {
         ::hkQuadReal h = (_mm_set_ss)(0.5f), t = (_mm_set_ss)(3.0f), z = (_mm_set_ss)(0.0f);
-        ::hkQuadReal square = dot3(*this).q;
+        ::hkQuadReal square = dot3(*this).m_vValue;
         ::hkQuadReal mask = (_mm_cmpeq_ss)(square,z);
         ::hkQuadReal guess = (_mm_rsqrt_ss)(square);
         ::hkQuadReal adjusted = (_mm_mul_ss)((_mm_mul_ss)(h,guess), (_mm_sub_ss)(t,(_mm_mul_ss)((_mm_mul_ss)(square,guess),guess)));
-        return (_mm_andnot_ps)(mask,adjusted);
+        return makeVectorComponent((_mm_andnot_ps)(mask,adjusted));
     }
     __forceinline void normalize3()
     {
         m_vComponents = (::_mm_mul_ps)(inverseLength3().broadcast(), m_vComponents);
     }
     __forceinline void mulS(float s) { m_vComponents = (::_mm_mul_ps)(m_vComponents, (_mm_set_ps1)(s)); }
-    void mul4(const ScalarC992& s) { m_vComponents = (::_mm_mul_ps)(s.broadcast(), m_vComponents); }
+    void mul4(const hkSimdReal& s) { m_vComponents = (::_mm_mul_ps)(s.broadcast(), m_vComponents); }
     void setMul4(const Vec_c99210& a, const Vec_c99210& b) { m_vComponents = (::_mm_mul_ps)(a.m_vComponents, b.m_vComponents); }
-    void scaled(const ScalarC992& f, const Vec_c99210& v) { m_vComponents = (::_mm_mul_ps)(f.broadcast(), v.m_vComponents); }
-    void accumulate(const ScalarC992& f, const Vec_c99210& v) { m_vComponents = (::_mm_add_ps)(m_vComponents, (::_mm_mul_ps)(f.broadcast(), v.m_vComponents)); }
+    void scaled(const hkSimdReal& f, const Vec_c99210& v) { m_vComponents = (::_mm_mul_ps)(f.broadcast(), v.m_vComponents); }
+    void accumulate(const hkSimdReal& f, const Vec_c99210& v) { m_vComponents = (::_mm_add_ps)(m_vComponents, (::_mm_mul_ps)(f.broadcast(), v.m_vComponents)); }
     void add4(const Vec_c99210& a) { m_vComponents = (::_mm_add_ps)(m_vComponents, a.m_vComponents); }
 };
 
 extern const Vec_c99210 DAT_01267e30;
 
-extern ::C00c98720* DAT_012681e0;
+extern ::hkDebugDisplay* DAT_012681e0;
 unsigned int __cdecl PackColorBigEndian(float r, float g, float b, float a);
 
 // @fnv 0x00c99210
-void __stdcall FUN_00c99210(const ::hkVector4_S& vertexA, const ::hkVector4_S& vertexB, const ::hkVector4_S& vertexC, unsigned int color)
+void hkDebugDisplay::displayLitTriangle(const ::hkVector4_S& vertexA, const ::hkVector4_S& vertexB, const ::hkVector4_S& vertexC, int colorValue)
 {
+    unsigned int color = static_cast<unsigned int>(colorValue);
     const Vec_c99210& a = reinterpret_cast<const Vec_c99210&>(vertexA);
     const Vec_c99210& b = reinterpret_cast<const Vec_c99210&>(vertexB);
     const Vec_c99210& c = reinterpret_cast<const Vec_c99210&>(vertexC);
@@ -10371,22 +8341,22 @@ void __stdcall FUN_00c99210(const ::hkVector4_S& vertexA, const ::hkVector4_S& v
 
     Vec_c99210 l0; l0.set(0.5f, 2.0f, 1.0f, 0.0f);
     l0.normalize3();
-    const ScalarC992 weight0(0.9f);
+    const hkSimdReal weight0 = makeScalarComponent(0.9f);
     Vec_c99210 l1; l1.set(-3.0f, -2.0f, -1.0f, 0.0f);
     l1.normalize3();
     Vec_c99210 rgb;
     rgb.set((unsigned char)(color >> 16) * (double(1.0f / 255.0f)), (unsigned char)(color >> 8) * (double(1.0f / 255.0f)), (unsigned char)color * (double(1.0f / 255.0f)), 0.0f);
     Vec_c99210 c0; c0.set(0.75f, 0.75f, 0.75f, 0.0f); c0.setMul4(c0, rgb);
     Vec_c99210 c1; c1.setColor(0.0f, 0.05f, DAT_010c6850, 0.0f); c1.setMul4(c1, rgb);
-    const ScalarC992 half(0.5f);
-    l1.mul4(ScalarC992(0.9f));
+    const hkSimdReal half = makeScalarComponent(0.5f);
+    l1.mul4(makeScalarComponent(0.9f));
     l0.mul4(weight0);
     Vec_c99210 res;
     res.scaled(l0.dot3(n) * half + half, c0);
     res.accumulate(l1.dot3(n) * half + half, c1);
-    res.accumulate(ScalarC992(0.05f), rgb);
+    res.accumulate(makeScalarComponent(0.05f), rgb);
     res.m_vComponents = (_mm_min_ps)((_mm_max_ps)(res.m_vComponents, DAT_01267e30.m_vComponents), (_mm_set_ps1)(1.0f));
     float alpha = (int)(color >> 24) * (double(1.0f / 255.0f));
     unsigned int argb = PackColorBigEndian(res.m_vComponents.m128_f32[0], res.m_vComponents.m128_f32[1], res.m_vComponents.m128_f32[2], alpha);
-    DAT_012681e0->FUN_00c98720(reinterpret_cast<int>(&vertexA), reinterpret_cast<int>(&vertexB), reinterpret_cast<int>(&vertexC), argb, 0, 0);
+    DAT_012681e0->DisplayTriangle(vertexA, vertexB, vertexC, argb, 0, 0);
 }

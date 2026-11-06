@@ -1,6 +1,10 @@
 // fallout_shared/tesweightform.cpp: TESWeightForm, Modifier, WeightComparison (6 functions)
 
-#include "tesweightform_decls.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/ActiveEffect.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESWeightForm.h"
 
 // @fnv 0x0048ebc0
 float TESWeightForm::GetWeightForForm(TESForm* form, bool useFormWeight)
@@ -77,10 +81,6 @@ float TESWeightForm::GetWeightForForm(TESForm* form, bool useFormWeight)
         return -1.0f;
 }
 
-struct BaseFormComponent
-{
-    virtual ~BaseFormComponent();
-};
 struct Modifier
 {
     void SetValue(float);
@@ -102,21 +102,13 @@ void* __fastcall FUN_0048eac0(void* pThis)
 
 extern int DAT_0101a4c4;
 
-struct Date
-{
-    Date();
-    ~Date();
-};
-
-struct FUN_0048eaf0 : Date
-{
-    ~FUN_0048eaf0();
-};
+void __fastcall DestroyBaseFormComponent(void* component);
 
 // @fnv 0x0048eaf0
-FUN_0048eaf0::~FUN_0048eaf0()
+void __fastcall FUN_0048eaf0(void* pThis)
 {
-    *reinterpret_cast<int*>(this) = reinterpret_cast<int>(&DAT_0101a4c4);
+    *reinterpret_cast<int*>(pThis) = reinterpret_cast<int>(&DAT_0101a4c4);
+    DestroyBaseFormComponent(pThis);
 }
 
 class PC7d;

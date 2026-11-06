@@ -2,106 +2,36 @@
 // src/fallout/ai/combat/combatprocedurehidefromtarget.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatprocedurehidefromtarget.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct CombatProcedure
-{
-    enum COMBAT_PROCEDURES
-    {
-        eHideFromTarget = 9
-    };
-};
-
-struct CombatProcedureHideFromTarget : CombatProcedure
-{
-    COMBAT_PROCEDURES FUN_009d60e0();
-};
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/CombatProcedure.h"
+#include "../../../../include/CombatProcedureHideFromTarget.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/Setting.h"
 
 // @fnv 0x009d60e0
 CombatProcedure::COMBAT_PROCEDURES CombatProcedureHideFromTarget::FUN_009d60e0()
 {
-    return eHideFromTarget;
+    return HIDE_FROM_TARGET;
 }
-
-struct FUN_009ca6c0_shell
-{
-    void FUN_009ca6c0();
-};
-
-struct FUN_009d6120_shell
-{
-    void FUN_009d6120();
-};
 
 // @fnv 0x009d6120
-void __thiscall FUN_009d6120_shell::FUN_009d6120()
+CombatProcedureHideFromTarget::~CombatProcedureHideFromTarget()
 {
-    *reinterpret_cast<int*>(this) = 0x01091a64;
-    reinterpret_cast<FUN_009ca6c0_shell*>(this)->FUN_009ca6c0();
 }
 
-extern "C" void __cdecl Deallocate(void*);
-
-struct FUN_009d60f0_shell : public FUN_009d6120_shell
-{
-    void* FUN_009d60f0(unsigned int flags);
-};
-
-// Calls FUN_009d6120, then deallocates this object if flags has bit 0 set, and returns this.
-// @fnv 0x009d60f0
-void* FUN_009d60f0_shell::FUN_009d60f0(unsigned int flags)
-{
-    FUN_009d6120();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
-
-struct FUN_009ca680
-{
-    void* m_vtbl;
-    int m_iWordAt04, m_8, m_iThirdValue;
-    FUN_009ca680();
-    ~FUN_009ca680();
-};
-
-struct FUN_00906f60
-{
-    int m_iWordAt00, m_iWordAt04;
-    FUN_00906f60();
-};
-
-struct FUN_006815c0
-{
-    int m_iWordAt00, m_iWordAt04, m_8;
-    FUN_006815c0();
-};
-
-extern "C" char DAT_01091a64[];
-
-struct FUN_009d6030 : FUN_009ca680
-{
-    int m_10;
-    float m_14;
-    FUN_00906f60 m_18;
-    FUN_006815c0 m_20;
-    FUN_006815c0 m_2c;
-    int m_38;
-    bool m_3c;
-    bool m_3d;
-    FUN_009d6030(int a, float b, bool c, bool d);
-};
-
-// Constructor: sets the vtable, initializes m_10 to 0, stores b in m_14, a in m_38, c in m_3c and d in m_3d.
 // @fnv 0x009d6030
-FUN_009d6030::FUN_009d6030(int aiValue, float afValue, bool abFlag1, bool abFlag2)
-    : m_10((m_vtbl = DAT_01091a64, 0)), m_14(afValue)
+CombatProcedureHideFromTarget::CombatProcedureHideFromTarget(int aiValue, float afValue, bool abFlag1, bool abFlag2)
+    : state(0), duration(afValue)
 {
     m_38 = aiValue;
-    m_3c = abFlag1;
-    m_3d = abFlag2;
+    keep = abFlag1;
+    reset = abFlag2;
 }
 
-struct S_009d6750_Output
+class Output
 {
+public:
     virtual void vf00();
     virtual void vf04();
     virtual void vf08();
@@ -111,26 +41,8 @@ struct S_009d6750_Output
     virtual void vf18();
 };
 
-struct S_009d6750_Timer
-{
-    float FUN_00435e00();
-    float FUN_006b9130();
-};
-
-struct S_009d6750 : CombatProcedureHideFromTarget
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    int m_uiContentCount;
-    int unk14;
-    S_009d6750_Timer m_timer;
-    void PrintState(S_009d6750_Output* out, int x, int y);
-};
-
 // @fnv 0x009d6750
-void S_009d6750::PrintState(S_009d6750_Output* out, int x, int y)
+void CombatProcedureHideFromTarget::PrintState(Output* out, int x, int y)
 {
     switch (m_uiContentCount)
     {
@@ -142,25 +54,11 @@ void S_009d6750::PrintState(S_009d6750_Output* out, int x, int y)
         break;
     case 2:
         out->Printf(x, y, "HIDING");
-        out->Printf(x, y, "Hiding Timer: %.02f/%.02f", m_timer.FUN_00435e00(), m_timer.FUN_006b9130());
+        out->Printf(x, y, "Hiding Timer: %.02f/%.02f", clock.FUN_00435e00(), clock.FUN_006b9130());
         break;
     }
 }
 
-struct BGSLoadFormBuffer
-{
-    void FUN_00864980(void* destination, unsigned int size);
-};
-struct FUN_00996ef0_shell
-{
-    void FUN_00996ef0(BGSLoadFormBuffer* stream);
-};
-struct FUN_009a5f20_shell
-{
-    float x;
-    float y;
-    void FUN_009a5f20(BGSLoadFormBuffer* stream);
-};
 struct FUN_009d6c80_shell
 {
     FUN_009d6c80_shell* FUN_00586150();
@@ -170,70 +68,29 @@ struct FUN_0097fb60_shell
     unsigned int GetFieldAtE8();
 };
 unsigned int __fastcall GetFieldValue(void* object);
-struct Float3
-{
-    float x;
-    float y;
-    float z;
-};
-struct HideTargetLayout
-{
-    void* unk00;
-    FUN_009d6c80_shell* owner;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    FUN_009a5f20_shell unk18;
-    Float3 unk20;
-    Float3 unk2C;
-    unsigned int state;
-    unsigned char unk3C;
-    unsigned char unk3D;
-    void Load(BGSLoadFormBuffer* stream);
-};
-// Reads the hide target's fields from the stream and sets state from the owner when the trailing tag is 1 or 2.
+// Reads the hide target fields and restores the hiding handle from the trailing tag.
 // @fnv 0x009d6900
-void HideTargetLayout::Load(BGSLoadFormBuffer* stream)
+void CombatProcedureHideFromTarget::LoadGame(BGSLoadFormBuffer* stream)
 {
-    ((FUN_00996ef0_shell*)this)->FUN_00996ef0(stream);
-    stream->FUN_00864980(&unk10, 4);
-    stream->FUN_00864980(&unk14, 4);
-    unk18.FUN_009a5f20(stream);
-    stream->FUN_00864980(&unk20, 12);
-    stream->FUN_00864980(&unk2C, 12);
-    stream->FUN_00864980(&unk3C, 1);
-    stream->FUN_00864980(&unk3D, 1);
+    CombatProcedure::FUN_00996ef0(stream);
+    stream->FUN_00864980(&state, 4);
+    stream->FUN_00864980(&duration, 4);
+    clock.FUN_009a5f20(stream);
+    stream->FUN_00864980(&destination, 12);
+    stream->FUN_00864980(&rotation, 12);
+    stream->FUN_00864980(&keep, 1);
+    stream->FUN_00864980(&reset, 1);
     unsigned char tag = 0;
     stream->FUN_00864980(&tag, 1);
     if (tag == 2)
     {
-        state = ((FUN_0097fb60_shell*)owner->FUN_00586150())->GetFieldAtE8();
+        m_38 = ((FUN_0097fb60_shell*)reinterpret_cast<FUN_009d6c80_shell*>(m_pCombatController)->FUN_00586150())->GetFieldAtE8();
     }
     else if (tag == 1)
     {
-        state = GetFieldValue(owner->FUN_00586150());
+        m_38 = GetFieldValue(reinterpret_cast<FUN_009d6c80_shell*>(m_pCombatController)->FUN_00586150());
     }
 }
-
-struct Archive
-{
-    void FUN_00865e50(void* apData, unsigned int aSize, int aFlags);
-};
-
-struct Block12
-{
-    int unk00;
-    int unk04;
-    int unk08;
-};
-
-struct Sub18
-{
-    int unk00;
-    int unk04;
-    void FUN_009a5eb0(Archive* apArchive);
-};
 
 struct Handle
 {
@@ -245,69 +102,31 @@ struct Owner04
     Handle* FUN_00586150();
 };
 
-struct BaseNode
-{
-    void SaveToBuffer(Archive* apArchive);
-};
-
-struct FUN_009d6820_cls : BaseNode
-{
-    int unk00;
-    Owner04* unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    Sub18 unk18;
-    Block12 unk20;
-    Block12 unk2c;
-    int unk38;
-    unsigned char unk3c;
-    unsigned char unk3d;
-
-    void Serialize(Archive* apArchive);
-};
-
-// Serializes the base node and its fields to the archive, then writes a state byte derived from comparing unk38 with a handle value.
+// Serializes the procedure fields and writes a tag identifying the hiding handle.
 // @fnv 0x009d6820
-void FUN_009d6820_cls::Serialize(Archive* apArchive)
+void CombatProcedureHideFromTarget::SaveGame(BGSSaveFormBuffer* apArchive)
 {
-    unsigned char state;
+    unsigned char tag;
     this->SaveToBuffer(apArchive);
-    apArchive->FUN_00865e50(&unk10, 4, 0);
-    apArchive->FUN_00865e50(&unk14, 4, 0);
-    unk18.FUN_009a5eb0(apArchive);
-    apArchive->FUN_00865e50(&unk20, 12, 0);
-    apArchive->FUN_00865e50(&unk2c, 12, 0);
-    apArchive->FUN_00865e50(&unk3c, 1, 0);
-    apArchive->FUN_00865e50(&unk3d, 1, 0);
-    state = 0;
+    apArchive->FUN_00865e50(&state, 4, 0);
+    apArchive->FUN_00865e50(&duration, 4, 0);
+    clock.FUN_009a5eb0(apArchive);
+    apArchive->FUN_00865e50(&destination, 12, 0);
+    apArchive->FUN_00865e50(&rotation, 12, 0);
+    apArchive->FUN_00865e50(&keep, 1, 0);
+    apArchive->FUN_00865e50(&reset, 1, 0);
+    tag = 0;
     if (unk38 != 0)
     {
-        state = (unk38 == unk04->FUN_00586150()->GetFieldAtE8()) ? 2 : 1;
+        tag = (unk38 == reinterpret_cast<Owner04*>(m_pCombatController)->FUN_00586150()->GetFieldAtE8()) ? 2 : 1;
     }
-    apArchive->FUN_00865e50(&state, 1, 0);
+    apArchive->FUN_00865e50(&tag, 1, 0);
 }
 
-struct Vec
-{
-    Vec();
-    Vec(const Vec&);
-    float x, y, z;
-    Vec operator-(const Vec&) const;
-    float FUN_004a7290() const;
-};
 struct WorldPos
 {
     int a, b, c, d;
     double distance(const WorldPos&);
-};
-struct Clock
-{
-    int a, b;
-    void FUN_008d7f40(float);
-    bool expired();
-    float elapsed();
 };
 struct Request
 {
@@ -358,7 +177,9 @@ struct Request
     ~Request();
     void SetInitialPathHeading(float);
 };
-struct ActorStub
+// Retained locally: include/ActorView.h lacks the bool path-build failure query at 0x008b3960.
+// ActorView: unit-local view of Actor declaring its virtual slots by index (speed = slot 175) and the helper calls 0x009d6140 makes; not the shared Actor
+struct ActorView
 {
     virtual void v000();
     virtual void v001();
@@ -485,7 +306,7 @@ struct ActorStub
     virtual void v122();
     virtual void v123();
     virtual void v124();
-    virtual Vec& position();
+    virtual NiPoint3& position();
     virtual void v126();
     virtual void v127();
     virtual void v128();
@@ -539,7 +360,7 @@ struct ActorStub
 
     void* FUN_00575d70();
     void* FUN_008d6f30();
-    void setup(Request*, Vec*, void*, void*, float, int);
+    void setup(Request*, NiPoint3*, void*, void*, float, int);
     bool path(Request*);
     bool failed();
     bool failedMove();
@@ -601,44 +422,21 @@ struct StateStub
 };
 struct OwnerStub
 {
-    ActorStub* GetFieldBC();
-    ActorStub* target();
+    ActorView* GetFieldBC();
+    ActorView* target();
     StateStub* FUN_00586150();
 };
 float height(void*, int, int);
-void location(OwnerStub*, Hiding*, Vec*, Vec*);
-Vec angle(ActorStub*, int);
+void location(OwnerStub*, Hiding*, NiPoint3*, NiPoint3*);
+NiPoint3 angle(ActorView*, int);
 float FUN_00435dd0();
-struct SettingStub
-{
-    float* Float();
-};
-extern SettingStub originalRuntimeFloatSetting431;
-struct HideProcedure
-{
-    int f00;
-    OwnerStub* owner;
-    int f08, f0c;
-    int state;
-    float duration;
-    Clock clock;
-    Vec destination;
-    Vec rotation;
-    Hiding* hiding;
-    bool keep;
-    bool reset;
-    void FUN_00996e20(int);
-    void SetLookAtPoint(const Vec&, unsigned char);
-    void FUN_009caac0(const char*);
-    void SetState();
-    void Update();
-};
+extern Setting originalRuntimeFloatSetting431;
 // @fnv 0x009d6140
-void HideProcedure::Update()
+void CombatProcedureHideFromTarget::Update()
 {
-    ActorStub* actor2 = owner->GetFieldBC();
-    ActorStub* enemy2 = owner->target();
-    StateStub* target7 = owner->FUN_00586150();
+    ActorView* actor2 = reinterpret_cast<OwnerStub*>(m_pCombatController)->GetFieldBC();
+    ActorView* enemy2 = reinterpret_cast<OwnerStub*>(m_pCombatController)->target();
+    StateStub* target7 = reinterpret_cast<OwnerStub*>(m_pCombatController)->FUN_00586150();
     switch (state)
     {
     case 0: {
@@ -646,7 +444,7 @@ void HideProcedure::Update()
         if (found7)
         {
             hiding->active = true;
-            location(owner, hiding, &destination, &rotation);
+            location(reinterpret_cast<OwnerStub*>(m_pCombatController), hiding, &destination, &rotation);
             rotation.z += height(enemy2 ? enemy2 : actor2, 2, 0);
         }
         else
@@ -655,8 +453,8 @@ void HideProcedure::Update()
             if (enemy2)
                 rotation = angle(enemy2, 2);
         }
-        Vec delta7 = actor2->position() - destination;
-        if (found7 && delta7.FUN_004a7290() > 625.0)
+        NiPoint3 delta7 = actor2->position() - destination;
+        if (found7 && static_cast<const NiPoint3&>(delta7).FUN_004a7290() > 625.0)
         {
             FUN_00996e20(3);
             Request request2;
@@ -720,7 +518,7 @@ void HideProcedure::Update()
                 {
                     if (!keep)
                     {
-                        owner->FUN_00586150()->FUN_009a03d0(1);
+                        reinterpret_cast<OwnerStub*>(m_pCombatController)->FUN_00586150()->FUN_009a03d0(1);
                         target7->turn(false);
                         SetState();
                         return;
@@ -732,7 +530,7 @@ void HideProcedure::Update()
                         if (actorPosition.distance(targetPosition) <
                             *originalRuntimeFloatSetting431.Float() * *originalRuntimeFloatSetting431.Float())
                         {
-                            owner->FUN_00586150()->FUN_009a03d0(1);
+                            reinterpret_cast<OwnerStub*>(m_pCombatController)->FUN_00586150()->FUN_009a03d0(1);
                             target7->turn(false);
                             SetState();
                             return;
@@ -741,7 +539,7 @@ void HideProcedure::Update()
                 }
                 if (time7 < target7->timer().elapsed())
                 {
-                    owner->FUN_00586150()->FUN_009a03d0(1);
+                    reinterpret_cast<OwnerStub*>(m_pCombatController)->FUN_00586150()->FUN_009a03d0(1);
                     target7->turn(false);
                     SetState();
                 }

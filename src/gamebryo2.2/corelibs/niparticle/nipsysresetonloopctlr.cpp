@@ -2,6 +2,19 @@
 // src/gamebryo2.2/corelibs/niparticle/nipsysresetonloopctlr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysresetonloopctlr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/StrArr.h"
+#include "../../../../include/NiStream.h"
+// BaseHack_nipsysresetonloopctlr: local type (was include/BaseHack.h, which had no evidence of one real class); its methods are 0x00a57130 NiExtraDataController::SaveBinary, 0x00a6d730 NiTimeController::SaveBinary, 0x00c31b80 NiPSysVolumeEmitter::IsEqual
+class NiObject;
+struct NiStream;
+
+class BaseHack_nipsysresetonloopctlr
+{
+public:
+    void __thiscall FUN_00a6d730(NiStream&);
+    bool FUN_00c31b80(NiObject*);
+};
+
 extern "C"
 {
     extern void* g_012026a8;
@@ -63,16 +76,6 @@ bool __thiscall Cls_00c284f0::IsTargetOfType()
     return false;
 }
 
-struct StrArr
-{
-    unsigned char _pad0[8];
-    unsigned short _s8;
-    unsigned short _sA;
-    unsigned short _sC;
-    unsigned short _sE;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 void __stdcall FUN_00a6d830(StrArr*);
 char* __cdecl _FUN_00a7d330(void*);
 // Appends the string returned by _FUN_00a7d330(g_012026a8) to pkStrings, growing the array if the position is at or past its size.
@@ -81,19 +84,16 @@ void __stdcall FUN_00c28520(StrArr* pkStrings)
 {
     FUN_00a6d830(pkStrings);
     char* pcString = _FUN_00a7d330(g_012026a8);
-    unsigned int uiPos = pkStrings->_sA;
-    unsigned int uiSize = pkStrings->_s8;
+    unsigned int uiPos = pkStrings->m_usSize;
+    unsigned int uiSize = pkStrings->m_usMaxSize;
     if (uiPos >= uiSize)
     {
-        pkStrings->SetSize(uiPos + pkStrings->_sE);
+        pkStrings->SetSize(uiPos + pkStrings->m_usGrowBy);
     }
     pkStrings->SetAt(uiPos, pcString);
 }
 
-struct NiMemObject
-{
-    static void* operator new(unsigned int size);
-};
+#include "../../../../include/NiMemObject.h"
 void __fastcall FUN_00a6d220(void* object);
 extern float DAT_01015f5c;
 extern int DAT_010be8e4;
@@ -193,17 +193,8 @@ void __cdecl FUN_00a2f8b0()
     FUN_00a6d0f0();
 }
 
-struct NiStream
-{
-    int unk00;
-};
 
-struct BaseHack
-{
-    void FUN_00a6d730(NiStream& s);
-};
-
-struct C27120Class : BaseHack
+struct C27120Class : BaseHack_nipsysresetonloopctlr
 {
     void FUN_00c27120(NiStream& s);
 };

@@ -84,11 +84,6 @@ void* S_007a61c0::FUN_007a61c0(unsigned int flags)
     return this;
 }
 
-class ListItemTile
-{
-  public:
-    virtual ~ListItemTile();
-};
 class ListItemData
 {
   public:
@@ -97,16 +92,12 @@ class ListItemData
 template <class T> class ListBoxItem
 {
   public:
-    ListItemTile* tile;
+    Tile* tile;
     T data;
 };
 struct ListNodeCalls
 {
     void FUN_006ecd40(int value);
-};
-struct TileValueCalls
-{
-    void SetFloat(int trait, float value, bool update);
 };
 int __cdecl FUN_00a01860(const char* name);
 extern "C" bool s_bAllowDetach;
@@ -121,31 +112,31 @@ class FUN_007308e0 : public ListBox<ListItemData*>
 // @fnv 0x00730950
 void FUN_007308e0::FUN_00730950()
 {
-    while (items.m_pkNext && items.m_pkNext->GetItem())
+    while (this->m_pkNext && this->m_pkNext->GetItem())
     {
-        BSSimpleList<ListBoxItem<ListItemData*>*>* next = items.m_pkNext->GetNext();
+        BSSimpleList<ListBoxItem<ListItemData*>*>* next = this->m_pkNext->GetNext();
         if (!s_bAllowDetach)
-            delete items.m_pkNext->GetItem()->tile;
+            delete this->m_pkNext->GetItem()->tile;
         if (FUN_007242c0(1))
-            delete items.m_pkNext->GetItem()->data;
-        delete items.m_pkNext->GetItem();
-        ((ListNodeCalls*)items.m_pkNext)->FUN_006ecd40(0);
-        delete items.m_pkNext;
-        items.m_pkNext = next;
+            delete this->m_pkNext->GetItem()->data;
+        delete this->m_pkNext->GetItem();
+        ((ListNodeCalls*)this->m_pkNext)->FUN_006ecd40(0);
+        delete this->m_pkNext;
+        this->m_pkNext = next;
     }
-    if (items.m_item)
+    if (this->m_item)
     {
         if (!s_bAllowDetach)
-            delete items.m_item->tile;
+            delete this->m_item->tile;
         if (FUN_007242c0(1))
-            delete items.m_item->data;
-        delete items.m_item;
+            delete this->m_item->data;
+        delete this->m_item;
     }
-    items.m_item = 0;
+    this->m_item = 0;
     m_usSelectedIndex = 0;
     m_fFirstListValue = 0.0f;
     if (m_pListTile)
-        ((TileValueCalls*)m_pListTile)->SetFloat(FUN_00a01860("_num_filtered"), 0.0f, true);
+        m_pListTile->FUN_00a012d0(FUN_00a01860("_num_filtered"), 0.0f, true);
     UpdateScrollPages();
     m_pSelectedTile = 0;
     FUN_0071a740();
@@ -169,8 +160,8 @@ struct LB_00730f40 : BSSimpleList<ListBoxItem<unsigned int>*>
     virtual void v0c();
     virtual void v10();
     virtual Tile* GetTileAt(unsigned int index, bool b);
-    TileListBoxCalls* m_pListTile;
-    TileListBoxCalls* m_pSelectedTile;
+    TileListBoxCalls_listbox* m_pListTile;
+    TileListBoxCalls_listbox* m_pSelectedTile;
     Tile* m_pHighlightedTile;
     const char* pTemplateName;
     unsigned short m_usSelectedIndex;
@@ -230,7 +221,7 @@ Tile* LB_00730f40::FUN_00730f40(int event)
             BSSimpleList<ListBoxItem<unsigned int>*>* entry = this;
             for (; !selected && entry && entry->GetItem(); entry = entry->GetNext())
             {
-                if (((TileListBoxCalls*)entry->GetItem()->pTile)->GetFloat(0xfac) == last)
+                if (((TileListBoxCalls_listbox*)entry->GetItem()->pTile)->GetFloat(0xfac) == last)
                     selected = entry->GetItem()->pTile;
             }
             if (selected && !selected->ContainsTrait(GetTileValueID(kListBoxEnabled, -1)))
@@ -263,22 +254,12 @@ Tile* LB_00730f40::FUN_00730f40(int event)
     return selected != m_pSelectedTile ? selected : 0;
 }
 
-class xEntryObj
-{
-  public:
-    virtual ~xEntryObj();
-};
 
-class InventoryStackRecord
-{
-  public:
-    int m_i0;
-    ~InventoryStackRecord();
-};
+#include "../../../include/InventoryStackRecord.h"
 
 struct xEntryItem
 {
-    xEntryObj* m_pEntryObject;
+    Tile* m_pEntryObject;
     InventoryStackRecord* m_pChange;
 };
 
@@ -293,11 +274,6 @@ class List_009e03e0
     void Initialize(unsigned int ui);
 };
 
-class xTileT
-{
-  public:
-    void Set(int iKey, float fVal, bool bProp);
-};
 int xTraitID(const char* pName);
 extern bool s_bAllowDetachX;
 
@@ -307,7 +283,7 @@ class xEntryMenu
     int m_i0;
     xEntryItem* m_pSelected;
     List_009e03e0* m_pEntries;
-    xTileT* m_pTile;
+    Tile* m_pTile;
     int m_i10;
     int m_aiPad[2];
     unsigned short m_us1c;
@@ -352,18 +328,13 @@ void xEntryMenu::ClearEntries()
     Rebuild();
 }
 
-struct ClearTile
-{
-    virtual ~ClearTile();
-    void SetFloat(int, float, bool);
-};
 struct ClearData
 {
     ~ClearData();
 };
 struct ClearTilePayloadPair
 {
-    ClearTile* unk00;
+    Tile* unk00;
     ClearData* unk04;
 };
 struct ClearNode
@@ -384,8 +355,8 @@ struct Target007a4780
     void* unk00;
     ClearTilePayloadPair* unk04;
     ClearNode* unk08;
-    ClearTile* unk0c;
-    ClearTile* unk10;
+    Tile* unk0c;
+    Tile* unk10;
     void* unk14;
     const char* unk18;
     unsigned short unk1c;
@@ -395,7 +366,7 @@ struct Target007a4780
     void UpdateSelectionState();
     void FUN_007a4780();
 };
-// Clears the entries, resets fields, and calls SetFloat on unk0c with a value from FUN_00a01860.
+// Clears the entries, resets fields, and calls FUN_00a012d0 on unk0c with a value from FUN_00a01860.
 // @fnv 0x007a4780
 void Target007a4780::FUN_007a4780()
 {
@@ -423,7 +394,7 @@ void Target007a4780::FUN_007a4780()
     unk1c = 0;
     unk20 = 0.0f;
     if (unk0c)
-        unk0c->SetFloat(FUN_00a01860(str_0106f8d0), 0.0f, true);
+        unk0c->FUN_00a012d0(FUN_00a01860(str_0106f8d0), 0.0f, true);
     FUN_007a7d80();
     unk10 = 0;
     UpdateSelectionState();
@@ -437,8 +408,8 @@ struct LB_007a4d50 : BSSimpleList<ListBoxItem<unsigned int>*>
     virtual void v0c();
     virtual void v10();
     virtual Tile* GetTileAt(unsigned int index, bool b);
-    TileListBoxCalls* m_pListTile;
-    TileListBoxCalls* m_pSelectedTile;
+    TileListBoxCalls_listbox* m_pListTile;
+    TileListBoxCalls_listbox* m_pSelectedTile;
     Tile* m_pHighlightedTile;
     const char* pTemplateName;
     unsigned short m_usSelectedIndex;
@@ -503,7 +474,7 @@ Tile* LB_007a4d50::FUN_007a4d50(int event)
             for (BSSimpleList<ListBoxItem<unsigned int>*>* node = this; !pNewTile && node && node->GetItem();
                  node = node->GetNext())
             {
-                if (((TileListBoxCalls*)node->GetItem()->pTile)->GetFloat(0xfac) == iTargetIndex)
+                if (((TileListBoxCalls_listbox*)node->GetItem()->pTile)->GetFloat(0xfac) == iTargetIndex)
                 {
                     pNewTile = node->GetItem()->pTile;
                 }
@@ -575,15 +546,15 @@ Tile* SomeClass::FUN_007a31e0(int param)
         break;
     case 15:
         delta = m_pListTile
-                    ? (int)FUN_004bd510(-((TileListBoxCalls*)m_pListTile)->GetFloat(4016) /
-                                            ((TileListBoxCalls*)m_pListTile)->GetFloat(FUN_00a01860("_scroll_delta")),
+                    ? (int)FUN_004bd510(-((TileListBoxCalls_listbox*)m_pListTile)->GetFloat(4016) /
+                                            ((TileListBoxCalls_listbox*)m_pListTile)->GetFloat(FUN_00a01860("_scroll_delta")),
                                         1.0f)
                     : 0;
         break;
     case 16:
         delta = m_pListTile
-                    ? (int)FUN_004bd510(((TileListBoxCalls*)m_pListTile)->GetFloat(4016) /
-                                            ((TileListBoxCalls*)m_pListTile)->GetFloat(FUN_00a01860("_scroll_delta")),
+                    ? (int)FUN_004bd510(((TileListBoxCalls_listbox*)m_pListTile)->GetFloat(4016) /
+                                            ((TileListBoxCalls_listbox*)m_pListTile)->GetFloat(FUN_00a01860("_scroll_delta")),
                                         1.0f)
                     : 0;
         break;
@@ -596,7 +567,7 @@ Tile* SomeClass::FUN_007a31e0(int param)
 
         if (m_pSelectedTile)
         {
-            int curIndex = (int)((TileListBoxCalls*)m_pSelectedTile)->GetFloat(4012);
+            int curIndex = (int)((TileListBoxCalls_listbox*)m_pSelectedTile)->GetFloat(4012);
             targetIndex = curIndex + delta;
             if (targetIndex < 0)
                 targetIndex = 0;
@@ -613,10 +584,10 @@ Tile* SomeClass::FUN_007a31e0(int param)
 
         while (true)
         {
-            for (BSSimpleList<ListBoxItem<BGSNote*>*>* iter = this ? &items : NULL;
+            for (BSSimpleList<ListBoxItem<BGSNote*>*>* iter = this ? reinterpret_cast<BSSimpleList<ListBoxItem<BGSNote*>*>*>(reinterpret_cast<char*>(this) + 4) : NULL;
                  !pResultTile && iter && iter->GetItem(); iter = iter->GetNext())
             {
-                if (((TileListBoxCalls*)iter->GetItem()->tile)->GetFloat(4012) == (float)targetIndex)
+                if (((TileListBoxCalls_listbox*)iter->GetItem()->tile)->GetFloat(4012) == (float)targetIndex)
                 {
                     pResultTile = (Tile*)iter->GetItem()->tile;
                 }

@@ -1,3 +1,4 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/common/serialize/data/hkdataobject.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/data/hkdataobject.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -119,7 +120,8 @@ void Wrapper::FUN_00dba6f0()
     target->invoke();
 }
 
-struct Interface
+// Exe 0x00dba730: unit-local Interface view; declarations and layout are preserved.
+struct HkdataobjectInterfaceView
 {
     virtual void f0();
     virtual void f1();
@@ -134,7 +136,7 @@ struct Interface
 };
 struct FUN_00dba730_cls
 {
-    Interface* ptr;
+    HkdataobjectInterfaceView* ptr;
     void FUN_00dba730();
 };
 // @fnv 0x00dba730
@@ -302,7 +304,8 @@ bool FUN_00dba980_cls::FUN_00dba980() const
 }
 
 namespace fnv_00dba9a0 {
-struct Interface
+// Exe 0x00dba9a0: unit-local Interface view; declarations and layout are preserved.
+struct HkdataobjectInterfaceView
 {
     virtual void f0();
     virtual void f1();
@@ -322,7 +325,7 @@ struct Interface
 };
 struct FUN_00dba9a0_cls
 {
-    Interface* ptr;
+    HkdataobjectInterfaceView* ptr;
     void* p1;
     void DispatchToInterface(unsigned int param);
 };
@@ -860,7 +863,8 @@ void FUN_00dbad60_cls::FUN_00dbad60(int aiArg, int aiUnused)
 }
 
 namespace fnv_00dbada0 {
-struct Interface
+// Exe 0x00dbada0: unit-local Interface view; declarations and layout are preserved.
+struct HkdataobjectInterfaceView
 {
     virtual void unk00();
     virtual void unk04();
@@ -883,7 +887,7 @@ struct Interface
 };
 struct Wrapper
 {
-    Interface* interfaceObject;
+    HkdataobjectInterfaceView* interfaceObject;
     void* value;
     void InvokeOnInterface(int argument);
 };
@@ -2492,8 +2496,8 @@ struct DB8000_Ref
     void FUN_00dba7f0();
 };
 
-struct DB8000_PtrArray
-{
+struct DB8000_PtrArrayLocalForm
+{ // local form of hkArray: 0x00db8000 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     void** m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -2578,12 +2582,7 @@ struct DB8000_Item
     int m_numOps;
 };
 
-struct DB8000_ItemArray
-{
-    DB8000_Item** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+typedef hkArray<DB8000_Item*> DB8000_ItemArray;
 
 extern int __cdecl FUN_00cb0fa0(const char* a, const char* b);
 
@@ -2604,9 +2603,9 @@ struct DB8000_Self
     void FUN_00dc73f0(DB8000_Handle* h, int a, int b);
     void FUN_00dc7d20(DB8000_Handle* h, int a, int b, int c, int d);
     void FUN_00dc7600(DB8000_Handle* h, int a);
-    void InitAndRun(const char* name, DB8000_PtrArray* out);
+    void InitAndRun(const char* name, DB8000_PtrArrayLocalForm* out);
     void AssignRefCountedSlot(DB8000_Handle* h1, DB8000_Handle* h2);
-    void CallWithReset(const char* name, DB8000_PtrArray* out);
+    void CallWithReset(const char* name, DB8000_PtrArrayLocalForm* out);
     void FUN_00dc7dc0(DB8000_Ref* ref, DB8000_Handle* h);
     void ReleaseRef(DB8000_Handle* h);
     void FUN_00dc72e0(DB8000_Handle* h, int a);
@@ -2673,7 +2672,7 @@ static __declspec(noinline) int __cdecl FUN_00db8000(DB8000_Self* self, DB8000_I
                         break;
                     case 4: {
                         DB8000_Callback pCallback = (DB8000_Callback)op->m_data->m_04;
-                        DB8000_PtrArray arr4;
+                        DB8000_PtrArrayLocalForm arr4;
                         arr4.init();
                         self->InitAndRun(name, &arr4);
                         for (int kIndex = 0; kIndex < arr4.m_iElementCount; ++kIndex)
@@ -2699,7 +2698,7 @@ static __declspec(noinline) int __cdecl FUN_00db8000(DB8000_Self* self, DB8000_I
                         DB8000_OpData* d = op->m_data;
                         DB8000_Handle hSub5;
                         hSub5.FUN_00dba650(self->vfn9((const char*)d->m_00));
-                        DB8000_PtrArray arr5;
+                        DB8000_PtrArrayLocalForm arr5;
                         arr5.init();
                         self->CallWithReset(name, &arr5);
                         for (int kIndex = 0; kIndex < arr5.m_iElementCount; ++kIndex)

@@ -1,22 +1,25 @@
-#ifndef FNV_BSCRITICALSECTION_H
-#define FNV_BSCRITICALSECTION_H
+#pragma once
 
-#include "layout_support.h"
-#include "_RTL_CRITICAL_SECTION.h"
-#pragma pack(push, 4)
+class BSCriticalSectionEntry;
+
 class RecursiveLock
 {
-  public:
-    _RTL_CRITICAL_SECTION CriticalSection;  // +0x0
-    unsigned long m_uiFirstValue;           // +0x1C
-    unsigned long m_uiSecondValue;          // +0x20
-    int m_uiRecursionCount;                        // +0x24
+public:
+    char CriticalSection[28];
+    unsigned long m_uiFirstValue;
+    unsigned long m_uiSecondValue;
+    int m_uiRecursionCount;
+
+    void Enter(char*);
     void Leave();
+    void Lock(char*);
+    void Unlock();
+    void Unlock(BSCriticalSectionEntry** entry, unsigned int* key, unsigned int* value);
+    bool TryLock();
+    void Wait();
+    static void OutputTrackingInfo();
+    unsigned int QOwningThreadID();
+    unsigned int QCurrentLockCount();
+    void InitWithSpinCount(unsigned long);
+    void* __vecDelDtor(unsigned int);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(RecursiveLock) == 0x28);
-FNV_STATIC_ASSERT(offsetof(RecursiveLock, CriticalSection) == 0x0);
-FNV_STATIC_ASSERT(offsetof(RecursiveLock, m_uiFirstValue) == 0x1C);
-FNV_STATIC_ASSERT(offsetof(RecursiveLock, m_uiSecondValue) == 0x20);
-FNV_STATIC_ASSERT(offsetof(RecursiveLock, m_uiRecursionCount) == 0x24);
-#endif

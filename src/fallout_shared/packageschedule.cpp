@@ -1,6 +1,7 @@
 // fallout_shared/packageschedule.cpp: PackedByteIntRecord, DurationData (9 functions)
 
 #include "layout_support.h"
+#include "../../include/QuestData.h"
 
 class PackedByteIntRecord
 {
@@ -100,8 +101,44 @@ void FUN_0067fd40_shell::FUN_0067fd40(DurationData* apCopy)
 
 struct BGSLoadFormBuffer;
 struct BGSSaveFormBuffer;
-struct CombatCoverPointData
+// CombatCoverPointData_packageschedule: local type (was include/CombatCoverPointData.h, which had no evidence of one real class); its methods are 0x005dc960 Main::GameOver, 0x0067fdb0 PackageSchedule::SetStartDayOfWeek, 0x009a2ea0 CombatCoverLocation::LoadGameBGS
+class BGSSaveFormBuffer;
+class BGSLoadFormBuffer;
+
+class CombatCoverPointData_packageschedule
 {
+public:
+    int unk00;
+    int unk04;
+    int unk08;
+    int unk0c;
+    int unk10;
+    int unk14;
+    int unk18;
+    int unk1c;
+    int unk20;
+    int unk24;
+    int unk28;
+    int unk2c;
+    int unk30;
+    int unk34;
+    int unk38;
+    int unk3c;
+    int unk40;
+    int unk44;
+    int unk48;
+    int unk4c;
+    int unk50;
+    int unk54;
+    int unk58;
+    int unk5c;
+    int unk60;
+    int unk64;
+    int unk68;
+    int unk6c;
+    int unk70;
+    int unk74;
+
     void Copy(void*);
     void SaveGame(BGSSaveFormBuffer*);
     void LoadGame(BGSLoadFormBuffer*);
@@ -116,20 +153,9 @@ struct CombatCoverPointData
     bool IsDirty();
     void SetDirty(bool);
     void* __vecDelDtor(unsigned int);
-    bool m_bDataDirty;
-    bool bReserved;
-    unsigned char m_ucCoverHeight;
-    char _pad_3[1];
-    int iLocation;
-    char m_cCoverData[12];
-    char CombatCoverPoint[84];
-    unsigned int m_uiCoverFlags;
-    unsigned int m_uiLocationFlags;
-    char m_cTrailingData[6];
-    char _pad_76[2];
 };
-typedef char _sizecheck_CombatCoverLocation[sizeof(CombatCoverPointData) == 120 ? 1 : -1];
-struct FUN_0067fdb0_shell : public CombatCoverPointData
+typedef char _sizecheck_CombatCoverLocation[sizeof(CombatCoverPointData_packageschedule) == 120 ? 1 : -1];
+struct FUN_0067fdb0_shell : public CombatCoverPointData_packageschedule
 {
     void FUN_0067fdb0(bool);
 };
@@ -137,13 +163,8 @@ struct FUN_0067fdb0_shell : public CombatCoverPointData
 // @fnv 0x0067fdb0
 void FUN_0067fdb0_shell::FUN_0067fdb0(bool abValue)
 {
-    bReserved = abValue;
+    *reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 1) = abValue;  // bReserved (+0x1); the shared CombatCoverPointData_packageschedule names no fields
 }
-
-struct QuestData
-{
-    void __thiscall Endian();
-};
 
 extern "C" unsigned char __cdecl FUN_00401500();
 extern "C" void __cdecl AppendChunk(int, void*, int);

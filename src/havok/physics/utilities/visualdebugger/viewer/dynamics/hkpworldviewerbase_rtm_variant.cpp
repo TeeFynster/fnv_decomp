@@ -231,24 +231,26 @@ Own_00ddcd60* make_00ddcd60()
 }
 
 namespace ClipSimd {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00ddd0b0 FUN_00ddd0b0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float x, y, z, w;
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_load_ss(const float*);
-    void _mm_store_ss(float*, __m128);
+    LocalM128 _mm_load_ps(const float*);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+    LocalM128 _mm_load_ss(const float*);
+    void _mm_store_ss(float*, LocalM128);
 }
 }
 
-struct __declspec(align(16)) hkVector4
+// local form of hkVector4: 0x00ddd0b0 needs ClipSimd packet operands and the original inline component accessor.
+struct __declspec(align(16)) ClipVectorLocal_00ddc
 {
     union
     {
@@ -256,18 +258,18 @@ struct __declspec(align(16)) hkVector4
         {
             float x, y, z, w;
         };
-        ClipSimd::__m128 q;
+        ClipSimd::LocalM128 q;
     };
     __forceinline const float& operator()(int i) const
     {
         return (&x)[i];
     }
 };
-extern const ClipSimd::__m128 g_kQuadRealConstant;
-static __forceinline float dot3(ClipSimd::__m128 a, ClipSimd::__m128 b)
+extern const ClipSimd::LocalM128 g_kQuadRealConstant;
+static __forceinline float dot3(ClipSimd::LocalM128 a, ClipSimd::LocalM128 b)
 {
-    ClipSimd::__m128 product = ClipSimd::_mm_mul_ps(a, b);
-    ClipSimd::__m128 sum = ClipSimd::_mm_add_ss(ClipSimd::_mm_shuffle_ps(product, product, 0x55), product);
+    ClipSimd::LocalM128 product = ClipSimd::_mm_mul_ps(a, b);
+    ClipSimd::LocalM128 sum = ClipSimd::_mm_add_ss(ClipSimd::_mm_shuffle_ps(product, product, 0x55), product);
     float r;
     ClipSimd::_mm_store_ss(&r, ClipSimd::_mm_add_ss(ClipSimd::_mm_shuffle_ps(product, product, 0xaa), sum));
     return r;
@@ -279,15 +281,15 @@ struct Hit
     {}
 };
 // @fnv 0x00ddd0b0
-Hit __cdecl FUN_00ddd0b0(const hkVector4& start, const hkVector4& end, int planeCount, const hkVector4* planes,
+Hit __cdecl FUN_00ddd0b0(const ClipVectorLocal_00ddc& start, const ClipVectorLocal_00ddc& end, int planeCount, const ClipVectorLocal_00ddc* planes,
                          float* first, float* last)
 {
-    hkVector4 a = start;
-    hkVector4 b = end;
-    const ClipSimd::__m128& ONE = g_kQuadRealConstant;
+    ClipVectorLocal_00ddc a = start;
+    ClipVectorLocal_00ddc b = end;
+    const ClipSimd::LocalM128& ONE = g_kQuadRealConstant;
     for (int i = 0; i < planeCount; ++i)
     {
-        hkVector4 plane = planes[i];
+        ClipVectorLocal_00ddc plane = planes[i];
         float w = plane(3);
         float da = w + dot3(plane.q, a.q);
         float db = w + dot3(b.q, plane.q);
@@ -298,9 +300,9 @@ Hit __cdecl FUN_00ddd0b0(const hkVector4& start, const hkVector4& end, int plane
         if (da * db < 0.0f)
         {
             float fraction = da / (da - db);
-            ClipSimd::__m128 t = ClipSimd::_mm_load_ss(&fraction);
+            ClipSimd::LocalM128 t = ClipSimd::_mm_load_ss(&fraction);
             t = ClipSimd::_mm_shuffle_ps(t, t, 0);
-            ClipSimd::__m128 p = ClipSimd::_mm_add_ps(ClipSimd::_mm_mul_ps(ClipSimd::_mm_sub_ps(ONE, t), a.q),
+            ClipSimd::LocalM128 p = ClipSimd::_mm_add_ps(ClipSimd::_mm_mul_ps(ClipSimd::_mm_sub_ps(ONE, t), a.q),
                                                       ClipSimd::_mm_mul_ps(t, b.q));
             if (da > 0.0f)
                 a.q = p;
@@ -308,8 +310,8 @@ Hit __cdecl FUN_00ddd0b0(const hkVector4& start, const hkVector4& end, int plane
                 b.q = p;
         }
     }
-    ClipSimd::__m128 origin = start.q;
-    ClipSimd::__m128 direction = ClipSimd::_mm_sub_ps(end.q, origin);
+    ClipSimd::LocalM128 origin = start.q;
+    ClipSimd::LocalM128 direction = ClipSimd::_mm_sub_ps(end.q, origin);
     float lengthSquared = dot3(direction, direction);
     float firstFraction = dot3(ClipSimd::_mm_sub_ps(a.q, origin), direction) / lengthSquared;
     float lastFraction = dot3(ClipSimd::_mm_sub_ps(b.q, origin), direction) / lengthSquared;

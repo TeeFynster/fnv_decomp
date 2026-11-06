@@ -1,3 +1,63 @@
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/BSTreeNode.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/Transform.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/bhkCapsuleShape.h"
+#include "../../../include/bhkConvexShape.h"
+// bhkLimitedHingeVector_bstreenode_o2_nood_variant: local type (was include/bhkLimitedHingeVector.h, which had no evidence of one real class); its methods are 0x004b4db0 bhkVector4::operator=
+class bhkLimitedHingeVector_bstreenode_o2_nood_variant
+{
+public:
+    union
+    {
+        struct
+        {
+            int unk00;
+            int unk04;
+            int unk08;
+            int unk0C;
+        };
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+        float value[4];
+        unsigned char vecData[16];
+    };
+
+    void FUN_004b4db0(const float*);
+};
+#include "../../../include/bhkShape.h"
+#include "../../../include/bhkSphereRepShape.h"
+#include "../../../include/hkVector4.h"
+#include "../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../../include/NiPoint3.h"
 
 // src/fallout_shared/speedtree/bstreenode_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHsc /Gy /GF (unit src/fallout_shared/speedtree/bstreenode.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
@@ -5,1033 +65,7 @@
 
 // src/fallout_shared/speedtree/bstreenode.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/speedtree/bstreenode.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct FUN_00622430_shell
-{
-    unsigned int __thiscall FUN_00622430();
-};
-struct NiRTTI;
-extern NiRTTI g_011d5e70;
-struct FUN_0066b5b0_shell
-{
-    const NiRTTI* __thiscall GetNiRTTI();
-};
-struct NiAVObject;
-struct NiNode
-{
-    NiAVObject* __thiscall GetAt(unsigned int);
-};
-struct BSTreeNode : NiNode
-{
-    NiAVObject* __thiscall GetFirstChild();
-};
-struct NiCullingProcess;
-extern "C" unsigned char __cdecl FUN_0054ee20();
-struct DummyNode
-{
-    void __thiscall FUN_00a5dbe0(NiCullingProcess* arCuller);
-    void __thiscall FUN_0066bf50(NiCullingProcess* arCuller);
-};
-struct FUN_00c6c290_holder
-{
-    void FUN_00c6c290();
-};
-struct FUN_0066d410_shell : public FUN_00c6c290_holder
-{
-    void FUN_0066d410();
-};
-struct NiRTTI
-{
-};
-extern const NiRTTI g_012683d0;
-struct FUN_0066d430_shell
-{
-    const NiRTTI* GetRTTI() const;
-};
-void __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
-struct FUN_0066d440_shell
-{
-    void FUN_0066d470();
-    void* FUN_0066d440(unsigned int flags);
-};
-struct FUN_0066d470_shell
-{
-    void FUN_0066d410();
-    void FUN_0066d470();
-};
-struct FUN_0066d510_shell
-{
-    const void* FUN_0066d510();
-};
-extern const void* g_012683e0;
-struct FUN_0066d520_shell
-{
-    void FUN_00cb78b0();
-    void* FUN_0066d520(unsigned int flags);
-};
-void __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
-struct GlobalObjectO2_00a7b610
-{
-};
-GlobalObjectO2_00a7b610 g_012681b4;
-struct FUN_0066d610_shell
-{
-    GlobalObjectO2_00a7b610* GetGlobalObject();
-};
-struct bhkCapsuleShape
-{
-    unsigned int __thiscall FUN_0066d730() const;
-};
-struct FUN_0066da50_t
-{
-    void FUN_0066da50();
-};
-struct FUN_0066d7a0_shell
-{
-    int m0;
-    FUN_0066da50_t m1;
-    void RunInner();
-};
-struct Flt
-{
-    operator unsigned int() const;
-};
-struct NiTriBasedGeom;
-struct FUN_0066b620_shell
-{
-    NiTriBasedGeom* __thiscall GetTriBasedGeom();
-};
-extern const char* const g_012683d0_arg1;
-struct FUN_0066d400_shell
-{
-    const char* const* GetArg1Ptr();
-};
-struct NiAVObject
-{
-    void __thiscall SetAppCulled(bool);
-};
-struct BSTreeNodeVisibility : BSTreeNode
-{
-    bool __thiscall FUN_0066bc40(bool);
-};
-struct FUN_0066d3d0_shell
-{
-    void __thiscall FUN_0066d3d0(void*);
-};
-extern int DAT_01066acc;
-struct FUN_0066d3a0_shell
-{
-    void* __thiscall FUN_0066d3a0(void*);
-};
-extern "C" void __cdecl FUN_004b5020();
-extern "C" void __cdecl FUN_0056e270();
-struct FUN_0056e120_shell
-{
-    void __thiscall FUN_0056e120();
-};
-struct FUN_0066d550_shell
-{
-    void* Initialize();
-};
-struct FUN_00c8bed0_holder
-{
-    void __thiscall FUN_00c8bed0();
-};
-void __cdecl _delete(void*, unsigned int);
-struct bhkTransformShape
-{
-    void* __thiscall Destroy(unsigned int);
-};
-struct FUN_0066d740_owner
-{
-    void __thiscall FUN_00caacf0();
-    void* __thiscall DestroyIfFlagged(unsigned int flags);
-};
-void __cdecl _delete(void* p, unsigned int size);
-struct FUN_0056e900_shell
-{
-    void __thiscall StepAndReturnThis();
-};
-struct FUN_006299a0_shell
-{
-    void __thiscall FUN_006299a0();
-};
-struct FUN_0066d770_shell
-{
-    void* __thiscall FUN_0066d770();
-};
-struct NiObject
-{
-    virtual ~NiObject();
-};
-struct NiTexturingProperty : NiObject
-{
-    virtual ~NiTexturingProperty();
-};
-struct PropHelper
-{
-    void* GetProperty(unsigned int);
-};
-struct NiAVObjectProp
-{
-    void AttachProperty(NiObject*);
-    void RemoveProperty(unsigned int);
-};
-struct FUN_0066bec0_shell
-{
-    bool AttachTexturingProperty(NiTexturingProperty* apProp);
-};
-struct FUN_0094db80_shell
-{
-    void FUN_0094db80(unsigned char);
-};
-struct BSTreeNodeVisibilityWork : BSTreeNodeVisibility
-{
-    bool SetVisibilityByType(unsigned short type, unsigned char mode);
-};
-struct FUN_0066bf80_vftable
-{
-    void* slot000;
-    void* slot004;
-    void* slot008;
-    void* slot00C;
-    void* slot010;
-    void* slot014;
-    void* slot018;
-    void* slot01C;
-    void* slot020;
-    void* slot024;
-    void* slot028;
-    void* slot02C;
-    void* slot030;
-    void* slot034;
-    void* slot038;
-    void* slot03C;
-    void* slot040;
-    void* slot044;
-    void* slot048;
-    void* slot04C;
-    void* slot050;
-    void* slot054;
-    void* slot058;
-    void* slot05C;
-    void* slot060;
-    void* slot064;
-    void* slot068;
-    void* slot06C;
-    void* slot070;
-    void* slot074;
-    void* slot078;
-    void* slot07C;
-    void* slot080;
-    void* slot084;
-    void* slot088;
-    void* slot08C;
-    void* slot090;
-    void* slot094;
-    void* slot098;
-    void* slot09C;
-    void* slot0A0;
-    void* slot0A4;
-    void* slot0A8;
-    void* slot0AC;
-    void* slot0B0;
-    void* slot0B4;
-    void* slot0B8;
-    void* slot0BC;
-    void* slot0C0;
-    void* slot0C4;
-    void* slot0C8;
-    void* slot0CC;
-    void* slot0D0;
-    void* slot0D4;
-    void* slot0D8;
-    void* slot0DC;
-    void* slot0E0;
-    void* slot0E4;
-    void* slot0E8;
-    void* slot0EC;
-    void* slot0F0;
-    void* slot0F4;
-    void* slot0F8;
-    void* slot0FC;
-    void* slot100;
-    void* slot104;
-    void* slot108;
-    void* slot10C;
-    void* slot110;
-    void* slot114;
-    void* slot118;
-    void* slot11C;
-    void* slot120;
-    void* slot124;
-    void* slot128;
-    void* slot12C;
-    void* slot130;
-    void* slot134;
-    void* slot138;
-    void* slot13C;
-    void* slot140;
-    void(__thiscall* process)(void*, float);
-};
-struct FUN_0066bf80_owner
-{
-    FUN_0066bf80_vftable* vtable;
-    void __thiscall FUN_0066bf80(struct FUN_0066bf80_data*, unsigned int);
-};
-struct FUN_0066bf80_data
-{
-    float time;
-};
-struct NiCamera;
-extern double gModifierZero;
-struct FUN_00a5dd70_shell
-{
-    void __thiscall FUN_00a5dd70(FUN_0066bf80_data&, unsigned int);
-};
-extern "C" unsigned int __cdecl FUN_00552380();
-extern bool __cdecl FUN_004b5fc0(NiAVObject*, NiCamera*);
-enum MEM_CONTEXT
-{
-    MEM_CONTEXT_SCENE = 0x1e
-};
-struct AutoMemContext
-{
-    AutoMemContext(MEM_CONTEXT, bool, const char*, int);
-    ~AutoMemContext();
-    int state;
-};
-class NiTexture;
-template <class T> struct NiPointer
-{
-    T* m_pObject;
-    NiPointer(T* apObject);
-    ~NiPointer();
-    operator T*() const;
-};
-struct BGSBodyPart
-{
-    const char* GetPartName();
-};
-struct bhkWorldObject;
-struct bhkCollisionObject
-{
-    bhkWorldObject* FUN_006fa820();
-};
-extern char g_01268444_arg1;
-NiObject* __cdecl FUN_00653270(const NiRTTI* apRTTI, NiObject* apObject);
-struct FUN_0066d7c0_cls
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c();
-    virtual void v90();
-    virtual void v94();
-    virtual void v98();
-    virtual void v9c();
-    virtual void va0();
-    virtual void va4();
-    virtual void va8();
-    virtual void vac();
-    virtual void vb0();
-    virtual void vb4();
-    virtual void vb8();
-    virtual void vbc();
-    virtual void vc0();
-    virtual void vc4();
-    virtual void vc8();
-    virtual void vcc();
-    virtual void vd0();
-    virtual void vd4();
-    virtual void vd8();
-    virtual void vdc();
-    virtual void ve0();
-    virtual void ve4();
-    virtual void ve8();
-    virtual void vec();
-    virtual void vf0();
-    virtual void vf4();
-    virtual void vf8();
-    virtual void vfc();
-    virtual void v100();
-    virtual void v104();
-    virtual BGSBodyPart* GetPart();
-    NiObject* FUN_0066d7c0();
-};
-struct S_0066b6c0_Base
-{
-    virtual ~S_0066b6c0_Base();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-};
-struct FUN_0066b6c0 : S_0066b6c0_Base
-{
-    NiPointer<NiNode> spTree0;
-    NiPointer<NiNode>* pArr1;
-    NiPointer<NiNode>* pArr2;
-    NiPointer<NiNode> spTree1;
-
-    virtual ~FUN_0066b6c0();
-};
-struct ItemList
-{
-    unsigned short GetCount();
-};
-struct SmartPtr
-{
-    void* m_pObject;
-    void* Get();
-};
-struct FUN_0066b840_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    SmartPtr m_kNode;
-    int unkE8;
-    SmartPtr* m_entries;
-    void* GetEntry(unsigned short index);
-};
-struct S_0066ba30_Str
-{
-    char* m_data;
-    unsigned short m_len;
-    unsigned short m_kMaximumCorner;
-    S_0066ba30_Str();
-    ~S_0066ba30_Str();
-};
-struct S_0066ba30_Model
-{
-    unsigned short FUN_006699d0();
-};
-struct S_0066ba30_Obj;
-template <class T> struct S_0066ba30_Ptr
-{
-    T* m_pObject;
-    operator T*() const;
-    T* operator->() const;
-    S_0066ba30_Ptr& operator=(T* p);
-};
-struct S_0066ba30_Node
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c();
-    virtual void v90();
-    virtual void v94();
-    virtual void v98();
-    virtual void v9c();
-    virtual void va0();
-    virtual void va4();
-    virtual void va8();
-    virtual void vac();
-    virtual void vb0();
-    virtual void vb4();
-    virtual void vb8();
-    virtual void vbc();
-    virtual void vc0();
-    virtual void vc4();
-    virtual void vc8();
-    virtual void vcc();
-    virtual void vd0();
-    virtual void vd4();
-    virtual void vd8();
-    virtual void SetObj(S_0066ba30_Obj* apObj, bool abFlag);
-    virtual void ve0();
-    virtual void ve4();
-    virtual void ClearObj(S_0066ba30_Obj* apObj);
-};
-struct S_0066ba30
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c();
-    virtual void v90();
-    virtual void v94();
-    virtual void v98();
-    virtual void v9c();
-    virtual void va0();
-    virtual void va4();
-    virtual void va8();
-    virtual void vac();
-    virtual void vb0();
-    virtual void vb4();
-    virtual void vb8();
-    virtual void vbc();
-    virtual void vc0();
-    virtual void vc4();
-    virtual void vc8();
-    virtual void vcc();
-    virtual void vd0();
-    virtual void vd4();
-    virtual void vd8();
-    virtual void vdc();
-    virtual void ve0();
-    virtual void ve4();
-    virtual void ve8();
-    virtual void vec();
-    virtual void vf0();
-    virtual void vf4();
-    virtual void vf8();
-    virtual void vfc();
-    virtual void v100();
-    virtual void v104();
-    virtual S_0066ba30_Node* GetNode();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    S_0066ba30_Ptr<S_0066ba30_Model> m_spModel;
-    int unkE8;
-    S_0066ba30_Ptr<S_0066ba30_Obj>* m_pObjects;
-    bool SetObjectAtIndex(unsigned short index, S_0066ba30_Obj* apObj);
-};
-struct VisNode70
-{
-    void Method00450f90(int aFlag);
-    VisNode70* Method00a59d30(int aFlag);
-};
-struct VisNodeAlpha70
-{
-    void Method0094db80(unsigned char aAlpha);
-};
-struct FUN_0066bd30_cls
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v3a();
-    virtual void v3b();
-    virtual void v3c();
-    virtual void v3d();
-    virtual void v3e();
-    virtual void v3f();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual VisNode70* v44(unsigned short aType);
-
-    bool FUN_0066bd30(unsigned short aType, unsigned char aMode);
-};
-struct C070Node
-{
-    virtual void vfunc000();
-    virtual void vfunc004();
-    virtual void vfunc008();
-    virtual void vfunc00C();
-    virtual void vfunc010();
-    virtual void vfunc014();
-    virtual void vfunc018();
-    virtual void vfunc01C();
-    virtual void vfunc020();
-    virtual void vfunc024();
-    virtual void vfunc028();
-    virtual void vfunc02C();
-    virtual void vfunc030();
-    virtual void vfunc034();
-    virtual void vfunc038();
-    virtual void vfunc03C();
-    virtual void vfunc040();
-    virtual void vfunc044();
-    virtual void vfunc048();
-    virtual void vfunc04C();
-    virtual void vfunc050();
-    virtual void vfunc054();
-    virtual void vfunc058();
-    virtual void vfunc05C();
-    virtual void vfunc060();
-    virtual void vfunc064();
-    virtual void vfunc068();
-    virtual void vfunc06C();
-    virtual void vfunc070();
-    virtual void vfunc074();
-    virtual void vfunc078();
-    virtual void vfunc07C();
-    virtual void vfunc080();
-    virtual void vfunc084();
-    virtual void vfunc088();
-    virtual void vfunc08C();
-    virtual void vfunc090();
-    virtual void vfunc094();
-    virtual void vfunc098();
-    virtual void vfunc09C();
-    virtual void vfunc0A0();
-    virtual void vfunc0A4();
-    virtual void vfunc0A8();
-    virtual void vfunc0AC();
-    virtual void vfunc0B0();
-    virtual void vfunc0B4();
-    virtual void vfunc0B8();
-    virtual void vfunc0BC();
-    virtual void vfunc0C0();
-    virtual void vfunc0C4();
-    virtual void vfunc0C8();
-    virtual void vfunc0CC();
-    virtual void vfunc0D0();
-    virtual void vfunc0D4();
-    virtual void vfunc0D8();
-    virtual void vfunc0DC();
-    virtual void vfunc0E0();
-    virtual void vfunc0E4();
-    virtual void vfunc0E8();
-    virtual void vfunc0EC();
-    virtual void vfunc0F0();
-    virtual void vfunc0F4();
-    virtual void vfunc0F8();
-    virtual void vfunc0FC();
-    virtual void vfunc100();
-    virtual void vfunc104();
-    virtual void vfunc108();
-    virtual void vfunc10C();
-    virtual void vfunc110();
-    virtual void vfunc114();
-    virtual void vfunc118();
-    virtual void vfunc11C();
-    virtual void vfunc120();
-    virtual void vfunc124();
-    virtual void vfunc128();
-    virtual void vfunc12C();
-    virtual void vfunc130();
-    virtual void vfunc134();
-    virtual void vfunc138();
-    virtual void vfunc13C();
-    virtual void vfunc140();
-    virtual void UpdateTime(float fTime);
-
-    void UpdateSelectedDownwardPass(FUN_0066bf80_data& kUpdate, unsigned int uiFlags);
-};
-struct C070TreeNode : C070Node
-{
-    void FUN_0066c070(FUN_0066bf80_data& kUpdate, unsigned int uiFlags);
-};
-extern char DAT_01066c5c;
-extern unsigned int DAT_012683dc;
-struct FUN_0066d490_base
-{
-    FUN_0066d490_base();
-    ~FUN_0066d490_base();
-};
-struct FUN_0066d490_cls : FUN_0066d490_base
-{
-    void* m_vptr;
-    void FUN_00cb7b80(unsigned int a1);
-    FUN_0066d490_cls(unsigned int a1);
-};
-extern char DAT_01066d44;
-extern unsigned int DAT_012681b0;
-struct FUN_0066d590_base
-{
-    FUN_0066d590_base();
-    ~FUN_0066d590_base();
-};
-struct FUN_0066d590_cls : FUN_0066d590_base
-{
-    void* m_vptr;
-    void FUN_00c8c5b0(unsigned int a1);
-    FUN_0066d590_cls(unsigned int a1);
-};
-extern "C" int __cdecl FUN_00406d00(char* text, unsigned size, const char* fmt, ...);
-extern "C" char* __cdecl FUN_00a7d330(const char* s);
-struct S_0066d880_List
-{
-    void FUN_0096a610(char** item);
-};
-struct S_0066d880_Obj
-{
-    unsigned char FUN_00666f00();
-    int FUN_008d6f30();
-};
-struct S_0066d880_Holder
-{
-    S_0066d880_Obj* FUN_00559450();
-};
-struct S_0066d880_Base
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    void FUN_00a5ea70(S_0066d880_List* list);
-};
-struct S_0066d880 : S_0066d880_Base
-{
-    S_0066d880_Holder m_e4;
-    void FUN_0066d880(S_0066d880_List* list);
-};
-
 #include <xmmintrin.h>
-struct bhkLimitedHingeVector
-{
-    void __thiscall FUN_004b4db0(const float*);
-    unsigned char vecData[16];
-};
 
 struct Inner
 {
@@ -1046,7 +80,7 @@ struct Param
     unsigned char unk00[4];
     void* m4;
     unsigned char unk08[8];
-    bhkLimitedHingeVector vecs[4];
+    bhkLimitedHingeVector_bstreenode_o2_nood_variant vecs[4];
 };
 
 extern const __m128 g_01268370[4];
@@ -1071,7 +105,7 @@ void __thiscall MyObj::FUN_00c8c410(void* pArg)
     tmp[1] = src[1];
     tmp[2] = src[2];
     tmp[3] = src[3];
-    bhkLimitedHingeVector* pv = p->vecs;
+    bhkLimitedHingeVector_bstreenode_o2_nood_variant* pv = p->vecs;
     pv[0].FUN_004b4db0((float*)tmp);
     pv[1].FUN_004b4db0((float*)&tmp[1]);
     pv[2].FUN_004b4db0((float*)&tmp[2]);
@@ -1090,12 +124,7 @@ struct AllocObj
 {
     AllocVt* vt;
 };
-struct AllocHolder
-{
-    unsigned int unk00, unk04, unk08, unk0C;
-    AllocObj* mpAlloc;
-};
-extern "C" AllocHolder* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct FUN_00cf5990
 {
@@ -1105,8 +134,8 @@ struct FUN_00cf5990
     void FUN_00c905b0();
     static void* operator new(unsigned int)
     {
-        AllocHolder* h = FUN_00c85750();
-        AllocObj* al = h->mpAlloc;
+        hkMemoryRouter* h = FUN_00c85750();
+        AllocObj* al = reinterpret_cast<AllocObj*>(h->m_heap);
         FUN_00cf5990* p = (FUN_00cf5990*)al->vt->Alloc(al, 0x70);
         p->w4 = 0x70;
         return p;
@@ -1151,17 +180,14 @@ struct Guard
         DAT_000002b4 = saved;
     }
 };
-struct Transform
+__forceinline Transform* InitializeTransform(Transform* transform, Src* apSrc)
 {
-    __m128 r[4];
-    __forceinline Transform(Src* apSrc)
-    {
-        r[0] = _mm_setr_ps(apSrc->f[0], apSrc->f[1], apSrc->f[2], apSrc->f[3]);
-        r[1] = _mm_setr_ps(apSrc->f[4], apSrc->f[5], apSrc->f[6], apSrc->f[7]);
-        r[2] = _mm_setr_ps(apSrc->f[8], apSrc->f[9], apSrc->f[10], apSrc->f[11]);
-        r[3] = _mm_setr_ps(apSrc->f[12], apSrc->f[13], apSrc->f[14], apSrc->f[15]);
-    }
-};
+    transform->r[0] = _mm_setr_ps(apSrc->f[0], apSrc->f[1], apSrc->f[2], apSrc->f[3]);
+    transform->r[1] = _mm_setr_ps(apSrc->f[4], apSrc->f[5], apSrc->f[6], apSrc->f[7]);
+    transform->r[2] = _mm_setr_ps(apSrc->f[8], apSrc->f[9], apSrc->f[10], apSrc->f[11]);
+    transform->r[3] = _mm_setr_ps(apSrc->f[12], apSrc->f[13], apSrc->f[14], apSrc->f[15]);
+    return transform;
+}
 
 struct TargetHolder
 {
@@ -1177,7 +203,9 @@ struct TargetHolder
 void TargetHolder::FUN_00c8c5b0(Src* apSrc)
 {
     Guard g0;
-    FUN_00cf5990* n = new FUN_00cf5990(apSrc->m4, &Transform(apSrc));
+    // Keep the original alignment and /GS buffer treatment of the temporary.
+    __declspec(align(16)) char storage[sizeof(Transform)];
+    FUN_00cf5990* n = new FUN_00cf5990(apSrc->m4, InitializeTransform(reinterpret_cast<Transform*>(storage), apSrc));
     ((void(__thiscall*)(void*, FUN_00cf5990*))this->vt[35])(this, n);
     n->FUN_00c905b0();
     ((void(__thiscall*)(void*, Src*))this->vt[47])(this, apSrc);
@@ -1196,11 +224,6 @@ struct Alloc
 {
     virtual void v0();
     virtual void* Alloc_(unsigned int);
-};
-struct Holder
-{
-    int unk00, unk04, unk08, unk0c;
-    Alloc* unk10;
 };
 struct AudioTlsState
 {
@@ -1384,17 +407,16 @@ struct Data8
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
     float unk20[4], unk30[4];
 };
-struct Vec
-{
-    float x, y, z, w;
-    void FUN_004b4db0(const float*);
-};
 struct Output
 {
     int unk00;
     float unk04;
     int unk08, unk0c;
-    Vec unk10, unk20;
+    // The fourth lanes belong to this output record; shared NiPoint3 holds xyz.
+    NiPoint3 unk10;
+    float unk1c;
+    NiPoint3 unk20;
+    float unk2c;
     int unk30;
     int unk34;
     int unk38;
@@ -1511,11 +533,11 @@ struct Obj
 extern unsigned int DAT_0126fd98;
 extern float DAT_010c72bc;
 extern float DAT_01267e30[];
-Holder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 void* FUN_00d22dc0::operator new(unsigned int n)
 {
-    Holder* h = FUN_00c85750();
-    Alloc* allocator = h->unk10;
+    hkMemoryRouter* h = FUN_00c85750();
+    Alloc* allocator = reinterpret_cast<Alloc*>(h->m_heap);
     void* p = allocator->Alloc_(n);
     *(short*)((char*)p + 4) = (short)n;
     return p;
@@ -1544,18 +566,18 @@ void Obj::FUN_00cab1b0(void* a1, void* a2)
     out.unk10.x = 0;
     out.unk10.y = 0;
     out.unk10.z = 0;
-    out.unk10.w = 0;
+    out.unk1c = 0;
     out.unk00 = 0;
     out.unk20.x = 1;
     out.unk20.y = 0;
     out.unk20.z = 0;
-    out.unk20.w = 0;
+    out.unk2c = 0;
     FUN_00c9fb70(&out);
     out.unk10.FUN_004b4db0(this && unk08 ? unk08->unk20 : DAT_01267e30);
     out.unk20.FUN_004b4db0(this && unk08 ? unk08->unk30 : DAT_01267e30);
     FUN_00d22dc0* sub =
-        new FUN_00d22dc0(_mm_setr_ps(out.unk10.x, out.unk10.y, out.unk10.z, out.unk10.w),
-                         _mm_setr_ps(out.unk20.x, out.unk20.y, out.unk20.z, out.unk20.w), out.unk04, 6, 1);
+        new FUN_00d22dc0(_mm_setr_ps(out.unk10.x, out.unk10.y, out.unk10.z, out.unk1c),
+                         _mm_setr_ps(out.unk20.x, out.unk20.y, out.unk20.z, out.unk2c), out.unk04, 6, 1);
     sub->v4();
     void* inner = sub->unk08;
     if (inner)
@@ -1642,6 +664,18 @@ void SpawnedSourceOwner::FUN_00cab820(SpawnedSource* apSource)
     Apply(apSource);
 }
 
+inline void hkVector4::operator=(const hkVector4& vector)
+{
+    m_vComponents = vector.m_vComponents;
+}
+inline void hkVector4::set(float a, float b, float c, float d)
+{
+    x = a;
+    y = b;
+    z = c;
+    w = d;
+}
+
 namespace fnv_00cb7c60 {
 extern __declspec(thread) int g_tlsHeapContext;
 
@@ -1659,40 +693,14 @@ struct HeapContextScope
     }
 };
 
-struct hkVec4
-{
-    __m128 m_vComponents;
-    hkVec4()
-    {}
-    hkVec4(const hkVec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void operator=(const hkVec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
 
 struct hkMemAllocator;
-struct hkMemRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemAllocator* unk10;
-    hkMemAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-hkMemRouter* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 void __cdecl FUN_00c908c0(hkMemAllocator& alloc, void* array, int numElem, int sizeElem);
 
-struct VecArray
-{
-    hkVec4* m_data;
+struct VecArrayLocalForm
+{ // local form of hkArray: 0x00cb7c60 needs the original inline/out-of-line helper split; shared replacement changes bytes.
+    hkVector4* m_data;
     int m_iElementCount;
     int m_iCapacityState;
     int getCapacity() const
@@ -1709,7 +717,7 @@ struct VecArray
         {
             int cap2 = 2 * getCapacity();
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(a, this, newSize, sizeof(hkVec4));
+            FUN_00c908c0(a, this, newSize, sizeof(hkVector4));
         }
     }
     void _setSize(hkMemAllocator& a, int n)
@@ -1719,7 +727,7 @@ struct VecArray
     }
     void SetSizeAndGrow(int n)
     {
-        _setSize(FUN_00c85750()->heap(), n);
+        _setSize(*reinterpret_cast<hkMemAllocator*>((&FUN_00c85750()->heap())), n);
     }
     void setSizeCleared(int n)
     {
@@ -1731,7 +739,7 @@ struct VecArray
 struct VertsOut
 {
     int unk00;
-    VecArray unk04;
+    VecArrayLocalForm unk04;
 };
 
 struct VertsData
@@ -1744,7 +752,7 @@ struct VertsData
     int unk14;
     int unk18;
     int unk1C;
-    hkVec4 unk20;
+    hkVector4 unk20;
 };
 
 struct VertsSource
@@ -1757,7 +765,7 @@ struct VertsSource
     {
         return (this && unk08) ? unk08->unk10 : 0;
     }
-    const hkVec4* getVerts() const
+    const hkVector4* getVerts() const
     {
         return (this && unk08) ? &unk08->unk20 : 0;
     }
@@ -1772,94 +780,38 @@ void VertsSource::FUN_00cb7c60(VertsOut* out)
     int n = getNumVerts();
     out->unk04.clear();
     out->unk04.SetSizeAndGrow(n);
-    const hkVec4* src = getVerts();
+    const hkVector4* src = getVerts();
     for (int i = 0; i < n; i++)
         out->unk04.m_data[i] = src[i];
 }
 }  // namespace fnv_00cb7c60
 
-#include <xmmintrin.h>
 namespace fnv_00cab710 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
+extern int DAT_012680f8;
+extern int DAT_01268274;
+extern int DAT_01268250;
+}
+inline bhkShape::bhkShape() : m_0c(0), m_10(0)
 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int8 m128_i8[16];
-    __int16 m128_i16[8];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int8 m128_u8[16];
-    unsigned __int16 m128_u16[8];
-    unsigned __int32 m128_u32[4];
-};
-
-struct NiPoint3
+    ++fnv_00cab710::DAT_012680f8;
+}
+inline bhkSphereRepShape::bhkSphereRepShape()
 {
-    float x;
-    float y;
-    float z;
-};
-
-class hkVector4
+    ++fnv_00cab710::DAT_01268274;
+}
+inline bhkConvexShape::bhkConvexShape()
 {
-  public:
-    __m128 m_vComponents;
-    float& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-    void set(float a, float b, float c, float d)
-    {
-        (*this)(0) = a;
-        (*this)(1) = b;
-        (*this)(2) = c;
-        (*this)(3) = d;
-    }
-};
+    ++fnv_00cab710::DAT_01268250;
+}
 
+namespace fnv_00cab710 {
 extern float DAT_01268328;
 extern int DAT_012680f8;
 extern int DAT_01268274;
 extern int DAT_01268250;
 
-class bhkSerializable
-{
-  public:
-    bhkSerializable();
-    virtual ~bhkSerializable();
-    int unk04;
-    int unk08;
-};
 
-class bhkShape : public bhkSerializable
-{
-  public:
-    bhkShape() : m_0c(0), m_10(0)
-    {
-        ++DAT_012680f8;
-    }
-    int m_0c;
-    int m_10;
-};
-
-class bhkSphereRepShape : public bhkShape
-{
-  public:
-    bhkSphereRepShape()
-    {
-        ++DAT_01268274;
-    }
-};
-
-class bhkConvexShape : public bhkSphereRepShape
-{
-  public:
-    bhkConvexShape()
-    {
-        ++DAT_01268250;
-    }
-};
-
+// Shared bhkCapsuleShape lacks this constructor and FUN_00cab0e0.
 class bhkCapsuleShapeCtor : public bhkConvexShape
 {
   public:
@@ -1870,15 +822,17 @@ class bhkCapsuleShapeCtor : public bhkConvexShape
 // @fnv 0x00cab710
 bhkCapsuleShapeCtor::bhkCapsuleShapeCtor(const NiPoint3& kPoint1, const NiPoint3& kPoint2, float fRadius)
 {
-    hkVector4 kA;
+    // Preserve the original vector temporaries' alignment and /GS buffers.
+    __declspec(align(16)) char storageA[sizeof(hkVector4)];
+    hkVector4& kA = *reinterpret_cast<hkVector4*>(storageA);
     kA.set(kPoint1.x * DAT_01268328, kPoint1.y * DAT_01268328, kPoint1.z * DAT_01268328, 0.0f);
-    hkVector4 kB;
+    __declspec(align(16)) char storageB[sizeof(hkVector4)];
+    hkVector4& kB = *reinterpret_cast<hkVector4*>(storageB);
     kB.set(kPoint2.x * DAT_01268328, kPoint2.y * DAT_01268328, kPoint2.z * DAT_01268328, 0.0f);
     FUN_00cab0e0(kA, kB, fRadius * DAT_01268328);
 }
 }  // namespace fnv_00cab710
 
-#include <xmmintrin.h>
 extern "C" unsigned long __readfsdword(unsigned long);
 namespace fnv_00cb7d80 {
 struct TlsBlock_t
@@ -2160,18 +1114,9 @@ union ScalarString
     float value;
     char* text;
 };
-struct Point
+inline NiPoint3 scale(__m128 v, float k)
 {
-    float x, y, z;
-    Point()
-    {}
-    Point(const Point& o) : x(o.x), y(o.y), z(o.z)
-    {}
-    char* FUN_00a59af0(const char*);
-};
-inline Point scale(__m128 v, float k)
-{
-    Point r;
+    NiPoint3 r;
     r.x = getX(v) * k;
     r.y = getY(v) * k;
     r.z = getZ(v) * k;
@@ -2214,7 +1159,7 @@ void RecordCollection::FUN_00cb7d80(NiStrArr* a1)
                     __m128 cur = _mm_load_ps(&rec->x);
                     ScalarString scalar;
                     scalar.value = rec->w;
-                    Point pt = scale(cur, DAT_011b1cd4);
+                    NiPoint3 pt = scale(cur, DAT_011b1cd4);
                     char buf[0x20];
                     FUN_00406d00(buf, 0x20, str_010c88f8, i);
                     {

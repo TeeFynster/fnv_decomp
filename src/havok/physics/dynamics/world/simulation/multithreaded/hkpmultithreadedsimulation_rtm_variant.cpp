@@ -1,3 +1,43 @@
+// hkMemoryRouterQ_hkpmultithreadedsimulation_rtm_variant: local type (was include/hkMemoryRouterQ.h, which had no evidence of one real class); no method of it is bound to a named game function
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkBool.h"
+
+class hkMemoryRouterQ_hkpmultithreadedsimulation_rtm_variant
+{
+public:
+    int unk00;
+    int unk04;
+    int unk08;
+    union
+    {
+        int unk0C;
+        int unk0c;
+    };
+    hkMemoryAllocator* m_pStreamAllocator;
+
+    hkMemoryAllocator& heap()
+    {
+        return *m_pStreamAllocator;
+    }
+
+    hkMemoryAllocator& debug();
+};
+#include "../../../../../../../include/Pair.h"
+#include "../../../../../../../include/Vec4.h"
+
+__forceinline float Vec4::delta() const
+{
+    return z;
+}
+
+__forceinline void Vec4::set(float start, float end)
+{
+    x = start;
+    y = end;
+    z = end - start;
+    w = z == 0.0f ? 0.0f : 1.0f / z;
+}
+
 // src/havok/physics/dynamics/world/simulation/multithreaded/hkpmultithreadedsimulation_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/dynamics/world/simulation/multithreaded/hkpmultithreadedsimulation.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -391,12 +431,13 @@ struct CollidableD020
         return (OwnerD020*)((char*)this + m_cOwnerOffset);
     }
 };
-struct PairD020
+// Two broad-phase collision-handle pointers; shared Pair stores two integer values.
+struct BroadPhaseHandlePair
 {
     CollidableD020* m_pkA;
     CollidableD020* m_pkB;
 };
-void __stdcall NotifyPhantomCollision(PairD020* pkPair);
+void __stdcall NotifyPhantomCollision(BroadPhaseHandlePair* pkPair);
 inline void* __cdecl operator new(unsigned int, void* p) throw()
 {
     return p;
@@ -406,24 +447,15 @@ struct GroupIdentity
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
     unsigned short count;
 };
-struct Vector4f
+// Exe 0x00d022b0: unit-local Vector4f view; declarations and layout are preserved.
+struct HkpmultithreadedsimulationVector4fView
 {
     int x, y, z, w;
-};
-struct hkBoolX
-{
-    char m_cBooleanValue;
-    hkBoolX()
-    {}
-    hkBoolX(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
 };
 struct __declspec(align(16)) CollisionInput
 {
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
-    Vector4f unk20, unk30, unk40;
+    HkpmultithreadedsimulationVector4fView unk20, unk30, unk40;
     int unk50, unk54, unk58, unk5C, unk60;
     void* scratch;
     int unk68, unk6C, unk70, unk74, unk78, unk7C;
@@ -507,16 +539,16 @@ struct TaskInput
     int unk00, unk04, unk08, unk0C;
     void* unk10;
     int unk14, unk18, unk1C, unk20, unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C;
-    Vector4f step;
+    HkpmultithreadedsimulationVector4fView step;
 };
 struct __declspec(align(16)) BuildJob : JobBase
 {
     void* results;
     unsigned short unk24, unk26, numItems, batch;
     int** items;
-    Vector4f step;
+    HkpmultithreadedsimulationVector4fView step;
     unsigned char flag;
-    __forceinline BuildJob(int** p, int n, TaskInput* input, int b, hkBoolX f) : JobBase(15, 0, 80, 1)
+    __forceinline BuildJob(int** p, int n, TaskInput* input, int b, hkBool f) : JobBase(15, 0, 80, 1)
     {
         step = input->step;
         count = 0;
@@ -594,8 +626,8 @@ struct Processor
     int unkB0, unkB4, unkB8, unkBC;
     JobQueue* active;
 
-    void ProcessGroups(int**, int, struct Group*, int, TaskInput*, hkBoolX);
-    void FUN_00d0c9c0(int**, int, TaskInput*, GroupIdentity*, hkBoolX);
+    void ProcessGroups(int**, int, struct Group*, int, TaskInput*, hkBool);
+    void FUN_00d0c9c0(int**, int, TaskInput*, GroupIdentity*, hkBool);
 };
 struct Group
 {
@@ -604,79 +636,53 @@ struct Group
     BuildJob* job;
     int unk14;
 };
-struct hkMemoryAllocatorQ
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void ReturnMemory(void* p, int numBytes);
-};
-struct hkStackMemoryQ
-{
-    char* m_pTileTemplate;
-};
-struct hkMemoryRouterQ
-{
-    hkStackMemoryQ m_aiEntries;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocatorQ* m_pStreamAllocator;
-};
 void __cdecl ResizeAudioStream(void* alloc, void* arr, int elemSize);
 extern "C" void __cdecl FUN_00cb1280(void* p, int v, int n);
-__forceinline hkMemoryRouterQ& getRouter()
+__forceinline hkMemoryRouterQ_hkpmultithreadedsimulation_rtm_variant& getRouter()
 {
-    return *(hkMemoryRouterQ*)FUN_00c85750();
+    return *(hkMemoryRouterQ_hkpmultithreadedsimulation_rtm_variant*)FUN_00c85750();
 }
-template <class T> struct hkArrayQ
+#include "../../../../../../../include/hkArray.h"
+// The function's local arrays are released by explicit calls (no destructor, no EH state), so they are hkArrayBase
+// with hkArray's pushBack / clearAndDeallocate (hkArray.inl bodies, through the router's stream heap) as members.
+template <class T> struct StreamHeapArrayQ : hkArrayBase<T>
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline hkArrayQ() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    __forceinline int getCapacity() const
+    __forceinline void _clearAndDeallocate(hkMemoryAllocator& alloc)
     {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void _clearAndDeallocate(hkMemoryAllocatorQ& alloc)
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
+        this->m_iElementCount = 0;
+        if ((this->m_iCapacityState & 0x80000000) == 0)
+            alloc.ReturnMemory(this->m_data, this->getCapacity() * sizeof(T));
+        this->m_data = 0;
+        this->m_iCapacityState = 0x80000000;
     }
     __forceinline void ClearAndRelease()
     {
         _clearAndDeallocate(*getRouter().m_pStreamAllocator);
     }
-    __forceinline void _pushBack(hkMemoryAllocatorQ& alloc, const T& t)
+    __forceinline void _pushBack(hkMemoryAllocator& alloc, const T& t)
     {
-        if (m_iElementCount == getCapacity())
+        if (this->m_iElementCount == this->getCapacity())
             ResizeAudioStream(&alloc, this, sizeof(T));
-        m_data[m_iElementCount++] = t;
+        this->m_data[this->m_iElementCount++] = t;
     }
     __forceinline void AddBack(const T& t)
     {
         _pushBack(*getRouter().m_pStreamAllocator, t);
     }
+    __forceinline hkArray<T>& array() { return static_cast<hkArray<T>&>(static_cast<hkArrayBase<T>&>(*this)); }
 };
 template <class T> __forceinline T* hkAllocateStackQ(int n)
 {
-    hkStackMemoryQ& s = getRouter().m_aiEntries;
-    char* p = s.m_pTileTemplate;
-    s.m_pTileTemplate = p + ((n * sizeof(T) + 0x7f) & ~0x7f);
+    char*& stackTop = reinterpret_cast<char*&>(getRouter().unk00);
+    char* p = stackTop;
+    stackTop = p + ((n * sizeof(T) + 0x7f) & ~0x7f);
     return (T*)p;
 }
 template <class T> __forceinline void hkDeallocateStackQ(T* p)
 {
-    getRouter().m_aiEntries.m_pTileTemplate = (char*)p;
+    reinterpret_cast<char*&>(getRouter().unk00) = (char*)p;
 }
-template <class T> struct hkLocalArrayQ : hkArrayQ<T>
+template <class T> struct hkLocalArrayQ : StreamHeapArrayQ<T>
 {
     T* m_pStackAllocation;
 
@@ -693,12 +699,6 @@ template <class T> struct hkLocalArrayQ : hkArrayQ<T>
         hkDeallocateStackQ(m_pStackAllocation);
         this->ClearAndRelease();
     }
-};
-struct hkBoolQ
-{
-    char m_cBooleanValue;
-    hkBoolQ(bool b) : m_cBooleanValue(b)
-    {}
 };
 struct AgentTableEntryQ
 {
@@ -747,7 +747,7 @@ struct CollidableQ
 };
 struct LinkedCollidableQ
 {
-    void CopyAndSortGeometryList(hkArrayQ<CollisionEntryQ>& entries);
+    void CopyAndSortGeometryList(hkArray<CollisionEntryQ>& entries);
 };
 struct EntityQ
 {
@@ -770,7 +770,7 @@ struct SimulationIslandQ
 struct InputQ
 {
     int LookupHashEntry(int key, int flag);
-    void FUN_00cb1870(hkMemoryAllocatorQ* heap, int key, EntityQ* entity);
+    void FUN_00cb1870(hkMemoryAllocator* heap, int key, EntityQ* entity);
 };
 struct CollideSimQ
 {
@@ -783,7 +783,7 @@ struct CollideSimQ
     int unk40[0x20];
     int m_c0;
     void FUN_00d0db40(EntityQ** entities, int numEntities, void* input, int* out);
-    void FUN_00d03030(AgentEntryQ** entries, int numEntries, void* input, SimulationIslandQ* island, hkBoolQ flag);
+    void FUN_00d03030(AgentEntryQ** entries, int numEntries, void* input, SimulationIslandQ* island, hkBool flag);
     void ProcessCollisionEntries(EntityQ** entities, int numEntities, void* input, InputQ* collInput) throw();
 };
 extern "C" void _ReadWriteBarrier(void);
@@ -2290,11 +2290,6 @@ static inline Singleton* GetSingleton()
 {
     return (Singleton*)FUN_00c85750();
 }
-struct Pair
-{
-    void* m_00;
-    int m_04;
-};
 struct ArrPair
 {
     Pair* m_pData;
@@ -2305,8 +2300,8 @@ struct ArrPair
         for (int k = 0; k < n; ++k)
         {
             Pair& pr = m_pData[m_iArrayLength++];
-            pr.m_00 = a;
-            pr.m_04 = b;
+            pr.a = (int)a;
+            pr.b = b;
         }
     }
 };
@@ -4682,7 +4677,7 @@ struct ParamObj
         int index = 0;
         if (m_iArrayLength >= 0)
         {
-            while (index <= m_iArrayLength && m_pData[index].m_00 == (void*)-1)
+            while (index <= m_iArrayLength && m_pData[index].a == -1)
                 ++index;
         }
         return index;
@@ -4692,7 +4687,7 @@ struct ParamObj
         ++index;
         if (index <= m_iArrayLength)
         {
-            while (index <= m_iArrayLength && m_pData[index].m_00 == (void*)-1)
+            while (index <= m_iArrayLength && m_pData[index].a == -1)
                 ++index;
         }
         return index;
@@ -4715,18 +4710,19 @@ struct ThisCls
 };
 
 namespace StepBeginSse {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00d022b0 FUN_00d022b0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    void _mm_store_ps(float*, __m128);
+    LocalM128 _mm_load_ss(const float*);
+    LocalM128 _mm_set_ss(float);
+    LocalM128 _mm_load_ps(const float*);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    void _mm_store_ps(float*, LocalM128);
 }
 }
 extern "C" void _ReadWriteBarrier();
@@ -4734,21 +4730,6 @@ extern "C" void __debugbreak();
 extern int DAT_01269210;
 extern char DAT_010ccbb0, DAT_010cc5bc, DAT_010cc5b0, DAT_01076f38;
 namespace StepBeginDetail {
-struct Vec4
-{
-    float x, y, z, w;
-    __forceinline float delta() const
-    {
-        return z;
-    }
-    __forceinline void set(float start, float end)
-    {
-        x = start;
-        y = end;
-        z = end - start;
-        w = z == 0.0f ? 0.0f : 1.0f / z;
-    }
-};
 struct Ring
 {
     int unk00;

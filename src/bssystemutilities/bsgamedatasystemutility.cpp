@@ -1,6 +1,7 @@
 // bssystemutilities/bsgamedatasystemutility.cpp: BSGameDataSystemUtility (3 functions)
 
 #include "BSGameDataSystemUtility.h"
+#include "../../include/MemoryManager.h"
 
 // @fnv 0x00af3a00
 void BSGameDataSystemUtility::Destroy()
@@ -30,10 +31,6 @@ void FUN_00af39e0_shell::CallVirtualMethod2()
     reinterpret_cast<Obj*>(this)->vt->f2(this);
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00af3a10_Class
 {

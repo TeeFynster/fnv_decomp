@@ -1,3 +1,9 @@
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
+#include "../../../../include/hkArrayBase.h"
 
 // src/havok/physics/vehicle/hkpvehicledata_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/vehicle/hkpvehicledata.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
@@ -5,46 +11,144 @@
 // src/havok/physics/vehicle/hkpvehicledata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/hkpvehicledata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 #include "havok/hkpVehicleData.h"
+#include "../../../../include/hkMemoryRouter.h"
+// Exe 0x00e39ab0 FUN_00e39ab0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
+#define FNV_FOURFLOATVECTOR_NO_SSE
+// local form of hkVector4: 0x00e39ab0 needs the packed SimdReal packet alongside the reflection hkBase scalar hkVector4.
+
+
+#if !defined(FNV_FOURFLOATVECTOR_NO_SSE)
+#include <xmmintrin.h>
+#else
+#endif
+
+class SimdReal;
+class SimdScalar;
+class ScalarValue;
+class Transform;
+class NiPoint3;
+
+#pragma pack(push, 4)
+
+class VehiclePacketLocal_00e2
 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
+public:
+#if defined(FNV_FOURFLOATVECTOR_NO_SSE)
+    union Components
+    {
+        float m128_f32[4];
+        unsigned __int64 m128_u64[2];
+        signed char m128_i8[16];
+        short m128_i16[8];
+        int m128_i32[4];
+        __int64 m128_i64[2];
+        unsigned char m128_u8[16];
+        unsigned short m128_u16[8];
+        unsigned int m128_u32[4];
+    };
+#else
+    typedef __declspec(align(4)) __m128 Components;
+#endif
+
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+        Components m_vComponents;
+        Components m;
+        float f[4];
+        Components values;
+        Components q;
+        Components value;
+        Components quad;
+        float elements[4];
+        float m_fComponents[4];
+    };
+
+    VehiclePacketLocal_00e2();
+    VehiclePacketLocal_00e2(float x, float y, float z, float w);
+    VehiclePacketLocal_00e2(const __m128& vector);
+
+    VehiclePacketLocal_00e2* FUN_005532a0(float x, float y, float z, float w);
+    void FUN_004a3f10(VehiclePacketLocal_00e2* vector);
+    void __thiscall FUN_004b4db0(const VehiclePacketLocal_00e2* vector);
+    VehiclePacketLocal_00e2& FUN_00e531a0(int parameter);
+    VehiclePacketLocal_00e2 FUN_00e53260(int parameter);
+    void FUN_005611c0();
+
+    void operator=(const VehiclePacketLocal_00e2& vector);
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    float& component(int index);
+    float& At(int index);
+    const float& At(int index) const;
+
+    __m128 length3() const;
+    float getW() const;
+    ScalarValue Dot(const VehiclePacketLocal_00e2& vector) const;
+    ScalarValue LengthSq() const;
+    ScalarValue Length() const;
+    ScalarValue InverseLength() const;
+    void Normalize();
+    bool NormalizeNonzero();
+    void Mul(const ScalarValue& scalar);
+    void Add(const VehiclePacketLocal_00e2& vector);
+    void Sub(const VehiclePacketLocal_00e2& vector);
+    void Cross(const VehiclePacketLocal_00e2& a, const VehiclePacketLocal_00e2& b);
+
+    void setAbs4(const VehiclePacketLocal_00e2& vector);
+    void setMul4(const SimdReal& scalar, const VehiclePacketLocal_00e2& vector);
+    void addMul4(const SimdReal& scalar, const VehiclePacketLocal_00e2& vector);
+    void setAddMul4(const VehiclePacketLocal_00e2& a, const VehiclePacketLocal_00e2& b, const SimdReal& scalar);
+    SimdReal getSimdAt3() const;
+    SimdReal lengthSquared3() const;
+    void setXYZ_W(__m128 xyz, __m128 w);
+    void setSqrtInverse4(const VehiclePacketLocal_00e2& vector);
+    void setAddMul(const VehiclePacketLocal_00e2& a, const VehiclePacketLocal_00e2& b, const SimdScalar& scalar);
+    void addMul(const float& scalar, const VehiclePacketLocal_00e2& vector);
+    void transformed(const Transform& transform, const VehiclePacketLocal_00e2& vector);
+    void addScaled(const VehiclePacketLocal_00e2& base, const VehiclePacketLocal_00e2& direction, float amount);
+    void* AddVector(void*, NiPoint3*, void*, float);
+    void* AddVector(void*, void*);
+    void* ScaleSwizzled();
 };
+
+#pragma pack(pop)
+
+#undef FNV_FOURFLOATVECTOR_NO_SSE
 extern "C"
 {
-    void _ReadWriteBarrier();
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_load_ps1(const float*);
-    void _mm_store_ss(float*, __m128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_set_ps1(float);
+    LocalM128 _mm_load_ss(const float*);
+    LocalM128 _mm_load_ps1(const float*);
+    void _mm_store_ss(float*, LocalM128);
 }
+extern "C" void _ReadWriteBarrier();
 
-extern __m128 DAT_01017d10;
+extern LocalM128 DAT_01017d10;
 
-struct hkMemoryAllocator;
-struct NineIntegerRecord
+__forceinline hkMemoryAllocator& heapOf(hkMemoryRouter* record)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* m_pStreamAllocator;
-    __forceinline hkMemoryAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-NineIntegerRecord* FUN_00c85750();
+    return *record->m_heap;
+}
+hkMemoryRouter* FUN_00c85750();
 void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* array, int numElements, int sizeElem);
 
-struct SimdReal
+class SimdReal
 {
-    __m128 m_vValue;
+public:
+    LocalM128 m_vValue;
     SimdReal()
     {}
     __forceinline SimdReal(float value)
@@ -59,108 +163,84 @@ struct SimdReal
     }
 };
 
-struct QuadStorage
-{
-    __m128 m_vComponents;
-};
-struct FourFloatVector : QuadStorage
-{
-    __forceinline void operator=(const FourFloatVector& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline float& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-    __forceinline const float& operator()(int i) const
-    {
-        return m_vComponents.m128_f32[i];
-    }
-    __forceinline void setAbs4(const FourFloatVector& v)
-    {
-        m_vComponents = _mm_and_ps(v.m_vComponents, DAT_01017d10);
-    }
-    __forceinline void setMul4(const SimdReal& r, const FourFloatVector& v)
-    {
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), v.m_vComponents);
-    }
-    __forceinline void addMul4(const SimdReal& r, const FourFloatVector& v)
-    {
-        m_vComponents =
-            _mm_add_ps(m_vComponents, _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), v.m_vComponents));
-    }
-    __forceinline void setAddMul4(const FourFloatVector& a, const FourFloatVector& b, const SimdReal& r)
-    {
-        m_vComponents =
-            _mm_add_ps(a.m_vComponents, _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), b.m_vComponents));
-    }
-    __forceinline SimdReal getSimdAt3() const
-    {
-        SimdReal s;
-        s.m_vValue = _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
-        return s;
-    }
-};
+__forceinline VehiclePacketLocal_00e2::VehiclePacketLocal_00e2()
+{}
 
-struct FloatMatrix3
+__forceinline void VehiclePacketLocal_00e2::operator=(const VehiclePacketLocal_00e2& v)
 {
-    FourFloatVector m_kColumn0;
-    FourFloatVector m_kColumn1;
-    FourFloatVector m_kColumn2;
-    __forceinline FourFloatVector& getColumn(int i)
+    reinterpret_cast<LocalM128&>(m_vComponents) = reinterpret_cast<const LocalM128&>(v.m_vComponents);
+}
+__forceinline float& VehiclePacketLocal_00e2::operator()(int i)
+{
+    return f[i];
+}
+__forceinline const float& VehiclePacketLocal_00e2::operator()(int i) const
+{
+    return f[i];
+}
+__forceinline void VehiclePacketLocal_00e2::setAbs4(const VehiclePacketLocal_00e2& v)
+{
+    reinterpret_cast<LocalM128&>(m_vComponents) = _mm_and_ps(reinterpret_cast<const LocalM128&>(v.m_vComponents), DAT_01017d10);
+}
+__forceinline void VehiclePacketLocal_00e2::setMul4(const SimdReal& r, const VehiclePacketLocal_00e2& v)
+{
+    reinterpret_cast<LocalM128&>(m_vComponents) = _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), reinterpret_cast<const LocalM128&>(v.m_vComponents));
+}
+__forceinline void VehiclePacketLocal_00e2::addMul4(const SimdReal& r, const VehiclePacketLocal_00e2& v)
+{
+    reinterpret_cast<LocalM128&>(m_vComponents) = _mm_add_ps(reinterpret_cast<const LocalM128&>(m_vComponents), _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), reinterpret_cast<const LocalM128&>(v.m_vComponents)));
+}
+__forceinline void VehiclePacketLocal_00e2::setAddMul4(const VehiclePacketLocal_00e2& a, const VehiclePacketLocal_00e2& b, const SimdReal& r)
+{
+    reinterpret_cast<LocalM128&>(m_vComponents) = _mm_add_ps(reinterpret_cast<const LocalM128&>(a.m_vComponents), _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), reinterpret_cast<const LocalM128&>(b.m_vComponents)));
+}
+__forceinline SimdReal VehiclePacketLocal_00e2::getSimdAt3() const
+{
+    SimdReal s;
+    s.m_vValue = _mm_shuffle_ps(reinterpret_cast<const LocalM128&>(m_vComponents), reinterpret_cast<const LocalM128&>(m_vComponents), 0xff);
+    return s;
+}
+
+struct __declspec(align(16)) FloatMatrix3
+{
+    VehiclePacketLocal_00e2 m_kColumn0;
+    VehiclePacketLocal_00e2 m_kColumn1;
+    VehiclePacketLocal_00e2 m_kColumn2;
+    __forceinline VehiclePacketLocal_00e2& getColumn(int i)
     {
         return (&m_kColumn0)[i];
     }
-    __forceinline const FourFloatVector& getColumn(int i) const
+    __forceinline const VehiclePacketLocal_00e2& getColumn(int i) const
     {
         return (&m_kColumn0)[i];
     }
     void FUN_00cd5610(const FloatMatrix3& a, const FloatMatrix3& b);
 };
 
-template <class T> struct Array
+template <class T>
+static __forceinline void Array_GrowArrayCapacity(hkArrayBase<T>& self, hkMemoryAllocator& alloc, int n)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
-    {
-        const int capacity = getCapacity();
+        const int capacity = self.getCapacity();
         if (capacity < n)
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(alloc, this, newSize, sizeof(T));
+            FUN_00c908c0(alloc, (&self), newSize, sizeof(T));
         }
     }
-    __forceinline void _setSize(hkMemoryAllocator& alloc, int n)
-    {
-        GrowArrayCapacity(alloc, n);
-        m_iElementCount = n;
+
+template <class T>
+static __forceinline void Array__setSize(hkArrayBase<T>& self, hkMemoryAllocator& alloc, int n)
+{
+        Array_GrowArrayCapacity(self, alloc, n);
+        self.m_iElementCount = n;
     }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        _setSize(FUN_00c85750()->heap(), n);
+
+template <class T>
+static __forceinline void Array_SetSizeAndGrow(hkArrayBase<T>& self, int n)
+{
+        Array__setSize(self, heapOf(FUN_00c85750()), n);
     }
-    __forceinline T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    __forceinline const T& operator[](int i) const
-    {
-        return m_data[i];
-    }
-};
 
 struct Motion
 {
@@ -169,7 +249,7 @@ struct Motion
     int unk08;
     int unk0C;
     FloatMatrix3 m_rotation;
-    FourFloatVector m_vTranslation;
+    VehiclePacketLocal_00e2 m_vTranslation;
     int unk50;
     int unk54;
     int unk58;
@@ -186,7 +266,7 @@ struct Motion
     int unk84;
     int unk88;
     int unk8C;
-    FourFloatVector m_vCenterOfMassLocal;
+    VehiclePacketLocal_00e2 m_vCenterOfMassLocal;
     int unkA0;
     int unkA4;
     int unkA8;
@@ -195,7 +275,7 @@ struct Motion
     int unkB4;
     int unkB8;
     int unkBC;
-    FourFloatVector m_kInertiaAndMassInv;
+    VehiclePacketLocal_00e2 m_kInertiaAndMassInv;
 
     float FUN_00c86430() const;
     __forceinline SimdReal getMassInv() const
@@ -276,7 +356,7 @@ struct RigidBody
     {
         return m_pMotionState.m_rotation;
     }
-    __forceinline const FourFloatVector& getCenterOfMassLocal() const
+    __forceinline const VehiclePacketLocal_00e2& getCenterOfMassLocal() const
     {
         return m_pMotionState.m_vCenterOfMassLocal;
     }
@@ -284,8 +364,8 @@ struct RigidBody
 
 struct SuspensionWheelParameters
 {
-    FourFloatVector m_vHardpointChassisSpace;
-    FourFloatVector m_vDirectionChassisSpace;
+    VehiclePacketLocal_00e2 m_vHardpointChassisSpace;
+    VehiclePacketLocal_00e2 m_vDirectionChassisSpace;
     float m_fRestLength;
     int unk24;
     int unk28;
@@ -309,13 +389,13 @@ struct WheelComponentParams
     char unk27;
 };
 
-struct FrictionCinfo
+struct __declspec(align(16)) FrictionCinfo
 {
-    FourFloatVector m_akFrictionVectors[2];
-    FourFloatVector m_kVectorA;
-    FourFloatVector m_kVectorB;
-    FourFloatVector m_kVectorC;
-    FourFloatVector m_kVectorD;
+    VehiclePacketLocal_00e2 m_akFrictionVectors[2];
+    VehiclePacketLocal_00e2 m_kVectorA;
+    VehiclePacketLocal_00e2 m_kVectorB;
+    VehiclePacketLocal_00e2 m_kVectorC;
+    VehiclePacketLocal_00e2 m_kVectorD;
     FloatMatrix3 m_kFrictionMatrix;
     float m_fMaxVelocityForPositionalFriction;
     float m_fAxisFrictionTuning4[2];
@@ -325,25 +405,25 @@ struct FrictionCinfo
 
 void __cdecl FUN_00e593f0(const FrictionCinfo& ci, hkpVehicleFrictionDescription& out);
 
-__forceinline Array<WheelComponentParams>& wheelParamsOf(hkpVehicleData& d)
+__forceinline hkArrayBase<WheelComponentParams>& wheelParamsOf(hkpVehicleData& d)
 {
-    return reinterpret_cast<Array<WheelComponentParams>&>(d.m_kWheelParams);
+    return reinterpret_cast<hkArrayBase<WheelComponentParams>&>(d.m_kWheelParams);
 }
-__forceinline Array<signed char>& wheelsPerAxleOf(hkpVehicleData& d)
+__forceinline hkArrayBase<signed char>& wheelsPerAxleOf(hkpVehicleData& d)
 {
-    return reinterpret_cast<Array<signed char>&>(d.m_kNumWheelsPerAxle);
+    return reinterpret_cast<hkArrayBase<signed char>&>(d.m_kNumWheelsPerAxle);
 }
 __forceinline const FloatMatrix3& orientationOf(const hkpVehicleData& d)
 {
     return reinterpret_cast<const FloatMatrix3&>(d.m_kChassisOrientation);
 }
-__forceinline FourFloatVector& inertiaInvDiagOf(hkpVehicleData& d)
+__forceinline VehiclePacketLocal_00e2& inertiaInvDiagOf(hkpVehicleData& d)
 {
-    return reinterpret_cast<FourFloatVector&>(d.m_vChassisUnitInertiaAndMassInv);
+    return reinterpret_cast<VehiclePacketLocal_00e2&>(d.m_vChassisUnitInertiaAndMassInv);
 }
 
 __forceinline void initVehicleComponents(hkpVehicleData& self,
-                                         const Array<SuspensionWheelParameters>& suspensionWheelParams,
+                                         const hkArrayBase<SuspensionWheelParameters>& suspensionWheelParams,
                                          const RigidBody* chassis)
 {
     self.m_bWheelsUseChassisForGround = true;
@@ -353,7 +433,7 @@ __forceinline void initVehicleComponents(hkpVehicleData& self,
     if (self.m_iWheelCount > 0)
     {
         _ReadWriteBarrier();
-        Array<WheelComponentParams>& wheels = wheelParamsOf(self);
+        hkArrayBase<WheelComponentParams>& wheels = wheelParamsOf(self);
         int remaining = self.m_iWheelCount;
         int i = 0;
         do
@@ -368,7 +448,7 @@ __forceinline void initVehicleComponents(hkpVehicleData& self,
 
     if (axle > wheelsPerAxleOf(self).GetLogicalSize())
     {
-        wheelsPerAxleOf(self).SetSizeAndGrow(axle);
+        Array_SetSizeAndGrow(wheelsPerAxleOf(self), axle);
     }
     {
         for (int i = 0; i < wheelsPerAxleOf(self).GetLogicalSize(); i++)
@@ -377,23 +457,28 @@ __forceinline void initVehicleComponents(hkpVehicleData& self,
         }
     }
     {
-        Array<WheelComponentParams>& params = wheelParamsOf(self);
-        for (int i = 0; i < self.m_iWheelCount; i++)
+        hkArrayBase<WheelComponentParams>& params = wheelParamsOf(self);
+        int i = 0;
+        if (i < self.m_iWheelCount)
         {
-            int axleIdx = params[i].m_iAxle;
-            wheelsPerAxleOf(self)[axleIdx]++;
+            for (int offset = 0; i < self.m_iWheelCount; ++i, offset += sizeof(WheelComponentParams))
+            {
+                int axleIdx = reinterpret_cast<const WheelComponentParams*>(
+                    reinterpret_cast<const char*>(params.m_data) + offset)->m_iAxle;
+                wheelsPerAxleOf(self)[axleIdx]++;
+            }
         }
     }
 
     {
-        FourFloatVector absUp;
+        VehiclePacketLocal_00e2 absUp;
         absUp.setAbs4(orientationOf(self).getColumn(0));
-        FourFloatVector absForward;
+        VehiclePacketLocal_00e2 absForward;
         absForward.setAbs4(orientationOf(self).getColumn(1));
-        FourFloatVector absRight;
+        VehiclePacketLocal_00e2 absRight;
         absRight.setAbs4(orientationOf(self).getColumn(2));
 
-        FourFloatVector ptr;
+        VehiclePacketLocal_00e2 ptr;
         ptr.setMul4(self.m_fTorqueMin / self.m_fTorqueRollFactor, absUp);
         ptr.addMul4(self.m_fChassisMass / self.m_fTorqueYawFactor, absForward);
         ptr.addMul4(self.m_fTorqueMax / self.m_fExtraTorqueFactor, absRight);
@@ -438,7 +523,7 @@ __forceinline void initVehicleComponents(hkpVehicleData& self,
 }
 
 // @fnv 0x00e39ab0
-void __fastcall FUN_00e39ab0(hkpVehicleData* self, int, const Array<SuspensionWheelParameters>& suspensionWheelParams,
+void __fastcall FUN_00e39ab0(hkpVehicleData* self, int, const hkArrayBase<SuspensionWheelParameters>& suspensionWheelParams,
                              const RigidBody* chassis)
 {
     initVehicleComponents(*self, suspensionWheelParams, chassis);

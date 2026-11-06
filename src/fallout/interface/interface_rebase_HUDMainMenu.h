@@ -18,7 +18,7 @@ class HUDMainMenu : public Menu
     unsigned int m_uiMessageCount;                                     // +0x194
     BSSimpleArray<HUDMainMenu__SubtitleData*, 1024> m_kSubtitleArray;  // +0x198
     HUDMainMenu__SubtitleData* m_pCurrentSubtitle;                     // +0x1A8
-    SoundPlaybackHandle m_kTargetDisplayData;                                // +0x1AC
+    BSSoundHandle m_kTargetDisplayData;                                // +0x1AC
     TESObjectREFR* m_pCrosshairReference;                              // +0x1B8
     int m_iHudValueFirstBeforeMode;                                    // +0x1BC
     int m_iHudValueSecondBeforeMode;                                   // +0x1C0

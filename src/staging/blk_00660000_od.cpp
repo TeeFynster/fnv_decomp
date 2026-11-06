@@ -2,7 +2,22 @@
 // src/staging/blk_00660000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/Setting.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/Actor.h"
+#include "../../include/ActorPackageData.h"
+#include "../../include/AutoMemHelper.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSLoadGameBuffer.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESPackage.h"
+#include "../../include/SL.h"
+#include "../../include/bhkCharacterController.h"
+#include "../../include/bhkConvexShape.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/BGSSaveLoadChangesMap.h"
 
 void __cdecl CopyConstructEntry(int a, int b);
 
@@ -101,25 +116,17 @@ int __thiscall FUN_00665f10_class::Identity(int aiValue)
     return aiValue;
 }
 
-struct BGSSaveLoadChangesMap
-{
-    void Deallocate(void* p);
-    void FUN_00666050(void* p);
-};
-
-// Clears the third word of the block and returns it to the allocator at offset 0xc.
+// NiTPointerMap::DeleteItem: clears the value and returns the node to the NiTPointerAllocator pool (the item
+// count's empty base at 0xc).
 // @fnv 0x00666050
-void BGSSaveLoadChangesMap::FUN_00666050(void* apBlock)
+template <>
+void NiTPointerMap<unsigned int, FormChangeRecord*>::DeleteItem(NiTMapItem<unsigned int, FormChangeRecord*>* pkItem)
 {
-    ((unsigned int*)apBlock)[2] = 0;
-    ((NiTPointerAllocator<unsigned int>*)((char*)this + 0xc))->Deallocate(apBlock);
+    pkItem->m_val = 0;
+    m_kItemCount.Deallocate(pkItem);
 }
 
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting1297;
+extern Setting originalRuntimeFloatSetting1297;
 
 // @fnv 0x0066b0b0
 float FUN_0066b0b0()
@@ -192,11 +199,6 @@ void FUN_0067ad70_Class::FUN_0067ad70()
 
 extern int DAT_01068aa4;
 
-struct ActorPackageData
-{
-    ActorPackageData();
-    ActorPackageData* FUN_0067d920();
-};
 
 ActorPackageData::ActorPackageData()
 {}
@@ -429,10 +431,6 @@ struct T_
 {
     void FUN_004a3f10(void*);
 };
-struct bhkCharacterController
-{
-    float& GetVectorElement(int);
-};
 struct FUN_0066c9c0_Class
 {
     T_ a;
@@ -444,7 +442,7 @@ void FUN_0066c9c0_Class::FUN_0066c9c0(T_& x, T_& y, float afValue)
 {
     a.FUN_004a3f10(&x);
     ((T_*)((char*)&a) + 16)->FUN_004a3f10(&y);
-    ((bhkCharacterController*)((char*)&a) + 16)->GetVectorElement(3) = afValue;
+    ((bhkCharacterController*)((char*)&a + 16))->GetVectorElement(3) = afValue;
 }
 
 struct Date
@@ -540,93 +538,58 @@ void* __thiscall FUN_0066df40_Class::FUN_0066e300(unsigned int flags)
     return this;
 }
 
-struct FUN_00671a70_Class
-{
-    unsigned short flags;
-    void FUN_00671a70(bool set);
-};
 // @fnv 0x00671a70
-void FUN_00671a70_Class::FUN_00671a70(bool set)
+void TESPackage::FUN_00671a70(bool set)
 {
-    set ? *(unsigned short*)((char*)this + 0x24) |= 0x40 : *(unsigned short*)((char*)this + 0x24) &= ~0x40;
+    set ? *reinterpret_cast<unsigned short*>(&specificFlags) |= 0x40 : *reinterpret_cast<unsigned short*>(&specificFlags) &= ~0x40;
 }
 
-struct FUN_00671ad0_Class
-{
-    void __thiscall FUN_00671ad0(bool a);
-};
 // @fnv 0x00671ad0
-void __thiscall FUN_00671ad0_Class::FUN_00671ad0(bool a)
+void __thiscall TESPackage::FUN_00671ad0(bool a)
 {
-    a ? *(unsigned short*)((char*)this + 0x24) &= ~1 : *(unsigned short*)((char*)this + 0x24) |= 1;
+    a ? *reinterpret_cast<unsigned short*>(&specificFlags) &= ~1 : *reinterpret_cast<unsigned short*>(&specificFlags) |= 1;
 }
 
-struct FUN_00671b30_Class
-{
-    unsigned short m_0024;
-    void FUN_00671b30(bool a);
-};
 
 // Sets or clears bit 1 of the 16-bit field at offset 0x24 based on the boolean argument.
 // @fnv 0x00671b30
-void FUN_00671b30_Class::FUN_00671b30(bool a)
+void TESPackage::FUN_00671b30(bool a)
 {
-    a ? *(unsigned short*)((char*)this + 0x24) &= 0xfffffffd : *(unsigned short*)((char*)this + 0x24) |= 2;
+    a ? *reinterpret_cast<unsigned short*>(&specificFlags) &= 0xfffffffd : *reinterpret_cast<unsigned short*>(&specificFlags) |= 2;
 }
 
-struct FUN_00671b90_Class
-{
-    void __thiscall FUN_00671b90(bool b);
-};
 // @fnv 0x00671b90
-void __thiscall FUN_00671b90_Class::FUN_00671b90(bool b)
+void __thiscall TESPackage::FUN_00671b90(bool b)
 {
-    b ? *(unsigned short*)((char*)this + 0x24) &= ~4 : *(unsigned short*)((char*)this + 0x24) |= 4;
+    b ? *reinterpret_cast<unsigned short*>(&specificFlags) &= ~4 : *reinterpret_cast<unsigned short*>(&specificFlags) |= 4;
 }
 
-struct FUN_00671bf0_Class
-{
-    void __thiscall FUN_00671bf0(bool a);
-};
 // @fnv 0x00671bf0
-void __thiscall FUN_00671bf0_Class::FUN_00671bf0(bool a)
+void __thiscall TESPackage::FUN_00671bf0(bool a)
 {
-    a ? *(unsigned short*)((char*)this + 0x24) &= ~8 : *(unsigned short*)((char*)this + 0x24) |= 8;
+    a ? *reinterpret_cast<unsigned short*>(&specificFlags) &= ~8 : *reinterpret_cast<unsigned short*>(&specificFlags) |= 8;
 }
 
-struct FUN_00671c50_Class
-{
-    void __thiscall FUN_00671c50(bool bSet);
-};
 
 // @fnv 0x00671c50
-void __thiscall FUN_00671c50_Class::FUN_00671c50(bool bSet)
+void __thiscall TESPackage::FUN_00671c50(bool bSet)
 {
-    bSet ? *(unsigned short*)((char*)this + 0x24) &= ~0x10 : *(unsigned short*)((char*)this + 0x24) |= 0x10;
+    bSet ? *reinterpret_cast<unsigned short*>(&specificFlags) &= ~0x10 : *reinterpret_cast<unsigned short*>(&specificFlags) |= 0x10;
 }
 
-struct FUN_00671cb0_Class
-{
-    void __thiscall SetFlag20(bool b);
-};
 
 // Sets or clears bit 0x20 in the 16-bit flags field at offset 0x24 based on b.
 // @fnv 0x00671cb0
-void __thiscall FUN_00671cb0_Class::SetFlag20(bool abSet)
+void __thiscall TESPackage::SetFlag20(bool abSet)
 {
-    abSet ? *(unsigned short*)((char*)this + 0x24) &= ~0x20 : *(unsigned short*)((char*)this + 0x24) |= 0x20;
+    abSet ? *reinterpret_cast<unsigned short*>(&specificFlags) &= ~0x20 : *reinterpret_cast<unsigned short*>(&specificFlags) |= 0x20;
 }
 
-struct FUN_0067ac70_Class
-{
-    unsigned short wFlags;  // +0x22
-    void __thiscall SetFlag100(bool bSet);
-};
 
 // @fnv 0x0067ac70
-void __thiscall FUN_0067ac70_Class::SetFlag100(bool bSet)
+void __thiscall TESPackage::SetFlag100(bool bSet)
 {
-    bSet ? ((unsigned short*)this)[17] |= 0x100 : ((unsigned short*)this)[17] &= ~0x100;
+    bSet ? behaviorFlags |= 0x100 : behaviorFlags &= ~0x100;
 }
 
 struct FUN_0067ad70_cls
@@ -645,10 +608,6 @@ void* __thiscall FUN_0067ad70_cls::DestroyAndFree(unsigned int flags)
     return this;
 }
 
-struct BGSSaveFormBuffer
-{
-    void __thiscall SaveData(void*, unsigned int, int);
-};
 struct FUNObj
 {
     void __thiscall FUN_0067fb60(void*);
@@ -664,7 +623,7 @@ void __thiscall Holder::SaveToBuffer(void* apBuffer)
 {
     unsigned char b;
     b = q != 0;
-    ((BGSSaveFormBuffer*)apBuffer)->SaveData(&b, 1, 0);
+    ((BGSSaveFormBuffer*)apBuffer)->SaveData(&b, 1u, 0);
     if (b)
         q->FUN_0067fb60(apBuffer);
 }
@@ -753,37 +712,21 @@ struct FUN_0067b170
     int pad2[3];
     FUN_0067b170();
 };
-struct TESPackage
-{
-    int GetPackType();
-    void* p;
-    void* q;
-    void* r;
-    void* s;
-    void* t;
-    void* u;
-    void* v;
-    void* w;
-    void* x;
-    void* y;
-    FUN_0067b170* e;
-    void SetPackageFlag(bool b);
-};
-// If the package type is 15 or 28, lazily allocates the FUN_0067b170 object at e and stores b in its flag field.
+// If the package type is 15 or 28, lazily allocates packageData and stores b in its flag field.
 // @fnv 0x00672b70
 void TESPackage::SetPackageFlag(bool abFlag)
 {
     if (GetPackType() == 15 || GetPackType() == 28)
     {
         FUN_0067b170* p = 0;
-        if (!e)
+        if (!packageData)
         {
             p = new FUN_0067b170();
-            e = p;
+            packageData = reinterpret_cast<TESPackageData*>(p);
         }
         else
         {
-            p = e;
+            p = reinterpret_cast<FUN_0067b170*>(packageData);
         }
         p->flag = abFlag;
     }
@@ -809,23 +752,14 @@ void __thiscall FUN_0067b100_Class::FUN_0067b100()
     BSEndian((unsigned char*)this + 0xc, EndianSizeTag<1>());
 }
 
-struct bhkConvexShape
-{
-    bhkConvexShape();
-    ~bhkConvexShape();
-    void FUN_00cab820(int a);
-};
-extern int DAT_01066e2c;
 extern int DAT_01268324;
 struct FUN_0066d6a0 : bhkConvexShape
 {
-    int* vtbl;
     FUN_0066d6a0(int a);
 };
 // @fnv 0x0066d6a0
 FUN_0066d6a0::FUN_0066d6a0(int a)
 {
-    vtbl = &DAT_01066e2c;
     FUN_00cab820(a);
     ++DAT_01268324;
 }
@@ -859,41 +793,24 @@ int FindPairValue(int aiThreshold, Pair8* apPairs, int aiCount)
     return v < 0 ? w8 : v;
 }
 
-struct FUN_00672c40_Class
-{
-    int GetPackType();
-    void SetExtraValue(float value);
-};
 // If GetPackType() is 15 or 28, lazily allocates the object at offset 0x28 and stores value at its offset 4.
 // @fnv 0x00672c40
-void FUN_00672c40_Class::SetExtraValue(float value)
+void TESPackage::SetExtraValue(float value)
 {
     if (GetPackType() == 15 || GetPackType() == 28)
     {
         FUN_0067b170* extra = 0;
-        if (!*(FUN_0067b170**)((char*)this + 0x28))
-            *(FUN_0067b170**)((char*)this + 0x28) = extra = new FUN_0067b170;
+        if (!*reinterpret_cast<FUN_0067b170**>(&packageData))
+            *reinterpret_cast<FUN_0067b170**>(&packageData) = extra = new FUN_0067b170;
         else
-            extra = *(FUN_0067b170**)((char*)this + 0x28);
+            extra = *reinterpret_cast<FUN_0067b170**>(&packageData);
         *(float*)((char*)extra + 4) = value;
     }
 }
 
-struct ListX
-{
-    ~ListX();
-};
-struct PackageList : ListX
-{
-    void ClearPackageList();
-    ~PackageList();
-};
-struct FUN_0067e3a0_Class : PackageList
-{
-    ~FUN_0067e3a0_Class();
-};
+#include "../../include/PackageList.h"
 // @fnv 0x0067e3a0
-FUN_0067e3a0_Class::~FUN_0067e3a0_Class()
+PackageList::~PackageList()
 {
     ClearPackageList();
 }
@@ -907,12 +824,6 @@ BSSimpleList<int>* FUN_00660400(BSSimpleList<int>* a)
 
 void* __cdecl operator new(unsigned int);
 
-struct AutoMemHelper
-{
-    int pad;
-    AutoMemHelper(int context, bool flag, const char* file, int line);
-    ~AutoMemHelper();
-};
 
 struct FUN_0044d000
 {
@@ -951,21 +862,7 @@ struct G2 : public List_009e03e0
     void AddHead(DetectionViewData** value);
 };
 
-struct SL : public G2
-{
-    SL();
-};
 
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void* data, unsigned int size);
-    bool ReadFormIdentifier(void* formId);
-    int ReadElementCount();
-};
-
-struct BGSLoadGameBuffer : public BGSLoadFormBuffer
-{
-};
 
 struct DetectionViewData
 {
@@ -999,7 +896,7 @@ void DetectionViewData::FUN_0066e440(BGSLoadGameBuffer* buffer)
         {
             DetectionViewData* state = new DetectionViewData;
             state->LoadGame(buffer);
-            list->AddHead(&state);
+            list->AddHead(reinterpret_cast<SkySoundObj**>(&state));
         }
     }
 }
@@ -1014,18 +911,10 @@ struct FUN_0067caa0
     FUN_0067caa0();
 };
 
-struct FUN_00672d10_Class
-{
-    unsigned char m_auiShapeKeys[0x28];
-    FUN_0067caa0* m_pObject;
-
-    FUN_0067caa0* __thiscall FUN_00672d10();
-};
-
 // @fnv 0x00672d10
-FUN_0067caa0* __thiscall FUN_00672d10_Class::FUN_00672d10()
+Schedule206* __thiscall TESPackage::FUN_00672d10()
 {
-    if (((TESPackage*)this)->GetPackType() == 0x10)
+    if (GetPackType() == 0x10)
     {
     }
     else
@@ -1034,16 +923,16 @@ FUN_0067caa0* __thiscall FUN_00672d10_Class::FUN_00672d10()
     }
 
     FUN_0067caa0* result = 0;
-    if (!m_pObject)
+    if (!packageData)
     {
         result = new FUN_0067caa0;
-        m_pObject = result;
+        packageData = reinterpret_cast<TESPackageData*>(result);
     }
     else
     {
-        result = m_pObject;
+        result = reinterpret_cast<FUN_0067caa0*>(packageData);
     }
-    return result;
+    return reinterpret_cast<Schedule206*>(result);
 }
 
 struct C0130Iterator
@@ -1409,17 +1298,9 @@ DetectionViewData* __cdecl FindStateByValue(int value)
     return 0;
 }
 
-struct SaveBufCls
-{
-    void __thiscall FUN_00865e50(void* data, unsigned int size, int z);
-    void __thiscall FUN_00865df0(void* data, unsigned int size);
-    unsigned int __thiscall FUN_00865f20();
-    void __thiscall FUN_00865ff0(unsigned int count, unsigned int pos);
-};
-
 struct SaveItemCls
 {
-    void __thiscall SaveDetectionState(SaveBufCls* buffer);
+    void __thiscall SaveDetectionState(BGSSaveFormBuffer* buffer);
 };
 
 struct SaveNodeCls
@@ -1434,11 +1315,11 @@ struct DetClassCls
     SaveNodeCls* m_04;
     unsigned char m_08[12];
     unsigned int m_14;
-    void __thiscall WriteToSaveBuffer(SaveBufCls* buffer);
+    void __thiscall WriteToSaveBuffer(BGSSaveFormBuffer* buffer);
 };
 
 // @fnv 0x0066e390
-void __thiscall DetClassCls::WriteToSaveBuffer(SaveBufCls* buffer)
+void __thiscall DetClassCls::WriteToSaveBuffer(BGSSaveFormBuffer* buffer)
 {
     buffer->FUN_00865e50(&this->m_08, 0xc, 0);
     buffer->FUN_00865e50(&this->m_14, 4, 0);
@@ -1567,12 +1448,10 @@ void D9B0Container::EraseByKey(int iKey)
 
 // Save: write the header value, every queued item, then patch the item count in at the reserved position.
 
-class E6D0SaveBuffer;
-
 class E6D0Item
 {
   public:
-    void Save(E6D0SaveBuffer* pkBuffer);
+    void Save(BGSSaveFormBuffer* pkBuffer);
 };
 
 class E6D0Node
@@ -1582,24 +1461,16 @@ class E6D0Node
     E6D0Node* GetNext();
 };
 
-class E6D0SaveBuffer
-{
-  public:
-    void SaveData(void* pvData, int iSize, int iFlags);
-    unsigned int GetPosition();
-    void WriteCountAt(int aiCountValue, unsigned int uiPosition);
-};
-
 extern int g_iE6D0Header;
 extern E6D0Node g_kE6D0Items;
 
 // Writes the E6D0 header, saves each non-null item from the g_kE6D0Items list, and patches the item count at the recorded position.
 // @fnv 0x0066e6d0
-void SaveE6D0Items(E6D0SaveBuffer* pkBuffer)
+void SaveE6D0Items(BGSSaveFormBuffer* pkBuffer)
 {
     pkBuffer->SaveData(&g_iE6D0Header, 4, 0);
     int aiCountValue = 0;
-    unsigned int uiCountPos = pkBuffer->GetPosition();
+    unsigned int uiCountPos = pkBuffer->FUN_00865f20();
     E6D0Node* pkNode = &g_kE6D0Items;
     while (pkNode)
     {
@@ -1611,7 +1482,7 @@ void SaveE6D0Items(E6D0SaveBuffer* pkBuffer)
         }
         pkNode = pkNode->GetNext();
     }
-    pkBuffer->WriteCountAt(aiCountValue, uiCountPos);
+    pkBuffer->FUN_00865ff0(aiCountValue, uiCountPos);
 }
 
 struct ComparisonEntry
@@ -1698,14 +1569,6 @@ int ComparisonOwner::CompareTo(ComparisonEntry* other)
     }
 }
 
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
-class Actor : public TESForm
-{
-};
 TESForm* __cdecl FUN_004839c0(void* p);
 struct E640Item
 {
@@ -1713,11 +1576,11 @@ struct E640Item
 };
 struct E640Cls : DetClassCls
 {
-    void __thiscall FUN_0066e640(SaveBufCls* buffer);
+    void __thiscall FUN_0066e640(BGSSaveFormBuffer* buffer);
 };
 // Resolves m_00 to an Actor via dynamic_cast and calls ResolveActorFormId on each item found while walking the m_04 node list.
 // @fnv 0x0066e640
-void E640Cls::FUN_0066e640(SaveBufCls* buffer)
+void E640Cls::FUN_0066e640(BGSSaveFormBuffer* buffer)
 {
     m_00 = m_00 ? dynamic_cast<Actor*>(FUN_004839c0(m_00)) : 0;
     SaveNodeCls* n = m_04;
@@ -1817,13 +1680,7 @@ float __cdecl FUN_0066dca0(int value, bool unscaled)
     }
 }
 
-struct Vector3
-{
-    float x;
-    float y;
-    float z;
-};
-extern Vector3 DAT_011f426c;
+extern NiPoint3 DAT_011f426c;
 
 struct SaveNodeExtended : SaveNodeCls
 {
@@ -1850,7 +1707,7 @@ void DetClassExtended::ClearAndReset()
 
     delete reinterpret_cast<SaveNodeExtended*>(m_04);
     m_04 = 0;
-    *reinterpret_cast<Vector3*>(m_08) = DAT_011f426c;
+    *reinterpret_cast<NiPoint3*>(m_08) = DAT_011f426c;
 }
 
 extern "C" void __cdecl FUN_00660510(void* first, void* last, void* destCont, void* destPtr, bool ptrCat, bool checked);
@@ -1898,6 +1755,7 @@ struct TagD9E0
 void __cdecl ResizeAudioStream(void* pAlloc, void* pArray, int iElemSize);
 void __cdecl FUN_0066db30(ElemD9E0* pDest, int iCount, const ElemD9E0& kVal, TagD9E0 kTag);
 
+// local form of hkArrayBase: 0x0066d9e0 needs the /Od append/capacity split with the call at 0x0062a100; the shared form changes bytes.
 class ArrD9E0
 {
   public:
@@ -1977,11 +1835,6 @@ class B6DF40List
     void RemoveHead();
 };
 
-class BGSSaveLoadGame
-{
-  public:
-    bool IsLoading();
-};
 
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 

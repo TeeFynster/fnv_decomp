@@ -2,6 +2,14 @@
 // src/gamebryo2.2/corelibs/niparticle/nipsysvortexfieldmodifier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysvortexfieldmodifier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/Mat3.h"
+#include "../../../../include/NiColor.h"
+#include "../../../../include/NiPSysFieldModifier.h"
+#include "../../../../include/NiPSysModifier.h"
+#include "../../../../include/NiTransform.h"
+#include "../../../../include/NiTPointerMap.h"
+#include "../../../../include/StrArr.h"
+
 extern "C" void* g_01202688;
 
 // @fnv 0x00c26810
@@ -10,15 +18,6 @@ void* __cdecl FUN_00c26810()
     return &g_01202688;
 }
 
-struct NiStream;
-struct NiColor
-{
-    void LoadBinary(NiStream&);
-};
-struct NiPSysFieldModifier
-{
-    void LoadBinary(NiStream&);
-};
 struct NiPSysVortexFieldModifier : NiPSysFieldModifier
 {
     NiColor m_kFogTint;
@@ -49,10 +48,7 @@ FUN_00c26920_shell* __thiscall FUN_00c26920_shell::DestroyIfFlagged(int a)
     return this;
 }
 
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+#include "../../../../include/NiMemObject.h"
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
 struct CloningProcess
 {
@@ -66,56 +62,31 @@ struct CloningProcess
 };
 typedef char _sizecheck_NiCloningProcess[sizeof(CloningProcess) == 16 ? 1 : -1];
 
-struct NiObject;
-struct ShaderBufferRecord;
-struct NiTStringPointerMap_00e93060
+// 0x00c2c110 is the drag modifier clone hook (ctor 0x00c2c030, drag object at 0x18), not an air field.
+struct ParticleDragCloneOwner : NiPSysModifier
 {
-    bool GetAt(const char*, ShaderBufferRecord*&);
+    NiObject* m_pkDragObject;
+    void RemapDragObject(CloningProcess&);
 };
-struct CloningProcess;
-struct NiPSysModifier
-{
-    virtual void ProcessClone(CloningProcess&);
-};
-struct NiPSysAirFieldModifier_00c2c110 : NiPSysModifier
-{
-    void FUN_00c2c110(CloningProcess&);
-};
-// Calls NiPSysModifier::ProcessClone, then remaps the object at offset 0x18 through the clone map, falling back to the original pointer.
+// Calls NiPSysModifier::ProcessClone, then remaps the drag object through the clone map, falling back to the original pointer.
 // @fnv 0x00c2c110
-void NiPSysAirFieldModifier_00c2c110::FUN_00c2c110(CloningProcess& aCloneProcess)
+void ParticleDragCloneOwner::RemapDragObject(CloningProcess& aCloneProcess)
 {
     NiPSysModifier::ProcessClone(aCloneProcess);
-    ShaderBufferRecord* pMappedObject = 0;
-    ((NiTStringPointerMap_00e93060*)aCloneProcess.m_pCloneMap)->GetAt((const char*)this, pMappedObject);
-    ShaderBufferRecord* destination = pMappedObject;
-    if (*(NiObject**)((char*)this + 0x18))
+    NiObject* pMappedObject = 0;
+    ((NiTPointerMap<NiObject*, NiObject*>*)aCloneProcess.m_pCloneMap)->GetAt(this, pMappedObject);
+    ParticleDragCloneOwner* destination = (ParticleDragCloneOwner*)pMappedObject;
+    if (m_pkDragObject)
     {
-        if (((NiTStringPointerMap_00e93060*)aCloneProcess.m_pCloneMap)
-                ->GetAt((const char*)*(NiObject**)((char*)this + 0x18), pMappedObject))
+        if (((NiTPointerMap<NiObject*, NiObject*>*)aCloneProcess.m_pCloneMap)
+                ->GetAt(m_pkDragObject, pMappedObject))
         {
-            *(NiObject**)((char*)destination + 0x18) = (NiObject*)pMappedObject;
+            destination->m_pkDragObject = pMappedObject;
             return;
         }
-        *(NiObject**)((char*)destination + 0x18) = *(NiObject**)((char*)this + 0x18);
+        destination->m_pkDragObject = m_pkDragObject;
     }
 }
-
-struct StrArr
-{
-    char _pad_0[8];
-    unsigned short m_usCapacity;  // +0x08
-    unsigned short m_usSize;      // +0x0a
-    char _pad_c[2];
-    unsigned short m_usGrowBy;  // +0x0e
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
-
-struct NiPoint3
-{
-    char* FUN_00a59af0(char const*);
-};
 
 char* __cdecl _FUN_00a7d330(void*);
 
@@ -137,12 +108,12 @@ void FUN_00c27060_shell::AppendNameAndDirection(StrArr* pkStrings)
     FUN_00c322b0(pkStrings);
     char* pcStr = _FUN_00a7d330(_g_01202688);
     unsigned int uiIdx = pkStrings->m_usSize;
-    if (uiIdx >= pkStrings->m_usCapacity)
+    if (uiIdx >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(pkStrings->m_usGrowBy + uiIdx);
     pkStrings->SetAt(uiIdx, pcStr);
     pcStr = ((NiPoint3*)((char*)this + 0x30))->FUN_00a59af0("Direction");
     uiIdx = pkStrings->m_usSize;
-    if (uiIdx >= pkStrings->m_usCapacity)
+    if (uiIdx >= pkStrings->m_usMaxSize)
         pkStrings->SetSize(pkStrings->m_usGrowBy + uiIdx);
     pkStrings->SetAt(uiIdx, pcStr);
 }
@@ -246,76 +217,32 @@ inline float NiSqrt(float fValue)
     return sqrtf(fValue);
 }
 
-struct Vec3
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ)
 {
-    float x;
-    float y;
-    float z;
-
-    Vec3()
-    {}
-    Vec3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    void FUN_004a0c10();
-
-    Vec3 operator-(const Vec3& pt) const
-    {
-        Vec3 res;
-        res.x = x - pt.x;
-        res.y = y - pt.y;
-        res.z = z - pt.z;
-        return res;
-    }
-
-    float Length() const
-    {
-        return NiSqrt(x * x + y * y + z * z);
-    }
-
-    Vec3& operator*=(float fScalar)
-    {
-        x *= fScalar;
-        y *= fScalar;
-        z *= fScalar;
-        return *this;
-    }
-
-    Vec3& operator+=(const Vec3& pt)
-    {
-        x += pt.x;
-        y += pt.y;
-        z += pt.z;
-        return *this;
-    }
-};
-
-struct Mat3
+    x = fX;
+    y = fY;
+    z = fZ;
+}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& pt) const
 {
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
-
-    Vec3 operator*(const Vec3& pt) const
-    {
-        return Vec3(m00 * pt.x + m01 * pt.y + m02 * pt.z, m10 * pt.x + m11 * pt.y + m12 * pt.z,
-                    m20 * pt.x + m21 * pt.y + m22 * pt.z);
-    }
-};
-
-class NiTransform
+    NiPoint3 res;
+    res.x = x - pt.x;
+    res.y = y - pt.y;
+    res.z = z - pt.z;
+    return res;
+}
+inline float NiPoint3::Length() const
 {
-  public:
-    Mat3 m_kOrientation;
-    Vec3 m_kTranslation;
-    float m_fScale;
-
-    void FUN_004b4880(NiTransform& kDest) const;
-    NiTransform operator*(const NiTransform& xform) const;
-};
+    return NiSqrt(x * x + y * y + z * z);
+}
+inline NiPoint3 Mat3::operator*(const NiPoint3& pt) const
+{
+    return NiPoint3(m00 * pt.x + m01 * pt.y + m02 * pt.z, m10 * pt.x + m11 * pt.y + m12 * pt.z,
+                m20 * pt.x + m21 * pt.y + m22 * pt.z);
+}
+// Keep the original empty construction; transform values are copied by assignment.
+inline NiTransform::NiTransform()
+{}
 
 struct AVObj
 {
@@ -328,7 +255,7 @@ struct AVObj
 
 struct ParticleInfo
 {
-    Vec3 m_kValue;
+    NiPoint3 m_kValue;
     float m_fXValue;
     float m_fYValue;
     float m_fZValue;
@@ -339,14 +266,14 @@ struct ParticleInfo
 struct PSysData
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    Vec3* m_pkVertex;
+    NiPoint3* m_pkVertex;
     int unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     int unk40, unk44, unk48, unk4c;
     unsigned short m_usActiveVertices;
     unsigned short unk52;
     int unk54, unk58, unk5c, unk60, unk64, unk68, unk6c;
     ParticleInfo* m_pkParticleInfo;
-    Vec3* GetVertices()
+    NiPoint3* GetVertices()
     {
         return m_pkVertex;
     }
@@ -367,9 +294,9 @@ struct VortexModifier
     bool m_bEnableMaxDistance;
     float m_fDistanceLimit;
     int unk2c;
-    Vec3 m_kLightVector;
+    NiPoint3 m_kLightVector;
 
-    Vec3 FUN_00c26820(const Vec3& akStart, const Vec3& kDirection, const Vec3& kPoint);
+    NiPoint3 FUN_00c26820(const NiPoint3& akStart, const NiPoint3& kDirection, const NiPoint3& kPoint);
     void FUN_00c269b0(float fTime, PSysData* pkData);
 };
 
@@ -377,16 +304,18 @@ struct VortexModifier
 // @fnv 0x00c269b0
 void VortexModifier::FUN_00c269b0(float fTime, PSysData* pkData)
 {
-    NiTransform kField = m_pkFieldObject->m_kWorldSpaceTransform;
+    NiTransform kField;
+    kField = m_pkFieldObject->m_kWorldSpaceTransform;
     NiTransform kInvPSys;
     {
-        NiTransform kPSys = m_pkTarget->m_kWorldSpaceTransform;
+        NiTransform kPSys;
+        kPSys = m_pkTarget->m_kWorldSpaceTransform;
         kPSys.FUN_004b4880(kInvPSys);
     }
     {
         NiTransform kFieldToPSys = kInvPSys * kField;
-        Vec3 kPosition = kFieldToPSys.m_kTranslation;
-        Vec3 kDirection = kFieldToPSys.m_kOrientation * m_kLightVector;
+        NiPoint3 kPosition = (*(NiPoint3*)&kFieldToPSys.m_Translate);
+        NiPoint3 kDirection = (*(Mat3*)&kFieldToPSys.m_Rotate) * m_kLightVector;
         kDirection.FUN_004a0c10();
         float fMaxDistanceSqr = m_fDistanceLimit * m_fDistanceLimit;
         for (unsigned short us = 0; us < pkData->m_usActiveVertices; us++)
@@ -395,12 +324,12 @@ void VortexModifier::FUN_00c269b0(float fTime, PSysData* pkData)
             float fDeltaT = fTime - pkCurrentParticle->m_fZValue;
             if (fDeltaT != 0.0f)
             {
-                Vec3* __restrict pkVertex = pkData->m_pkVertex;
-                Vec3 kParticlePosition = pkVertex[us];
-                float fDistance = (kParticlePosition - kFieldToPSys.m_kTranslation).Length();
+                NiPoint3* __restrict pkVertex = pkData->m_pkVertex;
+                NiPoint3 kParticlePosition = pkVertex[us];
+                float fDistance = static_cast<const NiPoint3&>(kParticlePosition - (*(NiPoint3*)&kFieldToPSys.m_Translate)).Length();  // the inline const body, as the stand-in had only that one
                 if (fDistance != 0.0f && fDistance <= fMaxDistanceSqr)
                 {
-                    Vec3 kDeltaV = FUN_00c26820(kPosition, kDirection, kParticlePosition);
+                    NiPoint3 kDeltaV = FUN_00c26820(kPosition, kDirection, kParticlePosition);
                     kDeltaV *= m_fInfluence * fDeltaT;
                     pkCurrentParticle->m_kValue += kDeltaV;
                 }
@@ -410,8 +339,8 @@ void VortexModifier::FUN_00c269b0(float fTime, PSysData* pkData)
 }
 
 namespace fnv_00c26c00 {
-typedef Pt_c268 Vec3;
-inline Vec3& operator+=(Vec3& a, Vec3 b)
+typedef Pt_c268 NiPoint3;
+inline NiPoint3& operator+=(NiPoint3& a, NiPoint3 b)
 {
     a.x += b.x;
     a.y += b.y;
@@ -424,14 +353,6 @@ struct NormVec3
     float y;
     float z;
     void FUN_004a0c10();
-};
-struct NiTransform
-{
-    float rotation[9];
-    Vec3 translation;
-    float scale;
-    void FUN_004b4880(NiTransform&);
-    void FUN_0062c250(NiTransform&, NiTransform&);
 };
 typedef char _sizecheck_NiTransform[sizeof(NiTransform) == 52 ? 1 : -1];
 struct TransformNode
@@ -466,7 +387,7 @@ struct TransformNode
 };
 struct Particle
 {
-    Vec3 velocity;
+    NiPoint3 velocity;
     float unk0c;
     float unk10;
     float age;
@@ -482,7 +403,7 @@ struct ParticleList
     int unk14;
     int unk18;
     int unk1c;
-    Vec3* positions;
+    NiPoint3* positions;
     int unk24;
     int unk28;
     int unk2c;
@@ -504,15 +425,15 @@ struct ParticleList
     int unk68;
     int unk6c;
     Particle* particles;
-    Vec3* GetPositions()
+    NiPoint3* GetPositions()
     {
         return positions;
     }
 };
 
-inline Vec3 RotMul(const float* m, const Vec3& v)
+inline NiPoint3 RotMul(const float* m, const NiPoint3& v)
 {
-    return Vec3(m[0] * v.x + m[1] * v.y + m[2] * v.z, m[4] * v.y + m[3] * v.x + m[5] * v.z,
+    return NiPoint3(m[0] * v.x + m[1] * v.y + m[2] * v.z, m[4] * v.y + m[3] * v.x + m[5] * v.z,
                 m[6] * v.x + m[7] * v.y + m[8] * v.z);
 }
 struct ForceOwner
@@ -529,12 +450,12 @@ struct ForceOwner
     int unk24;
     int unk28;
     int unk2c;
-    Vec3 m_dir;
+    NiPoint3 m_dir;
     void FUN_00c26c00(float, ParticleList*);
-    Vec3 ComputeForce(const Vec3& origin, const Vec3& axis, const Vec3& point);
-    Vec3 Force(const Vec3& origin, const Vec3& axis, Vec3 point)
+    NiPoint3 ComputeForce(const NiPoint3& origin, const NiPoint3& axis, const NiPoint3& point);
+    NiPoint3 Force(const NiPoint3& origin, const NiPoint3& axis, NiPoint3 point)
     {
-        const Vec3 kPoint = point;
+        const NiPoint3 kPoint = point;
         return ComputeForce(origin, axis, kPoint);
     }
 };
@@ -549,9 +470,9 @@ void ForceOwner::FUN_00c26c00(float delta, ParticleList* list)
     NiTransform combined;
     NiTransform* pA = &transformA;
     pA->FUN_004b4880(combined);
-    combined.FUN_0062c250(*pA, transformB);
-    Vec3 axis = RotMul(transformA.rotation, m_dir);
-    Vec3 origin = transformA.translation;
+    combined.FUN_0062c250(pA, transformB);
+    NiPoint3 axis = RotMul(&transformA.m_Rotate.m_pEntry[0][0], m_dir);
+    NiPoint3 origin = (*(NiPoint3*)&transformA.m_Translate);
     ((NormVec3*)&axis)->FUN_004a0c10();
     for (unsigned short i = 0; i < list->count; ++i)
     {
@@ -560,13 +481,13 @@ void ForceOwner::FUN_00c26c00(float delta, ParticleList* list)
         age -= pParticle->age;
         if (age != 0.0f)
         {
-            Vec3& vel = pParticle->velocity;
-            Vec3 result = Force(origin, axis, list->GetPositions()[i]);
+            NiPoint3& vel = pParticle->velocity;
+            NiPoint3 result = Force(origin, axis, list->GetPositions()[i]);
             age = unk1c * age;
             result.x = age * result.x;
             result.y = age * result.y;
             result.z = age * result.z;
-            vel += (const Vec3&)result;
+            vel += (const NiPoint3&)result;
         }
     }
 }
@@ -602,15 +523,6 @@ struct AirVector
     {
         return x * b.x + y * b.y + z * b.z;
     }
-};
-struct NiTransform
-{
-    float r00, r01, r02, r10, r11, r12, r20, r21, r22;
-    AirVector translate;
-    float scale;
-    void FUN_004b4880(NiTransform& result);
-    void FUN_0062c250(NiTransform& result, const NiTransform& right) const;
-    AirVector FUN_004b4500(const AirVector&);
 };
 struct AirNode
 {
@@ -666,20 +578,22 @@ void AirField::FUN_00c2c170(float time, const AirParticles* apParticles)
         return;
     if (!field)
         return;
-    NiTransform fieldWorld = field->world;
-    NiTransform transform = owner->world;
+    NiTransform fieldWorld;
+    fieldWorld = field->world;
+    NiTransform transform;
+    transform = owner->world;
     NiTransform inverse;
     transform.FUN_004b4880(inverse);
-    inverse.FUN_0062c250(transform, fieldWorld);
+    inverse.FUN_0062c250(&transform, fieldWorld);
     AirVector axis;
-    axis = transform.FUN_004b4500(direction);
+    axis = (const AirVector&)((Mat3*)&transform)->FUN_004b4500(*(NiPoint3*)&direction);
     axis.FUN_004a0c10();
     float axisSquared = axis.SquaredLength();
     float range = farDistance - nearDistance;
     for (unsigned short i = 0; i < apParticles->count; ++i)
     {
         AirVector position = apParticles->GetVertices()[i];
-        AirVector displacement = position - transform.translate;
+        AirVector displacement = position - *(AirVector*)&transform.m_Translate;
         AirParticle* pAlias0 = &apParticles->GetParticleInfo()[i];
         AirParticle* pAlias1 = pAlias0;
         AirParticle* particle = pAlias1;

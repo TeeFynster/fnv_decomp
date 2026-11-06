@@ -1,16 +1,74 @@
+#include "../../include/SettingT.h"
+#include "../../include/NiFrustum.h"
 // fallout_shared/screencustomsplatter.cpp: ScreenCustomSplatter, BSPortal, BSCustomSplatterExtraData (15 functions)
 
-#include "screencustomsplatter_decls.h"
-// Iterates the entries array and calls FUN_00c5dea0 on each non-null PortalEntry before destruction.
-// @fnv 0x00c50930
-BSPortal::~BSPortal()
+#include "../../include/NiFixedString.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/BSCustomSplatterExtraData.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/NiCamera.h"
+#include "../../include/NiFrustum.h"
+#include "../../include/BSPortal.h"
+#include "../../include/SkyTextureManager.h"
+
+#include "../../include/SettingT_GameSettingCollection_.h"
+class PortalEntry
 {
-    unsigned int count = entries.count;
+  public:
+    void FUN_00c5dea0();
+};
+class ScreenCustomSplatter
+{
+  public:
+    static void Clear();
+    static void Init();
+};
+// These allocations use the original sized exception-cleanup entry point.
+class SplatterNode : public NiNode
+{
+  public:
+    SplatterNode(unsigned short arraySize);
+    static void operator delete(void*, unsigned int);
+};
+extern unsigned int DAT_011c77dc;
+extern unsigned char DAT_011c77e8, DAT_011c77e9;
+extern float DAT_011c77ec;
+extern NiPointer<NiNode> DAT_011c7810;
+extern NiPointer<NiTexture> DAT_011c7804, DAT_011c7808, DAT_011c780c;
+extern SettingT_GameSettingCollection_ DAT_011ce284, DAT_011ce918, DAT_011cede8;
+extern bool DAT_011f941e;
+
+#include "../../include/MEM_CONTEXT.h"
+class INISettingCollection;
+using ::SettingT;
+class NiRenderer;
+class GraphicsRenderer
+{
+  public:
+    unsigned int GetRenderTargetWidth();
+    unsigned int GetRenderTargetHeight();
+};
+NiRenderer* FUN_0043c4b0();
+extern SettingT<INISettingCollection> DAT_011c77f4;
+extern NiPointer<NiNode> DAT_011c781c;
+extern SettingT_GameSettingCollection_ DAT_011cfc2c;
+extern NiPoint3 DAT_011a9478;
+extern float DAT_01022960, DAT_01016248, DAT_0102295c, DAT_01022958, DAT_01189500, DAT_01189504;
+extern double DAT_01011598, DAT_01011588;
+
+// Releases each non-null portal entry; this is not the complete BSPortal destructor.
+// @fnv 0x00c50930
+void __fastcall ClearPortalEntries(BSPortal* portal)
+{
+    unsigned int count = portal->entries.count;
     for (unsigned int uiIndex = 0; uiIndex < count; uiIndex++)
     {
         PortalEntry* value;
         PortalEntry* slot;
-        PortalEntry*& entry = entries.data[uiIndex];
+        PortalEntry*& entry = portal->entries.data[uiIndex];
         slot = entry;
         value = slot;
         if (value)
@@ -35,19 +93,20 @@ void ScreenCustomSplatter::Clear()
 // @fnv 0x004deb30
 void ScreenCustomSplatter::Init()
 {
-    AutoMemContext mem(MEM_CONTEXT_SCREEN, true,
+    AutoMemContext mem(MEM_CONTEXT_MEM_CONTEXT_EFFECTS_OVERHEAD, true,
                        "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\ScreenCustomSplatter.cpp", 189);
-    DAT_011c77e8 = DAT_011c77f4.Bool()->b;
+    DAT_011c77e8 = DAT_011c77f4.Bool()[0];
     if (DAT_011c77e8)
     {
         GraphicsRenderer* renderer = reinterpret_cast<GraphicsRenderer*>(FUN_0043c4b0());
         float fAspect = (float)renderer->GetRenderTargetWidth() / (float)renderer->GetRenderTargetHeight();
-        reinterpret_cast<NiPointer<NiAVObject>&>(DAT_011c781c) = new FUN_00a712f0;
+        reinterpret_cast<NiPointer<NiAVObject>&>(DAT_011c781c) = new NiCamera;
         DAT_011c781c->FUN_00440460(NiPoint3(0.0f, 0.0f, DAT_01022960));
         NiUpdateData update1(0.0f, false, false);
         DAT_011c781c->Update(update1);
         reinterpret_cast<NiCamera*>(DAT_011c781c.operator->())->AimAt(NiPoint3::ZERO, DAT_011a9478);
-        NiFrustum frustum(false);
+        NiFrustum frustum;
+        frustum.Init(false);
         frustum.ortho = false;
         frustum.top = DAT_01016248;
         frustum.bottom = DAT_0102295c;
@@ -62,7 +121,7 @@ void ScreenCustomSplatter::Init()
         DAT_01189504 = frustum.top;
         DAT_011c77ec = DAT_011cfc2c.Float()->f;
         DAT_011c77e9 = 0;
-        reinterpret_cast<NiPointer<NiAVObject>&>(DAT_011c7810) = new NiNode(0);
+        reinterpret_cast<NiPointer<NiAVObject>&>(DAT_011c7810) = new SplatterNode(0);
         DAT_011c77dc = 0;
         SkyTextureManager::LoadTextureFromPath(&DAT_011c7808, DAT_011ce918.String());
         SkyTextureManager::LoadTextureFromPath(&DAT_011c7804, DAT_011ce284.String());
@@ -71,22 +130,16 @@ void ScreenCustomSplatter::Init()
     }
 }
 
-class BSFadeNode
-{
-  public:
-    int m_iFadeNodeMode;
-    BSFadeNode(const char*);
-};
-extern BSFadeNode* DAT_011c77e4;
-// Allocates a BSFadeNode constructed from the string "CSD" and stores it in DAT_011c77e4.
+extern NiFixedString* DAT_011c77e4;
+// Allocates the "CSD" extra-data key and stores it in DAT_011c77e4.
 // @fnv 0x004de580
 void CreateCSDFadeNode()
 {
-    DAT_011c77e4 = new BSFadeNode("CSD");
+    DAT_011c77e4 = new NiFixedString("CSD");
 }
 
 // @fnv 0x004de890
-BSFadeNode* FUN_004de890()
+NiFixedString* FUN_004de890()
 {
     return DAT_011c77e4;
 }
@@ -123,15 +176,7 @@ float FUN_004de8d0()
     return DAT_011ad878;
 }
 
-struct NiRTTI
-{
-};
 extern NiRTTI g_011c7820;
-
-struct BSCustomSplatterExtraData
-{
-    const NiRTTI* GetRTTI() const;
-};
 
 // @fnv 0x004dead0
 const NiRTTI* BSCustomSplatterExtraData::GetRTTI() const
@@ -139,51 +184,23 @@ const NiRTTI* BSCustomSplatterExtraData::GetRTTI() const
     return &g_011c7820;
 }
 
-struct FUN_004deb10_shell
-{
-    void __thiscall FUN_00a7b300();
-    void FUN_004deb10();
-};
-
 // @fnv 0x004deb10
-void FUN_004deb10_shell::FUN_004deb10()
+void BSCustomSplatterExtraData::FUN_004deb10()
 {
     FUN_00a7b300();
 }
 
-extern int DAT_010228c4;
-struct NiExtraData
-{
-    char _pad[12];
-    NiExtraData(BSFadeNode*);
-};
-struct Vector4f
-{
-    int a, b, c, d;
-};
-struct FUN_004dea80 : NiExtraData
-{
-    Vector4f q;
-    FUN_004dea80(Vector4f* p);
-};
-// Initialises a NiExtraData-derived object with a vtable pointer and copies the four ints from p into its q member.
 // @fnv 0x004dea80
-FUN_004dea80::FUN_004dea80(Vector4f* apSource) : NiExtraData(FUN_004de890())
+BSCustomSplatterExtraData::BSCustomSplatterExtraData(SplatterWordsView* apSource) : NiExtraData(*FUN_004de890())
 {
-    *(int*)this = (int)&DAT_010228c4;
     q = *apSource;
 }
 
 void __cdecl _delete(void*, unsigned int);
-struct FUN_004deae0_holder
-{
-    void* DestroyIfFlagged(unsigned int);
-};
-// Calls FUN_004deb10 on this, then deletes this with size 0x1c when bit 0 of flags is set, and returns this.
 // @fnv 0x004deae0
-void* FUN_004deae0_holder::DestroyIfFlagged(unsigned int flags)
+void* BSCustomSplatterExtraData::DestroyIfFlagged(unsigned int flags)
 {
-    reinterpret_cast<FUN_004deb10_shell*>(this)->FUN_004deb10();
+    FUN_004deb10();
     if (flags & 1)
         _delete(this, 0x1c);
     return this;
@@ -195,80 +212,6 @@ struct OpacityFadeState
     float duration;
     float opacity;
     unsigned int count;
-};
-struct SplatterExtra : NiExtraData
-{
-    OpacityFadeState* GetOffsetC();
-};
-struct SplatterObject : NiAVObject
-{
-    SplatterExtra* FUN_00a5bdd0(BSFadeNode*);
-};
-struct SplatterNode : NiNode
-{
-    virtual void virtual00();
-    virtual void virtual01();
-    virtual void virtual02();
-    virtual void virtual03();
-    virtual void virtual04();
-    virtual void virtual05();
-    virtual void virtual06();
-    virtual void virtual07();
-    virtual void virtual08();
-    virtual void virtual09();
-    virtual void virtual0a();
-    virtual void virtual0b();
-    virtual void virtual0c();
-    virtual void virtual0d();
-    virtual void virtual0e();
-    virtual void virtual0f();
-    virtual void virtual10();
-    virtual void virtual11();
-    virtual void virtual12();
-    virtual void virtual13();
-    virtual void virtual14();
-    virtual void virtual15();
-    virtual void virtual16();
-    virtual void virtual17();
-    virtual void virtual18();
-    virtual void virtual19();
-    virtual void virtual1a();
-    virtual void virtual1b();
-    virtual void virtual1c();
-    virtual void virtual1d();
-    virtual void virtual1e();
-    virtual void virtual1f();
-    virtual void virtual20();
-    virtual void virtual21();
-    virtual void virtual22();
-    virtual void virtual23();
-    virtual void virtual24();
-    virtual void virtual25();
-    virtual void virtual26();
-    virtual void virtual27();
-    virtual void virtual28();
-    virtual void virtual29();
-    virtual void virtual2a();
-    virtual void virtual2b();
-    virtual void virtual2c();
-    virtual void virtual2d();
-    virtual void virtual2e();
-    virtual void virtual2f();
-    virtual void virtual30();
-    virtual void virtual31();
-    virtual void virtual32();
-    virtual void virtual33();
-    virtual void virtual34();
-    virtual void virtual35();
-    virtual void virtual36();
-    virtual void virtual37();
-    virtual void virtual38();
-    virtual void virtual39();
-    virtual void virtual3a();
-    virtual void virtual3b();
-    virtual void RemoveAt(unsigned int);
-    unsigned int FUN_0043b480();
-    NiAVObject* FUN_0043b4a0(unsigned int);
 };
 struct TimeGlobal
 {
@@ -285,21 +228,22 @@ void FUN_004de600()
 {
     if (DAT_011c77e8)
     {
-        unsigned int uiChildCount = reinterpret_cast<SplatterNode*>(DAT_011c7810.operator->())->FUN_0043b480();
+        unsigned int uiChildCount = reinterpret_cast<NiNode*>(DAT_011c7810.operator->())->FUN_0043b480();
         float elapsed = DAT_011f6394.FUN_0084d030();
         for (unsigned int index = 0; index < uiChildCount; ++index)
         {
-            SplatterObject* child = static_cast<SplatterObject*>(
-                reinterpret_cast<SplatterNode*>(DAT_011c7810.operator->())->FUN_0043b4a0(index));
+            NiAVObject* child = static_cast<NiAVObject*>(
+                reinterpret_cast<NiNode*>(DAT_011c7810.operator->())->FUN_0043b4a0(index));
             if (child)
             {
-                SplatterExtra* extra = child->FUN_00a5bdd0(FUN_004de890());
+                BSCustomSplatterExtraData* extra = static_cast<BSCustomSplatterExtraData*>(
+                    child->FUN_00a5bdd0(*FUN_004de890()));
                 OpacityFadeState* data = extra->GetOffsetC();
                 data->elapsed += elapsed;
                 if (data->elapsed >= data->duration)
                 {
                     DAT_011c77dc -= data->count;
-                    reinterpret_cast<SplatterNode*>(DAT_011c7810.operator->())->RemoveAt(index);
+                    reinterpret_cast<NiNode*>(DAT_011c7810.operator->())->RemoveNthObject(index);
                 }
                 else
                 {
@@ -331,12 +275,6 @@ void FUN_004de600()
     }
 }
 
-struct NiFixedString
-{
-    const char* m_kHandle;
-    NiFixedString(const char* str);
-    ~NiFixedString();
-};
 
 struct SplatterParams
 {
@@ -346,18 +284,9 @@ struct SplatterParams
     unsigned int ItemUpdateArray;
 };
 
-struct SplatterExtraData : NiExtraData
-{
-    SplatterParams params;
-    SplatterExtraData(SplatterParams* p);
-    static void* operator new(unsigned int size);
-    static void operator delete(void*, unsigned int);
-    void* GetList();
-};
-
 struct SplatterGeometry
 {
-    bool AddExtraData(SplatterExtraData* pData);
+    bool AddExtraData(BSCustomSplatterExtraData* pData);
     void SetName(const NiFixedString& kName);
 };
 
@@ -450,7 +379,7 @@ void FUN_004de8e0(unsigned int ItemUpdateArray, float fAlpha, int iUnused, float
                 kParams2.fAlpha = g_fSplatterDefaultAlpha.Float()->f;
             }
             kParams2.ItemUpdateArray = uiNum_2;
-            SplatterExtraData* pExtraData = new SplatterExtraData(&kParams2);
+            BSCustomSplatterExtraData* pExtraData = new BSCustomSplatterExtraData(reinterpret_cast<SplatterWordsView*>(&kParams2));
             pGeom->AddExtraData(pExtraData);
             pGeom->SetName(NiFixedString("ScreenSplatterRoot"));
             g_spSplatterRoot->AttachChildInAvailableSlot(pGeom, true);

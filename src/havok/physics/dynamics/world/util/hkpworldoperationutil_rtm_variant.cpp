@@ -1,3 +1,10 @@
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkpCollidableQualityType.h"
+#include "../../../../../../include/hkpAction.h"
+#include "../../../../../../include/hkpConstraintInstance.h"
+#include "../../../../../../include/hkpEntity.h"
+#include "../../../../../../include/hkpWorld.h"
+#include "../../../../../../include/hkpSimulationIsland.h"
 // src/havok/physics/dynamics/world/util/hkpworldoperationutil_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/dynamics/world/util/hkpworldoperationutil.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -283,10 +290,6 @@ struct CB3DD0World
 void __cdecl NotifyTargets(CB3DD0World* world, CB3DD0Entity* entity);
 void __cdecl DetachRecord(CB3DD0Entity* entity);
 void __cdecl FUN_00cb3dd0(CB3DD0World* world, CB3DD0Entity* entity, int fireCallbacks);
-struct FUN_00d070b0_class
-{
-    void FUN_00d070b0();
-};
 struct CleanupList
 {
     int unk00;
@@ -297,25 +300,16 @@ struct CleanupList
     int unk14;
     int unk18;
     int unk1c;
-    FUN_00d070b0_class* finalObject;
+    hkpSimulationIsland* finalObject;
     int unk24;
-    FUN_00d070b0_class** firstObjects;
+    hkpSimulationIsland** firstObjects;
     int firstCount;
     int unk30;
-    FUN_00d070b0_class** secondObjects;
+    hkpSimulationIsland** secondObjects;
     int secondCount;
 };
 void __cdecl FUN_00cb3e90(CleanupList* apCleanupList);
 struct Obj;
-struct Agent
-{
-    virtual void v0(int);
-    char pad0[0x20 - 4];
-    unsigned short m_20;
-    char pad1[0x4c - 0x22];
-    int m_4c;
-    __declspec(nothrow) void RemoveItem(Obj* o);
-};
 struct Obj
 {
     int pad0[2];
@@ -323,9 +317,9 @@ struct Obj
     char pad1[0xc8 - 0xc];
     bool m_c8;
     char pad2[3];
-    Agent* m_cc;
+    hkpSimulationIsland* m_cc;
 };
-__declspec(nothrow) void __cdecl RemoveListItem(Obj* o, Agent* a);
+__declspec(nothrow) void __cdecl RemoveListItem(Obj* o, hkpSimulationIsland* a);
 void __cdecl FUN_00cb4740(Obj* ctx, Obj* o);
 struct S_00cb5d00_Heap
 {
@@ -1614,7 +1608,6 @@ inline void* operator new(unsigned int, void* p)
     return p;
 }
 struct S00cb5310_Sub;
-struct S00cb5310_Node;
 struct S00cb5310_Piece;
 struct S00cb5310_Owner;
 struct S00cb5310_Sub
@@ -1640,7 +1633,7 @@ struct S00cb5310_Sub
 };
 struct S00cb5310_List
 {
-    S00cb5310_Node** m_00;
+    hkpSimulationIsland** m_00;
     int m_04;
     unsigned int m_08;
 };
@@ -1651,32 +1644,6 @@ struct S00cb5310_Alloc
     int unk08;
     int unk0C;
     void* m_pAllocator;
-};
-struct S00cb5310_Node
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    unsigned short m_20;
-    unsigned short unk22;
-    unsigned short unk24;
-    unsigned char m_26;
-    unsigned char unk27;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    float m_44;
-    S00cb5310_Piece** m_48;
-    int m_4c;
 };
 struct S00cb5310_Piece
 {
@@ -1757,7 +1724,7 @@ struct S00cb5310_Owner
     int unk1C;
     int unk20;
     int unk24;
-    S00cb5310_Node** m_28;
+    hkpSimulationIsland** m_28;
     int m_2c;
     int unk30;
     S00cb5310_List m_34;
@@ -1867,8 +1834,8 @@ extern int DAT_01267e30;
 void ResizeAudioStream(void* alloc, S00cb5310_List* list, int n);
 bool FUN_00d28560(float* p, S00cb5310_Piece** arr, int n, int size);
 void UpdateRotationInterpolation(float f, void* p);
-void FUN_00d011b0(S00cb5310_Owner* a1, S00cb5310_Node* a2);
-void __cdecl FUN_00cb5310(S00cb5310_Owner* a1, S00cb5310_Node* a2);
+void FUN_00d011b0(S00cb5310_Owner* a1, hkpSimulationIsland* a2);
+void __cdecl FUN_00cb5310(S00cb5310_Owner* a1, hkpSimulationIsland* a2);
 struct Cb5750_Deferred
 {
     unsigned char tag;
@@ -2214,32 +2181,6 @@ struct Cb5750_Owner
     void flush90() throw();
     void __cdecl AddCollisionShape(Cb5750_Param* param) throw();
 };
-struct Item_cb3d10
-{
-    void* unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    unsigned char unk24;
-    unsigned char unk25;
-    unsigned char unk26;
-    unsigned char unk27;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-};
 struct Owner_cb3d10
 {
     int unk00;
@@ -2296,15 +2237,15 @@ struct Owner_cb3d10
 };
 struct List_cb3d10
 {
-    Item_cb3d10** m_data;
+    hkpSimulationIsland** m_data;
     int m_iElementCount;
 };
-static Item_cb3d10* FindItemForThreshold(Owner_cb3d10* owner, List_cb3d10* list, int threshold, Item_cb3d10* target);
+static hkpSimulationIsland* FindItemForThreshold(Owner_cb3d10* owner, List_cb3d10* list, int threshold, hkpSimulationIsland* target);
 volatile int g_cb3d10_thr;
 Owner_cb3d10* volatile g_cb3d10_owner;
 List_cb3d10* volatile g_cb3d10_list;
-Item_cb3d10* volatile g_cb3d10_target;
-Item_cb3d10* volatile g_cb3d10_out;
+hkpSimulationIsland* volatile g_cb3d10_target;
+hkpSimulationIsland* volatile g_cb3d10_out;
 void CallTarget_cb3d10();
 struct B10293_Item
 {
@@ -2401,59 +2342,36 @@ template <class T> inline void S00cb4c60_copy(T* p, int n, const T& v)
     for (int i = 0; i < n; ++i)
         p[i] = v;
 }
-struct hkpWorld;
-struct hkpSimulationIsland;
-struct hkpEntity;
-struct hkpAction;
-struct hkBool
-{
-    char value;
-    hkBool(bool b) : value(b)
-    {}
-    hkBool(const hkBool& other) : value(other.value)
-    {}
-};
 void __cdecl FUN_00c908c0(void*, void*, int, int);
 void __cdecl ResizeAudioStream(void*, void*, int);
-template <class T> struct hkArrayNative
+template <class T> inline int hkArrayNative<T>::getCapacity() const
 {
-    T* data;
-    int count;
-    unsigned int capRaw;
-    int getCapacity() const
-    {
-        return capRaw & 0x3fffffff;
-    }
-    void reserve(int n)
-    {
-        S_00c6aca0_Heap& a = FUN_00c85750()->heap();
-        const int cap = getCapacity();
-        if (cap < n)
-        {
-            int cap2 = 2 * cap;
-            int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&a, this, newSize, sizeof(T));
-        }
-    }
-    void AddBack(const T& t)
-    {
-        S_00c6aca0_Router* r = FUN_00c85750();
-        if (count == getCapacity())
-            ResizeAudioStream(&r->heap(), this, sizeof(T));
-        S00cb4c60_copy(data + count, 1, t);
-        count++;
-    }
-    void SetSize(int size)
-    {
-        reserve(size);
-        count = size;
-    }
-};
-struct hkpConstraintInstance
+    return capRaw & 0x3fffffff;
+}
+template <class T> inline void hkArrayNative<T>::reserve(int n)
 {
-    int unk00, unk04;
-    hkpSimulationIsland* owner;
-};
+    S_00c6aca0_Heap& a = FUN_00c85750()->heap();
+    const int cap = getCapacity();
+    if (cap < n)
+    {
+        int cap2 = 2 * cap;
+        int newSize = (n < cap2) ? cap2 : n;
+        FUN_00c908c0(&a, this, newSize, sizeof(T));
+    }
+}
+template <class T> inline void hkArrayNative<T>::AddBack(const T& t)
+{
+    S_00c6aca0_Router* r = FUN_00c85750();
+    if (count == getCapacity())
+        ResizeAudioStream(&r->heap(), this, sizeof(T));
+    S00cb4c60_copy(data + count, 1, t);
+    count++;
+}
+template <class T> inline void hkArrayNative<T>::SetSize(int size)
+{
+    reserve(size);
+    count = size;
+}
 struct ConstraintRuntimeInfo
 {
     hkpConstraintInstance* constraint;
@@ -2468,142 +2386,6 @@ struct ConstraintRuntimeInfo
     int unk24;
     int unk28;
     int unk2c;
-};
-struct hkpAction
-{
-    int unk00, unk04, unk08;
-    hkpSimulationIsland* owner;
-};
-struct hkpEntity
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    unsigned short storageIndex, unkAA;
-    ConstraintRuntimeInfo* constraintMasters;
-    unsigned short constraintMasterCount, unkB2;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    hkpSimulationIsland* owner;
-};
-struct hkpSimulationIsland
-{
-    virtual ~hkpSimulationIsland();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    unsigned short storageIndex, dirtyIndex;
-    unsigned char unk24, flags25;
-    union
-    {
-        unsigned char flags26;
-        struct
-        {
-            unsigned char f26lo : 2;
-            unsigned char f26mid : 2;
-        } f26;
-    };
-    unsigned char unk27;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    hkArrayNative<hkpAction*> actions;
-    int unk44;
-    hkArrayNative<hkpEntity*> entities;
-    int unk54;
-    int unk58;
-    void FUN_00d07120();
-    void MergeFrom(hkpSimulationIsland*);
-};
-struct hkpWorld
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    hkpSimulationIsland* fixedIsland;
-    int unk24;
-    hkArrayNative<hkpSimulationIsland*> active;
-    hkArrayNative<hkpSimulationIsland*> inactive;
-    hkArrayNative<hkpSimulationIsland*> dirty;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int refCount94;
-    int unk98;
-    unsigned char flag9c, unk9d, unk9e, unk9f;
-    int unka0;
-    int unka4;
-    void FUN_00c910a0(hkpSimulationIsland*);
-    void FUN_00c91120();
-    void FUN_00c91140();
 };
 void __cdecl FUN_00cb5100(hkpWorld*, hkpSimulationIsland*, hkBool);
 void __cdecl FUN_00cff290(void*, void*);
@@ -2620,39 +2402,12 @@ static inline int GrowCap(int cap, int need)
 void __cdecl FUN_00cb4c60(hkpWorld* a1, hkpSimulationIsland* P, hkpSimulationIsland* Q);
 struct IslandList
 {
-    struct IslandNode** items;
+    hkpSimulationIsland** items;
     int count;
     int capacity;
 };
-struct IslandNode
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    unsigned char index;
-    unsigned char flags;
-    union
-    {
-        unsigned char state;
-        struct
-        {
-            unsigned char lowState : 2;
-            unsigned char highState : 2;
-            unsigned char otherState : 4;
-        };
-    };
-    unsigned char unk27;
-    IslandList first;
-    IslandList second;
-};
-void __cdecl FUN_00cb6060(IslandNode* data, Object* object, IslandList* list, int value);
-void __cdecl AddItemToContainer(Object* object, IslandNode* item);
+void __cdecl FUN_00cb6060(hkpSimulationIsland* data, Object* object, IslandList* list, int value);
+void __cdecl AddItemToContainer(Object* object, hkpSimulationIsland* item);
 void __cdecl PropagateStateToChildren(Object* object, int* data);
 #include <windows.h>
 struct Cb4890_Elem
@@ -3000,7 +2755,6 @@ struct S00cb5100_Bits
     unsigned char lo : 2;
     unsigned char hi : 6;
 };
-struct S00cb5100_Body;
 struct S00cb5100_Ent
 {
     int unk00;
@@ -3054,7 +2808,7 @@ struct S00cb5100_Ent
     int unkc0;
     int unkc4;
     int unkc8;
-    S00cb5100_Body* owner_cc;
+    hkpSimulationIsland* owner_cc;
     int unkd0;
     int unkd4;
     int unkd8;
@@ -3095,52 +2849,26 @@ struct S00cb5100_Ent
         wec = (unsigned short)((wec & 0x3fff) | a1);
     }
 };
-struct S00cb5100_Body
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int f1c;
-    unsigned short idx20;
-    unsigned short unk22;
-    unsigned short unk24;
-    unsigned char flags26;
-    unsigned char unk27;
-    int unk28;
-    int unk2c;
-    float f30;
-    float f34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    float f44;
-    S00cb5100_Ent** list48;
-    int count4c;
-};
 void ResizeAudioStream(void* heap, void* arr, int elemSize);
 struct S00cb5100_Arr
 {
-    S00cb5100_Body** m_data;
+    hkpSimulationIsland** m_data;
     int m_iElementCount;
     int m_cap;
-    S00cb5100_Body* pick(int* n, S00cb5100_Body** b, int k);
-    void AddBack(S00cb5100_Body* const& e)
+    hkpSimulationIsland* pick(int* n, hkpSimulationIsland** b, int k);
+    void AddBack(hkpSimulationIsland* const& e)
     {
         S_00c6aca0_Router* r = FUN_00c85750();
         if (m_iElementCount == (m_cap & 0x3fffffff))
             ResizeAudioStream(r->m10, this, 4);
-        S00cb5100_Body** out = m_data + m_iElementCount;
+        hkpSimulationIsland** out = m_data + m_iElementCount;
         for (int k = 0; k < 1; ++k)
             out[k] = e;
         ++m_iElementCount;
     }
 };
 void FUN_00cf1480(float a, float b, void* p);
-void ProcessBlocks(S00cb5100_Body* b, float f, float g, int h);
+void ProcessBlocks(hkpSimulationIsland* b, float f, float g, int h);
 struct S00cb5100_World
 {
     int unk00;
@@ -3154,7 +2882,7 @@ struct S00cb5100_World
     int unk20;
     int unk24;
     S00cb5100_Arr arr28;
-    S00cb5100_Body** data34;
+    hkpSimulationIsland** data34;
     int size38;
     int unk3c;
     int unk40;
@@ -3343,9 +3071,9 @@ struct S00cb5100_World
         S00cb5100_Bits bits307;
     };
 };
-void ProcessSceneCallbacks(S00cb5100_World* w, S00cb5100_Body* b);
-static __declspec(noinline) S00cb5100_Body* FindItemForThreshold(S00cb5100_World* w, S00cb5100_Arr* arr, int n,
-                                                                 S00cb5100_Body* b)
+void ProcessSceneCallbacks(S00cb5100_World* w, hkpSimulationIsland* b);
+static __declspec(noinline) hkpSimulationIsland* FindItemForThreshold(S00cb5100_World* w, S00cb5100_Arr* arr, int n,
+                                                                 hkpSimulationIsland* b)
 {
     if (w->size38 == 0 || arr->m_iElementCount == 0)
         return 0;
@@ -3355,7 +3083,7 @@ static inline bool S00cb5100_lt(unsigned char a, unsigned char b)
 {
     return a < b;
 }
-void FUN_00cb5100(S00cb5100_World* w, S00cb5100_Body* b, bool merge);
+void FUN_00cb5100(S00cb5100_World* w, hkpSimulationIsland* b, bool merge);
 #include <xmmintrin.h>
 extern float DAT_01017d00;
 __forceinline int c6a870Equals3(const __m128& a, const __m128& b, float eps = 0.001f)
@@ -4154,15 +3882,9 @@ struct S00cb4230_Quat
     {}
     S00cb4230_Vec4 m_vec;
 };
-struct InertiaTensor
-{
-    InertiaTensor()
-    {}
-    S00cb4230_Vec4 m_kColumn0;
-    S00cb4230_Vec4 m_kColumn1;
-    S00cb4230_Vec4 m_kColumn2;
-};
-struct S00cb4230_Rotation : InertiaTensor
+#include "../../../../../../include/hkMatrix3.h"
+
+struct S00cb4230_Rotation : hkMatrix3
 {
     S00cb4230_Rotation()
     {}
@@ -4178,24 +3900,8 @@ struct S00cb4230_Transform
         return m_vTranslation;
     }
 };
-struct S00cb4230_Swept
-{
-    S00cb4230_Swept()
-    {}
-    float getInvDeltaTime() const
-    {
-        return m_vCenterOfMass1(3);
-    }
-    float getBaseTime() const
-    {
-        return m_vCenterOfMass0(3);
-    }
-    S00cb4230_Vec4 m_vCenterOfMass0;
-    S00cb4230_Vec4 m_vCenterOfMass1;
-    S00cb4230_Quat m_qRotation0;
-    S00cb4230_Quat m_qRotation1;
-    S00cb4230_Vec4 m_vCenterOfMassLocal;
-};
+#include "../../../../../../include/hkSweptTransform.h"
+
 extern float DAT_010c7948[];
 struct S00cb4230_UFloat8
 {
@@ -4219,17 +3925,17 @@ struct S00cb4230_MotionStateData
     {
         return m_kMotionTransform;
     }
-    S00cb4230_Swept& getSweptTransform()
+    hkSweptTransform& getSweptTransform()
     {
         return m_kSweptTransform;
     }
-    const S00cb4230_Swept& getSweptTransform() const
+    const hkSweptTransform& getSweptTransform() const
     {
         return m_kSweptTransform;
     }
     void FUN_00c86660(void* p);
     S00cb4230_Transform m_kMotionTransform;
-    S00cb4230_Swept m_kSweptTransform;
+    hkSweptTransform m_kSweptTransform;
     S00cb4230_Vec4 m_kDeltaAngle;
     float m_fObjectRadius;
     float m_fLinearDamping;
@@ -4261,15 +3967,6 @@ struct MotionFlag31
 
   private:
     char m_cBooleanValue;
-};
-enum S00cb4230_MotionType
-{
-    S00cb4230_INVALID,
-    S00cb4230_DYNAMIC,
-    S00cb4230_SPHERE,
-    S00cb4230_BOX,
-    S00cb4230_KEYFRAMED,
-    S00cb4230_FIXED
 };
 template <typename E, typename S> struct S00cb4230_Enum
 {
@@ -4334,7 +4031,7 @@ struct MotionBase : RefHeader31
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void GetInverseScaleMatrix(InertiaTensor& out) const;
+    virtual void GetInverseScaleMatrix(hkMatrix3& out) const;
     virtual void v06();
     virtual void v07();
     virtual void v08();
@@ -4357,7 +4054,7 @@ struct MotionBase : RefHeader31
     virtual void v25(MotionState* p);
     virtual void v26();
     virtual void v27(MotionState* p);
-    S00cb4230_MotionType getType() const
+    hkpMotion::MotionType getType() const
     {
         return m_type;
     }
@@ -4371,11 +4068,11 @@ struct MotionBase : RefHeader31
     }
     const S00cb4230_Quat& getRotation() const
     {
-        return m_kMotionState.getSweptTransform().m_qRotation1;
+        return reinterpret_cast<const S00cb4230_Quat&>(m_kMotionState.getSweptTransform().m_qRotation1);
     }
     const S00cb4230_Vec4& getCenterOfMassLocal() const
     {
-        return m_kMotionState.getSweptTransform().m_vCenterOfMassLocal;
+        return reinterpret_cast<const S00cb4230_Vec4&>(m_kMotionState.getSweptTransform().m_vCenterOfMassLocal);
     }
     float getLinearDamping()
     {
@@ -4393,7 +4090,7 @@ struct MotionBase : RefHeader31
     {
         m_kMotionState.m_fAngularDamping = d;
     }
-    S00cb4230_Enum<S00cb4230_MotionType, unsigned char> m_type;
+    S00cb4230_Enum<hkpMotion::MotionType, unsigned char> m_type;
     char m_09;
     short m_0a;
     short m_0c;
@@ -4460,11 +4157,6 @@ struct S00cb4230_String
         }
     }
 };
-enum S00cb4230_Quality
-{
-    S00cb4230_QUALITY_FIXED,
-    S00cb4230_QUALITY_KEYFRAMED
-};
 struct S00cb4230_Handle
 {
     int m_iOwnerObjectOffset;
@@ -4484,9 +4176,9 @@ struct S00cb4230_Collidable
     {
         return &m_kBroadPhaseHandle;
     }
-    S00cb4230_Quality getQualityType() const
+    hkpCollidableQualityType getQualityType() const
     {
-        return S00cb4230_Quality(m_kBroadPhaseHandle.m_ucObjectQualityType);
+        return hkpCollidableQualityType(m_kBroadPhaseHandle.m_ucObjectQualityType);
     }
     void setMotionState(const S00cb4230_MotionStateData* s)
     {
@@ -4582,11 +4274,11 @@ struct ThisObj
     {
         return getRigidMotion()->getRotation();
     }
-    S00cb4230_Quality getQualityType() const
+    hkpCollidableQualityType getQualityType() const
     {
-        return S00cb4230_Quality(getCollidable()->getQualityType());
+        return hkpCollidableQualityType(getCollidable()->getQualityType());
     }
-    void setQualityType(S00cb4230_Quality type)
+    void setQualityType(hkpCollidableQualityType type)
     {
         getCollidableRw()->getBroadPhaseHandle()->m_ucObjectQualityType = char(type);
     }
@@ -4799,9 +4491,9 @@ template <typename T> __forceinline T* __cdecl S00cb4230_AddByteOffset(T* base, 
     return reinterpret_cast<T*>(reinterpret_cast<char*>(base) + offset);
 }
 void __cdecl FUN_00ca8240(int mode, const S00cb4230_Vec4* p40, const S00cb4230_Quat* p80, float fret,
-                          const InertiaTensor* out, const S00cb4230_Vec4* p90, float f0, float f1, MotionBase* motion);
+                          const hkMatrix3* out, const S00cb4230_Vec4* p90, float f0, float f1, MotionBase* motion);
 void __cdecl UpdateRotationInterpolation(float f, S00cb4230_MotionStateData* p);
-void __cdecl FUN_00cb4230(ThisObj* self, S00cb4230_MotionType mode, MotionFlag31 flagA, MotionFlag31 flagB,
+void __cdecl FUN_00cb4230(ThisObj* self, hkpMotion::MotionType mode, MotionFlag31 flagA, MotionFlag31 flagB,
                           Node4* node);
 struct MergeWorld
 {
@@ -5063,7 +4755,6 @@ int PickIslandByValue(int a, int b, int c);
 void CloneRecord(int a, int b);
 void FUN_00cfe020(int a, int b);
 void FUN_00cb3ee0(void* m, MotionObj* motion, void* w, int mode);
-struct S55Item;
 template <typename T>
 
 struct S55Array
@@ -5117,53 +4808,6 @@ __forceinline void S55Array<T>::GrowArrayCapacity(S_00c6aca0_Heap& a, int n)
         FUN_00c908c0(a, this, newSize, sizeof(T));
     }
 }
-struct S55Item
-{
-
-    int unk00;
-
-    int unk04;
-
-    int unk08;
-
-    int unk0c;
-
-    int unk10;
-
-    int unk14;
-
-    int unk18;
-
-    int m_1c;
-
-    unsigned short unk20;
-
-    unsigned short m_22;
-
-    unsigned char unk24;
-
-    unsigned char m_25;
-
-    unsigned char m_26;
-
-    unsigned char unk27;
-
-    int unk28;
-
-    int unk2c;
-
-    int unk30;
-
-    int unk34;
-
-    S55Array<S55Item*> m_38;
-
-    int unk44;
-
-    ObjB** m_48;
-
-    int m_4c;
-};
 struct S55Bool
 {
 
@@ -5195,7 +4839,7 @@ struct S55Owner
 
     int unk24;
 
-    S55Array<S55Item*> m_28;
+    S55Array<hkpSimulationIsland*> m_28;
 
     int unk34;
 
@@ -5203,7 +4847,7 @@ struct S55Owner
 
     int unk3c;
 
-    S55Array<S55Item*> m_40;
+    S55Array<hkpSimulationIsland*> m_40;
 
     int unk4c;
 
@@ -5271,8 +4915,8 @@ struct S55Owner
 
     void __thiscall FUN_00c910b0();
 };
-void __cdecl FUN_00cb5100(S55Owner* owner, S55Item* item, S55Bool b);
-void __cdecl FUN_00cb5310(S55Owner* owner, S55Item* item);
+void __cdecl FUN_00cb5100(S55Owner* owner, hkpSimulationIsland* item, S55Bool b);
+void __cdecl FUN_00cb5310(S55Owner* owner, hkpSimulationIsland* item);
 extern "C" void __cdecl FUN_00cb5570(S55Owner* owner, ObjB* first, ObjB* second);
 void __cdecl FUN_00cb55d0(S55Owner* owner);
 
@@ -5391,57 +5035,19 @@ struct SplitIsland_L60
     int data[32];
 };
 struct SplitIsland_H44;
-struct SplitIsland_Arg0
+// Byte views preserve the original independent island flag bitfields.
+struct SplitIsland_Flags25
 {
-    inline void SplitIsland_removeTransfer(SplitIsland_Target*, SplitIsland_H44&);
-    int unk00;
-    short f04;
-    short unk06;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    unsigned short unk20;
-    short unk22;
-    unsigned char unk24;
-    union
-    {
-        unsigned char f25;
-        struct
-        {
-            unsigned char stateLow : 2;
-            unsigned char groupState : 2;
-            unsigned char stateHigh : 4;
-        };
-    };
-    union
-    {
-        unsigned char f26;
-        struct
-        {
-            unsigned char type26 : 2;
-            unsigned char active26 : 1;
-            unsigned char pending26 : 1;
-            unsigned char high26 : 4;
-        };
-    };
-    unsigned char unk27;
-    int field28;
-    int field2C;
-    int field30;
-    int field34;
-    SplitIsland_Vec48 f38v;
-    int unk44;
-    SplitIsland_Vec48 f48v;
-    int field54;
-    int f58;
-    SplitIsland_Vec48 v5c;
-    int inline68;
-    char CheckConnectivity(void* p);
-    SplitIsland_Arg0* FUN_00d07830(void* arg);
-    inline void AccumulateStats(SplitIsland_Target*, SplitIsland_H44&);
+    unsigned char stateLow : 2;
+    unsigned char groupState : 2;
+    unsigned char stateHigh : 4;
+};
+struct SplitIsland_Flags26
+{
+    unsigned char type26 : 2;
+    unsigned char active26 : 1;
+    unsigned char pending26 : 1;
+    unsigned char high26 : 4;
 };
 struct SplitIsland_H44
 {
@@ -5472,10 +5078,10 @@ struct SplitIsland_Sub30
 };
 struct SplitIsland_Target
 {
-    inline void SplitIsland_assignOwner(SplitIsland_Arg0*);
+    inline void SplitIsland_assignOwner(hkpSimulationIsland*);
     int unk00;
     int unk04;
-    SplitIsland_Arg0* SplitIsland_owner;
+    hkpSimulationIsland* SplitIsland_owner;
     int unk0c;
     int unk10;
     int unk14;
@@ -5780,8 +5386,8 @@ struct SplitIsland_Arg1
     unsigned char field304;
     unsigned char f305;
     unsigned char f306;
-    void FUN_00c911f0(SplitIsland_Arg0* a);
-    void FUN_00c91230(SplitIsland_Arg0* a);
+    void FUN_00c911f0(hkpSimulationIsland* a);
+    void FUN_00c91230(hkpSimulationIsland* a);
 };
 struct SplitIsland_StreamLink
 {
@@ -5790,9 +5396,9 @@ struct SplitIsland_StreamLink
     int unk08;
     int unk0c;
     signed char ownerOffset;
-    __forceinline SplitIsland_Arg0* SplitIsland_owner()
+    __forceinline hkpSimulationIsland* SplitIsland_owner()
     {
-        return (SplitIsland_Arg0*)((SplitIsland_Node2*)((char*)this + ownerOffset))->fCC;
+        return (hkpSimulationIsland*)((SplitIsland_Node2*)((char*)this + ownerOffset))->fCC;
     }
 };
 struct SplitIsland_StreamRecord
@@ -6074,17 +5680,18 @@ inline void SplitIsland_Sub30::SplitIsland_debitTransfer(const SplitIsland_H44& 
     f18 -= info.f08;
     f14 -= info.f04;
 }
-inline void SplitIsland_Arg0::SplitIsland_removeTransfer(SplitIsland_Target* constraint, SplitIsland_H44& info)
+// The shared layout does not yet name these constraint-transfer totals at +0x0c, +0x10 and +0x14.
+inline void SplitIsland_removeTransfer(hkpSimulationIsland* island, SplitIsland_Target* constraint, SplitIsland_H44& info)
 {
     if (constraint->f30)
     {
-        unk0c -= info.f04;
-        unk10 -= info.f06;
-        unk14 -= info.f08;
+        ((int*)island)[3] -= info.f04;
+        ((int*)island)[4] -= info.f06;
+        ((int*)island)[5] -= info.f08;
         constraint->f30->SplitIsland_debitTransfer(info);
     }
 }
-inline void SplitIsland_Target::SplitIsland_assignOwner(SplitIsland_Arg0* p)
+inline void SplitIsland_Target::SplitIsland_assignOwner(hkpSimulationIsland* p)
 {
     SplitIsland_owner = p;
 }
@@ -6096,15 +5703,15 @@ __forceinline void SplitIsland_Vec48::SplitIsland_appendNodeUnchecked(SplitIslan
     ++cnt;
 }
 // @fnv 0x00cb6060
-void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Vec* a2, void* a3)
+void FUN_00cb6060(hkpSimulationIsland* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Vec* a2, void* a3)
 {
     SplitIsland_L60 groups;
     SplitIsland_Obj38 sel;
-    SplitIsland_CountedBuffer<int> cand(a0->f48v.cnt);
-    sel.FUN_00d27f70((int*)&cand.data, a0->f48v.cnt);
-    if (a0->CheckConnectivity(&sel))
+    SplitIsland_CountedBuffer<int> cand((*(SplitIsland_Vec48*)&a0->entities).cnt);
+    sel.FUN_00d27f70((int*)&cand.data, (*(SplitIsland_Vec48*)&a0->entities).cnt);
+    if (a0->CheckIslandConnectivity((IncompleteClassType&)sel))
     {
-        a0->f25 &= 0xf3;
+        a0->flags25 &= 0xf3;
         cand.SplitIsland_release();
         return;
     }
@@ -6113,11 +5720,11 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
     groups.f08 = 0x80000020;
     sel.RemapIndices(&groups);
     SplitIsland_StackBuffer<char> states(groups.f04, true);
-    if (a0->f25 & 0xc)
+    if (a0->flags25 & 0xc)
     {
         if (!!a1->fD5)
         {
-            SplitIsland_classifyParts(a1, sel, a0->f48v, groups, states);
+            SplitIsland_classifyParts(a1, sel, (*(SplitIsland_Vec48*)&a0->entities), groups, states);
             if (groups.f04 != 1)
             {
             }
@@ -6145,14 +5752,14 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
         }
         else
         {
-            SplitIsland_combineGroups(a1, sel, a0->f48v, groups, states);
+            SplitIsland_combineGroups(a1, sel, (*(SplitIsland_Vec48*)&a0->entities), groups, states);
         }
     }
     else
     {
         if (!!a1->fB4)
         {
-            SplitIsland_combineGroups(a1, sel, a0->f48v, groups, states);
+            SplitIsland_combineGroups(a1, sel, (*(SplitIsland_Vec48*)&a0->entities), groups, states);
         }
         else
         {
@@ -6168,7 +5775,7 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
         av[0] = first;
         av[arrays] = r;
         int kIter = *groups.f00;
-        int originalCount = a0->f48v.cnt;
+        int originalCount = (*(SplitIsland_Vec48*)&a0->entities).cnt;
         long alV = groups.f04;
         int* generation = SplitIsland_cursor();
         if (alV == 1)
@@ -6194,47 +5801,47 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
         {
             int tmp = *generation;
             *generation = tmp + (((alV * 4) + 0x7f) & ~0x7f);
-            a0->groupState = av[0] != 0;
+            ((SplitIsland_Flags25&)a0->flags25).groupState = av[0] != 0;
             *(int*)tmp = (int)a0;
             for (int i = 1; i < alV; i++)
             {
                 int* firstElem = SplitIsland_cursor();
                 SplitIsland_AllocB* alL = (SplitIsland_AllocB*)((SplitIsland_CursorObj*)firstElem)->alloc;
-                SplitIsland_Arg0* no = (SplitIsland_Arg0*)alL->AllocSz(0x6c);
-                no->f04 = 0x6c;
-                no = no->FUN_00d07830(a1);
-                no->type26 = 1;
-                no->pending26 = 0;
-                no->active26 = 1;
-                no->groupState = av[i] != 0;
-                no->unk20 = (short)a2->cnt;
+                hkpSimulationIsland* no = (hkpSimulationIsland*)alL->AllocSz(0x6c);
+                no->m_usMemSizeAndFlags = 0x6c;
+                no = ::new (no) hkpSimulationIsland((hkpWorld*)a1);
+                ((SplitIsland_Flags26&)no->flags26).type26 = 1;
+                ((SplitIsland_Flags26&)no->flags26).pending26 = 0;
+                ((SplitIsland_Flags26&)no->flags26).active26 = 1;
+                ((SplitIsland_Flags25&)no->flags25).groupState = av[i] != 0;
+                no->storageIndex = (short)a2->cnt;
                 ((SplitIsland_Vec48*)a2)->SplitIsland_append((int)no);
                 ((int*)tmp)[i] = (int)no;
-                no->f48v.SplitIsland_reserve(groups.f00[i]);
+                (*(SplitIsland_Vec48*)&no->entities).SplitIsland_reserve(groups.f00[i]);
             }
             // cb68cc: reset a0 f48 vector, relink elements
             {
-                int* c = a0->f48v.data;
-                int j = a0->f48v.cnt;
+                int* c = (*(SplitIsland_Vec48*)&a0->entities).data;
+                int j = (*(SplitIsland_Vec48*)&a0->entities).cnt;
                 if ((bool)a3)
                 {
-                    a0->f48v.SwapThreeInts((int)a3);
-                    a0->f48v.cnt = 0;
+                    (*(SplitIsland_Vec48*)&a0->entities).SwapThreeInts((int)a3);
+                    (*(SplitIsland_Vec48*)&a0->entities).cnt = 0;
                     int a = *groups.f00;
-                    a0->f48v.SplitIsland_reserve(a);
+                    (*(SplitIsland_Vec48*)&a0->entities).SplitIsland_reserve(a);
                 }
                 else
                 {
-                    a0->f48v.cnt = 0;
+                    (*(SplitIsland_Vec48*)&a0->entities).cnt = 0;
                 }
 
                 for (int k = 0; k < j; ++k)
                 {
-                    SplitIsland_Arg0* el = (SplitIsland_Arg0*)((int*)tmp)[cand.data[k]];
+                    hkpSimulationIsland* el = (hkpSimulationIsland*)((int*)tmp)[cand.data[k]];
                     SplitIsland_Node2* cpF = (SplitIsland_Node2*)c[k];
                     cpF->fCC = (int)el;
-                    cpF->fA8 = (short)el->f48v.cnt;
-                    el->f48v.SplitIsland_appendNodeUnchecked(cpF);
+                    cpF->fA8 = (short)(*(SplitIsland_Vec48*)&el->entities).cnt;
+                    (*(SplitIsland_Vec48*)&el->entities).SplitIsland_appendNodeUnchecked(cpF);
                     if (a0 != el)
                     {
                         SplitIsland_Sub30* y = (SplitIsland_Sub30*)cpF->fAC;
@@ -6242,12 +5849,12 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
                         {
                             SplitIsland_H44 h;
                             y->SplitIsland_readTransfer(h);
-                            h.f00 = a0->unk08;
-                            --a0->unk1c;
-                            a0->SplitIsland_removeTransfer(y->f00, h);
-                            ++el->unk1c;
+                            h.f00 = a0->m_iMaxSchemaSize;
+                            --a0->unk1C;
+                            SplitIsland_removeTransfer(a0, y->f00, h);
+                            ++el->unk1C;
                             y->f00->SplitIsland_owner = el;
-                            el->AccumulateStats(y->f00, h);
+                            el->AccumulateStats((void*)y->f00, (GenericConstraintAtomScheme&)h);
                         }
                     }
                 }
@@ -6257,9 +5864,9 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
                 {
                     int savedA1f20 = a1->f20;
                     int* f38data;
-                    f38data = a0->f38v.data;
-                    long n = a0->f38v.cnt;
-                    a0->f38v.cnt = 0;
+                    f38data = (*(SplitIsland_Vec48*)&a0->actions).data;
+                    long n = (*(SplitIsland_Vec48*)&a0->actions).cnt;
+                    (*(SplitIsland_Vec48*)&a0->actions).cnt = 0;
                     for (int saved38B = 0; saved38B < n; saved38B++)
                     {
                         SplitIsland_Elem2* e2 = (SplitIsland_Elem2*)f38data[saved38B];
@@ -6293,15 +5900,15 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
                             members.f08 = (int)0x80000000;
                         }
                         e2->f0c = base;
-                        SplitIsland_Arg0* head = (SplitIsland_Arg0*)base;
-                        head->f38v.SplitIsland_append((int)e2);
+                        hkpSimulationIsland* head = (hkpSimulationIsland*)base;
+                        (*(SplitIsland_Vec48*)&head->actions).SplitIsland_append((int)e2);
                     }
                     a1->FUN_00c911f0(a0);
                 }
                 // cb6b6a / cb6c2d: walk a0 ox vec at +0x5c
                 if (((originalCount - kIter) * 8) < originalCount)
                 {
-                    SplitIsland_Head58* ox = (SplitIsland_Head58*)&a0->f58;
+                    SplitIsland_Head58* ox = (SplitIsland_Head58*)&a0->unk58;
                     for (int saved38B = 0; saved38B < ox->vec.cnt; saved38B++)
                     {
                         char* elem = (char*)ox->vec.data[saved38B];
@@ -6311,7 +5918,7 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
                         while (s < len)
                         {
                             int buf18 = (int)((SplitIsland_StreamRecord*)s)->link10->SplitIsland_owner();
-                            if (((SplitIsland_Arg0*)buf18)->unk20 == 0xffff)
+                            if (((hkpSimulationIsland*)buf18)->storageIndex == 0xffff)
                             {
                                 buf18 = (int)((SplitIsland_StreamRecord*)s)->link14->SplitIsland_owner();
                             }
@@ -6322,7 +5929,7 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
                             else
                             {
                                 int b = s - elem;
-                                CloneRecord(&((SplitIsland_Arg0*)buf18)->f58, s);
+                                CloneRecord(&((hkpSimulationIsland*)buf18)->unk58, s);
                                 FUN_00cfe020(ox, s);
                                 if (saved38B >= ox->vec.cnt)
                                     break;
@@ -6340,20 +5947,20 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
                     idx.vec.cnt = 0;
                     idx.vec.cap = (int)0x80000001;
                     idx.hdr = 0x200;
-                    if (a0->v5c.cnt == 1)
+                    if ((*(SplitIsland_Vec48*)&a0->unk5C).cnt == 1)
                     {
-                        idx.vec.SplitIsland_appendUnchecked(a0->v5c.data[0]);
-                        a0->v5c.cnt = 0;
+                        idx.vec.SplitIsland_appendUnchecked((*(SplitIsland_Vec48*)&a0->unk5C).data[0]);
+                        (*(SplitIsland_Vec48*)&a0->unk5C).cnt = 0;
                     }
-                    else if (a0->v5c.cnt > 1)
+                    else if ((*(SplitIsland_Vec48*)&a0->unk5C).cnt > 1)
                     {
                         idx.vec.SplitIsland_reserve(2);
-                        idx.vec.SwapThreeInts((int)&a0->v5c);
+                        idx.vec.SwapThreeInts((int)&(*(SplitIsland_Vec48*)&a0->unk5C));
                     }
                     {
                         long cpV = idx.hdr;
-                        idx.hdr = a0->f58;
-                        a0->f58 = cpV;
+                        idx.hdr = a0->unk58;
+                        a0->unk58 = cpV;
                     }
                     for (int saved38B = 0; saved38B < idx.vec.cnt; saved38B++)
                     {
@@ -6365,11 +5972,11 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
                         while (s < endp)
                         {
                             int buf18 = (int)((SplitIsland_StreamRecord*)s)->link10->SplitIsland_owner();
-                            if (((SplitIsland_Arg0*)buf18)->unk20 == 0xffff)
+                            if (((hkpSimulationIsland*)buf18)->storageIndex == 0xffff)
                             {
                                 buf18 = (int)((SplitIsland_StreamRecord*)s)->link14->SplitIsland_owner();
                             }
-                            CloneRecord(&((SplitIsland_Arg0*)buf18)->f58, s);
+                            CloneRecord(&((hkpSimulationIsland*)buf18)->unk58, s);
                             s += ((SplitIsland_StreamRecord*)s)->size;
                         }
                         int* t2 = SplitIsland_cursor();
@@ -6390,12 +5997,12 @@ void FUN_00cb6060(SplitIsland_Arg0* a0, SplitIsland_Arg1* a1, SplitIsland_Arg2Ve
                 }
                 // cb6d6d: c91230 + pow2-spread grow on a0 vec5c
                 a1->FUN_00c91230(a0);
-                a0->v5c.SplitIsland_compact();
+                (*(SplitIsland_Vec48*)&a0->unk5C).SplitIsland_compact();
                 // cb6dee: final byte-accumulate loop over SplitIsland_cursor array
                 for (int i = 1; i < alV; i++)
                 {
                     char cp3 = a0->unk24;
-                    SplitIsland_Arg0* z = (SplitIsland_Arg0*)((int*)tmp)[i];
+                    hkpSimulationIsland* z = (hkpSimulationIsland*)((int*)tmp)[i];
                     cp3 += i;
                     z->unk24 = cp3;
                 }
@@ -6431,15 +6038,19 @@ __forceinline int SplitIsland_largerContribution(int a, int b)
 {
     return a > b ? a : b;
 }
-inline void SplitIsland_Arg0::AccumulateStats(SplitIsland_Target* constraint, SplitIsland_H44& info)
+
+// Retain this unit's inline implementation using the shared accumulator declaration.
+inline void hkpConstraintOwner::AccumulateStats(void* object, GenericConstraintAtomScheme& scheme)
 {
+    SplitIsland_Target* constraint = (SplitIsland_Target*)object;
+    SplitIsland_H44& info = (SplitIsland_H44&)scheme;
     if (constraint->f30)
     {
-        unk08 = SplitIsland_largerContribution(unk08, info.f00);
-        unk08 = SplitIsland_largerContribution(unk08, info.f04);
-        unk0c += info.f04;
-        unk10 += info.f06;
-        unk14 += info.f08;
+        m_iMaxSchemaSize = SplitIsland_largerContribution(m_iMaxSchemaSize, info.f00);
+        m_iMaxSchemaSize = SplitIsland_largerContribution(m_iMaxSchemaSize, info.f04);
+        ((int*)this)[3] += info.f04;
+        ((int*)this)[4] += info.f06;
+        ((int*)this)[5] += info.f08;
         SplitIsland_Sub30* rec = constraint->f30;
         const unsigned int r = rec->f16 + info.f06;
         const unsigned int t = rec->f18 + info.f08;
@@ -6447,6 +6058,6 @@ inline void SplitIsland_Arg0::AccumulateStats(SplitIsland_Target* constraint, Sp
         rec->f16 = (unsigned short)r;
         rec->f18 = (unsigned short)t;
         rec->f14 = (unsigned short)b;
-        unk08 = SplitIsland_largerContribution(unk08, (int)constraint->f30->f14);
+        m_iMaxSchemaSize = SplitIsland_largerContribution(m_iMaxSchemaSize, (int)constraint->f30->f14);
     }
 }

@@ -1,3 +1,4 @@
+#include "../../../../../../include/hkStringPtr.h"
 
 // src/havok/common/base/container/string/hkstringptr_gs_nogs_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/common/base/container/string/hkstringptr.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -95,14 +96,6 @@ template <class T, int N> struct hkInplaceArrayq
     }
 };
 
-class hkStringPtr
-{
-  public:
-    void operator=(const char* s) throw();
-    void FUN_00cb0c70(const char* fmt, ...);
-
-    const char* m_pcText;
-};
 
 // @fnv 0x00cb0c70
 void hkStringPtr::FUN_00cb0c70(const char* fmt, ...)

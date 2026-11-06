@@ -1,6 +1,16 @@
 // fallout_shared/tesmodeltextureswap.cpp: TESModelTextureSwap, NiFixedString, TESModel, DistantTreeTextureInfo (23 functions)
 
 #include "tesmodeltextureswap_decls.h"
+#include "../../include/BGSDistantTreeBlock.h"
+#include "../../include/TESModelTextureSwap.h"
+#include "../../include/BGSEquipType.h"
+#include "../../include/BGSMessageIcon.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESIcon.h"
+#include "../../include/TESTexture.h"
+#include "../../include/TESScriptableForm.h"
+#include "../../include/TESWeightForm.h"
 
 // Deletes every entry in the list by taking the head item, removing it, and freeing it, until the list is empty.
 // @fnv 0x0048ade0
@@ -8,10 +18,10 @@ void TESModelTextureSwap::ClearTextureSwaps()
 {
     void* pDelete;
     BGSPerkEntry* pItem;
-    while (!TextureSwapNodeAccessor.IsEmpty())
+    while (!reinterpret_cast<BSSimpleList<PerkButtonEntry*>*>(&textureList)->IsEmpty())
     {
-        pItem = reinterpret_cast<BSSimpleList<BGSPerkEntry*>*>(&TextureSwapNodeAccessor)->GetItem();
-        TextureSwapNodeAccessor.RemoveHead();
+        pItem = reinterpret_cast<BSSimpleList<BGSPerkEntry*>*>(&textureList)->GetItem();
+        reinterpret_cast<BSSimpleList<PerkButtonEntry*>*>(&textureList)->RemoveHead();
         pDelete = pItem;
         ::operator delete(pDelete);
     }
@@ -110,7 +120,8 @@ bool TESModelTextureSwap::ApplyTextureSwapToNode(NiAVObject* object, BSMap<int, 
                             reinterpret_cast<BGSTextureSet*>(swap->formID)->BuildShaderTextureSet();
                         shader->SetTextureSet(textureSet);
                         shader->BuildShaderTextureSet(0, 0);
-                        shader->vfn_108();
+                        // The shared shader header does not yet expose virtual slot 0x108.
+                        reinterpret_cast<void (__thiscall *)(BSShaderPPLightingProperty*)>((*reinterpret_cast<void***>(shader))[0x108 / 4])(shader);
                     }
                 }
                 reinterpret_cast<NiTMapBase<DFALL<NiTMapItem<unsigned int, CombatThreatRecord*> >, unsigned int,
@@ -186,7 +197,7 @@ void TESModelTextureSwap::ReadTextureSwapChunk(TESModelTextureSwap* model, TESFi
         buffer.data = static_cast<char*>(_alloca(buffer.size));
         file->GetChunkData(buffer.data, buffer.size);
         model->ParseTextureSwapData(buffer.data, buffer.size,
-                                    reinterpret_cast<TESFileFormVersion*>(file)->GetFormVersion());
+                                    file->GetFormVersion());
     }
     break;
     default:
@@ -235,7 +246,7 @@ void TESModelTextureSwap::AddTexSwap(const char* name, int index, BGSTextureSet*
             swap = new DistantTreeTextureInfo;
             TaskQueueInterface::CopyStringToBuffer(swap->objectName, 128, name);
             swap->index = index;
-            reinterpret_cast<BSSimpleList<SpellItem*>*>(&TextureSwapNodeAccessor)
+            reinterpret_cast<BSSimpleList<SpellItem*>*>(&textureList)
                 ->AddHead(reinterpret_cast<SpellItem*&>(swap));
         }
         swap->formID = reinterpret_cast<unsigned int>(textureSet);
@@ -277,41 +288,24 @@ DistantTreeTextureInfo::DistantTreeTextureInfo()
     objectName[0] = 0;
 }
 
-// Copy constructor: calls FUN_0043ba60 on other, then copies other.data into this object's data.
+// Copy constructor: retains the other string handle, then copies it.
 // @fnv 0x0048af40
 NiFixedString::NiFixedString(const NiFixedString& other)
 {
     FUN_0043ba60(other);
-    data = other.data;
+    m_kHandle = other.m_kHandle;
 }
 
 // @fnv 0x0048af70
 int NiFixedString::IsNotEmpty() const
 {
-    return data != EmptyFS.data;
+    return m_kHandle != EmptyFS.m_kHandle;
 }
 
-struct BSTextureSet;
-struct NiMemObject
-{
-    char _pad_0[1];
-};
-typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct FUN_0048b2f0_shell : public BSShaderPPLightingProperty
-{
-    void SetTextureSet(BSTextureSet*);
-};
-
-template <class T> class NiPointer
-{
-  public:
-    NiPointer<T>& operator=(T*);
-};
-
 // @fnv 0x0048b2f0
-void FUN_0048b2f0_shell::SetTextureSet(BSTextureSet* apTextureSet)
+void BSShaderPPLightingProperty::SetTextureSet(BSTextureSet* apTextureSet)
 {
-    *(NiPointer<NiNode>*)((char*)this + 0xA4) = (NiNode*)apTextureSet;
+    *reinterpret_cast<NiPointer<NiNode>*>(&spTextureSet) = reinterpret_cast<NiNode*>(apTextureSet);
 }
 
 extern "C" int __cdecl _NiStricmp(const char*, const char*);
@@ -345,7 +339,6 @@ void FUN_00409aa0_shell::FUN_00409aa0(unsigned int flags, bool set)
     set ? ((unsigned char*)this)[0xa0] |= flags : ((unsigned char*)this)[0xa0] &= ~flags;
 }
 
-struct BGSMenuIcon;
 struct BipedAnim;
 struct NiPoint3;
 struct Script;
@@ -358,171 +351,32 @@ struct blob12
 {
     char b[12];
 };
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
-struct TESFullName : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetFullNameLength(TESForm*);
-    unsigned int GetFullNameLength();
-    static char* GetFullName(TESForm*);
-    char* GetFullName();
-    void SetFullName(char*);
-    static void LoadFullNameChunk(TESFullName*, TESFile*);
-    void* GetFullNameString();
-    void* __vecDelDtor(unsigned int);
-    char m_kName[8];
-};
 typedef char _sizecheck_TESFullName[sizeof(TESFullName) == 12 ? 1 : -1];
-struct TESTexture : public BaseFormComponent
-{
-    virtual unsigned int GetTexturePathLength();
-    virtual char* NormalizeTextureFilePath(void*);
-    virtual char* GetRegularTextureFilePath(void*);
-    virtual char* GetTextureResourcePath();
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save(int);
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetTextureNameLength(TESForm*);
-    unsigned int GetTextureNameLength();
-    static char* GetTextureResourceName(TESForm*, TESObjectREFR*);
-    char* GetTextureResourceName();
-    void AssignTextureName(char*);
-    static void NormalizeTextureFilePath(char*, char*);
-    static char* NormalizeTextureFilePath(void*, char*);
-    static char* NormalFileToRegularFile(void*, char*);
-    static void GetRegularTextureFilePath(char*, char*);
-    static char* GetRegularTextureFilePath(void*, char*);
-    static void ConvertTexturePath(char*, char*);
-    static bool IsTextureChunk(int);
-    static void ReadTextureData(TESTexture*, TESFile*);
-    static char* GetMessageIconName(TESForm*, TESObjectREFR*);
-    void* __vecDelDtor(unsigned int);
-    char FullNameComponent[8];
-};
 typedef char _sizecheck_TESTexture[sizeof(TESTexture) == 12 ? 1 : -1];
-struct TESIcon : public TESTexture
-{
-    virtual char* GetTextureResourcePath();
-    void* __vecDelDtor(unsigned int);
-};
 typedef char _sizecheck_TESIcon[sizeof(TESIcon) == 12 ? 1 : -1];
-struct BGSMessageIcon : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save(int);
-    static void LoadMessageIcon(BGSMessageIcon*, TESFile*);
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    TESIcon* GetIcon();
-    char* GetMessageIconTextureName();
-    unsigned int GetMessageIconTextureNameLength();
-    void SetMessageIconTextureName(char*);
-    void* __vecDelDtor(unsigned int);
-    TESIcon Icon;
-};
 typedef char _sizecheck_BGSMessageIcon[sizeof(BGSMessageIcon) == 16 ? 1 : -1];
-struct TESScriptableForm : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    void InitItem(TESForm*);
-    static Script* GetScriptForForm(TESForm*);
-    Script* GetScriptForForm();
-    static char* GetFormScriptEditorID(TESForm*);
-    char* GetFormScriptEditorID();
-    static void SetFormScript(TESForm*, Script*);
-    void SetFormScript(Script*);
-    Script* m_pFormScript;
-    bool m_bHasScript;
-    char _pad_9[3];
-};
 typedef char _sizecheck_TESScriptableForm[sizeof(TESScriptableForm) == 12 ? 1 : -1];
-struct TESWeightForm : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static float GetWeightForForm(TESForm*, bool);
-    float GetWeightForForm();
-    void SetFormWeight(float);
-    void* __vecDelDtor(unsigned int);
-    float fWeight;
-};
 typedef char _sizecheck_TESWeightForm[sizeof(TESWeightForm) == 8 ? 1 : -1];
-struct BGSEquipType : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static int GetEquipType(TESForm*);
-    int GetEquipType();
-    void SetEquipType(int);
-    static BGSMenuIcon* GetEquipTypeIcon(int);
-    static char* GetEquipTypeName(int);
-    static void GenerateDefaultMenuIcons();
-    int m_eEquipType;
-};
 typedef char _sizecheck_BGSEquipType[sizeof(BGSEquipType) == 8 ? 1 : -1];
-struct FUN_0048a470_shell : public TESModelTextureSwap
-{
-    void FUN_0048a470();
-};
 
-struct FUN_00489040_shell
-{
-    void ClearString();
-};
 // @fnv 0x0048a470
-void FUN_0048a470_shell::FUN_0048a470()
+void TESModelTextureSwap::InitializeComponent()
 {
-    ((FUN_00489040_shell*)this)->ClearString();
+    TESModel::InitializeComponent();
 }
 
-struct FUN_004890e0_shell
-{
-    void ForwardToMember();
-};
-struct FUN_0048a500_shell : public TESModelTextureSwap
-{
-    void FUN_0048a500();
-};
 // @fnv 0x0048a500
-void FUN_0048a500_shell::FUN_0048a500()
+void TESModelTextureSwap::Free()
 {
     ClearTextureSwaps();
-    ((FUN_004890e0_shell*)this)->ForwardToMember();
+    TESModel::Free();
 }
-
-struct FUN_0048a7b0_shell : public TESModelTextureSwap
-{
-    bool LoadTextureSwapList(void*, unsigned int, unsigned int);
-};
 
 void* __cdecl __memcpy(void*, const void*, unsigned int);
 // Reads a count-prefixed list of texture swaps (name, texture pointer, optional geometry index) from a buffer and adds each valid entry via AddTexSwap.
 // @fnv 0x0048a7b0
-bool FUN_0048a7b0_shell::LoadTextureSwapList(void* apData, unsigned int aiDataSize, unsigned int aiVersion)
+bool TESModelTextureSwap::ParseTextureSwapData(void* apData, unsigned int aiDataSize, unsigned int aiVersion)
 {
     unsigned int uiRemaining;
     unsigned char* pdata;
@@ -598,71 +452,27 @@ bool FUN_0048a7b0_shell::LoadTextureSwapList(void* apData, unsigned int aiDataSi
     return true;
 }
 
-struct FUN_004891d0_obj
-{
-    void WriteToBuffer(unsigned int, unsigned int);
-};
-struct FUN_0048a590_obj
-{
-    bool SerializeList(unsigned int&, unsigned int&);
-};
 void __cdecl AppendChunk(unsigned int, unsigned int, unsigned int);
 void __cdecl Deallocate(void*);
 
-struct FUN_0048a520_shell : FUN_004891d0_obj
-{
-    void ProcessAndFreeData(unsigned int a, unsigned int b, unsigned int c);
-};
-
 // Calls WriteToBuffer with a and b, then if SerializeList yields a data pointer and size, passes them with c to AppendChunk and deallocates the pointer.
 // @fnv 0x0048a520
-void FUN_0048a520_shell::ProcessAndFreeData(unsigned int uiFirst, unsigned int uiSecond, unsigned int uiThird)
+void TESModelTextureSwap::ProcessAndFreeData(unsigned int uiFirst, unsigned int uiSecond, unsigned int uiThird)
 {
     WriteToBuffer(uiFirst, uiSecond);
     unsigned int pdata = 0;
     unsigned int idatasize = 0;
-    if (((FUN_0048a590_obj*)this)->SerializeList(pdata, idatasize))
+    if (SerializeList(reinterpret_cast<char**>(&pdata), &idatasize))
     {
         AppendChunk(uiThird, pdata, idatasize);
         Deallocate((void*)pdata);
     }
 }
 
-class B48A490Model
-{
-  public:
-    virtual ~B48A490Model();
-
-    const char* m_pcModel;
-    unsigned short m_usLength;
-    unsigned short m_usMaxLength;
-    float m_fBound;
-    void* m_pkTextures;
-    unsigned int m_uiValue1;
-};
-
-template <class T> class B48A490SimpleList
-{
-  public:
-    ~B48A490SimpleList();
-
-    T m_item;
-    B48A490SimpleList* m_pkNext;
-};
-
-class FUN_0048a490_TextureSwap : public B48A490Model
-{
-  public:
-    virtual ~FUN_0048a490_TextureSwap();
-    void FUN_0048a500();
-
-    B48A490SimpleList<void*> m_kTextureSwapList;
-};
-
 // @fnv 0x0048a490
-FUN_0048a490_TextureSwap::~FUN_0048a490_TextureSwap()
+TESModelTextureSwap::~TESModelTextureSwap()
 {
-    FUN_0048a500();
+    Free();
 }
 
 extern "C" char DAT_01183040;
@@ -684,28 +494,22 @@ struct TextureSwapNodeAccessor
 {
     TextureSwapNode* FUN_00500940();
 };
-struct FUN_0048aba0_Class
-{
-    void FUN_00489430(unsigned int);
-    void FUN_0048ade0();
-    void FUN_0048ae30(const char*, int, unsigned int);
-    void ApplyTextureSwapOverrides(unsigned int formID);
-};
+
 // Looks up a texture swap list for formID, then for each node applies its record's objectName, index and formID via FUN_0048ae30.
 // @fnv 0x0048aba0
-void FUN_0048aba0_Class::ApplyTextureSwapOverrides(unsigned int formID)
+void TESModelTextureSwap::ApplyTextureSwapOverrides(unsigned int formID)
 {
-    FUN_00489430(formID);
-    TextureSwapNodeAccessor* list =
-        static_cast<TextureSwapNodeAccessor*>(FUN_00ec43fb(formID, 0, &DAT_01183040, &DAT_011831c4, 0));
+    TESModel::BaseFormRecord(reinterpret_cast<BaseFormComponent*>(formID));
+    struct TextureSwapNodeAccessor* list =
+        static_cast<struct TextureSwapNodeAccessor*>(FUN_00ec43fb(formID, 0, &DAT_01183040, &DAT_011831c4, 0));
     if (!list)
         return;
-    FUN_0048ade0();
+    ClearTextureSwaps();
     TextureSwapNode* node = list->FUN_00500940();
     while (node && !node->FUN_008256d0())
     {
         TextureSwapRecord* record = *node->FUN_006815c0();
-        FUN_0048ae30(record->objectName, record->index, record->formID);
+        AddTexSwap(record->objectName, record->index, reinterpret_cast<BGSTextureSet*>(record->formID));
         node = node->FUN_00726070();
     }
 }
@@ -720,17 +524,10 @@ struct TextureSwapCount
 };
 int FUN_00404dc0(const char*, const char*);
 
-struct FUN_0048ac40_shell : public TESModelTextureSwap
-{
-    bool CompareModel(BaseFormComponent*);
-    TextureSwapRecord* FindTexSwap(int);
-    bool CompareTextureSwaps(BaseFormComponent* other);
-};
-
 // @fnv 0x0048ac40
-bool FUN_0048ac40_shell::CompareTextureSwaps(BaseFormComponent* other)
+bool TESModelTextureSwap::CompareTextureSwaps(BaseFormComponent* other)
 {
-    if (CompareModel(other))
+    if (TESModel::CompareWithBase(other))
         return true;
     TESModelTextureSwap* pOther = dynamic_cast<TESModelTextureSwap*>(other);
     if (!pOther)
@@ -742,7 +539,7 @@ bool FUN_0048ac40_shell::CompareTextureSwaps(BaseFormComponent* other)
     while (pNode && !pNode->FUN_008256d0())
     {
         TextureSwapRecord* pSwap = *pNode->FUN_006815c0();
-        TextureSwapRecord* pMine = FindTexSwap(pSwap->index);
+        TextureSwapRecord* pMine = reinterpret_cast<TextureSwapRecord*>(GetTexSwap(pSwap->index));
         if (!pMine)
             return true;
         if (pMine->formID != pSwap->formID)
@@ -754,12 +551,12 @@ bool FUN_0048ac40_shell::CompareTextureSwaps(BaseFormComponent* other)
     return false;
 }
 
-class ListNode
+class TextureSwapSerializationNode
 {
   public:
     bool FUN_008256d0();
     unsigned int* FUN_006815c0();
-    ListNode* FUN_00726070();
+    TextureSwapSerializationNode* FUN_00726070();
 };
 
 class ObjectRef
@@ -777,20 +574,12 @@ struct FUN_00401080_tag
 void __cdecl FUN_00401080(int*, FUN_00401080_tag);
 void __cdecl FUN_00401460(char*, unsigned int, unsigned int);
 
-class FUN_0048a590_cls
-{
-  public:
-    int unk00;
-    ListNode* FUN_00500940();
-    bool SerializeList(char** outA, unsigned int* outB);
-};
-
 // @fnv 0x0048a590
-bool FUN_0048a590_cls::SerializeList(char** apBuffer, unsigned int* auiSize)
+bool TESModelTextureSwap::SerializeList(char** apBuffer, unsigned int* auiSize)
 {
     *apBuffer = 0;
     *auiSize = 0;
-    ListNode* iT = FUN_00500940();
+    TextureSwapSerializationNode* iT = reinterpret_cast<TextureSwapSerializationNode*>(reinterpret_cast<TESAIForm*>(this)->GetPackageList());
     unsigned int v;
     unsigned int P;
     unsigned int r;
@@ -821,7 +610,7 @@ bool FUN_0048a590_cls::SerializeList(char** apBuffer, unsigned int* auiSize)
         }
         *(int*)_w = loA2;
         _w += 4;
-        iT = FUN_00500940();
+        iT = reinterpret_cast<TextureSwapSerializationNode*>(reinterpret_cast<TESAIForm*>(this)->GetPackageList());
         while (iT != 0 && !iT->FUN_008256d0())
         {
             P = *iT->FUN_006815c0();
@@ -847,10 +636,3 @@ bool FUN_0048a590_cls::SerializeList(char** apBuffer, unsigned int* auiSize)
     return *apBuffer != 0;
 }
 
-struct FUN_0048a440
-{
-    virtual ~FUN_0048a440();
-};
-// @fnv 0x0048a440
-FUN_0048a440::~FUN_0048a440()
-{}

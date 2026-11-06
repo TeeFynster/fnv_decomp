@@ -1,4 +1,6 @@
-// bscore/scrapheap_decls.h: declares ScrapHeapBuffer, ScrapHeapManager, Entry, MemoryManager
+// bscore/scrapheap_decls.h: declares ScrapHeapBuffer, ScrapHeapManager, Entry
+
+#include "../../include/RecursiveSpinLock.h"
 
 class ScrapHeapManager;
 
@@ -16,14 +18,6 @@ class ScrapHeapBuffer
     void Init(unsigned int size);
     void Deallocate(void* memory);
     void* Allocate(unsigned int size, unsigned int alignment);
-};
-
-class RecursiveSpinLock
-{
-  public:
-    unsigned int lockWord;
-    unsigned int listCount;
-    void Lock(const char* name);
 };
 
 class ScrapHeapManager
@@ -49,14 +43,6 @@ class ScrapHeapManager
     void FreeBuffer(char* buffer, unsigned int size);
     void FreeTailOfBlock(char* buffer, unsigned int offset, unsigned int size);
     void RemoveEntry(unsigned int index);
-};
-
-class IMemoryHeap;
-
-class MemoryManager
-{
-  public:
-    unsigned int HandleAllocationFailure(IMemoryHeap* heap, int errorCode, bool* handled);
 };
 
 extern MemoryManager g_memoryManager;

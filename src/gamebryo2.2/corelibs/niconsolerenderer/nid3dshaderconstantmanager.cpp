@@ -1,11 +1,7 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiD3DShaderConstantManager
-{
-    virtual ~NiD3DShaderConstantManager();
-    void* __thiscall Destroy(unsigned int flags);
-};
+#include "../../../../include/NiD3DShaderConstantManager.h"
 
 extern "C" void __cdecl __Dummy_00b6fef0(void* ptr, unsigned int flags);
 void __cdecl FUN_00e989c0();

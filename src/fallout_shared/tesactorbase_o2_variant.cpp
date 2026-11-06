@@ -2,6 +2,24 @@
 // src/fallout_shared/tesactorbase_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/tesactorbase.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
+#include "../../include/Actor.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSLoadGameBuffer.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/MissileProjectile.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/Reset3DMobIterator.h"
+#include "../../include/TESAIForm.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESAttributes.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESObjectREFR.h"
+
 #include "tesactorbase_decls.h"
 
 // 005fbfa0 = VC9 adjustor thunk. Recipe (b90180 class of matches): MI dual-slot override,

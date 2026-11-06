@@ -1,46 +1,35 @@
+#define FNV64_NIPOINTER_INLINE_BODIES
 // bsshader/beamshader.cpp: BeamPassShader, BloodSplatterBeamShader, DistantLODShader (6 functions)
+#include "NiRefObject_inline.h"
+#include "../../include/BSShader.h"
+#include "../../include/NiD3DDefaultShader.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiD3DShader.h"
+#include "../../include/NiD3DShaderConstantMap.h"
+#include "../../include/NiD3DShaderDeclaration.h"
+#include "../../include/NiD3DShaderInterface.h"
+#include "../../include/NiShader.h"
+#include "../../include/NiShaderConstantMap.h"
+#include "../../include/NiShaderDeclaration.h"
 
 #include "beamshader_types_BeamShader.h"
 #include "beamshader_types_NiConsoleShaderDeclaration.h"
-#include "beamshader_types_NiD3DShaderConstantMap.h"
+
+// This unit inlines the reference operations used by its constant maps.
+inline void NiD3DShaderConstantMap::IncRefCount()
+{
+    NiRefObject::IncRefCount();
+}
+
+inline void NiD3DShaderConstantMap::DecRefCount()
+{
+    NiRefObject::DecRefCount();
+}
 
 extern GraphicsRenderer* g_pkRenderer;
 extern const char g_emptyTopicInfoPrompt[1];
 extern "C" const char DAT_010A1E50[];
 extern "C" const char DAT_010af454[];
-
-class DeclarationSlots
-{
-  public:
-#define F(N) virtual void f##N();
-    F(0)
-    F(1)
-    F(2) F(3) F(4) F(5) F(6) F(7) F(8) F(9) F(10) F(11) F(12) F(13) F(14) F(15) F(16) F(17) F(18) F(19) F(20) F(21)
-        F(22) F(23) F(24) F(25) F(26) F(27) F(28) F(29) F(30) F(31) F(32) F(33)
-            F(34) virtual void f35(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-    F(36) F(37) F(38) F(39) F(40) F(41) F(42) F(43) F(44) virtual void f45();
-#undef F
-};
-
-class BeamShaderSlots
-{
-  public:
-#define F(N) virtual void f##N();
-    F(0)
-    F(1)
-    F(2) F(3) F(4) F(5) F(6) F(7) F(8) F(9) F(10) F(11) F(12) F(13) F(14) F(15) F(16) F(17) F(18) virtual void f19();
-    F(20)
-    F(21)
-    F(22) F(23) F(24) F(25) F(26) F(27) F(28) F(29) F(30) F(31) F(32) F(33) F(34) F(35) F(36) F(37) F(38) F(39) F(40)
-        F(41) F(42) F(43) F(44) F(45) F(46) F(47) virtual void f48(void*);
-    F(49)
-    F(50)
-    F(51) F(52) F(53) F(54) F(55) F(56) F(57) F(58) F(59) F(60) F(61) F(62) F(63) F(64) F(65) F(66) F(67) F(68) F(69)
-        F(70) virtual void f71();
-    F(72) F(73) F(74) F(75) F(76) F(77) F(78) virtual void f79();
-    virtual void f80();
-#undef F
-};
 
 class BloodSplatterBeamShader : public BeamShader
 {
@@ -54,20 +43,18 @@ class BloodSplatterBeamShader : public BeamShader
 BSShader* BloodSplatterBeamShader::CreateShader()
 {
     NiD3DVertexDeclaration* declaration = NiD3DVertexDeclaration::Create((NiRenderer*)g_pkRenderer, 5, 1);
-    DeclarationSlots* declarationSlots = (DeclarationSlots*)declaration;
-    declarationSlots->f35(0, 0, 0, 2, 0);
-    declarationSlots->f35(1, 3, 3, 2, 0);
-    declarationSlots->f35(2, 5, 4, 3, 0);
-    declarationSlots->f35(3, 7, 5, 1, 0);
-    declarationSlots->f45();
+    declaration->SetEntry(0, 0, (NiShaderDeclaration::ShaderParameter)0, (NiShaderDeclaration::ShaderParameterType)2, 0);
+    declaration->SetEntry(1, 3, (NiShaderDeclaration::ShaderParameter)3, (NiShaderDeclaration::ShaderParameterType)2, 0);
+    declaration->SetEntry(2, 5, (NiShaderDeclaration::ShaderParameter)4, (NiShaderDeclaration::ShaderParameterType)3, 0);
+    declaration->SetEntry(3, 7, (NiShaderDeclaration::ShaderParameter)5, (NiShaderDeclaration::ShaderParameterType)1, 0);
+    declaration->GetD3DDeclaration();
 
     BloodSplatterBeamShader* pShader = new BloodSplatterBeamShader(declaration);
-    BeamShaderSlots* shaderSlots = (BeamShaderSlots*)pShader;
-    shaderSlots->f19();
-    shaderSlots->f79();
-    shaderSlots->f80();
-    shaderSlots->f71();
-    shaderSlots->f48(declaration);
+    pShader->Initialize();
+    pShader->InitializeVertexShader();
+    pShader->InitializePixelShader();
+    pShader->InitShaderConstants();
+    pShader->UseShaderDeclaration(declaration);
     return pShader;
 }
 
@@ -110,7 +97,7 @@ void DistantLODShader::UpdateShaderConstants()
 {
     if (!m_spSecondShaderConstantMap.m_pShaderConstantMap)
     {
-        NiD3DShaderConstantMap* map = new NiD3DShaderConstantMap(m_pShaderObject, 0);
+        NiD3DShaderConstantMap* map = new NiD3DShaderConstantMap(m_pShaderObject, 0u);
         m_spSecondShaderConstantMap = map;
         m_spSecondShaderConstantMap.m_pShaderConstantMap->SetConstant(DAT_010A1E50, 0x20000009, 0, 0, 4, 0, 0, 0, 0, 0);
         m_spSecondShaderConstantMap.m_pShaderConstantMap->SetConstant(DAT_010af454, 0x10000009, 0, 4, 4,
@@ -118,7 +105,7 @@ void DistantLODShader::UpdateShaderConstants()
     }
     if (!m_spFirstShaderConstantMap.m_pShaderConstantMap)
     {
-        NiD3DShaderConstantMap* map = new NiD3DShaderConstantMap(m_pShaderObject, 2);
+        NiD3DShaderConstantMap* map = new NiD3DShaderConstantMap(m_pShaderObject, 2u);
         m_spFirstShaderConstantMap = map;
     }
 }
@@ -136,10 +123,10 @@ void BeamPassShader::SetupPass()
         BeamStage::CreateNewStage((NiPointer<BeamStage>&)stage);
         ConfigureBeamStage(stage.object, 0, 1, 2, true);
         stage.object->state->FUN_00e890c0(7, 0, 0, false);
-        p.object->FUN_00e802b0(p.object->stages, stage.object);
+        p.object->FUN_00e802b0(p.object->m_uiCurrentStage, stage.object);
     }
-    p.object->vertex = vertex;
-    p.object->pixel = pixel;
+    reinterpret_cast<NiPointer<NiRefObject>&>(p.object->m_spVertexShader) = vertex;
+    reinterpret_cast<NiPointer<NiRefObject>&>(p.object->m_spPixelShader) = pixel;
     p.object->SetRenderState(22, 1, true);
     p.object->SetRenderState(168, 15, true);
     p.object->SetRenderState(27, 1, true);
@@ -180,42 +167,10 @@ void* S::DestroyIfFlagged(unsigned int auiFlags)
     return this;
 }
 
-class ShaderBaseStub
-{
-  public:
-    virtual ~ShaderBaseStub();
-};
-
-class FUN_00bc49a0 : public ShaderBaseStub
+class FUN_00bc49a0 : public BSShader
 {
   public:
     static NiPointer<NiRefObject> ms_spShared;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
     int unk6C;
     int unk70;
     int unk74;

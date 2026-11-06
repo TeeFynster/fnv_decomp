@@ -3,6 +3,8 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/BSAudioManager.h"
 
 struct FUN_00ac5340_class
 {
@@ -156,12 +158,6 @@ void FUN_00ad41a0_cls::FUN_00ad41a0()
     *reinterpret_cast<int**>(this) = &DAT_010a31fc;
 }
 
-struct BSAudioManager
-{
-    static BSAudioManager& GetRandomGenerator();
-    void FUN_00adcd00(void* a, void* b);
-    void FUN_00ad84e0(void* a, void* b);
-};
 
 // @fnv 0x00ad84e0
 void BSAudioManager::FUN_00ad84e0(void* a, void* b)
@@ -169,13 +165,7 @@ void BSAudioManager::FUN_00ad84e0(void* a, void* b)
     GetRandomGenerator().FUN_00adcd00(a, b);
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-
+// Retained until the shared NiPoint3 declares AddOffset(NiPoint3*, NiPoint3*).
 struct FUN_00ac10c0_Class
 {
     float f0;
@@ -489,21 +479,13 @@ char* __thiscall FUN_00ad3fc0_Class::FUN_00ad3fc0(char* pBegin, char* pEnd)
     return pBegin;
 }
 
-struct FUN_00ac1120_Class
-{
-    float f0;
-    float f4;
-    float f8;
-    NiPoint3* __thiscall ScaleToPoint3(NiPoint3* pDest, float scale);
-};
-
-// Multiplies f0, f4 and f8 by scale, writes the results to pDest's x, y and z, and returns pDest.
+// Multiplies x, y and z by scale, writes the results to pDest, and returns pDest.
 // @fnv 0x00ac1120
-NiPoint3* FUN_00ac1120_Class::ScaleToPoint3(NiPoint3* pDest, float scale)
+NiPoint3* NiPoint3::ScaleTo(NiPoint3* pDest, float scale)
 {
-    float fX = scale * f0;
-    float fY2 = scale * f4;
-    float fZ2 = scale * f8;
+    float fX = scale * x;
+    float fY2 = scale * y;
+    float fZ2 = scale * z;
     pDest->x = fX;
     pDest->y = fY2;
     pDest->z = fZ2;
@@ -5146,17 +5128,18 @@ struct Str_00ac1600
     void Set(const Str_00ac1600* pkOther, int iZero, int iGlobal);
 };
 
-struct Vec3_00ac1600
+// 0x00ac1600 copies three integer words; shared Vec3 uses float assignment and changes the function extent.
+struct RecordWordPayload
 {
-    int x;
-    int y;
-    int z;
+    int word0;
+    int word1;
+    int word2;
 };
 
 struct Rec_00ac1600
 {
     int f0;
-    Vec3_00ac1600 v;
+    RecordWordPayload v;
     Str_00ac1600 s;
 };
 

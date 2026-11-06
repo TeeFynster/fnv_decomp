@@ -4,27 +4,19 @@
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkpconvexradiusbuilder.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/collide/hkpconvexradiusbuilder.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkAabb.h"
+#define FNV_TRANSFORM_NO_SSE
+#include "../../../../../../../include/Transform.h"
+#undef FNV_TRANSFORM_NO_SSE
+
 namespace bounding_plane_rework {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x, y, z, w;
     } lanes;
-} __m128;
+} __m128, LocalM128;
 extern "C" __m128 _mm_setr_ps(float, float, float, float);
-struct Transform
-{
-    __m128 rotation0, rotation1, rotation2, translation;
-};
-struct __declspec(align(16)) BoundVector
-{
-    float x, y, z, w;
-};
-struct Bounds
-{
-    BoundVector minimum, maximum;
-};
 extern const Transform DAT_01268370;
 struct Shape
 {
@@ -35,7 +27,7 @@ struct Shape
     virtual void slot10();
     virtual void slot14();
     virtual void slot18();
-    virtual void getBounds(const Transform*, float, Bounds*);
+    virtual void getBounds(const Transform*, float, hkAabb*);
 };
 struct Allocator;
 struct Holder
@@ -53,7 +45,9 @@ struct PlaneArray
 // @fnv 0x00de3200
 static __declspec(noinline) void FUN_00de3200(Shape* shape, PlaneArray* planes, float radius)
 {
-    Bounds bounds;
+    // getBounds fills uninitialized output storage; do not invoke hkAabb::hkAabb().
+    __m128 boundsStorage[sizeof(hkAabb) / sizeof(__m128)];
+    hkAabb& bounds = *reinterpret_cast<hkAabb*>(boundsStorage);
     shape->getBounds(&DAT_01268370, radius, &bounds);
     Holder* holder = FUN_00c85750();
     Allocator* allocationHeap = holder->allocator;
@@ -68,12 +62,12 @@ static __declspec(noinline) void FUN_00de3200(Shape* shape, PlaneArray* planes, 
     }
     planes->size += 6;
     int start = planes->size;
-    planes->data[start - 6] = _mm_setr_ps(1.0f, 0.0f, 0.0f, -bounds.maximum.x);
-    planes->data[start - 5] = _mm_setr_ps(0.0f, 1.0f, 0.0f, -bounds.maximum.y);
-    planes->data[start - 4] = _mm_setr_ps(0.0f, 0.0f, 1.0f, -bounds.maximum.z);
-    planes->data[start - 3] = _mm_setr_ps(-1.0f, 0.0f, 0.0f, bounds.minimum.x);
-    planes->data[start - 2] = _mm_setr_ps(0.0f, -1.0f, 0.0f, bounds.minimum.y);
-    planes->data[start - 1] = _mm_setr_ps(0.0f, 0.0f, -1.0f, bounds.minimum.z);
+    planes->data[start - 6] = _mm_setr_ps(1.0f, 0.0f, 0.0f, -bounds.m_kMaximumCorner.x);
+    planes->data[start - 5] = _mm_setr_ps(0.0f, 1.0f, 0.0f, -bounds.m_kMaximumCorner.y);
+    planes->data[start - 4] = _mm_setr_ps(0.0f, 0.0f, 1.0f, -bounds.m_kMaximumCorner.z);
+    planes->data[start - 3] = _mm_setr_ps(-1.0f, 0.0f, 0.0f, bounds.m_kMinimumCorner.x);
+    planes->data[start - 2] = _mm_setr_ps(0.0f, -1.0f, 0.0f, bounds.m_kMinimumCorner.y);
+    planes->data[start - 1] = _mm_setr_ps(0.0f, 0.0f, -1.0f, bounds.m_kMinimumCorner.z);
 }
 extern "C" void planeBuilderWitness(Shape* shape, PlaneArray* planes, float radius)
 {

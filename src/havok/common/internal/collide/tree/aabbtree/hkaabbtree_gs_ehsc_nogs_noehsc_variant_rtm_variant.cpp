@@ -7,6 +7,18 @@
 // to their real unit once identified.
 // src/havok/common/internal/collide/tree/aabbtree/hkaabbtree.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/collide/tree/aabbtree/hkaabbtree.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkAabb.h"
+#include "../../../../../../../include/Vec4.h"
+
+__forceinline __m128& Vec4::getQuad() { return *reinterpret_cast<__m128*>(&x); }
+__forceinline const __m128& Vec4::getQuad() const { return *reinterpret_cast<const __m128*>(&x); }
+__forceinline Vec4::Vec4(const Vec4& other) { getQuad() = other.getQuad(); }
+__forceinline void Vec4::set(float a, float b, float c, float d) { getQuad() = _mm_setr_ps(a, b, c, d); }
+__forceinline void Vec4::add4(const Vec4& value) { getQuad() = _mm_add_ps(getQuad(), value.getQuad()); }
+__forceinline void Vec4::sub4(const Vec4& value) { getQuad() = _mm_sub_ps(getQuad(), value.getQuad()); }
+__forceinline void Vec4::mul4(const Vec4& value) { getQuad() = _mm_mul_ps(getQuad(), value.getQuad()); }
+
 struct FUN_00d9be20_class {
     void FUN_00d9be20();
 };
@@ -35,29 +47,14 @@ struct Obj_d9be20 {
     int m10;
     void FUN_00d9be20();
 };
-union __declspec(intrin_type) __declspec(align(16)) __m128 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    signed char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-};
-struct Vec4 {
-    __m128 m_vComponents;
-    Vec4& operator=(const Vec4& o) { m_vComponents = o.m_vComponents; return *this; }
-};
 struct Key {
     int a;
     int b;
     Key& operator=(const Key& o) { a = o.a; b = o.b; a = o.a; return *this; }
 };
 struct Elem {
-    Vec4 v0;
-    Vec4 v1;
+    Vec4::Aligned v0;
+    Vec4::Aligned v1;
     Key k;
     int c;
     int d;
@@ -89,9 +86,8 @@ struct FUN_00d9ce00_Class
     int* PopItem(int first, int second, int* output);
 };
 struct UnsignedShortArray { unsigned short* elements; unsigned int count; unsigned int capacity; };
-struct AllocationContext { int unknown00, unknown04, unknown08, unknown0c; void* memory; };
 void __cdecl ResizeAudioStream(void* memory, UnsignedShortArray* buffer, unsigned int count);
-struct Owner { int unknown00, unknown04, unknown08; UnsignedShortArray buffer; AllocationContext* FUN_00c85750(); unsigned short* AppendElement(unsigned short value); };
+struct Owner { int unknown00, unknown04, unknown08; UnsignedShortArray buffer; hkMemoryRouter* FUN_00c85750(); unsigned short* AppendElement(unsigned short value); };
 struct Allocator {
     virtual void v00();
     virtual void v04();
@@ -99,14 +95,7 @@ struct Allocator {
     virtual void v0c();
     virtual void Free(void* p, unsigned int bytes);
 };
-struct AllocHolder {
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    Allocator* m_pThreadAllocator;
-};
-AllocHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 void __cdecl FUN_00c908c0(Allocator* allocator, void** data, unsigned int capacity, unsigned int elemSize);
 struct S_d9bf30_Rec {
     int unk0; int unk4; int unk8; int unkc;
@@ -122,8 +111,8 @@ struct S_d9bf30_Words {
         m_uiItemCount++;
     }
     __forceinline void refill(unsigned short newSize, int oldCount) {
-        AllocHolder* holder = FUN_00c85750();
-        Allocator* alloc = holder->m_pThreadAllocator;
+        hkMemoryRouter* holder = FUN_00c85750();
+        Allocator* alloc = reinterpret_cast<Allocator*>(&holder->heap());
 
         unsigned int cap = m_capFlags & 0x3fffffffu;
         if ((int)cap < (int)newSize) {
@@ -169,16 +158,6 @@ struct S_00d9d650_Heap
     virtual void unkVfn3();
     virtual void ReturnMemory(void* p, int numBytes);
 };
-struct S_00d9d650_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00d9d650_Heap* m_pStreamAllocator;
-    S_00d9d650_Heap& heap() { return *m_pStreamAllocator; }
-};
-namespace fnvc_adapt { S_00d9d650_Router& __cdecl FUN_00c85750(); }
 void __cdecl FUN_00c908c0(S_00d9d650_Heap& alloc, void* array, int reqCapacity, int sizeElem);
 template <typename T>
 struct S_00d9d650_Array
@@ -188,7 +167,7 @@ struct S_00d9d650_Array
     int m_iCapacityState;
 
     S_00d9d650_Array() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
-    ~S_00d9d650_Array() throw() { _clearAndDeallocate(fnvc_adapt::FUN_00c85750().heap()); }
+    ~S_00d9d650_Array() throw() { _clearAndDeallocate(*reinterpret_cast<S_00d9d650_Heap*>(FUN_00c85750()->GetAllocator())); }
 
     int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
     T& operator[](int i) { return m_data[i]; }
@@ -218,17 +197,12 @@ struct S_00d9d650_Array
         GrowArrayCapacity(alloc, n);
         m_iElementCount = n;
     }
-    void SetSizeAndGrow(int n) { _setSize(fnvc_adapt::FUN_00c85750().heap(), n); }
-};
-struct S_00d9d650_Vector4
-{
-    __m128 m_vComponents;
-    void operator=(const S_00d9d650_Vector4& v) { m_vComponents = v.m_vComponents; }
+    void SetSizeAndGrow(int n) { _setSize(*reinterpret_cast<S_00d9d650_Heap*>(FUN_00c85750()->GetAllocator()), n); }
 };
 struct S_00d9d650_Aabb
 {
-    S_00d9d650_Vector4 m_kMinimumCorner;
-    S_00d9d650_Vector4 m_kMaximumCorner;
+    Vec4::Aligned m_kMinimumCorner;
+    Vec4::Aligned m_kMaximumCorner;
 };
 struct S_00d9d650_Node
 {
@@ -321,33 +295,16 @@ public:
     void FUN_00d9bb50(NodeD9C7* pkNode, NodeD9C7** ppkOut);
     void FUN_00d9c7d0(NodeD9C7* pkNode);
 };
-extern "C" __m128 _mm_min_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_max_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_and_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_cmple_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_cmpge_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" int _mm_movemask_ps(__m128 a);
-struct TreeVector4
-{
-    __m128 m_vComponents;
-    __forceinline void setMin4(const TreeVector4& a, const TreeVector4& b) { m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void setMax4(const TreeVector4& a, const TreeVector4& b) { m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents); }
-};
 struct TreeAabb
 {
-    TreeVector4 m_kMinimumCorner;
-    TreeVector4 m_kMaximumCorner;
-    void setUnion(const TreeAabb& a, const TreeAabb& b) { m_kMinimumCorner.m_vComponents = _mm_min_ps(a.m_kMinimumCorner.m_vComponents, b.m_kMinimumCorner.m_vComponents); m_kMaximumCorner.m_vComponents = _mm_max_ps(a.m_kMaximumCorner.m_vComponents, b.m_kMaximumCorner.m_vComponents); }
-    bool contains(const TreeAabb& o) const { __m128 a = _mm_cmple_ps(m_kMinimumCorner.m_vComponents, o.m_kMinimumCorner.m_vComponents); __m128 b = _mm_cmple_ps(o.m_kMaximumCorner.m_vComponents, m_kMaximumCorner.m_vComponents); return (_mm_movemask_ps(_mm_and_ps(a, b)) & 7) == 7; }
+    Vec4::Aligned m_kMinimumCorner;
+    Vec4::Aligned m_kMaximumCorner;
+    void setUnion(const TreeAabb& a, const TreeAabb& b) { m_kMinimumCorner.getQuad() = _mm_min_ps(a.m_kMinimumCorner.getQuad(), b.m_kMinimumCorner.getQuad()); m_kMaximumCorner.getQuad() = _mm_max_ps(a.m_kMaximumCorner.getQuad(), b.m_kMaximumCorner.getQuad()); }
+    bool contains(const TreeAabb& o) const { __m128 a = _mm_cmple_ps(m_kMinimumCorner.getQuad(), o.m_kMinimumCorner.getQuad()); __m128 b = _mm_cmple_ps(o.m_kMaximumCorner.getQuad(), m_kMaximumCorner.getQuad()); return (_mm_movemask_ps(_mm_and_ps(a, b)) & 7) == 7; }
 };
 static __forceinline __m128 vmin(__m128 a, __m128 b) { return _mm_min_ps(a, b); }
 static __forceinline __m128 vmax(__m128 a, __m128 b) { return _mm_max_ps(a, b); }
-static __forceinline void unionOut(TreeAabb& o, const TreeAabb& a, const TreeAabb& b) { o.m_kMinimumCorner.m_vComponents = _mm_min_ps(a.m_kMinimumCorner.m_vComponents, b.m_kMinimumCorner.m_vComponents); o.m_kMaximumCorner.m_vComponents = _mm_max_ps(a.m_kMaximumCorner.m_vComponents, b.m_kMaximumCorner.m_vComponents); }
+static __forceinline void unionOut(TreeAabb& o, const TreeAabb& a, const TreeAabb& b) { o.m_kMinimumCorner.getQuad() = _mm_min_ps(a.m_kMinimumCorner.getQuad(), b.m_kMinimumCorner.getQuad()); o.m_kMaximumCorner.getQuad() = _mm_max_ps(a.m_kMaximumCorner.getQuad(), b.m_kMaximumCorner.getQuad()); }
 struct TreeNode
 {
     TreeAabb m_kBounds;
@@ -376,13 +333,6 @@ struct AabbTree
 
     void FUN_00d9afe0(int root, int leaf, int branch);
 };
-extern "C" {
-__m128 __cdecl _mm_min_ps(__m128,__m128);
-__m128 __cdecl _mm_max_ps(__m128,__m128);
-__m128 __cdecl _mm_cmpeq_ps(__m128,__m128);
-__m128 __cdecl _mm_and_ps(__m128,__m128);
-int __cdecl _mm_movemask_ps(__m128);
-}
 struct S00d9b240_Mask { __m128 mask; unsigned char allXYZ() const {unsigned int m=_mm_movemask_ps(_mm_and_ps(mask,mask))&7;return m==7;} };
 struct S00d9b240_Bounds {
  __m128 minimum,maximum;
@@ -404,12 +354,12 @@ struct S00d9b240_Tree {
  int getSiblingIndex(const S00d9b240_Node* p,int c) { return p->children[0]^p->children[1]^c; }
 };
 struct Aabb {
-    Vec4 lo;
-    Vec4 hi;
+    Vec4::Aligned lo;
+    Vec4::Aligned hi;
 };
 struct Rec {
-    Vec4 lo;
-    Vec4 hi;
+    Vec4::Aligned lo;
+    Vec4::Aligned hi;
     int f20;
     int f24;
     int f28;
@@ -480,12 +430,6 @@ template<class B, class I> struct CurrentTree {
 template<class B,class I> typename CurrentTree<B,I>::Node* CurrentTree<B,I>::Pool::GetEntryOffset(I i) { return &nodes[i]; }
 template<class B,class I> const typename CurrentTree<B,I>::Node* CurrentTree<B,I>::Pool::GetEntryOffset(I i) const { return &nodes[i]; }
 template CurrentTree<S00d9bb50_Aabb,unsigned short>::Node* CurrentTree<S00d9bb50_Aabb,unsigned short>::FUN_00d9bb50(unsigned short,unsigned short*);
-extern "C" {
-__m128 _mm_add_ps(__m128, __m128);
-__m128 _mm_mul_ps(__m128, __m128);
-__m128 _mm_min_ps(__m128, __m128);
-__m128 _mm_max_ps(__m128, __m128);
-}
 extern __m128 g_aabbQuantMax;
 // 0x011b6d70: 2147352576.0f x4
 extern __m128 g_vectorZero;
@@ -497,15 +441,6 @@ struct TreeHeap {
     virtual void v0c();
     virtual void ReturnMemory(void* p, int numBytes) throw();
 };
-struct TreeRouter {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    TreeHeap* m_pStreamAllocator;
-    TreeHeap& heap() { return *m_pStreamAllocator; }
-};
-__forceinline TreeRouter& GetTreeRouter() { return *(TreeRouter*)FUN_00c85750(); }
 void __cdecl FUN_00c908c0(TreeHeap& alloc, void* array, int reqCapacity, int sizeElem) throw();
 template <typename T>
 struct TreeArray {
@@ -514,7 +449,7 @@ struct TreeArray {
     int m_iCapacityState;
 
     __forceinline TreeArray() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
-    __forceinline ~TreeArray() { _clearAndDeallocate(GetTreeRouter().heap()); }
+    __forceinline ~TreeArray() { _clearAndDeallocate(*reinterpret_cast<TreeHeap*>(FUN_00c85750()->GetAllocator())); }
 
     __forceinline int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
 
@@ -540,13 +475,9 @@ struct TreeArray {
     }
     __forceinline void SetSizeAndGrow(int n)
     {
-        GrowArrayCapacity(GetTreeRouter().heap(), n);
+        GrowArrayCapacity(*reinterpret_cast<TreeHeap*>(FUN_00c85750()->GetAllocator()), n);
         m_iElementCount = n;
     }
-};
-struct TreeVec4 {
-    __m128 m_vComponents;
-    __forceinline float getComponent(int i) const { return m_vComponents.m128_f32[i]; }
 };
 struct TreeAabb16 {
     unsigned short m_kMinimumCorner[3];
@@ -596,21 +527,21 @@ struct AabbTree16 {
 
     __forceinline void convertAabb(const TreeAabb& in, TreeAabb16& out)
     {
-        TreeVec4 maxVal;
-        maxVal.m_vComponents = g_aabbQuantMax;
-        TreeVec4 hi;
-        hi.m_vComponents = _mm_max_ps(_mm_min_ps(_mm_mul_ps(_mm_add_ps(m_kVectorAt50, in.m_kMinimumCorner.m_vComponents), m_vScale), maxVal.m_vComponents), g_vectorZero);
-        int hi0 = fnv_FloatToInt(hi.getComponent(0));
-        int hi1 = fnv_FloatToInt(hi.getComponent(1));
-        int hi2 = fnv_FloatToInt(hi.getComponent(2));
-        int hi3 = fnv_FloatToInt(hi.getComponent(3));
+        Vec4::Aligned maxVal(Vec4::Uninitialized);
+        maxVal.getQuad() = g_aabbQuantMax;
+        Vec4::Aligned hi(Vec4::Uninitialized);
+        hi.getQuad() = _mm_max_ps(_mm_min_ps(_mm_mul_ps(_mm_add_ps(m_kVectorAt50, in.m_kMinimumCorner.getQuad()), m_vScale), maxVal.getQuad()), g_vectorZero);
+        int hi0 = fnv_FloatToInt(hi.x);
+        int hi1 = fnv_FloatToInt(hi.y);
+        int hi2 = fnv_FloatToInt(hi.z);
+        int hi3 = fnv_FloatToInt(hi.w);
 
-        TreeVec4 lo;
-        lo.m_vComponents = _mm_max_ps(_mm_min_ps(_mm_mul_ps(_mm_add_ps(in.m_kMaximumCorner.m_vComponents, m_kVectorAt40), m_vScale), maxVal.m_vComponents), g_vectorZero);
-        int lo0 = fnv_FloatToInt(lo.getComponent(0));
-        int lo1 = fnv_FloatToInt(lo.getComponent(1));
-        int lo2 = fnv_FloatToInt(lo.getComponent(2));
-        int lo3 = fnv_FloatToInt(lo.getComponent(3));
+        Vec4::Aligned lo(Vec4::Uninitialized);
+        lo.getQuad() = _mm_max_ps(_mm_min_ps(_mm_mul_ps(_mm_add_ps(in.m_kMaximumCorner.getQuad(), m_kVectorAt40), m_vScale), maxVal.getQuad()), g_vectorZero);
+        int lo0 = fnv_FloatToInt(lo.x);
+        int lo1 = fnv_FloatToInt(lo.y);
+        int lo2 = fnv_FloatToInt(lo.z);
+        int lo3 = fnv_FloatToInt(lo.w);
 
         out.m_kMinimumCorner[0] = (unsigned short)((unsigned int)lo0 >> 15);
         out.m_kMaximumCorner[0] = (unsigned short)((unsigned int)hi0 >> 15);
@@ -622,46 +553,25 @@ struct AabbTree16 {
 
     void FUN_00d9ce50(const TreeAabb* aabbs, const int* keys, int n, TreeArray<unsigned short>* out) throw();
 };
-namespace Simd840 {
-union __declspec(intrin_type) __declspec(align(16)) __m128 {
- struct { float x,y,z,w; };
-};
-extern "C" {
-__m128 _mm_set_ps1(float);
-__m128 _mm_setr_ps(float,float,float,float);
-__m128 _mm_add_ps(__m128,__m128);
-__m128 _mm_mul_ps(__m128,__m128);
-__m128 _mm_min_ps(__m128,__m128);
-__m128 _mm_max_ps(__m128,__m128);
-}
-}
-typedef Simd840::__m128 NativeSimd840;
 extern float DAT_0104da48, DAT_0104e148, DAT_01016248;
 extern "C" {
 void _ReadWriteBarrier();
 }
 __forceinline void copyCount840(int* a,const int* b){_ReadWriteBarrier();*a=*b;}
-struct Vector840 {
- union { NativeSimd840 q; struct { float x,y,z,w; }; };
- void operator=(const Vector840& other) { q=other.q; }
- __forceinline void set(float a,float b,float c,float d=0.0f) { q=Simd840::_mm_setr_ps(a,b,c,d); }
- void broadcast(float a) { q=Simd840::_mm_set_ps1(a); }
-};
-struct Bounds840 { Vector840 minimum, maximum; void operator=(const Bounds840& other) { minimum=other.minimum; _ReadWriteBarrier(); maximum=other.maximum;  } };
 struct Source840 {
  unsigned short minimum[3],maximum[3];
- __forceinline void center(Vector840& result) const {
-  Vector840 low;
+ __forceinline void center(Vec4& result) const {
+  Vec4::Aligned low(Vec4::Uninitialized);
   low.set((float)minimum[0],(float)minimum[1],(float)minimum[2]);
   result.set((float)maximum[0],(float)maximum[1],(float)maximum[2]);
-  result.q=Simd840::_mm_mul_ps(Simd840::_mm_add_ps(result.q,low.q),Simd840::_mm_set_ps1(DAT_01016248));
+  result.getQuad()=_mm_mul_ps(_mm_add_ps(result.getQuad(),low.getQuad()),_mm_set_ps1(DAT_01016248));
  }
 };
 struct Node840 { int unk00,unk04,unk08; union { int key; unsigned short children[2]; }; unsigned short flags,escape; };
 struct ParentAlias840 {Node840* value;};
 struct Task840 {
     static __forceinline void* operator new(unsigned int, void* destination) { return destination; }
-    Bounds840 bounds;
+    hkAabb bounds;
     unsigned short start,unused22;
     int count;
     Node840* node;
@@ -678,7 +588,7 @@ struct Manager840 {
     Node840* GetEntryOffset(unsigned short index);
     Node840* PopGlyphRecord(Node840** root, int* rootIndex, int* index);
 };
-void __cdecl FUN_00d9a850(Task840* task,const Source840* source,Words840* indices,unsigned short start,int count,Bounds840* left,Bounds840* right,int* leftCount,int* rightCount);
+void __cdecl FUN_00d9a850(Task840* task,const Source840* source,Words840* indices,unsigned short start,int count,hkAabb* left,hkAabb* right,int* leftCount,int* rightCount);
 struct Tree840 {
     int unk00,unk04,unk08,unk0c;
     Node840* root;
@@ -689,8 +599,6 @@ struct Tree840 {
     void FUN_00d9c840(const Source840* source,const int* keys,int count,Node840* rootNode,Words840& mapping,unsigned char reuse);
 };
 
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
 
 class Sd9_SimdReal
 {
@@ -703,21 +611,16 @@ private:
     __m128 m_vValue;
 };
 
-class Sd9_Vector4
+
+static __forceinline void Sd9_multiply(Vec4& vector, const Sd9_SimdReal& scalar)
 {
-public:
-    __forceinline void set(float a, float b, float c, float d = 0.0f) { m_vComponents = _mm_setr_ps(a, b, c, d); }
-    __forceinline void add4(const Sd9_Vector4& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void sub4(const Sd9_Vector4& v) { m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void mul4(const Sd9_Vector4& v) { m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void mul4(const Sd9_SimdReal& s) { m_vComponents = _mm_mul_ps(s.broadcast(), m_vComponents); }
-    __forceinline Sd9_SimdReal horizontalAdd3() const
-    {
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55), m_vComponents);
-        return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa), xySum);
-    }
-    __m128 m_vComponents;
-};
+    vector.getQuad() = _mm_mul_ps(scalar.broadcast(), vector.getQuad());
+}
+static __forceinline Sd9_SimdReal Sd9_horizontalAdd3(const Vec4& vector)
+{
+    __m128 xySum = _mm_add_ss(_mm_shuffle_ps(vector.getQuad(), vector.getQuad(), 0x55), vector.getQuad());
+    return _mm_add_ss(_mm_shuffle_ps(vector.getQuad(), vector.getQuad(), 0xaa), xySum);
+}
 
 template <typename T> __forceinline T Sd9_max2(T x, T y) { return x > y ? x : y; }
 template <typename T> __forceinline T Sd9_min2(T x, T y) { return x < y ? x : y; }
@@ -736,11 +639,11 @@ struct Sd9_Aabb16
 {
     struct Metric
     {
-        Sd9_Vector4 m_kCenterPosition;
+        Vec4::Aligned m_kCenterPosition;
         __forceinline int select(const Sd9_Aabb16& a, const Sd9_Aabb16& b) const;
     };
     __forceinline Metric getMetric() const;
-    __forceinline void center(Sd9_Vector4& centerOut) const;
+    __forceinline void center(Vec4& centerOut) const;
     __forceinline static void combine(const Sd9_Aabb16& a, const Sd9_Aabb16& b, Sd9_Aabb16& out);
     __forceinline Sd9_Bool contains(const Sd9_Aabb16& other) const;
     __forceinline void includeAabb(const Sd9_Aabb16& aabb);
@@ -751,14 +654,14 @@ struct Sd9_Aabb16
 
 __forceinline int Sd9_Aabb16::Metric::select(const Sd9_Aabb16& a, const Sd9_Aabb16& b) const
 {
-    Sd9_Vector4 centerA; a.center(centerA);
-    Sd9_Vector4 centerB; b.center(centerB);
+    Vec4::Aligned centerA; a.center(centerA);
+    Vec4::Aligned centerB; b.center(centerB);
     centerA.sub4(m_kCenterPosition);
     centerB.sub4(m_kCenterPosition);
     centerA.mul4(centerA);
     centerB.mul4(centerB);
     centerB.sub4(centerA);
-    int index = Sd9_isNegative(centerB.horizontalAdd3());
+    int index = Sd9_isNegative(Sd9_horizontalAdd3(centerB));
     return index;
 }
 
@@ -769,13 +672,13 @@ __forceinline Sd9_Aabb16::Metric Sd9_Aabb16::getMetric() const
     return metric;
 }
 
-__forceinline void Sd9_Aabb16::center(Sd9_Vector4& centerOut) const
+__forceinline void Sd9_Aabb16::center(Vec4& centerOut) const
 {
     centerOut.set(m_kMaximumCorner[0], m_kMaximumCorner[1], m_kMaximumCorner[2]);
-    Sd9_Vector4 myMin;
+    Vec4::Aligned myMin;
     myMin.set(m_kMinimumCorner[0], m_kMinimumCorner[1], m_kMinimumCorner[2]);
     centerOut.add4(myMin);
-    centerOut.mul4(0.5f);
+    Sd9_multiply(centerOut, 0.5f);
 }
 
 __forceinline void Sd9_Aabb16::combine(const Sd9_Aabb16& a, const Sd9_Aabb16& b, Sd9_Aabb16& out)
@@ -935,30 +838,19 @@ void Sd9_Tree::FUN_00d9b580(unsigned short insertPointIdx, unsigned short newLea
     }
 }
 
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_set_ss(float);
-extern "C" __m128 _mm_set_ps1(float a);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_min_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_max_ps(__m128 a, __m128 b);
 
 inline void* operator new(unsigned int, void* p) throw() { return p; }
 inline void operator delete(void*, void*) throw() {}
 
 void __cdecl ResizeAudioStream(void* alloc, void* array, int elemSize);
 
-struct BuildVector4
-{
-    __m128 m_vComponents;
-    void operator=(const BuildVector4& v) { m_vComponents = v.m_vComponents; }
-};
 
 struct BuildAabb
 {
-    BuildVector4 m_kMinimumCorner;
-    BuildVector4 m_kMaximumCorner;
+    BuildAabb() : m_kMinimumCorner(Vec4::Uninitialized), m_kMaximumCorner(Vec4::Uninitialized) {}
+    void operator=(const BuildAabb& other) { m_kMinimumCorner.getQuad() = other.m_kMinimumCorner.getQuad(); m_kMaximumCorner.getQuad() = other.m_kMaximumCorner.getQuad(); }
+    Vec4::Aligned m_kMinimumCorner;
+    Vec4::Aligned m_kMaximumCorner;
 };
 
 struct BuildTreeNode
@@ -976,15 +868,15 @@ struct BuildTreeNode
 };
 
 template <typename T>
-struct BuildArray
-{
+struct BuildArrayLocalForm
+{ // local form of hkArray: 0x00d9d1c0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    BuildArray() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
-    BuildArray(T* data, int flags) : m_data(data), m_iCapacityState(flags) {}
-    __forceinline ~BuildArray() { _clearAndDeallocate(fnvc_adapt::FUN_00c85750().heap()); }
+    BuildArrayLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
+    BuildArrayLocalForm(T* data, int flags) : m_data(data), m_iCapacityState(flags) {}
+    __forceinline ~BuildArrayLocalForm() { _clearAndDeallocate(*reinterpret_cast<S_00d9d650_Heap*>((&FUN_00c85750()->heap()))); }
 
     int GetLogicalSize() const { return m_iElementCount; }
     int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
@@ -1014,7 +906,7 @@ struct BuildArray
     }
     __forceinline void SetSizeAndGrow(int n)
     {
-        GrowArrayCapacity(fnvc_adapt::FUN_00c85750().heap(), n);
+        GrowArrayCapacity(*reinterpret_cast<S_00d9d650_Heap*>((&FUN_00c85750()->heap())), n);
         m_iElementCount = n;
     }
     __forceinline T& expandOneUnchecked()
@@ -1023,7 +915,7 @@ struct BuildArray
     }
     __forceinline void AddBack(const T& t)
     {
-        S_00d9d650_Heap& alloc = fnvc_adapt::FUN_00c85750().heap();
+        S_00d9d650_Heap& alloc = *reinterpret_cast<S_00d9d650_Heap*>((&FUN_00c85750()->heap()));
         if (m_iElementCount == getCapacity())
         {
             ResizeAudioStream(&alloc, this, sizeof(T));
@@ -1033,8 +925,13 @@ struct BuildArray
     }
 };
 
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+#pragma intrinsic(memcpy)
+
 struct BuildWorkItem
 {
+    BuildWorkItem() {}
+    BuildWorkItem(const BuildWorkItem& other) { memcpy(this, &other, sizeof(*this)); }
     BuildAabb m_kBounds;
     int m_kRayStart;
     int m_uiItemCount;
@@ -1042,11 +939,11 @@ struct BuildWorkItem
 };
 
 template <typename T, int N>
-struct BuildInplaceArray : public BuildArray<T>
+struct BuildInplaceArray : public BuildArrayLocalForm<T>
 {
     T m_kStorage[N];
 
-    BuildInplaceArray() : BuildArray<T>(m_kStorage, N | 0x80000000)
+    BuildInplaceArray() : BuildArrayLocalForm<T>(m_kStorage, N | 0x80000000)
     {
         this->m_data = m_kStorage;
 
@@ -1060,7 +957,7 @@ struct BuildNodePool
     __declspec(noalias) BuildTreeNode* PopItem(BuildTreeNode** root, int* rootIndex, int* indexOut);
 };
 
-void __cdecl FUN_00d9a520(const BuildAabb* item, const BuildAabb* aabbs, BuildArray<int>* indices, int start, int count,
+void __cdecl FUN_00d9a520(const BuildAabb* item, const BuildAabb* aabbs, BuildArrayLocalForm<int>* indices, int start, int count,
                           BuildAabb* leftAabb, BuildAabb* rightAabb, int* numLeft, int* numRight);
 
 struct BuildTree
@@ -1074,27 +971,27 @@ struct BuildTree
     int unk18;
     BuildNodePool m_kNodeCollection;
 
-    void FUN_00d9d1c0(const BuildAabb* aabbs, const int* keys, int numAabbs, BuildTreeNode* root, BuildArray<int>& nodeIndices, bool reuseNodes);
+    void FUN_00d9d1c0(const BuildAabb* aabbs, const int* keys, int numAabbs, BuildTreeNode* root, BuildArrayLocalForm<int>& nodeIndices, bool reuseNodes);
 };
 
 static __forceinline __m128 centerOf(const BuildAabb& b)
 {
     __m128 half = _mm_load_ss(&DAT_01016248);
-    return _mm_mul_ps(_mm_add_ps(b.m_kMinimumCorner.m_vComponents,b.m_kMaximumCorner.m_vComponents), _mm_shuffle_ps(half,half,0));
+    return _mm_mul_ps(_mm_add_ps(b.m_kMinimumCorner.getQuad(),b.m_kMaximumCorner.getQuad()), _mm_shuffle_ps(half,half,0));
 }
 static __forceinline void includeCenter(BuildAabb& b,__m128 p)
 {
-    b.m_kMinimumCorner.m_vComponents = _mm_min_ps(b.m_kMinimumCorner.m_vComponents,p);
-    b.m_kMaximumCorner.m_vComponents = _mm_max_ps(b.m_kMaximumCorner.m_vComponents,p);
+    b.m_kMinimumCorner.getQuad() = _mm_min_ps(b.m_kMinimumCorner.getQuad(),p);
+    b.m_kMaximumCorner.getQuad() = _mm_max_ps(b.m_kMaximumCorner.getQuad(),p);
 }
-__declspec(noinline) void __cdecl FUN_00d9a520(const BuildAabb* item, const BuildAabb* aabbs, BuildArray<int>* indices, int start, int count,
+__declspec(noinline) void __cdecl FUN_00d9a520(const BuildAabb* item, const BuildAabb* aabbs, BuildArrayLocalForm<int>* indices, int start, int count,
                           BuildAabb* leftAabb, BuildAabb* rightAabb, int* numLeft, int* numRight)
 {
-    leftAabb->m_kMinimumCorner.m_vComponents = rightAabb->m_kMinimumCorner.m_vComponents = _mm_set_ps1(3.40282e+38f);
-    leftAabb->m_kMaximumCorner.m_vComponents = rightAabb->m_kMaximumCorner.m_vComponents = _mm_set_ps1(-3.40282e+38f);
-    __m128 sum = _mm_add_ps(item->m_kMaximumCorner.m_vComponents,item->m_kMinimumCorner.m_vComponents);
+    leftAabb->m_kMinimumCorner.getQuad() = rightAabb->m_kMinimumCorner.getQuad() = _mm_set_ps1(3.40282e+38f);
+    leftAabb->m_kMaximumCorner.getQuad() = rightAabb->m_kMaximumCorner.getQuad() = _mm_set_ps1(-3.40282e+38f);
+    __m128 sum = _mm_add_ps(item->m_kMaximumCorner.getQuad(),item->m_kMinimumCorner.getQuad());
     float extent[4];
-    _mm_store_ps(extent,_mm_sub_ps(item->m_kMaximumCorner.m_vComponents,item->m_kMinimumCorner.m_vComponents));
+    _mm_store_ps(extent,_mm_sub_ps(item->m_kMaximumCorner.getQuad(),item->m_kMinimumCorner.getQuad()));
     int axis = extent[0] > extent[1] ? 0 : 1;
     if(extent[2] > extent[axis]) axis=2;
     float s[4]; _mm_store_ps(s,sum);
@@ -1133,9 +1030,9 @@ __declspec(noinline) void __cdecl FUN_00d9a520(const BuildAabb* item, const Buil
 }
 
 // @fnv 0x00d9d1c0
-void BuildTree::FUN_00d9d1c0(const BuildAabb* aabbs, const int* keys, int numAabbs, BuildTreeNode* root, BuildArray<int>& nodeIndices, bool reuseNodes)
+void BuildTree::FUN_00d9d1c0(const BuildAabb* aabbs, const int* keys, int numAabbs, BuildTreeNode* root, BuildArrayLocalForm<int>& nodeIndices, bool reuseNodes)
 {
-    BuildArray<int> indices;
+    BuildArrayLocalForm<int> indices;
     indices.SetSizeAndGrow(numAabbs);
     for (int i = 0; i < numAabbs; i++)
     {
@@ -1149,7 +1046,7 @@ void BuildTree::FUN_00d9d1c0(const BuildAabb* aabbs, const int* keys, int numAab
     for (int i = 0; i < numAabbs; i++)
     {
         __m128 scalarHalf = _mm_load_ss(&DAT_01016248);
-        __m128 center = _mm_mul_ps(_mm_add_ps(aabbs[i].m_kMinimumCorner.m_vComponents, aabbs[i].m_kMaximumCorner.m_vComponents), _mm_shuffle_ps(scalarHalf,scalarHalf,0));
+        __m128 center = _mm_mul_ps(_mm_add_ps(aabbs[i].m_kMinimumCorner.getQuad(), aabbs[i].m_kMaximumCorner.getQuad()), _mm_shuffle_ps(scalarHalf,scalarHalf,0));
         lo = _mm_min_ps(lo, center);
         hi = _mm_max_ps(hi, center);
     }
@@ -1159,8 +1056,8 @@ void BuildTree::FUN_00d9d1c0(const BuildAabb* aabbs, const int* keys, int numAab
         stack.m_iElementCount = 1;
         first.m_kRayStart = 0;
         first.m_uiItemCount = numAabbs;
-        first.m_kBounds.m_kMinimumCorner.m_vComponents = lo;
-        first.m_kBounds.m_kMaximumCorner.m_vComponents = hi;
+        first.m_kBounds.m_kMinimumCorner.getQuad() = lo;
+        first.m_kBounds.m_kMaximumCorner.getQuad() = hi;
         first.m_node = root;
     }
 

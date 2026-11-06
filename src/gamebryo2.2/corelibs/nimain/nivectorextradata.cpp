@@ -1,3 +1,8 @@
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiExtraData.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/StrArr.h"
+
 
 // src/gamebryo2.2/corelibs/nimain/nivectorextradata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nivectorextradata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -10,14 +15,8 @@ int* __cdecl FUN_00a92070()
     return &g_011f5e84;
 }
 
-struct NiObject
+struct NiVectorExtraData : NiExtraData
 {
-    virtual ~NiObject();
-};
-
-struct NiVectorExtraData : NiObject
-{
-    char m_auiShapeKeys[8];
     float m_afVectorComponents[4];
     bool FUN_00a92020(NiObject* pObject);
 };
@@ -58,15 +57,6 @@ void* Holder00a92080::FUN_00a92080(unsigned int flags)
     return this;
 }
 
-struct NiExtraData
-{
-    void FUN_00a7b2e0();
-    void FUN_00a7b330(void*, void*);
-};
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 struct CloningProcess
 {
 };
@@ -99,60 +89,39 @@ NiObject* FUN_00a920b0_shell::FUN_00a920b0(CloningProcess& kCloning)
     return pkObject;
 }
 
-struct StrArr
-{
-    char m_auiShapeKeys[8];
-    unsigned short m_uiCount;
-    unsigned short m_uiPosition;
-    unsigned short m_pAuxiliaryObject;
-    unsigned short m_uiCapacity;
-
-    void SetSize(unsigned int uiSize);
-    void SetAt(unsigned int uiIndex, char*& pcString);
-};
-
-typedef StrArr A89C70StringArray;
-
-struct A89C70Base
-{
-    void GetViewerStrings(A89C70StringArray* apViewerStrings);
-};
+// The shared NiExtraData header does not declare its StrArr viewer overload.
+extern void __fastcall GetExtraDataViewerStrings(NiExtraData* self, void*, StrArr* strings);
 
 char* __cdecl _FUN_00a7d330(char* pString);
 void* __cdecl _NiMalloc(unsigned int uiSize);
 int __cdecl _NiSprintf(char* pBuffer, unsigned int uiSize, const char* pFormat, double EntryPointTwoValueFunctionData,
                        double fSecondFunctionValue, double fValue3, double fValue4);
 
-struct FUN_00a92290_shell : NiVectorExtraData
-{
-    void FUN_00a92290(StrArr* apViewerStrings);
-};
-
 // @fnv 0x00a92290
-void FUN_00a92290_shell::FUN_00a92290(StrArr* pStringArray)
+void __fastcall AppendVectorViewerStrings(NiVectorExtraData* self, void* unused, StrArr* pStringArray)
 {
-    reinterpret_cast<A89C70Base*>(this)->GetViewerStrings(pStringArray);
+    GetExtraDataViewerStrings(self, unused, pStringArray);
 
     char* pcVectorString = _FUN_00a7d330(reinterpret_cast<char*>(g_011f5e84));
 
-    unsigned int uiIndex = pStringArray->m_uiPosition;
-    unsigned int ItemUpdateArray = pStringArray->m_uiCount;
+    unsigned int uiIndex = pStringArray->m_usSize;
+    unsigned int ItemUpdateArray = pStringArray->m_usMaxSize;
     if (uiIndex >= ItemUpdateArray)
     {
-        pStringArray->SetSize(static_cast<unsigned int>(pStringArray->m_uiCapacity) + uiIndex);
+        pStringArray->SetSize(static_cast<unsigned int>(pStringArray->m_usGrowBy) + uiIndex);
     }
     pStringArray->SetAt(uiIndex, pcVectorString);
 
     pcVectorString = static_cast<char*>(_NiMalloc(0x37));
 
-    _NiSprintf(pcVectorString, 0x37, "Vector = (%5.3f,%5.3f,%5.3f,%5.3f)", m_afVectorComponents[0],
-               m_afVectorComponents[1], m_afVectorComponents[2], m_afVectorComponents[3]);
+    _NiSprintf(pcVectorString, 0x37, "Vector = (%5.3f,%5.3f,%5.3f,%5.3f)", self->m_afVectorComponents[0],
+               self->m_afVectorComponents[1], self->m_afVectorComponents[2], self->m_afVectorComponents[3]);
 
-    uiIndex = pStringArray->m_uiPosition;
-    ItemUpdateArray = pStringArray->m_uiCount;
+    uiIndex = pStringArray->m_usSize;
+    ItemUpdateArray = pStringArray->m_usMaxSize;
     if (uiIndex >= ItemUpdateArray)
     {
-        pStringArray->SetSize(static_cast<unsigned int>(pStringArray->m_uiCapacity) + uiIndex);
+        pStringArray->SetSize(static_cast<unsigned int>(pStringArray->m_usGrowBy) + uiIndex);
     }
     pStringArray->SetAt(uiIndex, pcVectorString);
 }
@@ -334,14 +303,13 @@ static __forceinline void S_00a921f0_SaveFloat(S_00a921f0_Stream& s, const float
 class FUN_00a921f0_cls : public NiVectorExtraData
 {
   public:
-    void Callee7b2c0(S_00a921f0_Stream& s);
     void SaveToStream(S_00a921f0_Stream& s);
 };
 
 // @fnv 0x00a921f0
 void FUN_00a921f0_cls::SaveToStream(S_00a921f0_Stream& aStream)
 {
-    Callee7b2c0(aStream);
+    NiExtraData::SaveBinary(reinterpret_cast<NiStream&>(aStream));
     S_00a921f0_SaveFloat(aStream, &m_afVectorComponents[0]);
     S_00a921f0_SaveFloat(aStream, &m_afVectorComponents[1]);
     S_00a921f0_SaveFloat(aStream, &m_afVectorComponents[2]);
@@ -372,14 +340,13 @@ struct FUN_00a59be0_tmp
 class FUN_00a92110_cls : public NiVectorExtraData
 {
   public:
-    void FUN_00a7b4a0(S_00a921f0_Stream* s);
     void FUN_00a92110(S_00a921f0_Stream* s);
 };
 
 // @fnv 0x00a92110
 void FUN_00a92110_cls::FUN_00a92110(S_00a921f0_Stream* s)
 {
-    FUN_00a7b4a0(s);
+    NiExtraData::LoadBinary(reinterpret_cast<NiStream&>(*s));
     if ((unsigned int)s->unk0d8 < 0x500000e)
     {
         FUN_00a59be0_tmp tmp;

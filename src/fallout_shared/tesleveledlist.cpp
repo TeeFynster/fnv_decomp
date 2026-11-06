@@ -1,6 +1,83 @@
 // fallout_shared/tesleveledlist.cpp: TESLeveledList, TESFile, NiRefObject, TmpEndian and more (46 functions)
 
-#include "tesleveledlist_decls.h"
+#define FNV64_INCLUDE_BSMULTIBOUND_CAPSULE
+#include "../../include/BSShaderAccumulator.h"
+
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSPerkEntry.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/BSFile.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/FormChangeMask.h"
+#include "../../include/HighProcess.h"
+#include "../../include/TESContainer.h"
+#include "../../include/TESLeveledList.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/TESBoundAnimObject.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESObject.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/BSFaceGenKeyframe.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/NiColor.h"
+#include "../../include/BGSLoadGameBuffer.h"
+#include "../../include/FileEntryList.h"
+#include "../../include/TESGlobal.h"
+#include "../../include/bhkLiquidAction.h"
+
+// windows.h defines a printer API macro with the same name as the buffer method.
+#undef GetForm
+
+// Remaining declarations cover types not yet supported by the shared headers.
+
+extern unsigned int DAT_010a2480;
+
+class ContainerItemExtra
+{
+  public:
+    unsigned int data[3];
+    ContainerItemExtra();
+    void FUN_0040eb90(float);
+    void InitItem(TESForm*);
+};
+struct LeveledObject
+{
+    void* __vecDelDtor(unsigned int);
+    void* Destroy(unsigned int);
+    TESForm* pForm;
+    unsigned short m_sCount;
+    unsigned short sLevel;
+    ContainerItemExtra* m_pExtraData;
+};
+
+class TESGlobalValueReader
+{
+  public:
+    float GetValue();
+};
+
+class PlayerQuestData
+{
+  public:
+    PerkEntryConditionSet* GetConditions();
+};
+class ActorCause;
+
+class MersenneTwister
+{
+  public:
+    static MersenneTwister* GetRandomGenerator();
+    unsigned int GetRandomUInt();
+};
+unsigned int DialogueRandom();
+
+void* operator new(unsigned int) throw();
+
+int Warning(const char*, ...);
 
 extern "C" double __cdecl floor(double value);
 extern "C" int __cdecl _ftol2_sse();
@@ -22,7 +99,7 @@ void TESLeveledList::ClearComponent()
 // @fnv 0x00488f10
 void TESLeveledList::Revert(BGSLoadFormBuffer* buffer)
 {
-    if (buffer->GetOldChangeFlags(0x80000000))
+    if (buffer->GetOldChangeFlags(0x80000000).operator bool())
         ClearScriptAddedLeveledObjects();
 }
 
@@ -40,14 +117,14 @@ void TESLeveledList::PopulateContainerWithLeveledItems(unsigned short level, uns
             struct LevelScan
             {
                 unsigned short maxLevel;
-                BSSimpleList<BGSPerkEntry*>* node;
+                BSSimpleList<LeveledObject*>* node;
             } scan;
             scan.maxLevel = 0;
-            scan.node = reinterpret_cast<BSSimpleList<BGSPerkEntry*>*>(
+            scan.node = reinterpret_cast<BSSimpleList<LeveledObject*>*>(
                 reinterpret_cast<PlayerQuestData*>(this)->GetConditions());
             while (scan.node && !reinterpret_cast<BSSimpleList<BGSCameraShot*>*>(scan.node)->IsEmpty())
             {
-                unsigned short entryLevel = scan.node->GetItem()->level;
+                unsigned short entryLevel = scan.node->GetItem()->sLevel;
                 if (entryLevel > scan.maxLevel)
                     scan.maxLevel = entryLevel;
                 scan.node = scan.node->GetNext();
@@ -76,7 +153,7 @@ void TESLeveledList::PopulateContainerWithLeveledItems(unsigned short level, uns
                     TESLeveledList* nested = GetFormAsLeveledList(result.form);
                     if (nested)
                         nested->PopulateContainerWithLeveledItems(level, result.quantity, &selected, mode);
-                    else if (result.form->Unk_39())
+                    else if (result.form->IsActor_InEditor())
                     {
                         TESForm* object = result.form;
                         if (object)
@@ -108,22 +185,22 @@ void TESLeveledList::PopulateContainerWithLeveledItems(unsigned short level, uns
                         roll = DialogueRandom() % 100;
                         if (roll >= chance)
                         {
-                            BSSimpleList<BGSPerkEntry*>* node = reinterpret_cast<BSSimpleList<BGSPerkEntry*>*>(
+                            BSSimpleList<LeveledObject*>* node = reinterpret_cast<BSSimpleList<LeveledObject*>*>(
                                 reinterpret_cast<PlayerQuestData*>(this)->GetConditions());
                             while (node && !reinterpret_cast<BSSimpleList<BGSCameraShot*>*>(node)->IsEmpty())
                             {
-                                BGSPerkEntry* entry = node->GetItem();
+                                LeveledObject* entry = node->GetItem();
                                 node = node->GetNext();
-                                result.form = entry->form;
-                                result.quantity = entry->count;
-                                result.extra = entry->extra;
+                                result.form = entry->pForm;
+                                result.quantity = entry->m_sCount;
+                                result.extra = entry->m_pExtraData;
                                 if (result.form && result.quantity)
                                 {
                                     TESLeveledList* nested = GetFormAsLeveledList(result.form);
                                     if (nested)
                                         nested->PopulateContainerWithLeveledItems(level, result.quantity, &selected,
                                                                                   mode);
-                                    else if (result.form->Unk_39())
+                                    else if (result.form->IsActor_InEditor())
                                     {
                                         TESForm* object = result.form;
                                         if (object)
@@ -143,7 +220,7 @@ void TESLeveledList::PopulateContainerWithLeveledItems(unsigned short level, uns
                         TESLeveledList* nested = GetFormAsLeveledList(result.form);
                         if (nested)
                             nested->PopulateContainerWithLeveledItems(level, result.quantity, &selected, mode);
-                        else if (result.form->Unk_39())
+                        else if (result.form->IsActor_InEditor())
                         {
                             TESForm* object = result.form;
                             if (object)
@@ -166,7 +243,7 @@ void TESLeveledList::SelectLeveledObject(unsigned short level, TESForm*& form, u
     struct LevelRange
     {
         int lastLevel;
-        BSSimpleList<BGSPerkEntry*>* first;
+        BSSimpleList<LeveledObject*>* first;
         int minimumLevel;
         unsigned int choices;
     } range;
@@ -194,15 +271,15 @@ void TESLeveledList::SelectLeveledObject(unsigned short level, TESForm*& form, u
         range.choices = 1;
         range.lastLevel = 0;
         range.first = 0;
-        BSSimpleList<BGSPerkEntry*>* node =
-            reinterpret_cast<BSSimpleList<BGSPerkEntry*>*>(reinterpret_cast<PlayerQuestData*>(this)->GetConditions());
+        BSSimpleList<LeveledObject*>* node =
+            reinterpret_cast<BSSimpleList<LeveledObject*>*>(reinterpret_cast<PlayerQuestData*>(this)->GetConditions());
         foundRange = false;
         while (node)
         {
-            BGSPerkEntry* entry = node->GetItem();
+            LeveledObject* entry = node->GetItem();
             if (entry)
             {
-                int entryLevel = entry->level;
+                int entryLevel = entry->sLevel;
                 if (entryLevel > level)
                     break;
                 if (entryLevel > range.lastLevel && (range.lastLevel == 0 || !foundRange))
@@ -223,7 +300,7 @@ void TESLeveledList::SelectLeveledObject(unsigned short level, TESForm*& form, u
             struct SelectedForm
             {
                 unsigned short count;
-                BGSPerkEntry* entry;
+                LeveledObject* entry;
                 ContainerItemExtra* extra;
                 TESForm* form;
             } result;
@@ -238,11 +315,11 @@ void TESLeveledList::SelectLeveledObject(unsigned short level, TESForm*& form, u
                         return;
                 }
                 result.entry = node->GetItem();
-                result.form = result.entry->form;
-                result.count = result.entry->count;
-                result.extra = result.entry->extra;
+                result.form = result.entry->pForm;
+                result.count = result.entry->m_sCount;
+                result.extra = result.entry->m_pExtraData;
                 {
-                    TESLeveledList* nested = GetFormAsLeveledList(result.entry->form);
+                    TESLeveledList* nested = GetFormAsLeveledList(result.entry->pForm);
                     if (nested && recurse)
                     {
                         struct RecursiveForm
@@ -276,30 +353,30 @@ void TESLeveledList::InitItem(TESForm* owner)
 {
     struct ResolveState
     {
-        BGSPerkEntry* entry;
-        BSSimpleList<BGSPerkEntry*>* node;
-        BSSimpleList<BGSPerkEntry*>* previous;
+        LeveledObject* entry;
+        BSSimpleList<LeveledObject*>* node;
+        BSSimpleList<LeveledObject*>* previous;
         TESFile* file;
     } resolveState;
     {
         resolveState.previous = 0;
         resolveState.node =
-            reinterpret_cast<BSSimpleList<BGSPerkEntry*>*>(reinterpret_cast<PlayerQuestData*>(this)->GetConditions());
+            reinterpret_cast<BSSimpleList<LeveledObject*>*>(reinterpret_cast<PlayerQuestData*>(this)->GetConditions());
         resolveState.entry = 0;
         resolveState.file = owner ? owner->GetFile(-1) : 0;
         unsigned int formID, globalID;
         while (resolveState.node && (resolveState.entry = resolveState.node->GetItem()) != 0)
         {
-            formID = reinterpret_cast<unsigned int>(resolveState.entry->form);
+            formID = reinterpret_cast<unsigned int>(resolveState.entry->pForm);
             TESForm::RemapFormIDForFile(formID, resolveState.file);
-            resolveState.entry->form = TESForm::GetFormByID(formID);
-            if (!resolveState.entry->form)
+            resolveState.entry->pForm = TESForm::GetFormByID(formID);
+            if (!resolveState.entry->pForm)
             {
                 reinterpret_cast<BSSimpleList<BGSCameraShot*>*>(resolveState.node)->RemoveHead();
                 struct DeletedEntry
                 {
-                    BGSPerkEntry* doomed;
-                    BGSPerkEntry* object;
+                    LeveledObject* doomed;
+                    LeveledObject* object;
                 } deletion;
                 deletion.doomed = resolveState.entry;
                 deletion.object = deletion.doomed;
@@ -309,7 +386,7 @@ void TESLeveledList::InitItem(TESForm* owner)
                 {
                     if (reinterpret_cast<BGSCameraPath*>(owner)->HasNameForWarning())
                         Warning("MASTERFILE: Unable to find Leveled Object Form (%08X) for owner object \"%s\".",
-                                formID, owner->GetEditorID());
+                                formID, owner->GetName());
                     else
                         Warning("MASTERFILE: Unable to find Leveled Object Form (%08X) for owner object (%08X).",
                                 formID, owner->GetFormID());
@@ -322,8 +399,8 @@ void TESLeveledList::InitItem(TESForm* owner)
                 resolveState.previous = resolveState.node;
                 resolveState.node = resolveState.node->GetNext();
             }
-            if (resolveState.entry && resolveState.entry->extra)
-                resolveState.entry->extra->InitItem(owner);
+            if (resolveState.entry && resolveState.entry->m_pExtraData)
+                resolveState.entry->m_pExtraData->InitItem(owner);
         }
         if (m_pLevelGlobal)
         {
@@ -336,7 +413,7 @@ void TESLeveledList::InitItem(TESForm* owner)
                 {
                     if (reinterpret_cast<BGSCameraPath*>(owner)->HasNameForWarning())
                         Warning("MASTERFILE: Unable to find Leveled Chance Global (%08X) for owner object \"%s\".",
-                                globalID, owner->GetEditorID());
+                                globalID, owner->GetName());
                     else
                         Warning("MASTERFILE: Unable to find Leveled Chance Global (%08X) for owner object (%08X).",
                                 globalID, owner->GetFormID());
@@ -351,9 +428,9 @@ void TESLeveledList::InitItem(TESForm* owner)
 // @fnv 0x00488d70
 void TESLeveledList::LoadGame(BGSLoadFormBuffer* buffer)
 {
-    if (buffer->GetChangeFlags(0x80000000))
+    if (buffer->GetChangeFlags(0x80000000).operator bool())
     {
-        if (!reinterpret_cast<BSSimpleList<BGSCameraShot*>*>(m_kLeveledObjects)->IsEmpty())
+        if (!reinterpret_cast<BSSimpleList<BGSCameraShot*>*>(&m_kLeveledObjects)->IsEmpty())
             ClearScriptAddedLeveledObjects();
         unsigned int uiEntryCount = buffer->ReadElementCount();
         for (unsigned int i = 0; i < uiEntryCount; ++i)
@@ -370,9 +447,9 @@ void TESLeveledList::LoadGame(BGSLoadFormBuffer* buffer)
                 savedItem.health = 0;
                 savedItem.form =
                     TESForm::GetFormByID(reinterpret_cast<BGSLoadGameBuffer*>(buffer)->ReadFormIdentifier());
-                buffer->ReadTypedData(&level, 2);
-                buffer->ReadTypedData(&count, 2);
-                buffer->ReadTypedData(&savedItem.health, 4);
+                buffer->ReadTypedData(static_cast<void*>(&level), 2u);
+                buffer->ReadTypedData(static_cast<void*>(&count), 2u);
+                buffer->ReadTypedData(static_cast<void*>(&savedItem.health), 4u);
                 if (savedItem.form)
                 {
                     ContainerItemExtra* extra = 0;
@@ -398,7 +475,7 @@ bool TESFile::NextChunk()
     } chunkPos;
     chunkPos.formSize = m_kRecordInfo.length;
     if (IsCurrentFormCompressed())
-        chunkPos.formSize = reinterpret_cast<HighProcess*>(this)->GetPostAnimationAction();
+        chunkPos.formSize = reinterpret_cast<HighProcess*>(this)->HighProcess::GetPostAnimationAction();
     m_uiRecordOffset += m_uiChunkSize + 6;
     if (m_uiRecordOffset >= chunkPos.formSize)
     {
@@ -407,7 +484,7 @@ bool TESFile::NextChunk()
     }
     chunkPos.offset = m_uiRecordSize + reinterpret_cast<bhkLiquidAction*>(this)->GetInstanceSize() + m_uiRecordOffset;
     if (!IsCurrentFormCompressed())
-        m_pFile->vfn_14(chunkPos.offset, DAT_010a2480);
+        m_pFile->Seek(chunkPos.offset, DAT_010a2480);
     m_uiCurrentOffset = 0;
     FUN_004720d0();
     GetChunkID();
@@ -417,17 +494,17 @@ bool TESFile::NextChunk()
 // @fnv 0x00487900
 void TESLeveledList::InitializeLeveledList()
 {
-    BSSimpleList<BGSPerkEntry*>* node =
-        reinterpret_cast<BSSimpleList<BGSPerkEntry*>*>(reinterpret_cast<PlayerQuestData*>(this)->GetConditions());
+    BSSimpleList<LeveledObject*>* node =
+        reinterpret_cast<BSSimpleList<LeveledObject*>*>(reinterpret_cast<PlayerQuestData*>(this)->GetConditions());
     while (node)
     {
-        BGSPerkEntry* entry = node->GetItem();
+        LeveledObject* entry = node->GetItem();
         if (entry)
         {
             struct DeletedEntry
             {
-                BGSPerkEntry* doomed;
-                BGSPerkEntry* object;
+                LeveledObject* doomed;
+                LeveledObject* object;
             } deletion;
             deletion.doomed = entry;
             deletion.object = deletion.doomed;
@@ -437,7 +514,7 @@ void TESLeveledList::InitializeLeveledList()
         else
             node = node->GetNext();
     }
-    reinterpret_cast<BSSimpleList<ActorCause*>*>(m_kLeveledObjects)->RemoveAll();
+    reinterpret_cast<BSSimpleList<ActorCause*>*>(&m_kLeveledObjects)->RemoveAll();
 }
 
 // @fnv 0x004877e0
@@ -464,239 +541,29 @@ unsigned int DialogueRandom()
     return MersenneTwister::GetRandomGenerator()->GetRandomUInt();
 }
 
-struct BGSSaveFormBuffer;
-struct BGSTextureSet;
-struct BipedAnim;
-struct NiAVObject;
-struct NiPoint3;
-struct TESActorBase;
-struct TESModel;
-struct TESModelTextureSwap;
-struct TESFormList;
-struct TESWaterForm;
-struct DistantTreeTextureInfo;
-struct blob12
-{
-    char b[12];
-};
-struct TESObject : public TESForm
-{
-    virtual void __vslot_10();
-    virtual NiAVObject* GetModel3D();
-    virtual bool IsBoundAnimObject();
-    virtual TESWaterForm* GetAssociatedWaterForm();
-    virtual bool IsAutoCalculated();
-    virtual void SetPlayable(bool);
-    virtual NiAVObject* Get3DObject(TESObjectREFR*, bool);
-    virtual void Destroy3DModel(TESObjectREFR*);
-    virtual bool HasLoaded3D();
-    virtual bool IsModelValid();
-    virtual void UpdateModel3D();
-    virtual bool IsBoundItem();
-    virtual bool IsBoundItem(BipedAnim*);
-    virtual void Set3D(NiAVObject*, bool);
-    virtual unsigned int AcquireReference();
-    virtual unsigned int DecRef();
-    virtual NiAVObject* Create3DForReference(TESObjectREFR*);
-    NiAVObject* Get3D();
-    virtual unsigned int GetRefCount();
-    TESFormList* GetParentList();
-    unsigned int GetModelCount();
-    virtual bool IsObject();
-    virtual char* GetObjectDisplayName();
-    void SetParentList(TESFormList*);
-    void nod_SetPrev(TESObject*);
-    void nod_SetNext(TESObject*);
-    TESObject* nod_GetPrev();
-    TESObject* nod_GetNext();
-    static NiAVObject* FindGeometryByName(NiAVObject*, char*);
-    char* GetModelFileName(TESObjectREFR*);
-    void BuildModelFileName(TESObjectREFR*, char*);
-    void GetLODModelFileName(TESObjectREFR*, char*);
-    void GetLODFlatFileName(TESObjectREFR*, char*);
-    void __local_vftable_ctor_closure();
-    char _pad_4[20];
-    TESFormList* m_pOwningList;
-    TESObject* m_pPreviousObject;
-    TESObject* m_pNextObject;
-};
-typedef char _sizecheck_TESObject[sizeof(TESObject) == 36 ? 1 : -1];
-struct TESBoundObject : public TESObject
-{
-    virtual void __vslot_10();
-    virtual NiAVObject* Get3DObject(TESObjectREFR*);
-    virtual bool IsBoundItem(char*);
-    virtual bool IsBoundObject();
-    void SetBoundMinMax(NiAVObject*);
-    void CopyBoundData(TESBoundObject*);
-    static void CalcBoundingBox(NiAVObject*, NiPoint3*, NiPoint3*, void*, void*, float*);
-    static void CalcBoundingBoxRecursive(NiAVObject*, NiPoint3*, NiPoint3*, bool*, bool*, void*, void*, float*);
-    struct blob12 GetBoundsMinimum();
-    struct blob12 GetBoundsMaximum();
-    float GetBoundSize();
-    virtual void InitializeBoundData();
-    virtual void LoadBoundData(TESFile*);
-    virtual NiAVObject* Get3DObject(TESObjectREFR*, bool);
-    virtual bool IsBoundItem();
-    virtual bool Activate(TESObjectREFR*, TESObjectREFR*, bool, TESBoundObject*, int);
-    bool GetLODObjectExists(bool);
-    void __local_vftable_ctor_closure();
-    char TESBoundObjectBounds[12];
-};
-typedef char _sizecheck_TESBoundObject[sizeof(TESBoundObject) == 48 ? 1 : -1];
-struct TESBoundAnimObject : public TESBoundObject
-{
-    virtual void __vslot_10();
-    virtual bool IsBoundAnimObject();
-    virtual void Set3D(NiAVObject*, bool);
-    virtual bool IsBoundItem(char*);
-    void __local_vftable_ctor_closure();
-};
-typedef char _sizecheck_TESBoundAnimObject[sizeof(TESBoundAnimObject) == 48 ? 1 : -1];
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
-struct FUN_00487790_shell : public TESLeveledList
-{
-    unsigned char FUN_00487790();
-};
 
 // Returns the value of the TESGlobalValueReader at offset 0x10 if present, otherwise the byte at offset 0x0c.
 // @fnv 0x00487790
-unsigned char FUN_00487790_shell::FUN_00487790()
+unsigned char TESLeveledList::GetChanceNone()
 {
-    if (*reinterpret_cast<TESGlobalValueReader* const*>(reinterpret_cast<const char*>(this) + 0x10))
+    if (m_pLevelGlobal)
         return static_cast<unsigned char>(
-            (*reinterpret_cast<TESGlobalValueReader* const*>(reinterpret_cast<const char*>(this) + 0x10))->GetValue());
-    return *reinterpret_cast<const unsigned char*>(reinterpret_cast<const char*>(this) + 0x0c);
+            reinterpret_cast<TESGlobalValueReader*>(m_pLevelGlobal)->GetValue());
+    return m_pChanceGlobal;
 }
 
-namespace fnv_00487840 {
-struct BGSSaveFormBuffer;
-struct BGSTextureSet;
-struct BipedAnim;
-struct NiAVObject;
-struct NiPoint3;
-struct TESActorBase;
-struct TESModel;
-struct TESModelTextureSwap;
-struct TESFormList;
-struct TESWaterForm;
-struct DistantTreeTextureInfo;
-struct blob12
-{
-    char b[12];
-};
-struct TESObject : public TESForm
-{
-    virtual void __vslot_10();
-    virtual NiAVObject* GetModel3D();
-    virtual bool IsBoundAnimObject();
-    virtual TESWaterForm* GetAssociatedWaterForm();
-    virtual bool IsAutoCalculated();
-    virtual void SetPlayable(bool);
-    virtual NiAVObject* Get3DObject(TESObjectREFR*, bool);
-    virtual void Destroy3DModel(TESObjectREFR*);
-    virtual bool HasLoaded3D();
-    virtual bool IsModelValid();
-    virtual void UpdateModel3D();
-    virtual bool IsBoundItem();
-    virtual bool IsBoundItem(BipedAnim*);
-    virtual void Set3D(NiAVObject*, bool);
-    virtual unsigned int AcquireReference();
-    virtual unsigned int DecRef();
-    virtual NiAVObject* Create3DForReference(TESObjectREFR*);
-    NiAVObject* Get3D();
-    virtual unsigned int GetRefCount();
-    TESFormList* GetParentList();
-    unsigned int GetModelCount();
-    virtual bool IsObject();
-    virtual char* GetObjectDisplayName();
-    void SetParentList(TESFormList*);
-    void nod_SetPrev(TESObject*);
-    void nod_SetNext(TESObject*);
-    TESObject* nod_GetPrev();
-    TESObject* nod_GetNext();
-    static NiAVObject* FindGeometryByName(NiAVObject*, char*);
-    char* GetModelFileName(TESObjectREFR*);
-    void BuildModelFileName(TESObjectREFR*, char*);
-    void GetLODModelFileName(TESObjectREFR*, char*);
-    void GetLODFlatFileName(TESObjectREFR*, char*);
-    void __local_vftable_ctor_closure();
-    char _pad_4[20];
-    TESFormList* m_pOwningList;
-    TESObject* m_pPreviousObject;
-    TESObject* m_pNextObject;
-};
-typedef char _sizecheck_TESObject[sizeof(TESObject) == 36 ? 1 : -1];
-struct TESBoundObject : public TESObject
-{
-    virtual void __vslot_10();
-    virtual NiAVObject* Get3DObject(TESObjectREFR*);
-    virtual bool IsBoundItem(char*);
-    virtual bool IsBoundObject();
-    void SetBoundMinMax(NiAVObject*);
-    void CopyBoundData(TESBoundObject*);
-    static void CalcBoundingBox(NiAVObject*, NiPoint3*, NiPoint3*, void*, void*, float*);
-    static void CalcBoundingBoxRecursive(NiAVObject*, NiPoint3*, NiPoint3*, bool*, bool*, void*, void*, float*);
-    struct blob12 GetBoundsMinimum();
-    struct blob12 GetBoundsMaximum();
-    float GetBoundSize();
-    virtual void InitializeBoundData();
-    virtual void LoadBoundData(TESFile*);
-    virtual NiAVObject* Get3DObject(TESObjectREFR*, bool);
-    virtual bool IsBoundItem();
-    virtual bool Activate(TESObjectREFR*, TESObjectREFR*, bool, TESBoundObject*, int);
-    bool GetLODObjectExists(bool);
-    void __local_vftable_ctor_closure();
-    char TESBoundObjectBounds[12];
-};
-typedef char _sizecheck_TESBoundObject[sizeof(TESBoundObject) == 48 ? 1 : -1];
-struct TESBoundAnimObject : public TESBoundObject
-{
-    virtual void __vslot_10();
-    virtual bool IsBoundAnimObject();
-    virtual void Set3D(NiAVObject*, bool);
-    virtual bool IsBoundItem(char*);
-    void __local_vftable_ctor_closure();
-};
-typedef char _sizecheck_TESBoundAnimObject[sizeof(TESBoundAnimObject) == 48 ? 1 : -1];
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
-struct FUN_00487840_shell : public TESLeveledList
-{
-    bool FUN_00487840();
-};
 
 // @fnv 0x00487840
-bool FUN_00487840_shell::FUN_00487840()
+bool TESLeveledList::UsesAllEntries()
 {
-    if (*((unsigned char*)this + 0xD) & 2)
+    if (m_ucChanceNone & 2)
         return true;
     else
         return false;
 }
-}  // namespace fnv_00487840
 
-struct LeveledObject
-{
-    void* __vecDelDtor(unsigned int);
-    TESForm* pForm;
-    unsigned short m_sCount;
-    unsigned short sLevel;
-    ContainerItemExtra* m_pExtraData;
-};
 typedef char _sizecheck_LEVELED_OBJECT[sizeof(LeveledObject) == 12 ? 1 : -1];
 struct FUN_00487ba0_shell : public LeveledObject
 {
@@ -713,16 +580,11 @@ LeveledObject* __fastcall InitLeveledObject(LeveledObject* pThis)
     return pThis;
 }
 
-struct FUN_00488350_shell : public TESLeveledList
-{
-    void AddLeveledItemsToContainer(TESObjectREFR*, TESContainer*);
-};
-
 float __cdecl floor(float);
 
 // Reads the reference's level multiplier and all-below flag, computes a level from its level, and adds leveled list items to the container.
 // @fnv 0x00488350
-void FUN_00488350_shell::AddLeveledItemsToContainer(TESObjectREFR* apRef, TESContainer* apOutCont)
+void TESLeveledList::PopulateContainerFromReference(TESObjectREFR* apRef, TESContainer* apOutCont)
 {
     if (!apRef || !apOutCont)
         return;
@@ -742,106 +604,11 @@ void FUN_00488350_shell::AddLeveledItemsToContainer(TESObjectREFR* apRef, TESCon
 }
 
 namespace fnv_0050ad90 {
-struct BGSSaveFormBuffer;
-struct BGSTextureSet;
-struct BipedAnim;
-struct NiAVObject;
-struct NiPoint3;
-struct TESActorBase;
-struct TESModel;
-struct TESModelTextureSwap;
-struct TESFormList;
-struct TESWaterForm;
-struct DistantTreeTextureInfo;
-struct blob12
-{
-    char b[12];
-};
-struct TESObject : public TESForm
-{
-    virtual void __vslot_10();
-    virtual NiAVObject* GetModel3D();
-    virtual bool IsBoundAnimObject();
-    virtual TESWaterForm* GetAssociatedWaterForm();
-    virtual bool IsAutoCalculated();
-    virtual void SetPlayable(bool);
-    virtual NiAVObject* Get3DObject(TESObjectREFR*, bool);
-    virtual void Destroy3DModel(TESObjectREFR*);
-    virtual bool HasLoaded3D();
-    virtual bool IsModelValid();
-    virtual void UpdateModel3D();
-    virtual bool IsBoundItem();
-    virtual bool IsBoundItem(BipedAnim*);
-    virtual void Set3D(NiAVObject*, bool);
-    virtual unsigned int AcquireReference();
-    virtual unsigned int DecRef();
-    virtual NiAVObject* Create3DForReference(TESObjectREFR*);
-    NiAVObject* Get3D();
-    virtual unsigned int GetRefCount();
-    TESFormList* GetParentList();
-    unsigned int GetModelCount();
-    virtual bool IsObject();
-    virtual char* GetObjectDisplayName();
-    void SetParentList(TESFormList*);
-    void nod_SetPrev(TESObject*);
-    void nod_SetNext(TESObject*);
-    TESObject* nod_GetPrev();
-    TESObject* nod_GetNext();
-    static NiAVObject* FindGeometryByName(NiAVObject*, char*);
-    char* GetModelFileName(TESObjectREFR*);
-    void BuildModelFileName(TESObjectREFR*, char*);
-    void GetLODModelFileName(TESObjectREFR*, char*);
-    void GetLODFlatFileName(TESObjectREFR*, char*);
-    void __local_vftable_ctor_closure();
-    char _pad_4[20];
-    TESFormList* m_pOwningList;
-    TESObject* m_pPreviousObject;
-    TESObject* m_pNextObject;
-};
-typedef char _sizecheck_TESObject[sizeof(TESObject) == 36 ? 1 : -1];
-struct TESBoundObject : public TESObject
-{
-    virtual void __vslot_10();
-    virtual NiAVObject* Get3DObject(TESObjectREFR*);
-    virtual bool IsBoundItem(char*);
-    virtual bool IsBoundObject();
-    void SetBoundMinMax(NiAVObject*);
-    void CopyBoundData(TESBoundObject*);
-    static void CalcBoundingBox(NiAVObject*, NiPoint3*, NiPoint3*, void*, void*, float*);
-    static void CalcBoundingBoxRecursive(NiAVObject*, NiPoint3*, NiPoint3*, bool*, bool*, void*, void*, float*);
-    struct blob12 GetBoundsMinimum();
-    struct blob12 GetBoundsMaximum();
-    float GetBoundSize();
-    virtual void InitializeBoundData();
-    virtual void LoadBoundData(TESFile*);
-    virtual NiAVObject* Get3DObject(TESObjectREFR*, bool);
-    virtual bool IsBoundItem();
-    virtual bool Activate(TESObjectREFR*, TESObjectREFR*, bool, TESBoundObject*, int);
-    bool GetLODObjectExists(bool);
-    void __local_vftable_ctor_closure();
-    char TESBoundObjectBounds[12];
-};
-typedef char _sizecheck_TESBoundObject[sizeof(TESBoundObject) == 48 ? 1 : -1];
-struct TESBoundAnimObject : public TESBoundObject
-{
-    virtual void __vslot_10();
-    virtual bool IsBoundAnimObject();
-    virtual void Set3D(NiAVObject*, bool);
-    virtual bool IsBoundItem(char*);
-    void __local_vftable_ctor_closure();
-};
-typedef char _sizecheck_TESBoundAnimObject[sizeof(TESBoundAnimObject) == 48 ? 1 : -1];
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
+
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
-struct FUN_0050ad90_shell : public TESLeveledList
+struct LeveledListLevelDifference
 {
-    int FUN_0050ad90();
+    static int __thiscall Creature(TESLeveledList* list);
 };
 
 struct GlobalObject2_0040c150
@@ -851,104 +618,18 @@ struct GlobalObject2_0040c150
 extern GlobalObject2_0040c150 g_011c8e1c;
 
 // @fnv 0x0050ad90
-int FUN_0050ad90_shell::FUN_0050ad90()
+int __thiscall LeveledListLevelDifference::Creature(TESLeveledList* list)
 {
     return *g_011c8e1c.Int();
 }
 }  // namespace fnv_0050ad90
 
 namespace fnv_0050b370 {
-struct BGSSaveFormBuffer;
-struct BGSTextureSet;
-struct BipedAnim;
-struct NiAVObject;
-struct NiPoint3;
-struct TESActorBase;
-struct TESModel;
-struct TESModelTextureSwap;
-struct TESFormList;
-struct TESWaterForm;
-struct DistantTreeTextureInfo;
-struct blob12
-{
-    char b[12];
-};
-struct TESObject : public TESForm
-{
-    virtual void __vslot_10();
-    virtual NiAVObject* GetModel3D();
-    virtual bool IsBoundAnimObject();
-    virtual TESWaterForm* GetAssociatedWaterForm();
-    virtual bool IsAutoCalculated();
-    virtual void SetPlayable(bool);
-    virtual NiAVObject* Get3DObject(TESObjectREFR*, bool);
-    virtual void Destroy3DModel(TESObjectREFR*);
-    virtual bool HasLoaded3D();
-    virtual bool IsModelValid();
-    virtual void UpdateModel3D();
-    virtual bool IsBoundItem();
-    virtual bool IsBoundItem(BipedAnim*);
-    virtual void Set3D(NiAVObject*, bool);
-    virtual unsigned int AcquireReference();
-    virtual unsigned int DecRef();
-    virtual NiAVObject* Create3DForReference(TESObjectREFR*);
-    NiAVObject* Get3D();
-    virtual unsigned int GetRefCount();
-    TESFormList* GetParentList();
-    unsigned int GetModelCount();
-    virtual bool IsObject();
-    virtual char* GetObjectDisplayName();
-    void SetParentList(TESFormList*);
-    void nod_SetPrev(TESObject*);
-    void nod_SetNext(TESObject*);
-    TESObject* nod_GetPrev();
-    TESObject* nod_GetNext();
-    static NiAVObject* FindGeometryByName(NiAVObject*, char*);
-    char* GetModelFileName(TESObjectREFR*);
-    void BuildModelFileName(TESObjectREFR*, char*);
-    void GetLODModelFileName(TESObjectREFR*, char*);
-    void GetLODFlatFileName(TESObjectREFR*, char*);
-    void __local_vftable_ctor_closure();
-    char _pad_4[20];
-    TESFormList* m_pOwningList;
-    TESObject* m_pPreviousObject;
-    TESObject* m_pNextObject;
-};
-typedef char _sizecheck_TESObject[sizeof(TESObject) == 36 ? 1 : -1];
-struct TESBoundObject : public TESObject
-{
-    virtual void __vslot_10();
-    virtual NiAVObject* Get3DObject(TESObjectREFR*);
-    virtual bool IsBoundItem(char*);
-    virtual bool IsBoundObject();
-    void SetBoundMinMax(NiAVObject*);
-    void CopyBoundData(TESBoundObject*);
-    static void CalcBoundingBox(NiAVObject*, NiPoint3*, NiPoint3*, void*, void*, float*);
-    static void CalcBoundingBoxRecursive(NiAVObject*, NiPoint3*, NiPoint3*, bool*, bool*, void*, void*, float*);
-    struct blob12 GetBoundsMinimum();
-    struct blob12 GetBoundsMaximum();
-    float GetBoundSize();
-    virtual void InitializeBoundData();
-    virtual void LoadBoundData(TESFile*);
-    virtual NiAVObject* Get3DObject(TESObjectREFR*, bool);
-    virtual bool IsBoundItem();
-    virtual bool Activate(TESObjectREFR*, TESObjectREFR*, bool, TESBoundObject*, int);
-    bool GetLODObjectExists(bool);
-    void __local_vftable_ctor_closure();
-    char TESBoundObjectBounds[12];
-};
-typedef char _sizecheck_TESBoundObject[sizeof(TESBoundObject) == 48 ? 1 : -1];
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
+
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
-struct FUN_0050b370_shell : public TESLeveledList
+struct LeveledListLevelDifference
 {
-    int FUN_0050b370();
+    static int __thiscall Character(TESLeveledList* list);
 };
 
 struct GlobalObject2_0040c150
@@ -958,16 +639,13 @@ struct GlobalObject2_0040c150
 extern GlobalObject2_0040c150 g_011c8ed4;
 
 // @fnv 0x0050b370
-int FUN_0050b370_shell::FUN_0050b370()
+int __thiscall LeveledListLevelDifference::Character(TESLeveledList* list)
 {
     return *g_011c8ed4.Int();
 }
 }  // namespace fnv_0050b370
 
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+#include "../../include/NiMemObject.h"
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
 struct FUN_00526ac0_shell : public TESGlobal
 {
@@ -980,48 +658,24 @@ float FUN_00526ac0_shell::FUN_00526ac0()
     return *(float*)((char*)this + 0x24);
 }
 
-struct FUN_00487800_shell
-{
-    void SetFlag(bool bFlag);
-};
-
 // Sets or clears bit 0 of the byte at offset 0xd of this object according to bFlag.
 // @fnv 0x00487800
-void FUN_00487800_shell::SetFlag(bool bFlag)
+void TESLeveledList::SetCalcAllBelow(bool bFlag)
 {
     if (bFlag)
-        ((unsigned char*)this)[0xd] |= 1;
+        m_ucChanceNone |= 1;
     else
-        ((unsigned char*)this)[0xd] &= 0xfffffffe;
+        m_ucChanceNone &= 0xfffffffe;
 }
-
-struct FUN_00487860_shell
-{
-    unsigned char m00;
-    unsigned char m01;
-    unsigned char m02;
-    unsigned char m03;
-    unsigned char m04;
-    unsigned char m05;
-    unsigned char m06;
-    unsigned char m07;
-    unsigned char m08;
-    unsigned char m09;
-    unsigned char m0a;
-    unsigned char m0b;
-    unsigned char m0c;
-    unsigned char m0d;
-    void SetFlag2(bool set);
-};
 
 // Sets or clears bit 1 of the byte at offset 0x0d according to the set argument.
 // @fnv 0x00487860
-void FUN_00487860_shell::SetFlag2(bool set)
+void TESLeveledList::SetMultCalc(bool set)
 {
     if (set)
-        m0d |= 2;
+        m_ucChanceNone |= 2;
     else
-        m0d &= ~2;
+        m_ucChanceNone &= ~2;
 }
 
 struct FUN_00c611d0_shell
@@ -1099,16 +753,16 @@ void* __thiscall FUN_00c61270_shell::FUN_00c61270()
     return &g_01204398;
 }
 
-struct NiRefObject
+// Keep the scalar-deletion entry's explicit thiscall ABI outside NiRefObject.
+struct NiRefObjectDeletion
 {
-    virtual ~NiRefObject();
-    static void* __thiscall FUN_00c61280(NiRefObject* obj, unsigned int flags);
+    static void* __thiscall Delete(NiRefObject* obj, unsigned int flags);
 };
 
 extern "C" void __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
 
 // @fnv 0x00c61280
-void* __thiscall NiRefObject::FUN_00c61280(NiRefObject* obj, unsigned int flags)
+void* __thiscall NiRefObjectDeletion::Delete(NiRefObject* obj, unsigned int flags)
 {
     obj->NiRefObject::~NiRefObject();
     if (flags & 1)
@@ -1116,34 +770,25 @@ void* __thiscall NiRefObject::FUN_00c61280(NiRefObject* obj, unsigned int flags)
     return obj;
 }
 
-struct FUN_004878c0_shell
-{
-    void SetFlag4(bool bFlag);
-};
-
 // @fnv 0x004878c0
-void __thiscall FUN_004878c0_shell::SetFlag4(bool abSet)
+void __thiscall TESLeveledList::SetUseAll(bool abSet)
 {
     if (abSet)
-        reinterpret_cast<unsigned char*>(this)[0xd] |= 4;
+        m_ucChanceNone |= 4;
     else
-        reinterpret_cast<unsigned char*>(this)[0xd] &= ~4;
+        m_ucChanceNone &= ~4;
 }
 
 extern void __fastcall FUN_00c4f980(void*);
 extern int DAT_010c34ac;
 
-struct FUN_00c60d50_shell
-{
-    int* vtable_ptr;
-    FUN_00c60d50_shell();
-};
-
+// Initialize the capsule without introducing calls to its empty point constructors.
 // @fnv 0x00c60d50
-FUN_00c60d50_shell::FUN_00c60d50_shell()
+BSMultiBoundCapsule* __fastcall FUN_00c60d50(BSMultiBoundCapsule* capsule)
 {
-    FUN_00c4f980(this);
-    vtable_ptr = &DAT_010c34ac;
+    FUN_00c4f980(capsule);
+    *reinterpret_cast<int**>(capsule) = &DAT_010c34ac;
+    return capsule;
 }
 
 template <int N> struct EndianSizeTag
@@ -1167,31 +812,32 @@ void TmpEndian::SwapEndian()
     BSEndian(&f2, EndianSizeTag<2>());
 }
 
-class NiStream;
+// These leaves pass an opaque stream handle. NiStream is a struct in the
+// approved headers and a class in the pending headers; neither layout is used.
+struct ColorStreamIO
+{
+    static void __thiscall Load(NiColor* color, void* stream);
+    static void __thiscall Save(NiColor* color, void* stream);
+};
 struct FUN_00c4f9f0_shell
 {
     char _pad[12];
-    void FUN_00c4f9f0(NiStream&);
+    void FUN_00c4f9f0(void*);
 };
-struct NiColor
-{
-    char _pad[12];
-    void LoadBinary(NiStream&);
-};
-template <typename T> void ReadBinaryValue(NiStream&, T&);
+template <typename T> void ReadBinaryValue(void*, T&);
 struct FUN_00c60e70_shell : public FUN_00c4f9f0_shell
 {
     NiColor c1;
     NiColor c2;
     unsigned int u;
-    void FUN_00c60e70(NiStream&);
+    void FUN_00c60e70(void*);
 };
 // @fnv 0x00c60e70
-void FUN_00c60e70_shell::FUN_00c60e70(NiStream& stream)
+void FUN_00c60e70_shell::FUN_00c60e70(void* stream)
 {
     FUN_00c4f9f0(stream);
-    c1.LoadBinary(stream);
-    c2.LoadBinary(stream);
+    ColorStreamIO::Load(&c1, stream);
+    ColorStreamIO::Load(&c2, stream);
     ReadBinaryValue<unsigned int>(stream, u);
 }
 
@@ -1221,64 +867,33 @@ bool FUN_00c38020_shell::FUN_00c60ee0(int a)
 }
 
 namespace fnv_00c60f10 {
-struct NiColor
-{
-    void SaveBinary(class NiStream&);
-    float r;
-    float g;
-    float b;
-};
 struct FUN_00c38050_Holder
 {
-    void FUN_00c4fa60(class NiStream&);
+    void FUN_00c4fa60(void*);
     unsigned char data[12];
 };
-void __cdecl CallAnimCallback(class NiStream&, int*);
+void __cdecl CallAnimCallback(void*, int*);
 struct Host : FUN_00c38050_Holder
 {
     NiColor c1;
     NiColor c2;
     int f24;
-    void FUN_00c60f10(class NiStream&);
+    void FUN_00c60f10(void*);
 };
 // @fnv 0x00c60f10
-void Host::FUN_00c60f10(class NiStream& s)
+void Host::FUN_00c60f10(void* s)
 {
     FUN_00c38050_Holder::FUN_00c4fa60(s);
-    c1.SaveBinary(s);
-    c2.SaveBinary(s);
+    ColorStreamIO::Save(&c1, s);
+    ColorStreamIO::Save(&c2, s);
     CallAnimCallback(s, &f24);
 }
 }  // namespace fnv_00c60f10
 
-namespace fnv_00488c50 {
-struct BSFaceGenKeyframe
-{
-    float GetTime();
-};
-struct BGSSaveFormBuffer
-{
-    FormChangeMask GetChangeFlags(unsigned int);
-    void SerializeFormData(void*, int);
-    void SaveData(void*, int, int);
-    unsigned int FUN_00865f20();
-    void FUN_00865ff0(int, unsigned int);
-};
-struct LeveledObject
-{
-    TESForm* pForm;
-    int pad0;
-    int pad1;
-    void* m_pExtraData;
-};
-struct FUN_00488c50_shell : TESLeveledList
-{
-    void SaveLeveledListEntries(BGSSaveFormBuffer* apSaveGameBuffer);
-};
 // @fnv 0x00488c50
-void FUN_00488c50_shell::SaveLeveledListEntries(BGSSaveFormBuffer* apSaveGameBuffer)
+void TESLeveledList::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
 {
-    if (apSaveGameBuffer->GetChangeFlags(0x80000000))
+    if (apSaveGameBuffer->GetChangeFlags(0x80000000).operator bool())
     {
         unsigned int isaveGameCount = 0;
         unsigned int isaveGameBufferPos = apSaveGameBuffer->FUN_00865f20();
@@ -1302,18 +917,13 @@ void FUN_00488c50_shell::SaveLeveledListEntries(BGSSaveFormBuffer* apSaveGameBuf
         apSaveGameBuffer->FUN_00865ff0(isaveGameCount, isaveGameBufferPos);
     }
 }
-}  // namespace fnv_00488c50
 
-struct Vec3
-{
-    float x, y, z;
-};
 struct Shell
 {
     void CopyMembersStreamWithField(Shell*, int);
     char pad0c[0xc];
-    Vec3 m0c;
-    Vec3 m18;
+    NiPoint3 m0c;
+    NiPoint3 m18;
     float m24;
     void FUN_00c60e00(Shell* dest, int a);
 };
@@ -1322,8 +932,10 @@ struct Shell
 void Shell::FUN_00c60e00(Shell* dest, int aiArg)
 {
     CopyMembersStreamWithField(dest, aiArg);
-    dest->m0c = m0c;
-    dest->m18 = m18;
+    // Preserve the original trivial, bitwise vector copies. NiPoint3's shared
+    // assignment operator is out of line with this unit's /Od build flags.
+    reinterpret_cast<NiPoint3&>(dest->m0c) = reinterpret_cast<const NiPoint3&>(m0c);
+    reinterpret_cast<NiPoint3&>(dest->m18) = reinterpret_cast<const NiPoint3&>(m18);
     float f = m24;
     dest->m24 = f;
 }
@@ -1343,21 +955,16 @@ struct Shell : public A51BF0Base
     void FUN_00c60e00(Shell* object, int value);
 };
 
-struct FUN_00c60d50_shell : public Shell
-{
-    FUN_00c60d50_shell();
-};
-
 struct FUN_00c60d70_shell : public Shell
 {
     Shell* FUN_00c60d70(int value);
 };
 
-// Allocates a FUN_00c60d50_shell, passes value to FUN_00c60e00 on it, and returns the new shell.
+// Allocates a BSMultiBoundCapsule, copies the members, and returns the new object.
 // @fnv 0x00c60d70
 Shell* FUN_00c60d70_shell::FUN_00c60d70(int value)
 {
-    Shell* shell = new FUN_00c60d50_shell;
+    Shell* shell = reinterpret_cast<Shell*>(new BSMultiBoundCapsule);
     FUN_00c60e00(shell, value);
     return shell;
 }
@@ -1366,29 +973,25 @@ Shell* FUN_00c60d70_shell::FUN_00c60d70(int value)
 struct ScriptAddedEntries
 {
     unsigned char FUN_008256d0();
-    BGSPerkEntry*& FUN_006815c0();
+    LeveledObject*& FUN_006815c0();
     void FUN_0063f7b0();
 };
 struct CurrentLeveledEntries
 {
-    void FUN_00905330(BGSPerkEntry* const&);
-};
-struct FUN_00487980_shell : TESLeveledList
-{
-    void FUN_00487980();
+    void FUN_00905330(LeveledObject* const&);
 };
 
 // @fnv 0x00487980
-void FUN_00487980_shell::FUN_00487980()
+void TESLeveledList::ClearScriptAddedLeveledObjects()
 {
-    while (!reinterpret_cast<ScriptAddedEntries*>(m_kLeveledObjects)->FUN_008256d0())
+    while (!reinterpret_cast<ScriptAddedEntries*>(&m_kLeveledObjects)->FUN_008256d0())
     {
-        BGSPerkEntry* entryToDestroy = reinterpret_cast<ScriptAddedEntries*>(m_kLeveledObjects)->FUN_006815c0();
-        reinterpret_cast<ScriptAddedEntries*>(m_kLeveledObjects)->FUN_0063f7b0();
-        reinterpret_cast<CurrentLeveledEntries*>(leveledList)->FUN_00905330(entryToDestroy);
+        LeveledObject* entryToDestroy = reinterpret_cast<ScriptAddedEntries*>(&m_kLeveledObjects)->FUN_006815c0();
+        reinterpret_cast<ScriptAddedEntries*>(&m_kLeveledObjects)->FUN_0063f7b0();
+        reinterpret_cast<CurrentLeveledEntries*>(&leveledList)->FUN_00905330(entryToDestroy);
 
-        BGSPerkEntry* item = entryToDestroy;
-        BGSPerkEntry* removed = item;
+        LeveledObject* item = entryToDestroy;
+        LeveledObject* removed = item;
         removed ? removed->Destroy(1) : 0;
     }
 }
@@ -1409,14 +1012,8 @@ struct ExtraSaver_00488400 : ContainerItemExtra
     void WriteToChunk();
 };
 
-struct FUN_00488400_shell : TESLeveledList
-{
-    LevelNode_00488400* FUN_00717e50();
-    void SaveLeveledList();
-};
-
 // @fnv 0x00488400
-void FUN_00488400_shell::SaveLeveledList()
+void TESLeveledList::Save()
 {
     FUN_004858f0(0x444c564c, m_pChanceGlobal);
     FUN_004858f0(0x464c564c, m_ucChanceNone);
@@ -1425,7 +1022,7 @@ void FUN_00488400_shell::SaveLeveledList()
         unsigned int chanceFormID = m_pLevelGlobal->GetFormID();
         FUN_00485910(0x474c564c, chanceFormID);
     }
-    LevelNode_00488400* pEntryNode = FUN_00717e50();
+    LevelNode_00488400* pEntryNode = static_cast<LevelNode_00488400*>(GetLeveledList());
     LeveledObject* entry;
     while (pEntryNode && (entry = *pEntryNode->FUN_006815c0()) != 0)
     {
@@ -1445,10 +1042,6 @@ void FUN_00488400_shell::SaveLeveledList()
 }
 
 struct NiObject;
-struct TCVec3
-{
-    float x, y, z;
-};
 
 struct TCEq
 {
@@ -1460,8 +1053,8 @@ struct TCColorEq : public TCEq
     int unk00;
     int unk04;
     int unk08;
-    TCVec3 m0c;
-    TCVec3 m18;
+    NiPoint3 m0c;
+    NiPoint3 m18;
     float m24;
     bool FUN_00c60f60(NiObject* pObject);
 };
@@ -1475,13 +1068,13 @@ bool TCColorEq::FUN_00c60f60(NiObject* pObject)
     {
         TCColorEq* pOther = (TCColorEq*)pObject;
         {
-            TCVec3* pB = &pOther->m0c;
-            TCVec3* pA = &m0c;
+            NiPoint3* pB = &pOther->m0c;
+            NiPoint3* pA = &m0c;
             bResultTmp = pA->x == pB->x && pA->y == pB->y && pA->z == pB->z;
         }
         {
-            TCVec3* pB3 = &pOther->m18;
-            TCVec3* pA9 = &m18;
+            NiPoint3* pB3 = &pOther->m18;
+            NiPoint3* pA9 = &m18;
             bResultTmp &= (bool)(int)(pA9->x == pB3->x && pA9->y == pB3->y && pA9->z == pB3->z);
         }
         {
@@ -1569,24 +1162,20 @@ struct LeveledEntry
     unsigned short count, level;
     ListExtra* extra;
 };
-struct ListNode
+// Exe 0x004889d0: unit-local ListNode view; declarations and layout are preserved.
+struct TesleveledlistListNodeView
 {
     LeveledEntry* item;
-    ListNode* next;
+    TesleveledlistListNodeView* next;
     bool FUN_008256d0();
-    ListNode* FUN_00726070();
+    TesleveledlistListNodeView* FUN_00726070();
     LeveledEntry*& FUN_006815c0();
 };
 // The external leaf consumes the component receiver in ECX and returns its embedded head.
-ListNode* __fastcall FUN_00717e50(TESLeveledList*);
-class LeveledComparison : public TESLeveledList
-{
-  public:
-    bool FUN_004889d0(BaseFormComponent*);
-};
+TesleveledlistListNodeView* __fastcall FUN_00717e50(TESLeveledList*);
 // Compares this leveled list against another, returning true if any property or entry differs.
 // @fnv 0x004889d0
-bool LeveledComparison::FUN_004889d0(BaseFormComponent* component)
+bool TESLeveledList::IsEqualToBase(BaseFormComponent* component)
 {
     TESLeveledList* pOtherList = dynamic_cast<TESLeveledList*>(component);
     if (!pOtherList)
@@ -1601,8 +1190,8 @@ bool LeveledComparison::FUN_004889d0(BaseFormComponent* component)
         return true;
     if (m_pLevelGlobal != pOtherList->m_pLevelGlobal)
         return true;
-    ListNode* first = FUN_00717e50(this);
-    ListNode* pSecondNode = FUN_00717e50(pOtherList);
+    TesleveledlistListNodeView* first = FUN_00717e50(this);
+    TesleveledlistListNodeView* pSecondNode = FUN_00717e50(pOtherList);
     if (first->FUN_008256d0() != pSecondNode->FUN_008256d0())
         return true;
     if (!first->FUN_008256d0())
@@ -1649,28 +1238,12 @@ bool LeveledComparison::FUN_004889d0(BaseFormComponent* component)
     return false;
 }
 
-namespace fnv_00c610a0 {
-struct BSShaderAccumulator : FUN_00c60d50_shell
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    static void* __cdecl operator new(unsigned int size);
-};
-
-// Allocates and returns a new BSShaderAccumulator instance on the heap.
+// Allocates and returns a new BSMultiBoundCapsule instance on the heap.
 // @fnv 0x00c610a0
-FUN_00c60d50_shell* __cdecl FUN_00c610a0(void)
+BSMultiBoundCapsule* __cdecl FUN_00c610a0(void)
 {
-    return new BSShaderAccumulator();
+    return new BSMultiBoundCapsule();
 }
-}  // namespace fnv_00c610a0
 
 extern "C" void* __cdecl FUN_00ec43fb(void* in, int vfDelta, void* srcType, void* targetType, int isReference);
 extern char DAT_01183040[]; /* .?AVBaseFormComponent@@ */
@@ -1704,31 +1277,19 @@ class CIE_cls : public ContainerItemExtra
     void FUN_0040e980(ContainerItemExtra* src3);
 };
 
-class FUN_004887a0_cls : public TESLeveledList
-{
-  public:
-    LLNode_cls* FUN_00717e50();
-    void FUN_00487900();
-    void FUN_0042e680(unsigned char v);
-    void SetFlag(bool v);
-    void SetFlag2(bool v);
-    void SetFlag4(bool v);
-    void FUN_004887a0(void* comp);
-};
-
 // Copies the leveled list entries and properties from another TESLeveledList instance into this one.
 // @fnv 0x004887a0
-void FUN_004887a0_cls::FUN_004887a0(void* apSource)
+void TESLeveledList::BaseFormRecord(BaseFormComponent* apSource)
 {
     TESLeveledList* src3 = (TESLeveledList*)FUN_00ec43fb(apSource, 0, &DAT_01183040, &DAT_01186c1c, 0);
     if (src3 == 0)
     {
         return;
     }
-    FUN_00487900();
-    LLNode_cls* it = static_cast<FUN_004887a0_cls*>(src3)->FUN_00717e50();
+    InitializeLeveledList();
+    LLNode_cls* it = static_cast<LLNode_cls*>(src3->GetLeveledList());
     LevObjX* cell5;
-    LLNode_cls* dst = FUN_00717e50();
+    LLNode_cls* dst = static_cast<LLNode_cls*>(GetLeveledList());
     while (it != 0 && (cell5 = *it->FUN_006815c0()) != 0)
     {
         LevObjX* newObj = new LevObjX();
@@ -1740,7 +1301,7 @@ void FUN_004887a0_cls::FUN_004887a0(void* apSource)
             newObj->extra = new ContainerItemExtra();
             static_cast<CIE_cls*>(newObj->extra)->FUN_0040e980(cell5->extra);
         }
-        if (FUN_00717e50()->FUN_008256d0())
+        if (static_cast<LLNode_cls*>(GetLeveledList())->FUN_008256d0())
         {
             dst->FUN_005ae3d0(newObj);
         }
@@ -1753,7 +1314,7 @@ void FUN_004887a0_cls::FUN_004887a0(void* apSource)
     }
     m_pLevelGlobal = src3->m_pLevelGlobal;
     FUN_0042e680(src3->vfn_10());
-    SetFlag(src3->FUN_004877e0());
-    SetFlag2(src3->vfn_14());
-    SetFlag4(src3->FUN_004878a0());
+    SetCalcAllBelow(src3->FUN_004877e0());
+    SetMultCalc(src3->vfn_14());
+    SetUseAll(src3->FUN_004878a0());
 }

@@ -2,19 +2,12 @@
 // src/havok/common/base/container/string/hkstringbuf.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/container/string/hkstringbuf.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct BSAudio
-{
-};
+#include "../../../../../../include/BSAudio.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include <stdarg.h>
+
 BSAudio* __cdecl FUN_00c85750();
 extern "C" void __cdecl FUN_00c908c0(void*, void*, int, int);
-
-struct BufferHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    void* m_pAllocator;
-};
 
 class BufferOwner
 {
@@ -32,8 +25,8 @@ BufferOwner* BufferOwner::InitBuffer()
     m_pData = (char*)this + 0xc;
     m_iReferenceCount = 0;
     m_uiObjectFlags = 0x80000080;
-    BufferHolder* pHolder = reinterpret_cast<BufferHolder*>(FUN_00c85750());
-    void* pAllocator = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+    void* pAllocator = pHolder->m_temp;
     int iCount = (int)(m_uiObjectFlags & 0x3fffffff);
     if (iCount < 1)
     {
@@ -50,23 +43,11 @@ BufferOwner* BufferOwner::InitBuffer()
     return this;
 }
 
-#include <stdarg.h>
 int __cdecl FUN_00cb0f50(char* buf, int size, const char* fmt, va_list args);
-struct PolymorphicBase
+inline hkMemoryAllocator& GetStreamAllocator(hkMemoryRouter& router)
 {
-    virtual void v0();
-};
-struct Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    PolymorphicBase* m_pStreamAllocator;
-    PolymorphicBase& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
+    return *static_cast<hkMemoryAllocator*>(router.m_temp);
+}
 struct StringBuf : public BufferOwner
 {
     char* Begin()
@@ -77,7 +58,7 @@ struct StringBuf : public BufferOwner
     {
         return m_uiObjectFlags & 0x3fffffff;
     }
-    void Reserve(PolymorphicBase& alloc, int n)
+    void Reserve(hkMemoryAllocator& alloc, int n)
     {
         const int capacity = GetCapacity();
         if (capacity < n)
@@ -89,7 +70,7 @@ struct StringBuf : public BufferOwner
     }
     void SetSize(int n)
     {
-        Reserve(((Router*)FUN_00c85750())->heap(), n);
+        Reserve(GetStreamAllocator(*reinterpret_cast<hkMemoryRouter*>(FUN_00c85750())), n);
         m_iReferenceCount = n;
     }
     void SetLength(int n)

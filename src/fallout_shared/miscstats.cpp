@@ -1,17 +1,21 @@
 // fallout_shared/miscstats.cpp: MiscStatManager (5 functions)
 
+#include "../../include/Menu.h"
+#include "../../include/StatsMenu.h"
+#include "../../include/Tile.h"
 #include "miscstats_decls.h"
+#include "../../include/BGSSaveGameBuffer.h"
 
 // @fnv 0x004d5e10
-void MiscStatManager::AddMiscStat(MiscStat eStat, int delta)
+void AddMiscStat(MiscStatManager::MiscStat eStat, int delta)
 {
     if (delta == 0)
         return;
     if (eStat < MS_COUNT && DAT_011c6d50[eStat])
     {
         DAT_011c6d50[eStat]->value += delta;
-        ChallengeManager::UpdateChallengeProgress(CHALLENGE_MISCSTAT, delta, 0, 0, (unsigned short)eStat, 0, 0);
-        StatsMenu* menu = (StatsMenu*)Tile::FindMenuById(FUN_004d5e00())->GetMenu();
+        ChallengeManager::UpdateChallengeProgress(CHALLENGE_TYPE_CHALLENGE_TYPE_MISC_STAT, delta, 0, 0, (unsigned short)eStat, 0, 0);
+        StatsMenu* menu = (StatsMenu*)((Tile*)Tile::FindMenuById(FUN_004d5e00()))->GetMenu();
         if (menu)
             menu->RefreshMiscStat(eStat);
     }
@@ -37,12 +41,6 @@ void CopyEntrySecondFields(int* paiOut)
         paiOut[i] = ((int*)DAT_011c6d50[i])[1];
 }
 
-struct BGSSaveGameBuffer
-{
-    void* m_pBuffer;
-    void SaveData(void* pData, int a, int b);
-};
-
 extern MiscStatEntry* DAT_011c6d50[];
 
 // Writes the misc stat count (43) and each stat's value from DAT_011c6d50 to the save buffer, using 0 for null entries.
@@ -50,7 +48,7 @@ extern MiscStatEntry* DAT_011c6d50[];
 void SaveMiscStats(BGSSaveGameBuffer* pSave)
 {
     int nCount = 43;
-    pSave->SaveData(&nCount, 4, 0);
+    pSave->SaveData((void*)&nCount, 4, 0);
     unsigned int i = 0;
     for (; i < (unsigned int)nCount; ++i)
     {
@@ -60,7 +58,7 @@ void SaveMiscStats(BGSSaveGameBuffer* pSave)
         else
             nVal = 0;
         int iSaveValue = nVal;
-        pSave->SaveData(&iSaveValue, 4, 0);
+        pSave->SaveData((void*)&iSaveValue, 4, 0);
     }
 }
 

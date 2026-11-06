@@ -1,3 +1,6 @@
+#include "../../../../../../../include/Transform.h"
+#include "../../../../../../../include/hkArray.h"
+
 // src/havok/physics/collide/agent/compoundagent/bvtree/hkpbvtreeagent_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/agent/compoundagent/bvtree/hkpbvtreeagent_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -16,37 +19,11 @@ struct S_d2f5a0_Entry {
     int unk0; int unk4;
     S_d2f5a0_Obj* m_obj;
 };
-struct S_d2f5a0_Array {
-    S_d2f5a0_Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    S_d2f5a0_Entry* begin() { return m_data; }
-    S_d2f5a0_Entry* end() { return m_data + m_iElementCount; }
-};
+typedef hkArrayBase<S_d2f5a0_Entry> S_d2f5a0_Array;
 struct S_d2f5a0 {
     int unk0; int unk4; int unk8;
     S_d2f5a0_Array m_aiIndexedValues;
     void FUN_00d2f5a0(int a);
-};
-struct __declspec(align(16)) Transform {
-    float m_f00;
-    float m_f04;
-    float m_f08;
-    float m_f0c;
-    float m_f10;
-    float m_f14;
-    float m_f18;
-    float m_f1c;
-    float m_f20;
-    float m_f24;
-    float m_f28;
-    float m_f2c;
-    float m_f30;
-    float m_f34;
-    float m_f38;
-    float m_f3c;
-
-    Transform(void* apFirst, void* apSecond);
 };
 struct TargetObject {
     virtual void v00();
@@ -190,22 +167,12 @@ struct EntryD2F5 {
     int unk04;
     ListenerD2F5* m_pkListener;
 };
-template <class T>
-class hkArrayD2F5 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    T* begin() { return m_data; }
-    T* end() { return m_data + m_iElementCount; }
-};
 class OwnerD2F5 {
 public:
     virtual ~OwnerD2F5();
 
     int unk04[2];
-    hkArrayD2F5<EntryD2F5> m_entries;
+    hkArray<EntryD2F5> m_entries;
 
     void FUN_00d2f550(void* pArg);
 };
@@ -857,6 +824,7 @@ class Vec4D3
 		__m128 m_vComponents;
 };
 
+// local form of hkMatrix3: 0x00d302d0 needs inline construction/column access; shared form gives 3337 bytes vs exe 3185.
 class Mat3D3
 {
 	public:
@@ -956,6 +924,7 @@ inline BoolD3 AabbD3::contains( const AabbD3& other ) const
 	return both.allAreSet( VCompD3::MASK_XYZ ) != 0;
 }
 
+// local form of hkSweptTransform: 0x00d302d0 needs inline swept-time and vector access; shared form gives 3329 bytes vs exe 3185.
 class SweptD3
 {
 	public:
@@ -1018,29 +987,15 @@ class EnumD3
 		S m_kStorage;
 };
 
-class CdBodyD3
-{
-	public:
-		__forceinline CdBodyD3() {}
-		explicit __forceinline CdBodyD3( const CdBodyD3* parent );
-	private:
-		__forceinline CdBodyD3( const CdBodyD3& body ) {}
-	public:
-		__forceinline const XformD3& getTransform() const;
-		__forceinline const ShapeD3* getShape() const;
-		__forceinline void SetCollisionShapeAndKey( const ShapeD3* shape, KeyD3 key );
-		__forceinline const MotionStateD3* GetMotionState() const;
-		const ShapeD3* m_pCollisionShape;
-		KeyD3 m_uiCollisionShapeKey;
-		const void* m_pMotionState;
-		const CdBodyD3* m_parent;
-};
 
-inline const XformD3& CdBodyD3::getTransform() const { return *static_cast<const XformD3*>( m_pMotionState ); }
-inline const MotionStateD3* CdBodyD3::GetMotionState() const { return static_cast<const MotionStateD3*>( m_pMotionState ); }
-inline const ShapeD3* CdBodyD3::getShape() const { return m_pCollisionShape; }
-inline void CdBodyD3::SetCollisionShapeAndKey( const ShapeD3* shape, KeyD3 key ) { m_pCollisionShape = shape; m_uiCollisionShapeKey = key; }
-inline CdBodyD3::CdBodyD3( const CdBodyD3* parent ) { m_parent = parent; m_pMotionState = parent->m_pMotionState; }
+#include "../../../../../../../include/hkpCdBody.h"
+
+
+inline const hkTransform& hkpCdBody::getTransform() const { return *reinterpret_cast<const hkTransform*>( m_pMotionState ); }
+inline const hkMotionState* hkpCdBody::GetMotionState() const { return static_cast<const hkMotionState*>( m_pMotionState ); }
+inline const hkpShape* hkpCdBody::getShape() const { return m_pCollisionShape; }
+inline void hkpCdBody::SetCollisionShapeAndKey( const hkpShape* shape, KeyD3 key ) { m_pCollisionShape = shape; m_uiCollisionShapeKey = key; }
+inline hkpCdBody::hkpCdBody( const hkpCdBody* parent ) { m_parent = parent; m_pMotionState = parent->m_pMotionState; }
 
 class AllocatorD3
 {
@@ -1200,12 +1155,12 @@ namespace MemUtilD3
 }
 
 template <typename T>
-class ArrayBaseD3
-{
+class ArrayBaseD3LocalForm
+{ // local form of hkArray: 0x00d302d0 needs the original constructor stores; shared base construction changes bytes.
 	public:
-		__forceinline ArrayBaseD3() : m_data( 0 ), m_iElementCount( 0 ), m_iCapacityState( DONT_DEALLOCATE_FLAG ) {}
-		__forceinline ArrayBaseD3( T* buffer, int size, int capacity ) : m_data( buffer ), m_iElementCount( size ), m_iCapacityState( capacity | DONT_DEALLOCATE_FLAG ) {}
-		__forceinline ~ArrayBaseD3() {}
+		__forceinline ArrayBaseD3LocalForm() : m_data( 0 ), m_iElementCount( 0 ), m_iCapacityState( DONT_DEALLOCATE_FLAG ) {}
+		__forceinline ArrayBaseD3LocalForm( T* buffer, int size, int capacity ) : m_data( buffer ), m_iElementCount( size ), m_iCapacityState( capacity | DONT_DEALLOCATE_FLAG ) {}
+		__forceinline ~ArrayBaseD3LocalForm() {}
 		__forceinline T& operator[]( int i ) { return m_data[i]; }
 		__forceinline int GetLogicalSize() const { return m_iElementCount; }
 		__forceinline int getCapacity() const { return ( m_iCapacityState & static_cast<int>( CAPACITY_MASK ) ); }
@@ -1219,8 +1174,8 @@ class ArrayBaseD3
 		__forceinline T* end() { return m_data + m_iElementCount; }
 		static __forceinline void __cdecl copy( T* dst, const T* src, int n );
 	protected:
-		__forceinline ArrayBaseD3<T>& copyFromArray( AllocatorD3& alloc, const ArrayBaseD3<T>& src, IsPodTagD3 );
-		__forceinline ArrayBaseD3<T>& copyFromArray( AllocatorD3& alloc, const ArrayBaseD3<T>& src, IsClassTagD3 );
+		__forceinline ArrayBaseD3LocalForm<T>& copyFromArray( AllocatorD3& alloc, const ArrayBaseD3LocalForm<T>& src, IsPodTagD3 );
+		__forceinline ArrayBaseD3LocalForm<T>& copyFromArray( AllocatorD3& alloc, const ArrayBaseD3LocalForm<T>& src, IsClassTagD3 );
 	public:
 		enum
 		{
@@ -1236,14 +1191,14 @@ class ArrayBaseD3
 };
 
 template <typename T>
-inline void ArrayBaseD3<T>::clear()
+inline void ArrayBaseD3LocalForm<T>::clear()
 {
 	ArrayUtilD3::destruct( m_data, m_iElementCount, typename PodTraitD3<T>::type() );
 	m_iElementCount = 0;
 }
 
 template <typename T>
-inline void ArrayBaseD3<T>::_clearAndDeallocate( AllocatorD3& alloc )
+inline void ArrayBaseD3LocalForm<T>::_clearAndDeallocate( AllocatorD3& alloc )
 {
 	clear();
 	if ( ( m_iCapacityState & DONT_DEALLOCATE_FLAG ) == 0 )
@@ -1255,7 +1210,7 @@ inline void ArrayBaseD3<T>::_clearAndDeallocate( AllocatorD3& alloc )
 }
 
 template <typename T>
-inline void ArrayBaseD3<T>::removeAtAndCopy( int index )
+inline void ArrayBaseD3LocalForm<T>::removeAtAndCopy( int index )
 {
 	ArrayUtilD3::destruct( &m_data[index], 1, typename PodTraitD3<T>::type() );
 	m_iElementCount--;
@@ -1263,7 +1218,7 @@ inline void ArrayBaseD3<T>::removeAtAndCopy( int index )
 }
 
 template <typename T>
-inline void ArrayBaseD3<T>::GrowArrayCapacity( AllocatorD3& alloc, int n )
+inline void ArrayBaseD3LocalForm<T>::GrowArrayCapacity( AllocatorD3& alloc, int n )
 {
 	const int capacity = getCapacity();
 	if ( capacity < n )
@@ -1275,7 +1230,7 @@ inline void ArrayBaseD3<T>::GrowArrayCapacity( AllocatorD3& alloc, int n )
 }
 
 template <typename T>
-inline void ArrayBaseD3<T>::_setSize( AllocatorD3& alloc, int n )
+inline void ArrayBaseD3LocalForm<T>::_setSize( AllocatorD3& alloc, int n )
 {
 	GrowArrayCapacity( alloc, n );
 	ArrayUtilD3::destruct( m_data + n, m_iElementCount - n, typename PodTraitD3<T>::type() );
@@ -1284,7 +1239,7 @@ inline void ArrayBaseD3<T>::_setSize( AllocatorD3& alloc, int n )
 }
 
 template <typename T>
-inline T* ArrayBaseD3<T>::_expandAt( AllocatorD3& alloc, int index, int numtoinsert )
+inline T* ArrayBaseD3LocalForm<T>::_expandAt( AllocatorD3& alloc, int index, int numtoinsert )
 {
 	const int newsize = numtoinsert + m_iElementCount;
 	const int numtomove = m_iElementCount - index;
@@ -1299,7 +1254,7 @@ inline T* ArrayBaseD3<T>::_expandAt( AllocatorD3& alloc, int index, int numtoins
 }
 
 template <typename T>
-inline void __cdecl ArrayBaseD3<T>::copy( T* dst, const T* src, int n )
+inline void __cdecl ArrayBaseD3LocalForm<T>::copy( T* dst, const T* src, int n )
 {
 	for ( int i = 0; i < n; ++i )
 	{
@@ -1308,7 +1263,7 @@ inline void __cdecl ArrayBaseD3<T>::copy( T* dst, const T* src, int n )
 }
 
 template <typename T>
-inline ArrayBaseD3<T>& ArrayBaseD3<T>::copyFromArray( AllocatorD3& alloc, const ArrayBaseD3<T>& a, IsPodTagD3 )
+inline ArrayBaseD3LocalForm<T>& ArrayBaseD3LocalForm<T>::copyFromArray( AllocatorD3& alloc, const ArrayBaseD3LocalForm<T>& a, IsPodTagD3 )
 {
 	if ( getCapacity() < a.GetLogicalSize() )
 	{
@@ -1326,7 +1281,7 @@ inline ArrayBaseD3<T>& ArrayBaseD3<T>::copyFromArray( AllocatorD3& alloc, const 
 }
 
 template <typename T>
-inline ArrayBaseD3<T>& ArrayBaseD3<T>::copyFromArray( AllocatorD3& alloc, const ArrayBaseD3<T>& a, IsClassTagD3 )
+inline ArrayBaseD3LocalForm<T>& ArrayBaseD3LocalForm<T>::copyFromArray( AllocatorD3& alloc, const ArrayBaseD3LocalForm<T>& a, IsClassTagD3 )
 {
 	int oldSize = m_iElementCount;
 	int newSize = a.GetLogicalSize();
@@ -1340,17 +1295,17 @@ inline ArrayBaseD3<T>& ArrayBaseD3<T>::copyFromArray( AllocatorD3& alloc, const 
 }
 
 template <typename T, typename A = HeapAllocD3>
-class ArrayD3 : public ArrayBaseD3<T>
+class ArrayD3 : public ArrayBaseD3LocalForm<T>
 {
 	public:
-		__forceinline ArrayD3() : ArrayBaseD3<T>() {}
+		__forceinline ArrayD3() : ArrayBaseD3LocalForm<T>() {}
 		__forceinline ~ArrayD3() { ClearAndRelease(); }
-		__forceinline ArrayD3( T* buffer, int size, int capacity ) : ArrayBaseD3<T>( buffer, size, capacity ) {}
-		__forceinline ArrayD3& operator=( const ArrayBaseD3<T>& a ) { this->copyFromArray( A().get( this ), a, typename PodTraitD3<T>::type() ); return *this; }
+		__forceinline ArrayD3( T* buffer, int size, int capacity ) : ArrayBaseD3LocalForm<T>( buffer, size, capacity ) {}
+		__forceinline ArrayD3& operator=( const ArrayBaseD3LocalForm<T>& a ) { this->copyFromArray( A().get( this ), a, typename PodTraitD3<T>::type() ); return *this; }
 		__forceinline ArrayD3& operator=( const ArrayD3& a ) { this->copyFromArray( A().get( this ), a, typename PodTraitD3<T>::type() ); return *this; }
-		__forceinline void ClearAndRelease() { ArrayBaseD3<T>::_clearAndDeallocate( A().get( this ) ); }
-		__forceinline void SetSizeAndGrow( int size ) { ArrayBaseD3<T>::_setSize( A().get( this ), size ); }
-		__forceinline T* expandAt( int i, int n ) { return ArrayBaseD3<T>::_expandAt( A().get( this ), i, n ); }
+		__forceinline void ClearAndRelease() { ArrayBaseD3LocalForm<T>::_clearAndDeallocate( A().get( this ) ); }
+		__forceinline void SetSizeAndGrow( int size ) { ArrayBaseD3LocalForm<T>::_setSize( A().get( this ), size ); }
+		__forceinline T* expandAt( int i, int n ) { return ArrayBaseD3LocalForm<T>::_expandAt( A().get( this ), i, n ); }
 };
 
 template <typename T, unsigned N, typename A = HeapAllocD3>
@@ -1486,8 +1441,8 @@ class ShapeD3 : public RefObjectD3
 	public:
 		__forceinline ShapeTypeD3 getType() const;
 		__forceinline void getAabb( const XformD3& localToWorld, RealD3 tolerance, AabbD3& out ) const { CalculateAabb( localToWorld, tolerance, out ); }
-		virtual const void* GetClassType() const;
-		virtual void CalcContentStatistics( void* collector, const void* cls ) const;
+		virtual const void* getClassType() const;
+		virtual void calcContentStatistics( void* collector, const void* cls ) const;
 		virtual RealD3 getMaximumProjection( const Vec4D3& direction ) const;
 		virtual const ShapeContainerD3* GetShapeContainer() const { return 0; }
 		virtual bool isConvex() const { return false; }
@@ -1546,21 +1501,21 @@ class CCFilterD3
 class SCFilterD3
 {
 	public:
-		virtual BoolD3 IsCollisionEnabled( const CollisionInputD3& input, const CdBodyD3& a, const CdBodyD3& b, const ShapeContainerD3& bContainer, KeyD3 bKey ) const = 0;
-		virtual BoolD3 IsCollisionEnabled( const CollisionInputD3& input, const CdBodyD3& a, const CdBodyD3& b, const ShapeContainerD3& cA, const ShapeContainerD3& m_ucPackageByte, KeyD3 kA, KeyD3 kB ) const = 0;
+		virtual BoolD3 IsCollisionEnabled( const CollisionInputD3& input, const hkpCdBody& a, const hkpCdBody& b, const ShapeContainerD3& bContainer, KeyD3 bKey ) const = 0;
+		virtual BoolD3 IsCollisionEnabled( const CollisionInputD3& input, const hkpCdBody& a, const hkpCdBody& b, const ShapeContainerD3& cA, const ShapeContainerD3& m_ucPackageByte, KeyD3 kA, KeyD3 kB ) const = 0;
 };
 
 class FilterD3 : public RefObjectD3, public CCFilterD3, public SCFilterD3
 {
 	public:
-		virtual BoolD3 IsCollisionEnabled( const CollisionInputD3& input, const CdBodyD3& a, const CdBodyD3& b, const ShapeContainerD3& bContainer, KeyD3 bKey ) const = 0;
-		virtual BoolD3 IsCollisionEnabled( const CollisionInputD3& input, const CdBodyD3& a, const CdBodyD3& b, const ShapeContainerD3& cA, const ShapeContainerD3& m_ucPackageByte, KeyD3 kA, KeyD3 kB ) const = 0;
+		virtual BoolD3 IsCollisionEnabled( const CollisionInputD3& input, const hkpCdBody& a, const hkpCdBody& b, const ShapeContainerD3& bContainer, KeyD3 bKey ) const = 0;
+		virtual BoolD3 IsCollisionEnabled( const CollisionInputD3& input, const hkpCdBody& a, const hkpCdBody& b, const ShapeContainerD3& cA, const ShapeContainerD3& m_ucPackageByte, KeyD3 kA, KeyD3 kB ) const = 0;
 };
 
 class DispatcherD3
 {
 	public:
-		typedef AgentD3* ( __cdecl *CreateFuncD3 )( const CdBodyD3& collA, const CdBodyD3& collB, const CollisionInputD3& env, ContactMgrD3* mgr );
+		typedef AgentD3* ( __cdecl *CreateFuncD3 )( const hkpCdBody& collA, const hkpCdBody& collB, const CollisionInputD3& env, ContactMgrD3* mgr );
 		struct AgentFuncsD3
 		{
 			CreateFuncD3 m_pCreateFunc;
@@ -1577,7 +1532,7 @@ class DispatcherD3
 			int idx = ( predictive ? m_agent3TypeMap : m_agent2TypeMap )[typeA][typeB];
 			return m_agent2Funcs[idx].m_pCreateFunc;
 		}
-		__forceinline AgentD3* getNewCollisionAgent( const CdBodyD3& collA, const CdBodyD3& collB, const CollisionInputD3& environment, ContactMgrD3* mgr ) const;
+		__forceinline AgentD3* getNewCollisionAgent( const hkpCdBody& collA, const hkpCdBody& collB, const CollisionInputD3& environment, ContactMgrD3* mgr ) const;
 		UInt32D3 unk000;
 		UInt32D3 unk004;
 		UInt32D3 unk008;
@@ -1704,22 +1659,18 @@ struct CollisionInputD3
 	Aabb32InfoD3 m_aiValues;
 };
 
-inline AgentD3* DispatcherD3::getNewCollisionAgent( const CdBodyD3& collA, const CdBodyD3& collB, const CollisionInputD3& environment, ContactMgrD3* mgr ) const
+inline AgentD3* DispatcherD3::getNewCollisionAgent( const hkpCdBody& collA, const hkpCdBody& collB, const CollisionInputD3& environment, ContactMgrD3* mgr ) const
 {
-	const ShapeTypeD3 typeA = collA.getShape()->getType();
-	const ShapeTypeD3 typeB = collB.getShape()->getType();
+	const ShapeTypeD3 typeA = reinterpret_cast<const ShapeD3*>(collA.getShape())->getType();
+	const ShapeTypeD3 typeB = reinterpret_cast<const ShapeD3*>(collB.getShape())->getType();
 	DispatcherD3::IsAgentPredictiveD3 predictive = static_cast<DispatcherD3::IsAgentPredictiveD3>( (int)environment.m_bCreatePredictiveAgents.val() );
 	CreateFuncD3 f = getCollisionAgentCreationFunction( typeA, typeB, predictive );
 	return f( collA, collB, environment, mgr );
 }
 
-struct StepInfoD3
-{
-	PadD3<RealD3> m_uiStartTime;
-	PadD3<RealD3> m_fEndTime;
-	PadD3<RealD3> m_fTimeStep;
-	PadD3<RealD3> m_fInverseDeltaTime;
-};
+
+#include "../../../../../../../include/hkStepInfo.h"
+
 
 struct QualityInfoD3
 {
@@ -1732,7 +1683,7 @@ struct QualityInfoD3
 
 struct ProcessInputD3 : public CollisionInputD3
 {
-	StepInfoD3 m_pStepInfo;
+	hkStepInfo m_pStepInfo;
 	mutable PadD3<QualityInfoD3*> m_pCollisionQualityInfo;
 };
 
@@ -1745,12 +1696,12 @@ struct ProcessOutputD3
 class AgentD3 : public RefObjectD3
 {
 	public:
-		virtual const void* GetClassType() const;
-		virtual void CalcContentStatistics( void* collector, const void* cls ) const;
-		virtual void getPenetrations( const CdBodyD3& bodyA, const CdBodyD3& bodyB, const CollisionInputD3& input, void* collector ) = 0;
-		virtual void getClosestPoints( const CdBodyD3& bodyA, const CdBodyD3& bodyB, const CollisionInputD3& input, void* collector ) = 0;
-		virtual void linearCast( const CdBodyD3& bodyA, const CdBodyD3& bodyB, const void* input, void* collector, void* startCollector ) = 0;
-		virtual void ProcessAgent( const CdBodyD3& a, const CdBodyD3& b, const ProcessInputD3& input, ProcessOutputD3& result ) = 0;
+		virtual const void* getClassType() const;
+		virtual void calcContentStatistics( void* collector, const void* cls ) const;
+		virtual void getPenetrations( const hkpCdBody& bodyA, const hkpCdBody& bodyB, const CollisionInputD3& input, void* collector ) = 0;
+		virtual void getClosestPoints( const hkpCdBody& bodyA, const hkpCdBody& bodyB, const CollisionInputD3& input, void* collector ) = 0;
+		virtual void linearCast( const hkpCdBody& bodyA, const hkpCdBody& bodyB, const void* input, void* collector, void* startCollector ) = 0;
+		virtual void ProcessAgent( const hkpCdBody& a, const hkpCdBody& b, const ProcessInputD3& input, ProcessOutputD3& result ) = 0;
 		virtual void cleanup( ConstraintOwnerD3& info ) = 0;
 		ContactMgrD3* m_pContactManager;
 };
@@ -1764,12 +1715,12 @@ class NullAgentD3 : public AgentD3
 class DispatchHelperD3
 {
 	public:
-		DispatchHelperD3( const CdBodyD3& body ) : m_pBodyB( &body )
+		DispatchHelperD3( const hkpCdBody& body ) : m_pBodyB( &body )
 		{
 		}
-		__forceinline const CdBodyD3* getBodyB( const CdBodyD3& cIn, const CollisionInputD3& input, KeyD3 key )
+		__forceinline const hkpCdBody* getBodyB( const hkpCdBody& cIn, const CollisionInputD3& input, KeyD3 key )
 		{
-			m_pBodyB.SetCollisionShapeAndKey( m_shapeContainerB->GetShapeForKey( key, m_kShapeBufferB ), key );
+			m_pBodyB.SetCollisionShapeAndKey(reinterpret_cast<const hkpShape*>(m_shapeContainerB->GetShapeForKey( key, m_kShapeBufferB )), key );
 			return &m_pBodyB;
 		}
 		__forceinline const ShapeContainerD3* getShapeContainerB()
@@ -1777,7 +1728,7 @@ class DispatchHelperD3
 			return m_shapeContainerB;
 		}
 		const ShapeContainerD3* m_shapeContainerB;
-		CdBodyD3 m_pBodyB;
+		hkpCdBody m_pBodyB;
 		ShapeBufferD3 m_kShapeBufferB;
 };
 
@@ -1785,14 +1736,14 @@ template <class KEYD3, class ENTRYD3, class HELPERD3>
 class DispatchUtilD3
 {
 	public:
-		static __forceinline void __cdecl update( ArrayD3<ENTRYD3>& entries, ArrayD3<KEYD3>& keys, const CdBodyD3& cA, const CdBodyD3& m_ucPackageByte,
+		static __forceinline void __cdecl update( ArrayD3<ENTRYD3>& entries, ArrayD3<KEYD3>& keys, const hkpCdBody& cA, const hkpCdBody& m_ucPackageByte,
 			const CollisionInputD3& input, ContactMgrD3* mgr, ConstraintOwnerD3& constraintOwner, HELPERD3& base );
-		static __forceinline void __cdecl fastUpdate( ArrayD3<ENTRYD3>& entries, ArrayD3<KEYD3>& hitList, const CdBodyD3& cA, const CdBodyD3& m_ucPackageByte,
+		static __forceinline void __cdecl fastUpdate( ArrayD3<ENTRYD3>& entries, ArrayD3<KEYD3>& hitList, const hkpCdBody& cA, const hkpCdBody& m_ucPackageByte,
 			const CollisionInputD3& input, ContactMgrD3* mgr, ConstraintOwnerD3& constraintOwner, HELPERD3& base );
 };
 
 template <class KEYD3, class ENTRYD3, class HELPERD3>
-void __cdecl DispatchUtilD3<KEYD3, ENTRYD3, HELPERD3>::update( ArrayD3<ENTRYD3>& entries, ArrayD3<KEYD3>& keys, const CdBodyD3& cA, const CdBodyD3& m_ucPackageByte,
+void __cdecl DispatchUtilD3<KEYD3, ENTRYD3, HELPERD3>::update( ArrayD3<ENTRYD3>& entries, ArrayD3<KEYD3>& keys, const hkpCdBody& cA, const hkpCdBody& m_ucPackageByte,
 	const CollisionInputD3& input, ContactMgrD3* mgr, ConstraintOwnerD3& constraintOwner, HELPERD3& base )
 {
 	ENTRYD3* oldEntriesItr = entries.begin();
@@ -1820,9 +1771,9 @@ void __cdecl DispatchUtilD3<KEYD3, ENTRYD3, HELPERD3>::update( ArrayD3<ENTRYD3>&
 		}
 		if ( *newKeysItr < oldEntriesItr->GetIteratorKey() )
 		{
-			const CdBodyD3& bodyA = cA;
-			const CdBodyD3& bodyB = m_ucPackageByte;
-			const CdBodyD3& modifiedB = *base.getBodyB( m_ucPackageByte, input, *newKeysItr );
+			const hkpCdBody& bodyA = cA;
+			const hkpCdBody& bodyB = m_ucPackageByte;
+			const hkpCdBody& modifiedB = *base.getBodyB( m_ucPackageByte, input, *newKeysItr );
 			if ( input.m_iFilter->IsCollisionEnabled( input, bodyA, bodyB, *shapeContainer, *newKeysItr ) )
 			{
 				newEntriesItr->m_pCollisionAgent = input.m_pCollisionDispatcher->getNewCollisionAgent( bodyA, modifiedB, input, mgr );
@@ -1854,9 +1805,9 @@ void __cdecl DispatchUtilD3<KEYD3, ENTRYD3, HELPERD3>::update( ArrayD3<ENTRYD3>&
 
 	while ( newKeysItr != newKeysEnd )
 	{
-		const CdBodyD3& bodyA = cA;
-		const CdBodyD3& bodyB = m_ucPackageByte;
-		const CdBodyD3& modifiedB = *base.getBodyB( m_ucPackageByte, input, *newKeysItr );
+		const hkpCdBody& bodyA = cA;
+		const hkpCdBody& bodyB = m_ucPackageByte;
+		const hkpCdBody& modifiedB = *base.getBodyB( m_ucPackageByte, input, *newKeysItr );
 		if ( input.m_iFilter->IsCollisionEnabled( input, bodyA, bodyB, *shapeContainer, *newKeysItr ) )
 		{
 			newEntriesItr->m_pCollisionAgent = input.m_pCollisionDispatcher->getNewCollisionAgent( bodyA, modifiedB, input, mgr );
@@ -1874,7 +1825,7 @@ void __cdecl DispatchUtilD3<KEYD3, ENTRYD3, HELPERD3>::update( ArrayD3<ENTRYD3>&
 }
 
 template <class KEYD3, class ENTRYD3, class HELPERD3>
-void __cdecl DispatchUtilD3<KEYD3, ENTRYD3, HELPERD3>::fastUpdate( ArrayD3<ENTRYD3>& entries, ArrayD3<KEYD3>& hitList, const CdBodyD3& cA, const CdBodyD3& m_ucPackageByte,
+void __cdecl DispatchUtilD3<KEYD3, ENTRYD3, HELPERD3>::fastUpdate( ArrayD3<ENTRYD3>& entries, ArrayD3<KEYD3>& hitList, const hkpCdBody& cA, const hkpCdBody& m_ucPackageByte,
 	const CollisionInputD3& input, ContactMgrD3* mgr, ConstraintOwnerD3& constraintOwner, HELPERD3& base )
 {
 	{
@@ -1926,9 +1877,9 @@ hitFound:
 			int index = int( hitItr - hitList.begin() );
 			lastHit = entries.expandAt( index, 1 );
 
-			const CdBodyD3& bodyA = cA;
-			const CdBodyD3& bodyB = m_ucPackageByte;
-			const CdBodyD3& modifiedB = *base.getBodyB( m_ucPackageByte, input, *hitItr );
+			const hkpCdBody& bodyA = cA;
+			const hkpCdBody& bodyB = m_ucPackageByte;
+			const hkpCdBody& modifiedB = *base.getBodyB( m_ucPackageByte, input, *hitItr );
 			if ( input.m_iFilter->IsCollisionEnabled( input, bodyA, bodyB, *shapeContainer, *hitItr ) )
 			{
 				lastHit->m_pCollisionAgent = input.m_pCollisionDispatcher->getNewCollisionAgent( bodyA, modifiedB, input, mgr );
@@ -1949,11 +1900,11 @@ enum ResultD3 { RES_SUCCESS = 0, RES_FAILURE = 1 };
 class BvTreeAgentD3 : public AgentD3
 {
 	public:
-		void FUN_00d302d0( const CdBodyD3& bodyA, const CdBodyD3& bodyB, const ProcessInputD3& input, ProcessOutputD3& result );
-		static __forceinline ResultD3 __cdecl BuildCollisionHitList( const CdBodyD3& bodyA, const CdBodyD3& bodyB, const XformD3& bTa,
+		void FUN_00d302d0( const hkpCdBody& bodyA, const hkpCdBody& bodyB, const ProcessInputD3& input, ProcessOutputD3& result );
+		static __forceinline ResultD3 __cdecl BuildCollisionHitList( const hkpCdBody& bodyA, const hkpCdBody& bodyB, const XformD3& bTa,
 			const Vec4D3& linearTimInfo, const ProcessInputD3& input, AabbD3* cachedAabb, ArrayD3<KeyD3>& hitListOut );
 	protected:
-		__forceinline void prepareCollisionPartnersProcess( const CdBodyD3& bodyA, const CdBodyD3& bodyB, const ProcessInputD3& input, ConstraintOwnerD3& constraintOwner );
+		__forceinline void prepareCollisionPartnersProcess( const hkpCdBody& bodyA, const hkpCdBody& bodyB, const ProcessInputD3& input, ConstraintOwnerD3& constraintOwner );
 		struct EntryInfoD3
 		{
 			KeyD3 m_key;
@@ -1968,16 +1919,16 @@ class BvTreeAgentD3 : public AgentD3
 
 
 
-inline ResultD3 __cdecl BvTreeAgentD3::BuildCollisionHitList( const CdBodyD3& bodyA, const CdBodyD3& bodyB, const XformD3& bTa,
+inline ResultD3 __cdecl BvTreeAgentD3::BuildCollisionHitList( const hkpCdBody& bodyA, const hkpCdBody& bodyB, const XformD3& bTa,
 	const Vec4D3& linearTimInfo, const ProcessInputD3& input, AabbD3* cachedAabb, ArrayD3<KeyD3>& hitListOut )
 {
 	AabbD3 aabb;
 	{
-		const MotionStateD3* msA = bodyA.GetMotionState();
-		const MotionStateD3* msB = bodyB.GetMotionState();
+		const MotionStateD3* msA = reinterpret_cast<const MotionStateD3*>(bodyA.GetMotionState());
+		const MotionStateD3* msB = reinterpret_cast<const MotionStateD3*>(bodyB.GetMotionState());
 
 		Vec4D3 timInfo;
-		timInfo.rotInvDir( bodyB.getTransform().getRotation(), linearTimInfo );
+		timInfo.rotInvDir( reinterpret_cast<const XformD3&>(bodyB.getTransform()).getRotation(), linearTimInfo );
 
 		Vec4D3 aabbExtents;
 		if ( input.m_pCollisionQualityInfo->m_iQualityInfoValue10.val() )
@@ -1985,12 +1936,12 @@ inline ResultD3 __cdecl BvTreeAgentD3::BuildCollisionHitList( const CdBodyD3& bo
 			RealD3 secOrdErrA = ( msA->m_kDeltaAngle(3) + msB->m_kDeltaAngle(3) ) * msA->m_fObjectRadius;
 			RealD3 secOrdErrB = msB->m_kDeltaAngle(3) * msB->m_kDeltaAngle(3) * msB->m_fObjectRadius;
 			RealD3 checkEpsilon = input.m_fScalar * 0.5 + ( secOrdErrA + secOrdErrB );
-			bodyA.getShape()->getAabb( bTa, checkEpsilon, aabb );
+			reinterpret_cast<const ShapeD3*>(bodyA.getShape())->getAabb( bTa, checkEpsilon, aabb );
 
 			Vec4D3 massCenterAinB;
 			{
 				Vec4D3 radius4; radius4.setAll3( input.m_fScalar * 0.5 + msA->m_fObjectRadius + secOrdErrB );
-				massCenterAinB.xformInvPos( bodyB.getTransform(), msA->getSweptTransform().m_vCenterOfMass1 );
+				massCenterAinB.xformInvPos( reinterpret_cast<const XformD3&>(bodyB.getTransform()), msA->getSweptTransform().m_vCenterOfMass1 );
 				Vec4D3 maxR; maxR.setAdd4( massCenterAinB, radius4 );
 				Vec4D3 minR; minR.setSub4( massCenterAinB, radius4 );
 				aabb.m_kMinimumCorner.setMax4( aabb.m_kMinimumCorner, minR );
@@ -2015,7 +1966,7 @@ inline ResultD3 __cdecl BvTreeAgentD3::BuildCollisionHitList( const CdBodyD3& bo
 		else
 		{
 			RealD3 checkEpsilon = input.m_fScalar * 0.5;
-			bodyA.getShape()->getAabb( bTa, checkEpsilon, aabb );
+			reinterpret_cast<const ShapeD3*>(bodyA.getShape())->getAabb( bTa, checkEpsilon, aabb );
 			aabbExtents.setSub4( aabb.m_kMaximumCorner, aabb.m_kMinimumCorner );
 		}
 
@@ -2046,26 +1997,26 @@ inline ResultD3 __cdecl BvTreeAgentD3::BuildCollisionHitList( const CdBodyD3& bo
 			*cachedAabb = aabb;
 		}
 	}
-	const BvTreeShapeD3* bvB = static_cast<const BvTreeShapeD3*>( bodyB.getShape() );
+	const BvTreeShapeD3* bvB = static_cast<const BvTreeShapeD3*>( reinterpret_cast<const ShapeD3*>(bodyB.getShape()) );
 	bvB->GetAabbHits( aabb, hitListOut );
 	return RES_SUCCESS;
 }
 
-inline void BvTreeAgentD3::prepareCollisionPartnersProcess( const CdBodyD3& bodyA, const CdBodyD3& bodyB, const ProcessInputD3& input, ConstraintOwnerD3& constraintOwner )
+inline void BvTreeAgentD3::prepareCollisionPartnersProcess( const hkpCdBody& bodyA, const hkpCdBody& bodyB, const ProcessInputD3& input, ConstraintOwnerD3& constraintOwner )
 {
 	ResultD3 prepareSuccessfull;
 	InplaceArrayD3<KeyD3,128> hitList;
 	{
 		XformD3 bTa;
 		{
-			const XformD3& wTb = bodyB.getTransform();
-			const XformD3& wTa = bodyA.getTransform();
+			const XformD3& wTb = reinterpret_cast<const XformD3&>(bodyB.getTransform());
+			const XformD3& wTa = reinterpret_cast<const XformD3&>(bodyA.getTransform());
 			bTa.FUN_00cb22f0( wTb, wTa );
 		}
 		Vec4D3 linearTimInfo;
 		{
-			const MotionStateD3* msA = bodyA.GetMotionState();
-			const MotionStateD3* msB = bodyB.GetMotionState();
+			const MotionStateD3* msA = reinterpret_cast<const MotionStateD3*>(bodyA.GetMotionState());
+			const MotionStateD3* msB = reinterpret_cast<const MotionStateD3*>(bodyB.GetMotionState());
 			SweptUtilD3::calcTimInfo( *msA, *msB, input.m_pStepInfo.m_fTimeStep, linearTimInfo );
 		}
 		AabbD3* cachedAabb = ( reinterpret_cast<const BoolD3&>(DAT_011b4284) ) ? &m_kBoundingBox : 0;
@@ -2078,7 +2029,7 @@ inline void BvTreeAgentD3::prepareCollisionPartnersProcess( const CdBodyD3& body
 	}
 
 	{
-		const BvTreeShapeD3* bvB = static_cast<const BvTreeShapeD3*>( bodyB.getShape() );
+		const BvTreeShapeD3* bvB = static_cast<const BvTreeShapeD3*>( reinterpret_cast<const ShapeD3*>(bodyB.getShape()) );
 		const ShapeContainerD3* shapeContainer = bvB->GetShapeContainer();
 		DispatchHelperD3 helper( bodyB );
 		helper.m_shapeContainerB = shapeContainer;
@@ -2096,7 +2047,7 @@ inline void BvTreeAgentD3::prepareCollisionPartnersProcess( const CdBodyD3& body
 }
 
 // @fnv 0x00d302d0
-void BvTreeAgentD3::FUN_00d302d0( const CdBodyD3& bodyA, const CdBodyD3& bodyB, const ProcessInputD3& input, ProcessOutputD3& result )
+void BvTreeAgentD3::FUN_00d302d0( const hkpCdBody& bodyA, const hkpCdBody& bodyB, const ProcessInputD3& input, ProcessOutputD3& result )
 {
 	{
 		MonitorD3& mStream = MonitorD3::GetMonitorStream();
@@ -2115,7 +2066,7 @@ void BvTreeAgentD3::FUN_00d302d0( const CdBodyD3& bodyA, const CdBodyD3& bodyB, 
 	EntryInfoD3* itr = m_kEntries.begin();
 	EntryInfoD3* end = m_kEntries.end();
 
-	CdBodyD3 modifiedBodyB( &bodyB );
+	hkpCdBody modifiedBodyB( &bodyB );
 
 	{
 		MonitorD3& mStream = MonitorD3::GetMonitorStream();
@@ -2127,18 +2078,18 @@ void BvTreeAgentD3::FUN_00d302d0( const CdBodyD3& bodyA, const CdBodyD3& bodyB, 
 			mStream.setEnd( (char*)( h + 1 ) );
 		}
 	}
-	const BvTreeShapeD3* bvB = static_cast<const BvTreeShapeD3*>( bodyB.getShape() );
+	const BvTreeShapeD3* bvB = static_cast<const BvTreeShapeD3*>( reinterpret_cast<const ShapeD3*>(bodyB.getShape()) );
 	const ShapeContainerD3* shapeContainer = bvB->GetShapeContainer();
 	ShapeBufferD3 shapeBuffer;
 	while ( itr != end )
 	{
 		const ShapeD3* shape = shapeContainer->GetShapeForKey( itr->m_key, shapeBuffer );
-		modifiedBodyB.SetCollisionShapeAndKey( shape, itr->m_key );
+		modifiedBodyB.SetCollisionShapeAndKey(reinterpret_cast<const hkpShape*>(shape), itr->m_key );
 
 		if ( 0 )
 		{
 			const TriShapeD3* t = static_cast<const TriShapeD3*>( shape );
-			Vec4D3 offset = bodyB.getTransform().getTranslation();
+			Vec4D3 offset = reinterpret_cast<const XformD3&>(bodyB.getTransform()).getTranslation();
 			Vec4D3 a; a.setAdd4( t->getVertex(0), offset );
 			Vec4D3 b; b.setAdd4( t->getVertex(1), offset );
 			Vec4D3 c; c.setAdd4( t->getVertex(2), offset );

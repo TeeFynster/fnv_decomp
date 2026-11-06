@@ -1,6 +1,7 @@
 // bscore/bssimplearray_h_unit.cpp: PathOwner (1 function)
 
 #include "bssimplearray.h"
+#include "../../include/TESForm.h"
 
 typedef unsigned int size_t;
 
@@ -10,12 +11,6 @@ inline void* operator new(size_t, void* p)
 }
 inline void operator delete(void*, void*)
 {}
-
-class TESForm
-{
-  public:
-    unsigned int GetFormID();
-};
 
 class PathNodeA
 {

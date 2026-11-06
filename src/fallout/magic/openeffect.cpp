@@ -1,4 +1,7 @@
 
+#include "../../../include/NonActorMagicTarget.h"
+#include "../../../include/TESObjectREFR.h"
+
 // src/fallout/magic/openeffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/openeffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -44,32 +47,13 @@ FUN_008260b0* FUN_008260b0::CloneAndInstall()
     return result;
 }
 
-class MagicTarget
-{
-  public:
-    virtual ~MagicTarget();
-    int unk4;
-    int unk8;
-};
+int __cdecl FUN_00430b40(int value);
 
+// TESObjectREFR's shared header does not yet declare the lock-level accessor at 0x005691b0.
 struct S_00826190_Ref
 {
-    void* FUN_00569160();
     int FUN_005691b0();
-    void FUN_005692a0();
 };
-
-struct S_00826190_RefHolder
-{
-    virtual void vf0();
-    virtual S_00826190_Ref* GetRef();
-};
-
-class NonActorMagicTarget : public MagicTarget, public S_00826190_RefHolder
-{
-};
-
-int __cdecl FUN_00430b40(int value);
 
 struct S_00826190_Effect
 {
@@ -82,15 +66,15 @@ struct S_00826190_Effect
 void S_00826190_Effect::FUN_00826190()
 {
     NonActorMagicTarget* target = dynamic_cast<NonActorMagicTarget*>(FUN_0059bb30());
-    if (!target || !target->GetRef())
+    if (!target || !target->GetMagicTargetReference())
     {
         return;
     }
-    void* pLock = target->GetRef()->FUN_00569160();
+    void* pLock = target->GetMagicTargetReference()->GetLock();
     int a = FUN_00430b40((int)GetFloatAtOffset1C());
-    int lockLevel = FUN_00430b40(target->GetRef()->FUN_005691b0());
+    int lockLevel = FUN_00430b40(reinterpret_cast<S_00826190_Ref*>(target->GetMagicTargetReference())->FUN_005691b0());
     if (pLock && a >= lockLevel)
     {
-        target->GetRef()->FUN_005692a0();
+        target->GetMagicTargetReference()->Unlock();
     }
 }

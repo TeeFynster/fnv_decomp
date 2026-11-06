@@ -1,25 +1,107 @@
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTPointerListBase.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTArray.h"
 
 // src/bsshader/bstexturemanager_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/bsshader/bstexturemanager.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "NiObject.h"
-// One 16-byte surface-tint record. The water system writes the tint of the
-// surface type it is rendering; the refraction imagespace effect reads the
-// default record (slot 0).
-struct WaterTintRecord
+#include "../../include/NiPointer.h"
+#include "../../include/BSMultiBound.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiDepthStencilBuffer.h"
+// WaterTintRecord_bstexturemanager_o2_variant: local type (was include/WaterTintRecord.h, which had no evidence of one real class); no method of it is bound to a named game function
+struct WaterTintRecord_bstexturemanager_o2_variant
 {
     float r;
     float g;
     float b;
     float a;
-};
-extern WaterTintRecord g_waterTintRecords[];
-void SetWaterTintRecord(int index, WaterTintRecord tint);
 
-struct MemoryManager
-{
-    void Deallocate(void* p);
+    WaterTintRecord_bstexturemanager_o2_variant(float fR, float fG, float fB, float fA)
+        : r(fR), g(fG), b(fB), a(fA)
+    {}
 };
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
+
+// Preserve the reference-count operations that were inline in NiObject.h.
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+
+
+// Preserve the smart-pointer operations that were inline in layout_support.h.
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0)
+{}
+
+template <class T> inline NiPointer<T>::NiPointer(T* pkNew)
+{
+    m_pObject = pkNew;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+
+template <class T> inline NiPointer<T>::NiPointer(const NiPointer<T>& kSrc)
+{
+    m_pObject = kSrc.m_pObject;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+
+template <class T> inline NiPointer<T>::operator T*() const
+{
+    return m_pObject;
+}
+
+template <class T> inline T* NiPointer<T>::operator->() const
+{
+    return m_pObject;
+}
+
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer<T>& kSrc)
+{
+    if (m_pObject != kSrc.m_pObject)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = kSrc.m_pObject;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+
+extern WaterTintRecord_bstexturemanager_o2_variant g_waterTintRecords[];
+void SetWaterTintRecord(int index, WaterTintRecord_bstexturemanager_o2_variant tint);
 
 extern MemoryManager _g_memoryManager;
 
@@ -40,10 +122,16 @@ struct FUN_00b6dd00_Node
     FUN_00b6dd00_Item* m_pkItem;  // +0x08
 };
 
+// The shared list base supplies the layout; this unit also needs RemovePos.
+struct TextureResourceList : NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*>
+{
+    char* RemovePos(void*& position);
+};
+
 struct FUN_00b6dd00_Owner
 {
     char m_acPad[0x78];
-    NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*> m_kList;
+    TextureResourceList m_kList;
     void FUN_00b6dd00(int iArg1, bool bArg2);
 };
 
@@ -66,7 +154,7 @@ void FUN_00b6dd00_Owner::FUN_00b6dd00(int iArg1, bool bArg2)
         }
         else
         {
-            m_kList.RemovePos(pvPos);
+            m_kList.RemovePos((void*&)pvPos);
             if (pkItem->m_pkRef)
                 pkItem->m_pkRef->DecRefCount();
             _g_memoryManager.Deallocate(pkItem);
@@ -198,10 +286,6 @@ struct Renderer
 extern Renderer* DAT_011f9508;
 extern Renderer* formatRenderer;
 extern int DAT_011bf400;
-struct NiDepthStencilBuffer
-{
-    static Resource* Create(unsigned int, unsigned int, Renderer*, const Format&, unsigned int);
-};
 struct ResourceList
 {
     int head;
@@ -307,6 +391,7 @@ FUN_00b6dd80::FUN_00b6dd80()
 extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
 void* NiMalloc(unsigned int size);
 
+// distinct from NiTArray<void*, NiTMallocInterface<void*> >: legacy vftable 0x010b9d24 calls dtor 0x00ba3ce0; shared RTTI vftable 0x010edae4 calls 0x00e6eb70.
 template <class T> struct BaseArray
 {
     T* m_pBase;
@@ -608,17 +693,7 @@ FUN_00b97a80::FUN_00b97a80() : m_kArray(0x74, 1)
     Reset();
 }
 
-class BSMultiBound : public NiObject
-{
-  public:
-};
-
-struct MultiBoundListItem
-{
-    MultiBoundListItem* m_pkNext;
-    MultiBoundListItem* m_pkPrev;
-    NiPointer<BSMultiBound> m_element;
-};
+typedef NiTListItem<NiPointer<BSMultiBound> > MultiBoundListItem;
 
 struct MultiBoundPool
 {
@@ -703,7 +778,7 @@ void MultiBoundOwner::FUN_00b6d4c0(BSMultiBound* pkBound)
     if (pos)
     {
         m_kInactiveList.AddTail(pMultiBound);
-        m_kActiveList.RemovePos(pos);
+        m_kActiveList.RemovePos((void*&)pos);
     }
 }
 
@@ -721,7 +796,8 @@ void MultiBoundList::AddTail(const NiPointer<BSMultiBound>& element)
     m_pkTail = item;
 }
 
-struct RendererData
+// Exe 0x00b6d5e0: unit-local RendererData view; declarations and layout are preserved.
+struct BstexturemanagerRendererDataView
 {
     virtual void slot0();
     virtual void slot1();
@@ -766,12 +842,12 @@ struct RendererData
 
 struct BufferPtr
 {
-    RendererData* ptr;
-    operator RendererData*() const
+    BstexturemanagerRendererDataView* ptr;
+    operator BstexturemanagerRendererDataView*() const
     {
         return ptr;
     }
-    RendererData* operator->() const
+    BstexturemanagerRendererDataView* operator->() const
     {
         return ptr;
     }
@@ -800,42 +876,6 @@ class RenderTexture : public NiObject
     }
 };
 
-template <> class NiPointer<RenderTexture>
-{
-  public:
-    RenderTexture* m_pObject;
-    NiPointer(RenderTexture* object = 0)
-    {
-        m_pObject = object;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointer()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    operator RenderTexture*() const
-    {
-        return m_pObject;
-    }
-    RenderTexture* operator->() const
-    {
-        return m_pObject;
-    }
-    __forceinline NiPointer<RenderTexture>& operator=(RenderTexture* object)
-    {
-        if (m_pObject != object)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = object;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-};
 
 struct RenderTargetGroup
 {
@@ -878,66 +918,15 @@ struct RenderTargetGroup
     virtual unsigned int GetHeight(unsigned int uiIndex);
 };
 
-struct NiRenderer
+// The original renderer entry is virtual at slot 50. Keep its dispatch local
+// until the shared declaration describes the full renderer virtual interface.
+inline RenderTargetGroup* NiRenderer::GetDefaultRenderTargetGroup()
 {
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void slot25();
-    virtual void slot26();
-    virtual void slot27();
-    virtual void slot28();
-    virtual void slot29();
-    virtual void slot30();
-    virtual void slot31();
-    virtual void slot32();
-    virtual void slot33();
-    virtual void slot34();
-    virtual void slot35();
-    virtual void slot36();
-    virtual void slot37();
-    virtual void slot38();
-    virtual void slot39();
-    virtual void slot40();
-    virtual void slot41();
-    virtual void slot42();
-    virtual void slot43();
-    virtual void slot44();
-    virtual void slot45();
-    virtual void slot46();
-    virtual void slot47();
-    virtual void slot48();
-    virtual void slot49();
-    virtual RenderTargetGroup* GetDefaultRenderTargetGroup();
-};
+    typedef RenderTargetGroup* (__thiscall *GetTarget)(NiRenderer*);
+    return reinterpret_cast<GetTarget*>(*reinterpret_cast<void***>(this))[50](this);
+}
 
-struct HeapManager
-{
-    void* Allocate(unsigned int uiSize);
-};
-extern HeapManager DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 
 struct RTEntry
 {
@@ -954,45 +943,31 @@ struct RTEntry
     }
 };
 
-struct RTNode
-{
-    RTNode* m_pkNext;
-    RTNode* m_pkPrev;
-    RTEntry* m_element;
-};
+typedef NiTListItem<RTEntry* > RTNode;
 
 struct RTAllocator
 {
     void* Allocate();
-    unsigned int m_uiCount;
+
 };
 
-struct RTList
+typedef NiTPointerListBase<RTAllocator, RTEntry* > RTList;
+template <> inline void* NiTListBase<RTAllocator, RTEntry* >::GetHeadPos() const
 {
-    RTNode* m_pkHead;
-    RTNode* m_pkTail;
-    RTAllocator m_kItemCount;
-
-    RTNode* GetHeadPos() const
-    {
         return m_pkHead;
     }
-    RTEntry* const& Get(RTNode* p) const
-    {
-        return p->m_element;
+template <> inline RTEntry* const& NiTPointerListBase<RTAllocator, RTEntry* >::Get(void* p) const
+{
+        return ((RTNode*)p)->m_element;
     }
-    RTNode* GetNextPos(RTNode* p) const
-    {
-        return p->m_pkNext;
+template <> inline void* NiTListBase<RTAllocator, RTEntry* >::GetNextPos(void* p) const
+{
+        return ((RTNode*)p)->m_pkNext;
     }
-    inline RTEntry* FUN_00e7d7f0(RTNode*& kPos);
-    RTEntry* RemoveHead();
-    RTEntry* RemoveTail();
-    void DeleteItem(RTNode*);
-    void AddTail(RTEntry* const& pkElement)
-    {
+template <> inline void NiTPointerListBase<RTAllocator, RTEntry* >::AddTail(RTEntry* const& element)
+{
         RTNode* pkNode = (RTNode*)m_kItemCount.Allocate();
-        pkNode->m_element = pkElement;
+        pkNode->m_element = element;
         pkNode->m_pkNext = 0;
         pkNode->m_pkPrev = m_pkTail;
         if (m_pkTail)
@@ -1002,11 +977,10 @@ struct RTList
         m_pkTail = pkNode;
         m_kItemCount.m_uiCount++;
     }
-};
 
-RTEntry* RTList::FUN_00e7d7f0(RTNode*& position)
+template <> inline RTEntry* NiTPointerListBase<RTAllocator, RTEntry* >::RemovePos(void*& position)
 {
-    RTNode* node = position;
+    RTNode* node = (RTNode*)position;
     if (node == m_pkHead)
     {
         position = node->m_pkNext;
@@ -1169,7 +1143,7 @@ RenderTexture* RenderTargetManager::FUN_00b6d5e0(NiRenderer* pkRenderer, unsigne
         }
     }
 
-    RTNode* kPos = m_kFreeList.GetHeadPos();
+    RTNode* kPos = (RTNode*)m_kFreeList.GetHeadPos();
     while (kPos && !pkFound)
     {
         RTEntry* pkEntry = m_kFreeList.Get(kPos);
@@ -1185,7 +1159,7 @@ RenderTexture* RenderTargetManager::FUN_00b6d5e0(NiRenderer* pkRenderer, unsigne
         }
         else
         {
-            kPos = m_kFreeList.GetNextPos(kPos);
+            kPos = (RTNode*)m_kFreeList.GetNextPos(kPos);
         }
     }
 
@@ -1204,7 +1178,7 @@ RenderTexture* RenderTargetManager::FUN_00b6d5e0(NiRenderer* pkRenderer, unsigne
     }
     else
     {
-        m_kFreeList.FUN_00e7d7f0(kPos);
+        m_kFreeList.RemovePos((void*&)kPos);
         pkFound->m_bIsCubeMap = true;
     }
 

@@ -5,6 +5,9 @@
 
 // src/havok/animation/ragdoll/utils/hkaragdollutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/ragdoll/utils/hkaragdollutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../include/hkErrStream.h"
+#include "../../../../../include/hkError.h"
+
 extern "C"
 {
     int __cdecl FUN_00cea030(void*, void*);
@@ -62,23 +65,6 @@ struct Obj
     char pad0[0xc];
     Inner* inner;
 };
-struct hkErrStream
-{
-    void* p1;
-    void* p2;
-    void* p3;
-    hkErrStream(void* buf, int size) throw();
-    ~hkErrStream() throw();
-    hkErrStream& operator<<(const char* str) throw();
-};
-struct hkError
-{
-    virtual ~hkError() throw();
-    virtual void unk0();
-    virtual void unk1();
-    virtual int message(int type, int id, const char* desc, const char* file, int line) throw();
-};
-extern hkError* DAT_01268360;
 static bool IsSupportedRagdollConstraint(Obj* obj, bool reportError) throw();
 void caller(Obj* obj);
 struct SpawnedAllocator
@@ -165,7 +151,8 @@ void Quaternion::FUN_00c66320(const Quaternion* first, const Quaternion* second)
     value = _mm_shuffle_ps(xyz, _mm_unpackhi_ps(xyz, scalar), 0xc4);
     FUN_00ec408c(cookie);
 }
-struct Transform
+// hkQsTransform layout (translation, quaternion, scale; 0x00ce5070 = hkQsTransform::setFromTransform) over this unit's raw __m128/Quaternion stand-ins.
+struct RagdollQsTransform
 {
     __m128 translation;
     __forceinline const __m128& getTranslation() const
@@ -178,7 +165,7 @@ struct Transform
     {
         return scale;
     }
-    void FUN_00ce5070(const Transform*) throw();
+    void FUN_00ce5070(const RagdollQsTransform*) throw();
 };
 extern const __m128 DAT_010c71e0;
 extern const __m128 DAT_010c7170;
@@ -198,7 +185,7 @@ struct SimdVector
         return quad;
     }
 };
-static __forceinline void composeTransforms(Transform& destination, const Transform& parent, const Transform& child)
+static __forceinline void composeTransforms(RagdollQsTransform& destination, const RagdollQsTransform& parent, const RagdollQsTransform& child)
 {
     SimdVector qForward = parent.rotation.value;
     SimdVector wForward = _mm_shuffle_ps(qForward, qForward, 0xff);
@@ -217,12 +204,12 @@ static __forceinline void composeTransforms(Transform& destination, const Transf
     destination.rotation.FUN_00c66320(&parent.rotation, &child.rotation);
     destination.scale = _mm_mul_ps(child.scale, parent.scale);
 }
-template <class T> struct Array
-{
+template <class T> struct ArrayLocalForm
+{ // local form of hkArray: 0x00ceb2c0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* data;
     int size;
     int capacity;
-    Array() throw() : data(0), size(0), capacity(0x80000000)
+    ArrayLocalForm() throw() : data(0), size(0), capacity(0x80000000)
     {}
     void reserve(SpawnedAllocator* allocator, int count) throw()
     {
@@ -266,7 +253,7 @@ static __forceinline void constructBones(Bone* bone, int count) throw()
         }
     }
 }
-template <> __forceinline void Array<Bone>::SetSizeAndGrow(int count) throw()
+template <> __forceinline void ArrayLocalForm<Bone>::SetSizeAndGrow(int count) throw()
 {
     reserve(count);
     destroyBones(data + count, size - count);
@@ -287,11 +274,11 @@ struct SkeletonHeader
 struct Skeleton : SkeletonHeader
 {
     StringRef name;
-    Array<short> parents;
-    Array<Bone> bones;
-    Array<Transform> pose;
-    Array<StringRef> floatSlots;
-    Array<int> localFrames;
+    ArrayLocalForm<short> parents;
+    ArrayLocalForm<Bone> bones;
+    ArrayLocalForm<RagdollQsTransform> pose;
+    ArrayLocalForm<StringRef> floatSlots;
+    ArrayLocalForm<int> localFrames;
     __forceinline Skeleton() throw()
     {}
     __forceinline void* operator new(unsigned int bytes)
@@ -365,7 +352,7 @@ struct RigidBody
     int unke4;
     int unke8;
     int unkec;
-    Transform transform;
+    RagdollQsTransform transform;
 };
 struct BodyList
 {
@@ -419,10 +406,10 @@ Skeleton* __cdecl FUN_00ceb2c0(BodyList* bodies, ConstraintList* constraints) th
         if (parentIndex >= 0)
         {
             RigidBody* parent = bodies->data[parentIndex];
-            Transform childPose, parentPose;
+            RagdollQsTransform childPose, parentPose;
             childPose.FUN_00ce5070(&body->transform);
             parentPose.FUN_00ce5070(&parent->transform);
-            Transform& output = result->pose.data[i];
+            RagdollQsTransform& output = result->pose.data[i];
             const __m128& q = parentPose.rotation.value;
             SimdVector w = _mm_shuffle_ps(q, q, 0xff);
             SimdVector v = parentPose.getTranslation();
@@ -435,7 +422,7 @@ Skeleton* __cdecl FUN_00ceb2c0(BodyList* bodies, ConstraintList* constraints) th
             SimdVector t = _mm_mul_ps(_mm_add_ps(_mm_mul_ps(w, w), DAT_010c71e0), v);
             t = _mm_add_ps(t, _mm_mul_ps(_mm_shuffle_ps(d, d, 0), q));
             t = _mm_add_ps(cross, t);
-            Transform inversePose;
+            RagdollQsTransform inversePose;
             t = _mm_add_ps(t, t);
             t = _mm_xor_ps(t, DAT_010c44d0);
             inversePose.translation = t;
@@ -461,7 +448,7 @@ Skeleton* __cdecl FUN_00ceb2c0(BodyList* bodies, ConstraintList* constraints) th
             int buffer[128];
             hkErrStream stream(buffer, 512);
             stream << "Rigid Body name could not be found";
-            DAT_01268360->message(1, 0xabbacc14, reinterpret_cast<const char*>(buffer), ".\\Utils\\hkaRagdollUtils.cpp",
+            hkError::s_instance->message(1, 0xabbacc14, reinterpret_cast<const char*>(buffer), ".\\Utils\\hkaRagdollUtils.cpp",
                                   558);
         }
         currentBone.lockTranslation = i != 0;

@@ -1,23 +1,22 @@
-// gamebryo2.2/corelibs/nianimation/nialphacontroller.cpp: NiAlphaController, Holder, FloatCtlr (9 functions)
+// gamebryo2.2/corelibs/nianimation/nialphacontroller.cpp: NiAlphaController (9 functions)
 
-#include "nialphacontroller_decls.h"
+#include "../../../../include/NiAlphaController.h"
+#include "../../../../include/NiTransformController.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiFloatInterpController.h"
 
 // @fnv 0x00a57620
-void NiAlphaController::CopyMemberData(NiAlphaController* clone, CloningProcess& process)
+__declspec(noinline) void NiAlphaController::CopyMemberData(NiAlphaController* clone, CloningProcess& process)
 {
     reinterpret_cast<NiTransformController*>(this)->CopyMemberData(reinterpret_cast<NiTransformController*>(clone),
                                                                    process);
 }
 
-struct FUN_00a569f0_shell
-{
-    void __thiscall FUN_00a569f0(float& fValue);
-};
-
+// The unused EDX parameter keeps the original thiscall stack arguments in place.
 // @fnv 0x00a569f0
-void __thiscall FUN_00a569f0_shell::FUN_00a569f0(float& fValue)
+void __fastcall GetAlphaValue(NiAlphaController* self, void*, float& fValue)
 {
-    float* p = *reinterpret_cast<float**>(reinterpret_cast<char*>(this) + 0x2c);
+    float* p = reinterpret_cast<float*>(self->m_pkTarget);
     fValue = p[0x3c / 4];
 }
 
@@ -29,14 +28,6 @@ int* __cdecl FUN_00a56a80()
     return &g_011f4084;
 }
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
-struct NiFloatInterpController
-{
-    NiFloatInterpController();
-};
 extern int DAT_0109a76c;
 inline void* __cdecl operator new(unsigned int, void* p)
 {
@@ -49,7 +40,7 @@ NiFloatInterpController* __cdecl CreateFloatInterpController()
     NiFloatInterpController* p = (NiFloatInterpController*)BSFadeNode::operator new(0x38);
     if (p)
     {
-        new (p) NiFloatInterpController;
+        ::new (p) NiFloatInterpController;
         *(int**)p = &DAT_0109a76c;
         return p;
     }
@@ -86,10 +77,8 @@ bool __stdcall FUN_00bc3050(FUN_00bc3050_Obj* pkTarget)
     return false;
 }
 
-template <class T> struct NiTMallocInterface
-{
-};
-template <class T, class Alloc> struct NiTPrimitiveArray
+// Keep this array local while the approved headers only forward-declare NiTPrimitiveArray.
+template <class T> struct AlphaPrimitiveArray
 {
     char _pad[8];
     unsigned short m_usMaxSize;
@@ -99,11 +88,11 @@ template <class T, class Alloc> struct NiTPrimitiveArray
     void __thiscall SetSize(unsigned int);
     void __thiscall SetAt(unsigned int, T&);
 };
-void __stdcall FUN_00a576c0(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >*);
+void __stdcall FUN_00a576c0(AlphaPrimitiveArray<char*>*);
 char* __cdecl _FUN_00a7d330(const char*);
 // Grows pkStrings if full, then appends the string returned by _FUN_00a7d330(g_011f4084) at the current size index.
 // @fnv 0x00a56b60
-void __stdcall FUN_00a56b60(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >* pkStrings)
+void __stdcall FUN_00a56b60(AlphaPrimitiveArray<char*>* pkStrings)
 {
     FUN_00a576c0(pkStrings);
     char* pszStr = _FUN_00a7d330((const char*)g_011f4084);
@@ -114,35 +103,23 @@ void __stdcall FUN_00a56b60(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >
 }
 
 extern int DAT_0109a76c;
-struct NiNew
-{
-    int* vt;
-    int f[13];
-    void __thiscall Init();
-    static void* __cdecl operator new(unsigned int) throw();
-};
-struct Holder
-{
-    void __thiscall Copy(NiNew* n, CloningProcess* p);
-    NiNew* __thiscall CreateAndCopy(CloningProcess* p);
-};
-// Allocates and initialises a NiNew, then copies p into it via Copy and returns the new object, or null if allocation fails.
+// Allocates and initialises a NiFloatInterpController, then copies p into it via Copy and returns the new object, or null if allocation fails.
 // @fnv 0x00a56ae0
-NiNew* Holder::CreateAndCopy(CloningProcess* apSource)
+NiFloatInterpController* __fastcall CreateAndCopy(NiAlphaController* self, void*, CloningProcess* apSource)
 {
-    NiNew* n = (NiNew*)NiNew::operator new(0x38);
-    NiNew* r;
+    NiFloatInterpController* n = (NiFloatInterpController*)NiFloatInterpController::operator new(0x38);
+    NiFloatInterpController* r;
     if (n)
     {
-        n->Init();
-        n->vt = &DAT_0109a76c;
+        ::new (n) NiFloatInterpController;
+        *(int**)n = &DAT_0109a76c;
         r = n;
     }
     else
     {
         r = 0;
     }
-    Copy(r, apSource);
+    self->CopyMemberData(reinterpret_cast<NiAlphaController*>(r), *apSource);
     return r;
 }
 
@@ -176,75 +153,49 @@ struct UpdateData
 {
     float m_fTime;
 };
-struct FloatCtlr
+inline bool NiTimeController::GetManagerControlled() const
 {
-    int unk00, unk04;
-    unsigned short m_uiObjectFlags;
-    unsigned short unk0a;
-    int unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
-    float m_fControllerTime;
-    FloatTarget* m_pkTarget;
-    int unk30;
-    FloatInterpolator* m_spControllerInterpolator;
-    bool GetManagerControlled() const
-    {
-        return ((m_uiObjectFlags >> 5) & 1) ? true : false;
-    }
-    bool FUN_00a36250(float fTime);
-    void FUN_00a56a00(UpdateData& kData);
-};
+    return ((m_uiObjectFlags >> 5) & 1) ? true : false;
+}
 // @fnv 0x00a56a00
-void FloatCtlr::FUN_00a56a00(UpdateData& kData)
+void __fastcall UpdateAlpha(NiAlphaController* self, void*, UpdateData& kData)
 {
-    if (GetManagerControlled())
+    if (self->GetManagerControlled())
     {
-        m_fControllerTime = kInvalidTime;
+        self->m_fControllerTime = kInvalidTime;
     }
-    else if (FUN_00a36250(kData.m_fTime) &&
-             (!m_spControllerInterpolator || !m_spControllerInterpolator->AlwaysUpdate()))
+    else if (self->FUN_00a36250(kData.m_fTime) &&
+             (!self->m_spControllerInterpolator.m_pObject ||
+              !reinterpret_cast<FloatInterpolator*>(self->m_spControllerInterpolator.m_pObject)->AlwaysUpdate()))
     {
         return;
     }
-    if (m_spControllerInterpolator)
+    if (self->m_spControllerInterpolator.m_pObject)
     {
         float fValue;
-        if (m_spControllerInterpolator->Update(m_fControllerTime, m_pkTarget, fValue))
+        if (reinterpret_cast<FloatInterpolator*>(self->m_spControllerInterpolator.m_pObject)->Update(
+                self->m_fControllerTime, reinterpret_cast<FloatTarget*>(self->m_pkTarget), fValue))
         {
-            m_pkTarget->SetValue(fValue);
+            reinterpret_cast<FloatTarget*>(self->m_pkTarget)->SetValue(fValue);
         }
     }
 }
 
 #include <windows.h>
-struct Obj_00a56a90
-{
-    virtual void F0();
-    virtual void F1();
-    LONG m_lRef;
-};
-struct Base_00a56a90
-{
-    void __thiscall FUN_00a6d290();
-};
+void __cdecl FUN_00a6d290();
 void __cdecl _delete(void*, unsigned int);
-struct FUN_00a56a90_shell
-{
-    char _pad[0x34];
-    Obj_00a56a90* m_pEntryObject;
-    void* __thiscall FUN_00a56a90(unsigned int);
-};
-// Decrements m_pEntryObject's count, calls F1 at zero, invokes FUN_00a6d290, optionally deletes this, and returns this.
+// Releases the interpolator, destroys the base, and optionally deletes the controller.
 // @fnv 0x00a56a90
-void* __thiscall FUN_00a56a90_shell::FUN_00a56a90(unsigned int uiFlags)
+void* __fastcall DeleteAlphaController(NiAlphaController* self, void*, unsigned int uiFlags)
 {
-    Obj_00a56a90* p = m_pEntryObject;
+    NiInterpolator* p = self->m_spControllerInterpolator.m_pObject;
     if (p)
     {
-        if (InterlockedDecrement(&p->m_lRef) == 0)
-            p->F1();
+        if (InterlockedDecrement(reinterpret_cast<LONG*>(&p->m_uiRefCount)) == 0)
+            p->DeleteThis();
     }
-    ((Base_00a56a90*)this)->FUN_00a6d290();
+    reinterpret_cast<void (__thiscall*)(NiAlphaController*)>(FUN_00a6d290)(self);
     if (uiFlags & 1)
-        _delete(this, 0x38);
-    return this;
+        _delete(self, 0x38);
+    return self;
 }

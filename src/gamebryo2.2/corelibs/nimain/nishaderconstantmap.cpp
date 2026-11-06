@@ -1,6 +1,122 @@
 // gamebryo2.2/corelibs/nimain/nishaderconstantmap.cpp: NiShaderConstantMap (10 functions)
 
-#include "nishaderconstantmap_decls.h"
+#define FNV64_NIFIXEDSTRING_OWN_BODIES
+#include "../../../../include/NiShaderConstantMap.h"
+#undef FNV64_NIFIXEDSTRING_OWN_BODIES
+#include "MemoryManager.h"
+extern MemoryManager g_memoryManager;
+
+// Keep the unit-local atomic helper calls: their inline expansion preserves
+// the original compiler's constructor and assignment inlining decisions.
+inline unsigned int NiAtomicIncrement(unsigned int& value)
+{
+    return InterlockedIncrement((long*)&value);
+}
+inline unsigned int NiAtomicSubtract(unsigned int& value)
+{
+    return InterlockedDecrement((long*)&value);
+}
+inline void NiShaderConstantMapIncRefCount(char*& handle)
+{
+    if (handle != NiGlobalStringTable::ms_pcEmptyString)
+    {
+        char* buffer = NiGlobalStringTable::GetRealBufferStart(handle);
+        unsigned int* count = (unsigned int*)buffer;
+        NiAtomicIncrement(*count);
+    }
+}
+inline void NiShaderConstantMapDecRefCount(char*& handle)
+{
+    if (handle != NiGlobalStringTable::ms_pcEmptyString)
+    {
+        char* buffer = NiGlobalStringTable::GetRealBufferStart(handle);
+        unsigned int* count = (unsigned int*)buffer;
+        NiAtomicSubtract(*count);
+    }
+}
+
+inline NiFixedString::NiFixedString()
+{
+    m_kHandle = NiGlobalStringTable::ms_pcEmptyString;
+}
+
+inline NiFixedString::NiFixedString(const char* text)
+{
+    if (text == 0)
+        m_kHandle = NiGlobalStringTable::ms_pcEmptyString;
+    else
+        m_kHandle = NiGlobalStringTable::AddString(text);
+}
+
+inline NiFixedString::~NiFixedString()
+{
+    NiShaderConstantMapDecRefCount(m_kHandle);
+}
+
+inline NiFixedString& NiFixedString::operator=(const NiFixedString& text)
+{
+    char* handle = text.m_kHandle;
+    if (m_kHandle != handle)
+    {
+        NiShaderConstantMapIncRefCount(handle);
+        NiShaderConstantMapDecRefCount(m_kHandle);
+        m_kHandle = handle;
+    }
+    return *this;
+}
+
+inline NiFixedString& NiFixedString::operator=(const char* text)
+{
+    if (m_kHandle != text)
+    {
+        char* old = m_kHandle;
+        m_kHandle = NiGlobalStringTable::AddString(text);
+        NiShaderConstantMapDecRefCount(old);
+    }
+    return *this;
+}
+
+inline NiFixedString::operator const char*() const
+{
+    return m_kHandle;
+}
+
+inline NiShaderConstantMap::ShaderConstantMapEntry::ShaderConstantMapEntry()
+{
+    m_uiConstantID = 0;
+    m_kConstantName = (const char*)0;
+}
+
+inline NiShaderConstantMap::ShaderConstantMapEntry::ShaderConstantMapEntry(unsigned int id, const NiFixedString& name)
+{
+    m_uiConstantID = id;
+    m_kConstantName = name;
+}
+
+inline NiShaderConstantMap::ShaderConstantMapEntry::~ShaderConstantMapEntry()
+{}
+
+inline NiShaderConstantMap::ShaderConstantMapEntry&
+NiShaderConstantMap::ShaderConstantMapEntry::operator=(const ShaderConstantMapEntry& other)
+{
+    m_uiConstantID = other.m_uiConstantID;
+    m_kConstantName = other.m_kConstantName;
+    return *this;
+}
+
+inline void* NiShaderConstantMap::ShaderConstantMapEntry::operator new[](unsigned int size) throw()
+{
+    return g_memoryManager.Allocate(size);
+}
+
+extern "C" int strcpy_s(char*, unsigned int, const char*);
+// The mutable-source C++ overload is distinct from the CRT entry point.
+int strcpy_s(char*, unsigned int, char*);
+extern "C" char* strchr(char*, int);
+extern "C" int isdigit(int);
+extern "C" char* strtok_s(char*, const char*, char**);
+long FUN_00eca6d3(const char*);
+int NiStricmp(const char*, const char*);
 
 // @fnv 0x00a9c2a0
 void NiShaderConstantMap::InitializePoint3()

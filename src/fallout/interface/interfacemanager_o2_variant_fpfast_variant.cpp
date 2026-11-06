@@ -5,67 +5,54 @@
 
 // src/fallout/interface/interfacemanager_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/interface/interfacemanager.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
-#include "interfacemanager_packet.h"
+#include "../../../include/NiBound.h"
+#include "../../../include/NiRefObject.h"
+#include "../../../include/NiPointer.h"
 extern "C" __declspec(dllimport) unsigned int __stdcall XInputGetState(unsigned int dwUserIndex, void* pState);
 unsigned int __stdcall FUN_009f996e(unsigned int dwUserIndex, void* pState);
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 
-struct NiBound
+inline void NiRefObject::IncRefCount()
 {
-    float x, y, z;
-    float radius;
-};
-struct NiRefObject
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
 {
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    volatile long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (!InterlockedDecrement(&m_uiRefCount))
-            DeleteThis();
-    }
-};
-template <class T> struct NiPointer
+    if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)))
+        DeleteThis();
+}
+template <class T> inline NiPointer<T>::NiPointer(T* p) : m_pObject(p)
 {
-    T* m_pObject;
-    NiPointer(T* p = 0) : m_pObject(p)
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* p)
+{
+    if (m_pObject != p)
     {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointer()
-    {
-        if (m_pObject)
+        if (p)
+            p->IncRefCount();
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
+        m_pObject = p;
     }
-    NiPointer& operator=(T* p)
-    {
-        if (m_pObject != p)
-        {
-            if (p)
-                p->IncRefCount();
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = p;
-        }
-        return *this;
-    }
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-};
+    return *this;
+}
+template <class T> inline NiPointer<T>::operator T*() const
+{
+    return m_pObject;
+}
+template <class T> inline T* NiPointer<T>::operator->() const
+{
+    return m_pObject;
+}
 struct Item : NiRefObject
 {
     virtual void Unused2();
@@ -108,10 +95,7 @@ template <class T> struct TPtrList
     }
     void RemoveAll();
 };
-struct BSTextureManager
-{
-    void FUN_00b6d4c0(NiRefObject*);
-};
+#include "../../../include/BSTextureManager.h"
 struct Sub1e0
 {
     void FUN_00c5b8d0();
@@ -226,7 +210,7 @@ void Owner::FUN_00b5fd60()
         Item* item = list114.GetNext(pos);
         if (item)
         {
-            if (item->IsVisibleThing() && BoundOf(item)->radius < DAT_010231d0)
+            if (item->IsVisibleThing() && BoundOf(item)->m_fRadius < DAT_010231d0)
                 FUN_00b5dac0(item, this, 1, true);
             else
                 FUN_00b5dac0(item, this, 1, false);
@@ -238,7 +222,7 @@ void Owner::FUN_00b5fd60()
         Item* item = list108.GetNext(pos);
         if (item)
         {
-            if (item->IsVisibleThing() && BoundOf(item)->radius < DAT_010231d0)
+            if (item->IsVisibleThing() && BoundOf(item)->m_fRadius < DAT_010231d0)
                 FUN_00b5dac0(item, this, 0, true);
             else
                 FUN_00b5dac0(item, this, 0, false);

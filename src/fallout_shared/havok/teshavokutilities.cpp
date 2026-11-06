@@ -2,6 +2,29 @@
 // src/fallout_shared/havok/teshavokutilities.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/teshavokutilities.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../include/Setting.h"
+#include "../../../include/SettingT_GameSettingCollection_.h"
+#include "../../../include/NiObjectNET.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/bhkCollisionObject.h"
+#include "../../../include/bhkWorldObject.h"
+// CombatNode_teshavokutilities: local type (was include/CombatNode.h, which had no evidence of one real class); its methods are 0x00505c00 TESCombatStyle::GetPowerAttackF, 0x00505c20 TESCombatStyle::GetPowerAttackB, 0x005524b0 TESCombatStyle::GetPowerAttackChance, 0x006a9560 TESCombatStyle::GetPowerAttackL
+class CombatNode_teshavokutilities
+{
+public:
+    unsigned int FUN_00726070();
+    signed char GetByteAtOffset8C();
+    bool HasCombatFlag(int);
+    signed char FUN_0073cb80();
+    signed char FUN_00505c00();
+    signed char GetByteAtOffset9A();
+    signed char GetByteAtOffset9B();
+    signed char FUN_009e8670();
+};
+#include "../../../include/bhkFilter.h"
+
 extern float DAT_0104da48;
 extern float DAT_0104e148;
 
@@ -19,31 +42,6 @@ void FUN_006295a0_shell::FUN_006295a0()
     ((FUN_006295a0_shell*)((char*)this + 0x10))->FUN_004589c0(DAT_0104e148);
 }
 
-struct NiAVObject
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void* GetAsNiNode();
-};
-struct NiObjectNET
-{
-    unsigned int GetNumChildren();
-};
-struct NiNode : public NiAVObject
-{
-    NiAVObject* GetAt(unsigned int);
-    unsigned int GetNumChildren();
-};
-struct bhkWorldObject
-{
-    float FUN_004b5400();
-};
-struct bhkCollisionObject
-{
-    static bhkCollisionObject* GetFromNiAVObject(NiAVObject*);
-    bhkWorldObject* FUN_006fa820();
-};
 float FUN_0062c300(NiAVObject* object);
 // @fnv 0x0062c300
 float FUN_0062c300(NiAVObject* object)
@@ -55,7 +53,7 @@ float FUN_0062c300(NiAVObject* object)
         bhkWorldObject* pWorldObject = pCollisionObject ? pCollisionObject->FUN_006fa820() : 0;
         if (pWorldObject)
             fmass += pWorldObject->FUN_004b5400();
-        NiNode* pnode = (NiNode*)object->GetAsNiNode();
+        NiNode* pnode = (NiNode*)object->IsSceneNode();
         if (pnode && pnode->GetNumChildren())
         {
             for (unsigned int i = 0; i < pnode->GetNumChildren(); ++i)
@@ -65,15 +63,10 @@ float FUN_0062c300(NiAVObject* object)
     return fmass;
 }
 
-struct CombatNode
-{
-    void FUN_00726070();
-};
-
 struct FUN_0062be70_shell
 {
     char pad[0x30];
-    CombatNode m_node;
+    CombatNode_teshavokutilities m_node;
     void FUN_0062be70();
 };
 
@@ -83,10 +76,6 @@ void FUN_0062be70_shell::FUN_0062be70()
     m_node.FUN_00726070();
 }
 
-struct TESObjectREFR
-{
-    static TESObjectREFR* __cdecl GetReferenceFromNiAVObject(void*);
-};
 extern "C" void* __cdecl FUN_00c7fa90(void*);
 
 // @fnv 0x0062b4e0
@@ -102,28 +91,13 @@ TESObjectREFR* __cdecl FUN_0062b4e0(void* object)
     return result;
 }
 
-struct Setting_S
-{
-    float* Float();
-};
-struct H0043b4d0
-{
-    int m_uiFilterValue;
-    H0043b4d0();
-    int FUN_0043b4d0();
-};
-struct W_0043b4f0
-{
-    H0043b4d0 FUN_0043b4f0();
-};
-float __fastcall FUN_004b5400(void*);
-extern Setting_S originalRuntimeFloatSetting1034;
-extern Setting_S originalRuntimeFloatSetting1035;
-extern Setting_S originalRuntimeFloatSetting1036;
-extern Setting_S originalRuntimeFloatSetting1037;
-extern Setting_S originalRuntimeFloatSetting1038;
-extern Setting_S g_011d0d2c;
-extern Setting_S g_011d0f30;
+extern Setting originalRuntimeFloatSetting1034;
+extern Setting originalRuntimeFloatSetting1035;
+extern Setting originalRuntimeFloatSetting1036;
+extern Setting originalRuntimeFloatSetting1037;
+extern Setting originalRuntimeFloatSetting1038;
+extern Setting g_011d0d2c;
+extern Setting g_011d0f30;
 
 // @fnv 0x0062b520
 float FUN_0062b520(float value, bhkWorldObject* object, bool scale)
@@ -131,7 +105,7 @@ float FUN_0062b520(float value, bhkWorldObject* object, bool scale)
     if (!object)
         return value;
     float fMultiplier = 1.0f;
-    H0043b4d0 layer = ((W_0043b4f0*)object)->FUN_0043b4f0();
+    bhkFilter layer = object->FUN_0043b4f0();
     switch (layer.FUN_0043b4d0())
     {
     case 14:
@@ -153,7 +127,7 @@ float FUN_0062b520(float value, bhkWorldObject* object, bool scale)
     }
     if (scale)
     {
-        float f = FUN_004b5400(object);
+        float f = object->FUN_004b5400();
         if (f < *originalRuntimeFloatSetting1038.Float())
             fMultiplier *= f / *originalRuntimeFloatSetting1038.Float();
     }
@@ -195,34 +169,22 @@ void* FUN_0043b560_shell::GetSourceFilesFromObject()
     return result;
 }
 
-struct FUN_0062bc10_obj
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual int v3();
-    void* FUN_006838b0();
-    void AttachTarget(int);
-    unsigned int FUN_0043b480();
-    void* FUN_0043b4a0(unsigned int);
-};
-
 // @fnv 0x0062bc10
-void __cdecl FUN_0062bc10(FUN_0062bc10_obj* pObject)
+void __cdecl FUN_0062bc10(NiAVObject* pObject)
 {
     if (pObject != 0)
     {
         void* r = pObject->FUN_006838b0();
         if (r != 0)
         {
-            pObject->AttachTarget(0);
+            pObject->AssignCollisionObject(0);
         }
-        if (pObject->v3() != 0)
+        if (pObject->IsSceneNode() != 0)
         {
-            FUN_0062bc10_obj* self = pObject;
+            NiNode* self = static_cast<NiNode*>(pObject);
             for (unsigned int i = 0; i < self->FUN_0043b480(); i++)
             {
-                FUN_0062bc10((FUN_0062bc10_obj*)self->FUN_0043b4a0(i));
+                FUN_0062bc10(self->FUN_0043b4a0(i));
             }
         }
     }
@@ -261,15 +223,6 @@ struct ShapeWrapper
     CollisionShape* GetShape();
 };
 
-struct WorldShapeView : bhkWorldObject
-{
-    ShapeWrapper* GetShapeWrapper();
-};
-
-struct ChildNodeView : NiNode
-{
-    unsigned int GetChildCount();
-};
 
 // Recursively walks an NiAVObject tree, adding collision shape counts to firstCount or secondCount depending on shape type.
 // @fnv 0x0062bd00
@@ -283,7 +236,7 @@ void CountCollisionShapes(NiAVObject* object, unsigned int* firstCount, unsigned
             bhkWorldObject* world7 = collision4->FUN_006fa820();
             if (world7)
             {
-                ShapeWrapper* wrapper_2 = static_cast<WorldShapeView*>(world7)->GetShapeWrapper();
+                ShapeWrapper* wrapper_2 = reinterpret_cast<ShapeWrapper*>(world7->FUN_004ae6a0());
                 CollisionShape* shape5 = wrapper_2 ? wrapper_2->GetShape() : 0;
                 if (shape5)
                 {
@@ -307,25 +260,15 @@ void CountCollisionShapes(NiAVObject* object, unsigned int* firstCount, unsigned
                 }
             }
         }
-        if (object->GetAsNiNode())
+        if (object->IsSceneNode())
         {
-            ChildNodeView* node5 = static_cast<ChildNodeView*>(object);
-            for (unsigned int index2 = 0; index2 < node5->GetChildCount(); ++index2)
+            NiNode* node5 = static_cast<NiNode*>(object);
+            for (unsigned int index2 = 0; index2 < node5->GetNumChildren(); ++index2)
                 CountCollisionShapes(node5->GetAt(index2), firstCount, secondCount);
         }
     }
 }
 
-class GameSettingCollection;
-union SETTING_VALUE
-{
-    float f;
-};
-template <class T> class SettingT
-{
-  public:
-    SETTING_VALUE* Float();
-};
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting721;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting722;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting723;
@@ -335,13 +278,8 @@ extern SettingT<GameSettingCollection> originalRuntimeFloatSetting726;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting728;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting729;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting730;
-class GlobalObject_0040e0b0
-{
-  public:
-    float* Float();
-};
-extern GlobalObject_0040e0b0 g_011cf600;
-extern GlobalObject_0040e0b0 g_011cf2fc;
+extern Setting g_011cf600;
+extern Setting g_011cf2fc;
 extern float DAT_01013974;
 // Selects a factor and threshold from value against several float settings, then returns factor times a distance-scaled multiplier or zero.
 // @fnv 0x0062be90
@@ -349,29 +287,27 @@ float __cdecl ComputeDistanceFactor(float value, float distance)
 {
     float factor = 0.0f;
     float threshold = DAT_01013974;
-    if (value < originalRuntimeFloatSetting721.Float()->f)
+    if (value < *originalRuntimeFloatSetting721.Float())
         factor = 0.0f;
-    else if (value < originalRuntimeFloatSetting722.Float()->f)
+    else if (value < *originalRuntimeFloatSetting722.Float())
     {
         factor = *g_011cf600.Float();
-        threshold = originalRuntimeFloatSetting728.Float()->f;
+        threshold = *originalRuntimeFloatSetting728.Float();
     }
-    else if (value < originalRuntimeFloatSetting723.Float()->f)
+    else if (value < *originalRuntimeFloatSetting723.Float())
     {
-        factor = originalRuntimeFloatSetting724.Float()->f;
-        threshold = originalRuntimeFloatSetting729.Float()->f;
+        factor = *originalRuntimeFloatSetting724.Float();
+        threshold = *originalRuntimeFloatSetting729.Float();
     }
     else
     {
-        factor = originalRuntimeFloatSetting725.Float()->f;
-        threshold = originalRuntimeFloatSetting730.Float()->f;
+        factor = *originalRuntimeFloatSetting725.Float();
+        threshold = *originalRuntimeFloatSetting730.Float();
     }
     float scale =
-        distance > threshold ? *g_011cf2fc.Float() + distance * originalRuntimeFloatSetting726.Float()->f : 0.0;
+        distance > threshold ? *g_011cf2fc.Float() + distance * *originalRuntimeFloatSetting726.Float() : 0.0;
     return factor * scale;
 }
-
-class Owner62B;
 
 class Target62B
 {
@@ -411,9 +347,9 @@ class Target62B
     virtual void vfn80();
     virtual void vfn84();
     virtual void vfn88();
-    virtual void SetOwner(Owner62B* pkOwner);
+    virtual void SetOwner(NiAVObject* pkOwner);
 
-    Owner62B* GetOwner();
+    NiAVObject* GetOwner();
 };
 
 class Handle62B
@@ -425,27 +361,12 @@ class Handle62B
     Target62B* m_pPointer;
 };
 
-class Owner62B
-{
-  public:
-    void AttachTarget(void* pvTarget);
-
-    void* m_ppVirtualMethodTable;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    Handle62B m_kRoomNode;
-};
-
 // @fnv 0x0062bc90
-void Owner62B::AttachTarget(void* pvTarget)
+void NiAVObject::AssignCollisionObject(NiCollisionObject* pvTarget)
 {
-    m_kRoomNode.Reset(pvTarget);
-    if (m_kRoomNode.Get() && m_kRoomNode.Get()->GetOwner() != this)
-        m_kRoomNode.Get()->SetOwner(this);
+    reinterpret_cast<Handle62B&>(m_spCollisionObject).Reset(pvTarget);
+    if (reinterpret_cast<Handle62B&>(m_spCollisionObject).Get() && reinterpret_cast<Handle62B&>(m_spCollisionObject).Get()->GetOwner() != this)
+        reinterpret_cast<Handle62B&>(m_spCollisionObject).Get()->SetOwner(this);
 }
 
 struct BGSAcousticSpace;
@@ -478,157 +399,12 @@ bool FUN_0061f890_shell::FUN_0061f890(NiAVObject* object, bool flag)
 
 unsigned int GetBSXFlags(unsigned int handle, unsigned int type);
 
-class Refr62C3C0
-{
-  public:
-    virtual void vfn000();
-    virtual void vfn004();
-    virtual void vfn008();
-    virtual void vfn00C();
-    virtual void vfn010();
-    virtual void vfn014();
-    virtual void vfn018();
-    virtual void vfn01C();
-    virtual void vfn020();
-    virtual void vfn024();
-    virtual void vfn028();
-    virtual void vfn02C();
-    virtual void vfn030();
-    virtual void vfn034();
-    virtual void vfn038();
-    virtual void vfn03C();
-    virtual void vfn040();
-    virtual void vfn044();
-    virtual void vfn048();
-    virtual void vfn04C();
-    virtual void vfn050();
-    virtual void vfn054();
-    virtual void vfn058();
-    virtual void vfn05C();
-    virtual void vfn060();
-    virtual void vfn064();
-    virtual void vfn068();
-    virtual void vfn06C();
-    virtual void vfn070();
-    virtual void vfn074();
-    virtual void vfn078();
-    virtual void vfn07C();
-    virtual void vfn080();
-    virtual void vfn084();
-    virtual void vfn088();
-    virtual void vfn08C();
-    virtual void vfn090();
-    virtual void vfn094();
-    virtual void vfn098();
-    virtual void vfn09C();
-    virtual void vfn0A0();
-    virtual void vfn0A4();
-    virtual void vfn0A8();
-    virtual void vfn0AC();
-    virtual void vfn0B0();
-    virtual void vfn0B4();
-    virtual void vfn0B8();
-    virtual void vfn0BC();
-    virtual void vfn0C0();
-    virtual void vfn0C4();
-    virtual void vfn0C8();
-    virtual void vfn0CC();
-    virtual void vfn0D0();
-    virtual void vfn0D4();
-    virtual void vfn0D8();
-    virtual void vfn0DC();
-    virtual void vfn0E0();
-    virtual void vfn0E4();
-    virtual void vfn0E8();
-    virtual void vfn0EC();
-    virtual void vfn0F0();
-    virtual void vfn0F4();
-    virtual void vfn0F8();
-    virtual void vfn0FC();
-    virtual bool vfn100();
-    virtual void vfn104();
-    virtual void vfn108();
-    virtual void vfn10C();
-    virtual void vfn110();
-    virtual void vfn114();
-    virtual void vfn118();
-    virtual void vfn11C();
-    virtual void vfn120();
-    virtual void vfn124();
-    virtual void vfn128();
-    virtual void vfn12C();
-    virtual void vfn130();
-    virtual void vfn134();
-    virtual void vfn138();
-    virtual void vfn13C();
-    virtual void vfn140();
-    virtual void vfn144();
-    virtual void vfn148();
-    virtual void vfn14C();
-    virtual void vfn150();
-    virtual void vfn154();
-    virtual void vfn158();
-    virtual void vfn15C();
-    virtual void vfn160();
-    virtual void vfn164();
-    virtual void vfn168();
-    virtual void vfn16C();
-    virtual void vfn170();
-    virtual void vfn174();
-    virtual void vfn178();
-    virtual void vfn17C();
-    virtual void vfn180();
-    virtual void vfn184();
-    virtual void vfn188();
-    virtual void vfn18C();
-    virtual void vfn190();
-    virtual void vfn194();
-    virtual void vfn198();
-    virtual void vfn19C();
-    virtual void vfn1A0();
-    virtual void vfn1A4();
-    virtual void vfn1A8();
-    virtual void vfn1AC();
-    virtual void vfn1B0();
-    virtual void vfn1B4();
-    virtual void vfn1B8();
-    virtual void vfn1BC();
-    virtual void vfn1C0();
-    virtual void vfn1C4();
-    virtual void vfn1C8();
-    virtual void vfn1CC();
-    virtual void vfn1D0();
-    virtual void vfn1D4();
-    virtual void vfn1D8();
-    virtual void vfn1DC();
-    virtual void vfn1E0();
-    virtual void vfn1E4();
-    virtual void vfn1E8();
-    virtual void vfn1EC();
-    virtual void vfn1F0();
-    virtual void vfn1F4();
-    virtual void vfn1F8();
-    virtual void vfn1FC();
-    virtual void vfn200();
-    virtual void vfn204();
-    virtual void vfn208();
-    virtual void vfn20C();
-    virtual void vfn210();
-    virtual void vfn214();
-    virtual void vfn218();
-    virtual void vfn21C();
-    virtual void vfn220();
-    virtual void vfn224();
-    virtual void vfn228();
-    virtual bool vfn22C(unsigned int unk);
-    virtual bool vfn230();
-};
 
-// Returns true if refr is non-null and passes vfn100/vfn22C/vfn230 checks, or if GetBSXFlags(handle, 0x48) equals 0x48.
+// Returns true for an actor with health or a knocked state, or if GetBSXFlags(handle, 0x48) equals 0x48.
 // @fnv 0x0062c3c0
-bool FUN_0062c3c0(Refr62C3C0* refr, unsigned int handle)
+bool FUN_0062c3c0(TESObjectREFR* refr, unsigned int handle)
 {
-    if (refr != 0 && refr->vfn100() && (refr->vfn22C(0) || refr->vfn230()))
+    if (refr != 0 && refr->IsActor() && (refr->HasHealth(0) || refr->GetHasKnockedState()))
     {
         return true;
     }
@@ -640,25 +416,6 @@ bool FUN_0062c3c0(Refr62C3C0* refr, unsigned int handle)
 }
 
 #include <xmmintrin.h>
-struct RuntimeNode;
-struct Children;
-struct CollisionInfo
-{
-    unsigned int filterFlags;
-    int FUN_006240b0();
-};
-struct SceneNode
-{
-    virtual void Unknown0();
-    virtual void Unknown1();
-    virtual void Unknown2();
-    virtual Children* GetChildren();
-};
-struct Children
-{
-    unsigned int FUN_0043b480();
-    SceneNode* FUN_0043b4a0(unsigned int at);
-};
 struct __declspec(align(16)) PhysicsTransform
 {
     __m128 vector;
@@ -741,12 +498,7 @@ struct PhysicsObject
     virtual void Unknown58();
     virtual void Unknown59();
     virtual void UpdateTransform(PhysicsTransform* out);
-    CollisionInfo* FUN_0043b4f0(CollisionInfo* out);
     PhysicsState* GetReferenceFlags();
-};
-struct RuntimeNode
-{
-    PhysicsObject* FUN_006fa820();
 };
 struct MaterialSelector
 {
@@ -758,22 +510,20 @@ struct MaterialSelector
 };
 extern float DAT_0119acc8[];
 extern const float DAT_01016088;
-extern "C" RuntimeNode* __cdecl FUN_0043b610(SceneNode* node);
 
 // Recursively updates the physics collision scale of a scene node and its children based on a size coefficient and material type.
 // @fnv 0x0062b660
-void __cdecl SetCollisionScale(SceneNode* node, unsigned int operation, float size, MaterialSelector* material)
+void __cdecl SetCollisionScale(NiAVObject* node, unsigned int operation, float size, MaterialSelector* material)
 {
     if (node)
     {
-        RuntimeNode* runtime = FUN_0043b610(node);
+        bhkCollisionObject* runtime = bhkCollisionObject::GetFromNiAVObject(node);
         if (runtime)
         {
-            PhysicsObject* body = runtime->FUN_006fa820();
+            PhysicsObject* body = reinterpret_cast<PhysicsObject*>(runtime->FUN_006fa820());
             if (body)
             {
-                CollisionInfo collisionInfo;
-                int code = body->FUN_0043b4f0(&collisionInfo)->FUN_006240b0();
+                int code = reinterpret_cast<bhkWorldObject*>(body)->FUN_0043b4f0().FUN_006240b0();
                 float coefficient = DAT_0119acc8[code];
                 if (material && material->kind != -1)
                 {
@@ -804,12 +554,12 @@ void __cdecl SetCollisionScale(SceneNode* node, unsigned int operation, float si
                 state->OnTrigger(&transform);
             }
         }
-        Children* children = node->GetChildren();
+        NiNode* children = node->IsSceneNode();
         if (children)
         {
             for (unsigned int i = 0; i < children->FUN_0043b480(); ++i)
             {
-                SceneNode* child = children->FUN_0043b4a0(i);
+                NiAVObject* child = children->FUN_0043b4a0(i);
                 SetCollisionScale(child, operation, size, material);
             }
         }

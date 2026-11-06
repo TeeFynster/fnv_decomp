@@ -6,7 +6,9 @@ struct BSCriticalSectionEntry
     unsigned int key;
     unsigned int value;
 };
-class RecursiveLock
+// BSCriticalSectionMap: unit-local; not RecursiveLock but a hash map of BSCriticalSectionEntry (vftable +0 with the
+// hash-index virtual at slot 1, bucket count +4, buckets +8): 0x00a0c850 steps an iterator through it (NiTMapBase::GetNext shape)
+class BSCriticalSectionMap
 {
   public:
     virtual void vfn_0();

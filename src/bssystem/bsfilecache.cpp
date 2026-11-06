@@ -1,6 +1,7 @@
 // bssystem/bsfilecache.cpp: BSFileCache, StandIn (15 functions)
 
 #include "bsfilecache.h"
+#include "../../include/MemoryManager.h"
 
 // @fnv 0x00b00f20
 BSFileCache::BSFileCache()
@@ -145,10 +146,6 @@ void __thiscall FUN_00b012f0_shell::FUN_00b012f0(int aiValue1, int aiValue2)
 struct FUN_00b01020_Holder
 {
     void FUN_00b01020();
-};
-struct MemoryManager
-{
-    void _DeallocateAlias(void*);
 };
 extern MemoryManager g_memoryManager;
 struct FUN_00b01310_shell

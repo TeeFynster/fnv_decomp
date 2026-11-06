@@ -2,6 +2,8 @@
 // src/gamebryo2.2/corelibs/nisystem/nistandardallocator.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nisystem/nistandardallocator.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/NiStandardAllocator.h"
+
 // Swaps two adjacent ints at a and b when the pointers differ.
 // @fnv 0x00aa3530
 void __cdecl SwapIntPairs(int* paiFirst, int* paiSecond)
@@ -43,11 +45,6 @@ struct P03MM
 };
 
 P03MM g_memoryManager;
-
-struct NiStandardAllocator
-{
-    void* __thiscall NiStandardObjectAllocHelper(unsigned int);
-};
 
 // @fnv 0x00aa3430
 void __cdecl AllocateStandardAllocator()

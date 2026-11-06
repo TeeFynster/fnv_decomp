@@ -1,6 +1,9 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/animation/animation/animation/waveletcompressed/hkawaveletcompressedanimationclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/animation/waveletcompressed/hkawaveletcompressedanimationclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../include/BSAudio.h"
 
 struct DFB610Ostream
 {
@@ -111,25 +114,18 @@ template <class T> __forceinline void destruct(T* t, int n)
     for (int i = 0; i < n; ++i)
         t[i].~T();
 }
-template <class T> struct S_00dfb720_Array
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline void _clearAndDeallocate(S_00dfb720_Allocator& alloc)
-    {
+        { S_00dfb720_Allocator& alloc = FUN_00c85750()->heap();
         destruct(m_data, m_iElementCount);
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-    __forceinline ~S_00dfb720_Array() throw()
-    {
-        _clearAndDeallocate(FUN_00c85750()->heap());
-    }
-};
+     }
+    
+}
 struct S_00dfb720_Elem
 {
     int unk00;
@@ -165,7 +161,7 @@ struct S_00dfb720_Base
 struct __declspec(novtable) FUN_00dfb720 : S_00dfb720_Base
 {
     S_00dfb720_RefPtr<S_00dfb720_Ref> m_ref;
-    S_00dfb720_Array<S_00dfb720_Elem> m_ppData;
+    hkArray<S_00dfb720_Elem> m_ppData;
     virtual ~FUN_00dfb720() throw();
 };
 // Destructor of FUN_00dfb720; the body is empty, member destructors run implicitly.
@@ -310,11 +306,6 @@ struct Allocator
     virtual void unknown04() = 0;
     virtual void Release(void* object, unsigned int bytes) = 0;
 };
-struct BSAudio
-{
-    unsigned int unk00, unk04, unk08, unk0c;
-    Allocator* allocator;
-};
 BSAudio* FUN_00c85750();
 struct Owner
 {
@@ -332,7 +323,7 @@ Owner* Owner::FUN_00dfb7b0(unsigned int flags)
     {
         BSAudio* audio = FUN_00c85750();
         unsigned int bytes = size4;
-        audio->allocator->Release(this, bytes);
+        reinterpret_cast<Allocator*>(audio->pListener)->Release(this, bytes);
     }
     return this;
 }

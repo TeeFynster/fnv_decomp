@@ -1,135 +1,42 @@
-// fallout_shared/tesobjectarma.cpp: TESObjectARMA, ArmaCompare (12 functions)
+// fallout_shared/tesobjectarma.cpp: TESObjectARMA (12 functions)
 
-#include "tesobjectarma_load.h"
-class TESForm;
+#include <malloc.h>
+#include "../../include/BGSDestructibleObjectForm.h"
+#include "../../include/TESBipedModelForm.h"
+#include "../../include/TESObjectARMA.h"
+#include "../../include/TESObjectARMO.h"
+#include "../../include/TESResponse.h"
+#include "../../include/TESValueForm.h"
 
-class TESFormInitFlag
+// Local method access for ARMA routines not yet declared by the shared header; no layout is duplicated.
+class ArmorAddonOperations : public TESObjectARMA
 {
   public:
-    bool IsFormInitialized() const;
+    void* DestroyIfFlagged(unsigned int flags);
+    void SaveArmorGame(unsigned int flags);
+    void LoadArmorGame(BGSLoadFormBuffer* buffer);
+    void CopyArmor(TESForm* apCopy);
+    bool CompareArmor(TESForm* apCompare);
+    void SaveArmor();
 };
 
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-    virtual void Slot01();
-    virtual void Slot02();
-    virtual void Slot03();
-    virtual void Slot04();
-    virtual void Slot05();
-    virtual void Slot06();
-    virtual void Slot07();
-    virtual void Slot08();
-    virtual void Slot09();
-    virtual void Slot10();
-    virtual void Slot11();
-    virtual void Slot12();
-    virtual void Slot13();
-    virtual void Slot14();
-    virtual void Slot15();
-    virtual void Slot16();
-    virtual void Slot17();
-    virtual void Slot18();
-    virtual void Slot19();
-    virtual void Slot20();
-    virtual void Slot21();
-    virtual void Slot22();
-    virtual void Slot23();
-    virtual void Slot24();
-    virtual void Slot25();
-    virtual void Slot26();
-    virtual void Slot27();
-    virtual void Slot28();
-    virtual void Slot29();
-    virtual void Slot30();
-    virtual void Slot31();
-    virtual void Slot32();
-    virtual void Slot33();
-    virtual void Slot34();
-    virtual void Slot35();
-    virtual void Slot36();
-    virtual void Slot37();
-    virtual void Slot38();
-    virtual void Slot39();
-    virtual void Slot40();
-    virtual void Slot41();
-    virtual void Slot42();
-    virtual void Slot43();
-    virtual void Slot44();
-    virtual void Slot45();
-    virtual void Slot46();
-    virtual void Slot47();
-    virtual void Slot48();
-    virtual void Slot49();
-    virtual void Slot50();
-    virtual void Slot51();
-    virtual void Slot52();
-    virtual void Slot53();
-    virtual void Slot54();
-    virtual void Slot55();
-    virtual void readOBNDSubRecord(TESFile*);
-    virtual void Slot57();
-    virtual void Slot58();
-    virtual void Slot59();
-    virtual void Slot60();
-    virtual void Slot61();
-    virtual void Slot62();
-    virtual void Slot63();
-    virtual void Slot64();
-    virtual void Slot65();
-    virtual void Slot66();
-    virtual void Slot67();
-    virtual void Slot68();
-    virtual void Slot69();
-    virtual void Slot70();
-    virtual void Slot71();
-    virtual void Slot72();
-    virtual void Slot73();
-    virtual void Slot74();
-    virtual void Slot75();
-    virtual const char* GetEditorID();
-    virtual bool SetEditorID(const char*);
-    void LoadRecordHeader(TESFile*);
-    void SetFormType(ENUM_FORM_ID);
-    void SetInitializationState(bool initialized);
-};
+#include "../../include/ENUM_FORM_ID.h"
 
-class TESBipedModelForm
+struct BIPED_MODEL_OLD
 {
-  public:
-    unsigned char prefix[4];
-    unsigned int bipedFlags;
+    unsigned short m_uiBipedModelFlags;
     unsigned char m_ucBipedModelData;
-    unsigned char padding[3];
-    TESModelTextureSwap bipedModel[2];
-    TESModelTextureSwap worldModel[2];
-    TESTexture1024 m_kIcon[2];
-    BGSMessageIcon messageIcon[2];
-    TESModel m_kFaceGenModel;
-    void InitItem(TESForm* form);
+    void FUN_00512810();
 };
-
-class BGSDestructibleObjectForm
+class RegionDataEntry
 {
   public:
-    unsigned char bytes[8];
-    static void LoadDestructibleData(BGSDestructibleObjectForm*, TESFile*);
-    void InitItem(TESForm* form);
+    void Endian();
 };
-
-class TESObjectARMA : public TESForm
+// ArmorData's shared layout has no endian method yet.
+struct ArmorDataEndianAccess
 {
-  public:
-    unsigned char padToBiped[0x6c];
-    TESBipedModelForm biped;
-    BGSDestructibleObjectForm destructible;
-    BGSEquipType equipType;
-    unsigned char padToData[0x1c];
-    ArmorData data;
-    bool Load(TESFile* file);
-    void ResetFormData();
-    void InitItem();
+    void Endian();
 };
 
 extern "C" void* __cdecl memset(void* destination, int value, unsigned int size);
@@ -146,12 +53,12 @@ void TESObjectARMA::ResetFormData()
 // @fnv 0x00512030
 void TESObjectARMA::InitItem()
 {
-    if (((TESFormInitFlag*)this)->IsFormInitialized())
+    if (IsFormInitialized())
         return;
-    if (biped.bipedFlags == 0)
-        Warning("MASTERFILE: Armor '%s' needs to have biped slots selected in the editor.", GetEditorID());
-    destructible.InitItem((TESForm*)this);
-    biped.InitItem((TESForm*)this);
+    if (partMask == 0)
+        Warning("MASTERFILE: Armor '%s' needs to have biped slots selected in the editor.", GetName());
+    BGSDestructibleObjectForm::InitItem((TESForm*)this);
+    TESBipedModelForm::InitItem((TESForm*)this);
     SetInitializationState(true);
 }
 
@@ -170,188 +77,149 @@ bool TESObjectARMA::Load(TESFile* file)
         case 'DIDE': {
             char* editorID = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(editorID, 512);
-            SetEditorID(editorID);
+            SetEditorID_AtRuntime(editorID);
             break;
         }
         case 'DNBO':
             readOBNDSubRecord(file);
             break;
         case 'LLUF':
-            TESFullNameLoader::LoadFullNameChunk(this ? (TESFullName*)((char*)this + 0x30) : 0, file);
+            TESFullName::LoadFullNameChunk(this ? (TESFullName*)((char*)this + 0x30) : 0, file);
             break;
         case 'TDMB':
-            if (((TESFileFormVersion*)file)->GetFormVersion() < 11)
+            if (file->GetFormVersion() < 11)
             {
                 BIPED_MODEL_OLD oldData;
                 file->GetChunkData(&oldData, 4);
                 if (file->IsEndianConversionRequired())
                     oldData.FUN_00512810();
-                biped.m_ucBipedModelData = oldData.m_ucBipedModelData;
-                biped.bipedFlags = oldData.m_uiBipedModelFlags;
+                bipedFlags = oldData.m_ucBipedModelData;
+                partMask = oldData.m_uiBipedModelFlags;
             }
             else
             {
-                file->GetChunkData(&biped.bipedFlags, 8);
+                file->GetChunkData(&partMask, 8);
                 if (file->IsEndianConversionRequired())
-                    ((RegionDataEntry*)&biped.bipedFlags)->Endian();
+                    ((RegionDataEntry*)&partMask)->Endian();
             }
-            biped.m_ucBipedModelData &= ~0x10;
+            bipedFlags &= ~0x10;
             break;
         case 'TCMB': {
             char* constraint = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(constraint, 0);
-            biped.m_kFaceGenModel.SetModelFilePath(constraint);
+            modelRDT.SetModelFilePath(constraint);
             break;
         }
         case 'LDOM': {
             char* maleBiped = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(maleBiped, 0);
-            biped.bipedModel[0].SetModelFilePath(maleBiped);
+            bipedModel[0].SetModelFilePath(maleBiped);
             break;
         }
         case 'TDOM':
-            TESModel::LoadTextureSwapData(&biped.bipedModel[0], file);
+            TESModel::LoadTextureSwapData(&bipedModel[0], file);
             break;
         case 'SDOM':
-            TESModelTextureSwap::ReadTextureSwapChunk(&biped.bipedModel[0], file);
+            TESModelTextureSwap::ReadTextureSwapChunk(&bipedModel[0], file);
             break;
         case 'DDOM':
-            TESModel::LoadModelData(&biped.bipedModel[0], file);
+            TESModel::LoadModelData(&bipedModel[0], file);
             break;
         case 'DSOM':
-            TESModel::LoadModelData(&biped.bipedModel[1], file);
+            TESModel::LoadModelData(&bipedModel[1], file);
             break;
         case '2DOM': {
             char* maleWorld = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(maleWorld, 0);
-            biped.worldModel[0].SetModelFilePath(maleWorld);
+            groundModel[0].SetModelFilePath(maleWorld);
             break;
         }
         case 'T2OM':
-            TESModel::LoadTextureSwapData(&biped.worldModel[0], file);
+            TESModel::LoadTextureSwapData(&groundModel[0], file);
             break;
         case 'S2OM':
-            TESModelTextureSwap::ReadTextureSwapChunk(&biped.worldModel[0], file);
+            TESModelTextureSwap::ReadTextureSwapChunk(&groundModel[0], file);
             break;
         case 'NOCI': {
             char* maleIcon = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(maleIcon, 0);
-            biped.m_kIcon[0].SetTexture(maleIcon);
+            icon[0].SetTexture(maleIcon);
             break;
         }
         case 'OCIM': {
             char* maleMessage = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(maleMessage, 0);
-            biped.messageIcon[0].SetMessageIconTextureName(maleMessage);
+            messageIcon[0].SetMessageIconTextureName(maleMessage);
             break;
         }
         case '2CIM': {
             char* femaleMessage = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(femaleMessage, 0);
-            biped.messageIcon[1].SetMessageIconTextureName(femaleMessage);
+            messageIcon[1].SetMessageIconTextureName(femaleMessage);
             break;
         }
         case '3DOM': {
             char* femaleBiped = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(femaleBiped, 0);
-            biped.bipedModel[1].SetModelFilePath(femaleBiped);
+            bipedModel[1].SetModelFilePath(femaleBiped);
             break;
         }
         case 'T3OM':
-            TESModel::LoadTextureSwapData(&biped.bipedModel[1], file);
+            TESModel::LoadTextureSwapData(&bipedModel[1], file);
             break;
         case 'S3OM':
-            TESModelTextureSwap::ReadTextureSwapChunk(&biped.bipedModel[1], file);
+            TESModelTextureSwap::ReadTextureSwapChunk(&bipedModel[1], file);
             break;
         case '4DOM': {
             char* femaleWorld = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(femaleWorld, 0);
-            biped.worldModel[1].SetModelFilePath(femaleWorld);
+            groundModel[1].SetModelFilePath(femaleWorld);
             break;
         }
         case 'T4OM':
-            TESModel::LoadTextureSwapData(&biped.worldModel[1], file);
+            TESModel::LoadTextureSwapData(&groundModel[1], file);
             break;
         case 'S4OM':
-            TESModelTextureSwap::ReadTextureSwapChunk(&biped.worldModel[1], file);
+            TESModelTextureSwap::ReadTextureSwapChunk(&groundModel[1], file);
             break;
         case '2OCI': {
             char* femaleIcon = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(femaleIcon, 0);
-            biped.m_kIcon[1].SetTexture(femaleIcon);
+            icon[1].SetTexture(femaleIcon);
             break;
         }
         case 'TSED':
         case 'DTSD':
-            BGSDestructibleObjectForm::LoadDestructibleData(this ? &destructible : 0, file);
+            BGSDestructibleObjectForm::LoadDestructibleData(static_cast<BGSDestructibleObjectForm*>(this), file);
             break;
         case 'PYTE': {
             unsigned int type = 0;
             file->GetChunkData(&type);
             // Reuse the canonical identity of the folded scalar setter.
-            ((TESResponse*)&equipType)->SetEmotionValue(type);
+            ((TESResponse*)((char*)this + 0x154))->SetEmotionValue(type);
             break;
         }
         case 'MAND':
             memset(&data, 0, sizeof(data));
             file->GetChunkData(&data, sizeof(data));
             if (file->IsEndianConversionRequired())
-                data.FUN_00535aa0();
+                ((ArmorDataEndianAccess*)&data)->Endian();
             break;
         }
         if (chunk == 'ATAD' && file->IsEndianConversionRequired())
-            data.FUN_00535aa0();
+            ((ArmorDataEndianAccess*)&data)->Endian();
         if (!file->NextChunk())
             break;
     }
-    SetFormType(FORM_ARMO);
+    SetFormType(ENUM_FORM_ID_ARMO_ID);
     return true;
 }
 
-struct TESObjectARMO
-{
-    TESObjectARMO();
-    ~TESObjectARMO();
-};
-struct SFTX
-{
-    void SetFormType(int);
-};
-extern int DAT_0102a214;
-extern int DAT_0102a228;
-extern int DAT_0102a23c;
-extern int DAT_0102a250;
-extern int DAT_0102a264;
-extern int DAT_0102a278;
-extern int DAT_0102a2a4;
-extern int DAT_0102a2b8;
-extern int DAT_0102a2d8;
-extern int DAT_0102a2f0;
-extern int DAT_0102a304;
-extern int DAT_0102a31c;
-struct FUN_00511e40
-{
-    TESObjectARMO armo;
-    FUN_00511e40();
-};
 // @fnv 0x00511e40
-FUN_00511e40::FUN_00511e40()
+TESObjectARMA::TESObjectARMA()
 {
-    *(int*)((char*)this + 0x0) = (int)&DAT_0102a31c;
-    *(int*)((char*)this + 0x30) = (int)&DAT_0102a304;
-    *(int*)((char*)this + 0x3c) = (int)&DAT_0102a2f0;
-    *(int*)((char*)this + 0x48) = (int)&DAT_0102a2d8;
-    *(int*)((char*)this + 0x58) = (int)&DAT_0102a2b8;
-    *(int*)((char*)this + 0x60) = (int)&DAT_0102a2a4;
-    *(const char**)((char*)this + 0x68) = " rH";
-    *(int*)((char*)this + 0x70) = (int)&DAT_0102a278;
-    *(int*)((char*)this + 0x14c) = (int)&DAT_0102a264;
-    *(int*)((char*)this + 0x154) = (int)&DAT_0102a250;
-    *(int*)((char*)this + 0x15c) = (int)&DAT_0102a23c;
-    *(int*)((char*)this + 0x164) = (int)&DAT_0102a228;
-    *(int*)((char*)this + 0x16c) = (int)&DAT_0102a214;
-    ((SFTX*)this)->SetFormType(0x60);
-    ((TESObjectARMA*)this)->ResetFormData();
+    SetFormType(ENUM_FORM_ID_ARMA_ID);
+    ResetFormData();
 }
 
 struct FUN_00484d60_holder
@@ -363,95 +231,50 @@ struct FUN_0048ea40_holder
     void FUN_0048ea40(unsigned int);
 };
 
-struct FUN_005144c0_shell
-{
-    void FUN_005144c0(unsigned int flags);
-};
-
 // @fnv 0x005144c0
-void FUN_005144c0_shell::FUN_005144c0(unsigned int flags)
+void ArmorAddonOperations::SaveArmorGame(unsigned int flags)
 {
     reinterpret_cast<FUN_00484d60_holder*>(this)->SaveIfChanged(flags);
     reinterpret_cast<FUN_0048ea40_holder*>(reinterpret_cast<char*>(this) + 0x58)->FUN_0048ea40(flags);
 }
-
-struct BGSLoadFormBuffer;
-
-struct TESValueFormLoadGame
-{
-    void LoadGame(BGSLoadFormBuffer*);
-};
 
 struct TESFormBufferAccess
 {
     void LoadGame(BGSLoadFormBuffer*);
 };
 
-struct FUN_005160a0_shell : TESObjectARMO
-{
-    void LoadGame(BGSLoadFormBuffer* buffer);
-};
-
-// Loads the form buffer via TESFormBufferAccess::LoadGame, then loads the value form at offset 0x58 via TESValueFormLoadGame::LoadGame.
+// Loads the form buffer via TESFormBufferAccess::LoadGame, then loads the value form at offset 0x58 via TESValueForm::LoadGame.
 // @fnv 0x005160a0
-void FUN_005160a0_shell::LoadGame(BGSLoadFormBuffer* buffer)
+void ArmorAddonOperations::LoadArmorGame(BGSLoadFormBuffer* buffer)
 {
     reinterpret_cast<TESFormBufferAccess*>(this)->TESFormBufferAccess::LoadGame(buffer);
-    reinterpret_cast<TESValueFormLoadGame*>(static_cast<TESObjectARMO*>(this) + 0x58)
-        ->TESValueFormLoadGame::LoadGame(buffer);
+    reinterpret_cast<TESValueForm*>(reinterpret_cast<char*>(this) + 0x58)
+        ->TESValueForm::LoadGame(buffer);
 }
 
 void _Deallocate(void*);
-struct FUN_00511f30_holder
-{
-    void FUN_00511f60();
-    void* DestroyIfFlagged(unsigned int);
-};
-// Calls FUN_00511f60, then deallocates this if bit 0 of flags is set, and returns this.
+// Destroys the armor addon, then deallocates it if bit 0 of flags is set, and returns this.
 // @fnv 0x00511f30
-void* FUN_00511f30_holder::DestroyIfFlagged(unsigned int flags)
+void* ArmorAddonOperations::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_00511f60();
+    this->TESObjectARMA::~TESObjectARMA();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-struct FUN_00511f60_shell : TESObjectARMO
-{
-    void FUN_00511f60();
-    void FUN_00512bd0();
-};
 // @fnv 0x00511f60
-void FUN_00511f60_shell::FUN_00511f60()
+TESObjectARMA::~TESObjectARMA()
 {
-    *(void**)this = (void*)&DAT_0102a31c;
-    *(void**)((char*)this + 0x30) = (void*)&DAT_0102a304;
-    *(void**)((char*)this + 0x3c) = (void*)&DAT_0102a2f0;
-    *(void**)((char*)this + 0x48) = (void*)&DAT_0102a2d8;
-    *(void**)((char*)this + 0x58) = (void*)&DAT_0102a2b8;
-    *(void**)((char*)this + 0x60) = (void*)&DAT_0102a2a4;
-    *(void**)((char*)this + 0x68) = (void*)" rH";
-    *(void**)((char*)this + 0x70) = (void*)&DAT_0102a278;
-    *(void**)((char*)this + 0x14c) = (void*)&DAT_0102a264;
-    *(void**)((char*)this + 0x154) = (void*)&DAT_0102a250;
-    *(void**)((char*)this + 0x15c) = (void*)&DAT_0102a23c;
-    *(void**)((char*)this + 0x164) = (void*)&DAT_0102a228;
-    *(void**)((char*)this + 0x16c) = (void*)&DAT_0102a214;
-    FUN_00512bd0();
 }
 
 template <int N> struct EndianSizeTag
 {
 };
 void __cdecl BSEndian(unsigned short*, EndianSizeTag<2>);
-struct FUN_00512810_holder
-{
-    void FUN_00512810();
-};
 // Byte-swaps the 16-bit value at the start of this object by calling BSEndian.
 // @fnv 0x00512810
-void FUN_00512810_holder::FUN_00512810()
+void BIPED_MODEL_OLD::FUN_00512810()
 {
     BSEndian((unsigned short*)this, EndianSizeTag<2>());
 }
@@ -461,13 +284,9 @@ struct FUN_005e78f0_t
 {
     void FUN_004851b0(TESForm*);
 };
-struct FUN_005128e0_obj
-{
-    void FUN_005128e0(TESForm* apCopy);
-};
 // If apCopy is a TESObjectARMO, copies 0xc bytes at offset 0x178 from apCopy into this and calls FUN_004851b0(apCopy).
 // @fnv 0x005128e0
-void FUN_005128e0_obj::FUN_005128e0(TESForm* apCopy)
+void ArmorAddonOperations::CopyArmor(TESForm* apCopy)
 {
     TESObjectARMO* parmo = dynamic_cast<TESObjectARMO*>(apCopy);
     if (parmo == 0)
@@ -484,10 +303,6 @@ struct S_00487010
 {
     void FUN_00487010();
 };
-struct FUN_00480610_shell
-{
-    void InitBipedModel();
-};
 struct FUN_00479350_shell
 {
     void FUN_00479350();
@@ -502,23 +317,25 @@ struct FUN_00485680_shell
 };
 bool __cdecl FUN_00401500();
 void __cdecl AppendChunk(unsigned int size, void* apDest, unsigned int flags);
-struct FUN_00512840_shell
+// The shared biped header has no declaration for its save routine.
+struct BipedModelSaveAccess
 {
-    void FUN_00512840();
+    void Save();
 };
+
 // @fnv 0x00512840
-void FUN_00512840_shell::FUN_00512840()
+void ArmorAddonOperations::SaveArmor()
 {
     ((FUN_004855a0_shell*)this)->M();
     ((S_00487010*)((char*)this + 0x30))->FUN_00487010();
-    ((FUN_00480610_shell*)((char*)this + 0x70))->InitBipedModel();
+    ((BipedModelSaveAccess*)((char*)this + 0x70))->Save();
     ((FUN_00479350_shell*)((char*)this + 0x154))->FUN_00479350();
     ((FUN_00485e00_shell*)this)->FUN_00485e00();
     if (FUN_00401500())
-        ((ArmorData*)((char*)this + 0x178))->FUN_00535aa0();
+        ((ArmorDataEndianAccess*)((char*)this + 0x178))->Endian();
     AppendChunk(0x4d414e44, (char*)this + 0x178, 0xc);
     if (FUN_00401500())
-        ((ArmorData*)((char*)this + 0x178))->FUN_00535aa0();
+        ((ArmorDataEndianAccess*)((char*)this + 0x178))->Endian();
     ((FUN_00485680_shell*)this)->M();
 }
 
@@ -527,12 +344,8 @@ struct FUN_005e79a0_t
 {
     bool FUN_00485270(TESForm*);
 };
-struct ArmaCompare : TESObjectARMA
-{
-    bool FUN_00512940(TESForm* apCompare);
-};
 // @fnv 0x00512940
-bool ArmaCompare::FUN_00512940(TESForm* apCompare)
+bool ArmorAddonOperations::CompareArmor(TESForm* apCompare)
 {
     TESObjectARMA* pcomp = dynamic_cast<TESObjectARMA*>(apCompare);
     if (!pcomp)

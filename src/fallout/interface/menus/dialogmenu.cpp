@@ -1,12 +1,12 @@
-// fallout/interface/menus/dialogmenu.cpp: DialogMenu, TESTopicInfo, Interface, ListBoxProxy (19 functions)
+// fallout/interface/menus/dialogmenu.cpp: DialogMenu, TESTopicInfo and response list boxes (23 functions)
 
 #include "dialogmenu_decls.h"
 #include "dialogmenu_runtime.h"
 
 // @fnv 0x007628C0
-bool DialogMenu::HandleMenuInput(int button, float value)
+bool LocalDialogMenu::HandleMenuInput(int button, float value)
 {
-    if (Interface::GetSelectedTargetIndex(Interface::Dialog))
+    if (DialogMenuInterfaceCalls::GetSelectedTargetIndex(DialogMenuInterfaceCalls::Dialog))
     {
         switch (button)
         {
@@ -16,7 +16,7 @@ bool DialogMenu::HandleMenuInput(int button, float value)
                     ->ContainsTrait(ms_iDialogMenuValue))
                 HandleSelection(0, 0);
             else
-                HandleSelection(-1, m_kResponseListBox.GetSelectedTile());
+                HandleSelection(-1, m_kResponseListBox.GetHighlightedItem());
             return true;
         }
     }
@@ -25,7 +25,7 @@ bool DialogMenu::HandleMenuInput(int button, float value)
 
 // Sets the goodbye type to forced or natural based on the topic's parent rumor flag and its next response matching a conversation topic.
 // @fnv 0x00762860
-void DialogMenu::SetCurrentTopic(MenuTopic* topic)
+void LocalDialogMenu::SetCurrentTopic(MenuTopic* topic)
 {
     // The MenuTopic info/original-topic accessors share the canonical +18/+1C
     // getters; the first predicate shares TESTopic's flag predicate.
@@ -37,7 +37,7 @@ void DialogMenu::SetCurrentTopic(MenuTopic* topic)
 }
 
 // @fnv 0x00762FF0
-DialogMenu::DialogState DialogMenu::BeginDialogueResponse(bool usePrefix)
+LocalDialogMenu::DialogState LocalDialogMenu::BeginDialogueResponse(bool usePrefix)
 {
     MenuTopic* topic = pDialogueItem->GetSelectedTopic();
     DialogueResponse* response = topic ? topic->GetActiveResponse() : 0;
@@ -57,7 +57,7 @@ DialogMenu::DialogState DialogMenu::BeginDialogueResponse(bool usePrefix)
         m_pDialogueSpeaker->vfn_264(0.0f, response, true);
         m_kActorProcessResult =
             reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(m_pDialogueSpeaker)->GetLogDate())
-                ->vfn_48c(false);
+                ->GetActorSoundHandle(false);
         if (!m_bServiceDialogue)
         {
             if (usePrefix)
@@ -110,23 +110,23 @@ DialogMenu::DialogState DialogMenu::BeginDialogueResponse(bool usePrefix)
     {
         if (!m_bResponseStarted)
             Warning("MENUS: (Dialog Menu) Topic %s has no responses, which shouldn't happen.",
-                    topic ? reinterpret_cast<TESSoundFile*>(reinterpret_cast<TESResponse*>(topic)->GetNext() + 24)
+                    topic ? reinterpret_cast<TESSoundFile*>(reinterpret_cast<char*>(reinterpret_cast<TESResponse*>(topic)->GetNext()) + 24)
                                 ->GetSoundFile()
                           : "NULL");
-        if (DAT_011d9518 && m_eGoodbyeState != eForceGoodbye && !DAT_011d9518->FUN_00579200())
+        if (DAT_011d9518 && m_eGoodbyeState != eForceGoodbye && !DAT_011d9518->IsGoodbye())
         {
-            DAT_011d9518->RunResultScript(true, m_pDialogueSpeaker);
+            DAT_011d9518->RunResultScript(true, reinterpret_cast<MobileObject*>(m_pDialogueSpeaker));
             TESTopicInfo* follow;
             bool bDispositionFailure;
             follow = FindFollowupTopicInfo(DAT_011d9518, &bDispositionFailure,
-                                           reinterpret_cast<DialogueItem*>(pDialogueItem)->GetInfo(), g_thePlayer,
+                                           reinterpret_cast<LocalDialogueItem*>(pDialogueItem)->GetInfo(), g_thePlayer,
                                            false, false);
             if (follow && topic)
             {
                 BSSimpleList<MenuTopic*>* pNewTopicList =
                     reinterpret_cast<BSSimpleList<MenuTopic*>*>(new BSSimpleList<TESTopic*>);
                 MenuTopic* pNextTopic =
-                    new MenuTopic(reinterpret_cast<DialogueItem*>(topic)->GetQuest(),
+                    new MenuTopic(reinterpret_cast<LocalDialogueItem*>(topic)->GetQuest(),
                                   reinterpret_cast<TESTopic*>(reinterpret_cast<TESResponse*>(topic)->GetNext()), follow,
                                   m_pDialogueSpeaker, false);
                 pNextTopic->FillResponseList();
@@ -217,7 +217,7 @@ DialogMenu::DialogState DialogMenu::BeginDialogueResponse(bool usePrefix)
 }
 
 // @fnv 0x007638B0
-void DialogMenu::LoadTopicsList()
+void LocalDialogMenu::LoadTopicsList()
 {
     m_kResponseListBox.Clear();
     int iIndex = 0;
@@ -244,12 +244,12 @@ void DialogMenu::LoadTopicsList()
             if (reinterpret_cast<TESTopicInfo*>(reinterpret_cast<NiAVObject*>(pTopic)->GetParent())
                     ->IsChallengeFlagSet())
             {
-                MobileObject* actor = 0;
+                MobileObjectView* actor = 0;
                 if (m_pDialogueSpeaker->IsActor())
                     actor = m_pDialogueSpeaker;
                 else if (m_pDialogueSpeaker->FUN_00574900())
-                    actor = reinterpret_cast<MobileObject*>(
-                        reinterpret_cast<BGSExplosion*>(reinterpret_cast<DialogueItem*>(m_pDialogueSpeaker)
+                    actor = reinterpret_cast<MobileObjectView*>(
+                        reinterpret_cast<BGSExplosion*>(reinterpret_cast<LocalDialogueItem*>(m_pDialogueSpeaker)
                                                             ->SelectDefaultResponseList()
                                                             ->GetObjectReference())
                             ->FUN_00516bf0());
@@ -257,11 +257,11 @@ void DialogMenu::LoadTopicsList()
                     text, 512, "%s, %i", text,
                     ComputeWeightedValue(
                         g_thePlayer->actorValueOwner.GetActorValueFloatByIndex(ActorValue::ActorValue__Index_SPEECH),
-                        m_pDialogueSpeaker->IsActor() ? (float)m_pDialogueSpeaker->CalculateDisposition(g_thePlayer, 0)
-                                                      : DAT_011d0a24.Float()->f,
+                        m_pDialogueSpeaker->IsActor() ? (float)static_cast<ActorView*>(m_pDialogueSpeaker)->CalculateDisposition(g_thePlayer, 0)
+                                                      : *DAT_011d0a24.Float(),
                         reinterpret_cast<TESTopicInfo*>(reinterpret_cast<NiAVObject*>(pTopic)->GetParent())
                             ->GetNextSpeakerType()));
-                strcat_s(text, 512, "%");
+                ConcatDialogText(text, 512, "%");
             }
             else
             {
@@ -326,14 +326,14 @@ void DialogMenu::LoadTopicsList()
         if (bDisabled)
             pItemTile->FUN_0071aa60(true);
         if (iIndex <= 2)
-            iTopicHeight += (int)reinterpret_cast<TileListBoxCalls*>(pItemTile)->GetFloat(0xFB0);
+            iTopicHeight += (int)reinterpret_cast<TileListBoxCalls_dialogmenu_decls*>(pItemTile)->GetFloat(0xFB0);
         bNextTopic = pDialogueItem->AdvanceTopic();
         ++iIndex;
     }
     m_pTiles[3]->Set(0xFB0, (float)iTopicHeight, false);
     reinterpret_cast<Tile*>(reinterpret_cast<TimeGlobal*>(&m_kResponseListBox)->GetTimeStamp())
         ->Set(Tile::GetTraitID("_height"),
-              reinterpret_cast<TileListBoxCalls*>(reinterpret_cast<BSSimpleList<TESTopic*>*>(this)->GetNext())
+              reinterpret_cast<TileListBoxCalls_dialogmenu_decls*>(reinterpret_cast<BSSimpleList<TESTopic*>*>(this)->GetNext())
                   ->GetFloat(Tile::GetTraitID("_ScrollbarHeight")),
               true);
     reinterpret_cast<Tile*>(reinterpret_cast<TimeGlobal*>(&m_kResponseListBox)->GetTimeStamp())
@@ -343,10 +343,10 @@ void DialogMenu::LoadTopicsList()
 }
 
 // @fnv 0x00761A20
-Tile* DialogMenu::Create(MobileObject* speaker, TESTopic* topic, MobileObject* alternate)
+Tile* LocalDialogMenu::Create(MobileObjectView* speaker, TESTopic* topic, MobileObjectView* alternate)
 {
     InterfaceManager* pManager = FUN_004b7210();
-    Tile* existing = Tile::FindMenuById(1009);
+    Tile* existing = reinterpret_cast<Tile*>(Tile::FindMenuById(1009));
     if (existing)
         return existing;
     if (!speaker)
@@ -356,7 +356,7 @@ Tile* DialogMenu::Create(MobileObject* speaker, TESTopic* topic, MobileObject* a
         return 0;
     }
     Tile* m_pFourthMenuObject = pManager->FUN_00586150()->ReadFile("Data\\Menus\\Dialog\\dialog_menu.xml");
-    DAT_011d9510 = static_cast<DialogMenu*>(m_pFourthMenuObject->GetMenu());
+    DAT_011d9510 = static_cast<LocalDialogMenu*>(m_pFourthMenuObject->GetMenu());
     if (DAT_011d9510 && DAT_011d9510->GetClass() == (unsigned int)FUN_007620e0())
     {
         DAT_011d9510->SetTileMenu(reinterpret_cast<TileMenu*>(m_pFourthMenuObject), false);
@@ -365,8 +365,8 @@ Tile* DialogMenu::Create(MobileObject* speaker, TESTopic* topic, MobileObject* a
             Warning("MENUS: Dialogue Menu Creation Failed... Are your menu and art resources up to date?");
             return 0;
         }
-        if (reinterpret_cast<TileListBoxCalls*>(m_pFourthMenuObject)->GetFloat(0xFA7) == 6006.0 ||
-            reinterpret_cast<TileListBoxCalls*>(m_pFourthMenuObject)->GetFloat(0xFA7) == 102.0)
+        if (reinterpret_cast<TileListBoxCalls_dialogmenu_decls*>(m_pFourthMenuObject)->GetFloat(0xFA7) == 6006.0 ||
+            reinterpret_cast<TileListBoxCalls_dialogmenu_decls*>(m_pFourthMenuObject)->GetFloat(0xFA7) == 102.0)
             m_pFourthMenuObject->Set(0xFAD, Tile::GetInterfaceScale(), true);
         DAT_011d9510->m_pDialogueSpeaker = speaker;
         ImageSpaceModifierInstanceForm::Stop(TESImageSpaceModifier::GetGetHit());
@@ -377,7 +377,7 @@ Tile* DialogMenu::Create(MobileObject* speaker, TESTopic* topic, MobileObject* a
         TESPackage* pCurrentPackage = speaker->GetCurrentPackage();
         if (speaker->IsActor())
         {
-            Actor* actor = reinterpret_cast<Actor*>(speaker);
+            ActorView* actor = reinterpret_cast<ActorView*>(speaker);
             TESPackage* extra = reinterpret_cast<TESObjectREFR*>(actor)->GetExtraData()->GetPackageOverride();
             if (extra && extra->GetPackType() == 15)
                 DAT_011a008c = extra->GetPackageFloatValue();
@@ -385,16 +385,16 @@ Tile* DialogMenu::Create(MobileObject* speaker, TESTopic* topic, MobileObject* a
         if (!pCurrentPackage || pCurrentPackage->GetPackType() != 28 || speaker->vfn_2c8() != g_thePlayer)
         {
             if (speaker->IsActor() && !speaker->vfn_274(true))
-                reinterpret_cast<Actor*>(speaker)->SetSpeakingState(false);
+                reinterpret_cast<ActorView*>(speaker)->SetSpeakingState(false);
             if (speaker->vfn_274(true))
             {
-                reinterpret_cast<Actor*>(speaker)->StopMoving();
+                reinterpret_cast<ActorView*>(speaker)->StopMoving();
                 speaker->vfn_280(g_thePlayer, 0, 0, true, false, true, false, false, false);
             }
             else
                 speaker->vfn_280(g_thePlayer, 0, 0, true, false, true, false, false, false);
         }
-        MobileObject* pTopicSpeaker = speaker;
+        MobileObjectView* pTopicSpeaker = speaker;
         if (alternate)
             pTopicSpeaker = alternate;
         if (DAT_011d9510->pDialogueItem->Initialize(pTopicSpeaker, topic))
@@ -406,7 +406,7 @@ Tile* DialogMenu::Create(MobileObject* speaker, TESTopic* topic, MobileObject* a
         if (speaker->IsActor())
         {
             reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(speaker)->GetLogDate())
-                ->vfn_288(reinterpret_cast<Actor*>(speaker), 2);
+                ->SetProcessTarget(reinterpret_cast<MobileObject*>(speaker), 2);
             speaker->vfn_278(true);
         }
         DAT_011d9510->m_bPauseRequested = g_thePlayer->FUN_004eaf60();
@@ -419,7 +419,7 @@ Tile* DialogMenu::Create(MobileObject* speaker, TESTopic* topic, MobileObject* a
         {
             float distance = (*speaker->GetPos() - *g_thePlayer->GetPos()).Length();
             DAT_011d9510->m_pDialogueDepthOfFieldModifier = ImageSpaceModifierInstanceDOF::CreateAndRegister(
-                distance, DAT_011d46fc.Float()->f, ImageSpaceModifierInstanceDOF::Back, 0.0f, 0.0f, 0.0f);
+                distance, *DAT_011d46fc.Float(), ImageSpaceModifierInstanceDOF::DOF_BACK, 0.0f, 0.0f, 0.0f);
             DAT_011d9510->m_pDialogueDepthOfFieldModifier->FUN_005bbd60(true);
         }
         g_thePlayer->SetAimingWeapon(false, false, false);
@@ -432,11 +432,11 @@ Tile* DialogMenu::Create(MobileObject* speaker, TESTopic* topic, MobileObject* a
         ms_iDialogMenuValue = Tile::GetTraitID("_ShowingText");
         DAT_011d9504 = Tile::GetTraitID("_current_value");
         bool bSubtitles =
-            DAT_011d8934.Bool()->b || speaker->IsActor() && reinterpret_cast<Actor*>(speaker)->ShouldShowSubtitles();
+            *DAT_011d8934.Bool() || speaker->IsActor() && reinterpret_cast<ActorView*>(speaker)->ShouldShowSubtitles();
         reinterpret_cast<Tile*>(reinterpret_cast<BSSimpleList<TESTopic*>*>(DAT_011d9510)->GetNext())
             ->Set(Tile::GetTraitID("_ShowSubtitles"), bSubtitles);
         DAT_011d9510->m_pTiles[1]->Set(0xFC4, speaker->GetFullName(), true);
-        if (FUN_005d4a40() && !FUN_004b7210()->tutorial.FUN_00718840(17))
+        if (FUN_005d4a40() && !FUN_004b7210()->kTutorialManager.HasBeenShown(17))
             DAT_011d9510->m_bSuppressDialogueText = true;
         else
             DAT_011d9510->BeginDialogueResponse(false);
@@ -457,17 +457,17 @@ Tile* DialogMenu::Create(MobileObject* speaker, TESTopic* topic, MobileObject* a
 
 // Advances the dialogue camera zoom/speech state machine, closing the menu and updating the player's focus and camera each frame.
 // @fnv 0x00762950
-void DialogMenu::UpdateDialog()
+void LocalDialogMenu::UpdateDialog()
 {
-    if (bPaused || Interface::IsConsoleActive())
+    if (bPaused || DialogMenuInterfaceCalls::IsConsoleActive())
         return;
     if (m_eDialogState != eCameraZoomOut)
     {
         if (!reinterpret_cast<PlayerQuestData*>(m_pDialogueSpeaker)->GetLogDate() ||
             reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(m_pDialogueSpeaker)->GetLogDate())
-                    ->vfn_610() == 2 ||
+                    ->GetCurrentFadeState() == 2 ||
             reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(m_pDialogueSpeaker)->GetLogDate())
-                    ->vfn_610() >= 4)
+                    ->GetCurrentFadeState() >= 4)
         {
             Close();
             m_fCameraTransitionTime = 0.0f;
@@ -489,7 +489,7 @@ void DialogMenu::UpdateDialog()
         if (m_bSuppressDialogueText && m_fCameraTransitionTime == 0.0)
         {
             m_bSuppressDialogueText =
-                FUN_004b7210()->tutorial.ShowMessage(17, FUN_007620e0(), (unsigned int)DAT_011d3ee0.Float()->f * 1400);
+                FUN_004b7210()->kTutorialManager.ShowMessage(17, FUN_007620e0(), (unsigned int)*DAT_011d3ee0.Float() * 1400);
             if (!m_bSuppressDialogueText)
             {
                 if (m_pDialogueSpeaker)
@@ -500,7 +500,7 @@ void DialogMenu::UpdateDialog()
         else if (!m_bSuppressDialogueText && m_fCameraTransitionAlpha >= 0.1)
             reinterpret_cast<Tile*>(reinterpret_cast<BSSimpleList<TESTopic*>*>(this)->GetNext())->Set(DAT_011d9508, 1);
         m_fCameraTransitionTime += g_timeGlobal.FUN_0084d030();
-        m_fCameraTransitionAlpha = FUN_0040ebd0(m_fCameraTransitionTime / DAT_011d3ee0.Float()->f, 1.0f);
+        m_fCameraTransitionAlpha = FUN_0040ebd0(m_fCameraTransitionTime / *DAT_011d3ee0.Float(), 1.0f);
         if (m_fCameraTransitionAlpha == 1.0)
         {
             if (!m_bSuppressDialogueText)
@@ -508,7 +508,7 @@ void DialogMenu::UpdateDialog()
                 m_fCameraTransitionTime = 0.0f;
                 m_eDialogState = ePlaySpeech;
             }
-            else if (FUN_004b7210()->tutorial.FUN_00718840(17) && Interface::GetSelectedTargetIndex(Interface::Dialog))
+            else if (FUN_004b7210()->kTutorialManager.HasBeenShown(17) && DialogMenuInterfaceCalls::GetSelectedTargetIndex(DialogMenuInterfaceCalls::Dialog))
             {
                 m_fCameraTransitionTime = 0.0f;
                 reinterpret_cast<Tile*>(reinterpret_cast<BSSimpleList<TESTopic*>*>(this)->GetNext())
@@ -540,7 +540,7 @@ void DialogMenu::UpdateDialog()
             if (DAT_011d9594 == 0)
                 DAT_011d9594 = g_timeGlobal.GetTimeStamp();
             if (g_timeGlobal.GetTimeStamp() - DAT_011d9594 >= 500.0)
-                Actor::SetActorDialogueState(reinterpret_cast<TESForm*>(m_pDialogueSpeaker)->GetFormID(), true);
+                ActorView::SetActorDialogueState(reinterpret_cast<TESForm*>(m_pDialogueSpeaker)->GetFormID(), true);
         }
         else
         {
@@ -563,7 +563,7 @@ void DialogMenu::UpdateDialog()
         break;
     case eCameraZoomOut:
         m_fCameraTransitionTime += g_timeGlobal.FUN_0084d030();
-        m_fCameraTransitionAlpha = 1.0f - FUN_0040ebd0(m_fCameraTransitionTime / DAT_011d243c.Float()->f, 1.0f);
+        m_fCameraTransitionAlpha = 1.0f - FUN_0040ebd0(m_fCameraTransitionTime / *DAT_011d243c.Float(), 1.0f);
         if (m_fCameraTransitionAlpha == 0.0)
         {
             DAT_011f21d0 = true;
@@ -582,18 +582,18 @@ void DialogMenu::UpdateDialog()
                               (float)(m_fCameraTransitionAlpha * (DAT_011a008c == 0.0 ? 1.0 : DAT_011a008c / 100.0)),
                               m_eDialogState == eCameraZoomOut);
     g_thePlayer->UpdateCamera(false, false);
-    m_pDialogueDepthOfFieldModifier->FUN_0063f790(DAT_011d318c.Float()->f * m_fCameraTransitionAlpha);
+    m_pDialogueDepthOfFieldModifier->FUN_0063f790(*DAT_011d318c.Float() * m_fCameraTransitionAlpha);
 }
 
 // @fnv 0x00762160
-void DialogMenu::Close()
+void LocalDialogMenu::Close()
 {
     if (DAT_011d9510)
     {
-        MobileObject* speaker = DAT_011d9510->m_pDialogueSpeaker;
-        Actor* actor = 0;
+        MobileObjectView* speaker = DAT_011d9510->m_pDialogueSpeaker;
+        ActorView* actor = 0;
         if (speaker->IsActor())
-            actor = static_cast<Actor*>(speaker);
+            actor = static_cast<ActorView*>(speaker);
         TESTopicInfo* pInfo = DAT_011d9518;
         bool runEndScript =
             DAT_011d9510->m_eGoodbyeState == eForceGoodbye || DAT_011d9510->m_eGoodbyeState == eInvalidChoiceList;
@@ -610,31 +610,31 @@ void DialogMenu::Close()
         DAT_011d9514 = false;
         if (reinterpret_cast<PlayerQuestData*>(speaker)->GetLogDate())
         {
-            reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(speaker)->GetLogDate())->vfn_2ec(0);
-            if (actor && !reinterpret_cast<PlayerCharacter*>(actor)->HasCombatState())
+            reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(speaker)->GetLogDate())->SetDialogueEmotion(DIALOGUE_EMOTION_DE_NEUTRAL);
+            if (actor && !reinterpret_cast<PlayerCharacterView*>(actor)->HasCombatState())
                 reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(actor)->GetLogDate())
-                    ->vfn_24(actor, true);
+                    ->CheckForNewPackage(reinterpret_cast<Actor*>(actor), true);
         }
         if (actor && reinterpret_cast<PlayerQuestData*>(actor)->GetLogDate())
-            reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(actor)->GetLogDate())->vfn_650(true);
+            reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(actor)->GetLogDate())->RestorePreviousReference(true);
         if (reinterpret_cast<PlayerQuestData*>(speaker)->GetLogDate() && actor && !actor->vfn_22c(false) &&
             !actor->vfn_2e8())
             reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(speaker)->GetLogDate())
-                ->vfn_4b4(DAT_011cd450.Float()->f);
+                ->UpdateActorProcess(*DAT_011cd450.Float());
         if (actor)
             actor->StopMoving();
         g_thePlayer->UpdatePlayerState();
-        reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(g_thePlayer)->GetLogDate())->vfn_650(true);
-        if (pInfo && runEndScript && !pInfo->FUN_00579200())
+        reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(g_thePlayer)->GetLogDate())->RestorePreviousReference(true);
+        if (pInfo && runEndScript && !pInfo->IsGoodbye())
         {
-            pInfo->RunResultScript(true, speaker);
+            pInfo->RunResultScript(true, reinterpret_cast<MobileObject*>(speaker));
             pInfo->AddTopicList();
             pInfo = 0;
-            if (actor && !reinterpret_cast<PlayerCharacter*>(actor)->HasCombatState() &&
+            if (actor && !reinterpret_cast<PlayerCharacterView*>(actor)->HasCombatState() &&
                 reinterpret_cast<PlayerQuestData*>(actor)->GetLogDate() &&
                 reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(actor)->GetLogDate())
-                    ->vfn_24(actor, true))
-                reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(actor)->GetLogDate())->vfn_524(actor);
+                    ->CheckForNewPackage(reinterpret_cast<Actor*>(actor), true))
+                reinterpret_cast<BaseProcess*>(reinterpret_cast<PlayerQuestData*>(actor)->GetLogDate())->UpdateCurrentPackage(reinterpret_cast<Actor*>(actor));
         }
         reinterpret_cast<Tile*>(reinterpret_cast<BSSimpleList<TESTopic*>*>(DAT_011d9510)->GetNext())->Set(0xFA3, 1);
         DAT_011d9510->LoadMenuData();
@@ -644,7 +644,7 @@ void DialogMenu::Close()
 }
 
 // @fnv 0x007624f0
-void DialogMenu::HandleSelection(int id, Tile* tile)
+void LocalDialogMenu::HandleSelection(int id, Tile* tile)
 {
     bool bSpeechChallenge = false;
     if (m_eDialogState == eCameraZoomIn || m_eDialogState == eCameraZoomOut)
@@ -657,7 +657,7 @@ void DialogMenu::HandleSelection(int id, Tile* tile)
             return;
     }
     if (id == -1 && m_kResponseListBox.ContainsKey(tile) &&
-        pDialogueItem->FUN_0083e430((int)reinterpret_cast<TileListBoxCalls*>(tile)->GetFloat(0xFAC)))
+        pDialogueItem->FUN_0083e430((int)reinterpret_cast<TileListBoxCalls_dialogmenu_decls*>(tile)->GetFloat(0xFAC)))
     {
         MenuTopic* pTopic = pDialogueItem->GetSelectedTopic();
         bool wasNew = pTopic->m_bInfoHasBeenRead;
@@ -739,17 +739,12 @@ BGSPerk* TESTopicInfo::GetPerk()
 // @fnv 0x007627c0
 bool TESTopicInfo::IsChallengeFlagSet()
 {
-    return (challengeFlags & 0x80) ? true : false;
+    return (m_Data.flags & 0x80) ? true : false;
 }
-
-struct FUN_007620f0_shell : public DialogMenu
-{
-    bool FUN_007620f0();
-};
 
 // Returns true only if all four pointers stored at offset 0x30 in this DialogMenu are non-null.
 // @fnv 0x007620f0
-bool FUN_007620f0_shell::FUN_007620f0()
+bool LocalDialogMenu::FUN_007620f0()
 {
     for (int iIndex = 0; iIndex < 4; ++iIndex)
     {
@@ -759,35 +754,19 @@ bool FUN_007620f0_shell::FUN_007620f0()
     return true;
 }
 
-struct FUN_00763fd0_shell : public TESTopicInfo
-{
-    bool IsFlagSet();
-};
-
 // @fnv 0x00763fd0
-bool FUN_00763fd0_shell::IsFlagSet()
+bool TESTopicInfo::IsFlagSet()
 {
     return (bool)(*reinterpret_cast<char*>(reinterpret_cast<char*>(this) + 0x26) & 2);
 }
 
-struct ListX
-{
-    ~ListX();
-};
-namespace p07 {
-void __cdecl FUN_007211c0(void*);
-struct FUN_007643c0
-{
-    ListX list;
-    virtual ~FUN_007643c0();
-    void FUN_007646d0();
-};
+void __cdecl RemoveDialogListBoxFromRegistry(void*);
+
 // @fnv 0x007643c0
-FUN_007643c0::~FUN_007643c0()
+DialogListBox::~DialogListBox()
 {
-    FUN_007646d0();
-    FUN_007211c0(this);
-}
+    ClearItems();
+    RemoveDialogListBoxFromRegistry(this);
 }
 
 // @fnv 0x007620e0
@@ -797,16 +776,12 @@ int __cdecl FUN_007620e0()
 }
 
 void __cdecl _Deallocate(void*);
-struct Holder00761930
-{
-    void FUN_00761960();
-    void* FUN_00761930(unsigned int);
-};
-// Calls FUN_00761960, then deallocates this when flags has bit 0 set, and returns this.
+
+// Destroys the dialogue menu, optionally frees it, and returns its address.
 // @fnv 0x00761930
-void* Holder00761930::FUN_00761930(unsigned int flags)
+void* LocalDialogMenu::ScalarDeletingDestructor(unsigned int flags)
 {
-    FUN_00761960();
+    this->~LocalDialogMenu();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -834,17 +809,13 @@ struct BSSimpleList_WeatherEntry
     void* m_next;
     void Sort(int(__cdecl*)(WeatherEntry*, WeatherEntry*)) const;
 };
-struct ListBoxProxy : public ListBoxBase
-{
-    BSSimpleList_WeatherEntry list;
-    void SortAndSynchronize(int(__cdecl*)(ListBoxItem_int_*, ListBoxItem_int_*));
-};
+
 // Sorts the list using the given comparison function, then synchronizes the list box.
 // @fnv 0x00764900
-void ListBoxProxy::SortAndSynchronize(int(__cdecl* apCompareFn)(ListBoxItem_int_*, ListBoxItem_int_*))
+void DialogListBox::SortAndSynchronize(int(__cdecl* apCompareFn)(ListBoxItem_int_*, ListBoxItem_int_*))
 {
-    list.Sort(reinterpret_cast<int(__cdecl*)(WeatherEntry*, WeatherEntry*)>(apCompareFn));
-    reinterpret_cast<ListBox_int_*>(this)->Synchronize();
+    reinterpret_cast<BSSimpleList_WeatherEntry*>(reinterpret_cast<char*>(this) + 4)->Sort(reinterpret_cast<int(__cdecl*)(WeatherEntry*, WeatherEntry*)>(apCompareFn));
+    Synchronize();
 }
 
 // @fnv 0x00763ff0
@@ -864,33 +835,18 @@ void FUN_00763ff0()
     }
 }
 
-struct FUN_00ad88b0_h
-{
-    bool FUN_00ad88b0();
-};
-
-struct BSSoundHandleEx
-{
-    bool Play(bool);
-};
-
-struct FUN_00764200_shell
-{
-    void SetActive(bool b);
-};
-
 // @fnv 0x00764200
-void FUN_00764200_shell::SetActive(bool abActive)
+void LocalDialogMenu::SetActive(bool abActive)
 {
     if (((const unsigned char*)this)[0x131] && !abActive)
     {
-        ((BSSoundHandleEx*)((char*)this + 0x74))->Play(false);
+        m_kActorProcessResult.Play(false);
         ((unsigned char*)this)[0x131] = 0;
         ((int*)this)[0x28 / 4] = ((int*)this)[0x134 / 4];
     }
     else if (!((const unsigned char*)this)[0x131] && abActive)
     {
-        ((FUN_00ad88b0_h*)((char*)this + 0x74))->FUN_00ad88b0();
+        m_kActorProcessResult.Pause();
         ((unsigned char*)this)[0x131] = 1;
         ((int*)this)[0x134 / 4] = ((int*)this)[0x28 / 4];
         ((int*)this)[0x28 / 4] = 2;
@@ -899,32 +855,9 @@ void FUN_00764200_shell::SetActive(bool abActive)
 
 void __cdecl FUN_005293f0(void*);
 void __cdecl FUN_0083e510();
-struct FUN_00761960 : Menu
-{
-    DialogMenu::DialogState m_eDialogState;
-    DialogMenu::GoodbyeState m_eGoodbyeState;
-    Tile* m_pTiles[4];
-    ListBox_int_ m_kResponseListBox;
-    TopicMenuController* pDialogueItem;
-    SoundPlaybackHandle m_kActorProcessResult;
-    MobileObject* m_pDialogueSpeaker;
-    char m_cCurrentTopicLabel[128];
-    bool m_bResponseStarted;
-    unsigned char layoutPadding105[3];
-    float m_fCameraTransitionTime;
-    unsigned int m_uiDialogMenuFlags;
-    DialogMenuPoint2 m_kDialogMenuPoint1, m_kDialogMenuPoint2, m_kDialogMenuPoint3;
-    float m_fCameraTransitionAlpha;
-    ImageSpaceModifierInstanceDOF* m_pDialogueDepthOfFieldModifier;
-    bool m_bPauseRequested, bPaused;
-    unsigned char layoutPadding132[2];
-    DialogMenu::DialogState m_eStateBeforePause;
-    bool m_bServiceDialogue, m_bSuppressDialogueText, m_bServiceMenuRequested;
-    unsigned char layoutPadding13B[1];
-    ~FUN_00761960();
-};
+
 // @fnv 0x00761960
-FUN_00761960::~FUN_00761960()
+LocalDialogMenu::~LocalDialogMenu()
 {
     DAT_011d9514 = false;
     if (DAT_011d9510->m_pDialogueDepthOfFieldModifier)
@@ -1127,18 +1060,8 @@ struct SpeakerStandIn
 
 struct TopicStandIn : public TESTopic
 {
-    TESTopicInfo* FindInfo(MobileObject* speaker, PlayerCharacter* player);
+    TESTopicInfo* FindInfo(MobileObjectView* speaker, PlayerCharacterView* player);
     TESQuest* GetQuestForInfo(TESTopicInfo* info);
-};
-
-struct MenuTopicStandIn : public MenuTopic
-{
-    void* GetResponseAt(int index);
-};
-
-struct DialogMenuStandIn : public DialogMenu
-{
-    void RefreshTopics();
 };
 
 // If a dialogue menu exists, clears its flag, finds the topic's info for the player, speaks the first response, and refreshes the topics.
@@ -1155,54 +1078,27 @@ void StartDialogueForTopic(TESTopic* topic)
                                                  DAT_011d9510->m_pDialogueSpeaker, false);
             menuTopic->FillResponseList();
             ((SpeakerStandIn*)DAT_011d9510->m_pDialogueSpeaker)
-                ->SayResponse(0.0f, ((MenuTopicStandIn*)menuTopic)->GetResponseAt(0));
+                ->SayResponse(0.0f, menuTopic->GetActiveResponse(0));
             ((SpeakerStandIn*)DAT_011d9510->m_pDialogueSpeaker)->bDialogueStarted = true;
             delete menuTopic;
         }
-        ((DialogMenuStandIn*)DAT_011d9510)->RefreshTopics();
+        DAT_011d9510->RefreshTopics();
     }
 }
 
-struct FUN_007240c0
-{
-    virtual void vfn00();
-    FUN_007240c0();
-};
-struct FUN_0096a2d0
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    FUN_0096a2d0();
-    ~FUN_0096a2d0();
-};
-struct FUN_007642f0 : FUN_007240c0, FUN_0096a2d0
-{
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned short unk1c;
-    unsigned short unk1e;
-    float unk20;
-    float unk24;
-    float unk28;
-    unsigned short unk2c;
-    FUN_007642f0();
-    void FUN_007a1950(int a, int b);
-};
-void __cdecl AddToHeadList(FUN_007642f0* object);
+void __cdecl AddToHeadList(DialogListBox* object);
 // @fnv 0x007642f0
-FUN_007642f0::FUN_007642f0()
+DialogListBox::DialogListBox()
 {
-    unk14 = 0;
-    unk10 = 0;
-    unk0c = 0;
-    unk18 = 0;
-    unk2c = 0;
-    unk1c = 0;
-    unk28 = 0.0f;
-    unk24 = 0.0f;
-    unk20 = 0.0f;
-    FUN_007a1950(0, 1);
+    m_pHighlightedTile = 0;
+    m_pSelectedTile = 0;
+    m_pListTile = 0;
+    pTemplateName = 0;
+    usFlags = 0;
+    m_usSelectedIndex = 0;
+    m_fThirdListValue = 0.0f;
+    m_fSecondListValue = 0.0f;
+    m_fFirstListValue = 0.0f;
+    SetSelectionMode(0, 1);
     AddToHeadList(this);
 }

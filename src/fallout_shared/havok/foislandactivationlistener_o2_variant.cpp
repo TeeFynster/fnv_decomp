@@ -4,24 +4,13 @@
 
 // src/fallout_shared/havok/foislandactivationlistener.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/foislandactivationlistener.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct hkpIslandActivationListener
-{
-    void InitPtr();
-    void* FUN_006241e0(unsigned int);
-};
+#include "../../../include/hkpIslandActivationListener.h"
+#include "../../../include/NiPoint3.h"
+
 extern "C" void __cdecl _Deallocate(void*);
 extern int DAT_0104de10;
-struct FUN_00624210_shell
-{
-    int* m_ptr;
-    void InitPtr();
-};
 extern int DAT_011f942c;
 void FUN_00624bd0();
-struct NiPoint3
-{
-    float x, y, z;
-};
 struct hkVector4;
 struct NiTransform;
 struct TopicH

@@ -1,6 +1,26 @@
-// bgsimpactdataset.cpp: BGSImpactDataSet, SomeClass, ImpactDataSetCopy, BGSImpactDataSet_Cmp and more (25 functions)
+// bgsimpactdataset.cpp: BGSImpactDataSet, ImpactSwap and related routines (25 functions)
 
-#include "bgsimpactdataset_decls.h"
+#include "../include/BGSImpactData.h"
+#include "../include/BGSImpactDataSet.h"
+#include "../include/BGSPreloadable.h"
+#include "../include/TESFile.h"
+#include "../include/BGSTextureSet.h"
+#include "../include/DummyPointerMap.h"
+#include "../include/TESModel.h"
+#include "../include/NiTPointerMap.h"
+#include "../include/TESDataHandler.h"
+#include "../include/TESForm.h"
+
+class ImpactSwap
+{
+  public:
+    const char* GetAltFootstepMaterialName(int);
+    BGSImpactData* GetSwappedImpactData(int, BGSImpactData*);
+};
+extern ImpactSwap* DAT_011ca834;
+void __cdecl SetGlobalPointerAtOffset(int, const char*);
+void __cdecl FUN_00837500();
+
 extern "C" void* __cdecl memset(void*, int, unsigned int);
 
 // @fnv 0x0058e810
@@ -16,31 +36,10 @@ void BGSImpactDataSet::ResetFormData()
     memset(m_apImpactData, 0, sizeof(m_apImpactData));
 }
 
-#include "bgsimpactdataset_TESFile.h"
 #include <malloc.h>
 void* __cdecl operator new(unsigned int);
-class DataHandler
-{
-  public:
-    bool DoAddForm(TESForm*);
-};
-extern DataHandler* g_dataHandler;
+extern TESDataHandler* g_dataHandler;
 int __cdecl Warning(const char*, ...);
-class TESModel : public BaseFormComponent
-{
-  public:
-    unsigned int GetModelLength() const;
-};
-class BGSTextureSet
-{
-  public:
-    void LoadTextures(int priority, QueuedFile* file, bool noCache);
-};
-class BGSImpactData : public TESForm, public TESModel
-{
-  public:
-    BGSTextureSet* GetDecalTextureSet() const;
-};
 class ModelLoader
 {
   public:
@@ -62,7 +61,7 @@ void BGSImpactDataSet::CacheImpactDataSet()
         ms_pImpactDataSet = new BGSImpactDataSet;
         ms_pImpactDataSet->SetRefID(0x276, true);
         ms_pImpactDataSet->SetEditorID_AtRuntime("DefaultImpactDataSet");
-        g_dataHandler->DoAddForm(ms_pImpactDataSet);
+        g_dataHandler->AddFormToDataHandler(ms_pImpactDataSet);
     }
 }
 
@@ -70,7 +69,9 @@ void BGSImpactDataSet::CacheImpactDataSet()
 // @fnv 0x0058ec00
 bool BGSImpactDataSet::Load(TESFile* file)
 {
-    if (file->GetTESForm() != 0x5f)
+    // This record loader uses the original full-register form-type return ABI.
+    typedef ENUM_FORM_ID (TESFile::*GetTESFormFn)();
+    if ((file->*reinterpret_cast<GetTESFormFn>(&TESFile::GetTESForm))() != 0x5f)
         return false;
     LoadRecordHeader(file);
     unsigned int uiChunkID;
@@ -126,14 +127,14 @@ void BGSImpactDataSet::InitItem()
 }
 
 // @fnv 0x0058ef10
-void BGSImpactDataSet::QueueResourceLoad(int priority, QueuedFile* pQueuedFile)
+void BGSImpactDataSet::QueueResourceLoad(IO_TASK_PRIORITY priority, QueuedFile* pQueuedFile)
 {
     for (int i = 0; i < 12; ++i)
     {
         BGSImpactData* data = GetImpactDataForMaterial(i);
         if (data)
         {
-            if (data->GetModelLength())
+            if (static_cast<const BGSImpactData*>(data)->GetModelLength())
                 g_modelLoader->ProcessModelRequest(data, priority, pQueuedFile, true, true, false, false);
             BGSTextureSet* textureSet = data->GetDecalTextureSet();
             if (textureSet)
@@ -180,67 +181,26 @@ void* FUN_0040f2a0::DeleteThis(unsigned int flags)
     return this;
 }
 
-struct FUN_0058e890
-{
-    void FUN_0058e8c0();
-    void* DeleteThis(unsigned int flags);
-};
-// Calls the object's cleanup routine, frees the object when bit 0 of flags is set, and returns the object pointer.
-// @fnv 0x0058e890
-void* FUN_0058e890::DeleteThis(unsigned int flags)
-{
-    FUN_0058e8c0();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
-struct Base5a
-{
-    virtual ~Base5a();
-    char d[0x14];
-};
-struct Preload
-{
-    virtual void f();
-};
-struct FUN_0058e8c0 : Base5a, Preload
-{
-    ~FUN_0058e8c0();
-};
-// Destructor for the Preload-derived object; empty body, only the base destructors run.
 // @fnv 0x0058e8c0
-FUN_0058e8c0::~FUN_0058e8c0()
+BGSImpactDataSet::~BGSImpactDataSet()
 {}
 
-struct FUN_004855a0
-{
-    void M();
-};
-struct FUN_00485680
-{
-    void M();
-};
 void __cdecl FUN_00485710(unsigned int, unsigned int*, unsigned int);
-struct FUN_0058ed50
-{
-    void Save();
-};
 // @fnv 0x0058ed50
-void FUN_0058ed50::Save()
+void BGSImpactDataSet::Save()
 {
     int iIndex;
     unsigned int auiFormIDs[12];
-    ((FUN_004855a0*)this)->M();
+    TESForm::FUN_004855a0();
     for (iIndex = 0; iIndex < 12; iIndex++)
     {
-        if (((TESForm**)((char*)this + 0x1c))[iIndex])
-            auiFormIDs[iIndex] = ((TESForm**)((char*)this + 0x1c))[iIndex]->GetFormID();
+        if (m_apImpactData[iIndex])
+            auiFormIDs[iIndex] = m_apImpactData[iIndex]->GetFormID();
         else
             auiFormIDs[iIndex] = 0;
     }
     FUN_00485710(0x41544144, auiFormIDs, 12);
-    ((FUN_00485680*)this)->M();
+    TESForm::FUN_00485680();
 }
 
 struct FUN_0058efd0
@@ -257,13 +217,9 @@ FUN_0058efd0::FUN_0058efd0()
     memset(b, 0, sizeof(b));
 }
 
-struct FUN_0058f010_Item
-{
-    virtual ~FUN_0058f010_Item();
-};
 // Deletes each of the 12 item pointers in the array and sets them to null.
 // @fnv 0x0058f010
-void __fastcall FUN_0058f010(FUN_0058f010_Item** apItems)
+void __fastcall FUN_0058f010(NiTPointerMap<BGSImpactData*, BGSImpactData*>** apItems)
 {
     for (int i = 0; i < 12; i++)
     {
@@ -282,17 +238,12 @@ struct ImpactDataSwapExtraData : ContainerItemExtraFileData
     BGSImpactData* orig;
     BGSImpactData* repl;
 };
-struct MapX
-{
-    void* GetFirstPos();
-    void GetNext(void*&, BGSImpactData*&, BGSImpactData*&);
-};
 bool __cdecl FUN_00401500();
 void __cdecl AppendChunk(unsigned int, void*, unsigned int);
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
 struct FUN_0058f080
 {
-    MapX* m_pData[12];
+    NiTPointerMap<BGSImpactData*, BGSImpactData*>* m_pData[12];
     void Save();
 };
 // @fnv 0x0058f080
@@ -365,10 +316,6 @@ void FUN_0058f180::Load(TESFile* apFile)
 }
 }  // namespace fnv_0058f180
 
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&) const;
-};
 struct FUN_0058f6f0
 {
     DummyPointerMap* m[1];
@@ -380,7 +327,7 @@ unsigned int FUN_0058f6f0::Get(unsigned int auiIndex, unsigned int auiDefault)
 {
     unsigned int result = 0;
     if (m[auiIndex])
-        m[auiIndex]->GetAt(auiDefault, result);
+        static_cast<const DummyPointerMap*>(m[auiIndex])->GetAt(auiDefault, result);
     else
         result = auiDefault;
     return result;
@@ -435,10 +382,6 @@ void FUN_006233c0::GetImpactDataForMaterial(int aeType)
     }
 }
 
-struct NiTMap
-{
-    void GetNext(void*&, unsigned int&, void*&);
-};
 
 int __cdecl _memcmp(const void*, const void*, unsigned int);
 
@@ -458,15 +401,15 @@ bool FUN_0058f5c0_shell::IsImpactSwapDifferent(ImpactSwap* apSwap)
 
     for (i = 0; i < 12; ++i)
     {
-        if (reinterpret_cast<MapX**>(this)[i] && reinterpret_cast<MapX**>(apSwap)[i])
+        if (reinterpret_cast<NiTPointerMap<BGSImpactData*, BGSImpactData*>**>(this)[i] && reinterpret_cast<NiTPointerMap<BGSImpactData*, BGSImpactData*>**>(apSwap)[i])
         {
             void* iter;
 
-            if (reinterpret_cast<TESForm*>(reinterpret_cast<MapX**>(this)[i])->GetFormID() !=
-                reinterpret_cast<TESForm*>(reinterpret_cast<MapX**>(apSwap)[i])->GetFormID())
+            if (reinterpret_cast<TESForm*>(reinterpret_cast<NiTPointerMap<BGSImpactData*, BGSImpactData*>**>(this)[i])->GetFormID() !=
+                reinterpret_cast<TESForm*>(reinterpret_cast<NiTPointerMap<BGSImpactData*, BGSImpactData*>**>(apSwap)[i])->GetFormID())
                 return true;
 
-            iter = reinterpret_cast<MapX**>(this)[i]->GetFirstPos();
+            iter = reinterpret_cast<NiTPointerMap<BGSImpactData*, BGSImpactData*>**>(this)[i]->GetFirstPos();
             while (iter)
             {
                 BGSImpactData* pnewdata;
@@ -475,7 +418,7 @@ bool FUN_0058f5c0_shell::IsImpactSwapDifferent(ImpactSwap* apSwap)
 
                     pnewdata = 0;
                     polddata = 0;
-                    reinterpret_cast<NiTMap*>(reinterpret_cast<MapX**>(this)[i])
+                    reinterpret_cast<NiTPointerMap<unsigned int, void*>*>(reinterpret_cast<NiTPointerMap<BGSImpactData*, BGSImpactData*>**>(this)[i])
                         ->GetNext(iter, reinterpret_cast<unsigned int&>(pnewdata), reinterpret_cast<void*&>(polddata));
 
                     if (apSwap->GetSwappedImpactData(i, pnewdata) != polddata)
@@ -483,7 +426,7 @@ bool FUN_0058f5c0_shell::IsImpactSwapDifferent(ImpactSwap* apSwap)
                 }
             }
         }
-        else if (reinterpret_cast<MapX**>(this)[i] || reinterpret_cast<MapX**>(apSwap)[i])
+        else if (reinterpret_cast<NiTPointerMap<BGSImpactData*, BGSImpactData*>**>(this)[i] || reinterpret_cast<NiTPointerMap<BGSImpactData*, BGSImpactData*>**>(apSwap)[i])
         {
             return true;
         }
@@ -497,16 +440,6 @@ bool FUN_0058f5c0_shell::IsImpactSwapDifferent(ImpactSwap* apSwap)
 }
 
 void __cdecl operator delete(void*);
-
-struct RefObj
-{
-    unsigned int _ref_0084e3a0();
-};
-
-struct ImpactMap
-{
-    virtual ~ImpactMap();
-};
 
 struct SomeClass
 {
@@ -543,12 +476,12 @@ void SomeClass::RemapImpactData(TESForm* apForm)
         if (m_pData[i6])
         {
             j_ = 0;
-            count4 = ((RefObj*)m_pData[i6])->_ref_0084e3a0();
+            count4 = ((TESForm*)m_pData[i6])->GetFormID();
             entries3 = new Entry[count4];
-            posVal = ((MapX*)m_pData[i6])->GetFirstPos();
+            posVal = ((NiTPointerMap<BGSImpactData*, BGSImpactData*>*)m_pData[i6])->GetFirstPos();
             while (posVal)
             {
-                ((MapX*)m_pData[i6])->GetNext(posVal, entries3[j_].oldImpact, entries3[j_].newImpact);
+                ((NiTPointerMap<BGSImpactData*, BGSImpactData*>*)m_pData[i6])->GetNext(posVal, entries3[j_].oldImpact, entries3[j_].newImpact);
                 j_++;
             }
             ((NiTPointerMap<unsigned int, unsigned int>*)m_pData[i6])->RemoveAll();
@@ -589,9 +522,9 @@ void SomeClass::RemapImpactData(TESForm* apForm)
 
             delete[] entries3;
 
-            if (((RefObj*)m_pData[i6])->_ref_0084e3a0() == 0)
+            if (((TESForm*)m_pData[i6])->GetFormID() == 0)
             {
-                delete ((ImpactMap*)m_pData[i6]);
+                delete ((NiTPointerMap<BGSImpactData*, BGSImpactData*>*)m_pData[i6]);
                 m_pData[i6] = 0;
             }
         }
@@ -662,32 +595,20 @@ int FUN_0058e8f0(int value)
 }
 
 #include <string.h>
-struct S004851b0
-{
-    void FUN_004851b0(TESForm*);
-};
-struct ImpactDataSetCopy : BGSImpactDataSet
-{
-    void FUN_0058eb30(TESForm* apCopy);
-};
-// Copies impact data from apCopy into this ImpactDataSetCopy after casting it to BGSImpactDataSet.
+// Copies impact data from apCopy after casting it to BGSImpactDataSet.
 // @fnv 0x0058eb30
-void ImpactDataSetCopy::FUN_0058eb30(TESForm* apCopy)
+void BGSImpactDataSet::Copy(TESForm* apCopy)
 {
     BGSImpactDataSet* pSource = dynamic_cast<BGSImpactDataSet*>(apCopy);
     if (!pSource)
         return;
-    reinterpret_cast<S004851b0*>(this)->FUN_004851b0(pSource);
+    TESForm::CopyFrom(pSource);
     memcpy(m_apImpactData, pSource->m_apImpactData, sizeof(m_apImpactData));
 }
 
-struct BGSImpactDataSet_Cmp
-{
-    bool FUN_0058eb90(TESForm* apCompare);
-};
 // Returns true if apCompare is not a BGSImpactDataSet, TESForm::Compare returns true, or the impact-data arrays differ.
 // @fnv 0x0058eb90
-bool BGSImpactDataSet_Cmp::FUN_0058eb90(TESForm* apCompare)
+bool BGSImpactDataSet::Compare(TESForm* apCompare)
 {
     BGSImpactDataSet* pcomp = dynamic_cast<BGSImpactDataSet*>(apCompare);
     if (!pcomp)
@@ -702,7 +623,7 @@ bool BGSImpactDataSet_Cmp::FUN_0058eb90(TESForm* apCompare)
 extern "C" void* __cdecl memcpy(void*, const void*, size_t);
 struct ImpactSwapMaps
 {
-    MapX* m_pData[12];
+    NiTPointerMap<BGSImpactData*, BGSImpactData*>* m_pData[12];
     void FUN_0058f4c0(ImpactSwapMaps* apSwap);
 };
 // Deletes this object's 12 map entries, adds entries from apSwap's maps, then copies 300 bytes from offset 0x30.
@@ -711,7 +632,7 @@ void ImpactSwapMaps::FUN_0058f4c0(ImpactSwapMaps* apSwap)
 {
     for (int i = 0; i < 12; i++)
     {
-        delete (ImpactMap*)m_pData[i];
+        delete (NiTPointerMap<BGSImpactData*, BGSImpactData*>*)m_pData[i];
         m_pData[i] = 0;
     }
     for (int i = 0; i < 12; i++)

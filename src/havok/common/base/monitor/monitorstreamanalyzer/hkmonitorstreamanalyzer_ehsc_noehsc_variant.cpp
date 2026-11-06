@@ -1,3 +1,29 @@
+#include "../../../../../../include/hkArrayBase.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+
 // src/havok/common/base/monitor/monitorstreamanalyzer/hkmonitorstreamanalyzer_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-31 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/common/base/monitor/monitorstreamanalyzer/hkmonitorstreamanalyzer.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
@@ -88,7 +114,7 @@ struct Bins
     int unk38;
     int unk3c;
     double value;
-    void Accumulate(struct AxisData* data, struct Point* start, struct Point* end);
+    void Accumulate(struct AxisData* data, NiPoint3* start, NiPoint3* end);
 };
 struct AxisData
 {
@@ -99,33 +125,28 @@ struct AxisData
     float xScale;
     float yScale;
 };
-struct Point
-{
-    int unk00;
-    unsigned int x;
-    unsigned int y;
-};
 // Adds scaled start-to-end deltas into the weight/count bins at data's x and y indices, and sets value from start based on mode.
 // @fnv 0x00e0c5e0
-void Bins::Accumulate(AxisData* pAxisData, Point* start, Point* end)
+void Bins::Accumulate(AxisData* pAxisData, NiPoint3* start, NiPoint3* end)
 {
+    // Monitor samples use the words at offsets 4 and 8 as unsigned counters.
     unsigned int x = pAxisData->xIndex;
     if (x <= 7)
     {
-        weights[x] += (float)(end->x - start->x) * pAxisData->xScale;
+        weights[x] += (float)(reinterpret_cast<const unsigned int&>(end->y) - reinterpret_cast<const unsigned int&>(start->y)) * pAxisData->xScale;
         ++counts[x];
     }
     unsigned int y = pAxisData->yIndex;
     if (y <= 7)
     {
-        weights[y] += (float)(end->y - start->y) * pAxisData->yScale;
+        weights[y] += (float)(reinterpret_cast<const unsigned int&>(end->z) - reinterpret_cast<const unsigned int&>(start->z)) * pAxisData->yScale;
         ++counts[y];
     }
     unsigned int mode = pAxisData->mode;
     if (mode == 0)
-        value = (double)start->x * pAxisData->xScale;
+        value = (double)reinterpret_cast<const unsigned int&>(start->y) * pAxisData->xScale;
     else if (mode == 1)
-        value = (double)start->y * pAxisData->yScale;
+        value = (double)reinterpret_cast<const unsigned int&>(start->z) * pAxisData->yScale;
 }
 struct Node
 {
@@ -257,14 +278,6 @@ struct S_e0ce00_Array
         return m_data[m_iElementCount++];
     }
 };
-struct S_e0ce00_Bool
-{
-    char m_cBooleanValue;
-    S_e0ce00_Bool(bool b)
-    {
-        m_cBooleanValue = b;
-    }
-};
 struct S_e0ce00
 {
     S_e0ce00_Array* m_arrays;
@@ -273,11 +286,11 @@ struct S_e0ce00
     char* m_buf;
     int m_iElementCount;
     int m_iCapacityState;
-    S_e0ce00_Bool AppendBlock(const char* begin, const char* end, const S_e0ce00_Block& b);
+    hkBool AppendBlock(const char* begin, const char* end, const S_e0ce00_Block& b);
 };
 // Appends a copy of the bytes from begin to end into m_buf at the current offset and records a block in m_arrays[b.unk18] with that offset and length.
 // @fnv 0x00e0ce00
-S_e0ce00_Bool S_e0ce00::AppendBlock(const char* begin, const char* end, const S_e0ce00_Block& aBlock)
+hkBool S_e0ce00::AppendBlock(const char* begin, const char* end, const S_e0ce00_Block& aBlock)
 {
     int n = end - begin;
     if ((m_iCapacityState & 0x3fffffff) - m_iElementCount < n)
@@ -1365,12 +1378,6 @@ union CommandWord
     unsigned int tag;
     const char* name;
 };
-struct CommandTimingEntry
-{
-    CommandWord command;
-    unsigned int time0;
-    unsigned int time1;
-};
 struct NamedCommand
 {
     CommandWord command;
@@ -1386,18 +1393,6 @@ struct ValueCommand
 struct SomeMap
 {
     int __thiscall LookupBucketValue(unsigned int key, const char** out);
-};
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool()
-    {}
-    hkBool(bool b) : m_cBooleanValue(b)
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
 };
 template <typename T> __forceinline T doSwap(T val)
 {
@@ -1482,8 +1477,8 @@ do_command:
         p += 12;
         if (swapBytes)
         {
-            swapInPlace(((CommandTimingEntry*)cur)->time0);
-            swapInPlace(((CommandTimingEntry*)cur)->time1);
+            swapInPlace(((hkMonitorStream::TimerCommand*)cur)->m_time0);
+            swapInPlace(((hkMonitorStream::TimerCommand*)cur)->m_time1);
         }
         goto next;
     }
@@ -1504,8 +1499,8 @@ do_command:
         }
         if (swapBytes)
         {
-            swapInPlace(((CommandTimingEntry*)cur)->time0);
-            swapInPlace(((CommandTimingEntry*)cur)->time1);
+            swapInPlace(((hkMonitorStream::TimerCommand*)cur)->m_time0);
+            swapInPlace(((hkMonitorStream::TimerCommand*)cur)->m_time1);
         }
         goto next;
     }
@@ -1520,8 +1515,8 @@ do_command:
         }
         if (swapBytes)
         {
-            swapInPlace(((CommandTimingEntry*)cur)->time0);
-            swapInPlace(((CommandTimingEntry*)cur)->time1);
+            swapInPlace(((hkMonitorStream::TimerCommand*)cur)->m_time0);
+            swapInPlace(((hkMonitorStream::TimerCommand*)cur)->m_time1);
         }
         goto next;
     }
@@ -1840,20 +1835,7 @@ int FUN_00e0cc90_cls::FUN_00e0cc90(int arg)
     return m_iFallback;
 }
 struct S00e0d180_Node;
-struct S00e0d180_Array
-{
-
-    S00e0d180_Node** m_data;
-
-    int m_iElementCount;
-
-    int m_iCapacityState;
-
-    S00e0d180_Node*& operator[](int i)
-    {
-        return m_data[i];
-    }
-};
+typedef hkArrayBase<S00e0d180_Node*> S00e0d180_Array;
 struct S00e0d180_Node
 {
 
@@ -2102,25 +2084,12 @@ void __cdecl FUN_00e0d2c0(PrintStream* stream, PrintNode* node, int depth, const
         heap.v10(pad.data, pad.m_iCapacity & 0x3fffffff);
 }
 struct MonNode;
-struct MonNodeArray
-{
-    MonNode** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    MonNode*& operator[](int i)
-    {
-        return m_data[i];
-    }
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-};
+
 struct MonNode
 {
     float m_uiFilterValue[8];
     unsigned short m_uiItemCount[8];
-    MonNodeArray m_children;
+    hkArrayBase<MonNode*> m_children;
     int unk3c;
     double m_dValue;
 };
@@ -2183,17 +2152,7 @@ struct FrameInfoArrays
         return m_data[i];
     }
 };
-struct FloatArray
-{
-    float* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    float& operator[](int i)
-    {
-        float* p = m_data;
-        return p[i];
-    }
-};
+typedef hkArrayBase<float> FloatArray;
 extern double DAT_0103c7c8;
 extern float DAT_011bdd84;
 extern double DAT_010ea718;
@@ -2262,7 +2221,7 @@ void __cdecl FUN_00e0dd30(const MonNodeList& threadNodes, const AnimationTimingI
         startTimes[idx] = 1e30f;
         for (int t = 0; t < numThreads; ++t)
         {
-            MonNodeArray& children = threadNodes[t]->m_children[f]->m_children;
+            hkArrayBase<MonNode*>& children = threadNodes[t]->m_children[f]->m_children;
             if (children.GetLogicalSize() <= 0)
                 continue;
             for (int c = 0; c < children.GetLogicalSize(); ++c)
@@ -2524,8 +2483,8 @@ struct Se0e0c0_Heap
     }
 };
 
-template <typename T> struct Se0e0c0_ArrayBase
-{
+template <typename T> struct Se0e0c0_ArrayBaseLocalForm
+{ // local form of hkArray: 0x00e0e0c0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -2542,7 +2501,7 @@ template <typename T> struct Se0e0c0_ArrayBase
         return m_data[i];
     }
 };
-template <typename T> struct Se0e0c0_Array : Se0e0c0_ArrayBase<T>
+template <typename T> struct Se0e0c0_Array : Se0e0c0_ArrayBaseLocalForm<T>
 {
     __forceinline Se0e0c0_Array()
     {
@@ -2561,18 +2520,6 @@ template <typename T> struct Se0e0c0_Array : Se0e0c0_ArrayBase<T>
     }
 };
 
-struct Se0e0c0_Bool
-{
-    char m_cBooleanValue;
-    __forceinline Se0e0c0_Bool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    __forceinline operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
 
 struct Se0e0c0_Dummy;
 struct Se0e0c0_Pair
@@ -2612,10 +2559,10 @@ struct Se0e0c0_MapBase
         }
         return (Se0e0c0_Dummy*)i;
     }
-    __forceinline Se0e0c0_Bool isValid(Se0e0c0_Dummy* it) const
+    __forceinline hkBool isValid(Se0e0c0_Dummy* it) const
     {
         int i = (int)it;
-        return Se0e0c0_Bool(i <= m_iPairCount);
+        return hkBool(i <= m_iPairCount);
     }
 };
 struct Se0e0c0_PointerMap : Se0e0c0_MapBase
@@ -2647,7 +2594,7 @@ struct Se0e0c0_Node
 {
     float m_uiFilterValue[8];
     unsigned short m_uiItemCount[8];
-    Se0e0c0_ArrayBase<Se0e0c0_Node*> m_children;
+    Se0e0c0_ArrayBaseLocalForm<Se0e0c0_Node*> m_children;
     double m_dValue;
     Se0e0c0_Node* m_next;
     const char* m_name;
@@ -2661,7 +2608,7 @@ struct Se0e0c0_ColorTable
 {
     void* vtbl;
     int m_refs;
-    Se0e0c0_ArrayBase<Se0e0c0_ColorPair> m_kColorPairs;
+    Se0e0c0_ArrayBaseLocalForm<Se0e0c0_ColorPair> m_kColorPairs;
 };
 struct Se0e0c0_Input
 {
@@ -2673,7 +2620,7 @@ struct Se0e0c0_Input
     int m_iValueAt14;
     float m_fValueAt18;
     float m_fValueAt1C;
-    Se0e0c0_Bool m_bValueAt20;
+    hkBool m_bValueAt20;
     Se0e0c0_ColorTable* m_pColorTable;
 };
 struct Se0e0c0_SampleInfo
@@ -2682,8 +2629,8 @@ struct Se0e0c0_SampleInfo
 };
 
 void __cdecl Se0e0c0_outputStatsForFrame(Se0e0c0_Node* root, float start, float samplesPerTick, int count,
-                                         Se0e0c0_ArrayBase<Se0e0c0_Node*>& out, int timer);
-void Se0e0c0_reserveExactly(Se0e0c0_ArrayBase<Se0e0c0_Node*>& a, int n);
+                                         Se0e0c0_ArrayBaseLocalForm<Se0e0c0_Node*>& out, int timer);
+void Se0e0c0_reserveExactly(Se0e0c0_ArrayBaseLocalForm<Se0e0c0_Node*>& a, int n);
 int __cdecl Se0e0c0_strCasecmp(const char* a, const char* b);
 extern const int* Se0e0c0_numbers[10];
 
@@ -2716,7 +2663,7 @@ static void __cdecl FUN_00e0c1c0(int digit, int y, int width, int* texture)
 }
 
 static void __cdecl FUN_00e0daf0(const Se0e0c0_FrameInfo& info, int frame,
-                                 const Se0e0c0_ArrayBase<Se0e0c0_Node*>& nodes, int* texture, int height,
+                                 const Se0e0c0_ArrayBaseLocalForm<Se0e0c0_Node*>& nodes, int* texture, int height,
                                  Se0e0c0_ColorTable* colorTable, int rowStride, int width, float maxFrameTime,
                                  float startTime, Se0e0c0_PointerMap& unknownTimers);
 
@@ -2724,8 +2671,8 @@ extern float Se0e0c0_lastFrameTime;
 void Se0e0c0_setSize(Se0e0c0_Array<float>& a, int n, const float& fill);
 unsigned int __cdecl Se0e0c0_roundUpPow2(unsigned int v);
 
-void __cdecl FUN_00e0dd30(const Se0e0c0_ArrayBase<Se0e0c0_Node*>& nodes, const Se0e0c0_Input& input,
-                          Se0e0c0_ArrayBase<Se0e0c0_Array<Se0e0c0_FrameInfo> >& frameInfos, float& maxFrameTime,
+void __cdecl FUN_00e0dd30(const Se0e0c0_ArrayBaseLocalForm<Se0e0c0_Node*>& nodes, const Se0e0c0_Input& input,
+                          Se0e0c0_ArrayBaseLocalForm<Se0e0c0_Array<Se0e0c0_FrameInfo> >& frameInfos, float& maxFrameTime,
                           Se0e0c0_Array<float>& startTimes)
 {
     int numThreads = nodes.GetLogicalSize();
@@ -2751,7 +2698,7 @@ void __cdecl FUN_00e0dd30(const Se0e0c0_ArrayBase<Se0e0c0_Node*>& nodes, const S
         startTimes[idx] = 1e30f;
         for (int t = 0; t < numThreads; t++)
         {
-            const Se0e0c0_ArrayBase<Se0e0c0_Node*>& children = nodes[t]->m_children[f]->m_children;
+            const Se0e0c0_ArrayBaseLocalForm<Se0e0c0_Node*>& children = nodes[t]->m_children[f]->m_children;
             if (children.GetLogicalSize() > 0)
             {
                 for (int i = 0; i < children.GetLogicalSize(); i++)
@@ -2792,8 +2739,8 @@ void __cdecl FUN_00e0dd30(const Se0e0c0_ArrayBase<Se0e0c0_Node*>& nodes, const S
 }
 
 // @fnv 0x00e0e0c0
-void __cdecl FUN_00e0e0c0(const Se0e0c0_ArrayBase<Se0e0c0_Node*>& nodes, const Se0e0c0_Input& input,
-                          Se0e0c0_ArrayBase<Se0e0c0_Array<Se0e0c0_FrameInfo> >& frameInfos, int*& texture, int& height,
+void __cdecl FUN_00e0e0c0(const Se0e0c0_ArrayBaseLocalForm<Se0e0c0_Node*>& nodes, const Se0e0c0_Input& input,
+                          Se0e0c0_ArrayBaseLocalForm<Se0e0c0_Array<Se0e0c0_FrameInfo> >& frameInfos, int*& texture, int& height,
                           Se0e0c0_SampleInfo* sampleInfo)
 {
     int numThreads = nodes.GetLogicalSize();
@@ -2897,12 +2844,12 @@ template <class T> __forceinline void copyElements(T* dst, int count, const T& v
         dst[i] = value;
 }
 
-template <class T> struct SampleArrayBase
-{
+template <class T> struct SampleArrayBaseLocalForm
+{ // local form of hkArrayBase: 0x00e0daf0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
-    __forceinline SampleArrayBase() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
+    __forceinline SampleArrayBaseLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {}
     __forceinline T& operator[](int i)
     {
@@ -2958,19 +2905,19 @@ struct SampleAllocator
     }
 };
 
-template <class T> struct SampleArray : SampleArrayBase<T>
+template <class T> struct SampleArray : SampleArrayBaseLocalForm<T>
 {
     __forceinline void AddBack(const T& value)
     {
-        SampleArrayBase<T>::append(SampleAllocator().get(this), value);
+        SampleArrayBaseLocalForm<T>::append(SampleAllocator().get(this), value);
     }
     __forceinline void reserveExactly(int count)
     {
-        SampleArrayBase<T>::reserveExactly(SampleAllocator().get(this), count);
+        SampleArrayBaseLocalForm<T>::reserveExactly(SampleAllocator().get(this), count);
     }
     __forceinline ~SampleArray()
     {
-        SampleArrayBase<T>::release(SampleAllocator().get(this));
+        SampleArrayBaseLocalForm<T>::release(SampleAllocator().get(this));
     }
 };
 
@@ -3086,7 +3033,7 @@ struct TextureColors
 int __cdecl CompareStringsCaseInsensitive(const char*, const char*);
 
 static __forceinline void renderTextureColumns(const TextureFrame& info, int frame,
-                                               const SampleArrayBase<SampleNode*>& trees, int* image, int rows,
+                                               const SampleArrayBaseLocalForm<SampleNode*>& trees, int* image, int rows,
                                                TextureColors& colors, int stride, int samples, float duration,
                                                float start, ColorMap& missing)
 {
@@ -3151,10 +3098,10 @@ static __forceinline void renderTextureColumns(const TextureFrame& info, int fra
 
 // @fnv 0x00e0daf0
 static __declspec(noinline) void FUN_00e0daf0(const Se0e0c0_FrameInfo& info, int frame,
-                                              const Se0e0c0_ArrayBase<Se0e0c0_Node*>& trees, int* image, int rows,
+                                              const Se0e0c0_ArrayBaseLocalForm<Se0e0c0_Node*>& trees, int* image, int rows,
                                               Se0e0c0_ColorTable* colors, int stride, int samples, float duration,
                                               float start, Se0e0c0_PointerMap& missing)
 {
-    renderTextureColumns((const TextureFrame&)info, frame, (const SampleArrayBase<SampleNode*>&)trees, image, rows,
+    renderTextureColumns((const TextureFrame&)info, frame, (const SampleArrayBaseLocalForm<SampleNode*>&)trees, image, rows,
                          *(TextureColors*)colors, stride, samples, duration, start, (ColorMap&)missing);
 }

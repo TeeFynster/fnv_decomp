@@ -1,39 +1,17 @@
+// Map layout helpers: the shared palette owns a map whose shared declaration exposes only its prefix.
 // Names of nested/template specializations use the canonical generator identifier mapping.
 #ifndef FNV_NIDEFAULTAVOBJECTPALETTE_H
 #define FNV_NIDEFAULTAVOBJECTPALETTE_H
 
-#include "layout_support.h"
+#include <stddef.h>
+
+template <class K, class V> class NiTMapItem;
 #include "NiFixedString.h"
 #include "NiObjectNET.h"
 class DFALL_NiTMapItem_NiFixedString_NiAVObject_____;
-class NiAVObject;
-class NiAVObjectPalette;
-class NiStream;
-class CloningProcess;
-class NiDefaultAVObjectPalette;
-class NiTFixedStringMap_NiAVObject___;
+class PaletteObjectMapView;
 class NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___;
 class NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject_____AntiBloatAllocator;
-#pragma pack(push, 4)
-class NiAVObjectPalette : public NiObject
-{
-  public:
-    // base NiObject at +0x0, size 8
-    // const NiRTTI* __cdecl NiAVObjectPalette::*()
-    // void __cdecl NiAVObjectPalette::*(NiAVObjectPalette*, CloningProcess&)
-    // void __cdecl NiAVObjectPalette::*(NiStream&)
-    // void __cdecl NiAVObjectPalette::*(NiStream&)
-    // bool __cdecl NiAVObjectPalette::*(NiStream&)
-    // void __cdecl NiAVObjectPalette::*(NiStream&)
-    // bool __cdecl NiAVObjectPalette::*(NiObject*)
-    // void __cdecl NiAVObjectPalette::*(NiTPrimitiveArray<char *>*)
-    // NiAVObjectPalette
-    // void __cdecl NiAVObjectPalette::*()
-    // NiAVObjectPalette& __cdecl NiAVObjectPalette::*(const NiAVObjectPalette&)
-    // void __cdecl NiAVObjectPalette::*()
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiAVObjectPalette) == 8);
 #pragma pack(push, 4)
 class DFALL_NiTMapItem_NiFixedString_NiAVObject_____
 {
@@ -42,7 +20,7 @@ class DFALL_NiTMapItem_NiFixedString_NiAVObject_____
     // void __cdecl DFALL<NiTMapItem<NiFixedString,NiAVObject *> >::*(void*)
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(DFALL_NiTMapItem_NiFixedString_NiAVObject_____) == 1);
+typedef char NiDefaultPalette_layout_check_2[(sizeof(DFALL_NiTMapItem_NiFixedString_NiAVObject_____) == 1) ? 1 : -1];
 #pragma pack(push, 4)
 class NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject_____AntiBloatAllocator
     : public DFALL_NiTMapItem_NiFixedString_NiAVObject_____
@@ -52,12 +30,12 @@ class NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVO
     unsigned int m_uiCount;  // +0x0, 4 bytes
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(
+typedef char NiDefaultPalette_layout_check_3[(
     sizeof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject_____AntiBloatAllocator) ==
-    4);
-FNV_STATIC_ASSERT(
+    4) ? 1 : -1];
+typedef char NiDefaultPalette_layout_check_4[(
     offsetof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject_____AntiBloatAllocator,
-             m_uiCount) == 0);
+             m_uiCount) == 0) ? 1 : -1];
 #pragma pack(push, 4)
 class NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___
 {
@@ -87,17 +65,17 @@ class NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVO
     // void __cdecl NiTFixedStringMapBase<DFALL<NiTMapItem<NiFixedString,NiAVObject *> >,NiAVObject *>::*()
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___) == 16);
-FNV_STATIC_ASSERT(offsetof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___,
-                           m_ppVirtualMethodTable) == 0);
-FNV_STATIC_ASSERT(offsetof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___,
-                           m_uiHashSize) == 4);
-FNV_STATIC_ASSERT(offsetof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___,
-                           m_ppkHashTable) == 8);
-FNV_STATIC_ASSERT(offsetof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___,
-                           m_kItemCount) == 12);
+typedef char NiDefaultPalette_layout_check_5[(sizeof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___) == 16) ? 1 : -1];
+typedef char NiDefaultPalette_layout_check_6[(offsetof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___,
+                           m_ppVirtualMethodTable) == 0) ? 1 : -1];
+typedef char NiDefaultPalette_layout_check_7[(offsetof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___,
+                           m_uiHashSize) == 4) ? 1 : -1];
+typedef char NiDefaultPalette_layout_check_8[(offsetof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___,
+                           m_ppkHashTable) == 8) ? 1 : -1];
+typedef char NiDefaultPalette_layout_check_9[(offsetof(NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___,
+                           m_kItemCount) == 12) ? 1 : -1];
 #pragma pack(push, 4)
-class NiTFixedStringMap_NiAVObject___
+class PaletteObjectMapView
     : public NiTFixedStringMapBase_DFALL_NiTMapItem_NiFixedString_NiAVObject______NiAVObject___
 {
   public:
@@ -113,76 +91,5 @@ class NiTFixedStringMap_NiAVObject___
     // void __cdecl NiTFixedStringMap<NiAVObject *>::*()
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiTFixedStringMap_NiAVObject___) == 16);
-#pragma pack(push, 4)
-class NiDefaultAVObjectPalette : public NiAVObjectPalette
-{
-  public:
-    void BuildPalette();
-    void ProcessCloneBase(CloningProcess&);
-    virtual void vfn_08();
-    virtual void vfn_0c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual void vfn_8c();
-    virtual void AddNamedAVObject(const NiFixedString&, NiAVObject*);
-    virtual void LoadBinary(NiStream&);
-    virtual void ProcessClone(CloningProcess*);
-    // base NiAVObjectPalette at +0x0, size 8
-    NiTFixedStringMap_NiAVObject___ m_kObjectMap;  // +0x8, 16 bytes
-    NiAVObject* m_pkScene;                         // +0x18, 4 bytes
-    // const NiRTTI* __cdecl NiDefaultAVObjectPalette::*()
-    // NiObject* __cdecl NiDefaultAVObjectPalette::*(CloningProcess&)
-    // void __cdecl NiDefaultAVObjectPalette::*(NiDefaultAVObjectPalette*, CloningProcess&)
-    // void __cdecl NiDefaultAVObjectPalette::*(NiStream&)
-    // void __cdecl NiDefaultAVObjectPalette::*(NiStream&)
-    // bool __cdecl NiDefaultAVObjectPalette::*(NiStream&)
-    // void __cdecl NiDefaultAVObjectPalette::*(NiStream&)
-    // bool __cdecl NiDefaultAVObjectPalette::*(NiObject*)
-    // NiObject* __cdecl NiDefaultAVObjectPalette::*()
-    // void __cdecl NiDefaultAVObjectPalette::*(NiTPrimitiveArray<char *>*)
-    // NiDefaultAVObjectPalette
-    // void __cdecl NiDefaultAVObjectPalette::*()
-    // NiAVObject* __cdecl NiDefaultAVObjectPalette::*(const NiFixedString&)
-    // AddNamedAVObject
-    // void __cdecl NiDefaultAVObjectPalette::*(CloningProcess&)
-    // void __cdecl NiDefaultAVObjectPalette::*()
-    // unsigned int __cdecl NiDefaultAVObjectPalette::*()
-    // NiDefaultAVObjectPalette& __cdecl NiDefaultAVObjectPalette::*(const NiDefaultAVObjectPalette&)
-    // void __cdecl NiDefaultAVObjectPalette::*()
-    // void __cdecl NiDefaultAVObjectPalette::*()
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiDefaultAVObjectPalette) == 28);
-FNV_STATIC_ASSERT(offsetof(NiDefaultAVObjectPalette, m_kObjectMap) == 8);
-FNV_STATIC_ASSERT(offsetof(NiDefaultAVObjectPalette, m_pkScene) == 24);
+typedef char NiDefaultPalette_layout_check_10[(sizeof(PaletteObjectMapView) == 16) ? 1 : -1];
 #endif

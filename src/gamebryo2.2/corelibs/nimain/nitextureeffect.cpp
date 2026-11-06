@@ -1,6 +1,16 @@
 
 // gamebryo2.2/corelibs/nimain/nitextureeffect.cpp
 // NiTextureEffect: static texture-type string table init.
+#include "../../../../include/NiDynamicEffect.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/StrArr.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiMatrix3.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPlane.h"
+// NiFixedString is already supplied by the shared NiDynamicEffect hierarchy.
+#define FNV_NIFIXEDSTRING_H
 #include "nitextureeffect.h"
 
 NiFixedString NiTextureEffect::ms_kTextureEffectNames[4];
@@ -93,35 +103,9 @@ void FUN_00a928b0_shell::ClearFixedStrings()
     }
 }
 
-class NiStream;
 struct FUN_00a6ff10_holder
 {
     bool FUN_00a6ff10(NiStream&);
-};
-struct RegHolder54
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual void f6();
-    virtual void f7();
-    virtual void f8();
-    virtual void f9();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual bool RegFunc(NiStream&);
 };
 struct FUN_00a92a30_shell : NiTextureEffect
 {
@@ -132,123 +116,56 @@ bool FUN_00a92a30_shell::FUN_00a92a30(NiStream& kStream)
 {
     if (!((FUN_00a6ff10_holder*)this)->FUN_00a6ff10(kStream))
         return false;
-    RegHolder54* pkObj = *(RegHolder54**)((char*)this + 0x124);
+    NiObject* pkObj = *(NiObject**)((char*)this + 0x124);
     if (pkObj)
-        pkObj->RegFunc(kStream);
+        pkObj->RegisterStreamables(kStream);
     return true;
 }
 
 namespace fnv_00a929d0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
-struct NiObject
-{
-    volatile long m_iObjectReferenceCount;
-    virtual void _f0();
-    virtual void _f1();
-};
-struct NiStream
-{
-    NiObject* GetLoadedObject();
-};
-struct NiDynamicEffect
-{
-    virtual void LinkObject(NiStream&);
-};
 struct FUN_00a929d0_Holder : NiDynamicEffect
 {
-    char _pad[0x120];
+    char _pad[0x60];
     NiObject* m_pObject;
     void FUN_00a929d0(NiStream&);
 };
-// Links the stream's object to m_pObject, releasing the previous object and incrementing the new one's reference count.
-// @fnv 0x00a929d0
-void FUN_00a929d0_Holder::FUN_00a929d0(NiStream& kStream)
-{
-    NiDynamicEffect::LinkObject(kStream);
-    NiObject* pkObj = kStream.GetLoadedObject();
-    NiObject* pOld = m_pObject;
-    if (pOld != pkObj)
-    {
-        if (pOld && InterlockedDecrement(&pOld->m_iObjectReferenceCount) == 0)
-            pOld->_f1();
-        m_pObject = pkObj;
-        if (pkObj)
-            InterlockedIncrement(&pkObj->m_iObjectReferenceCount);
-    }
-}
 }  // namespace fnv_00a929d0
 
 extern int DAT_0109fd0c;
 extern float DAT_011a9448[32];
 extern float DAT_011a946c;
 
-struct FUN_00a92710_base
+// Invoke the shared base constructor in the storage being initialized here.
+inline void* operator new(size_t, NiDynamicEffect* object)
 {
-    void Init();
-};
+    return object;
+}
 
-struct Mat3x3
-{
-    float m[9];
-};
-
-struct Sub16
-{
-    float m[4];
-    void Init(float*, float);
-};
-
-struct FUN_00a92710_cls : FUN_00a92710_base
-{
-    int m_vptr00;
-    unsigned char m_unk04[0x99];
-    unsigned char m_9d;
-    unsigned char m_unk9e[0x26];
-    Mat3x3 m_mat1;
-    float m_e8;
-    float m_ec;
-    float m_f0;
-    Mat3x3 m_mat2;
-    float m_118;
-    float m_11c;
-    float m_120;
-    int m_124;
-    int m_128;
-    int m_12c;
-    int m_130;
-    int m_134;
-    unsigned char m_138;
-    unsigned char m_auiShapeKeys[3];
-    Sub16 m_sub1;
-    Sub16 m_sub2;
-
-    void* FUN_00a92710();
-};
-
-// Calls the base Init, sets the vtable pointer, copies a matrix into m_mat1 and m_mat2, zeroes several floats and ints, and initialises m_sub1 and m_sub2.
+// Constructs the dynamic-effect base, sets the vtable pointer, copies the projection matrices, and initializes the texture settings and planes.
 // @fnv 0x00a92710
-void* FUN_00a92710_cls::FUN_00a92710()
+void* NiTextureEffect::InitializeEffect()
 {
-    FUN_00a92710_base* base = reinterpret_cast<FUN_00a92710_base*>(this);
-    base->Init();
-    m_vptr00 = (int)&DAT_0109fd0c;
-    m_mat1 = *(Mat3x3*)&DAT_011a9448[0];
+    __assume(this != 0);
+    ::new (static_cast<NiDynamicEffect*>(this)) NiDynamicEffect;
+    *reinterpret_cast<int*>(this) = (int)&DAT_0109fd0c;
+    m_mat1 = *(NiMatrix3*)&DAT_011a9448[0];
     m_e8 = 0.0f;
     m_ec = 0.0f;
     m_f0 = 0.0f;
-    m_mat2 = *(Mat3x3*)&DAT_011a9448[0];
+    m_mat2 = *(NiMatrix3*)&DAT_011a9448[0];
     m_118 = 0.0f;
     m_11c = 0.0f;
     m_120 = 0.0f;
     m_124 = 0;
-    m_sub1.Init(&DAT_011a946c, 0.0f);
-    m_sub2.Init(&DAT_011a946c, 0.0f);
+    m_sub1.Initialize(&DAT_011a946c, 0.0f);
+    m_sub2.Initialize(&DAT_011a946c, 0.0f);
     m_128 = 0;
     m_130 = 0;
     m_134 = 0;
     m_138 = 0;
-    m_9d = 5;
+    effectType = 5;
     m_12c = 3;
     return this;
 }
@@ -302,26 +219,17 @@ struct RegistrationManager
 };
 extern RegistrationManager* DAT_011f4748;
 
-struct RefCounted
+inline void ReleaseTextureResource(NiObject* object)
 {
-    void** vtable;
-    volatile long m_uiRefCount;
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-        {
-            typedef void(__thiscall * DeleteFunction)(RefCounted*);
-            reinterpret_cast<DeleteFunction>(vtable[1])(this);
-        }
-    }
-};
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&object->m_uiRefCount)) == 0)
+        object->DeleteThis();
+}
 
 void __cdecl FUN_00aa1460(void* object, unsigned int size);
 
 struct TextureEffectMatch
 {
     void** m_ppVirtualMethodTable;
-    void DestroyDynamicEffect();
     TextureEffectMatch* FUN_00a92bd0(unsigned int flags);
 };
 
@@ -331,10 +239,10 @@ TextureEffectMatch* TextureEffectMatch::FUN_00a92bd0(unsigned int flags)
     m_ppVirtualMethodTable = reinterpret_cast<void**>(&DAT_0109fd0c);
     if (DAT_011f4748)
         DAT_011f4748->Deregister(this);
-    RefCounted* resource = *reinterpret_cast<RefCounted**>(reinterpret_cast<char*>(this) + 0x124);
+    NiObject* resource = *reinterpret_cast<NiObject**>(reinterpret_cast<char*>(this) + 0x124);
     if (resource)
-        resource->DecRefCount();
-    DestroyDynamicEffect();
+        ReleaseTextureResource(resource);
+    reinterpret_cast<NiDynamicEffect*>(this)->NiDynamicEffect::~NiDynamicEffect();
     if (flags & 1)
         FUN_00aa1460(this, 0x15c);
     return this;
@@ -476,12 +384,9 @@ bool FUN_00a93040_cls::FUN_00a93040(FUN_00a93040_cls* other)
     return false;
 }
 
-class NiStream;
-struct NiObjectStub;
-
-struct NiBinaryStreamStub
+struct WriteStream
 {
-    typedef unsigned int (*WriteFn)(NiBinaryStreamStub*, const void*, unsigned int, unsigned int*, unsigned int);
+    typedef unsigned int (*WriteFn)(WriteStream*, const void*, unsigned int, unsigned int*, unsigned int);
     void* m_vtbl;
     unsigned int m_uiStreamFlags;
     void* m_pfnRead;
@@ -495,262 +400,57 @@ struct NiBinaryStreamStub
     }
 };
 
-template <class T> inline void StreamSaveBinary(NiBinaryStreamStub& kStream, const T& kValue)
+template <class T> inline void StreamSaveBinary(WriteStream& kStream, const T& kValue)
 {
     unsigned int uiSize = sizeof(T);
     kStream.BinaryWrite(&kValue, sizeof(T), &uiSize, 1);
 }
 
-class NiStream
+// The output binary stream is stored at +0x250 in the original stream layout.
+inline WriteStream* NiStream::GetWriter()
 {
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void SaveLinkID(NiObjectStub* pkObject);
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    NiBinaryStreamStub* m_pBackingStream;
-};
+    return *reinterpret_cast<WriteStream**>(reinterpret_cast<char*>(this) + 0x250);
+}
 
-struct NiMatrix3Stub
+namespace fnv_00a929d0 {
+// Links the stream's object to m_pObject, releasing the previous object and incrementing the new one's reference count.
+// @fnv 0x00a929d0
+void FUN_00a929d0_Holder::FUN_00a929d0(NiStream& kStream)
 {
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    void SaveBinary(NiStream& kStream);
-};
-struct NiPoint3Stub
+    NiDynamicEffect::LinkObject(kStream);
+    NiObject* pkObj = kStream.GetLoadedObject();
+    NiObject* pOld = m_pObject;
+    if (pOld != pkObj)
+    {
+        if (pOld && InterlockedDecrement(reinterpret_cast<volatile long*>(&pOld->m_uiRefCount)) == 0)
+            pOld->DeleteThis();
+        m_pObject = pkObj;
+        if (pkObj)
+            InterlockedIncrement(reinterpret_cast<volatile long*>(&pkObj->m_uiRefCount));
+    }
+}
+}  // namespace fnv_00a929d0
+
+// NiPlane lacks SaveBinary; this adds only the missing method, with no local layout.
+struct PlaneSaver : NiPlane
 {
-    float x, y, z;
-    void SaveBinary(NiStream& kStream);
-};
-struct NiPlaneStub
-{
-    float x, y, z, d;
     void SaveBinary(NiStream& kStream);
 };
 
-struct NiDynamicEffectStub
+struct TexEffectSaver : NiDynamicEffect
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    void SaveBinary(NiStream& kStream);
-};
+    NiMatrix3 m_kModelProjMat;
+    NiPoint3 m_kModelProjTrans;
+    NiMatrix3 m_kWorldProjMat;
+    NiPoint3 m_kWorldProjTrans;
 
-struct TexEffectSaver : NiDynamicEffectStub
-{
-    NiMatrix3Stub m_kModelProjMat;
-    NiPoint3Stub m_kModelProjTrans;
-    NiMatrix3Stub m_kWorldProjMat;
-    NiPoint3Stub m_kWorldProjTrans;
-
-    NiObjectStub* m_spSourceTexture;
+    NiObject* m_spSourceTexture;
     int m_eTextureFiltering;
     int m_eTextureClamping;
     int m_eTextureType;
     int m_eCoordGenType;
     bool m_bClippingPlaneEnable;
-    NiPlaneStub m_kModelPlane;
+    PlaneSaver m_kModelPlane;
     void FUN_00a932f0(NiStream& kStream);
 };
 
@@ -758,29 +458,26 @@ struct TexEffectSaver : NiDynamicEffectStub
 // @fnv 0x00a932f0
 void TexEffectSaver::FUN_00a932f0(NiStream& kStream)
 {
-    NiDynamicEffectStub::SaveBinary(kStream);
+    NiDynamicEffect::SaveBinary(kStream);
     m_kModelProjMat.SaveBinary(kStream);
-    m_kModelProjTrans.SaveBinary(kStream);
-    StreamSaveBinary(*kStream.m_pBackingStream, m_eTextureFiltering);
-    StreamSaveBinary(*kStream.m_pBackingStream, m_eTextureClamping);
-    StreamSaveBinary(*kStream.m_pBackingStream, m_eTextureType);
-    StreamSaveBinary(*kStream.m_pBackingStream, m_eCoordGenType);
-    kStream.SaveLinkID(m_spSourceTexture);
+    m_kModelProjTrans.SaveBinary(&kStream);
+    StreamSaveBinary(*kStream.GetWriter(), m_eTextureFiltering);
+    StreamSaveBinary(*kStream.GetWriter(), m_eTextureClamping);
+    StreamSaveBinary(*kStream.GetWriter(), m_eTextureType);
+    StreamSaveBinary(*kStream.GetWriter(), m_eCoordGenType);
+    kStream.SaveLinkID(reinterpret_cast<const NiObject*>(m_spSourceTexture));
     bool bClip = m_bClippingPlaneEnable;
-    StreamSaveBinary(*kStream.m_pBackingStream, bClip);
+    StreamSaveBinary(*kStream.GetWriter(), bClip);
     m_kModelPlane.SaveBinary(kStream);
 }
 
-struct NiMemObject
-{
-    static void* __cdecl operator new(unsigned int size);
-};
+#include "../../../../include/NiMemObject.h"
 // @fnv 0x00a929b0
 void* __cdecl FUN_00a929b0()
 {
-    FUN_00a92710_cls* obj = (FUN_00a92710_cls*)NiMemObject::operator new(0x15c);
+    NiTextureEffect* obj = (NiTextureEffect*)NiMemObject::operator new(0x15c);
     if (obj)
-        return obj->FUN_00a92710();
+        return obj->InitializeEffect();
     return 0;
 }
 
@@ -792,18 +489,7 @@ struct TextureRef
     virtual void DeleteThis();
     volatile long references;
 };
-struct Matrix33
-{
-    float elements[3][3];
-};
-struct Vector3
-{
-    float x, y, z;
-};
-struct Plane4
-{
-    float x, y, z, w;
-};
+
 struct TextureEffectCandidate
 {
     unsigned field_000;
@@ -855,8 +541,8 @@ struct TextureEffectCandidate
     unsigned field_0b8;
     unsigned field_0bc;
     unsigned field_0c0;
-    Matrix33 matrix_c4;
-    Vector3 vector_e8;
+    NiMatrix3 matrix_c4;
+    NiPoint3 vector_e8;
     unsigned field_0f4;
     unsigned field_0f8;
     unsigned field_0fc;
@@ -873,7 +559,7 @@ struct TextureEffectCandidate
     unsigned field_128, field_12c, field_130, field_134;
     bool field_138;
     unsigned field_13c, field_140, field_144, field_148;
-    Plane4 vector_14c;
+    NiPlane vector_14c;
     void FUN_00a68d40(TextureEffectCandidate*, void*);
     void CopyTo(TextureEffectCandidate*, void*);
 };
@@ -905,37 +591,20 @@ void TextureEffectCandidate::CopyTo(TextureEffectCandidate* dest, void* context)
     dest->vector_14c = vector_14c;
 }
 
-struct StrArr
+inline void StrArr::AppendInline(char* value)
 {
-    void* vtable;
-    char** data;
-    unsigned short capacity;
-    unsigned short size;
-    unsigned short count;
-    unsigned short growBy;
-    void SetSize(unsigned int newSize);
-    void SetAt(unsigned int index, char*& value);
-    void Add(char* value)
-    {
-        unsigned int index = size;
-        if (index >= capacity)
-            SetSize(index + growBy);
-        SetAt(index, value);
-    }
-};
-struct DynamicEffectViewer : NiDynamicEffectStub
+    unsigned int index = m_usSize;
+    if (index >= m_usMaxSize)
+        SetSize(index + m_usGrowBy);
+    SetAt(index, value);
+}
+// The shared class does not yet declare the dynamic-effect viewer method.
+struct DynamicEffectViewer : NiDynamicEffect
 {
     void FUN_00a69140(StrArr& strings);
 };
-struct MatrixViewer : NiMatrix3Stub
-{
-    char* ToString(const char* name);
-};
-struct PointViewer : NiPoint3Stub
-{
-    char* FUN_00a59af0(const char* name);
-};
-struct PlaneViewer : NiPlaneStub
+
+struct PlaneViewer : PlaneSaver
 {
     char* FUN_00a69a60(const char* name);
 };
@@ -947,11 +616,11 @@ char* __cdecl BuildProjectionModeString(const char* name, int value);
 char* __cdecl FUN_00a7d370(const char* name, bool value);
 struct TextureEffectViewer : DynamicEffectViewer
 {
-    MatrixViewer modelProjMat;
-    PointViewer modelProjTrans;
-    NiMatrix3Stub worldProjMat;
-    NiPoint3Stub worldProjTrans;
-    NiObjectStub* sourceTexture;
+    NiMatrix3 modelProjMat;
+    NiPoint3 modelProjTrans;
+    NiMatrix3 worldProjMat;
+    NiPoint3 worldProjTrans;
+    NiObject* sourceTexture;
     int filter;
     int clamp;
     int textureMode;
@@ -964,52 +633,39 @@ struct TextureEffectViewer : DynamicEffectViewer
 void TextureEffectViewer::AppendToStrings(StrArr& strings)
 {
     FUN_00a69140(strings);
-    strings.Add(FUN_00a7d330(reinterpret_cast<const char*>(g_011f5e94)));
-    strings.Add(modelProjMat.ToString("m_kModelProjMat"));
-    strings.Add(modelProjTrans.FUN_00a59af0("m_kModelProjTrans"));
-    strings.Add(FUN_00a92a60("m_eTextureMode", textureMode));
-    strings.Add(BuildFilterModeString("m_eFilter", filter));
-    strings.Add(BuildTextureAddressModeString("m_eClamp", clamp));
-    strings.Add(FUN_00a92a60("m_eTextureMode", textureMode));
-    strings.Add(BuildProjectionModeString("m_eCoordMode", coordMode));
-    strings.Add(FUN_00a7d370("m_bPlaneEnable", planeEnable));
-    strings.Add(modelPlane.FUN_00a69a60("m_kModelPlane"));
+    strings.AppendInline(FUN_00a7d330(reinterpret_cast<const char*>(g_011f5e94)));
+    strings.AppendInline(modelProjMat.GetViewerString("m_kModelProjMat"));
+    strings.AppendInline(modelProjTrans.FUN_00a59af0("m_kModelProjTrans"));
+    strings.AppendInline(FUN_00a92a60("m_eTextureMode", textureMode));
+    strings.AppendInline(BuildFilterModeString("m_eFilter", filter));
+    strings.AppendInline(BuildTextureAddressModeString("m_eClamp", clamp));
+    strings.AppendInline(FUN_00a92a60("m_eTextureMode", textureMode));
+    strings.AppendInline(BuildProjectionModeString("m_eCoordMode", coordMode));
+    strings.AppendInline(FUN_00a7d370("m_bPlaneEnable", planeEnable));
+    strings.AppendInline(modelPlane.FUN_00a69a60("m_kModelPlane"));
 }
 
-struct ProjectionPoint
+// Preserve the original inline arithmetic while using the shared point and matrix layouts.
+inline NiPoint3 SubtractProjectionPoints(const NiPoint3& a, const NiPoint3& b)
 {
-    float x, y, z;
-    ProjectionPoint()
-    {}
-    ProjectionPoint(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    ProjectionPoint operator-(const ProjectionPoint& p) const
-    {
-        ProjectionPoint r;
-        r.x = x - p.x;
-        r.y = y - p.y;
-        r.z = z - p.z;
-        return r;
-    }
-    float Dot(const ProjectionPoint& p) const
-    {
-        return y * p.y + x * p.x + z * p.z;
-    }
-};
-
-struct ProjectionMatrix
+    NiPoint3 result;
+    result.x = a.x - b.x;
+    result.y = a.y - b.y;
+    result.z = a.z - b.z;
+    return result;
+}
+inline float ProjectionDot(const NiPoint3& a, const NiPoint3& b)
 {
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    ProjectionMatrix FUN_004768c0() const;
-    ProjectionMatrix FUN_0043f8d0(const ProjectionMatrix&) const;
-    ProjectionMatrix FUN_00a85520(float) const;
-    ProjectionPoint FUN_004b4500(const ProjectionPoint*) const;
-    ProjectionPoint operator*(const ProjectionPoint& p) const
-    {
-        return ProjectionPoint(m01 * p.y + m00 * p.x + m02 * p.z, m11 * p.y + m10 * p.x + m12 * p.z,
-                               m21 * p.y + m20 * p.x + m22 * p.z);
-    }
-};
+    return a.y * b.y + a.x * b.x + a.z * b.z;
+}
+inline NiPoint3 ProjectPlaneNormal(const NiMatrix3& m, const NiPoint3& p)
+{
+    NiPoint3 result;
+    result.x = m.m_pEntry[0][1] * p.y + m.m_pEntry[0][0] * p.x + m.m_pEntry[0][2] * p.z;
+    result.y = m.m_pEntry[1][1] * p.y + m.m_pEntry[1][0] * p.x + m.m_pEntry[1][2] * p.z;
+    result.z = m.m_pEntry[2][1] * p.y + m.m_pEntry[2][0] * p.x + m.m_pEntry[2][2] * p.z;
+    return result;
+}
 
 struct TextureProjection
 {
@@ -1017,20 +673,20 @@ struct TextureProjection
     unsigned int unk020, unk024, unk028, unk02c, unk030, unk034, unk038, unk03c;
     unsigned int unk040, unk044, unk048, unk04c, unk050, unk054, unk058, unk05c;
     unsigned int unk060, unk064;
-    ProjectionMatrix worldRotation;
-    ProjectionPoint worldTranslation;
+    NiMatrix3 worldRotation;
+    NiPoint3 worldTranslation;
     float worldScale;
     unsigned int unk09c, unk0a0, unk0a4, revision;
     unsigned int unk0ac, unk0b0, unk0b4, unk0b8, unk0bc, unk0c0;
-    ProjectionMatrix modelProjection;
-    ProjectionPoint modelTranslation;
-    ProjectionMatrix worldProjection;
-    ProjectionPoint projectionTranslation;
+    NiMatrix3 modelProjection;
+    NiPoint3 modelTranslation;
+    NiMatrix3 worldProjection;
+    NiPoint3 projectionTranslation;
     unsigned int sourceTexture, filtering, clamping, textureType, coordGenType;
     bool clippingEnabled;
-    ProjectionPoint modelPlaneNormal;
+    NiPoint3 modelPlaneNormal;
     float modelPlaneConstant;
-    ProjectionPoint worldPlaneNormal;
+    NiPoint3 worldPlaneNormal;
     float worldPlaneConstant;
     void UpdateWorldProjection();
 };
@@ -1045,34 +701,34 @@ void TextureProjection::UpdateWorldProjection()
     {
         projectionTranslation.x = projectionTranslation.y = 0.5f;
         projectionTranslation.z = 0.0f;
-        *p = worldRotation.m01;
-        worldProjection.m00 = 0.5 * worldRotation.m02;
-        worldProjection.m10 = -0.5 * (*p);
-        worldProjection.m20 = 0.0f;
-        *p = worldRotation.m11;
-        worldProjection.m01 = 0.5 * worldRotation.m12;
-        worldProjection.m11 = -0.5 * (*p);
-        worldProjection.m21 = 0.0f;
-        *p = worldRotation.m21;
-        worldProjection.m02 = 0.5 * worldRotation.m22;
-        worldProjection.m12 = -0.5 * (*p);
-        worldProjection.m22 = 0.0f;
+        *p = worldRotation.m_pEntry[0][1];
+        worldProjection.m_pEntry[0][0] = 0.5 * worldRotation.m_pEntry[0][2];
+        worldProjection.m_pEntry[1][0] = -0.5 * (*p);
+        worldProjection.m_pEntry[2][0] = 0.0f;
+        *p = worldRotation.m_pEntry[1][1];
+        worldProjection.m_pEntry[0][1] = 0.5 * worldRotation.m_pEntry[1][2];
+        worldProjection.m_pEntry[1][1] = -0.5 * (*p);
+        worldProjection.m_pEntry[2][1] = 0.0f;
+        *p = worldRotation.m_pEntry[2][1];
+        worldProjection.m_pEntry[0][2] = 0.5 * worldRotation.m_pEntry[2][2];
+        worldProjection.m_pEntry[1][2] = -0.5 * (*p);
+        worldProjection.m_pEntry[2][2] = 0.0f;
     }
     else if (coordGenType == 3 || coordGenType == 4)
     {
         projectionTranslation.x = projectionTranslation.y = projectionTranslation.z = 0.0f;
-        worldProjection = modelProjection.FUN_0043f8d0(worldRotation.FUN_004768c0());
+        worldProjection = modelProjection.operator*(worldRotation.Transpose());
     }
     else
     {
-        worldProjection = modelProjection.FUN_0043f8d0(worldRotation.FUN_004768c0()).FUN_00a85520(1.0f / worldScale);
-        projectionTranslation = modelTranslation - worldProjection.FUN_004b4500(&worldTranslation);
+        worldProjection = modelProjection.operator*(worldRotation.Transpose()).operator*(1.0f / worldScale);
+        projectionTranslation = SubtractProjectionPoints(modelTranslation, worldProjection.operator*(worldTranslation));
     }
-    ProjectionPoint worldNormal;
-    worldNormal = worldRotation * modelPlaneNormal;
+    NiPoint3 worldNormal;
+    worldNormal = ProjectPlaneNormal(worldRotation, modelPlaneNormal);
     float fUnusedDot =
         worldTranslation.x * worldNormal.x + worldTranslation.y * worldNormal.y + worldTranslation.z * worldNormal.z;
-    float fPlaneDist = worldTranslation.Dot(worldNormal);
+    float fPlaneDist = ProjectionDot(worldTranslation, worldNormal);
     *p = fPlaneDist + modelPlaneConstant * worldScale;
     worldPlaneNormal = worldNormal;
     revision += 1;
@@ -1104,192 +760,65 @@ template <class T> inline void StreamLoadEnum(NiBinaryStreamL& kStream, T& eValu
     StreamLoadBinary(kStream, uiValue);
     eValue = (T)uiValue;
 }
-struct NiStreamL
+// Input stream and file version accessors preserve the original stream layout.
+inline NiBinaryStream* NiStream::GetBinaryStream()
 {
-    int unk000[0x36];
-    unsigned int m_uiNifVersion;
-    int unk0dc[0x5c];
-    NiBinaryStreamL* m_pUnderlyingStream;
-    unsigned int ResetStreamState();
-};
-struct NiMatrix3L
+    return *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(this) + 0x24c);
+}
+
+inline unsigned int NiStream::GetFileVersion() const
 {
-    float m[9];
-    void LoadBinary(NiStreamL& kStream);
-};
-struct NiPoint3L
+    return *reinterpret_cast<const unsigned int*>(reinterpret_cast<const char*>(this) + 0xd8);
+}
+
+struct TexEffectLoader : NiDynamicEffect
 {
-    float x, y, z;
-    void LoadBinary(NiStreamL& kStream);
-};
-struct NiPlaneL
-{
-    float x, y, z, d;
-    void LoadBinary(NiStreamL& kStream);
-};
-struct NiDynamicEffectL
-{
-    int unk00[0x31];
-    void LoadBinary(NiStreamL& kStream);
-};
-struct TexEffectLoader : NiDynamicEffectL
-{
-    NiMatrix3L m_kModelProjMat;
-    NiPoint3L m_kModelProjTrans;
-    NiMatrix3L m_kWorldProjMat;
-    NiPoint3L m_kWorldProjTrans;
+    NiMatrix3 m_kModelProjMat;
+    NiPoint3 m_kModelProjTrans;
+    NiMatrix3 m_kWorldProjMat;
+    NiPoint3 m_kWorldProjTrans;
     void* m_spSourceTexture;
     int m_eTextureFiltering;
     int m_eTextureClamping;
     int m_eTextureType;
     int m_eCoordGenType;
     bool m_bClippingPlaneEnable;
-    NiPlaneL m_kModelPlane;
-    void FUN_00a93140(NiStreamL& kStream);
+    NiPlane m_kModelPlane;
+    void FUN_00a93140(NiStream& kStream);
 };
 // @fnv 0x00a93140
-void TexEffectLoader::FUN_00a93140(NiStreamL& kStream)
+void TexEffectLoader::FUN_00a93140(NiStream& kStream)
 {
-    NiDynamicEffectL::LoadBinary(kStream);
+    NiDynamicEffect::LoadBinary(kStream);
     m_kModelProjMat.LoadBinary(kStream);
     m_kModelProjTrans.LoadBinary(kStream);
-    StreamLoadEnum(*kStream.m_pUnderlyingStream, m_eTextureFiltering);
-    StreamLoadEnum(*kStream.m_pUnderlyingStream, m_eTextureClamping);
-    StreamLoadEnum(*kStream.m_pUnderlyingStream, m_eTextureType);
-    StreamLoadEnum(*kStream.m_pUnderlyingStream, m_eCoordGenType);
+    StreamLoadEnum(*reinterpret_cast<NiBinaryStreamL*>(kStream.GetBinaryStream()), m_eTextureFiltering);
+    StreamLoadEnum(*reinterpret_cast<NiBinaryStreamL*>(kStream.GetBinaryStream()), m_eTextureClamping);
+    StreamLoadEnum(*reinterpret_cast<NiBinaryStreamL*>(kStream.GetBinaryStream()), m_eTextureType);
+    StreamLoadEnum(*reinterpret_cast<NiBinaryStreamL*>(kStream.GetBinaryStream()), m_eCoordGenType);
     kStream.ResetStreamState();
     char bClip;
-    StreamLoadBinary(*kStream.m_pUnderlyingStream, bClip);
+    StreamLoadBinary(*reinterpret_cast<NiBinaryStreamL*>(kStream.GetBinaryStream()), bClip);
     m_bClippingPlaneEnable = bClip != 0;
     m_kModelPlane.LoadBinary(kStream);
-    if (kStream.m_uiNifVersion < 0x0a030004)
+    if (kStream.GetFileVersion() < 0x0a030004)
     {
         short sPS2;
-        StreamLoadBinary(*kStream.m_pUnderlyingStream, sPS2);
-        StreamLoadBinary(*kStream.m_pUnderlyingStream, sPS2);
+        StreamLoadBinary(*reinterpret_cast<NiBinaryStreamL*>(kStream.GetBinaryStream()), sPS2);
+        StreamLoadBinary(*reinterpret_cast<NiBinaryStreamL*>(kStream.GetBinaryStream()), sPS2);
     }
-    if (kStream.m_uiNifVersion < 0x04010010)
+    if (kStream.GetFileVersion() < 0x04010010)
     {
         short sTemp;
-        StreamLoadBinary(*kStream.m_pUnderlyingStream, sTemp);
+        StreamLoadBinary(*reinterpret_cast<NiBinaryStreamL*>(kStream.GetBinaryStream()), sTemp);
     }
 }
 
-class TESObjectDoorController
-{
-  public:
-    static void* operator new(unsigned int n);
-};
-class NiCloningProcessA93;
-namespace a93 {
-class FUN_00a92710
-{
-  public:
-    FUN_00a92710() throw();
-    static void* operator new(unsigned int n)
-    {
-        return TESObjectDoorController::operator new(n);
-    }
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00C;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01C;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02C;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03C;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04C;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05C;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06C;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07C;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08C;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09C;
-    unsigned int unk0A0;
-    unsigned int unk0A4;
-    unsigned int unk0A8;
-    unsigned int unk0AC;
-    unsigned int unk0B0;
-    unsigned int unk0B4;
-    unsigned int unk0B8;
-    unsigned int unk0BC;
-    unsigned int unk0C0;
-    unsigned int unk0C4;
-    unsigned int unk0C8;
-    unsigned int unk0CC;
-    unsigned int unk0D0;
-    unsigned int unk0D4;
-    unsigned int unk0D8;
-    unsigned int unk0DC;
-    unsigned int unk0E0;
-    unsigned int unk0E4;
-    unsigned int unk0E8;
-    unsigned int unk0EC;
-    unsigned int unk0F0;
-    unsigned int unk0F4;
-    unsigned int unk0F8;
-    unsigned int unk0FC;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10C;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11C;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12C;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13C;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14C;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-};
-}
-class NiTextureEffectA93
-{
-  public:
-    void CopyTo(a93::FUN_00a92710* pkClone, NiCloningProcessA93& kCloning);
-    a93::FUN_00a92710* Clone(NiCloningProcessA93& kCloning);
-};
-// Allocates a new a93::FUN_00a92710 object, copies this NiTextureEffectA93 into it via CopyTo, and returns the new object.
+// The constructor and copy targets are 0x00a92710 and 0x00a92f10, respectively.
 // @fnv 0x00a930f0
-a93::FUN_00a92710* NiTextureEffectA93::Clone(NiCloningProcessA93& kCloning)
+NiTextureEffect* NiTextureEffect::Clone(CloningProcess& kCloning)
 {
-    a93::FUN_00a92710* pkObject = new a93::FUN_00a92710;
+    NiTextureEffect* pkObject = new NiTextureEffect;
     CopyTo(pkObject, kCloning);
     return pkObject;
 }

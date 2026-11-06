@@ -1,5 +1,6 @@
 // fallout_shared/tesobjectcont.cpp: TESObjectCONT (9 functions)
 
+#include "../../include/PlayerMover.h"
 #include "tesobjectcont_decls.h"
 #include "tesobjectcont_types_TESObjectCONT.h"
 #include "tesobjectcont_match_decls.h"
@@ -79,7 +80,7 @@ void TESObjectCONT::InitItem()
 
 // Reads a TESObjectCONT record: checks the form type, loads the record header, then dispatches each chunk to its loader until the chunk list ends.
 // @fnv 0x00516580
-bool TESObjectCONT::Load(TESFile* file)
+bool TESObjectCONT::LoadForm(TESFile* file)
 {
     unsigned char formType;
     int chunkID;
@@ -251,10 +252,6 @@ void FUN_00516b60_shell::CopyFromContainer(TESForm* apCopy)
 struct FUN_005e79a0_t
 {
     bool FUN_00485270(TESForm*);
-};
-struct PlayerMover
-{
-    unsigned int GetActorStateFlags();
 };
 struct FUN_00516bf0_shell
 {

@@ -1,3 +1,9 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
 // src/staging/blk_00e00000_o2_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00e00000_o2.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS /EHsc /Gy (unit lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
@@ -5,6 +11,15 @@
 // src/staging/blk_00e00000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/BSAudio.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkArray.h"
+#include "../../include/FinishingFlag.h"
+#include "../../include/hkSmallArray.h"
+#include "../../include/Vec4.h"
 extern int DAT_010305a8;
 extern int DAT_010c749c;
 void __cdecl FUN_00e00570(int* pObject, int b);
@@ -409,23 +424,6 @@ struct FUN_00e11d60_class
     int m_30;
     void __thiscall FUN_00e11d60(int val);
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
 extern int DAT_0102e388;
 struct FUN_00e00000_cls
@@ -1585,24 +1583,10 @@ struct FUN_00e11520_class
     char flag100;
     void FUN_00e11520(int a, int b);
 };
-struct hkFinishLoadedObjectFlagE00
-{
-    int m_bFinishing;
-};
-template <class T> class hkSmallArrayE00
-{
-  public:
-    hkSmallArrayE00() : m_data(0), m_iElementCount(0), m_iCapacityState(0x8000)
-    {}
-
-    T* m_data;
-    unsigned short m_iElementCount;
-    unsigned short m_iCapacityState;
-};
 class hkMemberE00
 {
   public:
-    hkMemberE00(hkFinishLoadedObjectFlagE00 flag) throw();
+    hkMemberE00(FinishingFlag flag) throw();
 
     int unk00;
     int unk04;
@@ -1611,18 +1595,18 @@ class hkMemberE00
 class hkBaseE00
 {
   public:
-    __forceinline hkBaseE00(hkFinishLoadedObjectFlagE00 flag) : m_kMemberDescriptor(flag)
+    __forceinline hkBaseE00(FinishingFlag flag) : m_kMemberDescriptor(flag)
     {}
     virtual ~hkBaseE00();
 
     int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
-    hkSmallArrayE00<int> m_ppData;
+    hkSmallArray<int> m_ppData;
     hkMemberE00 m_kMemberDescriptor;
 };
 class hkMidE00 : public hkBaseE00
 {
   public:
-    __forceinline hkMidE00(hkFinishLoadedObjectFlagE00 flag) : hkBaseE00(flag)
+    __forceinline hkMidE00(FinishingFlag flag) : hkBaseE00(flag)
     {
         m_iType = -16;
     }
@@ -1633,7 +1617,7 @@ class hkMidE00 : public hkBaseE00
 class hkDerivedE00 : public hkMidE00
 {
   public:
-    __forceinline hkDerivedE00(hkFinishLoadedObjectFlagE00 flag) : hkMidE00(flag)
+    __forceinline hkDerivedE00(FinishingFlag flag) : hkMidE00(flag)
     {}
     virtual ~hkDerivedE00();
 };
@@ -3270,7 +3254,8 @@ inline void swap32E05E(void* pv)
     swapE05E(c[0], c[3]);
     swapE05E(c[1], c[2]);
 }
-struct hkEntryE05E
+// Serialized header entry: two 16-bit fields, four-byte stride in SwapHkHeaderE05E (0x00e05ef0).
+struct SerializedHalfwordPair
 {
     unsigned short m_uiFilterValue;
     unsigned short m_auiShapeKeys;
@@ -3279,7 +3264,7 @@ struct hkHeaderE05E
 {
     unsigned char unk00;
     unsigned char unk01;
-    hkEntryE05E m_entries[7];
+    SerializedHalfwordPair m_entries[7];
     unsigned char unk1E;
     unsigned char unk1F;
     unsigned char unk20;
@@ -3323,47 +3308,7 @@ template <int SIZE> __forceinline void memCpyOneAlignedE030(void* dst, const voi
         d[i] = s[i];
     } while (++i < SIZE / 4);
 }
-struct hkMemoryRouterE030
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pStreamAllocator;
-};
-namespace hkRouterE030 {
-extern "C" hkMemoryRouterE030& __cdecl FUN_00c85750();
-}
 void __cdecl ResizeAudioStream(void* m_pPoolBase, void* pArray, int iSizeElem);
-template <class T> class hkArrayE030
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void AddBack(const T& e)
-    {
-        hkMemoryRouterE030& router = hkRouterE030::FUN_00c85750();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(router.m_pStreamAllocator, this, sizeof(T));
-        memCpyOneAlignedE030<sizeof(T)>(m_data + m_iElementCount, &e);
-        m_iElementCount++;
-    }
-    __forceinline T& AllocatePair()
-    {
-        hkMemoryRouterE030& router = hkRouterE030::FUN_00c85750();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(router.m_pStreamAllocator, this, sizeof(T));
-        for (int i = 0; i < 1; ++i)
-            new (m_data + m_iElementCount + i) T;
-        return m_data[m_iElementCount++];
-    }
-};
 struct RangeE030
 {
     int m_iStart;
@@ -3387,7 +3332,7 @@ class ParserE030
     const char* m_pcBegin;
     const char* m_pcEnd;
 
-    void FUN_00e03010(int iOffset, hkArrayE030<RangeE030>& kOut);
+    void FUN_00e03010(int iOffset, hkArray<RangeE030>& kOut);
 };
 struct Slot00e04e10
 {
@@ -3486,16 +3431,6 @@ struct FUN_00e11480
     virtual ~FUN_00e11480();
 };
 extern "C" void _ReadWriteBarrier();
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" float _mm_cvtss_f32(__m128 a);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" void _mm_store_ss(float* p, __m128 a);
 struct VecNode113
 {
     VecNode113* next;
@@ -3571,16 +3506,6 @@ struct ExportSection
 };
 void __cdecl FUN_00e0cce0();
 struct Allocator;
-class BSAudio
-{
-  public:
-    int unk00, unk04, unk08, unk0c;
-    Allocator* unk10;
-    Allocator& heap()
-    {
-        return *unk10;
-    }
-};
 struct PtrMap
 {
     void* unk00;
@@ -3591,11 +3516,11 @@ struct PtrMap
         unk00 = 0;
         unk04 = 0;
         unk08 = -1;
-        EnsureCapacity(FUN_00c85750()->heap(), 0);
+        EnsureCapacity(FUN_00c85750()->GetAlloc(), 0);
     }
     __forceinline void destroy()
     {
-        ProcessArgument(FUN_00c85750()->heap());
+        ProcessArgument(FUN_00c85750()->GetAlloc());
         FUN_00a29680();
     }
     void EnsureCapacity(Allocator& allocator, int count);
@@ -3606,7 +3531,7 @@ struct PtrMap
     void FUN_00a29680();
     __forceinline void insert(unsigned int key, unsigned int value)
     {
-        FUN_00cb1870(FUN_00c85750()->heap(), key, value);
+        FUN_00cb1870(FUN_00c85750()->GetAlloc(), key, value);
     }
     __forceinline unsigned int FindValueForKey(unsigned int key, unsigned int def)
     {
@@ -3616,10 +3541,6 @@ struct PtrMap
     {
         FUN_00cb1fb0(key);
     }
-};
-struct Vec4
-{
-    float x, y, z, w;
 };
 template <class T> struct ListItem
 {
@@ -3796,48 +3717,14 @@ inline ScalarQ operator+(const ScalarQ& a, const ScalarQ& b)
 {
     return _mm_add_ss(a.value, b.value);
 }
-struct VectorQ
-{
-    __m128 quad;
-    float& operator()(int component)
-    {
-        return quad.m128_f32[component];
-    }
-    ScalarQ spatialDot(const VectorQ& other) const
-    {
-        __m128 product = _mm_mul_ps(quad, other.quad);
-        __m128 xy = _mm_add_ss(_mm_shuffle_ps(product, product, 85), product);
-        return _mm_add_ss(_mm_shuffle_ps(product, product, 170), xy);
-    }
-    ScalarQ componentAt(int component) const
-    {
-        _ReadWriteBarrier();
-        switch (component)
-        {
-        case 0:
-            return quad;
-        case 1:
-            return _mm_shuffle_ps(quad, quad, 85);
-        case 2:
-            return _mm_shuffle_ps(quad, quad, 170);
-        case 3:
-        default:
-            return _mm_shuffle_ps(quad, quad, 255);
-        }
-    }
-    ScalarQ distance(const VectorQ& plane) const
-    {
-        return spatialDot(plane) + plane.componentAt(3);
-    }
-};
 struct VertexQ
 {
     VertexQ* next;
     VertexQ* prev;
     int u8, uC;
-    VectorQ position;
-    VectorQ normal;
-    VectorQ data;
+    hkVector4 position;
+    hkVector4 normal;
+    hkVector4 data;
 };
 struct BlockQ;
 struct PoolQ
@@ -3861,7 +3748,7 @@ struct MeshQ
     int unkd0, unkd4, unkd8, unkdc, unke0, unke4, unke8, unkec;
     int unkf0, unkf4, unkf8, unkfc, unk100;
     float squaredTolerance;
-    int FUN_00e11990(const VectorQ& plane, int index);
+    int FUN_00e11990(const hkVector4& plane, int index);
 };
 
 struct SortItem

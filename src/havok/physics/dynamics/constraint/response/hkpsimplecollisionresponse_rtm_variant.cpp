@@ -1,3 +1,11 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
 // src/havok/physics/dynamics/constraint/response/hkpsimplecollisionresponse_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/dynamics/constraint/response/hkpsimplecollisionresponse.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
@@ -5,149 +13,151 @@
 // src/havok/physics/dynamics/constraint/response/hkpsimplecollisionresponse.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/response/hkpsimplecollisionresponse.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Keep this unit's float-only intrinsic packet: the SDK's byte-array lanes
+// change VC9's /GS classification and generated parameter copies.
+#define _INCLUDED_MM2
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_load_ss(const float*);
-    void _mm_store_ss(float*, __m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_setzero_ps();
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
+    LocalM128 _mm_load_ss(const float*);
+    void _mm_store_ss(float*, LocalM128);
+    LocalM128 _mm_set_ss(float);
+    LocalM128 _mm_setzero_ps();
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+    LocalM128 _mm_rsqrt_ss(LocalM128);
+    LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+    LocalM128 _mm_rcp_ps(LocalM128);
+    LocalM128 _mm_max_ps(LocalM128, LocalM128);
+    LocalM128 _mm_div_ss(LocalM128, LocalM128);
+    LocalM128 _mm_set_ps1(float);
+    LocalM128 _mm_load_ps1(const float*);
+    LocalM128 _mm_load_ps(const float*);
+    void _mm_store_ps(float*, LocalM128);
 }
+
+#include "../../../../../../include/Transform.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkMatrix3.h"
+
 #include <math.h>
 
 class Scalar
 {
-    __m128 value;
+    LocalM128 value;
 
   public:
     Scalar()
     {}
-    Scalar(const __m128& x) : value(x)
+    Scalar(const LocalM128& x) : value(x)
     {}
     Scalar(float x)
     {
         value = _mm_load_ss(&x);
     }
-    __forceinline __m128 splat() const
+    __forceinline LocalM128 splat() const
     {
         return _mm_shuffle_ps(value, value, 0);
     }
-    __forceinline const __m128& get() const
+    __forceinline const LocalM128& get() const
     {
         return value;
     }
 };
 
-extern const __m128 DAT_010ec7f0;
-class Vector
+extern const LocalM128 DAT_010ec7f0;
+__forceinline float& hkVector4::operator()(int i)
 {
-  public:
-    __m128 q;
-    __forceinline Vector()
-    {}
-    __forceinline Vector(const Vector& x) : q(x.q)
-    {}
-    __forceinline Vector(const __m128& x) : q(x)
-    {}
-    __forceinline void operator=(const Vector& x)
-    {
-        q = x.q;
-    }
-    __forceinline void operator=(const __m128& x)
-    {
-        q = x;
-    }
-    __forceinline float& operator()(int i)
-    {
-        return reinterpret_cast<float*>(&q)[i];
-    }
-    __forceinline const float& operator()(int i) const
-    {
-        return reinterpret_cast<const float*>(&q)[i];
-    }
-    __forceinline void zero()
-    {
-        q = _mm_setzero_ps();
-    }
-    __forceinline void subtract(const Vector& a, const Vector& b)
-    {
-        q = _mm_sub_ps(a.q, b.q);
-    }
-    __forceinline void scale(const Scalar& a)
-    {
-        q = _mm_mul_ps(a.splat(), q);
-    }
-    __forceinline void product(const Scalar& a, const Vector& b)
-    {
-        q = _mm_mul_ps(a.splat(), b.q);
-    }
-    __forceinline void interpolate(const Vector& a, const Vector& b, const Scalar& t)
-    {
-        __m128 f = t.splat();
-        __m128 inv = _mm_sub_ps(DAT_010ec7f0, f);
-        q = _mm_add_ps(_mm_mul_ps(inv, a.q), _mm_mul_ps(f, b.q));
-    }
-    __forceinline Scalar dot(const Vector& b) const
-    {
-        __m128 squares = _mm_mul_ps(q, b.q);
-        __m128 xy = _mm_add_ss(_mm_shuffle_ps(squares, squares, 0x55), squares);
-        return _mm_add_ss(_mm_shuffle_ps(squares, squares, 0xaa), xy);
-    }
-    __forceinline Scalar inverseLength() const
-    {
-        const __m128 half = _mm_set_ss(0.5f);
-        const __m128 three = _mm_set_ss(3.0f);
-        const __m128 zero = _mm_set_ss(0.0f);
-        const __m128 squared = dot(*this).get();
-        const __m128 mask = _mm_cmpeq_ss(squared, zero);
-        const __m128 rough = _mm_rsqrt_ss(squared);
-        const __m128 refined =
-            _mm_mul_ss(_mm_mul_ss(half, rough), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(squared, rough), rough)));
-        return _mm_andnot_ps(mask, refined);
-    }
-    __forceinline void normalize()
-    {
-        __m128 inv = inverseLength().splat();
-        q = _mm_mul_ps(inv, q);
-    }
-    __forceinline void cross(const Vector& a, const Vector& b)
-    {
-        const __m128 qa = a.q;
-        const __m128 qb = b.q;
-        __m128 forward = _mm_mul_ps(_mm_shuffle_ps(qa, qa, 0xc9), _mm_shuffle_ps(qb, qb, 0xd2));
-        __m128 reverse = _mm_mul_ps(_mm_shuffle_ps(qa, qa, 0xd2), _mm_shuffle_ps(qb, qb, 0xc9));
-        q = _mm_sub_ps(forward, reverse);
-    }
-};
+    return reinterpret_cast<float*>(&m_vComponents)[i];
+}
+
+__forceinline const float& hkVector4::operator()(int i) const
+{
+    return reinterpret_cast<const float*>(&m_vComponents)[i];
+}
+
+__forceinline void hkVector4::zero()
+{
+    m_vComponents = _mm_setzero_ps();
+}
+
+__forceinline void hkVector4::subtract(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4::scale(const Scalar& a)
+{
+    m_vComponents = _mm_mul_ps(a.splat(), m_vComponents);
+}
+
+__forceinline void hkVector4::product(const Scalar& a, const hkVector4& b)
+{
+    m_vComponents = _mm_mul_ps(a.splat(), b.m_vComponents);
+}
+
+__forceinline void hkVector4::interpolate(const hkVector4& a, const hkVector4& b, const Scalar& t)
+{
+    LocalM128 f = t.splat();
+    LocalM128 inv = _mm_sub_ps(DAT_010ec7f0, f);
+    m_vComponents = _mm_add_ps(_mm_mul_ps(inv, a.m_vComponents), _mm_mul_ps(f, b.m_vComponents));
+}
+
+__forceinline Scalar hkVector4::dot(const hkVector4& b) const
+{
+    LocalM128 squares = _mm_mul_ps(m_vComponents, b.m_vComponents);
+    LocalM128 xy = _mm_add_ss(_mm_shuffle_ps(squares, squares, 0x55), squares);
+    return _mm_add_ss(_mm_shuffle_ps(squares, squares, 0xaa), xy);
+}
+
+__forceinline Scalar hkVector4::inverseLength() const
+{
+    const LocalM128 half = _mm_set_ss(0.5f);
+    const LocalM128 three = _mm_set_ss(3.0f);
+    const LocalM128 zero = _mm_set_ss(0.0f);
+    const LocalM128 squared = dot(*this).get();
+    const LocalM128 mask = _mm_cmpeq_ss(squared, zero);
+    const LocalM128 rough = _mm_rsqrt_ss(squared);
+    const LocalM128 refined =
+        _mm_mul_ss(_mm_mul_ss(half, rough), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(squared, rough), rough)));
+    return _mm_andnot_ps(mask, refined);
+}
+
+__forceinline void hkVector4::normalize()
+{
+    LocalM128 inv = inverseLength().splat();
+    m_vComponents = _mm_mul_ps(inv, m_vComponents);
+}
+
+__forceinline void hkVector4::cross(const hkVector4& a, const hkVector4& b)
+{
+    const LocalM128 qa = a.m_vComponents;
+    const LocalM128 qb = b.m_vComponents;
+    LocalM128 forward = _mm_mul_ps(_mm_shuffle_ps(qa, qa, 0xc9), _mm_shuffle_ps(qb, qb, 0xd2));
+    LocalM128 reverse = _mm_mul_ps(_mm_shuffle_ps(qa, qa, 0xd2), _mm_shuffle_ps(qb, qb, 0xc9));
+    m_vComponents = _mm_sub_ps(forward, reverse);
+}
+
 struct Matrix
 {
-    Vector col0, col1, col2;
-    __forceinline Vector& column(int i)
+    hkVector4 col0, col1, col2;
+    __forceinline hkVector4& column(int i)
     {
         return (&col0)[i];
     }
 };
-struct Transform
-{
-    Matrix rotation;
-    Vector translation;
-};
+
 struct Sweep
 {
-    Vector center0, center1, rotation0, rotation1, localCenter;
+    hkVector4 center0, center1, rotation0, rotation1, localCenter;
     __forceinline float inverseTime() const
     {
         return center1(3);
@@ -162,7 +172,7 @@ struct MotionState
 {
     Transform transform;
     Sweep swept;
-    Vector deltaAngle;
+    hkVector4 deltaAngle;
     float radius;
     unsigned short dampingLinear, dampingAngular;
     float timeFactor;
@@ -170,19 +180,19 @@ struct MotionState
 };
 struct Input
 {
-    Vector relative;
+    hkVector4 relative;
     Matrix inertia;
-    Vector inverseMass;
+    hkVector4 inverseMass;
     const Transform* transform;
 };
 struct Velocity
 {
-    Vector linear, angular;
+    hkVector4 linear, angular;
 };
 struct AlignedDynamicArray
 {
     Matrix jacobian, inverseJacobian;
-    Vector inverseMass;
+    hkVector4 inverseMass;
     float mass;
     const Transform* transform;
 };
@@ -191,14 +201,16 @@ struct Constraint
     AlignedDynamicArray body0, body1;
     Matrix basis, inverseMass, mass;
 };
-struct Point
+// hkContactPoint (position, separating normal) over this unit's hkVector4; the shared hkContactPoint is built on
+// hkVector4, which this unit does not use. Not the shared x,y,z Point.
+struct SimpleContactPoint
 {
-    Vector position, normal;
-    __forceinline const Vector& pos() const
+    hkVector4 position, normal;
+    __forceinline const hkVector4& pos() const
     {
         return position;
     }
-    __forceinline const Vector& dir() const
+    __forceinline const hkVector4& dir() const
     {
         return normal;
     }
@@ -234,12 +246,12 @@ struct Motion : RefObject
     virtual void slot34();
     virtual void slot38();
     virtual void slot3c();
-    virtual void setLinear(const Vector&);
-    virtual void setAngular(const Vector&);
+    virtual void setLinear(const hkVector4&);
+    virtual void setAngular(const hkVector4&);
     unsigned char type, counter;
     unsigned short inactive0, inactive1;
     MotionState state;
-    Vector inverseMass, linear, angular;
+    hkVector4 inverseMass, linear, angular;
     __forceinline const Transform& transform() const
     {
         return state.transform;
@@ -248,11 +260,11 @@ struct Motion : RefObject
     {
         return &state;
     }
-    __forceinline const Vector& linearVelocity() const
+    __forceinline const hkVector4& linearVelocity() const
     {
         return linear;
     }
-    __forceinline const Vector& angularVelocity() const
+    __forceinline const hkVector4& angularVelocity() const
     {
         return angular;
     }
@@ -273,19 +285,19 @@ struct Manager
     virtual void slot2c();
     virtual void slot30();
     virtual void slot34();
-    virtual void begin(const Point&, Input&, Velocity&, Input&, Velocity&);
-    virtual void end(const Point&, float, Input&, Velocity&, Input&, Velocity&);
+    virtual void begin(const SimpleContactPoint&, Input&, Velocity&, Input&, Velocity&);
+    virtual void end(const SimpleContactPoint&, float, Input&, Velocity&, Input&, Velocity&);
 };
 extern "C" void __cdecl FUN_00df5950(const Input&, const Input&, const Matrix&, Constraint&);
 extern "C" float __cdecl FUN_00df5f80(const Constraint&, Params&, Velocity&, Velocity&);
-extern "C" void __cdecl FUN_00df5e80(const Constraint&, Velocity&, Velocity&, Vector&);
+extern "C" void __cdecl FUN_00df5e80(const Constraint&, Velocity&, Velocity&, hkVector4&);
 
-static __forceinline void centerAt(const MotionState& ms, float time, Vector& center)
+static __forceinline void centerAt(const MotionState& ms, float time, hkVector4& center)
 {
     float f = ms.swept.fraction(time);
     center.interpolate(ms.swept.center0, ms.swept.center1, f);
 }
-static __forceinline void velocityOf(const MotionState& ms, Vector& linear, Vector& angular)
+static __forceinline void velocityOf(const MotionState& ms, hkVector4& linear, hkVector4& angular)
 {
     linear.subtract(ms.swept.center1, ms.swept.center0);
     linear.scale(ms.swept.inverseTime());
@@ -295,7 +307,7 @@ static __forceinline float absolute(float f)
 {
     return fabsf(f);
 }
-static __forceinline void perpendicular(const Vector& normal, Vector& tangent)
+static __forceinline void perpendicular(const hkVector4& normal, hkVector4& tangent)
 {
     int smallest = 0, left = 1, right = 2;
     float x = absolute(normal(0));
@@ -316,7 +328,7 @@ static __forceinline void perpendicular(const Vector& normal, Vector& tangent)
     tangent(left) = normal(right);
     tangent(right) = -normal(left);
 }
-static __forceinline void makeBasis(const Vector& normal, Matrix& basis)
+static __forceinline void makeBasis(const hkVector4& normal, Matrix& basis)
 {
     basis.column(0) = normal;
     perpendicular(normal, basis.column(1));
@@ -325,13 +337,13 @@ static __forceinline void makeBasis(const Vector& normal, Matrix& basis)
 }
 
 // @fnv 0x00d9f250
-extern "C" void __cdecl FUN_00d9f250(const Point& point, float time, Params& params, Motion* a, Motion* b, Manager* mgr,
+extern "C" void __cdecl FUN_00d9f250(const SimpleContactPoint& point, float time, Params& params, Motion* a, Motion* b, Manager* mgr,
                                      Result& result)
 {
     Input ia;
     {
         ia.inverseMass = a->inverseMass;
-        Vector center;
+        hkVector4 center;
         centerAt(*a->motionState(), time, center);
         ia.relative.subtract(point.pos(), center);
         a->inverseInertia(ia.inertia);
@@ -340,7 +352,7 @@ extern "C" void __cdecl FUN_00d9f250(const Point& point, float time, Params& par
     Input ib;
     {
         ib.inverseMass = b->inverseMass;
-        Vector center;
+        hkVector4 center;
         centerAt(*b->motionState(), time, center);
         ib.relative.subtract(point.pos(), center);
         b->inverseInertia(ib.inertia);
@@ -362,7 +374,7 @@ extern "C" void __cdecl FUN_00d9f250(const Point& point, float time, Params& par
     result.impulse = FUN_00df5f80(info, params, va, vb);
     mgr->end(point, result.impulse, ia, va, ib, vb);
     {
-        Vector pa, pb;
+        hkVector4 pa, pb;
         FUN_00df5e80(info, oa, vb, pa);
         FUN_00df5e80(info, va, ob, pb);
         result.velocityA = pa(0);
@@ -380,30 +392,8 @@ extern "C" void __cdecl FUN_00d9f250(const Point& point, float time, Params& par
     }
 }
 
-namespace ConstraintInit {
 extern "C" void _ReadWriteBarrier(void);
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-extern "C"
-{
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_max_ps(__m128, __m128);
-    __m128 _mm_setzero_ps(void);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_div_ss(__m128, __m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_load_ss(float const*);
-    __m128 _mm_load_ps1(float const*);
-    __m128 _mm_load_ps(float const*);
-    void _mm_store_ps(float*, __m128);
-}
-typedef __m128 hkQuadReal;
+typedef LocalM128 hkQuadReal;
 typedef float hkReal;
 namespace MathUtilities {
 template <typename T> inline T max2(T x, T y)
@@ -450,136 +440,134 @@ static __forceinline void maximumLane(const RealLane& a, const RealLane& b, Real
     result = _mm_max_ps(a.quad(), b.quad());
 }
 
-class hkMatrix3;
-class hkVector4
+inline hkVector4::hkVector4(const hkVector4& v) : m_vComponents(v.m_vComponents) {}
+inline void hkVector4::cofactor(const hkVector4& b, const hkVector4& a)
 {
-  public:
-    hkQuadReal m_vComponents;
+    hkQuadReal p = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9),
+                              _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2));
+    hkQuadReal n = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2),
+                              _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(p, n);
+}
 
-    void cofactor(const hkVector4& b, const hkVector4& a)
-    {
-        hkQuadReal p = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9),
-                                  _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2));
-        hkQuadReal n = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2),
-                                  _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(p, n);
-    }
-    RealLane inner3(const hkVector4& v) const
-    {
-        hkQuadReal terms = _mm_mul_ps(m_vComponents, v.m_vComponents);
-        hkQuadReal xy = _mm_add_ss(_mm_shuffle_ps(terms, terms, 0x55), terms);
-        return _mm_add_ss(_mm_shuffle_ps(terms, terms, 0xaa), xy);
-    }
-    void scaled(const hkQuadReal& scale, const hkVector4& v)
-    {
-        m_vComponents = _mm_mul_ps(scale, v.m_vComponents);
-    }
-
-    hkReal& operator()(int i)
-    {
-        return ((hkReal*)&m_vComponents)[i];
-    }
-    const hkReal& operator()(int i) const
-    {
-        return ((const hkReal*)&m_vComponents)[i];
-    }
-    void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    void add4(const hkVector4& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-    void setCross(const hkVector4& v0, const hkVector4& v1)
-    {
-        const hkQuadReal b = v1.m_vComponents;
-        const hkQuadReal a = v0.m_vComponents;
-        m_vComponents = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a, a, 0xc9), _mm_shuffle_ps(b, b, 0xd2)),
-                                   _mm_mul_ps(_mm_shuffle_ps(a, a, 0xd2), _mm_shuffle_ps(b, b, 0xc9)));
-    }
-    inline void _setMul3(const hkMatrix3& r, const hkVector4& v);
-};
-class hkMatrix3
+inline RealLane hkVector4::inner3(const hkVector4& v) const
 {
-  public:
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-    hkVector4& getColumn(int i)
-    {
-        return (&m_kColumn0)[i];
-    }
-    const hkVector4& getColumn(int i) const
-    {
-        return (&m_kColumn0)[i];
-    }
-    hkReal& operator()(int r, int c)
-    {
-        return getColumn(c)(r);
-    }
-    void operator=(const hkMatrix3& m)
-    {
-        m_kColumn0 = m.m_kColumn0;
-        m_kColumn1 = m.m_kColumn1;
-        m_kColumn2 = m.m_kColumn2;
-    }
-    void setZero()
-    {
-        m_kColumn0.setZero4();
-        m_kColumn1.setZero4();
-        m_kColumn2.setZero4();
-    }
-    void addTo(hkMatrix3& dst) const
-    {
-        dst.m_kColumn0.m_vComponents = _mm_add_ps(dst.m_kColumn0.m_vComponents, m_kColumn0.m_vComponents);
-        dst.m_kColumn1.m_vComponents = _mm_add_ps(dst.m_kColumn1.m_vComponents, m_kColumn1.m_vComponents);
-        dst.m_kColumn2.m_vComponents = _mm_add_ps(dst.m_kColumn2.m_vComponents, m_kColumn2.m_vComponents);
-    }
-    __forceinline void SetProduct(const hkMatrix3& a, const hkMatrix3& b)
-    {
-        const hkQuadReal c0 = a.m_kColumn0.m_vComponents;
-        const hkQuadReal c1 = a.m_kColumn1.m_vComponents;
-        const hkQuadReal c2 = a.m_kColumn2.m_vComponents;
-        for (int i = 2; i >= 0; i--)
-        {
-            const hkQuadReal t = b.getColumn(i).m_vComponents;
-            const hkQuadReal xb = _mm_shuffle_ps(t, t, 0x00);
-            const hkQuadReal yb = _mm_shuffle_ps(t, t, 0x55);
-            const hkQuadReal zb = _mm_shuffle_ps(t, t, 0xaa);
-            getColumn(i).m_vComponents =
-                _mm_add_ps(_mm_add_ps(_mm_mul_ps(xb, c0), _mm_mul_ps(yb, c1)), _mm_mul_ps(zb, c2));
-        }
-    }
-    __forceinline void setMul2(const hkMatrix3& a, const hkMatrix3& b)
-    {
-        const hkQuadReal& c1 = a.getColumn(1).m_vComponents;
-        const hkQuadReal& c0 = a.getColumn(0).m_vComponents;
-        const hkQuadReal& c2 = a.getColumn(2).m_vComponents;
+    hkQuadReal terms = _mm_mul_ps(m_vComponents, v.m_vComponents);
+    hkQuadReal xy = _mm_add_ss(_mm_shuffle_ps(terms, terms, 0x55), terms);
+    return _mm_add_ss(_mm_shuffle_ps(terms, terms, 0xaa), xy);
+}
 
-        for (int i = 2; i >= 0; i--)
-        {
-            hkQuadReal t = b.getColumn(i).m_vComponents;
-            hkQuadReal x = _mm_shuffle_ps(t, t, 0x00);
-            hkQuadReal p = _mm_mul_ps(c0, x);
-            hkQuadReal y = _mm_shuffle_ps(t, t, 0x55);
-            hkQuadReal q = _mm_mul_ps(c1, y);
-            hkQuadReal z = _mm_shuffle_ps(t, t, 0xaa);
-            hkQuadReal w = _mm_mul_ps(c2, z);
-            getColumn(i).m_vComponents = _mm_add_ps(_mm_add_ps(p, q), w);
-        }
-    }
-    void transpose()
+inline void hkVector4::scaled(const hkQuadReal& scale, const hkVector4& v)
+{
+    m_vComponents = _mm_mul_ps(scale, v.m_vComponents);
+}
+
+
+
+
+
+inline void hkVector4::operator=(const hkVector4& v)
+{
+    m_vComponents = v.m_vComponents;
+}
+
+inline void hkVector4::setZero4()
+{
+    m_vComponents = _mm_setzero_ps();
+}
+
+inline void hkVector4::add4(const hkVector4& v)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
+}
+
+inline void hkVector4::setCross(const hkVector4& v0, const hkVector4& v1)
+{
+    const hkQuadReal b = v1.m_vComponents;
+    const hkQuadReal a = v0.m_vComponents;
+    m_vComponents = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(a, a, 0xc9), _mm_shuffle_ps(b, b, 0xd2)),
+                               _mm_mul_ps(_mm_shuffle_ps(a, a, 0xd2), _mm_shuffle_ps(b, b, 0xc9)));
+}
+
+inline hkMatrix3::hkMatrix3() {}
+inline const hkVector4& hkMatrix3::getColumn(int iCol) const
+{
+    return (&m_kColumn0)[iCol];
+}
+
+inline hkVector4& hkMatrix3::getColumn(int iCol)
+{
+    return (&m_kColumn0)[iCol];
+}
+
+inline hkReal& hkMatrix3::operator()(int iRow, int iCol)
+{
+    return getColumn(iCol)(iRow);
+}
+
+inline void hkMatrix3::operator=(const hkMatrix3& kRhs)
+{
+    m_kColumn0 = kRhs.m_kColumn0;
+    m_kColumn1 = kRhs.m_kColumn1;
+    m_kColumn2 = kRhs.m_kColumn2;
+}
+
+inline void hkMatrix3::setZero()
+{
+    m_kColumn0.setZero4();
+    m_kColumn1.setZero4();
+    m_kColumn2.setZero4();
+}
+
+inline void hkMatrix3::addTo(hkMatrix3& dst) const
+{
+    dst.m_kColumn0.m_vComponents = _mm_add_ps(dst.m_kColumn0.m_vComponents, m_kColumn0.m_vComponents);
+    dst.m_kColumn1.m_vComponents = _mm_add_ps(dst.m_kColumn1.m_vComponents, m_kColumn1.m_vComponents);
+    dst.m_kColumn2.m_vComponents = _mm_add_ps(dst.m_kColumn2.m_vComponents, m_kColumn2.m_vComponents);
+}
+
+__forceinline void hkMatrix3::SetProduct(const hkMatrix3& a, const hkMatrix3& b) throw()
+{
+    const hkQuadReal c0 = a.m_kColumn0.m_vComponents;
+    const hkQuadReal c1 = a.m_kColumn1.m_vComponents;
+    const hkQuadReal c2 = a.m_kColumn2.m_vComponents;
+    for (int i = 2; i >= 0; i--)
     {
-        AlgorithmUtilities::swap(m_kColumn1(0), m_kColumn0(1));
-        AlgorithmUtilities::swap(m_kColumn2(0), m_kColumn0(2));
-        AlgorithmUtilities::swap(m_kColumn2(1), m_kColumn1(2));
+        const hkQuadReal t = b.getColumn(i).m_vComponents;
+        const hkQuadReal xb = _mm_shuffle_ps(t, t, 0x00);
+        const hkQuadReal yb = _mm_shuffle_ps(t, t, 0x55);
+        const hkQuadReal zb = _mm_shuffle_ps(t, t, 0xaa);
+        getColumn(i).m_vComponents =
+            _mm_add_ps(_mm_add_ps(_mm_mul_ps(xb, c0), _mm_mul_ps(yb, c1)), _mm_mul_ps(zb, c2));
     }
-};
+}
+
+__forceinline void hkMatrix3::setMul2(const hkMatrix3& a, const hkMatrix3& b)
+{
+    const hkQuadReal& c1 = a.getColumn(1).m_vComponents;
+    const hkQuadReal& c0 = a.getColumn(0).m_vComponents;
+    const hkQuadReal& c2 = a.getColumn(2).m_vComponents;
+
+    for (int i = 2; i >= 0; i--)
+    {
+        hkQuadReal t = b.getColumn(i).m_vComponents;
+        hkQuadReal x = _mm_shuffle_ps(t, t, 0x00);
+        hkQuadReal p = _mm_mul_ps(c0, x);
+        hkQuadReal y = _mm_shuffle_ps(t, t, 0x55);
+        hkQuadReal q = _mm_mul_ps(c1, y);
+        hkQuadReal z = _mm_shuffle_ps(t, t, 0xaa);
+        hkQuadReal w = _mm_mul_ps(c2, z);
+        getColumn(i).m_vComponents = _mm_add_ps(_mm_add_ps(p, q), w);
+    }
+}
+
+inline void hkMatrix3::transpose() throw()
+{
+    AlgorithmUtilities::swap(m_kColumn1(0), m_kColumn0(1));
+    AlgorithmUtilities::swap(m_kColumn2(0), m_kColumn0(2));
+    AlgorithmUtilities::swap(m_kColumn2(1), m_kColumn1(2));
+}
+
 inline void hkVector4::_setMul3(const hkMatrix3& r, const hkVector4& v)
 {
     hkQuadReal t = v.m_vComponents;
@@ -591,6 +579,9 @@ inline void hkVector4::_setMul3(const hkMatrix3& r, const hkVector4& v)
     hkQuadReal r2 = _mm_mul_ps(r.getColumn(2).m_vComponents, zb);
     m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
+
+namespace ConstraintInit {
+
 static __forceinline hkQuadReal hkCross(const hkQuadReal& a, const hkQuadReal& b)
 {
     const hkQuadReal cross0 = _mm_mul_ps(_mm_shuffle_ps(a, a, 0xc9), _mm_shuffle_ps(b, b, 0xd2));

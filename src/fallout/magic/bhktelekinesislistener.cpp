@@ -2,11 +2,10 @@
 // src/fallout/magic/bhktelekinesislistener.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/bhktelekinesislistener.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct bhkTelekinesisListener
-{
-    void FUN_00807910();
-    void* Destroy(unsigned int flags);
-};
+#include "../../../include/BSAudio.h"
+#include "../../../include/hkpEntity.h"
+
+#include "../../../include/bhkTelekinesisListener.h"
 
 extern "C" void __cdecl _Deallocate(void*);
 
@@ -14,7 +13,7 @@ extern "C" void __cdecl _Deallocate(void*);
 // @fnv 0x008078e0
 void* bhkTelekinesisListener::Destroy(unsigned int flags)
 {
-    FUN_00807910();
+    this->bhkTelekinesisListener::~bhkTelekinesisListener();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -52,7 +51,6 @@ void FUN_00807980_shell::FUN_00807980(void* apEntity)
     delete (DelVirt*)((char*)this - 4);
 }
 
-struct hkpEntity;
 struct FUN_008079e0_shell
 {
     void FUN_00807a10(hkpEntity*);
@@ -66,10 +64,6 @@ void FUN_008079e0_shell::FUN_008079e0(hkpEntity* entity)
         ((FUN_008079e0_shell*)((char*)this - 8))->FUN_00807a10(entity);
 }
 
-struct BSAudio
-{
-    void* GetAudioBackendData();
-};
 struct ITopic
 {
     virtual void u0();
@@ -88,10 +82,6 @@ int GetTopicResult(int aiValue)
 }
 
 namespace fnv_00807c20 {
-struct BSAudio
-{
-    void* GetAudioBackendData();
-};
 BSAudio* __cdecl _FUN_00c85750();
 struct UnkTopic
 {
@@ -128,12 +118,6 @@ struct FUN_00807c50
 FUN_00807c50::FUN_00807c50()
 {}
 
-struct hkpEntity
-{
-    void __thiscall RemoveContactListener(void*);
-    void __thiscall AddEntityListener(void*);
-    void __thiscall RemoveEntityListener(void*);
-};
 // @fnv 0x00807cb0
 void __cdecl FUN_00807cb0(char* listener, hkpEntity* entity)
 {
@@ -181,10 +165,6 @@ void FUN_00807d60_shell::FUN_00807d60()
 }
 
 namespace fnv_00807dc0 {
-struct BSAudio
-{
-    void* GetAudioBackendData();
-};
 BSAudio* _FUN_00c85750();
 struct Topic
 {
@@ -201,50 +181,14 @@ void FUN_00807dc0(int aiArg1, int aiArg2)
 }
 }  // namespace fnv_00807dc0
 
-// Candidate for FUN_00807910 (0x00807910, 101 bytes) - bhkTelekinesisListener::~bhkTelekinesisListener()
-// The original is the non-deleting destructor of a class whose
-//   +0x00 subobject is a base class with a non-trivial destructor,
-//   +0x04 member has a non-trivial destructor,
-//   +0x08 member has a non-trivial destructor.
-// The destruction order (reverse declaration order) and the EH scope-state
-// sequence (1 -> 0 -> -1) are produced by the compiler itself.
-
-// base subobject at +0x00 (4 bytes: a vptr in the game)
-struct FNV_TK_Base
-{
-    int unk00;
-    ~FNV_TK_Base();
-};
-
-// member at +0x04
-struct FNV_TK_Member04
-{
-    int unk00;
-    ~FNV_TK_Member04();
-};
-
-// member at +0x08
-struct FNV_TK_Member08
-{
-    int unk00;
-    ~FNV_TK_Member08();
-};
-
-struct FUN_00807910_Listener : FNV_TK_Base
-{
-    FNV_TK_Member04 unk04;
-    FNV_TK_Member08 unk08;
-    ~FUN_00807910_Listener();
-};
-
-// Destructor for the listener object; destroys its member subobjects and base.
-// @fnv 0x00807910
-FUN_00807910_Listener::~FUN_00807910_Listener()
-{}
+// bhkTelekinesisListener's destructor is implicit: it destroys hkpEntityActivationListener (+0x08),
+// hkpEntityListener (+0x04) and bhkContactListener (+0x00) without storing this class's vftables.
+// It is emitted here because Destroy calls it.
+// @fnv 0x00807910 (bhkTelekinesisListener::~bhkTelekinesisListener, implicit)
 
 // ---------------------------------------------------------------------------
-// GetOrCreate807c50 - the lazy "get or create" accessor of the object whose
-// member at +0x214 holds a pointer to a FUN_00807c50.
+// GetOrCreate807c50 - the lazy "get or create" accessor of hkpEntity's
+// extended listeners at +0x214.
 //
 // The original is an /Od /EHsc /GS member function:
 //
@@ -290,155 +234,16 @@ struct FNV_807c50
     }
 };
 
-// The class that owns GetOrCreate807c50.
-struct FNV_807b50_owner
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    FNV_807c50* m_214;
-    FNV_807c50* GetOrCreate807c50();
-};
-
-// Returns m_214, allocating a new FNV_807c50 and storing it there first if it is null.
+// Returns the extended listeners, allocating them first if needed.
+// Kept here because hkpEntity does not yet declare the accessor.
 // @fnv 0x00807b50
-FNV_807c50* FNV_807b50_owner::GetOrCreate807c50()
+FNV_807c50* __fastcall GetOrCreate807c50(hkpEntity* entity)
 {
-    if (this->m_214 == 0)
+    if (entity->m_pExtendedListeners == 0)
     {
-        this->m_214 = new FNV_807c50();
+        entity->m_pExtendedListeners = reinterpret_cast<hkpEntityExtendedListeners*>(new FNV_807c50());
     }
-    return this->m_214;
+    return reinterpret_cast<FNV_807c50*>(entity->m_pExtendedListeners);
 }
 
 namespace TelekinesisRemovalDetail {
@@ -467,12 +272,12 @@ void __cdecl FUN_00807ac0(void* body)
     {
         int index;
         for (index = 0; index < (int)reinterpret_cast<ActivationArray*>(
-                                    reinterpret_cast<FNV_807b50_owner*>(entity)->GetOrCreate807c50())
+                                    GetOrCreate807c50(entity))
                                     ->GetShortAtOffset4();
              ++index)
         {
             FUN_008079e0_shell* listener =
-                reinterpret_cast<ActivationArray*>(reinterpret_cast<FNV_807b50_owner*>(entity)->GetOrCreate807c50())
+                reinterpret_cast<ActivationArray*>(GetOrCreate807c50(entity))
                     ->FUN_00629ab0((unsigned int)index);
             {
                 FUN_008079e0_shell* telekinesis = reinterpret_cast<FUN_008079e0_shell*>(
@@ -626,9 +431,6 @@ struct TelekinesisBodyView
 
 struct TelekinesisFinishReceiver : ::bhkTelekinesisListener
 {
-    void* contactListenerTable;
-    void* entityListenerTable;
-    void* activationListenerTable;
     TelekinesisReferenceView* pRef;
     TelekinesisBodyView* pBody;
     unsigned int m_Filter;

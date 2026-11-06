@@ -5,16 +5,15 @@
 
 // src/havok/common/serialize/util/hkserializeutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/util/hkserializeutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/Pair.h"
+
 void __cdecl FUN_00d48620(int a, int b, int c);
 void __cdecl FUN_00d48640(int a, int b);
 extern "C" int __cdecl FUN_00d485a0(int, int, int, int, int);
 void __cdecl FUN_00d48660(int a, int b, int c);
 extern int DAT_0102e388;
 extern int DAT_010d7540;
-struct hkReferencedObject
-{
-    void removeReference();
-};
 struct FUN_00dcc160_cls
 {
     void* vtbl;
@@ -168,11 +167,6 @@ struct D493E0Loader
     D493E0Registry* m_registry;
 
     D493E0Ref FindObject(const void* key, int flags) const;
-};
-struct Pair
-{
-    void* first;
-    void* second;
 };
 struct Vt4Obj
 {

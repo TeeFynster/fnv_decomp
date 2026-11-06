@@ -1,6 +1,12 @@
-// gamebryo2.2/corelibs/nimain/nidirectionallight.cpp: NiDirectionalLight, NiDirectionalLightShell, LightDerived (8 functions)
+// gamebryo2.2/corelibs/nimain/nidirectionallight.cpp: NiDirectionalLight (8 functions)
 
-#include "nidirectionallight_decls.h"
+#include "../../../../include/NiDirectionalLight.h"
+#include "../../../../include/NiLight.h"
+#include "../../../../include/NiUpdateData.h"
+#include "../../../../include/NiTPrimitiveArray.h"
+#include "../../../../include/NiPoint3.h"
+#include <string.h>
+
 // @fnv 0x00a71ec0
 void NiDirectionalLight::CopyMemberData(NiDirectionalLight* pDest, CloningProcess& process)
 {
@@ -14,31 +20,20 @@ void NiDirectionalLight::CopyMemberData(NiDirectionalLight* pDest, CloningProces
 void __fastcall FUN_00a71f60(void*);
 extern int DAT_0109d7b4;
 
-struct Vec3_00a75c20
-{
-    float x, y, z;
-    Vec3_00a75c20()
-    {}
-    Vec3_00a75c20(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-};
+inline NiPoint3::NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
+{}
 
-// Calls FUN_00a71f60, sets the vtable to &DAT_0109d7b4, stores Vec3(1,0,0) at pThis+0xf0 and byte 3 at pThis+0x9d, then returns pThis.
+// Calls FUN_00a71f60, sets the vtable to &DAT_0109d7b4, stores NiPoint3(1,0,0) at pThis+0xf0 and byte 3 at pThis+0x9d, then returns pThis.
 // @fnv 0x00a75c20
 void* __fastcall FUN_00a75c20(char* pObject)
 {
     FUN_00a71f60(pObject);
     *(int**)pObject = &DAT_0109d7b4;
-    Vec3_00a75c20 v(1.0f, 0.0f, 0.0f);
-    *(Vec3_00a75c20*)(pObject + 0xf0) = v;
+    NiPoint3 v(1.0f, 0.0f, 0.0f);
+    memcpy(pObject + 0xf0, &v, sizeof(v));
     *(unsigned char*)(pObject + 0x9d) = 3;
     return pObject;
 }
-
-struct FUN_00a75c70_shell : public NiDirectionalLight
-{
-    void* FUN_00a75c70();
-};
 
 struct GlobalObjectO2_00a7b610
 {
@@ -48,56 +43,30 @@ struct GlobalObjectO2_00a7b610
 GlobalObjectO2_00a7b610 g_011f4a68;
 
 // @fnv 0x00a75c70
-void* FUN_00a75c70_shell::FUN_00a75c70()
+void* __fastcall FUN_00a75c70(NiDirectionalLight*)
 {
     return &g_011f4a68;
 }
-
-struct NiDirectionalLightShell : NiDirectionalLight
-{
-    NiDirectionalLight* __thiscall FUN_00a75c80(int n);
-};
 
 extern "C" void __cdecl FUN_00a72010(void);
 extern "C" void __cdecl __Dummy_00b6fef0(void* p, int n);
 
 // Calls FUN_00a72010, then if bit 0 of n is set calls __Dummy_00b6fef0 on this with 0xfc, and returns this.
 // @fnv 0x00a75c80
-NiDirectionalLight* __thiscall NiDirectionalLightShell::FUN_00a75c80(int aiFlags)
+NiDirectionalLight* __fastcall FUN_00a75c80(NiDirectionalLight* light, void*, int aiFlags)
 {
     FUN_00a72010();
     if (aiFlags & 1)
-        __Dummy_00b6fef0(this, 0xfc);
-    return this;
+        __Dummy_00b6fef0(light, 0xfc);
+    return light;
 }
-
-struct NiUpdateData
-{
-    float fTime;
-    bool m_bUpdateEnabled;
-    bool m_bRender;
-    bool m_bInterpolate;
-    bool m_bTimeToDie;
-    bool m_bVisible;
-    char _pad_9[3];
-};
-typedef char _sizecheck_NiUpdateData[sizeof(NiUpdateData) == 12 ? 1 : -1];
-struct FUN_00a75cb0_shell : public NiDirectionalLight
-{
-    void FUN_00a75cb0(NiUpdateData*);
-};
-
-struct NiAVObject
-{
-    void UpdateWorldData(NiUpdateData&);
-};
 
 // Calls NiAVObject::UpdateWorldData, copies three floats from offsets 0x68/0x74/0x80 to 0xf0/0xf4/0xf8, and increments the int at 0xa8.
 // @fnv 0x00a75cb0
-void FUN_00a75cb0_shell::FUN_00a75cb0(NiUpdateData* UpdateData)
+void __fastcall FUN_00a75cb0(NiDirectionalLight* light, void*, NiUpdateData* UpdateData)
 {
-    ((NiAVObject*)this)->UpdateWorldData(*UpdateData);
-    char* p = reinterpret_cast<char*>(this);
+    light->NiAVObject::UpdateWorldData(*UpdateData);
+    char* p = reinterpret_cast<char*>(light);
     *reinterpret_cast<float*>(p + 0xf0) = *reinterpret_cast<float*>(p + 0x68);
     *reinterpret_cast<float*>(p + 0xf4) = *reinterpret_cast<float*>(p + 0x74);
     *reinterpret_cast<float*>(p + 0xf8) = *reinterpret_cast<float*>(p + 0x80);
@@ -106,22 +75,10 @@ void FUN_00a75cb0_shell::FUN_00a75cb0(NiUpdateData* UpdateData)
 }
 
 namespace fnv_00a75d70 {
-template <class T> struct NiTMallocInterface
+// Direct base operation missing from the shared NiLight declarations.
+struct NiLightViewerOperations
 {
-};
-template <class T, class A> struct NiTPrimitiveArray
-{
-    char _pad[8];
-    unsigned short m_usMax;
-    unsigned short m_usSize;
-    unsigned short m_usPad;
-    unsigned short m_usGrow;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, T&);
-};
-struct BaseLight
-{
-    void AppendEffectProperties(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >*);
+    void AppendEffectProperties(NiTPrimitiveArray<char*>*);
 };
 struct GlobalObjectO2_00a7b610
 {
@@ -129,18 +86,14 @@ struct GlobalObjectO2_00a7b610
 };
 extern GlobalObjectO2_00a7b610 g_011f4a68;
 char* _FUN_00a7d330(const char*);
-struct LightDerived : BaseLight
-{
-    void FUN_00a75d70(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >*);
-};
 // @fnv 0x00a75d70
-void LightDerived::FUN_00a75d70(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >* apArray)
+void __fastcall FUN_00a75d70(NiDirectionalLight* light, void*, NiTPrimitiveArray<char*>* apArray)
 {
-    AppendEffectProperties(apArray);
+    reinterpret_cast<NiLightViewerOperations*>(light)->AppendEffectProperties(apArray);
     char* s = _FUN_00a7d330(g_011f4a68.p);
     unsigned int sz = apArray->m_usSize;
-    if (sz >= apArray->m_usMax)
-        apArray->SetSize(sz + apArray->m_usGrow);
+    if (sz >= apArray->m_usMaxSize)
+        apArray->SetSize(sz + apArray->m_usGrowBy);
     apArray->SetAt(sz, s);
 }
 }  // namespace fnv_00a75d70
@@ -153,22 +106,12 @@ inline void* operator new(unsigned int, void* memory) throw()
 // @fnv 0x00a75d50
 NiDirectionalLight* __cdecl CreateNiDirectionalLight()
 {
-    return new (FUN_00aa13e0(sizeof(NiDirectionalLight))) NiDirectionalLight;
+    return ::new (FUN_00aa13e0(sizeof(NiDirectionalLight))) NiDirectionalLight;
 }
-
-class NiObject;
-
-extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
-void* __fastcall FUN_00a75c20(char* pObject);
-
-struct FUN_00a75cf0_impl : public NiDirectionalLight
-{
-    NiObject* FUN_00a75cf0(CloningProcess* kCloning);
-};
 
 // Allocates a NiDirectionalLight, initializes it via FUN_00a75c20, copies member data and m_kWorldDir from the source, and returns the new object.
 // @fnv 0x00a75cf0
-NiObject* FUN_00a75cf0_impl::FUN_00a75cf0(CloningProcess* kCloning)
+NiObject* __fastcall FUN_00a75cf0(NiDirectionalLight* light, void*, CloningProcess* kCloning)
 {
     NiDirectionalLight* pkObject = (NiDirectionalLight*)FUN_00aa13e0(sizeof(NiDirectionalLight));
 
@@ -177,7 +120,7 @@ NiObject* FUN_00a75cf0_impl::FUN_00a75cf0(CloningProcess* kCloning)
     else
         pkObject = 0;
 
-    CopyMemberData(pkObject, *kCloning);
-    pkObject->m_kWorldDir = m_kWorldDir;
+    light->CopyMemberData(pkObject, *kCloning);
+    *reinterpret_cast<NiPoint3*>(pkObject->unkF0) = *reinterpret_cast<NiPoint3*>(light->unkF0);
     return (NiObject*)pkObject;
 }

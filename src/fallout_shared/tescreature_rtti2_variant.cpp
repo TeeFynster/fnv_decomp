@@ -2,14 +2,12 @@
 // polymorphic classes (BGSBodyPartData, TESForm). The skeleton of src/fallout_shared/tescreature.cpp with those classes made polymorphic; move the functions to
 // their real unit once its classes are.
 
-#include "tescreature_decls_rtti2_tescreature.h"
+#include "../../include/BGSImpactDataSet.h"
+#include "../../include/BGSListForm.h"
+#include "../../include/TESCombatStyle.h"
+#include "../../include/TESCreature.h"
+#include "../../include/BGSBodyPartData.h"
 
-class TESForm;
-class TESCreature;
-class BGSBodyPartData;
-class TESCombatStyle;
-class BGSImpactDataSet;
-class BGSListForm;
 struct FormObj_CreatureInit;
 struct Host_CreatureInit;
 
@@ -234,22 +232,11 @@ struct Host_CreatureInit
     void FUN_005f9340();
 };
 
-class TESCreature;
-class BGSBodyPartData;
 extern "C" void __cdecl FUN_00485d50(unsigned int*, void*);
 extern "C" class TESForm* __cdecl FUN_004839c0(unsigned int);
 void __cdecl FUN_005b5e40(const char*, ...);
 TESCombatStyle* __cdecl FUN_00505000();
 extern "C" const char DAT_010495e0[], DAT_01049598[], DAT_01049548[], DAT_010494f8[], DAT_0102c740[], DAT_010494bc[];
-class TESCombatStyle
-{
-};
-class BGSImpactDataSet
-{
-};
-class BGSListForm
-{
-};
 
 // @fnv 0x005f9340
 void Host_CreatureInit::FUN_005f9340()
@@ -340,13 +327,6 @@ void Host_CreatureInit::FUN_005f9340()
 }
 
 namespace fnv_005fb270 {
-__if_not_exists(::TESCombatStyle::SetFormType)
-{
-    class TESCombatStyle : public ::TESForm
-    {
-    };
-}
-
 ::TESForm* __cdecl FUN_004839c0(unsigned int formId);
 
 struct TESCreatureCall_1b30

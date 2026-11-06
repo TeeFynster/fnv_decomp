@@ -1,33 +1,105 @@
-// Source layout: Menu. PC corrections are in generate_headers.py.
-#ifndef FNV_MENU_H
-#define FNV_MENU_H
-#include "layout_support.h"
-#pragma pack(push, 4)
+#pragma once
+
+#include "MagicTarget.h"
+
+class Tile;
+class TileMenu;
+class Tile__TileTemplate;
+class NiPoint3;
+class Target;
+class Arg;
+class Screen;
+
+
+#include "Interface.h"
+
 class Menu
 {
-  public:
-    void** m_ppVirtualMethodTable;                                        // +0x0
-    TileMenu* pMenu;                                        // +0x4
-    BSSimpleList<Tile__TileTemplate*> m_kTileTemplateList;  // +0x8
-    Tile* m_pMenuTile;                                        // +0x10
-    int m_iModalMenuId;                                     // +0x14
-    int m_iSecondaryValue;                                  // +0x18
-    bool m_bIsSpecial;                                      // +0x1C
-    bool m_bVisible;                                        // +0x1D
-    unsigned short layoutPadding1E;
-    int m_iMenuId;                       // +0x20
-    Interface__FADE_STATE m_eFadeState;  // +0x24
+public:
+    virtual ~Menu();
+    virtual void AssignTileByID(int, Tile*);
+    virtual void HandleLeftClickPress(unsigned int, Tile*);
+    virtual void HandleSelection(int, Tile*);
+    virtual void HandleMouseover(unsigned int, Tile*);
+    virtual void HandleMouseoverTileAlt(unsigned int, Tile*);
+    virtual void PostDragTileChange(unsigned int, Tile*, Tile*);
+    virtual void PreDragTileChange(unsigned int, Tile*, Tile*);
+    virtual void HandleActiveMenuClick(unsigned int, Tile*);
+    virtual void OnClickHeld(unsigned int, Tile*);
+    virtual void HandleMousewheel(unsigned int, Tile*);
+    virtual void UpdateDialog();
+    virtual bool HandleKeyboardInput(unsigned int);
+    virtual int GetClass();
+    virtual bool HandleMenuInput(int, float);
+    virtual bool HandleControllerInput(int, Tile*);
+    virtual void OnUpdateUserTrait(int);
+    virtual void HandleControllerConnectOrDisconnect(bool);
+
+    TileMenu* pMenu;
+    BSSimpleList<Tile__TileTemplate*> m_kTileTemplateList;
+    Tile* m_pMenuTile;
+    int m_iModalMenuId;
+    int m_iSecondaryValue;
+    bool m_bIsSpecial;
+    bool m_bVisible;
+    unsigned char layoutPadding1E[2];
+    int m_iMenuId;
+    Interface::FADE_STATE m_eFadeState;
+
+    Menu();
+    void SetTileMenu(TileMenu*, bool);
+    void SetMenuVisibility(bool);
+    void LoadMenuData();
+    void UnloadMenuData();
+    void ParseMenuXML(const char*);
+    void SetModal(int id) { m_iModalMenuId = id; }
+    Tile* CreateTileFromTemplate(Tile*, const char*, Tile*);
+    Tile* GetTile();
+    unsigned int GetVisibilityState();
+    void SetCurrentPageFromChar(unsigned char);
+    void UpdateCardSlots(int, int);
+    void UpdateControls();
+    void InitMenu();
+    void ClearActionPointSource();
+    void UpdateItemDisplay(int, Tile*);
+    bool IsUnk28Set();
+    bool UpdateScreenEffect();
+    NiPoint3 GetMarkerPosition(NiPoint3, void*);
+    void UpdateMapMarkers();
+    void UpdateQuestMarker();
+    bool UpdateProgress(float, int);
+    void HandleOptionSelection();
+    void HandlePendingTileAction();
+    void UpdateZoomAndScroll();
+    void UpdateClockText();
+    void AccumulateTileHeight(Target*);
+
+    Tile* FUN_00726070();
+    bool FUN_007273f0();
+    void FUN_00781680();
+    void FUN_0079e0a0();
+    void FUN_0079f6f0();
+    void FUN_0079dbb0();
+    void FUN_007fbee0(Arg*, void*, int);
+    Screen* FUN_00a03c90();
+    void FUN_00700320(int, int);
+    bool FUN_007fe4e0();
+    void FUN_00867a20();
+    void FUN_00795e20();
+    void FUN_007adc60(int, bool);
+    bool FUN_007adc30(int);
+    bool FUN_007b1970(float, int);
+    void FUN_007a7700();
+    void FUN_007a73e0();
+    void FUN_007a7260();
+    void FUN_00a1dc70(TileMenu*, bool);
+    void FUN_00a1dc20(bool);
+    void FUN_00a1d9e0();
+
+    static const char* GetMenuPath(const char*);
+    static float GetMenuScale();
+    static void SetMenuRootTile(int, Tile*);
+    static void SetVisible(int, bool);
+    static bool IsMenuVisible(Interface::enumMenus);
+    static bool ReadMenuDefinition(const char*, Menu*);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(Menu) == 0x28);
-FNV_STATIC_ASSERT(offsetof(Menu, m_ppVirtualMethodTable) == 0x0);
-FNV_STATIC_ASSERT(offsetof(Menu, pMenu) == 0x4);
-FNV_STATIC_ASSERT(offsetof(Menu, m_kTileTemplateList) == 0x8);
-FNV_STATIC_ASSERT(offsetof(Menu, m_pMenuTile) == 0x10);
-FNV_STATIC_ASSERT(offsetof(Menu, m_iModalMenuId) == 0x14);
-FNV_STATIC_ASSERT(offsetof(Menu, m_iSecondaryValue) == 0x18);
-FNV_STATIC_ASSERT(offsetof(Menu, m_bIsSpecial) == 0x1C);
-FNV_STATIC_ASSERT(offsetof(Menu, m_bVisible) == 0x1D);
-FNV_STATIC_ASSERT(offsetof(Menu, m_iMenuId) == 0x20);
-FNV_STATIC_ASSERT(offsetof(Menu, m_eFadeState) == 0x24);
-#endif

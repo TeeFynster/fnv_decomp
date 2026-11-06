@@ -1,7 +1,8 @@
-// bsshader/beamshader_pass.h: declares BeamTextureState, BeamStage, D3DRenderStateGroup, BeamRefPointer, NiD3DPass and more
+// bsshader/beamshader_pass.h: beam pass helpers and this unit's NiD3DPass inline methods
 #ifndef BEAMSHADER_PASS_H
 #define BEAMSHADER_PASS_H
 
+#include "../../include/NiD3DPass.h"
 #include "NiRefObject.h"
 class BeamTextureState
 {
@@ -33,59 +34,29 @@ class D3DRenderStateGroup
     static D3DRenderStateGroup* GetCurrentRenderStateGroup();
     void SetRenderState(unsigned int, unsigned int, bool);
 };
-class BeamRefPointer
+inline unsigned int NiD3DPass::GetStageCount() const
 {
-  public:
-    NiRefObject* object;
-    void operator=(NiRefObject* p)
-    {
-        if (object != p)
-        {
-            if (object)
-                object->DecRefCount();
-            object = p;
-            if (object)
-                object->IncRefCount();
-        }
-    }
-};
-class NiD3DPass
+    return m_uiStageCount;
+}
+
+inline void NiD3DPass::IncRefCount()
 {
-  public:
-    unsigned char pad0[0x14];
-    unsigned int stages;
-    unsigned int count;
-    unsigned int GetStageCount() const
-    {
-        return count;
-    }
-    unsigned char pad1c[0x14];
-    D3DRenderStateGroup* group;
-    unsigned char pad34[0x10];
-    BeamRefPointer pixel;
-    unsigned char pad48[0x14];
-    BeamRefPointer vertex;
-    unsigned char pad60[4];
-    unsigned int refs;
-    void IncRefCount()
-    {
-        ++refs;
-    }
-    void DecRefCount()
-    {
-        if (--refs == 0)
-            DestroyPass();
-    }
-    void DestroyPass();
-    static void CreateD3DPass(NiPointer<NiD3DPass>&);
-    void FUN_00e802b0(unsigned int, BeamStage*);
-    void SetRenderState(unsigned int a, unsigned int b, bool c)
-    {
-        if (!group)
-            group = D3DRenderStateGroup::GetCurrentRenderStateGroup();
-        group->SetRenderState(a, b, c);
-    }
-};
+    ++m_uiRefCount;
+}
+
+inline void NiD3DPass::DecRefCount()
+{
+    if (--m_uiRefCount == 0)
+        DestroyPass();
+}
+
+inline void NiD3DPass::SetRenderState(unsigned int state, unsigned int value, bool save)
+{
+    if (!m_pkRenderStateGroup)
+        m_pkRenderStateGroup = D3DRenderStateGroup::GetCurrentRenderStateGroup();
+    m_pkRenderStateGroup->SetRenderState(state, value, save);
+}
+
 class BeamPassPointer
 {
   public:

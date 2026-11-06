@@ -2,7 +2,36 @@
 // src/havok/physics/collide/shape/convex/capsule/hkpcapsuleshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/capsule/hkpcapsuleshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpCapsuleShape.h"
+// Keep the unit's float-only intrinsic representation: the CRT's integer lanes
+// otherwise change alias analysis and introduce a stack-security buffer.
+#define _INCLUDED_MM2
+// Exe 0x00d22370 GetSupportVertex: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_load_ps(float const*);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" LocalM128 _mm_load_ss(float const*);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_min_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_max_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_set_ps1(float);
+
+#include "../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/hkVector4.h"
+#include "../../../../../../../include/hkSimdReal.h"
+#include "../../../../../../../include/hkAabb.h"
+#include "../../../../../../../include/hkpCapsuleShape.h"
+#include "../../../../../../../include/hkTransform.h"
+#include "../../../../../../../include/hkVector4q.h"
+
 
 extern char const* const g_01268970_arg1;
 void __cdecl FUN_00c90360(char const* const* arg1, char const* const* arg2);
@@ -14,44 +43,32 @@ void __cdecl FUN_00d22360(char const* const* arg1, char const* const* arg2)
 }
 
 // @fnv 0x00d22350
-int __cdecl FUN_00d22350()
+int hkpCapsuleShape::GetNumCollisionSpheres() const
 {
     return 2;
 }
 
 // @fnv 0x00d22d60
-int __stdcall FUN_00d22d60(int a, int b)
+int hkpCapsuleShape::CalcSizeForSpu(const PhysicsShape& input, int spuBufferSizeLeft) const
 {
     return 0x40;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-extern "C" __m128 _mm_load_ps(float const* p);
-extern "C" void _mm_store_ps(float* p, __m128 v);
-
-class FUN_00d223f0_cls
-{
-  public:
-    void GatherIndexedVectors(unsigned short const* indices, int count, hkVector4* out);
-};
 
 // @fnv 0x00d223f0
-void FUN_00d223f0_cls::GatherIndexedVectors(unsigned short const* indices, int count, hkVector4* out)
+void hkpCapsuleShape::GetVerticesFromIds(const hkpVertexId* indices, int count, Vector4WithInt24W* out) const
 {
     int iRemaining = count - 1;
     if (iRemaining < 0)
     {
         return;
     }
-    hkVector4* pOut = out;
+    hkVector4* pOut = reinterpret_cast<hkVector4*>(out);
     unsigned short const* p = indices;
     do
     {
         unsigned int uiIndex = *p;
-        __m128 v = _mm_load_ps(reinterpret_cast<float const*>(reinterpret_cast<char*>(this) + uiIndex + 0x20));
+        LocalM128 v = _mm_load_ps(reinterpret_cast<float const*>(reinterpret_cast<const char*>(this) + uiIndex + 0x20));
         _mm_store_ps(reinterpret_cast<float*>(pOut), v);
         *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(pOut) + 0xc) = uiIndex | 0x3f000000;
         pOut++;
@@ -60,96 +77,53 @@ void FUN_00d223f0_cls::GatherIndexedVectors(unsigned short const* indices, int c
     } while (iRemaining >= 0);
 }
 
-struct __declspec(align(16)) hkVector4D224
-{
-    __m128 m_vComponents;
-
-    hkVector4D224()
-    {}
-    hkVector4D224(const hkVector4D224& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-
-class FUN_00d22480_cls
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    hkVector4D224 m_vector;
-
-    hkVector4D224 FUN_00d22480() const;
-};
-
 // @fnv 0x00d22480
-hkVector4D224 FUN_00d22480_cls::FUN_00d22480() const
+void hkpCapsuleShape::GetFirstVertex(hkVector4& out) const
 {
-    return m_vector;
+    out = m_kVertexB;
 }
 
-struct FUN_00d224a0_Data
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    __m128 unk20;
-    __m128 unk30;
-
-    void __thiscall FUN_00d224a0(__m128* result);
-};
-
 // @fnv 0x00d224a0
-void __thiscall FUN_00d224a0_Data::FUN_00d224a0(__m128* result)
+const hkSphere* hkpCapsuleShape::GetCollisionSpheres(hkSphere* sphereBuffer) const
 {
-    result[0] = unk20;
-    result[1] = unk30;
+    LocalM128* result = reinterpret_cast<LocalM128*>(sphereBuffer);
+    result[0] = m_kVertexA.m_vComponents;
+    result[1] = m_kVertexB.m_vComponents;
+    return sphereBuffer;
 }
 
 extern int DAT_010ce25c;
-union __declspec(align(16)) AlignedHKVector4
+
+
+template <typename ENUM, typename STORAGE>
+__forceinline hkEnum<ENUM, STORAGE>::hkEnum()
+{}
+
+__forceinline hkpShape::hkpShape()
 {
-    __m128 simd;
-    struct
-    {
-        float x, y, z, w;
-    };
-};
-struct FUN_00d22590_Class : hkpCapsuleShape
+    m_ulUserData = 0;
+}
+
+__forceinline hkpConvexShape::hkpConvexShape(hkpShapeType type, hkReal radius)
 {
-    FUN_00d22590_Class* __thiscall FUN_00d22590(const AlignedHKVector4& first, const AlignedHKVector4& second,
-                                                float radius);
-};
+    m_fSphereRadius = radius;
+    *reinterpret_cast<unsigned int*>(&m_type) = type;
+}
+
 // Initializes a capsule shape from two points and a radius, storing the radius in both endpoints' w components and setting the type to 5.
 // @fnv 0x00d22590
-FUN_00d22590_Class* __thiscall FUN_00d22590_Class::FUN_00d22590(const AlignedHKVector4& first,
-                                                                const AlignedHKVector4& second, float radius)
+hkpCapsuleShape::hkpCapsuleShape(const hkVector4& first, const hkVector4& second, hkReal radius)
+    : hkpConvexShape(HK_SHAPE_CAPSULE, radius)
 {
     m_fSphereRadius = radius;
     m_sReferenceCount = 1;
     m_ulUserData = 0;
-    m_type = 5;
+    *reinterpret_cast<unsigned int*>(&m_type) = 5;
     *reinterpret_cast<void**>(this) = &DAT_010ce25c;
-    reinterpret_cast<AlignedHKVector4*>(&m_kVertexA)->simd = first.simd;
-    reinterpret_cast<AlignedHKVector4*>(&m_kVertexB)->simd = second.simd;
+    m_kVertexA.m_vComponents = first.m_vComponents;
+    m_kVertexB.m_vComponents = second.m_vComponents;
     *reinterpret_cast<volatile float*>(&m_kVertexA.w) = radius;
     *reinterpret_cast<volatile float*>(&m_kVertexB.w) = radius;
-    return this;
 }
 
 struct __declspec(align(16)) Point4
@@ -174,77 +148,50 @@ void __cdecl GetClosestLinePoints(const Point4& aLineAStart, const Point4& aLine
 {
     ClosestLineResult result;
     FUN_00d231b0(aLineAStart, aLineAEnd, aLineBStart, aLineBEnd, &result);
-    *reinterpret_cast<__m128*>(pointA) = *reinterpret_cast<const __m128*>(&result.pointA);
-    *reinterpret_cast<__m128*>(pointB) = *reinterpret_cast<const __m128*>(&result.pointB);
+    *reinterpret_cast<LocalM128*>(pointA) = *reinterpret_cast<const LocalM128*>(&result.pointA);
+    *reinterpret_cast<LocalM128*>(pointB) = *reinterpret_cast<const LocalM128*>(&result.pointB);
     *pfFractionA = result.fractionA;
     *pfFractionB = result.fractionB;
     *pfDistance = result.distance;
 }
 
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
 extern float DAT_01016248;
-
-class Aabb_d22440
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    __m128 m_kMin;
-    __m128 m_kMax;
-
-    void __thiscall FUN_00d22440(__m128* pkCenter) const;
-};
 
 // Stores (m_kMax + m_kMin) scaled by the float at DAT_01016248 into pkCenter.
 // @fnv 0x00d22440
-void __thiscall Aabb_d22440::FUN_00d22440(__m128* pkCenter) const
+void hkpCapsuleShape::GetCentre(hkVector4& centreOut) const
 {
-    __m128 sum = _mm_add_ps(m_kMax, m_kMin);
+    LocalM128* pkCenter = &centreOut.m_vComponents;
+    LocalM128 sum = _mm_add_ps(m_kVertexB.m_vComponents, m_kVertexA.m_vComponents);
     *pkCenter = sum;
-    __m128 kHalf = _mm_load_ss(&DAT_01016248);
+    LocalM128 kHalf = _mm_load_ss(&DAT_01016248);
     kHalf = _mm_shuffle_ps(kHalf, kHalf, 0);
     *pkCenter = _mm_mul_ps(kHalf, sum);
 }
 
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ss(float*, __m128);
 
 // Projects a point onto a line segment defined by two endpoints, clamping the result to the segment bounds and writing it to out.
 // @fnv 0x00d224c0
 void __cdecl FUN_00d224c0(float* apPoint, float* apStart, float* apEnd, float* out)
 {
-    __m128 vStart = _mm_load_ps(apStart);
-    __m128 vEnd = _mm_load_ps(apEnd);
-    __m128 vPoint = _mm_load_ps(apPoint);
+    LocalM128 vStart = _mm_load_ps(apStart);
+    LocalM128 vEnd = _mm_load_ps(apEnd);
+    LocalM128 vPoint = _mm_load_ps(apPoint);
 
-    __m128 xmm2 = vStart;
-    __m128 xmm3 = vEnd;
-    __m128 xmm4 = vPoint;
+    LocalM128 xmm2 = vStart;
+    LocalM128 xmm3 = vEnd;
+    LocalM128 xmm4 = vPoint;
 
-    __m128 xmm1 = _mm_sub_ps(xmm3, xmm2);
-    __m128 xmm0 = _mm_sub_ps(xmm2, xmm4);
+    LocalM128 xmm1 = _mm_sub_ps(xmm3, xmm2);
+    LocalM128 xmm0 = _mm_sub_ps(xmm2, xmm4);
 
     xmm0 = _mm_mul_ps(xmm0, xmm1);
 
-    __m128 temp4 = xmm0;
+    LocalM128 temp4 = xmm0;
     temp4 = _mm_shuffle_ps(temp4, xmm0, 0x55);
     temp4 = _mm_add_ss(temp4, xmm0);
 
-    __m128 temp5 = xmm0;
+    LocalM128 temp5 = xmm0;
     temp5 = _mm_shuffle_ps(temp5, xmm0, 0xaa);
     temp5 = _mm_add_ss(temp5, temp4);
 
@@ -254,10 +201,10 @@ void __cdecl FUN_00d224c0(float* apPoint, float* apStart, float* apEnd, float* o
     _mm_store_ss(&negDot, temp5);
     negDot = -negDot;
 
-    __m128 l0 = _mm_mul_ps(xmm1, xmm1);
-    __m128 ls1 = _mm_shuffle_ps(l0, l0, 0x55);
+    LocalM128 l0 = _mm_mul_ps(xmm1, xmm1);
+    LocalM128 ls1 = _mm_shuffle_ps(l0, l0, 0x55);
     ls1 = _mm_add_ss(ls1, l0);
-    __m128 ls2 = _mm_shuffle_ps(l0, l0, 0xaa);
+    LocalM128 ls2 = _mm_shuffle_ps(l0, l0, 0xaa);
     ls2 = _mm_add_ss(ls2, ls1);
 
     _mm_store_ss(&lenSq, ls2);
@@ -276,89 +223,37 @@ void __cdecl FUN_00d224c0(float* apPoint, float* apStart, float* apEnd, float* o
 
     negDot /= lenSq;
 
-    __m128 tVec = _mm_load_ss(&negDot);
-    __m128 tBroadcast = _mm_shuffle_ps(tVec, tVec, 0);
-    __m128 scaledDiff = _mm_mul_ps(xmm1, tBroadcast);
-    __m128 result = _mm_add_ps(vStart, scaledDiff);
+    LocalM128 tVec = _mm_load_ss(&negDot);
+    LocalM128 tBroadcast = _mm_shuffle_ps(tVec, tVec, 0);
+    LocalM128 scaledDiff = _mm_mul_ps(xmm1, tBroadcast);
+    LocalM128 result = _mm_add_ps(vStart, scaledDiff);
 
     _mm_store_ps(out, result);
 }
 
-struct hkSimdRealD223
+__forceinline hkSimdReal::hkSimdReal(const LocalM128& x) : m_vValue(x)
+{}
+
+__forceinline hkSimdReal::operator float() const
 {
-    __m128 m_vValue;
+    float s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
 
-    hkSimdRealD223(const __m128& x) : m_vValue(x)
-    {}
-    operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-};
-
-struct hkVector4D223
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
 {
-    __m128 m_vComponents;
-
-    hkVector4D223()
-    {}
-    hkVector4D223(const hkVector4D223& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void operator=(const hkVector4D223& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void setSub4(const hkVector4D223& a, const hkVector4D223& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    hkSimdRealD223 dot3(const hkVector4D223& a) const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        const __m128 sum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), sum);
-    }
-    void setInt24W(int i)
-    {
-        reinterpret_cast<int*>(&m_vComponents)[3] = i | 0x3f000000;
-    }
-};
-
-class hkBaseObjectD223
-{
-  public:
-    virtual ~hkBaseObjectD223() throw();
-};
-
-class hkReferencedObjectD223 : public hkBaseObjectD223
-{
-  public:
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-
-class hkpCapsuleShapeD223 : public hkReferencedObjectD223
-{
-  public:
-    void FUN_00d22370(const hkVector4D223& kDirection, hkVector4D223& kSupportingVertexOut) const;
-
-    unsigned int m_ulUserData;
-    unsigned int m_type;
-    float m_fSphereRadius;
-    unsigned int unk14, unk18, unk1C;
-    hkVector4D223 m_kVertexA;
-    hkVector4D223 m_kVertexB;
-};
+    const LocalM128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    const LocalM128 sum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), sum);
+}
 
 // Picks vertex A or B by the sign of (B - A) dot kDirection, writes it to kSupportingVertexOut, and stores the vertex id (0 or 16) in W.
 // @fnv 0x00d22370
-void hkpCapsuleShapeD223::FUN_00d22370(const hkVector4D223& kDirection, hkVector4D223& kSupportingVertexOut) const
+void hkpCapsuleShape::GetSupportVertex(const hkVector4& kDirection, Vector4WithInt24W& supportingVertexOut) const
 {
-    hkVector4D223 kDelta;
+    hkVector4& kSupportingVertexOut = reinterpret_cast<hkVector4&>(supportingVertexOut);
+    hkVector4 kDelta;
     kDelta.setSub4(m_kVertexB, m_kVertexA);
     const float fDot = kDelta.dot3(kDirection);
     int iVertexId;
@@ -370,47 +265,27 @@ void hkpCapsuleShapeD223::FUN_00d22370(const hkVector4D223& kDirection, hkVector
     else
     {
         kSupportingVertexOut = m_kVertexB;
-        iVertexId = sizeof(hkVector4D223);
+        iVertexId = sizeof(hkVector4);
     }
-    kSupportingVertexOut.setInt24W(iVertexId);
+    reinterpret_cast<int*>(&kSupportingVertexOut.m_vComponents)[3] = iVertexId | 0x3f000000;
 }
 
-extern "C" __m128 _mm_min_ps(__m128, __m128);
-extern "C" __m128 _mm_max_ps(__m128, __m128);
-extern "C" __m128 _mm_set_ps1(float);
 
-struct hkTransformq;
 
-struct hkVector4q
+__forceinline void hkVector4q::setMin4(const hkVector4q& a, const hkVector4q& b)
 {
-    __m128 m_vComponents;
+    m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
+}
 
-    __forceinline void operator=(const hkVector4q& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void SetAllComponents(hkReal x)
-    {
-        m_vComponents = _mm_set_ps1(x);
-    }
-    __forceinline void setMin4(const hkVector4q& a, const hkVector4q& b)
-    {
-        m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setMax4(const hkVector4q& a, const hkVector4q& b)
-    {
-        m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void add4(const hkVector4q& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void sub4(const hkVector4q& a)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void SetTransformedPoint(const hkTransformq& a, const hkVector4q& bIn);
-};
+__forceinline void hkVector4q::setMax4(const hkVector4q& a, const hkVector4q& b)
+{
+    m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4q::add4(const hkVector4q& a)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
+}
 
 struct hkTransformq
 {
@@ -420,89 +295,65 @@ struct hkTransformq
     hkVector4q m_vTranslation;
 };
 
-union hkVector4U
-{
-    hkVector4 m_vec;
-    __m128 m_vComponents;
-};
-
-struct hkTransformU
-{
-    hkVector4U m_kColumn0;
-    hkVector4U m_kColumn1;
-    hkVector4U m_kColumn2;
-    hkVector4U m_vTranslation;
-
-    __forceinline void set(const hkTransform& t)
-    {
-        m_kColumn0.m_vec = t.m_rotation.m_kColumn0;
-        m_kColumn1.m_vec = t.m_rotation.m_kColumn1;
-        m_kColumn2.m_vec = t.m_rotation.m_kColumn2;
-        m_vTranslation.m_vec = t.m_vTranslation;
-    }
-};
-
 __forceinline void hkVector4q::SetTransformedPoint(const hkTransformq& a, const hkVector4q& bIn)
 {
-    const __m128 b = bIn.m_vComponents;
-    const __m128 b0 = _mm_shuffle_ps(b, b, 0x00);
-    const __m128 r0 = _mm_mul_ps(a.m_kColumn0.m_vComponents, b0);
-    const __m128 b1 = _mm_shuffle_ps(b, b, 0x55);
-    const __m128 r1 = _mm_mul_ps(a.m_kColumn1.m_vComponents, b1);
-    const __m128 b2 = _mm_shuffle_ps(b, b, 0xaa);
-    const __m128 r2 = _mm_mul_ps(a.m_kColumn2.m_vComponents, b2);
+    const LocalM128 b = bIn.m_vComponents;
+    const LocalM128 b0 = _mm_shuffle_ps(b, b, 0x00);
+    const LocalM128 r0 = _mm_mul_ps(a.m_kColumn0.m_vComponents, b0);
+    const LocalM128 b1 = _mm_shuffle_ps(b, b, 0x55);
+    const LocalM128 r1 = _mm_mul_ps(a.m_kColumn1.m_vComponents, b1);
+    const LocalM128 b2 = _mm_shuffle_ps(b, b, 0xaa);
+    const LocalM128 r2 = _mm_mul_ps(a.m_kColumn2.m_vComponents, b2);
     m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), _mm_add_ps(r2, a.m_vTranslation.m_vComponents));
 }
-
-struct hkAabbq
-{
-    hkVector4q m_kMinimumCorner;
-    hkVector4q m_kMaximumCorner;
-};
 
 static __forceinline void hkTransformPoints(const hkTransform& t, const hkVector4q* vectorsIn, int numVectors,
                                             hkVector4q* vectorsOut)
 {
-    hkVector4U c0;
-    c0.m_vec = t.m_rotation.m_kColumn0;
-    hkVector4U c1;
-    c1.m_vec = t.m_rotation.m_kColumn1;
-    hkVector4U c2;
-    c2.m_vec = t.m_rotation.m_kColumn2;
-    hkVector4U trans;
-    trans.m_vec = t.m_vTranslation;
+    struct ColumnBits
+    {
+        float x, y, z, w;
+    };
+    union Column
+    {
+        ColumnBits bits;
+        LocalM128 simd;
+    };
+    Column c0;
+    c0.bits = *reinterpret_cast<const ColumnBits*>(&static_cast<const LocalM128&>(t.m_row0));
+    Column c1;
+    c1.bits = *reinterpret_cast<const ColumnBits*>(&static_cast<const LocalM128&>(t.m_row1));
+    Column c2;
+    c2.bits = *reinterpret_cast<const ColumnBits*>(&static_cast<const LocalM128&>(t.m_row2));
+    Column trans;
+    trans.bits = *reinterpret_cast<const ColumnBits*>(&static_cast<const LocalM128&>(t.m_row3));
     int i = numVectors - 1;
     do
     {
-        const __m128 b = vectorsIn[i].m_vComponents;
-        const __m128 b0 = _mm_shuffle_ps(b, b, 0x00);
-        const __m128 r0 = _mm_mul_ps(c0.m_vComponents, b0);
-        const __m128 b1 = _mm_shuffle_ps(b, b, 0x55);
-        const __m128 r1 = _mm_mul_ps(c1.m_vComponents, b1);
-        const __m128 b2 = _mm_shuffle_ps(b, b, 0xaa);
-        const __m128 r2 = _mm_mul_ps(c2.m_vComponents, b2);
-        vectorsOut[i].m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), _mm_add_ps(r2, trans.m_vComponents));
+        const LocalM128 b = vectorsIn[i].m_vComponents;
+        const LocalM128 b0 = _mm_shuffle_ps(b, b, 0x00);
+        const LocalM128 r0 = _mm_mul_ps(c0.simd, b0);
+        const LocalM128 b1 = _mm_shuffle_ps(b, b, 0x55);
+        const LocalM128 r1 = _mm_mul_ps(c1.simd, b1);
+        const LocalM128 b2 = _mm_shuffle_ps(b, b, 0xaa);
+        const LocalM128 r2 = _mm_mul_ps(c2.simd, b2);
+        vectorsOut[i].m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), _mm_add_ps(r2, trans.simd));
     } while (--i >= 0);
 }
 
-class hkpCapsuleShapeAabb : public hkpCapsuleShape
-{
-  public:
-    void FUN_00d225e0(const hkTransform& localToWorld, hkReal tolerance, hkAabbq& out) const;
-};
-
 // Computes the world-space AABB of the capsule by transforming its two vertices and expanding by the sphere radius plus tolerance.
 // @fnv 0x00d225e0
-void hkpCapsuleShapeAabb::FUN_00d225e0(const hkTransform& localToWorld, hkReal tolerance, hkAabbq& out) const
+void hkpCapsuleShape::CalculateAabb(const hkTransform& localToWorld, hkReal tolerance, hkAabb& out) const
 {
-    hkVector4q tol4;
-    tol4.SetAllComponents(m_fSphereRadius + tolerance);
+    LocalM128 tol4;
+    (reinterpret_cast<hkVector4q&>(tol4).*static_cast<void (hkVector4q::*)(float)>(&hkVector4q::SetAllComponents))(m_fSphereRadius + tolerance);
 
-    hkVector4q obj[2];
-    hkTransformPoints(localToWorld, reinterpret_cast<const hkVector4q*>(&m_kVertexA), 2, &obj[0]);
+    LocalM128 obj[2];
+    hkTransformPoints(localToWorld, reinterpret_cast<const hkVector4q*>(&m_kVertexA), 2, reinterpret_cast<hkVector4q*>(obj));
 
-    out.m_kMinimumCorner.setMin4(obj[0], obj[1]);
-    out.m_kMinimumCorner.sub4(tol4);
-    out.m_kMaximumCorner.setMax4(obj[0], obj[1]);
-    out.m_kMaximumCorner.add4(tol4);
+    reinterpret_cast<hkVector4q&>(out.m_kMinimumCorner).setMin4(reinterpret_cast<const hkVector4q&>(obj[0]), reinterpret_cast<const hkVector4q&>(obj[1]));
+    reinterpret_cast<hkVector4q&>(out.m_kMinimumCorner).sub4(reinterpret_cast<const hkVector4q&>(tol4));
+    reinterpret_cast<hkVector4q&>(out.m_kMaximumCorner).setMax4(reinterpret_cast<const hkVector4q&>(obj[0]), reinterpret_cast<const hkVector4q&>(obj[1]));
+    reinterpret_cast<hkVector4q&>(out.m_kMaximumCorner).add4(reinterpret_cast<const hkVector4q&>(tol4));
 }
+

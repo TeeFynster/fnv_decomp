@@ -2,6 +2,22 @@
 // src/havok/common/base/debugutil/statisticscollector/util/hkstatisticscollectorutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/debugutil/statisticscollector/util/hkstatisticscollectorutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkClass.h"
+#include "../../../../../../../include/hkClassMember.h"
+#include "../../../../../../../include/hkStringPtr.h"
+
+// These getters are absent from the shared headers. Their ECX argument uses
+// the same register convention as the original zero-argument member calls.
+int __fastcall GetObjectSize(const hkClass* klass);
+const hkClass* __fastcall GetParent(const hkClass* klass);
+int __fastcall GetCArraySize(const hkClassMember* member);
+
+inline hkClassMember::Type hkClassMember::getType() const
+{
+    return static_cast<Type>(m_type);
+}
+
 extern "C" int __cdecl FUN_00cb10d0(const char* s);
 
 class Hasher
@@ -56,25 +72,21 @@ extern "C" void __cdecl EmitStringWithHash(int* pValue, const char* pString, Han
     }
 }
 
-struct Format
-{
-    bool* GetLastNodeFlag(unsigned int*);
-};
 struct Destination
 {
     virtual void v00();
     virtual void v04();
     virtual void v08();
     virtual void WriteDirect(void*, unsigned int, int);
-    virtual void WriteFormatted(Format*, void*, unsigned int, int);
+    virtual void WriteFormatted(const hkClass*, void*, unsigned int, int);
 };
 // @fnv 0x00cf6030
-void __cdecl WriteToDestination(void* data, unsigned int size, Format* format, Destination* destination)
+void __cdecl WriteToDestination(void* data, unsigned int size, const hkClass* format, Destination* destination)
 {
     unsigned int originalSize = size;
     if (originalSize)
     {
-        if (*format->GetLastNodeFlag(&size))
+        if (format->GetLastNodeFlag())
             destination->WriteDirect(data, originalSize, 0);
         else
             destination->WriteFormatted(format, data, originalSize, 0);
@@ -129,11 +141,6 @@ void FUN_00cf6080(int a, void* p, int aiOldCount, int newCount, int elemSize, S_
 }
 }  // namespace fnv_00cf6080
 
-struct Target
-{
-    int FUN_00d470d0();
-};
-
 struct TypeInfo
 {
     unsigned char m_ucKind;
@@ -146,22 +153,11 @@ struct TypeInfo
 
 TypeInfo* __cdecl FUN_00d868a0(int aiType);
 
-struct Thing
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    unsigned char unk0c;
-    unsigned char m_ucType;
-
-    Target* FUN_00d86910();
-};
-
 // Reads the type from apThing, looks up its TypeInfo, and returns m_sValue if positive, else the result of FUN_00d470d0 for kind 0x19, otherwise -1.
 // @fnv 0x00cf61c0
-int __cdecl GetThingValue(Thing* apThing)
+__declspec(noinline) int __cdecl GetThingValue(const hkClassMember* apThing)
 {
-    unsigned char ucType = apThing->m_ucType;
+    unsigned char ucType = apThing->m_eSubtype;
     if (ucType == 0)
         return -1;
 
@@ -171,42 +167,21 @@ int __cdecl GetThingValue(Thing* apThing)
         return sValue;
 
     if (pInfo->m_ucKind == 0x19)
-        return apThing->FUN_00d86910()->FUN_00d470d0();
+        return GetObjectSize(apThing->GetClass());
 
     return -1;
 }
 
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-
-struct Shape;
-
-struct Container
-{
-    __declspec(nothrow) int FUN_00d46f70() const;
-    __declspec(nothrow) const Shape* FUN_00d46f80(int i) const;
-};
-
-__declspec(nothrow) hkBool __cdecl GetFlagByState(const Shape* s);
+__declspec(nothrow) hkBool __cdecl GetFlagByState(const hkClassMember* s);
 
 // Calls FUN_00d46f70 for a count, then GetFlagByState on each shape from FUN_00d46f80, returning false on the first failure and true otherwise.
 // @fnv 0x00cf6330
-hkBool __cdecl FUN_00cf6330(const Container* apContainer)
+hkBool __cdecl FUN_00cf6330(const hkClass* apContainer)
 {
-    int n = apContainer->FUN_00d46f70();
+    int n = apContainer->GetNumDeclaredMembers();
     for (int i = 0; i < n; i++)
     {
-        if (!GetFlagByState(apContainer->FUN_00d46f80(i)))
+        if (!GetFlagByState(&apContainer->GetDeclaredMember(i)))
             return false;
     }
     return true;
@@ -219,14 +194,6 @@ hkBool __cdecl FUN_00cf6330(const Container* apContainer)
 // pointer it is handed.  The walker returns the very pointer it was given, so
 // the test reads the byte through the returned pointer.
 
-struct FNV_C60d0_Walker
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    bool* GetLastNodeFlag(bool* outFlag);
-};
 
 struct FNV_C60d0_Sink
 {
@@ -234,18 +201,16 @@ struct FNV_C60d0_Sink
     virtual void v1();
     virtual void v2();
     virtual void v3(void* a0, void* a1, int flag);
-    virtual void v4(void* a0, void* a1, void* a2, int flag);
+    virtual void v4(const hkClass* a0, void* a1, void* a2, int flag);
 };
 
 // @fnv 0x00cf60d0
-extern "C" void __cdecl FUN_00cf60d0(void* pA0, void* pA1, FNV_C60d0_Walker* pWalker, FNV_C60d0_Sink* pSink)
+extern "C" void __cdecl FUN_00cf60d0(void* pA0, void* pA1, const hkClass* pWalker, FNV_C60d0_Sink* pSink)
 {
     void* p = pA1;
     if (p)
     {
-        bool flag;
-        bool* pf = pWalker->GetLastNodeFlag(&flag);
-        if (*pf)
+        if (pWalker->GetLastNodeFlag())
         {
             pSink->v3(pA0, p, 1);
         }
@@ -283,16 +248,10 @@ void __cdecl CallObjectMethodAndDispatch(int aiFirst, int aiSecond)
     }
 }
 
-struct FUN_00d46f70_Obj
-{
-    int __thiscall FUN_00d46f70();
-    FUN_00d46f70_Obj* __thiscall FUN_00d46d50();
-};
-
-extern FUN_00d46f70_Obj DAT_01268748;
+extern hkClass DAT_01268748;
 
 // @fnv 0x00cf6170
-unsigned char* FUN_00cf6170(unsigned char* result, FUN_00d46f70_Obj* object)
+unsigned char* FUN_00cf6170(unsigned char* result, const hkClass* object)
 {
     if (object != 0)
     {
@@ -301,13 +260,13 @@ unsigned char* FUN_00cf6170(unsigned char* result, FUN_00d46f70_Obj* object)
             if (object == &DAT_01268748)
                 break;
 
-            if (object->FUN_00d46f70() > 0)
+            if (object->GetNumDeclaredMembers() > 0)
             {
                 *result = 1;
                 return result;
             }
 
-            object = object->FUN_00d46d50();
+            object = GetParent(object);
         } while (object != 0);
     }
 
@@ -315,17 +274,12 @@ unsigned char* FUN_00cf6170(unsigned char* result, FUN_00d46f70_Obj* object)
     return result;
 }
 
-struct SceneNode
-{
-    SceneNode* Advance();
-};
-
-unsigned char* FUN_00cf6330(SceneNode** where, SceneNode* node);
+unsigned char* FUN_00cf6330(const hkClass** where, const hkClass* node);
 
 // @fnv 0x00cf6380
-unsigned char* FUN_00cf6380(unsigned char* pResult, SceneNode* pStartNode)
+unsigned char* FUN_00cf6380(unsigned char* pResult, const hkClass* pStartNode)
 {
-    SceneNode* cur = pStartNode;
+    const hkClass* cur = pStartNode;
     do
     {
         unsigned char* flag = FUN_00cf6330(&pStartNode, cur);
@@ -334,33 +288,13 @@ unsigned char* FUN_00cf6380(unsigned char* pResult, SceneNode* pStartNode)
             *pResult = 0;
             return pResult;
         }
-        cur = cur->Advance();
+        cur = GetParent(cur);
     } while (cur != 0);
     *pResult = 1;
     return pResult;
 }
 
-struct CF63C0Bool
-{
-    char m_cBooleanValue;
-
-    CF63C0Bool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-
-struct CF63C0Class
-{
-    int GetObjectAlignment() const;
-    CF63C0Bool hasVtable() const;
-};
-
-CF63C0Bool __cdecl FUN_00cf6380(const CF63C0Class& pClassInfo);
+hkBool __cdecl FUN_00cf6380(const hkClass& pClassInfo);
 
 struct CF63C0Writer
 {
@@ -368,11 +302,11 @@ struct CF63C0Writer
     virtual void unk04();
     virtual void unk08();
     virtual void writeObjectWithVtable(void* context, const void* object, bool recurse);
-    virtual void WriteObjectWithClass(const CF63C0Class& pClassInfo, void* context, const void* object, bool recurse);
+    virtual void WriteObjectWithClass(const hkClass& pClassInfo, void* context, const void* object, bool recurse);
 };
 
 // @fnv 0x00cf63c0
-void __cdecl WriteObjectArray(void* context, const CF63C0Class& pClassInfo, const void* data, int count,
+void __cdecl WriteObjectArray(void* context, const hkClass& pClassInfo, const void* data, int count,
                               CF63C0Writer& writer)
 {
     if (count)
@@ -380,8 +314,8 @@ void __cdecl WriteObjectArray(void* context, const CF63C0Class& pClassInfo, cons
         if (!FUN_00cf6380(pClassInfo))
         {
             const char* cur = static_cast<const char*>(data);
-            int size = pClassInfo.GetObjectAlignment();
-            if (pClassInfo.hasVtable())
+            int size = GetObjectSize(&pClassInfo);
+            if (pClassInfo.GetLastNodeFlag())
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -401,24 +335,19 @@ void __cdecl WriteObjectArray(void* context, const CF63C0Class& pClassInfo, cons
     }
 }
 
-struct Node
-{
-    Node* FUN_00d46d50();
-};
-
-void __cdecl WriteReflectedMembers(void* a, Node* b, void* c);
+void __cdecl WriteReflectedMembers(void* a, const hkClass* b, void* c);
 
 // If a1 is non-null, walks the linked list starting at a2, calling WriteReflectedMembers(a1, p, a3) for each node.
 // @fnv 0x00cf6920
-void __cdecl FUN_00cf6920(void* a1, Node* apNode, void* apArg)
+void __cdecl FUN_00cf6920(void* a1, const hkClass* apNode, void* apArg)
 {
     if (a1 == 0)
         return;
-    Node* p = apNode;
+    const hkClass* p = apNode;
     do
     {
         WriteReflectedMembers(a1, p, apArg);
-        p = p->FUN_00d46d50();
+        p = GetParent(p);
     } while (p != 0);
 }
 
@@ -436,39 +365,19 @@ void __cdecl FUN_00cf6920(void* a1, Node* apNode, void* apArg)
 // The helper at 0x00d86910 is a __thiscall member that returns the dword at
 // this+4; it must be a real call (not inlined) so that `this` stays in ECX.
 
-struct FNV_Cf62b0_Obj
-{
-    unsigned int unk00;
-    int m04;  // returned by the helper (0x00d86910)
-    unsigned char unk08;
-    unsigned char unk09;
-    unsigned char unk0a;
-    unsigned char unk0b;
-    unsigned char unk0c;  // the "type" byte
-    unsigned char unk0d;
-    unsigned short unk0e;
-    unsigned short unk10;  // the flag word
-    int __thiscall FUN_cf62b0_get04();
-};
-
-__declspec(noinline) int __thiscall FNV_Cf62b0_Obj::FUN_cf62b0_get04()
-{
-    return m04;
-}
-
-extern "C" void __cdecl FUN_cf62b0_next(unsigned char* out, int node);
+extern "C" void __cdecl FUN_cf62b0_next(unsigned char* out, const hkClass* node);
 
 // @fnv 0x00cf62b0
-unsigned char* GetFlagByState(unsigned char* pucOut, FNV_Cf62b0_Obj* pObj)
+unsigned char* GetFlagByState(unsigned char* pucOut, const hkClassMember* pObj)
 {
-    bool bFlagSet = ((pObj->unk10 >> 9) & 1) != 0;
+    bool bFlagSet = ((pObj->m_flags >> 9) & 1) != 0;
     if (bFlagSet)
     {
         *pucOut = 1;
         return pucOut;
     }
 
-    unsigned int uiStateIndex = (unsigned int)pObj->unk0c - 1;
+    unsigned int uiStateIndex = (unsigned int)pObj->m_type - 1;
     switch (uiStateIndex)
     {
     case 0:
@@ -510,7 +419,7 @@ unsigned char* GetFlagByState(unsigned char* pucOut, FNV_Cf62b0_Obj* pObj)
         return pucOut;
 
     case 24:
-        FUN_cf62b0_next(pucOut, pObj->FUN_cf62b0_get04());
+        FUN_cf62b0_next(pucOut, pObj->GetClass());
         return pucOut;
 
     default:
@@ -519,35 +428,8 @@ unsigned char* GetFlagByState(unsigned char* pucOut, FNV_Cf62b0_Obj* pObj)
     }
 }
 
-struct Meta64;
 struct Writer64;
-struct Flags64
-{
-    unsigned short value;
-    unsigned short get() const
-    {
-        return value;
-    }
-};
-struct Member64
-{
-    const char* name;
-    Meta64* pClassInfo;
-    void* enumeration;
-    unsigned char type, subtype;
-    short cArraySize;
-    Flags64 flags;
-    unsigned short offset;
-    void* attributes;
-    int FUN_00d86940();
-    Meta64* FUN_00d86910();
-};
-struct Meta64
-{
-    int FUN_00d46f70();
-    Member64* FUN_00d46f80(int);
-    int FUN_00d470d0();
-};
+
 struct Pair64
 {
     void* data;
@@ -555,14 +437,14 @@ struct Pair64
 };
 struct Homogeneous64
 {
-    Meta64* pClassInfo;
+    const hkClass* pClassInfo;
     void* data;
     int count;
 };
 struct Variant64
 {
     void* object;
-    Meta64* pClassInfo;
+    const hkClass* pClassInfo;
 };
 struct Array64
 {
@@ -573,8 +455,8 @@ struct Array64
 struct Access64
 {
     void* data;
-    Member64* member;
-    Access64(void*, Member64*);
+    const hkClassMember* member;
+    Access64(void*, const hkClassMember*);
     char** FUN_00d87220(int);
     const char* FUN_00d87230(int);
     Pair64* FUN_00d87340(int);
@@ -594,31 +476,31 @@ struct Writer64
     unsigned char includeStorage;
     void EmitString(const char*, const char*);
 };
-int __cdecl MemberSize64(Member64*);
-void __cdecl EmitStringWithHash(Member64*, const char*, Writer64*);
+int __cdecl MemberSize64(const hkClassMember*);
+void __cdecl EmitStringWithHash(const hkClassMember*, const char*, Writer64*);
 void __cdecl FUN_00cf6080(const char*, void*, int, int, int, Writer64*);
-void __cdecl FUN_00cf6460(Member64*, void*, int, Writer64*);
-void __cdecl WriteObjectArray(const char*, Meta64*, void*, int, Writer64*);
-void __cdecl WriteToDestination(const char*, void*, Meta64*, Writer64*);
-void __cdecl FUN_00cf60d0(const char*, void*, Meta64*, Writer64*);
-int __cdecl GetThingValue(Member64*);
+void __cdecl FUN_00cf6460(const hkClassMember*, void*, int, Writer64*);
+void __cdecl WriteObjectArray(const char*, const hkClass*, void*, int, Writer64*);
+void __cdecl WriteToDestination(const char*, void*, const hkClass*, Writer64*);
+void __cdecl FUN_00cf60d0(const char*, void*, const hkClass*, Writer64*);
+int __cdecl GetThingValue(const hkClassMember*);
 
 // @fnv 0x00cf6580
-void __cdecl WriteReflectedMembers(void* base, Meta64* apMeta, Writer64* writer)
+void __cdecl WriteReflectedMembers(void* base, const hkClass* apMeta, Writer64* writer)
 {
     if (!base)
         return;
-    int count = apMeta->FUN_00d46f70();
+    int count = apMeta->GetNumDeclaredMembers();
     for (int i = 0; i < count; ++i)
     {
-        Member64* m = apMeta->FUN_00d46f80(i);
-        if (((unsigned char)(m->flags.get() >> 9) & 1) != 0)
+        const hkClassMember* m = &apMeta->GetDeclaredMember(i);
+        if (((unsigned char)(m->m_flags >> 9) & 1) != 0)
             continue;
-        switch (m->type)
+        switch (m->m_type)
         {
         case 29: {
             Access64 value(base, m);
-            int n = m->FUN_00d86940();
+            int n = GetCArraySize(m);
             if (n <= 1)
                 EmitStringWithHash(m, *value.FUN_00d87220(0), writer);
             else
@@ -628,22 +510,22 @@ void __cdecl WriteReflectedMembers(void* base, Meta64* apMeta, Writer64* writer)
         }
         case 33: {
             Access64 value(base, m);
-            int n = m->FUN_00d86940();
+            int n = GetCArraySize(m);
             if (n <= 1)
             {
-                const char* name = m->name;
+                const char* name = m->m_name;
                 writer->EmitString(name, value.FUN_00d87230(0));
             }
             else
                 for (int j = 0; j < n; ++j)
                 {
-                    const char* name = m->name;
+                    const char* name = m->m_name;
                     writer->EmitString(name, value.FUN_00d87230(j));
                 }
             break;
         }
         case 22: {
-            Array64* a = (Array64*)((char*)base + m->offset);
+            Array64* a = (Array64*)((char*)base + m->m_offset);
             if ((a->capacity & 0x80000000u) && !writer->includeStorage)
                 break;
             int length = a->count;
@@ -651,15 +533,15 @@ void __cdecl WriteReflectedMembers(void* base, Meta64* apMeta, Writer64* writer)
             int size = GetThingValue(m);
             if (size < 0)
                 break;
-            bool pointers = m->subtype == 20;
+            bool pointers = m->m_eSubtype == 20;
             const char* name;
             if (pointers)
             {
-                writer->Begin(m->name);
+                writer->Begin(m->m_name);
                 name = "array";
             }
             else
-                name = m->name;
+                name = m->m_name;
             FUN_00cf6080(name, a->data, length, capacity, size, writer);
             FUN_00cf6460(m, a->data, length, writer);
             if (pointers)
@@ -674,8 +556,8 @@ void __cdecl WriteReflectedMembers(void* base, Meta64* apMeta, Writer64* writer)
             int size = GetThingValue(m);
             if (size < 0)
                 break;
-            writer->Begin(m->name);
-            FUN_00cf6080(m->name, data, length, length, size, writer);
+            writer->Begin(m->m_name);
+            FUN_00cf6080(m->m_name, data, length, length, size, writer);
             FUN_00cf6460(m, data, length, writer);
             writer->End();
             break;
@@ -683,71 +565,43 @@ void __cdecl WriteReflectedMembers(void* base, Meta64* apMeta, Writer64* writer)
         case 27: {
             Access64 value(base, m);
             Homogeneous64 a = *value.FUN_00d87350(0);
-            Meta64* itemClass = a.pClassInfo;
+            const hkClass* itemClass = a.pClassInfo;
             void* data = a.data;
             int length = a.count;
             if (length > 0 && itemClass && data)
             {
-                writer->Begin(m->name);
-                const char* name = m->name;
-                FUN_00cf6080(name, data, length, length, itemClass->FUN_00d470d0(), writer);
-                WriteObjectArray(m->name, itemClass, data, length, writer);
+                writer->Begin(m->m_name);
+                const char* name = m->m_name;
+                FUN_00cf6080(name, data, length, length, GetObjectSize(itemClass), writer);
+                WriteObjectArray(m->m_name, itemClass, data, length, writer);
                 writer->End();
             }
             break;
         }
         case 20:
-            if (m->subtype == 25)
+            if (m->m_eSubtype == 25)
             {
-                void* data = *(void**)((char*)base + m->offset);
-                const char* name = m->name;
-                WriteToDestination(name, data, m->FUN_00d86910(), writer);
+                void* data = *(void**)((char*)base + m->m_offset);
+                const char* name = m->m_name;
+                WriteToDestination(name, data, m->GetClass(), writer);
             }
             break;
         case 28: {
-            Variant64* a = (Variant64*)((char*)base + m->offset);
+            Variant64* a = (Variant64*)((char*)base + m->m_offset);
             if (a->object && a->pClassInfo)
-                WriteToDestination(m->name, a->object, a->pClassInfo, writer);
+                WriteToDestination(m->m_name, a->object, a->pClassInfo, writer);
             break;
         }
         case 25: {
-            const char* name = m->name;
-            void* data = (char*)base + m->offset;
-            FUN_00cf60d0(name, data, m->FUN_00d86910(), writer);
+            const char* name = m->m_name;
+            void* data = (char*)base + m->m_offset;
+            FUN_00cf60d0(name, data, m->GetClass(), writer);
             break;
         }
         }
     }
 }
 
-struct hkClassMember
-{
-    const char* m_name;
-    void* m_class;
-    void* m_pClassEnum;
-    unsigned char m_type;
-    enum Type
-    {
-        TYPE_VOID
-    };
-    Type getType() const
-    {
-        return (Type)m_type;
-    }
-};
-
-struct hkClass
-{
-    int GetNumDeclaredMembers() const;
-    const hkClassMember& GetDeclaredMember(int i) const;
-    void touch() const
-    {}
-};
-
-struct hkStringPtr
-{
-    const char* m_pcText;
-};
 
 struct StringArrayAccessor
 {
@@ -805,18 +659,18 @@ struct TaggedString64
 {
     unsigned int bits;
 };
-static __declspec(noinline) const char* FUN_00cf6210(Meta64* pClassInfo, void* object)
+static __declspec(noinline) const char* FUN_00cf6210(const hkClass* pClassInfo, void* object)
 {
     if (!pClassInfo)
         return 0;
-    int count = pClassInfo->FUN_00d46f70();
+    int count = pClassInfo->GetNumDeclaredMembers();
     for (int i = 0; i < count; ++i)
     {
-        Member64* m = pClassInfo->FUN_00d46f80(i);
-        if (FUN_00cb0fa0(m->name, DAT_01094398) == 0)
+        const hkClassMember* m = &pClassInfo->GetDeclaredMember(i);
+        if (FUN_00cb0fa0(m->m_name, DAT_01094398) == 0)
         {
             Access64 access(object, m);
-            switch (m->type)
+            switch (m->m_type)
             {
             case 0x21: {
                 TaggedString64* slot = (TaggedString64*)access.FUN_00d87230(0);
@@ -835,30 +689,30 @@ static __declspec(noinline) const char* FUN_00cf6210(Meta64* pClassInfo, void* o
 
 // Processes each element according to member subtype, calling the corresponding writer or helper for recognized subtypes.
 // @fnv 0x00cf6460
-void __cdecl FUN_00cf6460(Member64* member, void* elements, int count, Writer64* writer)
+void __cdecl FUN_00cf6460(const hkClassMember* member, void* elements, int count, Writer64* writer)
 {
     if (count <= 0)
         return;
-    switch (member->subtype)
+    switch (member->m_eSubtype)
     {
     case 0x14: {
-        Meta64* meta = member->FUN_00d86910();
+        const hkClass* meta = member->GetClass();
         if (!meta)
             return;
         for (int i = 0; i < count; ++i)
         {
             const char* name = FUN_00cf6210(meta, ((void**)elements)[i]);
             if (!name)
-                name = member->name;
+                name = member->m_name;
             WriteToDestination(name, ((void**)elements)[i], meta, writer);
         }
         return;
     }
     case 0x19: {
-        Meta64* meta = member->FUN_00d86910();
+        const hkClass* meta = member->GetClass();
         if (!meta)
             return;
-        WriteObjectArray(member->name, meta, elements, count, writer);
+        WriteObjectArray(member->m_name, meta, elements, count, writer);
         return;
     }
     case 0x1d:
@@ -867,7 +721,7 @@ void __cdecl FUN_00cf6460(Member64* member, void* elements, int count, Writer64*
         return;
     case 0x21: {
         for (int i = 0; i < count; ++i)
-            writer->EmitString(member->name, (const char*)((const char**)elements + i));
+            writer->EmitString(member->m_name, (const char*)((const char**)elements + i));
         return;
     }
     }

@@ -1,4 +1,7 @@
-// fallout_shared/bgsdecalmanager_decls.h: declares RgbaColor, ProcessLists, NiRenderer, DecalVtableCall
+#include "../../include/Setting.h"
+// 0x00408d60 returns the setting value at +4 (or a fallback byte for null this).
+
+// fallout_shared/bgsdecalmanager_decls.h: declares NiColorA, Setting, NiRenderer, DecalVtableCall
 #ifndef BGSDECALMANAGER_DECLS_H
 #define BGSDECALMANAGER_DECLS_H
 
@@ -15,101 +18,54 @@ class BSFaceGenAnimationData;
 class NiProperty;
 class NiTexture;
 class ParentSpaceNode;
-class RgbaColor;
-template <class T> class NiPointer
+class NiColorA;
+template <class T> class DecalNiPointer
 {
   public:
     T* m_pObject;
 };
-class ImageSpaceEffectParam
-{
-  public:
-    float r;
-    float g;
-    float b;
-    float a;
-    ImageSpaceEffectParam(float, float, float, float);
-};
-class RgbaColor
-{
-  public:
-    float r;
-    float g;
-    float b;
-    float a;
-};
+#include "../../include/NiColorA.h"
 
-template <> class NiPointer<BSFaceGenAnimationData>
+template <> class DecalNiPointer<BSFaceGenAnimationData>
 {
   public:
     BSFaceGenAnimationData* m_pObject;
     operator BSFaceGenAnimationData*() const;
 };
-template <> class NiPointer<NiTexture>
+template <> class DecalNiPointer<NiTexture>
 {
   public:
     NiTexture* m_pObject;
-    ~NiPointer();
+    ~DecalNiPointer();
 };
 
-template <class T, unsigned int N> class BSSimpleArray
-{
-  public:
-    unsigned int GetSize();
-};
-template <class T> class NiTPointerAllocator
+#include "../../include/BSSimpleArray.h"
+template <class T> class DecalNiTPointerAllocator
 {
 };
-template <class Allocator, class T> class NiTPointerListBase
+template <class Allocator, class T> class DecalNiTPointerListBase
 {
   public:
     T& GetNext(void*&);
-    NiPointer<NiTexture> RemovePos(void*&);
+    DecalNiPointer<NiTexture> RemovePos(void*&);
 };
 
 class TESTopic;
-template <> class BSSimpleList<TESTopic*>
+// 0x0043b1b0 -> 0x0043b1d0 loads the first pointer as a string; this is a folded string view, not list traversal.
+struct FirstPointerStringView_0043b1b0
 {
-  public:
     const char* FUN_0043b1b0();
 };
-class TESTopicInfoData
-{
-  public:
-    BSSimpleList<TESTopic*>* GetLinkToList();
-};
-class ProcessLists
-{
-  public:
-    unsigned char* GetLifeStateControlFlag();
-};
-extern ProcessLists DAT_011c5904;
+#include "../../include/TESTopicInfoData.h"
+
+extern Setting DAT_011c5904;
 extern int DAT_011c57ec;
 extern unsigned int DAT_011c57f4;
 extern "C" const char DAT_0101e1c8[];
 extern "C" const char DAT_0101e19c[];
 extern "C" const char DAT_0101e174[];
 
-class NiRenderer
-{
-  public:
-    void StartScene();
-    void FinishScene();
-    char _pdbpad_1[7];
-    char m_spAccum_pad7_pad7[4];
-    void* m_pCamera;
-    void* m_pActiveRenderTargetGroup;
-    char m_acRendererDataB[4];
-    char _pdbpad_18[104];
-    char m_acRendererDataC[128];
-    char m_acRendererDataD[128];
-    char m_acRendererDataE[128];
-    int m_iRendererState;
-    unsigned int m_uiRendererFlags;
-    bool m_bRendererFlagA;
-    bool m_bRendererFlagB;
-    char _pdbpad_20a[118];
-};
+#include "../../include/NiRenderer.h"
 NiRenderer* FUN_0043c4b0();
 int __cdecl Warning(const char*, ...);
 

@@ -5,17 +5,11 @@
 // src/fallout_shared/tesvalueform.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/tesvalueform.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct BaseFormComponent
-{
-    virtual ~BaseFormComponent();
-};
-
-struct TESValueForm : BaseFormComponent
-{
-    unsigned int GetValueFromForm();
-    void SetFormValue(unsigned int);
-    void FUN_0048e7f0(BaseFormComponent*);
-};
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/TESValueForm.h"
+#include "../../include/TESSaveLoadGame.h"
 
 // @fnv 0x0048e7f0
 void TESValueForm::FUN_0048e7f0(BaseFormComponent* component)
@@ -26,12 +20,6 @@ void TESValueForm::FUN_0048e7f0(BaseFormComponent* component)
     SetFormValue(form->GetValueFromForm());
 }
 
-namespace fnv_0048e9b0 {
-struct TESValueForm
-{
-    unsigned short FUN_0048e9b0(unsigned int aiFlags);
-};
-
 // @fnv 0x0048e9b0
 unsigned short TESValueForm::FUN_0048e9b0(unsigned int aiFlags)
 {
@@ -40,93 +28,46 @@ unsigned short TESValueForm::FUN_0048e9b0(unsigned int aiFlags)
         isize += 4;
     return isize;
 }
-}  // namespace fnv_0048e9b0
 
 namespace fnv_0048e9e0 {
-struct TESSaveLoadGame
-{
-    void FUN_008579b0(void*, int);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
-struct TESValueForm
-{
-    void FUN_0048e9e0(unsigned int flags);
-};
+}  // namespace fnv_0048e9e0
 
 // @fnv 0x0048e9e0
 void TESValueForm::FUN_0048e9e0(unsigned int flags)
 {
     if (flags & 2)
-        g_TESSaveLoadGame->FUN_008579b0(reinterpret_cast<char*>(this) + 4, 4);
+        fnv_0048e9e0::g_TESSaveLoadGame->FUN_008579b0(&iValue, 4);
 }
-}  // namespace fnv_0048e9e0
+
 
 namespace fnv_0048ea10 {
-struct TESSaveLoadGame
-{
-    void ReadTypedData(void* p, unsigned int n);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
-struct TESValueForm
-{
-    void FUN_0048ea10(unsigned int a, unsigned int b);
-};
+}  // namespace fnv_0048ea10
 
 // @fnv 0x0048ea10
 void TESValueForm::FUN_0048ea10(unsigned int a, unsigned int b)
 {
     if (a & 2)
-        g_TESSaveLoadGame->ReadTypedData((char*)this + 4, 4);
+        fnv_0048ea10::g_TESSaveLoadGame->ReadTypedData(&iValue, 4);
 }
-}  // namespace fnv_0048ea10
 
-namespace fnv_0048ea40 {
-struct FormChangeMask
-{
-    int flags;
-    operator bool() const;
-};
-struct BGSLoadFormBuffer
-{
-    FormChangeMask GetChangeFlags(int);
-};
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-};
-struct TESValueForm
-{
-    void FUN_0048ea40(BGSSaveFormBuffer*);
-};
+
 // @fnv 0x0048ea40
 void TESValueForm::FUN_0048ea40(BGSSaveFormBuffer* aBuffer)
 {
-    if (((BGSLoadFormBuffer*)aBuffer)->GetChangeFlags(2))
-        aBuffer->SaveData((char*)this + 4, 4, 0);
+    if (reinterpret_cast<BGSLoadFormBuffer*>(aBuffer)->GetChangeFlags(2).operator bool())
+        aBuffer->SaveData(&iValue, 4, 0);
 }
-}  // namespace fnv_0048ea40
 
-struct FormChangeMask
-{
-    unsigned int flags;
-    operator bool() const;
-};
-struct BGSLoadFormBuffer
-{
-    FormChangeMask GetChangeFlags(unsigned int);
-    void ReadTypedData(void*, unsigned int);
-};
-struct FUN_0048ea80_Class
-{
-    void FUN_0048ea80(BGSLoadFormBuffer* buffer);
-};
+
 // @fnv 0x0048ea80
-void FUN_0048ea80_Class::FUN_0048ea80(BGSLoadFormBuffer* buffer)
+void TESValueForm::LoadGame(BGSLoadFormBuffer* buffer)
 {
-    if (buffer->GetChangeFlags(2))
-        buffer->ReadTypedData((char*)this + 4, 4);
+    if (buffer->GetChangeFlags(2u).operator bool())
+        buffer->ReadTypedData(static_cast<void*>(&iValue), 4u);
 }
 
 struct BaseData
@@ -314,18 +255,13 @@ Item* Holder::FUN_00970a20(void* key, int unused)
     return current;
 }
 
-struct FUN_0048e840_shell
-{
-    bool FUN_0048e840(BaseFormComponent* other);
-};
-
 // @fnv 0x0048e840
-bool FUN_0048e840_shell::FUN_0048e840(BaseFormComponent* other)
+bool TESValueForm::IsEqualToBase(BaseFormComponent* other)
 {
     TESValueForm* form = dynamic_cast<TESValueForm*>(other);
     if (!form)
         return true;
-    if (reinterpret_cast<TESValueForm*>(this)->GetValueFromForm() != form->GetValueFromForm())
+    if (GetValueFromForm() != form->GetValueFromForm())
         return true;
     return false;
 }

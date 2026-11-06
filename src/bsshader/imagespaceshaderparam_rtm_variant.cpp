@@ -2,10 +2,18 @@
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
+// The legacy unit headers must use the shared NiRefObject base.
+#define FNV_NIREFOBJECT_H
+#include "../../include/NiFixedString.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/NiTexture.h"
 #include "imagespaceshaderparam_decls.h"
 #include "imagespaceshaderparam_types_NiD3DShaderConstantMap.h"
 #include "imagespaceshaderparam_types_ImageSpaceShaderParam.h"
-struct H
+#include "../../include/ImageSpaceTexture.h"
+// View of ImageSpaceShaderParam: +0x3C is m_pfVertexShaderConstants (the first three vectors are reserved).
+struct ImageSpaceVertexConstantsView
 {
     char _0[0x3C];
     float* _pf;
@@ -95,91 +103,7 @@ struct ShaderPass_4e30
     bool FUN_00c04e30(int arg);
 };
 
-// Native NiObject/NiTexture contracts: JIP-LN-NVSE internal/netimmerse.h.
-class NiRTTI;
-class NiNode;
-class BSFadeNode;
-class BSMultiBoundNode;
-class NiGeometry;
-class NiTriBasedGeom;
-class NiTriStrips;
-class NiTriShape;
-class BSSegmentedTriShape;
-class BSResizableTriShape;
-class NiParticles;
-class NiLines;
-class bhkNiCollisionObject;
-class bhkBlendCollisionObject;
-class bhkRigidBody;
-class bhkLimitedHingeConstraint;
-class NiObjectCopyInfo;
-class NiStream;
-class NiBound;
-class NiControllerManager;
-class NiTimeController;
-class NiExtraData;
-class NiObject : public NiRefObject
-{
-  public:
-    virtual NiRTTI* GetType();
-    virtual NiNode* GetNiNode();
-    virtual BSFadeNode* GetFadeNode();
-    virtual BSMultiBoundNode* GetMultiBoundNode();
-    virtual NiGeometry* GetNiGeometry();
-    virtual NiTriBasedGeom* GetTriBasedGeom();
-    virtual NiTriStrips* GetTriStrips();
-    virtual NiTriShape* GetTriShape();
-    virtual BSSegmentedTriShape* GetSegmentedTriShape();
-    virtual BSResizableTriShape* GetResizableTriShape();
-    virtual NiParticles* GetNiParticles();
-    virtual NiLines* GetNiLines();
-    virtual bhkNiCollisionObject* GetCollisionObject();
-    virtual bhkBlendCollisionObject* GetBlendCollisionObject();
-    virtual bhkRigidBody* GetRigidBody();
-    virtual bhkLimitedHingeConstraint* GetLimitedHingeConstraint();
-    virtual NiObject* Clone(NiObjectCopyInfo*);
-    virtual void LoadBinary(NiStream*);
-    virtual void LinkObject(NiStream*);
-    virtual void RegisterStreamables(NiStream*);
-    virtual void SaveBinary(NiStream*);
-    virtual bool Compare(NiObject*);
-    virtual void GetViewerStrings(NiTArray<char*, NiTNewInterface<char*> >*);
-    virtual void AddViewerStrings(NiTArray<char*, NiTNewInterface<char*> >*);
-    virtual void ProcessClone(NiObjectCopyInfo*);
-    virtual void PostLinkObject(NiStream*);
-    virtual bool StreamCanSkip();
-    virtual NiRTTI* GetStreamableRTTI();
-    virtual void SetWorldBound(NiBound*);
-    virtual unsigned int GetBlockAllocationSize();
-    virtual void Unk_20();
-    virtual void Unk_21(unsigned int);
-    virtual NiControllerManager* GetControllerManager();
-};
-class NiFixedString
-{
-  public:
-    const char* str;
-};
-class NiObjectNET : public NiObject
-{
-  public:
-    NiFixedString m_blockName;
-    NiTimeController* m_controller;
-    NiExtraData** m_extraDataList;
-    unsigned short m_extraDataListLen, m_extraDataListCapacity;
-};
-class NiTexture : public NiObjectNET
-{
-  public:
-    virtual void Unk_23();
-    virtual void Unk_24();
-    virtual unsigned int GetRenderedWidth();
-    virtual unsigned int GetRenderedHeight();
-};
-struct ImageSpaceTexture
-{
-    NiTexture* GetTexture() const;
-};
+
 extern float g_fBlurBase;
 extern float g_fBlurScale;
 extern float g_fBlurOne;
@@ -238,8 +162,8 @@ struct ImageSpaceEffectFourTexturePass
 // @fnv 0x00ba4270
 bool ImageSpaceEffectFourTexturePass::FUN_00ba4270(int a1)
 {
-    float m_fGlyphWidthInPixels = (float)unk28.GetAt(2)->GetTexture()->GetRenderedWidth();
-    float m_fGlyphExtent = (float)unk28.GetAt(1)->GetTexture()->GetRenderedHeight();
+    float m_fGlyphWidthInPixels = (float)unk28.GetAt(2)->GetTexture()->GetWidth();
+    float m_fGlyphExtent = (float)unk28.GetAt(1)->GetTexture()->GetHeight();
     int iLevel = unk58;
     int iLo = iLevel - 1;
     int iHi = iLo + 1;

@@ -1,3 +1,4 @@
+#include "../../include/NiTMapItem.h"
 
 // src/staging/blk_00a00000_od_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/staging/blk_00a00000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,12 +6,13 @@
 
 // src/staging/blk_00a00000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
-extern P03MM g_memoryManager;
+#include "../../include/BSSimpleList.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/StrMem.h"
+#include <string.h>
+#include "../../include/NiAVObject.h"
+#include "../../include/Tile3D.h"
 struct FUN_00a1c020_Class
 {
     void* AllocateShifted(unsigned int size);
@@ -26,10 +28,6 @@ struct FUN_00a1e1a0_class
     int m_vtbl;
     int m_field;
     void __thiscall FUN_00a1e1a0();
-};
-struct MemoryManager
-{
-    void Deallocate(void*);
 };
 struct FUN_00a11d80_Class
 {
@@ -178,11 +176,6 @@ struct FUN_00a0d2a0_Obj
 {
     void FUN_00a0d2a0();
 };
-struct FUN_00aa4060_Class
-{
-    void __thiscall FUN_00aa4060(void*);
-};
-extern FUN_00aa4060_Class DAT_011f6238;
 struct FUN_00a0d5c0_Local
 {
     int unk00;
@@ -276,7 +269,6 @@ struct FUN_00a0d790_class : S00a0d390
     void FUN_00a0d790();
 };
 extern int DAT_01094e9c;
-extern FUN_00aa4060_Class DAT_011f6238;
 extern void* __cdecl FUN_00aa10f0(void*);
 struct FUN_00a0d990_cls : S00a0d390
 {
@@ -374,26 +366,11 @@ void* __thiscall S00a0d7f0::FUN_00a0d7f0(unsigned int flags)
 extern NiFixedString* DAT_011f34cc;
 extern const char* DAT_0109b220;
 
-class NiFixedString
+inline void NiFixedString::operator delete(void* pvMem)
 {
-  public:
-    const char* m_pcString;
-    ~NiFixedString();
-    void operator delete(void* pvMem)
-    {
-        _g_memoryManager.Deallocate(pvMem);
-    }
-};
-
-inline NiFixedString::~NiFixedString()
-{
-    if (m_pcString == DAT_0109b220)
-    {
-        return;
-    }
-    char* pcBlock = (char*)m_pcString - 8;
-    InterlockedDecrement((long*)pcBlock);
+    _g_memoryManager.Deallocate(pvMem);
 }
+
 
 // @fnv 0x00a1c790
 void __cdecl FUN_00a1c790()
@@ -401,59 +378,31 @@ void __cdecl FUN_00a1c790()
     delete DAT_011f34cc;
 }
 
-struct NiNodeRef
+__forceinline void StrMem::SetLength(unsigned int n)
 {
-    NiNode* m_pObject;
-    NiNodeRef& operator=(NiNode* object);
-};
+    length = n <= 0xffff ? (unsigned short)n : 0xffff;
+}
 
-struct Tile3D
+__forceinline void StrMem::SetMaxLength(unsigned int n)
 {
-    Tile3D();
-    virtual ~Tile3D();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    NiNodeRef m_pController;
-    int unk30;
-    int unk34;
-};
+    capacity = n <= 0xffff ? (unsigned short)n : 0xffff;
+}
 
-struct TileStr
+__forceinline StrMem::StrMem()
 {
-    char* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    __forceinline void SetLength(unsigned int length)
-    {
-        sLen = length <= 0xffff ? (unsigned short)length : 0xffff;
-    }
-    __forceinline void SetMaxLength(unsigned int length)
-    {
-        sMaxLen = length <= 0xffff ? (unsigned short)length : 0xffff;
-    }
-    __forceinline TileStr()
-    {
-        pString = 0;
-        SetLength(0);
-        SetMaxLength(0);
-    }
-    ~TileStr();
-};
+    text = 0;
+    SetLength(0);
+    SetMaxLength(0);
+}
 
-struct FUN_00a0bc80 : Tile3D
+// Tile3D's constructor; derived from Tile (whose constructor 0x00709860 it calls) because this unit's StrMem carries the
+// inline string constructors the original expands for +0x40/+0x48, which the shared Tile3D's BSStringT members lack here.
+struct FUN_00a0bc80 : Tile
 {
-    int unk38;
+    void* m_pParent;
     int unk3C;
-    TileStr str40;
-    TileStr str48;
+    StrMem str40;
+    StrMem str48;
     FUN_00a0bc80();
     __forceinline void Dead2()
     {
@@ -467,8 +416,8 @@ FUN_00a0bc80::FUN_00a0bc80()
 {
     int aiD[7];
     Dead2();
-    m_pController = 0;
-    unk38 = 0;
+    m_pRenderedNodeEntry = 0;
+    m_pParent = 0;
     unk3C = 0;
 }
 
@@ -677,12 +626,7 @@ void S00a1bc20_Obj::FUN_00a1bc20()
 
 void __cdecl NiFreeE900(void* pvMem);
 
-struct MapItemE900
-{
-    MapItemE900* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+
 
 class MapBaseE900
 {
@@ -694,10 +638,10 @@ class MapBaseE900
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItemE900* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItemE900* pkItem);
-    virtual MapItemE900* NewItem();
-    virtual void DeleteItem(MapItemE900* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
 
     void RemoveAll()
     {
@@ -705,7 +649,7 @@ class MapBaseE900
         {
             while (m_ppkHashTable[i])
             {
-                MapItemE900* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -715,7 +659,7 @@ class MapBaseE900
     }
 
     unsigned int m_uiHashSize;
-    MapItemE900** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 
@@ -742,10 +686,10 @@ FUN_00a1e900::~FUN_00a1e900()
     {
         for (unsigned int i = 0; i < m_uiHashSize; i++)
         {
-            MapItemE900* pkItem = m_ppkHashTable[i];
+            NiTMapItem<const char*, void*>* pkItem = m_ppkHashTable[i];
             while (pkItem)
             {
-                MapItemE900* pkSave = pkItem;
+                NiTMapItem<const char*, void*>* pkSave = pkItem;
                 pkItem = pkItem->m_pkNext;
                 NiFreeE900((char*)pkSave->m_key);
             }
@@ -755,12 +699,7 @@ FUN_00a1e900::~FUN_00a1e900()
 
 void __cdecl NiFreeE9F0(void* pvMem);
 
-struct MapItemE9F0
-{
-    MapItemE9F0* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+
 
 class MapBaseE9F0
 {
@@ -772,10 +711,10 @@ class MapBaseE9F0
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItemE9F0* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItemE9F0* pkItem);
-    virtual MapItemE9F0* NewItem();
-    virtual void DeleteItem(MapItemE9F0* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
 
     void RemoveAll()
     {
@@ -783,7 +722,7 @@ class MapBaseE9F0
         {
             while (m_ppkHashTable[i])
             {
-                MapItemE9F0* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -793,7 +732,7 @@ class MapBaseE9F0
     }
 
     unsigned int m_uiHashSize;
-    MapItemE9F0** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 
@@ -931,25 +870,15 @@ FUN_00a1ed60::~FUN_00a1ed60()
 
 void __cdecl NiFreeD4D0(void* pvMem);
 
-struct MemoryManagerD4D0
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerD4D0 g_kMemoryManagerD4D0;
 
-struct MapItemD4D0
-{
-    MapItemD4D0* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+
 
 class FUN_00a0d4d0
 {
   public:
     static void operator delete(void* pvMem)
     {
-        g_kMemoryManagerD4D0.Deallocate(pvMem);
+        _g_memoryManager.Deallocate(pvMem);
     }
 
 // @fnv 0x00a0d4d0
@@ -960,10 +889,10 @@ class FUN_00a0d4d0
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItemD4D0* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItemD4D0* pkItem);
-    virtual MapItemD4D0* NewItem();
-    virtual void DeleteItem(MapItemD4D0* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
 
     void RemoveAll()
     {
@@ -971,7 +900,7 @@ class FUN_00a0d4d0
         {
             while (m_ppkHashTable[i])
             {
-                MapItemD4D0* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -981,7 +910,7 @@ class FUN_00a0d4d0
     }
 
     unsigned int m_uiHashSize;
-    MapItemD4D0** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 
@@ -992,25 +921,15 @@ void* MakeMapD4D0()
 
 void __cdecl NiFreeD520(void* pvMem);
 
-struct MemoryManagerD520
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerD520 g_kMemoryManagerD520;
 
-struct MapItemD520
-{
-    MapItemD520* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+
 
 class MapBaseD520
 {
   public:
     static void operator delete(void* pvMem)
     {
-        g_kMemoryManagerD520.Deallocate(pvMem);
+        _g_memoryManager.Deallocate(pvMem);
     }
     virtual ~MapBaseD520()
     {
@@ -1019,17 +938,17 @@ class MapBaseD520
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItemD520* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItemD520* pkItem);
-    virtual MapItemD520* NewItem();
-    virtual void DeleteItem(MapItemD520* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
     void RemoveAll()
     {
         for (unsigned int i = 0; i < m_uiHashSize; i++)
         {
             while (m_ppkHashTable[i])
             {
-                MapItemD520* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -1038,7 +957,7 @@ class MapBaseD520
         m_uiCount = 0;
     }
     unsigned int m_uiHashSize;
-    MapItemD520** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 class FUN_00a0d520 : public MapBaseD520
@@ -1060,25 +979,15 @@ void* MakeMapD520()
 
 void __cdecl NiFreeD840(void* pvMem);
 
-struct MemoryManagerD840
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerD840 g_kMemoryManagerD840;
 
-struct MapItemD840
-{
-    MapItemD840* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+
 
 class MapBaseD840
 {
   public:
     static void operator delete(void* pvMem)
     {
-        g_kMemoryManagerD840.Deallocate(pvMem);
+        _g_memoryManager.Deallocate(pvMem);
     }
     virtual ~MapBaseD840()
     {
@@ -1087,17 +996,17 @@ class MapBaseD840
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItemD840* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItemD840* pkItem);
-    virtual MapItemD840* NewItem();
-    virtual void DeleteItem(MapItemD840* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
     void RemoveAll()
     {
         for (unsigned int i = 0; i < m_uiHashSize; i++)
         {
             while (m_ppkHashTable[i])
             {
-                MapItemD840* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -1106,7 +1015,7 @@ class MapBaseD840
         m_uiCount = 0;
     }
     unsigned int m_uiHashSize;
-    MapItemD840** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 class FUN_00a0d840 : public MapBaseD840
@@ -1128,25 +1037,15 @@ void* MakeMapD840()
 
 void __cdecl NiFreeE7E0(void* pvMem);
 
-struct MemoryManagerE7E0
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerE7E0 g_kMemoryManagerE7E0;
 
-struct MapItemE7E0
-{
-    MapItemE7E0* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+
 
 class MapBaseE7E0
 {
   public:
     static void operator delete(void* pvMem)
     {
-        g_kMemoryManagerE7E0.Deallocate(pvMem);
+        _g_memoryManager.Deallocate(pvMem);
     }
     virtual ~MapBaseE7E0()
     {
@@ -1155,17 +1054,17 @@ class MapBaseE7E0
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItemE7E0* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItemE7E0* pkItem);
-    virtual MapItemE7E0* NewItem();
-    virtual void DeleteItem(MapItemE7E0* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
     void RemoveAll()
     {
         for (unsigned int i = 0; i < m_uiHashSize; i++)
         {
             while (m_ppkHashTable[i])
             {
-                MapItemE7E0* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -1174,7 +1073,7 @@ class MapBaseE7E0
         m_uiCount = 0;
     }
     unsigned int m_uiHashSize;
-    MapItemE7E0** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 class FUN_00a1e7e0 : public MapBaseE7E0
@@ -1196,25 +1095,15 @@ void* MakeMapE7E0()
 
 void __cdecl NiFreeE8B0(void* pvMem);
 
-struct MemoryManagerE8B0
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerE8B0 g_kMemoryManagerE8B0;
 
-struct MapItemE8B0
-{
-    MapItemE8B0* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+
 
 class FUN_00a1e8b0
 {
   public:
     static void operator delete(void* pvMem)
     {
-        g_kMemoryManagerE8B0.Deallocate(pvMem);
+        _g_memoryManager.Deallocate(pvMem);
     }
 
 // @fnv 0x00a1e8b0
@@ -1225,10 +1114,10 @@ class FUN_00a1e8b0
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItemE8B0* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItemE8B0* pkItem);
-    virtual MapItemE8B0* NewItem();
-    virtual void DeleteItem(MapItemE8B0* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
 
     void RemoveAll()
     {
@@ -1236,7 +1125,7 @@ class FUN_00a1e8b0
         {
             while (m_ppkHashTable[i])
             {
-                MapItemE8B0* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -1246,7 +1135,7 @@ class FUN_00a1e8b0
     }
 
     unsigned int m_uiHashSize;
-    MapItemE8B0** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 
@@ -1307,61 +1196,54 @@ void make_00a1eb20()
 #include <string.h>
 unsigned int __cdecl BSStringLength(const char*);
 unsigned int __cdecl BSStringCapacityMaximum(unsigned int, unsigned int);
-struct StrMem
+inline bool StrMem::Set(const char* source, unsigned int requested)
 {
-    char* data;
-    unsigned short length, capacity;
-    unsigned int MaxLength();
-    void SetLength(unsigned int);
-    void SetMaxLength(unsigned int);
-    bool Set(const char* source, unsigned int requested)
+    unsigned int len = source ? BSStringLength(source) : 0;
+    unsigned int max = BSStringCapacityMaximum(len, requested);
+    if (max <= MaxLength())
     {
-        unsigned int len = source ? BSStringLength(source) : 0;
-        unsigned int max = BSStringCapacityMaximum(len, requested);
-        if (max <= MaxLength())
+        if (max)
         {
-            if (max)
-            {
-                if (source)
-                    memcpy(data, source, len + 1);
-                else
-                    data[0] = 0;
-            }
+            if (source)
+                memcpy(text, source, len + 1);
             else
-            {
-                if (data)
-                {
-                    char* released = data;
-                    delete[] released;
-                }
-                data = 0;
-                max = 0;
-                SetMaxLength(max);
-            }
+                text[0] = 0;
         }
         else
         {
-            char* old = data;
-            data = new char[max + 1];
-            if (source)
-                memcpy(data, source, len + 1);
-            else
-                data[0] = 0;
-            if (old)
+            if (text)
             {
-                char* released = old;
+                char* released = text;
                 delete[] released;
             }
+            text = 0;
+            max = 0;
             SetMaxLength(max);
         }
-        SetLength(len);
-        return len != 0;
     }
-    ~StrMem()
+    else
     {
-        Set(0, 0);
+        char* old = text;
+        text = new char[max + 1];
+        if (source)
+            memcpy(text, source, len + 1);
+        else
+            text[0] = 0;
+        if (old)
+        {
+            char* released = old;
+            delete[] released;
+        }
+        SetMaxLength(max);
     }
-};
+    SetLength(len);
+    return len != 0;
+}
+inline StrMem::~StrMem()
+{
+    Set(0, 0);
+}
+
 class FUN_00a0bb50
 {
   public:
@@ -1389,7 +1271,7 @@ struct Base670
     }
     static void operator delete(void* p)
     {
-        DAT_011f6238.FUN_00aa4060(p);
+        _g_memoryManager.Deallocate(p);
     }
     virtual ~Base670()
     {

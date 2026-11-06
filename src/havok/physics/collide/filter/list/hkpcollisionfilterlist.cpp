@@ -2,7 +2,18 @@
 // src/havok/physics/collide/filter/list/hkpcollisionfilterlist.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/filter/list/hkpcollisionfilterlist.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpCollisionFilterList.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkpCollisionFilter.h"
+
+// No shared hkpCollisionFilterList header exists yet; retain its reflected layout.
+class hkpCollisionFilterList : public hkpCollisionFilter
+{
+  public:
+    int m_postTypePadding[3]; // Reflected filter array starts at +0x30.
+    hkArray<hkpCollisionFilter*> m_kFilters;
+};
 
 struct hkBoolRet
 {
@@ -11,7 +22,8 @@ struct hkBoolRet
     {}
 };
 
-struct Interface
+// Exe 0x00e49cf0: unit-local Interface view; declarations and layout are preserved.
+struct HkpcollisionfilterlistInterfaceView
 {
     virtual hkBoolRet IsCollisionEnabled(void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7) = 0;
 };
@@ -24,7 +36,7 @@ struct BaseWithVptr
     int unk08;
 };
 
-struct SubFilter : public BaseWithVptr, public Interface
+struct SubFilter : public BaseWithVptr, public HkpcollisionfilterlistInterfaceView
 {
 };
 
@@ -110,18 +122,6 @@ CheckResult FilterChain::EvaluateAllFilters(int first, int second)
     return CheckResult(true);
 }
 
-struct hkBool9BC0
-{
-    hkBool9BC0(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
 
 struct CollidableA9BC0;
 struct CollidableB9BC0;
@@ -130,7 +130,7 @@ class CollidableFilter9BC0
 {
   public:
     virtual ~CollidableFilter9BC0();
-    virtual hkBool9BC0 IsCollisionEnabled(const CollidableA9BC0& a, const CollidableB9BC0& b) const;
+    virtual hkBool IsCollisionEnabled(const CollidableA9BC0& a, const CollidableB9BC0& b) const;
 };
 
 class ReferencedObject9BC0
@@ -145,29 +145,11 @@ class CollisionFilter9BC0 : public ReferencedObject9BC0, public CollidableFilter
 {
 };
 
-template <class T> struct hkArray9BC0
-{
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    const T& operator[](int i) const
-    {
-        return m_data[i];
-    }
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
 
 class CollisionFilterList9BC0
 {
   public:
-    hkBool9BC0 FUN_00e49bc0(const CollidableA9BC0& a, const CollidableB9BC0& b) const;
+    hkBool FUN_00e49bc0(const CollidableA9BC0& a, const CollidableB9BC0& b) const;
 
     int unk00;
     int unk04;
@@ -179,12 +161,12 @@ class CollisionFilterList9BC0
     int unk1c;
     int unk20;
     int unk24;
-    hkArray9BC0<CollisionFilter9BC0*> m_kFilters;
+    hkArray<CollisionFilter9BC0*> m_kFilters;
 };
 
 // Returns true if every filter in m_kFilters reports that collision between a and b is enabled, otherwise false.
 // @fnv 0x00e49bc0
-hkBool9BC0 CollisionFilterList9BC0::FUN_00e49bc0(const CollidableA9BC0& a, const CollidableB9BC0& b) const
+hkBool CollisionFilterList9BC0::FUN_00e49bc0(const CollidableA9BC0& a, const CollidableB9BC0& b) const
 {
     for (int i = m_kFilters.GetLogicalSize() - 1; i >= 0; i--)
     {
@@ -194,23 +176,11 @@ hkBool9BC0 CollisionFilterList9BC0::FUN_00e49bc0(const CollidableA9BC0& a, const
     return true;
 }
 
-struct hkBool9C20
-{
-    hkBool9C20(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
 class Iface9C20
 {
   public:
     virtual void vpad0();
-    virtual hkBool9C20 IsCollisionEnabled(const void* p0, const void* p1, const void* p2, const void* p3,
+    virtual hkBool IsCollisionEnabled(const void* p0, const void* p1, const void* p2, const void* p3,
                                           const void* p4) const;
 };
 class ReferencedObject9C20
@@ -228,24 +198,10 @@ class IfacePad9C20_0
 class Filter9C20 : public ReferencedObject9C20, public IfacePad9C20_0, public Iface9C20
 {
 };
-template <class E> struct hkArray9C20
-{
-    const E& operator[](int i) const
-    {
-        return m_data[i];
-    }
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    E* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
 class FilterList9C20
 {
   public:
-    hkBool9C20 FUN_00e49c20(const void* p0, const void* p1, const void* p2, const void* p3, const void* p4) const;
+    hkBool FUN_00e49c20(const void* p0, const void* p1, const void* p2, const void* p3, const void* p4) const;
     int unk00;
     int unk04;
     int unk08;
@@ -255,11 +211,11 @@ class FilterList9C20
     int unk18;
     int unk1c;
     int unk20;
-    hkArray9C20<Filter9C20*> m_kFilters;
+    hkArray<Filter9C20*> m_kFilters;
 };
 // Returns true only if every filter in m_kFilters reports IsCollisionEnabled true for the given arguments.
 // @fnv 0x00e49c20
-hkBool9C20 FilterList9C20::FUN_00e49c20(const void* p0, const void* p1, const void* p2, const void* p3,
+hkBool FilterList9C20::FUN_00e49c20(const void* p0, const void* p1, const void* p2, const void* p3,
                                         const void* p4) const
 {
     for (int i = m_kFilters.GetLogicalSize() - 1; i >= 0; i--)
@@ -270,22 +226,10 @@ hkBool9C20 FilterList9C20::FUN_00e49c20(const void* p0, const void* p1, const vo
     return true;
 }
 
-struct hkBool9C90
-{
-    hkBool9C90(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
 class Iface9C90
 {
   public:
-    virtual hkBool9C90 IsCollisionEnabled(const void* p0, const void* p1, const void* p2, const void* p3) const;
+    virtual hkBool IsCollisionEnabled(const void* p0, const void* p1, const void* p2, const void* p3) const;
 };
 class ReferencedObject9C90
 {
@@ -307,24 +251,10 @@ class IfacePad9C90_1
 class Filter9C90 : public ReferencedObject9C90, public IfacePad9C90_0, public IfacePad9C90_1, public Iface9C90
 {
 };
-template <class E> struct hkArray9C90
-{
-    const E& operator[](int i) const
-    {
-        return m_data[i];
-    }
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    E* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
 class FilterList9C90
 {
   public:
-    hkBool9C90 FUN_00e49c90(const void* p0, const void* p1, const void* p2, const void* p3) const;
+    hkBool FUN_00e49c90(const void* p0, const void* p1, const void* p2, const void* p3) const;
     int unk00;
     int unk04;
     int unk08;
@@ -333,11 +263,11 @@ class FilterList9C90
     int unk14;
     int unk18;
     int unk1c;
-    hkArray9C90<Filter9C90*> m_kFilters;
+    hkArray<Filter9C90*> m_kFilters;
 };
 // Returns true only if every filter in m_kFilters reports IsCollisionEnabled true for the given arguments.
 // @fnv 0x00e49c90
-hkBool9C90 FilterList9C90::FUN_00e49c90(const void* p0, const void* p1, const void* p2, const void* p3) const
+hkBool FilterList9C90::FUN_00e49c90(const void* p0, const void* p1, const void* p2, const void* p3) const
 {
     for (int i = m_kFilters.GetLogicalSize() - 1; i >= 0; i--)
     {
@@ -401,12 +331,6 @@ struct AllocatorE49
     virtual void* Allocate(int& bytes) throw();
     virtual void Free(void*, int) throw();
 };
-struct RouterE49
-{
-    int unk00, unk04, unk08, unk0c;
-    AllocatorE49* heap;
-};
-RouterE49* GetRouterE49() throw();
 struct RefE49
 {
     virtual ~RefE49() throw();
@@ -455,7 +379,7 @@ struct FilterArrayE49
     }
     __forceinline void Copy(const FilterArrayE49& source)
     {
-        AllocatorE49* heap = GetRouterE49()->heap;
+        AllocatorE49* heap = reinterpret_cast<AllocatorE49*>(hkMemoryRouter::getInstance().m_heap);
         if ((capacity & 0x3fffffff) < source.size)
         {
             if ((capacity & 0x80000000) == 0)

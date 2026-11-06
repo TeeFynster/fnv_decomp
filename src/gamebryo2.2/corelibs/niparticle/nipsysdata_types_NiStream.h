@@ -1,6 +1,10 @@
 // Names of nested/template specializations use the canonical generator identifier mapping.
 #ifndef FNV_NISTREAM_TYPES_H
 #define FNV_NISTREAM_TYPES_H
+#include "../../../../include/NiTMallocInterface.h"
+#include "../../../../include/NiTNewInterface.h"
+#include "../../../../include/NiTPrimitiveArray.h"
+#include "../../../../include/NiTLargeObjectArray.h"
 
 #include "layout_support.h"
 #include "NiFixedString.h"
@@ -13,9 +17,6 @@ class ProcessorAffinityInfo;
 class NiSearchPath;
 class NiStream;
 class NiStream__BackgroundLoadProcedure;
-class NiTLargeObjectArray_NiFixedString_;
-class NiTLargeObjectArray_NiPointer_NiObject___;
-class NiTPrimitiveArray_NiObjectGroup___;
 class NiTPrimitiveSet_unsigned_int_;
 class NiTSet_unsigned_int_NiTMallocInterface_unsigned_int___;
 class NiThread;
@@ -100,43 +101,18 @@ FNV_STATIC_ASSERT(offsetof(BSStreamHeader, pAuthor) == 4);
 FNV_STATIC_ASSERT(offsetof(BSStreamHeader, PluginMetadata) == 68);
 FNV_STATIC_ASSERT(offsetof(BSStreamHeader, PluginMetadataHeader) == 132);
 #pragma pack(push, 4)
-class NiTPrimitiveArray_NiObjectGroup___ : public NiTArray<NiObjectGroup*, NiTMallocInterface<NiObjectGroup*> >
-{
-  public:
-    // base NiTArray<NiObjectGroup *,NiTMallocInterface<NiObjectGroup *> > at +0x0, size 16
-    // NiTPrimitiveArray<NiObjectGroup *>
-    // void __cdecl NiTPrimitiveArray<NiObjectGroup *>::*()
-    // NiTPrimitiveArray<NiObjectGroup *>& __cdecl NiTPrimitiveArray<NiObjectGroup *>::*(const NiTPrimitiveArray<NiObjectGroup *>&)
-    // void __cdecl NiTPrimitiveArray<NiObjectGroup *>::*()
-    // void __cdecl NiTPrimitiveArray<NiObjectGroup *>::*()
-};
+// the exe's NiTPrimitiveArray<NiObjectGroup*> (the name spells the instantiation)
+typedef NiTPrimitiveArray<NiObjectGroup*> NiTPrimitiveArray_NiObjectGroup___;
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTPrimitiveArray_NiObjectGroup___) == 16);
 #pragma pack(push, 4)
-class NiTLargeObjectArray_NiPointer_NiObject___
-    : public NiTLargeArray<NiPointer<NiObject>, NiTNewInterface<NiPointer<NiObject> > >
-{
-  public:
-    // base NiTLargeArray<NiPointer<NiObject>,NiTNewInterface<NiPointer<NiObject> > > at +0x0, size 24
-    // NiTLargeObjectArray<NiPointer<NiObject> >
-    // void __cdecl NiTLargeObjectArray<NiPointer<NiObject> >::*()
-    // NiTLargeObjectArray<NiPointer<NiObject> >& __cdecl NiTLargeObjectArray<NiPointer<NiObject> >::*(const NiTLargeObjectArray<NiPointer<NiObject> >&)
-    // void __cdecl NiTLargeObjectArray<NiPointer<NiObject> >::*()
-    // void __cdecl NiTLargeObjectArray<NiPointer<NiObject> >::*()
-};
+// the exe's NiTLargeObjectArray<NiPointer<NiObject> > (the name spells the instantiation)
+typedef NiTLargeObjectArray<NiPointer<NiObject> > NiTLargeObjectArray_NiPointer_NiObject___;
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTLargeObjectArray_NiPointer_NiObject___) == 24);
 #pragma pack(push, 4)
-class NiTLargeObjectArray_NiFixedString_ : public NiTLargeArray<NiFixedString, NiTNewInterface<NiFixedString> >
-{
-  public:
-    // base NiTLargeArray<NiFixedString,NiTNewInterface<NiFixedString> > at +0x0, size 24
-    // NiTLargeObjectArray<NiFixedString>
-    // void __cdecl NiTLargeObjectArray<NiFixedString>::*()
-    // NiTLargeObjectArray<NiFixedString>& __cdecl NiTLargeObjectArray<NiFixedString>::*(const NiTLargeObjectArray<NiFixedString>&)
-    // void __cdecl NiTLargeObjectArray<NiFixedString>::*()
-    // void __cdecl NiTLargeObjectArray<NiFixedString>::*()
-};
+// the exe's NiTLargeObjectArray<NiFixedString> (the name spells the instantiation)
+typedef NiTLargeObjectArray<NiFixedString> NiTLargeObjectArray_NiFixedString_;
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTLargeObjectArray_NiFixedString_) == 24);
 #pragma pack(push, 4)

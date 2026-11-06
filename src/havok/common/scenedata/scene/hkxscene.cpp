@@ -2,13 +2,14 @@
 // src/havok/common/scenedata/scene/hkxscene.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/scene/hkxscene.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkxScene.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkBaseObject.h"
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkMatrix3.h"
+#include "../../../../../include/hkMemoryRouter.h"
 
-struct hkMalleableContactNormal
-{
-    void removeReference();
-};
-typedef hkMalleableContactNormal Ref;
+typedef hkReferencedObject Ref;
 struct Alloc
 {
     virtual void slot0();
@@ -17,12 +18,6 @@ struct Alloc
     virtual void slotC();
     virtual void freeBlock(void*, int);
 };
-struct Router
-{
-    int unk00, unk04, unk08, unk0c;
-    Alloc* unk10;
-};
-void* __cdecl FUN_00c85750();
 struct FUN_00cb0c00_class
 {
     char* value;
@@ -30,30 +25,6 @@ struct FUN_00cb0c00_class
 };
 typedef FUN_00cb0c00_class String;
 extern int DAT_010e99d8, DAT_0102e388;
-struct Array
-{
-    Ref** data;
-    int size;
-    int capacity;
-    __forceinline void clear()
-    {
-        Alloc* allocator = ((Router*)FUN_00c85750())->unk10;
-        Ref** p = data;
-        int n = size;
-        int zero = 0;
-        for (int i = 0; i < n; ++i)
-        {
-            if (p[i])
-                p[i]->removeReference();
-            p[i] = 0;
-        }
-        size = zero;
-        if (capacity >= 0)
-            allocator->freeBlock(data, (capacity & 0x3fffffff) * 4);
-        data = 0;
-        capacity = 0x80000000;
-    }
-};
 struct Root
 {
     Ref* ptr;
@@ -71,7 +42,7 @@ struct Scene
     String unk08, unk0c;
     float unk10;
     Root unk14;
-    Array unk18, unk24, unk30, unk3c, unk48, unk54, unk60, unk6c;
+    hkArray<Ref*> unk18, unk24, unk30, unk3c, unk48, unk54, unk60, unk6c;
     void ClearScene();
 };
 // @fnv 0x00e4a750
@@ -79,132 +50,132 @@ void Scene::ClearScene()
 {
     unk00 = &DAT_010e99d8;
     {
-        Alloc* allocator = ((Router*)FUN_00c85750())->unk10;
-        Ref** p = unk6c.data;
-        int n = unk6c.size;
+        Alloc* allocator = reinterpret_cast<Alloc*>(hkMemoryRouter::getInstance().m_heap);
+        Ref** p = unk6c.m_data;
+        int n = unk6c.m_iElementCount;
         for (int i = 0; i < n; ++i)
         {
             if (p[i])
                 p[i]->removeReference();
             p[i] = 0;
         }
-        unk6c.size = 0;
-        if (!(unk6c.capacity & 0x80000000))
-            allocator->freeBlock(unk6c.data, (unk6c.capacity & 0x3fffffff) * 4);
-        unk6c.data = 0;
-        unk6c.capacity = 0x80000000;
+        unk6c.m_iElementCount = 0;
+        if (!(unk6c.m_iCapacityState & 0x80000000))
+            allocator->freeBlock(unk6c.m_data, (unk6c.m_iCapacityState & 0x3fffffff) * 4);
+        unk6c.m_data = 0;
+        unk6c.m_iCapacityState = 0x80000000;
     }
     {
-        Alloc* allocator = ((Router*)FUN_00c85750())->unk10;
-        Ref** p = unk60.data;
-        int n = unk60.size;
+        Alloc* allocator = reinterpret_cast<Alloc*>(hkMemoryRouter::getInstance().m_heap);
+        Ref** p = unk60.m_data;
+        int n = unk60.m_iElementCount;
         for (int i = 0; i < n; ++i)
         {
             if (p[i])
                 p[i]->removeReference();
             p[i] = 0;
         }
-        unk60.size = 0;
-        if (!(unk60.capacity & 0x80000000))
-            allocator->freeBlock(unk60.data, (unk60.capacity & 0x3fffffff) * 4);
-        unk60.data = 0;
-        unk60.capacity = 0x80000000;
+        unk60.m_iElementCount = 0;
+        if (!(unk60.m_iCapacityState & 0x80000000))
+            allocator->freeBlock(unk60.m_data, (unk60.m_iCapacityState & 0x3fffffff) * 4);
+        unk60.m_data = 0;
+        unk60.m_iCapacityState = 0x80000000;
     }
     {
-        Alloc* allocator = ((Router*)FUN_00c85750())->unk10;
-        Ref** p = unk54.data;
-        int n = unk54.size;
+        Alloc* allocator = reinterpret_cast<Alloc*>(hkMemoryRouter::getInstance().m_heap);
+        Ref** p = unk54.m_data;
+        int n = unk54.m_iElementCount;
         for (int i = 0; i < n; ++i)
         {
             if (p[i])
                 p[i]->removeReference();
             p[i] = 0;
         }
-        unk54.size = 0;
-        if (!(unk54.capacity & 0x80000000))
-            allocator->freeBlock(unk54.data, (unk54.capacity & 0x3fffffff) * 4);
-        unk54.data = 0;
-        unk54.capacity = 0x80000000;
+        unk54.m_iElementCount = 0;
+        if (!(unk54.m_iCapacityState & 0x80000000))
+            allocator->freeBlock(unk54.m_data, (unk54.m_iCapacityState & 0x3fffffff) * 4);
+        unk54.m_data = 0;
+        unk54.m_iCapacityState = 0x80000000;
     }
     {
-        Alloc* allocator = ((Router*)FUN_00c85750())->unk10;
-        Ref** p = unk48.data;
-        int n = unk48.size;
+        Alloc* allocator = reinterpret_cast<Alloc*>(hkMemoryRouter::getInstance().m_heap);
+        Ref** p = unk48.m_data;
+        int n = unk48.m_iElementCount;
         for (int i = 0; i < n; ++i)
         {
             if (p[i])
                 p[i]->removeReference();
             p[i] = 0;
         }
-        unk48.size = 0;
-        if (!(unk48.capacity & 0x80000000))
-            allocator->freeBlock(unk48.data, (unk48.capacity & 0x3fffffff) * 4);
-        unk48.data = 0;
-        unk48.capacity = 0x80000000;
+        unk48.m_iElementCount = 0;
+        if (!(unk48.m_iCapacityState & 0x80000000))
+            allocator->freeBlock(unk48.m_data, (unk48.m_iCapacityState & 0x3fffffff) * 4);
+        unk48.m_data = 0;
+        unk48.m_iCapacityState = 0x80000000;
     }
     {
-        Alloc* allocator = ((Router*)FUN_00c85750())->unk10;
-        Ref** p = unk3c.data;
-        int n = unk3c.size;
+        Alloc* allocator = reinterpret_cast<Alloc*>(hkMemoryRouter::getInstance().m_heap);
+        Ref** p = unk3c.m_data;
+        int n = unk3c.m_iElementCount;
         for (int i = 0; i < n; ++i)
         {
             if (p[i])
                 p[i]->removeReference();
             p[i] = 0;
         }
-        unk3c.size = 0;
-        if (!(unk3c.capacity & 0x80000000))
-            allocator->freeBlock(unk3c.data, (unk3c.capacity & 0x3fffffff) * 4);
-        unk3c.data = 0;
-        unk3c.capacity = 0x80000000;
+        unk3c.m_iElementCount = 0;
+        if (!(unk3c.m_iCapacityState & 0x80000000))
+            allocator->freeBlock(unk3c.m_data, (unk3c.m_iCapacityState & 0x3fffffff) * 4);
+        unk3c.m_data = 0;
+        unk3c.m_iCapacityState = 0x80000000;
     }
     {
-        Alloc* allocator = ((Router*)FUN_00c85750())->unk10;
-        Ref** p = unk30.data;
-        int n = unk30.size;
+        Alloc* allocator = reinterpret_cast<Alloc*>(hkMemoryRouter::getInstance().m_heap);
+        Ref** p = unk30.m_data;
+        int n = unk30.m_iElementCount;
         for (int i = 0; i < n; ++i)
         {
             if (p[i])
                 p[i]->removeReference();
             p[i] = 0;
         }
-        unk30.size = 0;
-        if (!(unk30.capacity & 0x80000000))
-            allocator->freeBlock(unk30.data, (unk30.capacity & 0x3fffffff) * 4);
-        unk30.data = 0;
-        unk30.capacity = 0x80000000;
+        unk30.m_iElementCount = 0;
+        if (!(unk30.m_iCapacityState & 0x80000000))
+            allocator->freeBlock(unk30.m_data, (unk30.m_iCapacityState & 0x3fffffff) * 4);
+        unk30.m_data = 0;
+        unk30.m_iCapacityState = 0x80000000;
     }
     {
-        Alloc* allocator = ((Router*)FUN_00c85750())->unk10;
-        Ref** p = unk24.data;
-        int n = unk24.size;
+        Alloc* allocator = reinterpret_cast<Alloc*>(hkMemoryRouter::getInstance().m_heap);
+        Ref** p = unk24.m_data;
+        int n = unk24.m_iElementCount;
         for (int i = 0; i < n; ++i)
         {
             if (p[i])
                 p[i]->removeReference();
             p[i] = 0;
         }
-        unk24.size = 0;
-        if (!(unk24.capacity & 0x80000000))
-            allocator->freeBlock(unk24.data, (unk24.capacity & 0x3fffffff) * 4);
-        unk24.data = 0;
-        unk24.capacity = 0x80000000;
+        unk24.m_iElementCount = 0;
+        if (!(unk24.m_iCapacityState & 0x80000000))
+            allocator->freeBlock(unk24.m_data, (unk24.m_iCapacityState & 0x3fffffff) * 4);
+        unk24.m_data = 0;
+        unk24.m_iCapacityState = 0x80000000;
     }
     {
-        Alloc* allocator = ((Router*)FUN_00c85750())->unk10;
-        Ref** p = unk18.data;
-        int n = unk18.size;
+        Alloc* allocator = reinterpret_cast<Alloc*>(hkMemoryRouter::getInstance().m_heap);
+        Ref** p = unk18.m_data;
+        int n = unk18.m_iElementCount;
         for (int i = 0; i < n; ++i)
         {
             if (p[i])
                 p[i]->removeReference();
             p[i] = 0;
         }
-        unk18.size = 0;
-        if (!(unk18.capacity & 0x80000000))
-            allocator->freeBlock(unk18.data, (unk18.capacity & 0x3fffffff) * 4);
-        unk18.data = 0;
-        unk18.capacity = 0x80000000;
+        unk18.m_iElementCount = 0;
+        if (!(unk18.m_iCapacityState & 0x80000000))
+            allocator->freeBlock(unk18.m_data, (unk18.m_iCapacityState & 0x3fffffff) * 4);
+        unk18.m_data = 0;
+        unk18.m_iCapacityState = 0x80000000;
     }
     unk14.~Root();
     unk0c.FUN_00cb0c00();
@@ -212,36 +183,16 @@ void Scene::ClearScene()
     unk00 = &DAT_0102e388;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
+
+
+__forceinline hkMatrix3::hkMatrix3() {}
+
+__forceinline void hkMatrix3::operator=(const hkMatrix3& matrix)
 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-
-struct hkVector4E4A6
-{
-    __m128 m_vComponents;
-
-    hkVector4E4A6()
-    {}
-    hkVector4E4A6(const hkVector4E4A6& kV)
-    {
-        m_vComponents = kV.m_vComponents;
-    }
-    void operator=(const hkVector4E4A6& kV)
-    {
-        m_vComponents = kV.m_vComponents;
-    }
-};
-
-struct hkMatrix3E4A6
-{
-    hkVector4E4A6 m_kColumn0;
-    hkVector4E4A6 m_kColumn1;
-    hkVector4E4A6 m_kColumn2;
-};
-
-const hkMatrix3E4A6& FUN_00cd4b50();
+    m_kColumn0 = matrix.m_kColumn0;
+    m_kColumn1 = matrix.m_kColumn1;
+    m_kColumn2 = matrix.m_kColumn2;
+}
 
 struct FUN_00cb0a60
 {
@@ -250,34 +201,7 @@ struct FUN_00cb0a60
     const char* m_pcText;
 };
 
-template <class T> struct hkArrayE4A6
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArrayE4A6() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
-
-class hkBaseObjectE4A6
-{
-  public:
-    virtual ~hkBaseObjectE4A6() throw();
-};
-
-class hkReferencedObjectE4A6 : public hkBaseObjectE4A6
-{
-  public:
-    hkReferencedObjectE4A6() throw() : m_sReferenceCount(1)
-    {}
-    virtual ~hkReferencedObjectE4A6() throw();
-
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-
-class FUN_00e4a6a0 : public hkReferencedObjectE4A6
+class FUN_00e4a6a0 : public hkReferencedObject
 {
   public:
     FUN_00e4a6a0() throw();
@@ -287,86 +211,51 @@ class FUN_00e4a6a0 : public hkReferencedObjectE4A6
     FUN_00cb0a60 m_kSceneFileName;
     float m_fNumFrames;
     void* m_pAabbRootNode;
-    hkArrayE4A6<void*> m_kSelectionSets;
-    hkArrayE4A6<void*> m_kCameras;
-    hkArrayE4A6<void*> m_ppLights;
-    hkArrayE4A6<void*> m_kMeshList;
-    hkArrayE4A6<void*> m_kMaterials;
-    hkArrayE4A6<void*> m_kInplaceTextures;
-    hkArrayE4A6<void*> m_kExternalTextures;
-    hkArrayE4A6<void*> m_kSkinBindings;
+    hkArray<void*> m_kSelectionSets;
+    hkArray<void*> m_kCameras;
+    hkArray<void*> m_ppLights;
+    hkArray<void*> m_kMeshList;
+    hkArray<void*> m_kMaterials;
+    hkArray<void*> m_kInplaceTextures;
+    hkArray<void*> m_kExternalTextures;
+    hkArray<void*> m_kSkinBindings;
     unsigned int unk78, unk7C;
-    hkMatrix3E4A6 m_kAppliedTransform;
+    hkMatrix3 m_kAppliedTransform;
 };
 
-// Initializes m_fNumFrames and m_pAabbRootNode, then copies the matrix returned by FUN_00cd4b50 into m_kAppliedTransform.
+// Initializes m_fNumFrames and m_pAabbRootNode, then copies the identity matrix returned by hkMatrix3::GetIdentityTransform into m_kAppliedTransform.
 // @fnv 0x00e4a6a0
 FUN_00e4a6a0::FUN_00e4a6a0() throw() : m_fNumFrames(0.0f), m_pAabbRootNode(0)
 {
-    m_kAppliedTransform = FUN_00cd4b50();
+    m_kAppliedTransform = hkMatrix3::GetIdentityTransform();
 }
 
 extern int DAT_010e929c;
 extern int DAT_0102e388;
 
-struct Heap_e4a4
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void ReturnMemory(void* p, int nbytes) throw();
-};
-struct Router_e4a4
-{
-    int unk00, unk04, unk08, unk0C;
-    Heap_e4a4* m_pStreamAllocator;
-    Heap_e4a4& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    static Router_e4a4& __cdecl FUN_00c85750() throw();
-};
 
-template <class T> struct hkArray_e4a4
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    __forceinline void ClearAndRelease() throw()
-    {
-        Heap_e4a4& heap = Router_e4a4::FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            heap.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
 
-struct hkReferencedObject_e4a4
+template <class T>
+__forceinline void ClearAndRelease(hkArray<T>& array) throw()
 {
-    void FUN_00c905b0() throw();
-};
+    Alloc& heap = reinterpret_cast<Alloc&>(hkMemoryRouter::getInstance().heap());
+    array.m_iElementCount = 0;
+    if ((array.m_iCapacityState & 0x80000000) == 0)
+        heap.freeBlock(array.m_data, (array.m_iCapacityState & 0x3fffffff) * sizeof(T));
+    array.m_data = 0;
+    array.m_iCapacityState = 0x80000000;
+}
 
 struct Entry_e4a4
 {
-    hkReferencedObject_e4a4* m_pCollisionShape;
-    hkReferencedObject_e4a4* m_iMaterialIndex;
+    hkReferencedObject* m_pCollisionShape;
+    hkReferencedObject* m_iMaterialIndex;
     int unk08, unk0C, unk10, unk14, unk18, unk1C;
     ~Entry_e4a4() throw()
     {
-        m_pCollisionShape->FUN_00c905b0();
+        m_pCollisionShape->removeReference();
         if (m_iMaterialIndex)
-            m_iMaterialIndex->FUN_00c905b0();
+            m_iMaterialIndex->removeReference();
     }
 };
 
@@ -380,9 +269,9 @@ struct Mesh_e4a4
 {
     int* m_vtbl;
     int unk04;
-    hkArray_e4a4<Entry_e4a4> m_entries;
-    hkArray_e4a4<short> m_ppIndices;
-    hkArray_e4a4<int> m_iSlotIds;
+    hkArray<Entry_e4a4> m_entries;
+    hkArray<short> m_ppIndices;
+    hkArray<int> m_iSlotIds;
     Name_e4a4 m_name;
     void FUN_00e4a460();
 };
@@ -396,8 +285,8 @@ void Mesh_e4a4::FUN_00e4a460()
     for (int i = 0; i < n; i++)
         m_entries[i].~Entry_e4a4();
     m_name.FUN_00cb0c00();
-    m_iSlotIds.ClearAndRelease();
-    m_ppIndices.ClearAndRelease();
-    m_entries.ClearAndRelease();
+    ClearAndRelease(m_iSlotIds);
+    ClearAndRelease(m_ppIndices);
+    ClearAndRelease(m_entries);
     m_vtbl = &DAT_0102e388;
 }

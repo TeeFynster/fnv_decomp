@@ -5,22 +5,17 @@
 #define FNV_NIBLENDINTERPOLATOR_NICLONINGPROCESS_H
 
 #include "niblendinterpolator_layout_support.h"
-#include "niblendinterpolator_NiObject.h"
+#include "../../../../include/NiObject.h"
 #include "niblendinterpolator_NiTPointerMap.h"
 #include "niblendinterpolator_layout_support.h"
 class CloningProcess;
-enum NiObjectNET__CopyType
-{
-    NiObjectNET__CopyType_COPY_NONE = 0,
-    NiObjectNET__CopyType_COPY_EXACT = 1,
-    NiObjectNET__CopyType_COPY_UNIQUE = 2
-};
+#include "../../../../include/NiObjectNET.h"
 class CloningProcess
 {
   public:
     NiTPointerMap<NiObject*, NiObject*>* m_pCloneMap;  // +0x0, 4 bytes
     NiTPointerMap<NiObject*, bool>* m_pProcessMap;     // +0x4, 4 bytes
-    NiObjectNET__CopyType m_eCloneCopyMode;            // +0x8, 4 bytes
+    NiObjectNET::CopyType m_eCloneCopyMode;            // +0x8, 4 bytes
     char m_bExactType;                                 // +0xC, 1 bytes
     unsigned char layoutPaddingD[3];
     // void __cdecl CloningProcess::*(unsigned int)

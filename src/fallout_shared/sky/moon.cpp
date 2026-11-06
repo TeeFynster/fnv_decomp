@@ -1,6 +1,21 @@
 // fallout_shared/sky/moon.cpp: Moon, TaskQueueInterface (11 functions)
 
-#include "moon_types.h"
+#include "../../../include/BSShaderManager.h"
+#include "../../../include/BSThread.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiColorA.h"
+#include "../../../include/SkyShaderProperty.h"
+#include "../../../include/TESSaveLoadGame.h"
+#include "../../../include/BGSTerrainManager.h"
+
+#include "../../../include/BSStringT.h"
+
+#include "../../../include/MEM_CONTEXT.h"
+#include "../../../include/AutoMemContext.h"
+
+#include "../../../include/Moon.h"
+#include "../../../include/SkyObject.h"
 
 // @fnv 0x006366d0
 float Moon::GetMoonVisibility()
@@ -82,7 +97,7 @@ void* __fastcall _ref_0084e3a0(const Sky*);
 unsigned int __fastcall FUN_00636980(void*);
 
 // @fnv 0x006368f0
-bool __cdecl FUN_006368f0(const Sky* apSky)
+bool __cdecl Moon::IsMoonVisible(const Sky* apSky)
 {
     if (_ref_0084e3a0(apSky) && FUN_00636980(_ref_0084e3a0(apSky)))
     {
@@ -110,126 +125,20 @@ unsigned char FUN_00636980_Helper::FUN_00636980()
     return f55 & ~0xc0;
 }
 
-struct FUN_00456630_helper
+struct NiAVObjectFlagQuery
 {
-    bool FUN_00456630(unsigned int);
-};
-
-struct FUN_006366b0_shell
-{
-    bool FUN_006366b0();
+    bool HasFlags(unsigned int);
 };
 
 // @fnv 0x006366b0
-bool FUN_006366b0_shell::FUN_006366b0()
+bool NiAVObject::FUN_006366b0()
 {
-    return ((FUN_00456630_helper*)this)->FUN_00456630(0x20);
+    return ((NiAVObjectFlagQuery*)this)->HasFlags(0x20);
 }
-
-void _Deallocate(void*);
-struct S00634cb0
-{
-    void FUN_00634ce0();
-    void* DestroyIfFlagged(unsigned int);
-};
-// Calls FUN_00634ce0, then deallocates this if bit 0 of flags is set, and returns this.
-// @fnv 0x00634cb0
-void* S00634cb0::DestroyIfFlagged(unsigned int flags)
-{
-    FUN_00634ce0();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-class NiNode
-{
-  public:
-    virtual void Vfn00();
-    virtual void Vfn04();
-    virtual void Vfn08();
-    virtual void Vfn0C();
-    virtual void Vfn10();
-    virtual void Vfn14();
-    virtual void Vfn18();
-    virtual void Vfn1C();
-    virtual void Vfn20();
-    virtual void Vfn24();
-    virtual void Vfn28();
-    virtual void Vfn2C();
-    virtual void Vfn30();
-    virtual void Vfn34();
-    virtual void Vfn38();
-    virtual void Vfn3C();
-    virtual void Vfn40();
-    virtual void Vfn44();
-    virtual void Vfn48();
-    virtual void Vfn4C();
-    virtual void Vfn50();
-    virtual void Vfn54();
-    virtual void Vfn58();
-    virtual void Vfn5C();
-    virtual void Vfn60();
-    virtual void Vfn64();
-    virtual void Vfn68();
-    virtual void Vfn6C();
-    virtual void Vfn70();
-    virtual void Vfn74();
-    virtual void Vfn78();
-    virtual void Vfn7C();
-    virtual void Vfn80();
-    virtual void Vfn84();
-    virtual void Vfn88();
-    virtual void Vfn8C();
-    virtual void Vfn90();
-    virtual void Vfn94();
-    virtual void Vfn98();
-    virtual void Vfn9C();
-    virtual void VfnA0();
-    virtual void VfnA4();
-    virtual void VfnA8();
-    virtual void VfnAC();
-    virtual void VfnB0();
-    virtual void VfnB4();
-    virtual void VfnB8();
-    virtual void VfnBC();
-    virtual void VfnC0();
-    virtual void VfnC4();
-    virtual void VfnC8();
-    virtual void VfnCC();
-    virtual void VfnD0();
-    virtual void VfnD4();
-    virtual void VfnD8();
-    virtual void VfnDC();
-    virtual void VfnE0();
-    virtual void VfnE4();
-    virtual void DetachChildAlt(NiNode* child);
-    NiNode* GetParent();
-};
-
-class FUN_00634ce0 : public SkyObject
-{
-  public:
-    virtual ~FUN_00634ce0();
-    NiPointer<NiNode> m_pMoonNode;
-    NiPointer<NiNode> m_pMoonShadowNode;
-    NiPointer<NiTriShape> m_pMoonShape;
-    NiPointer<NiTriShape> m_pMoonShadowShape;
-    BSStringT<char> m_kMoonTexturePaths[8];
-    float m_fFadeStartAngle;
-    float m_fFadeEndAngle;
-    float m_fFadeAngleRange;
-    float fSpeed;
-    float m_fGlyphVerticalOffset;
-    unsigned int iSize;
-    int m_eUpdateStatus;
-    float fPos;
-    float m_fValue;
-};
 
 // Clears the four NiPointer members, detaches the node from its parent if it has one, then clears the node pointer.
 // @fnv 0x00634ce0
-FUN_00634ce0::~FUN_00634ce0()
+Moon::~Moon()
 {
     m_pMoonShadowShape = 0;
     m_pMoonShape = 0;
@@ -237,7 +146,7 @@ FUN_00634ce0::~FUN_00634ce0()
     m_pMoonNode = 0;
     if (m_pRootNode->GetParent())
     {
-        m_pRootNode->GetParent()->DetachChildAlt(m_pRootNode);
+        m_pRootNode->GetParent()->RemoveObject(m_pRootNode);
     }
     m_pRootNode = 0;
 }
@@ -245,47 +154,22 @@ FUN_00634ce0::~FUN_00634ce0()
 // 0x00634a70  /MT /Od /Oy- /GS /EHsc /Gy /GF  thiscall ctor, 7 args (ret 0x1c)
 // Moon::Moon(name, fadeStart, fadeEnd, shadowEarlyFade, speed, zOffset, size)
 
-struct FUN_00406f90_this;
-int __cdecl FUN_00406f60(FUN_00406f90_this*, const char*, ...);
-
-class FUN_00634a70 : public SkyObject
-{
-  public:
-    FUN_00634a70(const char* name, float fadeStart, float fadeEnd, float shadowEarlyFade, float speed, float zOffset,
-                 unsigned int size);
-    virtual ~FUN_00634a70();
-    NiPointer<NiNode> m_pMoonNode;
-    NiPointer<NiNode> m_pMoonShadowNode;
-    NiPointer<NiTriShape> m_pMoonShape;
-    NiPointer<NiTriShape> m_pMoonShadowShape;
-    BSStringT<char> m_kMoonTexturePaths[8];
-    float m_fFadeStartAngle;
-    float m_fFadeEndAngle;
-    float m_fFadeAngleRange;
-    float fSpeed;
-    float m_fGlyphVerticalOffset;
-    unsigned int iSize;
-    int m_eUpdateStatus;
-    float fPos;
-    float m_fValue;
-};
-
 // Builds the moon texture paths from name and phase suffixes, stores fade/speed/z-offset/size parameters, and initialises position and node pointers.
 // @fnv 0x00634a70
-FUN_00634a70::FUN_00634a70(const char* name, float fadeStart, float fadeEnd, float shadowEarlyFade, float speed,
+Moon::Moon(const char* name, float fadeStart, float fadeEnd, float shadowEarlyFade, float speed,
                            float zOffset, unsigned int size)
     : m_pMoonNode(0), m_pMoonShadowNode(0), m_pMoonShape(0), m_pMoonShadowShape(0)
 {
     AutoMemContext memContext(MEM_CONTEXT_MEM_CONTEXT_SKY, true,
                               "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\Sky\\Moon.cpp", 50);
     const char* fmt = "\\Textures\\Sky\\%s_%s.dds";
-    FUN_00406f60((FUN_00406f90_this*)&m_kMoonTexturePaths[3], fmt, name, "one_wan");
-    FUN_00406f60((FUN_00406f90_this*)&m_kMoonTexturePaths[5], fmt, name, "one_wax");
-    FUN_00406f60((FUN_00406f90_this*)&m_kMoonTexturePaths[2], fmt, name, "half_wan");
-    FUN_00406f60((FUN_00406f90_this*)&m_kMoonTexturePaths[6], fmt, name, "half_wax");
-    FUN_00406f60((FUN_00406f90_this*)&m_kMoonTexturePaths[1], fmt, name, "three_wan");
-    FUN_00406f60((FUN_00406f90_this*)&m_kMoonTexturePaths[7], fmt, name, "three_wax");
-    FUN_00406f60((FUN_00406f90_this*)&m_kMoonTexturePaths[0], fmt, name, "full");
+    m_kMoonTexturePaths[3].PrintfString( fmt, name, "one_wan");
+    m_kMoonTexturePaths[5].PrintfString( fmt, name, "one_wax");
+    m_kMoonTexturePaths[2].PrintfString( fmt, name, "half_wan");
+    m_kMoonTexturePaths[6].PrintfString( fmt, name, "half_wax");
+    m_kMoonTexturePaths[1].PrintfString( fmt, name, "three_wan");
+    m_kMoonTexturePaths[7].PrintfString( fmt, name, "three_wax");
+    m_kMoonTexturePaths[0].PrintfString( fmt, name, "full");
 
     m_fFadeStartAngle = fadeStart;
     m_fFadeEndAngle = fadeEnd;
@@ -299,10 +183,9 @@ FUN_00634a70::FUN_00634a70(const char* name, float fadeStart, float fadeEnd, flo
     m_pMoonShadowNode = 0;
     m_pMoonShape = 0;
     m_pMoonShadowShape = 0;
-    m_eUpdateStatus = 0;
+    m_eUpdateStatus = US_NOT_REQUIRED;
 }
 
-struct NiTexture;
 struct TESSaveLoadGame;
 
 extern TESSaveLoadGame* g_TESSaveLoadGame;
@@ -316,13 +199,6 @@ extern float DAT_010249d8;
 float __cdecl FUN_0040ebd0(float, float);
 float __fastcall GetFieldEC(const char*);
 
-namespace MoonUpdateDetail {
-
-struct Flt
-{
-    operator unsigned int() const;
-};
-
 struct Mtx
 {
     float m0, m1, m2, m3, m4, m5, m6, m7, m8;
@@ -330,16 +206,11 @@ struct Mtx
     Mtx operator*(const Mtx&) const;
 };
 
-struct RgbaColor
-{
-    float r, g, b, a;
-    RgbaColor(float, float, float, float);
-};
+namespace MoonUpdateDetail {
 
-struct NiAVObject
+struct Flt
 {
-    void SetLocalRotation(const Mtx&);
-    void SetAppCulled(bool);
+    operator unsigned int() const;
 };
 
 struct PropHelper
@@ -347,55 +218,12 @@ struct PropHelper
     void* GetProperty(unsigned int);
 };
 
-struct BGSTerrainManager
-{
-    unsigned int GetMinLevel();
-};
 
-struct SkyShaderProperty
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    RgbaColor kColor;
 
-    void SetTexture(::NiTexture*);
-};
-
-struct BSShaderManager
-{
-    static void __cdecl GetTexture(const char*, bool, ::NiPointer< ::NiTexture>&, bool, bool);
-};
 
 struct SkyView
 {
     int FUN_00476c90();
-};
-
-struct BSThread
-{
-    unsigned int GetThreadID();
 };
 
 struct Twin_0084d030
@@ -403,10 +231,6 @@ struct Twin_0084d030
     float GetStoredFloatValue();
 };
 
-struct TESSaveLoadGame
-{
-    bool GetLoading();
-};
 
 struct TESFaction_RankDataView
 {
@@ -423,15 +247,19 @@ struct FUN_004a0c90_shell
     void FUN_004a0c90(float);
 };
 
-struct FUN_00636020_shell : public ::Moon
-{
-    void FUN_00636020(::Sky*, float);
-};
+} // namespace MoonUpdateDetail
 
 // Updates moon position and visibility, sets texture and culling state on moon nodes, and applies rotation matrices when the sky view is active.
 // @fnv 0x00636020
-void FUN_00636020_shell::FUN_00636020(::Sky* apSky, float afSecondsPassed)
+void Moon::Update(::Sky* apSky, float afSecondsPassed)
 {
+    using MoonUpdateDetail::Flt;
+    using MoonUpdateDetail::PropHelper;
+    using MoonUpdateDetail::SkyView;
+    using MoonUpdateDetail::Twin_0084d030;
+    using MoonUpdateDetail::TESFaction_RankDataView;
+    using MoonUpdateDetail::FUN_00524ac0_shell;
+    using MoonUpdateDetail::FUN_004a0c90_shell;
     float fTimePassed;
     float fvisShadow;
     float fvisMoon;
@@ -484,7 +312,7 @@ void FUN_00636020_shell::FUN_00636020(::Sky* apSky, float afSecondsPassed)
 
     if (((SkyView*)apSky)->FUN_00476c90() == 3 || ((SkyView*)apSky)->FUN_00476c90() == 2)
     {
-        if (!((::FUN_006366b0_shell*)((const Flt*)&m_pRootNode)->operator unsigned int())->FUN_006366b0())
+        if (!((::NiAVObject*)((const Flt*)&m_pRootNode)->operator unsigned int())->FUN_006366b0())
         {
             ((NiAVObject*)((const Flt*)&m_pRootNode)->operator unsigned int())->SetAppCulled(true);
             return;
@@ -504,7 +332,7 @@ void FUN_00636020_shell::FUN_00636020(::Sky* apSky, float afSecondsPassed)
         {
             ((NiAVObject*)((const Flt*)&m_pRootNode)->operator unsigned int())->SetAppCulled(false);
             if (fvisMoon <= _gModifierZero ||
-                !((::FUN_006366b0_shell*)((const Flt*)&m_pMoonShape)->operator unsigned int())->FUN_006366b0())
+                !((::NiAVObject*)((const Flt*)&m_pMoonShape)->operator unsigned int())->FUN_006366b0())
             {
                 ((NiAVObject*)((const Flt*)&m_pMoonNode)->operator unsigned int())->SetAppCulled(true);
             }
@@ -521,10 +349,10 @@ void FUN_00636020_shell::FUN_00636020(::Sky* apSky, float afSecondsPassed)
                               ->GetProperty(3)
                         : 0;
                 if (pshadeProperty)
-                    pshadeProperty->kColor.a = fvisMoon;
+                    ((NiColorA*)&pshadeProperty->propertyData[0x60])->a = fvisMoon;
             }
             if (fvisShadow <= _gModifierZero ||
-                !((::FUN_006366b0_shell*)((const Flt*)&m_pMoonShadowShape)->operator unsigned int())->FUN_006366b0())
+                !((::NiAVObject*)((const Flt*)&m_pMoonShadowShape)->operator unsigned int())->FUN_006366b0())
             {
                 ((NiAVObject*)((const Flt*)&m_pMoonShadowNode)->operator unsigned int())->SetAppCulled(true);
             }
@@ -543,13 +371,11 @@ void FUN_00636020_shell::FUN_00636020(::Sky* apSky, float afSecondsPassed)
                               ->GetProperty(3)
                         : 0;
                 if (pshadeProperty)
-                    pshadeProperty->kColor =
-                        RgbaColor(((float*)((TESFaction_RankDataView*)apSky)->GetRankDataList())[0],
+                    *(NiColorA*)&pshadeProperty->propertyData[0x60] =
+                        NiColorA(((float*)((TESFaction_RankDataView*)apSky)->GetRankDataList())[0],
                                   ((float*)((TESFaction_RankDataView*)apSky)->GetRankDataList())[1],
                                   ((float*)((TESFaction_RankDataView*)apSky)->GetRankDataList())[2], fvisShadow);
             }
         }
     }
-}
-
 }

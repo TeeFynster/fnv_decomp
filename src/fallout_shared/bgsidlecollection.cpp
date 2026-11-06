@@ -1,5 +1,9 @@
-// fallout_shared/bgsidlecollection.cpp: BGSIdleCollection, StandIn, IdleCollectionStandIn (14 functions)
+// fallout_shared/bgsidlecollection.cpp: BGSIdleCollection (14 functions)
 
+#include "../../include/BGSIdleCollection.h"
+#include "../../include/Actor.h"
+#include "../../include/TESIdleForm.h"
+#include "../../include/TESObjectANIO.h"
 #include "bgsidlecollection_decls.h"
 
 // @fnv 0x004797e0
@@ -26,13 +30,13 @@ void BGSIdleCollection::InitItem(TESForm* form)
         idle = dynamic_cast<TESObjectANIO*>(TESFormInitFlag::GetFormByID(formID));
         if (idle)
         {
-            if (static_cast<TESIdleForm*>(idle)->IsIdleFile())
+            if (reinterpret_cast<TESIdleForm*>(idle)->IsIdleFile())
             {
-                m_ppIdleForms[index] = static_cast<TESIdleForm*>(idle);
+                m_ppIdleForms[index] = reinterpret_cast<TESIdleForm*>(idle);
             }
             else
             {
-                Warning(kBGSIdleCollectionMissingAnim, static_cast<TESIdleForm*>(idle)->GetName(), form->GetName(),
+                Warning(kBGSIdleCollectionMissingAnim, reinterpret_cast<TESIdleForm*>(idle)->GetName(), form->GetName(),
                         form->GetFormID());
                 RemoveIdleEntry(index);
                 --index;
@@ -151,16 +155,10 @@ int BGSIdleCollection::GetPickType()
     return 0;
 }
 
-extern int DAT_0101abd8;
-void __fastcall FUN_0047b540(void* pThis);
-
 // @fnv 0x00479790
-void* __fastcall FUN_00479790(BaseFormComponent* pThis)
+BGSIdleCollection::BGSIdleCollection()
 {
-    pThis->BaseFormComponent::BaseFormComponent();
-    *(int**)pThis = &DAT_0101abd8;
-    FUN_0047b540(pThis);
-    return pThis;
+    InitializeComponent();
 }
 
 struct Arr
@@ -179,65 +177,41 @@ void __fastcall FUN_0047a110(Arr* self, SArgs aArgs)
     *self->GetAt(aArgs.i) = *aArgs.v;
 }
 
-namespace fnv_004797c0 {
-extern "C" void* DAT_0101abd8;
-
-struct FUN_004797c0_shell
-{
-    void FUN_00479810();
-    void FUN_004797c0();
-};
-
 // @fnv 0x004797c0
-void FUN_004797c0_shell::FUN_004797c0()
+BGSIdleCollection::~BGSIdleCollection()
 {
-    *reinterpret_cast<void**>(this) = &DAT_0101abd8;
-    FUN_00479810();
+    BGSIdleCollection::Free();
 }
-}  // namespace fnv_004797c0
 
 extern "C" int __cdecl memcmp(const void*, const void*, unsigned int);
 
-struct BGSIdleCollection_shell : BGSIdleCollection
-{
-    bool __thiscall IsDifferentFrom(BaseFormComponent* other);
-};
-
 // @fnv 0x00479930
-bool __thiscall BGSIdleCollection_shell::IsDifferentFrom(BaseFormComponent* other)
+bool __thiscall BGSIdleCollection::CompareWithBase(BaseFormComponent* other)
 {
     BGSIdleCollection* idle = dynamic_cast<BGSIdleCollection*>(other);
     if (!idle)
         return true;
-    if (reinterpret_cast<const unsigned char*>(this)[4] != reinterpret_cast<const unsigned char*>(idle)[4])
+    if (m_ucIdleCount != idle->m_ucIdleCount)
         return true;
-    if (reinterpret_cast<const unsigned char*>(this)[5] != reinterpret_cast<const unsigned char*>(idle)[5])
+    if (m_ucPickType != idle->m_ucPickType)
         return true;
-    if (reinterpret_cast<const float*>(this)[3] != reinterpret_cast<const float*>(idle)[3])
+    if (m_fIdleChance != idle->m_fIdleChance)
         return true;
-    if (reinterpret_cast<const TESIdleForm**>(this)[2] && reinterpret_cast<const TESIdleForm**>(idle)[2] &&
-        memcmp(reinterpret_cast<const TESIdleForm**>(this)[2], reinterpret_cast<const TESIdleForm**>(idle)[2],
-               reinterpret_cast<const unsigned char*>(this)[5] * 4))
+    if (m_ppIdleForms && idle->m_ppIdleForms &&
+        memcmp(m_ppIdleForms, idle->m_ppIdleForms,
+               m_ucPickType * 4))
         return true;
     return false;
 }
 
 void __cdecl _Deallocate(void*);
-struct StandIn
-{
-    char _pad0[5];
-    unsigned char _c5;
-    char _pad6[2];
-    void* _p8;
-    void FUN_00479810();
-};
 // @fnv 0x00479810
-void StandIn::FUN_00479810()
+void BGSIdleCollection::Free()
 {
-    void* idleArray = _p8;
+    void* idleArray = m_ppIdleForms;
     _Deallocate(idleArray);
-    _c5 = 0;
-    _p8 = 0;
+    m_ucPickType = 0;
+    m_ppIdleForms = 0;
 }
 
 struct _DeallocateHelper
@@ -248,13 +222,9 @@ struct __memcpyHelper
 {
     static void __memcpy(void*, const void*, unsigned int);
 };
-struct FUN_00479850_shell : BGSIdleCollection
-{
-    void FUN_00479850(BaseFormComponent* apCopyFC);
-};
 // Copies the idle count, reallocates and copies the idle form array from apCopyFC, and copies the extra field.
 // @fnv 0x00479850
-void FUN_00479850_shell::FUN_00479850(BaseFormComponent* apCopyFC)
+void BGSIdleCollection::CopyFromBase(BaseFormComponent* apCopyFC)
 {
     BGSIdleCollection* pSource = dynamic_cast<BGSIdleCollection*>(apCopyFC);
     if (!pSource)
@@ -275,65 +245,44 @@ void FUN_00479850_shell::FUN_00479850(BaseFormComponent* apCopyFC)
     m_fIdleChance = pSource->m_fIdleChance;
 }
 
-struct FUN_004799f0_shell : BaseFormComponent
-{
-    unsigned char m_ucIdleCount;  // +0x04
-    unsigned char m_ucPickType;   // +0x05
-    TESForm** m_ppIdleForms;      // +0x08
-    float m_fIdleChance;          // +0x0c
-    void FUN_004799f0();
-};
-
 void __cdecl FUN_004858f0(unsigned int, unsigned char);
 void __cdecl _FUN_00485910(unsigned int, float);
 void __cdecl _FUN_00485710(unsigned int, unsigned int*, unsigned int);
 extern "C" void* __cdecl _alloca(unsigned int);
 
 // @fnv 0x004799f0
-void FUN_004799f0_shell::FUN_004799f0()
+void __fastcall SaveIdleCollection(BGSIdleCollection* self)
 {
     unsigned int isize3;
     unsigned int* parray;
     unsigned int i;
 
-    if (m_ucPickType)
+    if (self->m_ucPickType)
     {
-        FUN_004858f0(0x464c4449, m_ucIdleCount);
-        FUN_004858f0(0x434c4449, m_ucPickType);
-        _FUN_00485910(0x544c4449, m_fIdleChance);
+        FUN_004858f0(0x464c4449, self->m_ucIdleCount);
+        FUN_004858f0(0x434c4449, self->m_ucPickType);
+        _FUN_00485910(0x544c4449, self->m_fIdleChance);
 
-        isize3 = m_ucPickType << 2;
+        isize3 = self->m_ucPickType << 2;
         parray = (unsigned int*)_alloca(isize3);
 
-        for (i = 0; i < m_ucPickType; i++)
+        for (i = 0; i < self->m_ucPickType; i++)
         {
-            if (m_ppIdleForms[i] != 0)
-                parray[i] = m_ppIdleForms[i]->GetFormID();
+            if (self->m_ppIdleForms[i] != 0)
+                parray[i] = self->m_ppIdleForms[i]->GetFormID();
             else
                 parray[i] = 0;
         }
 
-        _FUN_00485710(0x414c4449, parray, m_ucPickType);
+        _FUN_00485710(0x414c4449, parray, self->m_ucPickType);
     }
 }
 
 void* __memcpy(void* dst, const void* src, unsigned int size);
 
-struct TESForm;
-
-struct IdleCollectionStandIn
-{
-    int unk00;
-    unsigned char m_ucIdleCount;
-    unsigned char m_ucPickType;
-    unsigned short unk06;
-    TESForm** m_ppIdleForms;
-    void RemoveAt(unsigned int index);
-};
-
 // Removes the element at index from the array, shrinking the count and reallocating the array without that element.
 // @fnv 0x00479ea0
-void IdleCollectionStandIn::RemoveAt(unsigned int index)
+void BGSIdleCollection::RemoveIdleEntry(unsigned int index)
 {
     if (index < m_ucPickType)
     {
@@ -347,7 +296,7 @@ void IdleCollectionStandIn::RemoveAt(unsigned int index)
         {
             m_ucPickType--;
             int n;
-            TESForm** newArrayA = new TESForm*[m_ucPickType];
+            TESIdleForm** newArrayA = new TESIdleForm*[m_ucPickType];
             n = index;
             if (n > 0)
             {

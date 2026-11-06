@@ -1,11 +1,6 @@
 // bsshader/tallgrassshader_decls.h: declares MemoryManager, TallGrassShader
 
-class MemoryManager
-{
-  public:
-    void* Allocate(unsigned int);
-    void Deallocate(void*);
-};
+#include "../../include/MemoryManager.h"
 extern MemoryManager g_memoryManager;
 // The lazily allocated constants object; constructor identity is unresolved.
 class FUN_00ba94b0

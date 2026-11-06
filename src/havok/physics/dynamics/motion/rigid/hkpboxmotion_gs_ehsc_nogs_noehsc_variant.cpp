@@ -1,3 +1,4 @@
+#include <xmmintrin.h>
 
 // src/havok/physics/dynamics/motion/rigid/hkpboxmotion_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/dynamics/motion/rigid/hkpboxmotion.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -16,11 +17,7 @@ struct FUN_00d1e670_StandIn
 
     void FUN_00d1e670(float);
 };
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
+typedef ::__m128 __m128;
 extern "C" __m128 _mm_setzero_ps(void);
 struct Cls_00d1e7b0
 {
@@ -79,7 +76,7 @@ struct Cls_00d1e7b0
 };
 
 extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
+extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
 
 struct __declspec(align(16)) Vector4D1E850
 {
@@ -96,6 +93,7 @@ struct __declspec(align(16)) Vector4D1E850
         return *reinterpret_cast<const __m128*>(this);
     }
 };
+// local form of hkRotation: 0x00d1e850 needs implicit construction and original SIMD column access; shared form gives 123 bytes vs exe 109.
 struct RotationD1E850
 {
     Vector4D1E850 m_kColumn0;

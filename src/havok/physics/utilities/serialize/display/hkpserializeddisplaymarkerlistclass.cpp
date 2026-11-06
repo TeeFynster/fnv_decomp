@@ -2,25 +2,17 @@
 // src/havok/physics/utilities/serialize/display/hkpserializeddisplaymarkerlistclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/serialize/display/hkpserializeddisplaymarkerlistclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiBytes) throw();
-};
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/BSAudio.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
 
-struct AudioHolder
+inline hkMemoryAllocator& BSAudio::heap()
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
+    return *reinterpret_cast<hkMemoryAllocator*>(pListener);
+}
 
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct RefElem_t
 {
@@ -54,13 +46,13 @@ FUN_00dff010_cls::~FUN_00dff010_cls() throw()
         m_ppData[i]->FUN_00c905b0();
     }
 
-    AudioHolder* pAudioHolder = FUN_00c85750();
-    AudioAllocator* pAudioAllocator = pAudioHolder->m_pAllocator;
+    hkMemoryRouter* pAudioHolder = FUN_00c85750();
+    hkMemoryAllocator* pAudioAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     unsigned int uiCapacity = m_uCapacity;
     *(volatile int*)&m_iArrayLength = 0;
     if ((uiCapacity & 0x80000000) == 0)
     {
-        pAudioAllocator->FreeArray(m_ppData, (uiCapacity & 0x3fffffff) * 4);
+        pAudioAllocator->bufFree(m_ppData, (uiCapacity & 0x3fffffff) * 4);
     }
     *(volatile RefElem_t***)&m_ppData = 0;
     unsigned int* puiCapacity = &m_uCapacity;
@@ -69,23 +61,6 @@ FUN_00dff010_cls::~FUN_00dff010_cls() throw()
 }
 
 namespace fnv_00dff080 {
-struct hkMemoryAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-
-struct BSAudio
-{
-    int unk00, unk04, unk08, unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-
 BSAudio* FUN_00c85750();
 
 struct FUN_00e05d10_Base
@@ -97,7 +72,7 @@ struct FUN_00e05d10_Base
     void operator delete(void* p, unsigned int)
     {
         FUN_00e05d10_Base* b = static_cast<FUN_00e05d10_Base*>(p);
-        FUN_00c85750()->heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        FUN_00c85750()->heap().blockFree(p, b->m_usMemSizeAndFlags);
     }
 };
 

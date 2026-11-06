@@ -1,7 +1,10 @@
 // fallout_shared/tesanimation.cpp: TESAnimation, ActorValueOwner (10 functions)
 
-#include "tesanimation_decls.h"
-#include "BaseFormComponent.h"
+#include "../../include/ActorValueOwner.h"
+#include "layout_support.h"
+#include "../../include/TESAnimation.h"
+
+unsigned int __cdecl BSStringLength(const char*);
 
 // @fnv 0x0047f9f0
 TESAnimation::~TESAnimation()
@@ -59,144 +62,49 @@ void TESAnimation::LoadComponent(TESForm* form, TESFile* file)
     }
 }
 
-struct BFC_s
-{
-    BFC_s();
-    virtual void f();
-};
-struct BSSpinLock_s
-{
-    BSSpinLock_s();
-};
-struct FUN_0047f9c0 : public BFC_s
-{
-    BSSpinLock_s lock;
-    virtual void g();
-    FUN_0047f9c0();
-};
-// Empty constructor for the BFC_s-derived class.
 // @fnv 0x0047f9c0
-FUN_0047f9c0::FUN_0047f9c0()
+TESAnimation::TESAnimation()
 {}
 
 int __cdecl _stricmp(const char*, const char*);
-struct ListNodeStub
-{
-    bool _ref_008256d0();
-    const char** _ref_006815c0();
-    ListNodeStub* _ref_00726070();
-};
-struct FUN_0047fcb0_cls
-{
-    int pad;
-    ListNodeStub list;
-    bool ContainsName(const char* apName);
-};
 // @fnv 0x0047fcb0
-bool FUN_0047fcb0_cls::ContainsName(const char* apName)
+bool TESAnimation::IsKFFileInList(const char* apName)
 {
-    if (list._ref_008256d0())
+    if (m_kKFFileList.IsEmpty())
         return false;
-    ListNodeStub* pNode = &list;
+    BSSimpleList<const char*>* pNode = &m_kKFFileList;
     while (pNode)
     {
-        const char* pcName = *pNode->_ref_006815c0();
+        const char* pcName = pNode->GetItem();
         if (!_stricmp(pcName, apName))
             return true;
-        pNode = pNode->_ref_00726070();
+        pNode = pNode->GetNext();
     }
     return false;
 }
 
 void* __cdecl operator new(unsigned int);
-unsigned int __cdecl BSStringLength(const char*);
 struct TaskQueueInterface
 {
     static void __cdecl CopyStringToBuffer(char*, unsigned int, const char*);
 };
-struct SoundListView
-{
-    void AddTail(char* const&);
-};
-struct FUN_0047fcb0_stub
-{
-    bool ContainsName(const char*);
-};
-struct FUN_0047fd20_cls
-{
-    int pad;
-    SoundListView list;
-    void AddPathToList(const char* apPath);
-};
 // If the path is not already present, allocates a copy of it, copies the string into it and appends it to the list.
 // @fnv 0x0047fd20
-void FUN_0047fd20_cls::AddPathToList(const char* apPath)
+void TESAnimation::AddPathToList(const char* apPath)
 {
     char* pcPathCopy;
-    if (!((FUN_0047fcb0_stub*)this)->ContainsName(apPath))
+    if (!IsKFFileInList(apPath))
     {
         unsigned int uiSize = BSStringLength(apPath) + 1;
         pcPathCopy = new char[uiSize];
         TaskQueueInterface::CopyStringToBuffer(pcPathCopy, uiSize, apPath);
-        list.AddTail(pcPathCopy);
+        m_kKFFileList.AddTail(reinterpret_cast<const char* const&>(pcPathCopy));
     }
 }
 
-struct PackedRecordData;
-struct Actor;
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
-struct BGSVoiceType;
-struct BipedAnim;
-struct CHUNK;
-struct ContainerChanges;
-struct ContainerItemExtra;
-struct InventoryItemEntry;
-struct FormRecordHeader;
-struct TESFileGroup;
-struct HWND__;
-struct InventoryChanges;
-struct MagicItemForm;
-struct NiAVObject;
-struct NiColor;
-struct NiPoint3;
-struct PackageList;
-struct SpellItem;
-struct TESAIForm;
-struct TESActorBase;
-struct TESActorBaseData;
-struct TESAmmo;
-struct TESBoundObject;
-struct TESContainer;
-struct TESFaction;
-struct TESForm;
-struct TESHealthForm;
-struct TESLevItem;
-struct TESLevSpell;
-struct TESObject;
-struct TESObjectARMO;
-struct TESObjectCLOT;
-struct TESFormList;
-struct TESObjectREFR;
-struct TESObjectWEAP;
-struct TESPackage;
-struct TESWaterForm;
-struct blob8
-{
-    char b[8];
-};
-struct blob12
-{
-    char b[12];
-};
-struct FUN_0047fb50_shell : public TESAnimation
-{
-    void FUN_0047fb50(BaseFormComponent*);
-};
-
 // Casts apCopyFC to TESAnimation, frees this component, then copies each filename from the source's file list via AddPathToList.
 // @fnv 0x0047fb50
-void FUN_0047fb50_shell::FUN_0047fb50(BaseFormComponent* apCopyFC)
+void TESAnimation::CopyFromBase(BaseFormComponent* apCopyFC)
 {
     TESAnimation* pcopy = dynamic_cast<TESAnimation*>(apCopyFC);
     if (pcopy == 0)
@@ -214,23 +122,8 @@ void FUN_0047fb50_shell::FUN_0047fb50(BaseFormComponent* apCopyFC)
 
 int __cdecl CompareNamesNoCase(const char* a, const char* b);
 
-struct ListStepStub
-{
-    ListStepStub* FUN_00726070();
-};
-
-struct ListStepStub2
-{
-    ListStepStub2* FUN_00726070();
-};
-
-struct FUN_0047fbd0_cls : public TESAnimation
-{
-    bool IsAnimationDifferent(BaseFormComponent* component);
-};
-
 // @fnv 0x0047fbd0
-bool FUN_0047fbd0_cls::IsAnimationDifferent(BaseFormComponent* component)
+bool TESAnimation::CompareWithBase(BaseFormComponent* component)
 {
     const char* x;
     const char* y;
@@ -259,8 +152,8 @@ bool FUN_0047fbd0_cls::IsAnimationDifferent(BaseFormComponent* component)
                 }
             }
         }
-        a = (BSSimpleList<const char*>*)((ListStepStub*)a)->FUN_00726070();
-        b8 = (BSSimpleList<const char*>*)((ListStepStub2*)b8)->FUN_00726070();
+        a = a->GetNext();
+        b8 = b8->GetNext();
     }
     if (a != 0 || b8 != 0)
     {

@@ -2,6 +2,8 @@
 // src/fallout_shared/bsclonepool.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/bsclonepool.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/AutoMemHelper.h"
+
 struct S_004b0aa0_Found;
 struct S_004b0aa0_Cur
 {
@@ -128,12 +130,6 @@ FUN_004b0c80::FUN_004b0c80()
 }
 
 extern const char DAT_0101fca0[];
-struct AutoMemHelper
-{
-    AutoMemHelper(int aiMemoryContext, bool bFlag, const char* pcFile, int iLine);
-    ~AutoMemHelper();
-    int m_iPrev;
-};
 
 struct FUN_004ad270
 {

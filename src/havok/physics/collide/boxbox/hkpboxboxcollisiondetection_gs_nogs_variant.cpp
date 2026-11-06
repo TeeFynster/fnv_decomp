@@ -1,3 +1,6 @@
+#define FNV_VEC4_SIMD
+#include "../../../../../include/Vec4.h"
+
 
 // src/havok/physics/collide/boxbox/hkpboxboxcollisiondetection_gs_nogs_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/physics/collide/boxbox/hkpboxboxcollisiondetection.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -23,11 +26,6 @@ struct KeyEntry
     unsigned char k0;
     unsigned char k1;
     unsigned short unk02;
-};
-
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
 };
 
 struct Obj

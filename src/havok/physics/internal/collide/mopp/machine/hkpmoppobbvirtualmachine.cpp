@@ -2,6 +2,8 @@
 // src/havok/physics/internal/collide/mopp/machine/hkpmoppobbvirtualmachine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/machine/hkpmoppobbvirtualmachine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/HitArray.h"
+
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 
 struct GridSource {
@@ -142,7 +144,6 @@ struct CodeData {
  float f10;float f14;float f18;float f1c;
  union {unsigned char* code;unsigned char* p20;};
 };
-struct HitArray { int* data; int size; unsigned capacity; };
 struct AllocatorContext { int field00, field04, field08, field0c; void* allocator; };
 extern AllocatorContext* __cdecl FUN_00c85750();
 extern void __cdecl ResizeAudioStream(void*, void*, int);
@@ -171,7 +172,7 @@ struct VirtualMachine {
  __forceinline void AddHit(int value) {
   HitArray* out=hits;AllocatorContext* context=FUN_00c85750();
   if(out->size==(out->capacity&0x3fffffff)) ResizeAudioStream(context->allocator,out,4);
-  int* destination=&out->data[out->size]; ++out->size; *destination=value; }
+  int* destination=&reinterpret_cast<int*>(out->data)[out->size]; ++out->size; *destination=value; }
 };
 // Executes a MOPP BVH tree traversal from a QueryState, recursing on diagonal and axial branches, and emits a hit via AddHit on a leaf.
 // @fnv 0x00dd1400

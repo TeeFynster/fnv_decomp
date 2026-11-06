@@ -1,6 +1,50 @@
+#include "../../include/Setting.h"
+// 0x00408d60 returns the setting value at +4 (or a fallback byte for null this).
+
 // fallout_shared/bgsopencloseform.cpp: BGSOpenCloseForm, AIThreadManager (8 functions)
 
-#include "bgsopencloseform_packet_decls.h"
+#include "../../include/TESForm.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/LowProcess.h"
+#include "../../include/NiControllerManager.h"
+#include "../../include/NiControllerSequence.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/TESObjectDOOR.h"
+#include "../../include/TESObjectACTI.h"
+#include "../../include/TESObjectCONT.h"
+
+// Form IDs used by this unit.
+#include "../../include/ENUM_FORM_ID.h"
+#include "../../include/NavMeshObstacleManager.h"
+
+// Private declarations for the remaining animation and event interfaces.
+class NiProperty;
+class SkyShaderProperty;
+SkyShaderProperty* FUN_00653270(const NiRTTI*, NiProperty*);
+extern NiRTTI DAT_011f36ac;
+#include "../../include/OBJECT_ACTION.h"
+class AIThreadManager
+{
+  public:
+    static TESObjectREFR* IsConditionMet();
+};
+bool IsConditionMet();
+class TaskQueueInterface
+{
+  public:
+    static TaskQueueInterface* GetSingleton();
+    void FUN_0087b600(TESObjectREFR*, bool, bool);
+};
+
+class GlobalObject_0045cf30
+{
+};
+extern GlobalObject_0045cf30 g_011d7188;
+extern const char DAT_01011f30[];
+extern const char g_011d22b0_arg1[];
+extern float DAT_0101ab70;
+void FUN_00c6bd00(NiNode*, bool);
 
 // @fnv 0x0047a490
 bool BGSOpenCloseForm::HasOpenCloseComponent(TESForm* apForm)
@@ -9,7 +53,7 @@ bool BGSOpenCloseForm::HasOpenCloseComponent(TESForm* apForm)
     bool bIsActivatorForm = false;
     if (apForm)
     {
-        switch (apForm->GetFormType())
+        switch (static_cast<const TESForm*>(apForm)->GetFormType())
         {
         case ENUM_FORM_ID_ACTI_ID:
         case ENUM_FORM_ID_TERM_ID:
@@ -30,19 +74,19 @@ bool BGSOpenCloseForm::HasOpenCloseComponent(TESForm* apForm)
 }
 
 // @fnv 0x0047b250
-BGSOpenCloseForm::OPEN_STATE BGSOpenCloseForm::GetOpenState(TESObjectREFR* ref)
+int BGSOpenCloseForm::GetOpenState(TESObjectREFR* ref)
 {
     // Local names preserve MSVC9 stack allocation order.
     OPEN_STATE eState = CLOSED_UNKNOWN;
     if (ref && HasOpenCloseComponent(ref->GetObjectReference()))
     {
-        bool pManager = ref->GetAction(ACTION_OPEN);  // Saved open action flag.
+        bool pManager = ref->GetAction(OBJECT_ACTION_OBJECT_ACTION_OPEN);  // Saved open action flag.
         if (pManager)
             eState = OPEN;
         else
             eState = CLOSED;
-        NiNode* pController = ref->GetNiNode_v();                                   // Reference scene node.
-        NiTimeController* pNode = pController ? pController->GetControllers() : 0;  // Controller chain.
+        NiNode* pController = ref->GetNiNode();                                   // Reference scene node.
+        NiTimeController* pNode = pController ? pController->NiObjectNET::GetControllers() : 0;  // Controller chain.
         // Runtime RTTI cast to the controller manager.
         NiControllerManager* bOpen = (NiControllerManager*)FUN_00653270(&DAT_011f36ac, (NiProperty*)pNode);
         if (bOpen)
@@ -52,9 +96,9 @@ BGSOpenCloseForm::OPEN_STATE BGSOpenCloseForm::GetOpenState(TESObjectREFR* ref)
                 bOpen->FindSequenceByName(*NiControllerManager::FindSequenceByName());
             if (pOpenSequence && pCloseSequence)
             {
-                if (((LowProcess*)pOpenSequence)->GetActiveCombatTarget() == (TESObjectREFR*)1)
+                if (((LowProcess*)pOpenSequence)->LowProcess::GetActiveCombatTarget() == (TESObjectREFR*)1)
                     eState = OPENING;
-                else if (((LowProcess*)pCloseSequence)->GetActiveCombatTarget() == (TESObjectREFR*)1)
+                else if (((LowProcess*)pCloseSequence)->LowProcess::GetActiveCombatTarget() == (TESObjectREFR*)1)
                     eState = CLOSING;
             }
         }
@@ -74,11 +118,11 @@ bool BGSOpenCloseForm::SetOpenState(TESObjectREFR* ref, bool open, bool immediat
             return true;
         }
         if (open)
-            ref->PerformAction(ACTION_OPEN);
+            ref->PerformAction(OBJECT_ACTION_OBJECT_ACTION_OPEN);
         else
-            ref->CloseReference(ACTION_OPEN);
-        NiNode* node = ref->GetNiNode_v();
-        NiTimeController* manager = node ? node->GetControllers() : 0;  // Controller chain.
+            ref->CloseReference(OBJECT_ACTION_OBJECT_ACTION_OPEN);
+        NiNode* node = ref->GetNiNode();
+        NiTimeController* manager = node ? node->NiObjectNET::GetControllers() : 0;  // Controller chain.
         // Runtime RTTI cast to the controller manager.
         NiControllerManager* controller = (NiControllerManager*)FUN_00653270(&DAT_011f36ac, (NiProperty*)manager);
         if (controller)
@@ -104,21 +148,21 @@ bool BGSOpenCloseForm::SetOpenState(TESObjectREFR* ref, bool open, bool immediat
                 {
                     ref->GetExtraData()->CallExtraDataListMethod36(0);
                     controller->StopSequence(active, 0.0f);
-                    controller->ActivateControllerSequence(inactive, 0, false, 1.0f, 0.0f, 0);
+                    controller->ActivateControllerSequence(inactive, 0, false, 1.0f, 0.0f, static_cast<NiControllerSequence*>(0));
                     inactive->FUN_0098adb0(-DAT_0101ab70);
                     NiUpdateData data(inactive->FUN_00759450(), true, false);
-                    ref->GetNiNode_v()->Update(data);
+                    ref->GetNiNode()->Update(static_cast<const NiUpdateData&>(data));
                     controller->StopSequence(inactive, 0.0f);
-                    ref->FUN_00578a30(active->GetName());
-                    FUN_00c6bd00(ref->GetNiNode_v(), true);
+                    ref->FUN_00578a30(static_cast<const NiControllerSequence*>(active)->GetName());
+                    FUN_00c6bd00(ref->GetNiNode(), true);
                 }
                 else
                 {
                     controller->StopSequence(inactive, 0.0f);
-                    controller->ActivateControllerSequence(active, 0, false, 1.0f, 0.0f, 0);
+                    controller->ActivateControllerSequence(active, 0, false, 1.0f, 0.0f, static_cast<NiControllerSequence*>(0));
                     active->FUN_0098adb0(-DAT_0101ab70);
                     NiUpdateData data(active->FUN_00759450(), true, false);
-                    ref->GetNiNode_v()->Update(data);
+                    ref->GetNiNode()->Update(static_cast<const NiUpdateData&>(data));
                 }
                 result = true;
             }
@@ -130,8 +174,8 @@ bool BGSOpenCloseForm::SetOpenState(TESObjectREFR* ref, bool open, bool immediat
             else
                 ref->FUN_00578a30(g_011d22b0_arg1);
         }
-        if (immediate && *((ProcessLists*)&g_011d7188)->GetLifeStateControlFlag() &&
-            ref->GetObjectReference()->GetFormType() == ENUM_FORM_ID_DOOR_ID && ref->GetNiNode_v() &&
+        if (immediate && *((Setting*)&g_011d7188)->FUN_00408d60() &&
+            static_cast<const TESForm*>(ref->GetObjectReference())->GetFormType() == ENUM_FORM_ID_DOOR_ID && ref->GetNiNode() &&
             !ref->GetExtraRadioData())
         {
             if (open)
@@ -143,26 +187,16 @@ bool BGSOpenCloseForm::SetOpenState(TESObjectREFR* ref, bool open, bool immediat
     return result;
 }
 
-struct FUN_00759450_shell : public NiControllerSequence
-{
-    float FUN_00759450();
-};
-
 // @fnv 0x00759450
-float FUN_00759450_shell::FUN_00759450()
+float NiControllerSequence::FUN_00759450()
 {
-    return *(float*)((char*)this + 0x2c);
+    return m_fFirstKeyTime;
 }
 
-struct FUN_0098adb0_shell : public NiControllerSequence
-{
-    void FUN_0098adb0(float);
-};
-
 // @fnv 0x0098adb0
-void FUN_0098adb0_shell::FUN_0098adb0(float afValue)
+void NiControllerSequence::FUN_0098adb0(float afValue)
 {
-    *(float*)((char*)this + 0x48) = afValue;
+    m_fSequenceOffset = afValue;
 }
 
 extern NiFixedString* DAT_011c61c4;
@@ -173,13 +207,6 @@ NiFixedString* __cdecl FUN_005c1490()
     return DAT_011c61c4;
 }
 
-class TESObjectACTI
-{
-};
-class TESObjectCONT
-{
-};
-
 // @fnv 0x0047a3a0
 BGSOpenCloseForm* GetOpenCloseForm(TESForm* apForm)
 {
@@ -187,24 +214,24 @@ BGSOpenCloseForm* GetOpenCloseForm(TESForm* apForm)
 
     if (apForm && BGSOpenCloseForm::HasOpenCloseComponent(apForm))
     {
-        switch (apForm->GetFormType())
+        switch (static_cast<const TESForm*>(apForm)->GetFormType())
         {
         case 0x15:
         case 0x17: {
             TESObjectACTI* pObject = reinterpret_cast<TESObjectACTI*>(apForm);
-            pOpenCloseForm = pObject ? reinterpret_cast<BGSOpenCloseForm*>(reinterpret_cast<char*>(pObject) + 0x70) : 0;
+            pOpenCloseForm = static_cast<BGSOpenCloseForm*>(pObject);
             break;
         }
 
         case 0x1c: {
             TESObjectDOOR* pObject = reinterpret_cast<TESObjectDOOR*>(apForm);
-            pOpenCloseForm = pObject ? reinterpret_cast<BGSOpenCloseForm*>(reinterpret_cast<char*>(pObject) + 0x70) : 0;
+            pOpenCloseForm = static_cast<BGSOpenCloseForm*>(pObject);
             break;
         }
 
         case 0x1b: {
             TESObjectCONT* pObject = reinterpret_cast<TESObjectCONT*>(apForm);
-            pOpenCloseForm = pObject ? reinterpret_cast<BGSOpenCloseForm*>(reinterpret_cast<char*>(pObject) + 0x84) : 0;
+            pOpenCloseForm = static_cast<BGSOpenCloseForm*>(pObject);
             break;
         }
         }
@@ -227,14 +254,10 @@ struct EventExtra
     Ref* GetTarget();
     void ResetTargetPointer(Ref*);
 };
-struct BaseForm
-{
-    unsigned int FormType();
-};
 struct Ref
 {
     EventExtra* Extra();
-    BaseForm* Base();
+    TESForm* Base();
     void Reset(bool);
 };
 struct OpenCloseHandler
@@ -263,7 +286,7 @@ extern EventSetting setting;
 bool ProcessEvent(Ref*, SequenceEvent*);
 int CompareEvent(const char*, const char*);
 void SetEventFlags(Ref*, EventExtra*, unsigned int);
-OpenCloseHandler* GetHandler(BaseForm*);
+OpenCloseHandler* GetHandler(TESForm*);
 bool ShouldQueue();
 EventQueue* GetQueue();
 // @fnv 0x0047ac70
@@ -287,7 +310,7 @@ void __cdecl ProcessOpenCloseEvent(Ref* ref, SequenceEvent* sequence)
                 if (openTarget == player && openHandler && openHandler->IsSpecial())
                     player->Reset(false);
             }
-            if (*setting.Bool() && ref->Base()->FormType() == 28)
+            if (*setting.Bool() && ref->Base()->GetFormType() == 28)
             {
                 if (ShouldQueue())
                     GetQueue()->Open(ref);
@@ -307,7 +330,7 @@ void __cdecl ProcessOpenCloseEvent(Ref* ref, SequenceEvent* sequence)
                     closeHandler->Close(ref, closeTarget);
                 ref->Extra()->ResetTargetPointer(0);
             }
-            if (*setting.Bool() && ref->Base()->FormType() == 28)
+            if (*setting.Bool() && ref->Base()->GetFormType() == 28)
             {
                 if (ShouldQueue())
                     GetQueue()->Close(ref);

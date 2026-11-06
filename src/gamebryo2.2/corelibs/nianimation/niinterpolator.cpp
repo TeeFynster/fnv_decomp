@@ -1,11 +1,16 @@
 // gamebryo2.2/corelibs/nianimation/niinterpolator.cpp: NiInterpolator, NiKeyBasedInterpolator (8 functions)
 
-#include "niinterpolator_decls.h"
+// The constructor installs its vtable explicitly after initializing m_fLastTime.
+class __declspec(novtable) NiInterpolator;
+#include "../../../../include/NiKeyBasedInterpolator.h"
+
+extern const float DAT_01015f5c;
+extern void* NiInterpolator_VTable[];
 
 // @fnv 0x00a56ff0
 NiInterpolator::NiInterpolator() : m_fLastTime(DAT_01015f5c)
 {
-    m_pVTable = NiInterpolator_VTable;
+    *reinterpret_cast<void**>(this) = NiInterpolator_VTable;
 }
 
 struct BSBlendTreadTransfInterpolator;
@@ -34,40 +39,20 @@ const char* const* __cdecl FUN_00a57070()
     return &g_011f36fc_arg1;
 }
 
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-};
-extern void* NiInterpolator_VTable[];
-struct NiKeyBasedInterpolator : public NiRefObject
-{
-    void FUN_00a57010();
-};
+// Preserve the original explicit base cleanup without a stand-in member declaration.
 // @fnv 0x00a57010
-void NiKeyBasedInterpolator::FUN_00a57010()
+void __fastcall DestructNiInterpolator(NiInterpolator* apInterpolator)
 {
-    *reinterpret_cast<void**>(this) = NiInterpolator_VTable;
-    NiRefObject::~NiRefObject();
+    *reinterpret_cast<void**>(apInterpolator) = NiInterpolator_VTable;
+    apInterpolator->NiRefObject::~NiRefObject();
 }
 
-template <class T> struct NiTMallocInterface
-{
-};
-template <class T, class A> struct NiTPrimitiveArray
-{
-    char _0[8];
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    char _1[2];
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, T&);
-};
-void __stdcall AppendCameraPathEntries(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >*);
+#include "../../../../include/NiTPrimitiveArray.h"
+void __stdcall AppendCameraPathEntries(NiTPrimitiveArray<char*>*);
 char* _FUN_00a7d330(const char*);
 // Appends the string returned by _FUN_00a7d330(g_011f36fc_arg1) to pkStrings, growing the array when full.
 // @fnv 0x00a570b0
-void __stdcall FUN_00a570b0(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >* pkStrings)
+void __stdcall FUN_00a570b0(NiTPrimitiveArray<char*>* pkStrings)
 {
     AppendCameraPathEntries(pkStrings);
     char* pcString = _FUN_00a7d330(g_011f36fc_arg1);

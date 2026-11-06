@@ -1,6 +1,8 @@
 // src/bsshader/lighting30shaderproperty.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/lighting30shaderproperty.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/BSFadeNode.h"
+
 struct GlobalObjectO2_00a7b610
 {
     GlobalObjectO2_00a7b610();
@@ -13,11 +15,6 @@ GlobalObjectO2_00a7b610* __cdecl FUN_00a756c0()
 {
     return &g_011f4a5c;
 }
-
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 
 void* __fastcall FUN_00a75650(void*);
 

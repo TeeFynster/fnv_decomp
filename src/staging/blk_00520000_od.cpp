@@ -2,7 +2,26 @@
 // src/staging/blk_00520000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/TES.h"
+#include "../../include/TESFullName.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/AutoMemHelper.h"
+#include "../../include/BGSAmmoForm.h"
+#include "../../include/GO.h"
+#include "../../include/GameTimerRecord.h"
+#include "../../include/InventoryStackRecord.h"
+#include "../../include/LockFreeMap.h"
+#include "../../include/RecursiveSpinLock.h"
+#include "../../include/NiColorA.h"
+#include "../../include/IOTask.h"
+#include "../../include/IOManager.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESQueuedCellManager.h"
 
 struct FUN_005224c0_Class
 {
@@ -65,11 +84,6 @@ void __thiscall FUN_00527740_class::FUN_00527740()
 struct BSTreeNode;
 struct TESObjectREFR;
 
-template <class Key, class Node> struct LockFreeMap
-{
-    LockFreeMap(unsigned int a, unsigned int b, unsigned int c);
-};
-
 struct FUN_00527e30
 {
     LockFreeMap<TESObjectREFR*, BSTreeNode*> m;
@@ -79,12 +93,6 @@ struct FUN_00527e30
 // @fnv 0x00527e30
 FUN_00527e30::FUN_00527e30() : m(2, 0x25, 0xc)
 {}
-
-struct TESQueuedCellManager
-{
-    void SubmitQueuedItems();
-    void FUN_00528540();
-};
 
 // @fnv 0x00528540
 void TESQueuedCellManager::FUN_00528540()
@@ -125,11 +133,6 @@ void* __thiscall FUN_0052d160_cls::FUN_0052d160()
     return this;
 }
 
-struct NiBound
-{
-    NiBound();
-};
-
 NiBound::NiBound()
 {}
 
@@ -158,12 +161,6 @@ void FUN_0052d220_obj::DestroyBase()
 {
     FUN_0052d240_obj::~FUN_0052d240_obj();
 }
-
-struct NiObjectNET
-{
-    void FUN_00439360(unsigned short a, unsigned int b, unsigned int c);
-    void FUN_00533fb0(unsigned short a);
-};
 
 // @fnv 0x00533fb0
 void NiObjectNET::FUN_00533fb0(unsigned short a)
@@ -205,10 +202,6 @@ Base537* Base537::FUN_00537b80()
     return this;
 }
 
-struct GO
-{
-    GO& operator=(void*);
-};
 
 struct FUN_00539f20_Class
 {
@@ -244,20 +237,20 @@ void FUN_005278a0::DoIt()
 
 void __cdecl FUN_0040fca0(unsigned long);
 
-struct FUN_005289b0_Class
+// These task-manager signatures are not declared by the shared IOManager yet.
+// The adapter adds declarations only; the shared class supplies the layout.
+class IOManagerTaskCalls : public IOManager
 {
-    int m_field00;
-    int m_field04;
-    int m_field08;
-    int m_field0c;
-    void __thiscall FUN_005289b0(void* p);
+  public:
+    void __thiscall WaitForTask(void* p);
+    bool RunQueuedTask(void*, int);
 };
 
-// Loops calling FUN_0040fca0(0) while the object's m_field0c is 3 or 5.
+// Loops calling FUN_0040fca0(0) while the task state at offset 0x0c is 3 or 5.
 // @fnv 0x005289b0
-void __thiscall FUN_005289b0_Class::FUN_005289b0(void* pObject)
+void __thiscall IOManagerTaskCalls::WaitForTask(void* pObject)
 {
-    while (((FUN_005289b0_Class*)pObject)->m_field0c == 3 || ((FUN_005289b0_Class*)pObject)->m_field0c == 5)
+    while (*(int*)((char*)pObject + 0x0c) == 3 || *(int*)((char*)pObject + 0x0c) == 5)
         FUN_0040fca0(0);
 }
 
@@ -344,15 +337,7 @@ void* __thiscall FUN_005293c0_Class::FUN_005293c0(unsigned int flags)
     return this;
 }
 
-struct GameTimerRecord
-{
-    int GetSection();
-};
 extern GameTimerRecord g_timeGlobal;
-struct TESSound
-{
-    unsigned int Deallocate();
-};
 struct MapH
 {
     bool RemoveAt(unsigned int);
@@ -413,13 +398,6 @@ char* __thiscall FUN_005271b0_Class::GetFieldByType(unsigned int type)
     }
 }
 
-struct InventoryStackRecord
-{
-    int m_iWordAt00;
-    int m_iWordAt04;
-    int m_8;
-    InventoryStackRecord();
-};
 struct FUN_00527270 : public InventoryStackRecord
 {
     int m_iThirdValue;
@@ -435,15 +413,16 @@ FUN_00527270::FUN_00527270()
     m_14 = 0;
 }
 
+class BGSLoadedReferenceCollection;
 namespace fnv_00527350 {
-struct BGSLoadedReferenceCollection;
 struct MapX
 {
     void* GetFirstPos();
 };
-struct ScriptS
+// DAT_011c95c8 is the loaded-reference collection; 0x00500940 returns this+0x18, its default bucket.
+struct LoadedReferenceBucketAccess
 {
-    void* GetHeader();
+    void* GetDefaultBucket();
 };
 extern BGSLoadedReferenceCollection* DAT_011c95c8;
 struct FUN_005271b0_Class
@@ -468,7 +447,7 @@ struct FUN_00527350
     char f34;
     void FUN_00527350_Init();
 };
-// Clears f10, f14 and f34, resolves fc from DAT_011c95c8 (falling back to GetHeader), then stores GetFirstPos() into f18.
+// Clears f10, f14 and f34, resolves fc from DAT_011c95c8 (falling back to GetDefaultBucket), then stores GetFirstPos() into f18.
 // @fnv 0x00527350
 void FUN_00527350::FUN_00527350_Init()
 {
@@ -477,7 +456,7 @@ void FUN_00527350::FUN_00527350_Init()
     f34 = 0;
     fc = (int)((FUN_005271b0_Class*)DAT_011c95c8)->GetFieldByType(vtbl);
     if (!fc)
-        fc = (int)((ScriptS*)DAT_011c95c8)->GetHeader();
+        fc = (int)((LoadedReferenceBucketAccess*)DAT_011c95c8)->GetDefaultBucket();
     f18 = (int)((MapX*)fc)->GetFirstPos();
 }
 }  // namespace fnv_00527350
@@ -520,12 +499,6 @@ void* __thiscall FUN_005278d0_Class::FUN_005278d0(unsigned int flags)
     return this;
 }
 
-struct IOTask
-{
-    virtual void __thiscall Dummy();
-    IOTask(int a);
-    char _pad[20];
-};
 struct FUN_00527c00 : public IOTask
 {
     int m_18;
@@ -580,11 +553,6 @@ void* __thiscall FUN_00527f90_Holder::FUN_00527f90(unsigned int flags)
     return this;
 }
 
-struct RecursiveSpinLock
-{
-    void __thiscall Lock(const char*);
-    void __thiscall Unlock();
-};
 struct FUN_00449f80_Class
 {
     void* __thiscall FUN_00449f80(void* a, void* b, unsigned char c);
@@ -720,12 +688,6 @@ void* FUN_005285c0_Class::FUN_005285c0(void* a, void* b, void* c)
 
 extern unsigned int _data_011c16bc;
 
-struct AutoMemHelper
-{
-    int m_auiShapeKeys;
-    AutoMemHelper(int, bool, const char*, int);
-    ~AutoMemHelper();
-};
 
 struct FUN_00526c90
 {
@@ -761,30 +723,10 @@ void FUN_005272b0_Class::ClearAndDestroy()
     reinterpret_cast<FUN_005272b0_ItemChange*>(this)->dtor();
 }
 
-struct FUN_005285a0_Class
-{
-    virtual void __thiscall v0();
-    virtual void __thiscall v1();
-    virtual void __thiscall v2();
-    virtual void __thiscall v3();
-    virtual void __thiscall v4();
-    virtual void __thiscall v5();
-    virtual void __thiscall v6();
-    virtual void __thiscall v7();
-    virtual void __thiscall v8();
-    virtual void __thiscall v9();
-    virtual void __thiscall v10();
-    virtual void __thiscall v11();
-    virtual void __thiscall v12();
-    virtual void __thiscall v13();
-    virtual void __thiscall v14();
-    virtual void __thiscall v15();
-    virtual void __thiscall CallVirtual17();
-};
 // @fnv 0x005285a0
-void __thiscall FUN_005285a0_Class::CallVirtual17()
+int __thiscall TESQueuedCellManager::CallVirtual17()
 {
-    ((void(__thiscall*)(void*))(*(void***)this)[17])(this);
+    return ((int(__thiscall*)(void*))(*(void***)this)[17])(this);
 }
 
 class Sub24_b5481
@@ -971,21 +913,29 @@ struct Handle
     ~Handle();
     FUN_005287e0_Class* FUN_00559450();
 };
-struct Controller
+struct Local_cls;
+struct Obj20_cls;
+struct QueryState175;
+struct Head175;
+
+// The shared manager does not yet declare the request iterator overloads.
+// This adapter supplies declarations without duplicating its layout.
+struct TESQueuedCellManagerRequestCalls : TESQueuedCellManager
 {
     unsigned char AdvanceRequest(Query*, unsigned int*, Handle*, unsigned int);
-    void ProcessQueries();
+    bool AdvanceRequest(Local_cls*, int*, Obj20_cls*, int);
+    bool AdvanceRequest(QueryState175*, int*, Head175*, int);
 };
 // Loops over queries until one finishes, and for each successful query whose handle value passes a check, calls its v5 method.
 // @fnv 0x00528110
-void Controller::ProcessQueries()
+void TESQueuedCellManager::ProcessQueries()
 {
     Query query;
     while (!query.FUN_006ebde0())
     {
         unsigned int x = 0;
         Handle y(0);
-        if (AdvanceRequest(&query, &x, &y, 1))
+        if (static_cast<TESQueuedCellManagerRequestCalls*>(this)->AdvanceRequest(&query, &x, &y, 1))
         {
             if (y.FUN_00559450()->FUN_005287e0())
             {
@@ -1025,25 +975,19 @@ struct Obj20_cls
     Holder_cls* FUN_00559450();
 };
 
-extern FUN_005289b0_Class* DAT_01202d98;
-
-struct FUN_005282d0_cls
-{
-    void FUN_005282d0();
-    bool AdvanceRequest(Local_cls* a, int* b, Obj20_cls* o, int f);
-};
+extern IOManager* DAT_01202d98;
 
 // @fnv 0x005282d0
-void FUN_005282d0_cls::FUN_005282d0()
+void TESQueuedCellManager::FUN_005282d0()
 {
     Local_cls a;
     while (!a.FUN_006ebde0())
     {
         int b = 0;
         Obj20_cls o4(0);
-        if (AdvanceRequest(&a, &b, &o4, 1))
+        if (static_cast<TESQueuedCellManagerRequestCalls*>(this)->AdvanceRequest(&a, &b, &o4, 1))
         {
-            DAT_01202d98->FUN_005289b0(o4.FUN_00559450());
+            static_cast<IOManagerTaskCalls*>(DAT_01202d98)->WaitForTask(o4.FUN_00559450());
             if (o4.FUN_00559450()->FUN_005287e0())
             {
                 o4.FUN_00559450()->v5();
@@ -1053,19 +997,12 @@ void FUN_005282d0_cls::FUN_005282d0()
 }
 
 namespace fnv_005283c0 {
-struct TESObjectCELL;
 
 struct QWorldSpace
 {
     TESObjectCELL* GetCellAt(int x, int y);
 };
 
-class TES
-{
-  public:
-    bool IsCellLoadedQ(TESObjectCELL* cell);
-    void HandleLoadedCellQ(TESObjectCELL* cell);
-};
 extern TES* g_TES;
 
 struct QIOTask
@@ -1094,29 +1031,6 @@ struct QTaskPtr
     operator QIOTask*() const;
 };
 
-class IOManager
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void AddTask(QIOTask* task);
-};
 extern IOManager* DAT_01202d98;
 
 int __cdecl TESWorldSpace_GetKeyForCellCoord(short x, short y);
@@ -1152,20 +1066,13 @@ void QCellQueue::FUN_005283c0(QWorldSpace* ws, int x, int y)
         QTaskPtr ptr(new QCellTask((int)this, (int)entry7));
         int key = TESWorldSpace_GetKeyForCellCoord((unsigned short)x, (unsigned short)y);
         bool ok6 = Insert(key, &ptr, 1);
-        DAT_01202d98->AddTask(ptr);
+        DAT_01202d98->AddTask(reinterpret_cast<::QIOTask*>(static_cast<QIOTask*>(ptr)));
     }
 }
 }  // namespace fnv_005283c0
 
 extern const char kThreadSafeStructuresSourceFile[];
 
-class AutoMemContext
-{
-  public:
-    int unk00;
-    AutoMemContext(MEM_CONTEXT aeMemoryContext, bool bPush, const char* pFile, int iLine);
-    ~AutoMemContext();
-};
 
 struct QueuedRefPtr
 {
@@ -1218,7 +1125,7 @@ struct QueuedMap
 // @fnv 0x00528e40
 void QueuedMap::FUN_00528e40(bool abFreeNodes)
 {
-    AutoMemContext kMemContext(MEM_CONTEXT_MEM_CONTEXT_TASK_OVERHEAD, true, kThreadSafeStructuresSourceFile, 0x42c);
+    AutoMemContext kMemContext(static_cast<MEM_CONTEXT>(6), true, kThreadSafeStructuresSourceFile, 0x42c);
     if (owner == 0)
         return;
     lock.Lock(0);
@@ -1625,7 +1532,8 @@ struct Entries
 {
     bool Next(EntryState*, Ref**, int);
 };
-struct Map
+// Exe 0x005273c0: unit-local Map view; declarations and layout are preserved.
+struct BlkMapView
 {
     int f00;
     int f04;
@@ -1641,7 +1549,7 @@ struct State
     int type;
     Form* filter;
     int context;
-    Map* map;
+    BlkMapView* map;
     Ref* current;
     Entries* entries;
     void* pos;
@@ -1656,11 +1564,11 @@ struct Collection
     int f0c;
     int f10;
     int f14;
-    Map first;
-    Map second;
-    Map third;
-    Map fourth;
-    Map fifth;
+    BlkMapView first;
+    BlkMapView second;
+    BlkMapView third;
+    BlkMapView fourth;
+    BlkMapView fifth;
     bool FindNextRef(State*, Ref**, Ref**, unsigned int);
 };
 // Walks the collection's maps by stage and flags, skipping disabled, deleted, excluded or filtered refs, and returns the next matching ref and its item.
@@ -1813,20 +1721,6 @@ void __thiscall Cls::FUN_00529330()
     FUN_0044e360(this->m_iWordAt04);
 }
 
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-    NiPoint3(float, float, float);
-    NiPoint3 operator+(const NiPoint3&) const;
-    NiPoint3 operator*(float) const;
-    bool FUN_004390c0(const NiPoint3&);
-    NiPoint3& Subtract(const NiPoint3&);
-    void FUN_004a0c10();
-    NiPoint3 FUN_0053d1a0(const NiPoint3&);
-};
-NiPoint3 operator*(float, const NiPoint3&);
 extern const NiPoint3 DAT_011a9484;
 float FUN_004b1520(float, float);
 struct TerrainInput
@@ -1918,17 +1812,8 @@ struct Head175
     ~Head175();
     void* FUN_00559450();
 };
-struct Manager175
-{
-    bool RunQueuedTask(void*, int);
-};
-struct FUN_005281f0_Class
-{
-    bool AdvanceRequest(QueryState175*, int*, Head175*, int);
-    int FUN_005281f0();
-};
 // @fnv 0x005281f0
-int FUN_005281f0_Class::FUN_005281f0()
+int TESQueuedCellManager::FUN_005281f0()
 {
     int count = 0;
     QueryState175 query;
@@ -1936,30 +1821,14 @@ int FUN_005281f0_Class::FUN_005281f0()
     {
         int currentValue = 0;
         Head175 itemHead(0);
-        if (AdvanceRequest(&query, &currentValue, &itemHead, 1))
+        if (static_cast<TESQueuedCellManagerRequestCalls*>(this)->AdvanceRequest(&query, &currentValue, &itemHead, 1))
         {
-            if (!reinterpret_cast<Manager175*>(DAT_01202d98)->RunQueuedTask(itemHead.FUN_00559450(), 0))
+            if (!static_cast<IOManagerTaskCalls*>(DAT_01202d98)->RunQueuedTask(itemHead.FUN_00559450(), 0))
                 ++count;
         }
     }
     return count;
 }
-
-class NiObject
-{
-  public:
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual NiObject* slot9(int a, int b);
-    void FUN_00528ce0(NiObject* other);
-};
 
 struct FUN_00528bb0_class
 {
@@ -1971,7 +1840,25 @@ struct FUN_00528bb0_class
 // @fnv 0x00528bb0
 void FUN_00528bb0_class::FUN_00528bb0(int arg)
 {
-    reinterpret_cast<NiObject*>(this)->FUN_00528ce0(m_obj->slot9(arg, arg));
+    // This queue object's slot 9 takes two arguments, unlike NiObject::IsTriShape.
+    // Preserve the original call ABI until that queue interface is shared.
+    __asm
+    {
+        mov eax, arg
+        push eax
+        mov ecx, arg
+        push ecx
+        mov edx, this
+        mov eax, [edx]
+        mov ecx, this
+        mov ecx, [ecx]
+        mov edx, [eax]
+        mov eax, [edx + 24h]
+        call eax
+        push eax
+        mov ecx, this
+        call NiObject::FUN_00528ce0
+    }
 }
 
 namespace QueueReconstruction528be0 {
@@ -2004,11 +1891,6 @@ FUN_00528be0::~FUN_00528be0()
 }
 
 class TESAmmo;
-class BGSAmmoForm
-{
-  public:
-    TESAmmo* GetAmmoHelper();
-};
 struct AmmoProcess
 {
     virtual void v0();
@@ -2191,11 +2073,6 @@ int Thing::GetOrFallback(int arg)
     return m_uiFilterValue;
 }
 
-struct RgbaColor
-{
-    float r, g, b, a;
-    RgbaColor(float r, float g, float b, float a);
-};
 struct _ref_006815c0
 {
     _ref_006815c0();
@@ -2204,7 +2081,7 @@ struct _ref_006815c0
 struct FUN_0052d180 : _ref_006815c0
 {
     int pad;
-    RgbaColor c;
+    NiColorA c;
     FUN_0052d180();
 };
 // @fnv 0x0052d180

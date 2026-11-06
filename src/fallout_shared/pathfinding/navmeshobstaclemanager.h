@@ -8,31 +8,7 @@
 #define FNV_NAVMESHOBSTACLEMANAGER_H
 
 
-#include "layout_support.h"
-
-class ObstacleTaskData;
-
-// Lock entry points stay out of line: the original counts call them.
-class RecursiveSpinLock
-{
-  public:
-    volatile unsigned int m_uiOwningThreadID;  // +0x0
-    unsigned int m_uiRecursionCount;              // +0x4
-    void Lock(const char* name);
-    void Unlock();
-};
-
-class NavMeshObstacleManager
-{
-  public:
-    // State ahead of the background task bookkeeping is not reconstructed yet.
-    unsigned char layoutPadding0[0x13C];
-    BSSimpleArray<ObstacleTaskData*, 1024> m_kProcessedTasks;   // +0x13C
-    BSSimpleArray<ObstacleTaskData*, 1024> m_kBackgroundTasks;  // +0x14C
-    FNV_ALIGN(32) RecursiveSpinLock m_kTaskLock;                       // +0x160
-    unsigned int GetProcessedTaskCount();
-    unsigned int GetBackgroundTaskCount();
-};
+#include "../../../include/NavMeshObstacleManager.h"
 
 const char kGetProcessedTaskCountLabel[] = "NavMeshObstacleManager::GetProcessedTaskCount()";
 const char kGetBackgroundTaskCountLabel[] = "NavMeshObstacleManager::GetBackgroundTaskCount()";

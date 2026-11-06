@@ -8,23 +8,30 @@
 // src/staging/blk_00dc0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+#include "../../include/FinishingFlag.h"
+// Keep the intrinsic storage view without CRT byte lanes, which change VC9 /GS code generation.
+#define _INCLUDED_MM2
+// Exe 0x00ddd2c0 FUN_00ddd2c0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    float _mm_cvtss_f32(__m128);
-    void _mm_store_ss(float*, __m128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    float _mm_cvtss_f32(LocalM128);
+    void _mm_store_ss(float*, LocalM128);
 }
+#include "../../include/Pair.h"
+#include "../../include/hkVector4q.h"
+
 struct VecArray
 {
-    __m128* m_data;
+    LocalM128* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 };
@@ -43,20 +50,16 @@ struct MemRouter
 };
 void* __cdecl FUN_00c85750();
 void __cdecl FUN_00c908c0(MemAllocator* alloc, VecArray* arr, int newCap, int elemSize);
-static __forceinline float distanceSquared(__m128 a, __m128 b)
+static __forceinline float distanceSquared(LocalM128 a, LocalM128 b)
 {
-    __m128 v = _mm_sub_ps(a, b);
-    __m128 d = _mm_mul_ps(v, v);
-    __m128 yx = _mm_add_ss(_mm_shuffle_ps(d, d, 0x55), d);
+    LocalM128 v = _mm_sub_ps(a, b);
+    LocalM128 d = _mm_mul_ps(v, v);
+    LocalM128 yx = _mm_add_ss(_mm_shuffle_ps(d, d, 0x55), d);
     float r;
     _mm_store_ss(&r, _mm_add_ss(_mm_shuffle_ps(d, d, 0xaa), yx));
     return r;
 }
 void __cdecl FUN_00dd68d0(float tol, VecArray* arr, int* outCount);
-struct FinishingFlag
-{
-    int m_bFinishing;
-};
 class __declspec(align(16)) S00dced70_Object
 {
   public:
@@ -77,29 +80,12 @@ class __declspec(align(16)) S00dced70_Object
 const void* __cdecl FUN_00dced70();
 struct __declspec(align(16)) FUN_00dd1f00
 {
-    __m128 unk00;
+    LocalM128 unk00;
     int unk10;
     float unk14;
     int unk18;
     int unk1c;
     FUN_00dd1f00(const FUN_00dd1f00& o);
-};
-struct Pair_00dd6c10
-{
-    int first;
-    int second;
-
-    static __forceinline Pair_00dd6c10 make(int a, int b)
-    {
-        Pair_00dd6c10 p;
-        p.first = a;
-        p.second = b;
-        return p;
-    }
-    __forceinline bool operator==(const Pair_00dd6c10& o) const
-    {
-        return first == o.first && second == o.second;
-    }
 };
 struct Alloc_00dd6c10
 {
@@ -128,10 +114,10 @@ template <class T> struct Arr_00dd6c10
 };
 struct PairList_00dd6c10
 {
-    Pair_00dd6c10* data;
+    Pair* data;
     int size;
     int capacity;
-    Pair_00dd6c10 storage[32];
+    Pair storage[32];
 
     __forceinline void init()
     {
@@ -139,25 +125,25 @@ struct PairList_00dd6c10
         size = 0;
         capacity = 0x80000020;
     }
-    __forceinline int indexOf(const Pair_00dd6c10& t) const
+    __forceinline int indexOf(const Pair& t) const
     {
         for (int i = 0; i < size; i++)
         {
-            if (data[i] == t)
+            if (data[i].a == t.a && data[i].b == t.b)
                 return i;
         }
         return -1;
     }
-    __forceinline void add(const Pair_00dd6c10& item)
+    __forceinline void add(const Pair& item)
     {
         Holder_00dd6c10* h = static_cast<Holder_00dd6c10*>(FUN_00c85750());
         if (size == (capacity & 0x3fffffff))
-            ResizeAudioStream(h->allocator, this, sizeof(Pair_00dd6c10));
-        Pair_00dd6c10* p = &data[size];
+            ResizeAudioStream(h->allocator, this, sizeof(Pair));
+        Pair* p = &data[size];
         if (p)
         {
-            p->first = item.first;
-            p->second = item.second;
+            p->a = item.a;
+            p->b = item.b;
         }
         size++;
     }
@@ -165,45 +151,33 @@ struct PairList_00dd6c10
     {
         size = 0;
         if ((capacity & 0x80000000) == 0)
-            a.freeBlock(data, (capacity & 0x3fffffff) * sizeof(Pair_00dd6c10));
+            a.freeBlock(data, (capacity & 0x3fffffff) * sizeof(Pair));
     }
     __forceinline void clearAndFree()
     {
         _clearAndDeallocate(static_cast<Holder_00dd6c10*>(FUN_00c85750())->heap());
     }
 };
-typedef Arr_00dd6c10<__m128> VecArr_00dd6c10;
-static __forceinline float dot3_00dd6c10(const __m128& a, const __m128& b)
+typedef Arr_00dd6c10<LocalM128> VecArr_00dd6c10;
+static __forceinline float dot3_00dd6c10(const LocalM128& a, const LocalM128& b)
 {
-    __m128 p = _mm_mul_ps(a, b);
-    __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    LocalM128 p = _mm_mul_ps(a, b);
+    LocalM128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
     float r;
     _mm_store_ss(&r, _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s));
     return r;
 }
-static __forceinline __m128 cross_00dd6c10(__m128 b, __m128 a)
+static __forceinline LocalM128 cross_00dd6c10(LocalM128 b, LocalM128 a)
 {
     return _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(b, b, 0xd2), _mm_shuffle_ps(a, a, 0xc9)),
                       _mm_mul_ps(_mm_shuffle_ps(b, b, 0xc9), _mm_shuffle_ps(a, a, 0xd2)));
 }
-static __forceinline __m128 cross2_00dd6c10(__m128 a, __m128 b)
+static __forceinline LocalM128 cross2_00dd6c10(LocalM128 a, LocalM128 b)
 {
-    __m128 t0 = _mm_mul_ps(_mm_shuffle_ps(b, b, 0xc9), _mm_shuffle_ps(a, a, 0xd2));
-    __m128 t1 = _mm_mul_ps(_mm_shuffle_ps(b, b, 0xd2), _mm_shuffle_ps(a, a, 0xc9));
+    LocalM128 t0 = _mm_mul_ps(_mm_shuffle_ps(b, b, 0xc9), _mm_shuffle_ps(a, a, 0xd2));
+    LocalM128 t1 = _mm_mul_ps(_mm_shuffle_ps(b, b, 0xd2), _mm_shuffle_ps(a, a, 0xc9));
     return _mm_sub_ps(t1, t0);
 }
-struct hkVector4q_00dd6c10
-{
-    __m128 m_vComponents;
-    __forceinline void setCross(const hkVector4q_00dd6c10& v1, const hkVector4q_00dd6c10& v2)
-    {
-        __m128 positive = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
-                                     _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        __m128 negative = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
-                                     _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(positive, negative);
-    }
-};
 static __forceinline bool lt_00dd6c10(const float& a, const float& b)
 {
     return a < b;
@@ -214,14 +188,14 @@ static __forceinline bool gt_00dd6c10(const float& a, const float& b)
 }
 extern float DAT_0104e148;
 extern const float DAT_010c8440 = -1.1920929e-07f;
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_xor_ps(__m128, __m128);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_xor_ps(LocalM128, LocalM128);
 extern const float DAT_010b9be8;
-extern const __m128 DAT_010c44d0;
+extern const LocalM128 DAT_010c44d0;
 struct PlanePoint
 {
-    __m128 position;
+    LocalM128 position;
     int plane0, plane1, plane2, unk1c;
     __forceinline void copyPlanes(const PlanePoint& other)
     {
@@ -231,7 +205,7 @@ struct PlanePoint
     }
 };
 int __cdecl FUN_00dd6380(VecArr_00dd6c10* vectors, int first, int second, int third, PlanePoint* point);
-__declspec(noinline) int __cdecl FUN_00dd6510(const __m128* normal, VecArr_00dd6c10* vectors, int first, int second,
+__declspec(noinline) int __cdecl FUN_00dd6510(const LocalM128* normal, VecArr_00dd6c10* vectors, int first, int second,
                                               PlanePoint* lower, PlanePoint* upper)
 {
     lower->plane0 = lower->plane1 = lower->plane2 = -1;
@@ -246,7 +220,7 @@ __declspec(noinline) int __cdecl FUN_00dd6510(const __m128* normal, VecArr_00dd6
             continue;
         if (!initialized)
         {
-            __m128 scale = _mm_load_ss(&DAT_010b9be8);
+            LocalM128 scale = _mm_load_ss(&DAT_010b9be8);
             scale = _mm_shuffle_ps(scale, scale, 0);
             upper->position = _mm_add_ps(_mm_mul_ps(scale, *normal), point.position);
             lower->position = _mm_xor_ps(upper->position, DAT_010c44d0);
@@ -287,36 +261,36 @@ inline float fabsf(float x)
 {
     return (float)fabs((double)x);
 }
-extern "C" __m128 _mm_mul_ss(__m128, __m128);
+extern "C" LocalM128 _mm_mul_ss(LocalM128, LocalM128);
 
 extern float DAT_0104da48;
 
 struct TriangleProjectionData
 {
-    __m128 edge0;
-    __m128 edge1;
-    __m128 vertices[3];
+    LocalM128 edge0;
+    LocalM128 edge1;
+    LocalM128 vertices[3];
 };
 
 // @fnv 0x00ddd2c0
-int __cdecl FUN_00ddd2c0(const __m128* origin, const __m128* firstAxis, const __m128* secondAxis,
-                         const TriangleProjectionData* triangle, const __m128* direction)
+int __cdecl FUN_00ddd2c0(const LocalM128* origin, const LocalM128* firstAxis, const LocalM128* secondAxis,
+                         const TriangleProjectionData* triangle, const LocalM128* direction)
 {
     float maximum = DAT_0104e148;
-    const __m128* entry = origin;
-    const __m128 center = *entry;
+    const LocalM128* entry = origin;
+    const LocalM128 center = *entry;
     entry = firstAxis;
-    const __m128 axis = *entry;
+    const LocalM128 axis = *entry;
     entry = triangle->vertices;
-    const __m128* begin = entry;
+    const LocalM128* begin = entry;
     float minimum = DAT_0104da48;
-    const __m128* vertex = begin;
+    const LocalM128* vertex = begin;
     int remaining = 3;
     do
     {
-        __m128 p = _mm_mul_ps(_mm_sub_ps(*vertex, center), axis);
-        __m128 y = _mm_shuffle_ps(p, p, 0x55);
-        __m128 z = _mm_shuffle_ps(p, p, 0xAA);
+        LocalM128 p = _mm_mul_ps(_mm_sub_ps(*vertex, center), axis);
+        LocalM128 y = _mm_shuffle_ps(p, p, 0x55);
+        LocalM128 z = _mm_shuffle_ps(p, p, 0xAA);
         y = _mm_add_ss(y, p);
         z = _mm_add_ss(z, y);
         float projection;
@@ -336,9 +310,9 @@ int __cdecl FUN_00ddd2c0(const __m128* origin, const __m128* firstAxis, const __
         if (!(fabsf(maximum) > fabsf(minimum)))
             useDirection = 0;
         float scale = (float)useDirection;
-        __m128 p = _mm_mul_ps(*secondAxis, *direction);
-        __m128 y = _mm_shuffle_ps(p, p, 0x55);
-        __m128 z = _mm_shuffle_ps(p, p, 0xAA);
+        LocalM128 p = _mm_mul_ps(*secondAxis, *direction);
+        LocalM128 y = _mm_shuffle_ps(p, p, 0x55);
+        LocalM128 z = _mm_shuffle_ps(p, p, 0xAA);
         y = _mm_add_ss(y, p);
         z = _mm_add_ss(z, y);
         z = _mm_mul_ss(z, _mm_load_ss(&scale));
@@ -354,9 +328,9 @@ int __cdecl FUN_00ddd2c0(const __m128* origin, const __m128* firstAxis, const __
     remaining = 3;
     do
     {
-        __m128 p = _mm_mul_ps(_mm_sub_ps(*vertex, center), *secondAxis);
-        __m128 y = _mm_shuffle_ps(p, p, 0x55);
-        __m128 z = _mm_shuffle_ps(p, p, 0xAA);
+        LocalM128 p = _mm_mul_ps(_mm_sub_ps(*vertex, center), *secondAxis);
+        LocalM128 y = _mm_shuffle_ps(p, p, 0x55);
+        LocalM128 z = _mm_shuffle_ps(p, p, 0xAA);
         y = _mm_add_ss(y, p);
         z = _mm_add_ss(z, y);
         float projection;
@@ -376,9 +350,9 @@ int __cdecl FUN_00ddd2c0(const __m128* origin, const __m128* firstAxis, const __
     if (!(fabsf(secondMaximum) > fabsf(secondMinimum)))
         useDirection = 0;
     float scale = (float)useDirection;
-    __m128 p = _mm_mul_ps(*firstAxis, *direction);
-    __m128 y = _mm_shuffle_ps(p, p, 0x55);
-    __m128 z = _mm_shuffle_ps(p, p, 0xAA);
+    LocalM128 p = _mm_mul_ps(*firstAxis, *direction);
+    LocalM128 y = _mm_shuffle_ps(p, p, 0x55);
+    LocalM128 z = _mm_shuffle_ps(p, p, 0xAA);
     y = _mm_add_ss(y, p);
     z = _mm_add_ss(z, y);
     z = _mm_mul_ss(z, _mm_load_ss(&scale));

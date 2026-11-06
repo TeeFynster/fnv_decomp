@@ -1,3 +1,10 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkReferencedObject.h"
+
 
 // src/havok/physics/utilities/constraint/bilateral/hkpconstraintutils_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/utilities/constraint/bilateral/hkpconstraintutils.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,48 +12,13 @@
 
 // src/havok/physics/utilities/constraint/bilateral/hkpconstraintutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/constraint/bilateral/hkpconstraintutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-struct hkMemoryAllocator
-{
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-struct AudioMgr
-{
-    int unk00, unk04, unk08;
-    hkMemoryAllocator* unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
+typedef ::__m128 LocalM128;
 struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
+inline hkMemoryRouter* audio()
 {
-    return (AudioMgr*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
 struct Block5
 {
     int unk00, unk04, unk08, unk0c, unk10;
@@ -59,19 +31,11 @@ struct Block5b
     unsigned char unk07;
     int unk08, unk0c, unk10;
 };
-struct hkRefObj
-{
-    void* m_vtbl;
-    unsigned short m_usMemSizeAndFlags;
-    unsigned short m_sReferenceCount;
-    void FUN_00c90510();
-    void FUN_00c905b0();
-};
-struct CloneDataBase : hkRefObj
+struct CloneDataBase : hkReferencedObject
 {
     int unk08, unk0c;
     int unk10, unk14, unk18, unk1c;
-    __m128 unk20, unk30, unk40, unk50, unk60, unk70;
+    LocalM128 unk20, unk30, unk40, unk50, unk60, unk70;
 };
 struct CloneDataA : CloneDataBase
 {
@@ -104,7 +68,7 @@ struct SourceDataHeader
 };
 struct SourceData : SourceDataHeader
 {
-    __m128 unk20, unk30, unk40, unk50, unk60, unk70, unk80;
+    LocalM128 unk20, unk30, unk40, unk50, unk60, unk70, unk80;
 };
 struct SourceDataB : SourceData
 {
@@ -120,7 +84,7 @@ struct SourceDataA : SourceData
     Block5 unk124;
 };
 struct Instance;
-struct Instance : hkRefObj
+struct Instance : hkReferencedObject
 {
     int unk08;
     SourceData* unk0c;
@@ -132,7 +96,7 @@ struct Instance : hkRefObj
 };
 inline void* hkAlloc(int size)
 {
-    hkRefObj* p = (hkRefObj*)audio()->heap().AllocateMemoryBlock(size);
+    hkReferencedObject* p = (hkReferencedObject*)audio()->heap().blockAlloc(size);
     p->m_usMemSizeAndFlags = (unsigned short)size;
     return p;
 }
@@ -170,12 +134,12 @@ class FnvInner
     virtual unsigned int GetKind() throw();
 
     char unk04[0x0c];
-    __m128 m_20;
-    __m128 m_30;
+    LocalM128 m_20;
+    LocalM128 m_30;
     char unk40[0x10];
-    __m128 m_50;
+    LocalM128 m_50;
     char unk60[0x30];
-    __m128 m_90;
+    LocalM128 m_90;
 };
 class FnvHolder
 {
@@ -183,7 +147,7 @@ class FnvHolder
     char unk00[0x0c];
     FnvInner* m_0c;
 };
-int FUN_00e5ad40(FnvHolder* a0, __m128* a1, __m128* a2);
+int FUN_00e5ad40(FnvHolder* a0, LocalM128* a1, LocalM128* a2);
 
 struct Ent
 {
@@ -195,16 +159,16 @@ struct Ent
     int unka0, unka4, unka8, unkac, unkb0, unkb4, unkb8, unkbc;
     int unkc0, unkc4, unkc8, unkcc, unkd0, unkd4, unkd8, unkdc;
     int unke0, unke4, unke8, unkec;
-    __m128 unkf0;
+    LocalM128 unkf0;
     int unk100, unk104, unk108, unk10c, unk110, unk114, unk118, unk11c;
-    __m128 unk120;
+    LocalM128 unk120;
     int unk130, unk134, unk138, unk13c, unk140, unk144, unk148, unk14c;
     int unk150, unk154, unk158, unk15c, unk160, unk164, unk168, unk16c;
     int unk170, unk174, unk178, unk17c, unk180, unk184, unk188, unk18c;
     int unk190, unk194, unk198, unk19c, unk1a0, unk1a4, unk1a8, unk1ac;
-    __m128 unk1b0;
-    __m128 unk1c0;
-    void FUN_00ca8800(__m128* v);
+    LocalM128 unk1b0;
+    LocalM128 unk1c0;
+    void FUN_00ca8800(LocalM128* v);
     void OnTrigger(int arg);
     void FUN_00561800(void* p);
 };
@@ -218,34 +182,34 @@ struct FnvHolder2 : FnvHolder
 
 struct Conv
 {
-    __m128 m;
-    void FUN_00c7f640(__m128* src, __m128* arg);
+    LocalM128 m;
+    void FUN_00c7f640(LocalM128* src, LocalM128* arg);
 };
 
 // Constraint pivots followed by their transformed positions.
 struct WorkVectors
 {
-    __m128 va;
-    __m128 vb;
+    LocalM128 va;
+    LocalM128 vb;
     Conv cb;
     Conv ca;
 };
 
 extern "C"
 {
-    __m128 _mm_load_ps(const float* p);
-    __m128 _mm_mul_ps(__m128 a, __m128 b);
-    __m128 _mm_add_ps(__m128 a, __m128 b);
-    __m128 _mm_sub_ps(__m128 a, __m128 b);
-    __m128 _mm_shuffle_ps(__m128 a, __m128 b, int sel);
-    __m128 _mm_add_ss(__m128 a, __m128 b);
-    __m128 _mm_set_ps1(float x);
-    void _mm_store_ss(float* p, __m128 v);
+using ::_mm_load_ps;
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
+using ::_mm_sub_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_add_ss;
+using ::_mm_set_ps1;
+using ::_mm_store_ss;
 }
 
 extern "C"
 {
-    const __m128 DAT_010ec7f0 = {{1.0f, 1.0f, 1.0f, 1.0f}};
+    const LocalM128 DAT_010ec7f0 = {{1.0f, 1.0f, 1.0f, 1.0f}};
     const float DAT_010959f4 = 1e-6f;
 }
 
@@ -260,9 +224,9 @@ bool* FUN_00e5af80(bool* out, FnvHolder2* h, float t, float t2)
     if (FUN_00e5ad40(h, &v.va, &v.vb) == 0)
     {
         {
-            __m128 sq = _mm_mul_ps(v.va, v.va);
-            __m128 lo = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-            __m128 hi = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), lo);
+            LocalM128 sq = _mm_mul_ps(v.va, v.va);
+            LocalM128 lo = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
+            LocalM128 hi = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), lo);
             _mm_store_ss(&d, hi);
         }
         if (d > DAT_010959f4)
@@ -279,19 +243,19 @@ bool* FUN_00e5af80(bool* out, FnvHolder2* h, float t, float t2)
         v.cb.FUN_00c7f640(&b->unkf0, &v.vb);
         v.ca.FUN_00c7f640(&a->unkf0, &v.va);
         {
-            __m128 cbv = v.cb.m;
-            __m128 cav = v.ca.m;
-            __m128 dd = _mm_sub_ps(cbv, cav);
-            __m128 sq = _mm_mul_ps(dd, dd);
-            __m128 lo = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-            __m128 hi = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), lo);
+            LocalM128 cbv = v.cb.m;
+            LocalM128 cav = v.ca.m;
+            LocalM128 dd = _mm_sub_ps(cbv, cav);
+            LocalM128 sq = _mm_mul_ps(dd, dd);
+            LocalM128 lo = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
+            LocalM128 hi = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), lo);
             _mm_store_ss(&d, hi);
         }
         if (d > t * t)
         {
             {
-                __m128 t2v = _mm_set_ps1(t2);
-                __m128 r = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, t2v), v.cb.m),
+                LocalM128 t2v = _mm_set_ps1(t2);
+                LocalM128 r = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, t2v), v.cb.m),
                                       _mm_mul_ps(_mm_load_ps(b->unk120.m128_f32), t2v));
                 a->FUN_00ca8800(&r);
             }

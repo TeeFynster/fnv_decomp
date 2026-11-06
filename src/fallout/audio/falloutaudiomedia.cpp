@@ -1,6 +1,17 @@
 // fallout/audio/falloutaudiomedia.cpp: FalloutAudioMedia, FAMThread (30 functions)
 
+#include "../../../include/ActorTaskManager.h"
+#include "../../../include/BGSMusicType.h"
+#include "../../../include/FORenderedMenu.h"
+#include "../../../include/StartMenu.h"
+#include "../../../include/TESLandTexture.h"
 #include "falloutaudiomedia_decls.h"
+#include "../../../include/BSAudio.h"
+#include "../../../include/BSFile.h"
+#include "../../../include/BSThread.h"
+#include "../../../include/MediaLocationController.h"
+#include "../../../include/MediaSet.h"
+#include "../../../include/SETTING_VALUE.h"
 
 // @fnv 0x008304a0
 void FalloutAudioMedia::BeginMediaUpdate()
@@ -23,7 +34,7 @@ void FalloutAudioMedia::EndMediaUpdate()
 void FalloutAudioMedia::PlayMedia(BGSMusicType* musicType)
 {
     if (musicType)
-        PlayMedia(kMediaType_Music, musicType->GetRandomEntry(), 1000, musicType->FUN_00830050(), false,
+        PlayMedia(MEDIATYPE_MEDIA_SPECIAL, musicType->GetRandomEntry(), 1000, musicType->FUN_00830050(), false,
                   musicType->FUN_00830080(), 0);
 }
 
@@ -129,24 +140,9 @@ unsigned int __fastcall FUN_0082f7b0(FAMThread* pThis)
     return 0;
 }
 
-struct SETTING_VALUE
-{
-    float f;
-};
 
-class SettingT_GameSettingCollection_
-{
-  public:
-    SETTING_VALUE* Float();
-};
+#include "../../../include/SettingT_GameSettingCollection_.h"
 
-class BSAudio
-{
-  public:
-    float GetMusicVolume();
-    float FUN_00ad7ab0();
-    float GetMasterVolume();
-};
 
 extern SettingT_GameSettingCollection_ g_011dd084;
 extern double DAT_01073490;
@@ -217,41 +213,25 @@ float __cdecl FUN_0082fff0(float value)
 void __cdecl PlayMusicType(BGSMusicType* aiMusicType)
 {
     if (aiMusicType)
-        FalloutAudioMedia::PlayMedia(kMediaType_Music, aiMusicType->GetRandomEntry(), 1000, aiMusicType->FUN_00830050(),
+        FalloutAudioMedia::PlayMedia(MEDIATYPE_MEDIA_SPECIAL, aiMusicType->GetRandomEntry(), 1000, aiMusicType->FUN_00830050(),
                                      false, aiMusicType->FUN_00830080(), 0);
 }
 
-struct FUN_00830050_shell : public BGSMusicType
-{
-    bool FUN_00830050();
-};
-
 // Returns true if the float at offset 0x24 is greater than zero.
 // @fnv 0x00830050
-bool FUN_00830050_shell::FUN_00830050()
+bool BGSMusicType::FUN_00830050()
 {
-    return *(float*)((char*)this + 0x24) > 0.0f ? true : false;
+    return fVolumeScale > 0.0f ? true : false;
 }
-
-struct FUN_00830080_shell : public BGSMusicType
-{
-    float FUN_00830080();
-};
 
 // Returns the float at offset 0x24 negated when it is greater than zero, otherwise returns it unchanged.
 // @fnv 0x00830080
-float FUN_00830080_shell::FUN_00830080()
+float BGSMusicType::FUN_00830080()
 {
-    return (*reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x24) > 0.0)
-               ? -*reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x24)
-               : *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x24);
+    return (fVolumeScale > 0.0)
+               ? -fVolumeScale
+               : fVolumeScale;
 }
-
-class ActorTaskManager
-{
-  public:
-    void QueryPerformanceCounter(int);
-};
 
 extern ActorTaskManager g_011dd3d8;
 
@@ -388,12 +368,7 @@ unsigned long __cdecl FUN_00830a20(unsigned long param_1)
 }  // namespace fnv_00830a20
 
 namespace fnv_00830490 {
-struct ATM
-{
-    void __thiscall WaitForTasksDuringRendering();
-};
-
-extern ATM g_011dd3d8;
+extern ActorTaskManager g_011dd3d8;
 
 // @fnv 0x00830490
 void __cdecl FUN_00830490()
@@ -525,17 +500,6 @@ class AudioClock
     unsigned int GetSynchTime();
 };
 AudioClock* FUN_00453a70();
-class MediaLocationController
-{
-  public:
-    bool Update(bool);
-};
-class MediaSet
-{
-  public:
-    bool Update(unsigned int, bool, MediaLocationController*);
-    void Reset();
-};
 class WorldSpace
 {
   public:
@@ -798,41 +762,24 @@ void UpdateMediaLocation()
     }
 }
 
-struct BSThread
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    void Initialize(int stackSize, const char* name, bool suspended);
-    void SetThreadPriority(int priority);
-    void FUN_00aa6550(int value);
-};
 
 struct FAMThread : BSThread
 {
+    void* waitHandle;
+    unsigned int threadID;
+    unsigned int parentID;
+    unsigned int state;
+    void* event;
+    unsigned int unk44;
+    unsigned int unk48;
+
     FAMThread();
     ~FAMThread();
 };
 
 extern const char DAT_0107cc08[];
 extern const char DAT_0107cbf0[];
-extern BSThread* DAT_011dd1f4;
+extern ::FAMThread* DAT_011dd1f4;
 
 // Allocates two FAMThread objects, initializes each with a 0x4000 stack and name, sets priority 1, and calls FUN_00aa6550 with 0.
 // @fnv 0x0082f830
@@ -853,15 +800,6 @@ struct EmptyType
 {
 };
 
-struct BSFile
-{
-    virtual ~BSFile();
-    BSFile(char const*, int, unsigned int, bool);
-
-    unsigned char padding[0x154];
-
-    bool Write();
-};
 
 struct S2f760
 {
@@ -947,7 +885,7 @@ void __cdecl PlayAudioMedia(int aeMediaType, char const* apFileName, unsigned in
     }
 
     pTask = reinterpret_cast<EmptyType*>(
-        static_cast<FORenderedMenu*>(TESLandTexture::GetSoundSystem())->GetCurrentTimeMilliseconds());
+        reinterpret_cast<FORenderedMenu*>(TESLandTexture::GetSoundSystem())->GetCurrentTimeMilliseconds());
 
     if (DAT_011dd36c == 0)
     {

@@ -1,26 +1,176 @@
-// Source layout: InventoryChanges. PC corrections are in generate_headers.py.
-#ifndef FNV_INVENTORYCHANGES_H
-#define FNV_INVENTORYCHANGES_H
-#include "layout_support.h"
-#pragma pack(push, 4)
-class InventoryChanges
+#pragma once
+
+class Actor;
+class ArrSI;
+class BGSListForm;
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
+class ExtraDataList;
+class IndexedPointerCollection;
+class InventoryEntry;
+class InventoryEntryData;
+class InventoryItem;
+class InventoryIterator;
+class InventoryList;
+class InventoryStackRecord;
+class ItemEntry;
+class ItemChangeShell;
+class TESActorBase;
+class TESAmmo;
+class TESBoundObject;
+class TESContainer;
+class TESCreature;
+class TESForm;
+class TESLevItem;
+class TESObject;
+class TESObjectREFR;
+class TESObjectWEAP;
+struct WalkTemp;
+template <class T> class BSSimpleList;
+enum BIPED_OBJECT;
+
+struct InventoryChanges
 {
-  public:
-    BSSimpleList<InventoryStackRecord*>* m_pEntryList;  // +0x0
-    TESObjectREFR* pRef;                      // +0x4
-    float m_fTotalWeight;                     // +0x8
-    float m_fArmorWeight;                     // +0xC
-    bool m_bChanged;                          // +0x10
-    unsigned char layoutPadding11;
-    unsigned short layoutPadding12;
+public:
+    BSSimpleList<InventoryStackRecord*>* m_pEntryList; // 0x00
+    TESObjectREFR* pRef;                            // 0x04
+    float m_fTotalWeight;                          // 0x08
+    float m_fArmorWeight;                          // 0x0C
+    bool m_bChanged;                               // 0x10
+    unsigned char layoutPadding11;                // 0x11
+    unsigned short layoutPadding12;               // 0x12
+
     InventoryChanges(TESObjectREFR* reference);
-    static InventoryChanges* CreateForReference(TESObjectREFR* reference);
+    void* __vecDelDtor(unsigned int);
+    void ForceWeightRecalculation();
+    static void KillTempRef();
+    void AddItemToEntry(TESBoundObject*, int, Actor*, ExtraDataList*, InventoryStackRecord*);
+    bool IsEmpty();
+    void AddItem(TESBoundObject*, ExtraDataList*, int);
+    void AddItem(TESObjectREFR*, int, bool, bool);
+    void AddChangeEntry(InventoryStackRecord*, bool);
+    void RemoveChangeItem(TESBoundObject*);
+    TESObjectREFR* RemoveItem(TESObjectREFR*, TESBoundObject*, bool, int, ExtraDataList*, bool,
+                             TESObjectREFR*, void*, void*, bool, bool, InventoryStackRecord*);
+    void UpdateItemCount(int, bool, int);
+    TESObjectREFR* DropItem(TESObjectREFR*, TESBoundObject*, int, TESObjectREFR*, void*, void*);
+    void PutItemIntoContainer(TESBoundObject*, int, TESObjectREFR*, ExtraDataList*);
+    void DamageItem(TESBoundObject*, float);
+    void RepairBatch(TESBoundObject*, float);
+    void AddOwnership(TESBoundObject*, TESForm*);
+    void RemoveOwnership(TESBoundObject*);
+    TESContainer* GetOriginalContainer();
+    void RemoveBoundItem(TESBoundObject*, int, Actor*, ExtraDataList*, bool, bool);
+    bool RemoveInventoryItem(bool*, TESBoundObject*, int, Actor*, ExtraDataList*, bool, bool,
+                             InventoryStackRecord*, bool*);
+    void ResetInventoryChanges();
+    bool RunScripts(TESObjectREFR*);
+    void ResetInventoryState();
+    void CleanUpBoundItems(Actor*);
+    TESBoundObject* GetLeveledCalculatedBaseObject(TESLevItem*);
+    void ModifyCharge(float);
+    InventoryStackRecord* GetOrCreateInventoryEntry(TESBoundObject*, bool, unsigned int);
+    static InventoryChanges* __cdecl CreateForReference(TESObjectREFR*);
+    static InventoryChanges* __cdecl CreateForReference(void*);
+    InventoryChanges* CreateForReference();
+    static InventoryChanges* GetOrAddInventoryChanges(TESObjectREFR*);
+    static InventoryChanges* GetOrAddInventoryChanges(void*);
+    static InventoryChanges* GetOrAddInventoryChanges(Actor*);
+    ExtraDataList* GetExtraDataListForObject(TESBoundObject*, bool);
+    bool WearingWeapon(TESBoundObject**);
+    bool WearingAmmo(TESBoundObject**);
+    bool WearingTorch(TESBoundObject**);
+    InventoryStackRecord* WearingRing(bool);
+    bool WearingVoiceModulateItem();
+    bool HasItemOfType(unsigned int);
+    bool FindItemInInventory(TESBoundObject*, int, int, int*, unsigned int, TESObjectREFR*);
+    bool FindItemInInventory(TESBoundObject*, int, int, int&, unsigned int, TESObjectREFR*);
+    InventoryStackRecord* FindInventoryItem(TESObjectREFR*, bool*);
+    bool HasQuestObject();
+    bool HasScript();
+    bool HasItem(unsigned int);
+    TESBoundObject* GetObjectAtIndex(int, int*);
+    TESBoundObject* GetBoundObjectByIndex(int, int*);
+    InventoryStackRecord* GetPotion(void*);
+    InventoryStackRecord* GetBestAmmoForActor(TESActorBase*, bool);
+    TESAmmo* GetBestAmmoForWeapon(TESObjectWEAP*, bool*);
+    InventoryStackRecord* GetBestWeapon(TESActorBase*, float*, int, bool);
+    InventoryStackRecord* FindBestArmor(TESActorBase*, int, bool);
+    void* GetListBestArmor(TESActorBase*);
+    InventoryStackRecord* GetBestClothing(TESActorBase*, int, bool);
+    InventoryStackRecord* GetBestLight(TESActorBase*, bool);
+    ItemEntry* SelectBestWeapon(TESCreature*, int*, int, int);
+    InventoryEntryData* SelectBestWeapon(TESCreature*, float*, int, bool);
+    ItemEntry* FindBestAmmoChange(TESCreature*, int);
+    InventoryStackRecord* GetInventoryEntryData(int, bool);
+    InventoryStackRecord* GetInventoryEntryData(BIPED_OBJECT, bool);
+    InventoryStackRecord* GetEquippedItemForSlot(int);
+    InventoryStackRecord** GetEntryPointerByIndices(int, int);
+    InventoryItem** CollectEntriesByRank(int, int);
+    void SetHotKeyItem(InventoryStackRecord*, ExtraDataList*, int);
+    void SetInventoryEntryCount(InventoryStackRecord*, int);
+    void RemoveAllObjectsWorn(bool, TESObjectREFR*);
+    void RemoveWornItems(bool, TESObjectREFR*);
+    bool RechargeAll();
+    void RemoveAllHealth();
+    int GetCount(bool);
+    InventoryStackRecord* GetInventoryEntryAtIndex(int);
+    IndexedPointerCollection* GetFirstItem();
+    InventoryStackRecord* GetEntryForListNode(IndexedPointerCollection*);
+    void RemoveItemChangeEntry(TESBoundObject*, void*);
+    void RefreshItemChange(TESBoundObject*, void*);
+    void UpdateItemChangeEntry(TESBoundObject*, void*);
+    int GetObjectCount(int);
+    int GetObjectCount(TESBoundObject*);
+    int GetObjectCount(TESForm*);
+    InventoryStackRecord* GetFirstInventoryEntry();
+    int GetInventoryEntryCount();
+    InventoryEntry* GetNextInventoryEntry(InventoryList*);
+    void TransferItemToReference(TESObjectREFR*, int, TESObjectREFR*);
+    float RemoveAllTypedItems(TESObjectREFR*, TESObjectREFR*, bool, bool, bool, bool, int, BGSListForm*);
+    float RemoveAllItems(TESObjectREFR*, TESObjectREFR*, bool, bool, bool, bool, int, BGSListForm*);
+    void DuplicateAllItems(TESObjectREFR*, TESObjectREFR*);
+    void MoveItemsOfType(TESObjectREFR*, TESObjectREFR*, TESForm*);
+    void RemoveNonStolenItems(TESObjectREFR*, TESObjectREFR*);
+    float GetInventoryWeight(bool);
+    float GetInventoryWeight(Actor*);
+    unsigned int GetTotalItemCount(bool, bool);
+    void AddAmountToItemChange(TESBoundObject*, int);
+    float GetArmorValueForActor(Actor*);
+    void UpdateArmorWeight();
+    void UpdateWeight();
+    void RemoveDefaultLeveledItems();
+    bool IsLevelItemInited(int);
+    InventoryStackRecord* FindEntryForObject(TESBoundObject*, unsigned int);
+    InventoryStackRecord* FindEntryWithExtraListType(int);
+    void SetItemsBacktoDefaultState();
+    void CopyInventoryChanges(InventoryChanges*, TESObjectREFR*, bool);
+    void ResetEntryList();
+    void ClearInventoryChanges();
+    void ResetCachedWeights();
+    void ResetAndProcess(int, bool, int);
+    unsigned short GetSaveSize();
+    void SaveGame(BGSSaveFormBuffer*);
+    void SaveGame();
+    void LoadGame(BGSLoadFormBuffer*);
+    void LoadGame();
+    void InitLoadGame(BGSLoadFormBuffer*);
+    void InitLoadGame();
+    int GetExtraDataListIndexForItem(TESBoundObject*, ExtraDataList*);
+    ExtraDataList* GetExtraDataListFromIndexForItem(TESBoundObject*, int);
+    unsigned int FindItemEntryData(int*, void*, unsigned int);
+    bool GetNextItem(InventoryIterator*, InventoryStackRecord**, unsigned int);
+    int ForEachInventoryItem(bool (__cdecl* callback)(WalkTemp*, void*), void* context, int flags);
+    TESObjectREFR* GetRef();
+    static TESObjectREFR* GetTempRef();
+    void RemoveExtraFromObject(TESObject*, ExtraDataList*);
+    void DeleteExtraData(TESBoundObject*, ExtraDataList*);
+    ExtraDataList* FUN_004bfda0(TESForm*, int);
+    InventoryStackRecord* FUN_004d0650(TESForm*, int);
+    int FUN_004c8fd0(int);
+    int FUN_004c8fd0(bool);
+    ItemChangeShell* FUN_004c94f0(int);
+    ArrSI* FUN_004c8c10(unsigned int, int);
+    void FUN_004d1960();
+    bool FUN_0042cde0();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(InventoryChanges) == 0x14);
-FNV_STATIC_ASSERT(offsetof(InventoryChanges, m_pEntryList) == 0x0);
-FNV_STATIC_ASSERT(offsetof(InventoryChanges, pRef) == 0x4);
-FNV_STATIC_ASSERT(offsetof(InventoryChanges, m_fTotalWeight) == 0x8);
-FNV_STATIC_ASSERT(offsetof(InventoryChanges, m_fArmorWeight) == 0xC);
-FNV_STATIC_ASSERT(offsetof(InventoryChanges, m_bChanged) == 0x10);
-#endif

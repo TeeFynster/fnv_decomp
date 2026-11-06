@@ -1,21 +1,51 @@
-// Source layout: TESReactionForm. PC corrections are in generate_headers.py.
-#ifndef FNV_TESREACTIONFORM_H
-#define FNV_TESREACTIONFORM_H
+#pragma once
 
-#include "layout_support.h"
 #include "BaseFormComponent.h"
-#pragma pack(push, 4)
+#include "MagicTarget.h"
+
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
+class ReactionInfo;
+class TESForm;
+
 class TESReactionForm : public BaseFormComponent
 {
-  public:
-    BSSimpleList<ReactionInfo*> m_kReactionList;  // +0x4
-    unsigned char m_ucReactionFlags;                // +0xC
+public:
+    TESReactionForm();
+    ~TESReactionForm();
+
+    virtual void Init();
+    virtual void Free();
+    virtual void CopyFromBase(BaseFormComponent* component);
+    virtual bool CompareWithBase(BaseFormComponent* component);
+
+    void InitializeComponent();
+    void ClearComponent();
+    void Save();
+    void BaseFormRecord(BaseFormComponent* component);
+    bool IsEqualToBase(BaseFormComponent* component);
+    void InitItem(TESForm* form);
+    void ClearReactionList();
+    int GetLowestReaction(TESForm**, int*, long);
+    int GetHighestReaction(TESForm**, int*, long);
+    void SetReactionValue(TESForm*, int);
+    int GetReactionValue(TESForm*);
+    void ModReaction(TESForm*, int);
+    int GetFactionCombatRelation(TESForm*);
+    void SetFightReaction(TESForm*, int);
+    unsigned short GetSaveSize(unsigned int);
+    void SaveGame(BGSSaveFormBuffer*);
+    void SaveGame(unsigned int);
+    void LoadGame(BGSLoadFormBuffer*);
+    void LoadGame(unsigned int, unsigned int);
+    void InitLoadGame(BGSLoadFormBuffer*);
+    void InitLoadGame(unsigned int, unsigned int);
+    void* GetReactionList();
+    void RemoveReactionItem(ReactionInfo*);
+    void vfn_0();
+
+    BSSimpleList<ReactionInfo*> m_kReactionList;
+    unsigned char m_ucReactionFlags;
     unsigned char layoutPaddingD;
     unsigned short layoutPaddingE;
-    void InitializeComponent();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(TESReactionForm) == 0x10);
-FNV_STATIC_ASSERT(offsetof(TESReactionForm, m_kReactionList) == 0x4);
-FNV_STATIC_ASSERT(offsetof(TESReactionForm, m_ucReactionFlags) == 0xC);
-#endif

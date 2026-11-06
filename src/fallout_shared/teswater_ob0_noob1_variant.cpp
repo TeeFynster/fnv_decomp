@@ -3,8 +3,6 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob0 /GF (unit src/fallout_shared/teswater.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /Ob1 /GF). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "teswater_decls.h"
-#include "teswater_work.h"
 
 void* __cdecl operator new(unsigned int uiSize);
 void* __cdecl operator new[](unsigned int uiSize);

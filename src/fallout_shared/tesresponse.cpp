@@ -1,5 +1,22 @@
+#include "../../include/BSStringT.h"
+#include "../../include/Stack.h"
 // fallout_shared/tesresponse.cpp: TESResponse, DialogueResponseData (11 functions)
 
+#include "tesresponse_support.h"
+#include "../../include/NiPointer.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/MapEntryCount.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESIdleForm.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESQuest.h"
+#include "../../include/TESResponse.h"
+#include "../../include/TESResponseList.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESTopic.h"
+#include "../../include/TESTopicInfo.h"
 #include "tesresponse_decls.h"
 #include <stdio.h>
 #include <string.h>
@@ -18,7 +35,7 @@ void TESResponse::InitItem(TESForm* owner)
         resolved.formID = reinterpret_cast<unsigned int>(Data.m_pTopic);
         TESForm::RemapFormIDForFile(resolved.formID, owner->GetFile(-1));
         resolved.form = TESForm::GetFormByID(resolved.formID);
-        if (resolved.form && resolved.form->GetFormType() == 69)
+        if (resolved.form && static_cast<const TESForm*>(resolved.form)->GetFormType() == 69)
             Data.m_pTopic = static_cast<TESTopic*>(resolved.form);
         else
             Data.m_pTopic = 0;
@@ -51,7 +68,7 @@ void TESResponse::InitItem(TESForm* owner)
         resolved.formID = reinterpret_cast<unsigned int>(Data.m_pResponseSound);
         TESForm::RemapFormIDForFile(resolved.formID, owner->GetFile(-1));
         resolved.form = TESForm::GetFormByID(resolved.formID);
-        if (resolved.form && resolved.form->GetFormType() == 13)
+        if (resolved.form && static_cast<const TESForm*>(resolved.form)->GetFormType() == 13)
             Data.m_pResponseSound = static_cast<TESSound*>(resolved.form);
         else
             Data.m_pResponseSound = 0;
@@ -84,7 +101,7 @@ void TESResponse::InitItem(TESForm* owner)
         resolved.formID = reinterpret_cast<unsigned int>(m_pFirstIdleForm);
         TESForm::RemapFormIDForFile(resolved.formID, owner->GetFile(-1));
         resolved.form = TESForm::GetFormByID(resolved.formID);
-        if (resolved.form && resolved.form->GetFormType() == 72)
+        if (resolved.form && static_cast<const TESForm*>(resolved.form)->GetFormType() == 72)
             m_pFirstIdleForm = static_cast<TESIdleForm*>(resolved.form);
         else
             m_pFirstIdleForm = 0;
@@ -117,7 +134,7 @@ void TESResponse::InitItem(TESForm* owner)
         resolved.formID = reinterpret_cast<unsigned int>(m_pSecondIdleForm);
         TESForm::RemapFormIDForFile(resolved.formID, owner->GetFile(-1));
         resolved.form = TESForm::GetFormByID(resolved.formID);
-        if (resolved.form && resolved.form->GetFormType() == 72)
+        if (resolved.form && static_cast<const TESForm*>(resolved.form)->GetFormType() == 72)
             m_pSecondIdleForm = static_cast<TESIdleForm*>(resolved.form);
         else
             m_pSecondIdleForm = 0;
@@ -262,43 +279,14 @@ unsigned int TESResponse::GetResponseID()
     return Data.m_ucResponseFlags;
 }
 
-struct DialogueResponse
-{
-    BSStringT<char>& GetDialogueText();
-};
-struct BSStr
-{
-    bool Set(char const*, unsigned int);
-};
-struct TESObject
-{
-    unsigned int GetNext();
-};
-struct RegionPointList
-{
-    void SetDistanceInsideAtMax(unsigned int);
-};
-struct BSThread
-{
-    unsigned int GetThreadID();
-};
-struct TESRecipe
-{
-    void SetSkill(int);
-};
 void* __cdecl __memcpy(void*, const void*, unsigned int);
-struct FUN_006174d0_shell
-{
-    char _pad[24];
-    BSStr s;
-    void CopyResponse(TESResponse* apCopy);
-};
-// Copies 24 bytes from apCopy into this, then sets the string, distance and skill fields from apCopy's members.
+
+// Copies the response data, text, and speaker/listener idle forms.
 // @fnv 0x006174d0
-void FUN_006174d0_shell::CopyResponse(TESResponse* apCopy)
+void TESResponse::CopyResponse(TESResponse* apCopy)
 {
-    __memcpy(this, &((DialogueResponse*)apCopy)->GetDialogueText(), 24);
-    s.Set(apCopy->GetDialogueText(), 0);
-    ((RegionPointList*)this)->SetDistanceInsideAtMax(((TESObject*)apCopy)->GetNext());
-    ((TESRecipe*)this)->SetSkill(((BSThread*)apCopy)->GetThreadID());
+    __memcpy(this, apCopy->GetData(), 24);
+    m_kResponseText.Set(apCopy->GetDialogueText(), 0);
+    SetSpeakerIdle(apCopy->GetSpeakerIdle());
+    SetListenerIdle(apCopy->GetListenerIdle());
 }

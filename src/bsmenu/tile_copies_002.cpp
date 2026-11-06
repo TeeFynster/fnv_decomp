@@ -3,8 +3,6 @@
 // Twin_<addr>/FUN_<addr> are placeholder names; the original identities of these functions are unknown.
 #include "Tile__FloatAction.h"
 
-#include "tile_packet_decls.h"
-
 struct Twin_0084d030 : public Tile__FloatAction
 {
     float GetStoredFloatValue();

@@ -1,3 +1,12 @@
+#include "../../../include/BGSLoadGameBuffer.h"
+#include "../../../include/BGSSaveFormBuffer.h"
+#include "../../../include/NavMesh.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiPointer.h"
+#include "../../../include/NavMeshPtr.h"
+#include "../../../include/PathingLocation.h"
+#include "../../../include/PathingCoverLocation.h"
+#include "../../../include/PathingSolution.h"
 
 // src/havok/unplaced/pathingrequestcover.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/pathfinding/pathingrequestcover.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -78,10 +87,6 @@ void FUN_006e43e0_class::SetFlag(bool value)
     ((char*)this)[0xd1] = value;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-};
 
 struct PathingRequestCover
 {
@@ -103,49 +108,28 @@ unsigned char* FUN_006e4630(int aiBase, unsigned short ausIndex, unsigned char a
     return (unsigned char*)((aiBase << 0x10) + ausIndex * 4 + aucOffset);
 }
 
-struct FUN_006e4820_class
-{
-    bool FUN_006e4820();
-};
-
 // @fnv 0x006e4820
-bool FUN_006e4820_class::FUN_006e4820()
+bool PathingCoverLocation::FUN_006e4820()
 {
-    return *(const unsigned char*)((const char*)this + 0x4c) == 2;
+    return f04c == 2;
 }
-
-struct FUN_006e4500_class
-{
-    void FUN_006e4500(unsigned short a, unsigned short b, unsigned short c, char e, char f, char g);
-};
 
 // @fnv 0x006e4500
-void FUN_006e4500_class::FUN_006e4500(unsigned short ausValue, unsigned short b, unsigned short c, char e, char f,
+void PathingCoverLocation::FUN_006e4500(unsigned short ausValue, unsigned short b, unsigned short c, char e, char f,
                                       char g)
 {
-    ((char*)this)[0x4c] = (char)ausValue;
-    ((char*)this)[0x4d] = (char)(ausValue >= b ? 1 : 0);
-    ((char*)this)[0x4e] = (char)(ausValue > c ? 1 : 0);
-    ((char*)this)[0x4f] = e;
-    ((char*)this)[0x50] = f;
-    ((char*)this)[0x51] = g;
-    ((char*)this)[0x52] = 0;
+    f04c = (char)ausValue;
+    f04d = (char)(ausValue >= b ? 1 : 0);
+    f04e = (char)(ausValue > c ? 1 : 0);
+    f04f = e;
+    f050 = f;
+    f051 = g;
+    f052 = 0;
 }
 
-struct PathingLocation
-{
-    PathingLocation& operator=(const PathingLocation&);
-    char pad[0x28];
-};
-struct FUN_006e4430_class : public PathingLocation
-{
-    NiPoint3 a, b, c;
-    unsigned char f04c, f04d, f04e, f04f, f050, f051, f052;
-    FUN_006e4430_class& operator=(const FUN_006e4430_class& src);
-};
 // Copies the base PathingLocation, three NiPoint3 values and seven bytes from src into this object and returns *this.
 // @fnv 0x006e4430
-FUN_006e4430_class& FUN_006e4430_class::operator=(const FUN_006e4430_class& src)
+PathingCoverLocation& PathingCoverLocation::operator=(const PathingCoverLocation& src)
 {
     PathingLocation::operator=(src);
     a = src.a;
@@ -161,65 +145,42 @@ FUN_006e4430_class& FUN_006e4430_class::operator=(const FUN_006e4430_class& src)
     return *this;
 }
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void* data, int size, int);
-};
 struct FUN_006def40_Class
 {
     void FUN_006def40(BGSSaveFormBuffer* buffer);
-};
-struct PathingCoverLocation
-{
-    void SaveToBuffer(BGSSaveFormBuffer* buffer);
 };
 // Calls the base save routine, then writes three 12-byte blocks and seven single bytes from offsets 0x28 through 0x52 into the buffer.
 // @fnv 0x006e48a0
 void PathingCoverLocation::SaveToBuffer(BGSSaveFormBuffer* buffer)
 {
     ((FUN_006def40_Class*)this)->FUN_006def40(buffer);
-    buffer->SaveData((char*)this + 0x28, 12, 0);
-    buffer->SaveData((char*)this + 0x34, 12, 0);
-    buffer->SaveData((char*)this + 0x40, 12, 0);
-    buffer->SaveData((char*)this + 0x4c, 1, 0);
-    buffer->SaveData((char*)this + 0x4d, 1, 0);
-    buffer->SaveData((char*)this + 0x4e, 1, 0);
-    buffer->SaveData((char*)this + 0x4f, 1, 0);
-    buffer->SaveData((char*)this + 0x50, 1, 0);
-    buffer->SaveData((char*)this + 0x51, 1, 0);
-    buffer->SaveData((char*)this + 0x52, 1, 0);
+    buffer->SaveData(&a, 12, 0);
+    buffer->SaveData(&b, 12, 0);
+    buffer->SaveData(&c, 12, 0);
+    buffer->SaveData(&f04c, 1, 0);
+    buffer->SaveData(&f04d, 1, 0);
+    buffer->SaveData(&f04e, 1, 0);
+    buffer->SaveData(&f04f, 1, 0);
+    buffer->SaveData(&f050, 1, 0);
+    buffer->SaveData(&f051, 1, 0);
+    buffer->SaveData(&f052, 1, 0);
 }
 
-namespace fnv_006e4980 {
-struct BGSLoadGameBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-};
-struct PathingLocation
-{
-    void Load(BGSLoadGameBuffer*);
-};
-struct PathingCoverLocation
-{
-    PathingLocation base;
-    void Load(BGSLoadGameBuffer* buffer);
-};
 // @fnv 0x006e4980
 void PathingCoverLocation::Load(BGSLoadGameBuffer* buffer)
 {
-    base.Load(buffer);
-    buffer->ReadTypedData((char*)this + 0x28, 0xc);
-    buffer->ReadTypedData((char*)this + 0x34, 0xc);
-    buffer->ReadTypedData((char*)this + 0x40, 0xc);
-    buffer->ReadTypedData((char*)this + 0x4c, 1);
-    buffer->ReadTypedData((char*)this + 0x4d, 1);
-    buffer->ReadTypedData((char*)this + 0x4e, 1);
-    buffer->ReadTypedData((char*)this + 0x4f, 1);
-    buffer->ReadTypedData((char*)this + 0x50, 1);
-    buffer->ReadTypedData((char*)this + 0x51, 1);
-    buffer->ReadTypedData((char*)this + 0x52, 1);
+    PathingLocation::Load(buffer);
+    buffer->ReadTypedData(&a, 0xc);
+    buffer->ReadTypedData(&b, 0xc);
+    buffer->ReadTypedData(&c, 0xc);
+    buffer->ReadTypedData(&f04c, 1);
+    buffer->ReadTypedData(&f04d, 1);
+    buffer->ReadTypedData(&f04e, 1);
+    buffer->ReadTypedData(&f04f, 1);
+    buffer->ReadTypedData(&f050, 1);
+    buffer->ReadTypedData(&f051, 1);
+    buffer->ReadTypedData(&f052, 1);
 }
-}  // namespace fnv_006e4980
 
 struct CoverPoint3
 {
@@ -329,36 +290,8 @@ void CoverPathingRequestCover::CopyToCover(CoverPathingRequest* apRequest)
     pCover->SetThreatPoint(m_kThreatPoint);
 }
 
-class NavMesh
-{
-  public:
-    bool FUN_006997b0(unsigned short a);
-};
 
-class NavMeshPtr
-{
-  public:
-    NavMesh* m_p;
-    NavMeshPtr();
-    ~NavMeshPtr();
-    NavMesh* operator->() const;
-};
 
-class PathingSolution
-{
-  public:
-    char pad[0x70];
-    int unk70;
-};
-
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-    NiPointer(T* p);
-    ~NiPointer();
-    T* operator->() const;
-};
 
 struct FUN_006e4650_class
 {
@@ -374,7 +307,7 @@ bool FUN_006e4650_class::FUN_006e4650(int aiValue)
     if (FUN_006dd610(nm))
     {
         NiPointer<PathingSolution> sol(0);
-        if (nm->FUN_006997b0(GetShortValueAtOffset24(sol)) && sol->unk70 == aiValue)
+        if (nm->FUN_006997b0(GetShortValueAtOffset24(sol)) && *(int*)((char*)sol.operator->() + 0x70) == aiValue)
             return true;
     }
     return false;
@@ -385,44 +318,15 @@ struct S_006e4570_NavMesh : NavMesh
     int FUN_0084e3a0();
 };
 
-struct S_006e4570
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    unsigned char unk50;
-    unsigned char unk51;
-
-    bool FUN_006dd640(NavMeshPtr& navMesh, unsigned short& triangleIndex);
-    unsigned char* FUN_006e4570();
-};
-
 // Looks up a navmesh triangle via FUN_006dd640 and returns FUN_006e4630's result for that triangle and unk51, or null if lookup fails.
 // @fnv 0x006e4570
-unsigned char* S_006e4570::FUN_006e4570()
+unsigned char* PathingCoverLocation::FUN_006e4570()
 {
     NavMeshPtr navMesh;
     unsigned short triangleIndexA = 0;
-    if (FUN_006dd640(navMesh, triangleIndexA))
+    if (FUN_006dd640(&navMesh, &triangleIndexA))
     {
-        return FUN_006e4630(((S_006e4570_NavMesh*)navMesh.operator->())->FUN_0084e3a0(), triangleIndexA, unk51);
+        return FUN_006e4630(((S_006e4570_NavMesh*)navMesh.operator->())->FUN_0084e3a0(), triangleIndexA, f051);
     }
     return 0;
 }
@@ -442,7 +346,7 @@ int S_006e4740::FUN_006e4740()
         NiPointer<PathingSolution> sol(0);
         if (nm->FUN_006997b0(GetShortValueAtOffset24(sol)))
         {
-            return sol->unk70;
+            return *(int*)((char*)sol.operator->() + 0x70);
         }
     }
     return -1;
@@ -453,18 +357,11 @@ struct PointCalc : NiPoint3
     PointCalc FUN_00439ef0(const NiPoint3& other) const;
     double FUN_004a7290() const;
 };
-struct DistanceCheck
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
-    PointCalc firstPoint;
-    PointCalc secondPoint;
-    bool FUN_006e4840(const NiPoint3& point);
-};
 // @fnv 0x006e4840
-bool DistanceCheck::FUN_006e4840(const NiPoint3& point)
+bool PathingCoverLocation::FUN_006e4840(const NiPoint3& point)
 {
-    PointCalc vecA = firstPoint.FUN_00439ef0(point);
-    PointCalc vecB = secondPoint.FUN_00439ef0(point);
+    PointCalc vecA = ((const PointCalc&)a).FUN_00439ef0(point);
+    PointCalc vecB = ((const PointCalc&)b).FUN_00439ef0(point);
     if (vecA.FUN_004a7290() < vecB.FUN_004a7290())
         return true;
     return false;

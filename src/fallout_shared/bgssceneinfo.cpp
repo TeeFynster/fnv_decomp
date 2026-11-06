@@ -1,6 +1,41 @@
+#include "../../include/SettingT.h"
 
 // src/fallout_shared/bgssceneinfo.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/bgssceneinfo.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../include/BSSimpleArray.h"
+#include "../../include/BSThread.h"
+#include "../../include/INISettingCollection.h"
+#include "../../include/NiTMap.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/Script.h"
+#include "../../include/TESSaveLoadGame.h"
+#include "../../include/TESWorldSpace.h"
+
+// Per-scene statistics: sixteen 32-bit counters, stored by value in the scene cache.
+struct SceneInfo
+{
+    int unk00;
+    int unk04;
+    int unk08;
+    int unk0C;
+    int unk10;
+    int unk14;
+    int unk18;
+    int unk1C;
+    int unk20;
+    int unk24;
+    int unk28;
+    int unk2C;
+    int unk30;
+    int unk34;
+    int unk38;
+    int unk3C;
+    void ClearToZero();
+};
+
+template <>
+void BSSimpleArray<SceneInfo, 1024>::Insert(unsigned int index, SceneInfo& value);
 
 struct FUN_004a7cf0_shell
 {
@@ -39,10 +74,6 @@ struct Flt
     operator unsigned int() const;
 };
 
-struct Script
-{
-    int GetText();
-};
 
 struct FUN_004a8070_shell
 {
@@ -53,7 +84,7 @@ struct FUN_004a8070_shell
 // @fnv 0x004a8070
 int FUN_004a8070_shell::GetScriptText()
 {
-    return ((Script*)((unsigned int)(*(Flt*)((char*)this + 0xb8))))->GetText();
+    return (int)((Script*)((unsigned int)(*(Flt*)((char*)this + 0xb8))))->GetText();
 }
 
 extern unsigned char DAT_0118868c;
@@ -107,14 +138,9 @@ int FUN_004a9100()
     return *g_011c59e0.Int();
 }
 
-struct DummyArr
-{
-    int GetBufferElementAddress(unsigned int);
-    int FUN_004a95b0(unsigned int);
-};
-
 // @fnv 0x004a95b0
-int DummyArr::FUN_004a95b0(unsigned int a)
+template <>
+SceneInfo& BSSimpleArray<SceneInfo, 1024>::GetAt(unsigned int a)
 {
     return GetBufferElementAddress(a);
 }
@@ -202,10 +228,6 @@ void FUN_004a7cd0_shell::FUN_004a7cd0()
     m_0000 = &DAT_0101ec68;
 }
 
-struct BSThread
-{
-    unsigned int GetThreadID();
-};
 struct FUN_004a8030_shell
 {
     unsigned int FUN_004a8030();
@@ -334,19 +356,7 @@ int FUN_004a8090_shell::CallTargetV36()
     return ((Target*)(unsigned int)m_kHandle)->v36();
 }
 
-struct INISettingCollection
-{
-    virtual int v00();
-    virtual int v01();
-    virtual int v02();
-    virtual int v03();
-    virtual int v04();
-    virtual int v05(unsigned int a);
-};
-struct SettingT
-{
-    static INISettingCollection* __cdecl GetCollection();
-};
+
 
 // @fnv 0x004a8fe0
 void __cdecl FUN_004a8fe0()
@@ -354,8 +364,8 @@ void __cdecl FUN_004a8fe0()
     int i;
     for (i = 0; i < 0x10; ++i)
     {
-        SettingT::GetCollection()->v05(*(unsigned int*)(0x01188694 + i * 0x14));
-        SettingT::GetCollection()->v05(*(unsigned int*)(0x01188698 + i * 0x14));
+        ::SettingT<INISettingCollection>::GetCollection()->ReadSetting(**(Setting**)(0x01188694 + i * 0x14));
+        ::SettingT<INISettingCollection>::GetCollection()->ReadSetting(**(Setting**)(0x01188698 + i * 0x14));
     }
 }
 
@@ -363,21 +373,9 @@ struct GlobalObject_0045cfe0
 {
     int* Int();
 };
-struct TESWorldSpace
-{
-    TESWorldSpace* GetParentWorld(int);
-};
 struct CP_008c48d0
 {
     int GetPrevPath();
-};
-struct TESSaveLoadGame
-{
-    TESWorldSpace* GetHitSound();
-};
-struct _ref_0084e3a0
-{
-    int FUN_0084e3a0();
 };
 extern GlobalObject_0045cfe0 g_011c5b20;
 extern GlobalObject_0045cfe0 g_011c5ae0;
@@ -389,7 +387,7 @@ int FUN_004a9050()
     int iValue = *g_011c5b20.Int();
     if (!((CP_008c48d0*)g_TES)->GetPrevPath())
     {
-        TESWorldSpace* pworld = ((TESSaveLoadGame*)g_TES)->GetHitSound();
+        TESWorldSpace* pworld = (TESWorldSpace*)((TESSaveLoadGame*)g_TES)->GetHitSound();
         TESWorldSpace* pLODworld;
         pLODworld = pworld;
         while (pLODworld && pLODworld->GetParentWorld(1))
@@ -397,7 +395,7 @@ int FUN_004a9050()
         if (pLODworld)
         {
             int iadjust = 0;
-            if (((_ref_0084e3a0*)pLODworld)->FUN_0084e3a0() == 0x3c)
+            if (pLODworld->FUN_0084e3a0() == 0x3c)
                 iadjust = *g_011c5ae0.Int();
             else
                 iadjust = *g_011c5c04.Int();
@@ -419,11 +417,6 @@ struct GlobalObject_004aa1b0
     void RemoveAll();
 };
 
-struct GlobalObject_004a9d80
-{
-    unsigned int GetFlags();
-};
-
 struct GlobalObject_004a9bf0
 {
     void RemoveAll();
@@ -431,7 +424,7 @@ struct GlobalObject_004a9bf0
 
 extern GlobalObject_004a9e90 g_011c5be8;
 extern GlobalObject_004aa1b0 g_011c5ad0;
-extern GlobalObject_004a9d80 g_011c5ab4;
+extern BSSimpleArray<SceneInfo, 1024> DAT_011c5ab4;
 extern GlobalObject_004a9bf0 g_011c5c40;
 extern unsigned char DAT_0118868d;
 
@@ -448,7 +441,7 @@ void FUN_004a8230_shell::ResetAndProcessNode(NiNode* node, bool includeAddonNode
     g_011c5be8.RemoveAll();
     g_011c5ad0.RemoveAll();
 
-    if (includeAddonNodes && DAT_0118868d && g_011c5ab4.GetFlags() == 0)
+    if (includeAddonNodes && DAT_0118868d && DAT_011c5ab4.GetSize() == 0)
         this->LoadSceneModels();
 
     memset((char*)this + 4, 0, 0x40);
@@ -485,35 +478,10 @@ struct SceneRecord
     int unk2C;
     SceneDescription description;
 };
-struct SceneInfo
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    void ClearToZero();
-};
 struct SceneSource
 {
     unsigned int FUN_0045a120();
     SceneRecord* FUN_004617e0(unsigned int);
-};
-struct SceneCache
-{
-    void InsertAt(unsigned int, SceneInfo*);
-    void* FUN_004a95b0(unsigned int);
 };
 struct SceneLoader
 {
@@ -522,7 +490,6 @@ struct SceneLoader
 };
 extern SceneSource* DAT_011c3f2c;
 extern SceneLoader* DAT_011c3b3c;
-extern SceneCache DAT_011c5ab4;
 extern char DAT_01016fac;
 extern int DAT_011f4428;
 void __cdecl FUN_00406d30(char*, unsigned int, const char*);
@@ -543,7 +510,7 @@ void LoadScenes::LoadSceneModels()
     {
         SceneInfo sceneInfo;
         sceneInfo.ClearToZero();
-        DAT_011c5ab4.InsertAt(uiSceneIndex, &sceneInfo);
+        DAT_011c5ab4.Insert(uiSceneIndex, sceneInfo);
         SceneRecord* pSceneRecord = DAT_011c3f2c->FUN_004617e0(uiSceneIndex);
         if (pSceneRecord)
         {
@@ -558,7 +525,7 @@ void LoadScenes::LoadSceneModels()
                 {
                     if (!FUN_00c511f0(model))
                         AccumulateSceneStatistics(FUN_00653270(&DAT_011f4428, model),
-                                                  DAT_011c5ab4.FUN_004a95b0(uiSceneIndex), 0, 0);
+                                                  &DAT_011c5ab4.GetAt(uiSceneIndex), 0, 0);
                     DAT_011c3b3c->FUN_0045a5e0(cPath);
                 }
             }
@@ -566,53 +533,40 @@ void LoadScenes::LoadSceneModels()
     }
 }
 
-struct SearchRecord
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
-};
-struct S5460
-{
-    bool FUN_00438b90();
-    unsigned int FUN_009a3910();
-};
-struct NavMeshSearchLOSArray
-{
-    virtual void v0();
-    virtual SearchRecord* Allocate(unsigned int);
-    SearchRecord* data;
-    unsigned int count, capacity;
-    void AddEntry(const SearchRecord&);
-    void CopyBlocks(SearchRecord*, SearchRecord*, unsigned int);
-    void ConstructScanItems(SearchRecord*, unsigned int);
-    void FUN_006a8500();
-    void InsertAt(unsigned int, const SearchRecord&);
-};
+// These no-argument array helpers receive the array in ECX. Keep declarations
+// here until BSSimpleArray exposes the capacity queries and storage release.
+bool __fastcall IsSceneArrayFull(BSSimpleArray<SceneInfo, 1024>* array);
+unsigned int __fastcall GetSceneArrayGrowth(BSSimpleArray<SceneInfo, 1024>* array);
+// 0x006a8500 frees pBuffer through _Deallocate (virtual slot 2), then clears it.
+void __fastcall FreeSceneArrayStorage(BSSimpleArray<SceneInfo, 1024>* array);
+
 // @fnv 0x004a9690
-void NavMeshSearchLOSArray::InsertAt(unsigned int index, const SearchRecord& value)
+template <>
+void BSSimpleArray<SceneInfo, 1024>::Insert(unsigned int index, SceneInfo& value)
 {
-    if (index == count)
+    if (index == iSize)
     {
-        AddEntry(value);
+        AppendValue(value);
         return;
     }
-    if (((S5460*)this)->FUN_00438b90())
+    if (IsSceneArrayFull(this))
     {
-        unsigned int fresh = ((S5460*)this)->FUN_009a3910();
-        SearchRecord* newCapacity = Allocate(fresh);
-        CopyBlocks(newCapacity, data, index);
-        ConstructScanItems(newCapacity + index, 1);
-        CopyBlocks(newCapacity + index + 1, data + index, count - index);
-        FUN_006a8500();
-        data = newCapacity;
-        capacity = fresh;
+        unsigned int fresh = GetSceneArrayGrowth(this);
+        SceneInfo* newCapacity = _Allocate(fresh);
+        UpdateEntryValue(newCapacity, pBuffer, index);
+        InitializeItems(newCapacity + index, 1);
+        UpdateEntryValue(newCapacity + index + 1, pBuffer + index, iSize - index);
+        FreeSceneArrayStorage(this);
+        pBuffer = newCapacity;
+        SimpleArrayStorage = fresh;
     }
     else
     {
-        CopyBlocks(data + index + 1, data + index, count - index);
-        ConstructScanItems(data + index, 1);
+        UpdateEntryValue(pBuffer + index + 1, pBuffer + index, iSize - index);
+        InitializeItems(pBuffer + index, 1);
     }
-    count = count + 1;
-    data[index] = value;
+    iSize = iSize + 1;
+    pBuffer[index] = value;
 }
 
 struct SceneOwner;
@@ -945,11 +899,6 @@ struct StatExtra
 {
     int FUN_009ee040();
 };
-struct StatMap
-{
-    int FUN_0044ddc0();
-    int* FUN_004a95b0(int);
-};
 struct StatUnique
 {
     bool FUN_005f65d0(const int&);
@@ -957,7 +906,7 @@ struct StatUnique
 };
 struct StatTextureSet
 {
-    void Lookup(void*, int*);
+    void FUN_00853130(void*, int*);
     void FUN_00844700(void*, int);
 };
 struct StatTextureCount
@@ -1098,7 +1047,7 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
                 StatExtra* extra = (StatExtra*)FUN_00653270(&DAT_01202de8, node3);
                 int index = extra->FUN_009ee040();
                 if (index >= 0 && index < (int)DAT_011c3f2c->FUN_0045a120() &&
-                    index < ((StatMap*)&g_011c5ab4)->FUN_0044ddc0())
+                    index < (int)DAT_011c5ab4.GetSize())
                 {
                     for (int i = 0; i < 16; i++)
                     {
@@ -1110,7 +1059,7 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
                         case 3:
                             break;
                         default:
-                            counts[i] += ((StatMap*)&g_011c5ab4)->FUN_004a95b0(index)[i];
+                            counts[i] += ((int*)&DAT_011c5ab4.GetAt((unsigned int)index))[i];
                             break;
                         }
                     }
@@ -1205,7 +1154,7 @@ void SceneStatistics::AccumulateSceneStatistics(StatObject* object, int* output,
                         while (texture1)
                         {
                             int uses = 0;
-                            ((StatTextureSet*)&g_011c5ad0)->Lookup(texture1, &uses);
+                            ((StatTextureSet*)&g_011c5ad0)->FUN_00853130(texture1, &uses);
                             uses++;
                             ((StatTextureSet*)&g_011c5ad0)->FUN_00844700(texture1, uses);
                             if (uses == *DAT_011c5a90.FUN_0043d4d0())
@@ -1439,22 +1388,10 @@ void __cdecl FUN_004a9120(float fUsed, char* buffer, bool abUseFirstTotal)
     }
 }
 
-template <class A, class B> struct NiTPointerMap
-{
-    virtual ~NiTPointerMap();
-    void RemoveAll();
-};
-struct FUN_004a99d0 : NiTPointerMap<unsigned int, unsigned int>
-{
-    ~FUN_004a99d0();
-};
-struct FUN_004a9970 : FUN_004a99d0
-{
-    ~FUN_004a9970();
-};
-// Destructor that calls RemoveAll to clear all entries in the pointer map.
+// RTTI at vftable 0x0101ed0c identifies NiTMap<TESObjectCELL*, bool>.
 // @fnv 0x004a9970
-FUN_004a9970::~FUN_004a9970()
+template <>
+NiTMap<TESObjectCELL*, bool>::~NiTMap()
 {
     RemoveAll();
 }

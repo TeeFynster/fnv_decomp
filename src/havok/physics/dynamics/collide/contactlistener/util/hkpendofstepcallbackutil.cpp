@@ -1,3 +1,12 @@
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/MemoryManager.h"
+#include "../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/hkpWorldPostSimulationListener.h"
+
 
 // src/havok/physics/dynamics/collide/contactlistener/util/hkpendofstepcallbackutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/collide/contactlistener/util/hkpendofstepcallbackutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -51,20 +60,11 @@ void __fastcall PassObjectToTarget(Derived* apObject, void* apUnused, Target* ap
     apTarget->FUN_00c93920(apObject);
 }
 
-struct S_00d9e280_B2
-{
-    virtual void f2();
-};
 struct S_00d9e280_World
 {
-    int ClearValue(S_00d9e280_B2* p);
+    int ClearValue(hkpWorldPostSimulationListener* p);
 };
-struct S_00d9e280_B0
-{
-    virtual void FUN_00d9e280(S_00d9e280_World* w);
-    int unk04;
-};
-struct S_00d9e280_D : S_00d9e280_B0, S_00d9e280_B2
+struct S_00d9e280_D : hkReferencedObject, hkpWorldPostSimulationListener
 {
     virtual void FUN_00d9e280(S_00d9e280_World* w);
 };
@@ -111,14 +111,6 @@ struct RecordArray
     unsigned int count;
     unsigned int capacity;
 };
-struct MemoryManager
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* allocator;
-};
 struct FUN_00d9e450_class
 {
     int unk00;
@@ -154,22 +146,6 @@ void FUN_00d9e450_class::AppendRecord(void* first, void* second, void* third)
     slot->third = third;
 }
 
-struct hkBaseObject
-{
-    virtual void BaseV() = 0;
-};
-struct hkReferencedObject : hkBaseObject
-{
-    unsigned short unk04;
-    unsigned short unk06;
-    hkReferencedObject();
-};
-hkReferencedObject::hkReferencedObject() : unk06(1)
-{}
-struct hkpWorldPostSimulationListener
-{
-    virtual void ListenerMethod() = 0;
-};
 struct FUN_00d9e860 : hkReferencedObject, hkpWorldPostSimulationListener
 {
     volatile int unk0C;
@@ -183,7 +159,7 @@ struct FUN_00d9e860 : hkReferencedObject, hkpWorldPostSimulationListener
     volatile int unk2C;
     volatile int unk30;
     volatile int unk34;
-    virtual ~FUN_00d9e860() = 0;
+    virtual ~FUN_00d9e860() throw() = 0;
     FUN_00d9e860();
 };
 // @fnv 0x00d9e860
@@ -205,16 +181,6 @@ FUN_00d9e860::FUN_00d9e860()
 extern "C" void* __cdecl FUN_00c85750(void);
 extern "C" void __cdecl ResizeAudioStream(void* heap, void* arr, int elemSize);
 
-struct S_00d9e3f0_Router
-{
-    int unk00, unk04, unk08, unk0C;
-    void* m10;
-    static S_00d9e3f0_Router& GetMonitorStream()
-    {
-        return *(S_00d9e3f0_Router*)FUN_00c85750();
-    }
-};
-
 struct S_00d9e3f0_Item
 {
     int unk00, unk04, unk08, unk0C;
@@ -227,9 +193,9 @@ struct S_00d9e3f0_Arr
     unsigned m_cap;
     S_00d9e3f0_Item& AllocatePair()
     {
-        S_00d9e3f0_Router& r = S_00d9e3f0_Router::GetMonitorStream();
+        hkMemoryRouter& r = *static_cast<hkMemoryRouter*>(FUN_00c85750());
         if (m_iElementCount == (int)(m_cap & 0x3fffffff))
-            ResizeAudioStream(r.m10, this, sizeof(S_00d9e3f0_Item));
+            ResizeAudioStream(r.m_heap, this, sizeof(S_00d9e3f0_Item));
         return m_data[m_iElementCount++];
     }
 };
@@ -402,23 +368,7 @@ setRecursionStart:
 }
 
 namespace fnv_00d9ee20 {
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct FUN_00d9ee20_cls
 {
@@ -439,9 +389,9 @@ FUN_00d9ee20_cls* FUN_00d9ee20_cls::FUN_00d9ee20(unsigned char acFlags)
     FUN_00d0b0d0();
     if (acFlags & 1)
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(this, m_uSize);
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        pAllocator->blockFree(this, m_uSize);
     }
     return this;
 }
@@ -452,28 +402,17 @@ extern "C" unsigned __int64 __rdtsc(void);
 #include <windows.h>
 extern DWORD DAT_0126835c;
 
-struct S_00d9ea80_Heap
+static inline hkMemoryRouter& GetMonitorStream()
 {
-    virtual void v0();
-    virtual void v4();
-    virtual void v8();
-    virtual void vc();
-    virtual void ReleaseBlock(void* p, int n);
-};
-struct S_00d9ea80_Router
+    return *static_cast<hkMemoryRouter*>(FUN_00c85750());
+}
+
+static __forceinline hkMemoryAllocator& GetStreamHeap(hkMemoryRouter& holder)
 {
-    int unk0, unk4, unk8, unkc;
-    S_00d9ea80_Heap* m_pStreamAllocator;
-    static S_00d9ea80_Router& GetMonitorStream()
-    {
-        return *(S_00d9ea80_Router*)FUN_00c85750();
-    }
-    S_00d9ea80_Heap& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-void __cdecl FUN_00c908c0(S_00d9ea80_Heap*, void* arr, int n, int elemSize);
+    return *reinterpret_cast<hkMemoryAllocator*>(holder.m_heap);
+}
+
+void __cdecl FUN_00c908c0(hkMemoryAllocator*, void* arr, int n, int elemSize);
 
 struct S_00d9ea80_TimerEntry
 {
@@ -553,7 +492,7 @@ struct S_00d9ea80_EntryArray
     S_00d9ea80_Entry* m_data;
     int m_iElementCount;
     int m_cap;
-    __forceinline void reserve(S_00d9ea80_Heap& a, int n)
+    __forceinline void reserve(hkMemoryAllocator& a, int n)
     {
         int cap = m_cap & 0x3fffffff;
         if (cap < n)
@@ -613,7 +552,7 @@ void S_00d9ea80::FUN_00d9ea80(int arg)
     else
     {
         int n = m_src.m_iElementCount;
-        S_00d9ea80_Heap& hp = S_00d9ea80_Router::GetMonitorStream().heap();
+        hkMemoryAllocator& hp = GetStreamHeap(GetMonitorStream());
         int iOldCount = arr->m_iElementCount;
         arr->reserve(hp, iOldCount + n);
         arr->m_iElementCount += n;
@@ -825,37 +764,10 @@ struct StripCollisionD9E : S_00d9e2b0
 {
     S_00d9e2b0_Bool Equals(const StripCollisionD9E& other) const;
 };
-struct hkMemAllocatorD9E
-{
-    virtual void Slot0();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-    virtual void* BufRealloc(void* pold, int oldNumBytes, int& reqNumBytesInOut);
-};
-struct hkMemRouterD9E
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemAllocatorD9E* m_pStreamAllocator;
-    __forceinline hkMemAllocatorD9E& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    static __forceinline hkMemRouterD9E& GetMonitorStream()
-    {
-        return *static_cast<hkMemRouterD9E*>(FUN_00c85750());
-    }
-};
-void __cdecl FUN_00c908c0(hkMemAllocatorD9E* alloc, void* array, int reqNumElems, int sizeElem);
-
-static __forceinline StripCollisionD9E* bufAllocD9E(hkMemAllocatorD9E* alloc, int& n)
+static __forceinline StripCollisionD9E* bufAllocD9E(hkMemoryAllocator* alloc, int& n)
 {
     int nbytes = n * (int)sizeof(StripCollisionD9E);
-    StripCollisionD9E* p = static_cast<StripCollisionD9E*>(alloc->AllocateBufferWithSize(nbytes));
+    StripCollisionD9E* p = static_cast<StripCollisionD9E*>(alloc->bufAlloc(nbytes));
     n = nbytes / (int)sizeof(StripCollisionD9E);
     return p;
 }
@@ -872,73 +784,84 @@ template <unsigned int ELEMENTSIZE> static __forceinline void memCpyOneAlignedD9
         ++i;
     } while (i < int(ELEMENTSIZE / sizeof(CopyTypeD9E)));
 }
-struct ElemArrayD9E
+static __forceinline hkMemoryAllocator* ElemArrayD9E_heap();
+
+static __forceinline int ElemArrayD9E_indexOf(hkArrayBase<StripCollisionD9E>& self, const StripCollisionD9E& t);
+
+static __forceinline void ElemArrayD9E_removeAt(hkArrayBase<StripCollisionD9E>& self, int idx);
+
+static __forceinline void ElemArrayD9E_SetSizeAndGrow(hkArrayBase<StripCollisionD9E>& self, int n);
+
+static __forceinline void ElemArrayD9E_ClearAndRelease(hkArrayBase<StripCollisionD9E>& self);
+
+static __forceinline void ElemArrayD9E_init(hkArrayBase<StripCollisionD9E>& self, int n);
+
+static __forceinline hkMemoryAllocator* ElemArrayD9E_heap()
 {
-    StripCollisionD9E* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    static __forceinline hkMemAllocatorD9E* heap()
-    {
-        return static_cast<hkMemRouterD9E*>(FUN_00c85750())->m_pStreamAllocator;
-    }
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
+        return reinterpret_cast<hkMemoryAllocator*>(static_cast<hkMemoryRouter*>(FUN_00c85750())->m_heap);
     }
 
-    __forceinline ElemArrayD9E(int n)
-    {
-        int cap = n;
-        StripCollisionD9E* p;
-        int flags;
-        m_data = 0;
-        m_iElementCount = 0;
-        m_iCapacityState = (int)0x80000000;
-        hkMemRouterD9E* router = static_cast<hkMemRouterD9E*>(FUN_00c85750());
-        hkMemAllocatorD9E* alloc = router->m_pStreamAllocator;
-        p = cap ? bufAllocD9E(alloc, cap) : 0;
-        flags = cap ? cap : (int)0x80000000;
-        m_data = p;
-        m_iElementCount = cap;
-        m_iCapacityState = flags;
-    }
-    __forceinline int indexOf(const StripCollisionD9E& t) const
-    {
-        int end = m_iElementCount;
+static __forceinline int ElemArrayD9E_indexOf(hkArrayBase<StripCollisionD9E>& self, const StripCollisionD9E& t)
+{
+        int end = self.m_iElementCount;
         for (int i = 0; i < end; ++i)
         {
-            if (m_data[i].Equals(t).m_cBooleanValue)
+            if (self.m_data[i].Equals(t).m_cBooleanValue)
                 return i;
         }
         return -1;
     }
-    __forceinline void removeAt(int idx)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != idx)
-            memCpyOneAlignedD9E<sizeof(StripCollisionD9E)>(m_data + idx, m_data + m_iElementCount);
+
+static __forceinline void ElemArrayD9E_removeAt(hkArrayBase<StripCollisionD9E>& self, int idx)
+{
+        self.m_iElementCount--;
+        if (self.m_iElementCount != idx)
+            memCpyOneAlignedD9E<sizeof(StripCollisionD9E)>(self.m_data + idx, self.m_data + self.m_iElementCount);
     }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        hkMemAllocatorD9E& alloc = hkMemRouterD9E::GetMonitorStream().heap();
-        int capacity = getCapacity();
+
+static __forceinline void ElemArrayD9E_SetSizeAndGrow(hkArrayBase<StripCollisionD9E>& self, int n)
+{
+        hkMemoryAllocator& alloc = GetStreamHeap(GetMonitorStream());
+        int capacity = self.getCapacity();
         if (capacity < n)
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(StripCollisionD9E));
+            FUN_00c908c0(&alloc, (&self), newSize, sizeof(StripCollisionD9E));
         }
-        m_iElementCount = n;
+        self.m_iElementCount = n;
     }
-    __forceinline void ClearAndRelease()
-    {
-        hkMemAllocatorD9E& alloc = hkMemRouterD9E::GetMonitorStream().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, getCapacity() * (int)sizeof(StripCollisionD9E));
+
+static __forceinline void ElemArrayD9E_ClearAndRelease(hkArrayBase<StripCollisionD9E>& self)
+{
+        hkMemoryAllocator& alloc = GetStreamHeap(GetMonitorStream());
+        self.m_iElementCount = 0;
+        if ((self.m_iCapacityState & 0x80000000) == 0)
+            alloc.bufFree(self.m_data, self.getCapacity() * (int)sizeof(StripCollisionD9E));
     }
-    void SwapThreeInts(ElemArrayD9E& other);
+
+static __forceinline void ElemArrayD9E_init(hkArrayBase<StripCollisionD9E>& self, int n)
+{
+
+        int cap = n;
+        StripCollisionD9E* p;
+        int flags;
+        self.m_data = 0;
+        self.m_iElementCount = 0;
+        self.m_iCapacityState = (int)0x80000000;
+        hkMemoryRouter* router = static_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryAllocator* alloc = reinterpret_cast<hkMemoryAllocator*>(router->m_heap);
+        p = cap ? bufAllocD9E(alloc, cap) : 0;
+        flags = cap ? cap : (int)0x80000000;
+        self.m_data = p;
+        self.m_iElementCount = cap;
+        self.m_iCapacityState = flags;
+    }
+
+struct ElemArrayD9EPolicy
+{
+    static __forceinline void destroy(hkArrayBase<StripCollisionD9E>& self) { }
+    static __forceinline void init(hkArrayBase<StripCollisionD9E>& self, int n) { ElemArrayD9E_init(self, n); }
 };
 
 __declspec(noinline) S_00d9e2b0_Bool StripCollisionD9E::Equals(const StripCollisionD9E& other) const
@@ -946,33 +869,33 @@ __declspec(noinline) S_00d9e2b0_Bool StripCollisionD9E::Equals(const StripCollis
     return S_00d9e2b0_Bool(m_iWordAt00 == other.m_iWordAt00 && m_iWordAt04 == other.m_iWordAt04 && m_8 == other.m_8);
 }
 
-static __forceinline void stripCollisionArrays(ElemArrayD9E& a, ElemArrayD9E& b)
+static __forceinline void stripCollisionArrays(hkArray<StripCollisionD9E, ElemArrayD9EPolicy>& a, hkArray<StripCollisionD9E, ElemArrayD9EPolicy>& b)
 {
     int asize0 = a.m_iElementCount;
     int bsize = b.m_iElementCount;
     if (asize0 == 0)
         return;
-    ElemArrayD9E kept(bsize);
+    hkArray<StripCollisionD9E, ElemArrayD9EPolicy> kept(bsize);
     int i;
     int k = 0;
     for (i = 0; i < bsize; i++)
     {
-        int idx = a.indexOf(b.m_data[i]);
+        int idx = ElemArrayD9E_indexOf(a, b.m_data[i]);
         if (idx == -1)
             kept.m_data[k++] = b.m_data[i];
         else
-            a.removeAt(idx);
+            ElemArrayD9E_removeAt(a, idx);
     }
-    kept.SetSizeAndGrow(bsize - asize0 + a.m_iElementCount);
-    b.SwapThreeInts(kept);
-    kept.ClearAndRelease();
+    ElemArrayD9E_SetSizeAndGrow(kept, bsize - asize0 + a.m_iElementCount);
+    b.swap(kept);
+    ElemArrayD9E_ClearAndRelease(kept);
 }
 
 // Removes entries from the first array that are found in the second, then replaces the second array with the remaining entries.
 // @fnv 0x00d9e680
 void __cdecl FUN_00d9e680(void* apFirstArray, S_00d9ea80_EntryArray* apSecondArray)
 {
-    stripCollisionArrays(*static_cast<ElemArrayD9E*>(apFirstArray), *reinterpret_cast<ElemArrayD9E*>(apSecondArray));
+    stripCollisionArrays(*static_cast<hkArray<StripCollisionD9E, ElemArrayD9EPolicy>*>(apFirstArray), *reinterpret_cast<hkArray<StripCollisionD9E, ElemArrayD9EPolicy>*>(apSecondArray));
 }
 
 struct hkMergeTarget8b0
@@ -1001,31 +924,18 @@ struct hkArray12_8b0
     int m_uiLogicalSize;
     int m_iCapacityAndFlags;
 };
-struct hkAllocator8b0
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void* BufAlloc(int& iNumBytesInOut);
-    virtual void BufFree(void* pvData, int iNumBytes);
-};
-struct hkRouter8b0
-{
-    int unk00, unk04, unk08, unk0C;
-    hkAllocator8b0* m_pkHeap;
-};
 static inline unsigned __int64 GetKey8b0(const hkValue8b0& kValue)
 {
     return ((unsigned __int64)kValue.m_pkObj->m_kPointA->m_iOwnerObjectOffset << 32) |
            kValue.m_pkObj->m_kPointB->m_iOwnerObjectOffset;
 }
 
-static inline hkValue8b0* AllocArray8b0(hkAllocator8b0* pkHeap, int& iCount)
+static inline hkValue8b0* AllocArray8b0(hkMemoryAllocator* pkHeap, int& iCount)
 {
     if (iCount)
     {
         int iNumBytes = iCount * sizeof(hkValue8b0);
-        hkValue8b0* pkData = (hkValue8b0*)pkHeap->BufAlloc(iNumBytes);
+        hkValue8b0* pkData = (hkValue8b0*)pkHeap->bufAlloc(iNumBytes);
         iCount = iNumBytes / (int)sizeof(hkValue8b0);
         return pkData;
     }
@@ -1043,8 +953,8 @@ void __cdecl FUN_00d9e8b0(hkArray16_8b0* pkNew, hkArray12_8b0* volatile argOut)
         return;
 
     int iTotalCount = pkOut->m_uiLogicalSize + pkNew->m_uiLogicalSize;
-    hkRouter8b0& kRouter0 = *(hkRouter8b0*)FUN_00c85750();
-    hkValue8b0* pkData = AllocArray8b0(kRouter0.m_pkHeap, iTotalCount);
+    hkMemoryRouter& kRouter0 = *static_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkValue8b0* pkData = AllocArray8b0(reinterpret_cast<hkMemoryAllocator*>(kRouter0.m_heap), iTotalCount);
     int iCapacity = iTotalCount ? iTotalCount : 0x80000000;
     hkArray12_8b0 kMerged;
     kMerged.m_iCapacityAndFlags = iCapacity;
@@ -1068,10 +978,10 @@ void __cdecl FUN_00d9e8b0(hkArray16_8b0* pkNew, hkArray12_8b0* volatile argOut)
 
     ((hkMergeTarget8b0*)argOut)->SwapThreeInts((int*)&kMerged);
     pkNew->m_uiLogicalSize = 0;
-    hkRouter8b0& kRouter = *(hkRouter8b0*)FUN_00c85750();
-    hkAllocator8b0* pkHeap = kRouter.m_pkHeap;
+    hkMemoryRouter& kRouter = *static_cast<hkMemoryRouter*>(FUN_00c85750());
+    hkMemoryAllocator* pkHeap = reinterpret_cast<hkMemoryAllocator*>(kRouter.m_heap);
     if ((kMerged.m_iCapacityAndFlags & 0x80000000) == 0)
-        pkHeap->BufFree(kMerged.m_pData, (kMerged.m_iCapacityAndFlags & 0x3fffffff) * sizeof(hkValue8b0));
+        pkHeap->bufFree(kMerged.m_pData, (kMerged.m_iCapacityAndFlags & 0x3fffffff) * (int)sizeof(hkValue8b0));
 }
 
 struct BatchCollision : S_00d9e2b0
@@ -1086,23 +996,6 @@ struct BatchSwap
 {
     void SwapThreeInts(int*);
 };
-struct BatchHeap
-{
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void* allocate(int* bytes);
-    virtual void freeBuffer(void* data, int bytes);
-};
-struct BatchContext
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    BatchHeap* heap;
-};
-
 static __forceinline void transferEntry(void* out, const void* in)
 {
     unsigned k = 0;
@@ -1154,21 +1047,21 @@ struct IncomingBatch : BatchArrayView<S_00d9e3f0_Item>
 struct PendingBatch : BatchArrayView<BatchCollision>
 {
 };
-static __forceinline S_00d9e3f0_Item* makeAllocation(BatchHeap* heap, int& size)
+static __forceinline S_00d9e3f0_Item* makeAllocation(hkMemoryAllocator* heap, int& size)
 {
     int bytes = size * 16;
-    S_00d9e3f0_Item* result = (S_00d9e3f0_Item*)heap->allocate(&bytes);
+    S_00d9e3f0_Item* result = (S_00d9e3f0_Item*)heap->bufAlloc(bytes);
     size = bytes / 16;
     return result;
 }
 struct BatchBuffer;
-extern "C" void __cdecl FUN_00c908c0(BatchHeap*, BatchBuffer*, int, int);
+extern "C" void __cdecl FUN_00c908c0(hkMemoryAllocator*, BatchBuffer*, int, int);
 struct BatchBuffer : BatchArrayView<S_00d9e3f0_Item>
 {
     __forceinline BatchBuffer(int size) : BatchArrayView<S_00d9e3f0_Item>()
     {
-        BatchContext* context = (BatchContext*)FUN_00c85750();
-        BatchHeap* heap = context->heap;
+        hkMemoryRouter* context = static_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryAllocator* heap = reinterpret_cast<hkMemoryAllocator*>(context->m_heap);
         S_00d9e3f0_Item* allocation = size ? makeAllocation(heap, size) : 0;
         int cap = size ? size : 0x80000000;
         data = allocation;
@@ -1177,8 +1070,8 @@ struct BatchBuffer : BatchArrayView<S_00d9e3f0_Item>
     }
     __forceinline void resize(int size)
     {
-        BatchContext* context = (BatchContext*)FUN_00c85750();
-        BatchHeap* heap = context->heap;
+        hkMemoryRouter* context = static_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryAllocator* heap = reinterpret_cast<hkMemoryAllocator*>(context->m_heap);
         int cap = capacity & 0x3fffffff;
         if (cap < size)
             FUN_00c908c0(heap, this, size < 2 * cap ? 2 * cap : size, 16);
@@ -1186,11 +1079,11 @@ struct BatchBuffer : BatchArrayView<S_00d9e3f0_Item>
     }
     __forceinline void clear()
     {
-        BatchContext* context = (BatchContext*)FUN_00c85750();
-        BatchHeap* heap = context->heap;
+        hkMemoryRouter* context = static_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryAllocator* heap = reinterpret_cast<hkMemoryAllocator*>(context->m_heap);
         count = 0;
         if ((capacity & 0x80000000) == 0)
-            heap->freeBuffer(data, (capacity & 0x3fffffff) * 16);
+            heap->bufFree(data, (capacity & 0x3fffffff) * 16);
     }
 };
 struct DestinationArg
@@ -1236,4 +1129,16 @@ void __cdecl FUN_00d9e4a0(PendingBatch& destination, IncomingBatch& incoming)
         ((BatchSwap*)&incoming)->SwapThreeInts((int*)&temporary);
         temporary.clear();
     }
+}
+
+
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
+{
+    __if_exists(A::destroy) { A::destroy(*this); }
+    __if_not_exists(A::destroy) { clearAndDeallocate(); }
+}
+
+template <class T, class A> __forceinline hkArray<T, A>::hkArray(int n)
+{
+    A::init(*this, n);
 }

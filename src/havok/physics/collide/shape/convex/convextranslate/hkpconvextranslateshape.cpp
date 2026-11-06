@@ -2,7 +2,25 @@
 // src/havok/physics/collide/shape/convex/convextranslate/hkpconvextranslateshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/convextranslate/hkpconvextranslateshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpConvexTranslateShape.h"
+// Exe 0x00dd5f50 FUN_00dd5f50: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+
+#include "../../../../../../../include/hkpConvexTranslateShape.h"
+#include "../../../../../../../include/hkpShape.h"
+#include "../../../../../../../include/hkVector4.h"
+#include "../../../../../../../include/hkRotation.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include <string.h>
 
 // FUN_00dd5e60 : the stub family - load a sub-object pointer out of `this`
 // and tail-jump to one of its virtuals.
@@ -44,53 +62,29 @@ void __thiscall Own_dd5e60::FUN_00dd5e60()
     m_sub->v2C();
 }
 
-class hkpShapeCollectionDD5E
+// Vtable slot 0x18 is hkpShape::CalcSizeForSpu, not a shape-collection operation.
+// The shared translate-shape header does not yet declare this override.
+class ConvexTranslateSpuSizingView : public hkpConvexTranslateShape
 {
   public:
-    virtual void V0() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual void V3() throw();
-    virtual void V4() throw();
-    virtual void V5() throw();
-    virtual int getChildShapes(int iKey, int iBufferSize) throw();
-};
-
-class hkpShapeBufferDD5E
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    hkpShapeCollectionDD5E* m_pShapeCollection;
-    int m_offset;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    hkpShapeCollectionDD5E m_inlineCollection;
-
-    int GetChildShapes(int iKey, int iBufferSize);
+    virtual int CalcSizeForSpu(const PhysicsShape& input, int spuBufferSizeLeft) const;
 };
 
 // @fnv 0x00dd5e10
-int hkpShapeBufferDD5E::GetChildShapes(int iKey, int iBufferSize)
+int ConvexTranslateSpuSizingView::CalcSizeForSpu(const PhysicsShape& input, int spuBufferSizeLeft) const
 {
-    const int iMax = iBufferSize - 0x30;
-    int iResult = m_pShapeCollection->getChildShapes(iKey, iMax);
+    const int iMax = spuBufferSizeLeft - 0x30;
+    int iResult = m_pContainedShape.m_pContainedShape->CalcSizeForSpu(input, iMax);
     if (iResult < 0)
         return -1;
     if (iResult > iMax)
         return -1;
-    if (m_pShapeCollection == &m_inlineCollection)
+    if (m_pContainedShape.m_pContainedShape == reinterpret_cast<const hkpShape*>(this + 1))
     {
-        m_offset = 0;
+        const_cast<ConvexTranslateSpuSizingView*>(this)->m_iChildShapeSize = 0;
         return iResult + 0x30;
     }
-    m_offset = iResult;
+    const_cast<ConvexTranslateSpuSizingView*>(this)->m_iChildShapeSize = iResult;
     return 0x30;
 }
 
@@ -141,28 +135,6 @@ void* FUN_00dd5ea0_class::FUN_00dd5ea0()
     return &unk14;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
-
-struct hkVector4D5F
-{
-    __m128 m_vComponents;
-    void add4(const hkVector4D5F& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-    void setAdd4(const hkVector4D5F& a, const hkVector4D5F& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-};
-
 struct ObjDD5F50
 {
     void* m_vptr;
@@ -181,7 +153,7 @@ struct ObjDD5F50
     virtual void v12();
     virtual void v13();
     virtual void v14();
-    virtual void __thiscall FUN_00dd5f50_v(const unsigned short* ids, int numIds, hkVector4D5F* verticesOut);
+    virtual void __thiscall FUN_00dd5f50_v(const unsigned short* ids, int numIds, hkVector4* verticesOut);
 };
 
 struct ClsDD5F50
@@ -194,14 +166,14 @@ struct ClsDD5F50
     int m_14;
     ObjDD5F50* m_pContainedShape;  // +0x18
     int m_1c;
-    hkVector4D5F m_vTranslation;  // +0x20
+    hkVector4 m_vTranslation;  // +0x20
 
-    void __thiscall FUN_00dd5f50(const unsigned short* ids, int numIds, hkVector4D5F* verticesOut);
+    void __thiscall FUN_00dd5f50(const unsigned short* ids, int numIds, hkVector4* verticesOut);
 };
 
 // Calls the contained shape's virtual vertex generator, then adds m_vTranslation to each output vertex.
 // @fnv 0x00dd5f50
-void ClsDD5F50::FUN_00dd5f50(const unsigned short* ids, int numIds, hkVector4D5F* verticesOut)
+void ClsDD5F50::FUN_00dd5f50(const unsigned short* ids, int numIds, hkVector4* verticesOut)
 {
     m_pContainedShape->FUN_00dd5f50_v(ids, numIds, verticesOut);
     for (int i = 0; i < numIds; i++)
@@ -211,16 +183,6 @@ void ClsDD5F50::FUN_00dd5f50(const unsigned short* ids, int numIds, hkVector4D5F
 }
 
 namespace fnv_00dd60e0 {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int32 m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_sub_ps(__m128 _A, __m128 _B);
-
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 extern "C" unsigned long DAT_0126835c;
 extern "C" const char DAT_010d1074[];
@@ -228,37 +190,18 @@ extern "C" const char DAT_010c41f8[];
 extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 
-struct CommandTimingEntry
-{
-    const char* m_pCommandName;
-    unsigned int m_uiStartTicks;
-    unsigned int m_uiEndTicks;
-};
-
-struct MonitorStream
-{
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    char* m_pRayCursor;
-    char* m_pCurrentCommand;
-    static MonitorStream* GetMonitorStream()
-    {
-        return (MonitorStream*)TlsGetValue(DAT_0126835c);
-    }
-};
-
 static const char s_kEndTimer[] = "Et";
 static inline void TimerMark(const char* name)
 {
-    MonitorStream* s = MonitorStream::GetMonitorStream();
-    if (s->m_kRayEnd < s->m_pCurrentCommand)
+    hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (s->m_end.m_storage < s->m_capacityMinus16.m_storage)
     {
-        CommandTimingEntry* h = (CommandTimingEntry*)s->m_kRayEnd;
-        h->m_pCommandName = name;
+        hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)s->m_end.m_storage;
+        h->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         volatile unsigned int t = (unsigned int)__rdtsc();
-        h->m_uiStartTicks = t;
-        s->m_kRayEnd = (char*)(h + 1);
+        h->m_time0 = t;
+        s->m_end.m_storage = (char*)(h + 1);
     }
 }
 
@@ -272,20 +215,10 @@ class HkBoolDD
     }
 };
 
-class Vec4DD
-{
-  public:
-    __m128 m_vComponents;
-    void setSub4(const Vec4DD& a, const Vec4DD& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-};
-
 struct RayInputDD60
 {
-    Vec4DD m_vFrom;
-    Vec4DD m_vTo;
+    hkVector4 m_vFrom;
+    hkVector4 m_vTo;
     unsigned int m_uiFilterInfo;
     void* m_pRayShapeCollectionFilter;
     int pad[2];
@@ -293,7 +226,7 @@ struct RayInputDD60
 
 struct RayOutputDD60
 {
-    Vec4DD m_vHitNormal;
+    hkVector4 m_vHitNormal;
     float m_fHitFraction;
     int m_iExtraInfo;
     int pad[2];
@@ -329,7 +262,7 @@ class ConvexTranslateDD60
     int pad[6];
     const ShapeDD60* m_pContainedShape;
     int pad1c;
-    Vec4DD m_vTranslation;
+    hkVector4 m_vTranslation;
     HkBoolDD FUN_00dd60e0(const RayInputDD60& input, RayOutputDD60& results) const;
 };
 
@@ -338,7 +271,8 @@ class ConvexTranslateDD60
 HkBoolDD ConvexTranslateDD60::FUN_00dd60e0(const RayInputDD60& input, RayOutputDD60& results) const
 {
     TimerMark("TtrcConvTransl");
-    RayInputDD60 subInput = input;
+    RayInputDD60 subInput;
+    memcpy(&subInput, &input, sizeof(subInput));
     subInput.m_vFrom.setSub4(input.m_vFrom, m_vTranslation);
     subInput.m_vTo.setSub4(input.m_vTo, m_vTranslation);
     results.changeLevel(1);
@@ -350,9 +284,6 @@ HkBoolDD ConvexTranslateDD60::FUN_00dd60e0(const RayInputDD60& input, RayOutputD
     return hit;
 }
 }  // namespace fnv_00dd60e0
-
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
 
 struct FNV_dd6060_Shape
 {
@@ -366,28 +297,28 @@ struct FNV_dd6060_Shape
     virtual void v14();
     virtual void v18();
 
-    virtual void v1C(const hkRotation* rotation, float distance, __m128* output);
+    virtual void v1C(const hkRotation* rotation, float distance, LocalM128* output) const;
 };
 
 struct FNV_dd6060_Class : hkpConvexTranslateShape
 {
 
-    void __thiscall FUN_00dd6060(const hkRotation* rotation, float distance, __m128* output);
+    void __thiscall FUN_00dd6060(const hkRotation* rotation, float distance, LocalM128* output);
 };
 
 // Calls the contained shape's v1C, then adds the translation rotated by the rotation columns to output[0] and output[1].
 // @fnv 0x00dd6060
-void FNV_dd6060_Class::FUN_00dd6060(const hkRotation* rotation, float distance, __m128* output)
+void FNV_dd6060_Class::FUN_00dd6060(const hkRotation* rotation, float distance, LocalM128* output)
 
 {
 
-    FNV_dd6060_Shape* shape = reinterpret_cast<FNV_dd6060_Shape*>(m_pContainedShape.m_pContainedShape);
+    const FNV_dd6060_Shape* shape = reinterpret_cast<const FNV_dd6060_Shape*>(m_pContainedShape.m_pContainedShape);
 
     shape->v1C(rotation, distance, output);
 
-    __m128 translation = _mm_load_ps(&m_vTranslation.x);
+    LocalM128 translation = _mm_load_ps(&m_vTranslation.x);
 
-    __m128 moved = _mm_mul_ps(_mm_shuffle_ps(translation, translation, 0x55), _mm_load_ps(&rotation->m_kColumn1.x));
+    LocalM128 moved = _mm_mul_ps(_mm_shuffle_ps(translation, translation, 0x55), _mm_load_ps(&rotation->m_kColumn1.x));
 
     moved = _mm_add_ps(
         moved, _mm_mul_ps(_mm_shuffle_ps(translation, translation, 0x00), _mm_load_ps(&rotation->m_kColumn0.x)));

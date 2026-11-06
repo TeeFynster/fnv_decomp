@@ -9,13 +9,57 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <xmmintrin.h>
-struct Point3
+// PodPoint3: unit-local copy of the former shared stand-in Point3. Same layout as NiPoint3 but constructor-free (an aggregate under VC9): with NiPoint3, 0x0062bfb0 does not match (POD construction/return; NiPoint3's user constructors change the code).
+#include <stddef.h>
+class PodPoint3
 {
-    float x, y, z;
-    Point3* FUN_006815c0();
-    Point3* FUN_00439e90(Point3* out, const Point3* other) const;
-    Point3* FUN_00416870(float x, float y, float z);
+public:
+    float x;
+    float y;
+    float z;
+
+    // Legacy compilers require an aggregate for brace initialization.
+#if !defined(_MSC_VER) || _MSC_VER >= 1800
+    PodPoint3()
+    {}
+    PodPoint3(float fX, float fY, float fZ)
+        : x(fX), y(fY), z(fZ)
+    {}
+#endif
+
+    PodPoint3 operator+(const PodPoint3& other) const;
+    PodPoint3 operator-(const PodPoint3& other) const;
+    PodPoint3 operator-() const;
+    PodPoint3 operator*(float scalar) const;
+    float operator*(const PodPoint3& other) const;
+    PodPoint3& operator+=(const PodPoint3& other);
+    friend PodPoint3 operator*(float scalar, const PodPoint3& point);
+
+    float DotPart(float value, const PodPoint3& point) const;
+    float DotProduct(const PodPoint3& point) const;
+    double DotProduct(const PodPoint3& point);
+    float Length() const;
+
+    PodPoint3& FUN_00439180(float scalar);
+    PodPoint3 FUN_00439e90(const PodPoint3& shift) const;
+    PodPoint3* FUN_00439e90(PodPoint3* output, const PodPoint3* other) const;
+    PodPoint3 FUN_00439ef0(const PodPoint3& other) const;
+    void FUN_00439ef0();
+    PodPoint3 FUN_004b3800(const PodPoint3& axis) const;
+    void FUN_004a0c10();
+    float FUN_00457910();
+    float FUN_00457990() const;
+    double FUN_004a7290();
+    PodPoint3* FUN_006815c0();
+    PodPoint3* FUN_00416870(float x, float y, float z);
+    void FUN_0043d410(float x, int y, int z);
+    char* FUN_00a59af0(const char* text);
+
+    static void* operator new[](size_t size);
+    static void operator delete[](void* memory);
+    static const PodPoint3 ZERO;
 };
+#include "../../../include/NiTransform.h"
 struct Aabb
 {
     __m128 minimum, maximum;
@@ -26,19 +70,9 @@ struct HavokTransform
     __m128 rotation0, rotation1, rotation2, translation;
     HavokTransform* FUN_0056ded0();
 };
-struct Transform
-{
-    float rotation[3][3];
-    Point3 translation;
-    float scale;
-    Transform* FUN_00476a80();
-    Transform* FUN_004b4880(Transform* out) const;
-    Transform* FUN_0062c250(Transform* out, const Transform* other) const;
-    Point3* FUN_00524c40(Point3* out, const Point3* point) const;
-};
 struct Node
 {
-    const Transform* FUN_00461130() const;
+    const NiTransform* FUN_00461130() const;
 };
 struct WorldObject
 {
@@ -52,17 +86,17 @@ struct CollisionObject
 };
 struct RTTI;
 extern RTTI g_012683c8;
-extern Point3 DAT_011f426c;
+extern PodPoint3 DAT_011f426c;
 CollisionObject* FUN_004b5260(Node*);
-void FUN_00458620(Point3* out, const __m128* havokPoint);
-Point3* FUN_004a3760(Point3* out, float scale, const Point3* point);
+void FUN_00458620(PodPoint3* out, const __m128* havokPoint);
+PodPoint3* FUN_004a3760(PodPoint3* out, float scale, const PodPoint3* point);
 float FUN_00476b70(float minimum, float maximum);
 bool FUN_0043b300(const RTTI*, WorldObject*);
-Transform* FUN_00624ad0(Transform* out, const HavokTransform* havok);
+NiTransform* FUN_00624ad0(NiTransform* out, const HavokTransform* havok);
 // @fnv 0x0062bfb0
-Point3* FUN_0062bfb0(Point3* out, Node* node)
+PodPoint3* FUN_0062bfb0(PodPoint3* out, Node* node)
 {
-    Point3 chosen = DAT_011f426c;
+    PodPoint3 chosen = DAT_011f426c;
     CollisionObject* collision = FUN_004b5260(node);
     if (collision)
     {
@@ -72,16 +106,16 @@ Point3* FUN_0062bfb0(Point3* out, Node* node)
             Aabb bounds;
             bounds.FUN_00437c10();
             body->GetAabb(&bounds);
-            Point3 minimum;
+            PodPoint3 minimum;
             minimum.FUN_006815c0();
             FUN_00458620(&minimum, &bounds.minimum);
-            Point3 maximum;
+            PodPoint3 maximum;
             maximum.FUN_006815c0();
             FUN_00458620(&maximum, &bounds.maximum);
-            Point3 lower, upper, minTermA, maxTermA, minTermB, maxTermB;
+            PodPoint3 lower, upper, minTermA, maxTermA, minTermB, maxTermB;
             FUN_004a3760(&maxTermA, .55f, &maximum)->FUN_00439e90(&upper, FUN_004a3760(&minTermA, .45f, &minimum));
             FUN_004a3760(&maxTermB, .45f, &maximum)->FUN_00439e90(&lower, FUN_004a3760(&minTermB, .55f, &minimum));
-            Point3 random;
+            PodPoint3 random;
             chosen = *random.FUN_00416870(FUN_00476b70(lower.x, upper.x), FUN_00476b70(lower.y, upper.y),
                                           FUN_00476b70(lower.z, upper.z));
             if (FUN_0043b300(&g_012683c8, body) || collision->FUN_0044ddc0() != node)
@@ -89,16 +123,13 @@ Point3* FUN_0062bfb0(Point3* out, Node* node)
                 HavokTransform bodyHavok;
                 bodyHavok.FUN_0056ded0();
                 body->FUN_00c8d280(&bodyHavok);
-                Transform bodyWorld;
-                bodyWorld.FUN_00476a80();
+                NiTransform bodyWorld;
                 FUN_00624ad0(&bodyWorld, &bodyHavok);
-                bodyWorld.scale = 1.0f;
-                Transform inverse;
-                inverse.FUN_00476a80();
-                node->FUN_00461130()->FUN_004b4880(&inverse);
-                Transform composed;
-                Point3 transformed;
-                chosen = *inverse.FUN_0062c250(&composed, &bodyWorld)->FUN_00524c40(&transformed, &chosen);
+                bodyWorld.m_fScale = 1.0f;
+                NiTransform inverse;
+                node->FUN_00461130()->FUN_004b4880(inverse);
+                PodPoint3 transformed;
+                chosen = *(PodPoint3*)(inverse * bodyWorld).FUN_00524c40((NiPoint3*)&transformed, (const NiPoint3&)chosen);
             }
         }
     }

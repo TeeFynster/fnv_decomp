@@ -3,32 +3,12 @@
 // their real unit once its classes are.
 
 #include "menumanager_decls_rtti2_menumanager.h"
+#include "../../../include/TESObjectBOOK.h"
+#include "../../../include/Tile.h"
 
 // 0x00720aa0  838 bytes  /MT /Od /Oy- /GS /EHsc /Gy /GF
 // thiscall (ret 4), one int arg: fetch the cached menu for that class, delete
 // it, then build the class's menu through an if/else-if chain over the ids.
-
-class Tile
-{
-  public:
-    virtual ~Tile();
-    float FUN_00a011b0(int value);
-    Tile* FUN_00a03c90();
-    void FUN_007037c0(int value);
-    void* FUN_004fd3a0();
-    char* FUN_00671d10();
-};
-
-class TESBoundObject
-{
-  public:
-    virtual ~TESBoundObject();
-    TESBoundObject* FUN_007af430();
-};
-
-class TESObjectBOOK : public TESBoundObject
-{
-};
 
 Tile* FUN_00a09030(int menuClass);
 bool IsStartMenuFlag1Set();
@@ -66,32 +46,32 @@ void* Mgr20::FUN_00720aa0(int menuClass)
     if (FUN_00720df0() == menuClass)
     {
         pMenu = FUN_00704140();
-        FUN_007164c0(pMenu->FUN_00a03c90(), pMenu->FUN_00a011b0(0xfc1));
-        pMenu->FUN_00a03c90()->FUN_007037c0(8);
+        FUN_007164c0(((Tile*)pMenu->FUN_00a03c90()), pMenu->FUN_00a011b0(0xfc1));
+        ((Tile*)pMenu->FUN_00a03c90())->FUN_007037c0(8);
     }
     else if (menuClass == 0x40b)
     {
         pMenu = FUN_00704490();
-        FUN_007164c0(pMenu->FUN_00a03c90(), pMenu->FUN_00a011b0(0xfc1));
-        pMenu->FUN_00a03c90()->FUN_007037c0(8);
+        FUN_007164c0(((Tile*)pMenu->FUN_00a03c90()), pMenu->FUN_00a011b0(0xfc1));
+        ((Tile*)pMenu->FUN_00a03c90())->FUN_007037c0(8);
     }
     else if (menuClass == 0x425)
     {
         pMenu = FUN_007046c0();
-        FUN_007164c0(pMenu->FUN_00a03c90(), pMenu->FUN_00a011b0(0xfc1));
-        pMenu->FUN_00a03c90()->FUN_007037c0(8);
+        FUN_007164c0(((Tile*)pMenu->FUN_00a03c90()), pMenu->FUN_00a011b0(0xfc1));
+        ((Tile*)pMenu->FUN_00a03c90())->FUN_007037c0(8);
     }
     else if (menuClass == 0x3ea)
     {
         pMenu = CreateInventoryMenuIfModifierKey();
-        FUN_007164c0(pMenu->FUN_00a03c90(), pMenu->FUN_00a011b0(0xfc1));
-        pMenu->FUN_00a03c90()->FUN_007037c0(8);
+        FUN_007164c0(((Tile*)pMenu->FUN_00a03c90()), pMenu->FUN_00a011b0(0xfc1));
+        ((Tile*)pMenu->FUN_00a03c90())->FUN_007037c0(8);
     }
     else if (menuClass == 0x3eb)
     {
         pMenu = FUN_00704be0();
-        FUN_007164c0(pMenu->FUN_00a03c90(), pMenu->FUN_00a011b0(0xfc1));
-        pMenu->FUN_00a03c90()->FUN_007037c0(8);
+        FUN_007164c0(((Tile*)pMenu->FUN_00a03c90()), pMenu->FUN_00a011b0(0xfc1));
+        ((Tile*)pMenu->FUN_00a03c90())->FUN_007037c0(8);
     }
     else if (menuClass == 0x3ec)
     {

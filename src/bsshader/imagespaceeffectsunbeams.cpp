@@ -2,12 +2,22 @@
 // src/bsshader/imagespaceeffectsunbeams.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/imagespaceeffectsunbeams.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct MemMgr_cls
+#include "../../include/MemoryManager.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiDX9Renderer.h"
+#include "../../include/NiRenderTargetGroup.h"
+#include "../../include/NiCamera.h"
+
+// Preserve the inline operations used by this unit with the shared declarations.
+inline NiPoint3::NiPoint3(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
+{}
+
+inline NiPoint3 NiPoint3::operator-() const
 {
-    int unk00;
-    void* FUN_00aa3e40(unsigned int size);
-};
-extern MemMgr_cls DAT_011f6238;
+    return NiPoint3(-x, -y, -z);
+}
+
+extern MemoryManager DAT_011f6238;
 
 struct Node_cls
 {
@@ -183,134 +193,15 @@ void FUN_00c04aa0_cls::InitNode(Ctx_cls* apCtx, int aiArg)
     FUN_00ba3c70(0, iValue, node, 0);
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {}
-    NiPoint3 operator-() const
-    {
-        return NiPoint3(-x, -y, -z);
-    }
-    float Dot(const NiPoint3& pt) const
-    {
-        return x * pt.x + y * pt.y + z * pt.z;
-    }
-};
-
-struct RenderTargetGroup
-{
-    virtual void Dummy00();
-    virtual void Dummy04();
-    virtual void Dummy08();
-    virtual void Dummy0c();
-    virtual void Dummy10();
-    virtual void Dummy14();
-    virtual void Dummy18();
-    virtual void Dummy1c();
-    virtual void Dummy20();
-    virtual void Dummy24();
-    virtual void Dummy28();
-    virtual void Dummy2c();
-    virtual void Dummy30();
-    virtual void Dummy34();
-    virtual void Dummy38();
-    virtual void Dummy3c();
-    virtual void Dummy40();
-    virtual void Dummy44();
-    virtual void Dummy48();
-    virtual void Dummy4c();
-    virtual void Dummy50();
-    virtual void Dummy54();
-    virtual void Dummy58();
-    virtual void Dummy5c();
-    virtual void Dummy60();
-    virtual void Dummy64();
-    virtual void Dummy68();
-    virtual void Dummy6c();
-    virtual void Dummy70();
-    virtual void Dummy74();
-    virtual void Dummy78();
-    virtual void Dummy7c();
-    virtual void Dummy80();
-    virtual void Dummy84();
-    virtual void Dummy88();
-    virtual void Dummy8c();
-    virtual unsigned int GetWidth(unsigned int index);  // 0x90
-};
-
-struct Renderer
-{
-    virtual void Dummy00();
-    virtual void Dummy04();
-    virtual void Dummy08();
-    virtual void Dummy0c();
-    virtual void Dummy10();
-    virtual void Dummy14();
-    virtual void Dummy18();
-    virtual void Dummy1c();
-    virtual void Dummy20();
-    virtual void Dummy24();
-    virtual void Dummy28();
-    virtual void Dummy2c();
-    virtual void Dummy30();
-    virtual void Dummy34();
-    virtual void Dummy38();
-    virtual void Dummy3c();
-    virtual void Dummy40();
-    virtual void Dummy44();
-    virtual void Dummy48();
-    virtual void Dummy4c();
-    virtual void Dummy50();
-    virtual void Dummy54();
-    virtual void Dummy58();
-    virtual void Dummy5c();
-    virtual void Dummy60();
-    virtual void Dummy64();
-    virtual void Dummy68();
-    virtual void Dummy6c();
-    virtual void Dummy70();
-    virtual void Dummy74();
-    virtual void Dummy78();
-    virtual void Dummy7c();
-    virtual void Dummy80();
-    virtual void Dummy84();
-    virtual void Dummy88();
-    virtual void Dummy8c();
-    virtual void Dummy90();
-    virtual void Dummy94();
-    virtual void Dummy98();
-    virtual void Dummy9c();
-    virtual void Dummya0();
-    virtual void Dummya4();
-    virtual void Dummya8();
-    virtual void Dummyac();
-    virtual void Dummyb0();
-    virtual void Dummyb4();
-    virtual void Dummyb8();
-    virtual void Dummybc();
-    virtual void Dummyc0();
-    virtual void Dummyc4();
-    virtual RenderTargetGroup* GetDefaultRenderTargetGroup();  // 0xc8
-};
-
 struct ConstantMap
 {
     void SetReferenceVector(unsigned int reg, float x, float y, float z, float w);
 };
 
-struct CameraData
-{
-    char pad_00[0x6c];
-    float mat[3][3];
-};
-
 extern unsigned char DAT_01202498;
 extern float DAT_011f9418;
-extern Renderer* DAT_011f9508;
-extern CameraData* DAT_011f917c;
+extern NiDX9Renderer* DAT_011f9508;
+extern NiCamera* DAT_011f917c;
 extern NiPoint3 DAT_012004f0;
 
 struct FUN_00c04b90_class
@@ -350,16 +241,16 @@ bool FUN_00c04b90_class::UpdateCameraConstants(void* apUnused)
         fVar1 = m_f58;
     }
 
-    RenderTargetGroup* pkRT = DAT_011f9508->GetDefaultRenderTargetGroup();
+    NiRenderTargetGroup* pkRT = DAT_011f9508->GetDefaultRT();
     double d5c = m_f5c;
-    unsigned int width = pkRT->GetWidth(0);
+    unsigned int width = reinterpret_cast<unsigned int>(pkRT->vf36(0));
     float fDiv = (float)(d5c / (float)width);
 
     pkMap->SetReferenceVector(0, fVar1, fDiv, m_f60, 1.0f);
 
-    CameraData* pCamera = DAT_011f917c;
-    NiPoint3 kCol0(pCamera->mat[0][0], pCamera->mat[1][0], pCamera->mat[2][0]);
-    NiPoint3 kCol1(pCamera->mat[0][1], pCamera->mat[1][1], pCamera->mat[2][1]);
+    NiCamera* pCamera = DAT_011f917c;
+    NiPoint3 kCol0(pCamera->m_kWorld.m_Rotate.m_pEntry[0][1], pCamera->m_kWorld.m_Rotate.m_pEntry[1][1], pCamera->m_kWorld.m_Rotate.m_pEntry[2][1]);
+    NiPoint3 kCol1(pCamera->m_kWorld.m_Rotate.m_pEntry[0][2], pCamera->m_kWorld.m_Rotate.m_pEntry[1][2], pCamera->m_kWorld.m_Rotate.m_pEntry[2][2]);
     NiPoint3 kVec = DAT_012004f0;
     NiPoint3 negCol0 = -kCol0;
 

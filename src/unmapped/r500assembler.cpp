@@ -1,10 +1,9 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct BSFile
-{
-    virtual ~BSFile();
-};
+#include "../../include/BSFile.h"
+#include "../../include/SL.h"
+#include "../../include/StartMenu.h"
 
 struct FUN_0085fbb0 : public BSFile
 {
@@ -37,10 +36,6 @@ extern "C" __declspec(dllimport) void* __stdcall FindFirstFileA(const char*, _WI
 extern "C" __declspec(dllimport) int __stdcall FindNextFileA(void*, _WIN32_FIND_DATAA*);
 extern "C" __declspec(dllimport) int __stdcall FindClose(void*);
 struct DebrisData;
-struct StartMenu
-{
-    const char* GetMenuTitle();
-};
 extern StartMenu g_011c3f74;
 const char* __cdecl PrepareScriptMessage(const char*, bool);
 char* __cdecl FUN_004dc110();
@@ -48,12 +43,6 @@ int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
 struct AEList
 {
     void Insert(DebrisData*, int(__cdecl*)(DebrisData*, DebrisData*));
-};
-struct SL
-{
-    void* a;
-    void* b;
-    SL();
 };
 struct FUN_0085fb40
 {
@@ -199,7 +188,7 @@ void SaveLoadList::LoadSaveFiles()
                         DeleteAllItems();
                     list = new SL;
                     lstrcpy(path, FUN_004dc110());
-                    lstrcatA(path, PrepareScriptMessage(g_011c3f74.GetMenuTitle(), false));
+                    lstrcatA(path, PrepareScriptMessage(static_cast<const StartMenu&>(g_011c3f74).GetMenuTitle(), false));
                     lstrcatA(path, "*.ess");
                     handle = FindFirstFileA(path, (_WIN32_FIND_DATAA*)&findData);
                     if (handle != (void*)-1)
@@ -209,7 +198,7 @@ void SaveLoadList::LoadSaveFiles()
                             if (findData.nFileSizeHigh || findData.nFileSizeLow)
                             {
                                 _sprintf_s(fullPath, 260, "%s%s%s", FUN_004dc110(),
-                                           PrepareScriptMessage(g_011c3f74.GetMenuTitle(), false), findData.cFileName);
+                                           PrepareScriptMessage(static_cast<const StartMenu&>(g_011c3f74).GetMenuTitle(), false), findData.cFileName);
                                 file = new FUN_0085fb40(fullPath, 0, 0x20000);
                                 ((AEList*)list)->Insert((DebrisData*)file, CompareFileWriteTimes);
                             }
@@ -331,10 +320,11 @@ struct Item
     virtual ~Item();
 };
 
-struct ListNode
+// Exe 0x0085fbd0: unit-local ListNode view; declarations and layout are preserved.
+struct R500assemblerListNodeView
 {
     Item** GetItem();
-    ListNode* GetNext();
+    R500assemblerListNodeView* GetNext();
 };
 
 struct List
@@ -357,7 +347,7 @@ void __thiscall FUN_0085fbd0_class::DeleteAllItems()
 {
     if (m_kNode)
     {
-        ListNode* node = (ListNode*)m_kNode;
+        R500assemblerListNodeView* node = (R500assemblerListNodeView*)m_kNode;
         while (node)
         {
             Item* item = *node->GetItem();
@@ -386,6 +376,6 @@ void* __thiscall SaveGameFileDeleteEntry85::FUN_0085fb80(unsigned int flags)
 {
     FUN_0085fbb0::Method_0085fbb0();
     if (flags & 1)
-        operator delete(this);
+        ::operator delete(this);
     return this;
 }

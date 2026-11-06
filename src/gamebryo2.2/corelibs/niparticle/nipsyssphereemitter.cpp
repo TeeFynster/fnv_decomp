@@ -1,14 +1,15 @@
 // gamebryo2.2/corelibs/niparticle/nipsyssphereemitter.cpp: NiPSysSphereEmitter, PSysSphereEmitter (10 functions)
 
 #include "nipsyssphereemitter_decls.h"
+#include "../../../../include/BSFadeNode.h"
 // Calls the base LoadBinary, then reads a 4-byte value from the stream into a member and advances the stream position.
 // @fnv 0x00c20040
 void NiPSysSphereEmitter::LoadBinary(NiStream& stream)
 {
     NiPSysVolumeEmitter::LoadBinary(stream);
-    NiBinaryStream* __restrict input = stream.input;
+    NiBinaryStream* __restrict input = stream.m_pkIstr;
     unsigned int size = 4;
-    input->position += input->read(input, &m_fBoundRadius, 4, &size, 1);
+    input->m_uiAbsoluteCurrentPos += input->m_pfnRead(input, &m_fBoundRadius, 4, &size, 1);
 }
 
 struct GlobalObjectO2_00a7b610;
@@ -21,14 +22,6 @@ GlobalObjectO2_00a7b610* __cdecl FUN_00c1fe10()
 }
 
 extern int DAT_010bd974;
-struct BSFadeNode
-{
-    void* operator new(unsigned int size);
-    void FUN_00c31af0();
-    void* m_pvt;
-    char m_auiShapeKeys[0x54];
-    float m_f58;
-};
 // @fnv 0x00c1fff0
 BSFadeNode* __cdecl FUN_00c1fff0()
 {
@@ -36,8 +29,8 @@ BSFadeNode* __cdecl FUN_00c1fff0()
     if (p)
     {
         p->FUN_00c31af0();
-        p->m_f58 = 0.0f;
-        p->m_pvt = &DAT_010bd974;
+        *reinterpret_cast<float*>(reinterpret_cast<char*>(p) + 0x58) = 0.0f;
+        *reinterpret_cast<void**>(p) = &DAT_010bd974;
         return p;
     }
     return 0;
@@ -62,12 +55,9 @@ void* Holder20020::FUN_00c20020(unsigned int auiFlags)
     return this;
 }
 
-struct Base00c1fde0
-{
-    char _pad[0x58];
-    bool __thiscall FUN_00c31b80(void* pkObject);
-};
-struct Holder00c1fde0 : Base00c1fde0
+// The shared class does not yet declare this IsEqual override.
+extern "C" bool __cdecl NiPSysVolumeEmitter_IsEqual();
+struct Holder00c1fde0 : NiPSysVolumeEmitter
 {
     float m_fCylinderRadius;
     bool __thiscall FUN_00c1fde0(void* pkObject);
@@ -76,96 +66,51 @@ struct Holder00c1fde0 : Base00c1fde0
 bool __thiscall Holder00c1fde0::FUN_00c1fde0(void* pkObject)
 {
     Holder00c1fde0* pkDest = (Holder00c1fde0*)pkObject;
-    if (!FUN_00c31b80(pkObject))
+    if (!reinterpret_cast<bool (__thiscall*)(const NiPSysVolumeEmitter*, NiObject*)>(
+            &NiPSysVolumeEmitter_IsEqual)(this, static_cast<NiObject*>(pkObject)))
         return false;
     if (m_fCylinderRadius != pkDest->m_fCylinderRadius)
         return false;
     return true;
 }
 
-struct FUN_00c1ffa0_s
+struct SphereEmitterCloneView
 {
-    float m_f58;
     void* FUN_00c31b10(BSFadeNode* pkObject, void* pkCloningProcess);
     BSFadeNode* CreateFadeNode(void* pkCloningProcess);
 };
 
 // @fnv 0x00c1ffa0
-BSFadeNode* FUN_00c1ffa0_s::CreateFadeNode(void* pkCloningProcess)
+BSFadeNode* SphereEmitterCloneView::CreateFadeNode(void* pkCloningProcess)
 {
-    BSFadeNode* pkObject = new BSFadeNode;
+    BSFadeNode* pkObject = static_cast<BSFadeNode*>(BSFadeNode::operator new(0x5c));
     if (pkObject)
     {
         pkObject->FUN_00c31af0();
-        pkObject->m_f58 = 0.0f;
-        pkObject->m_pvt = &DAT_010bd974;
+        *reinterpret_cast<float*>(reinterpret_cast<char*>(pkObject) + 0x58) = 0.0f;
+        *reinterpret_cast<void**>(pkObject) = &DAT_010bd974;
     }
     else
     {
         pkObject = 0;
     }
     FUN_00c31b10(pkObject, pkCloningProcess);
-    pkObject->m_f58 = ((float*)((char*)this + 0x58))[0];
+    *reinterpret_cast<float*>(reinterpret_cast<char*>(pkObject) + 0x58) =
+        *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x58);
     return pkObject;
 }
 
-// FUN_00c20080 - the sphere emitter's stream loader.
-//
-// The pack's NiStream / NiBinaryStream declarations do not match the original
-// code: the original takes the binary stream from stream+0x250 (the pack says
-// +0x24c) and the reader function pointer from stream+0x0c (the pack says
-// +0x08), so both objects are modelled here with the offsets read out of the
-// original code.
-//
-// The original does, in this order:
-//   push esi / mov esi,[esp+8] / push edi / push esi / mov edi,ecx
-//   call <base loader>                    ; NiPSysVolumeEmitter::LoadBinary
-//   mov esi,[esi+0x250]                   ; the binary stream
-//   mov ecx,[esi+0xc]                     ; its reader
-//   push 1 / lea eax,[esp+0x10] / push eax / push 4
-//   add edi,0x58 / push edi / push esi
-//   mov dword ptr [esp+0x20],4            ; the element size
-//   call ecx
-//   add dword ptr [esi+4],eax             ; position += bytes read
-//   add esp,0x14 / pop edi / pop esi / ret 4
-
-struct BinaryStream
-{
-    unsigned int unk00;
-    unsigned int position;  // +0x04
-    unsigned int unk08;
-    unsigned int(__cdecl* read)(BinaryStream*, void*, unsigned int, unsigned int*, unsigned int);  // +0x0c
-};
-
-struct GameStream
-{
-    char padding[0x250];
-    BinaryStream* input;  // +0x250
-};
-
-// The emitter object: its vtable pointer sits at +0x00, so the sphere
-// emitter's radius float lands at +0x58.
-struct PSysVolumeEmitter
-{
-    void* vtable;  // +0x00
-    char padding[0x54];
-    void LoadBinary(GameStream& stream);
-};
-
-struct PSysSphereEmitter : PSysVolumeEmitter
-{
-    float m_fBoundRadius;  // +0x58
-    void FUN_00c20080(GameStream& stream);
-};
+// The shared class does not yet declare this SaveBinary override.
+extern "C" void __cdecl NiPSysVolumeEmitter_SaveBinary();
 
 // @fnv 0x00c20080
-void PSysSphereEmitter::FUN_00c20080(GameStream& stream)
+void NiPSysSphereEmitter::SaveBinary(NiStream& stream)
 {
-    PSysVolumeEmitter::LoadBinary(stream);
-    BinaryStream* input = stream.input;
+    reinterpret_cast<void (__thiscall*)(NiPSysVolumeEmitter*, NiStream&)>(&NiPSysVolumeEmitter_SaveBinary)(this, stream);
+    NiBinaryStream* input = stream.m_pkOstr;
     {
         unsigned int size = 4;
-        input->position += input->read(input, &m_fBoundRadius, 4, &size, 1);
+        input->m_uiAbsoluteCurrentPos += input->m_pfnWrite(input, &m_fBoundRadius, 4, &size, 1);
     }
 }
 
@@ -215,40 +160,10 @@ void __thiscall Emitter00c200c0::AppendTwoValues(FUN_00c200c0_Arr* p)
     p->FUN_0096ae90(n, &uiValue);
 }
 
-struct S_00c31af0_Base
-{
-    virtual void vf00();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    S_00c31af0_Base();
-};
-struct FUN_00c31af0 : S_00c31af0_Base
-{
-    int unk54;
-    FUN_00c31af0();
-};
 // @fnv 0x00c31af0
-FUN_00c31af0::FUN_00c31af0() : S_00c31af0_Base()
+NiPSysVolumeEmitter::NiPSysVolumeEmitter() : NiPSysEmitter()
 {
-    unk54 = 0;
+    m_pkEmitterObject = 0;
 }
 
 extern "C" int __cdecl rand();

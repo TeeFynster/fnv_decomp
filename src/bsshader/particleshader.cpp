@@ -1,7 +1,29 @@
+#include "../../include/NiPointer.h"
 // bsshader/particleshader.cpp: ParticleShader, ShaderState (12 functions)
 
 #include "particleshader_decls.h"
+#include "../../include/BSShader.h"
+// 0x00ba53f0 zeroes four scalar rows at unaligned offset 0xec.
+struct ParticleShaderRow_00ba53f0 { float x, y, z, w; };
+#include "../../include/MemoryManager.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiProperty.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/NiPoint3.h"
+// The former Vector3 stand-in defined this constructor inline in its class.
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{
+}
 
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+#pragma intrinsic(memcpy)
+
+inline NiUpdateData::NiUpdateData() {}
+inline NiBound::NiBound(const NiBound& bound)
+    { memcpy(this, &bound, sizeof(*this)); }
 // Returns the cached particle count, computing it from the renderer level (26, or 78 when level >= 2) if not yet set.
 // @fnv 0x00ba52d0
 unsigned int ParticleShader::GetShaderParticleCount()
@@ -26,18 +48,13 @@ BSShader* ParticleShader::CreateShader()
     d->vfn_94(0, 4, 6, 0x80000000, 0, 10, 1, 0);
     d->vfn_b4();
     ParticleShader* pParticleShader = new FUN_00ba53f0(d);
-    pParticleShader->vfn_4c();
+    pParticleShader->Initialize();
     pParticleShader->vfn_13c();
     pParticleShader->vfn_140();
-    pParticleShader->vfn_11c();
-    pParticleShader->vfn_c0(d);
+    pParticleShader->InitShaderConstants();
+    pParticleShader->UseShaderDeclaration(reinterpret_cast<NiD3DShaderDeclaration*>(d));
     return pParticleShader;
 }
-
-struct NiD3DPass
-{
-    void __thiscall DestroyPass();
-};
 
 // Assigns a NiD3DPass pointer, releasing the old pass when its refcount at offset 0x64 drops to zero and incrementing the new pass's refcount.
 // @fnv 0x00ba53c0
@@ -50,7 +67,7 @@ void* __fastcall AssignNiD3DPass(void* pThis, int, void* param)
     {
         if (old)
         {
-            int* piRefCount = (int*)((char*)old + 0x64);
+            unsigned int* piRefCount = &old->m_uiRefCount;
             *piRefCount -= 1;
             if (*piRefCount == 0)
                 old->DestroyPass();
@@ -58,7 +75,7 @@ void* __fastcall AssignNiD3DPass(void* pThis, int, void* param)
         NiD3DPass* n = *ppParam;
         *ppThis = n;
         if (n)
-            ++*(int*)((char*)n + 0x64);
+            ++n->m_uiRefCount;
     }
     return pThis;
 }
@@ -100,7 +117,6 @@ void __thiscall FUN_00ba52f0_shell::FUN_00ba52f0()
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-void FUN_00e80190();
 extern "C" void FUN_00be0f10();
 
 struct ComTarget
@@ -112,26 +128,26 @@ struct ComTarget
 
 struct RefSlot
 {
-    void* value;
+    NiD3DPass* value;
     ~RefSlot()
     {
-        void* p = value;
+        NiD3DPass* p = value;
         if (p)
         {
-            if (--*(int*)((char*)p + 0x64) == 0)
+            if (--p->m_uiRefCount == 0)
             {
-                ((void(__thiscall*)(void*))FUN_00e80190)(p);
+                p->DestroyPass();
             }
         }
     }
     void Release()
     {
-        void* p = value;
+        NiD3DPass* p = value;
         if (p)
         {
-            if (--*(int*)((char*)p + 0x64) == 0)
+            if (--p->m_uiRefCount == 0)
             {
-                ((void(__thiscall*)(void*))FUN_00e80190)(p);
+                p->DestroyPass();
             }
             value = 0;
         }
@@ -195,47 +211,12 @@ struct ComSlot2
     }
 };
 
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 
 extern "C" ComTarget* DAT_012003f4;
 
-struct BaseCleanup : BSShader
+struct FUN_00ba5740 : BSShader
 {
-    ~BaseCleanup();
-};
-
-struct FUN_00ba5740 : BaseCleanup
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
     int unk6c;
     void* slot70;
     RefSlot slot74;
@@ -568,89 +549,8 @@ void __cdecl FUN_00ba5320()
     DAT_011adcd8 = DAT_011adcd4 = 1.0f;
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-
-struct NiBound
-{
-    NiPoint3 center;
-    float radius;
-};
 extern NiBound DAT_011f4288;
 extern int DAT_012003f0;
-
-struct NiUpdateData
-{
-    float t;
-    char c4;
-    char c5;
-    char c6;
-    char c7;
-    char c8;
-};
-
-class NiObject
-{
-  public:
-    virtual void vfn_0();
-    NiObject* Clone();
-};
-
-class NiProperty
-{
-  public:
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual void vfn_8();
-    virtual void vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual void vfn_8c();
-    virtual void vfn_90();
-    virtual void vfn_94();
-    virtual void vfn_98();
-    virtual void vfn_9c(NiObject*);
-    int f04;
-    int f08;
-    int f0c;
-    int f10;
-    int f14;
-    int f18;
-    int type;
-};
 
 struct BoundHolder
 {
@@ -659,115 +559,6 @@ struct BoundHolder
     int f08;
     int f0c;
     NiBound bound;
-};
-
-class NiAVObject : public NiObject
-{
-  public:
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual void vfn_8();
-    virtual NiAVObject* vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual void vfn_8c();
-    virtual void vfn_90();
-    virtual void vfn_94();
-    virtual void vfn_98();
-    virtual void vfn_9c();
-    virtual void vfn_a0();
-    virtual void vfn_a4();
-    virtual void vfn_a8();
-    virtual void vfn_ac();
-    virtual void vfn_b0();
-    virtual void vfn_b4();
-    virtual void vfn_b8();
-    virtual void vfn_bc();
-    virtual void vfn_c0();
-    virtual void vfn_c4();
-    virtual void vfn_c8();
-    virtual void vfn_cc();
-    virtual void vfn_d0();
-    virtual void vfn_d4();
-    virtual void vfn_d8();
-    virtual void vfn_dc(NiObject*, int);
-    NiProperty* GetProperty(unsigned int);
-    void Update(NiUpdateData&);
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    void* unk10;
-    void* unk14;
-    void* unk18;
-    void* unk1c;
-    void* unk20;
-    void* unk24;
-    void* unk28;
-    void* unk2c;
-    void* unk30;
-    void* unk34;
-    void* unk38;
-    void* unk3c;
-    void* unk40;
-    void* unk44;
-    void* unk48;
-    void* unk4c;
-    void* unk50;
-    void* unk54;
-    void* unk58;
-    void* unk5c;
-    void* unk60;
-    void* unk64;
-    void* unk68;
-    void* unk6c;
-    void* unk70;
-    void* unk74;
-    void* unk78;
-    void* unk7c;
-    void* unk80;
-    void* unk84;
-    void* unk88;
-    void* unk8c;
-    void* unk90;
-    void* unk94;
-    void* unk98;
-    void* unk9c;
-    void* unka0;
-    void* unka4;
-    void* unka8;
-    void* unkac;
-    void* unkb0;
-    void* unkb4;
-    BoundHolder* holder;
 };
 
 struct ArgObj
@@ -791,38 +582,41 @@ NiProperty* __cdecl FUN_00ba68d0(NiAVObject* apObject, ArgObj* apArg)
 {
     if (apObject)
     {
-        NiAVObject* obj = apObject->vfn_c();
+        NiNode* obj = apObject->IsSceneNode();
         if (obj)
         {
             NiObject* pPrototype = FUN_00ba64e0();
             NiAVObject* clone = (NiAVObject*)pPrototype->Clone();
-            BoundHolder* holder = clone->holder;
+            // The clone is geometry; its data pointer follows the NiAVObject base.
+            BoundHolder* holder = *(BoundHolder**)((char*)clone + 0xb8);
             NiBound b = holder->bound;
             NiBound* pOtherBound = apArg->bound;
             if (!pOtherBound)
                 pOtherBound = &DAT_011f4288;
-            float t = pOtherBound->radius * 2.0f;
-            float newRadius = (b.radius > t) ? b.radius : t;
-            holder->bound.radius = newRadius;
-            holder->bound.center = b.center;
-            obj->vfn_dc(clone, 1);
+            float t = pOtherBound->m_fRadius * 2.0f;
+            float newRadius = (b.m_fRadius > t) ? b.m_fRadius : t;
+            holder->bound.m_fRadius = newRadius;
+            holder->bound.m_kCenter = b.m_kCenter;
+            obj->AttachChildInAvailableSlot(clone, true);
             NiUpdateData updateData;
-            updateData.t = 0.0f;
-            updateData.c4 = 0;
-            updateData.c5 = 0;
-            updateData.c6 = 0;
-            updateData.c7 = 0;
-            updateData.c8 = 0;
-            obj->Update(updateData);
+            updateData.fTime = 0.0f;
+            updateData.pad1 = 0;
+            updateData.pad2 = 0;
+            updateData.pad3 = 0;
+            updateData.pad4 = 0;
+            updateData.pad5 = 0;
+            obj->NiAVObject::Update(updateData);
             FUN_00b57e30(clone, 0, 0);
             NiProperty* pProperty = clone->GetProperty(3);
             int bValidType = 0;
             if (pProperty)
-                bValidType = (pProperty->type == 0x11);
+                // Shader-property type, beyond the NiProperty base.
+                bValidType = (*(int*)((char*)pProperty + 0x1c) == 0x11);
             NiProperty* pKeptProperty = bValidType ? pProperty : 0;
             if (pKeptProperty)
             {
-                pKeptProperty->vfn_9c(clone);
+                typedef void (__thiscall *SetGeometry)(NiProperty*, NiObject*);
+                (*(SetGeometry**)pKeptProperty)[0x9c / 4](pKeptProperty, clone);
                 FUN_00ba64e0();
                 ++DAT_012003f0;
             }
@@ -861,7 +655,7 @@ inline unsigned short* Q64_allocIdx(unsigned short t)
 }
 inline NiPoint3* Q64_allocPos(unsigned short n)
 {
-    return new (DAT_011f6238) NiPoint3[n];
+    return ::new (DAT_011f6238) NiPoint3[n];
 }
 inline Q64_Pt2* Q64_allocUv(unsigned short n)
 {
@@ -885,8 +679,8 @@ struct Q64_Sub
     NiBound bound;
     void SetObjectBound(const NiPoint3& c, float r)
     {
-        bound.center = c;
-        bound.radius = r;
+        bound.m_kCenter = c;
+        bound.m_fRadius = r;
     }
 };
 
@@ -1090,21 +884,7 @@ struct RefObj : ComTarget
             vfn_4();
     }
 };
-template <class T> struct NiPtr
-{
-    T* m_pObject;
-    NiPtr& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-            m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-};
+using ::NiPointer;
 // Builds and caches a Q64_Top containing repeated quad geometry with vertices, UVs, and a renderer.
 // @fnv 0x00ba64e0
 NiObject* __cdecl FUN_00ba64e0()
@@ -1126,10 +906,14 @@ NiObject* __cdecl FUN_00ba64e0()
 
     for (unsigned short i = 0; i < n; i++)
     {
-        NiPoint3 p0 = {-1.0f, -1.0f, 0.0f};
-        NiPoint3 p1 = {1.0f, -1.0f, 0.0f};
-        NiPoint3 p2 = {1.0f, 1.0f, 0.0f};
-        NiPoint3 p3 = {-1.0f, 1.0f, 0.0f};
+        NiPoint3 p0;
+        p0.x = -1.0f; p0.y = -1.0f; p0.z = 0.0f;
+        NiPoint3 p1;
+        p1.x = 1.0f; p1.y = -1.0f; p1.z = 0.0f;
+        NiPoint3 p2;
+        p2.x = 1.0f; p2.y = 1.0f; p2.z = 0.0f;
+        NiPoint3 p3;
+        p3.x = -1.0f; p3.y = 1.0f; p3.z = 0.0f;
         Q64_Pt2 u0 = {0.0f, 0.0f};
         Q64_Pt2 u1 = {1.0f, 0.0f};
         Q64_Pt2 u2 = {1.0f, 1.0f};
@@ -1162,8 +946,8 @@ NiObject* __cdecl FUN_00ba64e0()
     Q64_Top* top = new Q64_Top(geo);
     Q64_Sub* sub = top->sub;
     NiBound kBound = sub->bound;
-    sub->bound.radius = 512.0f;
-    sub->bound.center = kBound.center;
+    sub->bound.m_fRadius = 512.0f;
+    sub->bound.m_kCenter = kBound.m_kCenter;
 
     Q64_Ren* ren = new Q64_Ren;
     top->FUN_00439410(ren);
@@ -1215,38 +999,10 @@ struct ObjectPointer
         }
     }
 };
-struct PassReference
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int references;
-};
+
 struct PassPointer
 {
-    PassReference* pass;
+    NiD3DPass* pass;
     PassPointer() : pass(0)
     {}
     ~PassPointer()
@@ -1255,31 +1011,16 @@ struct PassPointer
     }
     void reset()
     {
-        PassReference* previous = pass;
+        NiD3DPass* previous = pass;
         if (previous)
         {
-            if (!--previous->references)
-                reinterpret_cast<NiD3DPass*>(previous)->DestroyPass();
+            if (!--previous->m_uiRefCount)
+                previous->DestroyPass();
             pass = 0;
         }
     }
 };
-struct Vector3
-{
-    float x, y, z;
-    Vector3()
-    {}
-    Vector3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-};
-struct FourFloatVector
-{
-    float x, y, z, w;
-    FourFloatVector() : x(0), y(0), z(0), w(0)
-    {}
-    FourFloatVector(float a, float b, float c, float d) : x(a), y(b), z(c), w(d)
-    {}
-};
+
 struct Particle
 {
     float x, y, z, w, a, b, c, d, e, f, g, h;
@@ -1288,45 +1029,11 @@ struct Particle
         return particleMemoryManager.FUN_00aa3e40(size);
     }
 };
-struct ShaderBase
-{
-    ShaderBase();
-    ~ShaderBase();
-    virtual void unused();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    bool enabled;
-    unsigned char unk25;
-    unsigned short unk26;
-    ObjectPointer declaration;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    void* particles;
-};
-class FUN_00ba53f0 : public ShaderBase
+class FUN_00ba53f0 : public BSShader
 {
   public:
+    unsigned int unk6c;
+    void* particles;
     PassPointer firstPass, secondPass;
     ObjectPointer vertexProgram, pixelProgram;
     unsigned int unk84;
@@ -1349,28 +1056,48 @@ class FUN_00ba53f0 : public ShaderBase
     unsigned int unkc8;
     unsigned int unkcc;
     unsigned int unkd0;
-    Vector3 position, direction;
-    FourFloatVector row0, row1, row2, row3;
+    NiPoint3 position, direction;
+    // The shader stores these rows at 0xec with 4-byte alignment. Keep their
+    // storage unaligned; all accesses below use the shared scalar members.
+    unsigned char rowStorage[4 * sizeof(ParticleShaderRow_00ba53f0)];
     FUN_00ba53f0(NiD3DVertexDeclaration* declaration);
 };
+inline void InitializeShaderRow(ParticleShaderRow_00ba53f0& row)
+{
+    row.x = 0;
+    row.y = 0;
+    row.z = 0;
+    row.w = 0;
+}
+
+inline void ZeroShaderRow(ParticleShaderRow_00ba53f0& row)
+{
+    float components[4] = {0, 0, 0, 0};
+    memcpy(&row, components, sizeof(components));
+}
+
 // Initializes a particle shader with a vertex declaration, sets up particle arrays based on renderer level, and zeroes out matrix rows.
 // @fnv 0x00ba53f0
 FUN_00ba53f0::FUN_00ba53f0(NiD3DVertexDeclaration* apVertexDeclaration)
 {
-    unk68 = 14;
-    enabled = true;
+    InitializeShaderRow(*reinterpret_cast<ParticleShaderRow_00ba53f0*>(rowStorage + 0 * sizeof(ParticleShaderRow_00ba53f0)));
+    InitializeShaderRow(*reinterpret_cast<ParticleShaderRow_00ba53f0*>(rowStorage + 1 * sizeof(ParticleShaderRow_00ba53f0)));
+    InitializeShaderRow(*reinterpret_cast<ParticleShaderRow_00ba53f0*>(rowStorage + 2 * sizeof(ParticleShaderRow_00ba53f0)));
+    InitializeShaderRow(*reinterpret_cast<ParticleShaderRow_00ba53f0*>(rowStorage + 3 * sizeof(ParticleShaderRow_00ba53f0)));
+    iShaderType = 14;
+    m_bUsesNiRenderState = true;
     unk6c = 0x241;
     firstPass.reset();
     secondPass.reset();
-    declaration.reset(reinterpret_cast<RefObject*>(apVertexDeclaration));
+    reinterpret_cast<ObjectPointer&>(m_spShaderDecl).reset(reinterpret_cast<RefObject*>(apVertexDeclaration));
     vertexProgram.reset(0);
     pixelProgram.reset(0);
-    position = Vector3(0, 0, 0);
-    direction = Vector3(0, 0, 0);
-    row0 = FourFloatVector(0, 0, 0, 0);
-    row1 = FourFloatVector(0, 0, 0, 0);
-    row2 = FourFloatVector(0, 0, 0, 0);
-    row3 = FourFloatVector(0, 0, 0, 0);
+    position = NiPoint3(0.0f, 0.0f, 0.0f);
+    direction = NiPoint3(0.0f, 0.0f, 0.0f);
+    ZeroShaderRow(*reinterpret_cast<ParticleShaderRow_00ba53f0*>(rowStorage + 0 * sizeof(ParticleShaderRow_00ba53f0)));
+    ZeroShaderRow(*reinterpret_cast<ParticleShaderRow_00ba53f0*>(rowStorage + 1 * sizeof(ParticleShaderRow_00ba53f0)));
+    ZeroShaderRow(*reinterpret_cast<ParticleShaderRow_00ba53f0*>(rowStorage + 2 * sizeof(ParticleShaderRow_00ba53f0)));
+    ZeroShaderRow(*reinterpret_cast<ParticleShaderRow_00ba53f0*>(rowStorage + 3 * sizeof(ParticleShaderRow_00ba53f0)));
     unsigned int count = fnv_particle_shader_particle_count;
     if (!count)
     {

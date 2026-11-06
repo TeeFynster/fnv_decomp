@@ -1,3 +1,214 @@
+#include "../../../../../../../include/hkArray.h"
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+// The original's timer stamp helper, a unit-local view (declared only here, as before).
+struct ProfRec_hkpcontinuoussimulation_rtm_variant : hkMonitorStream::TimerCommand
+{
+    void stamp();
+};
+#include "../../../../../../../include/hkBool.h"
+// The RTM unit uses an intrinsic union without byte lanes. Adding byte lanes
+// changes alias analysis and the generated code for FUN_00d0cb00.
+#ifndef _INCLUDED_MM2
+#define _INCLUDED_MM2
+// Exe 0x00d0cb00 FUN_00d0cb00: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+    __int32 m128_i32[4];
+    __int64 m128_i64[2];
+    unsigned __int32 m128_u32[4];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_mul_ps(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_add_ps(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 _A, LocalM128 _B, unsigned int _Imm8);
+extern "C" LocalM128 _mm_unpacklo_ps(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_unpackhi_ps(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_movelh_ps(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_movehl_ps(LocalM128 _A, LocalM128 _B);
+#endif
+// LocalVecArray: unit-local copy of the former shared stand-in Vec. This unit uses it as a 12-byte {m_pData, m_iArrayLength, m_iCapacity} array header (the hkArray layout), not as a point.
+#include <xmmintrin.h>
+class Matrix;
+class Scalar;
+class Simd;
+class Tok;
+class Mask;
+class Elem;
+class Iter;
+class CIter;
+class CMutIter;
+class Mat3;
+class Mat4;
+class hkVector4;
+class hkQuaternion;
+
+class LocalVecArray
+{
+public:
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+        };
+        struct
+        {
+            void* m_pData;
+            int m_iArrayLength;
+            int m_iCapacity;
+        };
+    };
+
+    LocalVecArray();
+    LocalVecArray(float a, float b, float c);
+    // Keep the implicit copy constructor, copy assignment and destructor trivial.
+
+    void negative(const LocalVecArray& n);
+    void inv(const Matrix& m, const LocalVecArray& n);
+    void point(const Matrix& m, const LocalVecArray& b);
+    void difference(const LocalVecArray& a, const LocalVecArray& b);
+    Scalar dot(const LocalVecArray& n) const;
+    Scalar at(int i) const;
+    void set(float a, float b, float c, float d);
+
+    Simd lengthSquared() const;
+    void mul(const Simd& factor);
+    void SetProduct(const Simd& factor, const LocalVecArray& v);
+
+    void resize(unsigned n);
+    Tok& operator[](unsigned i);
+    void release(int elemSize);
+
+    LocalVecArray& operator-=(const LocalVecArray& v);
+    LocalVecArray& operator+=(const LocalVecArray& v);
+    LocalVecArray operator*(float scale) const;
+    LocalVecArray operator+(const LocalVecArray& v) const;
+    LocalVecArray operator-(const LocalVecArray& v) const;
+    float Squared() const;
+    float Length() const;
+    float Normalize();
+    float Dot(const LocalVecArray& v) const;
+    LocalVecArray Cross(const LocalVecArray& v) const;
+    LocalVecArray ApplyScaled(float scale);
+    LocalVecArray ApplyScaled(float scale) const;
+    void FUN_00acf580(unsigned n, Tok value);
+    LocalVecArray FUN_004a0bd0();
+    LocalVecArray FUN_004a0bd0() const;
+    LocalVecArray FUN_0053d1a0(const LocalVecArray& v);
+    LocalVecArray FUN_004b3800(const LocalVecArray& v);
+    LocalVecArray FUN_004b3800(const LocalVecArray& v) const;
+    LocalVecArray FUN_00439e90(const LocalVecArray& v);
+    LocalVecArray FUN_00439e90(const LocalVecArray& v) const;
+    LocalVecArray FUN_00439ef0(const LocalVecArray& v);
+    LocalVecArray FUN_00439ef0(const LocalVecArray& v) const;
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    void FUN_006815c0();
+    void FUN_00439180(float scale);
+    LocalVecArray& FUN_0063c8a0(const LocalVecArray& v);
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    void FUN_004b4db0(const float* values);
+    void FUN_00a38560();
+    void FUN_004f0180(void* value);
+
+    LocalVecArray& ScaleByInverse(float divisor);
+    float FUN_00457910();
+    LocalVecArray* FUN_006a6eb0();
+    bool FUN_004390c0(const LocalVecArray& v);
+
+    LocalM128 get() const;
+    void set(LocalM128 value);
+    void operator=(const LocalM128& value);
+    operator LocalM128() const;
+    LocalM128& getQuad();
+    const LocalM128& getQuad() const;
+    LocalM128& quad();
+    const LocalM128& quad() const;
+    float& operator()(int component);
+    const float& operator()(int component) const;
+    void setZero4();
+    void setSub4(const LocalVecArray& a, const LocalVecArray& b);
+    void setAdd4(const LocalVecArray& a, const LocalVecArray& b);
+    void setMul4(const LocalVecArray& a, const LocalVecArray& b);
+    void setMul4(const Scalar& a, const LocalVecArray& b);
+    void add4(const LocalVecArray& v);
+    void mul4(const LocalVecArray& v);
+    void mul4(const Scalar& value);
+    void add3clobberW(const LocalVecArray& v);
+    void sub3clobberW(const LocalVecArray& v);
+    void setBroadcast3clobberW(const LocalVecArray& v, int component);
+    Scalar horizontalAdd3() const;
+    void setCross(const LocalVecArray& a, const LocalVecArray& b);
+    Scalar dot3(const LocalVecArray& v) const;
+    Scalar lengthSquared3() const;
+    Scalar lengthInverse3() const;
+    void normalize3();
+    Scalar getSimdAt(int component) const;
+    void setInterpolate4(const LocalVecArray& a, const LocalVecArray& b, const Scalar& fraction);
+    void setAddMul4(const LocalVecArray& a, const LocalVecArray& b, const Scalar& scale);
+    void setNeg4(const LocalVecArray& v);
+    Mask compareLessThanZero4() const;
+    void SetRotatedDirection(const hkQuaternion& rotation, const LocalVecArray& direction);
+    void setRotatedTranslation(const hkQuaternion& rotation, const LocalVecArray& direction);
+    void cross(const LocalVecArray& a, const LocalVecArray& b);
+    Scalar squared() const;
+    Scalar inverseLength() const;
+    void normalize();
+    void negate(const LocalVecArray& v);
+
+    void FUN_00c7f640(const void* matrix, const hkVector4& point);
+    void FUN_00c7f640(Mat4* matrix, void* point);
+    void FUN_00c7f640(const void* matrix, const LocalVecArray* point);
+    void FUN_00c7f640(const void* matrix, const void* point);
+    void FUN_00c7f700(Mat3* matrix, void* point);
+    void FUN_00c7f700(const void* matrix, const LocalVecArray* point);
+    void FUN_00b12790();
+    void FUN_00b13040(LocalVecArray* out, const LocalVecArray* v);
+    LocalVecArray* ScaleSwizzled(LocalVecArray* out, float factor);
+    void AddVector(LocalVecArray* out, const LocalVecArray* v);
+    float Dot(const LocalVecArray& v);
+    LocalVecArray* FUN_004a3c90(const LocalVecArray* v);
+    LocalVecArray* FUN_0062b0a0(LocalVecArray* out, LocalVecArray* v);
+    LocalVecArray* FUN_0062af00(LocalVecArray* target);
+
+    void FUN_00cf7690(Elem* value);
+    void FUN_00b1e970();
+    Iter begin();
+    Iter end();
+    CIter FUN_00b33030(CIter first, CIter last);
+    void FUN_00b32120();
+    unsigned int size() const;
+    unsigned int capacity() const;
+    void FUN_00b2df90();
+    void FUN_00b2e140(Elem* first, Elem* last);
+    bool InitBuffer(unsigned int count);
+    Elem* _Ucopy(Elem* first, Elem* last, Elem* out);
+    LocalVecArray& FUN_00b2db10(const LocalVecArray& v);
+    CMutIter FUN_00aceb80(CMutIter first, CMutIter last);
+    void FUN_00acac40();
+    LocalVecArray& FUN_00ad61e0(const LocalVecArray& v);
+};
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkRotation.h"
+#include "../../../../../../../include/hkMotionState.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkTransform.h"
+#include "../../../../../../../include/hkSweptTransform.h"
 // src/havok/physics/dynamics/world/simulation/continuous/hkpcontinuoussimulation_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/dynamics/world/simulation/continuous/hkpcontinuoussimulation.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -164,13 +375,6 @@ struct Item {
     char pad[0x30];
     SubItem* volatile sub;
 };
-class hkBool {
-public:
-    char m_cBooleanValue;
-    inline hkBool() {}
-    inline hkBool(bool b) : m_cBooleanValue(char(b)) {}
-    inline operator bool() const { return m_cBooleanValue != 0; }
-};
 hkBool __cdecl CompareItemPriority(const Item* apItemA, const Item* apItemB);
 struct D0BD00Entry {
     float m_uiCommandId;
@@ -316,45 +520,6 @@ public:
 
     void RemoveMatchingEntries(ScopeQuery* q);
 };
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int32 m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_mul_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_add_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_sub_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_shuffle_ps(__m128 _A, __m128 _B, unsigned int _Imm8);
-extern "C" __m128 _mm_unpacklo_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_unpackhi_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_movelh_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_movehl_ps(__m128 _A, __m128 _B);
-class hkVector4 {
-public:
-    __m128 m_vComponents;
-    hkVector4& operator=(const hkVector4& v) { m_vComponents = v.m_vComponents; return *this; }
-};
-class hkRotation {
-public:
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-};
-class FUN_008cd6a0_Class {
-public:
-    void FUN_00cb2d90(void* q);
-};
-struct hkMotionState {
-    hkRotation m_rotation;
-    hkVector4 m_vTranslation;
-    hkVector4 m_vCenterOfMass0;
-    hkVector4 m_vCenterOfMass1;
-    hkVector4 m_qRotation0;
-    hkVector4 m_qRotation1;
-    hkVector4 m_vCenterOfMassLocal;
-};
 struct SolverBody {
     hkVector4 m_unk00;
     hkVector4 m_unk10;
@@ -490,11 +655,6 @@ struct Entry {
     int m_04;
     int m_08;
 };
-struct Vec {
-    Entry* m_00;
-    int m_04;
-    unsigned int m_08;
-};
 struct FloatSrc {
     unsigned int unk00;
     unsigned int unk04;
@@ -513,12 +673,12 @@ struct HolderBase {
     unsigned int unk0c;
     void* m_10;
 };
-void __cdecl ResizeAudioStream(void* alloc, Vec* vec, unsigned int elemSize);
+void __cdecl ResizeAudioStream(void* alloc, LocalVecArray* vec, unsigned int elemSize);
 int __cdecl FUN_00d9f6f0(int a, int b, int c, int d, void* e);
 int __cdecl FUN_00d0bd30(float f, Entry* entry, void* out, int a, int b);
-unsigned char* __cdecl CollectMatchingEntries(unsigned char* pResult, SrcA* pSrc, Vec* pVec, int a4, Vec* dst);
+unsigned char* __cdecl CollectMatchingEntries(unsigned char* pResult, SrcA* pSrc, LocalVecArray* pVec, int a4, LocalVecArray* dst);
 struct S_00d0d150_Vector4 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     void operator=(const S_00d0d150_Vector4& v) { m_vComponents = v.m_vComponents; }
 };
 struct S_00d0d150_QualityInfo {
@@ -875,26 +1035,20 @@ struct S_00d0d150_CollisionOutput {
     S_00d0d150_ToiInfo m_fTimeOfImpact;
 };
 inline void* __cdecl operator new(unsigned int, void* where) throw() { return where; }
-template <typename T>
-struct S_00d0d150_Array {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+template <class T>
+static __forceinline T* S_00d0d150_Array_expandByUnchecked(hkArrayBase<T>& self, int n);
 
-    int GetLogicalSize() const { return m_iElementCount; }
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    T& operator[](int i) { return m_data[i]; }
-    __forceinline T* expandByUnchecked(int n)
-    {
-        int oldsize = m_iElementCount;
-        m_iElementCount = oldsize + n;
-        int numToConstruct = m_iElementCount - oldsize;
-        T* p = m_data + oldsize;
+template <class T>
+static __forceinline T* S_00d0d150_Array_expandByUnchecked(hkArrayBase<T>& self, int n)
+{
+        int oldsize = self.m_iElementCount;
+        self.m_iElementCount = oldsize + n;
+        int numToConstruct = self.m_iElementCount - oldsize;
+        T* p = self.m_data + oldsize;
         for (int i = 0; i < numToConstruct; ++i)
             new (p + i) T;
-        return m_data + oldsize;
+        return self.m_data + oldsize;
     }
-};
 struct S_00d0d150_ErrStream {
     int unk0;
     int unk4;
@@ -930,7 +1084,7 @@ struct S_00d0d150 {
     int unk24;
     int unk28;
     int unk2c;
-    S_00d0d150_Array<S_00d0d150_ToiEvent> m_kToiEventQueue;
+    hkArrayBase<S_00d0d150_ToiEvent> m_kToiEventQueue;
 
     void QueueToiEvent(const S_00d0d150_CollisionOutput& result, const S_00d0d150_AgentNnEntry& entry) throw();
 };
@@ -2266,26 +2420,33 @@ struct S_00d0e210_Router {
     S_00d0e210_Heap* m_pStreamAllocator;
     S_00d0e210_Heap& heap() { return *m_pStreamAllocator; }
 };
-template <typename T>
-struct S_00d0e210_Array {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+template <class T>
+static __forceinline void S_00d0e210_Array_destroy(hkArrayBase<T>& self) throw();
 
-    S_00d0e210_Array() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
-    ~S_00d0e210_Array() throw() { _clearAndDeallocate(((S_00d0e210_Router*)FUN_00c85750())->heap()); }
-    void _clearAndDeallocate(S_00d0e210_Heap& alloc) throw()
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
+template <class T>
+static __forceinline void S_00d0e210_Array__clearAndDeallocate(hkArrayBase<T>& self, S_00d0e210_Heap& alloc) throw();
+
+template <class T>
+static __forceinline void S_00d0e210_Array_destroy(hkArrayBase<T>& self) throw()
+{ S_00d0e210_Array__clearAndDeallocate(self, ((S_00d0e210_Router*)FUN_00c85750())->heap()); }
+
+template <class T>
+static __forceinline void S_00d0e210_Array__clearAndDeallocate(hkArrayBase<T>& self, S_00d0e210_Heap& alloc) throw()
+{
+        self.m_iElementCount = 0;
+        if ((self.m_iCapacityState & 0x80000000) == 0)
+            alloc.ReturnMemory(self.m_data, (self.m_iCapacityState & 0x3fffffff) * sizeof(T));
+        self.m_data = 0;
+        self.m_iCapacityState = 0x80000000;
     }
-    T& operator[](int i) { return m_data[i]; }
+
+struct S_00d0e210_ArrayPolicy
+{
+    template <class T>
+    static __forceinline void destroy(hkArrayBase<T>& self) { S_00d0e210_Array_destroy(self); }
 };
 template <typename T, int N>
-struct S_00d0e210_Inplace : S_00d0e210_Array<T> {
+struct S_00d0e210_Inplace : hkArray<T, S_00d0e210_ArrayPolicy> {
     T m_kStorage[N];
     S_00d0e210_Inplace() throw()
     {
@@ -2437,7 +2598,7 @@ struct S_00d0e210_ToiEvent {
             d[i] = s[i];
     }
 };
-struct S_00d0e210_ToiArray : S_00d0e210_Array<S_00d0e210_ToiEvent> {
+struct S_00d0e210_ToiArray : hkArray<S_00d0e210_ToiEvent, S_00d0e210_ArrayPolicy> {
     void removeAt(int i) throw()
     {
         m_iElementCount--;
@@ -2761,31 +2922,34 @@ template <typename T> inline void Se4b0_construct(T* p, int n, const T& t)
 {
     for (int i = 0; i < n; i++) p[i] = t;
 }
-template <class T> struct Se4b0_Arr {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    void _clearAndDeallocate(Se4b0_Heap& alloc)
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
+template <class T>
+static __forceinline void Se4b0_Arr__clearAndDeallocate(hkArrayBase<T>& self, Se4b0_Heap& alloc);
+
+template <class T>
+static __forceinline void Se4b0_Arr_AddBack(hkArrayBase<T>& self, const T& t);
+
+template <class T>
+static __forceinline void Se4b0_Arr__clearAndDeallocate(hkArrayBase<T>& self, Se4b0_Heap& alloc)
+{
+        self.m_iElementCount = 0;
+        if ((self.m_iCapacityState & 0x80000000) == 0)
+            alloc.ReturnMemory(self.m_data, self.getCapacity() * sizeof(T));
     }
-    void AddBack(const T& t)
-    {
+
+template <class T>
+static __forceinline void Se4b0_Arr_AddBack(hkArrayBase<T>& self, const T& t)
+{
         Manager* r = FUN_00c85750();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(reinterpret_cast<void*>(r->unk10), reinterpret_cast<Vec*>(this), sizeof(T));
-        Se4b0_construct<T>(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
+        if (self.m_iElementCount == self.getCapacity())
+            ResizeAudioStream(reinterpret_cast<void*>(r->unk10), reinterpret_cast<LocalVecArray*>((&self)), sizeof(T));
+        Se4b0_construct<T>(self.m_data + self.m_iElementCount, 1, t);
+        self.m_iElementCount++;
     }
-};
 inline void Se4b0_freeStack(void* p)
 {
     FUN_00c85750()->unk00 = reinterpret_cast<int>(p);
 }
-template <class T> struct Se4b0_LocalArr : Se4b0_Arr<T> {
+template <class T> struct Se4b0_LocalArr : hkArrayBase<T> {
     T* m_pStackAllocation;
     Se4b0_LocalArr(int n)
     {
@@ -2898,23 +3062,23 @@ inline void Se4b0_ensure(Se4b0_Body* body, float time, Se4b0_States& states)
     }
 }
 __forceinline void Se4b0_visit(Se4b0_Body* body, Se4b0_Constraint* c, int level, float time,
-    Se4b0_States& states, Se4b0_Arr<Se4b0_Body*>* outBodies, Se4b0_Arr<ItemObj*>* outItems)
+    Se4b0_States& states, hkArrayBase<Se4b0_Body*>* outBodies, hkArrayBase<ItemObj*>* outItems)
 {
     if (level <= c->item->m_1c) {
         Se4b0_Body* other = c->getOther(body);
         if (other->motionType == 5) {
-            outItems->AddBack(c->item);
+            Se4b0_Arr_AddBack((*(outItems)), c->item);
         } else if (states[other->storageIndex] != 16) {
-            outItems->AddBack(c->item);
+            Se4b0_Arr_AddBack((*(outItems)), c->item);
             if (states[other->storageIndex] < 2) {
-                outBodies->AddBack(other);
+                Se4b0_Arr_AddBack(*outBodies, other);
                 Se4b0_ensure(other, time, states);
                 states[other->storageIndex] = 2;
             }
         }
     }
 }
-void FUN_00d0e4b0(World* world, int level, float time, Se4b0_Arr<Se4b0_Body*>* bodies, Se4b0_States* states, Se4b0_Arr<Se4b0_Body*>* outBodies, Se4b0_Arr<ItemObj*>* outItems);
+void FUN_00d0e4b0(World* world, int level, float time, hkArrayBase<Se4b0_Body*>* bodies, Se4b0_States* states, hkArrayBase<Se4b0_Body*>* outBodies, hkArrayBase<ItemObj*>* outItems);
 // Baseline from the attributed contributor draft dated 2026-10-28.
 // Current-claim official checking is required; no padding instructions are inserted.
 struct S_00d0d150_Entity {
@@ -2963,7 +3127,7 @@ static __forceinline void memCpyOneAligned112(void* dst, const void* src) {
         static_cast<S00d0e9c0_DwordPair*>(dst)[i] = static_cast<const S00d0e9c0_DwordPair*>(src)[i];
     }
 }
-static __forceinline void removeToiEventAt(S_00d0d150_Array<S_00d0d150_ToiEvent>& arr, int index) {
+static __forceinline void removeToiEventAt(hkArrayBase<S_00d0d150_ToiEvent>& arr, int index) {
     arr.m_iElementCount--;
     if (arr.m_iElementCount != index) {
         memCpyOneAligned112(arr.m_data + index, arr.m_data + arr.m_iElementCount);
@@ -3004,7 +3168,7 @@ struct S_00d0e9c0 {
     int unk24;
     int unk28;
     int unk2c;
-    S_00d0d150_Array<S_00d0d150_ToiEvent> m_kToiEventQueue;
+    hkArrayBase<S_00d0d150_ToiEvent> m_kToiEventQueue;
     int unk3c;
     int unk40;
     int unk44;
@@ -3454,24 +3618,18 @@ struct StackArena {
     __forceinline void* take(int n) {char* p=top;top=p+n;return p;}
     __forceinline void put(void* p) {top=static_cast<char*>(p);}
 };
-class RouterFacade {
-    StackArena arena;
-    Heap* temporary;
-    Heap* regular;
-public:
-    static __declspec(nothrow) RouterFacade& __cdecl FUN_00c85750();
-    inline StackArena& stack() {return arena;}
-    inline Heap& heap() {return *regular;}
-};
+// hkMemoryRouter::get is bound to 0x00c85750 in other units; its first three words hold the stack allocator.
+inline StackArena& routerStack() {return reinterpret_cast<StackArena&>(hkMemoryRouter::getInstance().m_stack.m_next.m_storage);}
+inline Heap& routerHeap() {return *reinterpret_cast<Heap*>(hkMemoryRouter::getInstance().m_heap);}
 struct ArrayOps {
     static __declspec(nothrow) void __cdecl FUN_00c908c0(Heap&,void*,int,int) throw();
     static __declspec(nothrow) void __cdecl ResizeAudioStream(Heap&,void*,int) throw();
     __forceinline static void GrowArray(Heap& a,void* p,int n) {ResizeAudioStream(a,p,n);}
 };
-template<class T> __forceinline void releaseArena(T* p) {RouterFacade::FUN_00c85750().stack().put(p);}
-template<class T> __forceinline T* allocateArena(int n) {return static_cast<T*>(RouterFacade::FUN_00c85750().stack().take((n*sizeof(T)+127)&~127));}
+template<class T> __forceinline void releaseArena(T* p) {routerStack().put(p);}
+template<class T> __forceinline T* allocateArena(int n) {return static_cast<T*>(routerStack().take((n*sizeof(T)+127)&~127));}
 struct SelectHeap {
-    inline Heap& get(const void*) const {return RouterFacade::FUN_00c85750().heap();}
+    inline Heap& get(const void*) const {return routerHeap();}
 };
 template<class T> __forceinline void copyOne(T* dst,const T* src) {*reinterpret_cast<unsigned int*>(dst)=*reinterpret_cast<const unsigned int*>(src);}
 struct ScalarTag {};
@@ -3705,21 +3863,19 @@ __declspec(nothrow) void FUN_00d88580(const ResourceInfo&,const TimeInterval&,co
 __declspec(nothrow) void UpdateIslandMotionStates(SolverIsland*,StateTable&,Resources&) throw();
 __declspec(nothrow) void PartitionMotionPairs(List<SchemaRecord>&,int&,int) throw();
 __declspec(nothrow) void FUN_00d0c6d0(List<SchemaRecord>&,int&,StateTable&) throw();
-struct SweepView {hkVector4 center0,center1,rotation0,rotation1,localCenter;};
-struct RotationSetter {__declspec(nothrow) void FUN_00cb2d90(void*);};
-struct TransformView {hkRotation rotation;hkVector4 translation;};
-__declspec(nothrow) void FUN_00cf1510(const SweepView&,float,TransformView&) throw();
+// 0x00cf1510 takes the shared Havok swept transform and four-column transform in other units.
+__declspec(nothrow) void FUN_00cf1510(const hkSweptTransform&,float,hkTransform&) throw();
 __forceinline void updateEntity(DynamicNode* node,float time) {
     hkMotionState* m=node->getMotion()->GetMotionState();
-    FUN_00cf1510(*reinterpret_cast<SweepView*>(&m->m_vCenterOfMass0),time,*reinterpret_cast<TransformView*>(m));
+    FUN_00cf1510(m->m_kSweptTransform,time,m->m_kMotionTransform);
 }
 __forceinline void restoreState(hkMotionState* m) {
-    reinterpret_cast<RotationSetter*>(m)->FUN_00cb2d90(&m->m_qRotation1);
-    __m128 center=m->m_vCenterOfMassLocal.m_vComponents;
-    __m128 y=_mm_mul_ps(_mm_shuffle_ps(center,center,0x55),m->m_rotation.m_kColumn1.m_vComponents);
-    __m128 x=_mm_mul_ps(_mm_shuffle_ps(center,center,0),m->m_rotation.m_kColumn0.m_vComponents);
-    __m128 z=_mm_mul_ps(_mm_shuffle_ps(center,center,0xaa),m->m_rotation.m_kColumn2.m_vComponents);
-    m->m_vTranslation.m_vComponents=_mm_sub_ps(m->m_vCenterOfMass1.m_vComponents,_mm_add_ps(_mm_add_ps(y,x),z));
+    reinterpret_cast<hkRotation*>(m)->FUN_00cb2d90(m->m_kSweptTransform.m_qRotation1);
+    LocalM128 center=m->m_kSweptTransform.m_vCenterOfMassLocal.m_vComponents;
+    LocalM128 y=_mm_mul_ps(_mm_shuffle_ps(center,center,0x55),m->m_kMotionTransform.m_row1);
+    LocalM128 x=_mm_mul_ps(_mm_shuffle_ps(center,center,0),m->m_kMotionTransform.m_row0);
+    LocalM128 z=_mm_mul_ps(_mm_shuffle_ps(center,center,0xaa),m->m_kMotionTransform.m_row2);
+    m->m_kMotionTransform.m_row3=_mm_sub_ps(m->m_kSweptTransform.m_vCenterOfMass1.m_vComponents,_mm_add_ps(_mm_add_ps(y,x),z));
 }
 __declspec(noinline) __declspec(nothrow) void PartitionMotionPairs(List<SchemaRecord>& a,int& cursor,int n) throw() {
     for(int i=a.GetLogicalSize()-n;i<a.GetLogicalSize();++i) {
@@ -3786,7 +3942,7 @@ __declspec(noinline) __declspec(nothrow) BoolFlag CollectMatchingEntries(Resourc
         satisfied=false;
         
         if(rejected->GetLogicalSize()==rejected->getCapacity())
-            ArrayOps::GrowArray(RouterFacade::FUN_00c85750().heap(),rejected,12);
+            ArrayOps::GrowArray(routerHeap(),rejected,12);
         SolveViolation& entry=*rejected->expandByUnchecked(1);
         entry.constraint=record.constraint;
         if(record.constraint->data->GetType()==11) {
@@ -3805,7 +3961,7 @@ template<class T> class ScanPointer {T p;public:__forceinline ScanPointer(){} __
 // Resolve an event and remove obsolete queued events.
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 extern "C" unsigned __int64 __rdtsc(void);
-extern "C" __m128 _mm_setzero_ps();
+extern "C" LocalM128 _mm_setzero_ps();
 extern "C" void _ReadWriteBarrier(void);
 extern unsigned long DAT_0126835c;
 extern int DAT_01269200;
@@ -3820,18 +3976,7 @@ void __cdecl FUN_00cb1280(void* p, int v, int n);
 void __cdecl FUN_00c90670(void* data, int size, int elem);
 void __cdecl FUN_00c90740(void* data, int size, int elem);
 typedef unsigned long DWORD;
-struct ProfRec { const char* m_pName; DWORD m_iTick; DWORD unk08;
-    __forceinline void stamp() {
-        DWORD value;
-        __asm {
-            rdtsc
-            mov dword ptr[value], eax
-        }
-        m_iTick=value;
-    }
-};
-struct ProfBuf { DWORD unk00; ProfRec* m_pCur; DWORD unk08; ProfRec* m_pRecordEnd; };
-struct ProfPairRec : ProfRec {const char* m_subName;};
+struct ProfPairRec : ProfRec_hkpcontinuoussimulation_rtm_variant {const char* m_subName;};
 struct HeapObj {
     virtual void v00();
     virtual void v04();
@@ -4044,7 +4189,6 @@ struct EventReleaseObj {
     virtual void v10(); virtual void v14(); virtual void v18(); virtual void v1c();
     virtual void call20(Island* a, CollisionProperties* b);
 };
-struct Vec4 { __m128 m_vComponents; };
 struct BigObj {
     int unk00; int unk04; int unk08; int unk0c;
     hkVector4 m_v10;
@@ -4130,21 +4274,21 @@ struct Self {
     void FUN_00d100a0(Arg0* a0, Entry70* pair, float fa, float fb);
 };
 static __forceinline void clockOne(const char* name) {
-    ProfBuf& stream=*(ProfBuf*)TlsGetValue(DAT_0126835c);
-    if(stream.m_pCur<stream.m_pRecordEnd) {
-        ProfRec* command=stream.m_pCur;
-        command->m_pName=name;
-        command->stamp();
-        stream.m_pCur=command+1;
+    hkMonitorStream& stream=*(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if(stream.m_end.m_storage<stream.m_capacityMinus16.m_storage) {
+        hkMonitorStream::TimerCommand* command=reinterpret_cast<hkMonitorStream::TimerCommand*>(stream.m_end.m_storage);
+        command->m_commandAndMonitor=name;
+        static_cast<ProfRec_hkpcontinuoussimulation_rtm_variant*>(command)->stamp();
+        stream.m_end.m_storage=reinterpret_cast<char*>(command+1);
     }
 }
 static __forceinline void clockTwo(const char* name,const char* sub) {
-    ProfBuf& stream=*(ProfBuf*)TlsGetValue(DAT_0126835c);
-    if(stream.m_pCur<stream.m_pRecordEnd) {
-        ProfPairRec* command=(ProfPairRec*)stream.m_pCur;
-        command->m_pName=name;command->m_subName=sub;
-        command->stamp();
-        stream.m_pCur=(ProfRec*)(command+1);
+    hkMonitorStream& stream=*(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if(stream.m_end.m_storage<stream.m_capacityMinus16.m_storage) {
+        ProfPairRec* command=(ProfPairRec*)stream.m_end.m_storage;
+        command->m_commandAndMonitor=name;command->m_subName=sub;
+        static_cast<ProfRec_hkpcontinuoussimulation_rtm_variant*>(command)->stamp();
+        stream.m_end.m_storage=reinterpret_cast<char*>((hkMonitorStream::TimerCommand*)(command+1));
     }
 }
 static __forceinline void copyProbe(void* destination,const void* source) {
@@ -4384,25 +4528,25 @@ struct Res { DWORD unk; };
 struct hkTimeSection {
     volatile DWORD* tick;
     __forceinline hkTimeSection(const char* name, volatile DWORD& ticks) throw() : tick(&ticks) {
-        ProfBuf* b = (ProfBuf*)TlsGetValue(DAT_0126835c);
-        if (b->m_pCur < b->m_pRecordEnd) {
-            ProfRec* r = b->m_pCur;
-            r->m_pName = name;
+        hkMonitorStream* b = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        if (b->m_end.m_storage < b->m_capacityMinus16.m_storage) {
+            hkMonitorStream::TimerCommand* r = reinterpret_cast<hkMonitorStream::TimerCommand*>(b->m_end.m_storage);
+            r->m_commandAndMonitor = name;
             _ReadWriteBarrier();
             *tick = (DWORD)__rdtsc();
-            r->m_iTick = *tick;
-            b->m_pCur = r + 1;
+            r->m_time0 = *tick;
+            b->m_end.m_storage = reinterpret_cast<char*>(r + 1);
         }
     }
     __forceinline ~hkTimeSection() throw() {
-        ProfBuf* b = (ProfBuf*)TlsGetValue(DAT_0126835c);
-        if (b->m_pCur < b->m_pRecordEnd) {
-            ProfRec* r = b->m_pCur;
-            r->m_pName = "Et";
+        hkMonitorStream* b = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        if (b->m_end.m_storage < b->m_capacityMinus16.m_storage) {
+            hkMonitorStream::TimerCommand* r = reinterpret_cast<hkMonitorStream::TimerCommand*>(b->m_end.m_storage);
+            r->m_commandAndMonitor = "Et";
             _ReadWriteBarrier();
             *tick = (DWORD)__rdtsc();
-            r->m_iTick = *tick;
-            b->m_pCur = r + 1;
+            r->m_time0 = *tick;
+            b->m_end.m_storage = reinterpret_cast<char*>(r + 1);
         }
     }
 };
@@ -4410,25 +4554,25 @@ struct OuterTimeSection {
     bool ordered;
     volatile DWORD* tick;
     __forceinline OuterTimeSection(const char* name, volatile DWORD& ticks) throw() : ordered(false), tick(&ticks) {
-        ProfBuf* b = (ProfBuf*)TlsGetValue(DAT_0126835c);
-        if (b->m_pCur < b->m_pRecordEnd) {
-            ProfRec* r = b->m_pCur;
-            r->m_pName = name;
+        hkMonitorStream* b = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        if (b->m_end.m_storage < b->m_capacityMinus16.m_storage) {
+            hkMonitorStream::TimerCommand* r = reinterpret_cast<hkMonitorStream::TimerCommand*>(b->m_end.m_storage);
+            r->m_commandAndMonitor = name;
             _ReadWriteBarrier();
             *tick = (DWORD)__rdtsc();
-            r->m_iTick = *tick;
-            b->m_pCur = r + 1;
+            r->m_time0 = *tick;
+            b->m_end.m_storage = reinterpret_cast<char*>(r + 1);
         }
     }
     __forceinline ~OuterTimeSection() throw() {
-        ProfBuf* b = (ProfBuf*)TlsGetValue(DAT_0126835c);
-        if (b->m_pCur < b->m_pRecordEnd) {
-            ProfRec* r = b->m_pCur;
-            r->m_pName = "Et";
+        hkMonitorStream* b = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        if (b->m_end.m_storage < b->m_capacityMinus16.m_storage) {
+            hkMonitorStream::TimerCommand* r = reinterpret_cast<hkMonitorStream::TimerCommand*>(b->m_end.m_storage);
+            r->m_commandAndMonitor = "Et";
             _ReadWriteBarrier();
             *tick = (DWORD)__rdtsc();
-            r->m_iTick = *tick;
-            b->m_pCur = r + 1;
+            r->m_time0 = *tick;
+            b->m_end.m_storage = reinterpret_cast<char*>(r + 1);
         }
         if (ordered) { _ReadWriteBarrier(); }
     }
@@ -4725,11 +4869,11 @@ struct WorkBuf {
     int unk254;
     int unk255;
 };
-extern "C" __m128 _mm_load_ps(const float* p);
-extern "C" void _mm_store_ps(float* p, __m128 a);
-extern "C" __m128 _mm_load_ss(const float* p);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
+extern "C" LocalM128 _mm_load_ps(const float* p);
+extern "C" void _mm_store_ps(float* p, LocalM128 a);
+extern "C" LocalM128 _mm_load_ss(const float* p);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
 struct BodyX {
     int unk00; int unk04; int unk08; int unk0c;
     int unk10; int unk14; int unk18; int unk1c;
@@ -4744,7 +4888,8 @@ struct BodyX {
     int unka0; int unka4;
     unsigned short m_a8;
 };
-struct PairX {
+// Constraint internal prefix: entity pointers at +4/+8, unlike include/Pair.h's two integers.
+struct ConstraintEntityLink {
     int unk00;
     BodyX* m_apEntities[2];
 };
@@ -4755,7 +4900,7 @@ struct QX {
     unsigned char unk1d;
     unsigned short unk1e;
     int unk20; int unk24; int unk28; int unk2c;
-    PairX* m_30;
+    ConstraintEntityLink* m_30;
 };
 struct Dest {
     int unk00; int unk04; int unk08; int unk0c;
@@ -4805,13 +4950,15 @@ struct FlagsX {
     unsigned char* m_data;
     int m_iElementCount;
 };
-static __forceinline __m128 SplatW(float f) { __m128 s = _mm_load_ss(&f); return _mm_shuffle_ps(s, s, 0); }
+static __forceinline LocalM128 SplatW(float f) { LocalM128 s = _mm_load_ss(&f); return _mm_shuffle_ps(s, s, 0); }
+// Keep the raw SIMD assignment inline in this unit on the approved headers too.
+inline void hkVector4::operator=(const LocalM128& value) { m_vComponents = value; }
 // @fnv 0x00d0cb00
 __declspec(nothrow) void FUN_00d0cb00(Resources& resources, ProcessInput& input, List<SchemaRecord>& schemaList, int& index, Constraint::ConstraintPriority priority, StateTable& states, const List<DynamicNode*>& objects, List<DynamicNode*>& outBodies) throw()
 {
     SrcA* p0 = (SrcA*)&resources;
     char** p1 = (char**)&input;
-    Vec* entries = (Vec*)&schemaList;
+    LocalVecArray* entries = (LocalVecArray*)&schemaList;
     int* idx = &index;
     int level = priority;
     FlagsX* flags = (FlagsX*)&states;
@@ -4827,24 +4974,24 @@ __declspec(nothrow) void FUN_00d0cb00(Resources& resources, ProcessInput& input,
         for (i = 0; i < objs->m_iElementCount; i++) {
             ObjX* o = objs->m_data[i];
             Dest* d = (Dest*)((char*)o->m_a4 + p0->m_0c);
-            *out++ = d->m_10;
-            *out++ = d->m_20;
-            hkVector4 diff;
-            diff.m_vComponents = _mm_sub_ps(o->m_140.m_vComponents, o->m_130.m_vComponents);
+            *out++ = d->m_10.m_vComponents;
+            *out++ = d->m_20.m_vComponents;
+            LocalM128 diff;
+            diff = _mm_sub_ps(o->m_140.m_vComponents, o->m_130.m_vComponents);
             d->m_10 = diff;
-            hkVector4 scaled;
-            scaled.m_vComponents = _mm_mul_ps(SplatW(o->getW()), diff.m_vComponents);
+            LocalM128 scaled;
+            scaled = _mm_mul_ps(SplatW(o->getW()), diff);
             d->m_10 = scaled;
-            hkVector4 scaled2;
-            scaled2.m_vComponents = _mm_mul_ps(SplatW(o->getW()), o->m_180.m_vComponents);
+            LocalM128 scaled2;
+            scaled2 = _mm_mul_ps(SplatW(o->getW()), o->m_180.m_vComponents);
             d->m_20 = scaled2;
         }
     }
     int cur = *idx;
-    if (cur < entries->m_04) {
+    if (cur < entries->m_iArrayLength) {
         WorkBuf buf;
-        for (; cur < entries->m_04; cur++) {
-            Entry* elem = &entries->m_00[cur];
+        for (; cur < entries->m_iArrayLength; cur++) {
+            Entry* elem = &static_cast<Entry*>(entries->m_pData)[cur];
             QX* q = (QX*)elem->m_00;
             if (level <= (int)q->m_1c) {
                 BodyX** pair = q->m_30->m_apEntities;
@@ -4853,7 +5000,7 @@ __declspec(nothrow) void FUN_00d0cb00(Resources& resources, ProcessInput& input,
                 BodyX* body = pair[sel];
                 if (base[body->m_a8] & 4) {
                     int j = (*idx)++;
-                    Entry* arr = entries->m_00;
+                    Entry* arr = static_cast<Entry*>(entries->m_pData);
                     Entry tmp = arr[j];
                     arr[j] = arr[cur];
                     arr[cur] = tmp;
@@ -4863,12 +5010,12 @@ __declspec(nothrow) void FUN_00d0cb00(Resources& resources, ProcessInput& input,
                         flags->m_data[body->m_a8] |= 4;
                         Manager* m2 = FUN_00c85750();
                         if (outVec->m_iElementCount == (int)(outVec->m_cap & 0x3fffffff)) {
-                            ResizeAudioStream((void*)m2->unk10, (Vec*)outVec, 4);
+                            ResizeAudioStream((void*)m2->unk10, (LocalVecArray*)outVec, 4);
                         }
                         CopyOne(outVec->m_data + outVec->m_iElementCount,1,body);
                         outVec->m_iElementCount++;
                         int j = (*idx)++;
-                        Entry* arr = entries->m_00;
+                        Entry* arr = static_cast<Entry*>(entries->m_pData);
                     Entry tmp = arr[j];
                         arr[j] = arr[cur];
                         arr[cur] = tmp;
@@ -4883,11 +5030,18 @@ __declspec(nothrow) void FUN_00d0cb00(Resources& resources, ProcessInput& input,
         for (k = 0; k < objs->m_iElementCount; k++) {
             ObjX* o = objs->m_data[k];
             Dest* d = (Dest*)((char*)o->m_a4 + p0->m_0c);
-            d->m_10 = *in;
+            d->m_10 = in->m_vComponents;
             in++;
-            d->m_20 = *in;
+            d->m_20 = in->m_vComponents;
             in++;
         }
     }
     FUN_00c85750()->unk00 = savedTop;
+}
+
+
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
+{
+    __if_exists(A::destroy) { A::destroy(*this); }
+    __if_not_exists(A::destroy) { clearAndDeallocate(); }
 }

@@ -1,3 +1,9 @@
+#include "../../../../include/NiTMapItem.h"
+#include "../../../../include/NiDynamicGeometryGroup.h"
+#include "../../../../include/NiGeometryBufferData.h"
+#include "../../../../include/NiGeometryGroup.h"
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiUnsharedGeometryGroup.h"
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -7,12 +13,6 @@ extern int DAT_0126fa34;
 void __cdecl FUN_00e98710();
 void __cdecl _delete(void*, unsigned int);
 
-struct NiUnsharedGeometryGroup
-{
-    void* m_ppVirtualMethodTable;
-    virtual ~NiUnsharedGeometryGroup();
-    void* __thiscall Destroy(unsigned int flags);
-};
 
 // Restores the vtable, clears the global pointer if it refers to this object, calls FUN_00e98710, and optionally deletes the object.
 // @fnv 0x00e94d30
@@ -29,12 +29,8 @@ void* __thiscall NiUnsharedGeometryGroup::Destroy(unsigned int flags)
 }
 
 struct Direct3DDeviceInterface;
-struct NiGeometryBufferData;
-struct NiGeometryData;
-struct NiGeometryGroup;
 struct NiScreenTexture;
 struct NiSkinInstance;
-struct NiVBChip;
 
 struct P03MM
 {
@@ -42,10 +38,6 @@ struct P03MM
 };
 extern P03MM g_memoryManager;
 extern int DAT_01400000;
-struct NiGeometryBufferData
-{
-    NiGeometryBufferData();
-};
 __forceinline void* __cdecl operator new(unsigned int, void* p)
 {
     return p;
@@ -62,9 +54,9 @@ void __thiscall S::CreateScreenTextureBufferData(NiScreenTexture* pkScreenTextur
     {
         void* pMemory = g_memoryManager.Allocate(0x54);
         NiGeometryBufferData* pkBuffData = pMemory ? new (pMemory) NiGeometryBufferData() : 0;
-        *(int*)((char*)pkBuffData + 0x3c) = 4;
+        pkBuffData->m_eRequestType = 4;
         *(NiGeometryBufferData**)((char*)pkScreenTexture + 0x1c) = pkBuffData;
-        *(int*)((char*)pkBuffData + 4) = (int)&DAT_01400000;
+        pkBuffData->m_uiValue1 = (unsigned int)&DAT_01400000;
         FUN_00e98730(pkBuffData);
     }
 }
@@ -80,15 +72,15 @@ struct FakeVB
 void __stdcall FUN_00e94ee0(NiGeometryBufferData* pkBuffData, unsigned int uiStreamIndex)
 {
     NiVBChip* pkChip;
-    if (uiStreamIndex < *(unsigned int*)((char*)pkBuffData + 0x20))
+    if (uiStreamIndex < pkBuffData->m_uiRegisterStreamCount)
     {
-        pkChip = ((NiVBChip**)*(void**)((char*)pkBuffData + 0x28))[uiStreamIndex];
+        pkChip = pkBuffData->m_ppkVertexBuffers[uiStreamIndex];
         if (pkChip)
         {
             if (*(FakeVB**)((char*)pkChip + 8))
                 ((FakeVB*)*(void**)((char*)pkChip + 8))->Release();
-            if (uiStreamIndex < *(unsigned int*)((char*)pkBuffData + 0x20))
-                ((NiVBChip**)*(void**)((char*)pkBuffData + 0x28))[uiStreamIndex] = 0;
+            if (uiStreamIndex < pkBuffData->m_uiRegisterStreamCount)
+                pkBuffData->m_ppkVertexBuffers[uiStreamIndex] = 0;
             *(void**)((char*)pkChip + 8) = 0;
             _delete(pkChip, 0x20);
         }
@@ -96,116 +88,66 @@ void __stdcall FUN_00e94ee0(NiGeometryBufferData* pkBuffData, unsigned int uiStr
 }
 
 void* _fnv_zlib_memset(void*, int, unsigned int);
-struct NiGeometryGroup
-{
-    void RemoveObject(NiGeometryBufferData*);
-};
-struct NiDynamicGeometryGroup : NiGeometryGroup
-{
-    void FUN_00e950f0(NiGeometryData* pkData);
-};
-struct Deleter
-{
-    virtual ~Deleter();
-};
+// These removal methods are not declared by the shared group header.
+// Explicit group parameters and an unused EDX parameter preserve the original thiscall ABI.
 // Removes pkData's buffer data from the group, clears its buffer array, deletes it, and nulls the pointer.
 // @fnv 0x00e950f0
-void NiDynamicGeometryGroup::FUN_00e950f0(NiGeometryData* pkData)
+void __fastcall FUN_00e950f0(NiDynamicGeometryGroup* pkGroup, void*, NiGeometryData* pkData)
 {
-    NiGeometryBufferData* pkBuffData = *(NiGeometryBufferData**)((char*)pkData + 0x34);
+    NiGeometryBufferData* pkBuffData = static_cast<NiGeometryBufferData*>(pkData->m_pkBuffData);
     if (pkBuffData)
     {
-        NiGeometryGroup::RemoveObject(pkBuffData);
-        if (*(void**)((char*)pkBuffData + 0x28))
-            _fnv_zlib_memset(*(void**)((char*)pkBuffData + 0x28), 0, *(unsigned int*)((char*)pkBuffData + 0x20) * 4);
-        delete (Deleter*)pkBuffData;
-        *(NiGeometryBufferData**)((char*)pkData + 0x34) = 0;
+        pkGroup->NiGeometryGroup::RemoveObject(pkBuffData);
+        if (pkBuffData->m_ppkVertexBuffers)
+            _fnv_zlib_memset(pkBuffData->m_ppkVertexBuffers, 0, pkBuffData->m_uiRegisterStreamCount * 4);
+        delete pkBuffData;
+        pkData->m_pkBuffData = 0;
     }
 }
 
-namespace fnv_00e95140 {
 struct Direct3DDeviceInterface;
-struct NiGeometryBufferData;
-struct NiGeometryData;
-struct NiGeometryGroup;
 struct NiScreenTexture;
 struct NiSkinInstance;
-struct NiVBChip;
 
 void* _fnv_zlib_memset(void*, int, unsigned int);
-struct NiGeometryGroup
-{
-    void RemoveObject(NiGeometryBufferData*);
-};
-struct NiGeometryBufferData
-{
-    virtual ~NiGeometryBufferData();
-    char _pad04[28];
-    unsigned int m_uiRegisterStreamCount;
-    unsigned int _pad24;
-    NiVBChip** m_ppkVertexBuffers;
-};
-struct NiDynamicGeometryGroup : NiGeometryGroup
-{
-    void FUN_00e95140(NiGeometryData* pkData);
-};
 // Removes the geometry buffer data stored at offset 0x28 of pkData, clears its chip array, deletes it and nulls the pointer.
 // @fnv 0x00e95140
-void NiDynamicGeometryGroup::FUN_00e95140(NiGeometryData* pkData)
+void __fastcall FUN_00e95140(NiDynamicGeometryGroup* pkGroup, void*, NiGeometryData* pkData)
 {
     NiGeometryBufferData* pkBuffData = *(NiGeometryBufferData**)((char*)pkData + 0x28);
     if (pkBuffData)
     {
-        NiGeometryGroup::RemoveObject(pkBuffData);
+        pkGroup->NiGeometryGroup::RemoveObject(pkBuffData);
         if (pkBuffData->m_ppkVertexBuffers)
             _fnv_zlib_memset(pkBuffData->m_ppkVertexBuffers, 0, pkBuffData->m_uiRegisterStreamCount * 4);
         delete pkBuffData;
         *(NiGeometryBufferData**)((char*)pkData + 0x28) = 0;
     }
 }
-}  // namespace fnv_00e95140
 
-namespace fnv_00e95190 {
-struct NiGeometryGroup
-{
-    void RemoveObject(NiGeometryBufferData*);
-};
-struct NiDynamicGeometryGroup : NiGeometryGroup
-{
-    void FUN_00e95190(NiGeometryData* pkData);
-};
 void* _fnv_zlib_memset(void*, int, unsigned int);
-struct DeleteHelper
-{
-    virtual ~DeleteHelper();
-};
 // @fnv 0x00e95190
-void NiDynamicGeometryGroup::FUN_00e95190(NiGeometryData* pkData)
+void __fastcall FUN_00e95190(NiDynamicGeometryGroup* pkGroup, void*, NiGeometryData* pkData)
 {
     NiGeometryBufferData* pkBuffData = *(NiGeometryBufferData**)((char*)pkData + 0x1c);
     if (pkBuffData)
     {
-        RemoveObject(pkBuffData);
-        void* p = *(void**)((char*)pkBuffData + 0x28);
+        pkGroup->RemoveObject(pkBuffData);
+        void* p = pkBuffData->m_ppkVertexBuffers;
         if (p)
-            _fnv_zlib_memset(p, 0, *(unsigned int*)((char*)pkBuffData + 0x20) * 4);
-        delete (DeleteHelper*)pkBuffData;
+            _fnv_zlib_memset(p, 0, pkBuffData->m_uiRegisterStreamCount * 4);
+        delete pkBuffData;
         *(NiGeometryBufferData**)((char*)pkData + 0x1c) = 0;
     }
 }
-}  // namespace fnv_00e95190
 
 extern int DAT_010f1008;
 extern int DAT_0126fa34;
 void __cdecl FUN_00e98710();
 void __cdecl _delete(void*, unsigned int);
 struct Direct3DDeviceInterface;
-struct NiGeometryBufferData;
-struct NiGeometryData;
-struct NiGeometryGroup;
 struct NiScreenTexture;
 struct NiSkinInstance;
-struct NiVBChip;
 extern P03MM g_memoryManager;
 extern int DAT_01400000;
 void __stdcall FUN_00e94ee0(NiGeometryBufferData* pkBuffData, unsigned int uiStream);
@@ -225,15 +167,10 @@ struct OwnerEntry
     int unk04;
     int unk08;
 };
-template <class TVAL> struct MapItem
-{
-    MapItem* m_pkNext;
-    const char* m_key;
-    TVAL m_val;
-};
+
 template <class TVAL> struct StrMap
 {
-    typedef MapItem<TVAL> Item;
+    typedef NiTMapItem<const char*, TVAL> Item;
     virtual ~StrMap();
     virtual unsigned int KeyToHashIndex(const char* key) const;
     unsigned int m_uiHashSize;
@@ -275,6 +212,7 @@ template <class TVAL> struct StrMap
         pos = 0;
     }
 };
+// local form of NiTPrimitiveArray: 0x00e94f30 needs value-returning GetAt and the local destructor split (shared trial is 457 bytes, exe 445).
 template <class T> struct PtrArray
 {
     virtual ~PtrArray();
@@ -400,82 +338,59 @@ struct IDirect3DDevice9_E94
                                               IDirect3DVertexBuffer9_E94** ppVB, void** pSharedHandle);
 };
 extern bool DAT_0126f0d0;
-class NiMemObject_E94
+class NiVBBlock;
+class NiVBDynamicSet;
+// NiVBChip.h is not available yet; retain the 0x20-byte chip layout used by the vertex-buffer allocation.
+class NiVBChip : public NiMemObject
 {
   public:
-    static void* operator new(unsigned int uiSize);
-};
-class NiVBChipE94 : public NiMemObject_E94
-{
-  public:
-    NiVBChipE94()
+    NiVBChip()
     {
-        m_pkTreeBlock = 0;
-        m_uiPosition = 0;
-        m_pkOwningStream = 0;
-        m_pkPrev = 0;
+        m_uiIndex = 0;
+        m_pkBlock = 0;
+        m_pkVB = 0;
+        m_uiOffset = 0;
         m_uiSize = 0;
-        m_pkNext = 0;
-        m_uiValueBeforeCount = 0;
-        m_pUserData = 0;
+        m_uiLockFlags = 0;
+        m_pkNextChip = 0;
+        m_pkPrevChip = 0;
     }
-    void* m_pkTreeBlock;
-    unsigned int m_uiPosition;
-    IDirect3DVertexBuffer9_E94* m_pkOwningStream;
-    NiVBChipE94* m_pkPrev;
-    NiVBChipE94* m_pkNext;
-    unsigned int m_uiSize;
-    unsigned int m_uiValueBeforeCount;
-    void* m_pUserData;
-};
-struct NiBuffDataE94
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    unsigned int m_uiGroupIndex;
-    int unk10;
-    bool m_bIsInitialized;
-    int unk18;
-    unsigned int m_uiVertexCount;
-    unsigned int m_uiRegisterStreamCount;
-    unsigned int* m_puiVertexStrides;
-    unsigned int GetVertexStride(unsigned int uiStream) const
+    unsigned int m_uiIndex;
+    union
     {
-        return uiStream < m_uiRegisterStreamCount ? m_puiVertexStrides[uiStream] : 0;
-    }
+        NiVBBlock* m_pkBlock;
+        NiVBDynamicSet* m_pkDynamicSet;
+    };
+    IDirect3DVertexBuffer9_E94* m_pkVB;
+    unsigned int m_uiOffset;
+    unsigned int m_uiLockFlags;
+    unsigned int m_uiSize;
+    NiVBChip* m_pkNextChip;
+    NiVBChip* m_pkPrevChip;
 };
-class NiUnsharedGeometryGroupE94
-{
-  public:
-    void* m_ppVirtualMethodTable;
-    int unk04;
-    IDirect3DDevice9_E94* m_pDirect3DDevice;
-    NiVBChipE94* FUN_00e94e30(NiBuffDataE94* pkBuffData, unsigned int uiStream);
-};
-
-// Creates a D3D vertex buffer sized for the stream and returns a new NiVBChipE94 wrapping it with the given size and owning stream.
+// The shared unshared-group header does not declare this method; retain it as an ABI-compatible helper.
+// Creates a D3D vertex buffer sized for the stream and returns a new NiVBChip wrapping it with the given size and owning stream.
 // @fnv 0x00e94e30
-NiVBChipE94* NiUnsharedGeometryGroupE94::FUN_00e94e30(NiBuffDataE94* pkBuffData, unsigned int uiStream)
+NiVBChip* __fastcall FUN_00e94e30(NiUnsharedGeometryGroup* pkGroup, void*, NiGeometryBufferData* pkBuffData, unsigned int uiStream)
 {
-    unsigned int uiVertexCount = pkBuffData->m_uiVertexCount;
-    unsigned int uiVBSize = pkBuffData->GetVertexStride(uiStream) * uiVertexCount;
+    unsigned int uiVertexCount = pkBuffData->m_uiVertexDataSize;
+    unsigned int uiVBSize = (uiStream < pkBuffData->m_uiRegisterStreamCount ? pkBuffData->m_puiVertexStrides[uiStream] : 0) * uiVertexCount;
     unsigned int uiUsage = 0x8;
     if (pkBuffData->m_bIsInitialized)
         uiUsage = 0x8 | 0x10;
     IDirect3DVertexBuffer9_E94* pkVB;
-    m_pDirect3DDevice->CreateVertexBuffer(uiVBSize, uiUsage, pkBuffData->m_uiGroupIndex, DAT_0126f0d0 ? 0 : 1, &pkVB,
+    static_cast<IDirect3DDevice9_E94*>(pkGroup->m_pD3DDevice)->CreateVertexBuffer(uiVBSize, uiUsage, pkBuffData->m_uiGroupIndex, DAT_0126f0d0 ? 0 : 1, &pkVB,
                                           0);
     IDirect3DVertexBuffer9_E94* pkNewVB = pkVB;
-    NiVBChipE94* pkChip = new NiVBChipE94;
+    NiVBChip* pkChip = new NiVBChip;
     if (pkChip)
     {
-        pkChip->m_pkOwningStream = pkNewVB;
+        pkChip->m_pkVB = pkNewVB;
         pkChip->m_uiSize = uiVBSize;
-        pkChip->m_pkTreeBlock = 0;
-        pkChip->m_uiPosition = 0;
-        pkChip->m_pkPrev = 0;
-        pkChip->m_pkNext = 0;
+        pkChip->m_uiIndex = 0;
+        pkChip->m_pkBlock = 0;
+        pkChip->m_uiOffset = 0;
+        pkChip->m_uiLockFlags = 0;
     }
     return pkChip;
 }

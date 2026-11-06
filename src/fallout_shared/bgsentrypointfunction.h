@@ -5,7 +5,7 @@
 void BGSEntryPointFunctionDataActivateChoice::InitializeComponent()
 {
     flags = 0;
-    reinterpret_cast<TESForm*>(formStorage)->SetInitializationState(false);
-    reinterpret_cast<TESForm*>(formStorage)->NotifySaveLoadGameOfFormChange();
+    static_cast<TESForm*>(&resultScript)->SetInitializationState(false);
+    static_cast<TESForm*>(&resultScript)->NotifySaveLoadGameOfFormChange();
 }
 #endif

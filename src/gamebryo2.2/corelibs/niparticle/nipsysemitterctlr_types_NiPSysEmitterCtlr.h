@@ -203,30 +203,7 @@ FNV_STATIC_ASSERT(sizeof(NiPSysModifierBoolCtlr) == 64);
 class NiInterpolator : public NiObject
 {
   public:
-    virtual void vfn_08();
-    virtual void vfn_0C();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1C();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2C();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3C();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual NiObject* Clone(CloningProcess& process);
-    virtual void vfn_4C();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5C();
-    virtual void vfn_60();
-    virtual void vfn_64();
+    // slots 0x08-0x64 are the shared NiObject virtuals (Clone is NiObject::MakeClone, 0x48)
     virtual void ProcessClone(CloningProcess& process);
 };
 
@@ -311,39 +288,7 @@ class NiPSysEmitterCtlr : public NiPSysModifierCtlr
     void ProcessClone(CloningProcess& process);
     void CopyMemberData(NiPSysEmitterCtlr* destination, CloningProcess& process);
     NiObject* MakeClone(CloningProcess& process);
-    virtual void vfn_08();
-    virtual void vfn_0C();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1C();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2C();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3C();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4C();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5C();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6C();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7C();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
+    // slots 0x08-0x88 are the shared NiObject virtuals
     virtual void vfn_8C();
     virtual void vfn_90();
     virtual void vfn_94();

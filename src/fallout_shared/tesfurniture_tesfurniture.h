@@ -1,160 +1,42 @@
-// Unit-local PC header for fallout_shared/tesfurniture.cpp.
-// inheritance this-adjustments match the game layout:
-//   TESObjectACTI (144 bytes): +0x00 TESBoundAnimObject (48), +0x30 TESFullName
-//   (12), +0x3C TESModelTextureSwap (32), +0x5C TESScriptableForm (12),
-//   +0x68 BGSDestructibleObjectForm (8), +0x70 BGSOpenCloseForm (4),
-//   members at +0x74..0x8F.
-//   TESFurniture adds int m_iMarkerCount at +0x90 (148 bytes total).
+#include "../../include/BSStringT.h"
+// Unit header for fallout_shared/tesfurniture.cpp: the shared TESFurniture hierarchy plus the externals the unit calls.
 #ifndef FNV_TESFURNITURE_UNIT_H
 #define FNV_TESFURNITURE_UNIT_H
 
-#include "tesfurniture_layout_support.h"
-#include "tesfurniture_TESForm.h"
-#include "tesfurniture_TESFullName.h"
-#include "tesfurniture_TESScriptableForm.h"
-#include "tesfurniture_BaseFormComponent.h"
-#include "tesfurniture_NiPoint3.h"
+#include <stddef.h>
+// BSStringT with its out-of-line constructor and destructor (0x004037b0), as TESObjectACTI's constructor calls them.
+
+#include "../../include/TESFurniture.h"
+#include "../../include/TESFile.h"
+#include "../../include/FurnitureMark.h"
+#include "../../include/SettingT_GameSettingCollection_.h"
+
 class NiAVObject;
 class NiNode;
+class Script;
 NiAVObject* FUN_00c54400(NiNode*);
 int Warning(const char*, ...);
-class TESWaterForm;
-class BGSTalkingActivator;
-// PC column reads at 01189fa0/4/8 have the corresponding 16-byte row stride.
-class GameSettingCollection;
-union SETTING_VALUE
-{
-    bool b;
-    float f;
-    int i;
-    const char* s;
-};
-template <class T> class SettingT
+extern SettingT<GameSettingCollection>* g_ppFurnitureMarkerOffsetSettings[][4];
+extern "C" void* __cdecl _alloca(size_t auiBytes);
+
+#include "../../include/ENUM_FORM_ID.h"
+#include "../../include/CHUNK_ID.h"
+
+// TESFile::GetFormVersion view (0x004d0d10 family), kept as the unit's shim.
+class TESFileFormVersion : public TESFile
 {
   public:
-    SETTING_VALUE* Float();
+    unsigned short GetFormVersion();
 };
-extern SettingT<GameSettingCollection>* g_ppFurnitureMarkerOffsetSettings[][4];
-
-// with BGSDefaultObjectManager::IsFormInitialized (0x004013e0) through
-// identical-COMDAT folding. The canonical TESForm.h does not declare it yet,
-// so it is declared on this shim, following the accepted TESFileFormInt
-// precedent in tessound.cpp.
+class TESFullNameLoader
+{
+  public:
+    static void LoadFullNameChunk(TESFullName* apName, TESFile* apFile);
+};
+// TESForm::IsFormInitialized is folded with BGSDefaultObjectManager::IsFormInitialized (0x004013e0).
 struct TESFormInitFlag : public TESForm
 {
     bool IsFormInitialized() const;
 };
 
-// TESObject/TESBoundObject/TESBoundAnimObject chain flattened to its 48-byte
-// PC size; the vtable pointer is inherited from TESForm.
-class TESBoundAnimObject : public TESForm
-{
-  public:
-    TESBoundAnimObject();
-    virtual ~TESBoundAnimObject();
-    virtual void vfn_138();
-    virtual void vfn_13c();
-    virtual void vfn_140();
-    virtual void vfn_144();
-    virtual void vfn_148();
-    virtual void vfn_14c();
-    virtual void vfn_150(NiAVObject*);
-    virtual void vfn_154();
-    virtual void vfn_158();
-    virtual void vfn_15c();
-    virtual void vfn_160();
-    virtual void vfn_164();
-    virtual void vfn_168();
-    virtual void vfn_16c();
-    virtual void vfn_170();
-    virtual void vfn_174();
-    virtual NiNode* Create3DModel(TESObjectREFR*);
-    unsigned char layoutPadding18[0x18];
-};
-FNV_STATIC_ASSERT(sizeof(TESBoundAnimObject) == 0x30);
-// TESModel (24 bytes) plus the texture-swap list (8 bytes).
-class TESModel : public BaseFormComponent
-{
-  public:
-    unsigned char layoutPadding04[0x14];
-    static void LoadModelData(TESModel*, TESFile*);
-    virtual void vfn_10();
-    virtual const char* GetModelFilePath();
-};
-FNV_STATIC_ASSERT(sizeof(TESModel) == 0x18);
-class TESModelTextureSwap : public TESModel
-{
-  public:
-    TESModelTextureSwap();
-    virtual ~TESModelTextureSwap();
-    unsigned char layoutPadding18[0x8];
-    bool ParseTextureSwapData(void*, unsigned int, unsigned int);
-};
-FNV_STATIC_ASSERT(sizeof(TESModelTextureSwap) == 0x20);
-class CollisionComponent;
-class BGSDestructibleObjectForm : public BaseFormComponent
-{
-  public:
-    BGSDestructibleObjectForm();
-    ~BGSDestructibleObjectForm();
-    CollisionComponent* pData;  // +0x4
-    void InitItem(TESForm* form);
-    static void LoadDestructibleData(BGSDestructibleObjectForm*, TESFile*);
-};
-FNV_STATIC_ASSERT(sizeof(BGSDestructibleObjectForm) == 0x8);
-FNV_STATIC_ASSERT(offsetof(BGSDestructibleObjectForm, pData) == 0x4);
-class BGSOpenCloseForm
-{
-  public:
-    virtual void HandleOpenAnimationFinish(TESObjectREFR*, TESObjectREFR*);
-    virtual void HandleCloseFinish(TESObjectREFR*, TESObjectREFR*);
-    virtual bool GetBlockActivatesWhileOpening() const;
-    BGSOpenCloseForm();
-};
-FNV_STATIC_ASSERT(sizeof(BGSOpenCloseForm) == 0x4);
-// The supplied explicit vtable-pointer field is represented by the three evidenced virtuals.
-class TESObjectACTI : public TESBoundAnimObject,
-                      public TESFullName,
-                      public TESModelTextureSwap,
-                      public TESScriptableForm,
-                      public BGSDestructibleObjectForm,
-                      public BGSOpenCloseForm
-{
-  public:
-    TESObjectACTI();
-    virtual ~TESObjectACTI();
-    TESSound* m_pSoundEffect;
-    TESSound* m_pLoopSound;
-    TESSound* pRadioTemplate;
-    TESWaterForm* m_pWaterForm;
-    BGSTalkingActivator* m_pTalkingActivator;
-    BSStringT<char> m_kActivationPrompt;
-    void ResetFormData();
-};
-FNV_STATIC_ASSERT(sizeof(TESObjectACTI) == 0x90);
-class TESFurniture : public TESObjectACTI
-{
-  public:
-    int m_iMarkerCount;  // +0x90
-    TESFurniture();
-    void ResetFormData();
-    void InitItem();
-    bool Load(TESFile* file);
-    bool GetCanSitOn();
-    void SetCanSitOn(bool bSit);
-    bool GetCanSleepOn();
-    void SetCanSleepOn(bool bSleep);
-    bool IsMarkerEnabled(unsigned int aiMarker);
-    void SetMarkerEnabled(unsigned int aiMarker, bool bEnabled);
-    void UpdateSitSleepFlags(NiAVObject* apMarker);
-    static unsigned int GetMarkerCount(NiAVObject* apMarker);
-    static unsigned int GetMarkerNumber(NiAVObject* apMarker, unsigned int auMarker);
-    static bool IsFurnitureSitMarker(unsigned int auMarker);
-    static bool IsFurnitureSleepMarker(unsigned int auMarker);
-    void InitializeMarkerFlags();
-    NiPoint3 GetMarkerOffset(unsigned int auMarker, float afScale);
-    float GetMarkerRotation(unsigned int auMarker);
-};
-FNV_STATIC_ASSERT(sizeof(TESFurniture) == 0x94);
-FNV_STATIC_ASSERT(offsetof(TESFurniture, m_iMarkerCount) == 0x90);
 #endif

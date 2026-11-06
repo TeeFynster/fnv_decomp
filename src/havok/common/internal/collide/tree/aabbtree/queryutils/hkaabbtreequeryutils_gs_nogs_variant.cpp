@@ -1,3 +1,4 @@
+#include "../../../../../../../../include/hkArray.h"
 
 // src/havok/common/internal/collide/tree/aabbtree/queryutils/hkaabbtreequeryutils_gs_nogs_variant.cpp - flag-variant unit created 2026-10-25 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/common/internal/collide/tree/aabbtree/queryutils/hkaabbtreequeryutils.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -36,28 +37,7 @@ struct S_00d1bcb0_Entry
     int m_kPointA;
     int m_kPointB;
 };
-struct S_00d1bcb0_Array
-{
-    S_00d1bcb0_Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void _pushBack(S_00d1bcb0_Allocator& alloc, const S_00d1bcb0_Entry& e)
-    {
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(alloc, this, sizeof(S_00d1bcb0_Entry));
-        new (m_data + m_iElementCount) S_00d1bcb0_Entry(e);
-        m_iElementCount++;
-    }
-    void AddBack(const S_00d1bcb0_Entry& e)
-    {
-        _pushBack(FUN_00c85750()->heap(), e);
-    }
-};
+typedef hkArray<S_00d1bcb0_Entry> S_00d1bcb0_Array;
 struct S_00d1bcb0
 {
     int unk00;

@@ -6,6 +6,127 @@
 // to their real unit once identified.
 // src/havok/physics/utilities/visualdebugger/viewer/hkpshapedisplaybuilder.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/hkpshapedisplaybuilder.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../include/hkAabb.h"
+// local form of hkVector4: 0x00ddfd10 needs original typed calls (shared extent 4708 vs 4724).
+
+
+// Define FNV_VECTOR_USE_LOCAL_SSE when __m128 and intrinsics are already declared.
+#if !defined(FNV_VECTOR_USE_LOCAL_SSE)
+#include <xmmintrin.h>
+#endif
+
+class Scalar;
+class Comparison;
+class Transform;
+class hkRotation;
+
+class DisplayVectorCallLocal_00ddfd10
+{
+public:
+    union
+    {
+        __m128 q;
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+    };
+
+    __forceinline DisplayVectorCallLocal_00ddfd10() {}
+    __forceinline DisplayVectorCallLocal_00ddfd10(const DisplayVectorCallLocal_00ddfd10& vector) : q(vector.q) {}
+    __forceinline DisplayVectorCallLocal_00ddfd10(const __m128& vector) : q(vector) {}
+    DisplayVectorCallLocal_00ddfd10(float x, float y, float z);
+    __forceinline DisplayVectorCallLocal_00ddfd10& operator=(const DisplayVectorCallLocal_00ddfd10& vector)
+    {
+        q = vector.q;
+        return *this;
+    }
+    __forceinline void operator=(const __m128& vector)
+    {
+        q = vector;
+    }
+    operator __m128() const;
+    DisplayVectorCallLocal_00ddfd10 operator*(float value) const;
+    DisplayVectorCallLocal_00ddfd10 operator+(const DisplayVectorCallLocal_00ddfd10& vector) const;
+    DisplayVectorCallLocal_00ddfd10 operator-() const;
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    __m128& packet();
+    const __m128& packet() const;
+
+    void set(float x, float y, float z, float w = 0.0f);
+    void zero();
+    void setZero4();
+    void subtract(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b);
+    void sub(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b);
+    void setSub(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b);
+    void setSub4(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b);
+    void add(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b);
+    void setAdd(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b);
+    void setAdd4(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b);
+    void add4(const DisplayVectorCallLocal_00ddfd10& vector);
+    void mul(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b);
+    void mul4(const DisplayVectorCallLocal_00ddfd10& vector);
+    void mul4(const Scalar& scalar);
+    void multiply(const Scalar& scalar);
+    void scale(const Scalar& scalar);
+    void product(const Scalar& scalar, const DisplayVectorCallLocal_00ddfd10& vector);
+    void cross(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b);
+    void setCross(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b);
+    void negate(const DisplayVectorCallLocal_00ddfd10& vector);
+    void setNeg4(const DisplayVectorCallLocal_00ddfd10& vector);
+    void addMul(const DisplayVectorCallLocal_00ddfd10& a, __m128 scale, const DisplayVectorCallLocal_00ddfd10& b);
+    void setAddMul4(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b, const Scalar& scalar);
+    void interpolate(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b, const Scalar& t);
+    void setInterpolate4(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b, const Scalar& t);
+    void Interpolate(const DisplayVectorCallLocal_00ddfd10& oldValue, const DisplayVectorCallLocal_00ddfd10& newValue, float factor);
+    void SetTransformedPoint(const Transform& transform, const DisplayVectorCallLocal_00ddfd10& point);
+
+    Scalar getSimdAt(int index) const;
+    Scalar dot(const DisplayVectorCallLocal_00ddfd10& vector) const;
+    Scalar dot3(const DisplayVectorCallLocal_00ddfd10& vector) const;
+    float DotProduct(const DisplayVectorCallLocal_00ddfd10& vector);
+    Scalar sum() const;
+    Scalar norm() const;
+    Scalar lengthSquared3() const;
+    Scalar length3() const;
+    float length() const;
+    Scalar inverseLength() const;
+    void normalize();
+    void normalize3();
+    Comparison compareLessThanZero4() const;
+    int getMajorAxis() const;
+    int maxAxisSecond() const;
+    int maxAxis() const;
+    float GetAngle();
+
+    void FUN_00416870(float x, float y, float z);
+    DisplayVectorCallLocal_00ddfd10 FUN_00439ef0(const DisplayVectorCallLocal_00ddfd10& vector);
+    DisplayVectorCallLocal_00ddfd10 FUN_00439e90(const DisplayVectorCallLocal_00ddfd10& vector);
+    void FUN_00439180(float value);
+    void FUN_004a0c10();
+    void FUN_005611c0();
+    void FUN_00c66320(const DisplayVectorCallLocal_00ddfd10* a, const DisplayVectorCallLocal_00ddfd10* b);
+    void FUN_00c74ac0(const DisplayVectorCallLocal_00ddfd10* a, const DisplayVectorCallLocal_00ddfd10* b);
+    void FUN_00c74c90(DisplayVectorCallLocal_00ddfd10* vector);
+    void FUN_00c7f640(const Transform& transform, const DisplayVectorCallLocal_00ddfd10& point);
+    void FUN_00cb2450(const DisplayVectorCallLocal_00ddfd10* vector, float value);
+    void FUN_00cb26e0(const hkRotation* rotation);
+
+    template <int I> void splat(const DisplayVectorCallLocal_00ddfd10& vector);
+
+    static const DisplayVectorCallLocal_00ddfd10& getZero();
+};
+
+#include "../../../../../../include/Transform.h"
+
+// Preserve uninitialized output bounds; getAabb fills every component.
+__forceinline hkAabb::hkAabb()
+{}
+
 struct S_00ddfcd0_Allocator
 {
     virtual void v0();
@@ -87,97 +208,75 @@ class Scalar
         return _mm_shuffle_ps(value, value, 0);
     }
 };
-struct Transform;
-class Vector
+__forceinline DisplayVectorCallLocal_00ddfd10::operator __m128() const
 {
-    __m128 q;
-
-  public:
-    __forceinline Vector()
-    {}
-    __forceinline Vector(const Vector& v) : q(v.q)
-    {}
-    __forceinline void operator=(const Vector& v)
-    {
-        q = v.q;
-    }
-    __forceinline void operator=(const __m128& v)
-    {
-        q = v;
-    }
-    __forceinline operator __m128() const
-    {
-        return q;
-    }
-    __forceinline float& operator()(int n)
-    {
-        return reinterpret_cast<float*>(&q)[n];
-    }
-    __forceinline const float& operator()(int n) const
-    {
-        return reinterpret_cast<const float*>(&q)[n];
-    }
-    __forceinline void setZero4()
-    {
-        q = _mm_setzero_ps();
-    }
-    __forceinline void set(float a, float b, float c, float d = 0)
-    {
-        q = _mm_setr_ps(a, b, c, d);
-    }
-    __forceinline void setSub4(const Vector& a, const Vector& b)
-    {
-        q = _mm_sub_ps(a.q, b.q);
-    }
-    __forceinline void setAdd4(const Vector& a, const Vector& b)
-    {
-        q = _mm_add_ps(a.q, b.q);
-    }
-    __forceinline void add4(const Vector& b)
-    {
-        q = _mm_add_ps(q, b.q);
-    }
-    __forceinline void mul4(const Vector& b)
-    {
-        q = _mm_mul_ps(q, b.q);
-    }
-    __forceinline void mul4(const Scalar& x)
-    {
-        q = _mm_mul_ps(x.broadcast(), q);
-    }
-    __forceinline int getMajorAxis() const;
-    __forceinline Scalar dot3(const Vector& b) const
-    {
-        __m128 s = _mm_mul_ps(q, b.q);
-        __m128 y = _mm_shuffle_ps(s, s, 0x55), z = _mm_shuffle_ps(s, s, 0xaa);
-        return _mm_add_ss(z, _mm_add_ss(y, s));
-    }
-    __forceinline Scalar length3() const
-    {
-        return _mm_sqrt_ss(dot3(*this).quad());
-    }
-    void FUN_00c7f640(const Transform&, const Vector&);
-    __forceinline void SetTransformedPoint(const Transform& m, const Vector& p)
-    {
-        FUN_00c7f640(m, p);
-    }
-    static __forceinline const Vector& getZero();
-};
-extern Vector DAT_01267e30, DAT_01017d10;
-__forceinline int Vector::getMajorAxis() const
+    return q;
+}
+__forceinline float& DisplayVectorCallLocal_00ddfd10::operator()(int n)
 {
-    Vector v;
+    return reinterpret_cast<float*>(&q)[n];
+}
+__forceinline const float& DisplayVectorCallLocal_00ddfd10::operator()(int n) const
+{
+    return reinterpret_cast<const float*>(&q)[n];
+}
+__forceinline void DisplayVectorCallLocal_00ddfd10::setZero4()
+{
+    q = _mm_setzero_ps();
+}
+__forceinline void DisplayVectorCallLocal_00ddfd10::set(float a, float b, float c, float d)
+{
+    q = _mm_setr_ps(a, b, c, d);
+}
+__forceinline void DisplayVectorCallLocal_00ddfd10::setSub4(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b)
+{
+    q = _mm_sub_ps(a.q, b.q);
+}
+__forceinline void DisplayVectorCallLocal_00ddfd10::setAdd4(const DisplayVectorCallLocal_00ddfd10& a, const DisplayVectorCallLocal_00ddfd10& b)
+{
+    q = _mm_add_ps(a.q, b.q);
+}
+__forceinline void DisplayVectorCallLocal_00ddfd10::add4(const DisplayVectorCallLocal_00ddfd10& b)
+{
+    q = _mm_add_ps(q, b.q);
+}
+__forceinline void DisplayVectorCallLocal_00ddfd10::mul4(const DisplayVectorCallLocal_00ddfd10& b)
+{
+    q = _mm_mul_ps(q, b.q);
+}
+__forceinline void DisplayVectorCallLocal_00ddfd10::mul4(const Scalar& x)
+{
+    q = _mm_mul_ps(x.broadcast(), q);
+}
+__forceinline Scalar DisplayVectorCallLocal_00ddfd10::dot3(const DisplayVectorCallLocal_00ddfd10& b) const
+{
+    __m128 s = _mm_mul_ps(q, b.q);
+    __m128 y = _mm_shuffle_ps(s, s, 0x55), z = _mm_shuffle_ps(s, s, 0xaa);
+    return _mm_add_ss(z, _mm_add_ss(y, s));
+}
+__forceinline Scalar DisplayVectorCallLocal_00ddfd10::length3() const
+{
+    return _mm_sqrt_ss(dot3(*this).quad());
+}
+__forceinline void DisplayVectorCallLocal_00ddfd10::SetTransformedPoint(const Transform& m, const DisplayVectorCallLocal_00ddfd10& p)
+{
+    FUN_00c7f640(m, p);
+}
+extern DisplayVectorCallLocal_00ddfd10 DAT_01267e30, DAT_01017d10;
+__forceinline int DisplayVectorCallLocal_00ddfd10::getMajorAxis() const
+{
+    DisplayVectorCallLocal_00ddfd10 v;
     v = _mm_and_ps(q, (__m128)DAT_01017d10);
     return v(0) < v(1) ? (v(1) < v(2) ? 2 : 1) : (v(0) < v(2) ? 2 : 0);
 }
-__forceinline const Vector& Vector::getZero()
+__forceinline const DisplayVectorCallLocal_00ddfd10& DisplayVectorCallLocal_00ddfd10::getZero()
 {
     return DAT_01267e30;
 }
 struct Basis
 {
-    Vector a, b, c;
-    __forceinline Vector& column(int i)
+    DisplayVectorCallLocal_00ddfd10 a, b, c;
+    __forceinline DisplayVectorCallLocal_00ddfd10& column(int i)
     {
         return (&a)[i];
     }
@@ -203,32 +302,24 @@ struct Basis
 struct Rotation : Basis
 {
 };
-struct Transform
+__forceinline Transform& Transform::operator=(const Transform& m)
 {
-    Rotation rotation;
-    Vector translation;
-    void FUN_00c6cd60(const Transform&);
-    __forceinline Transform& operator=(const Transform& m)
-    {
-        FUN_00c6cd60(m);
-        return *this;
-    }
-    void FUN_00cb2240(const Transform&, const Transform&);
-    __forceinline void SetProduct(const Transform& a, const Transform& b)
-    {
-        FUN_00cb2240(a, b);
-    }
-    __forceinline void setIdentity()
-    {
-        rotation.setIdentity();
-        translation.setZero4();
-    }
-    __forceinline void setTranslation(const Vector& p)
-    {
-        translation = p;
-    }
-    static __forceinline const Transform& GetIdentityTransform();
-};
+    FUN_00c6cd60(m);
+    return *this;
+}
+__forceinline void Transform::SetProduct(const Transform& a, const Transform& b)
+{
+    FUN_00cb2240(a, b);
+}
+__forceinline void Transform::setIdentity()
+{
+    reinterpret_cast<Rotation*>(r)->setIdentity();
+    reinterpret_cast<DisplayVectorCallLocal_00ddfd10*>(&r[3])->setZero4();
+}
+__forceinline void Transform::setTranslation(const DisplayVectorCallLocal_00ddfd10& p)
+{
+    *reinterpret_cast<DisplayVectorCallLocal_00ddfd10*>(&r[3]) = p;
+}
 extern Transform DAT_01268370;
 __forceinline const Transform& Transform::GetIdentityTransform()
 {
@@ -236,24 +327,20 @@ __forceinline const Transform& Transform::GetIdentityTransform()
 }
 class SphereRec
 {
-    Vector pos;
+    DisplayVectorCallLocal_00ddfd10 pos;
 
   public:
     __forceinline SphereRec()
     {}
-    __forceinline SphereRec(const Vector& p, float r)
+    __forceinline SphereRec(const DisplayVectorCallLocal_00ddfd10& p, float r)
     {
         pos = p;
         pos(3) = r;
     }
-    __forceinline const Vector& getPosition() const
+    __forceinline const DisplayVectorCallLocal_00ddfd10& getPosition() const
     {
         return pos;
     }
-};
-struct Bounds
-{
-    Vector m_kMinimumCorner, m_kMaximumCorner;
 };
 struct ShapeBuffer
 {
@@ -409,7 +496,7 @@ struct Mesh
             material = m;
         }
     };
-    Array<Vector> m_kVertices;
+    Array<DisplayVectorCallLocal_00ddfd10> m_kVertices;
     Array<Triangle> m_uiTriangleCount;
     __forceinline void* operator new(unsigned int n)
     {
@@ -424,8 +511,8 @@ struct Strided
 {
     const float* data;
     int count, stride;
-    __forceinline Strided(const ArrayBase<Vector>& a)
-        : data((const float*)a.begin()), count(a.GetLogicalSize()), stride(sizeof(Vector))
+    __forceinline Strided(const ArrayBase<DisplayVectorCallLocal_00ddfd10>& a)
+        : data((const float*)a.begin()), count(a.GetLogicalSize()), stride(sizeof(DisplayVectorCallLocal_00ddfd10))
     {}
 };
 struct MeshUtility
@@ -452,7 +539,7 @@ struct RefObject
 struct Display : RefObject
 {
     Mesh* geometry;
-    Transform transform;
+    __declspec(align(16)) Transform transform;
     int displayType;
     __forceinline Mesh* getGeometry()
     {
@@ -471,27 +558,27 @@ struct FUN_00e0af50 : Display
 };
 struct FUN_00d22dc0 : Display
 {
-    Vector top, bottom;
+    DisplayVectorCallLocal_00ddfd10 top, bottom;
     float radius;
     int sides, segments;
-    FUN_00d22dc0(const Vector&, const Vector&, float, int, int);
+    FUN_00d22dc0(const DisplayVectorCallLocal_00ddfd10&, const DisplayVectorCallLocal_00ddfd10&, float, int, int);
 };
 struct FUN_00d58510 : Display
 {
-    Vector top, bottom;
+    DisplayVectorCallLocal_00ddfd10 top, bottom;
     float radius;
     int sides, segments;
-    FUN_00d58510(const Vector&, const Vector&, float, int, int);
+    FUN_00d58510(const DisplayVectorCallLocal_00ddfd10&, const DisplayVectorCallLocal_00ddfd10&, float, int, int);
 };
 struct FUN_00de1f50 : Display
 {
-    Vector half;
-    FUN_00de1f50(const Vector&);
+    DisplayVectorCallLocal_00ddfd10 half;
+    FUN_00de1f50(const DisplayVectorCallLocal_00ddfd10&);
 };
 struct FUN_00de4f20 : Display
 {
-    Vector normal, center, perp, extent;
-    FUN_00de4f20(const Vector&, const Vector&, const Vector&, const Vector&);
+    DisplayVectorCallLocal_00ddfd10 normal, center, perp, extent;
+    FUN_00de4f20(const DisplayVectorCallLocal_00ddfd10&, const DisplayVectorCallLocal_00ddfd10&, const DisplayVectorCallLocal_00ddfd10&, const DisplayVectorCallLocal_00ddfd10&);
 };
 struct FUN_00de1d20 : Display
 {
@@ -525,7 +612,7 @@ struct BaseShape
     virtual const Container* GetShapeContainer() const;
     virtual void f14();
     virtual void f18();
-    virtual void getAabb(const Transform&, float, Bounds&) const;
+    virtual void getAabb(const Transform&, float, hkAabb&) const;
     virtual void f20();
     virtual void f24();
     virtual void f28();
@@ -553,8 +640,8 @@ struct BallShape : Convex
 struct MultiBallShape : BaseShape
 {
     int count;
-    Vector points[8];
-    __forceinline const Vector* getSpheres() const
+    DisplayVectorCallLocal_00ddfd10 points[8];
+    __forceinline const DisplayVectorCallLocal_00ddfd10* getSpheres() const
     {
         return points;
     }
@@ -565,24 +652,24 @@ struct MultiBallShape : BaseShape
 };
 struct PlaneShape : BaseShape
 {
-    Vector plane;
-    __forceinline const Vector& getPlane() const
+    DisplayVectorCallLocal_00ddfd10 plane;
+    __forceinline const DisplayVectorCallLocal_00ddfd10& getPlane() const
     {
         return plane;
     }
 };
 struct CapsuleShape : Convex
 {
-    Vector endpoints[2];
-    __forceinline const Vector& getVertex(int i) const
+    DisplayVectorCallLocal_00ddfd10 endpoints[2];
+    __forceinline const DisplayVectorCallLocal_00ddfd10& getVertex(int i) const
     {
         return endpoints[i];
     }
 };
 struct CylinderShape : Convex
 {
-    Vector endpoints[2];
-    __forceinline const Vector& getVertex(int i) const
+    DisplayVectorCallLocal_00ddfd10 endpoints[2];
+    __forceinline const DisplayVectorCallLocal_00ddfd10& getVertex(int i) const
     {
         return endpoints[i];
     }
@@ -596,7 +683,7 @@ struct RayShape : BaseShape
 {
     struct Ray
     {
-        Vector m_kRayStart, m_kRayEnd;
+        DisplayVectorCallLocal_00ddfd10 m_kRayStart, m_kRayEnd;
     };
     Array<Ray> rays;
     float penetration;
@@ -607,8 +694,8 @@ struct RayShape : BaseShape
 };
 struct CenteredPointBounds : Convex
 {
-    Vector half;
-    __forceinline const Vector& getHalfExtents() const
+    DisplayVectorCallLocal_00ddfd10 half;
+    __forceinline const DisplayVectorCallLocal_00ddfd10& getHalfExtents() const
     {
         return half;
     }
@@ -618,8 +705,8 @@ struct TranslateShape : Convex
     int unk14;
     const BaseShape* child;
     int unk1c;
-    Vector translation;
-    __forceinline const Vector& getTranslation() const
+    DisplayVectorCallLocal_00ddfd10 translation;
+    __forceinline const DisplayVectorCallLocal_00ddfd10& getTranslation() const
     {
         return translation;
     }
@@ -633,7 +720,7 @@ struct ConvexTransformShape : Convex
     int unk14;
     const BaseShape* child;
     int unk1c;
-    Transform transform;
+    __declspec(align(16)) Transform transform;
     __forceinline const Transform& getTransform() const
     {
         return transform;
@@ -648,7 +735,7 @@ struct TransformShape : BaseShape
     int unk10;
     const BaseShape* child;
     int unk18, unk1c, unk20, unk24, unk28, unk2c;
-    Transform transform;
+    __declspec(align(16)) Transform transform;
     __forceinline const Transform& getTransform() const
     {
         return transform;
@@ -681,12 +768,12 @@ struct ListShape : BaseShape, Container
 };
 struct TriangleShape : Convex
 {
-    Vector vertices[3], extrusion;
-    __forceinline const Vector& getVertex(int i) const
+    DisplayVectorCallLocal_00ddfd10 vertices[3], extrusion;
+    __forceinline const DisplayVectorCallLocal_00ddfd10& getVertex(int i) const
     {
         return vertices[i];
     }
-    __forceinline const Vector& getExtrusion() const
+    __forceinline const DisplayVectorCallLocal_00ddfd10& getExtrusion() const
     {
         return extrusion;
     }
@@ -699,7 +786,7 @@ struct CollectionShape : BaseShape, Container
 };
 struct PieceShape : Convex
 {
-    Vector* vertices;
+    DisplayVectorCallLocal_00ddfd10* vertices;
     int vertexCount;
     int unk1c;
     const CollectionShape* m_pDisplayMesh;
@@ -709,7 +796,7 @@ struct PieceShape : Convex
 struct HeightShape : BaseShape
 {
     int m_iXResolution, m_iZResolution, unk18, unk1c;
-    Vector m_kHeightScaleVector;
+    DisplayVectorCallLocal_00ddfd10 m_kHeightScaleVector;
     __forceinline float getHeightAt(int a, int b) const
     {
         return GetHeightAtGridPoint(a, b);
@@ -758,7 +845,7 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
     {
     case 1: {
         const BallShape* s = static_cast<const BallShape*>(shape);
-        Vector zero;
+        DisplayVectorCallLocal_00ddfd10 zero;
         zero.setZero4();
         SphereRec sphere(zero, s->getRadius());
         FUN_00e0af50* g = new FUN_00e0af50(sphere, m_kEnvironment.m_iSecondValue, m_kEnvironment.m_iFirstValue);
@@ -768,10 +855,10 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
     }
     case 21: {
         const MultiBallShape* s = static_cast<const MultiBallShape*>(shape);
-        const Vector* points = s->getSpheres();
+        const DisplayVectorCallLocal_00ddfd10* points = s->getSpheres();
         for (int i = 0; i < s->getNumSpheres(); ++i)
         {
-            SphereRec sphere(Vector::getZero(), points[i](3));
+            SphereRec sphere(DisplayVectorCallLocal_00ddfd10::getZero(), points[i](3));
             FUN_00e0af50* g = new FUN_00e0af50(sphere, m_kEnvironment.m_iSecondValue, m_kEnvironment.m_iFirstValue);
             g->getTransform().setIdentity();
             g->getTransform().setTranslation(points[i]);
@@ -781,17 +868,17 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
     }
     case 28: {
         const PlaneShape* s = static_cast<const PlaneShape*>(shape);
-        const Vector& plane = s->getPlane();
-        Bounds bounds;
+        const DisplayVectorCallLocal_00ddfd10& plane = s->getPlane();
+        hkAabb bounds;
         s->getAabb(Transform::GetIdentityTransform(), 0.001f, bounds);
-        Vector ext;
-        ext.setSub4(bounds.m_kMaximumCorner, bounds.m_kMinimumCorner);
-        Vector axis;
+        DisplayVectorCallLocal_00ddfd10 ext;
+        ext.setSub4(*reinterpret_cast<const DisplayVectorCallLocal_00ddfd10*>(&bounds.m_kMaximumCorner.x), *reinterpret_cast<const DisplayVectorCallLocal_00ddfd10*>(&bounds.m_kMinimumCorner.x));
+        DisplayVectorCallLocal_00ddfd10 axis;
         axis.setZero4();
         axis(ext.getMajorAxis()) = 1;
         ext.mul4(0.5f);
-        Vector center(ext);
-        center.add4(bounds.m_kMinimumCorner);
+        DisplayVectorCallLocal_00ddfd10 center(ext);
+        center.add4(*reinterpret_cast<const DisplayVectorCallLocal_00ddfd10*>(&bounds.m_kMinimumCorner.x));
         FUN_00de4f20* g = new FUN_00de4f20(plane, axis, center, ext);
         g->getTransform() = mat;
         out.AddBack(g);
@@ -806,9 +893,9 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
     }
     case 2: {
         const CylinderShape* s = static_cast<const CylinderShape*>(shape);
-        Vector a;
+        DisplayVectorCallLocal_00ddfd10 a;
         a.SetTransformedPoint(mat, s->getVertex(1));
-        Vector b;
+        DisplayVectorCallLocal_00ddfd10 b;
         b.SetTransformedPoint(mat, s->getVertex(0));
         FUN_00d58510* g = new FUN_00d58510(a, b, s->FUN_00d571a0(), 9, 1);
         g->getTransform() = mat;
@@ -823,15 +910,15 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
         for (int i = 0; i < s->getRays().GetLogicalSize(); ++i)
         {
             RayShape::Ray ray = s->getRays()[i];
-            Vector* a = mesh->m_kVertices.expandBy(1);
+            DisplayVectorCallLocal_00ddfd10* a = mesh->m_kVertices.expandBy(1);
             *a = ray.m_kRayStart;
             a->SetTransformedPoint(mat, *a);
-            Vector* b = mesh->m_kVertices.expandBy(1);
+            DisplayVectorCallLocal_00ddfd10* b = mesh->m_kVertices.expandBy(1);
             *b = ray.m_kRayStart;
-            Vector offset;
+            DisplayVectorCallLocal_00ddfd10 offset;
             offset.set(0.01f, 0, 0, 0);
             b->add4(offset);
-            Vector* c = mesh->m_kVertices.expandBy(1);
+            DisplayVectorCallLocal_00ddfd10* c = mesh->m_kVertices.expandBy(1);
             *c = ray.m_kRayEnd;
             c->SetTransformedPoint(mat, *c);
             Mesh::Triangle* t = mesh->m_uiTriangleCount.expandBy(1);
@@ -849,24 +936,24 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
     }
     case 11: {
         const TranslateShape* s = static_cast<const TranslateShape*>(shape);
-        Transform local;
+        __declspec(align(16)) Transform local;
         local.setIdentity();
         local.setTranslation(s->getTranslation());
-        Transform result;
+        __declspec(align(16)) Transform result;
         result.SetProduct(mat, local);
         FUN_00ddfd10(s->GetShapeForKey(), result, out);
         break;
     }
     case 12: {
         const ConvexTransformShape* s = static_cast<const ConvexTransformShape*>(shape);
-        Transform result;
+        __declspec(align(16)) Transform result;
         result.SetProduct(mat, s->getTransform());
         FUN_00ddfd10(s->GetShapeForKey(), result, out);
         break;
     }
     case 15: {
         const TransformShape* s = static_cast<const TransformShape*>(shape);
-        Transform result;
+        __declspec(align(16)) Transform result;
         result.SetProduct(mat, s->getTransform());
         FUN_00ddfd10(s->GetShapeForKey(), result, out);
         break;
@@ -912,7 +999,7 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
         const TriangleShape* s = static_cast<const TriangleShape*>(shape);
         Mesh* mesh = GetCurrentDisplay(out)->getGeometry();
         int base = mesh->m_kVertices.GetLogicalSize();
-        Vector* v = mesh->m_kVertices.expandBy(3);
+        DisplayVectorCallLocal_00ddfd10* v = mesh->m_kVertices.expandBy(3);
         v[0].SetTransformedPoint(mat, s->getVertex(0));
         v[1].SetTransformedPoint(mat, s->getVertex(1));
         v[2].SetTransformedPoint(mat, s->getVertex(2));
@@ -920,13 +1007,13 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
         t->set(base, base + 1, base + 2);
         if (s->getExtrusion().length3() > 0)
         {
-            Vector a;
+            DisplayVectorCallLocal_00ddfd10 a;
             a.setAdd4(s->getVertex(0), s->getExtrusion());
-            Vector b;
+            DisplayVectorCallLocal_00ddfd10 b;
             b.setAdd4(s->getVertex(1), s->getExtrusion());
-            Vector c;
+            DisplayVectorCallLocal_00ddfd10 c;
             c.setAdd4(s->getVertex(2), s->getExtrusion());
-            Vector* e = mesh->m_kVertices.expandBy(3);
+            DisplayVectorCallLocal_00ddfd10* e = mesh->m_kVertices.expandBy(3);
             e[0].SetTransformedPoint(mat, a);
             e[1].SetTransformedPoint(mat, b);
             e[2].SetTransformedPoint(mat, c);
@@ -947,7 +1034,7 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
         LocalArray<SphereRec> points(count);
         points.SetSizeAndGrow(count);
         const SphereRec* p = s->getCollisionSpheres(points.begin());
-        Array<Vector> transformed;
+        Array<DisplayVectorCallLocal_00ddfd10> transformed;
         transformed.SetSizeAndGrow(count);
         for (int i = 0; i < count; ++i)
             transformed.data[i].SetTransformedPoint(mat, p[i].getPosition());
@@ -970,7 +1057,7 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
             t->set(base, base + 1, base + 2);
             for (int j = 0; j < 3; ++j)
             {
-                Vector* v = mesh->m_kVertices.expandBy(1);
+                DisplayVectorCallLocal_00ddfd10* v = mesh->m_kVertices.expandBy(1);
                 v->SetTransformedPoint(mat, child->getVertex(j));
             }
         }
@@ -981,24 +1068,24 @@ void Node::FUN_00ddfd10(const BaseShape* shape, const Transform& mat, Array<Disp
     case 13: {
         const HeightShape* s = static_cast<const HeightShape*>(shape);
         Mesh* mesh = GetCurrentDisplay(out)->getGeometry();
-        Vector scale = s->m_kHeightScaleVector;
+        DisplayVectorCallLocal_00ddfd10 scale = s->m_kHeightScaleVector;
         for (int i = 0; i < s->m_iXResolution - 1; ++i)
             for (int j = 0; j < s->m_iZResolution - 1; ++j)
             {
-                Vector a;
+                DisplayVectorCallLocal_00ddfd10 a;
                 a.set((float)(float)i + 0.0, s->getHeightAt(i, j), (float)(float)j + 0.0);
                 a.mul4(scale);
-                Vector b;
+                DisplayVectorCallLocal_00ddfd10 b;
                 b.set((float)(float)i + 0.0, s->getHeightAt(i, j + 1), (float)(float)j + 1.0);
                 b.mul4(scale);
-                Vector c;
+                DisplayVectorCallLocal_00ddfd10 c;
                 c.set((float)(float)i + 1.0, s->getHeightAt(i + 1, j), (float)(float)j + 0.0);
                 c.mul4(scale);
-                Vector d;
+                DisplayVectorCallLocal_00ddfd10 d;
                 d.set((float)(float)i + 1.0, s->getHeightAt(i + 1, j + 1), (float)(float)j + 1.0);
                 d.mul4(scale);
                 int base = mesh->m_kVertices.GetLogicalSize();
-                Vector* v = mesh->m_kVertices.expandBy(4);
+                DisplayVectorCallLocal_00ddfd10* v = mesh->m_kVertices.expandBy(4);
                 v[0].SetTransformedPoint(mat, a);
                 v[1].SetTransformedPoint(mat, b);
                 v[2].SetTransformedPoint(mat, c);

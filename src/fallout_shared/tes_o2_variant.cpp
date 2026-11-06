@@ -1,3 +1,15 @@
+#include "../../include/BGSPlaceableWater.h"
+#include "../../include/PlaceableWaterData.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/BSTempNodeManager.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NP.h"
+#include "../../include/NiCamera.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/NiTPointerMap.h"
 
 // src/fallout_shared/tes_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/tes.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
@@ -8,17 +20,9 @@ struct GlobalObject_00a7b610
 {
 };
 extern GlobalObject_00a7b610 g_01202df8;
-struct NiRTTI
-{
-};
 struct FUN_00450620_shell
 {
     const NiRTTI* GetNiRTTI() const;
-};
-struct BSTempNodeManager
-{
-    virtual ~BSTempNodeManager();
-    void* FUN_00450630(unsigned int flags);
 };
 extern "C" void __cdecl FUN_00c44e20(BSTempNodeManager*);
 extern void __cdecl __Dummy_00b6fef0(void*, unsigned int);
@@ -29,10 +33,6 @@ struct FUN_004512a0_shell
 };
 extern char DAT_01189184;
 void FUN_00451520(unsigned char value);
-struct NP
-{
-    NP& operator=(void*);
-};
 extern NP DAT_011f95e8;
 void FUN_00451570(void* arg);
 extern unsigned char DAT_011ad86c;
@@ -88,354 +88,6 @@ struct blob12
 {
     char b[12];
 };
-struct TESDataHandler
-{
-    static bool LoadForm(TESForm*, TESFile*);
-    bool SaveForm(TESForm*, bool);
-    char* GetFormName(unsigned char);
-    void OutputFormList();
-    void SetModelSizeOutputEnabled(bool);
-    void OutputModelSizeList();
-    void CheckTexturesRecurse(NiAVObject*, char*);
-    static bool CheckDismemberSkinInstanceRecurse(NiAVObject*, char*);
-    void PrintTextureInfo(void*, NiTriBasedGeom*, char*, char*, bool);
-    void OutputTextureInfo();
-    void CheckTexturePath(char*);
-    bool AddFormToDataHandler(TESForm*);
-    void ReleaseForm(TESForm*);
-    unsigned char NotUniqueID(char*);
-    void GetObjectCounts();
-    void GetReferenceCounts();
-    void GetRegions();
-    void InitializeMagicSystem();
-    void GetReferencesInArea(TESObjectCELL*, void*, float, void*, float, int*, long);
-    void GetReferencesInArea(void*, float, void*, float, int*, long);
-    void EnumReferencesCloseToRef(TESObjectREFR*, float, void*, float, int*, long);
-    static bool ReferenceBaseSearchEnumFunc(TESObjectREFR*, long);
-    bool FindTeleportPathBetweenSmallSpaces(TESForm*, TESForm*, void*);
-    bool FindTeleportPathBetweenWorlds(TESWorldSpace*, TESWorldSpace*, void*);
-    bool FindTeleportPathFromSmallSpaceToWorld(TESForm*, TESWorldSpace*, void*, bool);
-    TESObjectREFR* FindFirstReference(TESObject*);
-    TESObjectREFR* FindFirstReference(char*);
-    bool FindConnectedWorld(TESWorldSpace*, TESWorldSpace*, void*);
-    bool FindConnectedSmallSpace(TESForm*, TESForm*, void*, void*);
-    TESWorldSpace* BuildPathNodeLocation(TESForm*, NiPoint3*, void*);
-    TESObjectREFR* FindClosestReference(TESBoundObject*, void*, TESObjectCELL*);
-    TESObjectREFR* FindClosestReference(char*, void*, TESObjectCELL*);
-    TESObjectREFR* GetReference(char*);
-    TESObjectREFR* GetReference(unsigned int);
-    TESLandTexture* GetLandTexture(char*);
-    TESLandTexture* GetLandTexture(unsigned int);
-    TESRace* GetRace(char*);
-    TESRace* GetRace(unsigned int);
-    TESClass* GetClass(char*);
-    TESClass* GetClass(unsigned int);
-    Script* GetScript(char*);
-    Script* GetScript(unsigned int);
-    TESSound* GetSoundByEditorID(char*);
-    TESSound* GetSoundByEditorID(unsigned int);
-    TESGlobal* GetGlobal(char*);
-    TESGlobal* GetGlobal(unsigned int);
-    BGSVoiceType* GetVoiceType(unsigned int);
-    TESFaction* GetFactionByFormID(char*);
-    TESFaction* GetFactionByFormID(unsigned int);
-    TESReputation* GetReputation(char*);
-    TESReputation* GetReputation(unsigned int);
-    TESRecipe* GetRecipe(char*);
-    TESRecipe* GetRecipe(unsigned int);
-    TESRecipeCategory* GetRecipeCategory(char*);
-    TESRecipeCategory* GetRecipeCategory(unsigned int);
-    TESCasino* GetCasino(char*);
-    TESCasino* GetCasino(unsigned int);
-    TESCaravanDeck* GetCaravanDeck(char*);
-    TESCaravanDeck* GetCaravanDeck(unsigned int);
-    TESTopic* GetAudioBackendData(int, int);
-    TESTopic* GetAudioBackendData(char*);
-    TESTopic* GetAudioBackendData(unsigned int);
-    TESChallenge* GetChallenge(char*);
-    TESAmmoEffect* GetAmmoEffect(char*);
-    TESQuest* GetQuest(char*);
-    TESCombatStyle* GetCombatStyle(char*);
-    TESEffectShader* GetEffectShader(char*);
-    BGSProjectile* GetProjectileData(char*);
-    BGSExplosion* GetExplosion(char*);
-    BGSDebris* GetDebris(char*);
-    BGSPerk* GetPerk(char*);
-    BGSMessage* GetMessage(char*);
-    TESLoadScreenType* GetLoadScreenType(char*);
-    TESLoadScreenType* GetLoadScreenType(unsigned int);
-    TESFormList* GetObjectList();
-    void* GetFileList();
-    void* GetPartDataList();
-    void* GetPerks();
-    void* GetDebrisList();
-    void* GetExplosionList();
-    void* GetProjectileList();
-    void* GetRadiationStageList();
-    void* GetDehydrationStageList();
-    void* GetHungerStageList();
-    void* GetSleepDeprevationStageList();
-    void* GetEffectShaderList();
-    void* GetWaterList();
-    void* GetLoadScreenList();
-    void* GetAnimObjectList();
-    TESObjectANIO* GetAnimObject(TESIdleForm*, int);
-    void* GetCombatStyleList();
-    void* GetPackageList();
-    void* GetWorldSpaceList();
-    void* GetClimateList();
-    void* GetImageSpaceList();
-    void* GetImageSpaceModifierList();
-    void* GetWeatherList();
-    void* GetEnchantmentItemList();
-    void* GetSpellItemList();
-    void* GetLandTextList();
-    void* GetCameraShotList();
-    void* GetHeadPartList();
-    void* GetHairList();
-    void* GetEyesList();
-    void* GetRaceList();
-    void* GetZoneList();
-    void* GetClassList();
-    void* GetFactionList();
-    void* GetReputationList();
-    void* GetChallengeList();
-    void* GetRecipeList();
-    void* GetRecipeCategoryList();
-    void* GetAmmoEffectList();
-    void* GetCasinoList();
-    void* GetCaravanDeckList();
-    void* GetSoundList();
-    void* GetAcousticSpaceList();
-    void* GetRagdollList();
-    void* GetGlobalList();
-    void* GetVoiceTypeList();
-    void* GetImpactDataList();
-    void* GetImpactDataSetList();
-    void* GetBadFormList();
-    TESRegionList* GetRegionList();
-    void* GetTopicList();
-    void* GetTopicInfoList();
-    void* GetNoteList();
-    void* GetMenuIconList();
-    void* GetListFormList();
-    void* GetMessageList();
-    void* GetLightingTemplateList();
-    void* GetMusicTypeList();
-    void* GetLoadScreenTypeList();
-    void* GetMediaSetList();
-    void* GetMediaLocationControllerList();
-    void AddTopic(TESTopic*);
-    void RemoveTopic(TESTopic*);
-    void AddTopicInfo(TESTopicInfo*);
-    void RemoveTopicInfo(TESTopicInfo*);
-    void* GetScriptList();
-    void SortScriptList();
-    void* GetQuestList();
-    void AddQuest(TESQuest*);
-    void RemoveQuest(TESQuest*);
-    unsigned int GetAddonNodeCount();
-    BGSAddonNode* GetAddonNodeByIndex(unsigned int);
-    void RegisterAddonNode(BGSAddonNode*);
-    void RemoveAddonNode(BGSAddonNode*);
-    TESObjectCELL* GetCellByNameAndGrid(char*);
-    TESObjectCELL* GetCellByNameAndGrid(char*, int, int, TESWorldSpace*);
-    unsigned int GetInteriorCellCount();
-    TESObjectCELL* GetCellByInteriorIndex(unsigned int);
-    void RefreshCellList();
-    unsigned int GetCellCount();
-    TESObjectCELL* GetCellByIndex(unsigned int);
-    TESObjectCELL* GetCellByNumericID(unsigned int);
-    TESObjectCELL* LookupCellByEditorID(char*);
-    TESWorldSpace* GetWorldSpaceByEditorID(char*, int*, int*);
-    TESObjectCELL* GetCellByWorldPosition(float, float, TESWorldSpace*, bool);
-    TESObjectCELL* GetCellAtGridPosition(int, int, TESWorldSpace*, bool);
-    TESWorldSpace* GetWorldSpaceForCell(TESObjectCELL*);
-    void RemoveCell(TESObjectCELL*);
-    void RemoveCell(int, int, TESWorldSpace*);
-    void RemoveCell(char*);
-    TESObjectREFR* CreateReferenceInLoadedArea(TESBoundObject*, void*, void*, bool, BGSPrimitive*, void*);
-    TESObjectREFR* PlaceReferenceAtLocation(TESBoundObject*, void*, void*, TESObjectCELL*, TESWorldSpace*,
-                                            TESObjectREFR*, BGSPrimitive*, void*);
-    TESObjectCELL* SelectCell(struct blob12, bool*, TESWorldSpace*);
-    bool AssignToCell(TESObjectCELL*, TESObjectREFR*);
-    bool PlaceInExterior(TESObjectREFR*, TESWorldSpace*);
-    void RemoveDuplicateReferences();
-    TESObjectREFR* CreateProjectileAtLocation(TESBoundObject*, void*, void*, TESObjectCELL*, TESWorldSpace*);
-    TESObjectREFR* PlaceObjectAtLocation(TESBoundObject*, void*, void*, TESObjectCELL*, TESWorldSpace*);
-    TESFile* LookupTESFile(unsigned int);
-    TESFile* LookupTESFile(char*);
-    bool RemoveListFile(TESFile*);
-    static void FileCacheCompleteCallback(char*);
-    char* GetActiveFileName();
-    void SetActiveFile(TESFile*);
-    TESFile* GetActiveFile();
-    void RemoveIDFromDataHandler(unsigned int);
-    unsigned int GetNextID();
-    void AddCompiledFile(TESFile*);
-    void ClearFileList();
-    bool UpdateLoadingStatusCallback(char*);
-    void BuildCompiledFileList();
-    int CountCheckedFiles(int);
-    unsigned int CountFiles();
-    unsigned int CountCompiled();
-    bool LoadPluginFiles(bool);
-    bool ClearData();
-    bool SaveActiveData(char*, bool);
-    void CloseAllTES();
-    bool LoadTESFile(TESFile*, bool);
-    void ClearLoadedFormCount();
-    unsigned int AddDownloadedContentToFileList();
-    void RunAllPersistentRefScripts();
-    bool ConstructObject(TESFile*, bool, TESForm*, bool);
-    bool FormGroupLoadsInGame(TESFile*, FormRecordHeader*);
-    static TESForm* CreateFormForType(unsigned char);
-    bool ResetOffsetData(TESFile*);
-    void FixAllScriptIDs();
-    void SetSaveLoadGameState(int);
-    bool GetMasterSave();
-    void SetMasterSave(bool);
-    bool GetSaveLoadGame();
-    void SetSaveLoadGame(bool);
-    bool GetSaveLoad();
-    void SetSaveLoad(bool);
-    bool GetAutoSaving();
-    void SetAutoSaving(bool);
-    bool GetClearingData();
-    void SetClearingData(bool);
-    bool GetHasDesiredFiles();
-    void SetHasDesiredFiles(bool);
-    bool IsSavingLoading();
-    void SetCheckingModels(bool);
-    bool GetCheckingModels();
-    void SetLoadingFiles(bool);
-    bool GetLoadingFiles();
-    bool GetGameSettingsLoaded();
-    void MarkGameSettingsLoaded();
-    void FlushSoundBuffers();
-    void SetBarterContainer(TESObjectREFR*);
-    void AddBarterItem(InventoryStackRecord*, int, TESObjectREFR*);
-    void ClearBarterContainer();
-    InventoryChanges* GetBarterContainer();
-    void CreateRecipeContainer(TESObjectREFR*);
-    void RemoveItemRecipeContainer(InventoryStackRecord*, int, TESObjectREFR*);
-    void ClearRecipeContainer();
-    InventoryChanges* GetRecipeContainer();
-    TESRegionDataManager* GetRegionDataManager();
-    TESFile* GetCompiledFileByIndex(int);
-    unsigned int GetNextFormID();
-    void SetNextFormID(unsigned int);
-    bool FormIDExists(unsigned int);
-    AlchemyItem* DoesPotionMatch(AlchemyItem*);
-    void SetDontRemoveIDs(bool);
-    bool GetDontRemoveIDs();
-    void* QArrayInteriorCells();
-    TESEffectShader* GetSpotterShader();
-    TESEffectShader* GetItemDetectedShader();
-    TESEffectShader* GetCateyeShader();
-    void SetSpotterShader(TESEffectShader*);
-    void SetItemDetectedShader(TESEffectShader*);
-    void SetCateyeShader(TESEffectShader*);
-    void ClearDLCFlags();
-    int GetNumDLCInstalled();
-    void DataError(int);
-    bool IsFormIDRemapped(unsigned int);
-    void AdvanceNextID();
-    char* GetDLCFlags();
-    bool IsDLCFlagSet(char);
-    void SetDLCFlag(char, bool);
-    int GetDLCIndex(char*);
-    unsigned int LoadFilesInDirectory(char*, void*);
-    void* __vecDelDtor(unsigned int);
-    char m_cDLCFlagCount;
-    char _pad_1[3];
-    TESFormList* m_pBoundObjectList;
-    char m_kPackages[8];
-    char m_kWorldSpaceList[8];
-    char m_kClimateList[8];
-    char m_kImageSpaceList[8];
-    char m_kImageSpaceModifierList[8];
-    char m_kWeatherList[8];
-    char m_kEnchantmentItemList[8];
-    char m_kSpellList[8];
-    char m_kHeadPartList[8];
-    char m_kHairList[8];
-    char m_kEyeList[8];
-    char m_kRaceList[8];
-    char m_kEncounterZoneList[8];
-    char m_kLandTextureList[8];
-    char m_kCameraShotList[8];
-    char m_kClassList[8];
-    char m_pVoiceType[8];
-    char m_kReputationList[8];
-    char m_kChallengeList[8];
-    char m_kCraftingRecipeList[8];
-    char m_kRecipeCategoryList[8];
-    char m_kAmmoEffectList[8];
-    char m_kCasinoList[8];
-    char m_kCaravanDeckList[8];
-    char m_kScriptList[8];
-    char m_kSoundList[8];
-    char m_kAcousticSpaceList[8];
-    char m_kRagdollList[8];
-    char m_kGlobalList[8];
-    char m_kVoiceTypeList[8];
-    char m_kImpactEffectList[8];
-    char m_kImpactDataSetList[8];
-    char m_kTopicList[8];
-    char m_kTopicInfoList[8];
-    char m_kQuestList[8];
-    char m_kCombatStyleList[8];
-    char m_kLoadScreenList[8];
-    char m_kWaterFormList[8];
-    char m_kEffectShaderList[8];
-    char m_kProjectileList[8];
-    char m_kExplosionList[8];
-    char m_kRadiationStageList[8];
-    char m_kDehydrationStageList[8];
-    char m_kHungerStageList[8];
-    char m_kSleepDeprivationStageList[8];
-    char m_kDebrisList[8];
-    char m_kPerkList[8];
-    char m_kBodyPartDataList[8];
-    char m_kNoteList[8];
-    char m_kListFormList[8];
-    char m_kMenuIconList[8];
-    char m_kFourthDataList[8];
-    char m_kMessageList[8];
-    char m_kLightingTemplateList[8];
-    char m_kMusicTypeList[8];
-    char m_kLoadScreenTypeList[8];
-    char m_kMediaSetList[8];
-    char m_kMediaLocationControllerList[8];
-    TESRegionList* m_pRegions;
-    char m_kFirstArrayStorage[16];
-    char m_kSecondArrayStorage[16];
-    char m_kThirdArrayStorage[12];
-    unsigned int m_uiFormCount;
-    TESFile* m_pActiveFile;
-    char m_kModInfoList[8];
-    unsigned int m_iLoadedModCount;
-    char m_ppLoadedMods[1020];
-    bool m_bLoadingFiles;
-    bool m_bGameSettingsLoaded;
-    bool m_bMasterSave;
-    bool m_bSaveLoadGame;
-    bool m_bFirstStateField;
-    bool m_bSecondStateField;
-    bool m_bThirdStateField;
-    bool m_bFourthStateFlag;
-    bool m_bFifthStateFlag;
-    bool m_bSixthStateFlag;
-    unsigned char m_ucInternalStateByte;
-    char _pad_623[1];
-    TESRegionDataManager* m_pRegionDataManager;
-    InventoryChanges* m_pFirstInventoryChanges;
-    InventoryChanges* m_pSecondInventoryChanges;
-    TESEffectShader* m_pFirstEffectShader;
-    TESEffectShader* m_pSecondEffectShader;
-    TESEffectShader* m_pThirdEffectShader;
-};
 typedef char _sizecheck_TESDataHandler[sizeof(TESDataHandler) == 1596 ? 1 : -1];
 struct FUN_004516b0_shell : public TESDataHandler
 {
@@ -457,95 +109,6 @@ struct TESObjectREFR;
 struct blob4
 {
     char b[4];
-};
-struct BGSSaveLoadGame
-{
-    static void Create();
-    static void Destroy();
-    void ApplyFormChanges(BGSSaveLoadChangesMap*, FormIDConverter*);
-    void LoadCellChanges(bool);
-    void LoadForm(TESForm*);
-    void SetFormLoaded(TESForm*, bool);
-    bool ShouldUnloadForm(TESForm*);
-    void FormReconstructionMap(TESObjectCELL*);
-    bool ContainsReference(unsigned int);
-    bool ShouldSaveForm(TESForm*, bool);
-    void NotifyFormIDChanged(TESForm*, struct blob4, bool);
-    bool HasFormChangeFlags(TESForm*, struct blob4);
-    bool GetOldChange(TESForm*, struct blob4);
-    bool IsFormChanged(TESForm*);
-    void ClearFormChangeFlags(TESForm*, struct blob4);
-    void HasFormChanges(TESForm*);
-    void ClearAllForms();
-    void CleanupExpiredData();
-    void ProcessSubBuffer(int, BGSLoadFormBuffer*, TESForm*);
-    void ClearForm(TESForm*);
-    void ClearFormID(unsigned int);
-    void DeleteForm(TESForm*);
-    void ChangeFormID(unsigned int, unsigned int);
-    unsigned int GetNewFormID(unsigned int);
-    bool IsFormIDRemapped(unsigned int);
-    void AreStringsEqual(char*, char*);
-    void DisplayReferenceDebugText(TESObjectREFR*, IDebugText*);
-    void DisplayCellDebugText(TESObjectREFR*, IDebugText*);
-    FormIDConverter* GetFormIDMap();
-    FormIDConverter* GetWorldspaceFormIDMap();
-    SaveLoadChangeHistory* GetHistory();
-    BGSReconstructFormsInAllFilesMap* GetReconstructFormsMap();
-    unsigned char GetConvertedFileIndex(unsigned char);
-    unsigned char GetReverseConvertedFileIndex(unsigned char);
-    unsigned char GetLoadState();
-    bool SetGlobalAllowChanges(bool);
-    bool GetGlobalAllowChanges();
-    void SetDeferInitForms(bool);
-    bool GetDeferInitForms();
-    void SetSaveGameLoading(bool);
-    bool GetSaveGameLoading();
-    void SetSaveGameSaving(bool);
-    bool GetSaveGameSaving();
-    void SetInitingForms(bool);
-    bool GetInitingForms();
-    void SetPositioningPlayerCharacter(bool);
-    bool GetPositioningPlayerCharacter();
-    void SetPlayerLocationInvalid(bool);
-    bool GetPlayerLocationInvalid();
-    void SetSaveLoadFailed(bool);
-    bool GetSaveLoadFailed();
-    bool SetThreadAllowChanges(bool);
-    bool GetThreadAllowChanges();
-    void SetLoadingMovedRefs(bool);
-    bool GetLoadingMovedRefs();
-    void SetReconstructingForms(bool);
-    bool GetReconstructingForms();
-    bool GetAllowChanges();
-    void SaveGame(SaveLoadFile*);
-    bool LoadGame(SaveLoadFile*, bool);
-    void PrepareLoadGame(SaveLoadFile*);
-    bool IsValidSaveGame(SaveLoadFile*);
-    unsigned int LoadFormRecord(SaveLoadFile*, BGSLoadFormBuffer*, FormIDConverter*);
-    bool FindFormByID(TESForm**, struct blob4, bool);
-    void InitializePackageLocations(Actor*);
-    void CancelInitPackageLocations(Actor*);
-    void ClearFormChanges();
-    BGSSaveLoadChangesMap* GetChangesMap();
-    void* __vecDelDtor(unsigned int);
-    BGSSaveLoadChangesMap* m_pFormChangesMap;
-    BGSSaveLoadChangesMap* m_pSecondChangesMap;
-    FormIDConverter* m_pSecondSaveLoadData;
-    FormIDConverter* m_pSaveLoadData;
-    BGSSaveLoadReferencesMap* m_pReferencesMap;
-    LoadGameSubBufferQueue* m_pSaveLoadMap;
-    void* m_pAuxiliaryData;
-    SaveLoadChangeHistory* m_pNoteHandler;
-    BGSReconstructFormsInAllFilesMap* m_pFormReconstructionMap;
-    char LoadFormBufferArray[16];
-    char m_acTextBuffer[16];
-    char m_acFirstTextBuffer[255];
-    char m_acSecondTextBuffer[255];
-    char _pad_242[2];
-    unsigned int m_uiInitializationFlags;
-    unsigned char m_ucSaveLoadState;
-    char _pad_249[3];
 };
 typedef char _sizecheck_BGSSaveLoadGame[sizeof(BGSSaveLoadGame) == 588 ? 1 : -1];
 struct FUN_004523c0_shell : public BGSSaveLoadGame
@@ -569,15 +132,6 @@ struct FUN_00452440_shell
 struct FUN_004e32c0_shell
 {
     bool __thiscall HasFlags(int arg);
-};
-struct PlaceableWaterData
-{
-    unsigned int flags;
-};
-struct BGSPlaceableWater
-{
-    PlaceableWaterData* FUN_00624700();
-    bool __thiscall HasFlags(unsigned int flags);
 };
 extern unsigned char DAT_0119b8c8;
 unsigned char FUN_00452480();
@@ -799,27 +353,9 @@ void FUN_00578060(TESObjectREFR* self);
 void FUN_00578170(TESObjectREFR* self);
 void FUN_0045c680(TESObjectREFR* arg, bool flag);
 extern "C" double _gModifierZero;
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-struct NiCamera
-{
-    float x;
-    float y;
-    float z;
-    float w;
-    int __thiscall ClassifyPoint(const NiPoint3* other);
-};
 struct FUN_00451cd0_shell
 {
     unsigned char FUN_00451cd0();
-};
-struct TESObjectCELL
-{
-    bool IsInterior(void);
 };
 struct TESObjectCELL_AddToInteriorBuffer
 {
@@ -856,26 +392,24 @@ struct FUN_0045ae20_shell
 };
 
 struct ShaderBufferRecord;
-struct NiTStringPointerMap_00e93060
-{
-    bool GetAt(char const*, ShaderBufferRecord*&);
-};
+// GetCacheDataMap (0x00b61170) uses unsigned-long keys in tallgrassshaderproperty.cpp; its GetAt (0x00a53c30) is NiTMapBase lookup.
+typedef NiTPointerMap<unsigned long, ShaderBufferRecord*> GrassCacheMap;
 struct ShaderBufferRecord
 {
     char pad[0x30];
-    NiTStringPointerMap_00e93060 map;
+    GrassCacheMap map;
 };
 struct TallGrassShaderProperty
 {
-    static NiTStringPointerMap_00e93060* __cdecl GetCacheDataMap();
+    static GrassCacheMap* __cdecl GetCacheDataMap();
 };
 // @fnv 0x00b617b0
 bool __cdecl FUN_00b617b0(char const* a, char const* b)
 {
     ShaderBufferRecord* pn = 0;
-    if (!TallGrassShaderProperty::GetCacheDataMap()->GetAt(a, pn))
+    if (!TallGrassShaderProperty::GetCacheDataMap()->GetAt(reinterpret_cast<unsigned long>(a), pn))
         return false;
-    return pn->map.GetAt(b, pn);
+    return pn->map.GetAt(reinterpret_cast<unsigned long>(b), pn);
 }
 
 // Release one update lock; when the last lock goes away, process (a budgeted part of) the pending queue
@@ -954,10 +488,6 @@ struct QueryStub
 
 void __fastcall FUN_00c4ed40(void* p);
 
-struct MemoryManager
-{
-    void Deallocate(void* p);
-};
 
 extern MemoryManager DAT_011f6238;
 

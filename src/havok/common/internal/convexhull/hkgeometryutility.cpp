@@ -1,6 +1,16 @@
+// Exe 0x00d5ad90: declare the native LocalM128 view before Vec4 forward declarations.
+// VC9 requires __m128 as the first typedef for the native SIMD ABI.
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
 
 // src/havok/common/internal/convexhull/hkgeometryutility.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/convexhull/hkgeometryutility.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#define FNV_VEC4_NO_SSE
+#define FNV_VEC4_SCALAR
+#include "../../../../../include/Vec4.h"
 
 struct FUN_00d5a5e0_ctxA
 {
@@ -94,17 +104,9 @@ void __cdecl FUN_00d5a630(void* a1, int a2, int a3)
     a.FinishA();
 }
 
-struct S_00d5a6b0_Elem
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-
 struct S_00d5a6b0_Array
 {
-    S_00d5a6b0_Elem* m_data;
+    Vec4* m_data;
     int m_iElementCount;
 };
 
@@ -141,18 +143,10 @@ struct D5C110MemoryRouter
 
 extern "C" D5C110MemoryRouter& __cdecl FUN_00c85750();
 
-struct D5C110Vector4
-{
-    float m_uiX;
-    float m_uiY;
-    float m_uiZ;
-    float m_w;
-};
-
 // hkArray<hkVector4> without a destructor (Havok was built without EH): explicit cleanup.
 struct D5C110VertexArray
 {
-    D5C110Vector4* m_data;
+    Vec4* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
@@ -164,7 +158,7 @@ struct D5C110VertexArray
         D5C110Allocator& alloc = FUN_00c85750().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(D5C110Vector4));
+            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(Vec4));
     }
 };
 
@@ -196,8 +190,8 @@ void __cdecl BuildGeometryFromShape(const void* shape, D5C110Geometry& aGeometry
     {
         D5C110StridedVertices stridedVertices;
         stridedVertices.m_iStridedVertexCount = vertices.m_iElementCount;
-        stridedVertices.m_kVertices = &vertices.m_data->m_uiX;
-        stridedVertices.m_iVertexStride = sizeof(D5C110Vector4);
+        stridedVertices.m_kVertices = &vertices.m_data->x;
+        stridedVertices.m_iVertexStride = sizeof(Vec4);
         InitAndSetB(stridedVertices, aGeometry);
     }
     else
@@ -239,14 +233,12 @@ unsigned char S00d5ad60_cls::S00d5ad60_call(float* other, float threshold)
 }
 
 #ifndef _INCLUDED_MM2
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
+// Exe 0x00d5ad90 FUN_00d5ad90 SIMD maximum: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+
 #endif
 #ifndef _INCLUDED_MM2
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 #endif
 extern float DAT_01011d78;
 
@@ -257,7 +249,7 @@ static __declspec(noinline) int FUN_00d5ad90(const float* pVec, float fTol)
     float a2 = fabs(pVec[2]);
     float a1 = fabs(pVec[1]);
     float a0 = fabs(pVec[0]);
-    __m128 v = _mm_setr_ps(a0, a1, a2, DAT_01011d78);
+    LocalM128 v = _mm_setr_ps(a0, a1, a2, DAT_01011d78);
     float fMaxAbs = (v.m128_f32[0] > v.m128_f32[1]) ? v.m128_f32[0] : v.m128_f32[1];
     if (v.m128_f32[2] > fMaxAbs)
         fMaxAbs = v.m128_f32[2];
@@ -277,14 +269,6 @@ struct S00d5c060_Src
     char* m_pData;
     int m_uiItemCount;
     int m_iElementIndex;
-};
-
-struct S00d5c060_Vec3
-{
-    float m_uiX;
-    float m_uiY;
-    float m_uiZ;
-    unsigned int unk0C;
 };
 
 struct __declspec(align(16)) S00d5c060_Result
@@ -307,12 +291,12 @@ S00d5c060_Result FUN_00d5c060(const S00d5c060_Src* src, float scale)
     int count = src->m_uiItemCount;
     char* data = AllocateWithHeader(&FUN_00c85750().heap(), count * 16);
     int quad = src->m_iElementIndex / 4;
-    S00d5c060_Vec3* d = (S00d5c060_Vec3*)data;
+    Vec4* d = (Vec4*)data;
     for (int i = 0; i < src->m_uiItemCount; ++i)
     {
-        d[i].m_uiX = ((const float*)src->m_pData)[i * quad];
-        d[i].m_uiY = ((const float*)src->m_pData)[i * quad + 1];
-        d[i].m_uiZ = ((const float*)src->m_pData)[i * quad + 2];
+        d[i].x = ((const float*)src->m_pData)[i * quad];
+        d[i].y = ((const float*)src->m_pData)[i * quad + 1];
+        d[i].z = ((const float*)src->m_pData)[i * quad + 2];
     }
     FUN_00d5beb0(&result, data, src->m_uiItemCount, 0, scale);
     FUN_00c856c0(&FUN_00c85750().heap(), data);
@@ -321,14 +305,15 @@ S00d5c060_Result FUN_00d5c060(const S00d5c060_Src* src, float scale)
 
 namespace fnv_00d5d270 {
 #ifndef _INCLUDED_MM2
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00d5ad90 FUN_00d5ad90 SIMD maximum: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 #endif
 #ifndef _INCLUDED_MM2
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 #endif
 
 extern float DAT_01013ea4;
@@ -346,7 +331,7 @@ struct S4
 
 struct ObbVec
 {
-    __m128 q;
+    LocalM128 q;
     float x() const
     {
         return q.m128_f32[0];
@@ -530,7 +515,7 @@ void FUN_00d5d270(const void* shape, ObbVec* outExt, ObbXf* outXf, int mode)
         FUN_00d5ae60(data, (const char*)&f.rot1, count, 16, S4((int)&f.ext1), S4((int)&f.ctr1));
     }
 
-    __m128 vPickedCtr;
+    LocalM128 vPickedCtr;
     ObbRot* pickedRot;
     if (vol0 < vol1)
     {
@@ -544,9 +529,9 @@ void FUN_00d5d270(const void* shape, ObbVec* outExt, ObbXf* outXf, int mode)
         pickedRot = &f.rot1;
         outExt->q = f.ext1.q;
     }
-    __m128 vCol0 = pickedRot->c0.q;
-    __m128 vCol1 = pickedRot->c1.q;
-    __m128 vCol2 = pickedRot->c2.q;
+    LocalM128 vCol0 = pickedRot->c0.q;
+    LocalM128 vCol1 = pickedRot->c1.q;
+    LocalM128 vCol2 = pickedRot->c2.q;
     _ReadWriteBarrier();
     outXf->c0.q = vCol0;
     outXf->c1.q = vCol1;
@@ -567,25 +552,20 @@ void FUN_00d5d270(const void* shape, ObbVec* outExt, ObbXf* outXf, int mode)
 }
 }  // namespace fnv_00d5d270
 
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" float _mm_cvtss_f32(__m128);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" __m128 _mm_sqrt_ss(__m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" float _mm_cvtss_f32(LocalM128);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" LocalM128 _mm_sqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
 
 extern const float DAT_01012054;
 
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
-};
-
 struct MyPoint
 {
-    __m128 v;
+    LocalM128 v;
 };
 
 // FUN_00d5bb10, FUN_00d5bb80 and FUN_00d5bce0 are stand-ins: the real 2-, 3- and 4-point sphere builders live
@@ -593,7 +573,7 @@ struct MyPoint
 static __declspec(noinline) Vec4* FUN_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, float t)
 {
     res->x = 0.0f;
-    Vec4 a = *p0;
+    Vec4::Aligned a = *p0;
     res->y = a.x + t + (float)(int)p1;
     res->w = a.y;
     return res;
@@ -602,7 +582,7 @@ static __declspec(noinline) Vec4* FUN_00d5bb10(Vec4* res, Vec4* p0, Vec4* p1, fl
 static __declspec(noinline) Vec4* FUN_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, float t)
 {
     res->x = 0.0f;
-    Vec4 a = *p0;
+    Vec4::Aligned a = *p0;
     res->y = a.x + t + (float)(int)p1 + (float)(int)p2;
     res->w = a.y;
     return res;
@@ -611,7 +591,7 @@ static __declspec(noinline) Vec4* FUN_00d5bb80(Vec4* res, Vec4* p0, Vec4* p1, Ve
 static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Vec4* p2, Vec4* p3, float t)
 {
     res->x = 0.0f;
-    Vec4 a = *p0;
+    Vec4::Aligned a = *p0;
     res->y = a.x + t + (float)(int)p1 + (float)(int)p2 + (float)(int)p3;
     res->w = a.y;
     return res;
@@ -619,44 +599,44 @@ static __declspec(noinline) Vec4* FUN_00d5bce0(Vec4* res, Vec4* p0, Vec4* p1, Ve
 
 // Moves points whose XYZ distance from out exceeds out[3] to the front, then recurses on the preceding points.
 // @fnv 0x00d5beb0
-__m128* __cdecl FUN_00d5beb0(__m128* apResult, MyPoint* apPoints, int count, int depth, float t)
+LocalM128* __cdecl FUN_00d5beb0(LocalM128* apResult, MyPoint* apPoints, int count, int depth, float t)
 {
-    Vec4 rTempA;
-    Vec4 rTempB;
-    Vec4 rTempC;
+    Vec4::Aligned rTempA(Vec4::Uninitialized);
+    Vec4::Aligned rTempB(Vec4::Uninitialized);
+    Vec4::Aligned rTempC(Vec4::Uninitialized);
 
     switch (depth)
     {
     case 0:
-        *(__m128*)&rTempA = _mm_setzero_ps();
+        *(LocalM128*)&rTempA = _mm_setzero_ps();
         ((float*)&rTempA)[3] = DAT_01012054;
-        *apResult = *(__m128*)&rTempA;
+        *apResult = *(LocalM128*)&rTempA;
         break;
     case 1:
-        *(__m128*)&rTempA = apPoints[-1].v;
+        *(LocalM128*)&rTempA = apPoints[-1].v;
         ((float*)&rTempA)[3] = t;
-        *apResult = *(__m128*)&rTempA;
+        *apResult = *(LocalM128*)&rTempA;
         break;
     case 2:
-        *apResult = *(__m128*)FUN_00d5bb10(&rTempA, (Vec4*)&apPoints[-1], (Vec4*)&apPoints[-2], t);
+        *apResult = *(LocalM128*)FUN_00d5bb10(&rTempA, (Vec4*)&apPoints[-1], (Vec4*)&apPoints[-2], t);
         break;
     case 3:
         *apResult =
-            *(__m128*)FUN_00d5bb80(&rTempB, (Vec4*)&apPoints[-1], (Vec4*)&apPoints[-2], (Vec4*)&apPoints[-3], t);
+            *(LocalM128*)FUN_00d5bb80(&rTempB, (Vec4*)&apPoints[-1], (Vec4*)&apPoints[-2], (Vec4*)&apPoints[-3], t);
         break;
     default:
-        *apResult = *(__m128*)FUN_00d5bce0(&rTempC, (Vec4*)&apPoints[-1], (Vec4*)&apPoints[-2], (Vec4*)&apPoints[-3],
+        *apResult = *(LocalM128*)FUN_00d5bce0(&rTempC, (Vec4*)&apPoints[-1], (Vec4*)&apPoints[-2], (Vec4*)&apPoints[-3],
                                            (Vec4*)&apPoints[-4], t);
         return apResult;
     }
 
     for (int i = 0; i < count; ++i)
     {
-        __m128 rDiff = _mm_sub_ps(apPoints[i].v, *apResult);
-        __m128 rSq = _mm_mul_ps(rDiff, rDiff);
-        __m128 rShuf1 = _mm_shuffle_ps(rSq, rSq, 0x55);
-        __m128 rShuf2 = _mm_shuffle_ps(rSq, rSq, 0xaa);
-        __m128 sum = _mm_add_ss(rShuf1, rSq);
+        LocalM128 rDiff = _mm_sub_ps(apPoints[i].v, *apResult);
+        LocalM128 rSq = _mm_mul_ps(rDiff, rDiff);
+        LocalM128 rShuf1 = _mm_shuffle_ps(rSq, rSq, 0x55);
+        LocalM128 rShuf2 = _mm_shuffle_ps(rSq, rSq, 0xaa);
+        LocalM128 sum = _mm_add_ss(rShuf1, rSq);
         sum = _mm_add_ss(rShuf2, sum);
         float dist;
         _mm_store_ss(&dist, _mm_sqrt_ss(sum));
@@ -667,39 +647,39 @@ __m128* __cdecl FUN_00d5beb0(__m128* apResult, MyPoint* apPoints, int count, int
             {
                 rTempA = *(Vec4*)&apPoints[iSwap];
                 apPoints[iSwap].v = apPoints[iSwap - 1].v;
-                apPoints[iSwap - 1].v = *(__m128*)&rTempA;
+                apPoints[iSwap - 1].v = *(LocalM128*)&rTempA;
             }
 
-            *apResult = *FUN_00d5beb0((__m128*)&rTempB, apPoints + 1, i, depth + 1, t);
+            *apResult = *FUN_00d5beb0((LocalM128*)&rTempB, apPoints + 1, i, depth + 1, t);
         }
     }
 
     return apResult;
 }
 
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_mul_ss(__m128, __m128);
-extern "C" __m128 _mm_sub_ss(__m128, __m128);
-extern "C" __m128 _mm_rsqrt_ss(__m128);
-extern "C" __m128 _mm_cmpeq_ss(__m128, __m128);
-extern "C" __m128 _mm_andnot_ps(__m128, __m128);
-extern "C" __m128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_rsqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_load_ss(const float*);
 class ObbScalar
 {
-    __m128 val;
+    LocalM128 val;
 
   public:
-    __forceinline ObbScalar(__m128 x) : val(x)
+    __forceinline ObbScalar(LocalM128 x) : val(x)
     {}
     __forceinline ObbScalar(float x) : val(_mm_load_ss(&x))
     {}
-    __forceinline __m128 splat() const
+    __forceinline LocalM128 splat() const
     {
         return _mm_shuffle_ps(val, val, 0);
     }
-    __forceinline __m128 quad() const
+    __forceinline LocalM128 quad() const
     {
         return val;
     }
@@ -712,7 +692,7 @@ class ObbScalar
 };
 class ObbAxis
 {
-    __m128 val;
+    LocalM128 val;
 
   public:
     __forceinline ObbAxis()
@@ -741,24 +721,24 @@ class ObbAxis
     }
     __forceinline ObbScalar dot(const ObbAxis& a) const
     {
-        __m128 p = _mm_mul_ps(val, a.val);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+        LocalM128 p = _mm_mul_ps(val, a.val);
+        LocalM128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
         return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
     }
     __forceinline void cross(const ObbAxis& a, const ObbAxis& b)
     {
-        __m128 u = _mm_mul_ps(_mm_shuffle_ps(a.val, a.val, 0xc9), _mm_shuffle_ps(b.val, b.val, 0xd2));
-        __m128 v = _mm_mul_ps(_mm_shuffle_ps(a.val, a.val, 0xd2), _mm_shuffle_ps(b.val, b.val, 0xc9));
+        LocalM128 u = _mm_mul_ps(_mm_shuffle_ps(a.val, a.val, 0xc9), _mm_shuffle_ps(b.val, b.val, 0xd2));
+        LocalM128 v = _mm_mul_ps(_mm_shuffle_ps(a.val, a.val, 0xd2), _mm_shuffle_ps(b.val, b.val, 0xc9));
         val = _mm_sub_ps(u, v);
     }
     __forceinline void normalize()
     {
-        __m128 half = _mm_load_ss(&kHalf), three = _mm_load_ss(&kThree), zero = _mm_load_ss(&kZero);
-        __m128 d = dot(*this).quad();
-        __m128 mask = _mm_cmpeq_ss(d, zero);
-        __m128 r = _mm_rsqrt_ss(d);
-        __m128 q = _mm_mul_ss(_mm_mul_ss(half, r), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(d, r), r)));
-        __m128 inv = _mm_andnot_ps(mask, q);
+        LocalM128 half = _mm_load_ss(&kHalf), three = _mm_load_ss(&kThree), zero = _mm_load_ss(&kZero);
+        LocalM128 d = dot(*this).quad();
+        LocalM128 mask = _mm_cmpeq_ss(d, zero);
+        LocalM128 r = _mm_rsqrt_ss(d);
+        LocalM128 q = _mm_mul_ss(_mm_mul_ss(half, r), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(d, r), r)));
+        LocalM128 inv = _mm_andnot_ps(mask, q);
         val = _mm_mul_ps(_mm_shuffle_ps(inv, inv, 0), val);
     }
     static const float kHalf, kThree, kZero;
@@ -933,15 +913,15 @@ void obbCaller()
     obbAnswer = FUN_00d5b640(obbVerts, obbCount, obbStride, obbAxes, obbStep, obbDir, obbIter);
 }
 
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ss(__m128, __m128);
-extern "C" __m128 _mm_sub_ss(__m128, __m128);
-extern "C" __m128 _mm_rsqrt_ss(__m128);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_cmpeq_ss(__m128, __m128);
-extern "C" __m128 _mm_andnot_ps(__m128, __m128);
-extern "C" __m128 _mm_set_ss(float);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_rsqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_set_ss(float);
 extern const float DAT_010d1018 = 0.0000011920928955078125f;
 
 struct S4
@@ -953,18 +933,18 @@ struct S4
 
 class AxisScalar
 {
-    __m128 value;
+    LocalM128 value;
 
   public:
-    AxisScalar(__m128 q) : value(q)
+    AxisScalar(LocalM128 q) : value(q)
     {}
     AxisScalar(float f) : value(_mm_load_ss(&f))
     {}
-    __forceinline __m128 quad() const
+    __forceinline LocalM128 quad() const
     {
         return value;
     }
-    __forceinline __m128 splat() const
+    __forceinline LocalM128 splat() const
     {
         return _mm_shuffle_ps(value, value, 0);
     }
@@ -978,7 +958,7 @@ class AxisScalar
 
 class Axis
 {
-    __m128 value;
+    LocalM128 value;
 
   public:
     void operator=(const Axis& other)
@@ -1028,14 +1008,14 @@ class Axis
     }
     __forceinline void setCross(const Axis& a, const Axis& b)
     {
-        __m128 left = _mm_mul_ps(_mm_shuffle_ps(a.value, a.value, 0xc9), _mm_shuffle_ps(b.value, b.value, 0xd2));
-        __m128 right = _mm_mul_ps(_mm_shuffle_ps(a.value, a.value, 0xd2), _mm_shuffle_ps(b.value, b.value, 0xc9));
+        LocalM128 left = _mm_mul_ps(_mm_shuffle_ps(a.value, a.value, 0xc9), _mm_shuffle_ps(b.value, b.value, 0xd2));
+        LocalM128 right = _mm_mul_ps(_mm_shuffle_ps(a.value, a.value, 0xd2), _mm_shuffle_ps(b.value, b.value, 0xc9));
         value = _mm_sub_ps(left, right);
     }
     __forceinline AxisScalar dot3(const Axis& v) const
     {
-        __m128 product = _mm_mul_ps(value, v.value);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product);
+        LocalM128 product = _mm_mul_ps(value, v.value);
+        LocalM128 sum = _mm_add_ss(_mm_shuffle_ps(product, product, 0x55), product);
         return _mm_add_ss(_mm_shuffle_ps(product, product, 0xaa), sum);
     }
     __forceinline AxisScalar lengthSquared3() const
@@ -1044,18 +1024,18 @@ class Axis
     }
     __forceinline AxisScalar lengthInverse3() const
     {
-        const __m128 h = _mm_set_ss(0.5f);
-        const __m128 t = _mm_set_ss(3.0f);
-        const __m128 z = _mm_set_ss(0.0f);
-        __m128 square = dot3(*this).quad();
-        __m128 mask = _mm_cmpeq_ss(square, z);
-        __m128 inv = _mm_rsqrt_ss(square);
-        __m128 correction = _mm_mul_ss(_mm_mul_ss(h, inv), _mm_sub_ss(t, _mm_mul_ss(_mm_mul_ss(square, inv), inv)));
+        const LocalM128 h = _mm_set_ss(0.5f);
+        const LocalM128 t = _mm_set_ss(3.0f);
+        const LocalM128 z = _mm_set_ss(0.0f);
+        LocalM128 square = dot3(*this).quad();
+        LocalM128 mask = _mm_cmpeq_ss(square, z);
+        LocalM128 inv = _mm_rsqrt_ss(square);
+        LocalM128 correction = _mm_mul_ss(_mm_mul_ss(h, inv), _mm_sub_ss(t, _mm_mul_ss(_mm_mul_ss(square, inv), inv)));
         return _mm_andnot_ps(mask, correction);
     }
     __forceinline void normalize3()
     {
-        __m128 scale = lengthInverse3().splat();
+        LocalM128 scale = lengthInverse3().splat();
         value = _mm_mul_ps(scale, value);
     }
 };

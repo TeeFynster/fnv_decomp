@@ -1,9 +1,126 @@
+#include "../../../../include/Pathing.h"
 // fallout/ai/combat/combatprocedureattackmelee.cpp: CombatProcedureAttackMelee, This, MeleeProc, CombatAttackHelper and more (57 functions)
 
-#include "combatprocedureattackmelee_timer.h"
+#include "../../../../include/Actor.h"
+// CombatNode_combatprocedureattackmelee: local type (was include/CombatNode.h, which had no evidence of one real class); its methods are 0x00505c00 TESCombatStyle::GetPowerAttackF, 0x00505c20 TESCombatStyle::GetPowerAttackB, 0x005524b0 TESCombatStyle::GetPowerAttackChance, 0x006a9560 TESCombatStyle::GetPowerAttackL
+class CombatNode_combatprocedureattackmelee
+{
+public:
+    unsigned int FUN_00726070();
+    signed char GetByteAtOffset8C();
+    bool HasCombatFlag(int);
+    signed char FUN_0073cb80();
+    signed char FUN_00505c00();
+    signed char GetByteAtOffset9A();
+    signed char GetByteAtOffset9B();
+    signed char FUN_009e8670();
+};
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/TimeoutTimer.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/AnimIdle.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/BSAudio.h"
+#include "../../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../../../include/CombatProcedure.h"
+#include "../../../../include/CombatProcedureAttackMelee.h"
+#include "../../../../include/CombatTargetTimestamp.h"
+#include "../../../../include/PathingLocation.h"
+#include "../../../../include/MobileObject.h"
+// LocalPoint3Ext: unit-local copy of the former shared stand-in NiPoint3_ext. Same layout as NiPoint3; with NiPoint3, 0x009cdf80 (the original calls the out-of-line NiPoint3() at 0x006815c0, which NiPoint3.h's __forceinline constructor inlines) does not match.
+#include "../../../../include/NiPoint3.h"
+class LocalPoint3Ext
+{
+  public:
+    float x;
+    float y;
+    float z;
+
+    typedef LocalPoint3Ext AimVector;
+
+    __forceinline LocalPoint3Ext()
+    {}
+    LocalPoint3Ext(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+    {}
+
+    LocalPoint3Ext operator+(const LocalPoint3Ext& point) const
+    {
+        return LocalPoint3Ext(x + point.x, y + point.y, z + point.z);
+    }
+    LocalPoint3Ext operator-(const LocalPoint3Ext& point) const
+    {
+        return LocalPoint3Ext(x - point.x, y - point.y, z - point.z);
+    }
+    NiPoint3 operator-(const NiPoint3& point) const;
+    float operator*(const LocalPoint3Ext& point) const
+    {
+        return x * point.x + y * point.y + z * point.z;
+    }
+    LocalPoint3Ext& operator*=(float scalar);
+    LocalPoint3Ext& operator+=(const NiPoint3& point);
+    friend LocalPoint3Ext operator*(float scalar, const LocalPoint3Ext& point)
+    {
+        return LocalPoint3Ext(scalar * point.x, scalar * point.y, scalar * point.z);
+    }
+
+    float Dot(const NiPoint3& point) const;
+    float Dot(const LocalPoint3Ext& point) const;
+    LocalPoint3Ext& Subtract(const LocalPoint3Ext& point);
+    float GetLengthSquared();
+    void ComputeMagnitude();
+    float GetSquaredXYLength() const;
+    float Length() const;
+
+    AimVector FUN_00439ef0(const AimVector& point) const;
+    LocalPoint3Ext FUN_00439ef0(const NiPoint3& point) const;
+    NiPoint3* FUN_00439ef0(NiPoint3* output, const NiPoint3& point) const;
+    AimVector FUN_00439e90(const AimVector& point) const;
+    bool FUN_00439090(const AimVector& point) const;
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    void FUN_006815c0();
+    float FUN_004a7290() const;
+    float FUN_00457910();
+    LocalPoint3Ext& FUN_0063c8a0(const NiPoint3& point);
+    NiPoint3 FUN_004a0bd0() const;
+};
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/Setting.h"
+#include "../../../../include/NiPoint3.h"
+
+// Nonvirtual melee calls not yet declared by the shared Actor header.
+struct ActorMeleeCalls : Actor
+{
+    void FUN_008b3a50();
+    bool TryAttack(int);
+    bool FUN_008b3840(void*);
+    bool FUN_00894900();
+    float FUN_008be280();
+    float FUN_008be350();
+};
 
 // @fnv 0x008d7f80
-bool TimeoutTimer::CheckTimer()
+bool TimeoutTimer::CheckTimer() const
 {
     return Actor::GetActorScale() - m_fStartTime > m_fTimeout;
 }
@@ -73,11 +190,7 @@ void __thiscall FUN_009cfc40_shell::FUN_009cfc40(int)
     ((unsigned char*)this)[0] = 1;
 }
 
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting592;
+extern Setting originalRuntimeFloatSetting592;
 extern double g_d100;
 struct Obj
 {
@@ -99,50 +212,10 @@ float FUN_00644580(Obj* p, int percent, int unused, bool abApplySetting, bool ab
                           : fResult * *originalRuntimeFloatSetting592.Float() * (abUseAltValue ? 1.0f : 0.25f);
 }
 
-struct FUN_009cc220
-{
-    virtual ~FUN_009cc220();
-};
-void __cdecl _Deallocate(void*);
-struct FUN_009cc1f0_shell
-{
-    void* DestroySelf(unsigned int flags);
-};
-// @fnv 0x009cc1f0
-void* FUN_009cc1f0_shell::DestroySelf(unsigned int flags)
-{
-    ((FUN_009cc220*)this)->FUN_009cc220::~FUN_009cc220();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-namespace fnv_009cc220 {
-struct FUN_009ca6c0_shell
-{
-    virtual ~FUN_009ca6c0_shell();
-};
-struct FUN_009cc220 : FUN_009ca6c0_shell
-{
-    virtual ~FUN_009cc220();
-};
 // @fnv 0x009cc220
-FUN_009cc220::~FUN_009cc220()
+CombatProcedureAttackMelee::~CombatProcedureAttackMelee()
 {}
-}  // namespace fnv_009cc220
 
-struct FUN_008b3ab0_shell
-{
-    void FUN_008b3ab0();
-};
-struct FUN_00894cc0_shell
-{
-    bool FUN_00894cc0(bool);
-};
-struct CombatProcedure
-{
-    void RunProcedure();
-};
 struct FUN_009cc4d0_shell : CombatProcedure
 {
     Actor* FUN_00996de0();
@@ -154,18 +227,10 @@ void FUN_009cc4d0_shell::RunCombatProcedure()
 {
     Actor* pattacker = FUN_00996de0();
     RunProcedure();
-    ((FUN_008b3ab0_shell*)pattacker)->FUN_008b3ab0();
-    ((FUN_00894cc0_shell*)pattacker)->FUN_00894cc0(false);
+    pattacker->FUN_008b3ab0();
+    pattacker->FUN_00894cc0(false);
 }
 
-struct AnimIdle
-{
-    int GetSection();
-};
-struct FUN_008935f0_shell
-{
-    bool TryAttack(int);
-};
 struct FUN_009cce70_shell : AnimIdle
 {
     Actor* FUN_00996de0();
@@ -177,7 +242,7 @@ void FUN_009cce70_shell::FUN_009cce70(int attack, int arg2)
     if (attack == 0xff || !GetSection())
         return;
     Actor* pattacker = FUN_00996de0();
-    bool queued = ((FUN_008935f0_shell*)pattacker)->TryAttack(attack);
+    bool queued = ((ActorMeleeCalls*)pattacker)->TryAttack(attack);
     if (queued)
     {
         ((FUN_009cf6d0_shell*)this)->FUN_009cf6d0(0);
@@ -186,10 +251,6 @@ void FUN_009cce70_shell::FUN_009cce70(int attack, int arg2)
 }
 
 namespace fnv_009cd3d0 {
-struct AnimIdle
-{
-    int GetSection();
-};
 struct FUN_009cd3d0_shell : AnimIdle
 {
     void FUN_009cd3d0();
@@ -227,20 +288,12 @@ bool FUN_009cdde0_shell::HasNoFlag(unsigned short mask)
     return !(*(unsigned short*)((char*)this + 8) & mask) != 0;
 }
 
-struct FUN_00894900_shell
-{
-    bool FUN_00894900();
-};
-struct CombatTargetTimestamp
-{
-    float GetElapsedTime();
-};
 extern double DAT_01011588;
 struct FUN_009cde10_shell
 {
     int GetAudioBackendData();
     int GetSection();
-    FUN_00894900_shell* FUN_00996e00();
+    ActorMeleeCalls* FUN_00996e00();
     void FUN_009cd410();
     void EvaluateReaction();
     float FUN_009ce560();
@@ -252,7 +305,7 @@ struct FUN_009cde10_shell
 // @fnv 0x009cde10
 void FUN_009cde10_shell::FUN_009cde10()
 {
-    FUN_00894900_shell* ptarget;
+    ActorMeleeCalls* ptarget;
     if (GetAudioBackendData() != 1)
         return;
     ptarget = FUN_00996e00();
@@ -376,10 +429,6 @@ char FUN_009cfbd0_shell::FUN_009cfbd0(unsigned short mask)
 }
 }  // namespace fnv_009cfbd0
 
-struct FUN_008b3bd0_shell
-{
-    unsigned char FUN_008b3bd0();
-};
 struct FUN_009cfc00_shell
 {
     Actor* FUN_00996de0();
@@ -390,19 +439,11 @@ struct FUN_009cfc00_shell
 void FUN_009cfc00_shell::FUN_009cfc00()
 {
     Actor* pattacker = FUN_00996de0();
-    if (!((FUN_008b3bd0_shell*)pattacker)->FUN_008b3bd0())
+    if (!pattacker->FUN_008b3bd0())
         ((FUN_009cfc40_shell*)((char*)this + 0x64))->FUN_009cfc40(1);
 }
 
 namespace fnv_009cfc60 {
-struct FUN_008b3a50_shell
-{
-    void FUN_008b3a50();
-};
-struct FUN_008b3ab0_shell
-{
-    void FUN_008b3ab0();
-};
 struct FUN_009cfc60_shell
 {
     Actor* FUN_00996de0();
@@ -414,8 +455,8 @@ struct FUN_009cfc60_shell
 void FUN_009cfc60_shell::FUN_009cfc60()
 {
     Actor* pattacker = FUN_00996de0();
-    ((FUN_008b3a50_shell*)pattacker)->FUN_008b3a50();
-    ((FUN_008b3ab0_shell*)pattacker)->FUN_008b3ab0();
+    ((ActorMeleeCalls*)pattacker)->FUN_008b3a50();
+    pattacker->FUN_008b3ab0();
     StopIfSpeakerOutOfRange();
 }
 }  // namespace fnv_009cfc60
@@ -436,12 +477,6 @@ float FUN_009cfd20_shell::GetModifierValue()
     return ((float*)this)[0x17];
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
 extern NiPoint3 _NiPoint3_ZERO;
 struct FUN_00906f60
 {
@@ -474,7 +509,8 @@ FUN_009cff10_shell* FUN_009cff10_shell::Reset()
     f = false;
     g = false;
     h = false;
-    v = _NiPoint3_ZERO;
+    // Preserve the original trivial vector copy through the shared POD point type.
+    *(NiPoint3*)&v = *(const NiPoint3*)&_NiPoint3_ZERO;
     m.FUN_00906f60::FUN_00906f60();
     return this;
 }
@@ -491,23 +527,7 @@ void FUN_009d0530_shell::UpdateFlags(unsigned short mask, bool clear)
 }
 
 namespace fnv_009d0590 {
-struct TESObjectREFR;
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-struct PathingLocation
-{
-    int a, b, c, d, e, f, g, h, i, j;
-    PathingLocation(TESObjectREFR*);
-    ~PathingLocation();
-};
-struct Pathing
-{
-    static bool __cdecl FindPathingLocation(PathingLocation&, const NiPoint3&, PathingLocation*, void*);
-};
+
 struct FUN_009d0590_shell
 {
     bool FUN_009d0590(TESObjectREFR* ref, const NiPoint3* pt);
@@ -516,7 +536,7 @@ struct FUN_009d0590_shell
 bool FUN_009d0590_shell::FUN_009d0590(TESObjectREFR* ref, const NiPoint3* pt)
 {
     PathingLocation loc(ref);
-    return Pathing::FindPathingLocation(loc, *pt, 0, 0);
+    return Pathing::FindPathingLocation(loc, *pt, 0, static_cast<void*>(0));
 }
 }  // namespace fnv_009d0590
 
@@ -525,11 +545,7 @@ struct TESAmmoInitCalls
 {
     unsigned int GetFieldBC();
 };
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S g_011cee60;
+extern Setting g_011cee60;
 struct FUN_008d7f40_shell
 {
     void __thiscall FUN_008d7f40(float);
@@ -556,83 +572,56 @@ void FUN_009d0610_shell::FUN_009d0610(TESAmmoInitCalls* pAmmoInitCalls)
 }  // namespace fnv_009d0610
 
 namespace fnv_009d0690 {
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-};
 struct FUN_009a5eb0_shell
 {
     void FUN_009a5eb0(BGSSaveFormBuffer*);
 };
-struct CombatTargetTimestamp
-{
-    void SaveTimeStamp(BGSSaveFormBuffer*);
-};
-struct FUN_009d0690_shell
-{
-    void SaveGame(BGSSaveFormBuffer*);
-    void FUN_009d0690(BGSSaveFormBuffer* buf);
-};
+}  // namespace fnv_009d0690
 // @fnv 0x009d0690
-void FUN_009d0690_shell::FUN_009d0690(BGSSaveFormBuffer* buf)
+void CombatProcedureAttackMelee::SaveGame(BGSSaveFormBuffer* buf)
 {
-    SaveGame(buf);
+    CombatProcedure::SaveGame(buf);
     buf->SaveData((char*)this + 0x10, 4, 0);
     buf->SaveData((char*)this + 0x14, 4, 0);
     buf->SaveData((char*)this + 0x18, 4, 0);
     buf->SaveData((char*)this + 0x1c, 4, 0);
-    ((FUN_009a5eb0_shell*)((char*)this + 0x20))->FUN_009a5eb0(buf);
-    ((FUN_009a5eb0_shell*)((char*)this + 0x28))->FUN_009a5eb0(buf);
-    ((FUN_009a5eb0_shell*)((char*)this + 0x30))->FUN_009a5eb0(buf);
-    ((FUN_009a5eb0_shell*)((char*)this + 0x38))->FUN_009a5eb0(buf);
-    ((FUN_009a5eb0_shell*)((char*)this + 0x40))->FUN_009a5eb0(buf);
-    ((FUN_009a5eb0_shell*)((char*)this + 0x48))->FUN_009a5eb0(buf);
+    ((fnv_009d0690::FUN_009a5eb0_shell*)((char*)this + 0x20))->FUN_009a5eb0(buf);
+    ((fnv_009d0690::FUN_009a5eb0_shell*)((char*)this + 0x28))->FUN_009a5eb0(buf);
+    ((fnv_009d0690::FUN_009a5eb0_shell*)((char*)this + 0x30))->FUN_009a5eb0(buf);
+    ((fnv_009d0690::FUN_009a5eb0_shell*)((char*)this + 0x38))->FUN_009a5eb0(buf);
+    ((fnv_009d0690::FUN_009a5eb0_shell*)((char*)this + 0x40))->FUN_009a5eb0(buf);
+    ((fnv_009d0690::FUN_009a5eb0_shell*)((char*)this + 0x48))->FUN_009a5eb0(buf);
     ((CombatTargetTimestamp*)((char*)this + 0x60))->SaveTimeStamp(buf);
     buf->SaveData((char*)this + 0x50, 1, 0);
     buf->SaveData((char*)this + 0x54, 4, 0);
 }
-}  // namespace fnv_009d0690
 
 namespace fnv_009d0790 {
-struct BGSLoadFormBuffer
-{
-    virtual unsigned char GetVersion();
-    void ReadTypedData(void*, unsigned int);
-};
 struct FUN_009a5e_timer
 {
     void LoadGame(BGSLoadFormBuffer*);
 };
-struct CombatTargetTimestamp
-{
-    void LoadGame(BGSLoadFormBuffer*);
-};
-struct FUN_009d0790_shell
-{
-    void LoadGameBase(BGSLoadFormBuffer*);
-    void FUN_009d0790(BGSLoadFormBuffer* buf);
-};
+}  // namespace fnv_009d0790
 // Loads the base form data, four 4-byte fields, six timers, a version-gated object, then a 1-byte and a 4-byte field from the buffer.
 // @fnv 0x009d0790
-void FUN_009d0790_shell::FUN_009d0790(BGSLoadFormBuffer* apBuffer)
+void CombatProcedureAttackMelee::LoadGame(BGSLoadFormBuffer* apBuffer)
 {
-    LoadGameBase(apBuffer);
+    CombatProcedure::LoadGame(apBuffer);
     apBuffer->ReadTypedData((char*)this + 0x10, 4);
     apBuffer->ReadTypedData((char*)this + 0x14, 4);
     apBuffer->ReadTypedData((char*)this + 0x18, 4);
     apBuffer->ReadTypedData((char*)this + 0x1c, 4);
-    ((FUN_009a5e_timer*)((char*)this + 0x20))->LoadGame(apBuffer);
-    ((FUN_009a5e_timer*)((char*)this + 0x28))->LoadGame(apBuffer);
-    ((FUN_009a5e_timer*)((char*)this + 0x30))->LoadGame(apBuffer);
-    ((FUN_009a5e_timer*)((char*)this + 0x38))->LoadGame(apBuffer);
-    ((FUN_009a5e_timer*)((char*)this + 0x40))->LoadGame(apBuffer);
-    ((FUN_009a5e_timer*)((char*)this + 0x48))->LoadGame(apBuffer);
+    ((fnv_009d0790::FUN_009a5e_timer*)((char*)this + 0x20))->LoadGame(apBuffer);
+    ((fnv_009d0790::FUN_009a5e_timer*)((char*)this + 0x28))->LoadGame(apBuffer);
+    ((fnv_009d0790::FUN_009a5e_timer*)((char*)this + 0x30))->LoadGame(apBuffer);
+    ((fnv_009d0790::FUN_009a5e_timer*)((char*)this + 0x38))->LoadGame(apBuffer);
+    ((fnv_009d0790::FUN_009a5e_timer*)((char*)this + 0x40))->LoadGame(apBuffer);
+    ((fnv_009d0790::FUN_009a5e_timer*)((char*)this + 0x48))->LoadGame(apBuffer);
     if (apBuffer->GetVersion() >= 0x12)
         ((CombatTargetTimestamp*)((char*)this + 0x60))->LoadGame(apBuffer);
     apBuffer->ReadTypedData((char*)this + 0x50, 1);
     apBuffer->ReadTypedData((char*)this + 0x54, 4);
 }
-}  // namespace fnv_009d0790
 
 struct FUN_00996de0_Class
 {
@@ -641,10 +630,6 @@ struct FUN_00996de0_Class
 struct FUN_00980070_shell
 {
     unsigned int FUN_00980070();
-};
-struct FUN_005524b0_class
-{
-    char GetByteAtOffset8C();
 };
 
 struct FUN_009cefd0_shell
@@ -660,7 +645,7 @@ char FUN_009cefd0_shell::IsWithinThreshold(float afValue, float afLimit, float a
 {
     char bResult = 0;
     unsigned int pTarget3 = ((FUN_00996de0_Class*)this)->FUN_00996de0();
-    bool bFlag = ((FUN_005524b0_class*)this->m_04->FUN_00980070())->GetByteAtOffset8C() >= 100;
+    bool bFlag = ((CombatNode_combatprocedureattackmelee*)this->m_04->FUN_00980070())->GetByteAtOffset8C() >= 100;
     float fElapsed3 = 0.0f;
     if (afValue <= afLimit + fElapsed3)
     {
@@ -675,6 +660,7 @@ struct AnimDataV
     char FUN_00495f50(int, int);
     int GetSlotValue();
 };
+// Retained: the shared GetAnimData() cannot reproduce this slot 0x1E4 call with an int argument.
 struct ActorV
 {
     virtual void v000();
@@ -824,14 +810,6 @@ struct FUN_0051f5f0_shell
 {
     unsigned int GetByteAt11D();
 };
-struct MobileObject
-{
-    bool FUN_005a2030() const;
-};
-struct FatigueProxy
-{
-    float GetFatiguePercentage();
-};
 struct FUN_00996e00_shell
 {
     void* FUN_00996e00();
@@ -844,25 +822,14 @@ struct S009ce870
 {
     int FUN_009ce870(float, float, bool, bool, int);
 };
-struct BSAudio
-{
-    void* GetAudioBackendData();
-};
 unsigned int __cdecl DialogueRandom();
 bool CheckChanceSuccess(unsigned int, float, bool, bool, int);
-extern Setting_S originalRuntimeFloatSetting597;
+extern Setting originalRuntimeFloatSetting597;
 extern int DAT_011a8244;
-struct CombatProcedureAttackMelee
-{
-    int m_00;
-    FUN_00980070_shell* m_04;
-    int FUN_009ccb20(bool abMidAttack, float afDistance, float afReach, bool abTargetAttacking, bool abTargetPostAttack,
-                     bool abTargetRecoiling, bool* abDoPowerAttack, bool* abSwitchAttack);
-};
 
 // Chooses a melee attack id from distance, reach, power-attack and animation state, setting the power-attack and switch-attack flags.
 // @fnv 0x009ccb20
-int CombatProcedureAttackMelee::FUN_009ccb20(bool abMidAttack, float afDistance, float afReach, bool abTargetAttacking,
+int CombatProcedureAttackMelee::ChooseMeleeAttack(bool abMidAttack, float afDistance, float afReach, bool abTargetAttacking,
                                              bool abTargetPostAttack, bool abTargetRecoiling, bool* abDoPowerAttack,
                                              bool* abSwitchAttack)
 {
@@ -876,13 +843,13 @@ int CombatProcedureAttackMelee::FUN_009ccb20(bool abMidAttack, float afDistance,
     ptarget = (ActorV*)((FUN_00996e00_shell*)this)->FUN_00996e00();
     *abSwitchAttack = false;
     iAttack = 0xff;
-    pweapon = (TESObjectWEAP*)FUN_007031c0((int)m_04);
+    pweapon = (TESObjectWEAP*)FUN_007031c0((int)m_pCombatController);
     if (!ptarget)
         return iAttack;
     if (pattacker->V218() && ((MobileObject*)pattacker)->FUN_005a2030())
         *abDoPowerAttack = false;
     else
-        *abDoPowerAttack = CheckChanceSuccess(m_04->FUN_00980070(), ((FatigueProxy*)pattacker)->GetFatiguePercentage(),
+        *abDoPowerAttack = CheckChanceSuccess(((FUN_00980070_shell*)m_pCombatController)->FUN_00980070(), ((Actor*)pattacker)->GetFatiguePercentage(),
                                               abTargetRecoiling, ptarget->V230(), 0);
     if ((int)((BSAudio*)this)->GetAudioBackendData() == 4)
     {
@@ -957,43 +924,12 @@ struct TargetInterface
     virtual void v0c(int arg);
 };
 
-struct FUN_008b3a20_shell
-{
-    int unk000, unk004, unk008, unk00C;
-    int unk010, unk014, unk018, unk01C;
-    int unk020, unk024, unk028, unk02C;
-    int unk030, unk034, unk038, unk03C;
-    int unk040, unk044, unk048, unk04C;
-    int unk050, unk054, unk058, unk05C;
-    int unk060, unk064, unk068, unk06C;
-    int unk070, unk074, unk078, unk07C;
-    int unk080, unk084, unk088, unk08C;
-    int unk090, unk094, unk098, unk09C;
-    int unk0A0, unk0A4, unk0A8, unk0AC;
-    int unk0B0, unk0B4, unk0B8, unk0BC;
-    int unk0C0, unk0C4, unk0C8, unk0CC;
-    int unk0D0, unk0D4, unk0D8, unk0DC;
-    int unk0E0, unk0E4, unk0E8, unk0EC;
-    int unk0F0, unk0F4, unk0F8, unk0FC;
-    int unk100, unk104, unk108, unk10C;
-    int unk110, unk114, unk118, unk11C;
-    int unk120, unk124, unk128, unk12C;
-    int unk130, unk134, unk138, unk13C;
-    int unk140, unk144, unk148, unk14C;
-    int unk150, unk154, unk158, unk15C;
-    int unk160, unk164, unk168, unk16C;
-    int unk170, unk174, unk178, unk17C;
-    int unk180, unk184, unk188, unk18C;
-    TargetInterface* unk190;
 
-    void DispatchToTarget(int arg);
-};
-
-// Forwards the argument to the virtual v0c method of the object stored at unk190.
+// Forwards the argument to the movement controller virtual method at slot 0x0C.
 // @fnv 0x008b3a20
-void FUN_008b3a20_shell::DispatchToTarget(int aiValue)
+void Actor::DispatchToTarget(int aiValue)
 {
-    unk190->v0c(aiValue);
+    ((TargetInterface*)m_pActorMover)->v0c(aiValue);
 }
 
 struct CombatProcBase
@@ -1070,325 +1006,6 @@ struct AnimData;
 struct SubA4
 {
     int FUN_0066ef20(int);
-};
-struct ActorA
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual AnimData* GetAnimData121();
-    bool FUN_00894cc0(bool);
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-    int m_40;
-    int m_44;
-    int m_48;
-    int m_4c;
-    int m_50;
-    int m_54;
-    int m_58;
-    int m_5c;
-    int m_60;
-    int m_64;
-    int m_68;
-    int m_6c;
-    int m_70;
-    int m_74;
-    int m_78;
-    int m_7c;
-    int m_80;
-    int m_84;
-    int m_88;
-    int m_8c;
-    int m_90;
-    int m_94;
-    int m_98;
-    int m_9c;
-    int m_a0;
-    SubA4 m_a4;
-};
-struct ActorB
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual int V116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual bool V140();
-    virtual bool V141();
-    bool FUN_00894900();
-    bool FUN_00493bb0();
-    bool FUN_00894d60();
-    void* FUN_008a1710();
-    bool FUN_00437bd0();
-    bool FUN_00579670();
-    bool FUN_00437bf0();
 };
 struct Proc
 {
@@ -1677,12 +1294,8 @@ struct Obj04
     int FUN_0097fc70();
     Mid1 FUN_00586150();
 };
-struct SettingObj
-{
-    float* FUN_00403e20();
-};
-extern SettingObj DAT_011cea38;
-extern ActorB* DAT_011dea3c;
+extern Setting DAT_011cea38;
+extern ActorMeleeCalls* DAT_011dea3c;
 struct GlobalObj
 {
     void FUN_00983970(void*, int, int, int);
@@ -1715,15 +1328,14 @@ struct This
     int m_18;
     int m_1c;
     Sub20 m_20;
-    ActorA* FUN_00996de0();
-    ActorB* FUN_00996e00();
+    Actor* FUN_00996de0();
+    ActorMeleeCalls* FUN_00996e00();
     int FUN_00825c00();
     float GetModifierValue();
     float FUN_009ce560();
     bool IsWithinThreshold(float, float, int);
     void FUN_009cf6d0(int);
     int FUN_0044edb0();
-    int FUN_009ccb20(bool, float, float, bool, bool, bool, bool*, bool*);
     void FUN_009cce70(int, int);
     void FUN_009cc510();
 };
@@ -1742,7 +1354,7 @@ void This::FUN_009cc510()
     bool t5;
     bool t19;
     int t43;
-    ActorB* t45;
+    ActorMeleeCalls* t45;
     bool t57;
     bool s5;
     float s12;
@@ -1752,7 +1364,7 @@ void This::FUN_009cc510()
     bool s44;
     AnimData* s56;
     bool r14;
-    ActorA* r23;
+    Actor* r23;
     bool r39;
     r23 = FUN_00996de0();
     t45 = FUN_00996e00();
@@ -1763,7 +1375,7 @@ void This::FUN_009cc510()
     m_1c = 0xff;
     s12 = GetModifierValue();
     v51 = FUN_009ce560();
-    s56 = r23->GetAnimData121();
+    s56 = r23->GetAnimData();
     t43 = FUN_008a7570(r23);
     s23 = FUN_008a7570(t45);
     t57 = FUN_005f2540(s56->FUN_004301b0(4));
@@ -1778,14 +1390,14 @@ void This::FUN_009cc510()
     if (IsWithinThreshold(s12, v51, 0))
     {
         n44 = 0.0f;
-        n44 = CalculateWeightedValue((int)m_04->FUN_00980070(), m_04->FUN_0097fc70(), r23->m_a4.FUN_0066ef20(11), s33,
-                                     FUN_007031c0((int)m_04) == 0, s5, t45->V140(), r14);
+        n44 = CalculateWeightedValue((int)m_04->FUN_00980070(), m_04->FUN_0097fc70(), r23->GetActorValueAsInteger(11), s33,
+                                     FUN_007031c0((int)m_04) == 0, s5, t45->GetHasKnockedState(), r14);
         if (m_04->FUN_00586150().GetHandle()->FUN_00435e00() > 5.0 && n44 != 0.0)
             n44 += 100.0;
         if (!s44 && t45 != DAT_011dea3c)
             n44 += 100.0;
         m2 = FUN_00644580(m_04->FUN_00980070(), 50, 50, false, s33);
-        v29 = t45->V141() || t45->V140() || t45->FUN_00437bd0() || t45->FUN_00579670() || t45->FUN_00437bf0();
+        v29 = t45->GetIsParalyzed() || t45->GetHasKnockedState() || t45->FUN_00437bd0() || t45->FUN_00579670() || t45->FUN_00437bf0();
         m33 = t45->FUN_008a1710();
         if (v29 || !FUN_008a16d0(t45) || (m33 != 0 && FUN_004c0c30(m33)))
             m2 = 0.0f;
@@ -1817,10 +1429,10 @@ void This::FUN_009cc510()
             }
             bool found = false;
             bool bp2 = false;
-            int res = FUN_009ccb20(t57, s12, v51, s33, s20, s5, &found, &bp2);
+            int res = ((CombatProcedureAttackMelee*)this)->ChooseMeleeAttack(t57, s12, v51, s33, s20, s5, &found, &bp2);
             if (res != 0xff)
             {
-                if (FUN_00996e00()->V116() != 0)
+                if (FUN_00996e00()->GetNiNode() != 0)
                 {
                     if (found)
                     {
@@ -1891,7 +1503,7 @@ void FUN_009cced0_cls::FUN_009cced0()
         {
             if (FUN_005f25d0(reinterpret_cast<FUN_0051f5f0_shell*>(pResult)->GetByteAt11D()))
             {
-                reinterpret_cast<FUN_008935f0_shell*>(a)->TryAttack(
+                reinterpret_cast<ActorMeleeCalls*>(a)->TryAttack(
                     reinterpret_cast<FUN_0051f5f0_shell*>(pResult)->GetByteAt11D());
             }
         }
@@ -2001,134 +1613,6 @@ struct ProcessM
     virtual void v051();
     virtual TimerObj* GetTimer();
 };
-struct MeleeActor
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v00a();
-    virtual void v00b();
-    virtual void v00c();
-    virtual void v00d();
-    virtual void v00e();
-    virtual void v00f();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v01a();
-    virtual void v01b();
-    virtual void v01c();
-    virtual void v01d();
-    virtual void v01e();
-    virtual void v01f();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v02a();
-    virtual void v02b();
-    virtual void v02c();
-    virtual void v02d();
-    virtual void v02e();
-    virtual void v02f();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v03a();
-    virtual void v03b();
-    virtual void v03c();
-    virtual void v03d();
-    virtual void v03e();
-    virtual void v03f();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v04a();
-    virtual void v04b();
-    virtual void v04c();
-    virtual void v04d();
-    virtual void v04e();
-    virtual void v04f();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v05a();
-    virtual void v05b();
-    virtual void v05c();
-    virtual void v05d();
-    virtual void v05e();
-    virtual void v05f();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v06a();
-    virtual void v06b();
-    virtual void v06c();
-    virtual void v06d();
-    virtual void v06e();
-    virtual void v06f();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual AnimDataM* GetAnimDataM();
-    bool IsReady();
-    bool SetFlag(bool b);
-    ProcessM* GetProcessM();
-};
 struct MeleeTarget
 {
     int GetAnimActionM();
@@ -2136,7 +1620,7 @@ struct MeleeTarget
 struct MeleeProc
 {
     int GetModeM();
-    MeleeActor* GetActorM();
+    Actor* GetActorM();
     MeleeTarget* GetTargetM();
     void SetStateM(int state);
     void FinishM();
@@ -2151,21 +1635,21 @@ void MeleeProc::FUN_009ccfb0()
 {
     if (GetModeM() != 1)
         return;
-    MeleeActor* actor = GetActorM();
+    Actor* actor = GetActorM();
     MeleeTarget* target8 = GetTargetM();
-    if (!actor->IsReady())
+    if (!actor->FUN_00894d60())
         SetStateM(3);
-    TimerObj* timer5 = actor->GetProcessM()->GetTimer();
+    TimerObj* timer5 = ((ProcessM*)actor->GetProcess())->GetTimer();
     if (timer5)
     {
         bool bAttacking4 = false;
-        if (GetActorM()->GetAnimDataM() && GetActorM()->GetAnimDataM()->GetControllerSequence(2) &&
-            GetActorM()->GetAnimDataM()->GetControllerSequence(2)->GetState() != 1)
+        if (((AnimDataM*)GetActorM()->GetAnimData()) && ((AnimDataM*)GetActorM()->GetAnimData())->GetControllerSequence(2) &&
+            ((AnimDataM*)GetActorM()->GetAnimData())->GetControllerSequence(2)->GetState() != 1)
             bAttacking4 = true;
         float fTime = timer5->GetValue(0);
         if (fTime <= _gModifierZero && !bAttacking4)
         {
-            actor->SetFlag(false);
+            actor->FUN_00894cc0(false);
             SetStateM(3);
         }
         else
@@ -2173,7 +1657,7 @@ void MeleeProc::FUN_009ccfb0()
             bool bTargetAttack2 = target8 ? target8->GetAnimActionM() == 8 : 0;
             if (bTargetAttack2 && !bAttacking4)
             {
-                actor->SetFlag(false);
+                actor->FUN_00894cc0(false);
                 SetStateM(3);
                 FinishM();
             }
@@ -2185,135 +1669,10 @@ void MeleeProc::FUN_009ccfb0()
     }
 }
 
-struct AnimData9cd430
+// Animation state accessor at 0x004301b0 used by the slot 0x1E4 int-argument call.
+struct MeleeAnimationState
 {
     unsigned short FUN_004301b0();
-};
-
-struct Actor9cd430
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v00a();
-    virtual void v00b();
-    virtual void v00c();
-    virtual void v00d();
-    virtual void v00e();
-    virtual void v00f();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v01a();
-    virtual void v01b();
-    virtual void v01c();
-    virtual void v01d();
-    virtual void v01e();
-    virtual void v01f();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v02a();
-    virtual void v02b();
-    virtual void v02c();
-    virtual void v02d();
-    virtual void v02e();
-    virtual void v02f();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v03a();
-    virtual void v03b();
-    virtual void v03c();
-    virtual void v03d();
-    virtual void v03e();
-    virtual void v03f();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v04a();
-    virtual void v04b();
-    virtual void v04c();
-    virtual void v04d();
-    virtual void v04e();
-    virtual void v04f();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v05a();
-    virtual void v05b();
-    virtual void v05c();
-    virtual void v05d();
-    virtual void v05e();
-    virtual void v05f();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v06a();
-    virtual void v06b();
-    virtual void v06c();
-    virtual void v06d();
-    virtual void v06e();
-    virtual void v06f();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual AnimData9cd430* GetAnimData(int);
 };
 
 struct Controller9cd430
@@ -2322,13 +1681,9 @@ struct Controller9cd430
     bool GetModifierKey();
 };
 
-struct FloatSetting9cd430
-{
-    float* Float();
-};
-extern FloatSetting9cd430 originalRuntimeFloatSetting593;
+extern Setting originalRuntimeFloatSetting593;
 
-bool __cdecl IsTargetInCone(Actor9cd430*, void*, int);
+bool __cdecl IsTargetInCone(Actor*, void*, int);
 bool __cdecl FUN_005f2670(unsigned int);
 
 struct CombatProc9cd430
@@ -2337,7 +1692,7 @@ struct CombatProc9cd430
     Controller9cd430* m_04;
 
     int Check44edb0();
-    Actor9cd430* GetActor();
+    Actor* GetActor();
     void* GetTarget();
     float GetF1();
     float GetF2();
@@ -2358,7 +1713,7 @@ void CombatProc9cd430::FUN_009cd430()
 {
     if (Check44edb0())
         return;
-    Actor9cd430* actor = GetActor();
+    Actor* actor = GetActor();
     void* target = GetTarget();
     float distance = GetF1();
     float reachDist = GetF2();
@@ -2390,7 +1745,8 @@ void CombatProc9cd430::FUN_009cd430()
     }
     else if (bInReach && distance < *originalRuntimeFloatSetting593.Float())
     {
-        bool ok = FUN_005f2670(actor->GetAnimData(4)->FUN_004301b0());
+        // The shared slot 0x1E4 has no argument; preserve this call's original int argument.
+        bool ok = FUN_005f2670(((MeleeAnimationState* (__thiscall *)(Actor*, int))(*(void***)actor)[0x79])(actor, 4)->FUN_004301b0());
         if (!ok)
             Do9cdf00();
     }
@@ -2587,155 +1943,14 @@ extern double DAT_01090d68;
 extern double DAT_01021798;
 extern int DAT_011a5ac8[];
 
-struct SettingX
-{
-    float* FUN_00403e20();
-};
-extern SettingX DAT_011ceb98;
+extern Setting DAT_011ceb98;
 
 struct WeapObj
 {
     float FUN_00508070();
 };
 
-struct AVOwner
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual float GetActorValue(int);
-};
 
-struct ActorX
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v00a();
-    virtual void v00b();
-    virtual void v00c();
-    virtual void v00d();
-    virtual void v00e();
-    virtual void v00f();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v01a();
-    virtual void v01b();
-    virtual void v01c();
-    virtual void v01d();
-    virtual void v01e();
-    virtual void v01f();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v02a();
-    virtual void v02b();
-    virtual void v02c();
-    virtual void v02d();
-    virtual void v02e();
-    virtual void v02f();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v03a();
-    virtual void v03b();
-    virtual void v03c();
-    virtual void v03d();
-    virtual void v03e();
-    virtual void v03f();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v04a();
-    virtual void v04b();
-    virtual void v04c();
-    virtual void v04d();
-    virtual void v04e();
-    virtual void v04f();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v05a();
-    virtual void v05b();
-    virtual void v05c();
-    virtual void v05d();
-    virtual void v05e();
-    virtual void v05f();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v06a();
-    virtual void v06b();
-    virtual void v06c();
-    virtual void v06d();
-    virtual void v06e();
-    virtual void v06f();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual WeapObj* GetLoadedForm();
-    char pad04[0xa0];
-    AVOwner avOwner;
-    const char* FUN_0055d520();
-    int FUN_0084e3a0();
-    unsigned short GetVtbl20Result();
-};
 
 struct AttackData
 {
@@ -2766,7 +1981,7 @@ struct ProcX
 {
     int m_00;
     CombatCtrl* m_04;
-    ActorX* FUN_00996de0();
+    Actor* FUN_00996de0();
     bool IsWithinThreshold(float, float, int);
     float FUN_009cfe90();
 };
@@ -2782,7 +1997,7 @@ int S009ce870::FUN_009ce870(float afDistance, float afReach, bool, bool, int)
     int count = 0;
     bool abAllowedA[5];
     FUN_00403d30(abAllowedA, 0, 5);
-    ActorX* pActorF = ((ProcX*)this)->FUN_00996de0();
+    Actor* pActorF = ((ProcX*)this)->FUN_00996de0();
     AttackData* pDataVal = ((ProcX*)this)->m_04->FUN_00980070();
     if (((ProcX*)this)->m_04->FUN_00981970())
         return 0xff;
@@ -2790,14 +2005,14 @@ int S009ce870::FUN_009ce870(float afDistance, float afReach, bool, bool, int)
         ((ProcX*)this)->m_04->UpdateActorValues();
     bool bPower7 = ((ProcX*)this)->m_04->FUN_008d8220() && !((ProcX*)this)->IsWithinThreshold(afDistance, afReach, 0);
     float fMultX = bPower7 ? pDataVal->GetFloatAtOffsetB0() : 1.0f;
-    WeapObj* pWeap4 = pActorF->GetLoadedForm();
+    WeapObj* pWeap4 = (WeapObj*)pActorF->GetAnimData();
     float fSpeed7 = pWeap4->FUN_00508070();
     if (fSpeed7 <= DAT_01012060)
         fSpeed7 = 1.0f;
     float fRateB = ((ProcX*)this)->FUN_009cfe90();
     float fReach5 = afReach * fMultX;
     bool bAny6 =
-        pActorF->avOwner.GetActorValue(0x1d) > DAT_01012060 && pActorF->avOwner.GetActorValue(0x1e) > DAT_01012060;
+        pActorF->GetCurrentActorValue((ActorValue::Index)0x1d) > DAT_01012060 && pActorF->GetCurrentActorValue((ActorValue::Index)0x1e) > DAT_01012060;
     int aiAttacks[5];
     for (int i = 0; i < 5; i++)
     {
@@ -2847,7 +2062,7 @@ int S009ce870::FUN_009ce870(float afDistance, float afReach, bool, bool, int)
             }
             else
             {
-                unsigned short usMove = pActorF->GetVtbl20Result();
+                unsigned short usMove = (unsigned short)pActorF->GetActorStateFlags();
                 if (abAllowedA[3] && (usMove & 4))
                 {
                     k = 3;
@@ -2910,19 +2125,9 @@ int S009ce870::FUN_009ce870(float afDistance, float afReach, bool, bool, int)
     return iResult;
 }
 
-struct CombatNode
-{
-    signed char GetByteAtOffset8C();
-    bool HasCombatFlag(int);
-    signed char FUN_0073cb80();
-    signed char FUN_00505c00();
-    signed char GetByteAtOffset9A();
-    signed char GetByteAtOffset9B();
-    signed char FUN_009e8670();
-};
 struct CombatContext
 {
-    CombatNode* FUN_00980070();
+    CombatNode_combatprocedureattackmelee* FUN_00980070();
 };
 extern double DAT_01012060;
 struct MeleeProcedure
@@ -2970,140 +2175,6 @@ namespace CombatReaction {
 struct Animation
 {
 };
-struct Actor
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual Animation* GetAnimation();
-    int FUN_008a7570();
-    float GetFatigueRatio();
-    float FUN_00884dc0();
-    bool FUN_00493bb0();
-    bool FUN_005a2030();
-    unsigned short FUN_00897910(int, int, int, int);
-    float FUN_00897b50(int);
-    void DispatchToTarget(int);
-    const char* FUN_0055d520();
-};
 extern Actor* DAT_011dea3c;
 struct Config
 {
@@ -3128,10 +2199,6 @@ struct Timer
 struct Options
 {
     unsigned short FUN_004a8ae0();
-};
-struct Setting
-{
-    const float* FUN_00403e20();
 };
 extern Setting DAT_011ce380;
 extern const double DAT_01012060, DAT_0104f2f0, DAT_01020758, DAT_01017a40;
@@ -3210,7 +2277,7 @@ void Procedure::EvaluateReaction()
                                              targetCondition3, options.FUN_004a8ae0());
         if (action)
         {
-            Animation* animation = FUN_00996de0()->GetAnimation();
+            Animation* animation = (Animation*)FUN_00996de0()->GetAnimData();
             if (animation)
             {
                 int state = 3;
@@ -3662,150 +2729,6 @@ struct Process98
     virtual void v183();
     virtual int State();
 };
-struct Actor98
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v00a();
-    virtual void v00b();
-    virtual void v00c();
-    virtual void v00d();
-    virtual void v00e();
-    virtual void v00f();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v01a();
-    virtual void v01b();
-    virtual void v01c();
-    virtual void v01d();
-    virtual void v01e();
-    virtual void v01f();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v02a();
-    virtual void v02b();
-    virtual void v02c();
-    virtual void v02d();
-    virtual void v02e();
-    virtual void v02f();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v03a();
-    virtual void v03b();
-    virtual void v03c();
-    virtual void v03d();
-    virtual void v03e();
-    virtual void v03f();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v04a();
-    virtual void v04b();
-    virtual void v04c();
-    virtual void v04d();
-    virtual void v04e();
-    virtual void v04f();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v05a();
-    virtual void v05b();
-    virtual void v05c();
-    virtual void v05d();
-    virtual void v05e();
-    virtual void v05f();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v06a();
-    virtual void v06b();
-    virtual void v06c();
-    virtual void v06d();
-    virtual void v06e();
-    virtual void v06f();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v07a();
-    virtual void v07b();
-    virtual void v07c();
-    virtual void v07d();
-    virtual void v07e();
-    virtual void v07f();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v08a();
-    virtual bool Test(bool);
-    Process98* GetProcess();
-};
 struct Context98
 {
     bool FUN_009818b0();
@@ -3814,7 +2737,7 @@ struct Procedure98
 {
     int unk00;
     Context98* context;
-    Actor98* FUN_00996e00();
+    Actor* FUN_00996e00();
     unsigned int FUN_00825c00();
     void FUN_009cced0();
     void FUN_009ccfb0();
@@ -3826,7 +2749,7 @@ struct Procedure98
 // @fnv 0x009cf570
 void Procedure98::UpdateState()
 {
-    Actor98* actor = FUN_00996e00();
+    Actor* actor = FUN_00996e00();
     switch (FUN_00825c00())
     {
     case 0:
@@ -3839,19 +2762,14 @@ void Procedure98::UpdateState()
         FUN_009cd3d0();
         break;
     case 3: {
-        int result = actor && actor->GetProcess() ? actor->GetProcess()->State() : 0;
-        if (!context->FUN_009818b0() && !result && (!actor || !actor->Test(false)))
+        int result = actor && actor->GetProcess() ? ((Process98*)actor->GetProcess())->State() : 0;
+        if (!context->FUN_009818b0() && !result && (!actor || !actor->HasHealth(false)))
             FUN_009cc510();
         break;
     }
     }
 }
 
-struct MeleeDebugActor
-{
-    short GetVtbl20Result();
-    bool FUN_008b3bd0();
-};
 struct MeleeDebugTimer
 {
     float started;
@@ -3899,15 +2817,15 @@ struct MeleeDebugProcedure
     MeleeDebugTimer delayTimer;
     int unk50, unk54, unk58, unk5C, unk60;
     MeleeDebugFlags stateFlags;
-    MeleeDebugActor* FUN_00996de0();
+    Actor* FUN_00996de0();
     void PrintDebugInfo(MeleeDebugOutput*, int, int);
 };
 // Builds description strings from move, attack and delay timers and prints the procedure's move/attack state and flags via output->Print.
 // @fnv 0x009cf700
 void MeleeDebugProcedure::PrintDebugInfo(MeleeDebugOutput* output, int x, int y)
 {
-    MeleeDebugActor* actor = FUN_00996de0();
-    short sMovementFlags = actor->GetVtbl20Result();
+    Actor* actor = FUN_00996de0();
+    short sMovementFlags = (short)actor->GetActorStateFlags();
     char description[100];
     description[0] = DAT_01011584[0];
     FUN_00ec61c0(description + 1, 0, 99);
@@ -3962,166 +2880,23 @@ void MeleeDebugProcedure::PrintDebugInfo(MeleeDebugOutput* output, int x, int y)
         output->Print(x, y, DAT_01090d70);
 }
 
-class Point9CF
-{
-  public:
-    float x, y, z;
 
-    Point9CF operator-(const Point9CF& pt) const;
-    float Length() const;
-};
-
-class Actor9CF
-{
-  public:
-    virtual void vfn000();
-    virtual void vfn004();
-    virtual void vfn008();
-    virtual void vfn00C();
-    virtual void vfn010();
-    virtual void vfn014();
-    virtual void vfn018();
-    virtual void vfn01C();
-    virtual void vfn020();
-    virtual void vfn024();
-    virtual void vfn028();
-    virtual void vfn02C();
-    virtual void vfn030();
-    virtual void vfn034();
-    virtual void vfn038();
-    virtual void vfn03C();
-    virtual void vfn040();
-    virtual void vfn044();
-    virtual void vfn048();
-    virtual void vfn04C();
-    virtual void vfn050();
-    virtual void vfn054();
-    virtual void vfn058();
-    virtual void vfn05C();
-    virtual void vfn060();
-    virtual void vfn064();
-    virtual void vfn068();
-    virtual void vfn06C();
-    virtual void vfn070();
-    virtual void vfn074();
-    virtual void vfn078();
-    virtual void vfn07C();
-    virtual void vfn080();
-    virtual void vfn084();
-    virtual void vfn088();
-    virtual void vfn08C();
-    virtual void vfn090();
-    virtual void vfn094();
-    virtual void vfn098();
-    virtual void vfn09C();
-    virtual void vfn0A0();
-    virtual void vfn0A4();
-    virtual void vfn0A8();
-    virtual void vfn0AC();
-    virtual void vfn0B0();
-    virtual void vfn0B4();
-    virtual void vfn0B8();
-    virtual void vfn0BC();
-    virtual void vfn0C0();
-    virtual void vfn0C4();
-    virtual void vfn0C8();
-    virtual void vfn0CC();
-    virtual void vfn0D0();
-    virtual void vfn0D4();
-    virtual void vfn0D8();
-    virtual void vfn0DC();
-    virtual void vfn0E0();
-    virtual void vfn0E4();
-    virtual void vfn0E8();
-    virtual void vfn0EC();
-    virtual void vfn0F0();
-    virtual void vfn0F4();
-    virtual void vfn0F8();
-    virtual void vfn0FC();
-    virtual void vfn100();
-    virtual void vfn104();
-    virtual void vfn108();
-    virtual void vfn10C();
-    virtual void vfn110();
-    virtual void vfn114();
-    virtual void vfn118();
-    virtual void vfn11C();
-    virtual void vfn120();
-    virtual void vfn124();
-    virtual void vfn128();
-    virtual void vfn12C();
-    virtual void vfn130();
-    virtual void vfn134();
-    virtual void vfn138();
-    virtual void vfn13C();
-    virtual void vfn140();
-    virtual void vfn144();
-    virtual void vfn148();
-    virtual void vfn14C();
-    virtual void vfn150();
-    virtual void vfn154();
-    virtual void vfn158();
-    virtual void vfn15C();
-    virtual void vfn160();
-    virtual void vfn164();
-    virtual void vfn168();
-    virtual void vfn16C();
-    virtual void vfn170();
-    virtual void vfn174();
-    virtual void vfn178();
-    virtual void vfn17C();
-    virtual void vfn180();
-    virtual void vfn184();
-    virtual void vfn188();
-    virtual void vfn18C();
-    virtual void vfn190();
-    virtual void vfn194();
-    virtual void vfn198();
-    virtual void vfn19C();
-    virtual void vfn1A0();
-    virtual void vfn1A4();
-    virtual void vfn1A8();
-    virtual void vfn1AC();
-    virtual void vfn1B0();
-    virtual void vfn1B4();
-    virtual void vfn1B8();
-    virtual void vfn1BC();
-    virtual void vfn1C0();
-    virtual void vfn1C4();
-    virtual void vfn1C8();
-    virtual void vfn1CC();
-    virtual void vfn1D0();
-    virtual void vfn1D4();
-    virtual void vfn1D8();
-    virtual void vfn1DC();
-    virtual void vfn1E0();
-    virtual void vfn1E4();
-    virtual void vfn1E8();
-    virtual void vfn1EC();
-    virtual void vfn1F0();
-    virtual const Point9CF& GetPos();
-};
 
 class Position9CF
 {
   public:
-    const Point9CF& GetPos();
+    const NiPoint3& GetPos();
 };
 
-class Setting9CF
-{
-  public:
-    float* Float();
-};
 
-extern Setting9CF g_kTalkDistance9CF;
+extern Setting g_kTalkDistance9CF;
 
 bool __cdecl IsMenuMode9CF();
 
 class Dialogue9CF
 {
   public:
-    Actor9CF* GetSpeaker();
+    Actor* GetSpeaker();
     void Stop();
     void StopIfSpeakerOutOfRange();
 
@@ -4158,203 +2933,18 @@ void Dialogue9CF::StopIfSpeakerOutOfRange()
 {
     if (!IsMenuMode9CF())
     {
-        Actor9CF* pkSpeaker = GetSpeaker();
-        Point9CF kDelta = m_kListener.GetPos() - pkSpeaker->GetPos();
-        if (kDelta.Length() >= *g_kTalkDistance9CF.Float() * *g_kTalkDistance9CF.Float())
+        Actor* pkSpeaker = GetSpeaker();
+        NiPoint3 kDelta = m_kListener.GetPos() - *(const NiPoint3*)((const Actor*)pkSpeaker)->GetPos();
+        if (kDelta.FUN_004a7290() >= *g_kTalkDistance9CF.Float() * *g_kTalkDistance9CF.Float())
             Stop();
     }
 }
 
-struct Pt3
-{
-    float x;
-    float y;
-    float z;
-    Pt3 operator+(const Pt3& o) const;
-    Pt3 operator-(const Pt3& o) const;
-    float Length() const;
-};
-extern Pt3 kPt3Zero;
-struct CombatActor
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v00a();
-    virtual void v00b();
-    virtual void v00c();
-    virtual void v00d();
-    virtual void v00e();
-    virtual void v00f();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v01a();
-    virtual void v01b();
-    virtual void v01c();
-    virtual void v01d();
-    virtual void v01e();
-    virtual void v01f();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v02a();
-    virtual void v02b();
-    virtual void v02c();
-    virtual void v02d();
-    virtual void v02e();
-    virtual void v02f();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v03a();
-    virtual void v03b();
-    virtual void v03c();
-    virtual void v03d();
-    virtual void v03e();
-    virtual void v03f();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v04a();
-    virtual void v04b();
-    virtual void v04c();
-    virtual void v04d();
-    virtual void v04e();
-    virtual void v04f();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v05a();
-    virtual void v05b();
-    virtual void v05c();
-    virtual void v05d();
-    virtual void v05e();
-    virtual void v05f();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v06a();
-    virtual void v06b();
-    virtual void v06c();
-    virtual void v06d();
-    virtual void v06e();
-    virtual void v06f();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v07a();
-    virtual void v07b();
-    virtual void v07c();
-    virtual Pt3* GetPos();
-    virtual void v07e();
-    virtual void v07f();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v08a();
-    virtual void v08b();
-    virtual void v08c();
-    virtual void v08d();
-    virtual void v08e();
-    virtual void v08f();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v09a();
-    virtual void v09b();
-    virtual void v09c();
-    virtual void v09d();
-    virtual void v09e();
-    virtual void v09f();
-    virtual void v0a0();
-    virtual void v0a1();
-    virtual void v0a2();
-    virtual void v0a3();
-    virtual void v0a4();
-    virtual void v0a5();
-    virtual void v0a6();
-    virtual void v0a7();
-    virtual void v0a8();
-    virtual void v0a9();
-    virtual void v0aa();
-    virtual void GetCurrentTargetDistance(Pt3* out);
-    bool IsAlive();
-};
+extern NiPoint3 kPt3Zero;
 struct CombatProcStub
 {
-    CombatActor* GetTarget();
-    CombatActor* GetActor();
+    Actor* GetTarget();
+    Actor* GetActor();
     float GetRange();
     bool IsTargetOutOfRange();
 };
@@ -4362,33 +2952,25 @@ struct CombatProcStub
 // @fnv 0x009cfd70
 bool CombatProcStub::IsTargetOutOfRange()
 {
-    Pt3 unusedPos8 = kPt3Zero;
-    Pt3 heading = kPt3Zero;
-    if (!GetActor() || !GetActor()->IsAlive())
+    NiPoint3 unusedPos8 = kPt3Zero;
+    NiPoint3 heading = kPt3Zero;
+    if (!GetActor() || !GetActor()->FUN_004938e0())
         return false;
-    GetActor()->GetCurrentTargetDistance(&heading);
+    GetActor()->Unk_AB(*(NiPoint3*)&heading);
     heading.z = 0.0f;
-    Pt3 aheadX = *GetActor()->GetPos() + heading;
+    NiPoint3 aheadX = *(NiPoint3*)((const Actor*)GetActor())->GetPos() + heading;
     float aRange = GetRange();
-    Pt3 diff4 = *GetTarget()->GetPos() - aheadX;
+    NiPoint3 diff4 = *(NiPoint3*)((const Actor*)GetTarget())->GetPos() - aheadX;
     float dist = diff4.Length();
     return dist >= aRange * aRange;
 }
 
-struct FUN_00416870
-{
-    float x, y, z;
-    FUN_00416870(float, float, float);
-    FUN_00416870 FUN_00439ef0(const FUN_00416870&) const;
-    FUN_00416870 FUN_00439e90(const FUN_00416870&) const;
-    float FUN_00457990() const;
-};
 struct FUN_006815c0
 {
     float xx, xy, xz, yx, yy, yz, zx, zy, zz;
     FUN_006815c0();
     void FUN_004a0c90(float, int);
-    FUN_00416870 FUN_004b4500(const FUN_00416870&) const;
+    NiPoint3 FUN_004b4500(const NiPoint3&) const;
 };
 struct Control057
 {
@@ -4652,191 +3234,7 @@ struct Control057
     virtual void v257();
     virtual bool Check(int);
 };
-struct Actor057
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual FUN_00416870& Position();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual float Heading();
-    Control057* FUN_008d8520();
-    bool FUN_008b3bd0();
-    float FUN_008be280();
-    float FUN_008be350();
-    unsigned GetVtbl20Result();
-};
-extern SettingX DAT_011cf968;
+extern Setting DAT_011cf968;
 float __cdecl FUN_0040ebd0(float, float);
 struct State057
 {
@@ -4844,38 +3242,39 @@ struct State057
     int mode;
     short mask;
     bool left, right, forward, back;
-    FUN_00416870 position;
-    int UpdateDirection(Actor057* actor, unsigned direction);
-    bool FUN_009d0590(Actor057*, const FUN_00416870&);
+    NiPoint3 position;
+    int UpdateDirection(Actor* actor, unsigned direction);
+    bool FUN_009d0590(Actor*, const NiPoint3&);
     void UpdateFlags(unsigned short, bool);
 };
 // Initializes direction flags from controls, updates position, and for the given direction tests a rotated offset point, storing the result via UpdateFlags.
 // @fnv 0x009cff90
-int State057::UpdateDirection(Actor057* actor, unsigned direction)
+int State057::UpdateDirection(Actor* actor, unsigned direction)
 {
     if (!initialized)
     {
-        left = actor->FUN_008d8520()->Check(5);
-        right = actor->FUN_008d8520()->Check(6);
-        forward = actor->FUN_008d8520()->Check(3);
-        back = actor->FUN_008d8520()->Check(4);
+        left = ((Control057*)actor->GetProcess())->Check(5);
+        right = ((Control057*)actor->GetProcess())->Check(6);
+        forward = ((Control057*)actor->GetProcess())->Check(3);
+        back = ((Control057*)actor->GetProcess())->Check(4);
         initialized = true;
     }
     if (!active && actor->FUN_008b3bd0())
         return 4;
     else if (!active && direction == 0)
     {
-        FUN_00416870 f = position.FUN_00439ef0(actor->Position());
+        NiPoint3 f = position.FUN_00439ef0(*(NiPoint3*)((const Actor*)actor)->GetPos());
         if (f.FUN_00457990() < *DAT_011cf968.FUN_00403e20())
             return 4;
     }
-    position = actor->Position();
+    position = *(NiPoint3*)((const Actor*)actor)->GetPos();
     FUN_006815c0 a;
-    a.FUN_004a0c90(actor->Heading(), 0);
-    float b = actor->FUN_008be280();
+    // The shared slot 0x2BC takes bool; this original call has no argument and returns float.
+    a.FUN_004a0c90(((float (__thiscall *)(Actor*))(*(void***)actor)[0xaf])(actor), 0);
+    float b = ((ActorMeleeCalls*)actor)->FUN_008be280();
     if (b == 0.0)
         b = 32.0f;
-    float e = actor->FUN_008be350();
+    float e = ((ActorMeleeCalls*)actor)->FUN_008be350();
     if (e == 0.0)
         e = b;
     unsigned c;
@@ -4887,11 +3286,11 @@ int State057::UpdateDirection(Actor057* actor, unsigned direction)
     }
     b = FUN_0040ebd0(b, 64.0f);
     e = FUN_0040ebd0(e, 64.0f);
-    c = actor->GetVtbl20Result();
+    c = actor->GetActorStateFlags();
     switch (direction)
     {
     case 0: {
-        FUN_00416870 g(0.0f, -e, 0.0f);
+        NiPoint3 g(0.0f, -e, 0.0f);
         if (c & 2)
             g.y -= e;
         g = a.FUN_004b4500(g).FUN_00439e90(position);
@@ -4899,7 +3298,7 @@ int State057::UpdateDirection(Actor057* actor, unsigned direction)
         break;
     }
     case 1: {
-        FUN_00416870 h(0.0f, e, 0.0f);
+        NiPoint3 h(0.0f, e, 0.0f);
         if (c & 1)
             h.y += e;
         h = a.FUN_004b4500(h).FUN_00439e90(position);
@@ -4907,7 +3306,7 @@ int State057::UpdateDirection(Actor057* actor, unsigned direction)
         break;
     }
     case 2: {
-        FUN_00416870 i(-b, 0.0f, 0.0f);
+        NiPoint3 i(-b, 0.0f, 0.0f);
         if (c & 4)
             i.x -= b;
         i = a.FUN_004b4500(i).FUN_00439e90(position);
@@ -4915,7 +3314,7 @@ int State057::UpdateDirection(Actor057* actor, unsigned direction)
         break;
     }
     case 3: {
-        FUN_00416870 j(b, 0.0f, 0.0f);
+        NiPoint3 j(b, 0.0f, 0.0f);
         if (c & 8)
             j.x += b;
         j = a.FUN_004b4500(j).FUN_00439e90(position);
@@ -4932,7 +3331,7 @@ class GlobalObject_0045d260
     void FUN_00483710();
 };
 extern GlobalObject_0045d260 g_011f24e4;
-extern Setting_S originalRuntimeFloatSetting594;
+extern Setting originalRuntimeFloatSetting594;
 struct P12_9cc240
 {
     float dst0, y, z;
@@ -4941,7 +3340,7 @@ struct Act9cc240
 {
     bool FUN_008b3b90();
     bool FUN_008b3960();
-    float GetScale();
+    float FUN_00567400();
 };
 struct Tgt9cc240
 {
@@ -5071,7 +3470,7 @@ void CPAM9cc240::UpdateCombatState()
     {
         _v = GetModifierValue();
         a7 = FUN_009ce560();
-        if (_v - a7 < *originalRuntimeFloatSetting594.Float() * dst0->GetScale() * 2.25)
+        if (_v - a7 < *originalRuntimeFloatSetting594.Float() * dst0->FUN_00567400() * 2.25)
             bDone6 = true;
     }
     if (bDone6)
@@ -5099,290 +3498,13 @@ struct State150
     bool GetModifierKey();
     void FUN_009818e0(int);
 };
-struct Actor150
-{
-    virtual void p00();
-    virtual void p01();
-    virtual void p02();
-    virtual void p03();
-    virtual void p04();
-    virtual void p05();
-    virtual void p06();
-    virtual void p07();
-    virtual void p08();
-    virtual void p09();
-    virtual void p10();
-    virtual void p11();
-    virtual void p12();
-    virtual void p13();
-    virtual void p14();
-    virtual void p15();
-    virtual void p16();
-    virtual void p17();
-    virtual void p18();
-    virtual void p19();
-    virtual void p20();
-    virtual void p21();
-    virtual void p22();
-    virtual void p23();
-    virtual void p24();
-    virtual void p25();
-    virtual void p26();
-    virtual void p27();
-    virtual void p28();
-    virtual void p29();
-    virtual void p30();
-    virtual void p31();
-    virtual void p32();
-    virtual void p33();
-    virtual void p34();
-    virtual void p35();
-    virtual void p36();
-    virtual void p37();
-    virtual void p38();
-    virtual void p39();
-    virtual void p40();
-    virtual void p41();
-    virtual void p42();
-    virtual void p43();
-    virtual void p44();
-    virtual void p45();
-    virtual void p46();
-    virtual void p47();
-    virtual void p48();
-    virtual void p49();
-    virtual void p50();
-    virtual void p51();
-    virtual void p52();
-    virtual void p53();
-    virtual void p54();
-    virtual void p55();
-    virtual void p56();
-    virtual void p57();
-    virtual void p58();
-    virtual void p59();
-    virtual void p60();
-    virtual void p61();
-    virtual void p62();
-    virtual void p63();
-    virtual void p64();
-    virtual void p65();
-    virtual void p66();
-    virtual void p67();
-    virtual void p68();
-    virtual void p69();
-    virtual void p70();
-    virtual void p71();
-    virtual void p72();
-    virtual void p73();
-    virtual void p74();
-    virtual void p75();
-    virtual void p76();
-    virtual void p77();
-    virtual void p78();
-    virtual void p79();
-    virtual void p80();
-    virtual void p81();
-    virtual void p82();
-    virtual void p83();
-    virtual void p84();
-    virtual void p85();
-    virtual void p86();
-    virtual void p87();
-    virtual void p88();
-    virtual void p89();
-    virtual void p90();
-    virtual void p91();
-    virtual void p92();
-    virtual void p93();
-    virtual void p94();
-    virtual void p95();
-    virtual void p96();
-    virtual void p97();
-    virtual void p98();
-    virtual void p99();
-    virtual void p100();
-    virtual void p101();
-    virtual void p102();
-    virtual void p103();
-    virtual void p104();
-    virtual void p105();
-    virtual void p106();
-    virtual void p107();
-    virtual void p108();
-    virtual void p109();
-    virtual void p110();
-    virtual void p111();
-    virtual void p112();
-    virtual void p113();
-    virtual void p114();
-    virtual void p115();
-    virtual void p116();
-    virtual void p117();
-    virtual void p118();
-    virtual void p119();
-    virtual void p120();
-    virtual Anim150* anim();
-    virtual void p122();
-    virtual void p123();
-    virtual void p124();
-    virtual void p125();
-    virtual void p126();
-    virtual void p127();
-    virtual void p128();
-    virtual void p129();
-    virtual void p130();
-    virtual void p131();
-    virtual void p132();
-    virtual void p133();
-    virtual void p134();
-    virtual void p135();
-    virtual void p136();
-    virtual void p137();
-    virtual void p138();
-    virtual void p139();
-    virtual bool V230();
-    virtual bool check234();
-    virtual void x00();
-    virtual void x01();
-    virtual void x02();
-    virtual void x03();
-    virtual void x04();
-    virtual void x05();
-    virtual void x06();
-    virtual void x07();
-    virtual void x08();
-    virtual void x09();
-    virtual void x10();
-    virtual void x11();
-    virtual void x12();
-    virtual void x13();
-    virtual void x14();
-    virtual void x15();
-    virtual void x16();
-    virtual void x17();
-    virtual void x18();
-    virtual void x19();
-    virtual void x20();
-    virtual void x21();
-    virtual void x22();
-    virtual void x23();
-    virtual void x24();
-    virtual void x25();
-    virtual void x26();
-    virtual void x27();
-    virtual void x28();
-    virtual void x29();
-    virtual void x30();
-    virtual void x31();
-    virtual void x32();
-    virtual void x33();
-    virtual void x34();
-    virtual void x35();
-    virtual void x36();
-    virtual void x37();
-    virtual void x38();
-    virtual void x39();
-    virtual void x40();
-    virtual void x41();
-    virtual void x42();
-    virtual void x43();
-    virtual void x44();
-    virtual void x45();
-    virtual void x46();
-    virtual void x47();
-    virtual void x48();
-    virtual void x49();
-    virtual void x50();
-    virtual void x51();
-    virtual void x52();
-    virtual void x53();
-    virtual void x54();
-    virtual void x55();
-    virtual void x56();
-    virtual void x57();
-    virtual void x58();
-    virtual void x59();
-    virtual void x60();
-    virtual void x61();
-    virtual void x62();
-    virtual void x63();
-    virtual void x64();
-    virtual void x65();
-    virtual void x66();
-    virtual void x67();
-    virtual void x68();
-    virtual void x69();
-    virtual void x70();
-    virtual void x71();
-    virtual void x72();
-    virtual void x73();
-    virtual void x74();
-    virtual void x75();
-    virtual void x76();
-    virtual void x77();
-    virtual void x78();
-    virtual void x79();
-    virtual void x80();
-    virtual void x81();
-    virtual void x82();
-    virtual void x83();
-    virtual void x84();
-    virtual void x85();
-    virtual void x86();
-    virtual void x87();
-    virtual void x88();
-    virtual void x89();
-    virtual void x90();
-    virtual void x91();
-    virtual void x92();
-    virtual void x93();
-    virtual void x94();
-    virtual void x95();
-    virtual void x96();
-    virtual void x97();
-    virtual void x98();
-    virtual void x99();
-    virtual void x100();
-    virtual void x101();
-    virtual void x102();
-    virtual void x103();
-    virtual void x104();
-    virtual void x105();
-    virtual void x106();
-    virtual void x107();
-    virtual void x108();
-    virtual void x109();
-    virtual void x110();
-    virtual void x111();
-    virtual void x112();
-    virtual void x113();
-    virtual void x114();
-    virtual void x115();
-    virtual void x116();
-    virtual void x117();
-    virtual void x118();
-    virtual void x119();
-    virtual void x120();
-    virtual void x121();
-    virtual void x122();
-    virtual void x123();
-    virtual State150* state();
-    bool FUN_00894d60();
-    bool FUN_00894cc0(bool);
-    bool FUN_00894900();
-    int FUN_008a7570();
-    unsigned char FUN_00437bd0();
-    bool FUN_00579670();
-    bool FUN_00437bf0();
-};
 unsigned int FUN_00487f50();
 struct C150
 {
     int pad;
     State150* m04;
-    Actor150* FUN_00996de0();
-    Actor150* FUN_00996e00();
+    ActorMeleeCalls* FUN_00996de0();
+    ActorMeleeCalls* FUN_00996e00();
     int FUN_00825c00();
     void FUN_009cf6d0(int);
     float GetModifierValue();
@@ -5392,11 +3514,11 @@ struct C150
 // @fnv 0x009cd150
 void C150::FUN_009cd150()
 {
-    if (FUN_00996de0()->anim() && FUN_00996de0()->anim()->FUN_00491040(2) &&
-        FUN_00996de0()->anim()->FUN_00491040(2)->FUN_008041a0() != 1)
+    if (((Anim150*)FUN_00996de0()->GetAnimData()) && ((Anim150*)FUN_00996de0()->GetAnimData())->FUN_00491040(2) &&
+        ((Anim150*)FUN_00996de0()->GetAnimData())->FUN_00491040(2)->FUN_008041a0() != 1)
         return;
-    Actor150* actor2 = FUN_00996de0();
-    Actor150* target7 = FUN_00996e00();
+    ActorMeleeCalls* actor2 = FUN_00996de0();
+    ActorMeleeCalls* target7 = FUN_00996e00();
     if (m04->GetModifierKey() || FUN_00825c00() == 1)
     {
         if (!target7)
@@ -5411,12 +3533,12 @@ void C150::FUN_009cd150()
         bool active = target7->FUN_00894900();
         bool action = target7->FUN_008a7570() == 4;
         bool state2 = false;
-        if (target7->state())
-            state2 = target7->state()->GetModifierKey();
+        if (((State150*)target7->GetCombatController()))
+            state2 = ((State150*)target7->GetCombatController())->GetModifierKey();
         float elapsedTmp = GetModifierValue();
         float limit = FUN_009ce560();
         bool flag_ = false;
-        bool blocked = target7->check234() || target7->V230() || target7->FUN_00437bd0() || target7->FUN_00579670() ||
+        bool blocked = target7->GetIsParalyzed() || target7->GetHasKnockedState() || target7->FUN_00437bd0() || target7->FUN_00579670() ||
                        target7->FUN_00437bf0();
         if (!(!(elapsedTmp > limit) && !blocked && !action && !state2 &&
               (FUN_00487f50() % 100 >= 5 || (active && !flag_)) && actor2->FUN_00894d60()))
@@ -5430,20 +3552,7 @@ void C150::FUN_009cd150()
     }
 }
 
-struct ActorHelper
-{
-    unsigned short GetVtbl20Result();
-    bool FUN_008b3bd0();
-    bool FUN_008b3bf0();
-    bool FUN_008b3840(void*);
-};
 
-struct NiPoint3_ext : public NiPoint3
-{
-    NiPoint3_ext();
-    NiPoint3 operator-(const NiPoint3&) const;
-    float Length() const;
-};
 
 struct CombatProcedure_shell : public FUN_009cde10_shell
 {
@@ -5451,23 +3560,23 @@ struct CombatProcedure_shell : public FUN_009cde10_shell
     void* m_04;
 
     int FUN_0044edb0();
-    ActorHelper* FUN_00996de0();
-    Actor057* FUN_00996e00();
+    ActorMeleeCalls* FUN_00996de0();
+    Actor* FUN_00996e00();
     void FUN_009ce190();
     void FUN_009ce5b0(CombatVec3*);
     unsigned char IsWithinThreshold(float, float, int);
     void UpdateCombatMovement();
 };
 
-float __cdecl FUN_009a6770(ActorHelper*, Actor057*);
+float __cdecl FUN_009a6770(ActorMeleeCalls*, Actor*);
 
 // @fnv 0x009cdf80
 void CombatProcedure_shell::UpdateCombatMovement()
 {
-    ActorHelper* actor;
+    ActorMeleeCalls* actor;
     unsigned short wVal;
     float f0c;
-    Actor057* target8;
+    Actor* target8;
     CombatVec3 vec1c3;
     float fX;
 
@@ -5480,7 +3589,7 @@ void CombatProcedure_shell::UpdateCombatMovement()
     target8 = this->FUN_00996e00();
     f0c = this->GetModifierValue();
     fX = this->FUN_009ce560();
-    wVal = actor->GetVtbl20Result();
+    wVal = (unsigned short)actor->GetActorStateFlags();
 
     if (!actor->FUN_008b3bd0())
     {
@@ -5488,7 +3597,7 @@ void CombatProcedure_shell::UpdateCombatMovement()
         return;
     }
 
-    FUN_009a68b0(&vec1c3, actor, (CombatAttackVT*)target8, (int)&target8->Position(), this->FUN_009ce560());
+    FUN_009a68b0(&vec1c3, actor, (CombatAttackVT*)target8, (int)&*(NiPoint3*)((const Actor*)target8)->GetPos(), this->FUN_009ce560());
 
     if (f0c > *originalRuntimeFloatSetting593.Float() * 2)
     {
@@ -5502,7 +3611,7 @@ void CombatProcedure_shell::UpdateCombatMovement()
     if (this->FUN_009cf030(f0c, fX, 0) && FUN_0097f2d0(this->m_04))
     {
         unsigned char b_ = 0;
-        NiPoint3_ext pt9;
+        LocalPoint3Ext pt9;
         if (actor->FUN_008b3bf0())
         {
             b_ = 1;
@@ -5510,7 +3619,7 @@ void CombatProcedure_shell::UpdateCombatMovement()
         else if (actor->FUN_008b3840(&pt9))
         {
             float f38 = FUN_009a6770(actor, target8);
-            float f5 = ((NiPoint3_ext&)(pt9 - (const NiPoint3&)target8->Position())).Length() - f38;
+            float f5 = ((LocalPoint3Ext&)(pt9 - (const NiPoint3&)*(NiPoint3*)((const Actor*)target8)->GetPos())).Length() - f38;
             b_ = this->IsWithinThreshold(f5, fX, 0);
         }
         if (!b_)
@@ -5806,6 +3915,7 @@ struct ZProcess
     virtual void v253();
     virtual bool Check();
 };
+// Retained: this slot 0x1E4 animation call passes three ints; the shared method has no parameters.
 struct ZActor
 {
     virtual void v0();
@@ -5954,11 +4064,7 @@ struct ZActor
 void __cdecl FUN_009a68b0(ZPoint*, ZActor*, ZActor*, const ZPoint&, float);
 float __cdecl FUN_009a6770(ZActor*, ZActor*);
 bool __cdecl IsTargetInCone(ZActor*, ZActor*, int);
-struct ZSetting
-{
-    float* Float();
-};
-extern ZSetting g_011cf27c;
+extern Setting g_011cf27c;
 extern double DAT_01017a40;
 struct ZMelee
 {
@@ -6322,163 +4428,6 @@ struct Context_9cf
     int FUN_007031c0();
 };
 
-struct Actor_9cf
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v3a();
-    virtual void v3b();
-    virtual void v3c();
-    virtual void v3d();
-    virtual void v3e();
-    virtual void v3f();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v4a();
-    virtual void v4b();
-    virtual void v4c();
-    virtual void v4d();
-    virtual void v4e();
-    virtual void v4f();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v5a();
-    virtual void v5b();
-    virtual void v5c();
-    virtual void v5d();
-    virtual void v5e();
-    virtual void v5f();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v6a();
-    virtual void v6b();
-    virtual void v6c();
-    virtual void v6d();
-    virtual void v6e();
-    virtual void v6f();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual AnimData_9cf* v1e4();
-    virtual void v7a();
-    virtual void v7b();
-    virtual void v7c();
-    virtual void* v1f4();
-    virtual void v7e();
-    virtual void v7f();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual bool v218();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v8a();
-    virtual void v8b();
-    virtual bool v230();
-
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    int unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40;
-    int unk44, unk48, unk4c, unk50, unk54, unk58, unk5c, unk60;
-    int unk64, unk68, unk6c, unk70, unk74, unk78, unk7c, unk80;
-    int unk84, unk88, unk8c, unk90, unk94, unk98, unk9c, unka0;
-    SubA4 m_a4;
-
-    ActorProcess_9cf* FUN_008d8520();
-    bool FUN_005a2030();
-    int FUN_008a7570();
-    bool FUN_00894900();
-    bool FUN_00894d60();
-};
 
 struct CTSHelper
 {
@@ -6487,8 +4436,8 @@ struct CTSHelper
     float FUN_00435e00();
 };
 
-bool __cdecl IsTargetInCone(Actor_9cf*, Actor_9cf*, int);
-bool __cdecl FUN_009a7940(Actor_9cf*, Actor_9cf*, void*, void*, int, int);
+bool __cdecl IsTargetInCone(ActorMeleeCalls*, ActorMeleeCalls*, int);
+bool __cdecl FUN_009a7940(ActorMeleeCalls*, ActorMeleeCalls*, void*, void*, int, int);
 float __cdecl FUN_00435dd0();
 
 struct FUN_009cf090_Class
@@ -6501,8 +4450,8 @@ struct FUN_009cf090_Class
     CTSHelper m_timer60;
 
     int FUN_00825c00();
-    Actor_9cf* FUN_00996de0();
-    Actor_9cf* FUN_00996e00();
+    ActorMeleeCalls* FUN_00996de0();
+    ActorMeleeCalls* FUN_00996e00();
     int FUN_009ce870(float, float, bool, bool, int);
     bool IsActionAvailable(int);
     void FUN_009cce70(int, int);
@@ -6514,7 +4463,7 @@ struct FUN_009cf090_Class
 // @fnv 0x009cf090
 void FUN_009cf090_Class::TryAttackTarget(float afArg1, float afArg2)
 {
-    Actor_9cf* pkActorVal;
+    ActorMeleeCalls* pkActorVal;
     bool bTargetRecoiling;
     {
         int iAttack4;
@@ -6523,7 +4472,7 @@ void FUN_009cf090_Class::TryAttackTarget(float afArg1, float afArg2)
         bool bTargetMidAttack3;
         bool bTargetPostAttack_2;
         bool bInAttackAnim5;
-        Actor_9cf* pkTarget5;
+        ActorMeleeCalls* pkTarget5;
         int iRandA;
         float fPercent4;
         float aFMax;
@@ -6552,18 +4501,18 @@ void FUN_009cf090_Class::TryAttackTarget(float afArg1, float afArg2)
             return;
         }
 
-        if (!pkActorVal->FUN_008d8520()->V254())
+        if (!((ActorProcess_9cf*)pkActorVal->FUN_008d8520())->V254())
         {
             return;
         }
 
-        bInAttackAnim5 = (pkActorVal->v1e4() != 0) ? FUN_005f2670(pkActorVal->v1e4()->FUN_004301b0(4)) : false;
+        bInAttackAnim5 = (((AnimData_9cf*)pkActorVal->GetAnimData()) != 0) ? FUN_005f2670(((AnimData_9cf*)pkActorVal->GetAnimData())->FUN_004301b0(4)) : false;
         if (bInAttackAnim5)
         {
             return;
         }
 
-        if (pkActorVal->v218() && pkActorVal->FUN_005a2030())
+        if (pkActorVal->IsCharacter() && pkActorVal->FUN_005a2030())
         {
             return;
         }
@@ -6593,9 +4542,9 @@ void FUN_009cf090_Class::TryAttackTarget(float afArg1, float afArg2)
                 if (iRandA < this->m_04->FUN_00980070()->GetByteAtOffsetAD())
                 {
                     fChanceTmp = CalculateWeightedValue((int)this->m_04->FUN_00980070(), this->m_04->FUN_0097fc70(),
-                                                        pkActorVal->m_a4.FUN_0066ef20(11), bTargetAttacking4,
+                                                        pkActorVal->GetActorValueAsInteger(11), bTargetAttacking4,
                                                         !this->m_04->FUN_007031c0(), bTargetPostAttack_2,
-                                                        pkTarget5->v230(), bTargetRecoiling);
+                                                        pkTarget5->GetHasKnockedState(), bTargetRecoiling);
 
                     fPercent4 = FUN_00644580((Obj*)this->m_04->FUN_00980070(), 50, 50, false, bTargetAttacking4);
 
@@ -6603,7 +4552,7 @@ void FUN_009cf090_Class::TryAttackTarget(float afArg1, float afArg2)
 
                     if (fChanceTmp > fPercent4 && fChanceTmp > aFMax)
                     {
-                        if (FUN_009a7940(pkActorVal, pkTarget5, pkActorVal->v1f4(), pkTarget5->v1f4(), 0, 30))
+                        if (FUN_009a7940(pkActorVal, pkTarget5, ((const Actor*)pkActorVal)->GetPos(), ((const Actor*)pkTarget5)->GetPos(), 0, 30))
                         {
                             this->FUN_009cce70(iAttack4, 0);
                             this->SetMode(0);
@@ -6650,14 +4599,6 @@ float __cdecl CalculateWeightedValue(Obj641* object, int percent, int unused, bo
     return value;
 }
 
-struct xActorM
-{
-    int GetFlags();
-    bool IsReady();
-    int GetAnimAction();
-    const char* GetFullName();
-    void SetFlags(int i);
-};
 struct xCtx
 {
     bool IsBusy();
@@ -6675,12 +4616,8 @@ struct xMgr
 {
     void Notify(xCtx* pCtx, int a, int b, int c);
 };
-struct xSetting
-{
-    float* Float();
-};
-extern xSetting xS_eb98;
-extern xSetting xS_e380;
+extern Setting xS_eb98;
+extern Setting xS_e380;
 extern xMgr* xCombatMgr;
 unsigned char xLogOn();
 void xDebugLog(const char* fmt, ...);
@@ -6699,8 +4636,8 @@ class xMelee
     int GetState();
     void Finish();
     void Advance();
-    xActorM* GetActor();
-    xActorM* GetTarget();
+    Actor* GetActor();
+    Actor* GetTarget();
     void Prepare();
     void Prepare2();
     int GetSection();
@@ -6726,10 +4663,10 @@ void xMelee::UpdateDodge()
         Advance();
         return;
     }
-    xActorM* qfTOqo = GetActor();
-    xActorM* qpqRa = GetTarget();
-    int qSVM = qfTOqo->GetFlags();
-    if (!qfTOqo->IsReady())
+    Actor* qfTOqo = GetActor();
+    Actor* qpqRa = GetTarget();
+    int qSVM = qfTOqo->GetActorStateFlags();
+    if (!qfTOqo->FUN_004938e0())
     {
         Finish();
         return;
@@ -6766,10 +4703,10 @@ void xMelee::UpdateDodge()
                 }
             }
             else
-                qfTOqo->SetFlags(qSVM | 1);
+                qfTOqo->DispatchToTarget(qSVM | 1);
         }
         else if (qrEZrs < *xS_eb98.Float() && (qSVM & 1))
-            qfTOqo->SetFlags(qSVM & ~1);
+            qfTOqo->DispatchToTarget(qSVM & ~1);
     }
     else if (qSVM & 1)
     {
@@ -6784,10 +4721,10 @@ void xMelee::UpdateDodge()
     {
         float qxQHW = (float)(xRandom() % 100);
         if ((qSVM & 0x100) && !m_pCtx->IsBusy() && qxQHW > *xS_e380.Float())
-            qfTOqo->SetFlags((qSVM | 0x200) & ~0x100);
+            qfTOqo->DispatchToTarget((qSVM | 0x200) & ~0x100);
     }
     else if (qSVM & 0x200)
-        qfTOqo->SetFlags((qSVM | 0x100) & ~0x200);
+        qfTOqo->DispatchToTarget((qSVM | 0x100) & ~0x200);
     xCombatMgr->Notify(m_pCtx, 2, 0, 0);
 }
 
@@ -6803,186 +4740,7 @@ struct FUN_009cfe90_Vector
     float FUN_00589850();
 };
 
-struct FUN_009cfe90_TargetBase
-{
-    virtual void vf000();
-    virtual void vf004();
-    virtual void vf008();
-    virtual void vf00c();
-    virtual void vf010();
-    virtual void vf014();
-    virtual void vf018();
-    virtual void vf01c();
-    virtual void vf020();
-    virtual void vf024();
-    virtual void vf028();
-    virtual void vf02c();
-    virtual void vf030();
-    virtual void vf034();
-    virtual void vf038();
-    virtual void vf03c();
-    virtual void vf040();
-    virtual void vf044();
-    virtual void vf048();
-    virtual void vf04c();
-    virtual void vf050();
-    virtual void vf054();
-    virtual void vf058();
-    virtual void vf05c();
-    virtual void vf060();
-    virtual void vf064();
-    virtual void vf068();
-    virtual void vf06c();
-    virtual void vf070();
-    virtual void vf074();
-    virtual void vf078();
-    virtual void vf07c();
-    virtual void vf080();
-    virtual void vf084();
-    virtual void vf088();
-    virtual void vf08c();
-    virtual void vf090();
-    virtual void vf094();
-    virtual void vf098();
-    virtual void vf09c();
-    virtual void vf0a0();
-    virtual void vf0a4();
-    virtual void vf0a8();
-    virtual void vf0ac();
-    virtual void vf0b0();
-    virtual void vf0b4();
-    virtual void vf0b8();
-    virtual void vf0bc();
-    virtual void vf0c0();
-    virtual void vf0c4();
-    virtual void vf0c8();
-    virtual void vf0cc();
-    virtual void vf0d0();
-    virtual void vf0d4();
-    virtual void vf0d8();
-    virtual void vf0dc();
-    virtual void vf0e0();
-    virtual void vf0e4();
-    virtual void vf0e8();
-    virtual void vf0ec();
-    virtual void vf0f0();
-    virtual void vf0f4();
-    virtual void vf0f8();
-    virtual void vf0fc();
-    virtual void vf100();
-    virtual void vf104();
-    virtual void vf108();
-    virtual void vf10c();
-    virtual void vf110();
-    virtual void vf114();
-    virtual void vf118();
-    virtual void vf11c();
-    virtual void vf120();
-    virtual void vf124();
-    virtual void vf128();
-    virtual void vf12c();
-    virtual void vf130();
-    virtual void vf134();
-    virtual void vf138();
-    virtual void vf13c();
-    virtual void vf140();
-    virtual void vf144();
-    virtual void vf148();
-    virtual void vf14c();
-    virtual void vf150();
-    virtual void vf154();
-    virtual void vf158();
-    virtual void vf15c();
-    virtual void vf160();
-    virtual void vf164();
-    virtual void vf168();
-    virtual void vf16c();
-    virtual void vf170();
-    virtual void vf174();
-    virtual void vf178();
-    virtual void vf17c();
-    virtual void vf180();
-    virtual void vf184();
-    virtual void vf188();
-    virtual void vf18c();
-    virtual void vf190();
-    virtual void vf194();
-    virtual void vf198();
-    virtual void vf19c();
-    virtual void vf1a0();
-    virtual void vf1a4();
-    virtual void vf1a8();
-    virtual void vf1ac();
-    virtual void vf1b0();
-    virtual void vf1b4();
-    virtual void vf1b8();
-    virtual void vf1bc();
-    virtual void vf1c0();
-    virtual void vf1c4();
-    virtual void vf1c8();
-    virtual void vf1cc();
-    virtual void vf1d0();
-    virtual void vf1d4();
-    virtual void vf1d8();
-    virtual void vf1dc();
-    virtual void vf1e0();
-    virtual void vf1e4();
-    virtual void vf1e8();
-    virtual void vf1ec();
-    virtual void vf1f0();
-    virtual void vf1f4();
-    virtual void vf1f8();
-    virtual void vf1fc();
-    virtual void vf200();
-    virtual void vf204();
-    virtual void vf208();
-    virtual void vf20c();
-    virtual void vf210();
-    virtual void vf214();
-    virtual void vf218();
-    virtual void vf21c();
-    virtual void vf220();
-    virtual void vf224();
-    virtual void vf228();
-    virtual void vf22c();
-    virtual void vf230();
-    virtual void vf234();
-    virtual void vf238();
-    virtual void vf23c();
-    virtual void vf240();
-    virtual void vf244();
-    virtual void vf248();
-    virtual void vf24c();
-    virtual void vf250();
-    virtual void vf254();
-    virtual void vf258();
-    virtual void vf25c();
-    virtual void vf260();
-    virtual void vf264();
-    virtual void vf268();
-    virtual void vf26c();
-    virtual void vf270();
-    virtual void vf274();
-    virtual void vf278();
-    virtual void vf27c();
-    virtual void vf280();
-    virtual void vf284();
-    virtual void vf288();
-    virtual void vf28c();
-    virtual void vf290();
-    virtual void vf294();
-    virtual void vf298();
-    virtual void vf29c();
-    virtual void vf2a0();
-    virtual void vf2a4();
-    virtual void vf2a8();
-};
 
-struct FUN_009cfe90_Target : FUN_009cfe90_TargetBase
-{
-    bool FUN_004938e0();
-    virtual void vf2ac(int* value);
-};
 
 // @fnv 0x009cfe90
 float ProcX::FUN_009cfe90()
@@ -6990,7 +4748,7 @@ float ProcX::FUN_009cfe90()
     FUN_009cfe90_Vector value;
 
     if (reinterpret_cast<CombatAttackHelper*>(this)->FUN_00996e00() == 0 ||
-        !reinterpret_cast<FUN_009cfe90_Target*>(reinterpret_cast<CombatAttackHelper*>(this)->FUN_00996e00())
+        !reinterpret_cast<Actor*>(reinterpret_cast<CombatAttackHelper*>(this)->FUN_00996e00())
              ->FUN_004938e0())
         return 0.0f;
 
@@ -6998,8 +4756,8 @@ float ProcX::FUN_009cfe90()
     value.y = DAT_011f4270;
     value.z = DAT_011f4274;
 
-    reinterpret_cast<FUN_009cfe90_Target*>(reinterpret_cast<CombatAttackHelper*>(this)->FUN_00996e00())
-        ->vf2ac(&value.x);
+    reinterpret_cast<Actor*>(reinterpret_cast<CombatAttackHelper*>(this)->FUN_00996e00())
+        ->Unk_AB(*(NiPoint3*)&value.x);
 
     return value.FUN_00589850();
 }
@@ -7010,20 +4768,6 @@ struct Req
     int data[43];
     Req();
     ~Req();
-};
-struct Vec
-{
-    float x, y, z;
-};
-struct Loc
-{
-    int data[10];
-    Loc(Vec const&, void*);
-    ~Loc();
-    unsigned char FUN_006ded70(float);
-    unsigned FUN_00441110();
-    unsigned FUN_006dd4f0() const;
-    Vec FUN_005c3420() const;
 };
 struct Shape;
 struct Avoid
@@ -7046,10 +4790,6 @@ struct Shape
     int data[9];
     Shape(int, float, float);
 };
-struct Settings
-{
-    float* FUN_00403e20();
-};
 extern "C" char DAT_011cf120;
 extern "C" char DAT_011cf4e0;
 struct Act
@@ -7067,7 +4807,7 @@ struct Holder
 {
     char* FUN_00586150();
 };
-unsigned char __cdecl FUN_009a7940(Act*, Targ*, Vec*, int, int, int);
+unsigned char __cdecl FUN_009a7940(Act*, Targ*, NiPoint3*, int, int, int);
 float __cdecl FUN_009a6830(Act*, Targ*, float);
 struct C009ce5b0
 {
@@ -7076,23 +4816,23 @@ struct C009ce5b0
     Act* FUN_00996de0();
     Targ* FUN_00996e00();
     float FUN_009ce560();
-    void FUN_009ce5b0(Vec* pos);
+    void FUN_009ce5b0(NiPoint3* pos);
 };
 // Builds a request using an avoidance shape when both checks pass, otherwise builds one from target data.
 // @fnv 0x009ce5b0
-void C009ce5b0::FUN_009ce5b0(Vec* apPosition)
+void C009ce5b0::FUN_009ce5b0(NiPoint3* apPosition)
 {
     Act* actor2 = FUN_00996de0();
     Targ* target = FUN_00996e00();
     Req request;
-    Loc location(*apPosition, actor2);
-    if (location.FUN_006ded70(actor2->FUN_008be1b0()) &&
+    PathingLocation location(*(const NiPoint3*)apPosition, (void*)actor2);
+    if (location.IsDistanceBelowThreshold(actor2->FUN_008be1b0()) &&
         FUN_009a7940(actor2, target, apPosition, target->v07d(), 0, 30))
     {
         Ptr avoidX(new Avoid);
-        avoidX.FUN_00559450()->AppendNode(Shape(target->v07d(), *((Settings*)&DAT_011cf4e0)->FUN_00403e20(),
-                                                  *((Settings*)&DAT_011cf120)->FUN_00403e20()));
-        actor2->PathToLocation(&request, &location.FUN_005c3420(), location.FUN_006dd4f0(), location.FUN_00441110(), 5.0f,
+        avoidX.FUN_00559450()->AppendNode(Shape(target->v07d(), *((Setting*)&DAT_011cf4e0)->FUN_00403e20(),
+                                                  *((Setting*)&DAT_011cf120)->FUN_00403e20()));
+        actor2->PathToLocation(&request, &location.FUN_005c3420(), (unsigned)location.FUN_006dd4f0(), (unsigned)location.FUN_00441110(), 5.0f,
                              avoidX.FUN_00559450());
     }
     else
@@ -7115,10 +4855,6 @@ struct FUN_00980070_shellQ
 {
     unsigned int FUN_00980070();
 };
-struct FUN_005524b0_classQ
-{
-    char GetByteAtOffset8C();
-};
 
 // Returns 1 if a is at least b, otherwise 0, ignoring the c parameter.
 // @fnv 0x009cf030
@@ -7130,7 +4866,7 @@ unsigned char FUN_009cde10_shell::FUN_009cf030(float a, float b, int aiUnused)
     unsigned char bResult = 0;
 
     pTarget3 = ((FUN_00996de0_ClassQ*)this)->FUN_00996de0();
-    bFlag = ((FUN_005524b0_classQ*)(*(FUN_00980070_shellQ**)((char*)this + 4))->FUN_00980070())->GetByteAtOffset8C() >= 100;
+    bFlag = ((CombatNode_combatprocedureattackmelee*)(*(FUN_00980070_shellQ**)((char*)this + 4))->FUN_00980070())->GetByteAtOffset8C() >= 100;
     m_fPackageValue = 0.0f;
     if (a >= b + m_fPackageValue)
     {

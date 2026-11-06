@@ -1,15 +1,14 @@
-
 #include "bhkcharactercontroller_decls.h"
 
 // @fnv 0x00560d30
 float& bhkCharacterController::GetVectorElement(int index)
 {
-    return components[index];
+    return reinterpret_cast<float*>(this)[index];
 }
 
 // @fnv 0x00931ed0
-GlobalObject_008c71b0 MobileObject::GetVectorElement()
+CharacterControllerValue MobileObject::GetVectorElement()
 {
     bhkCharacterController* controller = GetPhysicsCharacterController();
-    return controller ? controller->FUN_0070c440() : GlobalObject_008c71b0(0);
+    return controller ? reinterpret_cast<const CharacterControllerValue&>(controller->FUN_0070c440()) : CharacterControllerValue(0);
 }

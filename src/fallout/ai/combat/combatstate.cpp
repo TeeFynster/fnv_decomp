@@ -1,6 +1,199 @@
-// fallout/ai/combat/combatstate.cpp: CombatState, Host, Holder, NavMeshSearchLOSArray and more (141 functions)
+#include "../../../../include/SettingT.h"
+// fallout/ai/combat/combatstate.cpp: CombatState, Host, Holder and shared BSSimpleArray specializations (141 functions)
 
-#include "combatstate_decls.h"
+#include "../../../../include/ActorCombatGroup.h"
+#include "../../../../include/CombatActor.h"
+#include "../../../../include/CombatState.h"
+#include "../../../../include/BSSimpleArray.h"
+#include "../../../../include/SETTING_VALUE.h"
+// CombatCoverPointData_combatstate: local type (was include/CombatCoverPointData.h, which had no evidence of one real class); its methods are 0x005dc960 Main::GameOver, 0x0067fdb0 PackageSchedule::SetStartDayOfWeek, 0x009a2ea0 CombatCoverLocation::LoadGameBGS
+class BGSSaveFormBuffer;
+class BGSLoadFormBuffer;
+
+class CombatCoverPointData_combatstate
+{
+public:
+    int unk00;
+    int unk04;
+    int unk08;
+    int unk0c;
+    int unk10;
+    int unk14;
+    int unk18;
+    int unk1c;
+    int unk20;
+    int unk24;
+    int unk28;
+    int unk2c;
+    int unk30;
+    int unk34;
+    int unk38;
+    int unk3c;
+    int unk40;
+    int unk44;
+    int unk48;
+    int unk4c;
+    int unk50;
+    int unk54;
+    int unk58;
+    int unk5c;
+    int unk60;
+    int unk64;
+    int unk68;
+    int unk6c;
+    int unk70;
+    int unk74;
+
+    void Copy(void*);
+    void SaveGame(BGSSaveFormBuffer*);
+    void LoadGame(BGSLoadFormBuffer*);
+    bool IsHideCover();
+    bool IsCrouchCover();
+    bool IsStandCover();
+    bool IsLedgeCover();
+    bool IsValidCover();
+    unsigned char GetCoverHeight();
+    bool IsReserved();
+    void SetReserved(bool);
+    bool IsDirty();
+    void SetDirty(bool);
+    void* __vecDelDtor(unsigned int);
+};
+// Effects_combatstate: local type (was include/Effects.h, which had no evidence of one real class); its methods are 0x00405c00 EffectItemList::GetEffectScore, 0x004065e0 EffectItemList::GetAssociatedSkill
+class EffectLink;
+class ImageSpaceEffect;
+class LightObject;
+
+class Effects_combatstate
+{
+public:
+    union
+    {
+        char prefix[200];
+        struct
+        {
+            unsigned int unk00;
+            unsigned int unk04;
+            unsigned int unk08;
+            EffectLink* lights;
+            char unk10[184];
+        };
+    };
+    ImageSpaceEffect* noise;
+
+    EffectLink* Head() const { return lights; }
+    LightObject* Next(EffectLink*& iter) const;
+    void DispelAllEffects();
+    float FUN_00405c00(int, int, int);
+    int count();
+};
+#include "../../../../include/Actor.h"
+#include "../../../../include/ActiveEffect.h"
+#include "../../../../include/AlchemyItem.h"
+#include "../../../../include/InventoryChanges.h"
+#include "../../../../include/CombatController.h"
+#include "../../../../include/PathingRequest.h"
+#include "../../../../include/PathingRequestCoveredMove.h"
+#include "../../../../include/BGSSaveGameBuffer.h"
+#include "../../../../include/GameSettingCollection.h"
+#include "../../../../include/Setting.h"
+#include "../../../../include/AnimIdle.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/CombatTargetTimestamp.h"
+#include "../../../../include/EffectSetting.h"
+#include "../../../../include/MagicCaster.h"
+#include "../../../../include/MobileObject.h"
+#include "../../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/PathingCoverLocation.h"
+#include "../../../../include/PathingLocation.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/SL.h"
+#include "../../../../include/TES.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/TESWorldSpace.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/TimeoutTimer.h"
+#include "../../../../include/V4.h"
+#include <string.h>
+#pragma intrinsic(memcpy)
+
+// Unit declarations not supplied by the shared headers.
+// CombatState field accesses below retain offsets checked against the game image;
+// the shared declaration does not expose those fields yet.
+class CombatLocations
+{
+  public:
+    virtual void Clear();
+};
+class CombatLOS
+{
+  public:
+    bool FUN_00884920();
+    void FUN_008be220(CombatLocations*);
+};
+
+
+
+class GlobalObject_0044f440
+{
+  public:
+    float FUN_00450410();
+};
+float RandomFloat(float, float);
+bool RandomBoolean(float);
+extern GlobalObject_0044f440 DAT_011d57d0;
+extern GlobalObject_0044f440 DAT_011d5944;
+extern GlobalObject_0044f440 DAT_011d5750;
+extern GlobalObject_0044f440 DAT_011d5968;
+extern GlobalObject_0044f440 DAT_011d5874;
+extern GlobalObject_0044f440 DAT_011d58e8;
+extern GlobalObject_0044f440 DAT_011d5988;
+extern GlobalObject_0044f440 DAT_011d5794;
+extern GlobalObject_0044f440 DAT_011d57b8;
+extern GlobalObject_0044f440 DAT_011d581c;
+extern GlobalObject_0044f440 DAT_011d5894;
+extern GlobalObject_0044f440 DAT_011d5930;
+extern GlobalObject_0044f440 DAT_011d58d8;
+extern GlobalObject_0044f440 DAT_011d5868;
+extern GlobalObject_0044f440 DAT_011d5834;
+extern GlobalObject_0044f440 DAT_011d58c4;
+extern GlobalObject_0044f440 DAT_011d5908;
+extern GlobalObject_0044f440 DAT_011d585c;
+extern const float DAT_01017870;
+extern const float DAT_01017718;
+extern const float DAT_010162c0;
+extern const float DAT_01016088;
+extern const float DAT_01016248;
+extern const float DAT_0101e570;
+#include "../../../../include/Projectile.h"
 // Gets or adds the InventoryChanges for this reference and returns the count of the given object in it, or 0 if none.
 // @fnv 0x00575610
 int CombatState::GetInventoryItemCount(TESForm* object)
@@ -20,17 +213,17 @@ int CombatState::GetInventoryItemCount(TESForm* object)
 // @fnv 0x008be1b0
 void CombatState::ProcessCoverLOSResult()
 {
-    if (los && los->FUN_00884920())
-        los->FUN_008be220(this);
+    if (*(CombatLOS**)((char*)this + 0x68) && (*(CombatLOS**)((char*)this + 0x68))->FUN_00884920())
+        (*(CombatLOS**)((char*)this + 0x68))->FUN_008be220(this ? (CombatLocations*)((char*)this + 0xa8) : 0);
     else
-        Clear();
+        ((CombatLocations*)((char*)this + 0xa8))->Clear();
 }
 
 // @fnv 0x0064bf90
 void CombatState::UpdateCombatStateData(int state, float* pfX, float* pfY, float delta)
 {
-    timer -= delta;
-    if (timer <= 0.0)
+    (*(float*)((char*)this + 0x17c)) -= delta;
+    if ((*(float*)((char*)this + 0x17c)) <= 0.0)
     {
         switch (state)
         {
@@ -40,123 +233,84 @@ void CombatState::UpdateCombatStateData(int state, float* pfX, float* pfY, float
         case 11:
             if (RandomBoolean(DAT_01017870))
             {
-                timer = RandomFloat(DAT_010162c0, DAT_01017718);
-                offsetX = 0.0f;
-                offsetY = 0.0f;
+                (*(float*)((char*)this + 0x17c)) = RandomFloat(DAT_010162c0, DAT_01017718);
+                (*(float*)((char*)this + 0x180)) = 0.0f;
+                (*(float*)((char*)this + 0x184)) = 0.0f;
             }
             else
             {
-                timer = RandomFloat(DAT_01016248, DAT_01016088);
-                offsetY = RandomFloat(DAT_011d5944.FUN_00450410(), DAT_011d57d0.FUN_00450410());
-                offsetX = RandomFloat(DAT_011d5968.FUN_00450410(), DAT_011d5750.FUN_00450410());
+                (*(float*)((char*)this + 0x17c)) = RandomFloat(DAT_01016248, DAT_01016088);
+                (*(float*)((char*)this + 0x184)) = RandomFloat(DAT_011d5944.FUN_00450410(), DAT_011d57d0.FUN_00450410());
+                (*(float*)((char*)this + 0x180)) = RandomFloat(DAT_011d5968.FUN_00450410(), DAT_011d5750.FUN_00450410());
             }
             break;
         case 2:
         case 4:
             if (RandomBoolean(DAT_01017870))
             {
-                timer = RandomFloat(DAT_01017718, DAT_0101e570);
-                offsetX = 0.0f;
-                offsetY = 0.0f;
+                (*(float*)((char*)this + 0x17c)) = RandomFloat(DAT_01017718, DAT_0101e570);
+                (*(float*)((char*)this + 0x180)) = 0.0f;
+                (*(float*)((char*)this + 0x184)) = 0.0f;
             }
             else
             {
-                timer = RandomFloat(DAT_01016248, DAT_01016088);
-                offsetY = RandomFloat(DAT_011d58e8.FUN_00450410(), DAT_011d5874.FUN_00450410());
-                offsetX = RandomFloat(DAT_011d5794.FUN_00450410(), DAT_011d5988.FUN_00450410());
+                (*(float*)((char*)this + 0x17c)) = RandomFloat(DAT_01016248, DAT_01016088);
+                (*(float*)((char*)this + 0x184)) = RandomFloat(DAT_011d58e8.FUN_00450410(), DAT_011d5874.FUN_00450410());
+                (*(float*)((char*)this + 0x180)) = RandomFloat(DAT_011d5794.FUN_00450410(), DAT_011d5988.FUN_00450410());
             }
             break;
         case 3:
         case 9:
         case 12:
-            timer = RandomFloat(DAT_010162c0, DAT_01017718);
+            (*(float*)((char*)this + 0x17c)) = RandomFloat(DAT_010162c0, DAT_01017718);
             if (RandomBoolean(DAT_01017870))
             {
-                offsetX = 0.0f;
-                offsetY = 0.0f;
+                (*(float*)((char*)this + 0x180)) = 0.0f;
+                (*(float*)((char*)this + 0x184)) = 0.0f;
             }
             else
             {
-                offsetY = RandomFloat(DAT_011d581c.FUN_00450410(), DAT_011d57b8.FUN_00450410());
-                offsetX = RandomFloat(DAT_011d5930.FUN_00450410(), DAT_011d5894.FUN_00450410());
+                (*(float*)((char*)this + 0x184)) = RandomFloat(DAT_011d581c.FUN_00450410(), DAT_011d57b8.FUN_00450410());
+                (*(float*)((char*)this + 0x180)) = RandomFloat(DAT_011d5930.FUN_00450410(), DAT_011d5894.FUN_00450410());
             }
             break;
         case 1:
         case 6:
-            timer = RandomFloat(DAT_01016248, DAT_01016088);
-            offsetY = 0.0f;
+            (*(float*)((char*)this + 0x17c)) = RandomFloat(DAT_01016248, DAT_01016088);
+            (*(float*)((char*)this + 0x184)) = 0.0f;
             if (RandomBoolean(DAT_01016248))
-                offsetX = 0.0f;
+                (*(float*)((char*)this + 0x180)) = 0.0f;
             else
-                offsetX = RandomFloat(DAT_011d5868.FUN_00450410(), DAT_011d58d8.FUN_00450410());
+                (*(float*)((char*)this + 0x180)) = RandomFloat(DAT_011d5868.FUN_00450410(), DAT_011d58d8.FUN_00450410());
             break;
         case 5:
             if (RandomBoolean(DAT_01017870))
             {
-                timer = RandomFloat(DAT_01017718, DAT_0101e570);
-                offsetX = 0.0f;
-                offsetY = 0.0f;
+                (*(float*)((char*)this + 0x17c)) = RandomFloat(DAT_01017718, DAT_0101e570);
+                (*(float*)((char*)this + 0x180)) = 0.0f;
+                (*(float*)((char*)this + 0x184)) = 0.0f;
             }
             else
             {
-                timer = RandomFloat(DAT_01016248, DAT_01016088);
-                offsetY = RandomFloat(DAT_011d58c4.FUN_00450410(), DAT_011d5834.FUN_00450410());
-                offsetX = RandomFloat(DAT_011d585c.FUN_00450410(), DAT_011d5908.FUN_00450410());
+                (*(float*)((char*)this + 0x17c)) = RandomFloat(DAT_01016248, DAT_01016088);
+                (*(float*)((char*)this + 0x184)) = RandomFloat(DAT_011d58c4.FUN_00450410(), DAT_011d5834.FUN_00450410());
+                (*(float*)((char*)this + 0x180)) = RandomFloat(DAT_011d585c.FUN_00450410(), DAT_011d5908.FUN_00450410());
             }
             break;
         }
     }
-    *pfX += offsetX;
-    *pfY += offsetY;
+    *pfX += ((float*)this)[0x60];
+    *pfY += ((float*)this)[0x61];
 }
 
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
-struct CombatCoverPointData
-{
-    void Copy(void*);
-    void SaveGame(BGSSaveFormBuffer*);
-    void LoadGame(BGSLoadFormBuffer*);
-    bool IsHideCover();
-    bool IsCrouchCover();
-    bool IsStandCover();
-    bool IsLedgeCover();
-    bool IsValidCover();
-    unsigned char GetCoverHeight();
-    bool IsReserved();
-    void SetReserved(bool);
-    bool IsDirty();
-    void SetDirty(bool);
-    void* __vecDelDtor(unsigned int);
-    bool m_bDataDirty;
-    bool bReserved;
-    unsigned char m_ucCoverHeight;
-    char _pad_3[1];
-    int iLocation;
-    char m_cCoverData[12];
-    char CombatCoverPoint[84];
-    unsigned int m_uiCoverFlags;
-    unsigned int m_uiLocationFlags;
-    char m_cTrailingData[6];
-    char _pad_76[2];
-};
-typedef char _sizecheck_CombatCoverLocation[sizeof(CombatCoverPointData) == 120 ? 1 : -1];
-struct FUN_005dc960_shell : public CombatCoverPointData
-{
-    bool FUN_005dc960();
-};
+typedef char _sizecheck_CombatCoverLocation[sizeof(CombatCoverPointData_combatstate) == 120 ? 1 : -1];
 
 // @fnv 0x005dc960
-bool FUN_005dc960_shell::FUN_005dc960()
+bool CombatCoverPointData_combatstate::IsReserved()
 {
-    return bReserved;
+    return reinterpret_cast<bool*>(&unk00)[1];
 }
-
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
 struct CoordinateTriple;
-struct TESForm;
-struct TESObjectREFR;
 struct CombatAvoidanceSphere
 {
     void Copy(void*);
@@ -289,11 +443,6 @@ struct CoordinateTriple
     void FUN_00527b70(void*);
 };
 
-struct CombatTargetTimestamp
-{
-    void SaveTimeStamp(void*);
-};
-
 struct FUN_009a2d80_shell
 {
     void FUN_009a2d80(void* buffer);
@@ -378,97 +527,75 @@ FUN_006d3370_s* FUN_006d3370_s::FUN_006d3370(unsigned int flags)
     return this;
 }
 
-struct NavMeshSearchLOSArray
-{
-    void* vfn_0;
-    void* data;
-    int size;
-    int capacity;
-    void FUN_006a8500();
-    void FUN_006dbee0(void* data, int size);
-    void FUN_006dbde0(bool freeStorage);
-};
-
-// @fnv 0x006dbde0
-void NavMeshSearchLOSArray::FUN_006dbde0(bool freeStorage)
-{
-    if (data)
-    {
-        FUN_006dbee0(data, size);
-        if (freeStorage)
-        {
-            FUN_006a8500();
-            data = 0;
-            capacity = 0;
-        }
-        size = 0;
-    }
-}
-
+// The 0x54-byte elements are PathingCoverLocation objects. Retain this element
+// view until the shared header exposes its deleting destructor at 0x006dc4d0.
 struct Elem
 {
     int v[21];
     void FUN_006dc4d0(int);
 };
-struct FUN_006dbee0_s
+
+// 0x006a8500 releases pBuffer through virtual slot 2 and then clears it.
+void __fastcall ReleaseCombatCoverArrayBuffer(BSSimpleArray<Elem, 1024>*);
+
+// @fnv 0x006dbde0
+template <>
+void BSSimpleArray<Elem, 1024>::Clear(bool freeStorage)
 {
-    void FUN_006dbee0(Elem* arr, unsigned int count);
-};
-// Calls FUN_006dc4d0(0) on each of the count elements in arr.
+    if (pBuffer)
+    {
+        ReleaseElements(pBuffer, iSize);
+        if (freeStorage)
+        {
+            ReleaseCombatCoverArrayBuffer(this);
+            pBuffer = 0;
+            SimpleArrayStorage = 0;
+        }
+        iSize = 0;
+    }
+}
+
+// Calls the deleting destructor with flag 0 for each cover location.
 // @fnv 0x006dbee0
-void FUN_006dbee0_s::FUN_006dbee0(Elem* apElements, unsigned int count)
+template <>
+void BSSimpleArray<Elem, 1024>::ReleaseElements(Elem* apElements, unsigned int count)
 {
     for (unsigned int i = 0; i < count; i++)
         apElements[i].FUN_006dc4d0(0);
 }
 
-struct FUN_009052c0_shell
-{
-    void* FUN_009052c0(int index);
-};
 // @fnv 0x009052c0
-void* FUN_009052c0_shell::FUN_009052c0(int index)
+template <>
+Elem& BSSimpleArray<Elem, 1024>::GetAt(int index)
 {
-    return *(char**)((char*)this + 4) + index * 0x54;
+    return *(pBuffer + index);
 }
 
-struct Tile;
 struct IMH
 {
-    Tile* FUN_00586150();
+    CombatState* FUN_00586150();
 };
-struct CombatLoc
-{
-    void FUN_0099ac20(int);
-};
+
 // @fnv 0x0097beb0
 void FUN_0097beb0(IMH* pIMH, int iUnused, int iValue)
 {
-    CombatLoc* t = (CombatLoc*)pIMH->FUN_00586150();
+    CombatState* t = pIMH->FUN_00586150();
     t->FUN_0099ac20(iValue);
 }
 
-struct V4
-{
-    int a, b, c, d;
-};
 struct FUN_0097ee60_shell
 {
     V4 v;
     void AssignV4(V4* o);
 };
-// Copies the four-int V4 pointed to by o into the shell's v member.
+// Copies the 16 bytes pointed to by o without invoking V4::operator=.
 // @fnv 0x0097ee60
 void FUN_0097ee60_shell::AssignV4(V4* apValue)
 {
-    v = *apValue;
+    memcpy(&v, apValue, sizeof(v));
 }
 
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting413;
+extern Setting originalRuntimeFloatSetting413;
 struct CombatTimeStampHelper
 {
     float GetElapsedTime();
@@ -556,16 +683,12 @@ struct CH
     int v;
     void __thiscall CombatTargetTimestamp(float);
 };
-struct SH
-{
-    void __thiscall FUN_006dbde0(int);
-};
 struct Unk975C0
 {
     char _0[24];
     float f18;
     int i1c;
-    SH s20;
+    BSSimpleArray<Elem, 1024> s20;
     void FUN_009975c0();
 };
 // @fnv 0x009975c0
@@ -575,7 +698,7 @@ void Unk975C0::FUN_009975c0()
     f18 = 0.0f;
     data.CombatTargetTimestamp(-DAT_0108df70);
     i1c = data.v;
-    s20.FUN_006dbde0(1);
+    s20.Clear(true);
 }
 
 namespace fnv_00997ba0 {
@@ -625,11 +748,6 @@ void FUN_00997bf0_shell::FUN_00997bf0()
 }
 }  // namespace fnv_00997bf0
 
-struct MobileObject
-{
-    unsigned int GetCurrentProcessLevel();
-};
-
 struct TESAmmoInitCalls
 {
     MobileObject* GetFieldBC();
@@ -660,28 +778,23 @@ void FUN_00997cb0_Class::FUN_00997cb0()
 }
 
 namespace fnv_00998980 {
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting411;
+
+extern Setting originalRuntimeFloatSetting411;
 struct CombatTimeStampHelper
 {
     float GetElapsedTime();
 };
-struct FUN_00998980_shell
-{
-    char _pad[0x98];
-    CombatTimeStampHelper _ts;
-    bool FUN_00998980();
-};
+
 // Returns whether the elapsed time from _ts is less than the float value of originalRuntimeFloatSetting411.
 // @fnv 0x00998980
-bool FUN_00998980_shell::FUN_00998980()
-{
-    return (double)_ts.GetElapsedTime() < *originalRuntimeFloatSetting411.Float();
-}
 }  // namespace fnv_00998980
+
+bool CombatState::FUN_00998980()
+{
+    using namespace fnv_00998980;
+    return (double)((fnv_00998980::CombatTimeStampHelper*)((char*)this + 0x98))->GetElapsedTime() < *originalRuntimeFloatSetting411.Float();
+}
+
 
 struct FUN_009989d0_shell
 {
@@ -747,23 +860,12 @@ bool Holder::IsModifierZero()
     return mod.GetValue() == _gModifierZero;
 }
 
-struct FUN_0099a3e0_s
-{
-    char a[0x10];
-    int state;
-    bool FUN_0099a3e0();
-};
 // Returns true when state is neither 3 nor 4.
 // @fnv 0x0099a3e0
-bool FUN_0099a3e0_s::FUN_0099a3e0()
+bool TESWorldSpace::FUN_0099a3e0()
 {
-    return state != 3 && state != 4;
+    return *(int*)m_kSourceFiles != 3 && *(int*)m_kSourceFiles != 4;
 }
-
-struct Actor
-{
-    static float __cdecl GetActorScale(void);
-};
 
 struct RegionPoint
 {
@@ -819,17 +921,6 @@ void FUN_0099a650_shell::FUN_0099a650(int aiUnused, bool b)
 }
 
 namespace fnv_0099a6b0 {
-struct Actor
-{
-    static float __cdecl GetActorScale();
-};
-
-struct CombatTargetTimestamp
-{
-    float val;
-    CombatTargetTimestamp(float v);
-    float GetElapsedTime();
-};
 
 struct S9a0c50
 {
@@ -863,17 +954,8 @@ void FUN_0099a6b0_Class::FUN_0099a6b0(int p1, int p2)
 }  // namespace fnv_0099a6b0
 
 namespace fnv_0099a720 {
-struct Setting_S
-{
-    float* Float();
-};
 
-Setting_S g_011ce058;
-
-struct FUN_008d7f40_cls
-{
-    void FUN_008d7f40(float);
-};
+extern Setting g_011ce058;
 
 struct FUN_0099a720_cls
 {
@@ -889,7 +971,7 @@ void FUN_0099a720_cls::FUN_0099a720()
     {
         *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x64) =
             *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x58);
-        reinterpret_cast<FUN_008d7f40_cls*>(reinterpret_cast<char*>(this) + 0x1d4)->FUN_008d7f40(*g_011ce058.Float());
+        reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x1d4)->Start(*g_011ce058.Float());
     }
     EvaluateWeaponScores();
 }
@@ -915,10 +997,6 @@ void FUN_0099a9a0_shell::UpdateStageHolders()
         this->ReleaseStageHolder(0);
 }
 
-struct AlchemyItem
-{
-    void* FUN_004030b0();
-};
 struct CTSHelper
 {
     float GetElapsedTime();
@@ -946,19 +1024,7 @@ bool FUN_0099ab50_Class::FUN_0099ab50(D3* dest)
 }
 
 namespace fnv_0099abc0 {
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-struct Actor
-{
-};
-struct AlchemyItem
-{
-    Actor* FUN_004030b0();
-};
+
 float __cdecl FUN_009a8460(Actor*, int, int);
 struct FUN_0099abc0_This
 {
@@ -972,17 +1038,14 @@ bool FUN_0099abc0_This::UpdateLastSeenFiringLocation(NiPoint3& arLastSeenFiringL
     Actor* ptarget;
     if (!FUN_0099ab50(arLastSeenFiringLocation))
         return false;
-    ptarget = (*(AlchemyItem**)((char*)this + 0x1c4))->FUN_004030b0();
+    ptarget = (Actor*)(*(AlchemyItem**)((char*)this + 0x1c4))->FUN_004030b0();
     arLastSeenFiringLocation.z += FUN_009a8460(ptarget, 2, 1);
     return true;
 }
 }  // namespace fnv_0099abc0
 
 struct MagicItem;
-struct MagicCaster
-{
-    void SetSelectedMagicItem(MagicItem*);
-};
+
 struct FUN_0099b520_shell : MagicCaster
 {
     void FUN_0099b520(MagicItem* spell);
@@ -990,7 +1053,7 @@ struct FUN_0099b520_shell : MagicCaster
 // @fnv 0x0099b520
 void FUN_0099b520_shell::FUN_0099b520(MagicItem* spell)
 {
-    SetSelectedMagicItem(spell);
+    SetSelectedMagicItem((int)spell);
 }
 
 struct FUN_0099b580_shell
@@ -1036,21 +1099,13 @@ struct ParentSpaceNode
     int b;
     int c;
 };
-template <class T, int N> struct BSSimpleArray
-{
-    T& GetAt(int);
-};
-struct ArrSI : public BSSimpleArray<ParentSpaceNode, 1024>
-{
-    unsigned int GetFlags();
-};
 bool __cdecl FUN_0099cc60(void*, ParentSpaceNode*, int);
 // @fnv 0x0099cb00
-bool __cdecl FUN_0099cb00(void* p1, ArrSI* pNodes)
+bool __cdecl FUN_0099cb00(void* p1, BSSimpleArray<ParentSpaceNode, 1024>* pNodes)
 {
     unsigned int i;
     ParentSpaceNode node;
-    for (i = 0; i < pNodes->GetFlags(); ++i)
+    for (i = 0; i < pNodes->GetSize(); ++i)
     {
         node = pNodes->GetAt(i);
         if (FUN_0099cc60(p1, &node, 0))
@@ -1098,8 +1153,9 @@ void FUN_009a0650_shell::SetField18C(int aiValue)
 
 struct Inner097
 {
-    char data[16];
+    int data[4];
     void FUN_0097ede0();
+    NiPoint3* FUN_006815c0();
 };
 struct FUN_009a08d0_Cls
 {
@@ -1140,20 +1196,12 @@ float FUN_009a0b30_self::GetScaledValue()
 }
 
 namespace fnv_009a0be0 {
-struct AnimIdle
-{
-    int __thiscall GetSection();
-};
-struct Setting_S
-{
-    float* __thiscall Float();
-};
+
 struct Obj_1c4
 {
     AnimIdle* __thiscall FUN_004f9bf0();
 };
-struct GameSettingCollection;
-template <class T> struct SettingT;
+using ::SettingT;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting424;
 
 struct FUN_009a0be0_Class
@@ -1172,7 +1220,7 @@ float FUN_009a0be0_Class::GetIdleAdjustedValue()
         if (section != 0xf && section != 6 && section != 0)
         {
             return *(float*)(*(char**)((char*)this + 0xc4) + 0x1c) +
-                   reinterpret_cast<Setting_S*>(&originalRuntimeFloatSetting424)->Float()[0];
+                   reinterpret_cast<Setting*>(&originalRuntimeFloatSetting424)->Float()[0];
         }
     }
     return *(float*)(*(char**)((char*)this + 0xc4) + 0x1c);
@@ -1190,17 +1238,6 @@ struct S5460
 struct S006950d0
 {
     E006950d0* __thiscall GetElement(unsigned int);
-};
-
-struct Actor
-{
-    static float __cdecl GetActorScale(void);
-};
-
-struct CombatTargetTimestamp
-{
-    float time;
-    CombatTargetTimestamp(float);
 };
 
 struct Entry
@@ -1240,10 +1277,6 @@ struct CombatTimeStamp_ctor
 {
     void __thiscall CombatTargetTimestamp(float);
 };
-struct Actor
-{
-    static float __cdecl GetActorScale(void);
-};
 
 struct FUN_009a0ec0_Block
 {
@@ -1280,11 +1313,6 @@ void __thiscall FUN_009a0ec0_shell::SetNodeBlockAndTimestamp(const FUN_009a0ec0_
 }  // namespace fnv_009a0ec0
 
 namespace fnv_009a1010 {
-struct Actor
-{
-    float __thiscall GetCombatRating(float);
-    float __thiscall FUN_008be600();
-};
 
 struct TESAmmoInitCalls
 {
@@ -1306,11 +1334,6 @@ void FUN_009a1010_Class::FUN_009a1010()
 }  // namespace fnv_009a1010
 
 namespace fnv_009a2bf0 {
-struct BGSSaveFormBuffer
-{
-    void SerializeFormData(void*, int);
-    void SaveData(void*, int, int);
-};
 
 struct CoordinateTriple
 {
@@ -1334,18 +1357,12 @@ struct FUN_009a2bf0_shell : CoordinateTriple
 void FUN_009a2bf0_shell::FUN_009a2bf0(BGSSaveFormBuffer* a_buffer)
 {
     FUN_00527b70(a_buffer);
-    a_buffer->SaveData(&field14, 4, 0);
-    a_buffer->SaveData(&field18, 4, 0);
-    a_buffer->SaveData(&field1C, 4, 0);
+    a_buffer->SaveData((void*)&field14, 4, 0);
+    a_buffer->SaveData((void*)&field18, 4, 0);
+    a_buffer->SaveData((void*)&field1C, 4, 0);
     a_buffer->SerializeFormData(field10, 0);
 }
 }  // namespace fnv_009a2bf0
-
-struct BGSLoadFormBuffer
-{
-    bool __thiscall ReadFormIdentifier(void*);
-    void __thiscall ReadTypedData(void*, unsigned int);
-};
 
 struct FUN_00527ba0_Class
 {
@@ -1368,15 +1385,7 @@ void FUN_009a2c60_Class::LoadFormData(void* buffer)
 }
 
 namespace fnv_009a2d20 {
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-};
-struct CombatTargetTimestamp
-{
-    int v;
-    void SaveTimeStamp(void*);
-};
+
 struct FUN_009a2d20_s
 {
     int a;
@@ -1391,17 +1400,9 @@ void FUN_009a2d20_s::FUN_009a2d20(BGSSaveFormBuffer* apBuffer)
 }
 }  // namespace fnv_009a2d20
 
+class BGSLoadGameBuffer;
 namespace fnv_009a2d50 {
-struct BGSLoadGameBuffer;
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-};
-struct CombatTargetTimestamp
-{
-    int v;
-    void LoadGame(BGSLoadGameBuffer*);
-};
+
 struct FUN_009a2d50_s
 {
     int a;
@@ -1413,16 +1414,13 @@ struct FUN_009a2d50_s
 void FUN_009a2d50_s::FUN_009a2d50(BGSLoadFormBuffer* buf)
 {
     buf->ReadTypedData(this, 4);
-    ts.LoadGame((BGSLoadGameBuffer*)buf);
+    ts.LoadGame((::BGSLoadGameBuffer*)buf);
 }
 }  // namespace fnv_009a2d50
 
+class BGSLoadGameBuffer;
 namespace fnv_009a2db0 {
-struct BGSLoadGameBuffer;
-struct CombatTargetTimestamp
-{
-    void LoadGame(BGSLoadGameBuffer*);
-};
+
 struct FUN_00527ba0_t
 {
     void FUN_00527ba0(BGSLoadGameBuffer*);
@@ -1435,16 +1433,12 @@ struct FUN_009a2db0_shell : FUN_00527ba0_t
 void FUN_009a2db0_shell::FUN_009a2db0(BGSLoadGameBuffer* buf)
 {
     FUN_00527ba0(buf);
-    ((CombatTargetTimestamp*)((char*)this + 0x10))->LoadGame(buf);
+    ((CombatTargetTimestamp*)((char*)this + 0x10))->LoadGame((::BGSLoadGameBuffer*)buf);
 }
 }  // namespace fnv_009a2db0
 
 namespace fnv_009a3130 {
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-    void SerializeFormData(void*, int);
-};
+
 struct CoordinateTriple
 {
     void FUN_00527b70(void*);
@@ -1462,21 +1456,17 @@ struct CombatSaveData
 // @fnv 0x009a3130
 void CombatSaveData::FUN_009a3130(BGSSaveFormBuffer* apSaveGameBuffer)
 {
-    apSaveGameBuffer->SaveData(&unk0, 1, 0);
-    apSaveGameBuffer->SaveData(&unk1, 1, 0);
-    apSaveGameBuffer->SaveData(&unk18, 4, 0);
-    apSaveGameBuffer->SaveData(&unk1C, 4, 0);
+    apSaveGameBuffer->SaveData((void*)&unk0, 1, 0);
+    apSaveGameBuffer->SaveData((void*)&unk1, 1, 0);
+    apSaveGameBuffer->SaveData((void*)&unk18, 4, 0);
+    apSaveGameBuffer->SaveData((void*)&unk1C, 4, 0);
     apSaveGameBuffer->SerializeFormData(pRef, 0);
     ((CoordinateTriple*)((char*)this + 8))->FUN_00527b70(apSaveGameBuffer);
 }
 }  // namespace fnv_009a3130
 
 namespace fnv_009a31b0 {
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-    bool ReadFormIdentifier(void*);
-};
+
 struct Sub08
 {
     void FUN_00527ba0(BGSLoadFormBuffer*);
@@ -1498,15 +1488,11 @@ void Holder::FUN_009a31b0(BGSLoadFormBuffer* pBuffer)
 }
 }  // namespace fnv_009a31b0
 
-struct FUN_009a3280_shell
-{
-    void* FUN_009052c0(int);
-    void* FUN_009a3280(int index);
-};
 // @fnv 0x009a3280
-void* FUN_009a3280_shell::FUN_009a3280(int index)
+template <>
+Elem& BSSimpleArray<Elem, 1024>::GetElement(unsigned int index)
 {
-    return FUN_009052c0(index);
+    return GetAt((int)index);
 }
 
 struct Elem54
@@ -1565,28 +1551,26 @@ CCL* FUN_009d6730_shell::FUN_009d6730(CCL* out)
     return out;
 }
 
-struct CombatCoverPointData;
 struct FUN_009d6c80_shell
 {
-    void FUN_009a05b0(CombatCoverPointData*);
+    void FUN_009a05b0(CombatCoverPointData_combatstate*);
     void FUN_009d6c80();
 };
 // @fnv 0x009d6c80
 void FUN_009d6c80_shell::FUN_009d6c80()
 {
-    FUN_009a05b0(*(CombatCoverPointData**)((char*)this + 0xe8));
+    FUN_009a05b0(*(CombatCoverPointData_combatstate**)((char*)this + 0xe8));
 }
 
-struct CombatCoverPointData;
 struct FUN_009d7c20_shell : CombatState
 {
-    void FUN_009a0510(CombatCoverPointData*);
+    void FUN_009a0510(CombatCoverPointData_combatstate*);
     void FUN_009d7c20();
 };
 // @fnv 0x009d7c20
 void FUN_009d7c20_shell::FUN_009d7c20()
 {
-    FUN_009a0510(*(CombatCoverPointData**)((char*)this + 0xe8));
+    FUN_009a0510(*(CombatCoverPointData_combatstate**)((char*)this + 0xe8));
 }
 
 struct RefX
@@ -1624,22 +1608,13 @@ void FUN_0099a530_shell::FUN_0099a530()
 }
 
 namespace fnv_009a2f50 {
-struct BGSSaveGameBuffer
-{
-    void FUN_00865f60(unsigned int);
-};
-struct BGSSaveFormBuffer : BGSSaveGameBuffer
-{
-    void SaveData(void*, int, int);
-};
-struct ArrSI
+
+// Exe 0x009a2f50: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct CombatstateOffset08View
 {
     unsigned int GetFlags();
 };
-struct CombatTargetTimestamp
-{
-    void SaveTimeStamp(BGSSaveFormBuffer*);
-};
+
 struct FUN_009a3280_shell
 {
     void* FUN_009a3280(int);
@@ -1658,7 +1633,7 @@ void FUN_009a2f50_shell::FUN_009a2f50(BGSSaveFormBuffer* buffer)
     buffer->SaveData((char*)this + 48, 4, 0);
     buffer->SaveData((char*)this + 52, 4, 0);
     ((CombatTargetTimestamp*)((char*)this + 28))->SaveTimeStamp(buffer);
-    unsigned int flags = ((char*)this + 32) ? ((ArrSI*)((char*)this + 32))->GetFlags() : 0;
+    unsigned int flags = ((char*)this + 32) ? ((CombatstateOffset08View*)((char*)this + 32))->GetFlags() : 0;
     buffer->FUN_00865f60(flags);
     for (unsigned int i = 0; i < flags; ++i)
     {
@@ -1669,20 +1644,7 @@ void FUN_009a2f50_shell::FUN_009a2f50(BGSSaveFormBuffer* buffer)
 }  // namespace fnv_009a2f50
 
 namespace fnv_009a3050 {
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-    int ReadElementCount();
-};
-struct CombatTargetTimestamp
-{
-    void LoadGame(BGSLoadFormBuffer*);
-};
-struct PathingCoverLocation
-{
-    virtual void v0();
-    virtual void LoadGame(BGSLoadFormBuffer*);
-};
+
 struct Helper
 {
     void FUN_009a32a0(unsigned int, int);
@@ -1740,33 +1702,6 @@ FUN_0097ee20_shell* FUN_0097ee20_shell::FUN_0097ee20()
     return this;
 }
 
-struct TES;
-struct TESWorldSpace;
-
-struct TES
-{
-    TESWorldSpace* GetHitSound();
-};
-
-struct TESWorldSpace
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual int getFormType();
-    bool FUN_0099a3e0();
-};
-
 struct Container
 {
     bool FUN_0099a360(int, TESWorldSpace*);
@@ -1783,7 +1718,7 @@ bool Container::FUN_0099a360(int, TESWorldSpace* param2)
         TESWorldSpace* SoundAssetTmp = ((TES*)(*(TES**)((char*)this + 0x1c4)))->GetHitSound();
         if (SoundAssetTmp)
         {
-            if (SoundAssetTmp->getFormType() == 7)
+            if (((int (__thiscall*)(TESWorldSpace*))(*(void***)SoundAssetTmp)[13])(SoundAssetTmp) == 7)
             {
                 TESWorldSpace* pHitSoundCopy = SoundAssetTmp;
                 if (pHitSoundCopy->FUN_0099a3e0())
@@ -1795,15 +1730,7 @@ bool Container::FUN_0099a360(int, TESWorldSpace* param2)
 }
 
 namespace fnv_0099a680 {
-struct CombatTargetTimestamp
-{
-    int v;
-    CombatTargetTimestamp(float);
-};
-struct Actor
-{
-    static float __cdecl GetActorScale();
-};
+
 struct FUN_0099a680_s
 {
     char pad[0x9c];
@@ -1845,38 +1772,29 @@ bool __fastcall FUN_00981990(void*);
 void* __fastcall _FNV_GetObjectReference(void*);
 int __fastcall _FNV_GetFormType(void*);
 int __fastcall _ref_0084e3a0(void*);
-struct Actor
-{
-    static float __cdecl GetActorScale();
-};
 struct CTSHelper
 {
     void CombatTargetTimestamp(float);
 };
-struct Host
-{
-    char _pad0[0xdc];
-    unsigned int m_uiCoverPointFlags;
-    unsigned int m_kCoverPointData;
-    char _pad1[0x1c4 - 0xe4];
-    void* ctrl;
-    void FUN_0099a7d0(void* apRef, void* apObject, int aiCount, bool abActivatedScriptOnly);
-};
+
 // @fnv 0x0099a7d0
-void Host::FUN_0099a7d0(void* apRef, void* apObject, int aiCount, bool abActivatedScriptOnly)
+}  // namespace fnv_0099a7d0
+
+void CombatState::FUN_0099a7d0(TESObjectREFR* apRef, TESBoundObject* apObject, int aiCount, bool abActivatedScriptOnly)
 {
-    if (FUN_00981990(ctrl))
+    using namespace fnv_0099a7d0;
+    if (FUN_00981990((*(void**)((char*)this + 0x1c4))))
     {
         if (_FNV_GetFormType(_FNV_GetObjectReference(apRef)) == 0x1c)
         {
-            m_uiCoverPointFlags = _ref_0084e3a0(apRef);
+            (*(unsigned int*)((char*)this + 0xdc)) = _ref_0084e3a0(apRef);
             unsigned int ts;
-            ((CTSHelper*)&ts)->CombatTargetTimestamp(Actor::GetActorScale());
-            m_kCoverPointData = ts;
+            ((fnv_0099a7d0::CTSHelper*)&ts)->CombatTargetTimestamp(Actor::GetActorScale());
+            (*(unsigned int*)((char*)this + 0xe0)) = ts;
         }
     }
 }
-}  // namespace fnv_0099a7d0
+
 
 struct FUN_0099b540_s
 {
@@ -1894,16 +1812,15 @@ void FUN_0099b540_s::SetFlags(unsigned int mask, bool set)
         flags &= ~mask;
 }
 
-struct CombatCoverPointData;
 struct FUN_009a0600_shell
 {
     unsigned char _pad[0xE4];
-    CombatCoverPointData* m_pCurrentCoverPoint;
-    CombatCoverPointData* m_pAlternateCoverPoint;
-    bool FUN_009a0600(CombatCoverPointData* apCoverLocation);
+    CombatCoverPointData_combatstate* m_pCurrentCoverPoint;
+    CombatCoverPointData_combatstate* m_pAlternateCoverPoint;
+    bool FUN_009a0600(CombatCoverPointData_combatstate* apCoverLocation);
 };
 // @fnv 0x009a0600
-bool FUN_009a0600_shell::FUN_009a0600(CombatCoverPointData* apCoverLocation)
+bool FUN_009a0600_shell::FUN_009a0600(CombatCoverPointData_combatstate* apCoverLocation)
 {
     if (!apCoverLocation)
         return false;
@@ -1911,11 +1828,6 @@ bool FUN_009a0600_shell::FUN_009a0600(CombatCoverPointData* apCoverLocation)
 }
 
 namespace fnv_009a0a80 {
-struct AlchemyItem
-{
-    void* FUN_004030b0();
-    bool FUN_00981420();
-};
 struct Host
 {
     unsigned char pad0[0xC4];
@@ -1928,7 +1840,7 @@ struct Host
 // @fnv 0x009a0a80
 bool Host::FUN_009a0a80()
 {
-    void* tmp = field_1C4->FUN_004030b0();
+    void* tmp = ((AlchemyItem*)field_1C4)->FUN_004030b0();
     if (tmp != 0)
     {
         if (FUN_0097ee90() || field_1C4->FUN_00981420())
@@ -1962,14 +1874,8 @@ float FUN_009a0b00_s::FUN_009a0b00()
 }
 
 namespace fnv_009a0b70 {
-struct Setting_S
-{
-    float* Float();
-};
-struct SettingT_GameSettingCollection : Setting_S
-{
-};
-extern SettingT_GameSettingCollection originalRuntimeFloatSetting424;
+
+extern Setting originalRuntimeFloatSetting424;
 extern double const DAT_0101de30;
 
 struct InnerData
@@ -2295,16 +2201,10 @@ void FUN_00997c30_shell::InitAmmoState()
 }  // namespace fnv_00997c30
 
 namespace fnv_00999160 {
-struct CombatTargetTimestamp;
 
 struct TESAmmoInitCalls
 {
     unsigned int GetFieldBC();
-};
-
-struct AlchemyItem : TESAmmoInitCalls
-{
-    int FUN_004030b0();
 };
 
 struct MyClass
@@ -2312,28 +2212,8 @@ struct MyClass
     void UpdateTargetPerception(int, int, int*, CombatTargetTimestamp*, bool*, bool*);
 };
 
-struct EffectSetting : AlchemyItem
-{
-    MyClass* GetCastSound();
-};
-
-struct Setting_S
-{
-    float* Float();
-};
-
-extern Setting_S g_011cf198;
-extern Setting_S originalRuntimeFloatSetting492;
-
-struct FUN_008d7f40_shell
-{
-    void FUN_008d7f40(float);
-};
-
-struct TimeoutTimer : FUN_008d7f40_shell
-{
-    bool CheckTimer();
-};
+extern Setting g_011cf198;
+extern Setting originalRuntimeFloatSetting492;
 
 struct FUN_00999160_struct
 {
@@ -2351,11 +2231,11 @@ struct FUN_00999160_struct
 // @fnv 0x00999160
 void FUN_00999160_struct::FUN_00999160()
 {
-    unsigned int count = field_1C4->GetFieldBC();
-    int target = field_1C4->FUN_004030b0();
+    unsigned int count = ((TESAmmoInitCalls*)field_1C4)->GetFieldBC();
+    int target = (int)((AlchemyItem*)field_1C4)->FUN_004030b0();
     if (target)
     {
-        field_1C4->GetCastSound()->UpdateTargetPerception(count, target, (int*)((char*)this + 0x6c),
+        ((MyClass*)field_1C4->GetCastSound())->UpdateTargetPerception(count, target, (int*)((char*)this + 0x6c),
                                                           (CombatTargetTimestamp*)((char*)this + 0x94),
                                                           (bool*)((char*)this + 0x70), (bool*)((char*)this + 0x71));
     }
@@ -2366,27 +2246,20 @@ void FUN_00999160_struct::FUN_00999160()
     if (((TimeoutTimer*)((char*)this + 0x204))->CheckTimer())
     {
         FUN_009a1010();
-        ((TimeoutTimer*)((char*)this + 0x204))->FUN_008d7f40(*g_011cf198.Float());
+        ((TimeoutTimer*)((char*)this + 0x204))->Start(*g_011cf198.Float());
     }
     if (((TimeoutTimer*)((char*)this + 0x20c))->CheckTimer())
     {
         UpdateRangeValue();
-        ((TimeoutTimer*)((char*)this + 0x20c))->FUN_008d7f40(*originalRuntimeFloatSetting492.Float());
+        ((TimeoutTimer*)((char*)this + 0x20c))->Start(*originalRuntimeFloatSetting492.Float());
     }
 }
 }  // namespace fnv_00999160
 
 struct WEAPStub;
 
-struct FUN_0097ac90_shell
-{
-    float FUN_0097ac90(int);
-};
 
-struct CombatStateStub
-{
-    WEAPStub* FUN_0097c150(int);
-};
+
 
 struct FUN_0099a2d0_shell
 {
@@ -2403,28 +2276,20 @@ WEAPStub* FUN_0099a2d0_shell::GetBestWeapon()
     {
         float fScore2;
         int weaponType = i;
-        fScore2 = ((FUN_0097ac90_shell*)this)->FUN_0097ac90(weaponType);
+        fScore2 = ((CombatState*)this)->FUN_0097ac90(weaponType);
         if (fScore2 > bestScoreA)
         {
             bestScoreA = fScore2;
-            kBestWeapon = (weaponType != 6) ? (kBestWeapon = ((CombatStateStub*)this)->FUN_0097c150(weaponType)) : 0;
+            kBestWeapon = (weaponType != 6) ? (kBestWeapon = ((CombatState*)this)->FUN_0097c150(weaponType)) : 0;
         }
     }
     return kBestWeapon;
 }
 
 namespace fnv_0099a840 {
-struct FUN_008d7f40_shell
-{
-    void FUN_008d7f40(float);
-};
 
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting425;
-extern Setting_S originalRuntimeFloatSetting426;
+extern Setting originalRuntimeFloatSetting425;
+extern Setting originalRuntimeFloatSetting426;
 
 struct FUN_0099a840_shell
 {
@@ -2447,7 +2312,7 @@ void FUN_0099a840_shell::FUN_0099a840(void* apItem)
                 val = *originalRuntimeFloatSetting426.Float();
                 break;
             }
-            ((FUN_008d7f40_shell*)((char*)this + 0x1ac + i * 8))->FUN_008d7f40(val);
+            ((TimeoutTimer*)((char*)this + 0x1ac + i * 8))->Start(val);
             break;
         }
     }
@@ -2455,15 +2320,6 @@ void FUN_0099a840_shell::FUN_0099a840(void* apItem)
 }  // namespace fnv_0099a840
 
 namespace fnv_0099a8d0 {
-struct NiPoint3
-{
-    float x, y, z;
-};
-
-struct AlchemyItem
-{
-    void* FUN_004030b0();
-};
 
 struct LocS
 {
@@ -2514,11 +2370,11 @@ struct FUN_0099a8d0_struct : FUN_00999100_shell
 // @fnv 0x0099a8d0
 void FUN_0099a8d0_struct::FUN_0099a8d0()
 {
-    void* ptr4 = field_1C4->FUN_004030b0();
+    void* ptr4 = ((AlchemyItem*)field_1C4)->FUN_004030b0();
     if (field_E4 && ptr4)
     {
-        NiPoint3 local_14;
-        bool bSafe = FUN_0099ccd0(&field_E4->loc, field_E4->loc.GetLocation(), &local_14, ptr4, 0);
+        unsigned int local_14[3];
+        bool bSafe = FUN_0099ccd0(&field_E4->loc, field_E4->loc.GetLocation(), (NiPoint3*)&local_14, ptr4, 0);
         if (!bSafe || !FUN_0097fb20(this))
         {
             field_E4->FUN_005407b0(1);
@@ -2535,11 +2391,6 @@ void FUN_0099a8d0_struct::FUN_0099a8d0()
     EvaluateWeaponScores();
 }
 }  // namespace fnv_0099a8d0
-
-struct NiPoint3
-{
-    float x, y, z;
-};
 
 extern int DAT_0106cbc0;
 
@@ -2571,9 +2422,9 @@ FUN_0099aa80_struct* FUN_0099aa80_struct::FUN_0099aa80(FUN_0099aa80_struct* othe
 {
     FUN_006dcc40(other);
     vtable = &DAT_0106cbc0;
-    pt28 = other->pt28;
-    pt34 = other->pt34;
-    pt40 = other->pt40;
+    memcpy(&pt28, &other->pt28, sizeof(pt28));
+    memcpy(&pt34, &other->pt34, sizeof(pt34));
+    memcpy(&pt40, &other->pt40, sizeof(pt40));
     b4c = other->b4c;
     b4d = other->b4d;
     b4e = other->b4e;
@@ -2583,26 +2434,6 @@ FUN_0099aa80_struct* FUN_0099aa80_struct::FUN_0099aa80(FUN_0099aa80_struct* othe
     b52 = other->b52;
     return this;
 }
-
-namespace fnv_0099ca00 {
-extern const float DAT_01017718;
-
-struct ParentSpaceNode
-{
-};
-
-struct _ref_006815c0 : ParentSpaceNode
-{
-    int a, b, c;
-    _ref_006815c0();
-};
-
-struct Inner097
-{
-    int pad[4];
-    void FUN_0097ede0();
-    _ref_006815c0* _ref_006815c0();
-};
 
 struct Member
 {
@@ -2731,22 +2562,13 @@ struct Member
     virtual void d122();
     virtual void d123();
     virtual void d124();
-    virtual _ref_006815c0* GetPos();
+    virtual NiPoint3* GetPos();
 };
 
-struct EffectSetting
-{
-    struct ActorCombatGroup* GetCastSound();
-};
+namespace fnv_0099ca00 {
+extern const float DAT_01017718;
 
-struct ActorCombatGroup
-{
-    unsigned int GetVirtualNodeCount();
-    Member* FUN_00968630(int);
-    bool TryGetQuadForState(int, Inner097*, float);
-};
-
-bool __cdecl FUN_0099cc60(void*, ParentSpaceNode*, int);
+bool __cdecl FUN_0099cc60(void*, NiPoint3*, int);
 
 struct FUN_0099ca00_struct
 {
@@ -2759,21 +2581,21 @@ struct FUN_0099ca00_struct
 // @fnv 0x0099ca00
 bool FUN_0099ca00_struct::FUN_0099ca00(void* arg1, Member* pIgnoreMember)
 {
-    ActorCombatGroup* group = field_1C4->GetCastSound();
+    ActorCombatGroup* group = (ActorCombatGroup*)field_1C4->GetCastSound();
     unsigned int count = group->GetVirtualNodeCount();
     for (unsigned int i = 0; i < count; ++i)
     {
-        Member* member = group->FUN_00968630(i);
+        Member* member = group->FUN_00968630((int)i);
         if (member == pIgnoreMember)
         {
             continue;
         }
         Inner097 loc;
         loc.FUN_0097ede0();
-        _ref_006815c0 pos;
+        NiPoint3 pos;
         if (group->TryGetQuadForState(i, &loc, DAT_01017718))
         {
-            pos = *loc._ref_006815c0();
+            pos = *loc.FUN_006815c0();
         }
         else
         {
@@ -2791,165 +2613,10 @@ bool FUN_0099ca00_struct::FUN_0099ca00(void* arg1, Member* pIgnoreMember)
 namespace fnv_0099cb70 {
 extern const float DAT_01017718;
 
-struct _ref_006815c0
-{
-    int a, b, c;
-    _ref_006815c0();
-};
-
-struct Inner097
-{
-    int pad[4];
-    void FUN_0097ede0();
-    _ref_006815c0* _ref_006815c0();
-};
-
-struct Member
-{
-    virtual void d00();
-    virtual void d01();
-    virtual void d02();
-    virtual void d03();
-    virtual void d04();
-    virtual void d05();
-    virtual void d06();
-    virtual void d07();
-    virtual void d08();
-    virtual void d09();
-    virtual void d10();
-    virtual void d11();
-    virtual void d12();
-    virtual void d13();
-    virtual void d14();
-    virtual void d15();
-    virtual void d16();
-    virtual void d17();
-    virtual void d18();
-    virtual void d19();
-    virtual void d20();
-    virtual void d21();
-    virtual void d22();
-    virtual void d23();
-    virtual void d24();
-    virtual void d25();
-    virtual void d26();
-    virtual void d27();
-    virtual void d28();
-    virtual void d29();
-    virtual void d30();
-    virtual void d31();
-    virtual void d32();
-    virtual void d33();
-    virtual void d34();
-    virtual void d35();
-    virtual void d36();
-    virtual void d37();
-    virtual void d38();
-    virtual void d39();
-    virtual void d40();
-    virtual void d41();
-    virtual void d42();
-    virtual void d43();
-    virtual void d44();
-    virtual void d45();
-    virtual void d46();
-    virtual void d47();
-    virtual void d48();
-    virtual void d49();
-    virtual void d50();
-    virtual void d51();
-    virtual void d52();
-    virtual void d53();
-    virtual void d54();
-    virtual void d55();
-    virtual void d56();
-    virtual void d57();
-    virtual void d58();
-    virtual void d59();
-    virtual void d60();
-    virtual void d61();
-    virtual void d62();
-    virtual void d63();
-    virtual void d64();
-    virtual void d65();
-    virtual void d66();
-    virtual void d67();
-    virtual void d68();
-    virtual void d69();
-    virtual void d70();
-    virtual void d71();
-    virtual void d72();
-    virtual void d73();
-    virtual void d74();
-    virtual void d75();
-    virtual void d76();
-    virtual void d77();
-    virtual void d78();
-    virtual void d79();
-    virtual void d80();
-    virtual void d81();
-    virtual void d82();
-    virtual void d83();
-    virtual void d84();
-    virtual void d85();
-    virtual void d86();
-    virtual void d87();
-    virtual void d88();
-    virtual void d89();
-    virtual void d90();
-    virtual void d91();
-    virtual void d92();
-    virtual void d93();
-    virtual void d94();
-    virtual void d95();
-    virtual void d96();
-    virtual void d97();
-    virtual void d98();
-    virtual void d99();
-    virtual void d100();
-    virtual void d101();
-    virtual void d102();
-    virtual void d103();
-    virtual void d104();
-    virtual void d105();
-    virtual void d106();
-    virtual void d107();
-    virtual void d108();
-    virtual void d109();
-    virtual void d110();
-    virtual void d111();
-    virtual void d112();
-    virtual void d113();
-    virtual void d114();
-    virtual void d115();
-    virtual void d116();
-    virtual void d117();
-    virtual void d118();
-    virtual void d119();
-    virtual void d120();
-    virtual void d121();
-    virtual void d122();
-    virtual void d123();
-    virtual void d124();
-    virtual _ref_006815c0* GetPos();
-};
-
-struct EffectSetting
-{
-    struct ActorCombatGroup* GetCastSound();
-};
-
-struct ActorCombatGroup
-{
-    unsigned int GetVirtualNodeCount();
-    Member* FUN_00968630(int);
-    bool TryGetQuadForState(int, Inner097*, float);
-};
-
 struct Arr_006cee30
 {
     void FUN_006cee30(int);
-    void AddItem(_ref_006815c0*);
+    void AddItem(NiPoint3*);
 };
 
 struct FUN_0099cb70_struct
@@ -2963,18 +2630,18 @@ struct FUN_0099cb70_struct
 // @fnv 0x0099cb70
 void FUN_0099cb70_struct::CollectCastSoundPositions(Arr_006cee30* array)
 {
-    ActorCombatGroup* group = field_1C4->GetCastSound();
+    ActorCombatGroup* group = (ActorCombatGroup*)field_1C4->GetCastSound();
     unsigned int count = group->GetVirtualNodeCount();
     array->FUN_006cee30(count);
     for (unsigned int i = 0; i < count; ++i)
     {
-        Member* member = group->FUN_00968630(i);
+        Member* member = group->FUN_00968630((int)i);
         Inner097 loc;
         loc.FUN_0097ede0();
-        _ref_006815c0 pos;
+        NiPoint3 pos;
         if (group->TryGetQuadForState(i, &loc, DAT_01017718))
         {
-            pos = *loc._ref_006815c0();
+            pos = *loc.FUN_006815c0();
         }
         else
         {
@@ -3046,11 +2713,9 @@ struct StageHolder
     bool GetDone();
 };
 
-struct CombatCoverPointData;
-
 struct FUN_009d6c80_shell
 {
-    void FUN_009a05b0(CombatCoverPointData*);
+    void FUN_009a05b0(CombatCoverPointData_combatstate*);
 };
 
 struct FUN_006d3370_s
@@ -3075,7 +2740,7 @@ void FUN_009a0470_shell::ReleaseStageHolder(bool bParam)
         }
         if (((StageHolder*)*(void**)((char*)this + 0xe8))->GetDone())
         {
-            FUN_009a05b0((CombatCoverPointData*)*(void**)((char*)this + 0xe8));
+            FUN_009a05b0((CombatCoverPointData_combatstate*)*(void**)((char*)this + 0xe8));
         }
         delete (FUN_006d3370_s*)*(void**)((char*)this + 0xe8);
         *(void**)((char*)this + 0xe8) = 0;
@@ -3089,13 +2754,6 @@ void* __cdecl operator new(unsigned int);
 struct TESObjectREFRHelper
 {
     void SetTargetingState(bool);
-};
-
-struct SL
-{
-    TESObjectREFRHelper* field_0;
-    int field_4;
-    SL();
 };
 
 struct FUN_00981340_shell
@@ -3118,8 +2776,8 @@ void FUN_009a06c0_struct::SetArrayEntry(int aiIndex, TESObjectREFRHelper* apRefr
     if (apRefr)
     {
         array_190[aiIndex] = new SL();
-        array_190[aiIndex]->field_0 = apRefr;
-        array_190[aiIndex]->field_4 = aiValue;
+        array_190[aiIndex]->a = (int)apRefr;
+        array_190[aiIndex]->b = aiValue;
         if (apRefr)
         {
             apRefr->SetTargetingState(true);
@@ -3131,25 +2789,11 @@ void FUN_009a06c0_struct::SetArrayEntry(int aiIndex, TESObjectREFRHelper* apRefr
 namespace fnv_009a0c50 {
 extern double _gModifierZero;
 
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting429;
+extern Setting originalRuntimeFloatSetting429;
 
 struct CameraShotHelper
 {
     float GetField4C();
-};
-
-struct TESAmmoInitCalls
-{
-    void* GetFieldBC();
-};
-
-struct FUN_00980070_shell : TESAmmoInitCalls
-{
-    CameraShotHelper* FUN_00980070();
 };
 
 struct FieldC4
@@ -3172,7 +2816,7 @@ struct FUN_009a0c50_class
     char pad0[0xc4];
     FieldC4* field_C4;
     char padC8[0x1c4 - 0xc8];
-    FUN_00980070_shell* field_1C4;
+    CombatController* field_1C4;
 
     void FUN_009a0910(int);
     void UpdateModifierState(bool arg_8);
@@ -3189,7 +2833,7 @@ void FUN_009a0c50_class::UpdateModifierState(bool arg_8)
             return;
         }
     }
-    float f = field_1C4->FUN_00980070()->GetField4C();
+    float f = ((CameraShotHelper*)field_1C4->FUN_00980070())->GetField4C();
     if (f > _gModifierZero)
     {
         Ref_997440* pRef = (Ref_997440*)field_1C4->GetFieldBC();
@@ -3207,7 +2851,8 @@ struct CTSHelper
     float GetElapsedTime();
 };
 
-struct ArrSI
+// Exe 0x009a0d70: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct CombatstateOffset08View
 {
     unsigned int GetFlags();
 };
@@ -3231,7 +2876,7 @@ struct FUN_009a0d70_shell
 // @fnv 0x009a0d70
 bool FUN_009a0d70_shell::ContainsItem(void* apItem)
 {
-    for (unsigned int i = 0; i < ((ArrSI*)((char*)this + 0x164))->GetFlags(); ++i)
+    for (unsigned int i = 0; i < ((CombatstateOffset08View*)((char*)this + 0x164))->GetFlags(); ++i)
     {
         void* entry = (void*)((FUN_00844160_shell*)((char*)this + 0x164))->FUN_00844160(i);
         if (((CTSHelper*)((char*)entry + 4))->GetElapsedTime() > 10.0)
@@ -3255,7 +2900,8 @@ struct CTSHelper
     float GetElapsedTime();
 };
 
-struct ArrSI
+// Exe 0x009a0e10: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct CombatstateOffset08View
 {
     unsigned int GetFlags();
 };
@@ -3266,7 +2912,7 @@ struct FUN_00844160_entry
     CTSHelper timer;
 };
 
-struct FUN_00844160_shell : ArrSI
+struct FUN_00844160_shell : CombatstateOffset08View
 {
     FUN_00844160_entry* FUN_00844160(unsigned int);
 };
@@ -3274,18 +2920,6 @@ struct FUN_00844160_shell : ArrSI
 struct ActorAvoidanceDataArray : FUN_00844160_shell
 {
     void FUN_00983720(unsigned int, unsigned int);
-};
-
-struct HArr
-{
-    void GrowCapacity(unsigned int);
-};
-
-template <typename T, int N> struct BSSimpleArray;
-
-template <> struct BSSimpleArray<void*, 1024> : HArr
-{
-    unsigned int Add(void*&);
 };
 
 struct FUN_009a0e10_shell
@@ -3334,12 +2968,13 @@ struct Item : CoordinateTriple
     CTSHelper time;
 };
 
-struct ArrSI
+// Exe 0x009a0f40: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct CombatstateOffset08View
 {
     unsigned int GetFlags();
 };
 
-struct MyArr : ArrSI
+struct MyArr : CombatstateOffset08View
 {
     Item* FUN_006dad90(unsigned int) const;
     void RemoveEntries(unsigned int, int);
@@ -3384,11 +3019,6 @@ bool FUN_009a0f40_struct::HasItemWithinRadius(const CoordinateTriple* arWorldLoc
 }
 }  // namespace fnv_009a0f40
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-};
-
 struct Member14
 {
     virtual void SaveGame(BGSSaveFormBuffer*);
@@ -3420,22 +3050,18 @@ struct FUN_009a2de0_struct
 // @fnv 0x009a2de0
 void FUN_009a2de0_struct::FUN_009a2de0(BGSSaveFormBuffer* buffer)
 {
-    buffer->SaveData(&byte1, 1, 0);
-    buffer->SaveData(&byte0, 1, 0);
-    buffer->SaveData(&byte2, 1, 0);
-    buffer->SaveData(&dword4, 4, 0);
+    buffer->SaveData((void*)&byte1, 1, 0);
+    buffer->SaveData((void*)&byte0, 1, 0);
+    buffer->SaveData((void*)&byte2, 1, 0);
+    buffer->SaveData((void*)&dword4, 4, 0);
     buffer->SaveData(data8, 12, 0);
     member14.SaveGame(buffer);
-    buffer->SaveData(&dword68, 4, 0);
-    buffer->SaveData(&dword6c, 4, 0);
+    buffer->SaveData((void*)&dword68, 4, 0);
+    buffer->SaveData((void*)&dword6c, 4, 0);
     member70.Save(buffer);
 }
 
 namespace fnv_009a2ea0 {
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-};
 
 struct Member14
 {
@@ -3469,14 +3095,14 @@ struct FUN_009a2ea0_struct
 // @fnv 0x009a2ea0
 void FUN_009a2ea0_struct::FUN_009a2ea0(BGSLoadFormBuffer* buffer)
 {
-    buffer->ReadTypedData(&byte1, 1);
-    buffer->ReadTypedData(&byte0, 1);
-    buffer->ReadTypedData(&byte2, 1);
-    buffer->ReadTypedData(&dword4, 4);
+    buffer->ReadTypedData((void*)&byte1, 1);
+    buffer->ReadTypedData((void*)&byte0, 1);
+    buffer->ReadTypedData((void*)&byte2, 1);
+    buffer->ReadTypedData((void*)&dword4, 4);
     buffer->ReadTypedData(data8, 12);
     member14.LoadGame(buffer);
-    buffer->ReadTypedData(&dword68, 4);
-    buffer->ReadTypedData(&dword6c, 4);
+    buffer->ReadTypedData((void*)&dword68, 4);
+    buffer->ReadTypedData((void*)&dword6c, 4);
     member70.FUN_00982ca0(buffer);
 }
 }  // namespace fnv_009a2ea0
@@ -3495,37 +3121,30 @@ struct UCL_009a3610
     unsigned int m_uiData;
     char pad[0x10];
 };
-struct FUN_009a3610_arr
-{
-    virtual void v0();
-    virtual UCL_009a3610* Allocate(unsigned int);
-    UCL_009a3610* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-    void UpdateThreat(unsigned int, unsigned int);
-    void ConstructEntries(UCL_009a3610*, unsigned int);
-    void FUN_009a3610(unsigned int aiNewSize, bool abFreeMemory);
-};
+typedef BSSimpleArray<fnv_009a3610::UCL_009a3610, 1024> FUN_009a3610_arr;
+
 // @fnv 0x009a3610
-void FUN_009a3610_arr::FUN_009a3610(unsigned int aiNewSize, bool abFreeMemory)
+}
+template <> void BSSimpleArray<fnv_009a3610::UCL_009a3610, 1024>::SetSize(unsigned int aiNewSize, bool abFreeMemory)
 {
+    using namespace fnv_009a3610;
     if (aiNewSize == 0)
     {
-        ((GlobalObject_00869f00*)this)->Clear(abFreeMemory);
+        ((fnv_009a3610::GlobalObject_00869f00*)this)->Clear(abFreeMemory);
     }
     else if (aiNewSize > SimpleArrayStorage)
     {
         if (SimpleArrayStorage == 0)
         {
-            pBuffer = Allocate(aiNewSize);
+            pBuffer = _Allocate(aiNewSize);
             SimpleArrayStorage = aiNewSize;
         }
         else
         {
-            UpdateThreat(aiNewSize, iSize);
+            ReallocateStorage(aiNewSize, iSize);
             SimpleArrayStorage = aiNewSize;
         }
-        ConstructEntries(&pBuffer[iSize], aiNewSize - iSize);
+        InitializeItems(&pBuffer[iSize], aiNewSize - iSize);
         iSize = aiNewSize;
     }
     else if (aiNewSize < iSize)
@@ -3534,16 +3153,17 @@ void FUN_009a3610_arr::FUN_009a3610(unsigned int aiNewSize, bool abFreeMemory)
         iSize = aiNewSize;
         if (abFreeMemory && aiNewSize <= SimpleArrayStorage >> 2)
         {
-            UpdateThreat(aiNewSize, aiNewSize);
+            ReallocateStorage(aiNewSize, aiNewSize);
             SimpleArrayStorage = aiNewSize;
         }
     }
     else
     {
-        ConstructEntries(&pBuffer[iSize], aiNewSize - iSize);
+        InitializeItems(&pBuffer[iSize], aiNewSize - iSize);
         iSize = aiNewSize;
     }
 }
+namespace fnv_009a3610 {
 }  // namespace fnv_009a3610
 
 struct TESObjectWEAP;
@@ -3606,19 +3226,6 @@ float __cdecl _FUN_00404010(float, float);
 
 unsigned int _data_011c16bc;
 
-struct Setting_S
-{
-    float* Float();
-};
-
-struct GameSettingCollection
-{
-};
-
-template <class T> struct SettingT : public Setting_S
-{
-};
-
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting423;
 
 struct FUN_009a08d0_Cls
@@ -3658,96 +3265,58 @@ void FUN_009a0910_shell::FUN_009a0910(FUN_009a0910_Vector* apVector, unsigned ch
 }  // namespace fnv_009a0910
 
 namespace fnv_009a3480 {
-struct Actor
+struct CombatTargetEntry
 {
-    unsigned int field_0;
+    Actor* actor;
     unsigned int field_4;
 };
 
-struct BSSimpleArrayActor
-{
-    virtual void FUN_00000000() = 0;
-    virtual Actor* Allocate(unsigned int count) = 0;
-
-    void Clear(bool clear);
-    Actor* m_buffer;
-    unsigned int m_iElementCount;
-    unsigned int m_pRayCursor;
-};
-
-struct FUN_0072ba80_shell : public BSSimpleArrayActor
-{
-    void FUN_0072ba80(char* data, unsigned int count);
-};
-
-struct S5460 : public FUN_0072ba80_shell
-{
-    void FUN_006a2770(unsigned int first, unsigned int second);
-    void ConstructObjects(Actor* data, unsigned int count);
-    void FUN_009a3480(unsigned int count, bool clear);
-};
+}  // namespace fnv_009a3480
 
 // @fnv 0x009a3480
-void S5460::FUN_009a3480(unsigned int count, bool clear)
+template <>
+void BSSimpleArray<fnv_009a3480::CombatTargetEntry, 1024>::SetSize(unsigned int count, bool clear)
 {
     if (count == 0)
     {
         Clear(clear);
     }
-    else if (count > m_pRayCursor)
+    else if (count > SimpleArrayStorage)
     {
-        if (m_pRayCursor == 0)
+        if (SimpleArrayStorage == 0)
         {
-            m_buffer = Allocate(count);
-            m_pRayCursor = count;
+            pBuffer = _Allocate(count);
+            SimpleArrayStorage = count;
         }
         else
         {
-            FUN_006a2770(count, m_iElementCount);
-            m_pRayCursor = count;
+            ReallocateStorage(count, iSize);
+            SimpleArrayStorage = count;
         }
 
-        ConstructObjects(m_buffer + m_iElementCount, count - m_iElementCount);
-        m_iElementCount = count;
+        InitializeItems(pBuffer + iSize, count - iSize);
+        iSize = count;
     }
-    else if (count < m_iElementCount)
+    else if (count < iSize)
     {
-        FUN_0072ba80_shell::FUN_0072ba80((char*)(m_buffer + count), m_iElementCount - count);
-        m_iElementCount = count;
+        ReleaseElements(pBuffer + count, iSize - count);
+        iSize = count;
 
-        if (clear && count <= (m_pRayCursor >> 2))
+        if (clear && count <= (SimpleArrayStorage >> 2))
         {
-            FUN_006a2770(count, count);
-            m_pRayCursor = count;
+            ReallocateStorage(count, count);
+            SimpleArrayStorage = count;
         }
     }
     else
     {
-        ConstructObjects(m_buffer + m_iElementCount, count - m_iElementCount);
-        m_iElementCount = count;
+        InitializeItems(pBuffer + iSize, count - iSize);
+        iSize = count;
     }
 }
-}  // namespace fnv_009a3480
 
-struct CombatTimer999260
-{
-    bool IsExpired();
-    void Reset(float afTime);
-};
-struct ValueSource999260
-{
-    float GetValue();
-};
-struct CombatController999260
-{
-    int GetActor();
-    ValueSource999260* GetValueSource();
-};
-struct FloatSetting999260
-{
-    float* Float();
-};
-extern FloatSetting999260 originalRuntimeFloatSetting357;
+
+extern Setting originalRuntimeFloatSetting357;
 bool RandomBoolean(float);
 extern const float fCombatTimerReset999260a;
 extern const float fCombatTimerReset999260b;
@@ -3868,7 +3437,7 @@ struct FUN_00999260_shell
     int unk1b8;
     int unk1bc;
     int unk1c0;
-    CombatController999260* pController;
+    CombatController* pController;
     int unk1c8;
     int unk1cc;
     int unk1d0;
@@ -3876,9 +3445,8 @@ struct FUN_00999260_shell
     int unk1d8;
     int unk1dc;
     int unk1e0;
-    CombatTimer999260 timer1e4;
-    int unk1e8;
-    CombatTimer999260 timer1ec;
+    CombatController::CombatTimer timer1e4;
+    CombatController::CombatTimer timer1ec;
     void UpdateCombatFlags();
 };
 
@@ -3886,20 +3454,20 @@ struct FUN_00999260_shell
 // @fnv 0x00999260
 void FUN_00999260_shell::UpdateCombatFlags()
 {
-    int iActor = pController->GetActor();
-    if (timer1e4.IsExpired())
+    int iActor = (int)pController->GetFieldBC();
+    if (timer1e4.FUN_008d7f80())
     {
         iFlags &= 0xffff00ff;
         if (RandomBoolean(*originalRuntimeFloatSetting357.Float()))
         {
             iFlags |= 0x100;
         }
-        timer1e4.Reset(fCombatTimerReset999260a);
+        timer1e4.FUN_008d7f40(fCombatTimerReset999260a);
     }
-    if (timer1ec.IsExpired())
+    if (timer1ec.FUN_008d7f80())
     {
         iFlags &= 0xffffff00;
-        float fValue = pController->GetValueSource()->GetValue();
+        float fValue = ((ActiveEffect*)pController->FUN_00980070())->GetFloatAtOffset1C();
         if (RandomBoolean(fValue / 100.0))
         {
             iFlags |= 1;
@@ -3908,7 +3476,7 @@ void FUN_00999260_shell::UpdateCombatFlags()
         {
             iFlags |= 2;
         }
-        timer1ec.Reset(fCombatTimerReset999260b);
+        timer1ec.FUN_008d7f40(fCombatTimerReset999260b);
     }
 }
 
@@ -4074,14 +3642,6 @@ void AA10Menu::HandleMenuEvent(int iArg, unsigned int uiEvent)
     }
 }
 
-struct Pt3
-{
-    float x, y, z;
-    Pt3();
-    Pt3 operator-(const Pt3& o) const;
-    float FUN_00589850();
-};
-
 struct Seg99
 {
     int unk00;
@@ -4094,8 +3654,8 @@ struct Seg99
     int unk1c;
     int unk20;
     int unk24;
-    Pt3 start;
-    Pt3 end;
+    NiPoint3 start;
+    NiPoint3 end;
 };
 
 struct Timer99
@@ -4107,7 +3667,7 @@ struct Timer99
 
 float FUN_0040ebd0(float, float);
 float GetScaleOrHeightDelta(TESObjectREFR*, int);
-bool FUN_006ba6e0(Pt3*, Pt3*, Pt3*, Pt3*, Pt3*);
+bool FUN_006ba6e0(NiPoint3*, NiPoint3*, NiPoint3*, NiPoint3*, NiPoint3*);
 
 struct Combat99
 {
@@ -4228,11 +3788,11 @@ struct Combat99
     int unk1bc;
     int unk1c0;
     Timer99* pTimer;
-    bool FUN_0099cec0(Seg99* apSeg, Pt3* apFrom, Pt3* apTarget, TESObjectREFR* apRef);
+    bool FUN_0099cec0(Seg99* apSeg, NiPoint3* apFrom, NiPoint3* apTarget, TESObjectREFR* apRef);
 };
 
 // @fnv 0x0099cec0
-bool Combat99::FUN_0099cec0(Seg99* apSeg, Pt3* apFrom, Pt3* apTarget, TESObjectREFR* apRef)
+bool Combat99::FUN_0099cec0(Seg99* apSeg, NiPoint3* apFrom, NiPoint3* apTarget, TESObjectREFR* apRef)
 {
     float fTop3 = FUN_0040ebd0(apSeg->start.z, apSeg->end.z);
     if (apTarget->z >= fTop3)
@@ -4241,7 +3801,7 @@ bool Combat99::FUN_0099cec0(Seg99* apSeg, Pt3* apFrom, Pt3* apTarget, TESObjectR
     }
     else
     {
-        Pt3 kTarget4 = *apTarget;
+        NiPoint3 kTarget4 = *apTarget;
         kTarget4.z += GetScaleOrHeightDelta(apRef, 1);
         if (kTarget4.z >= fTop3)
         {
@@ -4249,15 +3809,15 @@ bool Combat99::FUN_0099cec0(Seg99* apSeg, Pt3* apFrom, Pt3* apTarget, TESObjectR
         }
         else
         {
-            Pt3 kHit3;
+            NiPoint3 kHit3;
             bool bHitB = FUN_006ba6e0(&apSeg->start, &apSeg->end, &kTarget4, apFrom, &kHit3);
             if (!bHitB)
                 return false;
             float m_fGlyphExtent = kHit3.z - kTarget4.z;
-            Pt3 kDiff9 = kHit3 - kTarget4;
-            float fDist6 = kDiff9.FUN_00589850();
-            Pt3 kDiffVal = kHit3 - *apFrom;
-            float fLen2 = kDiffVal.FUN_00589850();
+            NiPoint3 kDiff9 = kHit3 - kTarget4;
+            float fDist6 = kDiff9.Length();
+            NiPoint3 kDiffVal = kHit3 - *apFrom;
+            float fLen2 = kDiffVal.Length();
             float fScaledTmp = m_fGlyphExtent * fLen2 / fDist6;
             float fLimit3 = pTimer->FUN_00998a30() ? pTimer->FUN_00453700() : pTimer->GetFieldCC();
             if (fLimit3 > fScaledTmp)
@@ -4267,20 +3827,8 @@ bool Combat99::FUN_0099cec0(Seg99* apSeg, Pt3* apFrom, Pt3* apTarget, TESObjectR
     return true;
 }
 
+namespace fnv_0099e190 {
 struct PosHolder;
-struct Vec3
-{
-    float x, y, z;
-    Vec3();
-    Vec3* Self();
-    Vec3 operator-(const Vec3& o) const;
-    Vec3 operator+(const Vec3& o) const;
-    Vec3 operator*(float s) const;
-    Vec3 Neg() const;
-    void Normalize();
-    Vec3 Cross(const Vec3& o) const;
-    float Length() const;
-};
 
 struct MyTimer
 {
@@ -4305,12 +3853,12 @@ struct Picker
     Picker(void* p);
     Picker();
     ~Picker();
-    Vec3 GetPoint();
+    NiPoint3 GetPoint();
 };
 
 struct MyMover
 {
-    void FUN_0099b8b0(Vec3* p, int a);
+    void FUN_0099b8b0(NiPoint3* p, int a);
 };
 
 struct MyActor
@@ -4447,7 +3995,7 @@ struct MyRef
     virtual void v122();
     virtual void v123();
     virtual void v124();
-    virtual Vec3* GetPos();
+    virtual NiPoint3* GetPos();
 };
 
 struct MyProc
@@ -4460,7 +4008,7 @@ struct PosHolder
 {
     float unk00, unk04, unk08;
     int unk0C;
-    Vec3* Self();
+    NiPoint3* Self();
     int FUN_0084e3a0(int a, int b);
 };
 
@@ -4471,14 +4019,14 @@ struct Result
 
 struct Mgr
 {
-    Result* FUN_00825c00(Vec3 v, MyActor* a, float f1, float f2, MyTimer t, float f3);
+    Result* FUN_00825c00(NiPoint3 v, MyActor* a, float f1, float f2, MyTimer t, float f3);
 };
 
 extern Mgr* DAT_011f1958;
-extern Vec3 DAT_011a9484;
+extern NiPoint3 DAT_011a9484;
 float FUN_00435dd0();
-bool FUN_006d7490(Picker* a, Vec3* b, Picker* c, int d);
-bool FUN_009a7940(MyActor* a, MyRef* r, Vec3* v, Vec3* w, int x, int y);
+bool FUN_006d7490(Picker* a, NiPoint3* b, Picker* c, int d);
+bool FUN_009a7940(MyActor* a, MyRef* r, NiPoint3* v, NiPoint3* w, int x, int y);
 int FUN_005a00a0(int n);
 
 struct FUN_0099e190_cls
@@ -4488,7 +4036,7 @@ struct FUN_0099e190_cls
     signed char last;
     char pad189[0x1c4 - 0x189];
     MyProc* proc;
-    bool FUN_009a0260(Vec3* v, int x);
+    bool FUN_009a0260(NiPoint3* v, int x);
     bool SelectAndMoveToPoint(MyMover* mover, unsigned int mask1, unsigned int mask2, float dist, float minDist);
 };
 
@@ -4502,13 +4050,13 @@ bool FUN_0099e190_cls::SelectAndMoveToPoint(MyMover* mover, unsigned int mask1, 
     float radius = A9->FUN_008be1b0() + 8.0;
     PosHolder h7;
     A9->FUN_00575650(&h7);
-    Vec3 pp = *h7.Self();
-    Vec3 T = *ref->GetPos();
+    NiPoint3 pp = *h7.Self();
+    NiPoint3 T = *ref->GetPos();
     Picker p4(A9);
-    Vec3 D_ = pp - T;
+    NiPoint3 D_ = pp - T;
     D_.Normalize();
-    Vec3 s = D_.Cross(DAT_011a9484);
-    Vec3 A5[4];
+    NiPoint3 s = D_.Cross(DAT_011a9484);
+    NiPoint3 A5[4];
     signed char slot[4];
     signed char dirOf[4];
     int n = 0;
@@ -4518,24 +4066,24 @@ bool FUN_0099e190_cls::SelectAndMoveToPoint(MyMover* mover, unsigned int mask1, 
         unsigned int bit = 1 << i;
         if (mask1 & bit)
         {
-            Vec3 off;
+            NiPoint3 off;
             switch (bit)
             {
             case 1:
-                off = s;
+                memcpy(&off, &s, sizeof(off));
                 break;
             case 2:
-                off = s.Neg();
+                memcpy(&off, &s.Neg(), sizeof(off));
                 break;
             case 4:
-                off = D_.Neg();
+                memcpy(&off, &D_.Neg(), sizeof(off));
                 break;
             case 8:
-                off = D_;
+                memcpy(&off, &D_, sizeof(off));
                 break;
             }
-            Vec3 target = pp + off * dist;
-            Vec3 end = target + off * radius;
+            NiPoint3 target = pp + off * dist;
+            NiPoint3 end = target + off * radius;
             if (DAT_011f1958->FUN_00825c00(target, A9, 0.0f, 0.0f, MyTimer(0.0f), 0.0f)->EvaluateThreats() > 0.0)
                 continue;
             Picker hit;
@@ -4543,11 +4091,11 @@ bool FUN_0099e190_cls::SelectAndMoveToPoint(MyMover* mover, unsigned int mask1, 
             {
                 if (minDist < dist)
                 {
-                    Vec3 diff3 = pp - hit.GetPoint();
+                    NiPoint3 diff3 = pp - hit.GetPoint();
                     float len = diff3.Length();
                     if (minDist > len - radius)
                         continue;
-                    target = pp + off * (len - radius);
+                    memcpy(&target, &(pp + off * (len - radius)), sizeof(target));
                 }
                 else
                 {
@@ -4561,7 +4109,7 @@ bool FUN_0099e190_cls::SelectAndMoveToPoint(MyMover* mover, unsigned int mask1, 
             }
             if (!FUN_009a0260(&target, h7.FUN_0084e3a0(1, 0)))
                 continue;
-            A5[n] = target;
+            memcpy(&A5[n], &target, sizeof(target));
             slot[i] = n;
             dirOf[n] = i;
             n++;
@@ -4580,6 +4128,8 @@ bool FUN_0099e190_cls::SelectAndMoveToPoint(MyMover* mover, unsigned int mask1, 
     mover->FUN_0099b8b0(&A5[slot[last]], 0);
     return true;
 }
+
+}  // namespace fnv_0099e190
 
 struct TargetPosition
 {
@@ -4673,18 +4223,6 @@ void TargetWork::FUN_009a0790(TargetRef* reference, unsigned char flag, float ne
     parameters->farRange = FUN_00404010(farRange, *DAT_011cf0d8.FUN_00403e20());
 }
 
-class TESForm
-{
-  public:
-    virtual void v0();
-};
-
-class TESObjectREFR : public TESForm
-{
-  public:
-    virtual void v1();
-};
-
 TESForm* __cdecl FUN_004839c0(TESObjectREFR* p);
 
 class FUN_009a3220_cls
@@ -4702,79 +4240,44 @@ void FUN_009a3220_cls::FUN_009a3220(int unkArg)
     m_04 = m_04 != 0 ? dynamic_cast<TESObjectREFR*>(FUN_004839c0(m_04)) : 0;
 }
 
-struct ElementProxy
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-};
-struct ArrayProxy
-{
-    virtual void unused();
-    virtual ElementProxy* Allocate(unsigned int);
-    ElementProxy* data;
-    unsigned int size, capacity;
-    void FUN_006dbde0(bool);
-    void FUN_006dbfc0(unsigned int, unsigned int);
-    void ConstructInPlace(ElementProxy*, unsigned int);
-    void FUN_006dbee0(ElementProxy*, unsigned int);
-    void FUN_009a32a0(unsigned int, bool);
-};
 // Grows, shrinks or clears the array to count elements, reallocating storage when needed and optionally shrinking capacity.
 // @fnv 0x009a32a0
-void ArrayProxy::FUN_009a32a0(unsigned int count, bool shrink)
+template <>
+void BSSimpleArray<Elem, 1024>::SetSize(unsigned int count, bool shrink)
 {
     if (count == 0)
     {
-        FUN_006dbde0(shrink);
+        Clear(shrink);
     }
-    else if (count > capacity)
+    else if (count > SimpleArrayStorage)
     {
-        if (capacity == 0)
+        if (SimpleArrayStorage == 0)
         {
-            data = Allocate(count);
-            capacity = count;
+            pBuffer = _Allocate(count);
+            SimpleArrayStorage = count;
         }
         else
         {
-            FUN_006dbfc0(count, size);
-            capacity = count;
+            ReallocateStorage(count, iSize);
+            SimpleArrayStorage = count;
         }
-        ConstructInPlace(data + size, count - size);
-        size = count;
+        InitializeItems(pBuffer + iSize, count - iSize);
+        iSize = count;
     }
-    else if (count < size)
+    else if (count < iSize)
     {
-        FUN_006dbee0(data + count, size - count);
-        size = count;
-        if (shrink && count <= (capacity >> 2))
+        ReleaseElements(pBuffer + count, iSize - count);
+        iSize = count;
+        if (shrink && count <= (SimpleArrayStorage >> 2))
         {
-            FUN_006dbfc0(count, count);
-            capacity = count;
+            ReallocateStorage(count, count);
+            SimpleArrayStorage = count;
         }
     }
     else
     {
-        ConstructInPlace(data + size, count - size);
-        size = count;
+        InitializeItems(pBuffer + iSize, count - iSize);
+        iSize = count;
     }
 }
 
@@ -4802,13 +4305,9 @@ struct RefS
     LocS GetLocationPointer();
     CellS* GetContainingCell();
 };
-struct TileS
-{
-    bool TestLoc(LocS*, int, int);
-};
 struct IfaceS
 {
-    TileS* GetTile();
+    CombatState* GetTile();
 };
 struct Sub30S
 {
@@ -4840,278 +4339,7 @@ struct ActorBaseS
     int unk2c;
     Sub30S data30;
 };
-struct ActorS
-{
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual void v214();
-    virtual void v218();
-    virtual bool IsDeadV();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual void v22c();
-    virtual void v230();
-    virtual void v234();
-    virtual void v238();
-    virtual void v23c();
-    virtual void v240();
-    virtual void v244();
-    virtual void v248();
-    virtual void v24c();
-    virtual void v250();
-    virtual void v254();
-    virtual void v258();
-    virtual void v25c();
-    virtual void v260();
-    virtual void v264();
-    virtual void v268();
-    virtual void v26c();
-    virtual void v270();
-    virtual void v274();
-    virtual void v278();
-    virtual void v27c();
-    virtual void v280();
-    virtual void v284();
-    virtual void v288();
-    virtual void v28c();
-    virtual void v290();
-    virtual void v294();
-    virtual void v298();
-    virtual void v29c();
-    virtual void v2a0();
-    virtual void v2a4();
-    virtual void v2a8();
-    virtual void v2ac();
-    virtual void v2b0();
-    virtual void v2b4();
-    virtual void v2b8();
-    virtual void v2bc();
-    virtual void v2c0();
-    virtual void v2c4();
-    virtual void v2c8();
-    virtual void v2cc();
-    virtual void v2d0();
-    virtual void v2d4();
-    virtual void v2d8();
-    virtual void v2dc();
-    virtual void v2e0();
-    virtual void v2e4();
-    virtual void v2e8();
-    virtual void v2ec();
-    virtual void v2f0();
-    virtual void v2f4();
-    virtual void v2f8();
-    virtual void v2fc();
-    virtual void v300();
-    virtual void v304();
-    virtual void v308();
-    virtual void v30c();
-    virtual void v310();
-    virtual void v314();
-    virtual void v318();
-    virtual void v31c();
-    virtual void v320();
-    virtual void v324();
-    virtual void v328();
-    virtual void v32c();
-    virtual void v330();
-    virtual void v334();
-    virtual void v338();
-    virtual void v33c();
-    virtual void v340();
-    virtual void v344();
-    virtual void v348();
-    virtual void v34c();
-    virtual void v350();
-    virtual void v354();
-    virtual void v358();
-    virtual void v35c();
-    virtual void v360();
-    virtual void v364();
-    virtual void v368();
-    virtual void v36c();
-    virtual void v370();
-    virtual void v374();
-    virtual void v378();
-    virtual void v37c();
-    virtual void v380();
-    virtual void v384();
-    virtual void v388();
-    virtual void v38c();
-    virtual void v390();
-    virtual void v394();
-    virtual void v398();
-    virtual void v39c();
-    virtual void v3a0();
-    virtual void v3a4();
-    virtual void v3a8();
-    virtual void v3ac();
-    virtual void v3b0();
-    virtual void v3b4();
-    virtual void v3b8();
-    virtual void v3bc();
-    virtual void v3c0();
-    virtual void v3c4();
-    virtual void v3c8();
-    virtual void v3cc();
-    virtual void v3d0();
-    virtual void v3d4();
-    virtual void v3d8();
-    virtual void v3dc();
-    virtual void v3e0();
-    virtual void v3e4();
-    virtual void v3e8();
-    virtual void v3ec();
-    virtual void v3f0();
-    virtual void v3f4();
-    virtual void v3f8();
-    virtual void v3fc();
-    virtual void v400();
-    virtual void v404();
-    virtual void v408();
-    virtual void v40c();
-    virtual void v410();
-    virtual void v414();
-    virtual void v418();
-    virtual void v41c();
-    virtual void v420();
-    virtual void v424();
-    virtual IfaceS* GetIfaceV();
-    ActorBaseS* GetActorBase();
-    LocS GetLocationPointer();
-};
+
 struct NodeS
 {
     RefS* ref;
@@ -5130,7 +4358,7 @@ struct GlobalIntS
     unsigned int* Int();
 };
 extern GlobalIntS g_011cfc98;
-bool __cdecl FUN_009a96f0(ActorS*, Loc2S*);
+bool __cdecl FUN_009a96f0(Actor*, Loc2S*);
 struct CombatNodeFinder
 {
     int unk000;
@@ -5206,17 +4434,17 @@ struct CombatNodeFinder
     int unk118;
     int unk11c;
     NodeArrS nodes;
-    RefS* FindNearestCombatNode(ActorS* actor, float maxDist, bool checkCell);
+    RefS* FindNearestCombatNode(Actor* actor, float maxDist, bool checkCell);
 };
 
 // Scans nodes for a valid, in-range reference (optionally cell-checked and tile-tested) and returns the closest one to the actor, or null.
 // @fnv 0x0098c3d0
-RefS* CombatNodeFinder::FindNearestCombatNode(ActorS* actor, float maxDist, bool checkCell)
+RefS* CombatNodeFinder::FindNearestCombatNode(Actor* actor, float maxDist, bool checkCell)
 {
-    if (actor->IsDeadV() && actor->GetActorBase()->data30.IsFlagV())
+    if (actor->IsCreature() && ((ActorBaseS*)actor->GetActorBase())->data30.IsFlagV())
         return 0;
-    IfaceS* iface3 = actor->GetIfaceV();
-    LocS actorLoc2 = actor->GetLocationPointer();
+    IfaceS* iface3 = (IfaceS*)actor->GetCombatController();
+    LocS actorLoc2 = actor->FUN_00575650<LocS>();
     RefS* bestX = 0;
     float bestDist5 = maxDist * maxDist;
     for (unsigned int i = 0; i < nodes.GetSize(); i++)
@@ -5248,12 +4476,16 @@ RefS* CombatNodeFinder::FindNearestCombatNode(ActorS* actor, float maxDist, bool
     return bestX;
 }
 
-namespace fnv_00997cf0 {
-struct NiPoint3Ex
+struct CombatWorld
 {
-    float x, y, z;
-    void FUN_00416870(float, float, float);
+    int a, b, c, d;
+    void* FUN_0084e3a0();
+    float ComputeWeightedDistance(const CombatWorld&, const NiPoint3&);
+    float FUN_00527a40(const CombatWorld&);
 };
+
+namespace fnv_00997cf0 {
+
 struct CombatStamp
 {
     int value;
@@ -5261,146 +4493,7 @@ struct CombatStamp
     float FUN_006a7f50();
     double FUN_00435e00();
 };
-struct CombatWorld
-{
-    int a, b, c, d;
-    void* FUN_0084e3a0();
-    float ComputeWeightedDistance(const CombatWorld&, const NiPoint3Ex&);
-    float FUN_00527a40(const CombatWorld&);
-};
-struct CombatActor
-{
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void slot25();
-    virtual void slot26();
-    virtual void slot27();
-    virtual void slot28();
-    virtual void slot29();
-    virtual void slot30();
-    virtual void slot31();
-    virtual void slot32();
-    virtual void slot33();
-    virtual void slot34();
-    virtual void slot35();
-    virtual void slot36();
-    virtual void slot37();
-    virtual void slot38();
-    virtual void slot39();
-    virtual void slot40();
-    virtual void slot41();
-    virtual void slot42();
-    virtual void slot43();
-    virtual void slot44();
-    virtual void slot45();
-    virtual void slot46();
-    virtual void slot47();
-    virtual void slot48();
-    virtual void slot49();
-    virtual void slot50();
-    virtual void slot51();
-    virtual void slot52();
-    virtual void slot53();
-    virtual void slot54();
-    virtual void slot55();
-    virtual void slot56();
-    virtual void slot57();
-    virtual void slot58();
-    virtual void slot59();
-    virtual void slot60();
-    virtual void slot61();
-    virtual void slot62();
-    virtual void slot63();
-    virtual bool IsActor();
-    virtual void slot65();
-    virtual void slot66();
-    virtual void slot67();
-    virtual void slot68();
-    virtual void slot69();
-    virtual void slot70();
-    virtual void slot71();
-    virtual void slot72();
-    virtual void slot73();
-    virtual void slot74();
-    virtual void slot75();
-    virtual void slot76();
-    virtual void slot77();
-    virtual void slot78();
-    virtual void slot79();
-    virtual void slot80();
-    virtual void slot81();
-    virtual void slot82();
-    virtual void slot83();
-    virtual void slot84();
-    virtual void slot85();
-    virtual void slot86();
-    virtual void slot87();
-    virtual void slot88();
-    virtual void slot89();
-    virtual void slot90();
-    virtual void slot91();
-    virtual void slot92();
-    virtual void slot93();
-    virtual void slot94();
-    virtual void slot95();
-    virtual void slot96();
-    virtual void slot97();
-    virtual void slot98();
-    virtual void slot99();
-    virtual void slot100();
-    virtual void slot101();
-    virtual void slot102();
-    virtual void slot103();
-    virtual void slot104();
-    virtual void slot105();
-    virtual void slot106();
-    virtual void slot107();
-    virtual void slot108();
-    virtual void slot109();
-    virtual void slot110();
-    virtual void slot111();
-    virtual void slot112();
-    virtual void slot113();
-    virtual void slot114();
-    virtual void slot115();
-    virtual void slot116();
-    virtual void slot117();
-    virtual void slot118();
-    virtual void slot119();
-    virtual void slot120();
-    virtual void slot121();
-    virtual void slot122();
-    virtual void slot123();
-    virtual void slot124();
-    virtual NiPoint3Ex* GetPosition();
-    void* FUN_00575ca0();
-    CombatWorld* FUN_00575650(CombatWorld*);
-    unsigned char FUN_004997b0();
-    bool FUN_00894900();
-};
+
 struct CombatTimers
 {
     int a, b;
@@ -5432,24 +4525,6 @@ struct CombatMap
 struct CombatOptions
 {
     bool FUN_009989d0();
-};
-struct CombatController
-{
-    CombatActor* GetFieldBC();
-    CombatActor* FUN_004030b0();
-    void FUN_0097f200();
-    bool GetFieldC5();
-    CombatMap* FUN_004fb070();
-    void SetByteAtOffsetC5(bool);
-    CombatPackage* FUN_004f9bf0();
-    bool FUN_00981940(int);
-    bool FUN_00981300();
-    bool FUN_0067a700();
-    void FUN_00981380();
-    bool FUN_00998a30();
-    void SetFieldC7(unsigned char);
-    bool GetByteAtOffsetC7();
-    CombatOptions* FUN_00980070();
 };
 struct CombatPath
 {
@@ -5488,7 +4563,7 @@ struct CombatPathOwner
 };
 struct CombatHazard
 {
-    float EvaluateThreats(NiPoint3Ex, CombatActor*, float, float, void*, float);
+    float EvaluateThreats(NiPoint3, CombatActor*, float, float, void*, float);
 };
 struct CombatHazardHolder
 {
@@ -5544,7 +4619,7 @@ struct CombatUpdate
     int unk078;
     int unk07c;
     float danger;
-    NiPoint3Ex targetPosition;
+    NiPoint3 targetPosition;
     unsigned int flags;
     CombatStamp targetTime;
     CombatStamp seenTime;
@@ -5671,7 +4746,8 @@ void CombatUpdate::FUN_00997cf0()
     unsigned char stance;
     CombatActor* follow;
     float range_;
-    NiPoint3Ex weights_26;
+    // Defer point initialization to Set; /Od otherwise calls the empty default constructor.
+    float weights_26[sizeof(NiPoint3) / sizeof(float)];
     float distance_1;
     bool fleeing_3;
     CombatActor* aFoundOther;
@@ -5686,9 +4762,9 @@ void CombatUpdate::FUN_00997cf0()
     float oldDangerX;
     void* space_41;
     CombatActor* owner_21;
-    owner_21 = controller->GetFieldBC();
+    owner_21 = (CombatActor*)controller->GetFieldBC();
     {
-        target4 = controller->FUN_004030b0();
+        target4 = (CombatActor*)controller->FUN_004030b0();
         space_41 = owner_21->FUN_00575ca0();
         if (target4 && space_41 != target4->FUN_00575ca0())
         {
@@ -5706,7 +4782,7 @@ void CombatUpdate::FUN_00997cf0()
             if (controller->GetFieldC5() || previousTarget != target4)
             {
                 state_7 = -100;
-                controller->FUN_004fb070()->UpdateTargetPerception(owner_21, target4, &state_7, &targetTime, &visible,
+                ((CombatMap*)controller->FUN_004fb070())->UpdateTargetPerception(owner_21, target4, &state_7, &targetTime, &visible,
                                                                    &detected);
                 targetState = state_7;
                 controller->SetByteAtOffsetC5(false);
@@ -5715,8 +4791,8 @@ void CombatUpdate::FUN_00997cf0()
             {
                 timeA.FUN_00435de0(FUN_00435dd0());
                 seenTime = timeA;
-                targetPosition = *target4->GetPosition();
-                package2 = controller->FUN_004f9bf0();
+                targetPosition = *(NiPoint3*)((const TESObjectREFR*)target4)->GetPos();
+                package2 = (CombatPackage*)controller->FUN_004f9bf0();
                 if (!package2 || package2->FUN_00825c00() != 13)
                 {
                     status = -1;
@@ -5766,9 +4842,9 @@ void CombatUpdate::FUN_00997cf0()
                 if (DAT_011a4d34)
                 {
                     current = 0;
-                    if (mode && mode->actor && mode->actor->IsActor())
+                    if (mode && mode->actor && ((TESForm*)mode->actor)->IsActor())
                         current = mode->actor;
-                    found = controller->FUN_004fb070()->FindNearestActor(owner_21, current, searchRange5);
+                    found = ((CombatMap*)controller->FUN_004fb070())->FindNearestActor(owner_21, current, searchRange5);
                     if (found)
                         FUN_009a0790(found, 2, nearRange, farRange_5);
                     else
@@ -5776,7 +4852,7 @@ void CombatUpdate::FUN_00997cf0()
                 }
                 else
                 {
-                    aFoundOther = controller->FUN_004fb070()->GetFieldAtOffset16(owner_21);
+                    aFoundOther = ((CombatMap*)controller->FUN_004fb070())->GetFieldAtOffset16(owner_21);
                     if (aFoundOther)
                         FUN_009a0910(aFoundOther, 2, nearRange, farRange_5);
                     else
@@ -5792,8 +4868,8 @@ void CombatUpdate::FUN_00997cf0()
                 UpdateModifierState(true);
             if (mode->actor)
                 mode->world = *mode->actor->FUN_00575650(&worldAB);
-            weights_26.FUN_00416870(1.0f, 1.0f, 0.25f);
-            distance_1 = mode->world.ComputeWeightedDistance(*owner_21->FUN_00575650(&worldB), weights_26);
+            reinterpret_cast<NiPoint3*>(weights_26)->Set(1.0f, 1.0f, 0.25f);
+            distance_1 = mode->world.ComputeWeightedDistance(*owner_21->FUN_00575650(&worldB), *reinterpret_cast<NiPoint3*>(weights_26));
             fleeing_3 = false;
             if ((mode->type == 0 || mode->type == 1) && target4 && controller->FUN_00981300() &&
                 !controller->FUN_0067a700())
@@ -5833,7 +4909,7 @@ void CombatUpdate::FUN_00997cf0()
                 }
                 break;
             case 1:
-                if (controller->FUN_00998a30() && mode->actor && mode->actor->IsActor())
+                if (controller->FUN_00998a30() && mode->actor && ((TESForm*)mode->actor)->IsActor())
                 {
                     if (distance_1 < *DAT_011cf45c.FUN_00403e20() * *DAT_011cf45c.FUN_00403e20())
                     {
@@ -5864,11 +4940,11 @@ void CombatUpdate::FUN_00997cf0()
             }
         }
         oldDangerX = danger;
-        if (!controller->FUN_00980070()->FUN_009989d0())
+        if (!((CombatOptions*)controller->FUN_00980070())->FUN_009989d0())
         {
             if (danger > *DAT_011cfbcc.FUN_00403e20() || (flags & 0x100))
             {
-                danger = DAT_011f1958->FUN_00825c00()->EvaluateThreats(*owner_21->GetPosition(), owner_21, 0, 0,
+                danger = DAT_011f1958->FUN_00825c00()->EvaluateThreats(*(NiPoint3*)((const TESObjectREFR*)owner_21)->GetPos(), owner_21, 0, 0,
                                                                        hazardData, 0);
                 if (danger >= *DAT_011cfbcc.FUN_00403e20() && oldDangerX < *DAT_011cfbcc.FUN_00403e20())
                     controller->FUN_0097f200();
@@ -6399,7 +5475,6 @@ void UpdateState::FUN_00998a50()
 }
 
 namespace CombatWeapons {
-struct Actor;
 struct Weapon;
 struct Ammo;
 struct Entry;
@@ -6412,20 +5487,14 @@ struct Profile
     Profile(int, int, const char*, int);
     ~Profile();
 };
-struct Point
-{
-    float x, y, z;
-};
+
 struct Location
 {
-    Point point;
+    NiPoint3 point;
     void* cell;
     float FUN_00527a40(const Location&);
 };
-struct Effects
-{
-    float FUN_00405c00(int, int, int);
-};
+
 struct Item
 {
     unsigned int unk0;
@@ -6443,7 +5512,7 @@ struct Item
     unsigned int unk30;
     unsigned int unk34;
     unsigned int unk38;
-    Effects effects;
+    Effects_combatstate effects;
     int FUN_00401170();
 };
 struct Extra
@@ -6568,10 +5637,6 @@ struct Process
     virtual void slot164();
     virtual void EquipAmmo(Equip*);
 };
-struct Projectile
-{
-    int FUN_004fd3c0();
-};
 struct Weapon : Item
 {
     Ammo* FUN_00525980(Actor*);
@@ -6598,140 +5663,6 @@ struct Inventory
     int FUN_004c8f30(Ammo*);
 };
 Inventory* FUN_004bf220(Actor*);
-struct Actor
-{
-    virtual void slot0();
-    virtual void slot4();
-    virtual void slot8();
-    virtual void slotc();
-    virtual void slot10();
-    virtual void slot14();
-    virtual void slot18();
-    virtual void slot1c();
-    virtual void slot20();
-    virtual void slot24();
-    virtual void slot28();
-    virtual void slot2c();
-    virtual void slot30();
-    virtual void slot34();
-    virtual void slot38();
-    virtual void slot3c();
-    virtual void slot40();
-    virtual void slot44();
-    virtual void slot48();
-    virtual void slot4c();
-    virtual void slot50();
-    virtual void slot54();
-    virtual void slot58();
-    virtual void slot5c();
-    virtual void slot60();
-    virtual void slot64();
-    virtual void slot68();
-    virtual void slot6c();
-    virtual void slot70();
-    virtual void slot74();
-    virtual void slot78();
-    virtual void slot7c();
-    virtual void slot80();
-    virtual void slot84();
-    virtual void slot88();
-    virtual void slot8c();
-    virtual void slot90();
-    virtual void slot94();
-    virtual void slot98();
-    virtual void slot9c();
-    virtual void slota0();
-    virtual void slota4();
-    virtual void slota8();
-    virtual void slotac();
-    virtual void slotb0();
-    virtual void slotb4();
-    virtual void slotb8();
-    virtual void slotbc();
-    virtual void slotc0();
-    virtual void slotc4();
-    virtual void slotc8();
-    virtual void slotcc();
-    virtual void slotd0();
-    virtual void slotd4();
-    virtual void slotd8();
-    virtual void slotdc();
-    virtual void slote0();
-    virtual void slote4();
-    virtual void slote8();
-    virtual void slotec();
-    virtual void slotf0();
-    virtual void slotf4();
-    virtual void slotf8();
-    virtual void slotfc();
-    virtual void slot100();
-    virtual void slot104();
-    virtual void slot108();
-    virtual void slot10c();
-    virtual void slot110();
-    virtual void slot114();
-    virtual void slot118();
-    virtual void slot11c();
-    virtual void slot120();
-    virtual void slot124();
-    virtual void slot128();
-    virtual void slot12c();
-    virtual void slot130();
-    virtual void slot134();
-    virtual void slot138();
-    virtual void slot13c();
-    virtual void slot140();
-    virtual void slot144();
-    virtual void slot148();
-    virtual void slot14c();
-    virtual void slot150();
-    virtual void slot154();
-    virtual void slot158();
-    virtual void slot15c();
-    virtual void slot160();
-    virtual void slot164();
-    virtual void slot168();
-    virtual void slot16c();
-    virtual void slot170();
-    virtual void slot174();
-    virtual void slot178();
-    virtual void slot17c();
-    virtual void slot180();
-    virtual void slot184();
-    virtual void slot188();
-    virtual void slot18c();
-    virtual void slot190();
-    virtual void slot194();
-    virtual void slot198();
-    virtual void slot19c();
-    virtual void slot1a0();
-    virtual void slot1a4();
-    virtual void slot1a8();
-    virtual void slot1ac();
-    virtual void slot1b0();
-    virtual void slot1b4();
-    virtual void slot1b8();
-    virtual void slot1bc();
-    virtual void slot1c0();
-    virtual void slot1c4();
-    virtual void slot1c8();
-    virtual void slot1cc();
-    virtual void slot1d0();
-    virtual void slot1d4();
-    virtual void slot1d8();
-    virtual void slot1dc();
-    virtual void slot1e0();
-    virtual Animation* AnimationData();
-    virtual void slot1e8();
-    virtual void slot1ec();
-    virtual void slot1f0();
-    virtual const Point& Position();
-    Location FUN_00575650();
-    bool FUN_008bc9d0(Weapon*, int);
-    Process* FUN_008d8520();
-    bool FUN_008a8870();
-    void FUN_008a8840();
-};
 struct CombatData
 {
     bool HasCombatFlag(unsigned int);
@@ -6777,10 +5708,7 @@ struct Timer
 {
     void FUN_008d7f40(float);
 };
-struct Setting
-{
-    float* FUN_00403e20();
-};
+
 extern Setting DAT_011ce4ac, DAT_011cf660;
 extern const char DAT_0108dfb0[];
 extern double DAT_01017a40, DAT_01012060, DAT_0106b798, DAT_0102f078;
@@ -6791,7 +5719,7 @@ void FUN_009a9180(Controller*, Weapon*, float&, float&, float&);
 float FUN_00404010(float, float);
 struct System
 {
-    bool IsThreatWithinLimits(Actor*, int, const Point&, float);
+    bool IsThreatWithinLimits(Actor*, int, const NiPoint3&, float);
 };
 extern System* DAT_011f1958;
 struct Manager
@@ -6920,8 +5848,8 @@ void Manager::EvaluateWeaponScores()
     float distance = 0.0f;
     if (target)
     {
-        Location sourcePointSlot0 = actor->FUN_00575650();
-        Location targetPointSlot14 = target->FUN_00575650();
+        Location sourcePointSlot0 = actor->FUN_00575650<Location>();
+        Location targetPointSlot14 = target->FUN_00575650<Location>();
         distance = sourcePointSlot0.FUN_00527a40(targetPointSlot14);
     }
     FUN_0099a2a0();
@@ -6975,7 +5903,7 @@ void Manager::EvaluateWeaponScores()
         }
         case 40: {
             Weapon* weaponSlot32Slot15 = (Weapon*)item;
-            if (actor->FUN_008bc9d0(weaponSlot32Slot15, 1))
+            if (actor->FUN_008bc9d0((::Weapon*)weaponSlot32Slot15, 1))
             {
                 unsigned int index = scoresSlot20.FUN_007881d0();
                 FUN_00403d30(&scoresSlot20.FUN_006b3160(index), 0, 20);
@@ -6990,7 +5918,7 @@ void Manager::EvaluateWeaponScores()
         }
     }
     Weapon* forcedSlot30 = 0;
-    Entry* equippedSlot10 = actor->FUN_008d8520()->Equipped();
+    Entry* equippedSlot10 = ((Process*)actor->FUN_008d8520())->Equipped();
     if (equippedSlot10 && equippedSlot10->FUN_00559450() && *equippedSlot10->FUN_00559450()->FUN_006815c0() &&
         (*equippedSlot10->FUN_00559450()->FUN_006815c0())->FUN_00418b10())
         forcedSlot30 = equippedSlot10->FUN_0044ddc0();
@@ -7013,11 +5941,11 @@ void Manager::EvaluateWeaponScores()
                 {
                     if (equippedSlot10 && weaponSlot32Slot15 == equippedSlot10->FUN_0044ddc0())
                     {
-                        Animation* animation = actor->AnimationData();
+                        Animation* animation = (Animation*)actor->GetAnimData();
                         bool busySlot0 = actor->FUN_008a8870() || (animation && animation->FUN_008846c0());
                         if (!busySlot0)
                         {
-                            Process* process = actor->FUN_008d8520();
+                            Process* process = (Process*)actor->FUN_008d8520();
                             int countSlot11 = inventorySlot40->FUN_004c8f30(alternativeSlot0);
                             Equip* replacement = new Equip(alternativeSlot0, countSlot11);
                             process->EquipAmmo(replacement);
@@ -7035,10 +5963,10 @@ void Manager::EvaluateWeaponScores()
             }
             else if (equippedSlot10 && weaponSlot32Slot15 == equippedSlot10->FUN_0044ddc0())
             {
-                AmmoState* state = actor->FUN_008d8520()->Ammunition();
+                AmmoState* state = ((Process*)actor->FUN_008d8520())->Ammunition();
                 if (state)
                 {
-                    Animation* animation2Slot1 = actor->AnimationData();
+                    Animation* animation2Slot1 = (Animation*)actor->GetAnimData();
                     Weapon* active = equippedSlot10->FUN_0044ddc0();
                     if (animation2Slot1 && active)
                     {
@@ -7132,7 +6060,7 @@ void Manager::EvaluateWeaponScores()
     if (target && bestWeapons[0])
     {
         int projectile = bestWeapons[0]->GetOrFallback(actor)->FUN_004fd3c0();
-        if (!DAT_011f1958->IsThreatWithinLimits(actor, projectile, target->Position(), DAT_010162c0))
+        if (!DAT_011f1958->IsThreatWithinLimits(actor, projectile, *(const NiPoint3*)((const Actor*)target)->GetPos(), DAT_010162c0))
             FUN_00442a80(projectile);
     }
     timer.FUN_008d7f40(*DAT_011cf660.FUN_00403e20());
@@ -7799,14 +6727,6 @@ struct FUN_005c3420_cls
 {
     int __thiscall FUN_005c3420(ParentSpaceNode* out);
 };
-struct FUN_00439ef0_cls
-{
-    void __thiscall FUN_00439ef0(ParentSpaceNode* out, int v);
-};
-struct FUN_004a7290_cls
-{
-    double __thiscall FUN_004a7290();
-};
 bool __cdecl FUN_006d7490(void* a, ParentSpaceNode* b, int c, int d);
 extern double DAT_0108d658;
 
@@ -7817,8 +6737,8 @@ bool __cdecl FUN_0099cc60(void* pNodeA, ParentSpaceNode* pNodeB, int c)
     ParentSpaceNode s2;
     if ((unsigned char)c == 0)
     {
-        ((FUN_00439ef0_cls*)pNodeB)->FUN_00439ef0(&s2, ((FUN_005c3420_cls*)pNodeA)->FUN_005c3420(&s1));
-        if (((FUN_004a7290_cls*)&s2)->FUN_004a7290() > DAT_0108d658)
+        ((NiPoint3*)pNodeB)->FUN_00439ef0((NiPoint3*)&s2, (const NiPoint3*)((FUN_005c3420_cls*)pNodeA)->FUN_005c3420(&s1));
+        if ((double)((NiPoint3*)&s2)->FUN_004a7290() > DAT_0108d658)
         {
             return false;
         }
@@ -7830,212 +6750,17 @@ bool __cdecl FUN_0099cc60(void* pNodeA, ParentSpaceNode* pNodeB, int c)
     return true;
 }
 
-struct NiPoint3Ex : NiPoint3
-{
-    NiPoint3Ex operator-(const NiPoint3& kPt) const;
-    float FUN_004a7290() const;
-};
-float GetDirectionAngle(const NiPoint3Ex& kPt);
+namespace fnv_0099ccd0 {
+
+float GetDirectionAngle(const NiPoint3& kPt);
 float FUN_004b15e0(float fA, float fB, float* pfOut);
 namespace std {
 float abs(float);
 }
-struct FUN_0099ccd0_Actor
-{
-    virtual void Unk_00();
-    virtual void Unk_01();
-    virtual void Unk_02();
-    virtual void Unk_03();
-    virtual void Unk_04();
-    virtual void Unk_05();
-    virtual void Unk_06();
-    virtual void Unk_07();
-    virtual void Unk_08();
-    virtual void Unk_09();
-    virtual void Unk_0A();
-    virtual void Unk_0B();
-    virtual void Unk_0C();
-    virtual void Unk_0D();
-    virtual void Unk_0E();
-    virtual void Unk_0F();
-    virtual void Unk_10();
-    virtual void Unk_11();
-    virtual void Unk_12();
-    virtual void Unk_13();
-    virtual void Unk_14();
-    virtual void Unk_15();
-    virtual void Unk_16();
-    virtual void Unk_17();
-    virtual void Unk_18();
-    virtual void Unk_19();
-    virtual void Unk_1A();
-    virtual void Unk_1B();
-    virtual void Unk_1C();
-    virtual void Unk_1D();
-    virtual void Unk_1E();
-    virtual void Unk_1F();
-    virtual void Unk_20();
-    virtual void Unk_21();
-    virtual void Unk_22();
-    virtual void Unk_23();
-    virtual void Unk_24();
-    virtual void Unk_25();
-    virtual void Unk_26();
-    virtual void Unk_27();
-    virtual void Unk_28();
-    virtual void Unk_29();
-    virtual void Unk_2A();
-    virtual void Unk_2B();
-    virtual void Unk_2C();
-    virtual void Unk_2D();
-    virtual void Unk_2E();
-    virtual void Unk_2F();
-    virtual void Unk_30();
-    virtual void Unk_31();
-    virtual void Unk_32();
-    virtual void Unk_33();
-    virtual void Unk_34();
-    virtual void Unk_35();
-    virtual void Unk_36();
-    virtual void Unk_37();
-    virtual void Unk_38();
-    virtual void Unk_39();
-    virtual void Unk_3A();
-    virtual void Unk_3B();
-    virtual void Unk_3C();
-    virtual void Unk_3D();
-    virtual void Unk_3E();
-    virtual void Unk_3F();
-    virtual void Unk_40();
-    virtual void Unk_41();
-    virtual void Unk_42();
-    virtual void Unk_43();
-    virtual void Unk_44();
-    virtual void Unk_45();
-    virtual void Unk_46();
-    virtual void Unk_47();
-    virtual void Unk_48();
-    virtual void Unk_49();
-    virtual void Unk_4A();
-    virtual void Unk_4B();
-    virtual void Unk_4C();
-    virtual void Unk_4D();
-    virtual void Unk_4E();
-    virtual void Unk_4F();
-    virtual void Unk_50();
-    virtual void Unk_51();
-    virtual void Unk_52();
-    virtual void Unk_53();
-    virtual void Unk_54();
-    virtual void Unk_55();
-    virtual void Unk_56();
-    virtual void Unk_57();
-    virtual void Unk_58();
-    virtual void Unk_59();
-    virtual void Unk_5A();
-    virtual void Unk_5B();
-    virtual void Unk_5C();
-    virtual void Unk_5D();
-    virtual void Unk_5E();
-    virtual void Unk_5F();
-    virtual void Unk_60();
-    virtual void Unk_61();
-    virtual void Unk_62();
-    virtual void Unk_63();
-    virtual void Unk_64();
-    virtual void Unk_65();
-    virtual void Unk_66();
-    virtual void Unk_67();
-    virtual void Unk_68();
-    virtual void Unk_69();
-    virtual void Unk_6A();
-    virtual void Unk_6B();
-    virtual void Unk_6C();
-    virtual void Unk_6D();
-    virtual void Unk_6E();
-    virtual void Unk_6F();
-    virtual void Unk_70();
-    virtual void Unk_71();
-    virtual void Unk_72();
-    virtual void Unk_73();
-    virtual void Unk_74();
-    virtual void Unk_75();
-    virtual void Unk_76();
-    virtual void Unk_77();
-    virtual void Unk_78();
-    virtual void Unk_79();
-    virtual void Unk_7A();
-    virtual void Unk_7B();
-    virtual void Unk_7C();
-    virtual NiPoint3* GetPos();
-    virtual void Unk_7E();
-    virtual void Unk_7F();
-    virtual void Unk_80();
-    virtual void Unk_81();
-    virtual void Unk_82();
-    virtual void Unk_83();
-    virtual void Unk_84();
-    virtual void Unk_85();
-    virtual void Unk_86();
-    virtual void Unk_87();
-    virtual void Unk_88();
-    virtual void Unk_89();
-    virtual void Unk_8A();
-    virtual void Unk_8B();
-    virtual void Unk_8C();
-    virtual void Unk_8D();
-    virtual void Unk_8E();
-    virtual void Unk_8F();
-    virtual void Unk_90();
-    virtual void Unk_91();
-    virtual void Unk_92();
-    virtual void Unk_93();
-    virtual void Unk_94();
-    virtual void Unk_95();
-    virtual void Unk_96();
-    virtual void Unk_97();
-    virtual void Unk_98();
-    virtual void Unk_99();
-    virtual void Unk_9A();
-    virtual void Unk_9B();
-    virtual void Unk_9C();
-    virtual void Unk_9D();
-    virtual void Unk_9E();
-    virtual void Unk_9F();
-    virtual void Unk_A0();
-    virtual void Unk_A1();
-    virtual void Unk_A2();
-    virtual void Unk_A3();
-    virtual void Unk_A4();
-    virtual void Unk_A5();
-    virtual void Unk_A6();
-    virtual void Unk_A7();
-    virtual void Unk_A8();
-    virtual void Unk_A9();
-    virtual void Unk_AA();
-    virtual void Unk_AB();
-    virtual void Unk_AC();
-    virtual void Unk_AD();
-    virtual void Unk_AE();
-    virtual float GetCurrentTargetDistance(int iUnk);
-};
-class PathingLocation
-{
-  public:
-    int m_data[10];
-    ~PathingLocation();
-};
-struct FUN_006dce10 : PathingLocation
-{
-    FUN_006dce10(const NiPoint3& kPt, TESObjectREFR* pRef);
-};
+
 struct FUN_006e4820_class
 {
     bool FUN_006e4820();
-};
-struct FUN_008a1710_shell
-{
-    TESObjectWEAP* FUN_008a1710();
 };
 float GetActorReach(Actor* pActor, TESObjectWEAP* pWeap);
 extern const double DAT_0106cd60;
@@ -8043,14 +6768,14 @@ extern const double DAT_01016ff0;
 
 struct FUN_0099ccd0_shell : Combat99
 {
-    bool FUN_0099ccd0(Seg99* pSeg, NiPoint3Ex* pPos, FUN_0099ccd0_Actor* pActor, bool bCheckAngle);
+    bool FUN_0099ccd0(Seg99* pSeg, NiPoint3* pPos, Actor* pActor, bool bCheckAngle);
 };
 
 // @fnv 0x0099ccd0
-bool FUN_0099ccd0_shell::FUN_0099ccd0(Seg99* pSeg, NiPoint3Ex* pPos, FUN_0099ccd0_Actor* pActor, bool bCheckAngle)
+bool FUN_0099ccd0_shell::FUN_0099ccd0(Seg99* pSeg, NiPoint3* pPos, Actor* pActor, bool bCheckAngle)
 {
-    NiPoint3 kTargetPos = *pActor->GetPos();
-    NiPoint3Ex kDiff = *pPos - kTargetPos;
+    NiPoint3 kTargetPos = *((const Actor*)pActor)->GetPos();
+    NiPoint3 kDiff = *pPos - kTargetPos;
     float fDistSqr9 = kDiff.FUN_004a7290();
     if (fDistSqr9 < DAT_0106cd60)
         return false;
@@ -8064,84 +6789,74 @@ bool FUN_0099ccd0_shell::FUN_0099ccd0(Seg99* pSeg, NiPoint3Ex* pPos, FUN_0099ccd
     }
     if (FUN_009a9630(pActor))
     {
-        float fImpulseRadiusSquared = GetActorReach((Actor*)pActor, ((FUN_008a1710_shell*)pActor)->FUN_008a1710()) * DAT_01016ff0;
+        float fImpulseRadiusSquared = GetActorReach((Actor*)pActor, (TESObjectWEAP*)pActor->FUN_008a1710()) * DAT_01016ff0;
         if (fDistSqr9 < fImpulseRadiusSquared * fImpulseRadiusSquared)
             return false;
     }
     else
     {
-        FUN_006dce10 kLoc(*pPos, (TESObjectREFR*)pActor);
-        if (FUN_006d7490((Picker*)&kLoc, (Vec3*)&kTargetPos, 0, 0))
+        PathingLocation kLoc((const ::NiPoint3&)*pPos, (TESObjectREFR*)pActor);
+        if (fnv_0099e190::FUN_006d7490((fnv_0099e190::Picker*)&kLoc, (NiPoint3*)&kTargetPos, 0, 0))
             return false;
         if (((FUN_006e4820_class*)pSeg)->FUN_006e4820())
         {
-            if (!FUN_0099cec0(pSeg, (Pt3*)pPos, (Pt3*)pActor->GetPos(), (TESObjectREFR*)pActor))
+            if (!FUN_0099cec0(pSeg, (NiPoint3*)pPos, (NiPoint3*)((const Actor*)pActor)->GetPos(), (TESObjectREFR*)pActor))
                 return false;
         }
     }
     return true;
 }
+}  // namespace fnv_0099ccd0
 
-struct FUN_0099d310_actor_calls
-{
-    float FUN_008be1b0();
-    float FUN_008a0b10();
-};
+// The shared Actor does not yet declare this no-argument query.
+float __fastcall FUN_008a0b10(Actor*);
 struct FUN_0099d310_field_calls
 {
     float GetFieldCC();
-    bool FUN_00998a30();
     float FUN_00453700();
 };
-struct FUN_0099d310_window
+// Owns a covered-move request initialized through its alternate constructor.
+class CoveredMoveRequestStorage
 {
-    void FUN_007cb2e0();
-};
-struct FUN_0099d310_arg
-{
-    void FUN_00507610(float);
-    void FUN_006e5ee0(float);
-    void FUN_006e4ef0(float);
-    void FUN_006e4320(float);
-    void FUN_005076c0(float);
-    void FUN_006e4f10(unsigned int);
-    int GetOffsetF4();
-    int FUN_006e4f90();
-    FUN_0099d310_window* FUN_006e4f90(void*);
-};
-struct FUN_0099d310_shell : C99
-{
-    bool FUN_0097ee90();
-    void CollectCastSoundPositions(int);
-    void CollectAvoidanceItems(int);
-    void FUN_0099d310(FUN_0099d310_arg*);
-};
-// @fnv 0x0099d310
-void FUN_0099d310_shell::FUN_0099d310(FUN_0099d310_arg* param)
-{
-    MobileObject* actor = ((TESAmmoInitCalls*)f1C4)->GetFieldBC();
-    void* item = ((AlchemyItem*)f1C4)->FUN_004030b0();
-    param->FUN_00507610(((FUN_0099d310_actor_calls*)actor)->FUN_008be1b0());
-    param->FUN_006e5ee0(((FUN_0099d310_actor_calls*)actor)->FUN_008a0b10());
-    param->FUN_006e4ef0(((FUN_0099d310_field_calls*)f1C4)->GetFieldCC());
-    if (((FUN_0099d310_field_calls*)f1C4)->FUN_00998a30())
+public:
+    __forceinline CoveredMoveRequestStorage()
     {
-        param->FUN_006e4320(((FUN_0099d310_field_calls*)f1C4)->FUN_00453700());
+        ((PathingRequestCoveredMove*)storage)->FUN_006e4a50();
     }
-    param->FUN_005076c0((float)((int(__thiscall*)(void*, unsigned int))(*(unsigned int**)((char*)actor + 0xa4))[2])(
+    __forceinline ~CoveredMoveRequestStorage()
+    {
+        ((PathingRequestCoveredMove*)storage)->~PathingRequestCoveredMove();
+    }
+    unsigned int storage[sizeof(PathingRequestCoveredMove) / sizeof(unsigned int)];
+};
+
+
+// @fnv 0x0099d310
+void CombatState::FUN_0099d310(PathingRequest* param)
+{
+    Actor* actor = (Actor*)((TESAmmoInitCalls*)(*(S81**)((char*)this + 0x1c4)))->GetFieldBC();
+    void* item = ((AlchemyItem*)(*(S81**)((char*)this + 0x1c4)))->FUN_004030b0();
+    param->FUN_00507610(actor->FUN_008be1b0());
+    param->FUN_006e5ee0(FUN_008a0b10(actor));
+    param->FUN_006e4ef0(((FUN_0099d310_field_calls*)(*(S81**)((char*)this + 0x1c4)))->GetFieldCC());
+    if (((CombatController*)(*(S81**)((char*)this + 0x1c4)))->FUN_00998a30())
+    {
+        param->FUN_006e4320(((FUN_0099d310_field_calls*)(*(S81**)((char*)this + 0x1c4)))->FUN_00453700());
+    }
+    ((PathingRequestCoveredMove*)param)->FUN_005076c0((float)((int(__thiscall*)(void*, unsigned int))(*(unsigned int**)((char*)actor + 0xa4))[2])(
         (char*)actor + 0xa4, 0x10));
     if (item != 0)
     {
-        if (FUN_0097ee90() && (unsigned char)_pad[0x74] == 0)
+        if (FUN_0097ee90() && (unsigned char)((char*)this)[0x74] == 0)
         {
-            param->FUN_006e4f10(((int(__thiscall*)(void*))(*(unsigned int**)item)[0x1f4 / 4])(item));
+            ((PathingRequestCoveredMove*)param)->FUN_006e4f10(((int(__thiscall*)(void*))(*(unsigned int**)item)[0x1f4 / 4])(item));
         }
-        CollectCastSoundPositions(param->GetOffsetF4());
+        ((fnv_0099cb70::FUN_0099cb70_struct*)this)->CollectCastSoundPositions((fnv_0099cb70::Arr_006cee30*)((PathingRequestCoveredMove*)param)->GetOffsetF4());
     }
-    CollectAvoidanceItems(param->FUN_006e4f90());
-    if (*((void**)&_pad[0xe4]) != 0 && *((unsigned char*)*((void**)&_pad[0xe4]) + 1) != 0)
+    ((fnv_009a0e10::FUN_009a0e10_shell*)this)->CollectAvoidanceItems((BSSimpleArray<void*, 1024>*)((PathingRequestCoveredMove*)param)->FUN_006e4f90());
+    if (*((void**)((char*)this + 0xe4)) != 0 && *((unsigned char*)*((void**)((char*)this + 0xe4)) + 1) != 0)
     {
-        param->FUN_006e4f90((char*)*((void**)&_pad[0xe4]) + 0x68)->FUN_007cb2e0();
+        ((PathingRequestCoveredMove*)param)->FUN_006e4f90((char*)*((void**)((char*)this + 0xe4)) + 0x68)->FUN_007cb2e0();
     }
 }
 
@@ -9255,11 +7970,7 @@ struct Stamp435
     unsigned value;
     void SaveTimeStamp(Save435*);
 };
-struct Pair435
-{
-    unsigned first, second;
-    void FUN_009a5eb0(Save435*);
-};
+
 struct Item435
 {
     void FUN_009a2d20(Save435*);
@@ -9347,9 +8058,9 @@ struct Owner435
     Stamp435 s9c;
     Stamp435 sa0;
     Stamp435 sa4;
-    Pair435 pa8;
-    Pair435 pb0;
-    Pair435 pb8;
+    TimeoutTimer pa8;
+    TimeoutTimer pb0;
+    TimeoutTimer pb8;
     Stamp435 sc0;
     OptionalC435* optionalC;
     unsigned char fc8;
@@ -9379,7 +8090,7 @@ struct Owner435
     OptionalB435* optional18c;
     RefPair435* pairs[5];
     void* refs[2];
-    Pair435 timers[2];
+    TimeoutTimer timers[2];
     unsigned f1bc;
     void* ref1c0;
     unsigned unk1c4;
@@ -9387,17 +8098,17 @@ struct Owner435
     unsigned char unk1c9;
     unsigned char unk1ca;
     unsigned char unk1cb;
-    Pair435 p1cc;
-    Pair435 p1d4;
-    Pair435 p1dc;
-    Pair435 p1e4;
-    Pair435 p1ec;
-    Pair435 p1f4;
-    Pair435 p1fc;
-    Pair435 p204;
-    Pair435 p20c;
-    Pair435 p214;
-    Pair435 p21c;
+    TimeoutTimer p1cc;
+    TimeoutTimer p1d4;
+    TimeoutTimer p1dc;
+    TimeoutTimer p1e4;
+    TimeoutTimer p1ec;
+    TimeoutTimer p1f4;
+    TimeoutTimer p1fc;
+    TimeoutTimer p204;
+    TimeoutTimer p20c;
+    TimeoutTimer p214;
+    TimeoutTimer p21c;
     unsigned unk224;
     unsigned f228;
     void SaveToStream(Save435*);
@@ -9454,10 +8165,10 @@ void Owner435::SaveToStream(Save435* pSaveBuffer)
     s9c.SaveTimeStamp(pSaveBuffer);
     sa0.SaveTimeStamp(pSaveBuffer);
     sa4.SaveTimeStamp(pSaveBuffer);
-    pa8.FUN_009a5eb0(pSaveBuffer);
-    pb0.FUN_009a5eb0(pSaveBuffer);
+    pa8.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    pb0.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
     sc0.SaveTimeStamp(pSaveBuffer);
-    pb8.FUN_009a5eb0(pSaveBuffer);
+    pb8.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
     se0.SaveTimeStamp(pSaveBuffer);
     unsigned char flags = 0;
     if (optionalE4)
@@ -9523,23 +8234,23 @@ void Owner435::SaveToStream(Save435* pSaveBuffer)
     for (unsigned uiRefTimerIndex = 0; uiRefTimerIndex < 2; uiRefTimerIndex++)
     {
         pSaveBuffer->FUN_00865df0(refs[uiRefTimerIndex], 0);
-        timers[uiRefTimerIndex].FUN_009a5eb0(pSaveBuffer);
+        timers[uiRefTimerIndex].SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
     }
     pSaveBuffer->FUN_00865e50(&f1bc, 4, 0);
     pSaveBuffer->FUN_00865df0(ref1c0, 0);
     pSaveBuffer->FUN_00865e50(&f1c8, 1, 0);
     pSaveBuffer->FUN_00865e50(&f228, 4, 0);
-    p1cc.FUN_009a5eb0(pSaveBuffer);
-    p1d4.FUN_009a5eb0(pSaveBuffer);
-    p1dc.FUN_009a5eb0(pSaveBuffer);
-    p1e4.FUN_009a5eb0(pSaveBuffer);
-    p1ec.FUN_009a5eb0(pSaveBuffer);
-    p1f4.FUN_009a5eb0(pSaveBuffer);
-    p1fc.FUN_009a5eb0(pSaveBuffer);
-    p20c.FUN_009a5eb0(pSaveBuffer);
-    p204.FUN_009a5eb0(pSaveBuffer);
-    p214.FUN_009a5eb0(pSaveBuffer);
-    p21c.FUN_009a5eb0(pSaveBuffer);
+    p1cc.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    p1d4.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    p1dc.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    p1e4.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    p1ec.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    p1f4.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    p1fc.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    p20c.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    p204.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    p214.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
+    p21c.SaveGame((BGSSaveFormBuffer*)pSaveBuffer);
 }
 
 class TESFile9A2;
@@ -9565,17 +8276,6 @@ void Holder9A2::ResolveRef(TESFile9A2* pkFile)
 
 namespace fnv_0099b5a0 {
 // 0x0099b5a0  779 bytes  /MT /Od /Oy- /GS /EHsc /Gy
-struct Vec3
-{
-    float x, y, z;
-    float GetSquaredXYLength() const;
-};
-struct P3
-{
-    float x, y, z;
-    P3();
-    Vec3 FUN_00439ef0(const Vec3&) const;
-};
 
 struct Sound99
 {
@@ -9583,11 +8283,12 @@ struct Sound99
 };
 struct Snd99
 {
-    Vec3 pos;
+    // FUN_0097ede0 fills this storage without constructing a NiPoint3.
+    float pos[sizeof(NiPoint3) / sizeof(float)];
     int extra;
     void FUN_0097ede0();
     void* FUN_0084e3a0();
-    P3* FUN_006815c0();
+    NiPoint3* FUN_006815c0();
 };
 struct Mob99
 {
@@ -9613,26 +8314,26 @@ struct Clock99
 };
 struct SndMgr99
 {
-    bool IsThreatWithinLimits(void*, Sound99*, Vec3*, float);
+    bool IsThreatWithinLimits(void*, Sound99*, NiPoint3*, float);
 };
 struct A1_99
 {
-    void FUN_0099b8b0(Vec3*, int);
+    void FUN_0099b8b0(NiPoint3*, int);
 };
 
-extern "C" Vec3 DAT_011f426c;
+extern "C" NiPoint3 DAT_011f426c;
 extern "C" SndMgr99* DAT_011f1958;
 
-void __cdecl FUN_009a8050(Vec3*, void*);
+void __cdecl FUN_009a8050(NiPoint3*, void*);
 float __cdecl FUN_009a7f00(Ammo99*, float);
 float __cdecl FUN_009a8460(void*, int, int);
-bool __cdecl FUN_009a7670(void*, void*, Ammo99*, Vec3, P3, Vec3, char*, P3*, float);
-float __cdecl ComputeProjectileFlightTime(Ammo99*, Vec3, P3, char, float);
+bool __cdecl FUN_009a7670(void*, void*, Ammo99*, NiPoint3, NiPoint3, NiPoint3, char*, NiPoint3*, float);
+float __cdecl ComputeProjectileFlightTime(Ammo99*, NiPoint3, NiPoint3, char, float);
 
 struct FUN_0099b5a0_holder
 {
     char pad00[0x84];
-    P3 pt84;
+    NiPoint3 pt84;
     char pad90[0x98 - 0x90];
     Clock99 clk;
     char pad99[0x1c4 - 0x99];
@@ -9652,12 +8353,13 @@ bool FUN_0099b5a0_holder::FUN_0099b5a0(A1_99* a1, char* acArg, Weap99* apWeapon)
         return false;
     Ammo99* ammoA = (Ammo99*)apWeapon->GetOrFallback(mobj3);
     float f6 = FUN_009a7f00(ammoA, 0.0f);
-    Vec3 posVal;
-    FUN_009a8050(&posVal, mobj3);
+    // This output buffer is populated without default construction in the game.
+    float posVal[sizeof(NiPoint3) / sizeof(float)];
+    FUN_009a8050((NiPoint3*)posVal, mobj3);
 
     for (unsigned i = 0; i < 2; i++)
     {
-        P3 v9;
+        NiPoint3 v9;
         if (i == 0)
         {
             Snd99 s2;
@@ -9675,7 +8377,7 @@ bool FUN_0099b5a0_holder::FUN_0099b5a0(A1_99* a1, char* acArg, Weap99* apWeapon)
             v9 = pt84;
         }
         v9.z += FUN_009a8460(spellB, 2, 0);
-        Vec3 d_ = v9.FUN_00439ef0(posVal);
+        NiPoint3 d_ = v9.FUN_00439ef0(*(const NiPoint3*)posVal);
         float len = d_.GetSquaredXYLength();
         if (f6 * f6 < len)
             continue;
@@ -9685,19 +8387,19 @@ bool FUN_0099b5a0_holder::FUN_0099b5a0(A1_99* a1, char* acArg, Weap99* apWeapon)
         Sound99* snd2 = ammoA->FUN_004fd3c0();
         if (snd2)
         {
-            if (!DAT_011f1958->IsThreatWithinLimits(mobj3, snd2, (Vec3*)&v9, 0.0f))
+            if (!DAT_011f1958->IsThreatWithinLimits(mobj3, snd2, (NiPoint3*)&v9, 0.0f))
                 continue;
         }
-        P3 tB;
-        if (FUN_009a7670(mobj3, spellB, ammoA, posVal, v9, DAT_011f426c, acArg, &tB, -1.0f))
+        NiPoint3 tB;
+        if (FUN_009a7670(mobj3, spellB, ammoA, *(NiPoint3*)posVal, v9, DAT_011f426c, acArg, &tB, -1.0f))
         {
             if (snd2)
             {
-                float r = ComputeProjectileFlightTime(ammoA, posVal, v9, *acArg, 0.0f);
-                if (!DAT_011f1958->IsThreatWithinLimits(mobj3, snd2, (Vec3*)&v9, r))
+                float r = ComputeProjectileFlightTime(ammoA, *(NiPoint3*)posVal, v9, *acArg, 0.0f);
+                if (!DAT_011f1958->IsThreatWithinLimits(mobj3, snd2, (NiPoint3*)&v9, r))
                     continue;
             }
-            a1->FUN_0099b8b0((Vec3*)&v9, 0);
+            a1->FUN_0099b8b0((NiPoint3*)&v9, 0);
             return true;
         }
     }
@@ -9938,24 +8640,13 @@ struct QLocSlot
     bool IsValid();
 };
 
-struct QLocArray
-{
-    void* vtbl;
-    void* data;
-    int size;
-    int capacity;
-    void Clear(bool freeStorage);
-    unsigned int GetSize();
-    QLocElem* GetAt(unsigned int index);
-};
-
 struct QOut
 {
     QPoint pos;
     QPoint dest;
     float radius;
     QStamp stamp;
-    QLocArray locs;
+    BSSimpleArray<QLocElem, 1024> locs;
     int key;
     int result;
     bool useCover;
@@ -10006,7 +8697,7 @@ struct QOrigin
 
 void FUN_009a9180(QCombatCtrl* ctrl, int a, float* minDist, float* maxDist, float* limit);
 float FUN_0040ebd0(float a, float b);
-int FindNearbyTriangles(QBuilder* b, QLocArray* arr);
+int FindNearbyTriangles(QBuilder* b, BSSimpleArray<QLocElem, 1024>* arr);
 
 extern QLock DAT_011f1a61;
 extern QSetting DAT_011ce3f0;
@@ -10180,7 +8871,7 @@ bool FUN_0099b8e0_cls::FUN_0099b8e0(int a1, QOut* out, QState* st, int a4, int a
         DAT_011f1958->GetLockable()->Lock();
         for (unsigned int i = 0; i < out->locs.GetSize(); i++)
         {
-            QLocElem* elem = out->locs.GetAt(i);
+            QLocElem* elem = &out->locs.GetAt(i);
             int _resC = 0;
             float score8 = 0.0f;
             int id = elem->GetKey();
@@ -10231,324 +8922,39 @@ struct Pos9f48
     float FUN_00527a40(const Pos9f48& kOther);
 };
 
-struct Tile9f48
+
+// 0x0088c600 is an Actor visibility query absent from include/Actor.h.
+struct AllyVisibilityQuery : Actor
 {
-    bool FUN_00998980();
+    bool IsTargetIn360View(void* target);
 };
 
 struct Process9f48
 {
-    Tile9f48* FUN_00586150();
-};
-
-struct Actor9f48
-{
-    virtual void V000();
-    virtual void V001();
-    virtual void V002();
-    virtual void V003();
-    virtual void V004();
-    virtual void V005();
-    virtual void V006();
-    virtual void V007();
-    virtual void V008();
-    virtual void V009();
-    virtual void V010();
-    virtual void V011();
-    virtual void V012();
-    virtual void V013();
-    virtual void V014();
-    virtual void V015();
-    virtual void V016();
-    virtual void V017();
-    virtual void V018();
-    virtual void V019();
-    virtual void V020();
-    virtual void V021();
-    virtual void V022();
-    virtual void V023();
-    virtual void V024();
-    virtual void V025();
-    virtual void V026();
-    virtual void V027();
-    virtual void V028();
-    virtual void V029();
-    virtual void V030();
-    virtual void V031();
-    virtual void V032();
-    virtual void V033();
-    virtual void V034();
-    virtual void V035();
-    virtual void V036();
-    virtual void V037();
-    virtual void V038();
-    virtual void V039();
-    virtual void V040();
-    virtual void V041();
-    virtual void V042();
-    virtual void V043();
-    virtual void V044();
-    virtual void V045();
-    virtual void V046();
-    virtual void V047();
-    virtual void V048();
-    virtual void V049();
-    virtual void V050();
-    virtual void V051();
-    virtual void V052();
-    virtual void V053();
-    virtual void V054();
-    virtual void V055();
-    virtual void V056();
-    virtual void V057();
-    virtual void V058();
-    virtual void V059();
-    virtual void V060();
-    virtual void V061();
-    virtual void V062();
-    virtual void V063();
-    virtual bool IsAlive();
-    virtual void W065();
-    virtual void W066();
-    virtual void W067();
-    virtual void W068();
-    virtual void W069();
-    virtual void W070();
-    virtual void W071();
-    virtual void W072();
-    virtual void W073();
-    virtual void W074();
-    virtual void W075();
-    virtual void W076();
-    virtual void W077();
-    virtual void W078();
-    virtual void W079();
-    virtual void W080();
-    virtual void W081();
-    virtual void W082();
-    virtual void W083();
-    virtual void W084();
-    virtual void W085();
-    virtual void W086();
-    virtual void W087();
-    virtual void W088();
-    virtual void W089();
-    virtual void W090();
-    virtual void W091();
-    virtual void W092();
-    virtual void W093();
-    virtual void W094();
-    virtual void W095();
-    virtual void W096();
-    virtual void W097();
-    virtual void W098();
-    virtual void W099();
-    virtual void W100();
-    virtual void W101();
-    virtual void W102();
-    virtual void W103();
-    virtual void W104();
-    virtual void W105();
-    virtual void W106();
-    virtual void W107();
-    virtual void W108();
-    virtual void W109();
-    virtual void W110();
-    virtual void W111();
-    virtual void W112();
-    virtual void W113();
-    virtual void W114();
-    virtual void W115();
-    virtual void W116();
-    virtual void W117();
-    virtual void W118();
-    virtual void W119();
-    virtual void W120();
-    virtual void W121();
-    virtual void W122();
-    virtual void W123();
-    virtual void W124();
-    virtual void W125();
-    virtual void W126();
-    virtual void W127();
-    virtual void W128();
-    virtual void W129();
-    virtual void W130();
-    virtual void W131();
-    virtual void W132();
-    virtual void W133();
-    virtual void W134();
-    virtual void W135();
-    virtual void W136();
-    virtual void W137();
-    virtual void W138();
-    virtual void W139();
-    virtual void W140();
-    virtual void W141();
-    virtual void W142();
-    virtual void W143();
-    virtual void W144();
-    virtual void W145();
-    virtual void W146();
-    virtual void W147();
-    virtual void W148();
-    virtual void W149();
-    virtual void W150();
-    virtual void W151();
-    virtual void W152();
-    virtual void W153();
-    virtual void W154();
-    virtual void W155();
-    virtual void W156();
-    virtual void W157();
-    virtual void W158();
-    virtual void W159();
-    virtual void W160();
-    virtual void W161();
-    virtual void W162();
-    virtual void W163();
-    virtual void W164();
-    virtual void W165();
-    virtual void W166();
-    virtual void W167();
-    virtual void W168();
-    virtual void W169();
-    virtual void W170();
-    virtual void W171();
-    virtual void W172();
-    virtual void W173();
-    virtual void W174();
-    virtual void W175();
-    virtual void W176();
-    virtual void W177();
-    virtual void W178();
-    virtual void W179();
-    virtual void W180();
-    virtual void W181();
-    virtual void W182();
-    virtual void W183();
-    virtual void W184();
-    virtual void W185();
-    virtual void W186();
-    virtual void W187();
-    virtual void W188();
-    virtual void W189();
-    virtual void W190();
-    virtual void W191();
-    virtual void W192();
-    virtual void W193();
-    virtual void W194();
-    virtual void W195();
-    virtual void W196();
-    virtual void W197();
-    virtual void W198();
-    virtual void W199();
-    virtual void W200();
-    virtual void W201();
-    virtual void W202();
-    virtual void W203();
-    virtual void W204();
-    virtual void W205();
-    virtual void W206();
-    virtual void W207();
-    virtual void W208();
-    virtual void W209();
-    virtual void W210();
-    virtual void W211();
-    virtual void W212();
-    virtual void W213();
-    virtual void W214();
-    virtual void W215();
-    virtual void W216();
-    virtual void W217();
-    virtual void W218();
-    virtual void W219();
-    virtual void W220();
-    virtual void W221();
-    virtual void W222();
-    virtual void W223();
-    virtual void W224();
-    virtual void W225();
-    virtual void W226();
-    virtual void W227();
-    virtual void W228();
-    virtual void W229();
-    virtual void W230();
-    virtual void W231();
-    virtual void W232();
-    virtual void W233();
-    virtual void W234();
-    virtual void W235();
-    virtual void W236();
-    virtual void W237();
-    virtual void W238();
-    virtual void W239();
-    virtual void W240();
-    virtual void W241();
-    virtual void W242();
-    virtual void W243();
-    virtual void W244();
-    virtual void W245();
-    virtual void W246();
-    virtual void W247();
-    virtual void W248();
-    virtual void W249();
-    virtual void W250();
-    virtual void W251();
-    virtual void W252();
-    virtual void W253();
-    virtual void W254();
-    virtual void W255();
-    virtual void W256();
-    virtual void W257();
-    virtual void W258();
-    virtual void W259();
-    virtual void W260();
-    virtual void W261();
-    virtual void W262();
-    virtual void W263();
-    virtual void W264();
-    virtual void W265();
-    virtual Process9f48* GetProcess();
-    bool IsTargetIn360View(void* pkTarget);
-    int FUN_00575650(Pos9f48* pkPosition);
-    float FUN_008be1b0();
+    CombatState* FUN_00586150();
 };
 
 struct Group9f48
 {
-    bool FUN_00986a80(Actor9f48* pkMember);
+    bool FUN_00986a80(Actor* pkMember);
     unsigned int FUN_00990890();
-    Actor9f48* GetIntAt(unsigned int uiIndex);
-};
-
-struct Controller9f48
-{
-    Group9f48* FUN_004fb070();
-    void* FUN_004030b0();
-    Actor9f48* GetFieldBC();
+    Actor* GetIntAt(unsigned int uiIndex);
 };
 
 struct Request9f48
 {
     char m_acPad[0x10];
-    Actor9f48* m_pkTarget;
-    void FUN_00997400(Actor9f48* pkTarget);
+    Actor* m_pkTarget;
+    void FUN_00997400(Actor* pkTarget);
     void FUN_00819a50(float fImpulseRadiusSquared);
 };
-
-class GameSettingCollection;
-template <class T> class SettingT
-{
-  public:
-    float* FUN_00403e20();
-};
+using ::SettingT;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting430;
 
 struct Planner9f48
 {
     char m_acPad[0x1c4];
-    Controller9f48* m_pkController;
+    CombatController* m_pkController;
     bool FUN_009a02a0(Pos9f48* pkPosition, int iA, int iB);
     bool TryAssignAllyTarget(Request9f48* pkRequest, int iUnused);
 };
@@ -10556,40 +8962,40 @@ struct Planner9f48
 // @fnv 0x0099f480
 bool Planner9f48::TryAssignAllyTarget(Request9f48* pkRequest, int iUnused)
 {
-    Group9f48* pkGroupList = m_pkController->FUN_004fb070();
-    if (pkRequest->m_pkTarget && pkRequest->m_pkTarget->IsAlive())
+    Group9f48* pkGroupList = (Group9f48*)m_pkController->FUN_004fb070();
+    if (pkRequest->m_pkTarget && pkRequest->m_pkTarget->IsActor())
     {
-        Actor9f48* pkTarget = pkRequest->m_pkTarget;
+        Actor* pkTarget = pkRequest->m_pkTarget;
         if (pkGroupList->FUN_00986a80(pkTarget))
         {
-            Process9f48* pkProcess = pkTarget->GetProcess();
+            Process9f48* pkProcess = (Process9f48*)pkTarget->GetCombatController();
             if (pkProcess && pkProcess->FUN_00586150()->FUN_00998980())
                 return true;
-            else if (pkTarget->IsTargetIn360View(m_pkController->FUN_004030b0()))
+            else if (((AllyVisibilityQuery*)pkTarget)->IsTargetIn360View(m_pkController->FUN_004030b0()))
                 return true;
         }
     }
-    Actor9f48* pkOwner = m_pkController->GetFieldBC();
+    Actor* pkOwner = (Actor*)m_pkController->GetFieldBC();
     Pos9f48 kOwnerPos;
-    pkOwner->FUN_00575650(&kOwnerPos);
-    Actor9f48* pkAlly = 0;
+    pkOwner->FUN_00575650((void*)&kOwnerPos);
+    Actor* pkAlly = 0;
     float fClosest = 67108864.0f;
     unsigned int ItemUpdateArray = pkGroupList->FUN_00990890();
     for (unsigned int i = 0; i < ItemUpdateArray; i++)
     {
-        Actor9f48* pkMember = pkGroupList->GetIntAt(i);
+        Actor* pkMember = pkGroupList->GetIntAt(i);
         if (pkMember == pkOwner)
             continue;
         bool bUsable = false;
-        Process9f48* pkOtherProcess = pkMember->GetProcess();
+        Process9f48* pkOtherProcess = (Process9f48*)pkMember->GetCombatController();
         if (pkOtherProcess && pkOtherProcess->FUN_00586150()->FUN_00998980())
             bUsable = true;
-        else if (pkMember->IsTargetIn360View(m_pkController->FUN_004030b0()))
+        else if (((AllyVisibilityQuery*)pkMember)->IsTargetIn360View(m_pkController->FUN_004030b0()))
             bUsable = true;
         if (!bUsable)
             continue;
         Pos9f48 kPos;
-        pkMember->FUN_00575650(&kPos);
+        pkMember->FUN_00575650((void*)&kPos);
         float fDistance = kPos.FUN_00527a40(kOwnerPos);
         if (fDistance >= fClosest)
             continue;
@@ -10832,15 +9238,6 @@ struct CombatLocations
     void FUN_009959c0(int aiType, CombatSearch* apSearch);
 };
 
-struct CombatController
-{
-    CombatRef* GetFieldBC();
-    CombatRef* FUN_004030b0();
-    CombatPathing* FUN_004fb070();
-    CombatLocations* FUN_005e3fc0();
-    void* FUN_007031c0();
-};
-
 struct CombatTypeInfo
 {
     bool bSkipSearch;
@@ -10861,64 +9258,37 @@ extern const float DAT_0108df70;
 int __cdecl FUN_005b5e40(const char* apFormat, ...);
 float __cdecl FUN_0097acb0(CombatController* apController, CombatPos* apFrom, CombatPos* apTo);
 
-struct CombatStateQ
-{
-    char pad00[0x18];
-    int iTargetCount;
-    char pad1c[0x5a];
-    char acFlags[0x4e];
-    CombatTargetInfo* pTargetInfo;
-    char padc8[0x1c];
-    CombatTyped* pTyped;
-    char pade8[4];
-    char kEC[0xa0];
-    CombatTimed* pTimed;
-    char pad190[0x34];
-    CombatController* pController;
+}  // namespace CombatFind
 
-    bool FUN_0097ee90();
-    bool FUN_0097fd40();
-    bool FUN_00461580(unsigned int auiMask);
-    CombatSlot* GetActionAtIndex(int aiIndex);
-    bool FUN_0099b8e0(void* apPackage, void* apData, CombatSearch* apSearch, CombatSpot* apSpot, int aiType);
-    bool SelectAndMoveToPoint(CombatSpot* apSpot, int a2, int a3, float a4, float a5);
-    bool FUN_0099d030(void* apData, CombatSearch* apSearch, CombatSpot* apSpot, int aiType, CombatPos* apPos,
-                      float afRadius, int a7);
-    bool FUN_0099b5a0(CombatSpot* apSpot, char* apFlags, int aiCount);
-    bool FUN_0099ebe0(CombatSearch* apSearch, CombatSpot* apSpot, int aiType);
-    bool TryAssignAllyTarget(CombatSpot* apSpot, int aiType);
-    bool FUN_009a02a0(CombatPos* apPos, int a2, bool abFlag);
-    bool FUN_0099ac20(int aiType);
-};
 
-// Finds a location for aiType using a CombatSpot and CombatSearch, then stores the result through pLocationsRes.
+// Finds a location for aiType using a CombatFind::CombatSpot and CombatFind::CombatSearch, then stores the result through pLocationsRes.
 // @fnv 0x0099ac20
-bool CombatStateQ::FUN_0099ac20(int aiType)
+bool CombatState::FUN_0099ac20(int aiType)
 {
-    CombatRef* pActorOld = pController->GetFieldBC();
-    CombatRef* pTarget = pController->FUN_004030b0();
-    CombatPathing* pPathingTmp = pController->FUN_004fb070();
-    CombatLocations* pLocationsRes = pController->FUN_005e3fc0();
+    CombatFind::CombatRef* pActorOld = (CombatFind::CombatRef*)(*(CombatController**)((char*)this + 0x1c4))->GetFieldBC();
+    CombatFind::CombatRef* pTarget = (CombatFind::CombatRef*)(*(CombatController**)((char*)this + 0x1c4))->FUN_004030b0();
+    CombatFind::CombatPathing* pPathingTmp = (CombatFind::CombatPathing*)(*(CombatController**)((char*)this + 0x1c4))->FUN_004fb070();
+    CombatFind::CombatLocations* pLocationsRes = (CombatFind::CombatLocations*)(*(CombatController**)((char*)this + 0x1c4))->FUN_005e3fc0();
     if (pLocationsRes->FUN_00980700(aiType))
     {
         pLocationsRes->FUN_00979f70(aiType);
         return true;
     }
-    else if (pLocationsRes->FUN_0097bd00(aiType) == DAT_0108df70)
+    else if (pLocationsRes->FUN_0097bd00(aiType) == CombatFind::DAT_0108df70)
     {
         return false;
     }
     bool bFound = false;
-    CombatSpot* pFinalSpot = new CombatSpot();
-    CombatSearch* pSearch = new CombatSearch();
+    CombatFind::CombatSpot* pFinalSpot = new CombatFind::CombatSpot();
+    CombatFind::CombatSearch* pSearch = new CombatFind::CombatSearch();
     pFinalSpot->FUN_00600ab0(aiType);
-    pFinalSpot->FUN_00819a50(DAT_011a5650[aiType].fRadius);
-    if (pTimed && pTimed->FUN_00825c00() == aiType)
+    pFinalSpot->FUN_00819a50(CombatFind::DAT_011a5650[aiType].fRadius);
+    if ((*(CombatFind::CombatTimed**)((char*)this + 0x18c)) && (*(CombatFind::CombatTimed**)((char*)this + 0x18c))->FUN_00825c00() == aiType)
     {
-        pFinalSpot->FUN_009973a0(pTimed);
-        if (pTyped && pTyped->iType == aiType)
-            pSearch->FUN_00997480(pTyped);
-        if (!DAT_011a5650[aiType].bSkipSearch)
+        pFinalSpot->FUN_009973a0((*(CombatFind::CombatTimed**)((char*)this + 0x18c)));
+        if ((*(CombatFind::CombatTyped**)((char*)this + 0xe4)) && (*(CombatFind::CombatTyped**)((char*)this + 0xe4))->iType == aiType)
+            pSearch->FUN_00997480((*(CombatFind::CombatTyped**)((char*)this + 0xe4)));
+        if (!CombatFind::DAT_011a5650[aiType].bSkipSearch)
         {
             pFinalSpot->CopyRefValue();
             bFound = true;
@@ -10950,7 +9320,7 @@ bool CombatStateQ::FUN_0099ac20(int aiType)
                 }
                 else
                 {
-                    CombatPos kPoint;
+                    CombatFind::CombatPos kPoint;
                     if (pPathingTmp->GetDetectedTargetLocation(pTarget, &kPoint))
                     {
                         pFinalSpot->AssignV4(&kPoint);
@@ -10962,68 +9332,68 @@ bool CombatStateQ::FUN_0099ac20(int aiType)
         case 2:
         case 4:
         case 5:
-            bFound = FUN_0099b8e0(pController->FUN_007031c0(), kEC, pSearch, pFinalSpot, aiType);
+            bFound = FUN_0099b8e0((*(CombatController**)((char*)this + 0x1c4))->FUN_007031c0(), ((char*)this + 0xec), (::CombatSearch*)pSearch, (::CombatSpot*)pFinalSpot, aiType);
             break;
         case 3:
-            bFound = SelectAndMoveToPoint(pFinalSpot, 3, 0xf, 128.0f, 128.0f);
+            bFound = SelectAndMoveToPoint((::CombatSpot*)pFinalSpot, 3, 0xf, 128.0f, 128.0f);
             break;
         case 6:
-            if (pTargetInfo && !pTargetInfo->bInvalid)
+            if ((*(CombatFind::CombatTargetInfo**)((char*)this + 0xc4)) && !(*(CombatFind::CombatTargetInfo**)((char*)this + 0xc4))->bInvalid)
             {
-                bFound = FUN_0099d030(kEC, pSearch, pFinalSpot, aiType, (CombatPos*)pTargetInfo->kPos.FUN_006815c0(),
+                bFound = FUN_0099d030(((char*)this + 0xec), (::CombatSearch*)pSearch, (::CombatSpot*)pFinalSpot, aiType, (::CombatPos*)(*(CombatFind::CombatTargetInfo**)((char*)this + 0xc4))->kPos.FUN_006815c0(),
                                       0.0f, 0);
             }
-            else if (pController->FUN_004030b0())
+            else if ((*(CombatController**)((char*)this + 0x1c4))->FUN_004030b0())
             {
-                CombatPoint3 kTargetPos = *pController->FUN_004030b0()->GetPos();
-                bFound = FUN_0099d030(kEC, pSearch, pFinalSpot, aiType, (CombatPos*)&kTargetPos, 0.0f, 0);
+                CombatFind::CombatPoint3 kTargetPos = *((CombatFind::CombatRef*)(*(CombatController**)((char*)this + 0x1c4))->FUN_004030b0())->GetPos();
+                bFound = FUN_0099d030(((char*)this + 0xec), (::CombatSearch*)pSearch, (::CombatSpot*)pFinalSpot, aiType, (::CombatPos*)&kTargetPos, 0.0f, 0);
             }
             break;
         case 7:
         case 8:
         case 9:
         case 16:
-            if (pTargetInfo && (aiType != 8 || !FUN_00461580(1 << aiType)))
+            if ((*(CombatFind::CombatTargetInfo**)((char*)this + 0xc4)) && (aiType != 8 || !FUN_00461580(1 << aiType)))
             {
-                if (pTargetInfo->pRef)
+                if ((*(CombatFind::CombatTargetInfo**)((char*)this + 0xc4))->pRef)
                 {
-                    pFinalSpot->FUN_00997400(pTargetInfo->pRef);
-                    if (pTargetInfo->pRef->IsActor())
+                    pFinalSpot->FUN_00997400((*(CombatFind::CombatTargetInfo**)((char*)this + 0xc4))->pRef);
+                    if ((*(CombatFind::CombatTargetInfo**)((char*)this + 0xc4))->pRef->IsActor())
                     {
-                        CombatRef* pActor = pTargetInfo->pRef;
+                        CombatFind::CombatRef* pActor = (*(CombatFind::CombatTargetInfo**)((char*)this + 0xc4))->pRef;
                         pFinalSpot->FUN_00819a50(pActor->FUN_008be1b0() + pActorOld->FUN_008be1b0());
                     }
                 }
                 else
                 {
-                    pFinalSpot->AssignV4(&pTargetInfo->kPos);
+                    pFinalSpot->AssignV4(&(*(CombatFind::CombatTargetInfo**)((char*)this + 0xc4))->kPos);
                 }
-                pFinalSpot->FUN_00819a50(pTargetInfo->fRadius);
+                pFinalSpot->FUN_00819a50((*(CombatFind::CombatTargetInfo**)((char*)this + 0xc4))->fRadius);
                 bFound = true;
             }
             break;
         case 11:
-            bFound = FUN_0099b5a0(pFinalSpot, acFlags, iTargetCount);
+            bFound = FUN_0099b5a0((::CombatSpot*)pFinalSpot, ((char*)this + 0x76), (*(int*)((char*)this + 0x18)));
             break;
         case 10:
         case 12:
-            bFound = FUN_0099ebe0(pSearch, pFinalSpot, aiType);
+            bFound = FUN_0099ebe0((::CombatSearch*)pSearch, (::CombatSpot*)pFinalSpot, aiType);
             break;
         case 13:
-            bFound = TryAssignAllyTarget(pFinalSpot, aiType);
+            bFound = TryAssignAllyTarget((::CombatSpot*)pFinalSpot, aiType);
             break;
         case 14:
             pFinalSpot->SetFlags(1, 1);
             bFound = true;
             break;
         case 15: {
-            CombatPos* pCover = pController->FUN_004fb070()->FindBestItem(pActorOld, 0x32, pFinalSpot->FUN_006815c0());
+            CombatFind::CombatPos* pCover = ((CombatFind::CombatPathing*)(*(CombatController**)((char*)this + 0x1c4))->FUN_004fb070())->FindBestItem(pActorOld, 0x32, pFinalSpot->FUN_006815c0());
             if (pCover)
             {
                 pFinalSpot->AssignV4(pCover);
                 bFound = true;
             }
-            else if (pFinalSpot->FUN_0097b940()->FUN_00439090(&DAT_011f426c))
+            else if (pFinalSpot->FUN_0097b940()->FUN_00439090(&CombatFind::DAT_011f426c))
             {
                 bFound = true;
             }
@@ -11036,33 +9406,33 @@ bool CombatStateQ::FUN_0099ac20(int aiType)
         case 19:
         case 20:
         case 21: {
-            CombatSlot* pSlot = GetActionAtIndex(aiType - 0x11);
+            CombatFind::CombatSlot* pSlot = (CombatFind::CombatSlot*)GetActionAtIndex(aiType - 0x11);
             if (pSlot && pSlot->pRef)
             {
                 pFinalSpot->FUN_00997400(pSlot->pRef);
                 pFinalSpot->FUN_00819a50(pSlot->pRef->FUN_00571600() + pActorOld->FUN_008be420() +
-                                         *DAT_011cf914.FUN_00403e20());
+                                         *CombatFind::DAT_011cf914.FUN_00403e20());
                 pFinalSpot->SetFlags(2, 1);
                 bFound = true;
             }
             break;
         }
         default:
-            FUN_005b5e40("COMBAT: Invalid combat location type %i passed to CombatState::FindCombatLocation()", aiType);
+            CombatFind::FUN_005b5e40("COMBAT: Invalid combat location type %i passed to CombatState::FindCombatLocation()", aiType);
         }
     }
     if (bFound)
     {
         if (!pFinalSpot->CallReferencedFunction())
             pFinalSpot->FUN_0099b520(pActorOld->FUN_00575ca0());
-        CombatPos kSpotPosTmp = *pFinalSpot->FUN_006815c0();
-        if (kSpotPosTmp.FUN_006815c0()->FUN_004390c0(&DAT_011f426c) || FUN_009a02a0(&kSpotPosTmp, 1, bFlag))
+        CombatFind::CombatPos kSpotPosTmp = *pFinalSpot->FUN_006815c0();
+        if (kSpotPosTmp.FUN_006815c0()->FUN_004390c0(&CombatFind::DAT_011f426c) || FUN_009a02a0((::CombatPos*)&kSpotPosTmp, 1, bFlag))
         {
             float fDistance = 0.0f;
-            if (DAT_011a5650[aiType].bMeasure)
+            if (CombatFind::DAT_011a5650[aiType].bMeasure)
             {
-                CombatPos kActorPos = pActorOld->FUN_00575650();
-                fDistance = FUN_0097acb0(pController, &kActorPos, &kSpotPosTmp);
+                CombatFind::CombatPos kActorPos = pActorOld->FUN_00575650();
+                fDistance = CombatFind::FUN_0097acb0((*(CombatController**)((char*)this + 0x1c4)), &kActorPos, &kSpotPosTmp);
             }
             pLocationsRes->SetEntry(aiType, pFinalSpot, fDistance);
             if (pSearch->iCount)
@@ -11074,20 +9444,13 @@ bool CombatStateQ::FUN_0099ac20(int aiType)
     }
     delete pFinalSpot;
     delete pSearch;
-    pLocationsRes->SetEntry(aiType, 0, DAT_0108df70);
+    pLocationsRes->SetEntry(aiType, 0, CombatFind::DAT_0108df70);
     return false;
 }
 
-}
-
 namespace fnv_0097ee90 {
-class GameSettingCollection;
 
-template <class T> class SettingT
-{
-  public:
-    float* Float();
-};
+using ::SettingT;
 
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting412;
 
@@ -11097,86 +9460,30 @@ class CTSHelper
     float GetElapsedTime();
 };
 
-struct DummyInner
-{
-    char pad94[0x94];
-    CTSHelper m_kTime;
-    bool FUN_0097ee90();
-};
 
-// Returns true when m_kTime.GetElapsedTime() is less than the value of originalRuntimeFloatSetting412.
+
+// Returns true when ((fnv_0097ee90::CTSHelper*)((char*)this + 0x94))->GetElapsedTime() is less than the value of originalRuntimeFloatSetting412.
 // @fnv 0x0097ee90
-bool DummyInner::FUN_0097ee90()
-{
-    return (double)m_kTime.GetElapsedTime() < *originalRuntimeFloatSetting412.Float();
-}
 }  // namespace fnv_0097ee90
 
-namespace fnv_0099d030 {
-union SETTING_VALUE
+bool CombatState::FUN_0097ee90()
 {
-    float f;
-};
+    using namespace fnv_0097ee90;
+    return (double)((fnv_0097ee90::CTSHelper*)((char*)this + 0x94))->GetElapsedTime() < *originalRuntimeFloatSetting412.Float();
+}
 
-class GameSettingCollection;
-template <typename T> class SettingT
-{
-  public:
-    SETTING_VALUE* Float();
-};
+
+namespace fnv_0099d030 {
+using ::SettingT;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting401;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting402;
-
-class TESObjectREFR
-{
-  public:
-    int unk00;
-};
-
-struct Actor : public TESObjectREFR
-{
-    float FUN_008be1b0();
-};
-
-class ActiveEffect
-{
-  public:
-    float GetFloatAtOffset1C();
-};
-
-class FUN_00980070_shell
-{
-  public:
-    unsigned int FUN_00980070();
-};
-
-class AlchemyItem : public FUN_00980070_shell
-{
-  public:
-    int FUN_004030b0();
-};
-
-class TESAmmoInitCalls : public AlchemyItem
-{
-  public:
-    Actor* GetFieldBC();
-};
 
 class CalendarDays
 {
   public:
-    bool TryUseCoverItem(void* unk68, void* unk14, TESAmmoInitCalls* m, float f, void* unk70, int one, bool unk75);
+    bool TryUseCoverItem(void* unk68, void* unk14, ::CombatController* m, float f, void* unk70, int one, bool unk75);
 };
 
-class FUN_009611e0_shell
-{
-  public:
-    int FUN_009611e0();
-};
-
-class TESWorldSpace : public FUN_009611e0_shell
-{
-};
 extern TESWorldSpace* BGSSaveLoadGlobalDataWorldspacePtr;
 
 class GlobalObject_0045d260
@@ -11186,7 +9493,7 @@ class GlobalObject_0045d260
 };
 extern GlobalObject_0045d260 g_011f1a63;
 
-class NiPoint3;
+}  // namespace fnv_0099d030
 
 class Arg0Class
 {
@@ -11211,137 +9518,70 @@ class Arg1Class
     bool unk75;
 };
 
-class FUN_0099b8b0_shell
-{
-  public:
-    void FUN_0099b8b0(int, int);
-};
+
 
 class Arg2Class : public FUN_0099b8b0_shell
 {
 };
 
-class PathingLocation
-{
-  public:
-    PathingLocation(TESObjectREFR* actor);
-    PathingLocation(const NiPoint3& pt, TESObjectREFR* actor);
-    ~PathingLocation();
-    int unk_00, unk_04, unk_08, unk_0c, unk_10, unk_14, unk_18, unk_1c, unk_20, unk_24;
-};
-
-class PathingRequest
-{
-  public:
-    void FUN_006e4bf0();
-    void SetOrigin(PathingLocation*);
-    void SetDestination(PathingLocation*);
-    void FUN_006d30e0(int);
-    void FUN_006d3100(Arg1Class*);
-    void FUN_006d61e0(void*);
-    void FUN_00705b10(int);
-    void FUN_006d3120();
-    int FUN_006377e0();
-    int unk_000, unk_004, unk_008, unk_00c, unk_010, unk_014, unk_018, unk_01c;
-    int unk_020, unk_024, unk_028, unk_02c, unk_030, unk_034, unk_038, unk_03c;
-    int unk_040, unk_044, unk_048, unk_04c, unk_050, unk_054, unk_058, unk_05c;
-    int unk_060, unk_064, unk_068, unk_06c, unk_070, unk_074, unk_078, unk_07c;
-    int unk_080, unk_084, unk_088, unk_08c, unk_090, unk_094, unk_098, unk_09c;
-    int unk_0a0, unk_0a4, unk_0a8, unk_0ac, unk_0b0, unk_0b4, unk_0b8, unk_0bc;
-    int unk_0c0, unk_0c4, unk_0c8, unk_0cc, unk_0d0, unk_0d4, unk_0d8, unk_0dc;
-    int unk_0e0, unk_0e4, unk_0e8, unk_0ec, unk_0f0, unk_0f4, unk_0f8, unk_0fc;
-    int unk_100, unk_104, unk_108;
-};
-
-class FUN_006e4a50 : public PathingRequest
-{
-  public:
-    FUN_006e4a50();
-    __forceinline ~FUN_006e4a50()
-    {
-        FUN_006e4bf0();
-    }
-};
-
+namespace fnv_0099d030 {
 bool FindCombatPosition(PathingRequest*, float, int);
 
-class CombatController
-{
-  public:
-    int unk_000, unk_004, unk_008, unk_00c, unk_010, unk_014, unk_018, unk_01c;
-    int unk_020, unk_024, unk_028, unk_02c, unk_030, unk_034, unk_038, unk_03c;
-    int unk_040, unk_044, unk_048, unk_04c, unk_050, unk_054, unk_058, unk_05c;
-    int unk_060, unk_064, unk_068, unk_06c, unk_070, unk_074, unk_078, unk_07c;
-    int unk_080, unk_084, unk_088, unk_08c, unk_090, unk_094, unk_098, unk_09c;
-    int unk_0a0, unk_0a4, unk_0a8, unk_0ac, unk_0b0, unk_0b4, unk_0b8, unk_0bc;
-    int unk_0c0, unk_0c4, unk_0c8, unk_0cc, unk_0d0, unk_0d4, unk_0d8, unk_0dc;
-    int unk_0e0, unk_0e4, unk_0e8, unk_0ec, unk_0f0, unk_0f4, unk_0f8, unk_0fc;
-    int unk_100, unk_104, unk_108, unk_10c, unk_110, unk_114, unk_118, unk_11c;
-    int unk_120, unk_124, unk_128, unk_12c, unk_130, unk_134, unk_138, unk_13c;
-    int unk_140, unk_144, unk_148, unk_14c, unk_150, unk_154, unk_158, unk_15c;
-    int unk_160, unk_164, unk_168, unk_16c, unk_170, unk_174, unk_178, unk_17c;
-    int unk_180, unk_184, unk_188, unk_18c, unk_190, unk_194, unk_198, unk_19c;
-    int unk_1a0, unk_1a4, unk_1a8, unk_1ac, unk_1b0, unk_1b4, unk_1b8, unk_1bc;
-    int unk_1c0;
-    TESAmmoInitCalls* member_1c4;
-    void FUN_0099d310(PathingRequest*);
-    bool FUN_0099d030(Arg0Class* a0, Arg1Class* a1, Arg2Class* a2, int a3, const NiPoint3& a4, float a5, void* a6);
-};
+}  // namespace fnv_0099d030
+
 
 // Attempts to use a cover item, then builds a PathingRequest and calls FindCombatPosition to locate a combat position for the actor.
 // @fnv 0x0099d030
-bool CombatController::FUN_0099d030(Arg0Class* a0, Arg1Class* a1, Arg2Class* a2, int a3, const NiPoint3& a4, float a5,
+bool CombatState::FUN_0099d030(Arg0Class* a0, Arg1Class* a1, Arg2Class* a2, int a3, const NiPoint3& a4, float a5,
                                     void* a6)
 {
+    using namespace fnv_0099d030;
     float fTmp = 1024.0f;
     float f2 = 2048.0f;
     int i1_2 = 200;
-    Actor* actor = this->member_1c4->GetFieldBC();
-    int i4 = this->member_1c4->FUN_004030b0();
+    Actor* actor = (Actor*)(*(CombatController**)((char*)this + 0x1c4))->GetFieldBC();
+    int i4 = (int)(*(CombatController**)((char*)this + 0x1c4))->FUN_004030b0();
     float val4 = (a5 != 0.0) ? a5 : 256.0f;
     if (a3 == 6)
     {
-        val4 = originalRuntimeFloatSetting401.Float()->f +
-               ((1.0f - ((ActiveEffect*)this->member_1c4->FUN_00980070())->GetFloatAtOffset1C() / 100.0f) *
-                (originalRuntimeFloatSetting402.Float()->f - originalRuntimeFloatSetting401.Float()->f));
+        val4 = originalRuntimeFloatSetting401.Float()[0] +
+               ((1.0f - ((ActiveEffect*)(*(CombatController**)((char*)this + 0x1c4))->FUN_00980070())->GetFloatAtOffset1C() / 100.0f) *
+                (originalRuntimeFloatSetting402.Float()[0] - originalRuntimeFloatSetting401.Float()[0]));
     }
     a0->unk30 = 0;
     if (a1->unk68 != 0 && a3 == a1->unk04)
     {
-        if (((CalendarDays*)BGSSaveLoadGlobalDataWorldspacePtr->FUN_009611e0())
-                ->TryUseCoverItem(a1->unk68, &a1->unk14, this->member_1c4, actor->FUN_008be1b0(), &a1->unk70, 1,
+        if (((CalendarDays*)fnv_0099d030::BGSSaveLoadGlobalDataWorldspacePtr->FUN_009611e0())
+                ->TryUseCoverItem(a1->unk68, &a1->unk14, (*(CombatController**)((char*)this + 0x1c4)), actor->FUN_008be1b0(), &a1->unk70, 1,
                                   a1->unk75))
         {
             return true;
         }
     }
     g_011f1a63.IsInCombat();
-    FUN_006e4a50 req2;
-    this->FUN_0099d310(&req2);
+    CoveredMoveRequestStorage req2;
+    this->FUN_0099d310((::PathingRequest*)&req2);
     PathingLocation loc1(actor);
-    req2.SetOrigin(&loc1);
+    ((::PathingRequest*)&req2)->SetOrigin(&loc1);
     PathingLocation loc2(a4, actor);
-    req2.SetDestination(&loc2);
-    req2.FUN_006d30e0((int)a0);
-    req2.FUN_006d3100(a1);
-    req2.FUN_006d61e0(a6);
-    req2.FUN_00705b10(a3);
-    bool retVal7 = FindCombatPosition(&req2, val4, 0);
+    ((::PathingRequest*)&req2)->SetDestination(&loc2);
+    ((::PathingRequest*)&req2)->FUN_006d30e0((int)a0);
+    ((::PathingRequest*)&req2)->FUN_006d3100((::Arg1Class*)a1);
+    ((::PathingRequest*)&req2)->FUN_006d61e0(a6);
+    ((::PathingRequest*)&req2)->FUN_00705b10(a3);
+    bool retVal7 = FindCombatPosition((::PathingRequest*)&req2, val4, 0);
     if (retVal7)
     {
-        a2->FUN_0099b8b0((int)req2.FUN_006377e0(), 0);
+        a2->FUN_0099b8b0((int)((::PathingRequest*)&req2)->FUN_006377e0(), 0);
     }
-    req2.FUN_006d3120();
+    ((::PathingRequest*)&req2)->FUN_006d3120();
     g_011f1a63.IsInCombat();
     return retVal7;
 }
-}  // namespace fnv_0099d030
+
 
 namespace fnv_006d3150 {
-struct NiPoint3
-{
-    float x, y, z;
-};
+
 extern NiPoint3 _NiPoint3_ZERO;
 
 struct FUN_006d3200
@@ -11385,16 +9625,9 @@ namespace fnv_00997600 {
 extern "C" void* __cdecl memset(void*, int, size_t);
 
 const float kFltMax = 3.402823466e+38F;
-struct Pt3
-{
-    float x, y, z;
-};
-extern Pt3 g_zeroPt3;
 
-struct Setting
-{
-    float* GetFloat();
-};
+extern NiPoint3 g_zeroPt3;
+
 extern Setting g_set804;
 extern Setting g_set7ec;
 extern Setting g_setdcc;
@@ -11464,7 +9697,7 @@ struct FUN_00997600
     int unk78;
     int unk7C;
     float f80;
-    Pt3 p84;
+    NiPoint3 p84;
     int unk90;
     FloatW w94, w98, w9C, wA0, wA4;
     P2 pA8, pB0, pB8;
@@ -11538,7 +9771,6 @@ struct RefCalls_9a2a30
 {
     void FUN_00564db0(bool);
 };
-class BGSLoadFormBuffer;
 
 TESForm* __cdecl FUN_004839c0(unsigned int);
 struct RefSlot
@@ -11711,3 +9943,4 @@ void HostA::FUN_009a2a30(BGSLoadFormBuffer* buffer)
     for (unsigned int j = 0; j < 7; j++)
         maximum = FUN_00404010(maximum, values[j]);
 }
+

@@ -1,6 +1,9 @@
 // bsmenu/tilerect.cpp: TileRect (2 functions)
 
-#include "tilerect.h"
+#include "layout_support.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/Tile.h"
+#include "../../include/TileRect.h"
 
 // Initializes the TileRect by calling Tile::Init, then sets a value of 0x0fa3 to 1.0f and calls a method with 3.
 // @fnv 0x00a1f370

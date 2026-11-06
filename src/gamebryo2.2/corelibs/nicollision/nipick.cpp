@@ -1,6 +1,15 @@
 // gamebryo2.2/corelibs/nicollision/nipick.cpp: Results, NiPick (10 functions)
+#include "NiObjectNET_inline.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiTMallocInterface.h"
+#define FNV64_NITARRAY_INLINE_BODIES
+#include "../../../../include/NiTArray.h"
+#include "../../../../include/NiNode.h"
+#include "../../../../include/NiPick.h"
+#include "../../../../include/NiColorA.h"
 
 #include "nipick_decls.h"
+#include "../../../../include/NiStream.h"
 
 // @fnv 0x00e98b40
 void NiPick::Results::InvokeCallbacks()
@@ -25,15 +34,15 @@ void NiPick::Results::InvokeCallbacks()
 bool NiPick::PerformPick(const NiPoint3& origin, const NiPoint3& direction, bool append)
 {
     if (!append)
-        m_kResults.m_uiValidCount = 0;
-    if (!NiPickIntersections::FindIntersections(origin, direction, *this, GetRoot()) || !m_kResults.m_uiValidCount)
+        resultGrow = 0;
+    if (!NiPickIntersections::FindIntersections(origin, direction, *this, GetRoot()) || !resultGrow)
         return false;
-    if (m_eSortMode != NO_SORT && m_eIntersectionMode != BOUND_INTERSECT && m_kResults.m_uiValidCount > 1)
+    if (sortType != NO_SORT && intersectType != BOUND_INTERSECT && resultGrow > 1)
     {
-        if (m_ePickMode == FIND_ALL)
-            m_kResults.InvokeCallbacks();
+        if (pickType == FIND_ALL)
+            reinterpret_cast<Results*>(&resultVtable)->InvokeCallbacks();
         else
-            m_kResults.FindHighestPriorityCallback();
+            reinterpret_cast<Results*>(&resultVtable)->FindHighestPriorityCallback();
     }
     return true;
 }
@@ -42,7 +51,9 @@ bool NiPick::PerformPick(const NiPoint3& origin, const NiPoint3& direction, bool
 // @fnv 0x00e98fa0
 NiPick::~NiPick()
 {
-    m_kResults.Clear();
+    reinterpret_cast<Results*>(&resultVtable)->Clear();
+    if (root)
+        static_cast<NiAVObject*>(root)->NiObjectNET::DecRefCount();
 }
 
 // Releases each record's two referenced objects, deallocates the records, then frees the base array.
@@ -56,9 +67,9 @@ void NiPick::Results::Clear() throw()
         if (record)
         {
             if (record->m_pParentNode.m_pObject)
-                record->m_pParentNode.m_pObject->DecRefCount();
+                record->m_pParentNode.m_pObject->NiObjectNET::DecRefCount();
             if (record->m_pReferencedObject.m_pObject)
-                record->m_pReferencedObject.m_pObject->DecRefCount();
+                record->m_pReferencedObject.m_pObject->NiObjectNET::DecRefCount();
             g_memoryManager.Deallocate(record);
         }
     }
@@ -66,19 +77,14 @@ void NiPick::Results::Clear() throw()
     NiFree(m_pBase);
 }
 
-struct FUN_00e98fd0_shell : NiPick::Results
-{
-    void* DestroyResults(bool free);
-};
-
 // Calls Clear, then frees this object through g_memoryManager when free is set, and returns this.
 // @fnv 0x00e98fd0
-void* FUN_00e98fd0_shell::DestroyResults(bool free)
+void* __fastcall DestroyPickResults(NiPick::Results* results, void*, bool free)
 {
-    Clear();
+    results->Clear();
     if (free & 1)
-        g_memoryManager.Deallocate(this);
-    return this;
+        g_memoryManager.Deallocate(results);
+    return results;
 }
 
 extern int DAT_0126fa60;
@@ -103,11 +109,6 @@ void* __thiscall FUN_00e99300_shell::FUN_00e99300()
     return result;
 }
 
-struct NiObject;
-struct NiStream
-{
-    static int __cdecl RegisterObjectLoader(const char*, NiObject*(__cdecl*)(void));
-};
 void* __cdecl _NiMalloc(unsigned int);
 typedef void(__cdecl* PFN)();
 extern const char g_0126fab4_arg0[];
@@ -153,7 +154,6 @@ void __cdecl IntersectsSphereAndBox();
 void __cdecl FUN_00ea7d40();
 void __cdecl CheckSweptSphereOverlap();
 void __cdecl IntersectSpheres();
-struct NiStream;
 struct FUN_00eac170_Ret;
 FUN_00eac170_Ret* __cdecl FUN_00eac170(NiStream&);
 void __cdecl SphereTriangleSweepTest();
@@ -320,107 +320,46 @@ void __cdecl FUN_00e99260()
     }
 }
 
-class ImageSpaceEffectParam
-{
-  public:
-    int unk;
-    int unkCur;
-    int unkValue;
-    int unk0C;
-    int uNewnk;
-    float fPriority;
-};
-
-template <> class NiTArray<ImageSpaceEffectParam*, NiTMallocInterface<ImageSpaceEffectParam*> >
-{
-  public:
-    virtual ~NiTArray();
-    ImageSpaceEffectParam** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void SetAt(unsigned int uiIndex, ImageSpaceEffectParam* const& element)
-    {
-        if (uiIndex >= m_usSize)
-        {
-            m_usSize = uiIndex + 1;
-            if (element != 0)
-                m_usESize++;
-        }
-        else
-        {
-            if (element != 0)
-            {
-                if (m_pBase[uiIndex] == 0)
-                    m_usESize++;
-            }
-            else
-            {
-                if (m_pBase[uiIndex] != 0)
-                    m_usESize--;
-            }
-        }
-        m_pBase[uiIndex] = element;
-    }
-};
-
-class FUN_00e98be0_queue : public NiTArray<ImageSpaceEffectParam*, NiTMallocInterface<ImageSpaceEffectParam*> >
-{
-  public:
-    unsigned int m_uiCount;
-
-    void MoveLowestPriorityToFront();
-};
-
-// Finds the element with the lowest fPriority, swaps it with the first element, and sets m_uiCount to 1.
 // @fnv 0x00e98be0
-void FUN_00e98be0_queue::MoveLowestPriorityToFront()
+void NiPick::Results::FindHighestPriorityCallback()
 {
-    if (m_uiCount)
+    if (m_uiValidCount)
     {
-        ImageSpaceEffectParam* pFirst = m_pBase[0];
-        ImageSpaceEffectParam* pLowestPriority = m_pBase[0];
+        Record* pFirst = m_pBase[0];
+        Record* pLowestPriority = m_pBase[0];
         unsigned int uiLowestIndex = 0;
-        for (unsigned int i = uiLowestIndex + 1; i < m_uiCount; i++)
+        for (unsigned int i = uiLowestIndex + 1; i < m_uiValidCount; i++)
         {
-            if (m_pBase[i]->fPriority < pLowestPriority->fPriority)
+            if (m_pBase[i]->m_fHitDistance < pLowestPriority->m_fHitDistance)
             {
                 pLowestPriority = m_pBase[i];
                 uiLowestIndex = i;
             }
         }
-        ImageSpaceEffectParam* pFirstElement = pFirst;
-        SetAt(uiLowestIndex, pFirstElement);
-        SetAt(0, pLowestPriority);
-        m_uiCount = 1;
+        Record* pFirstElement = pFirst;
+        typedef NiTArray<Record*, NiTMallocInterface<Record*> > RecordArray;
+        RecordArray* array = reinterpret_cast<RecordArray*>(this);
+        array->SetAt(uiLowestIndex, pFirstElement);
+        array->SetAt(0, pLowestPriority);
+        m_uiValidCount = 1;
     }
 }
 
-class FUN_00a5e3a0_Helper
+inline NiColorA::NiColorA(float fR, float fG, float fB, float fA) : r(fR), g(fG), b(fB), a(fA)
 {
-  public:
-    void* FUN_00aa3e40(unsigned int uiSize);
-};
+}
 
-struct NiColorAE993
-{
-    float r, g, b, a;
-    NiColorAE993(float fR = 0.0f, float fG = 0.0f, float fB = 0.0f, float fA = 0.0f) : r(fR), g(fG), b(fB), a(fA)
-    {}
-};
-
-class ImageSpaceTextureE993
+// Pick-record storage: 0x44 bytes, with SetObject at 0x00e98aa0 (nitarray.cpp), unlike the 0x10-byte ImageSpaceTexture.
+class PooledPickRecord
 {
   public:
     int m_unk00;
     int m_unk04;
     int unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
     int unk30;
-    NiColorAE993 m_kFogTint;
+    NiColorA m_kDiffuseColor;
 
-    ImageSpaceTextureE993(int iParam) : m_unk00(0), m_unk04(0)
+    PooledPickRecord(int iParam) : m_unk00(0), m_unk04(0)
     {
         SetObject(iParam);
     }
@@ -428,16 +367,16 @@ class ImageSpaceTextureE993
 
     static void* operator new(unsigned int uiSize)
     {
-        return ((FUN_00a5e3a0_Helper*)&g_memoryManager)->FUN_00aa3e40(uiSize);
+        return g_memoryManager.FUN_00aa3e40(uiSize);
     }
     static void operator delete(void*, int, int);
 };
 
-class TexturePoolE993
+class PickRecordPool
 {
   public:
-    virtual ~TexturePoolE993();
-    ImageSpaceTextureE993** m_pBase;
+    virtual ~PickRecordPool();
+    PooledPickRecord** m_pBase;
     unsigned short m_usMaxSize;
     unsigned short m_usSize;
     unsigned short m_usESize;
@@ -445,9 +384,9 @@ class TexturePoolE993
     unsigned int m_uiNext;
 
     void FUN_00a90180(unsigned int uiMaxSize);
-    void FUN_00ba3aa0(unsigned int uiIndex, ImageSpaceTextureE993* const& pkElement);
+    void FUN_00ba3aa0(unsigned int uiIndex, PooledPickRecord* const& pkElement);
 
-    unsigned int Add(ImageSpaceTextureE993* pkElement)
+    unsigned int Add(PooledPickRecord* pkElement)
     {
         unsigned int uiIndex = m_usSize;
         if (uiIndex >= m_usMaxSize)
@@ -456,22 +395,22 @@ class TexturePoolE993
         return uiIndex;
     }
 
-    ImageSpaceTextureE993* GetTexture(int iParam);
+    PooledPickRecord* GetTexture(int iParam);
 };
 
-// Returns the next ImageSpaceTextureE993 from the pool, reusing an existing slot or allocating a new one when the pool is exhausted.
+// Returns the next PooledPickRecord from the pool, reusing an existing slot or allocating a new one when the pool is exhausted.
 // @fnv 0x00e99330
-ImageSpaceTextureE993* TexturePoolE993::GetTexture(int iParam)
+PooledPickRecord* PickRecordPool::GetTexture(int iParam)
 {
     if (m_uiNext < m_usSize)
     {
-        ImageSpaceTextureE993* pkTexture = m_pBase[m_uiNext];
+        PooledPickRecord* pkTexture = m_pBase[m_uiNext];
         pkTexture->SetObject(iParam);
         m_uiNext++;
         return pkTexture;
     }
 
-    ImageSpaceTextureE993* pkTexture = new ImageSpaceTextureE993(iParam);
+    PooledPickRecord* pkTexture = new PooledPickRecord(iParam);
     Add(pkTexture);
     m_uiNext++;
     return pkTexture;

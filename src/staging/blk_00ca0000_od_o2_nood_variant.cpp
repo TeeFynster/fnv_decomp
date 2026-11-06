@@ -1,3 +1,4 @@
+#include "../../include/NiTLargeArray.h"
 // staging/blk_00ca0000_od_o2_nood_variant.cpp: Picker_ca3b, TriMeshShape, VecOwnerAB, CacObj and more (15 functions)
 
 extern "C" unsigned long __cdecl _byteswap_ulong(unsigned long);
@@ -11,34 +12,55 @@ extern "C" unsigned long __cdecl _byteswap_ulong(unsigned long);
 #include "../../include/layout_support.h"
 
 #include <xmmintrin.h>
-struct hkTransform;
-class hkVector4
+
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/NiStream.h"
+#include "../../include/Vec4.h"
+#include "../../include/hkAabb.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkTransform.h"
+
+inline float hkVector4::getX() const
 {
-  public:
-    __m128 m_vComponents;
-    float getX() const
-    {
-        float x;
-        _mm_store_ss(&x, m_vComponents);
-        return x;
-    }
-    void FUN_00c7f640(const hkTransform& t, const hkVector4& v);
-};
-struct hkTransform
+    float x;
+    _mm_store_ss(&x, m_vComponents);
+    return x;
+}
+inline void hkVector4::add(__m128 r)
 {
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-    hkVector4 m_kColumn3;
-    hkTransform& operator=(const hkTransform& t)
+    m_vComponents = _mm_add_ps(m_vComponents, r);
+}
+inline void hkVector4::set(float x, float y, float z, float w)
+{
+    m_vComponents = _mm_setr_ps(x, y, z, w);
+}
+inline void hkTransform::operator=(const hkTransform& t)
+{
+    m_row0 = t.m_row0;
+    m_row1 = t.m_row1;
+    m_row2 = t.m_row2;
+    m_row3 = t.m_row3;
+}
+static __forceinline void SetEmpty(hkAabb& aabb)
+{
+    aabb.m_kMinimumCorner.set(3.40282e+38f, 3.40282e+38f, 3.40282e+38f, 0.0f);
+    aabb.m_kMaximumCorner.set(-3.40282e+38f, -3.40282e+38f, -3.40282e+38f, 0.0f);
+}
+class Allocator
+{
+public:
+    virtual void slot0();
+    virtual void* alloc(int bytes);
+    virtual void slot2();
+    virtual void slot3();
+    virtual void Free(void*, unsigned);
+    template <class T> void FreeArray(T* data, unsigned capacity)
     {
-        m_kColumn0.m_vComponents = t.m_kColumn0.m_vComponents;
-        m_kColumn1.m_vComponents = t.m_kColumn1.m_vComponents;
-        m_kColumn2.m_vComponents = t.m_kColumn2.m_vComponents;
-        m_kColumn3.m_vComponents = t.m_kColumn3.m_vComponents;
-        return *this;
+        if (!(capacity & 0x80000000u))
+            Free(data, (capacity & 0x3fffffffu) * sizeof(T));
     }
 };
+
 struct hkVertex3
 {
     float x;
@@ -87,54 +109,20 @@ void ShapeCa36a0::FUN_00ca36a0(const hkTransform& t)
     for (unsigned int i = 0; i < m_kVertices->m_iElementCount; i++)
     {
         const hkVertex3& p = m_kVertices->m_data[i];
-        hkVector4 v;
-        v.m_vComponents.m128_f32[0] = p.x;
-        v.m_vComponents.m128_f32[1] = p.y;
-        v.m_vComponents.m128_f32[2] = p.z;
-        v.m_vComponents.m128_f32[3] = 0.0f;
-        v.m_vComponents = _mm_mul_ps(m_vScale.m_vComponents, v.m_vComponents);
-        hkVector4 tv;
-        tv.FUN_00c7f640(t, v);
-        m_cachedMin.m_vComponents = _mm_min_ps(m_cachedMin.m_vComponents, tv.m_vComponents);
-        m_cachedMax.m_vComponents = _mm_max_ps(m_cachedMax.m_vComponents, tv.m_vComponents);
+        __m128 v;
+        v.m128_f32[0] = p.x;
+        v.m128_f32[1] = p.y;
+        v.m128_f32[2] = p.z;
+        v.m128_f32[3] = 0.0f;
+        v = _mm_mul_ps(m_vScale.m_vComponents, v);
+        __m128 tv;
+        reinterpret_cast<hkVector4&>(tv).FUN_00c7f640(t, reinterpret_cast<const hkVector4&>(v));
+        m_cachedMin.m_vComponents = _mm_min_ps(m_cachedMin.m_vComponents, tv);
+        m_cachedMax.m_vComponents = _mm_max_ps(m_cachedMax.m_vComponents, tv);
     }
 }
 
 namespace fnv_00ca37e0 {
-class hkBool
-{
-  public:
-    hkBool()
-    {}
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
-
-struct hkTransform;
-
-class hkVector4
-{
-  public:
-    __m128 m_vComponents;
-    void add(__m128 r)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, r);
-    }
-    float getX() const
-    {
-        float x;
-        _mm_store_ss(&x, m_vComponents);
-        return x;
-    }
-    void FUN_00c7f640(const hkTransform& t, const hkVector4& v);
-};
 
 struct hkVertex3
 {
@@ -152,12 +140,6 @@ struct hkVertexArray
     int unk10;
     int unk14;
     hkVertex3* m_data;
-};
-
-struct hkAabb
-{
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
 };
 
 struct hkShapeCache
@@ -222,16 +204,16 @@ void ShapeCa37e0::FUN_00ca37e0(const hkTransform& t, float tolerance, hkAabb& ou
     for (unsigned int i = 0; i < m_kVertices->m_iElementCount; i++)
     {
         const hkVertex3& p = m_kVertices->m_data[i];
-        hkVector4 v;
-        v.m_vComponents.m128_f32[0] = p.x;
-        v.m_vComponents.m128_f32[1] = p.y;
-        v.m_vComponents.m128_f32[2] = p.z;
-        v.m_vComponents.m128_f32[3] = 0.0f;
-        v.m_vComponents = _mm_mul_ps(m_vScale.m_vComponents, v.m_vComponents);
-        hkVector4 tv;
-        tv.FUN_00c7f640(t, v);
-        out.m_kMinimumCorner.m_vComponents = _mm_min_ps(out.m_kMinimumCorner.m_vComponents, tv.m_vComponents);
-        out.m_kMaximumCorner.m_vComponents = _mm_max_ps(out.m_kMaximumCorner.m_vComponents, tv.m_vComponents);
+        __m128 v;
+        v.m128_f32[0] = p.x;
+        v.m128_f32[1] = p.y;
+        v.m128_f32[2] = p.z;
+        v.m128_f32[3] = 0.0f;
+        v = _mm_mul_ps(m_vScale.m_vComponents, v);
+        __m128 tv;
+        reinterpret_cast<hkVector4&>(tv).FUN_00c7f640(t, reinterpret_cast<const hkVector4&>(v));
+        out.m_kMinimumCorner.m_vComponents = _mm_min_ps(out.m_kMinimumCorner.m_vComponents, tv);
+        out.m_kMaximumCorner.m_vComponents = _mm_max_ps(out.m_kMaximumCorner.m_vComponents, tv);
     }
 addRadius:
     float radius = m_fSphereRadius + tolerance;
@@ -277,19 +259,6 @@ FUN_00ca39a0::FUN_00ca39a0(float x)
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 
-struct Ca39f0Vector4
-{
-    __m128 m_vComponents;
-    __forceinline void operator=(const Ca39f0Vector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void set(float x, float y, float z, float w)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
-
 struct Ca39f0RefObject
 {
     virtual ~Ca39f0RefObject();
@@ -313,31 +282,20 @@ struct Ca39f0Pointer
     {}
     ~Ca39f0Pointer()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     Ca39f0Pointer& operator=(const Ca39f0Pointer& ptr)
     {
         if (m_pObject != ptr.m_pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = ptr.m_pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
-    }
-};
-
-struct Ca39f0Aabb
-{
-    Ca39f0Vector4 m_kMinimumCorner;
-    Ca39f0Vector4 m_kMaximumCorner;
-    __forceinline void setEmpty()
-    {
-        m_kMinimumCorner.set(3.40282e+38f, 3.40282e+38f, 3.40282e+38f, 0.0f);
-        m_kMaximumCorner.set(-3.40282e+38f, -3.40282e+38f, -3.40282e+38f, 0.0f);
     }
 };
 
@@ -347,7 +305,7 @@ struct Ca39f0Cinfo
     Ca39f0Pointer m_object;
     float m_fSphereRadius;
     int unk0c;
-    Ca39f0Vector4 m_offset;
+    __m128 m_offset;
 };
 
 struct Ca39f0BaseA
@@ -390,12 +348,13 @@ struct Ca39f0Base : Ca39f0BaseA, Ca39f0BaseB
 
 struct FUN_00ca39f0 : Ca39f0Base
 {
-    Ca39f0Aabb m_kBounds;
+    // Raw SIMD storage preserves the original uninitialized construction.
+    __m128 m_kBounds[2];
     int unk80;
     Ca39f0Pointer m_pReferencedObject;
     int unk88;
     int unk8c;
-    Ca39f0Vector4 m_offset;
+    __m128 m_offset;
     float m_fSphereRadius;
 
     FUN_00ca39f0(const Ca39f0Cinfo& info);
@@ -409,7 +368,7 @@ FUN_00ca39f0::FUN_00ca39f0(const Ca39f0Cinfo& info) : Ca39f0Base(0x1f, 3)
     m_pReferencedObject = info.m_object;
     m_fSphereRadius = info.m_fSphereRadius;
     m_offset = info.m_offset;
-    m_kBounds.setEmpty();
+    SetEmpty(*reinterpret_cast<hkAabb*>(m_kBounds));
     m_enabled = true;
 }
 
@@ -437,10 +396,10 @@ template <class T> class Pointer_ca3b
     {
         if (m_pObject != kPointer.m_pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = kPointer.m_pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -449,25 +408,15 @@ template <class T> class Pointer_ca3b
     {
         if (m_pObject != pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
     }
     T* m_pObject;
-};
-
-struct Vector4_ca3b
-{
-    __m128 m_vComponents;
-    Vector4_ca3b& operator=(const Vector4_ca3b& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
 };
 
 struct PickResult_ca3b
@@ -476,7 +425,7 @@ struct PickResult_ca3b
     Pointer_ca3b<RefObject_ca3b> m_pReferencedObject;
     float m_fHitDistance;
     int unk0c;
-    Vector4_ca3b m_kPoint;
+    __m128 m_kPoint;
 };
 
 class Picker_ca3b
@@ -489,7 +438,7 @@ class Picker_ca3b
     int unk80;
     Pointer_ca3b<RefObject_ca3b> m_pReferencedObject;
     int unk88, unk8c;
-    Vector4_ca3b m_kPoint;
+    __m128 m_kPoint;
     float m_fHitDistance;
 
     void FUN_00ca3b20(PickResult_ca3b* pkResult);
@@ -547,25 +496,18 @@ struct SimdReal
     }
 };
 
-struct Vec4
+inline void Vec4::set(float a, float b, float c, float d)
 {
-    __m128 m_vComponents;
-    void set(float x, float y, float z, float w = 0.0f)
-    {
-        m_vComponents.m128_f32[0] = x;
-        m_vComponents.m128_f32[1] = y;
-        m_vComponents.m128_f32[2] = z;
-        m_vComponents.m128_f32[3] = w;
-    }
-    void mul4(const Vec4& a)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, a.m_vComponents);
-    }
-    SimdReal getSimdAt0() const
-    {
-        return SimdReal(m_vComponents);
-    }
-};
+    x = a; y = b; z = c; w = d;
+}
+inline void Vec4::mul4(const Vec4& a)
+{
+    reinterpret_cast<__m128&>(*this) = _mm_mul_ps(reinterpret_cast<const __m128&>(*this), reinterpret_cast<const __m128&>(a));
+}
+inline SimdReal Vec4::getSimdAt0() const
+{
+    return SimdReal(reinterpret_cast<const __m128&>(*this));
+}
 
 struct TriShape
 {
@@ -649,28 +591,6 @@ TriShape* TriMeshShape::FUN_00ca3c40(unsigned int key, TriShape* buffer)
     return shape;
 }
 
-static const float HK_REAL_MAX_CA4B = 3.40282e+38f;
-
-struct hkVector4CA4B
-{
-    __m128 m_vComponents;
-    void set(float x, float y, float z, float w)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
-
-struct AabbCA4B
-{
-    hkVector4CA4B m_kMin;
-    hkVector4CA4B m_kMax;
-    void setEmpty()
-    {
-        m_kMin.set(HK_REAL_MAX_CA4B, HK_REAL_MAX_CA4B, HK_REAL_MAX_CA4B, 0.0f);
-        m_kMax.set(-HK_REAL_MAX_CA4B, -HK_REAL_MAX_CA4B, -HK_REAL_MAX_CA4B, 0.0f);
-    }
-};
-
 struct ShapeBaseCA4B
 {
     ShapeBaseCA4B(int type, int subType);
@@ -685,49 +605,42 @@ struct __declspec(novtable) ShapeIfaceCA4B
     virtual void Vf00();
 };
 
-struct PointCA4B
+// 8-byte reference/flags record: SetAt 0x00ca49a0 matches MaterialArray below; shared Point is 12 bytes.
+struct MeshMaterialEntry
 {
     int unk00;
     int unk04;
 };
 
-struct PointArrayBaseCA4B
+MeshMaterialEntry* MeshMaterialArrayAllocate(unsigned int);
+typedef NiTLargeArray<MeshMaterialEntry, NiTMallocInterface<MeshMaterialEntry> > MeshMaterialArrayBase;
+template <> inline NiTLargeArray<MeshMaterialEntry, NiTMallocInterface<MeshMaterialEntry> >::NiTLargeArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
 {
-    static PointCA4B* Allocate(unsigned int ItemUpdateArray);
-    PointArrayBaseCA4B(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1)
-    {
         m_uiMaxSize = uiMaxSize;
         m_uiGrowBy = uiGrowBy;
         m_uiSize = 0;
         m_uiESize = 0;
         if (m_uiMaxSize > 0)
-            m_pBase = Allocate(m_uiMaxSize);
+            m_pBase = MeshMaterialArrayAllocate(m_uiMaxSize);
         else
             m_pBase = 0;
     }
-    virtual ~PointArrayBaseCA4B();
-    PointCA4B* m_pBase;
-    unsigned int m_uiMaxSize;
-    unsigned int m_uiSize;
-    unsigned int m_uiESize;
-    unsigned int m_uiGrowBy;
-};
 
-struct PointArrayCA4B : public PointArrayBaseCA4B
+struct MeshMaterialArray : public MeshMaterialArrayBase
 {
-    PointArrayCA4B(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) : PointArrayBaseCA4B(uiMaxSize, uiGrowBy)
+    MeshMaterialArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) : MeshMaterialArrayBase(uiMaxSize, uiGrowBy)
     {}
-    virtual ~PointArrayCA4B();
+    virtual ~MeshMaterialArray();
     void SetSize(unsigned int uiSize);
-    void SetAt(unsigned int uiIndex, const PointCA4B& kElement);
-    unsigned int SetAtGrow(unsigned int uiIndex, const PointCA4B& kElement)
+    void SetAt(unsigned int uiIndex, const MeshMaterialEntry& kElement);
+    unsigned int SetAtGrow(unsigned int uiIndex, const MeshMaterialEntry& kElement)
     {
         if (uiIndex >= m_uiMaxSize)
             SetSize(uiIndex + m_uiGrowBy);
         SetAt(uiIndex, kElement);
         return uiIndex;
     }
-    unsigned int Add(const PointCA4B& kElement)
+    unsigned int Add(const MeshMaterialEntry& kElement)
     {
         return SetAtGrow(m_uiSize, kElement);
     }
@@ -738,9 +651,9 @@ struct ShapeInfoCA4B
     int unk00;
     float m_fBoundRadius;
     int unk08;
-    PointCA4B* m_pkPoints;
+    MeshMaterialEntry* m_pkMaterials;
     int unk10;
-    int m_iNumPoints;
+    int m_iNumMaterials;
     int unk18;
     int unk1C;
     float m_fVectorY;
@@ -774,22 +687,22 @@ class FUN_00ca4bc0 : public ShapeBaseCA4B, public ShapeIfaceCA4B
     int unk54;
     int unk58;
     int unk5C;
-    AabbCA4B m_kAabb;
-    hkVector4CA4B m_kCenter;
+    __m128 m_kAabb[2];
+    __m128 m_kCenter;
     float m_fBoundRadius;
-    PointArrayCA4B m_kPoints;
+    MeshMaterialArray m_kMaterials;
 };
 
 // @fnv 0x00ca4bc0
 FUN_00ca4bc0::FUN_00ca4bc0(const ShapeInfoCA4B* pkInfo) : ShapeBaseCA4B(0x1e, 3), m_fBoundRadius(pkInfo->m_fBoundRadius)
 {
     m_fBoundRadius = pkInfo->m_fBoundRadius;
-    m_kCenter.set(pkInfo->m_fVectorY, pkInfo->m_fVectorZ, pkInfo->m_fScalarPart, pkInfo->m_fVectorX);
-    for (int i = 0; i < pkInfo->m_iNumPoints; i++)
+    m_kCenter = _mm_setr_ps(pkInfo->m_fVectorY, pkInfo->m_fVectorZ, pkInfo->m_fScalarPart, pkInfo->m_fVectorX);
+    for (int i = 0; i < pkInfo->m_iNumMaterials; i++)
     {
-        m_kPoints.Add(pkInfo->m_pkPoints[i]);
+        m_kMaterials.Add(pkInfo->m_pkMaterials[i]);
     }
-    m_kAabb.setEmpty();
+    SetEmpty(*reinterpret_cast<hkAabb*>(m_kAabb));
     m_bValueAt0C = true;
 }
 
@@ -858,22 +771,22 @@ class Ca5580Ptr
     Ca5580Ptr(Ca5580Ref* object = 0)
     {
         m_pObject = object;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~Ca5580Ptr()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     Ca5580Ptr& operator=(Ca5580Ref* object)
     {
         if (m_pObject != object)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = object;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -896,14 +809,6 @@ FUN_00ca5580::FUN_00ca5580() : unk00(0), m_sp(0), m_f(0.0f)
     m_v = _mm_set1_ps(DAT_01012068);
 }
 
-struct VecCAB
-{
-    __m128 m_vComponents;
-    void set(float x, float y, float z, float w)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
 struct BaseCAB0
 {
     virtual void v00();
@@ -924,7 +829,7 @@ struct ConstraintCAB : BaseCAB0, BaseCAB1, BaseCAB2
 };
 struct FUN_00cabec0 : ConstraintCAB
 {
-    VecCAB m_40;
+    __m128 m_40;
     int m_50, m_54, m_58, m_5c, m_60, m_64, m_68, m_6c, m_70, m_74, m_78, m_7c;
     int m_80, m_84, m_88, m_8c, m_90, m_94, m_98, m_9c, m_a0, m_a4, m_a8, m_ac;
     int m_b0, m_b4, m_b8, m_bc;
@@ -938,7 +843,7 @@ struct FUN_00cabec0 : ConstraintCAB
 FUN_00cabec0::FUN_00cabec0(int a) : ConstraintCAB(a)
 {
     m_c0 = 0;
-    m_40.set(0.0f, 0.0f, 1.0f, 0.0f);
+    m_40 = _mm_setr_ps(0.0f, 0.0f, 1.0f, 0.0f);
 }
 
 class VecOwnerAB
@@ -967,23 +872,18 @@ float VecOwnerAB::FUN_00cac860()
     return _mm_cvtss_f32(_mm_shuffle_ps(m_v, m_v, 0xff));
 }
 
-struct CacV4
-{
-    __m128 m_vComponents;
-};
-
 struct CacObj
 {
     int unk00;
     int unk04;
     int unk08;
     int unk0c;
-    CacV4 v4;
-    void FUN_00cac960(const CacV4* pv);
+    hkVector4 v4;
+    void FUN_00cac960(const hkVector4* pv);
 };
 
 // @fnv 0x00cac960
-void CacObj::FUN_00cac960(const CacV4* pv)
+void CacObj::FUN_00cac960(const hkVector4* pv)
 {
     v4.m_vComponents = pv->m_vComponents;
 }
@@ -1180,28 +1080,7 @@ struct F7_Scope
         F7_tls.unk2b4 = saved;
     }
 };
-struct F7_Alloc
-{
-    virtual void slot0();
-    virtual void* alloc(int bytes);
-};
-struct F7_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    F7_Alloc* m_pStreamAllocator;
-    F7_Alloc& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-F7_Router* __cdecl FUN_00c85750();
-struct F7_Vec
-{
-    __m128 q;
-};
+
 struct F7_Shape
 {
     int unk00;
@@ -1209,12 +1088,12 @@ struct F7_Shape
     unsigned short refs;
     int unk08;
     int unk0c;
-    F7_Vec unk10;
-    F7_Vec v20, v30, v40, v50, v60, v70, v80, v90, va0;
+    hkVector4 unk10;
+    hkVector4 v20, v30, v40, v50, v60, v70, v80, v90, va0;
     F7_Shape();
     static void* operator new(unsigned int amount)
     {
-        void* r = FUN_00c85750()->heap().alloc(amount);
+        void* r = (&hkMemoryRouter::getInstance())->heap().blockAlloc(amount);
         ((F7_Shape*)r)->size = (unsigned short)amount;
         return r;
     }
@@ -1223,9 +1102,9 @@ struct F7_Shape
 static __declspec(noinline) void __cdecl FUN_00cbd9e0(float s, F7_Shape* d)
 {
     __m128 k = _mm_set1_ps(s);
-    F7_Vec* p = &d->v20;
+    hkVector4* p = &d->v20;
     for (int i = 0; i < 3; i++)
-        p[i].q = _mm_mul_ps(p[i].q, k);
+        p[i].m_vComponents = _mm_mul_ps(p[i].m_vComponents, k);
 }
 struct F7_Params
 {
@@ -1249,14 +1128,14 @@ void F7_Clone::FUN_00cbdb70(F7_Shape* dest, F7_Params* params)
     F7_Shape* src = shape;
     if (!dest)
         dest = new F7_Shape;
-    dest->v20.q = src->v20.q;
-    dest->v30.q = src->v30.q;
-    dest->v40.q = src->v40.q;
-    dest->v50.q = src->v50.q;
-    dest->v60.q = src->v60.q;
-    dest->v70.q = src->v70.q;
-    dest->v80.q = src->v80.q;
-    dest->v90.q = src->v90.q;
+    dest->v20.m_vComponents = src->v20.m_vComponents;
+    dest->v30.m_vComponents = src->v30.m_vComponents;
+    dest->v40.m_vComponents = src->v40.m_vComponents;
+    dest->v50.m_vComponents = src->v50.m_vComponents;
+    dest->v60.m_vComponents = src->v60.m_vComponents;
+    dest->v70.m_vComponents = src->v70.m_vComponents;
+    dest->v80.m_vComponents = src->v80.m_vComponents;
+    dest->v90.m_vComponents = src->v90.m_vComponents;
     float scale = params->scale;
     if (scale != 1.0f)
         FUN_00cbd9e0(scale, dest);
@@ -1264,52 +1143,42 @@ void F7_Clone::FUN_00cbdb70(F7_Shape* dest, F7_Params* params)
 }
 
 namespace fnv_00cbeaf0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00cbeaf0 FUN_00cbeaf0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_min_ps(__m128, __m128);
-    __m128 _mm_max_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
+    LocalM128 _mm_min_ps(LocalM128, LocalM128);
+    LocalM128 _mm_max_ps(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
 }
+extern LocalM128 DAT_010c4c10;
 
-extern __m128 DAT_010c4c10;
-
-struct hkVector4
+static __forceinline void Load3(LocalM128& v, const float* p)
 {
-    __m128 m_vComponents;
-    __forceinline void load3(const float* p)
-    {
-        m_vComponents.m128_f32[0] = p[0];
-        m_vComponents.m128_f32[1] = p[1];
-        m_vComponents.m128_f32[2] = p[2];
-    }
-};
-
-struct hkAabb
-{
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
-};
+    v.m128_f32[0] = p[0];
+    v.m128_f32[1] = p[1];
+    v.m128_f32[2] = p[2];
+}
 
 // @fnv 0x00cbeaf0
 void FUN_00cbeaf0(const float* vertexArray, int numVertices, int striding, hkAabb& aabbOut)
 {
-    hkVector4 v;
-    v.load3(vertexArray);
-    __m128 vmin = v.m_vComponents;
-    __m128 vmax = vmin;
+    LocalM128 v;
+    Load3(v, vertexArray);
+    LocalM128 vmin = v;
+    LocalM128 vmax = vmin;
     for (int i = 1; i < numVertices; i++)
     {
-        v.load3((const float*)((const char*)vertexArray + i * striding));
-        vmin = _mm_min_ps(vmin, v.m_vComponents);
-        vmax = _mm_max_ps(vmax, v.m_vComponents);
+        Load3(v, (const float*)((const char*)vertexArray + i * striding));
+        vmin = _mm_min_ps(vmin, v);
+        vmax = _mm_max_ps(vmax, v);
     }
-    aabbOut.m_kMinimumCorner.m_vComponents = _mm_and_ps(DAT_010c4c10, vmin);
-    aabbOut.m_kMaximumCorner.m_vComponents = _mm_and_ps(DAT_010c4c10, vmax);
+    reinterpret_cast<LocalM128&>(aabbOut.m_kMinimumCorner.m_vComponents) = _mm_and_ps(DAT_010c4c10, vmin);
+    reinterpret_cast<LocalM128&>(aabbOut.m_kMaximumCorner.m_vComponents) = _mm_and_ps(DAT_010c4c10, vmax);
 }
 }  // namespace fnv_00cbeaf0
 
@@ -1329,66 +1198,12 @@ struct Reader
         position += read(this, output, bytes, itemSize, count);
     }
 };
-struct NiStream
+
+// NiStream's binary reader is stored at offset 0x24c in the game layout.
+static inline Reader* StreamReader(NiStream& stream)
 {
-    unsigned unk00;
-    unsigned version;
-    char fileName[216];
-    char filePath[260];
-    unsigned char unk1e4;
-    unsigned char littleEndian;
-    unsigned short unk1e6;
-    unsigned unk1e8;
-    unsigned unk1ec;
-    unsigned unk1f0;
-    unsigned unk1f4;
-    unsigned unk1f8;
-    unsigned unk1fc;
-    unsigned unk200;
-    unsigned unk204;
-    unsigned unk208;
-    unsigned unk20c;
-    unsigned unk210;
-    unsigned unk214;
-    unsigned unk218;
-    unsigned unk21c;
-    unsigned unk220;
-    unsigned unk224;
-    unsigned unk228;
-    unsigned unk22c;
-    unsigned unk230;
-    unsigned unk234;
-    unsigned unk238;
-    unsigned unk23c;
-    unsigned unk240;
-    unsigned unk244;
-    unsigned unk248;
-    Reader* reader;
-    void FUN_00a64670();
-    template <class T> void ReadValue(T& value)
-    {
-        reader->ReadScalar(&value, sizeof(T));
-    }
-};
-struct Allocator
-{
-    virtual void unk00() = 0;
-    virtual void unk04() = 0;
-    virtual void unk08() = 0;
-    virtual void unk0c() = 0;
-    virtual void Free(void*, unsigned) = 0;
-    template <class T> void FreeArray(T* data, unsigned capacity)
-    {
-        if (!(capacity & 0x80000000u))
-            Free(data, (capacity & 0x3fffffffu) * sizeof(T));
-    }
-};
-struct MemoryRouter
-{
-    unsigned unk00, unk04, unk08, unk0c;
-    Allocator* heap;
-};
-MemoryRouter* __cdecl FUN_00c85750();
+    return reinterpret_cast<Reader*&>(stream.m_pkIstr);
+}
 template <class T> struct LegacyArray
 {
     T* data;
@@ -1409,8 +1224,8 @@ template <class T> struct LegacyArray
     }
     void ClearAndDeallocate()
     {
-        MemoryRouter* router = FUN_00c85750();
-        ClearAndDeallocate(*router->heap);
+        hkMemoryRouter* router = (&hkMemoryRouter::getInstance());
+        ClearAndDeallocate(*reinterpret_cast<Allocator*>(router->m_heap));
     }
 };
 struct __declspec(align(16)) FUN_00ca7310
@@ -1484,24 +1299,12 @@ struct RuntimeMesh
     float radius;
     MaterialArray materials;
 };
-struct TextFlag
-{
-    unsigned char enabled;
-    TextFlag(bool value)
-    {
-        enabled = (char)value;
-    }
-    TextFlag(const TextFlag& value)
-    {
-        enabled = value.enabled;
-    }
-};
 struct FUN_00cc0500
 {
     void* vtable;
     unsigned short unk04, references;
     void* writer;
-    FUN_00cc0500(char*, int, TextFlag);
+    FUN_00cc0500(char*, int, hkBool);
     void FUN_00cc00e0();
     ~FUN_00cc0500()
     {
@@ -1578,15 +1381,15 @@ void MeshShape::FUN_00ca7a70(NiStream& stream)
 {
     unsigned char allocated;
     RuntimeMesh* mesh = GetRuntime(&allocated);
-    if (stream.version < 2)
+    if (stream.m_kHeader.m_uiVersion < 2)
     {
-        const char* name = stream.fileName;
+        const char* name = stream.m_kHeader.m_acAuthor;
         if (!*name)
             name = "Please";
         {
             char message[512];
-            FUN_00cc0500 text(message, 512, TextFlag(true));
-            const char* path = stream.filePath;
+            FUN_00cc0500 text(message, 512, true);
+            const char* path = stream.m_acFileName;
             text.FUN_00cc01c0("File ")
                 .FUN_00cc01c0(path)
                 .FUN_00cc01c0(" contains an old bhkpMeshShape! ")
@@ -1597,7 +1400,7 @@ void MeshShape::FUN_00ca7a70(NiStream& stream)
         }
         ReadGroup(stream);
         FUN_00ca7310 old;
-        stream.reader->Read(&old, 0xc0, 0, 0);
+        StreamReader(stream)->Read(&old, 0xc0, 0, 0);
         old.a24.ClearAndDeallocate();
         old.a30.ClearAndDeallocate();
         old.a3c.ClearAndDeallocate();
@@ -1610,14 +1413,14 @@ void MeshShape::FUN_00ca7a70(NiStream& stream)
         old.a90.ClearAndDeallocate();
         old.a9c.ClearAndDeallocate();
         old.aa8.ClearAndDeallocate();
-        if (stream.littleEndian != 1)
+        if (stream.m_bSourceIsLittleEndian != 1)
         {
             old.material = _byteswap_ulong(old.material);
             unsigned* radiusBits = reinterpret_cast<unsigned*>(&old.radius);
             *radiusBits = _byteswap_ulong(*radiusBits);
         }
         mesh->radius = old.radius;
-        if (stream.littleEndian != 1)
+        if (stream.m_bSourceIsLittleEndian != 1)
         {
             unsigned* x = reinterpret_cast<unsigned*>(&old.scaleX);
             unsigned* y = reinterpret_cast<unsigned*>(&old.scaleY);
@@ -1633,15 +1436,15 @@ void MeshShape::FUN_00ca7a70(NiStream& stream)
         material = old.material;
         mesh->material = 0;
         mesh->radius = DAT_010c72c0;
-        stream.FUN_00a64670();
+        stream.ReadUnsignedInteger();
     }
     else
     {
         FUN_00c84d00(stream);
-        stream.FUN_00a64670();
+        stream.ReadUnsignedInteger();
         unsigned count = 0;
-        stream.ReadValue(count);
-        if (stream.littleEndian != 1)
+        StreamReader(stream)->ReadScalar(&count, sizeof(count));
+        if (stream.m_bSourceIsLittleEndian != 1)
         {
             unsigned* radiusBits = reinterpret_cast<unsigned*>(&mesh->radius);
             *radiusBits = _byteswap_ulong(*radiusBits);
@@ -1649,8 +1452,8 @@ void MeshShape::FUN_00ca7a70(NiStream& stream)
         for (unsigned index = 0; index < count; ++index)
         {
             MaterialEntry entry;
-            stream.ReadValue(entry.flags);
-            if (stream.version < 9 && (entry.flags & 0x20))
+            StreamReader(stream)->ReadScalar(&entry.flags, sizeof(entry.flags));
+            if (stream.m_kHeader.m_uiVersion < 9 && (entry.flags & 0x20))
                 entry.flags = (entry.flags & ~0x20u) | 0x8000;
             mesh->materials.Append(entry);
         }

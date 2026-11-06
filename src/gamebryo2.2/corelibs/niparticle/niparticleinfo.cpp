@@ -1,11 +1,8 @@
+#include "../../../../include/NiPoint3.h"
 
 // src/gamebryo2.2/corelibs/niparticle/niparticleinfo.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/niparticleinfo.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiPoint3
-{
-    float x, y, z;
-};
 
 struct Point3ParameterData
 {

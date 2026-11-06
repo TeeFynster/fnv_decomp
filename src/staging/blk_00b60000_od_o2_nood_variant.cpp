@@ -5,7 +5,11 @@
 
 // src/staging/blk_00b60000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/BSFogProperty.h"
+#include "../../include/NiColor.h"
+#include "../../include/NiD3DShaderConstantMap.h"
+#include "../../include/NiShaderConstantMapEntry.h"
+#include "../../include/NiPoint3.h"
 
 #include <string.h>
 struct __declspec(align(16)) Matrix132
@@ -38,11 +42,7 @@ struct Group132
     Object132** objects;
 };
 extern Group132* DAT_011f91e0;
-struct Vector132
-{
-    float x, y, z;
-};
-extern Vector132 DAT_011f474c;
+extern NiPoint3 DAT_011f474c;
 extern Matrix132 DAT_011fecc8;
 struct Context132
 {
@@ -186,13 +186,9 @@ struct __declspec(align(16)) ClipPlane16
 {
     float x, y, z, d;
 };
-struct Vec3
-{
-    float x, y, z;
-};
 struct ClipPlane
 {
-    Vec3 n;
+    NiPoint3 n;
     float d;
 };
 struct ClipState
@@ -368,7 +364,7 @@ void ClipManager::FUN_00b7be00(unsigned int state)
 
             for (int i = 0; i < 6; ++i)
             {
-                Vec3 n = pSrc[i].n;
+                NiPoint3 n = pSrc[i].n;
                 ClipPlane16 plane;
                 plane.x = n.x;
                 plane.y = n.y;
@@ -502,62 +498,6 @@ class ShaderConstantDevice
     virtual long __stdcall SetVertexShaderConstantF(unsigned int, const float*, unsigned int);
 };
 
-class NiShaderConstantMapEntry
-{
-  public:
-    void* m_pVtbl;
-    unsigned int m_uiRefCount;
-    bool m_bEnableState;
-};
-
-class NiD3DShaderConstantMap
-{
-  public:
-    virtual void Func00();
-    virtual void Func04();
-    virtual void Func08();
-    virtual void Func0C();
-    virtual void Func10();
-    virtual void Func14();
-    virtual void Func18();
-    virtual void Func1C();
-    virtual void Func20();
-    virtual void Update();
-};
-
-struct NiColor
-{
-    float r;
-    float g;
-    float b;
-};
-
-struct BSFogProperty
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    NiColor m_kFogTint;
-    float m_fNearPlane;
-    float m_fFarPlane;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    float m_fPower;
-};
 
 struct D3DXVECTOR4
 {
@@ -641,7 +581,8 @@ struct DeviceHolder
     ShaderConstantDevice* m_pDirectInputDevice;
 };
 
-struct RendererData
+// Exe 0x00b7b450: unit-local RendererData view; declarations and layout are preserved.
+struct BlkRendererDataView
 {
     int unk00;
     int unk04;
@@ -679,7 +620,7 @@ struct ShaderGeometryGroup
 {
     GeometryState* current;
 };
-extern RendererData* DAT_0126f74c;
+extern BlkRendererDataView* DAT_0126f74c;
 extern D3DXVECTOR4 DAT_011fa280;
 extern D3DXVECTOR4 DAT_011fa290;
 extern D3DXVECTOR4 DAT_011a9bd0;
@@ -721,26 +662,26 @@ void BSShaderPass::FUN_00b7b450(unsigned int uiPass)
     {
         NiShaderConstantMapEntry* pkEntry = DAT_011febd8[i];
         if (pkEntry)
-            pkEntry->m_bEnableState = (DAT_011fcc80[uiPass] & (1 << (i + 1))) != 0;
+            *reinterpret_cast<bool*>(&pkEntry->unk08) = (DAT_011fcc80[uiPass] & (1 << (i + 1))) != 0;
     }
     for (i = 0; i < 22; i++)
     {
         NiShaderConstantMapEntry* pkEntry = DAT_011fec30[i];
         if (pkEntry)
-            pkEntry->m_bEnableState = (DAT_011fc0a0[uiPass] & (1 << (i + 1))) != 0;
+            *reinterpret_cast<bool*>(&pkEntry->unk08) = (DAT_011fc0a0[uiPass] & (1 << (i + 1))) != 0;
     }
 
-    m_pkVertexConstantMap->Update();
-    m_pkPixelConstantMap->Update();
+    m_pkVertexConstantMap->vf09();
+    m_pkPixelConstantMap->vf09();
 
-    if (DAT_011febf8->m_bEnableState)
+    if (*reinterpret_cast<bool*>(&DAT_011febf8->unk08))
     {
         BSFogProperty* pkFog = FUN_00b55520(DAT_011f91c4);
         if (pkFog)
         {
-            float fNear = pkFog->m_fNearPlane;
-            float fFar = pkFog->m_fFarPlane;
-            float m_fAlpha = pkFog->m_fPower;
+            float fNear = pkFog->nearDepth;
+            float fFar = pkFog->farDepth;
+            float m_fAlpha = pkFog->density;
             if (fFar == 0.0f && fNear == 0.0f)
             {
                 DAT_011fa280 = D3DXVECTOR4(500000.0f, 0.0f, 0.0f, 0.0f);
@@ -748,7 +689,7 @@ void BSShaderPass::FUN_00b7b450(unsigned int uiPass)
             }
             else
             {
-                NiColor kColor = pkFog->m_kFogTint;
+                NiColor kColor = pkFog->color;
                 DAT_011fa280 = D3DXVECTOR4(fFar, fFar - fNear, m_fAlpha, 0.0f);
                 DAT_011fa290 = D3DXVECTOR4(kColor.r, kColor.g, kColor.b, 0.0f);
             }
@@ -763,7 +704,7 @@ void BSShaderPass::FUN_00b7b450(unsigned int uiPass)
         pkDevice->SetVertexShaderConstantF(1, &kWorld.m11, 4);
     }
 
-    if (DAT_011febf8->m_bEnableState)
+    if (*reinterpret_cast<bool*>(&DAT_011febf8->unk08))
     {
         DAT_011fd9b8 = DAT_011a9bd0;
         DAT_011fd9c8 = DAT_011a9bd0;

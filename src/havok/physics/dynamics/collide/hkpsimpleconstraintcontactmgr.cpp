@@ -2,60 +2,62 @@
 // src/havok/physics/dynamics/collide/hkpsimpleconstraintcontactmgr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/collide/hkpsimpleconstraintcontactmgr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpSimpleConstraintContactMgr.h"
-
-struct FUN_00cfd3f0_class {
-    void* m_00;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    void* m_10;
-    void* m_14;
-    void* m_18;
-    void* m_1c;
-    void* m_20;
-    void* m_24;
-    void* m_28;
-    void* m_2c;
-    void* m_30;
-    void* m_34;
-    void* m_38;
-    void* m_3c;
-    char* FUN_00cfd3f0(unsigned short index);
-};
-
-// @fnv 0x00cfd3f0
-char* FUN_00cfd3f0_class::FUN_00cfd3f0(unsigned short index)
-{
-    return (char*)m_3c + 0x30 + (unsigned char)*(unsigned char*)((char*)m_20 + index) * 32;
+// Exe 0x00cfcf80 FUN_00cfcf80: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" {
+LocalM128 _mm_add_ss(LocalM128, LocalM128);
+LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+void _mm_store_ss(float*, LocalM128);
+void _mm_stream_ps(float*, LocalM128);
 }
 
-struct FUN_00cfcc70_data {
-    unsigned int m_00;
-    unsigned short m_04;
-    unsigned short m_08;
-    unsigned short m_0c;
-};
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkContactPoint.h"
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkStatisticsCollector.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkMatrix3.h"
+#include "../../../../../include/hkMatrix4.h"
+#include "../../../../../include/hkBaseObject.h"
+#include "../../../../../include/hkpConstraintData.h"
+#include "../../../../../include/hkpConstraintInstance.h"
+#include "../../../../../include/hkpConstraintOwner.h"
+#include "../../../../../include/hkpEntity.h"
+#include "../../../../../include/hkSmallArray.h"
+#include "../../../../../include/hkpSimpleContactConstraintAtom.h"
+#include "../../../../../include/hkpSimpleConstraintContactMgr.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkpConstraintInfo.h"
 
-struct FUN_00cfcc70_class {
-    void* m_00;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    unsigned short m_10;
-    unsigned char m_12[0x2a];
-    void* m_3c;
+// The contact-data base has reference storage at +4 and user data at +8 (12 bytes total).
+__forceinline hkpConstraintData::~hkpConstraintData() throw() {}
 
-    int FUN_00cfcc70(int value);
-};
+typedef float hkReal;
+typedef unsigned char hkUint8;
+typedef short hkInt16;
+typedef unsigned short hkUint16;
+typedef unsigned int hkUint32;
+
+// Methods absent from the shared header use explicit-this helpers. The unused EDX
+// parameter preserves the original thiscall stack arguments without a local manager class.
+// @fnv 0x00cfd3f0
+char* __fastcall GetSimpleContactPoint(hkpSimpleConstraintContactMgr* mgr, void*, unsigned short index)
+{
+    return (char*)mgr->m_kSimpleContactConstraintData.m_pAtom + 0x30 + (unsigned char)mgr->m_kSimpleContactConstraintData.m_kAtoms.m_data[index] * 32;
+}
 
 // @fnv 0x00cfcc70
-int FUN_00cfcc70_class::FUN_00cfcc70(int value) {
-    FUN_00cfcc70_data* data = static_cast<FUN_00cfcc70_data*>(m_3c);
-    int field4 = data->m_04;
-    int limit = *reinterpret_cast<unsigned short*>(
-        reinterpret_cast<unsigned char*>(data) + 0x0c);
-    int current = m_10;
+int __fastcall ReserveSimpleContactPoints(hkpSimpleConstraintContactMgr* mgr, void*, int value) {
+    hkpSimpleContactConstraintAtom* data = mgr->m_kSimpleContactConstraintData.m_pAtom;
+    int field4 = data->m_usNumContactPoints;
+    int limit = data->m_usMaxNumContactPointProperties;
+    int current = mgr->m_uiContactPointCount;
 
     field4 += value;
     current += field4;
@@ -64,9 +66,9 @@ int FUN_00cfcc70_class::FUN_00cfcc70(int value) {
     if (current > limit)
         return 1;
 
-    m_10 = static_cast<unsigned short>(
+    mgr->m_uiContactPointCount = static_cast<unsigned short>(
         static_cast<unsigned char>(
-            static_cast<unsigned char>(m_10) +
+            static_cast<unsigned char>(mgr->m_uiContactPointCount) +
             static_cast<unsigned char>(value)));
     return 0;
 }
@@ -93,46 +95,21 @@ void __stdcall FUN_00cfce30(void* a1, float a2, void* a3)
     }
 }
 
-struct FUN_00cfd410_class {
-    void* m_00;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    void* m_10;
-    void* m_14;
-    void* m_18;
-    void* m_1c;
-    unsigned char* m_20;
-    void* m_24;
-    void* m_28;
-    void* m_2c;
-    void* m_30;
-    void* m_34;
-    void* m_38;
-    unsigned char* m_3c;
-
-    unsigned char* FUN_00cfd410(unsigned short index);
-};
-
 // @fnv 0x00cfd410
-unsigned char* FUN_00cfd410_class::FUN_00cfd410(unsigned short index) {
-    unsigned char* pIndices = m_20;
+unsigned char* __fastcall GetSimpleContactProperties(hkpSimpleConstraintContactMgr* mgr, void*, unsigned short index) {
+    unsigned char* pIndices = mgr->m_kSimpleContactConstraintData.m_kAtoms.m_data;
     unsigned int value = pIndices[index];
 
     if (value == 0xff)
         return 0;
 
-    unsigned char* base = m_3c;
+    unsigned char* base = reinterpret_cast<unsigned char*>(mgr->m_kSimpleContactConstraintData.m_pAtom);
     short signedValue = static_cast<short>(value);
 
     return base + 0x30
         + (*(reinterpret_cast<unsigned short*>(base + 6)) << 5)
         + (*(reinterpret_cast<unsigned char*>(base + 0xa)) * signedValue);
 }
-
-struct FUN_00cf40b0_class {
-    void FUN_00cf40b0();
-};
 
 struct FUN_00cfda50_class {
     void FUN_00cfda50();
@@ -141,48 +118,20 @@ struct FUN_00cfda50_class {
 extern int DAT_010cc984;
 extern int _DAT_0102e388;
 
-struct FUN_00cfd720 {
-    void* m_00;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    void* m_10;
-    void* m_14;
-    void* m_18;
-    void* m_1c;
-    void* m_20;
-    void* m_24;
-    void* m_28;
-    void* m_2c;
-    void* m_30;
-    void* m_34;
-    void* m_38;
-    void* m_3c;
-    void* m_40;
-    void* m_44;
-    void* m_48;
-    void* m_4c;
-    void* m_50;
-    void* m_54;
-    void* m_58;
-    void* m_5c;
-    ~FUN_00cfd720();
-};
-
 void __cdecl FUN_00cb3dd0(void*, void*, int);
 
 // @fnv 0x00cfd720
-FUN_00cfd720::~FUN_00cfd720() {
-    *(void**)this = (void*)&DAT_010cc984;
-    if (*(unsigned short*)(*(char**)((char*)this + 0x3c) + 4) != 0) {
-        FUN_00cb3dd0(*(void**)((char*)this + 0xc), (char*)this + 0x44, 1);
+__declspec(noinline) void __fastcall DestroySimpleContactManager(hkpSimpleConstraintContactMgr* mgr) {
+    *(void**)mgr = (void*)&DAT_010cc984;
+    if (mgr->m_kSimpleContactConstraintData.m_pAtom->m_usNumContactPoints != 0) {
+        FUN_00cb3dd0(mgr->m_pOwningWorld, &mgr->m_pHavokConstraint, 1);
     }
-    *(void**)((char*)this + 0x58) = 0;
-    *(void**)((char*)this + 0x5c) = 0;
-    *(void**)((char*)this + 0x50) = 0;
-    ((FUN_00cf40b0_class*)((char*)this + 0x44))->FUN_00cf40b0();
-    ((FUN_00cfda50_class*)((char*)this + 0x14))->FUN_00cfda50();
-    *(void**)this = (void*)&_DAT_0102e388;
+    mgr->m_pHavokConstraint.m_kActorEntries[0] = 0;
+    mgr->m_pHavokConstraint.m_kActorEntries[1] = 0;
+    mgr->m_pHavokConstraint.m_data = 0;
+    mgr->m_pHavokConstraint.hkpConstraintInstance::~hkpConstraintInstance();
+    reinterpret_cast<FUN_00cfda50_class*>(&mgr->m_kSimpleContactConstraintData)->FUN_00cfda50();
+    *(void**)mgr = (void*)&_DAT_0102e388;
 }
 
 struct FUN_00cfd7d0_class {
@@ -202,24 +151,6 @@ void FUN_00cfd7d0_class::DecrementBytesAboveValue(unsigned int auiThreshold)
     }
 }
 
-struct FUN_00cfdae0_router
-{
-	virtual void FUN_00cfdae0_slot0();
-	virtual void FUN_00cfdae0_slot1();
-	virtual void FUN_00cfdae0_deallocate(void* object, unsigned short size);
-};
-
-struct FUN_00cfdae0_manager
-{
-	void* m_00;
-	void* m_04;
-	void* m_08;
-	void* m_0c;
-	FUN_00cfdae0_router* m_router;
-};
-
-FUN_00cfdae0_manager* _D1A0E0GetMemoryRouter();
-
 struct FUN_00cfdae0_class
 {
 	unsigned int m_00;
@@ -236,41 +167,19 @@ FUN_00cfdae0_class* FUN_00cfdae0_class::Destroy(unsigned char flags)
 
 	if (flags & 1)
 	{
-		FUN_00cfdae0_manager* manager = _D1A0E0GetMemoryRouter();
+		hkMemoryRouter& manager = hkMemoryRouter::getInstance();
 		unsigned short size = m_iElementCount;
-		manager->m_router->FUN_00cfdae0_deallocate(this, size);
+		manager.heap().blockFree(this, size);
 	}
 
 	return this;
 }
 
-struct ContactSubobject {
-    virtual void __fastcall method00(void*);
-    virtual void __fastcall method04(void*);
-    virtual void __fastcall method08(void*);
-    virtual void __fastcall method0c(void*);
-    virtual void __fastcall method10(void*);
-    virtual void __fastcall method14(void*);
-    virtual void __fastcall method18(void*);
-    virtual void __fastcall method1c(void*);
-    virtual void __fastcall method20(void*);
-    virtual void __fastcall method24(void*);
-    virtual void __fastcall method28(void*);
-    virtual void __fastcall method2c(void*);
-    virtual void __fastcall method30(void*);
-    virtual void __fastcall method34(void*);
-    virtual void __fastcall method38(void*);
-    virtual void __fastcall method3c(void*);
-    virtual void __fastcall method40(void*);
-};
-struct FUN_00cfccb0_class {
-    void* m_00; void* m_04; void* m_08; void* m_0c; void* m_10;
-    ContactSubobject embedded;
-    void __fastcall FUN_00cfccb0(void* forwardedArg);
-};
 // @fnv 0x00cfccb0
-void FUN_00cfccb0_class::FUN_00cfccb0(void* forwardedArg) {
-    embedded.method40(forwardedArg);
+void __fastcall ForwardSimpleContactVf40(hkpSimpleConstraintContactMgr* mgr, void* forwardedArg) {
+    hkpSimpleContactConstraintData* data = &mgr->m_kSimpleContactConstraintData;
+    reinterpret_cast<void (__fastcall*)(hkpSimpleContactConstraintData*, void*)>(
+        (*reinterpret_cast<void***>(data))[16])(data, forwardedArg);
 }
 
 // FUN_00cfd660 : a forwarding member  (add ecx, 0x20 ; jmp <base impl>)
@@ -299,49 +208,18 @@ int* __cdecl FUN_00cfdad0()
     return &DAT_01268798;
 }
 
-struct FnvCpu_FUN_00cfcc60_CpuObject { char* FUN_00cfcc60(); };
 // @fnv 0x00cfcc60
-char* FnvCpu_FUN_00cfcc60_CpuObject::FUN_00cfcc60()
+char* __fastcall GetSimpleContactConstraint(hkpSimpleConstraintContactMgr* mgr, void*)
 {
-    return reinterpret_cast<char*>(this) + 68;
+    return reinterpret_cast<char*>(&mgr->m_pHavokConstraint);
 }
 
-struct FUN_00cfccc0_target {
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1c();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2c();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void vf38();
-    virtual void vf3c();
-    virtual void vf40();
-    virtual void __thiscall vf44(int a, float b, int c, int d, int e, int f);
-};
-
-struct FUN_00cfccc0_class {
-    void* m_00;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    void* m_10;
-    FUN_00cfccc0_target m_14;
-
-    void __thiscall ForwardToVf44(int a, float b, int c, int d, int e, int f);
-};
-
-// Forwards all six arguments to the virtual method vf44 on the m_14 subobject.
+// Forwards all six arguments to the virtual method at +0x44 on the contact-data subobject.
 // @fnv 0x00cfccc0
-void __thiscall FUN_00cfccc0_class::ForwardToVf44(int aiArg1, float afArg2, int aiArg3, int aiArg4, int aiArg5, int aiArg6) {
-    m_14.vf44(aiArg1, afArg2, aiArg3, aiArg4, aiArg5, aiArg6);
+void __fastcall ForwardSimpleContactVf44(hkpSimpleConstraintContactMgr* mgr, void*, int aiArg1, float afArg2, int aiArg3, int aiArg4, int aiArg5, int aiArg6) {
+    hkpSimpleContactConstraintData* data = &mgr->m_kSimpleContactConstraintData;
+    reinterpret_cast<void (__thiscall*)(hkpSimpleContactConstraintData*, int, float, int, int, int, int)>(
+        (*reinterpret_cast<void***>(data))[17])(data, aiArg1, afArg2, aiArg3, aiArg4, aiArg5, aiArg6);
 }
 
 struct ContactRecord {
@@ -356,127 +234,73 @@ struct ContactRecord {
 };
 void __cdecl FUN_00d01900(void* handler, ContactRecord* record);
 void __cdecl FUN_00d001c0(unsigned short* contact, ContactRecord* record);
-struct FUN_00cfccf0_class {
-    void* m_00; void* m_04; void* m_08; void* m_0c;
-    void* m_10; void* m_14; void* m_18; void* m_1c;
-    void* m_20; void* m_24; void* m_28; void* m_2c;
-    void* m_30; void* m_34; void* m_38; void* m_3c;
-    void* m_40; void* m_44; void* m_48; void* m_4c;
-    void* m_50; void* m_54;
-    unsigned short* m_58;
-    unsigned short* m_5c;
-    void ProcessContactPair(void* firstInput, void* secondInput);
-};
-// Builds a ContactRecord from the two stored contacts and inputs, dispatches it via m_0c, then processes each contact whose flag at index 0x102 is set.
+// Builds and dispatches a ContactRecord, then processes each stored contact whose flag at index 0x102 is set.
 // @fnv 0x00cfccf0
-void FUN_00cfccf0_class::ProcessContactPair(void* firstInput, void* secondInput) {
-    unsigned short* first = m_58;
-    unsigned short* second = m_5c;
+void __fastcall ProcessSimpleContactPair(hkpSimpleConstraintContactMgr* mgr, void*, void* firstInput, void* secondInput) {
+    unsigned short* first = reinterpret_cast<unsigned short*>(mgr->m_pHavokConstraint.m_kActorEntries[0]);
+    unsigned short* second = reinterpret_cast<unsigned short*>(mgr->m_pHavokConstraint.m_kActorEntries[1]);
     ContactRecord record;
     record.flags = 0xffff;
     record.secondInput = secondInput;
     record.firstContact = first;
     record.secondContact = second;
-    record.owner = this;
+    record.owner = mgr;
     record.firstInput = firstInput;
-    FUN_00d01900(m_0c, &record);
+    FUN_00d01900(mgr->m_pOwningWorld, &record);
     if (first[0x102]) FUN_00d001c0(first, &record);
     if (second[0x102]) FUN_00d001c0(second, &record);
 }
 
-struct hkpConstraintInfoCFD2 {
-    int m_iMaxSchemaSize;
-    int m_iSchemaByteSize;
-    int m_iSolverResultCount;
-    int m_iSolverElementTemporaryCount;
+// No shared hkpConstraintInfo definition is available yet.
 
-    void clear()
-    {
-        m_iMaxSchemaSize = 0;
-        m_iSchemaByteSize = 0;
-        m_iSolverResultCount = 0;
-        m_iSolverElementTemporaryCount = 0;
-    }
-    void add(int iSchemaSize, int iNumSolverResults, int iNumSolverElemTemps)
-    {
-        m_iSchemaByteSize += iSchemaSize;
-        m_iSolverResultCount += iNumSolverResults;
-        m_iSolverElementTemporaryCount += iNumSolverElemTemps;
-    }
-};
-
-struct hkConstraintInternalCFD2 {
+// Shared m_pConstraintInternal names this record; its schema/result/temp counters are at +0x14/+0x16/+0x18.
+struct ConstraintRuntimeInfo {
     char m_acUnk00[0x14];
     hkUint16 m_iSchemaByteSize;
     hkUint16 m_iSolverResultCount;
     hkUint16 m_iSolverElementTemporaryCount;
 };
 
-class hkpConstraintInstanceCFD2 {
-public:
-    char m_acUnk00[0x30];
-    hkConstraintInternalCFD2* m_pConstraintInternal;
-};
+// The shared owner names the first word of its embedded hkpConstraintInfo only.
+inline void hkpConstraintOwner::subConstraintInfo(hkpConstraintInstance* pkConstraint, hkpConstraintInfo& kDelta)
+{
+    hkpConstraintInfo& kInfo = reinterpret_cast<hkpConstraintInfo&>(m_iMaxSchemaSize);
+    kInfo.m_iSchemaByteSize -= kDelta.m_iSchemaByteSize;
+    kInfo.m_iSolverResultCount -= kDelta.m_iSolverResultCount;
+    kInfo.m_iSolverElementTemporaryCount -= kDelta.m_iSolverElementTemporaryCount;
+    ConstraintRuntimeInfo* pkInternal = pkConstraint->m_pConstraintInternal;
+    pkInternal->m_iSolverResultCount = hkUint16(pkInternal->m_iSolverResultCount - kDelta.m_iSolverResultCount);
+    pkInternal->m_iSolverElementTemporaryCount = hkUint16(pkInternal->m_iSolverElementTemporaryCount - kDelta.m_iSolverElementTemporaryCount);
+    pkInternal->m_iSchemaByteSize = hkUint16(pkInternal->m_iSchemaByteSize - kDelta.m_iSchemaByteSize);
+}
 
-class hkpConstraintOwnerCFD2 : public hkReferencedObject {
-public:
-    hkpConstraintInfoCFD2 m_kConstraintInfo;
+inline PhysicsMaterial* hkpSimpleContactConstraintAtom::getContactPointPropertiesStream(int i)
+{
+    return reinterpret_cast<PhysicsMaterial*>(reinterpret_cast<hkUint8*>(this + 1) +
+        m_usMaxNumContactPoints * 0x20 + i * m_ucContactPointPropertiesStriding);
+}
 
-    void subConstraintInfo(hkpConstraintInstanceCFD2* pkConstraint, hkpConstraintInfoCFD2& kDelta)
-    {
-        m_kConstraintInfo.m_iSchemaByteSize -= kDelta.m_iSchemaByteSize;
-        m_kConstraintInfo.m_iSolverResultCount -= kDelta.m_iSolverResultCount;
-        m_kConstraintInfo.m_iSolverElementTemporaryCount -= kDelta.m_iSolverElementTemporaryCount;
-        hkConstraintInternalCFD2* pkInternal = pkConstraint->m_pConstraintInternal;
-        pkInternal->m_iSolverResultCount = hkUint16(pkInternal->m_iSolverResultCount - kDelta.m_iSolverResultCount);
-        pkInternal->m_iSolverElementTemporaryCount = hkUint16(pkInternal->m_iSolverElementTemporaryCount - kDelta.m_iSolverElementTemporaryCount);
-        pkInternal->m_iSchemaByteSize = hkUint16(pkInternal->m_iSchemaByteSize - kDelta.m_iSchemaByteSize);
-    }
-};
+void __cdecl FUN_00cfd950(hkpSimpleContactConstraintAtom* pkAtom, int iIndex);
+hkpSimpleContactConstraintAtom* __cdecl ShrinkBlockIfSparse(hkpSimpleContactConstraintAtom* pkAtom, int iNumFreeElemsLeft, hkBool& bAtomReallocated);
+void __cdecl ReplaceEntry(hkpConstraintInstance* pkConstraint, hkpSimpleContactConstraintAtom* pkOldAtom, hkpSimpleContactConstraintAtom* pkNewAtom, int iNewSize);
 
-struct hkpSimpleContactConstraintAtomCFD2 {
-    hkUint16 m_type;
-    hkUint16 m_usSizeOfAllAtoms;
-    hkUint16 m_usNumContactPoints;
-    hkUint16 m_usMaxNumContactPointProperties;
-    hkUint8 m_acUnk08[2];
-    hkUint8 m_ucContactPointPropertiesStriding;
-    hkUint8 m_acUnk0B[5];
-    hkUint16 m_flags;
-    hkUint8 m_acUnk12[0x1e];
-
-    hkUint8* getContactPointPropertiesStream(hkInt16 i)
-    {
-        return (hkUint8*)(this + 1) + m_usMaxNumContactPointProperties * 0x20 + i * m_ucContactPointPropertiesStriding;
-    }
-};
-
-void __cdecl FUN_00cfd950(hkpSimpleContactConstraintAtomCFD2* pkAtom, int iIndex);
-hkpSimpleContactConstraintAtomCFD2* __cdecl ShrinkBlockIfSparse(hkpSimpleContactConstraintAtomCFD2* pkAtom, int iNumFreeElemsLeft, hkBool& bAtomReallocated);
-void __cdecl ReplaceEntry(hkpConstraintInstanceCFD2* pkConstraint, hkpSimpleContactConstraintAtomCFD2* pkOldAtom, hkpSimpleContactConstraintAtomCFD2* pkNewAtom, int iNewSize);
-
-class hkSimpleContactConstraintDataCFD2 {
-public:
-    void* m_vtbl;
-    int m_aiUnk04[2];
-    hkArray<hkUint8> m_kAtoms;
-    int m_aiUnk18[3];
-    hkpConstraintInstanceCFD2* m_pHavokConstraint;
-    hkpSimpleContactConstraintAtomCFD2* m_pAtom;
-    int m_iAtomSize;
-
-    int FUN_00cfd200(hkpConstraintOwnerCFD2& kConstraintOwner, hkUint16 uiId);
-};
+inline hkpContactPointPropertiesCFD* hkpSimpleContactConstraintData::GetContactPointProperties(hkUint16 id)
+{
+    int iIndex = m_kAtoms.m_data[id];
+    if (iIndex == 0xff)
+        return 0;
+    return reinterpret_cast<hkpContactPointPropertiesCFD*>(m_pAtom->getContactPointPropertiesStream(static_cast<hkInt16>(iIndex)));
+}
 
 // @fnv 0x00cfd200
-int hkSimpleContactConstraintDataCFD2::FUN_00cfd200(hkpConstraintOwnerCFD2& kConstraintOwner, hkUint16 uiId)
+int hkpSimpleContactConstraintData::FUN_00cfd200(hkpConstraintOwner& kConstraintOwner, hkUint16 uiId)
 {
     int iIndex = m_kAtoms.m_data[uiId];
-    hkpSimpleContactConstraintAtomCFD2* pkAtom = m_pAtom;
+    hkpSimpleContactConstraintAtom* pkAtom = m_pAtom;
     m_kAtoms.m_data[uiId] = 0xff;
-    hkpConstraintInfoCFD2 kConInfo;
+    hkpConstraintInfo kConInfo;
     kConInfo.clear();
-    hkpSimpleContactConstraintAtomCFD2* pkOldAtom = m_pAtom;
+    hkpSimpleContactConstraintAtom* pkOldAtom = m_pAtom;
     hkBool bAtomReallocated = false;
     const int iNumContactPoints = pkAtom->m_usNumContactPoints;
     if (iNumContactPoints == 2)
@@ -487,7 +311,7 @@ int hkSimpleContactConstraintDataCFD2::FUN_00cfd200(hkpConstraintOwnerCFD2& kCon
         kConInfo.add(0x40, 1, 1);
 
     FUN_00cfd950(pkAtom, iIndex);
-    pkAtom->getContactPointPropertiesStream(iIndex)[0xf] &= ~2;
+    reinterpret_cast<hkUint8*>(pkAtom->getContactPointPropertiesStream(static_cast<hkInt16>(iIndex)))[0xf] &= ~2;
     pkAtom = ShrinkBlockIfSparse(m_pAtom, 1, bAtomReallocated);
     m_pAtom = pkAtom;
     ((FUN_00cfd7d0_class*)&m_kAtoms)->DecrementBytesAboveValue(iIndex);
@@ -498,156 +322,47 @@ int hkSimpleContactConstraintDataCFD2::FUN_00cfd200(hkpConstraintOwnerCFD2& kCon
         ReplaceEntry(m_pHavokConstraint, pkOldAtom, m_pAtom, m_pAtom->m_usSizeOfAllAtoms);
         m_iAtomSize = m_pAtom->m_usSizeOfAllAtoms;
     }
-    pkAtom->m_flags |= 5;
+    pkAtom->m_infoFlags |= 5;
     return iNumContactPoints - 1;
 }
 
-class hkpEntityCFD;
 class hkpWorldCFD;
-class hkpContactPointPropertiesCFD;
-class hkpSimpleConstraintContactMgrCFD;
 
-class hkpConstraintInstanceCFD {
-public:
-    virtual ~hkpConstraintInstanceCFD() throw();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    hkpEntityCFD* m_pEntityA;
-    hkpEntityCFD* m_pEntityB;
-};
-
-class hkpConstraintOwnerCFD {
-public:
-    virtual ~hkpConstraintOwnerCFD() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual void V3() throw();
-    virtual void AddConstraintToCriticalLockedIsland(hkpConstraintInstanceCFD* pkConstraint) throw();
-};
-
-template <class T>
-struct hkSmallArrayCFD {
-    T* m_data;
-    hkUint16 m_iElementCount;
-    hkUint16 m_iCapacityState;
-};
-
-class hkpEntityCFD {
-public:
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    hkMatrix4 unk010;
-    hkMatrix4 unk050;
-    hkMatrix4 unk090;
-    hkMatrix4 unk0D0;
-    hkMatrix4 unk110;
-    hkMatrix4 unk150;
-    hkMatrix4 unk190;
-    hkMatrix3 unk1D0;
-    hkSmallArrayCFD<void*> m_kContactListeners;
-};
-
-struct hkpSimpleContactConstraintAtomCFD {
-    hkUint16 unk00;
-    hkUint16 unk02;
-    hkUint16 unk04;
-    hkUint16 m_usMaxNumContactPoints;
-    hkUint16 unk08;
-    hkUint8 m_ucContactPointPropertiesStriding;
-    hkUint8 unk0B;
-    hkUint32 unk0C;
-    hkVector4 unk10;
-    hkVector4 unk20;
-
-    hkpContactPointPropertiesCFD* getContactPointPropertiesStream(int i)
-    {
-        char* pcBase = reinterpret_cast<char*>(this) + sizeof(hkpSimpleContactConstraintAtomCFD) + m_usMaxNumContactPoints * 0x20;
-        return reinterpret_cast<hkpContactPointPropertiesCFD*>(pcBase + i * m_ucContactPointPropertiesStriding);
-    }
-};
-
-class hkpSimpleContactConstraintDataCFD {
-public:
-    int unk00;
-    int unk04;
-    int unk08;
-    hkArray<hkUint8> m_kAtoms;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    hkpSimpleContactConstraintAtomCFD* m_pAtom;
-    int unk2C;
-
-    hkpContactPointPropertiesCFD* GetContactPointProperties(hkUint16 id)
-    {
-        int iIndex = m_kAtoms.m_data[id];
-        if (iIndex == 0xff)
-            return 0;
-        return m_pAtom->getContactPointPropertiesStream(static_cast<hkInt16>(iIndex));
-    }
-
-    int FUN_00cfd200(hkpConstraintOwnerCFD& kOwner, hkUint16 id) throw();
-};
-
-struct hkpContactPointRemovedEventCFD {
+// No shared removed-event definition is available yet.
+struct hkpContactPointRemovedEvent {
     hkUint16 m_usContactPointId;
     hkpContactPointPropertiesCFD* m_pContactPointProperties;
-    hkpEntityCFD* m_pEntityA;
-    hkpEntityCFD* m_pEntityB;
+    hkpEntity* m_pEntityA;
+    hkpEntity* m_pEntityB;
     int m_iUnknownValue;
-    hkpSimpleConstraintContactMgrCFD* m_pContactMgr;
-    hkpConstraintOwnerCFD* m_pConstraintOwner;
+    hkpSimpleConstraintContactMgr* m_pContactMgr;
+    hkpConstraintOwner* m_pConstraintOwner;
 
-    hkpContactPointRemovedEventCFD(hkUint16 id, hkpSimpleConstraintContactMgrCFD* pkMgr, hkpConstraintOwnerCFD* pkOwner, hkpContactPointPropertiesCFD* pkProps, hkpEntityCFD* pkA, hkpEntityCFD* pkB)
+    hkpContactPointRemovedEvent(hkUint16 id, hkpSimpleConstraintContactMgr* pkMgr, hkpConstraintOwner* pkOwner, hkpContactPointPropertiesCFD* pkProps, hkpEntity* pkA, hkpEntity* pkB)
         : m_usContactPointId(id), m_pContactPointProperties(pkProps), m_pEntityA(pkA), m_pEntityB(pkB), m_pContactMgr(pkMgr), m_pConstraintOwner(pkOwner) {}
 };
 
-void __cdecl FUN_00d01900(hkpWorldCFD* pkWorld, hkpContactPointRemovedEventCFD& kEvent) throw();
-void __cdecl FUN_00d001c0(hkpEntityCFD* pkEntity, hkpContactPointRemovedEventCFD& kEvent) throw();
-
-class hkpSimpleConstraintContactMgrCFD : public hkReferencedObject {
-public:
-    int unk08;
-    hkpWorldCFD* m_pOwningWorld;
-    int unk10;
-    hkpSimpleContactConstraintDataCFD m_kSimpleContactConstraintData;
-    hkpConstraintInstanceCFD m_pHavokConstraint;
-
-    void FUN_00cfd320(hkUint16 cpId, hkpConstraintOwnerCFD& kOwner) throw();
-};
+void __cdecl FUN_00d01900(hkpWorldCFD* pkWorld, hkpContactPointRemovedEvent& kEvent) throw();
+void __cdecl FUN_00d001c0(hkpEntity* pkEntity, hkpContactPointRemovedEvent& kEvent) throw();
 
 // @fnv 0x00cfd320
-void hkpSimpleConstraintContactMgrCFD::FUN_00cfd320(hkUint16 cpId, hkpConstraintOwnerCFD& kOwner) throw()
+void hkpSimpleConstraintContactMgr::FUN_00cfd320(hkUint16 cpId, hkpConstraintOwner& kOwner) throw()
 {
-    hkpEntityCFD* pkEntityA = m_pHavokConstraint.m_pEntityA;
-    hkpEntityCFD* pkEntityB = m_pHavokConstraint.m_pEntityB;
-    hkpContactPointRemovedEventCFD kEvent(cpId, this, &kOwner, m_kSimpleContactConstraintData.GetContactPointProperties(cpId), pkEntityA, pkEntityB);
-    FUN_00d01900(m_pOwningWorld, kEvent);
+    hkpEntity* pkEntityA = m_pHavokConstraint.m_kActorEntries[0];
+    hkpEntity* pkEntityB = m_pHavokConstraint.m_kActorEntries[1];
+    hkpContactPointRemovedEvent kEvent(cpId, this, &kOwner, m_kSimpleContactConstraintData.GetContactPointProperties(cpId), pkEntityA, pkEntityB);
+    FUN_00d01900(reinterpret_cast<hkpWorldCFD*>(m_pOwningWorld), kEvent);
     if (pkEntityA->m_kContactListeners.m_iElementCount)
         FUN_00d001c0(pkEntityA, kEvent);
     if (pkEntityB->m_kContactListeners.m_iElementCount)
         FUN_00d001c0(pkEntityB, kEvent);
     if (m_kSimpleContactConstraintData.FUN_00cfd200(kOwner, cpId) == 0)
-        kOwner.AddConstraintToCriticalLockedIsland(&m_pHavokConstraint);
+        kOwner.removeConstraintFromCriticalLockedIsland(&m_pHavokConstraint);
 }
-
-class hkReferencedObjectCFD4 {
-public:
-    hkReferencedObjectCFD4() { m_sReferenceCount = 1; }
-    virtual ~hkReferencedObjectCFD4();
-
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
 
 class hkWorldCFD4;
 
-class FUN_00cfd450 : public hkReferencedObjectCFD4 {
+class FUN_00cfd450 : public hkReferencedObject {
 public:
     FUN_00cfd450(hkWorldCFD4* pkWorld);
     virtual ~FUN_00cfd450();
@@ -704,52 +419,35 @@ struct ContactData
     void SetActive(unsigned short index);
 };
 
-struct ContactManager
-{
-    int* vtable;
-    unsigned short unk04;
-    unsigned short state06;
-    unsigned int unk08;
-    const unsigned char* first0C;
-    unsigned short unk10;
-    unsigned short unk12;
-    ContactCache cache;
-    ContactData data;
-
-    ContactManager* InitContact(const unsigned char* first,
-                                 const unsigned char* second,
-                                 const unsigned char* third);
-};
-
 // Initialises the contact manager: sets state, wires the cache and data pointers, looks up a table entry from the two types and applies it via SetActive.
 // @fnv 0x00cfd670
-ContactManager* ContactManager::InitContact(const unsigned char* first,
-                                              const unsigned char* second,
-                                              const unsigned char* third)
+hkpSimpleConstraintContactMgr* __fastcall InitSimpleContactManager(hkpSimpleConstraintContactMgr* mgr, void*, const unsigned char* first,
+                                                                 const unsigned char* second,
+                                                                 const unsigned char* third)
 {
-    state06 = 1;
-    unk08 = 0;
-    vtable = &DAT_010cc984;
-    cache.FUN_00d92f20(&data, second, third);
-    data.FUN_00cf3f40(1);
+    *reinterpret_cast<unsigned short*>(reinterpret_cast<char*>(&mgr->unk04) + 2) = 1;
+    mgr->unk08 = 0;
+    *reinterpret_cast<void**>(mgr) = &DAT_010cc984;
+    reinterpret_cast<ContactCache*>(&mgr->m_kSimpleContactConstraintData)->FUN_00d92f20(reinterpret_cast<ContactData*>(&mgr->m_pHavokConstraint), second, third);
+    reinterpret_cast<ContactData*>(&mgr->m_pHavokConstraint)->FUN_00cf3f40(1);
 
-    data.first14 = second;
-    data.cache0C = &cache;
-    data.second18 = third;
-    data.flags34 = 0xffffffff;
-    first0C = first;
-    unk12 = 0;
-    unk10 = 0;
-    cache.mode04 = 0;
-    data.mode04 = 0;
+    mgr->m_pHavokConstraint.m_kActorEntries[0] = reinterpret_cast<hkpEntity*>(const_cast<unsigned char*>(second));
+    mgr->m_pHavokConstraint.m_data = &mgr->m_kSimpleContactConstraintData;
+    mgr->m_pHavokConstraint.m_kActorEntries[1] = reinterpret_cast<hkpEntity*>(const_cast<unsigned char*>(third));
+    mgr->m_pHavokConstraint.m_uiUniqueId = 0xffffffff;
+    mgr->m_pOwningWorld = reinterpret_cast<hkpWorld*>(const_cast<unsigned char*>(first));
+    mgr->m_usNextProcessCallbackDelay = 0;
+    mgr->m_uiContactPointCount = 0;
+    mgr->m_kSimpleContactConstraintData.m_usMemSizeAndFlags = 0;
+    mgr->m_pHavokConstraint.m_usMemSizeAndFlags = 0;
 
     const unsigned char* table = *reinterpret_cast<const unsigned char* const*>(first + 0x80);
     int firstType = static_cast<signed char>(second[0x2a]);
     int secondType = static_cast<signed char>(third[0x2a]);
     int tableIndex = static_cast<signed char>(table[0x1bb0 + firstType * 10 + secondType]);
     unsigned short result = *reinterpret_cast<const unsigned short*>(table + 0x1c5c + tableIndex * 64);
-    data.SetActive(result);
-    return this;
+    reinterpret_cast<ContactData*>(&mgr->m_pHavokConstraint)->SetActive(result);
+    return mgr;
 }
 
 struct OffsetDescriptor {
@@ -759,52 +457,27 @@ struct OffsetDescriptor {
     int unk0c;
     signed char relativeOffset;
 };
-struct AllocatorInterface {
-    virtual void unk00();
-    virtual void* allocate(unsigned int size);
-};
-struct MemoryContext {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AllocatorInterface* allocator;
-};
-MemoryContext* __cdecl FUN_00c85750();
-struct ContactObject {
-    int unk00;
-    unsigned short GetAllocationSize;
-    ContactObject* InitContact(void* a, void* b, void* c);
-};
+
 struct FUN_00cfd780_class {
     void* unk00;
     void* unk04;
     void* m_08;
-    ContactObject* AllocateContactObject(OffsetDescriptor* first, OffsetDescriptor* second, int unused);
+    hkpSimpleConstraintContactMgr* AllocateContactObject(OffsetDescriptor* first, OffsetDescriptor* second, int unused);
 };
 // @fnv 0x00cfd780
-ContactObject* FUN_00cfd780_class::AllocateContactObject(OffsetDescriptor* first, OffsetDescriptor* second, int unused)
+hkpSimpleConstraintContactMgr* FUN_00cfd780_class::AllocateContactObject(OffsetDescriptor* first, OffsetDescriptor* second, int unused)
 {
     void* relativeFirst = (char*)first + first->relativeOffset;
     void* relativeSecond = (char*)second + second->relativeOffset;
-    MemoryContext* manager = FUN_00c85750();
-    ContactObject* pContactObject = (ContactObject*)manager->allocator->allocate(128);
-    pContactObject->GetAllocationSize = 128;
-    return pContactObject->InitContact(m_08, relativeFirst, relativeSecond);
+    hkMemoryRouter& manager = hkMemoryRouter::getInstance();
+    hkpSimpleConstraintContactMgr* pContactObject = (hkpSimpleConstraintContactMgr*)manager.heap().blockAlloc(128);
+    *reinterpret_cast<unsigned short*>(&pContactObject->unk04) = 128;
+    // Invoke the explicit-this constructor with the original ECX/stack calling convention.
+    return reinterpret_cast<hkpSimpleConstraintContactMgr* (__thiscall*)(hkpSimpleConstraintContactMgr*, void*, void*, void*)>(
+        InitSimpleContactManager)(pContactObject, m_08, relativeFirst, relativeSecond);
 }
 
 namespace fnv_00cfd9f0 {
-class hkMemoryAllocatorCFD9;
-
-struct hkMemoryRouterCFD9 {
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorCFD9* m_pStreamAllocator;
-    hkMemoryAllocatorCFD9& heap() { return *m_pStreamAllocator; }
-};
-extern "C" hkMemoryRouterCFD9& __cdecl FUN_00c85750();
 
 void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iElemSize);
 
@@ -815,94 +488,57 @@ __forceinline void constructWithCopyCFD9(T* p, int n, const T& t)
         p[i] = t;
 }
 
+}  // namespace fnv_00cfd9f0
+
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+    return hkMemoryRouter::getInstance().heap();
+}
+
 template <class T>
-class hkArrayCFD9 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+__forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& kAlloc, const T& t)
+{
+    if (m_iElementCount == getCapacity())
+        fnv_00cfd9f0::ResizeAudioStream(&kAlloc, this, sizeof(T));
+    fnv_00cfd9f0::constructWithCopyCFD9(m_data + m_iElementCount, 1, t);
+    m_iElementCount++;
+}
 
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    void AddBack(const T& t)
-    {
-        hkMemoryAllocatorCFD9& kAlloc = FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&kAlloc, this, sizeof(T));
-        constructWithCopyCFD9(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-};
+namespace fnv_00cfd9f0 {
 
+// distinct from hkArrayBase: mask filtering method 0x00cfd9f0 appends indices whose mask byte is not 0xff.
 class hkpShapeKeyMaskCFD9 {
 public:
     hkUint8* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    void FUN_00cfd9f0(hkArrayCFD9<hkUint16>& kIndicesOut) const;
+    void FUN_00cfd9f0(hkArray<hkUint16>& kIndicesOut) const;
 };
 
 // Appends each index whose mask byte is not 0xff to kIndicesOut.
 // @fnv 0x00cfd9f0
-void hkpShapeKeyMaskCFD9::FUN_00cfd9f0(hkArrayCFD9<hkUint16>& kIndicesOut) const
+void hkpShapeKeyMaskCFD9::FUN_00cfd9f0(hkArray<hkUint16>& kIndicesOut) const
 {
     for (int i = 0; i < m_iElementCount; i++) {
         if (m_data[i] != 0xff)
-            kIndicesOut.AddBack((hkUint16)i);
+            kIndicesOut.pushBack((hkUint16)i);
     }
 }
 }  // namespace fnv_00cfd9f0
 
-namespace fnv_00cfdb10 {
-struct AudioVtable_00cfdb10 {
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08(void* object, unsigned short value);
-};
-
-struct AudioObject_00cfdb10 {
-    void* m_00;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    AudioVtable_00cfdb10* m_10;
-};
-
-AudioObject_00cfdb10* __cdecl FUN_00c85750();
-
-struct ContactManager_00cfdb10 {
-    virtual int FUN_00cfdb10(unsigned char flags);
-    unsigned short m_04;
-
-    void FUN_00cfd720();
-};
-
-__declspec(noinline) void ContactManager_00cfdb10::FUN_00cfd720() {
-    g_sink_00cfd660 = 1;
-}
-
-void AudioVtable_00cfdb10::vf00() {
-}
-
-void AudioVtable_00cfdb10::vf04() {
-}
-
-void AudioVtable_00cfdb10::vf08(void* object, unsigned short value) {
-}
-
-// Calls FUN_00cfd720, and if bit 0 of flags is set, fetches an audio object and invokes its vtable vf08 with this and m_04.
+// Calls the destructor, then releases this allocation through the router heap when flags bit 0 is set.
 // @fnv 0x00cfdb10
-int ContactManager_00cfdb10::FUN_00cfdb10(unsigned char flags) {
-    FUN_00cfd720();
+int __fastcall DeleteSimpleContactManager(hkpSimpleConstraintContactMgr* mgr, void*, unsigned char flags) {
+    DestroySimpleContactManager(mgr);
 
     if ((flags & 1) != 0) {
-        AudioObject_00cfdb10* audio = FUN_00c85750();
-        audio->m_10->vf08(this, m_04);
+        hkMemoryRouter& router = hkMemoryRouter::getInstance();
+        router.heap().blockFree(mgr, *reinterpret_cast<unsigned short*>(&mgr->unk04));
     }
 
-    return (int)this;
+    return (int)mgr;
 }
-}  // namespace fnv_00cfdb10
 
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 
@@ -930,14 +566,11 @@ struct ContactSource {
 };
 extern "C" void __cdecl FUN_00d00ca0(void*, ContactCallDescriptor*);
 extern "C" void __cdecl FUN_00cfff00(void*, int*);
-struct ContactContext {
-    void FUN_00cfcd70(ContactSource* source, void* other);
-};
 // @fnv 0x00cfcd70
-void ContactContext::FUN_00cfcd70(ContactSource* source, void* other)
+void __fastcall ProcessSimpleContactContext(hkpSimpleConstraintContactMgr* mgr, void*, ContactSource* source, void* other)
 {
     ContactCallDescriptor info;
-    info.owner = this;
+    info.owner = mgr;
     info.kind = 2;
     info.firstManager = source->firstManager;
     info.secondManager = source->secondManager;
@@ -964,175 +597,88 @@ void ContactContext::FUN_00cfcd70(ContactSource* source, void* other)
 
 int __cdecl FUN_00d06f80(const void* pvChunk, int iNumBytes) throw();
 
-template <class T>
-class hkArrayCFD5 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int GetLogicalSize() const { return m_iElementCount; }
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    const T* begin() const { return m_data; }
-};
-
-struct hkpAgentNnSectorCFD5 {
-    unsigned short unk00;
-    unsigned short m_uiAgentCount;
-};
-
-class hkStatisticsCollectorCFD5 {
-public:
-    virtual ~hkStatisticsCollectorCFD5() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual void V3() throw();
-    virtual void V4() throw();
-    virtual void AddMemoryChunk(int iType, const char* pcName, const void* pvChunk, int iUsedSize, int iAllocatedSize) throw();
-    virtual void beginObject(const char* pcName) throw();
-    virtual void endObject() throw();
-
-    int m_04;
-    int m_08;
-    int m_0c;
-    bool m_countDontDeallocate;
-
-    void DispatchWithMode(const char* pcName, const void* pvBlock, int iSize, int iFlags) throw();
-
-    template <class T>
-    void addArray(const char* pcName, const hkArrayCFD5<T>& kArray)
-    {
-        if ((kArray.m_iCapacityState & 0x80000000) == 0 || m_countDontDeallocate) {
-            int iAllocated = FUN_00d06f80(kArray.begin(), kArray.getCapacity() * sizeof(T));
-            AddMemoryChunk(3, pcName, kArray.m_data, kArray.GetLogicalSize() * sizeof(T), iAllocated);
-        }
-    }
-};
-
-class hkClassCFD5;
-
-class hkpSimpleConstraintContactMgrCFD5 {
-public:
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
-    hkArrayCFD5<unsigned char> m_contactIds;
-    int unk2C, unk30, unk34, unk38;
-    hkpAgentNnSectorCFD5* m_pAtom;
-
-    void FUN_00cfd5e0(hkStatisticsCollectorCFD5* pkCollector, const hkClassCFD5* pkClass) const throw();
-};
-
-// Reports the hkpSimpleConstraintContactMgr object to the statistics collector, dispatching the atom and contact ID array.
-// @fnv 0x00cfd5e0
-void hkpSimpleConstraintContactMgrCFD5::FUN_00cfd5e0(hkStatisticsCollectorCFD5* pkCollector, const hkClassCFD5* pkClass) const throw()
+template <class T, class Allocator>
+void hkStatisticsCollector::addArray(const char* pcName, const hkArray<T, Allocator>& kArray)
 {
-    pkCollector->beginObject("hkpSimpleConstraintContactMgr");
-    pkCollector->DispatchWithMode("ContactAtom", m_pAtom, m_pAtom->m_uiAgentCount, 0);
-    pkCollector->addArray("ContactIds", m_contactIds);
-    pkCollector->endObject();
+    if ((kArray.m_iCapacityState & 0x80000000) == 0 || m_reportInplaceAllocations) {
+        int iAllocated = FUN_00d06f80(kArray.begin(), kArray.getCapacity() * sizeof(T));
+        AddMemoryChunk(3, pcName, kArray.m_data, kArray.GetLogicalSize() * sizeof(T), iAllocated);
+    }
 }
 
-struct hkAllocatorCFDA {
-    virtual void V0() throw();
-    virtual void V1() throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void V3() throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterCFDA {
-    int unk00, unk04, unk08, unk0C;
-    hkAllocatorCFDA* m_pkHeap;
-    hkAllocatorCFDA& heap() { return *m_pkHeap; }
-};
-
-namespace hkRouterCFDA {
-    extern "C" hkMemoryRouterCFDA* __cdecl FUN_00c85750() throw();
+// The pointer at +0x3c is a contact atom: +2 is its allocation size, not an agent count.
+// Reports the hkpSimpleConstraintContactMgr object to the statistics collector, dispatching the atom and contact ID array.
+// @fnv 0x00cfd5e0
+void hkpSimpleConstraintContactMgr::FUN_00cfd5e0(hkStatisticsCollector* pkCollector, const hkClass* pkClass) const throw()
+{
+    pkCollector->beginObject("hkpSimpleConstraintContactMgr");
+    pkCollector->DispatchWithMode("ContactAtom", m_kSimpleContactConstraintData.m_pAtom, m_kSimpleContactConstraintData.m_pAtom->m_usSizeOfAllAtoms, 0);
+    pkCollector->addArray("ContactIds", m_kSimpleContactConstraintData.m_kAtoms);
+    pkCollector->endObject();
 }
 
 int __cdecl RoundUpToBucketSize(int iType) throw();
 
 template <typename T>
-struct hkArrayCFDA {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+__forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& kAlloc)
+{
+    m_iElementCount = 0;
+    if ((m_iCapacityState & 0x80000000) == 0)
+        kAlloc.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
 
-    ~hkArrayCFDA() throw()
-    {
-        hkAllocatorCFDA& kAlloc = hkRouterCFDA::FUN_00c85750()->heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
+template <typename T, typename Allocator>
+__forceinline hkArray<T, Allocator>::~hkArray()
+{
+    clearAndDeallocate();
+}
 
 struct hkBlockCFDA {
     unsigned short unk00;
     unsigned short m_type;
 };
 
-class hkBaseObjectCFDA {
+class FUN_00cfda50 : public hkpConstraintData {
 public:
-    virtual ~hkBaseObjectCFDA() throw() {}
-    int unk04, unk08;
-};
-
-class FUN_00cfda50 : public hkBaseObjectCFDA {
-public:
-    hkArrayCFDA<char> m_buffer;
+    hkArray<char> m_buffer;
     int unk18, unk1C, unk20, unk24;
     hkBlockCFDA* m_block;
 
     virtual ~FUN_00cfda50() throw();
 };
 
-// Releases the hkBlockCFDA held by m_block back to the hkMemoryRouterCFDA heap using its rounded-up bucket size.
+// Releases m_block through the shared router heap using its rounded-up bucket size.
 // @fnv 0x00cfda50
 FUN_00cfda50::~FUN_00cfda50() throw()
 {
     hkBlockCFDA* pkBlock = m_block;
     if (pkBlock) {
         int iSize = RoundUpToBucketSize(pkBlock->m_type);
-        hkRouterCFDA::FUN_00c85750()->heap().ReleaseBlock(pkBlock, iSize);
+        hkMemoryRouter::getInstance().heap().blockFree(pkBlock, iSize);
     }
-}
-
-union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; unsigned __int64 m128_u64[2]; };
-extern "C" {
-__m128 _mm_sub_ps(__m128, __m128);
-__m128 _mm_mul_ps(__m128, __m128);
-__m128 _mm_add_ss(__m128, __m128);
-__m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-void _mm_store_ss(float*, __m128);
 }
 
 typedef unsigned short hkContactPointId;
 typedef unsigned long hkUlong;
 
-struct hkVec4
+__forceinline float hkVector4::dot3scalar(const hkVector4& b) const
 {
-    __m128 m_vComponents;
-    __forceinline void operator=(const hkVec4& v) { m_vComponents = v.m_vComponents; }
-    __forceinline void setSub4(const hkVec4& a, const hkVec4& b) { m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline float dot3(const hkVec4& b) const
-    {
-        __m128 p = _mm_mul_ps(m_vComponents, b.m_vComponents);
-        __m128 y = _mm_shuffle_ps(p, p, 0x55);
-        y = _mm_add_ss(y, p);
-        __m128 z = _mm_shuffle_ps(p, p, 0xaa);
-        __m128 d = _mm_add_ss(z, y);
-        float r;
-        _mm_store_ss(&r, d);
-        return r;
-    }
-};
+    LocalM128 p = _mm_mul_ps(m_vComponents, b.m_vComponents);
+    LocalM128 y = _mm_shuffle_ps(p, p, 0x55);
+    y = _mm_add_ss(y, p);
+    LocalM128 z = _mm_shuffle_ps(p, p, 0xaa);
+    LocalM128 d = _mm_add_ss(z, y);
+    float r;
+    _mm_store_ss(&r, d);
+    return r;
+}
 
 struct hkContactPt
 {
-    hkVec4 m_vContactPosition;
-    hkVec4 m_vSeparatingNormal;
+    hkVector4 m_vContactPosition;
+    hkVector4 m_vSeparatingNormal;
     float getDistance() const { return m_vSeparatingNormal.m_vComponents.m128_f32[3]; }
 };
 
@@ -1148,47 +694,26 @@ struct hkCPProperties
     float getRestitution() const { return m_fElasticity * (1.0f / 128.0f); }
 };
 
-struct hkCdBodyStub;
-struct hkGskCacheStub;
-
 struct hkProcessCollisionInputStub
 {
     unsigned int unk000; unsigned int unk004; unsigned int unk008; unsigned int unk00c; unsigned int unk010; unsigned int unk014; unsigned int unk018; unsigned int unk01c; unsigned int unk020; unsigned int unk024; unsigned int unk028; unsigned int unk02c; unsigned int unk030; unsigned int unk034; unsigned int unk038; unsigned int unk03c; unsigned int unk040; unsigned int unk044; unsigned int unk048; unsigned int unk04c; unsigned int unk050; unsigned int unk054; unsigned int unk058; unsigned int unk05c; unsigned int unk060; unsigned int unk064; unsigned int unk068;unsigned char unk06c;
     char m_flag6d;
 };
 
-struct hkConstraintInstanceStub;
-
-struct hkConstraintOwnerStub
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void AddConstraintToCriticalSection(hkConstraintInstanceStub* constraint);
-    virtual void vf10();
-    virtual void AddCallbackRequest(hkConstraintInstanceStub* constraint, int request);
-};
-
 struct hkProcessCollisionOutputStub
 {
     void* m_unk00;
-    hkConstraintOwnerStub* m_pConstraintOwner;
+    hkpConstraintOwner* m_pConstraintOwner;
 };
 
-struct hkContactListenerArray
-{
-    void* m_data;
-    unsigned short m_iElementCount;
-    unsigned short m_iCapacityState;
-    int GetLogicalSize() const { return m_iElementCount; }
-};
+
 
 struct hkRigidBodyStub
 {
     unsigned int unk000; unsigned int unk004; unsigned int unk008; unsigned int unk00c; unsigned int unk010; unsigned int unk014; unsigned int unk018; unsigned int unk01c; unsigned int unk020; unsigned int unk024; unsigned int unk028; unsigned int unk02c; unsigned int unk030; unsigned int unk034; unsigned int unk038; unsigned int unk03c; unsigned int unk040; unsigned int unk044; unsigned int unk048; unsigned int unk04c; unsigned int unk050; unsigned int unk054; unsigned int unk058; unsigned int unk05c; unsigned int unk060; unsigned int unk064; unsigned int unk068; unsigned int unk06c; unsigned int unk070; unsigned int unk074; unsigned int unk078; unsigned int unk07c; unsigned int unk080; unsigned int unk084; unsigned int unk088; unsigned int unk08c; unsigned int unk090; unsigned int unk094; unsigned int unk098; unsigned int unk09c; unsigned int unk0a0; unsigned int unk0a4; unsigned int unk0a8; unsigned int unk0ac; unsigned int unk0b0; unsigned int unk0b4; unsigned int unk0b8; unsigned int unk0bc; unsigned int unk0c0; unsigned int unk0c4; unsigned int unk0c8; unsigned int unk0cc; unsigned int unk0d0; unsigned int unk0d4; unsigned int unk0d8; unsigned int unk0dc; unsigned int unk0e0; unsigned int unk0e4; unsigned int unk0e8; unsigned int unk0ec; unsigned int unk0f0; unsigned int unk0f4; unsigned int unk0f8; unsigned int unk0fc; unsigned int unk100; unsigned int unk104; unsigned int unk108; unsigned int unk10c; unsigned int unk110; unsigned int unk114; unsigned int unk118; unsigned int unk11c; unsigned int unk120; unsigned int unk124; unsigned int unk128; unsigned int unk12c; unsigned int unk130; unsigned int unk134; unsigned int unk138; unsigned int unk13c; unsigned int unk140; unsigned int unk144; unsigned int unk148; unsigned int unk14c; unsigned int unk150; unsigned int unk154; unsigned int unk158; unsigned int unk15c; unsigned int unk160; unsigned int unk164; unsigned int unk168; unsigned int unk16c; unsigned int unk170; unsigned int unk174; unsigned int unk178; unsigned int unk17c; unsigned int unk180; unsigned int unk184; unsigned int unk188; unsigned int unk18c; unsigned int unk190; unsigned int unk194; unsigned int unk198; unsigned int unk19c; unsigned int unk1a0; unsigned int unk1a4; unsigned int unk1a8; unsigned int unk1ac; unsigned int unk1b0; unsigned int unk1b4; unsigned int unk1b8; unsigned int unk1bc; unsigned int unk1c0; unsigned int unk1c4; unsigned int unk1c8; unsigned int unk1cc; unsigned int unk1d0; unsigned int unk1d4; unsigned int unk1d8; unsigned int unk1dc; unsigned int unk1e0; unsigned int unk1e4; unsigned int unk1e8; unsigned int unk1ec; unsigned int unk1f0; unsigned int unk1f4; unsigned int unk1f8; unsigned int unk1fc;
-    hkContactListenerArray m_kContactListeners;
+    hkSmallArray<void*> m_kContactListeners;
 
-    void FUN_00ca0c40(const hkVec4& p, hkVec4& vecOut) const;
+    void FUN_00ca0c40(const hkVector4& p, hkVector4& vecOut) const;
     float FUN_00cac860() const;
 };
 
@@ -1217,63 +742,14 @@ struct hkContactPointAddedEventStub
 void __cdecl FUN_00d01850(void* world, hkContactPointAddedEventStub& event);
 void __cdecl FUN_00d00110(hkRigidBodyStub* entity, hkContactPointAddedEventStub& event);
 
-struct hkSimpleContactAtomStub
-{
-    unsigned int m_unk00;
-    unsigned short m_usNumContactPoints;
-    unsigned short m_unk06;
-    unsigned int m_unk08;
-    unsigned short m_usMaxNumContactPointProperties;
-};
-
-struct hkSimpleContactConstraintDataStub
-{
-    unsigned int unk000; unsigned int unk004; unsigned int unk008; unsigned int unk00c; unsigned int unk010; unsigned int unk014; unsigned int unk018; unsigned int unk01c; unsigned int unk020;
-    hkConstraintInstanceStub* m_pHavokConstraint;
-    hkSimpleContactAtomStub* m_pAtom;
-    unsigned int unk02c;
-
-    hkContactPointId FUN_00d92df0(hkConstraintOwnerStub* owner, hkContactPt** cpOut, hkCPProperties** cpiOut);
-};
-
-struct hkConstraintInstanceBody
-{
-    unsigned int unk000; unsigned int unk004; unsigned int unk008; unsigned int unk00c; unsigned int unk010;
-    hkRigidBodyStub* m_kActorEntries[2];
-    unsigned int unk01c; unsigned int unk020; unsigned int unk024; unsigned int unk028; unsigned int unk02c; unsigned int unk030; unsigned int unk034; unsigned int unk038;
-};
-
 template <class T>
 inline T* hkSelectOther(T* a, T* pairA, T* pairB)
 {
     return (T*)(hkUlong(a) ^ hkUlong(pairA) ^ hkUlong(pairB));
 }
 
-struct hkSimpleConstraintContactMgrStub
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10();
-    virtual void removeContactPointImpl(hkContactPointId id, hkConstraintOwnerStub* owner);
-
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    int m_type;
-    void* m_pOwningWorld;
-    unsigned short m_uiContactPointCount;
-    unsigned short m_usNextProcessCallbackDelay;
-    hkSimpleContactConstraintDataStub m_kSimpleContactConstraintData;
-    hkConstraintInstanceBody m_pHavokConstraint;
-
-    hkRigidBodyStub* FUN_00cfd800(const hkCdBodyStub& a, const hkCdBodyStub& b, int maxImpulse, hkCPProperties* cpi);
-    hkContactPointId FUN_00cfcf80(const hkCdBodyStub& a, const hkCdBodyStub& b, const hkProcessCollisionInputStub& input,
-        hkProcessCollisionOutputStub& output, const hkGskCacheStub* contactCache, hkContactPt& cp);
-};
-
 // @fnv 0x00cfcf80
-hkContactPointId hkSimpleConstraintContactMgrStub::FUN_00cfcf80(const hkCdBodyStub& a, const hkCdBodyStub& b,
+hkContactPointId hkpSimpleConstraintContactMgr::FUN_00cfcf80(const hkCdBodyStub& a, const hkCdBodyStub& b,
     const hkProcessCollisionInputStub& input, hkProcessCollisionOutputStub& output,
     const hkGskCacheStub* contactCache, hkContactPt& cp)
 {
@@ -1285,40 +761,40 @@ hkContactPointId hkSimpleConstraintContactMgrStub::FUN_00cfcf80(const hkCdBodySt
 
     if (numContactPoints == 0)
     {
-        output.m_pConstraintOwner->AddConstraintToCriticalSection((hkConstraintInstanceStub*)&m_pHavokConstraint);
+        output.m_pConstraintOwner->addConstraintToCriticalLockedIsland((hkpConstraintInstance*)&m_pHavokConstraint);
     }
 
     hkCPProperties* cpi;
     hkContactPointId id;
     {
         hkContactPt* dcp;
-        hkConstraintOwnerStub* owner = output.m_pConstraintOwner;
-        id = m_kSimpleContactConstraintData.FUN_00d92df0(owner, &dcp, &cpi);
+        hkpConstraintOwner* owner = output.m_pConstraintOwner;
+        id = m_kSimpleContactConstraintData.FUN_00d92df0(*owner, &dcp, &cpi);
         *dcp = cp;
     }
 
     hkRigidBodyStub* rbA = FUN_00cfd800(a, b, 10000, cpi);
-    hkRigidBodyStub* rbB = hkSelectOther(rbA, m_pHavokConstraint.m_kActorEntries[0], m_pHavokConstraint.m_kActorEntries[1]);
+    hkRigidBodyStub* rbB = hkSelectOther(rbA, reinterpret_cast<hkRigidBodyStub*>(m_pHavokConstraint.m_kActorEntries[0]), reinterpret_cast<hkRigidBodyStub*>(m_pHavokConstraint.m_kActorEntries[1]));
 
-    hkVec4 velA;
-    hkVec4 velB;
+    hkVector4 velA;
+    hkVector4 velB;
     rbA->FUN_00ca0c40(cp.m_vContactPosition, velA);
     rbB->FUN_00ca0c40(cp.m_vContactPosition, velB);
 
-    hkVec4 relVel;
+    hkVector4 relVel;
     relVel.setSub4(velA, velB);
-    float projectedVel = relVel.dot3(cp.m_vSeparatingNormal);
+    float projectedVel = relVel.dot3scalar(cp.m_vSeparatingNormal);
 
     cpi->m_fAccumulatedImpulse = 0.0f;
     cpi->m_uiUserData = 0;
 
     hkContactPointAddedEventStub event(id, this, &input, &output, &a, &b, &cp, contactCache, cpi, projectedVel);
     FUN_00d01850(m_pOwningWorld, event);
-    if (rbA->m_kContactListeners.GetLogicalSize())
+    if (rbA->m_kContactListeners.getSize())
     {
         FUN_00d00110(rbA, event);
     }
-    if (rbB->m_kContactListeners.GetLogicalSize())
+    if (rbB->m_kContactListeners.getSize())
     {
         FUN_00d00110(rbB, event);
     }
@@ -1332,7 +808,7 @@ hkContactPointId hkSimpleConstraintContactMgrStub::FUN_00cfcf80(const hkCdBodySt
     m_usNextProcessCallbackDelay = event.m_usNextProcessCallbackDelay;
 
     if (input.m_flag6d && cpi->getRestitution() == 0.0f
-        && rbA->m_kContactListeners.GetLogicalSize() <= 0 && rbB->m_kContactListeners.GetLogicalSize() <= 0)
+        && rbA->m_kContactListeners.getSize() <= 0 && rbB->m_kContactListeners.getSize() <= 0)
     {
         float invMassB = rbB->FUN_00cac860();
         float invMassSum = rbA->FUN_00cac860() + invMassB;
@@ -1343,7 +819,7 @@ hkContactPointId hkSimpleConstraintContactMgrStub::FUN_00cfcf80(const hkCdBodySt
     }
     else
     {
-        output.m_pConstraintOwner->AddCallbackRequest(m_kSimpleContactConstraintData.m_pHavokConstraint, 1);
+        output.m_pConstraintOwner->addCallbackRequest(m_kSimpleContactConstraintData.m_pHavokConstraint, 1);
     }
     return id;
 }
@@ -1402,33 +878,25 @@ struct CollisionFilterInfoQ {
     unsigned char m_numB;
 };
 
-struct FUN_00cfd800_mgr {
-    int unk00; int unk04; int unk08; int unk0c; int unk10; int unk14; int unk18; int unk1c;
-    int unk20; int unk24; int unk28; int unk2c; int unk30; int unk34; int unk38;
-    CollisionFilterInfoQ* m_3c;
-    int unk40; int unk44; int unk48; int unk4c; int unk50; int unk54;
-    RigidBodyq* m_pRigidBodyA;
-    RigidBodyq* m_pRigidBodyB;
-
-    void* FUN_00cfd800(const CdBodyQ& a, const CdBodyQ& b, int maxNum, ContactPropsQ* cpi);
-};
-
 // @fnv 0x00cfd800
-void* FUN_00cfd800_mgr::FUN_00cfd800(const CdBodyQ& a, const CdBodyQ& b, int maxNum, ContactPropsQ* cpi)
+hkRigidBodyStub* hkpSimpleConstraintContactMgr::FUN_00cfd800(const hkCdBodyStub& bodyAInput, const hkCdBodyStub& bodyBInput, int maxNum, hkCPProperties* properties)
 {
-    RigidBodyq* rba = m_pRigidBodyA;
-    RigidBodyq* rbb = m_pRigidBodyB;
+    const CdBodyQ& a = reinterpret_cast<const CdBodyQ&>(bodyAInput);
+    const CdBodyQ& b = reinterpret_cast<const CdBodyQ&>(bodyBInput);
+    ContactPropsQ* cpi = reinterpret_cast<ContactPropsQ*>(properties);
+    RigidBodyq* rba = reinterpret_cast<RigidBodyq*>(m_pHavokConstraint.m_kActorEntries[0]);
+    RigidBodyq* rbb = reinterpret_cast<RigidBodyq*>(m_pHavokConstraint.m_kActorEntries[1]);
     cpi->m_fSlipAngle = sqrt(rbb->m_iMaterialIndex.m_fSlipAngle * rba->m_iMaterialIndex.m_fSlipAngle);
     cpi->setRestitution(sqrt(rbb->m_iMaterialIndex.m_fElasticity * rba->m_iMaterialIndex.m_fElasticity));
     cpi->m_usFlags = 0;
 
     void* bodyA = a.getRootCollidable()->getOwner();
 
-    CollisionFilterInfoQ* info = m_3c;
+    CollisionFilterInfoQ* info = reinterpret_cast<CollisionFilterInfoQ*>(m_kSimpleContactConstraintData.m_pAtom);
     int numB = info->m_numB;
     int numA = info->m_numA;
     int* ext = cpi->m_aiContactData;
-    if (numA + numB == 0) return bodyA;
+    if (numA + numB == 0) return reinterpret_cast<hkRigidBodyStub*>(bodyA);
 
     const CdBodyQ* first;
     const CdBodyQ* second;
@@ -1454,21 +922,17 @@ void* FUN_00cfd800_mgr::FUN_00cfd800(const CdBodyQ& a, const CdBodyQ& b, int max
             second = second->m_parent;
         }
     }
-    return bodyA;
+    return reinterpret_cast<hkRigidBodyStub*>(bodyA);
+}
+
+inline hkContactPoint& hkContactPoint::operator=(const hkContactPoint& cp)
+{
+    m_vContactPosition.m_vComponents = cp.m_vContactPosition.m_vComponents;
+    m_vSeparatingNormal.m_vComponents = cp.m_vSeparatingNormal.m_vComponents;
+    return *this;
 }
 
 namespace fnv_00cfd950 {
-union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; unsigned __int64 m128_u64[2]; };
-
-struct hkVector4q {
-    __m128 m_vComponents;
-    void operator=(const hkVector4q& v) { m_vComponents = v.m_vComponents; }
-};
-
-struct hkContactPointq {
-    hkVector4q m_vContactPosition;
-    hkVector4q m_vSeparatingNormal;
-};
 
 static __forceinline void memCpy4(void* dst, const void* src, int numWords)
 {
@@ -1482,13 +946,13 @@ static __forceinline void memCpy4(void* dst, const void* src, int numWords)
 
 // Removes the contact point at iIndex from pkAtom by shifting later contact points and their properties down and decrementing m_usNumContactPoints.
 // @fnv 0x00cfd950
-void __cdecl FUN_00cfd950(hkpSimpleContactConstraintAtomCFD2* pkAtom, int iIndex)
+void __cdecl FUN_00cfd950(hkpSimpleContactConstraintAtom* pkAtom, int iIndex)
 {
     int numContactPoints = pkAtom->m_usNumContactPoints - 1;
     pkAtom->m_usNumContactPoints = hkUint16(numContactPoints);
-    hkContactPointq* cp = reinterpret_cast<hkContactPointq*>(pkAtom + 1) + iIndex;
+    hkContactPoint* cp = reinterpret_cast<hkContactPoint*>(pkAtom + 1) + iIndex;
     int striding = pkAtom->m_ucContactPointPropertiesStriding;
-    hkUint8* cpp = reinterpret_cast<hkUint8*>(reinterpret_cast<hkContactPointq*>(pkAtom + 1) + pkAtom->m_usMaxNumContactPointProperties)
+    hkUint8* cpp = reinterpret_cast<hkUint8*>(reinterpret_cast<hkContactPoint*>(pkAtom + 1) + pkAtom->m_usMaxNumContactPoints)
         + hkInt16(iIndex) * hkInt16(striding);
 
     for (int i = iIndex; i < numContactPoints; i++)
@@ -1505,37 +969,26 @@ void __cdecl FUN_00cfd950(hkpSimpleContactConstraintAtomCFD2* pkAtom, int iIndex
 struct Obj { unsigned unk000; unsigned unk004; unsigned unk008; unsigned unk00c; unsigned unk010; unsigned unk014; unsigned unk018; unsigned unk01c; unsigned unk020; unsigned unk024; unsigned unk028; unsigned unk02c; unsigned unk030; unsigned unk034; unsigned unk038; unsigned unk03c; unsigned unk040; unsigned unk044; unsigned unk048; unsigned unk04c; unsigned unk050; unsigned unk054; unsigned unk058; unsigned unk05c; unsigned unk060; unsigned unk064; unsigned unk068; unsigned unk06c; unsigned unk070; unsigned unk074; unsigned unk078; unsigned unk07c; unsigned unk080; unsigned unk084; unsigned unk088; unsigned unk08c; unsigned unk090; unsigned unk094; unsigned unk098; unsigned unk09c; unsigned unk0a0; unsigned unk0a4; unsigned unk0a8; unsigned unk0ac; unsigned unk0b0; unsigned unk0b4; unsigned unk0b8; unsigned unk0bc; unsigned unk0c0; unsigned unk0c4; unsigned unk0c8; unsigned unk0cc; unsigned unk0d0; unsigned unk0d4; unsigned unk0d8; unsigned unk0dc; unsigned unk0e0; unsigned unk0e4; unsigned unk0e8; unsigned unk0ec; unsigned unk0f0; unsigned unk0f4; unsigned unk0f8; unsigned unk0fc; unsigned unk100; unsigned unk104; unsigned unk108; unsigned unk10c; unsigned unk110; unsigned unk114; unsigned unk118; unsigned unk11c; unsigned unk120; unsigned unk124; unsigned unk128; unsigned unk12c; unsigned unk130; unsigned unk134; unsigned unk138; unsigned unk13c; unsigned unk140; unsigned unk144; unsigned unk148; unsigned unk14c; unsigned unk150; unsigned unk154; unsigned unk158; unsigned unk15c; unsigned unk160; unsigned unk164; unsigned unk168; unsigned unk16c; unsigned unk170; unsigned unk174; unsigned unk178; unsigned unk17c; unsigned unk180; unsigned unk184; unsigned unk188; unsigned unk18c; unsigned unk190; unsigned unk194; unsigned unk198; unsigned unk19c; unsigned unk1a0; unsigned unk1a4; unsigned unk1a8; unsigned unk1ac; unsigned unk1b0; unsigned unk1b4; unsigned unk1b8; unsigned unk1bc; unsigned unk1c0; unsigned unk1c4; unsigned unk1c8; unsigned unk1cc; unsigned unk1d0; unsigned unk1d4; unsigned unk1d8; unsigned unk1dc; unsigned unk1e0; unsigned unk1e4; unsigned unk1e8; unsigned unk1ec; unsigned unk1f0; unsigned unk1f4; unsigned unk1f8; unsigned unk1fc; unsigned unk200; unsigned short m204; };
 struct EventBase { int a1; int a2; int z18; int u1c; int a6; int a7; int a7b; float f; int result; void* self; EventBase(int a1, int a2, int a3, int* a4, float a5, int a6, int a7, float* a8, int a9, void* owner) : a1(a1), a2(a2), z18(0), a6(a6), a7(a7), a7b(a9), f(*a8), self(owner) {} };
 struct Ctx : EventBase { int a3; int* a4; float a5; Ctx(int a1, int a2, int a3, int* a4, float a5, int a6, int a7, float* a8, int a9, void* owner) : EventBase(a1,a2,a3,a4,a5,a6,a7,a8,a9,owner) , a3(a3), a4(a4), a5(a5) {} };
-struct Cls;
-struct Cls {
-    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
-    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
-    virtual void v8(int, int);
-    unsigned unk04, unk08; void* m0c; unsigned unk10; unsigned unk14; unsigned unk18; unsigned unk1c; unsigned unk20; unsigned unk24; unsigned unk28; unsigned unk2c; unsigned unk30; unsigned unk34; unsigned unk38; unsigned unk3c; unsigned unk40; unsigned unk44; unsigned unk48; unsigned unk4c; unsigned unk50; unsigned unk54; unsigned m58; unsigned m5c;
-    Obj* FUN_00cfd800(int, int, int, int);
-    int FUN_00cfce80(int a1, int a2, int a3, int* a4, float a5, int a6, int a7, float* a8, int a9);
-};
 void __cdecl FUN_00d01850(void*, Ctx*);
 void __cdecl FUN_00d00110(Obj*, Ctx*);
-// Dispatches an event context to m0c and to two objects with m204 set; result 1 calls v8(a4[1], a9), otherwise *a8 receives the context float; returns the result.
+// Dispatches an event to the world and bodies with listeners; a rejected event calls virtual slot 8, otherwise the projected velocity is updated.
 // @fnv 0x00cfce80
-int Cls::FUN_00cfce80(int a1, int a2, int a3, int* a4, float a5, int a6, int a7, float* a8, int a9) {
-    Obj* o = FUN_00cfd800(a1, a2, 7, a9);
-    Obj* p = (Obj*)((unsigned)o ^ m58 ^ m5c);
-    Ctx c(a1,a2,a3,a4,a5,a6,a7,a8,a9,this);
+int __fastcall ProcessSimpleContactEvent(hkpSimpleConstraintContactMgr* mgr, void*, int a1, int a2, int a3, int* a4, float a5, int a6, int a7, float* a8, int a9) {
+    Obj* o = reinterpret_cast<Obj*>(mgr->FUN_00cfd800(*reinterpret_cast<const hkCdBodyStub*>(a1), *reinterpret_cast<const hkCdBodyStub*>(a2), 7, reinterpret_cast<hkCPProperties*>(a9)));
+    Obj* p = (Obj*)((unsigned)o ^ (unsigned)mgr->m_pHavokConstraint.m_kActorEntries[0] ^ (unsigned)mgr->m_pHavokConstraint.m_kActorEntries[1]);
+    Ctx c(a1,a2,a3,a4,a5,a6,a7,a8,a9,mgr);
     c.result = 0;
-    FUN_00d01850(m0c, &c);
+    FUN_00d01850(mgr->m_pOwningWorld, &c);
     if (o->m204) FUN_00d00110(o, &c);
     if (p->m204) FUN_00d00110(p, &c);
-    if (c.result == 1) v8(a4[1], a9);
+    if (c.result == 1) reinterpret_cast<void (__thiscall*)(hkpSimpleConstraintContactMgr*, int, int)>((*reinterpret_cast<void***>(mgr))[8])(mgr, a4[1], a9);
     else *a8 = c.f;
     return c.result;
 }
 
-extern "C" void _mm_stream_ps(float*, __m128);
-
 struct CfdInfoItem {
-    __m128 m_v0;
-    __m128 m_v1;
+    LocalM128 m_v0;
+    LocalM128 m_v1;
     unsigned char* m_table;
     int unk24;
     int unk28;
@@ -1557,15 +1010,6 @@ struct CfdInfo {
     int unk08;
     int unk0c;
     CfdInfoItem m_items[1];
-};
-
-struct CfdHeader {
-    int unk00;
-    unsigned short unk04;
-    unsigned short m_offset;
-    unsigned char unk08;
-    unsigned char unk09;
-    unsigned char m_iElementIndex;
 };
 
 struct CfdEntity {
@@ -1599,8 +1043,6 @@ struct CfdBody {
     unsigned short m_numJac;
 };
 
-struct CfdMgr;
-
 template <class T> inline T CfdMin(T a, T b) { return a < b ? a : b; }
 
 struct CfdParams {
@@ -1609,39 +1051,17 @@ struct CfdParams {
     int unk08;
     CfdInfo* m_info;
     void* m_ptrs[256];
-    CfdMgr* m_pOwnerObject;
+    hkpSimpleConstraintContactMgr* m_pOwnerObject;
 };
 
 extern "C" void __cdecl NotifyShapeSetListeners(void* a, CfdParams* p);
 extern "C" void __cdecl FUN_00d00270(void* a, CfdParams* p);
 
-struct CfdMgr {
-    int unk00;
-    int unk04;
-    int unk08;
-    void* unk0c;
-    unsigned short unk10;
-    unsigned short m_uiItemCount;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int m_uiEdgeIndex;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    void* m_data;
-    CfdHeader* m_kHeader;
-
-    void FUN_00cfd470(CfdEntity* a, CfdEntity* b, int unused, CfdInfo* info);
-};
-
-// If m_uiItemCount is zero, builds params and runs NotifyShapeSetListeners, FUN_00d00270 and method14; then updates the count and streams item vectors into the header.
+// When the callback delay expires, dispatches the contact event; then updates the delay and streams the contact vectors into the atom.
 // @fnv 0x00cfd470
-void CfdMgr::FUN_00cfd470(CfdEntity* apEntityA, CfdEntity* apEntityB, int unused, CfdInfo* info)
+void __fastcall ProcessSimpleContactPoints(hkpSimpleConstraintContactMgr* mgr, void*, CfdEntity* apEntityA, CfdEntity* apEntityB, int unused, CfdInfo* info)
 {
-    int newCount = m_uiItemCount;
+    int newCount = mgr->m_usNextProcessCallbackDelay;
     if (newCount-- == 0) {
         CfdBody* bodyA = (CfdBody*)((char*)apEntityA + apEntityA->m_motionOffset);
         CfdBody* bodyB = (CfdBody*)((char*)apEntityB + apEntityB->m_motionOffset);
@@ -1650,29 +1070,29 @@ void CfdMgr::FUN_00cfd470(CfdEntity* apEntityA, CfdEntity* apEntityB, int unused
         params.m_kPointA = apEntityA;
         params.m_kPointB = apEntityB;
         params.m_info = info;
-        params.m_pOwnerObject = this;
+        params.m_pOwnerObject = mgr;
         CfdInfoItem* end = info->m_kRayEnd;
         void** out = params.m_ptrs;
         for (CfdInfoItem* pItem = info->m_items; pItem < end; pItem++) {
-            int idx = pItem->m_table[m_uiEdgeIndex];
+            int idx = pItem->m_table[(int)mgr->m_kSimpleContactConstraintData.m_kAtoms.m_data];
             void* ptr;
             if (idx == 0xff) {
                 ptr = 0;
             } else {
-                CfdHeader* h = m_kHeader;
-                ptr = (char*)h + (short)idx * h->m_iElementIndex + h->m_offset * 32 + 0x30;
+                hkpSimpleContactConstraintAtom* h = mgr->m_kSimpleContactConstraintData.m_pAtom;
+                ptr = (char*)h + (short)idx * h->m_ucContactPointPropertiesStriding + h->m_usMaxNumContactPoints * 32 + 0x30;
             }
             *out++ = ptr;
         }
-        NotifyShapeSetListeners(unk0c, &params);
+        NotifyShapeSetListeners(mgr->m_pOwningWorld, &params);
         if (bodyA->m_numJac != 0) FUN_00d00270(bodyA, &params);
         if (bodyB->m_numJac != 0) FUN_00d00270(bodyB, &params);
-        info->m_pSolver->method14(m_data, 8);
+        info->m_pSolver->method14(mgr->m_kSimpleContactConstraintData.m_pHavokConstraint, 8);
     }
-    m_uiItemCount = newCount;
+    mgr->m_usNextProcessCallbackDelay = newCount;
     CfdInfoItem* end = info->m_kRayEnd;
     for (CfdInfoItem* pItem = info->m_items; pItem < end; pItem++) {
-        float* dst = (float*)((char*)m_kHeader + pItem->m_table[m_uiEdgeIndex] * 32 + 0x30);
+        float* dst = (float*)((char*)mgr->m_kSimpleContactConstraintData.m_pAtom + pItem->m_table[(int)mgr->m_kSimpleContactConstraintData.m_kAtoms.m_data] * 32 + 0x30);
         _mm_stream_ps(dst, pItem->m_v0);
         _mm_stream_ps(dst + 4, pItem->m_v1);
     }

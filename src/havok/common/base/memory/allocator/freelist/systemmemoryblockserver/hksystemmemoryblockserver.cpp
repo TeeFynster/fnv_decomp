@@ -2,6 +2,9 @@
 // src/havok/common/base/memory/allocator/freelist/systemmemoryblockserver/hksystemmemoryblockserver.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/memory/allocator/freelist/systemmemoryblockserver/hksystemmemoryblockserver.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../../include/hkBool.h"
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+
 struct FUN_00d60480
 {
     int __thiscall GetValueAsInteger();
@@ -122,13 +125,6 @@ void __stdcall FUN_00d60530(unsigned char* out, int a2, int a3, int a4, int a5)
     *out = 0;
 }
 
-class hkStreamReaderD604
-{
-  public:
-    virtual void V0();
-    virtual int read(int iNumBytes);
-};
-
 class hkObjD604
 {
   public:
@@ -136,12 +132,13 @@ class hkObjD604
     int unk04;
     unsigned int m_pos;
     unsigned int m_pFreeList;
-    hkStreamReaderD604* m_pStreamReader;
+    // allocate at 0x00d60420 calls allocator slot +4 with a byte count; stream reads take a buffer and count.
+    hkMemoryAllocator* m_system;
 
     int ReadBytes(int iNumBytes, int* piOut);
 };
 
-// Checks the read stays within the limit, advances m_pos by iNumBytes, stores iNumBytes in piOut and returns the stream read result.
+// Checks the allocation limit, advances m_pos, stores the byte count and returns the allocated block.
 // @fnv 0x00d60420
 int hkObjD604::ReadBytes(int iNumBytes, int* piOut)
 {
@@ -149,7 +146,7 @@ int hkObjD604::ReadBytes(int iNumBytes, int* piOut)
         return 0;
     *piOut = iNumBytes;
     m_pos += iNumBytes;
-    return m_pStreamReader->read(iNumBytes);
+    return reinterpret_cast<int>(m_system->blockAlloc(iNumBytes));
 }
 
 struct FUN_00d60490_cls
@@ -168,17 +165,6 @@ int FUN_00d60490_cls::FUN_00d60490()
 }
 
 namespace fnv_00d604a0 {
-struct hkBoolD604
-{
-    char m_cBooleanValue;
-    hkBoolD604()
-    {}
-    hkBoolD604(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-
 struct hkObjD604
 {
     int unk00;
@@ -186,11 +172,11 @@ struct hkObjD604
     unsigned int m_pRayCursor;
     unsigned int m_iElementCount;
 
-    hkBoolD604 FUN_00d604a0(unsigned int n);
+    hkBool FUN_00d604a0(unsigned int n);
 };
 
 // @fnv 0x00d604a0
-hkBoolD604 hkObjD604::FUN_00d604a0(unsigned int n)
+hkBool hkObjD604::FUN_00d604a0(unsigned int n)
 {
     if (n == 0)
     {

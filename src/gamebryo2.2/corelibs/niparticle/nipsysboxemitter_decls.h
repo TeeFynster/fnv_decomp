@@ -1,10 +1,6 @@
 
-class RgbaColor
-{
-  public:
-    float r, g, b, a;
-};
-extern RgbaColor DAT_011a9be0;
+#include "../../../../include/NiColorA.h"
+extern NiColorA DAT_011a9be0;
 class NiPSysPositionModifier
 {
   public:
@@ -18,7 +14,7 @@ class NiPSysEmitter : public NiPSysPositionModifier
     NiPSysEmitter();
     virtual void LoadBinary(class NiStream&);
     float speed, speedVar, declination, declinationVar, planarAngle, planarAngleVar;
-    RgbaColor color;
+    NiColorA color;
     float radius, radiusVar, lifespan, lifespanVar, unknown;
 };
 class NiPSysVolumeEmitter : public NiPSysEmitter

@@ -1,3 +1,4 @@
+#include "../../include/BSStringT.h"
 
 // src/staging/blk_00a20000_od_ob1_variant.cpp - flag-variant unit created 2026-10-25 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/staging/blk_00a20000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,6 +7,7 @@
 // src/staging/blk_00a20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/NiAllocator.h"
 struct FUN_00a23a30_Class
 {
     unsigned int GetField1B08();
@@ -145,10 +147,7 @@ struct FUN_00a26310_Class
     int m_30;
     void FUN_00a26310(int a, FUN_00a26480_class* b);
 };
-struct BSStr
-{
-    bool Set(const char*, unsigned int);
-};
+
 struct FUN_00a22640_Class
 {
     int m_00;
@@ -165,7 +164,7 @@ struct FUN_00a22640_Class
     int m_2c;
     int m_30;
     int m_34;
-    BSStr m_38;
+    ::BSStringT<char> m_38;
     void FUN_00a22640();
 };
 struct FUN_00a24b70_Class
@@ -257,10 +256,6 @@ struct InputInterface
     virtual unsigned long __stdcall QueryInterface() = 0;
     virtual unsigned long __stdcall AddRef() = 0;
     virtual unsigned long __stdcall Release() = 0;
-};
-struct NiAllocator
-{
-    void __thiscall FUN_00aa4060(void*);
 };
 extern NiAllocator DAT_011f6238;
 struct InputManagerClose
@@ -5973,10 +5968,6 @@ struct WaveController
     void UpdateWaveChannel(int channel, short* output, unsigned int delta);
 };
 
-struct PoolQ
-{
-    void FUN_00aa4060(void* p);
-};
 struct FUN_00a26240
 {
     int a, b;
@@ -5987,7 +5978,7 @@ struct PoolDelQ
     __forceinline void operator delete(void* p)
     {
         int aiD[3];
-        ((PoolQ*)&DAT_011f6238)->FUN_00aa4060(p);
+        DAT_011f6238.Deallocate(p);
     }
 };
 struct FUN_00a25b00 : PoolDelQ
@@ -6039,14 +6030,9 @@ inline bool SettingIs(const unsigned char* apSetting, bool abValue)
     return apSetting ? apSetting[4] == abValue : false;
 }
 
-struct MemMgr
-{
-    void* FUN_00aa3e40(unsigned int size);
-};
-
 inline void* operator new(unsigned int size)
 {
-    return ((MemMgr*)&DAT_011f6238)->FUN_00aa3e40(size);
+    return DAT_011f6238.Allocate(size);
 }
 
 extern "C" long __stdcall FUN_00ee7f10(void* hinst, unsigned int version, void* iid, void** out, void* outer);
@@ -6140,7 +6126,7 @@ struct Mgr
 __forceinline Elem2* NewZeroedElem2()
 {
     unsigned int uiSizeVal = 0x24;
-    void* pMemory = ((MemMgr*)&DAT_011f6238)->FUN_00aa3e40(uiSizeVal);
+    void* pMemory = DAT_011f6238.Allocate(uiSizeVal);
     return (Elem2*)(pMemory ? (FUN_00ec61c0(pMemory, 0, uiSizeVal), pMemory) : 0);
 }
 
@@ -6268,16 +6254,12 @@ Mgr* Mgr::FUN_00a22660(int arg)
     return this;
 }
 
-struct S_00a25920_Pool
-{
-    void* FUN_00aa3e40(unsigned int size);
-};
 struct S_00a25920_Obj
 {
     int unk00;
     static __forceinline void* operator new(unsigned int)
     {
-        return ((S_00a25920_Pool&)DAT_011f6238).FUN_00aa3e40(0x14280);
+        return DAT_011f6238.Allocate(0x14280);
     }
     S_00a25920_Obj();
 };
@@ -6302,7 +6284,7 @@ void FUN_00a25880()
 
 __forceinline void __cdecl operator delete(void* memory)
 {
-    DAT_011f6238.FUN_00aa4060(memory);
+    DAT_011f6238.Deallocate(memory);
 }
 
 // @fnv 0x00a26240

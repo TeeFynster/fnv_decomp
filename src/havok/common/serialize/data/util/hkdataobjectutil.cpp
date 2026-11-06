@@ -1,6 +1,13 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/common/serialize/data/util/hkdataobjectutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/data/util/hkdataobjectutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#define FNV_VEC4_SIMD
+#include "../../../../../../include/Vec4.h"
+#include "../../../../../../include/hkMemoryRouter.h"
 
 struct FUN_00dc35e0_class
 {
@@ -128,19 +135,12 @@ struct S_00dc3ce0_Allocator
     int unk0;
 };
 
-struct S_00dc3ce0_Router
+hkMemoryRouter& __cdecl GetAudioHolder();
+
+inline S_00dc3ce0_Allocator& GetStreamAllocator(hkMemoryRouter& holder)
 {
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00dc3ce0_Allocator* m_pStreamAllocator;
-    static S_00dc3ce0_Router& FUN_00c85750();
-    S_00dc3ce0_Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
+    return *(S_00dc3ce0_Allocator*)holder.m_heap;
+}
 
 void ResizeAudioStream(S_00dc3ce0_Allocator& alloc, void* array, int sizeElem);
 
@@ -158,8 +158,8 @@ inline void* operator new(unsigned int, void* p)
     return p;
 }
 
-struct S_00dc3ce0_Array
-{
+struct S_00dc3ce0_ArrayLocalForm
+{ // local form of hkArray: 0x00dc2d60 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     S_00dc3ce0_Entry* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -167,7 +167,7 @@ struct S_00dc3ce0_Array
     {
         return m_iCapacityState & 0x3fffffff;
     }
-    __forceinline void AddBack(S_00dc3ce0_Allocator& alloc, const S_00dc3ce0_Entry& e)
+    __forceinline void pushBack(S_00dc3ce0_Allocator& alloc, const S_00dc3ce0_Entry& e)
     {
         if (m_iElementCount == getCapacity())
         {
@@ -176,9 +176,9 @@ struct S_00dc3ce0_Array
         new (m_data + m_iElementCount) S_00dc3ce0_Entry(e);
         m_iElementCount++;
     }
-    __forceinline void AddBack(const S_00dc3ce0_Entry& e)
+    __forceinline void pushBack(const S_00dc3ce0_Entry& e)
     {
-        AddBack(S_00dc3ce0_Router::FUN_00c85750().heap(), e);
+        pushBack(GetStreamAllocator(GetAudioHolder()), e);
     }
 };
 
@@ -200,7 +200,7 @@ struct S_00dc3ce0
     int unk34;
     int unk38;
     int unk3C;
-    S_00dc3ce0_Array m_entries;
+    S_00dc3ce0_ArrayLocalForm m_entries;
     void AddEntry(int a, int b, int c);
 };
 
@@ -208,7 +208,7 @@ struct S_00dc3ce0
 // @fnv 0x00dc3ce0
 void S_00dc3ce0::AddEntry(int aiFirst, int aiSecond, int aiThird)
 {
-    m_entries.AddBack(S_00dc3ce0_Entry(aiFirst, aiSecond, aiThird));
+    m_entries.pushBack(S_00dc3ce0_Entry(aiFirst, aiSecond, aiThird));
 }
 
 struct Temp
@@ -525,21 +525,13 @@ struct DC43A0Allocator
     virtual void ReturnMemory(void* p, int numBytes);
 };
 
-struct DC43A0MemoryRouter
+
+inline DC43A0Allocator& GetHeap(hkMemoryRouter& holder)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    DC43A0Allocator* m_pStreamAllocator;
+    return *(DC43A0Allocator*)holder.m_heap;
+}
 
-    DC43A0Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" DC43A0MemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 
 struct DC43A0ReferencedObject
 {
@@ -567,7 +559,7 @@ struct DC43A0MapA
     void ClearAndRelease(DC43A0Allocator& alloc);
     ~DC43A0MapA()
     {
-        ClearAndRelease(FUN_00c85750().heap());
+        ClearAndRelease(GetHeap(FUN_00c85750()));
     }
 };
 
@@ -580,7 +572,7 @@ struct DC43A0MapB
     void ClearAndRelease(DC43A0Allocator& alloc);
     ~DC43A0MapB()
     {
-        ClearAndRelease(FUN_00c85750().heap());
+        ClearAndRelease(GetHeap(FUN_00c85750()));
     }
 };
 
@@ -590,22 +582,22 @@ struct DC43A0Pair
     int m_kPointB;
 };
 
-struct DC43A0PairArray
+typedef hkArray<DC43A0Pair> DC43A0PairArray;
+} // namespace fnv_00dc43a0
+template<> __forceinline hkArray<fnv_00dc43a0::DC43A0Pair>::~hkArray()
 {
-    DC43A0Pair* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+    using namespace fnv_00dc43a0;
 
-    ~DC43A0PairArray()
-    {
-        DC43A0Allocator& alloc = FUN_00c85750().heap();
+        DC43A0Allocator& alloc = GetHeap(fnv_00dc43a0::FUN_00c85750());
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(DC43A0Pair));
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-};
+    
+}
+namespace fnv_00dc43a0 {
+
 
 struct FUN_00dc43a0
 {
@@ -626,16 +618,8 @@ FUN_00dc43a0::~FUN_00dc43a0() throw()
 }  // namespace fnv_00dc43a0
 
 namespace fnv_00dc4f20 {
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int m_iValue10;
-};
 
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct ObjectRef
 {
@@ -682,15 +666,15 @@ FUN_00dc4f20_cls* FUN_00dc4f20_cls::Construct(ObjectRef* apRef, int aiSecond)
     pSub->m_i00 = 0;
     pSub->m_i04 = 0;
     pSub->m_i08 = -1;
-    AudioHolder* pHolder = FUN_00c85750();
-    pSub->EnsureCapacity(pHolder->m_iValue10, 0);
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    pSub->EnsureCapacity((int)pHolder->m_heap, 0);
 
     SubRecord* pSub2 = &m_sub18;
     pSub2->m_i00 = 0;
     pSub2->m_i04 = 0;
     pSub2->m_i08 = -1;
-    AudioHolder* pHolder2 = FUN_00c85750();
-    pSub2->FUN_00dc3cc0(pHolder2->m_iValue10, 0);
+    hkMemoryRouter* pHolder2 = FUN_00c85750();
+    pSub2->FUN_00dc3cc0((int)pHolder2->m_heap, 0);
 
     unk24 = 0;
     unk28 = 0;
@@ -708,18 +692,12 @@ struct S_00dc58a0_Alloc
     virtual void v3();
     virtual void ReturnMemory(void* p, int n);
 };
-struct S_00dc58a0_Router
+inline S_00dc58a0_Alloc& GetBufferAllocator(hkMemoryRouter& holder)
 {
-    int unk0;
-    int unk4;
-    int unk8;
-    S_00dc58a0_Alloc* m_buf;
-    S_00dc58a0_Alloc& buf()
-    {
-        return *m_buf;
-    }
-};
-S_00dc58a0_Router* FUN_00c85750();
+    return *(S_00dc58a0_Alloc*)holder.m_temp;
+}
+
+hkMemoryRouter* FUN_00c85750();
 
 struct S_00dc58a0_Obj
 {
@@ -739,7 +717,7 @@ struct S_00dc58a0_Item
     int unk10;
 };
 struct S_00dc58a0_Arr
-{
+{ // local form of hkArrayBase: 0x00dc58a0 needs ClearAndRelease(S_00dc58a0_Alloc&) through the unit allocator ABI, absent from the shared base.
     S_00dc58a0_Item* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -772,7 +750,7 @@ void FUN_00dc58a0_cls::ProcessSourcePair(S_00dc58a0_Src* pSourceA, S_00dc58a0_Sr
     FUN_00dc56f0(arr, ha, pSourceB->GetObjectValue());
     for (int i = 0; i < arr.m_iElementCount; i++)
         FUN_00dc4210(pSourceA, pSourceB, &arr.m_data[i]);
-    arr.ClearAndRelease(FUN_00c85750()->buf());
+    arr.ClearAndRelease(GetBufferAllocator(*FUN_00c85750()));
 }
 }  // namespace fnv_00dc58a0
 
@@ -780,20 +758,12 @@ struct S_00dc5970_Allocator;
 struct S_00dc5970_ClassImpl;
 struct S_00dc5970_ObjectImpl;
 
-struct S_00dc5970_Router
+inline S_00dc5970_Allocator& GetCloneAllocator(hkMemoryRouter& holder) throw()
 {
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkc;
-    S_00dc5970_Allocator* m_pStreamAllocator;
+    return *(S_00dc5970_Allocator*)holder.m_heap;
+}
 
-    static S_00dc5970_Router& FUN_00c85750() throw();
-    S_00dc5970_Allocator& heap() throw()
-    {
-        return *m_pStreamAllocator;
-    }
-};
+hkMemoryRouter& __cdecl GetAudioHolderForCloning() throw();
 
 struct S_00dc5970_Handle
 {
@@ -848,11 +818,16 @@ struct S_00dc5970_Map
     }
     void insert(S_00dc5970_Handle key, S_00dc5970_Handle val) throw()
     {
-        Insert(S_00dc5970_Router::FUN_00c85750().heap(), key, val);
+        Insert(GetCloneAllocator(GetAudioHolderForCloning()), key, val);
     }
 };
 
-struct S_00dc5970_Cloner
+struct ValueQ;
+struct Element;
+struct Object;
+
+// World cloning context: copyObject (0x00dc5970) and both simple-value specializations share this type.
+struct Cloner
 {
     S_00dc5970_World& m_kSourceWorld;
     int unk4;
@@ -861,11 +836,14 @@ struct S_00dc5970_Cloner
     S_00dc5970_ClassImpl* FUN_00dc5440(S_00dc5970_ClassImpl* srcClass) throw();  // copyClass
     void ProcessSourcePair(S_00dc5970_Object& dstObj, const S_00dc5970_Object& srcObj) throw();
     S_00dc5970_Object CloneObject(const S_00dc5970_Object& srcObj) throw();
+    void CopyValue(ValueQ dst, const ValueQ& src) throw();
+    Object CloneObject(const Object& srcObj) throw();
+    void FUN_00dc37f0(Element dst, const Element& src);
 };
 
 // Looks up srcObj's handle in the map; if absent, clones its class, creates a destination object, records the handle mapping, copies the object and returns it.
 // @fnv 0x00dc5970
-S_00dc5970_Object S_00dc5970_Cloner::CloneObject(const S_00dc5970_Object& srcObj) throw()
+S_00dc5970_Object Cloner::CloneObject(const S_00dc5970_Object& srcObj) throw()
 {
     if (!srcObj.GetObjectKind())
     {
@@ -918,15 +896,16 @@ struct Allocator_cls
     virtual void Free(void* p, unsigned int size);
 };
 
-struct Pair_dc3
+// Eight-byte data-object handle used by the handle-to-handle map, not an array value proxy.
+struct DataObjectHandleKey
 {
     unsigned int lo;
     unsigned int hi;
 };
 struct HashEntry
 {
-    Pair_dc3 key;
-    Pair_dc3 val;
+    DataObjectHandleKey key;
+    DataObjectHandleKey val;
 };
 
 struct HashTable_cls
@@ -935,7 +914,7 @@ struct HashTable_cls
     unsigned int m_04;
     unsigned int m_08;
 
-    void Insert(Allocator_cls* alloc, Pair_dc3 key, Pair_dc3 val);
+    void Insert(Allocator_cls* alloc, DataObjectHandleKey key, DataObjectHandleKey val);
     void FUN_00dc39b0(Allocator_cls* alloc, int newSize);
 };
 
@@ -1073,14 +1052,9 @@ struct ValueQ
     void FUN_00dbab30(const char* s) throw();
 };
 
-struct ClonerQ : S_00dc5970_Cloner
-{
-    void CopyValue(ValueQ dst, const ValueQ& src) throw();
-};
-
 // Copies src into dst by dispatching on src's type tag and calling the matching setter for int, float, float array, object or string values.
 // @fnv 0x00dc5ab0
-void ClonerQ::CopyValue(ValueQ dst, const ValueQ& src) throw()
+void Cloner::CopyValue(ValueQ dst, const ValueQ& src) throw()
 {
     switch (src.QueryAndWriteResult())
     {
@@ -1172,9 +1146,9 @@ int hkPairMapDC37::Insert(hkMemoryAllocatorDC37& alloc, hkPairKeyDC37 key, hkPai
 class FUN_00c6cd00_cls
 {
   public:
-    __m128 m_v0;
-    __m128 m_v1;
-    __m128 m_v2;
+    LocalM128 m_v0;
+    LocalM128 m_v1;
+    LocalM128 m_v2;
 
     void __thiscall FUN_00c6cd00(const FUN_00c6cd00_cls* src);
 };
@@ -1190,7 +1164,7 @@ void FUN_00c6cd00_cls::FUN_00c6cd00(const FUN_00c6cd00_cls* src)
 
 struct S48
 {
-    __m128 v[3];
+    LocalM128 v[3];
     void __thiscall CopyFromFloatArray(const float* src);
 };
 // Copies 12 floats from src into the three __m128 members of v using SSE load/store.
@@ -1202,12 +1176,7 @@ void __thiscall S48::CopyFromFloatArray(const float* src)
     _mm_store_ps((float*)&v[2], _mm_load_ps(src + 8));
 }
 
-typedef __m128 M128;
-
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
-};
+typedef LocalM128 M128;
 
 struct Mat3a
 {
@@ -1283,14 +1252,6 @@ struct DAllocator
     virtual void* AllocateBufferWithSize(int& numBytes) throw();
 };
 
-struct DMemory
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    DAllocator* unk10;
-};
 
 __declspec(restrict) void* __cdecl FUN_00c85750() throw();
 extern "C" void __cdecl FUN_00cb1280(void* p, int v, int n) throw();
@@ -1320,8 +1281,8 @@ struct DTracker
 
 template <class T> __forceinline T* AllocElems(int& count)
 {
-    DMemory* mem = (DMemory*)FUN_00c85750();
-    DAllocator& heap = *mem->unk10;
+    hkMemoryRouter* mem = (hkMemoryRouter*)FUN_00c85750();
+    DAllocator& heap = *(DAllocator*)mem->m_heap;
     T* p;
     {
         int numBytes = count * (int)sizeof(T);
@@ -1584,10 +1545,10 @@ int DReader::ReadArray(DOutArray* out, DMember* member, DArray* apArray) throw()
         {
             out->unk04 = apArray->FUN_00dbac00();
             int totalBytes = pClassInfo->FUN_00d470d0() * out->unk04;
-            DMemory* mem = (DMemory*)FUN_00c85750();
+            hkMemoryRouter* mem = (hkMemoryRouter*)FUN_00c85750();
             {
                 int numBytes = totalBytes;
-                out->unk00 = CopyClassBytes(*mem->unk10, numBytes);
+                out->unk00 = CopyClassBytes(*(DAllocator*)mem->m_heap, numBytes);
             }
             elemSize = pClassInfo->FUN_00d470d0();
             FUN_00cb1280(out->unk00, 0, pClassInfo->FUN_00d470d0() * apArray->FUN_00dbac00());
@@ -1707,22 +1668,17 @@ finish:
     return result;
 }
 
-struct DC3710Vector4
+__forceinline void Vec4::operator=(const Vec4& v)
 {
-    __m128 m_vComponents;
-
-    void operator=(const DC3710Vector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
+    m_vComponents = v.m_vComponents;
+}
 
 struct DC3710Transform
 {
-    DC3710Vector4 m_kColumn0;
-    DC3710Vector4 m_kColumn1;
-    DC3710Vector4 m_kColumn2;
-    DC3710Vector4 m_vTranslation;
+    Vec4 m_kColumn0;
+    Vec4 m_kColumn1;
+    Vec4 m_kColumn2;
+    Vec4 m_vTranslation;
 
     void FUN_00dc3710(const DC3710Transform& t);
 };
@@ -1779,26 +1735,24 @@ __forceinline void constructStrings(char** p, int n, char* const& str) throw()
     }
 }
 
-struct StringArray
+typedef hkArray<char*> StringArray;
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    char** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const throw()
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void AddBack(char* str) throw()
-    {
-        S_00dc3ce0_Router& r = S_00dc3ce0_Router::FUN_00c85750();
+return reinterpret_cast<hkMemoryAllocator&>(*reinterpret_cast<hkMemoryAllocator*>(&GetStreamAllocator(GetAudioHolder())));
+}
+template<> __forceinline void hkArrayBase<char*>::_pushBack(hkMemoryAllocator& sharedAlloc, char* const& str)
+{
+S_00dc3ce0_Allocator& alloc = reinterpret_cast<S_00dc3ce0_Allocator&>(sharedAlloc);
+
         if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
         {
-            ResizeAudioStream(r.heap(), this, 4);
+            ResizeAudioStream(alloc, this, 4);
         }
         constructStrings(m_data + m_iElementCount, 1, str);
         m_iElementCount++;
-    }
-};
+    
+}
+
 
 struct StringHolder
 {
@@ -1906,10 +1860,10 @@ int __thiscall S_00dc4a80::ReadValue(void* out, int type, S_00dc4a80_Reader* rea
         }
         break;
     case 12:
-        *(__m128*)out = *(__m128*)reader->DispatchToVTableSlot8(4);
+        *(LocalM128*)out = *(LocalM128*)reader->DispatchToVTableSlot8(4);
         return 0;
     case 13:
-        *(__m128*)out = *(__m128*)reader->DispatchToVTableSlot8(4);
+        *(LocalM128*)out = *(LocalM128*)reader->DispatchToVTableSlot8(4);
         return 0;
     case 14:
         ((S_00dc4a80_M3*)out)->FUN_00c6cd00(reader->DispatchToVTableSlot8(12));
@@ -1935,7 +1889,7 @@ int __thiscall S_00dc4a80::ReadValue(void* out, int type, S_00dc4a80_Reader* rea
         if (reader->FUN_00dbac70())
         {
             copy = FUN_00cb1410(reader->FUN_00dbac70());
-            unk04->m_pStringFunctions.AddBack(copy);
+            unk04->m_pStringFunctions.pushBack(copy);
         }
         else
         {
@@ -1949,7 +1903,7 @@ int __thiscall S_00dc4a80::ReadValue(void* out, int type, S_00dc4a80_Reader* rea
         if (reader->FUN_00dbac70())
         {
             char* copy = FUN_00cb1410(reader->FUN_00dbac70());
-            unk04->m_pStringFunctions.AddBack(copy);
+            unk04->m_pStringFunctions.pushBack(copy);
             val = (int)copy;
         }
         else
@@ -1990,10 +1944,7 @@ int __thiscall S_00dc4a80::ReadValue(void* out, int type, S_00dc4a80_Reader* rea
 }
 
 namespace fnv_00dc4fa0 {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-} __m128;
+typedef ::__m128 LocalM128;
 
 struct S_00dc4fa0_Reader
 {
@@ -2029,26 +1980,7 @@ struct S_00dc4fa0_Tr
     void __thiscall FUN_00c6cd60(void*) throw();
 };
 
-struct StringArray
-{
-    char** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const throw()
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void AddBack(char* str) throw()
-    {
-        S_00dc3ce0_Router* r = &S_00dc3ce0_Router::FUN_00c85750();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(*r->m_pStreamAllocator, this, sizeof(char*));
-        char** p = m_data + m_iElementCount;
-        __assume(p != 0);
-        new (p) char*(str);
-        m_iElementCount++;
-    }
-};
+typedef hkArray<char*> StringArray;
 
 struct StringHolder
 {
@@ -2156,10 +2088,10 @@ int __thiscall S_00dc4fa0::FUN_00dc4fa0(void* out, int type, S_00dc4fa0_Reader* 
         }
         break;
     case 12:
-        *(__m128*)out = *(__m128*)reader->DispatchToInterface(4);
+        *(LocalM128*)out = *(LocalM128*)reader->DispatchToInterface(4);
         return 0;
     case 13:
-        *(__m128*)out = *(__m128*)reader->DispatchToInterface(4);
+        *(LocalM128*)out = *(LocalM128*)reader->DispatchToInterface(4);
         return 0;
     case 14:
         ((S_00dc4fa0_M3*)out)->FUN_00c6cd00(reader->DispatchToInterface(12));
@@ -2185,7 +2117,7 @@ int __thiscall S_00dc4fa0::FUN_00dc4fa0(void* out, int type, S_00dc4fa0_Reader* 
         if (reader->FUN_00dba9c0())
         {
             copy = FUN_00cb1410(reader->FUN_00dba9c0());
-            unk04->m_pStringFunctions.AddBack(copy);
+            unk04->m_pStringFunctions.pushBack(copy);
         }
         else
         {
@@ -2199,7 +2131,7 @@ int __thiscall S_00dc4fa0::FUN_00dc4fa0(void* out, int type, S_00dc4fa0_Reader* 
         if (reader->FUN_00dba9c0())
         {
             char* copy = FUN_00cb1410(reader->FUN_00dba9c0());
-            unk04->m_pStringFunctions.AddBack(copy);
+            unk04->m_pStringFunctions.pushBack(copy);
             val = (int)copy;
         }
         else
@@ -2313,12 +2245,6 @@ struct DCAlloc
     virtual void f3();
     virtual void Free(void*, int);
 };
-struct DCRouter
-{
-    int x[3];
-    DCAlloc* heap;
-    DCAlloc* other;
-};
 __forceinline void clearPart(int flags, int* cap, DCAlloc* other)
 {
     cap[-1] = 0;
@@ -2329,7 +2255,7 @@ __forceinline void clearPart(int flags, int* cap, DCAlloc* other)
 }
 // Looks up srcClass in m_kSourceWorld; on a miss, walks nodes, adds collected entries, visits members recursively, and frees temporary array storage.
 // @fnv 0x00dc5440
-S_00dc5970_ClassImpl* S_00dc5970_Cloner::FUN_00dc5440(S_00dc5970_ClassImpl* srcClass) throw()
+S_00dc5970_ClassImpl* Cloner::FUN_00dc5440(S_00dc5970_ClassImpl* srcClass) throw()
 {
 
     DCNode* arg = (DCNode*)srcClass;
@@ -2338,15 +2264,15 @@ S_00dc5970_ClassImpl* S_00dc5970_Cloner::FUN_00dc5440(S_00dc5970_ClassImpl* srcC
         return (S_00dc5970_ClassImpl*)result;
     {
         DCArray a = {0, 0, (int)0x80000000};
-        DCRouter* r = (DCRouter*)FUN_00c85750();
-        a.reserve(r->heap, 10);
+        hkMemoryRouter* r = (hkMemoryRouter*)FUN_00c85750();
+        a.reserve((DCAlloc*)r->m_temp, 10);
         DCNode* node = arg;
         while (node && !((DCWorld*)&m_kSourceWorld)->find(node))
         {
             DCIterator it(((DCWorld*)unk4)->find(node));
-            r = (DCRouter*)FUN_00c85750();
+            r = (hkMemoryRouter*)FUN_00c85750();
             if (a.size == (a.cap & 0x3fffffff))
-                ResizeAudioStream(r->heap, &a, 24);
+                ResizeAudioStream((DCAlloc*)r->m_temp, &a, 24);
             DCEntry* e = a.data + a.size;
             if (e)
             {
@@ -2373,15 +2299,15 @@ S_00dc5970_ClassImpl* S_00dc5970_Cloner::FUN_00dc5440(S_00dc5970_ClassImpl* srcC
                 FUN_00dc5440((S_00dc5970_ClassImpl*)((DCNode*)member.x[3])->get());
         }
         srcClass = (S_00dc5970_ClassImpl*)((DCWorld*)&m_kSourceWorld)->find(arg);
-        DCAlloc* heap = ((DCRouter*)FUN_00c85750())->heap;
+        DCAlloc* heap = (DCAlloc*)((hkMemoryRouter*)FUN_00c85750())->m_temp;
         if (a.size > 0)
         {
             int* cap = &a.data->cap;
             int i = a.size;
             do
             {
-                DCRouter* r = (DCRouter*)FUN_00c85750();
-                clearPart(cap[0], cap, r->other);
+                hkMemoryRouter* r = (hkMemoryRouter*)FUN_00c85750();
+                clearPart(cap[0], cap, (DCAlloc*)r->m_heap);
                 cap += 6;
             } while (--i);
         }
@@ -2393,19 +2319,12 @@ S_00dc5970_ClassImpl* S_00dc5970_Cloner::FUN_00dc5440(S_00dc5970_ClassImpl* srcC
 }
 
 struct DWC_Allocator;
-struct DWC_Router
+inline DWC_Allocator& GetTempAllocator(hkMemoryRouter& holder) throw()
 {
-    int unk0;
-    int unk4;
-    int unk8;
-    DWC_Allocator* m_pTemp;
+    return *(DWC_Allocator*)holder.m_temp;
+}
 
-    static DWC_Router& FUN_00c85750() throw();
-    DWC_Allocator& temp() throw()
-    {
-        return *m_pTemp;
-    }
-};
+hkMemoryRouter& __cdecl GetTempAudioHolder() throw();
 struct DWC_Allocator
 {
     virtual void vf0() throw();
@@ -2447,7 +2366,7 @@ __forceinline void DWC_construct(DWC_MemberInfo* t, int n) throw()
 }
 
 struct DWC_MemberArray
-{
+{ // local form of hkArrayBase: 0x00dc56f0 needs throw() temp-allocator growth/cleanup with DWC_construct and DWC_Allocator call signatures.
     DWC_MemberInfo* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -2456,7 +2375,7 @@ struct DWC_MemberArray
     {}
     ~DWC_MemberArray() throw()
     {
-        _clearAndDeallocate(DWC_Router::FUN_00c85750().temp());
+        _clearAndDeallocate(GetTempAllocator(GetTempAudioHolder()));
     }
     int getCapacity() const throw()
     {
@@ -2492,7 +2411,7 @@ struct DWC_MemberArray
     }
     __forceinline void SetSizeAndGrow(int n) throw()
     {
-        _setSize(DWC_Router::FUN_00c85750().temp(), n);
+        _setSize(GetTempAllocator(GetTempAudioHolder()), n);
     }
 };
 
@@ -2636,19 +2555,6 @@ struct Allocator355
     virtual void f8() throw();
     virtual void* allocate(int& bytes) throw();
 };
-struct Router355
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    Allocator355* heap;
-    static Router355& FUN_00c85750() throw();
-    __forceinline Allocator355& getHeap() throw()
-    {
-        return *heap;
-    }
-};
 
 struct Sequence355
 {
@@ -2656,7 +2562,8 @@ struct Sequence355
     char* data;
     int count;
 };
-struct Reader355
+// ReadObject at 0x00dc2d60 fills native members through a class registry and allocation tracker.
+struct NativeObjectCopier
 {
     Registry355* registry;
     S_00dc3ce0* tracker;
@@ -2670,7 +2577,7 @@ struct Reader355
 };
 // Deserializes an Object355 into destination by iterating class members and dispatching on member type, returning 1 on failure.
 // @fnv 0x00dc2d60
-int Reader355::ReadObject(char* destination, Object355* object) throw()
+int NativeObjectCopier::ReadObject(char* destination, Object355* object) throw()
 {
     int result = 0;
     ClassHandle355 classHandle;
@@ -2833,23 +2740,15 @@ struct S_Heap
     virtual void* v0() throw();
     virtual void* alloc(unsigned int n) throw();
 };
-struct S_Holder
+inline S_Heap& GetObjectAllocator(hkMemoryRouter& holder)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_Heap* m10;
-    S_Heap& heap()
-    {
-        return *m10;
-    }
-};
+    return *(S_Heap*)holder.m_heap;
+}
+
 void* __cdecl FUN_00c85750() throw();
-struct S_Heap;
 inline S_Heap& S_heap()
 {
-    return ((S_Holder*)FUN_00c85750())->heap();
+    return GetObjectAllocator(*(hkMemoryRouter*)FUN_00c85750());
 }
 struct S_Blk
 {
@@ -3072,15 +2971,9 @@ struct Element
     void FUN_00dbad00(const Object&) throw();
     void FUN_00dbadc0(const char*) throw();
 };
-struct ClonerStandin
-{
-    void* world;
-    Object CloneObject(const Object&) throw();
-    void FUN_00dc37f0(Element dst, const Element& src);
-};
 // Dispatches on the value returned by src.FUN_00dbac40() and invokes the corresponding destination method for handled cases.
 // @fnv 0x00dc37f0
-void ClonerStandin::FUN_00dc37f0(Element dst, const Element& src)
+void Cloner::FUN_00dc37f0(Element dst, const Element& src)
 {
 
     switch (src.FUN_00dbac40())
@@ -3116,18 +3009,11 @@ struct S_00dc4710_Alloc
     virtual void v0();
     virtual void* AllocateMemoryBlock(int n);
 };
-struct S_00dc4710_Router
+
+inline S_00dc4710_Alloc& GetReferenceAllocator(hkMemoryRouter& holder)
 {
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkc;
-    S_00dc4710_Alloc* m_pStreamAllocator;
-    S_00dc4710_Alloc& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
+    return *(S_00dc4710_Alloc*)holder.m_heap;
+}
 
 struct S_00dc4710_Ref
 {
@@ -3137,7 +3023,7 @@ struct S_00dc4710_Ref
     void removeReference() throw();  // FUN_00c905b0
     static void* operator new(unsigned int n)
     {
-        void* p = ((S_00dc4710_Router*)FUN_00c85750())->heap().AllocateMemoryBlock(n);
+        void* p = GetReferenceAllocator(*(hkMemoryRouter*)FUN_00c85750()).AllocateMemoryBlock(n);
         ((S_00dc4710_Ref*)p)->m_iElementCount = (short)n;
         return p;
     }
@@ -3190,12 +3076,13 @@ struct S_00dc4710_Bool
 
 template <typename K, typename V> struct hkMap_dc4710
 {
-    struct Pair
+    // hkMapBase<KEY,VAL>::Pair (Havok hkMap.h: key, val); renamed so it does not take include/Pair.h's name
+    struct KeyValue
     {
         K key;
         V val;
     };
-    Pair* m_kPrimitiveElement;
+    KeyValue* m_kPrimitiveElement;
     int m_iCapacityFlags;
     int m_iPairCount;
 
@@ -3207,7 +3094,7 @@ template <typename K, typename V> struct hkMap_dc4710
         int last = m_iPairCount;
         if (last >= 0)
         {
-            Pair* p = m_kPrimitiveElement;
+            KeyValue* p = m_kPrimitiveElement;
             do
             {
                 if (p->key.a != -1)
@@ -3224,7 +3111,7 @@ template <typename K, typename V> struct hkMap_dc4710
         i++;
         if (i <= last)
         {
-            Pair* p = m_kPrimitiveElement + i;
+            KeyValue* p = m_kPrimitiveElement + i;
             do
             {
                 if (p->key.a != -1)
@@ -3239,10 +3126,10 @@ template <typename K, typename V> struct hkMap_dc4710
     {
         return i <= m_iPairCount;
     }
-    inline Pair& getPair(Iterator i) const
+    inline KeyValue& getPair(Iterator i) const
     {
         const Iterator& index = i;
-        Pair* const& data = m_kPrimitiveElement;
+        KeyValue* const& data = m_kPrimitiveElement;
         return data[index];
     }
     inline K GetIteratorKey(Iterator i) const
@@ -3470,17 +3357,11 @@ struct DAllocator
     virtual void* AllocateBufferWithSize(int& numBytes) throw();
     virtual void ReturnMemory(void*, int) throw();
 };
-struct DMemory
+inline DAllocator& GetTemporaryHeap(hkMemoryRouter& holder) throw()
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    DAllocator* heap;
-    DAllocator& getHeap() throw()
-    {
-        return *heap;
-    }
-};
+    return *(DAllocator*)holder.m_temp;
+}
+
 __declspec(restrict) void* __cdecl FUN_00c85750();
 // hkMemoryAllocator::_bufAlloc<T>: the allocator may round the request up, the element count is updated
 template <class T> __forceinline T* AllocateBufferWithSize(DAllocator& a, int& reqNumInOut) throw()
@@ -3504,7 +3385,7 @@ struct DMembers
     int capacity;
     __forceinline DMembers(int n) throw() : data(0), size(0), capacity(0x80000000)
     {
-        DAllocator& alloc = ((DMemory*)FUN_00c85750())->getHeap();
+        DAllocator& alloc = GetTemporaryHeap(*(hkMemoryRouter*)FUN_00c85750());
         DMember* p = n ? AllocateBufferWithSize<DMember>(alloc, n) : 0;
         int cap = n ? n : 0x80000000;
         data = p;
@@ -3519,7 +3400,7 @@ struct DMembers
     }
     __forceinline ~DMembers() throw()
     {
-        DAllocator& a = ((DMemory*)FUN_00c85750())->getHeap();
+        DAllocator& a = GetTemporaryHeap(*(hkMemoryRouter*)FUN_00c85750());
         size = 0;
         if ((capacity & 0x80000000) == 0)
             a.ReturnMemory(data, (capacity & 0x3fffffff) * sizeof(DMember));
@@ -3743,18 +3624,11 @@ void ValueCloner::FUN_00dc4210(DataObject& dstObj, const DataObject& srcObj, con
 extern "C" void _ReadWriteBarrier();
 struct AllocatorVtbl;
 __declspec(restrict) void* __cdecl FUN_00c85750() throw();
-struct DC4430Memory
+__forceinline S_00dc3ce0_Allocator& GetMapAllocator(hkMemoryRouter& holder) throw()
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    AllocatorVtbl* m_pStreamAllocator;
-    __forceinline S_00dc3ce0_Allocator& heap() throw()
-    {
-        return *(S_00dc3ce0_Allocator*)m_pStreamAllocator;
-    }
-};
+    return *(S_00dc3ce0_Allocator*)holder.m_heap;
+}
+
 struct FlagBool
 {
     char value;
@@ -3819,8 +3693,8 @@ struct Arg1
     Key64* GetSourcePair(Key64* out) throw();
 };
 
-struct KeyArray
-{
+struct KeyArrayLocalForm
+{ // local form of hkArray: 0x00dc4430 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     Key64* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -3842,7 +3716,7 @@ struct KeyArray
         return -1;
     }
 
-    __forceinline void AddBack(S_00dc3ce0_Allocator& alloc, const Key64& e) throw()
+    __forceinline void pushBack(S_00dc3ce0_Allocator& alloc, const Key64& e) throw()
     {
         if (m_iElementCount == getCapacity())
         {
@@ -3852,9 +3726,9 @@ struct KeyArray
         m_iElementCount++;
     }
 
-    __forceinline void AddBack(const Key64& e) throw()
+    __forceinline void pushBack(const Key64& e) throw()
     {
-        AddBack((*(DC4430Memory*)FUN_00c85750()).heap(), e);
+        pushBack(GetMapAllocator(*(hkMemoryRouter*)FUN_00c85750()), e);
     }
 
     __forceinline void popBack() throw()
@@ -3916,7 +3790,7 @@ struct DC4430_Class
     int m_unk08;
     Map0C m_map0c;
     Map18 m_map18;
-    KeyArray m_ppData;
+    KeyArrayLocalForm m_ppData;
 
     int ReadObject(void* mem, Arg1* arg1) throw();
     RetDC4430 FUN_00dc4430(Arg1* arg1, int arg2) throw();
@@ -3965,7 +3839,7 @@ RetDC4430 DC4430_Class::FUN_00dc4430(Arg1* apArg, int aiFlag) throw()
                 size.second = 0;
                 return size;
             }
-            m_ppData.AddBack(*apArg->GetSourcePair(&key));
+            m_ppData.pushBack(*apArg->GetSourcePair(&key));
         }
 
         ObjA* world = m_obj00;
@@ -3976,8 +3850,8 @@ RetDC4430 DC4430_Class::FUN_00dc4430(Arg1* apArg, int aiFlag) throw()
         {
             (apArg->GetObjectValue().FUN_00dba690(), pClassInfo->FUN_00d47120());
             int mem = pClassInfo->FUN_00d470d0();
-            DC4430Memory* memory = (DC4430Memory*)FUN_00c85750();
-            AllocatorVtbl* heap = memory->m_pStreamAllocator;
+            hkMemoryRouter* memory = (hkMemoryRouter*)FUN_00c85750();
+            AllocatorVtbl* heap = (AllocatorVtbl*)memory->m_heap;
             result.first = heap->allocate(mem);
             m_obj04->AddEntry((int)result.first, mem, 6);
             _FUN_00cb1280(result.first, 0, pClassInfo->FUN_00d470d0());
@@ -3986,7 +3860,7 @@ RetDC4430 DC4430_Class::FUN_00dc4430(Arg1* apArg, int aiFlag) throw()
             Key64* __restrict pReturnedKey = apArg->GetSourcePair(&temp);
             Key64* __restrict destination = &key;
             *destination = *pReturnedKey;
-            m_map18.InsertKeyValue((*(DC4430Memory*)FUN_00c85750()).heap(), key.val, result.first);
+            m_map18.InsertKeyValue(GetMapAllocator(*(hkMemoryRouter*)FUN_00c85750()), key.val, result.first);
 
             if (ReadObject(result.first, apArg) == 1)
             {
@@ -4002,7 +3876,7 @@ RetDC4430 DC4430_Class::FUN_00dc4430(Arg1* apArg, int aiFlag) throw()
 
                 if (pClassInfo->GetLastNodeFlag() && g_01268748.FUN_00d46d80(pClassInfo))
                 {
-                    int b = m_map0c.FUN_00cb1f40((*(DC4430Memory*)FUN_00c85750()).heap(), result.first, 0);
+                    int b = m_map0c.FUN_00cb1f40(GetMapAllocator(*(hkMemoryRouter*)FUN_00c85750()), result.first, 0);
                     m_map0c.m_kPrimitiveElement[b].val++;
                 }
             }

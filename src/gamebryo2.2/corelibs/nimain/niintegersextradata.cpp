@@ -1,6 +1,9 @@
 // gamebryo2.2/corelibs/nimain/niintegersextradata.cpp: NiIntegersExtraData, NiExtraDataSaveHelperShell (19 functions)
 
 #include "niintegersextradata_decls.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiColor.h"
+#include "../../../../include/NiFixedString.h"
 // Loads the extra data from the stream: reads a count, resizes entries, then reads and appends that many NiIntegerStreamEntry objects.
 // @fnv 0x00c540a0
 void NiIntegersExtraData::LoadBinary(NiStream& stream)
@@ -10,7 +13,7 @@ void NiIntegersExtraData::LoadBinary(NiStream& stream)
     ReadBinaryValue(stream, count);
     if (count)
     {
-        entries.FUN_00c54850(count);
+        entries.SetSize(count);
         struct Flags
         {
             unsigned short value;
@@ -22,7 +25,7 @@ void NiIntegersExtraData::LoadBinary(NiStream& stream)
         for (unsigned int i = 0; i < count; ++i)
         {
             streamEntry.FUN_00c545d0(stream);
-            entries.FUN_00c54b70(streamEntry);
+            entries.Add(streamEntry);
             // Preserve the original frame's 176-byte unused local region.
             struct ReservedStreamLocals
             {
@@ -75,26 +78,17 @@ void NiIntegersExtraData::LoadBinary(NiStream& stream)
     }
 }
 
-struct NiFixedString
-{
-};
-
-struct NiAVObject
-{
-    void SetName(NiFixedString const& name);
-};
-
 extern NiFixedString* DAT_012031c0;
 
-struct FUN_00c543e0_shell : NiAVObject
+struct NiExtraDataNameInitializer : NiExtraData
 {
     void FUN_00c543e0();
 };
 
 // @fnv 0x00c543e0
-void FUN_00c543e0_shell::FUN_00c543e0()
+void NiExtraDataNameInitializer::FUN_00c543e0()
 {
-    SetName(*DAT_012031c0);
+    reinterpret_cast<NiAVObject*>(this)->SetName(*DAT_012031c0);
 }
 
 extern int g_012031c4;
@@ -148,14 +142,6 @@ bool C00c541e0::FUN_00c541e0(int a)
     return b;
 }
 
-class NiStream;
-struct NiColor
-{
-    float r;
-    float g;
-    float b;
-    void __thiscall SaveBinary(NiStream&);
-};
 void __cdecl FUN_00a303a0(NiStream&, unsigned short*);
 void __cdecl FUN_00a29550(NiStream&, unsigned char*);
 struct FUN_00c54660_shell
@@ -216,19 +202,15 @@ void __thiscall S::FUN_00c54810()
 }
 
 struct NiStream;
-struct NiExtraDataSaveHelper : NiExtraData
-{
-    void SaveBinary(NiStream&);
-};
 void __cdecl FUN_0044adf0(NiStream&, unsigned const&);
-struct NiExtraDataSaveHelperShell : NiExtraDataSaveHelper
+struct NiExtraDataSaveHelperShell : NiExtraData
 {
     void FUN_00c54170(NiStream&);
 };
 // @fnv 0x00c54170
 void NiExtraDataSaveHelperShell::FUN_00c54170(NiStream& stream)
 {
-    SaveBinary(stream);
+    NiExtraData::SaveBinary(stream);
     unsigned int count = *(unsigned short*)((char*)this + 0x18);
     FUN_0044adf0(stream, count);
     for (unsigned int i = 0; i < count; ++i)
@@ -246,7 +228,7 @@ struct FUN_00c53f10 : A51BF0Base
     FUN_00c53f10();
 };
 
-NiFixedString DAT_011f49e0;
+extern NiFixedString DAT_011f49e0;
 
 // Allocates a FUN_00c53f10 object, sets its name to DAT_011f49e0, and returns it as an NiAVObject pointer.
 // @fnv 0x00c54210
@@ -282,7 +264,7 @@ void FUN_00c54040_cls::FUN_00c54040(NiStream& stream, unsigned int flags)
     n = count;
     for (i = 0; i < n; i++)
     {
-        ((NiIntegerStreamArray*)((char*)&stream + 0xc))->FUN_00c54b70(*(NiIntegerStreamEntry*)(entries + (i << 4)));
+        ((NiIntegerStreamArray*)((char*)&stream + 0xc))->Add(*(NiIntegerStreamEntry*)(entries + (i << 4)));
     }
 }
 
@@ -443,12 +425,6 @@ bool FUN_00c54cc0_cls::FUN_00c54cc0(FUN_00c54cc0_cls* other)
 }
 
 static const char* dummy = "";
-
-struct NiPoint3
-{
-    float x, y, z;
-    char* __thiscall FUN_00a59af0(char const*);
-};
 
 struct Entry_00c542a0
 {

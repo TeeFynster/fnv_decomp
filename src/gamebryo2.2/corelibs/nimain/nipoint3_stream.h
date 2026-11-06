@@ -1,32 +1,15 @@
-// gamebryo2.2/corelibs/nimain/nipoint3_stream.h: declares NiBinaryStream, NiStream, NiColor
-struct NiBinaryStream
+// Inline scalar stream operations used by NiColor serialization.
+#pragma once
+#include "../../../../include/NiBinaryStream.h"
+
+inline void NiBinaryStream::Read(float* data)
 {
-    void* vtable;
-    unsigned int position;
-    unsigned int(__cdecl* read)(NiBinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int(__cdecl* write)(NiBinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-    void Read(void* data)
-    {
-        unsigned int size = 4;
-        position += read(this, data, 4, &size, 1);
-    }
-    void Write(const void* data)
-    {
-        unsigned int size = 4;
-        position += write(this, data, 4, &size, 1);
-    }
-};
-class NiStream
+    unsigned int size = 4;
+    m_uiAbsoluteCurrentPos += m_pfnRead(this, data, 4, &size, 1);
+}
+
+inline void NiBinaryStream::Write(float* data)
 {
-  public:
-    char padding[0x24c];
-    NiBinaryStream* input;
-    NiBinaryStream* output;
-};
-class NiColor
-{
-  public:
-    float r, g, b;
-    void LoadBinary(NiStream&);
-    void SaveBinary(NiStream&);
-};
+    unsigned int size = 4;
+    m_uiAbsoluteCurrentPos += m_pfnWrite(this, data, 4, &size, 1);
+}

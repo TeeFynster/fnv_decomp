@@ -1,3 +1,4 @@
+#include "../../include/SettingT.h"
 
 // src/generated/global_object_initializers_o2_od_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/generated/global_object_initializers_o2.cpp functions whose prologue its flags cannot
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
@@ -6,6 +7,10 @@
 // function is the compiler-generated dynamic initializer of a file-scope object in an /O2 translation unit; exposed by
 // the 2026-10-11 function-index repair. Constructors, exit thunks and argument data stay original (bound by address).
 #include "original_global_object_initializers_o2.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/BSTaskletManagerCallback.h"
+#include "../../include/INIPrefSettingCollection.h"
+#include "../../include/NiTPointerMap.h"
 // @fnv 0x00fc78a6
 // @fnv 0x00fde545
 GlobalObjectO2_00ec3289 g_0126fb90;
@@ -2257,12 +2262,8 @@ FUN_00404950::~FUN_00404950()
     }
 }
 
-struct NiTPointerMap
-{
-    virtual ~NiTPointerMap();
-    void RemoveAll();
-};
-struct FUN_00559df0 : NiTPointerMap
+class TESObjectREFR;
+struct FUN_00559df0
 {
     virtual ~FUN_00559df0();
 };
@@ -2273,27 +2274,16 @@ struct FUN_00559d90 : FUN_00559df0
 // @fnv 0x00559d90
 FUN_00559d90::~FUN_00559d90()
 {
-    RemoveAll();
+    reinterpret_cast<NiTPointerMap<TESObjectREFR*, TESObjectREFR*>*>(this)->RemoveAll();
 }
 
-extern void* DAT_0106ba6c;
-
-struct GlobalObject_00869f00
-{
-    void Clear(bool);
-};
-
-struct FUN_006b3830_Class
-{
-    void* m_iWordAt00;
-    void FUN_006b3830();
-};
+class NavMesh;
 
 // @fnv 0x006b3830
-void FUN_006b3830_Class::FUN_006b3830()
+template <>
+BSSimpleArray<NavMesh*, 1024>::~BSSimpleArray()
 {
-    m_iWordAt00 = &DAT_0106ba6c;
-    ((GlobalObject_00869f00*)this)->Clear(true);
+    Clear(true);
 }
 
 struct FUN_00869a20_class
@@ -2334,12 +2324,8 @@ void __thiscall FUN_00869e10_class::FUN_00869e10()
 extern int DAT_010a47b8;
 bool __cdecl FUN_00b00d50(void*);
 bool __cdecl QueueTasklet(void*);
-struct BSTaskletManagerCallback
-{
-    BSTaskletManagerCallback* FUN_00b00e40(int);
-};
 // @fnv 0x00b00e40
-BSTaskletManagerCallback* BSTaskletManagerCallback::FUN_00b00e40(int a)
+BSTaskletManagerCallback* BSTaskletManagerCallback::Initialize(int a)
 {
     *(int**)this = &DAT_010a47b8;
     bool b;
@@ -2355,18 +2341,12 @@ BSTaskletManagerCallback* BSTaskletManagerCallback::FUN_00b00e40(int a)
     return this;
 }
 
-extern unsigned int DAT_01073e50;
-
-struct BSSimpleArrayActor
-{
-    void Clear(bool);
-    void FUN_00788390();
-};
+struct EffectItemData;
 
 // @fnv 0x00788390
-void BSSimpleArrayActor::FUN_00788390()
+template <>
+BSSimpleArray<EffectItemData, 1024>::~BSSimpleArray()
 {
-    *(unsigned int*)this = (unsigned int)&DAT_01073e50;
     Clear(true);
 }
 
@@ -2470,28 +2450,12 @@ FUN_00632f90::~FUN_00632f90()
     GetSpawnedHelper()->unk08(this);
 }
 
-struct INIPrefSettingCollection
-{
-    virtual ~INIPrefSettingCollection();
-    virtual void v1();
-    virtual void v2(INIPrefSettingCollection*);
-};
-template <class T> struct SettingT
-{
-    static T* GetCollection();
-};
-struct Setting_01022738_011f35a0 : INIPrefSettingCollection
-{
-    virtual ~Setting_01022738_011f35a0();
-};
-struct FUN_004de420 : Setting_01022738_011f35a0
-{
-    virtual ~FUN_004de420();
-};
+using ::SettingT;
 // @fnv 0x004de420
-FUN_004de420::~FUN_004de420()
+template <>
+SettingT<INIPrefSettingCollection>::~SettingT()
 {
-    SettingT<INIPrefSettingCollection>::GetCollection()->v2(this);
+    GetCollection()->Remove(this);
 }
 
 #include <windows.h>

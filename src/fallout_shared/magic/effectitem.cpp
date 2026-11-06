@@ -1,6 +1,101 @@
 // fallout_shared/magic/effectitem.cpp: EffectItem, EffectItemList, ScriptEffect, Setting and more (52 functions)
 
-#include "effectitem_decls.h"
+#include "../../../include/BSStringT.h"
+
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/Setting.h"
+#include "../../../include/SettingCollectionMap.h"
+#include "../../../include/TESChallenge.h"
+#include "../../../include/TESGrass.h"
+#include "../../../include/ActorValueOwner.h"
+#include "../../../include/AutoMemHelper.h"
+#include "../../../include/CachedValuesOwner.h"
+#include "../../../include/TESChildCell.h"
+#include "../../../include/ActiveEffect.h"
+#include "../../../include/BGSImpactData__IMPACT_DATA_DATA.h"
+#include "../../../include/EffectSetting.h"
+#include "../../../include/PerkEntryConditionSet.h"
+#include "../../../include/ScriptEffect.h"
+#include "../../../include/TESFile.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/EffectItemList.h"
+#include "../../../include/EffectItem.h"
+// MagicEffectSystem_effectitem: local type (was include/MagicEffectSystem.h, which had no evidence of one real class); its methods are 0x00403ab0 EffectArchetypes::Activate, 0x00403c80 EffectArchetypes::CheckFlag, 0x00810fd0 EffectSetting::GetEffectArchetype
+class ActiveEffect;
+class MagicCaster;
+class MagicItem;
+class TESBoundObject;
+
+class MagicEffectSystem_effectitem
+{
+public:
+    struct _Type
+    {
+        enum Type
+        {
+            VALUE_MODIFIER,
+            SCRIPT,
+            DISPEL,
+            CURE_DISEASE,
+            ABSORB,
+            SHIELD,
+            CALM,
+            DEMORALIZE,
+            FRENZY,
+            COMMAND_CREATURE,
+            COMMAND_HUMANOID,
+            INVISIBILITY,
+            CHAMELEON,
+            LIGHT,
+            DARKNESS,
+            NIGHT_EYE,
+            LOCK,
+            OPEN,
+            BOUND_ITEM,
+            SUMMON_CREATURE,
+            DETECT_LIFE,
+            TELEKINESIS,
+            DISINTEGRATE_ARMOR,
+            DISINTEGRATE_WEAPON,
+            PARALYSIS,
+            REANIMATE,
+            SOUL_TRAP,
+            TURN_UNDEAD,
+            SUN_DAMAGE,
+            VAMPIRISM,
+            CURE_PARALYSIS,
+            CURE_ADDICTION,
+            CURE_POISON,
+            CONCUSSION,
+            VALUE_AND_PARTS,
+            LIMB_CONDITION,
+            TURBO,
+            COUNT,
+        };
+    };
+
+    typedef _Type::Type Type;
+
+    static bool __cdecl IsFlagSet(Type type, unsigned int flags);
+    static bool __cdecl IsFlagSet(int type, unsigned int flags);
+    static ActiveEffect* Activate(MagicCaster*, MagicItem*, EffectItem*, TESBoundObject*);
+};
+// TESConditionSave_effectitem: local type (was include/TESConditionSave.h, which had no evidence of one real class); its methods are 0x00680910 TESCondition::Save
+class TESConditionSave_effectitem
+{
+public:
+    void ProcessItems();
+};
+
+// Unit-specific declarations; TESForm is supplied by the shared headers.
+
+extern "C" void* __cdecl memset(void* destination, int value, unsigned int size);
+int __cdecl Warning(const char* format, ...);
+
+// The game uses the cdecl deallocation wrapper, rather than the manager member.
+void __cdecl _Deallocate(void* pointer);
+
+EffectSetting* __cdecl GetUsageMonitorEffectSetting();
 
 // @fnv 0x00404650
 int EffectItem::GetEffectID()
@@ -40,7 +135,7 @@ EffectItem* EffectItem::Delete(unsigned int flags)
 {
     DestroyContents();
     if (flags & 1)
-        MemoryManager::Deallocate(this);
+        _Deallocate(this);
     return this;
 }
 
@@ -50,18 +145,18 @@ void EffectItemList::AddItem(EffectItem* item)
     if (item->IsScriptBasedEffect() && GetScriptEffect())
         return;
 
-    Items.AddTail(item);
+    AddTail(item);
     if (item->IsHostile())
-        ++hostileCount;
+        ++m_iEffectCount;
 }
 
-// Constructs a ScriptEffect from caster, item and effect, initializing the base ActiveEffect and storing the effect's script with unknown set to 0.
+// Constructs a ScriptEffect, storing its script and initializing the script locals to null.
 // @fnv 0x00827740
 ScriptEffect::ScriptEffect(MagicCaster* caster, MagicItem* item, EffectItem* effect)
     : ActiveEffect(caster, item, effect)
 {
-    script = effect->GetScript();
-    unknown = 0;
+    pScript = static_cast<Script*>(effect->GetScript());
+    m_pScriptLocals = 0;
 }
 
 // Loads an EffectItem from a TESFile chunk: reads the 20-byte effect data (with endian conversion) or loads its conditions, returning false on unknown chunk IDs.
@@ -79,8 +174,7 @@ bool EffectItem::Load(TESFile* file, const char* actorEffect)
             Warning("GAME EFFECTS: Unknown EffectSetting encountered when loading EffectItem in actor effect '%s'",
                     actorEffect == 0 ? "{unknown}" : actorEffect);
         else if (m_pEffectSetting->IsAssociatedActorValueUsed() && m_pEffectSetting->HasAssociatedActorValue())
-            data.m_eAssociatedActorValue =
-                reinterpret_cast<int>(reinterpret_cast<InterfaceManager*>(m_pEffectSetting)->FUN_00586150());
+            data.m_eAssociatedActorValue = m_pEffectSetting->GetAssociatedActorValue();
         break;
     case 0x41445443:
         GetConditions()->Load(file);
@@ -91,31 +185,21 @@ bool EffectItem::Load(TESFile* file, const char* actorEffect)
     return true;
 }
 
-// Zeroes the first four ints of this_ptr, sets the fifth to -1, and returns this_ptr.
+// Initializes the effect data with zero values and no associated actor value.
 // @fnv 0x00403ba0
-int* __fastcall FUN_00403ba0(int* this_ptr)
+MagicEffectEntry::MagicEffectEntry()
 {
-    this_ptr[0] = 0;
-    this_ptr[1] = 0;
-    this_ptr[2] = 0;
-    this_ptr[3] = 0;
-    this_ptr[4] = -1;
-    return this_ptr;
+    m_iMagnitude = 0;
+    m_iArea = 0;
+    m_iPayloadInteger = 0;
+    m_eRange = 0;
+    m_eAssociatedActorValue = -1;
 }
 
-struct MagicEffectSystem
-{
-    static bool __cdecl IsFlagSet(int, unsigned int);
-};
-struct S3c60
-{
-    int GetArchetype();
-    bool HasFlag2();
-};
 // @fnv 0x00403c60
-bool S3c60::HasFlag2()
+bool EffectSetting::HasFlag2()
 {
-    return MagicEffectSystem::IsFlagSet(GetArchetype(), 2);
+    return MagicEffectSystem_effectitem::IsFlagSet(GetArchetype(), 2);
 }
 
 struct EffectArchetypeEntry
@@ -140,14 +224,9 @@ void __cdecl FUN_00403d30(void* apDest, int aiValue, unsigned int aCount)
     _fnv_zlib_memset(apDest, aiValue, aCount);
 }
 
-struct FUN_00403db0_shell : public EffectItem
-{
-    void FUN_00403db0(TESForm*);
-};
-
 // If apForm is not initialized, initializes the item's conditions with apForm.
 // @fnv 0x00403db0
-void FUN_00403db0_shell::FUN_00403db0(TESForm* apForm)
+void EffectItem::InitItem(TESForm* apForm)
 {
     if (apForm->GetInitialized())
         return;
@@ -155,58 +234,32 @@ void FUN_00403db0_shell::FUN_00403db0(TESForm* apForm)
         GetConditions()->InitItem(apForm);
 }
 
-struct S3e60
-{
-    bool GetFlag(unsigned int) const;
-    bool FUN_00403e60(unsigned int f);
-};
 // @fnv 0x00403e60
-bool S3e60::FUN_00403e60(unsigned int auiFlag)
+bool EffectSetting::FUN_00403e60(unsigned int auiFlag)
 {
     return GetFlag(auiFlag);
 }
 
-struct FUN_00403e80_shell : public EffectSetting
-{
-    bool FUN_00403e80();
-};
-
 // @fnv 0x00403e80
-bool FUN_00403e80_shell::FUN_00403e80()
+bool EffectSetting::HasAssociatedActorValue()
 {
-    return (int)((InterfaceManager*)this)->FUN_00586150() != -1;
+    return GetAssociatedActorValue() != -1;
 }
-
-struct FUN_00403ee0_shell : public EffectItem
-{
-    bool FUN_00403ee0();
-};
 
 // @fnv 0x00403ee0
-bool FUN_00403ee0_shell::FUN_00403ee0()
+bool EffectItem::FUN_00403ee0()
 {
-    return (*(EffectSetting**)((char*)this + 0x14))->IsAssociatedActorValueUsed();
+    return m_pEffectSetting->IsAssociatedActorValueUsed();
 }
-
-struct FUN_00403f00_shell : public EffectItem
-{
-    float FUN_00403f00();
-};
-
-class TESGrass
-{
-  public:
-    float GetLowestAllowedSlope();
-};
 
 float __cdecl CalcEffectCost(float, int, int, int, bool);
 
 // @fnv 0x00403f00
-float FUN_00403f00_shell::FUN_00403f00()
+float EffectItem::GetRawCost()
 {
     if (m_fCost < 0.0)
     {
-        m_fCost = CalcEffectCost(((TESGrass*)GetEffectSetting())->GetLowestAllowedSlope(), GetArea(), GetDuration(),
+        m_fCost = CalcEffectCost(((TESGrass*)GetEffectSetting())->TESGrass::GetLowestAllowedSlope(), GetArea(), GetDuration(),
                                  GetMagnitude(), GetRange() == 2);
     }
     return m_fCost;
@@ -229,64 +282,17 @@ struct blob12
 {
     char b[12];
 };
-struct TESChildCell
-{
-    virtual TESObjectCELL* GetSaveParentCell();
-};
 typedef char _sizecheck_TESChildCell[sizeof(TESChildCell) == 4 ? 1 : -1];
-struct ActorValueOwner
-{
-    virtual int GetBaseActorValue(int);
-    virtual float GetBaseActorValueFloat(int);
-    virtual int GetActorValue(int);
-    virtual float GetCurrentActorValue(int);
-    virtual float GetPermanentActorValueFloat(int);
-    virtual float GetTemporaryActorValue(int);
-    virtual float GetDamageActorValue(int);
-    virtual int GetPermanentActorValue(int);
-    virtual float GetPermanentActorValueAdjustment(int);
-    virtual TESForm* GetActorValueOwnerForm();
-    virtual unsigned short GetActorValueOwnerType();
-    int GetActorValueAsInteger(int);
-    float GetActorValueFloatByIndex(int);
-};
 typedef char _sizecheck_ActorValueOwner[sizeof(ActorValueOwner) == 4 ? 1 : -1];
-struct CachedValuesOwner
-{
-    virtual float GetFloatValue0();
-    virtual float GetFloatValue1();
-    virtual float GetFloatValue2();
-    virtual float GetFloatValue3();
-    virtual float GetFloatValue4();
-    virtual float GetFloatValue5();
-    virtual float GetFloatValue6();
-    virtual float GetFloatValue7();
-    virtual float GetFloatValue8();
-    virtual float GetFloatValue9();
-    virtual float GetFloatValue10();
-    virtual float GetFloatValue11();
-    virtual int GetIntegerValue12();
-    virtual int GetIntegerValue13();
-    virtual float GetFloatValue14();
-    virtual float GetFloatValue15();
-    virtual bool GetBooleanValue16();
-    void PrecalculateCachedValues();
-};
 typedef char _sizecheck_CachedValuesOwner[sizeof(CachedValuesOwner) == 4 ? 1 : -1];
-struct FUN_00403f80_shell : public EffectItem
-{
-    float GetModifiedCost(Actor*);
-};
-
-float __fastcall FUN_00403f00(EffectItem*);
 float __cdecl ScaleBySettingBlend(float, int, int);
 float __cdecl FUN_00404040(float);
 float __cdecl FUN_00404010(float, float);
 
 // @fnv 0x00403f80
-float FUN_00403f80_shell::GetModifiedCost(Actor* apActor)
+float EffectItem::GetCost(Actor* apActor)
 {
-    float fcost = FUN_00403f00(this);
+    float fcost = GetRawCost();
     if (apActor != 0)
     {
         fcost = ScaleBySettingBlend(fcost,
@@ -314,13 +320,8 @@ float __cdecl FUN_00404040(float aIn)
     return (aIn - droundToZero >= _gModifierZero) ? droundToZero : (droundToZero - 1.0);
 }
 
-struct FUN_004042a0_shell : public EffectItem
-{
-    bool IsDifferentFrom(EffectItem*);
-};
-
 // @fnv 0x004042a0
-bool FUN_004042a0_shell::IsDifferentFrom(EffectItem* apCompare)
+bool EffectItem::Compare(EffectItem* apCompare)
 {
     bool bDifferent = apCompare->GetEffectSetting() != GetEffectSetting() ||
                       apCompare->GetMagnitude() != GetMagnitude() || apCompare->GetArea() != GetArea() ||
@@ -340,95 +341,52 @@ bool FUN_004042a0_shell::IsDifferentFrom(EffectItem* apCompare)
     return bDifferent;
 }
 
-struct FUN_00404390_shell : public EffectItem
-{
-    int FUN_00404390();
-};
-
 // Returns 0 if the EffectSetting at offset 0x14 has flag 0x100 set, otherwise returns the int at offset 0 of this EffectItem.
 // @fnv 0x00404390
-int FUN_00404390_shell::FUN_00404390()
+int EffectItem::GetMagnitude()
 {
-    return (*(EffectSetting**)((char*)this + 0x14))->IsFlagSet(0x100) ? 0 : *(int*)this;
+    return m_pEffectSetting->IsFlagSet(0x100) ? 0 : data.m_iMagnitude;
 }
 
-struct FUN_00404420_shell : public EffectItem
-{
-    int FUN_00404420();
-};
-
 // @fnv 0x00404420
-int FUN_00404420_shell::FUN_00404420()
+int EffectItem::GetArea()
 {
     return (!m_pEffectSetting->IsFlagSet(0x200) && GetRange() != 0) ? data.m_iArea : 0;
 }
 
-struct FUN_004044d0_shell : public EffectItem
-{
-    int FUN_004044d0();
-};
-
 // Returns 0 if the EffectSetting at offset 0x14 has flag 0x80 set, otherwise returns the int at offset 0x8.
 // @fnv 0x004044d0
-int FUN_004044d0_shell::FUN_004044d0()
+int EffectItem::GetDuration()
 {
-    return (*(EffectSetting**)((char*)this + 0x14))->IsFlagSet(0x80) ? 0 : *(int*)((char*)this + 0x8);
+    return m_pEffectSetting->IsFlagSet(0x80) ? 0 : data.m_iPayloadInteger;
 }
 
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
+class ExtraDataList;
+class ScriptHeaderData;
+class ScriptReferencedObject;
+class Script;
+class ScriptCompiler;
+class ScriptLocals;
+class TESObject;
+class TESObjectREFR;
+class TESQuest;
 namespace fnv_004045e0 {
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
-struct ExtraDataList;
-struct ScriptHeaderData;
-struct ScriptReferencedObject;
-struct Script;
 struct CStringArgument;
-struct ScriptCompiler;
-struct ScriptLocals;
-struct TESObject;
-struct TESObjectREFR;
-struct TESQuest;
-struct FUN_004045e0_shell : public EffectItem
-{
-    Script* GetScriptFromEffectSetting();
-};
-
 int __fastcall _FNV_GetFormType(int);
-int __fastcall EffectSetting_GetArchetype(EffectSetting*);
-__pragma(comment(
-    linker, "/alternatename:?EffectSetting_GetArchetype@@YIHPAUEffectSetting@@@Z=?GetArchetype@EffectSetting@@QAEHXZ"))
-    __pragma(comment(
-        linker,
-        "/alternatename:?EffectSetting_GetArchetype@@YIHAAVEffectSetting@@@Z=?GetArchetype@EffectSetting@@QAEHXZ"))
-
-        class MagicEffectSystem
-{
-  public:
-    struct _Type
-    {
-        enum Type
-        {
-        };
-    };
-    static bool __cdecl IsFlagSet(_Type::Type, unsigned int);
-};
-
-class TESChallenge
-{
-  public:
-    int GetInterval();
-};
+}  // namespace fnv_004045e0
 
 // @fnv 0x004045e0
-Script* FUN_004045e0_shell::GetScriptFromEffectSetting()
+void* EffectItem::GetScript()
 {
     Script* pscript = 0;
     EffectSetting* psetting = GetEffectSetting();
-    if (MagicEffectSystem::IsFlagSet((MagicEffectSystem::_Type::Type)EffectSetting_GetArchetype(psetting), 0x40))
+    if (MagicEffectSystem_effectitem::IsFlagSet((MagicEffectSystem_effectitem::_Type::Type)psetting->GetArchetype(), 0x40))
     {
         if (((TESChallenge*)psetting)->GetInterval())
         {
-            if (_FNV_GetFormType(((TESChallenge*)psetting)->GetInterval()) == 0x11)
+            if (fnv_004045e0::_FNV_GetFormType(((TESChallenge*)psetting)->GetInterval()) == 0x11)
             {
                 pscript = (Script*)((TESChallenge*)GetEffectSetting())->GetInterval();
             }
@@ -436,7 +394,6 @@ Script* FUN_004045e0_shell::GetScriptFromEffectSetting()
     }
     return pscript;
 }
-}  // namespace fnv_004045e0
 
 char* __cdecl _strcpy(char*, const char*);
 
@@ -446,71 +403,28 @@ void __cdecl FUN_004046f0(char* apStrDest, const char* apStrSource)
     _strcpy(apStrDest, apStrSource);
 }
 
-struct S4eb0
-{
-    int a;
-    unsigned int b;
-    int c;
-    void FUN_00404f00(int, bool, char*, int);
-    S4eb0* FUN_00404eb0(int, bool, char*, int);
-};
-// Calls FUN_00404f00 with the given arguments and returns this.
+// Calls Enter with the given arguments and returns this.
 // @fnv 0x00404eb0
-S4eb0* S4eb0::FUN_00404eb0(int m, bool o, char* f, int l)
+AutoMemContext::AutoMemContext(int m, bool o, const char* f, int l)
 {
-    FUN_00404f00(m, o, f, l);
-    return this;
+    Enter(m, o, const_cast<char*>(f), l);
 }
-
-struct AutoMemContext
-{
-    void Enter(int, bool, char*, int);
-    void Leave();
-    void* __vecDelDtor(unsigned int);
-    int m_eMemoryContext;
-    unsigned int m_pFileName;
-    int m_iLineNumber;
-};
-typedef char _sizecheck_AutoMemContext[sizeof(AutoMemContext) == 12 ? 1 : -1];
-struct FUN_00404f00_shell : public AutoMemContext
-{
-    void FUN_00404f00(int, bool, char*, int);
-};
 
 int __cdecl GetTlsField();
 void __cdecl FUN_00404f30(int);
 
 // @fnv 0x00404f00
-void FUN_00404f00_shell::FUN_00404f00(int memContext, bool overridable, char* apFile, int aiLine)
+void AutoMemContext::Enter(int memContext, bool overridable, char* apFile, int aiLine)
 {
-    m_eMemoryContext = GetTlsField();
+    m_eMemoryContext = static_cast<MEM_CONTEXT>(GetTlsField());
     FUN_00404f30(memContext);
 }
 
-namespace fnv_00404f70 {
-struct AutoMemContext
-{
-    void Enter(int, bool, char*, int);
-    void Leave();
-    void* __vecDelDtor(unsigned int);
-    int m_eMemoryContext;
-    unsigned int m_pFileName;
-    int m_iLineNumber;
-};
-typedef char _sizecheck_AutoMemContext[sizeof(AutoMemContext) == 12 ? 1 : -1];
-struct FUN_00404f70_shell : public AutoMemContext
-{
-    void FUN_00404f70();
-};
-
-void __cdecl FUN_00404f30(int);
-
 // @fnv 0x00404f70
-void FUN_00404f70_shell::FUN_00404f70()
+void AutoMemContext::Leave()
 {
     FUN_00404f30(m_eMemoryContext);
 }
-}  // namespace fnv_00404f70
 
 unsigned int __cdecl _strlen(const char*);
 
@@ -520,32 +434,12 @@ unsigned int __cdecl FUN_0044a670(const char* apString)
     return _strlen(apString);
 }
 
-namespace fnv_005f5f80 {
-struct Actor;
-struct ActorMover;
-struct ActorPathHandler;
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
-struct DetailedActorPathHandler;
-struct IDebugText;
-struct NiPoint3;
-struct PathingRequest;
-struct TESObjectREFR;
-struct blob12
-{
-    char b[12];
-};
-struct FUN_005f5f80_shell : public EffectSetting
-{
-    TESForm* FUN_005f5f80();
-};
-
+// The shared header has no associated-form getter; keep its register ABI here.
 // @fnv 0x005f5f80
-TESForm* FUN_005f5f80_shell::FUN_005f5f80()
+TESForm* __fastcall GetEffectAssociatedForm(EffectSetting* effect)
 {
-    return *(TESForm**)((char*)this + 0x60);
+    return effect->data.m_pAssociatedForm;
 }
-}  // namespace fnv_005f5f80
 
 // Returns the larger of the two integer arguments.
 // @fnv 0x00647b70
@@ -564,50 +458,30 @@ int __cdecl GetTlsField()
     return DAT_tls_field;
 }
 
-struct MagicCaster;
-struct FUN_0045cd60_shell : public ActiveEffect
-{
-    MagicCaster* FUN_0045cd60();
-};
-
+// The shared header has no caster getter; keep its register ABI here.
 // @fnv 0x0045cd60
-MagicCaster* FUN_0045cd60_shell::FUN_0045cd60()
+MagicCaster* __fastcall GetActiveEffectCaster(ActiveEffect* effect)
 {
-    return *(MagicCaster**)((char*)this + 0x28);
+    return effect->m_pEffectInstance;
 }
-
-struct FUN_004040b0_shell : BGSImpactData__IMPACT_DATA_DATA, EffectItem
-{
-    void Save();
-};
 
 extern "C" bool __cdecl FUN_00401500();
 extern "C" void __cdecl AppendChunk(unsigned int, void*, unsigned int);
 
-struct TESConditionSave
-{
-    void ProcessItems();
-};
-
 // @fnv 0x004040b0
-void FUN_004040b0_shell::Save()
+void EffectItem::Save()
 {
     if (FUN_00401500())
-        Endian();
+        reinterpret_cast<BGSImpactData__IMPACT_DATA_DATA*>(this)->Endian();
     AppendChunk(0x54494645, this, 0x14);
     if (FUN_00401500())
-        Endian();
+        reinterpret_cast<BGSImpactData__IMPACT_DATA_DATA*>(this)->Endian();
     if (GetConditions())
-        reinterpret_cast<TESConditionSave*>(GetConditions())->ProcessItems();
+        reinterpret_cast<TESConditionSave_effectitem*>(GetConditions())->ProcessItems();
 }
 
-struct EffectItem_shell : EffectItem
-{
-    bool FUN_00404470(int range);
-};
-
 // @fnv 0x00404470
-bool EffectItem_shell::FUN_00404470(int range)
+bool EffectItem::FUN_00404470(int range)
 {
     bool result = false;
     if (!m_pEffectSetting->IsFlagSet(0x200))
@@ -634,75 +508,42 @@ void __cdecl FUN_00404f30(int aiValue)
 }
 }  // namespace fnv_00404f30
 
-struct FUN_006808b0
-{
-    ~FUN_006808b0();
-};
-struct MyCondProxy
-{
-    void InitializeConditionItems();
-};
-struct FUN_00403d50
-{
-    char _pad[0x1c];
-    FUN_006808b0 _c;
-    ~FUN_00403d50();
-};
 // @fnv 0x00403d50
-FUN_00403d50::~FUN_00403d50()
+EffectItem::~EffectItem()
 {
-    ((MyCondProxy*)((EffectItem*)this)->GetConditions())->InitializeConditionItems();
+    GetConditions()->InitializeConditionItems();
 }
 
-struct Unk004043d0
-{
-    bool FUN_004043d0(int);
-};
 // @fnv 0x004043d0
-bool Unk004043d0::FUN_004043d0(int a)
+bool EffectItem::FUN_004043d0(int a)
 {
     bool result = false;
-    if (!(*(EffectSetting**)((char*)this + 0x14))->IsFlagSet(0x100))
+    if (!m_pEffectSetting->IsFlagSet(0x100))
     {
         if (a >= 0)
         {
-            *(int*)this = a;
-            *(float*)((char*)this + 0x18) = -1.0f;
+            data.m_iMagnitude = a;
+            m_fCost = -1.0f;
             result = true;
         }
     }
     return result;
 }
 
-struct S00404510
-{
-    char _00[8];
-    int m08;
-    char _0C[8];
-    EffectSetting* m14;
-    float m18;
-    bool FUN_00404510(int);
-};
-// If m14 lacks flag 0x80 and a is non-negative, stores a in m08 and sets m18 to -1.0f, returning true; otherwise returns false.
+// Sets a non-negative duration and invalidates the cached cost when the effect permits a duration.
 // @fnv 0x00404510
-bool S00404510::FUN_00404510(int aiValue)
+bool EffectItem::FUN_00404510(int aiValue)
 {
     bool b = false;
-    if (!m14->IsFlagSet(0x80) && aiValue >= 0)
+    if (!m_pEffectSetting->IsFlagSet(0x80) && aiValue >= 0)
     {
-        m08 = aiValue;
-        m18 = -1.0f;
+        data.m_iPayloadInteger = aiValue;
+        m_fCost = -1.0f;
         b = true;
     }
     return b;
 }
 
-struct Setting
-{
-    void FUN_00404950();
-    void* FUN_004049a0(unsigned int);
-};
-void __cdecl _Deallocate(void*);
 // @fnv 0x004049a0
 void* Setting::FUN_004049a0(unsigned int flags)
 {
@@ -717,7 +558,6 @@ struct Dummy
     void FUN_00404c00();
     void* FUN_00404ca0(unsigned int);
 };
-void _Deallocate(void*);
 // Calls FUN_00404c00, then deallocates this if flags has bit 0 set, and returns this.
 // @fnv 0x00404ca0
 void* Dummy::FUN_00404ca0(unsigned int flags)
@@ -728,7 +568,8 @@ void* Dummy::FUN_00404ca0(unsigned int flags)
     return this;
 }
 
-struct ArrSI
+// Exe 0x00404f90: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct EffectitemOffset08View
 {
     unsigned int GetFlags();
 };
@@ -742,12 +583,12 @@ struct FUN_00404f90_shell
 {
     unsigned char _pad[0x10c];
     MapH _map;
-    void RemoveSettingFromMap(ArrSI* apSetting);
+    void RemoveSettingFromMap(EffectitemOffset08View* apSetting);
 };
 
 // If apSetting is non-null and has flags set, removes the entry keyed by those flags from _map.
 // @fnv 0x00404f90
-void FUN_00404f90_shell::RemoveSettingFromMap(ArrSI* apSetting)
+void FUN_00404f90_shell::RemoveSettingFromMap(EffectitemOffset08View* apSetting)
 {
     if (apSetting && apSetting->GetFlags())
     {
@@ -756,39 +597,20 @@ void FUN_00404f90_shell::RemoveSettingFromMap(ArrSI* apSetting)
 }
 
 namespace fnv_00404fd0 {
-struct AutoMemHelper
-{
-    int padding;
-
-    AutoMemHelper(int, bool, char const*, int);
-    ~AutoMemHelper();
-};
-
-template <class T> struct NiTPrimitiveArray
-{
-};
-
-struct Setting
-{
-    void FUN_00c33280(NiTPrimitiveArray<char*>*);
-};
 
 struct MapX
 {
     void* GetFirstPos();
 };
 
-struct NiTMap
+// Unit-local view of NiTMap for 0x00404fd0 (namespace fnv_00404fd0): built on the shared NiTMap, that code does not compile or does not match.
+struct NiTMap_00404fd0
 {
     void GetNext(void*&, unsigned int&, void*&);
 };
 
-template <class T> struct SettingCollectionMap
-{
-    unsigned int FUN_00404fd0(NiTPrimitiveArray<char*>*);
-};
-
 int _data_011c16bc;
+}  // namespace fnv_00404fd0
 
 // Iterates the map at offset 0x10c, calls FUN_00c33280 on each non-null Setting with apStringsA, and returns the count processed.
 // @fnv 0x00404fd0
@@ -801,10 +623,10 @@ template <> unsigned int SettingCollectionMap<Setting>::FUN_00404fd0(NiTPrimitiv
     Setting* pval;
 
     I = 0;
-    IT = reinterpret_cast<MapX*>(reinterpret_cast<char*>(this) + 0x10c)->GetFirstPos();
+    IT = reinterpret_cast<fnv_00404fd0::MapX*>(reinterpret_cast<char*>(this) + 0x10c)->GetFirstPos();
     while (IT != 0)
     {
-        reinterpret_cast<NiTMap*>(reinterpret_cast<char*>(this) + 0x10c)
+        reinterpret_cast<fnv_00404fd0::NiTMap_00404fd0*>(reinterpret_cast<char*>(this) + 0x10c)
             ->GetNext(IT, cpkey, reinterpret_cast<void*&>(pval));
 
         if (pval != 0)
@@ -816,75 +638,26 @@ template <> unsigned int SettingCollectionMap<Setting>::FUN_00404fd0(NiTPrimitiv
 
     return I;
 }
-}  // namespace fnv_00404fd0
 
-class FUN_00403b30_base
-{
-  public:
-    FUN_00403b30_base();
-    unsigned int m_00;
-    unsigned int m_04;
-    unsigned int m_08;
-    unsigned int m_0c;
-    unsigned int m_10;
-    unsigned int m_14;
-    unsigned int m_18;
-};
-
-class FUN_00403b30_member
-{
-  public:
-    FUN_00403b30_member();
-    ~FUN_00403b30_member();
-    unsigned int m_00;
-};
-
-class FUN_00403b30_cls : public FUN_00403b30_base
-{
-  public:
-    FUN_00403b30_member m_1c;
-    FUN_00403b30_cls(int a);
-    void Init(int a);
-};
-
-// Initializes the base and member subobjects, then calls Init with the given value.
+// Initializes the effect data and conditions, then calls Init with the given value.
 // @fnv 0x00403b30
-FUN_00403b30_cls::FUN_00403b30_cls(int aiValue) : FUN_00403b30_base(), m_1c()
+EffectItem::EffectItem(int aiValue) : data(), Conditions()
 {
     Init(aiValue);
 }
 
 extern float DAT_01012054;
 
-struct FUN_00403be0_target
-{
-    bool HasFlag2();
-};
-
-class FUN_00403be0_cls
-{
-  public:
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    int m_iResult;
-    InterfaceManager* m_pManager;
-    float m_fValue;
-
-    void FUN_00403be0(InterfaceManager* manager);
-};
-
-// Stores manager, zeroes three fields, sets m_iResult from HasFlag2/FUN_00586150 or -1, and sets m_fValue to DAT_01012054.
+// Stores the effect setting, resets the fields, and selects its associated actor value or -1.
 // @fnv 0x00403be0
-void FUN_00403be0_cls::FUN_00403be0(InterfaceManager* manager)
+void EffectItem::FUN_00403be0(EffectSetting* manager)
 {
-    m_pManager = manager;
-    unk04 = 0;
-    unk08 = 0;
-    unk00 = 0;
-    m_iResult = reinterpret_cast<FUN_00403be0_target*>(m_pManager)->HasFlag2() ? (int)m_pManager->FUN_00586150() : -1;
-    m_fValue = DAT_01012054;
+    m_pEffectSetting = manager;
+    data.m_iArea = 0;
+    data.m_iPayloadInteger = 0;
+    data.m_iMagnitude = 0;
+    data.m_eAssociatedActorValue = m_pEffectSetting->HasFlag2() ? m_pEffectSetting->GetAssociatedActorValue() : -1;
+    m_fCost = DAT_01012054;
 }
 
 // @fnv 0x00404090
@@ -932,36 +705,23 @@ bool EffectProcess::ProcessAllEffects()
 
 namespace fnv_00404560 {
 extern const float DAT_01012054;
-
-struct FUN_00404210_t
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    S3e60* unk14;
-    float unk18;
-
-    bool __thiscall FUN_00404560(unsigned int value);
-};
+}  // namespace fnv_00404560
 
 // @fnv 0x00404560
-bool __thiscall FUN_00404210_t::FUN_00404560(unsigned int value)
+bool __thiscall EffectItem::FUN_00404560(unsigned int value)
 {
     bool result = false;
 
-    if ((value == 1 && this->unk14->FUN_00403e60(0x20)) || (value == 2 && this->unk14->FUN_00403e60(0x40)) ||
-        (value == 0 && this->unk14->FUN_00403e60(0x10)))
+    if ((value == 1 && m_pEffectSetting->FUN_00403e60(0x20)) || (value == 2 && m_pEffectSetting->FUN_00403e60(0x40)) ||
+        (value == 0 && m_pEffectSetting->FUN_00403e60(0x10)))
     {
-        this->unk0C = value;
-        this->unk18 = DAT_01012054;
+        data.m_eRange = value;
+        m_fCost = fnv_00404560::DAT_01012054;
         result = true;
     }
 
     return result;
 }
-}  // namespace fnv_00404560
 
 extern char str_01012220[];
 struct SettingMap
@@ -980,24 +740,11 @@ struct SettingRegistry
     bool FUN_00405120();
 };
 extern "C" bool __fastcall FUN_00404d30(SettingRegistry*);
-extern "C" void __fastcall FUN_00404ee0(S4eb0*);
-struct ScopedContext
-{
-    int previousContext;
-    __forceinline ScopedContext(int context, bool temporary, char* file, int line)
-    {
-        reinterpret_cast<S4eb0*>(this)->FUN_00404eb0(context, temporary, file, line);
-    }
-    __forceinline ~ScopedContext()
-    {
-        FUN_00404ee0(reinterpret_cast<S4eb0*>(this));
-    }
-};
 // @fnv 0x00405120
 bool SettingRegistry::FUN_00405120()
 {
     int key;
-    ScopedContext memoryGuard(9, true, str_01012220, 0x278);
+    AutoMemContext memoryGuard(9, true, str_01012220, 0x278);
     bool isValid = FUN_00404d30(this);
     if (isValid)
     {
@@ -1060,3 +807,4 @@ FUN_004d61b0::FUN_004d61b0(int a1, int a2, int a3, const char* apName, int a5, i
         FUN_004d64c0(a3, 0);
     }
 }
+

@@ -1,6 +1,18 @@
-// fallout_shared/bgscamerapath.cpp: BGSCameraPath, CameraPathCompare, CameraPathClone, CameraPath and more (24 functions)
+// fallout_shared/bgscamerapath.cpp: BGSCameraPath and related functions (24 functions)
 
+// Keep the unit support types while using the shared form hierarchy.
+#include "layout_support.h"
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/BGSCameraShot.h"
+#define FNV_BASEFORMCOMPONENT_H
+#define FNV_TESFORM_H
+#include "../../include/BGSAcousticSpace.h"
+#include "../../include/BGSImpactData.h"
+#include "../../include/NiFormArray.h"
+#include "../../include/CameraShotData.h"
+#include "../../include/BGSCameraPath.h"
 #include "bgscamerapath.h"
+#include "../../include/Script.h"
 
 // @fnv 0x0058a620
 void BGSCameraPath::ResetFormData()
@@ -31,9 +43,6 @@ BGSCameraPath::BGSCameraPath()
     ResetFormData();
 }
 
-class BGSCameraShot : public TESForm
-{
-};
 extern int __cdecl Warning(const char* format, ...);
 extern "C" const char fnv_MessageWithName[];
 extern "C" const char fnv_MessageWithFormID[];
@@ -298,138 +307,57 @@ bool BGSCameraPath::HasMissingPathArray()
     return locals.success;
 }
 
-extern int DAT_010326fc;
-struct NTL
-{
-    void NiTLargePrimitiveArray(unsigned int, unsigned int);
-};
-// Calls NiTLargePrimitiveArray(0, 1) on self, stores &DAT_010326fc at self, and returns self.
 // @fnv 0x0058b3f0
-void* __fastcall FUN_0058b3f0(void* self)
-{
-    ((NTL*)self)->NiTLargePrimitiveArray(0, 1);
-    *(int**)self = &DAT_010326fc;
-    return self;
-}
+NiFormArray::NiFormArray() : NiTLargePrimitiveArray<TESForm*>(0, 1)
+{}
 
-struct FUN_0058b600_shell
-{
-    char pad[0x2c];
-    TESForm* m_field_2c;
-};
-
-// Returns the form ID of the TESForm stored at m_field_2c, or 0 if it is null.
+// Returns the number of child paths, or 0 if there is no child array.
 // @fnv 0x0058b600
-unsigned int __fastcall GetStoredFormID(FUN_0058b600_shell* thisPtr)
+unsigned int BGSCameraPath::GetChildCount()
 {
     unsigned int result = 0;
-    if (thisPtr->m_field_2c)
-        result = thisPtr->m_field_2c->GetFormID();
+    if (m_pPathArray)
+        result = m_pPathArray->GetSize();
     return result;
 }
 
-struct S_58a420
-{
-    void FUN_0058a450();
-    void* FUN_0058a420(unsigned int);
-};
-void _Deallocate(void*);
-// Calls FUN_0058a450, then deallocates this when bit 0 of flags is set, and returns this.
-// @fnv 0x0058a420
-void* S_58a420::FUN_0058a420(unsigned int flags)
-{
-    FUN_0058a450();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct Unk58
-{
-    void FUN_0058b450();
-    void* FUN_0058b420(unsigned int);
-};
-void __cdecl _Deallocate(void*);
-// Calls FUN_0058b450, deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x0058b420
-void* Unk58::FUN_0058b420(unsigned int flags)
-{
-    FUN_0058b450();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct FUN_00464f40_shell
-{
-    void __thiscall FUN_00464f40();
-    void __thiscall FUN_0058b450();
-};
-
-void __thiscall FUN_00464f40_shell::FUN_00464f40()
-{}
-
 // @fnv 0x0058b450
-void __thiscall FUN_00464f40_shell::FUN_0058b450()
+void __fastcall DestroyNiFormArray(NiFormArray* self)
 {
-    FUN_00464f40();
+    self->NiTLargePrimitiveArray<TESForm*>::~NiTLargePrimitiveArray();
 }
 
-struct FUN_0058b4f0_shell
-{
-    bool __thiscall IsFlag2Set();
-};
 // @fnv 0x0058b4f0
-bool __thiscall FUN_0058b4f0_shell::IsFlag2Set()
+bool __thiscall BGSCameraPath::IsFlag2Set()
 {
-    if (((const unsigned char*)this)[0x28] & 2)
+    if (data.cFlags & 2)
         return true;
     return false;
 }
 
-struct FUN_0058b470_shell
-{
-    unsigned char _pad[0x28];
-    unsigned char cFlags;
-    bool IsFlag80Set();
-};
-
 // Returns true when the cFlags bit 0x80 is set, otherwise false.
 // @fnv 0x0058b470
-bool FUN_0058b470_shell::IsFlag80Set()
+bool BGSCameraPath::IsFlag80Set()
 {
-    if (cFlags & 0x80)
+    if (data.cFlags & 0x80)
         return true;
     else
         return false;
 }
 
-struct S0058b4a0
-{
-    unsigned char _pad[0x28];
-    unsigned char _flag;
-    bool FUN_0058b4a0();
-};
-// Returns true when neither bit 0 nor bit 1 of _flag is set, otherwise false.
+// Returns true when neither bit 0 nor bit 1 of cFlags is set, otherwise false.
 // @fnv 0x0058b4a0
-bool S0058b4a0::FUN_0058b4a0()
+bool BGSCameraPath::FUN_0058b4a0()
 {
-    if (_flag & 1 || _flag & 2)
+    if (data.cFlags & 1 || data.cFlags & 2)
         return false;
     return true;
 }
 
-struct FUN_0058b4d0_shell
-{
-    unsigned char pad[0x28];
-    unsigned char flags28;
-    bool FUN_0058b4d0();
-};
-
 // @fnv 0x0058b4d0
-bool FUN_0058b4d0_shell::FUN_0058b4d0()
+bool BGSCameraPath::FUN_0058b4d0()
 {
-    if (flags28 & 1)
+    if (data.cFlags & 1)
         return true;
     return false;
 }
@@ -440,26 +368,12 @@ struct IdentifierHistoryEntry
     unsigned int ipreviousID;
 };
 
-struct Script
+// TESConditionSave_bgscamerapath: local type (was include/TESConditionSave.h, which had no evidence of one real class); its methods are 0x00680910 TESCondition::Save
+class TESConditionSave_bgscamerapath
 {
-    char* GetData();
-};
-
-struct TESConditionSave
-{
+public:
     void ProcessItems();
 };
-
-struct FUN_004855a0
-{
-    void M();
-};
-
-struct FUN_00485680
-{
-    void M();
-};
-
 struct BSSimpleList_shell
 {
     void** GetItem();
@@ -476,13 +390,8 @@ bool _FUN_00401500();
 void _FUN_00485990(unsigned int, void*, unsigned int);
 void _FUN_00485910(unsigned int, unsigned int);
 
-struct FUN_0058ac10_shell : public BGSCameraPath
-{
-    void FUN_0058ac10();
-};
-
 // @fnv 0x0058ac10
-void FUN_0058ac10_shell::FUN_0058ac10()
+void BGSCameraPath::FUN_0058ac10()
 {
     BSSimpleList_shell* pShotList;
     IdentifierHistoryEntry ids;
@@ -492,8 +401,8 @@ void FUN_0058ac10_shell::FUN_0058ac10()
         BGSCameraShot* pshot;
         unsigned int shotFormID;
 
-        reinterpret_cast<FUN_004855a0*>(this)->M();
-        reinterpret_cast<TESConditionSave*>(GetConditions())->ProcessItems();
+        TESForm::FUN_004855a0();
+        reinterpret_cast<TESConditionSave_bgscamerapath*>(GetConditions())->ProcessItems();
 
         memset(&ids, 0, 8);
 
@@ -537,7 +446,7 @@ void FUN_0058ac10_shell::FUN_0058ac10()
         }
     }
 
-    reinterpret_cast<FUN_00485680*>(this)->M();
+    TESForm::FUN_00485680();
 }
 
 void* __cdecl __memcpy(void*, const void*, unsigned int);
@@ -547,15 +456,9 @@ struct Cond_58a680
     void Copy(PerkEntryConditionSet* src, void* arg);
 };
 
-struct CameraPath_58a680 : public BGSCameraPath
-{
-    void CopyCommonData(TESForm* src);
-    void CopyFromForm(TESForm* apForm);
-};
-
 // Casts apForm to BGSCameraPath, copies common data, conditions, data and the shot list into this camera path.
 // @fnv 0x0058a680
-void CameraPath_58a680::CopyFromForm(TESForm* apForm)
+void BGSCameraPath::CopyFromForm(TESForm* apForm)
 {
     BGSCameraPath* p = dynamic_cast<BGSCameraPath*>(apForm);
     if (!p)
@@ -585,14 +488,9 @@ struct ConditionCompareStub
     bool IsDifferent(PerkEntryConditionSet* pathForm);
 };
 
-struct CameraPathCompare : BGSCameraPath
-{
-    bool FUN_0058a750(TESForm* form);
-};
-
 // Compares this camera path against another form's camera path: base form, conditions, a data byte, and shot lists; returns true if any differ.
 // @fnv 0x0058a750
-bool CameraPathCompare::FUN_0058a750(TESForm* form)
+bool BGSCameraPath::FUN_0058a750(TESForm* form)
 {
     BGSCameraPath* pathForm = dynamic_cast<BGSCameraPath*>(form);
     if (!pathForm)
@@ -617,18 +515,6 @@ bool CameraPathCompare::FUN_0058a750(TESForm* form)
     return false;
 }
 
-class FUN_0058a450;
-
-class PathFormArray
-{
-  public:
-    virtual ~PathFormArray();
-    unsigned int GetIndexOfForm(TESForm* form);
-    FUN_0058a450* GetFormAt(unsigned int index);
-    TESTopicInfo* RemoveAt(unsigned int index);
-    void Compact();
-};
-
 class DataHandlerStub
 {
   public:
@@ -636,39 +522,9 @@ class DataHandlerStub
 };
 extern DataHandlerStub* g_dataHandler;
 
-class CameraPathFormBase : public TESForm
-{
-  public:
-    virtual ~CameraPathFormBase();
-};
-
-class FUN_0058a450 : public CameraPathFormBase
-{
-  public:
-    PerkEntryConditionSet Conditions;
-    BSSimpleList<BGSCameraShot*> m_kCameraShotList;
-    CameraShotData data;
-    unsigned char pad29;
-    unsigned char pad2a;
-    unsigned char pad2b;
-    PathFormArray* m_pPathArray;
-    FUN_0058a450* m_pFirstCameraPath;
-    FUN_0058a450* m_pSecondCameraPath;
-
-    virtual ~FUN_0058a450();
-    virtual void ClearData();
-    FUN_0058a450* GetParentPath();
-    void RemoveChild(FUN_0058a450* child);
-    FUN_0058a450* GetPrevPathStub();
-    void SetPrevPathStub(FUN_0058a450* prev);
-    unsigned int GetChildCount();
-    FUN_0058a450* GetChildAt(unsigned int index);
-    void SetParentStub(FUN_0058a450* parent);
-};
-
 // Clears data, unlinks the path from its parent or the global path array while not loading, then deletes all children and the child array.
 // @fnv 0x0058a450
-FUN_0058a450::~FUN_0058a450()
+BGSCameraPath::~BGSCameraPath()
 {
     ClearData();
     if (!g_dataHandler->IsLoading())
@@ -679,18 +535,18 @@ FUN_0058a450::~FUN_0058a450()
         }
         else
         {
-            PathFormArray* pArray = (PathFormArray*)DAT_011ca700->GetPathArray();
+            NiFormArray* pArray = DAT_011ca700->GetPathArray();
             if (pArray)
             {
                 unsigned int uiPathIndex = pArray->GetIndexOfForm(this);
                 if (uiPathIndex != -1)
                 {
-                    FUN_0058a450* pNextPath = pArray->GetFormAt(uiPathIndex + 1);
+                    BGSCameraPath* pNextPath = (BGSCameraPath*)pArray->GetFormAt(uiPathIndex + 1);
                     if (pNextPath)
                     {
                         pNextPath->SetPrevPathStub(GetPrevPathStub());
                     }
-                    pArray->RemoveAt(uiPathIndex);
+                    ((NiTLargeArray<TESTopicInfo*, NiTMallocInterface<TESTopicInfo*> >*)pArray)->RemoveAt(uiPathIndex);
                     pArray->Compact();
                 }
             }
@@ -703,7 +559,7 @@ FUN_0058a450::~FUN_0058a450()
         {
             for (unsigned int i = 0; i < ItemUpdateArray; i++)
             {
-                FUN_0058a450* pChildPath = GetChildAt(i);
+                BGSCameraPath* pChildPath = GetChildAt(i);
                 pChildPath->SetParentStub(0);
                 delete pChildPath;
             }
@@ -722,20 +578,12 @@ struct CameraPathArrayResize
     void Resize(unsigned int size);
 };
 
-struct CameraPathClone : public BGSCameraPath
-{
-    TESForm* CreateBaseClone(bool abPersist, CameraPathMap* apMap);
-    void SetParentPath(BGSCameraPath* apParent);
-    void SetPrevPathForm(BGSCameraPath* apPrev);
-    TESForm* FUN_0058a870(bool abPersist, CameraPathMap* apMap);
-};
-
 // Clones the base camera path, remaps its parent and previous paths through apMap, and copies the child form array when present.
 // @fnv 0x0058a870
-TESForm* CameraPathClone::FUN_0058a870(bool abPersist, CameraPathMap* apMap)
+TESForm* BGSCameraPath::FUN_0058a870(bool abPersist, CameraPathMap* apMap)
 {
-    CameraPathClone* pClone_ =
-        static_cast<CameraPathClone*>(dynamic_cast<BGSCameraPath*>(CreateBaseClone(abPersist, apMap)));
+    BGSCameraPath* pClone_ =
+        dynamic_cast<BGSCameraPath*>(CreateBaseClone(abPersist, apMap));
     BGSCameraPath* pFound4 = 0;
     if (!apMap->GetAt(m_pFirstCameraPath, pFound4) || !pFound4)
         pFound4 = m_pFirstCameraPath;
@@ -773,34 +621,26 @@ struct CameraFlag
 {
     bool __thiscall FUN_008256d0();
 };
-struct CameraPath : FUN_0058b600_shell
-{
-    bool __thiscall FUN_00440d80();
-    CameraResponse* __thiscall FUN_00500940(unsigned int context, unsigned int flags);
-    CameraFlag* __thiscall FUN_00891170();
-    CameraPath* __thiscall GetCameraPathAt(unsigned int index);
-    CameraPath* __thiscall FUN_0058b510(unsigned int context, unsigned int flags);
-};
 
 // @fnv 0x0058b510
-CameraPath* CameraPath::FUN_0058b510(unsigned int context, unsigned int flags)
+BGSCameraPath* BGSCameraPath::FUN_0058b510(unsigned int context, unsigned int flags)
 {
-    CameraPath* result = 0;
+    BGSCameraPath* result = 0;
     if (!FUN_00440d80())
     {
         if (FUN_00500940(context, flags)->FUN_00680c30())
         {
-            if (reinterpret_cast<FUN_0058b470_shell*>(this)->IsFlag80Set() || !FUN_00891170()->FUN_008256d0())
+            if (IsFlag80Set() || !FUN_00891170()->FUN_008256d0())
             {
                 result = this;
             }
-            unsigned int count = GetStoredFormID(this);
+            unsigned int count = GetChildCount();
             if (count != 0)
             {
-                CameraPath* descendant = 0;
+                BGSCameraPath* descendant = 0;
                 for (unsigned int i = 0; i < count; ++i)
                 {
-                    CameraPath* child = GetCameraPathAt(i);
+                    BGSCameraPath* child = GetCameraPathAt(i);
                     if (child != 0)
                         descendant = child->FUN_0058b510(context, flags);
                     if (descendant != 0)
@@ -814,26 +654,9 @@ CameraPath* CameraPath::FUN_0058b510(unsigned int context, unsigned int flags)
     return result;
 }
 
-namespace fnv_0058b350 {
-class FUN_0058b3f0
-{
-  public:
-    FUN_0058b3f0();
-    void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    unsigned int unk0, unk4, unk8, unkC, unk10, unk14;
-};
-class OwnerX
-{
-  public:
-    unsigned int unk[11];
-    FUN_0058b3f0* m_pEntryObject;
-    FUN_0058b3f0* GetEntryObject();
-};
-// Returns m_pEntryObject, allocating a new FUN_0058b3f0 and storing it in m_pEntryObject if it was null.
+// Returns the child path array, allocating it if it is null.
 // @fnv 0x0058b350
-FUN_0058b3f0* OwnerX::GetEntryObject()
+NiFormArray* BGSCameraPath::GetEntryObject()
 {
-    return m_pEntryObject ? m_pEntryObject : (m_pEntryObject = new FUN_0058b3f0);
+    return m_pPathArray ? m_pPathArray : (m_pPathArray = new NiFormArray);
 }
-}  // namespace fnv_0058b350

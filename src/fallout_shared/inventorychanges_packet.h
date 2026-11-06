@@ -45,20 +45,7 @@ class InventoryStackRecord
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(InventoryStackRecord) == 0xC);
 
-#define FNV_EXTRADATALIST_H
-#pragma pack(push, 4)
-class ExtraDataList : public BaseExtraList
-{
-  public:
-    InventoryChanges* GetContainerChangeData();
-    void SetContainerChanges(InventoryChanges*);
-    InventoryChanges* FUN_0041db00();
-    bool HasExtraDataType0x2F();
-    bool FUN_0041d030();
-    void InitLoadGame(BGSLoadFormBuffer*, TESForm*);
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(ExtraDataList) == 0x20);
+#include "../../include/ExtraDataList.h"
 
 // No canonical header yet: API-only stub for the one flag this unit reads.
 class TESBipedModelForm

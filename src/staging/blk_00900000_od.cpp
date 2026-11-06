@@ -3,6 +3,14 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+// BSSpinLockUnlock_blk_00900000_od: local type (was include/BSSpinLockUnlock.h, which had no evidence of one real class); its methods are 0x0040fba0 BSSpinLock::Unlock, 0x0040fbf0 BSSpinLock::Lock
+class BSSpinLockUnlock_blk_00900000_od
+{
+public:
+    void Lock(const char*);
+    void Unlock();
+};
+#include "../../include/PathingAvoidNode.h"
 
 extern int DAT_01088438;
 
@@ -147,37 +155,34 @@ void FUN_009157c0::Method()
     ((QHeadPtr*)((char*)this + 0x14))->dtor();
 }
 
-struct PathingAvoidanceNode
-{
-    int a, b, c, d, e, f, g, h, i;
-};
 struct FUN_00905a10_StandIn
 {
     unsigned int GetNextIndex();
 };
 struct BSSimpleArray_PathingAvoidNode_1024
 {
-    void InitializeItems(PathingAvoidanceNode* pDest, unsigned int count);
+    void InitializeItems(PathingAvoidNode* pDest, unsigned int count);
 };
 struct FUN_00905450_StandIn
 {
     int m_iArrayLength;
-    PathingAvoidanceNode* m_pData;
+    PathingAvoidNode* m_pData;
     unsigned int GetNextIndex();
-    unsigned int AppendNode(PathingAvoidanceNode* pSrc);
+    unsigned int AppendNode(PathingAvoidNode* pSrc);
 };
 // Appends a copy of the given node to the array and returns the index it was stored at.
 // @fnv 0x00905450
-unsigned int FUN_00905450_StandIn::AppendNode(PathingAvoidanceNode* apNode)
+unsigned int FUN_00905450_StandIn::AppendNode(PathingAvoidNode* apNode)
 {
     unsigned int count = GetNextIndex();
     ((BSSimpleArray_PathingAvoidNode_1024*)this)->InitializeItems(&m_pData[count], 1);
-    *(PathingAvoidanceNode*)&m_pData[count] = *apNode;
+    *(PathingAvoidNode*)&m_pData[count] = *apNode;
     return count;
 }
 
 int __cdecl FUN_0043b460(long volatile*, long, long);
-struct Interface
+// Exe 0x00905510: unit-local Interface view; declarations and layout are preserved.
+struct BlkInterfaceView
 {
     static void __cdecl PrintDebugMessage(void);
 };
@@ -195,9 +200,9 @@ char FUN_00905510_Class::LockAndCall(int aiArg)
     {
         if (FUN_0043b460((long volatile*)(this + 1), 0, 1) == 0)
         {
-            Interface::PrintDebugMessage();
+            BlkInterfaceView::PrintDebugMessage();
             r = ((char(__thiscall*)(void*, int))vtbl[6])(this, aiArg);
-            Interface::PrintDebugMessage();
+            BlkInterfaceView::PrintDebugMessage();
             FUN_0043b460((long volatile*)(this + 1), 1, 0);
             break;
         }
@@ -280,11 +285,7 @@ void* FUN_00906130_Class::FUN_00906130(unsigned int flags)
     return this;
 }
 
-struct RecursiveSpinLock
-{
-    void Lock(const char*);
-    void Unlock();
-};
+#include "../../include/RecursiveSpinLock.h"
 struct FUN_00449f80_Class
 {
     void* FUN_00449f80(void* a, void* b, void* c, bool d);
@@ -774,12 +775,6 @@ bool TargetClass::FUN_00906c10(int a, void** b, QHeadPtrDest* apHeadDest)
     return bResult;
 }
 
-struct BSSpinLockUnlock
-{
-    void Lock(const char*);
-    void Unlock();
-};
-
 struct FUN_00528bb0_Class
 {
     bool FUN_00528bb0();
@@ -795,7 +790,7 @@ struct FUN_009062e0_Class
     int unk14;
     int unk18;
     int unk1C;
-    BSSpinLockUnlock lock;
+    BSSpinLockUnlock_blk_00900000_od lock;
     void* FUN_00449f80(void*);
     bool FUN_009062e0(void* a);
 };

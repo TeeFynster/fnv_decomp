@@ -1,3 +1,4 @@
+#include "../../../include/InterfaceManager.h"
 // fallout_shared/magic/magicformulas_packet.h: declares FlaggedData, InterfaceManager
 #ifndef MAGICFORMULAS_PACKET_H
 #define MAGICFORMULAS_PACKET_H
@@ -16,10 +17,6 @@ class QuestStage
   public:
     unsigned char GetIndex();
 };
-class InterfaceManager
-{
-  public:
-    int FUN_00874480();
-};
+
 InterfaceManager* FUN_004b7210();
 #endif

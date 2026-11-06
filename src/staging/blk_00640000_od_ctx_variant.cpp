@@ -1,9 +1,35 @@
+#include "../../include/SettingT.h"
 
 // blk_00640000_od_ctx_variant.cpp: context variant of src/staging/blk_00640000_od.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
 // src/staging/blk_00640000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
+// Isolate legacy support declarations that overlap the shared headers.
 #include "../../include/layout_support.h"
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/BSSimpleArray.h"
+#include "../../include/SETTING_VALUE.h"
+#include "../../include/SkyShaderProperty.h"
+#include "../../include/ActorValueOwner.h"
+#include "../../include/BSFaceGenManager.h"
+#include "../../include/BSFaceGenModel.h"
+#include "../../include/BSFaceGenModelExtraData.h"
+#include "../../include/GameSettingCollection.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiGeometryData.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/NiSkinInstance.h"
+#include "../../include/NiSkinPartition.h"
+#include "../../include/NiTriBasedGeom.h"
+#include "../../include/StartMenu.h"
+#include "../../include/NiTStringTemplateMap.h"
+#include "../../include/GO.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/Pair.h"
+#include "../../include/Setting.h"
+#include "../../include/PathingSolution.h"
+#include "../../include/BGSTerrainManager.h"
 struct FUN_006427a0_Class
 {
     void SetValue(float value);
@@ -18,11 +44,7 @@ struct GlobalObject_0040e0b0
 };
 GlobalObject_0040e0b0 g_011ce00c;
 float ScaleByGlobalFloat(float value);
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting289;
+extern Setting originalRuntimeFloatSetting289;
 extern double DAT_01011588;
 float AddScaledSetting(float a);
 struct Helper_00644400
@@ -217,15 +239,6 @@ struct FUN_00658aa0_class
     FUN_00658aa0_class* __thiscall Initialize(int a, unsigned char b);
 };
 extern "C" void* __cdecl NiFreeAlias(void*);
-struct NiTStringTemplateMap
-{
-    int m_auiShapeKeys[1];
-    int m_pObject;
-};
-struct BSFaceGenModelMap
-{
-    void FUN_00658b80(NiTStringTemplateMap* pStringMap);
-};
 struct FUN_00658d30_class
 {
     void __thiscall FUN_00658d50();
@@ -507,15 +520,8 @@ struct FUN_00642860_Class
 {
     void FUN_00642860();
 };
-struct GameSettingCollection
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual float GetFloat(unsigned int index);
-};
-extern Setting_S originalRuntimeFloatSetting332;
-extern Setting_S originalRuntimeFloatSetting333;
+extern Setting originalRuntimeFloatSetting332;
+extern Setting originalRuntimeFloatSetting333;
 float FUN_00643ed0(GameSettingCollection* collection, int index);
 struct FUN_00644350_Class
 {
@@ -539,13 +545,9 @@ GlobalObject_0040e0b0 g_011ce840;
 GlobalObject_0040e0b0 g_011cfd8c;
 float FUN_006463a0(int value);
 void __cdecl ClampUInt(unsigned int* p, unsigned int low, unsigned int high);
-struct ActorValueOwner
-{
-    float GetActorValueFloatByIndex(ActorValue::Index);
-};
 extern double g_d100;
-extern Setting_S g_011d17d0;
-extern Setting_S originalRuntimeFloatSetting1216;
+extern Setting g_011d17d0;
+extern Setting originalRuntimeFloatSetting1216;
 float __cdecl FUN_00649530(ActorValueOwner* p);
 struct S_0064dac0
 {
@@ -559,11 +561,6 @@ struct FUN_0064db20_Class
 struct Caller
 {
     void __thiscall Increment();
-};
-struct Pair
-{
-    int a;
-    int b;
 };
 struct Tgt
 {
@@ -619,10 +616,6 @@ struct FUN_0064e980_Block
     int mC;
 };
 void* __cdecl CopyBlocksBackward(void* a, FUN_0064e980_Block* b, FUN_0064e980_Block* c);
-struct BSFaceGenManager
-{
-    static void* __stdcall GetFaceGenManager(float a1, int a2, int a3);
-};
 struct Holder00aad6b0
 {
     void __thiscall FUN_00aad6b0();
@@ -662,11 +655,6 @@ struct FUN_00658ed0_Class
 struct FUN_00658f00_Class : public FUN_00658d30_class
 {
     FUN_00658f00_Class* __thiscall FUN_00658f00(unsigned int flags);
-};
-struct Pair590
-{
-    int a;
-    int b;
 };
 struct S_006590c0
 {
@@ -733,13 +721,13 @@ struct NarrowString
     char* p;
     ~NarrowString();
 };
-struct FaceGenMatrix
+struct FaceGenMatrixStorage
 {
-    ~FaceGenMatrix();
+    ~FaceGenMatrixStorage();
 };
 struct FUN_006593e0_Class
 {
-    FaceGenMatrix m_iWordAt00;
+    FaceGenMatrixStorage m_iWordAt00;
     char m_20[28];
     NarrowString m_40;
     ~FUN_006593e0_Class();
@@ -777,14 +765,9 @@ struct Holder : TextureBasis
 {
     int FUN_0065cec0(unsigned int);
 };
-struct Pair65cf50
-{
-    int a;
-    int b;
-};
 struct Holder65cf50
 {
-    Pair65cf50 data;
+    Pair data;
     void __thiscall FUN_0065dae0();
     void* __thiscall CopyDataAfterCallback(void* p, int q);
 };
@@ -981,15 +964,9 @@ struct FUN_0065ff60_class
 extern "C" void __cdecl FUN_00660190(int a, int b, int c, int d, int e, int f);
 struct NiRTTI;
 struct NiProperty;
-struct NiTexture;
 struct PropHelper
 {
     void* GetProperty(unsigned int);
-};
-struct SkyShaderProperty
-{
-    void SetTexture(NiTexture*);
-    void FUN_00634900(int*);
 };
 void* DynamicCastByRTTI(const NiRTTI*, NiProperty*);
 extern int DAT_011f49e0;
@@ -1133,15 +1110,8 @@ struct FUN_0065f240
     int m_cap;
     void Clear();
 };
-struct StartMenu
-{
-    char const* GetMenuTitle();
-};
-struct GlobalObject_0040c150 : public StartMenu
-{
-};
-extern GlobalObject_0040c150 g_011d30b4;
-extern GlobalObject_0040c150 g_011d41a4;
+extern StartMenu g_011d30b4;
+extern StartMenu g_011d41a4;
 int __cdecl _sprintf_s(char* buffer, unsigned int sizeOfBuffer, char const* format, ...);
 void __cdecl FormatMenuText(int menuType, char const* text, char* buffer, unsigned int bufferSize);
 struct FUN_0064da80_Class
@@ -1152,20 +1122,12 @@ struct FUN_0064daa0_Class
 {
     int __thiscall FUN_0064daa0(int a, int b);
 };
-struct BGSTerrainManager
-{
-    unsigned int GetMinLevel();
-};
 struct Calendar : public BGSTerrainManager
 {
     int GetDaysPassed();
     void __thiscall ScaleAll(float value);
 };
 void FUN_00653000(float value, Calendar* calendars, bool flag);
-struct GO
-{
-    ~GO();
-};
 struct Helper62d0
 {
     void* operator=(const void*);
@@ -1322,21 +1284,21 @@ extern double DAT_01012060;
 float __cdecl FUN_00476b70(float a, float b);
 float __cdecl FUN_006429e0(float a, float b);
 extern GlobalObject_0040e0b0 g_011cddec;
-extern Setting_S originalRuntimeFloatSetting112;
-extern Setting_S originalRuntimeFloatSetting117;
-extern Setting_S originalRuntimeFloatSetting113;
-extern Setting_S originalRuntimeFloatSetting114;
+extern Setting originalRuntimeFloatSetting112;
+extern Setting originalRuntimeFloatSetting117;
+extern Setting originalRuntimeFloatSetting113;
+extern Setting originalRuntimeFloatSetting114;
 extern GlobalObject_0040e0b0 g_011cdc28;
 extern GlobalObject_0040e0b0 g_011cdfa8;
 extern GlobalObject_0040e0b0 g_011cddc4;
 extern GlobalObject_0040e0b0 g_011cd890;
-extern Setting_S originalRuntimeFloatSetting116;
+extern Setting originalRuntimeFloatSetting116;
 extern GlobalObject_0040e0b0 g_011cd438;
 int FUN_00642a60(int base, int level, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int extra, bool flag);
-extern Setting_S DAT_011cdf78;
-extern Setting_S DAT_011cdf44;
-extern Setting_S DAT_011cde50;
-extern Setting_S DAT_011cdce8;
+extern Setting DAT_011cdf78;
+extern Setting DAT_011cdf44;
+extern Setting DAT_011cde50;
+extern Setting DAT_011cdce8;
 struct FUN_0066ef50_Class
 {
     double FUN_0066ef50(int a);
@@ -1562,7 +1524,7 @@ int __thiscall FUN_0064bda0_Class::FUN_0064bda0()
 }
 struct FUN_0040fbf0_lock
 {
-    void Wait(int);
+    void FUN_0040fbf0(int);
     void Leave();
 };
 struct FUN_0064be40_shell
@@ -1669,7 +1631,8 @@ class Iter64D : public ConstIter64D
   public:
     Iter64D();
 };
-class Vector64D
+// begin (0x0044a170), end (0x0065f550), and erase (0x0064dc50) identify an iterator container.
+class IteratorRangeSequence
 {
   public:
     Iter64D begin();
@@ -1701,7 +1664,8 @@ struct Vec2i
     int x;
     int y;
 };
-struct Vector4f
+// Exe 0x0064e430: unit-local Vector4f view; declarations and layout are preserved.
+struct BlkVector4fView
 {
     int a;
     int b;
@@ -1726,8 +1690,8 @@ class FUN_0064dcf0_cls
     Vec2i* GetFirst(Vec2i* out);
     Vec2i* GetSecond(Vec2i* out);
     Ret8 Combine(Vec2i b, Vec2i a);
-    void Apply(Vec2i c, int a1, Vector4f* q);
-    void ApplyToCopy(int a1, const Vector4f* a2);
+    void Apply(Vec2i c, int a1, BlkVector4fView* q);
+    void ApplyToCopy(int a1, const BlkVector4fView* a2);
 };
 struct FUN_0064dda0_target
 {
@@ -1920,11 +1884,6 @@ struct FUN_0064fe10_cls
 
     virtual ~FUN_0064fe10_cls();
 };
-struct PathingSolution
-{
-    void IncRefCount();
-    void DecRefCount();
-};
 struct PathingSolutionBase
 {
     int unk04;
@@ -2015,7 +1974,8 @@ struct Holder_657c50
 {
     void __thiscall Fin();
 };
-struct Pair_657c50
+// Method binds to iterator-distance helper 0x006580b0; this one-word cursor fragment is not an eight-byte pair.
+struct EntryOffsetCursor
 {
     int m_iWordAt00;
     void* __thiscall Method(void* p);
@@ -2031,7 +1991,7 @@ struct FUN_00657c50_cls
     void* __thiscall Get1(void* out);
     Holder_657c50* __thiscall Get3(void* out, void* a, void* x);
     void __thiscall Apply(int a, int b, int c, int d);
-    void* __thiscall FUN_00657c50(void* a, Pair_657c50 b, int c, int d);
+    void* __thiscall FUN_00657c50(void* a, EntryOffsetCursor b, int c, int d);
 };
 struct Sub_657cd0_08
 {
@@ -2836,12 +2796,7 @@ struct S_0065ff90_Dest
 _DummyTag __cdecl FUN_0065e750(S_0065ff90_Dest* dest);
 void __cdecl FUN_00660210(int first, int last, S_0065ff90_Dest dest, _DummyTag cat, S_0065ff90_Tag tag);
 void __cdecl FUN_0065ff90(int first, int last, S_0065ff90_Dest dest);
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
+#include "../../include/NiMemObject.h"
 struct FUN_0064ec10_obj
 {
     virtual void v00();
@@ -3315,115 +3270,6 @@ struct CheckedTag64e9
 };
 Elem64e9* __cdecl FUN_0064e9c0(Elem64e9* _First, Elem64e9* _Last, Elem64e9* _Dest, Alloc64e9& _Al, NonscalarTag64e9,
                                CheckedTag64e9);
-class BSFaceGenModelExtraData : public NiMemObject
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    BSFaceGenModelExtraData(int);
-};
-class NiRefObject
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
-class NiExtraData;
-class NiObject : public NiRefObject
-{
-  public:
-    virtual ~NiObject();
-    NiObject* Clone();
-    void ResolveObjectPointer(NiPointer<NiObject>& spCopy);
-};
-class NiObjectNET : public NiObject
-{
-  public:
-    bool AddExtraData(NiExtraData* pExtraData);
-};
-class NiGeometryData : public NiObject
-{
-  public:
-};
-class NiGeometry : public NiObjectNET
-{
-  public:
-    NiGeometryData* FUN_005495f0();
-    virtual void vfn00();
-    virtual void vfn01();
-    virtual void vfn02();
-    virtual void vfn03();
-    virtual void vfn04();
-    virtual void vfn05();
-    virtual void vfn06();
-    virtual void vfn07();
-    virtual void vfn08();
-    virtual void vfn09();
-    virtual void vfn0a();
-    virtual void vfn0b();
-    virtual void vfn0c();
-    virtual void vfn0d();
-    virtual void vfn0e();
-    virtual void vfn0f();
-    virtual void vfn10();
-    virtual void vfn11();
-    virtual void vfn12();
-    virtual void vfn13();
-    virtual void vfn14();
-    virtual void vfn15();
-    virtual void vfn16();
-    virtual void vfn17();
-    virtual void vfn18();
-    virtual void vfn19();
-    virtual void vfn1a();
-    virtual void vfn1b();
-    virtual void vfn1c();
-    virtual void vfn1d();
-    virtual void vfn1e();
-    virtual void vfn1f();
-    virtual void vfn20();
-    virtual void vfn21();
-    virtual void vfn22();
-    virtual void vfn23();
-    virtual void vfn24();
-    virtual void vfn25();
-    virtual void vfn26();
-    virtual void vfn27();
-    virtual void vfn28();
-    virtual void vfn29();
-    virtual void vfn2a();
-    virtual void vfn2b();
-    virtual void vfn2c();
-    virtual void vfn2d();
-    virtual void vfn2e();
-    virtual void vfn2f();
-    virtual void vfn30();
-    virtual void vfn31();
-    virtual void vfn32();
-    virtual void vfn33();
-    virtual void vfn34();
-    virtual void vfn35();
-    virtual void vfn36();
-    virtual void vfn37();
-    virtual void ReplaceModelData(NiGeometryData* pData);
-};
-class NiSkinPartition : public NiObject
-{
-  public:
-};
-class NiSkinInstance
-{
-  public:
-    NiSkinPartition* FUN_0043b230();
-    void FUN_004addc0(NiSkinPartition* pPartition);
-};
-class NiTriBasedGeom : public NiGeometry
-{
-  public:
-    NiSkinInstance* FUN_0043fad0();
-};
 class FUN_006624c0 : public NiMemObject
 {
   public:
@@ -3434,25 +3280,6 @@ class FUN_006624c0 : public NiMemObject
     int unk10;
     int unk14;
     FUN_006624c0(NiTriBasedGeom* pGeom, int a2, int a3);
-};
-struct FaceGenModelData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    NiPointer<NiGeometry> spGeom;
-    int unk14;
-    int unk18;
-};
-class BSFaceGenModel
-{
-  public:
-    int unk00;
-    int unk04;
-    FaceGenModelData* unk08;
-
-    bool CloneTriBasedGeom(NiPointer<NiTriBasedGeom>& out);
 };
 struct VecItem1C
 {
@@ -3524,18 +3351,19 @@ struct ObjectPointer64ce20
     ObjectPointer64ce20& operator=(void* object);
     ~ObjectPointer64ce20();
 };
-struct Vector64ce20
+// Three buffer pointers and destructor 0x0065c7c0 identify slot-ID storage rather than a four-float SIMD value.
+struct SlotIdStorage
 {
     void* m_pHeadNode;
     void* m_last;
     void* m_kRayEnd;
     void FUN_0064db70();
-    ~Vector64ce20();
+    ~SlotIdStorage();
 };
 struct FUN_0064ce20 : Base64ce20
 {
     ObjectPointer64ce20 m_object;
-    Vector64ce20 m_iSlotIds;
+    SlotIdStorage m_iSlotIds;
     ~FUN_0064ce20();
 };
 struct ItE4E0
@@ -3687,11 +3515,7 @@ struct VecF380
     bool FUN_0065f380(unsigned int _Capacity);
 };
 #include <math.h>
-template <class Collection> class SettingT
-{
-  public:
-    float* Float();
-};
+using ::SettingT;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting86;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting87;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting90;
@@ -3714,10 +3538,7 @@ struct FUN_006443d0 : GlobalObject_00869f00
     virtual ~FUN_006443d0();
 };
 struct BGSLoadGameBuffer;
-struct Interface
-{
-    static void __cdecl PrintDebugMessage(BGSLoadGameBuffer*);
-};
+void __cdecl PrintDebugMessage(BGSLoadGameBuffer*);
 struct FUN_0065e9a0_Class
 {
     void __thiscall FUN_0065e9a0(BGSLoadGameBuffer* p);

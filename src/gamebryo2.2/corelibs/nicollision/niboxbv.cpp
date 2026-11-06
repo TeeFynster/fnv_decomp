@@ -1,3 +1,272 @@
+#include "../../../../include/NiBoxBV.h"
+#include "../../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../../../include/NiPoint3.h"
+#include <stddef.h>
+// This unit needs the constructor-enabled Point3 definition. Include the
+// standard header first, then mask the legacy aggregate-only version test.
+#pragma push_macro("_MSC_VER")
+#undef _MSC_VER
+// PodPoint3: unit-local copy of the former shared stand-in Point3. Same layout as NiPoint3 but constructor-free (an aggregate under VC9): with NiPoint3, 0x00ea0ad0 does not match (POD construction/return; NiPoint3's user constructors change the code).
+#include <stddef.h>
+class PodPoint3
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    // Legacy compilers require an aggregate for brace initialization.
+#if !defined(_MSC_VER) || _MSC_VER >= 1800
+    PodPoint3()
+    {}
+    PodPoint3(float fX, float fY, float fZ)
+        : x(fX), y(fY), z(fZ)
+    {}
+#endif
+
+    PodPoint3 operator+(const PodPoint3& other) const;
+    PodPoint3 operator-(const PodPoint3& other) const;
+    PodPoint3 operator-() const;
+    PodPoint3 operator*(float scalar) const;
+    float operator*(const PodPoint3& other) const;
+    PodPoint3& operator+=(const PodPoint3& other);
+    friend PodPoint3 operator*(float scalar, const PodPoint3& point);
+
+    float DotPart(float value, const PodPoint3& point) const;
+    float DotProduct(const PodPoint3& point) const;
+    double DotProduct(const PodPoint3& point);
+    float Length() const;
+
+    PodPoint3& FUN_00439180(float scalar);
+    PodPoint3 FUN_00439e90(const PodPoint3& shift) const;
+    PodPoint3* FUN_00439e90(PodPoint3* output, const PodPoint3* other) const;
+    PodPoint3 FUN_00439ef0(const PodPoint3& other) const;
+    void FUN_00439ef0();
+    PodPoint3 FUN_004b3800(const PodPoint3& axis) const;
+    void FUN_004a0c10();
+    float FUN_00457910();
+    float FUN_00457990() const;
+    double FUN_004a7290();
+    PodPoint3* FUN_006815c0();
+    PodPoint3* FUN_00416870(float x, float y, float z);
+    void FUN_0043d410(float x, int y, int z);
+    char* FUN_00a59af0(const char* text);
+
+    static void* operator new[](size_t size);
+    static void operator delete[](void* memory);
+    static const PodPoint3 ZERO;
+};
+#pragma pop_macro("_MSC_VER")
+#include "../../../../include/NiPoint3.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3; this unit defines inline bodies for both NiPoint3 and the stand-in in different forms (constructor/temporary, operand order), so one NiPoint3 cannot carry both.
+#include "../../../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+#include <string.h>
+
+inline PodPoint3 PodPoint3::operator+(const PodPoint3& pt) const
+{
+    return PodPoint3(x + pt.x, y + pt.y, z + pt.z);
+}
+
+inline PodPoint3 PodPoint3::operator-(const PodPoint3& pt) const
+{
+    return PodPoint3(x - pt.x, y - pt.y, z - pt.z);
+}
+
+inline PodPoint3 PodPoint3::operator*(float fScalar) const
+{
+    PodPoint3 kRes = PodPoint3(fScalar * x, fScalar * y, fScalar * z);
+    return kRes;
+}
+
+inline PodPoint3 operator*(float fScalar, const PodPoint3& pt)
+{
+    return PodPoint3(fScalar * pt.x, fScalar * pt.y, fScalar * pt.z);
+}
+
+__forceinline float PodPoint3::DotPart(float v, const PodPoint3& pt) const
+{
+    return v * pt.x + y * pt.y + z * pt.z;
+}
+
+inline float PodPoint3::DotProduct(const PodPoint3& pt) const
+{
+    return x * pt.x + y * pt.y + z * pt.z;
+}
+
+inline PodPoint3 PodPoint3::FUN_004b3800(const PodPoint3& pt) const
+{
+    return PodPoint3(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
+}
+
+inline LocalVec3::LocalVec3()
+{}
+
+inline LocalVec3::LocalVec3(float a, float b, float c) : x(a), y(b), z(c)
+{}
+
+inline LocalVec3 LocalVec3::operator-(const LocalVec3& o) const
+{
+    return LocalVec3(x - o.x, y - o.y, z - o.z);
+}
+
+inline LocalVec3 LocalVec3::operator*(float s) const
+{
+    return LocalVec3(x * s, y * s, z * s);
+}
+
+inline float LocalVec3::Dot(const LocalVec3& o) const
+{
+    return x * o.x + y * o.y + z * o.z;
+}
+
+inline bool LocalVec3::operator==(const LocalVec3& o) const
+{
+    return x == o.x && y == o.y && z == o.z;
+}
+
+inline bool LocalVec3::operator!=(const LocalVec3& o) const
+{
+    return !(*this == o);
+}
 
 // src/gamebryo2.2/corelibs/nicollision/niboxbv.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/niboxbv.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -9,39 +278,18 @@ int __cdecl FUN_00b6f470()
     return 1;
 }
 
-struct NiStream;
-
-struct NiBoundingVolume
-{
-    void __thiscall SaveBinary(NiStream& kStream);
-};
-
 struct OrientedBoxBound
 {
     void __thiscall SaveBinary(NiStream& kStream);
 };
 
-struct NiBoxBV
-{
-    NiBoundingVolume m_kBase;
-    OrientedBoxBound m_kBoundsBox;
-    void __thiscall FUN_00ea0800(NiStream& kStream);
-};
-
 // @fnv 0x00ea0800
-void __thiscall NiBoxBV::FUN_00ea0800(NiStream& kStream)
+void __thiscall NiBoxBV::SaveBinary(NiStream& kStream)
 {
-    m_kBase.SaveBinary(kStream);
+    NiBoundingVolume::SaveBinary(kStream);
     ((OrientedBoxBound*)((char*)this + 4))->SaveBinary(kStream);
 }
 
-struct VType
-{
-    virtual int f0() const;
-    virtual int f1() const;
-    virtual int f2() const;
-    virtual int f3() const;
-};
 struct FakeBox
 {
     bool __thiscall FUN_00eae520(const FakeBox&) const;
@@ -53,7 +301,7 @@ struct StandIn
 // @fnv 0x00ea07a0
 int __thiscall StandIn::FUN_00ea07a0(const NiBoundingVolume& kABV)
 {
-    if (reinterpret_cast<const VType&>(kABV).f3() == 1)
+    if (kABV.F3() == 1)
     {
         if (reinterpret_cast<const FakeBox*>(reinterpret_cast<const char*>(&kABV) + 4)
                 ->FUN_00eae520(*reinterpret_cast<const FakeBox*>(reinterpret_cast<const char*>(this) + 4)))
@@ -62,9 +310,6 @@ int __thiscall StandIn::FUN_00ea07a0(const NiBoundingVolume& kABV)
     return 0;
 }
 
-struct NiPoint3
-{
-};
 struct P03MM
 {
     void* Allocate(unsigned int);
@@ -96,6 +341,7 @@ struct P03MM
 };
 extern P03MM g_memoryManager;
 extern int DAT_010f1814;
+// Shared NiBoxBV lacks a Clone override and box storage; retain this local form.
 struct FUN_00ea7d10_shell
 {
     void* vfptr;
@@ -121,18 +367,14 @@ NiBoundingVolume* FUN_00ea7d10_shell::Clone()
 }  // namespace fnv_00ea7d10
 
 extern const float g_011c5aa8_arg1;
-struct Pt3
+
+inline NiPoint3::NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
+{}
+
+inline NiPoint3 NiPoint3::operator-() const
 {
-    float x, y, z;
-    Pt3()
-    {}
-    Pt3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Pt3 operator-() const
-    {
-        return Pt3(-x, -y, -z);
-    }
-};
+    return NiPoint3(-x, -y, -z);
+}
 struct Isect
 {
     int pad[0x14];
@@ -140,13 +382,13 @@ struct Isect
     void __thiscall Solve(const void* a, const void* b);
     float __thiscall FUN_00eae6f0();
     int __thiscall FUN_00be0aa0();
-    const Pt3& __thiscall FUN_00eae700();
-    const Pt3& __thiscall FUN_00eae710();
+    const NiPoint3& __thiscall FUN_00eae700();
+    const NiPoint3& __thiscall FUN_00eae710();
     void __thiscall FUN_00eae6d0();
 };
 // @fnv 0x00ea3950
 bool FUN_00ea3950(float afLength, const void* pA, const void* pB, const void* pC, const void* pD, float* pfTime,
-                  Pt3* pPoint, bool bNormal, Pt3* pNormal, Pt3* pNegNormal)
+                  NiPoint3* pPoint, bool bNormal, NiPoint3* pNormal, NiPoint3* pNegNormal)
 {
     Isect k;
     k.InitRegion(pA, pC, afLength, 0.001f, g_011c5aa8_arg1, 0x20);
@@ -168,6 +410,7 @@ bool FUN_00ea3950(float afLength, const void* pA, const void* pB, const void* pC
 }
 
 extern int DAT_010f1814;
+// Shared NiBoxBV lacks the five-point constructor and box storage; retain this local form.
 struct FUN_00ea0820
 {
     int v0, v1, v2, v3;
@@ -220,18 +463,6 @@ void Ea07Owner::FUN_00ea07e0(int a)
 
 extern const float DAT_010141cc;
 extern const float DAT_01017d00;
-struct Point
-{
-    float x, y, z;
-    Point()
-    {}
-    Point(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Point operator-() const
-    {
-        return Point(-x, -y, -z);
-    }
-};
 struct PointPairState
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
@@ -240,13 +471,13 @@ struct PointPairState
     void Solve(const void*, const void*);
     float FUN_00eae6f0();
     int FUN_00be0aa0();
-    const Point& FUN_00eae700();
-    const Point& FUN_00eae710();
+    const NiPoint3& FUN_00eae700();
+    const NiPoint3& FUN_00eae710();
     void FUN_00eae6d0();
 };
 // @fnv 0x00ea3c50
-bool FUN_00ea3c50(float length, const void* a, const void* b, const void* c, const void* d, float* pfTime, Point* point,
-                  bool normals, Point* normal, Point* negative)
+bool FUN_00ea3c50(float length, const void* a, const void* b, const void* c, const void* d, float* pfTime, NiPoint3* point,
+                  bool normals, NiPoint3* normal, NiPoint3* negative)
 {
     PointPairState isect;
     isect.FUN_00eb3890(a, c, length, DAT_01017d00, DAT_010141cc, 32);
@@ -891,40 +1122,40 @@ bool IntersectsTriangle(float fTime, const BoxVolume& kBV0, const V3& kV0, const
 struct CollisionBox
 {
     void* vtable;
-    Pt3 center;
-    Pt3 axisX;
-    Pt3 axisY;
-    Pt3 axisZ;
-    Pt3 halfExtents;
+    NiPoint3 center;
+    NiPoint3 axisX;
+    NiPoint3 axisY;
+    NiPoint3 axisZ;
+    NiPoint3 halfExtents;
 };
 struct ProjectionQuery
 {
     float radius;
-    Pt3 base;
+    NiPoint3 base;
     float allowance;
-    void InitFromParams(float radius, const Pt3* anchor);
+    void InitFromParams(float radius, const NiPoint3* anchor);
 };
-extern const Pt3 DAT_011f426c;
+extern const NiPoint3 DAT_011f426c;
 extern const float DAT_01013ea4;
 extern const double DAT_0106d508;
-bool __cdecl IntersectsSphereAndBox(float threshold, const CollisionBox* box, const Pt3* direction,
-                                    const ProjectionQuery* query, const Pt3* anchor);
+bool __cdecl IntersectsSphereAndBox(float threshold, const CollisionBox* box, const NiPoint3* direction,
+                                    const ProjectionQuery* query, const NiPoint3* anchor);
 
 static __forceinline float Round(float v)
 {
     return v;
 }
-static __forceinline float Dot(const Pt3& a, const Pt3& b)
+static __forceinline float Dot(const NiPoint3& a, const NiPoint3& b)
 {
     volatile float rounded = b.x * a.x + a.y * b.y + a.z * b.z;
     return rounded;
 }
-static __forceinline float DotSecond(const Pt3& a, const Pt3& b)
+static __forceinline float DotSecond(const NiPoint3& a, const NiPoint3& b)
 {
     volatile float rounded = b.y * a.y + b.x * a.x + b.z * a.z;
     return rounded;
 }
-static __forceinline float DotSecondF(const Pt3& a, float bx, float by, float bz)
+static __forceinline float DotSecondF(const NiPoint3& a, float bx, float by, float bz)
 {
     volatile float rounded = by * a.y + bx * a.x + bz * a.z;
     return rounded;
@@ -933,25 +1164,25 @@ static __forceinline float Negate(float v)
 {
     return -v;
 }
-static __forceinline Pt3 Add(const Pt3& a, const Pt3& b)
+static __forceinline NiPoint3 Add(const NiPoint3& a, const NiPoint3& b)
 {
-    return Pt3(a.x + b.x, a.y + b.y, a.z + b.z);
+    return NiPoint3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
-static __forceinline void ClampToOrientedBox(const CollisionBox& box, const Pt3& direction, float distance,
-                                             Pt3& position, double tolerance)
+static __forceinline void ClampToOrientedBox(const CollisionBox& box, const NiPoint3& direction, float distance,
+                                             NiPoint3& position, double tolerance)
 {
-    Pt3 scaledDirection;
+    NiPoint3 scaledDirection;
     scaledDirection.x = direction.x * distance;
     scaledDirection.y = direction.y * distance;
     scaledDirection.z = direction.z * distance;
-    Pt3 projectedCenter = Add(scaledDirection, box.center);
+    NiPoint3 projectedCenter = Add(scaledDirection, box.center);
 
-    Pt3 displacement;
+    NiPoint3 displacement;
     displacement.x = position.x - projectedCenter.x;
     displacement.y = position.y - projectedCenter.y;
     displacement.z = position.z - projectedCenter.z;
 
-    Pt3 local;
+    NiPoint3 local;
     local.x = Round(Dot(box.axisX, displacement));
     local.y = Round(Dot(box.axisY, displacement));
     local.z = Round(Dot(box.axisZ, displacement));
@@ -971,47 +1202,47 @@ static __forceinline void ClampToOrientedBox(const CollisionBox& box, const Pt3&
     else if (local.z < Negate(box.halfExtents.z) * tolerance)
         local.z = Negate(box.halfExtents.z);
 
-    Pt3 boundedZ;
+    NiPoint3 boundedZ;
     boundedZ.x = box.axisZ.x * local.z;
     boundedZ.y = box.axisZ.y * local.z;
     boundedZ.z = box.axisZ.z * local.z;
-    Pt3 boundedY;
+    NiPoint3 boundedY;
     boundedY.x = *(volatile float*)&box.axisY.x * local.y;
     boundedY.y = box.axisY.y * local.y;
     boundedY.z = box.axisY.z * local.y;
-    Pt3 boundedX;
+    NiPoint3 boundedX;
     boundedX.x = box.axisX.x * local.x;
     boundedX.y = box.axisX.y * local.x;
     boundedX.z = box.axisX.z * local.x;
-    Pt3 sumX;
+    NiPoint3 sumX;
     sumX.x = projectedCenter.x + boundedX.x;
     sumX.y = projectedCenter.y + boundedX.y;
     sumX.z = projectedCenter.z + boundedX.z;
-    Pt3 sumY;
+    NiPoint3 sumY;
     sumY.x = sumX.x + boundedY.x;
     sumY.y = sumX.y + boundedY.y;
     sumY.z = sumX.z + boundedY.z;
-    Pt3 answer;
+    NiPoint3 answer;
     answer.x = sumY.x + boundedZ.x;
     answer.y = sumY.y + boundedZ.y;
     answer.z = sumY.z + boundedZ.z;
     position = answer;
 }
 
-static __forceinline void ClampSecondBox(const CollisionBox& box, const Pt3& direction, float distance, Pt3& position)
+static __forceinline void ClampSecondBox(const CollisionBox& box, const NiPoint3& direction, float distance, NiPoint3& position)
 {
-    Pt3 scaledDirection;
+    NiPoint3 scaledDirection;
     scaledDirection.x = direction.x * distance;
     scaledDirection.y = direction.y * distance;
     scaledDirection.z = direction.z * distance;
-    Pt3 projectedCenter = Add(scaledDirection, box.center);
+    NiPoint3 projectedCenter = Add(scaledDirection, box.center);
 
-    Pt3 displacement;
+    NiPoint3 displacement;
     displacement.x = position.x - projectedCenter.x;
     displacement.y = position.y - projectedCenter.y;
     displacement.z = position.z - projectedCenter.z;
 
-    Pt3 local;
+    NiPoint3 local;
     local.x = Round(DotSecondF(box.axisX, displacement.x, displacement.y, displacement.z));
     local.y = Round(DotSecondF(box.axisY, displacement.x, displacement.y, displacement.z));
     local.z = Round(DotSecondF(box.axisZ, displacement.x, displacement.y, displacement.z));
@@ -1031,27 +1262,27 @@ static __forceinline void ClampSecondBox(const CollisionBox& box, const Pt3& dir
     else if (local.z < Negate(box.halfExtents.z) * DAT_0106d508)
         local.z = Negate(box.halfExtents.z);
 
-    Pt3 boundedZ;
+    NiPoint3 boundedZ;
     boundedZ.x = box.axisZ.x * local.z;
     boundedZ.y = box.axisZ.y * local.z;
     boundedZ.z = box.axisZ.z * local.z;
-    Pt3 boundedY;
+    NiPoint3 boundedY;
     boundedY.x = local.y * box.axisY.x;
     boundedY.y = box.axisY.y * local.y;
     boundedY.z = box.axisY.z * local.y;
-    Pt3 boundedX;
+    NiPoint3 boundedX;
     boundedX.x = box.axisX.x * local.x;
     boundedX.y = box.axisX.y * local.x;
     boundedX.z = box.axisX.z * local.x;
-    Pt3 sumX;
+    NiPoint3 sumX;
     sumX.x = projectedCenter.x + boundedX.x;
     sumX.y = projectedCenter.y + boundedX.y;
     sumX.z = projectedCenter.z + boundedX.z;
-    Pt3 sumY;
+    NiPoint3 sumY;
     sumY.x = sumX.x + boundedY.x;
     sumY.y = sumX.y + boundedY.y;
     sumY.z = sumX.z + boundedY.z;
-    Pt3 answer;
+    NiPoint3 answer;
     answer.x = sumY.x + boundedZ.x;
     answer.y = sumY.y + boundedZ.y;
     answer.z = sumY.z + boundedZ.z;
@@ -1060,9 +1291,9 @@ static __forceinline void ClampSecondBox(const CollisionBox& box, const Pt3& dir
 
 // Clamps a position to two oriented collision boxes along given directions when a projection query reports no intersection.
 // @fnv 0x00ea7730
-void __cdecl ClampPositionToBoxes(float threshold, const CollisionBox* firstBox, const Pt3* firstDirection,
-                                  const CollisionBox* secondBox, const Pt3* secondDirection, const float* distance,
-                                  Pt3* position)
+void __cdecl ClampPositionToBoxes(float threshold, const CollisionBox* firstBox, const NiPoint3* firstDirection,
+                                  const CollisionBox* secondBox, const NiPoint3* secondDirection, const float* distance,
+                                  NiPoint3* position)
 {
     ProjectionQuery query;
     query.InitFromParams(1.0f, &DAT_011f426c);
@@ -1078,48 +1309,6 @@ void __cdecl ClampPositionToBoxes(float threshold, const CollisionBox* firstBox,
 }
 
 #include <math.h>
-class Point3
-{
-  public:
-    float x, y, z;
-    Point3()
-    {}
-    Point3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    Point3 operator+(const Point3& pt) const
-    {
-        return Point3(x + pt.x, y + pt.y, z + pt.z);
-    }
-    Point3 operator-(const Point3& pt) const
-    {
-        return Point3(x - pt.x, y - pt.y, z - pt.z);
-    }
-    Point3 operator*(float fScalar) const
-    {
-        Point3 kRes(fScalar * x, fScalar * y, fScalar * z);
-        return kRes;
-    }
-    friend Point3 operator*(float fScalar, const Point3& pt)
-    {
-        return Point3(fScalar * pt.x, fScalar * pt.y, fScalar * pt.z);
-    }
-    __forceinline float DotPart(float v, const Point3& pt) const
-    {
-        return v * pt.x + y * pt.y + z * pt.z;
-    }
-    float DotProduct(const Point3& pt) const
-    {
-        return x * pt.x + y * pt.y + z * pt.z;
-    }
-    Point3 FUN_004b3800(const Point3& pt) const
-    {
-        return Point3(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
-    }
-};
 inline float SatAbsF(float fValue)
 {
     float fAbs = (float)fabs(fValue);
@@ -1134,8 +1323,8 @@ inline float SatRoundedAbs(float v)
 class OBox
 {
   public:
-    Point3 m_kCenter;
-    Point3 m_akAxes[3];
+    PodPoint3 m_kCenter;
+    PodPoint3 m_akAxes[3];
     float m_afExtents[3];
     float GetExtent(unsigned int axis) const
     {
@@ -1152,27 +1341,27 @@ class OBoxBV
 };
 
 // @fnv 0x00ea0ad0
-bool __cdecl FUN_00ea0ad0(float fTime, const OBoxBV& kBV0, const Point3& kV0, const OBoxBV& kBV1, const Point3& kV1)
+bool __cdecl FUN_00ea0ad0(float fTime, const OBoxBV& kBV0, const PodPoint3& kV0, const OBoxBV& kBV1, const PodPoint3& kV1)
 {
     const OBox& kBox0 = kBV0.m_kBoundsBox;
     const OBox& kBox1 = kBV1.m_kBoundsBox;
 
     // convenience variables
-    const Point3* akA = kBox0.m_akAxes;
-    const Point3* akB = kBox1.m_akAxes;
+    const PodPoint3* akA = kBox0.m_akAxes;
+    const PodPoint3* akB = kBox1.m_akAxes;
     const float* afEA = kBox0.m_afExtents;
     const float* afEB = kBox1.m_afExtents;
 
     unsigned char extentIndex = 2;
     // Compute relative velocity of box1 with respect to box0 so that box0
     // may as well be stationary.
-    Point3 kW;
+    PodPoint3 kW;
     kW = kV1 - kV0;
 
     // Compute difference of box centers at time 0 and time 'fTime'.
-    Point3 kD0;
+    PodPoint3 kD0;
     kD0 = kBox1.m_kCenter - kBox0.m_kCenter;
-    Point3 kD1;
+    PodPoint3 kD1;
     kD1 = kD0 + kW * fTime;
 
     // matrix C = A^T B, c_{ij} = DotProduct(A_i,B_j)
@@ -1221,7 +1410,7 @@ bool __cdecl FUN_00ea0ad0(float fTime, const OBoxBV& kBV0, const Point3& kV0, co
     aafC[1][1] = akA[1].DotProduct(akB[1]);
     aafC[1][2] = akA[1].DotProduct(akB[2]);
     afAD0[1] = akA[1].DotProduct(kD0);
-    afAD1[1] = kD1.DotProduct(akA[1]);
+    afAD1[1] = static_cast<const PodPoint3&>(kD1).DotProduct(akA[1]);
     aafAbsC[1][0] = SatAbsF(aafC[1][0]);
     aafAbsC[1][1] = SatAbsF(aafC[1][1]);
     aafAbsC[1][2] = SatAbsF(aafC[1][2]);
@@ -1464,12 +1653,12 @@ bool __cdecl FUN_00ea0ad0(float fTime, const OBoxBV& kBV0, const Point3& kV0, co
             return false;
     }
 
-    Point3 kWxD0 = kW.FUN_004b3800(kD0);
+    PodPoint3 kWxD0 = kW.FUN_004b3800(kD0);
     float afWA[3], afWB[3];
 
     // axis C0+t*WxA0
-    afWA[1] = kW.DotProduct(akA[1]);
-    afWA[2] = kW.DotProduct(akA[2]);
+    afWA[1] = static_cast<const PodPoint3&>(kW).DotProduct(akA[1]);
+    afWA[2] = static_cast<const PodPoint3&>(kW).DotProduct(akA[2]);
     fR = SatAbsF(akA[0].DotProduct(kWxD0));
     fR0 = kBox0.GetExtent(1) * SatAbsF(afWA[2]) + kBox0.GetExtent(2) * SatAbsF(afWA[1]);
     fR1 = afEB[0] * SatAbsF(aafC[1][0] * afWA[2] - aafC[2][0] * afWA[1]) +
@@ -1480,7 +1669,7 @@ bool __cdecl FUN_00ea0ad0(float fTime, const OBoxBV& kBV0, const Point3& kV0, co
         return false;
 
     // axis C0+t*WxA1
-    afWA[0] = kW.DotProduct(akA[0]);
+    afWA[0] = static_cast<const PodPoint3&>(kW).DotProduct(akA[0]);
     fR = SatAbsF(akA[1].DotProduct(kWxD0));
     fR0 = kBox0.GetExtent(2) * SatAbsF(afWA[0]) + afEA[0] * SatAbsF(afWA[2]);
     fR1 = afEB[0] * SatAbsF(aafC[2][0] * afWA[0] - aafC[0][0] * afWA[2]) +
@@ -1501,8 +1690,8 @@ bool __cdecl FUN_00ea0ad0(float fTime, const OBoxBV& kBV0, const Point3& kV0, co
         return false;
 
     // axis C0+t*WxB0
-    afWB[1] = kW.DotProduct(akB[1]);
-    afWB[2] = kW.DotProduct(akB[2]);
+    afWB[1] = static_cast<const PodPoint3&>(kW).DotProduct(akB[1]);
+    afWB[2] = static_cast<const PodPoint3&>(kW).DotProduct(akB[2]);
     fR = SatAbsF(akB[0].DotProduct(kWxD0));
     fR0 = afEA[0] * SatAbsF(aafC[0][1] * afWB[2] - aafC[0][2] * afWB[1]) +
           kBox0.GetExtent(1) * SatRoundedAbs(aafC[1][1] * afWB[2] - aafC[1][2] * afWB[1]) +
@@ -1513,7 +1702,7 @@ bool __cdecl FUN_00ea0ad0(float fTime, const OBoxBV& kBV0, const Point3& kV0, co
         return false;
 
     // axis C0+t*WxB1
-    afWB[0] = kW.DotProduct(akB[0]);
+    afWB[0] = static_cast<const PodPoint3&>(kW).DotProduct(akB[0]);
     fR = SatAbsF(akB[1].DotProduct(kWxD0));
     fR0 = afEA[0] * SatAbsF(aafC[0][2] * afWB[0] - aafC[0][0] * afWB[2]) +
           kBox0.GetExtent(1) * SatRoundedAbs(aafC[1][2] * afWB[0] - aafC[1][0] * afWB[2]) +
@@ -1537,54 +1726,25 @@ bool __cdecl FUN_00ea0ad0(float fTime, const OBoxBV& kBV0, const Point3& kV0, co
 }
 
 namespace fnv_00ea7530 {
-struct Vec3
-{
-    float x, y, z;
-    Vec3()
-    {}
-    Vec3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Vec3 operator-(const Vec3& o) const
-    {
-        return Vec3(x - o.x, y - o.y, z - o.z);
-    }
-    Vec3 operator*(float s) const
-    {
-        return Vec3(x * s, y * s, z * s);
-    }
-    float Dot(const Vec3& o) const
-    {
-        return x * o.x + y * o.y + z * o.z;
-    }
-    bool operator==(const Vec3& o) const
-    {
-        return x == o.x && y == o.y && z == o.z;
-    }
-    bool operator!=(const Vec3& o) const
-    {
-        return !(*this == o);
-    }
-};
-
-extern const Vec3 NiPoint3_ZERO;
+extern const LocalVec3 NiPoint3_ZERO;
 
 struct CenteredPointBounds
 {
-    Vec3 m_kCenter;
-    Vec3 m_akAxes[3];
+    LocalVec3 m_kCenter;
+    LocalVec3 m_akAxes[3];
     float m_afExtents[3];
 };
 
 struct SphereShape
 {
-    Vec3 m_kCenter;
+    LocalVec3 m_kCenter;
     float m_fBoundRadius;
 };
 
 struct SegmentShape
 {
-    Vec3 m_kStartPoint;
-    Vec3 m_kLightVector;
+    LocalVec3 m_kStartPoint;
+    LocalVec3 m_kLightVector;
 };
 
 struct BoxBVStub
@@ -1600,13 +1760,13 @@ struct SphereBVStub
 };
 
 float SqrDistSegBox(const SegmentShape& kSeg, const CenteredPointBounds& kBox, float& fT, float& fB0, float& fB1, float& fB2);
-float SqrDistPtBox(const Vec3& kPt, const CenteredPointBounds& kBox, float& fB0, float& fB1, float& fB2);
+float SqrDistPtBox(const LocalVec3& kPt, const CenteredPointBounds& kBox, float& fB0, float& fB1, float& fB2);
 
 // @fnv 0x00ea7530
-bool IntersectsSphereAndBox(float fTime, const BoxBVStub& kBV0, const Vec3& kV0, const SphereBVStub& kBV1,
-                            const Vec3& kV1)
+bool IntersectsSphereAndBox(float fTime, const BoxBVStub& kBV0, const LocalVec3& kV0, const SphereBVStub& kBV1,
+                            const LocalVec3& kV1)
 {
-    Vec3 kDiff = kBV1.m_kBoundingSphere.m_kCenter - kBV0.m_kBoundsBox.m_kCenter;
+    LocalVec3 kDiff = kBV1.m_kBoundingSphere.m_kCenter - kBV0.m_kBoundsBox.m_kCenter;
     if (fabsf(kDiff.Dot(kBV0.m_kBoundsBox.m_akAxes[0])) <= kBV0.m_kBoundsBox.m_afExtents[0] &&
         fabsf(kDiff.Dot(kBV0.m_kBoundsBox.m_akAxes[1])) <= kBV0.m_kBoundsBox.m_afExtents[1] &&
         fabsf(kDiff.Dot(kBV0.m_kBoundsBox.m_akAxes[2])) <= kBV0.m_kBoundsBox.m_afExtents[2])
@@ -1614,14 +1774,16 @@ bool IntersectsSphereAndBox(float fTime, const BoxBVStub& kBV0, const Vec3& kV0,
         return true;
     }
 
-    Vec3 kV = kV1 - kV0;
+    LocalVec3 kV = kV1 - kV0;
     float fT, fB0, fB1, fB2;
     float fSqrDist;
     if (kV != NiPoint3_ZERO)
     {
         SegmentShape kSeg;
-        kSeg.m_kStartPoint = kBV1.m_kBoundingSphere.m_kCenter;
-        kSeg.m_kLightVector = kV * fTime;
+        // Preserve the original trivial copies instead of LocalVec3 float assignment.
+        memcpy(&kSeg.m_kStartPoint, &kBV1.m_kBoundingSphere.m_kCenter, sizeof(LocalVec3));
+        LocalVec3 kLightVector = kV * fTime;
+        memcpy(&kSeg.m_kLightVector, &kLightVector, sizeof(LocalVec3));
         fSqrDist = SqrDistSegBox(kSeg, kBV0.m_kBoundsBox, fT, fB0, fB1, fB2);
     }
     else
@@ -1632,26 +1794,12 @@ bool IntersectsSphereAndBox(float fTime, const BoxBVStub& kBV0, const Vec3& kV0,
 }
 }  // namespace fnv_00ea7530
 
-#include <string.h>
-namespace fnv_00ea08a0 {
-struct NiBoundingVolume
-{
-    NiBoundingVolume();
-};
-
-struct NiBoxBV : NiBoundingVolume
-{
-    NiBoxBV();
-    void FUN_00ea08a0(const NiBoundingVolume& kABV);
-};
-
 // @fnv 0x00ea08a0
-void NiBoxBV::FUN_00ea08a0(const NiBoundingVolume& kABV)
+void NiBoxBV::Copy(const NiBoundingVolume& kABV)
 {
     NiBoxBV* kBBV = this;
     memcpy((char*)kBBV + 4, (const char*)&kABV + 4, 60);
 }
-}  // namespace fnv_00ea08a0
 
 struct NormalVec
 {
@@ -1810,11 +1958,7 @@ struct WorldTransform
     SolPoint translation;
     float scale;
 };
-struct VolumeBase
-{
-    virtual ~VolumeBase();
-};
-struct SolBoxVolume : VolumeBase
+struct SolBoxVolume : NiBoundingVolume
 {
     SolShape m_kBoundsBox;
     const SolPoint& Center() const
@@ -1841,11 +1985,11 @@ struct SolBoxVolume : VolumeBase
     {
         m_kBoundsBox.m_afExtents[index] = value;
     }
-    void TransformFrom(const VolumeBase& source, const WorldTransform& transform);
+    void TransformFrom(const NiBoundingVolume& source, const WorldTransform& transform);
 };
 // Applies a WorldTransform to a source SolBoxVolume, updating this box's center, axes, and extents.
 // @fnv 0x00ea08c0
-void SolBoxVolume::TransformFrom(const VolumeBase& source, const WorldTransform& transform)
+void SolBoxVolume::TransformFrom(const NiBoundingVolume& source, const WorldTransform& transform)
 {
     const SolBoxVolume& input = static_cast<const SolBoxVolume&>(source);
     PutCenter(transform.scale * (transform.rotation * input.Center()) + transform.translation);
@@ -2041,10 +2185,6 @@ struct ReworkGeometry
     ReworkPoint center;
     ReworkPoint axes[3];
     float extents[3];
-};
-struct ReworkVolumeBase
-{
-    void* vtable;
 };
 struct ReworkBox
 {

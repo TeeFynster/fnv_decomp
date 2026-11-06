@@ -2,7 +2,9 @@
 // with declarations corrected to what the original code does (niddsreader_decls.h: NiPixelFormat += bool operator!=(const NiPixelFormat& other) const;). Move the function to its real unit once
 // that unit declares it this way.
 
-#include "niddsreader_decls_decl_niddsreader.h"
+#include "../../../../include/NiBMPReader.h"
+#include "../../../../include/NiImageReader.h"
+#include "../../../../include/NiPixelFormat.h"
 
 struct ReadCtx
 {

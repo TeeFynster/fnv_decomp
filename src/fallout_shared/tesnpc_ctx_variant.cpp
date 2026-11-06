@@ -1,7 +1,45 @@
 
 // tesnpc_ctx_variant.cpp: context variant of src/fallout_shared/tesnpc.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
-#include "tesnpc_pc_decls.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "../../include/Actor.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESRaceForm.h"
+#include "../../include/ActorSkillData.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/SEX.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESNPC.h"
+#include "../../include/TESRace.h"
+#include "../../include/TESHair.h"
+#include "../../include/TESEyes.h"
+#include "../../include/NiNode.h"
+#include "../../include/MiddleHighProcess.h"
+#include "../../include/NiTimeController.h"
+#include "../../include/NiControllerManager.h"
+
+class PlayerCharacter;
+extern PlayerCharacter* g_thePlayer;
+class ActorAnimData
+{
+public:
+    NiControllerManager* FUN_00496940();
+};
+// The shared FaceGenMatrix omits the checked row-element accessor (0x0060b370).
+// This method-only adapter retains that API without duplicating matrix storage.
+struct FaceGenCoordinateValue
+{
+    float* value;
+    unsigned int offset;
+    const float* FUN_00629ab0();
+};
+class FaceGenCoordinateBasis
+{
+public:
+    FaceGenCoordinateValue FUN_0060b370(unsigned int, unsigned int);
+};
 
 class Helper009f8770
 {
@@ -13,11 +51,6 @@ class FUN_00484d40_Host
   public:
     void FUN_00484d40(unsigned int* apFormID, int aiSize);
 };
-class FUN_004ac110_shell
-{
-  public:
-    TESRace* FUN_004ac110();
-};
 class FUN_009611e0_shell
 {
   public:
@@ -28,11 +61,6 @@ class FUN_006141f0_shell
   public:
     void BuildAppearance(TESActorBase* apBase, void* apData, SEX aeSex, bool abFlag);
 };
-class FUN_008b70d0_shell
-{
-  public:
-    Animation* FUN_008b70d0();
-};
 class FUN_004eaf60_shell
 {
   public:
@@ -42,11 +70,6 @@ class FUN_0043c610_shell
 {
   public:
     void RunVirtualMethod28();
-};
-class ActorView
-{
-  public:
-    TESActorBase* GetActorBase();
 };
 class GlobalObject_0040c150
 {
@@ -60,204 +83,6 @@ TESForm* FUN_004839c0(unsigned int auiFormID);
 void FNV_Warning(const char* apFormat, ...);
 void __cdecl FUN_00a6e8e0(NiNode* apNode, NiControllerManager* apManager);
 void __cdecl ApplyFaceGenTextures(NiNode* apNode, void* apData);
-class ActorFace
-{
-  public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual NiNode* GetHeadRootNode(bool);
-    virtual NiNode* GetFaceRootNode(bool);
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void UpdateHead();
-};
-class NodeFace
-{
-  public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void InsertChild(NiAVObject*);
-};
-class ModelFace
-{
-  public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void SetModelFilePath(const char*);
-};
-class NPCModelView
-{
-  public:
-    int pad[0xdc / 4];
-    ModelFace kModel;
-};
 class FaceRefr
 {
   public:
@@ -269,12 +94,6 @@ class PlayerFace
   public:
     void FUN_00950110(bool abFlag);
     void FUN_0094eaf0(NiNode* apNode, bool abFlag);
-};
-class NPCFace
-{
-  public:
-    void FUN_005dd560();
-    void FUN_00606820(Actor* apActor, int aiValue);
 };
 class FUN_005dd590
 {
@@ -296,17 +115,11 @@ class QHeadLocal : public FaceGenPaletteEntry
     void FUN_0043ecb0();
     void FUN_0043ed90(Actor* apActor, int aiValue);
 };
-class MiddleHighProcess : public BaseProcess
-{
-};
-class TESNPCFace : public TESNPC
-{
-  public:
-    void FUN_00609f60(Actor* apActor);
-};
+
+
 
 // @fnv 0x00609f60
-void TESNPCFace::FUN_00609f60(Actor* apActor)
+void TESNPC::FUN_00609f60(Actor* apActor)
 {
     bool bChanged = false;
     for (unsigned int i = 0; i < 2; i++)
@@ -321,9 +134,9 @@ void TESNPCFace::FUN_00609f60(Actor* apActor)
                 {
                     float fValue;
                     ((Helper009f8770*)this)->FUN_00484d00(&fValue, 4);
-                    if (*m_kFaceGenCoordinates[i][j].FUN_0060b370(r, c).FUN_00629ab0() != fValue)
+                    if (*((FaceGenCoordinateBasis*)&m_kFaceGenCoordinates[i][j])->FUN_0060b370(r, c).FUN_00629ab0() != fValue)
                     {
-                        *(float*)m_kFaceGenCoordinates[i][j].FUN_0060b370(r, c).FUN_00629ab0() = fValue;
+                        *(float*)((FaceGenCoordinateBasis*)&m_kFaceGenCoordinates[i][j])->FUN_0060b370(r, c).FUN_00629ab0() = fValue;
                         bChanged = true;
                     }
                 }
@@ -331,7 +144,7 @@ void TESNPCFace::FUN_00609f60(Actor* apActor)
         }
     }
     bool bPrevHadRace = false;
-    if (((FUN_004ac110_shell*)this)->FUN_004ac110())
+    if (FUN_004ac110())
         bPrevHadRace = false;
     else
         FNV_Warning("MODELS: %s has a bad current race when loading facegen", TESFullName::GetFullName());
@@ -344,7 +157,7 @@ void TESNPCFace::FUN_00609f60(Actor* apActor)
         bChanged = true;
     SetFormRace(pRace);
     bool bNowHasRace = false;
-    if (((FUN_004ac110_shell*)this)->FUN_004ac110())
+    if (FUN_004ac110())
         bNowHasRace = false;
     else
         FNV_Warning("MODELS: %s has a bad new race when loading facegen", TESFullName::GetFullName());
@@ -379,7 +192,7 @@ void TESNPCFace::FUN_00609f60(Actor* apActor)
     TESActorBaseData::UpdateFlagBit(1, bLoadedFemale, true);
     if (bChanged)
     {
-        NiAVObject* p3D = apActor->Get3DSimple();
+        NiAVObject* p3D = apActor->TESObjectREFR::Get3DSimple();
         NiNode* pNode = 0;
         if (p3D)
             pNode = p3D->IsSceneNode();
@@ -388,70 +201,71 @@ void TESNPCFace::FUN_00609f60(Actor* apActor)
             if (pNode)
             {
                 NiControllerManager* pAnimManager = 0;
-                if (((FUN_008b70d0_shell*)apActor)->FUN_008b70d0() &&
-                    ((ActorAnimData*)((FUN_008b70d0_shell*)apActor)->FUN_008b70d0())->FUN_00496940())
-                    pAnimManager = ((ActorAnimData*)((FUN_008b70d0_shell*)apActor)->FUN_008b70d0())
+                if (apActor->FUN_008b70d0() &&
+                    ((ActorAnimData*)apActor->FUN_008b70d0())->FUN_00496940())
+                    pAnimManager = (NiControllerManager*)((ActorAnimData*)apActor->FUN_008b70d0())
                                        ->FUN_00496940()
                                        ->GetStringAtOffset();
                 NiControllerManager* pkManager = pAnimManager;
-                NiNode* pFace = ((ActorFace*)apActor)->GetFaceRootNode(false);
+                // TESObjectREFR slots 0x1B0 and 0x1AC return the face and head roots.
+                NiNode* pFace = (NiNode*)apActor->vfn_1b0(false);
                 if (pFace && ((FUN_009611e0_shell*)pFace)->FUN_009611e0())
                 {
                     FUN_00a6e8e0(pFace, pkManager);
-                    ((NodeFace*)((FUN_009611e0_shell*)pFace)->FUN_009611e0())->InsertChild(pFace);
+                    ((NiNode*)((FUN_009611e0_shell*)pFace)->FUN_009611e0())->RemoveObject(pFace);
                 }
-                pFace = ((ActorFace*)apActor)->GetHeadRootNode(false);
+                pFace = (NiNode*)apActor->vfn_1ac(false);
                 if (pFace && ((FUN_009611e0_shell*)pFace)->FUN_009611e0())
                 {
                     FUN_00a6e8e0(pFace, pkManager);
-                    ((NodeFace*)((FUN_009611e0_shell*)pFace)->FUN_009611e0())->InsertChild(pFace);
+                    ((NiNode*)((FUN_009611e0_shell*)pFace)->FUN_009611e0())->RemoveObject(pFace);
                 }
             }
-            ((NPCFace*)this)->FUN_005dd560();
+            ResetFaceGen();
             if (FUN_005d9f90((char*)apActor))
-                ((NPCFace*)this)->FUN_00606820(apActor, FUN_005d9f90((char*)apActor));
-            if (((ActorFace*)apActor)->GetHeadRootNode(false) && ((ActorFace*)apActor)->GetFaceRootNode(false))
+                UpdateBodyModel(apActor, (BipedAnim*)FUN_005d9f90((char*)apActor));
+            if ((NiNode*)apActor->vfn_1ac(false) && (NiNode*)apActor->vfn_1b0(false))
             {
                 FUN_005dd590 kData;
-                ((FUN_006141f0_shell*)GetFormRace())->BuildAppearance(this, &kData, MALE, false);
-                ApplyFaceGenTextures(((ActorFace*)apActor)->GetHeadRootNode(false), &kData);
-                ApplyFaceGenTextures(((ActorFace*)apActor)->GetFaceRootNode(false), &kData);
+                ((FUN_006141f0_shell*)GetFormRace())->BuildAppearance(this, &kData, SEX_SEX_MALE, false);
+                ApplyFaceGenTextures((NiNode*)apActor->vfn_1ac(false), &kData);
+                ApplyFaceGenTextures((NiNode*)apActor->vfn_1b0(false), &kData);
             }
         }
         else
         {
             NiNode* pParent = 0;
-            ((NPCFace*)this)->FUN_005dd560();
+            ResetFaceGen();
             bool bWasFirstPerson = ((FUN_004eaf60_shell*)g_thePlayer)->FUN_004eaf60();
             ((PlayerFace*)g_thePlayer)->FUN_00950110(false);
             if (pNode && bPrevHadRace != bNowHasRace)
             {
-                pParent = (NiNode*)((FUN_009611e0_shell*)apActor->Get3DSimple())->FUN_009611e0();
+                pParent = (NiNode*)((FUN_009611e0_shell*)apActor->TESObjectREFR::Get3DSimple())->FUN_009611e0();
                 ((FaceRefr*)apActor)->Set3D(0, true);
             }
             if (bNowHasRace)
-                ((NPCModelView*)this)->kModel.SetModelFilePath(g_011d2b38.FUN_00403df0());
-            else if (GetSex() == FEMALE)
-                ((NPCModelView*)this)->kModel.SetModelFilePath(g_011d2718.FUN_00403df0());
+                SetModelFilePath(g_011d2b38.FUN_00403df0());
+            else if (TESActorBase::GetSex() == SEX_SEX_FEMALE)
+                SetModelFilePath(g_011d2718.FUN_00403df0());
             else
-                ((NPCModelView*)this)->kModel.SetModelFilePath(g_011d3e44.FUN_00403df0());
+                SetModelFilePath(g_011d3e44.FUN_00403df0());
             if (pParent)
             {
                 DAT_011c5cb4 = true;
                 NiNode* pNew3D = ((FaceRefr*)apActor)->FUN_0087e060(false);
-                if (!((ActorFace*)apActor)->GetFaceRootNode(false) && !((ActorFace*)apActor)->GetHeadRootNode(false))
+                if (!(NiNode*)apActor->vfn_1b0(false) && !(NiNode*)apActor->vfn_1ac(false))
                 {
-                    TESNPC* m_pActorBaseFormItem = (TESNPC*)((ActorView*)apActor)->GetActorBase();
+                    TESNPC* m_pActorBaseFormItem = (TESNPC*)apActor->GetActorBase();
                     QHeadLocal kHead(m_pActorBaseFormItem, 0);
                     kHead.FUN_0043ecb0();
                     ((FUN_0043c610_shell*)&kHead)->RunVirtualMethod28();
                     kHead.FUN_0043ed90(apActor, FUN_005d9f90((char*)apActor));
                 }
-                pParent->AttachChildInAvailableSlot(pNew3D, true);
+                pParent->AttachChildInAvailableSlot((NiAVObject*)pNew3D, true);
                 DAT_011c5cb4 = false;
-                if (apActor == g_thePlayer)
+                if (apActor == (Actor*)g_thePlayer)
                     ((PlayerFace*)g_thePlayer)->FUN_0094eaf0(pNew3D, false);
-                ((ActorFace*)apActor)->UpdateHead();
+                apActor->AnimateNiNode();
                 MiddleHighProcess* pProcess = dynamic_cast<MiddleHighProcess*>(apActor->GetProcess());
                 if (pProcess)
                     pProcess->ApplyProcessLevelChange(apActor);
@@ -462,82 +276,9 @@ void TESNPCFace::FUN_00609f60(Actor* apActor)
 }
 
 struct ElemT;
-struct ObjX;
-struct NiTimeController
-{
-    virtual void z00();
-    virtual void z01();
-    virtual void z02();
-    virtual void z03();
-    virtual void z04();
-    virtual void z05();
-    virtual void z06();
-    virtual void z07();
-    virtual void z08();
-    virtual void z09();
-    virtual void z10();
-    virtual void z11();
-    virtual void z12();
-    virtual void z13();
-    virtual void z14();
-    virtual void z15();
-    virtual void z16();
-    virtual void z17();
-    virtual void z18();
-    virtual void z19();
-    virtual void z20();
-    virtual void z21();
-    virtual void z22();
-    virtual void z23();
-    virtual void z24();
-    virtual void z25();
-    virtual void z26();
-    virtual void z27();
-    virtual void z28();
-    virtual void z29();
-    virtual void z30();
-    virtual void z31();
-    virtual void z32();
-    virtual void z33();
-    virtual void z34();
-    virtual void z35();
-    virtual void z36();
-    virtual void z37();
-    virtual void z38();
-    virtual void z39();
-    virtual void z40();
-    virtual void z41();
-    virtual void z42();
-    virtual void z43();
-    virtual void z44();
-    virtual void z45();
-    virtual void z46();
-    virtual void z47();
-    virtual void z48();
-    virtual void z49();
-    virtual void z50();
-    virtual void z51();
-    virtual void z52();
-    virtual void z53();
-    virtual void z54();
-    virtual void z55();
-    virtual void z56();
-    virtual void z57();
-    virtual void z58();
-    virtual void z59();
-    virtual void z60();
-    virtual void z61();
-    virtual void z62();
-    virtual void v63(int, void*);
-    unsigned int FUN_00441110();
-};
-struct NiFixedString
-{
-    NiFixedString(const char*);
-    ~NiFixedString();
-    operator const char*() const;
-    int f0;
-};
+// The runtime controller subtype provides slot 63; NiTimeController itself
+// does not declare this extension.
+typedef void (__thiscall *SetControllerData)(NiTimeController*, int, void*);
 struct ElemRet;
 struct ListT
 {
@@ -601,10 +342,6 @@ struct ElemT
     virtual PartT* v7();
     NiFixedString& GetName();
 };
-struct NiObjectNET
-{
-    NiTimeController* GetControllers() const;
-};
 struct FUN_00633c90
 {
     FUN_00633c90(int);
@@ -621,13 +358,11 @@ struct FUN_004037b0
     int f0;
     int f4;
 };
-struct NiMemObject
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
+#include "../../include/NiMemObject.h"
+// NiMemObject's operator delete (0x00aa1460) takes the size; the shared header also declares a one-argument form.
 struct FUN_00a6aa40 : NiMemObject
 {
+    static void operator delete(void*, unsigned int);
     FUN_00a6aa40();
     void FUN_005b8fc0(void*);
     void FUN_004f3200(int);
@@ -657,35 +392,20 @@ extern char DAT_0104a64c;
 int __cdecl FUN_00408b20(char const*, char const*);
 void __cdecl FUN_00406f60(void*, const char*, ...);
 void __cdecl FUN_00b57e30(void*, int, int);
-struct ParamSub
-{
-    const char* FUN_00408da0();
-};
-struct ParamT
-{
-    char pad24[0x24];
-    ParamSub sub;
-};
-struct ThisT
-{
-    char pad1c4[0x1c4];
-    FUN_00633c90 holder;
-    void FUN_0060a950(ParamT*);
-};
 // @fnv 0x0060a950
-void ThisT::FUN_0060a950(ParamT* param)
+void TESNPC::FUN_0060a950(TESEyes* param)
 {
     FUN_00633c90 a(0);
     FUN_00633c90 eye(0);
     ElemT* cur;
-    if (holder.FUN_00559450())
+    if (((FUN_00633c90*)&m_pkPrimaryFaceGenNode)->FUN_00559450())
     {
         long count;
-        count = holder.FUN_00559450()->FUN_0043b480();
+        count = ((FUN_00633c90*)&m_pkPrimaryFaceGenNode)->FUN_00559450()->FUN_0043b480();
         unsigned int ptr;
         for (ptr = 0; ptr < count; ptr++)
         {
-            cur = holder.FUN_00559450()->FUN_0043b4a0(ptr);
+            cur = ((FUN_00633c90*)&m_pkPrimaryFaceGenNode)->FUN_00559450()->FUN_0043b4a0(ptr);
             if (FUN_00408b20((const char*)cur->GetName(), &DAT_0104aac0) == 0)
                 a.FUN_0066b0d0(cur->v7());
             if (FUN_00408b20((const char*)cur->GetName(), &DAT_0104aab0) == 0)
@@ -695,7 +415,7 @@ void ThisT::FUN_0060a950(ParamT* param)
         {
             FUN_004037b0 p40;
             if (param)
-                FUN_00406f60(&p40, &DAT_0104a64c, param->sub.FUN_00408da0());
+                FUN_00406f60(&p40, &DAT_0104a64c, param->TESTexture::GetTextureResourceName());
             else
                 FUN_00406f60(&p40, &DAT_0104aa80);
             FUN_00633c90 c(0);
@@ -719,8 +439,8 @@ void ThisT::FUN_0060a950(ParamT* param)
                     found = (!m40 ? 0 : ((int)m40->FUN_00441110() >= 8 && (int)m40->FUN_00441110() <= 12)) ? m40 : 0;
                     if (nw && found)
                     {
-                        nw->v63(0, c.FUN_00559450());
-                        found->v63(0, c.FUN_00559450());
+                        (*reinterpret_cast<SetControllerData**>(nw))[63](nw, 0, c.FUN_00559450());
+                        (*reinterpret_cast<SetControllerData**>(found))[63](found, 0, c.FUN_00559450());
                         return;
                     }
                 }
@@ -737,10 +457,10 @@ void ThisT::FUN_0060a950(ParamT* param)
                 eye.FUN_00559450()->FUN_00439410(p44);
             }
         }
-        cur = holder.FUN_00559450()->v39(NiFixedString(&DAT_0104aac0));
+        cur = ((FUN_00633c90*)&m_pkPrimaryFaceGenNode)->FUN_00559450()->v39(NiFixedString((const char*)&DAT_0104aac0));
         if (cur)
             FUN_00b57e30(cur, 0, 0);
-        cur = holder.FUN_00559450()->v39(NiFixedString(&DAT_0104aab0));
+        cur = ((FUN_00633c90*)&m_pkPrimaryFaceGenNode)->FUN_00559450()->v39(NiFixedString((const char*)&DAT_0104aab0));
         if (cur)
             FUN_00b57e30(cur, 0, 0);
     }

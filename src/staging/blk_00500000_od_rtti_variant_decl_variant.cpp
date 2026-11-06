@@ -8,16 +8,26 @@
 // their real unit once its classes are.
 // src/staging/blk_00500000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/Actor.h"
+#include "../../include/ActorValueOwner.h"
+#include "../../include/BGSImpactData.h"
+#include "../../include/BGSTerrainManager.h"
+#include "../../include/PathingRequest.h"
+#include "../../include/TESObjectMISC.h"
+#include "../../include/BSFaceGenMorphData.h"
+#include "../../include/GO.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint4.h"
+#include "../../include/StrMem.h"
+#include "../../include/Setting.h"
+#include "../../include/TESObject.h"
+#include "../../include/TESObjectREFR.h"
 struct FUN_00505c20_class
 {
     unsigned char GetByteAtOffset9A();
 };
 struct NiNode;
-struct GO
-{
-    void* operator=(void*);
-};
 struct FUN_00507550_Class
 {
     void FUN_00507550(void* p);
@@ -25,10 +35,6 @@ struct FUN_00507550_Class
 struct FUN_00507570_Class
 {
     void FUN_00507570(float value);
-};
-struct FUN_00507610_Class
-{
-    void FUN_00507610(float value);
 };
 struct FUN_005076c0Class
 {
@@ -70,10 +76,6 @@ struct FUN_00508050_Class
 {
     float FUN_00508050();
 };
-struct FUN_00508070_class
-{
-    float FUN_00508070();
-};
 extern "C" void __cdecl _ref_006815c0();
 struct FUN_00509890_class
 {
@@ -101,17 +103,9 @@ struct FUN_00510110_class
     void FUN_005102e0();
     void FUN_00510110();
 };
-struct TESObject
-{
-    void* GetNext();
-};
 struct FUN_00510360_Class
 {
     void* FUN_00510360(TESObject* p);
-};
-struct BGSTerrainManager
-{
-    unsigned int GetMinLevel();
 };
 struct FUN_00510380_Class
 {
@@ -127,7 +121,8 @@ extern "C" int __cdecl _memcmp(const void* s1, const void* s2, unsigned int n);
 void __cdecl FUN_005104b0(const void* s1, const void* s2, unsigned int n);
 extern "C" void* __cdecl FUN_00eca2e0(void* p, int c, size_t n);
 void __cdecl FUN_005104d0(void* p, size_t n, char* c);
-struct ArrSI
+// Exe 0x00515040: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int GetFlags();
     unsigned int HasFlag10000000();
@@ -188,13 +183,6 @@ struct FUN_005010c0_class
 {
     void __thiscall FUN_005010f0();
     void* __thiscall FUN_005010c0(unsigned int flags);
-};
-struct NiPoint4
-{
-    float x;
-    float y;
-    float z;
-    float w;
 };
 struct FUN_00507660_class
 {
@@ -257,21 +245,9 @@ struct FUN_00507690_Class
     NiPoint4 m_0xe4;
     void __thiscall FUN_00507690(NiPoint4 v);
 };
-struct BGSImpactData
-{
-    float FUN_009a9350() const;
-};
-struct PathingRequest
-{
-    float GetActorRadius();
-};
 struct FUN_00508100_shell
 {
     float FUN_00508100();
-};
-struct BSFaceGenMorphData
-{
-    float FUN_00508120();
 };
 struct FUN_00759450_shell
 {
@@ -398,11 +374,6 @@ extern int DAT_010283e8;
 extern int DAT_01028408;
 extern int DAT_0102842c;
 extern int DAT_01028444;
-struct TESObjectMISC
-{
-    TESObjectMISC();
-    ~TESObjectMISC();
-};
 struct SFTX
 {
     void SetFormType(int);
@@ -420,16 +391,9 @@ struct TESObjectREFR_Flags
     void MarkAsModified(int change);
     void __thiscall SetRefFlag40000000(bool set);
 };
-struct Setting_S
-{
-    float* Float();
-};
 struct S_004ed780
 {
     S_004ed780* FUN_004ed780(float value);
-};
-struct GlobalObject_0044f440 : Setting_S
-{
 };
 struct FUN_0050e620_S
 {
@@ -438,26 +402,17 @@ struct FUN_0050e620_S
 struct GlobalObject_0045cf30 : FUN_0050e620_S
 {
 };
-struct S0042fa20
-{
-    void FUN_0045ce80(int value);
-};
-struct GlobalObject_0045cfe0 : S0042fa20
-{
-    int* Int();
-};
 extern unsigned char DAT_011c8fa0;
 extern double _DAT_01012060;
-extern GlobalObject_0044f440 g_011c8fb0;
+extern Setting g_011c8fb0;
 extern GlobalObject_0045cf30 g_011c8ff0;
 extern GlobalObject_0045cf30 g_011c9028;
-extern GlobalObject_0045cfe0 g_011c9054;
+extern Setting g_011c9054;
 extern GlobalObject_0045cf30 g_011c9060;
-extern GlobalObject_0044f440 g_011c906c;
-extern GlobalObject_0045cfe0 g_011c907c;
+extern Setting g_011c906c;
+extern Setting g_011c907c;
 bool __cdecl InitSettingsDefaults();
 struct TESBoundObject;
-struct Actor;
 struct LockExtraData
 {
     void* pVft;
@@ -468,268 +423,6 @@ struct P01RefA
 {
     virtual ~P01RefA();  // the original class is polymorphic (rtti_variants.py)
     LockExtraData* GetLock();
-};
-struct TESObjectREFR : public P01RefA
-{
-    bool __thiscall CanBeUsed(Actor* actor, bool value);
-};
-struct ActorVTable
-{
-    virtual bool V00();
-    virtual bool V01();
-    virtual bool V02();
-    virtual bool V03();
-    virtual bool V04();
-    virtual bool V05();
-    virtual bool V06();
-    virtual bool V07();
-    virtual bool V08();
-    virtual bool V09();
-    virtual bool V10();
-    virtual bool V11();
-    virtual bool V12();
-    virtual bool V13();
-    virtual bool V14();
-    virtual bool V15();
-    virtual bool V16();
-    virtual bool V17();
-    virtual bool V18();
-    virtual bool V19();
-    virtual bool V20();
-    virtual bool V21();
-    virtual bool V22();
-    virtual bool V23();
-    virtual bool V24();
-    virtual bool V25();
-    virtual bool V26();
-    virtual bool V27();
-    virtual bool V28();
-    virtual bool V29();
-    virtual bool V30();
-    virtual bool V31();
-    virtual bool V32();
-    virtual bool V33();
-    virtual bool V34();
-    virtual bool V35();
-    virtual bool V36();
-    virtual bool V37();
-    virtual bool V38();
-    virtual bool V39();
-    virtual bool V40();
-    virtual bool V41();
-    virtual bool V42();
-    virtual bool V43();
-    virtual bool V44();
-    virtual bool V45();
-    virtual bool V46();
-    virtual bool V47();
-    virtual bool V48();
-    virtual bool V49();
-    virtual bool V50();
-    virtual bool V51();
-    virtual bool V52();
-    virtual bool V53();
-    virtual bool V54();
-    virtual bool V55();
-    virtual bool V56();
-    virtual bool V57();
-    virtual bool V58();
-    virtual bool V59();
-    virtual bool V60();
-    virtual bool V61();
-    virtual bool V62();
-    virtual bool V63();
-};
-class ActorValueOwner
-{
-  public:
-    virtual void AVO00();
-    virtual void AVO01();
-    virtual void AVO02();
-    virtual void AVO03();
-    virtual void AVO04();
-    virtual void AVO05();
-    virtual void AVO06();
-    virtual int GetBaseActorValue(ActorValue::Index index);
-};
-struct ActorPad04 : public ActorVTable
-{
-    char pad04[0xa0];
-};
-struct Actor : public ActorPad04, public ActorValueOwner
-{
-    virtual bool ActorCheck();
-    virtual void V65();
-    virtual void V66();
-    virtual void V67();
-    virtual void V68();
-    virtual void V69();
-    virtual void V70();
-    virtual void V71();
-    virtual void V72();
-    virtual void V73();
-    virtual void V74();
-    virtual void V75();
-    virtual void V76();
-    virtual void V77();
-    virtual void V78();
-    virtual void V79();
-    virtual void V80();
-    virtual void V81();
-    virtual void V82();
-    virtual void V83();
-    virtual void V84();
-    virtual void V85();
-    virtual void V86();
-    virtual void V87();
-    virtual void V88();
-    virtual void V89();
-    virtual void V90();
-    virtual void V91();
-    virtual void V92();
-    virtual void V93();
-    virtual void V94();
-    virtual void V95();
-    virtual void V96();
-    virtual void V97();
-    virtual void V98();
-    virtual void V99();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual void V125();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
-    virtual void V144();
-    virtual void V145();
-    virtual void V146();
-    virtual void V147();
-    virtual void V148();
-    virtual void V149();
-    virtual void V150();
-    virtual void V151();
-    virtual void V152();
-    virtual void V153();
-    virtual void V154();
-    virtual void V155();
-    virtual void V156();
-    virtual void V157();
-    virtual void V158();
-    virtual void V159();
-    virtual void V160();
-    virtual void V161();
-    virtual void V162();
-    virtual void V163();
-    virtual void V164();
-    virtual void V165();
-    virtual void V166();
-    virtual void V167();
-    virtual void V168();
-    virtual void V169();
-    virtual void V170();
-    virtual void V171();
-    virtual void V172();
-    virtual void V173();
-    virtual void V174();
-    virtual void V175();
-    virtual void V176();
-    virtual void V177();
-    virtual void V178();
-    virtual void V179();
-    virtual void V180();
-    virtual void V181();
-    virtual void V182();
-    virtual void V183();
-    virtual void V184();
-    virtual void V185();
-    virtual void V186();
-    virtual void V187();
-    virtual void V188();
-    virtual void V189();
-    virtual void V190();
-    virtual void V191();
-    virtual void V192();
-    virtual void V193();
-    virtual void V194();
-    virtual void V195();
-    virtual void V196();
-    virtual void V197();
-    virtual void V198();
-    virtual void V199();
-    virtual void V200();
-    virtual void V201();
-    virtual void V202();
-    virtual void V203();
-    virtual void V204();
-    virtual void V205();
-    virtual void V206();
-    virtual void V207();
-    virtual void V208();
-    virtual void V209();
-    virtual void V210();
-    virtual void V211();
-    virtual void V212();
-    virtual void V213();
-    virtual void V214();
-    virtual void V215();
-    virtual bool CanUseSkillBook();
-    virtual void V217();
-    virtual void V218();
-    virtual void V219();
-    virtual void V220();
-    virtual void V221();
-    virtual void V222();
-    virtual void V223();
-    virtual void V224();
-    virtual void V225();
-    virtual void V226();
-    virtual void V227();
-    virtual void V228();
-    virtual void V229();
-    virtual void V230();
-    virtual void V231();
-    virtual void V232();
-    virtual void ModActorValue(ActorValue::Index index, float amount, int unk);
-    bool FUN_00493bb0();
-    bool __thiscall FUN_00891db0(TESBoundObject* object, int a, int b, int c, int& count);
 };
 extern Actor* g_thePlayer;
 extern TESBoundObject* g_pLockpickItem;
@@ -1402,13 +1095,6 @@ float __cdecl FUN_004e44b0(float v);
 float __cdecl FUN_0040ebd0(float a, float b);
 float __cdecl FUN_00404010(float a, float b);
 float __cdecl FUN_00408840(float v);
-struct NiUpdateData
-{
-    float m_kPointA;
-    bool m_kPointB;
-    int m_iThirdValue;
-    NiUpdateData(float a, bool b, int c);
-};
 struct Obj
 {
     float FUN_004e4600();
@@ -1433,24 +1119,13 @@ struct TimeGlobal
     float FUN_0084d030();
 };
 extern TimeGlobal DAT_011f6394;
-struct SettingObj
-{
-    float* FUN_00403e20();
-};
-extern SettingObj DAT_011c8fcc;
+extern Setting DAT_011c8fcc;
 struct TQ
 {
     void FUN_0087ad50();
 };
 TQ* __stdcall FUN_004537b0(void* p);
 bool __cdecl FUN_008c7aa0();
-struct P3
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    float m_iThirdValue;
-};
 struct Host
 {
     int unk00;
@@ -1499,7 +1174,7 @@ struct Host
     int unkAC;
     int unkB0;
     float m_b4;
-    bool FUN_0050de60(Ptr p1, float* p2, P3* p3);
+    bool FUN_0050de60(Ptr p1, float* p2, NiPoint3* p3);
 };
 struct Region
 {
@@ -1542,25 +1217,9 @@ extern PlayerSelection* selectionPlayer;
 unsigned int DialogueRandom();
 void* FindSelection(void*, Region*, void**);
 
-struct StrMem
-{
-    char* data;
-    unsigned short length, capacity;
-    StrMem();
-    ~StrMem();
-    const char* FUN_00559450() const;
-};
-struct StringSetting552
-{
-    const char* FUN_00403df0();
-};
-struct FloatSetting552
-{
-    float* FUN_00403e20();
-};
-extern StringSetting552 g_011d4ccc;
-extern StringSetting552 g_011d49c0;
-extern FloatSetting552 g_011c9284;
+extern Setting g_011d4ccc;
+extern Setting g_011d49c0;
+extern Setting g_011c9284;
 extern float DAT_010162c0;
 bool FUN_00702360();
 bool QueueUIMessage(const char*, int, const char*, const char*, float, bool);
@@ -1581,7 +1240,7 @@ bool SkillBookEffect552::FUN_00515040(TESObjectREFR* reference)
 {
     bool applied = false;
     Actor* actor2 = dynamic_cast<Actor*>(reference);
-    if (!actor2->CanUseSkillBook())
+    if (!actor2->IsPlayerRef())
         return applied;
     if (actor2->FUN_00493bb0() && !FUN_00702360())
     {
@@ -1591,12 +1250,12 @@ bool SkillBookEffect552::FUN_00515040(TESObjectREFR* reference)
     ActorValue::Index skill2 = FUN_00514fd0();
     if (ActorValue::IsSkill(skill2))
     {
-        if (g_thePlayer->GetBaseActorValue(skill2) < 200)
+        if (g_thePlayer->GetPermanentActorValue(skill2) < 200)
         {
             float amount5 = *g_011c9284.FUN_00403e20();
             StrMem message;
             ApplyPerkModifiers(11, g_thePlayer, &amount5);
-            g_thePlayer->ModActorValue(skill2, amount5, 0);
+            g_thePlayer->ForceActorValue(skill2, amount5, 0);
             FUN_004d5c60(15);
             FUN_00406f60(&message, g_011d49c0.FUN_00403df0(), ActorValue::GetActorValueName(skill2),
                          static_cast<int>(amount5));

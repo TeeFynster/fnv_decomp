@@ -1,17 +1,8 @@
+#include "../../../include/PathingPath.h"
 
 // src/fallout_shared/pathfinding/teleportpath.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/pathfinding/teleportpath.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct PathingPath
-{
-    void Clear();
-    float CalculatePathDistance();
-    void* __vecDelDtor(unsigned int);
-    char Spaces[16];
-    char Doors[16];
-    char Start[12];
-    char End[12];
-};
 typedef char _sizecheck_TeleportPath[sizeof(PathingPath) == 56 ? 1 : -1];
 struct FUN_006f4990_shell : public PathingPath
 {

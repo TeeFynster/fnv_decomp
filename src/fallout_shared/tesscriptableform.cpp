@@ -1,6 +1,17 @@
 // fallout_shared/tesscriptableform.cpp: TESScriptableForm (6 functions)
 
-#include "tesscriptableform_decls.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/Script.h"
+#include "../../include/TESScriptableForm.h"
+#include "../../include/BGSEquipType.h"
+#include "../../include/BGSMessageIcon.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESIcon.h"
+#include "../../include/TESTexture.h"
+#include "../../include/TESWeightForm.h"
+
+TESForm* GetFormByID(unsigned int id);
+int Warning(const char*, ...);
 
 // Resolves the stored script ID to a Script and warns if it cannot be found, then marks the item as initialized.
 // @fnv 0x0048cd90
@@ -44,276 +55,42 @@ void* __fastcall FUN_0048cc50(BaseFormComponent* apComponent)
     return apComponent;
 }
 
-struct BGSMenuIcon;
-struct BGSTextureSet;
-struct BipedAnim;
-struct NiAVObject;
-struct NiPoint3;
-struct TESBoundObject;
-struct TESIcon;
-struct TESModel;
-struct TESModelTextureSwap;
-struct TESObject;
-struct TESFormList;
-struct TESObjectREFR;
-struct FileEntryList;
-struct TESWaterForm;
-struct DistantTreeTextureInfo;
-struct blob12
-{
-    char b[12];
-};
-struct BGSMessageIcon : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save(int);
-    static void LoadMessageIcon(BGSMessageIcon*, TESFile*);
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    TESIcon* GetIcon();
-    char* GetMessageIconTextureName();
-    unsigned int GetMessageIconTextureNameLength();
-    void SetMessageIconTextureName(char*);
-    void* __vecDelDtor(unsigned int);
-    char Icon[12];
-};
-typedef char _sizecheck_BGSMessageIcon[sizeof(BGSMessageIcon) == 16 ? 1 : -1];
-struct TESFullName : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetFullNameLength(TESForm*);
-    unsigned int GetFullNameLength();
-    static char* GetFullName(TESForm*);
-    char* GetFullName();
-    void SetFullName(char*);
-    static void LoadFullNameChunk(TESFullName*, TESFile*);
-    void* GetFullNameString();
-    void* __vecDelDtor(unsigned int);
-    char m_kName[8];
-};
-typedef char _sizecheck_TESFullName[sizeof(TESFullName) == 12 ? 1 : -1];
-struct TESTexture : public BaseFormComponent
-{
-    virtual unsigned int GetTexturePathLength();
-    virtual char* NormalizeTextureFilePath(void*);
-    virtual char* GetRegularTextureFilePath(void*);
-    virtual char* GetTextureResourcePath();
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save(int);
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetTextureNameLength(TESForm*);
-    unsigned int GetTextureNameLength();
-    static char* GetTextureResourceName(TESForm*, TESObjectREFR*);
-    char* GetTextureResourceName();
-    void AssignTextureName(char*);
-    static void NormalizeTextureFilePath(char*, char*);
-    static char* NormalizeTextureFilePath(void*, char*);
-    static char* NormalFileToRegularFile(void*, char*);
-    static void GetRegularTextureFilePath(char*, char*);
-    static char* GetRegularTextureFilePath(void*, char*);
-    static void ConvertTexturePath(char*, char*);
-    static bool IsTextureChunk(int);
-    static void ReadTextureData(TESTexture*, TESFile*);
-    static char* GetMessageIconName(TESForm*, TESObjectREFR*);
-    void* __vecDelDtor(unsigned int);
-    char FullNameComponent[8];
-};
-typedef char _sizecheck_TESTexture[sizeof(TESTexture) == 12 ? 1 : -1];
-struct FUN_0048cc80_shell : public BGSMessageIcon
-{
-    void FUN_0048cc80();
-};
-
 // @fnv 0x0048cc80
-void FUN_0048cc80_shell::FUN_0048cc80()
+void __fastcall FUN_0048cc80(void* pThis)
 {
-    *(int*)((char*)this + 4) = 0;
-    ((char*)this)[8] = 0;
+    static_cast<TESScriptableForm*>(pThis)->m_pFormScript = 0;
+    static_cast<TESScriptableForm*>(pThis)->m_bHasScript = false;
 }
 
 void __cdecl FUN_00485910(unsigned int, unsigned int);
-struct S_0048cca0
-{
-    int field_0;
-    TESForm* field_4;
-    void FUN_0048cca0();
-};
 // @fnv 0x0048cca0
-void S_0048cca0::FUN_0048cca0()
+void TESScriptableForm::FUN_0048cca0()
 {
-    if (field_4)
+    if (m_pFormScript)
     {
-        unsigned int formID = field_4->GetFormID();
+        unsigned int formID = m_pFormScript->GetFormID();
         FUN_00485910(0x49524353, formID);
     }
 }
 
-namespace fnv_0048cce0 {
-struct BGSMenuIcon;
-struct BGSTextureSet;
-struct BipedAnim;
-struct NiAVObject;
-struct NiPoint3;
-struct TESBoundObject;
-struct TESModel;
-struct TESModelTextureSwap;
-struct TESObject;
-struct TESFormList;
-struct TESObjectREFR;
-struct FileEntryList;
-struct TESWaterForm;
-struct DistantTreeTextureInfo;
-struct blob12
-{
-    char b[12];
-};
-struct TESFullName : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetFullNameLength(TESForm*);
-    unsigned int GetFullNameLength();
-    static char* GetFullName(TESForm*);
-    char* GetFullName();
-    void SetFullName(char*);
-    static void LoadFullNameChunk(TESFullName*, TESFile*);
-    void* GetFullNameString();
-    void* __vecDelDtor(unsigned int);
-    char m_kName[8];
-};
-typedef char _sizecheck_TESFullName[sizeof(TESFullName) == 12 ? 1 : -1];
-struct TESTexture : public BaseFormComponent
-{
-    virtual unsigned int GetTexturePathLength();
-    virtual char* NormalizeTextureFilePath(void*);
-    virtual char* GetRegularTextureFilePath(void*);
-    virtual char* GetTextureResourcePath();
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save(int);
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetTextureNameLength(TESForm*);
-    unsigned int GetTextureNameLength();
-    static char* GetTextureResourceName(TESForm*, TESObjectREFR*);
-    char* GetTextureResourceName();
-    void AssignTextureName(char*);
-    static void NormalizeTextureFilePath(char*, char*);
-    static char* NormalizeTextureFilePath(void*, char*);
-    static char* NormalFileToRegularFile(void*, char*);
-    static void GetRegularTextureFilePath(char*, char*);
-    static char* GetRegularTextureFilePath(void*, char*);
-    static void ConvertTexturePath(char*, char*);
-    static bool IsTextureChunk(int);
-    static void ReadTextureData(TESTexture*, TESFile*);
-    static char* GetMessageIconName(TESForm*, TESObjectREFR*);
-    void* __vecDelDtor(unsigned int);
-    char FullNameComponent[8];
-};
-typedef char _sizecheck_TESTexture[sizeof(TESTexture) == 12 ? 1 : -1];
-struct TESIcon : public TESTexture
-{
-    virtual char* GetTextureResourcePath();
-    void* __vecDelDtor(unsigned int);
-};
-typedef char _sizecheck_TESIcon[sizeof(TESIcon) == 12 ? 1 : -1];
-struct BGSMessageIcon : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save(int);
-    static void LoadMessageIcon(BGSMessageIcon*, TESFile*);
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    TESIcon* GetIcon();
-    char* GetMessageIconTextureName();
-    unsigned int GetMessageIconTextureNameLength();
-    void SetMessageIconTextureName(char*);
-    void* __vecDelDtor(unsigned int);
-    TESIcon Icon;
-};
-typedef char _sizecheck_BGSMessageIcon[sizeof(BGSMessageIcon) == 16 ? 1 : -1];
-struct TESWeightForm : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static float GetWeightForForm(TESForm*, bool);
-    float GetWeightForForm();
-    void SetFormWeight(float);
-    void* __vecDelDtor(unsigned int);
-    float fWeight;
-};
-typedef char _sizecheck_TESWeightForm[sizeof(TESWeightForm) == 8 ? 1 : -1];
-struct BGSEquipType : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static int GetEquipType(TESForm*);
-    int GetEquipType();
-    void SetEquipType(int);
-    static BGSMenuIcon* GetEquipTypeIcon(int);
-    static char* GetEquipTypeName(int);
-    static void GenerateDefaultMenuIcons();
-    int m_eEquipType;
-};
-typedef char _sizecheck_BGSEquipType[sizeof(BGSEquipType) == 8 ? 1 : -1];
-struct FUN_0048cce0_shell : public TESScriptableForm
-{
-    void CopyFromScriptableForm(BaseFormComponent*);
-};
-
-struct TESRaceForm
-{
-    void Initialize(unsigned int);
-};
-struct Ref00726070
-{
-    unsigned int _ref_00726070();
-};
-// Casts apCopyFC to TESScriptableForm and, if successful, initializes this TESRaceForm from the copy's referenced form.
+// Copies the referenced script from another scriptable form.
 // @fnv 0x0048cce0
-void FUN_0048cce0_shell::CopyFromScriptableForm(BaseFormComponent* apCopyFC)
+void TESScriptableForm::CopyFromBase(BaseFormComponent* apCopyFC)
 {
     TESScriptableForm* pCopy = dynamic_cast<TESScriptableForm*>(apCopyFC);
     if (!pCopy)
         return;
-    ((TESRaceForm*)this)->Initialize(((Ref00726070*)pCopy)->_ref_00726070());
+    Initialize((unsigned int)pCopy->FUN_00726070());
 }
-}  // namespace fnv_0048cce0
 
-struct Helper_00726070
-{
-    unsigned int _ref_00726070();
-};
-struct Holder_0048cd30
-{
-    bool FUN_0048cd30(BaseFormComponent*);
-};
-// Casts a to TESScriptableForm and returns true if the cast fails or the two objects' _ref_00726070 values differ, false otherwise.
+// Returns true if the component is not scriptable or references a different script.
 // @fnv 0x0048cd30
-bool Holder_0048cd30::FUN_0048cd30(BaseFormComponent* apComponent)
+bool TESScriptableForm::CompareWithBase(BaseFormComponent* apComponent)
 {
     TESScriptableForm* b = dynamic_cast<TESScriptableForm*>(apComponent);
     if (!b)
         return true;
-    if (reinterpret_cast<Helper_00726070*>(this)->_ref_00726070() !=
-        reinterpret_cast<Helper_00726070*>(b)->_ref_00726070())
+    if (FUN_00726070() != b->FUN_00726070())
         return true;
     return false;
 }

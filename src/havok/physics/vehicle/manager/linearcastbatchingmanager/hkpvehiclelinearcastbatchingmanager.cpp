@@ -3,6 +3,8 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include "havok/hkpVehicleLinearCastBatchingManager.h"
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkMonitorStream.h"
 
 struct FUN_00e42fe0
 {
@@ -109,21 +111,6 @@ extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 
 extern DWORD DAT_0126835c;
 
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
-
-struct ProfBuf
-{
-    DWORD unk00;
-    ProfRec* m_pCur;
-    DWORD unk08;
-    ProfRec* m_pRecordEnd;
-};
-
 struct AllocV;
 struct CharacterBufferState
 {
@@ -228,29 +215,29 @@ struct Vehicle433
 
 static __forceinline void S00e43320_timerB(const char* name, volatile DWORD& tick)
 {
-    ProfBuf* pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    ProfRec* pRec = pBuf->m_pCur;
-    if (pRec < pBuf->m_pRecordEnd)
+    hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+    if (reinterpret_cast<char*>(pRec) < pBuf->m_capacityMinus16.m_storage)
     {
-        pRec->m_pName = name;
+        pRec->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         tick = (DWORD)__rdtsc();
-        pRec->m_iTick = tick;
-        pBuf->m_pCur = pRec + 1;
+        pRec->m_time0 = tick;
+        pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
     }
 }
 
 static __forceinline void S00e43320_timer(const char* name)
 {
-    ProfBuf* pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    ProfRec* pRec = pBuf->m_pCur;
-    if (pRec < pBuf->m_pRecordEnd)
+    hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+    if (reinterpret_cast<char*>(pRec) < pBuf->m_capacityMinus16.m_storage)
     {
-        pRec->m_pName = name;
+        pRec->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         volatile DWORD tick = (DWORD)__rdtsc();
-        pRec->m_iTick = tick;
-        pBuf->m_pCur = pRec + 1;
+        pRec->m_time0 = tick;
+        pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
     }
 }
 
@@ -284,15 +271,15 @@ void S00e43320_Mgr::FUN_00e43320(void* param1, void* param2, void* param3)
 {
     int i;
     {
-        ProfBuf* pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-        ProfRec* pRec = pBuf->m_pCur;
-        if (pRec < pBuf->m_pRecordEnd)
+        hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+        if (reinterpret_cast<char*>(pRec) < pBuf->m_capacityMinus16.m_storage)
         {
-            pRec->m_pName = "TtDoVehicles";
+            pRec->m_commandAndMonitor = "TtDoVehicles";
             _ReadWriteBarrier();
             *(volatile unsigned*)&i = (unsigned)__rdtsc();
-            pRec->m_iTick = *(volatile unsigned*)&i;
-            pBuf->m_pCur = pRec + 1;
+            pRec->m_time0 = *(volatile unsigned*)&i;
+            pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
         }
     }
     Out433 out;

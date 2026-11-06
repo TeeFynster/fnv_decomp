@@ -1,12 +1,6 @@
-// fallout/ai/combat/combatstate_decls.h: declares InventoryChanges, CombatLocations, CombatLOS, CombatPrefix, CombatState
-class TESObjectREFR;
-class TESForm;
-class InventoryChanges
-{
-  public:
-    static InventoryChanges* GetOrAddInventoryChanges(TESObjectREFR*);
-    int GetObjectCount(TESForm*);
-};
+#include "../../../../include/InventoryChanges.h"
+#include "../../../../include/CombatState.h"
+// fallout/ai/combat/combatstate_decls.h: declares CombatLocations, CombatLOS and combat globals
 class CombatLocations
 {
   public:
@@ -18,24 +12,6 @@ class CombatLOS
     bool FUN_00884920();
     void FUN_008be220(CombatLocations*);
 };
-class CombatPrefix
-{
-  public:
-    virtual void PrefixSlot();
-    char pad04[0x64];
-    CombatLOS* los;
-    char pad6c[0x3c];
-};
-class CombatState : public CombatPrefix, public CombatLocations
-{
-  public:
-    int GetInventoryItemCount(TESForm*);
-    void ProcessCoverLOSResult();
-    char padac[0xd0];
-    float timer, offsetX, offsetY;
-    void UpdateCombatStateData(int, float*, float*, float);
-};
-
 class GlobalObject_0044f440
 {
   public:

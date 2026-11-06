@@ -1,8 +1,113 @@
+#include "../../include/ProcessLists.h"
 
 // src/staging/blk_008c0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include <stddef.h>
+#include "../../include/TopicInfoArray.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include <string.h>
+#pragma intrinsic(memcpy)
+
+#include "../../include/ActorPackageContext.h"
+#include "../../include/ActorValueOwner.h"
+#include "../../include/ArrowProjectile.h"
+#include "../../include/BSFaceGenMorphData.h"
+#include "../../include/BSMultiBound.h"
+#include "../../include/BSMultiBoundShape.h"
+#include "../../include/BSMultiBoundSphere.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/CachedValuesOwner.h"
+#include "../../include/CountingSemaphore.h"
+#include "../../include/MagicCaster.h"
+#include "../../include/MagicTarget.h"
+#include "../../include/MobileObject.h"
+#include "../../include/NiCamera.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/TES.h"
+#include "../../include/TESChildCell.h"
+#include "../../include/TESEnchantableForm.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESHealthForm.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESTopicInfo.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/hkpMouseSpringAction.h"
+#include "../../include/Actor.h"
+#include "../../include/ActorValue.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/BGSAcousticSpace.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/BSMultiBoundNode.h"
+#include "../../include/NiNode.h"
+#include "../../include/GO.h"
+#include "../../include/HighProcess.h"
+#include "../../include/NiTimeController.h"
+#include "../../include/PathingRequest.h"
+// ActorValueUtility_blk_008c0000_od: local type (was include/ActorValueUtility.h, which had no evidence of one real class); its methods are 0x00648b50 GamePlayFormulas::GetRequiredExperiencePoints
+class ActorValueUtility_blk_008c0000_od
+{
+public:
+    static int __cdecl ConvertActorValue(int);
+};
+// PathActor_blk_008c0000_od: local type (was include/PathActor.h, which had no evidence of one real class); its methods are 0x00575d70 TESObjectREFR::GetWorldSpace, 0x0057b0a0 TESObjectREFR::GetRelevantWaterHeight, 0x005c3420 PathingLocation::GetLocation, 0x006dd6a0 PathingLocation::HasNavMeshData
+#include "../../include/NiPoint3.h"
+
+class PathingRequest;
+class PathPoint_blk_008c0000_od;
+
+class PathActor_blk_008c0000_od
+{
+public:
+    int Exists();
+    void Stop(int);
+    void Prepare(int aiFlag);
+    bool IsDone();
+    NiPoint3 GetPosition();
+    bool IsWithinProcThreshold();
+    bool FUN_008b3bb0();
+    float FUN_0057b0a0();
+    void* FUN_00575d70();
+    void* FUN_008d6f30();
+    void PathToLocation(PathingRequest*, PathPoint_blk_008c0000_od*, void*, void*, float, int);
+    void SetPathingRequestAvoidNodes(PathingRequest*);
+    void FUN_008b3ab0();
+    void UpdatePathing(PathActor_blk_008c0000_od* actor);
+};
+// PathPoint_blk_008c0000_od: local type (was include/PathPoint.h, which had no evidence of one real class); its methods are 0x004941c0 NiPoint3::operator/=, 0x00595c80 NiPoint3::SqrXYLength
+#include "../../include/NiPoint3.h"
+
+class PathPoint_blk_008c0000_od
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    PathPoint_blk_008c0000_od();
+    PathPoint_blk_008c0000_od(float, float, float);
+
+    PathPoint_blk_008c0000_od operator+(const PathPoint_blk_008c0000_od& pt) const;
+    PathPoint_blk_008c0000_od operator*(float fScalar) const;
+    void ScaleByInverse(float);
+    float GetSquaredXYLength();
+    NiPoint3 FUN_006a6eb0();
+};
+
+class TESSound;
+
+// ABI bridges for operations absent from the shared declarations.
+// Call sites select the original thiscall convention without recreating the classes.
+float __cdecl FUN_00508120(BSFaceGenMorphData*);
+void __cdecl FUN_0046a010(TESObjectREFR*, int);
+unsigned int __cdecl FUN_00726070(TESEnchantableForm*);
+
+bool __cdecl NiPointerEquals(const NiPointer<NiNode>*, NiNode*);
+BGSPerk*& __cdecl GetPerkListItem(BSSimpleList<BGSPerk*>*);
 
 struct FUN_008c1be0_Class
 {
@@ -15,21 +120,14 @@ unsigned int __thiscall FUN_008c1be0_Class::FUN_008c1be0(unsigned int mask)
     return *reinterpret_cast<unsigned int*>(this) & mask;
 }
 
-extern int DAT_01084fec;
-struct AX
-{
-    void FUN_006b3eb0(unsigned int, unsigned int);
-};
-struct PAVActor
-{
-    AX* __thiscall FUN_008c1c00();
-};
+template <>
+BSSimpleArray<Actor*, 1024>::~BSSimpleArray();
+
 // @fnv 0x008c1c00
-AX* __thiscall PAVActor::FUN_008c1c00()
+template <>
+BSSimpleArray<Actor*, 1024>::BSSimpleArray()
 {
-    *reinterpret_cast<int*>(this) = (int)&DAT_01084fec;
-    ((AX*)this)->FUN_006b3eb0(0, 0);
-    return (AX*)this;
+    FUN_006b3eb0(0, false);
 }
 
 struct BooleanFloatQuery
@@ -76,23 +174,10 @@ int FUN_008c5000_shell::IsNonZero(int arg)
     return FUN_008c5000(arg) != 0;
 }
 
-struct ActorPackageContext
-{
-    void Clear();
-};
-
-void ActorPackageContext::Clear()
-{}
-
-struct FUN_008c6c80_Class
-{
-    void __thiscall FUN_008c6c80(int a);
-};
-
 // @fnv 0x008c6c80
-void __thiscall FUN_008c6c80_Class::FUN_008c6c80(int a)
+void ActorPackageContext::Revert(BGSLoadFormBuffer* buffer)
 {
-    reinterpret_cast<ActorPackageContext*>(this)->Clear();
+    Clear();
 }
 
 extern int DAT_01085864;
@@ -359,10 +444,6 @@ void __thiscall FUN_008d5660_class::ForwardToInner(int aiValue)
     ((FUN_008d5660_class*)*(void**)this)->SaveToBuffer(aiValue);
 }
 
-struct ActorValueUtility
-{
-    static int __cdecl ConvertActorValue(int);
-};
 
 struct FUN_008d5720
 {
@@ -375,7 +456,7 @@ struct FUN_008d5720
 void __thiscall FUN_008d5720::Init(int)
 {
     bFlag = 0;
-    nValue = ActorValueUtility::ConvertActorValue(2);
+    nValue = ActorValueUtility_blk_008c0000_od::ConvertActorValue(2);
 }
 
 struct TaskQueueInterface
@@ -460,21 +541,6 @@ FUN_008ca800_Class* __thiscall FUN_008ca800_Class::FUN_008ca800()
 }
 
 extern "C" void __cdecl _Deallocate(void*);
-struct FUN_008c1c80_Class
-{
-    void __thiscall FUN_008c1cb0();
-    void* __thiscall FUN_008c1c80(unsigned int flags);
-};
-// Calls FUN_008c1cb0, then deallocates this if flags has bit 0 set, and returns this.
-// @fnv 0x008c1c80
-void* FUN_008c1c80_Class::FUN_008c1c80(unsigned int flags)
-{
-    FUN_008c1cb0();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
 struct FUN_008c4f90_Class
 {
     void __thiscall FUN_008c4f90(int arg);
@@ -492,14 +558,12 @@ void __thiscall FUN_008c4f90_Class::FUN_008c4f90(int arg)
     }
 }
 
-struct ScriptLocalsX
+// 0x004ae750 is a null-safe reference-target accessor, used here to retrieve a spring action, not script locals.
+struct SpringActionHandle
 {
-    void* GetLocalData();
+    void* GetAction();
 };
-struct hkpMouseSpringAction
-{
-    void ApplySpringForce(void*);
-};
+
 struct FUN_008c5df0_Class
 {
     void FUN_008c5df0(void* arg);
@@ -507,7 +571,7 @@ struct FUN_008c5df0_Class
 // @fnv 0x008c5df0
 void FUN_008c5df0_Class::FUN_008c5df0(void* arg)
 {
-    void* p = ((ScriptLocalsX*)this)->GetLocalData();
+    void* p = ((SpringActionHandle*)this)->GetAction();
     if (p)
         ((hkpMouseSpringAction*)p)->ApplySpringForce(arg);
 }
@@ -638,15 +702,7 @@ struct B006815c0
 {
     B006815c0();
 };
-struct TESObjectREFR
-{
-    void FUN_0046a010(int);
-};
-struct HighProcess
-{
-    HighProcess();
-    char pad[0x46c];
-};
+
 extern int DAT_01085948;
 extern int DAT_01085954;
 extern int DAT_011dfc98;
@@ -661,7 +717,7 @@ FUN_008cab20::FUN_008cab20()
     *(void**)this = &DAT_01085954;
     *(void**)((char*)this + 0x18) = &DAT_01085948;
     ((B006815c0*)((char*)this + 0xb4))->B006815c0::B006815c0();
-    ((TESObjectREFR*)this)->FUN_0046a010(1);
+    reinterpret_cast<void (__thiscall*)(TESObjectREFR*, int)>(FUN_0046a010)((TESObjectREFR*)this, 1);
     *(HighProcess**)((char*)this + 0x68) = new HighProcess;
     *(int*)((char*)this + 0x88) = 0;
     *((char*)this + 0xc0) = 0;
@@ -775,10 +831,6 @@ FUN_008d1d30::FUN_008d1d30() : FUN_0087d4a0(true)
     *(char*)(this + 0x144) = 0;
 }
 
-struct BGSSaveFormBuffer
-{
-    void __thiscall SaveData(void* data, int size, int flag);
-};
 struct FUN_008d56c0_class
 {
     void __thiscall SaveToBuffer(int a);
@@ -791,10 +843,6 @@ void __thiscall FUN_008d56c0_class::SaveToBuffer(int pBuffer)
     ((BGSSaveFormBuffer*)pBuffer)->SaveData((char*)this + 4, 4, 0);
 }
 
-struct BGSLoadFormBuffer
-{
-    void __thiscall ReadTypedData(void* data, unsigned int size);
-};
 struct FUN_008d56f0_Class
 {
     void __thiscall FUN_008d56f0(BGSLoadFormBuffer* buffer);
@@ -803,8 +851,8 @@ struct FUN_008d56f0_Class
 // @fnv 0x008d56f0
 void __thiscall FUN_008d56f0_Class::FUN_008d56f0(BGSLoadFormBuffer* buffer)
 {
-    buffer->ReadTypedData(this, 1);
-    buffer->ReadTypedData((char*)this + 4, 4);
+    buffer->ReadTypedData(this, 1u);
+    buffer->ReadTypedData((void*)((char*)this + 4), 4u);
 }
 
 unsigned int __cdecl gm_GetTickCount();
@@ -826,22 +874,7 @@ void __thiscall FUN_008d6000_Class::InitTiming(unsigned int a, unsigned int b)
     m_iThirdValue = gm_GetTickCount() + 0x708;
 }
 
-struct NiNode
-{
-    int x;
-};
-struct NiFrustum
-{
-    int x;
-};
-struct NiCamera
-{
-    const NiFrustum& GetViewFrustum() const;
-};
-struct MagicCaster
-{
-    void SetSelectedMagicItem(int);
-};
+
 struct S694a0
 {
     void FUN_00a694a0(void*);
@@ -850,10 +883,7 @@ struct FUN_008d6bb0_shell
 {
     void CreateMultiBoundNode(int);
 };
-struct ProcessLists
-{
-    void ProcessMobileObjects(void*);
-};
+
 extern ProcessLists DAT_011e0e80;
 
 struct FUN_008d6f50_Class
@@ -864,7 +894,7 @@ struct FUN_008d6f50_Class
 // @fnv 0x008d6f50
 void FUN_008d6f50_Class::FUN_008d6f50(int pCamera)
 {
-    if (((NiPointer<NiNode>*)((char*)this + 0xa0))->operator==(0))
+    if (reinterpret_cast<bool (__thiscall*)(const NiPointer<NiNode>*, NiNode*)>(NiPointerEquals)((NiPointer<NiNode>*)((char*)this + 0xa0), 0))
     {
         ((FUN_008d6bb0_shell*)this)->CreateMultiBoundNode(pCamera);
     }
@@ -932,10 +962,6 @@ void __cdecl FUN_008d68d0()
     }
 }
 
-struct NiTimeController
-{
-    NiTimeController* GetNext() const;
-};
 struct Model
 {
     NiTimeController* GetObject3D();
@@ -1014,18 +1040,7 @@ void* FUN_008d10e0_Class::FUN_008d10e0(int aiArg, int aiValue)
     return this;
 }
 
-struct TESTopicInfo
-{
-    TESSound* GetConversationData();
-};
-struct BGSAcousticSpace
-{
-    void SetNoonSound(TESSound*);
-};
-struct BSFaceGenMorphData
-{
-    float FUN_00508120();
-};
+
 struct FUN_00929240_Class
 {
     void FUN_00929240(float);
@@ -1041,9 +1056,9 @@ struct FUN_008d17d0_Class
 // @fnv 0x008d17d0
 void FUN_008d17d0_Class::FUN_008d17d0(BGSAcousticSpace* dst, void* arg)
 {
-    dst->SetNoonSound(reinterpret_cast<TESTopicInfo*>(this)->GetConversationData());
+    dst->SetNoonSound(reinterpret_cast<TESSound*>(reinterpret_cast<TESTopicInfo*>(this)->GetConversationData()));
     reinterpret_cast<FUN_00929240_Class*>(dst)->FUN_00929240(
-        reinterpret_cast<BSFaceGenMorphData*>(this)->FUN_00508120());
+        reinterpret_cast<float (__thiscall*)(BSFaceGenMorphData*)>(FUN_00508120)(reinterpret_cast<BSFaceGenMorphData*>(this)));
     reinterpret_cast<CloneableObj*>(this)->FUN_00a6cfe0(reinterpret_cast<CloneableObj*>(dst), arg);
 }
 
@@ -1065,20 +1080,11 @@ FUN_008c1c30_Class* FUN_008c1c30_Class::FUN_008c1c30(FUN_0087adf0_shell* pObject
     return this;
 }
 
-struct BSSimpleArrayActor
-{
-    void Clear(bool);
-};
-struct FUN_008c1cb0_Class
-{
-    void* m_iWordAt00;
-    void FUN_008c1cb0();
-};
 // @fnv 0x008c1cb0
-void FUN_008c1cb0_Class::FUN_008c1cb0()
+template <>
+BSSimpleArray<Actor*, 1024>::~BSSimpleArray()
 {
-    m_iWordAt00 = &DAT_01084fec;
-    ((BSSimpleArrayActor*)this)->Clear(true);
+    Clear(true);
 }
 
 struct FUN_008c45a0_Result
@@ -1333,12 +1339,6 @@ struct FUN_008c45a0_Result
     virtual void FUN_008c45a0(unsigned char arg);
 };
 
-struct TES
-{
-    void* GetLogDate();
-    void FUN_008c45a0(unsigned char arg);
-};
-
 // If GetLogDate() returns non-null, forwards arg to the virtual FUN_008c45a0 method on that object.
 // @fnv 0x008c45a0
 void TES::FUN_008c45a0(unsigned char aucValue)
@@ -1349,21 +1349,10 @@ void TES::FUN_008c45a0(unsigned char aucValue)
     }
 }
 
-struct CountingSemaphore
-{
-    CountingSemaphore(int, int);
-};
-
-struct FUN_008c7250_Class
-{
-    FUN_008c7250_Class* __thiscall FUN_008c7250();
-};
-
 // @fnv 0x008c7250
-FUN_008c7250_Class* __thiscall FUN_008c7250_Class::FUN_008c7250()
+CountingSemaphore::CountingSemaphore()
 {
-    ((CountingSemaphore*)this)->CountingSemaphore::CountingSemaphore(0, 0x14);
-    return this;
+    this->CountingSemaphore::CountingSemaphore(0, 0x14);
 }
 
 struct FUN_008c7270 : GlobalObject_0078d3b0
@@ -1412,7 +1401,8 @@ void FUN_008ca770_Class::FUN_008ca770(Date** ppDate)
 
 int __cdecl FUN_0043b460(long volatile*, long, long);
 
-struct Interface
+// Exe 0x008ca8d0: unit-local Interface view; declarations and layout are preserved.
+struct BlkInterfaceView
 {
     static void __cdecl PrintDebugMessage();
 };
@@ -1432,11 +1422,11 @@ void __thiscall FUN_008ca8d0_Class::FUN_008ca8d0(int* arg)
     {
         if (FUN_0043b460(&m_iWordAt04, 0, 1) == 0)
         {
-            Interface::PrintDebugMessage();
+            BlkInterfaceView::PrintDebugMessage();
             *reinterpret_cast<int*>(*arg + 0xc) = m_8;
             m_8 = *arg;
             *arg = 0;
-            Interface::PrintDebugMessage();
+            BlkInterfaceView::PrintDebugMessage();
             FUN_0043b460(&m_iWordAt04, 1, 0);
             break;
         }
@@ -1468,17 +1458,13 @@ struct FUN_008cc6f0_Class
 // @fnv 0x008cc6f0
 void* FUN_008cc6f0_Class::FUN_008cc6f0()
 {
-    ((BSSimpleList<BGSPerk*>*)((char*)this + 4))->GetItem();
-    ((BSSimpleList<BGSPerk*>*)((char*)this + 0x10))->GetItem();
-    ((BSSimpleList<BGSPerk*>*)((char*)this + 0x1c))->GetItem();
-    ((BSSimpleList<BGSPerk*>*)((char*)this + 0x30))->GetItem();
+    reinterpret_cast<BGSPerk*& (__thiscall*)(BSSimpleList<BGSPerk*>*)>(GetPerkListItem)((BSSimpleList<BGSPerk*>*)((char*)this + 4));
+    reinterpret_cast<BGSPerk*& (__thiscall*)(BSSimpleList<BGSPerk*>*)>(GetPerkListItem)((BSSimpleList<BGSPerk*>*)((char*)this + 0x10));
+    reinterpret_cast<BGSPerk*& (__thiscall*)(BSSimpleList<BGSPerk*>*)>(GetPerkListItem)((BSSimpleList<BGSPerk*>*)((char*)this + 0x1c));
+    reinterpret_cast<BGSPerk*& (__thiscall*)(BSSimpleList<BGSPerk*>*)>(GetPerkListItem)((BSSimpleList<BGSPerk*>*)((char*)this + 0x30));
     return this;
 }
 
-struct GO
-{
-    operator unsigned int() const;
-};
 
 struct FUN_008d3f40_Class
 {
@@ -1565,289 +1551,19 @@ void __thiscall FUN_008d56a0_Class::FUN_008d56a0(int value)
     ((FUN_008d5720*)*(void**)this)->Init(value);
 }
 
-class BaseProcess8C4
+// Process slot 0x3D4 is SetMagicTarget; Actor.h lacks this override, so the bridge adds only its declaration.
+class MagicTargetForwarder : public Actor
 {
   public:
-    virtual void unkv000();
-    virtual void unkv004();
-    virtual void unkv008();
-    virtual void unkv00C();
-    virtual void unkv010();
-    virtual void unkv014();
-    virtual void unkv018();
-    virtual void unkv01C();
-    virtual void unkv020();
-    virtual void unkv024();
-    virtual void unkv028();
-    virtual void unkv02C();
-    virtual void unkv030();
-    virtual void unkv034();
-    virtual void unkv038();
-    virtual void unkv03C();
-    virtual void unkv040();
-    virtual void unkv044();
-    virtual void unkv048();
-    virtual void unkv04C();
-    virtual void unkv050();
-    virtual void unkv054();
-    virtual void unkv058();
-    virtual void unkv05C();
-    virtual void unkv060();
-    virtual void unkv064();
-    virtual void unkv068();
-    virtual void unkv06C();
-    virtual void unkv070();
-    virtual void unkv074();
-    virtual void unkv078();
-    virtual void unkv07C();
-    virtual void unkv080();
-    virtual void unkv084();
-    virtual void unkv088();
-    virtual void unkv08C();
-    virtual void unkv090();
-    virtual void unkv094();
-    virtual void unkv098();
-    virtual void unkv09C();
-    virtual void unkv0A0();
-    virtual void unkv0A4();
-    virtual void unkv0A8();
-    virtual void unkv0AC();
-    virtual void unkv0B0();
-    virtual void unkv0B4();
-    virtual void unkv0B8();
-    virtual void unkv0BC();
-    virtual void unkv0C0();
-    virtual void unkv0C4();
-    virtual void unkv0C8();
-    virtual void unkv0CC();
-    virtual void unkv0D0();
-    virtual void unkv0D4();
-    virtual void unkv0D8();
-    virtual void unkv0DC();
-    virtual void unkv0E0();
-    virtual void unkv0E4();
-    virtual void unkv0E8();
-    virtual void unkv0EC();
-    virtual void unkv0F0();
-    virtual void unkv0F4();
-    virtual void unkv0F8();
-    virtual void unkv0FC();
-    virtual void unkv100();
-    virtual void unkv104();
-    virtual void unkv108();
-    virtual void unkv10C();
-    virtual void unkv110();
-    virtual void unkv114();
-    virtual void unkv118();
-    virtual void unkv11C();
-    virtual void unkv120();
-    virtual void unkv124();
-    virtual void unkv128();
-    virtual void unkv12C();
-    virtual void unkv130();
-    virtual void unkv134();
-    virtual void unkv138();
-    virtual void unkv13C();
-    virtual void unkv140();
-    virtual void unkv144();
-    virtual void unkv148();
-    virtual void unkv14C();
-    virtual void unkv150();
-    virtual void unkv154();
-    virtual void unkv158();
-    virtual void unkv15C();
-    virtual void unkv160();
-    virtual void unkv164();
-    virtual void unkv168();
-    virtual void unkv16C();
-    virtual void unkv170();
-    virtual void unkv174();
-    virtual void unkv178();
-    virtual void unkv17C();
-    virtual void unkv180();
-    virtual void unkv184();
-    virtual void unkv188();
-    virtual void unkv18C();
-    virtual void unkv190();
-    virtual void unkv194();
-    virtual void unkv198();
-    virtual void unkv19C();
-    virtual void unkv1A0();
-    virtual void unkv1A4();
-    virtual void unkv1A8();
-    virtual void unkv1AC();
-    virtual void unkv1B0();
-    virtual void unkv1B4();
-    virtual void unkv1B8();
-    virtual void unkv1BC();
-    virtual void unkv1C0();
-    virtual void unkv1C4();
-    virtual void unkv1C8();
-    virtual void unkv1CC();
-    virtual void unkv1D0();
-    virtual void unkv1D4();
-    virtual void unkv1D8();
-    virtual void unkv1DC();
-    virtual void unkv1E0();
-    virtual void unkv1E4();
-    virtual void unkv1E8();
-    virtual void unkv1EC();
-    virtual void unkv1F0();
-    virtual void unkv1F4();
-    virtual void unkv1F8();
-    virtual void unkv1FC();
-    virtual void unkv200();
-    virtual void unkv204();
-    virtual void unkv208();
-    virtual void unkv20C();
-    virtual void unkv210();
-    virtual void unkv214();
-    virtual void unkv218();
-    virtual void unkv21C();
-    virtual void unkv220();
-    virtual void unkv224();
-    virtual void unkv228();
-    virtual void unkv22C();
-    virtual void unkv230();
-    virtual void unkv234();
-    virtual void unkv238();
-    virtual void unkv23C();
-    virtual void unkv240();
-    virtual void unkv244();
-    virtual void unkv248();
-    virtual void unkv24C();
-    virtual void unkv250();
-    virtual void unkv254();
-    virtual void unkv258();
-    virtual void unkv25C();
-    virtual void unkv260();
-    virtual void unkv264();
-    virtual void unkv268();
-    virtual void unkv26C();
-    virtual void unkv270();
-    virtual void unkv274();
-    virtual void unkv278();
-    virtual void unkv27C();
-    virtual void unkv280();
-    virtual void unkv284();
-    virtual void unkv288();
-    virtual void unkv28C();
-    virtual void unkv290();
-    virtual void unkv294();
-    virtual void unkv298();
-    virtual void unkv29C();
-    virtual void unkv2A0();
-    virtual void unkv2A4();
-    virtual void unkv2A8();
-    virtual void unkv2AC();
-    virtual void unkv2B0();
-    virtual void unkv2B4();
-    virtual void unkv2B8();
-    virtual void unkv2BC();
-    virtual void unkv2C0();
-    virtual void unkv2C4();
-    virtual void unkv2C8();
-    virtual void unkv2CC();
-    virtual void unkv2D0();
-    virtual void unkv2D4();
-    virtual void unkv2D8();
-    virtual void unkv2DC();
-    virtual void unkv2E0();
-    virtual void unkv2E4();
-    virtual void unkv2E8();
-    virtual void unkv2EC();
-    virtual void unkv2F0();
-    virtual void unkv2F4();
-    virtual void unkv2F8();
-    virtual void unkv2FC();
-    virtual void unkv300();
-    virtual void unkv304();
-    virtual void unkv308();
-    virtual void unkv30C();
-    virtual void unkv310();
-    virtual void unkv314();
-    virtual void unkv318();
-    virtual void unkv31C();
-    virtual void unkv320();
-    virtual void unkv324();
-    virtual void unkv328();
-    virtual void unkv32C();
-    virtual void unkv330();
-    virtual void unkv334();
-    virtual void unkv338();
-    virtual void unkv33C();
-    virtual void unkv340();
-    virtual void unkv344();
-    virtual void unkv348();
-    virtual void unkv34C();
-    virtual void unkv350();
-    virtual void unkv354();
-    virtual void unkv358();
-    virtual void unkv35C();
-    virtual void unkv360();
-    virtual void unkv364();
-    virtual void unkv368();
-    virtual void unkv36C();
-    virtual void unkv370();
-    virtual void unkv374();
-    virtual void unkv378();
-    virtual void unkv37C();
-    virtual void unkv380();
-    virtual void unkv384();
-    virtual void unkv388();
-    virtual void unkv38C();
-    virtual void unkv390();
-    virtual void unkv394();
-    virtual void unkv398();
-    virtual void unkv39C();
-    virtual void unkv3A0();
-    virtual void unkv3A4();
-    virtual void unkv3A8();
-    virtual void unkv3AC();
-    virtual void unkv3B0();
-    virtual void unkv3B4();
-    virtual void unkv3B8();
-    virtual void unkv3BC();
-    virtual void unkv3C0();
-    virtual void unkv3C4();
-    virtual void unkv3C8();
-    virtual void unkv3CC();
-    virtual void unkv3D0();
-    virtual void SetValue(int iValue);
+    virtual void SetMagicTarget(MagicTarget* target);
 };
 
-class TESObjectREFR8C4
-{
-  public:
-    virtual ~TESObjectREFR8C4();
-
-    int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20;
-    int unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40;
-    int unk44, unk48, unk4C, unk50, unk54, unk58, unk5C, unk60;
-    int unk64, unk68, unk6C, unk70, unk74, unk78, unk7C, unk80;
-    int unk84;
-};
-
-class ActorValueOwner8C4
-{
-  public:
-    virtual void unkv00();
-    virtual void FUN_008c4510(int iValue);
-};
-
-class Actor8C4 : public TESObjectREFR8C4, public ActorValueOwner8C4
-{
-  public:
-    BaseProcess8C4* GetProcess();
-    virtual void FUN_008c4510(int iValue);
-};
-
-// Forwards iValue to the actor's process via SetValue when GetProcess() returns a process.
+// Forwards the magic target to the actor's process when one exists.
 // @fnv 0x008c4510
-void Actor8C4::FUN_008c4510(int iValue)
+void MagicTargetForwarder::SetMagicTarget(MagicTarget* target)
 {
     if (GetProcess())
-        GetProcess()->SetValue(iValue);
+        GetProcess()->SetMagicTarget(target);
 }
 
 extern int DAT_011c3580;
@@ -3673,49 +3389,15 @@ float __cdecl FUN_008d1d00()
     return DAT_011dfed8;
 }
 
-class ThreeByThreeMatrix
-{
-  public:
-    float m00;
-    float m01;
-    float m02;
-    float m10;
-    float m11;
-    float m12;
-    float m20;
-    float m21;
-    float m22;
-    ThreeByThreeMatrix Inverse() const;
-    ThreeByThreeMatrix operator*(const ThreeByThreeMatrix& rhs) const;
-};
-
-struct NiUpdateData
-{
-    float fTime;
-    bool m_bUpdateEnabled;
-    bool bIsMultiThreaded;
-    bool unk06;
-    bool unk07;
-    bool unk08;
-    NiUpdateData(float time, bool updateControllers, bool multiThreaded);
-};
-
 struct AnimTimeSource
 {
     float GetSourceTimeStub();
 };
 
-struct NiAVObject
-{
-    AnimTimeSource* GetObject3D();
-    void Update(NiUpdateData& data);
-    const ThreeByThreeMatrix& GetLocalRotateStub();
-};
-
-extern ThreeByThreeMatrix DAT_011a9448;
+extern NiMatrix3 DAT_011a9448;
 
 // @fnv 0x008d6970
-int ComputeRelativeRotation(int index, float time, ThreeByThreeMatrix* pOutRotate)
+int ComputeRelativeRotation(int index, float time, NiMatrix3* pOutRotate)
 {
     if (!DAT_011e0110[index] || !DAT_011e00e0[index])
     {
@@ -3729,10 +3411,12 @@ int ComputeRelativeRotation(int index, float time, ThreeByThreeMatrix* pOutRotat
         NiUpdateData data3(sourceTime, true, false);
         ((NiAVObject*)DAT_011e0110[index])->Update(data3);
     }
-    ThreeByThreeMatrix rotate5 = ((NiAVObject*)DAT_011e0110[index])->GetLocalRotateStub();
+    // Preserve the original raw matrix copy without invoking the shared copy constructor.
+    float rotate5[sizeof(NiMatrix3) / sizeof(float)];
+    *reinterpret_cast<NiMatrix3*>(rotate5) = ((NiAVObject*)DAT_011e0110[index])->GetLocalRotateStub();
     NiUpdateData update2(time, true, false);
     ((NiAVObject*)DAT_011e0110[index])->Update(update2);
-    *pOutRotate = rotate5.Inverse() * ((NiAVObject*)DAT_011e0110[index])->GetLocalRotateStub();
+    *pOutRotate = reinterpret_cast<const NiMatrix3*>(rotate5)->Inverse() * ((NiAVObject*)DAT_011e0110[index])->GetLocalRotateStub();
     return DAT_011e00e0[index];
 }
 
@@ -3804,211 +3488,9 @@ FUN_008d6af0_cls::~FUN_008d6af0_cls()
     m_98.Reset(0);
 }
 
-struct PathPoint
-{
-    float x, y, z;
-};
-class PathingRequest
-{
-  public:
-    PathingRequest();
-    virtual ~PathingRequest();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-
-    void SetSmoothingRandomness(float);
-    void SetByteAtA1(int);
-};
 extern const float DAT_010181e8;
-struct PathActor
-{
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void slot25();
-    virtual void slot26();
-    virtual void slot27();
-    virtual void slot28();
-    virtual void slot29();
-    virtual void slot30();
-    virtual void slot31();
-    virtual void slot32();
-    virtual void slot33();
-    virtual void slot34();
-    virtual void slot35();
-    virtual void slot36();
-    virtual void slot37();
-    virtual void slot38();
-    virtual void slot39();
-    virtual void slot40();
-    virtual void slot41();
-    virtual void slot42();
-    virtual void slot43();
-    virtual void slot44();
-    virtual void slot45();
-    virtual void slot46();
-    virtual void slot47();
-    virtual void slot48();
-    virtual void slot49();
-    virtual void slot50();
-    virtual void slot51();
-    virtual void slot52();
-    virtual void slot53();
-    virtual void slot54();
-    virtual void slot55();
-    virtual void slot56();
-    virtual void slot57();
-    virtual void slot58();
-    virtual void slot59();
-    virtual void slot60();
-    virtual void slot61();
-    virtual void slot62();
-    virtual void slot63();
-    virtual void slot64();
-    virtual void slot65();
-    virtual void slot66();
-    virtual void slot67();
-    virtual void slot68();
-    virtual void slot69();
-    virtual void slot70();
-    virtual void slot71();
-    virtual void slot72();
-    virtual void slot73();
-    virtual void slot74();
-    virtual void slot75();
-    virtual void slot76();
-    virtual void slot77();
-    virtual void slot78();
-    virtual void slot79();
-    virtual void slot80();
-    virtual void slot81();
-    virtual void slot82();
-    virtual void slot83();
-    virtual void slot84();
-    virtual void slot85();
-    virtual void slot86();
-    virtual void slot87();
-    virtual void slot88();
-    virtual void slot89();
-    virtual void slot90();
-    virtual void slot91();
-    virtual void slot92();
-    virtual void slot93();
-    virtual void slot94();
-    virtual void slot95();
-    virtual void slot96();
-    virtual void slot97();
-    virtual void slot98();
-    virtual void slot99();
-    virtual void slot100();
-    virtual void slot101();
-    virtual void slot102();
-    virtual void slot103();
-    virtual void slot104();
-    virtual void slot105();
-    virtual void slot106();
-    virtual void slot107();
-    virtual void slot108();
-    virtual void slot109();
-    virtual void slot110();
-    virtual void slot111();
-    virtual void slot112();
-    virtual void slot113();
-    virtual void slot114();
-    virtual void slot115();
-    virtual void slot116();
-    virtual void slot117();
-    virtual void slot118();
-    virtual void slot119();
-    virtual void slot120();
-    virtual void slot121();
-    virtual void slot122();
-    virtual void slot123();
-    virtual void slot124();
-    virtual PathPoint* Position();
-    virtual void slot126();
-    virtual void slot127();
-    virtual void slot128();
-    virtual void slot129();
-    virtual void slot130();
-    virtual void slot131();
-    virtual void slot132();
-    virtual int state();
-    bool IsWithinProcThreshold();
-    bool FUN_008b3bb0();
-    float FUN_0057b0a0();
-    void* FUN_00575d70();
-    void* FUN_008d6f30();
-    void PathToLocation(PathingRequest*, PathPoint*, void*, void*, float, int);
-    void SetPathingRequestAvoidNodes(PathingRequest*);
-    void FUN_008b3ab0();
-    void UpdatePathing(PathActor* actor);
-};
 // @fnv 0x008df060
-void PathActor::UpdatePathing(PathActor* actor)
+void PathActor_blk_008c0000_od::UpdatePathing(PathActor_blk_008c0000_od* actor)
 {
     if (actor)
     {
@@ -4017,7 +3499,7 @@ void PathActor::UpdatePathing(PathActor* actor)
             if (actor->FUN_008b3bb0())
             {
                 float smoothing = DAT_010181e8;
-                PathPoint position4 = *actor->Position();
+                PathPoint_blk_008c0000_od position4 = *reinterpret_cast<PathPoint_blk_008c0000_od*>(reinterpret_cast<const TESObjectREFR*>(actor)->GetPos());
                 position4.z = actor->FUN_0057b0a0() + smoothing;
                 PathingRequest request;
                 actor->PathToLocation(&request, &position4, actor->FUN_008d6f30(), actor->FUN_00575d70(), smoothing, 0);
@@ -4028,7 +3510,7 @@ void PathActor::UpdatePathing(PathActor* actor)
         }
         else
         {
-            state();
+            reinterpret_cast<TESObjectREFR*>(this)->GetSitSleepState();
             actor->FUN_008b3ab0();
         }
     }
@@ -4418,183 +3900,24 @@ struct ArrowImpact
 {
     int type;
 };
-struct ArrowProjectile
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual ArrowRenderer* GetRenderer();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    ArrowImpact* impact;
-    int unk8c;
-    bool HandleType0(ArrowWorldObj* obj);
-    bool HandleType1(ArrowWorldObj* obj);
-    bool HandleType2(ArrowWorldObj* obj);
-    bool HandleType3(ArrowWorldObj* obj);
-    bool HandleType4(ArrowWorldObj* obj);
-    bool ProcessImpact();
-};
+
 // @fnv 0x008cd210
 bool ArrowProjectile::ProcessImpact()
 {
+    // Impact storage is not yet named in the shared declaration (0x88 and 0x8c).
     bool bResult = false;
-    if (impact == 0)
+    if ((*reinterpret_cast<ArrowImpact**>(reinterpret_cast<char*>(this) + 0x88)) == 0)
         return bResult;
-    ArrowCollision* info = GetRenderer() ? FUN_004b5260(GetRenderer()) : 0;
+    ArrowCollision* info = GetNiNode() ? FUN_004b5260(reinterpret_cast<ArrowRenderer*>(GetNiNode())) : 0;
     if (info == 0)
     {
         FNV_Warning("AI: No collision data was found on this arrow");
-        delete impact;
-        impact = 0;
+        delete (*reinterpret_cast<ArrowImpact**>(reinterpret_cast<char*>(this) + 0x88));
+        (*reinterpret_cast<ArrowImpact**>(reinterpret_cast<char*>(this) + 0x88)) = 0;
         return bResult;
     }
     ArrowWorldObj* obj = info->FUN_006fa820();
-    switch (impact->type)
+    switch ((*reinterpret_cast<ArrowImpact**>(reinterpret_cast<char*>(this) + 0x88))->type)
     {
     case 0:
         bResult = HandleType0(obj);
@@ -4614,26 +3937,16 @@ bool ArrowProjectile::ProcessImpact()
     }
     if (!bResult)
     {
-        if (impact)
+        if ((*reinterpret_cast<ArrowImpact**>(reinterpret_cast<char*>(this) + 0x88)))
         {
-            delete impact;
-            impact = 0;
+            delete (*reinterpret_cast<ArrowImpact**>(reinterpret_cast<char*>(this) + 0x88));
+            (*reinterpret_cast<ArrowImpact**>(reinterpret_cast<char*>(this) + 0x88)) = 0;
         }
-        unk8c = 0;
+        (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x8c)) = 0;
     }
     return bResult;
 }
 
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-    NiPoint3(float, float, float);
-    float DotProduct(const NiPoint3&);
-    NiPoint3 operator-(const NiPoint3&) const;
-    NiPoint3& operator+=(const NiPoint3&);
-};
 struct RotationMatrix
 {
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
@@ -4941,85 +4254,7 @@ bool MovementController::UpdateAnimation(AnimationOutput* output)
     return true;
 }
 
-struct NiRefObjectStub
-{
-    void IncRefCount();
-    void DecRefCount();
-    static void* operator new(unsigned int size);
-};
 
-struct BSMultiBoundShape : NiRefObjectStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    BSMultiBoundShape();
-};
-
-struct BSMultiBound : NiRefObjectStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    BSMultiBound();
-    void SetShape(BSMultiBoundShape* shape);
-};
-
-struct BSMultiBoundNode : NiRefObjectStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    BSMultiBoundNode();
-    void SetMultiBound(BSMultiBound* bound);
-};
 
 struct SceneArg
 {
@@ -5085,7 +4320,7 @@ void FUN_008d6bb0_owner::CreateMultiBoundNode(SceneArg* arg)
 {
     holder.SetArg(arg);
     holder.SetData(arg->GetData());
-    pShape = new BSMultiBoundShape;
+    pShape = new BSMultiBoundSphere;
     pMultiBound = new BSMultiBound;
     m_pController = new BSMultiBoundNode;
     pMultiBound->SetShape(pShape);
@@ -5304,30 +4539,9 @@ int FUN_008d5830(unsigned int uiType)
 
 }
 
-class RefrBase5e30
-{
-  public:
-    virtual ~RefrBase5e30();
-    int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20;
-    int unk24, unk28, unk2C, unk30, unk34, unk38, unk3C, unk40;
-    int unk44, unk48, unk4C, unk50, unk54, unk58, unk5C, unk60;
-    int unk64, unk68, unk6C, unk70, unk74, unk78, unk7C, unk80;
-    int unk84, unk88, unk8C, unk90, unk94, unk98, unk9C, unkA0;
-};
-class AVOwner5e30
-{
-  public:
-    virtual void v00();
-    virtual float GetBaseActorValue(int av);
-    virtual void v08();
-    virtual float GetActorValue(int av);
-};
-class Actor5e30 : public RefrBase5e30, public AVOwner5e30
-{
-};
 struct HealthCond5e30
 {
-    Actor5e30* pActor;
+    Actor* pActor;
     int iType;
     bool IsHealthConditionMet();
 };
@@ -5353,8 +4567,8 @@ bool HealthCond5e30::IsHealthConditionMet()
         return false;
         break;
     case 5: {
-        float fCurrentValue = pActor->GetActorValue(16);
-        float fBaseValue = pActor->GetBaseActorValue(16);
+        float fCurrentValue = pActor->GetCurrentActorValue(ActorValue::ActorValue__Index_HEALTH);
+        float fBaseValue = pActor->GetBaseActorValueFloat(ActorValue::ActorValue__Index_HEALTH);
         float fHealthRatio = 1.0f;
         if (fBaseValue != 0.0)
             fHealthRatio = fCurrentValue / fBaseValue;
@@ -5364,8 +4578,8 @@ bool HealthCond5e30::IsHealthConditionMet()
     }
     break;
     case 4: {
-        float fCurrentValue = pActor->GetActorValue(16);
-        float fBaseValue = pActor->GetBaseActorValue(16);
+        float fCurrentValue = pActor->GetCurrentActorValue(ActorValue::ActorValue__Index_HEALTH);
+        float fBaseValue = pActor->GetBaseActorValueFloat(ActorValue::ActorValue__Index_HEALTH);
         float fHealthRatio = 1.0f;
         if (fBaseValue != 0.0)
             fHealthRatio = fCurrentValue / fBaseValue;
@@ -5377,7 +4591,7 @@ bool HealthCond5e30::IsHealthConditionMet()
     case 6:
         for (int i = 25; i < 31; i++)
         {
-            if (pActor->GetActorValue(i) == 0.0)
+            if (pActor->GetCurrentActorValue(static_cast<ActorValue::Index>(i)) == 0.0)
                 return true;
         }
         return false;
@@ -5387,11 +4601,6 @@ bool HealthCond5e30::IsHealthConditionMet()
 }
 
 extern float DAT_01087820;
-
-struct Vec3
-{
-    float x, y, z;
-};
 
 struct FloatHolder
 {
@@ -5404,7 +4613,7 @@ struct FUN_008d6fc0_cls
     int f00;
     int f04;
     int f08;
-    Vec3 f0c;
+    NiPoint3 f0c;
     FloatHolder f18;
     char f1c;
     char f1d;
@@ -5428,98 +4637,11 @@ void FUN_008d6fc0_cls::FUN_008d6fc0(const FUN_008d6fc0_cls& rhs)
     f1f = rhs.f1f;
     if (rhs.f18.FUN_006a7f50() > -DAT_01087820)
     {
-        f0c = rhs.f0c;
+        memcpy(&f0c, &rhs.f0c, sizeof(f0c));
         f18 = rhs.f18;
     }
 }
 
-class BaseFormComponent
-{
-  public:
-    virtual ~BaseFormComponent();
-};
-class TESForm : public BaseFormComponent
-{
-  public:
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-};
-class TESChildCell
-{
-  public:
-    virtual ~TESChildCell();
-};
-class CreatureRefr : public TESForm, public TESChildCell
-{
-  public:
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-};
-class MobileObject : public CreatureRefr
-{
-  public:
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-};
-class CreatureCaster
-{
-  public:
-    virtual ~CreatureCaster();
-    unsigned int unk04, unk08;
-    void SetSelectedMagicItem(int);
-};
-class MagicTarget
-{
-  public:
-    virtual ~MagicTarget();
-    unsigned int unk04, unk08, unk0c;
-};
-class ActorValueOwner
-{
-  public:
-    virtual ~ActorValueOwner();
-};
-class CachedValuesOwner
-{
-  public:
-    virtual ~CachedValuesOwner();
-};
-class Actor : public MobileObject,
-              public CreatureCaster,
-              public MagicTarget,
-              public ActorValueOwner,
-              public CachedValuesOwner
-{
-  public:
-    virtual ~Actor();
-    bool FUN_004077c0();
-};
 class FUN_008d45f0 : public Actor
 {
   public:
@@ -5557,12 +4679,6 @@ class AttachedArrowProcesses
 {
   public:
     AttachedArrowTimer* FUN_00717e50();
-};
-class TopicInfoArray
-{
-  public:
-    unsigned FUN_005be5c0(int);
-    Actor* FUN_00968670(unsigned);
 };
 // Removes up to maximum ArrowProjectiles matching owner, target and filter: the first pass deletes or calls FUN_008cc6d0(3), the second pass always deletes.
 // @fnv 0x008ce180
@@ -5606,25 +4722,6 @@ void FUN_008ce180(void* target, int maximum, int owner, bool destroy, bool filte
 
 struct FUN_008c2630_Obj;
 
-class TESBoundObject
-{
-  public:
-    virtual void v0();
-    int FUN_00401170();
-};
-
-class TESHealthForm : public TESBoundObject
-{
-  public:
-    virtual void h0();
-    unsigned int FUN_00726070();
-};
-
-class TESEnchantableForm : public TESHealthForm
-{
-  public:
-    virtual void w0();
-};
 
 struct FUN_008c2630_Obj
 {
@@ -5653,7 +4750,7 @@ void FUN_008c2630_Owner::FUN_008c2630(TESBoundObject* apForm, int a2)
         return;
     }
     TESEnchantableForm* r6 = dynamic_cast<TESEnchantableForm*>(apForm);
-    FUN_008c2630_Obj* p2 = r6 ? (FUN_008c2630_Obj*)r6->FUN_00726070() : 0;
+    FUN_008c2630_Obj* p2 = r6 ? (FUN_008c2630_Obj*)reinterpret_cast<unsigned int (__thiscall*)(TESEnchantableForm*)>(FUN_00726070)(r6) : 0;
     if (p2)
     {
         m_88.v5(p2 ? (char*)p2 + 0x18 : 0, apForm, 0);

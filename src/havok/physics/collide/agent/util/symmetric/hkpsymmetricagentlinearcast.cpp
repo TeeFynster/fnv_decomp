@@ -2,6 +2,8 @@
 // src/havok/physics/collide/agent/util/symmetric/hkpsymmetricagentlinearcast.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/util/symmetric/hkpsymmetricagentlinearcast.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkVector4.h"
+
 struct FUN_00d2dbe0;
 struct Callback
 {
@@ -56,25 +58,37 @@ unsigned char Wrapper::ForwardAndSyncState(void* first, void* second)
 
 #include <xmmintrin.h>
 extern const __m128 DAT_010c4c00;
-struct S_00da7070_Vec4
+
+__forceinline __m128& hkVector4::q()
 {
-    float x;
-    float y;
-    float z;
-    float w;
-    __m128& q()
-    {
-        return reinterpret_cast<__m128&>(*this);
-    }
-    const __m128& q() const
-    {
-        return reinterpret_cast<const __m128&>(*this);
-    }
-};
+    return m_vComponents;
+}
+
+__forceinline const __m128& hkVector4::q() const
+{
+    return m_vComponents;
+}
+
+__forceinline void hkVector4::setBroadcast3(const hkVector4& vector)
+{
+    __m128 t = _mm_shuffle_ps(vector.m_vComponents, vector.m_vComponents, 0xff);
+    m_vComponents = _mm_shuffle_ps(t, t, 0);
+}
+
+__forceinline void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b, const hkVector4& c)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(b.m_vComponents, c.m_vComponents));
+}
+
+__forceinline void hkVector4::setNeg3(const hkVector4& vector)
+{
+    m_vComponents = _mm_xor_ps(vector.m_vComponents, DAT_010c4c00);
+}
+
 struct S_00da7070_CdPoint
 {
-    S_00da7070_Vec4 m_vContactPosition;
-    S_00da7070_Vec4 m_vSeparatingNormal;
+    hkVector4 m_vContactPosition;
+    hkVector4 m_vSeparatingNormal;
     const void* m_pBodyA;
     const void* m_pBodyB;
 };
@@ -104,68 +118,6 @@ void S_00da7070::AddFlippedCdPoint(const S_00da7070_CdPoint& p)
 }
 
 namespace fnv_00da70e0 {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int32 m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_xor_ps(__m128, __m128);
-
-extern const __m128 DAT_010c4c00;
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-    __forceinline hkVector4& operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
-    __forceinline void setBroadcast3(const hkVector4& v)
-    {
-        __m128 t = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
-        m_vComponents = _mm_shuffle_ps(t, t, 0);
-    }
-    __forceinline void mul4(const hkVector4& v)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void add4(const hkVector4& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void setNeg4(const hkVector4& v)
-    {
-        m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c4c00);
-    }
-    __forceinline void setMul4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setAdd4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setAddMul4(const hkVector4& a, const hkVector4& b, const hkVector4& r)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(b.m_vComponents, r.m_vComponents));
-    }
-    __forceinline void setNeg3(const hkVector4& v)
-    {
-        m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c4c00);
-    }
-    __forceinline void neg4()
-    {
-        m_vComponents = _mm_xor_ps(m_vComponents, DAT_010c4c00);
-    }
-};
-
 struct VecDispatch
 {
     virtual void v00();

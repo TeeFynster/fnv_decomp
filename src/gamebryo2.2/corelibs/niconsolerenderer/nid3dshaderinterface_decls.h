@@ -1,25 +1,14 @@
 #ifndef NID3DSHADERINTERFACE_DECLS_H
 #define NID3DSHADERINTERFACE_DECLS_H
 
-class NiRenderer
-{
-  public:
-    static NiRenderer* ms_pRenderer;
-    char _pdbpad_1[7];
-    char m_spAccum_pad7_pad7[4];
-    void* m_pCamera;
-    void* m_pActiveRenderTargetGroup;
-    char m_acRendererDataB[4];
-    char _pdbpad_18[104];
-    char m_acRendererDataC[128];
-    char m_acRendererDataD[128];
-    char m_acRendererDataE[128];
-    int m_iRendererState;
-    unsigned int m_uiRendererFlags;
-    bool m_bRendererFlagA;
-    bool m_bRendererFlagB;
-    char _pdbpad_20a[118];
-};
+#include "../../../../include/NiD3DDefaultShader.h"
+#include "../../../../include/NiD3DPass.h"
+#include "../../../../include/NiD3DShaderFactory.h"
+#include "../../../../include/NiD3DShaderInterface.h"
+#include "../../../../include/NiShader.h"
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiRenderer.h"
+
 class ShaderPassRenderer
 {
   public:
@@ -102,81 +91,15 @@ class GraphicsRenderer
     unsigned char pad28c[0x8b8 - 0x28c];
     Direct3DDeviceInterface* m_pD3DDevice;
 };
-class NiShader
-{
-  public:
-    void** vtable;
-    unsigned char pad[16];
-    bool Initialize();
-};
-class NiD3DShaderInterface : public NiShader
-{
-  public:
-    ShaderPassRenderer* m_pRenderState;
-    GraphicsRenderer* m_pShaderObject;
-    Direct3DDeviceInterface* m_pD3DDevice;
-    bool Initialize();
-    void SetShaderObject(GraphicsRenderer*);
-    static unsigned int InitializeShaderRenderer(GraphicsRenderer*);
-};
 void FUN_00e7f920(GraphicsRenderer*);
 void FUN_00e7e8d0(GraphicsRenderer*);
 void FUN_00e92f70(GraphicsRenderer*);
 void FUN_00e93f50(GraphicsRenderer*);
-class NiD3DPass
-{
-  public:
-    static void SetActiveRenderer(void*);
-};
-class NiD3DDefaultShader
-{
-  public:
-    static void SetShaderName(const char*);
-};
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int) throw();
-};
 class Program : public NiMemObject
 {
   public:
     unsigned char data[28];
     Program* FUN_00e93ad0();
-};
-class NiD3DShaderFactory
-{
-  public:
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual void vfn_8();
-    virtual void vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70(GraphicsRenderer*);
-    static NiD3DShaderFactory* GetShaderFactory();
 };
 extern Direct3DDeviceInterface* DAT_0126f99c;
 extern Program* DAT_0126fa10;

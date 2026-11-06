@@ -75,14 +75,7 @@ class FUN_00d3e2b0_cls
     unsigned short m_w0c;
     void FUN_00d3e2b0(int a1);
 };
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pAllocator;
-};
+#include "../../../../../../../include/hkMemoryRouter.h"
 struct ObjAllocator
 {
     virtual void unk00();
@@ -97,7 +90,7 @@ struct SmallRecord
     unsigned short m_w0C;
 };
 extern char DAT_010cf018[];
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 void __cdecl FUN_00d3e2f0(int a, int b, int c, int d);
 void __cdecl FUN_00d3e330(int a, int b, int c, int d);
 void __stdcall FUN_00d3e510(int a, int b, int c, int d);

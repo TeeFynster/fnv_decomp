@@ -102,26 +102,26 @@ template class BSSimpleList<InventoryStackRecord*>;
 
 #include "bssimplelist_packet.h"
 // @fnv 0x00413f40
-BSSimpleList<TESTopic*>* TESTopicInfoData::GetLinkToList() { return &topics; }
+BSSimpleList<TESTopic*>* TESTopicInfoData::GetLinkToList() { return &m_kLinkToList; }
 // @fnv 0x00500940
-PerkEntryConditionSet* BGSCameraPath::GetConditions() { return reinterpret_cast<PerkEntryConditionSet*>(reinterpret_cast<char*>(this)+24); }
+PerkEntryConditionSet* BGSCameraPath::GetConditions() { return &Conditions; }
 // @fnv 0x00891170
-BSSimpleList<BGSCameraShot*>* BGSCameraPath::GetShotList() { return reinterpret_cast<BSSimpleList<BGSCameraShot*>*>(reinterpret_cast<char*>(this)+32); }
+BSSimpleList<BGSCameraShot*>* BGSCameraPath::GetShotList() { return &m_kCameraShotList; }
 // @fnv 0x005a7be0
 QuantityData::QuantityData() { SetQuantity(0); }
 // @fnv 0x00519550
-void TESObjectDOOR::ClearRandomTeleportList() { reinterpret_cast<BSSimpleList<ActorCause*>*>(reinterpret_cast<char*>(this)+136)->RemoveAll(); }
+void TESObjectDOOR::ClearRandomTeleportList() { reinterpret_cast<BSSimpleList<ActorCause*>*>(&m_kRandomTeleportTargets)->RemoveAll(); }
 // @fnv 0x00944460
 unsigned int GetRandomNumberInRange(int min, int max) { return MersenneTwister::GetRandomGenerator()->IntInRange(min,max); }
 // @fnv 0x005e7790
-void BGSHeadPart::AddExtraPart(BGSHeadPart* part) { reinterpret_cast<BSSimpleList<SpellItem*>*>(reinterpret_cast<char*>(this)+72)->AddHead(reinterpret_cast<SpellItem*&>(part)); }
+void BGSHeadPart::AddExtraPart(BGSHeadPart* part) { reinterpret_cast<BSSimpleList<SpellItem*>*>(&m_kExtraParts)->AddHead(reinterpret_cast<SpellItem*&>(part)); }
 // @fnv 0x004b0680
-BSSimpleList<TESWeather::WeatherSound*>::BSSimpleList(TESWeather::WeatherSound* item, BSSimpleList* next) : m_item(item),m_pkNext(next) {}
+template <> BSSimpleList<TESWeather::WeatherSound*>::BSSimpleList(TESWeather::WeatherSound* item, BSSimpleList* next) : m_item(item),m_pkNext(next) {}
 // @fnv 0x00501170
-void BGSTerminal::AddMenuItem(TerminalMenuItem* item) { if(item) reinterpret_cast<BSSimpleList<ScriptVariableInfo*>*>(reinterpret_cast<char*>(this)+152)->AddTail(reinterpret_cast<ScriptVariableInfo* const&>(item)); }
+void BGSTerminal::AddMenuItem(TerminalMenuItem* item) { if(item) reinterpret_cast<BSSimpleList<ScriptVariableInfo*>*>(&m_kMenuItems)->AddTail(reinterpret_cast<ScriptVariableInfo* const&>(item)); }
 
 // @fnv 0x006130e0
-BSSimpleList<TESClass*>* TESDataHandler::GetTESClassList() { return reinterpret_cast<BSSimpleList<TESClass*>*>(reinterpret_cast<char*>(this)+128); }
+BSSimpleList<TESClass*>* TESDataHandler::GetTESClassList() { return reinterpret_cast<BSSimpleList<TESClass*>*>(listClasses); }
 
 // @fnv 0x00500a20
 void InterfaceManager::FUN_00500a20(Tile* tile) { *reinterpret_cast<Tile**>(reinterpret_cast<char*>(this)+160) = tile; }

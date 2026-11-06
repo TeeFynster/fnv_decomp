@@ -1,3 +1,7 @@
+#include "../../../../../../include/ContactArray289.h"
+#include "../../../../../../include/hkpAllCdPointCollector.h"
+#include "../../../../../../include/hkpCdPointCollector.h"
+
 
 // src/havok/physics/utilities/charactercontrol/characterproxy/hkpcharacterproxy_gs_nogs_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/physics/utilities/charactercontrol/characterproxy/hkpcharacterproxy.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -521,88 +525,6 @@ struct FUN_00cada70_cls
 
     FUN_00cada70_cls* Construct(void* a1);
 };
-extern float DAT_0104da48;
-struct __declspec(align(16)) Vec289
-{
-    float x, y, z, w;
-};
-struct RootContact289
-{
-    Vec289 position, normal;
-    void* rootA;
-    unsigned shapeKeyA;
-    unsigned pathA[8];
-    void* rootB;
-    unsigned shapeKeyB;
-    unsigned pathB[8];
-};
-struct Allocator289
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    __declspec(nothrow) virtual void Free(void*, unsigned) throw();
-};
-struct Router289
-{
-    int unk00, unk04, unk08, unk0c;
-    Allocator289* heap;
-    Allocator289* GetAllocator()
-    {
-        return heap;
-    }
-};
-namespace Memory289 {
-extern "C" Router289* FUN_00c85750() throw();
-}
-class hkpCdPointCollector
-{
-  public:
-    __declspec(nothrow) __forceinline virtual ~hkpCdPointCollector()
-    {}
-    virtual void AddCdPoint(const void*) = 0;
-    virtual void reset()
-    {
-        limit = DAT_0104da48;
-    }
-    float limit;
-    __declspec(nothrow) hkpCdPointCollector() : limit(DAT_0104da48)
-    {}
-};
-struct ContactArray289
-{
-    RootContact289* data;
-    int count;
-    unsigned capacity;
-    RootContact289 local[8];
-    __declspec(nothrow) ContactArray289() : data(local), count(0), capacity(0x80000008)
-    {}
-    __declspec(nothrow) __forceinline ~ContactArray289()
-    {
-        Allocator289* alloc = Memory289::FUN_00c85750()->GetAllocator();
-        count = 0;
-        if ((capacity & 0x80000000) == 0)
-            alloc->Free(data, (capacity & 0x3fffffff) * sizeof(RootContact289));
-        data = 0;
-        capacity = 0x80000000;
-    }
-};
-class hkpAllCdPointCollector : public hkpCdPointCollector
-{
-  public:
-    ContactArray289 contacts;
-    __declspec(nothrow) hkpAllCdPointCollector()
-    {}
-    __declspec(nothrow) __forceinline virtual ~hkpAllCdPointCollector()
-    {}
-    virtual void AddCdPoint(const void*);
-    virtual void reset()
-    {
-        contacts.count = 0;
-        limit = DAT_0104da48;
-    }
-};
 struct Query289
 {
     __declspec(nothrow) void FUN_00cade20(void*, void*, hkpCdPointCollector*, hkpCdPointCollector*, unsigned,
@@ -611,7 +533,7 @@ struct Query289
 };
 
 #include <xmmintrin.h>
-extern const void* DAT_0104da28;
+#include <new>
 extern float DAT_0104da48;
 struct Allocator197
 {
@@ -621,43 +543,37 @@ struct Allocator197
     virtual void v0c();
     __declspec(nothrow) virtual void Free(void* memory, int bytes);
 };
-struct Contact197
+__declspec(nothrow) inline hkpCdPointCollector::hkpCdPointCollector() : m_fEarlyOutDistance(DAT_0104da48)
+{}
+
+__declspec(nothrow) __forceinline hkpCdPointCollector::~hkpCdPointCollector()
+{}
+
+__declspec(nothrow) inline ContactArray289::ContactArray289()
 {
-    __m128 position, normal;
-    void* bodyA;
-    unsigned int shapeA;
-    void* bodyB;
-    unsigned int shapeB;
-    __m128 unk30, unk40, unk50, unk60;
-};
-struct Collector197
+    data = local;
+    capacity = 0x80000008;
+    count = 0;
+}
+
+__declspec(nothrow) __forceinline ContactArray289::~ContactArray289()
 {
-    const void* vtable;
-    float distance;
-    int unk08, unk0c;
-    Contact197* data;
-    int count;
-    int capacity;
-    Contact197 local[8];
-    Collector197() throw()
-    {
-        vtable = &DAT_0104da28;
-        distance = DAT_0104da48;
-        data = local;
-        capacity = 0x80000008;
-        count = 0;
-    }
-    void Release() throw()
-    {
-        vtable = &DAT_0104da28;
-        FNVMemoryManager* manager = FUN_00c85750();
-        unsigned int flags = capacity;
-        Allocator197* heap = reinterpret_cast<Allocator197*>(manager->GetAllocator());
-        count = 0;
-        if (!(flags & 0x80000000u))
-            heap->Free(data, (flags & 0x3fffffff) * sizeof(Contact197));
-    }
-};
+    FNVMemoryManager* manager = FUN_00c85750();
+    unsigned int flags = capacity;
+    Allocator197* heap = reinterpret_cast<Allocator197*>(manager->GetAllocator());
+    count = 0;
+    if (!(flags & 0x80000000u))
+        heap->Free(data, (flags & 0x3fffffff) * sizeof(RootContact289));
+    data = 0;
+    capacity = 0x80000000;
+}
+
+__declspec(nothrow) inline hkpAllCdPointCollector::hkpAllCdPointCollector()
+{}
+
+__declspec(nothrow) __forceinline hkpAllCdPointCollector::~hkpAllCdPointCollector()
+{}
+
 struct Bool197
 {
     bool value;
@@ -744,7 +660,7 @@ struct Controller197
     virtual void v00();
     virtual void v04();
     virtual void v08();
-    __declspec(nothrow) virtual void Collect(Context197*, Collector197*, Bool197);
+    __declspec(nothrow) virtual void Collect(Context197*, hkpAllCdPointCollector*, Bool197);
     int unk04;
     int unk08;
     int unk0c;
@@ -776,7 +692,9 @@ void Controller197::FUN_00cae7f0(Context197* context)
     Query197 query = *provider->owner->query;
     query.z.value = (margin5c + margin58) + query.z.value;
     provider->Process(context, &query);
-    Collector197 collector;
-    Collect(context, &collector, false);
-    collector.Release();
+    // Preserve the original explicit lifetime without adding an exception cleanup scope.
+    __declspec(align(16)) unsigned char storage[sizeof(hkpAllCdPointCollector)];
+    hkpAllCdPointCollector* collector = ::new (storage) hkpAllCdPointCollector;
+    Collect(context, collector, false);
+    collector->hkpAllCdPointCollector::~hkpAllCdPointCollector();
 }

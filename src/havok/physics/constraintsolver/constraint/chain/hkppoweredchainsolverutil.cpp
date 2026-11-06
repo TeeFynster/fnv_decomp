@@ -2,6 +2,9 @@
 // src/havok/physics/constraintsolver/constraint/chain/hkppoweredchainsolverutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/constraintsolver/constraint/chain/hkppoweredchainsolverutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/hkAabb.h"
+#include "../../../../../../include/hkVector4.h"
+
 struct FUN_00df0810_Channel
 {
     float value1;
@@ -608,27 +611,6 @@ void __cdecl FUN_00df0870(int arg0, ObjF* __restrict obj, int arg2, __m128* arg3
     *arg4 = (int)p180;
 }
 
-struct hkVector4
-{
-    union
-    {
-        __m128 m_vComponents;
-        struct
-        {
-            float x;
-            float y;
-            float z;
-            float w;
-        };
-    };
-};
-
-struct hkAabb
-{
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
-};
-
 struct MatrixGroup
 {
     char data0[0xc0];
@@ -663,7 +645,13 @@ void __cdecl FUN_00df11a0(InputStruct* apInput, hkAabb* out)
     do
     {
         const hkAabb* aabb = (const hkAabb*)((const char*)apInput->aabbs + offset);
-        hkAabb tempAabb;
+        // Scalar storage preserves the uninitialized temporary without adding /GS buffer checks.
+        struct __declspec(align(16))
+        {
+            float minX, minY, minZ, minW;
+            float maxX, maxY, maxZ, maxW;
+        } tempAabbStorage;
+        hkAabb& tempAabb = *(hkAabb*)&tempAabbStorage;
         FUN_00e29510(&tempAabb, &apInput->matrices[i].data0, &out[i - 1]);
         tempAabb.m_kMinimumCorner.m_vComponents =
             _mm_sub_ps(_mm_load_ps(&aabb->m_kMinimumCorner.x), tempAabb.m_kMinimumCorner.m_vComponents);

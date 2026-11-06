@@ -2,7 +2,13 @@
 // src/havok/physics/utilities/collide/filter/constrainedsystem/hkpconstrainedsystemfilter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/collide/filter/constrainedsystem/hkpconstrainedsystemfilter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpConstrainedSystemFilter.h"
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkpCollidable.h"
+#include "../../../../../../../include/hkpCollidableCollidableFilter.h"
+#include "../../../../../../../include/hkpCollisionFilter.h"
+#include "../../../../../../../include/hkpConstraintData.h"
+#include "../../../../../../../include/hkpConstraintInstance.h"
+#include "../../../../../../../include/hkpEntity.h"
 
 extern int g_unk0126d658;
 
@@ -47,127 +53,62 @@ FnvCpu_FUN_00dffb00_CpuObject* FnvCpu_FUN_00dffb00_CpuObject::FUN_00dffb00(unsig
     return this;
 }
 
-struct hkBoolE46B
+// Keep the original inline owner calculation when using the shared collidable layout.
+inline void* hkpCollidable::getOwner() const
 {
-    char m_cBooleanValue;
-    hkBoolE46B(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
+    return const_cast<char*>(reinterpret_cast<const char*>(this)) + m_iOwnerOffset;
+}
 
-class FUN_00c9c3c0_Class;
+class hkpEntity;
 
-class hkpCollidableE46B
+inline hkpEntity* getRigidBodyForConstraintFilter(const hkpCollidable* pkCollidable)
 {
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    signed char m_iOwnerOffset;
-    char unk11[7];
-    char m_cBroadPhaseType;
-
-    void* getOwner() const
-    {
-        return const_cast<char*>(reinterpret_cast<const char*>(this)) + m_iOwnerOffset;
-    }
-};
-
-inline FUN_00c9c3c0_Class* hkGetRigidBodyE46B(const hkpCollidableE46B* pkCollidable)
-{
-    if (pkCollidable->m_cBroadPhaseType == 1)
-        return static_cast<FUN_00c9c3c0_Class*>(pkCollidable->getOwner());
+    if (pkCollidable->m_kBroadPhaseHandle.m_type == 1)
+        return static_cast<hkpEntity*>(pkCollidable->getOwner());
     return 0;
 }
 
-class hkpConstraintDataE46B
-{
-  public:
-    virtual void V00() throw();
-    virtual void V04() throw();
-    virtual void V08() throw();
-    virtual void V0C() throw();
-    virtual void V10() throw();
-    virtual void V14() throw();
-    virtual void V18() throw();
-    virtual void V1C() throw();
-    virtual int getType() const throw();
-};
+// The shared hkpEntity header lacks the constraint accessors bound at 0x00c9c380/0x00c9c3c0.
 
-struct hkpConstraintInstanceE46B
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkpConstraintDataE46B* m_data;
-    int unk10;
-    FUN_00c9c3c0_Class* m_pEntityA;
-    FUN_00c9c3c0_Class* m_pEntityB;
-};
-
-class FUN_00c9c3c0_Class
-{
-  public:
-    int FUN_00c9c380() throw();
-    int GetEntryAt(int i) throw();
-};
-
-class hkpCollidableCollidableFilterE46B
-{
-  public:
-    virtual void V00() throw();
-    virtual hkBoolE46B IsCollisionEnabled(const hkpCollidableE46B& a, const hkpCollidableE46B& b) const throw();
-};
-
-class hkpCollisionFilterE46B
-{
-  public:
-    int unk00;
-    int unk04;
-    hkpCollidableCollidableFilterE46B m_collidableFilter;
-};
-
-class hkpConstraintCollisionFilterE46B
+// This entry receives the +0x08 collidable-filter subobject: m_otherFilter is +0x2c here, +0x34 in hkpConstrainedSystemFilter; hkpConstraintCollisionFilter instead derives from hkpPairCollisionFilter.
+class ConstrainedSystemCollidableFilterView
 {
   public:
     char unk00[0x2c];
-    hkpCollisionFilterE46B* m_pChildFilter;
+    hkpCollisionFilter* m_pChildFilter;
 
-    hkBoolE46B ConstraintCollisionFilter(const hkpCollidableE46B& a, const hkpCollidableE46B& b) const throw();
+    hkBool IsCollisionEnabled(const hkpCollidable& a, const hkpCollidable& b) const throw();
 };
 
 // Returns false if the collidable filter rejects the pair or a non-type-11 constraint links the two rigid bodies; true otherwise.
 // @fnv 0x00e46bf0
-hkBoolE46B hkpConstraintCollisionFilterE46B::ConstraintCollisionFilter(const hkpCollidableE46B& a,
-                                                                       const hkpCollidableE46B& b) const throw()
+hkBool ConstrainedSystemCollidableFilterView::IsCollisionEnabled(const hkpCollidable& a,
+                                                                const hkpCollidable& b) const throw()
 {
-    FUN_00c9c3c0_Class* pkBodyA = hkGetRigidBodyE46B(&a);
-    FUN_00c9c3c0_Class* pkBodyB = hkGetRigidBodyE46B(&b);
+    hkpEntity* pkBodyA = getRigidBodyForConstraintFilter(&a);
+    hkpEntity* pkBodyB = getRigidBodyForConstraintFilter(&b);
 
-    if (m_pChildFilter && !m_pChildFilter->m_collidableFilter.IsCollisionEnabled(a, b))
+    // The collidable-filter interface follows the referenced-object base at +0x08.
+    if (m_pChildFilter &&
+        !reinterpret_cast<const hkpCollidableCollidableFilter*>(
+            reinterpret_cast<const char*>(m_pChildFilter) + sizeof(hkReferencedObject))->IsCollisionEnabled(a, b))
         return false;
 
     if (!pkBodyA || !pkBodyB)
         return true;
 
     const bool bSwapBodies = pkBodyA->FUN_00c9c380() > pkBodyB->FUN_00c9c380();
-    FUN_00c9c3c0_Class* pkEntityA = bSwapBodies ? pkBodyB : pkBodyA;
-    FUN_00c9c3c0_Class* pkEntityB = bSwapBodies ? pkBodyA : pkBodyB;
+    hkpEntity* pkEntityA = bSwapBodies ? pkBodyB : pkBodyA;
+    hkpEntity* pkEntityB = bSwapBodies ? pkBodyA : pkBodyB;
 
     int numConstraints = pkEntityA->FUN_00c9c380();
     for (int i = 0; i < numConstraints; i++)
     {
-        const hkpConstraintInstanceE46B* pkConstraint =
-            reinterpret_cast<const hkpConstraintInstanceE46B*>(pkEntityA->GetEntryAt(i));
+        const hkpConstraintInstance* pkConstraint =
+            reinterpret_cast<const hkpConstraintInstance*>(pkEntityA->GetEntryAt(i));
         if (pkConstraint && pkConstraint->m_data->getType() != 11)
         {
-            if (pkConstraint->m_pEntityA == pkEntityB || pkConstraint->m_pEntityB == pkEntityB)
+            if (pkConstraint->m_kActorEntries[0] == pkEntityB || pkConstraint->m_kActorEntries[1] == pkEntityB)
                 return false;
         }
     }
@@ -186,39 +127,24 @@ struct FilterDelegate
     int unk08;
     CheckInterface callback;
 };
-struct FilterResult
-{
-    bool value;
-    FilterResult(bool v) : value(v)
-    {}
-};
 struct ConstraintFilter
 {
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24;
     FilterDelegate* delegate;
-    FilterResult Evaluate(int, int, int, int, int);
+    hkBool Evaluate(int, int, int, int, int);
 };
 // @fnv 0x00e46cf0
-FilterResult ConstraintFilter::Evaluate(int aiArg1, int aiArg2, int aiArg3, int aiArg4, int aiArg5)
+hkBool ConstraintFilter::Evaluate(int aiArg1, int aiArg2, int aiArg3, int aiArg4, int aiArg5)
 {
     FilterDelegate* const& ref = delegate;
-    return FilterResult(ref == 0 || *delegate->callback.evaluate(&aiArg5, aiArg1, aiArg2, aiArg3, aiArg4, aiArg5) != 0);
+    return hkBool(ref == 0 || *delegate->callback.evaluate(&aiArg5, aiArg1, aiArg2, aiArg3, aiArg4, aiArg5) != 0);
 }
-
-struct hkBoolE46D
-{
-    char m_cBooleanValue;
-    hkBoolE46D(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-};
 
 class hkFilterE46D
 {
   public:
     virtual void V0();
-    virtual hkBoolE46D IsCollisionEnabled(void* a, void* b);
+    virtual hkBool IsCollisionEnabled(void* a, void* b);
 };
 
 struct hkWorldE46D
@@ -237,31 +163,15 @@ class hkObjE46D
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
     hkWorldE46D* m_pOwningWorld;
 
-    hkBoolE46D IsInWorldFilter(void* a, void* b);
+    hkBool IsInWorldFilter(void* a, void* b);
 };
 
 // Returns true if the object has no world or its world's filter accepts the two arguments.
 // @fnv 0x00e46df0
-hkBoolE46D hkObjE46D::IsInWorldFilter(void* a, void* b)
+hkBool hkObjE46D::IsInWorldFilter(void* a, void* b)
 {
     return !m_pOwningWorld || m_pOwningWorld->m_iFilter.IsCollisionEnabled(a, b).m_cBooleanValue;
 }
-
-class hkBoolE46C
-{
-  public:
-    hkBoolE46C()
-    {}
-    hkBoolE46C(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
 
 class hkBase0E46C
 {
@@ -273,7 +183,7 @@ class hkBase0E46C
 class hkFilterE46C
 {
   public:
-    virtual hkBoolE46C IsCollisionEnabled(const void* a, const void* b, const void* c, const void* d, const void* e,
+    virtual hkBool IsCollisionEnabled(const void* a, const void* b, const void* c, const void* d, const void* e,
                                           const void* f, const void* g) const;
 };
 
@@ -287,35 +197,19 @@ class hkListE46C
     int unk00[10];
     hkFilterImplE46C* m_iFilter;
 
-    hkBoolE46C FUN_00e46d40(const void* a, const void* b, const void* c, const void* d, const void* e, const void* f,
+    hkBool FUN_00e46d40(const void* a, const void* b, const void* c, const void* d, const void* e, const void* f,
                             const void* g) const;
 };
 
 // Returns true when m_iFilter is null or when m_iFilter->IsCollisionEnabled(a, b, c, d, e, f, g) is true.
 // @fnv 0x00e46d40
-hkBoolE46C hkListE46C::FUN_00e46d40(const void* a, const void* b, const void* c, const void* d, const void* e,
+hkBool hkListE46C::FUN_00e46d40(const void* a, const void* b, const void* c, const void* d, const void* e,
                                     const void* f, const void* g) const
 {
     return !m_iFilter || m_iFilter->IsCollisionEnabled(a, b, c, d, e, f, g);
 }
 
 namespace fnv_00e46da0 {
-class hkBoolE46D
-{
-  public:
-    hkBoolE46D()
-    {}
-    hkBoolE46D(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
-
 class hkBase0E46D
 {
   public:
@@ -326,7 +220,7 @@ class hkBase0E46D
 class hkFilterE46D
 {
   public:
-    virtual hkBoolE46D IsCollisionEnabled(const void* a, const void* b, const void* c, const void* d) const;
+    virtual hkBool IsCollisionEnabled(const void* a, const void* b, const void* c, const void* d) const;
 };
 
 class hkFilterImplE46D : public hkBase0E46D, public hkFilterE46D
@@ -339,36 +233,24 @@ class hkListE46D
     int unk00[9];
     hkFilterImplE46D* m_iFilter;
 
-    hkBoolE46D FUN_00e46da0(const void* a, const void* b, const void* c, const void* d) const;
+    hkBool FUN_00e46da0(const void* a, const void* b, const void* c, const void* d) const;
 };
 
 // Returns true when m_iFilter is null or when m_iFilter->IsCollisionEnabled(a, b, c, d) is true.
 // @fnv 0x00e46da0
-hkBoolE46D hkListE46D::FUN_00e46da0(const void* a, const void* b, const void* c, const void* d) const
+hkBool hkListE46D::FUN_00e46da0(const void* a, const void* b, const void* c, const void* d) const
 {
     return !m_iFilter || m_iFilter->IsCollisionEnabled(a, b, c, d);
 }
 }  // namespace fnv_00e46da0
 
-struct Owner
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual int getType();
-};
 int __cdecl CallA(void*, void*);
 void __cdecl CallB(void*);
 // If the owner at +0xc has type other than 11, calls CallA with the +0x10 offsets of the pointers at +0x14 and +0x18, and passes a nonzero result to CallB.
 // @fnv 0x00e46e30
 void __stdcall FUN_00e46e30(void* p)
 {
-    Owner* owner = *reinterpret_cast<Owner**>(reinterpret_cast<char*>(p) + 0xc);
+    hkpConstraintData* owner = *reinterpret_cast<hkpConstraintData**>(reinterpret_cast<char*>(p) + 0xc);
     if (owner->getType() != 11)
     {
         void* b = *reinterpret_cast<void**>(reinterpret_cast<char*>(p) + 0x18);

@@ -2,6 +2,140 @@
 // src/gamebryo2.2/corelibs/nicollision/nicollisiontraversals.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/nicollisiontraversals.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3; RaycastShape/IntersectShape (0x00e993d0) use the stand-in's own operator/ctor bodies and a different x87 order than this unit's NiPoint3 bodies.
+#include "../../../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+#include "../../../../include/Normal.h"
+#include "../../../../include/NiPoint2.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/Bound.h"
+#include "../../../../include/Mat3.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiMatrix3.h"
+#include "../../../../include/Transform.h"
+
 extern int DAT_0126fa68;
 extern int DAT_0126fa6c;
 extern int DAT_0126fa70;
@@ -158,17 +292,18 @@ done:
 namespace fnv_00e9c6f0 {
 extern int DAT_011f5eb4;
 
-struct ListNode
+// Exe 0x00e9c6f0: unit-local ListNode view; declarations and layout are preserved.
+struct NicollisiontraversalsListNodeView
 {
     int unk00;
-    ListNode* m_pNext;
+    NicollisiontraversalsListNodeView* m_pNext;
 };
 
 struct ItemOwner
 {
     virtual void v00();
     virtual void v04();
-    virtual ListNode* v08();
+    virtual NicollisiontraversalsListNodeView* v08();
     int unk04;
     int unk08;
     int unk0C;
@@ -247,12 +382,12 @@ bool __cdecl FUN_00e9c6f0(int a1, int a2, SpawnParam* pSpawnParam, ItemOwner* ow
 
     if (owner != 0)
     {
-        ListNode* node = owner->v08();
+        NicollisiontraversalsListNodeView* node = owner->v08();
         if (node != 0)
         {
             do
             {
-                if (node == (ListNode*)&DAT_011f5eb4)
+                if (node == (NicollisiontraversalsListNodeView*)&DAT_011f5eb4)
                 {
                     return FUN_00e9c680(a1, a2, pSpawnParam, owner);
                 }
@@ -281,20 +416,11 @@ bool __cdecl FUN_00e9c6f0(int a1, int a2, SpawnParam* pSpawnParam, ItemOwner* ow
 }
 }  // namespace fnv_00e9c6f0
 
-struct S_00e9c490_Pt
-{
-    float x, y, z;
-    S_00e9c490_Pt FUN_00439ef0(const S_00e9c490_Pt& o) const;
-    S_00e9c490_Pt FUN_00439e90(const S_00e9c490_Pt& o) const;
-    S_00e9c490_Pt* ApplyScaled(S_00e9c490_Pt* out, float s) const;
-    float DotProduct(const S_00e9c490_Pt& o) const;
-    float FUN_00457990() const;
-};
 struct S_00e9c490_Entry
 {
     int unk00;
     int unk04;
-    S_00e9c490_Pt unk08;
+    NiPoint3 unk08;
     float unk14;
 };
 struct S_00e9c490_Pool
@@ -374,20 +500,20 @@ struct S_00e9c490_Node
     int unk80;
     int unk84;
     int unk88;
-    S_00e9c490_Pt unk8c;
+    NiPoint3 unk8c;
 };
 extern char DAT_0126fa64;
 extern char DAT_0126fa65;
 extern int DAT_011f4a48;
 extern int DAT_011f5f64;
 static const float DAT_01011d78 = 0.0f;
-bool __cdecl RayIntersectsBound(S_00e9c490_Node* node, S_00e9c490_Pt* p1, S_00e9c490_Pt* p2);
-bool __cdecl FUN_00e9c6f0(S_00e9c490_Pt* p1, S_00e9c490_Pt* p2, S_00e9c490_Ctx* ctx, S_00e9c490_Node* node);
-bool __cdecl RaycastShape(S_00e9c490_Pt* p1, S_00e9c490_Pt* p2, S_00e9c490_Ctx* ctx, S_00e9c490_Node* node);
+bool __cdecl RayIntersectsBound(S_00e9c490_Node* node, NiPoint3* p1, NiPoint3* p2);
+bool __cdecl FUN_00e9c6f0(NiPoint3* p1, NiPoint3* p2, S_00e9c490_Ctx* ctx, S_00e9c490_Node* node);
+bool __cdecl RaycastShape(NiPoint3* p1, NiPoint3* p2, S_00e9c490_Ctx* ctx, S_00e9c490_Node* node);
 bool __cdecl FUN_0043b300(const void* rtti, S_00e9c490_Node* node);
 
 // @fnv 0x00e9c490
-bool __cdecl FUN_00e9c490(S_00e9c490_Pt* pPoint1, S_00e9c490_Pt* pPoint2, S_00e9c490_Ctx* pContext,
+bool __cdecl FUN_00e9c490(NiPoint3* pPoint1, NiPoint3* pPoint2, S_00e9c490_Ctx* pContext,
                           S_00e9c490_Node* node)
 {
     if (!node)
@@ -405,7 +531,7 @@ bool __cdecl FUN_00e9c490(S_00e9c490_Pt* pPoint1, S_00e9c490_Pt* pPoint2, S_00e9
             return RaycastShape(pPoint1, pPoint2, pContext, node);
         if (DAT_0126fa65 && FUN_0043b300(&DAT_011f4a48, node))
         {
-            S_00e9c490_Pt d = node->unk8c.FUN_00439ef0(*pPoint1);
+            NiPoint3 d = node->unk8c.FUN_00439ef0(*pPoint1);
             if (pPoint2->DotProduct(d) < DAT_01011d78)
                 return false;
             float len = d.FUN_00457990();
@@ -414,7 +540,7 @@ bool __cdecl FUN_00e9c490(S_00e9c490_Pt* pPoint1, S_00e9c490_Pt* pPoint2, S_00e9
         }
         if (DAT_0126fa64 && FUN_0043b300(&DAT_011f5f64, node))
         {
-            S_00e9c490_Pt d = node->unk8c.FUN_00439ef0(*pPoint1);
+            NiPoint3 d = node->unk8c.FUN_00439ef0(*pPoint1);
             if (pPoint2->DotProduct(d) < DAT_01011d78)
                 return false;
             S_00e9c490_Entry* pEntry = pContext->unk18.GetTexture(node);
@@ -422,7 +548,10 @@ bool __cdecl FUN_00e9c490(S_00e9c490_Pt* pPoint1, S_00e9c490_Pt* pPoint2, S_00e9
             pEntry->unk14 = len;
             if (pContext->unk08 == 1)
             {
-                pEntry->unk08 = pPoint1->FUN_00439e90(*pPoint2->ApplyScaled(&d, len));
+                // Use the scalar multiply ABI with an explicit result buffer to reuse d.
+                typedef NiPoint3* (NiPoint3::*ScaleInto)(NiPoint3*, float) const;
+                pEntry->unk08 = pPoint1->FUN_00439e90(
+                    *(pPoint2->*reinterpret_cast<ScaleInto>(&NiPoint3::ApplyScaled))(&d, len));
             }
             return false;
         }
@@ -437,65 +566,79 @@ int FUN_00e9c7c0()
 }
 
 #include <math.h>
-class NiPoint2
+#include "../../../../include/NiBoundingVolume.h"
+#include "../../../../include/Vec4.h"
+inline NiPoint2 NiPoint2::operator*(float f) const
 {
-  public:
-    float x, y;
-    NiPoint2 operator*(float f) const
-    {
-        NiPoint2 r = *this;
-        r.x *= f;
-        r.y *= f;
-        return r;
-    }
-    NiPoint2 operator+(const NiPoint2& b) const
-    {
-        NiPoint2 r = *this;
-        r.x += b.x;
-        r.y += b.y;
-        return r;
-    }
-};
-struct P3
+    NiPoint2 r = *this;
+    r.x *= f;
+    r.y *= f;
+    return r;
+}
+inline NiPoint2 NiPoint2::operator+(const NiPoint2& b) const
 {
-    float x, y, z;
-    P3 operator*(float f) const
-    {
-        P3 r;
-        r.x = x * f;
-        r.y = y * f;
-        r.z = z * f;
-        return r;
-    }
-    P3 operator+(const P3& b) const
-    {
-        P3 r;
-        r.x = x + b.x;
-        r.y = y + b.y;
-        r.z = z + b.z;
-        return r;
-    }
-    P3 operator-(const P3& b) const
-    {
-        P3 r;
-        r.x = x - b.x;
-        r.y = y - b.y;
-        r.z = z - b.z;
-        return r;
-    }
-    P3 Cross(const P3& b) const
-    {
-        P3 r;
-        r.x = y * b.z - z * b.y;
-        r.y = z * b.x - x * b.z;
-        r.z = x * b.y - y * b.x;
-        return r;
-    }
+    NiPoint2 r = *this;
+    r.x += b.x;
+    r.y += b.y;
+    return r;
+}
+// RaycastPoint: the point of RaycastGeometry (0x00e9a280) and its Pick/Geometry helpers. Same layout as NiPoint3, but
+// its inline operators build their result component-wise in a temporary, while this unit's NiPoint3::operator-/operator*
+// build theirs through the constructor (RaycastShape 0x00e9b4f0, OrientedBoxBound::ComputeFromPoints 0x00eadf30); one
+// NiPoint3 cannot carry both bodies, and each form only matches its own functions (tried 2026-11-04).
+class RaycastPoint
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    __declspec(noalias) RaycastPoint() throw();
+    RaycastPoint operator*(float f) const;
+    RaycastPoint operator+(const RaycastPoint& rhs) const;
+    RaycastPoint operator-(const RaycastPoint& rhs) const;
+    RaycastPoint Cross(const RaycastPoint& rhs) const;
+    float Length() const;
+    float FUN_004a7290() const;
     __declspec(noalias) void FUN_004a0c10();
 };
-P3 operator*(float f, const P3& p)
+inline RaycastPoint::RaycastPoint() throw() {}
+inline RaycastPoint RaycastPoint::operator*(float f) const
 {
-    P3 r;
+    RaycastPoint r;
+    r.x = x * f;
+    r.y = y * f;
+    r.z = z * f;
+    return r;
+}
+inline RaycastPoint RaycastPoint::operator+(const RaycastPoint& b) const
+{
+    RaycastPoint r;
+    r.x = x + b.x;
+    r.y = y + b.y;
+    r.z = z + b.z;
+    return r;
+}
+inline RaycastPoint RaycastPoint::operator-(const RaycastPoint& b) const
+{
+    RaycastPoint r;
+    r.x = x - b.x;
+    r.y = y - b.y;
+    r.z = z - b.z;
+    return r;
+}
+inline RaycastPoint RaycastPoint::Cross(const RaycastPoint& b) const
+{
+    RaycastPoint r;
+    r.x = y * b.z - z * b.y;
+    r.y = z * b.x - x * b.z;
+    r.z = x * b.y - y * b.x;
+    return r;
+}
+
+RaycastPoint operator*(float f, const RaycastPoint& p)
+{
+    RaycastPoint r;
     r.x = f * p.x;
     r.y = f * p.y;
     r.z = f * p.z;
@@ -532,38 +675,33 @@ extern P4 DAT_011a9be0;
 struct Matrix
 {
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    P3 Apply(const P3& p) const
+    RaycastPoint Apply(const RaycastPoint& p) const
     {
-        P3 r;
+        RaycastPoint r;
         r.x = m00 * p.x + (m01 * p.y) + m02 * p.z;
         r.y = (((m10 * p.x) + m11 * p.y) + (p.z * m12));
         r.z = m20 * p.x + m21 * p.y + p.z * m22;
         return r;
     }
-    P3 InverseRotatePoint(const P3& p) const
+    RaycastPoint InverseRotatePoint(const RaycastPoint& p) const
     {
-        P3 r;
+        RaycastPoint r;
         r.x = m00 * p.x + p.y * m10 + (m20 * p.z);
         r.y = ((m01 * p.x + p.y * m11) + (m21 * p.z));
         r.z = m02 * p.x + m12 * p.y + (m22 * p.z);
         return r;
     }
-    P3 InverseRotateVector(const P3& p) const
+    RaycastPoint InverseRotateVector(const RaycastPoint& p) const
     {
-        P3 r;
+        RaycastPoint r;
         r.x = m00 * p.x + m10 * p.y + m20 * p.z;
         r.y = p.x * m01 + m11 * p.y + m21 * p.z;
         r.z = (m02 * p.x + m12 * p.y + m22 * p.z);
         return r;
     }
-    __declspec(noalias) P3 FUN_004b4500(const P3*);
+    __declspec(noalias) RaycastPoint FUN_004b4500(const RaycastPoint*);
 };
-struct Transform
-{
-    Matrix rotation;
-    P3 translation;
-    float scale;
-};
+
 struct Buffer
 {
     char* data;
@@ -573,9 +711,9 @@ struct Buffer
     {}
     ~Buffer()
     {}
-    P3& Point(unsigned i) const
+    RaycastPoint& Point(unsigned i) const
     {
-        return *reinterpret_cast<P3*>(data + stride * i);
+        return *reinterpret_cast<RaycastPoint*>(data + stride * i);
     }
     NiPoint2& UV(unsigned i) const
     {
@@ -635,8 +773,8 @@ struct GeometryData
     int unk14;
     int unk18;
     int unk1c;
-    P3* positions;
-    P3* normals;
+    RaycastPoint* positions;
+    RaycastPoint* normals;
     P4* colors;
     NiPoint2* texcoords;
     struct Provider* provider;
@@ -715,10 +853,13 @@ struct Geometry
     int unk5c;
     int unk60;
     int unk64;
-    Transform world;
-    int unk9c;
-    int unka0;
-    int unka4;
+    // NiTransform storage begins at 0x68 without SIMD alignment.
+    unsigned char worldStorage[sizeof(Transform)];
+    Transform& World()
+    {
+        return *reinterpret_cast<Transform*>(worldStorage);
+    }
+    // Transform also covers the padding at 0x9c through 0xa7.
     int unka8;
     int unkac;
     int unkb0;
@@ -728,11 +869,11 @@ struct Geometry
 struct Hit
 {
     int unk00, unk04;
-    P3 point;
+    RaycastPoint point;
     float distance;
     unsigned short triangle, i0, i1, i2;
     NiPoint2 uv;
-    P3 normal;
+    RaycastPoint normal;
     P4 color;
 };
 struct HitList
@@ -769,28 +910,28 @@ struct Pick
         return wantColor;
     }
 };
-bool __cdecl FUN_00eadb90(const P3*, const P3*, const P3*, const P3*, const P3*, bool, P3*, float*, float*, float*);
+bool __cdecl FUN_00eadb90(const RaycastPoint*, const RaycastPoint*, const RaycastPoint*, const RaycastPoint*, const RaycastPoint*, bool, RaycastPoint*, float*, float*, float*);
 // Tests a ray against geometry triangles when available and fills hit data, including optional interpolated attributes.
 // @fnv 0x00e9a280
-bool __cdecl RaycastGeometry(const P3* origin, const P3* direction, Pick* pick, Geometry* geometry)
+bool __cdecl RaycastGeometry(const RaycastPoint* origin, const RaycastPoint* direction, Pick* pick, Geometry* geometry)
 {
-    Transform& worldTransform = geometry->world;
-    P3 delta;
-    delta = *origin - worldTransform.translation;
+    Transform& worldTransform = geometry->World();
+    RaycastPoint delta;
+    delta = *origin - *reinterpret_cast<const RaycastPoint*>(&worldTransform.position);
     float inverseScale;
     inverseScale = 1.0f / worldTransform.scale;
-    P3 localOrigin = worldTransform.rotation.InverseRotatePoint(delta) * inverseScale;
-    const Matrix& rotation = worldTransform.rotation;
-    P3 localDirection = rotation.InverseRotateVector(*direction) * inverseScale;
+    RaycastPoint localOrigin = reinterpret_cast<Matrix&>(worldTransform.rotation).InverseRotatePoint(delta) * inverseScale;
+    const Matrix& rotation = reinterpret_cast<Matrix&>(worldTransform.rotation);
+    RaycastPoint localDirection = rotation.InverseRotateVector(*direction) * inverseScale;
     bool found = false;
     unsigned short count;
     count = geometry->data->GetTriangleTotal();
     bool locked = false;
     GeometryData* data = geometry->data;
     Buffer positionBuffer;
-    P3 p0, p1, p2;
-    P3 normal;
-    P3* positions = geometry->data->positions;
+    RaycastPoint p0, p1, p2;
+    RaycastPoint normal;
+    RaycastPoint* positions = geometry->data->positions;
     if (!positions)
     {
         Provider* provider = data->provider;
@@ -805,7 +946,7 @@ bool __cdecl RaycastGeometry(const P3* origin, const P3* direction, Pick* pick, 
     {
         Hit* hit;
         hit = pick->hits.GetTexture(geometry);
-        P3 offset = geometry->world.translation - *origin;
+        RaycastPoint offset = *reinterpret_cast<const RaycastPoint*>(&geometry->World().position) - *origin;
         float distance;
         float squared = offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
         distance = (float)sqrt(squared);
@@ -833,7 +974,7 @@ bool __cdecl RaycastGeometry(const P3* origin, const P3* direction, Pick* pick, 
             p1 = positions[i1];
             p2 = positions[i2];
         }
-        P3 intersection;
+        RaycastPoint intersection;
         float distance, b1, b2;
         if (!FUN_00eadb90(&localOrigin, &localDirection, &p0, &p1, &p2, pick->GetFrontOnly(), &intersection, &distance,
                           &b1, &b2))
@@ -842,7 +983,7 @@ bool __cdecl RaycastGeometry(const P3* origin, const P3* direction, Pick* pick, 
         Hit* hit = pick->hits.GetTexture(geometry);
         if (pick->coordinates == 1)
             intersection =
-                worldTransform.translation + worldTransform.rotation.Apply(intersection) * worldTransform.scale;
+                *reinterpret_cast<const RaycastPoint*>(&worldTransform.position) + reinterpret_cast<Matrix&>(worldTransform.rotation).Apply(intersection) * worldTransform.scale;
         hit->point = intersection;
         hit->distance = distance;
         hit->triangle = triangle;
@@ -879,30 +1020,30 @@ bool __cdecl RaycastGeometry(const P3* origin, const P3* direction, Pick* pick, 
             data->GetBounds(&normalBuffer);
             if (normalBuffer.data)
             {
-                P3 n0 = normalBuffer.Point(i0), n1 = normalBuffer.Point(i1), n2 = normalBuffer.Point(i2);
+                RaycastPoint n0 = normalBuffer.Point(i0), n1 = normalBuffer.Point(i1), n2 = normalBuffer.Point(i2);
                 normal = n0 * b0 + n1 * b1 + n2 * b2;
             }
             else if (pick->interpolateNormal && geometry->data->normals)
             {
-                P3* normals;
+                RaycastPoint* normals;
                 normals = geometry->data->normals;
                 normal = normals[i0] * b0 + normals[i1] * b1 + normals[i2] * b2;
             }
             else
             {
-                P3 edge2;
-                P3 edge1;
+                RaycastPoint edge2;
+                RaycastPoint edge1;
                 edge1 = p1 - p0;
                 edge2 = p2 - p0;
                 normal = edge1.Cross(edge2);
             }
             normal.FUN_004a0c10();
             if (pick->coordinates == 1)
-                normal = worldTransform.rotation.FUN_004b4500(&normal);
+                normal = reinterpret_cast<Matrix&>(worldTransform.rotation).FUN_004b4500(&normal);
             hit->normal = normal;
         }
         else
-            hit->normal = *reinterpret_cast<const P3*>(&_NiPoint3_ZERO);
+            hit->normal = *reinterpret_cast<const RaycastPoint*>(&_NiPoint3_ZERO);
         if (pick->GetColor())
         {
             Buffer colorBuffer;
@@ -945,33 +1086,15 @@ bool __cdecl RaycastGeometry(const P3* origin, const P3* direction, Pick* pick, 
 
 extern char DAT_011f4248;
 extern "C" void* memcpy(void* dst, const void* src, unsigned int n);
-struct NiPoint3
+__forceinline NiPoint3::NiPoint3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+__forceinline NiPoint3 NiPoint3::operator-(const NiPoint3& pt) const
 {
-    float x, y, z;
-    __forceinline NiPoint3()
-    {}
-    __forceinline NiPoint3(float _x, float _y, float _z) : x(_x), y(_y), z(_z)
-    {}
-    __forceinline NiPoint3 operator-(const NiPoint3& pt) const
-    {
-        return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
-    }
-    __forceinline NiPoint3 operator*(float f) const
-    {
-        return NiPoint3(x * f, y * f, z * f);
-    }
-    __forceinline NiPoint3& operator+=(const NiPoint3& pt)
-    {
-        x += pt.x;
-        y += pt.y;
-        z += pt.z;
-        return *this;
-    }
-    __forceinline float Dot(const NiPoint3& pt) const
-    {
-        return x * pt.x + y * pt.y + z * pt.z;
-    }
-};
+    return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float f) const
+{
+    return NiPoint3(x * f, y * f, z * f);
+}
 
 __forceinline void ScaleOut(float f, NiPoint3& o, const NiPoint3& v)
 {
@@ -997,13 +1120,7 @@ __forceinline void Dot2(const NiPoint3& a, float bx, float by, float bz, float& 
     o = ((a.x * bx) + (a.y) * by) + a.z * (float)bz;
 }
 
-struct ThreeByThreeMatrix
-{
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
-    void GetMatrix(float* a, float* b);
-};
+
 struct OrientedBoxBound
 {
     NiPoint3 m_kCenter;
@@ -1066,7 +1183,7 @@ void OrientedBoxBound::ComputeFromPoints(unsigned short count, const NiPoint3* a
         mat[3] = mat[1];
         mat[6] = mat[2];
         mat[7] = mat[5];
-        ((ThreeByThreeMatrix*)mat)->GetMatrix(afEigenvalue, (float*)&m_akAxis0);
+        ((NiMatrix3*)mat)->EigenSolveSymmetric(afEigenvalue, (NiPoint3*)&m_akAxis0);
         afMin[0] = points[0].x - m_kCenter.x;
         afMin[1] = points[0].y - m_kCenter.y;
         afMin[2] = points[0].z - m_kCenter.z;
@@ -1136,46 +1253,61 @@ void OrientedBoxBound::ComputeFromPoints(unsigned short count, const NiPoint3* a
 }
 
 #include <math.h>
-namespace fnv_00e993d0 {
-struct Vec3
+inline LocalVec3::LocalVec3() {}
+// The Mat3 LocalVec3 members as RaycastShape/IntersectShape use them (Mat3.h declares the NiPoint3 ones).
+struct Mat3LocalView : public Mat3
 {
-
-    float x, y, z;
-    Vec3()
-    {}
-    void AssignOutput(const Vec3& v)
-    {
-        Vec3 copy(v);
-        memcpy(this, &copy, 12);
-    }
-    Vec3& operator=(const Vec3& v)
-    {
-        memcpy(this, &v, sizeof(v));
-        return *this;
-    }
-    Vec3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Vec3 operator+(const Vec3&) const;
-    Vec3 FUN_004b3800(const Vec3&) const;
-    __declspec(noalias) void FUN_004a0c10();
-    Vec3 operator-(const Vec3& v) const
-    {
-        Vec3 r(x - v.x, y - v.y, z - v.z);
-        return r;
-    }
-    Vec3 operator*(float f) const
-    {
-        Vec3 r(x * f, y * f, z * f);
-        return r;
-    }
-    Vec3 Added(const Vec3& v) const
-    {
-        Vec3 r(x + v.x, v.y + y, v.z + z);
-        return r;
-    }
+    LocalVec3 RotateCaptured(const LocalVec3& v, const float& cachedm01, const float& cachedm02, const float& cachedm10) const;
+    LocalVec3 InverseRotate(const float& vx, const float& vy, const float& vz) const;
+    __declspec(noalias) LocalVec3 FUN_004b4500(const LocalVec3& point) const;
 };
+inline LocalVec3 Mat3LocalView::RotateCaptured(const LocalVec3& v, const float& cachedm01, const float& cachedm02, const float& cachedm10) const
+{
+    LocalVec3 r;
+    r.x = v.y * cachedm10 + m00 * v.x + m20 * v.z;
+    r.y = v.x * cachedm01 + v.y * m11 + m21 * v.z;
+    r.z = cachedm02 * v.x + m12 * v.y + v.z * m22;
+    return r;
+}
+inline LocalVec3 Mat3LocalView::InverseRotate(const float& vx, const float& vy, const float& vz) const
+{
+    LocalVec3 r;
+    r.x = vy * m10 + m00 * vx + m20 * vz;
+    r.y = vx * m01 + vy * m11 + m21 * vz;
+    r.z = m02 * vx + m12 * vy + vz * m22;
+    return r;
+}
 
-inline Vec3 ScalePoint(float f, const Vec3& v)
+inline void LocalVec3::AssignOutput(const LocalVec3& v)
+{
+    LocalVec3 copy(v);
+    memcpy(this, &copy, 12);
+}
+inline LocalVec3::LocalVec3(float a, float b, float c) : x(a), y(b), z(c) {}
+inline LocalVec3 LocalVec3::operator-(const LocalVec3& v) const
+{
+    LocalVec3 r(x - v.x, y - v.y, z - v.z);
+    return r;
+}
+inline LocalVec3 LocalVec3::operator*(float f) const
+{
+    LocalVec3 r(x * f, y * f, z * f);
+    return r;
+}
+inline LocalVec3 LocalVec3::Added(const LocalVec3& v) const
+{
+    LocalVec3 r(x + v.x, v.y + y, v.z + z);
+    return r;
+}
+
+namespace fnv_00e993d0 {
+// Keep vector copies as the original three-word memcpy.
+inline void CopyVector(LocalVec3& destination, const LocalVec3& source)
+{
+    memcpy(&destination, &source, sizeof(LocalVec3));
+}
+
+inline LocalVec3 ScalePoint(float f, const LocalVec3& v)
 {
     return v * f;
 }
@@ -1199,68 +1331,16 @@ struct Vec2
     }
     Vec2 operator+(const Vec2&) const;
 };
-struct Vec4
-{
-    float x, y, z, w;
-    Vec4() : x(0), y(0), z(0), w(0)
-    {}
-    Vec4 operator+(const Vec4&) const;
-};
 extern Vec2 __cdecl FUN_00532fd0(float, const Vec2&);
-extern Vec3 __cdecl FUN_004a3760(float, const Vec3&);
+extern LocalVec3 __cdecl FUN_004a3760(float, const LocalVec3&);
 extern Vec4 __cdecl FUN_00532f40(float, const Vec4&);
-
-struct Mat3
-{
-
-    float m00, m01, m02;
-
-    float m10, m11, m12;
-
-    float m20, m21, m22;
-    __declspec(noalias) Vec3 FUN_004b4500(const Vec3&) const;
-    Vec3 RotateCaptured(const Vec3& v, const float& cachedm01, const float& cachedm02, const float& cachedm10) const
-    {
-        Vec3 r;
-        r.x = v.y * cachedm10 + m00 * v.x + m20 * v.z;
-        r.y = v.x * cachedm01 + v.y * m11 + m21 * v.z;
-        r.z = cachedm02 * v.x + m12 * v.y + v.z * m22;
-        return r;
-    }
-    Vec3 InverseRotate(const float& vx, const float& vy, const float& vz) const
-    {
-        Vec3 r;
-        r.x = vy * m10 + m00 * vx + m20 * vz;
-        r.y = vx * m01 + vy * m11 + m21 * vz;
-        r.z = m02 * vx + m12 * vy + vz * m22;
-        return r;
-    }
-};
-
-struct Transform
-{
-
-    Mat3 rotation;
-
-    Vec3 translation;
-
-    float scale;
-};
-
-struct Normal : Vec3
-{
-    Normal()
-    {}
-    Normal(const Vec3& v) : Vec3(v)
-    {}
-};
 
 struct QueryResult
 {
 
     int unk00, unk04;
 
-    Vec3 point;
+    LocalVec3 point;
 
     float distance;
 
@@ -1268,7 +1348,7 @@ struct QueryResult
 
     Vec2 uv;
 
-    Vec3 normal;
+    LocalVec3 normal;
 
     Vec4 tangent;
 };
@@ -1301,7 +1381,7 @@ struct Options
 struct BufferView
 {
 
-    Vec3* data;
+    LocalVec3* data;
 
     int stride;
 
@@ -1408,9 +1488,9 @@ struct Mesh
 
     int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
 
-    Vec3* vertices;
+    LocalVec3* vertices;
 
-    Vec3* normals;
+    LocalVec3* normals;
 
     Vec4* colors;
 
@@ -1444,38 +1524,47 @@ struct Shape
 
     int unk60, unk64;
 
-    Transform world;
+    // NiTransform storage begins at 0x68 without SIMD alignment.
+    unsigned char worldStorage[sizeof(Transform)];
+    Transform& World()
+    {
+        return *reinterpret_cast<Transform*>(worldStorage);
+    }
 
-    int unk9C, unkA0, unkA4, unkA8, unkAC, unkB0, unkB4;
+    // Transform also covers the padding at 0x9c through 0xa7.
+    int unkA8, unkAC, unkB0, unkB4;
 
     Mesh* mesh;
 };
 
-extern bool __cdecl FUN_00eadb90(const Vec3*, const Vec3*, const Vec3*, const Vec3*, const Vec3*, bool, Vec3*, float*,
+extern bool __cdecl FUN_00eadb90(const LocalVec3*, const LocalVec3*, const LocalVec3*, const LocalVec3*, const LocalVec3*, bool, LocalVec3*, float*,
                                  float*, float*);
 
 extern Vec4 DAT_011a9be0;
-extern Vec3 DAT_011f426c;
+extern LocalVec3 DAT_011f426c;
 extern Vec2 DAT_011f4980;
 // @fnv 0x00e993d0
-bool __cdecl IntersectShape(const Vec3* rayStart, const Vec3* rayDirection, Options* options, Shape* shape)
+bool __cdecl IntersectShape(const LocalVec3* rayStart, const LocalVec3* rayDirection, Options* options, Shape* shape)
 {
-    const Transform& xform = shape->world;
-    double cachedm01 = xform.rotation.m01;
-    double cachedm02 = xform.rotation.m02;
-    double cachedm10 = xform.rotation.m10;
-    Vec3 difference = *rayStart - xform.translation;
+    const Transform& xform = shape->World();
+    double cachedm01 = reinterpret_cast<const Mat3&>(xform.rotation).m01;
+    double cachedm02 = reinterpret_cast<const Mat3&>(xform.rotation).m02;
+    double cachedm10 = reinterpret_cast<const Mat3&>(xform.rotation).m10;
+    LocalVec3 difference = *rayStart - *reinterpret_cast<const LocalVec3*>(&xform.position);
     float invScale = 1.0f / xform.scale;
-    difference = xform.rotation.InverseRotate(difference.x, difference.y, difference.z);
-    Vec3 localStart = difference * invScale;
-    difference = xform.rotation.RotateCaptured(*rayDirection, cachedm01, cachedm02, cachedm10);
-    Vec3 localDirection = difference * invScale;
+    CopyVector(difference, *reinterpret_cast<const LocalVec3*>(
+        &reinterpret_cast<const Mat3LocalView&>(xform.rotation).InverseRotate(difference.x, difference.y, difference.z)));
+    LocalVec3 localStart = difference * invScale;
+    CopyVector(difference, *reinterpret_cast<const LocalVec3*>(
+        &reinterpret_cast<const Mat3LocalView&>(xform.rotation).RotateCaptured(
+            *reinterpret_cast<const ::LocalVec3*>(rayDirection), cachedm01, cachedm02, cachedm10)));
+    LocalVec3 localDirection = difference * invScale;
     bool anyHit = false;
     const unsigned short triangleCount = shape->mesh->GetTriangleTotal();
     bool ownsPositions = false;
     Mesh* mesh = shape->mesh;
     BufferView positions = {0, 0, false};
-    Vec3* directVertices = mesh->vertices;
+    LocalVec3* directVertices = mesh->vertices;
     if (!directVertices)
     {
         Stream* stream = mesh->stream;
@@ -1504,23 +1593,23 @@ bool __cdecl IntersectShape(const Vec3* rayStart, const Vec3* rayDirection, Opti
             c = triangles[tri + 2];
             if (a == b || b == c)
                 continue;
-            Vec3 va, vb, vc;
+            LocalVec3 va, vb, vc;
             if (!directVertices)
             {
-                va = *(Vec3*)((unsigned char*)positions.data + a * positions.stride);
-                vb = *(Vec3*)((unsigned char*)positions.data + b * positions.stride);
-                vc = *(Vec3*)((unsigned char*)positions.data + c * positions.stride);
+                CopyVector(va, *(LocalVec3*)((unsigned char*)positions.data + a * positions.stride));
+                CopyVector(vb, *(LocalVec3*)((unsigned char*)positions.data + b * positions.stride));
+                CopyVector(vc, *(LocalVec3*)((unsigned char*)positions.data + c * positions.stride));
             }
             else
             {
-                const Vec3& aVertex = directVertices[a];
-                va = aVertex;
-                const Vec3& bVertex = directVertices[b];
-                vb = bVertex;
-                const Vec3& cVertex = directVertices[c];
-                vc = cVertex;
+                const LocalVec3& aVertex = directVertices[a];
+                CopyVector(va, aVertex);
+                const LocalVec3& bVertex = directVertices[b];
+                CopyVector(vb, bVertex);
+                const LocalVec3& cVertex = directVertices[c];
+                CopyVector(vc, cVertex);
             }
-            Vec3 point;
+            LocalVec3 point;
             float distance, u, v;
             bool frontOnly = options->unk10;
             if (!FUN_00eadb90(&localStart, &localDirection, &va, &vb, &vc, frontOnly, &point, &distance, &u, &v))
@@ -1529,9 +1618,14 @@ bool __cdecl IntersectShape(const Vec3* rayStart, const Vec3* rayDirection, Opti
             QueryResult* result = options->output.GetTexture(shape);
             if (options->coordinateMode == 1)
             {
-                point = ScalePoint(xform.scale, xform.rotation.FUN_004b4500(point)).Added(xform.translation);
+                const LocalVec3& rotated = *reinterpret_cast<const LocalVec3*>(
+                    &reinterpret_cast<const Mat3LocalView&>(xform.rotation).FUN_004b4500(
+                        *reinterpret_cast<const ::LocalVec3*>(&point)));
+                float scale = xform.scale;
+                LocalVec3 scaled(rotated.x * scale, rotated.y * scale, rotated.z * scale);
+                CopyVector(point, scaled.Added(*reinterpret_cast<const LocalVec3*>(&xform.position)));
             }
-            result->point = point;
+            CopyVector(result->point, point);
             result->distance = distance;
             result->triangle = tri;
             result->a = a;
@@ -1580,36 +1674,38 @@ bool __cdecl IntersectShape(const Vec3* rayStart, const Vec3* rayDirection, Opti
             {
                 BufferView normals = {0, 0, false};
                 mesh->GetBounds(&normals);
-                Normal normal;
+                LocalVec3 normal;
                 if (normals.data)
                 {
-                    Vec3 na = *(Vec3*)((unsigned char*)normals.data + a * normals.stride);
-                    Vec3 nb = *(Vec3*)((unsigned char*)normals.data + b * normals.stride);
-                    Vec3 nc = *(Vec3*)((unsigned char*)normals.data + c * normals.stride);
-                    const Vec3& sum = ((na * weight).Added(nb * u)).Added(nc * v);
-                    normal = sum;
+                    LocalVec3 na = *(LocalVec3*)((unsigned char*)normals.data + a * normals.stride);
+                    LocalVec3 nb = *(LocalVec3*)((unsigned char*)normals.data + b * normals.stride);
+                    LocalVec3 nc = *(LocalVec3*)((unsigned char*)normals.data + c * normals.stride);
+                    const LocalVec3& sum = ((na * weight).Added(nb * u)).Added(nc * v);
+                    CopyVector(normal, sum);
                 }
                 else
                 {
-                    Vec3* directNormals;
+                    LocalVec3* directNormals;
                     if (options->needsTangent && (directNormals = shape->mesh->normals) != 0)
-                        normal = FUN_004a3760(weight, directNormals[a]) + FUN_004a3760(u, directNormals[b]) +
-                                 FUN_004a3760(v, directNormals[c]);
+                        CopyVector(normal, FUN_004a3760(weight, directNormals[a]) + FUN_004a3760(u, directNormals[b]) +
+                                 FUN_004a3760(v, directNormals[c]));
                     else
                     {
-                        Vec3 edge1, edge2;
-                        edge1 = vb - va;
-                        edge2 = vc - va;
-                        normal = edge1.FUN_004b3800(edge2);
+                        LocalVec3 edge1, edge2;
+                        CopyVector(edge1, vb - va);
+                        CopyVector(edge2, vc - va);
+                        CopyVector(normal, edge1.FUN_004b3800(edge2));
                     }
                 }
-                normal.FUN_004a0c10();
+                reinterpret_cast<RaycastPoint&>(normal).FUN_004a0c10();
                 if (options->coordinateMode == 1)
-                    static_cast<Vec3&>(normal) = xform.rotation.FUN_004b4500(normal);
+                    CopyVector(normal, *reinterpret_cast<const LocalVec3*>(
+                        &reinterpret_cast<const Mat3LocalView&>(xform.rotation).FUN_004b4500(
+                            *reinterpret_cast<const ::LocalVec3*>(&normal))));
                 result->normal.AssignOutput(normal);
             }
             else
-                result->normal = DAT_011f426c;
+                CopyVector(result->normal, DAT_011f426c);
             if (options->needsColor)
             {
                 BufferView colors = {0, 0, false};
@@ -1651,7 +1747,7 @@ bool __cdecl IntersectShape(const Vec3* rayStart, const Vec3* rayDirection, Opti
     }
 
     QueryResult* result = options->output.GetTexture(shape);
-    Vec3 delta = shape->world.translation - *rayStart;
+    LocalVec3 delta = *reinterpret_cast<const LocalVec3*>(&shape->World().position) - *rayStart;
     float squared = delta.y * delta.y + delta.x * delta.x + delta.z * delta.z;
     squared = sqrt(squared);
     result->distance = squared;
@@ -1659,49 +1755,22 @@ bool __cdecl IntersectShape(const Vec3* rayStart, const Vec3* rayDirection, Opti
 }
 }  // namespace fnv_00e993d0
 
+inline void NiPoint3::AssignOutput(const NiPoint3& v)
+{
+    NiPoint3 copy(v);
+    memcpy(this, &copy, 12);
+}
+inline NiPoint3 NiPoint3::Sum(const NiPoint3& v) const
+{
+    return NiPoint3(x + v.x, y + v.y, z + v.z);
+}
+inline NiPoint3 NiPoint3::Added(const NiPoint3& v) const
+{
+    return NiPoint3(x + v.x, v.y + y, v.z + z);
+}
+
 #include <math.h>
 namespace fnv_00e9b4f0 {
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3()
-    {}
-    void AssignOutput(const NiPoint3& v)
-    {
-        NiPoint3 copy(v);
-        memcpy(this, &copy, 12);
-    }
-    NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    NiPoint3 FUN_00439ef0(const NiPoint3&) const;
-    NiPoint3 FUN_00439e90(const NiPoint3&) const;
-    float FUN_00457990() const;
-    NiPoint3 FUN_004b3800(const NiPoint3&) const;
-    __declspec(noalias) void FUN_004a0c10();
-    NiPoint3 operator-(const NiPoint3& v) const
-    {
-        NiPoint3 r(x - v.x, y - v.y, z - v.z);
-        return r;
-    }
-    NiPoint3 operator*(float f) const
-    {
-        return NiPoint3(x * f, y * f, z * f);
-    }
-    NiPoint3 Sum(const NiPoint3& v) const
-    {
-        return NiPoint3(x + v.x, y + v.y, z + v.z);
-    }
-    NiPoint3 Added(const NiPoint3& v) const
-    {
-        return NiPoint3(x + v.x, v.y + y, v.z + z);
-    }
-    float Dot(const NiPoint3& v) const
-    {
-        return x * v.x + y * v.y + z * v.z;
-    }
-};
-
 inline NiPoint3 ScalePoint(float f, const NiPoint3& v)
 {
     return v * f;
@@ -1726,38 +1795,16 @@ struct Vec2
     }
     Vec2 operator+(const Vec2&) const;
 };
-struct Vec4
-{
-    float x, y, z, w;
-    Vec4() : x(0), y(0), z(0), w(0)
-    {}
-    Vec4 operator+(const Vec4&) const;
-};
 extern Vec2 __cdecl FUN_00532fd0(float, const Vec2&);
 extern NiPoint3 __cdecl FUN_004a3760(float, const NiPoint3&);
 extern Vec4 __cdecl FUN_00532f40(float, const Vec4&);
 extern __declspec(noalias) NiPoint3 __cdecl FUN_004b3ae0(const NiPoint3&, const float*);
 
-struct Mat3
-{
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
-    __declspec(noalias) NiPoint3 FUN_004b4500(const NiPoint3*) const;
-};
 
-struct Transform
-{
-    Mat3 rotation;
-    NiPoint3 translation;
-    float scale;
-};
 
-struct Bound
-{
-    NiPoint3 center;
-    float radius;
-};
+
+
+
 
 struct QueryResult
 {
@@ -1918,8 +1965,14 @@ struct Shape
     int unk24, unk28, unk2C, unk30, unk34, unk38, unk3C;
     int unk40, unk44, unk48, unk4C, unk50, unk54, unk58, unk5C;
     int unk60, unk64;
-    Transform world;
-    int unk9C, unkA0, unkA4, unkA8, unkAC, unkB0, unkB4;
+    // NiTransform storage begins at 0x68 without SIMD alignment.
+    unsigned char worldStorage[sizeof(Transform)];
+    Transform& World()
+    {
+        return *reinterpret_cast<Transform*>(worldStorage);
+    }
+    // Transform also covers the padding at 0x9c through 0xa7.
+    int unkA8, unkAC, unkB0, unkB4;
     Mesh* mesh;
     int unkBC;
 };
@@ -1962,11 +2015,11 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
         }
         else if (FUN_0043b300(&g_011f4a40, shape))
             return RaycastGeometry(rayStart, rayDirection, options, shape);
-        const Transform& xform = shape->world;
-        NiPoint3 difference = *rayStart - xform.translation;
+        const Transform& xform = shape->World();
+        NiPoint3 difference = *rayStart - *reinterpret_cast<const NiPoint3*>(&xform.position);
         float invScale = (float)(1.0f / xform.scale);
-        NiPoint3 localStart = FUN_004b3ae0(difference, &xform.rotation.m00) * invScale;
-        NiPoint3 localDirection = FUN_004b3ae0(*rayDirection, &xform.rotation.m00) * invScale;
+        NiPoint3 localStart = FUN_004b3ae0(difference, &reinterpret_cast<const Mat3&>(xform.rotation).m00) * invScale;
+        NiPoint3 localDirection = FUN_004b3ae0(*rayDirection, &reinterpret_cast<const Mat3&>(xform.rotation).m00) * invScale;
         bool anyHit = false;
         const unsigned short triangleCount = shape->mesh->GetTriangleTotal();
         bool ownsPositions = false;
@@ -1984,7 +2037,7 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
             if (!positions.data)
             {
                 QueryResult* result = options->output.GetTexture(shape);
-                NiPoint3 offset = shape->world.translation.FUN_00439ef0(*rayStart);
+                NiPoint3 offset = reinterpret_cast<const NiPoint3*>(&shape->World().position)->FUN_00439ef0(*rayStart);
                 result->distance = offset.FUN_00457990();
                 return true;
             }
@@ -2014,7 +2067,10 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
                 QueryResult* result = options->output.GetTexture(shape);
                 if (options->coordinateMode == 1)
                 {
-                    point = ScalePoint(xform.scale, xform.rotation.FUN_004b4500(&point)).Added(xform.translation);
+                    point = ScalePoint(xform.scale, *reinterpret_cast<const NiPoint3*>(
+                        &reinterpret_cast<const Mat3&>(xform.rotation).FUN_004b4500(
+                            reinterpret_cast<const ::NiPoint3*>(&point))))
+                        .Added(*reinterpret_cast<const NiPoint3*>(&xform.position));
                 }
                 result->point = point;
                 result->distance = distance;
@@ -2085,9 +2141,12 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
                             normal = edge1.FUN_004b3800(edge2);
                         }
                     }
-                    normal.FUN_004a0c10();
+                    // RaycastPoint declares the same normalize routine with its noalias contract.
+                    reinterpret_cast<RaycastPoint&>(normal).FUN_004a0c10();
                     if (options->coordinateMode == 1)
-                        normal = xform.rotation.FUN_004b4500(&normal);
+                        normal = *reinterpret_cast<const NiPoint3*>(
+                            &reinterpret_cast<const Mat3&>(xform.rotation).FUN_004b4500(
+                                reinterpret_cast<const ::NiPoint3*>(&normal)));
                     result->normal.AssignOutput(normal);
                 }
                 else
@@ -2098,12 +2157,15 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
                     mesh->FUN_00a67660(&colors);
                     if (colors.data)
                     {
-                        Vec4 ca, cb, cc;
-                        colors.FUN_00534780(a, &ca);
-                        colors.FUN_00534780(b, &cb);
-                        colors.FUN_00534780(c, &cc);
-                        Vec4 sum = FUN_00532f40(weight, ca) + FUN_00532f40(u, cb) + FUN_00532f40(v, cc);
-                        result->tangent = sum;
+                        // Preserve zero initialization and trivial copies for color samples.
+                        P4 ca, cb, cc;
+                        colors.FUN_00534780(a, reinterpret_cast<Vec4*>(&ca));
+                        colors.FUN_00534780(b, reinterpret_cast<Vec4*>(&cb));
+                        colors.FUN_00534780(c, reinterpret_cast<Vec4*>(&cc));
+                        Vec4 sum = FUN_00532f40(weight, *reinterpret_cast<const Vec4*>(&ca))
+                            + FUN_00532f40(u, *reinterpret_cast<const Vec4*>(&cb))
+                            + FUN_00532f40(v, *reinterpret_cast<const Vec4*>(&cc));
+                        memcpy(&result->tangent, &sum, sizeof(sum));
                     }
                     else
                     {
@@ -2112,7 +2174,7 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
                         {
                             Vec4 sum = FUN_00532f40(weight, directColors[a]) + FUN_00532f40(u, directColors[b]) +
                                        FUN_00532f40(v, directColors[c]);
-                            result->tangent = sum;
+                            memcpy(&result->tangent, &sum, sizeof(sum));
                         }
                     }
                 }
@@ -2132,7 +2194,7 @@ bool __cdecl RaycastShape(const NiPoint3* rayStart, const NiPoint3* rayDirection
     }
 
     Bound sphere = shape->bound ? *shape->bound : DAT_011f4288;
-    normal = sphere.center - *rayStart;
+    normal = *reinterpret_cast<const NiPoint3*>(&sphere.x) - *rayStart;
     float along = rayDirection->y * normal.y + normal.x * rayDirection->x + normal.z * rayDirection->z;
     if (along < 0.0f)
         return false;
@@ -2177,25 +2239,6 @@ struct TempBounds
     void ComputeFromPoints(unsigned int code, int* point);
 };
 
-struct NiBoundingVolume
-{
-    int vtable;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-};
 struct Helper
 {
     NiBoundingVolume* FUN_00ea0820(const NiPoint3&, const NiPoint3&, const NiPoint3&, const NiPoint3&, const NiPoint3&);

@@ -1,3 +1,5 @@
+#include "../../include/NiTMapItem.h"
+#include "../../include/NiTListItem.h"
 
 // src/staging/blk_00ae0000_od_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/staging/blk_00ae0000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,7 +7,16 @@
 
 // src/staging/blk_00ae0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include <stddef.h>
+#pragma pack(push, 4)
+#include "../../include/BSAudio.h"
+#include "../../include/BSFile.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiObjPtr.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiRefObject.h"
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
 extern int DAT_010a42b4;
 void* __cdecl _fnv_zlib_memset(void* p, int c, unsigned int n);
 struct FUN_00af30a0_Class
@@ -123,7 +134,6 @@ struct FUN_00afd960_Class
     int iField;
     void FUN_00afd960();
 };
-struct NiFile;
 struct FileFinder
 {
     static NiFile* __cdecl GetFile(const char*, int, unsigned int, unsigned int);
@@ -149,10 +159,6 @@ struct FUN_00aea730_Class
     int m_kPointB;
     FUN_00aea730_Class* FUN_00aea730(int v);
 };
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00aeaa80_Class
 {
@@ -167,11 +173,6 @@ struct FUN_00aefcf0_Class
 struct FUN_00af1d20_Class
 {
     void* FUN_00af1d20();
-};
-struct BSFile
-{
-    void __thiscall Close();
-    virtual ~BSFile();
 };
 int __cdecl CloseAndDeleteFile(BSFile* f);
 struct DownloadableContentManager
@@ -247,11 +248,6 @@ struct FUN_00afd8b0_Class
     unsigned int uiCRC;
     unsigned short m_usPassCountLocal;
     void* __thiscall FUN_00afd8b0();
-};
-struct BSAudio
-{
-    char pad[0x38];
-    void* pAudio;
 };
 extern BSAudio* DAT_011f6d98;
 struct FUN_00af1ba0_Class
@@ -587,28 +583,21 @@ class AE91F0Map
     void ClearAll();
 };
 extern int(__stdcall* FUN_00fdf1c4)(char*);
-struct S_00ae9290_Object
-{
-// @fnv 0x00ae9290
-    virtual void FUN_00ae9290_f0()
-    {}
-    virtual void FUN_00ae9290_f1()
-    {}
-};
 struct S_00ae9290_Class
 {
     void* p;
 
     void __thiscall FUN_00ae9290();
 };
+// @fnv 0x00ae9290
 void __thiscall S_00ae9290_Class::FUN_00ae9290()
 {
     if (this->p != 0)
     {
         char* p = (char*)this->p;
 
-        if (FUN_00fdf1c4(p + 4) == 0)
-            ((S_00ae9290_Object*)p)->FUN_00ae9290_f1();
+        if (FUN_00fdf1c4((char*)&((NiRefObject*)p)->m_uiRefCount) == 0)
+            ((NiRefObject*)p)->DeleteThis();
     }
 }
 extern "C" __declspec(dllimport) unsigned long __stdcall GetTickCount();
@@ -814,13 +803,6 @@ struct MMStub
     void* __thiscall Allocate(unsigned int size);
 };
 extern MMStub g_mmStub;
-class NiPoint3
-{
-  public:
-    float x;
-    float y;
-    float z;
-};
 extern const NiPoint3 NiPoint3_ZERO;
 struct Stub1A4
 {
@@ -3185,46 +3167,35 @@ class FUN_00aff090_cls
     void CloseHandleWrapper();
 };
 
-class NiRefObject
+inline void NiRefObject::IncRefCount()
 {
-  public:
-    virtual void v00();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
+    InterlockedIncrement((volatile long*)&m_uiRefCount);
+}
 
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
-struct NiObjPtr
+inline void NiRefObject::DecRefCount()
 {
-    NiRefObject* m_pObject;
+    if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
 
-    NiObjPtr& operator=(const NiObjPtr& other)
+inline NiObjPtr& NiObjPtr::operator=(const NiObjPtr& other)
+{
+    if (m_pObject != other.m_pObject)
     {
-        if (m_pObject != other.m_pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = other.m_pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    ~NiObjPtr()
-    {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
+        m_pObject = other.m_pObject;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
     }
-};
+    return *this;
+}
+
+inline NiObjPtr::~NiObjPtr()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
 
 struct AE8DE0_Record
 {
@@ -3391,12 +3362,6 @@ struct SndInfo
     int f8;
 };
 
-struct Mgr
-{
-    void* __thiscall FUN_00aa3e40(unsigned int n);
-    void __thiscall FUN_00aa4060(void* p);
-};
-extern "C" char DAT_011f6238;
 
 struct AF1d80
 {
@@ -3597,11 +3562,11 @@ struct AF1d80
     }
     static void* operator new(unsigned int n)
     {
-        return ((Mgr*)&DAT_011f6238)->FUN_00aa3e40(n);
+        return g_memoryManager.Allocate(n);
     }
     static void operator delete(void* p)
     {
-        ((Mgr*)&DAT_011f6238)->FUN_00aa4060(p);
+        g_memoryManager.Deallocate(p);
     }
 
     __forceinline int SamplesPerSec()
@@ -3780,7 +3745,7 @@ struct AudioBuffer
     }
     __forceinline void* AllocSnd(unsigned int n)
     {
-        void* p = ((Mgr*)&DAT_011f6238)->FUN_00aa3e40(n);
+        void* p = g_memoryManager.Allocate(n);
         return p;
     }
 
@@ -3807,7 +3772,7 @@ struct AudioBuffer
             nSize = this->m1ac + (this->m1b4->dwAvgBytesPerSec >> 1);
         else
             nSize = this->m1ac;
-        p = ((Mgr*)&DAT_011f6238)->FUN_00aa3e40(nSize);
+        p = g_memoryManager.Allocate(nSize);
         this->m1c8 = p;
         _fnv_zlib_memset(this->GetBuffer(), 0, nSize);
         this->m34 = this->m1b4->dwSamplesPerSec;
@@ -3852,12 +3817,7 @@ bool AudioBuffer::FUN_00aebff0()
     return Setup(bHalf, nSize);
 }
 
-struct AE8150_Node
-{
-    AE8150_Node* m_pkNext;
-    AE8150_Node* m_pkPrev;
-    void* m_element;
-};
+typedef NiTListItem<void* > AE8150_Node;
 typedef AE8150_Node* AE8150_Pos;
 struct AE8150_List
 {
@@ -3921,25 +3881,15 @@ FUN_00ae8c60::~FUN_00ae8c60()
 
 void __cdecl NiFree8D10(void* pvMem);
 
-struct MemoryManager8D10
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManager8D10 g_kMemoryManager8D10;
 
-struct MapItem8D10
-{
-    MapItem8D10* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+
 
 class MapBase8D10
 {
   public:
     static void operator delete(void* pvMem)
     {
-        g_kMemoryManager8D10.Deallocate(pvMem);
+        g_memoryManager.Deallocate(pvMem);
     }
     virtual ~MapBase8D10()
     {
@@ -3948,17 +3898,17 @@ class MapBase8D10
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItem8D10* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItem8D10* pkItem);
-    virtual MapItem8D10* NewItem();
-    virtual void DeleteItem(MapItem8D10* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
     void RemoveAll()
     {
         for (unsigned int i = 0; i < m_uiHashSize; i++)
         {
             while (m_ppkHashTable[i])
             {
-                MapItem8D10* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -3967,7 +3917,7 @@ class MapBase8D10
         m_uiCount = 0;
     }
     unsigned int m_uiHashSize;
-    MapItem8D10** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 class FUN_00ae8d10 : public MapBase8D10
@@ -5031,15 +4981,10 @@ void ArchiveHeader::FUN_00afd9d0()
     NiEndianSwap(m_usElementCount, Flag());
 }
 
-struct MemoryManagerAllocator
-{
-    void* Allocate(unsigned int size);
-};
-extern MemoryManagerAllocator g_memoryAllocator;
 
 inline void* operator new[](unsigned int size)
 {
-    return g_memoryAllocator.Allocate(size);
+    return g_memoryManager.Allocate(size);
 }
 inline void operator delete[](void* p)
 {
@@ -5300,11 +5245,6 @@ FileFinderImpl::~FileFinderImpl()
     }
 }
 
-struct MgrAF
-{
-    void* FUN_00aa3e40(unsigned int);
-    void FUN_00aa4060(void*);
-};
 struct GuidAF
 {
     unsigned int a;
@@ -5417,12 +5357,12 @@ inline unsigned int& LimitAF()
 }
 inline void* AllocateAF(unsigned int size)
 {
-    void* p = ((MgrAF*)&DAT_011f6238)->FUN_00aa3e40(size);
+    void* p = g_memoryManager.Allocate(size);
     return p;
 }
 inline void FreeAF(void* p)
 {
-    ((MgrAF*)&DAT_011f6238)->FUN_00aa4060(p);
+    g_memoryManager.Deallocate(p);
 }
 inline void ZeroAF(void* dest, unsigned int size)
 {
@@ -5609,13 +5549,13 @@ bool AF1430::FUN_00af1430()
                     desc.flags |= 0x2a0;
                     desc.bytes = unk1dc + (unsigned int)(unk1dc * 0.25);
                     desc.guid = *(GuidAF*)&DAT_01093f04;
-                    allocatedB = ((MgrAF*)&DAT_011f6238)->FUN_00aa3e40(0x12);
+                    allocatedB = g_memoryManager.Allocate(0x12);
                     desc.format = allocatedB;
                     source->Format(desc.format, 0x12, &n);
                     DAT_011f7128++;
                     if (device->Create(&desc, (void**)&created, 0) < 0)
                     {
-                        (free1_2 = desc.format, ((MgrAF*)&DAT_011f6238)->FUN_00aa4060(free1_2));
+                        (free1_2 = desc.format, g_memoryManager.Deallocate(free1_2));
                         return false;
                     }
                     created->Query((void*)&DAT_01100f94, (void**)&buffer);
@@ -5623,7 +5563,7 @@ bool AF1430::FUN_00af1430()
                         buffer->Query((void*)&DAT_01100fb4, &unkEffect);
                     else
                     {
-                        (CSA2 = desc.format, ((MgrAF*)&DAT_011f6238)->FUN_00aa4060(CSA2));
+                        (CSA2 = desc.format, g_memoryManager.Deallocate(CSA2));
                         return false;
                     }
                     effect.size = 0x20;
@@ -5649,7 +5589,7 @@ bool AF1430::FUN_00af1430()
                     n = 0;
                     if (buffer->Lock(0, 0, &dst2BytesTmp, &n, &dst2Bytes3, &n222, 2) < 0)
                     {
-                        (CSA6 = desc.format, ((MgrAF*)&DAT_011f6238)->FUN_00aa4060(CSA6));
+                        (CSA6 = desc.format, g_memoryManager.Deallocate(CSA6));
                         return false;
                     }
                     if (source->Lock(0, 0, &src1Bytes2, &CNA, &src2Bytes, &srcn8, 2) >= 0)
@@ -5659,7 +5599,7 @@ bool AF1430::FUN_00af1430()
                         source->Unlock(src1Bytes2, CNA, src2Bytes, srcn8);
                     }
                     buffer->Unlock(dst2BytesTmp, n, dst2Bytes3, n222);
-                    (CSAB = desc.format, ((MgrAF*)&DAT_011f6238)->FUN_00aa4060(CSAB));
+                    (CSAB = desc.format, g_memoryManager.Deallocate(CSAB));
                     return true;
                 }
             }
@@ -6031,3 +5971,5 @@ void AudioSound::FUN_00aed990()
         }
     }
 }
+
+#pragma pack(pop)

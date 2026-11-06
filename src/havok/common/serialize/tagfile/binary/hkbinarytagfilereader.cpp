@@ -2,6 +2,12 @@
 // src/havok/common/serialize/tagfile/binary/hkbinarytagfilereader.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/tagfile/binary/hkbinarytagfilereader.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkDataClassImpl.h"
+#include "../../../../../../include/hkBinaryTagfileReader.h"
+
 extern "C" void* DAT_010d6ce8;
 
 struct FUN_00dc5d30
@@ -24,28 +30,13 @@ struct hkBinaryTagFileReaderVirtualObject
     virtual void FreeAllBlocks(int);
 };
 
-struct hkMemoryRouterContext
-{
-    virtual void FUN_00d00000();
-    virtual void FUN_00d00004();
-    virtual void FUN_00d00008();
-    virtual void FUN_00d0000c();
-    virtual void Free(void*, unsigned int);
-};
-
-struct NineIntegerRecord
-{
-    void* m_p00;
-    void* m_p04;
-    void* m_p08;
-    void* m_p0c;
-    hkMemoryRouterContext* m_p10;
-};
-
-NineIntegerRecord* __cdecl _D1A0E0GetMemoryRouter();
+hkMemoryRouter* __cdecl _D1A0E0GetMemoryRouter();
 void __cdecl _FUN_00c856c0(void*, void*);
 
-struct hkLargeBlockAllocator
+// Not hkLargeBlockAllocator: 0x00dc6020 destroys a tagfile reader object (owned
+// object at +0x14, three hkArrays at +0x18/+0x24/+0x30) and tail-calls the hkIArchive
+// destructor body 0x00dd91f0 for the archive at +0. Real class name unknown.
+struct FUN_00dc6020_cls
 {
     void* m_p00;
     void* m_p04;
@@ -68,7 +59,7 @@ struct hkLargeBlockAllocator
 };
 
 // @fnv 0x00dc6020
-void hkLargeBlockAllocator::FreeAllBlocks()
+void FUN_00dc6020_cls::FreeAllBlocks()
 {
     if (m_p14)
         m_p14->FreeAllBlocks(1);
@@ -79,57 +70,48 @@ void hkLargeBlockAllocator::FreeAllBlocks()
         do
         {
             void* item = m_p24[i];
-            NineIntegerRecord* router = _D1A0E0GetMemoryRouter();
-            _FUN_00c856c0(router->m_p10, item);
+            hkMemoryRouter* router = _D1A0E0GetMemoryRouter();
+            _FUN_00c856c0(router->m_heap, item);
             ++i;
         } while (i < m_n28);
     }
 
-    NineIntegerRecord* router = _D1A0E0GetMemoryRouter();
-    hkMemoryRouterContext* context = router->m_p10;
+    hkMemoryRouter* router = _D1A0E0GetMemoryRouter();
+    hkMemoryAllocator* context = router->m_heap;
     unsigned int flags = m_flags38;
     m_n34 = 0;
     if (!(flags & 0x80000000))
-        context->Free(m_p30, (flags & 0x3fffffff) * 4);
+        context->bufFree(m_p30, (flags & 0x3fffffff) * 4);
     m_p30 = 0;
     m_flags38 = 0x80000000;
 
     router = _D1A0E0GetMemoryRouter();
-    context = router->m_p10;
+    context = router->m_heap;
     flags = m_flags2c;
     m_n28 = 0;
     if (!(flags & 0x80000000))
-        context->Free(m_p24, (flags & 0x3fffffff) * 4);
+        context->bufFree(m_p24, (flags & 0x3fffffff) * 4);
     m_p24 = 0;
     m_flags2c = 0x80000000;
 
     router = _D1A0E0GetMemoryRouter();
-    context = router->m_p10;
+    context = router->m_heap;
     flags = m_flags20;
     m_n1c = 0;
     if (!(flags & 0x80000000))
-        context->Free(m_p18, (flags & 0x3fffffff) * 4);
+        context->bufFree(m_p18, (flags & 0x3fffffff) * 4);
     m_p18 = 0;
     m_flags20 = 0x80000000;
 
     return FUN_00dd91f0();
 }
 
-class hkMemoryAllocatorDC5D;
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 
-struct hkMemoryRouterDC5D
+inline hkMemoryAllocator& readerHeap(hkMemoryRouter& router)
 {
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorDC5D* m_pStreamAllocator;
-    hkMemoryAllocatorDC5D& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterDC5D& __cdecl FUN_00c85750();
+    return *router.m_heap;
+}
 
 void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iElemSize);
 
@@ -139,128 +121,63 @@ template <class T> __forceinline void constructWithCopyDC5D(T* p, int n, const T
         p[i] = t;
 }
 
-template <class T> class hkArrayDC5D
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+    return readerHeap(FUN_00c85750());
+}
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void AddBack(const T& t)
-    {
-        hkMemoryAllocatorDC5D& kAlloc = FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&kAlloc, this, sizeof(T));
-        constructWithCopyDC5D(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-};
-
-char* __cdecl AllocateWithHeader(hkMemoryAllocatorDC5D* pkAlloc, int iNumBytes) throw();
-
-class hkBinaryReaderDC5D
+template <class T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& kAlloc, const T& t)
 {
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    hkArrayDC5D<char*> m_pStringFunctions;
+    if (m_iElementCount == getCapacity())
+        ResizeAudioStream(&kAlloc, this, sizeof(T));
+    constructWithCopyDC5D(m_data + m_iElementCount, 1, t);
+    m_iElementCount++;
+}
 
-    int FUN_00dc5bd0() throw();
-    void FUN_00dd90d0(void* pvBuf, int iNumBytes) throw();
-    char* ReadString();
-};
+char* __cdecl AllocateWithHeader(hkMemoryAllocator* pkAlloc, int iNumBytes) throw();
 
 // @fnv 0x00dc5d90
-char* hkBinaryReaderDC5D::ReadString()
+char* hkBinaryTagfileReader::ReadString()
 {
     int iLen = FUN_00dc5bd0();
     if (iLen > 0)
     {
-        char* pcString = AllocateWithHeader(&FUN_00c85750().heap(), iLen + 1);
+        char* pcString = AllocateWithHeader(&readerHeap(FUN_00c85750()), iLen + 1);
         FUN_00dd90d0(pcString, iLen);
         pcString[iLen] = 0;
-        m_pStringFunctions.AddBack(pcString);
+        m_pStringFunctions.pushBack(pcString);
         return pcString;
     }
     return m_pStringFunctions.m_data[-iLen];
 }
 
-namespace fnv_00dc5e10 {
-struct hkAllocatorDC5E
+void __cdecl FUN_00c908c0(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
+
+template <typename T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& kAlloc, int n)
 {
-    virtual void V0() throw();
-};
+    const int iCapacity = getCapacity();
+    if (iCapacity < n)
+    {
+        int iCap2 = 2 * iCapacity;
+        int iNewSize = (n < iCap2) ? iCap2 : n;
+        FUN_00c908c0(kAlloc, this, iNewSize, sizeof(T));
+    }
+}
 
-struct hkMemoryRouterDC5E
+template <typename T> __forceinline void hkArrayBase<T>::_setSize(hkMemoryAllocator& kAlloc, int n)
 {
-    void* m_apvUnk00[4];
-    hkAllocatorDC5E* m_pkHeap;
-    hkAllocatorDC5E& heap()
-    {
-        return *m_pkHeap;
-    }
-};
-extern "C" hkMemoryRouterDC5E* __cdecl FUN_00c85750() throw();
-
-void __cdecl FUN_00c908c0(hkAllocatorDC5E& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
-
-template <typename T> struct hkArrayDC5E
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    void GrowArrayCapacity(hkAllocatorDC5E& kAlloc, int n)
-    {
-        const int iCapacity = getCapacity();
-        if (iCapacity < n)
-        {
-            int iCap2 = 2 * iCapacity;
-            int iNewSize = (n < iCap2) ? iCap2 : n;
-            FUN_00c908c0(kAlloc, this, iNewSize, sizeof(T));
-        }
-    }
-    void SetSizeAndGrow(int n)
-    {
-        GrowArrayCapacity(FUN_00c85750()->heap(), n);
-        m_iElementCount = n;
-    }
-};
-
-class hkBinaryTagfileReaderDC5E
-{
-  public:
-    void FUN_00dd8fe0(void* pvBuf, int iElemSize, int iNumElems) throw();
-    void ReadBits(int iNumBits, hkArrayDC5E<char>& kBitsOut) throw();
-};
+    GrowArrayCapacity(kAlloc, n);
+    m_iElementCount = n;
+}
 
 // Reads iNumBits bits from the tagfile into kBitsOut, unpacking each byte least-significant bit first, then resizes the array to iNumBits.
 // @fnv 0x00dc5e10
-void hkBinaryTagfileReaderDC5E::ReadBits(int iNumBits, hkArrayDC5E<char>& kBitsOut) throw()
+void hkBinaryTagfileReader::ReadBits(int iNumBits, hkArray<char>& kBitsOut) throw()
 {
     int iNumBitsRounded = (iNumBits + 7) & ~7;
     int iNumBytes = iNumBitsRounded / 8;
     unsigned int auiBuf[16];
-    kBitsOut.SetSizeAndGrow(iNumBitsRounded);
+    kBitsOut.setSize(iNumBitsRounded);
     FUN_00dd8fe0(auiBuf, 1, iNumBytes);
     for (int i = 0; i < iNumBytes; i++)
     {
@@ -271,21 +188,13 @@ void hkBinaryTagfileReaderDC5E::ReadBits(int iNumBits, hkArrayDC5E<char>& kBitsO
             uiByte >>= 1;
         }
     }
-    kBitsOut.SetSizeAndGrow(iNumBits);
+    kBitsOut.setSize(iNumBits);
 }
-}  // namespace fnv_00dc5e10
 
 extern "C" char* __fastcall ReadString(void* p);
 extern "C" int __fastcall FUN_00dc5bd0(void* p);
 void __cdecl FUN_00c908c0(void*, void*, int, int);
 void __cdecl ResizeAudioStream(void*, void*, int);
-
-struct VirtualObject
-{
-    virtual void dummy0();
-    virtual void dummy1();
-    virtual void* vtable_8();
-};
 
 struct Struct3;
 
@@ -311,21 +220,21 @@ struct Item
     char* m_altName;
 };
 
-static __forceinline void __fastcall callFree(hkMemoryRouterContext* ctx, void* p, unsigned int size)
+static __forceinline void __fastcall callFree(hkMemoryAllocator* ctx, void* p, unsigned int size)
 {
-    ctx->Free(p, size);
+    ctx->bufFree(p, size);
 }
 
-struct ItemArray
-{
+struct ItemArrayLocalForm
+{ // local form of hkArray: 0x00dc6c90 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     Item* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
     void ClearAndRelease()
     {
-        NineIntegerRecord* r = _D1A0E0GetMemoryRouter();
-        hkMemoryRouterContext* ctx = r->m_p10;
+        hkMemoryRouter* r = _D1A0E0GetMemoryRouter();
+        hkMemoryAllocator* ctx = r->m_heap;
         int cap = m_iCapacityState;
         m_iElementCount = 0;
         if ((cap & 0x80000000) == 0)
@@ -339,8 +248,8 @@ struct Struct3
 {
     char* m_str;
     int m_type;
-    void* m_obj;
-    ItemArray m_items;
+    const char* m_obj;
+    ItemArrayLocalForm m_items;
 };
 
 template <class T> inline void constructWithCopy(T* destination, const T* source, int count)
@@ -348,16 +257,7 @@ template <class T> inline void constructWithCopy(T* destination, const T* source
     for (int i = 0; i < count; ++i)
         destination[i] = source[i];
 }
-template <class T> struct ObjectArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    T& operator[](int index)
-    {
-        return m_data[index];
-    }
-};
+
 
 struct TagFileReader
 {
@@ -367,9 +267,9 @@ struct TagFileReader
     void* unk0c;
     Field10Class* m_p10;
     hkBinaryTagFileReaderVirtualObject* m_p14;
-    ObjectArray<VirtualObject*> m_kTrackedObjects;
-    ObjectArray<void*> m_objects24;
-    ObjectArray<void*> m_objects30;
+    hkArrayBase<hkDataClassImpl*> m_kTrackedObjects;
+    hkArrayBase<void*> m_objects24;
+    hkArrayBase<void*> m_objects30;
     Field10Class* getP10()
     {
         return m_p10;
@@ -404,7 +304,7 @@ int TagFileReader::ReadTagFileEntry()
     int iObjectIndex = FUN_00dc5bd0(this);
     if (iObjectIndex >= 0 && m_kTrackedObjects[iObjectIndex])
     {
-        entry.s.m_obj = m_kTrackedObjects[iObjectIndex]->vtable_8();
+        entry.s.m_obj = m_kTrackedObjects[iObjectIndex]->getName(); // src: HAVOK_SRC
     }
     else
     {
@@ -413,8 +313,8 @@ int TagFileReader::ReadTagFileEntry()
 
     int iItemCount = FUN_00dc5bd0(this);
     {
-        NineIntegerRecord* r = _D1A0E0GetMemoryRouter();
-        hkMemoryRouterContext* ctx = r->m_p10;
+        hkMemoryRouter* r = _D1A0E0GetMemoryRouter();
+        hkMemoryAllocator* ctx = r->m_heap;
         int iNewCapacity = entry.s.m_items.m_iCapacityState & 0x3fffffff;
         if (iNewCapacity < iItemCount)
         {
@@ -444,13 +344,13 @@ int TagFileReader::ReadTagFileEntry()
 
     void* pResult = getP10()->vtable_0c(&entry.s);
     {
-        ObjectArray<VirtualObject*>* targetArr = &m_kTrackedObjects;
-        NineIntegerRecord* r = _D1A0E0GetMemoryRouter();
+        hkArrayBase<hkDataClassImpl*>* targetArr = &m_kTrackedObjects;
+        hkMemoryRouter* r = _D1A0E0GetMemoryRouter();
         if (targetArr->m_iElementCount == (targetArr->m_iCapacityState & 0x3fffffff))
         {
-            ResizeAudioStream(r->m_p10, targetArr, 4);
+            ResizeAudioStream(r->m_heap, targetArr, 4);
         }
-        VirtualObject* pStoredObject = static_cast<VirtualObject*>(pResult);
+        hkDataClassImpl* pStoredObject = static_cast<hkDataClassImpl*>(pResult);
         constructWithCopy(targetArr->m_data + targetArr->m_iElementCount, &pStoredObject, 1);
         ++targetArr->m_iElementCount;
     }
@@ -459,13 +359,7 @@ int TagFileReader::ReadTagFileEntry()
     return 0;
 }
 
-struct ReaderDC5BD0
-{
-    int FUN_00dd8fe0(void* pvBuffer, int iSize, int iCount);
-    int FUN_00dc5bd0();
-};
-
-__forceinline void ReadVarIntDC5BD0(ReaderDC5BD0& kReader, __int64& kValue)
+__forceinline void ReadTagfileVarInt(hkBinaryTagfileReader& kReader, __int64& kValue)
 {
     unsigned char ucByte;
     kReader.FUN_00dd8fe0(&ucByte, 1, 1);
@@ -490,22 +384,16 @@ __forceinline void ReadVarIntDC5BD0(ReaderDC5BD0& kReader, __int64& kValue)
 
 // Reads a variable-length integer from the reader and returns it as a 32-bit signed value.
 // @fnv 0x00dc5bd0
-int ReaderDC5BD0::FUN_00dc5bd0()
+int hkBinaryTagfileReader::FUN_00dc5bd0() throw()
 {
     __int64 iVarInt;
-    ReadVarIntDC5BD0(*this, iVarInt);
+    ReadTagfileVarInt(*this, iVarInt);
     return (int)iVarInt;
 }
 
-struct ReaderDC5C80
-{
-    int FUN_00dd8fe0(void* pvBuffer, int iSize, int iCount);
-    __int64 ReadVarInt();
-};
-
 // Reads a variable-length signed integer and returns the decoded value.
 // @fnv 0x00dc5c80
-__int64 ReaderDC5C80::ReadVarInt()
+__int64 hkBinaryTagfileReader::ReadVarInt()
 {
     unsigned char ucByte;
     FUN_00dd8fe0(&ucByte, 1, 1);
@@ -621,30 +509,30 @@ S00dc5f30_Obj* S00dc5f30_Obj::FUN_00dc5f30(int a0, int a1)
     m_hl30.m_uiValueCount = 0;
     m_hl30.m_flags = 0x80000000;
 
-    hkMemoryRouterDC5D& r = FUN_00c85750();
+    hkMemoryRouter& r = FUN_00c85750();
     if (pFirstList->m_uiValueCount == (pFirstList->m_flags & 0x3fffffff))
     {
-        ResizeAudioStream(r.m_pStreamAllocator, pFirstList, 4);
+        ResizeAudioStream(r.m_heap, pFirstList, 4);
     }
     void** pSlot = (void**)pFirstList->m_p + pFirstList->m_uiValueCount;
     __assume(pSlot != 0);
     new (pSlot) void * (0);
     ++pFirstList->m_uiValueCount;
 
-    hkMemoryRouterDC5D& r2 = FUN_00c85750();
+    hkMemoryRouter& r2 = FUN_00c85750();
     if (pSecondList->m_uiValueCount == (pSecondList->m_flags & 0x3fffffff))
     {
-        ResizeAudioStream(r2.m_pStreamAllocator, pSecondList, 4);
+        ResizeAudioStream(r2.m_heap, pSecondList, 4);
     }
     void** pSlot2 = (void**)pSecondList->m_p + pSecondList->m_uiValueCount;
     __assume(pSlot2 != 0);
     new (pSlot2) void*(&DAT_01011584);
     pSecondList->m_uiValueCount += 1;
 
-    hkMemoryRouterDC5D& r3 = FUN_00c85750();
+    hkMemoryRouter& r3 = FUN_00c85750();
     if (pSecondList->m_uiValueCount == (pSecondList->m_flags & 0x3fffffff))
     {
-        ResizeAudioStream(r3.m_pStreamAllocator, pSecondList, 4);
+        ResizeAudioStream(r3.m_heap, pSecondList, 4);
     }
     void** pSlot3 = (void**)pSecondList->m_p + pSecondList->m_uiValueCount;
     __assume(pSlot3 != 0);
@@ -654,15 +542,6 @@ S00dc5f30_Obj* S00dc5f30_Obj::FUN_00dc5f30(int a0, int a1)
     return this;
 }
 
-class hkMemoryAllocatorDC5D
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void ReturnMemory(void* pvData, int iNumBytes);
-};
 template <typename T> __forceinline void ConstructTF(T* p, int n)
 {
     for (int i = 0; i < n; ++i)
@@ -673,16 +552,16 @@ template <typename T> __forceinline void ConstructWithCopyTF(T* p, int n, const 
     for (int i = 0; i < n; ++i)
         p[i] = t;
 }
-template <typename T> struct hkArrayTF
-{
-    hkArrayTF() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
+template <typename T> struct hkArrayTFLocalForm
+{ // local form of hkArray: 0x00dc6970 needs the original inline/out-of-line helper split; shared replacement changes bytes.
+    hkArrayTFLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {}
     __forceinline void clearStorage()
     {
-        hkMemoryAllocatorDC5D& kAlloc = FUN_00c85750().heap();
+        hkMemoryAllocator& kAlloc = readerHeap(FUN_00c85750());
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
+            kAlloc.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
         m_data = 0;
         m_iCapacityState = 0x80000000;
     }
@@ -700,7 +579,7 @@ template <typename T> struct hkArrayTF
     }
     __forceinline void AddBack(const T& t)
     {
-        hkMemoryAllocatorDC5D& kAlloc = FUN_00c85750().heap();
+        hkMemoryAllocator& kAlloc = readerHeap(FUN_00c85750());
         if (m_iElementCount == getCapacity())
             ResizeAudioStream(&kAlloc, this, sizeof(T));
         ConstructWithCopyTF(m_data + m_iElementCount, 1, t);
@@ -715,13 +594,13 @@ template <typename T> struct hkArrayTF
     int m_iElementCount;
     int m_iCapacityState;
 };
-template <typename T> struct hkLocalArrayTF : public hkArrayTF<T>
+template <typename T> struct hkLocalArrayTF : public hkArrayTFLocalForm<T>
 {
     __forceinline hkLocalArrayTF(int n)
     {
-        hkMemoryRouterDC5D& kRouter = FUN_00c85750();
-        T* pLocal = (T*)kRouter.m_00;
-        kRouter.m_00 = (int)((char*)pLocal + ((n * sizeof(T) + 0x7f) & ~0x7f));
+        hkMemoryRouter& kRouter = FUN_00c85750();
+        T* pLocal = (T*)kRouter.m_stack.m_next.m_storage;
+        kRouter.m_stack.m_next.m_storage = (void*)((int)((char*)pLocal + ((n * sizeof(T) + 0x7f) & ~0x7f)));
         this->m_data = pLocal;
         this->m_iCapacityState = n | 0x80000000;
         m_pStackAllocation = pLocal;
@@ -731,7 +610,7 @@ template <typename T> struct hkLocalArrayTF : public hkArrayTF<T>
         T* pLocal = m_pStackAllocation;
         if (pLocal == this->m_data)
             this->m_iElementCount = 0;
-        FUN_00c85750().m_00 = (int)pLocal;
+        FUN_00c85750().m_stack.m_next.m_storage = (void*)((int)pLocal);
     }
     T* m_pStackAllocation;
 };
@@ -767,7 +646,6 @@ class hkErrorTF
     virtual int message(int eType, int aiSoundId, const char* pcDescription, const char* pcFile, int iLine);
 };
 extern hkErrorTF* DAT_01268360;
-struct hkDataClassImplTF;
 struct hkDataObjectImplTF;
 struct MemberInfoTF
 {
@@ -782,7 +660,7 @@ struct MemberInfoTF
 class hkDataClassTF
 {
   public:
-    hkDataClassTF(hkDataClassImplTF* pkImpl)
+    hkDataClassTF(hkDataClassImpl* pkImpl)
     {
         FUN_00dba650(pkImpl);
     }
@@ -790,11 +668,11 @@ class hkDataClassTF
     {
         FUN_00dba660();
     }
-    void FUN_00dba650(hkDataClassImplTF* pkImpl);
+    void FUN_00dba650(hkDataClassImpl* pkImpl);
     void FUN_00dba660();
     int FUN_00dba730() const;
-    void DispatchItems(hkArrayTF<MemberInfoTF>& kInfo) const;
-    hkDataClassImplTF* m_pClassImpl;
+    void DispatchItems(hkArrayTFLocalForm<MemberInfoTF>& kInfo) const;
+    hkDataClassImpl* m_pClassImpl;
 };
 struct ValueRawTF
 {
@@ -868,7 +746,7 @@ class hkBinaryTagfileReaderTF
     {
         return ::FUN_00dc5bd0(this);
     }
-    void ReadBits(int iNumMembers, hkArrayTF<bool>& kUsed);
+    void ReadBits(int iNumMembers, hkArrayTFLocalForm<bool>& kUsed);
     void FUN_00dc6720(hkDataObjectImplTF* impl, void* handle, const MemberInfoTF& kInfo);
     hkDataObjectTF FUN_00dc6970(int aiAllocationTag);
     int unk00;
@@ -877,11 +755,11 @@ class hkBinaryTagfileReaderTF
     int unk0C;
     hkDataWorldTF* m_pOwningWorld;
     int unk14;
-    hkArrayTF<hkDataClassImplTF*> m_kLookupMap;
+    hkArrayTFLocalForm<hkDataClassImpl*> m_kLookupMap;
     int unk24;
     int unk28;
     int unk2C;
-    hkArrayTF<hkDataObjectImplTF*> m_remembered;
+    hkArrayTFLocalForm<hkDataObjectImplTF*> m_remembered;
 };
 // Reads a data object from the binary tagfile stream, resolves its class and members, reads present values, and returns the object.
 // @fnv 0x00dc6970
@@ -933,25 +811,9 @@ hkDataObjectTF hkBinaryTagfileReaderTF::FUN_00dc6970(int aiAllocationTag)
     return hkDataObjectTF(kObj, kMembers, kUsedMembers, kClass);
 }
 
-struct TagAllocator
+__forceinline hkMemoryRouter* getTagRouter()
 {
-    virtual void unused00();
-    virtual void unused04();
-    virtual void unused08();
-    virtual void* allocate(int& bytes);
-    virtual void freeBlock(void* block, int bytes);
-};
-struct TagRouter
-{
-    char* stackTop;
-    void* stackEnd;
-    void* stackBlock;
-    TagAllocator* temporary;
-    TagAllocator* heap;
-};
-__forceinline TagRouter* getTagRouter()
-{
-    return reinterpret_cast<TagRouter*>(&FUN_00c85750());
+    return &FUN_00c85750();
 }
 template <class T> struct TagArray
 {
@@ -960,26 +822,26 @@ template <class T> struct TagArray
     int capacity;
     __forceinline TagArray() : data(0), size(0), capacity(0x80000000)
     {}
-    static __forceinline T* allocateNonzero(TagAllocator* a, int& count)
+    static __forceinline T* allocateNonzero(hkMemoryAllocator* a, int& count)
     {
         int bytes = count * sizeof(T);
-        T* p = static_cast<T*>(a->allocate(bytes));
+        T* p = static_cast<T*>(a->bufAlloc(bytes));
         count = bytes / int(sizeof(T));
         return p;
     }
-    static __forceinline T* allocateChunk(TagAllocator* a, int& count)
+    static __forceinline T* allocateChunk(hkMemoryAllocator* a, int& count)
     {
         return count ? allocateNonzero(a, count) : 0;
     }
     __forceinline TagArray(int count) : data(0), size(0), capacity(0x80000000)
     {
-        T* p = allocateChunk(getTagRouter()->temporary, count);
+        T* p = allocateChunk(reinterpret_cast<hkMemoryAllocator*>(getTagRouter()->m_temp), count);
         int flags = count ? count : 0x80000000;
         data = p;
         size = count;
         capacity = flags;
     }
-    __forceinline void reserve(TagAllocator* a, int count)
+    __forceinline void reserve(hkMemoryAllocator* a, int count)
     {
         int current = capacity & 0x3fffffff;
         if (current < count)
@@ -988,11 +850,11 @@ template <class T> struct TagArray
             FUN_00c908c0(a, this, count >= grown ? count : grown, sizeof(T));
         }
     }
-    __forceinline void release(TagAllocator* a)
+    __forceinline void release(hkMemoryAllocator* a)
     {
         size = 0;
         if (!(capacity & 0x80000000))
-            a->freeBlock(data, (capacity & 0x3fffffff) * sizeof(T));
+            a->bufFree(data, (capacity & 0x3fffffff) * sizeof(T));
     }
 };
 template <class T> struct TagLocalArray : TagArray<T>
@@ -1000,9 +862,9 @@ template <class T> struct TagLocalArray : TagArray<T>
     T* original;
     __forceinline void allocateLocal(int count)
     {
-        TagRouter* router = getTagRouter();
-        T* p = reinterpret_cast<T*>(router->stackTop);
-        router->stackTop += (count * sizeof(T) + 127) & ~127;
+        hkMemoryRouter* router = getTagRouter();
+        T* p = reinterpret_cast<T*>(router->m_stack.m_next.m_storage);
+        router->m_stack.m_next.m_storage = (char*)router->m_stack.m_next.m_storage + ((count * sizeof(T) + 127) & ~127);
         data = p;
         original = p;
         capacity = count | 0x80000000;
@@ -1012,8 +874,8 @@ template <class T> struct TagLocalArray : TagArray<T>
         T* p = original;
         if (p == data)
             size = 0;
-        getTagRouter()->stackTop = reinterpret_cast<char*>(p);
-        release(getTagRouter()->heap);
+        getTagRouter()->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(p));
+        release(getTagRouter()->m_heap);
         data = 0;
         capacity = 0x80000000;
     }
@@ -1085,10 +947,10 @@ void TagReader::FUN_00dc6100(TagArrayRef* array, int count)
     {
     case 1: {
         TagArray<char> values(count);
-        values.reserve(getTagRouter()->temporary, count);
+        values.reserve(reinterpret_cast<hkMemoryAllocator*>(getTagRouter()->m_temp), count);
         FUN_00dd8fe0(values.data, 1, count);
         array->FUN_00dbae10(values.data, count);
-        values.release(getTagRouter()->temporary);
+        values.release(reinterpret_cast<hkMemoryAllocator*>(getTagRouter()->m_temp));
         break;
     }
     case 2:
@@ -1097,11 +959,11 @@ void TagReader::FUN_00dc6100(TagArrayRef* array, int count)
         break;
     case 3: {
         TagArray<float> values(count);
-        values.reserve(getTagRouter()->temporary, count);
+        values.reserve(reinterpret_cast<hkMemoryAllocator*>(getTagRouter()->m_temp), count);
         values.size = count;
         FUN_00dd8fe0(values.data, 4, count);
         array->FUN_00dbae80(values.data, values.size);
-        values.release(getTagRouter()->temporary);
+        values.release(reinterpret_cast<hkMemoryAllocator*>(getTagRouter()->m_temp));
         break;
     }
     case 4: {

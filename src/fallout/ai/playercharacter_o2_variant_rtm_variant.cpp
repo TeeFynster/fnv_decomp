@@ -5,6 +5,7 @@
 // src/fallout/ai/playercharacter_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/ai/playercharacter.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 #include "PlayerCharacter.h"
+#include "../../../include/NiPoint3.h"
 struct FUN_00c6fd20_class
 {
     void* m_60c;
@@ -13,12 +14,6 @@ struct FUN_00c6fd20_class
 
 #include <xmmintrin.h>
 extern "C" double __cdecl sqrt(double);
-struct Point3
-{
-    float x, y, z;
-    Point3()
-    {}
-};
 class ScalarValue
 {
     ::__m128 value;
@@ -50,16 +45,17 @@ inline ScalarValue operator-(const ScalarValue& b)
 {
     return (_mm_sub_ss)(DAT_010c7160, b.Vector4f());
 }
-struct __declspec(align(16)) FourFloatVector
+// local form of hkVector4: 0x00c6f500 needs ScalarValue inline math and copy calls (shared extent 1263 vs 1302).
+struct __declspec(align(16)) ParticleVectorLocal_00c6f500
 {
     ::__m128 value;
-    FourFloatVector()
+    ParticleVectorLocal_00c6f500()
     {}
-    FourFloatVector(const FourFloatVector& v) : value(v.value)
+    ParticleVectorLocal_00c6f500(const ParticleVectorLocal_00c6f500& v) : value(v.value)
     {}
-    FourFloatVector(const ::__m128& v) : value(v)
+    ParticleVectorLocal_00c6f500(const ::__m128& v) : value(v)
     {}
-    void operator=(const FourFloatVector& v)
+    void operator=(const ParticleVectorLocal_00c6f500& v)
     {
         value = v.value;
     }
@@ -71,7 +67,7 @@ struct __declspec(align(16)) FourFloatVector
     {
         return reinterpret_cast<float*>(&value)[i];
     }
-    __forceinline ScalarValue Dot(const FourFloatVector& v) const
+    __forceinline ScalarValue Dot(const ParticleVectorLocal_00c6f500& v) const
     {
         ::__m128 product = (_mm_mul_ps)(value, v.value);
         ::__m128 first = (_mm_add_ss)((_mm_shuffle_ps)(product, product, 0x55), product);
@@ -116,15 +112,15 @@ struct __declspec(align(16)) FourFloatVector
     {
         value = (_mm_mul_ps)(a.Broadcast(), value);
     }
-    __forceinline void Add(const FourFloatVector& b)
+    __forceinline void Add(const ParticleVectorLocal_00c6f500& b)
     {
         value = (_mm_add_ps)(value, b.value);
     }
-    __forceinline void Sub(const FourFloatVector& b)
+    __forceinline void Sub(const ParticleVectorLocal_00c6f500& b)
     {
         value = (_mm_sub_ps)(value, b.value);
     }
-    __forceinline void Cross(const FourFloatVector& a, const FourFloatVector& b)
+    __forceinline void Cross(const ParticleVectorLocal_00c6f500& a, const ParticleVectorLocal_00c6f500& b)
     {
         ::__m128 lhs = (_mm_mul_ps)((_mm_shuffle_ps)(a.value, a.value, 0xc9), (_mm_shuffle_ps)(b.value, b.value, 0xd2));
         ::__m128 rhs = (_mm_mul_ps)((_mm_shuffle_ps)(a.value, a.value, 0xd2), (_mm_shuffle_ps)(b.value, b.value, 0xc9));
@@ -443,7 +439,7 @@ struct __declspec(align(16)) Particle
     unsigned int unk_4c4;
     unsigned int unk_4c8;
     unsigned int unk_4cc;
-    FourFloatVector localDirection;
+    ParticleVectorLocal_00c6f500 localDirection;
     unsigned int unk_4e0;
     unsigned int unk_4e4;
     unsigned int unk_4e8;
@@ -452,7 +448,7 @@ struct __declspec(align(16)) Particle
     unsigned int unk_4f4;
     unsigned int unk_4f8;
     unsigned int unk_4fc;
-    FourFloatVector modifier;
+    ParticleVectorLocal_00c6f500 modifier;
     unsigned int unk_510;
     unsigned int unk_514;
     unsigned int unk_518;
@@ -481,7 +477,7 @@ struct __declspec(align(16)) Particle
     unsigned int unk_574;
     unsigned int unk_578;
     unsigned int unk_57c;
-    FourFloatVector accumulatedImpulse;
+    ParticleVectorLocal_00c6f500 accumulatedImpulse;
     unsigned int impulseCount;
     unsigned int unk_594;
     unsigned int unk_598;
@@ -512,14 +508,14 @@ struct __declspec(align(16)) Particle
     unsigned int unk_5fc;
     unsigned int unk_600;
     unsigned int startFrame;
-    __forceinline void AddPush(const FourFloatVector& delta)
+    __forceinline void AddPush(const ParticleVectorLocal_00c6f500& delta)
     {
-        FourFloatVector& sum = accumulatedImpulse;
+        ParticleVectorLocal_00c6f500& sum = accumulatedImpulse;
         sum.Add(delta);
         ++impulseCount;
     }
-    const FourFloatVector* FUN_00621a40() const;
-    void UpdateMaxVelocity(Point3* direction, float timeStep);
+    const ParticleVectorLocal_00c6f500* FUN_00621a40() const;
+    void UpdateMaxVelocity(NiPoint3* direction, float timeStep);
     void FUN_00c6cbc0(float angle, float impactStrength);
 };
 struct Source
@@ -575,9 +571,9 @@ struct Source
     Particle* particle;
     void FUN_00c90510();
     void FUN_00c905b0();
-    const FourFloatVector* FUN_00cac950();
+    const ParticleVectorLocal_00c6f500* FUN_00cac950();
 };
-extern void __cdecl FUN_00458620(Point3* result, const FourFloatVector* value);
+extern void __cdecl FUN_00458620(NiPoint3* result, const ParticleVectorLocal_00c6f500* value);
 extern float __cdecl FUN_0040ebd0(float fTargetUpperBound, float value);
 extern float __cdecl FUN_00404010(float fTargetUpperBound, float value);
 struct ParticleController
@@ -987,12 +983,12 @@ struct ControllerPrefix
 };
 struct ControllerOwner : ControllerPrefix, ParticleController
 {
-    const FourFloatVector* FUN_00807080() const;
+    const ParticleVectorLocal_00c6f500* FUN_00807080() const;
 };
 extern const float DAT_01267bcc;
-__declspec(noinline) void Particle::UpdateMaxVelocity(Point3* direction, float timeStep)
+__declspec(noinline) void Particle::UpdateMaxVelocity(NiPoint3* direction, float timeStep)
 {
-    FourFloatVector proposed;
+    ParticleVectorLocal_00c6f500 proposed;
     proposed.At(0) = direction->x * DAT_01267bcc;
     proposed.At(1) = direction->y * DAT_01267bcc;
     proposed.At(2) = direction->z * DAT_01267bcc;
@@ -1005,7 +1001,7 @@ __declspec(noinline) void Particle::UpdateMaxVelocity(Point3* direction, float t
     }
 }
 float __cdecl FUN_004587d0(float);
-__declspec(noinline) void __cdecl FUN_00458620(Point3* result, const FourFloatVector* value)
+__declspec(noinline) void __cdecl FUN_00458620(NiPoint3* result, const ParticleVectorLocal_00c6f500* value)
 {
     result->x = FUN_004587d0(float(ScalarValue((_mm_load_ss)(&value->At(0)))));
     result->y = FUN_004587d0(float(ScalarValue((_mm_load_ss)(&value->At(1)))));
@@ -1013,7 +1009,7 @@ __declspec(noinline) void __cdecl FUN_00458620(Point3* result, const FourFloatVe
 }
 // @fnv 0x00c6f500
 __declspec(noinline) void __fastcall FUN_00c6f500(ParticleController* self, void*, unsigned int mode, Source* source,
-                                                  const FourFloatVector* transform)
+                                                  const ParticleVectorLocal_00c6f500* transform)
 {
     ControllerOwner* owner;
     Particle* particle = source->particle;
@@ -1028,9 +1024,9 @@ __declspec(noinline) void __fastcall FUN_00c6f500(ParticleController* self, void
     if (priority > self->currentFrame || (particle->flags & 0x4000u))
         return;
     {
-        Point3 adjusted;
-        FourFloatVector ownVelocity = *source->FUN_00cac950();
-        FourFloatVector normal = transform[1];
+        NiPoint3 adjusted;
+        ParticleVectorLocal_00c6f500 ownVelocity = *source->FUN_00cac950();
+        ParticleVectorLocal_00c6f500 normal = transform[1];
         normal.At(2) = 0.0f;
         if (float(normal.LengthSq()) > 0.0f)
             normal.Normalize();
@@ -1048,19 +1044,19 @@ __declspec(noinline) void __fastcall FUN_00c6f500(ParticleController* self, void
     }
     if (!(particle->flags & 1u))
         return;
-    FourFloatVector separation = transform[0];
+    ParticleVectorLocal_00c6f500 separation = transform[0];
     separation.Sub(*particle->FUN_00621a40());
     separation.At(2) = 0.0f;
-    FourFloatVector projection = particle->localDirection;
+    ParticleVectorLocal_00c6f500 projection = particle->localDirection;
     projection.At(2) = 0.0f;
     projection.Normalize();
     float along = separation.Dot(projection);
     projection.Mul(along);
     float scale = float(projection.Length()) / (particle->lifetime * DAT_01011588) - DAT_0103c7c8;
-    FourFloatVector otherNormal = transform[1];
+    ParticleVectorLocal_00c6f500 otherNormal = transform[1];
     otherNormal.At(2) = 0.0f;
     otherNormal.Normalize();
-    FourFloatVector current = *owner->FUN_00807080();
+    ParticleVectorLocal_00c6f500 current = *owner->FUN_00807080();
     current.At(2) = 0.0f;
     float angle = 0.0f;
     if (current.NormalizeNonzero())
@@ -1069,7 +1065,7 @@ __declspec(noinline) void __fastcall FUN_00c6f500(ParticleController* self, void
     scale = FUN_00404010(0.0f, FUN_0040ebd0(1.0f, scale));
     if (scale > 0.0f)
     {
-        FourFloatVector side;
+        ParticleVectorLocal_00c6f500 side;
         side.Cross(separation, projection);
         if (side.At(2) > 0.0f)
             scale *= DAT_0101a6b0;

@@ -1,3 +1,25 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkResult.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/hkpBroadPhaseCastCollector.h"
+#include "../../../../../../../include/hkpCollidableCollidableFilter.h"
+#include "../../../../../../../include/hkpCollidable.h"
+#include "../../../../../../../include/hkpCollisionFilter.h"
+#include "../../../../../../../include/hkpEntity.h"
+#include "../../../../../../../include/hkpRayCollidableFilter.h"
+#include "../../../../../../../include/hkpRayShapeCollectionFilter.h"
+#include "../../../../../../../include/hkpShapeCollectionFilter.h"
+#include "../../../../../../../include/hkpSimulationIsland.h"
+#include "../../../../../../../include/hkpWorld.h"
+#include "../../../../../../../include/hkVector4.h"
+
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/Transform.h"
+
 // src/havok/physics/dynamics/world/util/aabbtree/hkpaabbtreeworldmanager_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/dynamics/world/util/aabbtree/hkpaabbtreeworldmanager.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS /EHsc /Gy (unit lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
@@ -118,69 +140,12 @@ void __stdcall FUN_00d08380(int);
 struct FUN_00cd29f0_cls {
     void FUN_00cd29f0(int iValue);
 };
-struct FUN_00d08400_cls {
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    signed char m_targetOffset;
-};
-void __cdecl DispatchToOffsetTarget(FUN_00d08400_cls* pkObject, unsigned short usValue);
-struct __declspec(align(16)) hkVector4D084 {
-    float x, y, z, w;
-};
-struct hkpWorldRayCastInputD084 {
-    hkVector4D084 m_vFrom;
-    hkVector4D084 m_vTo;
-    bool m_bEnableShapeCollectionFilter;
-    unsigned int m_uiFilterInfo;
-};
-struct hkpShapeRayCastOutputD084 {
-    hkVector4D084 m_vHitNormal;
-    float m_fHitFraction;
-    int m_iExtraInfo;
-    int m_pad18;
-    int m_pad1c;
-    unsigned int m_uiShapeKeys[8];
-    int m_uiShapeKeyIndex;
-
-    hkpShapeRayCastOutputD084()
-    {
-        m_fHitFraction = 1.0f;
-        m_iExtraInfo = -1;
-        m_uiShapeKeys[0] = 0xffffffff;
-        m_uiShapeKeyIndex = 0;
-    }
-};
-struct hkpWorldRayCastOutputD084 : public hkpShapeRayCastOutputD084 {
-    const void* m_pRootCollidable;
-
-    hkpWorldRayCastOutputD084() { m_pRootCollidable = 0; }
-};
+void __cdecl DispatchToOffsetTarget(hkpCollidable* pkObject, unsigned short usValue);
+// Only pointer/reference declarations below need these ray-cast types; no local layout is required.
+struct hkpWorldRayCastInput;
+class hkpWorldRayCaster;
+struct hkpWorldRayCastOutput;
 struct hkpRayHitCollectorD084;
-class hkpRayShapeCollectionFilterD084 {
-public:
-    virtual ~hkpRayShapeCollectionFilterD084() throw();
-};
-class hkpRayCollidableFilterD084 {
-public:
-    virtual ~hkpRayCollidableFilterD084() throw();
-};
-class hkpCollidableCollidableFilterD084 {
-public:
-    virtual ~hkpCollidableCollidableFilterD084() throw();
-};
-class hkpShapeCollectionFilterD084 {
-public:
-    virtual ~hkpShapeCollectionFilterD084() throw();
-};
-class hkReferencedObjectD084 {
-public:
-    virtual ~hkReferencedObjectD084() throw();
-    int m_usMemSizeAndFlags;
-};
-class hkpCollisionFilterD084 : public hkReferencedObjectD084, public hkpCollidableCollidableFilterD084, public hkpShapeCollectionFilterD084, public hkpRayShapeCollectionFilterD084, public hkpRayCollidableFilterD084 {
-};
 class hkpRayCastCollectorBaseD084 {
 public:
     virtual void CollectRayHit() throw();
@@ -191,33 +156,17 @@ public:
 };
 class FUN_00d9a040 : public hkpRayCastCollectorBaseD084, public hkpTreeCastCallbackD084 {
 public:
-    const hkpWorldRayCastInputD084* m_pRayCastInput;
-    const hkpRayCollidableFilterD084* m_iFilter;
-    const hkpRayShapeCollectionFilterD084* m_shapeFilter;
-    hkpWorldRayCastOutputD084* m_pRayCastOutput;
+    const hkpWorldRayCastInput* m_pRayCastInput;
+    const hkpRayCollidableFilter* m_iFilter;
+    const hkpRayShapeCollectionFilter* m_shapeFilter;
+    hkpWorldRayCastOutput* m_pRayCastOutput;
     hkpRayHitCollectorD084* m_kCollector;
     int m_1c;
 
     FUN_00d9a040() throw();
 };
-class hkpBroadPhaseCastCollectorD084 {
-public:
-    virtual void ReleaseCollector() throw();
-};
-class hkpWorldRayCasterD084 : public hkpBroadPhaseCastCollectorD084 {
-public:
-    const hkpWorldRayCastInputD084* m_pRayCastInput;
-    const hkpRayCollidableFilterD084* m_iFilter;
-    const hkpRayShapeCollectionFilterD084* m_shapeFilter;
-    hkpWorldRayCastOutputD084* m_pRayCastOutput;
-    hkpRayHitCollectorD084* m_kCollector;
-};
-struct hkBoolD084 {
-    char m_cBooleanValue;
-    hkBoolD084(bool b) { m_cBooleanValue = (char)b; }
-};
-hkBoolD084 __cdecl FUN_00d98ca0(void* pkBroadPhase, const hkVector4D084& kFrom, const hkVector4D084& kTo, hkpWorldRayCasterD084* pkCaster) throw();
-void __cdecl FUN_00d1bd00(void* pkTree, const hkVector4D084& kFrom, const hkVector4D084& kTo, hkpTreeCastCallbackD084* pkCaster, float fEarlyOut) throw();
+hkBool __cdecl FUN_00d98ca0(void* pkBroadPhase, const hkVector4& kFrom, const hkVector4& kTo, hkpWorldRayCaster* pkCaster) throw();
+void __cdecl FUN_00d1bd00(void* pkTree, const hkVector4& kFrom, const hkVector4& kTo, hkpTreeCastCallbackD084* pkCaster, float fEarlyOut) throw();
 class hkpRayCastQueryD084 {
 public:
     int m_00;
@@ -231,40 +180,11 @@ public:
     int m_20;
     bool m_useTree;
 
-    void CastRay(const hkpWorldRayCastInputD084& kInput, const hkpCollisionFilterD084* pkFilter, hkpRayHitCollectorD084* pkCollector) const throw();
-};
-template <class T>
-class hkArrayD085 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; ++i) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            m_data[index] = m_data[m_iElementCount];
-    }
+    void CastRay(const hkpWorldRayCastInput& kInput, const hkpCollisionFilter* pkFilter, hkpRayHitCollectorD084* pkCollector) const throw();
 };
 class hkBroadPhaseD085 {
 public:
     void FUN_00d9c7d0(unsigned short id);
-};
-struct hkCollidableD085 {
-    int unk00;
-};
-struct hkEntityD085 {
-    int unk00[4];
-    hkCollidableD085 m_kCollidable;
 };
 class hkHandlerD085 {
 public:
@@ -273,93 +193,58 @@ public:
     int unk10[5];
     bool m_enabled;
     char unk25[0x1f];
-    hkArrayD085<hkCollidableD085*> m_kCollidables;
+    hkArray<hkpCollidable*> m_kCollidables;
 
-    unsigned short FUN_00d083e0(hkCollidableD085* c);
-    void FUN_00d08570(hkEntityD085* entity);
+    unsigned short FUN_00d083e0(hkpCollidable* c);
+    void FUN_00d08570(hkpEntity* entity);
 };
 struct PlaceTagD088 {};
 inline void* operator new(unsigned int, void* p, PlaceTagD088) throw() { __assume(p != 0); return p; }
 inline void operator delete(void*, void*, PlaceTagD088) throw() {}
-template <class T>
-struct hkArrayD088 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+template <typename T>
+__forceinline void hkArrayBase<T>::pushBackUnchecked(const T& e)
+{
+    new (&m_data[m_iElementCount], PlaceTagD088()) T(e);
+    m_iElementCount++;
+}
+template <typename T>
+__forceinline void hkArrayBase<T>::removeAt(int index)
+{
+    m_iElementCount--;
+    if (m_iElementCount != index)
+        m_data[index] = m_data[m_iElementCount];
+}
 
-    void pushBackUnchecked(const T& e)
-    {
-        new (&m_data[m_iElementCount], PlaceTagD088()) T(e);
-        m_iElementCount++;
-    }
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            m_data[index] = m_data[m_iElementCount];
-    }
-};
-struct hkBoolRetD088 {
-    char m_cBooleanValue;
-    hkBoolRetD088() throw() {}
-};
-class hkpEntityD088 {
-public:
-    hkBoolRetD088 FUN_00c9bff0() const throw();
-};
-struct hkpCollidableD088 {
-    const void* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const void* m_parent;
-    signed char m_iOwnerOffset;
-    char m_pad11[3];
-    unsigned int m_iOwnerObjectOffset;
-    char m_type;
-
-    hkpEntityD088* getOwner() const { return (hkpEntityD088*)((char*)this + m_iOwnerOffset); }
-};
 class hkpEntityListD088 {
 public:
     char m_pad00[0x44];
-    hkArrayD088<hkpCollidableD088*> m_kCollidables;
+    hkArray<hkpCollidable*> m_kCollidables;
     char m_pad50[0xc];
     bool m_checkAll;
     char m_pad5d[3];
     int m_currentIndex;
     int m_maxChecksPerCall;
 
-    __forceinline void checkCollidable(int i, hkArrayD088<hkpCollidableD088*>& kInactive)
+    __forceinline void checkCollidable(int i, hkArray<hkpCollidable*>& kInactive)
     {
-        hkpCollidableD088* pkCollidable = m_kCollidables.m_data[i];
-        if (pkCollidable->m_type == 1) {
-            hkpEntityD088* pkEntity = pkCollidable->getOwner();
-            if (pkEntity && !pkEntity->FUN_00c9bff0().m_cBooleanValue) {
+        hkpCollidable* pkCollidable = m_kCollidables.m_data[i];
+        if (pkCollidable->m_kBroadPhaseHandle.m_type == 1) {
+            hkpEntity* pkEntity = static_cast<hkpEntity*>(pkCollidable->getOwner());
+            unsigned char active;
+            if (pkEntity && !*(pkEntity->FUN_00c9bff0(&active))) {
                 kInactive.pushBackUnchecked(m_kCollidables.m_data[i]);
                 m_kCollidables.removeAt(i);
             }
         }
     }
 
-    bool CheckCollidables(hkArrayD088<hkpCollidableD088*>& kInactive) throw();
+    bool CheckCollidables(hkArray<hkpCollidable*>& kInactive) throw();
 };
 struct hkObjectE02;
 struct hkLoaderE02 {
     int Get(char const* name, hkObjectE02** out);
 };
-struct Router {
-    int a;
-    int b;
-    int c;
-    int d;
-    int e;
-    int f;
-    int g;
-    int h;
-    int i;
-    int j;
-};
-Router* __cdecl _FNV_e03300_arena();
+hkMemoryRouter* __cdecl _FNV_e03300_arena();
 struct Sink {
     void FUN_00cb1870(void*, int, int);
 };
@@ -397,40 +282,7 @@ struct FUN_00d08c70_class {
     FUN_00d9a4d0_class* unk0C;
     void __thiscall FUN_00d08c70(void* arg);
 };
-class hkMemoryAllocatorD08C;
-struct hkMemoryRouterD08C {
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorD08C* m_pStreamAllocator;
-    hkMemoryAllocatorD08C& heap() { return *m_pStreamAllocator; }
-};
-extern "C" hkMemoryRouterD08C& __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iElemSize);
-template <class T>
-__forceinline void constructWithCopyD08C(T* p, int n, const T& t)
-{
-    for (int i = 0; i < n; i++)
-        p[i] = t;
-}
-template <class T>
-class hkArrayD08C {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    void AddBack(const T& t)
-    {
-        hkMemoryAllocatorD08C& kAlloc = FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&kAlloc, this, sizeof(T));
-        constructWithCopyD08C(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-};
 class hkpEntityD08C;
 void __cdecl DispatchToOffsetTarget(hkpEntityD08C* pkEntity, int iFlags);
 class hkpEntityListD08C {
@@ -452,7 +304,7 @@ public:
     int unk38;
     int unk3C;
     int unk40;
-    hkArrayD08C<hkpEntityD08C*> m_kActorEntries;
+    hkArray<hkpEntityD08C*> m_kActorEntries;
 
     void FUN_00d08c90(hkpEntityD08C* pkEntity);
 };
@@ -569,23 +421,13 @@ struct S00d08740_cls {
     void Collect(void* kFrom, void* kTo, void* pkRoot, void* pkFilter, void* pkShapeFilter, void* pkOutput, void* pkCollector);
 };
 class hkMemoryAllocatorD089;
-struct hkMemoryRouterD089 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorD089* m_pStreamAllocator;
-    hkMemoryAllocatorD089& heap() { return *m_pStreamAllocator; }
-};
-namespace fnvc_adapt { extern "C" hkMemoryRouterD089* __cdecl FUN_00c85750(); }
-enum hkResultD089 { HK_SUCCESS = 0, HK_FAILURE = 1 };
 class hkMapBaseD089 {
 public:
     void* m_kPrimitiveElement;
     int m_iCapacityFlags;
     int m_iPairCount;
 
-    hkResultD089 LookupBucketValue(unsigned int key, unsigned int* out) const;
+    hkResult LookupBucketValue(unsigned int key, unsigned int* out) const;
     int FUN_00cb1870(hkMemoryAllocatorD089& alloc, unsigned int key, unsigned int val);
 };
 class OwnerD089 {
@@ -614,44 +456,6 @@ public:
 
     void FUN_00d08980(unsigned int key);
 };
-struct hkpCollidableD08 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    unsigned int m_broadPhaseId;
-    signed char m_cBroadPhaseType;
-};
-struct hkpEntityD08 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkpCollidableD08 m_kCollidable;
-};
-struct hkpSimulationIslandD08 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    hkpEntityD08** m_kActorEntries;
-    int m_iActorEntryCount;
-};
 class hkpPrimaryD08 {
 public:
     virtual ~hkpPrimaryD08();
@@ -664,8 +468,8 @@ public:
 };
 class hkpIslandListenerD08 {
 public:
-    virtual void islandAddedCallback(hkpSimulationIslandD08* island);
-    virtual void FUN_00d089f0(hkpSimulationIslandD08* island);
+    virtual void islandAddedCallback(hkpSimulationIsland* island);
+    virtual void FUN_00d089f0(hkpSimulationIsland* island);
 };
 class TrackerD08 : public hkpPrimaryD08, public hkpIslandListenerD08 {
 public:
@@ -692,8 +496,8 @@ public:
     bool m_dirty;
     bool m_needsUpdate;
 
-    void FUN_00d08980(hkpCollidableD08* collidable);
-    virtual void FUN_00d089f0(hkpSimulationIslandD08* island);
+    void FUN_00d08980(hkpCollidable* collidable);
+    virtual void FUN_00d089f0(hkpSimulationIsland* island);
 };
 extern int DAT_010ccfcc;
 extern float DAT_0104da4c;
@@ -745,26 +549,7 @@ struct S00d0a490_cls {
     int __thiscall CallSubroutine(int a0, int a1, int a2, int a3, int a4, int a5, int a6);
 };
 void __cdecl FUN_00d083c0();
-struct hkpEntityB90 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int m_kCollidable;
-};
-struct hkpSimulationIslandB90 {
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
-    int unk30, unk34, unk38, unk3C, unk40, unk44;
-    hkArrayD08C<hkpEntityB90*> m_kActorEntries;
-};
-struct hkpWorldB90 {
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
-    hkpSimulationIslandB90* m_pFixedIsland;
-    hkpEntityB90* m_pFixedRigidBody;
-    int unk28, unk2C, unk30;
-    hkArrayD08C<hkpSimulationIslandB90*> m_kActiveSimulationIslands;
-};
-void __cdecl FUN_00d08b90(hkArrayD08C<int*>& out, hkpWorldB90* world);
+void __cdecl FUN_00d08b90(hkArray<int*>& out, hkpWorld* world);
 extern unsigned int DAT_0126835c;
 extern char DAT_010cd234[];
 extern char DAT_010c41f8[];
@@ -772,7 +557,6 @@ extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 struct MonitorEvent { const char* tag; unsigned int time; unsigned int extra; };
-struct MonitorStream { int unk00; MonitorEvent* current; int unk08; MonitorEvent* end; };
 struct UpdateOwner {
     int unk00;
     int unk04;
@@ -862,15 +646,14 @@ extern const char str_010cd0c4[];
 extern const char str_01076f38[];
 extern const char str_010cd0b8[];
 struct S00d094a0_Cmd { const char* m_name; unsigned m_uiCommandId; int m_08; const char* m_detail; };
-struct S00d094a0_Stream { char* m_00; char* m_kRayEnd; char* m_08; char* m_capEnd; };
 union CountPhase { volatile unsigned ticks; int bytes; };
-union StreamPhase { S00d094a0_Stream* stream; int capacity; };
+union StreamPhase { hkMonitorStream* stream; int capacity; };
 struct CapPair {StreamPhase pointer;int capacity2;};
 __forceinline void S00d094a0_beginList(const char* name, const char* detail)
 {
-    S00d094a0_Stream* t = (S00d094a0_Stream*)TlsGetValue(DAT_0126835c);
-    S00d094a0_Cmd* p = (S00d094a0_Cmd*)t->m_kRayEnd;
-    if ((char*)p < t->m_capEnd) {
+    hkMonitorStream* t = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    S00d094a0_Cmd* p = (S00d094a0_Cmd*)t->m_end.m_storage;
+    if ((char*)p < t->m_capacityMinus16.m_storage) {
         p->m_name = name;
         p->m_detail = detail;
         _ReadWriteBarrier();
@@ -880,14 +663,14 @@ __forceinline void S00d094a0_beginList(const char* name, const char* detail)
             mov dword ptr[stamp], eax
         }
         p->m_uiCommandId = stamp;
-        t->m_kRayEnd = (char*)p + 16;
+        t->m_end.m_storage = (char*)p + 16;
     }
 }
 __forceinline void S00d094a0_timer(const char* name)
 {
-    S00d094a0_Stream* t = (S00d094a0_Stream*)TlsGetValue(DAT_0126835c);
-    S00d094a0_Cmd* p = (S00d094a0_Cmd*)t->m_kRayEnd;
-    if ((char*)p < t->m_capEnd) {
+    hkMonitorStream* t = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    S00d094a0_Cmd* p = (S00d094a0_Cmd*)t->m_end.m_storage;
+    if ((char*)p < t->m_capacityMinus16.m_storage) {
         p->m_name = name;
         _ReadWriteBarrier();
         unsigned stamp;
@@ -896,7 +679,7 @@ __forceinline void S00d094a0_timer(const char* name)
             mov dword ptr[stamp], eax
         }
         p->m_uiCommandId = stamp;
-        t->m_kRayEnd = (char*)p + 12;
+        t->m_end.m_storage = (char*)p + 12;
     }
 }
 struct S00d094a0_Alloc {
@@ -908,7 +691,7 @@ struct S00d094a0_Alloc {
     template<class T> __forceinline T* elements(int& count) {int bytes=count*4; void* p=AllocateBufferWithSize(bytes);count=bytes/4;return (T*)p;}
 
 };
-__forceinline S00d094a0_Alloc& S00d094a0_heap() { return *(S00d094a0_Alloc*)&FUN_00c85750().heap(); }
+__forceinline S00d094a0_Alloc& S00d094a0_heap() { return *(S00d094a0_Alloc*)&hkMemoryRouter::getInstance().heap(); }
 __forceinline void* reserveExternal(void*& data, int& capacity, int& bytes, int n) {
     S00d094a0_Alloc& a = S00d094a0_heap();
     bytes=n*4;
@@ -1008,17 +791,6 @@ struct S00d094a0_Owner {
     S00d094a0_Helper* m_6c;
     void FUN_00d094a0(S00d094a0_Tree** tree, S00d094a0_Input* input, S00d094a0_Ctx* ctx, S00d094a0_Queue* queue, S00d094a0_Sync* sync);
 };
-template<class T> struct TempArray {
-    T* data; int size; int flags;
-    __forceinline TempArray(int count) {
-        S00d094a0_Alloc& heap=S00d094a0_heap();
-        T* pointer=count?heap.elements<T>(count):0;
-        int cap=count?count:0x80000000;
-        data=pointer;size=count;flags=cap;
-    }
-    __forceinline void release() {S00d094a0_Alloc& heap=S00d094a0_heap(); if(!(flags&0x80000000))heap.ReturnMemory(data,(flags&0x3fffffff)*sizeof(T));}
-    __forceinline T* begin(){return data;}
-};
 inline void* operator new(unsigned int, void* location) { return location; }
 struct Target {
     int unk00;
@@ -1037,30 +809,7 @@ struct Item2 {
     int unk0C;
     Target m_target;
 };
-struct AllocHolder {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_alloc;
-};
 void ResizeAudioStream(void* alloc, void* array, int elemSize);
-template <typename T>
-struct hkArray {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    void AddBack(AllocHolder* h, T val) {
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff)) {
-            ResizeAudioStream(h->m_alloc, this, sizeof(T));
-        }
-        T* slot = m_data + m_iElementCount;
-        __assume(slot != 0);
-        new (slot) T(val);
-        ++m_iElementCount;
-    }
-};
 struct SubStruct1 {
     int unk00;
     int unk04;
@@ -1152,12 +901,6 @@ struct Container {
     hkArray<Item2*> m_array2;
 };
 void FUN_00d08ac0(hkArray<Target*>* out, int containerHandle);
-struct MarkerBuf {
-    int unk0;
-    int* m_cursor;
-    int unk8;
-    int* m_kRayEnd;
-};
 extern int DAT_00fdf044;
 extern unsigned int DAT_0126835c;
 extern char DAT_010cd224;
@@ -1185,18 +928,6 @@ struct AllocV {
     virtual void v3();
     virtual void __thiscall ReleaseBlock(void* p, int bytes);
 };
-struct TempArr {
-    int* m_data;
-    int m_iElementCount;
-    int m_capFlags;
-    void destroy()
-    {
-        hkMemoryAllocatorD08C& a = FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_capFlags & 0x80000000) == 0)
-            ((AllocV&)a).ReleaseBlock(m_data, (m_capFlags & 0x3fffffff) * 4);
-    }
-};
 struct EntListSelf {
     int unk00;
     int unk04;
@@ -1221,27 +952,27 @@ struct EntListSelf {
 
     void __thiscall FUN_00d09df0(void* p1, void* p2);
 };
-static __forceinline void mark16(MarkerBuf* buf, char* name, char* name2, volatile unsigned int* stampOut)
+static __forceinline void mark16(hkMonitorStream* buf, char* name, char* name2, volatile unsigned int* stampOut)
 {
-    int* cur = buf->m_cursor;
-    if (cur < buf->m_kRayEnd) {
+    int* cur = (int*)buf->m_end.m_storage;
+    if (cur < (int*)buf->m_capacityMinus16.m_storage) {
         cur[0] = (int)name;
         cur[3] = (int)name2;
         _ReadWriteBarrier();
         *stampOut = (unsigned int)__rdtsc();
         cur[1] = (int)*stampOut;
-        buf->m_cursor = cur + 4;
+        buf->m_end.m_storage = (char*)(cur + 4);
     }
 }
-static __forceinline void mark12(MarkerBuf* buf, char* name, volatile unsigned int* stampOut)
+static __forceinline void mark12(hkMonitorStream* buf, char* name, volatile unsigned int* stampOut)
 {
-    int* cur = buf->m_cursor;
-    if (cur < buf->m_kRayEnd) {
+    int* cur = (int*)buf->m_end.m_storage;
+    if (cur < (int*)buf->m_capacityMinus16.m_storage) {
         cur[0] = (int)name;
         _ReadWriteBarrier();
         *stampOut = (unsigned int)__rdtsc();
         cur[1] = (int)*stampOut;
-        buf->m_cursor = cur + 3;
+        buf->m_end.m_storage = (char*)(cur + 3);
     }
 }
 namespace RaycasterRework {
@@ -1249,10 +980,10 @@ namespace RaycasterRework {
 class FUN_00d9a040 : public hkpRayCastCollectorBaseD084,
                      public hkpTreeCastCallbackD084 {
 public:
-    const hkpWorldRayCastInputD084* m_pRayCastInput;
-    const hkpRayCollidableFilterD084* m_iFilter;
-    const hkpRayShapeCollectionFilterD084* m_shapeFilter;
-    hkpWorldRayCastOutputD084* m_pRayCastOutput;
+    const hkpWorldRayCastInput* m_pRayCastInput;
+    const hkpRayCollidableFilter* m_iFilter;
+    const hkpRayShapeCollectionFilter* m_shapeFilter;
+    hkpWorldRayCastOutput* m_pRayCastOutput;
     hkpRayHitCollectorD084* m_kCollector;
     float m_fEarlyOutHitFraction;
 
@@ -1277,25 +1008,21 @@ struct Scalar {
  __m128 spread() const { return _mm_shuffle_ps(value,value,0); }
  operator float() const { float f;_mm_store_ss(&f,value);return f; }
 };
-struct __declspec(align(16)) Vector {
- union { __m128 value; float x; };
- void set(__m128 a) { value=a; }
- __m128 get() const { return value; }
- void interpolate(const Vector& a,const Vector& b,const Scalar& scale);
- void add(const Vector& a,const Vector& b) { value=_mm_add_ps(a.value,b.value); }
- void sub(const Vector& a,const Vector& b) { value=_mm_sub_ps(a.value,b.value); }
- void scale(const Scalar& s) { value=_mm_mul_ps(s.spread(),value); }
-};
-struct Triple { Vector avg,mid,half; };
-struct Pair { Vector low,high; };
+#include "../../../../../../../include/hkVector4.h"
+inline void hkVector4::add(const hkVector4& a, const hkVector4& b) { value=_mm_add_ps(a.value,b.value); }
+inline void hkVector4::sub(const hkVector4& a, const hkVector4& b) { value=_mm_sub_ps(a.value,b.value); }
+inline void hkVector4::scale(const Scalar& s) { value=_mm_mul_ps(s.spread(),value); }
+
+struct Triple { hkVector4 avg,mid,half; };
+// hkAabb filled by the shape getAabb slot (min, max); local POD because include/hkAabb.h declares an out-of-line ctor
+struct AabbBox { hkVector4 low,high; };
 struct Vertex { __m128 value; float unk10; float unk14; };
 struct MatrixData {int f00,f04,f08,f0c,f10,f14;int f18,f1c;__m128 a,b,c;};
-struct Transform {int unk00,unk04,unk08,unk0c,unk10,unk14,unk18,unk1c,unk20,unk24,unk28,unk2c; __m128 m_vTranslation;};
 struct Obj;
 struct Engine {
  virtual void f0(); virtual void f1(); virtual void f2(); virtual void f3();
  virtual void f4(); virtual void f5(); virtual void f6();
- virtual void getBounds(Transform* transform, float value, Pair* out);
+ virtual void getBounds(Transform* transform, float value, AabbBox* out);
  int unk04,unk08,unk0c;
 };
 struct Obj {Engine* m_eng;int unk04;Transform* m_kMotionTransform;};
@@ -1316,7 +1043,7 @@ struct CollectorState {
 };
 extern "C" const __m128 DAT_010ec7f0={1,1,1,1};
 extern "C" const float DAT_01016248=0.5f;
-inline void Vector::interpolate(const Vector& a,const Vector& b,const Scalar& scale) {
+inline void hkVector4::interpolate(const hkVector4& a,const hkVector4& b,const Scalar& scale) {
  __m128 weight=scale.spread();
  __m128 opposite=_mm_sub_ps(DAT_010ec7f0,weight);
  value=_mm_add_ps(_mm_mul_ps(opposite,a.value),_mm_mul_ps(b.value,weight));
@@ -1336,8 +1063,8 @@ void CollectorState::FUN_00d984b0(int arg1, Obj* arg2, Vertex* arg3, void* arg4,
     m_88=arg6.p;
     struct Metrics {float distance,radius;}; Metrics metrics;
     metrics.radius = arg3->unk14;
-    Vector diff;
-    m70=_mm_sub_ps(arg3->value,arg2->m_kMotionTransform->m_vTranslation);
+    hkVector4 diff;
+    m70=_mm_sub_ps(arg3->value,arg2->m_kMotionTransform->r[3]);
     diff.set(m70);
     __m128 sq=_mm_mul_ps(m70,m70);
     __m128 y=_mm_shuffle_ps(sq,sq,0x55);
@@ -1346,11 +1073,11 @@ void CollectorState::FUN_00d984b0(int arg1, Obj* arg2, Vertex* arg3, void* arg4,
     sum = _mm_add_ss(z,_mm_add_ss(y,sq));
     __m128 root=_mm_sqrt_ss(sum);
     _mm_store_ss(&metrics.distance,root);f84=metrics.distance;
-    Pair out;
+    AabbBox out;
     f28=metrics.radius;
     arg2->m_eng->getBounds(arg2->m_kMotionTransform,arg3->unk14,&out);
 
-    Pair* box=&out;
+    AabbBox* box=&out;
     Triple temp;
     temp.avg.interpolate(box->low,box->high,Scalar(DAT_01016248));
     temp.mid.add(temp.avg,diff);

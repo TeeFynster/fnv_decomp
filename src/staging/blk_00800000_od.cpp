@@ -3,6 +3,24 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/NiPointer.h"
+#include "../../include/ActiveEffect.h"
+#include "../../include/ConcussionEffect.h"
+#include "../../include/ValueModifierEffect.h"
+#include "../../include/GO.h"
+#include "../../include/GameTimerRecord.h"
+#include "../../include/Mat3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiNode.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkpEntity.h"
+#include "../../include/Setting.h"
+#include "../../include/bhkWorldObject.h"
 
 struct FUN_008009d0_cls
 {
@@ -17,7 +35,8 @@ void FUN_008009d0_cls::FUN_008009d0()
         *(char*)((char*)this + 0x2b5) = 1;
 }
 
-struct Interface
+// Exe 0x00800a90: unit-local Interface view; declarations and layout are preserved.
+struct BlkInterfaceView
 {
     static void __cdecl PrintDebugMessage(const char*);
 };
@@ -31,7 +50,7 @@ struct FUN_00800a90
 // @fnv 0x00800a90
 void __thiscall FUN_00800a90::SetOcclusionDisabled()
 {
-    Interface::PrintDebugMessage("--==OCCLUSION DISABLED==--\n");
+    BlkInterfaceView::PrintDebugMessage("--==OCCLUSION DISABLED==--\n");
     ((char*)this)[0x118] = 0;
 }
 
@@ -70,19 +89,6 @@ void FUN_0080fae0(float value)
     DAT_011dc778 += value;
 }
 
-struct hkVector4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
 hkVector4& __cdecl FUN_004a3e00(hkVector4&, NiPoint3 const&);
 
 struct FUN_00810510_Class
@@ -107,10 +113,6 @@ void FUN_00810550_class::FUN_00810550(float value)
     *(float*)((char*)this + 0x8c) = value;
 }
 
-struct GO
-{
-    void* operator=(void*);
-};
 struct FUN_008105c0_Class
 {
     void SetPointer(void* p);
@@ -328,14 +330,7 @@ void* __thiscall FUN_00802b80_t::InitBuffer(int aiCount)
     return this;
 }
 
-struct ScriptLocalsX
-{
-    void* __thiscall GetLocalData();
-};
-struct hkpEntity
-{
-    void AddContactListener(void*);
-};
+// These physics wrappers call bhkWorldObject's Havok-object accessor at 0x004ae750.
 struct FUN_008078b0_Class
 {
     void __thiscall FUN_008078b0(void* listener);
@@ -343,7 +338,7 @@ struct FUN_008078b0_Class
 // @fnv 0x008078b0
 void __thiscall FUN_008078b0_Class::FUN_008078b0(void* listener)
 {
-    void* entity = ((ScriptLocalsX*)this)->GetLocalData();
+    void* entity = ((bhkWorldObject*)this)->FUN_004ae750();
     if (entity)
         ((hkpEntity*)entity)->AddContactListener(listener);
 }
@@ -368,10 +363,6 @@ void* __thiscall FUN_0080c490_Class::FUN_0080c490(unsigned int flags)
 }
 
 namespace fnv_0080fb00 {
-struct ScriptLocalsX
-{
-    void* __thiscall GetLocalData();
-};
 struct FUN_00cac960_class
 {
     void __thiscall FUN_00cac960(int a);
@@ -383,7 +374,7 @@ struct FUN_0080fb00_Class
 // @fnv 0x0080fb00
 void __thiscall FUN_0080fb00_Class::FUN_0080fb00(int a)
 {
-    void* r = ((ScriptLocalsX*)this)->GetLocalData();
+    void* r = ((bhkWorldObject*)this)->FUN_004ae750();
     if (r)
         ((FUN_00cac960_class*)r)->FUN_00cac960(a);
 }
@@ -492,14 +483,7 @@ void __thiscall FUN_00800e50_Class::FUN_00800e50(int aiValue)
     }
 }
 
-struct MagicCaster;
-struct MagicItem;
-struct EffectItem;
-struct ConcussionEffect
-{
-    char data[0x4c];
-    ConcussionEffect(MagicCaster*, MagicItem*, EffectItem*);
-};
+
 void* __cdecl operator new(unsigned int);
 
 // Allocates and constructs a ConcussionEffect from the given MagicCaster, MagicItem and EffectItem.
@@ -525,22 +509,9 @@ FUN_0080d6b0_t* __cdecl FUN_0080d880(int a, int b, int c)
 }
 
 class AnimIdle;
-template <> class NiPointer<AnimIdle>
-{
-  public:
-    AnimIdle* m_pObject;
-    NiPointer(AnimIdle* p);
-    ~NiPointer();
-    NiPointer<AnimIdle>& operator=(AnimIdle* p);
-};
-struct SoundPlaybackHandle
-{
-    SoundPlaybackHandle();
-    ~SoundPlaybackHandle();
-    unsigned int uiSoundID;
-    bool m_bLooping;
-    unsigned int uiState;
-};
+template <> NiPointer<AnimIdle>::NiPointer(AnimIdle* p);
+template <> NiPointer<AnimIdle>::~NiPointer();
+template <> NiPointer<AnimIdle>& NiPointer<AnimIdle>::operator=(AnimIdle* p);
 struct FUN_008133d0_shell
 {
     void FUN_008133d0(int);
@@ -575,7 +546,7 @@ struct FUN_008117d0 : FUN_0081dbb0
     NiPointer<AnimIdle> spBC;
     NiPointer<AnimIdle> spC0;
     int iC4;
-    SoundPlaybackHandle kSound;
+    BSSoundHandle kSound;
     float fD4;
     FUN_008117d0();
 };
@@ -594,10 +565,6 @@ FUN_008117d0::FUN_008117d0() : spA8(0), spB4(0), spB8(0), spBC(0), spC0(0)
     fD4 = 0.0f;
 }
 
-struct GameTimerRecord
-{
-    unsigned int GetTime() const;
-};
 extern GameTimerRecord g_timeGlobal;
 struct FUN_00800650_Class
 {
@@ -621,10 +588,6 @@ void __thiscall FUN_00800650_Class::FUN_00800650(float a, float b, float c)
 }
 
 namespace fnv_008006b0 {
-struct GameTimerRecord
-{
-    unsigned int GetTime() const;
-};
 extern GameTimerRecord g_timeGlobal;
 struct FUN_008006b0_Class
 {
@@ -644,14 +607,7 @@ void FUN_008006b0_Class::FUN_008006b0()
 }
 }  // namespace fnv_008006b0
 
-struct Setting_S
-{
-    float* Float();
-};
-struct GlobalObject_011db78c : Setting_S
-{
-};
-extern GlobalObject_011db78c g_011db78c;
+extern Setting g_011db78c;
 extern double DAT_01011588;
 float __cdecl FUN_004e44d0(float);
 struct FUN_00800820_Class
@@ -678,45 +634,19 @@ FUN_0080a900* FUN_0080ac70(void* apArg1, void* apArg2, void* apArg3)
     return new FUN_0080a900(apArg1, apArg2, apArg3);
 }
 
-extern int DAT_01079c8c;
-struct MagicCaster;
-struct MagicItem;
-struct EffectItem;
-struct ActiveEffect
-{
-    ActiveEffect(MagicCaster*, MagicItem*, EffectItem*);
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-    int m_40;
-    int m_44;
-    int m_48;
-    int m_4c;
-};
+
 struct FUN_0080c070 : ActiveEffect
 {
+    int f48;
+    int f4c;
     FUN_0080c070(MagicCaster* a, MagicItem* b, EffectItem* c, int d);
 };
 // @fnv 0x0080c070
 FUN_0080c070::FUN_0080c070(MagicCaster* a, MagicItem* pItem, EffectItem* pEffect, int d)
     : ActiveEffect(a, pItem, pEffect)
 {
-    m_00 = (int)&DAT_01079c8c;
-    m_48 = d;
-    m_4c = -1;
+    f48 = d;
+    f4c = -1;
 }
 
 struct FUN_0080cd30_t
@@ -732,16 +662,16 @@ FUN_0080cd30_t* __cdecl FUN_0080d120(int aiArg1, int aiArg2, int aiArg3)
     return new FUN_0080cd30_t(aiArg1, aiArg2, aiArg3);
 }
 
-struct FUN_0080d1a0
+struct FUN_0080d1a0 : ActiveEffect
 {
-    char data[0x4c];
-    FUN_0080d1a0(int a, int b, int c);
+    int f48;
+    FUN_0080d1a0(MagicCaster*, MagicItem*, EffectItem*);
     ~FUN_0080d1a0();
 };
 
 // Allocates and constructs a FUN_0080d1a0 object from the three arguments and returns the new pointer.
 // @fnv 0x0080d430
-FUN_0080d1a0* CreateFUN_0080d1a0(int aiArg1, int aiArg2, int aiArg3)
+FUN_0080d1a0* CreateFUN_0080d1a0(MagicCaster* aiArg1, MagicItem* aiArg2, EffectItem* aiArg3)
 {
     return new FUN_0080d1a0(aiArg1, aiArg2, aiArg3);
 }
@@ -771,14 +701,8 @@ FUN_0080f390* CreateFUN0080f390(int aiFirst, int aiSecond, int aiThird)
     return new FUN_0080f390(aiFirst, aiSecond, aiThird);
 }
 
-struct FUN_0080c0b0_base
+struct FUN_0080c0b0 : ActiveEffect
 {
-    FUN_0080c0b0_base(MagicCaster* a, MagicItem* b, EffectItem* c);
-};
-
-struct FUN_0080c0b0 : FUN_0080c0b0_base
-{
-    char pad[0x48];
     int f48;
     int f4c;
     FUN_0080c0b0(MagicCaster* a, MagicItem* b, EffectItem* c, int d);
@@ -786,9 +710,8 @@ struct FUN_0080c0b0 : FUN_0080c0b0_base
 
 // @fnv 0x0080c0b0
 FUN_0080c0b0::FUN_0080c0b0(MagicCaster* apCaster, MagicItem* apItem, EffectItem* apEffect, int d)
-    : FUN_0080c0b0_base(apCaster, apItem, apEffect)
+    : ActiveEffect(apCaster, apItem, apEffect)
 {
-    *(void**)this = (void*)&DAT_01079c8c;
     f48 = 0;
     f4c = d;
 }
@@ -909,7 +832,7 @@ void FUN_00810590_Class::FUN_00810590(int aiArg1, int aiArg2)
 struct FUN_008192a0 : FUN_0081dbb0
 {
     char pad[0x14];
-    SoundPlaybackHandle sound;
+    BSSoundHandle sound;
     unsigned int fC8;
     unsigned int fCC;
 
@@ -924,15 +847,8 @@ FUN_008192a0::FUN_008192a0()
     fC8 = 0;
 }
 
-enum ENUM_LOD_MULT
-{
-    ENUM_LOD_MULT_FORCE_UNSIGNED = 0x80000000u
-};
+#include "../../include/ENUM_LOD_MULT.h"
 
-struct ThreeByThreeMatrix
-{
-    float m[9];
-};
 
 struct ModelLoader
 {
@@ -951,28 +867,6 @@ struct CloningProcess
     unsigned int pad[7];
     CloningProcess(float);
     ~CloningProcess();
-};
-
-struct Object
-{
-    void FUN_00440460(NiPoint3 const&);
-};
-
-struct LodObject
-{
-    void SetAppCulled(bool);
-};
-
-struct NiAVObject
-{
-    void SetLocalRotation(ThreeByThreeMatrix const&);
-    void FUN_00440490(float);
-    void UpdateSceneObject();
-    NiAVObject* CloneObject(CloningProcess&);
-};
-
-struct NiNode : NiAVObject
-{
 };
 
 struct Calendar
@@ -1007,9 +901,9 @@ NiAVObject* LoadAndCloneModel(char const* path)
         if (scale)
         {
             scale->FUN_00440490(1.0f);
-            reinterpret_cast<LodObject*>(scale)->SetAppCulled(false);
-            scale->SetLocalRotation(reinterpret_cast<ThreeByThreeMatrix const&>(DAT_011a9448));
-            reinterpret_cast<Object*>(scale)->FUN_00440460(_NiPoint3_ZERO);
+            scale->SetAppCulled(false);
+            scale->SetLocalRotation(reinterpret_cast<NiMatrix3 const&>(DAT_011a9448));
+            scale->FUN_00440460(_NiPoint3_ZERO);
 
             if (reinterpret_cast<Calendar*>(scale)->GetDaysPassed())
                 reinterpret_cast<FUN_0050f5a0_struct*>(scale)->FUN_0050f5a0();
@@ -1383,18 +1277,6 @@ bool FUN_00800a00_cls::GetRatioByIndex(unsigned int uiIndex, float* pfOut)
     }
 }
 
-class NiNode;
-template <> class NiPointer<NiNode>
-{
-  public:
-    NiNode* m_pObject;
-    NiPointer<NiNode>& operator=(NiNode* p);
-    operator NiNode*() const;
-};
-struct Ptr_0066b0d0
-{
-    Ptr_0066b0d0& FUN_0066b0d0(NiNode* value);
-};
 void __cdecl FUN_005b5e40(const char* value);
 void __cdecl FUN_00ba91a0(void* value, int a, const void* b);
 typedef NiNode*(__thiscall* FUN_00800d50_getter)(NiNode*);
@@ -1418,14 +1300,14 @@ void FUN_00800e50_Class::FUN_00800d50(int pNode)
         return;
     }
     *(int*)((char*)this + this->f0c * 8 + 0x14) = pNode;
-    ((Ptr_0066b0d0*)((char*)this + this->f0c * 8 + 0x18))
-        ->FUN_0066b0d0(((FUN_00800d50_getter)(*(unsigned int*)(*(unsigned int*)pNode + 0x1d0)))((NiNode*)pNode));
+    ((NiPointer<NiNode>*)((char*)this + this->f0c * 8 + 0x18))
+        ->operator=(((FUN_00800d50_getter)(*(unsigned int*)(*(unsigned int*)pNode + 0x1d0)))((NiNode*)pNode));
     this->f0c++;
     if (this->f04 == 0)
     {
         this->f04 = pNode;
-        ((Ptr_0066b0d0*)((char*)this + 8))
-            ->FUN_0066b0d0(((FUN_00800d50_getter)(*(unsigned int*)(*(unsigned int*)pNode + 0x1d0)))((NiNode*)pNode));
+        ((NiPointer<NiNode>*)((char*)this + 8))
+            ->operator=(((FUN_00800d50_getter)(*(unsigned int*)(*(unsigned int*)pNode + 0x1d0)))((NiNode*)pNode));
     }
     FUN_00ba91a0((NiNode*)*((NiPointer<NiNode>*)((char*)this + this->f0c * 8 + 0x18)), 0x31, 0);
 }
@@ -1630,26 +1512,12 @@ FUN_0080fb30::~FUN_0080fb30()
     controller = 0;
 }
 
-struct Pt3
-{
-    float x;
-    float y;
-    float z;
-    Pt3 operator-(const Pt3& rhs) const;
-    float Length();
-};
 
-struct Mat3
-{
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    Mat3();
-    void FromAngles(float a, float b, float c);
-};
 
 struct SceneObj
 {
-    Pt3* GetPos();
-    void GetTransformScale(const Pt3& p);
+    NiPoint3* GetPos();
+    void GetTransformScale(const NiPoint3& p);
     void SetLocalRotation(const Mat3& m);
 };
 
@@ -1658,11 +1526,7 @@ struct Emitter
     void Fire(float a, float len, float f, bool b);
 };
 
-struct Setting_811d1b14
-{
-    float* Float();
-};
-extern Setting_811d1b14 g_011d1b14;
+extern Setting g_011d1b14;
 
 float FUN_004b5550(float, float);
 
@@ -1670,7 +1534,7 @@ struct EffectParams
 {
     NiPointer<Emitter> spEmitter;
     NiPointer<SceneObj> m_pController;
-    Pt3 pos;
+    NiPoint3 pos;
     NiPointer<SceneObj> aspObstacleData;
     NiPointer<SceneObj> m_spTargetObject;
 };
@@ -1701,7 +1565,7 @@ void EffectBase::FUN_00812700(float a, EffectParams* pParams)
         pParams->pos = *pParams->aspObstacleData->GetPos();
     }
     node5->GetTransformScale(pParams->pos);
-    Pt3 dir = *pParams->m_spTargetObject->GetPos() - pParams->pos;
+    NiPoint3 dir = *pParams->m_spTargetObject->GetPos() - pParams->pos;
     bool bFar = GetTime() - fD4 > *g_011d1b14.Float();
     pParams->spEmitter->Fire(a, dir.Length(), f88, bFar);
     Mat3 rot2;
@@ -1995,8 +1859,6 @@ void __thiscall FUN_0081c4e0_cls::FUN_0081c4e0(int a1)
     }
 }
 
-class NiAVObject;
-
 NiAVObject* __cdecl LoadAndCloneModel(const char* value);
 
 struct FUN_0081e440_Embedded
@@ -2074,14 +1936,6 @@ void FUN_0081f1e0_Class::ApplyVirtualCall(int arg1, int arg2)
     this->FUN_009d9f40()->vf50(arg1, arg2);
 }
 
-class NiFixedString
-{
-    const char* value;
-
-  public:
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
 struct EquipObject;
 struct EquipGeometry
 {
@@ -2755,98 +2609,55 @@ void __thiscall FUN_00800870_Class::UpdateProgress(float value)
     }
 }
 
-struct MagicCaster;
-struct MagicItem;
-struct EffectItem;
 
-struct ActiveEffectStandIn
+struct FUN_0080cd30_Class : ValueModifierEffect
 {
-    void __thiscall FUN_0082ba60(MagicCaster*, MagicItem*, EffectItem*);
+    FUN_0080cd30_Class(MagicCaster*, MagicItem*, EffectItem*);
 };
 
-extern char DAT_01079e7c[];
-
-struct FUN_0080cd30_Class
-{
-    void* vft;
-    void* __thiscall FUN_0080cd30(MagicCaster*, MagicItem*, EffectItem*);
-};
-
-// Calls FUN_0082ba60 with the three arguments, sets vft to DAT_01079e7c, and returns this.
+// Constructs the ValueModifierEffect base and installs the derived vtable.
 // @fnv 0x0080cd30
-void* __thiscall FUN_0080cd30_Class::FUN_0080cd30(MagicCaster* apCaster, MagicItem* apMagicItem,
-                                                  EffectItem* apEffectItem)
+FUN_0080cd30_Class::FUN_0080cd30_Class(MagicCaster* apCaster, MagicItem* apMagicItem,
+                                                   EffectItem* apEffectItem)
+    : ValueModifierEffect(apCaster, apMagicItem, apEffectItem)
 {
-    reinterpret_cast<ActiveEffectStandIn*>(this)->FUN_0082ba60(apCaster, apMagicItem, apEffectItem);
-    vft = DAT_01079e7c;
-    return this;
 }
 
-extern int DAT_01079f2c;
-
-class SpawnedBase
-{
-  public:
-    void SpawnedInit(int a, int b, int c);
-};
-
 // @fnv 0x0080d1a0
-FUN_0080d1a0::FUN_0080d1a0(int a, int b, int c)
+FUN_0080d1a0::FUN_0080d1a0(MagicCaster* a, MagicItem* b, EffectItem* c)
+    : ActiveEffect(a, b, c)
 {
-    reinterpret_cast<SpawnedBase*>(this)->SpawnedInit(a, b, c);
-    *(int*)this = (int)&DAT_01079f2c;
-    *(int*)((char*)this + 0x48) = 0;
+    f48 = 0;
 }
 
 // FUN_0080d6b0: constructor-like member that forwards its three arguments to
 // the base routine using `this`, installs the class vtable pointer into the
 // object and returns itself.
 
-extern int DAT_01079ffc;
-
-struct FUN_0080d6b0_cls
+struct FUN_0080d6b0_cls : ActiveEffect
 {
-    void* m_pVTable;
-    void FUN_00803d30(int a, int b, int c);
-    FUN_0080d6b0_cls* FUN_0080d6b0(int a, int b, int c);
+    FUN_0080d6b0_cls(MagicCaster*, MagicItem*, EffectItem*);
 };
 
-// Calls FUN_00803d30 with the three arguments, sets m_pVTable to DAT_01079ffc, and returns this.
+// Constructs the ActiveEffect base and installs the derived vtable.
 // @fnv 0x0080d6b0
-FUN_0080d6b0_cls* FUN_0080d6b0_cls::FUN_0080d6b0(int a, int b, int c)
+FUN_0080d6b0_cls::FUN_0080d6b0_cls(MagicCaster* a, MagicItem* b, EffectItem* c)
+    : ActiveEffect(a, b, c)
 {
-    FUN_00803d30(a, b, c);
-    m_pVTable = (void*)&DAT_01079ffc;
-    return this;
 }
 
-// Constructor-like thiscall with 3 stack args: calls a base routine with the
-// three args, stores the class vtable pointer, returns this.
-
-extern char DAT_0107a0cc[];
-
-struct FUN_00803d30_base
+struct FUN_0080d900_cls : ActiveEffect
 {
-    void FUN_00803d30(int a1, int a2, int a3);
+    FUN_0080d900_cls(MagicCaster*, MagicItem*, EffectItem*);
 };
 
-struct FUN_0080d900_cls : FUN_00803d30_base
-{
-    void* m_pVTable;
-
-    FUN_0080d900_cls* FUN_0080d900(int a1, int a2, int a3);
-};
-
-// Calls the base class constructor, sets the vtable pointer to DAT_0107a0cc, and returns this.
+// Constructs the ActiveEffect base and installs the derived vtable.
 // @fnv 0x0080d900
-FUN_0080d900_cls* FUN_0080d900_cls::FUN_0080d900(int a1, int a2, int a3)
+FUN_0080d900_cls::FUN_0080d900_cls(MagicCaster* a1, MagicItem* a2, EffectItem* a3)
+    : ActiveEffect(a1, a2, a3)
 {
-    FUN_00803d30(a1, a2, a3);
-    m_pVTable = (void*)DAT_0107a0cc;
-    return this;
 }
 
-extern int DAT_0107a4ac;
 struct FUN_0080f390_shell : ActiveEffect
 {
     FUN_0080f390_shell(MagicCaster* a, MagicItem* b, EffectItem* c);
@@ -2856,7 +2667,6 @@ struct FUN_0080f390_shell : ActiveEffect
 FUN_0080f390_shell::FUN_0080f390_shell(MagicCaster* apCaster, MagicItem* apItem, EffectItem* apEffect)
     : ActiveEffect(apCaster, apItem, apEffect)
 {
-    *(int*)this = (int)&DAT_0107a4ac;
 }
 
 namespace fnv_0081de70 {

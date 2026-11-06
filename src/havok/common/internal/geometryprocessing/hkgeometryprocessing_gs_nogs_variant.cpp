@@ -1,3 +1,7 @@
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/Vec4.h"
+
 
 // src/havok/common/internal/geometryprocessing/hkgeometryprocessing_gs_nogs_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/common/internal/geometryprocessing/hkgeometryprocessing.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -21,21 +25,7 @@ struct FUN_00dee6b0_Class
     float FUN_00dee6b0(int testFlag);
 };
 extern int DAT_010cd664;
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00dee6c0_cls
 {
     int m_vptr;
@@ -145,14 +135,6 @@ extern "C" void FUN_00de9650(SphereInput276* in, SphereOutput276* out)
 
 extern "C" void _ReadBarrier();
 
-struct Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-
 __declspec(align(16)) struct Vec4Pair
 {
     Vec4 a;
@@ -184,11 +166,17 @@ extern Vec4 DAT_01267e30;
 // @fnv 0x00dedbb0
 bool __cdecl FUN_00dedbb0(Owner* self, int count, Vec4Array* out, Obj* obj)
 {
-    Vec4Pair pair;
-    Vec4 scratch;
-    Vec4 delta;
-    Vec4 base;
-    Vec4 cur;
+    // Preserve the original uninitialized SIMD storage without invoking Vec4 constructors.
+    __m128 pairStorage[2];
+    Vec4Pair& pair = *(Vec4Pair*)pairStorage;
+    __m128 scratchStorage;
+    Vec4& scratch = *(Vec4*)&scratchStorage;
+    __m128 deltaStorage;
+    Vec4& delta = *(Vec4*)&deltaStorage;
+    __m128 baseStorage;
+    Vec4& base = *(Vec4*)&baseStorage;
+    __m128 curStorage;
+    Vec4& cur = *(Vec4*)&curStorage;
     int limit;
     unsigned char flag;
     int tries;
@@ -196,7 +184,7 @@ bool __cdecl FUN_00dedbb0(Owner* self, int count, Vec4Array* out, Obj* obj)
     self->FUN_00e11530(&pair);
     base = pair.a;
     _mm_store_ps((float*)(void*)&delta,
-                 _mm_sub_ps(_mm_load_ps((const float*)&pair.b), _mm_load_ps((const float*)&pair.a)));
+                 _mm_sub_ps(pairStorage[1], pairStorage[0]));
     tries = 0;
     limit = count * 8;
     while (count != 0)
@@ -209,10 +197,10 @@ bool __cdecl FUN_00dedbb0(Owner* self, int count, Vec4Array* out, Obj* obj)
         if (flag != 0)
         {
             cur.w = 1.0f;
-            AudioHolder* holder = FUN_00c85750();
+            hkMemoryRouter* holder = FUN_00c85750();
             if (out->m_04 == (int)(out->m_08 & 0x3fffffff))
             {
-                ResizeAudioStream(holder->m_pAllocator, out, 0x10);
+                ResizeAudioStream(holder->m_heap, out, 0x10);
             }
             Vec4* __restrict dst = out->m_00 + out->m_04;
             _mm_store_ps((float*)dst, _mm_load_ps((const float*)&cur));

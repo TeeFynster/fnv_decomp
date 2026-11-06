@@ -1,28 +1,21 @@
+#include "../../../../include/NiRenderedCubeMap.h"
+#include <string.h>
 
 // src/gamebryo2.2/corelibs/nimain/nirenderedcubemap.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nirenderedcubemap.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct FUN_00ee8220_shell
-{
-    void* __thiscall FUN_00ee8220();
-};
-
+// These accessors and the deleting destructor have no declarations in the shared class.
 // @fnv 0x00ee8220
-void* __thiscall FUN_00ee8220_shell::FUN_00ee8220()
+void* __fastcall FUN_00ee8220(NiRenderedCubeMap* cubeMap)
 {
-    void* p = *(void**)(this + 0x4C);
+    void* p = cubeMap->m_ppCubeMapFaces[0];
     return *(void**)((char*)p + 8);
 }
 
-struct FUN_00ee8230_shell
-{
-    int __thiscall FUN_00ee8230();
-};
-
 // @fnv 0x00ee8230
-int __thiscall FUN_00ee8230_shell::FUN_00ee8230()
+int __fastcall FUN_00ee8230(NiRenderedCubeMap* cubeMap)
 {
-    int* p = *(int**)((char*)this + 0x4c);
+    void* p = cubeMap->m_ppCubeMapFaces[0];
     return *(int*)((char*)p + 0xc);
 }
 
@@ -35,151 +28,69 @@ void* __cdecl FUN_00ee82a0()
 }
 
 void __cdecl operator delete(void* p, size_t size);
-void* __cdecl operator new(size_t);
-struct NiRenderedCubeMap
-{
-    virtual ~NiRenderedCubeMap();
-    void __thiscall FUN_00ee82b0();
-};
-struct NiRenderedCubeMap_shell : NiRenderedCubeMap
-{
-    void* __thiscall FUN_00ee8440(unsigned int flags);
-};
-// Calls FUN_00ee82b0, then frees this with operator delete when flags has bit 0 set, and returns this.
+
 // @fnv 0x00ee8440
-void* __thiscall NiRenderedCubeMap_shell::FUN_00ee8440(unsigned int flags)
+void* __fastcall FUN_00ee8440(NiRenderedCubeMap* cubeMap, void*, unsigned int flags)
 {
-    FUN_00ee82b0();
+    cubeMap->FUN_00ee82b0();
     if (flags & 1)
-        operator delete(this, 0x64);
-    return this;
+        operator delete(cubeMap, 0x64);
+    return cubeMap;
 }
 
 extern "C" void _ReadWriteBarrier(void);
-#include <string.h>
 extern int DAT_0109b944;
 extern int DAT_0110102c;
-struct NiProperty
-{
-    NiProperty() throw();
-    int* m_pVtbl;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-struct Mid_ee8240 : NiProperty
-{
-    Mid_ee8240() throw()
-    {
-        m_pVtbl = &DAT_0109b944;
-        m_iA = 6;
-        m_iB = 3;
-        m_iC = 2;
-        m_iD = 0;
-        FUN_00a5f7b0();
-        m_i30 = 0;
-        _ReadWriteBarrier();
-    }
-    void FUN_00a5f7b0() throw();
-    int m_iA;
-    int m_iB;
-    int m_iC;
-    volatile int m_iD;
-    int unk28;
-    int unk2C;
-    int m_i30;
-};
-struct FUN_00ee8240 : Mid_ee8240
-{
-    FUN_00ee8240() throw();
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int m_i48;
-    int m_i4C;
-    int m_i50;
-    int m_i54;
-    int m_i58;
-    int m_i5C;
-    int m_i60;
-};
-// Constructor for FUN_00ee8240 that sets the vtable pointer and zero-initializes m_i4C through m_i60 plus m_i48.
+
+// Entry points for base initialization and teardown absent from the shared headers.
+void __fastcall InitializeObjectNET(NiObjectNET* object);
+void __fastcall InitializeTexture(NiTexture* texture) throw();
+void __fastcall DestroyTexture(NiTexture* texture);
+void __fastcall DestroyObjectNET(NiObjectNET* object);
+
 // @fnv 0x00ee8240
-FUN_00ee8240::FUN_00ee8240() throw()
+NiRenderedCubeMap* __fastcall ConstructCubeMap(NiRenderedCubeMap* cubeMap) throw()
 {
-    m_pVtbl = &DAT_0110102c;
-    memset(&m_i4C, 0, 0x18);
-    m_i48 = 0;
+    InitializeObjectNET(cubeMap);
+    *(int**)cubeMap = &DAT_0109b944;
+    cubeMap->m_kFormatPrefs.m_ePreferredPixelLayout = NiTexture::TextureFormatPreferences::PIX_DEFAULT;
+    cubeMap->m_kFormatPrefs.m_eAlphaFormat = NiTexture::TextureFormatPreferences::ALPHA_DEFAULT;
+    cubeMap->m_kFormatPrefs.m_eMipFlag = NiTexture::TextureFormatPreferences::MIP_DEFAULT;
+    *(volatile int*)&cubeMap->m_pkRendererData = 0;
+    InitializeTexture(cubeMap);
+    cubeMap->m_spRenderTargetBuffer.m_pObject = 0;
+    _ReadWriteBarrier();
+    *(int**)cubeMap = &DAT_0110102c;
+    memset(cubeMap->m_ppCubeMapFaces, 0, 0x18);
+    cubeMap->unk48 = 0;
+    return cubeMap;
 }
 
-#include <windows.h>
-struct Ref
-{
-    virtual void slot0() = 0;
-    virtual void slot1() = 0;
-};
 struct Item
 {
     virtual ~Item();
 };
-extern int DAT_0109b944;
-struct Obj
-{
-    virtual void baseSlot() = 0;
-    int pad04;
-    int pad08;
-    int pad0c;
-    int pad10;
-    int pad14;
-    int pad18;
-    int pad1c;
-    int pad20;
-    Item* item24;
-    int pad28;
-    int pad2c;
-    Ref* ref30;
-    int pad34;
-    int pad38;
-    int pad3c;
-    int pad40;
-    int pad44;
-    int pad48;
-    Ref* ref4c;
-    Ref* ref50;
-    Ref* ref54;
-    Ref* ref58;
-    Ref* ref5c;
-    Ref* ref60;
-    Ref* end64;
-    void FUN_00ee82b0();
-    void FUN_00a5f800();
-    void DestroyFogProperty();
-};
-// Releases the six Ref pointers and item24, resets the vtable to DAT_0109b944, then calls FUN_00a5f800 and DestroyFogProperty.
+
 // @fnv 0x00ee82b0
-void Obj::FUN_00ee82b0()
+void NiRenderedCubeMap::FUN_00ee82b0()
 {
-    Ref** next = &end64;
+    NiRefObject** next = (NiRefObject**)(m_ppCubeMapFaces + 6);
     int count = 5;
     do
     {
-        Ref* p = *--next;
+        NiRefObject* p = *--next;
         if (p && InterlockedDecrement((volatile long*)p + 1) == 0)
-            p->slot1();
+            p->DeleteThis();
         --count;
     } while (count >= 0);
-    Ref* p = ref30;
+    NiRefObject* p = m_spRenderTargetBuffer.m_pObject;
     if (p && InterlockedDecrement((volatile long*)p + 1) == 0)
-        p->slot1();
+        p->DeleteThis();
     *(int*)this = (int)&DAT_0109b944;
-    if (item24)
-        delete item24;
-    FUN_00a5f800();
-    DestroyFogProperty();
+    if (m_pkRendererData)
+        delete (Item*)m_pkRendererData;
+    DestroyTexture(this);
+    DestroyObjectNET(this);
 }
 
 struct S_00ee8330_RefObject
@@ -203,35 +114,21 @@ struct S_00ee8330_Buffer : S_00ee8330_RefObject
     static S_00ee8330_Buffer* Create(unsigned int uiWidth, unsigned int uiHeight);
 };
 
-template <class T> struct S_00ee8330_Ptr
+inline void AssignFace(void*& face, S_00ee8330_Buffer* object)
 {
-    T* m_pObject;
-    S_00ee8330_Ptr& operator=(T* pObject)
+    if (face != object)
     {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
+        if (face)
+            ((S_00ee8330_Buffer*)face)->DecRefCount();
+        face = object;
+        if (face)
+            ((S_00ee8330_Buffer*)face)->IncRefCount();
     }
-};
-
-struct S_00ee8330_FormatPrefs
-{
-    int m_ePreferredPixelLayout;
-    int m_eAlphaFormat;
-    int m_eMipFlag;
-};
+}
 
 extern bool DAT_011f4ac0;
 extern int DAT_011ab3c8;
 extern bool DAT_011ab3c4;
-
-struct S_00ee8330_Renderer;
 
 inline bool S_00ee8330_IsPowerOf2(unsigned int ui)
 {
@@ -239,34 +136,6 @@ inline bool S_00ee8330_IsPowerOf2(unsigned int ui)
         return false;
     return (ui & (ui - 1)) == 0;
 }
-
-struct S_00ee8330_CubeMap
-{
-    static void* operator new(size_t n);
-    S_00ee8330_CubeMap() throw();
-    virtual ~S_00ee8330_CubeMap();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    S_00ee8330_FormatPrefs m_kTextureFormatPreferences;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    bool m_b40;
-    bool m_b41;
-    int m_i44;
-    int unk48;
-    S_00ee8330_Ptr<S_00ee8330_Buffer> m_kFaceBuffers[6];
-
-    static S_00ee8330_CubeMap* FUN_00ee8330(unsigned int uiSize, S_00ee8330_Renderer* pkRenderer,
-                                            S_00ee8330_FormatPrefs& kPrefs);
-};
 
 struct S_00ee8330_Renderer
 {
@@ -352,28 +221,28 @@ struct S_00ee8330_Renderer
     virtual void v13c();
     virtual void v140();
     virtual void v144();
-    virtual bool CreateRenderedCubeMapRendererData(S_00ee8330_CubeMap* pkCubeMap);
+    virtual bool CreateRenderedCubeMapRendererData(NiRenderedCubeMap* pkCubeMap);
 };
 
 // Allocates a cube map, creates six face buffers, copies three globals into fields, and calls the renderer to create renderer data.
 // @fnv 0x00ee8330
-S_00ee8330_CubeMap* S_00ee8330_CubeMap::FUN_00ee8330(unsigned int uiFaceSize, S_00ee8330_Renderer* pkRenderer,
-                                                     S_00ee8330_FormatPrefs& kPrefs)
+NiRenderedCubeMap* NiRenderedCubeMap::FUN_00ee8330(unsigned int uiFaceSize, NiRenderer* pkRenderer,
+                                                     NiTexture::TextureFormatPreferences& kPrefs)
 {
     if (!pkRenderer || !S_00ee8330_IsPowerOf2(uiFaceSize))
         return 0;
 
-    S_00ee8330_CubeMap* pkThis = new S_00ee8330_CubeMap;
-    pkThis->m_kTextureFormatPreferences = kPrefs;
+    NiRenderedCubeMap* pkThis = new NiRenderedCubeMap;
+    pkThis->m_kFormatPrefs = kPrefs;
 
     for (unsigned int ui = 0; ui < 6; ui++)
-        pkThis->m_kFaceBuffers[ui] = S_00ee8330_Buffer::Create(uiFaceSize, uiFaceSize);
+        AssignFace(pkThis->m_ppCubeMapFaces[ui], S_00ee8330_Buffer::Create(uiFaceSize, uiFaceSize));
 
-    pkThis->m_b41 = DAT_011f4ac0;
-    pkThis->m_i44 = DAT_011ab3c8;
-    pkThis->m_b40 = DAT_011ab3c4;
+    pkThis->m_bUseDepthBuffer = DAT_011f4ac0;
+    pkThis->m_ePixelFormat = (_D3DFORMAT)DAT_011ab3c8;
+    pkThis->m_bUseMipMaps = DAT_011ab3c4;
 
-    if (!pkRenderer->CreateRenderedCubeMapRendererData(pkThis))
+    if (!((S_00ee8330_Renderer*)pkRenderer)->CreateRenderedCubeMapRendererData(pkThis))
     {
         delete pkThis;
         return 0;

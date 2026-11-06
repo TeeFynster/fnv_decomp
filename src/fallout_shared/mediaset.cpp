@@ -1,6 +1,13 @@
-// fallout_shared/mediaset.cpp: MediaSet, MediaSetLoad, MediaSetBattle, MediaSetCopy and more (22 functions)
+#include "../../include/BSStringT.h"
+// fallout_shared/mediaset.cpp: MediaSet, MediaSetLoad, MediaSetBattle and more (22 functions)
 
+#include "../../include/MediaSet.h"
+#include "../../include/BSAudio.h"
 #include "mediaset_decls.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/GO.h"
+#include "../../include/Sky.h"
+#include "../../include/TES.h"
 
 // @fnv 0x00598a70
 void MediaSet::InitItem()
@@ -14,7 +21,7 @@ void MediaSet::InitItem()
     if (formID)
     {
         RemapFormIDForFile(formID, GetFile(-1));
-        m_pSound1 = dynamic_cast<TESSound*>(TESFormInitFlag::GetFormByID(formID));
+        m_pSound1 = dynamic_cast<TESSound*>(TESForm::GetFormByID(formID));
         if (!m_pSound1)
             Warning("MASTERFILE: Could not find open sound (%08X) for MediaSet '%s' (%08X).", formID, GetName(),
                     GetFormID());
@@ -24,7 +31,7 @@ void MediaSet::InitItem()
     if (formID)
     {
         RemapFormIDForFile(formID, GetFile(-1));
-        m_pSound2 = dynamic_cast<TESSound*>(TESFormInitFlag::GetFormByID(formID));
+        m_pSound2 = dynamic_cast<TESSound*>(TESForm::GetFormByID(formID));
         if (!m_pSound2)
             Warning("MASTERFILE: Could not find open sound (%08X) for MediaSet '%s' (%08X).", formID, GetName(),
                     GetFormID());
@@ -33,16 +40,16 @@ void MediaSet::InitItem()
     SetInitializationState(true);
 }
 
-// Calls FUN_00597850 on six members, then zeroes two members.
+// Resets six entries, then zeroes two sound members.
 // @fnv 0x00599bd0
 void MediaSet::ClearData()
 {
-    m_kMediaSetEntry1.FUN_00597850();
-    m_kMediaSetEntry2.FUN_00597850();
-    m_kMediaSetEntry3.FUN_00597850();
-    m_kMediaSetEntry4.FUN_00597850();
-    m_kMediaSetEntry5.FUN_00597850();
-    m_kMediaSetEntry6.FUN_00597850();
+    m_kMediaSetEntry1.Reset();
+    m_kMediaSetEntry2.Reset();
+    m_kMediaSetEntry3.Reset();
+    m_kMediaSetEntry4.Reset();
+    m_kMediaSetEntry5.Reset();
+    m_kMediaSetEntry6.Reset();
     m_pSound1 = 0;
     m_pSound2 = 0;
 }
@@ -50,12 +57,12 @@ void MediaSet::ClearData()
 // @fnv 0x00599b30
 void MediaSet::ResetFormData()
 {
-    m_kMediaSetEntry1.FUN_00597850();
-    m_kMediaSetEntry2.FUN_00597850();
-    m_kMediaSetEntry3.FUN_00597850();
-    m_kMediaSetEntry4.FUN_00597850();
-    m_kMediaSetEntry5.FUN_00597850();
-    m_kMediaSetEntry6.FUN_00597850();
+    m_kMediaSetEntry1.Reset();
+    m_kMediaSetEntry2.Reset();
+    m_kMediaSetEntry3.Reset();
+    m_kMediaSetEntry4.Reset();
+    m_kMediaSetEntry5.Reset();
+    m_kMediaSetEntry6.Reset();
     m_fMediaParameter1 = 0.0f;
     fSkillValueBonus = 0.0f;
     m_fMediaParameter3 = 0.0f;
@@ -99,12 +106,12 @@ MediaSet::MediaSet()
 {
     SetFormType(ENUM_FORM_ID_MSET_ID);
     Type = static_cast<MEDIASETTYPE>(-1);
-    m_kMediaSetEntry1.FUN_00597850();
-    m_kMediaSetEntry2.FUN_00597850();
-    m_kMediaSetEntry3.FUN_00597850();
-    m_kMediaSetEntry4.FUN_00597850();
-    m_kMediaSetEntry5.FUN_00597850();
-    m_kMediaSetEntry6.FUN_00597850();
+    m_kMediaSetEntry1.Reset();
+    m_kMediaSetEntry2.Reset();
+    m_kMediaSetEntry3.Reset();
+    m_kMediaSetEntry4.Reset();
+    m_kMediaSetEntry5.Reset();
+    m_kMediaSetEntry6.Reset();
     m_fMediaParameter1 = 0.0f;
     fSkillValueBonus = 0.0f;
     m_fMediaParameter3 = 0.0f;
@@ -125,7 +132,7 @@ MediaSet::MediaSet()
 bool MediaSet::UpdateLayerLocation(unsigned int time, bool force, MediaLocationController* controller)
 {
     bool bReturn;
-    bool bPlaying = FalloutAudioMedia::IsMediaPlaying(MEDIA_INCIDENTAL, false);
+    bool bPlaying = FalloutAudioMedia::IsMediaPlaying(MEDIATYPE_MEDIA_LOCATION, false);
     bReturn = true;
     char cLayer = 0;
     if (force)
@@ -135,11 +142,11 @@ bool MediaSet::UpdateLayerLocation(unsigned int time, bool force, MediaLocationC
     else
     {
         bool a;  // Restart after the previous incidental reaches its fade window.
-        unsigned int fMinPercent = FUN_00830970(MEDIA_INCIDENTAL);
+        unsigned int fMinPercent = FUN_00830970(MEDIATYPE_MEDIA_LOCATION);
         a = false;
         if (m_uiMediaValue3 && fMinPercent && time > m_uiMediaValue3 + fMinPercent - m_fMediaParameter3 * 1000.0)
         {
-            FalloutAudioMedia::FadeOutMedia(static_cast<int>(m_fMediaParameter3 * 1000.0), MEDIA_INCIDENTAL);
+            FalloutAudioMedia::FadeOutMedia(static_cast<int>(m_fMediaParameter3 * 1000.0), MEDIATYPE_MEDIA_LOCATION);
             m_uiMediaValue3 = time;
             if (!controller->FUN_00598000())
                 a = true;
@@ -234,10 +241,10 @@ bool MediaSet::UpdateLayerLocation(unsigned int time, bool force, MediaLocationC
             {
                 DAT_011dd37c = static_cast<unsigned int>(time + m_fMediaParameter1 * 1000.0);
                 unsigned int uiElapsedMilliseconds = 0;
-                if (FUN_00830a20(MEDIA_INCIDENTAL) && !a)
-                    uiElapsedMilliseconds = time - FUN_00830a20(MEDIA_INCIDENTAL);
+                if (FUN_00830a20(MEDIATYPE_MEDIA_LOCATION) && !a)
+                    uiElapsedMilliseconds = time - FUN_00830a20(MEDIATYPE_MEDIA_LOCATION);
                 FalloutAudioMedia::PlayMedia(
-                    MEDIA_INCIDENTAL,
+                    MEDIATYPE_MEDIA_LOCATION,
                     reinterpret_cast<const char*>(reinterpret_cast<const NiPointer<NiNode>*>(pLayer)->operator->()),
                     static_cast<unsigned int>(m_fMediaParameter3 * 1000.0), !controller->FUN_00598000(), true,
                     pLayer->Attenuation, uiElapsedMilliseconds);
@@ -247,7 +254,7 @@ bool MediaSet::UpdateLayerLocation(unsigned int time, bool force, MediaLocationC
             else
             {
                 if (bPlaying)
-                    FalloutAudioMedia::FadeOutMedia(static_cast<int>(m_fMediaParameter3 * 1000.0), MEDIA_INCIDENTAL);
+                    FalloutAudioMedia::FadeOutMedia(static_cast<int>(m_fMediaParameter3 * 1000.0), MEDIATYPE_MEDIA_LOCATION);
                 bReturn = false;
             }
             m_bActorStateFlag = force;
@@ -260,20 +267,13 @@ bool MediaSet::UpdateLayerLocation(unsigned int time, bool force, MediaLocationC
 
 extern float const runtimeFloatSettingDefault313;
 
-struct FUN_00597850_Class
-{
-    BSStringT<char> m_str;
-    float m_f08;
-    float m_f0c;
-};
-
-// Clears the string, then sets m_f08 to runtimeFloatSettingDefault313 and m_f0c to 100.0f.
+// Clears the name and restores the attenuation and percentage defaults.
 // @fnv 0x00597850
-void __fastcall FUN_00597850(FUN_00597850_Class* pThis)
+void MediaSetEntry::Reset()
 {
-    pThis->m_str.Set(0, 0);
-    pThis->m_f08 = runtimeFloatSettingDefault313;
-    pThis->m_f0c = 100.0f;
+    Name.Set(0, 0);
+    Attenuation = runtimeFloatSettingDefault313;
+    Percent = 100.0f;
 }
 
 // @fnv 0x007d9ec0
@@ -284,21 +284,7 @@ void __fastcall FUN_007d9ec0(BSStringT<char>* apString)
 
 extern "C" void* __cdecl _alloca(unsigned int);
 
-struct BSStringTChar
-{
-    char* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    BSStringTChar(const char* apText);
-    ~BSStringTChar();
-    BSStringTChar& operator+=(const char* apText);
-    bool Set(const BSStringTChar& arString);
-};
 
-struct TESFormLoadDataHelper
-{
-    void ReadTypedData(TESFile* apFile, void* apData, unsigned short ausSize);
-};
 
 struct MediaSetLoad : public MediaSet
 {
@@ -329,7 +315,7 @@ bool MediaSetLoad::FUN_00598bc0(TESFile* apFile)
             readOBNDSubRecord(apFile);
             break;
         case 'LLUF':
-            TESFullNameLoader::LoadFullNameChunk(this, apFile);
+            TESFullName::LoadFullNameChunk(this, apFile);
             break;
         case '1MAN':
             apFile->GetChunkData(&itempint);
@@ -348,27 +334,27 @@ bool MediaSetLoad::FUN_00598bc0(TESFile* apFile)
             {
                 pMessage = (char*)_alloca(apFile->GetChunkSize());
                 apFile->GetChunkData(pMessage, 0);
-                BSStringTChar stemp("Data\\Music\\");
+                ::BSStringT<char> stemp("Data\\Music\\");
                 stemp += pMessage;
                 switch (chunkid)
                 {
                 case '2MAN':
-                    ((BSStringTChar*)&m_kMediaSetEntry1.Name)->Set(stemp);
+                    ((::BSStringT<char>*)&m_kMediaSetEntry1.Name)->Set(stemp);
                     break;
                 case '3MAN':
-                    ((BSStringTChar*)&m_kMediaSetEntry2.Name)->Set(stemp);
+                    ((::BSStringT<char>*)&m_kMediaSetEntry2.Name)->Set(stemp);
                     break;
                 case '4MAN':
-                    ((BSStringTChar*)&m_kMediaSetEntry3.Name)->Set(stemp);
+                    ((::BSStringT<char>*)&m_kMediaSetEntry3.Name)->Set(stemp);
                     break;
                 case '5MAN':
-                    ((BSStringTChar*)&m_kMediaSetEntry4.Name)->Set(stemp);
+                    ((::BSStringT<char>*)&m_kMediaSetEntry4.Name)->Set(stemp);
                     break;
                 case '6MAN':
-                    ((BSStringTChar*)&m_kMediaSetEntry5.Name)->Set(stemp);
+                    ((::BSStringT<char>*)&m_kMediaSetEntry5.Name)->Set(stemp);
                     break;
                 case '7MAN':
-                    ((BSStringTChar*)&m_kMediaSetEntry6.Name)->Set(stemp);
+                    ((::BSStringT<char>*)&m_kMediaSetEntry6.Name)->Set(stemp);
                     break;
                 }
             }
@@ -437,7 +423,7 @@ bool MediaSetLoad::FUN_00598bc0(TESFile* apFile)
             break;
         }
         case 'MANP':
-            ((TESFormLoadDataHelper*)this)->ReadTypedData(apFile, &m_cMediaFlag, 1);
+            ReadTypedData(apFile, &m_cMediaFlag, 1);
             break;
         case 'MAND':
         case 'MANE':
@@ -484,28 +470,22 @@ bool MediaSetLoad::FUN_00598bc0(TESFile* apFile)
     return true;
 }
 
-struct FUN_00598000_shell
-{
-    int __thiscall FUN_00598000();
-};
-
 // @fnv 0x00598000
-int __thiscall FUN_00598000_shell::FUN_00598000()
+int MediaLocationController::FUN_00598000()
 {
-    return (*(int*)((char*)this + 0x6c) >> 4) & 3;
+    return (iFlags >> 4) & 3;
 }
 
-struct FUN_00597880_shell
+struct MediaSetLifetime
 {
-    void FUN_005978b0();
-    void* FUN_00597880(unsigned int);
+    void* Destroy(unsigned int flags);
 };
 void _Deallocate(void*);
-// Calls FUN_005978b0, then deallocates this when flags has bit 1 set, and returns this.
+// Destroys the media set, optionally deallocates it, and returns its address.
 // @fnv 0x00597880
-void* FUN_00597880_shell::FUN_00597880(unsigned int flags)
+void* MediaSetLifetime::Destroy(unsigned int flags)
 {
-    this->FUN_005978b0();
+    reinterpret_cast<MediaSet*>(this)->MediaSet::~MediaSet();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -517,55 +497,30 @@ struct UnnamedStr
     int _04;
     void __thiscall AssignFromString(const UnnamedStr&);
 };
-struct FUN_00599780
+// Operations absent from the shared MediaSetEntry declaration use a stateless
+// adapter; all storage and offsets come from MediaSetEntry.
+struct MediaSetEntryOperations
 {
-    UnnamedStr _00;
-    float _08;
-    float _0c;
-    FUN_00599780(const FUN_00599780&);
+    MediaSetEntry* CopyConstruct(const MediaSetEntry& other);
 };
-// Copy-constructs from that: copies the embedded UnnamedStr via AssignFromString and copies the two floats _08 and _0c.
-// @fnv 0x00599780
-FUN_00599780::FUN_00599780(const FUN_00599780& that)
-{
-    _00.AssignFromString(that._00);
-    _08 = that._08;
-    _0c = that._0c;
-}
 
-struct GO
+// @fnv 0x00599780
+MediaSetEntry* MediaSetEntryOperations::CopyConstruct(const MediaSetEntry& other)
 {
-    operator unsigned int() const;
-};
+    reinterpret_cast<UnnamedStr*>(this)->AssignFromString(*reinterpret_cast<const UnnamedStr*>(&other.Name));
+    reinterpret_cast<MediaSetEntry*>(this)->Attenuation = other.Attenuation;
+    reinterpret_cast<MediaSetEntry*>(this)->Percent = other.Percent;
+    return reinterpret_cast<MediaSetEntry*>(this);
+}
 
 struct S7010 : GO
 {
     unsigned int Length();
 };
 
-struct DoorPart30
+struct MediaFormWriter
 {
-    void FUN_00487010();
-};
-
-struct FUN_004855a0
-{
-    void M();
-};
-
-struct FUN_00485680
-{
-    void M();
-};
-
-struct FUN_00485e00_shell
-{
-    void FUN_00485e00();
-};
-
-struct FUN_005991b0_shell
-{
-    void FUN_005991b0();
+    void Finish();
 };
 
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
@@ -574,10 +529,10 @@ void __cdecl _FUN_00485910(unsigned int, unsigned int);
 void __cdecl _FUN_00485910(unsigned int, float);
 
 // @fnv 0x005991b0
-void FUN_005991b0_shell::FUN_005991b0()
+void MediaSet::SaveMediaSet()
 {
-    reinterpret_cast<FUN_004855a0*>(this)->M();
-    reinterpret_cast<DoorPart30*>(reinterpret_cast<char*>(this) + 0x18)->FUN_00487010();
+    TESForm::FUN_004855a0();
+    TESFullName::FUN_00487010();
 
     _FUN_00485910(0x314d414e, *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x44));
 
@@ -585,7 +540,7 @@ void FUN_005991b0_shell::FUN_005991b0()
     {
         FUN_004856f0(0x324d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
-                         *reinterpret_cast<GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x48)))),
+                         *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x48)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x48)->Length() + 1);
     }
 
@@ -593,7 +548,7 @@ void FUN_005991b0_shell::FUN_005991b0()
     {
         FUN_004856f0(0x334d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
-                         *reinterpret_cast<GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x58)))),
+                         *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x58)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x58)->Length() + 1);
     }
 
@@ -601,7 +556,7 @@ void FUN_005991b0_shell::FUN_005991b0()
     {
         FUN_004856f0(0x344d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
-                         *reinterpret_cast<GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x68)))),
+                         *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x68)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x68)->Length() + 1);
     }
 
@@ -609,7 +564,7 @@ void FUN_005991b0_shell::FUN_005991b0()
     {
         FUN_004856f0(0x354d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
-                         *reinterpret_cast<GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x78)))),
+                         *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x78)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x78)->Length() + 1);
     }
 
@@ -617,7 +572,7 @@ void FUN_005991b0_shell::FUN_005991b0()
     {
         FUN_004856f0(0x364d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
-                         *reinterpret_cast<GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x88)))),
+                         *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x88)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x88)->Length() + 1);
     }
 
@@ -625,7 +580,7 @@ void FUN_005991b0_shell::FUN_005991b0()
     {
         FUN_004856f0(0x374d414e,
                      reinterpret_cast<void*>(static_cast<unsigned int>(
-                         *reinterpret_cast<GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x98)))),
+                         *reinterpret_cast<const GO*>(reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x98)))),
                      reinterpret_cast<S7010*>(reinterpret_cast<char*>(this) + 0x98)->Length() + 1);
     }
 
@@ -663,75 +618,18 @@ void FUN_005991b0_shell::FUN_005991b0()
                           ->GetFormID());
     }
 
-    reinterpret_cast<FUN_00485e00_shell*>(this)->FUN_00485e00();
-    reinterpret_cast<FUN_00485680*>(this)->M();
+    reinterpret_cast<MediaFormWriter*>(this)->Finish();
+    TESForm::FUN_00485680();
 }
 
-struct S_5978b0_Form
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    virtual ~S_5978b0_Form();
-};
-
-struct FUN_005978b0 : public S_5978b0_Form, public TESFullName
-{
-    unsigned int m_uiMediaValue1;
-    unsigned int m_uiMediaValue2;
-    unsigned int m_uiMediaValue3;
-    bool bEffectFlag;
-    bool m_bActorStateFlag;
-    bool m_bCountWasNonzero;
-    bool m_bConditionWasTrue;
-    char m_cMediaState;
-    TESFullName m_kFullName;
-    int Type;
-    MediaSet::MediaSetEntry m_kMediaSetEntry1;
-    MediaSet::MediaSetEntry m_kMediaSetEntry2;
-    MediaSet::MediaSetEntry m_kMediaSetEntry3;
-    MediaSet::MediaSetEntry m_kMediaSetEntry4;
-    MediaSet::MediaSetEntry m_kMediaSetEntry5;
-    MediaSet::MediaSetEntry m_kMediaSetEntry6;
-    ~FUN_005978b0();
-};
-
 // @fnv 0x005978b0
-FUN_005978b0::~FUN_005978b0()
+MediaSet::~MediaSet()
 {}
 
-class Sky
-{
-  public:
-    float GetFieldEC();
-};
 float __fastcall FUN_00595ea0(void* apSky);
 float __fastcall FUN_00596030(void* apSky);
 
-class TES
-{
-  public:
-    Sky* GetSky();
-};
 extern TES* g_TES;
-
-struct SoundPlaybackHandle
-{
-    unsigned int uiSoundID;
-    unsigned int unk04;
-    unsigned int unk08;
-    ~SoundPlaybackHandle();
-    bool Play();
-};
-
-class BSAudio
-{
-  public:
-    static BSAudio* GetSingleton();
-    SoundPlaybackHandle GetSoundHandleByFormID(unsigned int auiFormID, unsigned int auiFlags, unsigned int auiUnk);
-};
 
 unsigned int GetRandomNumberInRange(int aiMin, int aiMax);
 
@@ -753,24 +651,21 @@ bool MediaSetBattle::UpdateBattleMusic(unsigned int auiTime)
                                            : true;
     if (m_bConditionWasTrue)
     {
-        BSAudio::GetSingleton()->GetSoundHandleByFormID(m_pSound1->GetFormID(), 0x901, 0).Play();
+        BSAudio::GetSingleton()->GetSoundHandleByFormID(m_pSound1->GetFormID(), 0x901).Play(false);
         DAT_011ca9fc =
             GetRandomNumberInRange((int)(m_fMediaParameter1 * 1000.0), (int)(m_fMediaParameter3 * 1000.0)) + auiTime;
     }
     else
     {
-        BSAudio::GetSingleton()->GetSoundHandleByFormID(m_pSound2->GetFormID(), 0x901, 0).Play();
+        BSAudio::GetSingleton()->GetSoundHandleByFormID(m_pSound2->GetFormID(), 0x901).Play(false);
         DAT_011ca9fc =
             GetRandomNumberInRange((int)(fSkillValueBonus * 1000.0), (int)(m_fMediaValue * 1000.0)) + auiTime;
     }
     return true;
 }
 
-struct MediaLayerData
+struct MediaLayerData : MediaSetEntry
 {
-    BSStringT<char> Name;
-    float Attenuation;
-    float Percent;
     MediaLayerData(const MediaLayerData& arOther);
     ~MediaLayerData();
     void SetLayer(MediaLayerData arLayer);
@@ -781,35 +676,37 @@ struct MediaSetBaseCopy
     void CopyBase(TESForm* apForm);
 };
 
-struct MediaSetCopy : public MediaSet
+// 0x00599550 copies MediaSet fields; its missing shared declaration needs only a storage-free thiscall adapter.
+struct MediaFormCopyOperation
 {
-    void FUN_00599550(TESForm* apForm);
+    void CopyFrom(TESForm* apForm);
 };
 
 // Copies Type, six layer entries and several scalar fields from another MediaSet, then calls CopyBase.
 // @fnv 0x00599550
-void MediaSetCopy::FUN_00599550(TESForm* apForm)
+void MediaFormCopyOperation::CopyFrom(TESForm* apForm)
 {
     MediaSet* pOther = dynamic_cast<MediaSet*>(apForm);
     if (!pOther)
         return;
-    Type = pOther->Type;
-    ((MediaLayerData*)&m_kMediaSetEntry1)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry1);
-    ((MediaLayerData*)&m_kMediaSetEntry2)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry2);
-    ((MediaLayerData*)&m_kMediaSetEntry3)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry3);
-    ((MediaLayerData*)&m_kMediaSetEntry4)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry4);
-    ((MediaLayerData*)&m_kMediaSetEntry5)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry5);
-    ((MediaLayerData*)&m_kMediaSetEntry6)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry6);
-    m_cMediaFlag = pOther->m_cMediaFlag;
-    m_fMediaParameter1 = pOther->m_fMediaParameter1;
-    fSkillValueBonus = pOther->fSkillValueBonus;
-    m_fMediaParameter3 = pOther->m_fMediaParameter3;
-    m_fMediaValue = pOther->m_fMediaValue;
-    m_pSound1 = pOther->m_pSound1;
-    m_pSound2 = pOther->m_pSound2;
+    reinterpret_cast<MediaSet*>(this)->Type = pOther->Type;
+    ((MediaLayerData*)&reinterpret_cast<MediaSet*>(this)->m_kMediaSetEntry1)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry1);
+    ((MediaLayerData*)&reinterpret_cast<MediaSet*>(this)->m_kMediaSetEntry2)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry2);
+    ((MediaLayerData*)&reinterpret_cast<MediaSet*>(this)->m_kMediaSetEntry3)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry3);
+    ((MediaLayerData*)&reinterpret_cast<MediaSet*>(this)->m_kMediaSetEntry4)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry4);
+    ((MediaLayerData*)&reinterpret_cast<MediaSet*>(this)->m_kMediaSetEntry5)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry5);
+    ((MediaLayerData*)&reinterpret_cast<MediaSet*>(this)->m_kMediaSetEntry6)->SetLayer(*(MediaLayerData*)&pOther->m_kMediaSetEntry6);
+    reinterpret_cast<MediaSet*>(this)->m_cMediaFlag = pOther->m_cMediaFlag;
+    reinterpret_cast<MediaSet*>(this)->m_fMediaParameter1 = pOther->m_fMediaParameter1;
+    reinterpret_cast<MediaSet*>(this)->fSkillValueBonus = pOther->fSkillValueBonus;
+    reinterpret_cast<MediaSet*>(this)->m_fMediaParameter3 = pOther->m_fMediaParameter3;
+    reinterpret_cast<MediaSet*>(this)->m_fMediaValue = pOther->m_fMediaValue;
+    reinterpret_cast<MediaSet*>(this)->m_pSound1 = pOther->m_pSound1;
+    reinterpret_cast<MediaSet*>(this)->m_pSound2 = pOther->m_pSound2;
     ((MediaSetBaseCopy*)this)->CopyBase(pOther);
 }
 
+// local form of BSStringT<char>: 0x00599700 needs the 0x007d9ec0 destructor wrapper and dummy-argument accessor; shared replacement changes bytes.
 struct TextValue
 {
     char* text;
@@ -820,9 +717,6 @@ struct TextValue
 };
 struct StringRecord
 {
-    TextValue name;
-    float first;
-    float second;
     void FUN_004037f0(TextValue*);
     void SetValues(TextValue value, float firstValue, float secondValue);
 };
@@ -830,15 +724,12 @@ struct StringRecord
 void StringRecord::SetValues(TextValue aTextValue, float afFirst, float afSecond)
 {
     FUN_004037f0(aTextValue.FUN_00559450(0));
-    first = afFirst;
-    second = afSecond;
+    reinterpret_cast<MediaSetEntry*>(this)->Attenuation = afFirst;
+    reinterpret_cast<MediaSetEntry*>(this)->Percent = afSecond;
 }
 
-struct LayerInfo
+struct LayerInfo : MediaSetEntry
 {
-    BSStringT<char> Name;
-    float Attenuation;
-    float Percent;
 
     const char* __thiscall FUN_00559450(unsigned int index);
     int __thiscall FUN_00408a80(const char* text);
@@ -856,50 +747,16 @@ bool LayerInfo::FUN_00599a50(LayerInfo other)
     return true;
 }
 
-struct FUN_00483630_holder
+struct MediaSetNameHolder : public TESForm, public TESFullName
 {
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    virtual ~FUN_00483630_holder();
+    virtual ~MediaSetNameHolder();
 };
 
-struct FUN_00599d00 : public FUN_00483630_holder, public TESFullName
-{
-    virtual ~FUN_00599d00();
-};
-
-// Destructor for a TESFullName-derived holder object; the body is empty.
 // @fnv 0x00599d00
-FUN_00599d00::~FUN_00599d00()
+MediaSetNameHolder::~MediaSetNameHolder()
 {}
 
-struct Ctrl598060
-{
-    int FUN_00598000();
-    bool FUN_0071aa80();
-    float FUN_00598040();
-};
-struct SoundForm598060
-{
-    unsigned int FUN_0084e3a0();
-};
-struct BSSoundHandleEx
-{
-    int v0;
-    int v1;
-    int v2;
-    BSSoundHandleEx();
-    ~BSSoundHandleEx();
-    bool FUN_00ad8830(bool);
-};
-struct BSAudio598060
-{
-    BSSoundHandleEx FUN_00ad73b0(int, int);
-};
-BSAudio598060* __cdecl FUN_00453a70();
+bool __fastcall GetControllerCondition(MediaLocationController* controller);
 bool __cdecl FUN_00830750(unsigned long, bool);
 unsigned int __cdecl FUN_008308c0(unsigned long);
 void __cdecl StartFade(int, int);
@@ -907,82 +764,31 @@ void __cdecl PlayAudioMedia(int, const char*, unsigned int, bool, bool, float, u
 void __cdecl FUN_008304c0();
 extern unsigned int DAT_011ca9fc;
 
-struct This598060
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int m_2c;
-    unsigned char m_30;
-    unsigned char m_31;
-    unsigned char m_32;
-    unsigned char unk33;
-    char m_34;
-    unsigned char unk35;
-    unsigned char unk36;
-    unsigned char unk37;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    FUN_00597850_Class m_48;
-    FUN_00597850_Class m_58;
-    FUN_00597850_Class m_68;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    float m_ac;
-    int unkb0;
-    float m_b4;
-    int unkb8;
-    SoundForm598060* m_bc;
-    SoundForm598060* m_c0;
-    bool UpdateSoundState(unsigned int, bool, Ctrl598060*);
-};
-
 // @fnv 0x00598060
-bool This598060::UpdateSoundState(unsigned int auiTime, bool abEnabled, Ctrl598060* apCtrl)
+bool MediaSet::PointLocation(unsigned int auiTime, bool abEnabled, MediaLocationController* apCtrl)
 {
     bool flagDTmp;
     bool retVal;
     unsigned int local7;
     bool b2;
     bool b4;
-    FUN_00597850_Class* ptrLocal;
+    MediaSetEntry* ptrLocal;
     int local4;
     b2 = FUN_00830750(3, true);
     retVal = true;
-    b4 = apCtrl->FUN_00598040() < 100.0;
-    if (this->m_31 == 0 && abEnabled)
+    b4 = reinterpret_cast<TESObjectREFR*>(apCtrl)->GetScale() < 100.0;
+    if (this->m_bActorStateFlag == 0 && abEnabled)
     {
         DAT_011dd37c = 0;
     }
     local7 = FUN_008308c0(2);
     flagDTmp = false;
-    if (this->m_2c != 0 && local7 != 0)
+    if (this->m_uiMediaValue3 != 0 && local7 != 0)
     {
-        if ((double)auiTime > (double)(unsigned int)(this->m_2c + local7) - this->m_b4 * 1000.0)
+        if ((double)auiTime > (double)(unsigned int)(this->m_uiMediaValue3 + local7) - this->m_fMediaParameter3 * 1000.0)
         {
-            StartFade((int)(this->m_b4 * 1000.0), 2);
-            this->m_2c = auiTime;
+            StartFade((int)(this->m_fMediaParameter3 * 1000.0), 2);
+            this->m_uiMediaValue3 = auiTime;
             if (apCtrl->FUN_00598000() == 0)
             {
                 flagDTmp = true;
@@ -993,8 +799,8 @@ bool This598060::UpdateSoundState(unsigned int auiTime, bool abEnabled, Ctrl5980
             }
         }
     }
-    if (!((b2 && this->m_31 == abEnabled && this->m_32 == apCtrl->FUN_0071aa80() &&
-           ((char)this->m_34 == (char)b4 || (char)this->m_34 != 0)) ||
+    if (!((b2 && this->m_bActorStateFlag == abEnabled && this->m_bCountWasNonzero == GetControllerCondition(apCtrl) &&
+           ((char)this->m_cMediaState == (char)b4 || (char)this->m_cMediaState != 0)) ||
           DAT_011dd37c >= auiTime) ||
         flagDTmp)
     {
@@ -1002,62 +808,62 @@ bool This598060::UpdateSoundState(unsigned int auiTime, bool abEnabled, Ctrl5980
         ptrLocal = 0;
         if (abEnabled)
         {
-            if (this->m_bc != 0 && !this->m_30)
+            if (this->m_pSound1 != 0 && !this->bEffectFlag)
             {
-                FUN_00453a70()->FUN_00ad73b0((int)this->m_bc->FUN_0084e3a0(), 0x901).FUN_00ad8830(false);
+                BSAudio::FUN_00453a70()->FUN_00ad73b0((int)this->m_pSound1->TESForm::FUN_0084e3a0(), 0x901).Play(false);
             }
-            ptrLocal = &this->m_48;
-            this->m_30 = 1;
+            ptrLocal = &this->m_kMediaSetEntry1;
+            this->bEffectFlag = 1;
         }
-        else if (apCtrl->FUN_0071aa80())
+        else if (GetControllerCondition(apCtrl))
         {
-            if (this->m_30 && this->m_c0 != 0)
+            if (this->bEffectFlag && this->m_pSound2 != 0)
             {
-                FUN_00453a70()->FUN_00ad73b0((int)this->m_c0->FUN_0084e3a0(), 0x901).FUN_00ad8830(false);
+                BSAudio::FUN_00453a70()->FUN_00ad73b0((int)this->m_pSound2->TESForm::FUN_0084e3a0(), 0x901).Play(false);
             }
-            ptrLocal = &this->m_68;
-            this->m_30 = 0;
+            ptrLocal = &this->m_kMediaSetEntry3;
+            this->bEffectFlag = 0;
         }
         else
         {
-            if (this->m_30 && this->m_c0 != 0)
+            if (this->bEffectFlag && this->m_pSound2 != 0)
             {
-                FUN_00453a70()->FUN_00ad73b0((int)this->m_c0->FUN_0084e3a0(), 0x901).FUN_00ad8830(false);
+                BSAudio::FUN_00453a70()->FUN_00ad73b0((int)this->m_pSound2->TESForm::FUN_0084e3a0(), 0x901).Play(false);
             }
-            ptrLocal = &this->m_58;
-            this->m_30 = 0;
+            ptrLocal = &this->m_kMediaSetEntry2;
+            this->bEffectFlag = 0;
         }
         if (ptrLocal != 0)
         {
             DAT_011dd37c = auiTime;
             if (!abEnabled)
             {
-                DAT_011dd37c = (unsigned int)(this->m_ac * 1000.0 + (double)DAT_011dd37c);
+                DAT_011dd37c = (unsigned int)(this->m_fMediaParameter1 * 1000.0 + (double)DAT_011dd37c);
             }
             local4 = 0;
             if (FUN_00830a20((MEDIATYPE)3) != 0 && !flagDTmp)
             {
                 local4 = auiTime - FUN_00830a20((MEDIATYPE)3);
             }
-            if (ptrLocal == &this->m_48)
+            if (ptrLocal == &this->m_kMediaSetEntry1)
             {
-                PlayAudioMedia(3, ptrLocal->m_str.String(), 1000, true, true, ptrLocal->m_f08, (unsigned int)local4);
+                PlayAudioMedia(3, ptrLocal->Name.String(), 1000, true, true, ptrLocal->Attenuation, (unsigned int)local4);
             }
             else
             {
-                PlayAudioMedia(3, ptrLocal->m_str.String(), (unsigned int)(this->m_b4 * 1000.0), true, true,
-                               ptrLocal->m_f08, (unsigned int)local4);
+                PlayAudioMedia(3, ptrLocal->Name.String(), (unsigned int)(this->m_fMediaParameter3 * 1000.0), true, true,
+                               ptrLocal->Attenuation, (unsigned int)local4);
             }
             FUN_008304c0();
         }
         else
         {
-            StartFade((int)(this->m_b4 * 1000.0), 3);
+            StartFade((int)(this->m_fMediaParameter3 * 1000.0), 3);
             retVal = false;
         }
-        this->m_31 = abEnabled;
-        this->m_32 = apCtrl->FUN_0071aa80();
-        this->m_34 = b4;
+        this->m_bActorStateFlag = abEnabled;
+        this->m_bCountWasNonzero = GetControllerCondition(apCtrl);
+        this->m_cMediaState = b4;
     }
     else
     {
@@ -1065,11 +871,11 @@ bool This598060::UpdateSoundState(unsigned int auiTime, bool abEnabled, Ctrl5980
         {
             if (auiTime > DAT_011ca9fc)
             {
-                if (this->m_30 == 0)
+                if (this->bEffectFlag == 0)
                 {
                     if (b2)
                     {
-                        StartFade((int)(this->m_b4 * 1000.0), 3);
+                        StartFade((int)(this->m_fMediaParameter3 * 1000.0), 3);
                     }
                     retVal = false;
                 }
@@ -1080,18 +886,6 @@ bool This598060::UpdateSoundState(unsigned int auiTime, bool abEnabled, Ctrl5980
 }
 
 namespace fnv_00598550 {
-struct BSSoundHandleEx
-{
-    unsigned int uiSoundID;
-    unsigned int uiState;
-    unsigned int uiFlags;
-    ~BSSoundHandleEx();
-    bool FUN_00ad8830();
-};
-struct DungeonAudio
-{
-    BSSoundHandleEx FUN_00ad73b0(unsigned int, unsigned int, unsigned int);
-};
 struct DungeonController
 {
     void FUN_007037c0(unsigned int);
@@ -1118,7 +912,7 @@ bool DungeonMediaSet::UpdatePlayback(bool active, unsigned int time, int mediaTy
         if (!playing && !bEffectFlag)
         {
             if (m_pSound1 && !bEffectFlag)
-                ((DungeonAudio*)BSAudio::GetSingleton())->FUN_00ad73b0(m_pSound1->GetFormID(), 0x901, 0).FUN_00ad8830();
+                BSAudio::GetSingleton()->GetSoundHandleByFormID(m_pSound1->GetFormID(), 0x901).Play(false);
             DAT_011ca9fc = time - 1;
             bEffectFlag = true;
             FalloutAudioMedia::PlayMedia((MEDIATYPE)mediaType, m_kMediaSetEntry1.Name.String(),
@@ -1153,7 +947,7 @@ bool DungeonMediaSet::UpdatePlayback(bool active, unsigned int time, int mediaTy
         if (fading)
         {
             if (m_pSound2)
-                ((DungeonAudio*)BSAudio::GetSingleton())->FUN_00ad73b0(m_pSound2->GetFormID(), 0x901, 0).FUN_00ad8830();
+                BSAudio::GetSingleton()->GetSoundHandleByFormID(m_pSound2->GetFormID(), 0x901).Play(false);
             DAT_011ca9fc = time + m_fMediaParameter3 * 1000.0;
             if (DAT_011dd374)
                 DAT_011dd374->FUN_007037c0(DAT_011ca9fc);

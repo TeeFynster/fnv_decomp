@@ -2,36 +2,61 @@
 // src/havok/unplaced/cellmopp.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/cellmopp.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../include/NiPoint3.h"
+#include "../../../include/CellMopp.h"
+
+class C621EF0Object
+{
+  public:
+    virtual void VFunc000();
+    virtual void VFunc004();
+    virtual void VFunc008();
+    virtual void VFunc00C();
+    virtual void VFunc010();
+    virtual void VFunc014();
+    virtual void VFunc018();
+    virtual void VFunc01C();
+    virtual void VFunc020();
+    virtual void VFunc024();
+    virtual void VFunc028();
+    virtual void VFunc02C();
+    virtual void VFunc030();
+    virtual void VFunc034();
+    virtual void VFunc038();
+    virtual void VFunc03C();
+    virtual void VFunc040();
+    virtual void VFunc044();
+    virtual void VFunc048();
+    virtual void VFunc04C();
+    virtual void VFunc050();
+    virtual void VFunc054();
+    virtual void VFunc058();
+    virtual void VFunc05C();
+    virtual void VFunc060();
+    virtual void VFunc064();
+    virtual void VFunc068();
+    virtual void VFunc06C();
+    virtual void VFunc070();
+    virtual void VFunc074();
+    virtual void VFunc078();
+    virtual void VFunc07C();
+    virtual void VFunc080();
+    virtual void VFunc084();
+    virtual void VFunc088();
+    virtual void VFunc08C();
+    virtual void VFunc090();
+    virtual unsigned int GetFormID();
+};
+
 struct GlobalObject_004aff00
 {
     void RemoveAll();
 };
-struct FUN_00621e60
-{
-    void FUN_00621e80();
-    void Clear();
-};
 // @fnv 0x00621e60
-void FUN_00621e60::Clear()
+void CellMopp::Remove()
 {
-    FUN_00621e80();
+    Kill();
     ((GlobalObject_004aff00*)((char*)this + 8))->RemoveAll();
-}
-
-struct FUN_00622780
-{
-    void Clear();
-};
-
-struct FUN_00621e40Class
-{
-    void FUN_00621e40();
-};
-
-// @fnv 0x00621e40
-void FUN_00621e40Class::FUN_00621e40()
-{
-    ((FUN_00622780*)this)->Clear();
 }
 
 struct FUN_00622290_cls
@@ -72,10 +97,7 @@ void FUN_006222f0_Class::FUN_006222f0(int aiValue)
 
 extern const char* const g_01268350_arg1;
 
-struct bhkBvTreeShape
-{
-    const char* const* GetArg1Ptr();
-};
+#include "../../../include/bhkBvTreeShape.h"
 
 // @fnv 0x006223c0
 const char* const* bhkBvTreeShape::GetArg1Ptr()
@@ -111,13 +133,9 @@ void* __thiscall FUN_00622420_Class::GetGlobalPtr()
 
 int __fastcall FUN_009938b0(void*);
 
-struct FUN_00622470
-{
-    bool IsCreated();
-};
 
 // @fnv 0x00622470
-bool FUN_00622470::IsCreated()
+bool CellMopp::IsCreated()
 {
     return FUN_009938b0(reinterpret_cast<char*>(this) + 8) != 0;
 }
@@ -126,7 +144,8 @@ struct Base537
 {
     void FUN_00537bb0();
 };
-struct CellMopp_00622490
+// 0x00622490 initializes parameters at +0x10 via 0x006224c0, not a NiRefObject-derived CellMopp.
+struct HeightFieldResetCall
 {
     void __thiscall Reset();
 };
@@ -138,7 +157,7 @@ struct FUN_00622490 : Base537
 FUN_00622490::FUN_00622490()
 {
     FUN_00537bb0();
-    ((CellMopp_00622490*)((char*)this + 0x10))->Reset();
+    ((HeightFieldResetCall*)((char*)this + 0x10))->Reset();
 }
 
 struct FUN_00622570_Class
@@ -154,17 +173,11 @@ unsigned char* FUN_00622570_Class::FUN_00622570(unsigned char aucValue)
     return &m_kPointB;
 }
 
-struct CellMopp_00621d90
-{
-    void FUN_00621dc0();
-    void* __thiscall Destroy(unsigned int flags);
-    static void operator delete(void* p, unsigned int size);
-};
-// Calls FUN_00621dc0, then frees this with operator delete when flags has bit 0 set, and returns this.
+// Calls the CellMopp destructor, then frees this with operator delete when flags has bit 0 set, and returns this.
 // @fnv 0x00621d90
-void* __thiscall CellMopp_00621d90::Destroy(unsigned int flags)
+void* __thiscall CellMopp::Destroy(unsigned int flags)
 {
-    this->FUN_00621dc0();
+    this->CellMopp::~CellMopp();
     if (flags & 1)
         operator delete(this, 24);
     return this;
@@ -214,19 +227,11 @@ struct Arr
 {
     unsigned int* GetAt(int);
 };
-struct CellMopp_00621ef0
-{
-    unsigned int* LookupFirstFormID();
-};
-struct CellMopp_00621e80
-{
-    void FUN_00621e80();
-};
 // Gets the array from LookupFirstFormID and, if non-null, calls FUN_005380d0 on each non-zero element of the list at this+8.
 // @fnv 0x00621e80
-void CellMopp_00621e80::FUN_00621e80()
+void CellMopp::Kill()
 {
-    unsigned int* pArray = ((CellMopp_00621ef0*)this)->LookupFirstFormID();
+    unsigned int* pArray = reinterpret_cast<unsigned int*>(LookupFirstFormID());
     if (pArray)
     {
         for (unsigned int i = 0; i < FUN_009938b0((char*)this + 8); ++i)
@@ -257,17 +262,18 @@ void* FUN_006223f0::Delete(unsigned int flags)
     return this;
 }
 
-struct CellMopp_006224f0
+// 0x006224c0 extends the scale/resolution initializer with fields at +0x30 and +0x34.
+struct HeightFieldSampleParameters
 {
-    void InitializeCellMopp();
+    void InitializeHeightFieldParameters();
     void* __thiscall Reset();
 };
 
-// Calls InitializeCellMopp, then zeroes the int at offset 0x30 and the float at 0x34, and returns this.
+// Calls InitializeHeightFieldParameters, then zeroes the int at offset 0x30 and the float at 0x34, and returns this.
 // @fnv 0x006224c0
-void* CellMopp_006224f0::Reset()
+void* HeightFieldSampleParameters::Reset()
 {
-    InitializeCellMopp();
+    InitializeHeightFieldParameters();
     *(int*)((char*)this + 0x30) = 0;
     *(float*)((char*)this + 0x34) = 0.0f;
     return this;
@@ -275,29 +281,11 @@ void* CellMopp_006224f0::Reset()
 
 extern int DAT_011cc1c8;
 
-struct FUN_00621dc0_sub
-{
-    ~FUN_00621dc0_sub();
-};
-
-struct FUN_00621dc0_base
-{
-    virtual ~FUN_00621dc0_base();
-    unsigned int unk04;
-    void Clear();
-};
-
-struct FUN_00621dc0_cls : FUN_00621dc0_base
-{
-    FUN_00621dc0_sub m_08;
-    virtual ~FUN_00621dc0_cls();
-};
-
 // @fnv 0x00621dc0
-FUN_00621dc0_cls::~FUN_00621dc0_cls()
+CellMopp::~CellMopp()
 {
     --DAT_011cc1c8;
-    Clear();
+    Remove();
 }
 
 extern int g_i622310Count;
@@ -328,7 +316,8 @@ FUN_00622310::FUN_00622310(void* pvArg)
     g_i622310Count++;
 }
 
-struct CellMoppBaseView_006815c0
+// 0x006224f0 sets scale[4], two grid resolutions, height limits and a projection flag at +0x20.
+struct HeightFieldScaleAndResolution
 {
     int unk00;
     int unk04;
@@ -341,22 +330,22 @@ struct CellMoppBaseView_006815c0
     void FUN_006815c0();
     void FUN_004b4d50(float a, float b, float c, float d);
 };
-struct CellMoppMemberView_00622570
+struct HeightFieldProjectionFlag
 {
     unsigned char m_kPointB;
     void FUN_006815c0();
     unsigned char* FUN_00622570(unsigned char b);
 };
 extern float DAT_01012054;
-struct CellMoppCtor_006224f0 : CellMoppBaseView_006815c0
+struct SampledHeightFieldParameters : HeightFieldScaleAndResolution
 {
-    CellMoppMemberView_00622570 m20;
-    CellMoppCtor_006224f0* InitializeCellMopp();
+    HeightFieldProjectionFlag m20;
+    SampledHeightFieldParameters* InitializeHeightFieldParameters();
 };
 // @fnv 0x006224f0
-CellMoppCtor_006224f0* CellMoppCtor_006224f0::InitializeCellMopp()
+SampledHeightFieldParameters* SampledHeightFieldParameters::InitializeHeightFieldParameters()
 {
-    ((CellMoppBaseView_006815c0*)this)->FUN_006815c0();
+    ((HeightFieldScaleAndResolution*)this)->FUN_006815c0();
     m20.FUN_006815c0();
     FUN_004b4d50(1.0f, 1.0f, 1.0f, 0.0f);
     m10 = 2;
@@ -367,89 +356,16 @@ CellMoppCtor_006224f0* CellMoppCtor_006224f0::InitializeCellMopp()
     return this;
 }
 
-class C621EF0Object
-{
-  public:
-    virtual void VFunc000();
-    virtual void VFunc004();
-    virtual void VFunc008();
-    virtual void VFunc00C();
-    virtual void VFunc010();
-    virtual void VFunc014();
-    virtual void VFunc018();
-    virtual void VFunc01C();
-    virtual void VFunc020();
-    virtual void VFunc024();
-    virtual void VFunc028();
-    virtual void VFunc02C();
-    virtual void VFunc030();
-    virtual void VFunc034();
-    virtual void VFunc038();
-    virtual void VFunc03C();
-    virtual void VFunc040();
-    virtual void VFunc044();
-    virtual void VFunc048();
-    virtual void VFunc04C();
-    virtual void VFunc050();
-    virtual void VFunc054();
-    virtual void VFunc058();
-    virtual void VFunc05C();
-    virtual void VFunc060();
-    virtual void VFunc064();
-    virtual void VFunc068();
-    virtual void VFunc06C();
-    virtual void VFunc070();
-    virtual void VFunc074();
-    virtual void VFunc078();
-    virtual void VFunc07C();
-    virtual void VFunc080();
-    virtual void VFunc084();
-    virtual void VFunc088();
-    virtual void VFunc08C();
-    virtual void VFunc090();
-    virtual unsigned int GetFormID();
-};
-
-class C621EF0Pointer
-{
-  public:
-    C621EF0Object* Get();
-};
-
-class C621EF0Array
-{
-  public:
-    unsigned int GetSize();
-    C621EF0Pointer& GetAt(unsigned int uiIndex);
-};
-
 int __cdecl C621EF0Lookup(unsigned int auiFormId);
 
-class C621EF0Owner
-{
-  public:
-    int unk00;
-    int unk04;
-    C621EF0Array m_kThirdFollowingStreamField;
-
-    int LookupFirstFormID();
-};
-
 // @fnv 0x00621ef0
-int C621EF0Owner::LookupFirstFormID()
+int CellMopp::LookupFirstFormID()
 {
-    if (m_kThirdFollowingStreamField.GetSize() && m_kThirdFollowingStreamField.GetAt(0).Get())
-        return C621EF0Lookup(m_kThirdFollowingStreamField.GetAt(0).Get()->GetFormID());
+    if (m_kThirdFollowingStreamField.GetSize() && (bhkRigidBody*)m_kThirdFollowingStreamField.GetAt(0))
+        return C621EF0Lookup(((C621EF0Object*)(bhkRigidBody*)m_kThirdFollowingStreamField.GetAt(0))->GetFormID());
     else
         return 0;
 }
-
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
 
 struct B006815c0
 {
@@ -479,19 +395,8 @@ struct FUN_0056d2c0_Class
 
 unsigned int __cdecl PackBytesBigEndian(int r, int g, int b, int a);
 
-class FUN_00622590_Owner : public FUN_00622470
-{
-  public:
-    int unk00;
-    int unk04;
-    C621EF0Array m_kThirdFollowingStreamField;
-
-    int LookupFirstFormID();
-    bool PlaceGridObjects(FUN_0056d2c0_Class* p1, const NiPoint3* pPos, int p3);
-};
-
 // @fnv 0x00622590
-bool FUN_00622590_Owner::PlaceGridObjects(FUN_0056d2c0_Class* p1, const NiPoint3* pPos, int p3)
+bool CellMopp::PlaceGridObjects(bhkWorld* p1, const NiPoint3* pPos, int p3)
 {
     bool bResultTmp = false;
     if (p1 && IsCreated())
@@ -505,7 +410,7 @@ bool FUN_00622590_Owner::PlaceGridObjects(FUN_0056d2c0_Class* p1, const NiPoint3
             float _offsetX = -2048.0f;
             for (unsigned int j8 = 0; j8 < 2; j8++)
             {
-                FUN_005610f0_Class* pObj4 = (FUN_005610f0_Class*)m_kThirdFollowingStreamField.GetAt(kIdx++).Get();
+                FUN_005610f0_Class* pObj4 = (FUN_005610f0_Class*)(bhkRigidBody*)m_kThirdFollowingStreamField.GetAt(kIdx++);
                 NiPoint3 kPos = *pPos;
                 kPos.x += _offsetX;
                 kPos.y += offsetY2;
@@ -519,9 +424,9 @@ bool FUN_00622590_Owner::PlaceGridObjects(FUN_0056d2c0_Class* p1, const NiPoint3
         {
             for (unsigned int k = 0; k < (unsigned int)FUN_009938b0(&m_kThirdFollowingStreamField); k++)
             {
-                FUN_005610f0_Class* pObj3 = (FUN_005610f0_Class*)m_kThirdFollowingStreamField.GetAt(k).Get();
-                p1->FUN_0056d2c0(pObj3);
-                p1->FUN_00c68e30(pObj3, PackBytesBigEndian(0xdc, 0x96, 0x28, 0xff));
+                FUN_005610f0_Class* pObj3 = (FUN_005610f0_Class*)(bhkRigidBody*)m_kThirdFollowingStreamField.GetAt(k);
+                ((FUN_0056d2c0_Class*)p1)->FUN_0056d2c0(pObj3);
+                ((FUN_0056d2c0_Class*)p1)->FUN_00c68e30(pObj3, PackBytesBigEndian(0xdc, 0x96, 0x28, 0xff));
             }
         }
     }

@@ -1,6 +1,70 @@
-// effectsetting.cpp: EffectSetting, EndianSwappableData, EffectSettingList, EffT (41 functions)
+// effectsetting.cpp: EffectSetting and effect data helpers (41 functions)
 
-#include "effectsetting_decls.h"
+#include <stddef.h>
+#include "../include/BSStringT.h"
+#define FNV_JOIN2(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN2(a, b)
+#define FNV_STATIC_ASSERT(e) typedef char FNV_JOIN(fnv_check_, __LINE__)[(e) ? 1 : -1]
+#include "../include/BSSimpleList.h"
+#include "../include/LowProcess.h"
+#include "../include/MiddleHighProcess.h"
+#include "../include/TESChallenge.h"
+#include "../include/TESGrass.h"
+#include "../include/TESEffectShader.h"
+#include "../include/TESSound.h"
+#include "../include/TESObjectLIGH.h"
+
+#include "../include/EffectSetting.h"
+#include "../include/TES.h"
+#include "../include/TESFile.h"
+
+FNV_STATIC_ASSERT(sizeof(EffectSetting__EffectSettingData) == 72);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, iFlags) == 0);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_fBaseCost) == 4);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_pAssociatedForm) == 8);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_iAssociatedSkill) == 12);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_iResistanceActorValue) == 16);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_sCounterEffectCount) == 20);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, apTargetLight) == 24);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, fSpeed) == 28);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_pEffectShader) == 32);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_pEnchantEffectShader) == 36);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_pCastSound) == 40);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_pBoltSound) == 44);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_pContactSound) == 48);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_pAreaEffectSound) == 52);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_fEnchantmentFactor) == 56);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_fBarterFactor) == 60);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_eEffectTypeItem) == 64);
+FNV_STATIC_ASSERT(offsetof(EffectSetting__EffectSettingData, m_iAssociatedActorValue) == 68);
+FNV_STATIC_ASSERT(sizeof(EffectSetting) == 176);
+FNV_STATIC_ASSERT(offsetof(EffectSetting, m_pEffectSettingCallback) == 80);
+FNV_STATIC_ASSERT(offsetof(EffectSetting, m_pPredicateData) == 84);
+FNV_STATIC_ASSERT(offsetof(EffectSetting, data) == 88);
+FNV_STATIC_ASSERT(offsetof(EffectSetting, counterEffects) == 160);
+FNV_STATIC_ASSERT(offsetof(EffectSetting, m_iActorValue) == 168);
+FNV_STATIC_ASSERT(offsetof(EffectSetting, m_iEffectID) == 172);
+
+class TESFullNameLoader
+{
+  public:
+    static void LoadFullNameChunk(TESFullName*, TESFile*);
+};
+template <int n> struct EndianSizeTag
+{
+};
+void BSEndian(unsigned int*, EndianSizeTag<4>);
+extern "C" void* __cdecl _alloca(unsigned int);
+extern "C" void* __cdecl memset(void*, int, unsigned int);
+int __cdecl Warning(const char*, ...);
+
+// This entry point returns a full register value in the original Load call.
+int __fastcall ReadEffectFormType(TESFile* file);
+
+double FUN_00408820(float value);
+
+#include "../include/PathingRequest.h"
+#include "../include/TESDataHandler.h"
 
 // Compares the effect name with name case-insensitively and, if they differ, sets the full name to name.
 // @fnv 0x00408570
@@ -33,7 +97,7 @@ bool EffectSetting::HasNoAssociatedActorValue()
 // @fnv 0x00407ac0
 bool EffectSetting::Load(TESFile* file)
 {
-    if (file->GetTESForm() != 16)
+    if (ReadEffectFormType(file) != 16)
         return false;
     LoadRecordHeader(file);
     int chunk;
@@ -229,88 +293,58 @@ bool FUN_004077c0_shell::FUN_004077c0()
     return (*(unsigned int*)((char*)this + 8) & 0x4000) ? true : false;
 }
 
-struct FUN_004077e0_shell : public EffectSetting
-{
-    void* FUN_004077e0();
-};
-
 // @fnv 0x004077e0
-void* FUN_004077e0_shell::FUN_004077e0()
+void* EffectSetting::FUN_004077e0()
 {
-    return reinterpret_cast<char*>(this) + 0xA0;
+    return &counterEffects;
 }
-
-struct FUN_00407820_shell : public EffectSetting
-{
-    TESEffectShader* FUN_00407820();
-};
 
 // @fnv 0x00407820
-TESEffectShader* FUN_00407820_shell::FUN_00407820()
+TESEffectShader* EffectSetting::FUN_00407820()
 {
-    return *(TESEffectShader**)((char*)this + 0x78);
+    return data.m_pEffectShader;
 }
-
-struct FUN_004078a0_shell : public EffectSetting
-{
-    void SetEffectID(int);
-};
 
 // @fnv 0x004078a0
-void FUN_004078a0_shell::SetEffectID(int aeID)
+void EffectSetting::SetEffectID(int aeID)
 {
-    *(int*)((char*)this + 0x98) = aeID;
+    data.m_eEffectTypeItem = static_cast<EffectArchetypes__ArchetypeID>(aeID);
 }
-
-struct FUN_00408680_shell : public EffectSetting
-{
-    bool HasAllFlags(unsigned int);
-};
 
 // @fnv 0x00408680
-bool FUN_00408680_shell::HasAllFlags(unsigned int aiFlags)
+bool EffectSetting::HasAllFlags(unsigned int aiFlags)
 {
-    return (*(unsigned int*)((char*)this + 0x58) & aiFlags) == aiFlags;
+    return (data.iFlags & aiFlags) == aiFlags;
 }
-
-struct FUN_004086e0_shell : public EffectSetting
-{
-    int UpdateCounter();
-};
 
 // Increments or decrements the counter at offset 0xac depending on its sign, then returns the new value.
 // @fnv 0x004086e0
-int FUN_004086e0_shell::UpdateCounter()
+int EffectSetting::UpdateCounter()
 {
-    if (*(int*)((char*)this + 0xac) < 0)
+    if (m_iEffectID < 0)
     {
-        *(int*)((char*)this + 0xac) -= 1;
+        m_iEffectID -= 1;
     }
     else
     {
-        *(int*)((char*)this + 0xac) += 1;
+        m_iEffectID += 1;
     }
-    return *(int*)((char*)this + 0xac);
+    return m_iEffectID;
 }
-
-struct FUN_00408790_shell : public EffectSetting
-{
-    int FUN_00408790();
-};
 
 // If the associated-item count at offset 0xac is positive, logs a warning; otherwise decrements it, and returns the count.
 // @fnv 0x00408790
-int FUN_00408790_shell::FUN_00408790()
+int __fastcall QueueEffectCounter(EffectSetting* self)
 {
-    if (*(int*)((char*)this + 0xac) > 0)
+    if (self->m_iEffectID > 0)
     {
         Warning("GAME EFFECTS: Trying to Queue up an Effect Associated Item which is already loaded");
     }
     else
     {
-        *(int*)((char*)this + 0xac) = *(int*)((char*)this + 0xac) - 1;
+        self->m_iEffectID = self->m_iEffectID - 1;
     }
-    return *(int*)((char*)this + 0xac);
+    return self->m_iEffectID;
 }
 
 namespace std {
@@ -339,15 +373,10 @@ int __cdecl FUN_00408b20(const char* apString1, const char* apString2)
     return FUN_00ec6da0(apString1, apString2);
 }
 
-struct FUN_004ee4b0_shell : public EffectSetting
-{
-    void FUN_004ee4b0(float);
-};
-
 // @fnv 0x004ee4b0
-void FUN_004ee4b0_shell::FUN_004ee4b0(float afBaseCost)
+void EffectSetting::FUN_004ee4b0(float afBaseCost)
 {
-    *(float*)((char*)this + 0x5c) = afBaseCost;
+    data.m_fBaseCost = afBaseCost;
 }
 
 struct FUN_00591300_shell : public TESFullName
@@ -361,52 +390,38 @@ void FUN_00591300_shell::FUN_00591300()
     ((BSStringT<char>*)((char*)this + 4))->BSStringT<char>::~BSStringT<char>();
 }
 
-struct FUN_00810570_shell : public EffectSetting
-{
-    void SetAssociatedActorValue(int);
-};
-
 // @fnv 0x00810570
-void FUN_00810570_shell::SetAssociatedActorValue(int aeAssociatedActorValue)
+void EffectSetting::SetAssociatedActorValue(int aeAssociatedActorValue)
 {
-    *(int*)((char*)this + 0x9c) = aeAssociatedActorValue;
+    data.m_iAssociatedActorValue = aeAssociatedActorValue;
 }
-
-struct FUN_00857230_shell : public EffectSetting
-{
-    void SetSound(TESSound*);
-};
 
 // @fnv 0x00857230
-void FUN_00857230_shell::SetSound(TESSound* apValue)
+void EffectSetting::SetHitSound(TESSound* apValue)
 {
-    *(TESSound**)((char*)this + 0x88) = apValue;
+    data.m_pContactSound = apValue;
 }
 
-struct FUN_008ce390_shell : public EffectSetting
-{
-    TESSound* FUN_008ce390();
-};
-
 // @fnv 0x008ce390
-TESSound* FUN_008ce390_shell::FUN_008ce390()
+TESSound* EffectSetting::GetAreaSound()
 {
-    return *(TESSound**)((char*)this + 0x8c);
+    return data.m_pAreaEffectSound;
 }
 
 void __cdecl operator delete(void*);
-struct S
+// A word-sized aggregate keeps this legacy stack argument beside ECX's object.
+struct EffectDestroyFlags
 {
-    void FUN_00407230();
-    void* DestroyIfFlagged(unsigned int);
+    unsigned int value;
 };
+
 // @fnv 0x00407200
-void* S::DestroyIfFlagged(unsigned int flags)
+void* __fastcall DestroyEffectSettingIfFlagged(EffectSetting* self, EffectDestroyFlags flags)
 {
-    FUN_00407230();
-    if (flags & 1)
-        operator delete(this);
-    return this;
+    self->EffectSetting::~EffectSetting();
+    if (flags.value & 1)
+        operator delete(self);
+    return self;
 }
 
 extern "C" short __cdecl FUN_00ec3bda(short);
@@ -419,141 +434,87 @@ void __cdecl FUN_00407a90(short* psValue)
     *tmp = FUN_00ec3bda(*tmp);
 }
 
-struct FUN_00408550_Cls
-{
-    char _pad[0x6C];
-    short _v;
-    int GetShortValue();
-};
 // @fnv 0x00408550
-int FUN_00408550_Cls::GetShortValue()
+int __fastcall GetEffectCounterCount(EffectSetting* self)
 {
-    return _v;
+    return self->data.m_sCounterEffectCount;
 }
 
-struct S3e60
-{
-    bool FUN_00403e60(unsigned int);
-};
-struct S86a0
-{
-    int FUN_004086a0();
-};
 // @fnv 0x004086a0
-int S86a0::FUN_004086a0()
+int __fastcall GetEffectFlagMode(EffectSetting* self)
 {
-    return (((S3e60*)this)->FUN_00403e60(0x2000000) ? 2 : 0) + (((S3e60*)this)->FUN_00403e60(0x4000000) ? 1 : 0);
+    return (self->FUN_00403e60(0x2000000) ? 2 : 0) + (self->FUN_00403e60(0x4000000) ? 1 : 0);
 }
 
-struct Unk00408730
-{
-    int ClampCounterTowardZero();
-};
 // Steps the int at offset 0xAC one unit toward zero and returns the resulting value.
 // @fnv 0x00408730
-int Unk00408730::ClampCounterTowardZero()
+int __fastcall ClampEffectCounterTowardZero(EffectSetting* self)
 {
-    if (*(int*)((char*)this + 0xAC) < 0)
-        *(int*)((char*)this + 0xAC) = *(int*)((char*)this + 0xAC) + 1;
-    else if (*(int*)((char*)this + 0xAC) > 0)
-        *(int*)((char*)this + 0xAC) = *(int*)((char*)this + 0xAC) - 1;
-    return *(int*)((char*)this + 0xAC);
+    if (self->m_iEffectID < 0)
+        self->m_iEffectID = self->m_iEffectID + 1;
+    else if (self->m_iEffectID > 0)
+        self->m_iEffectID = self->m_iEffectID - 1;
+    return self->m_iEffectID;
 }
 
-struct FUN_004087e0_Shell
-{
-    int FUN_004087e0();
-};
 // Converts the int at offset 0xac to float, passes it to FUN_00408820, stores the result back at 0xac and returns it.
 // @fnv 0x004087e0
-int FUN_004087e0_Shell::FUN_004087e0()
+int __fastcall NormalizeEffectCounter(EffectSetting* self)
 {
-    *(int*)((char*)this + 0xac) = (int)FUN_00408820((float)*(int*)((char*)this + 0xac));
-    return *(int*)((char*)this + 0xac);
+    self->m_iEffectID = (int)FUN_00408820((float)self->m_iEffectID);
+    return self->m_iEffectID;
 }
 
-struct Holder00408910
-{
-    char pad[0xA8];
-    int valA8;
-    int StepTowardZero();
-};
-// Moves valA8 one step toward zero (increments if negative, decrements if positive) and returns it.
+// Moves the loaded count one step toward zero and returns it.
 // @fnv 0x00408910
-int Holder00408910::StepTowardZero()
+int __fastcall StepEffectLoadedCountTowardZero(EffectSetting* self)
 {
-    if (valA8 < 0)
-        valA8++;
-    else if (valA8 > 0)
-        valA8--;
-    return valA8;
+    if (self->m_iActorValue < 0)
+        self->m_iActorValue++;
+    else if (self->m_iActorValue > 0)
+        self->m_iActorValue--;
+    return self->m_iActorValue;
 }
 
-struct FUN_00408a00_Struct
-{
-    int _pad[42];
-    int _val;
-    bool IsPositive();
-};
 // @fnv 0x00408a00
-bool FUN_00408a00_Struct::IsPositive()
+bool __fastcall IsEffectLoadedCountPositive(EffectSetting* self)
 {
-    return _val > 0;
+    return self->m_iActorValue > 0;
 }
 
-struct Dummy00501c30
+// These comparison entry points are absent from BSStringT.h. Aggregates keep
+// their legacy stack arguments alongside the string object in ECX.
+struct BSStringArgument
 {
-    bool IsNotOne(const char*);
-    bool FUN_00501c30(const char*);
+    const BSStringT<char>* value;
 };
-// Returns the negation of IsNotOne for the given string argument.
+struct BSStringCompareArguments
+{
+    const BSStringT<char>* value;
+    bool ignoreCase;
+};
+bool __fastcall BSStringsEqual(BSStringT<char>* self, BSStringArgument string);
+int __fastcall CompareBSStrings(BSStringT<char>* self, BSStringCompareArguments args);
+
 // @fnv 0x00501c30
-bool Dummy00501c30::FUN_00501c30(const char* pcString)
+bool __fastcall BSStringsNotEqual(BSStringT<char>* self, BSStringArgument string)
 {
-    return !IsNotOne(pcString);
+    return !reinterpret_cast<bool (__thiscall*)(BSStringT<char>*, const BSStringT<char>*)>(BSStringsEqual)(
+        self, string.value);
 }
 
-struct S501c60
-{
-    int CompareString(const char*, int);
-    bool IsNotOne(const char*);
-};
-// Returns true when CompareString called with the string and 1 returns zero.
 // @fnv 0x00501c60
-bool S501c60::IsNotOne(const char* a)
+bool __fastcall BSStringsEqual(BSStringT<char>* self, BSStringArgument string)
 {
-    return !this->CompareString(a, 1);
+    return !reinterpret_cast<int (__thiscall*)(BSStringT<char>*, const BSStringT<char>*, bool)>(CompareBSStrings)(
+        self, string.value, true);
 }
 
-struct Flt
-{
-    operator unsigned int() const;
-};
-struct FUN_00501c90_shell : BSStringT<char>
-{
-    int CompareString(BSStringT<char> const* arString, bool abIgnoreCase);
-};
 // @fnv 0x00501c90
-int FUN_00501c90_shell::CompareString(BSStringT<char> const* apString, bool abIgnoreCase)
+int __fastcall CompareBSStrings(BSStringT<char>* self, BSStringCompareArguments args)
 {
-    return StrCmp((char const*)((Flt const*)apString)->operator unsigned int(), abIgnoreCase);
+    return self->StrCmp(static_cast<const char*>(*args.value), args.ignoreCase);
 }
-
-struct TESChallenge
-{
-    int GetThreshold();
-    int GetInterval();
-};
-
-struct LowProcess
-{
-    void SetPackageObjectType(int value);
-};
-
-struct TESGrass
-{
-    float GetLowestAllowedSlope();
-};
 
 struct IMH
 {
@@ -562,11 +523,6 @@ struct IMH
 
 struct TargetDoorController
 {
-};
-
-struct MiddleHighProcess
-{
-    void AddDeferredHideLimb(TargetDoorController* value);
 };
 
 struct Date
@@ -578,42 +534,17 @@ struct PlayerQuestData
     void SetLogDate(Date* value);
 };
 
-struct TES
-{
-    void* GetLogDate();
-};
+// Operations absent from EffectSetting.h remain free entry points. Aggregates
+// keep legacy stack arguments alongside the object pointer in ECX.
+void __fastcall SetEffectField90(EffectSetting* setting, float value);
 
-struct FUN_00407860_class
-{
-    void FUN_00407860(float value);
-};
+void __fastcall SetEffectField94(EffectSetting* setting, float value);
 
-struct FUN_00407880_Class
+struct EffectModeValue
 {
-    void FUN_00407880(float value);
+    unsigned int value;
 };
-
-struct PathingRequest
-{
-    float GetCenterRadius();
-    void SetCenterRadius(float value);
-};
-
-struct S3c60
-{
-    int GetArchetype();
-};
-
-struct FUN_009e3360_Class
-{
-    void SetMode(unsigned int value);
-};
-
-struct TESDataHandler
-{
-    void* GetBGSRecipeList();
-    unsigned int GetNextID();
-};
+void __fastcall SetEffectMode(EffectSetting* setting, EffectModeValue value);
 
 struct DH : public TESDataHandler
 {
@@ -621,85 +552,62 @@ struct DH : public TESDataHandler
 
 extern DH* g_dataHandler;
 
-struct FUN_005e78f0_t
-{
-    void FUN_004851b0(TESForm* value);
-};
-
-struct EffectSettingAux
-{
-    void FUN_004ee4b0(float value);
-    void SetAssociatedActorValue(int value);
-    void SetEffectID(int value);
-    int GetEffectID();
-};
-
 struct TESEffectShaderAux
 {
     float FUN_00644930();
 };
 
-struct FUN_00408600_class
-{
-    void CopyValuesFromList(void* value);
-};
-
 float __fastcall GetField90Float(char* value);
-
-struct FUN_00407600_class : public EffectSetting
+struct EffectCounterSource
 {
-    void CopyFromEffectSetting(TESForm* apCopy);
+    void* list;
 };
+void __fastcall CopyEffectCounterValues(EffectSetting* self, EffectCounterSource source);
 
 // Copies fields from an EffectSetting into this object, assigning a new ref ID when this form is non-temporary and has no form ID.
 // @fnv 0x00407600
-void FUN_00407600_class::CopyFromEffectSetting(TESForm* apCopy)
+void EffectSetting::CopyFromBase(BaseFormComponent* component)
 {
-    EffectSetting* psetting = dynamic_cast<EffectSetting*>(apCopy);
+    EffectSetting* psetting = dynamic_cast<EffectSetting*>(reinterpret_cast<TESForm*>(component));
     if (!psetting)
         return;
 
-    reinterpret_cast<FUN_005e78f0_t*>(this)->FUN_004851b0(apCopy);
-    reinterpret_cast<LowProcess*>(this)->SetPackageObjectType(
+    TESForm::CopyFrom(reinterpret_cast<TESForm*>(component));
+    reinterpret_cast<LowProcess*>(this)->LowProcess::SetPackageObjectType(
         reinterpret_cast<TESChallenge*>(psetting)->GetThreshold());
-    reinterpret_cast<EffectSettingAux*>(this)->FUN_004ee4b0(reinterpret_cast<TESGrass*>(psetting)->GetLowestAllowedSlope());
-    reinterpret_cast<EffectSettingAux*>(this)->SetAssociatedActorValue(
+    this->FUN_004ee4b0(reinterpret_cast<TESGrass*>(psetting)->TESGrass::GetLowestAllowedSlope());
+    this->SetAssociatedActorValue(
         reinterpret_cast<IMH*>(psetting)->FUN_00586150());
-    reinterpret_cast<MiddleHighProcess*>(this)->AddDeferredHideLimb(
-        reinterpret_cast<TargetDoorController*>(reinterpret_cast<EffectSettingAux*>(psetting)->GetEffectID()));
+    reinterpret_cast<MiddleHighProcess*>(this)->MiddleHighProcess::AddDeferredHideLimb(
+        reinterpret_cast<ObjectToAcquire*>(psetting->GetEffectID()));
     reinterpret_cast<PlayerQuestData*>(this)->SetLogDate(
         reinterpret_cast<Date*>(reinterpret_cast<TES*>(psetting)->GetLogDate()));
-    reinterpret_cast<FUN_00407860_class*>(this)->FUN_00407860(GetField90Float(reinterpret_cast<char*>(psetting)));
-    reinterpret_cast<FUN_00407880_Class*>(this)->FUN_00407880(
-        reinterpret_cast<TESEffectShaderAux*>(psetting)->FUN_00644930());
+    SetEffectField90(this, GetField90Float(reinterpret_cast<char*>(psetting)));
+    SetEffectField94(this, reinterpret_cast<TESEffectShaderAux*>(psetting)->FUN_00644930());
     reinterpret_cast<PathingRequest*>(this)->SetCenterRadius(
         reinterpret_cast<PathingRequest*>(psetting)->GetCenterRadius());
-    reinterpret_cast<EffectSettingAux*>(this)->SetEffectID(reinterpret_cast<S3c60*>(psetting)->GetArchetype());
-    reinterpret_cast<FUN_009e3360_Class*>(this)->SetMode(reinterpret_cast<TESChallenge*>(psetting)->GetInterval());
-    SetLight(psetting->GetLight());
-    SetEffectShader(psetting->GetEffectShader());
-    SetEnchantEffectShader(psetting->GetEnchantEffectShader());
-    SetCastSound(psetting->GetCastSound());
-    SetBoltSound(psetting->GetBoltSound());
-    SetHitSound(psetting->GetHitSound());
-    SetAreaSound(psetting->GetAreaSound());
-    reinterpret_cast<FUN_00408600_class*>(this)->CopyValuesFromList(
-        reinterpret_cast<TESDataHandler*>(psetting)->GetBGSRecipeList());
+    this->SetEffectID(psetting->GetArchetype());
+    reinterpret_cast<void (__thiscall*)(EffectSetting*, unsigned int)>(SetEffectMode)(
+        this, reinterpret_cast<TESChallenge*>(psetting)->GetInterval());
+    this->SetLight(psetting->GetLight());
+    this->SetEffectShader(psetting->GetEffectShader());
+    this->SetEnchantEffectShader(psetting->GetEnchantEffectShader());
+    this->SetCastSound(psetting->GetCastSound());
+    this->SetBoltSound(psetting->GetBoltSound());
+    this->SetHitSound(psetting->GetHitSound());
+    this->SetAreaSound(psetting->GetAreaSound());
+    reinterpret_cast<void (__thiscall*)(EffectSetting*, void*)>(CopyEffectCounterValues)(
+        this, psetting->FUN_004077e0());
 
-    if (!IsTemporary() && GetFormID() == 0)
-        SetRefID(g_dataHandler->GetNextID(), true);
+    if (!this->IsTemporary() && this->GetFormID() == 0)
+        this->SetRefID(g_dataHandler->GetNextID(), true);
 }
 
 void BSEndian(unsigned int*, EndianSizeTag<2>);
 
-struct EndianSwappableData
-{
-    void SwapEndianFields();
-};
-
 // Byte-swaps the 4-byte fields at offsets 0x00-0x40 and the 2-byte field at 0x14 of this object via BSEndian.
 // @fnv 0x004078c0
-void EndianSwappableData::SwapEndianFields()
+void EffectSetting__EffectSettingData::Endian()
 {
     BSEndian((unsigned int*)((unsigned char*)this + 0x00), EndianSizeTag<4>());
     BSEndian((unsigned int*)((unsigned char*)this + 0x04), EndianSizeTag<4>());
@@ -721,171 +629,67 @@ void EndianSwappableData::SwapEndianFields()
     BSEndian((unsigned int*)((unsigned char*)this + 0x40), EndianSizeTag<4>());
 }
 
-struct EffectSettingList : public BSSimpleList<EffectSetting*>
-{
-    ~EffectSettingList();
-};
-
-class FormBase
-{
-  public:
-    virtual ~FormBase();
-    virtual void ClearData();
-    unsigned char m_ucFormType;
-    unsigned int m_uiFormFlags;
-    unsigned int iFormID;
-    BSSimpleList<TESFile*> m_kSourceFiles;
-};
-
-class FUN_00407230 : public FormBase, public TESModel, public TESDescription, public TESFullName, public TESIcon
-{
-  public:
-    bool(__cdecl* m_pEffectSettingCallback)(EffectSetting*, void*);
-    void* m_pPredicateData;
-    EffectSetting__EffectSettingData data;
-    EffectSettingList counterEffects;
-    int m_iActorValue;
-    int m_iEffectID;
-    ~FUN_00407230();
-};
-
 // @fnv 0x00407230
-FUN_00407230::~FUN_00407230()
+EffectSetting::~EffectSetting()
 {
     ClearData();
 }
 
-EffectSettingList::~EffectSettingList()
-{}
-
-struct SubListA0
-{
-    unsigned int unk00;
-    void Reset();
-    void AddItem(int* item);
-};
-
-struct TESFormLike
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned short m_6c;
-    unsigned short unk6E;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9C;
-    SubListA0 m_a0;
-    int* GetVal();
-    TESFormLike* Next();
-};
-
-// Resets m_a0 and m_6c, then walks the list from arg, adding each non-zero GetVal result to m_a0 and counting them in m_6c.
+// Rebuilds the counter-effect list and updates the record's count.
 // @fnv 0x00408600
-void FUN_00408600_class::CopyValuesFromList(void* pSourceList)
+void __fastcall CopyEffectCounterValues(EffectSetting* self, EffectCounterSource source)
 {
-    int val;
-    ((TESFormLike*)this)->m_a0.Reset();
-    ((TESFormLike*)this)->m_6c = 0;
-    for (TESFormLike* cur = (TESFormLike*)pSourceList; cur != 0 && (val = *cur->GetVal()) != 0; cur = cur->Next())
+    EffectSetting* val;
+    self->counterEffects.RemoveAll();
+    self->data.m_sCounterEffectCount = 0;
+    for (BSSimpleList<EffectSetting*>* cur = (BSSimpleList<EffectSetting*>*)source.list;
+         cur != 0 && (val = cur->GetItem()) != 0; cur = cur->GetNext())
     {
-        ((TESFormLike*)this)->m_a0.AddItem(&val);
-        ((TESFormLike*)this)->m_6c++;
+        self->counterEffects.AddHead(val);
+        self->data.m_sCounterEffectCount++;
     }
 }
 
-struct ListT
-{
-    unsigned int* FUN_006815c0();
-    ListT* FUN_00726070();
-};
-struct EffT
-{
-    char pad00[0xa0];
-    ListT m_a0;
-    bool FUN_00485270(void* p);
-    int FUN_006286d0();
-    double FUN_00639b20();
-    int FUN_00586150();
-    int FUN_005f5f80();
-    int FUN_0070ec90();
-    int FUN_008d8520();
-    int FUN_004fd380();
-    int FUN_00407820();
-    int FUN_00407840();
-    double FUN_009b0bd0();
-    int FUN_004fb070();
-    int FUN_004fd3c0();
-    int FUN_004fd3e0();
-    int FUN_008ce390();
-    int GetShortValue();
-    int FUN_00810fd0();
-    bool IsDifferentFrom(void* param);
-};
+// These legacy getters return double to preserve the original comparison's
+// floating-point temporaries. The shared class has no equivalent declarations.
+double __fastcall GetEffectBaseCostForComparison(EffectSetting* setting);
+double __fastcall GetEffectCenterRadiusForComparison(EffectSetting* setting);
+
 extern int DAT_01183028;
 extern int DAT_011837c4;
 void* __cdecl FUN_00ec43fb(void* a1, int a2, int* a3, int* a4, int a5);
 
 // @fnv 0x004082f0
-bool EffT::IsDifferentFrom(void* pObject)
+bool EffectSetting::CompareWithBase(BaseFormComponent* component)
 {
-    EffT* other = (EffT*)FUN_00ec43fb(pObject, 0, &DAT_01183028, &DAT_011837c4, 0);
+    EffectSetting* other = (EffectSetting*)FUN_00ec43fb(component, 0, &DAT_01183028, &DAT_011837c4, 0);
     if (other == 0)
         return 1;
-    if (FUN_00485270(pObject))
+    if (TESForm::Compare(reinterpret_cast<TESForm*>(component)))
         return 1;
-    if (FUN_006286d0() != other->FUN_006286d0() || !(FUN_00639b20() == other->FUN_00639b20()) ||
-        FUN_00586150() != other->FUN_00586150() || FUN_005f5f80() != other->FUN_005f5f80() ||
-        FUN_0070ec90() != other->FUN_0070ec90() || FUN_008d8520() != other->FUN_008d8520() ||
-        FUN_004fd380() != other->FUN_004fd380() || FUN_00407820() != other->FUN_00407820() ||
-        FUN_00407840() != other->FUN_00407840() || !(FUN_009b0bd0() == other->FUN_009b0bd0()) ||
-        FUN_004fb070() != other->FUN_004fb070() || FUN_004fd3c0() != other->FUN_004fd3c0() ||
-        FUN_004fd3e0() != other->FUN_004fd3e0() || FUN_008ce390() != other->FUN_008ce390() ||
-        GetShortValue() != other->GetShortValue() || FUN_00810fd0() != other->FUN_00810fd0())
+    if (reinterpret_cast<TESChallenge*>(this)->GetThreshold() != reinterpret_cast<TESChallenge*>(other)->GetThreshold() ||
+        !(GetEffectBaseCostForComparison(this) == GetEffectBaseCostForComparison(other)) ||
+        reinterpret_cast<IMH*>(this)->FUN_00586150() != reinterpret_cast<IMH*>(other)->FUN_00586150() ||
+        reinterpret_cast<TESChallenge*>(this)->GetInterval() != reinterpret_cast<TESChallenge*>(other)->GetInterval() ||
+        GetEffectID() != other->GetEffectID() ||
+        reinterpret_cast<TES*>(this)->GetLogDate() != reinterpret_cast<TES*>(other)->GetLogDate() ||
+        GetLight() != other->GetLight() || GetEffectShader() != other->GetEffectShader() ||
+        GetEnchantEffectShader() != other->GetEnchantEffectShader() ||
+        !(GetEffectCenterRadiusForComparison(this) == GetEffectCenterRadiusForComparison(other)) ||
+        GetCastSound() != other->GetCastSound() || GetBoltSound() != other->GetBoltSound() ||
+        GetHitSound() != other->GetHitSound() || GetAreaSound() != other->GetAreaSound() ||
+        GetEffectCounterCount(this) != GetEffectCounterCount(other) || GetArchetype() != other->GetArchetype())
         return 1;
-    ListT* pa4 = &m_a0;
-    ListT* pbX = &other->m_a0;
+    BSSimpleList<EffectSetting*>* pa4 = &counterEffects;
+    BSSimpleList<EffectSetting*>* pbX = &other->counterEffects;
     while (pa4 && pbX)
     {
-        unsigned int av = *pa4->FUN_006815c0();
-        unsigned int bv5 = *pbX->FUN_006815c0();
+        EffectSetting* av = pa4->GetItem();
+        EffectSetting* bv5 = pbX->GetItem();
         if (av != bv5)
             return 1;
-        pa4 = pa4->FUN_00726070();
-        pbX = pbX->FUN_00726070();
+        pa4 = pa4->GetNext();
+        pbX = pbX->GetNext();
     }
     return 0;
 }

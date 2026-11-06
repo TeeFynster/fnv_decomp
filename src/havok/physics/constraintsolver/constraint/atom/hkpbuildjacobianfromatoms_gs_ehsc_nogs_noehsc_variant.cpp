@@ -1,3 +1,7 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#include "../../../../../../include/hkVector4.h"
+#include <string.h>
 
 // src/havok/physics/constraintsolver/constraint/atom/hkpbuildjacobianfromatoms_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/constraintsolver/constraint/atom/hkpbuildjacobianfromatoms.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -290,15 +294,6 @@ void __fastcall S00d6e280_Wrap(S00d6e280_Obj* self, S00d6e280_Other* other, S00d
     FUN_00d6e280(&cur, tab, self, other, a1);
 }
 
-struct FourFloatVector
-{
-    float x, y, z, w;
-};
-union AlignedVector
-{
-    __m128 vec;
-    FourFloatVector components;
-};
 struct NodeKind
 {
     unsigned short kind;
@@ -315,8 +310,8 @@ struct FnvNode
     NodeKind* unk14;
     int unk18;
     int unk1c;
-    FourFloatVector vec1;
-    FourFloatVector vec2;
+    hkVector4 vec1;
+    hkVector4 vec2;
 };
 struct FnvSubObject
 {
@@ -332,11 +327,7 @@ struct FnvSubObject
     int unk24;
     int unk28;
     int unk2c;
-    union
-    {
-        __m128 vec;
-        FourFloatVector components;
-    };
+    __m128 vec;
     int unk40;
     int unk44;
     int unk48;
@@ -403,10 +394,10 @@ void __cdecl FUN_00d6f460(NodeKind* node, DispatchArgs args, FnvPacket* packet, 
 static __declspec(noinline) void FUN_00d6ecb0(FnvPacket* arg1, void* arg2, FnvNode* node)
 {
     FnvPacket localPacket = *arg1;
-    AlignedVector v1;
-    v1.components = node->vec1;
-    AlignedVector v2;
-    v2.components = node->vec2;
+    __m128 v1;
+    memcpy(&v1, &node->vec1, sizeof(v1));
+    __m128 v2;
+    memcpy(&v2, &node->vec2, sizeof(v2));
     NodeKind* kind = node->unk14;
     DispatchArgs args;
     args.raw = node->unk12;
@@ -414,8 +405,8 @@ static __declspec(noinline) void FUN_00d6ecb0(FnvPacket* arg1, void* arg2, FnvNo
     obj1.FUN_00d71f90(arg1->unk30);
     FnvSubObject obj2;
     obj2.FUN_00d71f90(arg1->unk34);
-    obj1.vec = _mm_mul_ps(obj1.vec, v1.vec);
-    obj2.vec = _mm_mul_ps(obj2.vec, v2.vec);
+    obj1.vec = _mm_mul_ps(obj1.vec, v1);
+    obj2.vec = _mm_mul_ps(obj2.vec, v2);
     localPacket.unk30 = &obj1;
     localPacket.unk34 = &obj2;
     FUN_00dced90(&obj1.vec, &obj2.vec, arg2);
@@ -446,7 +437,8 @@ struct Body337
     __m128 unk40;
     __m128 basisX, basisY, basisZ;
 };
-struct Pair337
+// Solver input is 0x38 bytes with body pointers at +0x30/+0x34; include/Pair.h is two 32-bit values (0x08 bytes).
+struct AngularJacobianBodyInputs
 {
     unsigned int unk00, unk04, unk08, unk0c;
     unsigned int unk10, unk14, unk18, unk1c;
@@ -459,7 +451,7 @@ struct Jacobian337
     __m128 first, second;
 };
 // @fnv 0x00d6cc80
-static __declspec(noinline) void FUN_00d6cc80(const Pair337* pair, Jacobian337* output, const __m128* direction,
+static __declspec(noinline) void FUN_00d6cc80(const AngularJacobianBodyInputs* pair, Jacobian337* output, const __m128* direction,
                                               float* effectiveMass)
 {
     __m128 value = *direction;
@@ -488,7 +480,7 @@ static __declspec(noinline) void FUN_00d6cc80(const Pair337* pair, Jacobian337* 
     output->first.m128_f32[3] = reciprocal;
     *effectiveMass = reciprocal;
 }
-void BuildJacobian337(const Pair337* pair, Jacobian337* output, const __m128* direction, float* mass)
+void BuildJacobian337(const AngularJacobianBodyInputs* pair, Jacobian337* output, const __m128* direction, float* mass)
 {
     FUN_00d6cc80(pair, output, direction, mass);
 }
@@ -634,21 +626,6 @@ struct __declspec(align(16)) S00d6f300_Real
 {
     float r;
 };
-struct S00d6f300_V4
-{
-    __m128 q;
-    void setSub4(const S00d6f300_V4& a, const S00d6f300_V4& b)
-    {
-        q = _mm_sub_ps(a.q, b.q);
-    }
-    float dot3(const S00d6f300_V4& b) const
-    {
-        __m128 m = _mm_mul_ps(q, b.q);
-        float r;
-        _mm_store_ss(&r, _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m)));
-        return r;
-    }
-};
 struct S00d6f300_B
 {
     int unk00;
@@ -663,19 +640,12 @@ struct S00d6f300_B
     int unk24;
     int unk28;
     int unk2c;
-    S00d6f300_V4 m_30;
+    hkVector4 m_30;
 };
 struct S00d6f300_Pair
 {
     float a;
     float b;
-};
-struct S00d6f300_Out
-{
-    float x;
-    float y;
-    float z;
-    float w;
 };
 struct __declspec(align(16)) S00d6f300_Info
 {
@@ -684,11 +654,12 @@ struct __declspec(align(16)) S00d6f300_Info
     S00d6f300_Pair ab;
     float c;
     float d;
-    S00d6f300_Out out;
+    // The output starts at +0x18, below hkVector4's SIMD alignment.
+    float out[4];
 };
 void ComputeJacobian(const __m128* n, const __m128* pos, S00d6f300_O* o, S00d6f300_Cmd* cur, S00d6f300_Info* info);
-void FUN_00dcfff0(void* h, S00d6f300_Info* info, S00d6f300_Out* out);
-void FUN_00dd03c0(S00d6f300_Out* out, S00d6f300_O* o, S00d6f300_Cmd* cur, S00d6f300_Cmd** p);
+void FUN_00dcfff0(void* h, S00d6f300_Info* info, hkVector4* out);
+void FUN_00dd03c0(hkVector4* out, S00d6f300_O* o, S00d6f300_Cmd* cur, S00d6f300_Cmd** p);
 extern const double DAT_010c9300;
 
 // @fnv 0x00d6f300
@@ -709,15 +680,17 @@ static __declspec(noinline) void FUN_00d6f300(S00d6f300_A* s, S00d6f300_O* o, S0
             S00d6f300_Info info;
             info.ab.a = 0.0f;
             info.ab.b = 0.0f;
-            ComputeJacobian(&a3[s->m_03], &a2->m_30.q, o, cur, &info);
+            ComputeJacobian(&a3[s->m_03], &a2->m_30.m_vComponents, o, cur, &info);
             info.o = o;
             info.ab = *(S00d6f300_Pair*)o->m_64;
             info.c = s->m_08 - *b;
-            S00d6f300_V4 d;
-            d.setSub4(a2->m_30, ((const S00d6f300_V4*)a3)[3]);
-            info.d = *b - d.dot3(((const S00d6f300_V4*)a3)[s->m_03]);
-            FUN_00dcfff0(h, &info, &info.out);
-            FUN_00dd03c0(&info.out, o, cur, p);
+            __m128 d = _mm_sub_ps(a2->m_30.m_vComponents, a3[3]);
+            __m128 m = _mm_mul_ps(d, a3[s->m_03]);
+            float dot;
+            _mm_store_ss(&dot, _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m)));
+            info.d = *b - dot;
+            FUN_00dcfff0(h, &info, reinterpret_cast<hkVector4*>(info.out));
+            FUN_00dd03c0(reinterpret_cast<hkVector4*>(info.out), o, cur, p);
             if (*b != s->m_08 || *a == 0)
             {
                 *b = s->m_08;

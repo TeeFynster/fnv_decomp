@@ -1,3 +1,4 @@
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
 
 // src/havok/physics/internal/collide/gjk/gskmanifold/hkpgskmanifoldutil_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/internal/collide/gjk/gskmanifold/hkpgskmanifoldutil.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,6 +6,102 @@
 
 // src/havok/physics/internal/collide/gjk/gskmanifold/hkpgskmanifoldutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/gjk/gskmanifold/hkpgskmanifoldutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../include/hkSimdReal.h"
+#include "../../../../../../../include/hkVector4.h"
+
+__forceinline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x)
+{}
+
+__forceinline hkSimdReal::operator float() const
+{
+    float s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
+
+__forceinline __m128 hkSimdReal::broadcast() const
+{
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+
+__forceinline const __m128& hkSimdReal::getQuad() const
+{
+    return m_vValue;
+}
+
+class Vector4Comparison
+{
+  public:
+    enum Mask
+    {
+        MASK_XY = 3
+    };
+    __forceinline int anyIsSet(Mask m) const
+    {
+        return _mm_movemask_ps(m_uiMask) & m;
+    }
+    __m128 m_uiMask;
+};
+
+
+__forceinline void hkVector4::setSub4(const hkVector4& v0, const hkVector4& v1)
+{
+    m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
+}
+__forceinline void hkVector4::setCross(const hkVector4& v0, const hkVector4& v1)
+{
+    __m128 cross0;
+    cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)),
+                        _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)));
+    __m128 cross1;
+    cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)),
+                        _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)));
+    m_vComponents = _mm_sub_ps(cross0, cross1);
+}
+__forceinline void hkVector4::setInterpolate4(const hkVector4& v0, const hkVector4& v1, const hkSimdReal& _t)
+{
+    static __declspec(align(16)) const float cw[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    __m128 t = _t.broadcast();
+    __m128 s = _mm_sub_ps(*(const __m128*)&cw, t);
+    m_vComponents = _mm_add_ps(_mm_mul_ps(s, v0.m_vComponents), _mm_mul_ps(t, v1.m_vComponents));
+}
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
+    return _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2)), xySum);
+}
+__forceinline hkSimdReal hkVector4::lengthSquared3() const
+{
+    return this->dot3(*this);
+}
+__forceinline Vector4Comparison hkVector4::compareLessThanZero4() const
+{
+    hkVector4 zero;
+    zero.m_vComponents = _mm_setzero_ps();
+    Vector4Comparison m;
+    m.m_uiMask = _mm_cmplt_ps(m_vComponents, zero.m_vComponents);
+    return m;
+}
+__forceinline hkSimdReal hkVector4::getSimdAt(int i) const
+{
+    switch (i)
+    {
+    case 0:
+        return m_vComponents;
+    case 1:
+        return _mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(1, 1, 1, 1));
+    case 2:
+        return _mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(2, 2, 2, 2));
+    default:
+        return _mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
+    }
+}
+__forceinline float& hkVector4::operator()(int a)
+{
+    return reinterpret_cast<float*>(&m_vComponents)[a];
+}
+
 struct S_00dad640_Entry
 {
     unsigned short unk0;
@@ -68,37 +165,17 @@ void __cdecl FUN_00dae340(S_00dad640_Set* set, unsigned int index);
 #include <xmmintrin.h>
 extern float DAT_0104da48;
 
-struct __declspec(align(16)) S_00daee00_Vec
+static __forceinline void storeLengthSquared3(const hkVector4& vector, float& f)
 {
-    float x;
-    float y;
-    float z;
-    float w;
-
-    void setSub4(const S_00daee00_Vec& a, const S_00daee00_Vec& b)
-    {
-        *(__m128*)this = _mm_sub_ps(*(const __m128*)&a, *(const __m128*)&b);
-    }
-    void setCross(const S_00daee00_Vec& a, const S_00daee00_Vec& b)
-    {
-        __m128 v1 = *(const __m128*)&a;
-        __m128 v2 = *(const __m128*)&b;
-        __m128 c0 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, 0xc9), _mm_shuffle_ps(v2, v2, 0xd2));
-        __m128 c1 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, 0xd2), _mm_shuffle_ps(v2, v2, 0xc9));
-        *(__m128*)this = _mm_sub_ps(c0, c1);
-    }
-    void storeLengthSquared3(float& f) const
-    {
-        __m128 v = *(const __m128*)this;
-        __m128 x2 = _mm_mul_ps(v, v);
-        __m128 r = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2));
-        _mm_store_ss(&f, r);
-    }
-};
+    __m128 v = vector.m_vComponents;
+    __m128 x2 = _mm_mul_ps(v, v);
+    __m128 r = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2));
+    _mm_store_ss(&f, r);
+}
 
 struct S_00daee00_Point
 {
-    S_00daee00_Vec pos;
+    hkVector4 pos;
     float unk10;
     float unk14;
     float unk18;
@@ -137,9 +214,9 @@ int S_00daee00::FUN_00daee00()
 
     for (int i = 0; i < 4; i++)
     {
-        S_00daee00_Vec diff;
+        hkVector4 diff;
         diff.setSub4(points[4].pos, points[i].pos);
-        diff.storeLengthSquared3(distance);
+        storeLengthSquared3(diff, distance);
         float d = distance;
         dists[i] = d;
         if (maxDist < d)
@@ -157,15 +234,15 @@ int S_00daee00::FUN_00daee00()
     used[farIdx] = 1;
 
     int idx2 = 4;
-    const S_00daee00_Vec& farPos = points[farIdx].pos;
+    const hkVector4& farPos = points[farIdx].pos;
     maxDist *= 1.05f;
     for (int i = 0; i < 5; i++)
     {
         if (!used[i])
         {
-            S_00daee00_Vec diff;
+            hkVector4 diff;
             diff.setSub4(points[farIdx].pos, points[i].pos);
-            diff.storeLengthSquared3(distance);
+            storeLengthSquared3(diff, distance);
             float d = distance;
             if (d > maxDist)
             {
@@ -177,18 +254,18 @@ int S_00daee00::FUN_00daee00()
     used[idx2] = 1;
 
     int idx3 = 0;
-    S_00daee00_Vec edge;
+    hkVector4 edge;
     edge.setSub4(farPos, points[idx2].pos);
     float maxDist3 = 0.0f;
     for (int i = 0; i < 5; i++)
     {
         if (!used[i])
         {
-            S_00daee00_Vec diff;
+            hkVector4 diff;
             diff.setSub4(points[i].pos, farPos);
-            S_00daee00_Vec cross;
+            hkVector4 cross;
             cross.setCross(diff, edge);
-            cross.storeLengthSquared3(distance);
+            storeLengthSquared3(cross, distance);
             float d = distance;
             if (d > maxDist3)
             {
@@ -200,15 +277,15 @@ int S_00daee00::FUN_00daee00()
     used[idx3] = 1;
 
     int idx4 = 0;
-    const S_00daee00_Vec& thirdPos = points[idx3].pos;
+    const hkVector4& thirdPos = points[idx3].pos;
     maxDist3 = 0.0f;
     for (int i = 0; i < 5; i++)
     {
         if (!used[i])
         {
-            S_00daee00_Vec diff;
+            hkVector4 diff;
             diff.setSub4(thirdPos, points[i].pos);
-            diff.storeLengthSquared3(distance);
+            storeLengthSquared3(diff, distance);
             float d = distance;
             if (d > maxDist3)
             {
@@ -339,126 +416,26 @@ void CallTarget_dad720()
 }
 
 #include <xmmintrin.h>
+#include "../../../../../../../include/hkPadSpu.h"   // Havok 7.1 hkPadSpu (was a unit-local ValueWrapper copy)
 namespace fnv_00dad860 {
-#include <xmmintrin.h>
 
 typedef float hkReal;
 typedef __m128 hkQuadReal;
 
-class VectorComponentValue
-{
-  public:
-    __forceinline VectorComponentValue(const hkQuadReal& x) : m_vValue(x)
-    {}
-    __forceinline operator hkReal() const
-    {
-        hkReal s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-    __forceinline hkQuadReal broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-    __forceinline const hkQuadReal& getQuad() const
-    {
-        return m_vValue;
-    }
 
-  private:
-    hkQuadReal m_vValue;
-};
-typedef const VectorComponentValue& hkSimdRealParameter;
+typedef const hkSimdReal& hkSimdRealParameter;
 
-__forceinline VectorComponentValue operator+(hkSimdRealParameter r, hkSimdRealParameter s)
+__forceinline hkSimdReal operator+(hkSimdRealParameter r, hkSimdRealParameter s)
 {
     return _mm_add_ss(r.getQuad(), s.getQuad());
 }
-__forceinline VectorComponentValue operator/(hkSimdRealParameter r, hkSimdRealParameter s)
+__forceinline hkSimdReal operator/(hkSimdRealParameter r, hkSimdRealParameter s)
 {
     return _mm_div_ss(r.getQuad(), s.getQuad());
 }
 
-class Vector4Comparison
-{
-  public:
-    enum Mask
-    {
-        MASK_XY = 3
-    };
-    __forceinline int anyIsSet(Mask m) const
-    {
-        return _mm_movemask_ps(m_uiMask) & m;
-    }
-    hkQuadReal m_uiMask;
-};
 
-class hkVector4
-{
-  public:
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setSub4(const hkVector4& v0, const hkVector4& v1)
-    {
-        m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    __forceinline void setCross(const hkVector4& v0, const hkVector4& v1)
-    {
-        hkQuadReal cross0;
-        cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)),
-                            _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)));
-        hkQuadReal cross1;
-        cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, _MM_SHUFFLE(3, 1, 0, 2)),
-                            _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, _MM_SHUFFLE(3, 0, 2, 1)));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    __forceinline void setInterpolate4(const hkVector4& v0, const hkVector4& v1, hkSimdRealParameter _t)
-    {
-        static __declspec(align(16)) const float cw[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-        hkQuadReal t = _t.broadcast();
-        hkQuadReal s = _mm_sub_ps(*(const hkQuadReal*)&cw, t);
-        m_vComponents = _mm_add_ps(_mm_mul_ps(s, v0.m_vComponents), _mm_mul_ps(t, v1.m_vComponents));
-    }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        hkQuadReal x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        hkQuadReal xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(1, 1, 1, 1)), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, _MM_SHUFFLE(2, 2, 2, 2)), xySum);
-    }
-    __forceinline VectorComponentValue lengthSquared3() const
-    {
-        return this->dot3(*this);
-    }
-    __forceinline Vector4Comparison compareLessThanZero4() const
-    {
-        hkVector4 zero;
-        zero.m_vComponents = _mm_setzero_ps();
-        Vector4Comparison m;
-        m.m_uiMask = _mm_cmplt_ps(m_vComponents, zero.m_vComponents);
-        return m;
-    }
-    __forceinline VectorComponentValue getSimdAt(int i) const
-    {
-        switch (i)
-        {
-        case 0:
-            return m_vComponents;
-        case 1:
-            return _mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(1, 1, 1, 1));
-        case 2:
-            return _mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(2, 2, 2, 2));
-        default:
-            return _mm_shuffle_ps(m_vComponents, m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
-        }
-    }
-    __forceinline hkReal& operator()(int a)
-    {
-        return reinterpret_cast<hkReal*>(&m_vComponents)[a];
-    }
-    hkQuadReal m_vComponents;
-};
+
 
 namespace hkVector4Util_S {
 __forceinline void dot3_3vs3(const hkVector4& a0, const hkVector4& b0, const hkVector4& a1, const hkVector4& b1,
@@ -479,24 +456,15 @@ __forceinline void dot3_3vs3(const hkVector4& a0, const hkVector4& b0, const hkV
 }
 }
 
-template <typename T> class ValueWrapper
-{
-  public:
-    __forceinline operator T() const
-    {
-        return m_kStorage;
-    }
-    T m_kStorage;
-};
 
 struct MeshVertexBasisData
 {
     hkVector4 m_pMeshVertexBuffer[16];
     hkVector4 m_kFirstBasisVector;
-    ValueWrapper<hkReal> m_kBoxBasisVector;
-    ValueWrapper<hkReal> m_kThirdBasisVector;
-    ValueWrapper<hkReal> m_kFourthBasisVector;
-    ValueWrapper<hkReal> m_fMinimumCollisionSeparation;
+    hkPadSpu<hkReal> m_kBoxBasisVector;
+    hkPadSpu<hkReal> m_kThirdBasisVector;
+    hkPadSpu<hkReal> m_kFourthBasisVector;
+    hkPadSpu<hkReal> m_fMinimumCollisionSeparation;
     __forceinline const hkVector4& getVertexA(unsigned int offset) const
     {
         return *(const hkVector4*)((const char*)this + offset);
@@ -550,7 +518,7 @@ static __declspec(noinline) int FUN_00dad860(const MeshVertexBasisData& work, co
     {
         return 1;
     }
-    VectorComponentValue t = dots.getSimdAt(0) / (dots.getSimdAt(0) + dots.getSimdAt(1));
+    hkSimdReal t = dots.getSimdAt(0) / (dots.getSimdAt(0) + dots.getSimdAt(1));
     out.m_vContactPosition.setInterpolate4(a1, a0, t);
     out.m_vHitNormal.setSub4(out.m_vContactPosition, b0);
     return 0;

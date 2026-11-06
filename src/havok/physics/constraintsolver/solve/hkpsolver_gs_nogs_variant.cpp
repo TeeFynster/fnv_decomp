@@ -1,115 +1,113 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
+#define FNV64_HKENUM_INLINE_BODIES
+#define FNV64_HKENUM_FORCEINLINE
+#define FNV64_HKENUM_COMPARISONS
 // src/havok/physics/constraintsolver/solve/hkpsolver_gs_nogs_variant.cpp - flag-variant unit created 2026-10-31 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/physics/constraintsolver/solve/hkpsolver.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
 
 #include "fnv_asm_helpers.h"
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkSimdReal.h"
+#define FNV64_HKVECTOR4_OWN_COPY
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkMatrix3.h"
+#include "../../../../../include/hkpVelocityAccumulator.h"
+
+__forceinline const hkVector4& hkMatrix3::getColumn(int i) const { return (&m_kColumn0)[i]; }
 // src/havok/physics/constraintsolver/solve/hkpsolver.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/constraintsolver/solve/hkpsolver.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern unsigned char DAT_011b9434[128];
 int __cdecl FUN_00d921d0(const signed char* index);
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
+using ::_mm_add_ss;
 // Adds the lowest single-precision float of b to that of a and stores the result in out.
 // @fnv 0x00c6cce0
-extern "C" void __cdecl AddScalarFloat(__m128* pResult, const __m128* pLeft, const __m128* pRight)
+extern "C" void __cdecl AddScalarFloat(LocalM128* pResult, const LocalM128* pLeft, const LocalM128* pRight)
 {
     *pResult = _mm_add_ss(*pLeft, *pRight);
 }
 char* __cdecl FUN_00d921c0(char* dst, const char* src);
-extern "C" __m128 _mm_sub_ss(__m128 a, __m128 b);
+using ::_mm_sub_ss;
 // @fnv 0x00c6ccc0
-extern "C" void __cdecl SubtractScalarFloat(__m128* pResult, const __m128* pLeft, const __m128* pRight)
+extern "C" void __cdecl SubtractScalarFloat(LocalM128* pResult, const LocalM128* pLeft, const LocalM128* pRight)
 {
     *pResult = _mm_sub_ss(*pLeft, *pRight);
 }
 void FUN_00d892d0();
 
 #include <math.h>
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ss(__m128, __m128);
-extern "C" __m128 _mm_min_ps(__m128, __m128);
-extern "C" __m128 _mm_max_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_load_ps(const float*);
-extern __m128 DAT_010c7160;
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
+using ::_mm_sub_ps;
+using ::_mm_mul_ss;
+using ::_mm_min_ps;
+using ::_mm_max_ps;
+using ::_mm_load_ss;
+using ::_mm_store_ss;
+using ::_mm_load_ps;
+extern LocalM128 DAT_010c7160;
 extern unsigned char DAT_01269204;
 typedef float hkReal;
-typedef __m128 hkQuadReal;
-class VectorComponentValue
+typedef LocalM128 hkQuadReal;
+__forceinline hkSimdReal::hkSimdReal(const hkQuadReal& x) : m_vValue(x) {}
+__forceinline hkSimdReal::hkSimdReal(hkReal x) { m_vValue = _mm_load_ss(&x); }
+__forceinline hkSimdReal::hkSimdReal() {}
+__forceinline hkSimdReal::operator hkReal() const
 {
-public:
-    __forceinline VectorComponentValue(const hkQuadReal& x) : m_vValue(x) {}
-    __forceinline VectorComponentValue(hkReal x) { m_vValue = _mm_load_ss(&x); }
-    __forceinline VectorComponentValue() {}
-    __forceinline operator hkReal() const
-    {
-        hkReal s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-    __forceinline hkQuadReal broadcast() const { return _mm_shuffle_ps(m_vValue, m_vValue, 0); }
-    __forceinline const hkQuadReal& getQuad() const { return m_vValue; }
-    void FUN_005dbf20(hkReal x);
-    hkQuadReal m_vValue;
-};
-typedef const VectorComponentValue& hkSimdRealParameter;
-__forceinline void hkSimdReal_setMax(hkSimdRealParameter a, hkSimdRealParameter b, VectorComponentValue& result)
-{
-    result = VectorComponentValue(_mm_max_ps(a.getQuad(), b.getQuad()));
+    hkReal s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
 }
-__forceinline void hkSimdReal_setMin(hkSimdRealParameter a, hkSimdRealParameter b, VectorComponentValue& result)
+__forceinline hkQuadReal hkSimdReal::broadcast() const { return _mm_shuffle_ps(m_vValue, m_vValue, 0); }
+__forceinline const hkQuadReal& hkSimdReal::getQuad() const { return m_vValue; }
+// The shared scalar SIMD class is named hkSimdReal in this tree.
+typedef const hkSimdReal& hkSimdRealParameter;
+__forceinline void hkSimdReal_setMax(hkSimdRealParameter a, hkSimdRealParameter b, hkSimdReal& result)
 {
-    result = VectorComponentValue(_mm_min_ps(a.getQuad(), b.getQuad()));
+    result = hkSimdReal(_mm_max_ps(a.getQuad(), b.getQuad()));
+}
+__forceinline void hkSimdReal_setMin(hkSimdRealParameter a, hkSimdRealParameter b, hkSimdReal& result)
+{
+    result = hkSimdReal(_mm_min_ps(a.getQuad(), b.getQuad()));
 }
 __forceinline void hkSimdReal_store(hkSimdRealParameter a, float* f)
 {
     _mm_store_ss(f, a.getQuad());
 }
-__forceinline VectorComponentValue operator*(hkSimdRealParameter r, hkSimdRealParameter s) { return _mm_mul_ss(r.getQuad(), s.getQuad()); }
-__forceinline VectorComponentValue operator-(hkSimdRealParameter r, hkSimdRealParameter s) { return _mm_sub_ss(r.getQuad(), s.getQuad()); }
-__forceinline VectorComponentValue operator+(hkSimdRealParameter r, hkSimdRealParameter s) { return _mm_add_ss(r.getQuad(), s.getQuad()); }
-__forceinline VectorComponentValue operator-(hkSimdRealParameter r) { return _mm_sub_ss(DAT_010c7160, r.getQuad()); }
-VectorComponentValue __cdecl SubtractScalarFloat(hkSimdRealParameter r, hkSimdRealParameter s);
-VectorComponentValue __cdecl FUN_00891060(hkSimdRealParameter r, hkSimdRealParameter s);
-__declspec(noinline) VectorComponentValue __cdecl AddScalarFloat(hkSimdRealParameter r, hkSimdRealParameter s) { return _mm_add_ss(r.getQuad(),s.getQuad()); }
-class hkMatrix3;
-class hkVector4
+__forceinline hkSimdReal operator*(hkSimdRealParameter r, hkSimdRealParameter s) { return _mm_mul_ss(r.getQuad(), s.getQuad()); }
+__forceinline hkSimdReal operator-(hkSimdRealParameter r, hkSimdRealParameter s) { return _mm_sub_ss(r.getQuad(), s.getQuad()); }
+__forceinline hkSimdReal operator+(hkSimdRealParameter r, hkSimdRealParameter s) { return _mm_add_ss(r.getQuad(), s.getQuad()); }
+__forceinline hkSimdReal operator-(hkSimdRealParameter r) { return _mm_sub_ss(DAT_010c7160, r.getQuad()); }
+hkSimdReal __cdecl SubtractScalarFloat(hkSimdRealParameter r, hkSimdRealParameter s);
+hkSimdReal __cdecl FUN_00891060(hkSimdRealParameter r, hkSimdRealParameter s);
+__declspec(noinline) hkSimdReal __cdecl AddScalarFloat(hkSimdRealParameter r, hkSimdRealParameter s) { return _mm_add_ss(r.getQuad(),s.getQuad()); }
+// Solver adapter: getSimdAtE(2) supplies zero rather than the vector's third lane.
+class SolverVector4
 {
 public:
-    __forceinline void commitIncrement(hkVector4& dest) const { dest.add4(*this); }
+    __forceinline void commitIncrement(SolverVector4& dest) const { dest.add4(*this); }
     __forceinline operator hkQuadReal() const { return m_vComponents; }
     __forceinline void operator=(const hkQuadReal& q) { m_vComponents = q; }
-    __forceinline void operator=(const hkVector4& v) { m_vComponents = v.m_vComponents; }
-    __forceinline void add4(const hkVector4& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void add3clobberW(const hkVector4& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void setAdd4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void sub3clobberW(const hkVector4& v) { m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void mul4(const hkVector4& v) { m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void setMul4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents); }
+    __forceinline void operator=(const SolverVector4& v) { m_vComponents = v.m_vComponents; }
+    __forceinline void add4(const SolverVector4& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
+    __forceinline void add3clobberW(const SolverVector4& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
+    __forceinline void setAdd4(const SolverVector4& a, const SolverVector4& b) { m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents); }
+    __forceinline void sub3clobberW(const SolverVector4& v) { m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents); }
+    __forceinline void setSub4(const SolverVector4& a, const SolverVector4& b) { m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents); }
+    __forceinline void mul4(const SolverVector4& v) { m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents); }
+    __forceinline void setMul4(const SolverVector4& a, const SolverVector4& b) { m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents); }
     __forceinline void mul4(hkSimdRealParameter s) { m_vComponents = _mm_mul_ps(s.broadcast(), m_vComponents); }
-    __forceinline void setMul4(hkSimdRealParameter r, const hkVector4& v) { m_vComponents = _mm_mul_ps(r.broadcast(), v.m_vComponents); }
-    __forceinline VectorComponentValue horizontalAdd3() const
+    __forceinline void setMul4(hkSimdRealParameter r, const SolverVector4& v) { m_vComponents = _mm_mul_ps(r.broadcast(), v.m_vComponents); }
+    __forceinline hkSimdReal horizontalAdd3() const
     {
         hkQuadReal xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55), m_vComponents);
         return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa), xySum);
     }
     __forceinline hkReal& operator()(int a) { return reinterpret_cast<hkReal*>(&m_vComponents)[a]; }
     __forceinline const hkReal& operator()(int a) const { return reinterpret_cast<const hkReal*>(&m_vComponents)[a]; }
-    __forceinline VectorComponentValue getSimdAtE(int i) const
+    __forceinline hkSimdReal getSimdAtE(int i) const
     {
         switch (i)
         {
@@ -120,7 +118,7 @@ public:
         default: return _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
         }
     }
-    __forceinline VectorComponentValue getSimdAt(int i) const
+    __forceinline hkSimdReal getSimdAt(int i) const
     {
         switch (i)
         {
@@ -131,53 +129,41 @@ public:
         default: return _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
         }
     }
-    __forceinline void setBroadcast(const hkVector4& v, int i)
-    {
+    __forceinline void setBroadcast(const SolverVector4& v, int i) {
         if (i == 0) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x00);
         else if (i == 1) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55);
         else if (i == 2) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xaa);
         else if (i == 3) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
     }
-    __forceinline void setBroadcast3clobberW(const hkVector4& v, int i) { setBroadcast(v, i); }
-    void FUN_00c7f750(const hkMatrix3& a, const hkVector4& b);
-    __forceinline void SetRotatedVector(const hkMatrix3& a, const hkVector4& b) { FUN_00c7f750(a, b); }
+    __forceinline void setBroadcast3clobberW(const SolverVector4& v, int i) { setBroadcast(v, i); }
+    void FUN_00c7f750(const hkMatrix3& a, const SolverVector4& b);
+    __forceinline void SetRotatedVector(const hkMatrix3& a, const SolverVector4& b) { FUN_00c7f750(a, b); }
     hkQuadReal m_vComponents;
 };
-class hkMatrix3 { public: hkVector4 m_kColumn0, m_kColumn1, m_kColumn2; };
-template <class TYPE> class ValueWrapper
-{
-public:
-    __forceinline ValueWrapper() {}
-    __forceinline ValueWrapper(TYPE e) : m_kStorage(e) {}
-    __forceinline void operator=(TYPE e) { m_kStorage = e; }
-    __forceinline TYPE val() const { return m_kStorage; }
-    __forceinline TYPE operator->() const { return m_kStorage; }
-    __forceinline operator TYPE() const { return val(); }
-private:
-    TYPE m_kStorage;
-};
+
+#include "../../../../../include/hkPadSpu.h"   // Havok 7.1 hkPadSpu (was a unit-local ValueWrapper copy)
 struct ConstraintSolverInfo
 {
     float unk00, m_fTau, m_fMotorDamping, m_fPostDampingParameter;
-    hkVector4 unk10, unk20;
-    hkVector4 m_kGravity;
-    hkVector4 m_kTimeStep;
+    SolverVector4 unk10, unk20;
+    SolverVector4 m_kGravity;
+    SolverVector4 m_kTimeStep;
 };
 struct FloatRecord { float m_fAccumulatedImpulse; };
 class QuantizedBoundsData
 {
 public:
     int unk00;
-    __forceinline const hkVector4& getSumLinearVel() const { return m_sumLinearVel; }
-    __forceinline hkVector4& getSumLinearVel() { return m_sumLinearVel; }
-    __forceinline const hkVector4& getSumAngularVel() const { return m_sumAngularVel; }
-    hkVector4 m_vLinearVelocity;
-    hkVector4 m_vAngularVelocity;
-    hkVector4 m_vInverseInertiaAndMass;
-    hkVector4 m_sumLinearVel;
-    hkVector4 m_sumAngularVel;
-    hkVector4 unk60;
-    hkVector4 unk70;
+    __forceinline const SolverVector4& getSumLinearVel() const { return m_sumLinearVel; }
+    __forceinline SolverVector4& getSumLinearVel() { return m_sumLinearVel; }
+    __forceinline const SolverVector4& getSumAngularVel() const { return m_sumAngularVel; }
+    SolverVector4 m_vLinearVelocity;
+    SolverVector4 m_vAngularVelocity;
+    SolverVector4 m_vInverseInertiaAndMass;
+    SolverVector4 m_sumLinearVel;
+    SolverVector4 m_sumAngularVel;
+    SolverVector4 unk60;
+    SolverVector4 unk70;
 };
 template <class T> __forceinline T* hkSelect(int i, T* a, T* b)
 {
@@ -187,8 +173,8 @@ template <class T> __forceinline T* hkSelect(int i, T* a, T* b)
 }
 struct SolverStepInfo
 {
-    ValueWrapper<int> m_intStep;
-    ValueWrapper<hkReal> m_stepFactor;
+    hkPadSpu<int> m_intStep;
+    hkPadSpu<hkReal> m_stepFactor;
 };
 enum SolverSchemaType
 {
@@ -223,24 +209,9 @@ enum SolverSchemaType
     SCHEMA_TYPE_BALL_SOCKET_CHAIN = 30,
     SCHEMA_TYPE_POWERED_CHAIN = 31
 };
-class hkBool
-{
-public:
-    __forceinline hkBool(bool b) { m_cBooleanValue = (char)b; }
-    __forceinline operator bool() const { return m_cBooleanValue != 0; }
-    char m_cBooleanValue;
-};
-template <class E, class S> class hkEnum
-{
-public:
-    __forceinline hkEnum() {}
-    __forceinline hkEnum(E e) { m_kStorage = (S)e; }
-    __forceinline void operator=(E e) { m_kStorage = (S)e; }
-    __forceinline hkBool operator==(E e) const { return m_kStorage == (S)e; }
-    __forceinline operator E() const { return (E)m_kStorage; }
-    __forceinline hkBool operator!=(E e) const { return m_kStorage != (S)e; }
-    S m_kStorage;
-};
+
+#include "../../../../../include/hkEnum.h"
+using ::hkEnum;
 typedef hkEnum<SolverSchemaType, signed char> SchemaEnum;
 class SolverSchemaHeader
 {
@@ -284,31 +255,31 @@ class ConstraintJacobian
 {
 public:
     __forceinline const hkReal& getRHS() const { return m_kLinearJacobian(3); }
-    __forceinline const VectorComponentValue getRhsSr() const { return m_kLinearJacobian.getSimdAt(3); }
-    __forceinline const VectorComponentValue getRhsSrE() const { return m_kLinearJacobian.getSimdAtE(3); }
+    __forceinline const hkSimdReal getRhsSr() const { return m_kLinearJacobian.getSimdAt(3); }
+    __forceinline const hkSimdReal getRhsSrE() const { return m_kLinearJacobian.getSimdAtE(3); }
     __forceinline hkReal getInvJacDiag() const { return m_kAngularVelocity[0](3); }
-    __forceinline VectorComponentValue getInvJacDiagSr() const { return m_kAngularVelocity[0].getSimdAt(3); }
+    __forceinline hkSimdReal getInvJacDiagSr() const { return m_kAngularVelocity[0].getSimdAt(3); }
     __forceinline hkReal getUserValue() const { return m_kAngularVelocity[1](3); }
-    __forceinline VectorComponentValue getUserValueSr() const { return m_kAngularVelocity[1].getSimdAt(3); }
-    hkVector4 m_kLinearJacobian;
-    hkVector4 m_kAngularVelocity[2];
+    __forceinline hkSimdReal getUserValueSr() const { return m_kAngularVelocity[1].getSimdAt(3); }
+    SolverVector4 m_kLinearJacobian;
+    SolverVector4 m_kAngularVelocity[2];
 };
 class AngularJacobianElement
 {
 public:
     __forceinline hkReal getAngularRhs() const { return m_kAngularVelocity[1](3); }
-    __forceinline VectorComponentValue getAngularRhsSr() const { return m_kAngularVelocity[1].getSimdAt(3); }
+    __forceinline hkSimdReal getAngularRhsSr() const { return m_kAngularVelocity[1].getSimdAt(3); }
     __forceinline hkReal getInvJacDiag() const { return m_kAngularVelocity[0](3); }
-    __forceinline VectorComponentValue getInvJacDiagSr() const { return m_kAngularVelocity[0].getSimdAt(3); }
-    hkVector4 m_kAngularVelocity[2];
+    __forceinline hkSimdReal getInvJacDiagSr() const { return m_kAngularVelocity[0].getSimdAt(3); }
+    SolverVector4 m_kAngularVelocity[2];
 };
 class JacobianElement
 {
 public:
-    __forceinline VectorComponentValue getRhsSr() const { return m_kTranslationalVelocity[0].getSimdAt(3); }
-    __forceinline VectorComponentValue getInvJacDiagSr() const { return m_kAngularVelocity[0].getSimdAt(3); }
-    hkVector4 m_kTranslationalVelocity[2];
-    hkVector4 m_kAngularVelocity[2];
+    __forceinline hkSimdReal getRhsSr() const { return m_kTranslationalVelocity[0].getSimdAt(3); }
+    __forceinline hkSimdReal getInvJacDiagSr() const { return m_kAngularVelocity[0].getSimdAt(3); }
+    SolverVector4 m_kTranslationalVelocity[2];
+    SolverVector4 m_kAngularVelocity[2];
 };
 class JacobianPair { public: ConstraintJacobian m_kFirstFrictionJacobian, m_kSecondFrictionJacobian; hkReal m_offDiag; };
 class Friction3DSchema { public: ConstraintJacobian m_kFirstFrictionJacobian, m_kSecondFrictionJacobian; AngularJacobianElement m_kAngularVelocity; hkReal m_offDiag, m_maxFrictionImpulse, m_angularFactor; };
@@ -326,8 +297,8 @@ class FrictionImpulseLimitedJacobian : public AngularJacobianElement { public: h
 class AngularLimitJacobian : public AngularJacobianElement { public: hkReal m_minLimit, m_maxLimit, m_userTau; };
 class MotorInfoRecord : public AngularJacobianElement { public: hkpMotorInfo m_pMotor; };
 class SingleJacobianSchema : public JacobianElement {};
-class SetInverseMassSchema { public: hkVector4 m_invMassA, m_invMassB; };
-class AddVelocitySchema { public: hkVector4 m_fVelocity; int m_iBodyIndex; };
+class SetInverseMassSchema { public: SolverVector4 m_invMassA, m_invMassB; };
+class AddVelocitySchema { public: SolverVector4 m_fVelocity; int m_iBodyIndex; };
 class hkpJacobianSetComSchema { public: hkMatrix3 m_angularA, m_angularB; };
 void __cdecl ValidateHavokKeyCode(unsigned char*);
 class hkpStiffChainSchema : public SolverSchemaHeader { public: unsigned char unk01; unsigned short m_iConstraintCount; int m_sizeOfNext; };
@@ -347,51 +318,51 @@ __forceinline void storeVelocityAccumulators(QuantizedBoundsData& a, QuantizedBo
 __forceinline hkReal hkMath_fabs(hkReal r) { return fabsf(r); }
 __forceinline hkReal hkMath_sqrt(hkReal r) { return sqrtf(r); }
 __forceinline hkReal hkMath_sqrtInverse(hkReal r) { return 1.0f / hkMath_sqrt(r); }
-__forceinline VectorComponentValue getLinearDv0(const ConstraintJacobian& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info)
+__forceinline hkSimdReal getLinearDv0(const ConstraintJacobian& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info)
 {
-    hkVector4 a; a.setSub4(mA.m_vLinearVelocity, mB.m_vLinearVelocity);
-    hkVector4 b; b.setMul4(mA.m_vAngularVelocity, jac.m_kAngularVelocity[0]);
-    hkVector4 c; c.setMul4(mB.m_vAngularVelocity, jac.m_kAngularVelocity[1]);
+    SolverVector4 a; a.setSub4(mA.m_vLinearVelocity, mB.m_vLinearVelocity);
+    SolverVector4 b; b.setMul4(mA.m_vAngularVelocity, jac.m_kAngularVelocity[0]);
+    SolverVector4 c; c.setMul4(mB.m_vAngularVelocity, jac.m_kAngularVelocity[1]);
     a.mul4(jac.m_kLinearJacobian);
     b.add4(c);
     b.add4(a);
-    const VectorComponentValue vel = b.horizontalAdd3();
-    const VectorComponentValue dv = jac.getRhsSr() - vel;
+    const hkSimdReal vel = b.horizontalAdd3();
+    const hkSimdReal dv = jac.getRhsSr() - vel;
     return dv;
 }
-__forceinline VectorComponentValue getAngularDv0(const AngularJacobianElement& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info)
+__forceinline hkSimdReal getAngularDv0(const AngularJacobianElement& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info)
 {
-    hkVector4 a; a.setMul4(mA.m_vAngularVelocity, jac.m_kAngularVelocity[0]);
-    hkVector4 b; b.setMul4(mB.m_vAngularVelocity, jac.m_kAngularVelocity[1]);
+    SolverVector4 a; a.setMul4(mA.m_vAngularVelocity, jac.m_kAngularVelocity[0]);
+    SolverVector4 b; b.setMul4(mB.m_vAngularVelocity, jac.m_kAngularVelocity[1]);
     a.add4(b);
-    const VectorComponentValue vel = a.horizontalAdd3();
-    const VectorComponentValue dv = jac.getAngularRhsSr() - vel;
+    const hkSimdReal vel = a.horizontalAdd3();
+    const hkSimdReal dv = jac.getAngularRhsSr() - vel;
     return dv;
 }
-__forceinline VectorComponentValue getLinearDv0UserTauWithCustomRhs(const ConstraintJacobian& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkReal tau, hkReal damping, hkReal customRhs)
+__forceinline hkSimdReal getLinearDv0UserTauWithCustomRhs(const ConstraintJacobian& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkReal tau, hkReal damping, hkReal customRhs)
 {
-    hkVector4 vel4;
+    SolverVector4 vel4;
     {
-        hkVector4 linVelA; linVelA.setSub4(mA.m_vLinearVelocity, mA.getSumLinearVel());
-        hkVector4 angVelA; angVelA.setSub4(mA.m_vAngularVelocity, mA.getSumAngularVel());
-        hkVector4 linVelB; linVelB.setSub4(mB.m_vLinearVelocity, mB.getSumLinearVel());
-        hkVector4 angVelB; angVelB.setSub4(mB.m_vAngularVelocity, mB.getSumAngularVel());
-        hkVector4 a; a.setSub4(linVelA, linVelB);
-        hkVector4 b; b.setMul4(angVelA, jac.m_kAngularVelocity[0]);
-        hkVector4 c; c.setMul4(angVelB, jac.m_kAngularVelocity[1]);
+        SolverVector4 linVelA; linVelA.setSub4(mA.m_vLinearVelocity, mA.getSumLinearVel());
+        SolverVector4 angVelA; angVelA.setSub4(mA.m_vAngularVelocity, mA.getSumAngularVel());
+        SolverVector4 linVelB; linVelB.setSub4(mB.m_vLinearVelocity, mB.getSumLinearVel());
+        SolverVector4 angVelB; angVelB.setSub4(mB.m_vAngularVelocity, mB.getSumAngularVel());
+        SolverVector4 a; a.setSub4(linVelA, linVelB);
+        SolverVector4 b; b.setMul4(angVelA, jac.m_kAngularVelocity[0]);
+        SolverVector4 c; c.setMul4(angVelB, jac.m_kAngularVelocity[1]);
         a.mul4(jac.m_kLinearJacobian);
         b.add4(c);
         vel4.setAdd4(b, a);
     }
-    hkVector4 svel4;
+    SolverVector4 svel4;
     {
-        hkVector4 linVelA = mA.getSumLinearVel();
-        hkVector4 angVelA = mA.getSumAngularVel();
-        hkVector4 linVelB = mB.getSumLinearVel();
-        hkVector4 angVelB = mB.getSumAngularVel();
-        hkVector4 a; a.setSub4(linVelA, linVelB);
-        hkVector4 b; b.setMul4(angVelA, jac.m_kAngularVelocity[0]);
-        hkVector4 c; c.setMul4(angVelB, jac.m_kAngularVelocity[1]);
+        SolverVector4 linVelA = mA.getSumLinearVel();
+        SolverVector4 angVelA = mA.getSumAngularVel();
+        SolverVector4 linVelB = mB.getSumLinearVel();
+        SolverVector4 angVelB = mB.getSumAngularVel();
+        SolverVector4 a; a.setSub4(linVelA, linVelB);
+        SolverVector4 b; b.setMul4(angVelA, jac.m_kAngularVelocity[0]);
+        SolverVector4 c; c.setMul4(angVelB, jac.m_kAngularVelocity[1]);
         a.mul4(jac.m_kLinearJacobian);
         b.add4(c);
         svel4.setAdd4(b, a);
@@ -399,56 +370,56 @@ __forceinline VectorComponentValue getLinearDv0UserTauWithCustomRhs(const Constr
     const hkReal ru = info.m_kTimeStep(0) * tau;
     svel4.mul4(ru);
     vel4.mul4(damping);
-    hkVector4 dv; dv.setAdd4(svel4, vel4);
+    SolverVector4 dv; dv.setAdd4(svel4, vel4);
     const hkReal rhsUpdate = dv.horizontalAdd3();
     return customRhs * tau - rhsUpdate;
 }
-__forceinline VectorComponentValue getLinearDv0UserTau(const ConstraintJacobian& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkReal tau, hkReal damping)
+__forceinline hkSimdReal getLinearDv0UserTau(const ConstraintJacobian& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkReal tau, hkReal damping)
 {
     return getLinearDv0UserTauWithCustomRhs(jac, mA, mB, info, tau, damping, jac.getRHS());
 }
-__forceinline VectorComponentValue getAngularDv0UserTauWithCustomRhs(const AngularJacobianElement& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkReal tau, hkReal damping, hkReal customAngularRhs)
+__forceinline hkSimdReal getAngularDv0UserTauWithCustomRhs(const AngularJacobianElement& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkReal tau, hkReal damping, hkReal customAngularRhs)
 {
-    hkVector4 vel4;
+    SolverVector4 vel4;
     {
-        hkVector4 angVelA; angVelA.setSub4(mA.m_vAngularVelocity, mA.getSumAngularVel());
-        hkVector4 angVelB; angVelB.setSub4(mB.m_vAngularVelocity, mB.getSumAngularVel());
-        hkVector4 a; a.setMul4(angVelA, jac.m_kAngularVelocity[0]);
-        hkVector4 b; b.setMul4(angVelB, jac.m_kAngularVelocity[1]);
+        SolverVector4 angVelA; angVelA.setSub4(mA.m_vAngularVelocity, mA.getSumAngularVel());
+        SolverVector4 angVelB; angVelB.setSub4(mB.m_vAngularVelocity, mB.getSumAngularVel());
+        SolverVector4 a; a.setMul4(angVelA, jac.m_kAngularVelocity[0]);
+        SolverVector4 b; b.setMul4(angVelB, jac.m_kAngularVelocity[1]);
         vel4.setAdd4(a, b);
     }
-    hkVector4 svel4;
+    SolverVector4 svel4;
     {
-        hkVector4 angVelA = mA.getSumAngularVel();
-        hkVector4 angVelB = mB.getSumAngularVel();
-        hkVector4 a; a.setMul4(angVelA, jac.m_kAngularVelocity[0]);
-        hkVector4 b; b.setMul4(angVelB, jac.m_kAngularVelocity[1]);
+        SolverVector4 angVelA = mA.getSumAngularVel();
+        SolverVector4 angVelB = mB.getSumAngularVel();
+        SolverVector4 a; a.setMul4(angVelA, jac.m_kAngularVelocity[0]);
+        SolverVector4 b; b.setMul4(angVelB, jac.m_kAngularVelocity[1]);
         svel4.setAdd4(a, b);
     }
     const hkReal ru = info.m_kTimeStep(0) * tau;
     svel4.mul4(ru);
     vel4.mul4(damping);
-    hkVector4 dv; dv.setAdd4(svel4, vel4);
+    SolverVector4 dv; dv.setAdd4(svel4, vel4);
     const hkReal rhsUpdate = dv.horizontalAdd3();
     return customAngularRhs * tau - rhsUpdate;
 }
-__forceinline VectorComponentValue getAngularDv0UserTau(const AngularJacobianElement& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkReal tau, hkReal damping)
+__forceinline hkSimdReal getAngularDv0UserTau(const AngularJacobianElement& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkReal tau, hkReal damping)
 {
     return getAngularDv0UserTauWithCustomRhs(jac, mA, mB, info, tau, damping, jac.getAngularRhs());
 }
 __forceinline void applyImpulse(hkSimdRealParameter imp, const ConstraintJacobian& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr)
 {
-    hkVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
-    hkVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
-    hkVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
-    hkVector4 negImpLinB; negImpLinB.setBroadcast3clobberW(impB, 3);
+    SolverVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
+    SolverVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
+    SolverVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
+    SolverVector4 negImpLinB; negImpLinB.setBroadcast3clobberW(impB, 3);
     impLinA.mul4(jac.m_kLinearJacobian);
     negImpLinB.mul4(jac.m_kLinearJacobian);
     mA.m_vLinearVelocity.add3clobberW(impLinA);
     mB.m_vLinearVelocity.sub3clobberW(negImpLinB);
     impA.mul4(jac.m_kAngularVelocity[0]);
     impB.mul4(jac.m_kAngularVelocity[1]);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     mA.m_vAngularVelocity.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
@@ -456,18 +427,18 @@ __forceinline void applyImpulse(hkSimdRealParameter imp, const ConstraintJacobia
 }
 __forceinline void applyImpulseX(hkSimdRealParameter imp, const ConstraintJacobian& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr)
 {
-    hkVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
-    hkVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
-    hkVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
-    hkVector4 negImpLinB; negImpLinB.setBroadcast3clobberW(impB, 3);
+    SolverVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
+    SolverVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
+    SolverVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
+    SolverVector4 negImpLinB; negImpLinB.setBroadcast3clobberW(impB, 3);
     impLinA.mul4(jac.m_kLinearJacobian);
     negImpLinB.mul4(jac.m_kLinearJacobian);
     mA.m_vLinearVelocity.add3clobberW(impLinA);
     mB.m_vLinearVelocity.sub3clobberW(negImpLinB);
-    hkVector4& oA = mA.m_vAngularVelocity;
+    SolverVector4& oA = mA.m_vAngularVelocity;
     impA.mul4(jac.m_kAngularVelocity[0]);
     impB.mul4(jac.m_kAngularVelocity[1]);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     oA.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
@@ -492,11 +463,11 @@ __forceinline void applyImpulse01(hkSimdRealParameter imp0, hkSimdRealParameter 
 }
 __forceinline void ApplyAngularImpulseToBodies(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr)
 {
-    hkVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
-    hkVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
+    SolverVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
+    SolverVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
     impA.mul4(jac.m_kAngularVelocity[0]);
     impB.mul4(jac.m_kAngularVelocity[1]);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     mA.m_vAngularVelocity.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
@@ -504,11 +475,11 @@ __forceinline void ApplyAngularImpulseToBodies(hkSimdRealParameter imp, const An
 }
 __forceinline void applyAngularImpulseSwappedMul(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr)
 {
-    hkVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
-    hkVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
+    SolverVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
+    SolverVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
     impB.mul4(jac.m_kAngularVelocity[1]);
     impA.mul4(jac.m_kAngularVelocity[0]);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     mA.m_vAngularVelocity.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
@@ -518,12 +489,12 @@ __forceinline void applyAngularImpulse0(hkSimdRealParameter imp, const AngularJa
 {
     ApplyAngularImpulseToBodies(imp, jac, mA, mB, sr);
 }
-__forceinline void getDv01(const ConstraintJacobian* jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkVector4& velOut)
+__forceinline void getDv01(const ConstraintJacobian* jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, SolverVector4& velOut)
 {
     velOut(0) = getLinearDv0(jac[0], mA, mB, info);
     velOut(1) = getLinearDv0(jac[1], mA, mB, info);
 }
-__forceinline void getDv012(const Friction3DSchema* jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkVector4& velOut)
+__forceinline void getDv012(const Friction3DSchema* jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, SolverVector4& velOut)
 {
     velOut(0) = getLinearDv0(jac->m_kFirstFrictionJacobian, mA, mB, info);
     velOut(1) = getLinearDv0(jac->m_kSecondFrictionJacobian, mA, mB, info);
@@ -532,21 +503,21 @@ __forceinline void getDv012(const Friction3DSchema* jac, const QuantizedBoundsDa
 __forceinline void SolveSingleContact(const ConstraintSolverInfo& info, const JacobianPointerSchema& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr, FloatRecord*& delayedResult)
 {
     {
-        VectorComponentValue dv = getLinearDv0(schema, mA, mB, info);
-        VectorComponentValue impulse = dv * schema.getInvJacDiagSr();
-        VectorComponentValue negPreviousImpulse = VectorComponentValue(DAT_010c7160) - VectorComponentValue(sr->m_fAccumulatedImpulse);
+        hkSimdReal dv = getLinearDv0(schema, mA, mB, info);
+        hkSimdReal impulse = dv * schema.getInvJacDiagSr();
+        hkSimdReal negPreviousImpulse = hkSimdReal(DAT_010c7160) - hkSimdReal(sr->m_fAccumulatedImpulse);
         hkSimdReal_setMax(negPreviousImpulse, impulse, impulse);
         applyImpulse0(impulse, schema, mA, mB, *sr);
     }
 }
 __forceinline void solveSingleLimitContact(const ConstraintSolverInfo& info, const SolverStepInfo& temp, const JacobianPointerSchema& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr, FloatRecord*& delayedResult)
 {
-    VectorComponentValue dv = getLinearDv0(schema, mA, mB, info);
+    hkSimdReal dv = getLinearDv0(schema, mA, mB, info);
     {
-        VectorComponentValue impulse = dv * schema.getInvJacDiagSr();
-        VectorComponentValue maxImpulse = schema.getUserValueSr();
-        VectorComponentValue impulseApplied = sr->m_fAccumulatedImpulse;
-        VectorComponentValue negImpApplied = VectorComponentValue(DAT_010c7160) - impulseApplied;
+        hkSimdReal impulse = dv * schema.getInvJacDiagSr();
+        hkSimdReal maxImpulse = schema.getUserValueSr();
+        hkSimdReal impulseApplied = sr->m_fAccumulatedImpulse;
+        hkSimdReal negImpApplied = hkSimdReal(DAT_010c7160) - impulseApplied;
         maxImpulse = maxImpulse - impulseApplied;
         hkSimdReal_setMax(negImpApplied, impulse, impulse);
         hkSimdReal_setMin(maxImpulse, impulse, impulse);
@@ -555,7 +526,7 @@ __forceinline void solveSingleLimitContact(const ConstraintSolverInfo& info, con
 }
 __forceinline void solvePairContact(const ConstraintSolverInfo& info, const JacobianPair& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr)
 {
-    hkVector4 dv4;
+    SolverVector4 dv4;
     getDv01(&schema.m_kFirstFrictionJacobian, mA, mB, info, dv4);
     const hkReal dv0 = dv4(0);
     const hkReal dv1 = dv4(1);
@@ -570,8 +541,8 @@ __forceinline void solvePairContact(const ConstraintSolverInfo& info, const Jaco
         else
         {
 checkImp0:
-            VectorComponentValue imp01 = VectorComponentValue(dv4(0)) * schema.m_kFirstFrictionJacobian.getInvJacDiagSr();
-            VectorComponentValue negImp = VectorComponentValue(DAT_010c7160) - VectorComponentValue(sr[0].m_fAccumulatedImpulse);
+            hkSimdReal imp01 = hkSimdReal(dv4(0)) * schema.m_kFirstFrictionJacobian.getInvJacDiagSr();
+            hkSimdReal negImp = hkSimdReal(DAT_010c7160) - hkSimdReal(sr[0].m_fAccumulatedImpulse);
             hkSimdReal_setMax(negImp, imp01, imp01);
             applyImpulse0(imp01, schema.m_kFirstFrictionJacobian, mA, mB, *sr);
         }
@@ -586,23 +557,23 @@ checkImp0:
         applyImpulse1(imp10, schema.m_kSecondFrictionJacobian, mA, mB, sr[1]);
     }
 }
-__forceinline VectorComponentValue getLinearDv0B(const ConstraintJacobian& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info)
+__forceinline hkSimdReal getLinearDv0B(const ConstraintJacobian& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info)
 {
     hkQuadReal d = _mm_sub_ps(mA.m_vLinearVelocity.m_vComponents, mB.m_vLinearVelocity.m_vComponents);
     hkQuadReal bq = _mm_mul_ps(mA.m_vAngularVelocity.m_vComponents, jac.m_kAngularVelocity[0].m_vComponents);
     hkQuadReal cq = _mm_mul_ps(mB.m_vAngularVelocity.m_vComponents, jac.m_kAngularVelocity[1].m_vComponents);
     hkQuadReal m = _mm_mul_ps(_mm_load_ps((const float*)&jac.m_kLinearJacobian), d);
-    hkVector4 b; b.m_vComponents = _mm_add_ps(_mm_add_ps(bq, cq), m);
+    SolverVector4 b; b.m_vComponents = _mm_add_ps(_mm_add_ps(bq, cq), m);
     return jac.getRhsSrE() - b.horizontalAdd3();
 }
-__forceinline void getDv01B(const ConstraintJacobian* jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, hkVector4& velOut)
+__forceinline void getDv01B(const ConstraintJacobian* jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, SolverVector4& velOut)
 {
     velOut(0) = getLinearDv0(jac[0], mA, mB, info);
     velOut(1) = getLinearDv0B(jac[1], mA, mB, info);
 }
 __forceinline void solvePairContactB(const ConstraintSolverInfo& info, const JacobianPair& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr)
 {
-    hkVector4 dv4;
+    SolverVector4 dv4;
     getDv01B(&schema.m_kFirstFrictionJacobian, mA, mB, info, dv4);
     const hkReal dv0 = dv4(0);
     const hkReal dv1 = dv4(1);
@@ -617,8 +588,8 @@ __forceinline void solvePairContactB(const ConstraintSolverInfo& info, const Jac
         else
         {
 checkImp0:
-            VectorComponentValue imp01 = VectorComponentValue(dv4(0)) * schema.m_kFirstFrictionJacobian.getInvJacDiagSr();
-            VectorComponentValue negImp = VectorComponentValue(DAT_010c7160) - VectorComponentValue(sr[0].m_fAccumulatedImpulse);
+            hkSimdReal imp01 = hkSimdReal(dv4(0)) * schema.m_kFirstFrictionJacobian.getInvJacDiagSr();
+            hkSimdReal negImp = hkSimdReal(DAT_010c7160) - hkSimdReal(sr[0].m_fAccumulatedImpulse);
             hkSimdReal_setMax(negImp, imp01, imp01);
             applyImpulse0(imp01, schema.m_kFirstFrictionJacobian, mA, mB, *sr);
         }
@@ -635,7 +606,7 @@ checkImp0:
 }
 __forceinline void solve3dFriction(const ConstraintSolverInfo& info, const Friction3DSchema& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr)
 {
-    hkVector4 vel4;
+    SolverVector4 vel4;
     getDv012(&schema, mA, mB, info, vel4);
     const hkReal dv0 = vel4(0);
     const hkReal dv1 = vel4(1);
@@ -663,7 +634,7 @@ __forceinline void solve3dFriction(const ConstraintSolverInfo& info, const Frict
 }
 __forceinline void solve2dFriction(const ConstraintSolverInfo& info, const TwoAxisFrictionInfo& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr)
 {
-    hkVector4 vel4;
+    SolverVector4 vel4;
     getDv01(&schema.m_kFirstFrictionJacobian, mA, mB, info, vel4);
     const hkReal dv0 = vel4(0);
     const hkReal dv1 = vel4(1);
@@ -685,26 +656,26 @@ __forceinline void solve2dFriction(const ConstraintSolverInfo& info, const TwoAx
     }
     applyImpulse01(imp0, imp1, &schema.m_kFirstFrictionJacobian, mA, mB, sr);
 }
-__forceinline void rollingFields(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, hkVector4& field0, const hkVector4& field2)
+__forceinline void rollingFields(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, SolverVector4& field0, const SolverVector4& field2)
 {
-    hkVector4 impA; impA.setMul4(imp, field2);
-    hkVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
+    SolverVector4 impA; impA.setMul4(imp, field2);
+    SolverVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
     impA.mul4(jac.m_kAngularVelocity[0]);
     impB.mul4(jac.m_kAngularVelocity[1]);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     field0.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
     hkSimdReal_store(s, &sr.m_fAccumulatedImpulse);
 }
-__forceinline void rollingSecond(hkSimdRealParameter imp, const hkVector4& angularA, const hkVector4& angularB, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, const hkVector4& field0, const hkVector4& field1, hkVector4& outputA)
+__forceinline void rollingSecond(hkSimdRealParameter imp, const SolverVector4& angularA, const SolverVector4& angularB, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, const SolverVector4& field0, const SolverVector4& field1, SolverVector4& outputA)
 {
-    hkVector4 impA; impA.setMul4(imp, field0);
-    hkVector4 impB; impB.setMul4(imp, field1);
+    SolverVector4 impA; impA.setMul4(imp, field0);
+    SolverVector4 impB; impB.setMul4(imp, field1);
     impA.mul4(angularA);
     impB.mul4(angularB);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
-    hkVector4& oA = outputA;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
+    SolverVector4& oA = outputA;
     oA.m_vComponents = _mm_add_ps(oA.m_vComponents, impA.m_vComponents);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
@@ -753,19 +724,19 @@ __forceinline void solve1dAngFriction(const ConstraintSolverInfo& info, const So
     }
     applyAngularImpulse0(imp0, schema, mA, mB, *sr);
 }
-__forceinline void lowerApplication(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, const hkVector4& massA, const hkVector4& massB)
+__forceinline void lowerApplication(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, const SolverVector4& massA, const SolverVector4& massB)
 {
-    hkVector4 impA; impA.setMul4(imp, massA);
-    hkVector4 impB; impB.setMul4(imp, massB);
+    SolverVector4 impA; impA.setMul4(imp, massA);
+    SolverVector4 impB; impB.setMul4(imp, massB);
     impA.mul4(jac.m_kAngularVelocity[0]);
     impB.mul4(jac.m_kAngularVelocity[1]);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     mA.m_vAngularVelocity.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
     hkSimdReal_store(s, &sr.m_fAccumulatedImpulse);
 }
-__forceinline void regionApplication(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, const hkVector4& massA, const hkVector4& massB, const hkVector4& axisA, const hkVector4& axisB);
+__forceinline void regionApplication(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, const SolverVector4& massA, const SolverVector4& massB, const SolverVector4& axisA, const SolverVector4& axisB);
 __forceinline void nativeApplication(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr);
 __forceinline void solve1dAngLimits(const ConstraintSolverInfo& info, const SolverStepInfo& temp, const AngularLimitJacobian& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr, FloatRecord*& delayedResult)
 {
@@ -789,13 +760,13 @@ __forceinline void solve1dAngLimits(const ConstraintSolverInfo& info, const Solv
         }
     }
 }
-__forceinline void regionApplication(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, const hkVector4& massA, const hkVector4& massB, const hkVector4& axisA, const hkVector4& axisB)
+__forceinline void regionApplication(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, const SolverVector4& massA, const SolverVector4& massB, const SolverVector4& axisA, const SolverVector4& axisB)
 {
-    hkVector4 impA; impA.setMul4(imp, massA);
-    hkVector4 impB; impB.setMul4(imp, massB);
+    SolverVector4 impA; impA.setMul4(imp, massA);
+    SolverVector4 impB; impB.setMul4(imp, massB);
     impA.mul4(axisA);
     impB.mul4(axisB);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     mA.m_vAngularVelocity.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
@@ -826,11 +797,11 @@ __forceinline void solve1dAngularMotor(const ConstraintSolverInfo& info, const S
 }
 __forceinline void nativeApplication(hkSimdRealParameter imp, const AngularJacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr)
 {
-    hkVector4 impA; impA = _mm_mul_ps(imp.broadcast(), mA.m_vInverseInertiaAndMass);
-    hkVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
+    SolverVector4 impA; impA = _mm_mul_ps(imp.broadcast(), mA.m_vInverseInertiaAndMass);
+    SolverVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
     impB.mul4(jac.m_kAngularVelocity[1]);
     impA.mul4(jac.m_kAngularVelocity[0]);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     mA.m_vAngularVelocity.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
@@ -838,23 +809,23 @@ __forceinline void nativeApplication(hkSimdRealParameter imp, const AngularJacob
 }
 __forceinline void solve1dAngular(const ConstraintSolverInfo& info, const SolverStepInfo& temp, const JacobianHolder& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr, FloatRecord*& delayedResult)
 {
-    VectorComponentValue dv = getAngularDv0(schema, mA, mB, info);
-    VectorComponentValue impulse = dv * schema.getInvJacDiagSr();
+    hkSimdReal dv = getAngularDv0(schema, mA, mB, info);
+    hkSimdReal impulse = dv * schema.getInvJacDiagSr();
     nativeApplication(impulse, schema, mA, mB, *sr);
 }
-__forceinline void applyImpulseG(hkSimdRealParameter imp, const ConstraintJacobian& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, const hkVector4& massA)
+__forceinline void applyImpulseG(hkSimdRealParameter imp, const ConstraintJacobian& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, const SolverVector4& massA)
 {
-    hkVector4 impA; impA = massA; impA.mul4(imp);
-    hkVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
-    hkVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
-    hkVector4 negImpLinB; negImpLinB.setBroadcast3clobberW(impB, 3);
+    SolverVector4 impA; impA = massA; impA.mul4(imp);
+    SolverVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
+    SolverVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
+    SolverVector4 negImpLinB; negImpLinB.setBroadcast3clobberW(impB, 3);
     impLinA.setMul4(jac.m_kLinearJacobian, impLinA);
     negImpLinB.mul4(jac.m_kLinearJacobian);
     mA.m_vLinearVelocity.add3clobberW(impLinA);
     mB.m_vLinearVelocity.sub3clobberW(negImpLinB);
     impA.mul4(jac.m_kAngularVelocity[0]);
     impB.mul4(jac.m_kAngularVelocity[1]);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     mA.m_vAngularVelocity.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
@@ -862,47 +833,47 @@ __forceinline void applyImpulseG(hkSimdRealParameter imp, const ConstraintJacobi
 }
 __forceinline void solve1dBilateral(const ConstraintSolverInfo& info, const SolverStepInfo& temp, const JacobianDataHolder& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr, FloatRecord*& delayedResult)
 {
-    VectorComponentValue vel = getLinearDv0(schema, mA, mB, info);
-    VectorComponentValue impulse = vel * schema.getInvJacDiagSr();
+    hkSimdReal vel = getLinearDv0(schema, mA, mB, info);
+    hkSimdReal impulse = vel * schema.getInvJacDiagSr();
     applyImpulseG(impulse, schema, mA, mB, *sr, mA.m_vInverseInertiaAndMass);
 }
-__forceinline void linearApplication(hkSimdRealParameter imp, const ConstraintJacobian& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, hkVector4& linearA)
+__forceinline void linearApplication(hkSimdRealParameter imp, const ConstraintJacobian& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr, SolverVector4& linearA)
 {
-    hkVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
-    hkVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
-    hkVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
-    hkVector4 negImpLinB; negImpLinB.setBroadcast3clobberW(impB, 3);
+    SolverVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
+    SolverVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
+    SolverVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
+    SolverVector4 negImpLinB; negImpLinB.setBroadcast3clobberW(impB, 3);
     impLinA.mul4(jac.m_kLinearJacobian);
     negImpLinB.mul4(jac.m_kLinearJacobian);
     linearA.add3clobberW(impLinA);
     mB.m_vLinearVelocity.sub3clobberW(negImpLinB);
     impA.mul4(jac.m_kAngularVelocity[0]);
     impB.mul4(jac.m_kAngularVelocity[1]);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     mA.m_vAngularVelocity.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
     hkSimdReal_store(s, &sr.m_fAccumulatedImpulse);
 }
-__forceinline VectorComponentValue fieldProjection(const ConstraintJacobian& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, const hkVector4& linearA)
+__forceinline hkSimdReal fieldProjection(const ConstraintJacobian& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info, const SolverVector4& linearA)
 {
-    hkVector4 a; a.setSub4(linearA, mB.m_vLinearVelocity);
-    hkVector4 b; b.setMul4(mA.m_vAngularVelocity, jac.m_kAngularVelocity[0]);
-    hkVector4 c; c.setMul4(mB.m_vAngularVelocity, jac.m_kAngularVelocity[1]);
+    SolverVector4 a; a.setSub4(linearA, mB.m_vLinearVelocity);
+    SolverVector4 b; b.setMul4(mA.m_vAngularVelocity, jac.m_kAngularVelocity[0]);
+    SolverVector4 c; c.setMul4(mB.m_vAngularVelocity, jac.m_kAngularVelocity[1]);
     a.mul4(jac.m_kLinearJacobian);
     b.add4(c);
     b.add4(a);
-    const VectorComponentValue vel = b.horizontalAdd3();
-    const VectorComponentValue dv = jac.getRhsSr() - vel;
+    const hkSimdReal vel = b.horizontalAdd3();
+    const hkSimdReal dv = jac.getRhsSr() - vel;
     return dv;
 }
 __forceinline void solve1dBilateralWithImpulseLimit(const ConstraintSolverInfo& info, const SolverStepInfo& temp, const JacobianDataHolder& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr, FloatRecord*& delayedResult)
 {
-    VectorComponentValue vel = getLinearDv0(schema, mA, mB, info);
-    VectorComponentValue impulse = vel * schema.getInvJacDiagSr();
-    VectorComponentValue impulseApplied = sr->m_fAccumulatedImpulse;
-    VectorComponentValue maxImpulse = schema.getUserValueSr();
-    VectorComponentValue minImpulse = -maxImpulse;
+    hkSimdReal vel = getLinearDv0(schema, mA, mB, info);
+    hkSimdReal impulse = vel * schema.getInvJacDiagSr();
+    hkSimdReal impulseApplied = sr->m_fAccumulatedImpulse;
+    hkSimdReal maxImpulse = schema.getUserValueSr();
+    hkSimdReal minImpulse = -maxImpulse;
     maxImpulse = maxImpulse - impulseApplied;
     minImpulse = minImpulse - impulseApplied;
     hkSimdReal_setMax(minImpulse, impulse, impulse);
@@ -911,8 +882,8 @@ __forceinline void solve1dBilateralWithImpulseLimit(const ConstraintSolverInfo& 
 }
 __forceinline void solve1dBilateralUserTau(const ConstraintSolverInfo& info, const SolverStepInfo& temp, const LinearSoftConstraintAtom& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr, FloatRecord*& delayedResult)
 {
-    VectorComponentValue dv = getLinearDv0UserTau(schema, mA, mB, info, schema.m_userTau, schema.m_userDamping);
-    VectorComponentValue impulse = dv * schema.getInvJacDiagSr();
+    hkSimdReal dv = getLinearDv0UserTau(schema, mA, mB, info, schema.m_userTau, schema.m_userDamping);
+    hkSimdReal impulse = dv * schema.getInvJacDiagSr();
     applyImpulse0(impulse, schema, mA, mB, *sr);
 }
 __forceinline void solve1dFriction(const ConstraintSolverInfo& info, const SolverStepInfo& temp, const FrictionImpulseLimitAtom& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr, FloatRecord*& delayedResult)
@@ -976,42 +947,42 @@ __forceinline void solve1dLinearMotor(const ConstraintSolverInfo& info, const So
     }
     applyImpulse0(impulse, schema, mA, mB, *sr);
 }
-__forceinline VectorComponentValue getDv2Lin2Ang(const JacobianElement& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info)
+__forceinline hkSimdReal getDv2Lin2Ang(const JacobianElement& jac, const QuantizedBoundsData& mA, const QuantizedBoundsData& mB, const ConstraintSolverInfo& info)
 {
-    hkVector4 lA; lA.setMul4(mA.m_vLinearVelocity, jac.m_kTranslationalVelocity[0]);
-    hkVector4 lB; lB.setMul4(mB.m_vLinearVelocity, jac.m_kTranslationalVelocity[1]);
-    hkVector4 a; a.setMul4(mA.m_vAngularVelocity, jac.m_kAngularVelocity[0]);
-    hkVector4 b; b.setMul4(mB.m_vAngularVelocity, jac.m_kAngularVelocity[1]);
-    hkVector4 c; c.setSub4(lA, lB);
+    SolverVector4 lA; lA.setMul4(mA.m_vLinearVelocity, jac.m_kTranslationalVelocity[0]);
+    SolverVector4 lB; lB.setMul4(mB.m_vLinearVelocity, jac.m_kTranslationalVelocity[1]);
+    SolverVector4 a; a.setMul4(mA.m_vAngularVelocity, jac.m_kAngularVelocity[0]);
+    SolverVector4 b; b.setMul4(mB.m_vAngularVelocity, jac.m_kAngularVelocity[1]);
+    SolverVector4 c; c.setSub4(lA, lB);
     a.add4(b);
     a.add4(c);
-    const VectorComponentValue vel = a.horizontalAdd3();
-    const VectorComponentValue dv = SubtractScalarFloat(jac.getRhsSr(), vel);
+    const hkSimdReal vel = a.horizontalAdd3();
+    const hkSimdReal dv = SubtractScalarFloat(jac.getRhsSr(), vel);
     return dv;
 }
 __forceinline void applyImpulse2Lin2Ang(hkSimdRealParameter imp, const JacobianElement& jac, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord& sr)
 {
-    hkVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
-    hkVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
-    hkVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
-    hkVector4 impLinB; impLinB.setBroadcast3clobberW(impB, 3);
+    SolverVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
+    SolverVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
+    SolverVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
+    SolverVector4 impLinB; impLinB.setBroadcast3clobberW(impB, 3);
     impLinA.mul4(jac.m_kTranslationalVelocity[0]);
     impLinB.mul4(jac.m_kTranslationalVelocity[1]);
     mA.m_vLinearVelocity.add3clobberW(impLinA);
     mB.m_vLinearVelocity.sub3clobberW(impLinB);
     impA.mul4(jac.m_kAngularVelocity[0]);
     impB.mul4(jac.m_kAngularVelocity[1]);
-    VectorComponentValue s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     mA.m_vAngularVelocity.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
-    VectorComponentValue sum; sum=AddScalarFloat(s,imp); s=sum;
+    hkSimdReal sum; sum=AddScalarFloat(s,imp); s=sum;
     hkSimdReal_store(s, &sr.m_fAccumulatedImpulse);
 }
 __forceinline void solvePulley(const ConstraintSolverInfo& info, const SingleJacobianSchema& schema, QuantizedBoundsData& mA, QuantizedBoundsData& mB, FloatRecord* sr, FloatRecord*& delayedResult)
 {
-    VectorComponentValue dv = getDv2Lin2Ang(schema, mA, mB, info);
+    hkSimdReal dv = getDv2Lin2Ang(schema, mA, mB, info);
     {
-        VectorComponentValue impulse = FUN_00891060(dv, schema.getInvJacDiagSr());
+        hkSimdReal impulse = FUN_00891060(dv, schema.getInvJacDiagSr());
         applyImpulse2Lin2Ang(impulse, schema, mA, mB, sr[0]);
     }
 }
@@ -1263,9 +1234,9 @@ case_1D_LINEAR_MOTOR:
                 const int bodyIndex = sc->m_iBodyIndex;
                 QuantizedBoundsData* accum = hkSelect(bodyIndex, mA, mB);
                 const hkReal f = info.m_kGravity(0) * hkReal(int(temp.m_intStep));
-                VectorComponentValue fs;
+                hkSimdReal fs;
                 fs.FUN_005dbf20(f);
-                hkVector4 integratedVel; integratedVel.setMul4(fs, sc->m_fVelocity);
+                SolverVector4 integratedVel; integratedVel.setMul4(fs, sc->m_fVelocity);
                 sc->m_fVelocity.commitIncrement(accum->m_vLinearVelocity);
                 accum->m_vLinearVelocity.add4(integratedVel);
                 accum->getSumLinearVel().add4(integratedVel);
@@ -1277,10 +1248,10 @@ case_1D_LINEAR_MOTOR:
             {
                 const hkpJacobianSetComSchema* sc = reinterpret_cast<const hkpJacobianSetComSchema*>(com);
                 storeVelocityAccumulators(*mA, *mB);
-                hkVector4 deltaVelA; deltaVelA.FUN_00c7f750(sc->m_angularA, mA->m_vAngularVelocity);
-                hkVector4 deltaVelB; deltaVelB.FUN_00c7f750(sc->m_angularB, mB->m_vAngularVelocity);
-                hkVector4 deltaSumVelA; deltaSumVelA.FUN_00c7f750(sc->m_angularA, mA->getSumAngularVel());
-                hkVector4 deltaSumVelB; deltaSumVelB.FUN_00c7f750(sc->m_angularB, mB->getSumAngularVel());
+                SolverVector4 deltaVelA; deltaVelA.FUN_00c7f750(sc->m_angularA, mA->m_vAngularVelocity);
+                SolverVector4 deltaVelB; deltaVelB.FUN_00c7f750(sc->m_angularB, mB->m_vAngularVelocity);
+                SolverVector4 deltaSumVelA; deltaSumVelA.FUN_00c7f750(sc->m_angularA, mA->getSumAngularVel());
+                SolverVector4 deltaSumVelB; deltaSumVelB.FUN_00c7f750(sc->m_angularB, mB->getSumAngularVel());
                 mA->m_vLinearVelocity.add4(deltaVelA);
                 mA->getSumLinearVel().add4(deltaSumVelA);
                 mB->m_vLinearVelocity.add4(deltaVelB);
@@ -1339,51 +1310,51 @@ extern "C" void __cdecl FUN_00d8aac0(const ConstraintSolverInfo& info, const Sol
     stepJacobian(info, temp, schemas, accumulators, elemTemp);
 }
 
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ss(float*, __m128);
+using ::_mm_add_ps;
+using ::_mm_sub_ps;
+using ::_mm_mul_ps;
+using ::_mm_load_ss;
+using ::_mm_store_ss;
 class Scalar {
-    union { __m128 q; float components[4]; };
+    union { LocalM128 q; float components[4]; };
 public:
     Scalar() {}
-    Scalar(const __m128& v):q(v) {}
+    Scalar(const LocalM128& v):q(v) {}
     Scalar(float v):q(_mm_load_ss(&v)) {}
     operator float() const { float v; _mm_store_ss(&v,q); return v; }
-    __forceinline __m128 broadcast() const { return _mm_shuffle_ps(q,q,0); }
-    __forceinline const __m128& get() const { return q; }
+    __forceinline LocalM128 broadcast() const { return _mm_shuffle_ps(q,q,0); }
+    __forceinline const LocalM128& get() const { return q; }
 };
 inline Scalar operator+(const Scalar& a,const Scalar& b) {return _mm_add_ss(a.get(),b.get());}
 inline void storeScalar(const Scalar& a,float* p) {_mm_store_ss(p,a.get());}
-class Vec {
-    union { __m128 q; float components[4]; };
+// SolverVector4 of the probe solver records (ProbeBody, ProbeRow) with the unit's own inline SIMD set (setSub4/setMul4/horizontalAdd3...) over components[4].
+class ProbeVector4 {
+    union { LocalM128 q; float components[4]; };
 public:
-    __forceinline __m128 get() const {return q;}
-    __forceinline void set(__m128 v) {q=v;}
-    __forceinline void operator=(const Vec& v) {q=v.q;}
-    __forceinline void setSub4(const Vec& a,const Vec& b) {q=_mm_sub_ps(a.q,b.q);}
-    __forceinline void setAdd4(const Vec& a,const Vec& b) {q=_mm_add_ps(a.q,b.q);}
-    __forceinline void setMul4(const Vec& a,const Vec& b) {q=_mm_mul_ps(a.q,b.q);}
-    __forceinline void setMul4(const Scalar& a,const Vec& b) {q=_mm_mul_ps(a.broadcast(),b.q);}
-    __forceinline void add4(const Vec& b) {q=_mm_add_ps(q,b.q);}
-    __forceinline void mul4(const Vec& b) {q=_mm_mul_ps(q,b.q);}
+    __forceinline LocalM128 get() const {return q;}
+    __forceinline void set(LocalM128 v) {q=v;}
+    __forceinline void operator=(const ProbeVector4& v) {q=v.q;}
+    __forceinline void setSub4(const ProbeVector4& a,const ProbeVector4& b) {q=_mm_sub_ps(a.q,b.q);}
+    __forceinline void setAdd4(const ProbeVector4& a,const ProbeVector4& b) {q=_mm_add_ps(a.q,b.q);}
+    __forceinline void setMul4(const ProbeVector4& a,const ProbeVector4& b) {q=_mm_mul_ps(a.q,b.q);}
+    __forceinline void setMul4(const Scalar& a,const ProbeVector4& b) {q=_mm_mul_ps(a.broadcast(),b.q);}
+    __forceinline void add4(const ProbeVector4& b) {q=_mm_add_ps(q,b.q);}
+    __forceinline void mul4(const ProbeVector4& b) {q=_mm_mul_ps(q,b.q);}
     __forceinline void mul4(const Scalar& b) {q=_mm_mul_ps(b.broadcast(),q);}
-    __forceinline void add3clobberW(const Vec& b) {q=_mm_add_ps(q,b.q);}
-    __forceinline void sub3clobberW(const Vec& b) {q=_mm_sub_ps(q,b.q);}
-    __forceinline void setBroadcast3clobberW(const Vec& b,int component) {q=_mm_shuffle_ps(b.q,b.q,0xff);}
+    __forceinline void add3clobberW(const ProbeVector4& b) {q=_mm_add_ps(q,b.q);}
+    __forceinline void sub3clobberW(const ProbeVector4& b) {q=_mm_sub_ps(q,b.q);}
+    __forceinline void setBroadcast3clobberW(const ProbeVector4& b,int component) {q=_mm_shuffle_ps(b.q,b.q,0xff);}
     __forceinline const float& operator()(int component) const {return q.m128_f32[component];}
     __forceinline Scalar horizontalAdd3() const {
-        __m128 xy=_mm_add_ss(_mm_shuffle_ps(q,q,0x55),q);
+        LocalM128 xy=_mm_add_ss(_mm_shuffle_ps(q,q,0x55),q);
         return _mm_add_ss(_mm_shuffle_ps(q,q,0xaa),xy);
     }
 };
 
-struct ProbeBody { Vec reserved, linear, angular, mass, baseLinear, baseAngular; };
-struct ProbeRow { Vec axis, angularA, angularB; };
+struct ProbeBody { ProbeVector4 reserved, linear, angular, mass, baseLinear, baseAngular; };
+struct ProbeRow { ProbeVector4 axis, angularA, angularB; };
 struct ProbeCoeff { float lower, diagonal, upper; };
-struct ProbeSettings { Vec a,b,c,d; float scale; };
+struct ProbeSettings { ProbeVector4 a,b,c,d; float scale; };
 struct ProbeHeader {
     unsigned short type, count; int flags; float strength, damping;
     ProbeRow* rows() { return (ProbeRow*)(this+1); }
@@ -1393,56 +1364,56 @@ struct ProbeHeader {
 };
 inline const ProbeSettings* settingsAt(unsigned int p) {return (const ProbeSettings*)p;}
 static __forceinline Scalar calculateRhs(const ProbeRow& row, const ProbeBody& a, const ProbeBody& b, const ProbeSettings& settings, float strength, float damping, float rhs) {
-    Vec relative;
+    ProbeVector4 relative;
     {
-        Vec linA; linA.setSub4(a.linear,a.baseLinear);
-        Vec angA; angA.setSub4(a.angular,a.baseAngular);
-        Vec linB; linB.setSub4(b.linear,b.baseLinear);
-        Vec angB; angB.setSub4(b.angular,b.baseAngular);
-        Vec delta; delta.setSub4(linA,linB);
-        Vec termA; termA.setMul4(angA,row.angularA);
-        Vec termB; termB.setMul4(angB,row.angularB);
+        ProbeVector4 linA; linA.setSub4(a.linear,a.baseLinear);
+        ProbeVector4 angA; angA.setSub4(a.angular,a.baseAngular);
+        ProbeVector4 linB; linB.setSub4(b.linear,b.baseLinear);
+        ProbeVector4 angB; angB.setSub4(b.angular,b.baseAngular);
+        ProbeVector4 delta; delta.setSub4(linA,linB);
+        ProbeVector4 termA; termA.setMul4(angA,row.angularA);
+        ProbeVector4 termB; termB.setMul4(angB,row.angularB);
         delta.mul4(row.axis);
         termA.add4(termB);
         relative.setAdd4(termA,delta);
     }
-    Vec baseline;
+    ProbeVector4 baseline;
     {
-        Vec linA = a.baseLinear;
-        Vec angA = a.baseAngular;
-        Vec linB = b.baseLinear;
-        Vec angB = b.baseAngular;
-        Vec delta; delta.setSub4(linA,linB);
-        Vec termA; termA.setMul4(angA,row.angularA);
-        Vec termB; termB.setMul4(angB,row.angularB);
+        ProbeVector4 linA = a.baseLinear;
+        ProbeVector4 angA = a.baseAngular;
+        ProbeVector4 linB = b.baseLinear;
+        ProbeVector4 angB = b.baseAngular;
+        ProbeVector4 delta; delta.setSub4(linA,linB);
+        ProbeVector4 termA; termA.setMul4(angA,row.angularA);
+        ProbeVector4 termB; termB.setMul4(angB,row.angularB);
         delta.mul4(row.axis);
         termA.add4(termB);
         baseline.setAdd4(termA,delta);
     }
     baseline.mul4(settings.scale*strength);
     relative.mul4(damping);
-    Vec total; total.setAdd4(baseline,relative);
+    ProbeVector4 total; total.setAdd4(baseline,relative);
     float reduction=total.horizontalAdd3();
     float result=rhs*strength-reduction;
     return result;
 }
 static __forceinline void applyDirect(float value,const ProbeRow* row,ProbeBody* a,ProbeBody* b,float* output) {
-__m128 scalar=_mm_load_ss(&value);
-__m128 factor=_mm_shuffle_ps(scalar,scalar,0);
-__m128 massA=_mm_mul_ps(a->mass.get(),factor);
-__m128 massB=_mm_mul_ps(b->mass.get(),factor);
-Vec linA; linA.set(_mm_shuffle_ps(massA,massA,0xff));
-Vec linB; linB.set(_mm_shuffle_ps(massB,massB,0xff));
+LocalM128 scalar=_mm_load_ss(&value);
+LocalM128 factor=_mm_shuffle_ps(scalar,scalar,0);
+LocalM128 massA=_mm_mul_ps(a->mass.get(),factor);
+LocalM128 massB=_mm_mul_ps(b->mass.get(),factor);
+ProbeVector4 linA; linA.set(_mm_shuffle_ps(massA,massA,0xff));
+ProbeVector4 linB; linB.set(_mm_shuffle_ps(massB,massB,0xff));
 linA.mul4(row->axis);
 linB.mul4(row->axis);
 a->linear.add3clobberW(linA);
 b->linear.sub3clobberW(linB);
-__m128 angA=_mm_mul_ps(row->angularA.get(),massA);
+LocalM128 angA=_mm_mul_ps(row->angularA.get(),massA);
 angA=_mm_add_ps(angA,a->angular.get());
-__m128 angB=_mm_mul_ps(row->angularB.get(),massB);
+LocalM128 angB=_mm_mul_ps(row->angularB.get(),massB);
 a->angular.set(angA);
 b->angular.set(_mm_add_ps(angB,b->angular.get()));
-__m128 oldOutput=_mm_load_ss(output);
+LocalM128 oldOutput=_mm_load_ss(output);
 _mm_store_ss(output,_mm_add_ss(oldOutput,scalar));
 }
 // @fnv 0x00d893a0
@@ -1479,226 +1450,191 @@ void __cdecl FUN_00d893a0(unsigned int settingsAddress, void* unused, unsigned i
     }
 }
 
-extern "C" __m128 _mm_setzero_ps();
+using ::_mm_setzero_ps;
 
 
 
 
 
-class hkSimdRealQ {
-public:
-    hkSimdRealQ(const __m128& x) : m_vValue(x) {}
-    hkSimdRealQ(float x) { m_vValue = _mm_load_ss(&x); }
-    hkSimdRealQ() {}
-    operator float() const { float s; _mm_store_ss(&s, m_vValue); return s; }
-    __forceinline __m128 broadcast() const { return _mm_shuffle_ps(getQuad(), getQuad(), 0); }
-    __forceinline __m128 getQuad() const { return m_vValue; }
-private:
-    __m128 m_vValue;
-};
-typedef const hkSimdRealQ& hkSimdRealParameterQ;
-inline hkSimdRealQ operator+(hkSimdRealParameterQ r, hkSimdRealParameterQ s) { return _mm_add_ss(r.getQuad(), s.getQuad()); }
-__forceinline void hkSimdReal_storeQ(hkSimdRealParameterQ a, float* p) { _mm_store_ss(p, a.getQuad()); }
-
-class hkMatrix3Q;
-class hkVector4Q {
-public:
-    __forceinline void operator=(const __m128& v) { m_vComponents = v; }
-    __forceinline float& operator()(int i) { return reinterpret_cast<float*>(&m_vComponents)[i]; }
-    __forceinline const float& operator()(int i) const { return reinterpret_cast<const float*>(&m_vComponents)[i]; }
-    __forceinline void setZero4() { m_vComponents = _mm_setzero_ps(); }
-    __forceinline void add4(const hkVector4Q& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void add3clobberW(const hkVector4Q& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void setAdd4(const hkVector4Q& a, const hkVector4Q& b) { m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void sub3clobberW(const hkVector4Q& v) { m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void setSub4(const hkVector4Q& a, const hkVector4Q& b) { m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void mul4(const hkVector4Q& v) { m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents); }
-    __forceinline void setMul4(const hkVector4Q& a, const hkVector4Q& b) { m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void mul4(hkSimdRealParameterQ s) { m_vComponents = _mm_mul_ps(s.broadcast(), m_vComponents); }
-    __forceinline void setMul4(hkSimdRealParameterQ r, const hkVector4Q& v) { m_vComponents = _mm_mul_ps(r.broadcast(), v.m_vComponents); }
-    __forceinline void setBroadcast(const hkVector4Q& v, int i) {
-        if (i == 0) { m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0); }
-        else if (i == 1) { m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 85); }
-        else if (i == 2) { m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 170); }
-        else if (i == 3) { m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 255); }
+#include <string.h>
+// The chain's original implicit SIMD copies used object copies, not SIMD assignments.
+__forceinline hkVector4::hkVector4(const hkVector4& vector) { memcpy(&m_vComponents, &vector.m_vComponents, sizeof(m_vComponents)); }
+__forceinline void hkVector4::operator=(const LocalM128& v) { m_vComponents = v; }
+__forceinline float& hkVector4::operator()(int i) { return reinterpret_cast<float*>(&m_vComponents)[i]; }
+__forceinline const float& hkVector4::operator()(int i) const { return reinterpret_cast<const float*>(&m_vComponents)[i]; }
+__forceinline void hkVector4::add3clobberW(const hkVector4& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
+__forceinline void hkVector4::sub3clobberW(const hkVector4& v) { m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents); }
+__forceinline void hkVector4::setMul4(hkSimdRealParameter r, const hkVector4& v) { m_vComponents = _mm_mul_ps(r.broadcast(), v.m_vComponents); }
+__forceinline void hkVector4::mul4(const float& scalar) { mul4(hkSimdReal(scalar)); }
+__forceinline void hkVector4::setBroadcast(const hkVector4& v, int i) {
+    if (i == 0) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0);
+    else if (i == 1) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 85);
+    else if (i == 2) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 170);
+    else if (i == 3) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 255);
+}
+__forceinline void hkVector4::setBroadcast3clobberW(const hkVector4& v, int i) { setBroadcast(v, i); }
+__forceinline hkSimdReal hkVector4::horizontalAdd3() const {
+    LocalM128 xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 85), m_vComponents);
+    return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 170), xySum);
+}
+__forceinline hkSimdReal hkVector4::getSimdAt(int i) const {
+    switch (i) {
+    case 0: return m_vComponents;
+    case 1: return _mm_shuffle_ps(m_vComponents, m_vComponents, 85);
+    case 2: return _mm_shuffle_ps(m_vComponents, m_vComponents, 170);
+    case 3:
+    default: return _mm_shuffle_ps(m_vComponents, m_vComponents, 255);
     }
-    __forceinline void setBroadcast3clobberW(const hkVector4Q& v, int i) { setBroadcast(v, i); }
-    __forceinline hkSimdRealQ horizontalAdd3() const {
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 85), m_vComponents);
-        return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 170), xySum);
-    }
-    __forceinline hkSimdRealQ getSimdAt(int i) const {
-        switch (i) {
-        case 0: return m_vComponents;
-        case 1: return _mm_shuffle_ps(m_vComponents, m_vComponents, 85);
-        case 2: return _mm_shuffle_ps(m_vComponents, m_vComponents, 170);
-        case 3:
-        default: return _mm_shuffle_ps(m_vComponents, m_vComponents, 255);
-        }
-    }
-    __forceinline void _setMul3(const hkMatrix3Q& a, const hkVector4Q& b);
-    __m128 m_vComponents;
-};
-class hkMatrix3Q {
-public:
-    __forceinline const hkVector4Q& getColumn(int i) const { return (&m_kColumn0)[i]; }
-    hkVector4Q m_kColumn0, m_kColumn1, m_kColumn2;
-};
-__forceinline void hkVector4Q::_setMul3(const hkMatrix3Q& a, const hkVector4Q& b) {
-    const __m128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0);
-    const __m128 r0 = _mm_mul_ps(a.getColumn(0).m_vComponents, b0);
-    const __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 85);
-    const __m128 r1 = _mm_mul_ps(a.getColumn(1).m_vComponents, b1);
-    const __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 170);
-    const __m128 r2 = _mm_mul_ps(a.getColumn(2).m_vComponents, b2);
+}
+
+__forceinline void hkVector4::setZero4() { m_vComponents = _mm_setzero_ps(); }
+
+__forceinline void hkVector4::_setMul3(const hkMatrix3& a, const hkVector4& b) {
+    const LocalM128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0);
+    const LocalM128 r0 = _mm_mul_ps(a.getColumn(0).m_vComponents, b0);
+    const LocalM128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 85);
+    const LocalM128 r1 = _mm_mul_ps(a.getColumn(1).m_vComponents, b1);
+    const LocalM128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 170);
+    const LocalM128 r2 = _mm_mul_ps(a.getColumn(2).m_vComponents, b2);
     m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
 
 template <class T> __forceinline T* hkAddByteOffsetQ(T* base, long offset) { return reinterpret_cast<T*>(reinterpret_cast<char*>(base) + offset); }
 
-class hkpVelocityAccumulatorQ {
+// Local definition retained: include/hkpVelocityAccumulatorOffset.h is not available.
+class hkpVelocityAccumulatorOffset {
 public:
-    __forceinline const hkVector4Q& getScratch0() const { return m_vCenterOfMass; }
-    __forceinline const hkVector4Q& getScratch1() const { return m_kCoreFromWorldMatrix.getColumn(0); }
-    __forceinline const hkVector4Q& getSumLinearVel() const { return getScratch0(); }
-    __forceinline const hkVector4Q& getSumAngularVel() const { return getScratch1(); }
-    unsigned char m_type;
-    unsigned int m_uiDeactivationClass;
-    float m_fGravityFactor;
-    hkVector4Q m_vLinearVelocity;
-    hkVector4Q m_vAngularVelocity;
-    hkVector4Q m_vInverseInertiaAndMass;
-    hkVector4Q m_vCenterOfMass;
-    hkMatrix3Q m_kCoreFromWorldMatrix;
-};
-class hkpVelocityAccumulatorOffsetQ {
-public:
-    __forceinline hkpVelocityAccumulatorQ& getAccumulator(hkpVelocityAccumulatorQ* base) { return *hkAddByteOffsetQ(base, m_offset); }
+    __forceinline hkpVelocityAccumulator& getAccumulator(hkpVelocityAccumulator* base) { return *hkAddByteOffsetQ(base, m_offset); }
     int m_offset;
 };
-class hkp1Lin2AngJacobianQ {
+// Local definition retained: include/hkp1Lin2AngJacobian.h is not available.
+class hkp1Lin2AngJacobian {
 public:
     __forceinline const float& getRHS() const { return m_kLinearJacobian(3); }
-    hkVector4Q m_kLinearJacobian;
-    hkVector4Q m_kAngularVelocity[2];
+    hkVector4 m_kLinearJacobian;
+    hkVector4 m_kAngularVelocity[2];
 };
-struct hkpConstraintChainMatrixTripleQ { hkMatrix3Q m_lower, m_kMiddle, m_upper; };
-struct hkpJacobianBallSocketChainSchemaQ {
-    __forceinline static hkp1Lin2AngJacobianQ* getJacobians(hkpJacobianBallSocketChainSchemaQ* s) { return reinterpret_cast<hkp1Lin2AngJacobianQ*>(reinterpret_cast<char*>(s) + sizeof(hkpJacobianBallSocketChainSchemaQ)); }
-    __forceinline hkpConstraintChainMatrixTripleQ* getMatrixBuffer() { return reinterpret_cast<hkpConstraintChainMatrixTripleQ*>(hkAddByteOffsetQ(getJacobians(this), m_iConstraintCount * 3 * sizeof(hkp1Lin2AngJacobianQ))); }
-    __forceinline hkVector4Q* getTempBuffer() { return reinterpret_cast<hkVector4Q*>(hkAddByteOffsetQ(getMatrixBuffer(), m_iConstraintCount * sizeof(hkpConstraintChainMatrixTripleQ))); }
-    __forceinline hkpVelocityAccumulatorOffsetQ* getAccumulatorOffsetsBase() { return reinterpret_cast<hkpVelocityAccumulatorOffsetQ*>(hkAddByteOffsetQ(getTempBuffer(), (m_iConstraintCount + 1) * sizeof(hkVector4Q))); }
+// Local definition retained: include/hkpConstraintChainMatrixTriple.h is not available.
+struct hkpConstraintChainMatrixTriple { hkMatrix3 m_lower, m_kMiddle, m_upper; };
+// Local definition retained: include/hkpJacobianBallSocketChainSchema.h is not available.
+struct hkpJacobianBallSocketChainSchema {
+    __forceinline static hkp1Lin2AngJacobian* getJacobians(hkpJacobianBallSocketChainSchema* s) { return reinterpret_cast<hkp1Lin2AngJacobian*>(reinterpret_cast<char*>(s) + sizeof(hkpJacobianBallSocketChainSchema)); }
+    __forceinline hkpConstraintChainMatrixTriple* getMatrixBuffer() { return reinterpret_cast<hkpConstraintChainMatrixTriple*>(hkAddByteOffsetQ(getJacobians(this), m_iConstraintCount * 3 * sizeof(hkp1Lin2AngJacobian))); }
+    __forceinline hkVector4* getTempBuffer() { return reinterpret_cast<hkVector4*>(hkAddByteOffsetQ(getMatrixBuffer(), m_iConstraintCount * sizeof(hkpConstraintChainMatrixTriple))); }
+    __forceinline hkpVelocityAccumulatorOffset* getAccumulatorOffsetsBase() { return reinterpret_cast<hkpVelocityAccumulatorOffset*>(hkAddByteOffsetQ(getTempBuffer(), (m_iConstraintCount + 1) * sizeof(hkVector4))); }
     short m_schemaType;
     unsigned short m_iConstraintCount;
     int m_iElementCount;
     float m_fTau;
     float m_fMotorDamping;
 };
-struct hkpSolverInfoQ { int u00,u04,u08,u0c,u10,u14,u18,u1c,u20,u24,u28,u2c,u30,u34,u38,u3c; hkVector4Q GetTimeStepFactor; };
-struct hkpSolverElemTempQ { union { float m_fAccumulatedImpulse; float m_fSecondUnionFloat; float m_fAccumulatedMotorRhs; }; };
+// Local definition retained: include/hkpSolverInfo.h is not available.
+struct hkpSolverInfo { int u00,u04,u08,u0c,u10,u14,u18,u1c,u20,u24,u28,u2c,u30,u34,u38,u3c; hkVector4 GetTimeStepFactor; };
+// Local definition retained: include/hkpSolverElemTemp.h is not available.
+struct hkpSolverElemTemp { union { float m_fAccumulatedImpulse; float m_fSecondUnionFloat; float m_fAccumulatedMotorRhs; }; };
 
 namespace hkVector4UtilQ { __forceinline void reserveRegisters(unsigned int) {} __forceinline void releaseRegisters(unsigned int) {} }
 namespace hkSolverQ {
-__forceinline void loadVelocityAccumulators(const hkpVelocityAccumulatorQ&, const hkpVelocityAccumulatorQ&) { hkVector4UtilQ::reserveRegisters(0xffff0000); }
-__forceinline void storeVelocityAccumulators(hkpVelocityAccumulatorQ&, hkpVelocityAccumulatorQ&) { hkVector4UtilQ::releaseRegisters(0xffff0000); }
+__forceinline void loadVelocityAccumulators(const hkpVelocityAccumulator&, const hkpVelocityAccumulator&) { hkVector4UtilQ::reserveRegisters(0xffff0000); }
+__forceinline void storeVelocityAccumulators(hkpVelocityAccumulator&, hkpVelocityAccumulator&) { hkVector4UtilQ::releaseRegisters(0xffff0000); }
 __forceinline void popVelocityAccumulators() { hkVector4UtilQ::releaseRegisters(0xffff0000); }
 struct SolverStepInfo { int m_unused; };
 
-static __forceinline hkSimdRealQ getLinearDv0UserTauWithCustomRhs(const hkp1Lin2AngJacobianQ& jac, const hkpVelocityAccumulatorQ& mA, const hkpVelocityAccumulatorQ& mB, const hkpSolverInfoQ& info, float tau, float damping, float customRhs)
+static __forceinline hkSimdReal getLinearDv0UserTauWithCustomRhs(const hkp1Lin2AngJacobian& jac, const hkpVelocityAccumulator& mA, const hkpVelocityAccumulator& mB, const hkpSolverInfo& info, float tau, float damping, float customRhs)
 {
-    hkVector4Q vel4;
+    hkVector4 vel4;
     {
-        hkVector4Q linVelA; linVelA.setSub4(mA.m_vLinearVelocity, mA.getSumLinearVel());
-        hkVector4Q angVelA; angVelA.setSub4(mA.m_vAngularVelocity, mA.getSumAngularVel());
-        hkVector4Q linVelB; linVelB.setSub4(mB.m_vLinearVelocity, mB.getSumLinearVel());
-        hkVector4Q angVelB; angVelB.setSub4(mB.m_vAngularVelocity, mB.getSumAngularVel());
-        hkVector4Q c; c.setSub4(linVelA, linVelB);
-        hkVector4Q a; a.setMul4(angVelA, jac.m_kAngularVelocity[0]);
-        hkVector4Q b; b.setMul4(angVelB, jac.m_kAngularVelocity[1]);
+        hkVector4 linVelA; linVelA.setSub4(mA.m_vLinearVelocity, mA.getSumLinearVel());
+        hkVector4 angVelA; angVelA.setSub4(mA.m_vAngularVelocity, mA.getScratch1());
+        hkVector4 linVelB; linVelB.setSub4(mB.m_vLinearVelocity, mB.getSumLinearVel());
+        hkVector4 angVelB; angVelB.setSub4(mB.m_vAngularVelocity, mB.getScratch1());
+        hkVector4 c; c.setSub4(linVelA, linVelB);
+        hkVector4 a; a.setMul4(angVelA, jac.m_kAngularVelocity[0]);
+        hkVector4 b; b.setMul4(angVelB, jac.m_kAngularVelocity[1]);
         c.mul4(jac.m_kLinearJacobian);
         a.add4(b);
         vel4.setAdd4(a, c);
     }
-    hkVector4Q svel4;
+    hkVector4 svel4;
     {
-        hkVector4Q linVelA = mA.getSumLinearVel();
-        hkVector4Q angVelA = mA.getSumAngularVel();
-        hkVector4Q linVelB = mB.getSumLinearVel();
-        hkVector4Q angVelB = mB.getSumAngularVel();
-        hkVector4Q c; c.setSub4(linVelA, linVelB);
-        hkVector4Q a; a.setMul4(angVelA, jac.m_kAngularVelocity[0]);
-        hkVector4Q b; b.setMul4(angVelB, jac.m_kAngularVelocity[1]);
+        hkVector4 linVelA = mA.getSumLinearVel();
+        hkVector4 angVelA = mA.getScratch1();
+        hkVector4 linVelB = mB.getSumLinearVel();
+        hkVector4 angVelB = mB.getScratch1();
+        hkVector4 c; c.setSub4(linVelA, linVelB);
+        hkVector4 a; a.setMul4(angVelA, jac.m_kAngularVelocity[0]);
+        hkVector4 b; b.setMul4(angVelB, jac.m_kAngularVelocity[1]);
         c.mul4(jac.m_kLinearJacobian);
         a.add4(b);
         svel4.setAdd4(a, c);
     }
     svel4.mul4(info.GetTimeStepFactor(0) * tau);
     vel4.mul4(damping);
-    hkVector4Q rhsUpdate; rhsUpdate.setAdd4(svel4, vel4);
+    hkVector4 rhsUpdate; rhsUpdate.setAdd4(svel4, vel4);
     float ru = rhsUpdate.horizontalAdd3();
     float dv = customRhs * tau - ru;
     return dv;
 }
-static __forceinline hkSimdRealQ getLinearDv0UserTau(const hkp1Lin2AngJacobianQ& jac, const hkpVelocityAccumulatorQ& mA, const hkpVelocityAccumulatorQ& mB, const hkpSolverInfoQ& info, float tau, float damping)
+static __forceinline hkSimdReal getLinearDv0UserTau(const hkp1Lin2AngJacobian& jac, const hkpVelocityAccumulator& mA, const hkpVelocityAccumulator& mB, const hkpSolverInfo& info, float tau, float damping)
 {
     return getLinearDv0UserTauWithCustomRhs(jac, mA, mB, info, tau, damping, jac.getRHS());
 }
-static __forceinline void applyImpulse(hkSimdRealParameterQ imp, const hkp1Lin2AngJacobianQ& jac, hkpVelocityAccumulatorQ& mA, hkpVelocityAccumulatorQ& mB, hkpSolverElemTempQ& sr)
+static __forceinline void applyImpulse(hkSimdRealParameter imp, const hkp1Lin2AngJacobian& jac, hkpVelocityAccumulator& mA, hkpVelocityAccumulator& mB, hkpSolverElemTemp& sr)
 {
-    hkVector4Q impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
-    hkVector4Q impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
-    hkVector4Q impLinA; impLinA.setBroadcast3clobberW(impA, 3);
-    hkVector4Q negImpLinB; negImpLinB.setBroadcast3clobberW(impB, 3);
+    hkVector4 impA; impA.setMul4(imp, mA.m_vInverseInertiaAndMass);
+    hkVector4 impB; impB.setMul4(imp, mB.m_vInverseInertiaAndMass);
+    hkVector4 impLinA; impLinA.setBroadcast3clobberW(impA, 3);
+    hkVector4 negImpLinB; negImpLinB.setBroadcast3clobberW(impB, 3);
     impLinA.mul4(jac.m_kLinearJacobian);
     negImpLinB.mul4(jac.m_kLinearJacobian);
     mA.m_vLinearVelocity.add3clobberW(impLinA);
     mB.m_vLinearVelocity.sub3clobberW(negImpLinB);
     impA.mul4(jac.m_kAngularVelocity[0]);
     impB.mul4(jac.m_kAngularVelocity[1]);
-    hkSimdRealQ s = sr.m_fAccumulatedImpulse;
+    hkSimdReal s = sr.m_fAccumulatedImpulse;
     mA.m_vAngularVelocity.add3clobberW(impA);
     mB.m_vAngularVelocity.add3clobberW(impB);
     s = s + imp;
-    hkSimdReal_storeQ(s, &sr.m_fAccumulatedImpulse);
+    hkSimdReal_store(s, &sr.m_fAccumulatedImpulse);
 }
 }
 
 // @fnv 0x00d89690
-void __cdecl FUN_00d89690(const hkpSolverInfoQ& info, const hkSolverQ::SolverStepInfo& temp, hkpVelocityAccumulatorQ* accums, hkpJacobianBallSocketChainSchemaQ* chain, hkpSolverElemTempQ* sr)
+void __cdecl FUN_00d89690(const hkpSolverInfo& info, const hkSolverQ::SolverStepInfo& temp, hkpVelocityAccumulator* accums, hkpJacobianBallSocketChainSchema* chain, hkpSolverElemTemp* sr)
 {
     int numConstraints = chain->m_iConstraintCount;
-    hkp1Lin2AngJacobianQ* j = hkpJacobianBallSocketChainSchemaQ::getJacobians(chain);
-    hkpVelocityAccumulatorOffsetQ* va = chain->getAccumulatorOffsetsBase();
-    hkpConstraintChainMatrixTripleQ* triple = chain->getMatrixBuffer();
-    hkVector4Q* g = chain->getTempBuffer() + 1;
+    hkp1Lin2AngJacobian* j = hkpJacobianBallSocketChainSchema::getJacobians(chain);
+    hkpVelocityAccumulatorOffset* va = chain->getAccumulatorOffsetsBase();
+    hkpConstraintChainMatrixTriple* triple = chain->getMatrixBuffer();
+    hkVector4* g = chain->getTempBuffer() + 1;
     g[-1].setZero4();
     {
         for (int gi = 0; gi < numConstraints; j += 3, gi++)
         {
-            hkpVelocityAccumulatorQ* __restrict raA = &va[gi].getAccumulator(accums);
-            hkpVelocityAccumulatorQ* __restrict raB = &va[gi + 1].getAccumulator(accums);
+            hkpVelocityAccumulator* __restrict raA = &va[gi].getAccumulator(accums);
+            hkpVelocityAccumulator* __restrict raB = &va[gi + 1].getAccumulator(accums);
             hkSolverQ::loadVelocityAccumulators(*raA, *raB);
-            hkVector4Q dv;
+            hkVector4 dv;
             dv(0) = hkSolverQ::getLinearDv0UserTau(j[0], *raA, *raB, info, chain->m_fTau, chain->m_fMotorDamping);
             dv(1) = hkSolverQ::getLinearDv0UserTau(j[1], *raA, *raB, info, chain->m_fTau, chain->m_fMotorDamping);
             dv(2) = hkSolverQ::getLinearDv0UserTau(j[2], *raA, *raB, info, chain->m_fTau, chain->m_fMotorDamping);
             dv(3) = 0.0f;
             hkSolverQ::popVelocityAccumulators();
-            hkVector4Q tmp;
+            hkVector4 tmp;
             tmp._setMul3(triple[gi].m_lower, g[gi - 1]);
             tmp.setSub4(dv, tmp);
             g[gi]._setMul3(triple[gi].m_kMiddle, tmp);
         }
     }
     {
-        hkVector4Q imp; imp.setZero4();
-        j = hkpJacobianBallSocketChainSchemaQ::getJacobians(chain);
+        hkVector4 imp; imp.setZero4();
+        j = hkpJacobianBallSocketChainSchema::getJacobians(chain);
         for (int gi = numConstraints - 1; gi >= 0; gi--)
         {
-            hkpVelocityAccumulatorQ* __restrict raA = &va[gi].getAccumulator(accums);
-            hkpVelocityAccumulatorQ* __restrict raB = &va[gi + 1].getAccumulator(accums);
+            hkpVelocityAccumulator* __restrict raA = &va[gi].getAccumulator(accums);
+            hkpVelocityAccumulator* __restrict raB = &va[gi + 1].getAccumulator(accums);
             int jIdx = gi * 3;
-            hkVector4Q tmp;
+            hkVector4 tmp;
             tmp._setMul3(triple[gi].m_upper, imp);
             imp.setSub4(g[gi], tmp);
             hkSolverQ::loadVelocityAccumulators(*raA, *raB);
@@ -1710,23 +1646,22 @@ void __cdecl FUN_00d89690(const hkpSolverInfoQ& info, const hkSolverQ::SolverSte
     }
 }
 
-extern "C" void _mm_store_ss(float*,__m128);
-extern "C" __m128 _mm_mul_ps(__m128,__m128);
-extern "C" __m128 _mm_sub_ps(__m128,__m128);
-extern "C" __m128 _mm_add_ps(__m128,__m128);
-extern "C" __m128 _mm_shuffle_ps(__m128,__m128,int);
-extern "C" __m128 _mm_setzero_ps();
+using ::_mm_store_ss;
+using ::_mm_mul_ps;
+using ::_mm_sub_ps;
+using ::_mm_add_ps;
+using ::_mm_setzero_ps;
 
 template <class TYPE> class PoweredChainCell {
 public:
     __forceinline PoweredChainCell() {}
-    __forceinline PoweredChainCell(TYPE e) : m_kStorage(e) {}
-    __forceinline void operator=(TYPE e) { m_kStorage = e; }
-    __forceinline TYPE val() const { return m_kStorage; }
-    __forceinline TYPE operator->() const { return m_kStorage; }
-    __forceinline operator TYPE() const { return m_kStorage; }
+    __forceinline PoweredChainCell(TYPE e) : m_storage(e) {}
+    __forceinline void operator=(TYPE e) { m_storage = e; }
+    __forceinline TYPE val() const { return m_storage; }
+    __forceinline TYPE operator->() const { return m_storage; }
+    __forceinline operator TYPE() const { return m_storage; }
 private:
-    TYPE m_kStorage;
+    TYPE m_storage;
 };
 
 
@@ -1745,7 +1680,6 @@ typedef const PoweredChainScalar& PoweredChainScalarParameter;
 inline PoweredChainScalar operator+(PoweredChainScalarParameter r, PoweredChainScalarParameter s) { return _mm_add_ss(r.getQuad(), s.getQuad()); }
 __forceinline void poweredChainStoreScalar(PoweredChainScalarParameter a, hkReal* p) { _mm_store_ss(p, a.getQuad()); }
 
-class PoweredChainMatrix3;
 class PoweredChainVector4 {
 public:
     __forceinline void operator=(const hkQuadReal& v) { m_vComponents = v; }
@@ -1781,15 +1715,10 @@ public:
         default: return _mm_shuffle_ps(m_vComponents, m_vComponents, 255);
         }
     }
-    __forceinline void _setMul3(const PoweredChainMatrix3& a, const PoweredChainVector4& b);
+    __forceinline void _setMul3(const hkMatrix3& a, const PoweredChainVector4& b);
     hkQuadReal m_vComponents;
 };
-class PoweredChainMatrix3 {
-public:
-    __forceinline const PoweredChainVector4& getColumn(int i) const { return (&m_kColumn0)[i]; }
-    PoweredChainVector4 m_kColumn0, m_kColumn1, m_kColumn2;
-};
-__forceinline void PoweredChainVector4::_setMul3(const PoweredChainMatrix3& a, const PoweredChainVector4& b) {
+__forceinline void PoweredChainVector4::_setMul3(const hkMatrix3& a, const PoweredChainVector4& b) {
     const hkQuadReal b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0);
     const hkQuadReal r0 = _mm_mul_ps(a.getColumn(0).m_vComponents, b0);
     const hkQuadReal b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 85);
@@ -1804,7 +1733,7 @@ template <class T> __forceinline T* poweredChainAddByteOffset(T* base, long offs
 class PoweredChainAccumulator {
 public:
     __forceinline const PoweredChainVector4& getScratch0() const { return m_vCenterOfMass; }
-    __forceinline const PoweredChainVector4& getScratch1() const { return m_kCoreFromWorldMatrix.getColumn(0); }
+    __forceinline const PoweredChainVector4& getScratch1() const { return reinterpret_cast<const PoweredChainVector4&>(m_kCoreFromWorldMatrix.getColumn(0)); }
     __forceinline const PoweredChainVector4& getSumLinearVel() const { return getScratch0(); }
     __forceinline const PoweredChainVector4& getSumAngularVel() const { return getScratch1(); }
     unsigned char m_type;
@@ -1814,7 +1743,7 @@ public:
     PoweredChainVector4 m_vAngularVelocity;
     PoweredChainVector4 m_vInverseInertiaAndMass;
     PoweredChainVector4 m_vCenterOfMass;
-    PoweredChainMatrix3 m_kCoreFromWorldMatrix;
+    hkMatrix3 m_kCoreFromWorldMatrix;
 };
 class PoweredChainAccumulatorOffset {
 public:
@@ -1835,7 +1764,7 @@ public:
 };
 class PoweredChainMatrix6 {
 public:
-    PoweredChainMatrix3 m_iUnknownValue2[2][2];
+    hkMatrix3 m_iUnknownValue2[2][2];
 };
 class PoweredChainVector8 {
 public:
@@ -2092,23 +2021,23 @@ void __cdecl FUN_00d8a3a0(const PoweredChainSettings& info, const PoweredChainSo
 
 namespace ConstraintStepImplementation {
 
-namespace ConstraintStepStorage { typedef union __declspec(intrin_type) __declspec(align(16)) __m128 { struct { float x,y,z,w; }; } __m128;
+namespace ConstraintStepStorage { typedef ::__m128 LocalM128;
 }
-extern "C" ConstraintStepStorage::__m128 _mm_add_ss(ConstraintStepStorage::__m128, ConstraintStepStorage::__m128);
-extern "C" ConstraintStepStorage::__m128 _mm_sub_ss(ConstraintStepStorage::__m128, ConstraintStepStorage::__m128);
-extern "C" ConstraintStepStorage::__m128 _mm_mul_ss(ConstraintStepStorage::__m128, ConstraintStepStorage::__m128);
-extern "C" ConstraintStepStorage::__m128 _mm_add_ps(ConstraintStepStorage::__m128, ConstraintStepStorage::__m128);
-extern "C" ConstraintStepStorage::__m128 _mm_sub_ps(ConstraintStepStorage::__m128, ConstraintStepStorage::__m128);
-extern "C" ConstraintStepStorage::__m128 _mm_mul_ps(ConstraintStepStorage::__m128, ConstraintStepStorage::__m128);
-extern "C" ConstraintStepStorage::__m128 _mm_min_ps(ConstraintStepStorage::__m128, ConstraintStepStorage::__m128);
-extern "C" ConstraintStepStorage::__m128 _mm_max_ps(ConstraintStepStorage::__m128, ConstraintStepStorage::__m128);
-extern "C" ConstraintStepStorage::__m128 _mm_shuffle_ps(ConstraintStepStorage::__m128,ConstraintStepStorage::__m128,int);
-extern "C" ConstraintStepStorage::__m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ss(float*,ConstraintStepStorage::__m128);
-extern ConstraintStepStorage::__m128 DAT_010c7160;
+using ::_mm_add_ss;
+using ::_mm_sub_ss;
+using ::_mm_mul_ss;
+using ::_mm_add_ps;
+using ::_mm_sub_ps;
+using ::_mm_mul_ps;
+using ::_mm_min_ps;
+using ::_mm_max_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_load_ss;
+using ::_mm_store_ss;
+extern ConstraintStepStorage::LocalM128 DAT_010c7160;
 extern unsigned char DAT_01269204;
 typedef float ConstraintStepReal;
-typedef ConstraintStepStorage::__m128 ConstraintStepQuad;
+typedef ConstraintStepStorage::LocalM128 ConstraintStepQuad;
 class ConstraintStepScalar
 {
 public:
@@ -2146,7 +2075,6 @@ __forceinline ConstraintStepScalar operator-(ConstraintStepScalarParameter r) { 
 ConstraintStepScalar __cdecl SubtractScalarFloat(ConstraintStepScalarParameter r, ConstraintStepScalarParameter s);
 ConstraintStepScalar __cdecl FUN_00891060(ConstraintStepScalarParameter r, ConstraintStepScalarParameter s);
 __declspec(noinline) ConstraintStepScalar __cdecl AddScalarFloat(ConstraintStepScalarParameter r, ConstraintStepScalarParameter s) { return _mm_add_ss(r.getQuad(),s.getQuad()); }
-class ConstraintStepMatrix;
 class ConstraintStepVector
 {
 public:
@@ -2189,22 +2117,9 @@ public:
         else if (i == 3) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
     }
     __forceinline void setBroadcast3clobberW(const ConstraintStepVector& v, int i) { setBroadcast(v, i); }
-    void FUN_00c7f750(const ConstraintStepMatrix& a, const ConstraintStepVector& b);
-    __forceinline void SetRotatedVector(const ConstraintStepMatrix& a, const ConstraintStepVector& b) { FUN_00c7f750(a, b); }
+    void FUN_00c7f750(const hkMatrix3& a, const ConstraintStepVector& b);
+    __forceinline void SetRotatedVector(const hkMatrix3& a, const ConstraintStepVector& b) { FUN_00c7f750(a, b); }
     ConstraintStepQuad m_vComponents;
-};
-class ConstraintStepMatrix { public: ConstraintStepVector m_kColumn0, m_kColumn1, m_kColumn2; };
-template <class TYPE> class ValueWrapper
-{
-public:
-    __forceinline ValueWrapper() {}
-    __forceinline ValueWrapper(TYPE e) : m_kStorage(e) {}
-    __forceinline void operator=(TYPE e) { m_kStorage = e; }
-    __forceinline TYPE val() const { return m_kStorage; }
-    __forceinline TYPE operator->() const { return m_kStorage; }
-    __forceinline operator TYPE() const { return val(); }
-private:
-    TYPE m_kStorage;
 };
 struct ConstraintSolverInfo
 {
@@ -2237,8 +2152,8 @@ template <class T> __forceinline T* hkSelect(int i, T* a, T* b)
 }
 struct SolverStepInfo
 {
-    ValueWrapper<int> m_intStep;
-    ValueWrapper<ConstraintStepReal> m_stepFactor;
+    hkPadSpu<int> m_intStep;
+    hkPadSpu<ConstraintStepReal> m_stepFactor;
 };
 enum SolverSchemaType
 {
@@ -2273,24 +2188,7 @@ enum SolverSchemaType
     SCHEMA_TYPE_BALL_SOCKET_CHAIN = 30,
     SCHEMA_TYPE_POWERED_CHAIN = 31
 };
-class hkBool
-{
-public:
-    __forceinline hkBool(bool b) { m_cBooleanValue = (char)b; }
-    __forceinline operator bool() const { return m_cBooleanValue != 0; }
-    char m_cBooleanValue;
-};
-template <class E, class S> class hkEnum
-{
-public:
-    __forceinline hkEnum() {}
-    __forceinline hkEnum(E e) { m_kStorage = (S)e; }
-    __forceinline void operator=(E e) { m_kStorage = (S)e; }
-    __forceinline hkBool operator==(E e) const { return m_kStorage == (S)e; }
-    __forceinline operator E() const { return (E)m_kStorage; }
-    __forceinline hkBool operator!=(E e) const { return m_kStorage != (S)e; }
-    S m_kStorage;
-};
+using ::hkEnum;
 typedef hkEnum<SolverSchemaType, signed char> SchemaEnum;
 class SolverSchemaHeader
 {
@@ -2377,7 +2275,7 @@ class MotorInfoRecord : public AngularJacobianElement { public: hkpMotorInfo m_p
 class SingleJacobianSchema : public JacobianElement {};
 class SetInverseMassSchema { public: ConstraintStepVector m_invMassA, m_invMassB; };
 class AddVelocitySchema { public: ConstraintStepVector m_fVelocity; int m_iBodyIndex; };
-class hkpJacobianSetComSchema { public: ConstraintStepMatrix m_angularA, m_angularB; };
+class hkpJacobianSetComSchema { public: hkMatrix3 m_angularA, m_angularB; };
 void __cdecl ValidateHavokKeyCode(unsigned char*);
 class hkpStiffChainSchema : public SolverSchemaHeader { public: unsigned char unk01; unsigned short m_iConstraintCount; int m_sizeOfNext; };
 class hkpBallChainSchema : public SolverSchemaHeader { public: unsigned char unk01; unsigned short m_iConstraintCount; int m_sizeOfNext; };

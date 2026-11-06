@@ -1,7 +1,42 @@
 // fallout_shared/bgsaddonnode.cpp: BGSAddonNode, BGSAddonNodeSoundHandleExtra (17 functions)
 
-#include "bgsaddonnode_types_BGSAddonNode.h"
-#include "bgsaddonnode_decls.h"
+#include "layout_support.h"
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/BGSAddonNode.h"
+#include "../../include/BGSAddonNodeSoundHandleExtra.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESSound.h"
+
+class TESFormInitFlag
+{
+public:
+    bool IsFormInitialized() const;
+};
+class TESFileFormVersion
+{
+public:
+    unsigned short GetFormVersion();
+};
+// TESFileAccessor_bgsaddonnode: local type (was include/TESFileAccessor.h, which had no evidence of one real class); its methods are 0x00401680 TESFile::QEndian
+class TESFileAccessor_bgsaddonnode
+{
+public:
+    bool GetChunkData();
+};
+class AddonNodeData
+{
+public:
+    void FUN_00512810();
+    unsigned short m_usAddonNodeIndex;
+    unsigned char cFlags;
+    unsigned char layoutPadding3[1];
+};
+extern unsigned int DAT_011c8054;
+TESForm* GetFormByID(unsigned int formID);
+int __cdecl Warning(const char* format, ...);
 #include <malloc.h>
 #include <string.h>
 
@@ -10,7 +45,7 @@ void BGSAddonNode::ResetFormData()
 {
     SoundAssetTmp = 0;
     memset(reinterpret_cast<char*>(this) + 0x58, 0, 4);
-    uiFlags = 0;
+    uiParticleSystemIndex = 0;
 }
 
 // @fnv 0x004f8c90
@@ -79,7 +114,7 @@ bool BGSAddonNode::Load(TESFile* file)
             break;
         }
         case 0x41544144:  // DATA
-            file->GetChunkData(&iIndex);
+            file->GetChunkData(&uiIndex);
             break;
         case 0x4d414e53:  // SNAM
         {
@@ -91,11 +126,11 @@ bool BGSAddonNode::Load(TESFile* file)
         case 0x4d414e44:  // DNAM
         {
             file->GetChunkData(reinterpret_cast<char*>(this) + 0x58, 4);
-            if (reinterpret_cast<TESFileAccessor*>(file)->GetChunkData())
+            if (reinterpret_cast<TESFileAccessor_bgsaddonnode*>(file)->GetChunkData())
                 reinterpret_cast<AddonNodeData*>(reinterpret_cast<char*>(this) + 0x58)->FUN_00512810();
             if (FUN_00448bf0())
             {
-                uiFlags = DAT_011c8054;
+                uiParticleSystemIndex = DAT_011c8054;
                 ++DAT_011c8054;
             }
             break;
@@ -109,37 +144,26 @@ bool BGSAddonNode::Load(TESFile* file)
 }
 
 // @fnv 0x004f8b00
-BGSAddonNode::BGSAddonNode() : iIndex(-1)
+BGSAddonNode::BGSAddonNode() : uiIndex(-1)
 {
     SetFormType(ENUM_FORM_ID_ADDN_ID);
     ResetFormData();
 }
 
-class BSFadeNode
-{
-  public:
-    int m_unk;
-    BSFadeNode(const char* name);
-};
+extern NiFixedString* DAT_011c8058;
 
-extern BSFadeNode* DAT_011c8058;
-
-// Allocates a BSFadeNode named "ASH" and stores it in DAT_011c8058.
+// Allocates the "ASH" extra-data name and stores it in DAT_011c8058.
 // @fnv 0x004f92e0
 void __cdecl FUN_004f92e0()
 {
-    DAT_011c8058 = new BSFadeNode("ASH");
+    DAT_011c8058 = ::new NiFixedString("ASH");
 }
-
-namespace fnv_004f9230 {
-extern int DAT_011c8058;
 
 // @fnv 0x004f9230
-int FUN_004f9230()
+const NiFixedString& FUN_004f9230()
 {
-    return DAT_011c8058;
+    return *DAT_011c8058;
 }
-}  // namespace fnv_004f9230
 
 void _Deallocate(void*);
 struct Proxy_004f8b90
@@ -156,11 +180,6 @@ void* Proxy_004f8b90::FUN_004f8b90(unsigned int flags)
     return this;
 }
 
-struct BGSAddonNodeSoundHandleExtra
-{
-    void FUN_004f9270();
-    void* FUN_004f9240(unsigned int);
-};
 void _delete(void*, unsigned int);
 // Calls FUN_004f9270, deletes this with size 24 when bit 0 of flags is set, and returns this.
 // @fnv 0x004f9240
@@ -173,30 +192,20 @@ void* BGSAddonNodeSoundHandleExtra::FUN_004f9240(unsigned int flags)
 }
 
 namespace fnv_004f9360 {
-struct BSFadeNode
-{
-    int FUN_004b9900(int);
-};
-extern BSFadeNode* DAT_011c8058;
 // Calls FUN_004b9900(1) on DAT_011c8058 if it is non-null, then sets DAT_011c8058 to null.
 // @fnv 0x004f9360
 void FUN_004f9360()
 {
-    BSFadeNode* pFadeNode;
+    NiFixedString* pName;
     {
-        BSFadeNode* inner = DAT_011c8058;
-        pFadeNode = inner;
-        pFadeNode ? pFadeNode->FUN_004b9900(1) : 0;
+        NiFixedString* inner = DAT_011c8058;
+        pName = inner;
+        pName ? pName->FUN_004b9900(1) : 0;
     }
     DAT_011c8058 = 0;
 }
 }  // namespace fnv_004f9360
 
-class TESSound;
-struct EffectSetting
-{
-    TESSound* GetCastSound();
-};
 struct FUN_004fc940_cls
 {
     char _pad[0x4C];
@@ -233,13 +242,13 @@ struct FUN_004f8fe0_shell : public BGSAddonNode
 // @fnv 0x004f8fe0
 void FUN_004f8fe0_shell::FUN_004f8fe0()
 {
-    reinterpret_cast<FUN_004855a0*>(this)->M();
+    reinterpret_cast<::FUN_004855a0*>(this)->M();
     reinterpret_cast<S_0048a520*>(reinterpret_cast<char*>(this) + 0x30)
         ->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    FUN_00485910(0x41544144, iIndex);
+    FUN_00485910(0x41544144, uiIndex);
     if (SoundAssetTmp)
     {
-        unsigned int itempint = SoundAssetTmp->GetFormID();
+        unsigned int itempint = SoundAssetTmp->TESForm::GetFormID();
         FUN_00485910(0x4d414e53, itempint);
     }
     if (FUN_00401500())
@@ -247,18 +256,13 @@ void FUN_004f8fe0_shell::FUN_004f8fe0()
     AppendChunk(0x4d414e44, reinterpret_cast<char*>(this) + 0x58, 4);
     if (FUN_00401500())
         reinterpret_cast<AddonNodeData*>(reinterpret_cast<char*>(this) + 0x58)->FUN_00512810();
-    reinterpret_cast<FUN_00485680*>(this)->M();
+    reinterpret_cast<::FUN_00485680*>(this)->M();
 }
 
-extern "C" void* g_011c806c;
-
-struct FUN_004f9220_shell
-{
-    void* __thiscall FUN_004f9220();
-};
+extern "C" NiRTTI g_011c806c;
 
 // @fnv 0x004f9220
-void* __thiscall FUN_004f9220_shell::FUN_004f9220()
+const NiRTTI* BGSAddonNodeSoundHandleExtra::GetRTTI() const
 {
     return &g_011c806c;
 }
@@ -320,44 +324,13 @@ bool FUN_004f9110_shell::FUN_004f9110(TESForm* apCompare)
     return false;
 }
 
-struct Base_4f9270
-{
-    virtual ~Base_4f9270();
-    int unk04;
-    int unk08;
-};
-
-struct Member_4f9270
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-
-    ~Member_4f9270();
-    void Reset();
-};
-
-class FUN_004f9270_cls : public Base_4f9270
-{
-  public:
-    Member_4f9270 m_0c;
-
-    virtual ~FUN_004f9270_cls();
-};
-
-// Destructor that calls Reset on the m_0c member before the base destructor runs.
+// Clears the sound handle before the member and base destructors run.
 // @fnv 0x004f9270
-FUN_004f9270_cls::~FUN_004f9270_cls()
+BGSAddonNodeSoundHandleExtra::~BGSAddonNodeSoundHandleExtra()
 {
-    m_0c.Reset();
+    m_kData.Stop();
 }
 
-class TESDataHandler
-{
-  public:
-    void RemoveAddonNode(BGSAddonNode* node);
-};
 extern TESDataHandler* g_dataHandler;
 
 class FUN_004f8bc0 : public TESBoundObject, public TESModelTextureSwap
@@ -376,31 +349,6 @@ FUN_004f8bc0::~FUN_004f8bc0()
     }
 }
 
-class NiFixedString;
-class ExtraDataBase
-{
-  public:
-    ExtraDataBase(const NiFixedString& kName);
-    ~ExtraDataBase();
-    virtual void Slot00();
-    int m_iRefCount;
-    const char* m_kName;
-};
-class GlobalObject_0041a250
-{
-  public:
-    GlobalObject_0041a250();
-    int m_00;
-};
-const NiFixedString& FUN_004f9230();
-class FUN_004f91b0 : public ExtraDataBase
-{
-  public:
-    FUN_004f91b0();
-    virtual void Slot00();
-    GlobalObject_0041a250 m_kData;
-};
-// Constructs an ExtraDataBase-derived object, passing the result of FUN_004f9230() to the base constructor.
 // @fnv 0x004f91b0
-FUN_004f91b0::FUN_004f91b0() : ExtraDataBase(FUN_004f9230())
+BGSAddonNodeSoundHandleExtra::BGSAddonNodeSoundHandleExtra() : NiExtraData(FUN_004f9230())
 {}

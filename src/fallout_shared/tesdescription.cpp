@@ -1,18 +1,30 @@
+#include "../../include/BSStringT.h"
 // fallout_shared/tesdescription.cpp: TESDescription, TESDataHandler, TermHack (14 functions)
 
-#include "tesdescription_decls.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESDescription.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESIcon.h"
+#include "../../include/TESTexture.h"
+
+#include "../../include/CHUNK_ID.h"
+extern TESDataHandler* g_dataHandler;
+extern BSStringT<char> g_menuParsedXML;
+extern const char g_011c72c0_arg1[];
+
 // @fnv 0x00482f20
 bool TESDataHandler::LoadDescriptionForForm()
 {
-    return loadDescription;
+    return bLoadingFiles;
 }
-// If both description and file are non-null, calls Initialize on the description with the file's offset as a CombatController.
+// Initializes the description offset from the file when both are non-null.
 // @fnv 0x00482d50
 void TESDescription::ReadDescriptionFromFile(TESDescription* description, TESFile* file)
 {
     if (description && file)
-        reinterpret_cast<CombatProcedure*>(description)
-            ->Initialize(reinterpret_cast<CombatController*>(file->GetOffset()));
+        description->SetDescriptionFileOffset(file->GetOffset());
 }
 // @fnv 0x00482c50
 TESDescription::TESDescription()
@@ -27,7 +39,7 @@ const char* TESDescription::GetDescription(TESForm* form, CHUNK_ID chunk)
         TESForm* owner = form;
         if (!owner)
             owner = dynamic_cast<TESForm*>(this);
-        reinterpret_cast<TESFile*>(this)->ReadTESInfo(owner, chunk);
+        LoadDescriptionForForm(owner, chunk);
     }
     return reinterpret_cast<NiPointer<NiNode>*>(&g_menuParsedXML)->operator->()
                ? reinterpret_cast<const char*>(reinterpret_cast<NiPointer<NiNode>*>(&g_menuParsedXML)->operator->())
@@ -42,117 +54,41 @@ unsigned char FUN_00401500()
     return DAT_011c54ba;
 }
 
-struct TESObjectREFR;
-struct TESFullName : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetFullNameLength(TESForm*);
-    unsigned int GetFullNameLength();
-    static char* GetFullName(TESForm*);
-    char* GetFullName();
-    void SetFullName(char*);
-    static void LoadFullNameChunk(TESFullName*, TESFile*);
-    void* GetFullNameString();
-    void* __vecDelDtor(unsigned int);
-    char m_kName[8];
-};
-typedef char _sizecheck_TESFullName[sizeof(TESFullName) == 12 ? 1 : -1];
-struct TESTexture : public BaseFormComponent
-{
-    virtual unsigned int GetTexturePathLength();
-    virtual char* NormalizeTextureFilePath(void*);
-    virtual char* GetRegularTextureFilePath(void*);
-    virtual char* GetTextureResourcePath();
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save(int);
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetTextureNameLength(TESForm*);
-    unsigned int GetTextureNameLength();
-    static char* GetTextureResourceName(TESForm*, TESObjectREFR*);
-    char* GetTextureResourceName();
-    void AssignTextureName(char*);
-    static void NormalizeTextureFilePath(char*, char*);
-    static char* NormalizeTextureFilePath(void*, char*);
-    static char* NormalFileToRegularFile(void*, char*);
-    static void GetRegularTextureFilePath(char*, char*);
-    static char* GetRegularTextureFilePath(void*, char*);
-    static void ConvertTexturePath(char*, char*);
-    static bool IsTextureChunk(int);
-    static void ReadTextureData(TESTexture*, TESFile*);
-    static char* GetMessageIconName(TESForm*, TESObjectREFR*);
-    void* __vecDelDtor(unsigned int);
-    char FullNameComponent[8];
-};
-typedef char _sizecheck_TESTexture[sizeof(TESTexture) == 12 ? 1 : -1];
-struct TESIcon : public TESTexture
-{
-    virtual char* GetTextureResourcePath();
-    void* __vecDelDtor(unsigned int);
-};
-typedef char _sizecheck_TESIcon[sizeof(TESIcon) == 12 ? 1 : -1];
-struct FUN_00482c80_shell : public TESDescription
-{
-    void ClearParsedXML();
-};
-
 extern "C" unsigned char DAT_011c54ba;
 unsigned char FUN_00401500();
 
-struct BSStr
-{
-    bool Set(char const*, unsigned int);
-};
+
 
 extern int DAT_011c5490;
 
-// Resets the parsed XML string, clears DAT_011c5490, and zeroes the second dword of this object.
+// Resets the parsed XML string, clears DAT_011c5490, and zeroes the description offset.
 // @fnv 0x00482c80
-void FUN_00482c80_shell::ClearParsedXML()
+void TESDescription::InitializeComponent()
 {
-    ((BSStr*)&g_menuParsedXML)->Set(0, 0);
+    ((::BSStringT<char>*)&g_menuParsedXML)->Set(0, 0);
     DAT_011c5490 = 0;
-    ((unsigned long*)this)[1] = 0;
+    m_uiDescriptionFileOffset = 0;
 }
 
 void __cdecl WriteDescChunk(void*, int);
 
-struct FUN_00482cb0_shell
-{
-    void __thiscall FUN_00482cb0();
-};
-
 // @fnv 0x00482cb0
-void __thiscall FUN_00482cb0_shell::FUN_00482cb0()
+void __thiscall TESDescription::FUN_00482cb0()
 {
     WriteDescChunk(this, 0x43534544);
 }
 
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
-struct DescStandIn
-{
-    int GetMenuParsedXmlLength();
-    virtual void vf0();
-    virtual void vf1();
-    virtual void vf2();
-    virtual void vf3();
-    virtual void* vf4(int, int);
-};
 // @fnv 0x00482cd0
 void __cdecl WriteDescChunk(void* apDesc, int aiChunk)
 {
     char empty;
     if (apDesc)
     {
-        if (((DescStandIn*)apDesc)->GetMenuParsedXmlLength())
+        if (((TESDescription*)apDesc)->GetDescriptionLength())
         {
-            FUN_004856f0(aiChunk, ((DescStandIn*)apDesc)->vf4(0, 0x43534544),
-                         ((DescStandIn*)apDesc)->GetMenuParsedXmlLength() + 1);
+            FUN_004856f0(aiChunk, const_cast<char*>(((TESDescription*)apDesc)->GetDescription(0, (CHUNK_ID)0x43534544)),
+                         ((TESDescription*)apDesc)->GetDescriptionLength() + 1);
         }
         else
         {
@@ -167,12 +103,8 @@ struct S7010
 {
     unsigned int Length();
 };
-struct FUN_00482d30_shell
-{
-    unsigned int __thiscall GetMenuParsedXmlLength();
-};
 // @fnv 0x00482d30
-unsigned int __thiscall FUN_00482d30_shell::GetMenuParsedXmlLength()
+unsigned int __thiscall TESDescription::GetDescriptionLength()
 {
     return ((S7010*)&g_menuParsedXML)->Length();
 }
@@ -219,45 +151,26 @@ struct StrCmpHelper
     int StrCmp(char const*, bool) const;
 };
 
-struct FUN_00482df0_shell
-{
-    bool __thiscall FUN_00482df0(BaseFormComponent* apComponent);
-};
-
 // @fnv 0x00482df0
-bool __thiscall FUN_00482df0_shell::FUN_00482df0(BaseFormComponent* apComponent)
+bool __thiscall TESDescription::IsEqualToBase(BaseFormComponent* apComponent)
 {
     TESDescription* pDesc = dynamic_cast<TESDescription*>(apComponent);
     if (!pDesc)
         return true;
-    if (((DescStandIn*)this)->GetMenuParsedXmlLength() || ((DescStandIn*)pDesc)->GetMenuParsedXmlLength())
+    if (GetDescriptionLength() || pDesc->GetDescriptionLength())
     {
-        if (((DescStandIn*)this)->GetMenuParsedXmlLength() != ((DescStandIn*)pDesc)->GetMenuParsedXmlLength())
+        if (GetDescriptionLength() != pDesc->GetDescriptionLength())
             return true;
-        else if (((StrCmpHelper*)&g_menuParsedXML)->StrCmp((char const*)((DescStandIn*)pDesc)->vf4(0, 0x43534544), 0))
+        else if (((StrCmpHelper*)&g_menuParsedXML)->StrCmp((char const*)pDesc->GetDescription(0, (CHUNK_ID)0x43534544), 0))
             return true;
     }
     return false;
 }
 
-struct TESObjectREFR;
-
-struct PlayerCharacter
-{
-    int GetTerminalAccessResult(TESObjectREFR* apRef);
-};
 extern PlayerCharacter* g_thePlayer;
 
-struct BSStringT_char
-{
-    char* pString;
-    unsigned short usLen;
-    unsigned short usMaxLen;
-    BSStringT_char();
-    ~BSStringT_char();
-    operator const char*() const;
-};
-int FUN_00406f60(BSStringT_char* apStr, const char* apFmt, ...);
+
+int FUN_00406f60(::BSStringT<char>* apStr, const char* apFmt, ...);
 
 struct SettingString
 {
@@ -265,11 +178,8 @@ struct SettingString
 };
 extern SettingString g_011c8394;
 
+#include "../../include/ActorValue.h"
 namespace ActorValue {
-enum Index
-{
-    kAV_0 = 0
-};
 const char* __cdecl GetActorValueName(Index aeIndex);
 }
 
@@ -338,7 +248,7 @@ void TermHack::FUN_005015f0(TESObjectREFR* apRef, PlayerCharacter* apActor)
             FUN_00709470(2, apRef, 0, 0, 1, 0);
             break;
         case 4: {
-            BSStringT_char kMsg;
+            ::BSStringT<char> kMsg;
             FUN_00406f60(&kMsg, g_011c8394.GetString(), ActorValue::GetActorValueName((ActorValue::Index)0x28),
                          (int)FUN_004bd510(FUN_005017a0(apRef), 1.0f));
             QueueUIMessage(kMsg, 0, "Interface\\Icons\\Message Icons\\glow_message_vaultboy_sad.dds", 0, 2.0f, false);
@@ -355,22 +265,12 @@ class GlobalObject_004037b0
     bool FUN_004037f0(const char* apString, unsigned int auiLength);
 };
 extern GlobalObject_004037b0 g_011c5498;
-struct Off482d
-{
-    unsigned long FUN_00726070();
-};
-
-struct Desc482d : public TESDescription
-{
-    void FUN_00482d80(BaseFormComponent* apComponent);
-};
-
 // @fnv 0x00482d80
-void Desc482d::FUN_00482d80(BaseFormComponent* apComponent)
+void TESDescription::BaseFormRecord(BaseFormComponent* apComponent)
 {
     TESDescription* pDesc = dynamic_cast<TESDescription*>(apComponent);
     if (!pDesc)
         return;
-    g_011c5498.FUN_004037f0((const char*)((DescStandIn*)pDesc)->vf4(0, 'CSED'), 0);
-    m_uiDescriptionFileOffset = ((Off482d*)pDesc)->FUN_00726070();
+    g_011c5498.FUN_004037f0((const char*)pDesc->GetDescription(0, (CHUNK_ID)'CSED'), 0);
+    m_uiDescriptionFileOffset = pDesc->GetDescriptionFileOffset();
 }

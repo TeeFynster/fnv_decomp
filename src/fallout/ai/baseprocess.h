@@ -3,8 +3,8 @@
 static const int kCalculateMoveModeValue1 = 257;
 
 // @fnv 0x008d0540
-int BaseProcess::GetAttackChance(Actor* argument0, float argument1, float argument2, float argument3, bool argument4,
-                                 bool argument5)
+unsigned int BaseProcess::GetAttackChance(Actor* argument0, float argument1, float argument2, float argument3, bool argument4,
+                                 bool argument5) const
 {
     return kCalculateMoveModeValue1;
 }
@@ -16,15 +16,15 @@ void BaseProcess::StopPackage()
 }
 
 // @fnv 0x00859670
-TESPackage* BaseProcess::GetOneTimePackage()
+TESPackage* BaseProcess::GetOneTimePackage() const
 {
-    return GetStablePackage();
+    return GetCurrentPackage();
 }
 
 // @fnv 0x008d0450
-int BaseProcess::GetPackageInfoValue()
+int BaseProcess::GetPackageInfoValue() const
 {
-    return Unk_8F();
+    return GetPackageState();
 }
 
 // @fnv 0x008d0400
@@ -34,7 +34,7 @@ void BaseProcess::SetPackageExecutionState(int amount)
 }
 
 // @fnv 0x008d0470
-void BaseProcess::SetAnimationState(int index)
+void BaseProcess::SetAnimationState(unsigned int index)
 {
-    Unk_8E(index);
+    SetPackageInfoState(index);
 }

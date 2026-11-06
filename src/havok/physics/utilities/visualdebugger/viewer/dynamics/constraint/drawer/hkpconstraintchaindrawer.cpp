@@ -1,43 +1,198 @@
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkpconstraintchaindrawer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkpconstraintchaindrawer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
+// LocalVec: unit-local copy of the former shared stand-in Vec. This unit uses the stand-in's matrix/SpeedTree members (FUN_00c7f640/FUN_00c7f700 transforms, FUN_00b12790/FUN_00b13040), which NiPoint3 does not have.
+#include <xmmintrin.h>
+class Matrix;
+class Scalar;
+class Simd;
+class Tok;
+class Mask;
+class Elem;
+class Iter;
+class CIter;
+class CMutIter;
+class Mat3;
+class Mat4;
+class hkVector4;
+class hkQuaternion;
 
-struct __declspec(align(16)) hkVector4
+class LocalVec
 {
-    float x, y, z, w;
-    hkVector4()
-    {}
-    hkVector4(const hkVector4& o)
+public:
+    union
     {
-        *(__m128*)&x = *(const __m128*)&o.x;
-    }
-    void operator=(const hkVector4& o)
-    {
-        *(__m128*)&x = *(const __m128*)&o.x;
-    }
+        struct
+        {
+            float x;
+            float y;
+            float z;
+        };
+        struct
+        {
+            void* m_pData;
+            int m_iArrayLength;
+            int m_iCapacity;
+        };
+    };
+
+    LocalVec();
+    LocalVec(float a, float b, float c);
+    // Keep the implicit copy constructor, copy assignment and destructor trivial.
+
+    void negative(const LocalVec& n);
+    void inv(const Matrix& m, const LocalVec& n);
+    void point(const Matrix& m, const LocalVec& b);
+    void difference(const LocalVec& a, const LocalVec& b);
+    Scalar dot(const LocalVec& n) const;
+    Scalar at(int i) const;
+    void set(float a, float b, float c, float d);
+
+    Simd lengthSquared() const;
+    void mul(const Simd& factor);
+    void SetProduct(const Simd& factor, const LocalVec& v);
+
+    void resize(unsigned n);
+    Tok& operator[](unsigned i);
+    void release(int elemSize);
+
+    LocalVec& operator-=(const LocalVec& v);
+    LocalVec& operator+=(const LocalVec& v);
+    LocalVec operator*(float scale) const;
+    LocalVec operator+(const LocalVec& v) const;
+    LocalVec operator-(const LocalVec& v) const;
+    float Squared() const;
+    float Length() const;
+    float Normalize();
+    float Dot(const LocalVec& v) const;
+    LocalVec Cross(const LocalVec& v) const;
+    LocalVec ApplyScaled(float scale);
+    LocalVec ApplyScaled(float scale) const;
+    void FUN_00acf580(unsigned n, Tok value);
+    LocalVec FUN_004a0bd0();
+    LocalVec FUN_004a0bd0() const;
+    LocalVec FUN_0053d1a0(const LocalVec& v);
+    LocalVec FUN_004b3800(const LocalVec& v);
+    LocalVec FUN_004b3800(const LocalVec& v) const;
+    LocalVec FUN_00439e90(const LocalVec& v);
+    LocalVec FUN_00439e90(const LocalVec& v) const;
+    LocalVec FUN_00439ef0(const LocalVec& v);
+    LocalVec FUN_00439ef0(const LocalVec& v) const;
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    void FUN_006815c0();
+    void FUN_00439180(float scale);
+    LocalVec& FUN_0063c8a0(const LocalVec& v);
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    void FUN_004b4db0(const float* values);
+    void FUN_00a38560();
+    void FUN_004f0180(void* value);
+
+    LocalVec& ScaleByInverse(float divisor);
+    float FUN_00457910();
+    LocalVec* FUN_006a6eb0();
+    bool FUN_004390c0(const LocalVec& v);
+
+    __m128 get() const;
+    void set(__m128 value);
+    void operator=(const __m128& value);
+    operator __m128() const;
+    __m128& getQuad();
+    const __m128& getQuad() const;
+    __m128& quad();
+    const __m128& quad() const;
+    float& operator()(int component);
+    const float& operator()(int component) const;
+    void setZero4();
+    void setSub4(const LocalVec& a, const LocalVec& b);
+    void setAdd4(const LocalVec& a, const LocalVec& b);
+    void setMul4(const LocalVec& a, const LocalVec& b);
+    void setMul4(const Scalar& a, const LocalVec& b);
+    void add4(const LocalVec& v);
+    void mul4(const LocalVec& v);
+    void mul4(const Scalar& value);
+    void add3clobberW(const LocalVec& v);
+    void sub3clobberW(const LocalVec& v);
+    void setBroadcast3clobberW(const LocalVec& v, int component);
+    Scalar horizontalAdd3() const;
+    void setCross(const LocalVec& a, const LocalVec& b);
+    Scalar dot3(const LocalVec& v) const;
+    Scalar lengthSquared3() const;
+    Scalar lengthInverse3() const;
+    void normalize3();
+    Scalar getSimdAt(int component) const;
+    void setInterpolate4(const LocalVec& a, const LocalVec& b, const Scalar& fraction);
+    void setAddMul4(const LocalVec& a, const LocalVec& b, const Scalar& scale);
+    void setNeg4(const LocalVec& v);
+    Mask compareLessThanZero4() const;
+    void SetRotatedDirection(const hkQuaternion& rotation, const LocalVec& direction);
+    void setRotatedTranslation(const hkQuaternion& rotation, const LocalVec& direction);
+    void cross(const LocalVec& a, const LocalVec& b);
+    Scalar squared() const;
+    Scalar inverseLength() const;
+    void normalize();
+    void negate(const LocalVec& v);
+
+    void FUN_00c7f640(const void* matrix, const hkVector4& point);
+    void FUN_00c7f640(Mat4* matrix, void* point);
+    void FUN_00c7f640(const void* matrix, const LocalVec* point);
+    void FUN_00c7f640(const void* matrix, const void* point);
+    void FUN_00c7f700(Mat3* matrix, void* point);
+    void FUN_00c7f700(const void* matrix, const LocalVec* point);
+    void FUN_00b12790();
+    void FUN_00b13040(LocalVec* out, const LocalVec* v);
+    LocalVec* ScaleSwizzled(LocalVec* out, float factor);
+    void AddVector(LocalVec* out, const LocalVec* v);
+    float Dot(const LocalVec& v);
+    LocalVec* FUN_004a3c90(const LocalVec* v);
+    LocalVec* FUN_0062b0a0(LocalVec* out, LocalVec* v);
+    LocalVec* FUN_0062af00(LocalVec* target);
+
+    void FUN_00cf7690(Elem* value);
+    void FUN_00b1e970();
+    Iter begin();
+    Iter end();
+    CIter FUN_00b33030(CIter first, CIter last);
+    void FUN_00b32120();
+    unsigned int size() const;
+    unsigned int capacity() const;
+    void FUN_00b2df90();
+    void FUN_00b2e140(Elem* first, Elem* last);
+    bool InitBuffer(unsigned int count);
+    Elem* _Ucopy(Elem* first, Elem* last, Elem* out);
+    LocalVec& FUN_00b2db10(const LocalVec& v);
+    CMutIter FUN_00aceb80(CMutIter first, CMutIter last);
+    void FUN_00acac40();
+    LocalVec& FUN_00ad61e0(const LocalVec& v);
 };
-struct hkRotation
+#include "../../../../../../../../../include/hkRotation.h"
+#include "../../../../../../../../../include/hkTransform.h"
+
+inline hkVector4::hkVector4(const hkVector4& o)
 {
-    hkVector4 c0, c1, c2;
-};
-struct hkTransform
+    m_vComponents = o.m_vComponents;
+}
+inline void hkVector4::operator=(const hkVector4& o)
 {
-    hkRotation m_rotation;
-    hkVector4 m_vTranslation;
-};
+    m_vComponents = o.m_vComponents;
+}
+
+inline hkRotation::hkRotation()
+{}
+inline hkRotation::hkRotation(const hkRotation& o)
+    : m_kColumn0(o.m_kColumn0), m_kColumn1(o.m_kColumn1), m_kColumn2(o.m_kColumn2)
+{}
+inline void hkRotation::operator=(const hkRotation& o)
+{
+    m_kColumn0 = o.m_kColumn0;
+    m_kColumn1 = o.m_kColumn1;
+    m_kColumn2 = o.m_kColumn2;
+}
 
 struct RigidBody
 {
@@ -163,11 +318,6 @@ struct ChainInstance
     int m_iActorEntryCount;
 };
 
-struct Vec
-{
-    hkVector4 v;
-    void FUN_00c7f640(const void* m, const hkVector4& p);
-};
 struct Sub
 {
     void FUN_00e10a10(void* a);
@@ -183,7 +333,7 @@ struct Listener
     virtual void v18();
     virtual void v1c();
     virtual void v20();
-    virtual void Fire(Vec* a, Vec* b, unsigned c, int d, int e);
+    virtual void Fire(LocalVec* a, LocalVec* b, unsigned c, int d, int e);
 };
 struct Obj
 {
@@ -197,8 +347,10 @@ struct Obj
     int unk1c;
     hkVector4 m_posA;
     hkVector4 m_posB;
-    Vec m40;
-    Vec m50;
+    LocalVec m40;
+    float m4C;
+    LocalVec m50;
+    float m5C;
     hkRotation m_kFirstRotation;
     hkRotation m_kSecondRotation;
     Sub mC0;
@@ -217,12 +369,21 @@ void Obj::FireChainConstraints(ChainInstance* apChain, Listener* apListener, int
     {
         RigidBody* pBodyA = apChain->m_ppRigidBodies[iPair];
         RigidBody* pBodyB = apChain->m_ppRigidBodies[iPair + 1];
-        hkTransform transformB = pBodyB->m_kMotionTransform;
-        hkTransform transformA = pBodyA->m_kMotionTransform;
+        const hkVector4* sourceB = reinterpret_cast<const hkVector4*>(&pBodyB->m_kMotionTransform);
+        // Vector storage preserves the original copy without the flat transform's GS buffer classification.
+        hkVector4 storageB[4] = { sourceB[0], sourceB[1], sourceB[2], sourceB[3] };
+        hkVector4 storageA[4] = {
+            reinterpret_cast<const hkVector4&>(pBodyA->m_kMotionTransform.m_kColumn0),
+            reinterpret_cast<const hkVector4&>(pBodyA->m_kMotionTransform.m_kColumn1),
+            reinterpret_cast<const hkVector4&>(pBodyA->m_kMotionTransform.m_kColumn2),
+            reinterpret_cast<const hkVector4&>(pBodyA->m_kMotionTransform.m_vTranslation)
+        };
+        hkTransform& transformB = reinterpret_cast<hkTransform&>(storageB);
+        hkTransform& transformA = reinterpret_cast<hkTransform&>(storageA);
         m_kSecondRotation = transformB.m_rotation;
         m_kFirstRotation = transformA.m_rotation;
-        m_posB = transformB.m_vTranslation;
-        m_posA = transformA.m_vTranslation;
+        m_posB.m_vComponents = transformB.m_vTranslation;
+        m_posA.m_vComponents = transformA.m_vTranslation;
         hkVector4 pivotB;
         hkVector4 pivotA;
         switch (data->getType())

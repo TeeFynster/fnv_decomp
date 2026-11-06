@@ -1,98 +1,110 @@
-// Source layout: HUDMainMenu. PC corrections are in generate_headers.py.
-#ifndef FNV_HUDMAINMENU_H
-#define FNV_HUDMAINMENU_H
+#pragma once
 
-#include "layout_support.h"
-#include "SoundPlaybackHandle.h"
-#include "GameTimerRecord.h"
-#include "HotkeyWheelDisplay.h"
 #include "Menu.h"
-#pragma pack(push, 4)
+#include "BSSoundHandle.h"
+#include "HotkeyWheelDisplay.h"
+#include "GameTimerRecord.h"
+#include "ShadowSceneLight.h"
+
+class Actor;
+class Tile;
+class TESObjectREFR;
+class NiControllerSequence;
+class RegionObjectEntry;
+class HUDMainMenu__MessageData;
+class HUDMainMenu__SubtitleData;
+class HUDMainMenu__QuestObjective;
+class HUDMainMenu__XPUpdate;
+class HUDMainMenu__RadiationUpdate;
+
+
 class HUDMainMenu : public Menu
 {
-  public:
-    Tile* m_pTiles[87];                                                // +0x28
-    Tile* m_pAdditionalHudTile;                                        // +0x184
-    float m_fMessageDisplayTimer;                                      // +0x188
-    BSSimpleList<HUDMainMenu__MessageData*> m_kMessageList;            // +0x18C
-    unsigned int m_uiMessageCount;                                     // +0x194
-    BSSimpleArray<HUDMainMenu__SubtitleData*, 1024> m_kSubtitleArray;  // +0x198
-    HUDMainMenu__SubtitleData* m_pCurrentSubtitle;                     // +0x1A8
-    SoundPlaybackHandle m_kTargetDisplayData;                                // +0x1AC
-    TESObjectREFR* m_pCrosshairReference;                              // +0x1B8
-    int m_iHudValueFirstBeforeMode;                                    // +0x1BC
-    int m_iHudValueSecondBeforeMode;                                   // +0x1C0
-    HUDMainMenu__HUD_MENU_MODE m_eHudMenuMode;                         // +0x1C4
-    HotkeyWheelDisplay m_kMenuData;                                          // +0x1C8
-    bool m_bHudModeActive;                                             // +0x1FC
-    unsigned char layoutPadding1FD;
-    unsigned short layoutPadding1FE;
-    NiControllerSequence* m_pHudAnimationSequence;  // +0x200
-    bool m_bSequenceActive;                         // +0x204
-    bool m_bHudAnimationActive;                     // +0x205
-    unsigned short layoutPadding206;
-    unsigned int m_uiHudAnimationCounter;       // +0x208
-    BSSimpleList<RegionObjectEntry*>* m_pRegionObjectListObj;  // +0x20C
-    int m_iHudValueFirstAfterUpdateList;        // +0x210
-    int m_iHudValueSecondAfterUpdateList;       // +0x214
-    int m_iHudValueThirdAfterUpdateList;        // +0x218
-    Actor* m_pTargetActor;                      // +0x21C
-    bool m_bTargetActorVisible;                 // +0x220
-    unsigned char layoutPadding221;
-    unsigned short layoutPadding222;
-    GameTimerRecord m_cBuffer;                          // +0x224
-    unsigned int m_uiHudValueFirstAfterActor;   // +0x244
-    unsigned int m_uiHudValueSecondAfterActor;  // +0x248
-    int m_iHudValueFirstAfterUnsignedValues;    // +0x24C
-    int m_iHudValueSecondAfterUnsignedValues;   // +0x250
-    bool m_bQuestObjectiveUpdatesEnabled;       // +0x254
-    unsigned char layoutPadding255;
-    unsigned short layoutPadding256;
-    BSSimpleList<HUDMainMenu__QuestObjective*> m_kQuestObjectives;  // +0x258
-    bool m_bQuestObjectiveUpdatePending;                            // +0x260
-    bool m_bXPUpdatePending;                                        // +0x261
-    unsigned short layoutPadding262;
-    BSSimpleList<HUDMainMenu__XPUpdate*> m_kXPUpdates;                // +0x264
-    BSSimpleList<HUDMainMenu__RadiationUpdate*> m_kRadiationUpdates;  // +0x26C
-    float m_fRadiationUpdateTimer;                                    // +0x274
-    int GetClass();
+public:
+    enum HUD_MENU_MODE
+    {
+        HMM_NONE = 0,
+        HMM_CHANGED = 1,
+        HMM_RUN_AND_GUN = 2,
+        HMM_PIPBOY = 3,
+        HMM_START = 4,
+        HMM_LOAD = 5,
+        HMM_DIALOGUE = 6,
+        HMM_VATS = 7,
+        HMM_VATS_PLAYBACK = 8,
+        HMM_CONTAINER = 9,
+        HMM_SIT_SLEEP_ANIM = 10,
+        HMM_SIT_SLEEP = 11,
+        HMM_MOVEMENT_DISABLED = 12,
+        HMM_PIPBOY_DISABLED = 13,
+        HMM_CHARGEN_MENU = 14,
+        HMM_HACKING = 15,
+        HMM_TERMINAL = 16,
+        HMM_MESSAGE_MENU = 17,
+        HMM_SPECIAL_BOOK = 18,
+        HMM_LOVE_TESTER = 19,
+        HMM_VANITY = 20,
+        HMM_AUTO_VANITY = 21,
+        HMM_IRON_SIGHTS = 22,
+        HMM_SNIPER_RIFLE = 23,
+        HMM_MOVIE = 24,
+        HMM_CASINO_GAME = 25,
+    };
+
+    HUDMainMenu();
+    virtual ~HUDMainMenu();
+    virtual void AssignTileByID(int aTileID, Tile* apTile);
+    virtual int GetClass();
+
+    Tile* m_pTiles[87];
+    Tile* m_pAdditionalHudTile;
+    float m_fMessageDisplayTimer;
+    BSSimpleList<HUDMainMenu__MessageData*> m_kMessageList;
+    unsigned int m_uiMessageCount;
+    BSSimpleArray<HUDMainMenu__SubtitleData*, 1024> m_kSubtitleArray;
+    HUDMainMenu__SubtitleData* m_pCurrentSubtitle;
+    BSSoundHandle m_kTargetDisplayData;
+    TESObjectREFR* m_pCrosshairReference;
+    int m_iHudValueFirstBeforeMode;
+    int m_iHudValueSecondBeforeMode;
+    HUD_MENU_MODE m_eHudMenuMode;
+    HotkeyWheelDisplay m_kMenuData;
+    bool m_bHudModeActive;
+    unsigned char layoutPadding1FD[3];
+    NiControllerSequence* m_pHudAnimationSequence;
+    bool m_bSequenceActive;
+    bool m_bHudAnimationActive;
+    unsigned char layoutPadding206[2];
+    unsigned int m_uiHudAnimationCounter;
+    BSSimpleList<RegionObjectEntry*>* m_pRegionObjectListObj;
+    int m_iHudValueFirstAfterUpdateList;
+    int m_iHudValueSecondAfterUpdateList;
+    int m_iHudValueThirdAfterUpdateList;
+    Actor* m_pTargetActor;
+    bool m_bTargetActorVisible;
+    unsigned char layoutPadding221[3];
+    GameTimerRecord m_cBuffer;
+    unsigned int m_uiHudValueFirstAfterActor;
+    unsigned int m_uiHudValueSecondAfterActor;
+    int m_iHudValueFirstAfterUnsignedValues;
+    int m_iHudValueSecondAfterUnsignedValues;
+    bool m_bQuestObjectiveUpdatesEnabled;
+    unsigned char layoutPadding255[3];
+    BSSimpleList<HUDMainMenu__QuestObjective*> m_kQuestObjectives;
+    bool m_bQuestObjectiveUpdatePending;
+    bool m_bXPUpdatePending;
+    unsigned char layoutPadding262[2];
+    BSSimpleList<HUDMainMenu__XPUpdate*> m_kXPUpdates;
+    BSSimpleList<HUDMainMenu__RadiationUpdate*> m_kRadiationUpdates;
+    float m_fRadiationUpdateTimer;
+
+    void FUN_005de380();
+
+    static HUDMainMenu* g_pHudMainMenuInstance;
+    static void SetCrosshairTarget(TESObjectREFR*, bool);
+    static void SetHUDVisible(bool);
+    static bool UpdateTargetReference(TESObjectREFR*, bool, bool);
+    bool RefreshTargetDisplay();
+    static void UpdateTargetActor(Actor* actor);
+    static void UpdateVisibilityState(int state);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(HUDMainMenu) == 0x278);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_pTiles) == 0x28);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_pAdditionalHudTile) == 0x184);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_fMessageDisplayTimer) == 0x188);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_kMessageList) == 0x18C);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_uiMessageCount) == 0x194);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_kSubtitleArray) == 0x198);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_pCurrentSubtitle) == 0x1A8);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_kTargetDisplayData) == 0x1AC);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_pCrosshairReference) == 0x1B8);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_iHudValueFirstBeforeMode) == 0x1BC);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_iHudValueSecondBeforeMode) == 0x1C0);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_eHudMenuMode) == 0x1C4);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_kMenuData) == 0x1C8);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_bHudModeActive) == 0x1FC);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_pHudAnimationSequence) == 0x200);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_bSequenceActive) == 0x204);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_bHudAnimationActive) == 0x205);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_uiHudAnimationCounter) == 0x208);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_pRegionObjectListObj) == 0x20C);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_iHudValueFirstAfterUpdateList) == 0x210);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_iHudValueSecondAfterUpdateList) == 0x214);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_iHudValueThirdAfterUpdateList) == 0x218);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_pTargetActor) == 0x21C);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_bTargetActorVisible) == 0x220);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_cBuffer) == 0x224);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_uiHudValueFirstAfterActor) == 0x244);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_uiHudValueSecondAfterActor) == 0x248);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_iHudValueFirstAfterUnsignedValues) == 0x24C);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_iHudValueSecondAfterUnsignedValues) == 0x250);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_bQuestObjectiveUpdatesEnabled) == 0x254);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_kQuestObjectives) == 0x258);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_bQuestObjectiveUpdatePending) == 0x260);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_bXPUpdatePending) == 0x261);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_kXPUpdates) == 0x264);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_kRadiationUpdates) == 0x26C);
-FNV_STATIC_ASSERT(offsetof(HUDMainMenu, m_fRadiationUpdateTimer) == 0x274);
-#endif

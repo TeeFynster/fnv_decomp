@@ -1,20 +1,29 @@
-// gamebryo2.2/corelibs/nimain/nialphaaccumulator.cpp: NiAlphaAccumulator, CloneAccumulator (17 functions)
+// gamebryo2.2/corelibs/nimain/nialphaaccumulator.cpp: NiAlphaAccumulator (17 functions)
 
-#include "nialphaaccumulator_decls.h"
+#include "../../../../include/NiAccumulator.h"
+#include "../../../../include/NiAlphaAccumulator.h"
+#include "../../../../include/NiBackToFrontAccumulator.h"
 
-// Constructs the accumulator: sets the vtable pointer and zeroes the list count, head, tail and the remaining members.
+extern "C" unsigned int kVtbl_NiBackToFrontAccumulator;
+
+// Initializes the shared accumulator layout using the original constructor's register ABI.
+NiAccumulator* __fastcall InitializeAccumulator(NiAccumulator*) throw();
+
 // @fnv 0x00aa0f00
-NiAlphaAccumulator::NiAlphaAccumulator()
+__declspec(noinline) NiBackToFrontAccumulator* __fastcall InitializeBackToFrontAccumulator(NiBackToFrontAccumulator* self)
 {
-    *(volatile unsigned int*)this = (unsigned int)&kVtbl_NiBackToFrontAccumulator;
-    m_kUnsortedGeometryList.m_kItemCount.m_uiCount = 0;
-    m_kUnsortedGeometryList.m_pkHead = 0;
-    m_kUnsortedGeometryList.m_pkTail = 0;
-    m_pkGeometryList = 0;
-    m_iGeometryCount = 0;
-    m_iGeometryCapacity = 0;
-    m_ppGeometries = 0;
-    m_pfGeometrySortValues = 0;
+    InitializeAccumulator(self);
+    *(volatile unsigned int*)self = (unsigned int)&kVtbl_NiBackToFrontAccumulator;
+    volatile NiBackToFrontAccumulator* fields = self;
+    fields->m_kItems.m_kItemCount.m_uiCount = 0;
+    fields->m_kItems.m_pkHead = 0;
+    fields->m_kItems.m_pkTail = 0;
+    fields->m_kItemsToSortAndRender = 0;
+    fields->m_iNumItems = 0;
+    fields->m_iMaxItems = 0;
+    fields->m_ppkItems = 0;
+    fields->m_pfDepths = 0;
+    return self;
 }
 
 extern float DAT_01096b8c;
@@ -158,38 +167,20 @@ bool FUN_00a43450_shell::FUN_00a43450(FUN_00a43450_stream* arStream)
     return bret;
 }
 
-struct NiObject;
-struct NiMemObject
-{
-    char _pad_0[1];
-};
-typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct FUN_00a9b510_shell : public NiAlphaAccumulator
-{
-    bool FUN_00a9b510(NiObject*);
-};
-
-struct FUN_00aa0ae0_stub
-{
-    char FUN_00aa0ae0(NiObject* pkObject);
-};
+// The base equality thunk returns a byte, which the alpha override normalizes.
+char __stdcall FUN_00aa0ae0(NiObject*);
 // @fnv 0x00a9b510
-bool FUN_00a9b510_shell::FUN_00a9b510(NiObject* pkObject)
+bool NiAlphaAccumulator::IsEqual(NiObject* pkObject) const
 {
-    bool b = ((FUN_00aa0ae0_stub*)this)->FUN_00aa0ae0(pkObject) != 0;
+    bool b = FUN_00aa0ae0(pkObject) != 0;
     return b;
 }
 
-struct FUN_00a9b530_shell : public NiAlphaAccumulator
-{
-    void* FUN_00a9b530();
-};
-
 extern const char* const g_011fa000_arg1;
 // @fnv 0x00a9b530
-void* FUN_00a9b530_shell::FUN_00a9b530()
+const NiRTTI* NiAlphaAccumulator::GetRTTI() const
 {
-    return (void*)&g_011fa000_arg1;
+    return (const NiRTTI*)&g_011fa000_arg1;
 }
 
 void* __cdecl FUN_00aa13e0(unsigned int);
@@ -359,20 +350,16 @@ struct FUN_00a9b850_Obj
     FUN_00a9b850_Prop* m9c;
 };
 
-struct FUN_00a9b850_shell : public NiAlphaAccumulator
-{
-    bool FUN_00a9b850(FUN_00a9b850_Obj* a1);
-};
-
 // @fnv 0x00a9b850
-bool FUN_00a9b850_shell::FUN_00a9b850(FUN_00a9b850_Obj* pObject)
+bool NiAlphaAccumulator::RegisterObject(NiGeometry* pkObject)
 {
+    FUN_00a9b850_Obj*& pObject = reinterpret_cast<FUN_00a9b850_Obj*&>(pkObject);
     FUN_00a9b850_Prop* p = pObject->m9c;
     int g = DAT_011f4748;
-    if ((p->unk18 & 1) && (!m_bSkipObjectsWithFlag13 || !((unsigned char)(p->unk18w >> 13) & 1)) &&
+    if ((p->unk18 & 1) && (!m_bObserveNoSortHint || !((unsigned char)(p->unk18w >> 13) & 1)) &&
         ((unsigned char)~(pObject->unk30 >> 6) & 1))
     {
-        reinterpret_cast<FUN_00b58570_Class*>(&m_kUnsortedGeometryList)->FUN_00b58570(&pObject);
+        reinterpret_cast<FUN_00b58570_Class*>(&m_kItems)->FUN_00b58570(&pObject);
         return true;
     }
     pObject->vfn_0DC(g);
@@ -501,133 +488,80 @@ struct S00a9b570_Geom
     }
 };
 
-struct S00a9b570_Node
+class ItemListNode
 {
-    S00a9b570_Node* m_pkNext;
-    S00a9b570_Node* m_pkPrev;
-    S00a9b570_Geom* m_element;
+  public:
+    ItemListNode* m_pkNext;
+    ItemListNode* m_pkPrev;
+    NiGeometry* m_element;
 };
 
-struct S00a9b570_List
+static inline NiGeometry* const& GetNext(ItemListNode*& pos)
 {
-    S00a9b570_Node* m_pkHead;
-    S00a9b570_Node* m_pkTail;
-    unsigned int m_uiCount;
-    S00a9b570_Node* GetHeadPos() const
-    {
-        return m_pkHead;
-    }
-    unsigned int GetSize() const
-    {
-        return m_uiCount;
-    }
-    S00a9b570_Geom* const& GetNext(S00a9b570_Node*& pos) const
-    {
-        S00a9b570_Geom* const& e = pos->m_element;
-        pos = pos->m_pkNext;
-        return e;
-    }
-};
-
-struct S00a9b570_Acc
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    S00a9b570_Cam* m_pkAccumulationCamera;
-    S00a9b570_List m_kUnsortedGeometryList;
-    S00a9b570_List* m_pkList;
-    int m_iGeometryCount;
-    int m_iGeometryCapacity;
-    S00a9b570_Geom** m_ppGeometries;
-    float* m_pfGeometrySortValues;
-    int m_iCurrentItem;
-    bool m_bSkipObjectsWithFlag13;
-    bool m_bSkipObjectsWithFlag14;
-    bool m_bInterface;
-
-    void FUN_00a9b570();
-    void FUN_00aa0b40(int start, int finish);
-};
+    NiGeometry* const& e = pos->m_element;
+    pos = pos->m_pkNext;
+    return e;
+}
 
 // @fnv 0x00a9b570
-void S00a9b570_Acc::FUN_00a9b570()
+void NiAlphaAccumulator::Sort()
 {
-    if (!m_pkList)
-        m_pkList = &m_kUnsortedGeometryList;
-    m_iGeometryCount = m_pkList->GetSize();
-    if (m_iGeometryCount == 0)
+    if (!m_kItemsToSortAndRender)
+        m_kItemsToSortAndRender = &m_kItems;
+    m_iNumItems = m_kItemsToSortAndRender->m_kItemCount.m_uiCount;
+    if (m_iNumItems == 0)
         return;
-    if (m_iGeometryCount > m_iGeometryCapacity)
+    if (m_iNumItems > m_iMaxItems)
     {
-        FUN_00aa10f0(m_ppGeometries);
-        m_iGeometryCapacity = m_iGeometryCount;
-        m_ppGeometries = (S00a9b570_Geom**)FUN_00aa1070(m_iGeometryCapacity * sizeof(S00a9b570_Geom*));
-        FUN_00aa10f0(m_pfGeometrySortValues);
-        m_pfGeometrySortValues = (float*)FUN_00aa1070(m_iGeometryCapacity * sizeof(float));
+        FUN_00aa10f0(m_ppkItems);
+        m_iMaxItems = m_iNumItems;
+        m_ppkItems = (NiGeometry**)FUN_00aa1070(m_iMaxItems * sizeof(NiGeometry*));
+        FUN_00aa10f0(m_pfDepths);
+        m_pfDepths = (float*)FUN_00aa1070(m_iMaxItems * sizeof(float));
     }
-    S00a9b570_Node* kPos = m_pkList->GetHeadPos();
-    S00a9b570_Pt kViewDir = m_pkAccumulationCamera->GetWorldTranslation();
+    ItemListNode* kPos = m_kItemsToSortAndRender->m_pkHead;
+    S00a9b570_Pt kViewDir = reinterpret_cast<const S00a9b570_Cam*>(m_pkCamera)->GetWorldTranslation();
     int i;
-    if (m_bInterface)
+    if (m_bInterfaceSort)
     {
-        for (i = 0; i < m_iGeometryCount; i++)
+        for (i = 0; i < m_iNumItems; i++)
         {
-            m_ppGeometries[i] = m_pkList->GetNext(kPos);
-            m_pfGeometrySortValues[i] = m_ppGeometries[i]->m_fFogDepth;
+            m_ppkItems[i] = GetNext(kPos);
+            m_pfDepths[i] = reinterpret_cast<S00a9b570_Geom*>(m_ppkItems[i])->m_fFogDepth;
         }
     }
-    else if (m_bSkipObjectsWithFlag14)
+    else if (m_bSortByClosestPoint)
     {
-        for (i = 0; i < m_iGeometryCount; i++)
+        for (i = 0; i < m_iNumItems; i++)
         {
-            m_ppGeometries[i] = m_pkList->GetNext(kPos);
-            S00a9b570_Geom* g = m_ppGeometries[i];
-            m_pfGeometrySortValues[i] =
+            m_ppkItems[i] = GetNext(kPos);
+            S00a9b570_Geom* g = reinterpret_cast<S00a9b570_Geom*>(m_ppkItems[i]);
+            m_pfDepths[i] =
                 S00a9b570_Closest(g->GetBoundingVolume().m_fBoundRadius, g->GetBoundingVolume().m_kCenter, kViewDir);
         }
     }
     else
     {
-        for (i = 0; i < m_iGeometryCount; i++)
+        for (i = 0; i < m_iNumItems; i++)
         {
-            m_ppGeometries[i] = m_pkList->GetNext(kPos);
-            m_pfGeometrySortValues[i] = S00a9b570_Dot(m_ppGeometries[i]->GetBoundingVolume().m_kCenter, kViewDir);
+            m_ppkItems[i] = GetNext(kPos);
+            m_pfDepths[i] = S00a9b570_Dot(reinterpret_cast<S00a9b570_Geom*>(m_ppkItems[i])->GetBoundingVolume().m_kCenter, kViewDir);
         }
     }
-    FUN_00aa0b40(0, m_iGeometryCount - 1);
+    QuickSort(0, m_iNumItems - 1);
 }
 
-struct DelS
-{
-    static void operator delete(void*, unsigned int);
-};
-struct FUN_00aa0dc0 : DelS
-{
-    char pad[0x30];
-    virtual ~FUN_00aa0dc0();
-};
-struct FUN_00a9b540 : FUN_00aa0dc0
-{
-    virtual ~FUN_00a9b540();
-};
 // @fnv 0x00a9b540
-FUN_00a9b540::~FUN_00a9b540()
+NiAlphaAccumulator::~NiAlphaAccumulator()
 {}
 
-namespace fnv_00a9b790 {
 class NiRenderer;
+namespace fnv_00a9b790 {
 extern NiRenderer* DAT_011f4748;
-
-struct S00a9b790_Node
-{
-    S00a9b790_Node* m_pkNext;
-    S00a9b790_Node* m_pkPrev;
-    void* m_element;
-};
 
 struct S00a9b790_NodeAllocator
 {
-    S00a9b790_Node* FUN_0043a010();
+    ItemListNode* FUN_0043a010();
 };
 
 class S00a9b790_NiAlphaProperty
@@ -775,71 +709,38 @@ class S00a9b790_NiVisibleArray
     }
 };
 
-class S00a9b790_VNiAccumulator
+static inline void AddTail(NiAlphaAccumulator* self, S00a9b790_NiGeometry* pkObject)
 {
-  public:
-    unsigned int m_layout0;
-    unsigned int m_layout4;
-    void* m_pkAccumulationCamera;
-};
+    ItemListNode* pkNode = ((S00a9b790_NodeAllocator*)&self->m_kItems.m_kItemCount)->FUN_0043a010();
+    pkNode->m_element = reinterpret_cast<NiGeometry*>(pkObject);
+    pkNode->m_pkNext = 0;
+    pkNode->m_pkPrev = self->m_kItems.m_pkTail;
+    ItemListNode* pkTail = self->m_kItems.m_pkTail;
+    if (pkTail)
+        pkTail->m_pkNext = pkNode;
+    else
+        self->m_kItems.m_pkHead = pkNode;
+    self->m_kItems.m_kItemCount.m_uiCount++;
+    self->m_kItems.m_pkTail = pkNode;
+}
 
-class S00a9b790_VNiBackToFrontAccumulator : public S00a9b790_VNiAccumulator
+}  // namespace fnv_00a9b790
+
+// @fnv 0x00a9b790
+void NiAlphaAccumulator::RegisterObjectArray(NiVisibleArray* array)
 {
-  public:
-    struct ItemList
-    {
-        S00a9b790_Node* m_pkHead;
-        S00a9b790_Node* m_pkTail;
-        struct Allocator
-        {
-            unsigned int m_uiCount;
-        } m_kItemCount;
-    } m_kUnsortedGeometryList;
-    ItemList* m_pkGeometryList;
-    int m_iGeometryCount;
-    int m_iGeometryCapacity;
-    void** m_ppGeometries;
-    float* m_pfGeometrySortValues;
-    int m_iCurrentItem;
-};
-
-class S00a9b790_VNiAlphaAccumulator : public S00a9b790_VNiBackToFrontAccumulator
-{
-  public:
-    bool m_bSkipObjectsWithFlag13;
-    bool m_bSkipObjectsWithFlag14;
-    bool m_bInterface;
-    unsigned char m_padding33;
-
-    void AddTail(S00a9b790_NiGeometry* pkObject)
-    {
-        S00a9b790_Node* pkNode = ((S00a9b790_NodeAllocator*)&m_kUnsortedGeometryList.m_kItemCount)->FUN_0043a010();
-        pkNode->m_element = pkObject;
-        pkNode->m_pkNext = 0;
-        pkNode->m_pkPrev = m_kUnsortedGeometryList.m_pkTail;
-        S00a9b790_Node* pkTail = m_kUnsortedGeometryList.m_pkTail;
-        if (pkTail)
-            pkTail->m_pkNext = pkNode;
-        else
-            m_kUnsortedGeometryList.m_pkHead = pkNode;
-        m_kUnsortedGeometryList.m_kItemCount.m_uiCount++;
-        m_kUnsortedGeometryList.m_pkTail = pkNode;
-    }
-    __forceinline void Body(S00a9b790_NiVisibleArray& kArray);
-};
-
-void S00a9b790_VNiAlphaAccumulator::Body(S00a9b790_NiVisibleArray& kArray)
-{
-    NiRenderer* pkRenderer = DAT_011f4748;
+    using namespace fnv_00a9b790;
+    S00a9b790_NiVisibleArray& kArray = reinterpret_cast<S00a9b790_NiVisibleArray&>(*array);
+    ::NiRenderer* pkRenderer = fnv_00a9b790::DAT_011f4748;
     const unsigned int uiQuantity = kArray.GetCount();
     for (unsigned int i = 0; i < uiQuantity; i++)
     {
         S00a9b790_NiGeometry& kObject = kArray.GetAt(i);
         const S00a9b790_NiAlphaProperty* pkAlpha = kObject.GetAlpha();
-        if (pkAlpha->GetAlphaBlending() && !(m_bSkipObjectsWithFlag13 && pkAlpha->GetNoSorter()) &&
+        if (pkAlpha->GetAlphaBlending() && !(m_bObserveNoSortHint && pkAlpha->GetNoSorter()) &&
             kObject.GetSortObject())
         {
-            AddTail(&kObject);
+            AddTail(this, &kObject);
         }
         else
         {
@@ -848,52 +749,27 @@ void S00a9b790_VNiAlphaAccumulator::Body(S00a9b790_NiVisibleArray& kArray)
     }
 }
 
-struct S00a9b790_Acc : NiAlphaAccumulator
-{
-    void FUN_00a9b790(S00a9b790_NiVisibleArray& kArray);
-};
-// @fnv 0x00a9b790
-void S00a9b790_Acc::FUN_00a9b790(S00a9b790_NiVisibleArray& kArray)
-{
-    ((S00a9b790_VNiAlphaAccumulator*)this)->Body(kArray);
-}
-}  // namespace fnv_00a9b790
-
-struct NiObject;
-struct CloningProcess;
 extern unsigned int kVtbl_NiAlphaAccumulator;
-struct CloneBaseInitializer
-{
-    void FUN_00aa0f00();
-};
-struct CloneCopyHelper
-{
-    void FUN_00aa0ab0(void*, CloningProcess*);
-};
-struct CloneAccumulator : NiAlphaAccumulator
-{
-    NiObject* FUN_00a9b730(CloningProcess*);
-};
 
 // Allocates a NiAlphaAccumulator clone, initializes it, copies skip flags, and returns the new object.
 // @fnv 0x00a9b730
-NiObject* CloneAccumulator::FUN_00a9b730(CloningProcess* cloning)
+NiObject* NiAlphaAccumulator::MakeClone(CloningProcess& cloning)
 {
     NiAlphaAccumulator* clone = (NiAlphaAccumulator*)FUN_00aa13e0(sizeof(NiAlphaAccumulator));
     if (clone)
     {
-        ((CloneBaseInitializer*)clone)->FUN_00aa0f00();
-        clone->m_layout0 = (unsigned int)&kVtbl_NiAlphaAccumulator;
-        clone->m_bSkipObjectsWithFlag13 = true;
-        clone->m_bSkipObjectsWithFlag14 = false;
-        clone->m_bInterface = false;
+        InitializeBackToFrontAccumulator(clone);
+        *(unsigned int*)clone = (unsigned int)&kVtbl_NiAlphaAccumulator;
+        clone->m_bObserveNoSortHint = true;
+        clone->m_bSortByClosestPoint = false;
+        clone->m_bInterfaceSort = false;
     }
     else
     {
         clone = 0;
     }
-    ((CloneCopyHelper*)this)->FUN_00aa0ab0(clone, cloning);
-    clone->m_bSkipObjectsWithFlag13 = m_bSkipObjectsWithFlag13;
-    clone->m_bSkipObjectsWithFlag14 = m_bSkipObjectsWithFlag14;
+    CopyMemberData(clone, cloning);
+    clone->m_bObserveNoSortHint = m_bObserveNoSortHint;
+    clone->m_bSortByClosestPoint = m_bSortByClosestPoint;
     return (NiObject*)clone;
 }

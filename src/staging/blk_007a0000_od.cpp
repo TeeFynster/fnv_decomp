@@ -1,8 +1,15 @@
+#include "../../include/BSStringT.h"
 
 // src/staging/blk_007a0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/NiPointer.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/Menu.h"
+#include "../../include/MapMenu.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/SL.h"
 
 struct FUN_007a1400_class
 {
@@ -46,60 +53,35 @@ Unk65* __thiscall Unk65a::FUN_007ab230(Unk65* other)
     return other;
 }
 
-extern "C" void* __cdecl DAT_01075794;
+// Opaque MessageMenu element types; the arrays never dereference their elements here.
+struct MessageMenuEntry;
+struct PerkActivation;
 
-struct NavMeshInfo;
-
-struct AX
-{
-    void FUN_006b3eb0(unsigned int, unsigned int);
-};
-
-struct FUN_007ab590 : BSSimpleArray<NavMeshInfo*, 1024>
-{
-    FUN_007ab590* DeserializeFromFile();
-};
-
-// Sets the object's vtable pointer to DAT_01075794, calls FUN_006b3eb0(0, 0), and returns this.
 // @fnv 0x007ab590
-FUN_007ab590* FUN_007ab590::DeserializeFromFile()
+template <>
+BSSimpleArray<MessageMenuEntry*, 1024>::BSSimpleArray()
 {
-    *reinterpret_cast<void**>(this) = &DAT_01075794;
-    reinterpret_cast<AX*>(this)->FUN_006b3eb0(0, 0);
-    return this;
+    FUN_006b3eb0(0, false);
 }
 
-namespace fnv_007ab610 {
-extern int DAT_010757a8;
-struct AX
-{
-    void FUN_006b3eb0(unsigned int, unsigned int);
-    AX* FUN_007ab610();
-};
 // @fnv 0x007ab610
-AX* AX::FUN_007ab610()
+template <>
+BSSimpleArray<PerkActivation*, 1024>::BSSimpleArray()
 {
-    *(int*)this = (int)&DAT_010757a8;
-    FUN_006b3eb0(0, 0);
-    return this;
+    FUN_006b3eb0(0, false);
 }
-}  // namespace fnv_007ab610
 
-extern int DAT_010757a8;
-
-struct GlobalObject_00869f00
+// @fnv 0x007ab5f0
+template <>
+BSSimpleArray<MessageMenuEntry*, 1024>::~BSSimpleArray()
 {
-    void __thiscall Clear(bool);
-    void __thiscall FUN_007ab670();
-};
-
-void __thiscall GlobalObject_00869f00::Clear(bool)
-{}
+    Clear(true);
+}
 
 // @fnv 0x007ab670
-void __thiscall GlobalObject_00869f00::FUN_007ab670()
+template <>
+BSSimpleArray<PerkActivation*, 1024>::~BSSimpleArray()
 {
-    *(int*)this = (int)&DAT_010757a8;
     Clear(true);
 }
 
@@ -125,22 +107,6 @@ unsigned int __thiscall FUN_007b8f10_Class::GetField630()
     return *(unsigned int*)((char*)this + 0x630);
 }
 
-struct GlobalObject_007ab590
-{
-    ~GlobalObject_007ab590();
-    void* __thiscall FUN_007ab5c0(unsigned int flags);
-};
-
-// Runs the destructor and, if flags has bit 0 set, frees the object with operator delete, then returns this.
-// @fnv 0x007ab5c0
-void* __thiscall GlobalObject_007ab590::FUN_007ab5c0(unsigned int flags)
-{
-    GlobalObject_007ab590::~GlobalObject_007ab590();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
 void __cdecl FUN_00730490(char*, int);
 
 struct FUN_007b52a0_class
@@ -157,27 +123,18 @@ void __thiscall FUN_007b52a0_class::FUN_007b52a0()
         FUN_00730490(m_ptr, m_uiItemCount + 1);
 }
 
-struct EffectSetting
-{
-    EffectSetting* GetLight();
-};
-struct MapMenu_007a1880
-{
-    unsigned char m_data[0x10c];
-    EffectSetting* pEffect;
-    bool bEffectChanged;
-};
-extern MapMenu_007a1880* DAT_011da368;
+extern MapMenu* DAT_011da368;
+// The parent-world accessor shares 0x004fd380 with EffectSetting::GetLight (pointer at offset 0xc0).
 // @fnv 0x007a1880
-void __cdecl FUN_007a1880(EffectSetting* effect)
+void __cdecl FUN_007a1880(TESWorldSpace* worldspace)
 {
     if (DAT_011da368)
     {
-        EffectSetting* previous = DAT_011da368->pEffect;
-        DAT_011da368->pEffect = effect;
-        while (DAT_011da368->pEffect && DAT_011da368->pEffect->GetLight())
-            DAT_011da368->pEffect = DAT_011da368->pEffect->GetLight();
-        DAT_011da368->bEffectChanged = previous != DAT_011da368->pEffect;
+        TESWorldSpace* previous = DAT_011da368->m_pCurrentWorldspace;
+        DAT_011da368->m_pCurrentWorldspace = worldspace;
+        while (DAT_011da368->m_pCurrentWorldspace && reinterpret_cast<EffectSetting*>(DAT_011da368->m_pCurrentWorldspace)->GetLight())
+            DAT_011da368->m_pCurrentWorldspace = reinterpret_cast<TESWorldSpace*>(reinterpret_cast<EffectSetting*>(DAT_011da368->m_pCurrentWorldspace)->GetLight());
+        DAT_011da368->m_bLocalMapMode = previous != DAT_011da368->m_pCurrentWorldspace;
     }
 }
 
@@ -224,50 +181,12 @@ void FUN_007a62b0_Class::FUN_007a62b0()
     FUN_007a8030_v5(FUN_007a8030(0) - 1);
 }
 
-struct BSS
-{
-    ~BSS();
-    BSS* FUN_007a86b0(unsigned int flags);
-};
+
 // Destructs the object and, if bit 0 of flags is set, frees its memory, then returns the pointer.
 // @fnv 0x007a86b0
-BSS* BSS::FUN_007a86b0(unsigned int flags)
+template <> BSStringT<char>* BSStringT<char>::FUN_007a86b0(unsigned int flags)
 {
-    this->BSS::~BSS();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
-struct BSSimpleArrayActor
-{
-    void __thiscall Clear(bool);
-};
-void* __cdecl DAT_01075794;
-
-struct FUN_007ab5f0_class : BSSimpleArrayActor
-{
-    void* m_data;
-    void FUN_007ab5f0();
-};
-
-// @fnv 0x007ab5f0
-void FUN_007ab5f0_class::FUN_007ab5f0()
-{
-    m_data = &DAT_01075794;
-    Clear(true);
-}
-
-struct GlobalObject_007ab610
-{
-    ~GlobalObject_007ab610();
-    void* FUN_007ab640(unsigned int flags);
-};
-// Destroys the object, optionally frees its memory when flags has bit 0 set, and returns the object pointer.
-// @fnv 0x007ab640
-void* GlobalObject_007ab610::FUN_007ab640(unsigned int flags)
-{
-    this->GlobalObject_007ab610::~GlobalObject_007ab610();
+    this->~BSStringT();
     if (flags & 1)
         operator delete(this);
     return this;
@@ -462,17 +381,6 @@ struct SceneInner
     unsigned char m_flag08;
 };
 
-struct SceneHolder
-{
-    SceneInner* m_00;
-};
-
-struct SceneNodeRef
-{
-    SceneHolder* FUN_006815c0();
-    SceneNodeRef* FUN_00726070();
-};
-
 struct FUN_007a80e0_cls
 {
     int unk00;
@@ -497,13 +405,13 @@ void FUN_007a80e0_cls::InitSceneNodes()
 {
     this->m_1c = 0;
     this->m_20 = 0.0f;
-    for (SceneNodeRef* pNodeRef = this ? (SceneNodeRef*)((char*)this + 4) : 0;
-         pNodeRef != 0 && pNodeRef->FUN_006815c0()->m_00 != 0; pNodeRef = pNodeRef->FUN_00726070())
+    for (SL* pNodeRef = this ? (SL*)((char*)this + 4) : 0;
+         pNodeRef != 0 && pNodeRef->FUN_006815c0() != 0; pNodeRef = pNodeRef->FUN_00726070())
     {
-        if (pNodeRef->FUN_006815c0()->m_00->m_flag08 == 0)
+        if (reinterpret_cast<SceneInner*>(pNodeRef->FUN_006815c0())->m_flag08 == 0)
         {
-            pNodeRef->FUN_006815c0()->m_00->m_00->FUN_00700320(0xfac, this->m_1c++);
-            this->AccumulateTileHeight(pNodeRef->FUN_006815c0()->m_00->m_00);
+            reinterpret_cast<SceneInner*>(pNodeRef->FUN_006815c0())->m_00->FUN_00700320(0xfac, this->m_1c++);
+            this->AccumulateTileHeight(reinterpret_cast<SceneInner*>(pNodeRef->FUN_006815c0())->m_00);
         }
     }
     this->FUN_007a8580();
@@ -553,19 +461,25 @@ int __cdecl FUN_007abda0()
     return 0x3f8;
 }
 
+template <class T>
+NiPointer<T>::NiPointer(T* object)
+{
+    m_pObject = object;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+
+template <class T>
+NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+
 struct RefObj7ac9f0
 {
     void IncRefCount();
     void DecRefCount();
-};
-
-struct Vec3_7ac9f0
-{
-    float x;
-    float y;
-    float z;
-    Vec3_7ac9f0()
-    {}
 };
 
 struct Base7ac9f0
@@ -637,28 +551,28 @@ struct FUN_007ac9f0 : Base7ac9f0
     NiPointer<RefObj7ac9f0> spObj3;
     NiPointer<RefObj7ac9f0> spObj4;
     NiPointer<RefObj7ac9f0> spObj5;
-    Vec3_7ac9f0 kPos0;
-    Vec3_7ac9f0 kPos1;
+    NiPoint3 kPos0;
+    NiPoint3 kPos1;
     int unk128;
     int unk12C;
     int unk130;
     int unk134;
     int unk138;
     int unk13C;
-    Vec3_7ac9f0 kPos2;
+    NiPoint3 kPos2;
     FUN_007ac9f0();
     virtual ~FUN_007ac9f0();
 };
 
 // @fnv 0x007ac9f0
-FUN_007ac9f0::FUN_007ac9f0()
+FUN_007ac9f0::FUN_007ac9f0() : spObj0(0), spObj1(0), spObj2(0), spObj3(0), spObj4(0), spObj5(0)
 {}
 
 extern "C" const double DAT_01012060;
 struct ActiveEffectEntry
 {
     float FUN_00a011b0(unsigned int id);
-    void SetFloat(unsigned int id, float value, bool update);
+    void FUN_00a012d0(unsigned int id, float value, bool update);
 };
 struct ActiveEffectCollection
 {
@@ -679,7 +593,7 @@ void ActiveEffectCollection::FUN_007b4530(int amount)
         ActiveEffectEntry* pEffect = **FUN_0057cbe0(&it);
         float fAmount = pEffect->FUN_00a011b0(4002);
         fAmount = (float)amount * rate + fAmount;
-        pEffect->SetFloat(4002, fAmount, true);
+        pEffect->FUN_00a012d0(4002, fAmount, true);
     }
 }
 
@@ -718,7 +632,6 @@ void __thiscall FUN_007b5330_Class::FUN_007b5330(int arg1, int* arg2)
     this->InsertBefore(arg1, result);
 }
 
-namespace q72 {
 struct Target
 {
     void FUN_00700320(int id, int idx);
@@ -729,41 +642,20 @@ struct Item
     int u4;
     bool m_bSkip;
 };
-struct SL
-{
-    Item* item;
-    SL* next;
-    Item*& FUN_006815c0();
-    SL* FUN_00726070();
-};
-struct Head
-{
-    int m_iWordAt00;
-};
-struct Menu : Head, SL
-{
-    char pad0c[0x10];
-    unsigned short m_usElementCount;
-    float m_fValue;
-    void AccumulateTileHeight(Target* t);
-    void FUN_007a7700();
-    void FUN_007a73e0();
-    void FUN_007a7260();
-};
 // @fnv 0x007a7260
 void Menu::FUN_007a7260()
 {
-    m_usElementCount = 0;
-    m_fValue = 0.0f;
-    for (SL* it = this; it && it->FUN_006815c0(); it = it->FUN_00726070())
+    // Preserve the original word/float accesses at 0x1c/0x20 and list head at 0x04.
+    *reinterpret_cast<unsigned short*>(&m_bIsSpecial) = 0;
+    *reinterpret_cast<float*>(&m_iMenuId) = 0.0f;
+    for (SL* it = this ? reinterpret_cast<SL*>(&pMenu) : 0; it && it->FUN_006815c0(); it = it->FUN_00726070())
     {
         if (!it->FUN_006815c0()->m_bSkip)
         {
-            it->FUN_006815c0()->m_pFlagTarget->FUN_00700320(0xfac, m_usElementCount++);
+            it->FUN_006815c0()->m_pFlagTarget->FUN_00700320(0xfac, (*reinterpret_cast<unsigned short*>(&m_bIsSpecial))++);
             AccumulateTileHeight(it->FUN_006815c0()->m_pFlagTarget);
         }
     }
     FUN_007a7700();
     FUN_007a73e0();
-}
 }

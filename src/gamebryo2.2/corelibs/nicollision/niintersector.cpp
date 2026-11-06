@@ -2,6 +2,8 @@
 // src/gamebryo2.2/corelibs/nicollision/niintersector.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/niintersector.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/MemoryManager.h"
+
 struct VTableObject
 {
     virtual void __fastcall Query(int value);
@@ -104,10 +106,6 @@ char* FnvCpu_FUN_00eae710_CpuObject::FUN_00eae710()
     return reinterpret_cast<char*>(this) + 44;
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00eae770
 {

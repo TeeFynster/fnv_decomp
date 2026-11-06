@@ -2,21 +2,11 @@
 // src/fallout/ai/trespasspackage.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/trespasspackage.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct BGSLoadFormBuffer
-{
-    bool __thiscall ReadFormIdentifier(void*);
-    void __thiscall ReadTypedData(void*, unsigned int);
-};
+#include "../../../include/BGSLoadFormBuffer.h"
+#include "../../../include/BGSSaveFormBuffer.h"
+#include "../../../include/TrespassPackage.h"
+#include "../../../include/TESSaveLoadGame.h"
 
-struct TESPackage
-{
-    void __thiscall LoadGame(BGSLoadFormBuffer*);
-};
-
-struct TrespassPackage : TESPackage
-{
-    void __thiscall FUN_009f9840(BGSLoadFormBuffer*);
-};
 
 // @fnv 0x009f9840
 void __thiscall TrespassPackage::FUN_009f9840(BGSLoadFormBuffer* apLoadGameBuffer)
@@ -31,15 +21,9 @@ void __thiscall TrespassPackage::FUN_009f9840(BGSLoadFormBuffer* apLoadGameBuffe
     apLoadGameBuffer->ReadFormIdentifier((void*)((char*)this + 0x8c));
 }
 
-struct TrespassPackageShell : TrespassPackage
-{
-    void __thiscall FUN_009f9450();
-    void* __thiscall FUN_009f9220(unsigned int flags);
-};
-
 // Calls FUN_009f9450, then deletes this when flags has bit 1 set, and returns this.
 // @fnv 0x009f9220
-void* __thiscall TrespassPackageShell::FUN_009f9220(unsigned int flags)
+void* __thiscall TrespassPackage::FUN_009f9220(unsigned int flags)
 {
     FUN_009f9450();
     if (flags & 1)
@@ -47,7 +31,6 @@ void* __thiscall TrespassPackageShell::FUN_009f9220(unsigned int flags)
     return this;
 }
 
-struct TESForm;
 TESForm* __cdecl _ref_004839c0(TESForm*);
 
 struct FUN_00679a90_shell
@@ -55,13 +38,8 @@ struct FUN_00679a90_shell
     void __thiscall DispatchToSubobjects(void*);
 };
 
-struct FUN_009f98e0_shell : public TrespassPackage
-{
-    void __thiscall FUN_009f98e0(unsigned int);
-};
-
 // @fnv 0x009f98e0
-void __thiscall FUN_009f98e0_shell::FUN_009f98e0(unsigned int a)
+void __thiscall TrespassPackage::FUN_009f98e0(unsigned int a)
 {
     ((FUN_00679a90_shell*)this)->DispatchToSubobjects((void*)a);
     *(TESForm**)((char*)this + 0x88) =
@@ -82,76 +60,55 @@ struct Base009f8770
 {
     void __thiscall FUN_00679340();
 };
-struct TESSaveLoadGame
-{
-    unsigned char __thiscall FUN_008df040();
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
-struct TrespassPackageInit : Base009f8770
-{
-    void __thiscall LoadTrespassPackage();
-};
 // @fnv 0x009f9660
-void __thiscall TrespassPackageInit::LoadTrespassPackage()
+void __thiscall TrespassPackage::LoadTrespassPackage()
 {
-    FUN_00679340();
-    ((STR00*)this)->FUN_00484d00(this + 0x80, 4);
-    ((STR00*)this)->FUN_00484d00(this + 0x84, 4);
-    ((STR00*)this)->FUN_00484d00(this + 0x90, 4);
+    ((Base009f8770*)this)->FUN_00679340();
+    ((STR00*)this)->FUN_00484d00((char*)this + 0x80, 4);
+    ((STR00*)this)->FUN_00484d00((char*)this + 0x84, 4);
+    ((STR00*)this)->FUN_00484d00((char*)this + 0x90, 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x6c)
     {
-        ((STR00*)this)->FUN_00484d00(this + 0x94, 4);
-        ((STR00*)this)->FUN_00484d00(this + 0x98, 4);
+        ((STR00*)this)->FUN_00484d00((char*)this + 0x94, 4);
+        ((STR00*)this)->FUN_00484d00((char*)this + 0x98, 4);
     }
     unsigned int v1;
     ((FUN_00484d40_Host*)this)->FUN_00484d40(&v1, 4);
-    *(unsigned int*)(this + 0x88) = v1;
+    *(unsigned int*)((char*)this + 0x88) = v1;
     unsigned int uiValue8c;
     ((FUN_00484d40_Host*)this)->FUN_00484d40(&uiValue8c, 4);
-    *(unsigned int*)(this + 0x8c) = uiValue8c;
+    *(unsigned int*)((char*)this + 0x8c) = uiValue8c;
 }
 
 struct FUN_006797c0_shell
 {
     void __thiscall FUN_006797c0(void*);
 };
-struct BGSSaveFormBuffer
-{
-    void __thiscall SerializeFormData(void*, int);
-    void __thiscall SaveData(void*, int, int);
-};
-struct FUN_009f9790_shell
-{
-    void __thiscall SaveToBuffer(BGSSaveFormBuffer* apSaveGameBuffer);
-};
 // Calls the base save routine, then writes five 4-byte fields at offsets 0x80-0x98 and two pointers at 0x88/0x8c to the save buffer.
 // @fnv 0x009f9790
-void __thiscall FUN_009f9790_shell::SaveToBuffer(BGSSaveFormBuffer* apSaveGameBuffer)
+void __thiscall TrespassPackage::SaveToBuffer(BGSSaveFormBuffer* apSaveGameBuffer)
 {
     ((FUN_006797c0_shell*)this)->FUN_006797c0(apSaveGameBuffer);
-    apSaveGameBuffer->SaveData(this + 0x80, 4, 0);
-    apSaveGameBuffer->SaveData(this + 0x84, 4, 0);
-    apSaveGameBuffer->SaveData(this + 0x90, 4, 0);
-    apSaveGameBuffer->SaveData(this + 0x94, 4, 0);
-    apSaveGameBuffer->SaveData(this + 0x98, 4, 0);
-    apSaveGameBuffer->SerializeFormData(*(void**)(this + 0x88), 0);
-    apSaveGameBuffer->SerializeFormData(*(void**)(this + 0x8c), 0);
+    apSaveGameBuffer->SaveData((char*)this + 0x80, 4, 0);
+    apSaveGameBuffer->SaveData((char*)this + 0x84, 4, 0);
+    apSaveGameBuffer->SaveData((char*)this + 0x90, 4, 0);
+    apSaveGameBuffer->SaveData((char*)this + 0x94, 4, 0);
+    apSaveGameBuffer->SaveData((char*)this + 0x98, 4, 0);
+    apSaveGameBuffer->SerializeFormData(*(void**)((char*)this + 0x88), 0);
+    apSaveGameBuffer->SerializeFormData(*(void**)((char*)this + 0x8c), 0);
 }
 
 struct Saver
 {
     unsigned short FUN_00678fd0();
 };
-struct FUN_009f9500_shell : public Saver
-{
-    unsigned short FUN_009f9500();
-};
 // Computes the save size: adds FUN_00678fd0's result, 12, 8, and two 4-byte blocks when g_TESSaveLoadGame's version is at least 108.
 // @fnv 0x009f9500
-unsigned short FUN_009f9500_shell::FUN_009f9500()
+unsigned short TrespassPackage::FUN_009f9500()
 {
     unsigned short usSize = 0;
-    usSize += FUN_00678fd0();
+    usSize += ((Saver*)this)->FUN_00678fd0();
     usSize += 12;
     if (g_TESSaveLoadGame->FUN_008df040() >= 108)
     {
@@ -177,26 +134,12 @@ struct FUN_00484d20_Class
     void __thiscall ForwardToSaveLoadGame(int, int);
 };
 
-struct SaveManager
-{
-    unsigned char __thiscall FUN_008df040();
-};
-
-extern SaveManager* DAT_011de45c;
+extern TESSaveLoadGame* DAT_011de45c;
 
 unsigned int __fastcall _ref_0084e3a0(void*);
 
-struct FUN_009f9570_shell
-{
-    unsigned char padding[0x88];
-    TESForm* pOwner;
-    TESForm* pReferencedForm;
-
-    void __thiscall SaveFormRefs();
-};
-
 // @fnv 0x009f9570
-void FUN_009f9570_shell::SaveFormRefs()
+void TrespassPackage::SaveFormRefs()
 {
     unsigned int iobjectOwnedID;
     unsigned int iownerID;
@@ -219,14 +162,14 @@ void FUN_009f9570_shell::SaveFormRefs()
     }
 
     iownerID = 0;
-    if (pOwner != 0)
-        iownerID = _ref_0084e3a0(pOwner);
+    if (*(TESForm**)((char*)this + 0x88) != 0)
+        iownerID = _ref_0084e3a0(*(TESForm**)((char*)this + 0x88));
 
     reinterpret_cast<FUN_00484d20_Class*>(this)->ForwardToSaveLoadGame(reinterpret_cast<int>(&iownerID), 4);
 
     iobjectOwnedID = 0;
-    if (pReferencedForm != 0)
-        iobjectOwnedID = _ref_0084e3a0(pReferencedForm);
+    if (*(TESForm**)((char*)this + 0x8c) != 0)
+        iobjectOwnedID = _ref_0084e3a0(*(TESForm**)((char*)this + 0x8c));
 
     reinterpret_cast<FUN_00484d20_Class*>(this)->ForwardToSaveLoadGame(reinterpret_cast<int>(&iobjectOwnedID), 4);
 }

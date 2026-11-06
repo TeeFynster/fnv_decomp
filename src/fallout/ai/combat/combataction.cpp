@@ -1,6 +1,38 @@
 // fallout/ai/combat/combataction.cpp: CombatAction (12 functions)
 
 #include "combataction_decls.h"
+#include "../../../../include/CombatAction.h"
+#include "../../../../include/CombatState.h"
+#include "../../../../include/CombatActionAcquireLineOfSight.h"
+#include "../../../../include/CombatActionActivateCombatItem.h"
+#include "../../../../include/CombatActionApproachTarget.h"
+#include "../../../../include/CombatActionAttackGrenade.h"
+#include "../../../../include/CombatActionAttackGrenadeFlushTarget.h"
+#include "../../../../include/CombatActionAttackGrenadeFromCover.h"
+#include "../../../../include/CombatActionAttackHandToHand.h"
+#include "../../../../include/CombatActionAttackMelee.h"
+#include "../../../../include/CombatActionAttackRanged.h"
+#include "../../../../include/CombatActionAttackRangedExplosive.h"
+#include "../../../../include/CombatActionAttackRangedExplosiveFromCover.h"
+#include "../../../../include/CombatActionAttackRangedFromCover.h"
+#include "../../../../include/CombatActionAvoidThreat.h"
+#include "../../../../include/CombatActionDodge.h"
+#include "../../../../include/CombatActionDrawWeapon.h"
+#include "../../../../include/CombatActionFlee.h"
+#include "../../../../include/CombatActionHide.h"
+#include "../../../../include/CombatActionIgnoreBlockedTarget.h"
+#include "../../../../include/CombatActionInvestigate.h"
+#include "../../../../include/CombatActionMove.h"
+#include "../../../../include/CombatActionMoveAndAttackGrenade.h"
+#include "../../../../include/CombatActionMoveAndAttackRanged.h"
+#include "../../../../include/CombatActionMoveAndAttackRangedExplosive.h"
+#include "../../../../include/CombatActionMoveAndSwitchToMelee.h"
+#include "../../../../include/CombatActionSearch.h"
+#include "../../../../include/CombatActionSwitchWeapon.h"
+#include "../../../../include/CombatActionUseCombatItem.h"
+#include "../../../../include/CombatWorldStateArray.h"
+#include "../../../../include/CombatWorldStateListNode.h"
+#include "../../../../include/BSThread.h"
 
 // Creates and returns a new CombatAction subclass instance matching the given COMBAT_ACTION type, warning and returning 0 for unknown types.
 // @fnv 0x00979f90
@@ -76,84 +108,34 @@ struct CombatActionEntry
 };
 extern CombatActionEntry DAT_011a4280[];
 
-struct BSThread
-{
-    unsigned int GetThreadID();
-};
-
-struct FUN_00979e20_shell
-{
-    char* GetCombatActionName();
-};
-
 // @fnv 0x00979e20
-char* FUN_00979e20_shell::GetCombatActionName()
+char* CombatAction::GetCombatActionName()
 {
     return DAT_011a4280[reinterpret_cast<BSThread*>(this)->GetThreadID()].pName;
 }
 
-namespace fnv_00979e40 {
-struct CombatActionEntry
-{
-    char* pName;
-    float m_fPathingCostCur;
-    int iFlags;
-};
-extern CombatActionEntry DAT_011a4280[];
-
-struct BSThread
-{
-    unsigned int GetThreadID();
-};
-
-struct CombatController;
-
-struct FUN_00979e40_shell
-{
-    float FUN_00979e40(CombatController* apCombatController, int aiActionValue);
-};
-
 // @fnv 0x00979e40
-float FUN_00979e40_shell::FUN_00979e40(CombatController* apCombatController, int aiActionValue)
+float CombatAction::FUN_00979e40(CombatController* apCombatController, int aiActionValue)
 {
     return DAT_011a4280[reinterpret_cast<BSThread*>(this)->GetThreadID()].m_fPathingCostCur;
 }
-}  // namespace fnv_00979e40
 
 struct TaskQueueInterface
 {
     static void __cdecl CopyStringToBuffer(char*, unsigned int, const char*);
 };
 
-struct FUN_00979e60_shell
-{
-    char* GetCombatActionName();
-    void FUN_00979e60(char* apDebugText, unsigned int aiMaxLength, int aiActionValue);
-};
-
 // @fnv 0x00979e60
-void FUN_00979e60_shell::FUN_00979e60(char* apDebugText, unsigned int aiMaxLength, int aiActionValue)
+void CombatAction::FUN_00979e60(char* apDebugText, unsigned int aiMaxLength, int aiActionValue)
 {
     TaskQueueInterface::CopyStringToBuffer(apDebugText, aiMaxLength, GetCombatActionName());
 }
 
 struct CombatController;
-struct CombatStateArray
-{
-    bool FUN_009aadc0(unsigned int, int);
-};
 struct UnsignedIdHandle
 {
     int _ref_00726070();
     operator unsigned int() const;
-};
-struct B006815c0
-{
-    UnsignedIdHandle** _ref_006815c0();
-};
-struct CombatWorldStateListNext
-{
-    CombatWorldStateListNode* GetNext();
 };
 struct TgtOps
 {
@@ -168,15 +150,9 @@ struct FUN_00979f70_shell
     void FUN_00979f70(unsigned int);
 };
 
-struct FUN_00979e90_shell
-{
-    bool FUN_00979f50(int, int*);
-    bool FUN_00979e90(CombatController* apCombatController, CombatStateArray* apWorldStateArray, int aiActionValue);
-};
-
 // @fnv 0x00979e90
-bool FUN_00979e90_shell::FUN_00979e90(CombatController* apCombatController, CombatStateArray* apWorldStateArray,
-                                      int aiActionValue)
+bool CombatAction::FUN_00979e90(CombatController* apCombatController, CombatWorldStateArray* apWorldStateArray,
+                                 int aiActionValue)
 {
     UnsignedIdHandle* pWorldState4;
     int iValue3;
@@ -186,14 +162,14 @@ bool FUN_00979e90_shell::FUN_00979e90(CombatController* apCombatController, Comb
     pList = reinterpret_cast<CombatWorldStateListNode*>(reinterpret_cast<TgtOps*>(this)->GetPosition());
     while (pList)
     {
-        pWorldState4 = *reinterpret_cast<B006815c0*>(pList)->_ref_006815c0();
+        pWorldState4 = pList->operator->()->item;
         if (pWorldState4)
         {
             iValue3 = pWorldState4->_ref_00726070() == -1 ? aiActionValue : pWorldState4->_ref_00726070();
             if (!apWorldStateArray->FUN_009aadc0(*pWorldState4, iValue3))
                 return false;
         }
-        pList = reinterpret_cast<CombatWorldStateListNext*>(pList)->GetNext();
+        pList = pList->GetNext();
     }
     _iCombatLocation = -1;
     if (FUN_00979f50(1, &_iCombatLocation))
@@ -202,21 +178,17 @@ bool FUN_00979e90_shell::FUN_00979e90(CombatController* apCombatController, Comb
     return true;
 }
 
-struct FUN_009aa410_shell
+// The shared node has no declaration for FindStateByType at 0x009aa410.
+struct CombatActionStateListAccess : CombatWorldStateListNode
 {
     void FindStateByType(int, int);
 };
 
-struct FUN_00979f50_shell
-{
-    void FUN_00979f50(int a, int b);
-};
-
 // Calls FindStateByType on the object at offset 0xc of this, passing a and b through.
 // @fnv 0x00979f50
-void FUN_00979f50_shell::FUN_00979f50(int aiArg1, int aiArg2)
+void CombatAction::FUN_00979f50(int aiArg1, int aiArg2)
 {
-    reinterpret_cast<FUN_009aa410_shell*>(reinterpret_cast<char*>(this) + 0xc)->FindStateByType(aiArg1, aiArg2);
+    reinterpret_cast<CombatActionStateListAccess*>(&m_kActionWorldStateNode)->FindStateByType(aiArg1, aiArg2);
 }
 
 namespace fnv_00979f70 {
@@ -264,14 +236,6 @@ bool FUN_0097abd0(char* apCombatActionName, float afCost)
 }  // namespace fnv_0097abd0
 
 struct CombatController;
-struct FUN_009cdac0_shell
-{
-    float GetField60Float();
-};
-struct CombatState : FUN_009cdac0_shell
-{
-    float FUN_0097ac90(int);
-};
 struct IMH
 {
     CombatState* FUN_00586150();
@@ -288,20 +252,15 @@ float GetWeaponDPSDeficit(CombatController* apCombatController, int aeWeaponType
     float fmaxAttackDPS;
 
     pcombatState = reinterpret_cast<IMH*>(apCombatController)->FUN_00586150();
-    fattackDPS = pcombatState->FUN_0097ac90(aeWeaponType);
+    fattackDPS = pcombatState->GetCombatWeaponDPS(aeWeaponType);
     if (fattackDPS == _gModifierZero)
         return DAT_0108ca80;
-    fmaxAttackDPS = pcombatState->GetField60Float();
+    fmaxAttackDPS = pcombatState->GetMaxCombatWeaponDPS();
     return fmaxAttackDPS - fattackDPS;
 }
 
-struct FUN_0097ac90_shell
-{
-    float FUN_0097ac90(int aiIndex);
-};
-
 // @fnv 0x0097ac90
-float FUN_0097ac90_shell::FUN_0097ac90(int aiIndex)
+float CombatState::GetCombatWeaponDPS(int aiIndex)
 {
     return reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x3c)[aiIndex];
 }
@@ -330,6 +289,9 @@ float FUN_0097acb0(CombatController* apCombatController, CoordinateTriple* arSta
 
 extern int DAT_0108cab8;
 
+// CombatWorldStateListNode currently has no nontrivial constructor or destructor.
+// Keep this constructor's local representation until the shared node supports
+// the four initialization calls and their exception cleanup at 0x00979bd0.
 struct CondS
 {
     int data[2];

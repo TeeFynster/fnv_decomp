@@ -1,3 +1,6 @@
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/Pair.h"
 
 // src/havok/common/base/memory/system/freelist/hkfreelistmemorysystem.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/memory/system/freelist/hkfreelistmemorysystem.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -122,26 +125,7 @@ void __thiscall FUN_00cd0940_shell::ResetRecordState(int* aiParams, unsigned cha
     }
 }
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiBytes) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct PtrArrayMember
 {
@@ -151,12 +135,16 @@ struct PtrArrayMember
 
     ~PtrArrayMember() throw()
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_debug);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
         if ((uCapacity & 0x80000000) == 0)
-            pAllocator->FreeArray(m_ppData, (uCapacity & 0x3fffffff) * 4);
+        {
+            // Preserve virtual slot 4; the shared header declares FreeArray as nonvirtual.
+            typedef void (__thiscall *FreeArrayFn)(hkMemoryAllocator*, void*, unsigned int);
+            ((FreeArrayFn*)*(void**)pAllocator)[4](pAllocator, m_ppData, (uCapacity & 0x3fffffff) * 4);
+        }
         m_ppData = 0;
         m_uCapacity = 0x80000000;
     }
@@ -289,12 +277,6 @@ struct Gap400
     Gap040 g0d;
     Gap040 g0e;
     Gap040 g0f;
-};
-
-struct Pair
-{
-    int a;
-    int b;
 };
 
 struct Flags
@@ -1595,17 +1577,7 @@ namespace fnv_00cd0b30 {
 extern "C" char str_010cade0;
 extern "C" char str_010cadb4;
 
-struct AudioHolderStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    void* m_pAllocator;
-};
-
-AudioHolderStub* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void* pAllocator, void* pArray, unsigned int auiNewSize);
 
 struct Target_cc01
@@ -1685,10 +1657,10 @@ void FUN_00cd0b30_cls::FUN_00cd0b30(int apTarget)
     {
         if (*(p - 8) != 0)
         {
-            AudioHolderStub* holder = FUN_00c85750();
+            hkMemoryRouter* holder = FUN_00c85750();
             if (localData.m_nCallbackId == (localData.m_cA & 0x3fffffffu))
             {
-                ResizeAudioStream(holder->m_pAllocator, &localData.m_ppA, 4);
+                ResizeAudioStream(holder->m_debug, &localData.m_ppA, 4);
             }
             localData.m_ppA[localData.m_nCallbackId] = (void*)(p - 0x134);
             localData.m_nCallbackId++;
@@ -1696,7 +1668,7 @@ void FUN_00cd0b30_cls::FUN_00cd0b30(int apTarget)
             holder = FUN_00c85750();
             if (localData.m_nB == (localData.m_cB & 0x3fffffffu))
             {
-                ResizeAudioStream(holder->m_pAllocator, &localData.m_pB, 4);
+                ResizeAudioStream(holder->m_debug, &localData.m_pB, 4);
             }
             localData.m_pB[localData.m_nB] = *(int*)p;
             localData.m_nB++;

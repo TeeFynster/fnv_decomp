@@ -1,10 +1,33 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#include "../../include/NiTArray.h"
 // fallout_shared/globalfunc_o2_variant.cpp: Holder, SearchObject, ObjectCandidate, BeamPassShader and more (34 functions)
 
 #include <windows.h>
+#include "../../include/MEM_CONTEXT.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkError.h"
+#include "../../include/hkpUnaryAction.h"
 // src/fallout_shared/globalfunc_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/globalfunc.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "globalfunc_decls.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/LANGUAGE.h"
+#include "../../include/hkVector4.h"
+#include "../../include/NiStream.h"
+#include "../../include/Vec4.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiD3DPixelShader.h"
+#include "../../include/NiD3DVertexShader.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/Transform.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/bhkRefObject.h"
 bool ConvertLocalizedString(const char* input, char* output, unsigned int capacity);
 bool UpdateObjectVisibility(NiAVObject* object);
 bool RemoveInvalidChildNodes(NiNode* object);
@@ -20,10 +43,6 @@ extern int DAT_0126f74c;
 struct BeamStage
 {
     void ApplyPairToState(unsigned int);
-};
-struct NiD3DPass
-{
-    bool ApplyRenderStateChanges(bool);
 };
 struct InBa
 {
@@ -56,11 +75,6 @@ void __stdcall FUN_00ba6240(OutBa* a1)
     ((NiD3DPass*)s)->ApplyRenderStateChanges(false);
 }
 
-class NiObject;
-struct NiStream
-{
-    NiObject* GetLoadedObject();
-};
 struct S86870
 {
     virtual void d00() = 0;
@@ -123,10 +137,10 @@ void S86870::FUN_00c86870(NiStream* s)
     FUN_00c87670(s);
 }
 
-template <class T> struct NiTMallocInterface
-{
-};
-template <class T, class A> struct NiTPrimitiveArray
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/hkOstream.h"
+#include "../../include/bhkUnaryAction.h"
+template <class T, class A> struct NiTPrimitiveArrayWithAllocator
 {
     char _0[8];
     unsigned short m_8;
@@ -138,9 +152,9 @@ template <class T, class A> struct NiTPrimitiveArray
 };
 extern const char* const g_0126811c_arg1;
 char* __cdecl _FUN_00a7d330(const char*);
-void __stdcall FUN_00c878c0(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >*);
+void __stdcall FUN_00c878c0(NiTPrimitiveArrayWithAllocator<char*, NiTMallocInterface<char*> >*);
 // @fnv 0x00c87be0
-void __stdcall FUN_00c87be0(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >* p)
+void __stdcall FUN_00c87be0(NiTPrimitiveArrayWithAllocator<char*, NiTMallocInterface<char*> >* p)
 {
     FUN_00c878c0(p);
     char* v = _FUN_00a7d330(g_0126811c_arg1);
@@ -153,10 +167,6 @@ void __stdcall FUN_00c87be0(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >
 }
 
 namespace fnv_00c86790 {
-struct NiStream
-{
-    void ResetStreamState();
-};
 struct RetVal
 {
     int a;
@@ -429,10 +439,6 @@ void FUN_00c867d0_cls::FUN_00c867d0(FUN_00c867d0_out* out)
     out->unk04 = value;
 }
 
-struct NiTStringPointerMap_00e93020
-{
-    bool GetAt(void* key, void*& value) const;
-};
 
 struct FUN_00c86800_Link
 {
@@ -455,9 +461,10 @@ struct FUN_00c86800_Target
     void* m08;
 };
 
+// GetAt at 0x00a53c30 is the shared NiTMapBase lookup; this clone table uses object-pointer keys.
 struct FUN_00c86800_Table
 {
-    NiTStringPointerMap_00e93020* map;
+    NiTPointerMap<void*, void*>* map;
 };
 
 struct FUN_00c86800_Class : S86870
@@ -654,7 +661,7 @@ struct HeapContextGuard
 };
 
 extern const char* g_name86b80;
-typedef NiTPrimitiveArray<char*, NiTMallocInterface<char*> > StringArray;
+typedef NiTPrimitiveArrayWithAllocator<char*, NiTMallocInterface<char*> > StringArray;
 
 inline void AddString(StringArray* arr, char*& s)
 {
@@ -727,23 +734,18 @@ FUN_00c86cb0::~FUN_00c86cb0()
     DAT_01268124--;
 }
 
-struct FourFloatVector
-{
-    float x, y, z, w;
-    void __thiscall FUN_004b4db0(const FourFloatVector*);
-};
 struct InnerData
 {
     float unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    FourFloatVector q20;
-    FourFloatVector q30;
+    hkVector4 q20;
+    hkVector4 q30;
     float x40, y44, z48, w4c;
 };
 struct OutputData
 {
     unsigned int unk00, unk04, unk08, unk0c;
-    FourFloatVector a10;
-    FourFloatVector b20;
+    hkVector4 a10;
+    hkVector4 b20;
     float x30, y34, z38, w3c;
 };
 void __stdcall FUN_00c867d0(OutputData*);
@@ -1024,31 +1026,19 @@ struct BC878C0AllocTagScope
     }
 };
 
-class BC878C0StringArray
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-  public:
-    virtual ~BC878C0StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
+    return SetAtGrow(m_usSize, element);
+}
 
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > BC878C0StringArray;
 
 extern const char* g_pcC878C0Name;
 
@@ -1162,6 +1152,19 @@ void __stdcall FUN_00ba5e60(OutBa* a1)
     }
 }
 
+struct CollisionObjectCountContext
+{
+    void* pCurrentObject;
+    bool bRecurse;
+    unsigned int uiTraversalFlags;
+    int iCount;
+    void* pUserData;
+    void* pAuxiliaryData;
+    unsigned int uiFilterFlags;
+};
+void FUN_00c68900(NiAVObject*, CollisionObjectCountContext*,
+                  void (*)(NiCollisionObject*, CollisionObjectCountContext*));
+
 struct C69EE0Properties
 {
     int unk;
@@ -1235,31 +1238,19 @@ struct StageReturnPtr
     }
 };
 
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-        {
-            DeleteThis();
-        }
-    }
-};
 
-class NiD3DPixelShader : public NiRefObject
+
+// This unit inlines the atomic operations used by its reference pointers.
+inline void NiRefObject::IncRefCount()
 {
-};
-class NiD3DVertexShader : public NiRefObject
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+
+inline void NiRefObject::DecRefCount()
 {
-};
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
 
 template <class T> class NiD3DPointer
 {
@@ -1268,22 +1259,22 @@ template <class T> class NiD3DPointer
     NiD3DPointer(T* p = 0) : m_pObject(p)
     {
         if (m_pObject)
-            m_pObject->IncRefCount();
+            static_cast<NiRefObject*>(m_pObject)->IncRefCount();
     }
     ~NiD3DPointer()
     {
         if (m_pObject)
-            m_pObject->DecRefCount();
+            static_cast<NiRefObject*>(m_pObject)->DecRefCount();
     }
     NiD3DPointer& operator=(T* p)
     {
         if (m_pObject != p)
         {
             if (m_pObject)
-                m_pObject->DecRefCount();
+                static_cast<NiRefObject*>(m_pObject)->DecRefCount();
             m_pObject = p;
             if (m_pObject)
-                m_pObject->IncRefCount();
+                static_cast<NiRefObject*>(m_pObject)->IncRefCount();
         }
         return *this;
     }
@@ -1307,44 +1298,27 @@ struct D3DRenderStateGroup
 };
 D3DRenderStateGroup* __cdecl FUN_00e7f5d0();
 
-struct NiD3DPass_Standin : NiD3DPass
+inline unsigned int NiD3DPass::GetStageCount() const
 {
-    virtual ~NiD3DPass_Standin();
-    int unk04, unk08, unk0C, unk10;
-    unsigned int m_uiStageMask;
-    unsigned int m_uiNumberOfStages;
-    int unk1C, unk20, unk24, unk28, unk2C;
-    D3DRenderStateGroup* m_spRenderStateGroup;
-    int unk34, unk38, unk3C, unk40;
-    NiD3DPointer<NiD3DVertexShader> m_spVertexShaderObject;
-    int unk48, unk4C, unk50, unk54, unk58;
-    NiD3DPointer<NiD3DPixelShader> m_spPixelShaderObject;
-    int unk60;
-    int m_uiRefCount;
+    return m_uiStageCount;
+}
 
-    unsigned int GetStageCount() const
-    {
-        return m_uiNumberOfStages;
-    }
+inline void NiD3DPass::SetRenderState(unsigned int state, unsigned int value, bool save)
+{
+    if (!m_pkRenderStateGroup)
+        m_pkRenderStateGroup = FUN_00e7f5d0();
+    m_pkRenderStateGroup->SetRenderState(state, value, save);
+}
 
-    void FUN_00e802b0(unsigned int, StageReturn*);
-    void FUN_00e80190();
-
-    void SetRenderState(unsigned int uiState, unsigned int uiValue, bool bSave)
-    {
-        if (!m_spRenderStateGroup)
-        {
-            m_spRenderStateGroup = FUN_00e7f5d0();
-        }
-        m_spRenderStateGroup->SetRenderState(uiState, uiValue, bSave);
-    }
-};
+// The shared pass does not yet declare the indexed stage setter.
+void SetPassStage(NiD3DPass*, unsigned int, StageReturn*);
+typedef void (__thiscall *SetPassStageFunction)(NiD3DPass*, unsigned int, StageReturn*);
 
 void __cdecl ConfigureBeamStage(StageReturn*, int, int, int, int);
 
 struct NiD3DPassPtr
 {
-    NiD3DPass_Standin* m_pObject;
+    NiD3DPass* m_pObject;
     NiD3DPassPtr() : m_pObject(0)
     {}
     ~NiD3DPassPtr()
@@ -1353,7 +1327,7 @@ struct NiD3DPassPtr
         {
             if (--m_pObject->m_uiRefCount == 0)
             {
-                m_pObject->FUN_00e80190();
+                m_pObject->DestroyPass();
             }
         }
     }
@@ -1365,7 +1339,7 @@ struct NiD3DPassPtr
             {
                 if (--m_pObject->m_uiRefCount == 0)
                 {
-                    m_pObject->FUN_00e80190();
+                    m_pObject->DestroyPass();
                 }
             }
             m_pObject = ptr.m_pObject;
@@ -1376,11 +1350,11 @@ struct NiD3DPassPtr
         }
         return *this;
     }
-    operator NiD3DPass_Standin*() const
+    operator NiD3DPass*() const
     {
         return m_pObject;
     }
-    NiD3DPass_Standin* operator->() const
+    NiD3DPass* operator->() const
     {
         return m_pObject;
     }
@@ -1412,10 +1386,10 @@ void BeamPassShader::FUN_00ba59e0()
     {
         AssignStageFromPool(spStage);
         ConfigureBeamStage(spStage, 0, 1, 2, 1);
-        spRenderPass->FUN_00e802b0(spRenderPass->m_uiStageMask, spStage);
+        reinterpret_cast<SetPassStageFunction>(SetPassStage)(spRenderPass, spRenderPass->m_uiCurrentStage, spStage);
     }
-    spRenderPass->m_spPixelShaderObject = m_spPixelShaderObject;
-    spRenderPass->m_spVertexShaderObject = m_spVertexShaderObject;
+    reinterpret_cast<NiD3DPointer<NiD3DPixelShader>&>(spRenderPass->m_spVertexShader) = m_spPixelShaderObject;
+    reinterpret_cast<NiD3DPointer<NiD3DVertexShader>&>(spRenderPass->m_spPixelShader) = m_spVertexShaderObject;
     spRenderPass->SetRenderState(0xa8, 0xf, true);
     spRenderPass->SetRenderState(0x1b, 1, true);
     spRenderPass->SetRenderState(0x13, 5, true);
@@ -1431,10 +1405,10 @@ void BeamPassShader::FUN_00ba59e0()
     {
         AssignStageFromPool(spStage);
         ConfigureBeamStage(spStage, 0, 1, 2, 1);
-        spRenderPass->FUN_00e802b0(spRenderPass->m_uiStageMask, spStage);
+        reinterpret_cast<SetPassStageFunction>(SetPassStage)(spRenderPass, spRenderPass->m_uiCurrentStage, spStage);
     }
-    spRenderPass->m_spPixelShaderObject = m_spPixelShaderObject;
-    spRenderPass->m_spVertexShaderObject = m_spVertexShaderObject;
+    reinterpret_cast<NiD3DPointer<NiD3DPixelShader>&>(spRenderPass->m_spVertexShader) = m_spPixelShaderObject;
+    reinterpret_cast<NiD3DPointer<NiD3DVertexShader>&>(spRenderPass->m_spPixelShader) = m_spVertexShaderObject;
     spRenderPass->SetRenderState(0xa8, 0xf, true);
     spRenderPass->SetRenderState(0x1b, 1, true);
     spRenderPass->SetRenderState(0x13, 5, true);
@@ -1447,29 +1421,8 @@ void BeamPassShader::FUN_00ba59e0()
 }
 
 void* __cdecl FUN_00ec44d0(void*, const void*, unsigned int);
-struct Vec3
-{
-    union
-    {
-        struct
-        {
-            float x, y, z;
-        };
-        float coord[3];
-    };
-};
-struct Vec4
-{
-    float x, y, z, w;
-};
-struct Transform
-{
-    float unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    Vec3 unk24;
-    float unk30;
-    void FUN_004b4880(Transform*);
-    Vec3* FUN_00524c40(Vec3*, const Vec3*);
-};
+
+// The original scratch vector is left uninitialized.
 struct Update
 {
     void FUN_00e6fbb0(Transform*, int);
@@ -1546,13 +1499,13 @@ struct Source
     float unk84;
     int unk88;
     float unk8c;
-    Vec3 unk90;
-    Vec3 unk9c;
+    NiPoint3 unk90;
+    NiPoint3 unk9c;
     int unka8;
     int unkac;
     int unkb0;
     int unkb4;
-    Vec3 unkb8;
+    NiPoint3 unkb8;
     Vec4 unkc4;
     Vec4 unkd4;
     Vec4 unke4;
@@ -1571,7 +1524,7 @@ struct Source
     float unk130;
     float unk134;
     float unk138;
-    Vec3 unk13c;
+    NiPoint3 unk13c;
     float unk148;
 };
 struct Arg
@@ -1626,10 +1579,16 @@ struct Geom
     int unk5c;
     int unk60;
     int unk64;
-    Transform unk68;
+    // Geometry stores the 0x34-byte rotation/position/scale transform prefix.
+    float unk68[13];
     int unk9c;
     int unka0;
     int unka4;
+
+    Transform& GetWorldTransform()
+    {
+        return *reinterpret_cast<Transform*>(unk68);
+    }
     int unka8;
     int unkac;
     int unkb0;
@@ -1708,18 +1667,18 @@ struct Obj
     float unk88;
     float unk8c;
     float unk90;
-    Vec3 unk94;
+    NiPoint3 unk94;
     int unka0;
     Vec4 unka4;
-    Vec3 unkb4;
+    NiPoint3 unkb4;
     float unkc0;
     float unkc4;
     float unkc8;
     int unkcc;
     int unkd0;
-    Vec3 unkd4;
-    Vec3 unke0;
-    Vec3 unkec;
+    NiPoint3 unkd4;
+    NiPoint3 unke0;
+    NiPoint3 unkec;
     float unkf8;
     Vec4 unkfc;
     Vec4 unk10c;
@@ -1736,7 +1695,7 @@ inline int isSource(Source* p)
 void Obj::FUN_00ba5ee0(Arg* arg)
 {
     Geom* geom = *DAT_011f91e0;
-    unk18->FUN_00e6fbb0(&geom->unk68, 0);
+    unk18->FUN_00e6fbb0(&geom->GetWorldTransform(), 0);
     Source* raw = arg->unk0c;
     Source* source = isSource(raw) ? raw : 0;
     if (source)
@@ -1745,16 +1704,18 @@ void Obj::FUN_00ba5ee0(Arg* arg)
         unk88 = source->unk7c;
         unk8c = source->unk84;
         unk90 = source->unk8c;
-        unkd4 = source->unk90;
-        unke0 = source->unk9c;
-        Vec3 point = source->unk13c;
+        memcpy(&unkd4, &source->unk90, sizeof(NiPoint3));
+        memcpy(&unke0, &source->unk9c, sizeof(NiPoint3));
+        NiPoint3 point = source->unk13c;
         if (!source->unk6c)
         {
-            Transform transform;
-            geom->unk68.FUN_004b4880(&transform);
-            Vec3 result;
-            Vec3* __restrict moved = transform.FUN_00524c40(&result, &point);
-            point = *moved;
+            // These NiTransform operations use only rotation, position, and scale.
+            float transformStorage[13];
+            Transform& transform = *reinterpret_cast<Transform*>(transformStorage);
+            geom->GetWorldTransform().FUN_004b4880(&transform);
+            NiPoint3 result;
+            NiPoint3* __restrict moved = transform.FUN_00524c40(&result, &point);
+            memcpy(&point, moved, sizeof(NiPoint3));
         }
         unkec.x = point.x;
         unkec.y = point.y;
@@ -1772,9 +1733,9 @@ void Obj::FUN_00ba5ee0(Arg* arg)
         unka4.w = source->unkf4.w;
         if (source->unk6c)
         {
-            unkb4.x = geom->unk68.unk24.x;
-            unkb4.y = geom->unk68.unk24.y;
-            unkb4.z = geom->unk68.unk24.z;
+            unkb4.x = geom->GetWorldTransform().position.x;
+            unkb4.y = geom->GetWorldTransform().position.y;
+            unkb4.z = geom->GetWorldTransform().position.z;
         }
         else
         {
@@ -1794,13 +1755,13 @@ void Obj::FUN_00ba5ee0(Arg* arg)
     {
         void* resource = ((Manager*)DAT_0126f74c)->unk44;
         if (resource)
-            unk30->apply(resource, geom, other, 0, extra, arg, 0, &geom->unk68, data, 0, 1);
+            unk30->apply(resource, geom, other, 0, extra, arg, 0, &geom->GetWorldTransform(), data, 0, 1);
     }
     if (unk34)
     {
         void* resource = ((Manager*)DAT_0126f74c)->unk5c;
         if (resource)
-            unk34->apply(resource, geom, other, 0, extra, arg, 0, &geom->unk68, data, 0, 1);
+            unk34->apply(resource, geom, other, 0, extra, arg, 0, &geom->GetWorldTransform(), data, 0, 1);
     }
 }
 
@@ -1871,11 +1832,6 @@ extern int DAT_0102016c;
 extern int DAT_0102009c;
 extern int DAT_0101ffcc;
 
-class bhkRefObject
-{
-  public:
-    bhkRefObject* Initialize();
-};
 
 class TESObjectDoorController
 {
@@ -1962,43 +1918,11 @@ AllocatedNode* FUN_00c87010_cls::FUN_00c87010(FUN_00c86800_Table* p)
     return node;
 }
 
-struct hkBoolS
-{
-    char m_cBooleanValue;
-    hkBoolS(bool b)
-    {
-        m_cBooleanValue = b;
-    }
-};
-struct hkOstreamS
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkOstreamS(char* buf, int size, hkBoolS isString);
-    ~hkOstreamS();
-    hkOstreamS& operator<<(const char* s);
-};
-struct hkErrorS
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual int message(int type, int id, const char* desc, const char* file, int line);
-};
-extern hkErrorS* g_hkErrorInstance;
+// Retained locally: include/hkOstream.h lacks the (char*, int, hkBool) constructor at 0x00cc0500.
+extern hkError* g_hkErrorInstance;
 
-struct hkpActionS
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    unsigned int m_pEntity;
-};
-struct hkpWorldS
+// This is a Bethesda entity wrapper: virtual slots 37/39/50 and flags at +0x10 do not match hkpWorld.
+struct EntityActionInterface
 {
     virtual void v00();
     virtual void v01();
@@ -2039,7 +1963,7 @@ struct hkpWorldS
     virtual void v36();
     virtual unsigned int IsLocked();
     virtual void v38();
-    virtual void AddActionPre(hkpActionS* a);
+    virtual void AddActionPre(hkpUnaryAction* a);
     virtual void v40();
     virtual void v41();
     virtual void v42();
@@ -2050,7 +1974,7 @@ struct hkpWorldS
     virtual void v47();
     virtual void v48();
     virtual void v49();
-    virtual void AddActionPost(hkpActionS* a);
+    virtual void AddActionPost(hkpUnaryAction* a);
     int unk04;
     int unk08;
     int unk0c;
@@ -2061,7 +1985,7 @@ struct hkWorldHolderS
     int unk00;
     int unk04;
     int unk08;
-    hkpWorldS* m_pOwningWorld;
+    EntityActionInterface* m_pOwningWorld;
 };
 struct bhkWorldRefS
 {
@@ -2073,33 +1997,26 @@ struct bhkWorldRefS
     int unk14;
     hkWorldHolderS* m_pHkObject;
 };
-struct bhkUnaryActionS
-{
-    int unk00;
-    int unk04;
-    bhkWorldRefS* m_pWorld;
-    void FUN_00c86940(hkpActionS* action);
-};
 // @fnv 0x00c86940
-void bhkUnaryActionS::FUN_00c86940(hkpActionS* action)
+void bhkUnaryAction::FUN_00c86940(hkpUnaryAction* action)
 {
     TlsFlagGuard mode;
-    hkWorldHolderS* holder = this && m_pWorld ? m_pWorld->m_pHkObject : 0;
+    hkWorldHolderS* holder = this && m_pHavokObject ? reinterpret_cast<bhkWorldRefS*>(m_pHavokObject)->m_pHkObject : 0;
     _ReadWriteBarrier();
     if (holder)
     {
-        hkpWorldS* world = holder->m_pOwningWorld;
+        EntityActionInterface* world = holder->m_pOwningWorld;
         if (world)
         {
             unsigned int locked = world->IsLocked();
-            if (!locked && action->m_pEntity <= locked)
+            if (!locked && reinterpret_cast<unsigned int>(action->m_pEntity) <= locked)
             {
                 world->AddActionPre(action);
                 if (!(world->m_flags & 0x30))
                 {
                     {
                         char buf[512];
-                        hkOstreamS ostr(buf, sizeof(buf), true);
+                        hkOstream ostr(buf, sizeof(buf), true);
                         ostr << "A unary action is being added to the world before its target entities.\n";
                         g_hkErrorInstance->message(
                             1, 0x234f24fc, buf, "D:\\_Fallout3\\Platforms\\Common\\Code\\BSHavok\\bhkUnaryAction.cpp",
@@ -2113,41 +2030,24 @@ void bhkUnaryActionS::FUN_00c86940(hkpActionS* action)
 }
 
 extern __declspec(thread) unsigned int t_uiMemContext7100;
-inline unsigned int GetMemContext7100()
+inline AutoMemContext::AutoMemContext(int context)
 {
-    return t_uiMemContext7100;
+    m_eMemoryContext = static_cast<MEM_CONTEXT>(t_uiMemContext7100);
+    t_uiMemContext7100 = context;
 }
-inline void SetMemContext7100(unsigned int m_uiGeometryShaderFlags)
+inline AutoMemContext::~AutoMemContext()
 {
-    t_uiMemContext7100 = m_uiGeometryShaderFlags;
+    t_uiMemContext7100 = m_eMemoryContext;
 }
-class AutoMemContext7100
-{
-  public:
-    AutoMemContext7100(unsigned int m_uiGeometryShaderFlags)
-    {
-        m_uiPrevious = GetMemContext7100();
-        SetMemContext7100(m_uiGeometryShaderFlags);
-    }
-    ~AutoMemContext7100()
-    {
-        SetMemContext7100(m_uiPrevious);
-    }
-    unsigned int m_uiPrevious;
-};
 
-struct MemoryManager7100
-{
-    void* Allocate(unsigned int uiSize);
-};
-extern MemoryManager7100 g_kMemoryManager7100;
+extern MemoryManager g_kMemoryManager;
 
 class __declspec(align(16)) Aligned7100
 {
   public:
     static void* operator new(unsigned int uiSize)
     {
-        unsigned char* pucMem = (unsigned char*)g_kMemoryManager7100.Allocate(uiSize + 0x10);
+        unsigned char* pucMem = (unsigned char*)g_kMemoryManager.Allocate(uiSize + 0x10);
         unsigned char ucOffset = (unsigned char)(0x10 - ((unsigned int)pucMem & 0xf));
         pucMem += ucOffset;
         pucMem[-1] = ucOffset;
@@ -2187,7 +2087,7 @@ class Owner7100
 // @fnv 0x00c87100
 Aligned7100* Owner7100::FUN_00c87100(bool* pbCreated)
 {
-    AutoMemContext7100 kContext(0x10);
+    AutoMemContext kContext(0x10);
     bool bCreate = m_pPointer == 0;
     *pbCreated = bCreate;
     if (bCreate)
@@ -2501,26 +2401,11 @@ bool EntityOwner_c87b::FUN_00c87b40()
     return bResult;
 }
 
-struct RefCounted6b3c0
-{
-    virtual void slot0();
-    virtual void DeleteThis();
-    LONG m_iObjectReferenceCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_iObjectReferenceCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_iObjectReferenceCount) == 0)
-            DeleteThis();
-    }
-};
 
 struct RefPtr6b3c0
 {
-    RefCounted6b3c0* m_p;
-    RefPtr6b3c0(RefCounted6b3c0* p)
+    NiRefObject* m_p;
+    RefPtr6b3c0(NiRefObject* p)
     {
         m_p = p;
         if (m_p)
@@ -2549,7 +2434,7 @@ struct RefPtr6b3c0
         if (m_p)
             m_p->DecRefCount();
     }
-    operator RefCounted6b3c0*() const
+    operator NiRefObject*() const
     {
         return m_p;
     }
@@ -2560,7 +2445,7 @@ struct Entry6b3c0
     int unk04;
     int unk08;
     int unk0C;
-    RefCounted6b3c0* unk10;
+    NiRefObject* unk10;
     void Prepare();  // 0xc90510
 };
 
@@ -2569,11 +2454,7 @@ struct Target6b3c0
     void Add(Entry6b3c0* entry);  // 0xc97370
 };
 
-struct MemoryManager6b3c0
-{
-    void* Allocate(unsigned int size);  // 0xaa3e40
-};
-extern MemoryManager6b3c0 g_memoryManager6b3c0;
+extern MemoryManager g_memoryManager6b3c0;
 
 struct Node6b3c0
 {
@@ -2736,7 +2617,7 @@ void World6b3c0::FUN_00c6b3c0(Entry6b3c0* entry)
             }
             if (entry != 0)
             {
-                RefCounted6b3c0* obj = entry->unk10;
+                NiRefObject* obj = entry->unk10;
                 if (obj != 0)
                 {
                     RefPtr6b3c0 sp(obj);

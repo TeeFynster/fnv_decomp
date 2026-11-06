@@ -5,6 +5,13 @@
 
 #include "bsshadermanager_decls.h"
 #include <stddef.h>
+#include "../../include/BSShaderManager.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiPixelData.h"
+#define FNV64_NIFIXEDSTRING_OWN_BODIES
+#include "../../include/NiSourceTexture.h"
+#include "../../include/SkyShaderProperty.h"
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern "C" int __cdecl sprintf_s(char*, size_t, const char*, ...);
 extern "C" int __cdecl strcpy_s(char*, size_t, const char*);
@@ -16,109 +23,12 @@ class NiRTTI;
 class NiRenderer;
 class BSFileEntry;
 class BSFogProperty;
-class NiRefObject
+// NiRefObject release, inlined at every smart-pointer site.
+__forceinline void ReleaseReference(NiRefObject* object)
 {
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    __forceinline void DecRefCount()
-    {
-        if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)))
-            DeleteThis();
-    }
-};
-class NiObject : public NiRefObject
-{
-  public:
-    NiObject* DynamicCast(const NiRTTI*);
-};
-class NiFixedString
-{
-  public:
-    char* m_kHandle;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
-class NiTextureRendererData
-{
-  public:
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual void vfn_8();
-    virtual void vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual void vfn_8c();
-    virtual void vfn_90();
-    virtual void vfn_94();
-    virtual unsigned int vfn_98();
-};
-class NiTexture : public NiObject
-{
-  public:
-    unsigned char objectNET[16];
-    struct TextureFormatPreferences
-    {
-        unsigned int m_ePreferredPixelLayout, m_eAlphaFormat, m_eMipFlag;
-    } m_kTextureFormatPreferences;
-    NiTextureRendererData* m_pTextureRendererData;
-    NiTexture* m_pkPrev;
-    NiTexture* m_pkNext;
-};
-template <class T> class NiPointer;
-template <> class NiPointer<NiTexture>
-{
-  public:
-    NiTexture* m_pObject;
-    NiPointer();
-    ~NiPointer();
-    NiPointer& operator=(NiTexture*);
-    __forceinline void Reset()
-    {
-        if (m_pObject)
-        {
-            m_pObject->DecRefCount();
-            m_pObject = 0;
-        }
-    }
-};
-class NiSourceTexture : public NiTexture
-{
-  public:
-    void* m_spPixelData;
-    const char* m_pcFileName;
-    static NiSourceTexture* Create(const NiFixedString&, NiTexture::TextureFormatPreferences&, bool, bool);
-};
+    if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&object->m_uiRefCount)))
+        object->DeleteThis();
+}
 class FileFinder
 {
   public:
@@ -133,33 +43,6 @@ class TextureFileEntrySetter
   public:
     static void SetTexture(NiTexture*, const BSFileEntry*);
 };
-class NiAVObject
-{
-  public:
-    void UpdateSceneObject();
-};
-class ShadowSceneNode
-{
-  public:
-    void SetFogPropertyForIndex(BSFogProperty*);
-};
-class BSShaderManager
-{
-  public:
-    enum eObjectType
-    {
-        OBJECT_0 = 0,
-        OBJECT_1 = 1
-    };
-    static void GetTexture(const char*, bool, NiPointer<NiTexture>&, bool, bool);
-    static void BuildTexturePath(char*, const char*, const char*, bool);
-    static void SetFOV(float);
-    static char* GetRenderModeName();
-    static void SetRenderMode(unsigned int);
-    static void UpdateObjectTypeRecurse(NiAVObject*, bool, bool);
-    static void SetObjectTypeRecursively(NiAVObject*, eObjectType, bool, bool);
-    static void SetFogPropertyForIndex(int, BSFogProperty*);
-};
 extern "C" FileFinder* g_fileFinder;
 extern "C" bool fnv_NiStreamGetTexture(const char*, NiPointer<NiTexture>&);
 NiTexture* CreateSpawnedCubeShell(const NiFixedString&, NiRenderer*, NiTexture::TextureFormatPreferences&);
@@ -171,31 +54,10 @@ extern float DAT_011adcc8;
 extern unsigned int DAT_011f91b8;
 extern void (*DAT_011f9f38)(), (*DAT_011f9f3c)();
 extern void (*DAT_011f9f40[16])(), (*DAT_011f9f80[16])();
-extern unsigned int (*DAT_011f91ec)(NiAVObject*);
-extern ShadowSceneNode* DAT_011f91c8[4];
-class SkyShaderProperty
-{
-  public:
-    unsigned char propertyData[0x70];
-    NiPointer<NiTexture> m_spTexture;
-    void SetTexture(NiTexture*);
-};
 #pragma intrinsic(sin, cos)
 // The shipped setter was built without optimization.
 #pragma optimize("", off)
 #pragma optimize("", on)
-void __cdecl FUN_00b4f2f0(int idx, ShadowSceneNode* p);
-struct ImageSpaceTexture
-{
-    NiTexture* GetTexture();
-};
-struct ImageSpaceManager
-{
-    char data[0x204];
-    ImageSpaceTexture m_texture;
-};
-extern ImageSpaceManager* DAT_011f91ac;
-NiTexture* GetImageSpaceTexture();
 extern "C" NiTexture* DAT_011f95ec;
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 void __cdecl FUN_00b54ac0(NiTexture* pkTexture);
@@ -217,8 +79,6 @@ struct PropHelper
 void __cdecl ProcessPropertyTree(PropHelper*, int);
 void __cdecl ProcessPropertyTree(PropHelper* obj, int param2);
 BSFogProperty* __cdecl FUN_00b55520(int aiShadowSceneNode);
-void ProcessPropertyTree(NiAVObject*, unsigned int);
-void FUN_00b55b80(NiAVObject* obj);
 struct tagRECT
 {
     long left;
@@ -231,14 +91,6 @@ extern float DAT_011f95f8;
 extern float DAT_011f95fc;
 extern float DAT_011f9600;
 void __cdecl SetRectCenterAndHalfExtents(tagRECT* apLoadedRect);
-struct NiStream
-{
-    static int __cdecl RegisterObjectLoader(const char*, NiObject*(__cdecl*)());
-};
-struct BSFadeNode
-{
-    static NiObject* __cdecl CreateObject();
-};
 NiObject* __cdecl FUN_00b60f50();
 NiObject* __cdecl CreateNewObj();
 NiObject* __cdecl CreateB6AE60Obj();
@@ -756,10 +608,6 @@ void __cdecl UpdateShaderProperty(AVObj* obj, bool a1, bool a2, bool a3);
 void* __cdecl NiMalloc(unsigned int);
 extern "C" unsigned int __cdecl strlen(const char*);
 void* __cdecl _fnv_zlib_memset(void*, int, unsigned int);
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
 extern MemoryManager _g_memoryManager;
 struct StringHashMapBase
 {
@@ -783,7 +631,8 @@ StringHashMapBase::StringHashMapBase()
     _fnv_zlib_memset(m_apBuckets, 0, uiBytes);
     m_bShaderEnabled = 1;
 }
-struct ShaderMap : StringHashMapBase
+// Exe 0x00b55bb0: unit-local ShaderMap view; declarations and layout are preserved.
+struct BsshadermanagerShaderMapView : StringHashMapBase
 {
     virtual void vfn_8();
 };
@@ -791,7 +640,7 @@ struct FUN_00b7ff40
 {
     char* m_name;
     int m_unk04;
-    ShaderMap m_map;
+    BsshadermanagerShaderMapView m_map;
     FUN_00b7ff40(int value);
 };
 
@@ -808,58 +657,6 @@ struct FUN_00b7ff40
 
 extern "C" void _ReadWriteBarrier();
 
-class NiPixelFormat
-{
-
-  public:
-    unsigned int flags, bitsPerPixel, srgb, rendererHint, extraData;
-
-    unsigned int redSemantic, redRepresentation, redBits;
-
-    unsigned int greenSemantic, greenRepresentation, greenBits;
-
-    unsigned int blueSemantic, blueRepresentation, blueBits;
-
-    unsigned int alphaSemantic, alphaRepresentation, alphaBits;
-};
-
-class NiMemObject
-{
-
-  public:
-    static void* operator new(size_t);
-
-    static void operator delete(void*);
-};
-
-class NiPixelData : public NiRefObject, public NiMemObject
-{
-
-  public:
-    NiPixelFormat format;
-
-    unsigned int unknown4c;
-
-    unsigned char* pixels;
-
-    unsigned int* widths;
-
-    unsigned int* heights;
-
-    unsigned int* offsets;
-
-    unsigned int levels;
-
-    unsigned int faces;
-
-    unsigned int revision;
-
-    unsigned int unknown6c;
-
-    bool changed;
-
-    NiPixelData(unsigned int, unsigned int, const NiPixelFormat&, unsigned int, unsigned int);
-};
 
 class PixelOwner
 {
@@ -877,7 +674,7 @@ class PixelOwner
     ~PixelOwner()
     {
         if (object)
-            object->DecRefCount();
+            ReleaseReference(object);
     }
 
     void Assign(NiPixelData* p)
@@ -887,7 +684,7 @@ class PixelOwner
         {
 
             if (object)
-                object->DecRefCount();
+                ReleaseReference(object);
 
             object = p;
 
@@ -922,21 +719,13 @@ double FUN_00ec6940(double);
 
 double FUN_00ec6940(double);
 
-class NiGlobalStringTable
-{
 
-  public:
-    static char* AddString(const char*);
-};
 
-extern char* DAT_0109b220;
 
-struct InternedStringHeader
-{
-    long references;
-    unsigned int length;
-};
 
+
+// Own bodies (as in bsshadermanager.cpp): the shared constructor's null test, folded away for these arguments,
+// still changes register choices in FUN_00b55bb0.
 __forceinline NiFixedString::NiFixedString(const char* text)
 {
     m_kHandle = NiGlobalStringTable::AddString(text);
@@ -944,22 +733,17 @@ __forceinline NiFixedString::NiFixedString(const char* text)
 
 __forceinline NiFixedString::~NiFixedString()
 {
-    char* p = m_kHandle;
-    if (p != DAT_0109b220)
-    {
-        long& refs = (reinterpret_cast<InternedStringHeader*>(p) - 1)->references;
-        InterlockedDecrement(&refs);
-    }
+    NiGlobalStringTable::DecRefCount(m_kHandle);
 }
 
-__forceinline NiPointer<NiTexture>& NiPointer<NiTexture>::operator=(NiTexture* p)
+template <class T> __forceinline NiPointer<T>& NiPointer<T>::operator=(T* p)
 {
 
     if (m_pObject != p)
     {
 
         if (m_pObject)
-            m_pObject->DecRefCount();
+            ReleaseReference(m_pObject);
 
         m_pObject = p;
 
@@ -975,7 +759,7 @@ __forceinline void CopyTextureReference(NiPointer<NiTexture>& to, const NiPointe
     if (to.m_pObject != from.m_pObject)
     {
         if (to.m_pObject)
-            to.m_pObject->DecRefCount();
+            ReleaseReference(to.m_pObject);
         to.m_pObject = from.m_pObject;
         if (to.m_pObject)
             InterlockedIncrement(reinterpret_cast<volatile long*>(&to.m_pObject->m_uiRefCount));
@@ -1014,15 +798,13 @@ void FUN_00b55bb0()
     NiPixelData* faceData;
     unsigned int* faceOffsets;
 
-    NiPixelFormat cubePixelFormat;
-
-    cubePixelFormat = DAT_011aaac8;
+    NiPixelFormat cubePixelFormat = DAT_011aaac8;
 
     PixelOwner cube(new NiPixelData(128, 128, cubePixelFormat, 1, 6));
 
-    cube.object->revision += 1;
+    cube.object->m_uiRevID += 1;
 
-    unsigned char* pixel = cube.object->pixels + cube.object->offsets[0];
+    unsigned char* pixel = cube.object->m_pucPixels + cube.object->m_puiOffsetInBytes[0];
 
     float staged0;
     float staged1;
@@ -1108,8 +890,8 @@ void FUN_00b55bb0()
     }
 
     faceData = cube.object;
-    faceOffsets = faceData->offsets;
-    pixel = faceData->pixels + faceOffsets[0] + faceOffsets[faceData->levels];
+    faceOffsets = faceData->m_puiOffsetInBytes;
+    pixel = faceData->m_pucPixels + faceOffsets[0] + faceOffsets[faceData->m_uiMipmapLevels];
 
     for (loopIndex0 = 0; (float)loopIndex0 < 128.0f; ++loopIndex0)
     {
@@ -1148,7 +930,7 @@ void FUN_00b55bb0()
         }
     }
 
-    pixel = cube.object->pixels + cube.object->offsets[0] + 2 * cube.object->offsets[cube.object->levels];
+    pixel = cube.object->m_pucPixels + cube.object->m_puiOffsetInBytes[0] + 2 * cube.object->m_puiOffsetInBytes[cube.object->m_uiMipmapLevels];
 
     for (loopIndex1 = 0; (float)loopIndex1 < 128.0f; ++loopIndex1)
     {
@@ -1186,7 +968,7 @@ void FUN_00b55bb0()
         }
     }
 
-    pixel = cube.object->pixels + cube.object->offsets[0] + 3 * cube.object->offsets[cube.object->levels];
+    pixel = cube.object->m_pucPixels + cube.object->m_puiOffsetInBytes[0] + 3 * cube.object->m_puiOffsetInBytes[cube.object->m_uiMipmapLevels];
 
     for (loopIndex1 = 0; (float)loopIndex1 < 128.0f; ++loopIndex1, _ReadWriteBarrier())
     {
@@ -1229,7 +1011,7 @@ void FUN_00b55bb0()
             goto body3_1;
     }
 
-    pixel = cube.object->pixels + cube.object->offsets[0] + 4 * cube.object->offsets[cube.object->levels];
+    pixel = cube.object->m_pucPixels + cube.object->m_puiOffsetInBytes[0] + 4 * cube.object->m_puiOffsetInBytes[cube.object->m_uiMipmapLevels];
 
     for (loopIndex0 = 0; (float)loopIndex0 < 128.0f; ++loopIndex0)
     {
@@ -1267,7 +1049,7 @@ void FUN_00b55bb0()
         }
     }
 
-    pixel = cube.object->pixels + cube.object->offsets[0] + 5 * cube.object->offsets[cube.object->levels];
+    pixel = cube.object->m_pucPixels + cube.object->m_puiOffsetInBytes[0] + 5 * cube.object->m_puiOffsetInBytes[cube.object->m_uiMipmapLevels];
 
     for (loopIndex0 = 0; (float)loopIndex0 < 128.0f; ++loopIndex0)
     {
@@ -1306,13 +1088,13 @@ void FUN_00b55bb0()
     }
 
     NiTexture::TextureFormatPreferences prefs;
-    prefs.m_ePreferredPixelLayout = 2;
-    prefs.m_eMipFlag = 0;
-    prefs.m_eAlphaFormat = 0;
+    prefs.m_ePreferredPixelLayout = NiTexture::TextureFormatPreferences::TRUE_COLOR_32;
+    prefs.m_eMipFlag = NiTexture::TextureFormatPreferences::NO;
+    prefs.m_eAlphaFormat = NiTexture::TextureFormatPreferences::NONE;
 
     PixelOwner error(new NiPixelData(16, 16, gNiPoint3StartupSrc, 1, 1));
 
-    pixel = error.object->pixels + error.object->offsets[0];
+    pixel = error.object->m_pucPixels + error.object->m_puiOffsetInBytes[0];
 
     for (int row = 0; 16 > row; ++row)
         for (int column = 0; column < 16; ++column)
@@ -1327,8 +1109,8 @@ void FUN_00b55bb0()
             *pixel++ = 255;
         }
 
-    error.object->changed = true;
-    error.object->revision += 1;
+    error.object->m_bOwnsPixelData = true;
+    error.object->m_uiRevID += 1;
 
     {
         NiFixedString name("BSShader_DefErrorMap");
@@ -1337,7 +1119,7 @@ void FUN_00b55bb0()
 
     PixelOwner normal(new NiPixelData(16, 16, DAT_011aa2e8, 1, 1));
 
-    pixel = normal.object->pixels + normal.object->offsets[0];
+    pixel = normal.object->m_pucPixels + normal.object->m_puiOffsetInBytes[0];
 
     for (int row = 0; row < 16; ++row)
         for (int column = 0; column < 16; ++column)
@@ -1350,8 +1132,8 @@ void FUN_00b55bb0()
             *pixel++ = 255;
         }
 
-    normal.object->changed = true;
-    ++normal.object->revision;
+    normal.object->m_bOwnsPixelData = true;
+    ++normal.object->m_uiRevID;
 
     {
         NiFixedString name("BSShader_DefNormalMap");
@@ -1360,7 +1142,7 @@ void FUN_00b55bb0()
 
     PixelOwner gloss(new NiPixelData(16, 16, gNiPoint3StartupSrc, 1, 1));
 
-    pixel = gloss.object->pixels + gloss.object->offsets[0];
+    pixel = gloss.object->m_pucPixels + gloss.object->m_puiOffsetInBytes[0];
 
     for (int row = 0; 16 > row; ++row)
         for (int column = 0; 16 > column; ++column)
@@ -1375,8 +1157,8 @@ void FUN_00b55bb0()
             *pixel++ = 64;
         }
 
-    gloss.object->changed = true;
-    ++gloss.object->revision;
+    gloss.object->m_bOwnsPixelData = true;
+    ++gloss.object->m_uiRevID;
 
     {
         NiFixedString name("BSShader_DefNormalGlossMap");
@@ -1385,7 +1167,7 @@ void FUN_00b55bb0()
 
     normal.Assign(new NiPixelData(16, 16, DAT_011aa2e8, 1, 1));
 
-    pixel = normal.object->pixels + normal.object->offsets[0];
+    pixel = normal.object->m_pucPixels + normal.object->m_puiOffsetInBytes[0];
 
     for (int row = 0; row < 16; ++row)
         for (int column = 0; column < 16; ++column)
@@ -1396,8 +1178,8 @@ void FUN_00b55bb0()
             *pixel++ = 0;
         }
 
-    normal.object->changed = true;
-    normal.object->revision += 1;
+    normal.object->m_bOwnsPixelData = true;
+    normal.object->m_uiRevID += 1;
 
     {
         NiFixedString name("BSShader_DefHeightMap");
@@ -1410,7 +1192,7 @@ void FUN_00b55bb0()
 
     PixelOwner secret(new NiPixelData(4, 4, gNiPoint3StartupSrc, 1, 1));
 
-    pixel = secret.object->pixels + secret.object->offsets[0];
+    pixel = secret.object->m_pucPixels + secret.object->m_puiOffsetInBytes[0];
 
     for (int row = 4; row; --row)
         for (int column = 4; column; --column)
@@ -1425,8 +1207,8 @@ void FUN_00b55bb0()
             *pixel++ = 64;
         }
 
-    ++secret.object->revision;
-    secret.object->changed = true;
+    ++secret.object->m_uiRevID;
+    secret.object->m_bOwnsPixelData = true;
 
     {
         NiFixedString name("BSShader_HideSecretMap");
@@ -1435,7 +1217,7 @@ void FUN_00b55bb0()
 
     PixelOwner effect(new NiPixelData(4, 4, gNiPoint3StartupSrc, 1, 1));
 
-    pixel = effect.object->pixels + effect.object->offsets[0];
+    pixel = effect.object->m_pucPixels + effect.object->m_puiOffsetInBytes[0];
 
     for (int row = 4; row; --row)
         for (int column = 4; column; --column)
@@ -1450,8 +1232,8 @@ void FUN_00b55bb0()
             *pixel++ = 255;
         }
 
-    effect.object->changed = true;
-    effect.object->revision++;
+    effect.object->m_bOwnsPixelData = true;
+    effect.object->m_uiRevID++;
 
     {
         NiFixedString name("BSShader_DefTexEffectMap");
@@ -1480,20 +1262,20 @@ void FUN_00b55bb0()
     sprintf_s(texturePath, 260, "%saniso.dds", "Data\\Textures\\Effects\\");
 
     {
-        NiFixedString name(texturePath);
+        NiFixedString name(static_cast<const char*>(texturePath));
         DAT_011f9530 = NiSourceTexture::Create(name, DAT_011a9598, true, false);
     }
 
     sprintf_s(texturePath, 260, "%sNoiseMap.dds", "Data\\Textures\\Effects\\");
 
     {
-        NiFixedString name(texturePath);
+        NiFixedString name(static_cast<const char*>(texturePath));
         DAT_011f953c = NiSourceTexture::Create(name, DAT_011a9598, true, false);
     }
 
     PixelOwner noise(new NiPixelData(4, 4, gNiPoint3StartupSrc, 1, 1));
 
-    pixel = noise.object->pixels + noise.object->offsets[0];
+    pixel = noise.object->m_pucPixels + noise.object->m_puiOffsetInBytes[0];
 
     for (int row = 4; row; --row)
         for (int column = 4; column; --column)
@@ -1505,8 +1287,8 @@ void FUN_00b55bb0()
             *pixel++ = 255;
         }
 
-    noise.object->changed = true;
-    ++noise.object->revision;
+    noise.object->m_bOwnsPixelData = true;
+    ++noise.object->m_uiRevID;
 
     {
         NiFixedString name("BSShader_EmptyNoiseMap");
@@ -1515,7 +1297,7 @@ void FUN_00b55bb0()
 
     PixelOwner attenuation(new NiPixelData(128, 128, DAT_011aa2e8, 1, 1));
 
-    pixel = attenuation.object->pixels + attenuation.object->offsets[0];
+    pixel = attenuation.object->m_pucPixels + attenuation.object->m_puiOffsetInBytes[0];
 
     for (loopIndex0 = 0; 128 > loopIndex0; ++loopIndex0)
         for (loopIndex2 = 0; loopIndex2 < 128; ++loopIndex2)
@@ -1540,12 +1322,12 @@ void FUN_00b55bb0()
             *pixel++ = shade;
         }
 
-    prefs.m_ePreferredPixelLayout = 2;
-    prefs.m_eMipFlag = 0;
-    prefs.m_eAlphaFormat = 0;
+    prefs.m_ePreferredPixelLayout = NiTexture::TextureFormatPreferences::TRUE_COLOR_32;
+    prefs.m_eMipFlag = NiTexture::TextureFormatPreferences::NO;
+    prefs.m_eAlphaFormat = NiTexture::TextureFormatPreferences::NONE;
 
-    attenuation.object->changed = true;
-    attenuation.object->revision++;
+    attenuation.object->m_bOwnsPixelData = true;
+    attenuation.object->m_uiRevID++;
 
     {
         NiFixedString name("BSShader_AttenuationXYZ");

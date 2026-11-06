@@ -2,11 +2,7 @@
 // src/havok/common/base/system/io/iarchive/hkiarchive.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/system/io/iarchive/hkiarchive.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkReferencedObject
-{
-    void RetainReference();
-    void removeReference();
-};
+#include "../../../../../../../include/hkReferencedObject.h"
 
 struct FUN_00dd9110_class
 {
@@ -19,7 +15,7 @@ struct FUN_00dd9110_class
 // @fnv 0x00dd9110
 void FUN_00dd9110_class::SetReferencedObject(hkReferencedObject* apObject)
 {
-    apObject->RetainReference();
+    apObject->addReference();
     m_cByteAtOffset2->removeReference();
     m_cByteAtOffset2 = apObject;
 }
@@ -39,7 +35,7 @@ FUN_00dd9130_class* FUN_00dd9130_class::Init(hkReferencedObject* apObject, bool 
     *(int**)this = &DAT_010d7c80;
     *(hkReferencedObject**)((char*)this + 8) = apObject;
     *(bool*)((char*)this + 12) = abFlag;
-    apObject->RetainReference();
+    apObject->addReference();
     return this;
 }
 
@@ -66,10 +62,11 @@ void FUN_00dd90d0_cls::FUN_00dd90d0(int a)
     m_08->Tail(a);
 }
 
-struct hkResultDD90
+// The result at 0x00dd90e0 uses an aggregate return pointer; shared hkResult is an enum returned in EAX.
+struct ArchiveStreamResult
 {
     int m_pClassEnum;
-    hkResultDD90(int e)
+    ArchiveStreamResult(int e)
     {
         m_pClassEnum = e;
     }
@@ -81,7 +78,7 @@ class hkStreamDD90
     virtual void V0();
     virtual void V1();
     virtual void V2();
-    virtual hkResultDD90 getResult();
+    virtual ArchiveStreamResult getResult();
 };
 
 class hkWrapperDD90
@@ -91,11 +88,11 @@ class hkWrapperDD90
     int unk04;
     hkStreamDD90* m_stream;
 
-    hkResultDD90 GetStreamResult();
+    ArchiveStreamResult GetStreamResult();
 };
 
 // @fnv 0x00dd90e0
-hkResultDD90 hkWrapperDD90::GetStreamResult()
+ArchiveStreamResult hkWrapperDD90::GetStreamResult()
 {
     return m_stream->getResult();
 }

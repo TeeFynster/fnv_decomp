@@ -2,85 +2,40 @@
 // src/fallout_shared/facegen/bsfacegenmanager_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/facegen/bsfacegenmanager.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "bsfacegenmanager_decls.h"
+#include "../../../include/BSFaceGenMorphData.h"
+#include "../../../include/NiAdditionalGeometryData.h"
+#include "../../../include/RecursiveSpinLock.h"
 
-struct BSFaceGenModel
-{
-    virtual void _v00();
-    virtual void _v04();
-    virtual void _v08();
-    virtual void _v0c();
-    virtual void _v10();
-    virtual void _v14();
-    virtual void _v18();
-    virtual void _v1c();
-    virtual void _v20();
-    virtual void _v24();
-    virtual void _v28();
-    virtual void _v2c();
-    virtual void _v30();
-    virtual void _v34();
-    virtual void _v38();
-    virtual void _v3c();
-    virtual void _v40();
-    virtual void _v44();
-    virtual void _v48();
-    virtual void _v4c();
-    virtual void _v50();
-    virtual void _v54();
-    virtual void _v58();
-    virtual void _v5c();
-    virtual void _v60();
-    virtual void _v64();
-    virtual void _v68();
-    virtual void _v6c();
-    virtual void _v70();
-    virtual void _v74();
-    virtual void _v78();
-    virtual void _v7c();
-    virtual void _v80();
-    virtual void _v84();
-    virtual void _v88();
-    virtual bool HasMorphs();  // 0x8c
-
-    void FUN_00a72720(int a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7);
-};
-
-struct BSFaceGenMorphData
-{
-    void* m_pData;
-    unsigned int m_uiSize;
-    unsigned char m_bFlag;
-};
 
 struct S00a67410
 {
     char _pad0[0x20];
     void* m_pDefaultData;  // +0x20
     char _pad24[0xc];
-    BSFaceGenModel* m_pModel;  // +0x30
+    NiAdditionalGeometryData* m_pAdditionalData;  // +0x30 (vtable slot 0x8c = IsPacked, 0x00a72720 = its stream query)
     char _pad34[6];
     unsigned char m_bModifierActive;  // +0x3a
 
-    void FUN_00a67410(BSFaceGenMorphData* outData);
+    void FUN_00a67410(BSFaceGenMorphData::Buffers* outData);
 };
 
 // @fnv 0x00a67410
-void S00a67410::FUN_00a67410(BSFaceGenMorphData* outData)
+void S00a67410::FUN_00a67410(BSFaceGenMorphData::Buffers* outData)
 {
     if (!m_bModifierActive)
         return;
 
-    BSFaceGenModel* model = m_pModel;
+    NiAdditionalGeometryData* model = m_pAdditionalData;
     void* vars[6];
     vars[1] = 0;
     vars[3] = 0;
     vars[0] = 0;
 
-    if (model && model->HasMorphs())
+    if (model && model->IsPacked())
     {
         vars[2] = 0;
-        model->FUN_00a72720(0, &vars[0], &vars[5], &vars[3], &vars[4], &vars[2], &vars[1]);
+        model->FUN_00a72720(0, reinterpret_cast<char**>(&vars[0]), &vars[5], reinterpret_cast<unsigned short*>(&vars[3]),
+                            reinterpret_cast<int*>(&vars[4]), reinterpret_cast<int*>(&vars[2]), reinterpret_cast<int*>(&vars[1]));
     }
 
     void* data;
@@ -96,19 +51,12 @@ void S00a67410::FUN_00a67410(BSFaceGenMorphData* outData)
         size = (unsigned int)vars[1];
     }
 
-    outData->m_pData = data;
-    outData->m_uiSize = size;
-    outData->m_bFlag = 0;
+    outData->vertices = data;
+    outData->normals = reinterpret_cast<void*>(size);
+    *reinterpret_cast<unsigned char*>(&outData->tangents) = 0;
 }
 
-struct RecursiveSpinLock
-{
-    unsigned int value;
-    void Lock(char const*);
-};
-
-extern RecursiveSpinLock g_011c5f80;
-extern unsigned int DAT_011c5f84;
+extern RecursiveSpinLock g_011c5f80;  // the pool allocator's lock (recursion count at 0x011c5f84)
 
 template <class T> struct PoolAllocatorBase
 {
@@ -148,10 +96,8 @@ void FUN_00a68e30_shell::FUN_00a68e30()
         g_011c5f80.Lock(0);
         node->prev = 0;
         node->next = PoolAllocatorBase<unsigned int>::ms_pFreeList;
-        --DAT_011c5f84;
         PoolAllocatorBase<unsigned int>::ms_pFreeList = node;
-        if (!DAT_011c5f84)
-            g_011c5f80.value = 0;
+        g_011c5f80.Unlock();
 
         --m_uiCount;
     }

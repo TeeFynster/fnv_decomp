@@ -49,63 +49,40 @@ template <class T> __forceinline void hkConstructWithCopy(T* p, int n, const T& 
         p[i] = t;
 }
 
-template <class T> struct hkArr
+#include "../../../../../include/hkArray.h"
+// hkContainerHeapAllocator::get: the memory router's heap (hkMemAlloc is this unit's view of hkMemoryAllocator).
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline hkArr() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    __forceinline ~hkArr()
-    {
-        _clearAndDeallocate(GetRouter()->heap());
-    }
-    __forceinline int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    __forceinline void _clearAndDeallocate(hkMemAlloc& alloc)
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    __forceinline void AddBack(const T& t)
-    {
-        hkMemAlloc& alloc = GetRouter()->heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&alloc, this, sizeof(T));
-        hkConstructWithCopy(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-    __forceinline void expandRecord(int offset, const void* obj, const char* name)
-    {
-        hkMemAlloc& alloc = GetRouter()->heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&alloc, this, sizeof(T));
-        ::new (m_data + m_iElementCount) T(offset, obj, name);
-        m_iElementCount++;
-    }
-    __forceinline void pushBackConstruct(const T& t)
-    {
-        hkMemAlloc& alloc = GetRouter()->heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&alloc, this, sizeof(T));
-        ::new (m_data + m_iElementCount) T(t);
-        m_iElementCount++;
-    }
-};
+    return reinterpret_cast<hkMemoryAllocator&>(GetRouter()->heap());
+}
+template <class T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
+{
+    m_iElementCount = 0;
+    if ((m_iCapacityState & 0x80000000) == 0)
+        reinterpret_cast<hkMemAlloc&>(alloc).ReturnMemory(m_data, getCapacity() * sizeof(T));
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
+{
+    clearAndDeallocate();
+}
+template <class T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& t)
+{
+    if (m_iElementCount == getCapacity())
+        ResizeAudioStream(&alloc, this, sizeof(T));
+    hkConstructWithCopy(m_data + m_iElementCount, 1, t);
+    m_iElementCount++;
+}
+// pushBack with the element copy-constructed in place (CopyRecord has no default constructor).
+template <class T> static __forceinline void pushBackConstruct(hkArray<T>& a, const T& t)
+{
+    hkMemoryAllocator& alloc = hkContainerHeapAllocator().get(&a);
+    if (a.m_iElementCount == a.getCapacity())
+        ResizeAudioStream(&alloc, &a, sizeof(T));
+    ::new (a.m_data + a.m_iElementCount) T(t);
+    a.m_iElementCount++;
+}
 
 struct hkBoolRet
 {
@@ -226,10 +203,10 @@ struct ImportFixup
 
 struct RelocInfo
 {
-    hkArr<LocalFixup> m_pTrailingData;
-    hkArr<TypedPointerRecord> m_pGlobal;
-    hkArr<FinishFixup> m_kFinishFixups;
-    hkArr<ImportFixup> m_kImports;
+    hkArray<LocalFixup> m_pTrailingData;
+    hkArray<TypedPointerRecord> m_pGlobal;
+    hkArray<FinishFixup> m_kFinishFixups;
+    hkArray<ImportFixup> m_kImports;
     void* m_kNodePool;
     __forceinline RelocInfo() : m_kNodePool(0)
     {}
@@ -241,7 +218,7 @@ struct OArchive
     void* m_ppVirtualMethodTable;
     int m_memSizeAndRefCount;
     void* m_pStreamWriter;
-    OArchive(hkArr<char>& buf);
+    OArchive(hkArray<char>& buf);
     ~OArchive();
     void* GetStreamWriter()
     {
@@ -283,36 +260,36 @@ struct CopyRecord
 void* FUN_00e4afe0(const void* dataIn, const ClassInfo& klassIn, PtrMap* previousCopies,
                    VtableClassReg* vtableClassRegistry, LoadedObjectReg* loadedObjectRegistry, int flags)
 {
-    hkArr<char> buffer;
+    hkArray<char> buffer;
     OArchive dataOut(buffer);
     RelocInfo reloc;
-    hkArr<PendingCopy> todo;
+    hkArray<PendingCopy> todo;
     {
         PendingCopy p;
         p.m_object = dataIn;
         p.m_pObjectTypeInfo = &klassIn;
-        todo.AddBack(p);
+        todo.pushBack(p);
     }
     PtrMap doneObjects;
-    hkArr<CopyRecord> records;
+    hkArray<CopyRecord> records;
     ObjCopier copier(g_hostLayoutRules_e4afe0, g_hostLayoutRules_e4afe0, flags);
 
-    for (int todoIndex = 0; todoIndex < todo.GetLogicalSize(); ++todoIndex)
+    for (int todoIndex = 0; todoIndex < todo.getSize(); ++todoIndex)
     {
         const void* obj = todo[todoIndex].m_object;
         const ClassInfo* pClassInfo = todo[todoIndex].m_pObjectTypeInfo;
-        doneObjects.insert(obj, buffer.GetLogicalSize());
-        int globalStart = reloc.m_pGlobal.GetLogicalSize();
+        doneObjects.insert(obj, buffer.getSize());
+        int globalStart = reloc.m_pGlobal.getSize();
         if (pClassInfo->GetLastNodeFlag())
             pClassInfo = vtableClassRegistry->GetClassFromVirtualInstance(obj);
 
-        int offset = buffer.GetLogicalSize();
+        int offset = buffer.getSize();
         const char* name = pClassInfo->FUN_00d46d40();
-        records.pushBackConstruct(CopyRecord(offset, obj, name));
+        pushBackConstruct(records, CopyRecord(offset, obj, name));
 
         copier.FUN_00e04920(obj, *pClassInfo, dataOut.GetStreamWriter(), *pClassInfo, reloc);
 
-        for (int j = globalStart; j < reloc.m_pGlobal.GetLogicalSize(); ++j)
+        for (int j = globalStart; j < reloc.m_pGlobal.getSize(); ++j)
         {
             void* ptr = reloc.m_pGlobal[j].m_pData;
             if (!ptr)
@@ -334,21 +311,21 @@ void* FUN_00e4afe0(const void* dataIn, const ClassInfo& klassIn, PtrMap* previou
                 PendingCopy p;
                 p.m_object = ptr;
                 p.m_pObjectTypeInfo = ptrClass;
-                todo.AddBack(p);
+                todo.pushBack(p);
             }
         }
     }
 
-    if (buffer.GetLogicalSize())
+    if (buffer.getSize())
     {
-        char* versioned = (char*)AllocateWithHeader(GetRouter()->heap(), buffer.GetLogicalSize());
-        FUN_00cb1260(versioned, buffer.m_data, buffer.GetLogicalSize());
+        char* versioned = (char*)AllocateWithHeader(GetRouter()->heap(), buffer.getSize());
+        FUN_00cb1260(versioned, buffer.m_data, buffer.getSize());
 
-        for (int i = 0; i < reloc.m_pTrailingData.GetLogicalSize(); ++i)
+        for (int i = 0; i < reloc.m_pTrailingData.getSize(); ++i)
             *(char**)(versioned + reloc.m_pTrailingData[i].m_iSourceOffset) =
                 versioned + reloc.m_pTrailingData[i].m_iTargetOffset;
 
-        for (int i = 0; i < reloc.m_pGlobal.GetLogicalSize(); ++i)
+        for (int i = 0; i < reloc.m_pGlobal.getSize(); ++i)
         {
             void* ptr = reloc.m_pGlobal.m_data[i].m_pData;
             int offset = doneObjects.FindValueForKey(ptr, -1);
@@ -359,13 +336,13 @@ void* FUN_00e4afe0(const void* dataIn, const ClassInfo& klassIn, PtrMap* previou
 
         if (previousCopies)
         {
-            for (int i = 0; i < records.GetLogicalSize(); ++i)
+            for (int i = 0; i < records.getSize(); ++i)
                 previousCopies->insert(records[i].m_object, (int)(versioned + records[i].m_offset));
         }
 
         if (loadedObjectRegistry)
         {
-            for (int i = 0; i < records.GetLogicalSize(); ++i)
+            for (int i = 0; i < records.getSize(); ++i)
                 loadedObjectRegistry->RegisterLoadedObject(versioned + records[i].m_offset, records[i].m_pName);
         }
 

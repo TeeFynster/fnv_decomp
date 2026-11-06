@@ -2,18 +2,8 @@
 // src/fallout/magic/calmeffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/calmeffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct ActiveEffect
-{
-    void Dispel(bool);
-};
-struct MagicCaster
-{
-};
-struct CalmEffect : ActiveEffect
-{
-    bool __thiscall FUN_0080ba50(MagicCaster*);
-    bool __thiscall ClearCasterIfMatch(MagicCaster*);
-};
+#include "../../../include/CalmEffect.h"
+
 // Calls ClearCasterIfMatch on the caster; if it returns true, dispels the effect and returns that result.
 // @fnv 0x0080ba50
 bool __thiscall CalmEffect::FUN_0080ba50(MagicCaster* caster)
@@ -24,25 +14,12 @@ bool __thiscall CalmEffect::FUN_0080ba50(MagicCaster* caster)
     return result;
 }
 
-struct FUN_0080a900
-{
-    void* m_pEffectInstance;
-    void* pSpell;
-    void* pEffect;
-    char pad[0x4c - 12];
-    FUN_0080a900(void*, void*, void*);
-};
-struct FUN_0080a930_shell : ActiveEffect
-{
-    FUN_0080a900* FUN_0080a930();
-};
-// Allocates a FUN_0080a900 from this object's fields at offsets 0x28, 0x8 and 0xc, passes it to virtual method 17, and returns it.
+// Allocates a CalmEffect from the caster, spell and effect, copies its state, and returns it.
 // @fnv 0x0080a930
-FUN_0080a900* FUN_0080a930_shell::FUN_0080a930()
+CalmEffect* CalmEffect::FUN_0080a930()
 {
-    FUN_0080a900* presult =
-        new FUN_0080a900(*(void**)((char*)this + 0x28), *(void**)((char*)this + 8), *(void**)((char*)this + 0xc));
-    ((void(__thiscall*)(void*, void*))(*(void***)this)[17])(this, presult);
+    CalmEffect* presult = new CalmEffect(m_pEffectInstance, pSpell, pEffect);
+    CopyData(presult);
     return presult;
 }
 
@@ -327,22 +304,13 @@ struct FUN_00822b40_Class
     FUN_0080abf0_Target* FUN_00822b40();
 };
 
-struct ValueModifierEffect
-{
-    void ApplyEffect();
-    FUN_00822b40_Class* FUN_0059bb30();
-};
 
-struct FUN_0080abf0_Effect : ValueModifierEffect
-{
-    void FUN_0080abf0();
-};
 
 // @fnv 0x0080abf0
-void FUN_0080abf0_Effect::FUN_0080abf0()
+void CalmEffect::FUN_0080abf0()
 {
     ApplyEffect();
-    FUN_0080abf0_Target* target = FUN_0059bb30() ? FUN_0059bb30()->FUN_00822b40() : 0;
+    FUN_0080abf0_Target* target = ActiveEffect::FUN_0059bb30() ? ((FUN_00822b40_Class*)ActiveEffect::FUN_0059bb30())->FUN_00822b40() : 0;
     if (target && target->v428())
     {
         target->v428()->FUN_00483710();
@@ -548,26 +516,21 @@ struct FUN_0080a9e0_Caster
 struct FUN_0080a9e0_Helper
 {
     bool FUN_00493bb0();
-    float GetFloatAtOffset1C();
     unsigned short FUN_0087f9f0();
 };
 
 bool __cdecl FUN_006494d0(unsigned short a, float b);
 
-struct FUN_0080a9e0_cls
-{
-    bool FUN_0080a9e0(MagicCaster* caster);
-};
 
 // @fnv 0x0080a9e0
-bool FUN_0080a9e0_cls::FUN_0080a9e0(MagicCaster* caster)
+bool CalmEffect::FUN_0080a9e0(MagicCaster* caster)
 {
     FUN_0080a9e0_Effect* pEffect;
     pEffect = (caster != 0) ? ((FUN_0080a9e0_Caster*)caster)->FUN_00822b40() : 0;
     if (pEffect != 0 && !pEffect->vf08B(false) && !pEffect->vf0BA() && ((FUN_0080a9e0_Helper*)pEffect)->FUN_00493bb0())
     {
         if (FUN_006494d0(((FUN_0080a9e0_Helper*)pEffect)->FUN_0087f9f0(),
-                         ((FUN_0080a9e0_Helper*)this)->GetFloatAtOffset1C()))
+                         GetFloatAtOffset1C()))
         {
             return true;
         }
@@ -856,23 +819,15 @@ struct FUN_0080aa90_Holder
     FUN_0080aa90_Obj* FUN_00822b40();
 };
 
-class FUN_0080aa90_cls
-{
-  public:
-    void FUN_0082c000();
-    FUN_0080aa90_Holder* FUN_0059bb30();
 
-    void FUN_0080aa90();
-};
-
-// Calls FUN_0082c000, then if the holder's object and its Virt266 result are non-null, calls StopActorMoving on that result.
+// Starts the value modifier, then stops the target actor moving when its process is available.
 // @fnv 0x0080aa90
-void FUN_0080aa90_cls::FUN_0080aa90()
+void CalmEffect::FUN_0080aa90()
 {
     FUN_0080aa90_Obj* pObject;
 
-    FUN_0082c000();
-    pObject = FUN_0059bb30() != 0 ? FUN_0059bb30()->FUN_00822b40() : 0;
+    ValueModifierEffect::Start();
+    pObject = ActiveEffect::FUN_0059bb30() != 0 ? ((FUN_0080aa90_Holder*)ActiveEffect::FUN_0059bb30())->FUN_00822b40() : 0;
     if (pObject != 0)
     {
         if (pObject->Virt266() != 0)
@@ -1156,27 +1111,20 @@ struct FUN_0080ab10_obj
     FUN_0080ab10_obj* FUN_00822b40();
 };
 
-struct FUN_0080ab10_cls
-{
-    void FUN_0082c660(float);
-    void FUN_00804210(int);
-    FUN_0080ab10_obj* FUN_0059bb30();
-    void FUN_0080ab10(float a1);
-};
 
 // @fnv 0x0080ab10
-void FUN_0080ab10_cls::FUN_0080ab10(float afValue)
+void CalmEffect::FUN_0080ab10(float afValue)
 {
     unsigned char flag;
     FUN_0080ab10_obj* obj;
-    this->FUN_0082c660(afValue);
-    obj = (this->FUN_0059bb30() != 0) ? this->FUN_0059bb30()->FUN_00822b40() : 0;
+    ValueModifierEffect::Update(afValue);
+    obj = (ActiveEffect::FUN_0059bb30() != 0) ? ((FUN_0080ab10_obj*)ActiveEffect::FUN_0059bb30())->FUN_00822b40() : 0;
     if (obj != 0)
     {
         flag = (obj != 0 && obj->v266() != 0) ? obj->v266()->FUN_0047c850() : (unsigned char)1;
         if (obj->v139(0) || obj->v186() || !flag)
         {
-            this->FUN_00804210(0);
+            this->Dispel(false);
         }
     }
 }

@@ -1,0 +1,9 @@
+#pragma once
+
+enum SIZE_TYPE
+{
+    SIZE_TYPE_SIZE_CHAR = 0,
+    SIZE_TYPE_SIZE_SHORT = 1,
+    SIZE_TYPE_SIZE_INT = 2,
+    SIZE_TYPE_SIZE_COUNT = 3
+};

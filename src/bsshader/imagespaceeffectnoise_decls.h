@@ -1,19 +1,12 @@
-// bsshader/imagespaceeffectnoise_decls.h: declares MemoryManager, ImageSpaceShaderParam, ImageSpaceManager, Effects
+// bsshader/imagespaceeffectnoise_decls.h: effect classes without approved shared headers
 
-class MemoryManager
-{
-  public:
-    void* Allocate(unsigned int);
-    void Deallocate(void*);
-};
+#include "../../include/MemoryManager.h"
+
 extern MemoryManager g_memoryManager;
-class ImageSpaceEffectParam
-{
-    char storage[36];
-};
 class ImageSpaceShaderParam : public ImageSpaceEffectParam
 {
-    char storage[100];
+    // Setup at 0x00C05180 allocates 0x88 bytes for the shader parameter.
+    char storage[136];
 
   public:
     ImageSpaceShaderParam();
@@ -27,17 +20,8 @@ class ImageSpaceShaderParam : public ImageSpaceEffectParam
         g_memoryManager.Deallocate(p);
     }
 };
-template <class T> class NiTMallocInterface
-{
-};
-template <class T, class A> class NiTArray
-{
-    char storage[16];
-
-  public:
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, const T&);
-};
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTArray.h"
 class ImageSpaceTexture;
 class ImageSpaceEffect
 {
@@ -48,16 +32,6 @@ class ImageSpaceEffect
     void SetTextureArrayCount(int);
     void SetEffectParamAt(int, int, int);
     void SetEffectAt(int, ImageSpaceEffect*, ImageSpaceEffectParam*, int);
-};
-class ImageSpaceManager
-{
-  public:
-    char prefix[8];
-    struct Effects
-    {
-        char prefix[200];
-        ImageSpaceEffect* noise;
-    }* effects;
 };
 class NoiseImageSpaceEffect : public ImageSpaceEffect
 {

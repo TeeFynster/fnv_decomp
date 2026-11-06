@@ -1,46 +1,23 @@
+#define FNV64_NIPOINTER_COMPARE_DECLS // Exe 0x004b04f0 retains out-of-line pointer comparison.
+#include "../../../../include/NiTArray.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiUpdateData.h"
+#include "../../../../include/TESActorBaseData.h"
 
 // src/gamebryo2.2/corelibs/nimain/niavobject_od_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/nimain/niavobject.cpp functions whose prologue its flags cannot
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 // src/gamebryo2.2/corelibs/nimain/niavobject.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/niavobject.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+#include "../../../../include/NiMemObject.h"
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct NiUpdateData
-{
-    float fTime;
-    bool m_bUpdateEnabled;
-    bool m_bRender;
-    bool m_bInterpolate;
-    bool m_bTimeToDie;
-    bool m_bVisible;
-    char _pad_9[3];
-};
 typedef char _sizecheck_NiUpdateData[sizeof(NiUpdateData) == 12 ? 1 : -1];
-struct NiAVObject
-{
-    void __thiscall UpdateTimeControllers(NiUpdateData&, bool);
-};
-struct FUN_00a5a030_shell : NiAVObject
-{
-    void __thiscall FUN_00a5a030(NiUpdateData& data);
-};
 extern char const* const g_011f4428_arg1;
 char const* const* __cdecl FUN_00a5a420();
 extern const void* DAT_011f9140;
 const void* __cdecl FUN_00b4e1d0();
-struct MemoryManager
-{
-    void* __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
-struct FUN_00a59dc0_shell
-{
-    void __thiscall SetBoundObject(void* apBound);
-};
 
 // @fnv 0x00438220
 int __cdecl FUN_00438220()
@@ -51,10 +28,6 @@ int __cdecl FUN_00438220()
 struct Flt
 {
     operator unsigned int() const;
-};
-struct TESActorBaseData
-{
-    unsigned short GetFatigue() const;
 };
 struct FUN_00456650_shell
 {
@@ -90,32 +63,16 @@ void __thiscall FUN_0094db80_shell::FUN_0094db80(unsigned char ucRef)
 
 struct NiObjectStub;
 
-struct ObjPtr
-{
-    NiObjectStub* m_pObject;
-    ObjPtr(NiObjectStub* pObject);
-    ~ObjPtr();
-    bool operator!=(const ObjPtr& ptr) const;
-    ObjPtr& operator=(const ObjPtr& ptr);
-};
+typedef NiPointer<NiObjectStub> ObjPtr;
 
 ObjPtr* __cdecl FUN_005e0ba0(unsigned int auiCount);
 void __cdecl FUN_004b0220(ObjPtr* pArray);
 
-struct ObjPtrArray
-{
-    virtual ~ObjPtrArray();
-    ObjPtr* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
+typedef NiTArray<ObjPtr, NiTMallocInterface<ObjPtr> > ObjPtrArray;
 
-    void FUN_004afc80();
-};
 
 // @fnv 0x004afc80
-void ObjPtrArray::FUN_004afc80()
+template <> void NiTArray<ObjPtr, NiTMallocInterface<ObjPtr> >::RemoveAll()
 {
     if (m_usESize == m_usSize)
         return;

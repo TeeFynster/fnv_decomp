@@ -1,3 +1,6 @@
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/Transform.h"
+
 
 // src/havok/physics/collide/agent/compoundagent/bvtree/hkpbvtreeagent_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/collide/agent/compoundagent/bvtree/hkpbvtreeagent.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -24,20 +27,7 @@ struct S_d2f5a0_Entry
     int unk4;
     S_d2f5a0_Obj* m_obj;
 };
-struct S_d2f5a0_Array
-{
-    S_d2f5a0_Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    S_d2f5a0_Entry* begin()
-    {
-        return m_data;
-    }
-    S_d2f5a0_Entry* end()
-    {
-        return m_data + m_iElementCount;
-    }
-};
+typedef hkArrayBase<S_d2f5a0_Entry> S_d2f5a0_Array;
 struct S_d2f5a0
 {
     int unk0;
@@ -45,27 +35,6 @@ struct S_d2f5a0
     int unk8;
     S_d2f5a0_Array m_aiIndexedValues;
     void FUN_00d2f5a0(int a);
-};
-struct __declspec(align(16)) Transform
-{
-    float m_f00;
-    float m_f04;
-    float m_f08;
-    float m_f0c;
-    float m_f10;
-    float m_f14;
-    float m_f18;
-    float m_f1c;
-    float m_f20;
-    float m_f24;
-    float m_f28;
-    float m_f2c;
-    float m_f30;
-    float m_f34;
-    float m_f38;
-    float m_f3c;
-
-    Transform(void* apFirst, void* apSecond);
 };
 struct TargetObject
 {
@@ -257,29 +226,13 @@ struct EntryD2F5
     int unk04;
     ListenerD2F5* m_pkListener;
 };
-template <class T> class hkArrayD2F5
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    T* begin()
-    {
-        return m_data;
-    }
-    T* end()
-    {
-        return m_data + m_iElementCount;
-    }
-};
 class OwnerD2F5
 {
   public:
     virtual ~OwnerD2F5();
 
     int unk04[2];
-    hkArrayD2F5<EntryD2F5> m_entries;
+    hkArray<EntryD2F5> m_entries;
 
     void FUN_00d2f550(void* pArg);
 };
@@ -303,27 +256,6 @@ struct SlotRef
     SlotObj* m_ent;
     unsigned int unk04;
     unsigned int m_08;
-};
-
-__declspec(align(16)) struct SlotTemp
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    void Init(unsigned int a, unsigned int b);
 };
 
 __declspec(align(16)) struct SlotTemp2
@@ -369,9 +301,9 @@ struct SlotBox
 // @fnv 0x00d2f690
 void FUN_00d2f690(SlotRef* a, SlotRef* b, SlotParam* p, SlotBox* box)
 {
-    SlotTemp t1;
+    Transform t1;
     SlotTemp2 t2;
-    t1.Init(b->m_08, a->m_08);
+    t1.FUN_00cb22f0(reinterpret_cast<const Transform*>(b->m_08), reinterpret_cast<const Transform*>(a->m_08));
     SlotObj* obj = a->m_ent;
     obj->Eval(&t1, p->m_08, box);
     t2.Build(b->m_08, (char*)p + 0x50);
@@ -433,15 +365,6 @@ struct SolBox
         return (_mm_movemask_ps(_mm_and_ps(lo, hi)) & 7) == 7;
     }
 };
-struct __declspec(align(16)) SolTransform
-{
-    float m00, m04, m08, m0c, m10, m14, m18, m1c, m20, m24, m28, m2c, m30, m34, m38, m3c;
-    void FUN_00cb22f0(const SolTransform&, const SolTransform&);
-    inline void SetMulInverse(const SolTransform& a, const SolTransform& b)
-    {
-        FUN_00cb22f0(a, b);
-    }
-};
 template <class T> struct SolArray;
 struct SolContainer;
 enum SolKind
@@ -471,7 +394,7 @@ struct SolShape
     virtual const SolContainer* GetShapeContainer() const;
     virtual void v14();
     virtual void v18();
-    virtual void getAabb(const SolTransform&, float, SolBox&) const;
+    virtual void getAabb(const Transform&, float, SolBox&) const;
     __forceinline SolKind getType() const;
 };
 struct __declspec(align(16)) SolAlignedShape : SolShape
@@ -506,13 +429,13 @@ struct SolBody
 {
     const SolShape* shape;
     unsigned key;
-    const SolTransform* motion;
+    const Transform* motion;
     const SolBody* parent;
     __forceinline SolBody(const SolBody* p) : parent(p)
     {
         motion = p->motion;
     }
-    __forceinline const SolTransform& getTransform() const
+    __forceinline const Transform& getTransform() const
     {
         return *motion;
     }
@@ -1157,11 +1080,11 @@ void SolUpdater::FUN_00d2fac0(const SolBody& first, const SolBody& second, const
 {
     SolBox bounds;
     {
-        SolTransform transform;
+        Transform transform;
         {
-            const SolTransform& secondTransform = second.getTransform();
-            const SolTransform& firstTransform = first.getTransform();
-            transform.SetMulInverse(secondTransform, firstTransform);
+            const Transform& secondTransform = second.getTransform();
+            const Transform& firstTransform = first.getTransform();
+            transform.FUN_00cb22f0(secondTransform, firstTransform);
         }
         float extra = value.getTolerance() * 0.5;
         first.getShape()->getAabb(transform, value.getTolerance() + extra, bounds);

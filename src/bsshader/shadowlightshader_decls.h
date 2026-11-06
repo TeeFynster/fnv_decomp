@@ -1,96 +1,11 @@
-// bsshader/shadowlightshader_decls.h: declares NiD3DShaderConstantMap, ShadowLightShader
+// bsshader/shadowlightshader_decls.h: declares ShadowLightShader
 #ifndef SHADOWLIGHTSHADER_DECLS_H
 #define SHADOWLIGHTSHADER_DECLS_H
 
 #include "layout_support.h"
 #include "NiRefObject.h"
-class GraphicsRenderer;
-class NiD3DShaderConstantMap;
-class NiShaderConstantMapEntry;
-template <> class NiPointer<NiD3DShaderConstantMap>
-{
-  public:
-    NiD3DShaderConstantMap* m_pObject;
-    ~NiPointer();
-    NiPointer& operator=(NiD3DShaderConstantMap* object)
-    {
-        if (m_pObject != object)
-        {
-            if (m_pObject)
-                reinterpret_cast<NiRefObject*>(m_pObject)->DecRefCount();
-            m_pObject = object;
-            if (m_pObject)
-                reinterpret_cast<NiRefObject*>(m_pObject)->IncRefCount();
-        }
-        return *this;
-    }
-    NiPointer& operator=(const NiPointer& other)
-    {
-        if (m_pObject != other.m_pObject)
-        {
-            if (m_pObject)
-                reinterpret_cast<NiRefObject*>(m_pObject)->DecRefCount();
-            m_pObject = other.m_pObject;
-            if (m_pObject)
-                reinterpret_cast<NiRefObject*>(m_pObject)->IncRefCount();
-        }
-        return *this;
-    }
-};
-template <> class NiPointer<NiShaderConstantMapEntry>
-{
-  public:
-    NiShaderConstantMapEntry* m_pObject;
-    ~NiPointer();
-    NiPointer& operator=(NiShaderConstantMapEntry* object)
-    {
-        if (m_pObject != object)
-        {
-            if (m_pObject)
-                reinterpret_cast<NiRefObject*>(m_pObject)->DecRefCount();
-            m_pObject = object;
-            if (m_pObject)
-                reinterpret_cast<NiRefObject*>(m_pObject)->IncRefCount();
-        }
-        return *this;
-    }
-};
-class NiD3DShaderConstantMap : public NiRefObject
-{
-  public:
-    static void* operator new(unsigned int size);
-    NiD3DShaderConstantMap(GraphicsRenderer* renderer, unsigned int type);
-    unsigned char layoutPadding8[60];
-    virtual unsigned int AddEntry(const char*, unsigned int, unsigned int, unsigned int, unsigned int, const char*,
-                                  unsigned int, unsigned int, const void*, bool);
-    virtual void vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual unsigned int vfn_68(const char*, unsigned int, unsigned int, const char*, unsigned int, unsigned int,
-                                const void*, bool);
-    virtual void vfn_6c();
-    virtual NiShaderConstantMapEntry* vfn_70(const char*);
-};
+#include "../../include/NiPointer.h"
+#include "../../include/NiD3DShaderConstantMap.h"
 FNV_STATIC_ASSERT(sizeof(NiD3DShaderConstantMap) == 0x44);
 class ShadowLightShader
 {

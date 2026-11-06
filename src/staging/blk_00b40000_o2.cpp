@@ -1,13 +1,102 @@
+#include "../../include/ImageSpaceTexture.h"
+#include "../../include/NiTListItem.h"
 
 // src/staging/blk_00b40000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/BGSDecalNode.h"
+#include "../../include/BSTextureManager.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/NiTMap.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/ImageSpaceManager.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiTPrimitiveArray.h"
 
-struct ImageSpaceManager
+// These caches use the pointer-pool allocator (NewItem 0x00e72e50), with
+// seven virtual slots; the base's allocation slots are pure.
+typedef NiTPointerMap<const char*, NiPointer<NiRefObject> > NamedObjectMap;
+typedef NiTMapBase<NiTPointerAllocator<unsigned int>,
+                   const char*, NiPointer<NiRefObject> > NamedObjectMapBase;
+struct RTEntry;
+typedef NiTPointerMap<unsigned int, RTEntry*> RenderItemMap;
+typedef NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned int, RTEntry*> RenderItemMapBase;
+
+// The lookup only reads the map and writes its output reference.
+template <> __declspec(noalias) bool RenderItemMapBase::GetAt(unsigned int key, RTEntry*& value) const;
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+
+inline void NiRefObject::IncRefCount()
 {
-    void __thiscall SetValue(int);
-};
+    InterlockedIncrement((volatile long*)&m_uiRefCount);
+}
+
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0)
+{}
+
+template <class T> inline NiPointer<T>::NiPointer(T* pkNew) : m_pObject(pkNew)
+{
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+
+template <class T> inline NiPointer<T>::NiPointer(const NiPointer<T>& kSrc) : m_pObject(kSrc.m_pObject)
+{
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer<T>& kSrc)
+{
+    if (m_pObject != kSrc.m_pObject)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = kSrc.m_pObject;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+
+template <class T> inline NiPointer<T>::operator T*() const
+{
+    return m_pObject;
+}
+
+template <class T> inline T* NiPointer<T>::operator->() const
+{
+    return m_pObject;
+}
 
 extern ImageSpaceManager* DAT_011f91ac;
 
@@ -17,11 +106,6 @@ void __cdecl FUN_00b4f430(int arg)
     DAT_011f91ac->SetValue(arg);
 }
 
-struct BSRenderedTexture;
-struct BSTextureManager
-{
-    void AddRenderedTexture(BSRenderedTexture*);
-};
 extern BSTextureManager* DAT_011f91a8;
 extern BSRenderedTexture* DAT_011f949c;
 
@@ -36,17 +120,13 @@ void FUN_00b4f510()
     }
 }
 
-struct ImageSpaceTexture
-{
-    void AddRenderedTexture();
-};
-struct ImageSpaceManager;
+
 extern ImageSpaceManager* DAT_011f91ac;
 
 // @fnv 0x00b540b0
 void FUN_00b540b0()
 {
-    ((ImageSpaceTexture*)((char*)DAT_011f91ac + 0x204))->AddRenderedTexture();
+    ((ImageSpaceTexture*)DAT_011f91ac->DepthTexture)->AddRenderedTexture();
 }
 
 extern int DAT_011ffa0c;
@@ -90,42 +170,29 @@ void* __thiscall FUN_00b58110_Class::FUN_00b58110(int flags)
     return this;
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
-void __cdecl FUN_00b580a0(void);
-struct FUN_00b58400_class
-{
-    void* __thiscall FUN_00b58400(int flag);
-};
 // @fnv 0x00b58400
-void* __thiscall FUN_00b58400_class::FUN_00b58400(int flag)
+NamedObjectMap* __fastcall DestroyNamedObjectMap(NamedObjectMap* map, void*, unsigned int flag)
 {
-    FUN_00b580a0();
+    map->NamedObjectMap::~NiTPointerMap();
     if ((flag & 1))
-        g_memoryManager.Deallocate(this);
-    return this;
+        g_memoryManager.Deallocate(map);
+    return map;
 }
 
 extern "C" void __cdecl operator delete(void*, unsigned int);
 
 void __cdecl FUN_00b581c0(void);
 
-struct BGSDecalNode
-{
-    BGSDecalNode* FUN_00b584c0(unsigned int flags);
-};
-
-// Calls FUN_00b581c0, deletes this with size 0x34 when flags has bit 0 set, and returns this.
+// The shared BGSDecalNode has no declaration for this cleanup wrapper.
+// Calls FUN_00b581c0, deletes node with size 0x34 when flags has bit 0 set, and returns node.
 // @fnv 0x00b584c0
-BGSDecalNode* BGSDecalNode::FUN_00b584c0(unsigned int flags)
+BGSDecalNode* __fastcall FUN_00b584c0(BGSDecalNode* node, void*, unsigned int flags)
 {
     FUN_00b581c0();
     if (flags & 1)
-        operator delete(this, 0x34);
-    return this;
+        ::operator delete(node, 0x34);
+    return node;
 }
 
 extern char DAT_011f968c;
@@ -144,10 +211,6 @@ int __thiscall FUN_00b5a3f0_Class::FUN_00b5a3f0()
 }
 
 namespace fnv_00b5a480 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 void __cdecl FUN_00b59c20();
 struct FUN_00b5a480_Class
@@ -351,11 +414,6 @@ void __thiscall FUN_00b5a8d0_List::MoveBefore(FUN_00b5a8d0_Node* pNodeToMove, FU
     }
 }
 
-struct NiTPrimitiveArray_int___
-{
-    void __thiscall SetAt(unsigned int, int&);
-};
-
 struct FUN_00b5a3a0_Class
 {
     void FUN_00b5a3a0();
@@ -368,7 +426,7 @@ void FUN_00b5a3a0_Class::FUN_00b5a3a0()
     ImageSpaceTexture* tex = *(ImageSpaceTexture**)((char*)this + 0x2c);
     tex = *(ImageSpaceTexture**)((char*)tex + 8);
     tex->AddRenderedTexture();
-    NiTPrimitiveArray_int___* arr = (NiTPrimitiveArray_int___*)((char*)this + 0x28);
+    NiTPrimitiveArray<int>* arr = (NiTPrimitiveArray<int>*)((char*)this + 0x28);
     iZero = 0;
     arr->SetAt(2, iZero);
     iZero = 0;
@@ -818,25 +876,6 @@ void* FUN_00b57fd0()
     return &g_target_00b57fd0;
 }
 
-class B57FF0RefObject
-{
-  public:
-    virtual ~B57FF0RefObject();
-    virtual void DeleteThis();
-
-    unsigned int m_uiRefCount;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (!InterlockedDecrement((volatile long*)&m_uiRefCount))
-            DeleteThis();
-    }
-};
-
 class B57FF0Base
 {
   public:
@@ -880,7 +919,7 @@ class FUN_00b57ff0 : public B57FF0Base
     virtual ~FUN_00b57ff0();
 
     int m_iFadeIndex;
-    NiPointer<B57FF0RefObject> m_pReferencedObject;
+    NiPointer<NiRefObject> m_pReferencedObject;
 };
 
 // @fnv 0x00b57ff0
@@ -975,50 +1014,22 @@ int CpuObject::FUN_00b58090()
 
 void* __cdecl NiFreeAlias(void* p);
 
-struct NiTMapBaseStub
+template <class TAlloc, class TKEY, class TVAL>
+inline NiTMapBase<TAlloc, TKEY, TVAL>::~NiTMapBase()
 {
-    unsigned int m_uiHashSize;
-    void** m_ppkHashTable;
-    void RemoveAll();
-    virtual ~NiTMapBaseStub()
-    {
-        RemoveAll();
-        NiFreeAlias(m_ppkHashTable);
-    }
-};
+    RemoveAll();
+    NiFreeAlias(m_ppkHashTable);
+}
 
-struct FUN_00b580a0 : NiTMapBaseStub
-{
-    virtual ~FUN_00b580a0();
-};
-
-// Destructor that calls RemoveAll() to clear the hash table entries.
+// Clears the named cache before releasing the base hash table.
 // @fnv 0x00b580a0
-FUN_00b580a0::~FUN_00b580a0()
+template <> NamedObjectMap::~NiTPointerMap()
 {
     RemoveAll();
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
-
-struct ReferenceObject
-{
-    virtual void RetainUnused();
-    virtual void Destroy();
-    volatile long referenceCount;
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&referenceCount) == 0)
-        {
-            Destroy();
-        }
-    }
-    void IncRefCount()
-    {
-        InterlockedIncrement(&referenceCount);
-    }
-};
 
 struct FUN_00b58140_Class
 {
@@ -1054,7 +1065,7 @@ struct FUN_00b58140_Class
     unsigned int unk74;
     unsigned int unk78;
     unsigned int copiedValue7c;
-    ReferenceObject* reference80;
+    NiRefObject* reference80;
     unsigned int copiedValue84;
     unsigned int copiedValue88;
     void __thiscall FUN_00b702b0(FUN_00b58140_Class* destination, unsigned int flags);
@@ -1082,60 +1093,26 @@ void FUN_00b58140_Class::CopyTo(FUN_00b58140_Class* destination, unsigned int fl
     destination->copiedValue7c = copiedValue7c;
 }
 
-struct MapRefObject
-{
-    virtual void RefVirtual();
-    virtual void DeleteThis();
-    unsigned int refs;
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&refs);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((volatile long*)&refs) == 0)
-            DeleteThis();
-    }
-};
-struct PointerMapNode
-{
-    PointerMapNode* next;
-    unsigned int key;
-    NiPointer<MapRefObject> value;
-};
-struct PointerMap
-{
-    virtual void MapVirtual();
-    virtual unsigned int Hash(unsigned int);
-    virtual bool Equal(unsigned int, unsigned int);
-    virtual void Assign(PointerMapNode*, unsigned int, NiPointer<MapRefObject>);
-    virtual void Clear();
-    virtual PointerMapNode* NewItem();
-    unsigned int hashSize;
-    PointerMapNode** buckets;
-    unsigned int count;
-    void InsertOrAssign(unsigned int, NiPointer<MapRefObject>);
-};
-// Looks up key in the hash bucket; if found, replaces its value, otherwise allocates a new node, assigns key/value, links it into the bucket and increments count.
+// Replaces an existing value or inserts a newly allocated hash-chain item.
 // @fnv 0x00b582b0
-void PointerMap::InsertOrAssign(unsigned int key, NiPointer<MapRefObject> value)
+template <> void NamedObjectMapBase::SetAt(const char* key, NiPointer<NiRefObject> value)
 {
-    unsigned int hash = Hash(key);
-    PointerMapNode* node = buckets[hash];
+    unsigned int hash = KeyToHashIndex(key);
+    EntryType* node = m_ppkHashTable[hash];
     while (node)
     {
-        if (Equal(key, node->key))
+        if (IsKeysEqual(key, node->m_key))
         {
-            node->value = value;
+            node->m_val = value;
             return;
         }
-        node = node->next;
+        node = node->m_pkNext;
     }
     node = NewItem();
-    Assign(node, key, value);
-    node->next = buckets[hash];
-    buckets[hash] = node;
-    ++count;
+    SetValue(node, key, value);
+    node->m_pkNext = m_ppkHashTable[hash];
+    m_ppkHashTable[hash] = node;
+    ++m_kItemCount.m_uiCount;
 }
 
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
@@ -1266,34 +1243,19 @@ class BB595B0Heap
 
 extern BB595B0Heap g_kB595B0Heap;
 
-class BB595B0RefObject
-{
-  public:
-    virtual ~BB595B0RefObject();
-    virtual void DeleteThis();
-
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_lRefCount) == 0)
-            DeleteThis();
-    }
-
-    long m_lRefCount;
-};
-
 template <class T> class BB595B0Pointer
 {
   public:
     ~BB595B0Pointer()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     BB595B0Pointer& operator=(T* pObject)
     {
         if (m_pObject != pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = pObject;
         }
@@ -1314,12 +1276,7 @@ class BB595B0Entry
     }
 };
 
-template <class T> struct BB595B0ListNode
-{
-    BB595B0ListNode* m_pkNext;
-    BB595B0ListNode* m_pkPrev;
-    T m_element;
-};
+
 
 template <class T> class BB595B0List
 {
@@ -1330,19 +1287,19 @@ template <class T> class BB595B0List
     }
     void RemoveAll() throw();
 
-    BB595B0ListNode<T>* GetHeadPos() const
+    NiTListItem<T>* GetHeadPos() const
     {
         return m_pkHead;
     }
-    T& GetNext(BB595B0ListNode<T>*& pkPos) const
+    T& GetNext(NiTListItem<T>*& pkPos) const
     {
         T& element = pkPos->m_element;
         pkPos = pkPos->m_pkNext;
         return element;
     }
 
-    BB595B0ListNode<T>* m_pkHead;
-    BB595B0ListNode<T>* m_pkTail;
+    NiTListItem<T>* m_pkHead;
+    NiTListItem<T>* m_pkTail;
     unsigned int m_uiCount;
 };
 
@@ -1362,7 +1319,7 @@ class FUN_00b595b0_cls
     int unk04;
     int unk08;
     BB595B0List<BB595B0Entry*> m_kEntries;
-    BB595B0Pointer<BB595B0RefObject> m_pReferencedObject;
+    BB595B0Pointer<NiRefObject> m_pReferencedObject;
     BB595B0Queue m_kQueue;
 };
 
@@ -1372,7 +1329,7 @@ FUN_00b595b0_cls::~FUN_00b595b0_cls()
 {
     m_pReferencedObject = 0;
     m_kQueue.Clear();
-    BB595B0ListNode<BB595B0Entry*>* pkPos = m_kEntries.GetHeadPos();
+    NiTListItem<BB595B0Entry*>* pkPos = m_kEntries.GetHeadPos();
     while (pkPos)
     {
         delete m_kEntries.GetNext(pkPos);
@@ -1887,23 +1844,23 @@ extern float DAT_011f9184;
 void __cdecl FUN_00b4f2e0();
 extern void(__cdecl* DAT_011f91f8)();
 void __cdecl FUN_00b54000(float);
-extern NiPointer<B57FF0RefObject> DAT_011f9548[35];
-extern NiPointer<B57FF0RefObject> DAT_011f950c;
-extern NiPointer<B57FF0RefObject> DAT_011f9514;
-extern NiPointer<B57FF0RefObject> DAT_011f9510;
-extern NiPointer<B57FF0RefObject> DAT_011f9518;
-extern NiPointer<B57FF0RefObject> DAT_011f951c;
-extern NiPointer<B57FF0RefObject> DAT_011f9520;
-extern NiPointer<B57FF0RefObject> DAT_011f9524;
-extern NiPointer<B57FF0RefObject> DAT_011f9528;
-extern NiPointer<B57FF0RefObject> DAT_011f952c;
-extern NiPointer<B57FF0RefObject> DAT_011f9530;
-extern NiPointer<B57FF0RefObject> DAT_011f9534;
-extern NiPointer<B57FF0RefObject> DAT_011f9538;
-extern NiPointer<B57FF0RefObject> DAT_011f953c;
-extern NiPointer<B57FF0RefObject> DAT_011f9540;
-extern NiPointer<B57FF0RefObject> DAT_011f9544;
-extern NiPointer<B57FF0RefObject> DAT_011f95d4;
+extern NiPointer<NiRefObject> DAT_011f9548[35];
+extern NiPointer<NiRefObject> DAT_011f950c;
+extern NiPointer<NiRefObject> DAT_011f9514;
+extern NiPointer<NiRefObject> DAT_011f9510;
+extern NiPointer<NiRefObject> DAT_011f9518;
+extern NiPointer<NiRefObject> DAT_011f951c;
+extern NiPointer<NiRefObject> DAT_011f9520;
+extern NiPointer<NiRefObject> DAT_011f9524;
+extern NiPointer<NiRefObject> DAT_011f9528;
+extern NiPointer<NiRefObject> DAT_011f952c;
+extern NiPointer<NiRefObject> DAT_011f9530;
+extern NiPointer<NiRefObject> DAT_011f9534;
+extern NiPointer<NiRefObject> DAT_011f9538;
+extern NiPointer<NiRefObject> DAT_011f953c;
+extern NiPointer<NiRefObject> DAT_011f9540;
+extern NiPointer<NiRefObject> DAT_011f9544;
+extern NiPointer<NiRefObject> DAT_011f95d4;
 
 // @fnv 0x00b54280
 FUN_00b54280::FUN_00b54280()
@@ -1949,7 +1906,7 @@ FUN_00b54280::FUN_00b54280()
     DAT_011f91dc = false;
     DAT_011f91a4 = true;
     DAT_011f9178 = 0;
-    reinterpret_cast<NiPointer<B57FF0RefObject>&>(DAT_011f95ec) = 0;
+    reinterpret_cast<NiPointer<NiRefObject>&>(DAT_011f95ec) = 0;
     DAT_011f9181 = false;
     FUN_00b54000(75.0f);
     DAT_011f9184 = DAT_011f9188 = DAT_011f918c = DAT_011f9190 = 1.0f;
@@ -1965,73 +1922,22 @@ FUN_00b54280::FUN_00b54280()
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 
-class NiObjectB587
+template <> __declspec(noinline) bool NamedObjectMapBase::GetAt(
+    const char* key, NiPointer<NiRefObject>& value) const
 {
-  public:
-    virtual ~NiObjectB587();
-    virtual void DeleteThis();
-
-    void IncRefCount()
+    unsigned int index = KeyToHashIndex(key);
+    for (EntryType* item = m_ppkHashTable[index]; item; item = item->m_pkNext)
     {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    unsigned int m_uiRefCount;
-};
-
-template <class T> class NiPointerB587
-{
-  public:
-    NiPointerB587() : m_pObject(0)
-    {}
-    ~NiPointerB587()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-
-    NiPointerB587& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
+        if (IsKeysEqual(key, item->m_key))
         {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
+            value = item->m_val;
+            return true;
         }
-        return *this;
     }
+    return false;
+}
 
-    operator T*() const
-    {
-        return m_pObject;
-    }
-
-    T* m_pObject;
-};
-
-NiObjectB587* __cdecl FindNamedB587(void* pvMap, const char* pcKey);
-
-class NiTStringPointerMapB587
-{
-  public:
-    __declspec(noinline) bool GetAt(const char* pcKey, NiPointerB587<NiObjectB587>& spValue)
-    {
-        NiObjectB587* pkObject = FindNamedB587(this, pcKey);
-        if (!pkObject)
-            return false;
-        spValue = pkObject;
-        return true;
-    }
-};
-
-NiTStringPointerMapB587* __cdecl GetNamedMapB587();
+NamedObjectMap* __cdecl GetNiTStringMap();
 
 // Looks up pcName in the named map and returns true if a non-null object is found.
 // @fnv 0x00b58720
@@ -2040,8 +1946,8 @@ bool __cdecl IsNamedObjectPresent(const char* pcName)
     bool bFound = false;
     if (pcName)
     {
-        NiPointerB587<NiObjectB587> spRetainedObject;
-        if (GetNamedMapB587()->GetAt(pcName, spRetainedObject) && spRetainedObject)
+        NiPointer<NiRefObject> spRetainedObject;
+        if (GetNiTStringMap()->GetAt(pcName, spRetainedObject) && spRetainedObject)
             bFound = true;
     }
     return bFound;
@@ -2173,35 +2079,14 @@ struct Rend
     char pad[0x8b8];
     Accum* m_8b8;
 };
-struct ISM
-{
-    void RenderEndOfFrameEffects(int a, int* b, int* c);
-};
 }
 // @fnv 0x00b55ac0
 void __cdecl FUN_00b55ac0(int a, int b, int c)
 {
-    ((nb::ISM*)DAT_011f91ac)->RenderEndOfFrameEffects(a, &b, &c);
+    DAT_011f91ac->RenderEndOfFrameEffects((GraphicsRenderer*)a, (BSRenderedTexture**)&b, (BSRenderedTexture**)&c);
     for (int i = 0; i < 8; i++)
         ((nb::Rend*)DAT_011f9508)->m_8b8->SetTarget(i, 0);
 }
-
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 
 extern long DAT_011f4400;
 
@@ -2254,12 +2139,6 @@ void FUN_00b595a0_cls::FUN_00b595a0()
 }
 
 void* __cdecl B59890GetMap();
-struct B59890MapItem
-{
-    B59890MapItem* m_pkNext;
-    unsigned int m_key;
-    void* m_val;
-};
 struct B59890Value
 {
     ~B59890Value();
@@ -2268,37 +2147,34 @@ struct B59890Value
         g_memoryManager.Deallocate(p);
     }
 };
-struct B59890Map : NiTMapBaseStub
+template <class TAlloc, class TKEY, class TVAL>
+inline void* NiTMapBase<TAlloc, TKEY, TVAL>::GetFirstPos() const
 {
-    unsigned int m_uiCount;
-    B59890MapItem* GetFirstPos()
-    {
-        for (unsigned int i = 0; i < m_uiHashSize; ++i)
-            if (m_ppkHashTable[i])
-                return (B59890MapItem*)m_ppkHashTable[i];
-        return 0;
-    }
-    void __thiscall GetNext(B59890MapItem*& pkPos, unsigned int& key, void* volatile& value);
-};
+    for (unsigned int i = 0; i < m_uiHashSize; ++i)
+        if (m_ppkHashTable[i])
+            return m_ppkHashTable[i];
+    return 0;
+}
+
 extern int DAT_011f963c;
 extern int DAT_011f9640;
 // Iterates the map from its first position, deletes each stored value, then removes all entries and resets DAT_011f963c and DAT_011f9640 to zero.
 // @fnv 0x00b59890
 void ClearMap()
 {
-    B59890MapItem* pkItem = ((B59890Map*)B59890GetMap())->GetFirstPos();
-    B59890MapItem* pos = pkItem;
-    void* volatile value = 0;
+    void* pkItem = ((RenderItemMap*)B59890GetMap())->GetFirstPos();
+    void* pos = pkItem;
+    RTEntry* volatile value = 0;
     unsigned int key;
-    if (((B59890Map*)B59890GetMap())->m_uiCount > 0 && pkItem != 0)
+    if (((RenderItemMap*)B59890GetMap())->m_kItemCount.m_uiCount > 0 && pkItem != 0)
     {
         do
         {
-            ((B59890Map*)B59890GetMap())->GetNext(pos, key, value);
+            ((RenderItemMap*)B59890GetMap())->GetNext(pos, key, (RTEntry*&)value);
             delete (B59890Value*)value;
         } while (pos != 0);
     }
-    ((B59890Map*)B59890GetMap())->RemoveAll();
+    ((RenderItemMap*)B59890GetMap())->RemoveAll();
     DAT_011f963c = 0;
     DAT_011f9640 = 0;
 }
@@ -2709,71 +2585,37 @@ void TextureOwner::FUN_00b5ef90(const RefPtr_b9fcc0& value)
 extern void* __cdecl FUN_00ec61c0(void* dest, int value, unsigned int count);
 extern void* __cdecl FUN_00aa1070(unsigned int size);
 
-struct MapBase_00b585c0
-{
-    unsigned int hashSize;
-    void** hashTable;
-    unsigned int allocatorCount;
-
-    MapBase_00b585c0(unsigned int size) : hashSize(size), allocatorCount(0)
-    {
-        hashTable = static_cast<void**>(FUN_00aa1070(hashSize * sizeof(void*)));
-        FUN_00ec61c0(hashTable, 0, hashSize * sizeof(void*));
-    }
-    virtual ~MapBase_00b585c0()
-    {}
-};
-struct Map_00b585c0 : MapBase_00b585c0
-{
-    explicit Map_00b585c0(unsigned int size) : MapBase_00b585c0(size)
-    {}
-    virtual ~Map_00b585c0()
-    {}
-};
-// Returns a pointer to a static Map_00b585c0 instance initialized with a hash size of 37.
-// @fnv 0x00b585c0
-Map_00b585c0* __cdecl FUN_00b585c0()
-{
-    static Map_00b585c0 map(37);
-    return &map;
-}
-
 void* __cdecl NiMallocB58(unsigned int uiSize);
 extern "C" void* __cdecl MemSetB58(void* pvDest, int iValue, unsigned int uiSize);
 
-struct NiTMapItemB58;
-
-class NiTMapBaseB58
+template <class TAlloc, class TKEY, class TVAL>
+inline NiTMapBase<TAlloc, TKEY, TVAL>::NiTMapBase(unsigned int uiHashSize)
 {
-  public:
-    NiTMapBaseB58(unsigned int uiHashSize = 37)
-    {
-        m_uiHashSize = uiHashSize;
-        m_uiCount = 0;
-        unsigned int uiSize = sizeof(NiTMapItemB58*) * m_uiHashSize;
-        m_ppkHashTable = (NiTMapItemB58**)NiMallocB58(uiSize);
-        MemSetB58(m_ppkHashTable, 0, m_uiHashSize * sizeof(NiTMapItemB58*));
-    }
-    virtual ~NiTMapBaseB58();
+    m_uiHashSize = uiHashSize;
+    m_kItemCount.m_uiCount = 0;
+    unsigned int uiSize = sizeof(EntryType*) * m_uiHashSize;
+    m_ppkHashTable = (EntryType**)NiMallocB58(uiSize);
+    MemSetB58(m_ppkHashTable, 0, m_uiHashSize * sizeof(EntryType*));
+}
 
-    unsigned int m_uiHashSize;
-    NiTMapItemB58** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
+template <class TKEY, class TVAL>
+inline NiTPointerMap<TKEY, TVAL>::NiTPointerMap(unsigned int uiHashSize)
+    : NiTMapBase<NiTPointerAllocator<unsigned int>, TKEY, TVAL>(uiHashSize)
+{}
 
-class NiTStringMapB58 : public NiTMapBaseB58
+// Returns the static render-item cache, creating it on first call.
+// @fnv 0x00b585c0
+RenderItemMap* __cdecl FUN_00b585c0()
 {
-  public:
-    NiTStringMapB58(unsigned int uiHashSize = 37) : NiTMapBaseB58(uiHashSize)
-    {}
-    virtual ~NiTStringMapB58();
-};
+    static RenderItemMap map(37);
+    return &map;
+}
 
-// Returns a pointer to a static NiTStringMapB58 instance, creating it on first call.
+// Returns the static named-object cache, creating it on first call.
 // @fnv 0x00b58670
-NiTStringMapB58* __cdecl GetNiTStringMap()
+NamedObjectMap* __cdecl GetNiTStringMap()
 {
-    static NiTStringMapB58 s_kMap;
+    static NamedObjectMap s_kMap;
     return &s_kMap;
 }
 
@@ -3615,11 +3457,6 @@ struct RTEntry
     }
 };
 
-struct MapObj596a
-{
-    __declspec(noalias) bool __thiscall FUN_00a53c30(void* key, void*& out);
-    void __thiscall InsertOrUpdate(void* key, void* val);
-};
 extern "C" RTTexture* __cdecl FUN_00b587c0(RTKey* key);
 
 struct RTRenderer
@@ -3688,7 +3525,7 @@ extern int DAT_011f963c;
 static __forceinline bool Lookup(int k, RTEntry*& found)
 {
     found = 0;
-    return ((MapObj596a*)FUN_00b585c0())->FUN_00a53c30((void*)k, (void*&)found);
+    return FUN_00b585c0()->GetAt((unsigned int)k, found);
 }
 
 // Finds or creates an RTItem for key using a snapped position value, stores it in *out and returns usTotal minus usUsed.
@@ -3719,12 +3556,12 @@ int __cdecl GetOrCreateItem(RTKey* key, unsigned int pos, RTItem** ppItem)
     {
         RTEntry* found;
         found = 0;
-        if (!((MapObj596a*)FUN_00b585c0())->FUN_00a53c30((void*)(unsigned int)key->unk08, (void*&)found))
+        if (!FUN_00b585c0()->GetAt((unsigned int)key->unk08, found))
         {
             entry = new RTEntry;
             entry->tex = tex;
             entry->key = *key;
-            ((MapObj596a*)FUN_00b585c0())->InsertOrUpdate((void*)(unsigned int)key->unk08, entry);
+            FUN_00b585c0()->SetAt((unsigned int)key->unk08, entry);
         }
         else
         {

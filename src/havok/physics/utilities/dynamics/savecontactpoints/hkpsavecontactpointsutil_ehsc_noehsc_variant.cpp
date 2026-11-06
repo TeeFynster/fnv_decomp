@@ -1,3 +1,5 @@
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
 
 // src/havok/physics/utilities/dynamics/savecontactpoints/hkpsavecontactpointsutil_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/physics/utilities/dynamics/savecontactpoints/hkpsavecontactpointsutil.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -1815,21 +1817,6 @@ struct FUN_00dce7e0_local
     void __thiscall FUN_00a29680();
 };
 void __cdecl FUN_00dce7e0(int a, int b, int* p, int d);
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void* v04(unsigned int auiSize);
-    virtual void v08();
-    virtual void v0C();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 struct BSAudio;
 namespace fnvc_adapt {
 BSAudio* __cdecl FUN_00c85750();

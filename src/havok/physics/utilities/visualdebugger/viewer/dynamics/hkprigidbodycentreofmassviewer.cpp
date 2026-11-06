@@ -1,3 +1,4 @@
+#include "../../../../../../../include/hkArray.h"
 
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/hkprigidbodycentreofmassviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/hkprigidbodycentreofmassviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -76,27 +77,7 @@ void FUN_00d69fb0_cls::CallTargetMethod()
     ((Target*)((char*)this - 0x20))->FUN_00d69c10();
 }
 
-template <class T> struct S_00d69fc0_Array
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; ++i)
-        {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            m_data[index] = m_data[m_iElementCount];
-    }
-};
+
 
 struct S_00d69fc0_Item;
 
@@ -104,7 +85,7 @@ struct S_00d69fc0
 {
     int unk00;
     int unk04;
-    S_00d69fc0_Array<S_00d69fc0_Item*> m_items;
+    hkArrayBase<S_00d69fc0_Item*> m_items;
     void RemoveItem(S_00d69fc0_Item* item);
 };
 
@@ -596,19 +577,20 @@ FUN_00d6a0a0::~FUN_00d6a0a0()
 }
 }  // namespace fnv_00d6a0a0
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00d69d00 FUN_00d69d00: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x, y, z, w;
     } lanes;
-} __m128;
+} __m128, LocalM128;
 
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
 extern "C" unsigned __int64 __rdtsc(void);
 
 extern "C" void*(__stdcall* DAT_00fdf044)(unsigned long);
@@ -620,12 +602,12 @@ extern char DAT_010d2210[];
 extern char DAT_010d2200[];
 extern char DAT_010c41f8[];
 
-extern "C" __m128 _mm_set_ss(float);
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" __m128 _mm_load_ps1(const float*);
-extern "C" __m128 _mm_move_ss(__m128, __m128);
-extern "C" __m128 _mm_setzero_ps();
-extern "C" float _mm_cvtss_f32(__m128);
+extern "C" LocalM128 _mm_set_ss(float);
+extern "C" LocalM128 _mm_set_ps1(float);
+extern "C" LocalM128 _mm_load_ps1(const float*);
+extern "C" LocalM128 _mm_move_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_setzero_ps();
+extern "C" float _mm_cvtss_f32(LocalM128);
 
 struct MonRec
 {
@@ -670,20 +652,20 @@ static __forceinline void monEnd(const char* tag, volatile unsigned int* stamped
     }
 }
 
-static __forceinline __m128 makeLine(const __m128& pos, const __m128& axis, const float& s)
+static __forceinline LocalM128 makeLine(const LocalM128& pos, const LocalM128& axis, const float& s)
 {
-    __m128 x = _mm_load_ss(&s);
+    LocalM128 x = _mm_load_ss(&s);
     return _mm_add_ps(pos, _mm_mul_ps(_mm_shuffle_ps(x, x, 0), axis));
 }
 
 struct Motion
 {
     int m00, m04, m08, m0c;
-    __m128 axisX;
-    __m128 axisY;
-    __m128 axisZ;
+    LocalM128 axisX;
+    LocalM128 axisY;
+    LocalM128 axisZ;
     int m40, m44, m48, m4c, m50, m54, m58, m5c;
-    __m128 pos;
+    LocalM128 pos;
     float FUN_00c86430();
 };
 
@@ -718,7 +700,7 @@ struct DisplayHandler
     virtual void v18();
     virtual void v1C();
     virtual void v20();
-    virtual void DisplayLine(const __m128& start, const __m128& end, unsigned int color, void* id, void* tag);
+    virtual void DisplayLine(const LocalM128& start, const LocalM128& end, unsigned int color, void* id, void* tag);
 };
 
 struct HandlerOwner
@@ -761,7 +743,7 @@ void COMViewerPart::FUN_00d69d00(void* unused)
                 const float& scale = DAT_011b6194;
                 struct Lines
                 {
-                    __m128 pos, endZ, endX, endY;
+                    LocalM128 pos, endZ, endX, endY;
                 } axisLines;
                 axisLines.pos = items[i]->motion.pos;
                 Body* const& selected = items[i];
@@ -909,20 +891,20 @@ Parent::Parent()
 {}
 
 #include <math.h>
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
 
 struct Vec4Clamp
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 
 // Clamps the vector in v to maxLen by scaling it down when its squared length exceeds maxLen squared.
 // @fnv 0x00d6b330
 static __declspec(noinline) void __cdecl FUN_00d6b330(Vec4Clamp* apVec, float maxLen)
 {
-    __m128 vComponents = apVec->m_vComponents;
-    __m128 vSquared = _mm_mul_ps(vComponents, vComponents);
+    LocalM128 vComponents = apVec->m_vComponents;
+    LocalM128 vSquared = _mm_mul_ps(vComponents, vComponents);
     float fLenSq;
     _mm_store_ss(&fLenSq, _mm_add_ss(_mm_shuffle_ps(vSquared, vSquared, 0xaa),
                                      _mm_add_ss(_mm_shuffle_ps(vSquared, vSquared, 0x55), vSquared)));
@@ -931,7 +913,7 @@ static __declspec(noinline) void __cdecl FUN_00d6b330(Vec4Clamp* apVec, float ma
     {
         float invLen = 1.0f / sqrtf(fLenSq);
         float s = invLen * maxLen;
-        __m128 sv = _mm_load_ss(&s);
+        LocalM128 sv = _mm_load_ss(&s);
         apVec->m_vComponents = _mm_mul_ps(_mm_shuffle_ps(sv, sv, 0), vComponents);
     }
 }
@@ -1041,4 +1023,12 @@ void CenterOfMassRemovalDispatcher::FUN_00d69c10(Context* context)
             callback28.deliver(pSpecialRecord->data48.entries[j]);
         }
     }
+}
+
+
+template <typename T> __forceinline void hkArrayBase<T>::removeAt(int index)
+{
+    m_iElementCount--;
+    if (m_iElementCount != index)
+        m_data[index] = m_data[m_iElementCount];
 }

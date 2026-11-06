@@ -1,11 +1,33 @@
+#include "../../include/BSStringT.h"
 // staging/blk_005e0000_od_ctx_variant.cpp: Derived, Holder (4 functions)
 
 #include <string.h>
+#include "../../include/BSSimpleList.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/Actor.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/Script.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESSaveLoadGame.h"
 // blk_005e0000_od_ctx_variant.cpp: context variant of src/staging/blk_005e0000_od.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
 // src/staging/blk_005e0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/BGSPreloadable.h"
+#include "../../include/GO.h"
+#include "../../include/NavMeshPtr.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TESAttributes.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESSoundFile.h"
+#include "../../include/TESSound__SOUND_DATA.h"
+#include "../../include/BGSBodyPartData.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESChallenge.h"
+#include "../../include/TESSound.h"
 struct GlobalObject_0045cf30
 {
     unsigned char* Bool();
@@ -33,10 +55,6 @@ struct FUN_005e0310_class
     FUN_005e0310_class* __thiscall FUN_005e0310(void* a, void* b);
 };
 struct ActorCombatGroup;
-struct NiTMallocInterface_
-{
-    static void __cdecl Deallocate(ActorCombatGroup**);
-};
 struct FUN_005e0340Class
 {
     int m_vtbl;
@@ -50,11 +68,6 @@ struct FUN_005e0370_Class
     void* vtbl;
     void FUN_005e0950(int a, int b);
     void* FUN_005e0370(int a, int b);
-};
-struct NavMeshPtr
-{
-    void* FUN_00458b50();
-    void* FUN_005e05b0(int index);
 };
 struct QuantityData
 {
@@ -152,10 +165,6 @@ struct FUN_005ef540_class
 {
     void* __thiscall FUN_005ef540(int a, int b);
 };
-struct TESAttributes
-{
-    unsigned char GetAttributeValue(int);
-};
 struct FUN_005f1210_shell : TESAttributes
 {
     unsigned char FUN_005f1210();
@@ -192,16 +201,6 @@ struct FUN_005f60c0_Class
 {
     int HasFlag8();
 };
-struct TESChallenge
-{
-    void MarkForSave();
-    void FUN_005f60e0(int amount);
-};
-struct TESActorBaseData
-{
-    void UpdateFlagBit(int, bool, bool);
-    void FUN_005f9010(bool set);
-};
 void __cdecl FUN_00600b90();
 struct FUN_005ffbd0_cls
 {
@@ -234,10 +233,6 @@ struct Standin005e03a0
     void* vtbl;
     void* m4;
     void __thiscall FUN_005e03a0();
-};
-struct NiBound
-{
-    NiBound();
 };
 int __cdecl FUN_005e0aa0(void* a, int b);
 struct FUN_005e05d0 : NiBound
@@ -389,27 +384,6 @@ struct FUN_005ef5f0_class
     void* __thiscall FUN_005ef5f0(unsigned int flags);
 };
 void __cdecl operator delete(void*);
-struct FUN_005ef3b0
-{
-    void __thiscall FUN_005ef3b0_dtor();
-    FUN_005ef3b0* __thiscall FUN_005ef620(unsigned int flags);
-};
-struct NavMeshSearchLOSArray
-{
-    void FUN_006a8500();
-    void FUN_005efe70(void*, void*, int);
-};
-struct FUN_005ef860_class
-{
-    virtual void v0();
-    virtual void* v4(int a);
-    virtual void v8();
-    virtual void* vC(int a, int b);
-    void* m4;
-    int m8;
-    int mC;
-    void FUN_005ef860(int a, int b);
-};
 struct FUN_005efa40_class
 {
     short m0;
@@ -768,10 +742,6 @@ struct FUN_005efdd0_class
     void __thiscall FUN_005efdd0(char* a, char* b, unsigned int count);
 };
 void* __cdecl FUN_00ec7230(char* dst, const char* src, unsigned int size);
-struct FUN_005efe70_shell
-{
-    void __thiscall FUN_005efe70(char* a, char* b, unsigned int c);
-};
 void* __cdecl FUN_00ec7230(char* dst, const char* src, unsigned int count);
 struct FUN_005eff10_class
 {
@@ -781,19 +751,10 @@ struct FNStub
 {
     char* __thiscall GetFullName();
 };
-struct TESSaveLoadGame
-{
-    void FUN_008579b0(void*, int);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
-int BSStringLength(const char*);
 struct FUN_005f6f70_Class
 {
     void FUN_005f6f70();
-};
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short);
 };
 struct FUN_005e0950
 {
@@ -804,10 +765,6 @@ struct FUN_005e0950
     unsigned short mc;
     unsigned short me;
     FUN_005e0950(unsigned short, unsigned short);
-};
-struct FUN_006c8a30_Class
-{
-    void FUN_006a8500();
 };
 struct FUN_005ef6a0Class
 {
@@ -848,19 +805,11 @@ struct FUN_005ef910 : FUN_005ef910_vt
     void __thiscall RecordRequestedSize(unsigned int requested, unsigned int savedSize);
 };
 void __cdecl FUN_005e0b60(void*);
-struct GO
-{
-    operator unsigned int();
-};
 struct FUN_005e0600_Class
 {
     void FUN_005e0600();
 };
 void* __cdecl FUN_00885750();
-struct BSSimpleList_005e0b60
-{
-    BSSimpleList_005e0b60* GetItem();
-};
 void FUN_005e0b60(void* p);
 struct FUN_005e3fe0_class
 {
@@ -1095,9 +1044,9 @@ struct EntryArray
     void Clear(bool);
     void SetEntryCount(unsigned int, bool);
 };
-int BSStringLength(const char*);
 int strcpy_s(char* dst, unsigned int size, const char* src);
-struct Data005ecb30
+// 0x005ecb30 copies seven floats and two arrays (0x40 bytes); shared Data is a 0x10-byte skill/category record.
+struct FloatStringEntryRecord
 {
     unsigned char flag;
     float f04;
@@ -1109,7 +1058,7 @@ struct Data005ecb30
     float f1C;
     StrArray strings;
     EntryArray entries;
-    void FUN_005ecb30(Data005ecb30* other);
+    void FUN_005ecb30(FloatStringEntryRecord* other);
 };
 // FUN_005eedc0 : returns &m_pEntries[index] (element size 0x38)
 struct FUN_005eedc0_item
@@ -1245,12 +1194,6 @@ struct FUN_005f2ac0_cls
     FUN_005f2ac0_rec* m_38;
     void __thiscall SetRecordValue(unsigned int idx, float f);
 };
-struct Pt3
-{
-    float x;
-    float y;
-    float z;
-};
 struct Ext
 {
     float GetMult();
@@ -1288,13 +1231,6 @@ struct AudioPlaybackHandle
     void SetFreq(float f);
     void Play(bool b);
 };
-struct AudioMgr
-{
-    static AudioMgr* Get();
-    AudioPlaybackHandle Make(int id, SndForm* form);
-    AudioPlaybackHandle Make2(int id);
-    bool PlayAt(void* node, float f, int flags);
-};
 struct SndList
 {
     SndForm* GetSoundByEditorID(int idx);
@@ -1321,10 +1257,6 @@ struct StrElem
 struct ArrHolder
 {
     StrElem* GetArr();
-};
-struct Script
-{
-    ArrHolder* GetData(int* found);
 };
 struct Proc
 {
@@ -1457,7 +1389,7 @@ struct Ref
     virtual void v7A();
     virtual void v7B();
     virtual void v7C();
-    virtual Pt3* GetPos();
+    virtual NiPoint3* GetPos();
     virtual void v7E();
     virtual void v7F();
     virtual void v80();
@@ -1491,10 +1423,10 @@ extern double g_dPercent;
 extern float g_fVolume;
 extern double g_dZero;
 int __cdecl GetFlagBits(int v);
-bool __cdecl CheckDist(SndForm* form, Pt3 pos3, float f);
+bool __cdecl CheckDist(SndForm* form, NiPoint3 pos3, float f);
 void __cdecl DoTypeA(Ref* r, int type);
 void __cdecl DoTypeB(Ref* r, int n);
-void __cdecl DoShake(float f, Pt3* pos3);
+void __cdecl DoShake(float f, NiPoint3* pos3);
 double __cdecl StrToD(const char* s);
 struct FUN_005f2b60_cls
 {
@@ -1960,9 +1892,7 @@ void __cdecl FUN_00706f30(int);
 void __cdecl FUN_005f5880();
 bool __cdecl FUN_005f6110(ChallengeView* source, int amount);
 int __cdecl FUN_00408b20(const char*, const char*);
-struct NavMeshStaticAvoidNode : FUN_005ecd10_cls
-{
-};
+#include "../../include/NavMeshStaticAvoidNode.h"
 struct NodeArray : BSSimpleArray<NavMeshStaticAvoidNode*, 1024>
 {
     NavMeshStaticAvoidNode* FUN_00691750(int index);
@@ -1973,11 +1903,6 @@ struct FUN_005ece50_class
     BSSimpleArray<const char*, 1024> m4;
     NodeArray m14;
     unsigned char FUN_005ece50(FUN_005ece50_class* other);
-};
-struct PlayerCharacter
-{
-    bool IsSneaking();
-    bool MovingCheck();
 };
 struct TESSound;
 struct SoundDataHandler
@@ -1991,13 +1916,10 @@ int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
 TESSound* GetBrushSound(const char* apPrefix);
 extern const char* DAT_01196d40[10];
 const char* __cdecl GetStringByIndex(int index);
-struct BSStr
-{
-    bool Set(const char* a, unsigned int b);
-};
+
 struct FUN_005e2c10_shell
 {
-    BSStr m3c;
+    ::BSStringT<char> m3c;
     bool SetString(const char* a);
 };
 extern const char $SG3295[];
@@ -2026,38 +1948,6 @@ struct SoundData
     int unk18;
     int unk1C;
     int unk20;
-};
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
-class TESSound : public TESForm
-{
-  public:
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    SoundData soundData;
-    unsigned char unk68;
-
-    void FUN_004851b0(TESForm* form);
-    SoundData CopyBig();
-
-    void CopyFromSound(TESForm* form);
 };
 void __cdecl FUN_004858f0(unsigned int chunkId, unsigned char value);
 void __cdecl AppendChunk(unsigned int chunkId, void* data, unsigned int size);
@@ -2136,10 +2026,6 @@ unsigned int __cdecl FUN_005a00a0(unsigned int);
 extern unsigned int DAT_011caf04[10];
 extern char DAT_011caf2c[10];
 extern char DAT_011caf36;
-template <class T> struct BSSimpleListEx : public BSSimpleList<T>
-{
-    int GetSize();
-};
 bool FindDialogueFile(char* a1);
 extern bool DAT_011acdf9;
 bool FUN_005e39a0();
@@ -2421,12 +2307,6 @@ class SoundBoundAnimBase
     unsigned int unk28;
     unsigned int unk2c;
 };
-class TESSoundFile
-{
-  public:
-    virtual ~TESSoundFile();
-    BSStringT<char> soundFile;
-};
 // Native TESSound destructor; both bases and the string member own their lifetimes.
 class FUN_005e2ca0 : public SoundBoundAnimBase, public TESSoundFile
 {
@@ -2436,29 +2316,13 @@ class FUN_005e2ca0 : public SoundBoundAnimBase, public TESSoundFile
 };
 void BSEndian(unsigned int*, EndianSizeTag<0>);
 void BSEndian(unsigned short*, EndianSizeTag<0>);
-struct TESSound__SOUND_DATA
-{
-    unsigned char minAttenuation;
-    unsigned char maxAttenuation;
-    signed char frequencyAdjustment;
-    unsigned char unk03;
-    unsigned int soundFlags;
-    unsigned short staticAttenuation;
-    unsigned short stopTime;
-    unsigned short attenuationCurve[5];
-    unsigned short reverbAttenuation;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    signed char frequencyVariance;
-    void SwapEndian();
-};
 struct InitTag5E35
 {
 };
 void __cdecl FUN_00401080(int* p, InitTag5E35 tag);
 void __cdecl FUN_00407a90(short* p, InitTag5E35 tag);
-struct Data5E35
+// 0x005e3510 swaps an int at +4 and shorts at +8/+A in a 0xC-byte record; shared Data has a different layout.
+struct IntegerShortPairEndianRecord
 {
     int unk00;
     int m_04;
@@ -2483,27 +2347,6 @@ class FUN_00483630_holder
     int unk0C;
     int unk10;
     int unk14;
-};
-class TESModel
-{
-  public:
-    virtual ~TESModel();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-class BGSPreloadable
-{
-  public:
-    virtual void Preload();
-};
-class BGSBodyPartData
-{
-  public:
-    virtual void ClearData();
 };
 class FUN_005e4bc0 : public FUN_00483630_holder, public TESModel, public BGSPreloadable
 {
@@ -2566,10 +2409,6 @@ struct Body55
 };
 namespace s5e5d20 {
 
-struct Actor
-{
-    float FUN_006b9130();
-};
 
 bool FUN_005e5b80(int iArg0, int iArg1, void* pvArg2, void* pvArg3, unsigned char ucArg4, float** ppfValue,
                   Actor* pkActor);
@@ -2703,15 +2542,6 @@ struct EquivData_5ecd10
     float fValue24;
 
     bool IsEqual(const EquivData_5ecd10& other);
-};
-struct BSSimpleArrayActor
-{
-    void Clear(bool);
-};
-struct FUN_005ef3b0_class : BSSimpleArrayActor
-{
-    int* p;
-    void FUN_005ef3b0();
 };
 struct FUN_005efbc0_s
 {

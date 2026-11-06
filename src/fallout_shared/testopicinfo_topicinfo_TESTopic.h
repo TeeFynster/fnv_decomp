@@ -4,8 +4,9 @@
 
 #include "testopicinfo_topicinfo_layout_support.h"
 #include "DialogueTopicData.h"
-#include "testopicinfo_topicinfo_TESForm.h"
-#include "TESFullName.h"
+#include "layout_support.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFullName.h"
 class TESTopic : public TESForm
 {
   public:

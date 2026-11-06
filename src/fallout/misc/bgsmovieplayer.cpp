@@ -1,5 +1,7 @@
 // fallout/misc/bgsmovieplayer.cpp: BGSMoviePlayer (16 functions)
 
+#include "../../../include/BGSMoviePlayer.h"
+#include "../../../include/NiRenderer.h"
 #include "bgsmovieplayer_decls.h"
 
 // @fnv 0x00867290
@@ -99,9 +101,9 @@ bool BGSMoviePlayer::UpdateMoviePlayback(bool continuePlaying)
 
     if (continuePlaying || field_20)
     {
-        HotkeyWheelDisplay* wheel = g_osGlobals->FUN_00877720();
+        InputManager* wheel = g_osGlobals->FUN_00877720();
         wheel->FUN_00a23010();
-        if (wheel->SetHotkeyItem(5, true) || wheel->SetHotkeyItem(0x1c, true))
+        if (wheel->FUN_00a24660(5, true) || wheel->FUN_00a24660(0x1c, true))
         {
             if (FUN_00ec17c0())
                 FUN_00ec29b0();
@@ -130,25 +132,16 @@ float FUN_004de0e0()
 }
 
 void __cdecl FUN_008305e0(void);
-struct FUN_00867270_shell
-{
-    void __thiscall FUN_00867270();
-};
 // @fnv 0x00867270
-void __thiscall FUN_00867270_shell::FUN_00867270()
+void __thiscall BGSMoviePlayer::FUN_00867270()
 {
     FUN_008305e0();
 }
 
 void _Deallocate(void*);
-struct FUN_00867150_shell
-{
-    void __thiscall FUN_00867180();
-    void* __thiscall FUN_00867150(unsigned int);
-};
 // Calls FUN_00867180, then deallocates this if the low bit of flags is set, and returns this.
 // @fnv 0x00867150
-void* __thiscall FUN_00867150_shell::FUN_00867150(unsigned int flags)
+void* __thiscall BGSMoviePlayer::FUN_00867150(unsigned int flags)
 {
     FUN_00867180();
     if (flags & 1)
@@ -157,12 +150,8 @@ void* __thiscall FUN_00867150_shell::FUN_00867150(unsigned int flags)
 }
 
 void __cdecl ResetThreadFlags(void);
-struct FUN_00867280_shell
-{
-    void __thiscall FUN_00867280();
-};
 // @fnv 0x00867280
-void __thiscall FUN_00867280_shell::FUN_00867280()
+void __thiscall BGSMoviePlayer::FUN_00867280()
 {
     ResetThreadFlags();
 }
@@ -174,7 +163,7 @@ struct FUN_00ec15e0_shell
 };
 
 // @fnv 0x00867180
-void __thiscall FUN_00867150_shell::FUN_00867180()
+void __thiscall BGSMoviePlayer::FUN_00867180()
 {
     *(void**)this = &DAT_01082564;
     ((FUN_00ec15e0_shell*)this)->FUN_00ec15e0();

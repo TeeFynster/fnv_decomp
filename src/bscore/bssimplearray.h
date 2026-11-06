@@ -1,3 +1,4 @@
+#include "../../include/BSSimpleArray.h"
 // bscore/bssimplearray.h: declares SearchBounds
 #ifndef BSSIMPLEARRAY_H
 #define BSSIMPLEARRAY_H
@@ -42,16 +43,11 @@ class NavMeshInfo;
 class TESObjectREFR;
 template <class A, class B> class AStarNode;
 
-template <> class BSSimpleArray<AStarNode<const NavMeshInfo*, TESObjectREFR*>*, 1024>
-{
-  public:
-    void* vtable;
-    BSSimpleArray();
-};
+
 // @fnv 0x006B9760
-BSSimpleArray<AStarNode<const NavMeshInfo*, TESObjectREFR*>*, 1024>::BSSimpleArray()
+template <> BSSimpleArray<AStarNode<const NavMeshInfo*, TESObjectREFR*>*, 1024>::BSSimpleArray()
 {
-    vtable = &DAT_0106c264;
+
     reinterpret_cast<BSSimpleArray<NavMeshInfo*, 1024>*>(this)->FUN_006b3eb0(0, false);
 }
 
@@ -86,26 +82,20 @@ GlobalObject_00788300::GlobalObject_00788300()
 namespace DebugText {
 class DebugTextLine;
 }
-template <> class BSSimpleArray<DebugText::DebugTextLine*, 1024>
-{
-    void* vtable;
 
-  public:
-    BSSimpleArray();
-};
 // @fnv 0x00A11CD0
-BSSimpleArray<DebugText::DebugTextLine*, 1024>::BSSimpleArray()
+template <> BSSimpleArray<DebugText::DebugTextLine*, 1024>::BSSimpleArray()
 {
     unsigned int unused1;
     unsigned int unused2;
-    vtable = &DAT_0109504c;
+
     reinterpret_cast<BSSimpleArrayPacketDebug*>(this)->InitArray(0, false);
 }
 
 // @fnv 0x0043B4A0
 NiAVObject* NiNode::GetAt(unsigned int index)
 {
-    return reinterpret_cast<NiAVObject*>(reinterpret_cast<NiPointer<NiNode>*>(&children.GetAt(index))->operator->());
+    return m_kChildren.GetAt(index).operator->();
 }
 
 template <>
@@ -226,14 +216,14 @@ void BSSimpleArray<ButtonIcon, 1024>::Clear(bool freeBuffer)
 SandboxProcedureData::SandboxProcedureData()
 {
     pTarget = 0;
-    eProcedure = SANDBOX_PROCEDURE_SANDBOX_PROCEDURE_NONE;
+    eProcedure = SANDBOX_PROCEDURE_NONE;
     m_iActivityState = 0;
     m_iProcedureData = 0;
 }
 // Candidate address 006e3de0, 129 bytes; inferred owner/operation requires review.
 // Do not define the covered construction helper until its own callees are admissible.
 // @fnv 0x006E3DE0
-void BSSimpleArray<PathingAvoidanceNode, 1024>::_InitialSetup(unsigned int capacity, unsigned int initialSize)
+void BSSimpleArray<PathingAvoidNode, 1024>::_InitialSetup(unsigned int capacity, unsigned int initialSize)
 {
     pBuffer = 0;
     iSize = 0;

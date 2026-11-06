@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
 
 // src/speedtree/lightingengine_ob1_variant.cpp - flag-variant unit created 2026-10-25 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/speedtree/lightingengine.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,68 +8,183 @@
 // src/speedtree/lightingengine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/speedtree/lightingengine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern double FUN_00ec6054(double);
+#include "../../include/hkVector4.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3/CVec3; this unit's code depends on the stand-in's own overload set and inline bodies (its own NiPoint3/CVec3 bodies differ), so the shared class cannot replace it.
+#include "../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
 
-struct Vec3
+struct LocalVec3
 {
-    float x, y, z;
-    __forceinline float& operator[](int index)
+public:
+    union
     {
-        return ((float*)this)[index];
-    }
-    __forceinline Vec3()
+        float x;
+        unsigned int xb;
+    };
+    union
     {
-        x = y = z = 0.0f;
-    }
-    __forceinline Vec3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    void FUN_00b12790()
+        float y;
+        unsigned int yb;
+    };
+    union
     {
-        float lengthSquared = x * x + y * y + z * z;
-        float length = (float)FUN_00ec6054(lengthSquared);
-        float reciprocal = 1.0f / length;
-        x *= reciprocal;
-        y *= reciprocal;
-        z *= reciprocal;
-    }
-    float FUN_00b2a180(void* ptr)
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
     {
-        const Vec3& rhs = *(const Vec3*)ptr;
-        float value = x * rhs.x + y * rhs.y + z * rhs.z;
-        return value;
-    }
-    Vec3 FUN_00b13040(void*);
-    Vec3 AddVector(const Vec3& rhs)
-    {
-        return Vec3(x + rhs.x, y + rhs.y, z + rhs.z);
-    }
-    Vec3 ScaleSwizzled(float value)
-    {
-        return Vec3(x * value, y * value, z * value);
-    }
-    Vec3& FUN_00b2a1c0(void* ptr)
-    {
-        const Vec3& rhs = *(const Vec3*)ptr;
-        x += rhs.x;
-        y += rhs.y;
-        z += rhs.z;
+        x = other.x;
+        y = other.y;
+        z = other.z;
         return *this;
     }
-    float FUN_00b04d40(Vec3* rhs)
-    {
-        float squared = (rhs->z - z) * (rhs->z - z) + (rhs->y - y) * (rhs->y - y) + (rhs->x - x) * (rhs->x - x);
-        int bits = *(int*)&squared;
-        bits = (bits >> 1) + 0x1fc00000;
-        return *(float*)&bits;
-    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
 };
-struct FourFloatVector
+
+extern double FUN_00ec6054(double);
+
+__forceinline float& LocalVec3::operator[](int index)
 {
-    float x, y, z, w;
-    void* AddVector(void*, Vec3*, void*, float);
-    void* AddVector(void*, void*);
-    void* ScaleSwizzled();
-};
+    return ((float*)this)[index];
+}
+__forceinline LocalVec3::LocalVec3()
+{
+    x = y = z = 0.0f;
+}
+__forceinline LocalVec3::LocalVec3(float a, float b, float c) : x(a), y(b), z(c)
+{}
+inline void LocalVec3::FUN_00b12790()
+{
+    float lengthSquared = x * x + y * y + z * z;
+    float length = (float)FUN_00ec6054(lengthSquared);
+    float reciprocal = 1.0f / length;
+    x *= reciprocal;
+    y *= reciprocal;
+    z *= reciprocal;
+}
+inline float LocalVec3::FUN_00b2a180(void* ptr)
+{
+    const LocalVec3& rhs = *(const LocalVec3*)ptr;
+    float value = x * rhs.x + y * rhs.y + z * rhs.z;
+    return value;
+}
+inline LocalVec3 LocalVec3::AddVector(const LocalVec3& rhs)
+{
+    return LocalVec3(x + rhs.x, y + rhs.y, z + rhs.z);
+}
+inline LocalVec3 LocalVec3::ScaleSwizzled(float value)
+{
+    return LocalVec3(x * value, y * value, z * value);
+}
+inline LocalVec3& LocalVec3::FUN_00b2a1c0(void* ptr)
+{
+    const LocalVec3& rhs = *(const LocalVec3*)ptr;
+    x += rhs.x;
+    y += rhs.y;
+    z += rhs.z;
+    return *this;
+}
+inline float LocalVec3::FUN_00b04d40(LocalVec3* rhs)
+{
+    float squared = (rhs->z - z) * (rhs->z - z) + (rhs->y - y) * (rhs->y - y) + (rhs->x - x) * (rhs->x - x);
+    int bits = *(int*)&squared;
+    bits = (bits >> 1) + 0x1fc00000;
+    return *(float*)&bits;
+}
 struct Color
 {
     float r, g, b;
@@ -89,11 +206,11 @@ static __declspec(noinline) unsigned int PackChannel(float value, bool adjust, u
 struct GameContext
 {
     int unk00;
-    Vec3 rotation;
+    LocalVec3 rotation;
     int unk10;
     unsigned int packed14;
     unsigned char alpha18, unk19, unk1a, unk1b;
-    Vec3 location;
+    LocalVec3 location;
     void FUN_00b40430(float*);
     void FUN_00b404c0(const Color& values, bool adjust)
     {
@@ -102,8 +219,8 @@ struct GameContext
         packed += PackChannel(values.b, adjust, alpha18) << 16;
         packed14 = packed - 0x1000000;
     }
-    void FUN_00b40210(int, Vec3*, float);
-    float FUN_00b04d40(Vec3*);
+    void FUN_00b40210(int, LocalVec3*, float);
+    float FUN_00b04d40(LocalVec3*);
 };
 struct Record;
 struct Iterator
@@ -149,9 +266,9 @@ struct Record
 };
 struct DeviceData
 {
-    Vec3 position;
-    Vec3 scale;
-    Vec3 mix;
+    LocalVec3 position;
+    LocalVec3 scale;
+    LocalVec3 mix;
     int unk24, unk28, unk2c;
     float transformMode;
     float constant, linear, quadratic;
@@ -172,9 +289,9 @@ struct Scene
     int unk20, unk24, unk28, unk2c;
     int unk30, unk34;
     int state38, unk3c, unk40, unk44;
-    Vec3 colors48;
+    LocalVec3 colors48;
     int unk54, unk58, unk5c;
-    Vec3 position60;
+    LocalVec3 position60;
     int unk6c;
     float blend70;
     int flags74;
@@ -198,41 +315,43 @@ void Scene::FUN_00b2a210(int output, Record* records, int count)
                 void* rotationW = &it->rotation;
                 Color origin20;
                 it->FUN_00b40430(&origin20.r);
-                Vec3 best;
+                LocalVec3 best;
                 float maximumW2 = DAT_01012054;
-                Vec3 result5;
+                LocalVec3 result5;
                 for (int j = 0; j < 8; ++j)
                 {
                     if (DAT_011f8d50[j])
                     {
-                        Vec3 dir(DAT_011ad168[j].position.x, DAT_011ad168[j].position.y, DAT_011ad168[j].position.z);
-                        Vec3 normal_29 =
+                        LocalVec3 dir(DAT_011ad168[j].position.x, DAT_011ad168[j].position.y, DAT_011ad168[j].position.z);
+                        LocalVec3 normal_29 =
                             DAT_011ad168[j].transformMode == DAT_01012060 ? dir : dir.FUN_00b13040(rotationW);
                         normal_29.FUN_00b12790();
                         float weight = normal_29.FUN_00b2a180(location);
                         if (weight >= maximumW2)
                         {
                             maximumW2 = weight;
-                            best = dir;
+                            best.xb = dir.xb;
+                            best.yb = dir.yb;
+                            best.zb = dir.zb;
                         }
                         if (weight < DAT_01012060)
                             weight = 0.0f;
                         BlendWeight(weight, blend70);
                         if ((flags74 & 1) != 0)
                         {
-                            Vec3 pos29(position60.x, position60.y, position60.z);
-                            Vec3 combined5(DAT_011ad168[j].mix.x * colors48.x, DAT_011ad168[j].mix.y * colors48.y,
+                            LocalVec3 pos29(position60.x, position60.y, position60.z);
+                            LocalVec3 combined5(DAT_011ad168[j].mix.x * colors48.x, DAT_011ad168[j].mix.y * colors48.y,
                                            DAT_011ad168[j].mix.z * colors48.z);
                             float falloff = 1.0f;
                             if (DAT_011ad168[j].transformMode != DAT_01012060)
                             {
-                                float dist8 = ((Vec3*)rotationW)->FUN_00b04d40(&dir);
+                                float dist8 = ((LocalVec3*)rotationW)->FUN_00b04d40(&dir);
                                 float polynomial = DAT_011ad168[j].constant + DAT_011ad168[j].linear * dist8 +
                                                    DAT_011ad168[j].quadratic * dist8 * dist8;
                                 if (polynomial != DAT_01012060)
                                     falloff = 1.0f / polynomial;
                             }
-                            Vec3 attenuation((weight * DAT_011ad168[j].scale.x) * origin20[0],
+                            LocalVec3 attenuation((weight * DAT_011ad168[j].scale.x) * origin20[0],
                                              (weight * DAT_011ad168[j].scale.y) * origin20[1],
                                              (weight * DAT_011ad168[j].scale.z) * origin20[2]);
                             result5.FUN_00b2a1c0(

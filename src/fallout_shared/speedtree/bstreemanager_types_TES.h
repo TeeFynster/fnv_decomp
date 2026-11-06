@@ -19,7 +19,7 @@ class Sky;
 class TES;
 class TES__ParticleObjectCache;
 class TESRegion;
-class WaterZoneManager;
+class TESWaterSystem;
 #pragma pack(push, 4)
 class TES
 {
@@ -53,7 +53,7 @@ class TES
     TESRegion* m_pCurrentRegion;                              // +0x5C, 4 bytes
     bool m_bHasCurrentRegion;                                 // +0x60, 1 bytes
     unsigned char layoutPadding61[3];
-    WaterZoneManager* m_pCurrentClimate;                                                  // +0x64, 4 bytes
+    TESWaterSystem* m_pCurrentClimate;                                                  // +0x64, 4 bytes
     Sky* pWeatherSky;                                                                     // +0x68, 4 bytes
     BSSimpleList<NiPointer<ImageSpaceModifierInstance> > m_kImageSpaceModifierInstances;  // +0x6C, 8 bytes
     unsigned int m_uiNextImageSpaceModifierId;                                            // +0x74, 4 bytes
@@ -186,7 +186,7 @@ class TES
     // void __cdecl TES::*(TESObjectREFR*)
     // void __cdecl TES::*()
     // float __cdecl TES::*(const NiPoint3&, TESObjectCELL*)
-    // WaterZoneManager* __cdecl TES::*()
+    // TESWaterSystem* __cdecl TES::*()
     // Sky* __cdecl TES::*()
     // void __cdecl TES::*()
     // void __cdecl TES::*()

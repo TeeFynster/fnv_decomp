@@ -1,8 +1,67 @@
+#include "../../include/BSStringT.h"
 
 // src/staging/blk_00840000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/Actor.h"
+#include "../../include/ArrowProjectile.h"
+#include "../../include/BSFile.h"
+#include "../../include/ChangesMap.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiTMap.h"
+#include "../../include/TESSaveLoadGame.h"
+#include "../../include/NumericIDBufferMap.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/DFALL.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/HighProcess.h"
+#include "../../include/MagicProjectile.h"
+#include "../../include/MobileObject.h"
+#include "../../include/StartMenu.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESWorldSpace.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/BGSSaveLoadFileEntry.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/BGSSaveLoadManager.h"
+#include "../../include/BSSaveDataSystemUtility.h"
+#include "../../include/BSOcclusionPlane.h"
+#include "../../include/DummyPointerMap.h"
+#include "../../include/NiBinaryStream.h"
+#include "../../include/NiUpdateData.h"
+
+class BGSReconstructCellSubBlocksMap;
 
 extern int DAT_0107ea60;
 
@@ -317,9 +376,19 @@ void __thiscall WeaponQueue::QueueWeapon(unsigned int param_2)
     TaskQueueInterface::CopyStringToBuffer((char*)this + 0x3c, 0x40, (const char*)param_2);
 }
 
+// Save-record arrays use the original array ABI, including its vtable word.
+struct SaveValueArray
+{
+    void** m_ppVirtualMethodTable;
+    unsigned int* pBuffer;
+    unsigned int iSize;
+    unsigned int SimpleArrayStorage;
+    unsigned int& GetAt(int index);
+};
+
 struct FUN_0084e320_Class
 {
-    BSSimpleArray<unsigned int, 2> m_Array;
+    SaveValueArray m_Array;
     unsigned int GetArrayElement(int index);
 };
 
@@ -344,48 +413,26 @@ int FUN_0084e3a0_Class::FUN_0084e3a0()
     return m_iThirdValue;
 }
 
-struct BGSSaveLoadFileEntry
-{
-    void ReadTypedData();
-    void* FUN_00851ef0();
-};
-
 // @fnv 0x00851ef0
 void* BGSSaveLoadFileEntry::FUN_00851ef0()
 {
     ReadTypedData();
-    return *(void**)((char*)this + 0x20);
+    return reinterpret_cast<void*>(m_uiHeaderRecordValue);
 }
-
-namespace fnv_00851f10 {
-struct BGSSaveLoadFileEntry
-{
-    void ReadTypedData();
-    void* FUN_00851f10();
-};
 
 // @fnv 0x00851f10
 void* BGSSaveLoadFileEntry::FUN_00851f10()
 {
     ReadTypedData();
-    return *(void**)((char*)this + 0x24);
+    return reinterpret_cast<void*>(m_uiFileSize);
 }
-}  // namespace fnv_00851f10
-
-namespace fnv_00851f30 {
-struct BGSSaveLoadFileEntry
-{
-    void ReadTypedData();
-    void* FUN_00851f30();
-};
 
 // @fnv 0x00851f30
 void* BGSSaveLoadFileEntry::FUN_00851f30()
 {
     ReadTypedData();
-    return *(void**)((char*)this + 0x28);
+    return reinterpret_cast<void*>(SaveFileMetadata);
 }
-}  // namespace fnv_00851f30
 
 extern "C" void* __cdecl FUN_00af2e50(void);
 
@@ -660,64 +707,28 @@ void FUN_00857350_obj::FUN_00857350()
     FUN_00863d60();
 }
 
-struct NiBinaryStream
-{
-    unsigned int Read(void* buffer, unsigned int size);
-};
 
-struct FUN_00857ba0_shell
-{
-    unsigned int ReadFromStream(NiBinaryStream* stream, void* buffer, unsigned int size);
-};
 
 // @fnv 0x00857ba0
-unsigned int __thiscall FUN_00857ba0_shell::ReadFromStream(NiBinaryStream* stream, void* buffer, unsigned int size)
+unsigned int TESSaveLoadGame::ReadFile(BSFile* stream, void* buffer, unsigned int size)
 {
-    unsigned int result = stream->Read(buffer, size);
+    unsigned int result = static_cast<NiBinaryStream*>(stream)->Read(buffer, size);
     return result;
 }
 
-struct TESSound
-{
-    unsigned int Deallocate();
-};
-struct DummyPointerMap;
-struct Holder
-{
-    void FUN_0085efc0(DummyPointerMap*, unsigned int, unsigned short);
-    void FUN_0085f2b0(TESSound* sound, unsigned short flag);
-};
-// Calls FUN_0085efc0 with the map at this+0x5c, the result of sound->Deallocate(), and flag.
+
+// Queues the attached-animation buffer using the shared map member.
 // @fnv 0x0085f2b0
-void Holder::FUN_0085f2b0(TESSound* sound, unsigned short flag)
+void TESSaveLoadGame::QueueAttachedAnimationLoad(TESObjectREFR* sound, unsigned short flag)
 {
-    FUN_0085efc0((DummyPointerMap*)*(int*)((char*)this + 0x5c), sound->Deallocate(), flag);
+    QueueBufferLoad(m_pAttachedAnimationBufferMap, reinterpret_cast<TESSound*>(sound)->Deallocate(), flag);
 }
 
-namespace fnv_0085f420 {
-struct TESSound
-{
-    unsigned int Deallocate();
-};
-struct DummyPointerMap
-{
-};
-struct Holder
-{
-    void FUN_0085efc0(DummyPointerMap*, unsigned int, unsigned short);
-    DummyPointerMap* m_pMapObject;
-};
-struct FUN_0085f420Class : Holder
-{
-    void FUN_0085f420(TESSound* SoundAssetTmp, unsigned short wParam);
-};
-// Calls FUN_0085efc0 with the pointer at this+0x60, the result of TESSound::Deallocate, and wParam.
 // @fnv 0x0085f420
-void FUN_0085f420Class::FUN_0085f420(TESSound* SoundAssetTmp, unsigned short wParam)
+void TESSaveLoadGame::QueueCharControllerLoad(TESObjectREFR* SoundAssetTmp, unsigned short wParam)
 {
-    FUN_0085efc0(*(DummyPointerMap**)((char*)this + 0x60), SoundAssetTmp->Deallocate(), wParam);
+    QueueBufferLoad(m_pCharControllerBufferMap, reinterpret_cast<TESSound*>(SoundAssetTmp)->Deallocate(), wParam);
 }
-}  // namespace fnv_0085f420
 
 struct FUN_0085feb0_class
 {
@@ -773,27 +784,15 @@ void FUN_00844840_::FUN_00844840()
 }
 }  // namespace fnv_00844840
 
-namespace fnv_00844940 {
-extern "C" void _NiFreeAlias(void*);
-extern int DAT_0107ecc8;
-
-struct NiTPointerMap_00844940
-{
-    void* vtbl;
-    int a;
-    void* b;
-    void RemoveAll();
-    void FUN_00844940();
-};
-
+// Vftable 0x0107ecc8 identifies the DFALL map base for cell-subblock reconstruction maps.
+template <>
 // @fnv 0x00844940
-void NiTPointerMap_00844940::FUN_00844940()
+NiTMapBase<DFALL<NiTMapItem<unsigned int, BGSReconstructCellSubBlocksMap*> >,
+           unsigned int, BGSReconstructCellSubBlocksMap*>::~NiTMapBase()
 {
-    *reinterpret_cast<void**>(this) = (void*)&DAT_0107ecc8;
     RemoveAll();
-    _NiFreeAlias(b);
+    _NiFreeAlias(m_ppkHashTable);
 }
-}  // namespace fnv_00844940
 
 extern "C" void* __cdecl NiFreeAlias(void*);
 extern int DAT_0107ece8;
@@ -942,33 +941,17 @@ FUN_00844690_class* __thiscall FUN_00844690_class::FUN_00844690(int aiCount)
     return this;
 }
 
-namespace fnv_00844870 {
-extern "C" void* __cdecl NiMalloc(unsigned int);
-extern "C" void* __cdecl memset(void*, int, unsigned int);
-extern int DAT_0107ecc8;
-
-struct FUN_00844870_Cls
-{
-    int* vtbl;
-    int count;
-    void* data;
-    int pad;
-    FUN_00844870_Cls* __thiscall FUN_00844870(int count);
-};
-
-// Sets the vtable, stores count, allocates count*4 bytes zeroed into data, and returns this.
+template <>
 // @fnv 0x00844870
-FUN_00844870_Cls* __thiscall FUN_00844870_Cls::FUN_00844870(int count)
+NiTMapBase<DFALL<NiTMapItem<unsigned int, BGSReconstructCellSubBlocksMap*> >,
+           unsigned int, BGSReconstructCellSubBlocksMap*>::NiTMapBase(unsigned int count)
 {
-    vtbl = &DAT_0107ecc8;
-    this->count = count;
-    pad = 0;
-    unsigned int size = this->count * 4;
-    data = NiMalloc(size);
-    memset(data, 0, this->count * 4);
-    return this;
+    m_uiHashSize = count;
+    m_kItemCount.m_uiCount = 0;
+    unsigned int size = m_uiHashSize * 4;
+    m_ppkHashTable = (NiTMapItem<unsigned int, BGSReconstructCellSubBlocksMap*>**)NiMalloc(size);
+    memset(m_ppkHashTable, 0, m_uiHashSize * 4);
 }
-}  // namespace fnv_00844870
 
 void* __cdecl _NiMalloc(unsigned int size);
 void* __cdecl memset(void* dest, int c, unsigned int count);
@@ -1027,21 +1010,6 @@ void* __thiscall FUN_00845110_class::FUN_00845110(unsigned int flags)
     return this;
 }
 
-extern "C" void Deallocate(void*);
-struct FUN_00845140_class
-{
-    void __thiscall FUN_00844940();
-    void* __thiscall FUN_00845140(unsigned int flags);
-};
-// Calls FUN_00844940, then deallocates this when flags has bit 1 set, and returns this.
-// @fnv 0x00845140
-void* __thiscall FUN_00845140_class::FUN_00845140(unsigned int flags)
-{
-    FUN_00844940();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
 
 void __cdecl Deallocate(void*);
 struct FUN_00845170_class
@@ -1321,10 +1289,6 @@ struct FUN_00846d20_shell
 {
     unsigned int FUN_00846d20(unsigned int a);
 };
-struct BGSSaveLoadGame
-{
-    unsigned int FUN_0084e3a0();
-};
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
 struct FUN_0084e340_Class
@@ -1543,11 +1507,7 @@ void* FUN_00853440_class::FUN_008534d0(unsigned int flags)
     return this;
 }
 
-struct BSFile
-{
-    void __thiscall FUN_00473180(const char* p, unsigned int n);
-};
-int __cdecl BSStringLength(const char* p);
+
 struct FUN_00854b80_class
 {
     void __thiscall FUN_00854b80(const char* p);
@@ -1630,60 +1590,28 @@ void* __thiscall FUN_00855730_Class::FUN_00857250(unsigned int flags)
     return this;
 }
 
-struct TESSaveLoadGame
-{
-    void ReadTypedData(void*, unsigned int);
-};
-struct SetAtHelper
-{
-    void SetAt(unsigned int, unsigned int);
-};
-struct FUN_0085ef80_shell
-{
-    TESSaveLoadGame* AllocateWithPrefix(unsigned short);
-};
-struct FUN_0085efc0_Class
-{
-    void FUN_0085efc0(DummyPointerMap* a, unsigned int b, unsigned short c);
-};
 // @fnv 0x0085efc0
-void __thiscall FUN_0085efc0_Class::FUN_0085efc0(DummyPointerMap* pMap, unsigned int uiKey, unsigned short usIndex)
+void TESSaveLoadGame::QueueBufferLoad(NumericIDBufferMap* pMap, unsigned int uiKey, unsigned short usIndex)
 {
-    TESSaveLoadGame* q = ((FUN_0085ef80_shell*)this)->AllocateWithPrefix(usIndex);
-    TESSaveLoadGame* p = q + 2;
-    ((TESSaveLoadGame*)this)->ReadTypedData((void*)p, usIndex);
-    ((SetAtHelper*)pMap)->SetAt(uiKey, (unsigned int)q);
+    void* q = CreateQueuedBuffer(usIndex);
+    char* p = (char*)q + 2;
+    ReadTypedData((void*)p, usIndex);
+    pMap->SetAt(uiKey, q);
 }
 
-struct LH
-{
-    bool IsInList(int*&);
-};
-struct G2
-{
-    void AddHead(int**);
-};
-struct FUN_0085f710_class
-{
-    void* pad[0x68 / 4];
-    LH list;
-    void __thiscall AddActorToList(int* actor);
-};
 // If actor is not already in list, adds it to the head of the list.
 // @fnv 0x0085f710
-void __thiscall FUN_0085f710_class::AddActorToList(int* actor)
+void TESSaveLoadGame::QueueFormForFinalization(TESForm* actor)
 {
-    if (!list.IsInList(actor))
-        ((G2*)&list)->AddHead(&actor);
+    if (!m_kQueuedFinalizeForms.IsInList(actor))
+        m_kQueuedFinalizeForms.AddHead(actor);
 }
 
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+#pragma intrinsic(memcpy)
+
 unsigned int __fastcall FUN_00853500(void*);
-struct Vec3
-{
-    unsigned int x;
-    unsigned int y;
-    unsigned int z;
-};
+
 struct FUN_0084e460_t
 {
     unsigned int a;
@@ -1691,8 +1619,8 @@ struct FUN_0084e460_t
     unsigned int c;
     unsigned int d;
     unsigned int e;
-    Vec3 f;
-    Vec3 g;
+    NiPoint3 f;
+    NiPoint3 g;
     unsigned char flag;
     void FUN_0084e460(unsigned int arg);
 };
@@ -1705,19 +1633,13 @@ void FUN_0084e460_t::FUN_0084e460(unsigned int auiData)
     c = 0;
     d = 0;
     e = 0;
-    f = *(Vec3*)(auiData + 3);
-    g = *(Vec3*)(auiData + 15);
+    memcpy(&f, (void*)(auiData + 3), sizeof(f));
+    memcpy(&g, (void*)(auiData + 15), sizeof(g));
     flag = 0;
 }
 
 unsigned int __fastcall FUN_00853500(void* p);
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
 
 struct FUN_0084e580_t
 {
@@ -1745,15 +1667,14 @@ void __thiscall FUN_0084e580_class::FUN_0084e580(void* p)
     ((FUN_0084e580_t*)this)->c = FUN_00853500((char*)p + 0x1b);
     ((FUN_0084e580_t*)this)->d = *(short*)((char*)p + 0x1e);
     ((FUN_0084e580_t*)this)->e = *(short*)((char*)p + 0x20);
-    ((FUN_0084e580_t*)this)->f = *(NiPoint3*)((char*)p + 3);
-    ((FUN_0084e580_t*)this)->g = *(NiPoint3*)((char*)p + 0xf);
+    memcpy(&((FUN_0084e580_t*)this)->f, (char*)p + 3, sizeof(NiPoint3));
+    memcpy(&((FUN_0084e580_t*)this)->g, (char*)p + 0xf, sizeof(NiPoint3));
     ((FUN_0084e580_t*)this)->h = 0;
 }
 
-struct BSS
-{
-    ~BSS();
-};
+#pragma function(memcpy)
+
+
 struct FUN_0084fe50_class
 {
     void FUN_00851540();
@@ -1769,7 +1690,7 @@ struct FUN_0084fe50_class
     int m_24;
     int m_28;
     int m_2c;
-    BSS m_30;
+    ::BSStringT<char> m_30;
     ~FUN_0084fe50_class();
 };
 void __cdecl Deallocate(void*);
@@ -1826,113 +1747,71 @@ void* FUN_00852fd0_cls::InitializeBuffer(void* aiCount)
 
 int __cdecl DAT_00ffffff;
 
-struct FUN_00857bf0_Class
-{
-    unsigned char m_4c;
-    void* m_50;
-    int FUN_00857bf0(int a);
-};
 
 // @fnv 0x00857bf0
-int FUN_00857bf0_Class::FUN_00857bf0(int auiPacked)
+unsigned int TESSaveLoadGame::ConvertNumericID(unsigned int auiPacked)
 {
     unsigned char b = (auiPacked & 0xff000000) >> 24;
-    if (!*(void**)((char*)this + 0x50) || b == 0xff)
+    if (!m_pNumericIDBuffer || b == 0xff)
         return auiPacked;
     unsigned char c = 0;
-    if (b < *(unsigned char*)((char*)this + 0x4c))
+    if (b < m_ucSaveVersion)
     {
-        c = ((unsigned char*)*(void**)((char*)this + 0x50))[b];
+        c = ((unsigned char*)m_pNumericIDBuffer)[b];
         if (c != 0xff)
             return (auiPacked & (int)&DAT_00ffffff) + (c << 24);
     }
     return 0;
 }
 
-struct P09H
-{
-    int GetReferenceType();
-};
-struct MapX
-{
-    void* GetFirstPos();
-};
-struct NiTMap
-{
-    void GetNext(void*&, unsigned int&, void*&);
-};
-struct TESForm
-{
-    virtual ~TESForm();
-};
-struct TESObjectREFR : TESForm
-{
-    virtual ~TESObjectREFR();
-};
+
+
+
 extern "C" TESForm* __cdecl FUN_004839c0(unsigned int);
-struct FUN_0085f070_shell
-{
-    void SaveReferenceState(TESObjectREFR*, unsigned int, void*);
-    void FUN_0085f070();
-};
 void __cdecl Deallocate(void*);
 extern TESObjectREFR* g_thePlayer;
 // @fnv 0x0085f070
-void FUN_0085f070_shell::FUN_0085f070()
+void TESSaveLoadGame::LoadAnimations()
 {
-    void* pos2 = reinterpret_cast<MapX*>(*(void**)((char*)this + 0x58))->GetFirstPos();
+    void* pos2 = reinterpret_cast<NiTMap<unsigned int, void*>*>(m_pAnimationBufferMap)->GetFirstPos();
     while (pos2)
     {
         TESObjectREFR* ref;
         unsigned int key;
         void* value2;
-        reinterpret_cast<NiTMap*>(*(void**)((char*)this + 0x58))->GetNext(pos2, key, value2);
+        reinterpret_cast<NiTMap<unsigned int, void*>*>(m_pAnimationBufferMap)->GetNext(pos2, key, value2);
         if (key)
             ref = dynamic_cast<TESObjectREFR*>(FUN_004839c0(key));
         else
             ref = g_thePlayer;
         if (ref)
         {
-            if (!reinterpret_cast<P09H*>(ref)->GetReferenceType())
+            if (!ref->GetReferenceType())
             {
                 Deallocate(value2);
-                reinterpret_cast<MapH*>(*(void**)((char*)this + 0x58))->RemoveAt(key);
+                reinterpret_cast<MapH*>(m_pAnimationBufferMap)->RemoveAt(key);
                 continue;
             }
-            SaveReferenceState(ref, key, value2);
+            LoadAnimationForReference(ref, key, value2);
         }
         Deallocate(value2);
-        reinterpret_cast<MapH*>(*(void**)((char*)this + 0x58))->RemoveAt(key);
+        reinterpret_cast<MapH*>(m_pAnimationBufferMap)->RemoveAt(key);
     }
 }
 
 namespace fnv_0085f3d0 {
-struct TESForm
-{
-    void Revert(unsigned int);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
-struct FUN_0085f3d0
-{
-    void* p0;
-    void* p4;
-    void* p8;
-    void* pc;
-    void* p10;
-    void* p14;
-    void Method(TESForm* form, unsigned int value);
-};
-// @fnv 0x0085f3d0
-void FUN_0085f3d0::Method(TESForm* form, unsigned int value)
-{
-    void* old = p14;
-    p14 = (void*)value;
-    unsigned int ui;
-    g_TESSaveLoadGame->ReadTypedData(&ui, 2);
-    form->Revert(0);
-    p14 = old;
 }
-}  // namespace fnv_0085f3d0
+// @fnv 0x0085f3d0
+void TESSaveLoadGame::LoadAttachedAnimationForReference(TESObjectREFR* form, void* value)
+{
+    void* old = m_pBuffer;
+    m_pBuffer = (char*)value;
+    unsigned int ui;
+    fnv_0085f3d0::g_TESSaveLoadGame->ReadTypedData(&ui, 2);
+    static_cast<TESForm*>(form)->Revert(0u);
+    m_pBuffer = (char*)old;
+}
 
 struct Struct_004b0680
 {
@@ -2123,48 +2002,27 @@ struct FUN_0084fda0
 FUN_0084fda0::FUN_0084fda0()
 {}
 
-struct BGSAcousticSpace
-{
-    virtual void m_Virtual00();
-    virtual void m_Virtual04();
-    virtual void m_Virtual08();
-    virtual unsigned int Check(const char* string, int value1, int value2);
 
-    void __thiscall SetWallaSound(TESSound* sound);
-};
-
-void BGSAcousticSpace::m_Virtual00()
-{}
-
-void BGSAcousticSpace::m_Virtual04()
-{}
-
-void BGSAcousticSpace::m_Virtual08()
-{}
-
-unsigned int BGSAcousticSpace::Check(const char* string, int value1, int value2)
-{
-    return 0;
-}
-
-void BGSAcousticSpace::SetWallaSound(TESSound* sound)
-{}
-
-BGSAcousticSpace* __cdecl _FUN_00af2e50();
+// FUN_00af2e50 returns the BSSaveDataSystemUtility singleton (static at 0x011f72a0, ctor 0x00af2ed0 installs vftable
+// 0x010a4288); slot 3 (0x00aaa650) is called with ("-SAVE-", 0, 0) and 0x008d8040 stores the +0x44 result callback.
+namespace save_settings {
+BSSaveDataSystemUtility* __cdecl _FUN_00af2e50();
 
 void __cdecl UpdateHasSaves()
 {}
 
-// Allocates a FUN_0084fda0, sets its byte at offset 0x1C from Check("-SAVE-",0,0) > 0, and sets the walla sound to UpdateHasSaves.
+// Allocates a FUN_0084fda0, sets its byte at offset 0x1C from the save utility's slot 3 ("-SAVE-",0,0) > 0, and sets its result callback to UpdateHasSaves.
 // @fnv 0x0084fc70
 void InitAcousticSpace()
 {
     DAT_011de134 = new FUN_0084fda0;
 
-    reinterpret_cast<unsigned char*>(DAT_011de134)[0x1C] = _FUN_00af2e50()->Check("-SAVE-", 0, 0) > 0;
+    reinterpret_cast<unsigned char*>(DAT_011de134)[0x1C] = _FUN_00af2e50()->vf0C("-SAVE-", 0, 0) > 0;
 
-    _FUN_00af2e50()->SetWallaSound(reinterpret_cast<TESSound*>(&UpdateHasSaves));
+    _FUN_00af2e50()->SetResultCallback(reinterpret_cast<void (__cdecl*)(BSSaveDataSystemUtility::RESULT)>(&UpdateHasSaves));
 }
+
+}  // namespace save_settings
 
 struct FUN_0084fd70_class : FUN_0084fe50_class
 {
@@ -2182,10 +2040,6 @@ void* FUN_0084fd70_class::DestroyAndFree(unsigned int flags)
 
 namespace fnv_00850720 {
 char __cdecl ConsumeByteAtE4();
-struct BGSSaveLoadManager
-{
-    bool LoadGame(char*, int, bool, bool);
-};
 extern BGSSaveLoadManager* DAT_011de134;
 extern char DAT_011de138[];
 extern int DAT_011a224c;
@@ -2300,13 +2154,9 @@ FUN_00857280::FUN_00857280(int x, int y, int z, char f)
 
 void* __cdecl operator new(unsigned int size);
 void* __cdecl __memcpy(void* dst, const void* src, unsigned int count);
-struct FUN_0085ef80_class
-{
-    void* AllocateWithPrefix(unsigned short value);
-};
 // Allocates value + 2 bytes, copies the 2-byte value to the start of the block, and returns the block.
 // @fnv 0x0085ef80
-void* FUN_0085ef80_class::AllocateWithPrefix(unsigned short value)
+void* TESSaveLoadGame::CreateQueuedBuffer(unsigned short value)
 {
     unsigned short local;
     local = value;
@@ -2315,42 +2165,12 @@ void* FUN_0085ef80_class::AllocateWithPrefix(unsigned short value)
     return result2;
 }
 
-struct FUN_0085f5a0_Class : public Holder
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-    int m_40;
-    int m_44;
-    int m_48;
-    int m_4c;
-    int m_50;
-    int m_54;
-    int m_58;
-    int m_5c;
-    int m_60;
-    int m_64;
-    void FUN_0085f5a0(TESSound* sound, unsigned short flag);
-};
 
-// Forwards the sound's Deallocate() result and flag to FUN_0085efc0 with the map stored at this+0x64.
+// Queues the Havok buffer using the shared map member.
 // @fnv 0x0085f5a0
-void FUN_0085f5a0_Class::FUN_0085f5a0(TESSound* sound, unsigned short flag)
+void TESSaveLoadGame::QueueHavokDataLoad(TESObjectREFR* sound, unsigned short flag)
 {
-    FUN_0085efc0(reinterpret_cast<DummyPointerMap*>(*(void**)((char*)this + 0x64)), sound->Deallocate(), flag);
+    QueueBufferLoad(m_pHavokDataBufferMap, reinterpret_cast<TESSound*>(sound)->Deallocate(), flag);
 }
 
 extern void* DAT_011de45c;
@@ -2360,22 +2180,16 @@ struct FUN_00560530_Class
     void FUN_00560530(unsigned short arg);
 };
 
-struct FUN_0085f6c0_Class
-{
-    char pad[0x14];
-    int m_14;
-    void FUN_0085f6c0(int arg1, int arg2);
-};
 
 // @fnv 0x0085f6c0
-void FUN_0085f6c0_Class::FUN_0085f6c0(int apTarget, int aiValue)
+void TESSaveLoadGame::LoadHavokDataForReference(TESObjectREFR* apTarget, void* aiValue)
 {
-    int saved = m_14;
-    m_14 = aiValue;
+    int saved = (int)m_pBuffer;
+    m_pBuffer = (char*)aiValue;
     unsigned short buf;
     ((TESSaveLoadGame*)DAT_011de45c)->ReadTypedData(&buf, 2);
     ((FUN_00560530_Class*)apTarget)->FUN_00560530(buf);
-    m_14 = saved;
+    m_pBuffer = (char*)saved;
 }
 
 struct FUN_0085f810_shell
@@ -2389,25 +2203,9 @@ void* FUN_0085f810_shell::FUN_0085f810()
     return *(void**)((char*)this + 0x88) ? *(void**)((char*)*(void**)((char*)this + 0x88) + 0x28) : 0;
 }
 
-struct FUN_0085f2e0_class
-{
-    void FUN_0085f2e0();
-};
 
-struct FUN_0085f450_class
-{
-    void FUN_0085f450();
-};
 
-struct FUN_0085f5d0_class
-{
-    void ProcessMapEntries();
-};
 
-struct FUN_0085f750_class
-{
-    void DetachProjectiles();
-};
 
 struct FUN_00978420_class
 {
@@ -2419,44 +2217,27 @@ struct Zt5TES
     void FUN_00453550(float);
 };
 
-struct BSOcclusionPlane
-{
-    int GetCullResult() const;
-};
-
-struct ExtraDataList
-{
-    unsigned int GetRoomId();
-};
 
 struct FUN_00c6a870_class
 {
     void FUN_00c6a870();
 };
 
-struct TESSaveLoadGame_GetLoading_class
-{
-    bool GetLoading();
-};
 
 extern Zt5TES* g_TES;
 extern BSOcclusionPlane* _g_thePlayer;
 extern FUN_00978420_class DAT_011e0e80;
 
-struct FUN_0085f850_class
-{
-    void FUN_0085f850(bool);
-};
 
 // @fnv 0x0085f850
-void FUN_0085f850_class::FUN_0085f850(bool arg)
+void TESSaveLoadGame::LoadQueuedData(bool arg)
 {
-    if (!reinterpret_cast<TESSaveLoadGame_GetLoading_class*>(this)->GetLoading())
+    if (!GetLoading())
         return;
 
-    reinterpret_cast<FUN_0085f070_shell*>(this)->FUN_0085f070();
-    reinterpret_cast<FUN_0085f2e0_class*>(this)->FUN_0085f2e0();
-    reinterpret_cast<FUN_0085f450_class*>(this)->FUN_0085f450();
+    LoadAnimations();
+    LoadAttachedAnimations();
+    LoadCharControllers();
 
     if (arg)
     {
@@ -2466,14 +2247,14 @@ void FUN_0085f850_class::FUN_0085f850(bool arg)
         int cullResult = _g_thePlayer->GetCullResult();
         if (cullResult)
         {
-            unsigned int room = reinterpret_cast<ExtraDataList*>(cullResult)->GetRoomId();
+            bhkWorld* room = reinterpret_cast<ExtraDataList*>(cullResult)->GetRoomId();
             if (room)
                 reinterpret_cast<FUN_00c6a870_class*>(room)->FUN_00c6a870();
         }
     }
 
-    reinterpret_cast<FUN_0085f5d0_class*>(this)->ProcessMapEntries();
-    reinterpret_cast<FUN_0085f750_class*>(this)->DetachProjectiles();
+    LoadHavokData();
+    FinalizeQueuedForms();
 }
 
 struct B844520Stamp
@@ -2924,7 +2705,6 @@ struct FUN_00850360_class : public FUN_0084ff90_shell
     void DeleteWeaponFile(char* weapon, int flags);
 };
 
-extern "C" __declspec(dllimport) int __stdcall DeleteFileA(char* lpFileName);
 
 // Builds a file path from weapon via BuildWeaponPath and deletes that file with DeleteFileA.
 // @fnv 0x00850360
@@ -2973,39 +2753,13 @@ FUN_008562c0_cls* FUN_008562c0_cls::FUN_008562c0()
 
 extern int DAT_00ffffff;
 
-struct FUN_00857c70_StandIn
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    unsigned char unk4C;
-    unsigned char* unk50;
-
-    unsigned int __thiscall FUN_00857c70(unsigned int value);
-};
 
 // @fnv 0x00857c70
-unsigned int __thiscall FUN_00857c70_StandIn::FUN_00857c70(unsigned int value)
+unsigned int TESSaveLoadGame::ReverseConvertNumericID(unsigned int value)
 {
     unsigned char code = static_cast<unsigned char>((value & 0xFF000000u) >> 24);
 
-    if (this->unk50 == 0 || code == 0xFF)
+    if (this->m_pNumericIDBuffer == 0 || code == 0xFF)
         return value;
 
     {
@@ -3015,9 +2769,9 @@ unsigned int __thiscall FUN_00857c70_StandIn::FUN_00857c70(unsigned int value)
         foundIndex = 0xFF;
         index = 0;
 
-        for (; index < this->unk4C; ++index)
+        for (; index < this->m_ucSaveVersion; ++index)
         {
-            if (this->unk50[index] == code)
+            if (this->m_pNumericIDBuffer[index] == code)
                 foundIndex = static_cast<unsigned char>(index);
         }
 
@@ -3037,14 +2791,6 @@ class StaticFlagMgr
 
 extern StaticFlagMgr* DAT_011c3f2c;
 
-struct FUN_00859120_probe
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int FUN_0084e3a0();
-};
 
 class FUN_00859120_cls
 {
@@ -3058,7 +2804,7 @@ unsigned int __thiscall FUN_00859120_cls::ClearRefrFlag(TESForm* pForm, unsigned
 {
     TESObjectREFR* a;
     TESObjectCELL* b;
-    if (DAT_011c3f2c->FUN_00469860(reinterpret_cast<FUN_00859120_probe*>(pForm)->FUN_0084e3a0()) != 0)
+    if (DAT_011c3f2c->FUN_00469860(pForm->FUN_0084e3a0()) != 0)
     {
         a = dynamic_cast<TESObjectREFR*>(pForm);
         if (a != 0)
@@ -3095,16 +2841,8 @@ struct BinaryRecord44
     unsigned int value14, value18, value1c, value20, value24, value28;
     void FUN_00857320();
 };
-class TESForm;
-class MagicProjectile
-{
-  public:
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual ~MagicProjectile();
-};
+
+
 struct SourceItem
 {
     unsigned int FUN_00559450();
@@ -3118,12 +2856,9 @@ struct SourceTracker
 {
     void FUN_00905330(unsigned int* key);
 };
-struct FUN_008598d0_shell
+// Reconstruction overloads not yet declared by the shared class. No additional layout.
+struct SaveGameReferenceReconstruction : public TESSaveLoadGame
 {
-    SourceItemMap* source;
-    unsigned int field04, field08, field0c, field10, field14;
-    unsigned int field18, field1c, field20;
-    SourceTracker tracker;
     void* FUN_00861c00(void*);
     TESForm* FUN_00859a90(unsigned int key, BinaryRecord36* data);
     TESForm* FUN_00859f20(unsigned int key, BinaryRecord44* data);
@@ -3131,9 +2866,9 @@ struct FUN_008598d0_shell
     void ProcessSourceItem(unsigned int key);
 };
 // @fnv 0x008598d0
-void FUN_008598d0_shell::ProcessSourceItem(unsigned int key)
+void SaveGameReferenceReconstruction::ProcessSourceItem(unsigned int key)
 {
-    SourceItem* item = source->FUN_00855100(key);
+    SourceItem* item = reinterpret_cast<SourceItemMap*>(m_pChangesMap)->FUN_00855100(key);
     if (item != 0)
     {
         unsigned int flags = item->FUN_00559450();
@@ -3176,7 +2911,7 @@ void FUN_008598d0_shell::ProcessSourceItem(unsigned int key)
                 TESForm* newObject2 = FUN_00859f20(key, &record2);
                 if (newObject2 != 0)
                     FUN_00858730(newObject2);
-                tracker.FUN_00905330(&key);
+                reinterpret_cast<SourceTracker*>(&m_kChangedReferenceIDList)->FUN_00905330(&key);
             }
         }
         else
@@ -3191,414 +2926,17 @@ struct SavedReferenceData
     void LoadFromSave(TESObjectREFR*);
     char* FUN_00491040(char*);
 };
-struct ReferenceDataAccess
-{
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void slot25();
-    virtual void slot26();
-    virtual void slot27();
-    virtual void slot28();
-    virtual void slot29();
-    virtual void slot30();
-    virtual void slot31();
-    virtual void slot32();
-    virtual void slot33();
-    virtual void slot34();
-    virtual void slot35();
-    virtual void slot36();
-    virtual void slot37();
-    virtual void slot38();
-    virtual void slot39();
-    virtual void slot40();
-    virtual void slot41();
-    virtual void slot42();
-    virtual void slot43();
-    virtual void slot44();
-    virtual void slot45();
-    virtual void slot46();
-    virtual void slot47();
-    virtual void slot48();
-    virtual void slot49();
-    virtual void slot50();
-    virtual void slot51();
-    virtual void slot52();
-    virtual void slot53();
-    virtual void slot54();
-    virtual void slot55();
-    virtual void slot56();
-    virtual void slot57();
-    virtual void slot58();
-    virtual void slot59();
-    virtual void slot60();
-    virtual void slot61();
-    virtual void slot62();
-    virtual void slot63();
-    virtual void slot64();
-    virtual void slot65();
-    virtual void slot66();
-    virtual void slot67();
-    virtual void slot68();
-    virtual void slot69();
-    virtual void slot70();
-    virtual void slot71();
-    virtual void slot72();
-    virtual void slot73();
-    virtual void slot74();
-    virtual void slot75();
-    virtual void slot76();
-    virtual void slot77();
-    virtual void slot78();
-    virtual void slot79();
-    virtual void slot80();
-    virtual void slot81();
-    virtual void slot82();
-    virtual void slot83();
-    virtual void slot84();
-    virtual void slot85();
-    virtual void slot86();
-    virtual void slot87();
-    virtual void slot88();
-    virtual void slot89();
-    virtual void slot90();
-    virtual void slot91();
-    virtual void slot92();
-    virtual void slot93();
-    virtual void slot94();
-    virtual void slot95();
-    virtual void slot96();
-    virtual void slot97();
-    virtual void slot98();
-    virtual void slot99();
-    virtual void slot100();
-    virtual void slot101();
-    virtual void slot102();
-    virtual void slot103();
-    virtual void slot104();
-    virtual void slot105();
-    virtual void slot106();
-    virtual void slot107();
-    virtual void slot108();
-    virtual void slot109();
-    virtual void slot110();
-    virtual void slot111();
-    virtual void slot112();
-    virtual void slot113();
-    virtual void slot114();
-    virtual void slot115();
-    virtual void slot116();
-    virtual void slot117();
-    virtual void slot118();
-    virtual void slot119();
-    virtual void slot120();
-    virtual SavedReferenceData* GetData();
-};
+
 struct PlayerSaveAccess : TESObjectREFR
 {
     SavedReferenceData* FUN_00950a60(bool);
 };
 extern PlayerSaveAccess* DAT_011dea3c;
-class BaseProcess
-{
-  public:
-    virtual void slot0();
-};
-class HighProcess : public BaseProcess
-{
-  public:
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void slot25();
-    virtual void slot26();
-    virtual void slot27();
-    virtual void slot28();
-    virtual void slot29();
-    virtual void slot30();
-    virtual void slot31();
-    virtual void slot32();
-    virtual void slot33();
-    virtual void slot34();
-    virtual void slot35();
-    virtual void slot36();
-    virtual void slot37();
-    virtual void slot38();
-    virtual void slot39();
-    virtual void slot40();
-    virtual void slot41();
-    virtual void slot42();
-    virtual void slot43();
-    virtual void slot44();
-    virtual void slot45();
-    virtual void slot46();
-    virtual void slot47();
-    virtual void slot48();
-    virtual void slot49();
-    virtual void slot50();
-    virtual void slot51();
-    virtual void slot52();
-    virtual void slot53();
-    virtual void slot54();
-    virtual void slot55();
-    virtual void slot56();
-    virtual void slot57();
-    virtual void slot58();
-    virtual void slot59();
-    virtual void slot60();
-    virtual void slot61();
-    virtual void slot62();
-    virtual void slot63();
-    virtual void slot64();
-    virtual void slot65();
-    virtual void slot66();
-    virtual void slot67();
-    virtual void slot68();
-    virtual void slot69();
-    virtual void slot70();
-    virtual void slot71();
-    virtual void slot72();
-    virtual void slot73();
-    virtual void slot74();
-    virtual void slot75();
-    virtual void slot76();
-    virtual void slot77();
-    virtual void slot78();
-    virtual void slot79();
-    virtual void slot80();
-    virtual void slot81();
-    virtual void slot82();
-    virtual void slot83();
-    virtual void slot84();
-    virtual void slot85();
-    virtual void slot86();
-    virtual void slot87();
-    virtual void slot88();
-    virtual void slot89();
-    virtual void slot90();
-    virtual void slot91();
-    virtual void slot92();
-    virtual void slot93();
-    virtual void slot94();
-    virtual void slot95();
-    virtual void slot96();
-    virtual void slot97();
-    virtual void slot98();
-    virtual void slot99();
-    virtual void slot100();
-    virtual void slot101();
-    virtual void slot102();
-    virtual void slot103();
-    virtual void slot104();
-    virtual void slot105();
-    virtual void slot106();
-    virtual void slot107();
-    virtual void slot108();
-    virtual void slot109();
-    virtual void slot110();
-    virtual void slot111();
-    virtual void slot112();
-    virtual void slot113();
-    virtual void slot114();
-    virtual void slot115();
-    virtual void slot116();
-    virtual void slot117();
-    virtual void slot118();
-    virtual void slot119();
-    virtual void slot120();
-    virtual void slot121();
-    virtual void slot122();
-    virtual void slot123();
-    virtual void slot124();
-    virtual void slot125();
-    virtual void slot126();
-    virtual void slot127();
-    virtual void slot128();
-    virtual void slot129();
-    virtual void slot130();
-    virtual void slot131();
-    virtual void slot132();
-    virtual void slot133();
-    virtual void slot134();
-    virtual void slot135();
-    virtual void slot136();
-    virtual void slot137();
-    virtual void slot138();
-    virtual void slot139();
-    virtual void slot140();
-    virtual void slot141();
-    virtual void slot142();
-    virtual void slot143();
-    virtual void slot144();
-    virtual void slot145();
-    virtual void slot146();
-    virtual void slot147();
-    virtual void slot148();
-    virtual void slot149();
-    virtual void slot150();
-    virtual void slot151();
-    virtual void slot152();
-    virtual void slot153();
-    virtual void slot154();
-    virtual void slot155();
-    virtual void slot156();
-    virtual void slot157();
-    virtual void slot158();
-    virtual void slot159();
-    virtual void slot160();
-    virtual void slot161();
-    virtual void slot162();
-    virtual void slot163();
-    virtual void slot164();
-    virtual void slot165();
-    virtual void slot166();
-    virtual void slot167();
-    virtual void slot168();
-    virtual void slot169();
-    virtual void slot170();
-    virtual void slot171();
-    virtual void slot172();
-    virtual void slot173();
-    virtual void slot174();
-    virtual void slot175();
-    virtual void slot176();
-    virtual void slot177();
-    virtual void slot178();
-    virtual void slot179();
-    virtual void slot180();
-    virtual void slot181();
-    virtual void slot182();
-    virtual void slot183();
-    virtual void slot184();
-    virtual void slot185();
-    virtual void slot186();
-    virtual void slot187();
-    virtual void slot188();
-    virtual void slot189();
-    virtual void slot190();
-    virtual void slot191();
-    virtual void slot192();
-    virtual void slot193();
-    virtual void slot194();
-    virtual void slot195();
-    virtual void slot196();
-    virtual void slot197();
-    virtual void slot198();
-    virtual void slot199();
-    virtual void slot200();
-    virtual void slot201();
-    virtual void slot202();
-    virtual void slot203();
-    virtual void slot204();
-    virtual void slot205();
-    virtual void slot206();
-    virtual void slot207();
-    virtual void slot208();
-    virtual void slot209();
-    virtual void slot210();
-    virtual void slot211();
-    virtual void slot212();
-    virtual void slot213();
-    virtual void slot214();
-    virtual void slot215();
-    virtual void slot216();
-    virtual void slot217();
-    virtual void slot218();
-    virtual void slot219();
-    virtual void slot220();
-    virtual void slot221();
-    virtual void slot222();
-    virtual void slot223();
-    virtual void slot224();
-    virtual void slot225();
-    virtual void slot226();
-    virtual void slot227();
-    virtual void slot228();
-    virtual void slot229();
-    virtual void slot230();
-    virtual void slot231();
-    virtual void slot232();
-    virtual void slot233();
-    virtual void slot234();
-    virtual void slot235();
-    virtual void slot236();
-    virtual void slot237();
-    virtual void slot238();
-    virtual void slot239();
-    virtual void slot240();
-    virtual void slot241();
-    virtual void slot242();
-    virtual void slot243();
-    virtual void slot244();
-    virtual void slot245();
-    virtual void slot246();
-    virtual void slot247();
-    virtual void slot248();
-    virtual int GetSavedState();
-    virtual char* GetSavedToken();
-    virtual void RestoreSavedState(int, char*);
-};
-class MobileObject : public TESObjectREFR
-{
-  public:
-    BaseProcess* FUN_008d8520();
-};
-struct SaveManagerAccess
-{
-    void FUN_008579e0(int*, int);
-};
-struct ReferenceSaveContext
-{
-    unsigned int unk00, unk04, unk08, unk0C, unk10;
-    int mode;
-    void SaveReferenceState(TESObjectREFR*, int, int);
-};
+
+
 // Saves the reference's data, temporarily sets mode, and restores the high process saved state and token for first-person references.
 // @fnv 0x0085f150
-void ReferenceSaveContext::SaveReferenceState(TESObjectREFR* reference, int firstPerson, int newMode)
+void TESSaveLoadGame::LoadAnimationForReference(TESObjectREFR* reference, unsigned int firstPerson, void* newMode)
 {
     SavedReferenceData* dataB;
     if (reference == DAT_011dea3c)
@@ -3610,7 +2948,7 @@ void ReferenceSaveContext::SaveReferenceState(TESObjectREFR* reference, int firs
     }
     else
     {
-        dataB = reinterpret_cast<ReferenceDataAccess*>(reference)->GetData();
+        dataB = reinterpret_cast<SavedReferenceData*>(reference->GetAnimData());
     }
     MobileObject* _mobile = dynamic_cast<MobileObject*>(reference);
     HighProcess* process = 0;
@@ -3621,17 +2959,17 @@ void ReferenceSaveContext::SaveReferenceState(TESObjectREFR* reference, int firs
         process = dynamic_cast<HighProcess*>(_mobile->FUN_008d8520());
         if (process)
         {
-            savedState4 = process->GetSavedState();
-            token = process->GetSavedToken();
+            savedState4 = static_cast<BaseProcess*>(process)->GetAnimAction();
+            token = reinterpret_cast<char*>(static_cast<BaseProcess*>(process)->GetActorProcessTime());
         }
     }
-    int oldMode = mode;
-    mode = newMode;
+    int oldMode = (int)m_pBuffer;
+    m_pBuffer = (char*)newMode;
     int index;
-    static_cast<SaveManagerAccess*>(DAT_011de45c)->FUN_008579e0(&index, 2);
+    static_cast<TESSaveLoadGame*>(DAT_011de45c)->FUN_008579e0(&index, 2);
     if (dataB)
         dataB->LoadFromSave(reference);
-    mode = oldMode;
+    m_pBuffer = (char*)oldMode;
     if (process)
     {
         if (token)
@@ -3639,7 +2977,7 @@ void ReferenceSaveContext::SaveReferenceState(TESObjectREFR* reference, int firs
             char* start = token - 8;
             token = dataB->FUN_00491040(start);
         }
-        process->RestoreSavedState(savedState4, token);
+        static_cast<BaseProcess*>(process)->SetAnimAction(static_cast<ProcessAnimationAction>(savedState4), reinterpret_cast<BSAnimGroupSequence*>(token));
     }
 }
 
@@ -3658,40 +2996,31 @@ struct FnvRefMethod
 {
     int FUN_0043fcd0();
 };
-struct FnvState
-{
-    FnvQueue* unk00;
-    FnvQueue* unk04;
-    int unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
-    int unk28, unk2c, unk30, unk34, unk38, unk3c, unk40, unk44;
-    int unk48, unk4c, unk50, unk54, unk58, unk5c, unk60;
-    FnvMap* unk64;
-};
 // @fnv 0x0085f5d0
-void FUN_0085f5d0_class::ProcessMapEntries()
+void TESSaveLoadGame::LoadHavokData()
 {
-    void* cursor = reinterpret_cast<FnvState*>(this)->unk64->FUN_004b9ba0();
+    void* cursor = reinterpret_cast<FnvMap*>(m_pHavokDataBufferMap)->FUN_004b9ba0();
     while (cursor)
     {
         unsigned int key;
         void* data;
-        reinterpret_cast<FnvState*>(this)->unk64->FUN_006b7f20(cursor, key, data);
+        reinterpret_cast<FnvMap*>(m_pHavokDataBufferMap)->FUN_006b7f20(cursor, key, data);
         TESObjectREFR* refObject = dynamic_cast<TESObjectREFR*>(FUN_004839c0(key));
         if (refObject)
         {
             if (!reinterpret_cast<FnvRefMethod*>(refObject)->FUN_0043fcd0())
             {
-                if (reinterpret_cast<FnvState*>(this)->unk04)
-                    reinterpret_cast<FnvState*>(this)->unk04->GetOrCreateNode(refObject, 0);
+                if (reinterpret_cast<FnvQueue*>(m_pAlternateChangesMap))
+                    reinterpret_cast<FnvQueue*>(m_pAlternateChangesMap)->GetOrCreateNode(refObject, 0);
                 else
-                    reinterpret_cast<FnvState*>(this)->unk00->GetOrCreateNode(refObject, 0);
-                reinterpret_cast<FnvState*>(this)->unk64->RemoveKey(key);
+                    reinterpret_cast<FnvQueue*>(m_pChangesMap)->GetOrCreateNode(refObject, 0);
+                reinterpret_cast<FnvMap*>(m_pHavokDataBufferMap)->RemoveKey(key);
                 continue;
             }
-            reinterpret_cast<FUN_0085f6c0_Class*>(this)->FUN_0085f6c0((int)refObject, (int)data);
+            LoadHavokDataForReference(refObject, data);
         }
         FormHeap_Free(data);
-        reinterpret_cast<FnvState*>(this)->unk64->RemoveKey(key);
+        reinterpret_cast<FnvMap*>(m_pHavokDataBufferMap)->RemoveKey(key);
     }
 }
 
@@ -3718,12 +3047,6 @@ class B5F750Ref
     B5F750Node* Get3DSimple();
 };
 
-class ArrowProjectile : public TESForm
-{
-  public:
-    B5F750Ref* GetAttachedRef();
-    void Detach();
-};
 
 class B5F750List
 {
@@ -3736,44 +3059,11 @@ class B5F750List
     B5F750List* m_pkNext;
 };
 
-class B5F750Owner
-{
-  public:
-    void DetachProjectiles();
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    B5F750List m_kProjectiles;
-};
 
 // @fnv 0x0085f750
-void B5F750Owner::DetachProjectiles()
+void TESSaveLoadGame::FinalizeQueuedForms()
 {
-    B5F750List* pkNode = &m_kProjectiles;
+    B5F750List* pkNode = reinterpret_cast<B5F750List*>(&m_kQueuedFinalizeForms);
     while (pkNode)
     {
         TESForm* pkForm = *pkNode->GetItem();
@@ -3797,7 +3087,7 @@ void B5F750Owner::DetachProjectiles()
         }
         pkNode = pkNode->GetNext();
     }
-    m_kProjectiles.RemoveAll();
+    m_kQueuedFinalizeForms.RemoveAll();
 }
 
 // FUN_0085fe50 - 0x0085fe50, 39 bytes.  The unit 0x0085xxxx is an
@@ -3975,14 +3265,7 @@ struct SaveMemberB
     SaveMemberB(int);
     ~SaveMemberB();
 };
-struct ChangesMap
-{
-    int field00;
-    int field04;
-    int field08;
-    int field0c;
-    ChangesMap();
-};
+
 struct SaveMap
 {
     int field00;
@@ -4764,33 +4047,18 @@ bool FUN_00856300_cls::FUN_00856300(ProbeTarget* target, int value)
     return result;
 }
 
-class ThreeByThreeMatrix
-{
-  public:
-    float xx, xy, xz, yx, yy, yz, zx, zy, zz;
-};
-class TESWorldSpace : public TESForm
-{
-};
+
 class Controller
 {
   public:
     bool FUN_005c0860();
     void FUN_005620e0(NiPoint3*);
 };
-class NiUpdateData
-{
-  public:
-    NiUpdateData(float, bool, bool);
-    float time;
-    bool controllers, multi;
-    int flags;
-};
 class Node
 {
   public:
     void FUN_00440460(const NiPoint3&);
-    void FUN_0043fa80(const ThreeByThreeMatrix&);
+    void FUN_0043fa80(const NiMatrix3&);
     void FUN_00a59c60(NiUpdateData&);
 };
 class Extra
@@ -4799,220 +4067,52 @@ class Extra
     void* GetExtraData(unsigned char);
     TESForm* FUN_0041b320();
 };
-class RefAccess : public TESObjectREFR
+// The shared return type of FUN_0056fa00 is incomplete in this unit.
+// The shared declaration returns an incomplete Matrix type in this unit.
+class ReferenceRotationAccess : public TESObjectREFR
 {
-  public:
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void slot25();
-    virtual void slot26();
-    virtual void slot27();
-    virtual void slot28();
-    virtual void slot29();
-    virtual void slot30();
-    virtual void slot31();
-    virtual void slot32();
-    virtual void slot33();
-    virtual void slot34();
-    virtual void slot35();
-    virtual void slot36();
-    virtual void slot37();
-    virtual void slot38();
-    virtual void slot39();
-    virtual void slot40();
-    virtual void slot41();
-    virtual void slot42();
-    virtual void slot43();
-    virtual void slot44();
-    virtual void slot45();
-    virtual void slot46();
-    virtual void slot47();
-    virtual void slot48();
-    virtual void slot49();
-    virtual void slot50();
-    virtual void slot51();
-    virtual void slot52();
-    virtual void slot53();
-    virtual void slot54();
-    virtual void slot55();
-    virtual void slot56();
-    virtual void slot57();
-    virtual void slot58();
-    virtual void slot59();
-    virtual void slot60();
-    virtual void slot61();
-    virtual void slot62();
-    virtual void slot63();
-    virtual bool IsMobile();
-    virtual void slot65();
-    virtual void slot66();
-    virtual void slot67();
-    virtual void slot68();
-    virtual void slot69();
-    virtual void slot70();
-    virtual void slot71();
-    virtual void slot72();
-    virtual void slot73();
-    virtual void slot74();
-    virtual void slot75();
-    virtual void slot76();
-    virtual void slot77();
-    virtual void slot78();
-    virtual void slot79();
-    virtual void slot80();
-    virtual void slot81();
-    virtual void slot82();
-    virtual void slot83();
-    virtual void slot84();
-    virtual void slot85();
-    virtual void slot86();
-    virtual void slot87();
-    virtual void slot88();
-    virtual void slot89();
-    virtual void slot90();
-    virtual NiPoint3 GetRotation();
-    virtual NiPoint3 GetPosition();
-    virtual void slot93();
-    virtual void slot94();
-    virtual void slot95();
-    virtual void slot96();
-    virtual void slot97();
-    virtual void slot98();
-    virtual void slot99();
-    virtual void slot100();
-    virtual void slot101();
-    virtual void slot102();
-    virtual void slot103();
-    virtual void slot104();
-    virtual void slot105();
-    virtual void slot106();
-    virtual void slot107();
-    virtual void slot108();
-    virtual void slot109();
-    virtual void slot110();
-    virtual void slot111();
-    virtual void slot112();
-    virtual void slot113();
-    virtual void slot114();
-    virtual void slot115();
-    virtual void slot116();
-    virtual void slot117();
-    virtual void slot118();
-    virtual void slot119();
-    virtual void slot120();
-    virtual void slot121();
-    virtual void slot122();
-    virtual void slot123();
-    virtual void slot124();
-    virtual NiPoint3* GetWorldPosition();
-    virtual void slot126();
-    virtual void slot127();
-    virtual void slot128();
-    virtual void slot129();
-    virtual void slot130();
-    virtual void slot131();
-    virtual void slot132();
-    virtual void slot133();
-    virtual void slot134();
-    virtual void slot135();
-    virtual void slot136();
-    virtual void slot137();
-    virtual void slot138();
-    virtual void slot139();
-    virtual void slot140();
-    virtual void slot141();
-    virtual void slot142();
-    virtual void slot143();
-    virtual void slot144();
-    virtual void slot145();
-    virtual void slot146();
-    virtual void slot147();
-    virtual void slot148();
-    virtual void slot149();
-    virtual void slot150();
-    virtual void slot151();
-    virtual void slot152();
-    virtual void slot153();
-    virtual void slot154();
-    virtual void slot155();
-    virtual void slot156();
-    virtual void slot157();
-    virtual void slot158();
-    virtual void slot159();
-    virtual void slot160();
-    virtual void slot161();
-    virtual void slot162();
-    virtual void slot163();
-    virtual bool HasSavedLocation();
-    virtual TESWorldSpace* GetSavedWorld();
-    virtual TESObjectCELL* GetSavedCell();
-    Extra* FUN_005d43c0();
-    void SetLocationOnReference(const NiPoint3&);
-    void FUN_005757d0(float);
-    void FUN_00575700(NiPoint3);
-    Node* Get3DSimple();
-    ThreeByThreeMatrix FUN_0056fa00();
+public:
+    NiMatrix3 FUN_0056fa00();
 };
+
 class MobileAccess : public MobileObject
 {
   public:
     Controller* FUN_009306d0();
 };
-void FUN_00573800(RefAccess*, TESObjectCELL*, TESWorldSpace*);
+void FUN_00573800(TESObjectREFR*, TESObjectCELL*, TESWorldSpace*);
 void FUN_00c6bd00(Node*, bool);
-class RestoreBuffer
+// Position helpers not yet declared by the shared class. No additional layout.
+class SaveGamePositionAccess : public TESSaveLoadGame
 {
   public:
     unsigned char GetVersion();
     void FUN_008a8150(unsigned char);
     void FUN_004534f0(unsigned int);
-    bool FUN_00857d10(RefAccess*, bool);
 };
 // Restores the reference's saved location or extra-data position, updates its 3D and controller, and returns whether anything changed.
 // @fnv 0x00857d10
-bool RestoreBuffer::FUN_00857d10(RefAccess* ref, bool process)
+bool TESSaveLoadGame::ResetReferencePosition(TESObjectREFR* ref, bool process)
 {
-    unsigned char version3 = GetVersion();
-    FUN_008a8150(0);
+    unsigned char version3 = static_cast<SaveGamePositionAccess*>(this)->GetVersion();
+    static_cast<SaveGamePositionAccess*>(this)->FUN_008a8150(0);
     bool changed = false;
-    RefAccess* mobileX = 0;
-    if (ref->IsMobile())
+    TESObjectREFR* mobileX = 0;
+    if (reinterpret_cast<bool (__thiscall*)(TESObjectREFR*)>((*reinterpret_cast<void***>(ref))[0x40])(ref))
         mobileX = ref;
-    if (mobileX && mobileX->HasSavedLocation())
+    if (mobileX && reinterpret_cast<bool (__thiscall*)(TESObjectREFR*)>((*reinterpret_cast<void***>(mobileX))[0xa4])(mobileX))
     {
-        TESObjectCELL* cell6 = mobileX->GetSavedCell();
-        TESWorldSpace* world = mobileX->GetSavedWorld();
+        TESObjectCELL* cell6 = reinterpret_cast<TESObjectCELL* (__thiscall*)(TESObjectREFR*)>((*reinterpret_cast<void***>(mobileX))[0xa6])(mobileX);
+        TESWorldSpace* world = reinterpret_cast<TESWorldSpace* (__thiscall*)(TESObjectREFR*)>((*reinterpret_cast<void***>(mobileX))[0xa5])(mobileX);
         if (cell6 || world)
         {
-            ref->SetLocationOnReference(mobileX->GetPosition());
-            ref->FUN_005757d0(mobileX->GetRotation().z);
+            ref->SetLocationOnReference(reinterpret_cast<const NiPoint3&>(mobileX->GetEditorPosition()));
+            ref->SetReferenceAngle(mobileX->vfn_16c().z);
             if (process)
-                FUN_004534f0(1);
+                static_cast<SaveGamePositionAccess*>(this)->FUN_004534f0(1);
             FUN_00573800(ref, cell6, world);
             if (process)
-                FUN_004534f0(0);
+                static_cast<SaveGamePositionAccess*>(this)->FUN_004534f0(0);
             changed = true;
         }
     }
@@ -5020,13 +4120,13 @@ bool RestoreBuffer::FUN_00857d10(RefAccess* ref, bool process)
     {
         if (ref->FUN_005d43c0()->GetExtraData(15))
         {
-            NiPoint3 position3 = ref->GetPosition();
-            NiPoint3 rotation = ref->GetRotation();
-            ref->SetLocationOnReference(position3);
-            ref->FUN_00575700(rotation);
+            NiPoint3 position3 = ref->GetEditorPosition();
+            const NiPoint3 rotation = ref->vfn_16c();
+            ref->SetLocationOnReference(reinterpret_cast<const NiPoint3&>(position3));
+            static_cast<Actor*>(ref)->FUN_00575700(rotation);
             changed = true;
         }
-        TESForm* form7 = ref->FUN_005d43c0()->FUN_0041b320();
+        TESForm* form7 = reinterpret_cast<Extra*>(ref->FUN_005d43c0())->FUN_0041b320();
         if (form7)
         {
             TESObjectCELL* savedCell7 = dynamic_cast<TESObjectCELL*>(form7);
@@ -5040,10 +4140,10 @@ bool RestoreBuffer::FUN_00857d10(RefAccess* ref, bool process)
     }
     if (changed)
     {
-        Node* node6 = ref->Get3DSimple();
+        Node* node6 = reinterpret_cast<Node*>(ref->Get3DSimple());
         if (node6)
         {
-            NiPoint3 location9 = *ref->GetWorldPosition();
+            NiPoint3 location9 = *static_cast<const TESObjectREFR*>(ref)->GetPos();
             MobileObject* objectA = dynamic_cast<MobileObject*>((TESObjectREFR*)ref);
             if (objectA)
             {
@@ -5052,13 +4152,13 @@ bool RestoreBuffer::FUN_00857d10(RefAccess* ref, bool process)
                     controller->FUN_005620e0(&location9);
             }
             node6->FUN_00440460(location9);
-            node6->FUN_0043fa80(ref->FUN_0056fa00());
+            node6->FUN_0043fa80(static_cast<ReferenceRotationAccess*>(ref)->FUN_0056fa00());
             FUN_00c6bd00(node6, true);
             NiUpdateData update6(0.0f, false, false);
             node6->FUN_00a59c60(update6);
         }
     }
-    FUN_008a8150(version3);
+    static_cast<SaveGamePositionAccess*>(this)->FUN_008a8150(version3);
     return changed;
 }
 
@@ -5080,7 +4180,7 @@ struct List859
 };
 struct Map859
 {
-    bool Lookup(unsigned, List859*&);
+    bool FUN_00853130(unsigned, List859*&);
     bool RemoveKey(unsigned);
 };
 struct Cell859
@@ -5091,18 +4191,16 @@ struct Cell859
     int FUN_00544c30();
     int FUN_00544c60();
 };
-struct Manager859
+// Cell reconstruction overloads not yet declared by the shared class. No additional layout.
+struct SaveGameCellReconstruction : public TESSaveLoadGame
 {
-    unsigned field00, field04;
-    Map859* interiors;
-    Map859* worlds;
     bool FUN_0047c850();
     bool FUN_00858730(Cell859*);
     void ProcessSourceItem(unsigned);
     bool FUN_00859690(Cell859* cell);
 };
 // @fnv 0x00859690
-bool Manager859::FUN_00859690(Cell859* cell)
+bool SaveGameCellReconstruction::FUN_00859690(Cell859* cell)
 {
     bool result5 = false;
     if (!FUN_0047c850())
@@ -5111,7 +4209,7 @@ bool Manager859::FUN_00859690(Cell859* cell)
     if (cell->FUN_00425fd0())
     {
         List859* list8;
-        bool found8 = interiors->Lookup(cell->FUN_0084e3a0(), list8);
+        bool found8 = reinterpret_cast<Map859*>(m_pInteriorCellNewReferencesMap)->FUN_00853130(cell->FUN_0084e3a0(), list8);
         if (!found8)
             return result5;
         List859* node2 = list8;
@@ -5125,14 +4223,14 @@ bool Manager859::FUN_00859690(Cell859* cell)
             }
             node2 = node2->FUN_00726070();
         }
-        interiors->RemoveKey(cell->FUN_0084e3a0());
+        reinterpret_cast<Map859*>(m_pInteriorCellNewReferencesMap)->RemoveKey(cell->FUN_0084e3a0());
         list8->FUN_00470470();
         delete list8;
     }
     else
     {
         List859* listExterior;
-        bool foundExterior = worlds->Lookup(cell->FUN_0054ddd0()->FUN_0084e3a0(), listExterior);
+        bool foundExterior = reinterpret_cast<Map859*>(m_pExteriorCellNewReferencesMap1)->FUN_00853130(cell->FUN_0054ddd0()->FUN_0084e3a0(), listExterior);
         if (!foundExterior)
             return result5;
         List859* nodeExterior8 = listExterior;
@@ -5163,7 +4261,7 @@ bool Manager859::FUN_00859690(Cell859* cell)
         }
         if (listExterior->FUN_008256d0())
         {
-            worlds->RemoveKey(cell->FUN_0054ddd0()->FUN_0084e3a0());
+            reinterpret_cast<Map859*>(m_pExteriorCellNewReferencesMap1)->RemoveKey(cell->FUN_0054ddd0()->FUN_0084e3a0());
             delete listExterior;
         }
     }
@@ -5438,8 +4536,6 @@ struct FileFindData
     char cAlternateFileName[14];
 };
 
-extern "C" __declspec(dllimport) void* __stdcall FindFirstFileA(const char* fileName, FileFindData* findData);
-extern "C" __declspec(dllimport) int __stdcall FindClose(void* findFile);
 
 struct TimedFile
 {
@@ -5473,7 +4569,7 @@ int CompareFileWriteTimes(TimedFile* apFirstFile, TimedFile* apSecondFile)
     }
     else
     {
-        findHandle = FindFirstFileA(apFirstFile->GetPath(), &kFindData);
+        findHandle = FindFirstFileA(apFirstFile->GetPath(), reinterpret_cast<WIN32_FIND_DATAA*>(&kFindData));
         if (findHandle != (void*)-1)
             firstTime9 = kFindData.ftLastWriteTime;
         FindClose(findHandle);
@@ -5487,7 +4583,7 @@ int CompareFileWriteTimes(TimedFile* apFirstFile, TimedFile* apSecondFile)
     }
     else
     {
-        findHandle = FindFirstFileA(apSecondFile->GetPath(), &kFindData);
+        findHandle = FindFirstFileA(apSecondFile->GetPath(), reinterpret_cast<WIN32_FIND_DATAA*>(&kFindData));
         if (findHandle != (void*)-1)
             secondTime = kFindData.ftLastWriteTime;
         FindClose(findHandle);
@@ -5549,14 +4645,18 @@ struct FUN_00851680_class
     void AddFileToList(const char* path, int flag, int unused);
 };
 
+// The game runtime binding is separate from the Windows SDK CRT declaration.
+namespace GameCRT
+{
 int __cdecl strcpy_s(char* dst, unsigned int size, const char* src);
+}
 int __cdecl _stricmp(const char* a, const char* b);
 
 // @fnv 0x00851680
 void FUN_00851680_class::AddFileToList(const char* path, int flag, int unused)
 {
     char buf[260];
-    strcpy_s(buf, 260, path);
+    GameCRT::strcpy_s(buf, 260, path);
     unsigned int n = (unsigned int)BSStringLength(buf);
     if (n > 4)
     {
@@ -5604,41 +4704,31 @@ void* FUN_00858aa0_shell::FUN_00858aa0(unsigned short* a, unsigned int b, unsign
     return this;
 }
 
-struct StQ
-{
-    FnvQueue* pQ0;
-    FnvQueue* pQ4;
-    int unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40, unk44,
-        unk48, unk4c, unk50, unk54, unk58;
-    FnvMap* pMap;
-    void FUN_0085f3d0(TESObjectREFR* pRef_zaxvzc, void* pData_zbax);
-    void FUN_0085f2e0();
-};
 // @fnv 0x0085f2e0
-void StQ::FUN_0085f2e0()
+void TESSaveLoadGame::LoadAttachedAnimations()
 {
-    void* pIterator = pMap->FUN_004b9ba0();
+    void* pIterator = reinterpret_cast<FnvMap*>(m_pAttachedAnimationBufferMap)->FUN_004b9ba0();
     while (pIterator)
     {
         unsigned int uiID;
         void* pData_zbax;
-        pMap->FUN_006b7f20(pIterator, uiID, pData_zbax);
+        reinterpret_cast<FnvMap*>(m_pAttachedAnimationBufferMap)->FUN_006b7f20(pIterator, uiID, pData_zbax);
         TESObjectREFR* pRef_zaxvzc = dynamic_cast<TESObjectREFR*>(FUN_004839c0(uiID));
         if (pRef_zaxvzc)
         {
             if (!((FnvRefMethod*)pRef_zaxvzc)->FUN_0043fcd0())
             {
-                if (pQ4)
-                    pQ4->GetOrCreateNode(pRef_zaxvzc, 0);
+                if (reinterpret_cast<FnvQueue*>(m_pAlternateChangesMap))
+                    reinterpret_cast<FnvQueue*>(m_pAlternateChangesMap)->GetOrCreateNode(pRef_zaxvzc, 0);
                 else
-                    pQ0->GetOrCreateNode(pRef_zaxvzc, 0);
-                pMap->RemoveKey(uiID);
+                    reinterpret_cast<FnvQueue*>(m_pChangesMap)->GetOrCreateNode(pRef_zaxvzc, 0);
+                reinterpret_cast<FnvMap*>(m_pAttachedAnimationBufferMap)->RemoveKey(uiID);
                 continue;
             }
-            FUN_0085f3d0(pRef_zaxvzc, pData_zbax);
+            LoadAttachedAnimationForReference(pRef_zaxvzc, pData_zbax);
         }
         FormHeap_Free(pData_zbax);
-        pMap->RemoveKey(uiID);
+        reinterpret_cast<FnvMap*>(m_pAttachedAnimationBufferMap)->RemoveKey(uiID);
     }
 }
 
@@ -5685,9 +4775,6 @@ bool Map64::FUN_0084b8b0(Key64 key, int* val)
     return false;
 }
 
-class TESBoundObject : public TESForm
-{
-};
 
 namespace s85ac30 {
 
@@ -5890,11 +4977,6 @@ struct FullPositionRecord
     FullPositionRecord();
 };
 
-struct SaveGame
-{
-    unsigned char FUN_008df040();
-    void FUN_008579e0(void* pvBuffer, unsigned int uiSize);
-};
 
 struct DataHandler
 {
@@ -5902,14 +4984,15 @@ struct DataHandler
                               TESWorldSpace* pkWorld, TESObjectREFR* pkRef, int iArg0, int iArg1);
 };
 
-struct ProcessLists
+// DAT_011c3b3c is a pointer global, not the ProcessLists singleton object at 0x011e0e80; only its 0x00445570 call is known
+struct RefQueueView_00445570
 {
     void FUN_00445570(TESObjectREFR* pkRef);
 };
 
-extern SaveGame* DAT_011de45c;
+extern TESSaveLoadGame* DAT_011de45c;
 extern DataHandler* DAT_011c3f2c;
-extern ProcessLists* DAT_011c3b3c;
+extern RefQueueView_00445570* DAT_011c3b3c;
 extern TESObjectREFR* DAT_011dea3c;
 
 int FUN_00406d90(float fValue);
@@ -6008,7 +5091,7 @@ void RefLoader::LoadChange(TESForm* pkForm, unsigned int uiChangeFlags)
             if (pkCell2)
             {
                 if (pkCell2 != ((RefView*)pkRef)->FUN_008d6f30())
-                    FUN_00573800(pkRef, pkCell2, 0);
+                    s85ac30::FUN_00573800(pkRef, pkCell2, 0);
             }
             else if (pkWorld2)
             {
@@ -6018,7 +5101,7 @@ void RefLoader::LoadChange(TESForm* pkForm, unsigned int uiChangeFlags)
                 if ((((RefView*)pkRef)->FUN_008d6f30() &&
                      ((CellView*)((RefView*)pkRef)->FUN_008d6f30())->FUN_00425fd0()) ||
                     ((RefView*)pkRef)->FUN_008d6f30() != pkCell2)
-                    FUN_00573800(pkRef, 0, pkWorld2);
+                    s85ac30::FUN_00573800(pkRef, 0, pkWorld2);
                 else if (!pkCell2 && !((RefView*)pkRef)->FUN_005653d0())
                     FUN_005b5e40("SAVELOAD: Trying to load non-persistent ref into non-existent cell.");
             }
@@ -6206,14 +5289,6 @@ struct FUN_0085fed0_Object
     virtual char* GetName();
 };
 
-struct StartMenu
-{
-    char const* GetMenuTitle();
-};
-
-struct GlobalObject_0040c150 : public StartMenu
-{
-};
 
 struct FUN_0085fed0_Class
 {
@@ -6233,8 +5308,8 @@ extern char const _g_quicksaveName[];
 extern char const DAT_0107fae0[];
 extern char const str_010806a8[];
 extern char const str_01081aa8[];
-extern GlobalObject_0040c150 g_011d327c;
-extern GlobalObject_0040c150 g_011d3ed4;
+extern const StartMenu g_011d327c;
+extern const StartMenu g_011d3ed4;
 
 // After ParseSaveName and ReadSaveMetadata, fills buffer with a menu title plus suffix for two special save names, else the file name with its last 4 chars cut.
 // @fnv 0x0085fed0
@@ -6321,290 +5396,46 @@ void FUN_0084fd30()
 }  // namespace fnv_0084fd30
 
 // Members the file's BaseProcess/HighProcess do not declare yet: vtable slot 163 (int) and FUN_00926690.
-class CharControllerProcess : public BaseProcess
+class CharControllerProcess : public HighProcess
 {
-  public:
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void slot25();
-    virtual void slot26();
-    virtual void slot27();
-    virtual void slot28();
-    virtual void slot29();
-    virtual void slot30();
-    virtual void slot31();
-    virtual void slot32();
-    virtual void slot33();
-    virtual void slot34();
-    virtual void slot35();
-    virtual void slot36();
-    virtual void slot37();
-    virtual void slot38();
-    virtual void slot39();
-    virtual void slot40();
-    virtual void slot41();
-    virtual void slot42();
-    virtual void slot43();
-    virtual void slot44();
-    virtual void slot45();
-    virtual void slot46();
-    virtual void slot47();
-    virtual void slot48();
-    virtual void slot49();
-    virtual void slot50();
-    virtual void slot51();
-    virtual void slot52();
-    virtual void slot53();
-    virtual void slot54();
-    virtual void slot55();
-    virtual void slot56();
-    virtual void slot57();
-    virtual void slot58();
-    virtual void slot59();
-    virtual void slot60();
-    virtual void slot61();
-    virtual void slot62();
-    virtual void slot63();
-    virtual void slot64();
-    virtual void slot65();
-    virtual void slot66();
-    virtual void slot67();
-    virtual void slot68();
-    virtual void slot69();
-    virtual void slot70();
-    virtual void slot71();
-    virtual void slot72();
-    virtual void slot73();
-    virtual void slot74();
-    virtual void slot75();
-    virtual void slot76();
-    virtual void slot77();
-    virtual void slot78();
-    virtual void slot79();
-    virtual void slot80();
-    virtual void slot81();
-    virtual void slot82();
-    virtual void slot83();
-    virtual void slot84();
-    virtual void slot85();
-    virtual void slot86();
-    virtual void slot87();
-    virtual void slot88();
-    virtual void slot89();
-    virtual void slot90();
-    virtual void slot91();
-    virtual void slot92();
-    virtual void slot93();
-    virtual void slot94();
-    virtual void slot95();
-    virtual void slot96();
-    virtual void slot97();
-    virtual void slot98();
-    virtual void slot99();
-    virtual void slot100();
-    virtual void slot101();
-    virtual void slot102();
-    virtual void slot103();
-    virtual void slot104();
-    virtual void slot105();
-    virtual void slot106();
-    virtual void slot107();
-    virtual void slot108();
-    virtual void slot109();
-    virtual void slot110();
-    virtual void slot111();
-    virtual void slot112();
-    virtual void slot113();
-    virtual void slot114();
-    virtual void slot115();
-    virtual void slot116();
-    virtual void slot117();
-    virtual void slot118();
-    virtual void slot119();
-    virtual void slot120();
-    virtual void slot121();
-    virtual void slot122();
-    virtual void slot123();
-    virtual void slot124();
-    virtual void slot125();
-    virtual void slot126();
-    virtual void slot127();
-    virtual void slot128();
-    virtual void slot129();
-    virtual void slot130();
-    virtual void slot131();
-    virtual void slot132();
-    virtual void slot133();
-    virtual void slot134();
-    virtual void slot135();
-    virtual void slot136();
-    virtual void slot137();
-    virtual void slot138();
-    virtual void slot139();
-    virtual void slot140();
-    virtual void slot141();
-    virtual void slot142();
-    virtual void slot143();
-    virtual void slot144();
-    virtual void slot145();
-    virtual void slot146();
-    virtual void slot147();
-    virtual void slot148();
-    virtual void slot149();
-    virtual void slot150();
-    virtual void slot151();
-    virtual void slot152();
-    virtual void slot153();
-    virtual void slot154();
-    virtual void slot155();
-    virtual void slot156();
-    virtual void slot157();
-    virtual void slot158();
-    virtual void slot159();
-    virtual void slot160();
-    virtual void slot161();
-    virtual void slot162();
-    virtual int GetPhysicsCharacterController();
+public:
     void FUN_00926690(MobileObject*);
 };
 // Members the file's MobileObject does not declare yet: vtable slot 76 (name), FUN_00440d80, FUN_00440da0.
-class CharControllerMob : public MobileObject
-{
-  public:
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void slot25();
-    virtual void slot26();
-    virtual void slot27();
-    virtual void slot28();
-    virtual void slot29();
-    virtual void slot30();
-    virtual void slot31();
-    virtual void slot32();
-    virtual void slot33();
-    virtual void slot34();
-    virtual void slot35();
-    virtual void slot36();
-    virtual void slot37();
-    virtual void slot38();
-    virtual void slot39();
-    virtual void slot40();
-    virtual void slot41();
-    virtual void slot42();
-    virtual void slot43();
-    virtual void slot44();
-    virtual void slot45();
-    virtual void slot46();
-    virtual void slot47();
-    virtual void slot48();
-    virtual void slot49();
-    virtual void slot50();
-    virtual void slot51();
-    virtual void slot52();
-    virtual void slot53();
-    virtual void slot54();
-    virtual void slot55();
-    virtual void slot56();
-    virtual void slot57();
-    virtual void slot58();
-    virtual void slot59();
-    virtual void slot60();
-    virtual void slot61();
-    virtual void slot62();
-    virtual void slot63();
-    virtual void slot64();
-    virtual void slot65();
-    virtual void slot66();
-    virtual void slot67();
-    virtual void slot68();
-    virtual void slot69();
-    virtual void slot70();
-    virtual void slot71();
-    virtual void slot72();
-    virtual void slot73();
-    virtual void slot74();
-    virtual void slot75();
-    virtual const char* GetName();
-    bool FUN_00440d80();
-    bool FUN_00440da0();
-};
-// Iterates the m_60 FnvMap, resolves each key to a MobileObject, and loads its physics character controller via the HighProcess.
+
+// Iterates the character-controller buffer map and loads each MobileObject through its HighProcess.
 // @fnv 0x0085f450
-void FUN_0085f450_class::FUN_0085f450()
+void TESSaveLoadGame::LoadCharControllers()
 {
-    void* pos = ((FnvMap*)((FUN_0085f5a0_Class*)this)->m_60)->FUN_004b9ba0();
+    void* pos = reinterpret_cast<FnvMap*>(m_pCharControllerBufferMap)->FUN_004b9ba0();
     while (pos)
     {
         unsigned int data;
         void* object;
-        ((FnvMap*)((FUN_0085f5a0_Class*)this)->m_60)->FUN_006b7f20(pos, data, object);
+        reinterpret_cast<FnvMap*>(m_pCharControllerBufferMap)->FUN_006b7f20(pos, data, object);
         MobileObject* id = dynamic_cast<MobileObject*>(FUN_004839c0(data));
         if (id)
         {
             HighProcess* process = dynamic_cast<HighProcess*>(id->FUN_008d8520());
             if (process)
             {
-                int saved = ((FUN_0085f5a0_Class*)this)->m_14;
-                ((FUN_0085f5a0_Class*)this)->m_14 = (int)object;
+                int saved = (int)m_pBuffer;
+                m_pBuffer = (char*)object;
                 int mode;
-                ((SaveManagerAccess*)DAT_011de45c)->FUN_008579e0(&mode, 2);
-                if (((CharControllerProcess*)process)->GetPhysicsCharacterController())
+                ((TESSaveLoadGame*)DAT_011de45c)->FUN_008579e0(&mode, 2);
+                if (static_cast<BaseProcess*>(process)->GetPhysicsCharacterController())
                     ((CharControllerProcess*)process)->FUN_00926690(id);
-                else if (!((CharControllerMob*)id)->FUN_00440d80() || !((CharControllerMob*)id)->FUN_00440da0())
+                else if (!id->FUN_00440d80() || !id->FUN_00440da0())
                 {
                     FUN_005b5e40(
                         "SAVELOAD: (LoadCharControllers()) Mob %s %08X does not have a character controller to load.",
-                        ((CharControllerMob*)id)->GetName(), ((FUN_0084e3a0_Class*)id)->FUN_0084e3a0());
+                        static_cast<const TESForm*>(id)->GetName(), ((FUN_0084e3a0_Class*)id)->FUN_0084e3a0());
                 }
-                ((FUN_0085f5a0_Class*)this)->m_14 = saved;
+                m_pBuffer = (char*)saved;
             }
         }
         Deallocate(object);
-        ((FnvMap*)((FUN_0085f5a0_Class*)this)->m_60)->RemoveKey(data);
+        reinterpret_cast<FnvMap*>(m_pCharControllerBufferMap)->RemoveKey(data);
     }
 }
 
@@ -6738,17 +5569,7 @@ struct VObj
     virtual NiPoint3* GetPos();
     int FUN_00950bb0(int);
 };
-class Actor : public TESForm
-{
-  public:
-    int FUN_008d6f30();
-    int FUN_00575d70();
-    void FUN_00893340(int);
-    void FUN_00575830(NiPoint3*);
-    void FUN_00575700(NiPoint3);
-    void FUN_00484af0(int);
-    void FUN_00483710();
-};
+
 struct CellX
 {
     void FUN_0054cfd0(NiPoint3*, NiPoint3*);
@@ -6830,11 +5651,9 @@ struct ActorList2
     }
 };
 
-struct Cls
+// Initial-form reconstruction overloads not yet declared by the shared class. No additional layout.
+struct SaveGameInitForms : public TESSaveLoadGame
 {
-    Owner* owner;
-    char pad[0x1c];
-    EntryListNode* m_20;
     bool FUN_0047c850();
     void FUN_004534f0(int);
     void FUN_00861ee0(unsigned char);
@@ -6844,7 +5663,7 @@ struct Cls
 
 // Calls Enter on ctx and each listed form, repositions the owned actors, optionally resets scene nodes and camera, then calls Leave and frees the list.
 // @fnv 0x00858af0
-void Cls::FUN_00858af0(EntryListNode* list, Entry* ctx, bool reset)
+void SaveGameInitForms::FUN_00858af0(EntryListNode* list, Entry* ctx, bool reset)
 {
     if (!FUN_0047c850())
         return;
@@ -6854,7 +5673,7 @@ void Cls::FUN_00858af0(EntryListNode* list, Entry* ctx, bool reset)
     bool own = true;
     if (!list)
     {
-        list = m_20;
+        list = reinterpret_cast<EntryListNode*>(m_pInitFormArray);
         own = false;
     }
     if (ctx)
@@ -6887,7 +5706,7 @@ void Cls::FUN_00858af0(EntryListNode* list, Entry* ctx, bool reset)
         {
             Actor* a = *it->FUN_006815c0();
             a->FUN_00893340(0);
-            owner->GetOrCreateNode(a, 2);
+            reinterpret_cast<Owner*>(m_pChangesMap)->GetOrCreateNode(a, 2);
             if (!a->FUN_008d6f30() && !a->FUN_00575d70())
             {
                 unsigned int id = 0;
@@ -6912,7 +5731,8 @@ void Cls::FUN_00858af0(EntryListNode* list, Entry* ctx, bool reset)
     }
     if (reset)
     {
-        NiPoint3 cam;
+        // The saved camera position has no default-constructor call in the original.
+        float cameraPositionStorage[3];
         Node3d* node1 = DAT_011dea10->FUN_005f36f0() ? DAT_011dea10->FUN_005f36f0()->FUN_004543c0() : 0;
         if (node1)
             node1->FUN_00c66300();
@@ -6927,9 +5747,9 @@ void Cls::FUN_00858af0(EntryListNode* list, Entry* ctx, bool reset)
             node1->FUN_00c6b540(0);
         if (FUN_00451010())
             FUN_00451010()->FUN_00c6b540(0);
-        cam = *((VObj*)DAT_011dea3c)->GetPos();
+        reinterpret_cast<NiPoint3&>(cameraPositionStorage) = *((VObj*)DAT_011dea3c)->GetPos();
         FUN_00451590(0);
-        FUN_0057d0a0(cam, DAT_011a9478, 1.0f);
+        FUN_0057d0a0(reinterpret_cast<NiPoint3&>(cameraPositionStorage), DAT_011a9478, 1.0f);
         FUN_00451590(1);
     }
     if (ctx && ((Actor*)DAT_011dea3c)->FUN_008d6f30())
@@ -6951,11 +5771,11 @@ void Cls::FUN_00858af0(EntryListNode* list, Entry* ctx, bool reset)
             }
         }
     }
-    if (m_20)
+    if (m_pInitFormArray)
     {
-        m_20->ClearItems();
-        delete m_20;
-        m_20 = 0;
+        reinterpret_cast<EntryListNode*>(m_pInitFormArray)->ClearItems();
+        delete reinterpret_cast<EntryListNode*>(m_pInitFormArray);
+        m_pInitFormArray = 0;
     }
     if (reset)
     {

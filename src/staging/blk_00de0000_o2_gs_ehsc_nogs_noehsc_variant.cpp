@@ -1,5 +1,7 @@
+#include "../../include/hkAabbUint32.h"
 // staging/blk_00de0000_o2_gs_ehsc_nogs_noehsc_variant.cpp: hkVector4_S, ShapeRayCastOutput, hkVector4, hkTransform and more (8 functions)
 #include <windows.h>
+#include "../../include/hkJobType.h"
 
 // src/staging/blk_00de0000_o2_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-29 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/staging/blk_00de0000_o2.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -8,12 +10,38 @@
 // src/staging/blk_00de0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkMonitorStream.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkMonitorStream.h"
+#include "../../include/hkMonitorStream.h"
+#include "../../include/hkStackMemory.h"
+#include "../../include/Vec4.h"
+#include "../../include/hkAabb.h"
+#include "../../include/hkArray.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkMatrix3.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkThreadLocalData.h"
+#include "../../include/hkTransform.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkVector4_S.h"
+#include "../../include/hkpCollidable.h"
+#include "../../include/hkpFixedBufferRayHitCollector.h"
+#include "../../include/hkpShape.h"
+#include "../../include/hkRotation.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkMonitorStream.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkBaseObject.h"
+#include "../../include/hkReferencedObject.h"
+#include "../../include/hkpCdBody.h"
+#include "../../include/hkpRayHitCollector.h"
 void __cdecl FUN_00df64d0(void* p, int b);
 struct FUN_00cb0c00_class {
     void __thiscall FUN_00cb0c00();
 };
 void FUN_00dfb490(FUN_00cb0c00_class* self);
-struct hkReferencedObject { void removeReference(); };
 void FUN_00dfb9d0(hkReferencedObject** p);
 extern int DAT_010cc2fc;
 extern int DAT_010df34c;
@@ -430,21 +458,7 @@ void __cdecl FUN_00dffe60(FUN_00dffe60_vt* p);
 typedef void (__thiscall *Vfn0)(void*, int);
 void __cdecl FUN_00dfff00(void* p);
 extern int DAT_0102e388;
-struct AudioAllocator {
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00de10e0_cls {
     int m_vptr;
     unsigned short m_uSize;
@@ -706,13 +720,7 @@ struct FUN_00de4910_cls {
 };
 // CopyVec4ToBuffer: copies the 16-byte vector stored at this+0x80 into the
 // 4-int block pointed to by the stack parameter.
-struct Vec4
-{
-    int m_uiX;
-    int m_uiY;
-    int m_uiZ;
-    int m_w;
-};
+
 struct FUN_00de4920_cls
 {
     int m_i00;
@@ -790,15 +798,10 @@ struct FUN_00de4e10_cls {
 
     char* FUN_00de4e10();
 };
-struct FUN_00de5320_vec4 {
-    int m_uiX;
-    int m_uiY;
-    int m_uiZ;
-    int m_w;
-};
+
 class FUN_00de5320_cls {
 public:
-    FUN_00de5320_vec4 GetVec4At70();
+    Vec4 GetVec4At70();
 };
 struct FUN_00de5350_cls {
     int unk00;
@@ -2221,14 +2224,7 @@ void __cdecl FUN_00dffa50(FUN_00dffa50_cls* pObject, int value);
 struct DFFA90FinishFlag {
     int m_bFinishing;
 };
-class DFFA90ReferencedObject {
-public:
-    DFFA90ReferencedObject(DFFA90FinishFlag) {}
-    virtual ~DFFA90ReferencedObject();
 
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
 class DFFA90ListenerA {
 public:
     DFFA90ListenerA(DFFA90FinishFlag) {}
@@ -2261,7 +2257,7 @@ public:
     DFFA90ListenerE(DFFA90FinishFlag) {}
     virtual ~DFFA90ListenerE();
 };
-class FUN_00dffa90 : public DFFA90ReferencedObject,
+class FUN_00dffa90 : public hkReferencedObject,
                      public DFFA90ListenerA,
                      public DFFA90ListenerB,
                      public DFFA90ListenerC,
@@ -2345,60 +2341,17 @@ extern int g_target_00dfffd0;
 void* FUN_00dfffd0();
 extern void* DAT_010e80b4;
 void** __cdecl FUN_00dffff0();
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    signed char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
+
 extern "C" __m128 _mm_setzero_ps(void);
-class hkVector4_de1210
-{
-public:
-    __m128 m_vComponents;
-    __forceinline void operator=(const hkVector4_de1210& v) { m_vComponents = v.m_vComponents; }
-    __forceinline void setZero() { m_vComponents = _mm_setzero_ps(); }
-    __forceinline float& operator()(int i) { return m_vComponents.m128_f32[i]; }
-};
-class hkMatrix3_de1210
-{
-public:
-    hkVector4_de1210 m_kColumn0;
-    hkVector4_de1210 m_kColumn1;
-    hkVector4_de1210 m_kColumn2;
-    __forceinline void setIdentity()
-    {
-        hkVector4_de1210 zero;
-        zero.setZero();
-        const float one = 1.0f;
-        m_kColumn0 = zero;
-        m_kColumn1 = zero;
-        m_kColumn2 = zero;
-        m_kColumn0(0) = one;
-        m_kColumn1(1) = one;
-        m_kColumn2(2) = one;
-    }
-};
-class hkReferencedObject_de1210
-{
-public:
-    virtual void v00();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    hkReferencedObject_de1210() { m_sReferenceCount = 1; }
-};
-class Base_de1210 : public hkReferencedObject_de1210
+
+
+
+class Base_de1210 : public hkReferencedObject
 {
 public:
     int m_iUnk08;
-    hkMatrix3_de1210 m_kRotationMatrix;
-    hkVector4_de1210 m_kVec40;
+    hkMatrix3 m_kRotationMatrix;
+    hkVector4 m_kVec40;
     int m_iUnk50;
 
     Base_de1210()
@@ -2406,49 +2359,23 @@ public:
         m_iUnk08 = 0;
         m_iUnk50 = 3;
         m_kRotationMatrix.setIdentity();
-        m_kVec40.setZero();
+        m_kVec40.setZero4();
     }
     virtual void v00();
 };
 class FUN_00de1210 : public Base_de1210
 {
 public:
-    hkVector4_de1210 m_kVec60;
-    hkVector4_de1210 m_kVec70;
+    hkVector4 m_kVec60;
+    hkVector4 m_kVec70;
 
     FUN_00de1210();
     virtual void v00();
 };
-struct DE1FC0Vector4 {
-    __m128 m_vComponents;
 
-    void setZero4() { m_vComponents = _mm_setzero_ps(); }
-    float& operator()(int i) { return reinterpret_cast<float*>(&m_vComponents)[i]; }
-};
-struct DE1FC0Rotation {
-    DE1FC0Vector4 m_kColumn0;
-    DE1FC0Vector4 m_kColumn1;
-    DE1FC0Vector4 m_kColumn2;
 
-    void setIdentity()
-    {
-        m_kColumn0.setZero4();
-        m_kColumn1.setZero4();
-        m_kColumn2.setZero4();
-        m_kColumn0(0) = 1.0f;
-        m_kColumn1(1) = 1.0f;
-        m_kColumn2(2) = 1.0f;
-    }
-};
-class DE1FC0ReferencedObject {
-public:
-    DE1FC0ReferencedObject() { m_sReferenceCount = 1; }
-    virtual void vfunc00();
 
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-class DE1FC0Transform : public DE1FC0ReferencedObject {
+class DE1FC0Transform : public hkReferencedObject {
 public:
     DE1FC0Transform()
     {
@@ -2460,8 +2387,8 @@ public:
 
     int m_ulUserData;
     int unk0C;
-    DE1FC0Rotation m_rotation;
-    DE1FC0Vector4 m_vTranslation;
+    hkRotation m_rotation;
+    hkVector4 m_vTranslation;
     int m_type;
     int unk54;
     int unk58;
@@ -2472,15 +2399,10 @@ public:
     FUN_00de1fc0();
     virtual void vfunc01();
 
-    DE1FC0Vector4 m_extra;
+    hkVector4 m_extra;
 };
 // Return a copy of the stored 4-float value.
-struct DE5300Vector4 {
-    float x;
-    float y;
-    float z;
-    float w;
-};
+
 class DE5300Object {
 public:
     int unk00;
@@ -2507,49 +2429,20 @@ public:
     int unk54;
     int unk58;
     int unk5C;
-    DE5300Vector4 m_kValue;
+    hkVector4 m_kValue;
 
-    DE5300Vector4 GetValue() const;
+    hkVector4 GetValue() const;
 };
-struct DE5450Vector4 {
-    __m128 m_vComponents;
 
-    void setZero4() { m_vComponents = _mm_setzero_ps(); }
-    float& operator()(int i) { return m_vComponents.m128_f32[i]; }
-    void operator=(const DE5450Vector4& v) { m_vComponents = v.m_vComponents; }
-};
-struct DE5450Transform {
-    DE5450Vector4 m_kColumn0;
-    DE5450Vector4 m_kColumn1;
-    DE5450Vector4 m_kColumn2;
-    DE5450Vector4 m_vTranslation;
 
-    void setIdentity()
-    {
-        m_kColumn0.setZero4();
-        m_kColumn1.setZero4();
-        m_kColumn2.setZero4();
-        m_kColumn0(0) = 1.0f;
-        m_kColumn1(1) = 1.0f;
-        m_kColumn2(2) = 1.0f;
-        m_vTranslation.setZero4();
-    }
-};
-class DE5450ReferencedObject {
-public:
-    DE5450ReferencedObject() : m_sReferenceCount(1) {}
-    virtual void unk00();
 
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-class DE5450Shape : public DE5450ReferencedObject {
+class DE5450Shape : public hkReferencedObject {
 public:
     DE5450Shape() : m_ulUserData(0), m_type(4) { m_kMotionTransform.setIdentity(); }
 
     int m_ulUserData;
     int unk0C;
-    DE5450Transform m_kMotionTransform;
+    hkTransform m_kMotionTransform;
     int m_type;
     int unk54;
     int unk58;
@@ -2560,16 +2453,16 @@ public:
     FUN_00de5450();
     virtual void unk00();
 
-    DE5450Vector4 m_vecA;
-    DE5450Vector4 m_vecB;
+    hkVector4 m_vecA;
+    hkVector4 m_vecB;
     int m_uiItemCount;
     float m_valueA;
     float m_valueB;
 };
-struct FourFloatVector { float x,y,z,w; };
-struct Matrix64 { FourFloatVector a,b,c,d; };
+
+struct Matrix64 { hkVector4 a,b,c,d; };
 struct Input {
- int count; float a,b; FourFloatVector vector;
+ int count; float a,b; hkVector4 vector;
  unsigned* values; void* source; Matrix64* matrices; float scale; unsigned flags;
 };
 struct Header {
@@ -2578,7 +2471,7 @@ struct Header {
  unsigned flags,unk0c,size;
  float scale,a,b;
 };
-void FUN_00df19e0(int,FourFloatVector*,Matrix64*,void*,void*,void*,void*,void*,int);
+void FUN_00df19e0(int,hkVector4*,Matrix64*,void*,void*,void*,void*,void*,int);
 void WriteInputHeader(Input* input,void*,Header** cursor);
 extern "C" const __m128 DAT_011b9490;
 // @fnv 0x00df2740
@@ -2824,27 +2717,16 @@ extern "C" void _ReadWriteBarrier(void);
 extern unsigned long DAT_0126835c;
 extern char DAT_010dba3c[];
 extern char DAT_010c41f8[];
-struct MonitorStreamKd {
-    int unk00;
-    char* m_kRayEnd;
-    int unk08;
-    char* m_capacityEnd;
-};
-struct TimerCommandKd {
-    const char* m_name;
-    unsigned int m_uiCommandId;
-    int unk08;
-};
 static inline void TimerCommandKdWrite(const char* name)
 {
-    MonitorStreamKd* s = (MonitorStreamKd*)TlsGetValue(DAT_0126835c);
-    if (s->m_kRayEnd < s->m_capacityEnd) {
-        TimerCommandKd* h = (TimerCommandKd*)s->m_kRayEnd;
-        h->m_name = name;
+    hkMonitorStream* s = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+    if (s->m_end.m_storage < s->m_capacityMinus16.m_storage) {
+        hkMonitorStream::TimerCommand* h = reinterpret_cast<hkMonitorStream::TimerCommand*>(s->m_end.m_storage);
+        h->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         volatile unsigned int t = (unsigned int)__rdtsc();
-        h->m_uiCommandId = t;
-        s->m_kRayEnd = (char*)(h + 1);
+        h->m_time0 = t;
+        s->m_end.m_storage = (char*)(h + 1);
     }
 }
 struct KdPair { int m_kPointA; int m_kPointB; };
@@ -3036,14 +2918,9 @@ struct d540_cls
 extern "C" d540_cls* d540_target(void);
 static void FUN_00def540(float a, float b, d540_cls* t);
 void d540_caller(float fa, float fb);
-struct def550_vec4 {
-    float m_iWordAt00;
-    float m_iWordAt04;
-    float m_8;
-    float m_iThirdValue;
-};
-extern "C" def550_vec4* def550_target(void);
-static void SetVec4(float a, float b, float c, float d, def550_vec4* t);
+
+extern "C" hkVector4* def550_target(void);
+static void SetVec4(float a, float b, float c, float d, hkVector4* t);
 void def550_caller(float a, float b, float c, float d);
 void FUN_00df0690();
 static void FUN_00df30a0(int* piTarget, int iValue);
@@ -3086,32 +2963,22 @@ int __cdecl FUN_00d1b930(void* processor, WorkItem* item, unsigned int* value, i
 void __cdecl ProcessWorkQueue(ExecutionContext* context, WorkQueue* queue);
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 extern "C" unsigned long DAT_0126835c;
-struct CommandTimingEntry
-{
-    const char* m_pCommandName;
-    unsigned int m_uiStartTicks;
-    unsigned int m_uiEndTicks;
-};
-struct MonitorStream
-{
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    char* m_pRayCursor;
-    char* m_pCurrentCommand;
 
-    static MonitorStream* GetMonitorStream() { return (MonitorStream*)TlsGetValue(DAT_0126835c); }
-};
+__forceinline hkMonitorStream* hkMonitorStream::getInstancePtr()
+{
+    return static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+}
 static inline void TimerMark(const char* name)
 {
-    MonitorStream* s = MonitorStream::GetMonitorStream();
-    if (s->m_kRayEnd < s->m_pCurrentCommand)
+    hkMonitorStream* s = hkMonitorStream::getInstancePtr();
+    if (s->m_end.m_storage < s->m_capacityMinus16.m_storage)
     {
-        CommandTimingEntry* h = (CommandTimingEntry*)s->m_kRayEnd;
-        h->m_pCommandName = name;
+        hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)s->m_end.m_storage;
+        h->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         volatile unsigned int t = (unsigned int)__rdtsc();
-        h->m_uiStartTicks = t;
-        s->m_kRayEnd = (char*)(h + 1);
+        h->m_time0 = t;
+        s->m_end.m_storage = (char*)(h + 1);
     }
 }
 struct Key
@@ -3160,7 +3027,7 @@ static __declspec(noinline) float FUN_00df9ae0(void)
 }
 static void WriteFloatToVector(float a, float b, float* out);
 void dummy_caller(void);
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00dfb5a0_cls {
     int unk00;
     char* m_pData;
@@ -3177,28 +3044,16 @@ inline void DestructElementsDFB5A0(T* p, int n)
     }
 }
 struct ElemDFB5A0 { int unk00; FUN_00cb0c00_class m_04; void FUN_00cb0c00() { m_04.FUN_00cb0c00(); } };
-void __cdecl ResizeAudioStream(AudioAllocator* alloc, void* array, int sizeOfElement);
-struct Pair_de30 {
+void __cdecl ResizeAudioStream(hkMemoryAllocator* alloc, void* array, int sizeOfElement);
+// Registry entries store a pointer and an integer key; shared Pair stores two integers and has no pointer constructor.
+struct FilterRegistryEntry {
     void* m_uiFilterValue;
     int m_key;
-    Pair_de30(void* value, int key) : m_uiFilterValue(value), m_key(key) {}
-};
-template <class T> struct hkArray_de30 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    void AddBack(const T& t)
-    {
-        AudioHolder* router = FUN_00c85750();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(router->m_pAllocator, this, sizeof(T));
-        new (&m_data[m_iElementCount]) T(t);
-        m_iElementCount++;
-    }
+    FilterRegistryEntry(void* value, int key) : m_uiFilterValue(value), m_key(key) {}
 };
 struct Registry_de30 {
     int unk00, unk04;
-    hkArray_de30<Pair_de30> m_pairs;
+    hkArray<FilterRegistryEntry> m_pairs;
     void FUN_00de30a0(void* value, int key);
 };
 void __cdecl FUN_00de9b00();
@@ -3231,24 +3086,13 @@ extern "C" __m128 _mm_unpacklo_ps(__m128, __m128);
 extern "C" __m128 _mm_unpackhi_ps(__m128, __m128);
 extern "C" __m128 _mm_movelh_ps(__m128, __m128);
 extern "C" __m128 _mm_movehl_ps(__m128, __m128);
-class hkVector4
+
+
+__forceinline const hkVector4& hkRotation::getColumn(int index) const
 {
-public:
-    __m128 m_vComponents;
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void setAdd4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void _setMul3(const class hkMatrix3& m, const hkVector4& v);
-    __forceinline void _setRotatedInverseDir(const class hkMatrix3& m, const hkVector4& v);
-};
-class hkMatrix3
-{
-public:
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-    hkVector4 m_kColumn3;
-};
-__forceinline void hkVector4::_setMul3(const hkMatrix3& m, const hkVector4& v)
+    return (&m_kColumn0)[index];
+}
+__forceinline void hkVector4::_setMul3(const hkRotation& m, const hkVector4& v)
 {
     const __m128 v0 = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x00);
     const __m128 v1 = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55);
@@ -3258,7 +3102,7 @@ __forceinline void hkVector4::_setMul3(const hkMatrix3& m, const hkVector4& v)
     const __m128 r2 = _mm_mul_ps(m.m_kColumn2.m_vComponents, v2);
     m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
-__forceinline void hkVector4::_setRotatedInverseDir(const hkMatrix3& m, const hkVector4& v)
+__forceinline void hkVector4::_setRotatedInverseDir(const hkRotation& m, const hkVector4& v)
 {
     __m128 c0 = m.m_kColumn0.m_vComponents;
     __m128 c1 = m.m_kColumn1.m_vComponents;
@@ -3280,10 +3124,15 @@ __forceinline void hkVector4::_setRotatedInverseDir(const hkMatrix3& m, const hk
 struct OutRef { hkVector4* p; hkVector4* operator->() const { return p; } };
 struct Jac {
     hkMatrix3 m0;      // 0x00
+    hkVector4 unk30;
     hkMatrix3 unk40;   // 0x40
+    hkVector4 unk70;
     hkMatrix3 m1;      // 0x80
+    hkVector4 unkB0;
     hkMatrix3 unkC0;   // 0xC0
-    hkMatrix3 rot;     // 0x100
+    hkVector4 unkF0;
+    hkRotation rot;    // 0x100
+    hkVector4 unk130;
 };
 void __cdecl FUN_00df5e80(const Jac* j, const hkVector4* a, const hkVector4* b, OutRef out);
 struct Obj_df7a90 {
@@ -3422,11 +3271,11 @@ struct InDF8800 {
 struct ArrDF8800 {
     ~ArrDF8800()
     {
-        AudioAllocator* pkAllocator = FUN_00c85750()->m_pAllocator;
+        hkMemoryAllocator* pkAllocator = reinterpret_cast<hkMemoryAllocator*>(FUN_00c85750()->m_heap);
         int iCapacityAndFlags = m_iCapacityAndFlags;
         m_uiLogicalSize = 0;
         if ((iCapacityAndFlags & 0x80000000) == 0)
-            pkAllocator->FreeArray(m_ppGeometries, (iCapacityAndFlags & 0x3fffffff) * 4);
+            pkAllocator->bufFree(m_ppGeometries, (iCapacityAndFlags & 0x3fffffff) * 4);
         m_ppGeometries = 0;
         m_iCapacityAndFlags = 0x80000000;
     }
@@ -4488,7 +4337,7 @@ struct FUN_00dfdd90_cls
     void __thiscall FUN_00cb0c00();
 };
 void __cdecl FUN_00dfdd90(FUN_00dfdd90_cls* p);
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00de10b0_cls {
     virtual ~FUN_00de10b0_cls();
     unsigned short m_uSize;
@@ -4496,9 +4345,9 @@ struct FUN_00de10b0_cls {
 
     static void operator delete(void* apMemory) throw()
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(apMemory, ((FUN_00de10b0_cls*)apMemory)->m_uSize);
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        pAllocator->blockFree(apMemory, ((FUN_00de10b0_cls*)apMemory)->m_uSize);
     }
 };
 // sub ecx,0x28; jmp target  ==  MSVC adjustor thunk: Derived overrides a virtual that both of its bases
@@ -4632,117 +4481,8 @@ typedef unsigned char hkUint8;
 typedef unsigned short hkUint16;
 typedef unsigned int hkUint32;
 typedef unsigned long __w64 hkUlong;
-typedef unsigned __w64 hk_size_t;class FinishingFlag
-{
-public:
-FinishingFlag():m_bFinishing(0){}
-int m_bFinishing;
-};
-class hkClass;
-class hkBool
-{
-public:
-typedef char CompileTimeTrueType;inline hkBool(bool b)
-{
-m_cBooleanValue=static_cast<char>(b);
-}
-inline operator bool()const
-{
-return m_cBooleanValue !=0;
-}
-private:
-char m_cBooleanValue;};template<typename ENUM,typename STORAGE>
-class hkEnum
-{
-public:
-hkEnum()
-{
-}
-hkEnum(ENUM e)
-{
-m_kStorage=static_cast<STORAGE>(e);
-}
-private:
-STORAGE m_kStorage;};
-template<typename TYPE>
-class ValueWrapper
-{
-public:
-__forceinline ValueWrapper(){}
-__forceinline void operator=(TYPE e)
-{
-m_kStorage=e;
-}
-__forceinline TYPE val()const
-{
-return m_kStorage;
-}
-__forceinline operator TYPE()const
-{
-return val();
-}
-private:
-TYPE m_kStorage;};template<typename T>
-class hkThreadLocalData
-{
-public:
-hkThreadLocalData()
-{
-m_slotID=TlsAlloc();
-}
-__forceinline T getData()const
-{
-return(T)(hkUlong)TlsGetValue(m_slotID);
-}
-unsigned long m_slotID;};class hkMemoryAllocator
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}
-virtual void*AllocateMemoryBlock(int numBytes)=0;
-virtual void ReleaseBlock(void*p,int numBytes)=0;public:
-enum MemoryState
-{
-MEMORY_STATE_OK,
-MEMORY_STATE_OUT_OF_MEMORY
-};};struct StringPointerTriple
-{
-public:
-__forceinline StringPointerTriple();protected:
-ValueWrapper<void*>m_next;};
-class NineIntegerRecord
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}
-typedef hkMemoryAllocator Allocator_S;
-static NineIntegerRecord&__cdecl GetMonitorStream();inline Allocator_S&heap(){return*m_pStreamAllocator;}
-protected:
-StringPointerTriple m_aiEntries;
-Allocator_S*m_pTemp;
-Allocator_S*m_pStreamAllocator;};
-class hkBaseObject
-{
-public:
-static const struct ClassMemberDescriptor Members[];
-__forceinline virtual ~hkBaseObject(){}
-public:
-__forceinline hkBaseObject(){}
-};
-class hkStatisticsCollector;
-class hkReferencedObject_S:public hkBaseObject
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;hkReferencedObject_S*b=static_cast<hkReferencedObject_S*>(NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));b->m_usMemSizeAndFlags=static_cast<hkUint16>(nbytes);;return b;}
-virtual const hkClass*GetClassType()const;
-virtual void CalcContentStatistics(hkStatisticsCollector*collector,const hkClass*cls)const;
-public:
-enum
-{
-MASK_MEMSIZE=0x7fff
-};
-hkUint16 m_usMemSizeAndFlags;
-public:
-hkReferencedObject_S(class FinishingFlag flag){}
-};
+typedef unsigned __w64 hk_size_t;
+
 
 extern "C"{
 
@@ -4754,68 +4494,27 @@ extern "C"{
 
 };
 typedef __m128 hkQuadReal;
-class hkMatrix3_S;
-class hkRotation;
-class hkTransform;
-class hkVector4_S
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
-__forceinline void operator=(const hkVector4_S&v);
-__forceinline void setSub4(const hkVector4_S&a,const hkVector4_S&b);
-__forceinline void _setMul3(const hkMatrix3_S&a,const hkVector4_S&b);
-__forceinline void _setRotatedDir(const hkRotation&a,const hkVector4_S&b);
-__forceinline void _setRotatedInverseDir(const hkRotation&a,const hkVector4_S&b);
-__forceinline void _setTransformedInversePos(const hkTransform&a,const hkVector4_S&b);
-private:
-hkQuadReal m_vComponents;
-public:
-operator hkQuadReal()const
-{
-return m_vComponents;
-}
-};class hkMatrix3_S
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
-__forceinline const hkVector4_S&getColumn(int i)const;
-protected:
-hkVector4_S m_kColumn0;
-hkVector4_S m_kColumn1;
-hkVector4_S m_kColumn2;};class __declspec(align(16))hkRotation:public hkMatrix3_S
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}};
-class hkTransform
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
-__forceinline const hkVector4_S&getTranslation()const;
-__forceinline const hkRotation&getRotation()const;
-private:
-hkRotation m_rotation;
-hkVector4_S m_vTranslation;};inline void hkVector4_S::operator=(const hkVector4_S&v)
+
+__forceinline void hkVector4_S::operator=(const hkVector4_S&v)
 {
 m_vComponents=v.m_vComponents;
 }
-inline void hkVector4_S::setSub4(const hkVector4_S&v0,const hkVector4_S&v1)
+__forceinline void hkVector4_S::setSub4(const hkVector4_S&v0,const hkVector4_S&v1)
 {
 m_vComponents=_mm_sub_ps(v0.m_vComponents,v1.m_vComponents);
 }
-inline void hkVector4_S::_setMul3(const hkMatrix3_S&a,const hkVector4_S&b)
+__forceinline void hkVector4_S::_setRotatedDir(const hkRotation&r,const hkVector4_S&b)
 {
+const hkMatrix3& a = reinterpret_cast<const hkMatrix3&>(r);
 const hkQuadReal b0=_mm_shuffle_ps(b.m_vComponents,b.m_vComponents,(((0)<<6)|((0)<<4)|((0)<<2)|((0))));
-const hkQuadReal r0=_mm_mul_ps(a.getColumn(0).m_vComponents,b0);
+const hkQuadReal r0=_mm_mul_ps(a.m_kColumn0.m_vComponents,b0);
 const hkQuadReal b1=_mm_shuffle_ps(b.m_vComponents,b.m_vComponents,(((1)<<6)|((1)<<4)|((1)<<2)|((1))));
-const hkQuadReal r1=_mm_mul_ps(a.getColumn(1).m_vComponents,b1);
+const hkQuadReal r1=_mm_mul_ps(a.m_kColumn1.m_vComponents,b1);
 const hkQuadReal b2=_mm_shuffle_ps(b.m_vComponents,b.m_vComponents,(((2)<<6)|((2)<<4)|((2)<<2)|((2))));
-const hkQuadReal r2=_mm_mul_ps(a.getColumn(2).m_vComponents,b2);
-m_vComponents=_mm_add_ps(_mm_add_ps(r0,r1),r2);}
-inline void hkVector4_S::_setRotatedDir(const hkRotation&r,const hkVector4_S&v)
-{
-_setMul3(r,v);
+const hkQuadReal r2=_mm_mul_ps(a.m_kColumn2.m_vComponents,b2);
+m_vComponents=_mm_add_ps(_mm_add_ps(r0,r1),r2);
 }
-inline void hkVector4_S::_setRotatedInverseDir(const hkRotation&r,const hkVector4_S&b)
+__forceinline void hkVector4_S::_setRotatedInverseDir(const hkRotation&r,const hkVector4_S&b)
 {
 hkQuadReal c0=r.getColumn(0).m_vComponents;
 hkQuadReal c1=r.getColumn(1).m_vComponents;
@@ -4828,164 +4527,57 @@ const hkQuadReal r1=_mm_mul_ps(c1,b1);
 const hkQuadReal b2=_mm_shuffle_ps(b.m_vComponents,b.m_vComponents,(((2)<<6)|((2)<<4)|((2)<<2)|((2))));
 const hkQuadReal r2=_mm_mul_ps(c2,b2);
 m_vComponents=_mm_add_ps(_mm_add_ps(r0,r1),r2);}
-inline void hkVector4_S::_setTransformedInversePos(const hkTransform&a,const hkVector4_S&b)
+__forceinline void hkVector4_S::_setTransformedInversePos(const hkTransform&a,const hkVector4_S&b)
 {
-hkVector4_S t0;t0.setSub4(b,a.getTranslation());
+// This ray-cast path uses the layout-identical hkVector4_S view.
+hkVector4_S t0;t0.setSub4(b,reinterpret_cast<const hkVector4_S&>(a.getTranslation()));
 _setRotatedInverseDir(a.getRotation(),t0);
 }
-inline const hkVector4_S&hkMatrix3_S::getColumn(int x)const
+__forceinline const hkVector4&hkTransform::getTranslation()const
 {
-return(&m_kColumn0)[x];
+return reinterpret_cast<const hkVector4&>(m_row3);
 }
-const hkVector4_S&hkTransform::getTranslation()const
+__forceinline const hkRotation&hkTransform::getRotation()const
 {
-return m_vTranslation;
+return reinterpret_cast<const hkRotation&>(m_row0);
 }
-const hkRotation&hkTransform::getRotation()const
+
+__forceinline hkMonitorStream& hkMonitorStream::getInstance()
 {
-return m_rotation;
+    extern hkThreadLocalData<hkMonitorStream*> g_pMonitorStream;
+    return *g_pMonitorStream.getData();
 }
-class StringCursor
+__forceinline char* __cdecl hkMonitorStream::getStart() { return m_start.val(); }
+__forceinline char* __cdecl hkMonitorStream::getEnd() { return m_end.val(); }
+__forceinline char* __cdecl hkMonitorStream::getCapacityMinus16() { return m_capacityMinus16.val(); }
+__forceinline hkBool __cdecl hkMonitorStream::memoryAvailable()
 {
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}static StringCursor&GetMonitorStream()
-{
-extern hkThreadLocalData<StringCursor*>g_pMonitorStream;
-return*g_pMonitorStream.getData();
+    return getEnd() < getCapacityMinus16();
 }
-public:
-__forceinline char*__cdecl GetStreamStart(){return m_kRayStart.val();}
-__forceinline char*__cdecl GetStreamEnd(){return m_kRayEnd.val();}
-__forceinline char*__cdecl getCapacityMinus16(){return m_pCurrentCommand.val();}
-__forceinline hkBool __cdecl memoryAvailable()
-{
-return GetStreamEnd()<getCapacityMinus16();
-}
-__forceinline void __cdecl setEnd(char*ptr){m_kRayEnd=ptr;}
-public:
-static void __cdecl init();
-public:
-ValueWrapper<char*>m_kRayStart;
-ValueWrapper<char*>m_kRayEnd;
-ValueWrapper<char*>m_pRayCursor;
-ValueWrapper<char*>m_pCurrentCommand;
-public:
-struct Command
-{
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(StringCursor::Command));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-const char*m_pCommandName;
-};
-struct TimerCommand_S:public StringCursor::Command
-{
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(StringCursor::TimerCommand_S));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-hkUint32 m_uiStartTicks;
-hkUint32 m_uiEndTicks;
-__forceinline void setTime();
-};};
-void StringCursor::TimerCommand_S::setTime()
+__forceinline void __cdecl hkMonitorStream::setEnd(char* ptr) { m_end = ptr; }
+__forceinline void hkMonitorStream::TimerCommand::setTime()
 {
 hkUint32 ticks;
 __asm{
 rdtsc
 mov dword ptr[ticks],eax
 }
-m_uiStartTicks=ticks;
+m_time0=ticks;
 }
-class hkAabb
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
-public:
-hkVector4_S m_kMinimumCorner;};
-__declspec(align(16))struct hkAabbUint32
-{};
-enum CollisionShapeType
-{
-HK_SHAPE_INVALID=0,
-HK_SHAPE_SPHERE,
-HK_FIRST_SHAPE_TYPE=HK_SHAPE_SPHERE,
-HK_SHAPE_CYLINDER,
-HK_SHAPE_TRIANGLE,
-HK_SHAPE_BOX,
-HK_SHAPE_CAPSULE,
-HK_SHAPE_CONVEX_VERTICES,
-HK_SHAPE_COLLECTION,
-HK_SHAPE_BV_TREE,
-HK_SHAPE_LIST,
-HK_SHAPE_MOPP,
-HK_SHAPE_CONVEX_TRANSLATE,
-HK_SHAPE_CONVEX_TRANSFORM,
-HK_SHAPE_SAMPLED_HEIGHT_FIELD,
-HK_SHAPE_EXTENDED_MESH,
-HK_SHAPE_TRANSFORM,
-HK_SHAPE_COMPRESSED_MESH,
-HK_SHAPE_MAX_ID_SPU=HK_SHAPE_COMPRESSED_MESH+1,
-HK_SHAPE_CONVEX,
-HK_SHAPE_PACKED_CONVEX_VERTICES,
-HK_SHAPE_MOPP_EMBEDDED,
-HK_SHAPE_CONVEX_PIECE,
-HK_SHAPE_MULTI_SPHERE,
-HK_SHAPE_CONVEX_LIST,
-HK_SHAPE_TRIANGLE_COLLECTION,
-HK_SHAPE_MULTI_RAY,
-HK_SHAPE_HEIGHT_FIELD,
-HK_SHAPE_SPHERE_REP,
-HK_SHAPE_BV,
-HK_SHAPE_PLANE,
-HK_SHAPE_PHANTOM_CALLBACK,
-HK_SHAPE_USER0,
-HK_SHAPE_USER1,
-HK_SHAPE_USER2,
-HK_SHAPE_MAX_ID,
-HK_SHAPE_ALL=-1
-};
+
+#include "../../include/hkAabbUint32.h"
+
 struct ShapeRayCastQuery;
 struct ShapeRayCastOutput;
 class hkpRayHitCollector;
 class hkpCdBody;
 class hkpShapeContainer;
 typedef hkUint32 hkpShapeKey;
-class hkpShape:public hkReferencedObject_S
-{
-public:
-static const struct ClassMemberDescriptor Members[];
-virtual hkReal getMaximumProjection(const hkVector4_S&direction)const;
-__forceinline hkBool RayCast(const ShapeRayCastQuery&input,ShapeRayCastOutput&output)const;
-__forceinline void castRayWithCollector(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkpRayHitCollector&collector)const;
-virtual const hkpShapeContainer*GetShapeContainer()const{return 0;}
-virtual bool isConvex()const{return false;}
-struct PhysicsShape
-{
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(hkpShape::PhysicsShape));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-bool m_bIsConvex;
-bool m_bIsConvexPiece;
-bool m_bIsComposite;
-};
-virtual int CalcSizeForSpu(const PhysicsShape&input,int spuBufferSizeLeft)const;
-protected:
-virtual void CalculateAabb(const hkTransform&localToWorld,hkReal tolerance,hkAabb&out)const=0;
-virtual hkBool IntersectRayWithShape(const ShapeRayCastQuery&input,ShapeRayCastOutput&output)const=0;
-virtual void CastRayWithCollector(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkpRayHitCollector&collector)const=0;
-public:
-static void __cdecl resetShapeFunctions();
-public:
-public:
-hkUlong m_ulUserData;
-public:
-hkEnum<::CollisionShapeType,hkUint32>m_type;
-public:
-hkpShape(class FinishingFlag flag):hkReferencedObject_S(flag)
-{
-if(flag.m_bFinishing)
-{
-m_type=HK_SHAPE_INVALID;
-}
-}
-};hkBool hkpShape::RayCast(const ShapeRayCastQuery&input,ShapeRayCastOutput&output)const
+__forceinline hkBool hkpShape::RayCast(const ShapeRayCastQuery&input,ShapeRayCastOutput&output)const
 {
 return IntersectRayWithShape(input,output);
 }
-void hkpShape::castRayWithCollector(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkpRayHitCollector&collector)const
+__forceinline void hkpShape::castRayWithCollector(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkpRayHitCollector&collector)const
 {
 return CastRayWithCollector(input,cdBody,collector);
 }
@@ -5011,7 +4603,7 @@ struct ShapeRayCastOutput:public RayCastHitResult
 public:
 enum{MAX_HIERARCHY_DEPTH=8};
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 __forceinline ShapeRayCastOutput();
 __forceinline void reset();
 private:
@@ -5034,59 +4626,13 @@ ShapeRayCastOutput::ShapeRayCastOutput()
 {
 _reset();
 }
-class hkpCdBody
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline const hkTransform&getTransform()const;
-public:
-explicit __forceinline hkpCdBody(const hkpCdBody*parent);
-public:
-const hkpShape*m_pCollisionShape;
-hkpShapeKey m_uiCollisionShapeKey;
-const void*m_pMotionState;};
-const hkTransform&hkpCdBody::getTransform()const
+__forceinline const hkTransform&hkpCdBody::getTransform()const
 {
 ;
 return*static_cast<const hkTransform*>(m_pMotionState);
 }
 struct GskAgentInput;
-class hkpCollidable:public hkpCdBody
-{
-public:
-static const struct ClassMemberDescriptor Members[];
-inline const hkpShape*getShape()const;
-public:
-__forceinline hkUint32 GetFilterInfoForKey()const;
-public:
-struct BoundingVolumeData
-{
-static const struct ClassMemberDescriptor Members[];static const hkClass&__cdecl staticClass();struct DefaultStruct;
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(hkpCollidable::BoundingVolumeData));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-BoundingVolumeData();
-BoundingVolumeData(class FinishingFlag flag);
-__forceinline bool hasAllocations()const;
-void deallocate();
-void allocate(int numChildShapes);
-__forceinline void invalidate(){m_kMinimumCorner[0]=1;m_kMaximumCorner[0]=0;}
-__forceinline bool isValid()const{return m_kMinimumCorner[0]<=m_kMaximumCorner[0];}
-public:
-hkUint32 m_kMinimumCorner[3];
-hkUint8 m_ucExpansionMin[3];
-hkUint8 m_ucExpansionShift;
-hkUint32 m_kMaximumCorner[3];
-hkUint8 m_ucExpansionMax[3];
-hkUint8 m_ucUnknownByte;
-hkUint16 m_uiNumChildShapeAabbs;
-hkUint16 m_uiCapacityChildShapeAabbs;
-hkAabbUint32*m_pChildShapeAabbs;
-hkpShapeKey*m_pChildShapeKeys;
-};
-protected:
-hkInt8 m_iOwnerOffset;
-public:
-hkUint8 m_uiForceCollideOntoPpu;
-public:
-struct BoundingVolumeData m_kBoundingVolumeData;};__forceinline const hkpShape*hkpCollidable::getShape()const
+__forceinline const hkpShape*hkpCollidable::getShape()const
 {
 return m_pCollisionShape;
 }
@@ -5095,13 +4641,13 @@ return m_pCollisionShape;
 class PhysicsSimulationContext
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 public:
 CRITICAL_SECTION m_kCriticalSection;};
 class BusyWaitingSemaphore
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 protected:
 protected:void*m_pCompletionSemaphore;};
 typedef BusyWaitingSemaphore hkSemaphoreBusyWait;
@@ -5109,26 +4655,10 @@ template<typename T>
 class CapacityGrowingArray
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
 private:
 inline void increaseCapacity();};
 typedef hkUint8 hkJobSubType;
-enum JobCategory
-{
-HK_JOB_TYPE_DYNAMICS,
-HK_JOB_TYPE_COLLIDE,
-HK_JOB_TYPE_COLLISION_QUERY,
-HK_JOB_TYPE_RAYCAST_QUERY,
-HK_JOB_TYPE_ANIMATION,
-HK_JOB_TYPE_BEHAVIOR,
-HK_JOB_TYPE_CLOTH,
-HK_JOB_TYPE_PATHFINDING,
-HK_JOB_TYPE_UNIT_TEST,
-HK_JOB_TYPE_CHARACTER_PROXY,
-HK_JOB_TYPE_HAVOK_MAX,
-HK_JOB_TYPE_USER_0=HK_JOB_TYPE_HAVOK_MAX,
-HK_JOB_TYPE_MAX
-};
 struct JobDescriptor
 {__declspec(align(16))hkJobSubType m_ucSubType;};
 struct JobQueueConstructionInfo
@@ -5136,17 +4666,17 @@ struct JobQueueConstructionInfo
 class JobDispatcher
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 enum{JOB_QUEUE_ENTRY_SIZE=128};
 struct JobQueueSlot:public JobDescriptor
 {
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(JobQueueSlot));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;hkMemoryRouter::getInstance().heap().blockFree(p,sizeof(JobQueueSlot));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
 JobQueueSlot(){}
 hkUchar m_data[JOB_QUEUE_ENTRY_SIZE-sizeof(JobDescriptor)];
 };
 struct Queue:public CapacityGrowingArray<JobQueueSlot>
 {
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(Queue));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;hkMemoryRouter::getInstance().heap().blockFree(p,sizeof(Queue));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
 };
 enum WaitPolicy
 {
@@ -5155,7 +4685,7 @@ WAIT_INDEFINITELY
 };
 struct JobQueueWaitState
 {
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(JobQueueWaitState));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;hkMemoryRouter::getInstance().heap().blockFree(p,sizeof(JobQueueWaitState));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
 __declspec(align(16))hkInt16 m_sQueueCounts[HK_JOB_TYPE_MAX];
 int m_iWaitCount;
 WaitPolicy m_eWaitPolicy;
@@ -5199,11 +4729,11 @@ struct WorldRayCastOutput;
 struct CollisionQueryJobHeader
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}};
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}};
 struct RayCastQueryJobDescriptor:public JobDescriptor
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 enum JobSubType
 {
 RAYCAST_QUERY_SHAPE_RAYCAST,
@@ -5223,7 +4753,7 @@ hkSemaphoreBusyWait*m_pCompletionSemaphore;};
 struct WorldRayCastCommand
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 public:
 ShapeRayCastQuery m_kRayCastQuery;
 hkUint32 m_uiCollisionFilterInfo;
@@ -5308,14 +4838,6 @@ resultToReturn=furthestHit;
 }
 }
 return resultToReturn;}
-class hkpRayHitCollector
-{
-public:
-inline hkpRayHitCollector();
-virtual void CollectRayHit(const hkpCdBody&cdBody,const RayCastHitResult&hitInfo)=0;
-inline void reset();
-public:
-hkReal m_fEarlyOutHitFraction;};
 inline void hkpRayHitCollector::reset()
 {
 m_fEarlyOutHitFraction=1.f;
@@ -5324,29 +4846,14 @@ inline hkpRayHitCollector::hkpRayHitCollector()
 {
 reset();
 }
-class hkpFixedBufferRayHitCollector:public hkpRayHitCollector
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
-public:
-__forceinline hkpFixedBufferRayHitCollector(WorldRayCastOutput*buffer,int capacity);
-public:
-static void __cdecl addRayHitImplementation(const hkpCdBody&cdBody,const RayCastHitResult&hitInfo,hkpFixedBufferRayHitCollector*collector);
-protected:
-virtual __forceinline void CollectRayHit(const hkpCdBody&cdBody,const RayCastHitResult&hitInfo);
-public:
-ValueWrapper<WorldRayCastOutput*>m_pRayHitBuffer;
-ValueWrapper<WorldRayCastOutput*>m_pHitBufferEnd;
-ValueWrapper<int>m_pRayCursor;
-ValueWrapper<int>m_iHitCount;
-ValueWrapper<const hkpCollidable*>m_pCollidable;};
+
 typedef void(__cdecl*hkFixedBufferRayHitCollectorAddRayHitCallbackFunc)(const hkpCdBody&cdBody,const RayCastHitResult&hitInfo,class hkpFixedBufferRayHitCollector*collector);
 extern hkFixedBufferRayHitCollectorAddRayHitCallbackFunc g_pFixedBufferRayHitCallback;
 __forceinline void registerFixedBufferRayHitCollectorAddRayHitCallbackFunction(hkFixedBufferRayHitCollectorAddRayHitCallbackFunc func)
 {
 g_pFixedBufferRayHitCallback=func;
 }
-hkpFixedBufferRayHitCollector::hkpFixedBufferRayHitCollector(WorldRayCastOutput*buffer,int capacity):hkpRayHitCollector()
+__forceinline hkpFixedBufferRayHitCollector::hkpFixedBufferRayHitCollector(WorldRayCastOutput*buffer,int capacity):hkpRayHitCollector()
 {
 ;
 m_pRayHitBuffer=buffer;
@@ -5370,7 +4877,8 @@ const hkpCollidable*collidable=command->m_kCollidables[i];
 const hkpShape*shape=collidable->getShape();
 if(shape)
 {
-const hkTransform&transform=collidable->getTransform();
+// The shared collidable stores the hkpCdBody prefix without inheritance.
+const hkTransform&transform=reinterpret_cast<const hkpCdBody*>(collidable)->getTransform();
 input.m_vTo._setTransformedInversePos(transform,command->m_kRayCastQuery.m_vTo);
 input.m_vFrom._setTransformedInversePos(transform,command->m_kRayCastQuery.m_vFrom);
 output.reset();
@@ -5390,7 +4898,7 @@ aiRecipeIndex->m_pRootCollidable=collidable;
 }
 else
 {
-shape->castRayWithCollector(input,*collidable,fixedBufferRayHitCollector);
+shape->castRayWithCollector(input,*reinterpret_cast<const hkpCdBody*>(collidable),fixedBufferRayHitCollector);
 }
 }
 }
@@ -5403,12 +4911,12 @@ command->m_iResultCapacity=fixedBufferRayHitCollector.m_iHitCount;
 // @fnv 0x00df94b0
 JobDispatcher::JobStatus __cdecl FUN_00df94b0(JobDispatcher&jobQueue,JobDispatcher::JobQueueSlot&nextJobOut)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::TimerCommand_S*h=reinterpret_cast<StringCursor::TimerCommand_S*>(mStream.GetStreamEnd());h->m_pCommandName="T" "t" "CollQueryShapeRayCast";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="T" "t" "CollQueryShapeRayCast";h->setTime();mStream.setEnd((char*)(h+1));}};
 const WorldRayCastJob&raycastJob=reinterpret_cast<WorldRayCastJob&>(nextJobOut);
 for(int i=0;i<raycastJob.m_iCommandCount;i++)
 {
 hkCpuShapeRayCastJobProcessCommand(raycastJob.m_pCommands[i]);
 }
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::TimerCommand_S*h=reinterpret_cast<StringCursor::TimerCommand_S*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return jobQueue.GetNextJob(&nextJobOut,nextJobOut);
 }

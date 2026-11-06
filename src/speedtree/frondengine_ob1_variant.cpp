@@ -5,20 +5,19 @@
 
 // src/speedtree/frondengine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/speedtree/frondengine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct FUN_00b1ada0_class
+#include "../../include/CVec3.h"
+// The former Vector3 stand-in defined these constructors inline in its class.
+inline CVec3::CVec3()
 {
-    float a;
-    float b;
-    float c;
-    FUN_00b1ada0_class* FUN_00b1ada0(float x, float y, float z);
-};
-struct FUN_00b1add0
+}
+inline CVec3::CVec3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
 {
-    float f0;
-    float f4;
-    float f8;
-    void Set(float a, float b, float c);
+}
+// BaseTag_frondengine: local type (was include/BaseTag.h, which had no evidence of one real class); no method of it is bound to a named game function
+class BaseTag_frondengine
+{
 };
+#include "../../include/IdvFileError.h"
 struct FUN_00b39460_class
 {
     void __thiscall FUN_00b39460();
@@ -753,19 +752,6 @@ Iter* __thiscall Iter::FUN_00b235e0(int _Off)
     return this;
 }
 
-namespace std {
-class exception
-{
-  public:
-    exception(const char* const& _Message = 0);
-    virtual ~exception();
-    const char* _mWhat;
-    int _mDoFree;
-};
-class bad_alloc : public exception
-{
-};
-}
 void* __cdecl operator new(unsigned int);
 
 // @fnv 0x00b23b50
@@ -779,16 +765,12 @@ void* __cdecl FUN_00b23b50(unsigned int n)
     {
         if ((unsigned)-1 / n < 44)
         {
-            throw std::bad_alloc();
+            throw std::bad_alloc(0);
         }
     }
     return operator new(n * 44);
 }
 
-inline void* __cdecl operator new(unsigned int, void* _Where) throw()
-{
-    return (_Where);
-}
 
 struct GlobalObject_00b3f100
 {
@@ -1339,8 +1321,6 @@ FUN_00b16890_It& FUN_00b16890_It::FUN_00b16890(int _Off)
 
 void __cdecl operator delete(void* _Ptr) throw();
 extern int DAT_010173f0;
-inline void operator delete(void*, void*)
-{}
 namespace dtorb181 {
 void FUN_00ec7c56();
 int FUN_00ec7c6b(void* _Dst, unsigned int _Size, const void* _Src, unsigned int _Count);
@@ -7887,8 +7867,6 @@ EraseIterator EraseVector::FUN_00b1f800(EraseConstIterator first_arg, EraseConst
 namespace fnv_00b1f9e0 {
 void __cdecl operator delete(void* _Ptr) throw();
 extern int DAT_010173f0;
-inline void operator delete(void*, void*)
-{}
 namespace tidyb1f9 {
 void FUN_00ec7c56();
 int FUN_00ec7c6b(void* _Dst, unsigned int _Size, const void* _Src, unsigned int _Count);
@@ -20541,8 +20519,6 @@ GvElem* FUN_00b26ce0(GvElem* _First, GvElem* _Last, GvElem* _Dest)
 }  // namespace fnv_00b26ce0
 
 namespace fnv_00b26db0 {
-inline void operator delete(void*, void*)
-{}
 struct ElQ
 {
     int m[14];
@@ -24028,14 +24004,15 @@ struct Aux
     }
 };
 
-struct Vec : Aux
+// std::vector of 4-byte elements (first/last/end at +0x0c/+0x10/+0x14): 0x00b1e970 = _Tidy, called from the destructor.
+struct IntStdVector : Aux
 {
     int alval;
     int* first;
     int* last;
     int* end;
     void FUN_00b1e970();
-    ~Vec()
+    ~IntStdVector()
     {
         FUN_00b1e970();
     }
@@ -24043,7 +24020,7 @@ struct Vec : Aux
 
 struct FUN_00b1ff50
 {
-    Vec v;
+    IntStdVector v;
     float f18;
     float f1c;
     unsigned char c20;
@@ -24234,6 +24211,10 @@ CopyableStateBlock* __cdecl FUN_00b240b0(CopyableStateBlock* _First, CopyableSta
 }
 
 #include <math.h>
+inline float& CVec3::operator[](int index)
+{
+    return (&x)[index];
+}
 namespace fnv_00b1be50 {
 extern "C" void __cdecl _invalid_parameter_noinfo();
 extern "C" double __cdecl atan2(double, double);
@@ -24258,44 +24239,29 @@ inline float cosQ(float x)
     return (float)(double)(float)FUN_00ec9f30((double)x);
 }
 
-struct PointQ
+inline void InitializeProfileCoordinate(CVec3& point)
 {
-    float v[3];
-    PointQ()
-    {
-        v[0] = v[1] = v[2] = 0.0f;
-    }
-    PointQ(float x, float y, float z)
-    {
-        v[0] = x;
-        v[1] = y;
-        v[2] = z;
-    }
-    float& operator[](int i)
-    {
-        return v[i];
-    }
-    void FUN_00b12790();
-};
+    point.x = point.y = point.z = 0.0f;
+}
 struct PointVecQ
 {
     int unk00;
     int unk04;
     int unk08;
-    PointQ* m_pHeadNode;
-    PointQ* m_last;
-    PointQ* m_kRayEnd;
+    CVec3* m_pHeadNode;
+    CVec3* m_last;
+    CVec3* m_kRayEnd;
     unsigned size() const
     {
         return m_last - m_pHeadNode;
     }
-    PointQ& operator[](unsigned pos)
+    CVec3& operator[](unsigned pos)
     {
         if (!(pos < size()))
             _invalid_parameter_noinfo();
         return *(m_pHeadNode + pos);
     }
-    void FUN_00b1e4c0(const PointQ& p);
+    void FUN_00b1e4c0(const CVec3& p);
 };
 struct CurveQ
 {
@@ -24342,7 +24308,8 @@ void FUN_00b1be50_Owner::FUN_00b1be50(ScaleQ* scale, PointVecQ& points, PointVec
     for (unsigned i = 0; i < m_uiItemCount; i++)
     {
         float t = 1.0 - i / (m_uiItemCount - 1.0);
-        PointQ p;
+        CVec3 p;
+        InitializeProfileCoordinate(p);
         p[0] = 0.0f;
         p[1] = -t * scale->m_height;
         p[2] = m_profile->FUN_00b37ad0(t) * scale->m_height - base;
@@ -24350,7 +24317,7 @@ void FUN_00b1be50_Owner::FUN_00b1be50(ScaleQ* scale, PointVecQ& points, PointVec
     }
     for (int j = m_uiItemCount - 2; j >= 0; j--)
     {
-        PointQ p = points[j];
+        CVec3 p = points[j];
         p[1] *= -1.0;
         points.FUN_00b1e4c0(p);
     }
@@ -24378,7 +24345,7 @@ void FUN_00b1be50_Owner::FUN_00b1be50(ScaleQ* scale, PointVecQ& points, PointVec
         {
             char pad[0x3c];
         }
-        PointQ n(0.0f, cosQ(angle), sinQ(angle));
+        CVec3 n(0.0f, cosQ(angle), sinQ(angle));
         padQ();
         n.FUN_00b12790();
         normals.FUN_00b1e4c0(n);
@@ -25341,8 +25308,6 @@ inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
-inline void operator delete(void*, void*)
-{}
 inline void FreeQ(void* p)
 {
     FormHeap_Free(p);
@@ -25403,8 +25368,6 @@ inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
-inline void operator delete(void*, void*)
-{}
 struct StrY
 {
     char b[0x1c];
@@ -25456,8 +25419,6 @@ inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
-inline void operator delete(void*, void*)
-{}
 inline void FreeQ(void* p)
 {
     FormHeap_Free(p);
@@ -27264,8 +27225,6 @@ inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
-inline void operator delete(void*, void*)
-{}
 struct StrY
 {
     char b[0x1c];
@@ -27318,8 +27277,6 @@ inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
-inline void operator delete(void*, void*)
-{}
 inline void FreeQ(void* p)
 {
     FormHeap_Free(p);
@@ -27396,8 +27353,6 @@ inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
-inline void operator delete(void*, void*)
-{}
 inline void FreeQ(void* p)
 {
     FormHeap_Free(p);
@@ -27474,8 +27429,6 @@ inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
-inline void operator delete(void*, void*)
-{}
 inline void FreeQ(void* p)
 {
     FormHeap_Free(p);
@@ -28231,7 +28184,7 @@ template <class A> inline void destroy_range(typename A::pointer _First, typenam
     destroy_range(_First, _Last, _Al, ptr_cat(_First, _Last));
 }
 
-struct Vector;
+struct GlobalObjectVector;
 
 struct IterBase
 {
@@ -28246,7 +28199,7 @@ struct IterBase
     {
         return m_pContainerProxy == _Other.m_pContainerProxy;
     }
-    void _Set_container(const Vector* _Cont);
+    void _Set_container(const GlobalObjectVector* _Cont);
 };
 struct Ranit : IterBase
 {
@@ -28258,7 +28211,7 @@ struct ConstIterator : Ranit
     {
         _Myptr = 0;
     }
-    ConstIterator(GlobalObject_00b3f100* _Ptr, const Vector* _Cont);
+    ConstIterator(GlobalObject_00b3f100* _Ptr, const GlobalObjectVector* _Cont);
     bool operator==(const ConstIterator& _Right) const
     {
         {
@@ -28280,11 +28233,13 @@ struct Iterator : ConstIterator
 {
     Iterator()
     {}
-    Iterator(GlobalObject_00b3f100* _Ptr, const Vector* _Cont) : ConstIterator(_Ptr, _Cont)
+    Iterator(GlobalObject_00b3f100* _Ptr, const GlobalObjectVector* _Cont) : ConstIterator(_Ptr, _Cont)
     {}
 };
 
-struct Vector
+// std::vector<GlobalObject_00b3f100> layout (VC9 iterator proxy, then _Myfirst/_Mylast/_Myend at +0x0c);
+// 0x00b1ffd0 is its erase(first, last). Not the shared SIMD Vector.
+struct GlobalObjectVector
 {
     void* m_pContainerProxy;
     int unk04;
@@ -28305,11 +28260,11 @@ struct Vector
     Iterator FUN_00b1ffd0(ConstIterator _First_arg, ConstIterator _Last_arg);
 };
 
-inline void IterBase::_Set_container(const Vector* _Cont)
+inline void IterBase::_Set_container(const GlobalObjectVector* _Cont)
 {
     m_pContainerProxy = _Cont->m_pContainerProxy;
 }
-inline ConstIterator::ConstIterator(GlobalObject_00b3f100* _Ptr, const Vector* _Cont)
+inline ConstIterator::ConstIterator(GlobalObject_00b3f100* _Ptr, const GlobalObjectVector* _Cont)
 {
     {
         if (!(_Cont != 0 && _Cont->_Myfirst <= _Ptr && _Ptr <= _Cont->_Mylast))
@@ -28375,7 +28330,7 @@ template <class In, class Out> inline Out __cdecl FUN_00b236a0(In _First, In _La
 }
 
 // @fnv 0x00b1ffd0
-Iterator Vector::FUN_00b1ffd0(ConstIterator _First_arg, ConstIterator _Last_arg)
+Iterator GlobalObjectVector::FUN_00b1ffd0(ConstIterator _First_arg, ConstIterator _Last_arg)
 {
     Iterator _First = _Make_iter(_First_arg);
     Iterator _Last = _Make_iter(_Last_arg);
@@ -28437,16 +28392,6 @@ extern "C" void* __cdecl FUN_0044d670(unsigned int, int);
 
 extern double FUN_00ec9f30(double);
 extern double FUN_00eca060(double);
-struct FloatMatrix3;
-struct Vector3
-{
-    float x, y, z;
-    Vector3 FUN_00b12890(const FloatMatrix3&) const;
-    Vector3 AddVector(const Vector3&) const;
-    Vector3 ScaleSwizzled(float) const;
-    Vector3 FUN_00b12810(const Vector3&) const;
-    void FUN_00b12790();
-};
 struct FloatMatrix3
 {
     float xx, xy, xz, yx, yy, yz, zx, zy, zz;
@@ -28477,15 +28422,15 @@ struct FUN_00b39460
 struct FUN_00b1fca0
 {
     int allocator, allocationFlags, growth;
-    Vector3* first;
-    Vector3* last;
-    Vector3* limit;
+    CVec3* first;
+    CVec3* last;
+    CVec3* limit;
     ~FUN_00b1fca0();
     unsigned int size() const
     {
         return last - first;
     }
-    Vector3& operator[](unsigned int _Pos)
+    CVec3& operator[](unsigned int _Pos)
     {
         {
             if (!(_Pos < size()))
@@ -28563,7 +28508,7 @@ struct Geometry
     PackedColors colors;
     FUN_00449fd0 positions;
     FUN_00449fd0 windPositions;
-    void FUN_00b300c0(const Vector3& point)
+    void FUN_00b300c0(const CVec3& point)
     {
         float px = point.x;
         float py = point.y;
@@ -28589,9 +28534,9 @@ struct Geometry
         unsigned int packed = FUN_00b30060(color);
         colors.FUN_00b32210(packed);
     }
-    void FUN_00b30190(const Vector3&);
-    void FUN_00b305f0(const Vector3&);
-    void FUN_00b30660(const Vector3&);
+    void FUN_00b30190(const CVec3&);
+    void FUN_00b305f0(const CVec3&);
+    void FUN_00b30660(const CVec3&);
     void FUN_00b30560(float, unsigned char);
     float* FUN_00b30f80(unsigned int);
     float* FUN_00b30fd0(unsigned int);
@@ -28612,8 +28557,10 @@ struct Geometry
         vertex = selected;
     }
 };
-struct DistancePoint : FUN_00b1ada0_class
+// Extend the shared vector with the external constructor and distance call it does not declare.
+struct DistancePoint : CVec3
 {
+    DistancePoint(float x, float y, float z);
     float FUN_00b04d40(const DistancePoint&) const;
 };
 struct B1FrondBuilder
@@ -28643,27 +28590,27 @@ void B1FrondBuilder::FUN_00b1b000(FrondInput* frond)
                 FloatMatrix3 previousA = guide ? (*(FloatMatrix3*)&(*frond)[guide - 1].rotation) : current2X;
                 current2X.FUN_00b1ae00(frond->angle);
                 previousA.FUN_00b1ae00(frond->angle);
-                Vector3 point7 = positions3[vertex].FUN_00b12890(current2X);
-                Vector3 priority_2 = positions3[vertex].FUN_00b12890(previousA);
-                Vector3 midPoint =
-                    (*(Vector3*)&(*frond)[guide]).AddVector(point7.AddVector(priority_2).ScaleSwizzled(0.5f));
-                Vector3 tangentsB = point7.AddVector(priority_2);
+                CVec3 point7 = positions3[vertex].FUN_00b12890(current2X);
+                CVec3 priority_2 = positions3[vertex].FUN_00b12890(previousA);
+                CVec3 midPoint =
+                    (*(CVec3*)&(*frond)[guide]).AddVector(point7.AddVector(priority_2).ScaleSwizzled(0.5f));
+                CVec3 tangentsB = point7.AddVector(priority_2);
                 tangentsB.FUN_00b12790();
                 geometry->FUN_00b300c0(midPoint);
                 TexCoord uvB;
                 uvB.u = across_2;
                 uvB.v = along;
                 geometry->FUN_00b301f0(uvB, (unsigned short)frond->layer);
-                Vector3 normal_0 = normals[vertex].FUN_00b12890(current2X);
-                Vector3 priorNormal = normals[vertex].FUN_00b12890(previousA);
-                Vector3 localA = normal_0.AddVector(priorNormal).ScaleSwizzled(0.5f);
+                CVec3 normal_0 = normals[vertex].FUN_00b12890(current2X);
+                CVec3 priorNormal = normals[vertex].FUN_00b12890(previousA);
+                CVec3 localA = normal_0.AddVector(priorNormal).ScaleSwizzled(0.5f);
                 localA.FUN_00b12790();
                 Color4 colorSlot5;
                 colorSlot5.r = colorSlot5.g = colorSlot5.b = colorSlot5.a = 1.0f;
                 geometry->FUN_00b30020(colorSlot5);
                 geometry->FUN_00b30190(localA);
                 geometry->FUN_00b305f0(tangentsB);
-                Vector3 binormalVal = localA.FUN_00b12810(tangentsB);
+                CVec3 binormalVal = localA.FUN_00b12810(tangentsB);
                 binormalVal.FUN_00b12790();
                 geometry->FUN_00b30660(binormalVal);
                 if (geometry->HasWind())
@@ -28684,10 +28631,8 @@ void B1FrondBuilder::FUN_00b1b000(FrondInput* frond)
                 unsigned int priorIndex8 = frond->start + (row - 1) * frond->stride + column;
                 float* coordinates = geometry->FUN_00b30f80(indexA6);
                 float* local7 = geometry->FUN_00b30f80(priorIndex8);
-                DistancePoint point21;
-                point21.FUN_00b1ada0(coordinates[0], coordinates[1], coordinates[2]);
-                DistancePoint priorVal;
-                priorVal.FUN_00b1ada0(local7[0], local7[1], local7[2]);
+                DistancePoint point21(coordinates[0], coordinates[1], coordinates[2]);
+                DistancePoint priorVal(local7[0], local7[1], local7[2]);
                 total += point21.FUN_00b04d40(priorVal);
                 cumulative.PushBack(total);
             }
@@ -28923,16 +28868,13 @@ struct Compare
         return a.f2c > b.f2c;
     }
 };
-struct BaseTag
-{
-};
-__forceinline Entry* checkedBase(Iter& it, BaseTag)
+__forceinline Entry* checkedBase(Iter& it, BaseTag_frondengine)
 {
     return it.raw();
 }
 __forceinline Entry* checkedBase(Iter& it)
 {
-    BaseTag tag;
+    BaseTag_frondengine tag;
     return checkedBase(it, tag);
 }
 void __cdecl FUN_00b23cd0(Entry*, Entry*, int, Compare);
@@ -29337,14 +29279,15 @@ static __forceinline void DeadQ()
     int aiD[25];
 }
 
-struct Vector_b1ea20 : vectorS<SFrondGuideEntry>
+// A checked STL-style frond-guide container (begin/end/capacity), unlike the SIMD math Vector.
+struct FrondGuideEraseContainer : vectorS<SFrondGuideEntry>
 {
     iterator FUN_00b1ea20(const_iterator _First_arg, const_iterator _Last_arg);
     void __thiscall FUN_00b1ebc0(SFrondGuideEntry* a, SFrondGuideEntry* b);
 };
 
 // @fnv 0x00b1ea20
-Vector_b1ea20::iterator Vector_b1ea20::FUN_00b1ea20(const_iterator _First_arg, const_iterator _Last_arg)
+FrondGuideEraseContainer::iterator FrondGuideEraseContainer::FUN_00b1ea20(const_iterator _First_arg, const_iterator _Last_arg)
 {
     iterator _First = _Make_iter(_First_arg);
     DeadQ();
@@ -30214,310 +30157,12 @@ extern "C" unsigned __cdecl strlen(const char*);
 }
 void __cdecl operator delete(void*);
 void* __cdecl operator new(unsigned);
-namespace std {
-template <class T> struct char_traits
-{
-    static unsigned length(const T* text)
-    {
-        return FrondComputeCrt::strlen(text);
-    }
-    static void assign(T& dest, const T& value)
-    {
-        dest = value;
-    }
-    static T* _Copy_s(T*, unsigned, const T*, unsigned);
-    static T* _Move_s(T*, unsigned, const T*, unsigned);
-};
-template <class T> class allocator
-{
-  public:
-    allocator() throw()
-    {}
-    allocator(const allocator&) throw()
-    {}
-    void deallocate(T* ptr, unsigned)
-    {
-        ::operator delete(ptr);
-    }
-    T* allocate(unsigned count)
-    {
-        return (T*)::operator new(count * sizeof(T));
-    }
-    unsigned max_size() const throw()
-    {
-        unsigned count = unsigned(-1) / sizeof(T);
-        return 0 < count ? count : 1;
-    }
-};
-class StringErrorBase
-{
-  public:
-    static void _Xlen();
-    static void _Xran();
-};
-template <class T, class Alloc> class StringValue : public StringErrorBase
-{
-  protected:
-    StringValue(Alloc al = Alloc()) : _Alval(al)
-    {}
-
-  public:
-    StringValue(const StringValue& other) : _Alval(other._Alval)
-    {}
-
-  protected:
-    Alloc _Alval;
-};
-template <class T, class Traits = char_traits<T>, class Alloc = allocator<T> >
-class basic_string : public StringValue<T, Alloc>
-{
-    typedef StringValue<T, Alloc> Base;
-    typedef basic_string<T, Traits, Alloc> Self;
-    enum
-    {
-        BufferSize = 16 / sizeof(T) < 1 ? 1 : 16 / sizeof(T),
-        AllocMask = sizeof(T) <= 1 ? 15 : sizeof(T) <= 2 ? 7 : sizeof(T) <= 4 ? 3 : sizeof(T) <= 8 ? 1 : 0
-    };
-
-  public:
-    basic_string(const T* text) : Base()
-    {
-        _Tidy();
-        assign(text);
-    }
-    basic_string(const Self& other) : Base(other)
-    {
-        _Tidy();
-        assign(other, 0, unsigned(-1));
-    }
-    ~basic_string()
-    {
-        _Tidy(true);
-    }
-    Self& assign(const T* text)
-    {
-        return assign(text, Traits::length(text));
-    }
-    Self& assign(const T* text, unsigned count)
-    {
-        if (_Inside(text))
-            return assign(*this, text - _Myptr(), count);
-        if (_Grow(count))
-        {
-            Traits::_Copy_s(_Myptr(), _Myres, text, count);
-            _Eos(count);
-        }
-        return *this;
-    }
-    Self& assign(const Self& other, unsigned off, unsigned count)
-    {
-        if (other.size() < off)
-            StringErrorBase::_Xran();
-        unsigned num = other.size() - off;
-        if (count < num)
-            num = count;
-        if (this == &other)
-            erase(off + num), erase(0, off);
-        else if (_Grow(num))
-        {
-            Traits::_Copy_s(_Myptr(), _Myres, other._Myptr() + off, num);
-            _Eos(num);
-        }
-        return *this;
-    }
-    Self& erase(unsigned off = 0, unsigned count = unsigned(-1))
-    {
-        if (_Mysize < off)
-            StringErrorBase::_Xran();
-        if (_Mysize - off < count)
-            count = _Mysize - off;
-        if (0 < count)
-        {
-            Traits::_Move_s(_Myptr() + off, _Myres - off, _Myptr() + off + count, _Mysize - off - count);
-            unsigned newsize = _Mysize - count;
-            _Eos(newsize);
-        }
-        return *this;
-    }
-    Self& operator+=(const Self& other)
-    {
-        return append(other);
-    }
-    Self& operator+=(const T* text)
-    {
-        return append(text);
-    }
-    Self& append(const Self& other)
-    {
-        return append(other, 0, unsigned(-1));
-    }
-    Self& append(const Self& other, unsigned off, unsigned count)
-    {
-        if (other.size() < off)
-            StringErrorBase::_Xran();
-        unsigned num = other.size() - off;
-        if (num < count)
-            count = num;
-        if (unsigned(-1) - _Mysize <= count || _Mysize + count < _Mysize)
-            StringErrorBase::_Xlen();
-        if (0 < count && _Grow(num = _Mysize + count))
-        {
-            Traits::_Copy_s(_Myptr() + _Mysize, _Myres - _Mysize, other._Myptr() + off, count);
-            _Eos(num);
-        }
-        return *this;
-    }
-    Self& append(const T* text, unsigned count)
-    {
-        if (_Inside(text))
-            return append(*this, text - _Myptr(), count);
-        if (unsigned(-1) - _Mysize <= count || _Mysize + count < _Mysize)
-            StringErrorBase::_Xlen();
-        unsigned num;
-        if (0 < count && _Grow(num = _Mysize + count))
-        {
-            Traits::_Copy_s(_Myptr() + _Mysize, _Myres - _Mysize, text, count);
-            _Eos(num);
-        }
-        return *this;
-    }
-    Self& append(const T* text)
-    {
-        return append(text, Traits::length(text));
-    }
-    unsigned size() const
-    {
-        return _Mysize;
-    }
-    unsigned max_size() const
-    {
-        unsigned num = Base::_Alval.max_size();
-        return num <= 1 ? 1 : num - 1;
-    }
-    void _Tidy(bool built = false, unsigned newsize = 0)
-    {
-        if (!built)
-            ;
-        else if (BufferSize <= _Myres)
-        {
-            T* ptr = _Bx.pointer;
-            if (0 < newsize)
-                Traits::_Copy_s(_Bx.buffer, BufferSize, ptr, newsize);
-            Base::_Alval.deallocate(ptr, _Myres + 1);
-        }
-        _Myres = BufferSize - 1;
-        _Eos(newsize);
-    }
-
-  private:
-    void _Copy(unsigned newsize, unsigned oldlen)
-    {
-        unsigned newres = newsize | AllocMask;
-        if (max_size() < newres)
-            newres = newsize;
-        else if (newres / 3 < _Myres / 2 && _Myres <= max_size() - _Myres / 2)
-            newres = _Myres + _Myres / 2;
-        T* ptr = 0;
-        try
-        {
-            ptr = Base::_Alval.allocate(newres + 1);
-        }
-        catch (...)
-        {
-            newres = newsize;
-            try
-            {
-                ptr = Base::_Alval.allocate(newres + 1);
-            }
-            catch (...)
-            {
-                _Tidy(true);
-                throw;
-            }
-        }
-        if (0 < oldlen)
-            Traits::_Copy_s(ptr, newres + 1, _Myptr(), oldlen);
-        _Tidy(true);
-        _Bx.pointer = ptr;
-        _Myres = newres;
-        _Eos(oldlen);
-    }
-    void _Eos(unsigned newsize)
-    {
-        Traits::assign(_Myptr()[_Mysize = newsize], T());
-    }
-    bool _Grow(unsigned newsize, bool trim = false)
-    {
-        if (max_size() < newsize)
-            StringErrorBase::_Xlen();
-        if (_Myres < newsize)
-            _Copy(newsize, _Mysize);
-        else if (trim && newsize < BufferSize)
-            _Tidy(true, newsize < _Mysize ? newsize : _Mysize);
-        else if (newsize == 0)
-            _Eos(0);
-        return 0 < newsize;
-    }
-    bool _Inside(const T* ptr)
-    {
-        if (ptr == 0 || ptr < _Myptr() || _Myptr() + _Mysize <= ptr)
-            return false;
-        else
-            return true;
-    }
-    T* _Myptr()
-    {
-        return BufferSize <= _Myres ? _Bx.pointer : _Bx.buffer;
-    }
-    const T* _Myptr() const
-    {
-        return BufferSize <= _Myres ? _Bx.pointer : _Bx.buffer;
-    }
-    union Storage
-    {
-        T buffer[BufferSize];
-        T* pointer;
-    } _Bx;
-    unsigned _Mysize, _Myres;
-};
-typedef basic_string<char> string;
-class runtime_error : public ::dtorb181::BxException
-{
-    string _Str;
-
-  public:
-    runtime_error(const string& message) : _Str(message)
-    {}
-    runtime_error(const FUN_0044a4c0& message) : _Str(*(const string*)&message)
-    {}
-    virtual ~runtime_error()
-    {}
-    virtual const char* what() const;
-};
-}
 int* __cdecl GetErrorNumber();
 char* __cdecl GetErrorText(int);
-namespace std {
-template <class T, class Traits, class Alloc>
-inline basic_string<T, Traits, Alloc> operator+(const basic_string<T, Traits, Alloc>& left, const T* right)
-{
-    return basic_string<T, Traits, Alloc>(left) += right;
-}
-template <class T, class Traits, class Alloc>
-inline basic_string<T, Traits, Alloc> operator+(const basic_string<T, Traits, Alloc>& left,
-                                                const basic_string<T, Traits, Alloc>& right)
-{
-    return basic_string<T, Traits, Alloc>(left) += right;
-}
-}
-class IdvFileError : public std::runtime_error
-{
-  public:
-    IdvFileError(const std::string& message, bool systemError)
-        : std::runtime_error(message + " [" +
-                             (systemError ? std::string(GetErrorText(*GetErrorNumber())) : std::string("")) + "]")
-    {}
-};
+inline IdvFileError::IdvFileError(const std::string& message, bool systemError)
+    : std::runtime_error(message + " [" +
+                         (systemError ? std::string(GetErrorText(*GetErrorNumber())) : std::string("")) + "]")
+{}
 FUN_0044a4c0 __cdecl FUN_00b18860(const char*, ...);
 struct FrondGuide;
 template <class T> struct FrondVector
@@ -30603,7 +30248,7 @@ void FrondEngine::FUN_00b18fd0(FrondGeometry* output, void* context)
         }
     }
     if (vertexCount > 65535)
-        throw std::runtime_error(FUN_00b18860(vertexLimitMessage, 65535));
+        throw std::runtime_error(*(const std::string*)&FUN_00b18860(vertexLimitMessage, 65535));
     geometry->FUN_00b2fb30(geometryType);
     switch (mode)
     {

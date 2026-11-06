@@ -1,13 +1,135 @@
-// bsshader/shadowscenenode.cpp: ShadowSceneNode, Base, Self, BlendOwner and more (63 functions)
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTPointerListBase.h"
+// bsshader/shadowscenenode.cpp: shadow scene operations (63 functions)
 
-#include "shadowscenenode_local.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/BSRenderedTexture.h"
+#include "../../include/BSTextureManager.h"
+#include "../../include/ShadowSceneLight.h"
+#include "../../include/ShadowSceneNode.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSShaderLightingProperty.h"
+#include "../../include/BSShaderProperty.h"
+#include "../../include/Bound.h"
+#include "../../include/NiDirectionalLight.h"
+#include "../../include/NiLight.h"
+#include "../../include/NiPlane.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/SceneGraph.h"
+#include "../../include/StrArr.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiColor.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTPointerList.h"
+#include "../../include/hkReferencedObject.h"
+#include <string.h>
+
+// Inline implementations used by this unit remain here alongside the shared declarations.
+inline NiPoint3::NiPoint3(float a, float b, float c) : x(a), y(b), z(c) {}
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
+
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0) DeleteThis();
+}
+
+
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0) {}
+template <class T> inline NiPointer<T>::NiPointer(T* pkNew) : m_pObject(pkNew)
+{
+    if (m_pObject != 0) m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0) m_pObject->DecRefCount();
+}
+template <class T> inline NiPointer<T>::operator T*() const { return m_pObject; }
+template <class T> inline T* NiPointer<T>::operator->() const { return m_pObject; }
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject != 0) m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0) m_pObject->IncRefCount();
+    }
+    return *this;
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer<T>& kSrc)
+{
+    return *this = kSrc.m_pObject;
+}
+template <class TAlloc, class T> inline T& NiTPointerListBase<TAlloc, T>::GetNext(void*& pos)
+{
+    NiTListItem<T>* item = static_cast<NiTListItem<T>*>(pos);
+    T& element = item->m_element;
+    pos = item->m_pkNext;
+    return element;
+}
+
+void __fastcall RemoveShadowList(void*);
+inline ShadowList::ShadowList() { count = 0; head = 0; tail = 0; }
+inline ShadowList::~ShadowList() { RemoveAll(); }
+template <class T> inline ShadowSceneList<T>::ShadowSceneList()
+{
+    m_kItemCount.m_uiCount = 0;
+    m_pkHead = 0;
+    m_pkTail = 0;
+}
+template <class T> inline ShadowSceneList<T>::~ShadowSceneList() { RemoveAll(); }
+template <class T> inline void ShadowSceneList<T>::RemoveAll() { RemoveShadowList(this); }
+inline BSCompoundFrustum::~BSCompoundFrustum() { FUN_00c47770(); }
+template <> inline NiPointer<BSFogProperty>::~NiPointer()
+{
+    if (m_pObject) reinterpret_cast<NiRefObject*>(m_pObject)->DecRefCount();
+}
+template <> inline NiPointer<NiCamera>::~NiPointer()
+{
+    if (m_pObject) reinterpret_cast<NiRefObject*>(m_pObject)->DecRefCount();
+}
+inline void ShadowList::RemoveAll() { RemoveShadowList(this); }
+
+extern BSTextureManager* DAT_011f91a8;
+struct ShadowListItem
+{
+    ShadowListItem* next;
+    ShadowListItem* prev;
+    ShadowSceneLight* light;
+};
+
+struct ShadowLightFlags
+{
+    char pad[0x30];
+    unsigned flags;
+    char pad34[0x94];
+    NiPoint3 ambient;
+    NiPoint3 diffuse;
+};
+
+inline float ShadowMax(float a, float b)
+{
+    return a > b ? a : b;
+}
 
 // @fnv 0x00b5eeb0
 void ShadowSceneNode::AddObject(NiAVObject* apObject)
 {
     if (!apObject)
         return;
-    if (apObject->m_uiObjectFlags & 1)
+    if (apObject->m_uFlags & 1)
         return;
     RemoveSceneObject(apObject, false);
 }
@@ -16,7 +138,7 @@ void ShadowSceneNode::AddObject(NiAVObject* apObject)
 // @fnv 0x00b5c3c0
 void ShadowSceneNode::UpdateShadowLights()
 {
-    ShadowListItem* item = shadowLights.head;
+    ShadowListItem* item = lShadowLightList.head;
     while (item)
     {
         ShadowSceneLight*& lightRef = item->light;
@@ -24,19 +146,19 @@ void ShadowSceneNode::UpdateShadowLights()
         ShadowSceneLight* light = lightRef;
         if (light)
         {
-            DAT_011f91a8->RemoveRenderedTexture(light->texture);
-            BSRenderedTexture* old = light->texture;
+            DAT_011f91a8->RemoveRenderedTexture(light->spDynamicShadowMap.m_pObject);
+            BSRenderedTexture* old = light->spDynamicShadowMap.m_pObject;
             if (old)
             {
-                if (!InterlockedDecrement(&old->refs))
-                    old->DeleteThis();
-                light->texture = 0;
+                if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&reinterpret_cast<NiRefObject*>(old)->m_uiRefCount)))
+                    reinterpret_cast<NiRefObject*>(old)->DeleteThis();
+                light->spDynamicShadowMap.m_pObject = 0;
             }
         }
     }
-    shadowLights.RemoveAll();
-    shadowCount = 0;
-    shadowCount2 = 0;
+    lShadowLightList.RemoveAll();
+    kShadowLightActiveFence = 0;
+    kShadowLightFadingInFence = 0;
 }
 
 // @fnv 0x00b5b4d0
@@ -44,7 +166,7 @@ float ShadowSceneNode::CalculateLightingAtPoint(NiPoint3 point, int& count, floa
                                                 NiLight* ignore)
 {
     float total = 0.0f;
-    ShadowListItem* item = lights.head;
+    ShadowListItem* item = lLightList.head;
     while (item)
     {
         ShadowSceneLight*& ref = item->light;
@@ -52,15 +174,16 @@ float ShadowSceneNode::CalculateLightingAtPoint(NiPoint3 point, int& count, floa
         ShadowSceneLight* light = ref;
         if (light)
         {
-            total += light->ComputeLightAttenuation(point, ignore);
+            total += light->ComputeLightAttenuation(*reinterpret_cast<const NiPoint3*>(&point), ignore);
             if (total > 0.0f)
                 ++count;
         }
     }
-    ShadowLightFlags* data = ambientLight->lightData;
-    NiPoint3 color = data->ambient;
+    ShadowLightFlags* data = reinterpret_cast<ShadowLightFlags*>(pSunLight->spLight.m_pObject);
+    NiPoint3 color;
+    memcpy(&color, &data->ambient, sizeof(color));
     ambient = ShadowMax(color.x, ShadowMax(color.y, color.z));
-    color = data->diffuse;
+    memcpy(&color, &data->diffuse, sizeof(color));
     diffuse = ShadowMax(color.x, ShadowMax(color.y, color.z));
     return total;
 }
@@ -177,8 +300,8 @@ void __fastcall FUN_00b5b060(char* pThis, int)
             BSRenderedTexture* pkTex = *(BSRenderedTexture**)(pkLight + 0x10C);
             if (pkTex)
             {
-                if (InterlockedDecrement(&pkTex->refs) == 0)
-                    pkTex->DeleteThis();
+                if (InterlockedDecrement(reinterpret_cast<volatile long*>(&reinterpret_cast<NiRefObject*>(pkTex)->m_uiRefCount)) == 0)
+                    reinterpret_cast<NiRefObject*>(pkTex)->DeleteThis();
                 *(BSRenderedTexture**)(pkLight + 0x10C) = 0;
             }
             *(unsigned int*)(*(char**)(pkLight + 0xF8) + 0x30) |= 1;
@@ -284,35 +407,18 @@ void* __fastcall FUN_00b5aa40(FUN_00b5aa40_self* self, int unused)
     return 0;
 }
 
-struct FUN_00b5ac60_item
-{
-    unsigned char pad[0x110];
-    unsigned short id;
-};
-struct FUN_00b5ac60_node
-{
-    FUN_00b5ac60_node* next;
-    int unk;
-    FUN_00b5ac60_item* item;
-};
-struct FUN_00b5ac60_self
-{
-    unsigned char pad[0xb4];
-    FUN_00b5ac60_node* head;
-};
-
 // Walks the linked list from self->head and counts nodes whose item is non-null and whose id is not 0xff.
 // @fnv 0x00b5ac60
-int __fastcall FUN_00b5ac60(FUN_00b5ac60_self* self, int unused)
+int __fastcall FUN_00b5ac60(ShadowSceneNode* self, int unused)
 {
     int count = 0;
-    FUN_00b5ac60_node* n = self->head;
+    ShadowListItem* n = self->lLightList.head;
     while (n)
     {
-        FUN_00b5ac60_item* const* pp = &n->item;
+        ShadowSceneLight* const* pp = &n->light;
         n = n->next;
-        FUN_00b5ac60_item* it = *pp;
-        if (it && it->id != 0xff)
+        ShadowSceneLight* it = *pp;
+        if (it && it->usFrustumCull != 0xff)
             ++count;
     }
     return count;
@@ -421,93 +527,56 @@ struct NiAVObjectVirt
     virtual NiNode* vfunc3();
 };
 
-struct FUN_00b5b150_Struct
-{
-    void __thiscall ProcessNodeChildren(NiNode*);
-};
-
 // If apObject is non-null, gets its node via vfunc3 and, when that node exists, passes it to ProcessNodeChildren on thisptr.
 // @fnv 0x00b5b1c0
-void __fastcall FUN_00b5b1c0(ShadowSceneNode* thisptr, int, NiAVObject* apObject)
+void ShadowSceneNode::FUN_00b5b1c0(NiAVObject* apObject)
 {
     if (apObject)
     {
         NiNode* pnode = ((NiAVObjectVirt*)apObject)->vfunc3();
         if (pnode)
-            ((FUN_00b5b150_Struct*)thisptr)->ProcessNodeChildren(pnode);
+            reinterpret_cast<void (__thiscall*)(ShadowSceneNode*, NiNode*)>(&ProcessNodeChildren)(this, pnode);
     }
 }
 
-struct FUN_00b5b4a0_item
-{
-    unsigned char pad[0xf8];
-    int key;
-};
-struct FUN_00b5b4a0_node
-{
-    FUN_00b5b4a0_node* next;
-    int unk;
-    FUN_00b5b4a0_item* item;
-};
-struct FUN_00b5b4a0_self
-{
-    unsigned char pad[0xb4];
-    FUN_00b5b4a0_node* head;
-};
-
 // Walks the linked list from self->head and returns the first item whose key equals key, or null if none matches.
 // @fnv 0x00b5b4a0
-FUN_00b5b4a0_item* __fastcall FUN_00b5b4a0(FUN_00b5b4a0_self* self, int unused, int key)
+ShadowSceneLight* __fastcall FUN_00b5b4a0(ShadowSceneNode* self, int unused, int key)
 {
-    FUN_00b5b4a0_node* n = self->head;
+    ShadowListItem* n = self->lLightList.head;
     while (n)
     {
-        FUN_00b5b4a0_item* const* pp = &n->item;
+        ShadowSceneLight* const* pp = &n->light;
         n = n->next;
-        FUN_00b5b4a0_item* it = *pp;
-        if (it && it->key == key)
+        ShadowSceneLight* it = *pp;
+        if (it && reinterpret_cast<int>(it->spLight.m_pObject) == key)
             return it;
     }
     return 0;
 }
 
-struct FUN_00b9dcb0_stub;
-struct FUN_00b5c450_item
-{
-    unsigned char pad[0xf8];
-    int key;
-    void SetShadowEnabled(int v);
-};
-struct FUN_00b5c450_node
-{
-    FUN_00b5c450_node* next;
-    int unk;
-    FUN_00b5c450_item* item;
-};
-struct FUN_00b5c450_self
-{
-    unsigned char pad[0xb4];
-    FUN_00b5c450_node* head;
-};
+void __fastcall SetShadowEnabled(ShadowSceneLight* light, int, bool enable);
 
-// Walks the linked list from self->head and, for the first item whose key matches, calls SetShadowEnabled with flag.
+// Walks the linked list from self->lLightList.head and, for the first item whose key matches, calls SetShadowEnabled with flag.
 // @fnv 0x00b5c450
-void __fastcall CallItemMethodByKey(FUN_00b5c450_self* self, int unused, int key, int flag)
+void __fastcall CallItemMethodByKey(ShadowSceneNode* self, int unused, int key, int flag)
 {
-    FUN_00b5c450_node* n = self->head;
+    ShadowListItem* n = self->lLightList.head;
     while (n)
     {
-        FUN_00b5c450_item* const* pp = &n->item;
+        ShadowSceneLight* const* pp = &n->light;
         n = n->next;
-        FUN_00b5c450_item* it = *pp;
-        if (it && it->key == key)
+        ShadowSceneLight* it = *pp;
+        if (it && reinterpret_cast<int>(it->spLight.m_pObject) == key)
         {
-            it->SetShadowEnabled(flag);
+            reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, int)>(&SetShadowEnabled)(it, flag);
             return;
         }
     }
 }
 
+void __fastcall ResetSceneLight(ShadowSceneLight*, int);
+void __fastcall ProcessSceneLight(ShadowSceneNode*, int, ShadowSceneLight*);
 struct V3D
 {
     float x, y, z;
@@ -519,82 +588,50 @@ struct LightDataD
     char pad2[0x58];
     V3D pos;
 };
-struct LightD
-{
-    char pad[0xec];
-    char f_ec;
-    char pad2[7];
-    char f_f4;
-    char pad3[3];
-    LightDataD* data;
-    char f_fc;
-    char pad4[3];
-    V3D v100;
-    int pad5;
-    short s110;
-    void FUN_00b9ef30();
-    void SetTripleInts(V3D);
-};
-struct OwnerD
-{
-    void FUN_00b5d300(LightD*);
-};
+
 struct PosD
 {
     bool _Call_439090(const V3D*);
 };
+void __fastcall SetLightPosition(ShadowSceneLight*, int, V3D);
 // @fnv 0x00b5d930
-void __fastcall FUN_00b5d930(OwnerD* self, int, LightD* l)
+void __fastcall FUN_00b5d930(ShadowSceneNode* self, int, ShadowSceneLight* l)
 {
-    if (l->f_f4 && l->f_fc && !l->f_ec)
+    if (l->bPointLight && l->bDynamicLight && !l->bCastShadow)
     {
-        LightDataD* d = l->data;
+        LightDataD* d = reinterpret_cast<LightDataD*>(l->spLight.m_pObject);
         if (d->flags & 1)
         {
-            l->FUN_00b9ef30();
+            reinterpret_cast<void (__thiscall*)(ShadowSceneLight*)>(&ResetSceneLight)(l);
             return;
         }
-        V3D p = l->v100;
-        if (((PosD*)&p)->_Call_439090(&d->pos) && l->s110 != 0xff)
+        V3D p = *reinterpret_cast<V3D*>(&l->bPointPosition);
+        if (((PosD*)&p)->_Call_439090(&d->pos) && l->usFrustumCull != 0xff)
         {
-            l->SetTripleInts(d->pos);
-            self->FUN_00b5d300(l);
+            reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, V3D)>(&SetLightPosition)(l, d->pos);
+            reinterpret_cast<void (__thiscall*)(ShadowSceneNode*, ShadowSceneLight*)>(&ProcessSceneLight)(self, l);
         }
     }
 }
 
-struct FUN_00b5ddb0_item;
-struct FUN_00b5ddb0_node
-{
-    FUN_00b5ddb0_node* next;
-    int unk;
-    FUN_00b5ddb0_item* item;
-};
-struct FUN_00b5ddb0_self
-{
-    unsigned char pad[0xb4];
-    FUN_00b5ddb0_node* head;
-    void FUN_00b5d270(FUN_00b5ddb0_item* it);
-    void FUN_00b5d180();
-    void FUN_00b5ddb0(bool a, bool b);
-};
+void __fastcall RemoveLightObjects(ShadowSceneNode*, int, ShadowSceneLight*);
 
 // @fnv 0x00b5ddb0
-void FUN_00b5ddb0_self::FUN_00b5ddb0(bool a, bool b)
+void __fastcall UpdateLightObjects(ShadowSceneNode* self, int, bool a, bool b)
 {
     if (a)
     {
-        FUN_00b5ddb0_node* n = head;
+        ShadowListItem* n = self->lLightList.head;
         while (n)
         {
-            FUN_00b5ddb0_item* const* pp = &n->item;
+            ShadowSceneLight* const* pp = &n->light;
             n = n->next;
-            FUN_00b5ddb0_item* it = *pp;
+            ShadowSceneLight* it = *pp;
             if (it)
-                FUN_00b5d270(it);
+                reinterpret_cast<void (__thiscall*)(ShadowSceneNode*, ShadowSceneLight*)>(&RemoveLightObjects)(self, it);
         }
         if (!b)
-            FUN_00b5d180();
+            self->FUN_00b5d180();
     }
 }
 
@@ -629,88 +666,59 @@ void __fastcall FUN_00cb9930(void* self, int, unsigned* dst, unsigned* src, unsi
     }
 }
 
-struct CloningProcess;
-struct NiDirectionalLight;
-struct NiDynamicEffect;
-struct NiLight;
-struct NiNode;
-struct NiStream;
-struct NiUpdateData;
-struct FUN_00b5aac0_shell : public ShadowSceneNode
+inline void NiDirectionalLight::SetAmbientColor(const NiColor& color)
 {
-    void FUN_00b5aac0(NiDirectionalLight*);
-};
-
-struct NiColor
+    m_kAmb = color;
+    revID++;
+}
+inline void NiDirectionalLight::SetDiffuseColor(const NiColor& color)
 {
-    float r;
-    float g;
-    float b;
-};
-struct BSFadeNode
+    m_kDiff = color;
+    revID++;
+}
+inline void NiLight::IncRefCount()
 {
-    static void* operator new(unsigned int);
-    static void operator delete(void*);
-};
-struct NiDirectionalLight : public BSFadeNode
+    InterlockedIncrement((volatile long*)&m_uiRefCount);
+}
+inline void NiLight::DecRefCount()
 {
-    NiDirectionalLight();
-    char pad0[0xa8];
-    unsigned int m_uiRevID;
-    char padac[0x1c];
-    NiColor m_kAmb;
-    NiColor m_kDiff;
-    char pade0[0x1c];
-    void SetAmbientColor(const NiColor& kColor)
+    if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0) DeleteThis();
+}
+inline bool NiLight::IsKindOfType(const NiRTTI* pkRTTI) const
+{
+    for (const NiRTTI* pkType = GetRTTI(); pkType; pkType = pkType->m_pBaseRTTI)
     {
-        m_kAmb = kColor;
-        m_uiRevID++;
+        if (pkType == pkRTTI) return true;
     }
-    void SetDiffuseColor(const NiColor& kColor)
-    {
-        m_kDiff = kColor;
-        m_uiRevID++;
-    }
-};
+    return false;
+}
 
-struct GlobalObjectO2_00b9fda0 : public BSFadeNode
-{
-    GlobalObjectO2_00b9fda0();
-    virtual ~GlobalObjectO2_00b9fda0();
-    void FUN_00b9dda0(NiDirectionalLight*);
-    char pad[0x24c];
-};
+namespace fnv_00b9dda0 { void __fastcall BindLight(ShadowSceneLight*, int, NiLight*); }
 extern NiColor DAT_011f4998;
 
 // @fnv 0x00b5aac0
-void FUN_00b5aac0_shell::FUN_00b5aac0(NiDirectionalLight* apLight)
+void __fastcall SetSunLight(ShadowSceneNode* self, int, NiDirectionalLight* apLight)
 {
-    if (*(GlobalObjectO2_00b9fda0**)((char*)this + 0xe0))
+    if (self->pSunLight)
     {
-        delete *(GlobalObjectO2_00b9fda0**)((char*)this + 0xe0);
-        *(GlobalObjectO2_00b9fda0**)((char*)this + 0xe0) = 0;
+        delete self->pSunLight;
+        self->pSunLight = 0;
     }
     if (apLight)
     {
-        *(GlobalObjectO2_00b9fda0**)((char*)this + 0xe0) = new GlobalObjectO2_00b9fda0;
-        (*(GlobalObjectO2_00b9fda0**)((char*)this + 0xe0))->FUN_00b9dda0(apLight);
+        self->pSunLight = new ShadowSceneLight;
+        reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, NiLight*)>(&fnv_00b9dda0::BindLight)(self->pSunLight, apLight);
     }
     else
     {
         NiDirectionalLight* pdefaultsun = new NiDirectionalLight;
         pdefaultsun->SetAmbientColor(DAT_011f4998);
         pdefaultsun->SetDiffuseColor(DAT_011f4998);
-        *(GlobalObjectO2_00b9fda0**)((char*)this + 0xe0) = new GlobalObjectO2_00b9fda0;
-        (*(GlobalObjectO2_00b9fda0**)((char*)this + 0xe0))->FUN_00b9dda0(pdefaultsun);
+        self->pSunLight = new ShadowSceneLight;
+        reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, NiLight*)>(&fnv_00b9dda0::BindLight)(self->pSunLight, pdefaultsun);
     }
 }
 
-struct NiPlane
-{
-    NiPoint3 m_kPlaneNormal;
-    float m_fPlaneConstant;
-    NiPlane();
-};
 struct SSFrustumPlanes
 {
     NiPlane m_akPlanes[6];
@@ -772,29 +780,24 @@ struct SSListOwner
         return kElement;
     }
 };
-struct FUN_00b5ac90_t
-{
-    char pad[0x1e0];
-    SSListOwner* pOwner;
-    void FUN_00b5ac90(SSCamera* pkCamera);
-};
+
 // @fnv 0x00b5ac90
-void FUN_00b5ac90_t::FUN_00b5ac90(SSCamera* pkCamera)
+void __fastcall UpdatePortalVisibility(ShadowSceneNode* self, int, SSCamera* pkCamera)
 {
-    if (pOwner)
+    if (reinterpret_cast<SSListOwner*>(self->pBSPortalGraph))
     {
         FUN_00a69400 kCuller(0);
         kCuller.m_pkAccumulationCamera = pkCamera;
         kCuller.FUN_00a694a0(&pkCamera->m_kViewFrustum);
-        SSListNode* pkPos = pOwner->GetHeadPos();
+        SSListNode* pkPos = reinterpret_cast<SSListOwner*>(self->pBSPortalGraph)->GetHeadPos();
         SSCullData kData;
         while (pkPos)
         {
-            SSNode* pkNode = pOwner->GetNext(pkPos);
+            SSNode* pkNode = reinterpret_cast<SSListOwner*>(self->pBSPortalGraph)->GetNext(pkPos);
             if (pkNode)
             {
-                bool bA = pkNode->FUN_00c33cf0(&kData, 0, NiPoint3::ZERO);
-                bA &= pkNode->FUN_00c358a0(pkCamera->m_kWorldTranslate);
+                bool bA = pkNode->FUN_00c33cf0(&kData, 0, *reinterpret_cast<const NiPoint3*>(&NiPoint3::ZERO));
+                bA &= pkNode->FUN_00c358a0(*reinterpret_cast<const NiPoint3*>(&pkCamera->m_kWorldTranslate));
                 pkNode->iState = bA ? 1 : 2;
             }
         }
@@ -802,16 +805,7 @@ void FUN_00b5ac90_t::FUN_00b5ac90(SSCamera* pkCamera)
 }
 
 namespace fnv_00b5c490 {
-struct NiRTTI_b5c490
-{
-    const char* m_pcName;
-};
-extern NiRTTI_b5c490 g_011f5f1c_arg1;
-struct Bound_b5c490
-{
-    float m_kCenter[3];
-    float fRadius;
-};
+extern NiRTTI g_011f5f1c_arg1;
 struct AVObj_b5c490
 {
     virtual void v0();
@@ -823,7 +817,7 @@ struct AVObj_b5c490
     virtual void v6();
     virtual AVObj_b5c490* IsGeometry();
     char pad04[0x1c];
-    Bound_b5c490* m_pBound;
+    Bound* m_pBound;
     char pad24[0xc];
     unsigned int m_uiObjectFlags;
     char pad34[0x6c];
@@ -847,7 +841,7 @@ bool FUN_00b5c490(AVObj_b5c490* pObj, void* apArg2, void* apArg3, void* apArg4, 
 {
     if (!pObj)
         return true;
-    if (!pObj->m_pBound || pObj->m_pBound->fRadius == 0.0f || (pObj->m_uiObjectFlags & 1) || !pObj->IsSceneNode())
+    if (!pObj->m_pBound || pObj->m_pBound->radius == 0.0f || (pObj->m_uiObjectFlags & 1) || !pObj->IsSceneNode())
         return false;
     AVObj_b5c490* pNode = pObj->IsSceneNode();
     bool bResult = true;
@@ -877,10 +871,6 @@ bool FUN_00b5c490(AVObj_b5c490* pObj, void* apArg2, void* apArg3, void* apArg4, 
 }
 }  // namespace fnv_00b5c490
 
-struct BndS5
-{
-    float x, y, z, r;
-};
 struct Nd5;
 struct AV5
 {
@@ -893,7 +883,7 @@ struct AV5
     virtual void v6();
     virtual void* IsGeom();
     char pad04[0x1c];
-    BndS5* pBound;
+    Bound* pBound;
     char pad24[0xc];
     unsigned int flags;
 };
@@ -921,7 +911,7 @@ bool CheckBoundAndChildren(AV5* apObject, void* apArg1, void* apArg2, bool c)
 {
     if (!apObject)
         return true;
-    if (apObject->pBound && apObject->pBound->r != 0.0f && !(apObject->flags & 1) && apObject->IsSceneNode())
+    if (apObject->pBound && apObject->pBound->radius != 0.0f && !(apObject->flags & 1) && apObject->IsSceneNode())
     {
         Nd5* node = apObject->IsSceneNode();
         bool result = true;
@@ -952,48 +942,29 @@ bool CheckBoundAndChildren(AV5* apObject, void* apArg1, void* apArg2, bool c)
     return false;
 }
 
-namespace fnv_00b5c7d0 {
-struct StrArr
+inline void StrArr::SetAt(unsigned int uiIndex, char*& element)
 {
-    void* vtbl;
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int uiIndex, char*& element)
+    if (uiIndex >= m_usSize)
     {
-        if (uiIndex >= m_usSize)
-        {
-            m_usSize = (unsigned short)(uiIndex + 1);
-            if (element != 0)
-                m_usESize++;
-        }
-        else
-        {
-            if (element != 0)
-            {
-                if (m_pBase[uiIndex] == 0)
-                    m_usESize++;
-            }
-            else
-            {
-                if (m_pBase[uiIndex] != 0)
-                    m_usESize--;
-            }
-        }
-        m_pBase[uiIndex] = element;
+        m_usSize = (unsigned short)(uiIndex + 1);
+        if (element != 0) m_usESize++;
     }
-    unsigned int Add(char*& element)
+    else if (element != 0)
     {
-        unsigned int uiIndex = m_usSize;
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
+        if (m_pBase[uiIndex] == 0) m_usESize++;
     }
-};
+    else if (m_pBase[uiIndex] != 0) m_usESize--;
+    m_pBase[uiIndex] = element;
+}
+inline unsigned int StrArr::Add(char*& element)
+{
+    unsigned int uiIndex = m_usSize;
+    if (uiIndex >= m_usMaxSize) SetSize(uiIndex + m_usGrowBy);
+    (this->*static_cast<void (StrArr::*)(unsigned int, char*&)>(&StrArr::SetAt))(uiIndex, element);
+    return uiIndex;
+}
+
+namespace fnv_00b5c7d0 {
 struct FUN_00c51570_Class
 {
     void* FUN_00a5ea70(void*);
@@ -1010,48 +981,46 @@ struct LightNode
     char* light;
 };
 
-struct ShadowSceneNodeS : FUN_00c51570_Class
+// Local method adapters add no object storage to the shared node layout.
+class ShadowSceneViewer : public ShadowSceneNode
 {
-    unsigned int InitializeTESResources() const
-    {
-        return *(unsigned int*)((char*)this + 0xbc);
-    }
+  public:
+    unsigned int CountLights() const { return lLightList.count; }
     static char* const& Next(LightNode*& pos)
     {
-        char* const& e = pos->light;
+        char* const& light = pos->light;
         pos = pos->next;
-        return e;
+        return light;
     }
-    char* GetLightAt(unsigned short usIndex) const
+    char* GetLightAt(unsigned short index) const
     {
-        if (usIndex >= *(unsigned int*)((char*)this + 0xbc))
+        if (index >= lLightList.count)
             return 0;
-        LightNode* pos = *(LightNode**)((char*)this + 0xb4);
+        LightNode* pos = reinterpret_cast<LightNode*>(lLightList.head);
         char* light = Next(pos);
-        for (unsigned int i = 0; i < usIndex; i++)
+        for (unsigned int i = 0; i < index; i++)
             light = Next(pos);
         return light;
     }
-    void AppendLightStats(StrArr* pkStrings);
+    void AppendLightStats(StrArr* strings);
 };
-
 // @fnv 0x00b5c7d0
-void ShadowSceneNodeS::AppendLightStats(StrArr* pkStrings)
+void ShadowSceneViewer::AppendLightStats(StrArr* pkStrings)
 {
-    FUN_00c51570_Class::FUN_00a5ea70(pkStrings);
+    reinterpret_cast<FUN_00c51570_Class*>(this)->FUN_00a5ea70(pkStrings);
     char* s = FUN_00a7d330(g_011f9e80);
-    pkStrings->Add(s);
-    s = FUN_00a7d490("light count", InitializeTESResources());
-    pkStrings->Add(s);
+    (pkStrings->*static_cast<unsigned int (StrArr::*)(char*&)>(&StrArr::Add))(s);
+    s = FUN_00a7d490("light count", CountLights());
+    (pkStrings->*static_cast<unsigned int (StrArr::*)(char*&)>(&StrArr::Add))(s);
     int iShadowLightCount = 0;
-    unsigned int ItemUpdateArray = InitializeTESResources();
+    unsigned int ItemUpdateArray = CountLights();
     for (int i = 0; i < (unsigned short)ItemUpdateArray; i++)
     {
         if (GetLightAt((unsigned short)i)[0xec])
             iShadowLightCount++;
     }
     s = FUN_00a7d4d0("shadow light count", iShadowLightCount);
-    pkStrings->Add(s);
+    (pkStrings->*static_cast<unsigned int (StrArr::*)(char*&)>(&StrArr::Add))(s);
 }
 }  // namespace fnv_00b5c7d0
 
@@ -1067,38 +1036,29 @@ struct TLSData
 };
 __declspec(thread) TLSData g_tlsData;
 
-struct AutoMemContext
+inline AutoMemContext::AutoMemContext(int newContext)
 {
-    int oldContext;
-    AutoMemContext(int newContext)
-    {
-        oldContext = g_tlsData.memContext;
-        g_tlsData.memContext = newContext;
-    }
-    ~AutoMemContext()
-    {
-        g_tlsData.memContext = oldContext;
-    }
-};
-
-struct BSRenderedTextureHelper : BSRenderedTexture
+    m_eMemoryContext = (MEM_CONTEXT)g_tlsData.memContext;
+    g_tlsData.memContext = newContext;
+}
+inline AutoMemContext::~AutoMemContext()
 {
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&refs) == 0)
-            DeleteThis();
-    }
-};
+    g_tlsData.memContext = m_eMemoryContext;
+}
 
 struct TexturePtr
 {
-    BSRenderedTextureHelper* m_pObject;
-    void operator=(BSRenderedTextureHelper* p)
+    BSRenderedTexture* m_pObject;
+    void operator=(BSRenderedTexture* p)
     {
         if (m_pObject != p)
         {
-            if (m_pObject)
-                m_pObject->DecRefCount();
+            if (m_pObject != 0)
+            {
+                NiRefObject* object = reinterpret_cast<NiRefObject*>(m_pObject);
+                if (InterlockedDecrement(reinterpret_cast<volatile long*>(&object->m_uiRefCount)) == 0)
+                    object->DeleteThis();
+            }
             m_pObject = p;
         }
     }
@@ -1108,34 +1068,24 @@ struct TexturePtr
     }
 };
 
-struct FUN_00b9dcb0_Class
-{
-    char pad_00[0xec];
-    bool m_bFlagEC;
-    char pad_ed[0x1f];
-    TexturePtr m_spShadowTexture;
-
-    void SetShadowEnabled(bool bEnable);
-};
-
 // @fnv 0x00b9dcb0
-void FUN_00b9dcb0_Class::SetShadowEnabled(bool bEnable)
+void __fastcall SetShadowEnabled(ShadowSceneLight* light, int, bool bEnable)
 {
     AutoMemContext memContext(0x20);
 
     int bShadows = 0;
-    if ((!m_bFlagEC || bEnable) && _fnv_particle_shader_renderer_level >= 3)
+    if ((!light->bCastShadow || bEnable) && _fnv_particle_shader_renderer_level >= 3)
         bShadows = (DAT_011f91d8 & 0x10) > 0;
 
     if (!(char)bShadows)
     {
-        if (m_spShadowTexture)
+        if (reinterpret_cast<TexturePtr&>(light->spDynamicShadowMap))
         {
-            DAT_011f91a8->RemoveRenderedTexture(m_spShadowTexture);
-            m_spShadowTexture = 0;
+            DAT_011f91a8->RemoveRenderedTexture(reinterpret_cast<TexturePtr&>(light->spDynamicShadowMap));
+            reinterpret_cast<TexturePtr&>(light->spDynamicShadowMap) = 0;
         }
     }
-    m_bFlagEC = bEnable;
+    light->bCastShadow = bEnable;
 }
 
 namespace fnv_00b9dda0 {
@@ -1145,80 +1095,28 @@ extern "C"
     __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 }
 
-struct NiRTTI
-{
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
-
 extern const NiRTTI g_011f5ec4_arg1;
 extern const NiRTTI g_011f5f6c;
 
-struct NiLight
-{
-    virtual void vfn_00();
-    virtual void DeleteThis();
-    virtual const NiRTTI* GetRTTI() const;
-    long m_uiRefCount;
-    char pad_08[0x8c - 8];
-    NiPoint3 m_kPoint8C;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    bool IsKindOfType(const NiRTTI* pkRTTI) const
-    {
-        for (const NiRTTI* pkType = GetRTTI(); pkType; pkType = pkType->m_pBaseRTTI)
-        {
-            if (pkType == pkRTTI)
-                return true;
-        }
-        return false;
-    }
-};
-
-struct FUN_00b9dda0_Class
-{
-    char pad_00[0xd0];
-    float m_fFloatD0;
-    char pad_d4[0x20];
-    bool m_bFlagF4;
-    bool m_bFlagF5;
-    char pad_f6[2];
-    NiPointer<NiLight> m_spLight;
-    bool m_bFlagFC;
-    char pad_fd[3];
-    NiPoint3 m_kPoint100;
-
-    void FUN_00b9dda0(NiLight* apTargetLight);
-};
-
 // @fnv 0x00b9dda0
-void FUN_00b9dda0_Class::FUN_00b9dda0(NiLight* apLight)
+void __fastcall BindLight(ShadowSceneLight* self, int, NiLight* apLight)
 {
-    m_spLight = apLight;
+    self->spLight = apLight;
 
     bool bKind1 = apLight && apLight->IsKindOfType(&g_011f5ec4_arg1);
-    m_bFlagF4 = bKind1;
+    self->bPointLight = bKind1;
     if (bKind1)
     {
-        if (m_bFlagFC)
-            m_kPoint100 = apLight->m_kPoint8C;
+        if (self->bDynamicLight)
+            memcpy(&self->bPointPosition, &apLight->m_kWorld.m_Translate, sizeof(self->bPointPosition));
     }
     else
     {
-        m_fFloatD0 = 1.0f;
+        self->fLODDimmer = 1.0f;
     }
 
     bool bKind2 = apLight && apLight->IsKindOfType(&g_011f5f6c);
-    m_bFlagF5 = bKind2;
+    self->bAmbientLight = bKind2;
 }
 }  // namespace fnv_00b9dda0
 
@@ -1254,313 +1152,52 @@ int FUN_00b5a930_cls::FindFirstMatch(void* apContext, unsigned int start, FUN_00
     return -1;
 }
 
-struct S_Item
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    int unkF0;
-    int unkF4;
-    int m_f8;
-};
-struct S_Node
-{
-    S_Node* m_pNext;
-    int unk04;
-    S_Item* m_pInventoryEntryData;
-};
-struct S_Cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    S_Node* m_pHead;
-    int unkC4;
-    int unkC8;
-    S_Node* volatile m_pCur;
-    S_Item* FUN_00b5afc0();
-};
 // @fnv 0x00b5afc0
-S_Item* S_Cls::FUN_00b5afc0()
+ShadowSceneLight* __fastcall FirstActiveShadowLight(ShadowSceneNode* self, int)
 {
-    S_Node* node = m_pHead;
-    m_pCur = node;
+    ShadowListItem* node = self->lShadowLightList.head;
+    reinterpret_cast<ShadowListItem* volatile&>(self->kShadowLightListIterator) = node;
     if (!node)
         return 0;
-    S_Node* next = node->m_pNext;
-    m_pCur = next;
-    S_Item* it = node->m_pInventoryEntryData;
+    ShadowListItem* next = node->next;
+    reinterpret_cast<ShadowListItem* volatile&>(self->kShadowLightListIterator) = next;
+    ShadowSceneLight* it = node->light;
     while (next)
     {
-        if (it && it->m_f8)
+        if (it && it->spLight.m_pObject)
             break;
-        node = m_pCur;
-        next = node->m_pNext;
-        m_pCur = next;
-        it = node->m_pInventoryEntryData;
+        node = reinterpret_cast<ShadowListItem* volatile&>(self->kShadowLightListIterator);
+        next = node->next;
+        reinterpret_cast<ShadowListItem* volatile&>(self->kShadowLightListIterator) = next;
+        it = node->light;
     }
     return it;
 }
 
-struct FUN_00b5b010_item;
-struct FreeListNode
-{
-    FreeListNode* m_pNext;
-    unsigned int unk04;
-    FUN_00b5b010_item* m_pInventoryEntryData;
-};
-struct FUN_00b5b010_item
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9C;
-    unsigned int unkA0;
-    unsigned int unkA4;
-    unsigned int unkA8;
-    unsigned int unkAC;
-    unsigned int unkB0;
-    unsigned int unkB4;
-    unsigned int unkB8;
-    unsigned int unkBC;
-    unsigned int unkC0;
-    unsigned int unkC4;
-    unsigned int unkC8;
-    unsigned int unkCC;
-    unsigned int unkD0;
-    unsigned int unkD4;
-    unsigned int unkD8;
-    unsigned int unkDC;
-    unsigned int unkE0;
-    unsigned int unkE4;
-    unsigned int unkE8;
-    unsigned int unkEC;
-    unsigned int unkF0;
-    unsigned int unkF4;
-    unsigned int m_uiF8;
-};
-class FUN_00b5b010_cls
-{
-  public:
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9C;
-    unsigned int unkA0;
-    unsigned int unkA4;
-    unsigned int unkA8;
-    unsigned int unkAC;
-    unsigned int unkB0;
-    unsigned int unkB4;
-    unsigned int unkB8;
-    unsigned int unkBC;
-    unsigned int unkC0;
-    unsigned int unkC4;
-    unsigned int unkC8;
-    FreeListNode* m_pHead;
-    FUN_00b5b010_item* FUN_00b5b010();
-};
-// Pops nodes from the m_pHead list and returns the first item whose m_uiF8 is nonzero, or the last popped item.
+// Advances the shadow-light iterator and returns the first light with an attached game light, or the last item.
 // @fnv 0x00b5b010
-FUN_00b5b010_item* FUN_00b5b010_cls::FUN_00b5b010()
+ShadowSceneLight* __fastcall NextActiveShadowLight(ShadowSceneNode* self, int)
 {
-    FUN_00b5b010_item* item = 0;
-    if (m_pHead != 0)
+    ShadowSceneLight* item = 0;
+    if (reinterpret_cast<ShadowListItem*&>(self->kShadowLightListIterator) != 0)
     {
-        FreeListNode* node = *(FreeListNode* volatile*)&m_pHead;
-        m_pHead = node->m_pNext;
-        item = node->m_pInventoryEntryData;
-        while (m_pHead != 0)
+        ShadowListItem* node = *(ShadowListItem* volatile*)&reinterpret_cast<ShadowListItem*&>(self->kShadowLightListIterator);
+        reinterpret_cast<ShadowListItem*&>(self->kShadowLightListIterator) = node->next;
+        item = node->light;
+        while (reinterpret_cast<ShadowListItem*&>(self->kShadowLightListIterator) != 0)
         {
-            if (item != 0 && item->m_uiF8 != 0)
+            if (item != 0 && item->spLight.m_pObject != 0)
                 return item;
-            node = *(FreeListNode* volatile*)&m_pHead;
-            m_pHead = node->m_pNext;
-            item = node->m_pInventoryEntryData;
+            node = *(ShadowListItem* volatile*)&reinterpret_cast<ShadowListItem*&>(self->kShadowLightListIterator);
+            reinterpret_cast<ShadowListItem*&>(self->kShadowLightListIterator) = node->next;
+            item = node->light;
         }
     }
     return item;
 }
 
-struct TexMgrStandIn
-{
-    void FUN_00b6d4c0(BSRenderedTexture* pTileTexture);
-    void ReleaseCounted();
-};
+// Shared BSTextureManager does not yet declare this entry point.
+extern void FUN_00b6d130();
 
 struct LightNodeStandIn
 {
@@ -1579,23 +1216,23 @@ static inline ShadowSceneLight*& GetNextLightStandIn(LightNodeStandIn*& pkIter)
 // @fnv 0x00b5b1f0
 void __fastcall FUN_00b5b1f0(ShadowSceneNode* pThis, int)
 {
-    LightNodeStandIn* pLightNode = (LightNodeStandIn*)pThis->shadowLights.head;
+    LightNodeStandIn* pLightNode = (LightNodeStandIn*)pThis->lShadowLightList.head;
     while (pLightNode)
     {
         ShadowSceneLight* light = GetNextLightStandIn(pLightNode);
         if (light)
         {
-            ((TexMgrStandIn*)DAT_011f91a8)->FUN_00b6d4c0(light->texture);
-            BSRenderedTexture* pTexture = light->texture;
+            DAT_011f91a8->RemoveRenderedTexture(light->spDynamicShadowMap.m_pObject);
+            BSRenderedTexture* pTexture = light->spDynamicShadowMap.m_pObject;
             if (pTexture)
             {
-                if (InterlockedDecrement(&pTexture->refs) == 0)
-                    pTexture->DeleteThis();
-                light->texture = 0;
+                if (InterlockedDecrement(reinterpret_cast<volatile long*>(&reinterpret_cast<NiRefObject*>(pTexture)->m_uiRefCount)) == 0)
+                    reinterpret_cast<NiRefObject*>(pTexture)->DeleteThis();
+                light->spDynamicShadowMap.m_pObject = 0;
             }
         }
     }
-    ((TexMgrStandIn*)DAT_011f91a8)->ReleaseCounted();
+    reinterpret_cast<void (__thiscall*)(BSTextureManager*)>(&FUN_00b6d130)(DAT_011f91a8);
 }
 
 struct SearchNode
@@ -1620,13 +1257,10 @@ struct SearchObject
 {
     unsigned char CheckProcStateAndPlane(ProcessArgs args, char* target, char* item);
 };
-struct ShadowProcessor
-{
-    void ProcessTargetIfEligible(SearchObject* source, ProcessArgs args, char* target);
-};
+
 typedef unsigned char(__thiscall* TestCallback)(void*, char*);
 // @fnv 0x00b5bbe0
-void ShadowProcessor::ProcessTargetIfEligible(SearchObject* source, ProcessArgs args, char* target)
+void __fastcall ProcessTargetIfEligible(ShadowSceneNode* self, int, SearchObject* source, ProcessArgs args, char* target)
 {
     char* subobject = *(char**)((char*)source + 0xac);
     void* object = *(void**)(subobject + 0xc);
@@ -1638,7 +1272,7 @@ void ShadowProcessor::ProcessTargetIfEligible(SearchObject* source, ProcessArgs 
         *(unsigned int*)(*(char**)(*(char**)((char*)source + 0xac) + 0xc) + 8) = (accepted == 0) + 1;
         if (accepted)
         {
-            SearchList* list = *(SearchList**)((char*)this + 0x1e0);
+            SearchList* list = reinterpret_cast<SearchList*>(self->pBSPortalGraph);
             if (list)
             {
                 SearchNode* position = list->first;
@@ -1666,17 +1300,6 @@ struct NiRTTI_b5
 
 extern NiRTTI_b5 DAT_011f4a28;
 extern NiRTTI_b5 DAT_011f4a98;
-
-struct Pt3_b5
-{
-    float x, y, z;
-    Pt3_b5(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-};
 
 struct UpdData_b5
 {
@@ -1782,7 +1405,7 @@ struct Geom_b5 : AV_b5
     int unkd4;
     int unkd8;
     int unkdc;
-    Pt3_b5 m_kVec;
+    NiPoint3 m_kVec;
 };
 
 inline bool IsKindOf_b5(const NiRTTI_b5* pkRTTI, AV_b5* pkObj)
@@ -1797,14 +1420,9 @@ inline bool IsKindOf_b5(const NiRTTI_b5* pkRTTI, AV_b5* pkObj)
     return false;
 }
 
-struct SSN_b5
-{
-    void FUN_00b5c940(AV_b5* obj, bool flag);
-    int FUN_00b5ca70(Node_b5* node, float time);
-};
-
+void __fastcall CreateChildLight(ShadowSceneNode*, int, AV_b5*, bool);
 // @fnv 0x00b5ca70
-int SSN_b5::FUN_00b5ca70(Node_b5* node, float time)
+int __fastcall UpdateChildLights(ShadowSceneNode* self, int, Node_b5* node, float time)
 {
     int count = 0;
     for (unsigned int i = 0; i < node->GetArrayCount(); i++)
@@ -1815,20 +1433,20 @@ int SSN_b5::FUN_00b5ca70(Node_b5* node, float time)
         Node_b5* sub = child->IsSceneNode();
         if (sub)
         {
-            count += FUN_00b5ca70(sub, time);
+            count += reinterpret_cast<int (__thiscall*)(ShadowSceneNode*, Node_b5*, float)>(&UpdateChildLights)(self, sub, time);
             continue;
         }
         AV_b5* obj = IsKindOf_b5(&DAT_011f4a28, child) ? child : 0;
         if (!obj)
             continue;
-        FUN_00b5c940(obj, true);
+        reinterpret_cast<void (__thiscall*)(ShadowSceneNode*, AV_b5*, bool)>(&CreateChildLight)(self, obj, true);
         UpdData_b5 data;
         obj->Update(data);
         Geom_b5* g = (Geom_b5*)obj->DynamicCast(&DAT_011f4a98);
         if (g)
         {
             g->m_uiRevID++;
-            g->m_kVec = Pt3_b5(time, 0.0f, 0.0f);
+            g->m_kVec = NiPoint3(time, 0.0f, 0.0f);
         }
         count++;
     }
@@ -1995,91 +1613,16 @@ struct AVObj
     void Update(UpdateData& data);
 };
 
-struct ShadowLight
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    AVObj* m_pLight;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    unsigned short m_usIndex;
-    void Deactivate();
-    void Render(int arg, int idx);
-};
-
 struct LightNode
 {
     LightNode* m_pNext;
     LightNode* m_pListObject;
-    ShadowLight* m_pInventoryEntryData;
+    ShadowSceneLight* m_pInventoryEntryData;
 };
 
-inline ShadowLight* const& GetNext(LightNode*& pos)
+inline ShadowSceneLight* const& GetNext(LightNode*& pos)
 {
-    ShadowLight* const& item = pos->m_pInventoryEntryData;
+    ShadowSceneLight* const& item = pos->m_pInventoryEntryData;
     pos = pos->m_pNext;
     return item;
 }
@@ -2090,127 +1633,48 @@ struct RenderHelper
     void SetTarget(int a, int b);
 };
 extern RenderHelper g_renderHelper;
-extern ShadowLight* g_pCurrentShadowLight;
+extern ShadowSceneLight* g_pCurrentShadowLight;
 
-struct ShadowSceneNodeX
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    LightNode* m_pShadowHead;
-    LightNode* m_pShadowTail;
-    unsigned int m_uiShadowCount;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    RefPtr<ShadowRenderTarget> m_spReferencedObject;
-    void FUN_00b5b880(int arg);
-};
-
+void __fastcall RenderSceneLight(ShadowSceneLight*, int, int, int);
 // @fnv 0x00b5b880
-void ShadowSceneNodeX::FUN_00b5b880(int arg)
+void __fastcall RenderShadowLights(ShadowSceneNode* self, int, int arg)
 {
     AutoMemContext ctx(0x20);
-    if (!m_spReferencedObject)
+    if (!reinterpret_cast<RefPtr<ShadowRenderTarget>&>(self->spCubeMapCamera))
     {
-        m_spReferencedObject = new ShadowRenderTarget(0);
+        reinterpret_cast<RefPtr<ShadowRenderTarget>&>(self->spCubeMapCamera) = new ShadowRenderTarget(0);
     }
-    m_spReferencedObject->unk114 = 0;
-    if (m_uiShadowCount)
+    reinterpret_cast<RefPtr<ShadowRenderTarget>&>(self->spCubeMapCamera)->unk114 = 0;
+    if (self->lShadowLightList.count)
     {
         int n = 0;
-        LightNode* pos = m_pShadowHead;
+        LightNode* pos = reinterpret_cast<LightNode*>(self->lShadowLightList.head);
         while (pos)
         {
-            ShadowLight* light = GetNext(pos);
-            if (light && light->m_pLight)
+            ShadowSceneLight* light = GetNext(pos);
+            if (light && reinterpret_cast<AVObj*>(light->spLight.m_pObject))
             {
-                if (!(light->m_pLight->m_uiObjectFlags & 1))
+                if (!(reinterpret_cast<AVObj*>(light->spLight.m_pObject)->m_uiObjectFlags & 1))
                 {
                     UpdateData data;
-                    light->m_pLight->Update(data);
-                    if (light->m_usIndex != 0xff)
+                    reinterpret_cast<AVObj*>(light->spLight.m_pObject)->Update(data);
+                    if (light->usFrustumCull != 0xff)
                     {
                         g_pCurrentShadowLight = light;
-                        light->Render(arg, n);
+                        reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, int, int)>(&RenderSceneLight)(light, arg, n);
                         n++;
                     }
                 }
                 else
                 {
-                    light->Deactivate();
+                    reinterpret_cast<void (__thiscall*)(ShadowSceneLight*)>(&ResetSceneLight)(light);
                 }
             }
         }
         for (int i = n + 0x11; i < 0x15; i++)
             g_renderHelper.SetTarget(1, i);
     }
-    m_spReferencedObject->sp130 = 0;
+    reinterpret_cast<RefPtr<ShadowRenderTarget>&>(self->spCubeMapCamera)->sp130 = 0;
 }
 
 struct SPData
@@ -2427,135 +1891,19 @@ struct SPPass
     SPOwnerGeom* pOwner;
 };
 
-struct SPShader
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    SPData kDefaultData;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    bool bDefaultEnabled;
-
-    void FUN_00b5ba80(int aiPass, SPPass* apPass);
-};
-
 // @fnv 0x00b5ba80
-void SPShader::FUN_00b5ba80(int aiPass, SPPass* apPass)
+void __fastcall SetShadowPassData(ShadowSceneNode* self, int, int aiPass, SPPass* apPass)
 {
     SPRenderer* pRenderer = apPass->pOwner->pRenderer;
     SPGeometry* pGeomA = apPass->pGeomA;
     SPGeometry* pGeomB = apPass->pGeomB;
 
-    bool bEnabledA = pGeomA ? pGeomA->pProperty->pData->iType == 1 : bDefaultEnabled;
-    bool bEnabledB = pGeomB ? pGeomB->pProperty->pData->iType == 1 : bDefaultEnabled;
-    bool bUseA = pGeomA ? (bEnabledA && pGeomA->m_pSPData) : kDefaultData.iCount == 0;
-    bool bUseB = pGeomB ? (bEnabledB && pGeomB->m_pSPData) : kDefaultData.iCount == 0;
-    SPData* pDataA = pGeomA ? pGeomA->m_pSPData : &kDefaultData;
-    SPData* pDataB = pGeomB ? pGeomB->m_pSPData : &kDefaultData;
+    bool bEnabledA = pGeomA ? pGeomA->pProperty->pData->iType == 1 : self->bVisibleUnboundSpace;
+    bool bEnabledB = pGeomB ? pGeomB->pProperty->pData->iType == 1 : self->bVisibleUnboundSpace;
+    bool bUseA = pGeomA ? (bEnabledA && pGeomA->m_pSPData) : reinterpret_cast<SPData&>(self->kCompoundFrustum).iCount == 0;
+    bool bUseB = pGeomB ? (bEnabledB && pGeomB->m_pSPData) : reinterpret_cast<SPData&>(self->kCompoundFrustum).iCount == 0;
+    SPData* pDataA = pGeomA ? pGeomA->m_pSPData : &reinterpret_cast<SPData&>(self->kCompoundFrustum);
+    SPData* pDataB = pGeomB ? pGeomB->m_pSPData : &reinterpret_cast<SPData&>(self->kCompoundFrustum);
 
     pRenderer->Begin(aiPass);
     if (bEnabledA && !pDataA->iCount)
@@ -2608,233 +1956,36 @@ struct GlobalLock_t
 };
 extern GlobalLock_t DAT_011f9ea0;
 
-struct BoundOwner_t
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    BoundList_t m_kBounds;
-    int unkFC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    unsigned char m_b1FC;
-
-    void AddBound(BoundRef_t* pkBound);
-};
-
 // If pkBound has an object and m_b1FC is set, locks DAT_011f9ea0, appends pkBound to m_kBounds, then unlocks.
 // @fnv 0x00b5cff0
-void BoundOwner_t::AddBound(BoundRef_t* pkBound)
+void __fastcall QueueLightRemoval(ShadowSceneNode* self, int, BoundRef_t* pkBound)
 {
     if (!pkBound->m_pObject)
         return;
-    if (!m_b1FC)
+    if (!self->bAllowLightRemoveQueues)
         return;
     DAT_011f9ea0.Lock(0);
-    m_kBounds.AddTail(*pkBound);
+    reinterpret_cast<BoundList_t*>(&self->lLightQueueRemove)->AddTail(*pkBound);
     DAT_011f9ea0.Unlock();
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 
-class BSMultiBoundB5D
+NiTListItem<NiPointer<ShadowSceneLight> >* __cdecl NewListItemB5D(ShadowSceneLight* pkObject);
+
+template <class TAlloc, class T> __declspec(noinline) void NiTPointerListBase<TAlloc, T>::AddTail(const T& element)
 {
-  public:
-    virtual ~BSMultiBoundB5D();
-    virtual void DeleteThis();
-
-    void IncRefCount()
-    {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    unsigned int m_uiRefCount;
-};
-
-template <class T> class NiPointerB5D
-{
-  public:
-    NiPointerB5D(T* pObject) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    NiPointerB5D(const NiPointerB5D& ptr) : m_pObject(ptr.m_pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointerB5D()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-
-    T* m_pObject;
-};
-
-template <class T> struct NiTListItemB5D
-{
-    NiTListItemB5D* m_pkNext;
-    NiTListItemB5D* m_pkPrev;
-    T m_element;
-};
-
-NiTListItemB5D<NiPointerB5D<BSMultiBoundB5D> >* __cdecl NewListItemB5D(BSMultiBoundB5D* pkObject);
-
-template <class T> class NiTPointerListB5D
-{
-  public:
-    T& GetNext(NiTListItemB5D<T>*& pkPos)
-    {
-        T& element = pkPos->m_element;
-        pkPos = pkPos->m_pkNext;
-        return element;
-    }
-
-    __declspec(noinline) void AddTail(const T& element)
-    {
-        NiTListItemB5D<T>* pkItem = NewListItemB5D(element.m_pObject);
-        pkItem->m_pkNext = 0;
-        pkItem->m_pkPrev = m_pkTail;
-        if (m_pkTail)
-            m_pkTail->m_pkNext = pkItem;
-        else
-            m_pkHead = pkItem;
-        m_pkTail = pkItem;
-        m_uiCount++;
-    }
-
-    void RemoveAll();
-
-    NiTListItemB5D<T>* m_pkHead;
-    NiTListItemB5D<T>* m_pkTail;
-    unsigned int m_uiCount;
-};
+    NiTListItem<T>* pkItem = NewListItemB5D(element.m_pObject);
+    pkItem->m_pkNext = 0;
+    pkItem->m_pkPrev = m_pkTail;
+    if (m_pkTail)
+        m_pkTail->m_pkNext = pkItem;
+    else
+        m_pkHead = pkItem;
+    m_pkTail = pkItem;
+    m_kItemCount.m_uiCount++;
+}
 
 class CriticalLockB5D
 {
@@ -2852,159 +2003,30 @@ class CriticalLockB5D
 
 extern CriticalLockB5D g_kMultiBoundLockB5D;
 
-class MultiBoundManagerB5D
-{
-  public:
-    void Refresh();
-    void FUN_00b5d180();
-
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    NiTPointerListB5D<NiPointerB5D<BSMultiBoundB5D> > m_kBounds;
-    NiTPointerListB5D<NiPointerB5D<BSMultiBoundB5D> > m_kVisible;
-    int unkCC;
-    int m_iVisibleFirst;
-    int m_iVisibleLast;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    NiTPointerListB5D<NiPointerB5D<BSMultiBoundB5D> > m_kPending;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    bool m_bDeferUpdates;
-};
-
+void __fastcall RefreshShadowLights(ShadowSceneNode*, int);
 // @fnv 0x00b5d180
-void MultiBoundManagerB5D::FUN_00b5d180()
+void ShadowSceneNode::FUN_00b5d180()
 {
-    NiTListItemB5D<NiPointerB5D<BSMultiBoundB5D> >* pkPos = m_kBounds.m_pkHead;
+    void* pkPos = reinterpret_cast<NiTPointerList<NiPointer<ShadowSceneLight> >&>(lLightList).m_pkHead;
     while (pkPos)
     {
-        BSMultiBoundB5D* pkBound = m_kBounds.GetNext(pkPos).m_pObject;
+        ShadowSceneLight* pkBound = reinterpret_cast<NiTPointerList<NiPointer<ShadowSceneLight> >&>(lLightList).GetNext(pkPos).m_pObject;
         if (pkBound)
         {
-            NiPointerB5D<BSMultiBoundB5D> pMultiBound(pkBound);
-            if (m_bDeferUpdates)
+            NiPointer<ShadowSceneLight> pMultiBound(pkBound);
+            if (bAllowLightRemoveQueues)
             {
                 g_kMultiBoundLockB5D.Lock(0);
-                m_kPending.AddTail(pMultiBound);
+                reinterpret_cast<NiTPointerList<NiPointer<ShadowSceneLight> >&>(lLightQueueRemove).AddTail(pMultiBound);
                 g_kMultiBoundLockB5D.Unlock();
             }
         }
     }
-    Refresh();
-    m_kVisible.RemoveAll();
-    m_iVisibleFirst = 0;
-    m_iVisibleLast = 0;
-    Refresh();
+    reinterpret_cast<void (__thiscall*)(ShadowSceneNode*)>(&RefreshShadowLights)(this);
+    reinterpret_cast<NiTPointerList<NiPointer<ShadowSceneLight> >&>(lShadowLightList).RemoveAll();
+    kShadowLightActiveFence = 0;
+    kShadowLightFadingInFence = 0;
+    reinterpret_cast<void (__thiscall*)(ShadowSceneNode*)>(&RefreshShadowLights)(this);
 }
 
 struct Obj_b5d270
@@ -3069,22 +2091,22 @@ struct ObjPtr_b5d270
     ObjPtr_b5d270(Obj_b5d270* pObject)
     {
         m_pObject = pObject;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~ObjPtr_b5d270()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     ObjPtr_b5d270& operator=(const ObjPtr_b5d270& kPtr)
     {
         if (m_pObject != kPtr.m_pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = kPtr.m_pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -3095,27 +2117,17 @@ struct ObjPtr_b5d270
     }
 };
 
-struct Node_b5d270
-{
-    Node_b5d270* m_pkNext;
-    Node_b5d270* m_pkPrev;
-    ObjPtr_b5d270 m_element;
-};
+typedef NiTListItem<ObjPtr_b5d270 > Node_b5d270;
 
 struct Alloc_b5d270
 {
-    unsigned int m_uiCount;
+
     void* FUN_0043a010();
 };
 
-struct List_b5d270
+typedef NiTPointerListBase<Alloc_b5d270, ObjPtr_b5d270 > List_b5d270;
+template <> inline void NiTPointerListBase<Alloc_b5d270, ObjPtr_b5d270 >::AddTail(const ObjPtr_b5d270& element)
 {
-    Node_b5d270* m_pkHead;
-    Node_b5d270* m_pkTail;
-    Alloc_b5d270 m_kItemCount;
-
-    void FUN_00a5a310(const ObjPtr_b5d270& element)
-    {
         Node_b5d270* pkNode = (Node_b5d270*)m_kItemCount.FUN_0043a010();
         pkNode->m_element = element;
         pkNode->m_pkNext = 0;
@@ -3127,97 +2139,19 @@ struct List_b5d270
         m_kItemCount.m_uiCount++;
         m_pkTail = pkNode;
     }
-};
 
-struct Shell_b5d270
-{
-    int unk;
-    int unkCur;
-    int unkValue;
-    int unk0c;
-    int uNewnk;
-    int uTmpnk;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka;
-    int unkaCur;
-    int unkaValue;
-    int unkac;
-    int unkb;
-    int unkbCur;
-    int unkbValue;
-    int unkbc;
-    int unkc;
-    int unkcCur;
-    int unkcValue;
-    int unkcc;
-    int unkd;
-    int unkdCur;
-    int unkdValue;
-    int unkdc;
-    int unke;
-    int unkeCur;
-    int unkeValue;
-    int unkec;
-    int unkf;
-    int unkfCur;
-    int unkfValue;
-    List_b5d270 m_kList;
-
-    void FUN_00b5d270(Obj_b5d270* pObj);
-};
-
-// If pObj is non-null, appends it to m_kList via FUN_00a5a310.
+// If pObj is non-null, appends it to m_kList via AddTail.
 // @fnv 0x00b5d270
-void Shell_b5d270::FUN_00b5d270(Obj_b5d270* pObj)
+void __fastcall RemoveLightObjects(ShadowSceneNode* self, int, ShadowSceneLight* light)
 {
+    Obj_b5d270* pObj = reinterpret_cast<Obj_b5d270*>(light);
     if (pObj)
-        m_kList.FUN_00a5a310(pObj);
+        reinterpret_cast<List_b5d270*>(&self->lLightQueueUpdate)->AddTail(pObj);
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
-struct Vec
-{
-    float x, y, z;
-    Vec()
-    {}
-    Vec(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-};
-extern Vec DAT_011f426c;
+extern NiPoint3 DAT_011f426c;
 
 struct Ref
 {
@@ -3256,67 +2190,7 @@ template <class T> struct Ptr
         return p;
     }
 };
-struct List
-{
-    void* head;
-    void* tail;
-    unsigned count;
-    List()
-    {
-        count = 0;
-        head = 0;
-        tail = 0;
-    }
-    ~List();
-    void FUN_00e74d40();
-};
-struct Frustum
-{
-    Frustum();
-    ~Frustum();
-    unsigned unk000;
-    unsigned unk004;
-    unsigned unk008;
-    unsigned unk00c;
-    unsigned unk010;
-    unsigned unk014;
-    unsigned unk018;
-    unsigned unk01c;
-    unsigned unk020;
-    unsigned unk024;
-    unsigned unk028;
-    unsigned unk02c;
-    unsigned unk030;
-    unsigned unk034;
-    unsigned unk038;
-    unsigned unk03c;
-    unsigned unk040;
-    unsigned unk044;
-    unsigned unk048;
-    unsigned unk04c;
-    unsigned unk050;
-    unsigned unk054;
-    unsigned unk058;
-    unsigned unk05c;
-    unsigned unk060;
-    unsigned unk064;
-    unsigned unk068;
-    unsigned unk06c;
-    unsigned unk070;
-    unsigned unk074;
-    unsigned unk078;
-    unsigned unk07c;
-    unsigned unk080;
-    unsigned unk084;
-    unsigned unk088;
-    unsigned unk08c;
-    unsigned unk090;
-    unsigned unk094;
-    unsigned unk098;
-    unsigned unk09c;
-    unsigned unk0a0;
-};
-struct Bound;
+
 struct Base
 {
     Bound* EnsureBound();
@@ -3360,7 +2234,7 @@ struct Base
     unsigned unk014;
     unsigned unk018;
     unsigned unk01c;
-    struct Bound* bound;
+    Bound* bound;
     unsigned unk024;
     unsigned unk028;
     unsigned unk02c;
@@ -3420,227 +2294,7 @@ struct Alloc
     static void* operator new(unsigned);
     static void operator delete(void*);
 };
-struct Light : Ref, Alloc
-{
-    Light();
-    unsigned unk008;
-    unsigned unk00c;
-    unsigned unk010;
-    unsigned unk014;
-    unsigned unk018;
-    unsigned unk01c;
-    unsigned unk020;
-    unsigned unk024;
-    unsigned unk028;
-    unsigned unk02c;
-    unsigned unk030;
-    unsigned unk034;
-    unsigned unk038;
-    unsigned unk03c;
-    unsigned unk040;
-    unsigned unk044;
-    unsigned unk048;
-    unsigned unk04c;
-    unsigned unk050;
-    unsigned unk054;
-    unsigned unk058;
-    unsigned unk05c;
-    unsigned unk060;
-    unsigned unk064;
-    unsigned unk068;
-    unsigned unk06c;
-    unsigned unk070;
-    unsigned unk074;
-    unsigned unk078;
-    unsigned unk07c;
-    unsigned unk080;
-    unsigned unk084;
-    unsigned unk088;
-    unsigned unk08c;
-    unsigned unk090;
-    unsigned unk094;
-    unsigned unk098;
-    unsigned unk09c;
-    unsigned unk0a0;
-    unsigned unk0a4;
-    unsigned revision;
-    unsigned unk0ac;
-    unsigned unk0b0;
-    unsigned unk0b4;
-    unsigned unk0b8;
-    unsigned unk0bc;
-    unsigned unk0c0;
-    unsigned unk0c4;
-    NiColor ambient, diffuse;
-    unsigned unk0e0;
-    unsigned unk0e4;
-    unsigned unk0e8;
-    unsigned unk0ec;
-    unsigned unk0f0;
-    unsigned unk0f4;
-    unsigned unk0f8;
-    void SetAmbient(const NiColor& c)
-    {
-        ambient = c;
-        revision++;
-    }
-    void SetDiffuse(const NiColor& c)
-    {
-        diffuse = c;
-        revision++;
-    }
-};
-struct SceneLight : Ref, Alloc
-{
-    SceneLight();
-    unsigned unk008;
-    unsigned unk00c;
-    unsigned unk010;
-    unsigned unk014;
-    unsigned unk018;
-    unsigned unk01c;
-    unsigned unk020;
-    unsigned unk024;
-    unsigned unk028;
-    unsigned unk02c;
-    unsigned unk030;
-    unsigned unk034;
-    unsigned unk038;
-    unsigned unk03c;
-    unsigned unk040;
-    unsigned unk044;
-    unsigned unk048;
-    unsigned unk04c;
-    unsigned unk050;
-    unsigned unk054;
-    unsigned unk058;
-    unsigned unk05c;
-    unsigned unk060;
-    unsigned unk064;
-    unsigned unk068;
-    unsigned unk06c;
-    unsigned unk070;
-    unsigned unk074;
-    unsigned unk078;
-    unsigned unk07c;
-    unsigned unk080;
-    unsigned unk084;
-    unsigned unk088;
-    unsigned unk08c;
-    unsigned unk090;
-    unsigned unk094;
-    unsigned unk098;
-    unsigned unk09c;
-    unsigned unk0a0;
-    unsigned unk0a4;
-    unsigned unk0a8;
-    unsigned unk0ac;
-    unsigned unk0b0;
-    unsigned unk0b4;
-    unsigned unk0b8;
-    unsigned unk0bc;
-    unsigned unk0c0;
-    unsigned unk0c4;
-    unsigned unk0c8;
-    unsigned unk0cc;
-    unsigned unk0d0;
-    unsigned unk0d4;
-    unsigned unk0d8;
-    unsigned unk0dc;
-    unsigned unk0e0;
-    unsigned unk0e4;
-    unsigned unk0e8;
-    unsigned unk0ec;
-    unsigned unk0f0;
-    unsigned unk0f4;
-    unsigned unk0f8;
-    unsigned unk0fc;
-    unsigned unk100;
-    unsigned unk104;
-    unsigned unk108;
-    unsigned unk10c;
-    unsigned unk110;
-    unsigned unk114;
-    unsigned unk118;
-    unsigned unk11c;
-    unsigned unk120;
-    unsigned unk124;
-    unsigned unk128;
-    unsigned unk12c;
-    unsigned unk130;
-    unsigned unk134;
-    unsigned unk138;
-    unsigned unk13c;
-    unsigned unk140;
-    unsigned unk144;
-    unsigned unk148;
-    unsigned unk14c;
-    unsigned unk150;
-    unsigned unk154;
-    unsigned unk158;
-    unsigned unk15c;
-    unsigned unk160;
-    unsigned unk164;
-    unsigned unk168;
-    unsigned unk16c;
-    unsigned unk170;
-    unsigned unk174;
-    unsigned unk178;
-    unsigned unk17c;
-    unsigned unk180;
-    unsigned unk184;
-    unsigned unk188;
-    unsigned unk18c;
-    unsigned unk190;
-    unsigned unk194;
-    unsigned unk198;
-    unsigned unk19c;
-    unsigned unk1a0;
-    unsigned unk1a4;
-    unsigned unk1a8;
-    unsigned unk1ac;
-    unsigned unk1b0;
-    unsigned unk1b4;
-    unsigned unk1b8;
-    unsigned unk1bc;
-    unsigned unk1c0;
-    unsigned unk1c4;
-    unsigned unk1c8;
-    unsigned unk1cc;
-    unsigned unk1d0;
-    unsigned unk1d4;
-    unsigned unk1d8;
-    unsigned unk1dc;
-    unsigned unk1e0;
-    unsigned unk1e4;
-    unsigned unk1e8;
-    unsigned unk1ec;
-    unsigned unk1f0;
-    unsigned unk1f4;
-    unsigned unk1f8;
-    unsigned unk1fc;
-    unsigned unk200;
-    unsigned unk204;
-    unsigned unk208;
-    unsigned unk20c;
-    unsigned unk210;
-    unsigned unk214;
-    unsigned unk218;
-    unsigned unk21c;
-    unsigned unk220;
-    unsigned unk224;
-    unsigned unk228;
-    unsigned unk22c;
-    unsigned unk230;
-    unsigned unk234;
-    unsigned unk238;
-    unsigned unk23c;
-    unsigned unk240;
-    unsigned unk244;
-    unsigned unk248;
-    unsigned unk24c;
-    void SetLight(Light*);
-};
+
 struct Fog : Ref, Alloc
 {
     Fog();
@@ -3650,7 +2304,7 @@ struct Fog : Ref, Alloc
     unsigned unk014;
     unsigned unk018;
     unsigned unk01c;
-    Vec color;
+    NiPoint3 color;
     float near1, far1, near2, far2;
     void SetRange1(float v)
     {
@@ -3668,13 +2322,8 @@ struct Fog : Ref, Alloc
     unsigned unk048;
     unsigned unk04c;
     unsigned unk050;
-    Vec color2;
+    NiPoint3 color2;
     unsigned unk060;
-};
-struct Bound
-{
-    Vec center;
-    float radius;
 };
 struct Manager
 {
@@ -3688,7 +2337,7 @@ inline Bound* Base::EnsureBound()
         void* allocation = _g_memoryManager.Allocate(16);
         SetObjectBound(allocation);
         Bound* b = bound;
-        b->center = DAT_011f426c;
+        *reinterpret_cast<NiPoint3*>(&b->x) = DAT_011f426c;
         b->radius = 0;
     }
     return bound;
@@ -3697,311 +2346,86 @@ inline void Base::SetRadius(float r)
 {
     bound->radius = r;
 }
-struct FUN_00b5e0f0 : Base
-{
-    List lights, shadowLights;
-    unsigned unknownCC, count, count2;
-    Ptr<SceneLight> light1, light2;
-    SceneLight* directional;
-    List listE4, listF0, listFC, list108, list114;
-    unsigned unknown120;
-    Ptr<Ref> ref124, ref128;
-    unsigned unknown12C;
-    bool flag130, flag131;
-    unsigned short unknown132;
-    Ptr<Fog> fog;
-    Frustum frustum;
-    bool flag1DC;
-    unsigned unknown1E0;
-    Vec position, offset;
-    bool flag1FC;
-    virtual ~FUN_00b5e0f0();
-    FUN_00b5e0f0();
-};
+
 // @fnv 0x00b5e0f0
-FUN_00b5e0f0::FUN_00b5e0f0() : Base(0)
+ShadowSceneNode::ShadowSceneNode() : NiNode(0)
 {
-    AssignFixedString(Fixed("shadow scene node"));
-    lights.FUN_00e74d40();
-    shadowLights.FUN_00e74d40();
-    ref124 = (Ref*)0;
-    unknown12C = 0;
-    flag130 = false;
-    flag1DC = true;
-    offset = DAT_011f426c;
-    unknown1E0 = 0;
-    light1 = new SceneLight;
-    light2 = new SceneLight;
-    count = 0;
-    count2 = 0;
-    Light* light = new Light;
-    light->SetAmbient(DAT_011f4998);
-    light->SetDiffuse(DAT_011f4998);
-    directional = new SceneLight;
-    directional->SetLight(light);
-    flags |= 0x800;
-    EnsureBound()->radius = 1;
-    flags |= 0x2000;
-    flag131 = false;
-    position = DAT_011f426c;
-    flag1FC = true;
+    reinterpret_cast<Base*>(this)->AssignFixedString(Fixed("shadow scene node"));
+    lLightList.RemoveAll();
+    lShadowLightList.RemoveAll();
+    pWindowReflectionEnvMap = (NiRefObject*)0;
+    iCurrentCubeMapFace = 0;
+    bDisableLightUpdate = false;
+    bVisibleUnboundSpace = true;
+    *reinterpret_cast<NiPoint3*>(&kEyePosition) = DAT_011f426c;
+    pBSPortalGraph = 0;
+    kShadowLightActiveFenceObject = new ShadowSceneLight;
+    kShadowLightFadingInFenceObject = new ShadowSceneLight;
+    kShadowLightActiveFence = 0;
+    kShadowLightFadingInFence = 0;
+    NiDirectionalLight* light = new NiDirectionalLight;
+    light->SetAmbientColor(DAT_011f4998);
+    light->SetDiffuseColor(DAT_011f4998);
+    pSunLight = new ShadowSceneLight;
+    reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, NiLight*)>(&fnv_00b9dda0::BindLight)(pSunLight, light);
+    m_uFlags |= 0x800;
+    reinterpret_cast<Base*>(this)->EnsureBound()->radius = 1;
+    m_uFlags |= 0x2000;
+    bWireframe = false;
+    *reinterpret_cast<NiPoint3*>(&kLightingOffset) = DAT_011f426c;
+    bAllowLightRemoveQueues = true;
+    Ptr<Fog>& fog = reinterpret_cast<Ptr<Fog>&>(spFog);
     fog = new Fog;
     fog->SetRange1(500000.0f);
     fog->SetRange2(500000.0f);
-    fog->color = Vec(0.5f, 0.5f, 0.5f);
-    fog->color2 = Vec(0.5f, 0.5f, 0.5f);
+    fog->color = NiPoint3(0.5f, 0.5f, 0.5f);
+    fog->color2 = NiPoint3(0.5f, 0.5f, 0.5f);
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 
-class BSMultiBoundB5E
+void __cdecl ReleaseBoundB5E(ShadowSceneLight* pkBound);
+
+// Queues removal of the first shadow light attached to the requested scene object.
+class ShadowSceneLightRemoval : public ShadowSceneNode
 {
   public:
-    virtual ~BSMultiBoundB5E();
-    virtual void DeleteThis();
-
-    void IncRefCount()
+    __declspec(noinline) void RemoveBound(const NiPointer<ShadowSceneLight>& light)
     {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
+        ReleaseBoundB5E(light.m_pObject);
+        reinterpret_cast<unsigned int&>(kShadowLightListIterator)++;
     }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    unsigned int m_uiRefCount;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    void* m_pvOwner;
 };
-
-template <class T> class NiPointerB5E
-{
-  public:
-    NiPointerB5E(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointerB5E()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-
-    T* m_pObject;
-};
-
-template <class T> struct NiTListItemB5E
-{
-    NiTListItemB5E* m_pkNext;
-    NiTListItemB5E* m_pkPrev;
-    T m_element;
-};
-
-typedef NiTListItemB5E<NiPointerB5E<BSMultiBoundB5E> > BoundItemB5E;
-
-template <class T> class NiTPointerListB5E
-{
-  public:
-    T& GetNext(NiTListItemB5E<T>*& pkPos)
-    {
-        T& element = pkPos->m_element;
-        pkPos = pkPos->m_pkNext;
-        return element;
-    }
-
-    NiTListItemB5E<T>* m_pkHead;
-    NiTListItemB5E<T>* m_pkTail;
-    unsigned int m_uiCount;
-};
-
-void __cdecl ReleaseBoundB5E(BSMultiBoundB5E* pkBound);
-
-class MultiBoundManagerB5E
-{
-  public:
-    __declspec(noinline) void RemoveBound(const NiPointerB5E<BSMultiBoundB5E>& pMultiBound)
-    {
-        ReleaseBoundB5E(pMultiBound.m_pObject);
-        m_uiRemoved++;
-    }
-
-    void RemoveBoundByOwner(void* pvOwner);
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    NiTPointerListB5E<NiPointerB5E<BSMultiBoundB5E> > m_kBounds;
-    unsigned int m_uiRemoved;
-};
-
-// Scans m_kBounds for a bound whose m_pvOwner equals pvOwner and removes the first match via RemoveBound.
 // @fnv 0x00b5edf0
-void MultiBoundManagerB5E::RemoveBoundByOwner(void* pvOwner)
+void __fastcall RemoveLightByOwner(ShadowSceneNode* self, int, void* pvOwner)
 {
     if (!pvOwner)
         return;
-    BoundItemB5E* pkPos = m_kBounds.m_pkHead;
+    void* pkPos = reinterpret_cast<NiTPointerList<NiPointer<ShadowSceneLight> >&>(self->lShadowLightList).m_pkHead;
     while (pkPos)
     {
-        BSMultiBoundB5E* pkBound = m_kBounds.GetNext(pkPos).m_pObject;
-        if (pkBound && pkBound->m_pvOwner == pvOwner)
+        ShadowSceneLight* pkBound = reinterpret_cast<NiTPointerList<NiPointer<ShadowSceneLight> >&>(self->lShadowLightList).GetNext(pkPos).m_pObject;
+        if (pkBound && pkBound->spShadowScene.m_pObject == pvOwner)
         {
-            RemoveBound(pkBound);
+            static_cast<ShadowSceneLightRemoval*>(self)->RemoveBound(pkBound);
             return;
         }
     }
 }
 
-struct Allocator
+static __forceinline hkMemoryAllocator& RouterHeap(hkMemoryRouter& router)
 {
-    virtual ~Allocator();
-    virtual void* allocate(int);
-    virtual void f2();
-    virtual void f3();
-    virtual void release(void*, int);
-};
-struct Router
+    return *reinterpret_cast<hkMemoryAllocator*>(router.m_heap);
+}
+hkMemoryRouter& FUN_00c85750();
+__forceinline void* __cdecl hkReferencedObject::operator new(std::size_t amount)
 {
-    int unk00, unk04, unk08, unk0c;
-    Allocator* heapPtr;
-    __forceinline Allocator& heap()
-    {
-        return *heapPtr;
-    }
-};
-Router& FUN_00c85750();
-struct hkReferencedObject
-{
-    virtual ~hkReferencedObject();
-    unsigned short bytes, refs;
-    static __forceinline void* operator new(unsigned int amount)
-    {
-        void* result = FUN_00c85750().heap().allocate(amount);
-        ((hkReferencedObject*)result)->bytes = (unsigned short)amount;
-        return result;
-    }
-    static void operator delete(void*);
-    void removeReference();
-};
+    void* result = RouterHeap(FUN_00c85750()).blockAlloc(amount);
+    static_cast<hkReferencedObject*>(result)->m_usMemSizeAndFlags = (unsigned short)amount;
+    return result;
+}
+
 struct InterfacePart
 {
     virtual void f0();
@@ -4017,14 +2441,14 @@ struct InterfaceArray
     {}
     __forceinline ~InterfaceArray()
     {
-        Allocator* heap = &FUN_00c85750().heap();
+        hkMemoryAllocator* heap = &RouterHeap(FUN_00c85750());
         size = 0;
         if ((capacity & 0x80000000u) == 0)
-            heap->release(data, (capacity & 0x3fffffff) * 4);
+            heap->bufFree(data, (capacity & 0x3fffffff) * 4);
     }
     __forceinline void AddBack(InterfacePart* value)
     {
-        Allocator* heap = &FUN_00c85750().heap();
+        hkMemoryAllocator* heap = &RouterHeap(FUN_00c85750());
         if (size == (capacity & 0x3fffffff))
             ResizeAudioStream(heap, this, 4);
         data[size++] = value;
@@ -4181,51 +2605,7 @@ void Root::SetProcessEnabled(bool enable)
     }
 }
 
-struct FUN_00b5b0e0_Node
-{
-    FUN_00b5b0e0_Node* unk00;
-    FUN_00b5b0e0_Node* unk04;
-    void* unk08;
-};
-
 class LightingElem;
-
-class FUN_00b5b0e0_Prop
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    unsigned int m_uiShaderType;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    FUN_00b5b0e0_Node* m_pkHead;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    LightingElem* GetNext(void** pos);
-};
 
 class LightingElem
 {
@@ -4238,7 +2618,7 @@ struct FUN_00b5b0e0_Inner
     int unk9C;
     int unkA0;
     int unkA4;
-    FUN_00b5b0e0_Prop* m_pProp;
+    BSShaderLightingProperty* m_pProp;
 };
 
 struct FUN_00b5b0e0_Scene
@@ -4293,16 +2673,16 @@ void __cdecl FUN_00b5b0e0(void* pv)
     if (!pObj)
         return;
     FUN_00b5b0e0_Inner* pInner = &pObj->m_kInner;
-    FUN_00b5b0e0_Prop* pProp = pInner ? pInner->m_pProp : 0;
+    BSShaderLightingProperty* pProp = pInner ? pInner->m_pProp : 0;
     if (!pProp)
         pProp = pObj->m_kInner.m_pProp;
-    int bValidShader = pProp == 0 ? 0 : (int)((unsigned int)(pProp->m_uiShaderType - 1) <= 11);
-    FUN_00b5b0e0_Prop* pValidProp = bValidShader ? pProp : 0;
+    int bValidShader = pProp == 0 ? 0 : (int)((unsigned int)(pProp->iShaderPropertyType - 1) <= 11);
+    BSShaderLightingProperty* pValidProp = bValidShader ? pProp : 0;
     if (pValidProp)
     {
         void* pos;
         LightingElem* pElem;
-        while ((pElem = pValidProp->GetNext(&pos)) != 0)
+        while ((pElem = reinterpret_cast<LightingElem*>(pValidProp->GetFirstAttachedLight(pos))) != 0)
             pElem->FUN_00ba01a0(pv, 0);
     }
 }
@@ -4519,152 +2899,6 @@ struct Item2
     SubItem* subItem;
 };
 
-struct LightNode
-{
-    int light_00;
-    int light_04;
-    int light_08;
-    int light_0C;
-    int light_10;
-    int light_14;
-    int light_18;
-    int light_1C;
-    int light_20;
-    int light_24;
-    int light_28;
-    int light_2C;
-    int light_30;
-    int light_34;
-    int light_38;
-    int light_3C;
-    int light_40;
-    int light_44;
-    int light_48;
-    int light_4C;
-    int light_50;
-    int light_54;
-    int light_58;
-    int light_5C;
-    int light_60;
-    int light_64;
-    int light_68;
-    int light_6C;
-    int light_70;
-    int light_74;
-    int light_78;
-    int light_7C;
-    int light_80;
-    int light_84;
-    int light_88;
-    int light_8C;
-    int light_90;
-    int light_94;
-    int light_98;
-    int light_9C;
-    int light_A0;
-    int light_A4;
-    int light_A8;
-    int light_AC;
-    int light_B0;
-    int light_B4;
-    int light_B8;
-    int light_BC;
-    int light_C0;
-    int light_C4;
-    int light_C8;
-    int light_CC;
-    int light_D0;
-    int light_D4;
-    int light_D8;
-    int light_DC;
-    int light_E0;
-    int light_E4;
-    int light_E8;
-    unsigned char unkEC;
-    unsigned char unkED;
-    unsigned char unkEE;
-    unsigned char unkEF;
-    int light_F0;
-    int light_F4;
-    int light_F8;
-    int light_FC;
-    int light_100;
-    int light_104;
-    int light_108;
-    int light_10C;
-    int light_110;
-    int light_114;
-    int light_118;
-    int light_11C;
-    int light_120;
-    int light_124;
-    int light_128;
-    int light_12C;
-    int light_130;
-    int light_134;
-    int light_138;
-    int light_13C;
-    int light_140;
-    int light_144;
-    int light_148;
-    int light_14C;
-    int light_150;
-    int light_154;
-    int light_158;
-    int light_15C;
-    int light_160;
-    int light_164;
-    int light_168;
-    int light_16C;
-    int light_170;
-    int light_174;
-    int light_178;
-    int light_17C;
-    int light_180;
-    int light_184;
-    int light_188;
-    int light_18C;
-    int light_190;
-    int light_194;
-    int light_198;
-    int light_19C;
-    int light_1A0;
-    int light_1A4;
-    int light_1A8;
-    int light_1AC;
-    int light_1B0;
-    int light_1B4;
-    int light_1B8;
-    int light_1BC;
-    int light_1C0;
-    int light_1C4;
-    int light_1C8;
-    int light_1CC;
-    int light_1D0;
-    int light_1D4;
-    int light_1D8;
-    int light_1DC;
-    int light_1E0;
-    int light_1E4;
-    int light_1E8;
-    int light_1EC;
-    int light_1F0;
-    int light_1F4;
-    int light_1F8;
-    int light_1FC;
-    int light_200;
-    int light_204;
-    int light_208;
-    int light_20C;
-    int light_210;
-    Item1** items1;
-    unsigned int count1;
-    int unk21C;
-    int unk220;
-    Item2** items2;
-    unsigned int count2;
-};
-
 struct AmbientLight
 {
     int unk00;
@@ -4680,151 +2914,28 @@ struct AmbientLight
     int unk28;
 };
 
-struct NodeTarget
-{
-    int node_00;
-    int node_04;
-    int node_08;
-    int node_0C;
-    int node_10;
-    int node_14;
-    int node_18;
-    int node_1C;
-    int node_20;
-    int node_24;
-    int node_28;
-    int node_2C;
-    int node_30;
-    int node_34;
-    int node_38;
-    int node_3C;
-    int node_40;
-    int node_44;
-    int node_48;
-    int node_4C;
-    int node_50;
-    int node_54;
-    int node_58;
-    int node_5C;
-    int node_60;
-    int node_64;
-    int node_68;
-    int node_6C;
-    int node_70;
-    int node_74;
-    int node_78;
-    int node_7C;
-    int node_80;
-    int node_84;
-    int node_88;
-    int node_8C;
-    int node_90;
-    int node_94;
-    int node_98;
-    int node_9C;
-    int node_A0;
-    int node_A4;
-    int node_A8;
-    int node_AC;
-    int node_B0;
-    List_b9fcc0 lights;
-    List_b9fcc0 shadowLights;
-    int node_CC;
-    int node_D0;
-    int node_D4;
-    int node_D8;
-    int node_DC;
-    int node_E0;
-    int node_E4;
-    int node_E8;
-    int node_EC;
-    int node_F0;
-    int node_F4;
-    int node_F8;
-    int node_FC;
-    int node_100;
-    int node_104;
-    int node_108;
-    int node_10C;
-    int node_110;
-    int node_114;
-    int node_118;
-    int node_11C;
-    int node_120;
-    int node_124;
-    int node_128;
-    int node_12C;
-    int node_130;
-    int node_134;
-    int node_138;
-    int node_13C;
-    int node_140;
-    int node_144;
-    int node_148;
-    int node_14C;
-    int node_150;
-    int node_154;
-    int node_158;
-    int node_15C;
-    int node_160;
-    int node_164;
-    int node_168;
-    int node_16C;
-    int node_170;
-    int node_174;
-    int node_178;
-    int node_17C;
-    int node_180;
-    int node_184;
-    int node_188;
-    int node_18C;
-    int node_190;
-    int node_194;
-    int node_198;
-    int node_19C;
-    int node_1A0;
-    int node_1A4;
-    int node_1A8;
-    int node_1AC;
-    int node_1B0;
-    int node_1B4;
-    int node_1B8;
-    int node_1BC;
-    int node_1C0;
-    int node_1C4;
-    int node_1C8;
-    int node_1CC;
-    int node_1D0;
-    int node_1D4;
-    int node_1D8;
-    int node_1DC;
-    AmbientLight* ambientLight;
-
-    void RemoveLightFromNode(void** object, void* RemoveAmbientLight);
-};
-
 // @fnv 0x00b5d040
-void NodeTarget::RemoveLightFromNode(void** object, void* apLight)
+void __fastcall RemoveLightFromNode(ShadowSceneNode* self, int, void** object, void* apLight)
 {
 
-    if (ambientLight && ambientLight->unk28)
+    if (reinterpret_cast<AmbientLight*>(self->pBSPortalGraph) && reinterpret_cast<AmbientLight*>(self->pBSPortalGraph)->unk28)
     {
-        LightNode* node = (LightNode*)*object;
-        for (unsigned int i = 0; i < node->count1; ++i)
+        ShadowSceneLight* node = (ShadowSceneLight*)*object;
+        for (unsigned int i = 0; i < node->kMultiboundRooms.iSize; ++i)
         {
-            Item1* item = node->items1[i];
+            Item1* item = reinterpret_cast<Item1**>(node->kMultiboundRooms.pBuffer)[i];
             if (item && item->container.count)
             {
                 int index = item->container.Find(object, 0, &FUN_00b5a980);
                 if (index != -1)
                     item->container.RemoveAt(index, true);
             }
-            node = (LightNode*)*object;
+            node = (ShadowSceneLight*)*object;
         }
-        node = (LightNode*)*object;
-        for (unsigned int i = 0; i < node->count2; ++i)
+        node = (ShadowSceneLight*)*object;
+        for (unsigned int i = 0; i < node->kPortals.iSize; ++i)
         {
-            Item2* item = node->items2[i];
+            Item2* item = reinterpret_cast<Item2**>(node->kPortals.pBuffer)[i];
             if (item)
             {
                 SubItem* sub = item->subItem;
@@ -4845,14 +2956,14 @@ void NodeTarget::RemoveLightFromNode(void** object, void* apLight)
                         c->RemoveAt(index, true);
                 }
             }
-            node = (LightNode*)*object;
+            node = (ShadowSceneLight*)*object;
         }
     }
-    LightNode* node = (LightNode*)*object;
-    if (node->unkEC)
-        shadowLights.Remove(apLight);
+    ShadowSceneLight* node = (ShadowSceneLight*)*object;
+    if (node->bCastShadow)
+        reinterpret_cast<List_b9fcc0*>(&self->lShadowLightList)->Remove(apLight);
     else
-        lights.Remove(apLight);
+        reinterpret_cast<List_b9fcc0*>(&self->lLightList)->Remove(apLight);
 }
 }  // namespace fnv_00b5d040
 
@@ -4863,14 +2974,6 @@ void FUN_00b5c7c0()
 {
     FUN_00e74d40();
 }
-
-struct Bnd5
-{
-    float x;
-    float y;
-    float z;
-    float r;
-};
 
 extern unsigned int DAT_010a2720;
 struct FUN_00aa54a0_s
@@ -4909,26 +3012,21 @@ template <class T> struct S5_LArr
         return m_pBase[i];
     }
 };
-template <class T> struct S5_Item
-{
-    S5_Item* m_pkNext;
-    S5_Item* m_pkPrev;
-    T m_element;
-};
+
 template <class T> struct S5_List
 {
-    S5_Item<T>* m_pkHead;
-    S5_Item<T>* m_pkTail;
+    NiTListItem<T>* m_pkHead;
+    NiTListItem<T>* m_pkTail;
     unsigned int m_uiCount;
     unsigned int GetSize() const
     {
         return m_uiCount;
     }
-    S5_Item<T>* GetHeadPos() const
+    NiTListItem<T>* GetHeadPos() const
     {
         return m_pkHead;
     }
-    T GetNext(S5_Item<T>*& pos) const
+    T GetNext(NiTListItem<T>*& pos) const
     {
         T& e = pos->m_element;
         pos = pos->m_pkNext;
@@ -4953,73 +3051,14 @@ struct Obj5
     int unk14;
     Obj5* child;
     int unk1c;
-    Bnd5* bound;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int key;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    unsigned short id;
-    int GetKey() const
-    {
-        return key;
-    }
-    bool TestBound(Bnd5* b, int k, float f);
-    float Accum(Bnd5* b);
+    Bound* bound;
+};
+class SceneLightBounds : public ShadowSceneLight
+{
+  public:
+    int GetKey() const { return reinterpret_cast<int>(spLight.m_pObject); }
+    bool TestBound(Bound*, int, float);
+    float Accum(Bound*);
 };
 struct S5_A
 {
@@ -5078,7 +3117,7 @@ struct S5_A
     int unkd0;
     int unkd4;
     int unkd8;
-    S5_LArr<Obj5*> children;
+    S5_LArr<SceneLightBounds*> children;
 };
 struct S5_B
 {
@@ -5126,64 +3165,16 @@ struct S5_B
     int unka4;
     int unka8;
     int unkac;
-    S5_LArr<Obj5*> children;
+    S5_LArr<SceneLightBounds*> children;
 };
-struct S5_C
-{
-    void** vt;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    S5_List<Obj5*> list;
-};
-void __cdecl FUN_00b5b260(Obj5* obj, S5_C* a2, bool a3, S5_A* pA, S5_B* pB);
-void __cdecl FUN_00b5c490(Obj5* obj, S5_C* a2, bool a3, S5_A* pA, S5_B* pB);
-bool __cdecl CheckBoundAndChildren(Obj5* obj, S5_C* a2, Obj5** b, bool c);
+
+void __cdecl FUN_00b5b260(Obj5* obj, ShadowSceneNode* a2, bool a3, S5_A* pA, S5_B* pB);
+void __cdecl FUN_00b5c490(Obj5* obj, ShadowSceneNode* a2, bool a3, S5_A* pA, S5_B* pB);
+bool __cdecl CheckBoundAndChildren(Obj5* obj, ShadowSceneNode* a2, SceneLightBounds** b, bool c);
 
 // With flag set, filters child candidates by the object's bound, sorts matches, and calls CheckBoundAndChildren; otherwise dispatches based on Predicate().
 // @fnv 0x00b5dac0
-bool __cdecl FUN_00b5dac0(Obj5* obj, S5_C* apList, bool a3, bool abTestBound)
+bool __cdecl FUN_00b5dac0(Obj5* obj, ShadowSceneNode* apList, bool a3, bool abTestBound)
 {
     if (obj == 0)
         return true;
@@ -5211,18 +3202,18 @@ bool __cdecl FUN_00b5dac0(Obj5* obj, S5_C* apList, bool a3, bool abTestBound)
     {
         FUN_00aa54a0_s* ctx = ((MemMgr5*)&DAT_011f6238)->GetCtx();
         int count = 0;
-        Bnd5* pBound = obj->bound;
-        Bnd5 bound = *(pBound ? pBound : (Bnd5*)&DAT_011f4288);
-        Obj5** out;
+        Bound* pBound = obj->bound;
+        Bound bound = *(pBound ? pBound : (Bound*)&DAT_011f4288);
+        SceneLightBounds** out;
         if (pA != 0)
         {
-            out = (Obj5**)ctx->Allocate((pA->children.GetAllocatedSize() + 1) * sizeof(Obj5*));
+            out = (SceneLightBounds**)ctx->Allocate((pA->children.GetAllocatedSize() + 1) * sizeof(SceneLightBounds*));
             for (unsigned int i = 0; i < pA->children.GetAllocatedSize(); i++)
             {
-                Obj5* it = pA->children.GetAt(i);
+                SceneLightBounds* it = pA->children.GetAt(i);
                 if (it == 0)
                     continue;
-                if (a3 && it->id == 0xff)
+                if (a3 && it->usFrustumCull == 0xff)
                     continue;
                 if (it->TestBound(&bound, it->GetKey(), 1.0f))
                 {
@@ -5234,13 +3225,13 @@ bool __cdecl FUN_00b5dac0(Obj5* obj, S5_C* apList, bool a3, bool abTestBound)
         }
         else if (pB != 0)
         {
-            out = (Obj5**)ctx->Allocate((pB->children.GetAllocatedSize() + 1) * sizeof(Obj5*));
+            out = (SceneLightBounds**)ctx->Allocate((pB->children.GetAllocatedSize() + 1) * sizeof(SceneLightBounds*));
             for (unsigned int i = 0; i < pB->children.GetAllocatedSize(); i++)
             {
-                Obj5* it = pB->children.GetAt(i);
+                SceneLightBounds* it = pB->children.GetAt(i);
                 if (it == 0)
                     continue;
-                if (a3 && it->id == 0xff)
+                if (a3 && it->usFrustumCull == 0xff)
                     continue;
                 if (it->TestBound(&bound, it->GetKey(), 1.0f))
                 {
@@ -5252,14 +3243,14 @@ bool __cdecl FUN_00b5dac0(Obj5* obj, S5_C* apList, bool a3, bool abTestBound)
         }
         else
         {
-            out = (Obj5**)ctx->Allocate((apList->list.GetSize() + 1) * sizeof(Obj5*));
-            S5_Item<Obj5*>* pos = apList->list.GetHeadPos();
+            out = (SceneLightBounds**)ctx->Allocate((reinterpret_cast<S5_List<SceneLightBounds*>&>(apList->lLightList).GetSize() + 1) * sizeof(SceneLightBounds*));
+            NiTListItem<SceneLightBounds*>* pos = reinterpret_cast<S5_List<SceneLightBounds*>&>(apList->lLightList).GetHeadPos();
             while (pos)
             {
-                Obj5* it = apList->list.GetNext(pos);
+                SceneLightBounds* it = reinterpret_cast<S5_List<SceneLightBounds*>&>(apList->lLightList).GetNext(pos);
                 if (it == 0)
                     continue;
-                if (a3 && it->id == 0xff)
+                if (a3 && it->usFrustumCull == 0xff)
                     continue;
                 if (it->TestBound(&bound, it->GetKey(), 1.0f))
                 {
@@ -5292,14 +3283,11 @@ struct ArrOps
 {
     void FUN_00cb9930(unsigned*, unsigned*, unsigned);
 };
-struct FUN_00b5ddb0_self
-{
-    void FUN_00b5d180();
-};
+
 struct LocalLock
 {
     unsigned owner, count;
-    void Wait(char*);
+    void FUN_0040fbf0(char*);
     void unlock()
     {
         if (--count == 0)
@@ -5560,6 +3548,7 @@ struct LocalLightData
     unsigned int unk0ac;
     LocalArray objects;
 };
+
 struct LocalLight
 {
     unsigned int unk000;
@@ -5700,141 +3689,24 @@ struct LocalContext
     unsigned int unk01c;
     LocalLink<LocalGeometry>* geometries;
 };
-struct LocalTarget
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    NiTPointerListBase<NiTPointerAllocator<unsigned int>, NiPointer<NiProperty> > listA, listB, listC, listD, listE;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    unsigned int unk15c;
-    unsigned int unk160;
-    unsigned int unk164;
-    unsigned int unk168;
-    unsigned int unk16c;
-    unsigned int unk170;
-    unsigned int unk174;
-    unsigned int unk178;
-    unsigned int unk17c;
-    unsigned int unk180;
-    unsigned int unk184;
-    unsigned int unk188;
-    unsigned int unk18c;
-    unsigned int unk190;
-    unsigned int unk194;
-    unsigned int unk198;
-    unsigned int unk19c;
-    unsigned int unk1a0;
-    unsigned int unk1a4;
-    unsigned int unk1a8;
-    unsigned int unk1ac;
-    unsigned int unk1b0;
-    unsigned int unk1b4;
-    unsigned int unk1b8;
-    unsigned int unk1bc;
-    unsigned int unk1c0;
-    unsigned int unk1c4;
-    unsigned int unk1c8;
-    unsigned int unk1cc;
-    unsigned int unk1d0;
-    unsigned int unk1d4;
-    unsigned int unk1d8;
-    unsigned int unk1dc;
-    LocalContext* context;
-    unsigned int unk1e4;
-    unsigned int unk1e8;
-    unsigned int unk1ec;
-    unsigned int unk1f0;
-    unsigned int unk1f4;
-    unsigned int unk1f8;
-    bool dirty;
-    void FUN_00b5ddf0(LocalContext*);
-};
+
 // When the context changes, clears five lists, removes geometry and light references from old-context objects, then stores the new context.
 // @fnv 0x00b5ddf0
-void LocalTarget::FUN_00b5ddf0(LocalContext* apContext)
+void __fastcall SetPortalGraph(ShadowSceneNode* self, int, LocalContext* apContext)
 {
-    if (apContext != context)
+    if (apContext != reinterpret_cast<LocalContext*&>(self->pBSPortalGraph))
     {
-        DAT_011f9ea0.Wait(0);
-        DAT_011f9ec0.Wait(0);
-        dirty = false;
-        listA.RemoveAll();
-        listB.RemoveAll();
-        listC.RemoveAll();
-        listD.RemoveAll();
-        listE.RemoveAll();
-        if (context)
+        DAT_011f9ea0.FUN_0040fbf0(0);
+        DAT_011f9ec0.FUN_0040fbf0(0);
+        self->bAllowLightRemoveQueues = false;
+        RemoveShadowList(&self->lLightQueueAdd);
+        RemoveShadowList(&self->lLightQueueRemove);
+        RemoveShadowList(&self->lLightQueueUpdate);
+        RemoveShadowList(&self->lObjectQueueUpdate);
+        RemoveShadowList(&self->lObjectQueueUpdateActiveOnly);
+        if (reinterpret_cast<LocalContext*&>(self->pBSPortalGraph))
         {
-            LocalLink<LocalGeometry>* geometryPos = context->geometries;
+            LocalLink<LocalGeometry>* geometryPos = reinterpret_cast<LocalContext*&>(self->pBSPortalGraph)->geometries;
             while (geometryPos)
             {
                 LocalGeometry* geometry = nextItem(geometryPos);
@@ -5868,12 +3740,12 @@ void LocalTarget::FUN_00b5ddf0(LocalContext* apContext)
                 }
             }
         }
-        dirty = true;
+        self->bAllowLightRemoveQueues = true;
         DAT_011f9ea0.unlock();
         DAT_011f9ec0.unlock();
-        ((FUN_00b5ddb0_self*)this)->FUN_00b5d180();
+        self->FUN_00b5d180();
     }
-    context = apContext;
+    reinterpret_cast<LocalContext*&>(self->pBSPortalGraph) = apContext;
 }
 }  // namespace fnv_00b5ddf0
 
@@ -5887,27 +3759,6 @@ class FourComponentFloatVector
 
 extern FourComponentFloatVector DAT_011f4288;
 struct S00b5b260_Geom;
-struct S00b5b260_Light : public ShadowSceneLight
-{
-    bool FUN_00b9dae0(FourComponentFloatVector*, ShadowLightFlags*, float);
-    void AddGeometry(S00b5b260_Geom*);
-};
-
-class BSShaderProperty : public NiProperty
-{
-  public:
-    unsigned short unk18, unk1a;
-
-    unsigned int shaderType;
-};
-
-class BSShaderLightingProperty : public BSShaderProperty
-{
-  public:
-    void FUN_00b718b0();
-
-    void RemoveItemsAfterPos(S00b5b260_Geom*);
-};
 
 struct S00b5b260_Geom
 {
@@ -6071,7 +3922,7 @@ struct LightOwnerA
 
     unsigned int unk0dc;
 
-    S00b5b260_Light** lights;
+    ShadowSceneLight** lights;
     unsigned int count;
 };
 
@@ -6168,216 +4019,8 @@ struct LightOwnerB
 
     unsigned int unk0b0;
 
-    S00b5b260_Light** lights;
+    ShadowSceneLight** lights;
     unsigned int count;
-};
-
-struct SceneGraph
-{
-
-    unsigned int unk000;
-
-    unsigned int unk004;
-
-    unsigned int unk008;
-
-    unsigned int unk00c;
-
-    unsigned int unk010;
-
-    unsigned int unk014;
-
-    unsigned int unk018;
-
-    unsigned int unk01c;
-
-    unsigned int unk020;
-
-    unsigned int unk024;
-
-    unsigned int unk028;
-
-    unsigned int unk02c;
-
-    unsigned int unk030;
-
-    unsigned int unk034;
-
-    unsigned int unk038;
-
-    unsigned int unk03c;
-
-    unsigned int unk040;
-
-    unsigned int unk044;
-
-    unsigned int unk048;
-
-    unsigned int unk04c;
-
-    unsigned int unk050;
-
-    unsigned int unk054;
-
-    unsigned int unk058;
-
-    unsigned int unk05c;
-
-    unsigned int unk060;
-
-    unsigned int unk064;
-
-    unsigned int unk068;
-
-    unsigned int unk06c;
-
-    unsigned int unk070;
-
-    unsigned int unk074;
-
-    unsigned int unk078;
-
-    unsigned int unk07c;
-
-    unsigned int unk080;
-
-    unsigned int unk084;
-
-    unsigned int unk088;
-
-    unsigned int unk08c;
-
-    unsigned int unk090;
-
-    unsigned int unk094;
-
-    unsigned int unk098;
-
-    unsigned int unk09c;
-
-    unsigned int unk0a0;
-
-    unsigned int unk0a4;
-
-    unsigned int unk0a8;
-
-    unsigned int unk0ac;
-
-    unsigned int unk0b0;
-
-    unsigned int unk0b4;
-
-    unsigned int unk0b8;
-
-    unsigned int unk0bc;
-
-    unsigned int unk0c0;
-
-    unsigned int unk0c4;
-
-    unsigned int unk0c8;
-
-    unsigned int unk0cc;
-
-    unsigned int unk0d0;
-
-    unsigned int unk0d4;
-
-    unsigned int unk0d8;
-
-    unsigned int unk0dc;
-
-    unsigned int unk0e0;
-
-    unsigned int unk0e4;
-
-    unsigned int unk0e8;
-
-    unsigned int unk0ec;
-
-    unsigned int unk0f0;
-
-    unsigned int unk0f4;
-
-    unsigned int unk0f8;
-
-    unsigned int unk0fc;
-
-    unsigned int unk100;
-
-    unsigned int unk104;
-
-    unsigned int unk108;
-
-    unsigned int unk10c;
-
-    unsigned int unk110;
-
-    unsigned int unk114;
-
-    unsigned int unk118;
-
-    unsigned int unk11c;
-
-    unsigned int unk120;
-
-    unsigned int unk124;
-
-    unsigned int unk128;
-
-    unsigned int unk12c;
-
-    unsigned int unk130;
-
-    unsigned int unk134;
-
-    unsigned int unk138;
-
-    unsigned int unk13c;
-
-    unsigned int unk140;
-
-    unsigned int unk144;
-
-    unsigned int unk148;
-
-    unsigned int unk14c;
-
-    unsigned int unk150;
-
-    unsigned int unk154;
-
-    unsigned int unk158;
-
-    unsigned int unk15c;
-
-    unsigned int unk160;
-
-    unsigned int unk164;
-
-    unsigned int unk168;
-
-    unsigned int unk16c;
-
-    unsigned int unk170;
-
-    unsigned int unk174;
-
-    unsigned int unk178;
-
-    unsigned int unk17c;
-
-    unsigned int unk180;
-
-    unsigned int unk184;
-
-    unsigned int unk188;
-
-    unsigned int unk18c;
-
-    unsigned int unk190;
-
-    ShadowSceneNode* scene;
 };
 
 SceneGraph* FUN_00b4f5c0();
@@ -6386,11 +4029,11 @@ extern ShadowSceneNode* DAT_011f91c8;
 
 static inline BSShaderProperty* AsShader(BSShaderProperty* p)
 {
-    return p->shaderType != ~0u ? p : 0;
+    return p->iShaderPropertyType != ~0u ? p : 0;
 }
 static inline int IsLightingType(BSShaderProperty* p)
 {
-    unsigned int t = p->shaderType;
+    unsigned int t = p->iShaderPropertyType;
     return t >= 1 && t <= 12;
 }
 static inline BSShaderLightingProperty* AsLighting(BSShaderProperty* p)
@@ -6403,13 +4046,14 @@ static inline ShadowSceneLight* GetNext(ShadowListItem*& pos)
     pos = pos->next;
     return result;
 }
-static inline void S00b5b260_Apply(S00b5b260_Light* light, FourComponentFloatVector* bound, S00b5b260_Geom* geom)
+bool __fastcall TestLightSphere(ShadowSceneLight*, int, FourComponentFloatVector*, ShadowLightFlags*, float);
+static inline void S00b5b260_Apply(ShadowSceneLight* light, FourComponentFloatVector* bound, S00b5b260_Geom* geom)
 {
     if (light)
     {
-        ShadowLightFlags* data = light->lightData;
-        if (light->FUN_00b9dae0(bound, data, 1.0f))
-            light->AddGeometry(geom);
+        ShadowLightFlags* data = reinterpret_cast<ShadowLightFlags*>(light->spLight.m_pObject);
+        if (reinterpret_cast<bool (__thiscall*)(ShadowSceneLight*, FourComponentFloatVector*, ShadowLightFlags*, float)>(&TestLightSphere)(light, bound, data, 1.0f))
+            light->AddGeometry(reinterpret_cast<NiTriBasedGeom*>(geom));
     }
 }
 // @fnv 0x00b5b260
@@ -6426,7 +4070,8 @@ bool FUN_00b5b260(S00b5b260_Geom* geom, ShadowSceneNode* scene, void* unused, Li
             return false;
         if (!scene)
         {
-            scene = FUN_00b4f5c0()->scene;
+            // The shared SceneGraph does not yet expose the PC shadow-scene pointer.
+            scene = *reinterpret_cast<ShadowSceneNode**>(reinterpret_cast<char*>(FUN_00b4f5c0()) + 0x194);
             if (!scene)
                 scene = DAT_011f91c8;
         }
@@ -6434,7 +4079,8 @@ bool FUN_00b5b260(S00b5b260_Geom* geom, ShadowSceneNode* scene, void* unused, Li
         FourComponentFloatVector* bound = geom->worldBound;
         if (!bound)
             bound = &DAT_011f4288;
-        FourComponentFloatVector boundCopy = *bound;
+        FourComponentFloatVector boundCopy;
+        memcpy(&boundCopy, bound, sizeof(boundCopy));
         if (ownerA)
         {
             for (unsigned int i = 0; i < ownerA->count; ++i)
@@ -6451,10 +4097,10 @@ bool FUN_00b5b260(S00b5b260_Geom* geom, ShadowSceneNode* scene, void* unused, Li
         }
         else
         {
-            ShadowListItem* pos = scene->lights.head;
+            ShadowListItem* pos = scene->lLightList.head;
             while (pos)
             {
-                S00b5b260_Apply((S00b5b260_Light*)GetNext(pos), &boundCopy, geom);
+                S00b5b260_Apply((ShadowSceneLight*)GetNext(pos), &boundCopy, geom);
             }
         }
         lighting->RemoveItemsAfterPos(geom);
@@ -6487,15 +4133,12 @@ struct WeightVec
         return x * v.x + y * v.y + z * v.z;
     }
 };
-struct WeightLight
-{
-    float Evaluate(WeightVec, WeightVec, int);
-};
+
 struct WeightLink
 {
     WeightLink* next;
     int previous;
-    WeightLight* item;
+    ShadowSceneLight* item;
 };
 struct WeightData
 {
@@ -6557,149 +4200,23 @@ struct WeightData
     int unkec;
     WeightVec direction;
 };
-struct WeightOwner
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    WeightData* data;
-};
-struct WeightScene
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    WeightLink* head;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    WeightOwner* owner;
-    float FUN_00b5b610(WeightVec position, int* count, float* ambient, float* diffuse, WeightVec target, int flags);
-};
+
 // Sums light contributions, adds ambient and diffuse terms, and returns the total weighted lighting value at a position.
+float __fastcall EvaluateSceneLight(ShadowSceneLight*, int, WeightVec, WeightVec, int);
 // @fnv 0x00b5b610
-float WeightScene::FUN_00b5b610(WeightVec position, int* count, float* ambient, float* diffuse, WeightVec target,
-                                int flags)
+float __fastcall CalculateWeightedLighting(ShadowSceneNode* self, int, WeightVec position, int* count, float* ambient, float* diffuse, WeightVec target, int flags)
 {
     float total = 0.0f;
     float previous = 0.0f;
     *count = 0;
-    WeightLink* node = head;
+    WeightLink* node = reinterpret_cast<WeightLink*>(self->lLightList.head);
     while (node)
     {
-        WeightLight*& light = node->item;
+        ShadowSceneLight*& light = node->item;
         node = node->next;
         if (light)
         {
-            total += light->Evaluate(position, target, flags);
+            total += reinterpret_cast<float (__thiscall*)(ShadowSceneLight*, WeightVec, WeightVec, int)>(&EvaluateSceneLight)(light, position, target, flags);
             if (total > previous)
             {
                 ++*count;
@@ -6707,7 +4224,7 @@ float WeightScene::FUN_00b5b610(WeightVec position, int* count, float* ambient, 
             }
         }
     }
-    WeightData* data = owner->data;
+    WeightData* data = reinterpret_cast<WeightData*>(self->pSunLight->spLight.m_pObject);
     WeightVec* __restrict pAmbient = &data->ambient;
     WeightVec color = *pAmbient;
     float value = maximum(color.x, maximum(color.y, color.z));
@@ -6776,7 +4293,7 @@ template <class T> class S5c6e0_PointerList
         return 0;
     }
 
-    void FUN_00a5a310(const S5c6e0_RefArg<NiRefObject>& element);  // AddTail
+    void AddTail(const S5c6e0_RefArg<NiRefObject>& element);  // AddTail
 };
 
 class S5c6e0_Owner
@@ -6804,39 +4321,21 @@ void S5c6e0_Owner::FUN_00b5c6e0(NiRefObject* pkObject)
 {
     if (!m_kList.FindPos(pkObject))
     {
-        m_kList.FUN_00a5a310(pkObject);
-        if (pkObject)
+        m_kList.AddTail(pkObject);
+        if (pkObject != 0)
             pkObject->DecRefCount();
     }
 }
 
 namespace fnv_00b5c940 {
-class NiRTTIStub
+extern NiRTTI g_kDirLightRTTI;    // 0x011f4a68
+extern NiRTTI g_kPointLightRTTI;  // 0x011f4a98
+
+static inline bool IsExactLightType(const NiRTTI* type, const NiLight* light)
 {
-  public:
-    const char* m_pcName;
-    const NiRTTIStub* m_pBaseRTTI;
-};
-
-extern NiRTTIStub g_kDirLightRTTI;    // 0x011f4a68
-extern NiRTTIStub g_kPointLightRTTI;  // 0x011f4a98
-
-class NiLightObj : public NiObject
-{
-  public:
-    virtual const NiRTTIStub* GetRTTI() const;
-
-    bool IsExactKindOf(const NiRTTIStub* pkRTTI) const
-    {
-        return GetRTTI() == pkRTTI;
-    }
-    static bool IsExactKindOf(const NiRTTIStub* pkRTTI, const NiLightObj* pkObject)
-    {
-        if (!pkObject)
-            return false;
-        return pkObject->IsExactKindOf(pkRTTI);
-    }
-};
+    if (!light) return false;
+    return light->GetRTTI() == type;
+}
 
 class LightCS
 {
@@ -6855,179 +4354,14 @@ extern LightCS g_kShadowLightCS;  // 0x011f9ea0
 
 void* AllocObject(unsigned int uiSize);
 
-class SSLight : public NiObject
-{
-  public:
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    unsigned int m_uiUnkF8;
-    bool m_bFlagFC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    unsigned int m_uiUnk240;
-    int unk244;
-    int unk248;
-    int unk24C;
 
-    static void* operator new(unsigned int uiSize)
-    {
-        return AllocObject(uiSize);
-    }
-    static void operator delete(void*, unsigned int);
-    SSLight();
-    void SetLight(NiLightObj* pkLight);
-};
-
-template <class T> class SSListItem
-{
-  public:
-    SSListItem* m_pkNext;
-    SSListItem* m_pkPrev;
-    T m_element;
-};
 
 template <class T> class SSPointerList
 {
   public:
-    __declspec(noinline) void FUN_00a5a310(const T& element)
+    __declspec(noinline) void AddTail(const T& element)
     {
-        SSListItem<T>* pkNode = new SSListItem<T>;
+        NiTListItem<T>* pkNode = new NiTListItem<T>;
         pkNode->m_element = element;
         pkNode->m_pkNext = 0;
         pkNode->m_pkPrev = m_pkTail;
@@ -7038,153 +4372,27 @@ template <class T> class SSPointerList
         m_pkTail = pkNode;
         m_uiCount++;
     }
-    SSListItem<T>* m_pkHead;
-    SSListItem<T>* m_pkTail;
+    NiTListItem<T>* m_pkHead;
+    NiTListItem<T>* m_pkTail;
     unsigned int m_uiCount;
 };
 
-class SSNode
-{
-  public:
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    SSPointerList<NiPointer<SSLight> > m_kLights;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    unsigned int m_uiUnk1E0;
-
-    SSLight* FUN_00b5c940(NiLightObj* pkLight, bool bFlag);
-};
-
-// Validates pkLight is a directional or point light, creates an SSLight, stores bFlag, adds it to m_kLights, and returns the new SSLight.
+// Validates pkLight is a directional or point light, creates an ShadowSceneLight, stores bFlag, adds it to m_kLights, and returns the new ShadowSceneLight.
 // @fnv 0x00b5c940
-SSLight* SSNode::FUN_00b5c940(NiLightObj* pkLight, bool bFlag)
+ShadowSceneLight* __fastcall CreateSceneLight(ShadowSceneNode* self, int, NiLight* pkLight, bool bFlag)
 {
-    if (!NiLightObj::IsExactKindOf(&g_kDirLightRTTI, pkLight) &&
-        !NiLightObj::IsExactKindOf(&g_kPointLightRTTI, pkLight))
+    if (!IsExactLightType(&g_kDirLightRTTI, pkLight) &&
+        !IsExactLightType(&g_kPointLightRTTI, pkLight))
         return 0;
 
     g_kShadowLightCS.Enter(0);
-    SSLight* pkSSLight = new SSLight;
-    pkSSLight->SetLight(pkLight);
-    pkSSLight->m_bFlagFC = bFlag;
-    m_kLights.FUN_00a5a310(pkSSLight);
-    pkSSLight->m_uiUnk240 = m_uiUnk1E0;
+    ShadowSceneLight* pkShadowSceneLight = new ShadowSceneLight;
+    reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, NiLight*)>(&fnv_00b9dda0::BindLight)(pkShadowSceneLight, pkLight);
+    pkShadowSceneLight->bDynamicLight = bFlag;
+    reinterpret_cast<SSPointerList<NiPointer<ShadowSceneLight> >*>(&self->lLightQueueAdd)->AddTail(pkShadowSceneLight);
+    pkShadowSceneLight->pPortalGraph = self->pBSPortalGraph;
     g_kShadowLightCS.Leave();
-    return pkSSLight;
+    return pkShadowSceneLight;
 }
 }  // namespace fnv_00b5c940
 
@@ -7202,28 +4410,14 @@ struct GlobalObject_0096a2d0
 };
 extern "C" GlobalObject_0096a2d0 DAT_011f9ea0;
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
-struct LightEx;
-
-struct LightEx : public NiRefObject
-{
-    char body[0x250 - 8];
-    LightEx();
-    static void* operator new(unsigned int size)
-    {
-        return FUN_00aa13e0(size);
-    }
-    void FUN_00b9bb10(float, int);
-    void FUN_00b5af30(void* key);
-    void SetShadowEnabled(bool);
-};
 
 struct ActiveLightList : public NiTPointerListBase<NiTPointerAllocator<unsigned int>, NiPointer<NiRefObject> >
 {
     NiTListItem<NiPointer<NiRefObject> >* NewItem();
-    void FUN_00a5a310(const NiPointer<NiRefObject>& element);
+    void AddTail(const NiPointer<NiRefObject>& element);
 };
 
-void ActiveLightList::FUN_00a5a310(const NiPointer<NiRefObject>& element)
+void ActiveLightList::AddTail(const NiPointer<NiRefObject>& element)
 {
     NiTListItem<NiPointer<NiRefObject> >* node = NewItem();
     node->m_element = element;
@@ -7237,36 +4431,31 @@ void ActiveLightList::FUN_00a5a310(const NiPointer<NiRefObject>& element)
     m_kItemCount.m_uiCount++;
 }
 
-struct ShadowSceneNode_Self : public ShadowSceneNode
-{
-    ActiveLightList m_activeLights;  // at offset 0xe4
-    LightEx* FUN_00b5cbd0(void* key);
-};
-
 // Finds a shadow light matching key in shadowLights, clears its flag and returns it, or creates a new LightEx, adds it to m_activeLights, and returns it.
+void __fastcall FadeSceneLight(ShadowSceneLight*, int, float, int);
 // @fnv 0x00b5cbd0
-LightEx* ShadowSceneNode_Self::FUN_00b5cbd0(void* key)
+ShadowSceneLight* __fastcall FindSceneObjectLight(ShadowSceneNode* self, int, void* key)
 {
-    ShadowListItem* pos = shadowLights.head;
+    ShadowListItem* pos = self->lShadowLightList.head;
     while (pos)
     {
         ShadowSceneLight* const& ref = pos->light;
         pos = pos->next;
-        LightEx* light = (LightEx*)ref;
-        if (light && *(void**)((char*)light + 0x128) == key)
+        ShadowSceneLight* light = (ShadowSceneLight*)ref;
+        if (light && light->spShadowScene.m_pObject == key)
         {
-            ShadowLightFlags* flags = *(ShadowLightFlags**)((char*)light + 0xf8);
+            ShadowLightFlags* flags = reinterpret_cast<ShadowLightFlags*>(light->spLight.m_pObject);
             flags->flags &= 0xfffffffe;
-            light->FUN_00b9bb10(1.0f, 0);
+            reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, float, int)>(&FadeSceneLight)(light, 1.0f, 0);
             return light;
         }
     }
 
     DAT_011f9ea0.Lock(0);
-    LightEx* light = new LightEx;
-    light->FUN_00b5af30(key);
-    light->SetShadowEnabled(true);
-    m_activeLights.FUN_00a5a310(NiPointer<NiRefObject>(light));
+    ShadowSceneLight* light = new ShadowSceneLight;
+    reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, void*)>(&FUN_00b5af30)(light, key);
+    reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, bool)>(&SetShadowEnabled)(light, true);
+    reinterpret_cast<ActiveLightList*>(&self->lLightQueueAdd)->AddTail(NiPointer<NiRefObject>(light));
     DAT_011f9ea0.Unlock();
     return light;
 }
@@ -7356,25 +4545,13 @@ class S00b5cd00_Light
     int unkF8;
 };
 
-class S00b5cd00_Param
-{
-  public:
-    virtual void vf00();
-    virtual void DeleteThis();
-
-    long m_iObjectReferenceCount;
-
-    void FUN_00b9dda0(S00b5cd00_Light* light);
-    void SetShadowEnabled(bool value);
-};
-
 // Reference-taking argument wrapper: the constructor adds a reference; the caller drops it after the call.
 template <class T> class S00b5cd00_Ptr
 {
   public:
     S00b5cd00_Ptr(T* p) : m_p(p)
     {
-        InterlockedIncrement(&p->m_iObjectReferenceCount);
+        InterlockedIncrement(&*reinterpret_cast<volatile long*>(&p->m_uiRefCount));
     }
     ~S00b5cd00_Ptr()
     {
@@ -7386,153 +4563,31 @@ template <class T> class S00b5cd00_Ptr
 class S00b5cd00_List
 {
   public:
-    void FUN_00a5a310(const S00b5cd00_Ptr<S00b5cd00_Param>& item);
-};
-
-class S00b5cd00_Owner
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    S00b5cd00_List m_kNode;
-    S00b5cd00_Param* FUN_00b5cd00(S00b5cd00_Param* param);
+    void AddTail(const S00b5cd00_Ptr<ShadowSceneLight>& item);
 };
 
 // @fnv 0x00b5cd00
-S00b5cd00_Param* S00b5cd00_Owner::FUN_00b5cd00(S00b5cd00_Param* param)
+ShadowSceneLight* __fastcall AddDynamicLight(ShadowSceneNode* self, int, ShadowSceneLight* param)
 {
-    reinterpret_cast<unsigned char*>(param)[0xFC] = 1;
+    param->bDynamicLight = 1;
     S00b5cd00_Light* light = new S00b5cd00_Light;
     light->m_flags &= ~1u;
-    param->FUN_00b9dda0(light);
-    param->SetShadowEnabled(true);
-    reinterpret_cast<unsigned char*>(param)[0xED] = 0;
-    m_kNode.FUN_00a5a310(param);
-    if (InterlockedDecrement(&param->m_iObjectReferenceCount) == 0)
+    reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, S00b5cd00_Light*)>(&fnv_00b9dda0::BindLight)(param, light);
+    reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, bool)>(&SetShadowEnabled)(param, true);
+    param->bCubeShadowMap = 0;
+    reinterpret_cast<S00b5cd00_List*>(&self->lShadowLightList)->AddTail(param);
+    if (InterlockedDecrement(&*reinterpret_cast<volatile long*>(&param->m_uiRefCount)) == 0)
         param->DeleteThis();
     return param;
 }
 
 extern float DAT_011ad834;
 
-struct MyShadowSceneLight
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    float m_fD8;
-    float m_fDC;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    ShadowLightFlags* lightData;
-};
-
 struct MyShadowListItem
 {
     MyShadowListItem* next;
     MyShadowListItem* prev;
-    MyShadowSceneLight* light;
+    ShadowSceneLight* light;
 };
 
 struct MyShadowList
@@ -7545,108 +4600,48 @@ struct MyShadowList
     void MoveBefore(MyShadowListItem* a, MyShadowListItem* b);
 };
 
-struct SSN_cand
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    MyShadowList shadowLights;
-    unsigned int unknownCC;
-    MyShadowListItem* m_pD0;
-    MyShadowListItem* m_pD4;
-    void* m_spD8;
-    void* m_spDC;
-
-    void FUN_00b5cde0(MyShadowSceneLight* a2);
-};
-
-// Reorders shadow light list nodes by comparing m_fD8 and m_fDC against thresholds and DAT_011ad834, moving nodes before m_pD0 or m_pD4.
+// Reorders shadow lights by fade state, moving nodes before the active or fading-in fence.
 // @fnv 0x00b5cde0
-void SSN_cand::FUN_00b5cde0(MyShadowSceneLight* apLight)
+void __fastcall SortShadowLights(ShadowSceneNode* self, int, ShadowSceneLight* apLight)
 {
-    MyShadowList* pShadowList = &shadowLights;
+    MyShadowList* pShadowList = reinterpret_cast<MyShadowList*>(&self->lShadowLightList);
 
-    if (!m_pD4)
+    if (!reinterpret_cast<MyShadowListItem*&>(self->kShadowLightFadingInFence))
     {
-        pShadowList->FUN_00c1b4a0(&m_spDC);
-        m_pD4 = pShadowList->head;
+        pShadowList->FUN_00c1b4a0(&self->kShadowLightFadingInFenceObject);
+        reinterpret_cast<MyShadowListItem*&>(self->kShadowLightFadingInFence) = pShadowList->head;
     }
     else
     {
-        pShadowList->MoveNodeBefore(m_pD4, pShadowList->head);
+        pShadowList->MoveNodeBefore(reinterpret_cast<MyShadowListItem*&>(self->kShadowLightFadingInFence), pShadowList->head);
     }
 
-    if (!m_pD0)
+    if (!reinterpret_cast<MyShadowListItem*&>(self->kShadowLightActiveFence))
     {
-        pShadowList->FUN_00c1b4a0(&m_spD8);
-        m_pD0 = pShadowList->head;
+        pShadowList->FUN_00c1b4a0(&self->kShadowLightActiveFenceObject);
+        reinterpret_cast<MyShadowListItem*&>(self->kShadowLightActiveFence) = pShadowList->head;
     }
     else
     {
-        pShadowList->MoveNodeBefore(m_pD0, pShadowList->head);
+        pShadowList->MoveNodeBefore(reinterpret_cast<MyShadowListItem*&>(self->kShadowLightActiveFence), pShadowList->head);
     }
 
-    if (!m_pD4)
+    if (!reinterpret_cast<MyShadowListItem*&>(self->kShadowLightFadingInFence))
         return;
 
-    MyShadowListItem* cur = m_pD4->next;
+    MyShadowListItem* cur = reinterpret_cast<MyShadowListItem*&>(self->kShadowLightFadingInFence)->next;
     while (cur)
     {
         MyShadowListItem* node = cur;
-        MyShadowSceneLight*& light = cur->light;
+        ShadowSceneLight*& light = cur->light;
         cur = cur->next;
 
         if (!light)
             continue;
 
-        if (light->m_fD8 <= 0.100000001490116119384765625 && light->m_fDC < DAT_011ad834)
+        if (light->fShadowLODDimmerTarget <= 0.100000001490116119384765625 && light->fShadowLODDimmerElapsed < DAT_011ad834)
         {
-            MyShadowListItem* d0 = m_pD0;
+            MyShadowListItem* d0 = reinterpret_cast<MyShadowListItem*&>(self->kShadowLightActiveFence);
             if (node != d0)
             {
                 if (pShadowList->head == node)
@@ -7668,27 +4663,27 @@ void SSN_cand::FUN_00b5cde0(MyShadowSceneLight* apLight)
             continue;
         }
 
-        if (light->m_fD8 >= 0.89999997615814208984375 && light->m_fDC < DAT_011ad834)
+        if (light->fShadowLODDimmerTarget >= 0.89999997615814208984375 && light->fShadowLODDimmerElapsed < DAT_011ad834)
         {
-            float val = (light->m_fD8 > 0.0f) ? light->m_fDC / DAT_011ad834 : 1.0f - light->m_fDC / DAT_011ad834;
+            float val = (light->fShadowLODDimmerTarget > 0.0f) ? light->fShadowLODDimmerElapsed / DAT_011ad834 : 1.0f - light->fShadowLODDimmerElapsed / DAT_011ad834;
             if (val > 0.100000001490116119384765625)
             {
-                pShadowList->MoveBefore(node, m_pD0);
+                pShadowList->MoveBefore(node, reinterpret_cast<MyShadowListItem*&>(self->kShadowLightActiveFence));
                 continue;
             }
         }
 
-        if (!(light->lightData->flags & 1))
+        if (!(reinterpret_cast<ShadowLightFlags*>(light->spLight.m_pObject)->flags & 1))
         {
-            if (!(light->m_fD8 >= 0.89999997615814208984375 && light->m_fDC < DAT_011ad834))
+            if (!(light->fShadowLODDimmerTarget >= 0.89999997615814208984375 && light->fShadowLODDimmerElapsed < DAT_011ad834))
             {
                 if (light == apLight)
                 {
-                    pShadowList->MoveNodeBefore(node, m_pD4);
+                    pShadowList->MoveNodeBefore(node, reinterpret_cast<MyShadowListItem*&>(self->kShadowLightFadingInFence));
                 }
                 else
                 {
-                    pShadowList->MoveBefore(node, m_pD4);
+                    pShadowList->MoveBefore(node, reinterpret_cast<MyShadowListItem*&>(self->kShadowLightFadingInFence));
                 }
             }
         }
@@ -7705,7 +4700,7 @@ struct S00b5d9f0_Lock
     unsigned int m_pOwnerObject;
     int m_uiItemCount;
 
-    void __thiscall Wait(int spin);
+    void __thiscall FUN_0040fbf0(int spin);
 };
 
 extern S00b5d9f0_Lock DAT_011f9ec0;
@@ -7740,99 +4735,25 @@ struct S00b5d9f0_List
     int unk04;
     int unk08;
 
-    void __thiscall FUN_00a5a310(const S00b5d9f0_Temp& item);
-};
-
-struct S00b5d9f0_Owner
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    int unkF0;
-    int unkF4;
-    int unkF8;
-    int unkFC;
-    int unk100;
-    int unk104;
-    S00b5d9f0_List m_list108;
-    S00b5d9f0_List m_list114;
-
-    void FUN_00b5d9f0(S00b5d9f0_Obj* obj, unsigned char flag);
+    void __thiscall AddTail(const S00b5d9f0_Temp& item);
 };
 
 // Adds obj to m_list108 or m_list114 based on flag, then decrements obj's reference count and deletes it if zero.
 // @fnv 0x00b5d9f0
-void S00b5d9f0_Owner::FUN_00b5d9f0(S00b5d9f0_Obj* obj, unsigned char flag)
+void __fastcall QueueObjectUpdate(ShadowSceneNode* self, int, S00b5d9f0_Obj* obj, unsigned char flag)
 {
     if (obj == 0)
         return;
 
-    DAT_011f9ec0.Wait(0);
+    DAT_011f9ec0.FUN_0040fbf0(0);
 
     switch (!flag)
     {
     default:
-        m_list108.FUN_00a5a310(S00b5d9f0_Temp(obj));
+        reinterpret_cast<S00b5d9f0_List*>(&self->lObjectQueueUpdate)->AddTail(S00b5d9f0_Temp(obj));
         break;
     case 0:
-        m_list114.FUN_00a5a310(S00b5d9f0_Temp(obj));
+        reinterpret_cast<S00b5d9f0_List*>(&self->lObjectQueueUpdateActiveOnly)->AddTail(S00b5d9f0_Temp(obj));
         break;
     }
 
@@ -7844,6 +4765,7 @@ void S00b5d9f0_Owner::FUN_00b5d9f0(S00b5d9f0_Obj* obj, unsigned char flag)
         DAT_011f9ec0.m_pOwnerObject = 0;
 }
 
+class NiCullingProcess;
 namespace fnv_00b5e870 {
 extern "C" void _ReadWriteBarrier();
 extern "C" void _ReadBarrier();
@@ -7858,7 +4780,6 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volati
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* Addend);
 
-class NiCullingProcess;
 
 struct Obj4
 {
@@ -7868,193 +4789,18 @@ struct Obj4
     int m_04;
 };
 
-class Item : public NiRefObject
-{
-
-  public:
-    float m_reserve08_0;
-    float m_reserve08_1;
-    float m_reserve08_2;
-    float m_reserve08_3;
-    float m_reserve08_4;
-    float m_reserve08_5;
-    float m_reserve08_6;
-    float m_reserve08_7;
-
-    float m_reserve08_8;
-    float m_reserve08_9;
-    float m_reserve08_10;
-    float m_reserve08_11;
-    float m_reserve08_12;
-    float m_reserve08_13;
-    float m_reserve08_14;
-    float m_reserve08_15;
-
-    float m_reserve08_16;
-    float m_reserve08_17;
-    float m_reserve08_18;
-    float m_reserve08_19;
-    float m_reserve08_20;
-    float m_reserve08_21;
-    float m_reserve08_22;
-    float m_reserve08_23;
-
-    float m_reserve08_24;
-    float m_reserve08_25;
-    float m_reserve08_26;
-    float m_reserve08_27;
-    float m_reserve08_28;
-    float m_reserve08_29;
-    float m_reserve08_30;
-    float m_reserve08_31;
-
-    float m_reserve08_32;
-    float m_reserve08_33;
-    float m_reserve08_34;
-    float m_reserve08_35;
-    float m_reserve08_36;
-    float m_reserve08_37;
-    float m_reserve08_38;
-    float m_reserve08_39;
-
-    float m_reserve08_40;
-    float m_reserve08_41;
-    float m_reserve08_42;
-    float m_reserve08_43;
-    float m_reserve08_44;
-    float m_reserve08_45;
-    float m_reserve08_46;
-    float m_reserve08_47;
-
-    float m_reserve08_48;
-    float m_reserve08_49;
-    float m_reserve08_50;
-    float m_reserve08_51;
-    float m_reserve08_52;
-    float m_reserve08_53;
-    float m_reserve08_54;
-    float m_reserve08_55;
-
-    float m_reserve08_56;
-
-    char m_flagEC;
-
-    char m_reserveED_0;
-    char m_reserveED_1;
-    char m_reserveED_2;
-    char m_reserveED_3;
-    char m_reserveED_4;
-    char m_reserveED_5;
-    char m_reserveED_6;
-    char m_reserveED_7;
-
-    char m_reserveED_8;
-    char m_reserveED_9;
-    char m_reserveED_10;
-
-    Obj4* m_f8;
-
-    char m_flagFC;
-
-    char unkFD, unkFE, unkFF;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10C;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11C;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12C;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13C;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14C;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    unsigned int unk15C;
-    unsigned int unk160;
-    unsigned int unk164;
-    unsigned int unk168;
-    unsigned int unk16C;
-    unsigned int unk170;
-    unsigned int unk174;
-    unsigned int unk178;
-    unsigned int unk17C;
-    unsigned int unk180;
-    unsigned int unk184;
-    unsigned int unk188;
-    unsigned int unk18C;
-    unsigned int unk190;
-    unsigned int unk194;
-    unsigned int unk198;
-    unsigned int unk19C;
-    unsigned int unk1A0;
-    unsigned int unk1A4;
-    unsigned int unk1A8;
-    unsigned int unk1AC;
-    unsigned int unk1B0;
-    unsigned int unk1B4;
-    unsigned int unk1B8;
-    unsigned int unk1BC;
-    unsigned int unk1C0;
-    unsigned int unk1C4;
-    unsigned int unk1C8;
-    unsigned int unk1CC;
-    unsigned int unk1D0;
-    unsigned int unk1D4;
-    unsigned int unk1D8;
-    unsigned int unk1DC;
-    unsigned int unk1E0;
-    unsigned int unk1E4;
-    unsigned int unk1E8;
-    unsigned int unk1EC;
-    unsigned int unk1F0;
-    unsigned int unk1F4;
-    unsigned int unk1F8;
-    unsigned int unk1FC;
-    unsigned int unk200;
-    unsigned int unk204;
-    unsigned int unk208;
-    unsigned int unk20C;
-    unsigned int unk210;
-    struct GeometryLinks** objects;
-    unsigned int objectCount;
-    unsigned int unk21C;
-    unsigned int unk220;
-    struct LinkedLight** linkedLights;
-    unsigned int linkedLightCount;
-    unsigned int unk22C;
-    unsigned int unk230;
-    unsigned int unk234;
-    unsigned int unk238;
-    unsigned int unk23C;
-
-    int m_240;
-
-    void FUN_00b9e970(void* arg);
-};
-
-typedef NiPointer<Item> RefPtr_b9fcc0;
+typedef NiPointer<ShadowSceneLight> RefPtr_b9fcc0;
 struct FirstOwner
 {
-    Item* m_pObject;
-    FirstOwner(Item* p) : m_pObject(p)
+    ShadowSceneLight* m_pObject;
+    FirstOwner(ShadowSceneLight* p) : m_pObject(p)
     {
         if (p)
             p->IncRefCount();
     }
     ~FirstOwner()
     {
-        Item* p = m_pObject;
+        ShadowSceneLight* p = m_pObject;
         _ReadWriteBarrier();
         if (p)
             p->DecRefCount();
@@ -8455,539 +5201,15 @@ struct LightContext
 };
 extern int __cdecl FUN_00b5a980(int*, int*);
 
-class Self
+class ShadowSceneUpdater : public ShadowSceneNode
 {
-
   public:
-    char m_reserve00_0;
-    char m_reserve00_1;
-    char m_reserve00_2;
-    char m_reserve00_3;
-    char m_reserve00_4;
-    char m_reserve00_5;
-    char m_reserve00_6;
-    char m_reserve00_7;
-
-    char m_reserve00_8;
-    char m_reserve00_9;
-    char m_reserve00_10;
-    char m_reserve00_11;
-    char m_reserve00_12;
-    char m_reserve00_13;
-    char m_reserve00_14;
-    char m_reserve00_15;
-
-    char m_reserve00_16;
-    char m_reserve00_17;
-    char m_reserve00_18;
-    char m_reserve00_19;
-    char m_reserve00_20;
-    char m_reserve00_21;
-    char m_reserve00_22;
-    char m_reserve00_23;
-
-    char m_reserve00_24;
-    char m_reserve00_25;
-    char m_reserve00_26;
-    char m_reserve00_27;
-    char m_reserve00_28;
-    char m_reserve00_29;
-    char m_reserve00_30;
-    char m_reserve00_31;
-
-    char m_reserve00_32;
-    char m_reserve00_33;
-    char m_reserve00_34;
-    char m_reserve00_35;
-    char m_reserve00_36;
-    char m_reserve00_37;
-    char m_reserve00_38;
-    char m_reserve00_39;
-
-    char m_reserve00_40;
-    char m_reserve00_41;
-    char m_reserve00_42;
-    char m_reserve00_43;
-    char m_reserve00_44;
-    char m_reserve00_45;
-    char m_reserve00_46;
-    char m_reserve00_47;
-
-    char m_reserve00_48;
-    char m_reserve00_49;
-    char m_reserve00_50;
-    char m_reserve00_51;
-    char m_reserve00_52;
-    char m_reserve00_53;
-    char m_reserve00_54;
-    char m_reserve00_55;
-
-    char m_reserve00_56;
-    char m_reserve00_57;
-    char m_reserve00_58;
-    char m_reserve00_59;
-    char m_reserve00_60;
-    char m_reserve00_61;
-    char m_reserve00_62;
-    char m_reserve00_63;
-
-    char m_reserve00_64;
-    char m_reserve00_65;
-    char m_reserve00_66;
-    char m_reserve00_67;
-    char m_reserve00_68;
-    char m_reserve00_69;
-    char m_reserve00_70;
-    char m_reserve00_71;
-
-    char m_reserve00_72;
-    char m_reserve00_73;
-    char m_reserve00_74;
-    char m_reserve00_75;
-    char m_reserve00_76;
-    char m_reserve00_77;
-    char m_reserve00_78;
-    char m_reserve00_79;
-
-    char m_reserve00_80;
-    char m_reserve00_81;
-    char m_reserve00_82;
-    char m_reserve00_83;
-    char m_reserve00_84;
-    char m_reserve00_85;
-    char m_reserve00_86;
-    char m_reserve00_87;
-
-    char m_reserve00_88;
-    char m_reserve00_89;
-    char m_reserve00_90;
-    char m_reserve00_91;
-    char m_reserve00_92;
-    char m_reserve00_93;
-    char m_reserve00_94;
-    char m_reserve00_95;
-
-    char m_reserve00_96;
-    char m_reserve00_97;
-    char m_reserve00_98;
-    char m_reserve00_99;
-    char m_reserve00_100;
-    char m_reserve00_101;
-    char m_reserve00_102;
-    char m_reserve00_103;
-
-    char m_reserve00_104;
-    char m_reserve00_105;
-    char m_reserve00_106;
-    char m_reserve00_107;
-    char m_reserve00_108;
-    char m_reserve00_109;
-    char m_reserve00_110;
-    char m_reserve00_111;
-
-    char m_reserve00_112;
-    char m_reserve00_113;
-    char m_reserve00_114;
-    char m_reserve00_115;
-    char m_reserve00_116;
-    char m_reserve00_117;
-    char m_reserve00_118;
-    char m_reserve00_119;
-
-    char m_reserve00_120;
-    char m_reserve00_121;
-    char m_reserve00_122;
-    char m_reserve00_123;
-    char m_reserve00_124;
-    char m_reserve00_125;
-    char m_reserve00_126;
-    char m_reserve00_127;
-
-    char m_reserve00_128;
-    char m_reserve00_129;
-    char m_reserve00_130;
-    char m_reserve00_131;
-    char m_reserve00_132;
-    char m_reserve00_133;
-    char m_reserve00_134;
-    char m_reserve00_135;
-
-    char m_reserve00_136;
-    char m_reserve00_137;
-    char m_reserve00_138;
-    char m_reserve00_139;
-    char m_reserve00_140;
-    char m_reserve00_141;
-    char m_reserve00_142;
-    char m_reserve00_143;
-
-    char m_reserve00_144;
-    char m_reserve00_145;
-    char m_reserve00_146;
-    char m_reserve00_147;
-    char m_reserve00_148;
-    char m_reserve00_149;
-    char m_reserve00_150;
-    char m_reserve00_151;
-
-    char m_reserve00_152;
-    char m_reserve00_153;
-    char m_reserve00_154;
-    char m_reserve00_155;
-    char m_reserve00_156;
-    char m_reserve00_157;
-    char m_reserve00_158;
-    char m_reserve00_159;
-
-    char m_reserve00_160;
-    char m_reserve00_161;
-    char m_reserve00_162;
-    char m_reserve00_163;
-    char m_reserve00_164;
-    char m_reserve00_165;
-    char m_reserve00_166;
-    char m_reserve00_167;
-
-    char m_reserve00_168;
-    char m_reserve00_169;
-    char m_reserve00_170;
-    char m_reserve00_171;
-    char m_reserve00_172;
-    char m_reserve00_173;
-    char m_reserve00_174;
-    char m_reserve00_175;
-
-    char m_reserve00_176;
-    char m_reserve00_177;
-    char m_reserve00_178;
-    char m_reserve00_179;
-
-    List_b9fcc0 m_listB4;
-
-    List_b9fcc0 m_listC0;
-
-    char m_reserveCC_0;
-    char m_reserveCC_1;
-    char m_reserveCC_2;
-    char m_reserveCC_3;
-    char m_reserveCC_4;
-    char m_reserveCC_5;
-    char m_reserveCC_6;
-    char m_reserveCC_7;
-
-    char m_reserveCC_8;
-    char m_reserveCC_9;
-    char m_reserveCC_10;
-    char m_reserveCC_11;
-    char m_reserveCC_12;
-    char m_reserveCC_13;
-    char m_reserveCC_14;
-    char m_reserveCC_15;
-
-    char m_reserveCC_16;
-    char m_reserveCC_17;
-    char m_reserveCC_18;
-    char m_reserveCC_19;
-    char m_reserveCC_20;
-    char m_reserveCC_21;
-    char m_reserveCC_22;
-    char m_reserveCC_23;
-
-    char m_reserveCC_24;
-    char m_reserveCC_25;
-    char m_reserveCC_26;
-    char m_reserveCC_27;
-    char m_reserveCC_28;
-    char m_reserveCC_29;
-    char m_reserveCC_30;
-    char m_reserveCC_31;
-
-    char m_reserveCC_32;
-    char m_reserveCC_33;
-    char m_reserveCC_34;
-    char m_reserveCC_35;
-    char m_reserveCC_36;
-    char m_reserveCC_37;
-    char m_reserveCC_38;
-    char m_reserveCC_39;
-
-    char m_reserveCC_40;
-    char m_reserveCC_41;
-    char m_reserveCC_42;
-    char m_reserveCC_43;
-    char m_reserveCC_44;
-    char m_reserveCC_45;
-    char m_reserveCC_46;
-    char m_reserveCC_47;
-
-    char m_reserveCC_48;
-    char m_reserveCC_49;
-    char m_reserveCC_50;
-    char m_reserveCC_51;
-    char m_reserveCC_52;
-    char m_reserveCC_53;
-    char m_reserveCC_54;
-    char m_reserveCC_55;
-
-    char m_reserveCC_56;
-    char m_reserveCC_57;
-    char m_reserveCC_58;
-    char m_reserveCC_59;
-    char m_reserveCC_60;
-    char m_reserveCC_61;
-    char m_reserveCC_62;
-    char m_reserveCC_63;
-
-    char m_reserveCC_64;
-    char m_reserveCC_65;
-    char m_reserveCC_66;
-    char m_reserveCC_67;
-    char m_reserveCC_68;
-    char m_reserveCC_69;
-    char m_reserveCC_70;
-    char m_reserveCC_71;
-
-    char m_reserveCC_72;
-    char m_reserveCC_73;
-    char m_reserveCC_74;
-    char m_reserveCC_75;
-    char m_reserveCC_76;
-    char m_reserveCC_77;
-    char m_reserveCC_78;
-    char m_reserveCC_79;
-
-    char m_reserveCC_80;
-    char m_reserveCC_81;
-    char m_reserveCC_82;
-    char m_reserveCC_83;
-
-    char m_120;
-
-    char m_reserve121_0;
-    char m_reserve121_1;
-    char m_reserve121_2;
-    char m_reserve121_3;
-    char m_reserve121_4;
-    char m_reserve121_5;
-    char m_reserve121_6;
-    char m_reserve121_7;
-
-    char m_reserve121_8;
-    char m_reserve121_9;
-    char m_reserve121_10;
-    char m_reserve121_11;
-    char m_reserve121_12;
-    char m_reserve121_13;
-    char m_reserve121_14;
-
-    char m_130;
-
-    char m_reserve131_0;
-    char m_reserve131_1;
-    char m_reserve131_2;
-
-    Obj134* m_134;
-
-    char m_reserve138_0;
-    char m_reserve138_1;
-    char m_reserve138_2;
-    char m_reserve138_3;
-    char m_reserve138_4;
-    char m_reserve138_5;
-    char m_reserve138_6;
-    char m_reserve138_7;
-
-    char m_reserve138_8;
-    char m_reserve138_9;
-    char m_reserve138_10;
-    char m_reserve138_11;
-    char m_reserve138_12;
-    char m_reserve138_13;
-    char m_reserve138_14;
-    char m_reserve138_15;
-
-    char m_reserve138_16;
-    char m_reserve138_17;
-    char m_reserve138_18;
-    char m_reserve138_19;
-    char m_reserve138_20;
-    char m_reserve138_21;
-    char m_reserve138_22;
-    char m_reserve138_23;
-
-    char m_reserve138_24;
-    char m_reserve138_25;
-    char m_reserve138_26;
-    char m_reserve138_27;
-    char m_reserve138_28;
-    char m_reserve138_29;
-    char m_reserve138_30;
-    char m_reserve138_31;
-
-    char m_reserve138_32;
-    char m_reserve138_33;
-    char m_reserve138_34;
-    char m_reserve138_35;
-    char m_reserve138_36;
-    char m_reserve138_37;
-    char m_reserve138_38;
-    char m_reserve138_39;
-
-    char m_reserve138_40;
-    char m_reserve138_41;
-    char m_reserve138_42;
-    char m_reserve138_43;
-    char m_reserve138_44;
-    char m_reserve138_45;
-    char m_reserve138_46;
-    char m_reserve138_47;
-
-    char m_reserve138_48;
-    char m_reserve138_49;
-    char m_reserve138_50;
-    char m_reserve138_51;
-    char m_reserve138_52;
-    char m_reserve138_53;
-    char m_reserve138_54;
-    char m_reserve138_55;
-
-    char m_reserve138_56;
-    char m_reserve138_57;
-    char m_reserve138_58;
-    char m_reserve138_59;
-    char m_reserve138_60;
-    char m_reserve138_61;
-    char m_reserve138_62;
-    char m_reserve138_63;
-
-    char m_reserve138_64;
-    char m_reserve138_65;
-    char m_reserve138_66;
-    char m_reserve138_67;
-    char m_reserve138_68;
-    char m_reserve138_69;
-    char m_reserve138_70;
-    char m_reserve138_71;
-
-    char m_reserve138_72;
-    char m_reserve138_73;
-    char m_reserve138_74;
-    char m_reserve138_75;
-    char m_reserve138_76;
-    char m_reserve138_77;
-    char m_reserve138_78;
-    char m_reserve138_79;
-
-    char m_reserve138_80;
-    char m_reserve138_81;
-    char m_reserve138_82;
-    char m_reserve138_83;
-    char m_reserve138_84;
-    char m_reserve138_85;
-    char m_reserve138_86;
-    char m_reserve138_87;
-
-    char m_reserve138_88;
-    char m_reserve138_89;
-    char m_reserve138_90;
-    char m_reserve138_91;
-    char m_reserve138_92;
-    char m_reserve138_93;
-    char m_reserve138_94;
-    char m_reserve138_95;
-
-    char m_reserve138_96;
-    char m_reserve138_97;
-    char m_reserve138_98;
-    char m_reserve138_99;
-    char m_reserve138_100;
-    char m_reserve138_101;
-    char m_reserve138_102;
-    char m_reserve138_103;
-
-    char m_reserve138_104;
-    char m_reserve138_105;
-    char m_reserve138_106;
-    char m_reserve138_107;
-    char m_reserve138_108;
-    char m_reserve138_109;
-    char m_reserve138_110;
-    char m_reserve138_111;
-
-    char m_reserve138_112;
-    char m_reserve138_113;
-    char m_reserve138_114;
-    char m_reserve138_115;
-    char m_reserve138_116;
-    char m_reserve138_117;
-    char m_reserve138_118;
-    char m_reserve138_119;
-
-    char m_reserve138_120;
-    char m_reserve138_121;
-    char m_reserve138_122;
-    char m_reserve138_123;
-    char m_reserve138_124;
-    char m_reserve138_125;
-    char m_reserve138_126;
-    char m_reserve138_127;
-
-    char m_reserve138_128;
-    char m_reserve138_129;
-    char m_reserve138_130;
-    char m_reserve138_131;
-    char m_reserve138_132;
-    char m_reserve138_133;
-    char m_reserve138_134;
-    char m_reserve138_135;
-
-    char m_reserve138_136;
-    char m_reserve138_137;
-    char m_reserve138_138;
-    char m_reserve138_139;
-    char m_reserve138_140;
-    char m_reserve138_141;
-    char m_reserve138_142;
-    char m_reserve138_143;
-
-    char m_reserve138_144;
-    char m_reserve138_145;
-    char m_reserve138_146;
-    char m_reserve138_147;
-    char m_reserve138_148;
-    char m_reserve138_149;
-    char m_reserve138_150;
-    char m_reserve138_151;
-
-    char m_reserve138_152;
-    char m_reserve138_153;
-    char m_reserve138_154;
-    char m_reserve138_155;
-    char m_reserve138_156;
-    char m_reserve138_157;
-    char m_reserve138_158;
-    char m_reserve138_159;
-
-    char m_reserve138_160;
-    char m_reserve138_161;
-    char m_reserve138_162;
-    char m_reserve138_163;
-    char m_reserve138_164;
-    char m_reserve138_165;
-    char m_reserve138_166;
-    char m_reserve138_167;
-
-    int m_1e0;
-
-    __declspec(noinline) void RemoveLightFromNode(RefPtr_b9fcc0& a, void*& b);
-
-    void FUN_00b5d270(Item* item);
-
-    unsigned int FUN_00a5dbe0(void* p);
-
-    unsigned int FUN_00b5e870(ParamObj* arg);
+    __declspec(noinline) void RemoveLightFromNode(RefPtr_b9fcc0&, void*&);
+    void FUN_00b5d270(ShadowSceneLight*);
+    unsigned int FUN_00a5dbe0(void*);
+    unsigned int FUN_00b5e870(ParamObj*);
 };
-
+void __fastcall UpdateSceneLight(ShadowSceneLight*, int, void*);
 __declspec(noinline) RefPtr_b9fcc0 List_b9fcc0::FUN_00b9efa0(void*& p)
 {
     Node* node = static_cast<Node*>(p);
@@ -9014,15 +5236,15 @@ __declspec(noinline) RefPtr_b9fcc0 List_b9fcc0::FUN_00b9efa0(void*& p)
     return item;
 }
 
-__declspec(noinline) void Self::RemoveLightFromNode(RefPtr_b9fcc0& value, void*& position)
+__declspec(noinline) void ShadowSceneUpdater::RemoveLightFromNode(RefPtr_b9fcc0& value, void*& position)
 {
-    LightContext* context = reinterpret_cast<LightContext*>(m_1e0);
-    Item* item = value;
+    LightContext* context = reinterpret_cast<LightContext*>(reinterpret_cast<int>(pBSPortalGraph));
+    ShadowSceneLight* item = value;
     if (context && context->count)
     {
-        for (unsigned int i = 0; i < item->objectCount; ++i)
+        for (unsigned int i = 0; i < item->kMultiboundRooms.iSize; ++i)
         {
-            GeometryLinks* geometry = item->objects[i];
+            GeometryLinks* geometry = reinterpret_cast<GeometryLinks**>(item->kMultiboundRooms.pBuffer)[i];
             if (geometry && geometry->objects.count)
             {
                 unsigned int index = geometry->objects.FindFirstMatch(&value, 0, FUN_00b5a980);
@@ -9031,9 +5253,9 @@ __declspec(noinline) void Self::RemoveLightFromNode(RefPtr_b9fcc0& value, void*&
             }
             item = value;
         }
-        for (unsigned int i = 0; i < item->linkedLightCount; ++i)
+        for (unsigned int i = 0; i < item->kPortals.iSize; ++i)
         {
-            LinkedLight* light = item->linkedLights[i];
+            LinkedLight* light = reinterpret_cast<LinkedLight**>(item->kPortals.pBuffer)[i];
             if (light && light->data->links.count)
             {
                 LinkedLightData* data = light->data;
@@ -9052,15 +5274,15 @@ __declspec(noinline) void Self::RemoveLightFromNode(RefPtr_b9fcc0& value, void*&
             item = value;
         }
     }
-    if (item->m_flagEC)
-        m_listC0.FUN_00b9efa0(position);
+    if (item->bCastShadow)
+        reinterpret_cast<List_b9fcc0&>(lShadowLightList).FUN_00b9efa0(position);
     else
-        m_listB4.FUN_00b9efa0(position);
+        reinterpret_cast<List_b9fcc0&>(lLightList).FUN_00b9efa0(position);
 }
 
-// Processes entries in m_listB4, updates globals from arg and m_134, and returns a value derived from m_134 or FUN_00a5dbe0.
+// Processes entries in reinterpret_cast<List_b9fcc0&>(lLightList), updates globals from arg and reinterpret_cast<Obj134*>(spFog.m_pObject), and returns a value derived from reinterpret_cast<Obj134*>(spFog.m_pObject) or FUN_00a5dbe0.
 // @fnv 0x00b5e870
-unsigned int Self::FUN_00b5e870(ParamObj* arg)
+unsigned int ShadowSceneUpdater::FUN_00b5e870(ParamObj* arg)
 
 {
 
@@ -9068,37 +5290,37 @@ unsigned int Self::FUN_00b5e870(ParamObj* arg)
 
     MatObj& own = *arg->m_0c;
 
-    if (!m_130)
+    if (!bDisableLightUpdate)
     {
-        void* y = m_listB4.m_pFirstNode;
+        void* y = reinterpret_cast<List_b9fcc0&>(lLightList).m_pFirstNode;
         while (y)
         {
             void* v = y;
-            Item* idx = m_listB4.GetNext(y);
+            ShadowSceneLight* idx = reinterpret_cast<List_b9fcc0&>(lLightList).GetNext(y);
             if (idx)
             {
-                if (idx->m_f8 && idx->m_f8->m_04 != 1)
+                if (reinterpret_cast<Obj4*>(idx->spLight.m_pObject) && reinterpret_cast<Obj4*>(idx->spLight.m_pObject)->m_04 != 1)
                 {
-                    if (idx->m_flagFC)
+                    if (idx->bDynamicLight)
                         FUN_00b5d270(idx);
-                    if (!idx->m_flagEC || !FUN_005bf7b0())
-                        idx->FUN_00b9e970(arg);
+                    if (!idx->bCastShadow || !FUN_005bf7b0())
+                        reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, void*)>(&UpdateSceneLight)(idx, arg);
                 }
                 else
                 {
-                    int id = idx->m_240;
+                    int id = reinterpret_cast<int>(idx->pPortalGraph);
                     int c;
-                    c = m_1e0;
+                    c = reinterpret_cast<int>(pBSPortalGraph);
                     if (id != c)
                     {
-                        if (idx->m_flagEC)
+                        if (idx->bCastShadow)
                         {
                             FirstOwner q(idx);
-                            m_listC0.FUN_00b9fcc0(q);
+                            reinterpret_cast<List_b9fcc0&>(lShadowLightList).FUN_00b9fcc0(q);
                         }
                         else
                         {
-                            m_listB4.FUN_00b9efa0(v);
+                            reinterpret_cast<List_b9fcc0&>(lLightList).FUN_00b9efa0(v);
                         }
                     }
                     else
@@ -9110,7 +5332,7 @@ unsigned int Self::FUN_00b5e870(ParamObj* arg)
             }
         }
     }
-    DAT_011f91c4 = (unsigned char)m_120;
+    DAT_011f91c4 = (unsigned char)cSceneGraphIndex;
 
     DAT_011f917c = &own;
 
@@ -9164,7 +5386,7 @@ unsigned int Self::FUN_00b5e870(ParamObj* arg)
     DAT_011fa2c0 = n;
 
     Obj134* val;
-    val = m_134;
+    val = reinterpret_cast<Obj134*>(spFog.m_pObject);
     unsigned result = reinterpret_cast<unsigned>(val);
     if (val)
     {
@@ -9214,10 +5436,10 @@ struct S00b5eca0_List
     ShadowListItem* head;
     ShadowListItem* tail;
     unsigned count;
-    void FUN_00a5a310(const S00b5eca0_Ptr& sp);
+    void AddTail(const S00b5eca0_Ptr& sp);
 };
 ShadowListItem* S00b5eca0_NewItem();
-__declspec(noinline) void S00b5eca0_List::FUN_00a5a310(const S00b5eca0_Ptr& sp)
+__declspec(noinline) void S00b5eca0_List::AddTail(const S00b5eca0_Ptr& sp)
 {
     ShadowListItem* pkItem = S00b5eca0_NewItem();
     pkItem->light = sp.m_pObject;
@@ -9277,17 +5499,9 @@ struct S00b5eca0_Group
     virtual void va8();
     virtual void SetBuffer(void* pkBuffer);
 };
-struct S00b5eca0_Tex
-{
-    S00b5eca0_Group* FUN_00b6b260();
-};
-struct S00b5eca0_Mgr
-{
-    S00b5eca0_Tex* FUN_00b6e110(void* pkRenderer, int iType, int a, int b, int c);
-    void* FUN_00b6d120();
-    S00b5eca0_Tex* ActivatePending();
-};
-class NiRenderer;
+// Entry points not yet declared by the shared BSTextureManager header.
+extern void* FUN_00b6d120();
+extern BSRenderedTexture* FUN_00b6d3f0();
 extern NiRenderer* DAT_011f9508;
 struct S00b5eca0_Settings
 {
@@ -9353,118 +5567,42 @@ struct S00b5eca0_Settings
     char unkec;
     bool m_bUseRenderedShadows;
 };
-struct S00b5eca0_Light
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    bool m_bCastShadows;
-    char unked;
-    short unkee;
-    int unkf0;
-    int unkf4;
-    ShadowLightFlags* lightData;
-    char m_cFC;
-    void AssignRefObject(S00b5eca0_Tex* pkTexture);
-};
-struct S00b5eca0_Node : public ShadowSceneNode
-{
-    void FUN_00b5d300(ShadowSceneLight*);
-    ShadowSceneLight* FUN_00b5eca0(ShadowSceneLight* pkLight);
-};
 
 // Adds pkLight to the lights list, assigning a shadow texture if it casts shadows, and returns an existing light with the same lightData or null.
 // @fnv 0x00b5eca0
-ShadowSceneLight* S00b5eca0_Node::FUN_00b5eca0(ShadowSceneLight* pkLight)
+ShadowSceneLight* __fastcall AddSceneLight(ShadowSceneNode* self, int, ShadowSceneLight* pkLight)
 {
-    S00b5eca0_Light* pkL = (S00b5eca0_Light*)pkLight;
-    ShadowListItem* pkIter = lights.head;
-    ShadowLightFlags* pkData = pkLight->lightData;
+    ShadowListItem* pkIter = self->lLightList.head;
+    ShadowLightFlags* pkData = reinterpret_cast<ShadowLightFlags*>(pkLight->spLight.m_pObject);
     while (pkIter)
     {
         ShadowSceneLight*& rkExisting = pkIter->light;
         pkIter = pkIter->next;
         ShadowSceneLight* pkExisting = rkExisting;
-        if (pkExisting && pkExisting->lightData == pkData)
+        if (pkExisting && reinterpret_cast<ShadowLightFlags*>(pkExisting->spLight.m_pObject) == pkData)
         {
-            ((S00b5eca0_Light*)pkExisting)->m_cFC = pkL->m_cFC;
-            FUN_00b5d300(pkExisting);
+            pkExisting->bDynamicLight = pkLight->bDynamicLight;
+            reinterpret_cast<void (__thiscall*)(ShadowSceneNode*, ShadowSceneLight*)>(&ProcessSceneLight)(self, pkExisting);
             return pkExisting;
         }
     }
-    ((S00b5eca0_List*)&lights)->FUN_00a5a310(pkLight);
+    ((S00b5eca0_List*)&self->lLightList)->AddTail(pkLight);
 
-    if (pkL->m_bCastShadows)
+    if (pkLight->bCastShadow)
     {
-        S00b5eca0_Tex* pkTexture;
+        BSRenderedTexture* pkTexture;
         if (((S00b5eca0_Settings*)0)->m_bUseRenderedShadows)
         {
-            pkTexture = ((S00b5eca0_Mgr*)DAT_011f91a8)->FUN_00b6e110(DAT_011f9508, 0x2a, 0, 0, 0);
-            pkTexture->FUN_00b6b260()->SetBuffer(((S00b5eca0_Mgr*)DAT_011f91a8)->FUN_00b6d120());
+            pkTexture = static_cast<BSRenderedTexture*>(DAT_011f91a8->FUN_00b6e110(DAT_011f9508, 0x2a, 0, 0, 0));
+            reinterpret_cast<S00b5eca0_Group*>(pkTexture->GetGroup())->SetBuffer(reinterpret_cast<void* (__thiscall*)(BSTextureManager*)>(&FUN_00b6d120)(DAT_011f91a8));
         }
         else
         {
-            pkTexture = ((S00b5eca0_Mgr*)DAT_011f91a8)->ActivatePending();
+            pkTexture = reinterpret_cast<BSRenderedTexture* (__thiscall*)(BSTextureManager*)>(&FUN_00b6d3f0)(DAT_011f91a8);
         }
-        pkL->AssignRefObject(pkTexture);
+        reinterpret_cast<void (__thiscall*)(ShadowSceneLight*, BSRenderedTexture*)>(&AssignRefObject)(pkLight, pkTexture);
     }
-    FUN_00b5d300(pkLight);
+    reinterpret_cast<void (__thiscall*)(ShadowSceneNode*, ShadowSceneLight*)>(&ProcessSceneLight)(self, pkLight);
     return 0;
 }
 
@@ -9819,155 +5957,36 @@ struct CullMemoryManager
 extern CullMemoryManager DAT_011f6238;
 extern unsigned int DAT_010a2720;
 NiRefObject* FUN_00b4f5c0();
-struct SceneCull
+
+// Culls scene objects and lights by iterating group lists and calling Cull on visible entries, using a saved flags buffer to track state changes.
+class ShadowSceneCuller : public ShadowSceneNode
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    CullObject** children;
-    unsigned short capacity, count;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    unsigned int unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
-    unsigned int unkc4;
-    unsigned int unkc8;
-    unsigned int unkcc;
-    unsigned int unkd0;
-    unsigned int unkd4;
-    unsigned int unkd8;
-    unsigned int unkdc;
-    unsigned int unke0;
-    unsigned int unke4;
-    unsigned int unke8;
-    unsigned int unkec;
-    unsigned int unkf0;
-    unsigned int unkf4;
-    unsigned int unkf8;
-    unsigned int unkfc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    unsigned int unk15c;
-    unsigned int unk160;
-    unsigned int unk164;
-    unsigned int unk168;
-    unsigned int unk16c;
-    unsigned int unk170;
-    unsigned int unk174;
-    unsigned int unk178;
-    unsigned int unk17c;
-    unsigned int unk180;
-    unsigned int unk184;
-    unsigned int unk188;
-    unsigned int unk18c;
-    unsigned int unk190;
-    unsigned int unk194;
-    unsigned int unk198;
-    unsigned int unk19c;
-    unsigned int unk1a0;
-    unsigned int unk1a4;
-    unsigned int unk1a8;
-    unsigned int unk1ac;
-    unsigned int unk1b0;
-    unsigned int unk1b4;
-    unsigned int unk1b8;
-    unsigned int unk1bc;
-    unsigned int unk1c0;
-    unsigned int unk1c4;
-    unsigned int unk1c8;
-    unsigned int unk1cc;
-    unsigned int unk1d0;
-    unsigned int unk1d4;
-    unsigned int unk1d8;
-    bool special;
-    CullManager* manager;
+  public:
     void FUN_00b5e870(CullProcess*);
     void FUN_00a5dbe0(CullProcess*);
     void FUN_00b5ba80(void*, CullEntry*);
-    void FUN_00b5f9b0(CullProcess* process);
+    void FUN_00b5f9b0(CullProcess*);
 };
-// Culls scene objects and lights by iterating group lists and calling Cull on visible entries, using a saved flags buffer to track state changes.
 // @fnv 0x00b5f9b0
-void SceneCull::FUN_00b5f9b0(CullProcess* process)
+void ShadowSceneCuller::FUN_00b5f9b0(CullProcess* process)
 {
     FUN_00b5e870(process);
     NiPointer<NiRefObject> context(FUN_00b4f5c0());
     unsigned int rc = context->m_uiRefCount;
     if (rc == 1)
         context->IncRefCount();
-    if (manager)
+    if (reinterpret_cast<CullManager*>(pBSPortalGraph))
     {
         CullHeap* heap = DAT_011f6238.FUN_00aa42e0();
         bool* pSavedFlags = 0;
-        if (manager->FUN_00c5b5d0() > 0)
+        if (reinterpret_cast<CullManager*>(pBSPortalGraph)->FUN_00c5b5d0() > 0)
         {
-            pSavedFlags = (bool*)heap->FUN_00aa54a0(manager->FUN_00c5b5d0(), DAT_010a2720);
-            FUN_00ec61c0(pSavedFlags, 0, manager->FUN_00c5b5d0());
+            pSavedFlags = (bool*)heap->FUN_00aa54a0(reinterpret_cast<CullManager*>(pBSPortalGraph)->FUN_00c5b5d0(), DAT_010a2720);
+            FUN_00ec61c0(pSavedFlags, 0, reinterpret_cast<CullManager*>(pBSPortalGraph)->FUN_00c5b5d0());
         }
-        for (unsigned int i = 0; i < manager->FUN_00c5b5d0(); ++i)
+        for (unsigned int i = 0; i < reinterpret_cast<CullManager*>(pBSPortalGraph)->FUN_00c5b5d0(); ++i)
         {
-            CullObject* object = manager->FUN_00c5b5a0(i);
+            CullObject* object = reinterpret_cast<CullManager*>(pBSPortalGraph)->FUN_00c5b5a0(i);
             if (object)
             {
                 pSavedFlags[i] = (bool)(object->flags & 1);
@@ -9975,16 +5994,16 @@ void SceneCull::FUN_00b5f9b0(CullProcess* process)
             }
         }
         {
-            CullObject* extra = manager->extra;
+            CullObject* extra = reinterpret_cast<CullManager*>(pBSPortalGraph)->extra;
             if (extra)
                 extra->flags |= 1;
         }
-        if (!special && process->mode != 1 && process->mode != 3)
+        if (!bVisibleUnboundSpace && process->mode != 1 && process->mode != 3)
         {
-            CullGroupNode* pos = manager->groups30.head;
+            CullGroupNode* pos = reinterpret_cast<CullManager*>(pBSPortalGraph)->groups30.head;
             while (pos)
             {
-                CullGroup* group = manager->groups30.GetNext(pos);
+                CullGroup* group = reinterpret_cast<CullManager*>(pBSPortalGraph)->groups30.GetNext(pos);
                 if (group)
                 {
                     group->Cull(process);
@@ -10009,9 +6028,9 @@ void SceneCull::FUN_00b5f9b0(CullProcess* process)
                     process->state = 0;
                 }
             }
-            for (unsigned int i = 4; i < count; ++i)
+            for (unsigned int i = 4; i < m_kChildren.m_usSize; ++i)
             {
-                CullObject* object = children[i];
+                CullObject* object = reinterpret_cast<CullObject**>(m_kChildren.m_pBase)[i];
                 if (object)
                     object->FUN_00a59e00(process);
             }
@@ -10019,15 +6038,15 @@ void SceneCull::FUN_00b5f9b0(CullProcess* process)
         else
         {
             FUN_00a5dbe0(process);
-            CullGroupList* list = &manager->groups30;
+            CullGroupList* list = &reinterpret_cast<CullManager*>(pBSPortalGraph)->groups30;
             if (process->mode == 1 || process->mode == 3)
-                list = &manager->groups20;
+                list = &reinterpret_cast<CullManager*>(pBSPortalGraph)->groups20;
             CullGroupNode* pos = list->head;
             CullScratch scratch;
             while (pos)
             {
                 CullGroup* group = list->GetNext(pos);
-                CullLightList* lights = group ? &group->lights : &manager->lights;
+                CullLightList* lights = group ? &group->lights : &reinterpret_cast<CullManager*>(pBSPortalGraph)->lights;
                 if (lights->count)
                 {
                     CullLightNode* pLightNode = lights->head;
@@ -10045,9 +6064,9 @@ void SceneCull::FUN_00b5f9b0(CullProcess* process)
                 process->state = 0;
             }
         }
-        for (unsigned int i = 0; i < manager->FUN_00c5b5d0(); ++i)
+        for (unsigned int i = 0; i < reinterpret_cast<CullManager*>(pBSPortalGraph)->FUN_00c5b5d0(); ++i)
         {
-            CullObject* object = manager->FUN_00c5b5a0(i);
+            CullObject* object = reinterpret_cast<CullManager*>(pBSPortalGraph)->FUN_00c5b5a0(i);
             if (object && !pSavedFlags[i])
             {
                 object->flags &= ~1;
@@ -10055,7 +6074,7 @@ void SceneCull::FUN_00b5f9b0(CullProcess* process)
             }
         }
         {
-            CullObject* extra = manager->extra;
+            CullObject* extra = reinterpret_cast<CullManager*>(pBSPortalGraph)->extra;
             if (extra)
                 extra->flags &= ~1;
         }
@@ -10129,213 +6148,25 @@ struct LightObj
     void* unkDC;
     float radius;
 };
-struct Globals
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0C;
-    void* unk10;
-    void* unk14;
-    void* unk18;
-    void* unk1C;
-    void* unk20;
-    void* unk24;
-    void* unk28;
-    void* unk2C;
-    void* unk30;
-    void* unk34;
-    void* unk38;
-    void* unk3C;
-    void* unk40;
-    void* unk44;
-    void* unk48;
-    void* unk4C;
-    void* unk50;
-    void* unk54;
-    void* unk58;
-    void* unk5C;
-    void* unk60;
-    void* unk64;
-    void* unk68;
-    void* unk6C;
-    void* unk70;
-    void* unk74;
-    void* unk78;
-    void* unk7C;
-    void* unk80;
-    void* unk84;
-    void* unk88;
-    void* unk8C;
-    void* unk90;
-    void* unk94;
-    void* unk98;
-    void* unk9C;
-    void* unkA0;
-    void* unkA4;
-    void* unkA8;
-    void* unkAC;
-    void* unkB0;
-    void* unkB4;
-    void* unkB8;
-    void* unkBC;
-    void* unkC0;
-    void* unkC4;
-    void* unkC8;
-    void* unkCC;
-    void* unkD0;
-    void* unkD4;
-    void* unkD8;
-    void* unkDC;
-    void* unkE0;
-    void* unkE4;
-    void* unkE8;
-    void* unkEC;
-    void* unkF0;
-    void* unkF4;
-    void* unkF8;
-    void* unkFC;
-    void* unk100;
-    void* unk104;
-    void* unk108;
-    void* unk10C;
-    void* unk110;
-    void* unk114;
-    void* unk118;
-    void* unk11C;
-    void* unk120;
-    void* unk124;
-    void* unk128;
-    void* unk12C;
-    void* unk130;
-    void* unk134;
-    void* unk138;
-    void* unk13C;
-    void* unk140;
-    void* unk144;
-    void* unk148;
-    void* unk14C;
-    void* unk150;
-    void* unk154;
-    void* unk158;
-    void* unk15C;
-    void* unk160;
-    void* unk164;
-    void* unk168;
-    void* unk16C;
-    void* unk170;
-    void* unk174;
-    void* unk178;
-    void* unk17C;
-    void* unk180;
-    void* unk184;
-    void* unk188;
-    void* unk18C;
-    void* unk190;
-    void* unk194;
-    void* unk198;
-    void* unk19C;
-    void* unk1A0;
-    void* unk1A4;
-    void* unk1A8;
-    void* unk1AC;
-    void* unk1B0;
-    void* unk1B4;
-    void* unk1B8;
-    void* unk1BC;
-    void* unk1C0;
-    void* unk1C4;
-    void* unk1C8;
-    void* unk1CC;
-    void* unk1D0;
-    void* unk1D4;
-    void* unk1D8;
-    void* unk1DC;
-    void* unk1E0;
-    NiPoint3 g;
-};
-extern Globals* DAT_011f91c8;
+
+extern ShadowSceneNode* DAT_011f91c8;
 extern char DAT_011f4a68[];
-struct FUN_00b9dae0_cls
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0C;
-    void* unk10;
-    void* unk14;
-    void* unk18;
-    void* unk1C;
-    void* unk20;
-    void* unk24;
-    void* unk28;
-    void* unk2C;
-    void* unk30;
-    void* unk34;
-    void* unk38;
-    void* unk3C;
-    void* unk40;
-    void* unk44;
-    void* unk48;
-    void* unk4C;
-    void* unk50;
-    void* unk54;
-    void* unk58;
-    void* unk5C;
-    void* unk60;
-    void* unk64;
-    void* unk68;
-    void* unk6C;
-    void* unk70;
-    void* unk74;
-    void* unk78;
-    void* unk7C;
-    void* unk80;
-    void* unk84;
-    void* unk88;
-    void* unk8C;
-    void* unk90;
-    void* unk94;
-    void* unk98;
-    void* unk9C;
-    void* unkA0;
-    void* unkA4;
-    void* unkA8;
-    void* unkAC;
-    void* unkB0;
-    void* unkB4;
-    void* unkB8;
-    void* unkBC;
-    void* unkC0;
-    void* unkC4;
-    void* unkC8;
-    void* unkCC;
-    void* unkD0;
-    void* unkD4;
-    void* unkD8;
-    void* unkDC;
-    void* unkE0;
-    void* unkE4;
-    void* unkE8;
-    void* unkEC;
-    void* unkF0;
-    void* unkF4;
-    LightObj* defLight;
-    bool FUN_00b9dae0(NiPoint3* p, LightObj* l, float scale);
-};
+
 // Uses defLight when l is null, returns true for matching RTTI, otherwise compares an adjusted distance with l->radius.
 // @fnv 0x00b9dae0
-bool FUN_00b9dae0_cls::FUN_00b9dae0(NiPoint3* apPoint, LightObj* apLight, float scale)
+bool ShadowSceneLight::FUN_00b9dae0(NiPoint3* apPoint, NiLight* light, float scale)
 {
+    LightObj* apLight = reinterpret_cast<LightObj*>(light);
     if (!apLight)
-        apLight = defLight;
+        apLight = reinterpret_cast<LightObj*>(spLight.m_pObject);
     if (apLight->GetRTTI() == (void*)DAT_011f4a68)
         return true;
     NiPoint3 d;
     d.x = apLight->pos.x - apPoint->x;
     d.y = apLight->pos.y - apPoint->y;
     d.z = apLight->pos.z - apPoint->z;
-    NiPoint3 g = DAT_011f91c8->g;
+    NiPoint3 g;
+    memcpy(&g, &DAT_011f91c8->kLightingOffset, sizeof(g));
     NiPoint3 s;
     s.x = g.x + d.x;
     s.y = g.y + d.y;
@@ -10348,26 +6179,13 @@ bool FUN_00b9dae0_cls::FUN_00b9dae0(NiPoint3* apPoint, LightObj* apLight, float 
 }
 
 namespace fnv_00b5b410 {
-struct Sub2
-{
-    unsigned unk00;
-    unsigned unk04;
-    unsigned unk08;
-    unsigned unk0c;
-    unsigned unk10;
-    unsigned unk14;
-    unsigned unk18;
-    int unk1c;
-    void FUN_00b718b0();
-    void RemoveItemsAfterPos(void*);
-};
 
 struct Sub1
 {
     unsigned unk00;
     unsigned unk04;
     unsigned unk08;
-    Sub2* unk0c;
+    BSShaderLightingProperty* unk0c;
 };
 
 struct Obj
@@ -10414,14 +6232,9 @@ struct Obj
     Sub1 sub1;
 };
 
-struct Light
+inline int valid(BSShaderLightingProperty* q)
 {
-    void AddGeometry(void*);
-};
-
-inline int valid(Sub2* q)
-{
-    switch (q->unk1c)
+    switch (q->iShaderPropertyType)
     {
     case 1:
     case 2:
@@ -10442,15 +6255,15 @@ inline int valid(Sub2* q)
 }
 
 // @fnv 0x00b5b410
-bool __cdecl FUN_00b5b410(Obj* pObj, void* apUnused, Light** apLights, bool abUnused)
+bool __cdecl FUN_00b5b410(Obj* pObj, void* apUnused, ShadowSceneLight** apLights, bool abUnused)
 {
     Sub1* pSub1 = &pObj->sub1;
     if (pSub1)
     {
-        Sub2* pSub2 = pSub1->unk0c;
+        BSShaderLightingProperty* pSub2 = pSub1->unk0c;
         if (pSub2)
         {
-            Sub2* p = (pSub2->unk1c != -1) ? pSub2 : 0;
+            BSShaderLightingProperty* p = (pSub2->iShaderPropertyType != -1) ? pSub2 : 0;
             if (!p)
                 goto fail;
             p = valid(p) ? p : 0;
@@ -10462,7 +6275,7 @@ bool __cdecl FUN_00b5b410(Obj* pObj, void* apUnused, Light** apLights, bool abUn
             {
                 if (apLights[i])
                 {
-                    apLights[i]->AddGeometry(pObj);
+                    apLights[i]->AddGeometry(reinterpret_cast<NiTriBasedGeom*>(pObj));
                 }
             }
             p->RemoveItemsAfterPos(pObj);
@@ -10478,15 +6291,11 @@ bool __cdecl FUN_00b5b410(Obj* pObj, void* apUnused, Light** apLights, bool abUn
 }  // namespace fnv_00b5b410
 
 namespace fnv_00b5d300 {
-struct Pt3
-{
-    int x, y, z;
-};
 struct Pt4
 {
-    Pt3 pt;
+    NiPoint3 pt;
     float w;
-    __forceinline Pt4(const Pt3& a_pt, float a_w)
+    __forceinline Pt4(const NiPoint3& a_pt, float a_w)
     {
         pt = a_pt;
         w = a_w;
@@ -10557,11 +6366,7 @@ class FUN_00b5aea0_self
   public:
     void RemoveRange(unsigned int, unsigned int);
 };
-class FUN_00b9fba0_s
-{
-  public:
-    void FUN_00b9fba0();
-};
+
 class FUN_00c5b5d0_class
 {
   public:
@@ -10580,49 +6385,23 @@ struct LightData
     char unk31, unk32, unk33;
     int unk34, unk38, unk3c, unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c;
     int unk60, unk64, unk68, unk6c, unk70, unk74, unk78, unk7c, unk80, unk84, unk88;
-    Pt3 pt;
+    NiPoint3 pt;
     int unk98, unk9c, unka0, unka4, unka8, unkac, unkb0, unkb4, unkb8, unkbc, unkc0;
     float f_c4;
     int unkc8, unkcc, unkd0, unkd4, unkd8, unkdc;
     float f_e0;
 };
 
-struct OwnerD;
 struct Coll;
 struct ItemObj;
 struct OwnerObj;
-struct LightD
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
-    int unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c, unk60, unk64, unk68, unk6c, unk70, unk74, unk78, unk7c;
-    int unk80, unk84, unk88, unk8c, unk90, unk94, unk98, unk9c, unka0, unka4, unka8, unkac, unkb0, unkb4, unkb8, unkbc;
-    int unkc0, unkc4, unkc8, unkcc, unkd0, unkd4, unkd8, unkdc, unke0, unke4, unke8, unkec, unkf0, unkf4;
-    LightData* m_f8;
-    int unkfc;
-    int unk100, unk104, unk108, unk10c, unk110, unk114, unk118, unk11c, unk120, unk124, unk128, unk12c, unk130, unk134,
-        unk138, unk13c;
-    int unk140, unk144, unk148, unk14c, unk150, unk154, unk158, unk15c, unk160, unk164, unk168, unk16c, unk170, unk174,
-        unk178, unk17c;
-    int unk180, unk184, unk188, unk18c, unk190, unk194, unk198, unk19c, unk1a0, unk1a4, unk1a8, unk1ac, unk1b0, unk1b4,
-        unk1b8, unk1bc;
-    int unk1c0, unk1c4, unk1c8, unk1cc, unk1d0, unk1d4, unk1d8, unk1dc, unk1e0, unk1e4, unk1e8, unk1ec, unk1f0, unk1f4,
-        unk1f8, unk1fc;
-    int unk200, unk204, unk208, unk20c;
-    ArrayLikeT<ItemObj*> arr210;
-    ArrayLikeT<ItemObj*> arr220;
-    ArrayLikeT<OwnerObj*> arr230;
-    Coll* m_240;
-    void FUN_00b9ef30();
-    void FUN_00ba0110(void* p);
-    void FUN_00ba02b0();
-};
 
 struct OwnerObj
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     int unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c, unk60, unk64, unk68, unk6c, unk70, unk74, unk78, unk7c;
     int unk80, unk84, unk88, unk8c, unk90, unk94, unk98, unk9c, unka0, unka4, unka8, unkac;
-    ArrayLikeT<LightD*> arr;
+    ArrayLikeT<ShadowSceneLight*> arr;
 };
 
 struct Node
@@ -10692,7 +6471,7 @@ struct VirtObj
     virtual void d42();
     virtual void d43();
     virtual void d44();
-    virtual char v45(Pt3*);
+    virtual char v45(NiPoint3*);
 };
 struct Holder
 {
@@ -10778,7 +6557,7 @@ struct ItemObj
     int f_b0;
     PtrList listB4;
     int unkc0, unkc4, unkc8, unkcc, unkd0, unkd4, unkd8;
-    ArrayLikeT<LightD*> mapDc;
+    ArrayLikeT<ShadowSceneLight*> mapDc;
     int unkec, unkf0, unkf4, unkf8, unkfc, unk100;
     OwnerObj* m_104;
 };
@@ -10807,58 +6586,40 @@ struct GetterObj
     int f_18;
 };
 
-class OwnerD
+extern ShadowSceneNode* DAT_011f91c8;
+
+// Updates p's arrays using entries from reinterpret_cast<Coll*>(self->pBSPortalGraph) or reinterpret_cast<ElemObj**>(self->m_kChildren.m_pBase), adding or removing entries based on virtual checks.
+void __fastcall ClearLightGeometry(ShadowSceneLight*, int);
+void __fastcall FinishLightGeometry(ShadowSceneLight*, int);
+static inline void AddPortalObject(ShadowSceneLight* light, void* object)
 {
-  public:
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
-    int unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c, unk60, unk64, unk68, unk6c, unk70, unk74, unk78, unk7c;
-    int unk80, unk84, unk88, unk8c, unk90, unk94, unk98, unk9c;
-    ElemObj** m_a0;
-    short padA4;
-    unsigned short m_a6;
-    int unka8, unkac, unkb0, unkb4, unkb8, unkbc, unkc0, unkc4, unkc8, unkcc, unkd0, unkd4, unkd8, unkdc;
-    int unke0, unke4, unke8, unkec, unkf0, unkf4, unkf8, unkfc;
-    int unk100, unk104, unk108, unk10c, unk110, unk114, unk118, unk11c, unk120, unk124, unk128, unk12c, unk130, unk134,
-        unk138, unk13c;
-    int unk140, unk144, unk148, unk14c, unk150, unk154, unk158, unk15c, unk160, unk164, unk168, unk16c, unk170, unk174,
-        unk178, unk17c;
-    int unk180, unk184, unk188, unk18c, unk190, unk194, unk198, unk19c, unk1a0, unk1a4, unk1a8, unk1ac, unk1b0, unk1b4,
-        unk1b8, unk1bc;
-    int unk1c0, unk1c4, unk1c8, unk1cc, unk1d0, unk1d4, unk1d8, unk1dc;
-    Coll* m_1e0;
-    void FUN_00b5d300(LightD* p);
-};
-
-extern OwnerD* DAT_011f91c8;
-
-// Updates p's arrays using entries from m_1e0 or m_a0, adding or removing entries based on virtual checks.
+    light->AddObject(reinterpret_cast<NiAVObject*>(object));
+}
 // @fnv 0x00b5d300
-void OwnerD::FUN_00b5d300(LightD* apLight)
+void __fastcall ProcessPortalLight(ShadowSceneNode* self, int, ShadowSceneLight* apLight)
 {
-    LightData* ld = apLight->m_f8;
+    LightData* ld = reinterpret_cast<LightData*>(apLight->spLight.m_pObject);
     if ((ld->flag30 & 1) || ld->f_c4 < (double)0.05f)
     {
-        apLight->FUN_00b9ef30();
+        reinterpret_cast<void (__thiscall*)(ShadowSceneLight*)>(&ResetSceneLight)(apLight);
         return;
     }
-    apLight->m_240 = m_1e0;
-    ((FUN_00b9fba0_s*)apLight)->FUN_00b9fba0();
+    reinterpret_cast<Coll*&>(apLight->pPortalGraph) = reinterpret_cast<Coll*>(self->pBSPortalGraph);
+    reinterpret_cast<void (__thiscall*)(ShadowSceneLight*)>(&ClearLightGeometry)(apLight);
     unsigned int uiIndex = 0;
-    if (m_1e0 && m_1e0->list20.count)
+    if (reinterpret_cast<Coll*>(self->pBSPortalGraph) && reinterpret_cast<Coll*>(self->pBSPortalGraph)->list20.count)
     {
-        apLight->arr210.Clear();
-        apLight->arr220.Clear();
-        apLight->arr230.Clear();
-        LightData* pLightData2 = apLight->m_f8;
-        Pt3 ptPos;
-        ptPos.x = pLightData2->pt.x;
-        ptPos.y = pLightData2->pt.y;
-        ptPos.z = pLightData2->pt.z;
-        Pt4 pt4Pos(ptPos, apLight->m_f8->f_e0);
-        Node* node = m_1e0->list20.head;
+        reinterpret_cast<ArrayLikeT<ItemObj*>&>(apLight->kMultiboundRooms).Clear();
+        reinterpret_cast<ArrayLikeT<ItemObj*>&>(apLight->kPortals).Clear();
+        reinterpret_cast<ArrayLikeT<OwnerObj*>&>(apLight->kProcessedNodes).Clear();
+        LightData* pLightData2 = reinterpret_cast<LightData*>(apLight->spLight.m_pObject);
+        NiPoint3 ptPos;
+        memcpy(&ptPos, &pLightData2->pt, sizeof(ptPos));
+        Pt4 pt4Pos(ptPos, reinterpret_cast<LightData*>(apLight->spLight.m_pObject)->f_e0);
+        Node* node = reinterpret_cast<Coll*>(self->pBSPortalGraph)->list20.head;
         while (node)
         {
-            ItemObj* item = m_1e0->list20.GetNext(node);
+            ItemObj* item = reinterpret_cast<Coll*>(self->pBSPortalGraph)->list20.GetNext(node);
             if (!item)
                 continue;
             int idx = item->mapDc.Find(apLight);
@@ -10871,7 +6632,7 @@ void OwnerD::FUN_00b5d300(LightD* apLight)
                     while (pSubNode)
                     {
                         ItemObj* pSubItem = item->listB4.GetNext(pSubNode);
-                        if (pSubItem && apLight->arr220.Find(pSubItem) == -1)
+                        if (pSubItem && reinterpret_cast<ArrayLikeT<ItemObj*>&>(apLight->kPortals).Find(pSubItem) == -1)
                         {
                             OwnerObj* pOwner = pSubItem->m_104;
                             int iOwnerIndex = pOwner->arr.Find(apLight);
@@ -10900,29 +6661,29 @@ void OwnerD::FUN_00b5d300(LightD* apLight)
                             pSubItem->m_104->arr.Add(apLight);
                         }
                         OwnerObj* pOwner = pSubItem->m_104;
-                        if (apLight->arr230.FindIdx(pOwner) == (unsigned int)-1)
+                        if (reinterpret_cast<ArrayLikeT<OwnerObj*>&>(apLight->kProcessedNodes).FindIdx(pOwner) == (unsigned int)-1)
                         {
-                            apLight->FUN_00ba0110(pOwner);
-                            apLight->arr230.Add76(pSubItem->m_104);
+                            AddPortalObject(apLight, pOwner);
+                            reinterpret_cast<ArrayLikeT<OwnerObj*>&>(apLight->kProcessedNodes).Add76(pSubItem->m_104);
                         }
-                        if (apLight->arr220.FindIdx(pSubItem) == (unsigned int)-1)
+                        if (reinterpret_cast<ArrayLikeT<ItemObj*>&>(apLight->kPortals).FindIdx(pSubItem) == (unsigned int)-1)
                         {
-                            apLight->arr220.Add(pSubItem);
+                            reinterpret_cast<ArrayLikeT<ItemObj*>&>(apLight->kPortals).Add(pSubItem);
                         }
                     }
                 }
-                apLight->FUN_00ba0110(item);
-                apLight->arr210.Add(item);
+                AddPortalObject(apLight, item);
+                reinterpret_cast<ArrayLikeT<ItemObj*>&>(apLight->kMultiboundRooms).Add(item);
             }
         }
-        for (unsigned int i = 0; i < m_1e0->count70; i++)
+        for (unsigned int i = 0; i < reinterpret_cast<Coll*>(self->pBSPortalGraph)->count70; i++)
         {
-            apLight->FUN_00ba0110(m_1e0->arr6c[i]);
+            AddPortalObject(apLight, reinterpret_cast<Coll*>(self->pBSPortalGraph)->arr6c[i]);
         }
-        Node* fn = m_1e0->list14.head;
+        Node* fn = reinterpret_cast<Coll*>(self->pBSPortalGraph)->list14.head;
         while (fn)
         {
-            ItemObj* pSubItem = m_1e0->list14.GetNext(fn);
+            ItemObj* pSubItem = reinterpret_cast<Coll*>(self->pBSPortalGraph)->list14.GetNext(fn);
             if (pSubItem)
             {
                 if (pSubItem->m_104->arr.FindIdx(apLight) == (unsigned int)-1)
@@ -10930,73 +6691,73 @@ void OwnerD::FUN_00b5d300(LightD* apLight)
                     pSubItem->m_104->arr.Add(apLight);
                 }
                 OwnerObj* pOwner = pSubItem->m_104;
-                if (apLight->arr230.FindIdx(pOwner) == (unsigned int)-1)
+                if (reinterpret_cast<ArrayLikeT<OwnerObj*>&>(apLight->kProcessedNodes).FindIdx(pOwner) == (unsigned int)-1)
                 {
-                    apLight->FUN_00ba0110(pOwner);
-                    apLight->arr230.Add76(pSubItem->m_104);
+                    AddPortalObject(apLight, pOwner);
+                    reinterpret_cast<ArrayLikeT<OwnerObj*>&>(apLight->kProcessedNodes).Add76(pSubItem->m_104);
                 }
-                if (apLight->arr220.FindIdx(pSubItem) == (unsigned int)-1)
+                if (reinterpret_cast<ArrayLikeT<ItemObj*>&>(apLight->kPortals).FindIdx(pSubItem) == (unsigned int)-1)
                 {
-                    apLight->arr220.Add(pSubItem);
+                    reinterpret_cast<ArrayLikeT<ItemObj*>&>(apLight->kPortals).Add(pSubItem);
                 }
             }
         }
-        for (unsigned int i = 0; i < ((FUN_00c5b5d0_class*)m_1e0)->FUN_00c5b5d0(); i++)
+        for (unsigned int i = 0; i < ((FUN_00c5b5d0_class*)reinterpret_cast<Coll*>(self->pBSPortalGraph))->FUN_00c5b5d0(); i++)
         {
-            void* pElement = (void*)((FUN_00c5b5a0_cls*)m_1e0)->FUN_00c5b5a0(i);
+            void* pElement = (void*)((FUN_00c5b5a0_cls*)reinterpret_cast<Coll*>(self->pBSPortalGraph))->FUN_00c5b5a0(i);
             if (pElement)
-                apLight->FUN_00ba0110(pElement);
+                AddPortalObject(apLight, pElement);
         }
     }
     else
     {
-        if (this != DAT_011f91c8)
+        if (self != DAT_011f91c8)
         {
-            for (; uiIndex < m_a6; uiIndex++)
+            for (; uiIndex < self->m_kChildren.m_usSize; uiIndex++)
             {
-                ElemObj* e = m_a0[uiIndex];
+                ElemObj* e = reinterpret_cast<ElemObj**>(self->m_kChildren.m_pBase)[uiIndex];
                 if (e)
                 {
                     void* r = e->vfn3();
                     if (r)
-                        apLight->FUN_00ba0110(r);
+                        AddPortalObject(apLight, r);
                 }
             }
         }
         else
         {
-            if (m_a6 > 3)
+            if (self->m_kChildren.m_usSize > 3)
             {
-                ElemObj* e = m_a0[3];
+                ElemObj* e = reinterpret_cast<ElemObj**>(self->m_kChildren.m_pBase)[3];
                 if (e)
                 {
                     void* r = e->vfn3();
                     if (r)
-                        apLight->FUN_00ba0110(r);
+                        AddPortalObject(apLight, r);
                 }
             }
-            if (m_a6 > 6)
+            if (self->m_kChildren.m_usSize > 6)
             {
-                ElemObj* e = m_a0[6];
+                ElemObj* e = reinterpret_cast<ElemObj**>(self->m_kChildren.m_pBase)[6];
                 if (e)
                 {
                     void* r = e->vfn3();
                     if (r)
-                        apLight->FUN_00ba0110(r);
+                        AddPortalObject(apLight, r);
                 }
             }
         }
-        if (m_1e0)
+        if (reinterpret_cast<Coll*>(self->pBSPortalGraph))
         {
-            for (unsigned int i = 0; i < ((FUN_00c5b5d0_class*)m_1e0)->FUN_00c5b5d0(); i++)
+            for (unsigned int i = 0; i < ((FUN_00c5b5d0_class*)reinterpret_cast<Coll*>(self->pBSPortalGraph))->FUN_00c5b5d0(); i++)
             {
-                GetterObj* pElement = (GetterObj*)((FUN_00c5b5a0_cls*)m_1e0)->FUN_00c5b5a0(i);
+                GetterObj* pElement = (GetterObj*)((FUN_00c5b5a0_cls*)reinterpret_cast<Coll*>(self->pBSPortalGraph))->FUN_00c5b5a0(i);
                 if (pElement && pElement->f_18 == 0)
-                    apLight->FUN_00ba0110(pElement);
+                    AddPortalObject(apLight, pElement);
             }
         }
     }
-    apLight->FUN_00ba02b0();
+    reinterpret_cast<void (__thiscall*)(ShadowSceneLight*)>(&FinishLightGeometry)(apLight);
 }
 }  // namespace fnv_00b5d300
 
@@ -11007,17 +6768,20 @@ inline float Larger(float a, float b)
 
 inline NiPoint3 NiPoint3::operator*(float f) const
 {
-    NiPoint3 r = {x * f, y * f, z * f};
+    NiPoint3 r;
+    r.x = x * f; r.y = y * f; r.z = z * f;
     return r;
 }
 inline NiPoint3 NiPoint3::operator-(const NiPoint3& p) const
 {
-    NiPoint3 r = {x - p.x, y - p.y, z - p.z};
+    NiPoint3 r;
+    r.x = x - p.x; r.y = y - p.y; r.z = z - p.z;
     return r;
 }
 inline NiPoint3 NiPoint3::operator+(const NiPoint3& p) const
 {
-    NiPoint3 r = {x + p.x, y + p.y, z + p.z};
+    NiPoint3 r;
+    r.x = x + p.x; r.y = y + p.y; r.z = z + p.z;
     return r;
 }
 struct Product
@@ -11136,77 +6900,12 @@ struct BlendData
         return (c.x + c.y + c.z) / 3.0;
     }
 };
-struct BlendLight
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    BlendData* data;
-};
+
 struct BlendNode
 {
     BlendNode* next;
     BlendNode* prev;
-    BlendLight* light;
+    ShadowSceneLight* light;
 };
 extern float DAT_011f9838[100];
 extern float DAT_011f96a8[100];
@@ -11217,82 +6916,27 @@ struct BlendDirection : NiPoint3
 };
 extern const double DAT_010228a0;
 extern const double DAT_01012060;
-inline BlendLight* const& NextLight(BlendNode*& pos)
+inline ShadowSceneLight* const& NextLight(BlendNode*& pos)
 {
-    BlendLight* const& item = pos->light;
+    ShadowSceneLight* const& item = pos->light;
     pos = pos->next;
     return item;
 }
 extern unsigned DAT_011f9e78;
 extern BlendDirection DAT_011f99c8[100];
-struct BlendOwner
+
+class ShadowSceneBlender : public ShadowSceneNode
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    BlendNode* head;
-    BlendNode* tail;
-    unsigned count;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    BlendLight* mainLight;
-    __declspec(noinline) BlendLight* GetListItemAt(unsigned index);
-    unsigned FUN_00b5bca0(const NiPoint3& point, const NiPoint3& normal, NiPoint3& result);
+  public:
+    __declspec(noinline) ShadowSceneLight* GetListItemAt(unsigned int);
+    unsigned FUN_00b5bca0(const NiPoint3&, const NiPoint3&, NiPoint3&);
 };
-__declspec(noinline) BlendLight* BlendOwner::GetListItemAt(unsigned index)
+__declspec(noinline) ShadowSceneLight* ShadowSceneBlender::GetListItemAt(unsigned index)
 {
-    if (index >= count)
+    if (index >= lLightList.count)
         return 0;
-    BlendNode* node = head;
-    BlendLight* light = NextLight(node);
+    BlendNode* node = reinterpret_cast<BlendNode*>(lLightList.head);
+    ShadowSceneLight* light = NextLight(node);
     while (index > 0)
     {
         --index;
@@ -11302,11 +6946,12 @@ __declspec(noinline) BlendLight* BlendOwner::GetListItemAt(unsigned index)
 }
 // Computes a blended light position from point and normal, storing the result and returning whether any lights were used.
 // @fnv 0x00b5bca0
-unsigned BlendOwner::FUN_00b5bca0(const NiPoint3& point, const NiPoint3& normal, NiPoint3& result)
+unsigned ShadowSceneBlender::FUN_00b5bca0(const NiPoint3& point, const NiPoint3& normal, NiPoint3& result)
 {
-    BlendData* mainData = mainLight->data;
+    BlendData* mainData = reinterpret_cast<BlendData*>(pSunLight->spLight.m_pObject);
     unsigned used = 0;
-    NiPoint3 direction = NiPoint3::ZERO;
+    NiPoint3 direction;
+    memcpy(&direction, &NiPoint3::ZERO, sizeof(direction));
     if (mainData->Brightness() > DAT_010228a0)
     {
         NiPoint3 tmp;
@@ -11314,33 +6959,36 @@ unsigned BlendOwner::FUN_00b5bca0(const NiPoint3& point, const NiPoint3& normal,
         tmp.y = -mainData->direction.y;
         tmp.z = -mainData->direction.z;
         tmp.Unitize();
-        direction = tmp * 1000.0;
+        NiPoint3 scaled = tmp * 1000.0f;
+        memcpy(&direction, &scaled, sizeof(direction));
         used = 1;
     }
     else
     {
         if (!(DAT_011f9e78 & 1))
             DAT_011f9e78 |= 1;
-        NiPoint3 zero = NiPoint3::ZERO;
+        NiPoint3 zero;
+        memcpy(&zero, &NiPoint3::ZERO, sizeof(zero));
         float maximum = Larger(Larger(zero.x, zero.y), zero.z);
         int positive = 0;
         float total = 0.0f;
         unsigned index = 0;
-        BlendLight* light = GetListItemAt(0);
+        ShadowSceneLight* light = GetListItemAt(0);
         while (light)
         {
             if (used >= 100)
                 break;
-            BlendData* data = light->data;
+            BlendData* data = reinterpret_cast<BlendData*>(light->spLight.m_pObject);
             if (!(data->flags & 1))
             {
                 NiPoint3 delta = data->position - point;
-                NiPoint3 unit = delta;
+                NiPoint3 unit;
+                memcpy(&unit, &delta, sizeof(unit));
                 unit.Unitize();
                 float dot = normal.x * unit.x + normal.y * unit.y + normal.z * unit.z;
                 if (dot < 0.0f)
                     dot = 0.0f;
-                float luminance = light->data->Brightness();
+                float luminance = reinterpret_cast<BlendData*>(light->spLight.m_pObject)->Brightness();
                 float lengthSquared = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
                 float distance = sqrt(lengthSquared);
                 float attenuation = 1.0f - (distance - maximum) / data->radius;
@@ -11351,16 +6999,16 @@ unsigned BlendOwner::FUN_00b5bca0(const NiPoint3& point, const NiPoint3& normal,
                 if (weight > 0.01f)
                     ++positive;
                 total += weight;
-                static_cast<NiPoint3&>(DAT_011f99c8[used]) = delta;
+                memcpy(&static_cast<NiPoint3&>(DAT_011f99c8[used]), &delta, sizeof(delta));
                 ++used;
             }
             ++index;
             unsigned idx = (unsigned short)index;
-            if (idx >= count)
+            if (idx >= lLightList.count)
                 break;
-            BlendNode* node = head;
+            BlendNode* node = reinterpret_cast<BlendNode*>(lLightList.head);
             unsigned remaining = idx;
-            BlendLight* item = NextLight(node);
+            ShadowSceneLight* item = NextLight(node);
             while (remaining > 0)
             {
                 --remaining;
@@ -11379,25 +7027,21 @@ unsigned BlendOwner::FUN_00b5bca0(const NiPoint3& point, const NiPoint3& normal,
         }
         else
         {
-            const NiPoint3& source = mainLight->data->direction;
+            const NiPoint3& source = reinterpret_cast<BlendData*>(pSunLight->spLight.m_pObject)->direction;
             NiPoint3 tmp;
             tmp.x = -source.x;
             tmp.y = -source.y;
             tmp.z = -source.z;
             tmp.Unitize();
-            direction = tmp * 1000.0;
+            NiPoint3 scaled = tmp * 1000.0f;
+            memcpy(&direction, &scaled, sizeof(direction));
             used = 1;
         }
     }
-    result = point + direction;
+    NiPoint3 sum = point + direction;
+    memcpy(&result, &sum, sizeof(result));
     return used > 0;
 }
-
-class ShadowDtorTextureManager
-{
-  public:
-    void FUN_00b6da10(BSRenderedTexture*);
-};
 
 extern void __cdecl FUN_00b4f2f0(int, ShadowSceneNode*);
 
@@ -11508,215 +7152,31 @@ struct ShadowDtorContext
 };
 extern ShadowDtorContext* __cdecl FUN_00b4f5c0();
 
-class ShadowDtorFrustum
-{
-  public:
-    int unk00;
-    void FUN_00c47770();
-    ~ShadowDtorFrustum()
-    {
-        FUN_00c47770();
-    }
-};
-
-class ShadowDtorCleanup
-{
-  public:
-    void FUN_00b5d180();
-};
-
-struct ShadowDtorList : public ShadowList
-{
-    ~ShadowDtorList()
-    {
-        RemoveAll();
-    }
-};
-
-class ShadowDtorTexture : public BSRenderedTexture
-{
-  public:
-    void IncRefCount()
-    {
-        InterlockedIncrement(&refs);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&refs) == 0)
-            DeleteThis();
-    }
-};
-
-class ShadowDtorLight : public ShadowSceneLight
-{
-  public:
-    virtual ~ShadowDtorLight();
-};
-
-class FUN_00a5e930
-{
-  public:
-    virtual ~FUN_00a5e930();
-    int unkBase_004;
-    int unkBase_008;
-    int unkBase_00c;
-    int unkBase_010;
-    int unkBase_014;
-    int unkBase_018;
-    int unkBase_01c;
-    int unkBase_020;
-    int unkBase_024;
-    int unkBase_028;
-    int unkBase_02c;
-    int unkBase_030;
-    int unkBase_034;
-    int unkBase_038;
-    int unkBase_03c;
-    int unkBase_040;
-    int unkBase_044;
-    int unkBase_048;
-    int unkBase_04c;
-    int unkBase_050;
-    int unkBase_054;
-    int unkBase_058;
-    int unkBase_05c;
-    int unkBase_060;
-    int unkBase_064;
-    int unkBase_068;
-    int unkBase_06c;
-    int unkBase_070;
-    int unkBase_074;
-    int unkBase_078;
-    int unkBase_07c;
-    int unkBase_080;
-    int unkBase_084;
-    int unkBase_088;
-    int unkBase_08c;
-    int unkBase_090;
-    int unkBase_094;
-    int unkBase_098;
-    int unkBase_09c;
-    int unkBase_0a0;
-    int unkBase_0a4;
-    int unkBase_0a8;
-    int unkBase_0ac;
-    int unkBase_0b0;
-};
-
-class FUN_00b5e5a0 : public FUN_00a5e930
-{
-  public:
-    virtual ~FUN_00b5e5a0();
-
-    ShadowDtorList unkB4;
-    ShadowDtorList unkC0;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    NiPointer<NiRefObject> unkD8;
-    NiPointer<NiRefObject> unkDC;
-    ShadowDtorLight* unkE0;
-    ShadowDtorList unkE4;
-    ShadowDtorList unkF0;
-    ShadowDtorList unkFC;
-    ShadowDtorList unk108;
-    ShadowDtorList unk114;
-    unsigned char unk120;
-    char unk121;
-    char unk122;
-    char unk123;
-    NiPointer<ShadowDtorTexture> unk124;
-    NiPointer<NiRefObject> unk128;
-    int unk12C;
-    int unk130;
-    NiPointer<NiRefObject> unk134;
-    ShadowDtorFrustum unk138;
-    int unkPost_13c;
-    int unkPost_140;
-    int unkPost_144;
-    int unkPost_148;
-    int unkPost_14c;
-    int unkPost_150;
-    int unkPost_154;
-    int unkPost_158;
-    int unkPost_15c;
-    int unkPost_160;
-    int unkPost_164;
-    int unkPost_168;
-    int unkPost_16c;
-    int unkPost_170;
-    int unkPost_174;
-    int unkPost_178;
-    int unkPost_17c;
-    int unkPost_180;
-    int unkPost_184;
-    int unkPost_188;
-    int unkPost_18c;
-    int unkPost_190;
-    int unkPost_194;
-    int unkPost_198;
-    int unkPost_19c;
-    int unkPost_1a0;
-    int unkPost_1a4;
-    int unkPost_1a8;
-    int unkPost_1ac;
-    int unkPost_1b0;
-    int unkPost_1b4;
-    int unkPost_1b8;
-    int unkPost_1bc;
-    int unkPost_1c0;
-    int unkPost_1c4;
-    int unkPost_1c8;
-    int unkPost_1cc;
-    int unkPost_1d0;
-    int unkPost_1d4;
-    int unkPost_1d8;
-    int unkPost_1dc;
-    int unk1E0;
-};
-
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unkB4) == 0xb4);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unkC0) == 0xc0);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unkD8) == 0xd8);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unkDC) == 0xdc);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unkE0) == 0xe0);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unkE4) == 0xe4);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unkF0) == 0xf0);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unkFC) == 0xfc);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unk108) == 0x108);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unk114) == 0x114);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unk120) == 0x120);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unk124) == 0x124);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unk128) == 0x128);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unk134) == 0x134);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unk138) == 0x138);
-FNV_STATIC_ASSERT(offsetof(FUN_00b5e5a0, unk1E0) == 0x1e0);
-
 // Destroys the shadow scene object, clearing its node, light, texture, and list references.
 // @fnv 0x00b5e5a0
-FUN_00b5e5a0::~FUN_00b5e5a0()
+ShadowSceneNode::~ShadowSceneNode()
 {
-    ShadowSceneNode* node = ((ShadowSceneNode**)&DAT_011f91c8)[unk120];
+    ShadowSceneNode* node = ((ShadowSceneNode**)&DAT_011f91c8)[cSceneGraphIndex];
     if (node == (ShadowSceneNode*)this)
     {
-        FUN_00b4f2f0(unk120, 0);
+        FUN_00b4f2f0(cSceneGraphIndex, 0);
     }
     if (FUN_00b4f5c0() && FUN_00b4f5c0()->unk194 == this)
     {
         FUN_00b4f5c0()->unk194 = 0;
     }
-    ((ShadowDtorCleanup*)this)->FUN_00b5d180();
-    unkD8 = 0;
-    unkDC = 0;
-    delete unkE0;
-    if (unk124)
+    FUN_00b5d180();
+    kShadowLightActiveFenceObject = 0;
+    kShadowLightFadingInFenceObject = 0;
+    delete pSunLight;
+    if (pWindowReflectionEnvMap)
     {
-        reinterpret_cast<ShadowDtorTextureManager*>(DAT_011f91a8)->FUN_00b6da10(unk124);
+        DAT_011f91a8->AddRenderedTexture(reinterpret_cast<BSRenderedTexture*>(pWindowReflectionEnvMap.m_pObject));
     }
-    unk124 = 0;
-    unkE4.RemoveAll();
-    unkF0.RemoveAll();
-    unkFC.RemoveAll();
-    unk1E0 = 0;
-    unk128 = 0;
+    pWindowReflectionEnvMap = 0;
+    lLightQueueAdd.RemoveAll();
+    lLightQueueRemove.RemoveAll();
+    lLightQueueUpdate.RemoveAll();
+    pBSPortalGraph = 0;
+    reinterpret_cast<NiPointer<NiRefObject>&>(spCubeMapCamera) = 0;
 }

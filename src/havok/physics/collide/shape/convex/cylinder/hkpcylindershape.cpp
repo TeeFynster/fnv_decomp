@@ -2,7 +2,7 @@
 // src/havok/physics/collide/shape/convex/cylinder/hkpcylindershape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/cylinder/hkpcylindershape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpCylinderShape.h"
+#include "../../../../../../../include/hkpCylinderShape.h"
 
 // @fnv 0x00d571b0
 int __cdecl FUN_00d571b0()
@@ -15,13 +15,8 @@ int __cdecl FUN_00d571b0()
 // (vptr 0x0, m_usMemSizeAndFlags 0x4, m_sReferenceCount 0x6, m_ulUserData 0x8,
 //  m_type 0xC, m_fSphereRadius 0x10, m_fCylinderRadius 0x14).
 
-class hkpCylinderShapeGetCylRadius : public hkpCylinderShape {
-public:
-    hkReal FUN_00d571a0();
-};
-
 // @fnv 0x00d571a0
-hkReal hkpCylinderShapeGetCylRadius::FUN_00d571a0() {
+hkReal hkpCylinderShape::getCylinderRadius() const {
     return m_fCylinderRadius;
 }
 
@@ -92,44 +87,46 @@ S00d57b20_Obj* __thiscall S00d57b20_Obj::FUN_00d57b20(int condition)
 #include <xmmintrin.h>
 #include <math.h>
 namespace fnv_00d57220 {
-union __declspec(intrin_type) __declspec(align(16)) __m128 {
+// Exe 0x00d57220 InitPerpendiculars: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" __m128 _mm_set_ss(float);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ss(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_sub_ss(__m128, __m128);
-extern "C" __m128 _mm_rsqrt_ss(__m128);
-extern "C" __m128 _mm_cmpeq_ss(__m128, __m128);
-extern "C" __m128 _mm_andnot_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_set_ss(float);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_rsqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
 
 struct Vec_d57220v {
-    __m128 q;
+    LocalM128 q;
     float& operator()(int i) { return q.m128_f32[i]; }
     const float& operator()(int i) const { return q.m128_f32[i]; }
     void setZero4() { q = _mm_setzero_ps(); }
     __forceinline void normalize3()
     {
-        __m128 v = q;
-        __m128 x2 = _mm_mul_ps(v, v);
-        __m128 len2 = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+        LocalM128 v = q;
+        LocalM128 x2 = _mm_mul_ps(v, v);
+        LocalM128 len2 = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
         len2 = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), len2);
-        __m128 e = _mm_rsqrt_ss(len2);
-        __m128 mask = _mm_cmpeq_ss(len2, _mm_set_ss(0.0f));
-        __m128 t = _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(len2, e), e));
-        __m128 r = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e), t);
+        LocalM128 e = _mm_rsqrt_ss(len2);
+        LocalM128 mask = _mm_cmpeq_ss(len2, _mm_set_ss(0.0f));
+        LocalM128 t = _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(len2, e), e));
+        LocalM128 r = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e), t);
         r = _mm_andnot_ps(mask, r);
         q = _mm_mul_ps(_mm_shuffle_ps(r, r, 0), v);
     }
     void setCross(const Vec_d57220v& a, const Vec_d57220v& b)
     {
-        __m128 c0 = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xc9), _mm_shuffle_ps(b.q, b.q, 0xd2));
-        __m128 c1 = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xd2), _mm_shuffle_ps(b.q, b.q, 0xc9));
+        LocalM128 c0 = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xc9), _mm_shuffle_ps(b.q, b.q, 0xd2));
+        LocalM128 c1 = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xd2), _mm_shuffle_ps(b.q, b.q, 0xc9));
         q = _mm_sub_ps(c0, c1);
     }
 };

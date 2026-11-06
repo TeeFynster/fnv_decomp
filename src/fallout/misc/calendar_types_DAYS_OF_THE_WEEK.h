@@ -2,7 +2,6 @@
 #ifndef FNV_DAYS_OF_THE_WEEK_H
 #define FNV_DAYS_OF_THE_WEEK_H
 
-#include "layout_support.h"
 enum DAYS_OF_THE_WEEK
 {
     DAYS_OF_THE_WEEK_DAY_NONE = -1,

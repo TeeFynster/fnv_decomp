@@ -1605,16 +1605,8 @@ struct Entry
 struct Allocator
 {
 };
-struct Router
-{
-    int a, b, c, d;
-    Allocator* heap;
-    Allocator& getHeap()
-    {
-        return *heap;
-    }
-};
-Router* getRouter();
+#include "../../include/hkMemoryRouter.h"
+hkMemoryRouter* getRouter();
 int FUN_00e60cb0(unsigned char type, int count);
 extern "C" void FUN_00c908c0(Allocator*, void*, int, int);
 void FUN_00cb1260(void*, const void*, int);
@@ -1779,19 +1771,7 @@ struct FloatArray
         }
     }
 };
-struct MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    ArrayAllocator* m_pStreamAllocator;
-    ArrayAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-MemoryRouter* GetMemoryRouter();
+hkMemoryRouter* GetMemoryRouter();
 int RemoveAdjacentDuplicates(FloatArray* arr, int last);
 // Element-wise subtract another matrix of the same shape from this one.
 class E87E0Matrix

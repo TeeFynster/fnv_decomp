@@ -1,4 +1,6 @@
-// bssystemutilities/console/bsnetworksystemutility_console_decls.h: declares NetworkSystemUtility, MemoryManager
+// bssystemutilities/console/bsnetworksystemutility_console_decls.h: declares NetworkSystemUtility
+
+#include "../../../include/MemoryManager.h"
 
 class NetworkSystemUtility
 {
@@ -14,12 +16,6 @@ class NetworkSystemUtility
     NetworkSystemUtility();
     static void* operator new(unsigned int size);
     static void operator delete(void* pointer);
-};
-class MemoryManager
-{
-  public:
-    void* Allocate(unsigned int size);
-    void Deallocate(void* pointer);
 };
 extern MemoryManager g_memoryManager;
 extern NetworkSystemUtility* DAT_011f7270;

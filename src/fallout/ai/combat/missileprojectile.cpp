@@ -1,3 +1,60 @@
+#include "../../../../include/NiUpdateData.h"
+#include "../../../../include/NiBound.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiNode.h"
+#include "../../../../include/BGSProjectile.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/BeamProjectile.h"
+#include "../../../../include/MissileProjectile.h"
+#include "../../../../include/Projectile.h"
+#include "../../../../include/bhkHingeConstraint.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/PathingRequest.h"
+#include "../../../../include/Setting.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/bhkConstraint.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+
+// Helpers absent from the shared class declarations. Calls retain their original ABI.
+namespace MissileLocal {
+void __cdecl Detonate();
+void __cdecl GetDetonationDelay();
+void __cdecl GetElapsedTime();
+void __cdecl GetName();
+void __cdecl GetScaleDivisor();
+void __cdecl GetSceneObject();
+void __cdecl GetSpeed();
+void __cdecl GetTargetReference();
+void __cdecl IsDeleted();
+void __cdecl IsImpactFlagSet();
+void __cdecl IsImpactResponseSuppressed();
+void __cdecl MoveProjectile();
+void __cdecl ProcessHit();
+void __cdecl SetImpactFlag();
+void __cdecl SetImpactFlagInt();
+void __cdecl SetOrientationFromDirection();
+void __cdecl SetPosAndScale();
+void __cdecl SetPosition();
+void __cdecl SetPositionAndDirection();
+void __cdecl SetWorldTransform();
+void __cdecl UpdateBeamState();
+void __cdecl UpdateDetonation();
+void __cdecl UpdateNodeTransformBool();
+void __cdecl UpdateNodeTransformInt();
+}
+
+namespace ImpactResponse { struct ImpactVector; }
+namespace fnv_009ba660 { struct MissileVector; }
+
+// The shared Projectile API lacks the direction getter. This declaration-only
+// call interface preserves its member-function structure-return ABI; it carries
+// no projectile layout or inheritance.
+struct ProjectileDirectionAccess
+{
+    ImpactResponse::ImpactVector GetContactDirection();
+    fnv_009ba660::MissileVector GetMissileDirection();
+};
 
 // src/fallout/ai/combat/missileprojectile.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/missileprojectile.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -26,12 +83,6 @@ char const* const* __thiscall FUN_009ba4d0_shell::GetArg1Ptr()
 extern "C" void __cdecl FUN_00c89640(void*);
 extern "C" void __cdecl __Dummy_00b6fef0(void*, unsigned int);
 
-struct bhkConstraint
-{
-    virtual ~bhkConstraint();
-    void* DestroyConstraint(unsigned int);
-};
-
 // @fnv 0x009ba4e0
 void* bhkConstraint::DestroyConstraint(unsigned int flags)
 {
@@ -41,39 +92,13 @@ void* bhkConstraint::DestroyConstraint(unsigned int flags)
     return this;
 }
 
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-};
-
-struct BeamProjectile
-{
-    void LoadProjectile(BGSLoadFormBuffer*);
-};
-
-struct MissileProjectile : BeamProjectile
-{
-    void FUN_009baad0(BGSLoadFormBuffer*);
-};
-
 // Calls the base BeamProjectile load routine, then reads 4 bytes from the load buffer into this+0x150.
 // @fnv 0x009baad0
 void MissileProjectile::FUN_009baad0(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    BeamProjectile::LoadProjectile(apLoadGameBuffer);
+    reinterpret_cast<BeamProjectile*>(this)->BeamProjectile::LoadProjectile(apLoadGameBuffer);
     apLoadGameBuffer->ReadTypedData((void*)((char*)this + 0x150), 4);
 }
-
-namespace fnv_009bab70 {
-struct BGSLoadFormBuffer;
-struct Projectile
-{
-    void FUN_009c58e0(BGSLoadFormBuffer* apLoadGameBuffer);
-};
-struct MissileProjectile : Projectile
-{
-    void FUN_009bab70(BGSLoadFormBuffer* apLoadGameBuffer);
-};
 
 void Projectile::FUN_009c58e0(BGSLoadFormBuffer* apLoadGameBuffer)
 {}
@@ -84,12 +109,6 @@ void MissileProjectile::FUN_009bab70(BGSLoadFormBuffer* apLoadGameBuffer)
     FUN_009c58e0(apLoadGameBuffer);
     ((int*)this)[0x150 / 4] = 0;
 }
-}  // namespace fnv_009bab70
-
-struct BGSProjectile
-{
-    bool GetFlag(unsigned int) const;
-};
 
 struct FUN_009b7c90_shell : BGSProjectile
 {
@@ -104,11 +123,6 @@ bool FUN_009b7c90_shell::FUN_009b7c90()
 
 extern "C" void __cdecl _delete(void*, unsigned int);
 
-struct bhkHingeConstraint : bhkConstraint
-{
-    void* FUN_009ba520(unsigned int);
-};
-
 // Destroys the constraint and, when flags has bit 0 set, frees the 0x10-byte object; returns this.
 // @fnv 0x009ba520
 void* bhkHingeConstraint::FUN_009ba520(unsigned int flags)
@@ -120,13 +134,8 @@ void* bhkHingeConstraint::FUN_009ba520(unsigned int flags)
 }
 
 void __cdecl _Deallocate(void*);
-struct FUN_009b7a20_holder
-{
-    void FUN_009b7bc0();
-    void* FUN_009b7a20(unsigned int);
-};
 // @fnv 0x009b7a20
-void* FUN_009b7a20_holder::FUN_009b7a20(unsigned int flags)
+void* MissileProjectile::FUN_009b7a20(unsigned int flags)
 {
     FUN_009b7bc0();
     if (flags & 1)
@@ -148,34 +157,32 @@ void FUN_009ba320_shell::FUN_009ba320(unsigned int auiFirst, unsigned int auiSec
     FUN_009ba390(auiSecond);
 }
 
-struct ScriptLocalsX
+// 0x004ae750 null-checks and reads this+8 via 0x00620b80; ScriptLocals::GetLocalData is 0x00541c80.
+struct NullableObjectDataAccess
 {
-    void* GetLocalData();
+    void* GetObjectData();
 };
+
 struct FUN_009ba350_shell
 {
     void* m_p;
-    void FUN_009ba350(ScriptLocalsX* p);
+    void FUN_009ba350(NullableObjectDataAccess* p);
 };
 // @fnv 0x009ba350
-void FUN_009ba350_shell::FUN_009ba350(ScriptLocalsX* p)
+void FUN_009ba350_shell::FUN_009ba350(NullableObjectDataAccess* p)
 {
-    *(void**)((char*)this + 0xc) = p ? p->GetLocalData() : 0;
+    *(void**)((char*)this + 0xc) = p ? p->GetObjectData() : 0;
 }
 
 namespace fnv_009ba390 {
-struct ScriptLocalsX
-{
-    void* GetLocalData();
-};
 struct FUN_009ba390_shell
 {
-    void FUN_009ba390(ScriptLocalsX*);
+    void FUN_009ba390(NullableObjectDataAccess*);
 };
 // @fnv 0x009ba390
-void FUN_009ba390_shell::FUN_009ba390(ScriptLocalsX* apScriptLocals)
+void FUN_009ba390_shell::FUN_009ba390(NullableObjectDataAccess* apObjectData)
 {
-    *(void**)((char*)this + 0x10) = apScriptLocals ? apScriptLocals->GetLocalData() : 0;
+    *(void**)((char*)this + 0x10) = apObjectData ? apObjectData->GetObjectData() : 0;
 }
 }  // namespace fnv_009ba390
 
@@ -307,171 +314,30 @@ void* __thiscall FUN_009ba630_shell::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-};
 void __cdecl SaveProjectile(BGSLoadFormBuffer*);
-struct FUN_009baaa0_shell
-{
-    void FUN_009baaa0(BGSLoadFormBuffer* buffer);
-};
 // @fnv 0x009baaa0
-void FUN_009baaa0_shell::FUN_009baaa0(BGSLoadFormBuffer* buffer)
+void MissileProjectile::FUN_009baaa0(BGSLoadFormBuffer* buffer)
 {
-    reinterpret_cast<void(__thiscall*)(void*, BGSLoadFormBuffer*)>(SaveProjectile)(this, buffer);
+    reinterpret_cast<void(__thiscall*)(void*, BGSLoadFormBuffer*)>(::SaveProjectile)(this, buffer);
     reinterpret_cast<BGSSaveFormBuffer*>(buffer)->SaveData(reinterpret_cast<char*>(this) + 0x150, 4, 0);
 }
 
-struct S5870_Holder
-{
-    void FUN_009c5870(BGSLoadFormBuffer*);
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual int v116();
-    char _pad[0x150];
-    unsigned char b154;
-    void FUN_009babe0();
-    void LoadForm(BGSLoadFormBuffer*);
-};
-// Loads from the buffer via FUN_009c5870, then either calls FUN_009babe0 or sets b154 to 1 depending on v116().
+void __cdecl LoadMissileFormBase();
+// Loads the base projectile, then processes impacts if 3D exists or marks them pending.
 // @fnv 0x009bab20
-void S5870_Holder::LoadForm(BGSLoadFormBuffer* apLoadGameBuffer)
+void MissileProjectile::Unk_21(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    FUN_009c5870(apLoadGameBuffer);
-    if (v116())
+    reinterpret_cast<void(__thiscall*)(void*, BGSLoadFormBuffer*)>(LoadMissileFormBase)(this , apLoadGameBuffer);
+    if (GetNiNode())
         FUN_009babe0();
     else
-        b154 = 1;
+        *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x154) = 1;
 }
 
-struct XActor
-{
-    void* GetActorBase();
-};
-
-struct ArrSI
+// Exe 0x009b7cc0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct MissileprojectileOffset08View
 {
     unsigned int GetFlags();
-};
-
-struct PathingRequest
-{
-    bool IsRandomBelowRadiusThreshold();
 };
 
 struct FUN_009a7f00_obj
@@ -480,51 +346,36 @@ struct FUN_009a7f00_obj
     bool FUN_009a7f80() const;
 };
 
-struct BeamEffect
-{
-    void FUN_005de0a0(int, bool);
-};
-
-struct FUN_009bda10_shell
-{
-    void FUN_009bda10();
-};
-
-struct FUN_009b7cc0_shell
-{
-    void UpdateBeamFlags();
-};
-
 int DAT_011f2250;
 extern double _DAT_01012060;
 
 // Computes flags from the actor base's pathing/target state and the global flags, then sets each beam flag via FUN_005de0a0 and calls FUN_009bda10.
 // @fnv 0x009b7cc0
-void FUN_009b7cc0_shell::UpdateBeamFlags()
+void MissileProjectile::UpdateBeamFlags()
 {
-    bool bTime = reinterpret_cast<ArrSI*>(&DAT_011f2250)->GetFlags() == 4;
+    bool bTime = reinterpret_cast<MissileprojectileOffset08View*>(&DAT_011f2250)->GetFlags() == 4;
 
-    bool bTarget = reinterpret_cast<PathingRequest*>(reinterpret_cast<XActor*>(this)->GetActorBase())
+    bool bTarget = reinterpret_cast<PathingRequest*>(FUN_004181e0())
                        ->IsRandomBelowRadiusThreshold();
 
     bool bPathing =
         bTime ? false
-              : reinterpret_cast<FUN_009a7f00_obj*>(reinterpret_cast<XActor*>(this)->GetActorBase())->FUN_009a7f80();
+              : reinterpret_cast<FUN_009a7f00_obj*>(FUN_004181e0())->FUN_009a7f80();
 
     bool bNewGame =
-        reinterpret_cast<FUN_009a7f00_obj*>(reinterpret_cast<XActor*>(this)->GetActorBase())->FUN_00966980() > 0.0;
+        reinterpret_cast<FUN_009a7f00_obj*>(FUN_004181e0())->FUN_00966980() > 0.0;
 
-    reinterpret_cast<BeamEffect*>(this)->FUN_005de0a0(0x10, bTarget);
-    reinterpret_cast<BeamEffect*>(this)->FUN_005de0a0(1, bPathing);
-    reinterpret_cast<BeamEffect*>(this)->FUN_005de0a0(8, bPathing);
-    reinterpret_cast<BeamEffect*>(this)->FUN_005de0a0(0x20, bTarget && bPathing);
-    reinterpret_cast<BeamEffect*>(this)->FUN_005de0a0(2, !bTarget && bPathing);
-    reinterpret_cast<BeamEffect*>(this)->FUN_005de0a0(0x40, bNewGame && !bPathing);
-    reinterpret_cast<BeamEffect*>(this)->FUN_005de0a0(0x100, true);
-    reinterpret_cast<BeamEffect*>(this)->FUN_005de0a0(0x8000, !bPathing);
-    reinterpret_cast<BeamEffect*>(this)->FUN_005de0a0(0x2000, bPathing);
+    reinterpret_cast<void(__thiscall*)(void*, int, bool)>(MissileLocal::SetImpactFlag)(this, 0x10, bTarget);
+    reinterpret_cast<void(__thiscall*)(void*, int, bool)>(MissileLocal::SetImpactFlag)(this, 1, bPathing);
+    reinterpret_cast<void(__thiscall*)(void*, int, bool)>(MissileLocal::SetImpactFlag)(this, 8, bPathing);
+    reinterpret_cast<void(__thiscall*)(void*, int, bool)>(MissileLocal::SetImpactFlag)(this, 0x20, bTarget && bPathing);
+    reinterpret_cast<void(__thiscall*)(void*, int, bool)>(MissileLocal::SetImpactFlag)(this, 2, !bTarget && bPathing);
+    reinterpret_cast<void(__thiscall*)(void*, int, bool)>(MissileLocal::SetImpactFlag)(this, 0x40, bNewGame && !bPathing);
+    reinterpret_cast<void(__thiscall*)(void*, int, bool)>(MissileLocal::SetImpactFlag)(this, 0x100, true);
+    reinterpret_cast<void(__thiscall*)(void*, int, bool)>(MissileLocal::SetImpactFlag)(this, 0x8000, !bPathing);
+    reinterpret_cast<void(__thiscall*)(void*, int, bool)>(MissileLocal::SetImpactFlag)(this, 0x2000, bPathing);
 
-    reinterpret_cast<FUN_009bda10_shell*>(this)->FUN_009bda10();
+    reinterpret_cast<void(__thiscall*)(void*)>(MissileLocal::UpdateBeamState)(this);
 }
 
 struct FUN_009babe0_object
@@ -607,214 +458,55 @@ struct FUN_009babe0_list
     FUN_009babe0_list* _ref_00726070();
 };
 
-struct FUN_009b90b0_shell
-{
-    void FUN_009b90b0();
-};
-
-struct FUN_009ba660_shell
-{
-    void HandleMissileImpact();
-};
-
 // @fnv 0x009babe0
-void S5870_Holder::FUN_009babe0()
+void MissileProjectile::FUN_009babe0()
 {
     FUN_009babe0_impact* pimpact;
 
     if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x150) == 4 ||
         *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x150) == 3)
     {
-        pimpact = *reinterpret_cast<FUN_009babe0_list*>(reinterpret_cast<char*>(this) + 0x88)->_ref_006815c0();
+        pimpact = *reinterpret_cast<FUN_009babe0_list*>(&kImpacts)->_ref_006815c0();
 
         if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x150) == 4)
         {
-            pimpact = reinterpret_cast<FUN_009babe0_list*>(reinterpret_cast<char*>(this) + 0x88)->_ref_00726070()
-                          ? *reinterpret_cast<FUN_009babe0_list*>(reinterpret_cast<char*>(this) + 0x88)
+            pimpact = reinterpret_cast<FUN_009babe0_list*>(&kImpacts)->_ref_00726070()
+                          ? *reinterpret_cast<FUN_009babe0_list*>(&kImpacts)
                                  ->_ref_00726070()
                                  ->_ref_006815c0()
                           : 0;
         }
 
         if (pimpact && pimpact->pObject && pimpact->pObject->Check())
-            reinterpret_cast<FUN_009b90b0_shell*>(this)->FUN_009b90b0();
+            FUN_009b90b0();
     }
 
     if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x150) == 4)
-        reinterpret_cast<FUN_009ba660_shell*>(this)->HandleMissileImpact();
+        HandleMissileImpact();
 }
 
-extern int DAT_0108fa44;
-extern int DAT_0108fa38;
-struct BaseA
-{
-    void* vptr;
-    int pad[5];
-    BaseA(unsigned char a);
-    ~BaseA();
-    void FUN_004f15a0(int);
-};
-struct FUN_009b7a50 : BaseA
-{
-    void* vptr2;
-    int pad2[0x4d];
-    int m150;
-    unsigned char b154;
-    float f158;
-    float f15c;
-    FUN_009b7a50(unsigned char a);
-};
-// Initialises the BaseA-derived object: sets both vtables, calls FUN_004f15a0(0x3d), and zeroes m150, b154, f158 and f15c.
+// Sets the missile form type and clears the missile-specific state at offsets 0x150 through 0x15c.
 // @fnv 0x009b7a50
-FUN_009b7a50::FUN_009b7a50(unsigned char a) : BaseA(a)
+MissileProjectile::MissileProjectile(unsigned char a) : Projectile(*reinterpret_cast<bool*>(&a))
 {
-    vptr = &DAT_0108fa44;
-    vptr2 = &DAT_0108fa38;
-    FUN_004f15a0(0x3d);
-    m150 = 0;
-    b154 = 0;
-    f158 = 0.0f;
-    f15c = 0.0f;
+    SetFormType(0x3d);
+    *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x150) = 0;
+    *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x154) = 0;
+    *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x158) = 0.0f;
+    *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x15c) = 0.0f;
 }
 
-struct Vector3
-{
-    float x;
-    float y;
-    float z;
-};
-extern int DAT_0108fa44;
-extern int DAT_0108fa38;
-
-struct FUN_009bbef0
-{
-    int* m_primaryVtable;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    int* m_secondaryVtable;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    FUN_009bbef0(int a, int b, int c, Vector3 position, float magnitude, float duration);
-    ~FUN_009bbef0();
-    void FUN_004f15a0(unsigned int flag);
-};
-
-struct FUN_009b7af0 : FUN_009bbef0
-{
-    unsigned int unk150;
-    unsigned char unk154;
-    float unk158;
-    float unk15c;
-
-    FUN_009b7af0(int a, int b, int c, Vector3 position, float magnitude, float duration);
-};
-
-// Initialises the derived object: sets both vtables, calls FUN_004f15a0(61), and zeroes unk150, unk154, unk158 and unk15c.
+// Initializes the projectile base, then clears the missile-specific state.
 // @fnv 0x009b7af0
-FUN_009b7af0::FUN_009b7af0(int a, int b, int c, Vector3 position, float magnitude, float duration)
-    : FUN_009bbef0(a, b, c, position, magnitude, duration)
+MissileProjectile::MissileProjectile(int a, int b, int c, NiPoint3 position, float magnitude, float duration)
+    : Projectile(a, b, c, position, magnitude, duration)
 {
-    m_primaryVtable = &DAT_0108fa44;
-    m_secondaryVtable = &DAT_0108fa38;
-    FUN_004f15a0(61);
-    unk150 = 0;
-    unk154 = 0;
-    unk158 = 0.0f;
-    unk15c = 0.0f;
+    SetFormType(61);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x150) = 0;
+    *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x154) = 0;
+    *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x158) = 0.0f;
+    *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x15c) = 0.0f;
 }
-
-struct Base_b9999
-{
-    virtual ~Base_b9999();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-struct Sec_b9999
-{
-    virtual void v0();
-};
 
 struct Obj_b9999
 {
@@ -880,23 +572,16 @@ struct Obj_b9999
     Obj_b9999* Probe3();
 };
 
-struct FUN_009b7bc0_cls : Base_b9999, Sec_b9999
-{
-    virtual ~FUN_009b7bc0_cls();
-    void* Probe1();
-    void* Probe2();
-};
-
 // @fnv 0x009b7bc0
-FUN_009b7bc0_cls::~FUN_009b7bc0_cls()
+MissileProjectile::~MissileProjectile()
 {
     Obj_b9999* r;
-    if (reinterpret_cast<FUN_009b7c90_shell*>(Probe1())->FUN_009b7c90())
+    if (reinterpret_cast<FUN_009b7c90_shell*>(FUN_004181e0())->FUN_009b7c90())
     {
         Obj_b9999* s;
-        if (Probe2() != 0)
+        if (reinterpret_cast<void*(__thiscall*)(void*)>(MissileLocal::GetSceneObject)(this) != 0)
         {
-            r = reinterpret_cast<Obj_b9999*>(Probe2())->v39(FUN_009b7cb0());
+            r = reinterpret_cast<Obj_b9999*>(reinterpret_cast<void*(__thiscall*)(void*)>(MissileLocal::GetSceneObject)(this))->v39(FUN_009b7cb0());
             if (r != 0)
             {
                 s = r->Probe3();
@@ -906,269 +591,50 @@ FUN_009b7bc0_cls::~FUN_009b7bc0_cls()
     }
 }
 
-struct NiRTTI
-{
-    int unk00;
-};
 extern NiRTTI DAT_011f4428;
 extern double _DAT_01012060;
 
-struct NiPoint3s
+// POD snapshot: 0x009b7e40 copies four words; NiBound's declared copy constructor adds a call.
+struct ProjectileBoundSnapshot
 {
-    float x;
-    float y;
-    float z;
-    NiPoint3s(float ax, float ay, float az);
-    NiPoint3s operator-(const NiPoint3s& o) const;
-    float Length();
-};
-
-struct NiBounds
-{
-    float cx;
-    float cy;
-    float cz;
+    float center[3];
     float radius;
-    NiPoint3s* GetNavMeshData();
-    float GetRadius();
 };
 
-struct NiUpdateDatas
-{
-    float fTime;
-    bool m_bUpdateEnabled;
-    bool bUpdateSelected;
-    int unk08;
-    NiUpdateDatas(float t, bool a, bool b);
-};
-
-class NiAVObj
-{
-  public:
-    virtual void a0();
-    void SetAppCulled(bool b);
-    NiBounds* GetBoundingVolume();
-    NiPoint3s& GetWorldTranslate();
-};
-
-class NiNodeS : public NiAVObj
-{
-  public:
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void UpdateWorldData(NiUpdateDatas& data);
-    void* GetChildPtr(unsigned int idx);
-    NiAVObj* GetAt(int idx);
-};
-
-bool FUN_0043b300(const NiRTTI* rtti, NiAVObj* obj);
+bool FUN_0043b300(const NiRTTI* rtti, NiAVObject* obj);
 
 struct PathReq
 {
     float GetRadiusVal();
 };
 
-class ProjS
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual NiAVObj* Get3D();
-
-    PathReq* GetBaseObj();
-    bool IsFlagSet(int flag);
-    float GetScaleDivisor();
-    void SetPosAndScale(float scale, NiPoint3s pt);
-    void SetFlags(int a, int b);
-    float GetValueA();
-    float GetValueB();
-    void UpdateProjectileNodeVisibility();
-};
-
 // Updates the projectile's 3D node: toggles child culling by flag 0x10, rescales and repositions it from its bounds, and culls it when value A exceeds value B.
 // @fnv 0x009b7e40
-void ProjS::UpdateProjectileNodeVisibility()
+void MissileProjectile::UpdateProjectileNodeVisibility()
 {
-    NiAVObj* p3D = Get3D();
+    NiAVObject* p3D = GetNiNode();
     if (p3D && FUN_0043b300(&DAT_011f4428, p3D))
     {
-        NiNodeS* pNode5 = (NiNodeS*)p3D;
+        NiNode* pNode5 = static_cast<NiNode*>(p3D);
         pNode5->SetAppCulled(false);
-        if (GetBaseObj()->GetRadiusVal() > _DAT_01012060)
+        if (reinterpret_cast<PathReq*>(FUN_004181e0())->GetRadiusVal() > _DAT_01012060)
         {
-            if (pNode5->GetChildPtr(0))
-                pNode5->GetAt(0)->SetAppCulled(IsFlagSet(0x10));
-            if (pNode5->GetChildPtr(1))
-                pNode5->GetAt(1)->SetAppCulled(!IsFlagSet(0x10));
+            if (pNode5->FUN_0045bc00(0u))
+                pNode5->GetAt(0)->SetAppCulled(reinterpret_cast<bool(__thiscall*)(void*, int)>(MissileLocal::IsImpactFlagSet)(this, 0x10));
+            if (pNode5->FUN_0045bc00(1u))
+                pNode5->GetAt(1)->SetAppCulled(!reinterpret_cast<bool(__thiscall*)(void*, int)>(MissileLocal::IsImpactFlagSet)(this, 0x10));
         }
-        if (IsFlagSet(0x10))
+        if (reinterpret_cast<bool(__thiscall*)(void*, int)>(MissileLocal::IsImpactFlagSet)(this, 0x10))
         {
-            NiBounds bound5 = *pNode5->GetBoundingVolume();
-            NiPoint3s diff2 = pNode5->GetWorldTranslate() - *bound5.GetNavMeshData();
-            float fLen = diff2.Length() + bound5.GetRadius();
-            float fScale3 = fLen / GetScaleDivisor();
-            SetPosAndScale(fScale3, NiPoint3s(0.0f, fLen, 0.0f));
-            SetFlags(0, 1);
-            NiUpdateDatas data(0.0f, false, false);
+            ProjectileBoundSnapshot bound5 = *reinterpret_cast<const ProjectileBoundSnapshot*>(&pNode5->GetBoundingVolume());
+            NiPoint3 diff2 = pNode5->FUN_0043c490() - reinterpret_cast<NiBound&>(bound5).GetNavMeshData();
+            float fLen = diff2.Length() + reinterpret_cast<NiBound&>(bound5).GetRadius();
+            float fScale3 = fLen / reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetScaleDivisor)(this);
+            reinterpret_cast<void(__thiscall*)(void*, float, NiPoint3)>(MissileLocal::SetPosAndScale)(this, fScale3, NiPoint3(0.0f, fLen, 0.0f));
+            reinterpret_cast<void(__thiscall*)(void*, int, int)>(MissileLocal::UpdateNodeTransformInt)(this, 0, 1);
+            NiUpdateData data(0.0f, false, false);
             pNode5->UpdateWorldData(data);
-            if (GetValueA() > GetValueB())
+            if (reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetElapsedTime)(this) > reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetDetonationDelay)(this))
                 pNode5->SetAppCulled(true);
         }
     }
@@ -1196,108 +662,16 @@ struct CF845
     CF845(int);
     int FUN_0043b4d0();
 };
-struct Target890;
-bool CanProjectileHit(int, Collider890*, Target890*, void*);
-struct Target890
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    HitList hits;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int kind;
-    void* GetActorBase();
-    bool ProcessHit(int, int, int, Collider890*, int, int);
-    void FUN_009b8a20();
-    bool FUN_009b8900(int, int, int, Collider890*, int, int);
-};
+bool CanProjectileHit(int, Collider890*, MissileProjectile*, void*);
 // Checks the hit list and collider state, then calls ProcessHit and FUN_009b8a20 when the kind and collider conditions pass, returning true on success.
 // @fnv 0x009b8900
-bool Target890::FUN_009b8900(int aiArg1, int aiArg2, int aiArg3, Collider890* collider, int aiArg5, int aiArg6)
+bool MissileProjectile::FUN_009b8900(int aiArg1, int aiArg2, int aiArg3, Collider890* collider, int aiArg5, int aiArg6)
 {
-    bool p = hits.FUN_008256d0() || (*hits.FUN_006815c0())->flag;
+    bool p = reinterpret_cast<HitList*>(&kImpacts)->FUN_008256d0() || (*reinterpret_cast<HitList*>(&kImpacts)->FUN_006815c0())->flag;
     int h = collider ? CF845(collider->FUN_0043b540()).FUN_0043b4d0() : 0;
-    if (p && CanProjectileHit(aiArg1, collider, this, GetActorBase()) &&
-        (kind != 3 || h == 1 || h == 2 || h == 9 || h == 17 || h == 13 || h == 20) &&
-        ProcessHit(aiArg1, aiArg2, aiArg3, collider, aiArg5, aiArg6))
+    if (p && CanProjectileHit(aiArg1, collider, this, FUN_004181e0()) &&
+        (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x150) != 3 || h == 1 || h == 2 || h == 9 || h == 17 || h == 13 || h == 20) &&
+        reinterpret_cast<bool(__thiscall*)(void*, int, int, int, Collider890*, int, int)>(MissileLocal::ProcessHit)(this, aiArg1, aiArg2, aiArg3, collider, aiArg5, aiArg6))
     {
         FUN_009b8a20();
         return true;
@@ -1452,356 +826,135 @@ struct UpdateColor
     float r, g, b, a;
     UpdateColor(float, float, float, float);
 };
-struct UpdateProjectile
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual UpdateNode* Get3D();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual UpdateVec* GetPosition();
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    UpdateList hits;
-    bool pending;
-    UpdateTransform transform;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    int kind;
-    bool active;
-    float timeout;
-    float angle;
-    void FUN_009b8030(float);
-    void FUN_009babe0();
-    float FUN_00508070();
-    float GetFirstLightParameter();
-    void FUN_009bc8f0();
-    bool FUN_00440d80();
-    bool FUN_00440da0();
-    bool FUN_00444d00(int);
-    float FUN_00885bd0();
-    UpdateRef* FUN_008d8b80();
-    void SetOrientationFromDirection(UpdateVec);
-    void ApplyScale(float);
-    void FUN_00575830(const UpdateVec*);
-    void FUN_009c6330(UpdateTransform*);
-    void UpdateNodeTransform(bool, bool);
-    UpdateBase* FUN_004181e0();
-    const char* FUN_0055d520();
-    void UpdateDetonation(float);
-};
 // @fnv 0x009b8030
-void UpdateProjectile::FUN_009b8030(float afDeltaTime)
+void MissileProjectile::FUN_009b8030(float afDeltaTime)
 {
-    if (active && Get3D())
+    if ((*reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 0x154)) && reinterpret_cast<UpdateNode*>(GetNiNode()))
         FUN_009babe0();
-    if (GetFirstLightParameter() > FUN_00508070() && (hits.FUN_008256d0() || pending))
-        FUN_009bc8f0();
-    if (FUN_00440d80() || FUN_00440da0())
+    if (reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetElapsedTime)(this) > reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetDetonationDelay)(this) && (reinterpret_cast<UpdateList*>(&kImpacts)->FUN_008256d0() || m_bHasImpactData))
+        reinterpret_cast<void(__thiscall*)(void*)>(MissileLocal::Detonate)(this);
+    if (FUN_00440d80() || reinterpret_cast<bool(__thiscall*)(void*)>(MissileLocal::IsDeleted)(this))
         return;
-    if (kind == 4)
+    if ((*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x150)) == 4)
     {
-        timeout -= afDeltaTime;
-        if (timeout <= 0.0)
-            FUN_009bc8f0();
+        (*reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x158)) -= afDeltaTime;
+        if ((*reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x158)) <= 0.0)
+            reinterpret_cast<void(__thiscall*)(void*)>(MissileLocal::Detonate)(this);
     }
-    if (FUN_00444d00(128) && kind == 4)
+    if (reinterpret_cast<bool(__thiscall*)(void*, int)>(MissileLocal::IsImpactFlagSet)(this, 128) && (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x150)) == 4)
     {
-        UpdateImpact* impact = *hits.FUN_006815c0();
+        UpdateImpact* impact = *reinterpret_cast<UpdateList*>(&kImpacts)->FUN_006815c0();
         if (impact)
         {
             UpdateRef* node = impact->reference ? FUN_004b5820(impact->reference->FUN_00460140()) : 0;
-            UpdateNode* reference = Get3D();
+            UpdateNode* reference = reinterpret_cast<UpdateNode*>(GetNiNode());
             if (node && reference)
             {
-                UpdateTransform worldTransform = node->FUN_00461130()->FUN_0062c250(transform);
+                UpdateTransform worldTransform = node->FUN_00461130()->FUN_0062c250(*reinterpret_cast<UpdateTransform*>(&m_kImpactTransform));
                 reference->FUN_0043fa80(&worldTransform);
-                FUN_009c6330(&worldTransform);
+                reinterpret_cast<void(__thiscall*)(void*, UpdateTransform*)>(MissileLocal::SetWorldTransform)(this, &worldTransform);
                 reference->FUN_00440460(&worldTransform.translation);
-                FUN_00575830(&worldTransform.translation);
+                reinterpret_cast<void(__thiscall*)(void*, const UpdateVec*)>(MissileLocal::SetPosition)(this, &worldTransform.translation);
             }
-            UpdateNodeTransform(true, false);
+            reinterpret_cast<void(__thiscall*)(void*, bool, bool)>(MissileLocal::UpdateNodeTransformBool)(this, true, false);
         }
     }
-    else if (!pending || FUN_00444d00(1) || kind == 3)
+    else if (!m_bHasImpactData || reinterpret_cast<bool(__thiscall*)(void*, int)>(MissileLocal::IsImpactFlagSet)(this, 1) || (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x150)) == 3)
     {
-        bool stopped = !(FUN_00885bd0() > 0.0);
+        bool stopped = !(reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetSpeed)(this) > 0.0);
         bool skipPosition = false;
-        if (FUN_008d8b80())
+        if (reinterpret_cast<UpdateRef*(__thiscall*)(void*)>(MissileLocal::GetTargetReference)(this))
         {
-            SetOrientationFromDirection(FUN_008d8b80()->GetTargetPosition());
+            reinterpret_cast<void(__thiscall*)(void*, UpdateVec)>(MissileLocal::SetOrientationFromDirection)(this, reinterpret_cast<UpdateRef*(__thiscall*)(void*)>(MissileLocal::GetTargetReference)(this)->GetTargetPosition());
         }
         if (!stopped)
         {
-            if (FUN_008d8b80())
+            if (reinterpret_cast<UpdateRef*(__thiscall*)(void*)>(MissileLocal::GetTargetReference)(this))
             {
-                UpdateVec positionDelta = FUN_008d8b80()->GetTargetPosition() - *GetPosition();
+                UpdateVec positionDelta = reinterpret_cast<UpdateRef*(__thiscall*)(void*)>(MissileLocal::GetTargetReference)(this)->GetTargetPosition() - *reinterpret_cast<UpdateVec*>(static_cast<const MissileProjectile*>(this)->GetPos());
                 if (positionDelta.FUN_00457990() > *DAT_011cff34.FUN_00403e20())
                     skipPosition = true;
             }
             if (*DAT_011f20ec.FUN_00408d60())
             {
-                UpdateVec newPosition = *GetPosition();
-                ApplyScale(afDeltaTime);
-                UpdateVec color = *GetPosition();
+                UpdateVec newPosition = *reinterpret_cast<UpdateVec*>(static_cast<const MissileProjectile*>(this)->GetPos());
+                reinterpret_cast<void(__thiscall*)(void*, float)>(MissileLocal::MoveProjectile)(this, afDeltaTime);
+                UpdateVec color = *reinterpret_cast<UpdateVec*>(static_cast<const MissileProjectile*>(this)->GetPos());
                 UpdateColor debugColor(1.0f, 1.0f, 0.0f, 1.0f);
                 void* pDebugLine = FUN_004b3890(&newPosition, &debugColor, &color, &debugColor, 1);
                 DAT_011dea10->FUN_00458e20(pDebugLine, *DAT_011f210c.FUN_00403e20());
             }
             else
-                ApplyScale(afDeltaTime);
+                reinterpret_cast<void(__thiscall*)(void*, float)>(MissileLocal::MoveProjectile)(this, afDeltaTime);
         }
-        bool nearby = hits.FUN_008256d0() || (*hits.FUN_006815c0())->flag;
-        if (!nearby && (!FUN_00444d00(1) || GetFirstLightParameter() > FUN_00508070()))
-            FUN_00575830(&(*hits.FUN_006815c0())->position);
-        UpdateNodeTransform(skipPosition, !stopped);
-        if (Get3D())
-            Get3D()->FUN_00a68bf0();
-        if (FUN_004181e0()->FUN_009b88e0())
+        bool nearby = reinterpret_cast<UpdateList*>(&kImpacts)->FUN_008256d0() || (*reinterpret_cast<UpdateList*>(&kImpacts)->FUN_006815c0())->flag;
+        if (!nearby && (!reinterpret_cast<bool(__thiscall*)(void*, int)>(MissileLocal::IsImpactFlagSet)(this, 1) || reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetElapsedTime)(this) > reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetDetonationDelay)(this)))
+            reinterpret_cast<void(__thiscall*)(void*, const UpdateVec*)>(MissileLocal::SetPosition)(this, &(*reinterpret_cast<UpdateList*>(&kImpacts)->FUN_006815c0())->position);
+        reinterpret_cast<void(__thiscall*)(void*, bool, bool)>(MissileLocal::UpdateNodeTransformBool)(this, skipPosition, !stopped);
+        if (reinterpret_cast<UpdateNode*>(GetNiNode()))
+            reinterpret_cast<UpdateNode*>(GetNiNode())->FUN_00a68bf0();
+        if (reinterpret_cast<UpdateBase*>(Projectile::FUN_004181e0())->FUN_009b88e0())
         {
             UpdateMatrix rotation;
-            if (FUN_004181e0()->GetUnka4() > 0.0)
+            if (reinterpret_cast<UpdateBase*>(Projectile::FUN_004181e0())->GetUnka4() > 0.0)
             {
-                angle += FUN_004181e0()->GetUnka4() * afDeltaTime;
-                rotation.FUN_00524ac0(angle);
+                (reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0x158)->y) += reinterpret_cast<UpdateBase*>(Projectile::FUN_004181e0())->GetUnka4() * afDeltaTime;
+                rotation.FUN_00524ac0(reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0x158)->y);
             }
-            else if (FUN_004181e0()->FUN_009b88a0() > 0.0)
+            else if (reinterpret_cast<UpdateBase*>(Projectile::FUN_004181e0())->FUN_009b88a0() > 0.0)
             {
-                angle += FUN_004181e0()->FUN_009b88a0() * afDeltaTime;
-                rotation.FUN_0043f850(angle);
+                (reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0x158)->y) += reinterpret_cast<UpdateBase*>(Projectile::FUN_004181e0())->FUN_009b88a0() * afDeltaTime;
+                rotation.FUN_0043f850(reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0x158)->y);
             }
-            else if (FUN_004181e0()->FUN_009b88c0() > 0.0)
+            else if (reinterpret_cast<UpdateBase*>(Projectile::FUN_004181e0())->FUN_009b88c0() > 0.0)
             {
-                angle += FUN_004181e0()->FUN_009b88c0() * afDeltaTime;
-                rotation.FUN_004a0c90(angle);
+                (reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0x158)->y) += reinterpret_cast<UpdateBase*>(Projectile::FUN_004181e0())->FUN_009b88c0() * afDeltaTime;
+                rotation.FUN_004a0c90(reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0x158)->y);
             }
-            if (Get3D())
+            if (reinterpret_cast<UpdateNode*>(GetNiNode()))
             {
-                UpdateMatrix matrix = *Get3D()->FUN_006a9540();
+                UpdateMatrix matrix = *reinterpret_cast<UpdateNode*>(GetNiNode())->FUN_006a9540();
                 matrix = matrix.FUN_0043f8d0(rotation);
-                Get3D()->FUN_0043fa80(&matrix);
+                reinterpret_cast<UpdateNode*>(GetNiNode())->FUN_0043fa80(&matrix);
             }
             else
-                FUN_005b5e40(11, DAT_0108fd78, FUN_0055d520());
+                FUN_005b5e40(11, DAT_0108fd78, reinterpret_cast<const char*(__thiscall*)(void*)>(MissileLocal::GetName)(this));
         }
     }
-    UpdateDetonation(afDeltaTime);
-    if (FUN_00885bd0() > *DAT_011ce684.FUN_00403e20() && kind != 4)
-        FUN_009bc8f0();
-    if (GetFirstLightParameter() > FUN_00508070() && (hits.FUN_008256d0() || pending))
+    reinterpret_cast<void(__thiscall*)(void*, float)>(MissileLocal::UpdateDetonation)(this, afDeltaTime);
+    if (reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetSpeed)(this) > *DAT_011ce684.FUN_00403e20() && (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x150)) != 4)
+        reinterpret_cast<void(__thiscall*)(void*)>(MissileLocal::Detonate)(this);
+    if (reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetElapsedTime)(this) > reinterpret_cast<float(__thiscall*)(void*)>(MissileLocal::GetDetonationDelay)(this) && (reinterpret_cast<UpdateList*>(&kImpacts)->FUN_008256d0() || m_bHasImpactData))
     {
-        if (Get3D())
-            Get3D()->FUN_00450f90(true);
-        FUN_009bc8f0();
+        if (reinterpret_cast<UpdateNode*>(GetNiNode()))
+            reinterpret_cast<UpdateNode*>(GetNiNode())->FUN_00450f90(true);
+        reinterpret_cast<void(__thiscall*)(void*)>(MissileLocal::Detonate)(this);
     }
 }
 
 namespace ImpactResponse {
-struct Impact;
-struct Vector
+// NiPoint3 layout (x,y,z; methods at NiPoint3's 0x00416870/0x00439e90/0x00439ef0/0x00439180) but POD: this /Od unit's
+// original has no default-constructor calls, which the shared NiPoint3's user constructor would add.
+struct ImpactVector
 {
     float x, y;
 
   private:
     float z;
-    friend struct Impact;
-
+    friend class ::MissileProjectile;
   public:
     void FUN_00416870(float, float, float);
-    Vector FUN_00439ef0(const Vector&);
-    Vector FUN_00439e90(const Vector&);
+    ImpactVector FUN_00439ef0(const ImpactVector&);
+    ImpactVector FUN_00439e90(const ImpactVector&);
     void FUN_00439180(float);
-    float DotProduct(const Vector&);
+    float DotProduct(const ImpactVector&);
 };
-Vector FUN_004a3760(float, const Vector&);
-void FUN_00525340(Vector&);
+ImpactVector FUN_004a3760(float, const ImpactVector&);
+void FUN_00525340(ImpactVector&);
 double FUN_00408820(float);
 double SignOfFloat(float);
 extern const float DAT_01012054, DAT_010162c0;
-extern Vector DAT_011f426c;
+extern ImpactVector DAT_011f426c;
 struct Matrix
 {
     float unk00;
@@ -1815,7 +968,7 @@ struct Matrix
     float unk20;
     Matrix();
     void FUN_004b46a0(Matrix&);
-    Vector FUN_004b4500(const Vector&);
+    ImpactVector FUN_004b4500(const ImpactVector&);
 };
 struct Update
 {
@@ -1825,14 +978,14 @@ struct Update
 };
 struct Node
 {
-    void FUN_00440460(const Vector&);
+    void FUN_00440460(const ImpactVector&);
     void FUN_00a59c60(const Update&);
     Matrix* FUN_00461130();
 };
 struct Contact
 {
     int unk00;
-    Vector position, normal;
+    ImpactVector position, normal;
 };
 struct ContactList
 {
@@ -1848,257 +1001,67 @@ void FUN_00c6a350(Node*, int, int, int, int);
 void FUN_00c6a3d0(Node*, int, int, int);
 void FUN_00c6a0b0(Node*, int, int, int);
 int FUN_005dbe10();
-void FUN_0062b8d0(Node*, const Vector&, int);
-void FUN_0062ba80(Node*, const Vector&, int);
+void FUN_0062b8d0(Node*, const ImpactVector&, int);
+void FUN_0062ba80(Node*, const ImpactVector&, int);
 struct Game
 {
     bool FUN_0047c850();
 };
 extern Game* DAT_011de45c;
-struct Impact;
 struct Selection
 {
-    Impact* FUN_007af430();
+    MissileProjectile* FUN_007af430();
     void SetValue(int);
 };
 extern Selection DAT_011f2250;
-struct Setting
-{
-    const float* FUN_00403e20();
-};
 extern Setting DAT_011ce1dc;
 struct Base
 {
     float GetFloatAtOffset68();
 };
-struct Impact
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual Node* GetNode();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void Refresh();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    ContactList contacts;
-    void FUN_005de0a0(int, int);
-    int FUN_009d9f00();
-    Vector FUN_009b7010();
-    Base* FUN_004181e0();
-    bool HandleContactResponse();
-};
 // If the node has contacts, clears the selection, refreshes, applies physics and impulse/angular responses, and returns true.
 // @fnv 0x009b8c90
-bool Impact::HandleContactResponse()
+} // namespace ImpactResponse
+
+bool MissileProjectile::HandleContactResponse()
 {
-    if (GetNode() && !contacts.FUN_008256d0())
+    using ImpactResponse::Node;
+    using ImpactResponse::Contact;
+    using ImpactResponse::ContactList;
+    using ImpactResponse::Physics;
+    using ImpactResponse::Update;
+    using ImpactResponse::ImpactVector;
+    using ImpactResponse::Matrix;
+    using ImpactResponse::Base;
+    using ImpactResponse::DAT_011f2250;
+    using ImpactResponse::DAT_011de45c;
+    using ImpactResponse::DAT_011f426c;
+    using ImpactResponse::DAT_01012054;
+    using ImpactResponse::DAT_010162c0;
+    using ImpactResponse::DAT_011ce1dc;
+    using ImpactResponse::FUN_004b5260;
+    using ImpactResponse::FUN_00c6a350;
+    using ImpactResponse::FUN_00c6a3d0;
+    using ImpactResponse::FUN_00c6a0b0;
+    using ImpactResponse::FUN_005dbe10;
+    using ImpactResponse::FUN_0062b8d0;
+    using ImpactResponse::FUN_0062ba80;
+    using ImpactResponse::FUN_004a3760;
+    using ImpactResponse::FUN_00525340;
+    using ImpactResponse::FUN_00408820;
+    using ImpactResponse::SignOfFloat;
+    if (reinterpret_cast<Node*>(GetNiNode()) && !reinterpret_cast<ContactList*>(&kImpacts)->FUN_008256d0())
     {
         if (DAT_011f2250.FUN_007af430() == this)
             DAT_011f2250.SetValue(0);
-        Node* node7 = GetNode();
-        Contact* contact = *contacts.FUN_006815c0();
-        FUN_005de0a0(4, 1);
-        Refresh();
+        Node* node7 = reinterpret_cast<Node*>(GetNiNode());
+        Contact* contact = *reinterpret_cast<ContactList*>(&kImpacts)->FUN_006815c0();
+        reinterpret_cast<void(__thiscall*)(void*, int, int)>(MissileLocal::SetImpactFlagInt)(this, 4, 1);
+        Unk_A9();
         Physics* physics = FUN_004b5260(node7);
         if (physics)
             physics->FUN_00573ed0(true);
-        if (!DAT_011de45c->FUN_0047c850() && !FUN_009d9f00())
+        if (!DAT_011de45c->FUN_0047c850() && !reinterpret_cast<int(__thiscall*)(void*)>(MissileLocal::IsImpactResponseSuppressed)(this))
         {
             node7->FUN_00440460(contact->position);
             Update update(0.0f, 0, 0);
@@ -2109,27 +1072,27 @@ bool Impact::HandleContactResponse()
         FUN_00c6a0b0(node7, 1, 1, 0);
         if (!DAT_011de45c->FUN_0047c850())
         {
-            Vector linear_ = DAT_011f426c;
-            Vector direction3;
-            direction3 = FUN_004a3760(DAT_01012054, FUN_009b7010());
+            ImpactVector linear_ = DAT_011f426c;
+            ImpactVector direction3;
+            direction3 = FUN_004a3760(DAT_01012054, reinterpret_cast<ProjectileDirectionAccess*>(this)->GetContactDirection());
             direction3 = direction3;
             FUN_00525340(direction3);
             FUN_00525340(contact->normal);
             float dot = contact->normal.DotProduct(direction3);
-            Vector correctionTmp =
+            ImpactVector correctionTmp =
                 FUN_004a3760(DAT_010162c0, FUN_004a3760(dot, contact->normal).FUN_00439ef0(direction3));
             linear_ = direction3.FUN_00439e90(correctionTmp);
-            linear_.FUN_00439180(*DAT_011ce1dc.FUN_00403e20() * FUN_004181e0()->GetFloatAtOffset68());
+            linear_.FUN_00439180(*DAT_011ce1dc.FUN_00403e20() * reinterpret_cast<Base*>(Projectile::FUN_004181e0())->GetFloatAtOffset68());
             FUN_0062b8d0(node7, linear_, 1);
-            Vector kAngular = DAT_011f426c;
+            ImpactVector kAngular = DAT_011f426c;
             Matrix rotation;
-            GetNode()->FUN_00461130()->FUN_004b46a0(rotation);
-            Vector local = rotation.FUN_004b4500(contact->normal);
+            reinterpret_cast<Node*>(GetNiNode())->FUN_00461130()->FUN_004b46a0(rotation);
+            ImpactVector local = rotation.FUN_004b4500(contact->normal);
             if (FUN_00408820(local.y) > FUN_00408820(local.z))
                 local.z = FUN_00408820(local.y) * SignOfFloat(local.z);
             local.y = 0.0f;
             FUN_00525340(local);
-            Vector spin2;
+            ImpactVector spin2;
             spin2.FUN_00416870(-local.z, 0.0f, -local.x);
             kAngular = node7->FUN_00461130()->FUN_004b4500(spin2);
             kAngular.FUN_00439180(*DAT_011ce1dc.FUN_00403e20());
@@ -2137,11 +1100,7 @@ bool Impact::HandleContactResponse()
         }
     }
     return true;
-}
-}
-
-namespace fnv_009ba660 {
-struct MissileActor;
+}namespace fnv_009ba660 {
 struct MissileNode;
 struct MissileBody;
 struct MissileVector
@@ -2195,12 +1154,12 @@ struct MissilePause
 extern MissilePause* DAT_011ddf38;
 struct MissileVats
 {
-    MissileActor* FUN_007af430();
+    MissileProjectile* FUN_007af430();
     void SetValue(int);
 };
 struct MissileQueue
 {
-    void FUN_005ae3d0(MissileActor* const&);
+    void FUN_005ae3d0(MissileProjectile* const&);
 };
 struct MissileManager
 {
@@ -2341,280 +1300,50 @@ struct MissileNode
     void FUN_00a59c60(MissileUpdate*);
     MissileTransform* FUN_00461130();
 };
-struct MissileActor
-{
-    virtual void Slot0();
-    virtual void Slot4();
-    virtual void Slot8();
-    virtual void SlotC();
-    virtual void Slot10();
-    virtual void Slot14();
-    virtual void Slot18();
-    virtual void Slot1C();
-    virtual void Slot20();
-    virtual void Slot24();
-    virtual void Slot28();
-    virtual void Slot2C();
-    virtual void Slot30();
-    virtual void Slot34();
-    virtual void Slot38();
-    virtual void Slot3C();
-    virtual void Slot40();
-    virtual void Slot44();
-    virtual void Slot48();
-    virtual void Slot4C();
-    virtual void Slot50();
-    virtual void Slot54();
-    virtual void Slot58();
-    virtual void Slot5C();
-    virtual void Slot60();
-    virtual void Slot64();
-    virtual void Slot68();
-    virtual void Slot6C();
-    virtual void Slot70();
-    virtual void Slot74();
-    virtual void Slot78();
-    virtual void Slot7C();
-    virtual void Slot80();
-    virtual void Slot84();
-    virtual void Slot88();
-    virtual void Slot8C();
-    virtual void Slot90();
-    virtual void Slot94();
-    virtual void Slot98();
-    virtual void Slot9C();
-    virtual void SlotA0();
-    virtual void SlotA4();
-    virtual void SlotA8();
-    virtual void SlotAC();
-    virtual void SlotB0();
-    virtual void SlotB4();
-    virtual void SlotB8();
-    virtual void SlotBC();
-    virtual void SlotC0();
-    virtual void SlotC4();
-    virtual void SlotC8();
-    virtual void SlotCC();
-    virtual void SlotD0();
-    virtual void SlotD4();
-    virtual void SlotD8();
-    virtual void SlotDC();
-    virtual void SlotE0();
-    virtual void SlotE4();
-    virtual void SlotE8();
-    virtual void SlotEC();
-    virtual void SlotF0();
-    virtual void SlotF4();
-    virtual void SlotF8();
-    virtual void SlotFC();
-    virtual void Slot100();
-    virtual void Slot104();
-    virtual void Slot108();
-    virtual void Slot10C();
-    virtual void Slot110();
-    virtual void Slot114();
-    virtual void Slot118();
-    virtual void Slot11C();
-    virtual void Slot120();
-    virtual void Slot124();
-    virtual void Slot128();
-    virtual void Slot12C();
-    virtual void Slot130();
-    virtual void Slot134();
-    virtual void Slot138();
-    virtual void Slot13C();
-    virtual void Slot140();
-    virtual void Slot144();
-    virtual void Slot148();
-    virtual void Slot14C();
-    virtual void Slot150();
-    virtual void Slot154();
-    virtual void Slot158();
-    virtual void Slot15C();
-    virtual void Slot160();
-    virtual void Slot164();
-    virtual void Slot168();
-    virtual void Slot16C();
-    virtual void Slot170();
-    virtual void Slot174();
-    virtual void Slot178();
-    virtual void Slot17C();
-    virtual void Slot180();
-    virtual void Slot184();
-    virtual void Slot188();
-    virtual void Slot18C();
-    virtual void Slot190();
-    virtual void Slot194();
-    virtual void Slot198();
-    virtual void Slot19C();
-    virtual void Slot1A0();
-    virtual void Slot1A4();
-    virtual void Slot1A8();
-    virtual void Slot1AC();
-    virtual void Slot1B0();
-    virtual void Slot1B4();
-    virtual void Slot1B8();
-    virtual void Slot1BC();
-    virtual void Slot1C0();
-    virtual void Slot1C4();
-    virtual void Slot1C8();
-    virtual void Slot1CC();
-    virtual MissileNode* Get3D();
-    virtual void Slot1D4();
-    virtual void Slot1D8();
-    virtual void Slot1DC();
-    virtual void Slot1E0();
-    virtual void Slot1E4();
-    virtual void Slot1E8();
-    virtual void Slot1EC();
-    virtual void Slot1F0();
-    virtual void Slot1F4();
-    virtual void Slot1F8();
-    virtual void Slot1FC();
-    virtual void Slot200();
-    virtual void Slot204();
-    virtual void Slot208();
-    virtual void Slot20C();
-    virtual void Slot210();
-    virtual void Slot214();
-    virtual void Slot218();
-    virtual void Slot21C();
-    virtual void Slot220();
-    virtual void Slot224();
-    virtual void Slot228();
-    virtual void Slot22C();
-    virtual void Slot230();
-    virtual void Slot234();
-    virtual void Slot238();
-    virtual void Slot23C();
-    virtual void Slot240();
-    virtual void Slot244();
-    virtual void Slot248();
-    virtual void Slot24C();
-    virtual void Slot250();
-    virtual void Slot254();
-    virtual void Slot258();
-    virtual void Slot25C();
-    virtual void Slot260();
-    virtual void Slot264();
-    virtual void Slot268();
-    virtual void Slot26C();
-    virtual void Slot270();
-    virtual void Slot274();
-    virtual void Slot278();
-    virtual void Slot27C();
-    virtual void Slot280();
-    virtual void Slot284();
-    virtual void Slot288();
-    virtual void Slot28C();
-    virtual void Slot290();
-    virtual void Slot294();
-    virtual void Slot298();
-    virtual void Slot29C();
-    virtual void Slot2A0();
-    virtual void Detach();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    MissileHitHandle hitHandle;
-    int unk8C, unk90;
-    MissileTransform impactTransform;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    int unkF0;
-    int unkF4;
-    int unkF8;
-    int unkFC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    float distance;
-    void FUN_005de0a0(unsigned, bool);
-    MissileVector FUN_009b7010();
-    void FUN_00575830(const MissileVector&, const MissileVector&);
-    void UpdateNodeTransform(int, int);
-    bool FUN_00444d00(unsigned);
-    void HandleContactResponse();
-    void HandleMissileImpact();
-};
 // @fnv 0x009ba660
-void MissileActor::HandleMissileImpact()
+} // namespace fnv_009ba660
+
+void MissileProjectile::HandleMissileImpact()
 {
+    using fnv_009ba660::MissileNode;
+    using fnv_009ba660::MissileHitHandle;
+    using fnv_009ba660::MissileHit;
+    using fnv_009ba660::MissileVats;
+    using fnv_009ba660::MissileBody;
+    using fnv_009ba660::MissileCollision;
+    using fnv_009ba660::MissileHandle;
+    using fnv_009ba660::MissileVector;
+    using fnv_009ba660::MissileUpdate;
+    using fnv_009ba660::MissileQueue;
+    using fnv_009ba660::MissileTransform;
+    using fnv_009ba660::DAT_011cfc8c;
+    using fnv_009ba660::DAT_011ddf38;
+    using fnv_009ba660::DAT_011e0e80;
+    using fnv_009ba660::DAT_01017b78;
+    using fnv_009ba660::FUN_004b5820;
+    using fnv_009ba660::FUN_004b5a80;
+    using fnv_009ba660::FUN_004b5260;
+    using fnv_009ba660::FUN_00c69f50;
+    using fnv_009ba660::FUN_00c6a350;
+    using fnv_009ba660::FUN_009b7cb0;
     static float impactScale = *DAT_011cfc8c.FUN_00403e20();
     bool paused = DAT_011ddf38->FUN_0042ce10();
-    if (Get3D() && !hitHandle.FUN_008256d0())
+    if (reinterpret_cast<MissileNode*>(GetNiNode()) && !reinterpret_cast<MissileHitHandle*>(&kImpacts)->FUN_008256d0())
     {
         if (((MissileVats*)&DAT_011f2250)->FUN_007af430() == this)
             ((MissileVats*)&DAT_011f2250)->SetValue(0);
-        distance = DAT_01017b78;
-        MissileHit* hit31 = *hitHandle.FUN_006815c0();
+        *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x158) = DAT_01017b78;
+        MissileHit* hit31 = *reinterpret_cast<MissileHitHandle*>(&kImpacts)->FUN_006815c0();
         if (!hit31 || !hit31->node)
             return;
-        MissileNode* node3 = Get3D();
+        MissileNode* node3 = reinterpret_cast<MissileNode*>(GetNiNode());
         MissileNode* parent41 = FUN_004b5820(hit31->node->FUN_00460140());
         MissileBody* body20 = FUN_004b5a80(hit31->node);
         unsigned layer1 = body20 ? body20->FUN_0043b4f0().FUN_0043b4d0() : 0;
         if (body20 && layer1 != 19 && (!hit31->reference || !hit31->reference->IsActor()))
         {
-            FUN_005de0a0(4, true);
-            Detach();
+            reinterpret_cast<void(__thiscall*)(void*, unsigned, bool)>(MissileLocal::SetImpactFlag)(this, 4, true);
+            Unk_A9();
             MissileCollision* collision9 = FUN_004b5260(node3);
             MissileBody* ownBody53 = collision9 ? collision9->FUN_006fa820() : 0;
             if (ownBody53)
@@ -2624,8 +1353,8 @@ void MissileActor::HandleMissileImpact()
                 ownBody53->FUN_00626cb0(handle.value);
             }
             if (!paused)
-                FUN_00575830(hit31->position.FUN_00439e90(), FUN_009b7010().ApplyScaled(impactScale));
-            UpdateNodeTransform(0, 0);
+                reinterpret_cast<void(__thiscall*)(void*, const MissileVector&, const MissileVector&)>(MissileLocal::SetPositionAndDirection)(this, hit31->position.FUN_00439e90(), reinterpret_cast<ProjectileDirectionAccess*>(this)->GetMissileDirection().ApplyScaled(impactScale));
+            reinterpret_cast<void(__thiscall*)(void*, int, int)>(MissileLocal::UpdateNodeTransformInt)(this, 0, 0);
             FUN_00c69f50(node3, 1, 1);
             MissileUpdate update53(0.0f, false, false);
             node3->FUN_00a59c60(&update53);
@@ -2634,9 +1363,9 @@ void MissileActor::HandleMissileImpact()
             else
             {
                 FUN_00c6a350(node3, 4, 1, 0, 1);
-                if (!FUN_00444d00(128))
+                if (!reinterpret_cast<bool(__thiscall*)(void*, unsigned)>(MissileLocal::IsImpactFlagSet)(this, 128))
                 {
-                    FUN_005de0a0(128, true);
+                    reinterpret_cast<void(__thiscall*)(void*, unsigned, bool)>(MissileLocal::SetImpactFlag)(this, 128, true);
                     MissileQueue* queue = DAT_011e0e80.GetOffset70Ptr();
                     if (queue)
                         queue->FUN_005ae3d0(this);
@@ -2646,7 +1375,7 @@ void MissileActor::HandleMissileImpact()
                 {
                     MissileTransform inverse;
                     parent41->FUN_00461130()->FUN_004b4880(inverse);
-                    impactTransform = inverse.FUN_0062c250(*node3->FUN_00461130());
+                    *reinterpret_cast<MissileTransform*>(&m_kImpactTransform) = inverse.FUN_0062c250(*node3->FUN_00461130());
                 }
             }
             MissileNode* child2 = node3 ? node3->Find(FUN_009b7cb0()) : 0;
@@ -2657,4 +1386,3 @@ void MissileActor::HandleMissileImpact()
             HandleContactResponse();
     }
 }
-}  // namespace fnv_009ba660

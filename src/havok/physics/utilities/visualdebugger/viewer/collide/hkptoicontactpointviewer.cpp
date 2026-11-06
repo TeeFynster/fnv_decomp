@@ -2,25 +2,25 @@
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkptoicontactpointviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/collide/hkptoicontactpointviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+
 extern int currentState;
 // @fnv 0x00d68260
 int __cdecl FUN_00d68260() {
     return currentState;
 }
 
-struct Allocator {
-    virtual void* release();
-    virtual void* allocate(int size);
-};
-struct Global { int unk00; int unk04; int unk08; int unk0c; Allocator* allocator; };
 struct Built { int field00; short field04; int field08; int __thiscall FUN_00d682d0(int); };
-extern "C" Global* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
 // Allocates a 0x2c-byte Built via the global allocator, sets its field04 to 0x2c, calls FUN_00d682d0(arg), and returns result+8 or 0.
 // @fnv 0x00d686b0
 int __cdecl FUN_00d686b0(int arg)
 {
-    Global* global = FUN_00c85750();
-    Built* pBuilt = (Built*)global->allocator->allocate(0x2c);
+    hkMemoryRouter* global = FUN_00c85750();
+    hkMemoryAllocator* allocator = reinterpret_cast<hkMemoryAllocator*>(global->m_heap);
+    typedef void* (__thiscall* AllocateFunction)(hkMemoryAllocator*, int);
+    Built* pBuilt = (Built*)(*reinterpret_cast<AllocateFunction**>(allocator))[1](allocator, 0x2c);
     pBuilt->field04 = 0x2c;
     int result = pBuilt->FUN_00d682d0(arg);
     if (result) return result + 8;
@@ -389,21 +389,7 @@ Derived::Derived()
 }  // namespace fnv_00d68730
 
 namespace fnv_00d68740 {
-struct AudioAllocator {
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize);
-};
-
-struct AudioHolder {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct FUN_00d68740 {
     unsigned short m_u04;
@@ -412,10 +398,12 @@ struct FUN_00d68740 {
     virtual ~FUN_00d68740();
     static void operator delete(void* apMemory)
     {
-        AudioHolder* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = FUN_00c85750();
         unsigned int uiSize = ((FUN_00d68740*)apMemory)->m_u04;
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(apMemory, uiSize);
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        // This allocator frees through vtable slot 2; the shared Free declaration is nonvirtual.
+        typedef void (__thiscall* FreeFunction)(hkMemoryAllocator*, void*, unsigned int);
+        (*reinterpret_cast<FreeFunction**>(pAllocator))[2](pAllocator, apMemory, uiSize);
     }
 };
 
@@ -430,27 +418,29 @@ FUN_00d68740::FUN_00d68740()
 
 #include <math.h>
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128 {
+// Exe 0x00d683b0 FUN_00d683b0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct { float lane0, lane1, lane2, lane3; };
-} __m128;
+} __m128, LocalM128;
 
-extern "C" __m128 _mm_set_ss(float);
-extern "C" float _mm_cvtss_f32(__m128);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_sub_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, int imm);
-extern "C" __m128 _mm_load_ps(const float* p);
-extern "C" __m128 _mm_load_ss(const float* p);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-extern "C" __m128 _mm_rsqrt_ss(__m128 a);
-extern "C" __m128 _mm_sqrt_ss(__m128 a);
-extern "C" __m128 _mm_cmpeq_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_andnot_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_set_ss(float);
+extern "C" float _mm_cvtss_f32(LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_mul_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_sub_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, int imm);
+extern "C" LocalM128 _mm_load_ps(const float* p);
+extern "C" LocalM128 _mm_load_ss(const float* p);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
+extern "C" LocalM128 _mm_rsqrt_ss(LocalM128 a);
+extern "C" LocalM128 _mm_sqrt_ss(LocalM128 a);
+extern "C" LocalM128 _mm_cmpeq_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_setzero_ps(void);
 
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
@@ -465,12 +455,8 @@ extern const float DAT_010c69c0=(0.85f-1.0f);
 extern float DAT_010ec7f0;
 extern unsigned long DAT_0126835c;
 
-struct Vec {
-    union {
-        __m128 m;
-        struct { float x, y, z, w; };
-    };
-};
+// The unit keeps its own __m128 (float lanes only, so /GS adds no cookie); hkVector4.h uses it.
+#include "../../../../../../../include/hkVector4.h"
 
 struct Handler {
     virtual void v00();
@@ -482,7 +468,7 @@ struct Handler {
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void DisplayLine(const Vec& a, const Vec& b, int color, int id, int tag);
+    virtual void DisplayLine(const hkVector4& a, const hkVector4& b, int color, int id, int tag);
 };
 
 struct TimerCmd {
@@ -498,35 +484,35 @@ struct MonStream {
     TimerCmd* m_cap;
 };
 
-__forceinline __m128 lengthSquared3(__m128 v) {
-    __m128 sq = _mm_mul_ps(v, v);
-    __m128 y = _mm_shuffle_ps(sq, sq, 0x55);
-    __m128 xy = _mm_add_ss(y, sq);
-    __m128 z = _mm_shuffle_ps(sq, sq, 0xAA);
+__forceinline LocalM128 lengthSquared3(LocalM128 v) {
+    LocalM128 sq = _mm_mul_ps(v, v);
+    LocalM128 y = _mm_shuffle_ps(sq, sq, 0x55);
+    LocalM128 xy = _mm_add_ss(y, sq);
+    LocalM128 z = _mm_shuffle_ps(sq, sq, 0xAA);
     return _mm_add_ss(z, xy);
 }
 
-__forceinline __m128 sqrtInverse(__m128 len2) {
-    __m128 y0 = _mm_rsqrt_ss(len2);
-    __m128 zero = _mm_set_ss(DAT_01011d78);
-    __m128 three = _mm_set_ss(DAT_01017718);
-    __m128 half = _mm_set_ss(DAT_01016248);
-    __m128 r2 = _mm_mul_ss(_mm_mul_ss(len2, y0), y0);
-    __m128 eq = _mm_cmpeq_ss(len2, zero);
-    __m128 inv = _mm_mul_ss(_mm_mul_ss(half, y0), _mm_sub_ss(three, r2));
+__forceinline LocalM128 sqrtInverse(LocalM128 len2) {
+    LocalM128 y0 = _mm_rsqrt_ss(len2);
+    LocalM128 zero = _mm_set_ss(DAT_01011d78);
+    LocalM128 three = _mm_set_ss(DAT_01017718);
+    LocalM128 half = _mm_set_ss(DAT_01016248);
+    LocalM128 r2 = _mm_mul_ss(_mm_mul_ss(len2, y0), y0);
+    LocalM128 eq = _mm_cmpeq_ss(len2, zero);
+    LocalM128 inv = _mm_mul_ss(_mm_mul_ss(half, y0), _mm_sub_ss(three, r2));
     return _mm_andnot_ps(eq, inv);
 }
 
-__forceinline __m128 splat(float s) {
-    __m128 a = _mm_load_ss(&s);
+__forceinline LocalM128 splat(float s) {
+    LocalM128 a = _mm_load_ss(&s);
     return _mm_shuffle_ps(a, a, 0);
 }
 
 // @fnv 0x00d683b0
-static __declspec(noinline) void FUN_00d683b0(Handler* self, Vec* from, Vec* dir, int color, int id, int tag) {
+static __declspec(noinline) void FUN_00d683b0(Handler* self, hkVector4* from, hkVector4* dir, int color, int id, int tag) {
     float lenSq;
 
-    _mm_store_ss(&lenSq, lengthSquared3(dir->m));
+    _mm_store_ss(&lenSq, lengthSquared3(dir->v));
     if (lenSq > 1.1920928955078125e-07f) {
         { MonStream* s = (MonStream*)TlsGetValue(DAT_0126835c);
         if (s->m_kRayEnd < s->m_cap) {
@@ -540,11 +526,11 @@ static __declspec(noinline) void FUN_00d683b0(Handler* self, Vec* from, Vec* dir
             h->m_uiStartTicks = t1;
             s->m_kRayEnd = h + 1;
         } }
-        struct Endpoints { Vec head1; Vec perp; };
+        struct Endpoints { hkVector4 head1; hkVector4 perp; };
         Endpoints endpoints;
-        Vec to;
-        Vec head2;
-        to.m = _mm_add_ps(from->m, dir->m);
+        hkVector4 to;
+        hkVector4 head2;
+        to.v = _mm_add_ps(from->v, dir->v);
         int iAlt = 0;
         float cur = fabsf(dir->x);
         int i0 = 1;
@@ -557,20 +543,20 @@ static __declspec(noinline) void FUN_00d683b0(Handler* self, Vec* from, Vec* dir
             iAlt = 1;
         }
         if (az < cur) i2 = iAlt;
-        endpoints.perp.m = _mm_setzero_ps();
+        endpoints.perp.v = _mm_setzero_ps();
         (&endpoints.perp.x)[i0] = (&dir->x)[i2];
         (&endpoints.perp.x)[i2] = -(&dir->x)[i0];
-        __m128 inv = sqrtInverse(lengthSquared3(endpoints.perp.m));
-        __m128 len = _mm_sqrt_ss(lengthSquared3(dir->m));
-        __m128 perpS = _mm_mul_ps(_mm_mul_ps(endpoints.perp.m, _mm_shuffle_ps(inv, inv, 0)), _mm_shuffle_ps(len, len, 0));
+        LocalM128 inv = sqrtInverse(lengthSquared3(endpoints.perp.v));
+        LocalM128 len = _mm_sqrt_ss(lengthSquared3(dir->v));
+        LocalM128 perpS = _mm_mul_ps(_mm_mul_ps(endpoints.perp.v, _mm_shuffle_ps(inv, inv, 0)), _mm_shuffle_ps(len, len, 0));
         float coeff = DAT_01019de0;
-        __m128 cb = splat(coeff);
-        __m128 one = _mm_load_ps(&DAT_010ec7f0);
-        __m128 base = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(one, cb), from->m), _mm_mul_ps(cb, to.m));
+        LocalM128 cb = splat(coeff);
+        LocalM128 one = _mm_load_ps(&DAT_010ec7f0);
+        LocalM128 base = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(one, cb), from->v), _mm_mul_ps(cb, to.v));
         float scalePos = DAT_010c69c4;
-        endpoints.head1.m = _mm_add_ps(base, _mm_mul_ps(splat(scalePos), perpS));
+        endpoints.head1.v = _mm_add_ps(base, _mm_mul_ps(splat(scalePos), perpS));
         float scaleNeg = DAT_010c69c0;
-        head2.m = _mm_add_ps(base, _mm_mul_ps(splat(scaleNeg), perpS));
+        head2.v = _mm_add_ps(base, _mm_mul_ps(splat(scaleNeg), perpS));
         self->DisplayLine(*from, to, color, id, tag);
         self->DisplayLine(to, endpoints.head1, color, id, tag);
         self->DisplayLine(to, head2, color, id, tag);
@@ -589,7 +575,7 @@ static __declspec(noinline) void FUN_00d683b0(Handler* self, Vec* from, Vec* dir
     }
 }
 
-void RenderLine(Handler* handler, Vec* direction, Vec* origin, int color, int id, int tag) {
+void RenderLine(Handler* handler, hkVector4* direction, hkVector4* origin, int color, int id, int tag) {
     FUN_00d683b0(handler, origin, direction, color, id, tag);
 }
 
@@ -603,10 +589,10 @@ public:
 };
 
 struct S00d68670_ContactPoint {
-    Vec m_vContactPosition;
-    Vec m_vSeparatingNormal;
-    const Vec& getPosition() { return m_vContactPosition; }
-    const Vec& getNormal() const { return m_vSeparatingNormal; }
+    hkVector4 m_vContactPosition;
+    hkVector4 m_vSeparatingNormal;
+    const hkVector4& getPosition() { return m_vContactPosition; }
+    const hkVector4& getNormal() const { return m_vSeparatingNormal; }
 };
 
 struct S00d68670_Collidable {
@@ -655,6 +641,6 @@ void S00d68670_ToiContactPointViewer::FUN_00d68670(const S00d68670_ContactPointE
     if (event.isToi())
     {
         const S00d68670_Collidable* collidable = event.m_apEntities[0]->getCollidable();
-        FUN_00d683b0(m_pDisplayHandler, (Vec*)&event.m_vContactPoint->getPosition(), (Vec*)&event.m_vContactPoint->getNormal(), 0xffff0000, (int)collidable, DAT_01269004);
+        FUN_00d683b0(m_pDisplayHandler, (hkVector4*)&event.m_vContactPoint->getPosition(), (hkVector4*)&event.m_vContactPoint->getNormal(), 0xffff0000, (int)collidable, DAT_01269004);
     }
 }

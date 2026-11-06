@@ -1,6 +1,35 @@
 // fallout_shared/tesraceform.cpp: TESRaceForm, TESNPC, ActorValue, TESActorBase (5 functions)
 
-#include "tesraceform_decls.h"
+#include "../../include/ActorBaseAttributes.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSDestructibleObjectForm.h"
+#include "../../include/BGSTouchSpellForm.h"
+#include "../../include/FileEntryList.h"
+#include "../../include/PackageList.h"
+#include "../../include/ShortPoint3.h"
+#include "../../include/TESAIForm.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESAnimation.h"
+#include "../../include/TESAttributes.h"
+#include "../../include/TESBoundAnimObject.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESBoundObject__BOUND_DATA.h"
+#include "../../include/TESContainer.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESNPC.h"
+#include "../../include/TESObject.h"
+#include "../../include/TESRace.h"
+#include "../../include/TESRaceForm.h"
+#include "../../include/TESSpellList.h"
+
+TESForm* __cdecl GetFormByID(unsigned int formID);
+int __cdecl Warning(const char* format, ...);
+
+namespace ActorValue {
+bool IsSkill(Index actorValue);
+unsigned char ToArrayIndex(int section, Index actorValue);
+}
 
 // Resolves the stored race form ID against the owner's file, looks up the TESRace, and warns if the race cannot be found.
 // @fnv 0x0048b920
@@ -29,7 +58,7 @@ void TESRaceForm::InitItem(TESForm* owner)
     }
 }
 
-// Returns a skill value from kData arrays (plus offset unless Unk_51), otherwise delegates to ActorValueOwner::GetActorValue.
+// Returns a skill value from kData arrays (plus offset unless IsAutoCalculated), otherwise delegates to ActorValueOwner::GetActorValue.
 // @fnv 0x00607850
 int TESNPC::GetActorValue(ActorValue::Index actorValue)
 {
@@ -38,7 +67,7 @@ int TESNPC::GetActorValue(ActorValue::Index actorValue)
     {
         int skillIndex = static_cast<signed char>(ActorValue::ToArrayIndex(2, actorValue));
         value = kData.ucSkillValues[skillIndex];
-        if (!Unk_51())
+        if (!static_cast<const TESNPC*>(this)->IsAutoCalculated())
             value += kData.ucSkillOffsets[skillIndex];
     }
     else
@@ -65,14 +94,9 @@ float TESActorBase::GetCurrentActorValue(ActorValue::Index actorValue)
     return static_cast<float>(GetActorValue(actorValue));
 }
 
-struct FUN_0048b8c0_shell : TESRaceForm
-{
-    bool IsEqualToBase(BaseFormComponent* apCompareFC);
-};
-
 // Returns true if apCompareFC is not a TESRaceForm or its race differs from this form's race; otherwise false.
 // @fnv 0x0048b8c0
-bool FUN_0048b8c0_shell::IsEqualToBase(BaseFormComponent* apCompareFC)
+bool TESRaceForm::IsEqualToBase(BaseFormComponent* apCompareFC)
 {
     TESRaceForm* pcompare = dynamic_cast<TESRaceForm*>(apCompareFC);
     if (!pcompare)

@@ -6,6 +6,7 @@
 // src/staging/blk_00660000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/Vec4.h"
 
 #include <xmmintrin.h>
 struct ScalarValue
@@ -15,16 +16,10 @@ struct ScalarValue
     const __m128& Get() const;
     __m128 Broadcast() const;
 };
-struct Vec4
-{
-    __m128 value;
-    ScalarValue Dot(const Vec4&) const;
-    void FUN_0066c930();
-};
 // @fnv 0x0066c930
 void Vec4::FUN_0066c930()
 {
     __m128 d = Dot(*this).Get();
     ScalarValue s(_mm_rsqrt_ss(d));
-    value = _mm_mul_ps(value, s.Broadcast());
+    *reinterpret_cast<__m128*>(this) = _mm_mul_ps(*reinterpret_cast<__m128*>(this), s.Broadcast());
 }

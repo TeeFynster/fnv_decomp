@@ -3,24 +3,15 @@
 // byte only under /MT /Od /GS /EHsc /Gy /Oy- (unit src/gamebryo2.2/corelibs/nimain/nitrishape.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "nitrishape_decls.h"
-
-class NiTriGeom2
-{
-  public:
-    void __thiscall FUN_0051d000(unsigned short a);
-    void __thiscall FUN_0051d020(unsigned short a, unsigned short b, unsigned short c);
-};
+#include "../../../../include/NiGeometry.h"
+#include "../../../../include/NiTriBasedGeom.h"
+#include "../../../../include/NiTriBasedGeomData.h"
+#include "../../../../include/NiTriShape.h"
+#include "../../../../include/NiTriShapeData.h"
+#include "../../../../include/NiBillboardNode.h"
 
 // @fnv 0x0051d000
-void NiTriGeom2::FUN_0051d000(unsigned short a)
+void NiBillboardNode::FUN_0051d000(int a)
 {
-    this->FUN_0051d020(a, 7, 0);
-}
-
-void NiTriGeom2::FUN_0051d020(unsigned short a, unsigned short b, unsigned short c)
-{
-    (void)a;
-    (void)b;
-    (void)c;
+    reinterpret_cast<NiTriBasedGeom*>(this)->SetBitfield(static_cast<unsigned short>(a), 7, 0);
 }

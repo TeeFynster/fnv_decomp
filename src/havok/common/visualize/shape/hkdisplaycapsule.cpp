@@ -1,73 +1,60 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
 
 // src/havok/common/visualize/shape/hkdisplaycapsule.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/shape/hkdisplaycapsule.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../include/hkBool.h"
+// Retain this unit's intrinsic representation when shared headers include xmmintrin.h.
+#define _INCLUDED_MM2
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/Vec4.h"
+#include "../../../../../include/hkDisplayCapsule.h"
 
 struct StaticHelper
 {
     static void HandleObjectEvent(void* a, void* b, float c, void* d, void* e, void* f, void* g);
 };
 
-struct hkDisplayCapsule
-{
-    void FUN_00d22d70();
-};
-
 // @fnv 0x00d22d70
 void hkDisplayCapsule::FUN_00d22d70()
 {
-    StaticHelper::HandleObjectEvent(this + 0x60, this + 0x70, *(float*)((char*)this + 0x80),
-                                    *(void**)((char*)this + 0x88), *(void**)((char*)this + 0x84), this + 0x10,
-                                    this + 0x8);
+    StaticHelper::HandleObjectEvent((char*)this + 0x60, (char*)this + 0x70, *(float*)((char*)this + 0x80),
+                                    *(void**)((char*)this + 0x88), *(void**)((char*)this + 0x84), (char*)this + 0x10,
+                                    (char*)this + 0x8);
 }
 
 // @fnv 0x00d22db0
 void __stdcall FUN_00d22db0(int, int)
 {}
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_load_ss(const float*);
-    void _mm_store_ss(float*, __m128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_load_ss(const float*);
+    void _mm_store_ss(float*, LocalM128);
     double sqrt(double);
     void _ReadWriteBarrier();
 }
 extern float DAT_0104da4c;
 extern double DAT_01016978;
-struct Vector
-{
-    union
-    {
-        __m128 quad;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-    Vector()
-    {}
-    Vector(const Vector& v)
-    {
-        quad = v.quad;
-    }
-    void operator=(const Vector& v)
-    {
-        quad = v.quad;
-    }
-};
 struct Matrix
 {
-    Vector c0, c1, c2, c3;
+    hkVector4 c0, c1, c2, c3;
 };
 struct Other
 {
@@ -76,73 +63,73 @@ struct Other
 };
 struct Limit
 {
-    Vector axis, origin;
+    hkVector4 axis, origin;
     float slope, positive, negative, scale;
 };
-static __forceinline __m128 dot3(const Vector& a, const Vector& b)
+static __forceinline LocalM128 dot3ScalarCall(const hkVector4& a, const hkVector4& b)
 {
-    __m128 p = _mm_mul_ps(a.quad, b.quad);
-    __m128 xy = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    LocalM128 p = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+    LocalM128 xy = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
     return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), xy);
 }
-static __forceinline __m128 broadcast(__m128 a)
+static __forceinline LocalM128 broadcast(LocalM128 a)
 {
     return _mm_shuffle_ps(a, a, 0);
 }
-static __forceinline __m128 scalar(float a)
+static __forceinline LocalM128 scalar(float a)
 {
     return broadcast(_mm_load_ss(&a));
 }
-static __forceinline float value(__m128 a)
+static __forceinline float value(LocalM128 a)
 {
     float r;
     _mm_store_ss(&r, a);
     return r;
 }
-static __forceinline void crossProduct(Vector& result, const Vector& a, const Vector& b)
+static __forceinline void crossProduct(hkVector4& result, const hkVector4& a, const hkVector4& b)
 {
-    __m128 p = _mm_mul_ps(_mm_shuffle_ps(a.quad, a.quad, 0xc9), _mm_shuffle_ps(b.quad, b.quad, 0xd2));
-    __m128 q = _mm_mul_ps(_mm_shuffle_ps(a.quad, a.quad, 0xd2), _mm_shuffle_ps(b.quad, b.quad, 0xc9));
-    result.quad = _mm_sub_ps(p, q);
+    LocalM128 p = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9), _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2));
+    LocalM128 q = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2), _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9));
+    result.m_vComponents = _mm_sub_ps(p, q);
 }
 // Projects a point onto a Limit cone defined by axis, origin, slope, and positive/negative limits, applying scale and transform constraints.
 // @fnv 0x00d234e0
-static __declspec(noinline) void FUN_00d234e0(Limit* apLimit, const Vector* point, Vector* out, Other* other)
+static __declspec(noinline) void FUN_00d234e0(Limit* apLimit, const hkVector4* point, hkVector4* out, Other* other)
 {
     float slope = apLimit->slope;
     float scale = apLimit->scale;
-    Vector offset;
-    offset.quad = _mm_sub_ps(point->quad, apLimit->origin.quad);
-    Vector origin = apLimit->origin;
-    Vector axis = apLimit->axis;
-    __m128 axial = dot3(axis, offset);
+    hkVector4 offset;
+    offset.m_vComponents = _mm_sub_ps(point->m_vComponents, apLimit->origin.m_vComponents);
+    hkVector4 origin = apLimit->origin;
+    hkVector4 axis = apLimit->axis;
+    LocalM128 axial = dot3ScalarCall(axis, offset);
     float distance2;
-    _mm_store_ss(&distance2, dot3(offset, offset));
-    offset.quad = _mm_sub_ps(offset.quad, _mm_mul_ps(broadcast(axial), axis.quad));
+    _mm_store_ss(&distance2, dot3ScalarCall(offset, offset));
+    offset.m_vComponents = _mm_sub_ps(offset.m_vComponents, _mm_mul_ps(broadcast(axial), axis.m_vComponents));
     float axial2;
     _mm_store_ss(&axial2, _mm_mul_ss(axial, axial));
     Matrix* transform = other->transform;
     float facing;
-    _mm_store_ss(&facing, dot3(transform->c3, offset));
+    _mm_store_ss(&facing, dot3ScalarCall(transform->c3, offset));
     float limit = facing > 0.0f ? apLimit->positive : apLimit->negative;
     if (limit > 0.0f)
     {
         float side = 0.0f;
-        Vector cross;
+        hkVector4 cross;
         crossProduct(cross, transform->c3, axis);
         float cross2;
-        _mm_store_ss(&cross2, dot3(cross, cross));
+        _mm_store_ss(&cross2, dot3ScalarCall(cross, cross));
         if (DAT_0104da4c < cross2)
         {
             float len = (float)sqrt(cross2);
             float inv = 1.0f / len;
-            cross.quad = _mm_mul_ps(scalar(inv), cross.quad);
-            side = value(dot3(cross, offset));
+            cross.m_vComponents = _mm_mul_ps(scalar(inv), cross.m_vComponents);
+            side = value(dot3ScalarCall(cross, offset));
             float slope2 = slope * slope;
             float side2 = side * side;
             if (slope2 * axial2 >= side2)
             {
-                offset.quad = _mm_sub_ps(offset.quad, _mm_mul_ps(scalar(side), cross.quad));
+                offset.m_vComponents = _mm_sub_ps(offset.m_vComponents, _mm_mul_ps(scalar(side), cross.m_vComponents));
                 side = 0.0f;
             }
         }
@@ -152,10 +139,10 @@ static __declspec(noinline) void FUN_00d234e0(Limit* apLimit, const Vector* poin
         {
             if (side == 0.0f)
             {
-                out->quad = origin.quad;
+                out->m_vComponents = origin.m_vComponents;
                 return;
             }
-            offset.quad = _mm_mul_ps(scalar(side), cross.quad);
+            offset.m_vComponents = _mm_mul_ps(scalar(side), cross.m_vComponents);
         }
     }
     else
@@ -163,30 +150,30 @@ static __declspec(noinline) void FUN_00d234e0(Limit* apLimit, const Vector* poin
         float slope2 = slope * slope;
         if ((slope2 + 1.0) * axial2 >= distance2)
         {
-            out->quad = origin.quad;
+            out->m_vComponents = origin.m_vComponents;
             return;
         }
     }
     if (scale < 1.0f)
     {
         float projected2;
-        _mm_store_ss(&projected2, dot3(offset, offset));
+        _mm_store_ss(&projected2, dot3ScalarCall(offset, offset));
         if (DAT_0104da4c <= projected2 && distance2 * DAT_01016978 < projected2)
         {
             float ratio = distance2 / projected2;
             float root = (float)sqrt(ratio);
             float factor = scale + (1.0f - scale) * root;
-            offset.quad = _mm_mul_ps(scalar(factor), offset.quad);
-            __m128 component = dot3(axis, offset);
-            offset.quad = _mm_sub_ps(offset.quad, _mm_mul_ps(broadcast(component), axis.quad));
+            offset.m_vComponents = _mm_mul_ps(scalar(factor), offset.m_vComponents);
+            LocalM128 component = dot3ScalarCall(axis, offset);
+            offset.m_vComponents = _mm_sub_ps(offset.m_vComponents, _mm_mul_ps(broadcast(component), axis.m_vComponents));
         }
     }
-    origin.quad = _mm_add_ps(origin.quad, offset.quad);
-    out->quad = origin.quad;
+    origin.m_vComponents = _mm_add_ps(origin.m_vComponents, offset.m_vComponents);
+    out->m_vComponents = origin.m_vComponents;
 }
 Limit* volatile inputLimit;
-const Vector* volatile inputPoint;
-Vector* volatile outputPoint;
+const hkVector4* volatile inputPoint;
+hkVector4* volatile outputPoint;
 Other* volatile inputOther;
 void invokeProjection()
 {
@@ -195,10 +182,10 @@ void invokeProjection()
 
 extern "C"
 {
-    __m128 _mm_setr_ps(float, float, float, float);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    int _mm_movemask_ps(__m128);
+    LocalM128 _mm_setr_ps(float, float, float, float);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_cmplt_ps(LocalM128, LocalM128);
+    int _mm_movemask_ps(LocalM128);
     double fabs(double);
 }
 static __forceinline float root(float f)
@@ -210,14 +197,14 @@ static __forceinline float absoluteValue(float f)
     return (float)fabs(f);
 }
 extern float DAT_0104da4c;
-extern const __m128 DAT_01017d10;
+extern const LocalM128 DAT_01017d10;
 extern const float DAT_01011d78;
 
-static __forceinline __m128 scalarParam(float f)
+static __forceinline LocalM128 scalarParam(float f)
 {
     return _mm_load_ss(&f);
 }
-static __forceinline float scalar(__m128 q)
+static __forceinline float scalar(LocalM128 q)
 {
     float f;
     _mm_store_ss(&f, q);
@@ -226,7 +213,7 @@ static __forceinline float scalar(__m128 q)
 
 struct Basis
 {
-    Vector first, second, third;
+    hkVector4 first, second, third;
 };
 struct Record : Limit
 {
@@ -258,59 +245,59 @@ struct ContextArg
 };
 struct VecArg
 {
-    Vector* p;
-    VecArg(Vector* v) : p(v)
+    hkVector4* p;
+    VecArg(hkVector4* v) : p(v)
     {}
 };
 
-static __forceinline __m128 prefixColumns(Context* context, Record* a, Record* b, const Vector& raw, const Vector& unit,
-                                          const Basis& basis, float inv, Vector& base, __m128& first, __m128& second)
+static __forceinline LocalM128 prefixColumns(Context* context, Record* a, Record* b, const hkVector4& raw, const hkVector4& unit,
+                                          const Basis& basis, float inv, hkVector4& base, LocalM128& first, LocalM128& second)
 {
-    float bDot = scalar(dot3(b->origin, b->axis));
-    float aDot = scalar(dot3(a->origin, a->axis));
-    Vector centerSum;
-    centerSum.quad = _mm_add_ps(a->origin.quad, b->origin.quad);
-    float midpointDot = scalar(dot3(centerSum, unit)) * 0.5;
-    __m128 weights = _mm_setr_ps(midpointDot, aDot, bDot, DAT_01011d78);
-    first = _mm_mul_ps(_mm_shuffle_ps(weights, weights, 0), basis.first.quad);
-    second = _mm_mul_ps(_mm_shuffle_ps(weights, weights, 0x55), basis.second.quad);
-    __m128 third = _mm_mul_ps(_mm_shuffle_ps(weights, weights, 0xaa), basis.third.quad);
+    float bDot = scalar(dot3ScalarCall(b->origin, b->axis));
+    float aDot = scalar(dot3ScalarCall(a->origin, a->axis));
+    hkVector4 centerSum;
+    centerSum.m_vComponents = _mm_add_ps(a->origin.m_vComponents, b->origin.m_vComponents);
+    float midpointDot = scalar(dot3ScalarCall(centerSum, unit)) * 0.5;
+    LocalM128 weights = _mm_setr_ps(midpointDot, aDot, bDot, DAT_01011d78);
+    first = _mm_mul_ps(_mm_shuffle_ps(weights, weights, 0), basis.first.m_vComponents);
+    second = _mm_mul_ps(_mm_shuffle_ps(weights, weights, 0x55), basis.second.m_vComponents);
+    LocalM128 third = _mm_mul_ps(_mm_shuffle_ps(weights, weights, 0xaa), basis.third.m_vComponents);
     return third;
 }
 // Uses the cross product of a and b's axes to compute a point written to out; if that is degenerate or out of bounds, calls FUN_00d234e0 on both records.
 // @fnv 0x00d23850
-static __declspec(noinline) void FUN_00d23850(Context* context, Record* a, Record* b, VecArg point, Vector* out)
+static __declspec(noinline) void FUN_00d23850(Context* context, Record* a, Record* b, VecArg point, hkVector4* out)
 {
     float threshold = DAT_0104da4c;
-    Vector raw;
+    hkVector4 raw;
     crossProduct(raw, a->axis, b->axis);
-    float fLengthSq = scalar(dot3(raw, raw));
+    float fLengthSq = scalar(dot3ScalarCall(raw, raw));
     if (threshold >= fLengthSq)
         goto fallback;
     {
         float inv = 1.0f / root(fLengthSq);
-        __m128 scale = scalarParam(inv);
-        Vector unit;
-        unit.quad = _mm_mul_ps(_mm_shuffle_ps(scale, scale, 0), raw.quad);
+        LocalM128 scale = scalarParam(inv);
+        hkVector4 unit;
+        unit.m_vComponents = _mm_mul_ps(_mm_shuffle_ps(scale, scale, 0), raw.m_vComponents);
         Basis basis;
-        basis.first.quad = raw.quad;
+        basis.first.m_vComponents = raw.m_vComponents;
         crossProduct(basis.second, b->axis, unit);
         crossProduct(basis.third, unit, a->axis);
-        Vector base;
-        __m128 first;
-        __m128 second;
-        __m128 third = prefixColumns(context, a, b, raw, unit, basis, inv, base, first, second);
-        base.quad = _mm_mul_ps(_mm_add_ps(_mm_add_ps(first, second), third),
+        hkVector4 base;
+        LocalM128 first;
+        LocalM128 second;
+        LocalM128 third = prefixColumns(context, a, b, raw, unit, basis, inv, base, first, second);
+        base.m_vComponents = _mm_mul_ps(_mm_add_ps(_mm_add_ps(first, second), third),
                                _mm_shuffle_ps(scalarParam(inv), scalarParam(inv), 0));
-        __m128 absolute = _mm_and_ps(base.quad, DAT_01017d10);
-        if (_mm_movemask_ps(_mm_cmplt_ps(context->base.transform->c2.quad, absolute)) & 7)
+        LocalM128 absolute = _mm_and_ps(base.m_vComponents, DAT_01017d10);
+        if (_mm_movemask_ps(_mm_cmplt_ps(context->base.transform->c2.m_vComponents, absolute)) & 7)
             goto fallback;
 
-        Vector delta;
-        delta.quad = _mm_sub_ps(point.p->quad, base.quad);
-        float distance2 = scalar(dot3(delta, delta));
-        float preferred = scalar(dot3(context->base.transform->c3, unit));
-        float axial = scalar(dot3(delta, unit));
+        hkVector4 delta;
+        delta.m_vComponents = _mm_sub_ps(point.p->m_vComponents, base.m_vComponents);
+        float distance2 = scalar(dot3ScalarCall(delta, delta));
+        float preferred = scalar(dot3ScalarCall(context->base.transform->c3, unit));
+        float axial = scalar(dot3ScalarCall(delta, unit));
         float displacement = axial;
         float radius = a->slope + b->slope;
         if (axial * preferred > 0.0)
@@ -322,7 +309,7 @@ static __declspec(noinline) void FUN_00d23850(Context* context, Record* a, Recor
         float axial2 = axial * axial;
         if ((distance2 - axial2) * float(radius * radius) >= axial2)
         {
-            out->quad = base.quad;
+            out->m_vComponents = base.m_vComponents;
             return;
         }
         if (blend < 1.0f && distance2 * DAT_01016978 < axial * axial)
@@ -334,17 +321,17 @@ static __declspec(noinline) void FUN_00d23850(Context* context, Record* a, Recor
             ratio = blend + (1.0f - blend) * ratio;
             displacement = ratio * axial;
         }
-        out->quad =
-            _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&displacement), _mm_load_ss(&displacement), 0), unit.quad),
-                       base.quad);
+        out->m_vComponents =
+            _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&displacement), _mm_load_ss(&displacement), 0), unit.m_vComponents),
+                       base.m_vComponents);
         return;
     }
 fallback:
     context->working->states[a - static_cast<Shape*>(context->base.transform)->records].state = 2;
     context->working->states[b - static_cast<Shape*>(context->base.transform)->records].state = 2;
     ContextArg ca = {context};
-    Vector* dst = out;
-    Vector* src = point.p;
+    hkVector4* dst = out;
+    hkVector4* src = point.p;
     if (a->priority > b->priority)
     {
         FUN_00d234e0(b, src, dst, &ca.p->base);
@@ -360,8 +347,8 @@ fallback:
 extern Context* volatile testContext;
 extern Record* volatile testLeft;
 extern Record* volatile testRight;
-extern Vector* volatile testPoint;
-extern Vector* volatile testOut;
+extern hkVector4* volatile testPoint;
+extern hkVector4* volatile testOut;
 void invokeGeometry()
 {
     VecArg p(testPoint);
@@ -372,7 +359,7 @@ struct V
 {
     union
     {
-        __m128 v;
+        LocalM128 v;
         float f[4];
     };
     V()
@@ -414,7 +401,7 @@ struct PlaneRecord
 
     V point;
 
-    __m128 auxiliary;
+    LocalM128 auxiliary;
 
     PlaneMeta metadata;
 };
@@ -430,13 +417,13 @@ struct PlaneStatus
 struct PlaneGeometry
 {
 
-    __m128 unk00;
+    LocalM128 unk00;
 
-    __m128 unk10;
+    LocalM128 unk10;
 
-    __m128 bounds;
+    LocalM128 bounds;
 
-    __m128 unk30;
+    LocalM128 unk30;
 
     int unk40;
 
@@ -498,33 +485,33 @@ extern void __cdecl FUN_00d23380(IntersectionContext* context);
 inline void V::cross(const V& a, const V& b)
 {
 
-    __m128 lhs = _mm_mul_ps(_mm_shuffle_ps(a.v, a.v, 0xc9), _mm_shuffle_ps(b.v, b.v, 0xd2));
+    LocalM128 lhs = _mm_mul_ps(_mm_shuffle_ps(a.v, a.v, 0xc9), _mm_shuffle_ps(b.v, b.v, 0xd2));
 
-    __m128 rhs = _mm_mul_ps(_mm_shuffle_ps(a.v, a.v, 0xd2), _mm_shuffle_ps(b.v, b.v, 0xc9));
+    LocalM128 rhs = _mm_mul_ps(_mm_shuffle_ps(a.v, a.v, 0xd2), _mm_shuffle_ps(b.v, b.v, 0xc9));
 
     v = _mm_sub_ps(lhs, rhs);
 }
 
-inline float dot(const __m128& a, const __m128& b)
+inline float dot(const LocalM128& a, const LocalM128& b)
 {
 
-    __m128 p = _mm_mul_ps(a, b);
+    LocalM128 p = _mm_mul_ps(a, b);
 
-    __m128 xy = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    LocalM128 xy = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
 
-    __m128 total = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), xy);
+    LocalM128 total = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), xy);
 
     float result;
     _mm_store_ss(&result, total);
     return result;
 }
 
-inline __m128 distances3(float a, float b, float c)
+inline LocalM128 distances3(float a, float b, float c)
 {
     return _mm_setr_ps(a, b, c, DAT_01011d78);
 }
 
-extern void __cdecl FUN_00d234e0(IntersectionContext*, PlaneRecord*, const __m128*);
+extern void __cdecl FUN_00d234e0(IntersectionContext*, PlaneRecord*, const LocalM128*);
 
 extern const double DAT_01011588 = 0.5;
 
@@ -535,12 +522,12 @@ struct PairPlane
 
 struct PairRead
 {
-    const __m128* p;
+    const LocalM128* p;
 };
 
 struct PairWrite
 {
-    __m128* p;
+    LocalM128* p;
 };
 
 static __declspec(noinline) void FUN_00d23850(IntersectionContext* ctx, PairPlane aw, PairPlane bw, PairRead fw,
@@ -576,9 +563,9 @@ static __declspec(noinline) void FUN_00d23850(IntersectionContext* ctx, PairPlan
 
         float average = (float)(dot(_mm_add_ps(a->point.v, b->point.v), direction.v) * DAT_01011588);
 
-        __m128 distances = distances3(average, db, da);
+        LocalM128 distances = distances3(average, db, da);
 
-        __m128 sum = _mm_add_ps(
+        LocalM128 sum = _mm_add_ps(
             _mm_mul_ps(_mm_shuffle_ps(distances, distances, 0),
                        _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(nb.v, nb.v, 0xd2), _mm_shuffle_ps(na.v, na.v, 0xc9)),
                                   _mm_mul_ps(_mm_shuffle_ps(nb.v, nb.v, 0xc9), _mm_shuffle_ps(na.v, na.v, 0xd2)))),
@@ -586,12 +573,12 @@ static __declspec(noinline) void FUN_00d23850(IntersectionContext* ctx, PairPlan
 
         sum = _mm_add_ps(sum, _mm_mul_ps(_mm_shuffle_ps(distances, distances, 0xaa), right.v));
 
-        __m128 position = _mm_mul_ps(sum, scalar(inverse));
+        LocalM128 position = _mm_mul_ps(sum, scalar(inverse));
 
         if (!(_mm_movemask_ps(_mm_cmplt_ps(ctx->geometry->bounds, _mm_and_ps(position, DAT_01017d10))) & 7))
         {
 
-            __m128 difference = _mm_sub_ps(*fw.p, position);
+            LocalM128 difference = _mm_sub_ps(*fw.p, position);
 
             float squared = dot(difference, difference);
 
@@ -659,12 +646,12 @@ struct Wrap_reorder
 
 struct Wrap_fallback
 {
-    const __m128* p;
+    const LocalM128* p;
 };
 
 struct Wrap_result
 {
-    __m128* p;
+    LocalM128* p;
 };
 
 // Computes the intersection point of three planes using a cross-product basis, falling back to sequential pairwise intersection if the determinant is near zero.
@@ -689,12 +676,12 @@ static __declspec(noinline) void FUN_00d23ca0(IntersectionContext* ctx, PlaneRec
         float dc = dot(apPlaneC->normal.v, apPlaneC->point.v);
         float db = dot(apPlaneB->normal.v, apPlaneB->point.v);
         weights.v = distances3(dot(apPlaneA->normal.v, apPlaneA->point.v), db, dc);
-        __m128 wx = _mm_shuffle_ps(weights.v, weights.v, 0);
-        __m128 first = _mm_mul_ps(basis.column(0).v, wx);
-        __m128 wy = _mm_shuffle_ps(weights.v, weights.v, 0x55);
-        __m128 second = _mm_mul_ps(basis.column(1).v, wy);
-        __m128 wz = _mm_shuffle_ps(weights.v, weights.v, 0xaa);
-        __m128 third = _mm_mul_ps(basis.column(2).v, wz);
+        LocalM128 wx = _mm_shuffle_ps(weights.v, weights.v, 0);
+        LocalM128 first = _mm_mul_ps(basis.column(0).v, wx);
+        LocalM128 wy = _mm_shuffle_ps(weights.v, weights.v, 0x55);
+        LocalM128 second = _mm_mul_ps(basis.column(1).v, wy);
+        LocalM128 wz = _mm_shuffle_ps(weights.v, weights.v, 0xaa);
+        LocalM128 third = _mm_mul_ps(basis.column(2).v, wz);
         point.v = _mm_add_ps(_mm_add_ps(first, second), third);
         float inverse = 1.0f / determinant;
         point.v = _mm_mul_ps(point.v, _mm_shuffle_ps(_mm_load_ss(&inverse), _mm_load_ss(&inverse), 0));
@@ -749,9 +736,9 @@ extern PlaneRecord* volatile feed_c;
 
 extern int volatile feed_reorder;
 
-extern const __m128* volatile feed_fallback;
+extern const LocalM128* volatile feed_fallback;
 
-extern __m128* volatile feed_result;
+extern LocalM128* volatile feed_result;
 
 void emit_intersection()
 {
@@ -770,34 +757,15 @@ void emit_intersection()
 
 extern float runtimeFloatSettingDefault166;
 
-struct hkBool
+inline LocalM128& Vec4::getQuad()
 {
-    char m_cBooleanValue;
-    hkBool()
-    {}
-    hkBool(bool b) : m_cBooleanValue(b ? 1 : 0)
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
+    return *reinterpret_cast<LocalM128*>(&x);
+}
 
-struct Vec4
+inline const LocalM128& Vec4::getQuad() const
 {
-    union
-    {
-        __m128 m_vComponents;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-    void operator=(const Vec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
+    return *reinterpret_cast<const LocalM128*>(&x);
+}
 
 struct ActivePlane
 {
@@ -839,43 +807,43 @@ static __declspec(noinline) void FUN_00d234e0(const SimplexInfo& other_, const P
                                               Vec4& out_)
 {
     const Limit* self = (const Limit*)&self_;
-    const Vector* point = (const Vector*)&point_;
-    Vector* out = (Vector*)&out_;
+    const hkVector4* point = (const hkVector4*)&point_;
+    hkVector4* out = (hkVector4*)&out_;
     const Other* other = (const Other*)&other_;
     float slope = self->slope;
     float scale = self->scale;
-    Vector offset;
-    offset.quad = _mm_sub_ps(point->quad, self->origin.quad);
-    Vector origin = self->origin;
-    Vector axis = self->axis;
-    __m128 axial = dot3(axis, offset);
+    hkVector4 offset;
+    offset.m_vComponents = _mm_sub_ps(point->m_vComponents, self->origin.m_vComponents);
+    hkVector4 origin = self->origin;
+    hkVector4 axis = self->axis;
+    LocalM128 axial = dot3ScalarCall(axis, offset);
     float distance2;
-    _mm_store_ss(&distance2, dot3(offset, offset));
-    offset.quad = _mm_sub_ps(offset.quad, _mm_mul_ps(broadcast(axial), axis.quad));
+    _mm_store_ss(&distance2, dot3ScalarCall(offset, offset));
+    offset.m_vComponents = _mm_sub_ps(offset.m_vComponents, _mm_mul_ps(broadcast(axial), axis.m_vComponents));
     float axial2;
     _mm_store_ss(&axial2, _mm_mul_ss(axial, axial));
     Matrix* transform = other->transform;
     float facing;
-    _mm_store_ss(&facing, dot3(transform->c3, offset));
+    _mm_store_ss(&facing, dot3ScalarCall(transform->c3, offset));
     float limit = facing > 0.0f ? self->positive : self->negative;
     if (limit > 0.0f)
     {
         float side = 0.0f;
-        Vector cross;
+        hkVector4 cross;
         crossProduct(cross, transform->c3, axis);
         float cross2;
-        _mm_store_ss(&cross2, dot3(cross, cross));
+        _mm_store_ss(&cross2, dot3ScalarCall(cross, cross));
         if (DAT_0104da4c < cross2)
         {
             float len = (float)sqrt(cross2);
             float inv = 1.0f / len;
-            cross.quad = _mm_mul_ps(scalar(inv), cross.quad);
-            side = value(dot3(cross, offset));
+            cross.m_vComponents = _mm_mul_ps(scalar(inv), cross.m_vComponents);
+            side = value(dot3ScalarCall(cross, offset));
             float slope2 = slope * slope;
             float side2 = side * side;
             if (slope2 * axial2 >= side2)
             {
-                offset.quad = _mm_sub_ps(offset.quad, _mm_mul_ps(scalar(side), cross.quad));
+                offset.m_vComponents = _mm_sub_ps(offset.m_vComponents, _mm_mul_ps(scalar(side), cross.m_vComponents));
                 side = 0.0f;
             }
         }
@@ -885,10 +853,10 @@ static __declspec(noinline) void FUN_00d234e0(const SimplexInfo& other_, const P
         {
             if (side == 0.0f)
             {
-                out->quad = origin.quad;
+                out->m_vComponents = origin.m_vComponents;
                 return;
             }
-            offset.quad = _mm_mul_ps(scalar(side), cross.quad);
+            offset.m_vComponents = _mm_mul_ps(scalar(side), cross.m_vComponents);
         }
     }
     else
@@ -896,32 +864,32 @@ static __declspec(noinline) void FUN_00d234e0(const SimplexInfo& other_, const P
         float slope2 = slope * slope;
         if ((slope2 + 1.0) * axial2 >= distance2)
         {
-            out->quad = origin.quad;
+            out->m_vComponents = origin.m_vComponents;
             return;
         }
     }
     if (scale < 1.0f)
     {
         float projected2;
-        _mm_store_ss(&projected2, dot3(offset, offset));
+        _mm_store_ss(&projected2, dot3ScalarCall(offset, offset));
         if (DAT_0104da4c <= projected2 && distance2 * DAT_01016978 < projected2)
         {
             float ratio = distance2 / projected2;
             float root = (float)sqrt(ratio);
             float factor = scale + (1.0f - scale) * root;
-            offset.quad = _mm_mul_ps(scalar(factor), offset.quad);
-            __m128 component = dot3(axis, offset);
-            offset.quad = _mm_sub_ps(offset.quad, _mm_mul_ps(broadcast(component), axis.quad));
+            offset.m_vComponents = _mm_mul_ps(scalar(factor), offset.m_vComponents);
+            LocalM128 component = dot3ScalarCall(axis, offset);
+            offset.m_vComponents = _mm_sub_ps(offset.m_vComponents, _mm_mul_ps(broadcast(component), axis.m_vComponents));
         }
     }
-    origin.quad = _mm_add_ps(origin.quad, offset.quad);
-    out->quad = origin.quad;
+    origin.m_vComponents = _mm_add_ps(origin.m_vComponents, offset.m_vComponents);
+    out->m_vComponents = origin.m_vComponents;
 }
 
 static __declspec(noinline) hkBool FUN_00d23480(const PlaneRecord& sci, const Vec4& velocityIn)
 {
     V relativeVelocity;
-    relativeVelocity.v = _mm_sub_ps(velocityIn.m_vComponents, sci.point.v);
+    relativeVelocity.v = _mm_sub_ps(velocityIn.getQuad(), sci.point.v);
     float planeVel = dot(relativeVelocity.v, sci.normal.v);
     if (planeVel < runtimeFloatSettingDefault166)
     {
@@ -953,17 +921,17 @@ static __declspec(noinline) void FUN_00d23850(SimplexInfo& ctx_, const PlaneReco
         float db = dot(b->point.v, nb.v);
         float da = dot(a->point.v, na.v);
         float average = (float)(dot(_mm_add_ps(a->point.v, b->point.v), direction.v) * DAT_01011588);
-        __m128 distances = distances3(average, db, da);
-        __m128 sum = _mm_add_ps(
+        LocalM128 distances = distances3(average, db, da);
+        LocalM128 sum = _mm_add_ps(
             _mm_mul_ps(_mm_shuffle_ps(distances, distances, 0),
                        _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(nb.v, nb.v, 0xd2), _mm_shuffle_ps(na.v, na.v, 0xc9)),
                                   _mm_mul_ps(_mm_shuffle_ps(nb.v, nb.v, 0xc9), _mm_shuffle_ps(na.v, na.v, 0xd2)))),
             _mm_mul_ps(_mm_shuffle_ps(distances, distances, 0x55), left.v));
         sum = _mm_add_ps(sum, _mm_mul_ps(_mm_shuffle_ps(distances, distances, 0xaa), right.v));
-        __m128 position = _mm_mul_ps(sum, scalar(inverse));
+        LocalM128 position = _mm_mul_ps(sum, scalar(inverse));
         if (!(_mm_movemask_ps(_mm_cmplt_ps(ctx->geometry->bounds, _mm_and_ps(position, DAT_01017d10))) & 7))
         {
-            __m128 difference = _mm_sub_ps(fw.m_vComponents, position);
+            LocalM128 difference = _mm_sub_ps(fw.getQuad(), position);
             float squared = dot(difference, difference);
             float radius = dot(ctx->geometry->unk30, direction.v);
             float projection = dot(difference, direction.v);
@@ -975,7 +943,7 @@ static __declspec(noinline) void FUN_00d23850(SimplexInfo& ctx_, const PlaneReco
             float blend = (float)((a->auxiliary.m128_f32[3] + b->auxiliary.m128_f32[3]) * DAT_01011588);
             if ((squared - projection * projection) * threshold * threshold >= projection * projection)
             {
-                rw.m_vComponents = position;
+                rw.getQuad() = position;
                 return;
             }
             float adjustment = projection;
@@ -983,7 +951,7 @@ static __declspec(noinline) void FUN_00d23850(SimplexInfo& ctx_, const PlaneReco
             {
                 adjustment = projection * (blend + root(squared) * absoluteValue(1.0f / projection) * (1.0f - blend));
             }
-            rw.m_vComponents = _mm_add_ps(position, _mm_mul_ps(scalar(adjustment), direction.v));
+            rw.getQuad() = _mm_add_ps(position, _mm_mul_ps(scalar(adjustment), direction.v));
             return;
         }
     }
@@ -1019,15 +987,15 @@ static __declspec(noinline) void FUN_00d23ca0(SimplexInfo& ctx_, const PlaneReco
         float dc = dot(c->point.v, c->normal.v);
         float db = dot(b->point.v, b->normal.v);
         float da = dot(a->point.v, a->normal.v);
-        __m128 t = distances3(da, db, dc);
+        LocalM128 t = distances3(da, db, dc);
         float invDet = 1.0f / det;
-        __m128 sVel = _mm_add_ps(
+        LocalM128 sVel = _mm_add_ps(
             _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(t, t, 0), r0.v), _mm_mul_ps(_mm_shuffle_ps(t, t, 0x55), r1.v)),
             _mm_mul_ps(_mm_shuffle_ps(t, t, 0xaa), r2.v));
         sVel = _mm_mul_ps(sVel, scalar(invDet));
         if (!(_mm_movemask_ps(_mm_cmplt_ps(ctx->geometry->bounds, _mm_and_ps(sVel, DAT_01017d10))) & 7))
         {
-            result.m_vComponents = sVel;
+            result.getQuad() = sVel;
             return;
         }
     }
@@ -1058,6 +1026,7 @@ template <typename T> static __forceinline T hkMax2(T a, T b)
     return a > b ? a : b;
 }
 
+// Scratch velocities use the existing aligned, uninitialized hkVector4 storage; callees write all four lanes.
 // Iteratively reduces the active plane set by testing velocity against planes and resolving intersections until a stable result is written to the ray-cast output.
 // @fnv 0x00d23f50
 static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
@@ -1072,13 +1041,14 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
             return;
         }
         case 2: {
-            Vec4 velocity;
+            hkVector4 velocityStorage;
+            Vec4& velocity = reinterpret_cast<Vec4&>(velocityStorage);
             FUN_00d234e0(info, *info.m_kActivePlanes[1].m_pHavokConstraint, info.m_pRayCastInput->m_fVelocity,
                          velocity);
             hkBool plane0Used = FUN_00d23480(*info.m_kActivePlanes[0].m_pHavokConstraint, velocity);
             if (!plane0Used)
             {
-                info.m_pRayCastOutput->m_fVelocity = velocity;
+                info.m_pRayCastOutput->m_fVelocity.getQuad() = velocity.getQuad();
                 info.m_kActivePlanes[0] = info.m_kActivePlanes[1];
                 info.m_iActivePlaneCount = 1;
                 return;
@@ -1089,7 +1059,8 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
         }
         case 3: {
             {
-                Vec4 velocity;
+                hkVector4 velocityStorage;
+                Vec4& velocity = reinterpret_cast<Vec4&>(velocityStorage);
                 FUN_00d234e0(info, *info.m_kActivePlanes[2].m_pHavokConstraint, info.m_pRayCastInput->m_fVelocity,
                              velocity);
                 hkBool plane0Used = FUN_00d23480(*info.m_kActivePlanes[0].m_pHavokConstraint, velocity);
@@ -1098,7 +1069,7 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
                     hkBool plane1Used = FUN_00d23480(*info.m_kActivePlanes[1].m_pHavokConstraint, velocity);
                     if (!plane1Used)
                     {
-                        info.m_pRayCastOutput->m_fVelocity = velocity;
+                        info.m_pRayCastOutput->m_fVelocity.getQuad() = velocity.getQuad();
                         info.m_kActivePlanes[0] = info.m_kActivePlanes[2];
                         info.m_iActivePlaneCount = 1;
                         break;
@@ -1109,7 +1080,8 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
                 bool dropped_a_plane = false;
                 for (int testPlane = 0; testPlane < 2; testPlane++)
                 {
-                    Vec4 velocity;
+                    hkVector4 velocityStorage;
+                    Vec4& velocity = reinterpret_cast<Vec4&>(velocityStorage);
                     FUN_00d23850(info, info.m_kActivePlanes[testPlane].m_pHavokConstraint,
                                  info.m_kActivePlanes[2].m_pHavokConstraint, &info.m_pRayCastInput->m_fVelocity,
                                  &velocity);
@@ -1138,7 +1110,8 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
             bool dropped_a_plane = false;
             for (int i = 0; i < 3; i++)
             {
-                Vec4 velocity;
+                hkVector4 velocityStorage;
+                Vec4& velocity = reinterpret_cast<Vec4&>(velocityStorage);
                 FUN_00d23ca0(info, info.m_kActivePlanes[(i + 1) % 3].m_pHavokConstraint,
                              info.m_kActivePlanes[(i + 2) % 3].m_pHavokConstraint,
                              info.m_kActivePlanes[3].m_pHavokConstraint, false, info.m_pRayCastInput->m_fVelocity,
@@ -1158,7 +1131,14 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
                 break;
             }
             {
-                Vec4 velocity = info.m_pRayCastInput->m_fVelocity;
+                hkVector4 velocityStorage;
+                Vec4& velocity = reinterpret_cast<Vec4&>(velocityStorage);
+                // Preserve the original scalar bit copy from the input velocity.
+                const Vec4& inputVelocity = info.m_pRayCastInput->m_fVelocity;
+                velocity.xb = inputVelocity.xb;
+                velocity.yb = inputVelocity.yb;
+                velocity.zb = inputVelocity.zb;
+                velocity.wb = inputVelocity.wb;
                 PlaneRecord* sci0 = info.m_kActivePlanes[0].m_pHavokConstraint;
                 PlaneRecord* sci1 = info.m_kActivePlanes[1].m_pHavokConstraint;
                 PlaneRecord* sci2 = info.m_kActivePlanes[2].m_pHavokConstraint;
@@ -1191,7 +1171,7 @@ static __declspec(noinline) void FUN_00d23f50(SimplexInfo& info)
                 }
                 FUN_00d23ca0(info, sci1, sci2, sci3, false, velocity, velocity);
             skip3:
-                info.m_pRayCastOutput->m_fVelocity = velocity;
+                info.m_pRayCastOutput->m_fVelocity.getQuad() = velocity.getQuad();
             }
             {
                 int maxStatus = 0;

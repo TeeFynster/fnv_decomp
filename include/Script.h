@@ -1,47 +1,220 @@
-// Source layout: Script. PC corrections are in generate_headers.py.
-#ifndef FNV_SCRIPT_H
-#define FNV_SCRIPT_H
+#pragma once
 
-#include "layout_support.h"
-#include "ScriptHeaderData.h"
 #include "TESForm.h"
-#pragma pack(push, 4)
+#include "ScriptHeaderData.h"
+#include "MagicTarget.h"
+
+class ArrHolder;
+class CStringArgument;
+class Data;
+class ScriptHeaderView;
+class ScriptLocalVariable;
+class ScriptParameter;
+class ExtraDataList;
+class ScriptCompiler;
+class ScriptEventList;
+class ScriptLocals;
+class ScriptReferencedObject;
+class ScriptVariableInfo;
+class TESObjectREFR;
+class TESQuest;
+enum COMPILER_NAME;
+
 class Script : public TESForm
 {
-  public:
-    ScriptHeaderData m_kHeader;                                          // +0x18
-    char* m_pText;                                                    // +0x2C
-    char* m_data;                                                     // +0x30
-    float m_fValueAtOffset34;                                         // +0x34
-    float fValueAtOffset38;                                           // +0x38
-    float m_fValueAtOffset3C;                                         // +0x3C
-    TESQuest* m_pOwnerQuest;                                          // +0x40
-    BSSimpleList<ScriptReferencedObject*> m_kReferencedObjectList;  // +0x44
-    BSSimpleList<ScriptVariableInfo*> m_kVariableList;                    // +0x4C
+public:
+    ScriptHeaderData m_kHeader;
+    char* m_pText;
+    char* m_data;
+    float m_fValueAtOffset34;
+    float fValueAtOffset38;
+    float m_fValueAtOffset3C;
+    TESQuest* m_pOwnerQuest;
+    BSSimpleList<ScriptReferencedObject*> m_kReferencedObjectList;
+    BSSimpleList<ScriptVariableInfo*> m_kVariableList;
+
     Script();
     virtual ~Script();
     virtual void InitializeComponent();
+
     char* GetData();
+    char* GetText();
+    void SetText(const char* text);
+    void CompileScriptText(ScriptCompiler* compiler, COMPILER_NAME name, TESObjectREFR* reference);
     ScriptReferencedObject* GetReferencedForm(unsigned int index, ScriptLocals* locals);
     ScriptHeaderData* GetHeader();
     const char* GetVariableName(unsigned int index);
-    static bool GetValue(double& value, const char* data, unsigned int& offset, TESObjectREFR* reference,
-                         TESObjectREFR* container, Script* script, ScriptLocals* locals, bool skip);
     void CopyScriptContents(Script* script);
     void SetScriptData(unsigned int size, char* data);
     BSSimpleList<ScriptReferencedObject*>* GetReferencedObjectList();
     BSSimpleList<ScriptVariableInfo*>* GetVariableList();
     void InitItem(TESForm* form);
+    ScriptLocals* GetOrCreateScriptLocals();
+    ScriptEventList* CreateEventList();
+    void SetOwnerQuest(TESQuest* quest);
+    bool Run(TESObjectREFR* reference, ScriptLocals* locals, TESObjectREFR* container, bool skip);
+    void Run(TESObjectREFR* reference, ScriptLocals* locals, bool flag, bool skip);
+    bool Run(Actor* actor, ScriptLocals* locals, bool flag, bool skip);
+    void Run(void* reference, bool flag, bool flag2, bool skip);
+    void AdvanceScript(TESObjectREFR* reference, ScriptLocals* locals, float time);
+    void GetLocalData();
+
+    static bool GetLocalData(TESForm* form, ExtraDataList* extraData, unsigned int index);
+    static bool __cdecl GetLocalData(void* form, void* extraData, unsigned int index);
+    static bool GetValue(double& value, const char* data, unsigned int& offset,
+                         TESObjectREFR* reference, TESObjectREFR* container,
+                         Script* script, ScriptLocals* locals, bool skip);
+    static void SetReferenceScale(TESObjectREFR* reference, float scale);
+    static void MoveReferenceToPosition(TESObjectREFR* reference, TESObjectREFR* target,
+                                       float x, float y, float z);
+    static void MatchFaceGeometry(TESObjectREFR* reference, TESObjectREFR* target, int flag);
+    static bool __cdecl IsSexConditionFunction(TESObjectREFR* object, void* parameter,
+                                               void* argument, double& result);
+    static bool __cdecl IsConsolePlatform();
+
+    void* FUN_0055b980();
+    ScriptLocals* FUN_005abf60();
+    bool FUN_005ac1e0(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
+    static bool HandleScriptLocals(TESObjectREFR*, void*, void*, double&);
+    Data* FUN_00671d10();
+    char GetByteAt(unsigned int i);
+    char FUN_006e1670(unsigned int i, unsigned int a, unsigned int b);
+    void ExecuteScript(TESObjectREFR*, ScriptLocals*);
+    static bool __cdecl GetActorSexConditionFunction(TESObjectREFR*, void*, void*, double&);
+    static bool __cdecl GetPCIsSexConditionFunction(TESObjectREFR*, void*, void*, double&);
+    bool Run(TESObjectREFR* subject, void* args);
+    virtual void ClearData();
+    virtual bool LoadForm(TESFile* file);
+    bool Load(TESFile* file);
+    virtual void CopyFrom(const TESForm* form);
+    void InitializeActionList();
+    static void CopyListToView(BSSimpleList<ScriptVariableInfo*>* source, BSSimpleList<ScriptVariableInfo*>* dest, Script* script);
+    static void CopyScriptReferences(BSSimpleList<ScriptReferencedObject*>* source, BSSimpleList<ScriptReferencedObject*>* dest, Script* script);
+    BSSimpleList<ScriptLocalVariable*>* GetScriptEntryList();
+    virtual void InitItem();
+    static void CopyIdentifierBitsToValue(const unsigned int& id, double& value);
+    static void InitializeScriptRuntime();
+    static bool IsReferenceScriptActive(TESObjectREFR* ref);
+    static bool IsReferenceScriptEnabled(TESObjectREFR* ref);
+    static void ClearReferenceScriptState(TESObjectREFR* ref);
+    static void ClearScriptLocalsForReference(TESObjectREFR* ref);
+    static void SetScriptLocalsFromExtraData(TESObjectREFR* ref, ExtraDataList* extra);
+    void FUN_005aa2e0();
+    void FUN_005ae2e0();
+    void FUN_006eae40();
+    ScriptHeaderView* FUN_00500940();
+    void InitFromCompileData(CStringArgument*);
+    static bool OnHitWithFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool StopQuestFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool ScriptEffectUpdateFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool SetAllyFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool SetDestroyedFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetCurrentTimeFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool SetScriptCondition(TESObjectREFR*, void*, void*, double&);
+    static bool GetSecondsPassedFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateScriptResult(TESObjectREFR*, void*, void*, double&);
+    static bool GetDead(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool ResetScript(TESObjectREFR*, void*, void*, double&);
+    static bool GetItemCount(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetSitting(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool ReadScriptArguments(TESObjectREFR*, void*, void*, double&);
+    static bool GetTalkedToPC(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool FindScriptVariable(TESObjectREFR*, void*, void*, double&);
+    static bool GetIsRaining(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateWeatherCondition(TESObjectREFR*, void*, void*, double&);
+    static bool GetInCell(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateCellMembership(TESObjectREFR*, void*, void*, double&);
+    static bool GetInFaction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetScriptOperand(TESObjectREFR*, void*, void*, double&);
+    static bool GetRandomPercent(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateRandomPercentage(TESObjectREFR*, void*, void*, double&);
+    static bool GetLevel(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateReferenceLevel(TESObjectREFR*, void*, void*, double&);
+    static void CheckFlagFunction(unsigned int, TESObjectREFR*, TESForm*, ScriptLocals*, double&);
+    static bool OnAddFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnSellFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnEquipFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnUnequipFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnFireFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnOpenFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnCloseFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnGrabFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnReleaseFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnDestructionStageChangeFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnHitFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnDeathFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnStartCombatFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnCombatEndFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnSayToDoneFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnPackageStartFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnPackageEndFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnPackageChangeFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnLoadFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnResetFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnMagicEffectHitFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnTriggerFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnTriggerEnterFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool OnTriggerLeaveFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool IsIdlePlayingFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool CheckIdlePlaying(TESObjectREFR*, void*, void*, double&);
+    static bool IsTalkingFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool CheckTalkingState(TESObjectREFR*, void*, void*, double&);
+    static bool GetDayOfWeekFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool ParseScript(TESObjectREFR*, void*, void*, double&);
+    static bool IsPCSleepingFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool IsPlayerAsleep(TESObjectREFR*, void*, void*, double&);
+    static bool GetDestroyedFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool HandleScriptOperation(TESObjectREFR*, void*, void*, double&);
+    static bool HasBeenEatenFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetScriptObject(TESObjectREFR*, void*, void*, double&);
+    static bool GetUnconsciousFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool ResolveScriptValue(TESObjectREFR*, void*, void*, double&);
+    static bool IsInCombatFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetScriptFunctionValue(TESObjectREFR*, void*, void*, double&);
+    static bool IsInInteriorFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateReferenceQuery(TESObjectREFR*, void*, void*, double&);
+    static bool EvaluateReferenceCondition(TESObjectREFR*, void*, void*, double&);
+    static bool CheckActorCondition(TESObjectREFR*, void*, void*, double&);
+    static bool EvaluateReferenceFlag(TESObjectREFR*, void*, void*, double&);
+    static bool EvaluateFirstReferenceOperand(TESObjectREFR*, void*, void*, double&);
+    static bool EvaluateSecondReferenceOperand(TESObjectREFR*, void*, void*, double&);
+    static bool ReadScriptOperand(TESObjectREFR*, void*, void*, double&);
+    static bool EvaluateReferenceScriptValue(TESObjectREFR*, void*, void*, double&);
+    static bool ResolveScriptReference(TESObjectREFR*, void*, void*, double&);
+    static bool CheckScriptCondition(TESObjectREFR*, void*, void*, double&);
+    static bool EvaluateSeventhReferenceOperand(TESObjectREFR*, void*, void*, double&);
+    static bool GetScriptParameter(TESObjectREFR*, void*, void*, double&);
+    static bool HandleScriptExpression(TESObjectREFR*, void*, void*, double&);
+    static bool GetScriptResult(TESObjectREFR*, void*, void*, double&);
+    static bool AdvanceScriptInstruction(TESObjectREFR*, void*, void*, double&);
+    static bool HandleScriptReference(TESObjectREFR*, void*, void*, double&);
+    static bool ExecuteScriptCommand(TESObjectREFR*, void*, void*, double&);
+    static bool EvaluateReferencePredicate(TESObjectREFR*, void*, void*, double&);
+    static bool HandleScriptEvent(TESObjectREFR*, void*, void*, double&);
+    static bool WriteScriptValue(TESObjectREFR*, void*, void*, double&);
+    static bool EvaluateReferenceProperty(TESObjectREFR*, void*, void*, double&);
+    static bool GetQuestCompleted(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetQuestRunning(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetStage(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetDeadCount(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetQuestCompletedStatus(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool InvokeScriptFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetQuestCompletionState(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetStageDone(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool ConvertScriptValue(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetInWorldspace(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetInSameCell(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetDetected(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetGlobalValue(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool IsCurrentFurnitureRef(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetIsID(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateScriptExpression(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool GetPCMiscStat(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool HandleScriptVariable(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool ReadScriptReference(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateParsedScriptFunction(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateScriptFunctionCall(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateScriptCall(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    static bool EvaluateScriptCallback(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*, Script*, ScriptLocals*, double&, unsigned int&);
+    ArrHolder* GetData(int* found);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(Script) == 0x54);
-FNV_STATIC_ASSERT(offsetof(Script, m_kHeader) == 0x18);
-FNV_STATIC_ASSERT(offsetof(Script, m_pText) == 0x2C);
-FNV_STATIC_ASSERT(offsetof(Script, m_data) == 0x30);
-FNV_STATIC_ASSERT(offsetof(Script, m_fValueAtOffset34) == 0x34);
-FNV_STATIC_ASSERT(offsetof(Script, fValueAtOffset38) == 0x38);
-FNV_STATIC_ASSERT(offsetof(Script, m_fValueAtOffset3C) == 0x3C);
-FNV_STATIC_ASSERT(offsetof(Script, m_pOwnerQuest) == 0x40);
-FNV_STATIC_ASSERT(offsetof(Script, m_kReferencedObjectList) == 0x44);
-FNV_STATIC_ASSERT(offsetof(Script, m_kVariableList) == 0x4C);
-#endif

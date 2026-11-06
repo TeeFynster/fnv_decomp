@@ -2,11 +2,15 @@
 // src/havok/physics/collide/shape/compound/collection/hkpshapecollection.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/compound/collection/hkpshapecollection.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpShapeCollection.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkpRayShapeCollectionFilter.h"
+#include "../../../../../../../include/hkpShapeContainer.h"
+#include "../../../../../../../include/hkpShapeCollection.h"
 
-class hkPackedNiTriStripsShape;
-class hkNiTriStripsShape;
-class hkpListShape;
+// These constructors retain the original unit's uninitialized base storage.
+template <typename ENUM, typename STORAGE>
+inline hkEnum<ENUM, STORAGE>::hkEnum() {}
+inline hkpShape::hkpShape(hkpShapeType) {}
 
 class hkpShapeCollection_L
 {
@@ -96,53 +100,9 @@ struct hkBoolRet
     {}
 };
 
-typedef unsigned int hkpShapeKey;
-
-struct StringCursor
-{
-    char* m_kRayStart;
-    char* m_pTileTemplate;
-    char* m_pRayCursor;
-    char* m_kRayEnd;
-};
-
-class ShapeRayCastQuery;
-class ShapeRayCastOutput;
-class hkpRayShapeCollectionFilter;
-
-class hkpShape_V : public hkpShape
+class FUN_00d21450_Class : public hkpShapeCollection
 {
   public:
-    virtual void vfn1();
-    virtual void vfn2();
-    virtual void vfn3();
-    virtual void vfn4();
-    virtual void vfn5();
-    virtual void vfn6();
-    virtual void vfn7();
-    virtual hkBoolRet RayCast(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
-};
-
-class hkpShapeContainer
-{
-  public:
-    virtual ~hkpShapeContainer();
-    virtual int GetNumChildShapes() const;
-    virtual hkpShapeKey getFirstShapeKey() const;
-    virtual hkpShapeKey getNextShapeKey(hkpShapeKey key) const;
-    virtual hkUint32 GetFilterInfoForKey(hkpShapeKey key) const;
-    virtual const hkpShape_V* GetShapeForKey(hkpShapeKey key, void* buffer) const;
-};
-
-class FUN_00d21450_Class : public hkpShape
-{
-  public:
-    hkpShapeContainer m_container;
-    hkBool m_bDisableWelding;
-    hkUint8 m_eCollectionType;
-    char unk16;
-    char unk17;
-
     hkBoolRet FUN_00d21450(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
 };
 
@@ -174,59 +134,53 @@ struct ShapeRayCastOutput
     int m_uiShapeKeyIndex;
 };
 
-class hkpRayShapeCollectionFilter
-{
-  public:
-    virtual hkBoolRet IsCollisionEnabled(const ShapeRayCastQuery& aInput, const FUN_00d21450_Class& aCollection,
-                                         const hkpShapeContainer& bContainer, hkpShapeKey aKey) const = 0;
-};
-
-// Calls RayCast on each child in m_container (filtered if a filter is given), stores the last hit shape key in output.m_uiShapeKeys, returns true if any hit.
+// Casts a ray against each filtered child and stores the last hit shape key in output.m_uiShapeKeys.
 // @fnv 0x00d21450
 hkBoolRet FUN_00d21450_Class::FUN_00d21450(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const
 {
     volatile unsigned int time;
-    StringCursor* stream = (StringCursor*)TlsGetValue(DAT_0126835c);
-    char* current = stream->m_pTileTemplate;
-    if (current < stream->m_kRayEnd)
+    hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* current = stream->m_end.m_storage;
+    if (current < stream->m_capacityMinus16.val())
     {
         *(const char**)current = "TtrcShpCollect";
         _ReadWriteBarrier();
         time = (unsigned int)__rdtsc();
         *(unsigned int*)(current + 4) = time;
         current += 12;
-        stream->m_pTileTemplate = current;
+        stream->m_end.m_storage = current;
     }
     output.m_uiShapeKeyIndex++;
-    const hkpShapeContainer* container = &m_container;
+    const hkpShapeContainer* container =
+        reinterpret_cast<const hkpShapeContainer*>(reinterpret_cast<const char*>(this) + sizeof(hkpShape));
     hkpShapeKey uiHitKey = 0xffffffff;
     __declspec(align(16)) hkUlong buffer[512 / sizeof(hkUlong)];
-    hkBoolRet hitResult;
+    hkBool hitResult;
     if (input.m_pRayShapeCollectionFilter == 0)
     {
-        hkpShapeKey key = container->getFirstShapeKey();
+        hkpShapeKey key = container->GetFirstKey();
         while (key != 0xffffffff)
         {
-            const hkpShape_V* child = container->GetShapeForKey(key, buffer);
-            hitResult.hkBoolRet::hkBoolRet(child->RayCast(input, output));
+            const hkpShape* child = container->GetShapeForKey(key, *reinterpret_cast<hkpShapeBuffer*>(buffer));
+            hitResult.hkBool::hkBool(child->IntersectRayWithShape(input, output));
             if (hitResult.m_cBooleanValue)
                 uiHitKey = key;
-            key = container->getNextShapeKey(key);
+            key = container->GetNextShapeKey(key);
         }
     }
     else
     {
-        hkpShapeKey key = container->getFirstShapeKey();
+        hkpShapeKey key = container->GetFirstKey();
         while (key != 0xffffffff)
         {
             if (input.m_pRayShapeCollectionFilter->IsCollisionEnabled(input, *this, *container, key).m_cBooleanValue)
             {
-                const hkpShape_V* child = container->GetShapeForKey(key, buffer);
-                hitResult.hkBoolRet::hkBoolRet(child->RayCast(input, output));
+                const hkpShape* child = container->GetShapeForKey(key, *reinterpret_cast<hkpShapeBuffer*>(buffer));
+                hitResult.hkBool::hkBool(child->IntersectRayWithShape(input, output));
                 if (hitResult.m_cBooleanValue)
                     uiHitKey = key;
             }
-            key = container->getNextShapeKey(key);
+            key = container->GetNextShapeKey(key);
         }
     }
 
@@ -235,16 +189,16 @@ hkBoolRet FUN_00d21450_Class::FUN_00d21450(const ShapeRayCastQuery& input, Shape
     {
         output.m_uiShapeKeys[output.m_uiShapeKeyIndex] = uiHitKey;
     }
-    StringCursor* streamEnd = (StringCursor*)TlsGetValue(DAT_0126835c);
-    char* currentEnd = streamEnd->m_pTileTemplate;
-    if (currentEnd < streamEnd->m_kRayEnd)
+    hkMonitorStream* streamEnd = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* currentEnd = streamEnd->m_end.m_storage;
+    if (currentEnd < streamEnd->m_capacityMinus16.val())
     {
         *(const char**)currentEnd = "Et";
         _ReadWriteBarrier();
         time = (unsigned int)__rdtsc();
         *(unsigned int*)(currentEnd + 4) = time;
         currentEnd += 12;
-        streamEnd->m_pTileTemplate = currentEnd;
+        streamEnd->m_end.m_storage = currentEnd;
     }
     return hkBoolRet(uiHitKey != 0xffffffff);
 }
@@ -259,23 +213,9 @@ extern "C" char str_010c41f8[];
 class Arg0_L;
 class Arg1_L;
 class Arg2_L;
-class ShapeBuf_L;
+struct ShapeBuf_L;
 struct Ctx_L;
 class Owner_L;
-
-struct ProfRec_L
-{
-    void* id;
-    unsigned int time;
-    int unk08;
-};
-struct ProfSlot_L
-{
-    int unk00;
-    ProfRec_L* head;
-    int unk08;
-    ProfRec_L* end;
-};
 
 class Shape_L
 {
@@ -292,21 +232,6 @@ class Shape_L
     virtual void process_L(Arg0_L* arg0, Ctx_L* ctx, Arg2_L* arg2);
 };
 
-class Coll_L2 : public hkpShapeCollection_L
-{
-  public:
-    virtual int getFirstKey_L();
-    virtual int getNextKey_L(int key);
-    virtual int s04();
-    virtual Shape_L* getChildShape_L(int key, ShapeBuf_L& buffer);
-};
-
-class Filter_L
-{
-  public:
-    virtual char* isEnabled_L(char* out, Arg0_L* arg0, Owner_L* self, Coll_L2* coll, int key);
-};
-
 class Arg0_L
 {
   public:
@@ -319,7 +244,7 @@ class Arg0_L
     void* unk18;
     void* unk1c;
     void* unk20;
-    Filter_L* m_iFilter;
+    const hkpRayShapeCollectionFilter* m_iFilter;
 };
 
 class Arg1_L
@@ -345,20 +270,12 @@ struct Ctx_L
 
 struct __declspec(align(16)) ShapeBuf_L
 {
-    hkVector4 v00, v01, v02, v03, v04, v05, v06, v07;
-    hkVector4 v08, v09, v10, v11, v12, v13, v14, v15;
-    hkVector4 v16, v17, v18, v19, v20, v21, v22, v23;
-    hkVector4 v24, v25, v26, v27, v28, v29, v30, v31;
+    unsigned int data[128];
 };
 
-class Owner_L
+class Owner_L : public hkpShapeCollection
 {
   public:
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    Coll_L2 m_coll;
     void FUN_00d217d0(Arg0_L* arg0, Arg1_L* arg1, Arg2_L* arg2);
 };
 
@@ -366,64 +283,64 @@ class Owner_L
 void Owner_L::FUN_00d217d0(Arg0_L* arg0, Arg1_L* arg1, Arg2_L* arg2)
 {
     volatile unsigned int uiTimestamp;
-    ProfSlot_L* pProfSlot = (ProfSlot_L*)TlsGetValue(DAT_0126835c);
-    ProfRec_L* pProfRec = pProfSlot->head;
-    if (pProfRec < pProfSlot->end)
+    hkMonitorStream* pProfSlot = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    hkMonitorStream::TimerCommand* pProfRec =
+        reinterpret_cast<hkMonitorStream::TimerCommand*>(pProfSlot->m_end.val());
+    if (reinterpret_cast<char*>(pProfRec) < pProfSlot->m_capacityMinus16.val())
     {
-        pProfRec->id = &str_010ce1f8;
+        pProfRec->m_commandAndMonitor = str_010ce1f8;
         _ReadWriteBarrier();
         uiTimestamp = (unsigned int)__rdtsc();
-        pProfRec->time = uiTimestamp;
-        pProfSlot->head = pProfRec + 1;
+        pProfRec->m_time0 = uiTimestamp;
+        pProfSlot->m_end.m_storage = reinterpret_cast<char*>(pProfRec + 1);
     }
     ShapeBuf_L buffer;
-    char enabled;
     Ctx_L ctx;
     int key;
     if (arg0->m_iFilter == 0)
     {
-        key = this->m_coll.getFirstKey_L();
+        key = (reinterpret_cast<const hkpShapeContainer*>(reinterpret_cast<const char*>(this) + sizeof(hkpShape)))->GetFirstKey();
         if (key != -1)
         {
             do
             {
-                ctx.shape = this->m_coll.getChildShape_L(key, buffer);
+                ctx.shape = reinterpret_cast<Shape_L*>(const_cast<hkpShape*>((reinterpret_cast<const hkpShapeContainer*>(reinterpret_cast<const char*>(this) + sizeof(hkpShape)))->GetShapeForKey(key, reinterpret_cast<hkpShapeBuffer&>(buffer))));
                 ctx.arg1 = arg1;
                 ctx.unk08 = arg1->unk08;
                 ctx.key = key;
                 ctx.shape->process_L(arg0, &ctx, arg2);
-                key = this->m_coll.getNextKey_L(key);
+                key = (reinterpret_cast<const hkpShapeContainer*>(reinterpret_cast<const char*>(this) + sizeof(hkpShape)))->GetNextShapeKey(key);
             } while (key != -1);
         }
     }
     else
     {
-        key = this->m_coll.getFirstKey_L();
+        key = (reinterpret_cast<const hkpShapeContainer*>(reinterpret_cast<const char*>(this) + sizeof(hkpShape)))->GetFirstKey();
         if (key != -1)
         {
             do
             {
-                if (*arg0->m_iFilter->isEnabled_L(&enabled, arg0, this, &this->m_coll, key))
+                if (arg0->m_iFilter->IsCollisionEnabled(*reinterpret_cast<const ShapeRayCastQuery*>(arg0), *this, *(reinterpret_cast<const hkpShapeContainer*>(reinterpret_cast<const char*>(this) + sizeof(hkpShape))), key).m_cBooleanValue)
                 {
-                    ctx.shape = this->m_coll.getChildShape_L(key, buffer);
+                    ctx.shape = reinterpret_cast<Shape_L*>(const_cast<hkpShape*>((reinterpret_cast<const hkpShapeContainer*>(reinterpret_cast<const char*>(this) + sizeof(hkpShape)))->GetShapeForKey(key, reinterpret_cast<hkpShapeBuffer&>(buffer))));
                     ctx.arg1 = arg1;
                     ctx.unk08 = arg1->unk08;
                     ctx.key = key;
                     ctx.shape->process_L(arg0, &ctx, arg2);
                 }
-                key = this->m_coll.getNextKey_L(key);
+                key = (reinterpret_cast<const hkpShapeContainer*>(reinterpret_cast<const char*>(this) + sizeof(hkpShape)))->GetNextShapeKey(key);
             } while (key != -1);
         }
     }
-    pProfSlot = (ProfSlot_L*)TlsGetValue(DAT_0126835c);
-    pProfRec = pProfSlot->head;
-    if (pProfRec < pProfSlot->end)
+    pProfSlot = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    pProfRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pProfSlot->m_end.val());
+    if (reinterpret_cast<char*>(pProfRec) < pProfSlot->m_capacityMinus16.val())
     {
-        pProfRec->id = &str_010c41f8;
+        pProfRec->m_commandAndMonitor = str_010c41f8;
         _ReadWriteBarrier();
         uiTimestamp = (unsigned int)__rdtsc();
-        pProfRec->time = uiTimestamp;
-        pProfSlot->head = pProfRec + 1;
+        pProfRec->m_time0 = uiTimestamp;
+        pProfSlot->m_end.m_storage = reinterpret_cast<char*>(pProfRec + 1);
     }
 }
 }  // namespace fnv_00d217d0
@@ -434,99 +351,53 @@ extern float DAT_0104e148;
 extern const char str_010ce228[];
 extern const char str_010c41f8[];
 
-struct S00d216e0_Rec
-{
-    const char* name;
-    unsigned int tick;
-    unsigned int unk08;
-    void setTime()
-    {
-        _ReadWriteBarrier();
-        volatile unsigned int uiTicks = (unsigned int)__rdtsc();
-        tick = uiTicks;
-    }
-};
-
-struct S00d216e0_Ctx
-{
-    int unk00;
-    S00d216e0_Rec* cur;
-    int unk08;
-    S00d216e0_Rec* end;
-    static S00d216e0_Ctx& GetMonitorStream()
-    {
-        return *(S00d216e0_Ctx*)TlsGetValue(DAT_0126835c);
-    }
-};
-
 __forceinline void S00d216e0_timer(const char* name)
 {
-    S00d216e0_Ctx& kCtx = S00d216e0_Ctx::GetMonitorStream();
-    if (kCtx.cur < kCtx.end)
+    hkMonitorStream& kCtx = *(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (kCtx.m_end.val() < kCtx.m_capacityMinus16.val())
     {
-        S00d216e0_Rec* h = kCtx.cur;
-        h->name = name;
-        h->setTime();
-        kCtx.cur = h + 1;
+        hkMonitorStream::TimerCommand* h = reinterpret_cast<hkMonitorStream::TimerCommand*>(kCtx.m_end.val());
+        h->m_commandAndMonitor = name;
+        _ReadWriteBarrier();
+        volatile unsigned int uiTicks = (unsigned int)__rdtsc();
+        h->m_time0 = uiTicks;
+        kCtx.m_end.m_storage = reinterpret_cast<char*>(h + 1);
     }
 }
 
-class ShapeIterator
+// 0x00d216e0 traverses the collection container at +0x10; it uses no packed-triangle members or methods.
+class CollectionProjectionTraversal : public hkpShapeCollection
 {
   public:
-    virtual ~ShapeIterator();
-    virtual void Unk04();
-    virtual int First();
-    virtual int Next(int idx);
-    virtual void Unk10();
-    virtual class hkShape_StandIn* GetShape(int idx, float* outBuf);
+    virtual hkReal getMaximumProjection(const hkVector4& direction) const;
 };
 
-class hkShape_StandIn : public hkpShape
-{
-  public:
-    virtual ~hkShape_StandIn();
-    virtual void Unk04();
-    virtual void Unk08();
-    virtual float GetMaxProjection(int arg);
-};
-
-class hkPackedNiTriStripsShape_StandIn : public hkpShapeCollection
-{
-  public:
-    virtual ~hkPackedNiTriStripsShape_StandIn();
-    virtual void Unk04();
-    virtual int First();
-    virtual float FUN_00d216e0(int arg);
-    virtual void Unk10();
-    virtual void Unk14();
-};
-
-// Iterates child shapes via ShapeIterator, calls GetMaxProjection(arg) on each and returns the largest value, between two timer records.
+// Returns the largest child-shape projection, between two timer records.
 // @fnv 0x00d216e0
-float hkPackedNiTriStripsShape_StandIn::FUN_00d216e0(int arg)
+hkReal CollectionProjectionTraversal::getMaximumProjection(const hkVector4& direction) const
 {
     volatile float maxProj;
     __declspec(align(16)) float buf[125];
 
     S00d216e0_timer(str_010ce228);
 
-    ShapeIterator* iter = reinterpret_cast<ShapeIterator*>(reinterpret_cast<char*>(this) + 0x10);
+    const hkpShapeContainer* iter =
+        reinterpret_cast<const hkpShapeContainer*>(reinterpret_cast<const char*>(this) + sizeof(hkpShape));
 
     maxProj = DAT_0104e148;
-    int idx = iter->First();
+    int idx = iter->GetFirstKey();
 
     while (idx != -1)
     {
-        hkShape_StandIn* shape = iter->GetShape(idx, buf);
-        float currentProj = shape->GetMaxProjection(arg);
+        const hkpShape* shape = iter->GetShapeForKey(idx, *reinterpret_cast<hkpShapeBuffer*>(buf));
+        float currentProj = shape->getMaximumProjection(direction);
 
         if (!(maxProj > currentProj))
         {
             maxProj = currentProj;
         }
 
-        idx = iter->Next(idx);
+        idx = iter->GetNextShapeKey(idx);
     }
 
     S00d216e0_timer(str_010c41f8);
@@ -562,21 +433,12 @@ Derived::Derived()
 class hkpShape_ctor : public hkpShape
 {
   public:
-    hkpShape_ctor(int type)
+    hkpShape_ctor(int type) : hkpShape(static_cast<hkpShapeType>(type))
     {
         m_sReferenceCount = 1;
         m_ulUserData = 0;
-        m_type = type;
+        *reinterpret_cast<hkUint32*>(&m_type) = type;
     }
-};
-
-class ShapeContainerLite
-{
-  public:
-    virtual ~ShapeContainerLite();
-    virtual int FUN_00d213d0();
-    ShapeContainerLite()
-    {}
 };
 
 struct WeldingAndType
@@ -590,7 +452,7 @@ struct WeldingAndType
     }
 };
 
-class FUN_00d21410 : public hkpShape_ctor, public ShapeContainerLite
+class FUN_00d21410 : public hkpShape_ctor, public hkpShapeContainer
 {
   public:
     WeldingAndType m_info;
@@ -602,5 +464,5 @@ class FUN_00d21410 : public hkpShape_ctor, public ShapeContainerLite
 // Constructs a shape object, initializing the reference count, user data, type, and collection type fields.
 // @fnv 0x00d21410
 FUN_00d21410::FUN_00d21410(int type, char collectionType)
-    : hkpShape_ctor(type), ShapeContainerLite(), m_info(collectionType)
+    : hkpShape_ctor(type), hkpShapeContainer(), m_info(collectionType)
 {}

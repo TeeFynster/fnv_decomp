@@ -1,21 +1,19 @@
+#include "../../include/IOManager.h"
+#include "../../include/ExteriorCellLoaderTask.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/NiNode.h"
+#include "../../include/TES.h"
+#include "../../include/TESWorldSpace.h"
+#include "../../include/TESObjectCELL.h"
 
 // src/fallout_shared/exteriorcellloader.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/exteriorcellloader.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct IOManager
-{
-    void SubmitTask();
-};
-
-struct ExteriorCellLoaderTask : IOManager
-{
-    void FUN_00527ce0();
-};
 
 // @fnv 0x00527ce0
 void __thiscall ExteriorCellLoaderTask::FUN_00527ce0()
 {
-    SubmitTask();
+    ((IOManager*)this)->SubmitTask();
 }
 
 struct IntPoint2D
@@ -24,38 +22,23 @@ struct IntPoint2D
     int iY;
 };
 
-struct IOTask
-{
-};
-
-struct FUN_00527df0_shell
-{
-    IOTask m_IOTask;
-    IntPoint2D* m_pGridCoordinates;
-    bool GetDescription(char* apDescription, unsigned int aiBufferSize);
-};
 
 extern "C" char* __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
 
 // Formats the cell coordinates of the task's cell into apDescription using _sprintf_s and returns true.
 // @fnv 0x00527df0
-bool FUN_00527df0_shell::GetDescription(char* apDescription, unsigned int aiBufferSize)
+bool ExteriorCellLoaderTask::GetDescription(char* apDescription, unsigned int aiBufferSize)
 {
     _sprintf_s(apDescription, aiBufferSize, "ExteriorCellLoaderTask for cell ( %i, %i )",
                ((IntPoint2D*)*(int*)((char*)this + 0x1c))->iX, ((IntPoint2D*)*(int*)((char*)this + 0x1c))->iY);
     return true;
 }
 
-struct FUN_00528790_shell
-{
-    char bUnk96;
-    char GetUnk60Byte();
-};
-
+// TES.h exposes the flag but does not declare this accessor.
 // @fnv 0x00528790
-char FUN_00528790_shell::GetUnk60Byte()
+char __fastcall GetTESRegionState(TES* tes)
 {
-    return *reinterpret_cast<char*>(this + 0x60);
+    return (char)tes->m_bHasCurrentRegion;
 }
 
 struct FUN_005287e0_shell
@@ -100,49 +83,21 @@ void FUN_00528820_shell::ClearField()
 
 extern "C" void __cdecl _Deallocate(void*);
 
-struct FUN_00440640_shell
-{
-    void FUN_00440640();
-};
-
-struct FUN_00527c70_shell
-{
-    char* m_00;
-    char* m_1c;
-    void FUN_00527c70();
-};
-
-// Sets m_00 to "@|R", deallocates the pointer at offset 0x1c, then calls FUN_00440640 on this.
 // @fnv 0x00527c70
-void FUN_00527c70_shell::FUN_00527c70()
+ExteriorCellLoaderTask::~ExteriorCellLoaderTask()
 {
-    m_00 = "@|R";
     char* p = *(char**)((char*)this + 0x1c);
     _Deallocate(p);
-    ((FUN_00440640_shell*)this)->FUN_00440640();
 }
 
-struct NiNode
-{
-};
-struct TESObjectCELL
-{
-    NiNode* FUN_00545cb0();
-};
 extern int g_TES;
-
-struct FUN_00454b90_shell
-{
-    int m_00;
-    void AddCellToBuffer(TESObjectCELL* apCell);
-};
 
 struct FUN_005287b0_shell
 {
     void FUN_005287b0(TESObjectCELL* apCell);
 };
 
-// If apCell is non-null and its FUN_00545cb0() node is non-null, calls AddCellToBuffer on the global g_TES object with apCell.
+// If the cell has a node, add it to the TES cell buffer.
 // @fnv 0x005287b0
 void FUN_005287b0_shell::FUN_005287b0(TESObjectCELL* apCell)
 {
@@ -150,50 +105,22 @@ void FUN_005287b0_shell::FUN_005287b0(TESObjectCELL* apCell)
     {
         if (apCell->FUN_00545cb0())
         {
-            ((FUN_00454b90_shell*)(g_TES))->AddCellToBuffer(apCell);
+            ((TES*)g_TES)->AddToBuffer(apCell);
         }
     }
 }
 
-struct TES
-{
-    bool IsCellBuffered(TESObjectCELL* apCell, bool abUnload);
-};
 struct DH
 {
     void DeleteObject(TESObjectCELL* apCell);
 };
 extern DH* g_dataHandler;
-struct TESWorldSpace
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int GetCellAtGridCoord(int aiX, int aiY);
-};
-struct FUN_00527d80_shell
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    TESWorldSpace* m_1c;
-    void FUN_00527d80(int, int);
-};
 // @fnv 0x00527d80
-void FUN_00527d80_shell::FUN_00527d80(int, int)
+void ExteriorCellLoaderTask::Cancel(BS_TASK_STATE, void*)
 {
-    if (m_1c->m_0c && ((TES*)g_TES)->IsCellBuffered((TESObjectCELL*)m_1c->m_0c, false))
-        g_dataHandler->DeleteObject((TESObjectCELL*)m_1c->m_0c);
-    ((TESWorldSpace*)m_18)->GetCellAtGridCoord(m_1c->m_00, m_1c->m_04);
+    if (*(int*)(*(char**)((char*)this + 0x1c) + 0xc) && ((TES*)g_TES)->IsCellBuffered((TESObjectCELL*)*(int*)(*(char**)((char*)this + 0x1c) + 0xc), false))
+        g_dataHandler->DeleteObject((TESObjectCELL*)*(int*)(*(char**)((char*)this + 0x1c) + 0xc));
+    (*(TESWorldSpace**)((char*)this + 0x18))->GetCellAtGridCoord(((IntPoint2D*)*(void**)((char*)this + 0x1c))->iX, ((IntPoint2D*)*(void**)((char*)this + 0x1c))->iY);
 }
 
 struct FUN_00528840_shell : public FUN_00528800_shell
@@ -215,77 +142,54 @@ struct LoaderDummy
 {
     void FUN_00528620(IntPoint2D* p);
 };
-struct CellRefDummy
-{
-    void FUN_005571a0(int i);
-};
 struct MyCellEx
 {
     char _pad[0xC];
-    CellRefDummy* pObj;
-};
-struct FUN_00527cb0_shell
-{
-    char _pad[0x18];
-    LoaderDummy* pLoader;
-    IntPoint2D* m_pGridCoordinates;
-    void FUN_00527cb0();
+    TESObjectCELL* pObj;
 };
 // @fnv 0x00527cb0
-void FUN_00527cb0_shell::FUN_00527cb0()
+void ExteriorCellLoaderTask::Run()
 {
-    pLoader->FUN_00528620(m_pGridCoordinates);
-    ((MyCellEx*)m_pGridCoordinates)->pObj->FUN_005571a0(1);
+    (*(LoaderDummy**)((char*)this + 0x18))->FUN_00528620(*(IntPoint2D**)((char*)this + 0x1c));
+    ((MyCellEx*)*(void**)((char*)this + 0x1c))->pObj->FUN_005571a0(1);
 }
 
-bool __fastcall FUN_00449130(int*);
-
-struct FUN_00527d00_shell
-{
-    char _pad[0x18];
-    FUN_005287b0_shell* pLoader;
-    char* m_pGridCoordinates;
-    void FUN_00527d00();
-};
-
 // @fnv 0x00527d00
-void FUN_00527d00_shell::FUN_00527d00()
+void ExteriorCellLoaderTask::Finish()
 {
-    if (!FUN_00449130((int*)this))
+    if (!IOTask::FUN_00449130())
     {
-        if (*(int*)(m_pGridCoordinates + 0xc) != 0)
+        if (*(int*)(*(char**)((char*)this + 0x1c) + 0xc) != 0)
         {
-            if (*(unsigned char*)(m_pGridCoordinates + 0x10) != 0)
+            if (*(unsigned char*)(*(char**)((char*)this + 0x1c) + 0x10) != 0)
             {
-                pLoader->FUN_005287b0((TESObjectCELL*)*(int*)(m_pGridCoordinates + 0xc));
+                (*(FUN_005287b0_shell**)((char*)this + 0x18))->FUN_005287b0((TESObjectCELL*)*(int*)(*(char**)((char*)this + 0x1c) + 0xc));
             }
         }
     }
-    *(char*)(m_pGridCoordinates + 0x10) = 0;
-    ((TESWorldSpace*)pLoader)->GetCellAtGridCoord(*(int*)(m_pGridCoordinates), *(int*)(m_pGridCoordinates + 4));
+    *(char*)(*(char**)((char*)this + 0x1c) + 0x10) = 0;
+    (*(TESWorldSpace**)((char*)this + 0x18))->GetCellAtGridCoord(*(int*)*(void**)((char*)this + 0x1c), *(int*)(*(char**)((char*)this + 0x1c) + 4));
 }
 
 struct CellEffects;
-struct NiPoint2
-{
-    float x;
-    float y;
-};
 struct WorldSpaceAccess : TESWorldSpace
 {
     CellEffects* __thiscall FUN_00585b30(int x, int y);
 };
-struct NodeEffects : NiNode
+// FUN_00546fb0 returns landscape data, not a scene node.
+struct LandscapeEffects
 {
     void __thiscall FUN_00535b90(bool value);
     void __thiscall FUN_0053fa40(unsigned char value);
     void __thiscall FUN_0053f440();
 };
+// Supplemental method declarations absent from the shared TESObjectCELL header.
+// This adds no fields or virtual functions to the shared cell layout.
 struct CellEffects : TESObjectCELL
 {
     void __thiscall GetOrCreateWidget();
-    NodeEffects* __thiscall FUN_00546fb0();
-    NodeEffects* __thiscall FUN_00546fb0(NiPoint2* outPosition);
+    LandscapeEffects* __thiscall FUN_00546fb0();
+    LandscapeEffects* __thiscall FUN_00546fb0(NiPoint2* outPosition);
     bool __thiscall FUN_00451cd0();
     float __thiscall FUN_005471e0();
     void __thiscall SetFlag2(bool value);
@@ -297,7 +201,7 @@ struct GameWorld : TES
     CellEffects* __thiscall FUN_00461330(int mode, int x, int y, WorldSpaceAccess* worldSpace);
 };
 extern GameWorld* DAT_011c3f2c;
-extern FUN_00528790_shell* DAT_011dea10;
+extern TES* DAT_011dea10;
 struct GlobalSettings
 {
     unsigned char* __thiscall FUN_00408d60();
@@ -324,17 +228,18 @@ void CellLoader::FUN_00528620(CellLoadData* pLoadData)
         if (pLoadData->cell == 0)
             pLoadData->cell = DAT_011c3f2c->FUN_00461330(0, pLoadData->iX, pLoadData->iY, pLoadData->worldSpace);
         pLoadData->cell->GetOrCreateWidget();
-        NodeEffects* pNode = pLoadData->cell->FUN_00546fb0();
-        if (pNode != 0)
+        LandscapeEffects* pLandscape = pLoadData->cell->FUN_00546fb0();
+        if (pLandscape != 0)
         {
-            pNode->FUN_00535b90(true);
-            pNode->FUN_0053fa40(DAT_011dea10->GetUnk60Byte());
+            pLandscape->FUN_00535b90(true);
+            pLandscape->FUN_0053fa40(GetTESRegionState(DAT_011dea10));
         }
         if (!pLoadData->cell->FUN_00451cd0())
         {
-            NiPoint2 position;
-            pLoadData->cell->FUN_00546fb0(&position)->FUN_0053f440();
-            pLoadData->cell->SetFlag2(position.x < pLoadData->cell->FUN_005471e0());
+            // Avoid invoking NiPoint2's out-of-line default constructor.
+            float position[2];
+            pLoadData->cell->FUN_00546fb0((NiPoint2*)position)->FUN_0053f440();
+            pLoadData->cell->SetFlag2(position[0] < pLoadData->cell->FUN_005471e0());
             if (*DAT_011c7adc.FUN_00408d60() && pLoadData->cell->FUN_004518e0() && !pLoadData->cell->FUN_00451cd0())
             {
                 FUN_0049c860(pLoadData->cell);
@@ -411,19 +316,4 @@ bool FUN_00528870_shell::RunQueuedTask(QueuedTask* pTask, void* pArg)
         }
     }
     return true;
-}
-
-struct CellLoaderDeletingTask : FUN_00527c70_shell
-{
-    void* __thiscall FUN_00527c40(unsigned int aiFlags);
-};
-
-// Calls FUN_00527c70, deallocates this when aiFlags bit 0 is set, and returns this.
-// @fnv 0x00527c40
-void* __thiscall CellLoaderDeletingTask::FUN_00527c40(unsigned int aiFlags)
-{
-    FUN_00527c70();
-    if (aiFlags & 1)
-        _Deallocate(this);
-    return this;
 }

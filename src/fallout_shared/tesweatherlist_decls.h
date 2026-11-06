@@ -1,23 +1,15 @@
-// fallout_shared/tesweatherlist_decls.h: declares TESForm, TESGlobal, WeatherEntry, TESWeatherList, ContainerItemExtraFileData
+#include "../../include/BSSimpleList.h"
+// fallout_shared/tesweatherlist_decls.h: declares WeatherEntry, TESWeatherList, ContainerItemExtraFileData
 #ifndef FNV_TESWEATHERLIST_DECLS_H
 #define FNV_TESWEATHERLIST_DECLS_H
 
 
 #include "layout_support.h"
 
-class TESFile;
-class TESForm
-{
-  public:
-    virtual void vfn_0();
-    unsigned int GetFormID();
-    static TESForm* GetFormByID(unsigned int);
-    static void RemapFormIDForFile(unsigned int&, TESFile*);
-};
+#include "../../include/TESForm.h"
+#include "../../include/TESGlobal.h"
+
 class TESWeather;
-class TESGlobal : public TESForm
-{
-};
 
 class WeatherEntry
 {
@@ -28,24 +20,10 @@ class WeatherEntry
     WeatherEntry();
 };
 
-template <> class BSSimpleList<WeatherEntry*>
-{
-  public:
-    WeatherEntry* m_item;
-    BSSimpleList<WeatherEntry*>* m_pkNext;
-    WeatherEntry*& GetItem();
-    BSSimpleList<WeatherEntry*>* GetNext();
-    void RemoveAll();
-    void AddHead(WeatherEntry* const& item);
-    void Sort(int(__cdecl* compare)(WeatherEntry*, WeatherEntry*));
-};
 
-class TESWeatherList : public BSSimpleList<WeatherEntry*>
-{
-  public:
-    void ClearWeatherSounds();
-    static void LoadWeatherEntries(TESWeatherList* list, TESFile* file, TESForm* form);
-};
+
+// after the unit's BSSimpleList<WeatherEntry*> specialization above
+#include "../../include/TESWeatherList.h"
 
 class FUN_00582570
 {

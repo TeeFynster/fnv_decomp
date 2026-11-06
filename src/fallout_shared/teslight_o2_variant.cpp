@@ -2,13 +2,10 @@
 // src/fallout_shared/teslight_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/teslight.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "teslight_TESFullName.h"
-#include "teslight_TESForm.h"
-#include "teslight_TESScriptableForm.h"
-class TESSound : public TESForm
-{
-};
-#include "teslight_r2d_types_TESObjectLIGH.h"
+#include "../../include/TESSound.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiSortAdjustNode.h"
+#include "../../include/NiLight.h"
 #include "teslight_scene.h"
 extern "C" void* __cdecl memset(void* destination, int value, unsigned int size);
 extern "C" const char DAT_01029064[];

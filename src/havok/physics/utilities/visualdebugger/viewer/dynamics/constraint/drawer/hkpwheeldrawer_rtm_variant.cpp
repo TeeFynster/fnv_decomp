@@ -4,22 +4,23 @@
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkpwheeldrawer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/constraint/drawer/hkpwheeldrawer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00de71d0 FUN_00de71d0: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x, y, z, w;
     };
-};
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_load_ps1(const float*);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_load_ps1(const float*);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
 
 struct Matrix
 {
-    __m128 x, y, z, w;
+    LocalM128 x, y, z, w;
 };
 struct Dbg
 {
@@ -32,7 +33,7 @@ struct Dbg
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void Line(__m128* a, __m128* b, unsigned int c, int d, int e);
+    virtual void Line(LocalM128* a, LocalM128* b, unsigned int c, int d, int e);
 };
 
 struct Sub
@@ -41,8 +42,8 @@ struct Sub
 };
 struct Ops
 {
-    void FUN_00c7f640(const Matrix* p, const __m128* q);
-    void FUN_00c7f700(const __m128* p, const __m128* q);
+    void FUN_00c7f640(const Matrix* p, const LocalM128* q);
+    void FUN_00c7f700(const LocalM128* p, const LocalM128* q);
 };
 struct Ex
 {
@@ -53,9 +54,9 @@ struct Ex
 
 struct Body
 {
-    __m128 unk00, unk10, unk20, unk30, unk40, v50;
-    __m128 v60, v70, unk80, v90, limitsA0, unkB0, unkC0, vD0;
-    __m128 unkE0, unkF0, unk100, v110;
+    LocalM128 unk00, unk10, unk20, unk30, unk40, v50;
+    LocalM128 v60, v70, unk80, v90, limitsA0, unkB0, unkC0, vD0;
+    LocalM128 unkE0, unkF0, unk100, v110;
 };
 struct Input
 {
@@ -73,23 +74,23 @@ struct DrawObject
     float unk14;
     float unk18;
     float m1c;
-    __m128 unk20;
-    __m128 unk30;
-    __m128 m40;
-    __m128 m50;
-    __m128 m60;
-    __m128 unk70;
-    __m128 unk80;
-    __m128 m90;
-    __m128 unka0;
-    __m128 unkb0;
-    __m128 mc0;
+    LocalM128 unk20;
+    LocalM128 unk30;
+    LocalM128 m40;
+    LocalM128 m50;
+    LocalM128 m60;
+    LocalM128 unk70;
+    LocalM128 unk80;
+    LocalM128 m90;
+    LocalM128 unka0;
+    LocalM128 unkb0;
+    LocalM128 mc0;
     void FUN_00de71d0(Input* a, Dbg* dbg, int p3, int p4);
 };
 
-static inline __m128 bc(const float& s)
+static inline LocalM128 bc(const float& s)
 {
-    __m128 x = _mm_load_ss(&s);
+    LocalM128 x = _mm_load_ss(&s);
     return _mm_shuffle_ps(x, x, 0);
 }
 
@@ -98,7 +99,7 @@ void DrawObject::FUN_00de71d0(Input* a, Dbg* dbg, int p3, int p4)
 {
     Body* b = a->body;
     Matrix t0, t1;
-    __m128 q1, vc, vd, x2;
+    LocalM128 q1, vc, vd, x2;
 
     ((Sub*)&mc0)->FUN_00e10a10(dbg);
     ((Ex*)this)->FUN_00de47e0(a, &t0, &t1);
@@ -120,7 +121,7 @@ void DrawObject::FUN_00de71d0(Input* a, Dbg* dbg, int p3, int p4)
     float wa = b->limitsA0.y;
     float wb = b->limitsA0.z;
     ((Ops*)&vd)->FUN_00c7f700(&m90, &b->v70);
-    __m128 r = _mm_add_ps(_mm_mul_ps(bc(wb), q1), m50);
+    LocalM128 r = _mm_add_ps(_mm_mul_ps(bc(wb), q1), m50);
     float kk = m00 * m1c;
     s = (float)((double)kk * (double)0.1f);
     vc = _mm_add_ps(_mm_mul_ps(bc(s), vd), r);
@@ -129,7 +130,7 @@ void DrawObject::FUN_00de71d0(Input* a, Dbg* dbg, int p3, int p4)
     dbg->Line(&vc, &x2, 0xffffffff, p3, p4);
 
     float kf = m00 * m1c;
-    __m128 x4 = _mm_add_ps(_mm_mul_ps(bc(wa), q1), m50);
+    LocalM128 x4 = _mm_add_ps(_mm_mul_ps(bc(wa), q1), m50);
     vc = _mm_add_ps(_mm_mul_ps(bc((float)((double)kf * (double)0.1f)), vd), x4);
     x2 = _mm_add_ps(_mm_mul_ps(bc((float)((double)kf * -(double)0.1f)), vd), x4);
     dbg->Line(&vc, &x2, 0xffffffff, p3, p4);

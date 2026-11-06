@@ -1,15 +1,10 @@
-// fallout_shared/bgstouchspellform_decls.h: declares BGSCameraPath, TESObjectWithEditorID, MagicItem, MagicItemForm, EnchantmentItem
+// fallout_shared/bgstouchspellform_decls.h: declares TESObjectWithEditorID and unit helpers
 #ifndef FNV_BGSTOUCHSPELLFORM_DECLS_H
 #define FNV_BGSTOUCHSPELLFORM_DECLS_H
 
 
-#include "TESForm.h"
-
-class BGSCameraPath
-{
-  public:
-    int HasNameForWarning();
-};
+#include "layout_support.h"
+#include "../../include/TESForm.h"
 
 class TESObjectWithEditorID
 {
@@ -91,29 +86,6 @@ class TESObjectWithEditorID
     virtual void vfn_0x128();
     virtual void vfn_0x12c();
     virtual const char* GetEditorID();
-};
-
-class MagicItem
-{
-  public:
-    virtual void vfn_0x00();
-    virtual void vfn_0x04();
-    virtual void vfn_0x08();
-    virtual void vfn_0x0c();
-    virtual void vfn_0x10();
-    virtual void vfn_0x14();
-    virtual unsigned int GetMagicType();
-};
-
-class MagicItemForm : public TESForm, public MagicItem
-{
-  public:
-};
-
-class EnchantmentItem : public MagicItemForm
-{
-  public:
-    bool FUN_004094f0(TESForm* owner);
 };
 
 TESForm* GetFormByID(unsigned int formID);

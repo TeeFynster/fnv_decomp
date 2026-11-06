@@ -94,7 +94,9 @@ extern "C" bool __fastcall FUN_00ee8d20(ProgramCacheDirectoryState* cache, int)
     return false;
 }
 
-struct FileAccessObject : NiFile
+// FUN_00aa1a40 reads its good flag at +0x30: this unit lays the opened file out on its own (it derived from an
+// empty NiFile stand-in before), so it stays a self-contained view rather than the shared NiFile.
+struct FileAccessObject
 {
     FileAccessObject(const char*, NiFile::OpenMode, unsigned int);
     virtual ~FileAccessObject();
@@ -136,20 +138,13 @@ namespace RelativeFileSeekDetail {
 class RelativeSeekFile : public NiFile
 {
   public:
-    virtual ~RelativeSeekFile();
-    virtual operator bool() const;
-    virtual void Advance(int);
-    virtual unsigned int Position() const;
-    virtual void SetSwap(bool);
-    virtual void SeekFrom(int, int);
-
     void FUN_00aa1a90(int distance);
 };
 
 // @fnv 0x00aa1a90
 void RelativeSeekFile::FUN_00aa1a90(int distance)
 {
-    SeekFrom(distance, DAT_010a2484);
+    Seek(distance, DAT_010a2484);  // NiFile::Seek(int, int), vtable slot 5 (+0x14)
 }
 }
 

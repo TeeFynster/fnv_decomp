@@ -1,3 +1,4 @@
+#include "../../include/NiColorA.h"
 
 // src/staging/blk_004a0000_o2_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-24 by flag_moves.py: the bytes and the matched neighbours of these functions
 // say /MT /Od /Oy- /GS /EHsc /Gy (unit src/staging/blk_004a0000_o2.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions to their real
@@ -7,24 +8,9 @@
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
 
-class NiPoint3
-{
-  public:
-    union
-    {
-        struct
-        {
-            float x, y, z;
-        };
-        float components[3];
-    };
-    NiPoint3();
-    NiPoint3(float, float, float);
-    NiPoint3 ApplyScaled(float) const;
-    NiPoint3 FUN_00439e90(const NiPoint3&) const;
-    NiPoint3 FUN_00439ef0(const NiPoint3&) const;
-    void FUN_004a0c10();
-};
+#include "../../include/HitArray.h"
+#include "../../include/NiPoint3.h"
+
 struct __declspec(align(16)) ImpactVector4
 {
     union
@@ -37,7 +23,7 @@ struct __declspec(align(16)) ImpactVector4
     };
 };
 struct HitBody;
-struct ImpactHit
+struct HitInfo
 {
     ImpactVector4 normal;
     float fraction;
@@ -46,15 +32,6 @@ struct ImpactHit
     int unk40, unk44, unk48, unk4c;
     HitBody* body;
     int unk54, unk58, unk5c;
-};
-struct HitArray
-{
-    ImpactHit* GetEntryAt(int);
-    int FUN_00726070();
-};
-struct HitHolder
-{
-    HitArray* FUN_00460140();
 };
 struct FUN_004a3c20
 {
@@ -75,7 +52,7 @@ struct FUN_004a3c20
     void FUN_004a3da0(const NiPoint3&);
     void FUN_004a3eb0(const NiPoint3&);
     void FUN_004a3fb0(void*);
-    HitHolder* FUN_008cdd90();
+    HitArray* FUN_008cdd90();
 };
 struct FUN_004a3a70
 {
@@ -84,7 +61,7 @@ struct FUN_004a3a70
     int unk08, unk0c;
     unsigned int data;
     int size, capacity, unk1c;
-    unsigned char hitStorage[8 * sizeof(ImpactHit)];
+    unsigned char hitStorage[8 * sizeof(HitInfo)];
     FUN_004a3a70();
     ~FUN_004a3a70();
 };
@@ -193,12 +170,7 @@ struct IntSetting
 extern FloatSetting DAT_011c5818, DAT_011c584c;
 extern IntSetting DAT_011c5868;
 extern const float DAT_01017868, DAT_0101e578, DAT_01018f5c, DAT_0101e574, DAT_0101e570;
-struct ImageSpaceEffectParam
-{
-    float r, g, b, a;
-    ImageSpaceEffectParam(float, float, float, float);
-};
-void* __cdecl FUN_004b3890(const NiPoint3&, const ImageSpaceEffectParam&, const NiPoint3&, const ImageSpaceEffectParam&,
+void* __cdecl FUN_004b3890(const NiPoint3&, const NiColorA&, const NiPoint3&, const NiColorA&,
                            bool);
 struct TESView
 {
@@ -253,7 +225,7 @@ void ImpactTask::FUN_004a2d50()
         {
             splatter->FUN_006231a0(world);
             float distance = *DAT_011c5818.FUN_00403e20();
-            NiPoint3 end = origin.FUN_00439e90(direction.ApplyScaled(distance));
+            NiPoint3 end = static_cast<const NiPoint3&>(origin).FUN_00439e90(direction.ApplyScaled(distance));
             end.x += FUN_00476b70(DAT_0101e578, DAT_01017868);
             end.y += FUN_00476b70(DAT_0101e578, DAT_01017868);
             end.z += FUN_00476b70(DAT_0101e578, DAT_01017868);
@@ -262,8 +234,8 @@ void ImpactTask::FUN_004a2d50()
             end.z += drop;
             if (*DAT_011c5868.FUN_0043d4d0() > 0)
             {
-                void* line = FUN_004b3890(origin, ImageSpaceEffectParam(0, 1, 0, 1), end,
-                                          ImageSpaceEffectParam(0, 1, 1, 1), true);
+                void* line = FUN_004b3890(origin, NiColorA(0, 1, 0, 1), end,
+                                          NiColorA(0, 1, 1, 1), true);
                 g_TES->FUN_00458e20(line, DAT_01018f5c);
             }
             FUN_008c71b0 filter(0);
@@ -295,8 +267,8 @@ void ImpactTask::FUN_004a2d50()
                     void* texture = impact ? impact->FUN_006733e0() : 0;
                     if (!texture)
                         continue;
-                    NiPoint3 position = origin.FUN_00439e90(FUN_004a3760(
-                        ray.FUN_008cdd90()->FUN_00460140()->GetEntryAt(hit)->fraction, end.FUN_00439ef0(origin)));
+                    NiPoint3 position = static_cast<const NiPoint3&>(origin).FUN_00439e90(FUN_004a3760(
+                        ray.FUN_008cdd90()->FUN_00460140()->GetEntryAt(hit)->fraction, static_cast<const NiPoint3&>(end).FUN_00439ef0(origin)));
                     NiPoint3 normal;
                     FUN_004a3970(normal, ray.FUN_008cdd90()->FUN_00460140()->GetEntryAt(hit)->normal);
                     bool landscape = FUN_008c71b0(body->FUN_0043b540()).FUN_004a3a20() == 1;

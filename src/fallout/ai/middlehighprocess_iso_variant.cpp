@@ -1,7 +1,39 @@
 // src/fallout/ai/middlehighprocess_iso_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/fallout/ai/middlehighprocess.cpp that match byte for byte only
 // with VC9 SP1 and /MT /Od /Oy- /GS /EHsc /Gy (unit lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
-#include "middlehighprocess_decls.h"
+#include "../../../include/Actor.h"
+#include "../../../include/Character.h"
+#include "../../../include/EffectSetting.h"
+#include "../../../include/FleePackage.h"
+#include "../../../include/HighProcess.h"
+#include "../../../include/PathingLocation.h"
+#include "../../../include/PathingRequest.h"
+#include "../../../include/PathingRequestFlee.h"
+#include "../../../include/Setting.h"
+#include "../../../include/TESPackage.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TrespassPackage.h"
+#include "../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
 bool IsValidSandboxProcedure(int aiProcedure);
 
 // 0x00918120  /MT /Od /Oy- /GS /EHsc /Gy
@@ -12,57 +44,20 @@ struct NiP3
     float y;
     float z;
 };
-struct TESSound;
-struct Setting_S
-{
-    float f;
-};
 class PlayerS
 {
   public:
     bool IsSleepingOrResting();
 };
-class TESPackage
+// Actor has no POD-by-value overload for the 0x008bb520 call; NiPoint3
+// introduces a copy-constructor call under /Od.
+struct ActShell
 {
-  public:
-    virtual void tq_test();
-};
-class TrespassPackage : public TESPackage
-{
-  public:
-    virtual void tp_test();
-    int FUN_009185e0();
-    float FUN_00644790();
-    void FUN_008db4c0(float);
-};
-class HighProcess : public BaseProcess
-{
-  public:
-    virtual void hp_test();
-};
-class Character : public Actor
-{
-  public:
-    virtual void ch_test();
-};
-struct EffectSetting
-{
-    TESSound* GetBoltSound();
+    void FUN_008bb520(NiP3 p, int a);
 };
 struct TimeGlobal
 {
     float FUN_0084d030();
-};
-struct originalRuntimeFloatSetting1295_t
-{
-    Setting_S* Float();
-};
-struct ActShell
-{
-    void FUN_008bb520(NiP3 p, int a);
-    float FUN_005723b0(TESObjectREFR* r, int a, int b);
-    bool FUN_008a61b0();
-    bool FUN_008b3bb0();
 };
 struct ZZ1
 {
@@ -96,10 +91,6 @@ struct Pl20c
     char pad[0x20c];
     unsigned char b;
 };
-struct FUN_008a08c0_Class
-{
-    unsigned char GetByteAt7C4();
-};
 struct FUN_005c1a00
 {
     void Set(int a, char b);
@@ -107,10 +98,6 @@ struct FUN_005c1a00
 struct FUN_005a03f0_obj
 {
     bool FUN_005a03f0(unsigned int a);
-};
-struct TESObjectREFR_acc
-{
-    bool Activate(TESObjectREFR* a, bool b, TESBoundObject* c, int d);
 };
 
 struct MidProc
@@ -740,7 +727,7 @@ struct V1f4
 
 extern "C" Actor* g_thePlayer;
 extern "C" TimeGlobal DAT_011f6394;
-extern "C" originalRuntimeFloatSetting1295_t DAT_011cd2c4;
+extern "C" Setting DAT_011cd2c4;
 extern "C" double DAT_010179e0;
 
 // @fnv 0x00918120
@@ -764,13 +751,13 @@ void MidProc::FUN_00918120(Actor* pActor, int a2, int a3, int a4)
         return;
     }
 
-    if (((ActShell*)pActor)->FUN_005723b0(this->pTarget, 0, 0) > DAT_010179e0)
+    if (pActor->TESObjectREFR::FUN_005723b0(this->pTarget, 0, 0) > DAT_010179e0)
     {
         this->v166(pActor, false, a4, true);
         return;
     }
 
-    if (!((ActShell*)pActor)->FUN_008b3bb0())
+    if (!pActor->FUN_008b3bb0())
         this->v165(pActor);
 
     if (this->pTarget)
@@ -812,7 +799,7 @@ void MidProc::FUN_00918120(Actor* pActor, int a2, int a3, int a4)
     Character* pChr = dynamic_cast<Character*>(this->pTarget);
     Actor* pA2 = dynamic_cast<Actor*>(this->pTarget);
 
-    if (((ActShell*)pActor)->FUN_008a61b0() && pA2)
+    if (pActor->IsInDeadState() && pA2)
     {
         if (pChr == g_thePlayer)
         {
@@ -822,14 +809,14 @@ void MidProc::FUN_00918120(Actor* pActor, int a2, int a3, int a4)
                 ((FUN_005c1a00*)g_thePlayer)->Set(0, 1);
                 return;
             }
-            if (!this->v182() && !((FUN_008a08c0_Class*)g_thePlayer)->GetByteAt7C4())
+            if (!this->v182() && !g_thePlayer->GetByteAt7C4())
             {
-                if (((TESObjectREFR_acc*)g_thePlayer)->Activate(pActor, 0, 0, 1))
+                if (g_thePlayer->TESObjectREFR::Activate(pActor, 0, (TESBoundObject*)0, 1))
                     this->v162(pActor, 1);
             }
             else
             {
-                if (((FUN_008a08c0_Class*)g_thePlayer)->GetByteAt7C4())
+                if (g_thePlayer->GetByteAt7C4())
                 {
                     bool bCombat = this->v207(pActor, g_thePlayer, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0);
                 }
@@ -856,108 +843,9 @@ struct FleeRadius
 {
     int FUN_0044ddc0();
 };
-__if_not_exists(TESPackage::TESPackage)
-{
-    class TESPackage
-    {
-      public:
-        virtual ~TESPackage();
-    };
-}
 
-class FleePackageAccess
-{
-  public:
-    virtual void p_000();
-    virtual void p_001();
-    virtual void p_002();
-    virtual void p_003();
-    virtual void p_004();
-    virtual void p_005();
-    virtual void p_006();
-    virtual void p_007();
-    virtual void p_008();
-    virtual void p_009();
-    virtual void p_00a();
-    virtual void p_00b();
-    virtual void p_00c();
-    virtual void p_00d();
-    virtual void p_00e();
-    virtual void p_00f();
-    virtual void p_010();
-    virtual void p_011();
-    virtual void p_012();
-    virtual void p_013();
-    virtual void p_014();
-    virtual void p_015();
-    virtual void p_016();
-    virtual void p_017();
-    virtual void p_018();
-    virtual void p_019();
-    virtual void p_01a();
-    virtual void p_01b();
-    virtual void p_01c();
-    virtual void p_01d();
-    virtual void p_01e();
-    virtual void p_01f();
-    virtual void p_020();
-    virtual void p_021();
-    virtual void p_022();
-    virtual void p_023();
-    virtual void p_024();
-    virtual void p_025();
-    virtual void p_026();
-    virtual void p_027();
-    virtual void p_028();
-    virtual void p_029();
-    virtual void p_02a();
-    virtual void p_02b();
-    virtual void p_02c();
-    virtual void p_02d();
-    virtual void p_02e();
-    virtual void p_02f();
-    virtual void p_030();
-    virtual void p_031();
-    virtual void p_032();
-    virtual void p_033();
-    virtual void p_034();
-    virtual void p_035();
-    virtual void p_036();
-    virtual void p_037();
-    virtual void p_038();
-    virtual void p_039();
-    virtual void p_03a();
-    virtual void p_03b();
-    virtual void p_03c();
-    virtual void p_03d();
-    virtual void p_03e();
-    virtual void p_03f();
-    virtual void p_040();
-    virtual void p_041();
-    virtual void p_042();
-    virtual void p_043();
-    virtual void p_044();
-    virtual void p_045();
-    virtual void p_046();
-    virtual void p_047();
-    virtual void p_048();
-    virtual void p_049();
-    virtual void p_04a();
-    virtual void p_04b();
-    virtual void p_04c();
-    virtual void p_04d();
-    virtual void p_04e();
-    virtual bool Check13c(Actor* actor, int a, float b, int c);
-    FleeRadius* FUN_00671d10();
-    unsigned int FUN_00676280(Actor* actor);
-    void* FUN_00675c20(Actor* actor);
-    void FUN_00675de0(FleeVec3* pos, Actor* actor);
-};
-class FleePackage : public TESPackage
-{
-  public:
-    void FUN_009f1310(Actor* target);
-};
+
+// Shared Actor::Unk_104() lacks the parameters of virtual slot 0x410.
 struct FleeActorView
 {
     virtual void a_000();
@@ -1221,9 +1109,6 @@ struct FleeActorView
     virtual void a_102();
     virtual void a_103();
     virtual void Set410(Actor* actor, int a, int b, int c, int d, int e, float f, float g);
-    float FUN_005723b0(TESObjectREFR* target, int a, int b);
-    bool FUN_008b3bb0();
-    void* FUN_00575d70();
 };
 struct FleeProcedure
 {
@@ -1786,15 +1671,15 @@ void FleeProcedure::FUN_00918600(Actor* actor)
         }
         Begin90(actor, 0);
         fRadius = 0.0f;
-        if (((FleePackageAccess*)pPackage2)->FUN_00671d10())
+        if (pPackage2->GetLocation())
         {
-            fRadius = (float)((FleePackageAccess*)pPackage2)->FUN_00671d10()->FUN_0044ddc0();
+            fRadius = (float)((FleeRadius*)pPackage2->GetLocation())->FUN_0044ddc0();
         }
         else
         {
-            fRadius = (float)((FleePackageAccess*)pPackage2)->FUN_00676280(actor);
+            fRadius = (float)pPackage2->FUN_00676280(actor);
         }
-        if (pTarget && ((FleeActorView*)actor)->FUN_005723b0(pTarget, 0, 0) > fRadius)
+        if (pTarget && actor->TESObjectREFR::FUN_005723b0(pTarget, 0, 0) > fRadius)
         {
             ((FleeActorView*)actor)->Set410(actor, 1, 1, 1, 0, 0, -1.0f, -1.0f);
             pFlee2 = 0;
@@ -1806,13 +1691,15 @@ void FleeProcedure::FUN_00918600(Actor* actor)
             }
             return;
         }
-        else if (!pTarget && !((FleePackageAccess*)pPackage2)->Check13c(actor, 0, -1.0f, 0))
+        else if (!pTarget && !pPackage2->IsActorWithinPackageRadius(actor, false, -1.0f, false))
         {
-            pCell4 = ((FleePackageAccess*)pPackage2)->FUN_00675c20(actor);
-            ((FleePackageAccess*)pPackage2)->FUN_00675de0(&kPos, actor);
-            if (((FleeActorView*)actor)->FUN_008b3bb0())
+            pCell4 = pPackage2->GetPackageLocationCell(actor);
+            // Spell out the ABI return buffer so the shared method fills kPos directly.
+            (pPackage2->*reinterpret_cast<void (TESPackage::*)(FleeVec3*, Actor*)>(
+                &TESPackage::GetPackageLocationPosition))(&kPos, actor);
+            if (actor->FUN_008b3bb0())
             {
-                if (!Move824(actor, kPos, pCell4, ((FleeActorView*)actor)->FUN_00575d70()))
+                if (!Move824(actor, kPos, pCell4, actor->TESObjectREFR::FUN_00575d70()))
                 {
                     return;
                 }
@@ -1825,7 +1712,7 @@ void FleeProcedure::FUN_00918600(Actor* actor)
         }
         else
         {
-            if (!((FleeActorView*)actor)->FUN_008b3bb0())
+            if (!actor->FUN_008b3bb0())
             {
                 Fail294(actor);
             }
@@ -1833,34 +1720,17 @@ void FleeProcedure::FUN_00918600(Actor* actor)
     }
 }
 
-__if_not_exists(TESPackage::TESPackage)
-{
-    class TESPackage
-    {
-      public:
-        virtual void packageVirtual();
-    };
-}
+
 
 namespace FleeUpdate {
-struct Actor;
 struct Process;
 struct Package;
 struct Target;
 struct Weapon;
-struct Request;
-struct Point
-{
-    float x, y, z;
-};
 struct Timer
 {
     float FUN_0084d030();
     float FUN_00867da0();
-};
-struct Setting
-{
-    float* FUN_00403e20();
 };
 extern Timer DAT_011f6394, DAT_011de7b8;
 extern Setting DAT_011cd348, DAT_011ce570, DAT_011cf998;
@@ -1896,17 +1766,18 @@ struct Target
     Weapon* FUN_00680020();
 };
 struct ActorData;
+// Shared FleePackage lacks the avoided-reference and flee-target operations below.
 struct Package
 {
     void RemoveInvalidAvoidedReferences(Process*);
     Target* FUN_00671d10();
     float GetField90Float();
-    Actor* FindNearestRef(Actor*);
+    ::Actor* FindNearestRef(::Actor*);
     void FUN_00810530(int);
     void FUN_00898250(float);
-    Actor* FUN_005e3fc0();
-    void FUN_009f1140(Actor*, Actor*);
-    unsigned int FUN_00676280(Actor*);
+    ::Actor* FUN_005e3fc0();
+    void FUN_009f1140(::Actor*, ::Actor*);
+    unsigned int FUN_00676280(::Actor*);
     void* BuildAvoidNodeArray();
 };
 struct RaceData
@@ -1938,313 +1809,6 @@ struct ActorData
     int unk28;
     int unk2c;
     RaceData race;
-};
-struct Actor
-{
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual Point* v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual int v214();
-    virtual void v218();
-    virtual bool v21c();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual void v22c();
-    virtual void v230();
-    virtual void v234();
-    virtual void v238();
-    virtual void v23c();
-    virtual void v240();
-    virtual void v244();
-    virtual void v248();
-    virtual void v24c();
-    virtual void v250();
-    virtual void v254();
-    virtual void v258();
-    virtual void v25c();
-    virtual void v260();
-    virtual void v264();
-    virtual void v268();
-    virtual void v26c();
-    virtual void v270();
-    virtual void v274();
-    virtual void v278();
-    virtual void v27c();
-    virtual void v280();
-    virtual void v284();
-    virtual void v288();
-    virtual void v28c();
-    virtual void v290();
-    virtual void v294();
-    virtual void v298();
-    virtual void v29c();
-    virtual void v2a0();
-    virtual void v2a4();
-    virtual void v2a8();
-    virtual void v2ac();
-    virtual void v2b0();
-    virtual void v2b4();
-    virtual void v2b8();
-    virtual float v2bc(int);
-    virtual void v2c0();
-    virtual void v2c4();
-    virtual void v2c8();
-    virtual void v2cc();
-    virtual void v2d0();
-    virtual void v2d4();
-    virtual void v2d8();
-    virtual void v2dc();
-    virtual void v2e0();
-    virtual void v2e4();
-    virtual void v2e8();
-    virtual void v2ec();
-    virtual void v2f0();
-    virtual void v2f4();
-    virtual void v2f8();
-    virtual void v2fc();
-    virtual void v300();
-    virtual void v304();
-    virtual void v308();
-    virtual void v30c();
-    virtual void v310();
-    virtual void v314();
-    virtual void v318();
-    virtual void v31c();
-    virtual void v320();
-    virtual void v324();
-    virtual void v328();
-    virtual void v32c();
-    virtual void v330();
-    virtual void v334();
-    virtual void v338();
-    virtual void v33c();
-    virtual void v340();
-    virtual void v344();
-    virtual void v348();
-    virtual void v34c();
-    virtual void v350();
-    virtual void v354();
-    virtual void v358();
-    virtual void v35c();
-    virtual void v360();
-    virtual void v364();
-    virtual void v368();
-    virtual void v36c();
-    virtual void v370();
-    virtual void v374();
-    virtual void v378();
-    virtual void v37c();
-    virtual void v380();
-    virtual void v384();
-    virtual void v388();
-    virtual void v38c();
-    virtual void v390();
-    virtual void v394();
-    virtual void v398();
-    virtual void v39c();
-    virtual void v3a0();
-    virtual void v3a4();
-    virtual void v3a8();
-    virtual void v3ac();
-    virtual void v3b0();
-    virtual void v3b4();
-    virtual void v3b8();
-    virtual void v3bc();
-    virtual void v3c0();
-    virtual void v3c4();
-    virtual void v3c8();
-    virtual void v3cc();
-    virtual void v3d0();
-    virtual void v3d4();
-    virtual void v3d8();
-    virtual void v3dc();
-    virtual void v3e0();
-    virtual void v3e4();
-    virtual void v3e8();
-    virtual void v3ec();
-    virtual void v3f0();
-    virtual void v3f4();
-    virtual void v3f8();
-    virtual void v3fc();
-    virtual void v400();
-    virtual void v404();
-    virtual void v408();
-    virtual void v40c();
-    virtual void v410();
-    virtual void v414();
-    virtual void v418();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    AnimationOwner animations;
-    int unk94;
-    Weapon* FUN_008d6f30();
-    float FUN_005723b0(Actor*, int, int);
-    bool FUN_008b3bb0();
-    ActorData* FUN_004181e0();
-    void FUN_008bb630(Request*);
-    int FUN_00575d70();
 };
 struct Process
 {
@@ -2410,7 +1974,7 @@ struct Process
     virtual TESPackage* v27c();
     virtual void v280();
     virtual void v284();
-    virtual void v288(Actor*, int);
+    virtual void v288(::Actor*, int);
     virtual void v28c();
     virtual void v290();
     virtual void v294();
@@ -2769,7 +2333,7 @@ struct Process
     virtual void v818();
     virtual void v81c();
     virtual void v820();
-    virtual bool v824(Actor*, Point, Weapon*, int);
+    virtual bool v824(::Actor*, NiPoint3, Weapon*, int);
     int unk04;
     int unk08;
     int unk0c;
@@ -2812,91 +2376,11 @@ struct Process
     int unka0;
     float countdown;
     float FUN_007df1f0();
-    void FUN_00918860(Actor* actor);
+    void FUN_00918860(::Actor* actor);
 };
 }
-class PathingLocation
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    PathingLocation(TESObjectREFR*);
-    ~PathingLocation();
-};
-class PathingRequest
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    ~PathingRequest();
-};
-class PathingRequestFlee : public PathingRequest
-{
-  public:
-    PathingRequestFlee();
-    void InitFromActor(FleeUpdate::Actor*);
-    void SetInitialPathHeading(float);
-    void SetCantOpenDoors(bool);
-    void FUN_006d3b00(float);
-    void FUN_006d61e0(void*);
-    void FUN_00507610(float);
-    void FUN_006d1bc0(const PathingLocation&);
-    void FUN_008df000();
-};
 // @fnv 0x00918860
-void FleeUpdate::Process::FUN_00918860(Actor* actor)
+void FleeUpdate::Process::FUN_00918860(::Actor* actor)
 {
     Package* packageTmp = 0;
     packageTmp = (Package*)dynamic_cast<FleePackage*>(v27c());
@@ -2906,7 +2390,9 @@ void FleeUpdate::Process::FUN_00918860(Actor* actor)
     {
         if (v04c()->FUN_0040b470())
         {
-            actor->animations.FUN_00815480(v04c(), actor ? &actor->unk94 : 0, 0);
+            // Address the shared caster/target subobjects without nullable base conversions.
+            reinterpret_cast<AnimationOwner*>((char*)actor + (offsetof(::Actor, apTargetLight) - sizeof(void*)))->
+                FUN_00815480(v04c(), actor ? (char*)actor + (offsetof(::Actor, m_bLeadingFlag) - sizeof(void*)) : 0, 0);
             v04c()->FUN_0040b800(0);
             v050(0);
         }
@@ -2925,7 +2411,7 @@ void FleeUpdate::Process::FUN_00918860(Actor* actor)
     if (targetTmp)
     {
         float elapsed4 = packageTmp->GetField90Float();
-        Actor* destinationTmp = packageTmp->FindNearestRef(actor);
+        ::Actor* destinationTmp = packageTmp->FindNearestRef(actor);
         if (!destinationTmp)
         {
             packageTmp->FUN_00810530(1);
@@ -2934,12 +2420,12 @@ void FleeUpdate::Process::FUN_00918860(Actor* actor)
                 v288(actor, 1);
             return;
         }
-        if (actor->v214() == 4 || actor->v214() == 9)
+        if (actor->GetSitSleepState() == 4 || actor->GetSitSleepState() == 9)
         {
-            actor->v418();
+            actor->Unk_106();
             return;
         }
-        Weapon* weapon6 = actor->FUN_008d6f30();
+        Weapon* weapon6 = reinterpret_cast<Weapon*>(actor->FUN_008d6f30());
         if (weapon6)
         {
             packageTmp->FUN_00898250((float)(DAT_011f6394.FUN_0084d030() * -1.0));
@@ -2954,7 +2440,7 @@ void FleeUpdate::Process::FUN_00918860(Actor* actor)
                 threshold = *DAT_011cf998.FUN_00403e20();
             if (distance < threshold && actor->FUN_008b3bb0())
             {
-                Actor* reference = packageTmp->FUN_005e3fc0();
+                ::Actor* reference = packageTmp->FUN_005e3fc0();
                 bool expired = false;
                 if (countdown <= 0.0)
                     expired = true;
@@ -2965,9 +2451,9 @@ void FleeUpdate::Process::FUN_00918860(Actor* actor)
                     packageTmp->FUN_009f1140(actor, destinationTmp);
                     PathingRequestFlee request;
                     request.InitFromActor(actor);
-                    request.SetInitialPathHeading(actor->v2bc(0));
-                    if (actor->v21c())
-                        request.SetCantOpenDoors(actor->FUN_004181e0()->race.v028());
+                    request.SetInitialPathHeading(actor->GetCurrentTargetDistance(false));
+                    if (actor->IsCreature())
+                        request.SetCantOpenDoors(reinterpret_cast<ActorData*>(actor->FUN_004181e0())->race.v028());
                     request.FUN_006d3b00((float)packageTmp->FUN_00676280(actor));
                     request.FUN_006d61e0(packageTmp->BuildAvoidNodeArray());
                     request.FUN_00507610(1000.0f);
@@ -2975,11 +2461,12 @@ void FleeUpdate::Process::FUN_00918860(Actor* actor)
                         request.FUN_006d1bc0(PathingLocation((TESObjectREFR*)reference));
                     else
                         request.FUN_008df000();
-                    actor->FUN_008bb630((Request*)&request);
+                    actor->FUN_008bb630((PathingRequest*)&request);
                 }
                 else
                 {
-                    if (!v824(actor, *reference->v1f4(), reference->FUN_008d6f30(), reference->FUN_00575d70()))
+                    if (!v824(actor, *reinterpret_cast<NiPoint3*>(static_cast<const TESObjectREFR*>(reference)->GetPos()),
+                              reinterpret_cast<Weapon*>(reference->FUN_008d6f30()), reference->FUN_00575d70()))
                         return;
                 }
                 packageTmp->FUN_00810530(0);

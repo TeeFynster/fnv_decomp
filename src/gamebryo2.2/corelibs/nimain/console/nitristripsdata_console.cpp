@@ -1,67 +1,27 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-class NiPoint3_S
+#include "../../../../../include/NiPoint3.h"
+#include "../../../../../include/NiTriStripsData.h"
+
+// Preserve the original noalias contract, absent from the shared static method declaration.
+__declspec(noalias) void __cdecl FUN_00525340(NiPoint3& kPt);
+
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& pt) const
 {
-  public:
-    float x, y, z;
-    NiPoint3_S()
-    {}
-    NiPoint3_S(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    NiPoint3_S operator-(const NiPoint3_S& pt) const
-    {
-        return NiPoint3_S(x - pt.x, y - pt.y, z - pt.z);
-    }
-    NiPoint3_S& operator+=(const NiPoint3_S& pt)
-    {
-        x += pt.x;
-        y += pt.y;
-        z += pt.z;
-        return *this;
-    }
-    NiPoint3_S Cross(const NiPoint3_S& pt) const
-    {
-        return NiPoint3_S(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
-    }
-};
+    return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
+}
 
-__declspec(noalias) void FUN_00525340(NiPoint3_S& kPt);
-void NormalizePoints(NiPoint3_S* pkV, unsigned int uiElementCount, unsigned int uiStride);
-
-class S_00a8ab40_NiTriStripsData
+inline NiPoint3 NiPoint3::Cross(const NiPoint3& pt) const
 {
-  public:
-    void* vtbl;  // 0x00
-    int unk04;
-    unsigned short m_usVertices;  // 0x08
-    unsigned short unk0A;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    NiPoint3_S* m_pkVertex;  // 0x20
-    NiPoint3_S* m_pkNormal;  // 0x24
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    unsigned short m_usStrips;  // 0x44
-    unsigned short unk46;
-    unsigned short* m_pusStripLengths;  // 0x48
-    unsigned short* m_pusStripLists;    // 0x4c
-
-    void EnsureNormals(int aiNumVertices);
-    void FUN_00a67090(int aiNumVertices);
-    void GenerateNormals();
-};
+    return NiPoint3(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
+}
 
 // @fnv 0x00a8ab40
-void S_00a8ab40_NiTriStripsData::GenerateNormals()
+void NiTriStripsData::GenerateNormals()
 {
     EnsureNormals(1);
 
@@ -87,12 +47,12 @@ void S_00a8ab40_NiTriStripsData::GenerateNormals()
             if (usIndex0 == usIndex1 || usIndex1 == usIndex2 || usIndex2 == usIndex0)
                 continue;
 
-            const NiPoint3_S& kVertex0 = m_pkVertex[usIndex0];
-            const NiPoint3_S& kVertex1 = m_pkVertex[usIndex1];
-            const NiPoint3_S& kVertex2 = m_pkVertex[usIndex2];
-            NiPoint3_S kEdge1 = kVertex1 - kVertex0;
-            NiPoint3_S kEdge2 = kVertex2 - kVertex1;
-            NiPoint3_S kNormal = kEdge1.Cross(kEdge2);
+            const NiPoint3& kVertex0 = m_pkVertex[usIndex0];
+            const NiPoint3& kVertex1 = m_pkVertex[usIndex1];
+            const NiPoint3& kVertex2 = m_pkVertex[usIndex2];
+            NiPoint3 kEdge1 = kVertex1 - kVertex0;
+            NiPoint3 kEdge2 = kVertex2 - kVertex1;
+            NiPoint3 kNormal = kEdge1.Cross(kEdge2);
             FUN_00525340(kNormal);
 
             m_pkNormal[usIndex0] += kNormal;
@@ -102,6 +62,6 @@ void S_00a8ab40_NiTriStripsData::GenerateNormals()
         pusStripList += m_pusStripLengths[usStrip];
     }
 
-    NormalizePoints(m_pkNormal, m_usVertices, sizeof(NiPoint3_S));
-    FUN_00a67090(2);
+    NiPoint3::NormalizePoints(m_pkNormal, m_usVertices, sizeof(NiPoint3));
+    SetDirtyFlags(2);
 }

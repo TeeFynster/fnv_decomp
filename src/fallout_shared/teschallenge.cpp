@@ -1,6 +1,47 @@
 // fallout_shared/teschallenge.cpp: TESChallenge, ChallengeManager (16 functions)
 
+#include "../../include/SettingT.h"
+#include "../../include/Stack.h"
+#include "teschallenge_support.h"
+#include "../../include/NiPointer.h"
+#include "../../include/SETTING_VALUE.h"
+#include "../../include/BGSListForm.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSMessageIcon.h"
+#include "../../include/ChallengeData.h"
+#include "../../include/ChallengeProgress.h"
+#include "../../include/MapEntryCount.h"
+#include "../../include/Script.h"
+#include "../../include/TESChallenge.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESDescription.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESScriptableForm.h"
 #include "teschallenge_decls.h"
+#include "../../include/TESQuest.h"
+#include "../../include/BGSSaveFormBuffer.h"
+
+FNV_STATIC_ASSERT(sizeof(BGSMessageIcon) == 16);
+FNV_STATIC_ASSERT(offsetof(BGSMessageIcon, Icon) == 4);
+FNV_STATIC_ASSERT(sizeof(ChallengeData) == 24);
+FNV_STATIC_ASSERT(offsetof(ChallengeData, m_iPrimaryValue) == 0);
+FNV_STATIC_ASSERT(offsetof(ChallengeData, m_iAuxiliaryValue) == 4);
+FNV_STATIC_ASSERT(offsetof(ChallengeData, nFlags) == 8);
+FNV_STATIC_ASSERT(offsetof(ChallengeData, m_iRecordIndex) == 12);
+FNV_STATIC_ASSERT(offsetof(ChallengeData, FlaggedRecordValueEntry) == 16);
+FNV_STATIC_ASSERT(offsetof(ChallengeData, RecordIndexValueData) == 18);
+FNV_STATIC_ASSERT(offsetof(ChallengeData, IndexedRecordValueTriple) == 20);
+FNV_STATIC_ASSERT(sizeof(ChallengeProgress) == 8);
+FNV_STATIC_ASSERT(offsetof(ChallengeProgress, iProgress) == 0);
+FNV_STATIC_ASSERT(offsetof(ChallengeProgress, m_iCompletionCount) == 4);
+FNV_STATIC_ASSERT(sizeof(TESChallenge) == 124);
+FNV_STATIC_ASSERT(offsetof(TESChallenge, data) == 84);
+FNV_STATIC_ASSERT(offsetof(TESChallenge, progress) == 108);
+FNV_STATIC_ASSERT(offsetof(TESChallenge, m_pPrimaryForm) == 116);
+FNV_STATIC_ASSERT(offsetof(TESChallenge, m_pSecondaryForm) == 120);
 
 // @fnv 0x005F5080
 void TESChallenge::InitItem()
@@ -177,13 +218,13 @@ bool ChallengeManager::UpdateChallengeProgress(CHALLENGE_TYPE type, int count, T
                     challenge->GetSpecialOne() != 27)
                     TopicMenuController::IncrementMiscStat(27);
                 if (challenge->GetFullName() && challenge->GetDescription(0, (CHUNK_ID)0x43534544) &&
-                    DAT_011cb4d4.Bool()->b)
+                    *DAT_011cb4d4.Bool())
                 {
                     char message[512];
                     sprintf_s(message, sizeof(message), "%s   %d\\%d\n%s", challenge->GetFullName(),
                               challenge->GetThreshold(), challenge->GetThreshold(),
                               challenge->GetDescription(0, (CHUNK_ID)0x43534544));
-                    Interface::ShowMessage(message, 0, TESTextureLoader::GetTextureResourceName(challenge, 0), 0,
+                    Interface::ShowMessage(message, 0, TESTexture::GetTextureResourceName(challenge, 0), 0,
                                            DAT_010162c0, false);
                     Interface::PlayUISound(21);
                 }
@@ -214,13 +255,13 @@ bool ChallengeManager::UpdateChallengeProgress(CHALLENGE_TYPE type, int count, T
                     if (value == 0)
                     {
                         if (challenge->GetFullName() && challenge->GetDescription(0, (CHUNK_ID)0x43534544) &&
-                            DAT_011cb4d4.Bool()->b)
+                            *DAT_011cb4d4.Bool())
                         {
                             char message[512];
                             sprintf_s(message, sizeof(message), "%s   %d\\%d\n%s", challenge->GetFullName(),
                                       challenge->GetProgressValue(), challenge->GetThreshold(),
                                       challenge->GetDescription(0, (CHUNK_ID)0x43534544));
-                            Interface::ShowMessage(message, 0, TESTextureLoader::GetTextureResourceName(challenge, 0),
+                            Interface::ShowMessage(message, 0, TESTexture::GetTextureResourceName(challenge, 0),
                                                    0, DAT_010162c0, false);
                         }
                     }
@@ -254,10 +295,10 @@ bool TESChallenge::Load(TESFile* file)
             readOBNDSubRecord(file);
             break;
         case (CHUNK_ID)0x4c4c5546:
-            TESFullNameLoader::LoadFullNameChunk(this, file);
+            TESFullName::LoadFullNameChunk(this, file);
             break;
         case (CHUNK_ID)0x4e4f4349:
-            TESTextureLoader::ReadTextureData(static_cast<TESIcon*>(this), file);
+            TESTexture::ReadTextureData(static_cast<TESIcon*>(this), file);
             break;
         case (CHUNK_ID)0x4f43494d:
             BGSMessageIcon::LoadMessageIconChunk(this, file);
@@ -353,186 +394,84 @@ int TESChallenge::GetStartsLocked()
     return data.nFlags & 1;
 }
 
-struct FUN_005f4e00 : public TESForm,
-                      public TESFullName,
-                      public TESDescription,
-                      public TESScriptableForm,
-                      public TESIcon,
-                      public BGSMessageIcon
-{
-    FUN_005f4e00();
-    ~FUN_005f4e00();
-};
-
 // @fnv 0x005f4e00
-FUN_005f4e00::FUN_005f4e00()
+TESChallenge::TESChallenge()
 {
-    ((TESChallenge*)this)->TESChallenge::ResetFormData();
+    TESChallenge::ResetFormData();
     SetFormType((ENUM_FORM_ID)0x71);
 }
 
-struct FUN_00484bf0_shell
+// TESForm's legacy I/O at 0x00484c20/0x00484c50/0x00484d60 has no matching shared signatures; inherit its checked layout.
+struct ChallengeLegacyFormIO : TESForm
 {
-    unsigned short __thiscall FUN_00484bf0(unsigned int aiFlags);
-};
-
-struct FUN_005a7770_shell
-{
-    unsigned short __thiscall FUN_005a7770(unsigned int aiFlags);
+    void SaveChangeFlags(unsigned int flags);
+    void LoadChangeFlags(unsigned int flags, unsigned int currentFlags);
+    void SaveIfChanged(BGSSaveFormBuffer* buffer);
 };
 
 // @fnv 0x005a7770
-unsigned short __thiscall FUN_005a7770_shell::FUN_005a7770(unsigned int aiFlags)
+unsigned short __thiscall TESChallenge::FUN_005a7770(unsigned int aiFlags)
 {
     unsigned short isize = 0;
-    isize += ((FUN_00484bf0_shell*)this)->FUN_00484bf0(aiFlags);
+    isize += static_cast<unsigned short>(TESForm::GetSaveSize(aiFlags));
     return isize;
 }
 
-struct FUN_005f5820_shell
-{
-    void ClearField6C();
-};
 
 // @fnv 0x005f5820
-void FUN_005f5820_shell::ClearField6C()
+void TESChallenge::ClearProgress()
 {
-    *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x6c) = 0;
+    progress.iProgress = 0;
 }
-
-struct FUN_0051b070_shell
-{
-    void __thiscall FUN_00484c20(unsigned int aiFlags);
-};
-
-struct FUN_0059adb0_shell
-{
-    void __thiscall FUN_0059adb0(unsigned int aiFlags);
-};
 
 // @fnv 0x0059adb0
-void __thiscall FUN_0059adb0_shell::FUN_0059adb0(unsigned int aiFlags)
+void __thiscall TESChallenge::FUN_0059adb0(unsigned int aiFlags)
 {
-    ((FUN_0051b070_shell*)this)->FUN_00484c20(aiFlags);
+    reinterpret_cast<ChallengeLegacyFormIO*>(this)->SaveChangeFlags(aiFlags);
 }
-
-struct TESFormStub
-{
-    void __thiscall FUN_00484c50(unsigned int, unsigned int);
-};
-
-struct FUN_00616640_shell : public TESFormStub
-{
-    void __thiscall FUN_00616640(unsigned int aiFlags, unsigned int aiCurrentFlags);
-};
 
 // @fnv 0x00616640
-void __thiscall FUN_00616640_shell::FUN_00616640(unsigned int aiFlags, unsigned int aiCurrentFlags)
+void __thiscall TESChallenge::FUN_00616640(unsigned int aiFlags, unsigned int aiCurrentFlags)
 {
-    this->FUN_00484c50(aiFlags, aiCurrentFlags);
+    reinterpret_cast<ChallengeLegacyFormIO*>(this)->LoadChangeFlags(aiFlags, aiCurrentFlags);
 }
 
-struct TESQuest
-{
-    PerkEntryConditionSet* __thiscall GetConditions(void);
-};
-
-struct FUN_005e79a0_t
-{
-    bool __thiscall FUN_00485270(TESForm* apForm);
-};
 
 extern "C" int _memcmp(const void*, const void*, unsigned int);
 
-struct FUN_005f56b0_shell
-{
-    bool __thiscall IsNotEqual(TESForm* apCompare);
-};
 
 // Compares this TESChallenge against apCompare: returns true if it is not a TESChallenge or if data, form two, form one or the base comparison differ.
 // @fnv 0x005f56b0
-bool __thiscall FUN_005f56b0_shell::IsNotEqual(TESForm* apCompare)
+bool __thiscall TESChallenge::Compare(TESForm* apCompare)
 {
     TESChallenge* pcomp = dynamic_cast<TESChallenge*>(apCompare);
     if (!pcomp)
         return true;
-    if (_memcmp(&((TESChallenge*)this)->data, ((TESQuest*)pcomp)->GetConditions(), 0x18) != 0)
+    if (_memcmp(&this->data, ((TESQuest*)pcomp)->GetConditions(), 0x18) != 0)
         return true;
-    if (((TESChallenge*)this)->GetFormTwo() != pcomp->GetFormTwo())
+    if (this->GetFormTwo() != pcomp->GetFormTwo())
         return true;
-    if (((TESChallenge*)this)->GetFormOne() != pcomp->GetFormOne())
+    if (this->GetFormOne() != pcomp->GetFormOne())
         return true;
-    if (((FUN_005e79a0_t*)this)->FUN_00485270(pcomp))
+    if (TESForm::Compare(pcomp))
         return true;
     return false;
 }
 
-struct FUN_005f4ee0_shell
-{
-    void __thiscall FUN_005f4f10();
-    void* __thiscall FUN_005f4ee0(unsigned int);
-};
-void __cdecl _Deallocate(void*);
-// Calls FUN_005f4f10 on this, deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x005f4ee0
-void* __thiscall FUN_005f4ee0_shell::FUN_005f4ee0(unsigned int flags)
-{
-    this->FUN_005f4f10();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
 bool __cdecl FUN_00401500();
 void __cdecl FUN_00485910(unsigned int, unsigned int);
-struct FUN_004855a0
-{
-    void __thiscall M();
-};
-struct S_00487010
-{
-    void __thiscall FUN_00487010();
-};
-struct S_0048cca0
-{
-    void __thiscall FUN_0048cca0();
-};
-struct FUN_00482cb0_shell
-{
-    void __thiscall FUN_00482cb0();
-};
-struct FUN_0048e370_obj
-{
-    void __thiscall FUN_0048e370(unsigned int);
-};
-struct FUN_0047a240_shell
-{
-    void __thiscall FUN_0047a240(unsigned int);
-};
-struct FUN_00485e00_shell
-{
-    void __thiscall FUN_00485e20(int, int);
-};
-struct FUN_00485680
-{
-    void __thiscall M();
-};
-struct FUN_005f5540_shell
-{
-    void __thiscall Initialize();
-};
 // @fnv 0x005f5540
-void __thiscall FUN_005f5540_shell::Initialize()
+void __thiscall TESChallenge::Initialize()
 {
-    ((FUN_004855a0*)this)->M();
-    ((S_00487010*)((char*)this + 0x18))->FUN_00487010();
-    ((FUN_0048e370_obj*)((char*)this + 0x38))->FUN_0048e370(0x4e4f4349);
-    ((FUN_0047a240_shell*)((char*)this + 0x44))->FUN_0047a240(0x4f43494d);
-    ((S_0048cca0*)((char*)this + 0x2c))->FUN_0048cca0();
-    ((FUN_00482cb0_shell*)((char*)this + 0x24))->FUN_00482cb0();
+    TESForm::FUN_004855a0();
+    TESFullName::FUN_00487010();
+    TESIcon::Save(0x4e4f4349);
+    BGSMessageIcon::Save(0x4f43494d);
+    TESScriptableForm::FUN_0048cca0();
+    TESDescription::FUN_00482cb0();
     if (FUN_00401500())
         ((ChallengeData*)((char*)this + 0x54))->SwapEndianFields();
-    ((FUN_00485e00_shell*)this)->FUN_00485e20((int)((char*)this + 0x54), 0x18);
+    TESForm::FUN_00485e20(&data, 0x18);
     if (FUN_00401500())
         ((ChallengeData*)((char*)this + 0x54))->SwapEndianFields();
     if (*(unsigned int*)((char*)this + 0x74))
@@ -545,51 +484,31 @@ void __thiscall FUN_005f5540_shell::Initialize()
         unsigned int v2 = ((TESForm**)((char*)this + 0x78))[0]->GetFormID();
         FUN_00485910(0x4d414e58, v2);
     }
-    ((FUN_00485680*)this)->M();
+    TESForm::FUN_00485680();
 }
 
-struct FUN_005e78f0_t
-{
-    void __thiscall FUN_004851b0(TESForm* apForm);
-};
 
 void* __cdecl memcpy(void* dest, const void* src, unsigned int size);
 
-struct FUN_005f5630_shell
-{
-    void __thiscall CopyFromChallenge(TESForm* apCopy);
-};
 
 // Copies the TESChallenge data block and both forms from apCopy into this challenge, then calls FUN_004851b0 with apCopy.
 // @fnv 0x005f5630
-void __thiscall FUN_005f5630_shell::CopyFromChallenge(TESForm* apCopy)
+void __thiscall TESChallenge::CopyFromChallenge(TESForm* apCopy)
 {
     TESChallenge* challenge = dynamic_cast<TESChallenge*>(apCopy);
     if (!challenge)
         return;
-    memcpy(&((TESChallenge*)this)->data, &challenge->data, sizeof(ChallengeData));
-    ((TESChallenge*)this)->SetFormOne(challenge->GetFormOne());
-    ((TESChallenge*)this)->SetFormTwo(challenge->GetFormTwo());
-    ((FUN_005e78f0_t*)((TESChallenge*)this))->FUN_004851b0(apCopy);
+    memcpy(&this->data, &challenge->data, sizeof(ChallengeData));
+    this->SetFormOne(challenge->GetFormOne());
+    this->SetFormTwo(challenge->GetFormTwo());
+    TESForm::CopyFrom(apCopy);
 }
 
-struct BGSSaveFormBuffer
-{
-    void __thiscall SaveData(void*, int, int);
-};
-struct FUN_00484d60_holder
-{
-    void __thiscall SaveIfChanged(BGSSaveFormBuffer*);
-};
-struct FUN_005f5780_holder
-{
-    void __thiscall FUN_005f5780(BGSSaveFormBuffer*);
-};
 // Calls the base save routine, then writes the 4-byte values at offsets 0x6C and 0x70 into the save buffer.
 // @fnv 0x005f5780
-void __thiscall FUN_005f5780_holder::FUN_005f5780(BGSSaveFormBuffer* apBuffer)
+void __thiscall TESChallenge::FUN_005f5780(BGSSaveFormBuffer* apBuffer)
 {
-    ((FUN_00484d60_holder*)this)->SaveIfChanged(apBuffer);
+    reinterpret_cast<ChallengeLegacyFormIO*>(this)->SaveIfChanged(apBuffer);
     apBuffer->SaveData((char*)this + 0x6C, 4, 0);
     apBuffer->SaveData((char*)this + 0x70, 4, 0);
 }
@@ -630,14 +549,10 @@ void __cdecl BSEndian(unsigned char*, BSIntToType8);
 void __cdecl BSEndian(unsigned char*, BSIntToType16);
 void __cdecl BSEndian(unsigned char*, BSIntToType32);
 
-struct FUN_005f5480_shell
-{
-    void __thiscall SwapEndianFields();
-};
 
 // Byte-swaps the fields at offsets 0, 4, 8, 12, 16, 18 and 20 of this object to the opposite endianness.
 // @fnv 0x005f5480
-void __thiscall FUN_005f5480_shell::SwapEndianFields()
+void __thiscall ChallengeData::SwapEndianFields()
 {
     BSEndian((unsigned char*)this, BSIntToType1());
     BSEndian((unsigned char*)this + 4, BSIntToType10());
@@ -648,81 +563,8 @@ void __thiscall FUN_005f5480_shell::SwapEndianFields()
     BSEndian((unsigned char*)this + 20, BSIntToType32());
 }
 
-class B5F4F10Form
-{
-  public:
-    virtual ~B5F4F10Form();
-
-    unsigned char m_cFormType;
-    unsigned int m_iFormFlags;
-    unsigned int m_iFormID;
-    void* m_pkSourceFile;
-    void* m_pkNextSourceFile;
-};
-
-class B5F4F10FullName
-{
-  public:
-    virtual void Init();
-    ~B5F4F10FullName();
-
-    const char* m_pcName;
-    unsigned short m_usLength;
-    unsigned short m_usMaxLength;
-};
-
-class B5F4F10Description
-{
-  public:
-    virtual void Init();
-
-    unsigned int m_uiFileOffset;
-};
-
-class B5F4F10ScriptableForm
-{
-  public:
-    virtual void Init();
-
-    void* m_pkScript;
-    bool m_bScriptReady;
-};
-
-class B5F4F10Icon
-{
-  public:
-    virtual void Init();
-    ~B5F4F10Icon();
-
-    const char* m_pcPath;
-    unsigned short m_usLength;
-    unsigned short m_usMaxLength;
-};
-
-class B5F4F10Container
-{
-  public:
-    virtual void Init();
-    ~B5F4F10Container();
-
-    void* m_pkFirst;
-    void* m_pkNext;
-};
-
-class FUN_005f4f10_cls : public B5F4F10Form,
-                         public B5F4F10FullName,
-                         public B5F4F10Description,
-                         public B5F4F10ScriptableForm,
-                         public B5F4F10Icon,
-                         public B5F4F10Container
-{
-  public:
-    virtual ~FUN_005f4f10_cls();
-    void ClearData();
-};
-
 // @fnv 0x005f4f10
-FUN_005f4f10_cls::~FUN_005f4f10_cls()
+TESChallenge::~TESChallenge()
 {
-    ClearData();
+    TESForm::ClearData();
 }

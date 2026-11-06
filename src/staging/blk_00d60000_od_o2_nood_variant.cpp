@@ -6,6 +6,7 @@
 // src/staging/blk_00d60000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/Vec4.h"
 
 namespace sd6ae50 {
 
@@ -151,15 +152,6 @@ union Basis
         __m128 z;
     };
 };
-struct FUN_004b4ab0_Class
-{
-    union
-    {
-        __m128 value;
-    };
-    void FUN_004b4ab0(int basis, int vector);
-    void FUN_00c7f700(const Basis* basis, const FUN_004b4ab0_Class* vector);
-};
 struct MotionInput
 {
     float scale;
@@ -224,15 +216,15 @@ void __cdecl FUN_00d6aef0(const MotionInput* input, float outputBits)
         {
             struct
             {
-                FUN_004b4ab0_Class position;
+                Vec4 position;
                 __m128 delta;
                 Basis basis;
             };
         } workspace;
         buildBasis(input, normal, workspace.basis);
-        workspace.position.value = _mm_sub_ps(input->position, input->translation);
-        workspace.position.FUN_004b4ab0((int)&workspace.basis, (int)&workspace.position);
-        workspace.delta = _mm_sub_ps(input->target, workspace.position.value);
+        (*reinterpret_cast<__m128*>(&workspace.position)) = _mm_sub_ps(input->position, input->translation);
+        workspace.position.FUN_004b4ab0(reinterpret_cast<const Rot&>(workspace.basis), workspace.position);
+        workspace.delta = _mm_sub_ps(input->target, (*reinterpret_cast<__m128*>(&workspace.position)));
         float distanceSquared;
         _mm_store_ss(&distanceSquared, dot3(workspace.delta));
         __m128 movement;
@@ -247,19 +239,14 @@ void __cdecl FUN_00d6aef0(const MotionInput* input, float outputBits)
         {
             movement = _mm_mul_ps(_mm_set1_ps(input->scale), workspace.delta);
         }
-        workspace.position.value = _mm_add_ps(movement, workspace.position.value);
-        FUN_004b4ab0_Class* output = *reinterpret_cast<FUN_004b4ab0_Class* const*>(&outputBits);
-        output->FUN_00c7f700(&workspace.basis, &workspace.position);
+        (*reinterpret_cast<__m128*>(&workspace.position)) = _mm_add_ps(movement, (*reinterpret_cast<__m128*>(&workspace.position)));
+        Vec4* output = *reinterpret_cast<Vec4* const*>(&outputBits);
+        output->FUN_00c7f700(static_cast<const void*>(&workspace.basis), workspace.position);
         __m128 translation = _mm_load_ps(reinterpret_cast<const float*>(&input->translation));
-        __m128 transformed = _mm_load_ps(reinterpret_cast<const float*>(&output->value));
-        _mm_store_ps(reinterpret_cast<float*>(&output->value), _mm_add_ps(translation, transformed));
+        __m128 transformed = _mm_load_ps(reinterpret_cast<const float*>(&output->x));
+        _mm_store_ps(reinterpret_cast<float*>(&output->x), _mm_add_ps(translation, transformed));
     }
 }
-
-struct Vec4
-{
-    __m128 m_vComponents;
-};
 
 struct BodySource
 {
@@ -297,26 +284,21 @@ void FUN_00d6b4b0(BodyList* list, BodyOut* out)
     for (int i = 0; i < list->m_iElementCount; i++)
     {
         BodySource* src = list->m_data[i];
-        out[i].m_20.m_vComponents = src->m_1b0.m_vComponents;
-        out[i].m_30.m_vComponents = src->m_1c0.m_vComponents;
-        out[i].m_00.m_vComponents = src->m_140.m_vComponents;
-        out[i].m_10.m_vComponents = src->m_160.m_vComponents;
+        (*reinterpret_cast<__m128*>(&out[i].m_20)) = (*reinterpret_cast<__m128*>(&src->m_1b0));
+        (*reinterpret_cast<__m128*>(&out[i].m_30)) = (*reinterpret_cast<__m128*>(&src->m_1c0));
+        (*reinterpret_cast<__m128*>(&out[i].m_00)) = (*reinterpret_cast<__m128*>(&src->m_140));
+        (*reinterpret_cast<__m128*>(&out[i].m_10)) = (*reinterpret_cast<__m128*>(&src->m_160));
     }
 }
 
-struct __declspec(align(16)) V16
-{
-    float x, y, z, w;
-};
-
 struct __declspec(align(16)) D6Vec3
 {
-    V16 a;
-    V16 b;
-    V16 c;
+    float ax, ay, az, aw;
+    float bx, by, bz, bw;
+    float cx, cy, cz, cw;
 };
 
-struct D6Owner
+struct __declspec(align(16)) D6Owner
 {
     int unk00;
     int unk04;
@@ -330,7 +312,7 @@ struct D6Owner
     int unk24;
     int unk28;
     int unk2C;
-    V16 f30;
+    Vec4 f30;
 };
 
 struct D6Idx
@@ -341,15 +323,15 @@ struct D6Idx
 };
 
 extern "C" void __cdecl FUN_00dcf280(D6Vec3* s, void* d, void* e);
-extern "C" V16* __cdecl D6GetArray(void);
+extern "C" Vec4* __cdecl D6GetArray(void);
 
 // @fnv 0x00d6c030
-static __declspec(noinline) void FUN_00d6c030(D6Owner* a, V16* b, D6Idx* c, void* d, void* e)
+static __declspec(noinline) void FUN_00d6c030(D6Owner* a, Vec4* b, D6Idx* c, void* d, void* e)
 {
     D6Vec3 s;
-    *(__m128*)&s.a = *(__m128*)&a->f30;
-    *(__m128*)&s.b = *(__m128*)&b[3];
-    *(__m128*)&s.c = *(__m128*)&b[c->idx02];
+    *(__m128*)&s.ax = *(__m128*)&a->f30;
+    *(__m128*)&s.bx = *(__m128*)&b[3];
+    *(__m128*)&s.cx = *(__m128*)&b[c->idx02];
     FUN_00dcf280(&s, d, e);
 }
 

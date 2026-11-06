@@ -1,12 +1,12 @@
+#include "../../include/NiTMapItem.h"
 // src/unmapped/nitmapbase_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/unmapped/nitmapbase.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiStream
-{
-    void __thiscall FUN_00a64160(const char*);
-};
+#include "../../include/BSShaderManager.h"
+#include "../../include/NiStream.h"
+
 struct NiMapBase
 {
     void __thiscall FUN_00bb7160(NiStream*);
@@ -19,25 +19,20 @@ void __thiscall NiMapBase::FUN_00b60210(NiStream* stream)
     stream->FUN_00a64160(*(const char**)((char*)this + 0x88));
 }
 
-struct S_00b601a0_Item
-{
-    S_00b601a0_Item* m_pkNext;
-    int m_key;
-    int m_val;
-};
+
 
 struct S_00b601a0_Map
 {
     virtual ~S_00b601a0_Map();
     virtual unsigned int KeyToHashIndex(int key) const;
     virtual bool IsKeysEqual(int a, int b) const;
-    virtual void SetValue(S_00b601a0_Item* item, int key, int val);
-    virtual void ClearValue(S_00b601a0_Item* item);
-    virtual S_00b601a0_Item* NewItem();
-    virtual void DeleteItem(S_00b601a0_Item* item);
+    virtual void SetValue(NiTMapItem<int, int>* item, int key, int val);
+    virtual void ClearValue(NiTMapItem<int, int>* item);
+    virtual NiTMapItem<int, int>* NewItem();
+    virtual void DeleteItem(NiTMapItem<int, int>* item);
 
     unsigned int m_uiHashSize;
-    S_00b601a0_Item** m_ppkHashTable;
+    NiTMapItem<int, int>** m_ppkHashTable;
     unsigned int m_uiCount;
 
     void FUN_00b601a0();
@@ -50,7 +45,7 @@ void S_00b601a0_Map::FUN_00b601a0()
     {
         while (m_ppkHashTable[i])
         {
-            S_00b601a0_Item* pkSave = m_ppkHashTable[i];
+            NiTMapItem<int, int>* pkSave = m_ppkHashTable[i];
             m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
             ClearValue(pkSave);
             DeleteItem(pkSave);
@@ -58,13 +53,6 @@ void S_00b601a0_Map::FUN_00b601a0()
     }
     m_uiCount = 0;
 }
-
-struct NiTexture;
-
-struct BSShaderManager
-{
-    static void GetTexture(const char* path, bool a, NiTexture*& out, bool b, bool c);
-};
 
 struct TexBase
 {

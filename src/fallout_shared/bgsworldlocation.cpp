@@ -1,18 +1,21 @@
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSLoadGameBuffer.h"
+#include "../../include/BGSSaveGameBuffer.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TES.h"
+#include "../../include/TESCombatStyle.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/BGSSaveFormBuffer.h"
 
 // src/fallout_shared/bgsworldlocation.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/bgsworldlocation.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct TESObjectCELL
-{
-};
 struct CoordinateTriple
 {
     bool FUN_00527a00();
     TESObjectCELL* FUN_00527900();
-};
-struct TES
-{
-    bool IsCellBuffered(TESObjectCELL* pcell, bool bUnknown);
 };
 extern TES* g_TES;
 
@@ -26,12 +29,6 @@ bool CoordinateTriple::FUN_00527a00()
 }
 
 namespace fnv_00527a40 {
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3 operator-(const NiPoint3& rhs) const;
-    float UpdateCombatStyle();
-};
 
 struct CoordinateTriple
 {
@@ -57,10 +54,6 @@ struct Pt
     float x, y, z;
     float Length() const;
 };
-struct NiPoint3 : Pt
-{
-    NiPoint3 operator-(NiPoint3 const&) const;
-};
 struct FUN_00527a80_shell
 {
     NiPoint3 pos;
@@ -76,14 +69,6 @@ float FUN_00527a80_shell::DistanceTo(FUN_00527a80_shell* apOther)
     return (apOther->pos - pos).Length();
 }
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, unsigned int, int);
-    void SerializeFormData(void*, int);
-};
-struct BGSSaveGameBuffer : BGSSaveFormBuffer
-{
-};
 struct FUN_00527b70_shell
 {
     char _pad[12];
@@ -97,14 +82,6 @@ void FUN_00527b70_shell::FUN_00527b70(BGSSaveGameBuffer* apSaveGameBuffer)
     apSaveGameBuffer->SerializeFormData(m_pPathingCell, 0);
 }
 
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-};
-struct BGSLoadGameBuffer : BGSLoadFormBuffer
-{
-    unsigned int ReadFormIdentifier(void);
-};
 void* __cdecl _ref_004839c0(unsigned int);
 bool __cdecl FUN_00527b20(void*);
 struct FUN_00527ba0_This
@@ -122,10 +99,6 @@ void FUN_00527ba0_This::FUN_00527ba0(BGSLoadGameBuffer* apLoadGameBuffer)
         m_pPathingCell = 0;
 }
 
-struct TESForm
-{
-    int FNV_GetFormType();
-};
 struct FUN_00527990_shell
 {
     char _pad[12];
@@ -153,28 +126,19 @@ bool FUN_00527990_shell::FUN_00527990(int* apID, int* apType)
     return false;
 }
 
-struct P3
-{
-    float x, y, z;
-    P3 operator-(P3 const&) const;
-};
-struct TESCombatStyle
-{
-    float UpdateCombatStyle();
-};
 
 struct FUN_00527ac0_shell
 {
     char _pad[12];
-    float ComputeWeightedDistance(FUN_00527ac0_shell* apOther, P3* apDir);
+    float ComputeWeightedDistance(FUN_00527ac0_shell* apOther, NiPoint3* apDir);
 };
 
 // @fnv 0x00527ac0
-float FUN_00527ac0_shell::ComputeWeightedDistance(FUN_00527ac0_shell* apOther, P3* apDir)
+float FUN_00527ac0_shell::ComputeWeightedDistance(FUN_00527ac0_shell* apOther, NiPoint3* apDir)
 {
     if (*(int*)((char*)this + 0xc) != *(int*)((char*)apOther + 0xc))
         return 3.4028234663852886e+38f;
-    P3 diff = ((P3*)apOther)->operator-(*(P3*)this);
+    NiPoint3 diff = ((NiPoint3*)apOther)->operator-(*(NiPoint3*)this);
     diff.x = diff.x * apDir->x;
     diff.y = diff.y * apDir->y;
     diff.z = diff.z * apDir->z;

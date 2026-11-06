@@ -174,25 +174,29 @@ void __cdecl FUN_00d34db0(void* apUnused, void* a2, void* apFirstObj, void* apSe
     FUN_00da4900(a2, &s);
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; unsigned __int64 m128_u64[2]; };
+// Keep the intrinsic vector free of byte-array aliases, which add /GS checks absent from this unit.
+#define _INCLUDED_MM2
+// Exe 0x00d34e10 FUN_00d34e10: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4]; unsigned __int64 m128_u64[2]; } __m128, LocalM128;
 
 extern "C" {
-__m128 _mm_load_ps(const float* p);
-void _mm_store_ps(float* p, __m128 v);
-__m128 _mm_add_ps(__m128 a, __m128 b);
-__m128 _mm_sub_ps(__m128 a, __m128 b);
-__m128 _mm_mul_ps(__m128 a, __m128 b);
-__m128 _mm_min_ps(__m128 a, __m128 b);
-__m128 _mm_max_ps(__m128 a, __m128 b);
-__m128 _mm_add_ss(__m128 a, __m128 b);
-__m128 _mm_sqrt_ss(__m128 a);
-__m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm8);
-__m128 _mm_set_ps1(float a);
+LocalM128 _mm_load_ps(const float* p);
+void _mm_store_ps(float* p, LocalM128 v);
+LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+LocalM128 _mm_min_ps(LocalM128 a, LocalM128 b);
+LocalM128 _mm_max_ps(LocalM128 a, LocalM128 b);
+LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+LocalM128 _mm_sqrt_ss(LocalM128 a);
+LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm8);
+LocalM128 _mm_set_ps1(float a);
 }
 
-extern __m128 DAT_010ec7f0;
-extern const __m128 DAT_011b6d70;  // AABB quantization clip max
-extern __m128 DAT_01267e30;
+extern LocalM128 DAT_010ec7f0;
+extern const LocalM128 DAT_011b6d70;  // AABB quantization clip max
+extern LocalM128 DAT_01267e30;
 
 typedef unsigned int hkpShapeKey;
 
@@ -204,53 +208,47 @@ struct hkFloat4
     float w;
 };
 
-struct hkSimdRealq
+#include "../../../../../../include/hkSimdRealq.h"
+
+#include "../../../../../../include/hkVector4q.h"
+
+__forceinline void hkVector4q::setAdd4(const hkVector4q& a, const hkVector4q& b) { m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents); }
+__forceinline void hkVector4q::setMin4(const hkVector4q& a, const hkVector4q& b) { m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents); }
+__forceinline void hkVector4q::setMax4(const hkVector4q& a, const hkVector4q& b) { m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents); }
+
+__forceinline void hkVector4q::setInterpolate4(const hkVector4q& a, const hkVector4q& b, const hkVector4q& t)
 {
-    __m128 m_vValue;
-};
+    m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(_mm_load_ps(DAT_010ec7f0.m128_f32), t.m_vComponents), a.m_vComponents), _mm_mul_ps(t.m_vComponents, b.m_vComponents));
+}
 
-struct hkVector4q
+__forceinline void hkVector4q::setAddMul4(const hkVector4q& a, const hkVector4q& b, const hkSimdRealq& r)
 {
-    __m128 m_vComponents;
+    m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), b.m_vComponents), a.m_vComponents);
+}
 
+__forceinline hkSimdRealq hkVector4q::getSimdAt3() const
+{
+    hkSimdRealq r;
+    r.m_vValue = _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
+    return r;
+}
 
-    __forceinline void setSub4(const hkVector4q& a, const hkVector4q& b) { m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void setAdd4(const hkVector4q& a, const hkVector4q& b) { m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void mul4(const hkVector4q& a) { m_vComponents = _mm_mul_ps(m_vComponents, a.m_vComponents); }
-    __forceinline void setMin4(const hkVector4q& a, const hkVector4q& b) { m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents); }
-    __forceinline void setMax4(const hkVector4q& a, const hkVector4q& b) { m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents); }
+__forceinline hkSimdRealq hkVector4q::length3Simd() const
+{
+    const LocalM128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
+    const LocalM128 s = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
+    hkSimdRealq r;
+    r.m_vValue = _mm_sqrt_ss(s);
+    return r;
+}
 
-    __forceinline void setInterpolate4(const hkVector4q& a, const hkVector4q& b, const hkVector4q& t)
-    {
-        m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(_mm_load_ps(DAT_010ec7f0.m128_f32), t.m_vComponents), a.m_vComponents), _mm_mul_ps(t.m_vComponents, b.m_vComponents));
-    }
-
-    __forceinline void setAddMul4(const hkVector4q& a, const hkVector4q& b, const hkSimdRealq& r)
-    {
-        m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), b.m_vComponents), a.m_vComponents);
-    }
-
-    __forceinline hkSimdRealq getSimdAt3() const
-    {
-        hkSimdRealq r;
-        r.m_vValue = _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
-        return r;
-    }
-
-    __forceinline hkSimdRealq length3() const
-    {
-        const __m128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
-        const __m128 s = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
-        hkSimdRealq r;
-        r.m_vValue = _mm_sqrt_ss(s);
-        return r;
-    }
-};
-
+// A float4 copied through integer registers, then read as a vector (hkVector4q has a copy constructor, so it
+// cannot be a union member itself).
 union hkVector4u
 {
     hkFloat4 m_f;
-    hkVector4q m_v;
+    LocalM128 m_q;
+    __forceinline const hkVector4q& v() const { return *reinterpret_cast<const hkVector4q*>(&m_q); }
 };
 
 struct hkTransformq
@@ -263,12 +261,12 @@ struct hkTransformq
 
 __forceinline void SetTransformedPoint(hkVector4q& out, const hkTransformq& t, const hkVector4q& b)
 {
-    const __m128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
-    const __m128 r0 = _mm_mul_ps(b0, t.m_kColumn0.m_vComponents);
-    const __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
-    const __m128 r1 = _mm_mul_ps(b1, t.m_kColumn1.m_vComponents);
-    const __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
-    const __m128 r2 = _mm_mul_ps(b2, t.m_kColumn2.m_vComponents);
+    const LocalM128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
+    const LocalM128 r0 = _mm_mul_ps(b0, t.m_kColumn0.m_vComponents);
+    const LocalM128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
+    const LocalM128 r1 = _mm_mul_ps(b1, t.m_kColumn1.m_vComponents);
+    const LocalM128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
+    const LocalM128 r2 = _mm_mul_ps(b2, t.m_kColumn2.m_vComponents);
     out.m_vComponents = _mm_add_ps(_mm_add_ps(r1, r0), _mm_add_ps(r2, t.m_vTranslation.m_vComponents));
 }
 
@@ -306,19 +304,7 @@ struct hkAabbq
     hkVector4q m_kMaximumCorner;
 };
 
-struct hkAabbUint32
-{
-    unsigned int m_kMinimumCorner[3];
-    union {
-        struct { unsigned char m_ucExpansionMin[3]; unsigned char m_ucExpansionShift; };
-        hkpShapeKey m_uiCollisionShapeKey;
-    };
-    union {
-        unsigned int m_kMaximumCorner[4];
-        struct { unsigned int m_maxX; unsigned int m_maxY; unsigned int m_maxZ;
-                 unsigned char m_ucExpansionMax[3]; unsigned char m_expansionMaxXYZ; };
-    };
-};
+#include "../../../../../../include/hkAabbUint32.h"
 typedef hkAabbUint32 hkAabbUint32Key;
 
 struct hkpShapeBufferq
@@ -400,13 +386,13 @@ struct hkpProcessCollisionInputq
 
 union hkVec4F
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     float m_f[4];
     __forceinline float operator()(int i) const { return m_f[i]; }
 };
 
 static __forceinline void convertToUint32WithClip(const hkVector4q& a, const hkVector4q& b, const hkVector4q& scale,
-                                                  const __m128& maxVal, const __m128& minVal, unsigned int* out)
+                                                  const LocalM128& maxVal, const LocalM128& minVal, unsigned int* out)
 {
     hkVec4F x;
     x.m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
@@ -591,16 +577,16 @@ int __cdecl FUN_00d351c0(const hkpCdBodyq* body, int useCache, const hkpShapeCon
                 for (int k = 0; k < samples.m_numQsTransforms; k++)
                 {
                     hkVector4q relCenter;
-                    relCenter.setSub4(centerMotion, comLocal.m_v);
+                    relCenter.setSub4(centerMotion, comLocal.v());
                     hkVector4q p;
-                    p.setAddMul4(comLocal.m_v, relCenter, samples.m_kTransforms[k].m_vTranslation.getSimdAt3());
+                    p.setAddMul4(comLocal.v(), relCenter, samples.m_kTransforms[k].m_vTranslation.getSimdAt3());
                     hkVector4q pWorld;
                     SetTransformedPoint(pWorld, samples.m_kTransforms[k], p);
                     sweptMin.setMin4(sweptMin, pWorld);
                     sweptMax.setMax4(sweptMax, pWorld);
                 }
 
-                hkSimdRealq len = halfExtents.length3();
+                hkSimdRealq len = halfExtents.length3Simd();
                 hkVector4q radius;
                 radius.m_vComponents = _mm_shuffle_ps(len.m_vValue, len.m_vValue, 0);
                 hkVector4q expand;
@@ -614,7 +600,7 @@ int __cdecl FUN_00d351c0(const hkpCdBodyq* body, int useCache, const hkpShapeCon
             }
 
             hkAabbUint32Key* cur = out++;
-            __m128 maxVal = DAT_011b6d70;
+            LocalM128 maxVal = DAT_011b6d70;
             numAabbs++;
             const hkVector4q& scale = input->m_kAabbScale;
             const hkVector4q& offsetMin = input->m_kAabbMin;
@@ -624,7 +610,7 @@ int __cdecl FUN_00d351c0(const hkpCdBodyq* body, int useCache, const hkpShapeCon
             cur->m_kMinimumCorner[0] = fnv_FloatToInt(convertedMin(0));
             cur->m_kMinimumCorner[1] = fnv_FloatToInt(convertedMin(1));
             cur->m_kMinimumCorner[2] = fnv_FloatToInt(convertedMin(2));
-            cur->m_kMinimumCorner[3] = fnv_FloatToInt(convertedMin(3));
+            cur->m_uiCollisionShapeKey = fnv_FloatToInt(convertedMin(3));
 
             hkVec4F convertedMax;
             convertedMax.m_vComponents = _mm_max_ps(_mm_min_ps(_mm_mul_ps(_mm_add_ps(boundMaximum.m_vComponents, offsetMax.m_vComponents), scale.m_vComponents), maxVal), DAT_01267e30);
@@ -652,22 +638,21 @@ done:
 
 typedef unsigned int hkUint32;
 
-struct hkStringQ {
-    static __forceinline void memCpy16NonEmpty(void* dst, const void* src, int numQuads)
+// The shared headers have no hkString declaration; retain its inline block-copy operation without a class copy.
+static __forceinline void memCpy16NonEmpty(void* dst, const void* src, int numQuads)
+{
+    const hkUint32* src32 = reinterpret_cast<const hkUint32*>(src);
+    hkUint32* dst32 = reinterpret_cast<hkUint32*>(dst);
+    do
     {
-        const hkUint32* src32 = reinterpret_cast<const hkUint32*>(src);
-        hkUint32* dst32 = reinterpret_cast<hkUint32*>(dst);
-        do
-        {
-            dst32[0] = src32[0];
-            dst32[1] = src32[1];
-            dst32[2] = src32[2];
-            dst32[3] = src32[3];
-            dst32 += 4;
-            src32 += 4;
-        } while (--numQuads > 0);
-    }
-};
+        dst32[0] = src32[0];
+        dst32[1] = src32[1];
+        dst32[2] = src32[2];
+        dst32[3] = src32[3];
+        dst32 += 4;
+        src32 += 4;
+    } while (--numQuads > 0);
+}
 
 struct __declspec(align(16)) SortEntry {
     hkUint32 m_key;
@@ -679,8 +664,8 @@ struct __declspec(align(16)) SortEntry {
     hkUint32 unk18;
     hkUint32 unk1C;
     SortEntry() {}
-    SortEntry(const SortEntry& o) { hkStringQ::memCpy16NonEmpty(this, &o, sizeof(SortEntry) / 16); }
-    void operator=(const SortEntry& o) { hkStringQ::memCpy16NonEmpty(this, &o, sizeof(SortEntry) / 16); }
+    SortEntry(const SortEntry& o) { memCpy16NonEmpty(this, &o, sizeof(SortEntry) / 16); }
+    void operator=(const SortEntry& o) { memCpy16NonEmpty(this, &o, sizeof(SortEntry) / 16); }
 };
 
 struct SortEntryLess {
@@ -723,7 +708,7 @@ begin:
     if (i < aiHigh) { aiLow = i; goto begin; }
 }
 
-extern "C" __m128 _mm_set_ss(float);
+extern "C" LocalM128 _mm_set_ss(float);
 struct hkpAgent3ProcessInputq
 {
     const hkpCdBodyq* m_pBodyA;
@@ -736,7 +721,7 @@ static __forceinline void interpolateCenter(hkVector4q& out, const hkVector4q& a
     out.m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, _mm_shuffle_ps(t.m_vValue,t.m_vValue,0)), a.m_vComponents), _mm_mul_ps(b.m_vComponents, _mm_shuffle_ps(t.m_vValue,t.m_vValue,0)));
 }
 static __forceinline void convertLowerCurrent(const hkVector4q& in, const hkVector4q& offset, const hkVector4q& scale,
-                                                  const __m128& maxVal, const __m128& minVal, hkAabbUint32Key* out)
+                                                  const LocalM128& maxVal, const LocalM128& minVal, hkAabbUint32Key* out)
 {
     hkVec4F x;
     x.m_vComponents = _mm_add_ps(offset.m_vComponents, in.m_vComponents);
@@ -749,7 +734,7 @@ static __forceinline void convertLowerCurrent(const hkVector4q& in, const hkVect
     out->m_ucExpansionShift = fnv_FloatToInt(x(3));
 }
 static __forceinline void convertUpperCurrent(const hkVector4q& in, const hkVector4q& offset, const hkVector4q& scale,
-                                                  const __m128& maxVal, const __m128& minVal, unsigned int* out)
+                                                  const LocalM128& maxVal, const LocalM128& minVal, unsigned int* out)
 {
     hkVec4F x;
     x.m_vComponents = _mm_add_ps(offset.m_vComponents, _mm_load_ps(in.m_vComponents.m128_f32));
@@ -763,7 +748,7 @@ static __forceinline void convertUpperCurrent(const hkVector4q& in, const hkVect
 }
 
 static __forceinline void quantizeAabb(const hkAabbq& aabb, const hkpProcessCollisionInputq* in, hkAabbUint32Key* out) {
- __m128 maxVal=DAT_011b6d70;
+ LocalM128 maxVal=DAT_011b6d70;
  convertLowerCurrent(aabb.m_kMinimumCorner,in->m_kAabbMin,in->m_kAabbScale,maxVal,DAT_01267e30,out);
  convertUpperCurrent(aabb.m_kMaximumCorner,in->m_kAabbMaximum,in->m_kAabbScale,maxVal,DAT_01267e30,out->m_kMaximumCorner);
 }
@@ -818,16 +803,16 @@ void __cdecl FUN_00d34e10(const hkpAgent3ProcessInputq& input, const hkpShapeCon
             for (int k = 0; k < samples.m_numQsTransforms; k++)
             {
                 hkVector4q relCenter;
-                relCenter.setSub4(centerMotion, comLocal.m_v);
+                relCenter.setSub4(centerMotion, comLocal.v());
                 hkVector4q p;
-                p.setAddMul4(comLocal.m_v, relCenter, samples.m_kTransforms[k].m_vTranslation.getSimdAt3());
+                p.setAddMul4(comLocal.v(), relCenter, samples.m_kTransforms[k].m_vTranslation.getSimdAt3());
                 hkVector4q pWorld;
                 SetTransformedPoint(pWorld, samples.m_kTransforms[k], p);
                 sweptMin.setMin4(sweptMin, pWorld);
                 sweptMax.setMax4(sweptMax, pWorld);
             }
 
-            hkSimdRealq len = halfExtents.length3();
+            hkSimdRealq len = halfExtents.length3Simd();
             hkVector4q radius;
             radius.m_vComponents = _mm_shuffle_ps(len.m_vValue, len.m_vValue, 0);
             hkVector4q expand;

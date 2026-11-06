@@ -8,6 +8,9 @@
 // their real unit once its classes are.
 // src/fallout_shared/packagedatauseitem.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/packagedatauseitem.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../include/TESPackageData.h"
+#include "../../include/TESUseItemPackageData.h"
+
 extern "C" void __cdecl FUN_004856d0(int);
 struct LocationDescriptor
 {
@@ -17,39 +20,8 @@ struct LocationDescriptor
     ~LocationDescriptor();
     void FUN_0067f4d0(LocationDescriptor* other, bool a);
 };
-struct TESPackageData
-{
-    virtual ~TESPackageData();  // the original class is polymorphic (rtti_variants.py)
-    void Save(int);
-};
-struct TESUseItemPackageData : TESPackageData
-{
-    virtual ~TESUseItemPackageData();  // the original class is polymorphic (rtti_variants.py)
-    LocationDescriptor* m_pPackageTarget;
-    void FUN_0067c9d0();
-    void FUN_0067c860(TESPackageData* source);
-};
-struct FUN_0067c7a0_shell : TESUseItemPackageData
-{
-    void FUN_0067c7d0();
-    void* FUN_0067c7a0(unsigned int flags);
-};
-struct FUN_0067ad70
-{
-    virtual ~FUN_0067ad70();
-};
-struct LocationShell
-{
-    ~LocationShell();
-};
-struct FUN_0067c7d0 : FUN_0067ad70
-{
-    LocationShell* m_pPackageTarget;
-    virtual ~FUN_0067c7d0();
-};
-
 // @fnv 0x0067c860
-void TESUseItemPackageData::FUN_0067c860(TESPackageData* source)
+void TESUseItemPackageData::vf01(TESPackageData* source)
 {
     TESUseItemPackageData* copy = dynamic_cast<TESUseItemPackageData*>(source);
     if (copy)

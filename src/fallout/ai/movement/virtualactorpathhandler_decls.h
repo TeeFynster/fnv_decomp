@@ -2,13 +2,8 @@
 #define VIRTUALACTORPATHHANDLER_DECLS_H
 
 
-template <class T> class PathingRef
-{
-  public:
-    T* m_pObject;
-    void Reset(void*);
-    operator T*() const;
-};
+// src: XBOX_PDB (NiPointer<PathingSolution> and NiPointer<PathingRequest>).
+#include "../../../../include/NiPointer.h"
 
 class VirtualActorPathHandlerVtableCaller
 {
@@ -163,11 +158,7 @@ class PlayerCall
     bool IsSleepingOrResting();
 };
 
-class BGSLoadFormBuffer
-{
-  public:
-    void ReadTypedData(void*, unsigned int);
-};
+#include "../../../../include/BGSLoadFormBuffer.h"
 
 extern const double DAT_0102f078;
 extern PlayerCharacter* g_thePlayer;

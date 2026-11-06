@@ -2,6 +2,7 @@
 
 #include "layout_support.h"
 #include "original_string.h"
+#include "../../include/TimeoutTimer.h"
 #include <limits.h>
 #include <string.h>
 
@@ -245,14 +246,6 @@ void __cdecl FUN_0071d030(Outer* apOuter, const char* fmt, ...)
         va_end(args);
     }
 }
-
-class TimeoutTimer
-{
-  public:
-    float m_fStartTime;
-    float m_fTimeout;
-    float FUN_006b9130();
-};
 
 // @fnv 0x006b9130
 float TimeoutTimer::FUN_006b9130()

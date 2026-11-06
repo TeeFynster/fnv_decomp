@@ -2,6 +2,14 @@
 // src/havok/common/serialize/version/hkversionutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/version/hkversionutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../include/MemoryManager.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkClass.h"
+#include "../../../../../include/hkClassMember.h"
+
+
 extern "C" void __cdecl VisitObjectList(int, int);
 
 struct FUN_00db7a80_Class
@@ -25,23 +33,7 @@ void FUN_00db7a80_Class::EnsureInitialized()
     }
 }
 
-struct MemoryManager
-{
-    virtual void FUN_00e00000() = 0;
-    virtual void FUN_00e00004() = 0;
-    virtual void FUN_00e00008(void*, unsigned short) = 0;
-};
-
-struct MemoryRouter
-{
-    void* m_p00;
-    void* m_p04;
-    void* m_p08;
-    void* m_p0C;
-    MemoryManager* m_pMemoryManager;
-};
-
-MemoryRouter* _D1A0E0GetMemoryRouter();
+hkMemoryRouter* _D1A0E0GetMemoryRouter();
 
 struct Object
 {
@@ -63,9 +55,9 @@ FUN_00e049d0_Class* FUN_00e049d0_Class::FUN_00e049d0(int flags)
 
     if (flags & 1)
     {
-        MemoryRouter* router = _D1A0E0GetMemoryRouter();
+        hkMemoryRouter* router = _D1A0E0GetMemoryRouter();
         unsigned short type = m_type;
-        router->m_pMemoryManager->FUN_00e00008(this, type);
+        reinterpret_cast<hkMemoryAllocator*>(router->m_heap)->blockFree(this, type);
     }
 
     return this;
@@ -79,10 +71,11 @@ void* __cdecl FUN_00dc0fb0()
     return &str_010cf830;
 }
 
-struct FUN_00d86980_Class
-{
-    int FUN_00d86980();
-};
+// These getters are absent from the shared headers; a single fastcall argument
+// preserves the ECX receiver of each original zero-argument member call.
+int __fastcall GetMemberSize(const hkClassMember* member);
+const hkClass* __fastcall GetMemberClass(const hkClassMember* member) throw();
+const char* __fastcall GetClassName(const hkClass* klass) throw();
 
 struct FUN_00d871a0
 {
@@ -92,7 +85,7 @@ struct FUN_00d871a0
     FUN_00d871a0(void*, int);
     bool& FUN_00d871e0(bool&);
     void* FUN_00d871f0();
-    FUN_00d86980_Class* FUN_00d87370();
+    hkClassMember* FUN_00d87370();
 };
 
 extern "C" void* __cdecl FUN_00cb1260(void*, const void*, unsigned int);
@@ -105,73 +98,39 @@ void __cdecl FUN_00dc0fc0(void* a1, int a2, void* a3, int a4)
     bool b;
     if (obj1.FUN_00d871e0(b) && obj2.FUN_00d871e0(b))
     {
-        FUN_00cb1260(obj2.FUN_00d871f0(), obj1.FUN_00d871f0(), obj2.FUN_00d87370()->FUN_00d86980());
+        FUN_00cb1260(obj2.FUN_00d871f0(), obj1.FUN_00d871f0(), GetMemberSize(obj2.FUN_00d87370()));
     }
 }
 
-struct FUN_00d46d40_s
-{
-    const char* FUN_00d46d40() const throw();
-};
-
-class GlobalObjectO2_00d472a0 : public FUN_00d46d40_s
-{
-  public:
-    int m_00;
-};
-extern GlobalObjectO2_00d472a0 g_01268748;
+extern hkClass g_01268748;
 
 int __cdecl FUN_00cb0fa0(const char* pcA, const char* pcB) throw();
-
-class hkClassMemberDC11
-{
-  public:
-    enum Type
-    {
-        TYPE_POINTER = 0x14,
-        TYPE_ARRAY = 0x16,
-        TYPE_STRUCT = 0x19,
-        TYPE_SIMPLEARRAY = 0x1a,
-        TYPE_VARIANT = 0x1c,
-        TYPE_CSTRING = 0x1d,
-        TYPE_STRINGPTR = 0x21
-    };
-
-    const char* m_name;
-    const void* m_class;
-    const void* m_pClassEnum;
-    unsigned char m_type;
-    unsigned char m_eSubtype;
-
-    int FUN_00d86920() const throw();
-    const FUN_00d46d40_s& FUN_00d86910() const throw();
-};
 
 class hkVersionCheckDC11
 {
   public:
-    int FUN_00e032d0(const hkClassMemberDC11* pkOld, const hkClassMemberDC11* pkNew) throw();
-    int IsMemberCompatible(const hkClassMemberDC11* pkOld, const hkClassMemberDC11* pkNew) throw();
+    int FUN_00e032d0(const hkClassMember* pkOld, const hkClassMember* pkNew) throw();
+    int IsMemberCompatible(const hkClassMember* pkOld, const hkClassMember* pkNew) throw();
 };
 
 // Returns 1 if the old class member is compatible with the new one by type/subtype, cstring-to-stringptr, or variant-to-pointer conversion; otherwise 0.
 // @fnv 0x00dc1100
-int hkVersionCheckDC11::IsMemberCompatible(const hkClassMemberDC11* pkOld, const hkClassMemberDC11* pkNew) throw()
+int hkVersionCheckDC11::IsMemberCompatible(const hkClassMember* pkOld, const hkClassMember* pkNew) throw()
 {
-    bool bTypeCompatible = (pkOld->m_type == pkNew->m_type) || (pkOld->m_type == hkClassMemberDC11::TYPE_SIMPLEARRAY &&
-                                                                pkNew->m_type == hkClassMemberDC11::TYPE_ARRAY);
+    bool bTypeCompatible = (pkOld->m_type == pkNew->m_type) || (pkOld->m_type == hkClassMember::TYPE_SIMPLEARRAY &&
+                                                                pkNew->m_type == hkClassMember::TYPE_ARRAY);
     bool bCStringToStringPtr =
-        (pkOld->m_type == hkClassMemberDC11::TYPE_CSTRING && pkNew->m_type == hkClassMemberDC11::TYPE_STRINGPTR);
+        (pkOld->m_type == hkClassMember::TYPE_CSTRING && pkNew->m_type == hkClassMember::TYPE_STRINGPTR);
     bool bVariantToPtr =
-        (pkOld->m_type == hkClassMemberDC11::TYPE_VARIANT && pkNew->m_type == hkClassMemberDC11::TYPE_POINTER &&
-         pkNew->m_eSubtype == hkClassMemberDC11::TYPE_STRUCT && pkNew->FUN_00d86920() &&
-         FUN_00cb0fa0(g_01268748.FUN_00d46d40(), pkNew->FUN_00d86910().FUN_00d46d40()) == 0);
+        (pkOld->m_type == hkClassMember::TYPE_VARIANT && pkNew->m_type == hkClassMember::TYPE_POINTER &&
+         pkNew->m_eSubtype == hkClassMember::TYPE_STRUCT && GetMemberClass(pkNew) &&
+         FUN_00cb0fa0(GetClassName(&g_01268748), GetClassName(pkNew->GetClass())) == 0);
     bool bSubTypeCompatible =
-        (pkOld->m_eSubtype == pkNew->m_eSubtype) || (pkOld->m_eSubtype == hkClassMemberDC11::TYPE_CSTRING &&
-                                                     pkNew->m_eSubtype == hkClassMemberDC11::TYPE_STRINGPTR);
+        (pkOld->m_eSubtype == pkNew->m_eSubtype) || (pkOld->m_eSubtype == hkClassMember::TYPE_CSTRING &&
+                                                     pkNew->m_eSubtype == hkClassMember::TYPE_STRINGPTR);
     bool bSubVariantToPtr =
-        (pkOld->m_eSubtype == hkClassMemberDC11::TYPE_VARIANT && pkNew->m_eSubtype == hkClassMemberDC11::TYPE_POINTER &&
-         pkNew->FUN_00d86920() && FUN_00cb0fa0(g_01268748.FUN_00d46d40(), pkNew->FUN_00d86910().FUN_00d46d40()) == 0);
+        (pkOld->m_eSubtype == hkClassMember::TYPE_VARIANT && pkNew->m_eSubtype == hkClassMember::TYPE_POINTER &&
+         GetMemberClass(pkNew) && FUN_00cb0fa0(GetClassName(&g_01268748), GetClassName(pkNew->GetClass())) == 0);
 
     if (FUN_00e032d0(pkOld, pkNew) || bCStringToStringPtr || bVariantToPtr ||
         (bTypeCompatible && (bSubTypeCompatible || bSubVariantToPtr)))
@@ -181,19 +140,7 @@ int hkVersionCheckDC11::IsMemberCompatible(const hkClassMemberDC11* pkOld, const
 
 class hkMemoryAllocatorDC12;
 
-struct hkMemoryRouterDC12
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorDC12* m_pStreamAllocator;
-    hkMemoryAllocatorDC12& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterDC12& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 
 void __cdecl ProcessObjectArray(void* const* ppvList, int iFlags) throw();
 
@@ -236,21 +183,11 @@ extern "C" void __cdecl VisitObjectList(int apvList, int iFlags)
     ProcessObjectArray(ppvList, iFlags);
     hkVisitorDC12 kVisitor;
     hkPointerMapDC12 kDone;
-    kDone.EnsureCapacity(FUN_00c85750().heap(), 0);
+    kDone.EnsureCapacity(reinterpret_cast<hkMemoryAllocatorDC12&>(FUN_00c85750().heap()), 0);
     for (int i = 0; ppvList[i]; i++)
         kVisitor.FUN_00dc1bb0(ppvList[i], kDone, 1);
-    kDone.ProcessArgument(FUN_00c85750().heap());
+    kDone.ProcessArgument(reinterpret_cast<hkMemoryAllocatorDC12&>(FUN_00c85750().heap()));
 }
-
-class hkBoolDC10
-{
-  public:
-    hkBoolDC10(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-    char m_cBooleanValue;
-};
 
 class FUN_00d27520
 {
@@ -269,18 +206,8 @@ class FUN_00d27520
 class FUN_00d274c0 : public FUN_00d27520
 {
   public:
-    FUN_00d274c0(void* pvMem, int m_uiSizeAndFlags, hkBoolDC10 bMemoryIsString) throw();
+    FUN_00d274c0(void* pvMem, int m_uiSizeAndFlags, hkBool bMemoryIsString) throw();
     int FUN_00d27380(int offset, int whence) throw();
-};
-
-struct EntryDC10
-{
-    int m_key;
-    int unk04;
-    int unk08;
-    int unk0C;
-    unsigned short unk10;
-    unsigned short m_offset;
 };
 
 class SetDC10
@@ -294,7 +221,7 @@ class SectionsDC10
   public:
     int FUN_00d470d0() throw();
     int FUN_00d46f00() throw();
-    EntryDC10* FUN_00d46f20(int i) throw();
+    hkClassMember* FUN_00d46f20(int i) throw();
     void InvokeTarget(int i, FUN_00d27520* pkWriter) throw();
 };
 
@@ -305,8 +232,8 @@ void __cdecl FUN_00dc1070(void* apvBuffer, SetDC10* pkSet, SectionsDC10* pkSecti
     FUN_00d274c0 kWriter(apvBuffer, pkSections->FUN_00d470d0(), false);
     for (int i = 0; i < pkSections->FUN_00d46f00(); i++)
     {
-        EntryDC10* pkEntry = pkSections->FUN_00d46f20(i);
-        int key = pkEntry->m_key;
+        hkClassMember* pkEntry = pkSections->FUN_00d46f20(i);
+        int key = reinterpret_cast<int>(pkEntry->m_name);
         if (!pkSet->FUN_00d46fe0(key))
         {
             int iOffset = pkEntry->m_offset;
@@ -326,14 +253,6 @@ struct S00dc15a0_Buffer
     virtual void vf10(int* indices, unsigned int size);
 };
 
-struct S00dc15a0_AudioSystem
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    S00dc15a0_Buffer* unk0C;
-};
-
 struct S00dc15a0_Params
 {
     void* unk00;
@@ -348,7 +267,7 @@ struct S00dc15a0_Array
 };
 
 namespace fnvc_adapt {
-extern "C" S00dc15a0_AudioSystem* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
 }
 extern "C" void __cdecl FUN_00c908c0(S00dc15a0_Buffer* buffer, int** indices, int size, int elementSize);
 
@@ -368,8 +287,8 @@ int __cdecl FUN_00dc15a0(S00dc15a0_Params* params, int value, int flags)
     arr.m_iElementCount = 0;
     arr.m_capFlags = 0x80000000;
 
-    S00dc15a0_AudioSystem* pAudioSystem = fnvc_adapt::FUN_00c85750();
-    S00dc15a0_Buffer* heap = pAudioSystem->unk0C;
+    hkMemoryRouter* router = fnvc_adapt::FUN_00c85750();
+    S00dc15a0_Buffer* heap = reinterpret_cast<S00dc15a0_Buffer*>(router->m_temp);
     int iCurrentCap = arr.m_capFlags & 0x3fffffff;
     if (iCurrentCap < count)
     {
@@ -392,8 +311,8 @@ int __cdecl FUN_00dc15a0(S00dc15a0_Params* params, int value, int flags)
 
     int result = FUN_00dc12c0(params, value, flags, &arr);
 
-    pAudioSystem = fnvc_adapt::FUN_00c85750();
-    S00dc15a0_Buffer* heap2 = pAudioSystem->unk0C;
+    router = fnvc_adapt::FUN_00c85750();
+    S00dc15a0_Buffer* heap2 = reinterpret_cast<S00dc15a0_Buffer*>(router->m_temp);
     arr.m_iElementCount = 0;
     if ((arr.m_capFlags & 0x80000000) == 0)
     {
@@ -403,7 +322,8 @@ int __cdecl FUN_00dc15a0(S00dc15a0_Params* params, int value, int flags)
     return result;
 }
 
-struct hkStructureLayoutDC10
+// Four-byte layout rules copied by the object-copier constructor at 0x00e03120.
+struct StructureLayoutRules
 {
     char m_ucBytesInPointer;
     char m_bLittleEndian;
@@ -422,7 +342,7 @@ namespace FUN_00e03120 {
 class hkObjectCopier
 {
   public:
-    hkObjectCopier(const hkStructureLayoutDC10& kSrc, const hkStructureLayoutDC10& kDst, hkFlagsDC10 kFlags);
+    hkObjectCopier(const StructureLayoutRules& kSrc, const StructureLayoutRules& kDst, hkFlagsDC10 kFlags);
     virtual void CopyContents();
     int unk04, unk08, unk0C;
 };
@@ -432,12 +352,12 @@ namespace FUN_00dc1040 {
 class PackfileObjectCopier : public FUN_00e03120::hkObjectCopier
 {
   public:
-    PackfileObjectCopier(const hkStructureLayoutDC10& kSrc, const hkStructureLayoutDC10& kDst);
+    PackfileObjectCopier(const StructureLayoutRules& kSrc, const StructureLayoutRules& kDst);
     virtual void CopyContents();
 };
 
 // @fnv 0x00dc1040
-PackfileObjectCopier::PackfileObjectCopier(const hkStructureLayoutDC10& kSrc, const hkStructureLayoutDC10& kDst)
+PackfileObjectCopier::PackfileObjectCopier(const StructureLayoutRules& kSrc, const StructureLayoutRules& kDst)
     : FUN_00e03120::hkObjectCopier(kSrc, kDst, 0)
 {}
 }

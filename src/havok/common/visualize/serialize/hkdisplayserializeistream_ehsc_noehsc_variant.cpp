@@ -1,3 +1,26 @@
+// Keep the original intrinsic declaration: the CRT's extra byte-array aliases
+// cause this /GS unit to acquire a stack cookie absent from the game function.
+// Exe 0x00ddada0 FUN_00ddada0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_set_ps1(float a);
+#define _INCLUDED_MM2
+
+#include "../../../../../include/BSAudio.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkGeometry.h"
+#include "../../../../../include/hkDisplayGeometry.h"
+#include "../../../../../include/hkDisplayConvex.h"
+#include "../../../../../include/hkTransform.h"
+#include "../../../../../include/hkSphere.h"
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkDisplayCapsule.h"
+#include "../../../../../include/hkDisplaySemiCircle.h"
+#include "../../../../../include/hkDisplaySerializeIStream.h"
+#undef _INCLUDED_MM2
 
 // src/havok/common/visualize/serialize/hkdisplayserializeistream_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/common/visualize/serialize/hkdisplayserializeistream.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,436 +28,258 @@
 
 // src/havok/common/visualize/serialize/hkdisplayserializeistream.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/serialize/hkdisplayserializeistream.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct DdabeTag
-{
-    bool b;
-    DdabeTag() : b(false)
-    {}
-    DdabeTag(const DdabeTag& o) : b(o.b)
-    {}
-};
-struct DdabeBase
-{
-    DdabeBase(int a, DdabeTag t);
-    virtual void unk00();
-};
-struct FUN_00ddabe0 : DdabeBase
-{
-    FUN_00ddabe0(int a);
-    virtual void unk00();
-};
-struct FUN_00ddac60_Obj
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    float unk0C;
-};
-void __stdcall FUN_00dd8fe0(FUN_00ddac60_Obj* obj, int a, int b);
-void __stdcall FUN_00ddac60(FUN_00ddac60_Obj* obj);
-struct ArrayRecord
-{
-    void* data;
-    int size;
-    int capacity;
-};
-struct ArrayPair
-{
-    ArrayRecord first;
-    ArrayRecord second;
-};
-struct BSAudio
-{
-};
-BSAudio* __cdecl FUN_00c85750();
-extern "C" void __cdecl FUN_00c908c0(void*, void*, int, int);
-struct FUN_00ddacd0_shell
-{
-    void __thiscall FUN_00dd8fe0(void* output, int elementSize, int count);
-    void __thiscall FUN_00ddac60(void* output);
-    void __thiscall FUN_00ddac00(void* output);
-    void __thiscall FUN_00ddacd0(ArrayPair* arrays);
-};
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-struct FUN_00dd9210_cls
-{
-    int unk00;
-    unsigned short m_uSize;
-    unsigned short m_u06;
-
-    void FUN_00dd91f0();
-
-    FUN_00dd9210_cls* FUN_00dd9210(unsigned char acFlags);
-};
-
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_set_ps1(float a);
-extern "C" __m128 _mm_load_ps1(float const* p);
-
 typedef float hkReal;
 typedef signed char hkInt8;
 
-struct hkVector4Q
-{
-    __m128 m_vComponents;
-    void operator=(const hkVector4Q& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void SetAllComponents(hkReal r)
-    {
-        m_vComponents = _mm_set_ps1(r);
-    }
-};
+BSAudio* __cdecl FUN_00c85750();
 
-struct hkTransformQ
-{
-    hkVector4Q m_kColumn0;
-    hkVector4Q m_kColumn1;
-    hkVector4Q m_kColumn2;
-    hkVector4Q m_vTranslation;
-    void FUN_00c6cd60(const hkTransformQ& t);
-};
+// Shared hkMemoryRouter.h is not available; this unit uses its heap pointer at +0x10.
+#include "../../../../../include/hkMemoryRouter.h"
 
-struct hkSphereQ
+__forceinline hkMemoryRouter* getRouter()
 {
-    hkVector4Q m_pos;
-    hkSphereQ(const hkVector4Q& pos, hkReal radius)
-    {
-        m_pos = pos;
-        m_pos.m_vComponents.m128_f32[3] = radius;
-    }
-};
-
-struct hkMemoryAllocatorQ
-{
-    virtual void vf00();
-    virtual void* AllocateMemoryBlock(int numBytes);
-};
-
-struct hkMemoryRouterQ
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorQ* m_pStreamAllocator;
-    hkMemoryAllocatorQ& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-__forceinline hkMemoryRouterQ* getRouterQ()
-{
-    return (hkMemoryRouterQ*)FUN_00c85750();
+    return reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
 }
 
-struct hkGeometryQ
+__forceinline void* hkGeometry::operator new(size_t nbytes) throw()
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    hkGeometryQ();
-    __forceinline static void* operator new(unsigned int nbytes)
-    {
-        return getRouterQ()->heap().AllocateMemoryBlock(nbytes);
-    }
-    __forceinline static void operator delete(void* p)
-    {}
-};
+    return getRouter()->heap().blockAlloc(nbytes);
+}
 
-struct hkDisplayGeometryQ
+__forceinline void* hkDisplayGeometry::operator new(std::size_t nbytes)
 {
-    void* m_vtbl;
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    int m_type;
-    int unk0C;
-    hkTransformQ m_kMotionTransform;
+    void* b = getRouter()->heap().blockAlloc(nbytes);
+    static_cast<hkDisplayGeometry*>(b)->m_usMemSizeAndFlags = static_cast<unsigned short>(nbytes);
+    return b;
+}
 
-    __forceinline static void* operator new(unsigned int nbytes)
-    {
-        void* b = getRouterQ()->heap().AllocateMemoryBlock(nbytes);
-        static_cast<hkDisplayGeometryQ*>(b)->m_usMemSizeAndFlags = static_cast<unsigned short>(nbytes);
-        return b;
-    }
-    __forceinline static void operator delete(void* p)
-    {}
-    __forceinline void SetGeometryTransform(const hkTransformQ& t)
-    {
-        m_kMotionTransform.FUN_00c6cd60(t);
-    }
-};
+// Havok's default transform constructor leaves its components uninitialized.
+__forceinline hkTransform::hkTransform() {}
 
-struct hkDisplayConvexQ : hkDisplayGeometryQ
+__forceinline void hkVector4::SetAllComponents(float r)
 {
-    hkGeometryQ* m_pSourceGeometry;
-    hkDisplayConvexQ(hkGeometryQ* geom);
-};
+    m_vComponents = _mm_set_ps1(r);
+}
 
-struct hkDisplaySphereQ : hkDisplayGeometryQ
+// Shared hkDisplaySphere.h is not available; retain the real class declaration here.
+struct hkDisplaySphere : hkDisplayGeometry
 {
-    hkSphereQ m_pSphere;
+    hkSphere m_pSphere;
     int m_iXResolution;
     int m_iYResolution;
     int unk68;
     int unk6C;
     int unk70;
-    hkDisplaySphereQ(const hkSphereQ& sphere, int xRes, int yRes);
+    hkDisplaySphere(const hkSphere& sphere, int xRes, int yRes);
 };
 
-struct hkDisplayBoxQ : hkDisplayGeometryQ
+// Shared hkDisplayBox.h is not available; retain the real class declaration here.
+struct hkDisplayBox : hkDisplayGeometry
 {
-    hkVector4Q m_vHalfExtents;
+    hkVector4 m_vHalfExtents;
     int unk60;
-    hkDisplayBoxQ(const hkVector4Q& halfExtents);
+    hkDisplayBox(const hkVector4& halfExtents);
 };
 
-struct hkDisplayAABBQ : hkDisplayGeometryQ
+// Shared hkDisplayAABB.h is not available; retain the real class declaration here.
+struct hkDisplayAABB : hkDisplayGeometry
 {
-    hkVector4Q m_kMinimumCorner;
-    hkVector4Q m_kMaximumCorner;
+    hkVector4 m_kMinimumCorner;
+    hkVector4 m_kMaximumCorner;
     int unk70;
-    hkDisplayAABBQ(const hkVector4Q& min, const hkVector4Q& max);
+    hkDisplayAABB(const hkVector4& min, const hkVector4& max);
 };
 
-struct hkDisplayConeQ : hkDisplayGeometryQ
+// Shared hkDisplayCone.h is not available; retain the real class declaration here.
+struct hkDisplayCone : hkDisplayGeometry
 {
-    hkVector4Q m_kStartPosition;
-    hkVector4Q m_kAxisEndPoints;
+    hkVector4 m_kStartPosition;
+    hkVector4 m_kAxisEndPoints;
     hkReal m_fConeAngle;
     hkReal m_height;
     int m_iNumSegments;
     int unk7C;
     int unk80;
-    hkDisplayConeQ(hkReal coneAngle, hkReal coneHeight, int numSegments, const hkVector4Q& coneAxis,
-                   const hkVector4Q& startPos);
+    hkDisplayCone(hkReal coneAngle, hkReal coneHeight, int numSegments, const hkVector4& coneAxis,
+                   const hkVector4& startPos);
 };
 
-struct hkDisplaySemiCircleQ : hkDisplayGeometryQ
+// Shared hkDisplayPlane.h is not available; retain the real class declaration here.
+struct hkDisplayPlane : hkDisplayGeometry
 {
-    hkVector4Q m_kCenterPosition;
-    hkVector4Q m_vHitNormal;
-    hkVector4Q m_kStartPerpendicular;
-    hkReal m_fThetaMin;
-    hkReal m_fThetaMax;
-    hkReal m_fSphereRadius;
-    int m_iNumSegments;
+    hkVector4 m_vHitNormal;
+    hkVector4 m_kPerpendicularToNormal;
+    hkVector4 m_kCenterPosition;
+    hkVector4 m_fExtents;
     int unk90;
-    hkDisplaySemiCircleQ(const hkVector4Q& center, const hkVector4Q& normal, const hkVector4Q& startPerp,
-                         hkReal thetaMin, hkReal thetaMax, hkReal radius, int numSegments);
+    hkDisplayPlane(const hkVector4& normal, const hkVector4& perpToNormal, const hkVector4& center,
+                    const hkVector4& extent);
 };
 
-struct hkDisplayPlaneQ : hkDisplayGeometryQ
-{
-    hkVector4Q m_vHitNormal;
-    hkVector4Q m_kPerpendicularToNormal;
-    hkVector4Q m_kCenterPosition;
-    hkVector4Q m_fExtents;
-    int unk90;
-    hkDisplayPlaneQ(const hkVector4Q& normal, const hkVector4Q& perpToNormal, const hkVector4Q& center,
-                    const hkVector4Q& extent);
-};
+// Shared hkDisplayCapsule.h lacks the constructor and capsule data members used here.
 
-struct hkDisplayCapsuleQ : hkDisplayGeometryQ
+// Shared hkDisplayCylinder.h is not available; retain the real class declaration here.
+struct hkDisplayCylinder : hkDisplayGeometry
 {
-    hkVector4Q m_fMinimumV;
-    hkVector4Q m_fMaximumV;
+    hkVector4 m_fMinimumV;
+    hkVector4 m_fMaximumV;
     hkReal m_fSphereRadius;
     int m_iNumSides;
     int m_iNumHeightSegments;
     int unk7C;
     int unk80;
-    hkDisplayCapsuleQ(const hkVector4Q& top, const hkVector4Q& bottom, hkReal radius, int numSides,
-                      int numHeightSegments);
-};
-
-struct hkDisplayCylinderQ : hkDisplayGeometryQ
-{
-    hkVector4Q m_fMinimumV;
-    hkVector4Q m_fMaximumV;
-    hkReal m_fSphereRadius;
-    int m_iNumSides;
-    int m_iNumHeightSegments;
-    int unk7C;
-    int unk80;
-    hkDisplayCylinderQ(const hkVector4Q& top, const hkVector4Q& bottom, hkReal radius, int numSides,
+    hkDisplayCylinder(const hkVector4& top, const hkVector4& bottom, hkReal radius, int numSides,
                        int numHeightSegments);
 };
 
-struct hkDisplaySerializeIStreamQ
+__forceinline hkInt8 hkDisplaySerializeIStream::readInt8()
 {
-    int unk00;
-    void FUN_00dd8fe0(void* buf, int elemSize, int numElems);
-    void FUN_00ddac60(hkVector4Q& v);
-    void FUN_00ddac80(hkTransformQ& t);
-    void FUN_00ddacd0(hkGeometryQ* geom);
+    hkInt8 c;
+    FUN_00dd8fe0(&c, 1, 1);
+    return c;
+}
 
-    __forceinline hkInt8 readInt8()
-    {
-        hkInt8 c;
-        FUN_00dd8fe0(&c, 1, 1);
-        return c;
-    }
-    __forceinline int readInt32()
-    {
-        int i;
-        FUN_00dd8fe0(&i, 4, 1);
-        return i;
-    }
-    __forceinline hkReal readFloat32()
-    {
-        hkReal f;
-        FUN_00dd8fe0(&f, 4, 1);
-        return f;
-    }
-    __forceinline void ReadVector4(hkVector4Q& v)
-    {
-        FUN_00ddac60(v);
-    }
-    __forceinline void ReadTransform(hkTransformQ& t)
-    {
-        FUN_00ddac80(t);
-    }
-    __forceinline void ReadGeometry(hkGeometryQ* g)
-    {
-        FUN_00ddacd0(g);
-    }
+__forceinline int hkDisplaySerializeIStream::readInt32()
+{
+    int i;
+    FUN_00dd8fe0(&i, 4, 1);
+    return i;
+}
 
-    void FUN_00ddada0(hkDisplayGeometryQ*& geometry);
-};
+__forceinline hkReal hkDisplaySerializeIStream::readFloat32()
+{
+    hkReal f;
+    FUN_00dd8fe0(&f, 4, 1);
+    return f;
+}
+
+__forceinline void hkDisplaySerializeIStream::ReadVector4(hkVector4& v)
+{
+    FUN_00ddac60(v);
+}
+
+__forceinline void hkDisplaySerializeIStream::ReadTransform(hkTransform& t)
+{
+    FUN_00ddac80(t);
+}
+
+__forceinline void hkDisplaySerializeIStream::ReadGeometry(hkGeometry* g)
+{
+    FUN_00ddacd0(g);
+}
 
 // @fnv 0x00ddada0
-void hkDisplaySerializeIStreamQ::FUN_00ddada0(hkDisplayGeometryQ*& geometry)
+void hkDisplaySerializeIStream::FUN_00ddada0(hkDisplayGeometry*& geometry)
 {
     hkInt8 type = readInt8();
 
     switch (type)
     {
     case 6: {
-        hkTransformQ transform;
+        hkTransform transform;
         ReadTransform(transform);
-        hkGeometryQ* geom = new hkGeometryQ;
+        hkGeometry* geom = new hkGeometry;
         ReadGeometry(geom);
-        geometry = new hkDisplayConvexQ(geom);
-        geometry->SetGeometryTransform(transform);
+        geometry = new hkDisplayConvex(geom);
+        geometry->m_kMotionTransform = transform;
         break;
     }
     case 1: {
-        hkTransformQ transform;
+        hkTransform transform;
         ReadTransform(transform);
         hkReal radius = readFloat32();
-        hkVector4Q position;
+        hkVector4 position;
         ReadVector4(position);
-        hkSphereQ sphere(position, radius);
+        hkSphere sphere;
+        sphere.m_pos.m_vComponents = position.m_vComponents;
+        sphere.m_pos.m_vComponents.m128_f32[3] = radius;
         int xRes = readInt32();
         int yRes = readInt32();
-        geometry = new hkDisplaySphereQ(sphere, xRes, yRes);
-        geometry->SetGeometryTransform(transform);
+        geometry = new hkDisplaySphere(sphere, xRes, yRes);
+        geometry->m_kMotionTransform = transform;
         break;
     }
     case 8: {
-        hkTransformQ transform;
+        hkTransform transform;
         ReadTransform(transform);
         hkReal radius = readFloat32();
-        hkVector4Q top;
+        hkVector4 top;
         ReadVector4(top);
-        hkVector4Q bottom;
+        hkVector4 bottom;
         ReadVector4(bottom);
         int numSides = readInt32();
         int numHeightSegments = readInt32();
-        geometry = new hkDisplayCapsuleQ(top, bottom, radius, numSides, numHeightSegments);
-        geometry->SetGeometryTransform(transform);
+        geometry = new hkDisplayCapsule(top, bottom, radius, numSides, numHeightSegments);
+        geometry->m_kMotionTransform = transform;
         break;
     }
     case 9: {
-        hkTransformQ transform;
+        hkTransform transform;
         ReadTransform(transform);
         hkReal radius = readFloat32();
-        hkVector4Q top;
+        hkVector4 top;
         ReadVector4(top);
-        hkVector4Q bottom;
+        hkVector4 bottom;
         ReadVector4(bottom);
         int numSides = readInt32();
         int numHeightSegments = readInt32();
-        geometry = new hkDisplayCylinderQ(top, bottom, radius, numSides, numHeightSegments);
-        geometry->SetGeometryTransform(transform);
+        geometry = new hkDisplayCylinder(top, bottom, radius, numSides, numHeightSegments);
+        geometry->m_kMotionTransform = transform;
         break;
     }
     case 2: {
-        hkTransformQ transform;
+        hkTransform transform;
         ReadTransform(transform);
-        hkVector4Q halfExtents;
+        hkVector4 halfExtents;
         ReadVector4(halfExtents);
-        geometry = new hkDisplayBoxQ(halfExtents);
-        geometry->SetGeometryTransform(transform);
+        geometry = new hkDisplayBox(halfExtents);
+        geometry->m_kMotionTransform = transform;
         break;
     }
     case 3: {
-        hkVector4Q minExtent;
+        hkVector4 minExtent;
         ReadVector4(minExtent);
-        hkVector4Q maxExtent;
+        hkVector4 maxExtent;
         ReadVector4(maxExtent);
-        geometry = new hkDisplayAABBQ(minExtent, maxExtent);
+        geometry = new hkDisplayAABB(minExtent, maxExtent);
         break;
     }
     case 4: {
-        hkVector4Q startPos;
+        hkVector4 startPos;
         ReadVector4(startPos);
-        hkVector4Q axis;
+        hkVector4 axis;
         ReadVector4(axis);
         hkReal angle = readFloat32();
         hkReal height = readFloat32();
         int numSegments = readInt32();
-        geometry = new hkDisplayConeQ(angle, height, numSegments, axis, startPos);
+        geometry = new hkDisplayCone(angle, height, numSegments, axis, startPos);
         break;
     }
     case 5: {
-        hkVector4Q center;
+        hkVector4 center;
         ReadVector4(center);
-        hkVector4Q normal;
+        hkVector4 normal;
         ReadVector4(normal);
-        hkVector4Q perp;
+        hkVector4 perp;
         ReadVector4(perp);
         hkReal radius = readFloat32();
         hkReal thetaMin = readFloat32();
         hkReal thetaMax = readFloat32();
         int numSegments = readInt32();
-        geometry = new hkDisplaySemiCircleQ(center, normal, perp, thetaMin, thetaMax, radius, numSegments);
+        geometry = new hkDisplaySemiCircle(center, normal, perp, thetaMin, thetaMax, radius, numSegments);
         break;
     }
     case 7: {
-        hkVector4Q center;
+        hkVector4 center;
         ReadVector4(center);
-        hkVector4Q normal;
+        hkVector4 normal;
         ReadVector4(normal);
-        hkVector4Q perpToNormal;
+        hkVector4 perpToNormal;
         ReadVector4(perpToNormal);
         hkReal e = readFloat32();
-        hkVector4Q extent;
+        hkVector4 extent;
         extent.SetAllComponents(e);
-        geometry = new hkDisplayPlaneQ(normal, perpToNormal, center, extent);
+        geometry = new hkDisplayPlane(normal, perpToNormal, center, extent);
         break;
     }
     default:

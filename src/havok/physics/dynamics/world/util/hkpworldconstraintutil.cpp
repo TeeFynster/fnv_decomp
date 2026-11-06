@@ -1,3 +1,10 @@
+#include "../../../../../../include/hkpConstraintOwner.h"
+#include "../../../../../../include/hkpEntity.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkpConstraintAtom.h"
+#include "../../../../../../include/hkpConstraintInstance.h"
+#include "../../../../../../include/hkpConstraintData.h"
+#include "../../../../../../include/hkpModifierConstraintAtom.h"
 
 // src/havok/physics/dynamics/world/util/hkpworldconstraintutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/util/hkpworldconstraintutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -10,7 +17,8 @@ struct S_00d27820_Buf
 };
 struct S_00d27820_Rec
 {
-    S_00d27820_Node* link[3];
+    hkpConstraintInstance* constraint;
+    S_00d27820_Node* bodies[2];
     int unk0c, unk10;
     unsigned short px, py, pz;
     unsigned char idx;
@@ -61,39 +69,30 @@ struct S_00d27820_A
     unsigned char unk24;
     unsigned char flags;
 };
-struct S_00d27820_P
-{
-    int unk00, unk04;
-    S_00d27820_A* unk08;
-    int unk0c, unk10, unk14, unk18, unk1c;
-    int unk20, unk24, unk28, unk2c;
-    S_00d27820_Rec* unk30;
-    void FUN_00c905b0();
-};
 void __cdecl FUN_00cb1270(int a, int b, char* c);
 
-// Removes the record p->unk30 from its node lists, shifts the following records down, adjusts buffer sizes and counts, and calls FUN_00c905b0.
+// Removes the record p->m_pConstraintInternal from its node lists, shifts the following records down, adjusts buffer sizes and counts, and calls FUN_00c905b0.
 // @fnv 0x00d27820
-void DetachRecord(S_00d27820_P* p)
+void DetachRecord(hkpConstraintInstance* p)
 {
-    S_00d27820_Rec* pRec = p->unk30;
-    S_00d27820_A* a = p->unk08;
+    S_00d27820_Rec* pRec = reinterpret_cast<S_00d27820_Rec*>(p->m_pConstraintInternal);
+    S_00d27820_A* a = reinterpret_cast<S_00d27820_A*>(p->m_pOwnerObject);
     a->flags = (a->flags & ~2) | 1;
     unsigned x = pRec->px;
     unsigned y = pRec->py;
     unsigned z = pRec->pz;
-    if (p->unk30)
+    if (p->m_pConstraintInternal)
     {
-        S_00d27820_A* a2 = p->unk08;
+        S_00d27820_A* a2 = reinterpret_cast<S_00d27820_A*>(p->m_pOwnerObject);
         a2->vec.Sub(x, y, z);
-        S_00d27820_Rec* pRec2 = p->unk30;
+        S_00d27820_Rec* pRec2 = reinterpret_cast<S_00d27820_Rec*>(p->m_pConstraintInternal);
         pRec2->py -= y;
         pRec2->pz -= z;
         pRec2->px -= x;
     }
     a->cnt--;
-    p->unk08 = 0;
-    S_00d27820_Node* c = pRec->link[2 - pRec->idx];
+    p->m_pOwnerObject = 0;
+    S_00d27820_Node* c = pRec->bodies[1 - pRec->idx];
     unsigned short slot = pRec->slot;
     S_00d27820_Arr* arr = &c->arr;
     S_00d27820_Node** data = arr->data;
@@ -101,7 +100,7 @@ void DetachRecord(S_00d27820_P* p)
     data[slot] = pLastNode;
     arr->count--;
     pLastNode->unk30->slot = slot;
-    S_00d27820_Node* d = pRec->link[pRec->idx + 1];
+    S_00d27820_Node* d = pRec->bodies[pRec->idx];
     int delta = 0;
     if (pRec->cnt)
     {
@@ -112,32 +111,24 @@ void DetachRecord(S_00d27820_P* p)
         pBuf->size -= pRec->sz;
         pRec->cnt = 0;
     }
-    p->unk30 = 0;
+    p->m_pConstraintInternal = 0;
     S_00d27820_Rec* pIter = pRec;
     S_00d27820_Rec* end = d->unkac + d->unkb0 - 1;
     while (pIter < end)
     {
         *pIter = pIter[1];
-        pIter->link[0]->unk30 = pIter;
+        pIter->constraint->m_pConstraintInternal = reinterpret_cast<ConstraintRuntimeInfo*>(pIter);
         pIter->cnt = pIter->cnt ? pIter->cnt + delta : 0;
         pIter++;
     }
     d->unkb0--;
-    p->FUN_00c905b0();
+    p->removeReference();
 }
 
 typedef unsigned char hkUint8;
 typedef unsigned short hkUint16;
 typedef unsigned int hkUint32;
 
-struct hkpConstraintAtom
-{
-    hkUint16 m_type;
-    hkUint16 unk02;
-    int unk04;
-    int unk08;
-    int unk0C;
-};
 
 struct GenericConstraintAtomScheme
 {
@@ -161,92 +152,8 @@ struct hkpConstraintDataInfo : GenericConstraintAtomScheme
     int m_usSizeOfAllAtoms;
 };
 
-struct hkpModifierConstraintAtom : hkpConstraintAtom
-{
-    hkUint16 m_usModifierAtomSize;
-    hkUint16 m_iChildSize;
-    hkpConstraintAtom* m_pChildAtom;
 
-    int FUN_00d22090(GenericConstraintAtomScheme& infoOut, hkUint8& usedFlagsOut);
-};
 
-struct hkpConstraintData
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0A();
-    virtual void v0B();
-    virtual void v0C();
-    virtual void v0D();
-    virtual void v0E();
-    virtual void PopulateInfo(hkpConstraintDataInfo& infoOut) const;
-};
-
-struct hkpEntity
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    hkUint16 unkD0;
-    hkUint8 m_ucResponseModifierFlags;
-};
 
 struct ConstraintRuntimeInfo
 {
@@ -260,41 +167,7 @@ struct ConstraintRuntimeInfo
     hkUint16 m_iSchemaByteSize;
 };
 
-struct hkpConstraintInstance;
 
-struct hkpConstraintOwner
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void checkAccessRw();
-
-    int unk04;
-    int m_iMaxSchemaSize;
-    int m_iSchemaByteSize;
-
-    void AccumulateStats(hkpConstraintInstance* constraint, GenericConstraintAtomScheme& delta);
-};
-
-struct hkpConstraintInstance
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkpConstraintData* m_data;
-    hkpModifierConstraintAtom* m_pConstraintModifier;
-    hkpEntity* m_pEntityA;
-    hkpEntity* m_pEntityB;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    ConstraintRuntimeInfo* m_pConstraintInternal;
-};
 
 extern const hkUint16 DAT_010cb7a8[];
 
@@ -329,16 +202,16 @@ void __cdecl FUN_00d27960(hkpConstraintInstance* instance, hkpConstraintOwner& c
         instance->m_pConstraintModifier = newModifier;
         if (pConstraintInternal)
         {
-            newModifier->m_pChildAtom = pConstraintInternal->m_kBridgeAtoms;
+            newModifier->m_pChildAtom = reinterpret_cast<hkpModifierConstraintAtom*>(pConstraintInternal->m_kBridgeAtoms);
             newModifier->m_iChildSize = pConstraintInternal->m_iAtomsSize;
-            pConstraintInternal->m_kBridgeAtoms = newModifier;
+            pConstraintInternal->m_kBridgeAtoms = reinterpret_cast<hkpConstraintAtom*>(newModifier);
             pConstraintInternal->m_iAtomsSize = newModifier->m_usModifierAtomSize;
         }
         else
         {
             hkpConstraintDataInfo info;
             instance->m_data->PopulateInfo(info);
-            newModifier->m_pChildAtom = info.m_kBridgeAtoms;
+            newModifier->m_pChildAtom = reinterpret_cast<hkpModifierConstraintAtom*>(info.m_kBridgeAtoms);
             newModifier->m_iChildSize = (hkUint16)info.m_usSizeOfAllAtoms;
         }
     }
@@ -352,9 +225,9 @@ void __cdecl FUN_00d27960(hkpConstraintInstance* instance, hkpConstraintOwner& c
         constraintOwner.AccumulateStats(instance, info);
 
         usedFlags &=
-            (instance->m_pEntityA->m_ucResponseModifierFlags | instance->m_pEntityB->m_ucResponseModifierFlags);
+            (instance->m_kActorEntries[0]->m_ucResponseModifierFlags | instance->m_kActorEntries[1]->m_ucResponseModifierFlags);
         hkUint16 extra = DAT_010cb7a8[usedFlags & 7];
-        constraintOwner.m_iSchemaByteSize -= extra;
+        reinterpret_cast<GenericConstraintAtomScheme*>(&constraintOwner.m_iMaxSchemaSize)->m_iSchemaByteSize -= extra;
         instance->m_pConstraintInternal->m_iSchemaByteSize = instance->m_pConstraintInternal->m_iSchemaByteSize - extra;
         if (instance->m_pConstraintInternal)
         {
@@ -365,20 +238,12 @@ void __cdecl FUN_00d27960(hkpConstraintInstance* instance, hkpConstraintOwner& c
 
 namespace fnv_00d27ac0 {
 struct Entity;
-struct Constraint;
-struct Atom
-{
-    unsigned short type;
-    unsigned short unk02;
-    unsigned int unk04, unk08, unk0c;
-    unsigned short size;
-};
 struct ConstraintInfo
 {
     unsigned int unk00;
     unsigned int runtimeBytes;
     unsigned int unk08, unk0c;
-    Atom* atoms;
+    hkpConstraintAtom* atoms;
     unsigned short atomSize;
 };
 struct RuntimeInfo
@@ -386,30 +251,11 @@ struct RuntimeInfo
     unsigned int size;
     unsigned int unk04;
 };
-struct ConstraintData
-{
-    virtual void slot00();
-    virtual void slot04();
-    virtual void slot08();
-    virtual void slot0c();
-    virtual void slot10();
-    virtual void slot14();
-    virtual void slot18();
-    virtual void slot1c();
-    virtual void slot20();
-    virtual void GetRuntimeInfo(unsigned int, RuntimeInfo*);
-    virtual void slot28();
-    virtual void AddInstance(Constraint*, void*, unsigned int);
-    virtual void slot30();
-    virtual unsigned char* WantsRuntime(unsigned char*);
-    virtual void slot38();
-    virtual void GetConstraintInfo(ConstraintInfo*);
-};
 struct __declspec(align(16)) ConstraintInternal
 {
-    Constraint* constraint;
+    hkpConstraintInstance* constraint;
     Entity* bodies[2];
-    Atom* atoms;
+    hkpConstraintAtom* atoms;
     unsigned short atomSize;
     unsigned char flags;
     unsigned char priority;
@@ -430,8 +276,8 @@ struct InternalArray
 };
 struct ConstraintPointer
 {
-    Constraint* value;
-    __forceinline void Set(Constraint* x)
+    hkpConstraintInstance* value;
+    __forceinline void Set(hkpConstraintInstance* x)
     {
         value = x;
     }
@@ -451,7 +297,7 @@ struct ByteArray
 struct Island
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, count;
-    void AccumulateStats(Constraint*, ConstraintInfo*);
+    void AccumulateStats(hkpConstraintInstance*, ConstraintInfo*);
 };
 struct Entity
 {
@@ -509,96 +355,68 @@ struct Entity
     unsigned int unkD8, unkDC, unkE0, unkE4;
     unsigned char motionType;
 };
-struct Constraint
-{
-    virtual void slot00();
-    virtual void slot04();
-    virtual void slot08();
-    virtual void slot0c();
-    virtual void slot10();
-    virtual void slot14();
-    virtual void* GetInternal();
-    unsigned int unk04;
-    Island* island;
-    ConstraintData* data;
-    Atom* atoms;
-    Entity* bodies[2];
-    unsigned char priority;
-    unsigned char wantRuntime;
-    unsigned short unk1e;
-    unsigned int unk20, unk24, unk28, unk2c;
-    ConstraintInternal* internal;
-    unsigned int uid;
-    void FUN_00c90510();
-};
 void FUN_00cb5570(void*, Entity*, Entity*);
-unsigned char FUN_00d22120(Atom*, ConstraintInfo*, unsigned char*);
+unsigned char FUN_00d22120(hkpConstraintAtom*, ConstraintInfo*, unsigned char*);
 extern unsigned short DAT_010cb7a8[];
-struct MemoryRouter
-{
-    unsigned int unk00, unk04, unk08, unk0c;
-    void* heap;
-};
-MemoryRouter* FUN_00c85750();
 void FUN_00c908c0(void*, ByteArray*, int, int);
 void ResizeAudioStream(void*, ConstraintArray*, int);
 void FUN_00cb1270(void*, const void*, int);
 // Initializes a ConstraintInternal entry, inserts it into the master entity's constraint array, allocates runtime memory, and registers the constraint as a slave.
 // @fnv 0x00d27ac0
-ConstraintPointer* FUN_00d27ac0(void* unused, Constraint* constraint)
+ConstraintPointer* FUN_00d27ac0(void* unused, hkpConstraintInstance* constraint)
 {
-    constraint->FUN_00c90510();
+    constraint->addReference();
     ConstraintInfo info;
-    constraint->data->GetConstraintInfo(&info);
+    constraint->m_data->PopulateInfo(reinterpret_cast<hkpConstraintDataInfo&>(info));
     ConstraintInternal entry;
     entry.constraint = constraint;
-    entry.bodies[0] = constraint->bodies[0];
-    entry.bodies[1] = constraint->bodies[1];
-    if (constraint->atoms)
+    entry.bodies[0] = reinterpret_cast<Entity*>(constraint->m_kActorEntries[0]);
+    entry.bodies[1] = reinterpret_cast<Entity*>(constraint->m_kActorEntries[1]);
+    if (constraint->m_pConstraintModifier)
     {
-        entry.atoms = constraint->atoms;
-        entry.atomSize = constraint->atoms->size;
+        entry.atoms = reinterpret_cast<hkpConstraintAtom*>(constraint->m_pConstraintModifier);
+        entry.atomSize = constraint->m_pConstraintModifier->m_usModifierAtomSize;
     }
     else
     {
         entry.atoms = info.atoms;
         entry.atomSize = info.atomSize;
     }
-    entry.priority = constraint->priority;
+    entry.priority = constraint->m_priority;
     if (entry.bodies[0]->motionType != 5 && entry.bodies[1]->motionType != 5 &&
         entry.bodies[0]->island != entry.bodies[1]->island)
         FUN_00cb5570(entry.bodies[0]->world, entry.bodies[0], entry.bodies[1]);
     entry.masterIndex = entry.bodies[0]->motionType == 5;
     Entity* master = entry.bodies[entry.masterIndex];
-    constraint->island = master->island;
-    ++constraint->island->count;
-    unsigned int atomType = entry.atoms->type;
+    constraint->m_pOwnerObject = reinterpret_cast<hkpConstraintOwner*>(master->island);
+    ++reinterpret_cast<Island*>(constraint->m_pOwnerObject)->count;
+    unsigned int atomType = entry.atoms->m_type;
     entry.callbacks = 1;
     entry.flags = 0;
     if (atomType == 1)
     {
         entry.flags = 2;
         unsigned char result;
-        if (*constraint->data->WantsRuntime(&result))
+        if (*constraint->m_data->WantsRuntime(&result))
             entry.flags |= 4;
-        entry.callbacks = constraint->GetInternal() == 0;
+        entry.callbacks = constraint->vf06() == 0;
     }
     else if (atomType == 20)
         entry.flags = 2;
     unsigned char flags = 0;
-    if (constraint->atoms)
-        entry.flags |= FUN_00d22120(constraint->atoms, &info, &flags);
+    if (constraint->m_pConstraintModifier)
+        entry.flags |= FUN_00d22120(reinterpret_cast<hkpConstraintAtom*>(constraint->m_pConstraintModifier), &info, &flags);
     if (atomType == 22)
     {
-        unsigned char combined = constraint->bodies[1]->responseFlags | constraint->bodies[0]->responseFlags;
+        unsigned char combined = constraint->m_kActorEntries[1]->m_ucResponseModifierFlags | constraint->m_kActorEntries[0]->m_ucResponseModifierFlags;
         combined -= combined & flags;
         info.runtimeBytes += DAT_010cb7a8[combined & 7];
     }
     entry.unk16 = 0;
     entry.unk18 = 0;
     entry.unk14 = 0;
-    constraint->internal = &entry;
-    constraint->island->AccumulateStats(constraint, &info);
+    constraint->m_pConstraintInternal = reinterpret_cast<ConstraintRuntimeInfo*>(&entry);
+    reinterpret_cast<Island*>(constraint->m_pOwnerObject)->AccumulateStats(constraint, &info);
     InternalArray& array = master->constraints;
     unsigned short count = array.size;
     int index = 0;
@@ -609,8 +427,8 @@ ConstraintPointer* FUN_00d27ac0(void* unused, Constraint* constraint)
             break;
         if (entry.priority > current.priority)
             continue;
-        unsigned int incomingUid = entry.constraint->uid;
-        unsigned int currentUid = current.constraint->uid;
+        unsigned int incomingUid = entry.constraint->m_uiUniqueId;
+        unsigned int currentUid = current.constraint->m_uiUniqueId;
         if (incomingUid < currentUid)
             break;
         if (incomingUid > currentUid)
@@ -627,12 +445,12 @@ ConstraintPointer* FUN_00d27ac0(void* unused, Constraint* constraint)
     for (int i = firstChanged; i < (int)array.size; ++i)
     {
         ConstraintInternal* changed = &array.data[i];
-        Constraint* owner = changed->constraint;
-        owner->internal = changed;
+        hkpConstraintInstance* owner = changed->constraint;
+        owner->m_pConstraintInternal = reinterpret_cast<ConstraintRuntimeInfo*>(changed);
     }
-    ConstraintInternal* internal = constraint->internal;
+    ConstraintInternal* internal = reinterpret_cast<ConstraintInternal*>(constraint->m_pConstraintInternal);
     RuntimeInfo runtimeInfo;
-    internal->constraint->data->GetRuntimeInfo(constraint->wantRuntime, &runtimeInfo);
+    internal->constraint->m_data->GetRuntimeInfo((unsigned char)constraint->m_bWantRuntime.m_cBooleanValue, &runtimeInfo);
     unsigned int runtimeSize = (runtimeInfo.size + 15) & ~15u;
     runtimeInfo.size = runtimeSize;
     internal->runtimeSize = (unsigned short)runtimeSize;
@@ -642,9 +460,9 @@ ConstraintPointer* FUN_00d27ac0(void* unused, Constraint* constraint)
         int oldSize = storage.size;
         char* oldData = storage.data;
         int newSize = oldSize + runtimeSize;
-        MemoryRouter* router = FUN_00c85750();
+        hkMemoryRouter* router = (&hkMemoryRouter::getInstance());
         if ((int)(storage.capacity & 0x3fffffff) < newSize)
-            FUN_00c908c0(router->heap, &storage, newSize, 1);
+            FUN_00c908c0(router->m_heap, &storage, newSize, 1);
         storage.size = oldSize + runtimeInfo.size;
         char* position = storage.data;
         int displacement = storage.data - oldData;
@@ -671,14 +489,14 @@ ConstraintPointer* FUN_00d27ac0(void* unused, Constraint* constraint)
     }
     else
         internal->runtime = 0;
-    ConstraintData* instanceData = internal->constraint->data;
+    hkpConstraintData* instanceData = internal->constraint->m_data;
     instanceData->AddInstance(constraint, internal->runtime, internal->runtimeSize);
     Entity* slave = internal->bodies[1 - internal->masterIndex];
     internal->slaveIndex = (unsigned short)slave->slaves.size;
     ConstraintArray& slaves = slave->slaves;
-    MemoryRouter* router = FUN_00c85750();
+    hkMemoryRouter* router = (&hkMemoryRouter::getInstance());
     if (slaves.size == (int)(slaves.capacity & 0x3fffffff))
-        ResizeAudioStream(router->heap, &slaves, 4);
+        ResizeAudioStream(router->m_heap, &slaves, 4);
     ConstraintPointer* insertion = slaves.data + slaves.size;
     insertion->value = constraint;
     ++slaves.size;

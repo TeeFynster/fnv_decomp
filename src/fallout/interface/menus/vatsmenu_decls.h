@@ -1,47 +1,22 @@
-// fallout/interface/menus/vatsmenu_decls.h: declares TileListBoxCalls, VATSMenu
+// fallout/interface/menus/vatsmenu_decls.h: declares ListBox_00726660; TileListBoxCalls_vatsmenu_decls and VATSMenu come from include/
 
-class TileListBoxCalls
+// TileListBoxCalls_vatsmenu_decls: local type (was include/TileListBoxCalls.h, which had no evidence of one real class); its methods are 0x00a011b0 Tile::GetFloat
+#include "../../../../include/Tile.h"
+
+class TileListBoxCalls_vatsmenu_decls : public Tile
 {
   public:
-    float GetFloat(int);
+    float GetFloat(int trait);
 };
 int GetTileValueID(const char*, int);
-class VATSMenu
+#include "../../../../include/VATSMenu.h"
+// 0x00726660 is a ListBox<T> method, not VATSMenu: it reads the item list at +4 (0x00726c40 counts it) and the
+// list tile at +0xC (ListBox_int_ layout: vtable, BSSimpleList, m_pListTile). Real template argument and name unknown.
+class ListBox_00726660
 {
   public:
     char padding[12];
-    TileListBoxCalls* tile;
+    TileListBoxCalls_vatsmenu_decls* tile;
     int GetSelectedTargetIndex();
     unsigned int Create();
-    char _pdbpad_10[24];
-    char m_pTiles[128];
-    void* m_pAdditionalHudTile;
-    bool m_bStateFlag8;
-    char _pdbpad_ad[3];
-    char m_acMenuText[48];
-    float m_fOverrideActionPoints;
-    float m_fValue1;
-    float m_fValue2;
-    float m_fValue3;
-    float m_fValue4;
-    float m_fValue5;
-    bool m_bFirstFlag;
-    bool m_bStateFlag1;
-    bool m_bStateFlag2;
-    bool m_bStateFlag3;
-    float m_fHitChance;
-    void* m_pTargetChance;
-    bool m_bStateFlag4;
-    char _pdbpad_105[3];
-    void* m_pSelectedChance;
-    bool m_bStateFlag5;
-    bool m_bStateFlag9;
-    bool m_bAdditionalStateFlag;
-    bool m_bStateFlag10;
-    bool m_bStateFlag6;
-    char _pdbpad_111[3];
-    unsigned int m_uiTargetCount;
-    bool m_bStateFlag7;
-    char _pdbpad_119[3];
-    char m_acTargetText[40];
 };

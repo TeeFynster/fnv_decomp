@@ -1,31 +1,28 @@
+// Keep the shared string operations inline, as in the original water displacement update.
+#define inline __forceinline
+#include "../../include/NiFixedString.h"
+#undef inline
+#include "../../include/MemoryManager.h"
+#include "../../include/NiMemObject.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/NiScreenElementsData.h"
+#include "../../include/NiScreenElements.h"
+#include "../../include/ImageSpaceManager.h"
+#include "../../include/ImageSpaceTexture.h"
+#include "../../include/BSRenderedTexture.h"
+#include "../../include/ImageSpaceEffectParam.h"
+#include "../../include/NiPoint4.h"
 
 // src/bsshader/imagespaceeffectwaterdisplacement.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/imagespaceeffectwaterdisplacement.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiPoint2
-{
-    float x;
-    float y;
-    NiPoint2()
-    {}
-    NiPoint2(float _x, float _y) : x(_x), y(_y)
-    {}
-    float Unitize();
-};
 
-struct NiPoint4
+// Preserve the original NiMemObject allocation and throwing new-expression bookkeeping.
+__forceinline void* __cdecl operator new(size_t size)
 {
-    float x;
-    float y;
-    float z;
-    float w;
-};
-
-struct NiMemObject
-{
-    void* operator new(unsigned int size);
-    void operator delete(void* p, unsigned int size);
-};
+    return NiMemObject::operator new(size);
+}
 
 struct RenderTargetGroup
 {
@@ -77,52 +74,10 @@ struct RenderTargetGroup
     virtual void* GetView();
 };
 
-struct BSRenderedTexture
+// The shared layout lacks constructor 0x00b6b380; expose it on a fieldless derived helper.
+struct RenderedTextureWrapper : public BSRenderedTexture, public NiMemObject
 {
-    RenderTargetGroup* GetGroup();
-    void* FUN_004bc320();
-};
-
-struct ImageSpaceTexture
-{
-    unsigned char flag0;
-    unsigned char flag1;
-    unsigned char flag2;
-    int value4;
-    int value8;
-    int valueC;
-
-    ImageSpaceTexture() : flag0(0), flag1(0), flag2(0), value4(0), value8(0), valueC(0)
-    {}
-    ~ImageSpaceTexture();
-
-    BSRenderedTexture* FUN_00ba3770();
-    void* GetTexture();
-    void FUN_00ba3840(unsigned int);
-    void FUN_00ba37a0(void*);
-    void FUN_00ba3940(void*);
-    void FUN_00ba39a0();
-};
-
-struct Type_00b6b380 : public NiMemObject
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    Type_00b6b380(void*, int, int, void*);
+    RenderedTextureWrapper(void*, int, int, void*);
 };
 
 struct HolderForAccum
@@ -138,184 +93,54 @@ struct Emitter
     void SetFloat4At(int index, float x, float y, float z, float w);
 };
 
-struct NiScreenElementsData : public NiMemObject
-{
-    virtual void Destroy();
-    virtual void Release();
-    long m_uiRefCount;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-
-    NiScreenElementsData(bool, bool, unsigned short, int, int, int, int, int, int);
-    bool FUN_00a87ae0(int, int, int);
-    bool SetRectangle(int, float, float, float, float);
-    void FUN_00a87900();
-    bool FUN_00a88130(int, int, float, float, float, float);
-};
-
-struct NiScreenElements : public NiMemObject
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    NiScreenElementsData* m_spTransformData;
-    int unkbc;
-    int unkc0;
-
-    NiScreenElements(NiScreenElementsData*);
-    void FUN_00a5a040();
-    void Update(const void*);
-    void SetName(const void*);
-};
-
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 
-template <class T> struct NiPointer
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0)
+{}
+
+template <class T> __forceinline NiPointer<T>::NiPointer(T* p) : m_pObject(p)
 {
-    T* m_pObject;
-    NiPointer() : m_pObject(0)
-    {}
-    __forceinline NiPointer(T* p) : m_pObject(p)
+    if (m_pObject)
     {
-        if (m_pObject)
+        InterlockedIncrement((volatile long*)&m_pObject->m_uiRefCount);
+    }
+}
+
+template <class T> __forceinline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject)
+    {
+        if (InterlockedDecrement((volatile long*)&m_pObject->m_uiRefCount) == 0)
         {
-            InterlockedIncrement(&m_pObject->m_uiRefCount);
+            m_pObject->DeleteThis();
         }
     }
-    __forceinline ~NiPointer()
-    {
-        if (m_pObject)
-        {
-            if (InterlockedDecrement(&m_pObject->m_uiRefCount) == 0)
-            {
-                m_pObject->Release();
-            }
-        }
-    }
-    NiPointer& operator=(T* p);
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-};
+}
 
-struct NiUpdateData
+template <class T> inline NiPointer<T>::operator T*() const
 {
-    float m_fTime;
-    bool b1;
-    bool b2;
-    bool b3;
-    bool b4;
-    bool b5;
-    NiUpdateData(float t = 0.0f) : m_fTime(t), b1(false), b2(false), b3(false), b4(false), b5(false)
-    {}
-};
+    return m_pObject;
+}
 
-extern "C" char* __cdecl FUN_00a5b690(const char*);
-extern void* DAT_0109b220;
-
-struct NiFixedString
+template <class T> inline T* NiPointer<T>::operator->() const
 {
-    const char* m_kHandle;
-    __forceinline NiFixedString(const char* s)
-    {
-        m_kHandle = FUN_00a5b690(s);
-    }
-    __forceinline ~NiFixedString()
-    {
-        if (m_kHandle != (const char*)DAT_0109b220)
-        {
-            InterlockedDecrement((volatile long*)(m_kHandle - 8));
-        }
-    }
-    operator const void*() const
-    {
-        return &m_kHandle;
-    }
-};
+    return m_pObject;
+}
+
+inline NiUpdateData::NiUpdateData(float t) : fTime(t), pad1(false), pad2(false), pad3(false), pad4(false), pad5(false)
+{}
+
+inline NiFixedString::operator const void*() const
+{
+    return &m_kHandle;
+}
 
 struct Allocator
 {
     virtual void Delete0();
     virtual void Delete1();
     virtual void Free(void*);
-};
-
-struct ImageSpaceManager
-{
-    void FUN_00b97550(int, void*, void*, void*, int, int);
 };
 
 struct GameObject
@@ -411,8 +236,8 @@ void GameObject::FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4)
 
     tex64.FUN_00ba3840(8);
 
-    tex34.FUN_00ba37a0(new Type_00b6b380(tex64.FUN_00ba3770()->FUN_004bc320(), 0, 1,
-                                         GetAsset<1>()->FUN_00ba3770()->GetGroup()->GetView()));
+    tex34.FUN_00ba37a0((BSRenderedTexture*)new RenderedTextureWrapper(tex64.FUN_00ba3770()->FUN_004bc320(), 0, 1,
+                                         ((RenderTargetGroup*)GetAsset<1>()->FUN_00ba3770()->GetGroup())->GetView()));
 
     ImageSpaceTexture tex44;
 
@@ -458,15 +283,15 @@ void GameObject::FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4)
                 if (!widget.m_pObject)
                 {
                     NiPointer<NiScreenElementsData> spScreenData(
-                        new NiScreenElementsData(false, false, 1, 1, 1, 4, 1, 2, 1));
-                    widget = new NiScreenElements(spScreenData);
+                        ::new NiScreenElementsData(false, false, 1, 1, 1, 4, 1, 2, 1));
+                    widget = ::new NiScreenElements(spScreenData);
 
-                    NiScreenElementsData* localData0 = widget->m_spTransformData;
+                    NiScreenElementsData* localData0 = (NiScreenElementsData*)widget->m_spModelData.m_pObject;
                     localData0->FUN_00a87ae0(4, 0, 0);
-                    NiScreenElementsData* localData1 = widget->m_spTransformData;
+                    NiScreenElementsData* localData1 = (NiScreenElementsData*)widget->m_spModelData.m_pObject;
                     localData1->SetRectangle(0, 0.0f, DAT_01013ea4, 1.0f, DAT_010542a4);
-                    widget->m_spTransformData->FUN_00a87900();
-                    NiScreenElementsData* localData2 = widget->m_spTransformData;
+                    ((NiScreenElementsData*)widget->m_spModelData.m_pObject)->FUN_00a87900();
+                    NiScreenElementsData* localData2 = (NiScreenElementsData*)widget->m_spModelData.m_pObject;
                     localData2->FUN_00a88130(0, 0, 0.0f, 0.0f, 1.0f, 1.0f);
                     widget->FUN_00a5a040();
 
@@ -557,10 +382,6 @@ void GameObject::FUN_00ba0900(void* arg1, void* arg2, int arg3, int arg4)
     }
 }
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int size);
-};
 extern MemoryManager _g_memoryManager;
 
 extern const float DAT_011add48[];
@@ -692,11 +513,16 @@ struct EffectInitData
     TextureManager* unk08;
 };
 
-template <class T> class NiTPrimitiveArray
+// This unit uses the const-reference array API, distinct from the transitive shared array.
+namespace waterdisplacement
+{
+// Unit-local view of NiTPrimitiveArray for the code in namespace waterdisplacement: built on the shared NiTPrimitiveArray, that code does not compile or does not match.
+template <class T> class NiTPrimitiveArray_waterdisplacement
 {
   public:
     __declspec(noalias) void SetAt(unsigned int uiIndex, const T& element);
 };
+}
 
 struct ImageSpaceEffect
 {
@@ -706,7 +532,7 @@ struct ImageSpaceEffect
     int unk0C;
     int unk10;
     int unk14;
-    NiTPrimitiveArray<ImageSpaceShaderParam*> m_params;
+    waterdisplacement::NiTPrimitiveArray_waterdisplacement<ImageSpaceShaderParam*> m_params;
 
     void SetTextureArraySize(int count);
     void FUN_00ba3c70(int index, ImageSpaceTexture* tex, ImageSpaceShaderParam* param, int flag);
@@ -791,26 +617,14 @@ void ImageSpaceEffect::InitFromEffectInitData(EffectInitData* initData, int unus
 }
 
 namespace fnv_00ba04c0 {
-class MemoryManager
-{
-  public:
-    void* Allocate(unsigned int size);
-};
 extern MemoryManager DAT_011f6238;
-class MemObj
+class ImageSpaceShaderParam : public ImageSpaceEffectParam
 {
   public:
     static void* operator new(unsigned int size)
     {
         return DAT_011f6238.Allocate(size);
     }
-};
-class ImageSpaceEffectParam : public MemObj
-{
-};
-class ImageSpaceShaderParam : public ImageSpaceEffectParam
-{
-  public:
     int m_00;
     int m_04;
     int m_08;

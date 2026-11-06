@@ -6,6 +6,21 @@
 // src/fallout_shared/pathfinding/pathfind_decl_variant.cpp - declaration variant unit created 2026-10-24 by decl_variants.py for paused function 0x006da420: the skeleton of src/fallout_shared/pathfinding/pathfind.cpp
 // with declarations corrected to what the original code does (pathfind_local_types.h: PathingLocation += PathingLocation(TESObjectREFR* ref);). Move the function to its real unit once
 // that unit declares it this way.
+#include "../../../include/BSSimpleArray.h"
+#include "../../../include/NavMesh.h"
+#include "../../../include/NavMeshPtr.h"
+#include "../../../include/PathBuilder.h"
+#include "../../../include/Pathing.h"
+#include "../../../include/PathingLocation.h"
+#include "../../../include/PathingPath.h"
+#include "../../../include/PathingRequest.h"
+#include "../../../include/PathingRequestClosePoint.h"
+#include "../../../include/PathingRequestFlee.h"
+#include "../../../include/PathingRequestHide.h"
+#include "../../../include/PathingRequestLOS.h"
+#include "../../../include/PathingRequestOptimalLocation.h"
+#include "../../../include/PathingSolution.h"
+#include "../../../include/TESPackage.h"
 #include "pathfind_decls_decl_pathfind_decl_pathfind_decl_variant.h"
 
 struct RotationMatrix

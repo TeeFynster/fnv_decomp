@@ -2,41 +2,26 @@
 // src/fallout/magic/bhkcharacterlistenerspell.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/bhkcharacterlistenerspell.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiRTTI
-{
-};
-
-struct bhkCharacterProxy
-{
-    virtual ~bhkCharacterProxy();
-    const NiRTTI* GetRTTI();
-};
+#include "../../../include/NiObject.h"
+#include "../../../include/NiRTTI.h"
+#include "../../../include/bhkCharacterProxy.h"
 
 extern const NiRTTI g_01268344;
 
 // @fnv 0x00806f00
-const NiRTTI* bhkCharacterProxy::GetRTTI()
+const NiRTTI* bhkCharacterProxy::GetRTTI() const
 {
     return &g_01268344;
 }
 
-struct FUN_00806f10_shell
-{
-    unsigned int FUN_00806f10();
-};
-
 // @fnv 0x00806f10
-unsigned int FUN_00806f10_shell::FUN_00806f10()
+unsigned int __fastcall FUN_00806f10(bhkCharacterProxy*)
 {
     return 0xc0;
 }
 
 const char* __cdecl FUN_00458b20();
 int __fastcall GetReferenceFlags(void*);
-struct NiObject
-{
-    virtual const NiRTTI* GetStreamableRTTI();
-};
 struct ProxyHolder
 {
     const char* FUN_00cac950();

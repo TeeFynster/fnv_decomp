@@ -1,3 +1,6 @@
+#include "../../../../include/BSLookIKNote.h"
+#include "../../../../include/NiFixedString.h"
+
 
 // src/gamebryo2.2/corelibs/nianimation/bslookiknote.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/bslookiknote.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -20,37 +23,18 @@ int* __cdecl FUN_00a43f80()
 
 extern "C" void __cdecl _delete(void* p, unsigned int size);
 
-struct BSLookIKNote
-{
-    void FUN_00a44830();
-    void* __thiscall Destroy(unsigned int flags);
-};
-
 // Calls FUN_00a44830, then if flags has bit 0 set frees this with _delete, and returns this.
 // @fnv 0x00a43f90
 void* __thiscall BSLookIKNote::Destroy(unsigned int flags)
 {
-    FUN_00a44830();
+    BSLookIKNote::~BSLookIKNote();
     if (flags & 1)
         _delete(this, 0x18);
     return this;
 }
 
-namespace fnv_00a43fb0 {
 extern int DAT_01097c8c;
-
-struct BSLookIKNote
-{
-    void* m_vtbl;
-    int m_i04;
-    int m_i08;
-    float m_f0c;
-    float m_f10;
-    void* m_p14;
-    void* operator new(unsigned int size);
-    BSLookIKNote();
-    void FUN_00a43fa0();
-};
+inline void* operator new(unsigned int, void* storage) { return storage; }
 
 // @fnv 0x00a43fb0
 BSLookIKNote* __cdecl CreateLookIKNote()
@@ -58,39 +42,25 @@ BSLookIKNote* __cdecl CreateLookIKNote()
     BSLookIKNote* pNote = static_cast<BSLookIKNote*>(BSLookIKNote::operator new(0x18));
     if (pNote)
     {
-        pNote->FUN_00a43fa0();
-        pNote->m_f0c = 0.0f;
-        pNote->m_i08 = 2;
-        pNote->m_f10 = 0.0f;
-        pNote->m_vtbl = &DAT_01097c8c;
-        pNote->m_p14 = 0;
+        ::new (pNote) NiObject;
+        pNote->fTime = 0.0f;
+        *reinterpret_cast<int*>(pNote->unk08) = 2;
+        pNote->m_fDistanceScale = 0.0f;
+        *reinterpret_cast<void**>(pNote) = &DAT_01097c8c;
+        pNote->eState = 0;
         return pNote;
     }
     return 0;
 }
-}  // namespace fnv_00a43fb0
 
-namespace fnv_00a43f30 {
-struct NiObject;
+// BSAnimNote's equality helper is not declared by the shared base header.
+// Its receiver remains in ECX at this direct call.
+bool __stdcall AnimNoteIsEqual(NiObject* apObject);
 
-struct BSLookIKNote
-{
-    char _pad_0[0x10];
-    float m_fDistanceScale;
-    int eState;
-    bool IsEqual(NiObject* apObject);
-};
-
-struct FUN_00a43f30_shell : BSLookIKNote
-{
-    bool IsLookIKNoteEqual(NiObject* apObject);
-};
-
-// Returns true if IsEqual(apObject) passes and the float and eState fields match those of apObject cast to BSLookIKNote.
 // @fnv 0x00a43f30
-bool FUN_00a43f30_shell::IsLookIKNoteEqual(NiObject* apObject)
+bool BSLookIKNote::IsEqual(NiObject* apObject) const
 {
-    if (IsEqual(apObject))
+    if (AnimNoteIsEqual(apObject))
     {
         BSLookIKNote* pkDest = (BSLookIKNote*)apObject;
         if (m_fDistanceScale == pkDest->m_fDistanceScale && eState == pkDest->eState)
@@ -98,7 +68,6 @@ bool FUN_00a43f30_shell::IsLookIKNoteEqual(NiObject* apObject)
     }
     return false;
 }
-}  // namespace fnv_00a43f30
 
 struct S_00a44130_BinStream
 {
@@ -280,29 +249,15 @@ struct S_00a44130_Stream
     S_00a44130_BinStream* m_pBackingStream;
 };
 
-struct S_00a44130_Base
-{
-    void ReadBinaryFields(S_00a44130_Stream& kStream);
-};
+void __stdcall LoadAnimNoteFields(NiStream& kStream);
 
-struct S_00a44130_Note : S_00a44130_Base
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    int m_10;
-    int m_14;
-    void FUN_00a44130(S_00a44130_Stream& kStream);
-};
-
-// Calls the base save, then writes m_10 and m_14 to the stream as binary values.
 // @fnv 0x00a44130
-void S_00a44130_Note::FUN_00a44130(S_00a44130_Stream& kStream)
+void BSLookIKNote::LoadBinary(NiStream& kStream)
 {
-    S_00a44130_Base::ReadBinaryFields(kStream);
-    S_00a44130_StreamSaveBinary(*kStream.m_pBackingStream, m_10);
-    S_00a44130_StreamSaveBinary(*kStream.m_pBackingStream, m_14);
+    LoadAnimNoteFields(kStream);
+    S_00a44130_Stream& stream = reinterpret_cast<S_00a44130_Stream&>(kStream);
+    S_00a44130_StreamSaveBinary(*stream.m_pBackingStream, m_fDistanceScale);
+    S_00a44130_StreamSaveBinary(*stream.m_pBackingStream, eState);
 }
 
 struct S_00a44190_BinStream
@@ -478,88 +433,52 @@ template <class T> inline void S_00a44190_SaveBinary(S_00a44190_Stream& kStream,
 {
     S_00a44190_BinSave(*kStream.m_pBackingStream, &kValue, 1);
 }
-struct S_00a44190_Base
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void FUN_00a44a90(S_00a44190_Stream& kStream);
-};
-struct S_00a44190 : S_00a44190_Base
-{
-    float unk10;
-    float unk14;
-    void FUN_00a44190(S_00a44190_Stream& kStream);
-};
-// Calls the base class save routine, then serializes the two float members unk10 and unk14 to the stream.
+void __stdcall SaveAnimNoteFields(NiStream& kStream);
+
 // @fnv 0x00a44190
-void S_00a44190::FUN_00a44190(S_00a44190_Stream& kStream)
+void BSLookIKNote::SaveBinary(NiStream& kStream)
 {
-    S_00a44190_Base::FUN_00a44a90(kStream);
-    S_00a44190_SaveBinary(kStream, unk10);
-    S_00a44190_SaveBinary(kStream, unk14);
+    SaveAnimNoteFields(kStream);
+    S_00a44190_Stream& stream = reinterpret_cast<S_00a44190_Stream&>(kStream);
+    S_00a44190_SaveBinary(stream, m_fDistanceScale);
+    S_00a44190_SaveBinary(stream, eState);
 }
 
-class A43FF0Object
+// Call adapter for the base copy helper, absent from BSAnimNote's header.
+// It has no object representation or data members.
+struct AnimNoteCloneHelper
 {
-  public:
-    A43FF0Object() throw();
-    virtual ~A43FF0Object();
-
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem);
-
-    int unk04;
-};
-
-class A43FF0Mid : public A43FF0Object
-{
-  public:
-    A43FF0Mid() throw() : m_eRequestType(2), m_fStartValue(0.0f), m_fEnd(0.0f)
-    {}
-    virtual ~A43FF0Mid();
-
-    int m_eRequestType;
-    float m_fStartValue;
-    float m_fEnd;
-};
-
-class A43FF0Interp : public A43FF0Mid
-{
-  public:
-    A43FF0Interp() throw() : m_pUserData(0)
-    {}
-    virtual ~A43FF0Interp();
-
-    void CopyMemberData(A43FF0Interp* pkDest, void* pvCloning);
-    A43FF0Interp* FUN_00a43ff0(void* pvCloning);
-
-    void* m_pUserData;
+    void CopyMemberData(BSLookIKNote* pkDest, CloningProcess& cloning);
 };
 
 // @fnv 0x00a43ff0
-A43FF0Interp* A43FF0Interp::FUN_00a43ff0(void* pvCloning)
+NiObject* BSLookIKNote::MakeClone(CloningProcess& cloning)
 {
-    A43FF0Interp* pkClone = new A43FF0Interp;
-    CopyMemberData(pkClone, pvCloning);
-    pkClone->m_fEnd = m_fEnd;
-    pkClone->m_pUserData = m_pUserData;
+    BSLookIKNote* pkClone = static_cast<BSLookIKNote*>(BSLookIKNote::operator new(0x18));
+    if (pkClone)
+    {
+        ::new (pkClone) NiObject;
+        pkClone->fTime = 0.0f;
+        *reinterpret_cast<int*>(pkClone->unk08) = 2;
+        pkClone->m_fDistanceScale = 0.0f;
+        *reinterpret_cast<void**>(pkClone) = &DAT_01097c8c;
+        pkClone->eState = 0;
+    }
+    else
+        pkClone = 0;
+    reinterpret_cast<AnimNoteCloneHelper*>(this)->CopyMemberData(pkClone, cloning);
+    pkClone->m_fDistanceScale = m_fDistanceScale;
+    pkClone->eState = eState;
     return pkClone;
 }
 
 extern "C" int __cdecl strncmp(const char* s1, const char* s2, unsigned int n);
 extern "C" char* __cdecl strncpy(char* dest, const char* src, unsigned int n);
 
-class NiFixedString
+inline NiFixedString::operator const char*() const
 {
-  public:
-    operator const char*() const
-    {
-        return m_kHandle;
-    }
-    const char* m_kHandle;
-};
+    return m_kHandle;
+}
 
 class TimedTextEntry
 {
@@ -578,31 +497,11 @@ class TextKeyString
     char* m_pcString;
 };
 
-class TextKeyHandlerBase
-{
-  public:
-    bool ParseKey(TimedTextEntry* pkKey) throw();
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-};
-
-class LookIKKeyHandler : public TextKeyHandlerBase
-{
-  public:
-    bool ParseLookIKKey(TimedTextEntry* pkKey);
-
-    float m_fValue;
-    int m_iMode;
-};
-
-// Parses a "LookIK" text key: reads a 4-char float value into m_fValue and sets m_iMode to 1 for Start or 2 for Stop.
+// Parses a "LookIK" text key: reads a 4-char float value into m_fDistanceScale and sets eState to 1 for Start or 2 for Stop.
 // @fnv 0x00a44050
-bool LookIKKeyHandler::ParseLookIKKey(TimedTextEntry* pkKey)
+bool BSLookIKNote::vf35(const TimedTextEntry* pkKey)
 {
-    bool bResult = ParseKey(pkKey);
+    bool bResult = BSAnimNote::vf35(pkKey);
     const char* pcText = pkKey->m_kText;
 
     if (strncmp(pcText, "LookIK", 6) == 0)
@@ -616,7 +515,7 @@ bool LookIKKeyHandler::ParseLookIKKey(TimedTextEntry* pkKey)
         strncpy(acValue, pcText, 4);
         {
             TextKeyString kValue(acValue);
-            if (!kValue.ParseFloatValue(&m_fValue))
+            if (!kValue.ParseFloatValue(&m_fDistanceScale))
                 bResult = false;
             pcText += 4;
         }
@@ -625,10 +524,10 @@ bool LookIKKeyHandler::ParseLookIKKey(TimedTextEntry* pkKey)
         {
             pcText++;
             if (strncmp(pcText, "Start", 5) == 0)
-                m_iMode = 1;
+                eState = 1;
             if (strncmp(pcText, "Stop", 4) != 0)
                 return bResult;
-            m_iMode = 2;
+            eState = 2;
             return bResult;
         }
     }
@@ -655,18 +554,6 @@ extern const char str_0102909c[];
 char* __cdecl FUN_00a7d550(const char* fmt, float v);
 char* __cdecl FUN_00a7d5e0(const char* fmt, const char* s);
 
-struct S_00a441f0_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    float m_10;
-    int m_14;
-    void FUN_00a44bf0(S_00a441f0_arg* p);
-    void AppendFormattedFields(S_00a441f0_arg* p);
-};
-
 inline void S_Push(S_00a441f0_arg* p, char* s)
 {
     unsigned int n = p->m_0a;
@@ -678,11 +565,12 @@ inline void S_Push(S_00a441f0_arg* p, char* s)
 }
 
 // @fnv 0x00a441f0
-void S_00a441f0_cls::AppendFormattedFields(S_00a441f0_arg* p)
+void BSLookIKNote::GetViewerStrings(NiViewerStringsArray* strings)
 {
-    FUN_00a44bf0(p);
-    S_Push(p, FUN_00a7d550(str_01097d24, m_10));
-    switch (m_14)
+    BSAnimNote::GetViewerStrings(strings);
+    S_00a441f0_arg* p = reinterpret_cast<S_00a441f0_arg*>(strings);
+    S_Push(p, FUN_00a7d550(str_01097d24, m_fDistanceScale));
+    switch (eState)
     {
     case 1:
         S_Push(p, FUN_00a7d5e0(str_01044a7c, str_010477f4));

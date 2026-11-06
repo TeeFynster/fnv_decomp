@@ -1,6 +1,7 @@
 // fallout_shared/bsbipnode.cpp: AnimationInterpolatorNode (5 functions)
 
 #include "bsbipnode_decls.h"
+#include "../../include/NiUpdateData.h"
 
 // @fnv 0x004f0380
 void AnimationInterpolatorNode::UpdateInterpolatorsAtTime(float time, bool selective)
@@ -24,13 +25,13 @@ void AnimationInterpolatorNode::UpdateInterpolatorsAtTime(float time, bool selec
             else if (selective && target->FUN_004f0140())
                 continue;
 
-            if (m_pkBlendInterpolators[iIndex].Update(time, target, transform))
+            if (m_pkBlendInterpolators[iIndex].UpdateTransform(time, target, transform))
             {
                 if (transform.IsTranslateXNotNegatedConstant())
                     target->FUN_00440460(transform.GetTranslate());
-                if (transform.FUN_004f02e0())
+                if (transform.IsRotateValid())
                     target->FUN_004f0160(transform.GetOffsetC());
-                if (transform.FUN_004f0320())
+                if (transform.IsScaleValid())
                     target->FUN_00440490(transform.GetFloatAtOffset1C());
             }
         }
@@ -38,13 +39,13 @@ void AnimationInterpolatorNode::UpdateInterpolatorsAtTime(float time, bool selec
         target = m_ppTargetObjects[iIndex];
         if (!target || (!selective && !target->FUN_004f0140()))
             return;
-        if (m_pkBlendInterpolators[iIndex].Update(time, target, transform))
+        if (m_pkBlendInterpolators[iIndex].UpdateTransform(time, target, transform))
         {
             if (transform.IsTranslateXNotNegatedConstant())
                 target->FUN_00440460(transform.GetTranslate());
-            if (transform.FUN_004f02e0())
+            if (transform.IsRotateValid())
                 target->FUN_004f0160(transform.GetOffsetC());
-            if (transform.FUN_004f0320())
+            if (transform.IsScaleValid())
                 target->FUN_00440490(transform.GetFloatAtOffset1C());
         }
     }
@@ -79,59 +80,6 @@ void FUN_004f00e0_shell::FUN_004f00e0(void* kTrn)
 
 extern int DAT_011f36bc;
 extern int g_011f36e4;
-struct UpdData
-{
-    int a;
-    int b;
-    int c;
-    void NiUpdateData(float, bool, bool);
-};
-struct CtlV
-{
-    virtual void v0();
-    virtual void v1();
-    virtual const void* GetRTTI();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f0a();
-    virtual void f0b();
-    virtual void f0c();
-    virtual void f0d();
-    virtual void f0e();
-    virtual void f0f();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f1a();
-    virtual void f1b();
-    virtual void f1c();
-    virtual void f1d();
-    virtual void f1e();
-    virtual void f1f();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void Update(UpdData*);
-    CtlV* GetNext() const;
-};
-struct ModelOps
-{
-    CtlV* GetObject3D();
-};
 struct FUN_004f0040_shell
 {
     void UpdateControls(float afTime);
@@ -140,18 +88,17 @@ struct FUN_004f0040_shell
 // @fnv 0x004f0040
 void FUN_004f0040_shell::UpdateControls(float afTime)
 {
-    CtlV* pkControl;
-    for (pkControl = ((ModelOps*)this)->GetObject3D(); pkControl; pkControl = pkControl->GetNext())
+    NiTimeController* pkControl;
+    for (pkControl = ((NiObjectNET*)this)->GetControllers(); pkControl; pkControl = pkControl->GetNext())
     {
-        if (pkControl->GetRTTI() == &DAT_011f36bc)
+        if (pkControl->GetRTTI() == reinterpret_cast<const NiRTTI*>(&DAT_011f36bc))
         {
             ((AnimationInterpolatorNode*)pkControl)->UpdateInterpolatorsAtTime(afTime, false);
         }
-        else if (pkControl->GetRTTI() == &g_011f36e4)
+        else if (pkControl->GetRTTI() == reinterpret_cast<const NiRTTI*>(&g_011f36e4))
         {
-            UpdData updateData;
-            updateData.NiUpdateData(afTime, false, false);
-            pkControl->Update(&updateData);
+            NiUpdateData updateData(afTime, false, false);
+            pkControl->Update(updateData);
         }
     }
 }

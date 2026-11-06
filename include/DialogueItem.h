@@ -1,28 +1,43 @@
-// Source layout: DialogueItem. PC corrections are in generate_headers.py.
-#ifndef FNV_DIALOGUEITEM_H
-#define FNV_DIALOGUEITEM_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+#include "MagicTarget.h"
+
+class BGSLoadFormBuffer;
+class DialogueResponse;
+class DialoguePolicy;
+class TESTopicInfo;
+class TESTopic;
+class TESQuest;
+class TESObjectREFR;
+
 class DialogueItem
 {
-  public:
-    BSSimpleList<DialogueResponse*> m_kResponseList;          // +0x0
-    BSSimpleList<DialogueResponse*>* m_pCurrentResponseList;  // +0x8
-    TESTopicInfo* pInfo;                                      // +0xC
-    TESTopic* pTopic;                                         // +0x10
-    TESQuest* pQuest;                                         // +0x14
-    TESObjectREFR* m_pDialogueSpeaker;                        // +0x18
+public:
+    BSSimpleList<DialogueResponse*> m_kResponseList;
+    BSSimpleList<DialogueResponse*>* m_pCurrentResponseList;
+    TESTopicInfo* pInfo;
+    TESTopic* pTopic;
+    TESQuest* pQuest;
+    TESObjectREFR* m_pDialogueSpeaker;
+
+    DialogueItem();
+    DialogueItem(TESQuest* quest, TESTopic* topic, TESTopicInfo* info, TESObjectREFR* speaker);
+    ~DialogueItem();
+    static void operator delete(void*);
+    void LoadDialogueItem(BGSLoadFormBuffer*);
+    void RefreshObjectRef(BGSLoadFormBuffer*);
+    bool SelectDefaultResponseList();
+    bool NextResponse();
+    DialogueResponse* GetActiveResponse();
+    DialogueResponse* GetCurrentItem();
+    DialogueResponse* GetResponseByIndex(short index);
+    short GetResponseIndex(DialogueResponse*);
     TESTopicInfo* GetInfo();
     TESQuest* GetQuest();
     TESTopic* GetAudioBackendData();
+    TESTopic* Deallocate();
+    DialoguePolicy* FUN_0084e3a0();
+    bool FUN_0083c7b0();
+    bool FUN_0083c7e0();
+    void FUN_0083c850(int);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(DialogueItem) == 0x1C);
-FNV_STATIC_ASSERT(offsetof(DialogueItem, m_kResponseList) == 0x0);
-FNV_STATIC_ASSERT(offsetof(DialogueItem, m_pCurrentResponseList) == 0x8);
-FNV_STATIC_ASSERT(offsetof(DialogueItem, pInfo) == 0xC);
-FNV_STATIC_ASSERT(offsetof(DialogueItem, pTopic) == 0x10);
-FNV_STATIC_ASSERT(offsetof(DialogueItem, pQuest) == 0x14);
-FNV_STATIC_ASSERT(offsetof(DialogueItem, m_pDialogueSpeaker) == 0x18);
-#endif

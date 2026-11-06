@@ -2,6 +2,9 @@
 // src/havok/common/base/memory/system/hkmemorysystem.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/memory/system/hkmemorysystem.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkThreadMemory.h"
+
 // @fnv 0x00cbc440
 int __stdcall FUN_00cbc440(int a, int b)
 {
@@ -161,57 +164,15 @@ struct SixUnsignedValueRecord
     {}
 };
 
-struct hkMemoryAllocator
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void FillMemoryStatistics(SixUnsignedValueRecord& stats);
-};
+#include "../../../../../../include/hkStackMemory.h"
 
-struct hkThreadMemory
-{
-    unsigned int ComputeWeightedSum();
-};
-
-struct StringPointerTriple
-{
-    char* m_pTileTemplate;
-    char* m_kRayStart;
-    char* m_kRayEnd;
-};
-
-template <typename T> struct hkArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    const T& operator[](int i) const
-    {
-        return m_data[i];
-    }
-};
+#include "../../../../../../include/hkArray.h"
 
 struct MemSystemInfo
 {
     hkMemoryAllocator* m_pStreamAllocator;
     hkArray<hkThreadMemory*> m_threadMemory;
-    hkArray<StringPointerTriple*> m_kAllocatorList;
+    hkArray<hkStackMemory*> m_kAllocatorList;
     int m_stackTotal;
     int m_heapSoftLimit;
 };
@@ -281,7 +242,7 @@ static __declspec(noinline) void FUN_00cbc000(hkOstream* ostr, const char* name,
 void __stdcall FUN_00cbc220(hkOstream* ostr, MemSystemInfo* info)
 {
     SixUnsignedValueRecord stats;
-    info->m_pStreamAllocator->FillMemoryStatistics(stats);
+    info->m_pStreamAllocator->getMemoryStatistics(reinterpret_cast<hkMemoryAllocator::MemoryStatistics&>(stats));
     unsigned int heapInUse = stats.m_pAllocationMap;
     FUN_00cbc000(ostr, "Heap", stats, info->m_heapSoftLimit);
 
@@ -302,11 +263,11 @@ void __stdcall FUN_00cbc220(hkOstream* ostr, MemSystemInfo* info)
     int stackTotal = 0;
     for (int iStackIndex = 0; iStackIndex < info->m_kAllocatorList.GetLogicalSize(); iStackIndex++)
     {
-        StringPointerTriple* pStackTriple = info->m_kAllocatorList[iStackIndex];
+        hkStackMemory* pStackTriple = info->m_kAllocatorList[iStackIndex];
         int used;
-        int iStackSize = pStackTriple->m_kRayEnd - pStackTriple->m_kRayStart;
+        int iStackSize = (char*)pStackTriple->m_end.val() - (char*)pStackTriple->m_start.val();
         stackTotal += iStackSize;
-        used = iStackSize - (int)(pStackTriple->m_kRayEnd - pStackTriple->m_pTileTemplate);
+        used = iStackSize - (int)((char*)pStackTriple->m_end.val() - (char*)pStackTriple->m_next.val());
         FUN_00cc0410(ostr, "            Thread %i  size %10i      used:    %6i (%4.1f%%)\n", iStackIndex, iStackSize,
                      used, used * 100.0 / iStackSize);
     }
@@ -316,13 +277,13 @@ void __stdcall FUN_00cbc220(hkOstream* ostr, MemSystemInfo* info)
     }
     FUN_00cc0410(ostr, "            = total %i\n\n", stackTotal);
 
-    FUN_00c85750()->solverAllocator().FillMemoryStatistics(stats);
+    FUN_00c85750()->solverAllocator().getMemoryStatistics(reinterpret_cast<hkMemoryAllocator::MemoryStatistics&>(stats));
     FUN_00cc0410(ostr, "\t%s:\n", "Solver");
     FUN_00cc0410(ostr, "            totalSize:   %10i\n", stats.m_uiFirstValue);
     FUN_00cc0410(ostr, "              peak:      %10i (%4.1f%%)\n\n", stats.m_uiThirdValue,
                  (float)stats.m_uiThirdValue * 100.0 / (float)stats.m_uiFirstValue);
 
-    FUN_00c85750()->debugAllocator().FillMemoryStatistics(stats);
+    FUN_00c85750()->debugAllocator().getMemoryStatistics(reinterpret_cast<hkMemoryAllocator::MemoryStatistics&>(stats));
     if (heapInUse == stats.m_pAllocationMap)
     {
         FUN_00cc0410(ostr, "\tDebugMem: Not used.\n\n");

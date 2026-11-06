@@ -43,7 +43,7 @@ unsigned int NiBinaryStream::GetLine(char* buffer, unsigned int maxChars)
         char ch;
         unsigned int size = 1;
         unsigned int read = m_pfnRead(this, &ch, 1, &size, 1);
-        m_uiStreamFlags += read;
+        m_uiAbsoluteCurrentPos += read;
         total += read;
         if (read == 1)
         {
@@ -171,7 +171,7 @@ void FUN_00aa16d0_cls::FUN_00aa16d0(unsigned int offset, unsigned int whence)
         unsigned int newPos = m_uiPos + offset;
         if ((int)newPos >= 0 && (int)newPos < (int)m_uiBufferReadSize)
         {
-            m_uiStreamFlags += offset;
+            m_uiAbsoluteCurrentPos += offset;
             m_uiPos = newPos;
             return;
         }
@@ -184,8 +184,8 @@ void FUN_00aa16d0_cls::FUN_00aa16d0(unsigned int offset, unsigned int whence)
     m_bGood = FUN_00aa85c0(m_pFile, offset, whence) == 0;
     if (m_bGood)
     {
-        m_uiTotalFileSize = _ftell(m_pFile);
-        m_uiStreamFlags = m_uiTotalFileSize;
+        m_uiFilePos = _ftell(m_pFile);
+        m_uiAbsoluteCurrentPos = m_uiFilePos;
     }
 }
 

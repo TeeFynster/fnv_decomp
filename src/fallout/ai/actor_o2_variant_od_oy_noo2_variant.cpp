@@ -1,3 +1,4 @@
+#include "../../../include/NiQuaternion.h"
 
 // src/fallout/ai/actor_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy /Oy- (unit src/fallout/ai/actor_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,17 +6,20 @@
 
 // src/fallout/ai/actor_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/ai/actor.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
-#include "Actor.h"
-struct MemoryManager
-{
-    void* Deallocate(void*);
-};
+#include "../../../include/Actor.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/hkMemoryAllocator.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/Creature.h"
+#include "../../../include/Mat3.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiTransform.h"
+#include "../../../include/NiUpdateData.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiMatrix3.h"
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 extern MemoryManager g_memoryManager;
-struct bhkRagdollController
-{
-    void FUN_00c7d900();
-    void* FUN_00c7de30(unsigned int);
-};
 extern "C" void* g_012685f8;
 void* __cdecl FUN_00c7fa60();
 extern "C" void __cdecl _delete(void*, int);
@@ -168,8 +172,6 @@ struct FUN_00c6ffc0_Class
     Target* FUN_00c6e0b0();
     void FUN_00c6ffc0();
 };
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 extern char* EmptyFS;
 struct FixedStr
 {
@@ -187,18 +189,10 @@ struct FixedStr
     }
     bool Equals(const char*) const;
 };
-struct Mat3
-{
-    float m[9];
-};
-struct Pt3
-{
-    float x, y, z;
-};
 struct Xform
 {
     Mat3 rot;
-    Pt3 trans;
+    NiPoint3 trans;
     float scale;
 };
 struct RNode;
@@ -244,23 +238,6 @@ struct RArr
 struct RCtx;
 RObj* __cdecl FUN_00c4b470(RCtx*, RKey*, int);
 void __cdecl FUN_00c7bcb0(RCtx* ctx, RObj* obj, RArr* arr);
-struct NiUpdateData
-{
-    float m_fTime;
-    bool b0;
-    bool b1;
-    bool b2;
-    bool b3;
-    bool b4;
-};
-struct NiNode : NiAVObject
-{
-    void Update(NiUpdateData const&);
-};
-struct Creature
-{
-    static void __cdecl SetNodeFlagsRecursive(NiAVObject*, int, bool, bool, bool);
-};
 void __cdecl SetFlagRecursive(int, void*);
 void __cdecl FUN_00c7bcb0(void*, void*, void*);
 inline unsigned char GetFlag6(unsigned short w)
@@ -268,18 +245,6 @@ inline unsigned char GetFlag6(unsigned short w)
     return (unsigned char)(w >> 6) & 1;
 }
 void __cdecl FUN_00c7d3b0(NiNode* param_1, void* param_2, void* param_3, char* param_4, unsigned int* param_5);
-struct ThreeByThreeMatrix
-{
-    float m[9];
-    ThreeByThreeMatrix operator*(const ThreeByThreeMatrix&) const;
-};
-struct NiTransform
-{
-    ThreeByThreeMatrix m_kOrientation;
-    float m_kTranslation[3];
-    float m_fScale;
-    NiTransform operator*(const NiTransform&) const;
-};
 void FUN_00c74dd0(void*, NiTransform*);
 extern bool DAT_01267c28;
 extern bool DAT_01267c34;
@@ -341,7 +306,7 @@ struct FUN_00c7d630_t
     char pad4c[0x58 - 0x4c];
     RagNode* m_pkNode;
     char pad5c[4];
-    ThreeByThreeMatrix m_kRot;
+    NiMatrix3 m_kRot;
     void FUN_00c7d630(float);
     void FUN_00c79680();
     void FUN_00c7cb50(int);
@@ -510,23 +475,7 @@ void FUN_00c7d480_cls::FUN_00c7d480()
     }
     *(unsigned int*)_FUN_00c85750() = count;
 }
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00c7d5c0_elem
 {
     int unk00;
@@ -772,6 +721,8 @@ class FUN_00c7f970_cls
 };
 
 #include <xmmintrin.h>
+#include "../../../include/MemoryManager.h"
+#include "../../../include/bhkRagdollController.h"
 int __cdecl FUN_00458620(int value, int extra);
 
 struct __declspec(align(16)) ScratchVec
@@ -1471,10 +1422,11 @@ struct NormObj
 };
 struct NodeObj
 {
-    struct Pair;
-    Pair FUN_00461130(int arg);
+    struct ImpactPositionView_00461130;
+    ImpactPositionView_00461130 FUN_00461130(int arg);
 };
-struct NodeObj::Pair
+// 0x00461130 returns three float coordinates (12 bytes); shared Pair is an 8-byte integer/reference pair.
+struct NodeObj::ImpactPositionView_00461130
 {
     float x, y, z;
     ImpactPoint* FUN_00524c40();
@@ -1815,7 +1767,7 @@ void HostShell::FUN_008a4af0(ParamObj* source, float strength, float secondary, 
             bool enabled = true;
             if (this == DAT_011dea3c)
                 enabled = ((ImpactNode*)this)->IsActive();
-            if (!Unk_8C() && enabled)
+            if (!GetHasKnockedState() && enabled)
             {
                 bool special = false;
                 void* sub = ((SubObjSrc*)this)->FUN_009306d0();
@@ -3497,15 +3449,7 @@ class NiPoint3C7
     float z;
 };
 
-class NiQuaternionC7
-{
-  public:
-    NiQuaternionC7(float fW, float fX, float fY, float fZ);
-    float m_fVectorX;
-    float m_fVectorY;
-    float m_fVectorZ;
-    float m_fScalarPart;
-};
+
 
 class NameC7
 {
@@ -4487,7 +4431,7 @@ void RefC7::FUN_00930c70()
     if (pvOld != pvTarget)
     {
         pkProj->SetTarget(pvTarget);
-        NiQuaternionC7 kRot(0.0f, 0.0f, 0.0f, 0.0f);
+        ::NiQuaternion kRot(0.0f, 0.0f, 0.0f, 0.0f);
         kRot.m_fVectorX = 1.0f;
         kRot.m_fVectorY = 0.0f;
         kRot.m_fVectorZ = 0.0f;

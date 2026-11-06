@@ -1,16 +1,8 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiRenderer
-{
-    void* m_auiShapeKeys[0x6e8 / 4];
-    unsigned int m_maxStreamEntries;
-};
-
-struct BSFadeNode
-{
-    static void* operator new(unsigned int);
-};
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiRenderer.h"
 
 extern void* DAT_010ee70c;
 
@@ -29,7 +21,8 @@ struct NiD3DVertexDeclaration
 // @fnv 0x00e76700
 NiD3DVertexDeclaration* FUN_00e76700(NiRenderer* renderer, unsigned int maxStreamEntries, unsigned int streamCount)
 {
-    if (streamCount > renderer->m_maxStreamEntries)
+    // The backend stream limit is not exposed by the shared NiRenderer base.
+    if (streamCount > *reinterpret_cast<const unsigned int*>(reinterpret_cast<const char*>(renderer) + 0x6e8))
         return 0;
 
     NiD3DVertexDeclaration* pkShaderDeclaration = static_cast<NiD3DVertexDeclaration*>(BSFadeNode::operator new(0x38));

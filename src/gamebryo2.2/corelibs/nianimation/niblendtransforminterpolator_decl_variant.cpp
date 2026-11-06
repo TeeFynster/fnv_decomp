@@ -2,9 +2,10 @@
 // src/gamebryo2.2/corelibs/nianimation/niblendtransforminterpolator_decl_variant.cpp - declaration variant unit created 2026-10-26 by decl_variants.py for paused function 0x00a40b30: the skeleton of src/gamebryo2.2/corelibs/nianimation/niblendtransforminterpolator.cpp
 // that unit declares it this way.
 
-#include "niblendtransforminterpolator_types_NiBlendTransformInterpolator_decl_niblendtransforminterpolator.h"
-#include "niblendtransforminterpolator_types_NiQuatTransform.h"
-#include "niblendtransforminterpolator_NiObjectNET.h"
+#include "../../../../include/NiBlendTransformInterpolator.h"
+#include "../../../../include/NiQuatTransform.h"
+#include "../../../../include/NiObjectNET.h"
+class NiRTTI;
 struct FUN_00a40a40_shell : public NiBlendTransformInterpolator
 {
     void* FUN_00a40a40();
@@ -169,9 +170,14 @@ void __stdcall FUN_00a41170(AGViewerStrings* pkStrings);
 extern const float DAT_01015f5c;
 extern const float DAT_0109696c;
 extern const double DAT_010241b0;
+// The rotation part of NiQuatTransform (qx..qw) copied as plain words, as the POD assignment does.
+struct QuatWords
+{
+    unsigned int w[4];
+};
 __forceinline void Invalidate850(NiQuatTransform& value)
 {
-    value.m_fScale = value.m_kRotate.m_fVectorY = value.m_kTranslate.x = -3.402823466e+38F;
+    value.scale = value.qy = value.x = -3.402823466e+38F;
 }
 // @fnv 0x00a40b30
 bool NiBlendTransformInterpolator::FUN_00a40b30(float time, NiObjectNET* object, NiQuatTransform& value)
@@ -183,13 +189,13 @@ bool NiBlendTransformInterpolator::FUN_00a40b30(float time, NiObjectNET* object,
         Invalidate850(value);
         return false;
     }
-    if (m_pSingleInterpolator->Update(time, object, value))
+    if (m_pSingleInterpolator->UpdateTransform(time, object, value))
     {
-        if (value.m_kRotate.m_fVectorY != DAT_010241b0)
+        if (value.qy != DAT_010241b0)
         {
-            NiQuaternion rotation = value.m_kRotate;
+            NiQuaternion rotation = *reinterpret_cast<NiQuaternion*>(&value.qx);
             rotation.Normalize();
-            value.m_kRotate = rotation;
+            *reinterpret_cast<QuatWords*>(&value.qx) = *reinterpret_cast<QuatWords*>(&rotation);
         }
         return true;
     }

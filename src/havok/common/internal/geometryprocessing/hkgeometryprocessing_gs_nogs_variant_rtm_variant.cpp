@@ -7,6 +7,10 @@
 // to their real unit once identified.
 // src/havok/common/internal/geometryprocessing/hkgeometryprocessing.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/geometryprocessing/hkgeometryprocessing.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/Vec4.h"
+
 extern "C" void __cdecl Deallocate(void*);
 extern int DAT_010d9fc4;
 struct FUN_00dee620
@@ -23,21 +27,7 @@ struct FUN_00dee6b0_Class
     float FUN_00dee6b0(int testFlag);
 };
 extern int DAT_010cd664;
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00dee6c0_cls
 {
     int m_vptr;
@@ -144,13 +134,6 @@ extern "C" void FUN_00de9650(SphereInput276* in, SphereOutput276* out)
     out->value = _mm_setr_ps(x, z, y, 0.0f);
 }
 extern "C" void _ReadBarrier();
-struct Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
 __declspec(align(16)) struct Vec4Pair
 {
     Vec4 a;

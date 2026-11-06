@@ -2,12 +2,38 @@
 // src/staging/blk_00480000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include <windows.h>
+#include "../../include/BSSimpleArray.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTPointerListBase.h"
+#include "../../include/AnimIdle.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/NP.h"
+#include "../../include/TESForm.h"
+#include "../../include/GO.h"
+#include "../../include/Actor.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/FileEntryList.h"
+#include "../../include/FileEntryListCollection.h"
+#include "../../include/NiControllerManager.h"
+#include "../../include/NiPlane.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESBipedModelForm.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESIdleForm.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESModelList.h"
+#include "../../include/TESObject.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESSound.h"
+#include "../../include/hkpTypedBroadPhaseHandle.h"
 
-struct TESSaveLoadGame
-{
-    void __thiscall FUN_00857a10(int a, int b);
-};
+#include "../../include/TESSaveLoadGame.h"
 
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
@@ -36,7 +62,7 @@ int __thiscall FUN_00485bc0_class::FUN_00485bc0()
     return ((int*)this)[3] & (int)&DAT_00ffffff;
 }
 
-int __cdecl _stricmp(const char*, const char*);
+namespace fnv_string { int __cdecl CompareIgnoreCase(const char*, const char*); }
 
 struct FUN_00486b50_Class
 {
@@ -47,7 +73,7 @@ struct FUN_00486b50_Class
 // @fnv 0x00486b50
 int __thiscall FUN_00486b50_Class::IsStringEqualIgnoreCase(const char* pcStringA, const char* pcStringB)
 {
-    return _stricmp(pcStringA, pcStringB) == 0;
+    return fnv_string::CompareIgnoreCase(pcStringA, pcStringB) == 0;
 }
 
 extern int $SG4908;
@@ -151,14 +177,10 @@ FUN_00487620::~FUN_00487620()
     Deallocate(p);
 }
 
-struct FUN_004893c0_class
-{
-    void FUN_004893c0(unsigned char acFlags);
-};
 // @fnv 0x004893c0
-void FUN_004893c0_class::FUN_004893c0(unsigned char acFlags)
+void TESModel::FUN_004893c0(unsigned char acFlags)
 {
-    *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x14) = acFlags;
+    cFlags = acFlags;
 }
 
 struct BFC_s
@@ -248,10 +270,6 @@ struct Flt
 {
     operator unsigned int();
 };
-struct TESObject
-{
-    unsigned int GetNext();
-};
 struct FUN_0049ec60
 {
     unsigned int GetNext();
@@ -260,7 +278,7 @@ struct FUN_0049ec60
 // @fnv 0x0049ec60
 unsigned int FUN_0049ec60::GetNext()
 {
-    return ((TESObject*)((Flt*)((char*)this + 0xb8))->operator unsigned int())->GetNext();
+    return (unsigned int)((TESObject*)((Flt*)((char*)this + 0xb8))->operator unsigned int())->GetNext();
 }
 
 extern int DAT_010159d4;
@@ -312,11 +330,6 @@ void FUN_0049f670_Class::FUN_0049f670()
     ((void(__thiscall*)(void*, int))FUN_0049faf0)(this, 1);
 }
 }  // namespace fnv_0049f670
-
-struct NiPlane
-{
-    bool FUN_004390c0(const NiPlane&);
-};
 
 // @fnv 0x0049f830
 bool FUN_0049f830(NiPlane* self, const NiPlane& other)
@@ -451,19 +464,7 @@ void* __thiscall FUN_00486f10_Class::FUN_00486f10(unsigned int flags)
     return this;
 }
 
-struct FileEntryList
-{
-    void __thiscall FUN_00488ff0();
-    void* __thiscall FUN_0048a0a0(unsigned int flags);
-};
-// @fnv 0x0048a0a0
-void* FileEntryList::FUN_0048a0a0(unsigned int flags)
-{
-    FUN_00488ff0();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
+// The shared FileEntryList destructor emits the scalar deleting destructor at 0x0048a0a0.
 
 struct FUN_0048fb20_Class
 {
@@ -653,12 +654,6 @@ FUN_0048b560::FUN_0048b560() : BFC_s()
     ((FUN_0048b590_shell*)this)->ClearFields();
 }
 
-struct TESSound
-{
-    void* m_auiShapeKeys;
-    void* m_sound;
-    unsigned int Deallocate();
-};
 extern "C" void __cdecl FUN_00485910(int a, int b);
 struct FUN_0048b830_Class
 {
@@ -669,31 +664,19 @@ struct FUN_0048b830_Class
 // @fnv 0x0048b830
 void __thiscall FUN_0048b830_Class::ReleaseSound()
 {
-    if (((TESSound*)this)->m_sound)
+    if (m_auiShapeKeys)
     {
-        unsigned int result = ((TESSound*)((TESSound*)this)->m_sound)->Deallocate();
+        unsigned int result = ((TESSound*)m_auiShapeKeys)->Deallocate();
         FUN_00485910(0x4d414e52, result);
     }
 }
 
-struct TESModel
-{
-    unsigned int GetModelLength() const;
-};
-struct FNStub
-{
-    void* GetFullName();
-};
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
-struct FUN_0048cea0_shell : TESModel
-{
-    void __thiscall FUN_0048cea0();
-};
 // @fnv 0x0048cea0
-void __thiscall FUN_0048cea0_shell::FUN_0048cea0()
+void __thiscall TESFullName::Save()
 {
-    if (GetModelLength())
-        FUN_004856f0(0x4d414e46, reinterpret_cast<FNStub*>(this)->GetFullName(), GetModelLength() + 1);
+    if (static_cast<const TESFullName*>(this)->GetModelLength())
+        FUN_004856f0(0x4d414e46, GetFullName(), static_cast<const TESFullName*>(this)->GetModelLength() + 1);
 }
 
 struct FUN_00508100_shell
@@ -756,10 +739,6 @@ void __thiscall S_004963e0::SetFromFourInts(FourInts* apValues)
     ((FUN_00496470_shell*)this)->FUN_00496470(true);
 }
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void* p, int a, int b);
-};
 struct FUN_00497bc0_Class
 {
     void FUN_00497bc0(BGSSaveFormBuffer* buffer, int a);
@@ -773,32 +752,20 @@ void FUN_00497bc0_Class::FUN_00497bc0(BGSSaveFormBuffer* buffer, int aiUnused)
     buffer->SaveData(this + 0x14, 4, 0);
 }
 
-struct NiTListItem_0049c6d0
-{
-    NiTListItem_0049c6d0* a;
-    int b;
-    int c;
-};
-struct NiTPointerListBase_0049c6d0
-{
-    NiTListItem_0049c6d0* m0;
-    NiTListItem_0049c6d0* m4;
-    unsigned int m8;
-    void FUN_00559c90(NiTListItem_0049c6d0* a);
-    NiTListItem_0049c6d0* RemoveHead();
-};
+// The 0x00559c90 DeleteItem call clears the +8 element and uses the pool allocator at list +8.
 // @fnv 0x0049c6d0
-NiTListItem_0049c6d0* NiTPointerListBase_0049c6d0::RemoveHead()
+template <>
+unsigned int NiTPointerListBase<NiTPointerAllocator<unsigned int>, unsigned int>::RemoveHead()
 {
-    NiTListItem_0049c6d0* item = m0;
-    m0 = m0->a;
-    if (m0)
-        m0->b = 0;
+    NiTListItem<unsigned int>* item = m_pkHead;
+    m_pkHead = m_pkHead->m_pkNext;
+    if (m_pkHead)
+        m_pkHead->m_pkPrev = 0;
     else
-        m4 = 0;
-    NiTListItem_0049c6d0* result = (NiTListItem_0049c6d0*)item->c;
-    FUN_00559c90(item);
-    m8--;
+        m_pkTail = 0;
+    unsigned int result = item->m_element;
+    DeleteItem(item);
+    m_kItemCount.m_uiCount--;
     return result;
 }
 
@@ -871,64 +838,56 @@ void* __thiscall S_0049f850::FUN_0049f850(unsigned int flags)
     return this;
 }
 
-struct NiPlane_0049f8b0
+struct PlaneElem
 {
-    int m_kPointA[4];
-    NiPlane_0049f8b0& FUN_0049f8b0(const NiPlane_0049f8b0& other);
+    int a;
+    int b;
+    int c;
+    int d;
+    PlaneElem& FUN_0049f8b0(const PlaneElem& other);
 };
-// Copies the last three ints of other into this object's array and returns *this.
+
+// Copies the vector words while preserving the array record's first word.
 // @fnv 0x0049f8b0
-NiPlane_0049f8b0& NiPlane_0049f8b0::FUN_0049f8b0(const NiPlane_0049f8b0& other)
+PlaneElem& PlaneElem::FUN_0049f8b0(const PlaneElem& other)
 {
-    m_kPointA[1] = other.m_kPointA[1];
-    m_kPointA[2] = other.m_kPointA[2];
-    m_kPointA[3] = other.m_kPointA[3];
+    b = other.b;
+    c = other.c;
+    d = other.d;
     return *this;
 }
 
-struct NavMeshSearchLOSArray
-{
-    int pad0;
-    void* data;
-    int size;
-    int capacity;
-    void CallVirtualOnEach(void*, int);
-    void FUN_006a8500();
-    void FUN_0049faf0(bool freeStorage);
-};
+// The storage-free helper at 0x006a8500 dispatches through _Deallocate (slot 2).
+// Keep its declaration here until the shared array exposes this helper.
+template <class T, unsigned int Growth>
+void __fastcall FreeSimpleArrayStorage(BSSimpleArray<T, Growth>* array);
 
 // @fnv 0x0049faf0
-void NavMeshSearchLOSArray::FUN_0049faf0(bool freeStorage)
+template <>
+void BSSimpleArray<BSSimpleArray<NiPoint3, 1024>, 1024>::Clear(bool freeStorage)
 {
-    if (data)
+    if (pBuffer)
     {
-        CallVirtualOnEach(data, size);
+        ReleaseElements(pBuffer, iSize);
         if (freeStorage)
         {
-            FUN_006a8500();
-            data = 0;
-            capacity = 0;
+            FreeSimpleArrayStorage(this);
+            pBuffer = 0;
+            SimpleArrayStorage = 0;
         }
-        size = 0;
+        iSize = 0;
     }
 }
 
-struct FUN_0049fc80_Elem
-{
-    virtual void __thiscall Foo(int);
-    char _pad[12];
-};
-struct FUN_0049fc80_Holder
-{
-    void __thiscall CallVirtualOnEach(FUN_0049fc80_Elem* a, unsigned int b);
-};
-// Calls Foo(0) on each of b consecutive elements starting at a.
+// Calls each point array's virtual destructor without freeing the element itself.
 // @fnv 0x0049fc80
-void __thiscall FUN_0049fc80_Holder::CallVirtualOnEach(FUN_0049fc80_Elem* apElem, unsigned int b)
+template <>
+void BSSimpleArray<BSSimpleArray<NiPoint3, 1024>, 1024>::ReleaseElements(
+    BSSimpleArray<NiPoint3, 1024>* apElem, unsigned int b)
 {
     unsigned int i;
     for (i = 0; i < b; i++)
-        apElem[i].Foo(0);
+        apElem[i].~BSSimpleArray();
 }
 
 struct bsrandom_singleton
@@ -951,24 +910,6 @@ void FUN_0049ff80()
     bsrandom_singleton::DAT_011c57f8 = 0;
 }
 
-struct TESModelTextureSwap;
-struct TESForm
-{
-    virtual ~TESForm();
-    unsigned int FNV_GetFormType();
-};
-struct TESObjectREFR
-{
-    TESForm* GetOwner();
-};
-struct TESActorBase
-{
-    int GetSex();
-};
-struct TESBipedModelForm : TESForm
-{
-    TESModelTextureSwap* GetBipedModel(int);
-};
 // @fnv 0x00481090
 TESModelTextureSwap* GetBipedModelTextureSwap(TESForm* form, TESObjectREFR* refr)
 {
@@ -976,12 +917,12 @@ TESModelTextureSwap* GetBipedModelTextureSwap(TESForm* form, TESObjectREFR* refr
     if (!model2)
         return 0;
     if (!refr)
-        return (TESModelTextureSwap*)((char*)model2 + 0xc);
+        return &model2->bipedModel[0];
     TESForm* owner = refr->GetOwner();
     int aSex = 0;
     if (owner && owner->FNV_GetFormType() == 0x2a)
         aSex = reinterpret_cast<TESActorBase*>(owner)->GetSex();
-    return model2->GetBipedModel(aSex);
+    return model2->GetBipedModel((SEX)aSex);
 }
 
 extern int DAT_0101d274;
@@ -1013,13 +954,6 @@ FUN_0048b3e0_t::FUN_0048b3e0_t(int aiCount)
     }
 }
 
-struct GO
-{
-    void operator=(void*);
-};
-struct AnimIdle
-{
-};
 struct Animation
 {
     void AssignControllerManager(GO&);
@@ -1042,14 +976,6 @@ void __thiscall Animation::FUN_0048ff50()
 }
 
 namespace fnv_0049a920 {
-struct GO
-{
-    void operator=(void*);
-};
-struct NiControllerManager
-{
-    void DeactivateAllSequences(float);
-};
 struct KFModel
 {
     void* GetControllerSequence();
@@ -1229,14 +1155,14 @@ struct FUN_0049faa0_Class
     int m0;
     char* m4;
     char* ConstructElements(char*, int);
-    unsigned int AppendPlane(const NiPlane_0049f8b0&);
+    unsigned int AppendPlane(const PlaneElem&);
 };
 // @fnv 0x0049faa0
-unsigned int FUN_0049faa0_Class::AppendPlane(const NiPlane_0049f8b0& aPlane)
+unsigned int FUN_0049faa0_Class::AppendPlane(const PlaneElem& aPlane)
 {
     unsigned int i = ((Arr16*)this)->FUN_006f31f0();
     ConstructElements(m4 + (i << 4), 1);
-    ((NiPlane_0049f8b0*)(m4 + (i << 4)))->FUN_0049f8b0(aPlane);
+    ((PlaneElem*)(m4 + (i << 4)))->FUN_0049f8b0(aPlane);
     return i;
 }
 
@@ -1360,11 +1286,6 @@ unsigned int FUN_0049c4c0_Class::Modulo(unsigned short ausValue)
     return ausValue % m4;
 }
 
-struct BSSimpleArrayActor
-{
-    void Clear(bool);
-};
-
 struct FUN_006c8a30_Class
 {
     void FUN_006a8500();
@@ -1385,6 +1306,7 @@ struct FUN_00869600_Class
     unsigned int FUN_00869600();
 };
 
+// Retained until BSSimpleArray exposes the three-argument removal overload.
 struct FUN_0049f3c0_Class
 {
     virtual void FUN_0049f3c0_virtual1();
@@ -1403,7 +1325,7 @@ void FUN_0049f3c0_Class::FUN_0049f3c0(unsigned int uiStart, unsigned int arg2, b
 {
     if (arg2 >= this->m8)
     {
-        reinterpret_cast<BSSimpleArrayActor*>(this)->Clear(abReallocate);
+        reinterpret_cast<BSSimpleArray<ActorAvoidanceEntry, 1024>*>(this)->Clear(abReallocate);
     }
     else
     {
@@ -1601,23 +1523,6 @@ void List_48a2c0::FUN_0048a2c0(List_48a2c0* other)
 
 class TESForm;
 
-class ChangeFlags0048
-{
-  public:
-    unsigned int flags;
-    ChangeFlags0048();
-    operator bool() const;
-};
-
-class SaveFormBuf0048
-{
-  public:
-    ChangeFlags0048 GetChangeFlags(unsigned int mask);
-    unsigned int FUN_00865f20();
-    void FUN_00865df0(void* form, int arg);
-    void FUN_00865ff0(int count, unsigned int pos);
-};
-
 template <class T> class FormNode0048
 {
   public:
@@ -1627,6 +1532,13 @@ template <class T> class FormNode0048
     FormNode0048<T>* FUN_00726070();
 };
 
+// The original query returns a trivial mask, without FormChangeMask's destructor.
+struct SaveChangeFlags
+{
+    unsigned int flags;
+    operator bool() const;
+};
+
 class FormListPair
 {
   public:
@@ -1634,14 +1546,15 @@ class FormListPair
     FormNode0048<TESForm*> listA;
     FormNode0048<TESForm*> listB;
 
-    void FUN_0048e040(SaveFormBuf0048* buffer);
+    void FUN_0048e040(BGSSaveFormBuffer* buffer);
 };
 
 // If the buffer's change flags include 0x10, writes each non-null form of listA and listB to the buffer and records the counts at their saved positions.
 // @fnv 0x0048e040
-void FormListPair::FUN_0048e040(SaveFormBuf0048* buffer)
+void FormListPair::FUN_0048e040(BGSSaveFormBuffer* buffer)
 {
-    if (buffer->GetChangeFlags(0x10))
+    if ((buffer->*reinterpret_cast<SaveChangeFlags (BGSSaveFormBuffer::*)(unsigned int)>(
+            static_cast<FormChangeMask (BGSSaveFormBuffer::*)(unsigned int)>(&BGSSaveFormBuffer::GetChangeFlags)))(0x10))
     {
         {
             int i = 0;
@@ -1776,78 +1689,43 @@ void FUN_0049c410_cls::GetNextEntry(FUN_0049c410_item** apItem, unsigned short* 
     *apItem = 0;
 }
 
-struct ListLink_b5187
-{
-    ListLink_b5187* m_00;
-    ListLink_b5187* m_04;
-    unsigned int m_08;
-};
-
-struct FUN_0049c5d0_cls
-{
-    ListLink_b5187* m_00;
-    ListLink_b5187* m_04;
-    unsigned int m_08;
-
-    unsigned int RemoveTail();
-    unsigned int RemoveNode(ListLink_b5187** pNode);
-};
-
 // @fnv 0x0049c5d0
-unsigned int FUN_0049c5d0_cls::RemoveNode(ListLink_b5187** pNode)
+template <>
+unsigned int NiTPointerListBase<NiTPointerAllocator<unsigned int>, unsigned int>::RemovePos(void*& pos)
 {
-    ListLink_b5187* node = *pNode;
-    if (node == m_00)
+    NiTListItem<unsigned int>* node = (NiTListItem<unsigned int>*)pos;
+    if (node == m_pkHead)
     {
-        *pNode = node->m_00;
-        return (unsigned int)reinterpret_cast<NiTPointerListBase_0049c6d0*>(this)->RemoveHead();
+        pos = node->m_pkNext;
+        return RemoveHead();
     }
-    if (node == m_04)
+    if (node == m_pkTail)
     {
-        *pNode = 0;
+        pos = 0;
         return RemoveTail();
     }
-    ListLink_b5187* prev3 = node->m_04;
-    ListLink_b5187* next = node->m_00;
-    *pNode = next;
+    NiTListItem<unsigned int>* prev3 = node->m_pkPrev;
+    NiTListItem<unsigned int>* next = node->m_pkNext;
+    pos = next;
     if (prev3 != 0)
     {
-        prev3->m_00 = next;
+        prev3->m_pkNext = next;
     }
     if (next != 0)
     {
-        next->m_04 = prev3;
+        next->m_pkPrev = prev3;
     }
-    unsigned int data = node->m_08;
-    reinterpret_cast<NiTPointerListBase_0049c6d0*>(this)->FUN_00559c90(reinterpret_cast<NiTListItem_0049c6d0*>(node));
-    m_08 = m_08 - 1;
+    unsigned int data = node->m_element;
+    DeleteItem(node);
+    m_kItemCount.m_uiCount = m_kItemCount.m_uiCount - 1;
     return data;
 }
 
-// Stand-in for the game's NiTPointerListBase (list head / list tail / element count).
-// Layout taken from the disassembly of RemoveTail:
-//   +0x00  list head        +0x04  list tail        +0x08  element count
-// The list item is { next, prev, element }.
-struct FNVListItem
-{
-    FNVListItem* m_pkNext;
-    FNVListItem* m_pkPrev;
-    void* m_element;
-};
-
-struct FNVPointerList
-{
-    FNVListItem* m_pkHead;
-    FNVListItem* m_pkTail;
-    unsigned int m_uiCount;
-    void FNV_DeleteItem(FNVListItem* item);
-    void* RemoveTail();
-};
-
 // @fnv 0x0049c740
-void* FNVPointerList::RemoveTail()
+template <>
+unsigned int NiTPointerListBase<NiTPointerAllocator<unsigned int>, unsigned int>::RemoveTail()
 {
-    FNVListItem* pRemovedItem = m_pkTail;
+    NiTListItem<unsigned int>* pRemovedItem = m_pkTail;
     m_pkTail = m_pkTail->m_pkPrev;
     if (m_pkTail)
     {
@@ -1857,9 +1735,9 @@ void* FNVPointerList::RemoveTail()
     {
         m_pkHead = 0;
     }
-    void* element = pRemovedItem->m_element;
-    FNV_DeleteItem(pRemovedItem);
-    m_uiCount = m_uiCount - 1;
+    unsigned int element = pRemovedItem->m_element;
+    DeleteItem(pRemovedItem);
+    m_kItemCount.m_uiCount = m_kItemCount.m_uiCount - 1;
     return element;
 }
 
@@ -1897,15 +1775,6 @@ bool __cdecl AreVectorsEqual(const float* lhs, const float* rhs, float tolerance
     return IsApproximatelyEqual(lhs[0], rhs[0], tolerance) && IsApproximatelyEqual(lhs[1], rhs[1], tolerance) &&
            IsApproximatelyEqual(lhs[2], rhs[2], tolerance);
 }
-
-struct PlaneElem
-{
-    int a;
-    int b;
-    int c;
-    int d;
-    PlaneElem& FUN_0049f8b0(const PlaneElem& other);
-};
 
 struct PlaneArray
 {
@@ -2146,13 +2015,6 @@ struct AVObj
     void ClearEntries();
     VObj* FUN_0055b980();
 };
-struct NP
-{
-    void* p;
-    ~NP();
-    AVObj* FUN_00559450();
-    NP& FUN_0066b0d0(void*);
-};
 struct ListX
 {
     int head;
@@ -2346,24 +2208,15 @@ FUN_0048fb50::~FUN_0048fb50()
 }
 
 // Load v4 worker5: Animation load-from-buffer transcription.
-struct TESIdleForm : TESForm
-{
-};
-struct BGSLoadFormBuffer;
-struct Actor;
-struct BaseProcess;
 struct Animation;
 struct KFModel;
 struct Biped;
 struct ExtraDataList;
 struct MyNode;
 
-struct NiMemObject
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-struct AnimIdleStub : NiMemObject
+#include "../../include/NiMemObject.h"
+// AnimIdle construction at 0x004965d0 needs 0x38 bytes; include/AnimIdle.h lacks the constructor and payload.
+struct IdleAnimationConstruction : NiMemObject
 {
     int unk00;
     int unk04;
@@ -2379,7 +2232,7 @@ struct AnimIdleStub : NiMemObject
     int unk2c;
     int unk30;
     int unk34;
-    AnimIdleStub(TESIdleForm* a, int b, int c, Actor* d, int e, Animation* f);
+    IdleAnimationConstruction(TESIdleForm* a, int b, int c, Actor* d, int e, Animation* f);
 };
 struct PtrBox
 {
@@ -2402,10 +2255,8 @@ struct F497c10
 {
     void LoadAnimationData(BGSLoadFormBuffer* buffer, void* a);
 };
-struct hkpTypedBroadPhaseHandle
-{
-    unsigned int FUN_0044ddc0();
-};
+extern "C" unsigned int __cdecl FUN_0044ddc0();
+
 struct FUN_0047b470_This
 {
     bool FUN_0047b470();
@@ -2473,7 +2324,6 @@ struct FUN_005ae3d0_S
 {
     void FUN_005ae3d0(ExtraDataList** a);
 };
-struct PlayerCharacter;
 extern PlayerCharacter* g_thePlayer;
 TESForm* __cdecl FUN_004839c0(unsigned int a);
 MyNode* __cdecl FUN_00c802d0(MyNode* a);
@@ -2481,609 +2331,6 @@ void __cdecl SetFlagRecursive(int a, void* b);
 void __fastcall FinishScriptRunLockIfActive(void* a);
 void __fastcall FUN_00498290(Animation* a);
 void* __cdecl operator new(unsigned int);
-struct BaseProcess
-{
-    virtual void vp0();
-    virtual void vp1();
-    virtual void vp2();
-    virtual void vp3();
-    virtual void vp4();
-    virtual void vp5();
-    virtual void vp6();
-    virtual void vp7();
-    virtual void vp8();
-    virtual void vp9();
-    virtual void vp10();
-    virtual void vp11();
-    virtual void vp12();
-    virtual void vp13();
-    virtual void vp14();
-    virtual void vp15();
-    virtual void vp16();
-    virtual void vp17();
-    virtual void vp18();
-    virtual void vp19();
-    virtual void vp20();
-    virtual void vp21();
-    virtual void vp22();
-    virtual void vp23();
-    virtual void vp24();
-    virtual void vp25();
-    virtual void vp26();
-    virtual void vp27();
-    virtual void vp28();
-    virtual void vp29();
-    virtual void vp30();
-    virtual void vp31();
-    virtual void vp32();
-    virtual void vp33();
-    virtual void vp34();
-    virtual void vp35();
-    virtual void vp36();
-    virtual void vp37();
-    virtual void vp38();
-    virtual void vp39();
-    virtual void vp40();
-    virtual void vp41();
-    virtual void vp42();
-    virtual void vp43();
-    virtual void vp44();
-    virtual void vp45();
-    virtual void vp46();
-    virtual void vp47();
-    virtual void vp48();
-    virtual void vp49();
-    virtual void vp50();
-    virtual void vp51();
-    virtual void vp52();
-    virtual void vp53();
-    virtual void vp54();
-    virtual void vp55();
-    virtual void vp56();
-    virtual void vp57();
-    virtual void vp58();
-    virtual void vp59();
-    virtual void vp60();
-    virtual void vp61();
-    virtual void vp62();
-    virtual void vp63();
-    virtual void vp64();
-    virtual void vp65();
-    virtual void vp66();
-    virtual void vp67();
-    virtual void vp68();
-    virtual void vp69();
-    virtual void vp70();
-    virtual void vp71();
-    virtual void vp72();
-    virtual void vp73();
-    virtual void vp74();
-    virtual void vp75();
-    virtual void vp76();
-    virtual void vp77();
-    virtual void vp78();
-    virtual void vp79();
-    virtual void vp80();
-    virtual void vp81();
-    virtual void vp82();
-    virtual void vp83();
-    virtual void vp84();
-    virtual void vp85();
-    virtual void vp86();
-    virtual void vp87();
-    virtual void vp88();
-    virtual void vp89();
-    virtual void vp90();
-    virtual void vp91();
-    virtual void vp92();
-    virtual void vp93();
-    virtual void vp94();
-    virtual void vp95();
-    virtual void vp96();
-    virtual void vp97();
-    virtual void vp98();
-    virtual void vp99();
-    virtual void vp100();
-    virtual void vp101();
-    virtual void vp102();
-    virtual void vp103();
-    virtual void vp104();
-    virtual void vp105();
-    virtual void vp106();
-    virtual void vp107();
-    virtual void vp108();
-    virtual void vp109();
-    virtual void vp110();
-    virtual void vp111();
-    virtual void vp112();
-    virtual void vp113();
-    virtual void vp114();
-    virtual void V1cc(unsigned char a, void* b, void* c, void* d);
-    virtual void vp116();
-    virtual void vp117();
-    virtual void V1d8(void* a);
-    virtual void vp119();
-    virtual void vp120();
-    virtual void vp121();
-    virtual void vp122();
-    virtual void vp123();
-    virtual void vp124();
-    virtual void vp125();
-    virtual void vp126();
-    virtual void vp127();
-    virtual void vp128();
-    virtual void vp129();
-    virtual void vp130();
-    virtual void vp131();
-    virtual void vp132();
-    virtual void vp133();
-    virtual void vp134();
-    virtual void vp135();
-    virtual void vp136();
-    virtual void vp137();
-    virtual void vp138();
-    virtual void vp139();
-    virtual void vp140();
-    virtual void vp141();
-    virtual void vp142();
-    virtual void vp143();
-    virtual void vp144();
-    virtual void vp145();
-    virtual void vp146();
-    virtual void vp147();
-    virtual void vp148();
-    virtual void vp149();
-    virtual void vp150();
-    virtual void vp151();
-    virtual void vp152();
-    virtual void vp153();
-    virtual void vp154();
-    virtual void vp155();
-    virtual void vp156();
-    virtual void vp157();
-    virtual void vp158();
-    virtual void vp159();
-    virtual void vp160();
-    virtual void vp161();
-    virtual void vp162();
-    virtual void vp163();
-    virtual void vp164();
-    virtual void vp165();
-    virtual void vp166();
-    virtual void vp167();
-    virtual void vp168();
-    virtual void vp169();
-    virtual void vp170();
-    virtual void vp171();
-    virtual void vp172();
-    virtual void vp173();
-    virtual void vp174();
-    virtual void vp175();
-    virtual void vp176();
-    virtual void vp177();
-    virtual void vp178();
-    virtual void vp179();
-    virtual void vp180();
-    virtual void vp181();
-    virtual void vp182();
-    virtual void vp183();
-    virtual void vp184();
-    virtual void vp185();
-    virtual void vp186();
-    virtual void vp187();
-    virtual void vp188();
-    virtual void vp189();
-    virtual void vp190();
-    virtual void vp191();
-    virtual void vp192();
-    virtual void vp193();
-    virtual void vp194();
-    virtual void vp195();
-    virtual void vp196();
-    virtual void vp197();
-    virtual void vp198();
-    virtual void vp199();
-    virtual void vp200();
-    virtual void vp201();
-    virtual void vp202();
-    virtual void vp203();
-    virtual void vp204();
-    virtual void vp205();
-    virtual void vp206();
-    virtual void vp207();
-    virtual void vp208();
-    virtual void vp209();
-    virtual void vp210();
-    virtual void vp211();
-    virtual void vp212();
-    virtual void vp213();
-    virtual void vp214();
-    virtual void vp215();
-    virtual void vp216();
-    virtual void vp217();
-    virtual void vp218();
-    virtual void vp219();
-    virtual void vp220();
-    virtual void vp221();
-    virtual void vp222();
-    virtual void vp223();
-    virtual void vp224();
-    virtual void vp225();
-    virtual void vp226();
-    virtual void vp227();
-    virtual void vp228();
-    virtual void vp229();
-    virtual void vp230();
-    virtual void vp231();
-    virtual void vp232();
-    virtual void vp233();
-    virtual void vp234();
-    virtual void vp235();
-    virtual void vp236();
-    virtual void vp237();
-    virtual void vp238();
-    virtual void vp239();
-    virtual void vp240();
-    virtual void vp241();
-    virtual void vp242();
-    virtual void vp243();
-    virtual void vp244();
-    virtual void vp245();
-    virtual void vp246();
-    virtual void vp247();
-    virtual void vp248();
-    virtual void vp249();
-    virtual void vp250();
-    virtual void V3ec(int a, void* b);
-    virtual void vp252();
-    virtual void vp253();
-    virtual void vp254();
-    virtual void vp255();
-    virtual void vp256();
-    virtual void vp257();
-    virtual void vp258();
-    virtual void vp259();
-    virtual void vp260();
-    virtual void vp261();
-    virtual void vp262();
-    virtual void vp263();
-    virtual void vp264();
-    virtual void vp265();
-    virtual void vp266();
-    virtual void vp267();
-    virtual void vp268();
-    virtual void vp269();
-    virtual void vp270();
-    virtual void vp271();
-    virtual void vp272();
-    virtual void vp273();
-    virtual void vp274();
-    virtual void vp275();
-    virtual void vp276();
-    virtual unsigned char V454();
-    virtual void vp278();
-    virtual void vp279();
-    virtual void vp280();
-    virtual void vp281();
-    virtual void vp282();
-    virtual void vp283();
-    virtual void vp284();
-    virtual void vp285();
-    virtual void vp286();
-    virtual void vp287();
-    virtual void vp288();
-    virtual void vp289();
-    virtual void vp290();
-    virtual void vp291();
-    virtual void vp292();
-    virtual void vp293();
-    virtual void vp294();
-    virtual void vp295();
-    virtual void vp296();
-    virtual void vp297();
-    virtual void vp298();
-    virtual void vp299();
-    virtual void vp300();
-    virtual void vp301();
-    virtual void vp302();
-    virtual void vp303();
-    virtual void vp304();
-    virtual void vp305();
-    virtual void vp306();
-    virtual void vp307();
-    virtual void vp308();
-    virtual void vp309();
-    virtual void vp310();
-    virtual void V4dc(void* a, void* b);
-    virtual void vp312();
-    virtual void vp313();
-    virtual void vp314();
-    virtual void vp315();
-    virtual void vp316();
-    virtual void vp317();
-    virtual void vp318();
-    virtual void vp319();
-    virtual void vp320();
-    virtual void vp321();
-    virtual void vp322();
-    virtual void vp323();
-    virtual void vp324();
-    virtual void vp325();
-    virtual void vp326();
-    virtual void vp327();
-    virtual void vp328();
-    virtual void vp329();
-    virtual void vp330();
-    virtual void vp331();
-    virtual void vp332();
-    virtual void vp333();
-    virtual void vp334();
-    virtual void vp335();
-    virtual void vp336();
-    virtual void vp337();
-    virtual void vp338();
-    virtual void vp339();
-    virtual void vp340();
-    virtual void vp341();
-    virtual void vp342();
-    virtual void vp343();
-    virtual void vp344();
-    virtual void vp345();
-    virtual void vp346();
-    virtual void vp347();
-    virtual void vp348();
-    virtual void vp349();
-    virtual void vp350();
-    virtual void vp351();
-    virtual void vp352();
-    virtual void vp353();
-    virtual void vp354();
-    virtual void vp355();
-    virtual void vp356();
-    virtual void vp357();
-    virtual void vp358();
-    virtual void vp359();
-    virtual void vp360();
-    virtual void vp361();
-    virtual void vp362();
-    virtual void vp363();
-    virtual void vp364();
-    virtual void vp365();
-    virtual void vp366();
-    virtual void vp367();
-    virtual void vp368();
-    virtual void vp369();
-    virtual void vp370();
-    virtual void vp371();
-    virtual void vp372();
-    virtual void vp373();
-    virtual void vp374();
-    virtual void vp375();
-    virtual void vp376();
-    virtual void vp377();
-    virtual void vp378();
-    virtual void vp379();
-    virtual void vp380();
-    virtual void vp381();
-    virtual void vp382();
-    virtual void vp383();
-    virtual void vp384();
-    virtual void vp385();
-    virtual void vp386();
-    virtual void vp387();
-    virtual void vp388();
-    virtual void vp389();
-    virtual void vp390();
-    virtual void V61c();
-};
-struct Actor
-{
-    virtual void vp0();
-    virtual void vp1();
-    virtual void vp2();
-    virtual void vp3();
-    virtual void vp4();
-    virtual void vp5();
-    virtual void vp6();
-    virtual void vp7();
-    virtual void vp8();
-    virtual void vp9();
-    virtual void vp10();
-    virtual void vp11();
-    virtual void vp12();
-    virtual void vp13();
-    virtual void vp14();
-    virtual void vp15();
-    virtual void vp16();
-    virtual void vp17();
-    virtual void vp18();
-    virtual void vp19();
-    virtual void vp20();
-    virtual void vp21();
-    virtual void vp22();
-    virtual void vp23();
-    virtual void vp24();
-    virtual void vp25();
-    virtual void vp26();
-    virtual void vp27();
-    virtual void vp28();
-    virtual void vp29();
-    virtual void vp30();
-    virtual void vp31();
-    virtual void vp32();
-    virtual void vp33();
-    virtual void vp34();
-    virtual void vp35();
-    virtual void vp36();
-    virtual void vp37();
-    virtual void vp38();
-    virtual void vp39();
-    virtual void vp40();
-    virtual void vp41();
-    virtual void vp42();
-    virtual void vp43();
-    virtual void vp44();
-    virtual void vp45();
-    virtual void vp46();
-    virtual void vp47();
-    virtual void vp48();
-    virtual void vp49();
-    virtual void vp50();
-    virtual void vp51();
-    virtual void vp52();
-    virtual void vp53();
-    virtual void vp54();
-    virtual void vp55();
-    virtual void vp56();
-    virtual void vp57();
-    virtual void vp58();
-    virtual void vp59();
-    virtual void vp60();
-    virtual void vp61();
-    virtual void vp62();
-    virtual void vp63();
-    virtual void vp64();
-    virtual void vp65();
-    virtual void vp66();
-    virtual void vp67();
-    virtual void vp68();
-    virtual void vp69();
-    virtual void vp70();
-    virtual void vp71();
-    virtual void vp72();
-    virtual void vp73();
-    virtual void vp74();
-    virtual void vp75();
-    virtual void vp76();
-    virtual void vp77();
-    virtual void vp78();
-    virtual void vp79();
-    virtual void vp80();
-    virtual void vp81();
-    virtual void vp82();
-    virtual void vp83();
-    virtual void vp84();
-    virtual void vp85();
-    virtual void vp86();
-    virtual void vp87();
-    virtual void vp88();
-    virtual void vp89();
-    virtual void vp90();
-    virtual void vp91();
-    virtual void vp92();
-    virtual void vp93();
-    virtual void vp94();
-    virtual void vp95();
-    virtual void vp96();
-    virtual void vp97();
-    virtual void vp98();
-    virtual void vp99();
-    virtual void vp100();
-    virtual void vp101();
-    virtual void vp102();
-    virtual void vp103();
-    virtual void vp104();
-    virtual void vp105();
-    virtual void vp106();
-    virtual void vp107();
-    virtual void vp108();
-    virtual void vp109();
-    virtual void vp110();
-    virtual void vp111();
-    virtual void vp112();
-    virtual void vp113();
-    virtual void vp114();
-    virtual void vp115();
-    virtual void vp116();
-    virtual void vp117();
-    virtual void vp118();
-    virtual void vp119();
-    virtual void vp120();
-    virtual void vp121();
-    virtual void* V1e8();
-    virtual void vp123();
-    virtual void vp124();
-    virtual void vp125();
-    virtual void vp126();
-    virtual void vp127();
-    virtual void vp128();
-    virtual void vp129();
-    virtual void vp130();
-    virtual void vp131();
-    virtual void vp132();
-    virtual void vp133();
-    virtual void vp134();
-    virtual void vp135();
-    virtual void vp136();
-    virtual void vp137();
-    virtual void vp138();
-    virtual unsigned char V22c(int a);
-    virtual void vp140();
-    virtual void vp141();
-    virtual void vp142();
-    virtual void vp143();
-    virtual void vp144();
-    virtual void vp145();
-    virtual void vp146();
-    virtual void vp147();
-    virtual void vp148();
-    virtual void vp149();
-    virtual void vp150();
-    virtual void vp151();
-    virtual void vp152();
-    virtual void vp153();
-    virtual void vp154();
-    virtual void vp155();
-    virtual void vp156();
-    virtual void vp157();
-    virtual void vp158();
-    virtual void vp159();
-    virtual void vp160();
-    virtual void vp161();
-    virtual void vp162();
-    virtual void vp163();
-    virtual void vp164();
-    virtual void vp165();
-    virtual void vp166();
-    virtual void vp167();
-    virtual void vp168();
-    virtual void vp169();
-    virtual void vp170();
-    virtual void vp171();
-    virtual void vp172();
-    virtual void vp173();
-    virtual void vp174();
-    virtual void vp175();
-    virtual void vp176();
-    virtual void vp177();
-    virtual void vp178();
-    virtual void vp179();
-    virtual void vp180();
-    virtual void vp181();
-    virtual void vp182();
-    virtual void vp183();
-    virtual void vp184();
-    virtual void vp185();
-    virtual unsigned char V2e8();
-    BaseProcess* GetProcess();
-};
-struct BGSLoadFormBuffer
-{
-    virtual void vp0();
-    virtual void vp1();
-    virtual void vp2();
-    virtual Actor* V3();
-    void FUN_00864980(void* a, int b);
-    int FUN_00864a60();
-    unsigned int FUN_008648a0();
-    bool FUN_008648e0(int* a);
-    void AddToOffset(int a);
-};
-struct PlayerCharacter : Actor
-{
-    Animation* GetAnimation(bool a);
-    Biped* FUN_00950b00(bool a);
-};
 struct AnimPosition
 {
     float x;
@@ -3158,11 +2405,11 @@ void __thiscall AnimSelf::Load(BGSLoadFormBuffer* apBuffer)
 {
     if (m_08.FUN_00559450() == 0)
         return;
-    unsigned char actor2;
+    bool actor2;
     short groupA5;
     char slotX;
     char slot7;
-    Actor* owner6 = apBuffer->V3();
+    Actor* owner6 = apBuffer->GetActor();
     while (!m_104.IsEmpty())
     {
         void* item = *m_104.FUN_006815c0();
@@ -3170,27 +2417,27 @@ void __thiscall AnimSelf::Load(BGSLoadFormBuffer* apBuffer)
         FinishScriptRunLockIfActive(item);
         m_104.FUN_0063f7b0();
     }
-    owner6->GetProcess()->V4dc(owner6, this);
-    if (owner6->V22c(0) || owner6->V2e8())
+    owner6->GetProcess()->AssignAnimation(owner6, (Animation*)this);
+    if (owner6->HasHealth(0) || owner6->GetIsDying())
         FUN_004955c0(0x14, 0xe0, -1, 0.0f, -1);
     {
-        actor2 = owner6->GetProcess()->V454();
+        actor2 = owner6->GetProcess()->IsAdditionalActorFlagSet();
         FUN_004974a0();
         if (owner6 == (Actor*)g_thePlayer)
         {
             if ((Animation*)this == g_thePlayer->GetAnimation(1))
-                owner6->GetProcess()->V1cc(actor2, g_thePlayer->FUN_00950b00(1), this, g_thePlayer);
+                owner6->GetProcess()->PlayAnimation(actor2, (BipedAnim*)g_thePlayer->FUN_00950b00(1), (Animation*)this, g_thePlayer);
             else
-                g_thePlayer->GetProcess()->V1cc(actor2, g_thePlayer->FUN_00950b00(0), this, g_thePlayer);
+                g_thePlayer->GetProcess()->PlayAnimation(actor2, (BipedAnim*)g_thePlayer->FUN_00950b00(0), (Animation*)this, g_thePlayer);
         }
         else
         {
-            owner6->GetProcess()->V1cc(actor2, owner6->V1e8(), this, owner6);
+            owner6->GetProcess()->PlayAnimation(actor2, (BipedAnim*)owner6->GetValidBip01Names(), (Animation*)this, owner6);
         }
     }
-    owner6->GetProcess()->V1d8(owner6);
-    owner6->GetProcess()->V61c();
-    owner6->GetProcess()->V3ec(-1, 0);
+    owner6->GetProcess()->RunActorProcessing(owner6);
+    owner6->GetProcess()->ClearPostAnimActions();
+    owner6->GetProcess()->SetAnimAction((ProcessAnimationAction)-1, 0);
     {
         unsigned int bProc;
         for (bProc = 0; bProc < 8; bProc++)
@@ -3251,7 +2498,7 @@ void __thiscall AnimSelf::Load(BGSLoadFormBuffer* apBuffer)
         else
         {
             apBuffer->FUN_00864a60();
-            m_124 = new AnimIdleStub((TESIdleForm*)formA5, 7, 1, owner6, 1, (Animation*)0);
+            m_124 = new IdleAnimationConstruction((TESIdleForm*)formA5, 7, 1, owner6, 1, (Animation*)0);
             ((F497c10*)((PtrBox*)&m_124)->FUN_00559450())->LoadAnimationData(apBuffer, this);
         }
     }
@@ -3298,7 +2545,7 @@ void __thiscall AnimSelf::Load(BGSLoadFormBuffer* apBuffer)
         apBuffer->FUN_00864980(&groupA5, 2);
         apBuffer->FUN_00864980(&slotX, 1);
         if (slotX != -1 && m_e0[slotX] != 0)
-            owner6->GetProcess()->V3ec(groupA5, m_e0[slotX]);
+            owner6->GetProcess()->SetAnimAction((ProcessAnimationAction)groupA5, (BSAnimGroupSequence*)m_e0[slotX]);
     }
     {
         slot7 = -1;
@@ -3307,7 +2554,7 @@ void __thiscall AnimSelf::Load(BGSLoadFormBuffer* apBuffer)
         {
             if (slot7 != -1)
                 ((FUN_004970e0_shell*)((PtrBox*)&m_124)->FUN_00559450())->AssignGO(m_e0[slot7]);
-            if (((hkpTypedBroadPhaseHandle*)((PtrBox*)&m_124)->FUN_00559450())->FUN_0044ddc0() == 1)
+            if (((unsigned int (__thiscall*)(void*))FUN_0044ddc0)(((PtrBox*)&m_124)->FUN_00559450()) == 1)
             {
                 FUN_004974a0();
                 FUN_00498290((Animation*)this);
@@ -3395,62 +2642,16 @@ unsigned int FUN_00486df0_Map::HashString(const char* pcString)
 
 // Animation state SaveGame: header fields, the (form, value) list with a back-patched count,
 // the active sequence block with a back-patched size, then the 8 animation group slots.
-struct SaveBufN;
 struct GroupSeqN
 {
-    void SaveGame(SaveBufN* pBuffer, float fTime);
-};
-struct ProcN
-{
-    virtual void p000(), p001(), p002(), p003(), p004(), p005(), p006(), p007(), p008(), p009();
-    virtual void p010(), p011(), p012(), p013(), p014(), p015(), p016(), p017(), p018(), p019();
-    virtual void p020(), p021(), p022(), p023(), p024(), p025(), p026(), p027(), p028(), p029();
-    virtual void p030(), p031(), p032(), p033(), p034(), p035(), p036(), p037(), p038(), p039();
-    virtual void p040(), p041(), p042(), p043(), p044(), p045(), p046(), p047(), p048(), p049();
-    virtual void p050(), p051(), p052(), p053(), p054(), p055(), p056(), p057(), p058(), p059();
-    virtual void p060(), p061(), p062(), p063(), p064(), p065(), p066(), p067(), p068(), p069();
-    virtual void p070(), p071(), p072(), p073(), p074(), p075(), p076(), p077(), p078(), p079();
-    virtual void p080(), p081(), p082(), p083(), p084(), p085(), p086(), p087(), p088(), p089();
-    virtual void p090(), p091(), p092(), p093(), p094(), p095(), p096(), p097(), p098(), p099();
-    virtual void p100(), p101(), p102(), p103(), p104(), p105(), p106(), p107(), p108(), p109();
-    virtual void p110(), p111(), p112(), p113(), p114(), p115(), p116(), p117(), p118(), p119();
-    virtual void p120(), p121(), p122(), p123(), p124(), p125(), p126(), p127(), p128(), p129();
-    virtual void p130(), p131(), p132(), p133(), p134(), p135(), p136(), p137(), p138(), p139();
-    virtual void p140(), p141(), p142(), p143(), p144(), p145(), p146(), p147(), p148(), p149();
-    virtual void p150(), p151(), p152(), p153(), p154(), p155(), p156(), p157(), p158(), p159();
-    virtual void p160(), p161(), p162(), p163(), p164(), p165(), p166(), p167(), p168(), p169();
-    virtual void p170(), p171(), p172(), p173(), p174(), p175(), p176(), p177(), p178(), p179();
-    virtual void p180(), p181(), p182(), p183(), p184(), p185(), p186(), p187(), p188(), p189();
-    virtual void p190(), p191(), p192(), p193(), p194(), p195(), p196(), p197(), p198(), p199();
-    virtual void p200(), p201(), p202(), p203(), p204(), p205(), p206(), p207(), p208(), p209();
-    virtual void p210(), p211(), p212(), p213(), p214(), p215(), p216(), p217(), p218(), p219();
-    virtual void p220(), p221(), p222(), p223(), p224(), p225(), p226(), p227(), p228(), p229();
-    virtual void p230(), p231(), p232(), p233(), p234(), p235(), p236(), p237(), p238(), p239();
-    virtual void p240(), p241(), p242(), p243(), p244(), p245(), p246(), p247(), p248();
-    virtual unsigned short GetCurrentGroupID();
-    virtual GroupSeqN* GetCurrentSequence();
-};
-struct RefN
-{
-    ProcN* GetProcess();
-};
-struct SaveBufN
-{
-    virtual void b0();
-    virtual void b1();
-    virtual RefN* GetRef();
-    void SaveData(void* pData, unsigned int uiSize, int iFlags);
-    void SerializeFormData(void* pForm, int iFlags);
-    unsigned int GetPosition();
-    void WriteAt(unsigned int uiValue, unsigned int uiPosition);
-    unsigned int GetSize();
+    void SaveGame(BGSSaveFormBuffer* pBuffer, float fTime);
 };
 struct AnimDataN;
 struct SeqN
 {
     void* GetIdle();
     GroupSeqN* GetGroupSequence();
-    void SaveSequence(SaveBufN* pBuffer, AnimDataN* pData);
+    void SaveSequence(BGSSaveFormBuffer* pBuffer, AnimDataN* pData);
 };
 struct SeqPtrN
 {
@@ -3514,14 +2715,14 @@ struct AnimDataN
     int unk12c, unk130;
     ListN m_kList;
 
-    void SaveAnimData(SaveBufN* pBuffer);
+    void SaveAnimData(BGSSaveFormBuffer* pBuffer);
 };
 
 // Serializes animation data fields, the list of items, the current sequence and per-slot group state into the save buffer.
 // @fnv 0x0049ab40
-void AnimDataN::SaveAnimData(SaveBufN* pBuffer)
+void AnimDataN::SaveAnimData(BGSSaveFormBuffer* pBuffer)
 {
-    RefN* pObject = pBuffer->GetRef();
+    Actor* pObject = pBuffer->GetActor();
     pBuffer->SaveData(&m_10c, 4, 0);
     pBuffer->SaveData(&m_110, 4, 0);
     pBuffer->SaveData(&m_kPos, 12, 0);
@@ -3531,7 +2732,7 @@ void AnimDataN::SaveAnimData(SaveBufN* pBuffer)
     pBuffer->SaveData(&m_us122, 2, 0);
 
     int iCountTmp = 0;
-    unsigned int uiCountPos_ = pBuffer->GetPosition();
+    unsigned int uiCountPos_ = pBuffer->FUN_00865f20();
     ListN* pIter = &m_kList;
     while (pIter)
     {
@@ -3544,17 +2745,17 @@ void AnimDataN::SaveAnimData(SaveBufN* pBuffer)
         }
         pIter = pIter->GetNext();
     }
-    pBuffer->WriteAt(iCountTmp, uiCountPos_);
+    pBuffer->FUN_00865ff0(iCountTmp, uiCountPos_);
 
     SeqN* pSequence = m_spSeq128 ? m_spSeq128 : m_spSeq124;
     pBuffer->SerializeFormData(pSequence ? pSequence->GetIdle() : 0, 0);
     if (pSequence && pSequence->GetIdle())
     {
-        unsigned int uiPosition = pBuffer->GetPosition();
-        unsigned int uiStartSize = pBuffer->GetSize();
+        unsigned int uiPosition = pBuffer->FUN_00865f20();
+        unsigned int uiStartSize = pBuffer->FUN_0084e3a0();
         pSequence->SaveSequence(pBuffer, this);
-        unsigned int uiEnd = pBuffer->GetSize();
-        pBuffer->WriteAt(uiEnd - uiStartSize, uiPosition);
+        unsigned int uiEnd = pBuffer->FUN_0084e3a0();
+        pBuffer->FUN_00865ff0(uiEnd - uiStartSize, uiPosition);
     }
 
     GroupSeqN* pBlend = 0;
@@ -3572,8 +2773,8 @@ void AnimDataN::SaveAnimData(SaveBufN* pBuffer)
     pBuffer->SaveData(&cActiveMask, 1, 0);
 
     char cProcIdx = -1;
-    unsigned short usGroupID = pObject->GetProcess()->GetCurrentGroupID();
-    GroupSeqN* pCur2 = pObject->GetProcess()->GetCurrentSequence();
+    unsigned short usGroupID = pObject->GetProcess()->GetAnimAction();
+    GroupSeqN* pCur2 = (GroupSeqN*)pObject->GetProcess()->GetActorProcessTime();
     char cSeqSlot = -1;
     GroupSeqN* pMainSeq = pSequence ? pSequence->GetGroupSequence() : 0;
     for (unsigned int j = 0; j < 8; j++)
@@ -3608,11 +2809,6 @@ void AnimDataN::SaveAnimData(SaveBufN* pBuffer)
     pBuffer->SaveData(&cSeqSlot, 1, 0);
 }
 
-struct SaveGameBufferAA8
-{
-    void FUN_008579b0(void* pvData, unsigned int uiSize);
-};
-extern SaveGameBufferAA8* DAT_011de45c;
 struct ActorAnimDataAA8
 {
     unsigned short GetSerializedSize(Actor* pkActor);
@@ -3622,10 +2818,10 @@ struct ActorAnimDataAA8
 void __cdecl FUN_0049aa80(Actor* pkActor, ActorAnimDataAA8* pkAnimData)
 {
     unsigned short usAnimValue = 0;
-    if (pkAnimData && !pkActor->V22c(0))
+    if (pkAnimData && !pkActor->HasHealth(0))
         usAnimValue = pkAnimData->GetSerializedSize(pkActor);
-    DAT_011de45c->FUN_008579b0(&usAnimValue, 2);
-    if (pkAnimData && !pkActor->V22c(0))
+    g_TESSaveLoadGame->FUN_008579b0(&usAnimValue, 2u);
+    if (pkAnimData && !pkActor->HasHealth(0))
         pkAnimData->WriteToStream(pkActor);
 }
 
@@ -3688,22 +2884,10 @@ FUN_0049ec80::FUN_0049ec80()
     FUN_0049ee30(0);
 }
 
-class AutoMemContext
-{
-    int previous;
+#include "../../include/MEM_CONTEXT.h"
 
-  public:
-    AutoMemContext(MEM_CONTEXT, bool, const char*, int);
-    ~AutoMemContext();
-};
 extern const char DAT_0101e018[];
 extern const float DAT_01013ea4;
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3(float, float, float);
-};
 struct PointChain
 {
     virtual ~PointChain();
@@ -3777,48 +2961,49 @@ void __cdecl BuildWaterSurfaces(CellView* cell)
             int i3 = 0;
             while (i3 < (int)DAT_011c57ac->FUN_0044ddc0())
             {
-                NiPoint3 b = DAT_011c57ac->FUN_006a7af0(i3);
-                NiPoint3 a = DAT_011c57ac->FUN_006a7af0(i3 + 1);
-                if (AreVectorsEqual(b, chainX->GetLastEdge(), DAT_01013ea4) &&
-                    !AreVectorsEqual(a, chainX->FUN_006ced70(), DAT_01013ea4) &&
-                    !AreVectorsEqual(a, chainX->FUN_006a7af0(chainX->FUN_0044ddc0() - 2), DAT_01013ea4))
+                // Copy the point representation without invoking the shared copy constructor.
+                Point3N b = *reinterpret_cast<Point3N*>(&DAT_011c57ac->FUN_006a7af0(i3));
+                Point3N a = *reinterpret_cast<Point3N*>(&DAT_011c57ac->FUN_006a7af0(i3 + 1));
+                if (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->GetLastEdge(), DAT_01013ea4) &&
+                    !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->FUN_006ced70(), DAT_01013ea4) &&
+                    !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->FUN_006a7af0(chainX->FUN_0044ddc0() - 2), DAT_01013ea4))
                 {
-                    chainX->AddItem(a);
+                    chainX->AddItem(reinterpret_cast<const NiPoint3&>(a));
                     DAT_011c57ac->FUN_0049f3c0(i3, 2, true);
                     changed3 = true;
                     break;
                 }
-                else if (AreVectorsEqual(a, chainX->GetLastEdge(), DAT_01013ea4) &&
-                         !AreVectorsEqual(b, chainX->FUN_006ced70(), DAT_01013ea4) &&
-                         !AreVectorsEqual(b, chainX->FUN_006a7af0(chainX->FUN_0044ddc0() - 2), DAT_01013ea4))
+                else if (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->GetLastEdge(), DAT_01013ea4) &&
+                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->FUN_006ced70(), DAT_01013ea4) &&
+                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->FUN_006a7af0(chainX->FUN_0044ddc0() - 2), DAT_01013ea4))
                 {
-                    chainX->AddItem(b);
+                    chainX->AddItem(reinterpret_cast<const NiPoint3&>(b));
                     DAT_011c57ac->FUN_0049f3c0(i3, 2, true);
                     changed3 = true;
                     break;
                 }
-                else if (AreVectorsEqual(b, chainX->FUN_006ced70(), DAT_01013ea4) &&
-                         !AreVectorsEqual(a, chainX->GetLastEdge(), DAT_01013ea4) &&
-                         !AreVectorsEqual(a, chainX->FUN_006a7af0(1), DAT_01013ea4))
+                else if (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->FUN_006ced70(), DAT_01013ea4) &&
+                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->GetLastEdge(), DAT_01013ea4) &&
+                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->FUN_006a7af0(1), DAT_01013ea4))
                 {
-                    chainX->FUN_0049f270(0, a);
+                    chainX->FUN_0049f270(0, reinterpret_cast<const NiPoint3&>(a));
                     DAT_011c57ac->FUN_0049f3c0(i3, 2, true);
                     changed3 = true;
                     break;
                 }
-                else if (AreVectorsEqual(a, chainX->FUN_006ced70(), DAT_01013ea4) &&
-                         !AreVectorsEqual(b, chainX->GetLastEdge(), DAT_01013ea4) &&
-                         !AreVectorsEqual(b, chainX->FUN_006a7af0(1), DAT_01013ea4))
+                else if (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->FUN_006ced70(), DAT_01013ea4) &&
+                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->GetLastEdge(), DAT_01013ea4) &&
+                         !AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->FUN_006a7af0(1), DAT_01013ea4))
                 {
-                    chainX->FUN_0049f270(0, b);
+                    chainX->FUN_0049f270(0, reinterpret_cast<const NiPoint3&>(b));
                     DAT_011c57ac->FUN_0049f3c0(i3, 2, true);
                     changed3 = true;
                     break;
                 }
-                else if ((AreVectorsEqual(b, chainX->GetLastEdge(), DAT_01013ea4) &&
-                          AreVectorsEqual(a, chainX->FUN_006ced70(), DAT_01013ea4)) ||
-                         (AreVectorsEqual(b, chainX->FUN_006ced70(), DAT_01013ea4) &&
-                          AreVectorsEqual(a, chainX->GetLastEdge(), DAT_01013ea4)))
+                else if ((AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->GetLastEdge(), DAT_01013ea4) &&
+                          AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->FUN_006ced70(), DAT_01013ea4)) ||
+                         (AreVectorsEqual(reinterpret_cast<const NiPoint3&>(b), chainX->FUN_006ced70(), DAT_01013ea4) &&
+                          AreVectorsEqual(reinterpret_cast<const NiPoint3&>(a), chainX->GetLastEdge(), DAT_01013ea4)))
                 {
                     closed2 = true;
                     i3 += 2;
@@ -3888,46 +3073,17 @@ void __cdecl BuildWaterSurfaces(CellView* cell)
 extern "C" void* __cdecl _alloca(unsigned int);
 void* __memcpy(void*, const void*, unsigned int);
 void __cdecl BSEndian(unsigned char*, EndianSizeTag<1>);
-struct TESFile
-{
-    unsigned int GetChunkSize();
-    bool GetChunkData(void*, unsigned int);
-    bool GetChunkData();
-};
-class TESModelList
-{
-  public:
-    virtual ~TESModelList();
-};
 
-struct TgtOps
-{
-    void* GetPosition();
-};
+// The shared model-list API has no declaration for this existing list accessor.
+extern "C" void* __cdecl FUN_00717e50();
 struct ListNodeStandIn
 {
     void** FUN_006815c0();
     ListNodeStandIn* FUN_00726070();
 };
-struct FUN_00488fd0
-{
-    void* m0;
-    void* m4;
-    FUN_00488fd0();
-};
-struct S00489670
-{
-    void LoadTextureArchiveEntries(char*, unsigned char, TESForm*, void*);
-};
-struct FileEntryListCollection
-{
-    unsigned int m_uiCount;
-    FileEntryList** m_ppArray;
-    void ClearAndDeleteArray();
-    void LoadFromTESFile(TESModelList* pOwner, TESFile* pFile);
-};
+extern "C" void __cdecl FUN_00489670();
 
-// Reads a chunk from pFile, allocates m_ppArray, and loads texture archive entries for each FileEntryList from pOwner's model list.
+// Reads a chunk from pFile, allocates m_ppElementArray, and loads texture archive entries for each FileEntryList from pOwner's model list.
 // @fnv 0x0048a0d0
 void FileEntryListCollection::LoadFromTESFile(TESModelList* pOwner, TESFile* pFile)
 {
@@ -3946,9 +3102,9 @@ void FileEntryListCollection::LoadFromTESFile(TESModelList* pOwner, TESFile* pFi
                 if (pFile->GetChunkData())
                     BSEndian((unsigned char*)this, EndianSizeTag<1>());
                 uiElapsedMilliseconds = 4;
-                m_ppArray = new FileEntryList*[m_uiCount];
-                pNode = (ListNodeStandIn*)((TgtOps*)pOwner)->GetPosition();
-                for (unsigned int i = 0; i < m_uiCount; i++)
+                m_ppElementArray = new FileEntryList*[m_uiFileEntryCount];
+                pNode = (ListNodeStandIn*)((void* (__thiscall*)(TESModelList*))FUN_00717e50)(pOwner);
+                for (unsigned int i = 0; i < m_uiFileEntryCount; i++)
                 {
                     unsigned char ucEntryCount;
                     {
@@ -3956,12 +3112,12 @@ void FileEntryListCollection::LoadFromTESFile(TESModelList* pOwner, TESFile* pFi
                         if (pNode)
                             m_kModelObjectsItem = *pNode->FUN_006815c0();
                         pNode = pNode->FUN_00726070();
-                        m_ppArray[i] = (FileEntryList*)new FUN_00488fd0;
+                        m_ppElementArray[i] = new FileEntryList;
                         ucEntryCount = pBuffer[uiElapsedMilliseconds];
                         uiElapsedMilliseconds++;
-                        ((S00489670*)m_ppArray[i])
-                            ->LoadTextureArchiveEntries(pBuffer + uiElapsedMilliseconds, ucEntryCount,
-                                                        dynamic_cast<TESForm*>(pOwner), m_kModelObjectsItem);
+                        ((void (__thiscall*)(FileEntryList*, char*, unsigned char, TESForm*, void*))FUN_00489670)(
+                            m_ppElementArray[i], pBuffer + uiElapsedMilliseconds, ucEntryCount,
+                            dynamic_cast<TESForm*>(pOwner), m_kModelObjectsItem);
                         uiElapsedMilliseconds += ucEntryCount * 0x18;
                     }
                 }
@@ -4044,7 +3200,7 @@ struct FNV_Member14
     int unk00;
     int unk04;
     int unk08;
-    void RemoveAll();
+    void FUN_004ed900();
     ~FNV_Member14();
 };
 
@@ -4061,14 +3217,14 @@ struct FUN_0049fe20_Object : FNV_Handle
 extern FNV_Handle g_011c58e0;
 void __cdecl FUN_00622bc0();
 
-// Calls FUN_00622bc0, sets g_011c58e0 to 0, calls FUN_004a4650 on m_08 and RemoveAll on m_14, then sets m_20 and m_24 to 0.
+// Calls FUN_00622bc0, sets g_011c58e0 to 0, calls FUN_004a4650 on m_08 and FUN_004ed900 on m_14, then sets m_20 and m_24 to 0.
 // @fnv 0x0049fe20
 FUN_0049fe20_Object::~FUN_0049fe20_Object()
 {
     FUN_00622bc0();
     g_011c58e0 = 0;
     m_08.FUN_004a4650();
-    m_14.RemoveAll();
+    m_14.FUN_004ed900();
     m_20 = 0;
     m_24 = 0;
 }
@@ -4112,61 +3268,7 @@ FUN_00486ca0::~FUN_00486ca0()
 }
 }  // namespace fnv_00486ca0
 
-struct Caller300
-{
-    const char* __thiscall FUN_0047a300();
-};
-
-struct FUN_00481280_class
-{
-    const char* __thiscall FUN_00481280(int);
-};
-
-struct BipedMessageIconView
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    Caller300 messageIcon;
-};
+extern "C" const char* __cdecl FUN_00481280();
 
 // Returns the message icon string for a biped model form, optionally selecting the variant matching the sex of the given reference's owner.
 // @fnv 0x00480f80
@@ -4179,7 +3281,7 @@ const char* __cdecl FUN_00480f80(TESForm* form, TESObjectREFR* ref)
 
     if (ref == 0)
     {
-        return reinterpret_cast<BipedMessageIconView*>(pOwner)->messageIcon.FUN_0047a300();
+        return pOwner->messageIcon[0].GetMessageIconTextureName();
     }
 
     TESForm* pBipedModelForm = ref->GetOwner();
@@ -4188,7 +3290,7 @@ const char* __cdecl FUN_00480f80(TESForm* form, TESObjectREFR* ref)
     if (pBipedModelForm != 0 && pBipedModelForm->FNV_GetFormType() == 0x2a)
         nSex = reinterpret_cast<TESActorBase*>(pBipedModelForm)->GetSex();
 
-    return reinterpret_cast<FUN_00481280_class*>(pOwner)->FUN_00481280(nSex);
+    return ((const char* (__thiscall*)(TESBipedModelForm*, int))FUN_00481280)(pOwner, nSex);
 }
 
 void __cdecl operator delete(void*);

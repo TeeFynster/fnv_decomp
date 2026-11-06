@@ -1,8 +1,6 @@
 
-#include "nipixelformat_decls.h"
-
 // @fnv 0x00a76540
-bool NiPixelFormat::operator==(const NiPixelFormat& other) const
+bool NiPixelFormat::operator==(const NiPixelFormat& other) const throw()
 {
     if (other.m_eFormat != m_eFormat ||
         other.m_uiObjectFlags != m_uiObjectFlags ||

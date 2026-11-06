@@ -1,34 +1,17 @@
-// gamebryo2.2/corelibs/nianimation/nicolorinterpolator_decls.h: declares AnimationKey, NiMemObject, NiColorData, NiColorInterpolator
+// gamebryo2.2/corelibs/nianimation/nicolorinterpolator_decls.h: declares NiAnimationKey, NiMemObject, NiColorData, NiColorInterpolator
 #ifndef FNV_NICOLORINTERPOLATOR_DECLS_H
 #define FNV_NICOLORINTERPOLATOR_DECLS_H
 
-class AnimationKey
-{
-  public:
-    enum KeyType
-    {
-        NOINTERP,
-        LINKEY,
-        BEZKEY,
-        TCBKEY,
-        EULERKEY,
-        STEPKEY
-    };
-};
+#include "../../../../include/NiAnimationKey.h"
 class ColorAnimationKey;
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
+#include "../../../../include/NiMemObject.h"
 class NiColorData : public NiMemObject
 {
     char storage[24];
 
   public:
     NiColorData();
-    void SetColorKeys(ColorAnimationKey*, unsigned int, AnimationKey::KeyType);
+    void SetColorKeys(ColorAnimationKey*, unsigned int, NiAnimationKey::KeyType);
 };
 template <class T> class NiPointer
 {
@@ -45,6 +28,6 @@ class NiColorInterpolator
     unsigned int m_uiLastKeyIndex;
 
   public:
-    void SetAnimationKeys(ColorAnimationKey*, unsigned int, AnimationKey::KeyType);
+    void SetAnimationKeys(ColorAnimationKey*, unsigned int, NiAnimationKey::KeyType);
 };
 #endif

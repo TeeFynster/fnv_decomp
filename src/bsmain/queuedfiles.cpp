@@ -1,6 +1,8 @@
 // bsmain/queuedfiles.cpp: QueuedFile, ObjectC3 (10 functions)
 
-#include "queuedfiles.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/QueuedFileEntry.h"
+#include "../../include/QueuedChildren.h"
 
 // @fnv 0x0043bde0
 void QueuedFile::HandleChildCompletion(QueuedFile* apChild)
@@ -18,40 +20,12 @@ void QueuedFile::SetParent(QueuedFile* apParent)
         ((QueuedFile*)m_pParent)->AddChild(this);
 }
 
-struct BSFile;
-struct BSFileEntry;
-struct QueuedFileEntry : public QueuedFile
-{
-    virtual void __vslot_0();
-    virtual unsigned char GetFileIndex();
-    virtual void GenerateKey();
-    char* GetFileName();
-    void SetFileName(char*);
-    BSFileEntry* GetFileEntry();
-    void SetFileEntry(BSFileEntry*);
-    void LookupFileEntry(int);
-    BSFile* GetFile(int, int);
-    void GetLookupFileName(int, char*);
-    bool GetDescription(char*, unsigned int, char*);
-    char* pFileName;
-    BSFileEntry* m_pFileEntry;
-};
-typedef char _sizecheck_QueuedFileEntry[sizeof(QueuedFileEntry) == 48 ? 1 : -1];
-struct FUN_00c3cee0_shell : public QueuedFileEntry
-{
-    void FUN_00c3cee0(char*);
-};
-
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
 extern MemoryManager g_memoryManager;
 unsigned int __cdecl _strlen(const char*);
 int __cdecl _strcpy_s(char*, unsigned int, const char*);
 // Copies apName into a newly allocated buffer stored in pFileName, using strlen(apName)+1 bytes.
 // @fnv 0x00c3cee0
-void FUN_00c3cee0_shell::FUN_00c3cee0(char* apName)
+void QueuedFileEntry::FUN_00c3cee0(const char* apName)
 {
     unsigned int uiLen;
     if (apName)
@@ -67,25 +41,6 @@ void FUN_00c3cee0_shell::FUN_00c3cee0(char* apName)
 }
 
 namespace fnv_00c3cf60 {
-struct BSFile;
-struct BSFileEntry;
-struct QueuedFileEntry : public QueuedFile
-{
-    virtual void __vslot_0();
-    virtual unsigned char GetFileIndex();
-    virtual void GenerateKey();
-    char* GetFileName();
-    void SetFileName(char*);
-    BSFileEntry* GetFileEntry();
-    void SetFileEntry(BSFileEntry*);
-    void LookupFileEntry(int);
-    BSFile* GetFile(int, int);
-    void GetLookupFileName(int, char*);
-    bool GetDescription(char*, unsigned int, char*);
-    char* pFileName;
-    BSFileEntry* m_pFileEntry;
-};
-typedef char _sizecheck_QueuedFileEntry[sizeof(QueuedFileEntry) == 48 ? 1 : -1];
 struct FileNameHash
 {
     void GetAll(unsigned char*, unsigned char*, unsigned char*, unsigned char*, unsigned int*);
@@ -110,19 +65,17 @@ struct FileNameHash
     unsigned int uiCRC;
 };
 typedef char _sizecheck_BSHash[sizeof(FileNameHash) == 8 ? 1 : -1];
-struct FUN_00c3cf60_shell : public QueuedFileEntry
-{
-    void LookupFileEntryByArchive(int);
-};
-
 struct ArchiveManager
 {
     static BSFileEntry* __cdecl FindFileEntry(int, FileNameHash&, FileNameHash&, const char*);
 };
+}  // namespace fnv_00c3cf60
+
 // Builds the lookup file name for aeArchive, hashes it into directory and file hashes, queries ArchiveManager and stores the resulting BSFileEntry.
 // @fnv 0x00c3cf60
-void FUN_00c3cf60_shell::LookupFileEntryByArchive(int aeArchive)
+void QueuedFileEntry::LookupFileEntryByArchive(int aeArchive)
 {
+    using namespace fnv_00c3cf60;
     if (pFileName)
     {
         char acName[0x104];
@@ -135,40 +88,14 @@ void FUN_00c3cf60_shell::LookupFileEntryByArchive(int aeArchive)
         SetFileEntry(pEntry);
     }
 }
-}  // namespace fnv_00c3cf60
-
-extern int DAT_010c1554;
-struct P09QFBase
-{
-    void QueuedFile(int);
-};
-struct P09QFE
-{
-    P09QFE* InitQueuedFile(int aePriority);
-};
-// Calls QueuedFile with the priority, sets the vtable to DAT_010c1554, clears fields at offsets 0x28 and 0x2c, and returns this.
 // @fnv 0x00c3ce60
-P09QFE* P09QFE::InitQueuedFile(int aePriority)
+QueuedFileEntry::QueuedFileEntry(int aePriority) : QueuedFile(aePriority)
 {
-    ((P09QFBase*)this)->QueuedFile(aePriority);
-    *(int**)this = &DAT_010c1554;
-    *(char**)((char*)this + 0x28) = 0;
-    *(void**)((char*)this + 0x2c) = 0;
-    return this;
+    pFileName = 0;
+    m_pFileEntry = 0;
 }
 
-struct FUN_0063fa10
-{
-    virtual ~FUN_0063fa10();
-    void FUN_00c3cee0(const char* name);
-    void LookupFileEntryByArchive(int n);
-};
-struct QBase : FUN_0063fa10
-{
-    int pad[11];
-    QBase(int);
-};
-struct FUN_00905ba0 : QBase
+struct FUN_00905ba0 : QueuedFileEntry
 {
     int f30;
     int f34;
@@ -176,7 +103,7 @@ struct FUN_00905ba0 : QBase
     FUN_00905ba0(int a, int b, const char* name);
 };
 // @fnv 0x00905ba0
-FUN_00905ba0::FUN_00905ba0(int a, int b, const char* name) : QBase(0)
+FUN_00905ba0::FUN_00905ba0(int a, int b, const char* name) : QueuedFileEntry(0)
 {
     f30 = b;
     f34 = 0;
@@ -185,31 +112,18 @@ FUN_00905ba0::FUN_00905ba0(int a, int b, const char* name) : QBase(0)
     LookupFileEntryByArchive(4);
 }
 
-namespace fnv_00c3cea0 {
-struct MemoryManager
+static __forceinline void DeallocateFileName(void* pointer) throw()
 {
-    void Deallocate(void*) throw();
-};
-extern MemoryManager g_memoryManager;
-struct FaceGenPaletteBase
-{
-    int pad[9];
-    virtual ~FaceGenPaletteBase();
-};
-struct FUN_00c3cea0 : FaceGenPaletteBase
-{
-    char* pFileName;
-    virtual ~FUN_00c3cea0();
-};
-// Destructor that frees the palette's file name buffer through the memory manager.
+    g_memoryManager.Deallocate(pointer);
+}
+
+// Frees the file name buffer through the memory manager.
 // @fnv 0x00c3cea0
-FUN_00c3cea0::~FUN_00c3cea0()
+QueuedFileEntry::~QueuedFileEntry()
 {
     char* name = pFileName;
-    g_memoryManager.Deallocate(name);
+    DeallocateFileName(name);
 }
-}  // namespace fnv_00c3cea0
-
 #include <windows.h>
 struct PoolHolder
 {

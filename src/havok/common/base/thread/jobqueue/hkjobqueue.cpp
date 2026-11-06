@@ -1,6 +1,10 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/common/base/thread/jobqueue/hkjobqueue.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/thread/jobqueue/hkjobqueue.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkMonitorStream.h"
 
 struct FUNObj
 {
@@ -319,20 +323,7 @@ struct S_00d056a0_Allocator
     virtual void ReleaseBlock(void* p, int numBytes);
 };
 
-struct S_00d056a0_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00d056a0_Allocator* m_pStreamAllocator;
-    S_00d056a0_Allocator* heap()
-    {
-        return m_pStreamAllocator;
-    }
-};
-
-S_00d056a0_Router* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 
 struct S_00d056a0_Elem
 {
@@ -356,7 +347,7 @@ void S_00d056a0::FUN_00d056a0()
     if (n)
     {
         S_00d056a0_Elem* pData = m_data;
-        FUN_00c85750()->heap()->ReleaseBlock(pData, n * sizeof(S_00d056a0_Elem));
+        reinterpret_cast<S_00d056a0_Allocator*>(&FUN_00c85750()->heap())->ReleaseBlock(pData, n * sizeof(S_00d056a0_Elem));
     }
 }
 
@@ -1080,24 +1071,8 @@ void __cdecl InitHookTable(TargetObj* apTarget)
     FUN_00da3480(apTarget);
 }
 
-struct D04A20Allocator;
-
-struct D04A20MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    D04A20Allocator* m_pStreamAllocator;
-
-    D04A20Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
 namespace fnvc_adapt {
-extern "C" D04A20MemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 }
 void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
 
@@ -1108,8 +1083,8 @@ struct D04A20Operation
     int m_data;
 };
 
-struct D04A20OperationArray
-{
+struct D04A20OperationArrayLocalForm
+{ // local form of hkArray: 0x00d04a20 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     D04A20Operation* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -1121,7 +1096,7 @@ struct D04A20OperationArray
 
     D04A20Operation& AllocatePair()
     {
-        D04A20Allocator& alloc = fnvc_adapt::FUN_00c85750().heap();
+        hkMemoryAllocator& alloc = *(&fnvc_adapt::FUN_00c85750().heap());
         if (m_iElementCount == getCapacity())
             ResizeAudioStream(&alloc, this, sizeof(D04A20Operation));
         return m_data[m_iElementCount++];
@@ -1234,7 +1209,7 @@ struct D04A20World
     int unk194;
     int unk198;
     int unk19C;
-    D04A20OperationArray m_pPendingOperations;
+    D04A20OperationArrayLocalForm m_pPendingOperations;
 
     void processPendingOperations();
     void QueueOperation(void* object, bool flag, int data);
@@ -1303,7 +1278,7 @@ struct PoolTable
 {
     static void* operator new(unsigned int nbytes) throw()
     {
-        return FUN_00c85750()->heap()->AllocateMemoryBlock(nbytes);
+        return reinterpret_cast<S_00d056a0_Allocator*>(&FUN_00c85750()->heap())->AllocateMemoryBlock(nbytes);
     }
 
     unsigned short m_counts[12];
@@ -1452,12 +1427,12 @@ int __cdecl FUN_00d04550(void* context, void* argument, void* item)
 
 template <typename T> inline T* hkAllocateChunk(int n)
 {
-    return static_cast<T*>(FUN_00c85750()->heap()->AllocateMemoryBlock(n * sizeof(T)));
+    return static_cast<T*>(reinterpret_cast<S_00d056a0_Allocator*>(&FUN_00c85750()->heap())->AllocateMemoryBlock(n * sizeof(T)));
 }
 
 template <typename T> inline void hkDeallocateChunk(T* p, int n)
 {
-    FUN_00c85750()->heap()->ReleaseBlock(p, n * sizeof(T));
+    reinterpret_cast<S_00d056a0_Allocator*>(&FUN_00c85750()->heap())->ReleaseBlock(p, n * sizeof(T));
 }
 
 struct hkQueue128
@@ -1532,14 +1507,6 @@ struct LunaOwner : Owner
     int ProcessCallback(int param_2, int param_3, int param_4);
 };
 
-struct LunaTrace
-{
-    int unk00;
-    unsigned int* current;
-    int unk08;
-    unsigned int* end;
-};
-
 struct LunaCallbackItem
 {
     int unk00;
@@ -1560,16 +1527,16 @@ int LunaOwner::ProcessCallback(int param_2, int param_3, int param_4)
     };
     Phase212 phase;
     {
-        LunaTrace* trace = (LunaTrace*)TlsGetValue(_DAT_0126835c);
-        unsigned int* cursor = trace->current;
-        if (cursor < trace->end)
+        hkMonitorStream* trace = (hkMonitorStream*)TlsGetValue(_DAT_0126835c);
+        unsigned int* cursor = (unsigned int*)trace->m_end.m_storage;
+        if (cursor < (unsigned int*)trace->m_capacityMinus16.m_storage)
         {
             *cursor = (unsigned int)str_010ccd90;
             _ReadWriteBarrier();
             phase.tick = static_cast<unsigned int>(__rdtsc());
             cursor[1] = phase.tick;
             cursor += 3;
-            trace->current = cursor;
+            trace->m_end.m_storage = (char*)cursor;
         }
     }
 
@@ -1634,16 +1601,16 @@ int LunaOwner::ProcessCallback(int param_2, int param_3, int param_4)
     }
 
     {
-        LunaTrace* trace = (LunaTrace*)TlsGetValue(_DAT_0126835c);
-        unsigned int* cursor = trace->current;
-        if (cursor < trace->end)
+        hkMonitorStream* trace = (hkMonitorStream*)TlsGetValue(_DAT_0126835c);
+        unsigned int* cursor = (unsigned int*)trace->m_end.m_storage;
+        if (cursor < (unsigned int*)trace->m_capacityMinus16.m_storage)
         {
             *cursor = (unsigned int)str_010c41f8;
             _ReadWriteBarrier();
             volatile unsigned int stamp = static_cast<unsigned int>(__rdtsc());
             cursor[1] = (unsigned int)stamp;
             cursor += 3;
-            trace->current = cursor;
+            trace->m_end.m_storage = (char*)cursor;
         }
     }
 
@@ -1660,20 +1627,7 @@ struct TimerEntry
     int m_auiShapeKeys;
 };
 
-struct MonitorStream
-{
-    int unk00;
-    char* m_cur;
-    int unk08;
-    char* m_kRayEnd;
-};
-
-struct ArrayOfJobs
-{
-    void** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+typedef hkArrayBase<void*> ArrayOfJobs;
 
 struct FUN_00d04bd0_cls : Owner
 {
@@ -1686,15 +1640,15 @@ struct FUN_00d04bd0_cls : Owner
 // @fnv 0x00d04bd0
 void FUN_00d04bd0_cls::AddJobBatch(ArrayOfJobs* jobs, int priority)
 {
-    MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-    TimerEntry* cur = (TimerEntry*)stream->m_cur;
-    if ((char*)cur < stream->m_kRayEnd)
+    hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+    if ((char*)cur < stream->m_capacityMinus16.m_storage)
     {
         cur->m_name = "TtAddJobBatch";
         _ReadWriteBarrier();
         volatile unsigned int tsc = (unsigned int)__rdtsc();
         cur->m_uiCommandId = tsc;
-        stream->m_cur = (char*)(cur + 1);
+        stream->m_end.m_storage = (char*)(cur + 1);
     }
 
     RequestContext requestContext;
@@ -1758,15 +1712,15 @@ void FUN_00d04bd0_cls::AddJobBatch(ArrayOfJobs* jobs, int priority)
 
     this->FUN_00d04420(reg);
 
-    MonitorStream* streamEnd = (MonitorStream*)TlsGetValue(DAT_0126835c);
-    TimerEntry* curEnd = (TimerEntry*)streamEnd->m_cur;
-    if ((char*)curEnd < streamEnd->m_kRayEnd)
+    hkMonitorStream* streamEnd = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    TimerEntry* curEnd = (TimerEntry*)streamEnd->m_end.m_storage;
+    if ((char*)curEnd < streamEnd->m_capacityMinus16.m_storage)
     {
         curEnd->m_name = "Et";
         _ReadWriteBarrier();
         volatile unsigned int tscEnd = (unsigned int)__rdtsc();
         curEnd->m_uiCommandId = tscEnd;
-        streamEnd->m_cur = (char*)(curEnd + 1);
+        streamEnd->m_end.m_storage = (char*)(curEnd + 1);
     }
 }
 
@@ -1877,15 +1831,15 @@ int S_00d05020_JobQueue::FUN_00d05020(int aiJobType, int priority, S_00d05020_Jo
 {
     volatile unsigned int tick;
     {
-        MonitorStream* s = (MonitorStream*)TlsGetValue(hkMonitorStreamTls);
-        if (s->m_cur < s->m_kRayEnd)
+        hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(hkMonitorStreamTls);
+        if (s->m_end.m_storage < s->m_capacityMinus16.m_storage)
         {
-            TimerEntry* h = (TimerEntry*)s->m_cur;
+            TimerEntry* h = (TimerEntry*)s->m_end.m_storage;
             h->m_name = "TtGetNextJob";
             _ReadWriteBarrier();
             tick = (unsigned int)__rdtsc();
             h->m_uiCommandId = tick;
-            s->m_cur = (char*)(h + 1);
+            s->m_end.m_storage = (char*)(h + 1);
         }
     }
     RequestContext dynamicDataStorage;
@@ -1909,15 +1863,15 @@ int S_00d05020_JobQueue::FUN_00d05020(int aiJobType, int priority, S_00d05020_Jo
         result = FUN_00d05840(queueIndex, data, waitStatus, jobInOut);
     } while (result == -1);
     {
-        MonitorStream* s = (MonitorStream*)TlsGetValue(hkMonitorStreamTls);
-        if (s->m_cur < s->m_kRayEnd)
+        hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(hkMonitorStreamTls);
+        if (s->m_end.m_storage < s->m_capacityMinus16.m_storage)
         {
-            TimerEntry* h = (TimerEntry*)s->m_cur;
+            TimerEntry* h = (TimerEntry*)s->m_end.m_storage;
             h->m_name = "Et";
             _ReadWriteBarrier();
             tick = (unsigned int)__rdtsc();
             h->m_uiCommandId = tick;
-            s->m_cur = (char*)(h + 1);
+            s->m_end.m_storage = (char*)(h + 1);
         }
     }
     return result;
@@ -1929,13 +1883,6 @@ extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(DWORD);
 extern unsigned int DAT_0126835c;
 extern const char str_010dba98[];
 extern const char str_010c41f8[];
-struct S00df8570_Trace
-{
-    int status;
-    unsigned int* next;
-    int reserved;
-    unsigned int* end;
-};
 struct S00df8570_Input
 {
     int m00;
@@ -2028,15 +1975,15 @@ int __cdecl FUN_00df8570(S00df8570_Enc* encoder, S00df8570_Input* input)
     volatile unsigned int stamp;
     int output;
     {
-        S00df8570_Trace* trace = static_cast<S00df8570_Trace*>(TlsGetValue(DAT_0126835c));
-        unsigned int* next = trace->next;
-        if (next < trace->end)
+        hkMonitorStream* trace = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+        unsigned int* next = reinterpret_cast<unsigned int*>(trace->m_end.m_storage);
+        if (next < reinterpret_cast<unsigned int*>(trace->m_capacityMinus16.m_storage))
         {
             next[0] = reinterpret_cast<unsigned int>(str_010dba98);
             _ReadWriteBarrier();
             stamp = static_cast<unsigned int>(__rdtsc());
             next[1] = stamp;
-            trace->next = next + 3;
+            trace->m_end.m_storage = reinterpret_cast<char*>(next + 3);
         }
     }
     __declspec(align(16)) S00df8570_Rec records[4];
@@ -2068,15 +2015,15 @@ int __cdecl FUN_00df8570(S00df8570_Enc* encoder, S00df8570_Input* input)
     }
     int iResult = encoder->ProcessCallback(input, input, 0);
     {
-        S00df8570_Trace* trace = static_cast<S00df8570_Trace*>(TlsGetValue(DAT_0126835c));
-        unsigned int* next = trace->next;
-        if (next < trace->end)
+        hkMonitorStream* trace = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+        unsigned int* next = reinterpret_cast<unsigned int*>(trace->m_end.m_storage);
+        if (next < reinterpret_cast<unsigned int*>(trace->m_capacityMinus16.m_storage))
         {
             next[0] = reinterpret_cast<unsigned int>(str_010c41f8);
             _ReadWriteBarrier();
             reinterpret_cast<volatile unsigned int&>(output) = static_cast<unsigned int>(__rdtsc());
             next[1] = reinterpret_cast<volatile unsigned int&>(output);
-            trace->next = next + 3;
+            trace->m_end.m_storage = reinterpret_cast<char*>(next + 3);
         }
     }
     return iResult;
@@ -2131,19 +2078,7 @@ struct S_00d055c0_Heap
         vfn_10(p, bytes);
     }
 };
-struct S_00d055c0_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00d055c0_Heap* m10;
-    __forceinline S_00d055c0_Heap& heap()
-    {
-        return *m10;
-    }
-};
-S_00d055c0_Router* FUN_00c85750() throw();
+hkMemoryRouter* FUN_00c85750() throw();
 
 struct S_00d055c0_Elem
 {
@@ -2316,7 +2251,7 @@ void S_00d055c0_Obj::FUN_00d055c0()
             p--;
             p->FUN_00d056a0();
         } while (--n >= 0);
-        FUN_00c85750()->heap().ReleaseBlock(pool, 0x170);
+        reinterpret_cast<S_00d055c0_Heap*>(&FUN_00c85750()->heap())->ReleaseBlock(pool, 0x170);
     }
     if (unk74)
     {
@@ -2326,12 +2261,12 @@ void S_00d055c0_Obj::FUN_00d055c0()
             if (h)
             {
                 h->FUN_00d04370();
-                FUN_00c85750()->heap().ReleaseBlock(h, 4);
+                reinterpret_cast<S_00d055c0_Heap*>(&FUN_00c85750()->heap())->ReleaseBlock(h, 4);
             }
         }
     }
     {
-        S_00d055c0_Heap& heap = FUN_00c85750()->heap();
+        S_00d055c0_Heap& heap = *reinterpret_cast<S_00d055c0_Heap*>(&FUN_00c85750()->heap());
         unk1a0._clearAndDeallocate(heap);
     }
     unk58.ClearLists();
@@ -2385,17 +2320,8 @@ struct SlotAllocator
     virtual void vSlot10(unsigned int a, unsigned int b);
 };
 
-struct AllocHolder
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    SlotAllocator* m_pAllocator;
-};
-
 void* FUN_00d883c0(void* a1, unsigned int a2, unsigned int a3, ScratchBlock* a4);
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 
 // Initializes fields of a local ScratchBlock, passes it to FUN_00d883c0, then conditionally calls vSlot10 on m_pAllocator.
 // @fnv 0x00d889f0
@@ -2417,8 +2343,8 @@ void* __cdecl FUN_00d889f0(void* a1)
     s.unk64 = 0x80000000u;
     s.unk7C = 0;
     void* obj = FUN_00d883c0(a1, 0, 0, &s);
-    AllocHolder* pAllocHolder = FUN_00c85750();
-    SlotAllocator* alloc = pAllocHolder->m_pAllocator;
+    hkMemoryRouter* pAllocHolder = FUN_00c85750();
+    SlotAllocator* alloc = reinterpret_cast<SlotAllocator*>(pAllocHolder->m_heap);
     unsigned int flag = s.unk64;
     if ((flag & 0x80000000u) == 0)
         alloc->vSlot10(s.unk5C, (flag & 0x3FFFFFFFu) * 4);
@@ -2436,14 +2362,6 @@ struct TraceRecord
     const char* m_pName;
     unsigned long m_iTick;
     unsigned long unk08;
-};
-
-struct TraceBuffer
-{
-    unsigned long unk00;
-    TraceRecord* m_pCur;
-    unsigned long unk08;
-    TraceRecord* m_pRecordEnd;
 };
 
 struct TraceArg
@@ -2485,15 +2403,15 @@ void Worker::FUN_00d04d80(TraceArg* apTraceArg, int flag)
     Item item;
     RequestContext ctx;
 
-    TraceBuffer* pTraceBuf = (TraceBuffer*)TlsGetValue(DAT_0126835c);
-    if (pTraceBuf->m_pCur < pTraceBuf->m_pRecordEnd)
+    hkMonitorStream* pTraceBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if ((TraceRecord*)pTraceBuf->m_end.m_storage < (TraceRecord*)pTraceBuf->m_capacityMinus16.m_storage)
     {
-        TraceRecord* pTraceRec = pTraceBuf->m_pCur;
+        TraceRecord* pTraceRec = (TraceRecord*)pTraceBuf->m_end.m_storage;
         pTraceRec->m_pName = kTraceFinishJob;
         _ReadWriteBarrier();
         tick = (unsigned long)__rdtsc();
         pTraceRec->m_iTick = tick;
-        pTraceBuf->m_pCur = pTraceRec + 1;
+        pTraceBuf->m_end.m_storage = (char*)(pTraceRec + 1);
     }
 
     PoolSet* pPoolNode = GetNode(&ctx);
@@ -2512,15 +2430,15 @@ void Worker::FUN_00d04d80(TraceArg* apTraceArg, int flag)
 
     Release(pPoolNode);
 
-    pTraceBuf = (TraceBuffer*)TlsGetValue(DAT_0126835c);
-    if (pTraceBuf->m_pCur < pTraceBuf->m_pRecordEnd)
+    pTraceBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if ((TraceRecord*)pTraceBuf->m_end.m_storage < (TraceRecord*)pTraceBuf->m_capacityMinus16.m_storage)
     {
-        TraceRecord* pTraceRec = pTraceBuf->m_pCur;
+        TraceRecord* pTraceRec = (TraceRecord*)pTraceBuf->m_end.m_storage;
         pTraceRec->m_pName = kTraceEnd;
         _ReadWriteBarrier();
         tick = (unsigned long)__rdtsc();
         pTraceRec->m_iTick = tick;
-        pTraceBuf->m_pCur = pTraceRec + 1;
+        pTraceBuf->m_end.m_storage = (char*)(pTraceRec + 1);
     }
 }
 
@@ -2594,7 +2512,7 @@ struct Dispatcher : FUN_00d05490
     int FUN_00d051b0();
 };
 
-// Fetches and executes a loop of DispatchJob entries, recording start and end ticks into the TLS MonitorStream for each job type.
+// Fetches and executes a loop of DispatchJob entries, recording start and end ticks into the TLS hkMonitorStream for each job type.
 // @fnv 0x00d051b0
 int Dispatcher::FUN_00d051b0()
 {
@@ -2608,134 +2526,134 @@ int Dispatcher::FUN_00d051b0()
         switch (job.m_type)
         {
         case 0: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtPhysics";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.physics);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
         case 1: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtPhysics";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.physicsSecondary);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
         case 2: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtCollision Query";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.collision);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
         case 3: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtRayCast Query";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.raycast);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
         case 4: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtAnimation";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.animation);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
         case 5: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtBehavior";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.behavior);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
         case 6: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtCloth";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.cloth);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
         case 7: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtPathfinding";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.pathfinding);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
         case 9: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtCharacter Proxy";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.characterProxy);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
         case 10: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtUserJob";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.userJob);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
         default: {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "TtUnknownJobs";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.unknownJob);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
         break;
@@ -2743,14 +2661,14 @@ int Dispatcher::FUN_00d051b0()
         typedef int(__cdecl * Handler)(Dispatcher*, DispatchJob*);
         result = ((Handler*)m_slots[job.m_type].m_i00)[job.m_eSubtype](this, &job);
         {
-            MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-            TimerEntry* cur = (TimerEntry*)stream->m_cur;
-            if ((char*)cur < stream->m_kRayEnd)
+            hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+            TimerEntry* cur = (TimerEntry*)stream->m_end.m_storage;
+            if ((char*)cur < stream->m_capacityMinus16.m_storage)
             {
                 cur->m_name = "Et";
                 _ReadWriteBarrier();
                 cur->m_uiCommandId = ReadTick(&samples.end);
-                stream->m_cur = (char*)(cur + 1);
+                stream->m_end.m_storage = (char*)(cur + 1);
             }
         }
     } while (result == 0);

@@ -2,12 +2,7 @@
 // src/havok/physics/internal/collide/mopp/machine/hkpmoppearlyexitobbvirtualmachine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/machine/hkpmoppearlyexitobbvirtualmachine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-class hkBool {
-public:
-    hkBool() {}
-    hkBool(bool b) { m_cBooleanValue = (char)b; }
-    char m_cBooleanValue;
-};
+#include "../../../../../../../include/hkBool.h"
 extern char DAT_0126efba;
 void ValidateHavokKeyCode(char* pKey);
 struct S_00e647e0_Shape;

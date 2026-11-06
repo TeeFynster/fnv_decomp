@@ -61,9 +61,9 @@ template <class T> struct CmPointer
     {
         if (m_pObject != pObject)
         {
-            if (pObject)
+            if (pObject != 0)
                 pObject->IncRefCount();
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = pObject;
         }

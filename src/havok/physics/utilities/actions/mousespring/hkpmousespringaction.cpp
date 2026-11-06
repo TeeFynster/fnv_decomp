@@ -2,7 +2,17 @@
 // src/havok/physics/utilities/actions/mousespring/hkpmousespringaction.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/actions/mousespring/hkpmousespringaction.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpMouseSpringAction.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkpUnaryAction.h"
+#include "../../../../../../include/hkpCdBody.h"
+#include "../../../../../../include/hkpBroadPhaseHandle.h"
+#include "../../../../../../include/hkpTypedBroadPhaseHandle.h"
+
+typedef float hkReal;
+typedef unsigned int hkUint32;
+typedef unsigned short hkUint16;
 
 struct FUN_00d2b1f0
 {
@@ -42,11 +52,14 @@ int __cdecl FUN_00cbb8a0()
     return (int)&DAT_01268a14;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00cbb560 FUN_00cbb560: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
+
+#include "../../../../../../include/hkVector4.h"
 
 extern int DAT_010c8e94;
 extern int DAT_010c476c;
@@ -54,42 +67,7 @@ extern float DAT_0101b2d0;
 extern float DAT_0104da48;
 extern const char str_011b1f3c[];
 
-struct Ms_Heap
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void* AllocateBufferWithSize(int* n);
-    virtual void ReturnMemory(void* p, int n);
-};
-struct Ms_Tls
-{
-    int u0;
-    int u1;
-    int u2;
-    int u3;
-    Ms_Heap* heap;
-};
-Ms_Tls* __cdecl FUN_00c85750();
-
-struct Ms_ArrInit
-{
-    int* m_data;
-    int m_iElementCount;
-    int m_cap;
-    __forceinline void init()
-    {
-        m_data = 0;
-        m_iElementCount = 0;
-        m_cap = 0x80000000;
-    }
-};
-struct Ms_Arr
-{
-    int* m_data;
-    int m_iElementCount;
-    int m_cap;
-};
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct Ms_Sphere
 {
@@ -105,10 +83,10 @@ struct Ms_Sphere
 };
 struct Ms_Xf
 {
-    __m128 c0;
-    __m128 c1;
-    __m128 c2;
-    __m128 t;
+    LocalM128 c0;
+    LocalM128 c1;
+    LocalM128 c2;
+    LocalM128 t;
 };
 struct Ms_Body
 {
@@ -146,9 +124,9 @@ struct Ms_Input
     int i5;
     int i6;
     int i7;
-    __m128 q0;
-    __m128 q1;
-    __m128 q2;
+    LocalM128 q0;
+    LocalM128 q1;
+    LocalM128 q2;
 };
 struct Ms_Coll
 {
@@ -252,8 +230,8 @@ struct Ms_N
 };
 extern "C"
 {
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_load_ps(const float*);
+    void _mm_store_ps(float*, LocalM128);
+    LocalM128 _mm_load_ps(const float*);
 }
 struct Fv
 {
@@ -279,14 +257,14 @@ struct Ms_cls
     float maxRel;
     float objDamping;
     int shapeKey;
-    Ms_ArrInit cb;
-    Ms_cls* FUN_00cbb560(__m128* a0, __m128* a1, float a2, float a3, float a4, Ms_Ent* a5, Ms_Arr* a6);
+    hkArrayBase<int> cb;
+    Ms_cls* FUN_00cbb560(LocalM128* a0, LocalM128* a1, float a2, float a3, float a4, Ms_Ent* a5, hkArray<int>* a6);
 };
 
 // Initializes the Ms_cls object with position, mouse, and damping parameters, copies an array, and computes a shape key via a collision test against the world.
 // @fnv 0x00cbb560
-Ms_cls* Ms_cls::FUN_00cbb560(__m128* apPos, __m128* apMouse, float afDamping, float afElasticity, float afObjDamping,
-                             Ms_Ent* apEnt, Ms_Arr* apArr)
+Ms_cls* Ms_cls::FUN_00cbb560(LocalM128* apPos, LocalM128* apMouse, float afDamping, float afElasticity, float afObjDamping,
+                             Ms_Ent* apEnt, hkArray<int>* apArr)
 {
     ((Ms_B*)this)->FUN_00d2b260(apEnt, 0);
     *(int**)this = &DAT_010c8e94;
@@ -295,19 +273,19 @@ Ms_cls* Ms_cls::FUN_00cbb560(__m128* apPos, __m128* apMouse, float afDamping, fl
     damping = afDamping;
     elasticity = afElasticity;
     objDamping = afObjDamping;
-    cb.init();
+    cb.setOwnedData(0, 0, 0x80000000);
     maxRel = 250.0f;
     if (apArr)
     {
-        Ms_Heap& h = *FUN_00c85750()->heap;
-        int cap = cb.m_cap & 0x3fffffff;
+        hkMemoryAllocator& h = *(hkMemoryAllocator*)FUN_00c85750()->m_heap;
+        int cap = cb.m_iCapacityState & 0x3fffffff;
         if (cap < apArr->m_iElementCount)
         {
-            if ((cb.m_cap & 0x80000000) == 0)
-                h.ReturnMemory(cb.m_data, cap * 4);
+            if ((cb.m_iCapacityState & 0x80000000) == 0)
+                h.bufFree(cb.m_data, cap * 4);
             int n = apArr->m_iElementCount * 4;
-            cb.m_data = (int*)h.AllocateBufferWithSize(&n);
-            cb.m_cap = n / 4;
+            cb.m_data = (int*)h.bufAlloc(n);
+            cb.m_iCapacityState = n / 4;
         }
         int cnt = apArr->m_iElementCount;
         cb.m_iElementCount = cnt;
@@ -358,27 +336,11 @@ Ms_cls* Ms_cls::FUN_00cbb560(__m128* apPos, __m128* apMouse, float afDamping, fl
 }
 
 namespace fnv_00cbb790 {
-struct hkAllocatorCBB7
-{
-    virtual void V0() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void V2() throw();
-    virtual void* AllocateBufferWithSize(int& iNumBytesInOut) throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterCBB7
-{
-    void* m_00;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    hkAllocatorCBB7* m_pStreamAllocator;
-};
 void* __cdecl FUN_00c85750();
-inline hkAllocatorCBB7& heapCBB7()
+// 0x00c85750 returns the shared hkMemoryRouter; its heap pointer is at +0x10.
+inline hkMemoryAllocator& heapCBB7()
 {
-    return *((hkMemoryRouterCBB7*)FUN_00c85750())->m_pStreamAllocator;
+    return *(hkMemoryAllocator*)((hkMemoryRouter*)FUN_00c85750())->m_heap;
 }
 
 template <typename T> inline void copyCBB7(T* pDst, const T* pSrc, int n)
@@ -387,83 +349,58 @@ template <typename T> inline void copyCBB7(T* pDst, const T* pSrc, int n)
         pDst[i] = pSrc[i];
 }
 
-template <typename T> struct hkArrayCBB7
+}  // namespace fnv_00cbb790
+
+template <typename T, typename Allocator>
+__forceinline hkArray<T, Allocator>& hkArray<T, Allocator>::operator=(const hkArray& kOther)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+    hkMemoryAllocator& kAlloc = fnv_00cbb790::heapCBB7();
+    if (getCapacity() < kOther.m_iElementCount)
+    {
+        if ((m_iCapacityState & 0x80000000) == 0)
+            kAlloc.bufFree(m_data, getCapacity() * sizeof(T));
+        int iNumBytes = kOther.m_iElementCount * sizeof(T);
+        m_data = (T*)kAlloc.bufAlloc(iNumBytes);
+        m_iCapacityState = iNumBytes / (int)sizeof(T);
+    }
+    m_iElementCount = kOther.m_iElementCount;
+    fnv_00cbb790::copyCBB7(m_data, kOther.m_data, m_iElementCount);
+    return *this;
+}
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    const T& operator[](int i) const
-    {
-        return m_data[i];
-    }
-    __forceinline hkArrayCBB7& operator=(const hkArrayCBB7& kOther)
-    {
-        hkAllocatorCBB7& kAlloc = heapCBB7();
-        if (getCapacity() < kOther.m_iElementCount)
-        {
-            if ((m_iCapacityState & 0x80000000) == 0)
-                kAlloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-            int iNumBytes = kOther.m_iElementCount * sizeof(T);
-            m_data = (T*)kAlloc.AllocateBufferWithSize(iNumBytes);
-            m_iCapacityState = iNumBytes / (int)sizeof(T);
-        }
-        m_iElementCount = kOther.m_iElementCount;
-        copyCBB7(m_data, kOther.m_data, m_iElementCount);
-        return *this;
-    }
-};
-
-struct __declspec(align(16)) hkVector4CBB7
-{
-    __m128 m_vComponents;
-    void operator=(const hkVector4CBB7& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-
-class hkpEntity;
+namespace fnv_00cbb790 {
 
 class FUN_00cbb4e0 : public hkpUnaryAction
 {
   public:
     hkUint32 m_1c;
-    hkVector4CBB7 m_kMousePositionInWorld;
-    hkVector4CBB7 m_kGrabPointInBodySpace;
+    hkVector4 m_kMousePositionInWorld;
+    hkVector4 m_kGrabPointInBodySpace;
     hkReal m_fSpringDamping;
     hkReal m_fSpringElasticity;
     hkReal m_fMaxRelativeForce;
     hkReal m_fTau;
     hkUint32 m_uiCollisionShapeKey;
-    hkArrayCBB7<void*> m_kAppliedCallbacks;
+    hkArray<void*> m_kAppliedCallbacks;
 
     FUN_00cbb4e0(hkpEntity* pkEntity) throw();
 
     void* operator new(unsigned int uiSize)
     {
-        hkMemoryRouterCBB7* pkRouter = (hkMemoryRouterCBB7*)FUN_00c85750();
-        hkReferencedObject* pkObj = (hkReferencedObject*)pkRouter->m_pStreamAllocator->AllocateMemoryBlock(uiSize);
+        hkMemoryRouter* pkRouter = (hkMemoryRouter*)FUN_00c85750();
+        hkReferencedObject* pkObj = (hkReferencedObject*)((hkMemoryAllocator*)pkRouter->m_heap)->blockAlloc(uiSize);
         pkObj->m_usMemSizeAndFlags = (hkUint16)uiSize;
         return pkObj;
     }
 
-    FUN_00cbb4e0* CloneForEntity(const hkArrayCBB7<hkpEntity*>& kNewEntities,
-                                 const hkArrayCBB7<void*>& kNewPhantoms) const throw();
+    FUN_00cbb4e0* CloneForEntity(const hkArray<hkpEntity*>& kNewEntities,
+                                 const hkArray<void*>& kNewPhantoms) const throw();
 };
 
 // Creates a copy of this action for a single entity, returning null if the entity count is not one or any phantoms are present.
 // @fnv 0x00cbb790
-FUN_00cbb4e0* FUN_00cbb4e0::CloneForEntity(const hkArrayCBB7<hkpEntity*>& kNewEntities,
-                                           const hkArrayCBB7<void*>& kNewPhantoms) const throw()
+FUN_00cbb4e0* FUN_00cbb4e0::CloneForEntity(const hkArray<hkpEntity*>& kNewEntities,
+                                           const hkArray<void*>& kNewPhantoms) const throw()
 {
     if (kNewEntities.GetLogicalSize() != 1)
         return 0;
@@ -493,54 +430,13 @@ class FUN_00d01a60
 
 extern const float DAT_01012054;
 
-class hkpCdBodyCD2D
+inline void hkpTypedBroadPhaseHandle::SetOwnerPointer(void* owner)
 {
-  public:
-    hkpCdBodyCD2D(const void* shape, const void* motionState)
-    {
-        m_pCollisionShape = shape;
-        m_pMotionState = motionState;
-        m_parent = 0;
-        m_uiCollisionShapeKey = 0xffffffff;
-    }
-    const void* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const hkpCdBodyCD2D* m_parent;
-};
+    int offset = (int)((char*)owner - (char*)this);
+    m_iOwnerOffset = (signed char)offset;
+}
 
-class hkpBroadPhaseHandleCD2D
-{
-  public:
-    hkpBroadPhaseHandleCD2D()
-    {
-        m_iOwnerObjectOffset = 0;
-    }
-    unsigned int m_iOwnerObjectOffset;
-};
-
-class hkpTypedBroadPhaseHandleCD2D : public hkpBroadPhaseHandleCD2D
-{
-  public:
-    hkpTypedBroadPhaseHandleCD2D(int type)
-    {
-        m_type = (signed char)type;
-        m_ucObjectQualityType = -1;
-        m_uiCollisionFilterData = 0;
-        m_iOwnerOffset = 0x7f;
-    }
-    void SetOwnerPointer(void* owner)
-    {
-        int offset = (int)((char*)owner - (char*)this);
-        m_iOwnerOffset = (signed char)offset;
-    }
-    signed char m_type;
-    signed char m_iOwnerOffset;
-    signed char m_ucObjectQualityType;
-    unsigned int m_uiCollisionFilterData;
-};
-
-class FUN_00cd2d80 : public hkpCdBodyCD2D
+class FUN_00cd2d80 : public hkpCdBody
 {
   public:
     FUN_00cd2d80(const void* shape, const void* motionState, int type);
@@ -548,7 +444,7 @@ class FUN_00cd2d80 : public hkpCdBodyCD2D
     signed char m_iOwnerOffset;
     signed char m_uiForceCollideOntoPpu;
     unsigned short m_uiShapeSizeOnSpu;
-    hkpTypedBroadPhaseHandleCD2D m_kBroadPhaseHandle;
+    hkpTypedBroadPhaseHandle m_kBroadPhaseHandle;
     FUN_00d01a60 m_kBoundingVolumeData;
     float m_fAllowedPenetrationDepth;
 };
@@ -556,25 +452,13 @@ class FUN_00cd2d80 : public hkpCdBodyCD2D
 // Constructs the body from shape and motionState, builds the broad phase handle with type, sets its owner pointer, and sets a default allowed penetration depth.
 // @fnv 0x00cd2d80
 FUN_00cd2d80::FUN_00cd2d80(const void* apCollisionShape, const void* motionState, int aiBroadPhaseType)
-    : hkpCdBodyCD2D(apCollisionShape, motionState), m_iOwnerOffset(0), m_kBroadPhaseHandle(aiBroadPhaseType),
+    : hkpCdBody(apCollisionShape, motionState), m_iOwnerOffset(0), m_kBroadPhaseHandle(aiBroadPhaseType),
       m_fAllowedPenetrationDepth(DAT_01012054)
 {
     m_kBroadPhaseHandle.SetOwnerPointer(this);
     m_uiForceCollideOntoPpu = 0;
     m_uiShapeSizeOnSpu = 0;
 }
-
-struct Ms_Tls;
-Ms_Tls* FUN_00c85750();
-
-struct Ms_HeapX
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08(void* p, unsigned short n);
-    virtual void v0c();
-    virtual void v10(int p, int n);
-};
 
 struct Cls
 {
@@ -592,48 +476,39 @@ struct Cls
 // @fnv 0x00cbb8b0
 Cls* Cls::FUN_00cbb8b0(int flags)
 {
-    Ms_Tls* tls = FUN_00c85750();
-    Ms_HeapX* heap = *(Ms_HeapX**)((char*)tls + 0x10);
+    hkMemoryRouter* tls = FUN_00c85750();
+    hkMemoryAllocator* heap = (hkMemoryAllocator*)tls->m_heap;
     int n = m_5c;
     m_58 = 0;
     if (!((unsigned int)n & 0x80000000u))
-        heap->v10(m_54, (n & 0x3fffffff) * 4);
+        heap->bufFree((void*)m_54, (n & 0x3fffffff) * 4);
     m_54 = 0;
     m_5c = 0x80000000;
     FUN_00d2b2b0();
     if (flags & 1)
     {
-        Ms_Tls* tls2 = FUN_00c85750();
-        Ms_HeapX* heap2 = *(Ms_HeapX**)((char*)tls2 + 0x10);
-        heap2->v08(this, (unsigned short)m_04);
+        hkMemoryRouter* tls2 = FUN_00c85750();
+        hkMemoryAllocator* heap2 = (hkMemoryAllocator*)tls2->m_heap;
+        heap2->blockFree(this, (unsigned short)m_04);
     }
     return this;
 }
 
 extern "C"
 {
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_load_ps1(const float*);
-    __m128 _mm_cmple_ps(__m128, __m128);
-    int _mm_movemask_ps(__m128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_load_ps1(const float*);
+    LocalM128 _mm_cmple_ps(LocalM128, LocalM128);
+    int _mm_movemask_ps(LocalM128);
 }
 
 extern "C"
 {
 }
 
-extern const __m128 DAT_01017d10;
+extern const LocalM128 DAT_01017d10;
 extern const float DAT_01017d00;
-
-struct __declspec(align(16)) hkVector4CBB1
-{
-    __m128 m_vComponents;
-    void operator=(const hkVector4CBB1& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
 
 class UnkCall
 {
@@ -660,17 +535,17 @@ class hkpPositionTrackerCBB1
     int unk24;
     int unk28;
     int unk2C;
-    hkVector4CBB1 m_vContactPosition;
+    hkVector4 m_vContactPosition;
 
-    void FUN_00cbb150(const hkVector4CBB1& kPosition);
+    void FUN_00cbb150(const hkVector4& kPosition);
 };
 
 // @fnv 0x00cbb150
-void hkpPositionTrackerCBB1::FUN_00cbb150(const hkVector4CBB1& kPosition)
+void hkpPositionTrackerCBB1::FUN_00cbb150(const hkVector4& kPosition)
 {
-    __m128 d = _mm_sub_ps(kPosition.m_vComponents, m_vContactPosition.m_vComponents);
+    LocalM128 d = _mm_sub_ps(kPosition.m_vComponents, m_vContactPosition.m_vComponents);
     d = _mm_and_ps(d, DAT_01017d10);
-    __m128 eps = _mm_load_ps1(&DAT_01017d00);
+    LocalM128 eps = _mm_load_ps1(&DAT_01017d00);
     int iMask = _mm_movemask_ps(_mm_cmple_ps(d, eps));
     if ((iMask & 7) != 7)
     {
@@ -680,7 +555,7 @@ void hkpPositionTrackerCBB1::FUN_00cbb150(const hkVector4CBB1& kPosition)
     m_vContactPosition = kPosition;
 }
 
-extern "C" __m128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_setzero_ps(void);
 struct FUN_00cbb4e0
 {
     void* unk00;
@@ -689,7 +564,7 @@ struct FUN_00cbb4e0
     void* unk08;
     void* unk0C;
     unsigned int unk10;
-    hkStringPtr m_name;
+    const char* m_name;
     void* m_pEntity;
     unsigned int unk1C;
     hkVector4 m_kMousePositionInWorld;
@@ -699,19 +574,19 @@ struct FUN_00cbb4e0
     hkReal m_fMaxRelativeForce;
     hkReal m_fTau;
     unsigned int m_uiCollisionShapeKey;
-    hkArray<char> m_kAppliedCallbacks;
+    hkArrayBase<char> m_kAppliedCallbacks;
     FUN_00cbb4e0(int arg);
 };
 extern float DAT_01016248, DAT_01017870, DAT_0101ffc0;
 // Initializes the hkpMouseSpringAction fields with default spring constants, zeroed vectors, and the action name.
 // @fnv 0x00cbb4e0
-FUN_00cbb4e0::FUN_00cbb4e0(int arg)
+FUN_00cbb4e0::FUN_00cbb4e0(int arg) : m_kAppliedCallbacks(FinishingFlag())
 {
     ((Ms_B*)this)->FUN_00d2b260((void*)arg, 0);
     m_fSpringDamping = DAT_01016248;
     unk00 = (void*)&DAT_010c8e94;
     m_fSpringElasticity = DAT_01017870;
-    __m128 zero = _mm_setzero_ps();
+    LocalM128 zero = _mm_setzero_ps();
     m_fMaxRelativeForce = DAT_0101b2d0;
     m_fTau = DAT_0101ffc0;
     *(char* volatile*)&m_kAppliedCallbacks.m_data = 0;

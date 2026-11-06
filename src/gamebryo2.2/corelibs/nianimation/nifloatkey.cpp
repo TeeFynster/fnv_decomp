@@ -1,21 +1,24 @@
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiStream.h"
 
 // src/gamebryo2.2/corelibs/nianimation/nifloatkey.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/nifloatkey.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AnimationKey
-{
+// Exe 0x00a26f30: this prefix is eight bytes; time/value accesses use the derived record.
+struct FloatKeyPrefixView
+{ // distinct from AnimationKey: 0x00a26f30 uses an 8-byte float-key prefix before tangent floats at +8/+12.
     int _00;
     int _04;
 };
-struct TimedAnimationKey : AnimationKey
+struct TimedAnimationKey : FloatKeyPrefixView
 {
     float _08;
     float _0c;
 };
-bool __cdecl AreRecordsEqual(const AnimationKey&, const AnimationKey&);
+bool __cdecl AreRecordsEqual(const FloatKeyPrefixView&, const FloatKeyPrefixView&);
 // Returns false if AreRecordsEqual rejects the keys, otherwise compares the two float fields of the keys for equality.
 // @fnv 0x00a26f30
-bool FUN_00a26f30(const AnimationKey& key0, const AnimationKey& key1)
+bool FUN_00a26f30(const FloatKeyPrefixView& key0, const FloatKeyPrefixView& key1)
 {
     const TimedAnimationKey* pKey1Floats = (const TimedAnimationKey*)&key1;
     const TimedAnimationKey* pKey0Floats = (const TimedAnimationKey*)&key0;
@@ -24,37 +27,36 @@ bool FUN_00a26f30(const AnimationKey& key0, const AnimationKey& key1)
     return pKey0Floats->_08 == pKey1Floats->_08 && pKey0Floats->_0c == pKey1Floats->_0c;
 }
 
-struct MyIn
+// The shared header declares these helpers but does not yet expose the stream state.
+inline void NiBinaryStream::Read(void* data)
 {
-    int _pad;
-    int pos;
-    int(__cdecl* read)(MyIn*, void*, unsigned int, unsigned int*, unsigned int);
-};
-struct MyStream
-{
-    char _pad[0x24C];
-    MyIn* input;
-};
-// Reads 4 bytes from the stream's input into pValue and advances the input position by the bytes read.
-// @fnv 0x00a26df0
-void FUN_00a26df0(MyStream* pkStream, void* pValue)
-{
-    MyIn* __restrict pkInput = pkStream->input;
-    unsigned int uiSize = 4;
-    pkInput->pos += pkInput->read(pkInput, pValue, 4, &uiSize, 1);
+    NiBinaryStream* __restrict input = this;
+    unsigned int size = 4;
+    reinterpret_cast<unsigned int*>(input)[1] +=
+        (*reinterpret_cast<NIBINARYSTREAM_READFN*>(reinterpret_cast<char*>(input) + 8))(
+            input, data, 4, &size, 1);
 }
 
-struct NiBinaryStream
+inline void NiBinaryStream::Write(void* buffer)
 {
-    int _0;
-    unsigned int position;
-    unsigned int (*read)(NiBinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-};
-struct NiStream
+    NiBinaryStream* __restrict output = this;
+    unsigned int size = 4;
+    reinterpret_cast<unsigned int*>(output)[1] +=
+        (*reinterpret_cast<NIBINARYSTREAM_WRITEFN*>(reinterpret_cast<char*>(output) + 12))(
+            output, buffer, 4, &size, 1);
+}
+// NiStream keeps its binary stream pointers in the opaque shared state.
+inline NiBinaryStream* NiStream::GetBinaryStream()
 {
-    char _pad[0x24C];
-    NiBinaryStream* input;
-};
+    return *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(this) + 0x24C);
+}
+// Reads 4 bytes from the stream's input into pValue and advances the input position by the bytes read.
+// @fnv 0x00a26df0
+void FUN_00a26df0(NiStream* pkStream, void* pValue)
+{
+    pkStream->GetBinaryStream()->Read(pValue);
+}
+
 struct Base_00a26eb0
 {
     int _0;
@@ -65,42 +67,28 @@ struct Holder_00a26eb0 : Base_00a26eb0
     float m;
     void FUN_00a26eb0(NiStream&);
 };
-// Calls the base stream reader, then reads 4 bytes from stream.input into m and advances the stream position by the bytes read.
+// Calls the base stream reader, then reads 4 bytes from the input stream into m and advances the stream position by the bytes read.
 // @fnv 0x00a26eb0
 void Holder_00a26eb0::FUN_00a26eb0(NiStream& stream)
 {
     Base_00a26eb0::AccumulateAnimSink(stream);
-    NiBinaryStream* __restrict input = stream.input;
-    unsigned int size = 4;
-    input->position += input->read(input, &m, 4, &size, 1);
+    stream.GetBinaryStream()->Read(static_cast<void*>(&m));
 }
 
-struct SOut
-{
-    int f0;
-    int pos;
-    int f8;
-    int(__cdecl* fn)(SOut*, void*, int, unsigned int*, int);
-};
-struct SStream
-{
-    char pad[0x250];
-    SOut* out;
-};
 struct SObj
 {
     char pad[4];
     float v;
 };
-void __cdecl CallAnimCallback(SStream*, SObj*);
-// Calls CallAnimCallback, then writes the float at a2->v into the stream's output via its fn callback and advances pos by the bytes written.
+void __cdecl CallAnimCallback(NiStream*, SObj*);
+// Calls CallAnimCallback, then writes the float at a2->v and advances the output stream position by the bytes written.
 // @fnv 0x00a26ef0
-void WriteFloatToStream(SStream* pStream, SObj* pObj)
+void WriteFloatToStream(NiStream* pStream, SObj* pObj)
 {
     CallAnimCallback(pStream, pObj);
-    SOut* __restrict output = pStream->out;
-    unsigned int size = 4;
-    output->pos += output->fn(output, &pObj->v, 4, &size, 1);
+    NiBinaryStream* output =
+        *reinterpret_cast<NiBinaryStream**>(reinterpret_cast<char*>(pStream) + 0x250);
+    output->Write(static_cast<void*>(&pObj->v));
 }
 
 typedef void(__cdecl* BA26E20Func)(void*);
@@ -153,7 +141,9 @@ int __cdecl RegisterFloatKeyOps()
     return 1;
 }
 
-class NiFloatKeyA26
+// Local fallback: include/NiFloatKey.h is absent; +0 time/+4 value and
+// InterpolatePosition at 0x00a26b40 agree with nirollcontroller.cpp bindings.
+class NiFloatKey
 {
   public:
     enum KeyType
@@ -175,14 +165,14 @@ class NiFloatKeyA26
         return m_fValue;
     }
 
-    NiFloatKeyA26* GetKeyPointerByIndex(unsigned int uiIndex, unsigned char ucKeySize)
+    NiFloatKey* GetKeyPointerByIndex(unsigned int uiIndex, unsigned char ucKeySize)
     {
-        return (NiFloatKeyA26*)((char*)this + uiIndex * ucKeySize);
+        return (NiFloatKey*)((char*)this + uiIndex * ucKeySize);
     }
 
-    static float InterpolatePosition(float fTime, NiFloatKeyA26* pkKeys, KeyType eType, unsigned int uiNumKeys,
+    static float InterpolatePosition(float fTime, NiFloatKey* pkKeys, KeyType eType, unsigned int uiNumKeys,
                                      unsigned int& uiLastIdx, unsigned char ucSize);
-    static float GetValueAtTime(float fTime, NiFloatKeyA26* pkKeys, KeyType eType, unsigned int uiNumKeys,
+    static float GetValueAtTime(float fTime, NiFloatKey* pkKeys, KeyType eType, unsigned int uiNumKeys,
                                 unsigned char ucSize);
 
     float m_fTime;
@@ -193,7 +183,7 @@ extern float g_fDefaultValueA26;
 
 // Returns the key value at fTime, clamping to the first/last key outside the range and otherwise delegating to the interpolating lookup.
 // @fnv 0x00a26d70
-float NiFloatKeyA26::GetValueAtTime(float fTime, NiFloatKeyA26* pkKeys, KeyType eType, unsigned int uiNumKeys,
+float NiFloatKey::GetValueAtTime(float fTime, NiFloatKey* pkKeys, KeyType eType, unsigned int uiNumKeys,
                                     unsigned char ucSize)
 {
     if (uiNumKeys)
@@ -210,41 +200,36 @@ float NiFloatKeyA26::GetValueAtTime(float fTime, NiFloatKeyA26* pkKeys, KeyType 
     return g_fDefaultValueA26;
 }
 
-struct S00a26b40_Key
-{
-    float time;
-    float value;
-};
-typedef void(__cdecl* S00a26b40_Interp)(float, const S00a26b40_Key*, const S00a26b40_Key*, float*);
-extern S00a26b40_Interp DAT_011f3c90[];
+typedef void(__cdecl* FloatKeyInterpolation)(float, const NiFloatKey*, const NiFloatKey*, float*);
+extern FloatKeyInterpolation DAT_011f3c90[];
 
-static inline const S00a26b40_Key& S00a26b40_At(const S00a26b40_Key* keys, unsigned int i, unsigned char keySize)
+static inline const NiFloatKey& FloatKeyAt(const NiFloatKey* keys, unsigned int i, unsigned char keySize)
 {
-    return *(const S00a26b40_Key*)((const char*)keys + i * keySize);
+    return *(const NiFloatKey*)((const char*)keys + i * keySize);
 }
 
 // Selects a key interval for time, interpolates when a next key exists, and updates lastIndex on the multi-key path.
 // @fnv 0x00a26b40
-float __cdecl InterpolateKey(float time, const S00a26b40_Key* keys, unsigned int type, unsigned int count,
-                             unsigned int* lastIndex, unsigned char keySize)
+float NiFloatKey::InterpolatePosition(float time, NiFloatKey* keys, KeyType type, unsigned int count,
+                                       unsigned int& lastIndex, unsigned char keySize)
 {
     if (count == 1 || time == -3.4028234663852886e+38)
-        return keys->value;
+        return keys->m_fValue;
 
     unsigned int end = count - 1;
-    unsigned int last = *lastIndex;
-    float lastTime = S00a26b40_At(keys, last, keySize).time;
+    unsigned int last = lastIndex;
+    float lastTime = FloatKeyAt(keys, last, keySize).m_fTime;
     if (time < lastTime)
     {
         last = 0;
-        lastTime = keys->time;
+        lastTime = keys->m_fTime;
     }
     float nextTime = 0.0f;
     unsigned int next = last + 1;
     __assume(next <= end);
     for (; next <= end; next++)
     {
-        nextTime = S00a26b40_At(keys, next, keySize).time;
+        nextTime = FloatKeyAt(keys, next, keySize).m_fTime;
         if (time <= nextTime)
             break;
         lastTime = nextTime;
@@ -254,10 +239,10 @@ float __cdecl InterpolateKey(float time, const S00a26b40_Key* keys, unsigned int
     if (next < count)
     {
         float t = (time - lastTime) / (nextTime - lastTime);
-        DAT_011f3c90[type](t, &S00a26b40_At(keys, last, keySize), &S00a26b40_At(keys, next, keySize), &result);
+        DAT_011f3c90[type](t, &FloatKeyAt(keys, last, keySize), &FloatKeyAt(keys, next, keySize), &result);
     }
     else
-        result = S00a26b40_At(keys, last, keySize).value;
-    *lastIndex = last;
+        result = FloatKeyAt(keys, last, keySize).m_fValue;
+    lastIndex = last;
     return result;
 }

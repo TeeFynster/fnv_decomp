@@ -126,8 +126,8 @@ struct S_00dd9660_Router
 
 int __cdecl FUN_00c908c0(S_00dd9660_Heap& alloc, void* arr, int reqCapacity, int elemSize) throw();
 
-struct S_00dd9660_CharArray
-{
+struct S_00dd9660_CharArrayLocalForm
+{ // local form of hkArray: 0x00dd9660 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     char* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -165,7 +165,7 @@ struct S_00dd9660_CharArray
         m_data = 0;
         m_iCapacityState = 0x80000000;
     }
-    __forceinline ~S_00dd9660_CharArray() throw()
+    __forceinline ~S_00dd9660_CharArrayLocalForm() throw()
     {
         _clearAndDeallocate(S_00dd9660_Router::_FUN_00c85750().heap());
     }
@@ -175,7 +175,7 @@ struct S_00dd9660_CharArray
     }
 };
 
-struct S_00dd9660_InplaceCharArray : S_00dd9660_CharArray
+struct S_00dd9660_InplaceCharArray : S_00dd9660_CharArrayLocalForm
 {
     // 128 chars of inline storage, as words so /GS treats it like Havok's build (no cookie)
     unsigned int m_kStorage[32];

@@ -76,21 +76,7 @@ class NiPoint2
     NiPoint2();
     float x, y;
 };
-class SoundPlaybackHandle
-{
-  public:
-    unsigned int id;
-    bool assumeSuccess;
-    unsigned int state;
-    SoundPlaybackHandle();
-    ~SoundPlaybackHandle();
-    SoundPlaybackHandle& operator=(const SoundPlaybackHandle&);
-    bool Play(bool);
-    bool Stop();
-    bool Pause();
-    bool IsPlaying();
-    bool SetVolume(float);
-};
+#include "../../../../include/BSSoundHandle.h"
 union SETTING_VALUE;
 class SettingT_GameSettingCollection_
 {
@@ -510,9 +496,9 @@ class BSAudio
 {
   public:
     static BSAudio* GetSingleton();
-    SoundPlaybackHandle GetSoundHandleByFormID(unsigned int, unsigned int);
-    SoundPlaybackHandle GetSoundHandleByFilePath(const char*, unsigned int, void*);
-    SoundPlaybackHandle GetSoundHandleByEditorID(const char*, unsigned int);
+    BSSoundHandle GetSoundHandleByFormID(unsigned int, unsigned int);
+    BSSoundHandle GetSoundHandleByFilePath(const char*, unsigned int, void*);
+    BSSoundHandle GetSoundHandleByEditorID(const char*, unsigned int);
     static void EnableAudio();
     // Instance audio entry at 0x00ad85a0 is distinct from the static dialogue flag helper.
     void FUN_00ad85a0();
@@ -599,9 +585,9 @@ class MapMenu : public Menu
     char pad8d[3];
     BGSNote* m_pSelectedNote;
     unsigned int m_uiMapState;
-    BSSimpleList<SoundPlaybackHandle> m_kSoundList;
+    BSSimpleList<BSSoundHandle> m_kSoundList;
     BSSimpleArray<BSStringT<char> > SubtitlesToShow;
-    BSSimpleList<SoundPlaybackHandle>* m_pkActiveSoundList;
+    BSSimpleList<BSSoundHandle>* m_pkActiveSoundList;
     bool m_bMapListUpdatePending;
     char padbd[3];
     float m_fMapZoom;

@@ -1,33 +1,33 @@
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
 
 // src/havok/common/visualize/shape/hkdisplayconvex.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/shape/hkdisplayconvex.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkGeometry.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+
+
+inline void hkVector4::setZero4()
+{
+    m_vComponents = _mm_setzero_ps();
+}
+
+inline void hkVector4::operator=(const hkVector4& vector)
+{
+    m_vComponents = vector.m_vComponents;
+}
 
 // @fnv 0x00de1d10
 void __cdecl FUN_00de1d10()
 {}
 
-#include <xmmintrin.h>
-struct __declspec(align(16)) S_00de1d20_Vector4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-    float& operator()(int i)
-    {
-        return (&x)[i];
-    }
-    void setZero4()
-    {
-        reinterpret_cast<__m128&>(*this) = _mm_setzero_ps();
-    }
-};
-
+// local form of hkMatrix3: 0x00de1d20 needs implicit ctor and inline setIdentity; shared form gives 81 bytes vs exe 72.
 struct S_00de1d20_Matrix3
 {
-    S_00de1d20_Vector4 m_kColumn0;
-    S_00de1d20_Vector4 m_kColumn1;
-    S_00de1d20_Vector4 m_kColumn2;
+    hkVector4 m_kColumn0;
+    hkVector4 m_kColumn1;
+    hkVector4 m_kColumn2;
     float& operator()(int r, int c)
     {
         return ((float*)&m_kColumn0)[c * 4 + r];
@@ -62,7 +62,7 @@ struct S_00de1d20_Mid : S_00de1d20_Base
 {
     int unk8;
     S_00de1d20_Matrix3 unk10;
-    S_00de1d20_Vector4 unk40;
+    hkVector4 unk40;
     int unk50;
 
     __forceinline S_00de1d20_Mid(int a)
@@ -86,24 +86,7 @@ FUN_00de1d20::FUN_00de1d20(int aiValue) : S_00de1d20_Mid(aiValue)
     unk8 = aiValue;
 }
 
-namespace fnv_00de1d70 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-
-struct hkMemoryAllocator;
 void __cdecl ResizeAudioStream(void* alloc, void* array, int elemSize);
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-    void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
 
 template <typename T> __forceinline void hkConstructWithCopy(T* p, int n, const T& t)
 {
@@ -113,36 +96,17 @@ template <typename T> __forceinline void hkConstructWithCopy(T* p, int n, const 
     }
 }
 
-template <typename T> struct hkArr
+template <typename T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& t)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
+    if (m_iElementCount == getCapacity())
     {
-        return m_iCapacityState & 0x3fffffff;
+        ResizeAudioStream(&alloc, this, sizeof(T));
     }
+    hkConstructWithCopy(m_data + m_iElementCount, 1, t);
+    m_iElementCount++;
+}
 
-    __forceinline void _pushBack(hkMemoryAllocator& alloc, const T& t)
-    {
-        if (m_iElementCount == getCapacity())
-        {
-            ResizeAudioStream(&alloc, this, sizeof(T));
-        }
-        hkConstructWithCopy(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-};
-
-struct hkGeomTriangle
-{
-    int m_kPointA;
-    int m_kPointB;
-    int m_iThirdValue;
-    int m_iMaterialIndex;
-};
-
+namespace fnv_00de1d70 {
 struct TriIndices
 {
     int a;
@@ -150,23 +114,17 @@ struct TriIndices
     int c;
 };
 
-struct hkGeom
-{
-    hkArr<hkVector4> m_kVertices;
-    hkArr<hkGeomTriangle> m_uiTriangleCount;
-};
-
 struct EdgeBuilder
 {
     int unk00;
     int unk04;
-    hkGeom* m_pSourceGeometry;
-    void FUN_00de1d70(hkArr<hkVector4>& lines, hkMemoryAllocator& alloc);
+    hkGeometry* m_pSourceGeometry;
+    void FUN_00de1d70(hkArray<hkVector4>& lines, hkMemoryAllocator& alloc);
 };
 
 // For each triangle in the source geometry, appends three vertex pairs (a-b, a-c, b-c) to lines.
 // @fnv 0x00de1d70
-void EdgeBuilder::FUN_00de1d70(hkArr<hkVector4>& lines, hkMemoryAllocator& alloc)
+void EdgeBuilder::FUN_00de1d70(hkArray<hkVector4>& lines, hkMemoryAllocator& alloc)
 {
     if (m_pSourceGeometry)
     {

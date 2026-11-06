@@ -2,7 +2,32 @@
 // src/havok/physics/vehicle/driverinput/default/hkpvehicledefaultanalogdriverinput.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/driverinput/default/hkpvehicledefaultanalogdriverinput.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpVehicleDefaultAnalogDriverInput.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkReferencedObject.h"
+
+typedef float hkReal;
+
+
+// No shared driver-input header exists yet; reflection gives the 0x8-byte reference-counted base.
+class hkpVehicleDriverInput : public hkReferencedObject
+{
+  public:
+    hkpVehicleDriverInput() {}
+};
+
+// No shared default-input header exists yet; reflected members occupy offsets 0x8 through 0x14.
+class hkpVehicleDefaultAnalogDriverInput : public hkpVehicleDriverInput
+{
+  public:
+    hkReal m_fSlopeUp;
+    hkReal m_fDeadZone;
+    hkReal m_fSlopeDown;
+    hkBool m_bAutoReverse;
+
+    hkpVehicleDefaultAnalogDriverInput();
+    virtual ~hkpVehicleDefaultAnalogDriverInput();
+};
 
 struct FUN_00e43540_Arg1
 {
@@ -145,48 +170,9 @@ void VehicleInput::CalculateOutput(float timeStep, void* vehicle, VehicleStatus*
     output->buttonPressed = calculateButton(timeStep, vehicle, status, output).value;
 }
 
-struct hkBoolE436
-{
-    char m_cBooleanValue;
-    void operator=(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-
-class hkReferencedObjectE436
-{
-  public:
-    hkReferencedObjectE436() : m_sReferenceCount(1)
-    {}
-    virtual ~hkReferencedObjectE436()
-    {}
-    hkUint16 m_usMemSizeAndFlags;
-    hkInt16 m_sReferenceCount;
-};
-
-class hkpVehicleDriverInputE436 : public hkReferencedObjectE436
-{
-  public:
-    hkpVehicleDriverInputE436()
-    {}
-};
-
-class FUN_00e43680 : public hkpVehicleDriverInputE436
-{
-  public:
-    hkReal m_fSlopeUp;
-    hkReal m_fDeadZone;
-    hkReal m_fSlopeDown;
-    hkBoolE436 m_bAutoReverse;
-
-    FUN_00e43680();
-    virtual ~FUN_00e43680();
-};
-
 // Initializes the three hkReal members and the hkBool member to zero/false.
 // @fnv 0x00e43680
-FUN_00e43680::FUN_00e43680()
+hkpVehicleDefaultAnalogDriverInput::hkpVehicleDefaultAnalogDriverInput()
 {
     m_fSlopeUp = 0.0f;
     m_fDeadZone = 0.0f;
@@ -194,14 +180,12 @@ FUN_00e43680::FUN_00e43680()
     m_bAutoReverse = false;
 }
 
-typedef char hkBool;
-typedef float hkReal;
 
-// hkpVehicleDriverInputAnalogStatus: m_iGearCount sits at offset 0xcc.
-struct hkpVehicleDriverInputAnalogStatus
+// VehicleReverseState: m_iGearCount sits at offset 0xcc.
+struct VehicleReverseState
 {
     char pad0[0xcc];
-    hkBool m_iGearCount;
+    char m_iGearCount;
 };
 
 struct hkpVehicleDriverInputFilteredInput
@@ -214,18 +198,18 @@ struct hkpVehicleDriverInputFilteredInput
 struct AnalogDriverInput
 {
     char pad0[0x14];
-    hkBool m_bAutoReverse;
+    char m_bAutoReverse;
 
-    hkReal FUN_00e435a0(hkReal deltaTime, const hkpVehicleDriverInputAnalogStatus* status,
+    hkReal FUN_00e435a0(hkReal deltaTime, const VehicleReverseState* status,
                         const hkpVehicleDriverInputFilteredInput* input, int wheel);
 };
 
 // Returns the input's filter value, negated if the status byte and m_bAutoReverse are both set, with negative results returned as 0.
 // @fnv 0x00e435a0
-hkReal AnalogDriverInput::FUN_00e435a0(hkReal deltaTime, const hkpVehicleDriverInputAnalogStatus* status,
+hkReal AnalogDriverInput::FUN_00e435a0(hkReal deltaTime, const VehicleReverseState* status,
                                        const hkpVehicleDriverInputFilteredInput* input, int wheel)
 {
-    hkBool reversing = status->m_iGearCount;
+    char reversing = status->m_iGearCount;
     hkReal v;
     if (reversing && m_bAutoReverse)
     {
@@ -243,69 +227,38 @@ hkReal AnalogDriverInput::FUN_00e435a0(hkReal deltaTime, const hkpVehicleDriverI
     return v;
 }
 
-class hkMemoryAllocatorE43A
-{
-  public:
-    virtual ~hkMemoryAllocatorE43A() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterE43A
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorE43A* m_pStreamAllocator;
-
-    hkMemoryAllocatorE43A& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
+// No shared router header exists yet; the TLS accessor at 0x00c85750 supplies its heap at offset 0x10.
+#include "../../../../../../include/hkMemoryRouter.h"
 
 namespace hkRouterE43A {
-extern "C" hkMemoryRouterE43A& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
 
-class hkRefObjE43A
+inline void* __cdecl hkReferencedObject::operator new(std::size_t nbytes)
+{
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(hkRouterE43A::FUN_00c85750().heap().blockAlloc(nbytes));
+    b->m_usMemSizeAndFlags = (unsigned short)nbytes;
+    return b;
+}
+
+// Reflected analog-status members: positions at 0x8/0xc, flags at 0x10/0x11, total size 0x14.
+class hkpVehicleDriverInputAnalogStatus : public hkReferencedObject
 {
   public:
-    virtual ~hkRefObjE43A();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
+    float m_fPositionX;
+    float m_fPositionY;
+    hkBool m_bFlag;
+    hkBool m_bReverseButtonPressed;
 
-    static void* operator new(unsigned int nbytes)
-    {
-        hkRefObjE43A* b = static_cast<hkRefObjE43A*>(hkRouterE43A::FUN_00c85750().heap().AllocateMemoryBlock(nbytes));
-        b->m_usMemSizeAndFlags = (unsigned short)nbytes;
-        return b;
-    }
-    static void operator delete(void* p);
-    hkRefObjE43A()
-    {
-        m_sReferenceCount = 1;
-    }
+    virtual ~hkpVehicleDriverInputAnalogStatus();
+    hkpVehicleDriverInputAnalogStatus* FUN_00e43a60() const;
 };
 
-class hkCloneE43A : public hkRefObjE43A
-{
-  public:
-    float m_08;
-    float m_0C;
-    bool m_10;
-    bool m_11;
-
-    virtual ~hkCloneE43A();
-    hkCloneE43A* FUN_00e43a60() const;
-};
-
-// Allocates a new hkCloneE43A, copies the current object into it, and returns the pointer to the copy.
+// Allocates a new hkpVehicleDriverInputAnalogStatus, copies the current object into it, and returns the pointer to the copy.
 // @fnv 0x00e43a60
-hkCloneE43A* hkCloneE43A::FUN_00e43a60() const
+hkpVehicleDriverInputAnalogStatus* hkpVehicleDriverInputAnalogStatus::FUN_00e43a60() const
 {
-    hkCloneE43A* p = new hkCloneE43A;
+    hkpVehicleDriverInputAnalogStatus* p = new hkpVehicleDriverInputAnalogStatus;
     *p = *this;
     return p;
 }
@@ -361,26 +314,27 @@ hkReal AnalogDriverInput::GetOutput(hkReal deltaTime, const void* vehicle, const
 }
 }  // namespace fnv_00e436b0
 
-struct __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00e43780 FUN_00e43780: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef struct __declspec(intrin_type) __declspec(align(16)) {
     float f0, f1, f2, f3;
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_set_ss(float);
-    __m128 _mm_load_ps(const float*);
-    void _mm_store_ss(float*, __m128);
-    float _mm_cvtss_f32(__m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_sqrt_ss(__m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
+    LocalM128 _mm_set_ss(float);
+    LocalM128 _mm_load_ps(const float*);
+    void _mm_store_ss(float*, LocalM128);
+    float _mm_cvtss_f32(LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sqrt_ss(LocalM128);
+    LocalM128 _mm_rsqrt_ss(LocalM128);
+    LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
 }
 
 extern const float DAT_01011d78 = 0.0f;
@@ -394,9 +348,9 @@ namespace e43780 {
 struct HkVec
 {
     float x, y, z, w;
-    __forceinline const __m128& quad() const
+    __forceinline const LocalM128& quad() const
     {
-        return *(const __m128*)&x;
+        return *(const LocalM128*)&x;
     }
 };
 
@@ -437,7 +391,7 @@ struct StatusX
     int ua0, ua4, ua8, uac;
     int ub0, ub4, ub8, ubc;
     int uc0, uc4, uc8;
-    hkBool m_iGearCount;
+    char m_iGearCount;
 };
 
 struct InputX
@@ -455,33 +409,33 @@ static __forceinline ButtonResult makeBtn(unsigned char v)
     return r;
 }
 
-static __forceinline __m128 sqrtInv(__m128 x)
+static __forceinline LocalM128 sqrtInv(LocalM128 x)
 {
-    __m128 r = _mm_rsqrt_ss(x);
-    __m128 nr = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(DAT_01016248), r),
+    LocalM128 r = _mm_rsqrt_ss(x);
+    LocalM128 nr = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(DAT_01016248), r),
                            _mm_sub_ss(_mm_set_ss(DAT_01017718), _mm_mul_ss(_mm_mul_ss(x, r), r)));
     return _mm_andnot_ps(_mm_cmpeq_ss(x, _mm_set_ss(DAT_01011d78)), nr);
 }
 
-static __forceinline __m128 reduce3(__m128 m)
+static __forceinline LocalM128 reduce3(LocalM128 m)
 {
-    __m128 s = _mm_shuffle_ps(m, m, 0x55);
+    LocalM128 s = _mm_shuffle_ps(m, m, 0x55);
     s = _mm_add_ss(s, m);
-    __m128 t = _mm_shuffle_ps(m, m, 0xaa);
+    LocalM128 t = _mm_shuffle_ps(m, m, 0xaa);
     return _mm_add_ss(t, s);
 }
 
-static __forceinline __m128 rotateDir(VehInst* veh, const HkVec& bodyPos)
+static __forceinline LocalM128 rotateDir(VehInst* veh, const HkVec& bodyPos)
 {
     HkVec col0 = veh->m_kColumn0;
     HkVec col1 = veh->m_kColumn1;
     HkVec col2 = veh->m_kColumn2;
 
-    __m128 v = _mm_load_ps(&bodyPos.x);
-    __m128 r0 = _mm_load_ps(&col0.x);
-    __m128 q = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), _mm_load_ps(&col1.x));
+    LocalM128 v = _mm_load_ps(&bodyPos.x);
+    LocalM128 r0 = _mm_load_ps(&col0.x);
+    LocalM128 q = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), _mm_load_ps(&col1.x));
     q = _mm_add_ps(q, _mm_mul_ps(_mm_shuffle_ps(v, v, 0x00), r0));
-    __m128 z = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), _mm_load_ps(&col2.x));
+    LocalM128 z = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), _mm_load_ps(&col2.x));
     return _mm_add_ps(q, z);
 }
 
@@ -502,7 +456,7 @@ ButtonResult Cls::FUN_00e43780(int a1, StatusX* status, InputX* input, int a4)
 
     VehInst* veh = status->m_veh;
     HkVec pos = veh->m_pos;
-    hkBool bReverse = status->m_iGearCount;
+    char bReverse = status->m_iGearCount;
 
     float len;
     _mm_store_ss(&len, _mm_sqrt_ss(reduce3(_mm_mul_ps(pos.quad(), pos.quad()))));
@@ -516,12 +470,12 @@ ButtonResult Cls::FUN_00e43780(int a1, StatusX* status, InputX* input, int a4)
         if (len > DAT_0104da4c)
         {
             HkVec bodyPos = status->m_pChassisCollidable->m_pos;
-            __m128 q = rotateDir(veh, bodyPos);
+            LocalM128 q = rotateDir(veh, bodyPos);
 
-            __m128 invP = sqrtInv(reduce3(_mm_mul_ps(pos.quad(), pos.quad())));
-            __m128 invQ = sqrtInv(reduce3(_mm_mul_ps(q, q)));
-            __m128 np = _mm_mul_ps(_mm_shuffle_ps(invP, invP, 0), pos.quad());
-            __m128 nq = _mm_mul_ps(_mm_shuffle_ps(invQ, invQ, 0), q);
+            LocalM128 invP = sqrtInv(reduce3(_mm_mul_ps(pos.quad(), pos.quad())));
+            LocalM128 invQ = sqrtInv(reduce3(_mm_mul_ps(q, q)));
+            LocalM128 np = _mm_mul_ps(_mm_shuffle_ps(invP, invP, 0), pos.quad());
+            LocalM128 nq = _mm_mul_ps(_mm_shuffle_ps(invQ, invQ, 0), q);
             float fDot;
             _mm_store_ss(&fDot, reduce3(_mm_mul_ps(nq, np)));
 

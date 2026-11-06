@@ -1,5 +1,12 @@
 // fallout/misc/garbagecollector.cpp: GarbageCollector (22 functions)
 
+#include "../../../include/NiTMallocInterface.h"
+#include "../../../include/NiTNewInterface.h"
+#include "../../../include/NiTArray.h"
+#include "../../../include/BGSSaveLoadGame.h"
+#include "../../../include/GO.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiControllerManager.h"
 #include "garbagecollector_packet.h"
 #include "original_garbagecollector.h"
 
@@ -113,9 +120,10 @@ void GarbageCollector::Update()
         {
             --budget.size;
             --budget.remaining;
-            GarbageCollectorObjectPtr object = g_011de888.RemoveAt(budget.size);
-            if (object.FUN_0052aa80(0))
-                object.object->RemoveGarbageMark();
+            NiPointer<NiAVObject> object = g_011de888.RemoveAt(budget.size);
+            // The shared NiPointer lacks inequality; GO exposes the same pointer comparison.
+            if (reinterpret_cast<const GO&>(object) != 0)
+                object.m_pObject->RemoveGarbageMark();
         }
     }
     else if (g_011de848.GetSize())
@@ -135,7 +143,7 @@ void GarbageCollector::Update()
                 --budget.size;
                 --budget.remaining;
                 TESObjectREFR* object = ms_kReferencesQueuedForRemoval.GetAt(0);
-                if (object->vfn_100() || object->FUN_00564d80())
+                if (object->IsActor() || object->FUN_00564d80())
                     --special;
                 delete object;
             }
@@ -145,7 +153,7 @@ void GarbageCollector::Update()
     else if (ObjectGarbageB.GetSize())
     {
         ForEachNavMesh(&ObjectGarbageB, &ms_kReferencesQueuedForRemoval);
-        reinterpret_cast<NiTPrimitiveArray_unsigned_int_*>(&ObjectGarbageB)->RemoveAll();
+        ObjectGarbageB.RemoveAll();
     }
     else if (g_011de924.GetSize())
     {
@@ -155,7 +163,7 @@ void GarbageCollector::Update()
         {
             --budget.size;
             --budget.remaining;
-            g_011de924.GetAt(0)->debug.FUN_00401970();
+            g_011de924.GetAt(0u)->NiRefObject::DecRefCount();
             g_011de924.Remove(0, true);
         }
     }
@@ -167,11 +175,7 @@ void GarbageCollector::Update()
     UnlockGarbageCollector(true);
 }
 
-struct NavMeshPtr
-{
-    operator NavMesh*() const;
-    NavMesh* FUN_00458b50();
-};
+#include "../../../include/NavMeshPtr.h"
 struct TwoPointerRecord
 {
     TwoPointerRecord(unsigned int, const char*);
@@ -185,7 +189,7 @@ extern __declspec(thread) bool DAT_tlsFlag;
 void __cdecl AddNavMeshToGarbageCollector(NavMeshPtr& apNavMesh)
 {
     TwoPointerRecord tempAutoEvent(0x20, "GarbageCollector::Add(NavMeshPtr)");
-    ((NavMesh*)apNavMesh)->debug.FUN_0040f6e0();
+    ((NavMesh*)apNavMesh)->NiRefObject::IncRefCount();
     if (DAT_tlsFlag)
     {
         NavMesh* mesh = apNavMesh.FUN_00458b50();
@@ -198,16 +202,12 @@ void __cdecl AddNavMeshToGarbageCollector(NavMeshPtr& apNavMesh)
     }
 }
 
-struct Flt
-{
-    operator unsigned int() const;
-};
 bool __cdecl FUN_00867f70();
 bool __cdecl HasFlags(int);
 bool __cdecl BSSpinLockGlobalTryLock();
 void __cdecl FUN_00452530();
 void FUN_00869560(void*, void*);
-extern GlobalObject_00869db0 g_011de858;
+extern NiTObjectArray<NiPointer<BSTempEffect> > g_011de858;
 extern bool DAT_011de958;
 extern __declspec(thread) bool bCollecting;
 
@@ -257,8 +257,8 @@ void FUN_00868d70(bool abTryLock)
         {
             for (unsigned int i = 0; i < g_011de888.GetSize(); i++)
             {
-                if ((const Flt&)g_011de888.GetAt(i))
-                    g_011de888.GetAt(i).object->RemoveGarbageMark();
+                if ((NiAVObject*)(const NiPointer<NiAVObject>&)g_011de888.GetAt(i))
+                    g_011de888.GetAt(i).m_pObject->RemoveGarbageMark();
             }
             g_011de888.RemoveAll();
         }
@@ -269,20 +269,20 @@ void FUN_00868d70(bool abTryLock)
                 TESObjectREFR* pref = GarbageCollector::ms_kReferencesQueuedForRemoval.GetAt(0);
                 delete pref;
             }
-            ((NiTPrimitiveArray_unsigned_int_*)&GarbageCollector::ms_kReferencesQueuedForRemoval)->RemoveAll();
+            GarbageCollector::ms_kReferencesQueuedForRemoval.RemoveAll();
             g_modelLoader->FUN_004aaf10();
         }
         if (!HasFlags(0x20))
         {
             for (unsigned int i = 0; i < g_011de924.GetSize(); i++)
-                g_011de924.GetAt(i)->debug.FUN_00401970();
+                g_011de924.GetAt(i)->NiRefObject::DecRefCount();
             g_011de924.Clear(true);
         }
         bCollecting = bWasCollecting;
         if (bCollecting)
         {
             ForEachNavMesh(&GarbageCollector::ObjectGarbageB, &GarbageCollector::ms_kReferencesQueuedForRemoval);
-            ((NiTPrimitiveArray_unsigned_int_*)&GarbageCollector::ObjectGarbageB)->RemoveAll();
+            GarbageCollector::ObjectGarbageB.RemoveAll();
             FUN_00869420(&g_011de848, &g_011de888);
             g_011de848.RemoveAll();
             ForEachNavMesh(&g_011de838, &g_011de910);
@@ -297,17 +297,10 @@ void FUN_00868d70(bool abTryLock)
     }
 }
 
-struct RecursiveSpinLock
-{
-    void __thiscall Lock(const char*);
-};
+#include "../../../include/RecursiveSpinLock.h"
 
-struct GlobalObject_0096a2d0
-{
-    void __thiscall Lock(const char*);
-};
-
-extern GlobalObject_0096a2d0 g_011de8e0;
+// The garbage collector's lock (a 32-byte aligned global).
+extern RecursiveSpinLock g_011de8e0;
 
 // @fnv 0x00867f50
 void __cdecl LockGlobalObject(const char* apLabel)
@@ -315,38 +308,17 @@ void __cdecl LockGlobalObject(const char* apLabel)
     g_011de8e0.Lock(apLabel);
 }
 
-namespace fnv_00867f70 {
-struct RecursiveSpinLock
-{
-    bool TryLock();
-};
-extern RecursiveSpinLock g_011de8e0;
 // @fnv 0x00867f70
 bool __cdecl FUN_00867f70()
 {
     return g_011de8e0.TryLock();
 }
-}  // namespace fnv_00867f70
-
-namespace fnv_00867f80 {
-struct RecursiveSpinLock
-{
-    void Unlock();
-};
-
-struct GlobalObject_0096a2d0
-{
-    RecursiveSpinLock lock;
-};
-
-extern GlobalObject_0096a2d0 g_011de8e0;
 
 // @fnv 0x00867f80
 void FUN_00867f80()
 {
-    g_011de8e0.lock.Unlock();
+    g_011de8e0.Unlock();
 }
-}  // namespace fnv_00867f80
 
 struct FUN_00868210_shell
 {
@@ -370,15 +342,18 @@ void FUN_00868210_shell::ClearBitsAndUnlockGC()
 
 void __cdecl FUN_00868770(int* a, int b);
 
-struct FUN_00868740_shell
+// NiAVObject.h lacks the collector mark operation (0x00868740).
+// Keep just its member-call adapter; the refcount field comes from the shared class.
+struct GarbageMarkAdapter
 {
-    void FUN_00868740();
+    void MarkForCollection();
 };
 
 // @fnv 0x00868740
-void FUN_00868740_shell::FUN_00868740()
+void GarbageMarkAdapter::MarkForCollection()
 {
-    FUN_00868770(reinterpret_cast<int*>(this) + 1, *(reinterpret_cast<int*>(this) + 1) | 0x40000000);
+    FUN_00868770(reinterpret_cast<int*>(&reinterpret_cast<NiAVObject*>(this)->m_uiRefCount),
+        reinterpret_cast<NiAVObject*>(this)->m_uiRefCount | 0x40000000);
 }
 
 struct FUN_008681c0_shell
@@ -398,91 +373,69 @@ FUN_008681c0_shell* __thiscall FUN_008681c0_shell::InitFlags(int aiFlags, const 
     return this;
 }
 
-struct S_00868ce0
-{
-    int m_00;
-    int m_04;
-    void __thiscall FUN_00868ce0();
-};
-// Clears bit 30 of m_04 and passes the result to FUN_00868770 along with the address of m_04.
+// Clears the garbage-collection flag in the reference count through the atomic exchange adapter.
 // @fnv 0x00868ce0
-void __thiscall S_00868ce0::FUN_00868ce0()
+void __thiscall NiAVObject::RemoveGarbageMark()
 {
-    FUN_00868770(&m_04, m_04 & 0xBFFFFFFF);
+    FUN_00868770(reinterpret_cast<int*>(&m_uiRefCount), m_uiRefCount & 0xBFFFFFFF);
 }
 
-struct FUN_008693c0_shell
-{
-    unsigned char _00[10];
-    unsigned short m_0A;
-    void __thiscall FUN_00869640(int a, int b);
-    void __thiscall FUN_008693c0(int a);
-};
-// Forwards the value to FUN_00869640 together with the field at offset 0x0A.
 // @fnv 0x008693c0
-void __thiscall FUN_008693c0_shell::FUN_008693c0(int aiValue)
+template <class T, class TAlloc>
+unsigned int NiTArray<T, TAlloc>::Add(const T& element)
 {
-    FUN_00869640(m_0A, aiValue);
+    return SetAtGrow(m_usSize, element);
 }
 
-struct Caller008693c0
-{
-    void __thiscall FUN_008693c0(NavMesh**);
-};
-// Iterates over apArray's elements, and for each non-null NavMesh calls apObj->FUN_008693c0 with a pointer to it.
+// Copies non-null four-byte entries between the collector's raw-pointer arrays.
 // @fnv 0x008694c0
-void __cdecl ForEachNavMesh(GlobalObject_004aff00* apArray, Caller008693c0* apObj)
+template <class T>
+void __cdecl ForEachNavMesh(NiTObjectArray<T>* apArray, NiTObjectArray<T>* apObj)
 {
     unsigned int i;
     for (i = 0; i < apArray->GetSize(); i++)
     {
-        NavMesh* cur;
-        cur = ((GlobalObject_00869f00*)apArray)->GetAt(i);
+        T cur;
+        cur = apArray->GetAt(i);
         if (cur != 0)
         {
-            apObj->FUN_008693c0(&cur);
+            apObj->Add(cur);
         }
     }
 }
 
-struct ProxyArray
-{
-    NavMesh*& __thiscall FUN_006a7ad0(unsigned int);
-};
-// Iterates over a's elements, retrieves each NavMesh via FUN_006a7ad0, and adds the non-null ones to b.
+// Copies non-null meshes between the collector's BSSimpleArray queues.
 // @fnv 0x00869510
-void CopyNonNullElements(GlobalObject_00869f00* apSource, GlobalObject_00869f00* apDest)
+void CopyNonNullElements(BSSimpleArray<NavMesh*>* apSource, BSSimpleArray<NavMesh*>* apDest)
 {
     unsigned int i;
     for (i = 0; i < apSource->GetSize(); i++)
     {
         NavMesh* v;
-        v = ((ProxyArray*)apSource)->FUN_006a7ad0(i);
+        v = apSource->GetAt(static_cast<int>(i));
         if (v)
             apDest->Add(v);
     }
 }
 
-struct FUN_0050f5a0_struct
+// NiAVObject.h does not yet expose the child cleanup at 0x0050f5a0.
+// This adapter declares only the missing call, without duplicating the object layout.
+struct ChildGarbageCleanupAdapter
 {
-    void FUN_0050f5a0();
-};
-struct FUN_00572160_shell
-{
-    void FUN_00572160();
+    void ClearChildGarbage();
 };
 // @fnv 0x00572160
-void FUN_00572160_shell::FUN_00572160()
+void NiNode::FUN_00572160()
 {
     unsigned int i;
-    unsigned int count = ((GlobalObject_004aff00*)((char*)this + 0x9c))->GetSize();
+    unsigned int count = m_kChildren.GetSize();
     for (i = 0; i < count; ++i)
     {
-        unsigned int effect = (Flt&)((GlobalObject_00869f00*)((char*)this + 0x9c))->GetAt(i);
+        unsigned int effect = (unsigned int)(NiAVObject*)(const NiPointer<NiAVObject>&)m_kChildren.GetAt(i);
         if (effect)
-            ((FUN_0050f5a0_struct*)effect)->FUN_0050f5a0();
+            ((ChildGarbageCleanupAdapter*)effect)->ClearChildGarbage();
     }
-    ((GlobalObject_004aff00*)((char*)this + 0x9c))->RemoveAll();
+    m_kChildren.RemoveAll();
 }
 
 extern void(__stdcall* DAT_00fdf0e4)(void*, void*);
@@ -492,17 +445,7 @@ void __cdecl FUN_00868770(int* a, int b)
     DAT_00fdf0e4(a, (void*)b);
 }
 
-struct GO
-{
-    int m_00;
-    GO(int);
-    ~GO();
-};
-struct FUN_008693f0_Class
-{
-    void FUN_008693f0(int);
-};
-// Constructs a GO from ai and passes it to FUN_008693f0 on g_011de828 or g_011de858 depending on DAT_tlsFlag.
+// Adds a temporary-effect pointer to the active or deferred garbage queue.
 // @fnv 0x00868490
 void __cdecl FUN_00868490(int aiEffect)
 {
@@ -510,19 +453,14 @@ void __cdecl FUN_00868490(int aiEffect)
     if (DAT_tlsFlag)
     {
         GO p(aiEffect);
-        ((FUN_008693f0_Class*)&g_011de828)->FUN_008693f0((int)&p);
+        g_011de828.Add(reinterpret_cast<const NiPointer<BSTempEffect>&>(p));
     }
     else
     {
         GO p(aiEffect);
-        ((FUN_008693f0_Class*)&g_011de858)->FUN_008693f0((int)&p);
+        g_011de858.Add(reinterpret_cast<const NiPointer<BSTempEffect>&>(p));
     }
 }
-
-struct BGSSaveLoadGame
-{
-    bool FUN_0042ce10();
-};
 
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
@@ -540,25 +478,16 @@ void __cdecl FUN_00868560(GarbageCollectorDeleteB* apObject)
         }
         else
         {
-            reinterpret_cast<FUN_008693c0_shell*>(&g_011de838)->FUN_008693c0(reinterpret_cast<int>(&apObject));
+            g_011de838.Add(apObject);
         }
     }
     else
     {
-        reinterpret_cast<FUN_008693c0_shell*>(&g_011de910)->FUN_008693c0(reinterpret_cast<int>(&apObject));
+        g_011de910.Add(apObject);
     }
 }
 
-extern GlobalObject_004aff00 g_011de848;
-extern GlobalObject_004aff00 g_011de888;
-
-template <> class NiTArray<NiPointer<NiAVObject>, NiTNewInterface<NiPointer<NiAVObject> > >
-{
-  public:
-    unsigned int Add(const NiPointer<NiAVObject>& object);
-};
-
-// Calls FUN_00868740 on apObject if non-null, then adds it to one of two global NiTArray lists depending on bCollecting.
+// Marks a non-null object for collection and queues its smart pointer.
 // @fnv 0x00868660
 void FUN_00868660(NiAVObject* apObject)
 {
@@ -566,48 +495,35 @@ void FUN_00868660(NiAVObject* apObject)
 
     if (apObject)
     {
-        reinterpret_cast<FUN_00868740_shell*>(apObject)->FUN_00868740();
+        reinterpret_cast<GarbageMarkAdapter*>(apObject)->MarkForCollection();
     }
 
     if (bCollecting)
     {
         GO object(reinterpret_cast<int>(apObject));
-        reinterpret_cast<NiTArray<NiPointer<NiAVObject>, NiTNewInterface<NiPointer<NiAVObject> > >*>(&g_011de888)
-            ->Add(reinterpret_cast<const NiPointer<NiAVObject>&>(object));
+        g_011de888.Add(reinterpret_cast<const NiPointer<NiAVObject>&>(object));
     }
     else
     {
         GO object(reinterpret_cast<int>(apObject));
-        reinterpret_cast<NiTArray<NiPointer<NiAVObject>, NiTNewInterface<NiPointer<NiAVObject> > >*>(&g_011de848)
-            ->Add(reinterpret_cast<const NiPointer<NiAVObject>&>(object));
+        g_011de848.Add(reinterpret_cast<const NiPointer<NiAVObject>&>(object));
     }
 }
 
-struct AnimationManager
+// The shared NiAVObject declares GetController, but not removal at 0x00a5c480.
+struct ControllerRemovalAdapter
 {
-    void FUN_0048fef0(float);
-};
-struct TimeController
-{
-};
-struct SceneObject
-{
-    TimeController* FUN_00a5c570(const void*);
-    void FUN_00a5c480(TimeController*);
+    void RemoveController(NiTimeController*);
 };
 struct AnimationObject
 {
     void FUN_0048ff50();
-    AnimationManager* FUN_00496940();
-    SceneObject* FUN_005585e0();
+    NiControllerManager* FUN_00496940();
+    NiAVObject* FUN_005585e0();
 };
 struct AnimationLoader
 {
     void FUN_00445430(AnimationObject*);
-};
-struct AnimationQueue
-{
-    void FUN_008693c0(AnimationObject**);
 };
 extern int DAT_011f36bc;
 extern int g_011f36e4;
@@ -618,15 +534,15 @@ void AddAnimationToGarbageCollector(AnimationObject* object)
     object->FUN_0048ff50();
     if (object->FUN_00496940())
         object->FUN_00496940()->FUN_0048fef0(0.0f);
-    SceneObject* pRoot = object->FUN_005585e0();
+    NiAVObject* pRoot = object->FUN_005585e0();
     if (pRoot)
     {
-        TimeController* controller = pRoot->FUN_00a5c570(&DAT_011f36bc);
+        NiTimeController* controller = pRoot->GetController(reinterpret_cast<const NiRTTI*>(&DAT_011f36bc));
         if (controller)
-            pRoot->FUN_00a5c480(controller);
-        controller = pRoot->FUN_00a5c570(&g_011f36e4);
+            reinterpret_cast<ControllerRemovalAdapter*>(pRoot)->RemoveController(controller);
+        controller = pRoot->GetController(reinterpret_cast<const NiRTTI*>(&g_011f36e4));
         if (controller)
-            pRoot->FUN_00a5c480(controller);
+            reinterpret_cast<ControllerRemovalAdapter*>(pRoot)->RemoveController(controller);
     }
     ((AnimationLoader*)g_modelLoader)->FUN_00445430(object);
     if (!DAT_tlsFlag || (g_BGSSaveLoadGame && g_BGSSaveLoadGame->FUN_0042ce10()))
@@ -635,6 +551,6 @@ void AddAnimationToGarbageCollector(AnimationObject* object)
     }
     else
     {
-        ((AnimationQueue*)&g_011de808)->FUN_008693c0(&object);
+        g_011de808.Add(reinterpret_cast<GarbageCollectorDeleteA*&>(object));
     }
 }

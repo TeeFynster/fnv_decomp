@@ -514,10 +514,7 @@ Derived::Derived()
 {}
 }  // namespace fnv_00b90b40
 
-struct NiMemObject
-{
-    static void operator delete(void* p, unsigned int size);
-};
+#include "../../include/NiMemObject.h"
 struct FUN_00b90ca0_BaseA : NiMemObject
 {
     virtual ~FUN_00b90ca0_BaseA();

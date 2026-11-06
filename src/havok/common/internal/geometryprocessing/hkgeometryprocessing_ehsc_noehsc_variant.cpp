@@ -21,21 +21,9 @@ struct FUN_00dee6b0_Class
     float FUN_00dee6b0(int testFlag);
 };
 extern int DAT_010cd664;
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct FUN_00dee6c0_cls
 {
     int m_vptr;
@@ -59,13 +47,13 @@ extern "C"
     __m128 _mm_load_ps1(const float* p);
     void _mm_store_ss(float* p, __m128 a);
 }
-struct VectorComponentValue
+struct hkSimdReal
 {
     __m128 m_vValue;
 
-    VectorComponentValue()
+    hkSimdReal()
     {}
-    VectorComponentValue(const __m128& r) : m_vValue(r)
+    hkSimdReal(const __m128& r) : m_vValue(r)
     {}
     operator float() const
     {
@@ -74,7 +62,7 @@ struct VectorComponentValue
         return f;
     }
 };
-__forceinline VectorComponentValue operator/(const VectorComponentValue& a, const VectorComponentValue& b)
+__forceinline hkSimdReal operator/(const hkSimdReal& a, const hkSimdReal& b)
 {
     return _mm_div_ss(a.m_vValue, b.m_vValue);
 }
@@ -90,19 +78,19 @@ struct hkVector4
     {
         m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
     }
-    __forceinline void setAddMul4(const hkVector4& a, const hkVector4& b, const VectorComponentValue& r)
+    __forceinline void setAddMul4(const hkVector4& a, const hkVector4& b, const hkSimdReal& r)
     {
         m_vComponents =
             _mm_add_ps(a.m_vComponents, _mm_mul_ps(_mm_shuffle_ps(r.m_vValue, r.m_vValue, 0), b.m_vComponents));
     }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
+    __forceinline hkSimdReal dot3(const hkVector4& a) const
     {
         const __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
         const __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
         const __m128 z = _mm_shuffle_ps(x2, x2, 0xaa);
         return _mm_add_ss(z, xySum);
     }
-    __forceinline VectorComponentValue lengthSquared3() const
+    __forceinline hkSimdReal lengthSquared3() const
     {
         return dot3(*this);
     }

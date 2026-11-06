@@ -1,3 +1,6 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#include "../../include/hkArray.h"
 // src/staging/blk_00e40000_o2_fpfast_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00e40000_o2_fpfast_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -8,6 +11,10 @@
 // src/staging/blk_00e40000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkBool.h"
 struct FUN_00e428f0_class
 {
     void Remove(void*);
@@ -170,15 +177,6 @@ struct FUN_00e406d0_cls
     float* m_50;
     void ClampBoundsAt(int index, float value);
 };
-struct HolderStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    void* m_pAllocator;
-};
-HolderStub* __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void* pAllocator, void* pArray, unsigned int auiNewSize);
 struct ValueArray
 {
@@ -432,30 +430,18 @@ struct E4AAA0Element
     int m_iThirdValue;
     int m_iFourthElementInteger;
 };
-struct E4AAA0Array
+static __forceinline void E4AAA0Array_reserve(hkArrayBase<E4AAA0Element>& self, E4AAA0Allocator& alloc, int n);
+
+static __forceinline void E4AAA0Array_reserve(hkArrayBase<E4AAA0Element>& self, E4AAA0Allocator& alloc, int n)
 {
-    E4AAA0Element* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    void reserve(E4AAA0Allocator& alloc, int n)
-    {
-        const int cap = getCapacity();
+        const int cap = self.getCapacity();
         if (cap < n)
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(E4AAA0Element));
+            FUN_00c908c0(&alloc, (&self), newSize, sizeof(E4AAA0Element));
         }
     }
-
-    void InsertElements(E4AAA0Allocator& alloc, int index, int numdel, const E4AAA0Element* p, int numtoinsert);
-};
 class E4AE50ReferencedObject
 {
   public:
@@ -586,51 +572,6 @@ inline void SwapByte(unsigned char& left, unsigned char& right)
 void __cdecl FUN_00e53000(unsigned char* bytes);
 extern "C" void _ReadWriteBarrier(void);
 void __cdecl FUN_00e53030(unsigned char* p);
-class FUN_00e53160
-{
-  public:
-    float m_fVectorY;
-    float m_fVectorZ;
-    float m_fScalarPart;
-    float m_fVectorX;
-
-    FUN_00e53160(float fX, float fY, float fZ, float fW);
-};
-struct FUN_00e53180_cls
-{
-    float m_00;
-    float m_04;
-    float m_08;
-    float m_0c;
-    FUN_00e53180_cls(const float* pSrc);
-};
-struct FUN_00e531a0_struct
-{
-    float m_00;
-    float m_04;
-    float m_08;
-    float m_0c;
-
-    FUN_00e531a0_struct* FUN_00e531a0(const FUN_00e531a0_struct* other);
-};
-// FUN_00e531d0: thiscall member of a 4-float vector; subtracts a vector
-// (given by pointer/reference) from itself, in place, and returns itself.
-struct FUN_00e531d0_cls
-{
-    float m_00;
-    float m_04;
-    float m_08;
-    float m_0c;
-    FUN_00e531d0_cls* FUN_00e531d0(const float* pOther);
-};
-struct FUN_00e53200_cls
-{
-    float m_00;
-    float m_04;
-    float m_08;
-    float m_0c;
-    FUN_00e53200_cls(float s);
-};
 struct E53230Color
 {
     float r;
@@ -639,26 +580,6 @@ struct E53230Color
     float a;
 
     E53230Color& DivideByScalar(float fScalar);
-};
-struct FourFloatVector
-{
-    float x;
-    float y;
-    float z;
-    float w;
-
-    FourFloatVector& FUN_00e531a0(int parameter);
-    FourFloatVector FUN_00e53260(int parameter);
-};
-struct S_e53300_Vec;
-struct S_e53300_Vec
-{
-    float unk00;
-    float unk04;
-    float unk08;
-    float unk0c;
-    S_e53300_Vec& FUN_00e53200(float f);
-    S_e53300_Vec ScaleCopy(float f);
 };
 struct Quad4
 {
@@ -1364,8 +1285,8 @@ struct ExtendedListeners
 
     static void* operator new(size_t sz)
     {
-        HolderStub* mgr = FUN_00c85750();
-        return ((AllocationHeap*)mgr->m_pAllocator)->Allocate(sz);
+        hkMemoryRouter* mgr = (&hkMemoryRouter::getInstance());
+        return ((AllocationHeap*)mgr->m_heap)->Allocate(sz);
     }
 };
 struct ActorEntry
@@ -1524,8 +1445,8 @@ template <typename T> struct HkArray
 
     void ClearAndRelease()
     {
-        HolderStub* mgr = FUN_00c85750();
-        AllocationHeap* heap = (AllocationHeap*)mgr->m_pAllocator;
+        hkMemoryRouter* mgr = (&hkMemoryRouter::getInstance());
+        AllocationHeap* heap = (AllocationHeap*)mgr->m_pStreamAllocator;
         int cap = m_iCapacityState;
         m_iElementCount = 0;
         if ((cap & 0x80000000) == 0)
@@ -1607,16 +1528,6 @@ struct Entry
 struct Allocator
 {
 };
-struct Router
-{
-    int a, b, c, d;
-    Allocator* heap;
-    Allocator& getHeap()
-    {
-        return *heap;
-    }
-};
-Router* getRouter();
 int FUN_00e60cb0(unsigned char type, int count);
 extern "C" void FUN_00c908c0(Allocator*, void*, int, int);
 void FUN_00cb1260(void*, const void*, int);
@@ -1744,14 +1655,6 @@ struct L
     int m_04;
 };
 void __cdecl FUN_00e54c10(int idx, L* list);
-struct HolderView
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    void* volatile m_pAllocator;
-};
 struct FloatArrayRef
 {
     float* data;
@@ -1760,41 +1663,20 @@ struct FloatArrayRef
 };
 int __cdecl FUN_00e57210(FloatArrayRef* array, int count);
 struct ArrayAllocator;
-struct FloatArray;
-void FUN_00c908c0(ArrayAllocator* alloc, FloatArray* arr, int newCap, int elemSize);
-struct FloatArray
+
+void FUN_00c908c0(ArrayAllocator* alloc, hkArrayBase<float>* arr, int newCap, int elemSize);
+static __forceinline void FloatArray_reserve(hkArrayBase<float>& self, ArrayAllocator& alloc, int n);
+
+static __forceinline void FloatArray_reserve(hkArrayBase<float>& self, ArrayAllocator& alloc, int n)
 {
-    float* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void reserve(ArrayAllocator& alloc, int n)
-    {
-        int cap = getCapacity();
+        int cap = self.getCapacity();
         if (cap < n)
         {
             int c = 2 * cap;
-            FUN_00c908c0(&alloc, this, n < c ? c : n, 4);
+            FUN_00c908c0(&alloc, (&self), n < c ? c : n, 4);
         }
     }
-};
-struct MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    ArrayAllocator* m_pStreamAllocator;
-    ArrayAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-MemoryRouter* GetMemoryRouter();
-int RemoveAdjacentDuplicates(FloatArray* arr, int last);
+int RemoveAdjacentDuplicates(hkArrayBase<float>* arr, int last);
 // Element-wise subtract another matrix of the same shape from this one.
 class E87E0Matrix
 {
@@ -2054,36 +1936,17 @@ struct GtrStand_
     int unk14;
     void* FUN_00e4af40();
 };
-struct HolderStub;
-HolderStub* __cdecl FUN_00c85750();
-HolderStub* __cdecl FUN_00e4e3f0();
+hkMemoryRouter* __cdecl FUN_00e4e3f0();
 void FUN_00e52f10();
 void __cdecl FUN_00e52f20();
 void FUN_00e52f30();
-struct FUN_00e53180_Obj
-{
-    float x;
-    float y;
-    float z;
-    float w;
-    void FUN_00e53180(const Float4* source);
-};
-void __cdecl FUN_00e546e0(int a, int b, int c, int d, int count, float** inputs, FUN_00e53180_Obj** outputs);
+void __cdecl FUN_00e546e0(int a, int b, int c, int d, int count, float** inputs, hkVector4** outputs);
 struct E58E80Object
 {
     void CopyFrom(int setting);
 };
 E87E0Matrix* __fastcall FUN_00e58e80(int setting, int unused, E58E80Object* object, const E87E0Matrix& right);
 void __cdecl PrefixSum(float* p, unsigned int n);
-class hkBool
-{
-  public:
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    char m_cBooleanValue;
-};
 hkBool __cdecl InvertMatrix2x2(const float* m, float* out, float fEps);
 struct E5B110Ref
 {
@@ -2103,26 +1966,16 @@ static void FUN_00e5b110(E5B110Obj* obj, void* p);
 void E5B110Caller(char* q, int a, int b, int c);
 int GetUnsignedValue(const char*, bool, unsigned*);
 int FUN_00e5c8a0(const char* p, bool b, unsigned* u);
-struct UnkRet;
 struct FUN_00e47390_obj
 {
     virtual void v00();
     virtual void v04();
     virtual void v08(void* p, unsigned int bytes);
 };
-struct UnkRet
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    FUN_00e47390_obj* m_10;
-};
 struct UnkHolder
 {
     void* m_00;
     unsigned int m_04;
-    UnkRet* FUN_00c85750();
     void FUN_00e47390();
 };
 extern float DAT_0108cb00;

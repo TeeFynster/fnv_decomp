@@ -1,3 +1,4 @@
+#include "../../../../include/hkArray.h"
 
 // src/havok/common/visualize/hkprocessfactory.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/hkprocessfactory.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -137,14 +138,12 @@ struct S_00dd94c0_Entry
     void FUN_00cb0c00() throw();
 };
 
-struct S_00dd94c0_Array
+typedef hkArrayBase<S_00dd94c0_Entry> S_00dd94c0_Array;
+template<> __forceinline void hkArrayBase<S_00dd94c0_Entry>::_clearAndDeallocate(hkMemoryAllocator& sharedAlloc)
 {
-    S_00dd94c0_Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline void clear() throw()
-    {
-        S_00dd94c0_Heap& h = S_00dd94c0_GetHeap();
+S_00dd94c0_Heap& h = reinterpret_cast<S_00dd94c0_Heap&>(sharedAlloc);
+
+        
         int n = m_iElementCount;
         S_00dd94c0_Entry* p = m_data;
         for (int i = 0; i < n; i++, p++)
@@ -154,8 +153,9 @@ struct S_00dd94c0_Array
             h.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(S_00dd94c0_Entry));
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-};
+    
+}
+
 
 struct S_00dd94c0_Base
 {
@@ -183,7 +183,7 @@ FUN_00dd94c0::~FUN_00dd94c0() throw()
         FUN_00dd9580_Service* sv = FUN_00c85750();
         sv->unk10->notify(lock, 0x18);
     }
-    m_entries.clear();
+    m_entries._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(S_00dd94c0_GetHeap()));
 }
 
 int FUN_00cb0fa0(const char* a, const char* b);
@@ -234,8 +234,8 @@ struct S_00dd9380_Entry
 
 void FUN_00c908c0(S_00dd9380_Allocator& alloc, void* array, int numElem, int sizeElem);
 
-struct S_00dd9380_Array
-{
+struct S_00dd9380_ArrayLocalForm
+{ // local form of hkArray: 0x00dd9380 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     S_00dd9380_Entry* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -273,7 +273,7 @@ struct S_00dd9380
     int unk0;
     int unk4;
     int m_nextId;
-    S_00dd9380_Array m_entries;
+    S_00dd9380_ArrayLocalForm m_entries;
     CRITICAL_SECTION* m_lock;
     int FUN_00dd9380(const char* name, int value);
 };

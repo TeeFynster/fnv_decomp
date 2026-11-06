@@ -1,11 +1,52 @@
+#include "../../../../include/NiPointer.h"
+#include "../../../../include/BSStringT.h"
+#include "../../../../include/InterfaceManager.h"
+// Actor.h uses these enum types without forward declarations.
+enum DIALOGUE_EMOTION;
+enum SIT_SLEEP_STATE;
+
+#include "../../../../include/NiTexturingProperty.h"
+
+#include "../../../../include/BSShaderProperty.h"
+#include "../../../../include/Menu.h"
+#include "../../../../include/TESNPC.h"
+#include "../../../../include/TESRace.h"
+#include "../../../../include/TESDataHandler.h"
+#include "../../../../include/TESBoundObject.h"
+#include "../../../../include/TESActorBase.h"
+#include "../../../../include/RaceSexMenu.h"
+#include "../../../../include/NiUpdateData.h"
+#include "../../../../include/IOManager.h"
+#include "../../../../include/NiProperty.h"
+#include "../../../../include/MiddleHighProcess.h"
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiPick.h"
+#include "../../../../include/BSAudio.h"
+#include "../../../../include/FORenderedMenu.h"
+#include "../../../../include/GameSettingCollection.h"
+#include "../../../../include/InventoryChanges.h"
+#include "../../../../include/MagicHitEffect.h"
+#include "../../../../include/NiAdditionalGeometryData.h"
+#include "../../../../include/NiFixedString.h"
+#include "../../../../include/NiTimeController.h"
+#include "../../../../include/NiControllerManager.h"
+#include "../../../../include/SettingT_GameSettingCollection_.h"
+#include "../../../../include/TES.h"
+#include "../../../../include/TESEyes.h"
+#include "../../../../include/TESFullName.h"
+#include "../../../../include/TESHair.h"
+#include "../../../../include/Tile.h"
+
+// Animation::FUN_00496940 is bound at 0x00496940; include/ has no Animation.h yet.
+class Animation
+{
+public:
+    NiControllerManager* FUN_00496940();
+};
 
 // src/fallout/interface/menus/racesexmenu.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/interface/menus/racesexmenu.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-
-struct RaceSexMenu
-{
-    int __thiscall FUN_007ac4f0();
-};
 
 // @fnv 0x007ac4f0
 int __thiscall RaceSexMenu::FUN_007ac4f0()
@@ -63,14 +104,9 @@ void FUN_007b3720_shell::FUN_007b3720(int value)
     *(int*)((char*)this + 0x1d8) = value;
 }
 
-struct TGF
-{
-    float GetFloat(int);
-};
-
 struct RaceSexMenu_MenuOption
 {
-    TGF* pTGF;
+    Tile* pTGF;
     void FUN_007b3840(int& aiLow, int& aiHigh);
 };
 
@@ -96,11 +132,6 @@ void FUN_007b3b80_shell::FUN_007b3b80(int aiArg1, int aiArg2)
 {
     CreateEntry(aiArg1, "RSM_list_item_template", aiArg2, 0);
 }
-
-struct Tile
-{
-    void Set(int, float, bool);
-};
 
 int __cdecl GetTileValueID(const char*, int);
 
@@ -173,23 +204,19 @@ void* __thiscall FUN_007acb30_shell::FUN_007acb30(unsigned int flags)
 
 extern "C" void* DAT_011da634;
 
-struct ArrSI
+// Exe 0x007ad8d0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct RacesexmenuOffset08View
 {
     unsigned int GetFlags();
 };
 
-struct MiddleHighProcess
-{
-    unsigned int GetAnimation();
-};
-
 // Returns 1 if si is non-null, has flags, and DAT_011da634's process animation equals si's flags; otherwise 0.
 // @fnv 0x007ad8d0
-char __cdecl IsAnimationMatch(ArrSI* pArrSI)
+char __cdecl IsAnimationMatch(RacesexmenuOffset08View* pArrSI)
 {
     int result;
     if (pArrSI && pArrSI->GetFlags() && DAT_011da634 && *(int*)((char*)DAT_011da634 + 0xd8) &&
-        ((MiddleHighProcess*)*(int*)((char*)DAT_011da634 + 0xd8))->GetAnimation() == pArrSI->GetFlags())
+        ((MiddleHighProcess*)*(int*)((char*)DAT_011da634 + 0xd8))->MiddleHighProcess::GetAnimation() == (Animation*)pArrSI->GetFlags())
         result = 1;
     else
         result = 0;
@@ -198,7 +225,7 @@ char __cdecl IsAnimationMatch(ArrSI* pArrSI)
 
 struct FUN_007ae160_Obj
 {
-    TGF* pTGF;
+    Tile* pTGF;
     bool IsSelected();
 };
 // Returns true when pTGF is non-null and its _selected float equals 2.0.
@@ -208,22 +235,19 @@ bool FUN_007ae160_Obj::IsSelected()
     return pTGF && (pTGF->GetFloat(GetTileValueID("_selected", -1)) == 2.0);
 }
 
-struct FUN_007b3740_shell
+// 0x007b3740 reads trait 0x1005 through the first Tile*; this is a menu option, not Tile.
+struct RaceMenuOption
 {
-    TGF* m_pTGF;
+    Tile* m_pTGF;
     int GetFloat1005();
 };
 
 // @fnv 0x007b3740
-int FUN_007b3740_shell::GetFloat1005()
+int RaceMenuOption::GetFloat1005()
 {
     return (int)m_pTGF->GetFloat(0x1005);
 }
 
-struct Tile_Set_Helper
-{
-    void __thiscall Set(int, int);
-};
 struct TileValueAccessor
 {
     Tile* m_tile;
@@ -236,8 +260,8 @@ void __thiscall TileValueAccessor::FUN_007b3890(int aiLow, int aiHigh)
 {
     if (m_tile)
     {
-        ((Tile_Set_Helper*)m_tile)->Set(0x1006, aiLow);
-        ((Tile_Set_Helper*)m_tile)->Set(0x1007, aiHigh);
+        ((Tile*)m_tile)->Set(0x1006, aiLow);
+        ((Tile*)m_tile)->Set(0x1007, aiHigh);
         if (GetFloat1005() < aiLow)
             FUN_007b3760(aiLow);
         if (GetFloat1005() > aiHigh)
@@ -246,13 +270,10 @@ void __thiscall TileValueAccessor::FUN_007b3890(int aiLow, int aiHigh)
 }
 
 namespace fnv_007b3970 {
-struct Tile_Set_Helper
-{
-    void Set(int, int);
-};
+
 struct FUN_007b3970_shell
 {
-    Tile_Set_Helper* m_tile;
+    Tile* m_tile;
     void SetTileEnabled(bool abEnabled);
 };
 // If m_tile is set, calls Set on it with the "_enabled" key and abEnabled.
@@ -266,7 +287,7 @@ void FUN_007b3970_shell::SetTileEnabled(bool abEnabled)
 
 struct S007b39b0
 {
-    TGF* m_iWordAt00;
+    Tile* m_iWordAt00;
     int __thiscall GetPosition();
 };
 // @fnv 0x007b39b0
@@ -384,23 +405,14 @@ int FUN_007b5300_shell::GetSecondField(FUN_007b5300_param* p)
     return p ? p->_4 : 0;
 }
 
-namespace fnv_007ac500 {
-struct Tile;
-struct RaceSexMenu
-{
-    char pad[0x78];
-    Tile* m_pTiles[24];
-    void SetTile(int aiID, Tile* apTile);
-};
-
 // @fnv 0x007ac500
 void RaceSexMenu::SetTile(int aiID, Tile* apTile)
 {
     if (aiID >= 0 && aiID < 6)
         m_pTiles[aiID] = apTile;
 }
-}  // namespace fnv_007ac500
 
+// RaceSexMenu.h lacks the flag field and most menu handlers below.
 struct FUN_007adc30_shell
 {
     char _pad[0xec];
@@ -415,27 +427,13 @@ bool FUN_007adc30_shell::FUN_007adc30(int trait)
     return (m_flags & (1 << trait)) != 0;
 }
 
-struct TileHelper
-{
-    void Set(int, const char*, bool);
-};
-struct BSAudio
-{
-    int GetAudioBackendData();
-};
 struct OptList
 {
     void FUN_007b4410();
     int FUN_0084e3a0();
 };
-struct FORenderedMenu
-{
-    void UpdateSlotSelection(int);
-};
-struct InterfaceManager
-{
-    FORenderedMenu* GetActiveRenderedMenu();
-};
+
+
 InterfaceManager* FUN_004b7210();
 extern Flt g_011da700;
 extern Flt g_011da70c;
@@ -452,7 +450,7 @@ bool FUN_007af180_shell::FUN_007af180(int aeList)
 {
     if (aeList < 20)
     {
-        (*(Tile_Set_Helper**)((char*)this + 4))->Set(0x1004, aeList);
+        (*(Tile**)((char*)this + 4))->Set(0x1004, aeList);
         ((OptList**)((char*)this + 0x28))[aeList]->FUN_007b4410();
         if (aeList == 5 && FUN_007adc30(0))
             PopulateHairOptions();
@@ -463,12 +461,12 @@ bool FUN_007af180_shell::FUN_007af180(int aeList)
         UpdateMinusPlusTiles();
         if (FUN_004b7210()->GetActiveRenderedMenu() && aeList < 4)
             FUN_004b7210()->GetActiveRenderedMenu()->UpdateSlotSelection(aeList);
-        (*(Tile_Set_Helper**)((char*)this + 0x88))
+        (*(Tile**)((char*)this + 0x88))
             ->Set(0xfa3, ((OptList**)((char*)this + 0x28))[aeList]->FUN_0084e3a0() < 20);
-        (*(Tile_Set_Helper**)((char*)this + 0x8c))
-            ->Set(0xfa3, ((BSAudio**)((char*)this + 0x28))[aeList]->GetAudioBackendData() < 20 ||
+        (*(Tile**)((char*)this + 0x8c))
+            ->Set(0xfa3, (int)((BSAudio**)((char*)this + 0x28))[aeList]->GetAudioBackendData() < 20 ||
                              aeList == *(int*)((char*)this + 0x120));
-        (*(TileHelper**)((char*)this + 0x8c))
+        (*(Tile**)((char*)this + 0x8c))
             ->Set(0xfc4, (const char*)(unsigned int)(aeList == *(int*)((char*)this + 0x120) ? g_011da70c : g_011da700),
                   true);
         return true;
@@ -477,19 +475,6 @@ bool FUN_007af180_shell::FUN_007af180(int aeList)
         return false;
 }
 
-struct TESActorBase
-{
-    int GetSex();
-};
-struct HairResult
-{
-    int a;
-    int b;
-};
-struct FUN_004ac110_shell
-{
-    HairResult* FUN_004ac110();
-};
 struct GlobalObject_00869f00
 {
     void Clear(bool);
@@ -502,7 +487,7 @@ struct MenuOption2
     void SetTileEnabled(bool);
     void FUN_007b3890(int, int);
 };
-void __cdecl FUN_00603280(HairResult*, int, GlobalObject_00869f00*);
+void __cdecl FUN_00603280(TESRace*, int, GlobalObject_00869f00*);
 struct FUN_007af610_shell
 {
     void UpdateHairMenuOption();
@@ -511,7 +496,7 @@ struct FUN_007af610_shell
 void FUN_007af610_shell::UpdateHairMenuOption()
 {
     ((GlobalObject_00869f00*)((char*)this + 0xdc))->Clear(false);
-    FUN_00603280(((FUN_004ac110_shell*)*((FUN_004ac110_shell**)((char*)this + 0xd8)))->FUN_004ac110(),
+    FUN_00603280((TESRace*)(*((TESNPC**)((char*)this + 0xd8)))->FUN_004ac110(),
                  ((TESActorBase*)*((TESActorBase**)((char*)this + 0xd8)))->GetSex(),
                  (GlobalObject_00869f00*)((char*)this + 0xdc));
     MenuOption2* popt = ((MenuOption2*)*((MenuOption2**)((char*)this + 0x30)))->FindByColor(0x18);
@@ -527,14 +512,6 @@ void FUN_007af610_shell::UpdateHairMenuOption()
 }
 
 namespace fnv_007b1ca0 {
-struct TESNPC;
-struct TESEyes;
-struct TESHair
-{
-    bool IsValidForNPC(TESNPC*);
-    bool FUN_005fdf60();
-    bool IsFlag4Clear();
-};
 struct FUN_005fdf40_shell
 {
     bool FUN_005fdf40();
@@ -543,31 +520,15 @@ struct FUN_005fc5f0_shell
 {
     bool CanBeNPC(TESNPC*);
 };
-struct TESActorBase
-{
-    int GetSex();
-};
+
 struct HairNode
 {
     TESHair** _ref_006815c0();
     HairNode* _ref_00726070();
 };
-struct TESRace
-{
-    TESHair* FUN_00613870(int);
-    TESEyes* GetReferencedValue();
-};
-struct FUN_004ac110_shell
-{
-    TESRace* FUN_004ac110();
-};
+
 HairNode* __fastcall FUN_0045bb80(TESRace*);
-struct TESNPC
-{
-    TESHair* GetHair();
-    void SetHair(TESHair*);
-    void SetEyes(TESEyes*);
-};
+
 struct FUN_007adc60_shell
 {
     void FUN_007adc60(int, bool);
@@ -584,15 +545,15 @@ struct FUN_007b1ca0_t
 // @fnv 0x007b1ca0
 void FUN_007b1ca0_t::UpdateHairAndEyes()
 {
-    if (!pNPC->GetHair()->IsValidForNPC(pNPC))
+    if (!pNPC->GetHair()->IsValidForNPC((::TESNPC*)pNPC))
     {
-        TESHair* m_pHair = ((FUN_004ac110_shell*)pNPC)->FUN_004ac110()->FUN_00613870(((TESActorBase*)pNPC)->GetSex());
-        for (HairNode* pNode = FUN_0045bb80(((FUN_004ac110_shell*)pNPC)->FUN_004ac110());
+        TESHair* m_pHair = ((TESRace*)pNPC->FUN_004ac110())->FUN_00613870(((TESActorBase*)pNPC)->GetSex());
+        for (HairNode* pNode = FUN_0045bb80(((TESRace*)pNPC->FUN_004ac110()));
              m_pHair == 0 && pNode && *pNode->_ref_006815c0(); pNode = pNode->_ref_00726070())
         {
             if (((FUN_005fdf40_shell*)*pNode->_ref_006815c0())->FUN_005fdf40())
             {
-                if ((((TESActorBase*)pNPC)->GetSex() == 0 && (*pNode->_ref_006815c0())->FUN_005fdf60()) ||
+                if ((((TESActorBase*)pNPC)->GetSex() == 0 && (*pNode->_ref_006815c0())->IsFlag2Clear()) ||
                     (((TESActorBase*)pNPC)->GetSex() == 1 && (*pNode->_ref_006815c0())->IsFlag4Clear()))
                     m_pHair = *pNode->_ref_006815c0();
             }
@@ -600,9 +561,9 @@ void FUN_007b1ca0_t::UpdateHairAndEyes()
         pNPC->SetHair(m_pHair);
         RebuildFaceGen(1);
     }
-    if (!((FUN_005fc5f0_shell*)((MiddleHighProcess*)pNPC)->GetAnimation())->CanBeNPC(pNPC))
+    if (!((FUN_005fc5f0_shell*)((MiddleHighProcess*)pNPC)->MiddleHighProcess::GetAnimation())->CanBeNPC(pNPC))
     {
-        pNPC->SetEyes(((FUN_004ac110_shell*)pNPC)->FUN_004ac110()->GetReferencedValue());
+        pNPC->SetEyes(((TESRace*)pNPC->FUN_004ac110())->GetReferencedValue());
         UpdateEyeTextures();
     }
     ((FUN_007adc60_shell*)this)->FUN_007adc60(0, true);
@@ -610,29 +571,11 @@ void FUN_007b1ca0_t::UpdateHairAndEyes()
 }
 }  // namespace fnv_007b1ca0
 
-struct NiUpdateData
-{
-    float f;
-    bool b;
-    bool c;
-    NiUpdateData(float, bool, bool);
-};
-struct NiNode
-{
-    void Update(NiUpdateData const&);
-};
 struct PC_00605d70
 {
     NiNode* GetNode(bool);
 };
-struct ShadowSceneNode
-{
-    void RemoveSceneObject(NiNode*, bool);
-};
-struct NiAdditionalGeometryData
-{
-    static ShadowSceneNode* __cdecl GetShadowSceneNodeForIndex(int);
-};
+
 struct FUN_007fd660_shell
 {
     void FUN_007fd660(float);
@@ -646,10 +589,9 @@ struct FUN_007b1ae0_shell
 // @fnv 0x007b1ae0
 void FUN_007b1ae0_shell::UpdateShadowSceneNode()
 {
-    int pad;
     NiAdditionalGeometryData::GetShadowSceneNodeForIndex(3)->RemoveSceneObject(g_thePlayer->GetNode(false), false);
     NiUpdateData data(0.0f, false, false);
-    reinterpret_cast<NiNode*>(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(3))->Update(data);
+    reinterpret_cast<NiNode*>(NiAdditionalGeometryData::GetShadowSceneNodeForIndex(3))->Update((const NiUpdateData&)data);
     if (FUN_004b7210()->GetActiveRenderedMenu())
         reinterpret_cast<FUN_007fd660_shell*>(FUN_004b7210()->GetActiveRenderedMenu())->FUN_007fd660(1.0f);
 }
@@ -712,6 +654,7 @@ void FUN_007b5180_shell::CreateMenuOption()
     m_pCurrentOption = 0;
 }
 
+// TESNPC.h lacks RandomizeFace(int, int, int).
 struct FUN_00601830_shell
 {
     void RandomizeFace(int, int, int);
@@ -775,40 +718,18 @@ int FUN_007b1e50_shell::GetReferencedValue()
     return *m_ref._ref_006815c0();
 }
 
-struct Menu
-{
-};
 struct InterfaceManager_helper
 {
     Tile* FUN_00586150();
 };
-struct TileH
-{
-    Tile* ReadFile(const char*);
-    Menu* GetMenu();
-};
-struct TileNode
-{
-    NiNode* FUN_0056c7f0();
-};
-struct Tile_Helper
-{
-    static void UpdateAll(bool);
-};
+
 struct Str6a70
 {
     Str6a70& operator=(const char*);
 };
 Tile* __cdecl FUN_00a09030(int);
 extern const char DAT_010759bc[];
-struct FUN_00a1dc70_shell
-{
-    void FUN_00a1dc70(Tile*, bool);
-};
-struct SettingT_GameSettingCollection_
-{
-    const char* String();
-};
+
 struct GlobalObject_0040c150
 {
 };
@@ -822,20 +743,17 @@ struct GlobalObject_004037b0
 };
 extern GlobalObject_004037b0 g_011da6f4;
 int __cdecl FUN_004b7220();
-struct Actor
+
+struct RaceSexInventoryActor
 {
     unsigned char FUN_008a6970();
     void FUN_008a6840(int);
     void UnEquipObject(void*, int, void*, bool, bool, bool);
 };
-extern Actor* pPlayer;
+extern RaceSexInventoryActor* pPlayer;
 extern "C" unsigned char DAT_011da688;
-struct InventoryChanges
-{
-    static InventoryChanges* GetOrAddInventoryChanges(Actor*);
-    ArrSI* FUN_004c8c10(unsigned int, int);
-};
-extern "C" ArrSI* DAT_011da638[];
+
+extern "C" RacesexmenuOffset08View* DAT_011da638[];
 struct RaceInit
 {
     void SetupRaceMenu(int);
@@ -944,14 +862,7 @@ struct FUN_007ac9f0
     FUN_007ac9f0();
     void FUN_007ac9d0(int);
 };
-struct MagicHitEffect
-{
-    void FUN_00984f60(unsigned int);
-};
-struct NiPick
-{
-    void FUN_00705fc0(void*);
-};
+
 struct Im7181
 {
     void SetRenderedMenu(int);
@@ -962,11 +873,11 @@ Tile* __cdecl GetOrCreateMenuTile(int param)
     Tile* previous = FUN_00a09030(FUN_007ac9c0());
     if (previous)
         return previous;
-    Tile* tile = ((TileH*)((InterfaceManager_helper*)FUN_004b7210())->FUN_00586150())->ReadFile(DAT_010759bc);
+    Tile* tile = ((Tile*)((InterfaceManager_helper*)FUN_004b7210())->FUN_00586150())->ReadFile(DAT_010759bc);
     if (tile)
     {
-        DAT_011da634 = ((TileH*)tile)->GetMenu();
-        ((FUN_00a1dc70_shell*)DAT_011da634)->FUN_00a1dc70(tile, false);
+        DAT_011da634 = ((Tile*)tile)->GetMenu();
+        ((Menu*)DAT_011da634)->FUN_00a1dc70((TileMenu*)tile, false);
         if (!(unsigned int)g_011da70c)
         {
             *(Str6a70*)&g_011da70c = ((SettingT_GameSettingCollection_*)&g_011d35c4)->String();
@@ -981,7 +892,7 @@ Tile* __cdecl GetOrCreateMenuTile(int param)
         }
         DAT_011da688 = pPlayer->FUN_008a6970();
         pPlayer->FUN_008a6840(0);
-        InventoryChanges* inventory = InventoryChanges::GetOrAddInventoryChanges(pPlayer);
+        InventoryChanges* inventory = InventoryChanges::GetOrAddInventoryChanges((void*)pPlayer);
         for (unsigned int i = 0; i < 20; i++)
         {
             switch (i)
@@ -996,7 +907,7 @@ Tile* __cdecl GetOrCreateMenuTile(int param)
             case 11:
             case 14:
             case 15:
-                DAT_011da638[i] = inventory->FUN_004c8c10(i, 0);
+                DAT_011da638[i] = reinterpret_cast<RacesexmenuOffset08View*>(inventory->FUN_004c8c10(i, 0));
                 if (DAT_011da638[i])
                     pPlayer->UnEquipObject((void*)DAT_011da638[i]->GetFlags(), 1, 0, 0, 0, 1);
                 break;
@@ -1005,11 +916,11 @@ Tile* __cdecl GetOrCreateMenuTile(int param)
         ((RaceInit*)DAT_011da634)->SetupRaceMenu(param);
         if (*g_011db620.Bool())
         {
-            Tile_Helper::UpdateAll(false);
+            Tile::UpdateAll(false);
             FUN_007ac9f0* pRenderData = new FUN_007ac9f0;
             pRenderData->FUN_007ac9d0(param);
             ((MagicHitEffect*)pRenderData)->FUN_00984f60((unsigned int)tile);
-            ((NiPick*)pRenderData)->FUN_00705fc0(((TileNode*)tile)->FUN_0056c7f0());
+            ((NiPick*)pRenderData)->FUN_00705fc0((void*)tile->FUN_0056c7f0());
             ((Im7181*)FUN_004b7210())->SetRenderedMenu((int)pRenderData);
         }
     }
@@ -1109,12 +1020,6 @@ char __cdecl IsArgValueInSubLookup(FUN_007ad9c0_Arg* a1)
     return (char)result;
 }
 
-struct RSTile
-{
-    bool IsVisible();
-    void Set(int id, int value);
-};
-
 struct RSOptionList
 {
     bool SetFocus(bool abFocus);
@@ -1155,20 +1060,20 @@ struct RSMenu
     int unk80;
     int unk84;
     int unk88;
-    RSTile* tile8C;
+    Tile* tile8C;
 
     bool HasTrait(int trait);
     void Refresh();
     void SetTrait(int trait, bool on);
     int GetCurrentPage();
     void Accept();
-    RSTile* GetTile();
+    Tile* GetTile();
     void Close();
 };
 
 struct RSIM
 {
-    void ShowMessage(RSTile* tile, int id, int flag);
+    void ShowMessage(Tile* tile, int id, int flag);
 };
 
 struct RSItem
@@ -1250,22 +1155,11 @@ void __cdecl UpdateRaceSexMenu()
     }
 }
 
-class HighProcess7AE
+// 0x007b41c0 finds a race-menu option from its parent Tile.
+class RaceMenuOptionList
 {
   public:
-    int GetProcessLevel();
-};
-
-class Tile7AE
-{
-  public:
-    int GetValue();
-};
-
-class TileList7AE
-{
-  public:
-    Tile7AE* GetTile(int iLevel);
+    RaceMenuOption* GetTile(Tile* parent);
 };
 
 class Timer7AE
@@ -1276,45 +1170,41 @@ class Timer7AE
 
 Timer7AE* GetInterfaceTimer7AE();
 
-class StatsMenu7AE
+// 0x007ae1b0 is the race/sex menu click handler; its state at +0xb8..0xc4 is absent from StatsMenu.
+class RaceMenuClickState
 {
   public:
     int GetCurrentPage();
-    void FUN_007ae1b0(int iType, HighProcess7AE* pkProcess);
+    void FUN_007ae1b0(int iType, Tile* pkClickedTile);
 
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
     int unk20, unk24;
-    TileList7AE* m_apkLists[10];
+    RaceMenuOptionList* m_apkLists[10];
     int unk50, unk54, unk58, unk5C, unk60, unk64, unk68, unk6C;
     int unk70, unk74, unk78, unk7C, unk80, unk84, unk88, unk8C;
     int unk90, unk94, unk98, unk9C, unkA0, unkA4, unkA8, unkAC;
     int unkB0, unkB4;
     float m_fTime;
     int m_iValue;
-    HighProcess7AE* m_pkProcess;
-    Tile7AE* m_pkTile;
+    Tile* m_pkClickedTile;
+    RaceMenuOption* m_pkOption;
 };
 
-// For type 0x69 stores the process and its level tile value; for type 1 stores the interface timer time.
+// For type 0x69 stores the clicked tile and its option value; for type 1 stores the interface timer time.
 // @fnv 0x007ae1b0
-void StatsMenu7AE::FUN_007ae1b0(int iType, HighProcess7AE* pkProcess)
+void RaceMenuClickState::FUN_007ae1b0(int iType, Tile* pkClickedTile)
 {
     switch (iType)
     {
     case 0x69:
-        m_pkProcess = pkProcess;
-        m_pkTile = m_apkLists[GetCurrentPage()]->GetTile(pkProcess->GetProcessLevel());
-        m_iValue = m_pkTile->GetValue();
+        m_pkClickedTile = pkClickedTile;
+        m_pkOption = m_apkLists[GetCurrentPage()]->GetTile(pkClickedTile->FUN_0045cd60());
+        m_iValue = m_pkOption->GetFloat1005();
     case 1:
         m_fTime = GetInterfaceTimer7AE()->GetTime();
     }
 }
 
-class TESNPC;
-struct TESFullName
-{
-    const char* GetFullName();
-};
 struct Hair
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14;
@@ -1327,10 +1217,7 @@ struct HairNode
     Hair** FUN_006815c0();
     HairNode* FUN_00726070();
 };
-struct TESDataHandler
-{
-    HairNode* GetTESHairList();
-};
+
 extern TESDataHandler* DAT_011c3f2c;
 struct HairOption
 {
@@ -1411,7 +1298,7 @@ void HairMenu::PopulateHairOptions()
 {
     options->FUN_007b45b0();
     HairOption* pChosenOption = 0;
-    for (HairNode* node = DAT_011c3f2c->GetTESHairList(); node && *node->FUN_006815c0(); node = node->FUN_00726070())
+    for (HairNode* node = (HairNode*)DAT_011c3f2c->GetTESHairList(); node && *node->FUN_006815c0(); node = node->FUN_00726070())
     {
         if ((*node->FUN_006815c0())->FUN_005fdf40() && (*node->FUN_006815c0())->IsHairValidForNPC(npc))
         {
@@ -1428,8 +1315,6 @@ void HairMenu::PopulateHairOptions()
     options->ApplyToAllTiles();
     FUN_007adc60(0, false);
 }
-
-class B7AF450NPC;
 
 class B7AF450Texture
 {
@@ -1449,7 +1334,7 @@ class B7AF450Eyes
     B7AF450Texture m_kTexture;
 
     bool IsPlayable();
-    bool CanBeUsedBy(B7AF450NPC* pkNPC);
+    bool CanBeUsedBy(TESNPC* pkNPC);
 };
 
 class B7AF450EyesNode
@@ -1457,12 +1342,6 @@ class B7AF450EyesNode
   public:
     B7AF450Eyes** GetItem();
     B7AF450EyesNode* GetNext();
-};
-
-class B7AF450DataHandler
-{
-  public:
-    B7AF450EyesNode* GetEyesList();
 };
 
 class B7AF450ListItem
@@ -1479,7 +1358,7 @@ class B7AF450ListBox
     void Finish();
 };
 
-extern B7AF450DataHandler* g_pkB7AF450DataHandler;
+extern TESDataHandler* g_pkB7AF450DataHandler;
 
 class B7AF450RaceMenu
 {
@@ -1538,7 +1417,7 @@ class B7AF450RaceMenu
     int unkCC;
     int unkD0;
     int unkD4;
-    B7AF450NPC* m_pkNPC;
+    TESNPC* m_pkNPC;
 
     void FUN_007adc60(int iIndex, bool bFlag);
     void PopulateEyesList();
@@ -1548,7 +1427,7 @@ class B7AF450RaceMenu
 void B7AF450RaceMenu::PopulateEyesList()
 {
     m_pkListBox->Clear();
-    for (B7AF450EyesNode* pkIter = g_pkB7AF450DataHandler->GetEyesList(); pkIter && *pkIter->GetItem();
+    for (B7AF450EyesNode* pkIter = (B7AF450EyesNode*)g_pkB7AF450DataHandler->GetEyesList(); pkIter && *pkIter->GetItem();
          pkIter = pkIter->GetNext())
     {
         if ((*pkIter->GetItem())->IsPlayable() && (*pkIter->GetItem())->CanBeUsedBy(m_pkNPC))
@@ -1566,10 +1445,7 @@ struct Opt34
     void FUN_007b3d50(int, const char*);
     void RemoveOptionById(int);
 };
-struct D8Obj
-{
-    int FUN_005f0cc0();
-};
+
 struct SpStr
 {
     void* m_ptr;
@@ -1641,7 +1517,7 @@ struct FUN_007af520_cls
     int unkCC;
     int unkD0;
     int unkD4;
-    D8Obj* m_d8;
+    TESNPC* m_d8;
     void SyncListItemTemplate();
 };
 
@@ -1663,26 +1539,9 @@ void FUN_007af520_cls::SyncListItemTemplate()
 }
 
 namespace fnv_007af900 {
-struct BSStringTChar
-{
-    char* data;
-    unsigned short length;
-    unsigned short capacity;
-    BSStringTChar();
-    ~BSStringTChar();
-    operator const char*() const;
-};
-struct SettingT_GameSettingCollection_
-{
-    const char* String();
-    int* Int();
-};
-struct GameSettingCollection
-{
-    static GameSettingCollection* Instance();
-    bool GetSetting(const char*, SettingT_GameSettingCollection_**);
-};
-int __cdecl FUN_00406f60(BSStringTChar*, const char*, ...);
+
+
+int __cdecl FUN_00406f60(::BSStringT<char>*, const char*, ...);
 struct HairOption
 {
     int FUN_00726070();
@@ -1732,13 +1591,13 @@ void HairMenu::ApplyHairOption(HairOption* option)
         SettingT_GameSettingCollection_* valueSetting = 0;
         bool found;
         {
-            BSStringTChar name;
+            ::BSStringT<char> name;
             FUN_00406f60(&name, "iHairColor%02d", option->GetFloat1005());
             found = GameSettingCollection::Instance()->GetSetting(name, &valueSetting);
             FUN_00406f60(&name, "sHairColor%d", option->GetFloat1005());
             found = GameSettingCollection::Instance()->GetSetting(name, &setting);
             option->FUN_007b3810(setting->String());
-            FUN_007afa40(*valueSetting->Int());
+            FUN_007afa40(*(int*)valueSetting->Int());
         }
     }
     else
@@ -1926,20 +1785,8 @@ bool Target::FUN_007b1970(float offset, bool force)
 }
 
 namespace fnv_007b2b50 {
-struct StringB50
-{
-    char* text;
-    unsigned short length, capacity;
-    StringB50();
-    ~StringB50();
-};
-struct FixedB50
-{
-    char* text;
-    FixedB50(const char*);
-    ~FixedB50();
-    operator const char*() const;
-};
+
+
 struct ColorB50
 {
     float r, g, b, a;
@@ -1983,11 +1830,6 @@ struct PropertyB50
     ColorB50 color;
     int FUN_00441110();
 };
-struct PointB50
-{
-    float x, y, z;
-    PointB50(float, bool, bool);
-};
 struct NodeB50
 {
     virtual void v000();
@@ -2029,7 +1871,7 @@ struct NodeB50
     virtual void v090();
     virtual void v094();
     virtual void v098();
-    virtual NodeB50* v09c(const FixedB50&);
+    virtual NodeB50* v09c(const NiFixedString&);
     virtual void v0a0();
     virtual void v0a4();
     virtual void v0a8();
@@ -2103,8 +1945,8 @@ struct NodeB50
     void FUN_00a5a040();
     unsigned FUN_0043b480();
     NodeB50* FUN_0043b4a0(unsigned);
-    FixedB50& FUN_00413f40();
-    void FUN_00a59c60(const PointB50&);
+    NiFixedString& FUN_00413f40();
+    void FUN_00a59c60(const NiUpdateData&);
 };
 struct PtrB50
 {
@@ -2189,14 +2031,6 @@ struct FaceB50
 struct ObjectB50
 {
     void FUN_00a6e960();
-};
-struct ControllerB50
-{
-    void* GetStringAtOffset();
-};
-struct AnimationB50
-{
-    ControllerB50* FUN_00496940();
 };
 struct PlayerB50
 {
@@ -2426,33 +2260,10 @@ struct PlayerB50
     virtual FaceB50* v37c();
     BaseB50* FUN_007af430();
     int FUN_0087f4c0();
-    AnimationB50* FUN_00950a60(bool);
+    Animation* FUN_00950a60(bool);
 };
 extern PlayerB50* pPlayer;
-struct DataB50
-{
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048(int);
-    unsigned FUN_004169d0();
-    float FUN_00602130();
-};
+
 struct HostB50
 {
     unsigned unk000;
@@ -2509,7 +2320,7 @@ struct HostB50
     unsigned unk0cc;
     unsigned unk0d0;
     unsigned unk0d4;
-    DataB50* data;
+    TESNPC* data;
     bool RebuildFaceGen(bool);
     void UpdateShadowSceneNode();
 };
@@ -2527,15 +2338,15 @@ bool HostB50::RebuildFaceGen(bool rebuild)
     int k = 0;
     PtrB50 e(0);
     PtrB50 eb(0);
-    StringB50 c, f, cf, q, ba;
+    ::BSStringT<char> c, f, cf, q, ba;
 
     NodeB50* b;
 
-    AnimationB50* j;
+    Animation* j;
 
     if (!pPlayer->v1ac(false))
         return false;
-    data->v048(2048);
+    data->MarkAsModified(2048);
     if (rebuild)
     {
         char p[32];
@@ -2545,7 +2356,7 @@ bool HostB50::RebuildFaceGen(bool rebuild)
         NodeB50* cf = pPlayer->v1b0(false);
         for (int i = 0; i < 2; i++)
         {
-            NodeB50* part = h->v09c(FixedB50(FUN_00657820(p, i)));
+            NodeB50* part = h->v09c(NiFixedString((const char*)FUN_00657820(p, i)));
             if (part)
                 h->v0e8(part);
         }
@@ -2561,7 +2372,7 @@ bool HostB50::RebuildFaceGen(bool rebuild)
         pPlayer->FUN_007af430()->UpdateFaceGenHairVisibility(pPlayer, false);
         for (int i = 0; i < 2; i++)
         {
-            NodeB50* part = h->v09c(FixedB50(FUN_00657820(p, i)));
+            NodeB50* part = h->v09c(NiFixedString((const char*)FUN_00657820(p, i)));
             if (part)
             {
                 FUN_00b57e30(part, 0, 0);
@@ -2624,7 +2435,7 @@ bool HostB50::RebuildFaceGen(bool rebuild)
             }
         }
     }
-    PointB50 l(0, false, false);
+    NiUpdateData l(0, false, false);
     pPlayer->v1ac(false)->FUN_00a59c60(l);
     UpdateShadowSceneNode();
     return true;
@@ -2636,14 +2447,10 @@ struct Trait
     int FUN_0084e3a0();
     void __thiscall FUN_00a0a270(float value, unsigned int update);
 };
-struct TileFor3760
-{
-    void __thiscall FUN_00700320(unsigned int id, int value);
-    Trait* __thiscall FUN_00a00f30(unsigned int id);
-};
+
 struct MenuOptionFor3760
 {
-    TileFor3760* tile;
+    Tile* tile;
     int __thiscall GetFloat1005();
     void __thiscall FUN_007b3840(int& fTargetUpperBound, int& fMinimumInputValue);
     bool __thiscall FUN_007b3760(int value);
@@ -2665,7 +2472,7 @@ bool MenuOptionFor3760::FUN_007b3760(int value)
         if (currentValue != value)
         {
             tile->FUN_00700320(0x1005, value);
-            Trait* trait = tile->FUN_00a00f30(0x1009);
+            Trait* trait = (Trait*)tile->FUN_00a00f30(0x1009);
             if (trait->FUN_0084e3a0() == 0)
                 trait->FUN_00a0a270((float)value, 1);
             return true;
@@ -2678,7 +2485,7 @@ extern double DAT_01012070;
 
 struct OptionValueReader
 {
-    TGF* m_iWordAt00;
+    Tile* m_iWordAt00;
     unsigned int ReadOptionValue();
 };
 
@@ -2709,11 +2516,6 @@ struct FUN_0048f200
     ~FUN_0048f200();
 };
 
-struct PropertyObject : Tile_Set_Helper
-{
-    void FUN_00a01350(int kind, int value, bool enabled);
-    void FUN_00a04640(bool enabled);
-};
 struct InterfaceRoot
 {
     int unk00;
@@ -2747,14 +2549,14 @@ struct InterfaceRoot
     int unk70;
     int unk74;
     void* unk78;
-    PropertyObject* FUN_00a1ddb0(void* parent, const char* name, int mode);
+    Tile* FUN_00a1ddb0(void* parent, const char* name, int mode);
 };
 int __cdecl FUN_00a00940(const char* name, int index);
 struct FUN_007b39e0 : FUN_0048f200
 {
     int unk0c;
     int unk10;
-    PropertyObject* unk14;
+    Tile* unk14;
     float unk18;
     int unk1c;
     int unk20;
@@ -2822,21 +2624,22 @@ struct SelectedOption_007b3bb0
     int unk08;
     unsigned int value0c;
     int unk10;
-    TGF* pTGF;
+    Tile* pTGF;
 };
-struct Menu_007b3bb0
+// 0x007b4650 inserts list entries and pTGF is at +0x14; this is an option list, not the Menu base.
+struct FloatOptionList
 {
     int unk00;
     int unk04;
     int unk08;
     int unk0c;
     int unk10;
-    TGF* pTGF;
+    Tile* pTGF;
     int CreateEntry(const char* text, int flags);
     int AddFloatOption(const char* input, SelectedOption_007b3bb0* selected);
 };
 // @fnv 0x007b3bb0
-int Menu_007b3bb0::AddFloatOption(const char* input, SelectedOption_007b3bb0* selected)
+int FloatOptionList::AddFloatOption(const char* input, SelectedOption_007b3bb0* selected)
 {
     TempString_007b3bb0 text;
     FUN_00406f60(&text, DAT_01075b28, input, 0x3e);
@@ -2847,16 +2650,10 @@ int Menu_007b3bb0::AddFloatOption(const char* input, SelectedOption_007b3bb0* se
 // RaceSex menu: add a slider option (range [iLow, iHigh], initial value) whose thumb width covers
 // fSequenceTimeRatio of the range, at least one step.
 
-class B3CA0Tile
-{
-  public:
-    void Set(int eValue, float fValue, bool bPropagate);
-};
-
 class B3CA0SliderOption
 {
   public:
-    B3CA0Tile* m_pkTile;
+    Tile* m_pkTile;
 
     void SetRange(int iLow, int iHigh);
     void SetValue(int iValue);
@@ -2886,22 +2683,14 @@ B3CA0SliderOption* B3CA0Menu::FUN_007b3ca0(int m_uiSoundID, int iParent, int iLo
     return pkOption;
 }
 
-struct LocalTile
-{
-    virtual ~LocalTile();
-    double FUN_00a011b0(int);
-    LocalTile* GetParent();
-    void Set(int, float, bool);
-    void FUN_00a04640(bool);
-};
 struct Date
 {
-    LocalTile* tile;
+    Tile* tile;
     ~Date();
     int FUN_00726070();
 };
 int __cdecl FUN_00a00940(const char*, int);
-void __cdecl FUN_00706ff0(LocalTile*);
+void __cdecl FUN_00706ff0(Tile*);
 struct OptionList
 {
     void* unk00;
@@ -2958,7 +2747,7 @@ void OptionList::RemoveOptionById(int id)
 struct FUN_007b4050_shell
 {
     int unknown00, unknown04, unknown08, currentValue, previousValue;
-    TGF* control;
+    Tile* control;
     void CopyControlValues(FUN_007b4050_shell* other);
 };
 // Reads control's float at 0x1004 into other->currentValue and other->control's float at 0x1004 into previousValue.
@@ -3029,11 +2818,11 @@ struct FUN_007b45b0_shell
 
     void* FUN_00559450();
     NodeT*& FUN_0057cbe0(void*& it);
-    void RemoveAll();
+    void FUN_004ed900();
     void FUN_007b45b0();
 };
 
-// Iterates the list from FUN_00559450, deleting each node's m_item and the node, then calls RemoveAll and clears m_20.
+// Iterates the list from FUN_00559450, deleting each node's m_item and the node, then calls FUN_004ed900 and clears m_20.
 // @fnv 0x007b45b0
 void FUN_007b45b0_shell::FUN_007b45b0()
 {
@@ -3044,48 +2833,23 @@ void FUN_007b45b0_shell::FUN_007b45b0()
         delete node->m_item;
         delete node;
     }
-    RemoveAll();
+    FUN_004ed900();
     m_20 = 0;
 }
 
 // Race/sex menu initialization.
-class TESBoundObject
-{
-  public:
-    virtual ~TESBoundObject();
-};
-class TESNPC : public TESBoundObject
-{
-  public:
-    int FUN_005f0cc0();
-    unsigned int FUN_004169d0();
-};
+
 struct InitPlayer
 {
     TESBoundObject* FUN_007af430();
 };
 extern InitPlayer* DAT_011dea3c;
-struct BSStringTChar
-{
-    void* data;
-    unsigned short length, capacity;
-    BSStringTChar();
-    ~BSStringTChar();
-    void FUN_004037f0(const char*, int);
-    const char* FUN_00559450();
-    void FUN_004afad0();
-};
+
 struct InitSetting
 {
     const char* FUN_00403df0();
     const char* FUN_004c69f0();
     float* FUN_00403e20();
-};
-struct InitTile
-{
-    double FUN_00a011b0(int);
-    void SetFloat(int, float);
-    void FUN_00a01350(int, const char*, bool);
 };
 struct InitItem
 {
@@ -3116,11 +2880,6 @@ struct InitNode
 {
     InitForm** FUN_006815c0();
     InitNode* FUN_00726070();
-};
-struct InitData
-{
-    InitNode* FUN_004ea950();
-    InitNode* FUN_00624700();
 };
 
 struct InitString
@@ -3453,7 +3212,7 @@ struct InitRootManager
 float __stdcall FUN_00a01530(int);
 float __cdecl FUN_0040ebd0(float, float);
 float __cdecl FUN_00404010(float, float);
-void __cdecl FUN_00406f60(BSStringTChar*, const char*, ...);
+void __cdecl FUN_00406f60(::BSStringT<char>*, const char*, ...);
 char __cdecl IsHairMatching(int);
 extern InitSetting DAT_011d1f38;
 extern InitSetting DAT_011d20dc;
@@ -3501,7 +3260,7 @@ extern const char DAT_01074e34[];
 struct InitRaceMenu
 {
     int unk000;
-    InitTile* tile;
+    Tile* tile;
     int unk008;
     int unk00c;
     int unk010;
@@ -3515,10 +3274,10 @@ struct InitRaceMenu
     int unk07c;
     int unk080;
     int unk084;
-    InitTile* display;
+    Tile* display;
     int unk08c;
-    BSStringTChar title;
-    BSStringTChar question;
+    ::BSStringT<char> title;
+    ::BSStringT<char> question;
     float valuea0;
     float valuea4;
     float valuea8;
@@ -3548,7 +3307,7 @@ struct InitRaceMenu
     int unk118;
     int unk11c;
     int unk120;
-    InitTile* FUN_00726070();
+    Tile* FUN_00726070();
     void BuildMorphOptions();
     void UpdateHairMenuOption();
     bool FUN_007af180(int);
@@ -3560,14 +3319,14 @@ void InitRaceMenu::SetupRaceMenu(int mode)
 {
     const char* names[20];
     if (tile->FUN_00a011b0(0xfa7) == 6006.0 || tile->FUN_00a011b0(0xfa7) == 102.0)
-        tile->SetFloat(0xfad, FUN_00a01530(1));
+        tile->FUN_00a012d0(0xfad, FUN_00a01530(1));
     ((InitRootManager*)FUN_004b7210())->messages.FUN_00718630(15, (void*)FUN_007ac9c0(), 0x200);
     FUN_00726070()->FUN_00a01350(0x1005, DAT_01063ab4, true);
     FUN_00726070()->FUN_00a01350(0x1006, DAT_010692d0, true);
     npc = dynamic_cast<TESNPC*>(DAT_011dea3c->FUN_007af430());
     display->FUN_00a01350(0xfc4, DAT_011da6f4.FUN_00559450(), true);
     {
-        BSStringTChar aLabelStrings[4];
+        ::BSStringT<char> aLabelStrings[4];
         {
             int page;
             {
@@ -3579,10 +3338,10 @@ void InitRaceMenu::SetupRaceMenu(int mode)
                         {
                         case 2:
                         case 3:
-                            aLabelStrings[0].FUN_004037f0(DAT_011d1f38.FUN_00403df0(), 0);
-                            aLabelStrings[1].FUN_004037f0(DAT_011d20dc.FUN_00403df0(), 0);
-                            aLabelStrings[2].FUN_004037f0(DAT_011d2058.FUN_00403df0(), 0);
-                            aLabelStrings[3].FUN_004037f0(DAT_011d43d8.FUN_00403df0(), 0);
+                            aLabelStrings[0].Set(DAT_011d1f38.FUN_00403df0(), 0);
+                            aLabelStrings[1].Set(DAT_011d20dc.FUN_00403df0(), 0);
+                            aLabelStrings[2].Set(DAT_011d2058.FUN_00403df0(), 0);
+                            aLabelStrings[3].Set(DAT_011d43d8.FUN_00403df0(), 0);
                             break;
                         default:
                             FUN_00406f60(&aLabelStrings[0], DAT_01075ae4, DAT_011d1f38.FUN_00403df0());
@@ -3591,10 +3350,10 @@ void InitRaceMenu::SetupRaceMenu(int mode)
                             FUN_00406f60(&aLabelStrings[3], DAT_01075acc, DAT_011d43d8.FUN_00403df0());
                             break;
                         }
-                        names[0] = aLabelStrings[0].FUN_00559450();
-                        names[1] = aLabelStrings[1].FUN_00559450();
-                        names[2] = aLabelStrings[2].FUN_00559450();
-                        names[3] = aLabelStrings[3].FUN_00559450();
+                        names[0] = aLabelStrings[0].String();
+                        names[1] = aLabelStrings[1].String();
+                        names[2] = aLabelStrings[2].String();
+                        names[3] = aLabelStrings[3].String();
                         names[4] = DAT_011d36e4.FUN_00403df0();
                         names[5] = DAT_011d22d4.FUN_00403df0();
                         names[6] = DAT_011d4a74.FUN_00403df0();
@@ -3622,7 +3381,7 @@ void InitRaceMenu::SetupRaceMenu(int mode)
                         ((InitOptions*)options[7])->FUN_0050f9a0((void*)IsArgValueInSubLookup);
                         ((InitOptions*)options[0])->FUN_007b3b80(DAT_011d37ec.FUN_004c69f0(), 21);
                         ((InitOptions*)options[0])->FUN_007b3b80(DAT_011d2d3c.FUN_004c69f0(), 22);
-                        for (InitNode* pRaceNode = ((InitData*)DAT_011c3f2c)->FUN_004ea950();
+                        for (InitNode* pRaceNode = (InitNode*)DAT_011c3f2c->FUN_004ea950();
                              pRaceNode && *pRaceNode->FUN_006815c0(); pRaceNode = pRaceNode->FUN_00726070())
                         {
                             if ((*pRaceNode->FUN_006815c0())->FUN_0059f610())
@@ -3667,7 +3426,7 @@ void InitRaceMenu::SetupRaceMenu(int mode)
                         ((InitOptions*)options[6])
                             ->FUN_007b3ca0(DAT_011d2d48.FUN_004c69f0(), 32, 0, 255,
                                            (unsigned char)((color >> 16) & 255), 0.125f);
-                        for (InitNode* pBeardNode = ((InitData*)DAT_011c3f2c)->FUN_00624700();
+                        for (InitNode* pBeardNode = (InitNode*)DAT_011c3f2c->FUN_00624700();
                              pBeardNode && *pBeardNode->FUN_006815c0(); pBeardNode = pBeardNode->FUN_00726070())
                         {
                             if ((*pBeardNode->FUN_006815c0())->FUN_005e7a60())
@@ -3678,12 +3437,12 @@ void InitRaceMenu::SetupRaceMenu(int mode)
                         for (int j = 10; j < 19; j++)
                             ((InitOptions*)options[9])->AddFloatOption(names[j], ((InitOptions*)options[j]));
                         BuildMorphOptions();
-                        BSStringTChar doneLabel;
+                        ::BSStringT<char> doneLabel;
                         switch (mode)
                         {
                         case 2:
-                            title.FUN_004037f0(DAT_01075aac, 0);
-                            doneLabel.FUN_004037f0(DAT_011d43d8.FUN_00403df0(), 0);
+                            title.Set(DAT_01075aac, 0);
+                            doneLabel.Set(DAT_011d43d8.FUN_00403df0(), 0);
                             page = 3;
                             unk120 = page;
                             valuea0 = -7.4f;
@@ -3694,8 +3453,8 @@ void InitRaceMenu::SetupRaceMenu(int mode)
                             valueb4 = -0.8f;
                             break;
                         case 3:
-                            title.FUN_004037f0(DAT_01075a74, 0);
-                            doneLabel.FUN_004037f0(DAT_011d2058.FUN_00403df0(), 0);
+                            title.Set(DAT_01075a74, 0);
+                            doneLabel.Set(DAT_011d2058.FUN_00403df0(), 0);
                             page = 2;
                             unk120 = page;
                             valuea0 = -5.2f;
@@ -3707,8 +3466,8 @@ void InitRaceMenu::SetupRaceMenu(int mode)
                             UpdateHairMenuOption();
                             break;
                         default:
-                            title.FUN_004037f0(DAT_01075a4c, 0);
-                            doneLabel.FUN_004037f0(DAT_011d454c.FUN_00403df0(), 0);
+                            title.Set(DAT_01075a4c, 0);
+                            doneLabel.Set(DAT_011d454c.FUN_00403df0(), 0);
                             ((InitOptions*)options[0])->CopyControlValues(((InitOptions*)options[1]));
                             ((InitOptions*)options[1])->CopyControlValues(((InitOptions*)options[2]));
                             ((InitOptions*)options[2])->CopyControlValues(((InitOptions*)options[3]));
@@ -3725,7 +3484,7 @@ void InitRaceMenu::SetupRaceMenu(int mode)
                         }
                         if (FUN_004b7220() != 1)
                             doneLabel.FUN_004afad0();
-                        FUN_00406f60(&question, DAT_01074e34, DAT_011d4108.FUN_00403df0(), doneLabel.FUN_00559450());
+                        FUN_00406f60(&question, DAT_01074e34, DAT_011d4108.FUN_00403df0(), doneLabel.String());
                         valued0 = FUN_00404010(0.0f, FUN_0040ebd0(1.0f, *DAT_011da6cc.FUN_00403e20()));
                         valuec8 = valued0;
                         ((InitOptions*)options[0])->ApplyToAllTiles();
@@ -3742,12 +3501,6 @@ void InitRaceMenu::SetupRaceMenu(int mode)
     }
 }
 
-struct Tile7
-{
-    float GetValue(int aiID);
-    Tile7* GetChild(int aiID);
-    Tile7* GetParent();
-};
 struct MenuOption7
 {
     void FUN_007b3840(int& aiLow, int& aiHigh);
@@ -3755,7 +3508,7 @@ struct MenuOption7
 };
 struct OptionList7
 {
-    MenuOption7* FUN_007b41c0(Tile7* apTile);
+    MenuOption7* FUN_007b41c0(Tile* apTile);
 };
 struct IM7
 {
@@ -3793,7 +3546,7 @@ struct RaceSexMenu7
     int unk70;
     int unk74;
     int unk78;
-    Tile7* tile7c;
+    Tile* tile7c;
     int unk80;
     int unk84;
     int unk88;
@@ -3810,17 +3563,17 @@ struct RaceSexMenu7
     int unkb4;
     float fLastTime;
     int iBase;
-    Tile7* pActiveTile;
+    Tile* pActiveTile;
     MenuOption7* pActiveOption;
     int GetCurrentPage();
     void HandleOptionSelection();
     bool FUN_007b1970(float afAngle, int a2);
     void FUN_007adc60(int aiID, bool abVal);
-    void FUN_007ae240(int aiID, Tile7* apTile);
+    void FUN_007ae240(int aiID, Tile* apTile);
 };
 
 // @fnv 0x007ae240
-void RaceSexMenu7::FUN_007ae240(int aiID, Tile7* apTile)
+void RaceSexMenu7::FUN_007ae240(int aiID, Tile* apTile)
 {
     float fDelta2 = GetInterfaceMgr7()->FUN_007697f0() - fLastTime;
     if (fDelta2 != 0.0)
@@ -3834,7 +3587,7 @@ void RaceSexMenu7::FUN_007ae240(int aiID, Tile7* apTile)
                 int iLow6;
                 int iHigh;
                 pOption->FUN_007b3840(iLow6, iHigh);
-                float fRatio = fDelta2 / apTile->GetParent()->GetChild(0x65)->GetValue(0xfb1);
+                float fRatio = fDelta2 / apTile->GetParent()->GetChild(0x65)->GetFloat(0xfb1);
                 if (pOption->FUN_007b3760(FUN_004bd510(iBase + (iHigh - iLow6) * fRatio, 1.0f)))
                 {
                     pActiveOption = pOption;
@@ -3845,7 +3598,7 @@ void RaceSexMenu7::FUN_007ae240(int aiID, Tile7* apTile)
         }
         else if (aiID == 1)
         {
-            static float sfWidth = tile7c->GetValue(0xfb1);
+            static float sfWidth = tile7c->GetFloat(0xfb1);
             FUN_007adc60(5, FUN_007b1970(fDelta2 / sfWidth * 6.2831854820251465, 0));
             fLastTime = GetInterfaceMgr7()->FUN_007697f0();
         }
@@ -3872,7 +3625,8 @@ struct OS
     Input* FUN_00877720();
 };
 extern OS* DAT_011dea0c;
-struct Interface
+// Exe 0x007ae420: unit-local Interface view; declarations and layout are preserved.
+struct RacesexmenuInterfaceView
 {
     unsigned int unk0;
     unsigned int unk4;
@@ -3928,7 +3682,7 @@ struct Interface
     void* selected;
     int FUN_0070ec70();
 };
-Interface* FUN_004b7210();
+RacesexmenuInterfaceView* FUN_004b7210();
 bool FUN_004b71d0();
 unsigned int FUN_00457fe0();
 bool FUN_00702450(int);
@@ -3939,31 +3693,10 @@ float FUN_00404010(float, float);
 extern int DAT_011a07b0, DAT_011a07ac;
 extern double DAT_01075af8, DAT_01075af0, DAT_01017b70, DAT_01012060;
 extern float DAT_01075aec, DAT_0105559c;
-struct Menu
+
+// Race/sex state beyond the shared Menu base.
+struct RaceSexMenuState : ::Menu
 {
-    virtual void slot0();
-    virtual void slot4();
-    virtual void slot8();
-    virtual void Select(int, int);
-    virtual void slot10();
-    virtual void slot14();
-    virtual void slot18();
-    virtual void slot1c();
-    virtual void slot20();
-    virtual void slot24();
-    virtual void slot28();
-    virtual void slot2c();
-    virtual void slot30();
-    virtual int Id();
-    unsigned int unk4;
-    unsigned int unk8;
-    unsigned int unkc;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
     unsigned int unk28;
     unsigned int unk2c;
     unsigned int unk30;
@@ -4012,19 +3745,14 @@ struct Menu
     unsigned int unke8;
     unsigned int unkec;
     Sound sounds[4];
-    void FUN_007adc60(int, bool);
-    bool FUN_007adc30(int);
-    bool UpdateProgress(float, int);
-    bool FUN_007b1970(float, int);
-    void HandleOptionSelection();
-    void HandlePendingTileAction();
     void UpdateZoomAndScroll();
 };
+
 // Per frame, while the menu is active, drives zoom/scroll velocity from input and plays or stops the four sounds based on state.
 // @fnv 0x007ae420
-void Menu::UpdateZoomAndScroll()
+void RaceSexMenuState::UpdateZoomAndScroll()
 {
-    if (FUN_00702450(Id()))
+    if (FUN_00702450(GetClass()))
     {
         for (unsigned int i = 0; i < 4; i++)
             if (sounds[i].FUN_0044ddc0() == 3)
@@ -4088,9 +3816,9 @@ void Menu::UpdateZoomAndScroll()
                 else
                 {
                     if (up)
-                        Select(2, 0);
+                        HandleSelection(2, 0);
                     else
-                        Select(3, 0);
+                        HandleSelection(3, 0);
                 }
             }
             if (current < desired)
@@ -4132,14 +3860,9 @@ void Menu::UpdateZoomAndScroll()
                 sounds[j].FUN_00ad88b0();
     }
 }
-}
 
-struct Tile67
-{
-    Tile67* FUN_0045cd60();
-    bool IsAllChildrenFlag0();
-    Tile67* FUN_00a03eb0(int);
-};
+}  // namespace AppearanceInput
+
 struct Option67
 {
     int FUN_0084e3a0();
@@ -4219,8 +3942,8 @@ struct Interface67
     int unkc0;
     int unkc4;
     int unkc8;
-    Tile67* focused;
-    Tile67* GetFieldBC();
+    Tile* focused;
+    Tile* GetFieldBC();
 };
 struct Setting67
 {
@@ -4236,7 +3959,7 @@ extern char DAT_0106f380[], DAT_01075b00[];
 bool FUN_00702450(int);
 int FUN_0072fa60(int);
 bool FUN_004b71d0();
-void FUN_00706ff0(Tile67*);
+void FUN_00706ff0(Tile*);
 void UpdateRaceSexMenu();
 void ShowMessageBox(const char*, int, int, void (*)(), int, int, float, float, const char*, const char*, int);
 struct Menu67
@@ -4244,7 +3967,7 @@ struct Menu67
     virtual void v0();
     virtual void v1();
     virtual void v2();
-    virtual void Activate(int, Tile67*);
+    virtual void Activate(int, Tile*);
     virtual void v4();
     virtual void v5();
     virtual void v6();
@@ -4265,10 +3988,10 @@ struct Menu67
     int unk20;
     int unk24;
     Option67* options[20];
-    Tile67* parent;
+    Tile* parent;
     int unk7c, unk80, unk84;
-    Tile67* left;
-    Tile67* right;
+    Tile* left;
+    Tile* right;
     int unk90, unk94;
     String67 message;
     void FUN_007adc60(int, bool);
@@ -4310,7 +4033,7 @@ bool Menu67::HandleAction(int action, int argument)
         case 4:
         case 15:
         case 16: {
-            Tile67* tile = ((Interface67*)FUN_004b7210())->GetFieldBC();
+            Tile* tile = ((Interface67*)FUN_004b7210())->GetFieldBC();
             if (!tile && !FUN_004b71d0())
             {
                 tile = ((Interface67*)FUN_004b7210())->focused;
@@ -4340,7 +4063,7 @@ bool Menu67::HandleAction(int action, int argument)
                     trait7 = 0x64;
                 else
                     return false;
-                Tile67* pDestination = tile->FUN_00a03eb0(trait7);
+                Tile* pDestination = tile->FUN_00a03eb0(trait7);
                 if (pDestination)
                 {
                     Activate(trait7, pDestination);
@@ -4381,26 +4104,24 @@ struct StatsMenuItemList
     StatsMenuItem* FUN_00559450();
     StatsMenuItem** FUN_0057cbe0(StatsMenuItem*& p);
 };
-struct StatsMenuTile
-{
-    void FUN_00700320(int, int);
-};
+
 extern void __cdecl FUN_00a04200(int);
-class StatsMenu
+
+// Race/sex option state beyond the shared Menu base.
+struct RaceSexMenuOptionState : Menu
 {
-  public:
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24;
-    StatsMenuItemList* m_pageLists[2];
-    int unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C;
-    int unk50, unk54, unk58, unk5C, unk60, unk64, unk68, unk6C, unk70, unk74, unk78, unk7C;
-    StatsMenuTile* m_minusTile;
-    StatsMenuTile* m_plusTile;
+    StatsMenuItemList* m_pageLists[20];
+    unsigned char unk78[8];
+    Tile* m_minusTile;
+    Tile* m_plusTile;
+
     int FUN_007dcc00();
     void UpdateMinusPlusTiles();
 };
+
 // Scans the current page's items for entries returning -1 or 1 and toggles the minus and plus tiles accordingly.
 // @fnv 0x007af6b0
-void StatsMenu::UpdateMinusPlusTiles()
+void RaceSexMenuOptionState::UpdateMinusPlusTiles()
 {
     StatsMenuItem* pos;
     StatsMenuItemList* pOwner = m_pageLists[FUN_007dcc00()];
@@ -4693,13 +4414,9 @@ struct MorphData
     MorphData();
     ~MorphData();
 };
-struct MorphRace
-{
-    void* FUN_005d9fb0(int);
-};
 struct MorphRaceLink
 {
-    MorphRace* FUN_00726070();
+    TESRace* FUN_00726070();
 };
 struct FaceActor
 {
@@ -4908,7 +4625,7 @@ void FaceMorphMenu::BuildMorphOptions()
         {19, setting_011d5098.String(), setting_011da6a4.Float(), setting_011da6dc.Float()},
     };
     MorphData morphs[4];
-    FUN_00652af0(actor->race.FUN_00726070()->FUN_005d9fb0(actor->FUN_005f0cc0()), actor->FUN_00601800(), morphs, 0,
+    FUN_00652af0(actor->race.FUN_00726070()->GetMeanFaceCoord((SEX)actor->FUN_005f0cc0()), actor->FUN_00601800(), morphs, 0,
                  0.0f);
     for (int index = 0; index < (FUN_00651b30(), FUN_006521b0(0, 0)); ++index)
     {
@@ -5056,13 +4773,9 @@ struct FUN_00449610
     FUN_00449610();
     ~FUN_00449610();
 };
-struct SliderName
-{
-    const char* FUN_005d9fb0(int);
-};
 struct SliderNameRef
 {
-    SliderName* FUN_00726070();
+    TESRace* FUN_00726070();
 };
 struct SliderActor
 {
@@ -5103,7 +4816,7 @@ bool SliderMenu::ClampSliderOptions(int iStartIndex, int iEndIndex, int bForward
             if (option && (option->FUN_00726070() == 0x22 || option->FUN_00726070() == 0x23))
             {
                 FUN_00449610 values[4];
-                FUN_00652af0(actor->name.FUN_00726070()->FUN_005d9fb0(actor->FUN_005f0cc0()), actor->FUN_00601800(),
+                FUN_00652af0((const char*)actor->name.FUN_00726070()->GetMeanFaceCoord((SEX)actor->FUN_005f0cc0()), actor->FUN_00601800(),
                              values, 0, 0.0f);
                 {
                     int low, high;
@@ -5241,8 +4954,8 @@ struct AppearanceObject
     AppearanceObject* FUN_0043b4a0(unsigned int);
     void SetByteAtOffsetE4(unsigned char);
 
-    struct AppearanceName& GetName();
-    struct ShaderProperty* GetProperty(int);
+    struct NiFixedString& GetName();
+    struct BSShaderProperty* GetProperty(int);
 };
 struct FaceModel
 {
@@ -5355,499 +5068,7 @@ struct SkinRoot : AppearanceObject
 {
     SkinObject* FUN_009611e0();
 };
-struct AppearanceProcess
-{
-    virtual void slot000();
-    virtual void slot004();
-    virtual void slot008();
-    virtual void slot00c();
-    virtual void slot010();
-    virtual void slot014();
-    virtual void slot018();
-    virtual void slot01c();
-    virtual void slot020();
-    virtual void slot024();
-    virtual void slot028();
-    virtual void slot02c();
-    virtual void slot030();
-    virtual void slot034();
-    virtual void slot038();
-    virtual void slot03c();
-    virtual void slot040();
-    virtual void slot044();
-    virtual void slot048();
-    virtual void slot04c();
-    virtual void slot050();
-    virtual void slot054();
-    virtual void Refresh();
-    virtual void slot05c();
-    virtual void slot060();
-    virtual void slot064();
-    virtual void slot068();
-    virtual void slot06c();
-    virtual void slot070();
-    virtual void slot074();
-    virtual void slot078();
-    virtual void slot07c();
-    virtual void slot080();
-    virtual void slot084();
-    virtual void slot088();
-    virtual void slot08c();
-    virtual void slot090();
-    virtual void slot094();
-    virtual void slot098();
-    virtual void slot09c();
-    virtual void slot0a0();
-    virtual void slot0a4();
-    virtual void slot0a8();
-    virtual void slot0ac();
-    virtual void slot0b0();
-    virtual void slot0b4();
-    virtual void slot0b8();
-    virtual void slot0bc();
-    virtual void slot0c0();
-    virtual void slot0c4();
-    virtual void slot0c8();
-    virtual void slot0cc();
-    virtual void slot0d0();
-    virtual void slot0d4();
-    virtual void slot0d8();
-    virtual void slot0dc();
-    virtual void slot0e0();
-    virtual void slot0e4();
-    virtual void slot0e8();
-    virtual void slot0ec();
-    virtual void slot0f0();
-    virtual void slot0f4();
-    virtual void slot0f8();
-    virtual void slot0fc();
-    virtual void slot100();
-    virtual void slot104();
-    virtual void slot108();
-    virtual void slot10c();
-    virtual void slot110();
-    virtual void slot114();
-    virtual void slot118();
-    virtual void slot11c();
-    virtual void slot120();
-    virtual void slot124();
-    virtual void slot128();
-    virtual void slot12c();
-    virtual void slot130();
-    virtual void slot134();
-    virtual void slot138();
-    virtual void slot13c();
-    virtual void slot140();
-    virtual void slot144();
-    virtual void slot148();
-    virtual void slot14c();
-    virtual void slot150();
-    virtual void slot154();
-    virtual void slot158();
-    virtual void slot15c();
-    virtual void slot160();
-    virtual void slot164();
-    virtual void slot168();
-    virtual void slot16c();
-    virtual void slot170();
-    virtual void slot174();
-    virtual void slot178();
-    virtual void slot17c();
-    virtual void slot180();
-    virtual void slot184();
-    virtual void slot188();
-    virtual void slot18c();
-    virtual void slot190();
-    virtual void slot194();
-    virtual void slot198();
-    virtual void slot19c();
-    virtual void slot1a0();
-    virtual void slot1a4();
-    virtual void slot1a8();
-    virtual void slot1ac();
-    virtual void slot1b0();
-    virtual void slot1b4();
-    virtual void slot1b8();
-    virtual void slot1bc();
-    virtual void slot1c0();
-    virtual void slot1c4();
-    virtual void slot1c8();
-    virtual void slot1cc();
-    virtual void slot1d0();
-    virtual void slot1d4();
-    virtual void slot1d8();
-    virtual void slot1dc();
-    virtual void slot1e0();
-    virtual void slot1e4();
-    virtual void slot1e8();
-    virtual void slot1ec();
-    virtual void slot1f0();
-    virtual void slot1f4();
-    virtual void slot1f8();
-    virtual void slot1fc();
-    virtual void slot200();
-    virtual void slot204();
-    virtual void slot208();
-    virtual void slot20c();
-    virtual void slot210();
-    virtual void slot214();
-    virtual void slot218();
-    virtual void slot21c();
-    virtual void slot220();
-    virtual void slot224();
-    virtual void slot228();
-    virtual void slot22c();
-    virtual void slot230();
-    virtual void slot234();
-    virtual void slot238();
-    virtual void slot23c();
-    virtual void slot240();
-    virtual void slot244();
-    virtual void slot248();
-    virtual void slot24c();
-    virtual void slot250();
-    virtual void slot254();
-    virtual void slot258();
-    virtual void slot25c();
-    virtual void slot260();
-    virtual void slot264();
-    virtual void slot268();
-    virtual void slot26c();
-    virtual void slot270();
-    virtual void slot274();
-    virtual void slot278();
-    virtual void slot27c();
-    virtual void slot280();
-    virtual void slot284();
-    virtual void slot288();
-    virtual void slot28c();
-    virtual void slot290();
-    virtual void slot294();
-    virtual void slot298();
-    virtual void slot29c();
-    virtual void slot2a0();
-    virtual void slot2a4();
-    virtual void slot2a8();
-    virtual void slot2ac();
-    virtual void slot2b0();
-    virtual void slot2b4();
-    virtual void slot2b8();
-    virtual void slot2bc();
-    virtual void slot2c0();
-    virtual void slot2c4();
-    virtual void slot2c8();
-    virtual void slot2cc();
-    virtual void slot2d0();
-    virtual void slot2d4();
-    virtual void slot2d8();
-    virtual void slot2dc();
-    virtual void slot2e0();
-    virtual void slot2e4();
-    virtual void slot2e8();
-    virtual void slot2ec();
-    virtual void slot2f0();
-    virtual void slot2f4();
-    virtual void slot2f8();
-    virtual void slot2fc();
-    virtual void slot300();
-    virtual void slot304();
-    virtual void slot308();
-    virtual void slot30c();
-    virtual void slot310();
-    virtual void slot314();
-    virtual void slot318();
-    virtual void slot31c();
-    virtual void slot320();
-    virtual void slot324();
-    virtual void slot328();
-    virtual void slot32c();
-    virtual void slot330();
-    virtual void slot334();
-    virtual void slot338();
-    virtual void slot33c();
-    virtual void slot340();
-    virtual void slot344();
-    virtual void slot348();
-    virtual void slot34c();
-    virtual void slot350();
-    virtual void slot354();
-    virtual void slot358();
-    virtual void slot35c();
-    virtual void slot360();
-    virtual void slot364();
-    virtual void slot368();
-    virtual void slot36c();
-    virtual void slot370();
-    virtual void slot374();
-    virtual void slot378();
-    virtual void slot37c();
-    virtual void slot380();
-    virtual void slot384();
-    virtual void slot388();
-    virtual void slot38c();
-    virtual void slot390();
-    virtual void slot394();
-    virtual void slot398();
-    virtual void slot39c();
-    virtual void slot3a0();
-    virtual void slot3a4();
-    virtual void slot3a8();
-    virtual void slot3ac();
-    virtual void slot3b0();
-    virtual void slot3b4();
-    virtual void slot3b8();
-    virtual void slot3bc();
-    virtual void slot3c0();
-    virtual void slot3c4();
-    virtual void slot3c8();
-    virtual void slot3cc();
-    virtual void slot3d0();
-    virtual void slot3d4();
-    virtual void slot3d8();
-    virtual void slot3dc();
-    virtual void slot3e0();
-    virtual void slot3e4();
-    virtual void slot3e8();
-    virtual void slot3ec();
-    virtual void slot3f0();
-    virtual void slot3f4();
-    virtual void slot3f8();
-    virtual void slot3fc();
-    virtual void slot400();
-    virtual void slot404();
-    virtual void slot408();
-    virtual void slot40c();
-    virtual void slot410();
-    virtual void slot414();
-    virtual void slot418();
-    virtual void slot41c();
-    virtual void slot420();
-    virtual void slot424();
-    virtual void slot428();
-    virtual void slot42c();
-    virtual void slot430();
-    virtual void slot434();
-    virtual void slot438();
-    virtual void slot43c();
-    virtual void slot440();
-    virtual void slot444();
-    virtual void slot448();
-    virtual void slot44c();
-    virtual void slot450();
-    virtual void slot454();
-    virtual void slot458();
-    virtual void slot45c();
-    virtual void slot460();
-    virtual void slot464();
-    virtual void slot468();
-    virtual void slot46c();
-    virtual void slot470();
-    virtual void slot474();
-    virtual void slot478();
-    virtual void slot47c();
-    virtual void slot480();
-    virtual void slot484();
-    virtual void slot488();
-    virtual void slot48c();
-    virtual void slot490();
-    virtual void slot494();
-    virtual void slot498();
-    virtual void slot49c();
-    virtual void slot4a0();
-    virtual void slot4a4();
-    virtual void slot4a8();
-    virtual void slot4ac();
-    virtual void slot4b0();
-    virtual void slot4b4();
-    virtual void slot4b8();
-    virtual void slot4bc();
-    virtual void slot4c0();
-    virtual void slot4c4();
-    virtual void slot4c8();
-    virtual void slot4cc();
-    virtual void slot4d0();
-    virtual void slot4d4();
-    virtual void slot4d8();
-    virtual void slot4dc();
-    virtual void slot4e0();
-    virtual void slot4e4();
-    virtual void slot4e8();
-    virtual void slot4ec();
-    virtual void slot4f0();
-    virtual void slot4f4();
-    virtual void slot4f8();
-    virtual void slot4fc();
-    virtual void slot500();
-    virtual void slot504();
-    virtual void slot508();
-    virtual void slot50c();
-    virtual void slot510();
-    virtual void slot514();
-    virtual void slot518();
-    virtual void slot51c();
-    virtual void slot520();
-    virtual void slot524();
-    virtual void slot528();
-    virtual void slot52c();
-    virtual void slot530();
-    virtual void slot534();
-    virtual void slot538();
-    virtual void slot53c();
-    virtual void slot540();
-    virtual void slot544();
-    virtual void slot548();
-    virtual void slot54c();
-    virtual void slot550();
-    virtual void slot554();
-    virtual void slot558();
-    virtual void slot55c();
-    virtual void slot560();
-    virtual void slot564();
-    virtual void slot568();
-    virtual void slot56c();
-    virtual void slot570();
-    virtual void slot574();
-    virtual void slot578();
-    virtual void slot57c();
-    virtual void slot580();
-    virtual void slot584();
-    virtual void slot588();
-    virtual void slot58c();
-    virtual void slot590();
-    virtual void slot594();
-    virtual void slot598();
-    virtual void slot59c();
-    virtual void slot5a0();
-    virtual void slot5a4();
-    virtual void slot5a8();
-    virtual void slot5ac();
-    virtual void slot5b0();
-    virtual void slot5b4();
-    virtual void slot5b8();
-    virtual void slot5bc();
-    virtual void slot5c0();
-    virtual void slot5c4();
-    virtual void slot5c8();
-    virtual void slot5cc();
-    virtual void slot5d0();
-    virtual void slot5d4();
-    virtual void slot5d8();
-    virtual void slot5dc();
-    virtual void slot5e0();
-    virtual void slot5e4();
-    virtual void slot5e8();
-    virtual void slot5ec();
-    virtual void slot5f0();
-    virtual void slot5f4();
-    virtual void slot5f8();
-    virtual void slot5fc();
-    virtual void slot600();
-    virtual void slot604();
-    virtual void slot608();
-    virtual void slot60c();
-    virtual void slot610();
-    virtual void slot614();
-    virtual void slot618();
-    virtual void slot61c();
-    virtual void slot620();
-    virtual void slot624();
-    virtual void slot628();
-    virtual void slot62c();
-    virtual void slot630();
-    virtual void slot634();
-    virtual void slot638();
-    virtual void slot63c();
-    virtual void slot640();
-    virtual void slot644();
-    virtual void slot648();
-    virtual void slot64c();
-    virtual void slot650();
-    virtual void slot654();
-    virtual void slot658();
-    virtual void slot65c();
-    virtual void slot660();
-    virtual void slot664();
-    virtual void slot668();
-    virtual void slot66c();
-    virtual void slot670();
-    virtual void slot674();
-    virtual void slot678();
-    virtual void slot67c();
-    virtual void slot680();
-    virtual void slot684();
-    virtual void slot688();
-    virtual void slot68c();
-    virtual void slot690();
-    virtual void slot694();
-    virtual void slot698();
-    virtual void slot69c();
-    virtual void slot6a0();
-    virtual void slot6a4();
-    virtual void slot6a8();
-    virtual void slot6ac();
-    virtual void slot6b0();
-    virtual void slot6b4();
-    virtual void slot6b8();
-    virtual void slot6bc();
-    virtual void slot6c0();
-    virtual void slot6c4();
-    virtual void slot6c8();
-    virtual void slot6cc();
-    virtual void slot6d0();
-    virtual void slot6d4();
-    virtual void slot6d8();
-    virtual void slot6dc();
-    virtual void slot6e0();
-    virtual void slot6e4();
-    virtual void slot6e8();
-    virtual void slot6ec();
-    virtual void slot6f0();
-    virtual void slot6f4();
-    virtual void slot6f8();
-    virtual void slot6fc();
-    virtual void slot700();
-    virtual void slot704();
-    virtual void slot708();
-    virtual void slot70c();
-    virtual void slot710();
-    virtual void slot714();
-    virtual void slot718();
-    virtual void slot71c();
-    virtual void slot720();
-    virtual void slot724();
-    virtual void slot728();
-    virtual void slot72c();
-    virtual void slot730();
-    virtual void slot734();
-    virtual void slot738();
-    virtual void slot73c();
-    virtual void slot740();
-    virtual void slot744();
-    virtual void slot748();
-    virtual void slot74c();
-    virtual void slot750();
-    virtual void slot754();
-    virtual void slot758();
-    virtual void slot75c();
-    virtual void slot760();
-    virtual void slot764();
-    virtual void slot768();
-    virtual void slot76c();
-    virtual void slot770();
-    virtual void slot774();
-    virtual void slot778();
-    virtual void slot77c();
-    virtual void slot780();
-    virtual void slot784();
-    virtual void slot788();
-    virtual void slot78c();
-    virtual void slot790();
-    virtual void ResetA(int);
-    virtual void slot798();
-    virtual void ResetB(int);
-    virtual void slot7a0();
-    virtual void ResetC(int);
-};
+
 struct AppearancePlayer
 {
     virtual void slot000();
@@ -5961,7 +5182,7 @@ struct AppearancePlayer
     virtual SkinRoot* RootB(int);
     AppearanceObject* GetNode(bool);
     struct AppearanceAnimation* GetAnimation(bool);
-    AppearanceProcess* GetCurrentProcess();
+    MiddleHighProcess* GetCurrentProcess();
     void* GetBipedAnim(bool);
 };
 struct AppearanceNPC
@@ -5990,74 +5211,8 @@ struct AppearanceNPC
     void AttachHeadModels(AppearancePlayer*, void*, int, int);
     void FUN_00603ad0(void*);
 };
-struct ShaderProperty
-{
-    virtual void slot000();
-    virtual void slot004();
-    virtual void slot008();
-    virtual void slot00c();
-    virtual void slot010();
-    virtual void slot014();
-    virtual void slot018();
-    virtual void slot01c();
-    virtual void slot020();
-    virtual void slot024();
-    virtual void slot028();
-    virtual void slot02c();
-    virtual void slot030();
-    virtual void slot034();
-    virtual void slot038();
-    virtual void slot03c();
-    virtual void slot040();
-    virtual void slot044();
-    virtual void slot048();
-    virtual void slot04c();
-    virtual void slot050();
-    virtual void slot054();
-    virtual void slot058();
-    virtual void slot05c();
-    virtual void slot060();
-    virtual void slot064();
-    virtual void slot068();
-    virtual void slot06c();
-    virtual void slot070();
-    virtual void slot074();
-    virtual void slot078();
-    virtual void slot07c();
-    virtual void slot080();
-    virtual void slot084();
-    virtual void slot088();
-    virtual void slot08c();
-    virtual void slot090();
-    virtual void slot094();
-    virtual void slot098();
-    virtual void slot09c();
-    virtual void slot0a0();
-    virtual void slot0a4();
-    virtual void slot0a8();
-    virtual void slot0ac();
-    virtual void slot0b0();
-    virtual void slot0b4();
-    virtual void slot0b8();
-    virtual void slot0bc();
-    virtual void slot0c0();
-    virtual void slot0c4();
-    virtual void slot0c8();
-    virtual void slot0cc();
-    virtual void slot0d0();
-    virtual void slot0d4();
-    virtual void slot0d8();
-    virtual void slot0dc();
-    virtual void slot0e0();
-    virtual void slot0e4();
-    virtual void slot0e8();
-    virtual void slot0ec();
-    virtual void slot0f0();
-    virtual void slot0f4();
-    virtual void slot0f8();
-    virtual void SetTexture(int, void*);
-    int FUN_00441110();
-};
+// The shared shader also lacks the virtual hair texture setter at slot 63.
+typedef void (__thiscall* SetHairTextureFn)(BSShaderProperty*, int, void*);
 struct AppearanceAnimation
 {
     struct AppearanceManager* FUN_00496940();
@@ -6066,10 +5221,7 @@ struct AppearanceManager
 {
     void* GetStringAtOffset();
 };
-struct AppearanceName
-{
-    operator const char*() const;
-};
+
 struct FaceCoordinate
 {
     int a, b, c, d, e, f, g, h;
@@ -6190,20 +5342,20 @@ void AppearanceMenu::UpdateFaceGen(bool remove, bool shape, bool texture)
             if (controller && controller->FUN_009611e0())
             {
                 FUN_00a6e8e0(controller, skin);
-                appearancePlayer->GetCurrentProcess()->ResetB(0);
+                appearancePlayer->GetCurrentProcess()->SetFaceGenHeadNode(0);
                 controller->FUN_009611e0()->Remove(controller);
             }
             controller = appearancePlayer->RootA(0);
             if (controller && controller->FUN_009611e0())
             {
                 FUN_00a6e8e0(controller, skin);
-                appearancePlayer->GetCurrentProcess()->ResetA(0);
-                appearancePlayer->GetCurrentProcess()->ResetC(0);
+                appearancePlayer->GetCurrentProcess()->AttachFaceGenerationNode(0);
+                appearancePlayer->GetCurrentProcess()->SetAnimationNode(0);
                 controller->FUN_009611e0()->Remove(controller);
             }
         }
         if (appearancePlayer->GetCurrentProcess())
-            appearancePlayer->GetCurrentProcess()->Refresh();
+            appearancePlayer->GetCurrentProcess()->InitializeProcessState();
         npc->FUN_005dd560();
         int first = 0;
         int node = first;
@@ -6237,9 +5389,9 @@ void AppearanceMenu::UpdateFaceGen(bool remove, bool shape, bool texture)
                     object->ApplyShape(modified, model, 0);
                 if (texture && !_mbsnicmp(model->GetName(), "FaceGenFace", strlen("FaceGenFace")))
                 {
-                    ShaderProperty* generated;
+                    BSShaderProperty* generated;
                     {
-                        ShaderProperty* property = geometry->GetProperty(3);
+                        BSShaderProperty* property = geometry->GetProperty(3);
                         generated =
                             (!property ? 0 : (property->FUN_00441110() >= 8 && property->FUN_00441110() <= 12 ? 1 : 0))
                                 ? property
@@ -6251,7 +5403,7 @@ void AppearanceMenu::UpdateFaceGen(bool remove, bool shape, bool texture)
                     if (!object->FUN_007b2570())
                         object->FUN_0065a840();
                     object->ApplyTextureCoordinate(coordinates, pkTexture, FUN_006151d0());
-                    generated->SetTexture(1, pkTexture);
+                    (*(SetHairTextureFn**)generated)[63](generated, 1, pkTexture);
                 }
             }
             controller = appearancePlayer->RootB(0);
@@ -6261,293 +5413,7 @@ void AppearanceMenu::UpdateFaceGen(bool remove, bool shape, bool texture)
 }
 
 class Player511;
-class Process511
-{
-  public:
-    virtual void Virtual000();
-    virtual void Virtual004();
-    virtual void Virtual008();
-    virtual void Virtual00c();
-    virtual void Virtual010();
-    virtual void Virtual014();
-    virtual void Virtual018();
-    virtual void Virtual01c();
-    virtual void Virtual020();
-    virtual void Virtual024();
-    virtual void Virtual028();
-    virtual void Virtual02c();
-    virtual void Virtual030();
-    virtual void Virtual034();
-    virtual void Virtual038();
-    virtual void Virtual03c();
-    virtual void Virtual040();
-    virtual void Virtual044();
-    virtual void Virtual048();
-    virtual void Virtual04c();
-    virtual void Virtual050();
-    virtual void Virtual054();
-    virtual void Reset();
-    virtual void Virtual05c();
-    virtual void Virtual060();
-    virtual void Virtual064();
-    virtual void Virtual068();
-    virtual void Virtual06c();
-    virtual void Virtual070();
-    virtual void Virtual074();
-    virtual void Virtual078();
-    virtual void Virtual07c();
-    virtual void Virtual080();
-    virtual void Virtual084();
-    virtual void Virtual088();
-    virtual void Virtual08c();
-    virtual void Virtual090();
-    virtual void Virtual094();
-    virtual void Virtual098();
-    virtual void Virtual09c();
-    virtual void Virtual0a0();
-    virtual void Virtual0a4();
-    virtual void Virtual0a8();
-    virtual void Virtual0ac();
-    virtual void Virtual0b0();
-    virtual void Virtual0b4();
-    virtual void Virtual0b8();
-    virtual void Virtual0bc();
-    virtual void Virtual0c0();
-    virtual void Virtual0c4();
-    virtual void Virtual0c8();
-    virtual void Virtual0cc();
-    virtual void Virtual0d0();
-    virtual void Virtual0d4();
-    virtual void Virtual0d8();
-    virtual void Virtual0dc();
-    virtual void Virtual0e0();
-    virtual void Virtual0e4();
-    virtual void Virtual0e8();
-    virtual void Virtual0ec();
-    virtual void Virtual0f0();
-    virtual void Virtual0f4();
-    virtual void Virtual0f8();
-    virtual void Virtual0fc();
-    virtual void Virtual100();
-    virtual void Virtual104();
-    virtual void Virtual108();
-    virtual void Virtual10c();
-    virtual void Virtual110();
-    virtual void Virtual114();
-    virtual void Virtual118();
-    virtual void Virtual11c();
-    virtual void Virtual120();
-    virtual void Virtual124();
-    virtual void Virtual128();
-    virtual void Virtual12c();
-    virtual void Virtual130();
-    virtual void Virtual134();
-    virtual void Virtual138();
-    virtual void Virtual13c();
-    virtual void Virtual140();
-    virtual void Virtual144();
-    virtual void Virtual148();
-    virtual void Virtual14c();
-    virtual void Virtual150();
-    virtual void Virtual154();
-    virtual void Virtual158();
-    virtual void Virtual15c();
-    virtual void Virtual160();
-    virtual void Virtual164();
-    virtual void Virtual168();
-    virtual void Virtual16c();
-    virtual void Virtual170();
-    virtual void Virtual174();
-    virtual void Virtual178();
-    virtual void Virtual17c();
-    virtual void Virtual180();
-    virtual void Virtual184();
-    virtual void Virtual188();
-    virtual void Virtual18c();
-    virtual void Virtual190();
-    virtual void Virtual194();
-    virtual void Virtual198();
-    virtual void Virtual19c();
-    virtual void Virtual1a0();
-    virtual void Virtual1a4();
-    virtual void Virtual1a8();
-    virtual void Virtual1ac();
-    virtual void Virtual1b0();
-    virtual void Virtual1b4();
-    virtual void Virtual1b8();
-    virtual void Virtual1bc();
-    virtual void Virtual1c0();
-    virtual void Virtual1c4();
-    virtual void Virtual1c8();
-    virtual void Virtual1cc();
-    virtual void Virtual1d0();
-    virtual void Virtual1d4();
-    virtual void Virtual1d8();
-    virtual void Virtual1dc();
-    virtual void Virtual1e0();
-    virtual void Virtual1e4();
-    virtual void Virtual1e8();
-    virtual void Virtual1ec();
-    virtual void Virtual1f0();
-    virtual void Virtual1f4();
-    virtual void Virtual1f8();
-    virtual void Virtual1fc();
-    virtual void Virtual200();
-    virtual void Virtual204();
-    virtual void Virtual208();
-    virtual void Virtual20c();
-    virtual void Virtual210();
-    virtual void Virtual214();
-    virtual void Virtual218();
-    virtual void Virtual21c();
-    virtual void Virtual220();
-    virtual void Virtual224();
-    virtual void Virtual228();
-    virtual void Virtual22c();
-    virtual void Virtual230();
-    virtual void Virtual234();
-    virtual void Virtual238();
-    virtual void Virtual23c();
-    virtual void Virtual240();
-    virtual void Virtual244();
-    virtual void Virtual248();
-    virtual void Virtual24c();
-    virtual void Virtual250();
-    virtual void Virtual254();
-    virtual void Virtual258();
-    virtual void Virtual25c();
-    virtual void Virtual260();
-    virtual void Virtual264();
-    virtual void Virtual268();
-    virtual void Virtual26c();
-    virtual void Virtual270();
-    virtual void Virtual274();
-    virtual void Virtual278();
-    virtual void Virtual27c();
-    virtual void Virtual280();
-    virtual void Virtual284();
-    virtual void Virtual288();
-    virtual void Virtual28c();
-    virtual void Virtual290();
-    virtual void Virtual294();
-    virtual void Virtual298();
-    virtual void Virtual29c();
-    virtual void Virtual2a0();
-    virtual void Virtual2a4();
-    virtual void Virtual2a8();
-    virtual void Virtual2ac();
-    virtual void Virtual2b0();
-    virtual void Virtual2b4();
-    virtual void Virtual2b8();
-    virtual void Virtual2bc();
-    virtual void Virtual2c0();
-    virtual void Virtual2c4();
-    virtual void Virtual2c8();
-    virtual void Virtual2cc();
-    virtual void Virtual2d0();
-    virtual void Virtual2d4();
-    virtual void Virtual2d8();
-    virtual void Virtual2dc();
-    virtual void Virtual2e0();
-    virtual void Virtual2e4();
-    virtual void Virtual2e8();
-    virtual void Virtual2ec();
-    virtual void Virtual2f0();
-    virtual void Virtual2f4();
-    virtual void Virtual2f8();
-    virtual void Virtual2fc();
-    virtual void Virtual300();
-    virtual void Virtual304();
-    virtual void Virtual308();
-    virtual void Virtual30c();
-    virtual void Virtual310();
-    virtual void Virtual314();
-    virtual void Virtual318();
-    virtual void Virtual31c();
-    virtual void Virtual320();
-    virtual void Virtual324();
-    virtual void Virtual328();
-    virtual void Virtual32c();
-    virtual void Virtual330();
-    virtual void Virtual334();
-    virtual void Virtual338();
-    virtual void Virtual33c();
-    virtual void Virtual340();
-    virtual void Virtual344();
-    virtual void Virtual348();
-    virtual void Virtual34c();
-    virtual void Virtual350();
-    virtual void Virtual354();
-    virtual void Virtual358();
-    virtual void Virtual35c();
-    virtual void Virtual360();
-    virtual void Virtual364();
-    virtual void Virtual368();
-    virtual void Virtual36c();
-    virtual void Virtual370();
-    virtual void Virtual374();
-    virtual void Virtual378();
-    virtual void Virtual37c();
-    virtual void Virtual380();
-    virtual void Virtual384();
-    virtual void Virtual388();
-    virtual void Virtual38c();
-    virtual void Virtual390();
-    virtual void Virtual394();
-    virtual void Virtual398();
-    virtual void Virtual39c();
-    virtual void Virtual3a0();
-    virtual void Virtual3a4();
-    virtual void Virtual3a8();
-    virtual void Virtual3ac();
-    virtual void Virtual3b0();
-    virtual void Virtual3b4();
-    virtual void Virtual3b8();
-    virtual void Virtual3bc();
-    virtual void Virtual3c0();
-    virtual void Virtual3c4();
-    virtual void Virtual3c8();
-    virtual void Virtual3cc();
-    virtual void Virtual3d0();
-    virtual void Virtual3d4();
-    virtual void Virtual3d8();
-    virtual void Virtual3dc();
-    virtual void Virtual3e0();
-    virtual void Virtual3e4();
-    virtual void Virtual3e8();
-    virtual void Virtual3ec();
-    virtual void Virtual3f0();
-    virtual void Virtual3f4();
-    virtual void Virtual3f8();
-    virtual void Virtual3fc();
-    virtual void Virtual400();
-    virtual void Virtual404();
-    virtual void Virtual408();
-    virtual void Virtual40c();
-    virtual void Virtual410();
-    virtual void Virtual414();
-    virtual void Virtual418();
-    virtual void Virtual41c();
-    virtual void Virtual420();
-    virtual void Virtual424();
-    virtual void Virtual428();
-    virtual void Virtual42c();
-    virtual void Virtual430();
-    virtual void Virtual434();
-    virtual void Virtual438();
-    virtual void Virtual43c();
-    virtual void Virtual440();
-    virtual void Virtual444();
-    virtual void Virtual448();
-    virtual void Virtual44c();
-    virtual void Virtual450();
-    virtual void Virtual454();
-    virtual void Virtual458();
-    virtual void Virtual45c();
-    virtual void Virtual460();
-    virtual void SetOwner(Player511*);
-    virtual void SetMode(int);
-};
+
 class Root511
 {
   public:
@@ -6563,13 +5429,10 @@ class Root511
     virtual void Refresh();
     virtual void Update();
 };
-struct NiAVObject511
-{
-    void FUN_0043fa80(const Matrix*);
-};
+
 struct Node511
 {
-    NiAVObject511* FUN_0043b4a0(int);
+    NiAVObject* FUN_0043b4a0(int);
 };
 class Player511
 {
@@ -6684,7 +5547,7 @@ class Player511
     virtual int HasStateA(int);
     virtual int HasStateB(int);
     HairOption* FUN_007af430();
-    Process511* FUN_008d8520();
+    MiddleHighProcess* FUN_008d8520();
     void* FUN_00950b00(bool);
     Node511* FUN_00950bb0(bool);
     Matrix FUN_0056fac0(const Matrix&);
@@ -6692,10 +5555,7 @@ class Player511
 extern "C" Player511* _g_thePlayer;
 extern bool DAT_011c5cb4;
 extern Matrix DAT_011a9448;
-struct IOManager
-{
-    void FUN_00456520();
-};
+
 extern IOManager* DAT_01202d98;
 Root511* FUN_00705990();
 void FUN_006570e0(HairOption*);
@@ -6722,7 +5582,8 @@ class QHeadLocal
     void RunVirtualMethod28();
     void FUN_0043ed90(Player511*, void*);
 };
-struct Menu511
+// 0x007b25a0 refreshes race-menu face geometry using the NPC at +0xd8, beyond Menu (0x28 bytes).
+struct RaceMenuFaceRefreshState
 {
     int unk00;
     int unk04;
@@ -6783,13 +5644,13 @@ struct Menu511
     void UpdatePlayerHead();
 };
 // @fnv 0x007b25a0
-void Menu511::UpdatePlayerHead()
+void RaceMenuFaceRefreshState::UpdatePlayerHead()
 {
     FUN_006570e0(_g_thePlayer->FUN_007af430());
     DAT_011c5cb4 = true;
-    _g_thePlayer->FUN_008d8520()->Reset();
-    _g_thePlayer->FUN_008d8520()->SetMode(3);
-    _g_thePlayer->FUN_008d8520()->SetOwner(_g_thePlayer);
+    _g_thePlayer->FUN_008d8520()->InitializeProcessState();
+    ((BaseProcess*)_g_thePlayer->FUN_008d8520())->ResetActorModel((RESET_3D_FLAGS)3);
+    _g_thePlayer->FUN_008d8520()->Update3DModel((Actor*)_g_thePlayer);
     if (!_g_thePlayer->HasStateB(0) && !_g_thePlayer->HasStateA(0))
     {
         QHeadLocal head(npc, 0);
@@ -6800,7 +5661,7 @@ void Menu511::UpdatePlayerHead()
     DAT_011c5cb4 = false;
     Node511* node = _g_thePlayer->FUN_00950bb0(true);
     Node511* matrix = node;
-    NiAVObject511* object = matrix->FUN_0043b4a0(0);
+    NiAVObject* object = matrix->FUN_0043b4a0(0);
     Matrix node2 = DAT_011a9448;
     object->FUN_0043fa80(&_g_thePlayer->FUN_0056fac0(node2));
     DAT_01202d98->FUN_00456520();
@@ -6809,13 +5670,9 @@ void Menu511::UpdatePlayerHead()
     FUN_00705990()->Refresh();
 }
 
-struct NavTile
-{
-    bool IsAllChildrenFlag0();
-};
 struct NavItem
 {
-    NavTile* tile;
+    Tile* tile;
 };
 struct NavController
 {
@@ -6824,7 +5681,7 @@ struct NavController
     virtual void Slot2();
     virtual void Navigate(int, int);
 };
-void FUN_00706ff0(NavTile*);
+void FUN_00706ff0(Tile*);
 struct NavList
 {
     int unk00;
@@ -6897,18 +5754,9 @@ bool NavList::FUN_007b4260(int direction)
     return bResult;
 }
 
-struct OptTile
-{
-    float Read(int);
-    void Text(int, const char*, bool);
-    void Integer(int, int);
-    OptTile* Parent();
-    void Float(int, float, bool);
-    void Refresh(bool);
-};
 struct OptEntry
 {
-    OptTile* tile;
+    Tile* tile;
     unsigned int kind;
     int unk08;
     OptEntry();
@@ -6946,7 +5794,7 @@ struct Root4650
     int unk70;
     int unk74;
     void* parent;
-    OptTile* Create(void*, const char*, int);
+    Tile* Create(void*, const char*, int);
 };
 extern Root4650* root4650;
 int LookupTrait(const char*, int);
@@ -6955,7 +5803,7 @@ extern float DAT_010162c0;
 struct List4650
 {
     int unk00, unk04, unk08, unk0c, unk10;
-    OptTile* tile;
+    Tile* tile;
     float height;
     int unk1c;
     OptEntry* selected;
@@ -7008,11 +5856,6 @@ OptEntry* List4650::CreateEntry(const char* text, const char* templ, unsigned in
 }
 
 namespace fnv_007b4930 {
-struct PendingTile : LocalTile
-{
-    const unsigned char* FUN_00a011f0(int trait);
-    void FUN_00a0b110(int trait);
-};
 struct PendingOption : MenuOptionFor3760
 {
     int FUN_00726070();
@@ -7070,7 +5913,7 @@ struct PendingMenu
     int unk0b4;
     int unk0b8;
     int unk0bc;
-    PendingTile* pendingTile;
+    Tile* pendingTile;
     PendingOption* pendingOption;
     bool FUN_007adc30(int trait);
     void FUN_007adc60(int trait, bool enabled);
@@ -7086,7 +5929,7 @@ void PendingMenu::HandlePendingTileAction()
         int action = (int)pendingTile->FUN_00a011b0(0xfaa);
         bool changed = false;
         if (pendingOption->FUN_00726070() == 29 && (action == 100 || action == 104) &&
-            _mbscmp(static_cast<PendingTile*>(pendingTile->GetParent())->FUN_00a011f0(0x1009),
+            _mbscmp(reinterpret_cast<const unsigned char*>(pendingTile->GetParent()->FUN_00a011f0(0x1009)),
                     reinterpret_cast<const unsigned char*>(DAT_011d3528.FUN_00403df0())) == 0)
         {
             changed = true;
@@ -7142,13 +5985,9 @@ struct Option7
     void FUN_007b3840(int&, int&);
     void FUN_007b3760(int);
 };
-struct Race7
-{
-    char* FUN_005d9fb0(int);
-};
 struct RaceRef7
 {
-    Race7* FUN_00726070();
+    TESRace* FUN_00726070();
 };
 struct NPC7
 {
@@ -7371,7 +6210,7 @@ void Menu7::HandleOptionSelection()
         remaining = ((remaining > 15.0 ? remaining : 15.0f) < 65.0) ? (remaining > 15.0 ? remaining : 15.0f) : 65.0f;
         FUN_00652470(base3, 0, 0, (float)amount7);
         FUN_00652470(base3, 0, 1, remaining);
-        FUN_00652e00(npc->race.FUN_00726070()->FUN_005d9fb0(npc->GetSex()), base3, result6, 0);
+        FUN_00652e00((char*)npc->race.FUN_00726070()->GetMeanFaceCoord((SEX)npc->GetSex()), base3, result6, 0);
         if (FUN_00652900(result6, npc->FUN_00601800()))
             FUN_006529a0(result6, npc->FUN_00601800(), 0, 0);
         ((Menu7*)DAT_011da634)->FUN_007adc60(7, true);
@@ -7388,7 +6227,7 @@ void Menu7::HandleOptionSelection()
 }  // namespace fnv_007b4b50
 
 int __fastcall FUN_0044ddc0(void* self);
-HairResult* __fastcall FUN_004ac110(void* self);
+TESRace* __fastcall FUN_004ac110(void* self);
 // Returns 1 if p is non-null, its FUN_0044ddc0 result is non-zero, and the holder's m_d8 hair result equals that value; otherwise 0.
 // @fnv 0x007ad7f0
 char __cdecl IsHairMatching(Obj0* p)
@@ -7404,13 +6243,6 @@ char __cdecl IsHairMatching(Obj0* p)
 
 extern Setting67 DAT_011d3288;
 
-class HCTile
-{
-  public:
-    HCTile* FUN_0045cd60();
-    bool IsTraitNonZero(int m_iValueId);
-};
-
 class HCOption
 {
   public:
@@ -7422,7 +6254,7 @@ class HCOption
 class HCOptionList
 {
   public:
-    HCOption* FUN_007b41c0(HCTile* pkTile);
+    HCOption* FUN_007b41c0(Tile* pkTile);
     void ApplyToAllTiles();
     int FUN_0084e3a0();
     int FUN_0044edb0();
@@ -7433,10 +6265,6 @@ struct HCHairList
 {
     void FUN_00470470();              // RemoveAll
     void FUN_005ae3d0(int& riValue);  // AddHead
-};
-struct HCFaceData
-{
-    void FUN_00613fd0();
 };
 struct HCFaceFlags
 {
@@ -7460,7 +6288,7 @@ class HCNPC
     int unk2c;
     HCFaceFlags m_kFlags;  // +0x30
     HCHairList* FUN_00602170();
-    HCFaceData* FUN_004ac110();
+    TESRace* FUN_004ac110();
     void SetRace(int iValue, int iFlag);
     void SetHair(int iValue);
     void SetEyes(int iValue);
@@ -7535,7 +6363,7 @@ class HCMenuView
     int unk020;
     int unk024;
     HCOptionList* m_apLists[20];  // +0x28
-    HCTile* m_apDefaultTiles[6];  // +0x78
+    Tile* m_apDefaultTiles[6];  // +0x78
     int unk090;
     int unk094;
     HCName m_kName;  // +0x98
@@ -7548,7 +6376,7 @@ class HCMenuView
     int unk0b4;
     int unk0b8;
     int unk0bc;
-    HCTile* m_pkSelectedTile;      // +0xc0
+    Tile* m_pkSelectedTile;      // +0xc0
     HCOption* m_pkSelectedOption;  // +0xc4
     int unk0c8;
     int unk0cc;
@@ -7586,11 +6414,11 @@ class HCMenuView
     void FUN_007adc60(int m_uiSoundID, int iValue);
     void HandlePendingTileAction();
     void UpdateMinusPlusTiles();
-    void FUN_007adce0(int aiIndex, HCTile* pkTile);
+    void FUN_007adce0(int aiIndex, Tile* pkTile);
 };
 
 // @fnv 0x007adce0
-void HCMenuView::FUN_007adce0(int aiIndex, HCTile* pkTile)
+void HCMenuView::FUN_007adce0(int aiIndex, Tile* pkTile)
 {
     if (!pkTile && aiIndex < 6)
         pkTile = m_apDefaultTiles[aiIndex];
@@ -7610,7 +6438,7 @@ void HCMenuView::FUN_007adce0(int aiIndex, HCTile* pkTile)
             {
                 if (pkOption->FUN_00726070() == 0x17)
                 {
-                    m_pkNPC->FUN_004ac110()->FUN_00613fd0();
+                    m_pkNPC->FUN_004ac110()->ClearFaceGenUndo();
                     ((HCPlayer*)DAT_011dea3c)->FUN_0095e5f0();
                     ((HCPlayer*)DAT_011dea3c)->m_kSub94.FUN_008249d0(0);
                     ((HCPlayer*)DAT_011dea3c)->ApplyActorSpells();
@@ -7618,7 +6446,7 @@ void HCMenuView::FUN_007adce0(int aiIndex, HCTile* pkTile)
                 }
                 else
                 {
-                    m_pkNPC->FUN_004ac110()->FUN_00613fd0();
+                    m_pkNPC->FUN_004ac110()->ClearFaceGenUndo();
                     m_pkNPC->m_kFlags.FUN_0047dd50(1, pkOption->FUN_00726070() == 0x16, 1);
                     bUpdatePlayer = true;
                 }
@@ -7707,135 +6535,28 @@ void HCMenuView::FUN_007adce0(int aiIndex, HCTile* pkTile)
     }
 }
 
-namespace fnv_007b27c0 {
 class NiNode;
-class NiAVObject;
-class NiProperty;
 class NiSourceTexture;
-class BSShaderProperty;
-class TESEyes;
-class _FakeNiNode;
-class PlayerCharacter;
-class NiTimeController;
+namespace fnv_007b27c0 {
 
-template <class T> class NiPointer
+
+class _FakeNiNode;
+
+// Unit-local view of NiPointer for 0x007b27c0 (namespace fnv_007b27c0): built on the shared NiPointer, that code does not compile or does not match.
+template <class T> class NiPointer_007b27c0
 {
   public:
     T* m_pObject;
-    NiPointer(T* p = 0);
-    ~NiPointer();
-    NiPointer<T>& operator=(T* p);
+    NiPointer_007b27c0(T* p = 0);
+    ~NiPointer_007b27c0();
+    NiPointer_007b27c0<T>& operator=(T* p);
     operator T*() const;
 };
 
-template <typename CharT = char> class BSStringT
-{
-  public:
-    char* m_data;
-    unsigned short m_bufLen;
-    unsigned short m_strLen;
-    BSStringT();
-    ~BSStringT();
-    operator const CharT*() const;
-};
 
-class NiFixedString
-{
-  public:
-    operator const char*() const;
-};
-
-class NiAVObject
-{
-  public:
-    virtual void av_00();
-    virtual void av_01();
-    virtual void av_02();
-    virtual void av_03();
-    virtual void av_04();
-    virtual void av_05();
-    virtual void av_06();
-    virtual NiNode* GetNiNode();  // index 7, offset 0x1c
-    NiFixedString& GetName();
-    NiProperty* GetProperty(unsigned int);
-};
-
-class NiProperty
-{
-  public:
-    virtual ~NiProperty();
-};
-
-class NiTimeController
-{
-  public:
-    int FUN_00441110();
-};
-
-class BSShaderProperty : public NiProperty
-{
-  public:
-    virtual void sp_01();
-    virtual void sp_02();
-    virtual void sp_03();
-    virtual void sp_04();
-    virtual void sp_05();
-    virtual void sp_06();
-    virtual void sp_07();
-    virtual void sp_08();
-    virtual void sp_09();
-    virtual void sp_10();
-    virtual void sp_11();
-    virtual void sp_12();
-    virtual void sp_13();
-    virtual void sp_14();
-    virtual void sp_15();
-    virtual void sp_16();
-    virtual void sp_17();
-    virtual void sp_18();
-    virtual void sp_19();
-    virtual void sp_20();
-    virtual void sp_21();
-    virtual void sp_22();
-    virtual void sp_23();
-    virtual void sp_24();
-    virtual void sp_25();
-    virtual void sp_26();
-    virtual void sp_27();
-    virtual void sp_28();
-    virtual void sp_29();
-    virtual void sp_30();
-    virtual void sp_31();
-    virtual void sp_32();
-    virtual void sp_33();
-    virtual void sp_34();
-    virtual void sp_35();
-    virtual void sp_36();
-    virtual void sp_37();
-    virtual void sp_38();
-    virtual void sp_39();
-    virtual void sp_40();
-    virtual void sp_41();
-    virtual void sp_42();
-    virtual void sp_43();
-    virtual void sp_44();
-    virtual void sp_45();
-    virtual void sp_46();
-    virtual void sp_47();
-    virtual void sp_48();
-    virtual void sp_49();
-    virtual void sp_50();
-    virtual void sp_51();
-    virtual void sp_52();
-    virtual void sp_53();
-    virtual void sp_54();
-    virtual void sp_55();
-    virtual void sp_56();
-    virtual void sp_57();
-    virtual void sp_58();
-    virtual void sp_59();
-    virtual void SetTexture(int, int, NiSourceTexture*);  // index 60, offset 0xf0
-};
+// BSShaderProperty's shared declaration lacks this virtual texture setter.
+// Preserve the original dispatch until that declaration is shared.
+typedef void (__thiscall* SetEyeTextureFn)(BSShaderProperty*, int, int, NiSourceTexture*);
 
 class _FakeNiNode
 {
@@ -7844,165 +6565,8 @@ class _FakeNiNode
     NiAVObject* FUN_0043b4a0(unsigned int);
 };
 
-class PlayerCharacter
-{
-  public:
-    virtual void pc_000();
-    virtual void pc_001();
-    virtual void pc_002();
-    virtual void pc_003();
-    virtual void pc_004();
-    virtual void pc_005();
-    virtual void pc_006();
-    virtual void pc_007();
-    virtual void pc_008();
-    virtual void pc_009();
-    virtual void pc_010();
-    virtual void pc_011();
-    virtual void pc_012();
-    virtual void pc_013();
-    virtual void pc_014();
-    virtual void pc_015();
-    virtual void pc_016();
-    virtual void pc_017();
-    virtual void pc_018();
-    virtual void pc_019();
-    virtual void pc_020();
-    virtual void pc_021();
-    virtual void pc_022();
-    virtual void pc_023();
-    virtual void pc_024();
-    virtual void pc_025();
-    virtual void pc_026();
-    virtual void pc_027();
-    virtual void pc_028();
-    virtual void pc_029();
-    virtual void pc_030();
-    virtual void pc_031();
-    virtual void pc_032();
-    virtual void pc_033();
-    virtual void pc_034();
-    virtual void pc_035();
-    virtual void pc_036();
-    virtual void pc_037();
-    virtual void pc_038();
-    virtual void pc_039();
-    virtual void pc_040();
-    virtual void pc_041();
-    virtual void pc_042();
-    virtual void pc_043();
-    virtual void pc_044();
-    virtual void pc_045();
-    virtual void pc_046();
-    virtual void pc_047();
-    virtual void pc_048();
-    virtual void pc_049();
-    virtual void pc_050();
-    virtual void pc_051();
-    virtual void pc_052();
-    virtual void pc_053();
-    virtual void pc_054();
-    virtual void pc_055();
-    virtual void pc_056();
-    virtual void pc_057();
-    virtual void pc_058();
-    virtual void pc_059();
-    virtual void pc_060();
-    virtual void pc_061();
-    virtual void pc_062();
-    virtual void pc_063();
-    virtual void pc_064();
-    virtual void pc_065();
-    virtual void pc_066();
-    virtual void pc_067();
-    virtual void pc_068();
-    virtual void pc_069();
-    virtual void pc_070();
-    virtual void pc_071();
-    virtual void pc_072();
-    virtual void pc_073();
-    virtual void pc_074();
-    virtual void pc_075();
-    virtual void pc_076();
-    virtual void pc_077();
-    virtual void pc_078();
-    virtual void pc_079();
-    virtual void pc_080();
-    virtual void pc_081();
-    virtual void pc_082();
-    virtual void pc_083();
-    virtual void pc_084();
-    virtual void pc_085();
-    virtual void pc_086();
-    virtual void pc_087();
-    virtual void pc_088();
-    virtual void pc_089();
-    virtual void pc_090();
-    virtual void pc_091();
-    virtual void pc_092();
-    virtual void pc_093();
-    virtual void pc_094();
-    virtual void pc_095();
-    virtual void pc_096();
-    virtual void pc_097();
-    virtual void pc_098();
-    virtual void pc_099();
-    virtual void pc_100();
-    virtual void pc_101();
-    virtual void pc_102();
-    virtual void pc_103();
-    virtual void pc_104();
-    virtual void pc_105();
-    virtual void pc_106();
-    virtual _FakeNiNode* GetNode(bool);  // index 107, offset 0x1ac
-};
 extern PlayerCharacter* _g_thePlayer;
 
-class TESEyes
-{
-  public:
-    int unk_00;
-    int unk_04;
-    int unk_08;
-    int unk_0c;
-    int unk_10;
-    int unk_14;
-    int unk_18;
-    int unk_1c;
-    int unk_20;
-    TESFullName fullName;  // offset 0x24
-};
-
-class TESNPC
-{
-  public:
-    virtual void npc_00();
-    virtual void npc_01();
-    virtual void npc_02();
-    virtual void npc_03();
-    virtual void npc_04();
-    virtual void npc_05();
-    virtual void npc_06();
-    virtual void npc_07();
-    virtual void npc_08();
-    virtual void npc_09();
-    virtual void npc_10();
-    virtual void npc_11();
-    virtual void npc_12();
-    virtual void npc_13();
-    virtual void npc_14();
-    virtual void npc_15();
-    virtual void npc_16();
-    virtual void npc_17();
-    virtual void MarkAsModified(unsigned int);  // index 18, offset 0x48
-    TESEyes* FUN_00602150();
-};
-
-class TES
-{
-  public:
-    void CreateTextureImage(const char*, NiPointer<NiSourceTexture>&, bool, bool);
-};
 extern TES* g_TES;
 
 int __cdecl FUN_00408b20(const char*, const char*);
@@ -8072,28 +6636,28 @@ class RSMenuTarget
 // @fnv 0x007b27c0
 bool RSMenuTarget::UpdateEyeTextures()
 {
-    NiPointer<NiNode> spEyeLeft2;
-    NiPointer<NiNode> spEyeRight;
+    NiPointer_007b27c0<NiNode> spEyeLeft2;
+    NiPointer_007b27c0<NiNode> spEyeRight;
 
-    if (!_g_thePlayer->GetNode(0))
+    if (!reinterpret_cast<_FakeNiNode*>(_g_thePlayer->vfn_1ac(false)))
     {
         return false;
     }
 
     this->m_npc->MarkAsModified(0x800);
 
-    unsigned int childCount3 = _g_thePlayer->GetNode(0)->FUN_0043b480();
+    unsigned int childCount3 = reinterpret_cast<_FakeNiNode*>(_g_thePlayer->vfn_1ac(false))->FUN_0043b480();
     NiAVObject* child;
     for (unsigned int aI = 0; aI < childCount3; ++aI)
     {
-        child = _g_thePlayer->GetNode(0)->FUN_0043b4a0(aI);
+        child = reinterpret_cast<_FakeNiNode*>(_g_thePlayer->vfn_1ac(false))->FUN_0043b4a0(aI);
         if (FUN_00408b20(child->GetName(), "FaceGenEyeLeft") == 0)
         {
-            spEyeLeft2 = child->GetNiNode();
+            spEyeLeft2 = reinterpret_cast<NiNode*>(child->IsTriBasedGeometry());
         }
         if (FUN_00408b20(child->GetName(), "FaceGenEyeRight") == 0)
         {
-            spEyeRight = child->GetNiNode();
+            spEyeRight = reinterpret_cast<NiNode*>(child->IsTriBasedGeometry());
         }
     }
 
@@ -8102,35 +6666,35 @@ bool RSMenuTarget::UpdateEyeTextures()
         BSStringT<char> strEyeTexture;
         if (this->m_npc->FUN_00602150())
         {
-            FUN_00406f60((SpStr*)&strEyeTexture, "Textures\\%s", this->m_npc->FUN_00602150()->fullName.GetFullName());
+            FUN_00406f60((SpStr*)&strEyeTexture, "Textures\\%s", this->m_npc->FUN_00602150()->GetTextureResourceName());
         }
         else
         {
             FUN_00406f60((SpStr*)&strEyeTexture, "Textures\\Characters\\Eyes\\EyeDefault.dds");
         }
-        NiPointer<NiSourceTexture> spTextureVal;
+        NiPointer_007b27c0<NiSourceTexture> spTextureVal;
         g_TES->CreateTextureImage(strEyeTexture, spTextureVal, false, false);
         if (spTextureVal)
         {
-            NiProperty* prop2 = ((NiAVObject*)(NiNode*)spEyeLeft2)->GetProperty(3);
+            NiProperty* prop2 = (NiProperty*)((NiAVObject*)(NiNode*)spEyeLeft2)->GetProperty(3);
             BSShaderProperty* shaderProp = (prop2 == 0 ? 0
-                                                       : (((NiTimeController*)prop2)->FUN_00441110() >= 8 &&
-                                                          ((NiTimeController*)prop2)->FUN_00441110() <= 12))
+                                                       : (prop2->FUN_00441110() >= 8 &&
+                                                          prop2->FUN_00441110() <= 12))
                                                ? (BSShaderProperty*)prop2
                                                : 0;
             if (shaderProp)
             {
-                shaderProp->SetTexture(0, 0, spTextureVal);
+                (*(SetEyeTextureFn**)shaderProp)[60](shaderProp, 0, 0, spTextureVal);
             }
-            prop2 = ((NiAVObject*)(NiNode*)spEyeRight)->GetProperty(3);
+            prop2 = (NiProperty*)((NiAVObject*)(NiNode*)spEyeRight)->GetProperty(3);
             shaderProp = (prop2 == 0 ? 0
-                                     : (((NiTimeController*)prop2)->FUN_00441110() >= 8 &&
-                                        ((NiTimeController*)prop2)->FUN_00441110() <= 12))
+                                     : (prop2->FUN_00441110() >= 8 &&
+                                        prop2->FUN_00441110() <= 12))
                              ? (BSShaderProperty*)prop2
                              : 0;
             if (shaderProp)
             {
-                shaderProp->SetTexture(0, 0, spTextureVal);
+                (*(SetEyeTextureFn**)shaderProp)[60](shaderProp, 0, 0, spTextureVal);
             }
         }
     }
@@ -8225,13 +6789,13 @@ void FUN_007b3660_shell::FUN_007b3660()
         switch (((FUN_00726070_shell*)u1)->FUN_00726070())
         {
         case 0x1e:
-            f0 = ((FUN_007b3740_shell*)u1)->GetFloat1005();
+            f0 = ((RaceMenuOption*)u1)->GetFloat1005();
             break;
         case 0x1f:
-            mid = ((FUN_007b3740_shell*)u1)->GetFloat1005();
+            mid = ((RaceMenuOption*)u1)->GetFloat1005();
             break;
         case 0x20:
-            hi = ((FUN_007b3740_shell*)u1)->GetFloat1005();
+            hi = ((RaceMenuOption*)u1)->GetFloat1005();
             break;
         }
     }
@@ -8248,14 +6812,6 @@ template <class T> class FGPtr
     ~FGPtr();
     operator T*() const;
     T* operator->() const;
-};
-
-class FGFixedString
-{
-  public:
-    const char* m_kHandle;
-    FGFixedString(const char* pcString);
-    ~FGFixedString();
 };
 
 class FGNameBuffer
@@ -8312,7 +6868,7 @@ struct FGName
 class FGNode
 {
   public:
-    void AssignFixedString(const FGFixedString& kName);
+    void AssignFixedString(const NiFixedString& kName);
     void FUN_00440460(const void* pkTranslate);
     void FUN_0043fa80(const void* pkRotate);
     void FUN_00440490(float fScale);
@@ -8442,14 +6998,14 @@ int FUN_00408b20(const char* pcA, const char* pcB);
 FGGeometry* FUN_006530e0(void* pvData);
 FGGenerator* FUN_006521e0();
 void FUN_006529a0(FGGenerator* pkGeneratorCur, FUN_00449610* pkCoords, int iA, int iB);
-void GetModelNifFilename(BSStringTChar* pkOut, const char* pcPath);
-void FUN_00653a10(BSStringTChar* pkOut, const char* pcPath);
-void BuildModelFilename(BSStringTChar* pkOut, const char* pcPath);
+void GetModelNifFilename(::BSStringT<char>* pkOut, const char* pcPath);
+void FUN_00653a10(::BSStringT<char>* pkOut, const char* pcPath);
+void BuildModelFilename(::BSStringT<char>* pkOut, const char* pcPath);
 void HashPathComponents(const char* pcPath, FGPoint2* pkA, FGPoint2* pkB);
 int FindFileEntryInArchives(int iFlag, FGPoint2* pkA, FGPoint2* pkB, const char* pcPath);
-const char* GetModelEgtFilename(BSStringTChar* pkOut, const char* pcPath);
-const char* BuildTriPathAndSet(BSStringTChar* pkOut, const char* pcPath, int iIndex);
-const char* BuildEgmFilename(BSStringTChar* pkOut, const char* pcPath, int iIndex);
+const char* GetModelEgtFilename(::BSStringT<char>* pkOut, const char* pcPath);
+const char* BuildTriPathAndSet(::BSStringT<char>* pkOut, const char* pcPath, int iIndex);
+const char* BuildEgmFilename(::BSStringT<char>* pkOut, const char* pcPath, int iIndex);
 FGModel* GetOrCreateFaceGenModel(const char* pcTri, const char* pcPath, const char* pcEgm, const char* pcEgt, int iA,
                                  int iB, int iC);
 void FUN_00b57e30(FGNode* pkNode, int iA, int iB);
@@ -8471,12 +7027,12 @@ void FUN_00653e50(FGRoot* pkRoot, int iMode)
                 FGGeometry* pkSampleGeom = FUN_006530e0(pvGeomData);
                 FGPtr<FGNode> spFaceTmp(0);
                 FGNode* pkFaceInfo = 0;
-                BSStringTChar kModelPath;
-                BSStringTChar kPathLast;
-                BSStringTChar kTriPathData;
-                BSStringTChar kEgmPathEntry;
-                BSStringTChar kEgtPath;
-                BSStringTChar kUnusedCur;
+                ::BSStringT<char> kModelPath;
+                ::BSStringT<char> kPathLast;
+                ::BSStringT<char> kTriPathData;
+                ::BSStringT<char> kEgmPathEntry;
+                ::BSStringT<char> kEgtPath;
+                ::BSStringT<char> kUnusedCur;
                 FUN_00449610 akCoordsLocal[4];
                 FGGenerator* pkGeneratorCur = FUN_006521e0();
                 FUN_006529a0(pkGeneratorCur, akCoordsLocal, 0, 0);
@@ -8484,26 +7040,26 @@ void FUN_00653e50(FGRoot* pkRoot, int iMode)
                 switch (iMode)
                 {
                 case 0:
-                    FUN_00653a10(&kPathLast, kModelPath.FUN_00559450());
+                    FUN_00653a10(&kPathLast, kModelPath.String());
                     break;
                 case 1:
-                    BuildModelFilename(&kPathLast, kModelPath.FUN_00559450());
+                    BuildModelFilename(&kPathLast, kModelPath.String());
                 }
-                if (!kPathLast.FUN_00559450())
+                if (!kPathLast.String())
                     return;
                 FGPoint2 kMinVal;
                 FGPoint2 kMaxTotal;
-                HashPathComponents(kPathLast.FUN_00559450(), &kMinVal, &kMaxTotal);
-                int iFoundItem = FindFileEntryInArchives(0, &kMinVal, &kMaxTotal, kPathLast.FUN_00559450());
+                HashPathComponents(kPathLast.String(), &kMinVal, &kMaxTotal);
+                int iFoundItem = FindFileEntryInArchives(0, &kMinVal, &kMaxTotal, kPathLast.String());
                 if (!iFoundItem)
                     return;
                 FGPtr<FGModel> m_pRenderedNodeEntry(GetOrCreateFaceGenModel(
-                    BuildEgmFilename(&kTriPathData, kPathLast.FUN_00559450(), -1), kPathLast.FUN_00559450(),
-                    BuildTriPathAndSet(&kEgmPathEntry, kPathLast.FUN_00559450(), -1),
-                    GetModelEgtFilename(&kEgtPath, kPathLast.FUN_00559450()), 1, -1, 0));
+                    BuildEgmFilename(&kTriPathData, kPathLast.String(), -1), kPathLast.String(),
+                    BuildTriPathAndSet(&kEgmPathEntry, kPathLast.String(), -1),
+                    GetModelEgtFilename(&kEgtPath, kPathLast.String()), 1, -1, 0));
                 if (!m_pRenderedNodeEntry->FUN_0065a910(akCoordsLocal, &spFaceTmp) || !spFaceTmp)
                     return;
-                spFaceTmp->AssignFixedString(FGFixedString("FaceGenFace"));
+                spFaceTmp->AssignFixedString(NiFixedString("FaceGenFace"));
                 pkFaceInfo = spFaceTmp;
                 pkFaceInfo->FUN_00440460(pkChild->FUN_0043c490());
                 pkFaceInfo->FUN_0043fa80(pkChild->FUN_006a9540());
@@ -8587,20 +7143,6 @@ int StringList7B3D::FUN_007b3d50(int iIndex, const char* pcText, int iA, int iB)
 }
 
 namespace fnv_007ac1f0 {
-struct FUN_007ac1f0_base
-{
-    FUN_007ac1f0_base();
-    virtual ~FUN_007ac1f0_base();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-};
 
 struct Obj8
 {
@@ -8672,7 +7214,7 @@ MgrObj* FUN_00ad9060();
 void __cdecl FUN_00403d30(void* p, int v, unsigned int n);
 extern Pt12 DAT_011f426c;
 
-class FUN_007ac1f0_cls : public FUN_007ac1f0_base
+class FUN_007ac1f0_cls : public ::Menu
 {
   public:
     unsigned int unk28;
@@ -8995,19 +7537,9 @@ struct Item7ac700
     ~Item7ac700();
 };
 
-struct BSStr
-{
-    char* m_data;
-    short m_len;
-    short m_kMaximumCorner;
-    ~BSStr();
-};
 
-struct NiPtr
-{
-    void* m_obj;
-    ~NiPtr();
-};
+
+
 
 struct SimpleArr
 {
@@ -9043,21 +7575,7 @@ struct Elem124
     ~Elem124();
 };
 
-struct MenuBase
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    virtual ~MenuBase();
-};
-
-struct FUN_007ac560 : MenuBase
+struct FUN_007ac560 : ::Menu
 {
     Item7ac700* m_items[20];
     int unk78;
@@ -9066,8 +7584,8 @@ struct FUN_007ac560 : MenuBase
     int unk84;
     int unk88;
     int unk8c;
-    BSStr m_str90;
-    BSStr m_str98;
+    ::BSStringT<char> m_str90;
+    ::BSStringT<char> m_str98;
     int unka0;
     int unka4;
     int unka8;
@@ -9081,7 +7599,7 @@ struct FUN_007ac560 : MenuBase
     int unkc8;
     int unkcc;
     int unkd0;
-    NiPtr m_ptrd4;
+    ::NiPointer< ::NiObject> m_ptrd4;
     int unkd8;
     SimpleArr m_arrdc;
     IdentifierState m_sounds[4];

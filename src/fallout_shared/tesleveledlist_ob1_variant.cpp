@@ -3,7 +3,24 @@
 // byte only under /MT /Od /Ob1 /Oy- /GS /EHsc /Gy /GF (unit src/fallout_shared/tesleveledlist.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSLoadGameBuffer.h"
+#include "../../include/BSFile.h"
+#include "../../include/BaseProcess.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/FileEntryList.h"
+#include "../../include/HighProcess.h"
+#include "../../include/TESContainer.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESGlobal.h"
+#include "../../include/TESLeveledList.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/bhkLiquidAction.h"
 #include "tesleveledlist_decls.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiPoint3.h"
 extern "C" double __cdecl floor(double value);
 extern "C" int __cdecl _ftol2_sse();
 unsigned int DialogueRandom();
@@ -12,39 +29,24 @@ extern const char str_010c3570[];
 extern const char str_010c3568[];
 extern const char str_01015a9c[];
 
-class NiRTTI
+inline const char* NiRTTI::GetName() const
 {
-  public:
-    const char* GetName() const
-    {
-        return m_pcName;
-    }
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
+    return m_pcName;
+}
 
-class NiViewerStringsArray
-{
-  public:
-    unsigned int Add(char* const& element);
-};
+#include "../../include/NiTPrimitiveArray.h"
 
 extern "C" unsigned int __cdecl strlen(const char* s);
 void* NiMalloc(unsigned int uiSize);
 int NiSprintf(char* pcDest, unsigned int uiDestSize, const char* pcFormat, ...);
 
-class NiPoint3
+inline char* NiPoint3::FormatToBuffer(const char* pcPrefix) const
 {
-  public:
-    float x, y, z;
-    char* FormatToBuffer(const char* pcPrefix) const
-    {
-        unsigned int uiLen = strlen(pcPrefix) + 64;
-        char* pcString = (char*)NiMalloc(uiLen);
-        NiSprintf(pcString, uiLen, "%s = (%g, %g, %g)", pcPrefix, x, y, z);
-        return pcString;
-    }
-};
+    unsigned int uiLen = strlen(pcPrefix) + 64;
+    char* pcString = (char*)NiMalloc(uiLen);
+    NiSprintf(pcString, uiLen, "%s = (%g, %g, %g)", pcPrefix, x, y, z);
+    return pcString;
+}
 
 inline char* CreateDebugString(const char* pcText)
 {
@@ -91,7 +93,7 @@ class NiPointModifier : public NiBaseModifier
 void NiPointModifier::FUN_00c61120(NiViewerStringsArray* pkStrings)
 {
     NiBaseModifier::GetViewerStrings(pkStrings);
-    pkStrings->Add(CreateDebugString(ms_kRTTI.GetName()));
+    pkStrings->Add(CreateDebugString(static_cast<const NiRTTI&>(ms_kRTTI).GetName()));
     pkStrings->Add(m_kPathOffset.FormatToBuffer(str_010c3570));
     pkStrings->Add(m_kLightVector.FormatToBuffer(str_010c3568));
     pkStrings->Add(CreateDebugString(str_01015a9c, GetAttributeStrength()));

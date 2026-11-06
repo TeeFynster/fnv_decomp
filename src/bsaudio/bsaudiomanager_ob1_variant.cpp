@@ -1,3 +1,248 @@
+#include "../../include/NiTMapItem.h"
+#include "../../include/Setting.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/BSAudioManagerThread.h"
+#include "../../include/BSGameSound.h"
+#include "../../include/NP.h"
+#include "../../include/NavMeshPtr.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/NiPoint3.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3/CVec3; this unit's code depends on the stand-in's own overload set and inline bodies (its own NiPoint3/CVec3 bodies differ), so the shared class cannot replace it.
+#include "../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+#include "../../include/NiPoint3.h"
+#include "../../include/IOManager.h"
+#include "../../include/BSSemaphore_adf080.h"
+#include "../../include/BSAudioManager.h"
+#include "../../include/BSAudio.h"
+#include "../../include/GO.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/AudioLoadTask.h"
+
+__forceinline NiPoint3::NiPoint3(float ax, float ay, float az) : x(ax), y(ay), z(az)
+{}
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement((long*)&m_uiRefCount);
+}
+inline void NiRefObject::AcquireReference()
+{
+    InterlockedIncrement((long*)&m_uiRefCount);
+}
+inline void NiRefObject::DecRef()
+{
+    if (InterlockedDecrement((long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+
+template <class T> inline NiPointer<T>::NiPointer(T* pkNew)
+{
+    m_pObject = pkNew;
+    if (m_pObject)
+        ((NiRefObject*)m_pObject)->IncRefCount();
+}
+template <> inline NiPointer<NiRefObject>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+
+inline NavMeshPtr::NavMeshPtr(RefObject* object)
+{
+    m_pObject = (NavMesh*)object;
+    if (m_pObject)
+        ((NiRefObject*)m_pObject)->IncRefCount();
+}
+inline NavMeshPtr::NavMeshPtr(const NavMeshPtr& other)
+{
+    m_pObject = other.m_pObject;
+    if (m_pObject)
+        ((NiRefObject*)m_pObject)->IncRefCount();
+}
+inline NavMeshPtr::~NavMeshPtr()
+{
+    if (m_pObject)
+        ((NiRefObject*)m_pObject)->DecRef();
+}
+
+inline NP::NP(NiAVObject* object)
+{
+    p = object;
+    if (p)
+        ((NiRefObject*)p)->IncRefCount();
+}
+__forceinline NP::NP(RefObject* object) : p(object)
+{
+    if (p)
+        ((NiRefObject*)p)->AcquireReference();
+}
+
+extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void*, long, long*);
+extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(void*, unsigned long);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
+inline void BSSemaphore_adf080::Signal()
+{
+    ReleaseSemaphore(semaphore, 1, 0);
+    InterlockedIncrement(&count);
+}
+inline void BSSemaphore_adf080::Wait()
+{
+    WaitForSingleObject(semaphore, 0xffffffff);
+    InterlockedDecrement(&count);
+}
+inline LocalVec3::LocalVec3()
+{}
+void __cdecl FUN_00c45830(NiAVObject* object);
 
 // src/bsaudio/bsaudiomanager_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/bsaudio/bsaudiomanager.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -7,11 +252,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 extern "C" int __cdecl FUN_00ec7d40(int);
 int __cdecl FUN_0072fa80(int param_1);
-struct BSAudioManager
-{
-    static BSAudioManager& __cdecl GetRandomGenerator(void);
-    void FUN_00adc670(int, int);
-};
+
 struct FUN_00ad8d60_shell
 {
     int m_uiSoundResourceID;
@@ -84,9 +325,11 @@ struct FUN_00ae7020_shell : _Base_00441d20
     void __thiscall FUN_00ae7020();
 };
 struct SoundMessageRecord;
-struct BottomlessStack
+// AudioMessageStack::Push (0x00ae75f0) uses this 16-byte count/bottomless/top/limit layout.
+struct AudioMessageStack
 {
     void Push(SoundMessageRecord*);
+    void PushOne(SoundMessageRecord*);
     SoundMessageRecord* Pop();
     void SetBottomless(bool);
     void* __vecDelDtor(unsigned int);
@@ -96,18 +339,14 @@ struct BottomlessStack
     SoundMessageRecord* pTop;
     unsigned int m_uiStackLimit;
 };
-typedef char _sizecheck_AudioMessageStack[sizeof(BottomlessStack) == 16 ? 1 : -1];
-struct FUN_00ae7510_shell : public BottomlessStack
+typedef char _sizecheck_AudioMessageStack[sizeof(AudioMessageStack) == 16 ? 1 : -1];
+struct FUN_00ae7510_shell : public AudioMessageStack
 {
     void FUN_00ae7510();
 };
-struct FUN_00ae7510 : public BottomlessStack
+struct FUN_00ae7510 : public AudioMessageStack
 {
     FUN_00ae7510();
-};
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
 };
 extern MemoryManager* g_memoryManager;
 struct FUN_00ad93f0_shell
@@ -118,25 +357,15 @@ struct FUN_00ae77a0_shell : FUN_00ae7480_shell
 {
     void* FUN_00ae77a0(unsigned int flags);
 };
-struct GO
-{
-    GO& __thiscall operator=(void*);
-};
-template <typename T> struct NiTPointerAllocator
+template <typename T> struct AudioPointerAllocator
 {
     void __thiscall Deallocate(void*);
 };
 struct Host00ae8ef0
 {
     char _p[12];
-    NiTPointerAllocator<unsigned int> alloc;
+    AudioPointerAllocator<unsigned int> alloc;
     void __thiscall FUN_00ae8ef0(void* p);
-};
-struct AudioLoadTask
-{
-    int _pad[12];
-    void* SoundAssetTmp;
-    void __thiscall FUN_00ae7360();
 };
 struct Helper
 {
@@ -158,18 +387,12 @@ struct FUN_00ae89f0
     BSAudioDefinition _18;
     FUN_00ae89f0();
 };
-struct Setting_00ad9da0
-{
-    void* vtbl;
-    float fValue;
-    const char* pKey;
-};
-extern Setting_00ad9da0 g_011f6e14;
-extern Setting_00ad9da0 g_011f6e20;
-extern Setting_00ad9da0 g_011f6e2c;
-extern Setting_00ad9da0 g_011f6e38;
-extern Setting_00ad9da0 g_011f6e44;
-extern Setting_00ad9da0 g_011f6e50;
+extern Setting g_011f6e14;
+extern Setting g_011f6e20;
+extern Setting g_011f6e2c;
+extern Setting g_011f6e38;
+extern Setting g_011f6e44;
+extern Setting g_011f6e50;
 struct AudioVolumes_00ad9da0
 {
     float fVal[6];
@@ -188,12 +411,7 @@ struct FUN_00ae6e60_shell
     bool __thiscall FUN_00ae6e60(int param_2, unsigned char param_3);
 };
 struct SoundEmitter;
-struct AudioLoadTask;
-struct BSAudioManager;
-struct BSAudioManagerThread;
-struct BSGameSound;
 struct SoundMessageRecord;
-struct NiAVObject;
 struct blob4
 {
     char b[4];
@@ -202,15 +420,7 @@ struct blob12
 {
     char b[12];
 };
-struct Snd_
-{
-    void __thiscall FUN_00ad7fa0(char const*, int);
-};
-struct BSAudio : Snd_
-{
-    unsigned char _pad[6];
-    bool bIsMultiThreaded;
-};
+
 extern BSAudio* DAT_011f6d98;
 extern char $SG6265[];
 struct FUN_00ada330_shell
@@ -442,25 +652,12 @@ class FUN_00ae6f50 : public BaseObj_b5112
 
     FUN_00ae6f50(int aValue);
 };
-struct Sound7390
-{
-    virtual void* __thiscall ScalarDeletingDestructor(unsigned int);
-    int unk04;
-    unsigned int uiFlags08;
-    int unk0C;
-    unsigned int uiFlags10;
-};
-struct AudioLoadTask7390
-{
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
-    Sound7390* SoundAssetTmp;
-    void __thiscall ReleaseSound(int, int);
-};
+
 struct AudioHelper7390
 {
     void __thiscall FUN_00ae6f10();
 };
-AudioHelper7390* __stdcall FUN_00ad9060(AudioLoadTask7390*);
+AudioHelper7390* __stdcall FUN_00ad9060(AudioLoadTask*);
 struct Ptr_6e5cc0
 {
     void* p;
@@ -496,29 +693,13 @@ struct FUN_00ae8550_shell
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 
-struct DetectPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-extern DetectPoint3 DAT_011f426c;
 
-class DetectRefObject
-{
-  public:
-    int unk00;
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+extern NiPoint3 DAT_011f426c;
+
 class DetectRefPtr
 {
   public:
-    DetectRefPtr(DetectRefObject* pkObject = 0) : m_pPointer(pkObject)
+    DetectRefPtr(NiRefObject* pkObject = 0) : m_pPointer(pkObject)
     {
         if (m_pPointer)
             m_pPointer->IncRefCount();
@@ -533,13 +714,13 @@ class DetectRefPtr
         if (m_pPointer)
             m_pPointer->DecRefCount();
     }
-    DetectRefObject* m_pPointer;
+    NiRefObject* m_pPointer;
 };
 
 class DetectOwner
 {
   public:
-    bool FUN_00adb1a0(int iType, int iParam, int iUnk0, int iUnk1, DetectRefPtr spRetainedObject, DetectPoint3 kPoint);
+    bool FUN_00adb1a0(int iType, int iParam, int iUnk0, int iUnk1, DetectRefPtr spRetainedObject, NiPoint3 kPoint);
     bool FUN_00adb590(int iParam);
 };
 
@@ -553,29 +734,13 @@ bool DetectOwner::FUN_00adb590(int iParam)
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 
-struct NiPoint3
-{
-    float x, y, z;
-    static const NiPoint3 ZERO;
-};
-
-struct NiRefObjStub
-{
-    void* vtbl;
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-};
-
 struct NiAVObjPtr
 {
-    NiRefObjStub* m_pObject;
-    NiAVObjPtr(NiRefObjStub* p = 0)
+    NiRefObject* m_pObject;
+    NiAVObjPtr(NiRefObject* p = 0)
     {
         m_pObject = p;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiAVObjPtr();
@@ -723,7 +888,7 @@ struct FUN_00a1b940
     FUN_00a1b940();
     ~FUN_00a1b940();
 };
-struct MessageStackMember : BottomlessStack
+struct MessageStackMember : AudioMessageStack
 {
     MessageStackMember();
     ~MessageStackMember();
@@ -976,24 +1141,13 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile lo
 
 extern const NiPoint3 NiPoint3_ZERO;
 
-struct RefObject
-{
-    void* m_pVtable;
-    volatile long m_iRefCount;
-
-    void IncRefCount() throw()
-    {
-        InterlockedIncrement(&m_iRefCount);
-    }
-};
-
 struct RefPointer
 {
-    RefObject* m_pObject;
+    NiRefObject* m_pObject;
 
-    RefPointer(RefObject* object) throw() : m_pObject(object)
+    RefPointer(NiRefObject* object) throw() : m_pObject(object)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     RefPointer(const RefPointer&) throw();
@@ -1022,26 +1176,10 @@ bool __thiscall BSAudioManagerCall::FUN_00adb720(unsigned int id, unsigned short
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 
-struct RefObject405
-{
-    virtual ~RefObject405();
-    virtual void DeleteThis();
-    unsigned references;
-    void IncRefCount()
-    {
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&references));
-    }
-    void DecRefCount()
-    {
-        if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&references)))
-            DeleteThis();
-    }
-};
-
 struct RefPointer405
 {
-    RefObject405* object;
-    RefPointer405(RefObject405* value) : object(value)
+    NiRefObject* object;
+    RefPointer405(NiRefObject* value) : object(value)
     {
         if (object)
             object->IncRefCount();
@@ -1054,19 +1192,16 @@ struct RefPointer405
     ~RefPointer405()
     {
         if (object)
-            object->DecRefCount();
+            object->DecRef();
     }
 };
 
-struct Point405
-{
-    float x, y, z;
-};
-extern "C" Point405 _NiPoint3_ZERO;
+
+extern "C" NiPoint3 _NiPoint3_ZERO;
 
 struct FUN_00adb850_cls
 {
-    void FUN_00adb1a0(int message, int soundID, int milliseconds, int flags, RefPointer405 target, Point405 position);
+    void FUN_00adb1a0(int message, int soundID, int milliseconds, int flags, RefPointer405 target, NiPoint3 position);
     bool FUN_00adb850(int soundID, float seconds);
 };
 
@@ -1080,47 +1215,30 @@ bool FUN_00adb850_cls::FUN_00adb850(int soundID, float seconds)
 namespace fnv_00adcb20 {
 extern long(__stdcall* DAT_00fdf1c0)(volatile long*);
 
-struct S_adcb20_Ref
-{
-    int unk00;
-    long unk04;
-    __forceinline void Inc()
-    {
-        DAT_00fdf1c0(&unk04);
-    }
-};
-
 struct S_adcb20_Ptr
 {
-    S_adcb20_Ref* m_p;
-    __forceinline S_adcb20_Ptr(S_adcb20_Ref* p = 0)
+    NiRefObject* m_p;
+    __forceinline S_adcb20_Ptr(NiRefObject* p = 0)
     {
         m_p = p;
         if (m_p)
-            m_p->Inc();
+            m_p->IncRefCount();
     }
     __forceinline S_adcb20_Ptr(const S_adcb20_Ptr& other)
     {
         m_p = other.m_p;
         if (m_p)
-            m_p->Inc();
+            m_p->IncRefCount();
     }
     __forceinline ~S_adcb20_Ptr()
     {}
 };
 
-struct S_adcb20_Point3
-{
-    float x;
-    float y;
-    float z;
-};
-
-extern S_adcb20_Point3 NiPoint3_ZERO;
+extern NiPoint3 NiPoint3_ZERO;
 
 struct S_adcb20
 {
-    void FUN_00adb1a0(int a1, int a2, int a3, int a4, S_adcb20_Ptr a5, S_adcb20_Point3 a6);
+    void FUN_00adb1a0(int a1, int a2, int a3, int a4, S_adcb20_Ptr a5, NiPoint3 a6);
     void FUN_00adcb20(int a1, bool a2);
 };
 
@@ -1155,21 +1273,14 @@ struct IdentifierState
     {}
 };
 typedef bool(__cdecl* FileCB)(const char*, char*, unsigned int*, unsigned int*);
-struct AudioX
+inline bool AudioXReady(BSAudio* audio)
 {
-    char _p4[4];
-    bool bReady;
-    char _p5[0x1b];
-    FileCB pCallback;
-    bool IsReady()
-    {
-        return bReady;
-    }
-};
+    return audio->bAudioEnabled;
+}
 
-inline AudioX* GetAudioX()
+inline BSAudio* GetAudioX()
 {
-    AudioX* p = (AudioX*)DAT_011f6d98;
+    BSAudio* p = (BSAudio*)DAT_011f6d98;
     return p;
 }
 struct FUN_00ae5870_t
@@ -1181,9 +1292,9 @@ struct FUN_00ae5870_t
 IdentifierState FUN_00ae5870_t::FUN_00ae5870(const char* pName, unsigned int uiFlags)
 {
     unsigned int uiFileFlags_hk = 0;
-    if (!GetAudioX()->IsReady())
+    if (!AudioXReady(GetAudioX()))
         return IdentifierState();
-    FileCB pfnCB_fi = GetAudioX()->pCallback;
+    FileCB pfnCB_fi = (FileCB)GetAudioX()->pfnIDCallback;
     unsigned int uiExtra_mh = 0;
     char acPath_kmt[260];
     if (!pfnCB_fi || !pfnCB_fi(pName, acPath_kmt, &uiFileFlags_hk, &uiExtra_mh))
@@ -1347,7 +1458,7 @@ inline BSAudio* GetAudio70()
 }
 inline bool IsMultiThreaded70(BSAudio* p)
 {
-    return p->bIsMultiThreaded;
+    return p->bMultiThread;
 }
 
 class MemMgr70
@@ -1430,7 +1541,7 @@ struct SndStack70
             tail = 0;
         BSSoundMsg70* value = node->value;
         node->value = 0;
-        ((NiTPointerAllocator<unsigned int>*)&count)->Deallocate(node);
+        ((AudioPointerAllocator<unsigned int>*)&count)->Deallocate(node);
         --count;
         return value;
     }
@@ -1808,49 +1919,21 @@ extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(voi
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* pValue);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* pValue);
 
-struct NiRefObject
-{
-    void* m_pVtbl;
-    long m_uiRefCount;
-
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-};
-
-struct NiAVObject : NiRefObject
-{
-};
-
-struct NiPointer
+struct AudioObjectPtr
 {
     NiAVObject* m_pObject;
 
-    NiPointer(NiAVObject* pkObject = 0) : m_pObject(pkObject)
+    AudioObjectPtr(NiAVObject* pkObject = 0) : m_pObject(pkObject)
     {
         int scratch;
         if (m_pObject)
-            m_pObject->IncRefCount();
+            m_pObject->NiRefObject::IncRefCount();
     }
 
-    ~NiPointer()
+    ~AudioObjectPtr()
     {
         if (m_pObject)
-            InterlockedDecrement(&m_pObject->m_uiRefCount);
-    }
-};
-
-struct WaitHandleReference
-{
-    long m_iArrayLength;
-    void* m_hHandle;
-    int unk08;
-
-    void Wait()
-    {
-        WaitForSingleObject(m_hHandle, 0xFFFFFFFF);
-        InterlockedDecrement(&m_iArrayLength);
+            InterlockedDecrement((volatile long*)&m_pObject->m_uiRefCount);
     }
 };
 
@@ -1868,8 +1951,10 @@ struct BSAudioThread
     int unk24;
     int unk28;
     int unk2C;
-    WaitHandleReference m_kRelease;
-    WaitHandleReference m_kWait;
+    BSSemaphore_adf080 m_kRelease;
+    int unk38;
+    BSSemaphore_adf080 m_kWait;
+    int unk44;
     bool m_bSignalled;
 
     void WaitForSound()
@@ -1964,7 +2049,7 @@ struct BSAudioManager_
     BSAudioThread* m_pAudioThread;
 
     void FUN_00ada020();
-    void FUN_00adb1a0(int a1, int a2, int a3, int a4, NiPointer ptr, NiPoint3 kPos);
+    void FUN_00adb1a0(int a1, int a2, int a3, int a4, AudioObjectPtr ptr, NiPoint3 kPos);
 };
 
 // @fnv 0x00ada020
@@ -1983,23 +2068,13 @@ namespace fnv_00adb4e0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) unsigned long __stdcall GetTickCount();
 
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-};
-
 struct NiPtrB4E0
 {
     NiRefObject* m_pObject;
     NiPtrB4E0(NiRefObject* p = 0)
     {
         m_pObject = p;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     NiPtrB4E0(const NiPtrB4E0&);
@@ -2043,109 +2118,50 @@ inline long NiAtomicDecrementB7C0(long& lValue)
     return InterlockedDecrement(&lValue);
 }
 
-class RefObjectB7C0
-{
-  public:
-    virtual ~RefObjectB7C0();
-    virtual void DeleteThis();
-    void IncRefCount()
-    {
-        NiAtomicIncrementB7C0(m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (NiAtomicDecrementB7C0(m_uiRefCount) == 0)
-            DeleteThis();
-    }
-    long m_uiRefCount;
-};
 
-template <class T> class NiPointerB7C0
-{
-  public:
-    NiPointerB7C0(T* pObject = 0)
-    {
-        m_pObject = pObject;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointerB7C0()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    T* m_pObject;
-};
-
-class NiPoint3B7C0
-{
-  public:
-    float x, y, z;
-    static const NiPoint3B7C0 ZERO;
-};
 
 class MessageSenderB7C0
 {
   public:
     bool FUN_00adb1a0(int iType, unsigned int uiTarget, int iDelayMs, int iFlags,
-                      NiPointerB7C0<RefObjectB7C0> spRetainedObject, NiPoint3B7C0 kPos);
+                      NiPointer<NiRefObject> spRetainedObject, NiPoint3 kPos);
     bool FUN_00adb7c0(unsigned int uiTarget, float m_fDelay);
 };
 
 // @fnv 0x00adb7c0
 bool MessageSenderB7C0::FUN_00adb7c0(unsigned int uiTarget, float m_fDelay)
 {
-    FUN_00adb1a0(0x13, uiTarget, (int)(m_fDelay * 1000.0), 0, 0, NiPoint3B7C0::ZERO);
+    FUN_00adb1a0(0x13, uiTarget, (int)(m_fDelay * 1000.0), 0, 0, NiPoint3::ZERO);
     return false;
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    NiPoint3_audio()
-    {}
-    NiPoint3_audio(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
 struct FUN_00adc560_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adc560(int a, int b, unsigned int c);
 };
 // @fnv 0x00adc560
 void FUN_00adc560_cls::FUN_00adc560(int a, int b, unsigned int c)
 {
-    FUN_00adb1a0(9, a, 0, b, 0, NiPoint3_audio((float)c, 0.0f, 0.0f));
+    FUN_00adb1a0(9, a, 0, b, 0, NiPoint3((float)c, 0.0f, 0.0f));
 }
 
 struct Item_adc910
@@ -2330,35 +2346,17 @@ int __thiscall FUN_00adc9a0_shell::FUN_00adc9a0(unsigned long param_2)
 typedef bool(__cdecl* AudioFileResolverD570)(const char* pcName, char* pcPath, unsigned int* puiFlags,
                                              unsigned int* puiExtra);
 
-class AudioSystemD570
+inline bool AudioSystemReadyD570(BSAudio* audio)
 {
-  public:
-    bool IsReady()
-    {
-        return m_bReady;
-    }
-    AudioFileResolverD570 GetResolver()
-    {
-        return m_pfnResolve;
-    }
+    return audio->bAudioEnabled;
+}
+inline AudioFileResolverD570 AudioSystemResolverD570(BSAudio* audio)
+{
+    return (AudioFileResolverD570)audio->pfnNameCallback;
+}
 
-    void* m_pVTable;
-    bool m_bReady;
-    char m_cUnk05;
-    char m_cUnk06;
-    char m_cUnk07;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    AudioFileResolverD570 m_pfnResolve;
-};
-
-extern AudioSystemD570* g_pkAudioSystemD570;
-inline AudioSystemD570* GetAudioSystemD570()
+extern BSAudio* g_pkAudioSystemD570;
+inline BSAudio* GetAudioSystemD570()
 {
     return g_pkAudioSystemD570;
 }
@@ -2374,11 +2372,11 @@ class AudioManagerD570
 void AudioManagerD570::FUN_00add570(const char* pcName, unsigned int uiFlags)
 {
     unsigned int uiFlagsCopy = uiFlags;
-    AudioFileResolverD570 pfnResolve = GetAudioSystemD570()->GetResolver();
+    AudioFileResolverD570 pfnResolve = AudioSystemResolverD570(GetAudioSystemD570());
     unsigned int uiExtra = 0;
     {
         char acPath[264];
-        if (!GetAudioSystemD570()->IsReady() || !pfnResolve || !pfnResolve(pcName, acPath, &uiFlagsCopy, &uiExtra))
+        if (!AudioSystemReadyD570(GetAudioSystemD570()) || !pfnResolve || !pfnResolve(pcName, acPath, &uiFlagsCopy, &uiExtra))
             return;
         FUN_00add6f0(acPath, uiFlags, uiExtra);
     }
@@ -2418,6 +2416,7 @@ struct SoundQ3
 };
 typedef void(__cdecl* PfnA_Q)(SndHandleQ*, int, int*);
 typedef bool(__cdecl* PfnB_Q)(int, int*, int*);
+// BSAudio.h lacks the typed virtual callback and sound-creation signatures.
 struct AudioQ3
 {
     virtual void v0();
@@ -2485,6 +2484,8 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volati
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 extern float DAT_010a3484;
 
+// The shared NiPoint3 does not declare the single-int initialization overload.
+// Its three-float overload adds argument temporaries in FUN_00adea90.
 struct Pos3
 {
     float x, y, z;
@@ -2494,35 +2495,10 @@ struct Pos3
     {}
 };
 
-struct ObjT
+inline Pos3& AudioObjectPosition(NiAVObject* object)
 {
-    virtual void vfn_0();
-    virtual void DeleteThis();
-    void AcquireReference()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRef()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-    unsigned int GetRefCount() const
-    {
-        return m_uiRefCount;
-    }
-    Pos3& GetPos()
-    {
-        return m_pos;
-    }
-    long m_uiRefCount;
-    int unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
-    int unk30, unk34, unk38, unk3c, unk40, unk44, unk48, unk4c, unk50, unk54;
-    int unk58, unk5c, unk60, unk64, unk68, unk6c, unk70, unk74, unk78, unk7c;
-    int unk80, unk84, unk88;
-    Pos3 m_pos;
-};
-
+    return (Pos3&)object->m_kWorld.m_Translate;
+}
 struct MgrT
 {
     virtual void vfn_0();
@@ -2573,26 +2549,26 @@ struct EvtT
 
 struct Ptr
 {
-    ObjT* m_p;
-    Ptr(ObjT* p = 0) : m_p(p)
+    NiAVObject* m_p;
+    Ptr(NiAVObject* p = 0) : m_p(p)
     {
         if (m_p)
             m_p->AcquireReference();
     }
-    ~Ptr()
+    __forceinline ~Ptr()
     {
         if (m_p)
             m_p->DecRef();
     }
-    operator ObjT*() const
+    operator NiAVObject*() const
     {
         return m_p;
     }
-    ObjT* operator->() const
+    NiAVObject* operator->() const
     {
         return m_p;
     }
-    ObjT* Get() const
+    NiAVObject* Get() const
     {
         return m_p;
     }
@@ -2604,26 +2580,20 @@ struct Ptr
     {
         int a, b;
     }
-    void FUN_0066b0d0(ObjT* p);
+    void FUN_0066b0d0(NiAVObject* p);
 };
 
 extern "C" double DAT_010179e0;
 extern float DAT_010a3484;
-void __cdecl FUN_00c45830(ObjT* p);
 
-struct BSAudioBig
+inline BSAudio* AudioInstanceT()
 {
-    int unk00, unk04, unk08, unk0C;
-    MgrT* m_10;
-    static BSAudioBig* GetInstance()
-    {
-        return (BSAudioBig*)DAT_011f6d98;
-    }
-    MgrT* GetMgr()
-    {
-        return m_10;
-    }
-};
+    return DAT_011f6d98;
+}
+inline MgrT* AudioListenerT(BSAudio* audio)
+{
+    return (MgrT*)audio->pListener;
+}
 
 struct MapItem54
 {
@@ -2758,9 +2728,9 @@ void C_00adea90::FUN_00adea90()
 {
     EvtT* pEvt = 0;
     Ptr sp8;
-    if (!BSAudioBig::GetInstance()->GetMgr())
+    if (!AudioListenerT(AudioInstanceT()))
         return;
-    Pos3 pos4 = *(BSAudioBig::GetInstance()->GetMgr())->vfn_3();
+    Pos3 pos4 = *(AudioListenerT(AudioInstanceT()))->vfn_3();
     Pos3 unusedPos;
     Pos3 n3;
     void* objTmp = m84.FindFirst();
@@ -2771,10 +2741,10 @@ void C_00adea90::FUN_00adea90()
         pEvt = 0;
         m84.FUN_00ae7ee0(&objTmp, &v2, &sp8);
         m54.FUN_00a1e380(v2, &pEvt);
-        val4 = sp8.IsValid() ? sp8->GetRefCount() : 0;
+        val4 = sp8.IsValid() ? sp8->NiRefObject::GetRefCount() : 0;
         if (pEvt && (pEvt->vfn_1() || pEvt->HasFlag20000()) && sp8 && val4 > 2)
         {
-            unusedPos = sp8->GetPos();
+            unusedPos = AudioObjectPosition(sp8.Get());
             if (pEvt->GetFlags() & 4)
                 unusedPos.z = (float)(unusedPos.z + DAT_010179e0);
             pEvt->vfn_19(unusedPos);
@@ -2806,46 +2776,65 @@ void C_00adea90::FUN_00adea90()
 
 namespace fnv_00adef80 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
 struct FUN_00adef80_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
-    void FUN_00adef80(NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
+    void FUN_00adef80(NiPoint3 kPos);
 };
 // @fnv 0x00adef80
-void FUN_00adef80_cls::FUN_00adef80(NiPoint3_audio kPos)
+void FUN_00adef80_cls::FUN_00adef80(NiPoint3 kPos)
 {
     FUN_00adb1a0(0x38, 0, 0, 0, 0, kPos);
 }
 }  // namespace fnv_00adef80
+
+template <class T> inline NiPointer<T>::NiPointer()
+{
+    m_pObject = 0;
+    if (m_pObject)
+        ((NiRefObject*)m_pObject)->AcquireReference();
+}
+template <class T> inline NiPointer<T>::NiPointer(const NiPointer& rhs) : m_pObject(rhs.m_pObject)
+{
+    if (m_pObject)
+        ((NiRefObject*)m_pObject)->AcquireReference();
+}
+template <> inline NiPointer<NiAVObject>::~NiPointer()
+{
+    if (m_pObject)
+        ((NiRefObject*)m_pObject)->DecRef();
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject)
+            ((NiRefObject*)m_pObject)->DecRef();
+        m_pObject = pkNew;
+        if (m_pObject)
+            ((NiRefObject*)m_pObject)->AcquireReference();
+    }
+    return *this;
+}
+template <class T> inline T* NiPointer<T>::operator->() const { return m_pObject; }
+template <class T> inline NiPointer<T>::operator T*() const { return m_pObject; }
 
 namespace fnv_00adf080 {
 struct AudioListener_adf080;
@@ -2884,44 +2873,15 @@ class FUN_00ae6f50 : public BaseObj_b5112
 };
 }
 
-struct AudioSystem_adf080
-{
-    UInt32 unk00;
-    UInt16 unk04;
-    bool bIsMultiThreaded;
-    UInt8 unk07;
-    UInt32 unk08;
-    UInt32 unk0c;
-    AudioListener_adf080* listener;
-    __forceinline bool IsMultithreaded() const
-    {
-        return bIsMultiThreaded;
-    }
-    __forceinline AudioListener_adf080* GetListener()
-    {
-        return listener;
-    }
-};
-
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3()
-    {}
-    __forceinline NiPoint3(float ax, float ay, float az) : x(ax), y(ay), z(az)
-    {}
-};
-typedef NiPoint3 AudioVector_adf080;
-extern const AudioVector_adf080 NiPoint3_ZERO;
+extern const NiPoint3 NiPoint3_ZERO;
 extern double DAT_01088f48;
 extern char DAT_010a3488[];
-extern Setting_00ad9da0 g_011f6e80;
-extern Setting_00ad9da0 g_011f6e8c;
-extern Setting_00ad9da0 g_011f6e98;
-static __forceinline float& AudioSettingValue_adf080(Setting_00ad9da0* setting)
+extern Setting g_011f6e80;
+extern Setting g_011f6e8c;
+extern Setting g_011f6e98;
+static __forceinline float& AudioSettingValue_adf080(Setting* setting)
 {
-    return setting ? setting->fValue : (*(float*)&DAT_01202800 = 0.0f);
+    return setting ? setting->uValue.f : (*(float*)&DAT_01202800 = 0.0f);
 }
 
 struct AudioTls_adf080
@@ -3110,92 +3070,26 @@ static __forceinline void AudioSetContext_adf080(UInt32 context)
 {
     g_AudioTls_adf080.m_uiMemoryContext = context;
 }
-struct AudioMemoryContext_adf080
-{
-    UInt32 previous;
-    __forceinline AudioMemoryContext_adf080(UInt32 value) : previous(AudioGetContext_adf080())
-    {
-        AudioSetContext_adf080(value);
-    }
-    __forceinline ~AudioMemoryContext_adf080()
-    {
-        AudioSetContext_adf080(previous);
-    }
-};
 
-class NiRefObject
+} // namespace fnv_00adf080
+__forceinline AutoMemContext::AutoMemContext(int value)
 {
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void AcquireReference()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRef()
-    {
-        if (InterlockedDecrement((long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-    unsigned int GetRefCount() const
-    {
-        return m_uiRefCount;
-    }
-};
-class NiObject : public NiRefObject
+    m_eMemoryContext = (MEM_CONTEXT)fnv_00adf080::AudioGetContext_adf080();
+    fnv_00adf080::AudioSetContext_adf080(value);
+}
+__forceinline AutoMemContext::~AutoMemContext()
 {
-};
-class NiAVObject : public NiObject
+    fnv_00adf080::AudioSetContext_adf080(m_eMemoryContext);
+}
+namespace fnv_00adf080 {
+
+
+typedef ::NiPointer<NiAVObject> AudioRef_adf080;
+inline bool AudioPointersEqual(const AudioRef_adf080& left, const AudioRef_adf080& right)
 {
-};
-template <class T> class NiPointer
-{
-  public:
-    T* p;
-    NiPointer(T* object = 0) : p(object)
-    {
-        if (p)
-            p->AcquireReference();
-    }
-    NiPointer(const NiPointer& rhs) : p(rhs.p)
-    {
-        if (p)
-            p->AcquireReference();
-    }
-    ~NiPointer()
-    {
-        if (p)
-            p->DecRef();
-    }
-    NiPointer& __thiscall operator=(const NiPointer&);
-    NiPointer& operator=(T* object)
-    {
-        if (p != object)
-        {
-            if (p)
-                p->DecRef();
-            p = object;
-            if (p)
-                p->AcquireReference();
-        }
-        return *this;
-    }
-    T* operator->() const
-    {
-        return p;
-    }
-    operator T*() const
-    {
-        return p;
-    }
-    bool operator==(const NiPointer& rhs) const
-    {
-        return p == rhs.p;
-    }
-};
-typedef NiPointer<NiAVObject> AudioRef_adf080;
-void __cdecl FUN_00c45830(NiAVObject*);
+    return left.m_pObject == right.m_pObject;
+}
+
 
 enum AudioMessageType_adf080
 {
@@ -3246,9 +3140,9 @@ struct SoundMessageRecord
     {
         return shorts[index];
     }
-    __forceinline AudioVector_adf080 GetAudioPosition() const
+    __forceinline NiPoint3 GetAudioPosition() const
     {
-        return AudioVector_adf080(floats[0], floats[1], floats[2]);
+        return NiPoint3(floats[0], floats[1], floats[2]);
     }
 };
 typedef char AudioMessageSize_adf080[sizeof(SoundMessageRecord) == 0x20 ? 1 : -1];
@@ -3288,268 +3182,199 @@ struct AudioMessageList_adf080
     }
 };
 
-struct BSGameSound
+} // namespace fnv_00adf080
+
+__forceinline unsigned int BSGameSound::GetID() const
 {
-    virtual ~BSGameSound();
-    virtual bool v04();
-    virtual bool v08();
-    virtual bool v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30(bool);
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c(float);
-    virtual void v40();
-    virtual void v44();
-    virtual void v48(int);
-    virtual void v4c(AudioVector_adf080);
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c(float, float);
-    virtual void v60(UInt16, UInt16, UInt16, UInt16, UInt16);
-    virtual void v64(float);
-    virtual float v68();
-    virtual void v6c(int);
-    UInt32 id;
-    UInt32 flags;
-    UInt32 flags0c;
-    UInt32 state;
-    UInt32 unk014;
-    UInt16 attenuation18;
-    UInt16 attenuation1a;
-    UInt16 attenuation1c;
-    UInt16 unk01e;
-    UInt16 attenuation20;
-    UInt16 unk022;
-    float volume;
-    float value28;
-    float value2c;
-    UInt32 unk030;
-    UInt16 frequency34;
-    char fileName[260];
-    UInt16 unk13a;
-    UInt32 unk13c;
-    UInt32 unk140;
-    void* resource144;
-    void* resource148;
-    UInt32 unk14c;
-    UInt32 unk150;
-    UInt32 unk154;
-    UInt8 randomPercent158;
-    UInt8 unk159;
-    UInt16 frequency15a;
-    int value15c;
-    UInt32 unk160;
-    UInt32 value164;
-    UInt32 value168;
-    int value16c;
-    int value170;
-    UInt32 unk174;
-    UInt32 unk178;
-    AudioVector_adf080 vector17c;
-    int value188;
-    AudioMessageList_adf080 messages;
-    bool __thiscall FUN_00ae9d50(int);
-    bool __thiscall FUN_00ae9b50(int, float);
-    void __thiscall SetFlagAndApplyValue(bool);
-    __forceinline UInt32 GetID() const
-    {
-        return id;
-    }
-    __forceinline void SetID(UInt32 value)
-    {
-        id = value;
-    }
-    __forceinline UInt32 GetFlags() const
-    {
-        return flags;
-    }
-    __forceinline void SetFlags(UInt32 value)
-    {
-        flags = value;
-    }
-    __forceinline void* GetResource144() const
-    {
-        return resource144;
-    }
-    __forceinline void* GetResource148() const
-    {
-        return resource148;
-    }
-    __forceinline bool SameResource144(void* value) const
-    {
-        return value == resource144;
-    }
-    __forceinline bool SameResource148(void* value) const
-    {
-        return value == resource148 && resource148 != 0;
-    }
-    __forceinline bool Ready800() const
-    {
-        return (state & 0x800) != 0;
-    }
-    __forceinline bool Ready100() const
-    {
-        return (state & 0x100) != 0;
-    }
-    __forceinline bool Pending1() const
-    {
-        return (state & 1) != 0;
-    }
-    __forceinline bool Stopped10() const
-    {
-        return (state & 0x10) != 0;
-    }
-    __forceinline bool Alternate0c() const
-    {
-        return (flags0c & 1) != 0;
-    }
-    __forceinline bool Alternate1000() const
-    {
-        return (flags & 0x1000) != 0;
-    }
-    __forceinline bool Random40() const
-    {
-        return (flags & 0x40) != 0;
-    }
-    __forceinline bool SpecialCategory() const
-    {
-        return (flags & 0x10) || (flags & 0x4000000) || (flags & 0x2000000);
-    }
-    __forceinline void Set1000(bool b)
-    {
-        state = b ? (state | 0x1000) : (state & ~0x1000);
-    }
-    __forceinline void Set10(bool b)
-    {
-        state = b ? (state | 0x10) : (state & ~0x10);
-    }
-    __forceinline void Set200(bool b)
-    {
-        state = b ? (state | 0x200) : (state & ~0x200);
-    }
-    __forceinline void Set10000(bool b)
-    {
-        state = b ? (state | 0x10000) : (state & ~0x10000);
-    }
-    __forceinline void Set2000(bool b)
-    {
-        state = b ? (state | 0x2000) : (state & ~0x2000);
-    }
-    __forceinline void SetRandom40(bool b)
-    {
-        b ? flags |= 0x40 : flags &= ~0x40;
-    }
-    __forceinline void SetRandomPercent(UInt8 value)
-    {
-        randomPercent158 = value;
-    }
-    __forceinline UInt8 GetRandomPercent() const
-    {
-        return randomPercent158;
-    }
-    __forceinline void SetAttenuation18(UInt16 value)
-    {
-        attenuation18 = value;
-        v3c(volume);
-    }
-    __forceinline void SetAttenuation1a(UInt16 value)
-    {
-        attenuation1a = value;
-        v3c(volume);
-    }
-    __forceinline void SetAttenuation1c(UInt16 value)
-    {
-        attenuation1c = value;
-        v3c(volume);
-    }
-    __forceinline void SetFade20(double value)
-    {
-        attenuation20 = (UInt16)value;
-        v3c(volume);
-    }
-    __forceinline void SetFade1c(double fraction)
-    {
-        attenuation1c = (UInt16)(fraction * DAT_01088f48);
-        v3c(volume);
-    }
-    __forceinline void SetAttenuation20(UInt16 value)
-    {
-        attenuation20 = value;
-        v3c(volume);
-    }
-    __forceinline void RefreshVolume()
-    {
-        v3c(volume);
-    }
-    __forceinline void Set164(UInt32 value)
-    {
-        value164 = value;
-    }
-    __forceinline void Set168(UInt32 value)
-    {
-        value168 = value;
-    }
-    __forceinline void Set16c(int value)
-    {
-        value16c = value;
-    }
-    __forceinline void Set170(int value)
-    {
-        value170 = value;
-    }
-    __forceinline void Set188(int value)
-    {
-        value188 = value;
-    }
-    __forceinline void SetFrequencyScale(float scale)
-    {
-        frequency15a = (UInt16)(frequency34 * scale);
-    }
-    __forceinline void Set28(int value)
-    {
-        value28 = (float)(value * 0.09375);
-    }
-    __forceinline void Set2c(UInt16 value)
-    {
-        value2c = (float)(value * 0.09375);
-    }
-    __forceinline void Set15c(int value)
-    {
-        value15c = value;
-        flags |= 0x1000000;
-    }
-    __forceinline void Clear15c()
-    {
-        value15c = 0;
-        flags &= ~0x1000000;
-    }
-    __forceinline void Set8000(bool b)
-    {
-        state = b ? (state | 0x8000) : (state & ~0x8000);
-    }
-    __forceinline void SetReferenceVector(AudioVector_adf080 value)
-    {
-        vector17c = value;
-        Set8000(true);
-    }
-    __forceinline void QueueTail(SoundMessageRecord* message)
-    {
-        messages.AddItem(message);
-    }
-    __forceinline void QueueHead(SoundMessageRecord* message)
-    {
-        messages.AddHead(message);
-    }
-};
+    return iSoundID;
+}
+__forceinline void BSGameSound::SetID(unsigned int value)
+{
+    iSoundID = value;
+}
+__forceinline unsigned int BSGameSound::GetFlags() const
+{
+    return iSoundTypeFlags;
+}
+__forceinline void BSGameSound::SetFlags(unsigned int value)
+{
+    iSoundTypeFlags = value;
+}
+__forceinline void* BSGameSound::GetResource144() const
+{
+    return (void*)iSoundHash;
+}
+__forceinline void* BSGameSound::GetResource148() const
+{
+    return (void*)iDirectoryHash;
+}
+__forceinline bool BSGameSound::SameResource144(void* value) const
+{
+    return value == (void*)iSoundHash;
+}
+__forceinline bool BSGameSound::SameResource148(void* value) const
+{
+    return value == (void*)iDirectoryHash && iDirectoryHash != 0;
+}
+__forceinline bool BSGameSound::Ready800() const
+{
+    return (iStateFlags & 0x800) != 0;
+}
+__forceinline bool BSGameSound::Ready100() const
+{
+    return (iStateFlags & 0x100) != 0;
+}
+__forceinline bool BSGameSound::Pending1() const
+{
+    return (iStateFlags & 1) != 0;
+}
+__forceinline bool BSGameSound::Stopped10() const
+{
+    return (iStateFlags & 0x10) != 0;
+}
+__forceinline bool BSGameSound::Alternate0c() const
+{
+    return (iModifierFlags & 1) != 0;
+}
+__forceinline bool BSGameSound::Alternate1000() const
+{
+    return (iSoundTypeFlags & 0x1000) != 0;
+}
+__forceinline bool BSGameSound::Random40() const
+{
+    return (iSoundTypeFlags & 0x40) != 0;
+}
+__forceinline bool BSGameSound::SpecialCategory() const
+{
+    return (iSoundTypeFlags & 0x10) || (iSoundTypeFlags & 0x4000000) || (iSoundTypeFlags & 0x2000000);
+}
+__forceinline void BSGameSound::Set1000(bool b)
+{
+    iStateFlags = b ? (iStateFlags | 0x1000) : (iStateFlags & ~0x1000);
+}
+__forceinline void BSGameSound::Set10(bool b)
+{
+    iStateFlags = b ? (iStateFlags | 0x10) : (iStateFlags & ~0x10);
+}
+__forceinline void BSGameSound::Set200(bool b)
+{
+    iStateFlags = b ? (iStateFlags | 0x200) : (iStateFlags & ~0x200);
+}
+__forceinline void BSGameSound::Set10000(bool b)
+{
+    iStateFlags = b ? (iStateFlags | 0x10000) : (iStateFlags & ~0x10000);
+}
+__forceinline void BSGameSound::Set2000(bool b)
+{
+    iStateFlags = b ? (iStateFlags | 0x2000) : (iStateFlags & ~0x2000);
+}
+__forceinline void BSGameSound::SetRandom40(bool b)
+{
+    b ? iSoundTypeFlags |= 0x40 : iSoundTypeFlags &= ~0x40;
+}
+__forceinline void BSGameSound::SetRandomPercent(unsigned char value)
+{
+    iFreqVariance = value;
+}
+__forceinline unsigned char BSGameSound::GetRandomPercent() const
+{
+    return iFreqVariance;
+}
+__forceinline void BSGameSound::SetAttenuation18(unsigned short value)
+{
+    iStaticAttenuation = value;
+    v3c(fCurrentVolume);
+}
+__forceinline void BSGameSound::SetAttenuation1a(unsigned short value)
+{
+    iReverbAttenuation = value;
+    v3c(fCurrentVolume);
+}
+__forceinline void BSGameSound::SetAttenuation1c(unsigned short value)
+{
+    iSystemAttenuation = value;
+    v3c(fCurrentVolume);
+}
+__forceinline void BSGameSound::SetFade20(double value)
+{
+    iFaderAttenuation = (unsigned short)value;
+    v3c(fCurrentVolume);
+}
+__forceinline void BSGameSound::SetFade1c(double fraction)
+{
+    iSystemAttenuation = (unsigned short)(fraction * fnv_00adf080::DAT_01088f48);
+    v3c(fCurrentVolume);
+}
+__forceinline void BSGameSound::SetAttenuation20(unsigned short value)
+{
+    iFaderAttenuation = value;
+    v3c(fCurrentVolume);
+}
+__forceinline void BSGameSound::RefreshVolume()
+{
+    v3c(fCurrentVolume);
+}
+__forceinline void BSGameSound::Set164(unsigned int value)
+{
+    fnCompletionCallback = (void*)value;
+}
+__forceinline void BSGameSound::Set168(unsigned int value)
+{
+    fnPlayedCallback = (void*)value;
+}
+__forceinline void BSGameSound::Set16c(int value)
+{
+    pSoundCompletionContext = (void*)value;
+}
+__forceinline void BSGameSound::Set170(int value)
+{
+    pSoundPlayContext = (void*)value;
+}
+__forceinline void BSGameSound::Set188(int value)
+{
+    iPriority = value;
+}
+__forceinline void BSGameSound::SetFrequencyScale(float scale)
+{
+    iModSamplesPerSecond = (unsigned short)(iSamplesPerSecond * scale);
+}
+__forceinline void BSGameSound::Set28(int value)
+{
+    fBeginTime = (float)(value * 0.09375);
+}
+__forceinline void BSGameSound::Set2c(unsigned short value)
+{
+    fEndTime = (float)(value * 0.09375);
+}
+__forceinline void BSGameSound::Set15c(int value)
+{
+    iSynchStartTime = value;
+    iSoundTypeFlags |= 0x1000000;
+}
+__forceinline void BSGameSound::Clear15c()
+{
+    iSynchStartTime = 0;
+    iSoundTypeFlags &= ~0x1000000;
+}
+__forceinline void BSGameSound::Set8000(bool b)
+{
+    iStateFlags = b ? (iStateFlags | 0x8000) : (iStateFlags & ~0x8000);
+}
+__forceinline void BSGameSound::SetReferenceVector(::NiPoint3 value)
+{
+    vBeamEnd = value;
+    Set8000(true);
+}
+__forceinline void BSGameSound::QueueTail(SoundMessageRecord* message)
+{
+    ((fnv_00adf080::AudioMessageList_adf080*)QueuedMessages)->AddItem((fnv_00adf080::SoundMessageRecord* const&)message);
+}
+__forceinline void BSGameSound::QueueHead(SoundMessageRecord* message)
+{
+    ((fnv_00adf080::AudioMessageList_adf080*)QueuedMessages)->AddHead((fnv_00adf080::SoundMessageRecord* const&)message);
+}
+
+namespace fnv_00adf080 {
 
 template <class TVAL> struct AudioMapItem_adf080
 {
@@ -3675,84 +3500,35 @@ typedef AudioMap_adf080<BSGameSound*> AudioSoundMap_adf080;
 typedef AudioMap_adf080<AudioRef_adf080> AudioRefMap_adf080;
 typedef AudioMapItem_adf080<BSGameSound*> AudioSoundItem_adf080;
 typedef AudioMapItem_adf080<AudioRef_adf080> AudioRefItem_adf080;
-struct AudioMessageStack_adf080
-{
-    UInt32 count;
-    bool bottomless;
-    UInt8 unk005;
-    UInt16 unk006;
-    SoundMessageRecord* top;
-    UInt32 lastAllocation;
-    void __thiscall FUN_00ae75f0(SoundMessageRecord*);
-};
+
 extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void* semaphore, long count, long* previous);
 extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(void* handle, unsigned long milliseconds);
-struct BSSemaphore_adf080
+
+} // namespace fnv_00adf080
+
+inline void BSAudioManagerThread::FUN_00ae7ac0()
 {
-    long count;
-    void* semaphore;
-    void Signal()
-    {
-        ReleaseSemaphore(semaphore, 1, 0);
-        InterlockedIncrement(&count);
-    }
-    void Wait()
-    {
-        WaitForSingleObject(semaphore, 0xffffffff);
-        InterlockedDecrement(&count);
-    }
-};
-struct BSAudioManagerThread
+    waiting48 = true;
+    workSemaphore3c.Signal();
+    FUN_00aa6590(0, 0);
+}
+inline void BSAudioManagerThread::FUN_00ae7a50()
 {
-    UInt32 unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
-    BSSemaphore_adf080 doneSemaphore30;
-    UInt32 unk38;
-    BSSemaphore_adf080 workSemaphore3c;
-    UInt32 unk44;
-    bool waiting48;
-    void __thiscall FUN_00aa6590(int, int);
-    void FUN_00ae7ac0()
-    {
-        waiting48 = true;
-        workSemaphore3c.Signal();
-        FUN_00aa6590(0, 0);
-    }
-    void FUN_00ae7a50()
-    {
-        waiting48 = true;
-        workSemaphore3c.Signal();
-        doneSemaphore30.Wait();
-        waiting48 = false;
-    }
-};
+    waiting48 = true;
+    workSemaphore3c.Signal();
+    doneSemaphore30.Wait();
+    waiting48 = false;
+}
+
+namespace fnv_00adf080 {
+
 struct AudioListener_adf080
 {
     virtual void v00();
     virtual void v04();
-    virtual void v08(const AudioVector_adf080&);
+    virtual void v08(const NiPoint3&);
 };
-struct IOManager
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48(AudioTask_adf080::FUN_00ae6f50*);
-};
+
 extern IOManager* DAT_01202d98;
 
 struct FUN_00aa5140
@@ -3777,131 +3553,40 @@ static __forceinline BSAudio* GetAudio_adf080()
 }
 static __forceinline bool IsMultiThreaded_adf080(BSAudio* audio)
 {
-    return audio->bIsMultiThreaded;
+    return audio->bMultiThread;
 }
 static __forceinline AudioListener_adf080* GetListener_adf080(BSAudio* audio)
 {
-    return ((AudioSystem_adf080*)audio)->listener;
+    return (AudioListener_adf080*)audio->pListener;
 }
 static __forceinline UInt32 GetThreadID_adf080()
 {
     return GetCurrentThreadId();
 }
 
-struct BSAudioManager_adf080
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    AudioMessageStack_adf080 messageStack44;
-    AudioSoundMap_adf080 sounds54;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    AudioRefMap_adf080 objects84;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    float value0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    CritSecA critical0dc;
-    CritSecA critical0f4;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    bool precache134;
-    bool listenerDirty135;
-    UInt16 unk136;
-    UInt32 threadId138;
-    BSAudioManagerThread* thread13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    unsigned int unk15c;
-    unsigned int unk160;
-    unsigned int unk164;
-    unsigned int unk168;
-    unsigned int unk16c;
-    UInt32 flags170;
-    bool focus174;
-    bool alternate175;
-    UInt16 unk176;
-    AE6DE0Slot* slots178;
-    UInt32 slotCount17c;
-    bool __thiscall FUN_00adf080(SoundMessageRecord*);
-    void __thiscall FUN_00adb1a0(int, UInt32, int, UInt32, AudioRef_adf080, AudioVector_adf080);
-    BSGameSound* __thiscall FUN_00add1e0(void*, void*, UInt32);
-    void __thiscall FUN_00add960(BSGameSound*);
-    void __thiscall FUN_00ada5d0(UInt32, BSGameSound*);
-    SoundMessageRecord* __thiscall FUN_00adaf80();
-    bool __thiscall HasMatchingEntry(UInt32);
-    bool __thiscall AddSlot(void*, bool);
-    bool __thiscall FUN_00ae6e60(int, unsigned char);
-    void __thiscall FUN_00adbb30(UInt32, UInt16, UInt16, UInt16, UInt16, UInt16);
-    void __thiscall AddSound(BSGameSound*);
-};
+
+
+} // namespace fnv_00adf080
 
 // @fnv 0x00adf080
-bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
+bool BSAudioManager::FUN_00adf080(::SoundMessageRecord* message)
 {
-    AudioMemoryContext_adf080 m_uiMemoryContext(11);
+    using namespace fnv_00adf080;
+    AutoMemContext m_uiMemoryContext(11);
     BSGameSound* pkSound = 0;
-    UInt32 now = GetTickCount();
+    UInt32 now = fnv_00adf080::GetTickCount();
     bool bWasPlaying = false;
     AudioSoundItem_adf080* pkItem;
     UInt32 uId;
     {
-        switch (message->GetType())
+        switch (reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetType())
         {
         case 37: {
-            pkSound = (BSGameSound*)message->GetArgument2();
-            if (!DAT_01202d98)
+            pkSound = (BSGameSound*)reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2();
+            if (!fnv_00adf080::DAT_01202d98)
             {
-                FUN_00adb1a0(37, message->GetID(), message->GetArgument1(), message->GetArgument2(), AudioRef_adf080(),
-                             NiPoint3_ZERO);
+                FUN_00adb1a0(37, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(), AudioRef_adf080(),
+                             fnv_00adf080::NiPoint3_ZERO);
             }
             else if (pkSound)
             {
@@ -3911,16 +3596,16 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                     prior = FUN_00add1e0(pkSound->GetResource144(), pkSound->GetResource148(), pkSound->GetFlags());
                 if (!prior)
                 {
-                    if (!pkSound->fileName[0])
-                        FUN_005b5e40(DAT_010a3488, (int)pkSound->fileName);
+                    if (!pkSound->pFilename[0])
+                        ::FUN_005b5e40(DAT_010a3488, (int)pkSound->pFilename);
                     AudioTask_adf080::FUN_00ae6f50* task = new AudioTask_adf080::FUN_00ae6f50((int)pkSound);
                     pkSound->Set1000(true);
-                    DAT_01202d98->v48(task);
-                    sounds54.SetAt(message->GetID(), pkSound);
+                    fnv_00adf080::DAT_01202d98->AddTask((QIOTask*)task);
+                    (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).SetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound);
                 }
                 else
                 {
-                    prior->flags = pkSound->GetFlags();
+                    prior->iSoundTypeFlags = pkSound->GetFlags();
                     if (!alternate && prior->SameResource144(pkSound->GetResource144()))
                     {
                         delete pkSound;
@@ -3930,15 +3615,15 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                         FUN_00add960(pkSound);
                     }
                     pkSound = prior;
-                    pkSound->SetID(message->GetID());
-                    sounds54.SetAt(message->GetID(), pkSound);
+                    pkSound->SetID(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID());
+                    (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).SetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound);
                     FUN_00ada5d0(pkSound->GetID(), pkSound);
                 }
             }
             break;
         }
         case 38: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 pkSound->Set10(true);
                 pkSound->Set200(false);
@@ -3946,42 +3631,42 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 58: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                int value = message->GetArgument1();
-                pkSound->Set164(message->GetArgument2());
+                int value = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+                pkSound->Set164(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2());
                 pkSound->Set16c(value);
             }
             break;
         }
         case 59: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                int value = message->GetArgument1();
-                pkSound->Set168(message->GetArgument2());
+                int value = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+                pkSound->Set168(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2());
                 pkSound->Set170(value);
             }
             break;
         }
         case 39: {
             AudioRef_adf080 incoming;
-            incoming.operator=(message->object);
+            incoming.operator=(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->object);
             AudioRef_adf080 previous;
-            if (objects84.GetAt(message->GetID(), previous))
+            if ((*reinterpret_cast<AudioRefMap_adf080*>(MovingRefrList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), previous))
             {
-                objects84.RemoveAt(message->GetID());
-                if (previous->GetRefCount() == 1)
+                (*reinterpret_cast<AudioRefMap_adf080*>(MovingRefrList)).RemoveAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID());
+                if (previous->NiRefObject::GetRefCount() == 1)
                     FUN_00c45830(previous);
                 previous = 0;
             }
-            objects84.SetAt(message->GetID(), incoming);
-            message->SetObject(0);
+            (*reinterpret_cast<AudioRefMap_adf080*>(MovingRefrList)).SetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), incoming);
+            reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->SetObject(0);
             break;
         }
         case 64: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                bool enabled = message->GetArgument1();
+                bool enabled = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
                 if (enabled)
                     pkSound->SetFlags(pkSound->GetFlags() | 0x40000);
                 else
@@ -3990,32 +3675,32 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 63: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    pkSound->v6c(message->GetArgument1());
+                    pkSound->Seek(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1());
                 }
                 else
                 {
-                    SoundMessageRecord* queued = FUN_00adaf80();
-                    *queued = *message;
-                    pkSound->QueueTail(queued);
+                    fnv_00adf080::SoundMessageRecord* queued = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(FUN_00adaf80());
+                    *queued = *reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message);
+                    pkSound->QueueTail((::SoundMessageRecord*)queued);
                 }
             }
             break;
         }
         case 1: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
 
-                    if (!pkSound->FUN_00ae9b50(0, value0a8))
+                    if (!pkSound->FUN_00ae9b50(0, fCurrentGamehour))
                         pkSound->Set10000(true);
-                    if ((pkSound->GetFlags() & flags170) && !(pkSound->GetFlags() & 0x800))
+                    if ((pkSound->GetFlags() & iMuteMask) && !(pkSound->GetFlags() & 0x800))
                         pkSound->SetAttenuation1c(10000);
-                    if (focus174 && !(pkSound->GetFlags() & 0x20) && !(pkSound->GetFlags() & 4) &&
+                    if (bDialogueFade && !(pkSound->GetFlags() & 0x20) && !(pkSound->GetFlags() & 4) &&
                         !(pkSound->GetFlags() & 0x800) && !(pkSound->GetFlags() & 0x100000))
                     {
                         pkSound->SetAttenuation20((UInt16)(AudioSettingValue_adf080(&g_011f6e80) * 100.0));
@@ -4028,7 +3713,7 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                         pkSound->v64(frequency);
                     }
                     if (pkSound->Alternate0c() || pkSound->Alternate1000())
-                        pkSound->SetFlagAndApplyValue(alternate175);
+                        pkSound->SetFlagAndApplyValue(bListenerUnderwater);
                     pkSound->RefreshVolume();
                     pkSound->v30(false);
                     bool paused = false;
@@ -4054,20 +3739,20 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                 }
                 else if (pkSound->Pending1())
                 {
-                    SoundMessageRecord* queued = FUN_00adaf80();
-                    *queued = *message;
-                    pkSound->QueueTail(queued);
+                    fnv_00adf080::SoundMessageRecord* queued = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(FUN_00adaf80());
+                    *queued = *reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message);
+                    pkSound->QueueTail((::SoundMessageRecord*)queued);
                 }
                 else
                 {
-                    FUN_00adb1a0(1, message->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                 AudioRef_adf080(), NiPoint3_ZERO);
+                    FUN_00adb1a0(1, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                 AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                 }
             }
             break;
         }
         case 2: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
@@ -4076,15 +3761,15 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                 }
                 else
                 {
-                    SoundMessageRecord* queued = FUN_00adaf80();
-                    *queued = *message;
-                    pkSound->QueueTail(queued);
+                    fnv_00adf080::SoundMessageRecord* queued = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(FUN_00adaf80());
+                    *queued = *reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message);
+                    pkSound->QueueTail((::SoundMessageRecord*)queued);
                 }
             }
             break;
         }
         case 3: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
@@ -4093,15 +3778,15 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                 }
                 else
                 {
-                    SoundMessageRecord* queued = FUN_00adaf80();
-                    *queued = *message;
-                    pkSound->QueueTail(queued);
+                    fnv_00adf080::SoundMessageRecord* queued = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(FUN_00adaf80());
+                    *queued = *reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message);
+                    pkSound->QueueTail((::SoundMessageRecord*)queued);
                 }
             }
             break;
         }
         case 4: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
@@ -4110,26 +3795,26 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                 }
                 else
                 {
-                    SoundMessageRecord* queued = FUN_00adaf80();
-                    *queued = *message;
-                    pkSound->QueueTail(queued);
+                    fnv_00adf080::SoundMessageRecord* queued = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(FUN_00adaf80());
+                    *queued = *reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message);
+                    pkSound->QueueTail((::SoundMessageRecord*)queued);
                 }
             }
             break;
         }
         case 5: {
-            if ((UInt32)message->GetArgument1() <= now)
+            if ((UInt32)reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1() <= now)
             {
-                if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+                if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
                 {
                     if (pkSound->Ready800() && pkSound->Ready100())
                     {
 
-                        if (!pkSound->FUN_00ae9b50(0, value0a8))
+                        if (!pkSound->FUN_00ae9b50(0, fCurrentGamehour))
                             pkSound->Set10000(true);
-                        if ((pkSound->GetFlags() & flags170) && !(pkSound->GetFlags() & 0x800))
+                        if ((pkSound->GetFlags() & iMuteMask) && !(pkSound->GetFlags() & 0x800))
                             pkSound->SetAttenuation1c(10000);
-                        if (focus174 && !(pkSound->GetFlags() & 0x20) && !(pkSound->GetFlags() & 4) &&
+                        if (bDialogueFade && !(pkSound->GetFlags() & 0x20) && !(pkSound->GetFlags() & 4) &&
                             !(pkSound->GetFlags() & 0x800) && !(pkSound->GetFlags() & 0x100000))
                         {
                             pkSound->SetAttenuation20((UInt16)(AudioSettingValue_adf080(&g_011f6e80) * 100.0));
@@ -4142,9 +3827,9 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                             pkSound->v64(frequency);
                         }
                         if (pkSound->Alternate0c() || pkSound->Alternate1000())
-                            pkSound->SetFlagAndApplyValue(alternate175);
+                            pkSound->SetFlagAndApplyValue(bListenerUnderwater);
                         pkSound->RefreshVolume();
-                        if (!pkSound->v0c())
+                        if (!pkSound->IsPaused())
                             pkSound->v30(false);
                         bool paused = false;
                         if (HasMatchingEntry(pkSound->GetFlags()))
@@ -4169,15 +3854,15 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                     }
                     else
                     {
-                        FUN_00adb1a0(1, message->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                     AudioRef_adf080(), NiPoint3_ZERO);
+                        FUN_00adb1a0(1, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                     AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                     }
                 }
             }
             else
             {
-                FUN_00adb1a0(5, message->GetID(), message->GetArgument1(), message->GetArgument2(), AudioRef_adf080(),
-                             NiPoint3_ZERO);
+                FUN_00adb1a0(5, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(), AudioRef_adf080(),
+                             fnv_00adf080::NiPoint3_ZERO);
             }
             break;
         }
@@ -4185,66 +3870,66 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 9: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    if (message->GetArgument1() == 0)
+                    if (reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1() == 0)
                     {
-                        message->SetArgument1(now);
-                        message->SetArgument2(message->GetArgument2() + now);
+                        reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->SetArgument1(now);
+                        reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->SetArgument2(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2() + now);
                     }
-                    UInt32 start = message->GetArgument1();
-                    int uiEndTime = message->GetArgument2();
+                    UInt32 start = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+                    int uiEndTime = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2();
                     if (now >= uiEndTime)
                     {
                         pkSound->SetAttenuation1c(10000);
                         pkSound->Set200(false);
-                        int followup = (UInt32)message->GetAudioPosition().x;
+                        int followup = (UInt32)reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition().x;
                         if (followup > 0)
-                            FUN_00adb1a0(followup, pkSound->GetID(), 0, 0, AudioRef_adf080(), NiPoint3_ZERO);
+                            FUN_00adb1a0(followup, pkSound->GetID(), 0, 0, AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                     }
                     else if (now < uiEndTime)
                     {
                         pkSound->Set200(true);
                         pkSound->SetFade1c(1.0 - (double)(uiEndTime - now) / (uiEndTime - start));
-                        FUN_00adb1a0(9, pkSound->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                     AudioRef_adf080(), message->GetAudioPosition());
+                        FUN_00adb1a0(9, pkSound->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                     AudioRef_adf080(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition());
                     }
                     pkSound->RefreshVolume();
                     FUN_00ada5d0(pkSound->GetID(), pkSound);
                 }
                 else
                 {
-                    if (now >= message->GetArgument2())
+                    if (now >= reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2())
                     {
                         pkSound->SetAttenuation1c(10000);
                         pkSound->Set200(false);
-                        int followup = (UInt32)message->GetAudioPosition().x;
+                        int followup = (UInt32)reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition().x;
                         if (followup > 0)
-                            FUN_00adb1a0(followup, pkSound->GetID(), 0, 0, AudioRef_adf080(), NiPoint3_ZERO);
+                            FUN_00adb1a0(followup, pkSound->GetID(), 0, 0, AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                     }
                     else
                     {
-                        FUN_00adb1a0(9, pkSound->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                     AudioRef_adf080(), message->GetAudioPosition());
+                        FUN_00adb1a0(9, pkSound->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                     AudioRef_adf080(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition());
                     }
                 }
             }
             break;
         }
         case 11: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    if (message->GetArgument1() == 0)
+                    if (reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1() == 0)
                     {
-                        message->SetArgument1(now);
-                        message->SetArgument2(message->GetArgument2() + now);
+                        reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->SetArgument1(now);
+                        reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->SetArgument2(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2() + now);
                     }
-                    UInt32 start = message->GetArgument1();
-                    int uiEndTime = message->GetArgument2();
+                    UInt32 start = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+                    int uiEndTime = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2();
                     if (now >= uiEndTime)
                     {
                         pkSound->SetAttenuation1c(0);
@@ -4254,61 +3939,61 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                     {
                         pkSound->Set200(true);
                         pkSound->SetFade1c((double)(uiEndTime - now) / (uiEndTime - start));
-                        FUN_00adb1a0(11, message->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                     AudioRef_adf080(), NiPoint3_ZERO);
+                        FUN_00adb1a0(11, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                     AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                     }
                     pkSound->RefreshVolume();
                     FUN_00ada5d0(pkSound->GetID(), pkSound);
                 }
-                else if (pkSound->Ready800() && now >= message->GetArgument2())
+                else if (pkSound->Ready800() && now >= reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2())
                 {
                     pkSound->SetAttenuation1c(0);
                     pkSound->Set200(false);
-                    FUN_00adb1a0(8, message->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                 AudioRef_adf080(), NiPoint3_ZERO);
+                    FUN_00adb1a0(8, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                 AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                 }
                 else
                 {
-                    FUN_00adb1a0(11, message->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                 AudioRef_adf080(), NiPoint3_ZERO);
+                    FUN_00adb1a0(11, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                 AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                 }
             }
             break;
         }
         case 13: {
-            focus174 = message->GetID() != 0;
-            UInt32 duration = focus174 ? (UInt32)(AudioSettingValue_adf080(&g_011f6e98) * 1000.0)
+            bDialogueFade = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID() != 0;
+            UInt32 duration = bDialogueFade ? (UInt32)(AudioSettingValue_adf080(&g_011f6e98) * 1000.0)
                                        : (UInt32)(AudioSettingValue_adf080(&g_011f6e8c) * 1000.0);
-            AudioSoundItem_adf080* iterator = sounds54.GetFirst();
+            AudioSoundItem_adf080* iterator = (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetFirst();
             UInt32 soundHandle;
             while (iterator)
             {
-                sounds54.GetNext(iterator, soundHandle, pkSound);
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetNext(iterator, soundHandle, pkSound);
                 if (!(pkSound->GetFlags() & 0x20) && !(pkSound->GetFlags() & 4) && !(pkSound->GetFlags() & 0x800) &&
                     !(pkSound->GetFlags() & 0x100000))
                 {
-                    if (focus174)
+                    if (bDialogueFade)
                     {
                         FUN_00adb1a0(10, pkSound->GetID(), now, now + duration, AudioRef_adf080(),
-                                     AudioVector_adf080(AudioSettingValue_adf080(&g_011f6e80), 0.0f, 0.0f));
+                                     NiPoint3(AudioSettingValue_adf080(&g_011f6e80), 0.0f, 0.0f));
                     }
                     else
                     {
                         FUN_00adb1a0(12, pkSound->GetID(), now, now + duration, AudioRef_adf080(),
-                                     AudioVector_adf080(AudioSettingValue_adf080(&g_011f6e80), 0.0f, 0.0f));
+                                     NiPoint3(AudioSettingValue_adf080(&g_011f6e80), 0.0f, 0.0f));
                     }
                 }
             }
             break;
         }
         case 10: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    UInt32 attenuation = (UInt32)(message->GetAudioPosition().x * 100.0);
-                    UInt32 start = message->GetArgument1();
-                    int uiEndTime = message->GetArgument2();
+                    UInt32 attenuation = (UInt32)(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition().x * 100.0);
+                    UInt32 start = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+                    int uiEndTime = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2();
                     if (now >= uiEndTime)
                     {
                         pkSound->SetAttenuation20((UInt16)attenuation);
@@ -4316,28 +4001,28 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                     else if (now < uiEndTime)
                     {
                         pkSound->SetFade20((1.0 - (double)(uiEndTime - now) / (uiEndTime - start)) * attenuation);
-                        FUN_00adb1a0(10, pkSound->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                     AudioRef_adf080(), message->GetAudioPosition());
+                        FUN_00adb1a0(10, pkSound->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                     AudioRef_adf080(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition());
                     }
                     pkSound->RefreshVolume();
                     FUN_00ada5d0(pkSound->GetID(), pkSound);
                 }
                 else if (!pkSound->Stopped10())
                 {
-                    FUN_00adb1a0(10, pkSound->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                 AudioRef_adf080(), message->GetAudioPosition());
+                    FUN_00adb1a0(10, pkSound->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                 AudioRef_adf080(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition());
                 }
             }
             break;
         }
         case 12: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    UInt32 attenuation = (UInt32)(message->GetAudioPosition().x * 100.0);
-                    UInt32 start = message->GetArgument1();
-                    int uiEndTime = message->GetArgument2();
+                    UInt32 attenuation = (UInt32)(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition().x * 100.0);
+                    UInt32 start = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+                    int uiEndTime = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2();
                     if (now >= uiEndTime)
                     {
                         pkSound->SetAttenuation20(0);
@@ -4345,24 +4030,24 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                     else if (now < uiEndTime)
                     {
                         pkSound->SetFade20((double)(uiEndTime - now) / (uiEndTime - start) * attenuation);
-                        FUN_00adb1a0(12, message->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                     AudioRef_adf080(), message->GetAudioPosition());
+                        FUN_00adb1a0(12, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                     AudioRef_adf080(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition());
                     }
                     FUN_00ada5d0(pkSound->GetID(), pkSound);
                 }
                 else if (!pkSound->Stopped10())
                 {
-                    FUN_00adb1a0(12, message->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                 AudioRef_adf080(), message->GetAudioPosition());
+                    FUN_00adb1a0(12, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                 AudioRef_adf080(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition());
                 }
             }
             break;
         }
         case 14: {
-            pkItem = sounds54.GetFirst();
+            pkItem = (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetFirst();
             while (pkItem)
             {
-                sounds54.GetNext(pkItem, uId, pkSound);
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetNext(pkItem, uId, pkSound);
                 if (pkSound)
                     pkSound->RefreshVolume();
             }
@@ -4372,16 +4057,16 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 16: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    pkSound->v3c((float)(message->GetArgument1() / 1000.0));
+                    pkSound->v3c((float)(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1() / 1000.0));
                     FUN_00ada5d0(pkSound->GetID(), pkSound);
                 }
                 else if (!pkSound->Stopped10())
                 {
-                    FUN_00adb1a0(16, message->GetID(), message->GetArgument1(), 0, AudioRef_adf080(), NiPoint3_ZERO);
+                    FUN_00adb1a0(16, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), 0, AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                 }
             }
             break;
@@ -4393,24 +4078,24 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 19: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                pkSound->v64((float)(message->GetArgument1() / 1000.0));
+                pkSound->v64((float)(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1() / 1000.0));
             }
             break;
         }
         case 66: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                pkSound->SetFrequencyScale((float)(message->GetArgument1() / 1000.0));
+                pkSound->SetFrequencyScale((float)(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1() / 1000.0));
             }
             break;
         }
         case 20: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 pkSound->SetRandom40(true);
-                pkSound->SetRandomPercent((UInt8)message->GetArgument1());
+                pkSound->SetRandomPercent((UInt8)reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1());
             }
             break;
         }
@@ -4421,7 +4106,7 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 7: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
@@ -4429,15 +4114,15 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                 }
                 else
                 {
-                    SoundMessageRecord* queued = FUN_00adaf80();
-                    *queued = *message;
-                    pkSound->QueueHead(queued);
+                    fnv_00adf080::SoundMessageRecord* queued = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(FUN_00adaf80());
+                    *queued = *reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message);
+                    pkSound->QueueHead((::SoundMessageRecord*)queued);
                 }
             }
             break;
         }
         case 8: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
@@ -4445,9 +4130,9 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                 }
                 else
                 {
-                    SoundMessageRecord* queued = FUN_00adaf80();
-                    *queued = *message;
-                    pkSound->QueueHead(queued);
+                    fnv_00adf080::SoundMessageRecord* queued = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(FUN_00adaf80());
+                    *queued = *reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message);
+                    pkSound->QueueHead((::SoundMessageRecord*)queued);
                 }
             }
             break;
@@ -4456,20 +4141,20 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 24: {
-            UInt32 uiThreshold = message->GetID();
-            UInt32 mask = message->GetArgument1();
-            flags170 |= mask;
-            int duration = message->GetArgument2();
-            AudioSoundItem_adf080* iterator = sounds54.GetFirst();
+            UInt32 uiThreshold = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID();
+            UInt32 mask = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+            iMuteMask |= mask;
+            int duration = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2();
+            AudioSoundItem_adf080* iterator = (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetFirst();
             UInt32 soundHandle;
             while (iterator)
             {
-                sounds54.GetNext(iterator, soundHandle, pkSound);
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetNext(iterator, soundHandle, pkSound);
                 if ((pkSound->GetFlags() & mask) && !(pkSound->GetFlags() & 0x800) && !(pkSound->GetFlags() & 0x100000))
                 {
                     if (duration && uiThreshold > 5000)
                     {
-                        FUN_00adb1a0(9, pkSound->GetID(), now, now + duration, AudioRef_adf080(), NiPoint3_ZERO);
+                        FUN_00adb1a0(9, pkSound->GetID(), now, now + duration, AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                     }
                     else if (duration)
                     {
@@ -4486,19 +4171,19 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
         }
         break;
         case 25: {
-            UInt32 mask = message->GetArgument1();
-            flags170 &= ~mask;
-            int duration = message->GetArgument2();
-            AudioSoundItem_adf080* iterator = sounds54.GetFirst();
+            UInt32 mask = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+            iMuteMask &= ~mask;
+            int duration = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2();
+            AudioSoundItem_adf080* iterator = (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetFirst();
             UInt32 soundHandle;
             while (iterator)
             {
-                sounds54.GetNext(iterator, soundHandle, pkSound);
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetNext(iterator, soundHandle, pkSound);
                 if ((pkSound->GetFlags() & mask) && !(pkSound->GetFlags() & 0x800) && !(pkSound->GetFlags() & 0x100000))
                 {
                     if (duration)
                     {
-                        FUN_00adb1a0(11, pkSound->GetID(), now, now + duration, AudioRef_adf080(), NiPoint3_ZERO);
+                        FUN_00adb1a0(11, pkSound->GetID(), now, now + duration, AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                     }
                     else
                     {
@@ -4511,14 +4196,14 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
         }
         break;
         case 26: {
-            UInt32 mask = message->GetArgument1();
+            UInt32 mask = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
             AddSlot((void*)mask, false);
-            AudioSoundItem_adf080* iterator = sounds54.GetFirst();
+            AudioSoundItem_adf080* iterator = (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetFirst();
             UInt32 soundHandle;
             while (iterator)
             {
-                sounds54.GetNext(iterator, soundHandle, pkSound);
-                if (pkSound->v04() && (pkSound->GetFlags() & mask) && !(pkSound->GetFlags() & 0x800) &&
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetNext(iterator, soundHandle, pkSound);
+                if (pkSound->IsPlaying() && (pkSound->GetFlags() & mask) && !(pkSound->GetFlags() & 0x800) &&
                     !(pkSound->GetFlags() & 0x100000) && !(pkSound->GetFlags() & 0x400000))
                 {
                     pkSound->v34();
@@ -4532,13 +4217,13 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
         }
         break;
         case 27: {
-            UInt32 mask = message->GetArgument1();
-            AudioSoundItem_adf080* iterator = sounds54.GetFirst();
+            UInt32 mask = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+            AudioSoundItem_adf080* iterator = (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetFirst();
             UInt32 soundHandle;
             while (iterator)
             {
-                sounds54.GetNext(iterator, soundHandle, pkSound);
-                if (!pkSound->Stopped10() && pkSound->v0c() && (pkSound->GetFlags() & mask) &&
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetNext(iterator, soundHandle, pkSound);
+                if (!pkSound->Stopped10() && pkSound->IsPaused() && (pkSound->GetFlags() & mask) &&
                     !(pkSound->GetFlags() & 0x800) && !(pkSound->GetFlags() & 0x100000) &&
                     !(pkSound->GetFlags() & 0x400000))
                 {
@@ -4554,14 +4239,14 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
         }
         break;
         case 28: {
-            UInt32 mask = message->GetArgument1();
-            AudioSoundItem_adf080* iterator = sounds54.GetFirst();
+            UInt32 mask = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+            AudioSoundItem_adf080* iterator = (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetFirst();
             UInt32 soundHandle;
             AddSlot((void*)mask, true);
             while (iterator)
             {
-                sounds54.GetNext(iterator, soundHandle, pkSound);
-                if (!pkSound->v08() && pkSound->v04() && (pkSound->GetFlags() & mask) == mask &&
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetNext(iterator, soundHandle, pkSound);
+                if (!pkSound->HasStatusFlag0x80000() && pkSound->IsPlaying() && (pkSound->GetFlags() & mask) == mask &&
                     !(pkSound->GetFlags() & 0x800) && !(pkSound->GetFlags() & 0x100000) &&
                     !(pkSound->GetFlags() & 0x400000) && !(pkSound->GetFlags() & 0x2000) &&
                     !(pkSound->GetFlags() & 0x1000) && !pkSound->Stopped10())
@@ -4579,13 +4264,13 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
         }
         break;
         case 29: {
-            UInt32 mask = message->GetArgument1();
-            AudioSoundItem_adf080* iterator = sounds54.GetFirst();
+            UInt32 mask = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+            AudioSoundItem_adf080* iterator = (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetFirst();
             UInt32 soundHandle;
             while (iterator)
             {
-                sounds54.GetNext(iterator, soundHandle, pkSound);
-                if (!pkSound->Stopped10() && pkSound->v0c() && (pkSound->GetFlags() & mask) == mask &&
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetNext(iterator, soundHandle, pkSound);
+                if (!pkSound->Stopped10() && pkSound->IsPaused() && (pkSound->GetFlags() & mask) == mask &&
                     !(pkSound->GetFlags() & 0x800) && !(pkSound->GetFlags() & 0x100000) &&
                     !(pkSound->GetFlags() & 0x400000) && !(pkSound->GetFlags() & 0x1000) &&
                     !(pkSound->GetFlags() & 0x2000) && !(pkSound->GetFlags() & 0x1000))
@@ -4604,17 +4289,17 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
         }
         break;
         case 30: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                AudioVector_adf080 value = message->GetAudioPosition();
+                NiPoint3 value = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition();
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    pkSound->v4c(value);
+                    pkSound->v4c((const ::NiPoint3&)value);
                 }
                 else
                 {
-                    SoundMessageRecord* queued4 = 0;
-                    AudioMessageList_adf080* kQueued = &pkSound->messages;
+                    fnv_00adf080::SoundMessageRecord* queued4 = 0;
+                    AudioMessageList_adf080* kQueued = (AudioMessageList_adf080*)pkSound->QueuedMessages;
                     AudioMessageNode_adf080* iterator = 0;
                     bool foundTmp = false;
                     iterator = kQueued->GetHead();
@@ -4623,35 +4308,35 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                         queued4 = kQueued->GetNext(iterator);
                         if (queued4 && queued4->GetType() == 30)
                         {
-                            *queued4 = *message;
+                            *queued4 = *reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message);
                             foundTmp = true;
                         }
                     }
                     if (!foundTmp)
                     {
-                        queued4 = FUN_00adaf80();
-                        *queued4 = *message;
-                        pkSound->QueueHead(queued4);
+                        queued4 = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(FUN_00adaf80());
+                        *queued4 = *reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message);
+                        pkSound->QueueHead((::SoundMessageRecord*)queued4);
                     }
                 }
             }
             break;
         }
         case 31: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                AudioVector_adf080 value = message->GetAudioPosition();
+                NiPoint3 value = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition();
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    pkSound->SetReferenceVector(value);
+                    pkSound->SetReferenceVector((const ::NiPoint3&)value);
                 }
                 else if (!pkSound->Stopped10())
                 {
                     AudioRef_adf080 object;
-                    object.operator=(message->object);
-                    FUN_00adb1a0(31, message->GetID(), message->GetArgument1(), message->GetArgument2(), object,
-                                 message->GetAudioPosition());
-                    message->SetObject(0);
+                    object.operator=(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->object);
+                    FUN_00adb1a0(31, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(), object,
+                                 reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition());
+                    reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->SetObject(0);
                 }
             }
             break;
@@ -4660,49 +4345,49 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 33: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                UInt16 value = (UInt16)message->GetArgument1();
+                UInt16 value = (UInt16)reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
                 pkSound->SetAttenuation18(value);
             }
             break;
         }
         case 34: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                UInt16 value = (UInt16)message->GetArgument1();
+                UInt16 value = (UInt16)reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
                 pkSound->SetAttenuation1a(value);
             }
             break;
         }
         case 35: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                float duration = (float)(message->GetArgument2() / 1000.0);
+                float duration = (float)(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2() / 1000.0);
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    pkSound->v5c((float)(message->GetArgument1() / 1000.0), duration);
+                    pkSound->v5c((float)(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1() / 1000.0), duration);
                 }
                 else if (!pkSound->Stopped10())
                 {
-                    FUN_00adb1a0(35, message->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                 AudioRef_adf080(), NiPoint3_ZERO);
+                    FUN_00adb1a0(35, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                 AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                 }
             }
             break;
         }
         case 36: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    pkSound->v60(message->GetShort(0), message->GetShort(1), message->GetShort(2), message->GetShort(3),
-                                 message->GetShort(4));
+                    pkSound->v60(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetShort(0), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetShort(1), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetShort(2), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetShort(3),
+                                 reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetShort(4));
                 }
                 else
                 {
-                    FUN_00adbb30(message->GetID(), message->GetShort(0), message->GetShort(1), message->GetShort(2),
-                                 message->GetShort(3), message->GetShort(4));
+                    FUN_00adbb30(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetShort(0), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetShort(1), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetShort(2),
+                                 reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetShort(3), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetShort(4));
                 }
             }
             break;
@@ -4710,16 +4395,16 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
         case 40: {
             NiPoint3 origin;
             AudioRef_adf080 object;
-            AudioRefItem_adf080* iterator = objects84.GetFirst();
+            AudioRefItem_adf080* iterator = (*reinterpret_cast<AudioRefMap_adf080*>(MovingRefrList)).GetFirst();
             UInt32 uiID;
             while (iterator)
             {
-                objects84.GetNext(iterator, uiID, object);
-                objects84.RemoveAt(uiID);
-                if (object->GetRefCount() == 1)
+                (*reinterpret_cast<AudioRefMap_adf080*>(MovingRefrList)).GetNext(iterator, uiID, object);
+                (*reinterpret_cast<AudioRefMap_adf080*>(MovingRefrList)).RemoveAt(uiID);
+                if (object->NiRefObject::GetRefCount() == 1)
                     FUN_00c45830(object);
                 object.operator=(0);
-                sounds54.GetAt(uiID, pkSound);
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(uiID, pkSound);
                 if (pkSound)
                 {
                     pkSound->v38();
@@ -4732,17 +4417,17 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
         case 41: {
             NiPoint3 navPos;
             AudioRef_adf080 target;
-            target.operator=(message->object);
+            target.operator=(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->object);
             AudioRef_adf080 object;
-            int mask = message->GetArgument2();
-            AudioRefItem_adf080* aPos = objects84.GetFirst();
+            int mask = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2();
+            AudioRefItem_adf080* aPos = (*reinterpret_cast<AudioRefMap_adf080*>(MovingRefrList)).GetFirst();
             UInt32 uiID;
             while (aPos)
             {
-                objects84.GetNext(aPos, uiID, object);
-                if (object == target)
+                (*reinterpret_cast<AudioRefMap_adf080*>(MovingRefrList)).GetNext(aPos, uiID, object);
+                if (AudioPointersEqual(object, target))
                 {
-                    sounds54.GetAt(uiID, pkSound);
+                    (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(uiID, pkSound);
                     if (pkSound)
                     {
                         if (!mask || (mask && (mask & pkSound->GetFlags())))
@@ -4755,12 +4440,12 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 42: {
-            UInt32 mask = message->GetArgument1();
-            AudioSoundItem_adf080* iterator = sounds54.GetFirst();
+            UInt32 mask = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1();
+            AudioSoundItem_adf080* iterator = (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetFirst();
             UInt32 soundHandle;
             while (iterator)
             {
-                sounds54.GetNext(iterator, soundHandle, pkSound);
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetNext(iterator, soundHandle, pkSound);
                 if ((pkSound->GetFlags() & mask) && !(pkSound->GetFlags() & 0x800) && !(pkSound->GetFlags() & 0x100000))
                 {
                     pkSound->v38();
@@ -4795,7 +4480,7 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 51: {
-            pkSound = (BSGameSound*)message->GetArgument2();
+            pkSound = (BSGameSound*)reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2();
             if (pkSound)
             {
                 AddSound(pkSound);
@@ -4804,25 +4489,25 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 52: {
-            messageStack44.FUN_00ae75f0(message);
-            if (IsMultiThreaded_adf080(GetAudio_adf080()) && GetThreadID_adf080() == threadId138 && thread13c)
+            (*reinterpret_cast<AudioMessageStack*>(GarbageMessages)).Push(message);
+            if (IsMultiThreaded_adf080(GetAudio_adf080()) && GetThreadID_adf080() == dwAudioThreadID && pUpdateThread)
             {
-                DAT_011f6d98->bIsMultiThreaded = false;
-                thread13c->FUN_00ae7ac0();
+                ::DAT_011f6d98->bMultiThread = false;
+                pUpdateThread->FUN_00ae7ac0();
             }
             break;
         }
         case 53: {
-            messageStack44.FUN_00ae75f0(message);
-            if (IsMultiThreaded_adf080(GetAudio_adf080()) && GetThreadID_adf080() == threadId138 && thread13c)
+            (*reinterpret_cast<AudioMessageStack*>(GarbageMessages)).Push(message);
+            if (IsMultiThreaded_adf080(GetAudio_adf080()) && GetThreadID_adf080() == dwAudioThreadID && pUpdateThread)
             {
-                DAT_011f6d98->bIsMultiThreaded = false;
-                LeaveCriticalSection(&critical0f4);
-                thread13c->FUN_00ae7a50();
-                EnterCriticalSection(&critical0f4);
+                ::DAT_011f6d98->bMultiThread = false;
+                LeaveCriticalSection(&(*reinterpret_cast<CritSecA*>(ProcessingCritSection)));
+                pUpdateThread->FUN_00ae7a50();
+                EnterCriticalSection(&(*reinterpret_cast<CritSecA*>(ProcessingCritSection)));
                 bWasPlaying = true;
             }
-            else if (GetThreadID_adf080() != threadId138)
+            else if (GetThreadID_adf080() != dwAudioThreadID)
             {
                 DebugBreak();
             }
@@ -4833,62 +4518,62 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
             break;
         }
         case 55: {
-            AudioSoundItem_adf080* iterator = sounds54.GetFirst();
+            AudioSoundItem_adf080* iterator = (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetFirst();
             UInt32 soundHandle;
             while (iterator)
             {
-                sounds54.GetNext(iterator, soundHandle, pkSound);
+                (*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetNext(iterator, soundHandle, pkSound);
                 if (!pkSound->Stopped10() && (pkSound->Alternate0c() || pkSound->Alternate1000()))
-                    pkSound->SetFlagAndApplyValue(alternate175);
+                    pkSound->SetFlagAndApplyValue(bListenerUnderwater);
             }
             break;
         }
         break;
         case 56: {
-            AudioVector_adf080 value = message->GetAudioPosition();
+            NiPoint3 value = reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetAudioPosition();
             if (GetListener_adf080(GetAudio_adf080()))
             {
                 GetListener_adf080(GetAudio_adf080())->v08(value);
-                listenerDirty135 = true;
+                bListenerMoved = true;
             }
             break;
         }
         case 57: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready800() && pkSound->Ready100())
                 {
-                    pkSound->v48(message->GetArgument1());
+                    pkSound->v48(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1());
                 }
                 else if (!pkSound->Stopped10())
                 {
-                    FUN_00adb1a0(57, message->GetID(), message->GetArgument1(), 0, AudioRef_adf080(), NiPoint3_ZERO);
+                    FUN_00adb1a0(57, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), 0, AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                 }
             }
             break;
         }
         case 65: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
-                pkSound->Set188(message->GetArgument1());
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
+                pkSound->Set188(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1());
             break;
         }
         case 60: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready100())
                 {
-                    pkSound->Set15c(message->GetArgument1());
+                    pkSound->Set15c(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1());
                 }
                 else if (!pkSound->Stopped10())
                 {
-                    FUN_00adb1a0(60, message->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                 AudioRef_adf080(), NiPoint3_ZERO);
+                    FUN_00adb1a0(60, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                 AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                 }
             }
             break;
         }
         case 61: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
                 if (pkSound->Ready100())
                 {
@@ -4896,17 +4581,17 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
                 }
                 else if (!pkSound->Stopped10())
                 {
-                    FUN_00adb1a0(61, message->GetID(), message->GetArgument1(), message->GetArgument2(),
-                                 AudioRef_adf080(), NiPoint3_ZERO);
+                    FUN_00adb1a0(61, reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1(), reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2(),
+                                 AudioRef_adf080(), fnv_00adf080::NiPoint3_ZERO);
                 }
             }
             break;
         }
         case 62: {
-            if (sounds54.GetAt(message->GetID(), pkSound) && pkSound)
+            if ((*reinterpret_cast<AudioSoundMap_adf080*>(SoundList)).GetAt(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetID(), pkSound) && pkSound)
             {
-                pkSound->Set28(message->GetArgument1());
-                pkSound->Set2c((UInt16)message->GetArgument2());
+                pkSound->Set28(reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument1());
+                pkSound->Set2c((UInt16)reinterpret_cast<fnv_00adf080::SoundMessageRecord*>(message)->GetArgument2());
             }
             break;
         }
@@ -4914,172 +4599,18 @@ bool BSAudioManager_adf080::FUN_00adf080(SoundMessageRecord* message)
     }
     return bWasPlaying;
 }
-}  // namespace fnv_00adf080
+
 
 namespace fnv_00ae7050 {
 extern "C" __declspec(dllimport) unsigned long __stdcall GetTickCount();
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* apValue);
 
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount();
-    long m_uiRefCount;
-};
 
-template <class T> class NiPointer
-{
-  public:
-    NiPointer(T* pObject = 0)
-    {
-        m_pObject = pObject;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointer()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    T* m_pObject;
-};
 
-class BSGameSound7050
-{
-  public:
-    virtual ~BSGameSound7050();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual bool v09();
 
-    unsigned int GetAudioFlags() const
-    {
-        return m_uiAudioFlags;
-    }
-    unsigned int GetID() const
-    {
-        return m_uiID;
-    }
-    int Get148() const
-    {
-        return m_i148;
-    }
-    void SetPaused(bool bSet)
-    {
-        m_uiStateFlags = bSet ? (m_uiStateFlags | 0x200) : (m_uiStateFlags & ~0x200);
-    }
-    void SetStopping(bool bSet)
-    {
-        m_uiStateFlags = bSet ? (m_uiStateFlags | 0x1000) : (m_uiStateFlags & ~0x1000);
-    }
-    void SetStopped(bool bSet)
-    {
-        m_uiStateFlags = bSet ? (m_uiStateFlags | 0x10) : (m_uiStateFlags & ~0x10);
-    }
-    void FUN_00ae9d50(bool);
 
-    int unk04;
-    unsigned int m_uiAudioFlags;
-    int unk0C;
-    unsigned int m_uiStateFlags;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9C;
-    unsigned int unkA0;
-    unsigned int unkA4;
-    unsigned int unkA8;
-    unsigned int unkAC;
-    unsigned int unkB0;
-    unsigned int unkB4;
-    unsigned int unkB8;
-    unsigned int unkBC;
-    unsigned int unkC0;
-    unsigned int unkC4;
-    unsigned int unkC8;
-    unsigned int unkCC;
-    unsigned int unkD0;
-    unsigned int unkD4;
-    unsigned int unkD8;
-    unsigned int unkDC;
-    unsigned int unkE0;
-    unsigned int unkE4;
-    unsigned int unkE8;
-    unsigned int unkEC;
-    unsigned int unkF0;
-    unsigned int unkF4;
-    unsigned int unkF8;
-    unsigned int unkFC;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10C;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11C;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12C;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13C;
-    unsigned int unk140;
-    unsigned int m_uiID;
-    int m_i148;
-};
 
-struct BSAudioManager7050
-{
-    bool FUN_00add480(unsigned int uiID, bool bCheckAlt);
-    void FUN_00adb1a0(int iMsg, int i1, int i2, BSGameSound7050* SoundAssetTmp, NiPointer<NiRefObject> spRetainedObject,
-                      NiPoint3 kPos);
-};
-BSAudioManager7050* __cdecl FUN_00ad9060();
+
 
 inline unsigned int GetCurrentTime7050()
 {
@@ -5089,72 +4620,58 @@ inline unsigned int GetCurrentTime7050()
 extern unsigned int DAT_011f6e0c;
 extern unsigned int DAT_011f6e10;
 
-struct AudioLoadTask7050
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    BSGameSound7050* m_pGameSound;
 
-    void FUN_00ae7050();
-};
+
+} // namespace fnv_00ae7050
 
 // @fnv 0x00ae7050
-void AudioLoadTask7050::FUN_00ae7050()
+void AudioLoadTask::Run()
 {
-    bool bLoopSound = (m_pGameSound->GetAudioFlags() & 0x8000) != 0;
+    using namespace fnv_00ae7050;
+    bool bLoopSound = (static_cast<BSGameSound*>(SoundAssetTmp)->GetFlags() & 0x8000) != 0;
     bool bResult = false;
 
-    if (m_pGameSound->GetID() == 0 && m_pGameSound->Get148() != 0)
+    if (static_cast<BSGameSound*>(SoundAssetTmp)->GetResource144() == 0 && static_cast<BSGameSound*>(SoundAssetTmp)->GetResource148() != 0)
     {
-        m_pGameSound->FUN_00ae9d50(true);
-        if (FUN_00ad9060()->FUN_00add480(m_pGameSound->GetID(), false))
+        static_cast<BSGameSound*>(SoundAssetTmp)->FUN_00ae9d50(true);
+        if (BSAudioManager::GetRandomGenerator().FUN_00add480((unsigned int)static_cast<BSGameSound*>(SoundAssetTmp)->GetResource144(), false))
         {
             if (bLoopSound)
             {
-                delete m_pGameSound;
+                delete static_cast<BSGameSound*>(SoundAssetTmp);
             }
             else
             {
-                m_pGameSound->SetPaused(false);
-                m_pGameSound->SetStopping(false);
-                m_pGameSound->SetStopped(true);
+                static_cast<BSGameSound*>(SoundAssetTmp)->Set200(false);
+                static_cast<BSGameSound*>(SoundAssetTmp)->Set1000(false);
+                static_cast<BSGameSound*>(SoundAssetTmp)->Set10(true);
             }
             return;
         }
     }
 
-    if (bLoopSound && DAT_011f6e0c == m_pGameSound->GetID() && GetCurrentTime7050() - DAT_011f6e10 < 1000)
+    if (bLoopSound && DAT_011f6e0c == (unsigned int)static_cast<BSGameSound*>(SoundAssetTmp)->GetResource144() && GetCurrentTime7050() - DAT_011f6e10 < 1000)
     {
-        delete m_pGameSound;
+        delete static_cast<BSGameSound*>(SoundAssetTmp);
         return;
     }
 
-    bResult = m_pGameSound->v09();
+    bResult = static_cast<BSGameSound*>(SoundAssetTmp)->v24();
     if (bLoopSound)
     {
         if (bResult)
         {
-            DAT_011f6e0c = m_pGameSound->GetID();
-            DAT_011f6e10 = GetTickCount();
-            FUN_00ad9060()->FUN_00adb1a0(0x33, 0, 0, m_pGameSound, 0, NiPoint3_ZERO);
+            DAT_011f6e0c = (unsigned int)static_cast<BSGameSound*>(SoundAssetTmp)->GetResource144();
+            DAT_011f6e10 = ::GetTickCount();
+            BSAudioManager::GetRandomGenerator().FUN_00adb1a0(0x33, 0, 0, (unsigned int)SoundAssetTmp, 0, NiPoint3_ZERO);
         }
         else
         {
-            delete m_pGameSound;
+            delete static_cast<BSGameSound*>(SoundAssetTmp);
         }
     }
 }
-}  // namespace fnv_00ae7050
+
 
 extern "C" __declspec(dllimport) unsigned long __stdcall GetTickCount(void);
 
@@ -5182,17 +4699,14 @@ struct SoundMessageRecord
     }
 };
 
-struct Stack75f0 : BottomlessStack
+inline void AudioMessageStack::PushOne(SoundMessageRecord* param_2)
 {
-    void PushOne(SoundMessageRecord* param_2)
-    {
-        SoundMessageRecord* top = pTop;
-        param_2->pNext = top;
-        pTop = param_2;
-        iCount = iCount + 1;
-    }
-    void __thiscall FUN_00ae75f0(SoundMessageRecord* param_2);
-};
+    SoundMessageRecord* top = pTop;
+    param_2->pNext = top;
+    pTop = param_2;
+    iCount = iCount + 1;
+}
+
 
 inline unsigned int NowA()
 {
@@ -5201,7 +4715,7 @@ inline unsigned int NowA()
 }
 
 // @fnv 0x00ae75f0
-void Stack75f0::FUN_00ae75f0(SoundMessageRecord* param_2)
+void AudioMessageStack::Push(SoundMessageRecord* param_2)
 {
     if (param_2 != 0)
     {
@@ -5219,42 +4733,26 @@ void Stack75f0::FUN_00ae75f0(SoundMessageRecord* param_2)
 
 namespace fnv_00ae76b0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
 extern "C" __declspec(dllimport) unsigned long __stdcall GetTickCount();
-struct MemoryManager_ae76b0
-{
-    void* FUN_00aa3e40(unsigned int uiSize);
-    void FUN_00aa4060(void* p);
-};
-extern MemoryManager_ae76b0 DAT_011f6238;
+
+extern MemoryManager DAT_011f6238;
 struct FUN_00ae8650
 {
     FUN_00ae8650()
@@ -5273,7 +4771,7 @@ struct FUN_00ae8650
     }
     static void operator delete(void* p)
     {
-        DAT_011f6238.FUN_00aa4060(p);
+        DAT_011f6238.Deallocate(p);
     }
     FUN_00ae8650* GetNext() const
     {
@@ -5327,17 +4825,18 @@ struct MemoryManagerAllocHelper
 };
 extern MemoryManagerAllocHelper _g_memoryManager;
 
-template <class T> struct BSSimpleList
+// Unit-local view of BSSimpleList for 0x00ae81e0 (namespace fnv_00ae81e0): built on the shared BSSimpleList, that code does not compile or does not match.
+template <class T> struct BSSimpleList_00ae81e0
 {
     T m_item;
-    BSSimpleList<T>* m_pkNext;
+    BSSimpleList_00ae81e0<T>* m_pkNext;
 
-    BSSimpleList(const T& item)
+    BSSimpleList_00ae81e0(const T& item)
     {
         m_item = item;
         m_pkNext = 0;
     }
-    ~BSSimpleList()
+    ~BSSimpleList_00ae81e0()
     {
         RemoveAll();
     }
@@ -5353,7 +4852,7 @@ template <class T> struct BSSimpleList
     int Count()
     {
         int count = 0;
-        BSSimpleList<T>* iterA = this;
+        BSSimpleList_00ae81e0<T>* iterA = this;
         while (iterA)
         {
             if (iterA->m_item)
@@ -5366,7 +4865,7 @@ template <class T> struct BSSimpleList
     {
         while (m_pkNext)
         {
-            BSSimpleList<T>* next = m_pkNext->m_pkNext;
+            BSSimpleList_00ae81e0<T>* next = m_pkNext->m_pkNext;
             m_pkNext->m_pkNext = 0;
             delete m_pkNext;
             m_pkNext = next;
@@ -5381,8 +4880,8 @@ template <class T> struct BSSimpleList
     }
     void SortList(int(__cdecl* cmp)(T, T))
     {
-        BSSimpleList<T>* current = this;
-        BSSimpleList<T>* previous = 0;
+        BSSimpleList_00ae81e0<T>* current = this;
+        BSSimpleList_00ae81e0<T>* previous = 0;
         if (current)
         {
             int count = current->Count();
@@ -5437,12 +4936,12 @@ template <class T> struct BSSimpleList
 };
 
 // @fnv 0x00ae81e0
-template <> void BSSimpleList<unsigned char*>::FUN_00ae81e0(int(__cdecl* cmp)(unsigned char*, unsigned char*))
+template <> void BSSimpleList_00ae81e0<unsigned char*>::FUN_00ae81e0(int(__cdecl* cmp)(unsigned char*, unsigned char*))
 {
     unsigned char** arr5;
-    BSSimpleList<unsigned char*>* node2;
+    BSSimpleList_00ae81e0<unsigned char*>* node2;
     int i;
-    BSSimpleList<unsigned char*>* prev6;
+    BSSimpleList_00ae81e0<unsigned char*>* prev6;
     int j;
     int _num;
     _num = Count();
@@ -5463,7 +4962,7 @@ template <> void BSSimpleList<unsigned char*>::FUN_00ae81e0(int(__cdecl* cmp)(un
     {
         if (j > 0)
         {
-            node2 = new BSSimpleList<unsigned char*>(arr5[j]);
+            node2 = new BSSimpleList_00ae81e0<unsigned char*>(arr5[j]);
         }
         else
         {
@@ -5479,18 +4978,10 @@ template <> void BSSimpleList<unsigned char*>::FUN_00ae81e0(int(__cdecl* cmp)(un
 
 void __cdecl NiFree8F70(void* pvMem);
 
-struct MemoryManager8F70
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManager8F70 g_kMemoryManager8F70;
 
-struct MapItem8F70
-{
-    MapItem8F70* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+extern MemoryManager g_kMemoryManager8F70;
+
+
 
 class MapBase8F70
 {
@@ -5506,17 +4997,17 @@ class MapBase8F70
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItem8F70* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItem8F70* pkItem);
-    virtual MapItem8F70* NewItem();
-    virtual void DeleteItem(MapItem8F70* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
     void RemoveAll()
     {
         for (unsigned int i = 0; i < m_uiHashSize; i++)
         {
             while (m_ppkHashTable[i])
             {
-                MapItem8F70* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -5525,7 +5016,7 @@ class MapBase8F70
         m_uiCount = 0;
     }
     unsigned int m_uiHashSize;
-    MapItem8F70** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 class FUN_00ae8f70 : public MapBase8F70
@@ -5547,18 +5038,10 @@ void* MakeMap8F70()
 
 void __cdecl NiFree9060(void* pvMem);
 
-struct MemoryManager9060
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManager9060 g_kMemoryManager9060;
 
-struct MapItem9060
-{
-    MapItem9060* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+extern MemoryManager g_kMemoryManager9060;
+
+
 
 class MapBase9060
 {
@@ -5574,17 +5057,17 @@ class MapBase9060
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItem9060* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItem9060* pkItem);
-    virtual MapItem9060* NewItem();
-    virtual void DeleteItem(MapItem9060* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
     void RemoveAll()
     {
         for (unsigned int i = 0; i < m_uiHashSize; i++)
         {
             while (m_ppkHashTable[i])
             {
-                MapItem9060* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -5593,7 +5076,7 @@ class MapBase9060
         m_uiCount = 0;
     }
     unsigned int m_uiHashSize;
-    MapItem9060** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 class FUN_00ae9060 : public MapBase9060
@@ -5613,39 +5096,17 @@ void* MakeMap9060()
     return new FUN_00ae9060;
 }
 
-struct NiRefObjectStub
-{
-    void* m_pVtbl;
-    long m_iRefCount;
-    void AddRef()
-    {
-        InterlockedIncrement(&m_iRefCount);
-    }
-};
 
-struct NiPointerStub
-{
-    NiRefObjectStub* m_pObject;
-    NiPointerStub(NiRefObjectStub* p) : m_pObject(p)
-    {
-        if (m_pObject)
-            m_pObject->AddRef();
-    }
-    ~NiPointerStub();
-};
 
-struct BSAudioManagerAda
-{
-    void __thiscall FUN_00adb1a0(int mode, int a1, int a2, int a3, NiPointerStub sp, NiPoint3 pos);
-};
+
 
 // @fnv 0x00adcc10
 void FUN_00adcc10_shell::FUN_00adcc10(int param1, int param2)
 {
     if ((unsigned char)param2)
-        ((BSAudioManagerAda*)this)->FUN_00adb1a0(0x1d, 0, param1, 0, 0, NiPoint3_ZERO);
+        ((BSAudioManager*)this)->FUN_00adb1a0(0x1d, 0, param1, 0, 0, NiPoint3_ZERO);
     else
-        ((BSAudioManagerAda*)this)->FUN_00adb1a0(0x1b, 0, param1, 0, 0, NiPoint3_ZERO);
+        ((BSAudioManager*)this)->FUN_00adb1a0(0x1b, 0, param1, 0, 0, NiPoint3_ZERO);
 }
 
 namespace fnv_00ada0f0 {
@@ -5654,39 +5115,17 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volati
 extern "C" __declspec(dllimport) unsigned long __stdcall WaitForSingleObject(void* hHandle,
                                                                              unsigned long dwMilliseconds);
 
-struct NiPoint3
-{
-    float x, y, z;
-    static const NiPoint3 ZERO;
-};
-
-struct NiRefObjStub
-{
-    void* vtbl;
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-};
-
 struct NiAVObjPtr
 {
-    NiRefObjStub* m_pObject;
-    NiAVObjPtr(NiRefObjStub* p = 0)
+    NiRefObject* m_pObject;
+    NiAVObjPtr(NiRefObject* p = 0)
     {
         int m_uiChunkSize;
         m_pObject = p;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiAVObjPtr();
-};
-
-struct BSSemA0
-{
-    long m_iArrayLength;
-    void* m_pSemaphore;
 };
 
 struct AudioThreadA0
@@ -5706,16 +5145,16 @@ struct AudioThreadA0
     int unk30;
     int unk34;
     int unk38;
-    BSSemA0 m_kDone;
+    BSSemaphore_adf080 m_kDone;
 
     void __thiscall ReleaseSemaphoreAndIncrement();
     void __thiscall StopAndCloseHandle();
 
     void WaitDone()
     {
-        BSSemA0* pSem = &m_kDone;
-        WaitForSingleObject(pSem->m_pSemaphore, 0xFFFFFFFF);
-        InterlockedDecrement(&pSem->m_iArrayLength);
+        BSSemaphore_adf080* pSem = &m_kDone;
+        WaitForSingleObject(pSem->semaphore, 0xFFFFFFFF);
+        InterlockedDecrement(&pSem->count);
     }
 };
 
@@ -5933,99 +5372,91 @@ void OwnerQ::FUN_00ada330()
 namespace fnv_00adad80 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-struct NiAVObject
-{
-    virtual ~NiAVObject();
-    virtual void DeleteThis();
-    unsigned int refs;
-};
-template <class T> struct NiPointer
+
+// Unit-local view of NiPointer for 0x00adad80 (namespace fnv_00adad80): built on the shared NiPointer, that code does not compile or does not match.
+template <class T> struct NiPointer_00adad80
 {
     T* object;
-    NiPointer(T* p);
-    NiPointer();
-    NiPointer(T* p, int);
-    ~NiPointer()
+    NiPointer_00adad80(T* p);
+    NiPointer_00adad80();
+    NiPointer_00adad80(T* p, int);
+    ~NiPointer_00adad80()
     {
         if (object)
         {
             T* value = object;
-            if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&value->refs)))
+            if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&value->m_uiRefCount)))
                 value->DeleteThis();
         }
     }
-    NiPointer& operator=(const NiPointer&);
-    NiPointer& operator=(T*);
+    NiPointer_00adad80& operator=(const NiPointer_00adad80&);
+    NiPointer_00adad80& operator=(T*);
     bool IsSet() const
     {
         return object != 0;
     }
 };
-struct NP501 : NiPointer<NiAVObject>
+struct NP501 : NiPointer_00adad80<NiAVObject>
 {
-    NP501(NiAVObject* p) : NiPointer<NiAVObject>(p, 0)
+    NP501(NiAVObject* p) : NiPointer_00adad80<NiAVObject>(p, 0)
     {}
     ~NP501();
 };
-struct NiPoint3
-{
-    float x, y, z;
-    static const NiPoint3 ZERO;
-};
-struct Message501
+
+// Xbox AudioMessageStack::Push takes BSSoundMessage*: this is the sound record cleared at 0x00adad80.
+struct BSSoundMessage
 {
     unsigned int id, type, data, flags;
-    NiPointer<NiAVObject> node;
+    NiPointer_00adad80<NiAVObject> node;
     NiPoint3 position;
     void SetObj(NP501 sp);
-    __forceinline void Reset(NiPoint3 pt, NiPointer<NiAVObject> sp);
+    __forceinline void Reset(NiPoint3 pt, NiPointer_00adad80<NiAVObject> sp);
 };
-void __cdecl FUN_00c45830(NiAVObject*);
 struct FreeList501
 {
-    void FUN_00ae75f0(Message501*);
+    void FUN_00ae75f0(BSSoundMessage*);
 };
 struct Manager501
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
     FreeList501 messages;
-    void FUN_00adad80(Message501*);
+    void FUN_00adad80(BSSoundMessage*);
 };
-template <class T> inline NiPointer<T>::NiPointer(T* p)
+template <class T> inline NiPointer_00adad80<T>::NiPointer_00adad80(T* p)
 {
     object = p;
     int dq[2];
     if (object)
     {
         T* value = object;
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&value->refs));
+        InterlockedIncrement(reinterpret_cast<volatile long*>(&value->m_uiRefCount));
     }
 }
-template <class T> inline NiPointer<T>::NiPointer(T* p, int)
+template <class T> inline NiPointer_00adad80<T>::NiPointer_00adad80(T* p, int)
 {
     object = p;
     if (object)
     {
         T* value = object;
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&value->refs));
+        InterlockedIncrement(reinterpret_cast<volatile long*>(&value->m_uiRefCount));
     }
 }
-template <class T> inline NiPointer<T>::NiPointer()
+template <class T> inline NiPointer_00adad80<T>::NiPointer_00adad80()
 {
     object = 0;
     if (object)
     {
         int dq[2];
         T* value = object;
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&value->refs));
+        InterlockedIncrement(reinterpret_cast<volatile long*>(&value->m_uiRefCount));
     }
 }
-inline void Message501::SetObj(NP501 sp)
+inline void BSSoundMessage::SetObj(NP501 sp)
 {
     node = sp;
     int dq2[2];
 }
-__forceinline void Message501::Reset(NiPoint3 pt, NiPointer<NiAVObject> sp)
+__forceinline void BSSoundMessage::Reset(NiPoint3 pt, NiPointer_00adad80<NiAVObject> sp)
 {
     int dqB[2];
     id = 0;
@@ -6038,9 +5469,9 @@ __forceinline void Message501::Reset(NiPoint3 pt, NiPointer<NiAVObject> sp)
     position.z = pt.z;
 }
 // @fnv 0x00adad80
-void Manager501::FUN_00adad80(Message501* message)
+void Manager501::FUN_00adad80(BSSoundMessage* message)
 {
-    NiPointer<NiAVObject> old;
+    NiPointer_00adad80<NiAVObject> old;
     old = message->node;
     if (old.IsSet())
     {
@@ -6056,63 +5487,49 @@ void Manager501::FUN_00adad80(Message501* message)
 namespace fnv_00adafa0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-class NiAVObject
-{
-  public:
-    virtual void v0();
-    virtual void DeleteThis();
-    long refs;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&refs);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&refs) == 0)
-            DeleteThis();
-    }
-};
-template <class T> class NiPointer
+
+// Unit-local view of NiPointer for 0x00adafa0 (namespace fnv_00adafa0): built on the shared NiPointer, that code does not compile or does not match.
+template <class T> class NiPointer_00adafa0
 {
   public:
     T* p;
-    NiPointer(T* q = 0) : p(q)
+    NiPointer_00adafa0(T* q = 0) : p(q)
     {
         if (p)
-            p->IncRefCount();
+            p->NiRefObject::IncRefCount();
     }
-    NiPointer(const NiPointer& q) : p(q.p)
+    NiPointer_00adafa0(const NiPointer_00adafa0& q) : p(q.p)
     {
         if (p)
-            p->IncRefCount();
+            p->NiRefObject::IncRefCount();
     }
-    ~NiPointer()
+    ~NiPointer_00adafa0()
     {
         if (p)
-            p->DecRefCount();
+            p->DecRef();
     }
-    NiPointer& operator=(const NiPointer& q)
+    NiPointer_00adafa0& operator=(const NiPointer_00adafa0& q)
     {
         if (p != q.p)
         {
             if (q.p)
-                q.p->IncRefCount();
+                q.p->NiRefObject::IncRefCount();
             if (p)
-                p->DecRefCount();
+                p->DecRef();
             p = q.p;
         }
         return *this;
     }
-    NiPointer& operator=(T* q)
+    NiPointer_00adafa0& operator=(T* q)
     {
         if (p != q)
         {
             T* old = p;
             p = q;
             if (p)
-                p->IncRefCount();
+                p->NiRefObject::IncRefCount();
             if (old)
-                old->DecRefCount();
+                old->DecRef();
         }
         return *this;
     }
@@ -6121,28 +5538,19 @@ template <class T> class NiPointer
         return p != q;
     }
 };
-struct NP : NiPointer<NiAVObject>
-{
-    NP(NiAVObject* q) : NiPointer<NiAVObject>(q)
-    {}
-    __declspec(noinline) ~NP()
-    {}
-};
-struct VectorA
-{
-    float x, y, z;
-};
-extern VectorA DAT_011f426c;
+
+
+extern NiPoint3 DAT_011f426c;
 struct MessageA
 {
     int a, b, c, d;
-    NiPointer<NiAVObject> obj;
-    VectorA pos;
+    NiPointer_00adafa0<NiAVObject> obj;
+    NiPoint3 pos;
     __forceinline void SetObj(NP ptr)
     {
-        obj = ptr;
+        obj = reinterpret_cast<const NiPointer_00adafa0<NiAVObject>&>(ptr);
     }
-    __forceinline void Reset(VectorA position, NiPointer<NiAVObject> empty)
+    __forceinline void Reset(NiPoint3 position, NiPointer_00adafa0<NiAVObject> empty)
     {
         a = 0;
         b = 0;
@@ -6154,7 +5562,6 @@ struct MessageA
         pos.z = position.z;
     }
 };
-void __cdecl FUN_00c45830(NiAVObject*);
 struct StackA
 {
     void FUN_00ae75f0(MessageA*);
@@ -6168,11 +5575,11 @@ struct HostA
 // @fnv 0x00adafa0
 void HostA::FUN_00adafa0(MessageA* msg)
 {
-    NiPointer<NiAVObject> object;
+    NiPointer_00adafa0<NiAVObject> object;
     object = msg->obj;
     if (object != 0)
     {
-        msg->SetObj(0);
+        msg->SetObj((NiAVObject*)0);
         FUN_00c45830(object.p);
         object = (NiAVObject*)0;
     }
@@ -6193,56 +5600,11 @@ inline void Dead2()
 {
     int a[2];
 }
-struct RefObject
-{
-    virtual void v00();
-    virtual void v04();
-    long m_04;
-    void AddRef()
-    {
-        InterlockedIncrement(&m_04);
-    }
-    void Release()
-    {
-        if (!InterlockedDecrement(&m_04))
-            v04();
-    }
-};
-struct NavMeshPtr
-{
-    RefObject* m_00;
-    NavMeshPtr(RefObject* p)
-    {
-        m_00 = p;
-        if (m_00)
-            m_00->AddRef();
-    }
-    NavMeshPtr(const NavMeshPtr& p)
-    {
-        m_00 = p.m_00;
-        if (m_00)
-            m_00->AddRef();
-    }
-    ~NavMeshPtr()
-    {
-        if (m_00)
-            m_00->Release();
-    }
-    NavMeshPtr& operator=(const NavMeshPtr&);
-};
-struct AudioView
-{
-    char m_00[5];
-    bool m_05;
-    bool Ready()
-    {
-        return m_05;
-    }
-};
+
 inline bool Ready()
 {
-    AudioView* a = (AudioView*)DAT_011f6d98;
-    bool b = a->m_05;
+    BSAudio* a = (BSAudio*)DAT_011f6d98;
+    bool b = a->bInitialized;
     return b;
 }
 inline void SetState(int s)
@@ -6262,25 +5624,22 @@ struct StateGuard
         SetState(m_00);
     }
 };
-struct Point
-{
-    float m_00, m_04, m_08;
-};
+
 struct Record
 {
     int m_00, m_04, m_08, m_0c;
     NavMeshPtr m_10;
     float m_14, m_18, m_1c;
-    void Set(int a, int b, int c, int d, NavMeshPtr n, Point p)
+    void Set(int a, int b, int c, int d, NavMeshPtr n, NiPoint3 p)
     {
         m_00 = a;
         m_04 = b;
         m_08 = c;
         m_0c = d;
         m_10 = n;
-        m_14 = p.m_00;
-        m_18 = p.m_04;
-        m_1c = p.m_08;
+        m_14 = p.x;
+        m_18 = p.y;
+        m_1c = p.z;
         Dead2();
     }
 };
@@ -6296,10 +5655,10 @@ struct Host
     char m_a8[4];
     CritSecA m_ac;
     Record* FUN_00adad60();
-    void FUN_00adb1a0(int, int, int, int, NavMeshPtr, Point);
+    void FUN_00adb1a0(int, int, int, int, NavMeshPtr, NiPoint3);
 };
 // @fnv 0x00adb1a0
-void Host::FUN_00adb1a0(int a, int b, int c, int d, NavMeshPtr n, Point p)
+void Host::FUN_00adb1a0(int a, int b, int c, int d, NavMeshPtr n, NiPoint3 p)
 {
     if (Ready())
     {
@@ -6320,51 +5679,12 @@ void Host::FUN_00adb1a0(int a, int b, int c, int d, NavMeshPtr n, Point p)
 namespace fnv_00adb3e0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-struct RefObject
-{
-    virtual void v00();
-    virtual void v04();
-    long m_04;
-    void AddRef()
-    {
-        InterlockedIncrement(&m_04);
-    }
-    void Release()
-    {
-        if (!InterlockedDecrement(&m_04))
-            v04();
-    }
-};
-struct NavMeshPtr
-{
-    RefObject* m_00;
-    NavMeshPtr(RefObject* p)
-    {
-        m_00 = p;
-        if (m_00)
-            m_00->AddRef();
-    }
-    NavMeshPtr(const NavMeshPtr& p)
-    {
-        m_00 = p.m_00;
-        if (m_00)
-            m_00->AddRef();
-    }
-    ~NavMeshPtr()
-    {
-        if (m_00)
-            m_00->Release();
-    }
-};
-struct Point
-{
-    float m_00, m_04, m_08;
-};
-extern Point DAT_011f426c;
+
+extern NiPoint3 DAT_011f426c;
 struct Host
 {
     bool FUN_00adc910(unsigned int);
-    void FUN_00adb1a0(int, int, int, int, NavMeshPtr, Point);
+    void FUN_00adb1a0(int, int, int, int, NavMeshPtr, NiPoint3);
     bool FUN_00adb3e0(unsigned int id, bool flag);
 };
 // @fnv 0x00adb3e0
@@ -6373,8 +5693,8 @@ bool Host::FUN_00adb3e0(unsigned int id, bool flag)
     if (FUN_00adc910(id))
         return true;
     if (flag)
-        FUN_00adb1a0(0x2d, id, 0, 0, (RefObject*)0, DAT_011f426c);
-    FUN_00adb1a0(1, id, 0, 0, (RefObject*)0, DAT_011f426c);
+        FUN_00adb1a0(0x2d, id, 0, 0, (::RefObject*)0, DAT_011f426c);
+    FUN_00adb1a0(1, id, 0, 0, (::RefObject*)0, DAT_011f426c);
     return true;
 }
 }  // namespace fnv_00adb3e0
@@ -6382,34 +5702,9 @@ bool Host::FUN_00adb3e0(unsigned int id, bool flag)
 namespace fnv_00adb610 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* plAddend);
 
-struct NiPoint3
-{
-    float x, y, z;
-};
+
 extern NiPoint3 DAT_011f426c;  // NiPoint3::ZERO
 
-struct NiRefObject
-{
-    void* m_vtbl;
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-};
-
-template <class T> struct NiPointer
-{
-    T* m_pObject;
-    NiPointer(T* pObject = 0)
-    {
-        m_pObject = pObject;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointer()
-    {}
-};
 
 struct Handler_adb610
 {
@@ -6428,43 +5723,31 @@ bool Handler_adb610::FUN_00adb610(int iArg)
 
 namespace fnv_00adb690 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adb690_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
-    void FUN_00adb690(NiRefObject_audio* pObj, float fSeconds, int c);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
+    void FUN_00adb690(NiRefObject* pObj, float fSeconds, int c);
 };
 // @fnv 0x00adb690
-void FUN_00adb690_cls::FUN_00adb690(NiRefObject_audio* pObj, float fSeconds, int c)
+void FUN_00adb690_cls::FUN_00adb690(NiRefObject* pObj, float fSeconds, int c)
 {
     FUN_00adb1a0(0x29, 0, (int)(fSeconds * 1000.0), c, pObj, DAT_011f426c);
 }
@@ -6474,44 +5757,6 @@ namespace fnv_00adb970 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* lpAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* lpAddend);
 
-struct NiRefObject
-{
-    void* vtbl;
-    unsigned int m_uiRefCount;
-    __forceinline void IncRefCount()
-    {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
-    }
-    __forceinline void DecRefCount()
-    {
-        InterlockedDecrement((long volatile*)&m_uiRefCount);
-    }
-};
-
-template <class T> struct NiPointer
-{
-    T* m_pObject;
-    __forceinline NiPointer(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    __forceinline NiPointer(const NiPointer& ptr) : m_pObject(ptr.m_pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    __forceinline ~NiPointer()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-};
-
-struct NiPoint3
-{
-    float x, y, z;
-};
 
 struct FUN_00adb970_cls
 {
@@ -6533,57 +5778,8 @@ bool FUN_00adb970_cls::FUN_00adb970(int a1, float x, float y, float z)
 
 namespace fnv_00adb9f0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3()
-    {}
-    __forceinline NiPoint3(float ax, float ay, float az) : x(ax), y(ay), z(az)
-    {}
-};
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void AcquireReference()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRef()
-    {
-        if (InterlockedDecrement((long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-class NiObject : public NiRefObject
-{
-};
-class NiAVObject : public NiObject
-{
-};
-template <class T> class NiPointer
-{
-  public:
-    T* p;
-    NiPointer(T* object = 0) : p(object)
-    {
-        if (p)
-            p->AcquireReference();
-    }
-    NiPointer(const NiPointer& rhs) : p(rhs.p)
-    {
-        if (p)
-            p->AcquireReference();
-    }
-    ~NiPointer()
-    {
-        if (p)
-            p->DecRef();
-    }
-};
+
+
 struct AudioManagerTarget
 {
     void FUN_00adb1a0(int, unsigned int, int, unsigned int, NiPointer<NiAVObject>, NiPoint3);
@@ -6600,39 +5796,27 @@ bool AudioManagerTarget::FUN_00adb9f0(unsigned int id, float x, float y, float z
 
 namespace fnv_00adba70 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adba70_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adba70(int a, float fB, float fC);
 };
 // @fnv 0x00adba70
@@ -6662,33 +5846,7 @@ inline void Dead8()
 }
 extern __declspec(thread) int g_tlsMemContext;
 
-struct RefObject
-{
-    int vtable;
-    long references;
-    __forceinline void AcquireReference()
-    {
-        InterlockedIncrement(&references);
-    }
-};
-
-struct NP
-{
-    RefObject* object;
-    __forceinline NP(RefObject* p = 0) : object(p)
-    {
-        if (object)
-            object->AcquireReference();
-    }
-    ~NP();
-    NP& operator=(const NP& rhs);
-};
-
-struct Vector3
-{
-    float x, y, z;
-};
-extern Vector3 NiPoint3_ZERO;
+extern NiPoint3 NiPoint3_ZERO;
 
 struct FUN_00ae86d0
 {
@@ -6699,19 +5857,19 @@ struct FUN_00ae86d0
     NP node;
     union
     {
-        Vector3 position;
+        float position[3];
         unsigned short values[5];
     };
-    __forceinline FUN_00ae86d0(int soundId, NP src, Vector3 zero)
+    __forceinline FUN_00ae86d0(int soundId, NP src, NiPoint3 zero) : node((::RefObject*)0)
     {
         type = 0x24;
         id = soundId;
         data0 = 0;
         data1 = 0;
-        node = src;
-        position.x = zero.x;
-        position.y = zero.y;
-        position.z = zero.z;
+        reinterpret_cast<NiPointer<NiAVObject>&>(node) = reinterpret_cast<const NiPointer<NiAVObject>&>(src);
+        position[0] = zero.x;
+        position[1] = zero.y;
+        position[2] = zero.z;
     }
     ~FUN_00ae86d0();
     FUN_00ae86d0& CopyFrom(const FUN_00ae86d0& rhs);
@@ -6734,37 +5892,16 @@ __forceinline void SetCtx(int value)
     g_tlsMemContext = value;
 }
 
-struct AutoMemContext
-{
-    int previous;
-    __forceinline AutoMemContext(int value)
-    {
-        previous = GetCtx();
-        SetCtx(value);
-    }
-    __forceinline ~AutoMemContext()
-    {
-        SetCtx(previous);
-    }
-};
-
 struct Queue12
 {
     int unk00, unk04, unk08;
     void AddItem(const void*);
 };
 
-struct AudioState
-{
-    int unk00;
-    bool unk04;
-    bool threaded;
-};
-
 __forceinline bool IsThreaded()
 {
-    AudioState* audio = (AudioState*)DAT_011f6d98;
-    return audio->threaded;
+    BSAudio* audio = (BSAudio*)DAT_011f6d98;
+    return audio->bInitialized;
 }
 struct AudioOwner
 {
@@ -6793,7 +5930,7 @@ void AudioOwner::FUN_00adbb30(int id, unsigned short a, unsigned short b, unsign
         AutoMemContext context(11);
         EnterCriticalSection(&critical);
         FUN_00ae86d0* message = FUN_00adad60();
-        message->CopyFrom(static_cast<const FUN_00ae86d0&>(FUN_00ae86d0(id, (RefObject*)0, NiPoint3_ZERO)));
+        message->CopyFrom(static_cast<const FUN_00ae86d0&>(FUN_00ae86d0(id, (::RefObject*)0, NiPoint3_ZERO)));
         Dead6();
         message->SetValue(0, contour[0]);
         message->SetValue(1, contour[1]);
@@ -6809,39 +5946,27 @@ void AudioOwner::FUN_00adbb30(int id, unsigned short a, unsigned short b, unsign
 
 namespace fnv_00adbec0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adbec0_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adbec0(int a, unsigned short b);
 };
 // @fnv 0x00adbec0
@@ -6853,39 +5978,27 @@ void FUN_00adbec0_cls::FUN_00adbec0(int a, unsigned short b)
 
 namespace fnv_00adbf50 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adbf50_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     bool FUN_00adbf50(int a);
 };
 // @fnv 0x00adbf50
@@ -6898,39 +6011,14 @@ bool FUN_00adbf50_cls::FUN_00adbf50(int a)
 
 namespace fnv_00adbfd0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_adbfd0
-{
-    float x, y, z;
-};
-extern NiPoint3_adbfd0 DAT_011f426c;
-struct NiRefObject_adbfd0
-{
-    virtual ~NiRefObject_adbfd0();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
-template <class T> struct NiPointer_adbfd0
-{
-    NiPointer_adbfd0(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointer_adbfd0()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    T* m_pObject;
-};
+
+extern NiPoint3 DAT_011f426c;
+
+
 struct FUN_00adbfd0_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int c, int b, NiPointer_adbfd0<NiRefObject_adbfd0> pSceneObject,
-                      NiPoint3_adbfd0 kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int c, int b, NiPointer<NiRefObject> pSceneObject,
+                      NiPoint3 kPos);
     bool FUN_00adbfd0(int a, int b, int c);
 };
 // @fnv 0x00adbfd0
@@ -6943,39 +6031,27 @@ bool FUN_00adbfd0_cls::FUN_00adbfd0(int a, int b, int c)
 
 namespace fnv_00adc050 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adc050_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     bool FUN_00adc050(int a, int b, int c);
 };
 // @fnv 0x00adc050
@@ -6988,39 +6064,27 @@ bool FUN_00adc050_cls::FUN_00adc050(int a, int b, int c)
 
 namespace fnv_00adc0d0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adc0d0_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     bool FUN_00adc0d0(int a, float fSeconds);
 };
 // @fnv 0x00adc0d0
@@ -7033,39 +6097,27 @@ bool FUN_00adc0d0_cls::FUN_00adc0d0(int a, float fSeconds)
 
 namespace fnv_00adc160 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adc160_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adc160();
 };
 // @fnv 0x00adc160
@@ -7077,43 +6129,31 @@ void FUN_00adc160_cls::FUN_00adc160()
 
 namespace fnv_00adc1e0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adc1e0_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
-    void FUN_00adc1e0(int a, NiRefObject_audio* pObj);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
+    void FUN_00adc1e0(int a, NiRefObject* pObj);
 };
 // @fnv 0x00adc1e0
-void FUN_00adc1e0_cls::FUN_00adc1e0(int a, NiRefObject_audio* pObj)
+void FUN_00adc1e0_cls::FUN_00adc1e0(int a, NiRefObject* pObj)
 {
     FUN_00adb1a0(0x27, a, 0, 0, pObj, DAT_011f426c);
 }
@@ -7121,39 +6161,27 @@ void FUN_00adc1e0_cls::FUN_00adc1e0(int a, NiRefObject_audio* pObj)
 
 namespace fnv_00adc360 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adc360_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adc360(int a, int b);
 };
 // @fnv 0x00adc360
@@ -7165,39 +6193,27 @@ void FUN_00adc360_cls::FUN_00adc360(int a, int b)
 
 namespace fnv_00adc3e0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adc3e0_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adc3e0(int a);
 };
 // @fnv 0x00adc3e0
@@ -7209,39 +6225,27 @@ void FUN_00adc3e0_cls::FUN_00adc3e0(int a)
 
 namespace fnv_00adc460 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adc460_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adc460(int a, int b);
 };
 // @fnv 0x00adc460
@@ -7254,34 +6258,9 @@ void FUN_00adc460_cls::FUN_00adc460(int a, int b)
 namespace fnv_00adc4e0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* plAddend);
 
-struct NiPoint3
-{
-    float x, y, z;
-};
+
 extern NiPoint3 DAT_011f426c;  // NiPoint3::ZERO
 
-struct NiRefObject
-{
-    void* m_vtbl;
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-};
-
-template <class T> struct NiPointer
-{
-    T* m_pObject;
-    NiPointer(T* pObject = 0)
-    {
-        m_pObject = pObject;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointer()
-    {}
-};
 
 struct Handler_adb610
 {
@@ -7299,39 +6278,27 @@ void Handler_adb610::FUN_00adc4e0(int iArg, bool bFlag1, bool bFlag2)
 
 namespace fnv_00adc5f0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adc5f0_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adc5f0(int a, int b, int c);
 };
 // @fnv 0x00adc5f0
@@ -7343,39 +6310,27 @@ void FUN_00adc5f0_cls::FUN_00adc5f0(int a, int b, int c)
 
 namespace fnv_00adca20 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adca20_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adca20(int a, int b, int c);
 };
 // @fnv 0x00adca20
@@ -7387,39 +6342,27 @@ void FUN_00adca20_cls::FUN_00adca20(int a, int b, int c)
 
 namespace fnv_00adcaa0 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adcaa0_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adcaa0(int a, int b);
 };
 // @fnv 0x00adcaa0
@@ -7431,39 +6374,27 @@ void FUN_00adcaa0_cls::FUN_00adcaa0(int a, int b)
 
 namespace fnv_00adcd00 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
-{
-    float x, y, z;
-};
-struct NiRefObject_audio
-{
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
+
+
 template <class T> struct NiPointer_audio
 {
     NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiPointer_audio()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     T* m_pObject;
 };
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
+typedef NiPointer_audio<NiRefObject> NiRefObjectPtr_audio;
+extern NiPoint3 DAT_011f426c;
 struct FUN_00adcd00_cls
 {
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
+    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3 kPos);
     void FUN_00adcd00(int a, int b);
 };
 // @fnv 0x00adcd00
@@ -7479,53 +6410,30 @@ extern "C" __declspec(dllimport) unsigned long __stdcall GetTickCount();
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long*);
 extern "C" double __cdecl fabs(double);
-struct RefObject
-{
-    virtual void unused();
-    virtual void Destroy();
-    long refs;
-    void AddRef()
-    {
-        InterlockedIncrement(&refs);
-    }
-    void ReleaseRef()
-    {
-        if (!InterlockedDecrement(&refs))
-            Destroy();
-    }
-    void Inc()
-    {
-        InterlockedIncrement(&refs);
-    }
-    void Dec()
-    {
-        if (!InterlockedDecrement(&refs))
-            Destroy();
-    }
-};
+
 struct SoundPtr
 {
-    RefObject* ptr;
-    __forceinline SoundPtr(RefObject* value = 0) : ptr(value)
+    NiRefObject* ptr;
+    __forceinline SoundPtr(NiRefObject* value = 0) : ptr(value)
     {
         if (ptr)
-            ptr->Inc();
+            ptr->IncRefCount();
     }
     __forceinline ~SoundPtr()
     {
         if (ptr)
-            ptr->Dec();
+            ptr->DecRef();
     }
     SoundPtr& Assign(const SoundPtr&);
-    SoundPtr& FUN_0066b0d0(RefObject* value)
+    SoundPtr& FUN_0066b0d0(NiRefObject* value)
     {
         if (ptr != value)
         {
             if (ptr)
-                ptr->ReleaseRef();
+                ptr->DecRef();
             ptr = value;
             if (ptr)
-                ptr->AddRef();
+                ptr->IncRefCount();
         }
         return *this;
     }
@@ -7942,27 +6850,19 @@ struct AudioDevice
     virtual void v0c();
     virtual void Update();
 };
-struct AudioView
+inline AudioDevice* GetAudioDevice(BSAudio* audio)
 {
-    unsigned int unk00, unk04, unk08, unk0c;
-    AudioDevice* device;
-    AudioDevice* GetDevice()
-    {
-        return device;
-    }
-};
-extern AudioView* audioInstance;
-inline AudioView* Instance()
+    return (AudioDevice*)audio->pListener;
+}
+extern BSAudio* audioInstance;
+inline BSAudio* Instance()
 {
     return audioInstance;
 }
 extern float DAT_011ac3a0;
-struct PointAudio
-{
-    unsigned int x, y, z;
-};
+
 extern unsigned int DAT_011f426c, DAT_011f4270, DAT_011f4274;
-void __cdecl FUN_00c45830(RefObject*);
+void __cdecl FUN_00c45830(NiRefObject*);
 inline void SafeDelete(GameSound* value)
 {
     delete value;
@@ -8073,14 +6973,14 @@ struct AudioUpdate
 // @fnv 0x00adddd0
 void AudioUpdate::FUN_00adddd0()
 {
-    PointAudio origin41;
+    NiPoint3 origin41;
     GameSound* sound1;
     SoundEntry* entry24;
     unsigned int cursor5;
     unsigned int previousVal4 = lastTick;
     float difference5 = 0.0f;
     float volume2 = 1.0f;
-    if (!Instance()->GetDevice())
+    if (!GetAudioDevice(Instance()))
         return;
     lastTick = GetTickCount() - previousVal4;
     float target2 = DAT_011ac3a0;
@@ -8092,9 +6992,9 @@ void AudioUpdate::FUN_00adddd0()
     {
         bool result = true;
         sound1 = 0;
-        origin41.x = DAT_011f426c;
-        origin41.y = DAT_011f4270;
-        origin41.z = DAT_011f4274;
+        *(unsigned int*)&origin41.x = DAT_011f426c;
+        *(unsigned int*)&origin41.y = DAT_011f4270;
+        *(unsigned int*)&origin41.z = DAT_011f4274;
         cursor5 = 0;
         entry24 = sounds.First();
         while (entry24)
@@ -8232,7 +7132,7 @@ void AudioUpdate::FUN_00adddd0()
     }
     dirty = false;
     FUN_00adea90();
-    Instance()->GetDevice()->Update();
+    GetAudioDevice(Instance())->Update();
     lastTick = GetTickCount();
 }
 }  // namespace fnv_00adddd0
@@ -8240,27 +7140,18 @@ void AudioUpdate::FUN_00adddd0()
 namespace fnv_00ae5a50 {
 // reconstruction of 0x00ae5a50
 extern "C" char DAT_011f6238;  // MemoryManager singleton
-struct AudioSetting_00ae5a50
-{
-    void* vtable;
-    float value;
-    const char* name;
-};
-extern "C" AudioSetting_00ae5a50 DAT_011f6e68;  // Setting<float> object
+extern "C" Setting DAT_011f6e68;  // Setting object
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long*);
 extern "C" void __cdecl FUN_005b5e40_v(const char*, ...);
 
 inline float& GetVolume_00ae5a50()
 {
-    return &DAT_011f6e68 ? DAT_011f6e68.value : (*(float*)&DAT_01202800 = 0.0f, *(float*)&DAT_01202800);
+    return &DAT_011f6e68 ? DAT_011f6e68.uValue.f : (*(float*)&DAT_01202800 = 0.0f, *(float*)&DAT_01202800);
 }
 
-struct Pos3_00ae5a50
-{
-    float x, y, z;
-};
-extern "C" Pos3_00ae5a50 DAT_011f426c;
+
+extern "C" NiPoint3 DAT_011f426c;
 
 struct R_00ae5a50
 {
@@ -8288,7 +7179,7 @@ struct Sub18_00ae5a50
     char sourceBuf[260];
     float f210;
     float f214;
-    Pos3_00ae5a50 position;
+    NiPoint3 position;
     int f224;
     float f228;
     float f22c;
@@ -8349,35 +7240,29 @@ struct Msg_00ae5a50
     }
 };
 
-struct RefObj_00ae5a50
-{
-    virtual void v0();
-    long m_iObjectReferenceCount;
-};
-
 struct PtrArg_00ae5a50
 {
-    RefObj_00ae5a50* m_p;
-    inline PtrArg_00ae5a50(RefObj_00ae5a50* p) : m_p(p)
+    NiRefObject* m_p;
+    inline PtrArg_00ae5a50(NiRefObject* p) : m_p(p)
     {
         if (m_p)
         {
-            RefObj_00ae5a50* ref = m_p;
-            InterlockedIncrement(&ref->m_iObjectReferenceCount);
+            NiRefObject* ref = m_p;
+            InterlockedIncrement((long*)&ref->m_uiRefCount);
         }
     }
     inline PtrArg_00ae5a50(const PtrArg_00ae5a50& rhs) : m_p(rhs.m_p)
     {
         if (m_p)
         {
-            RefObj_00ae5a50* ref = m_p;
-            InterlockedIncrement(&ref->m_iObjectReferenceCount);
+            NiRefObject* ref = m_p;
+            InterlockedIncrement((long*)&ref->m_uiRefCount);
         }
     }
     inline ~PtrArg_00ae5a50()
     {
         if (m_p)
-            InterlockedDecrement(&m_p->m_iObjectReferenceCount);
+            InterlockedDecrement((long*)&m_p->m_uiRefCount);
     }
 };
 
@@ -8519,6 +7404,7 @@ struct Sound_00ae5a50
     }
 };
 
+// BSAudio.h declares these virtual slots as void-returning, without the creation argument.
 struct AudioBig_00ae5a50
 {
     virtual void v00();
@@ -8529,7 +7415,7 @@ struct AudioBig_00ae5a50
     virtual Sound_00ae5a50* v05(char*);
     inline bool IsMT()
     {
-        return bIsMultiThreaded;
+        return bMultiThread;
     }
     inline void* Get10()
     {
@@ -8539,7 +7425,7 @@ struct AudioBig_00ae5a50
     {
         return m_2c;
     }
-    bool bIsMultiThreaded;
+    bool bMultiThread;
     int unk08;
     int unk0c;
     void* m_10;
@@ -8559,7 +7445,7 @@ inline AudioBig_00ae5a50* AudioInstance_00ae5a50()
 inline bool AudioMT_00ae5a50()
 {
     AudioBig_00ae5a50* pa = (AudioBig_00ae5a50*)DAT_011f6d98;
-    return pa->bIsMultiThreaded;
+    return pa->bMultiThread;
 }
 inline void* Audio10_00ae5a50()
 {
@@ -8704,7 +7590,7 @@ struct Mgr_00ae5a50
     int m_180;
 
     R_00ae5a50 FUN_00ae5a50(char* apName, int aiFlags, void* ap5);
-    void FUN_00adb1a0(int, int, int, void*, PtrArg_00ae5a50, Pos3_00ae5a50);
+    void FUN_00adb1a0(int, int, int, void*, PtrArg_00ae5a50, NiPoint3);
 };
 
 typedef int(__cdecl* PFn1_00ae5a50)(R_00ae5a50*, void*, int*);
@@ -8765,7 +7651,7 @@ R_00ae5a50 Mgr_00ae5a50::FUN_00ae5a50(char* apName, int aiFlags, void* ap5)
         }
         local1417->m_08 = aiFlags;
     }
-    FUN_00adb1a0(0x25, local1417->ID(), 0, local1417, PtrArg_00ae5a50((RefObj_00ae5a50*)0), DAT_011f426c);
+    FUN_00adb1a0(0x25, local1417->ID(), 0, local1417, PtrArg_00ae5a50((NiRefObject*)0), DAT_011f426c);
     if (ap5 && local141)
     {
         iResult3 = ((PFn1_00ae5a50)local141)(&result300, ap5, 0);
@@ -8787,34 +7673,8 @@ R_00ae5a50 Mgr_00ae5a50::FUN_00ae5a50(char* apName, int aiFlags, void* ap5)
 namespace fnv_00ae7550 {
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-struct NiAVObject_ae7550
-{
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-template <class T> struct NiPointer_ae7550
-{
-    ~NiPointer_ae7550()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    T* m_pObject;
-};
-void __cdecl FUN_00c45830(NiAVObject_ae7550* pkObject);
+
+
 struct Pool_ae7550
 {
     void FUN_00aa4060(void* p);
@@ -8839,7 +7699,7 @@ struct FUN_00ae86d0
     int unk04;
     int unk08;
     FUN_00ae86d0* m_pNext;
-    NiPointer_ae7550<NiAVObject_ae7550> m_pReferencedObject;
+    NiPointer<NiAVObject> m_pReferencedObject;
     float unk14;
     float unk18;
     float unk1C;
@@ -8931,15 +7791,7 @@ bool FUN_00adb8e0_cls::FUN_00adb8e0(int a, bool b)
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct S00adc260_NiRefObjectA
-{
-    void* vtbl;
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-};
+
 template <class T> struct S00adc260_NiPointerA
 {
     T* m_pObject;
@@ -8948,14 +7800,14 @@ template <class T> struct S00adc260_NiPointerA
     S00adc260_NiPointerA(T* pObject = 0)
     {
         m_pObject = pObject;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
 };
 struct S00adc260_SoundOwnerA
 {
     void FUN_00adb1a0(unsigned int flags, int a, int b, int c,
-                      S00adc260_NiPointerA<S00adc260_NiRefObjectA> pSceneObject, DetectPoint3 pos);
+                      S00adc260_NiPointerA<NiRefObject> pSceneObject, NiPoint3 pos);
     void FUN_00adc260(int a, int b);
 };
 // @fnv 0x00adc260
@@ -9080,20 +7932,10 @@ extern __declspec(thread) int g_tlsMemContext;
 extern float DAT_01094c4c;
 extern double DAT_010a3470;
 extern float DAT_01012054;
-struct SettingQ
-{
-    void* m_pVtbl;
-    int m_iValue;
-};
-extern SettingQ DAT_011f6e5c;
+extern Setting DAT_011f6e5c;
 extern "C" void* _fnv_zlib_memset(void*, int, unsigned int);
 int __cdecl FUN_00ec65a6(char*, unsigned int, const char*);
-struct Vec3
-{
-    float x, y, z;
-    __forceinline Vec3()
-    {}
-};
+
 struct DebugInit
 {
     void FUN_00ae8770();
@@ -9537,7 +8379,7 @@ struct Param2Ada
     virtual void s18();
     virtual void s19();
     virtual void s20();
-    virtual float* v54(Vec3* arg);
+    virtual float* v54(LocalVec3* arg);
     int f04;
     int f08;
     int f0c;
@@ -9624,7 +8466,7 @@ __forceinline void DebugInfo::SetName(Param2Ada* sound)
 }
 __forceinline bool ReadDebugSetting()
 {
-    char* pSel = &DAT_011f6e5c ? (char*)&DAT_011f6e5c.m_iValue : (*(char*)& DAT_01202800 = 0, (char*)&DAT_01202800);
+    char* pSel = &DAT_011f6e5c ? (char*)&DAT_011f6e5c.uValue.i : (*(char*)& DAT_01202800 = 0, (char*)&DAT_01202800);
     return *(bool*)pSel;
 }
 struct ThisClsAda
@@ -9704,8 +8546,8 @@ void ThisClsAda::FUN_00ada5d0(int param1, Param2Ada* param2)
             if (param2->FUN_00ae9cf0() || param2->FUN_00ae9d10())
             {
                 descB_.f220 = param2->Read150();
-                descB_.f218 = param2->v54(&Vec3())[0];
-                descB_.f21c = param2->v54(&Vec3())[1];
+                descB_.f218 = param2->v54(&LocalVec3())[0];
+                descB_.f21c = param2->v54(&LocalVec3())[1];
                 descB_.f210 = param2->Read140();
                 descB_.f214 = param2->Read13c();
             }
@@ -9742,7 +8584,7 @@ void ThisClsAda::FUN_00ada5d0(int param1, Param2Ada* param2)
 
 struct SoundOwnerA
 {
-    void FUN_00adb1a0(unsigned int flags, int a, bool b, int c, NiAVObjPtr pSceneObject, DetectPoint3 pos);
+    void FUN_00adb1a0(unsigned int flags, int a, bool b, int c, NiAVObjPtr pSceneObject, NiPoint3 pos);
     void FUN_00adc2e0(int a, bool b);
 };
 // @fnv 0x00adc2e0
@@ -9813,25 +8655,15 @@ struct TaskListQ4
     NodeQ4* pHead;
     void AddItem(TaskQ4* const&);
 };
-struct TaskMgrQ4
+
+extern IOManager* DAT_01202d98;
+inline bool AudioReadyQ4(const BSAudio* audio)
 {
-    virtual void v00(), v01(), v02(), v03(), v04(), v05(), v06(), v07(), v08(), v09(), v10(), v11(), v12(), v13(),
-        v14(), v15(), v16(), v17();
-    virtual void AddTask(TaskQ4*);
-};
-extern TaskMgrQ4* DAT_01202d98;
-struct AudioQ4
+    return audio->bAudioEnabled;
+}
+inline BSAudio* GetAudioQ4()
 {
-    void* vtbl;
-    bool bReady;
-    bool IsReady() const
-    {
-        return bReady;
-    }
-};
-inline AudioQ4* GetAudioQ4()
-{
-    return (AudioQ4*)DAT_011f6d98;
+    return (BSAudio*)DAT_011f6d98;
 }
 struct OwnerQ4 : ObjRegistry
 {
@@ -9843,7 +8675,7 @@ struct OwnerQ4 : ObjRegistry
 // @fnv 0x00add960
 void OwnerQ4::FUN_00add960(SoundQ4* SoundAssetTmp)
 {
-    if (GetAudioQ4()->IsReady() && SoundAssetTmp->cEnabled && !(SoundAssetTmp->GetFlags() & 0x10000) &&
+    if (AudioReadyQ4(GetAudioQ4()) && SoundAssetTmp->cEnabled && !(SoundAssetTmp->GetFlags() & 0x10000) &&
         !FUN_00add480(SoundAssetTmp->GetID(), false))
     {
         TaskQ4* pTask;
@@ -9871,7 +8703,7 @@ void OwnerQ4::FUN_00add960(SoundQ4* SoundAssetTmp)
         DeadN();
         pTask = new (DAT_011f6238) TaskQ4((int)SoundAssetTmp);
         SoundAssetTmp->SetFlag1000(true);
-        DAT_01202d98->AddTask(pTask);
+        DAT_01202d98->AddTask((QIOTask*)pTask);
         m_kTasks.AddItem(pTask);
         LeaveCriticalSection(&m_kCS2);
     }

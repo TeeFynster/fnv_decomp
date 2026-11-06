@@ -1,33 +1,45 @@
-// Source layout: BSThread. PC corrections are in generate_headers.py.
-#ifndef FNV_BSTHREAD_H
-#define FNV_BSTHREAD_H
+#pragma once
 
-#include "layout_support.h"
-#include "RecursiveLock.h"
-#pragma pack(push, 4)
+#include "BSThreadCriticalSectionPC.h"
+
 class BSThread
 {
-  public:
-    void** m_ppVirtualMethodTable;                    // +0x0
-    RecursiveLock CriticalSection;  // +0x4
-    void* m_pThreadHandle;              // +0x2C
-    void* m_pCurrentThreadHandle;       // +0x30
-    unsigned int m_uiCreatedThreadId;   // +0x34
-    unsigned int m_uiCurrentThreadId;   // +0x38
-    bool m_bThreadStarted;              // +0x3C
-    unsigned char layoutPadding3D;
-    unsigned short layoutPadding3E;
-    void SetSchedulingPriority(unsigned int);
-    unsigned int ThreadProc();
-    void SetName(const char*);
+public:
+    enum StackSize  // values: Xbox PDB BSThread::StackSize
+    {
+        INHERIT_MAIN = 0,
+        SMALL_STACK_SIZE = 16384,
+        MEDIUM_STACK_SIZE = 32768,
+        LARGE_STACK_SIZE = 65536,
+        MAINTHREAD_STACK_SIZE = 131072
+    };
+
+    BSThread();
+    virtual ~BSThread();
+    virtual unsigned int ThreadProc();
+
+    void Initialize(StackSize stackSize, const char* name, bool suspended);
+    void Initialize(int stackSize, const char* name, bool suspended);
+    void SetThreadPriority(int priority);
+    void SetSchedulingPriority(unsigned int priority);
+    void SetSchedulingPriority(int priority);
+    void SetName(const char* name);
+    void SetPriority(int priority);
+    void Wakeup();
+    void Run();
+    unsigned int GetThreadID();
+    bool FUN_008905f0();
+    void FUN_00aa6430(int stackSize, const char* name, bool suspended);
+    void FUN_00aa6540(const char* name);
+    void FUN_00aa6550(unsigned int priority);
+    void FUN_00aa6550(int priority);
+    void FUN_00aa6560(int priority);
+
+    BSThreadCriticalSectionPC CriticalSection;
+    void* m_pThreadHandle;
+    void* m_pCurrentThreadHandle;
+    unsigned int m_uiCreatedThreadId;
+    unsigned int m_uiCurrentThreadId;
+    bool m_bThreadStarted;
+    unsigned char unk2D[3];
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BSThread) == 0x40);
-FNV_STATIC_ASSERT(offsetof(BSThread, m_ppVirtualMethodTable) == 0x0);
-FNV_STATIC_ASSERT(offsetof(BSThread, CriticalSection) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BSThread, m_pThreadHandle) == 0x2C);
-FNV_STATIC_ASSERT(offsetof(BSThread, m_pCurrentThreadHandle) == 0x30);
-FNV_STATIC_ASSERT(offsetof(BSThread, m_uiCreatedThreadId) == 0x34);
-FNV_STATIC_ASSERT(offsetof(BSThread, m_uiCurrentThreadId) == 0x38);
-FNV_STATIC_ASSERT(offsetof(BSThread, m_bThreadStarted) == 0x3C);
-#endif

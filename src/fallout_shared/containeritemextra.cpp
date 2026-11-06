@@ -1,8 +1,8 @@
 // fallout_shared/containeritemextra.cpp: ContainerItemExtra, TESLeveledList (9 functions)
 
-#include "containeritemextra_leveledlist.h"
 #include "layout_support.h"
-#include "TESForm.h"
+#include "../../include/TESLeveledList.h"
+#include "../../include/TESForm.h"
 #include "TESGlobal.h"
 
 enum

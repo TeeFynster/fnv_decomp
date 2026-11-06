@@ -47,7 +47,7 @@ NiPointer_LoadedFile& NiPointer_LoadedFile::FUN_0044b220(LoadedFile* pObject)
         if (m_pObject)
             m_pObject->FUN_0044b180();
         m_pObject = pObject;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     return *this;

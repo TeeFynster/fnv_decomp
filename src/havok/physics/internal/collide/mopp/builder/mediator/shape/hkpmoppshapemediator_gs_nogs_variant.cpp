@@ -1,7 +1,13 @@
+#include <xmmintrin.h>
+
 
 // src/havok/physics/internal/collide/mopp/builder/mediator/shape/hkpmoppshapemediator_gs_nogs_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/physics/internal/collide/mopp/builder/mediator/shape/hkpmoppshapemediator.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
+
+#include "../../../../../../../../../include/hkpConvexShape.h"
+#include "../../../../../../../../../include/hkpShape.h"
+#include "../../../../../../../../../include/hkpShapeContainer.h"
 
 int __stdcall ReadIntField(const void* a, int* b);
 struct FUN_00dd5260_T
@@ -13,13 +19,6 @@ struct FUN_00dd5260_T
     int e;
 };
 void __stdcall FUN_00dd5260(FUN_00dd5260_T* pSrc, int a1, int a2, int a3, FUN_00dd5260_T* pDst);
-struct FUN_00dd5210_Interface
-{
-    virtual void First();
-    virtual void Second();
-    virtual int GetValue();
-    virtual int UseValue(int value);
-};
 struct FUN_00dd5210_Record
 {
     int value;
@@ -32,14 +31,9 @@ struct FUN_00dd5210_Object
 {
     int unk00;
     int unk04;
-    FUN_00dd5210_Interface* unk08;
+    hkpShapeContainer* unk08;
     int unk0c;
     void FillRecords(FUN_00dd5210_Record* records);
-};
-struct SpawnedSource
-{
-    virtual void First();
-    virtual int Second();
 };
 struct SpawnedBase
 {
@@ -51,10 +45,10 @@ class FUN_00dd52a0_cls : public SpawnedBase
   public:
     short unk04;
     unsigned short m_flag06;
-    SpawnedSource* m_src08;
+    hkpShapeContainer* m_src08;
     int m_result0c;
 
-    FUN_00dd52a0_cls* InitFromSource(SpawnedSource* src);
+    FUN_00dd52a0_cls* InitFromSource(hkpShapeContainer* src);
 };
 struct CpuAllocator
 {
@@ -87,11 +81,6 @@ struct FnvCpu_FUN_00dd5290_CpuObject
     int value;
     int FUN_00dd5290();
 };
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 extern "C"
 {
     __m128 _mm_xor_ps(__m128, __m128);
@@ -100,37 +89,12 @@ extern "C"
 extern __m128 DAT_010c44d0;
 typedef float hkReal;
 typedef unsigned int hkpShapeKey;
-struct __declspec(align(16)) hkVector4
-{
-    __m128 m_vComponents;
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setNeg4(const hkVector4& v)
-    {
-        m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c44d0);
-    }
-};
+#include "../../../../../../../../../include/hkVector4.h"
+__forceinline void hkVector4::setNeg4(const hkVector4& v) { m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c44d0); }
+
 struct __declspec(align(16)) hkpShapeBuffer
 {
     int m_data[128];
-};
-struct hkpShape
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual hkReal getMaximumProjection(const hkVector4& direction) const;
-};
-struct hkpShapeContainer
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual const hkpShape* GetShapeForKey(hkpShapeKey key, hkpShapeBuffer& buffer) const;
 };
 struct ProjectionSample
 {
@@ -151,47 +115,6 @@ struct ProjectionShape
 };
 
 namespace fnv_00dd5440 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_xor_ps(__m128, __m128);
-
-extern __m128 DAT_010c44d0;
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-    __forceinline void setNeg4(const hkVector4& v)
-    {
-        m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c44d0);
-    }
-};
-
-struct hkpShapeBuffer
-{
-    char m_data[512];
-};
-
-struct hkpConvexShape
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual float getSupport(const hkVector4& direction) const;
-};
-
-struct hkpShapeContainer
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual const hkpConvexShape* GetShapeForKey(unsigned int key, hkpShapeBuffer& buffer) const;
-};
-
 struct hkpChildKey
 {
     unsigned int m_key;
@@ -220,13 +143,13 @@ void ExtentCalculator::FUN_00dd5440(const hkVector4& direction, int unused, cons
     float hi;
 
     unsigned int key = keys[0].m_key;
-    const hkpConvexShape* shape = m_container->GetShapeForKey(key, buffer);
+    const hkpConvexShape* shape = static_cast<const hkpConvexShape*>(m_container->GetShapeForKey(key, buffer));
     if (shape)
     {
-        hi = shape->getSupport(direction);
+        hi = shape->getMaximumProjection(direction);
         hkVector4 negDir;
         negDir.setNeg4(direction);
-        lo = -shape->getSupport(negDir);
+        lo = -shape->getMaximumProjection(negDir);
     }
     else
     {
@@ -240,13 +163,13 @@ void ExtentCalculator::FUN_00dd5440(const hkVector4& direction, int unused, cons
     for (int i = 1; i < numKeys; i++)
     {
         key = keys[i].m_key;
-        shape = m_container->GetShapeForKey(key, buffer);
+        shape = static_cast<const hkpConvexShape*>(m_container->GetShapeForKey(key, buffer));
         if (shape)
         {
-            hi = shape->getSupport(direction);
+            hi = shape->getMaximumProjection(direction);
             hkVector4 negDir;
             negDir.setNeg4(direction);
-            lo = -shape->getSupport(negDir);
+            lo = -shape->getMaximumProjection(negDir);
         }
         else
         {

@@ -2,7 +2,13 @@
 #ifndef FNV_NICONTROLLERSEQUENCE_IDTAG_H
 #define FNV_NICONTROLLERSEQUENCE_IDTAG_H
 
-#include "layout_support.h"
+#include <stddef.h>
+#ifndef FNV_STATIC_ASSERT
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+#endif
+template <class K, class V> class NiTPointerMap;
 #include "NiFixedString.h"
 class NiControllerSequence__IDTag;
 #pragma pack(push, 4)

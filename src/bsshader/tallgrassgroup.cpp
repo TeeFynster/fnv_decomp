@@ -2,6 +2,9 @@
 // src/bsshader/tallgrassgroup.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/tallgrassgroup.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/NiAVObject.h"
+#include "../../include/NiNode.h"
+
 extern unsigned int DAT_011f9ef8;
 
 void* __cdecl fnv_zlib_memset(void* dst, void* src, unsigned int size);
@@ -41,114 +44,38 @@ void FUN_00bd8a70_cls::FUN_00bd8a70()
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 
-class NiRefObject
+inline void NiAVObject::DecRefCount()
 {
-  public:
-    virtual void vf00();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
 
-class NiAVObject : public NiRefObject
+template <class T> inline NiPointer<T>::~NiPointer()
 {
-  public:
-    virtual void vf02();
-    virtual void vf03();
-    virtual void vf04();
-    virtual void vf05();
-    virtual void vf06();
-    virtual void vf07();
-    virtual void vf08();
-    virtual void vf09();
-    virtual void vf10();
-    virtual void vf11();
-    virtual void vf12();
-    virtual void vf13();
-    virtual void vf14();
-    virtual void vf15();
-    virtual void vf16();
-    virtual void vf17();
-    virtual void vf18();
-    virtual void vf19();
-    virtual void vf20();
-    virtual void vf21();
-    virtual void vf22();
-    virtual void vf23();
-    virtual void vf24();
-    virtual void vf25();
-    virtual void vf26();
-    virtual void vf27();
-    virtual void vf28();
-    virtual void vf29();
-    virtual void vf30();
-    virtual void vf31();
-    virtual void vf32();
-    virtual void vf33();
-    virtual void vf34();
-    virtual void vf35();
-    virtual void vf36();
-    virtual void vf37();
-    virtual void vf38();
-    virtual void vf39();
-    virtual void vf40();
-    virtual void vf41();
-    virtual void vf42();
-    virtual void vf43();
-    virtual void vf44();
-    virtual void vf45();
-    virtual void vf46();
-    virtual void vf47();
-    virtual void vf48();
-    virtual void vf49();
-    virtual void vf50();
-    virtual void vf51();
-    virtual void vf52();
-    virtual void vf53();
-    virtual void vf54();
-    virtual void vf55();
-    virtual void vf56();
-    virtual void vf57();
-    virtual void InsertChild(NiAVObject* pkChild);
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    NiAVObject* m_pParentNode;
-};
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
 
-template <class T> class NiPointer
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pObject)
 {
-  public:
-    T* m_pObject;
-    ~NiPointer()
+    if (m_pObject != pObject)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
+        m_pObject = pObject;
     }
-    NiPointer& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-        }
-        return *this;
-    }
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-};
+    return *this;
+}
+
+template <class T> inline NiPointer<T>::operator T*() const
+{
+    return m_pObject;
+}
+
+template <class T> inline T* NiPointer<T>::operator->() const
+{
+    return m_pObject;
+}
 
 struct MM
 {
@@ -174,10 +101,10 @@ class FUN_00bd8f90
 // @fnv 0x00bd8f90
 FUN_00bd8f90::~FUN_00bd8f90()
 {
-    m_spNode->InsertChild(m_pReferencedObject);
-    NiAVObject* pkParent = m_spNode->m_pParentNode;
+    static_cast<NiNode*>(m_spNode.operator->())->RemoveObject(m_pReferencedObject);
+    NiNode* pkParent = m_spNode->m_pkParent;
     if (pkParent)
-        pkParent->InsertChild(m_spNode);
+        pkParent->RemoveObject(m_spNode);
     m_pReferencedObject = 0;
     m_spNode = 0;
     m_spUnk0C = 0;

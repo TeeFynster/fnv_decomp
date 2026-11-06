@@ -3,11 +3,5 @@
 #define FNV_BGSTALKINGACTIVATOR_LOAD_H
 class TESEffectShader;
 // Existing canonical binding for the folded +0x7C pointer setter.
-class EffectSetting
-{
-  public:
-    unsigned char layoutPadding[0x7c];
-    TESEffectShader* pEnchantEffectShader;
-    void SetEnchantEffectShader(TESEffectShader*);
-};
+#include "../../include/EffectSetting.h"
 #endif

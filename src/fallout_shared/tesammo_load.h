@@ -12,27 +12,11 @@ class TESTextureLoader
     static void ReadTextureData(TESTexture*, TESFile*);
 };
 class CombatController;
-class CombatProcedure
-{
-  public:
-    void Initialize(CombatController*);
-};
+#include "../../include/CombatProcedure.h"
 class TESLandTexture;
-class TESRegionGrassObject
-{
-  public:
-    void AssignLandTexture(TESLandTexture*);
-};
-class BGSImpactData
-{
-  public:
-    void ReadTypedData(TESFile*, void*, unsigned short);
-};
-class EncounterZoneData
-{
-  public:
-    void Endian();
-};
+#include "../../include/TESRegionGrassObject.h"
+#include "../../include/BGSImpactData.h"
+#include "../../include/EncounterZoneData.h"
 class TESAmmoNVEndian
 {
   public:

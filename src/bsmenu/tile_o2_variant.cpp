@@ -3,7 +3,8 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 #include "Tile__FloatAction.h"
-#include "tile_packet_decls.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiBound.h"
 
 struct FUN_00bb79d0_class
 {
@@ -16,21 +17,10 @@ void __thiscall FUN_00bb79d0_class::FUN_00bb79d0(bool value)
     *(char*)((char*)this + 0xac) = value;
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager _g_memoryManager;
 void operator delete(void*, unsigned int);
-struct NiPoint3;
 struct NiPoint2;
-struct RgbaColor;
-struct NiBound
-{
-    float m_fCenter[3];
-    float m_fBoundRadius;
-    void ComputeFromPoints(int, const NiPoint3*);
-};
+struct NiColorA;
 struct SharedData_S
 {
     char pad[0xc];
@@ -92,14 +82,14 @@ struct GeomData_S
     NiBound m_kBound;
     NiPoint3* m_pkVertex;
     NiPoint3* m_pkNormal;
-    RgbaColor* m_pkColor;
+    NiColorA* m_pkColor;
     NiPoint2* m_pkTexture;
-    void FUN_00a670c0(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, RgbaColor* pkColor,
+    void FUN_00a670c0(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, NiColorA* pkColor,
                       NiPoint2* pkTexture, unsigned short usNumTextureSets, unsigned short eNBTMethod);
 };
 
 // @fnv 0x00a670c0
-void GeomData_S::FUN_00a670c0(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, RgbaColor* pkColor,
+void GeomData_S::FUN_00a670c0(unsigned short usVertices, NiPoint3* pkVertex, NiPoint3* pkNormal, NiColorA* pkColor,
                               NiPoint2* pkTexture, unsigned short usNumTextureSets, unsigned short eNBTMethod)
 {
     if (GetShared())

@@ -1,5 +1,7 @@
 // fallout_shared/tesattackdamageform.cpp: TESAttackDamageForm, TESCreature (6 functions)
 
+#include "../../include/CreatureSounds.h"
+#include "../../include/TESResponse.h"
 #include "tesattackdamageform_creature_decls.h"
 
 // @fnv 0x0047fdc0
@@ -57,11 +59,11 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
                  !templateSelection.creature->QCopiedTemplate())
             templateSelection.creature->CopyFromTemplateForm(0);
 
-        if (GetTemplateUseFlag(USE_SCRIPT))
+        if (GetTemplateUseFlag(TU_SCRIPT))
             TESScriptableForm::BaseFormRecord((TESScriptableForm*)templateSelection.creature);
-        if (GetTemplateUseFlag(USE_INVENTORY))
+        if (GetTemplateUseFlag(TU_INVENTORY))
             TESContainer::BaseFormRecord((TESContainer*)templateSelection.creature);
-        if (GetTemplateUseFlag(USE_BASE_DATA))
+        if (GetTemplateUseFlag(TU_BASEDATA))
         {
             TESFullName::BaseFormRecord((TESFullName*)templateSelection.creature);
             struct BaseDataFlags
@@ -84,15 +86,15 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
             flags.inherited &= 0x1070220a;
             SetFlags(flags.inherited | flags.current);
         }
-        if (GetTemplateUseFlag(USE_MODEL))
+        if (GetTemplateUseFlag(TU_MODEL))
         {
             TESModel::BaseFormRecord((TESModel*)templateSelection.creature);
             TESModelList::BaseFormRecord((TESModelList*)templateSelection.creature);
             TESAnimation::BaseFormRecord((TESAnimation*)templateSelection.creature);
-            SetBodyPartData(templateSelection.creature->GetBodyPartData());
+            SetBodyPartData(static_cast<const TESCreature*>(templateSelection.creature)->GetBodyPartData());
             FUN_0050eaa0(templateSelection.creature);
             SetImpactDataSet(templateSelection.creature->GetImpactDataSet());
-            SetBloodImpactMaterial(templateSelection.creature->GetBloodImpactMaterial());
+            SetBloodImpactMaterial(static_cast<const TESCreature*>(templateSelection.creature)->GetBloodImpactMaterial());
             BGSDestructibleObjectForm::BaseFormRecord((BGSDestructibleObjectForm*)templateSelection.creature);
             struct ModelFlags
             {
@@ -117,7 +119,7 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
             SetFlags(flags.inherited | flags.current);
             if (templateSelection.creature->GetCreatureSounds())
             {
-                CreatureSoundCollection* sounds = GetMutableCreatureSounds();
+                CreatureSounds* sounds = GetMutableCreatureSounds();
                 sounds->Copy(templateSelection.creature->GetCreatureSounds());
             }
             else
@@ -130,7 +132,7 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
         {
             if (templateSelection.creature->GetCreatureSounds())
             {
-                CreatureSoundCollection* sounds = GetMutableCreatureSounds();
+                CreatureSounds* sounds = GetMutableCreatureSounds();
                 sounds->Copy(templateSelection.creature->GetCreatureSounds());
             }
             else
@@ -138,7 +140,7 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
                 SetCreatureSoundsFrom(templateSelection.creature->GetSoundCreature());
             }
         }
-        if (GetTemplateUseFlag(USE_TRAITS))
+        if (GetTemplateUseFlag(TU_TRAITS))
         {
             // Folded death-item getter followed by its setter.
             FUN_0050f9a0((TESLevItem*)reinterpret_cast<NiTimeController*>(
@@ -146,13 +148,13 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
                              offsetof(TESActorBaseData, actorData))
                              ->FUN_00441110());
             reinterpret_cast<TESResponse*>(reinterpret_cast<char*>(&actorData) - offsetof(TESActorBaseData, actorData))
-                ->SetSpeakerIdle((TESIdleForm*)templateSelection.creature->GetVoiceType());
-            SetKarmaValue(templateSelection.creature->GetHealthRegeneration());
+                ->SetSpeakerIdle((TESIdleForm*)static_cast<const TESCreature*>(templateSelection.creature)->GetVoiceType());
+            SetKarmaValue(static_cast<const TESCreature*>(templateSelection.creature)->GetHealthRegeneration());
             FUN_005fbdb0(templateSelection.creature->FUN_0059f3a0());
             FUN_005f8bd0(templateSelection.creature->GetField158());
-            SetCombatStyle(templateSelection.creature->GetCombatStyle());
+            SetCombatStyle(static_cast<const TESCreature*>(templateSelection.creature)->GetCombatStyle());
         }
-        if (GetTemplateUseFlag(USE_STATS))
+        if (GetTemplateUseFlag(TU_STATS))
         {
             SetLevel(templateSelection.creature->GetLevel());
             SetMatchesPCLevel(templateSelection.creature->GetMatchesPCLevel());
@@ -162,23 +164,23 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
             TESHealthForm::BaseFormRecord((TESHealthForm*)templateSelection.creature);
             TESAttackDamageForm::BaseFormRecord((TESAttackDamageForm*)templateSelection.creature);
             SetSpeedMult(templateSelection.creature->GetShortAtOffset12());
-            SetFatigue(templateSelection.creature->GetFatigue());
+            SetFatigue(static_cast<const TESCreature*>(templateSelection.creature)->GetFatigue());
             SetByteAt12D(templateSelection.creature->GetCombatSkill());
             SetCreatureType(templateSelection.creature->FUN_005f9ad0());
             FUN_00507780(templateSelection.creature->FUN_00821640());
             SetBoltGrowWidth(templateSelection.creature->FUN_00567470());
             SetBoltSmallWidth(templateSelection.creature->FUN_00821660());
         }
-        if (GetTemplateUseFlag(USE_FACTIONS))
+        if (GetTemplateUseFlag(TU_FACTIONS))
             CopyFactionList((TESActorBaseData*)templateSelection.creature);
-        if (GetTemplateUseFlag(USE_SPELLS))
+        if (GetTemplateUseFlag(TU_SPELLS))
         {
             TESSpellList::BaseFormRecord((TESSpellList*)templateSelection.creature);
             BGSTouchSpellForm::BaseFormRecord((BGSTouchSpellForm*)templateSelection.creature);
         }
-        if (GetTemplateUseFlag(USE_AI_DATA))
+        if (GetTemplateUseFlag(TU_AIDATA))
             CopyAISettings((TESAIForm*)templateSelection.creature);
-        if (GetTemplateUseFlag(USE_AI_PACKAGES))
+        if (GetTemplateUseFlag(TU_AIPACKAGES))
             CopyAIPackageList((TESAIForm*)templateSelection.creature);
 
         templateSelection.useFlags = 0;
@@ -193,13 +195,8 @@ void TESCreature::CopyFromTemplateForm(TESActorBase* selectedForm)
     }
 }
 
-struct FUN_0047fe10_shell : public TESAttackDamageForm
-{
-    void FUN_0047fe10();
-};
-
 // @fnv 0x0047fe10
-void FUN_0047fe10_shell::FUN_0047fe10()
+void TESAttackDamageForm::ClearComponent()
 {
     m_usAttackDamage = 0;
 }

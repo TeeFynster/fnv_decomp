@@ -1,18 +1,27 @@
 // fallout_shared/magic/enchantmentitem.cpp: EnchantmentItem, MagicShaderHitEffect, SpellItem, Unnamed and more (11 functions)
 
-#include "enchantmentitem.h"
+#include "../../../include/MagicHitEffect.h"
+#include "../../../include/MagicShaderHitEffect.h"
+#include "../../../include/BGSAcousticSpace.h"
+#include "../../../include/IngredientItem.h"
+#include "../../../include/MagicItem.h"
+#include "../../../include/TESActorBase.h"
+#include "../../../include/TESTopicInfo.h"
+#include "../../../include/EnchantmentItem.h"
+#include "../../../include/SpellItem.h"
+#include "../../../include/TES.h"
 
 // @fnv 0x009d6b60
-TEMP_EFFECT_TYPE MagicShaderHitEffect::GetType()
+int MagicShaderHitEffect::GetType()
 {
-    return MAGIC_HIT_EFFECT_SHADER;
+    return BSTempEffect::_Type::MAGIC_SHADER_HIT;
 }
 
-#include "enchantmentitem_packet.h"
+
 // @fnv 0x00409340
 void SpellItem::ClearData()
 {
-    effects.RemoveAllEffectItems();
+    RemoveAllEffectItems();
 }
 // @fnv 0x00409310
 void EnchantmentItem::ResetFormData()
@@ -26,10 +35,7 @@ void EnchantmentItem::ResetFormData()
 // @fnv 0x00409080
 EnchantmentItem::EnchantmentItem()
 {
-    formVtable = DAT_01012ea4;
-    nameVtable = DAT_01012e5c;
-    effects.vtable = DAT_01012e44;
-    SetFormType(FORM_ENCHANTMENT);
+    SetFormType((ENUM_FORM_ID)19);
     ResetFormData();
 }
 
@@ -65,22 +71,6 @@ void* __thiscall Unnamed::FUN_00409270(unsigned int flags)
     return this;
 }
 
-struct TESActorBase
-{
-    virtual ~TESActorBase();
-};
-struct TESSound;
-struct TESTopicInfoData;
-struct MagicItem
-{
-    virtual ~MagicItem();
-};
-struct TESTopicInfo
-{
-    TESSound* GetConversationData();
-    void SetSpeaker(MagicItem*);
-    virtual ~TESTopicInfo();
-};
 struct EP_008c48d0
 {
     MagicItem* GetEntryPoint();
@@ -88,14 +78,6 @@ struct EP_008c48d0
 struct CP_008c48d0
 {
     TESSound* GetPrevPath();
-};
-struct BGSAcousticSpace
-{
-    void SetNoonSound(TESSound*);
-};
-struct TES
-{
-    void SetDawnSound(TESSound*);
 };
 struct FUN_00409400_shell
 {
@@ -108,7 +90,7 @@ void FUN_00409400_shell::CopySoundAndSpeakerData(MagicItem* apItem)
     EnchantmentItem* info = dynamic_cast<EnchantmentItem*>(apItem);
     if (!info)
         return;
-    ((BGSAcousticSpace*)((char*)this - 0x18))->SetNoonSound(((TESTopicInfo*)info)->GetConversationData());
+    ((BGSAcousticSpace*)((char*)this - 0x18))->SetNoonSound((TESSound*)((TESTopicInfo*)info)->GetConversationData());
     ((TESTopicInfo*)((char*)this - 0x18))->SetSpeaker(((EP_008c48d0*)info)->GetEntryPoint());
     ((TES*)((char*)this - 0x18))->SetDawnSound(((CP_008c48d0*)info)->GetPrevPath());
     ((char*)this)[0x28] = ((char*)info)[0x40];
@@ -151,10 +133,6 @@ float FUN_004094a0_Class::FUN_004094a0(int apActor)
 struct IMH
 {
     int FUN_00586150(void);
-};
-
-struct IngredientItem : MagicItem
-{
 };
 
 struct FUN_00409fd0_shell : EnchantmentItem
@@ -201,15 +179,7 @@ FUN_004092a0::~FUN_004092a0()
     FUN_00409340();
 }
 
-struct EnchantmentMagicPart : MagicItem
-{
-    unsigned int nameData04;
-    unsigned int nameData08;
-    EffectItemList effects;
-    virtual bool FUN_00409360(MagicItem* object) = 0;
-};
-
-struct EnchantmentComparison : PrimaryBase, EnchantmentMagicPart
+struct EnchantmentComparison : PrimaryBase, MagicItem
 {
     unsigned int type;
     unsigned int charge;
@@ -218,12 +188,12 @@ struct EnchantmentComparison : PrimaryBase, EnchantmentMagicPart
     unsigned int GetField38();
     unsigned int FUN_00639b40();
     unsigned int FUN_005f36f0();
-    virtual bool FUN_00409360(MagicItem* object);
+    virtual bool IsMagicItemEqual(MagicItem* object);
 };
 
 // Returns true if the cast fails or any of three accessor results or flags differ; otherwise returns false.
 // @fnv 0x00409360
-bool EnchantmentComparison::FUN_00409360(MagicItem* apMagicItem)
+bool EnchantmentComparison::IsMagicItemEqual(MagicItem* apMagicItem)
 {
     EnchantmentItem* pEnchantmentItem = dynamic_cast<EnchantmentItem*>(apMagicItem);
     if (pEnchantmentItem == 0)

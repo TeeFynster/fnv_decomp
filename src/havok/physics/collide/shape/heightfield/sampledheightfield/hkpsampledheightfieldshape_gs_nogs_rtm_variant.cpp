@@ -1,134 +1,21 @@
+#define FNV64_HKENUM_INLINE_BODIES
 
 // src/havok/physics/collide/shape/heightfield/sampledheightfield/hkpsampledheightfieldshape_gs_nogs_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/shape/heightfield/sampledheightfield/hkpsampledheightfieldshape.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS- /EHsc /Gy (unit lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
 // src/havok/physics/collide/shape/heightfield/sampledheightfield/hkpsampledheightfieldshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/heightfield/sampledheightfield/hkpsampledheightfieldshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpSampledHeightFieldShape.h"
+#include "../../../../../../../include/FinishingFlag.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkStackMemory.h"
+#include "../../../../../../../include/hkAabb.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkpRayHitCollector.h"
+#include "../../../../../../../include/hkThreadLocalData.h"
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
-union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; unsigned __int64 m128_u64[2]; };
-extern "C" __m128 _mm_load_ps1(const float*);
-extern float DAT_01012068;
-extern double DAT_01012070;
-struct Cls_00d24670 {
-    virtual void v00(); virtual void v04(); virtual void v08(); virtual void v0c();
-    virtual void v10(); virtual void v14(); virtual void v18(); virtual void v1c();
-    virtual void v20(); virtual void v24(); virtual void v28(); virtual void v2c();
-    virtual void v30();
-    virtual float getH(int x, int y);
-    virtual void getFlip(bool& flip);
-    void FUN_00d24670(int x, int y, float fx, float fy, __m128* nrm, float* height, int* flag);
-};
-struct hkInfoD260 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    float m_fScalar;
-};
-class hkBoolD260 {
-public:
-    hkBoolD260(bool b) { m_cBooleanValue = (char)b; }
-    hkBoolD260(const hkBoolD260& o) { m_cBooleanValue = o.m_cBooleanValue; }
-
-    char m_cBooleanValue;
-};
-class hkCollectorD260 {
-public:
-    hkCollectorD260(hkInfoD260* info) : m_fScalar(info->m_fScalar), m_bHasHit(false), m_info(info) {}
-    virtual void AddHit(void* hit);
-
-    float m_fScalar;
-    bool m_bHasHit;
-    hkInfoD260* m_info;
-};
-struct FUN_00d24b50_Obj {
-    void __thiscall FUN_00d24b50(void* object, int flags, hkBoolD260 flag2, float f, hkCollectorD260* collector);
-};
-class hkShapeD260 : public FUN_00d24b50_Obj {
-public:
-    hkBoolD260 __thiscall FUN_00d26080(void* object, hkInfoD260* info);
-};
-struct S00d261b0_Elem {
-    __m128 v00;
-    float f10;
-    int i14;
-    int unk18;
-    int unk1c;
-    int m_slots[8];
-    int m_idx40;
-};
-struct S00d261b0_cls {
-    int unk00;
-    float f04;
-    unsigned char b08;
-    S00d261b0_Elem* p0c;
-    void UpdateMinValue(int a0, int a1);
-};
-extern int DAT_010ce310;
-struct Arg3 {
-    int unk00;
-    float m_04;
-};
-struct Local12 {
-    void* m_00;
-    float m_04;
-    const Arg3* m_08;
-};
-struct Val1 {
-    unsigned char m_00;
-    Val1() : m_00(0) {}
-    Val1(const Val1& o) : m_00(o.m_00) {}
-};
-struct Host {
-    void FUN_00d24b50(int a1, int a2, Val1 v, float f, Local12* pLocal);
-    void FUN_00d260d0(int a1, int a2, const Arg3* a3);
-};
-struct __declspec(align(16)) RayData {
-    float x; float y; float z; float w;
-    float endX; float endY; float endZ; float endW;
-    float extraX; float extraY; float extraZ; float extraW;
-};
-struct Input {
-    RayData base;
-    float f30;
-    float f34;
-};
-struct Obj {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    float unk24;
-
-    void FUN_00d24b50(RayData* data, void* arg2, hkBoolD260 arg3, float arg4, void* arg5);
-    void FUN_00d26120(Input* input, void* arg2, void* arg3);
-};
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-__declspec(align(16)) const hkVector4 halfScale = {0.5f, 0.5f, 0.5f, 0.5f};
-struct SampledHeightField : hkpSampledHeightFieldShape {
-    virtual void slot01();
-    virtual void slot02();
-    virtual void slot03();
-    virtual void slot04();
-    virtual void slot05();
-    virtual void slot06();
-    virtual void slot07();
-    virtual void slot08();
-    virtual void slot09();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual float getHeightAt(int x, int z);
-    void FUN_00d249f0(hkUlong transform, float tolerance, hkUlong aabb);
-};
-void __cdecl FUN_00d26230(hkUlong, const hkVector4&, const hkVector4&, float, hkUlong);
-
 typedef signed char hkInt8;
 typedef signed short hkInt16;
 typedef signed int hkInt32;
@@ -138,12 +25,7 @@ typedef unsigned int hkUint32;
 typedef unsigned long __w64 hkUlong;
 typedef unsigned __int64 hkUint64;
 typedef __int64 hkInt64;
-typedef unsigned __w64 hk_size_t;class FinishingFlag
-{
-public:
-FinishingFlag():m_bFinishing(0){}
-int m_bFinishing;
-};
+typedef unsigned __w64 hk_size_t;
 class hkClass;
 class hkBoolR
 {
@@ -161,118 +43,9 @@ inline operator bool()const
 return m_cBooleanValue !=0;
 }
 private:
-char m_cBooleanValue;};template<typename ENUM,typename STORAGE>
-class hkEnum
-{
-public:
-hkEnum()
-{
-}
-hkEnum(ENUM e)
-{
-m_kStorage=static_cast<STORAGE>(e);
-}
-private:
-STORAGE m_kStorage;};
-template<typename TYPE>
-class ValueWrapper
-{
-public:
-__forceinline ValueWrapper(){}
-__forceinline ValueWrapper(TYPE e)
-:m_kStorage(e)
-{
-}
-__forceinline TYPE val()const
-{
-return m_kStorage;
-}
-private:
-TYPE m_kStorage;};
-extern "C"{
-__declspec(dllimport)void*_stdcall TlsGetValue(unsigned long dwTlsIndex);}
-template<typename T>
-class hkThreadLocalData
-{
-public:
-hkThreadLocalData()
-{
-m_slotID=TlsAlloc();
-}
-__forceinline T getData()const
-{
-return(T)(hkUlong)TlsGetValue(m_slotID);
-}
-unsigned long m_slotID;};
-namespace vc_attributes
-{
-enum YesNoMaybe
-{
-No=0x0fff0001,
-Maybe=0x0fff0010,
-Yes=0x0fff0100
-};
-enum AccessType
-{
-NoAccess=0,
-Read=1,
-Write=2,
-ReadWrite=3
-};
-[repeatable]
-[source_annotation_attribute(Parameter)]
-struct PreAttribute
-{
-PreAttribute();
-unsigned int Deref;
-YesNoMaybe Valid;
-YesNoMaybe Null;
-YesNoMaybe Tainted;
-AccessType Access;
-size_t ValidElementsConst;
-size_t ValidBytesConst;
-const wchar_t*ValidElements;
-const wchar_t*ValidBytes;
-const wchar_t*ValidElementsLength;
-const wchar_t*ValidBytesLength;
-size_t WritableElementsConst;
-size_t WritableBytesConst;
-const wchar_t*WritableElements;
-const wchar_t*WritableBytes;
-const wchar_t*WritableElementsLength;
-const wchar_t*WritableBytesLength;
-size_t ElementSizeConst;
-const wchar_t*ElementSize;
-YesNoMaybe NullTerminated;
-const wchar_t*Condition;
-};};
-const::vc_attributes::YesNoMaybe SA_Yes=::vc_attributes::Yes;
-const::vc_attributes::YesNoMaybe SA_No=::vc_attributes::No;
-const::vc_attributes::AccessType SA_Read=::vc_attributes::Read;
-typedef::vc_attributes::PreAttribute SA_Pre;class hkMemoryAllocator
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}
-virtual void*AllocateMemoryBlock(int numBytes)=0;
-virtual void ReleaseBlock(void*p,int numBytes)=0;public:
-enum MemoryState
-{
-MEMORY_STATE_OK,
-MEMORY_STATE_OUT_OF_MEMORY
-};};struct StringPointerTriple
-{
-public:
-__forceinline StringPointerTriple();protected:
-ValueWrapper<void*>m_next;};
-class NineIntegerRecord
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}
-typedef hkMemoryAllocator Allocator;
-static NineIntegerRecord&__cdecl GetMonitorStream();inline Allocator&heap(){return*m_pStreamAllocator;}
-protected:
-StringPointerTriple m_aiEntries;
-Allocator*m_pStreamAllocator;};
+char m_cBooleanValue;};
+#include "../../../../../../../include/hkEnum.h"
+using ::hkEnum;
 class hkBaseObject_
 {
 public:
@@ -283,9 +56,9 @@ class hkStatisticsCollector;
 class hkReferencedObject_:public hkBaseObject_
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;hkReferencedObject_*b=static_cast<hkReferencedObject_*>(NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));b->m_usMemSizeAndFlags=static_cast<hkUint16>(nbytes);;return b;}
-virtual const hkClass*GetClassType()const;
-virtual void CalcContentStatistics(hkStatisticsCollector*collector,const hkClass*cls)const;
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;hkReferencedObject_*b=static_cast<hkReferencedObject_*>(hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes)));b->m_usMemSizeAndFlags=static_cast<hkUint16>(nbytes);;return b;}
+virtual const hkClass*getClassType()const;
+virtual void calcContentStatistics(hkStatisticsCollector*collector,const hkClass*cls)const;
 public:
 enum
 {
@@ -295,46 +68,25 @@ hkUint16 m_usMemSizeAndFlags;
 public:
 hkReferencedObject_(class FinishingFlag flag){}
 };typedef float hkReal;
-extern "C"{
-extern __m128 _mm_add_ss(__m128 _A,__m128 _B);
-extern __m128 _mm_add_ps(__m128 _A,__m128 _B);
-extern __m128 _mm_sub_ss(__m128 _A,__m128 _B);
-extern __m128 _mm_sub_ps(__m128 _A,__m128 _B);
-extern __m128 _mm_mul_ss(__m128 _A,__m128 _B);
-extern __m128 _mm_mul_ps(__m128 _A,__m128 _B);
-extern __m128 _mm_rsqrt_ss(__m128 _A);
-extern __m128 _mm_andnot_ps(__m128 _A,__m128 _B);
-extern __m128 _mm_cmpeq_ss(__m128 _A,__m128 _B);
-extern __m128 _mm_shuffle_ps(__m128 _A,__m128 _B,unsigned int _Imm8);
-extern __m128 _mm_set_ss(float _A);
-extern int _mm_cvtss_si32(__m128 _A);
-extern __m128 _mm_set_ps1(float _A);
-extern __m128 _mm_load_ss(float const*_A);};
 typedef __m128 hkQuadReal;
 class hkVector4_;
 typedef const hkVector4_&hkVector4Parameter;
-class VectorComponentValue
+
+// Scalar operations used by the heightfield's local vector implementation.
+class HeightFieldScalar
 {
 public:
-VectorComponentValue(const hkQuadReal&x)
-:m_vValue(x)
-{
-}
-VectorComponentValue(hkReal x)
-{
-m_vValue=_mm_load_ss(&x);
-}
-__forceinline hkQuadReal broadcast()const
-{
-return _mm_shuffle_ps(m_vValue,m_vValue,0);
-}
-__forceinline const hkQuadReal&getQuad()const
-{
-return m_vValue;
-}
+    HeightFieldScalar(const hkQuadReal& x) : m_vValue(x) {}
+    HeightFieldScalar(hkReal x) { m_vValue = _mm_load_ss(&x); }
+    __forceinline hkQuadReal broadcast() const
+    {
+        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+    }
+    __forceinline const hkQuadReal& getQuad() const { return m_vValue; }
 private:
-hkQuadReal m_vValue;};
-typedef const VectorComponentValue&hkSimdRealParameter;class Vector4Comparison;
+    hkQuadReal m_vValue;
+};
+typedef const HeightFieldScalar&hkSimdRealParameter;class Vector4Comparison;
 typedef const Vector4Comparison&hkVector4ComparisonParameter;
 namespace MathUtilities
 {inline int __cdecl hkToIntFast(hkReal r){
@@ -357,15 +109,15 @@ class hkTransform_;
 class hkVector4_
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 __forceinline void setAll3(hkReal x);
 __forceinline void add4(const hkVector4_&a);
 __forceinline void setAdd4(const hkVector4_&a,const hkVector4_&b);
 __forceinline void mul4(const hkVector4_&a);
 __forceinline void setMul4(hkVector4Parameter a,hkVector4Parameter b);
 __forceinline void setInterpolate4(const hkVector4_&a,const hkVector4_&b,hkSimdRealParameter t);
-__forceinline VectorComponentValue dot3(const hkVector4_&a)const;
-__forceinline VectorComponentValue lengthInverse3()const;
+__forceinline HeightFieldScalar dot3(const hkVector4_&a)const;
+__forceinline HeightFieldScalar lengthInverse3()const;
 __forceinline void normalize3();
 __forceinline hkReal&operator()(int i);
 __forceinline hkQuadReal&getQuad();
@@ -409,12 +161,12 @@ hkQuadReal s=_mm_sub_ps(*(const hkQuadReal*)&cw,t);
 m_vComponents=_mm_add_ps(
 _mm_mul_ps(s,v0.m_vComponents),
 _mm_mul_ps(t,v1.m_vComponents));}
-inline VectorComponentValue hkVector4_::dot3(const hkVector4_&a)const
+inline HeightFieldScalar hkVector4_::dot3(const hkVector4_&a)const
 {
 hkQuadReal x2=_mm_mul_ps(m_vComponents,a.m_vComponents);
 hkQuadReal xySum=_mm_add_ss(_mm_shuffle_ps(x2,x2,(((1)<<6)|((1)<<4)|((1)<<2)|((1)))),x2);
 return _mm_add_ss(_mm_shuffle_ps(x2,x2,(((2)<<6)|((2)<<4)|((2)<<2)|((2)))),xySum);}
-inline VectorComponentValue hkVector4_::lengthInverse3()const
+inline HeightFieldScalar hkVector4_::lengthInverse3()const
 {
 const hkQuadReal half=_mm_set_ss(0.5f);
 const hkQuadReal three=_mm_set_ss(3.0f);
@@ -435,62 +187,35 @@ inline hkReal&hkVector4_::operator()(int a)
 {
 return reinterpret_cast<hkReal*>(&m_vComponents)[a];
 }
-class StringCursor
+
+// Keep monitor operations inline at their original call sites.
+__forceinline hkMonitorStream& hkMonitorStream::getInstance()
 {
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}static StringCursor&GetMonitorStream()
-{
-extern hkThreadLocalData<StringCursor*>g_pMonitorStream;
-return*g_pMonitorStream.getData();
+    extern hkThreadLocalData<hkMonitorStream*> g_pMonitorStream;
+    return *g_pMonitorStream.getData();
 }
-public:
-__forceinline char*__cdecl GetStreamStart(){return m_kRayStart.val();}
-__forceinline char*__cdecl GetStreamEnd(){return m_kRayEnd.val();}
-__forceinline char*__cdecl getCapacityMinus16(){return m_pCurrentCommand.val();}
-__forceinline hkBoolR __cdecl memoryAvailable()
+__forceinline char* __cdecl hkMonitorStream::getStart() { return m_start.val(); }
+__forceinline char* __cdecl hkMonitorStream::getEnd() { return m_end.val(); }
+__forceinline char* __cdecl hkMonitorStream::getCapacityMinus16() { return m_capacityMinus16.val(); }
+__forceinline hkBool __cdecl hkMonitorStream::memoryAvailable()
 {
-return GetStreamEnd()<getCapacityMinus16();
+    return getEnd() < getCapacityMinus16();
 }
-__forceinline void __cdecl setEnd(char*ptr){m_kRayEnd=ptr;}
-public:
-static void __cdecl init();
-public:
-ValueWrapper<char*>m_kRayStart;
-ValueWrapper<char*>m_kRayEnd;
-ValueWrapper<char*>m_pRayCursor;
-ValueWrapper<char*>m_pCurrentCommand;
-public:
-struct Command
-{
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(StringCursor::Command));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-const char*m_pCommandName;
-};
-struct CommandTimingEntry:public StringCursor::Command
-{
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(StringCursor::CommandTimingEntry));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-hkUint32 m_uiStartTicks;
-hkUint32 m_uiEndTicks;
-__forceinline void setTime();
-};};
-void StringCursor::CommandTimingEntry::setTime()
+__forceinline void __cdecl hkMonitorStream::setEnd(char* ptr) { m_end = ptr; }
+__forceinline void hkMonitorStream::TimerCommand::setTime()
 {
 hkUint32 ticks;
 __asm{
 rdtsc
 mov dword ptr[ticks],eax
 }
-m_uiStartTicks=ticks;
+m_time0=ticks;
 }
-class hkAabb
+class Vector4WithInt24W:public hkVector4_
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
-public:
-hkVector4_ m_kMinimumCorner;};class Vector4WithInt24W:public hkVector4_
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}};
-enum CollisionShapeType
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}};
+enum hkpShapeType
 {
 HK_SHAPE_INVALID=0,
 HK_SHAPE_SPHERE,
@@ -530,17 +255,12 @@ HK_SHAPE_USER2,
 HK_SHAPE_MAX_ID,
 HK_SHAPE_ALL=-1
 };
-enum hkpBufferSize
-{
-HK_SHAPE_BUFFER_SIZE=512
-};
+#include "../../../../../../../include/hkpBufferSize.h"
 typedef __declspec(align(16))char hkpShapeBuffer[HK_SHAPE_BUFFER_SIZE];
 struct ShapeRayCastQuery;
 struct ShapeRayCastOutput;
 struct ShapeRayBundleCastInput;
 struct ShapeRayCastOutputArray;
-class hkpRayHitCollector;
-class hkpCdBody;
 class hkpShapeContainer;
 class hkSphere;
 typedef hkUint16 hkpVertexId;
@@ -550,13 +270,13 @@ class hkpShape_:public hkReferencedObject_
 {
 public:
 static const struct ClassMemberDescriptor Members[];
-__forceinline hkpShape_(CollisionShapeType type);
+__forceinline hkpShape_(hkpShapeType type);
 virtual hkReal getMaximumProjection(const hkVector4_&direction)const;
 virtual const hkpShapeContainer*GetShapeContainer()const{return 0;}
 virtual bool isConvex()const{return false;}
 struct PhysicsShape
 {
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(hkpShape_::PhysicsShape));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;hkMemoryRouter::getInstance().heap().blockFree(p,sizeof(hkpShape_::PhysicsShape));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
 bool m_bIsConvex;
 bool m_bIsConvexPiece;
 bool m_bIsComposite;
@@ -583,26 +303,26 @@ typedef const hkpShape_*(__cdecl*GetChildShapeFunc)(const void*thisObj,hkpShapeK
 typedef hkUint32(__cdecl*GetCollisionFilterInfoFunc)(const void*thisObj,hkpShapeKey key);
 struct ShapeCallbackDispatchTable
 {
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(hkpShape_::ShapeCallbackDispatchTable));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
-ValueWrapper<GetSupportingVertexFunc>m_kGetSupportingVertexFunction;
-ValueWrapper<ConvertVertexIdsToVerticesFunc>m_kConvertVertexIdsToVerticesFunction;
-ValueWrapper<WeldContactPointFunc>m_kWeldContactPointFunction;
-ValueWrapper<GetCentreFunc>m_kGetCentreFunction;
-ValueWrapper<GetNumCollisionSpheresFunc>m_kGetNumCollisionSpheresFunction;
-ValueWrapper<GetCollisionSpheresFunc>m_kGetCollisionSpheresFunction;
-ValueWrapper<GetAabbFunc>m_kGetAabbFunction;
-ValueWrapper<CastRayFunc>m_kCastRayFunction;
-ValueWrapper<CastRayWithCollectorFunc>m_kCastRayWithCollectorFunction;
-ValueWrapper<CastRayBundleFunc>m_kCastRayBundleFunction;
-ValueWrapper<GetChildShapeFunc>m_kGetChildShapeFunction;
-ValueWrapper<GetCollisionFilterInfoFunc>m_kGetCollisionFilterInfoFunction;
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;hkMemoryRouter::getInstance().heap().blockFree(p,sizeof(hkpShape_::ShapeCallbackDispatchTable));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
+hkPadSpu<GetSupportingVertexFunc>m_kGetSupportingVertexFunction;
+hkPadSpu<ConvertVertexIdsToVerticesFunc>m_kConvertVertexIdsToVerticesFunction;
+hkPadSpu<WeldContactPointFunc>m_kWeldContactPointFunction;
+hkPadSpu<GetCentreFunc>m_kGetCentreFunction;
+hkPadSpu<GetNumCollisionSpheresFunc>m_kGetNumCollisionSpheresFunction;
+hkPadSpu<GetCollisionSpheresFunc>m_kGetCollisionSpheresFunction;
+hkPadSpu<GetAabbFunc>m_kGetAabbFunction;
+hkPadSpu<CastRayFunc>m_kCastRayFunction;
+hkPadSpu<CastRayWithCollectorFunc>m_kCastRayWithCollectorFunction;
+hkPadSpu<CastRayBundleFunc>m_kCastRayBundleFunction;
+hkPadSpu<GetChildShapeFunc>m_kGetChildShapeFunction;
+hkPadSpu<GetCollisionFilterInfoFunc>m_kGetCollisionFilterInfoFunction;
 void reset();
 };
 public:
 public:
 hkUlong m_ulUserData;
 public:
-hkEnum<::CollisionShapeType,hkUint32>m_type;
+hkEnum<::hkpShapeType,hkUint32>m_type;
 public:
 hkpShape_(class FinishingFlag flag):hkReferencedObject_(flag)
 {
@@ -632,7 +352,7 @@ struct ShapeRayCastOutput:public RayCastHitResult
 public:
 enum{MAX_HIERARCHY_DEPTH=8};
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 __forceinline ShapeRayCastOutput();
 private:
 __forceinline void _reset();
@@ -690,7 +410,7 @@ public:
 static const struct ClassMemberDescriptor Members[];
 struct CollisionSphereData
 {
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(hkpHeightFieldShape_::CollisionSphereData));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;hkMemoryRouter::getInstance().heap().blockFree(p,sizeof(hkpHeightFieldShape_::CollisionSphereData));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
 class hkSphere*m_kSpheres;
 int m_iSphereCount;
 hkReal m_fScalar;
@@ -698,19 +418,19 @@ hkReal m_fScalar;
 typedef hkVector4_ SphereCollisionOutput;
 struct SphereRayCastQuery:public ShapeRayCastQuery
 {
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p,sizeof(hkpHeightFieldShape_::SphereRayCastQuery));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}__forceinline void __cdecl operator delete(void*p){if(p){;hkMemoryRouter::getInstance().heap().blockFree(p,sizeof(hkpHeightFieldShape_::SphereRayCastQuery));}}__forceinline void*__cdecl operator new(hk_size_t n,void*p){;return p;}__forceinline void*__cdecl operator new[](hk_size_t,void*p){return p;}__forceinline void __cdecl operator delete(void*,void*){}__forceinline void __cdecl operator delete[](void*,void*){}class CommandArgument;
 hkReal m_fSphereRadius;
 hkReal m_fMaxExtraPenetration;
 };
 public:
-hkpHeightFieldShape_(CollisionShapeType type):hkpShape_(type){}
+hkpHeightFieldShape_(hkpShapeType type):hkpShape_(type){}
 public:
 hkpHeightFieldShape_(FinishingFlag flag):hkpShape_(flag){m_type=HK_SHAPE_HEIGHT_FIELD;}
 };
 class ShapeScaleVector
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}public:
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}public:
 hkVector4_ m_vScale;};
 class SampledHeightRayCastView:public hkpHeightFieldShape_
 {
@@ -772,13 +492,7 @@ __forceinline hkBoolR SampledHeightRayCastView::getTriangleFlip()const
 {
 return IsTriangleWindingFlipped();
 }
-class hkpRayHitCollector
-{
-public:
-inline hkpRayHitCollector();
-virtual void CollectRayHit(const hkpCdBody&cdBody,const RayCastHitResult&hitInfo)=0;
-public:
-hkReal m_fEarlyOutHitFraction;};__forceinline void SampledHeightRayCastView::_getHeightAndNormalAt(int x,int z,hkReal subX,hkReal subZ,hkVector4_&normalOut,hkReal&heightOut,int&triangleIndexOut)const
+__forceinline void SampledHeightRayCastView::_getHeightAndNormalAt(int x,int z,hkReal subX,hkReal subZ,hkVector4_&normalOut,hkReal&heightOut,int&triangleIndexOut)const
 {
 normalOut.setAll3(1.0f);
 if(getTriangleFlip())
@@ -835,7 +549,7 @@ triangleIndexOut=0;
 // @fnv 0x00d24b50
 void SampledHeightRayCastView::FUN_00d24b50(const ShapeRayCastQuery&input,const hkpCdBody&cdBody,hkBoolR reportPenetratingStartPosition,hkReal maxExtraPenetration,hkpRayHitCollector&collector)const
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="T" "t" "rcHeightFild";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="T" "t" "rcHeightFild";h->setTime();mStream.setEnd((char*)(h+1));}};
 hkIntUnion64 intFrom;
 hkVector4Util_S::convertToUint16(input.m_vFrom,m_kOffset,m_kInverseScale,intFrom);
 int ep[3];
@@ -894,7 +608,7 @@ int ix=ep[0];
 int iz=ep[2];
 if((unsigned)ix>=(unsigned)(m_iXResolution-1)||(unsigned)iz>=(unsigned)(m_iZResolution-1))
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 ShapeRayCastOutput output;
@@ -905,7 +619,7 @@ const hkReal h0=from(3)-fieldHeight;
 const hkReal h1=to(3)-fieldHeight;
 if(h1>h0)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 hkReal hitFraction;
@@ -913,7 +627,7 @@ if(reportPenetratingStartPosition&&h0<0.0f)
 {
 if(h1>h0-maxExtraPenetration)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 hitFraction=0.0f;
@@ -922,7 +636,7 @@ else
 {
 if(h0<0.0f || h1>=0.0f)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 hitFraction=h0 /(h0-h1);
@@ -935,7 +649,7 @@ output.m_fHitFraction=hitFraction;
 output.m_iExtraInfo=(iz<<16)+triangleIndexOut+ix*2;
 collector.CollectRayHit(cdBody,output);
 }
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 hkVector4_ clippedFrom=from;
@@ -949,7 +663,7 @@ if(signRayDir[0]>0)
 if(ep[0]>0){break;}
 if(to(0)<0.0f)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 ratio=-from(0)*gridLineDistance(0);
@@ -961,7 +675,7 @@ if(ep[0]<=m_iXResolution-2){break;}
 const hkReal maxVal=hkReal(m_iXResolution-1);
 if(to(0)>maxVal)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 ratio=(from(0)-maxVal)*gridLineDistance(0);
@@ -989,7 +703,7 @@ if(signRayDir[2]>0)
 if(ep[2]>0){break;}
 if(to(2)<0.0f)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 ratio=-from(2)*gridLineDistance(2);
@@ -1001,7 +715,7 @@ if(ep[2]<=m_iZResolution-2){break;}
 const hkReal maxVal=hkReal(m_iZResolution-1);
 if(to(2)>maxVal)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 ratio=(from(2)-maxVal)*gridLineDistance(2);
@@ -1023,13 +737,13 @@ break;
 }
 if((unsigned)ep[0]>=(unsigned)m_iXResolution)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 int x=ep[0]-signRayDir[0];
 if((unsigned)x>=(unsigned)m_iXResolution)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 hkBoolR diagDir=((signRayDir[0]^ signRayDir[2])>=0)^ triangleFlip;
@@ -1118,7 +832,7 @@ sInd=inMoreDistantTriangle ? 0:(distToNextCell[1]<distToNextCell[2]? 1:2);
 examineCrossedGridBorder:
 if((unsigned)ep[0]>=(unsigned)m_iXResolution ||(unsigned)ep[2]>=(unsigned)m_iZResolution)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 if(distToLastCrossedCell>collector.m_fEarlyOutHitFraction)
@@ -1232,7 +946,7 @@ lastRayHeight=rayHeight;
 distToLastCrossedCell=fraction;
 if(hitFraction>collector.m_fEarlyOutHitFraction)
 {
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 return;
 }
 {
@@ -1304,5 +1018,5 @@ inMoreDistantTriangle ^=2;
 ep[sInd]+=signRayDir[sInd];
 distToNextCell[sInd]+=gridLineDistance(sInd);
 }
-{StringCursor&mStream=StringCursor::GetMonitorStream();if(mStream.memoryAvailable()){StringCursor::CommandTimingEntry*h=reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());h->m_pCommandName="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
+{hkMonitorStream&mStream=hkMonitorStream::getInstance();if(mStream.memoryAvailable()){hkMonitorStream::TimerCommand*h=reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());h->m_commandAndMonitor="E" "t" "";h->setTime();mStream.setEnd((char*)(h+1));}};
 }

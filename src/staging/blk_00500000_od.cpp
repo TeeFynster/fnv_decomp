@@ -2,7 +2,24 @@
 // src/staging/blk_00500000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include <stddef.h>
+#include "../../include/Actor.h"
+#include "../../include/BGSImpactData.h"
+#include "../../include/BGSTerrainManager.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint4.h"
+#include "../../include/PathingRequest.h"
+#include "../../include/TESObjectDOOR.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESObjectMISC.h"
+#include "../../include/TESKey.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/BSFaceGenMorphData.h"
+#include "../../include/GO.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObject.h"
+#include "../../include/Setting.h"
 
 struct FUN_00505c20_class
 {
@@ -15,11 +32,6 @@ unsigned char FUN_00505c20_class::GetByteAtOffset9A()
     return ((unsigned char*)this)[0x9a];
 }
 
-struct NiNode;
-struct GO
-{
-    void* operator=(void*);
-};
 struct FUN_00507550_Class
 {
     void FUN_00507550(void* p);
@@ -41,13 +53,9 @@ void FUN_00507570_Class::FUN_00507570(float value)
     *(float*)((char*)this + 0x80) = value;
 }
 
-struct FUN_00507610_Class
-{
-    void FUN_00507610(float value);
-};
 
 // @fnv 0x00507610
-void FUN_00507610_Class::FUN_00507610(float value)
+void PathingRequest::FUN_00507610(float value)
 {
     *(float*)((char*)this + 0xb0) = value;
 }
@@ -239,10 +247,6 @@ void FUN_00510110_class::FUN_00510110()
     FUN_005102e0();
 }
 
-struct TESObject
-{
-    void* GetNext();
-};
 struct FUN_00510360_Class
 {
     void* FUN_00510360(TESObject* p);
@@ -253,10 +257,6 @@ void* FUN_00510360_Class::FUN_00510360(TESObject* apObject)
     return apObject->GetNext();
 }
 
-struct BGSTerrainManager
-{
-    unsigned int GetMinLevel();
-};
 struct FUN_00510380_Class
 {
     unsigned int __thiscall GetTerrainMinLevel(BGSTerrainManager* a);
@@ -297,14 +297,15 @@ void __cdecl FUN_005104d0(void* p, size_t n, char* pcValue)
     FUN_00eca2e0(p, *pcValue, n);
 }
 
-struct ArrSI
+// Exe 0x005113d0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int GetFlags();
     unsigned int HasFlag10000000();
 };
 
 // @fnv 0x005113d0
-unsigned int ArrSI::HasFlag10000000()
+unsigned int BlkOffset08View::HasFlag10000000()
 {
     return (GetFlags() & 0x10000000) != 0;
 }
@@ -320,20 +321,12 @@ void FUN_00519020_Class::SetField688(int value)
     *(int*)((char*)this + 0x688) = value;
 }
 
-struct FUN_008256d0_list
-{
-    bool FUN_008256d0();
-};
 
-struct FUN_005194d0_shell_base
-{
-    bool FUN_005194d0();
-};
 
 // @fnv 0x005194d0
-bool FUN_005194d0_shell_base::FUN_005194d0()
+bool TESObjectDOOR::FUN_005194d0()
 {
-    if (!reinterpret_cast<FUN_008256d0_list*>(reinterpret_cast<char*>(this) + 0x88)->FUN_008256d0())
+    if (!m_kRandomTeleportTargets.IsEmpty())
         return true;
     return false;
 }
@@ -458,14 +451,6 @@ void* __thiscall FUN_005010c0_class::FUN_005010c0(unsigned int flags)
     return this;
 }
 
-struct NiPoint4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-
 struct FUN_00507660_class
 {
     void FUN_00507660(NiPoint4 p);
@@ -534,7 +519,6 @@ void* __thiscall FUN_00501cd0_class::FUN_00501cd0()
     return this;
 }
 
-struct TESForm;
 TESForm* __cdecl GetFormByID(unsigned int id);
 
 // @fnv 0x00505000
@@ -603,21 +587,9 @@ void __thiscall FUN_00507690_Class::FUN_00507690(NiPoint4 aPoint)
     m_0xe4 = aPoint;
 }
 
-struct BGSImpactData
-{
-    float FUN_009a9350() const;
-};
-struct PathingRequest
-{
-    float GetActorRadius();
-};
 struct FUN_00508100_shell
 {
     float FUN_00508100();
-};
-struct BSFaceGenMorphData
-{
-    float FUN_00508120();
 };
 struct FUN_00759450_shell
 {
@@ -798,45 +770,10 @@ FUN_00509a10::FUN_00509a10()
     ResetFormData();
 }
 
-extern int DAT_01028364;
-extern int DAT_01028378;
-extern int DAT_0102838c;
-extern int DAT_010283a0;
-extern int DAT_010283b4;
-extern int DAT_010283d4;
-extern int DAT_010283e8;
-extern int DAT_01028408;
-extern int DAT_0102842c;
-extern int DAT_01028444;
-struct TESObjectMISC
-{
-    TESObjectMISC();
-    ~TESObjectMISC();
-};
-struct SFTX
-{
-    void SetFormType(int);
-};
-struct FUN_0050a5a0 : TESObjectMISC
-{
-    FUN_0050a5a0();
-    void SetFormType(int);
-    void SetInitializationState(bool);
-};
 // @fnv 0x0050a5a0
-FUN_0050a5a0::FUN_0050a5a0()
+TESKey::TESKey()
 {
-    *(int**)((char*)this + 0x00) = &DAT_01028444;
-    *(int**)((char*)this + 0x30) = &DAT_0102842c;
-    *(int**)((char*)this + 0x3c) = &DAT_01028408;
-    *(int**)((char*)this + 0x5c) = &DAT_010283e8;
-    *(int**)((char*)this + 0x68) = &DAT_010283d4;
-    *(int**)((char*)this + 0x74) = &DAT_010283b4;
-    *(int**)((char*)this + 0x7c) = &DAT_010283a0;
-    *(int**)((char*)this + 0x84) = &DAT_0102838c;
-    *(int**)((char*)this + 0x8c) = &DAT_01028378;
-    *(int**)((char*)this + 0x9c) = &DAT_01028364;
-    ((SFTX*)this)->SetFormType(0x2e);
+    SetFormType(0x2e);
     SetInitializationState(true);
 }
 
@@ -860,62 +797,35 @@ void __thiscall TESObjectREFR_Flags::SetRefFlag40000000(bool set)
     MarkAsModified(1);
 }
 
-struct Setting_S
-{
-    float* Float();
-};
-
-struct S_004ed780
-{
-    S_004ed780* FUN_004ed780(float value);
-};
-
-struct GlobalObject_0044f440 : Setting_S
-{
-};
-
-struct FUN_0050e620_S
-{
-    bool FUN_0050e620(unsigned char value);
-};
-
-struct GlobalObject_0045cf30 : FUN_0050e620_S
-{
-};
-
-struct S0042fa20
-{
-    void FUN_0045ce80(int value);
-};
-
-struct GlobalObject_0045cfe0 : S0042fa20
-{
-    int* Int();
-};
+// Setting mutators at 0x004ed780 and 0x0050e620 are absent from the shared header; preserve their call ABIs locally.
+extern "C" void AssignSettingFloat();
+extern "C" void AssignSettingByte();
+typedef Setting* (__thiscall *AssignSettingFloatFn)(Setting*, float);
+typedef bool (__thiscall *AssignSettingByteFn)(Setting*, unsigned char);
 
 extern unsigned char DAT_011c8fa0;
 extern double _DAT_01012060;
 
-extern GlobalObject_0044f440 g_011c8fb0;
-extern GlobalObject_0045cf30 g_011c8ff0;
-extern GlobalObject_0045cf30 g_011c9028;
-extern GlobalObject_0045cfe0 g_011c9054;
-extern GlobalObject_0045cf30 g_011c9060;
-extern GlobalObject_0044f440 g_011c906c;
-extern GlobalObject_0045cfe0 g_011c907c;
+extern Setting g_011c8fb0;
+extern Setting g_011c8ff0;
+extern Setting g_011c9028;
+extern Setting g_011c9054;
+extern Setting g_011c9060;
+extern Setting g_011c906c;
+extern Setting g_011c907c;
 
 // @fnv 0x0050e6c0
 bool __cdecl InitSettingsDefaults()
 {
     DAT_011c8fa0 = 0;
 
-    if (g_011c9060.FUN_0050e620(1))
+    if (reinterpret_cast<AssignSettingByteFn>(AssignSettingByte)(&g_011c9060, 1))
         DAT_011c8fa0 |= 1;
 
-    if (g_011c8ff0.FUN_0050e620(1))
+    if (reinterpret_cast<AssignSettingByteFn>(AssignSettingByte)(&g_011c8ff0, 1))
         DAT_011c8fa0 |= 2;
 
-    if (g_011c9028.FUN_0050e620(1))
+    if (reinterpret_cast<AssignSettingByteFn>(AssignSettingByte)(&g_011c9028, 1))
         DAT_011c8fa0 |= 4;
 
     if (!DAT_011c8fa0)
@@ -928,16 +838,14 @@ bool __cdecl InitSettingsDefaults()
         g_011c907c.FUN_0045ce80(2);
 
     if (*g_011c8fb0.Float() == 0.0)
-        reinterpret_cast<S_004ed780*>(&g_011c8fb0)->FUN_004ed780(1.0f);
+        reinterpret_cast<AssignSettingFloatFn>(AssignSettingFloat)(&g_011c8fb0, 1.0f);
 
     if (*g_011c906c.Float() == 0.0)
-        reinterpret_cast<S_004ed780*>(&g_011c906c)->FUN_004ed780(1.0f);
+        reinterpret_cast<AssignSettingFloatFn>(AssignSettingFloat)(&g_011c906c, 1.0f);
 
     return true;
 }
 
-struct TESBoundObject;
-struct Actor;
 
 struct LockExtraData
 {
@@ -946,89 +854,9 @@ struct LockExtraData
     bool IsLocked();
 };
 
-struct P01RefA
-{
-    LockExtraData* GetLock();
-};
 
-struct TESObjectREFR : public P01RefA
-{
-    bool __thiscall CanBeUsed(Actor* actor, bool value);
-};
 
-struct ActorVTable
-{
-    virtual bool V00();
-    virtual bool V01();
-    virtual bool V02();
-    virtual bool V03();
-    virtual bool V04();
-    virtual bool V05();
-    virtual bool V06();
-    virtual bool V07();
-    virtual bool V08();
-    virtual bool V09();
-    virtual bool V10();
-    virtual bool V11();
-    virtual bool V12();
-    virtual bool V13();
-    virtual bool V14();
-    virtual bool V15();
-    virtual bool V16();
-    virtual bool V17();
-    virtual bool V18();
-    virtual bool V19();
-    virtual bool V20();
-    virtual bool V21();
-    virtual bool V22();
-    virtual bool V23();
-    virtual bool V24();
-    virtual bool V25();
-    virtual bool V26();
-    virtual bool V27();
-    virtual bool V28();
-    virtual bool V29();
-    virtual bool V30();
-    virtual bool V31();
-    virtual bool V32();
-    virtual bool V33();
-    virtual bool V34();
-    virtual bool V35();
-    virtual bool V36();
-    virtual bool V37();
-    virtual bool V38();
-    virtual bool V39();
-    virtual bool V40();
-    virtual bool V41();
-    virtual bool V42();
-    virtual bool V43();
-    virtual bool V44();
-    virtual bool V45();
-    virtual bool V46();
-    virtual bool V47();
-    virtual bool V48();
-    virtual bool V49();
-    virtual bool V50();
-    virtual bool V51();
-    virtual bool V52();
-    virtual bool V53();
-    virtual bool V54();
-    virtual bool V55();
-    virtual bool V56();
-    virtual bool V57();
-    virtual bool V58();
-    virtual bool V59();
-    virtual bool V60();
-    virtual bool V61();
-    virtual bool V62();
-    virtual bool V63();
-};
 
-struct Actor : public ActorVTable
-{
-    virtual bool ActorCheck();
-    bool __thiscall FUN_00891db0(TESBoundObject* object, int a, int b, int c, int& count);
-};
 
 extern Actor* g_thePlayer;
 extern TESBoundObject* g_pLockpickItem;
@@ -1045,7 +873,7 @@ bool __thiscall FUN_00516cd0_class::CanUseLockedRef(TESObjectREFR* ref, Actor* a
     Actor* pActor;
     LockExtraData* iCount;
 
-    if (actor == 0 || !actor->ActorCheck())
+    if (actor == 0 || !actor->IsActor())
         return false;
 
     iCount = ref->GetLock();
@@ -2017,13 +1845,6 @@ float __cdecl FUN_004e44b0(float v);
 float __cdecl FUN_0040ebd0(float a, float b);
 float __cdecl FUN_00404010(float a, float b);
 float __cdecl FUN_00408840(float v);
-struct NiUpdateData
-{
-    float m_kPointA;
-    bool m_kPointB;
-    int m_iThirdValue;
-    NiUpdateData(float a, bool b, int c);
-};
 struct Obj
 {
     float FUN_004e4600();
@@ -2048,24 +1869,13 @@ struct TimeGlobal
     float FUN_0084d030();
 };
 extern TimeGlobal DAT_011f6394;
-struct SettingObj
-{
-    float* FUN_00403e20();
-};
-extern SettingObj DAT_011c8fcc;
+extern Setting DAT_011c8fcc;
 struct TQ
 {
     void FUN_0087ad50();
 };
 TQ* __stdcall FUN_004537b0(void* p);
 bool __cdecl FUN_008c7aa0();
-struct P3
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    float m_iThirdValue;
-};
 struct Host
 {
     int unk00;
@@ -2114,10 +1924,10 @@ struct Host
     int unkAC;
     int unkB0;
     float m_b4;
-    bool FUN_0050de60(Ptr p1, float* p2, P3* p3);
+    bool FUN_0050de60(Ptr p1, float* p2, NiPoint3* p3);
 };
 // @fnv 0x0050de60
-bool Host::FUN_0050de60(Ptr p1, float* apTime, P3* p3)
+bool Host::FUN_0050de60(Ptr p1, float* apTime, NiPoint3* p3)
 {
     Obj* s;
     s = p1.FUN_00559450();
@@ -2188,7 +1998,7 @@ bool Host::FUN_0050de60(Ptr p1, float* apTime, P3* p3)
         }
         else
         {
-            if ((m_a8 & 0x80) || (m_a8 & 0x100) || (p3 && p3->m_iThirdValue == 0.0))
+            if ((m_a8 & 0x80) || (m_a8 & 0x100) || (p3 && *reinterpret_cast<const float*>(reinterpret_cast<const char*>(p3) + 0x0C) == 0.0))
             {
                 float tim2;
                 tim2 = p1.FUN_00559450()->FUN_00644a50();
@@ -2204,7 +2014,7 @@ bool Host::FUN_0050de60(Ptr p1, float* apTime, P3* p3)
                 p1.FUN_00559450()->FUN_0050dd20(tim2);
                 if (FUN_00408840((float)(tim2 - *apTime)) < fin)
                 {
-                    if (p3 && p3->m_iThirdValue == 0.0)
+                    if (p3 && *reinterpret_cast<const float*>(reinterpret_cast<const char*>(p3) + 0x0C) == 0.0)
                     {
                         obj = true;
                     }
@@ -2485,15 +2295,6 @@ bool FUN_005098e0_Object::IsFlagged() const
     return unk15C || unk15D;
 }
 
-class NiPoint3
-{
-  public:
-    float x;
-    float y;
-    float z;
-    NiPoint3& operator*=(float afScalar);
-    NiPoint3 operator+(const NiPoint3& arPt) const;
-};
 
 class NiPoint3Init : public NiPoint3
 {
@@ -2501,169 +2302,35 @@ class NiPoint3Init : public NiPoint3
     NiPoint3Init(float afX, float afY, float afZ);
 };
 
-class TESBoundObject
-{
-  public:
-    virtual void VFunc0();
-};
 
-class TESObjectDOOR : public TESBoundObject
-{
-  public:
-    bool FUN_00517fa0();
-};
 
-class DoorRef
-{
-  public:
-    virtual void VFunc0();
-    virtual void VFunc1();
-    virtual void VFunc2();
-    virtual void VFunc3();
-    virtual void VFunc4();
-    virtual void VFunc5();
-    virtual void VFunc6();
-    virtual void VFunc7();
-    virtual void VFunc8();
-    virtual void VFunc9();
-    virtual void VFunc10();
-    virtual void VFunc11();
-    virtual void VFunc12();
-    virtual void VFunc13();
-    virtual void VFunc14();
-    virtual void VFunc15();
-    virtual void VFunc16();
-    virtual void VFunc17();
-    virtual void VFunc18();
-    virtual void VFunc19();
-    virtual void VFunc20();
-    virtual void VFunc21();
-    virtual void VFunc22();
-    virtual void VFunc23();
-    virtual void VFunc24();
-    virtual void VFunc25();
-    virtual void VFunc26();
-    virtual void VFunc27();
-    virtual void VFunc28();
-    virtual void VFunc29();
-    virtual void VFunc30();
-    virtual void VFunc31();
-    virtual void VFunc32();
-    virtual void VFunc33();
-    virtual void VFunc34();
-    virtual void VFunc35();
-    virtual void VFunc36();
-    virtual void VFunc37();
-    virtual void VFunc38();
-    virtual void VFunc39();
-    virtual void VFunc40();
-    virtual void VFunc41();
-    virtual void VFunc42();
-    virtual void VFunc43();
-    virtual void VFunc44();
-    virtual void VFunc45();
-    virtual void VFunc46();
-    virtual void VFunc47();
-    virtual void VFunc48();
-    virtual void VFunc49();
-    virtual void VFunc50();
-    virtual void VFunc51();
-    virtual void VFunc52();
-    virtual void VFunc53();
-    virtual void VFunc54();
-    virtual void VFunc55();
-    virtual void VFunc56();
-    virtual void VFunc57();
-    virtual void VFunc58();
-    virtual void VFunc59();
-    virtual void VFunc60();
-    virtual void VFunc61();
-    virtual void VFunc62();
-    virtual void VFunc63();
-    virtual void VFunc64();
-    virtual void VFunc65();
-    virtual void VFunc66();
-    virtual void VFunc67();
-    virtual void VFunc68();
-    virtual void VFunc69();
-    virtual void VFunc70();
-    virtual void VFunc71();
-    virtual void VFunc72();
-    virtual void VFunc73();
-    virtual void VFunc74();
-    virtual void VFunc75();
-    virtual void VFunc76();
-    virtual void VFunc77();
-    virtual void VFunc78();
-    virtual void VFunc79();
-    virtual void VFunc80();
-    virtual void VFunc81();
-    virtual void VFunc82();
-    virtual void VFunc83();
-    virtual void VFunc84();
-    virtual void VFunc85();
-    virtual void VFunc86();
-    virtual void VFunc87();
-    virtual void VFunc88();
-    virtual void VFunc89();
-    virtual void VFunc90();
-    virtual void VFunc91();
-    virtual void VFunc92();
-    virtual void VFunc93();
-    virtual void VFunc94();
-    virtual void VFunc95();
-    virtual void VFunc96();
-    virtual void VFunc97();
-    virtual void VFunc98();
-    virtual void VFunc99();
-    virtual void VFunc100();
-    virtual void VFunc101();
-    virtual void VFunc102();
-    virtual void VFunc103();
-    virtual void VFunc104();
-    virtual void VFunc105();
-    virtual void VFunc106();
-    virtual void VFunc107();
-    virtual void VFunc108();
-    virtual void VFunc109();
-    virtual void VFunc110();
-    virtual void VFunc111();
-    virtual void VFunc112();
-    virtual void VFunc113();
-    virtual void VFunc114();
-    virtual void VFunc115();
-    virtual void VFunc116();
-    virtual void VFunc117();
-    virtual void VFunc118();
-    virtual void VFunc119();
-    virtual void VFunc120();
-    virtual void VFunc121();
-    virtual void VFunc122();
-    virtual void VFunc123();
-    virtual void VFunc124();
-    virtual NiPoint3* GetPos();
-    TESBoundObject* FUN_007af430();
-    void* FUN_00568e50();
-    struct TeleportableReference* FUN_00568e70();
-    DoorRef* FUN_00569b20();
-    NiPoint3* FUN_00572500(NiPoint3* apOut, float afAngle);
-    const NiPoint3& FUN_00430830() const;
-};
+// These nonvirtual helpers are not yet declared by TESObjectREFR.h.
+// Cast their external symbols to the original thiscall signatures at each use.
+extern "C" void ReferenceGetDoorData();
+extern "C" void ReferenceGetTeleportData();
+extern "C" void ReferenceGetDoorMarker();
+extern "C" void ReferenceGetDoorOffset();
+extern "C" void ReferenceGetDoorRotation();
+typedef void* (__thiscall *GetDoorDataFn)(TESObjectREFR*);
+typedef TeleportableReference* (__thiscall *GetTeleportDataFn)(TESObjectREFR*);
+typedef TESObjectREFR* (__thiscall *GetDoorMarkerFn)(TESObjectREFR*);
+typedef NiPoint3* (__thiscall *GetDoorOffsetFn)(TESObjectREFR*, NiPoint3*, float);
+typedef const NiPoint3& (__thiscall *GetDoorRotationFn)(const TESObjectREFR*);
 
 struct TeleportableReference
 {
-    void FUN_00537e90(DoorRef* apLinkedDoor);
+    void FUN_00537e90(TESObjectREFR* apLinkedDoor);
     void FUN_006f4ed0(const NiPoint3& arPos);
     void SetVec(const NiPoint3& arRot);
 };
 
 float __cdecl FUN_00404010(float, float);
-extern Setting_S g_011c9398;
-extern Setting_S g_011c93c4;
+extern Setting g_011c9398;
+extern Setting g_011c93c4;
 
 // Links two door references by setting each door's teleport data to point at the other, using marker positions or computed offsets.
 // @fnv 0x00519810
-void __cdecl FUN_00519810(DoorRef* apDoorA, DoorRef* apDoorB)
+void __cdecl FUN_00519810(TESObjectREFR* apDoorA, TESObjectREFR* apDoorB)
 {
     if (apDoorA && apDoorB && apDoorA != apDoorB)
     {
@@ -2671,10 +2338,10 @@ void __cdecl FUN_00519810(DoorRef* apDoorA, DoorRef* apDoorB)
         TESObjectDOOR* pBaseDoorB = dynamic_cast<TESObjectDOOR*>(apDoorB->FUN_007af430());
         if (pBaseA && pBaseDoorB)
         {
-            if (!apDoorA->FUN_00568e50() && !apDoorB->FUN_00568e50())
+            if (!reinterpret_cast<GetDoorDataFn>(ReferenceGetDoorData)(apDoorA) && !reinterpret_cast<GetDoorDataFn>(ReferenceGetDoorData)(apDoorB))
             {
-                TeleportableReference* pTeleportDataA = apDoorA->FUN_00568e70();
-                TeleportableReference* pTeleportDataB = apDoorB->FUN_00568e70();
+                TeleportableReference* pTeleportDataA = reinterpret_cast<GetTeleportDataFn>(ReferenceGetTeleportData)(apDoorA);
+                TeleportableReference* pTeleportDataB = reinterpret_cast<GetTeleportDataFn>(ReferenceGetTeleportData)(apDoorB);
                 if (pTeleportDataA && pTeleportDataB)
                 {
                     float fDist = *g_011c9398.Float();
@@ -2682,41 +2349,41 @@ void __cdecl FUN_00519810(DoorRef* apDoorA, DoorRef* apDoorB)
                     float fPi = 3.1415927f;
 
                     pTeleportDataA->FUN_00537e90(apDoorB);
-                    DoorRef* pMarkerB = apDoorB->FUN_00569b20();
+                    TESObjectREFR* pMarkerB = reinterpret_cast<GetDoorMarkerFn>(ReferenceGetDoorMarker)(apDoorB);
                     if (pMarkerB)
                     {
-                        pTeleportDataA->FUN_006f4ed0(*pMarkerB->GetPos());
-                        pTeleportDataA->SetVec(pMarkerB->FUN_00430830());
+                        pTeleportDataA->FUN_006f4ed0(*static_cast<const TESObjectREFR*>(pMarkerB)->GetPos());
+                        pTeleportDataA->SetVec(reinterpret_cast<GetDoorRotationFn>(ReferenceGetDoorRotation)(pMarkerB));
                     }
                     else
                     {
-                        NiPoint3 kOffsetB;
-                        apDoorB->FUN_00572500(&kOffsetB, fPi);
+                        float kOffsetB[3];
+                        reinterpret_cast<GetDoorOffsetFn>(ReferenceGetDoorOffset)(apDoorB, reinterpret_cast<NiPoint3*>(kOffsetB), fPi);
                         if (pBaseDoorB->FUN_00517fa0())
-                            kOffsetB *= afValueAfterThirdFloat;
+                            (*reinterpret_cast<NiPoint3*>(kOffsetB)) *= afValueAfterThirdFloat;
                         else
-                            kOffsetB *= fDist;
-                        pTeleportDataA->FUN_006f4ed0(*apDoorB->GetPos() + kOffsetB);
-                        pTeleportDataA->SetVec(NiPoint3Init(0.0f, 0.0f, apDoorB->FUN_00430830().z + fPi));
+                            (*reinterpret_cast<NiPoint3*>(kOffsetB)) *= fDist;
+                        pTeleportDataA->FUN_006f4ed0(*static_cast<const TESObjectREFR*>(apDoorB)->GetPos() + *reinterpret_cast<NiPoint3*>(kOffsetB));
+                        pTeleportDataA->SetVec(NiPoint3Init(0.0f, 0.0f, reinterpret_cast<GetDoorRotationFn>(ReferenceGetDoorRotation)(apDoorB).z + fPi));
                     }
 
                     pTeleportDataB->FUN_00537e90(apDoorA);
-                    pMarkerB = apDoorA->FUN_00569b20();
+                    pMarkerB = reinterpret_cast<GetDoorMarkerFn>(ReferenceGetDoorMarker)(apDoorA);
                     if (pMarkerB)
                     {
-                        pTeleportDataB->FUN_006f4ed0(*pMarkerB->GetPos());
-                        pTeleportDataB->SetVec(pMarkerB->FUN_00430830());
+                        pTeleportDataB->FUN_006f4ed0(*static_cast<const TESObjectREFR*>(pMarkerB)->GetPos());
+                        pTeleportDataB->SetVec(reinterpret_cast<GetDoorRotationFn>(ReferenceGetDoorRotation)(pMarkerB));
                     }
                     else
                     {
-                        NiPoint3 kOffsetA;
-                        apDoorA->FUN_00572500(&kOffsetA, fPi);
+                        float kOffsetA[3];
+                        reinterpret_cast<GetDoorOffsetFn>(ReferenceGetDoorOffset)(apDoorA, reinterpret_cast<NiPoint3*>(kOffsetA), fPi);
                         if (pBaseA->FUN_00517fa0())
-                            kOffsetA *= afValueAfterThirdFloat;
+                            (*reinterpret_cast<NiPoint3*>(kOffsetA)) *= afValueAfterThirdFloat;
                         else
-                            kOffsetA *= fDist;
-                        pTeleportDataB->FUN_006f4ed0(*apDoorA->GetPos() + kOffsetA);
-                        pTeleportDataB->SetVec(NiPoint3Init(0.0f, 0.0f, apDoorA->FUN_00430830().z + fPi));
+                            (*reinterpret_cast<NiPoint3*>(kOffsetA)) *= fDist;
+                        pTeleportDataB->FUN_006f4ed0(*static_cast<const TESObjectREFR*>(apDoorA)->GetPos() + *reinterpret_cast<NiPoint3*>(kOffsetA));
+                        pTeleportDataB->SetVec(NiPoint3Init(0.0f, 0.0f, reinterpret_cast<GetDoorRotationFn>(ReferenceGetDoorRotation)(apDoorA).z + fPi));
                     }
                 }
             }
@@ -2724,12 +2391,6 @@ void __cdecl FUN_00519810(DoorRef* apDoorA, DoorRef* apDoorB)
     }
 }
 
-class TESForm
-{
-  public:
-    unsigned int FNV_GetFormType();
-    virtual ~TESForm();
-};
 struct TESObjectCELL_Ext : TESForm
 {
     bool IsInterior();

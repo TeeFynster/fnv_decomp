@@ -1,3 +1,7 @@
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/BeamProjectile.h"
+#include "../../../../include/FlameProjectile.h"
+#include "../../../../include/NiPoint3.h"
 
 // src/fallout/ai/combat/flameprojectile_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-28 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy (unit src/fallout/ai/combat/flameprojectile_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -11,51 +15,12 @@ struct Flt
 {
     operator unsigned int() const;
 };
-struct FUN_009b3cb0_shell
-{
-    unsigned int FUN_009b3cb0();
-};
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void* pBuf, unsigned int uSize);
-};
-struct BeamProjectile
-{
-    void LoadProjectile(BGSLoadFormBuffer* apLoadGameBuffer);
-};
-struct FlameProjectile : BeamProjectile
-{
-    FlameProjectile();
-    void FUN_009b3f00(BGSLoadFormBuffer* apLoadGameBuffer);
-};
-// placeholder declarations
-struct FUN_009b32b0_shell
-{
-    void ConfigureFlags();
-};
-struct FUN_005de0a0_shell
-{
-    void FUN_005de0a0(int, int);
-};
-struct FUN_009bda10_shell
-{
-    void FUN_009bda10();
-};
 
 #include <xmmintrin.h>
 struct FilterKey
 {
     unsigned int m_uiCurrentValue;
     FilterKey();
-};
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3();
-    void FUN_004a0c10();
-    NiPoint3 operator-(const NiPoint3& kPt) const;
-    NiPoint3 operator+(const NiPoint3& kPt) const;
-    NiPoint3 operator*(float fScalar) const;
 };
 struct NiMatrix33
 {

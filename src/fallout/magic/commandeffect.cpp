@@ -2,206 +2,80 @@
 // src/fallout/magic/commandeffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/commandeffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct ActorValueInfo
-{
-    void SetScriptName(const char*) const;
-};
+#include "../../../include/ActiveEffect.h"
+#include "../../../include/ActorValueInfo.h"
+#include "../../../include/BSThread.h"
+#include "../../../include/MagicTarget.h"
+#include "../../../include/MagicCaster.h"
 
-struct FUN_0080b640_shell : ActorValueInfo
-{
-    void FUN_0080b640(const char* apName);
-};
 
-// @fnv 0x0080b640
-void FUN_0080b640_shell::FUN_0080b640(const char* apName)
+class CommandEffect : public ActiveEffect
 {
-    ActorValueInfo::SetScriptName(apName);
-}
-
-extern int DAT_010799fc;
-struct FUN_0080b560_shell
-{
-    void FUN_0080b560(int, int, int);
-};
-struct FUN_0080b370_shell : FUN_0080b560_shell
-{
-    void* m_vt;
-    void* FUN_0080b370(int, int, int);
-};
-// Calls the base constructor with the three arguments, sets m_vt to the address of DAT_010799fc, and returns this.
-// @fnv 0x0080b370
-void* FUN_0080b370_shell::FUN_0080b370(int aiArg1, int aiArg2, int aiArg3)
-{
-    FUN_0080b560_shell::FUN_0080b560(aiArg1, aiArg2, aiArg3);
-    m_vt = (void*)&DAT_010799fc;
-    return this;
-}
-
-class MagicCaster;
-class MagicItem;
-class EffectItem;
-struct ActiveEffect
-{
-    ActiveEffect(MagicCaster*, MagicItem*, EffectItem*);
-};
-extern int DAT_01079a9c;
-struct FUN_0080b560 : ActiveEffect
-{
-    FUN_0080b560(MagicCaster*, MagicItem*, EffectItem*);
-};
-// @fnv 0x0080b560
-FUN_0080b560::FUN_0080b560(MagicCaster* a, MagicItem* pItem, EffectItem* pEffectItem)
-    : ActiveEffect(a, pItem, pEffectItem)
-{
-    *(int*)this = (int)&DAT_01079a9c;
-}
-
-namespace fnv_0080b7c0 {
-struct Actor;
-struct BSThread
-{
-    unsigned int GetThreadID();
-};
-struct MagicTarget
-{
-    Actor* GetOwnerActor() const;
-};
-struct MagicCaster
-{
-    Actor* GetCasterActor();
-};
-struct Proc_S
-{
-    MagicCaster* GetNext();
-};
-struct FUN_0080b7c0_shell : Proc_S
-{
+public:
+    CommandEffect(MagicCaster*, MagicItem*, EffectItem*);
+    virtual CommandEffect* Copy();
+    void FUN_0080b640(const char*);
+    void FUN_0080b660();
+    void FUN_0080b6f0(int);
     void FUN_0080b7c0();
-};
-void FUN_0080b9e0(Actor*, Actor*, int);
-// Gets the target actor from the thread ID and the caster from the next entry, then calls FUN_0080b9e0 with both and 1 if both exist.
-// @fnv 0x0080b7c0
-void FUN_0080b7c0_shell::FUN_0080b7c0()
-{
-    Actor* ptarget =
-        ((BSThread*)this)->GetThreadID() ? ((MagicTarget*)((BSThread*)this)->GetThreadID())->GetOwnerActor() : 0;
-    Actor* pcaster = GetNext() ? GetNext()->GetCasterActor() : 0;
-    if (ptarget && pcaster)
-        FUN_0080b9e0(ptarget, pcaster, 1);
-}
-}  // namespace fnv_0080b7c0
 
-struct EffectStorage : FUN_0080b560
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    EffectStorage(MagicCaster* caster, MagicItem* item, EffectItem* effect) : FUN_0080b560(caster, item, effect)
-    {}
+    MagicCaster* FUN_0045cd60();
+    void FUN_00804210(int);
 };
-struct FUN_0080b590_vtable
+
+class CommandCreatureEffect : public CommandEffect
 {
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    void* unk10;
-    void* unk14;
-    void* unk18;
-    void* unk1c;
-    void* unk20;
-    void* unk24;
-    void* unk28;
-    void* unk2c;
-    void* unk30;
-    void* unk34;
-    void* unk38;
-    void* unk3c;
-    void* unk40;
-    void(__thiscall* ApplyEffect)(void*, FUN_0080b560*);
+public:
+    CommandCreatureEffect(MagicCaster*, MagicItem*, EffectItem*);
 };
-struct FUN_0080b590_object
-{
-    FUN_0080b590_vtable* vtable;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    FUN_0080b560* __thiscall CreateAndApplyEffect();
-};
-// Allocates an EffectStorage from the object's caster, item and effect item, applies it via the vtable, and returns it.
+
+// @fnv 0x0080b370
+CommandCreatureEffect::CommandCreatureEffect(MagicCaster* caster, MagicItem* item, EffectItem* effect)
+    : CommandEffect(caster, item, effect)
+{}
+
+// @fnv 0x0080b560
+CommandEffect::CommandEffect(MagicCaster* caster, MagicItem* item, EffectItem* effect)
+    : ActiveEffect(caster, item, effect)
+{}
+
 // @fnv 0x0080b590
-FUN_0080b560* __thiscall FUN_0080b590_object::CreateAndApplyEffect()
+CommandEffect* CommandEffect::Copy()
 {
-    FUN_0080b560* effect = new EffectStorage((MagicCaster*)unk28, (MagicItem*)unk08, (EffectItem*)unk0c);
-    vtable->ApplyEffect(this, effect);
+    CommandEffect* effect = new CommandEffect(m_pEffectInstance, pSpell, pEffect);
+    CopyData(effect);
     return effect;
 }
 
-namespace fnv_0080b660 {
-struct Actor;
-struct MagicCaster
+// @fnv 0x0080b640
+void CommandEffect::FUN_0080b640(const char* apName)
 {
-    Actor* FUN_00815410();
-};
-struct SourceA
-{
-    Actor* FUN_00822b40();
-};
-struct FUN_0045cd60_shell
-{
-    MagicCaster* FUN_0045cd60();
-};
-struct FUN_0080b660_class : FUN_0045cd60_shell
-{
-    SourceA* FUN_0059bb30();
-    void FUN_0080b660();
-};
+    reinterpret_cast<const ActorValueInfo*>(this)->SetScriptName(apName);
+}
+
 void __cdecl StartHostilityAndCombat(Actor*, Actor*);
-// Resolves the source actor and magic caster actor, and if both exist calls StartHostilityAndCombat with them.
+
 // @fnv 0x0080b660
-void FUN_0080b660_class::FUN_0080b660()
+void CommandEffect::FUN_0080b660()
 {
     Actor* pSourceActor = FUN_0059bb30() ? FUN_0059bb30()->FUN_00822b40() : (Actor*)0;
     Actor* pCasterActor = FUN_0045cd60() ? FUN_0045cd60()->FUN_00815410() : (Actor*)0;
     if (pSourceActor && pCasterActor)
         StartHostilityAndCombat(pSourceActor, pCasterActor);
 }
-}  // namespace fnv_0080b660
 
-class EffectHost;
-struct EffectSource
+void FUN_0080b9e0(Actor*, Actor*, int);
+
+// @fnv 0x0080b7c0
+void CommandEffect::FUN_0080b7c0()
 {
-    EffectHost* FUN_00822b40();
-    void* FUN_00815410();
-};
-struct FUN_0080b6f0_owner
-{
-    EffectSource* FUN_0059bb30();
-    EffectSource* FUN_0045cd60();
-    void FUN_00804210(int);
-};
+    Actor* ptarget =
+        ((BSThread*)this)->GetThreadID() ? ((MagicTarget*)((BSThread*)this)->GetThreadID())->GetOwnerActor() : 0;
+    Actor* pcaster = FUN_0045cd60() ? FUN_0045cd60()->GetCasterActor() : 0;
+    if (ptarget && pcaster)
+        FUN_0080b9e0(ptarget, pcaster, 1);
+}
+
 class EffectHost
 {
   public:
@@ -394,25 +268,19 @@ class EffectHost
     virtual bool v2e8();
 };
 void __cdecl FUN_0080b8f0(void*, void*);
-struct FUN_0080b6f0_cls
-{
-    int unk00;
-    void FUN_0080b6f0(int);
-};
-
 // @fnv 0x0080b6f0
-void FUN_0080b6f0_cls::FUN_0080b6f0(int)
+void CommandEffect::FUN_0080b6f0(int)
 {
     EffectHost* a;
     void* b;
-    a = ((FUN_0080b6f0_owner*)this)->FUN_0059bb30() != 0 ? ((FUN_0080b6f0_owner*)this)->FUN_0059bb30()->FUN_00822b40()
+    a = FUN_0059bb30() != 0 ? reinterpret_cast<EffectHost*>(FUN_0059bb30()->FUN_00822b40())
                                                          : 0;
-    b = ((FUN_0080b6f0_owner*)this)->FUN_0045cd60() != 0 ? ((FUN_0080b6f0_owner*)this)->FUN_0045cd60()->FUN_00815410()
+    b = FUN_0045cd60() != 0 ? FUN_0045cd60()->FUN_00815410()
                                                          : 0;
     if (a != 0 && b != 0)
     {
         if (a->v22c(0) || a->v2e8())
-            ((FUN_0080b6f0_owner*)this)->FUN_00804210(0);
+            FUN_00804210(0);
         else
             FUN_0080b8f0(a, b);
     }

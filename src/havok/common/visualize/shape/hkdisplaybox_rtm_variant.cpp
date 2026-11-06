@@ -1,62 +1,16 @@
+#include "../../../../../include/hkArray.h"
 // src/havok/common/visualize/shape/hkdisplaybox_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/visualize/shape/hkdisplaybox.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS /EHsc /Gy (unit lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
 
 // src/havok/common/visualize/shape/hkdisplaybox.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/shape/hkdisplaybox.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-struct hkTransform;
-struct hkMemoryAllocator;
-struct __declspec(align(16)) hkVector4
-{
-    float x, y, z, w;
-    void FUN_00c7f640(const hkTransform& t, const hkVector4& p);
-    void set(const hkVector4& o)
-    {
-        *(__m128*)&x = *(const __m128*)&o.x;
-    }
-};
-struct hkRotation
-{
-    hkVector4 c0, c1, c2;
-};
-struct hkTransform
-{
-    hkRotation m_rotation;
-    hkVector4 m_vTranslation;
-};
-__declspec(nothrow) void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
-struct hkVector4Array
-{
-    hkVector4* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkTransform.h"
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void SetSizeAndGrow(hkMemoryAllocator& alloc, int n)
-    {
-        if (getCapacity() < n)
-        {
-            int cap = 2 * getCapacity();
-            FUN_00c908c0(alloc, this, n < cap ? cap : n, sizeof(hkVector4));
-        }
-        m_iElementCount = n;
-    }
-};
+struct hkMemoryAllocator;
+__declspec(nothrow) void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
+typedef hkArray<hkVector4> hkVector4Array;
 struct hkBoxGeometry
 {
     int unk00;
@@ -88,35 +42,6 @@ struct __declspec(align(16)) Vector4D22DC0
         *reinterpret_cast<__m128*>(this) = *reinterpret_cast<const __m128*>(&kOther);
     }
 };
-struct RotationD22DC0
-{
-    Vector4D22DC0 m_kColumn0;
-    Vector4D22DC0 m_kColumn1;
-    Vector4D22DC0 m_kColumn2;
-    float& operator()(int iRow, int iCol)
-    {
-        return reinterpret_cast<float*>(&m_kColumn0 + iCol)[iRow];
-    }
-    void setIdentity()
-    {
-        m_kColumn0.setZero4();
-        m_kColumn1.setZero4();
-        m_kColumn2.setZero4();
-        (*this)(0, 0) = 1.0f;
-        (*this)(1, 1) = 1.0f;
-        (*this)(2, 2) = 1.0f;
-    }
-};
-struct TransformD22DC0
-{
-    RotationD22DC0 m_rotation;
-    Vector4D22DC0 m_vTranslation;
-    void setIdentity()
-    {
-        m_rotation.setIdentity();
-        m_vTranslation.setZero4();
-    }
-};
 struct ReferencedD22DC0
 {
     ReferencedD22DC0() throw()
@@ -136,7 +61,7 @@ struct ShapeD22DC0 : public ReferencedD22DC0
     virtual ~ShapeD22DC0() throw();
     int m_ulUserData;
     int unk0C;
-    TransformD22DC0 m_kMotionTransform;
+    hkTransform m_kMotionTransform;
     int m_type;
 };
 struct FUN_00d58510 : public ShapeD22DC0
@@ -181,12 +106,12 @@ struct BoxBuild2190Tri
     int m_iThirdValue;
     int m_iFourthElementInteger;
 };
-template <class T> struct BoxBuild2190MatchArray
-{
+template <class T> struct BoxBuild2190MatchArrayLocalForm
+{ // local form of hkArray: 0x00de2190 needs the original constructor stores; shared base construction changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
-    BoxBuild2190MatchArray() : m_data(0), m_iElementCount(0), m_iCapacityState((int)0x80000000)
+    BoxBuild2190MatchArrayLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState((int)0x80000000)
     {}
     int getCapacity() const
     {
@@ -212,8 +137,8 @@ template <class T> struct BoxBuild2190MatchArray
 };
 struct BoxBuild2190Geom
 {
-    BoxBuild2190MatchArray<hkVector4> m_verts;
-    BoxBuild2190MatchArray<BoxBuild2190Tri> m_tris;
+    BoxBuild2190MatchArrayLocalForm<hkVector4> m_verts;
+    BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri> m_tris;
 };
 
 struct BoxBuild2190BoxShell
@@ -254,7 +179,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
     m_08 = geom;
 
     {
-        BoxBuild2190MatchArray<hkVector4>* arr = &m_08->m_verts;
+        BoxBuild2190MatchArrayLocalForm<hkVector4>* arr = &m_08->m_verts;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         hkVector4* dst = arr->append(*allocp);
@@ -262,7 +187,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
             (_mm_setr_ps)(-m_vHalfExtents.x, m_vHalfExtents.y, m_vHalfExtents.z, DAT_01011d78);
     }
     {
-        BoxBuild2190MatchArray<hkVector4>* arr = &m_08->m_verts;
+        BoxBuild2190MatchArrayLocalForm<hkVector4>* arr = &m_08->m_verts;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         hkVector4* dst = arr->append(*allocp);
@@ -270,7 +195,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
             (_mm_setr_ps)(m_vHalfExtents.x, m_vHalfExtents.y, m_vHalfExtents.z, DAT_01011d78);
     }
     {
-        BoxBuild2190MatchArray<hkVector4>* arr = &m_08->m_verts;
+        BoxBuild2190MatchArrayLocalForm<hkVector4>* arr = &m_08->m_verts;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         hkVector4* dst = arr->append(*allocp);
@@ -278,7 +203,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
             (_mm_setr_ps)(m_vHalfExtents.x, -m_vHalfExtents.y, m_vHalfExtents.z, DAT_01011d78);
     }
     {
-        BoxBuild2190MatchArray<hkVector4>* arr = &m_08->m_verts;
+        BoxBuild2190MatchArrayLocalForm<hkVector4>* arr = &m_08->m_verts;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         hkVector4* dst = arr->append(*allocp);
@@ -286,7 +211,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
             (_mm_setr_ps)(-m_vHalfExtents.x, -m_vHalfExtents.y, m_vHalfExtents.z, DAT_01011d78);
     }
     {
-        BoxBuild2190MatchArray<hkVector4>* arr = &m_08->m_verts;
+        BoxBuild2190MatchArrayLocalForm<hkVector4>* arr = &m_08->m_verts;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         hkVector4* dst = arr->append(*allocp);
@@ -294,7 +219,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
             (_mm_setr_ps)(-m_vHalfExtents.x, m_vHalfExtents.y, -m_vHalfExtents.z, DAT_01011d78);
     }
     {
-        BoxBuild2190MatchArray<hkVector4>* arr = &m_08->m_verts;
+        BoxBuild2190MatchArrayLocalForm<hkVector4>* arr = &m_08->m_verts;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         hkVector4* dst = arr->append(*allocp);
@@ -302,7 +227,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
             (_mm_setr_ps)(m_vHalfExtents.x, m_vHalfExtents.y, -m_vHalfExtents.z, DAT_01011d78);
     }
     {
-        BoxBuild2190MatchArray<hkVector4>* arr = &m_08->m_verts;
+        BoxBuild2190MatchArrayLocalForm<hkVector4>* arr = &m_08->m_verts;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         hkVector4* dst = arr->append(*allocp);
@@ -310,7 +235,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
             (_mm_setr_ps)(m_vHalfExtents.x, -m_vHalfExtents.y, -m_vHalfExtents.z, DAT_01011d78);
     }
     {
-        BoxBuild2190MatchArray<hkVector4>* arr = &m_08->m_verts;
+        BoxBuild2190MatchArrayLocalForm<hkVector4>* arr = &m_08->m_verts;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         hkVector4* dst = arr->append(*allocp);
@@ -322,7 +247,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         m_08->m_verts.m_data[i].FUN_00c7f640(m_kMotionTransform, m_08->m_verts.m_data[i]);
 
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -332,7 +257,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -342,7 +267,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -352,7 +277,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -362,7 +287,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -372,7 +297,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -382,7 +307,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -392,7 +317,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -402,7 +327,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -412,7 +337,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -422,7 +347,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);
@@ -432,7 +357,7 @@ void BoxBuild2190BoxShell::FUN_00de2190()
         t->m_iFourthElementInteger = -1;
     }
     {
-        BoxBuild2190MatchArray<BoxBuild2190Tri>* arr = &m_08->m_tris;
+        BoxBuild2190MatchArrayLocalForm<BoxBuild2190Tri>* arr = &m_08->m_tris;
         hkMemoryAllocator* allocp = &FUN_00c85750()->heap();
         _ReadWriteBarrier();
         BoxBuild2190Tri* t = arr->append(*allocp);

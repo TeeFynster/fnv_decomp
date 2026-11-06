@@ -5,21 +5,6 @@
 #define FNV_PATHMANAGER_H
 
 
-class cancellation_token_source
-{
-  public:
-    ~cancellation_token_source();
-};
-
-class QueuedMessage
-{
-  public:
-    unsigned int m_eMessageType;
-    cancellation_token_source m_pPathingSolution;
-
-    ~QueuedMessage();
-};
-
 // @fnv 0x00800190
 QueuedMessage::~QueuedMessage()
 {}

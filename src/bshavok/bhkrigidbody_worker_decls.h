@@ -1,8 +1,14 @@
-// bshavok/bhkrigidbody_worker_decls.h: declares hkpMotion, WorldPhysicsSettings, hkpRigidBody, bhkRigidBodyPrefix, BhkRigidBody
+// bshavok/bhkrigidbody_worker_decls.h: declares WorldPhysicsSettings, hkpRigidBodyMotionView, bhkRigidBodyPrefix, BhkRigidBody
 #ifndef FNV_BHKRIGIDBODY_WORKER_DECLS_H
 #define FNV_BHKRIGIDBODY_WORKER_DECLS_H
 
+#include <stddef.h>
 #include <xmmintrin.h>
+#ifndef FNV_STATIC_ASSERT
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+#endif
 #include "NiPoint3.h"
 class NiQuaternion;
 
@@ -12,11 +18,6 @@ extern NiRTTI DAT_012681c0;
 extern float DAT_01022958;
 extern float DAT_010c60d8;
 
-class hkpMotion
-{
-  public:
-    float GetMassValue();
-};
 
 class WorldPhysicsSettings
 {
@@ -35,9 +36,12 @@ FNV_STATIC_ASSERT(offsetof(WorldPhysicsSettings, m_fSurfaceFriction) == 0xa8);
 FNV_STATIC_ASSERT(offsetof(WorldPhysicsSettings, m_fRestitution) == 0xac);
 FNV_STATIC_ASSERT(offsetof(WorldPhysicsSettings, m_iAutoRemoveLevel) == 0xb7);
 
-class hkpRigidBody
+#include "../../include/hkpRigidBody.h"
+#include "../../include/NiD3DDefaultShader.h"
+// Motion-state vectors of the body at their hkpRigidBody offsets: the transform translation (0x120), the swept
+// transform's second centre of mass (0x140) and rotation (0x160) and the local centre of mass (0x170).
+struct hkpRigidBodyMotionView
 {
-  public:
     char layoutPadding000[0x120];
     __m128 m_vContactPosition;
     char layoutPadding130[0x10];
@@ -45,9 +49,6 @@ class hkpRigidBody
     char layoutPadding150[0x10];
     __m128 m_rotation;
     __m128 m_vCenterOfMassLocal;
-    void SetWorldPosition(const NiPoint3&);
-    void SetBodyOrientation(const NiQuaternion&);
-    void SetPositionAndRotation(const NiPoint3&, const NiQuaternion&);
 };
 
 class bhkRigidBodyPrefix
@@ -98,10 +99,5 @@ class BhkRigidBody : public bhkRigidBodyPrefix
   public:
     WorldPhysicsSettings rigidBody;
     BhkRigidBody();
-};
-class NiD3DDefaultShader
-{
-  public:
-    static void SetShaderName(const char*);
 };
 #endif

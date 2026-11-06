@@ -2,11 +2,7 @@
 // src/fallout/ai/combat/combatcovermap.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatcovermap.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct CombatCoverMap
-{
-    void* __thiscall FUN_00983100(unsigned int flags);
-    void __thiscall FUN_00983130();
-};
+#include "../../../../include/CombatCoverMap.h"
 
 // Calls FUN_00983130, then deletes this if flags has bit 0 set, and returns this.
 // @fnv 0x00983100
@@ -74,6 +70,7 @@ void __thiscall FUN_009a0510_shell::FUN_009a0510(StageHolder* pStage)
             ->FUN_00983280(m_1c4, pStage);
 }
 
+class TESWorldSpace;
 namespace fnv_009a0560 {
 struct StageHolder
 {
@@ -87,7 +84,6 @@ struct FUN_00983420_shell
 {
     bool __thiscall GetOrCreateCoverItem(int, StageHolder*);
 };
-struct TESWorldSpace;
 extern TESWorldSpace* BGSSaveLoadGlobalDataWorldspacePtr;
 struct FUN_009a0560_shell
 {
@@ -143,7 +139,7 @@ struct MapMember
 };
 struct HolderLookup
 {
-    bool Lookup(unsigned int key, void** value);
+    bool FUN_00853130(unsigned int key, void** value);
     void FUN_00844700(unsigned int key, void* value);
 };
 struct CreatedShell
@@ -169,7 +165,7 @@ void FUN_00983280_holder::FUN_00983280(int value, StageHolder* pStageHolder)
 {
     ((MapMember*)((char*)this + 0x14))->AcquireLock();
     void* pCreatedShell = 0;
-    if (!((HolderLookup*)this)->Lookup(*(unsigned int*)((char*)pStageHolder + 0x68), &pCreatedShell))
+    if (!((HolderLookup*)this)->FUN_00853130(*(unsigned int*)((char*)pStageHolder + 0x68), &pCreatedShell))
     {
         pCreatedShell = new CreatedShell();
         ((CreatedShell*)pCreatedShell)->SetByteAtOffset(((HolderStatus*)pStageHolder)->GetDone());
@@ -245,7 +241,7 @@ struct FUN_00983420_class
     char pad[0x14];
     Lock lock;
 
-    bool Lookup(void* key, CoverItem** out);
+    bool FUN_00853130(void* key, CoverItem** out);
     void FUN_00844700(void* key, CoverItem* val);
 
     bool GetOrCreateCoverItem(void* arg1, Arg2* arg2);
@@ -257,7 +253,7 @@ bool FUN_00983420_class::GetOrCreateCoverItem(void* arg1, Arg2* arg2)
 {
     lock.Enter();
     CoverItem* pItem = 0;
-    if (!Lookup(arg2->unk68, &pItem))
+    if (!FUN_00853130(arg2->unk68, &pItem))
     {
         pItem = new CoverItem();
         pItem->SetByteAtOffset(arg2->FUN_00678ce0());
@@ -424,8 +420,9 @@ float FUN_008a88f0_cls::FUN_008a88f0()
     return 1.0f;
 }
 
-struct CoverMapValue
+class CoverMapValue
 {
+  public:
     ~CoverMapValue();
 };
 
@@ -437,13 +434,6 @@ struct CoverMapTarget
 struct CoverMapOwner
 {
     CoverMapTarget* GetTarget();
-};
-
-template <class T> struct CoverMapPointer
-{
-    T* m_pObject;
-    ~CoverMapPointer();
-    operator T*() const;
 };
 
 struct CoverMapBase
@@ -521,8 +511,9 @@ struct CoverMapVirtualTarget
     virtual void Detach(CoverMapOwner* owner);
 };
 
-struct CoverMapOwnerEx
+class CoverMapOwnerEx
 {
+  public:
     CoverMapVirtualTarget* GetTarget();
 };
 
@@ -577,7 +568,7 @@ struct FUN_009835d0_cls
     int unk10;
     CoverLockCalls lock;
 
-    bool Lookup(void* key, CoverItem** out);
+    bool FUN_00853130(void* key, CoverItem** out);
     bool TryUseCoverItem(unsigned int key, unsigned int p2, unsigned int p3, float x, void* target, unsigned char d,
                          unsigned char e);
 };
@@ -591,7 +582,7 @@ bool FUN_009835d0_cls::TryUseCoverItem(unsigned int key, unsigned int p2, unsign
 
     lock.FUN_00aa5ff0();
     item = 0;
-    if (Lookup((void*)key, &item))
+    if (FUN_00853130((void*)key, &item))
     {
         if (!((CoverItemCalls*)item)->FUN_00982df0(p3))
         {
@@ -628,7 +619,7 @@ void CoverMapUnreserveReceiver::FUN_00983520(void* apOwner, Arg2* apLocation)
     {
         this->lock.Enter();
         CoverItem* item = 0;
-        if (this->Lookup(apLocation->unk68, &item))
+        if (this->FUN_00853130(apLocation->unk68, &item))
         {
             if (((CoverReservationUnreserveCalls*)item)->FUN_00982ff0(apOwner, apLocation))
             {

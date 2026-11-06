@@ -7,7 +7,7 @@ void IngredientItem::ResetFormData()
 {
     data.m_iEffectIndex = -1;
     data.m_ucEntryType = 0;
-    InitializeComponent();
+    IngredientItem::InitializeComponent();
 }
 
 // @fnv 0x00409d40
@@ -108,10 +108,6 @@ struct FUN_00485e00_shell
 {
     void __thiscall FUN_00485e00();
 };
-struct FUN_0048e370_obj
-{
-    void __thiscall FUN_0048e370(unsigned int);
-};
 
 struct FUN_00409c70_shell
 {
@@ -122,7 +118,7 @@ struct FUN_00409c70_shell
 void __thiscall FUN_00409c70_shell::FUN_00409c70()
 {
     ((S_0048a520*)((char*)this + 0x1c))->ProcessAndFreeData(0x4c444f4d, 0x54444f4d, 0x53444f4d);
-    ((FUN_0048e370_obj*)((char*)this + 0x3c))->FUN_0048e370(0x4e4f4349);
+    ((TESIcon*)((char*)this + 0x3c))->Save(0x4e4f4349);
     ((S_0048cca0*)((char*)this + 0x48))->FUN_0048cca0();
     ((S_00477f20*)((char*)this + 0x64))->FUN_00477f20();
     ((FUN_00479350_shell*)((char*)this + 0x5c))->FUN_00479350();
@@ -156,13 +152,6 @@ struct B2_4fe
     virtual void v0();
     char pad[0x1c];
 };
-struct TESIcon
-{
-    TESIcon();
-    ~TESIcon();
-    virtual void v0();
-    char pad[0x8];
-};
 struct FUN_0048cc50
 {
     FUN_0048cc50();
@@ -195,7 +184,7 @@ struct S_004f15a0
 };
 struct FUN_004098f0 : FUN_00402b40, B2_4fe, TESIcon, FUN_0048cc50, FUN_0048eac0, FUN_00479320, FUN_00475350
 {
-    EffectIndexRecord data;
+    IngredientItem::EffectIndexRecord data;
     FUN_004098f0();
 };
 // @fnv 0x004098f0
@@ -250,13 +239,6 @@ struct DtorBase4c
     int unk1C;
 };
 
-struct DtorBase6c
-{
-    virtual ~DtorBase6c();
-    int unk04;
-    int unk08;
-};
-
 struct DtorBase78
 {
     virtual void Vslot00()
@@ -288,7 +270,7 @@ struct FUN_00409b40 : DtorBase00,
                       DtorBase30,
                       DtorBase3c,
                       DtorBase4c,
-                      DtorBase6c,
+                      TESIcon,
                       DtorBase78,
                       DtorBase84,
                       DtorBase8c,
@@ -385,7 +367,7 @@ struct LCLoader
 
 struct LCModel
 {
-    int unk00;
+    virtual void v00();
     int unk04;
     int unk08;
     int unk0C;
@@ -395,13 +377,6 @@ struct LCModel
     int unk1C;
 
     bool LoadTextureSwaps(void* apData, unsigned int auiSize, unsigned int auiVersion);
-};
-
-struct LCIcon
-{
-    int unk00;
-    int unk04;
-    int unk08;
 };
 
 struct LCScriptable
@@ -430,10 +405,10 @@ struct LCDestructible
 };
 
 void __cdecl LCLoadModel(LCModel* apModel, LCFile* apFile);
-void __cdecl LCLoadIcon(LCIcon* apIcon, LCFile* apFile);
+void __cdecl LCLoadIcon(TESIcon* apIcon, LCFile* apFile);
 void __cdecl LCLoadDestructible(LCDestructible* apDestructible, LCFile* apFile);
 
-struct LCItem : LCForm, LCLoader, LCModel, LCIcon, LCScriptable, LCEquipType, LCDestructible
+struct LCItem : LCForm, LCLoader, LCModel, TESIcon, LCScriptable, LCEquipType, LCDestructible
 {
     virtual void FUN_00409da0(LCFile* apFile, int aiChunk);
 };

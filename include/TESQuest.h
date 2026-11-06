@@ -1,43 +1,98 @@
-// Source layout: TESQuest. PC corrections are in generate_headers.py.
-#ifndef FNV_TESQUEST_H
-#define FNV_TESQUEST_H
+#pragma once
 
-#include "layout_support.h"
+#include "TESForm.h"
+#include "TESScriptableForm.h"
+#include "TESIcon.h"
+#include "TESFullName.h"
 #include "QuestData.h"
 #include "PerkEntryConditionSet.h"
-#include "TESForm.h"
-#include "TESFullName.h"
-#include "TESIcon.h"
-#include "TESScriptableForm.h"
-#pragma pack(push, 4)
-class TESQuest : public TESForm
+#include "MagicTarget.h"
+
+class QuestStage;
+class BGSQuestObjective;
+class RegionObjectEntry;
+class ScriptLocals;
+class QuestObjectiveList;
+class BGSSaveFormBuffer;
+
+template <class T> class PlayerList;
+
+class TESQuest : public TESForm, public TESScriptableForm, public TESIcon, public TESFullName
 {
-  public:
-    TESScriptableForm tESScriptableFormComponent;    // +0x18
-    TESIcon tESIconComponent;                        // +0x24
-    TESFullName tESFullNameComponent;                // +0x30
-    QuestData data;                                 // +0x3C
-    BSSimpleList<QuestStage*> m_kStageList;       // +0x44
-    BSSimpleList<BGSQuestObjective*> m_kObjectives;  // +0x4C
-    PerkEntryConditionSet m_kInfoConditions;                  // +0x54
-    ScriptLocals* m_pScriptLocals;                   // +0x5C
-    unsigned char m_ucEnabled;                       // +0x60
-    unsigned char layoutPadding61;
-    unsigned short layoutPadding62;
+public:
+    class QuestDataDefaults : public QuestData
+    {
+    public:
+        QuestDataDefaults();
+    };
+
+    QuestDataDefaults data;
+    BSSimpleList<QuestStage*> m_kStageList;
+    BSSimpleList<BGSQuestObjective*> m_kObjectives;
+    PerkEntryConditionSet m_kInfoConditions;
+    ScriptLocals* m_pScriptLocals;
+    unsigned char m_ucEnabled;
+    unsigned char layoutPadding61[3];
+    BSStringT<char> strEditorID;
+
+    TESQuest();
+    virtual ~TESQuest();
+    virtual void ClearData();
+    virtual void LoadGame(BGSLoadFormBuffer* buffer);
+    virtual void Revert(BGSLoadFormBuffer* buffer);
+    virtual void InitItem();
+    virtual const char* GetEditorName() const;
+
+    void ResetFormData();
+    void RemoveAllStages();
+    void ClearObjectives();
+    unsigned int GetStageMask();
+    void UpdateStageMask();
+    bool HasStage(unsigned char index);
+    bool IsStageComplete(unsigned char index);
+    BGSQuestObjective* GetObjective(unsigned int index);
+    void GetTargetsAndObjectives(BSSimpleList<RegionObjectEntry*>* targets,
+                                 BSSimpleList<BGSQuestObjective*>* objectives);
+    bool HasTargetsAndObjectives(BSSimpleList<RegionObjectEntry*>* targets,
+                                 BSSimpleList<BGSQuestObjective*>* objectives);
+    void GetTargetsAndObjectives(PlayerList<RegionObjectEntry*>* targets,
+                                 PlayerList<BGSQuestObjective*>* objectives);
+    bool HasTargetsAndObjectives(PlayerList<RegionObjectEntry*>* targets,
+                                 PlayerList<BGSQuestObjective*>* objectives);
+    bool Load(TESFile* file);
     bool GetEnabled();
-    PerkEntryConditionSet* GetConditions();
+    void SetEnabled(bool enabled);
+    bool GetCompleted();
+    bool GetAllowRepeatStages();
     bool GetAllowRepeatedTopics();
+    void RunScript();
+    void SetStartsEnabled(bool enabled);
+    PerkEntryConditionSet* GetConditions();
     ScriptLocals* GetScriptLocalData();
+    BSSimpleList<QuestStage*>* GetStageList();
+    BSSimpleList<BGSQuestObjective*>* GetObjectiveList();
+    QuestStage* GetStage(unsigned char index);
+    void AddStageDataAtIndex(QuestStage* stage);
+    void AddObjective(BGSQuestObjective* objective);
+    void MarkCompleted(bool completed);
+    void SetQuestCompleted(bool failed);
+    bool HasFlag40();
+    bool HasFlag20();
+    bool HasFlag0x10();
+    void SetFlag20(bool set);
+    void WriteToBuffer(BGSSaveFormBuffer* buffer);
+    void SaveIfChanged(BGSSaveFormBuffer* buffer);
+    void LoadQuestData(unsigned int flags, unsigned int extra);
+    void FUN_0060c950(int value);
+    void FUN_0060c9c0(bool set);
+    void FUN_0060ca30(bool set);
+    void FUN_0060caf0(bool set);
+    void FUN_0060d720();
+    void FUN_0060cd60();
+    unsigned short FUN_0060dba0(unsigned int changedFlags);
+    void FUN_0060dd50(unsigned int flags);
+    void FUN_0060e6a0(unsigned int flags);
+    void FUN_0060e7c0(BGSSaveFormBuffer* buffer);
+    float FUN_00792760();
+    QuestObjectiveList* FUN_005d43e0();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(TESQuest) == 0x64);
-FNV_STATIC_ASSERT(offsetof(TESQuest, tESScriptableFormComponent) == 0x18);
-FNV_STATIC_ASSERT(offsetof(TESQuest, tESIconComponent) == 0x24);
-FNV_STATIC_ASSERT(offsetof(TESQuest, tESFullNameComponent) == 0x30);
-FNV_STATIC_ASSERT(offsetof(TESQuest, data) == 0x3C);
-FNV_STATIC_ASSERT(offsetof(TESQuest, m_kStageList) == 0x44);
-FNV_STATIC_ASSERT(offsetof(TESQuest, m_kObjectives) == 0x4C);
-FNV_STATIC_ASSERT(offsetof(TESQuest, m_kInfoConditions) == 0x54);
-FNV_STATIC_ASSERT(offsetof(TESQuest, m_pScriptLocals) == 0x5C);
-FNV_STATIC_ASSERT(offsetof(TESQuest, m_ucEnabled) == 0x60);
-#endif

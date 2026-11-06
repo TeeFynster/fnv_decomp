@@ -1,58 +1,29 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct FUN_0043c610_shell
-{
-    void __thiscall RunVirtualMethod28();
-};
-
-struct FUN_0043daa0_shell
-{
-    void __thiscall FUN_0043daa0();
-};
+#include "../../include/IOTask.h"
+#include "../../include/QueuedFile.h"
+#include "../../include/QueuedFileLoad.h"
+#include "../../include/QueuedMagicItem.h"
 
 // @fnv 0x0043daa0
-void __thiscall FUN_0043daa0_shell::FUN_0043daa0()
+void QueuedFileLoad::Finish()
 {
-    ((FUN_0043c610_shell*)this)->RunVirtualMethod28();
+    QueuedFile::Finish();
 }
 
-extern int DAT_01016a18;
-struct QueuedFile
-{
-    void* vtbl;
-    int m_field;
-    int m_auiShapeKeys[8];
-    QueuedFile(int a);
-};
-struct FUN_0043db30 : QueuedFile
-{
-    void* m_magicItem;
-    void* m_effect;
-    FUN_0043db30(void* aMagicItem, void* aEffect, int aPriority);
-};
 // @fnv 0x0043db30
-FUN_0043db30::FUN_0043db30(void* aMagicItem, void* aEffect, int aPriority) : QueuedFile(aPriority)
+QueuedMagicItem::QueuedMagicItem(MagicItem* aMagicItem, EffectSetting* aEffect, IO_TASK_PRIORITY aPriority) : QueuedFile(aPriority)
 {
-    vtbl = &DAT_01016a18;
-    m_magicItem = aMagicItem;
-    m_effect = aEffect;
+    pMagicItem = aMagicItem;
+    m_pEffectSetting = aEffect;
 }
 
-struct QHeadLocal
-{
-    int vtbl;
-    int data;
-};
 struct QHeadPtr
 {
-    QHeadLocal* pHead;
-    QHeadPtr(QHeadLocal* pHead);
+    IOTask* pHead;
+    QHeadPtr(IOTask* pHead);
     ~QHeadPtr();
-};
-struct IOTask
-{
-    unsigned char GetPriority();
 };
 struct C_00449210
 {
@@ -60,12 +31,12 @@ struct C_00449210
 };
 struct FUN_0043d6b0_shell
 {
-    void __thiscall FUN_0043d6b0(QHeadLocal* aHead);
+    void __thiscall FUN_0043d6b0(IOTask* aHead);
 };
 // Wraps aHead in a QHeadPtr and passes its priority and the wrapper to the object at this+0x64 via FUN_00449210.
 // @fnv 0x0043d6b0
-void FUN_0043d6b0_shell::FUN_0043d6b0(QHeadLocal* aHead)
+void FUN_0043d6b0_shell::FUN_0043d6b0(IOTask* aHead)
 {
     QHeadPtr head(aHead);
-    (*(C_00449210**)((char*)this + 0x64))->FUN_00449210(((IOTask*)aHead)->GetPriority(), &head);
+    (*(C_00449210**)((char*)this + 0x64))->FUN_00449210(aHead->GetPriority(), &head);
 }

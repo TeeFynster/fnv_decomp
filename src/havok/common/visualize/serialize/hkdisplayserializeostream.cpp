@@ -1,6 +1,14 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/common/visualize/serialize/hkdisplayserializeostream.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/serialize/hkdisplayserializeostream.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkOArchive.h"
+
+__declspec(nothrow) hkMemoryRouter* __cdecl FUN_00c85750();
 
 // @fnv 0x00dda830
 unsigned int FUN_00dda830(const unsigned int* puiValues)
@@ -14,42 +22,6 @@ void __stdcall FUN_00dda730(unsigned int p)
 {
     WriteFloatArray(p, 3);
 }
-
-struct hkMemoryAllocator
-{
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-};
-
-struct AudioMgr
-{
-    int unk00, unk04, unk08, unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-
-struct BSAudio;
-__declspec(nothrow) BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
-{
-    return (AudioMgr*)FUN_00c85750();
-}
-
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    hkBool(const hkBool& o)
-    {
-        m_cBooleanValue = o.m_cBooleanValue;
-    }
-};
 
 struct RefObj
 {
@@ -67,7 +39,7 @@ struct FUN_00d27460 : RefObj
 
 inline void* hkAlloc(int n)
 {
-    RefObj* p = (RefObj*)audio()->heap().AllocateMemoryBlock(n);
+    RefObj* p = (RefObj*)FUN_00c85750()->heap().blockAlloc(n);
     p->m_usMemSizeAndFlags = (short)n;
     return p;
 }
@@ -114,17 +86,12 @@ struct DDA7C0Triangle
     int m_iMaterialIndex;
 };
 
-template <class T> struct DDA7C0Array
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+
 
 struct DDA7C0Geometry
 {
-    DDA7C0Array<DDA7C0Vector4> m_kVertices;
-    DDA7C0Array<DDA7C0Triangle> m_uiTriangleCount;
+    hkArrayBase<DDA7C0Vector4> m_kVertices;
+    hkArrayBase<DDA7C0Triangle> m_uiTriangleCount;
 };
 
 struct DDA7C0OStream
@@ -151,21 +118,6 @@ void DDA7C0OStream::WriteGeometry(const DDA7C0Geometry& geometry)
 }
 
 namespace fnv_00ddabb0 {
-struct Allocator
-{
-    virtual void ReportDiagnostic();
-    virtual void unused1();
-    virtual void Free(void* block, unsigned int size);
-};
-struct AllocatorHolder
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    Allocator* allocator;
-};
-AllocatorHolder* __cdecl FUN_00c85750();
 struct FUN_00ddabb0_shell
 {
     void* unk00;
@@ -173,51 +125,27 @@ struct FUN_00ddabb0_shell
     void FUN_00d60590();
     FUN_00ddabb0_shell* FUN_00ddabb0(unsigned int flags);
 };
-// Calls FUN_00d60590, then if bit 0 of flags is set frees this through the allocator from FUN_00c85750, and returns this.
+// Calls FUN_00d60590, then if bit 0 of flags is set frees this through the hkMemoryRouter heap allocator, and returns this.
 // @fnv 0x00ddabb0
 FUN_00ddabb0_shell* FUN_00ddabb0_shell::FUN_00ddabb0(unsigned int flags)
 {
     FUN_00d60590();
     if (flags & 1)
     {
-        AllocatorHolder* holder = FUN_00c85750();
-        holder->allocator->Free(this, size);
+        hkMemoryRouter* holder = FUN_00c85750();
+        holder->heap().blockFree(this, size);
     }
     return this;
 }
 }  // namespace fnv_00ddabb0
 
-// Stand-in for the class that owns WriteUInt16 (the game's own class name for
-// the neighbourhood is hkOArchive; no layout information is needed here because
-// the function never touches a member).
-//
-// The original is a __thiscall member with ONE 4-byte stack argument (the
-// callers do `mov ecx,<object> / push <arg> / call WriteUInt16`, and the body
-// ends in `ret 4`).  It forwards `this` (ECX) unchanged to WriteSwapped and
-// passes the ADDRESS of its own incoming argument as the first argument of
-// that call, followed by the constants 2 and 1:
-//
-//     push 1
-//     push 2
-//     lea eax, [esp+0xc]      ; &argument  (the incoming stack slot)
-//     push eax
-//     call 0x00d60600
-//     ret 4
-//
-// WriteSwapped is a __thiscall member of its own (it uses ECX as `this` and
-// pops three 4-byte arguments), so it is only DECLARED here: the call target
-// is then bound by the checker from the original's own bytes.
-
-struct hkOArchiveStandIn
-{
-    void WriteSwapped(void* p, int n, int m);  // declared, never defined
-    void WriteUInt16(unsigned int value);
-};
-
+// 0x00d60600 is hkOArchive::WriteSwapped in hkoarchive.cpp's bindings.
+// The shared header lacks this unsigned-16 writer; the unused EDX argument
+// lets this local helper retain the original thiscall ABI without a class copy.
 // @fnv 0x00d60920
-void hkOArchiveStandIn::WriteUInt16(unsigned int value)
+void __fastcall WriteUInt16(hkOArchive* archive, void*, unsigned short value)
 {
-    WriteSwapped(&value, 2, 1);
+    archive->WriteSwapped(&value, 2, 1);
 }
 
 #include <xmmintrin.h>
@@ -234,29 +162,19 @@ struct S_00dda740_Vector4
     }
 };
 
-struct S_00dda740_Matrix3
-{
-    S_00dda740_Vector4 m_kColumn0;
-    S_00dda740_Vector4 m_kColumn1;
-    S_00dda740_Vector4 m_kColumn2;
-    S_00dda740_Matrix3(const S_00dda740_Matrix3& o)
-    {
-        m_kColumn0.q() = o.m_kColumn0.q();
-        m_kColumn1.q() = o.m_kColumn1.q();
-        m_kColumn2.q() = o.m_kColumn2.q();
-    }
-};
+#include "../../../../../include/hkMatrix3.h"
+
 
 struct S_00dda740_Transform
 {
-    S_00dda740_Matrix3 m_rotation;
+    hkMatrix3 m_rotation;
     S_00dda740_Vector4 m_vTranslation;
 };
 
 struct S_00dda740_Quaternion
 {
     S_00dda740_Vector4 m_vec;
-    void FUN_00cb26e0(const S_00dda740_Matrix3& r);
+    void FUN_00cb26e0(const hkMatrix3& r);
 };
 
 struct S_00dda740
@@ -270,7 +188,7 @@ struct S_00dda740
 void S_00dda740::WriteTransform(const S_00dda740_Transform& t)
 {
     S_00dda740_Vector4 trans = t.m_vTranslation;
-    __declspec(align(16)) S_00dda740_Matrix3 rot = t.m_rotation;
+    __declspec(align(16)) hkMatrix3 rot = t.m_rotation;
     __declspec(align(16)) S_00dda740_Quaternion q;
     q.FUN_00cb26e0(rot);
     WriteFloatArray(&trans.x, 3);

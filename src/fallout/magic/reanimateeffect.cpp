@@ -1,14 +1,16 @@
+#include "../../../include/ActiveEffect.h"
+#include "../../../include/Actor.h"
+#include "../../../include/BSThread.h"
+#include "../../../include/Character.h"
+#include "../../../include/MagicCaster.h"
+#include "../../../include/MagicTarget.h"
+#include "../../../include/ReanimateEffect.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESSaveLoadGame.h"
 
 // src/fallout/magic/reanimateeffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/reanimateeffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct Actor;
-
-struct ReanimateEffect
-{
-    unsigned short __thiscall FUN_00804f80(Actor* apActor);
-    unsigned short __thiscall FUN_00827440(Actor* apActor);
-};
 
 // @fnv 0x00827440
 unsigned short __thiscall ReanimateEffect::FUN_00827440(Actor* apActor)
@@ -22,35 +24,12 @@ unsigned short __thiscall ReanimateEffect::FUN_00827440(Actor* apActor)
     return isize;
 }
 
-// Minimal stand-ins
-class Actor;
-
-struct ActiveEffect
-{
-    void LoadGame(Actor* apActor);
-};
-
-class TESSaveLoadGame
-{
-  public:
-    void ReadTypedData(void* dest, unsigned int size);
-};
-
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
-struct FUN_00827510_shell : ActiveEffect
-{
-    unsigned int m_4c;
-    unsigned int m_50;
-    unsigned char m_54[12];
-    unsigned char m_60[16];
-
-    void LoadGame(Actor* apActor);
-};
 
 // Loads the base ActiveEffect state, then reads four blocks (4, 4, 12 and 16 bytes) into this object at offsets 0x4c, 0x50, 0x54 and 0x60 via g_TESSaveLoadGame.
 // @fnv 0x00827510
-void FUN_00827510_shell::LoadGame(Actor* apActor)
+void ReanimateEffect::LoadGame(Actor* apActor)
 {
     ActiveEffect::LoadGame(apActor);
     g_TESSaveLoadGame->ReadTypedData((void*)((char*)this + 0x4c), 4);
@@ -59,130 +38,6 @@ void FUN_00827510_shell::LoadGame(Actor* apActor)
     g_TESSaveLoadGame->ReadTypedData((void*)((char*)this + 0x60), 16);
 }
 
-struct TESForm
-{
-    virtual void __thiscall Revert(unsigned int);
-};
-struct ActorVirt
-{
-    virtual void a0();
-    virtual void a1();
-    virtual void a2();
-    virtual void a3();
-    virtual void a4();
-    virtual void a5();
-    virtual void a6();
-    virtual void a7();
-    virtual void a8();
-    virtual void a9();
-    virtual void a10();
-    virtual void a11();
-    virtual void a12();
-    virtual void a13();
-    virtual void a14();
-    virtual void a15();
-    virtual void a16();
-    virtual void a17();
-    virtual void a18();
-    virtual void a19();
-    virtual void a20();
-    virtual void a21();
-    virtual void a22();
-    virtual void a23();
-    virtual void a24();
-    virtual void a25();
-    virtual void a26();
-    virtual void a27();
-    virtual void a28();
-    virtual void a29();
-    virtual void a30();
-    virtual void a31();
-    virtual void a32();
-    virtual void a33();
-    virtual void a34();
-    virtual void a35();
-    virtual void a36();
-    virtual void a37();
-    virtual void a38();
-    virtual void a39();
-    virtual void a40();
-    virtual void a41();
-    virtual void a42();
-    virtual void a43();
-    virtual void a44();
-    virtual void a45();
-    virtual void a46();
-    virtual void a47();
-    virtual void a48();
-    virtual void a49();
-    virtual void a50();
-    virtual void a51();
-    virtual void a52();
-    virtual void a53();
-    virtual void a54();
-    virtual void a55();
-    virtual void a56();
-    virtual void a57();
-    virtual void a58();
-    virtual void a59();
-    virtual void a60();
-    virtual void a61();
-    virtual void a62();
-    virtual void a63();
-    virtual void a64();
-    virtual void a65();
-    virtual void a66();
-    virtual void a67();
-    virtual void a68();
-    virtual void a69();
-    virtual void a70();
-    virtual void a71();
-    virtual void a72();
-    virtual void a73();
-    virtual void a74();
-    virtual void a75();
-    virtual void a76();
-    virtual void a77();
-    virtual void a78();
-    virtual void a79();
-    virtual void a80();
-    virtual void a81();
-    virtual void a82();
-    virtual void a83();
-    virtual void a84();
-    virtual void a85();
-    virtual void a86();
-    virtual void a87();
-    virtual void a88();
-    virtual void a89();
-    virtual void a90();
-    virtual void a91();
-    virtual void a92();
-    virtual void a93();
-    virtual void a94();
-    virtual void a95();
-    virtual void a96();
-    virtual void a97();
-    virtual void a98();
-    virtual void a99();
-    virtual void a100();
-    virtual void a101();
-    virtual void a102();
-    virtual void a103();
-    virtual void a104();
-    virtual void a105();
-    virtual void a106();
-    virtual void a107();
-    virtual void a108();
-    virtual void a109();
-    virtual void a110();
-    virtual void a111();
-    virtual void a112();
-    virtual void a113();
-    virtual void a114();
-    virtual void a115();
-    virtual int a116();
-};
 struct BodyVirt
 {
     virtual void b0();
@@ -244,115 +99,36 @@ struct BodyVirt
     virtual void b56();
     virtual void __thiscall b57(int);
 };
-struct FUN_008276e0_shell
-{
-    unsigned char _pad[0x48];
-    BodyVirt* pBody;
-    int iState;
-    void __thiscall FUN_008276e0(Actor* apActor);
-};
-// Reverts this form with apActor, then if iState is below 0x32 and apActor has a116() and pBody exists, calls pBody->b57(1).
+// Reverts this form, then restores body motion if the actor has 3D and iState is below 0x32.
 // @fnv 0x008276e0
-void __thiscall FUN_008276e0_shell::FUN_008276e0(Actor* apActor)
+void __thiscall ReanimateEffect::FUN_008276e0(Actor* apActor)
 {
     ((TESForm*)this)->TESForm::Revert((unsigned int)apActor);
-    if (iState < 0x32 && apActor && ((ActorVirt*)apActor)->a116() && pBody)
+    if (iState < 0x32 && apActor && apActor->GetNiNode() && pBody)
     {
         pBody->b57(1);
     }
 }
 
-struct FUN_008265b0_shell
-{
-    unsigned int a;
-    unsigned int b;
-    unsigned int c;
-    unsigned int d;
-    unsigned int e;
-    unsigned int f;
-    unsigned int g;
-    unsigned int h;
-    unsigned int i;
-    unsigned int j;
-    unsigned int k;
-    unsigned int l;
-    unsigned int m;
-    unsigned int n;
-    unsigned int o;
-    unsigned int p;
-    unsigned int q;
-    unsigned int r;
-    unsigned int s;
-    unsigned int t;
-    unsigned int u;
-    unsigned int v;
-    unsigned int w;
-    unsigned int x;
-    unsigned int y;
-    unsigned int z;
-    unsigned int aa;
-    unsigned int ab;
-    FUN_008265b0_shell(int, int, int);
-};
-// Allocates and constructs a FUN_008265b0_shell from the three arguments, returning the new object.
+// Allocates and constructs a reanimation effect from the three arguments, returning the new object.
 // @fnv 0x008273c0
-FUN_008265b0_shell* FUN_008273c0(int aiArg1, int aiArg2, int aiArg3)
+ReanimateEffect* FUN_008273c0(MagicCaster* apCaster, MagicItem* apSpell, EffectItem* apEffect)
 {
-    return new FUN_008265b0_shell(aiArg1, aiArg2, aiArg3);
+    return new ReanimateEffect(apCaster, apSpell, apEffect);
 }
 
-struct SaveGameHelper
-{
-    void SaveGame(Actor* apActor);
-};
-struct TESSaveLoadGameHelper
-{
-    void FUN_008579b0(void* apDest, int aiSize);
-};
-struct FUN_008274a0_shell : ActiveEffect
-{
-    unsigned char _pad[0x4c];
-    unsigned int m_4c;
-    unsigned int m_50;
-    unsigned char m_54[12];
-    unsigned char m_60[16];
-
-    void FUN_008274a0(Actor* apActor);
-};
 // @fnv 0x008274a0
-void FUN_008274a0_shell::FUN_008274a0(Actor* apActor)
+void ReanimateEffect::FUN_008274a0(Actor* apActor)
 {
-    ((SaveGameHelper*)this)->SaveGame(apActor);
-    ((TESSaveLoadGameHelper*)g_TESSaveLoadGame)->FUN_008579b0(&m_4c, 4);
-    ((TESSaveLoadGameHelper*)g_TESSaveLoadGame)->FUN_008579b0(&m_50, 4);
-    ((TESSaveLoadGameHelper*)g_TESSaveLoadGame)->FUN_008579b0(m_54, 12);
-    ((TESSaveLoadGameHelper*)g_TESSaveLoadGame)->FUN_008579b0(m_60, 16);
+    ActiveEffect::SaveGame(apActor);
+    g_TESSaveLoadGame->FUN_008579b0(&m_4c, 4);
+    g_TESSaveLoadGame->FUN_008579b0(&m_50, 4);
+    g_TESSaveLoadGame->FUN_008579b0(m_54, 12);
+    g_TESSaveLoadGame->FUN_008579b0(m_60, 16);
 }
 
 void* __cdecl operator new(unsigned int);
 extern int _data_011c16bc;
-
-struct FUN_008266a0_virt
-{
-    virtual void a0();
-    virtual void a1();
-    virtual void a2();
-    virtual void a3();
-    virtual void a4();
-    virtual void a5();
-    virtual void a6();
-    virtual void a7();
-    virtual void a8();
-    virtual void a9();
-    virtual void a10();
-    virtual void a11();
-    virtual void a12();
-    virtual void a13();
-    virtual void a14();
-    virtual void a15();
-    virtual void a16();
-    virtual void a17(ActiveEffect*);
-};
 
 struct FUN_008266a0_copy54
 {
@@ -364,21 +140,15 @@ struct FUN_008266a0_copy60
     unsigned char data[16];
 };
 
-struct FUN_008266a0_shell : ReanimateEffect
-{
-    ActiveEffect* FUN_008266a0();
-};
 
 // Allocates a new effect from three fields of this, passes it to a17, copies fields at 0x48-0x6f into it and returns it.
 // @fnv 0x008266a0
-ActiveEffect* FUN_008266a0_shell::FUN_008266a0()
+ActiveEffect* ReanimateEffect::FUN_008266a0()
 {
     ActiveEffect* presult = reinterpret_cast<ActiveEffect*>(
-        new FUN_008265b0_shell(*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x28),
-                               *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x08),
-                               *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x0c)));
+        new ReanimateEffect(m_pEffectInstance, pSpell, pEffect));
 
-    reinterpret_cast<FUN_008266a0_virt*>(this)->a17(presult);
+    reinterpret_cast<ActiveEffect*>(this)->CopyData(presult);
 
     *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(presult) + 0x48) =
         *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x48);
@@ -403,80 +173,12 @@ struct DH
 
 extern DH* g_dataHandler;
 
-struct MagicTarget
-{
-    Actor* __thiscall GetOwnerActor() const;
-};
-
-struct BSThread
-{
-    MagicTarget* __thiscall GetThreadID();
-};
 
 struct Proc_S
 {
     void* __thiscall GetNext();
 };
 
-struct MagicCaster
-{
-    Actor* __thiscall GetCasterActor();
-};
-
-struct Actor : ActorVirt
-{
-    void __thiscall FUN_008acf10(bool);
-    void __thiscall Kill(Actor*, float);
-
-    virtual void a117()
-    {}
-    virtual void a118()
-    {}
-    virtual void a119()
-    {}
-    virtual void a120()
-    {}
-    virtual void a121()
-    {}
-    virtual void a122()
-    {}
-    virtual void a123()
-    {}
-    virtual void a124()
-    {}
-    virtual void a125()
-    {}
-    virtual void a126()
-    {}
-    virtual void a127()
-    {}
-    virtual void a128()
-    {}
-    virtual void a129()
-    {}
-    virtual void a130()
-    {}
-    virtual void a131()
-    {}
-    virtual void a132()
-    {}
-    virtual void a133()
-    {}
-    virtual void a134()
-    {}
-    virtual void a135()
-    {}
-    virtual void a136()
-    {}
-    virtual void a137()
-    {}
-    virtual void a138()
-    {}
-    virtual bool a139(int)
-    {
-        return false;
-    }
-};
 
 struct EffectVirt
 {
@@ -664,23 +366,15 @@ struct EffectVirt
 
 void __cdecl FUN_0080b9e0(Actor*, Actor*, int);
 
-struct FUN_00827230_shell
-{
-    unsigned char _pad[0x48];
-    EffectVirt* m_48;
-    int m_4c;
-
-    void __thiscall FUN_00827230();
-};
 
 // @fnv 0x00827230
-void __thiscall FUN_00827230_shell::FUN_00827230()
+void __thiscall ReanimateEffect::FUN_00827230()
 {
     if (g_dataHandler->FUN_004226e0())
         return;
 
-    Actor* pTarget = reinterpret_cast<BSThread*>(this)->GetThreadID()
-                         ? reinterpret_cast<BSThread*>(this)->GetThreadID()->GetOwnerActor()
+    Actor* pTarget = reinterpret_cast<ActiveEffect*>(this)->GetTarget()
+                         ? reinterpret_cast<ActiveEffect*>(this)->GetTarget()->GetOwnerActor()
                          : 0;
 
     if (pTarget != 0)
@@ -694,7 +388,7 @@ void __thiscall FUN_00827230_shell::FUN_00827230()
         }
         else
         {
-            if (!pTarget->a139(0))
+            if (!pTarget->HasHealth(false))
                 pTarget->Kill(0, 0.0f);
         }
 
@@ -826,36 +520,11 @@ struct BoneCollision
 BoneCollision* FUN_0043b610(ReanimateNode*);
 void FUN_00c6a350(ReanimateNode*, bool, bool, bool, bool);
 void FUN_005b5e40(const char*);
-struct ReanimateState
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    BodyVirt* body;
-    int state;
-    void FUN_00805760(Actor*);
-    void UpdateReanimation(Actor*);
-};
 // @fnv 0x00827580
-void ReanimateState::UpdateReanimation(Actor* actor)
+void ReanimateEffect::UpdateReanimation(Actor* actor)
 {
     FUN_00805760(actor);
-    ReanimateNode* root = reinterpret_cast<ReanimateNode*>(actor->a116());
+    ReanimateNode* root = reinterpret_cast<ReanimateNode*>(actor->GetNiNode());
     if (root)
     {
         ReanimateBody* controller2 = static_cast<ActorBodyAccess*>(actor)->FUN_008adcb0();
@@ -874,8 +543,8 @@ void ReanimateState::UpdateReanimation(Actor* actor)
             BoneCollision* collision8 = FUN_0043b610(spine);
             if (collision8)
             {
-                body = collision8->FUN_006fa820();
-                body->b57(4);
+                pBody = collision8->FUN_006fa820();
+                pBody->b57(4);
             }
         }
         else
@@ -1833,46 +1502,18 @@ struct RTarget
 };
 void UpdatePhysics(RNode*, int, bool, bool, bool);
 void Warn(const char*);
-struct Reanimation
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    RBodyAccess* body;
-    int unk4c;
-    int unk50;
-    RVector position;
-    RVector rotation;
-    RSource* GetSource();
-    RTarget* GetTarget();
-    void Dispel(bool);
-    void StartReanimation();
-};
+RSource* __fastcall GetReanimationSource(ReanimateEffect* apEffect);
+
 // If the target actor is dead, resets and reconfigures it, assigns a package, and stores the spine bone's body position and rotation; otherwise dispels.
 // @fnv 0x008267b0
-void Reanimation::StartReanimation()
+void ReanimateEffect::StartReanimation()
 {
-    if (!GetSource())
+    if (!GetReanimationSource(this))
     {
         Dispel(true);
         return;
     }
-    RActorAccess* actor = GetTarget() ? GetTarget()->AsActor() : 0;
+    RActorAccess* actor = GetTarget() ? reinterpret_cast<RTarget*>(GetTarget())->AsActor() : 0;
     if (actor && actor->IsDead(0))
     {
         actor->SetStateFlags(0);
@@ -1883,7 +1524,7 @@ void Reanimation::StartReanimation()
         if (!process->GetSource())
             process->Enable(1);
         actor->SetFlag(true);
-        actor->SetType(GetSource()->GetType());
+        actor->SetType(GetReanimationSource(this)->GetType());
         if (actor->GetNode())
             actor->SetLocation(((RNodeAccess*)actor->GetNode())->GetPosition());
         actor->Refresh();
@@ -1914,8 +1555,8 @@ void Reanimation::StartReanimation()
                 {
                     body = collision->GetBody();
                     body->SetMotion(4);
-                    body->GetPosition(position);
-                    body->GetRotation(rotation);
+                    body->GetPosition(*reinterpret_cast<RVector*>(m_54));
+                    body->GetRotation(*reinterpret_cast<RVector*>(m_60));
                 }
             }
             else
@@ -1926,29 +1567,20 @@ void Reanimation::StartReanimation()
         Dispel(false);
 }
 
-struct TESObjectREFR
-{
-    virtual void a0();
-    virtual TESObjectREFR* a1();
-};
+// The shared Character has no declaration for 0x004f8960. Its no-argument
+// thiscall accessor uses ECX, as does this one-argument fastcall declaration.
+int __fastcall GetReanimationCharacterState(Character* apCharacter);
 
-struct Character : Actor
-{
-    bool __thiscall FUN_00608d80();
-    int __thiscall FUN_004f8960();
-};
+typedef TESObjectREFR* (__thiscall* ReanimationReferenceResolver)(TESObjectREFR*);
 
-struct FUN_00827340_cls
-{
-    bool __thiscall FUN_00827340(TESObjectREFR* apRef);
-};
 
-// Returns true when a1() yields a Character for which a139(0) is true, FUN_00608d80() is false, and FUN_004f8960() differs from 6.
+// The reference resolver at virtual slot 1 returns the candidate Character.
+// That return signature is not exposed by the shared TESObjectREFR declaration.
 // @fnv 0x00827340
-bool FUN_00827340_cls::FUN_00827340(TESObjectREFR* apRef)
+bool ReanimateEffect::FUN_00827340(TESObjectREFR* apRef)
 {
-    Character* pChar = dynamic_cast<Character*>(apRef->a1());
-    if (pChar != 0 && pChar->a139(0) && !pChar->FUN_00608d80() && pChar->FUN_004f8960() != 6)
+    Character* pChar = dynamic_cast<Character*>((*reinterpret_cast<ReanimationReferenceResolver**>(apRef))[1](apRef));
+    if (pChar != 0 && pChar->HasHealth(false) && !pChar->FUN_00608d80() && GetReanimationCharacterState(pChar) != 6)
     {
         return true;
     }
@@ -1958,12 +1590,10 @@ bool FUN_00827340_cls::FUN_00827340(TESObjectREFR* apRef)
 struct V12b
 {
     unsigned int d[3];
-    V12b();
 };
 struct V16b
 {
     unsigned int d[4];
-    V16b();
 };
 struct V12t
 {
@@ -1975,31 +1605,20 @@ struct V16p
     unsigned int d[4];
 };
 extern V16p g_v;
-struct EffBase
-{
-    virtual void v0();
-    unsigned char _pad[0x44];
-    EffBase(int, int, int);
-    ~EffBase();
-};
-struct FUN_008265b0 : EffBase
-{
-    int m_48;
-    int m_4c;
-    float m_50;
-    V12b m_54;
-    V16b m_60;
-    virtual void v0();
-    FUN_008265b0(int a, int b, int c);
-};
+// The shared effect stores its vectors as byte arrays. Their initialization
+// routine takes the vector address in ECX.
+void __fastcall InitializeReanimationVector(void* apVector);
+
 // Initializes m_48, m_4c, and m_50 to zero, assigns m_54 from Make(0, 0, 0), and copies g_v to m_60.
 // @fnv 0x008265b0
-FUN_008265b0::FUN_008265b0(int a, int b, int c) : EffBase(a, b, c)
+ReanimateEffect::ReanimateEffect(MagicCaster* a, MagicItem* b, EffectItem* c) : ActiveEffect(a, b, c)
 {
+    InitializeReanimationVector(m_54);
+    InitializeReanimationVector(m_60);
     m_48 = 0;
     m_50 = 0.0f;
     m_4c = 0;
     V12t t;
-    m_54 = *(V12b*)&t.Make(0.0f, 0.0f, 0.0f);
-    m_60 = *(V16b*)&g_v;
+    *reinterpret_cast<V12b*>(m_54) = *(V12b*)&t.Make(0.0f, 0.0f, 0.0f);
+    *reinterpret_cast<V16b*>(m_60) = *(V16b*)&g_v;
 }

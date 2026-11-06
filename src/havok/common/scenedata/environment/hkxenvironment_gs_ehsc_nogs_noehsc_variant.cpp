@@ -5,118 +5,18 @@
 
 // src/havok/common/scenedata/environment/hkxenvironment.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/environment/hkxenvironment.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkxEnvironment.h"
-struct HKXMemoryManager
-{
-    virtual void Unused1()
-    {}
-    virtual void Unused2()
-    {}
-    virtual void Free(void* p, unsigned short size) = 0;
-};
-struct HKXMemoryRouter
-{
-    char padding[0x10];
-    HKXMemoryManager* manager;
-};
-struct HKXEnvironmentStandIn
-{
-    char padding[4];
-    unsigned short size;
-    void DestroyEnvironment();
-    HKXEnvironmentStandIn* FUN_00e3f8a0(unsigned char flags);
-};
-HKXMemoryRouter* _D1A0E0GetMemoryRouter();
-extern int DAT_010ebab8;
-struct FnvVtObj
-{
-    int m_vptr;
+#include "../../../../../include/hkxEnvironment.h"
+#include "../../../../../include/hkError.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkOstream.h"
+#include "../../../../../include/hkMemoryRouter.h"
 
-    FnvVtObj* FUN_00e3f510(unsigned int unusedArg);
-};
-struct HavokString
-{
-    char* text;
-};
-struct EnvironmentVariable
-{
-    HavokString name;
-    HavokString value;
-};
-struct HavokAllocator
-{
-    virtual ~HavokAllocator();
-    virtual void* AllocateMemoryBlock(int);
-    virtual void ReleaseBlock(void*, int);
-    virtual void* AllocateBufferWithSize(int&);
-    virtual void ReturnMemory(void*, int);
-};
-HKXMemoryRouter* __cdecl FUN_00c85750();
-void __fastcall FUN_00cb0c00(HavokString* string);
-struct EnvironmentArray
-{
-    EnvironmentVariable* data;
-    int size;
-    int capacityAndFlags;
+// 0x00c85750 is also bound to hkMemoryRouter::GetMonitorStream in other units.
+hkMemoryRouter* getMemoryRouter();
 
-    __forceinline void release()
-    {
-        HavokAllocator* allocator = reinterpret_cast<HavokAllocator*>(FUN_00c85750()->manager);
-        EnvironmentVariable* entry = data;
-        if (size > 0)
-        {
-            int remaining = size;
-            do
-            {
-                FUN_00cb0c00(&entry->value);
-                FUN_00cb0c00(&entry->name);
-                ++entry;
-            } while (--remaining != 0);
-        }
-        size = 0;
-        if ((static_cast<unsigned int>(capacityAndFlags) & 0x80000000u) == 0)
-            allocator->ReturnMemory(data, (capacityAndFlags & 0x3fffffff) * sizeof(EnvironmentVariable));
-        data = 0;
-        capacityAndFlags = 0x80000000;
-    }
-};
-struct EnvironmentLayout
-{
-    void** vtable;
-    unsigned short memoryFlags;
-    short referenceCount;
-    EnvironmentArray variables;
-};
-hkBaseObject::~hkBaseObject()
-{}
 
-struct hkMemoryAllocator
-{
-    virtual void vf00();
-    virtual void vf01();
-    virtual void vf02();
-    virtual void vf03();
-    virtual void ReturnMemory(void* p, int numBytes);
-};
-
-struct hkMemoryRouterStandIn
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    hkMemoryAllocator* m_pStreamAllocator;
-    hkMemoryAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-hkMemoryRouterStandIn* getMemoryRouter();
-
-struct hkStringStandIn
-{
-    static int strLen(const char* str);
-};
+// 0x00cb10d0 is the free C-string length routine declared by hkstring.cpp; no string object is passed.
+int __cdecl FUN_00cb10d0(const char* str);
 
 class InlineStorageString
 {
@@ -124,11 +24,11 @@ class InlineStorageString
     InlineStorageString();
     __forceinline ~InlineStorageString()
     {
-        hkMemoryAllocator& a = getMemoryRouter()->heap();
+        hkMemoryAllocator& a = getMemoryRouter()->temp();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
         {
-            a.ReturnMemory(m_data, m_iCapacityState & 0x3fffffff);
+            a.bufFree(m_data, m_iCapacityState & 0x3fffffff);
         }
         m_data = 0;
         m_iCapacityState = 0x80000000;
@@ -147,28 +47,7 @@ class InlineStorageString
     char m_kStorage[128];
 };
 
-class hkOstream
-{
-  public:
-    hkOstream(void* buf, int bufSize);
-    ~hkOstream();
-    hkOstream& operator<<(const char* s);
 
-    int unk00;
-    int unk04;
-    int unk08;
-};
-
-class hkError
-{
-  public:
-    virtual void vf00();
-    virtual void vf01();
-    virtual void vf02();
-    virtual int message(int type, int id, const char* description, const char* file, int line);
-
-    static hkError* s_instance;
-};
 
 struct hkxEnvironmentTransition
 {
@@ -193,7 +72,7 @@ int hkxEnvironmentParser::FUN_00e3f520(const char* str)
     int pos = 0;
     InlineStorageString name;
     InlineStorageString value;
-    const int length = hkStringStandIn::strLen(str);
+    const int length = FUN_00cb10d0(str);
 
     do
     {
@@ -238,7 +117,7 @@ int hkxEnvironmentParser::FUN_00e3f520(const char* str)
         {
         case 6: {
             char assertBuf[512];
-            hkOstream ostr(assertBuf, sizeof(assertBuf));
+            hkOstream ostr(static_cast<void*>(assertBuf), sizeof(assertBuf));
             ostr << "Error parsing environment string: '" << str << "'";
             hkError::s_instance->message(1, 0xabba7881, assertBuf, ".\\Environment\\hkxEnvironment.cpp", 308);
             return 1;
@@ -272,7 +151,7 @@ int hkxEnvironmentParser::FUN_00e3f520(const char* str)
             break;
         default: {
             char assertBuf[512];
-            hkOstream ostr(assertBuf, sizeof(assertBuf));
+            hkOstream ostr(static_cast<void*>(assertBuf), sizeof(assertBuf));
             ostr << "Internal Error: Unknown action parsing environment string: '" << str << "'";
             hkError::s_instance->message(1, 0xabba0032, assertBuf, ".\\Environment\\hkxEnvironment.cpp", 320);
             return 1;

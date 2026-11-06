@@ -1,3 +1,9 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
 
 // src/staging/blk_00b20000_od_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/staging/blk_00b20000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,6 +12,11 @@
 // src/staging/blk_00b20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/Random.h"
+#include "../../include/CVec3.h"
+#include "../../include/CVec3.h"
 extern "C" void __cdecl FUN_00b02c90();
 struct FUN_00b274a0_class
 {
@@ -28,13 +39,6 @@ extern int DAT_010a5890;
 struct FUN_00b3f0a0_Class
 {
     void __thiscall FUN_00b3f0a0();
-};
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    NiPoint3& __thiscall FUN_00b2a1c0(const NiPoint3& other);
 };
 unsigned int __cdecl FUN_00ec7c56();
 struct FUN_00b393b0_Class
@@ -138,17 +142,6 @@ struct FUN_00b3c470_class
     int i14;
     FUN_00b3c470_class();
 };
-struct FUN_00b3f030_Class
-{
-    int* vtbl;
-    FUN_00b3f030_Class();
-};
-struct Random
-{
-    void* vtbl;
-    void* __thiscall DestroyRandom(unsigned int flags);
-};
-extern const int vftable_Random[];
 void _Deallocate(void*);
 struct FUN_00b27060_cls
 {
@@ -1260,11 +1253,11 @@ void Obj::FUN_00b32de0(unsigned n, Value val)
         FUN_00b33030(begin() + n, end());
 }
 
-struct Vector342;
+struct CheckedIntSequence;
 struct Aux342
 {
-    const Vector342* container;
-    const Vector342* GetContainer() const
+    const CheckedIntSequence* container;
+    const CheckedIntSequence* GetContainer() const
     {
         return container;
     }
@@ -1278,12 +1271,12 @@ struct IteratorOwner342
 struct ConstIterator342 : IteratorOwner342
 {
     int* pointer;
-    const Vector342* GetContainer() const
+    const CheckedIntSequence* GetContainer() const
     {
         return owner ? owner->GetContainer() : 0;
     }
     ConstIterator342& FUN_00ac1000(int offset);
-    ConstIterator342(int*, const Vector342*);
+    ConstIterator342(int*, const CheckedIntSequence*);
     bool IsContainerSet() const
     {
         return owner != 0;
@@ -1301,7 +1294,7 @@ struct ConstIterator342 : IteratorOwner342
 };
 struct Iterator342 : ConstIterator342
 {
-    Iterator342(int* pointer, const Vector342* vector) : ConstIterator342(pointer, vector)
+    Iterator342(int* pointer, const CheckedIntSequence* vector) : ConstIterator342(pointer, vector)
     {}
     Iterator342& operator+=(int offset)
     {
@@ -1314,7 +1307,8 @@ struct Iterator342 : ConstIterator342
         return temporary += offset;
     }
 };
-struct Vector342
+// Int storage starts at +0x0c; 0x00abc320 binds to WordInsert::WordVector insertion, unlike the SIMD include/hkVector4.h.
+struct CheckedIntSequence
 {
     const Aux342* owner;
     int unk04, unk08;
@@ -1332,7 +1326,7 @@ struct Vector342
     void FUN_00abc320(ConstIterator342 where, unsigned int count, const int& value);
     Iterator342 FUN_00b33240(ConstIterator342 where, const int& value);
 };
-inline ConstIterator342::ConstIterator342(int* value, const Vector342* vector)
+inline ConstIterator342::ConstIterator342(int* value, const CheckedIntSequence* vector)
 {
     if (!vector || vector->first > value || value > vector->last)
         FUN_00ec7c56();
@@ -1349,7 +1343,7 @@ inline ConstIterator342& ConstIterator342::FUN_00ac1000(int offset)
     return *this;
 }
 // @fnv 0x00b33240
-Iterator342 Vector342::FUN_00b33240(ConstIterator342 where, const int& value)
+Iterator342 CheckedIntSequence::FUN_00b33240(ConstIterator342 where, const int& value)
 {
     unsigned int offset = Size() == 0 ? 0 : where - Begin();
     FUN_00abc320(where, 1, value);
@@ -1600,7 +1594,8 @@ struct Container445
 {
     Aux445* proxy;
 };
-struct Vector445 : Container445
+// UShort bounds at +0x0c/+0x10 serve checked iterator 0x00b359d0, unlike the SIMD include/hkVector4.h.
+struct CheckedUShortSequenceBounds : Container445
 {
     unsigned allocator04, allocator08;
     unsigned short* first;
@@ -1628,8 +1623,8 @@ Iterator445& Iterator445::FUN_00b359d0(int offset)
 {
     if (!IsContainerSet())
         FUN_00ec7c56();
-    if (!(pointer + offset <= static_cast<const Vector445*>(GetContainer())->last &&
-          pointer + offset >= static_cast<const Vector445*>(GetContainer())->first))
+    if (!(pointer + offset <= static_cast<const CheckedUShortSequenceBounds*>(GetContainer())->last &&
+          pointer + offset >= static_cast<const CheckedUShortSequenceBounds*>(GetContainer())->first))
         FUN_00ec7c56();
     pointer += offset;
     return *this;
@@ -1710,21 +1705,11 @@ struct BufferGroup
 struct PointRecord
 {
     int unk00;
-    struct Vec3
-    {
-        float x, y, z;
-        __forceinline Vec3& operator=(const Vec3& rhs)
-        {
-            x = rhs.x;
-            y = rhs.y;
-            z = rhs.z;
-            return *this;
-        }
-    } position;
+    CVec3 position;
     unsigned char index;
     unsigned int value;
     int unk18;
-    Vec3 normal, tangent, bitangent;
+    CVec3 normal, tangent, bitangent;
     unsigned char kind;
     float weight;
     unsigned char selector;
@@ -1784,6 +1769,14 @@ struct SelectorRange
         n = count;
     }
 };
+// Preserve component-wise vector copies with either shared assignment declaration.
+__forceinline CVec3& CopyGroupVector(CVec3* output, const CVec3& value)
+{
+    output->x = value.x;
+    output->y = value.y;
+    output->z = value.z;
+    return *output;
+}
 struct GroupBuilder
 {
     unsigned char compact, dynamic;
@@ -1819,7 +1812,7 @@ void GroupBuilder::FUN_00b29380(unsigned short count, PointVector* input)
                 group->originalPositions = new float[group->count * 3];
                 for (int k = 0; k < group->count; k++)
                 {
-                    *((PointRecord::Vec3*)&group->originalPositions[k * 3]) = input[i][k]->position;
+                    CopyGroupVector((CVec3*)&group->originalPositions[k * 3], input[i][k]->position);
                 }
                 group->weights = new float[group->count];
                 for (int l = 0; l < group->count; l++)
@@ -1841,7 +1834,7 @@ void GroupBuilder::FUN_00b29380(unsigned short count, PointVector* input)
             group->positions = new float[group->count * 3];
             for (unsigned int n = 0; n < group->count; n++)
             {
-                *((PointRecord::Vec3*)&group->positions[n * 3]) = input[i][n]->position;
+                CopyGroupVector((CVec3*)&group->positions[n * 3], input[i][n]->position);
             }
             group->kinds = new unsigned char[group->count];
             for (unsigned int o = 0; o < group->count; o++)
@@ -1870,7 +1863,7 @@ void GroupBuilder::FUN_00b29380(unsigned short count, PointVector* input)
                 group->normals = new float[group->count * 3];
                 for (unsigned int s = 0; s < group->count; s++)
                 {
-                    *((PointRecord::Vec3*)&group->normals[s * 3]) = input[i][s]->normal;
+                    CopyGroupVector((CVec3*)&group->normals[s * 3], input[i][s]->normal);
                 }
             }
             if (!compact)
@@ -1879,8 +1872,8 @@ void GroupBuilder::FUN_00b29380(unsigned short count, PointVector* input)
                 group->bitangents = new float[group->count * 3];
                 for (unsigned int t = 0; t < group->count; t++)
                 {
-                    *((PointRecord::Vec3*)&group->tangents[t * 3]) = input[i][t]->tangent;
-                    *((PointRecord::Vec3*)&group->bitangents[t * 3]) = input[i][t]->bitangent;
+                    CopyGroupVector((CVec3*)&group->tangents[t * 3], input[i][t]->tangent);
+                    CopyGroupVector((CVec3*)&group->bitangents[t * 3], input[i][t]->bitangent);
                 }
             }
         }
@@ -1965,7 +1958,8 @@ struct ElemB9F1
 {
     int unk00;
 };
-struct VectorB9F1 : public ContainerBaseAuxB9F1
+// Pointer bounds at +0x0c/+0x10; 0x00b2abc0 binds to stl::_Vector_const_iterator<MatchNode*>::operator++, unlike SIMD hkVector4.
+struct CheckedPointerSequenceStorage : public ContainerBaseAuxB9F1
 {
     AuxContB9F1* _Myownedaux;
     int _Alaux;
@@ -1986,7 +1980,7 @@ FUN_00b2abc0_It& FUN_00b2abc0_It::FUN_00b2abc0()
 {
     if (!(this->_Has_container()))
         InvalidParameterNoInfoC2();
-    if (!(_Myptr < ((VectorB9F1*)this->_Getmycont())->_Mylast))
+    if (!(_Myptr < ((CheckedPointerSequenceStorage*)this->_Getmycont())->_Mylast))
         InvalidParameterNoInfoC2();
     ++_Myptr;
     return *this;
@@ -2697,17 +2691,13 @@ struct BxLengthError : public BxLogicError
     {}
 };
 
-struct Point3
-{
-    float x, y, z;
-};
 struct FUN_00b2e680
 {
     unsigned char flag;
-    Point3 position;
+    NiPoint3 position;
     float value;
     BxString name;
-    Point3 first, second, third;
+    NiPoint3 first, second, third;
 };
 typedef char FUN_00b2e680SizeCheck[(sizeof(FUN_00b2e680) == 0x54) ? 1 : -1];
 struct CheckedRange
@@ -8584,19 +8574,15 @@ BoundsB3 BoundsB3::FUN_00b3c9a0(const BoundsB3& other)
 
 extern const float DAT_01016970;
 extern const float DAT_01015f5c;
-struct Vector3
+inline float& CVec3::operator[](int index)
 {
-    float values[3];
-    float& operator[](int index)
-    {
-        return values[index];
-    }
-};
+    return (&x)[index];
+}
 struct RangeInitializer
 {
-    Vector3 first;
+    CVec3 first;
     float unk0c, unk10, unk14;
-    Vector3 second;
+    CVec3 second;
     void FUN_00b3cc30();
 };
 // @fnv 0x00b3cc30
@@ -10224,17 +10210,13 @@ struct BxLengthError : public BxLogicError
     {}
 };
 
-struct Point3
-{
-    float x, y, z;
-};
 struct FUN_00b2e680
 {
     unsigned char flag;
-    Point3 position;
+    NiPoint3 position;
     float value;
     BxString name;
-    Point3 first, second, third;
+    NiPoint3 first, second, third;
 };
 typedef char FUN_00b2e680SizeCheck[(sizeof(FUN_00b2e680) == 0x54) ? 1 : -1];
 struct CheckedRange
@@ -10993,17 +10975,13 @@ struct BxLengthError : public BxLogicError
     {}
 };
 
-struct Point3
-{
-    float x, y, z;
-};
 struct FUN_00b2e680
 {
     unsigned char flag;
-    Point3 position;
+    NiPoint3 position;
     float value;
     BxString name;
-    Point3 first, second, third;
+    NiPoint3 first, second, third;
 };
 typedef char FUN_00b2e680SizeCheck[(sizeof(FUN_00b2e680) == 0x54) ? 1 : -1];
 struct CheckedRange
@@ -14925,7 +14903,7 @@ struct FUN_00b20ba0 : Container
         auxiliaryAllocator.deallocate((Container*)proxy, 1);
     }
 };
-template <class T> struct Vector;
+template <class T> struct Vector_copy_short;
 struct Universal
 {
 };
@@ -14984,13 +14962,14 @@ inline unsigned short* __cdecl FUN_00b362c0(Iterator first, Iterator last, unsig
     return initializeCopy(checkedBase(first), checkedBase(last), dest, allocator, pointerCategory(first, dest),
                           CheckedRange());
 }
-template <class T> struct Vector : FUN_00b20ba0
+// Unit-local view of hkVector4 for the code in namespace copy_short: built on the shared hkVector4, that code does not compile or does not match.
+template <class T> struct Vector_copy_short : FUN_00b20ba0
 {
     Allocator allocator;
     unsigned short* first;
     unsigned short* last;
     unsigned short* limit;
-    Vector(Allocator source) : FUN_00b20ba0(source), allocator(source)
+    Vector_copy_short(Allocator source) : FUN_00b20ba0(source), allocator(source)
     {}
     unsigned int size() const
     {
@@ -15048,18 +15027,18 @@ template <class T> struct Vector : FUN_00b20ba0
 };
 inline Iterator::Iterator(unsigned short* position, const Container* owner)
 {
-    if (!owner || ((const Vector<unsigned short>*)owner)->first > position ||
-        position > ((const Vector<unsigned short>*)owner)->last)
+    if (!owner || ((const Vector_copy_short<unsigned short>*)owner)->first > position ||
+        position > ((const Vector_copy_short<unsigned short>*)owner)->last)
         FUN_00ec7c56();
     setContainer(owner);
     pointer = position;
 }
-struct FUN_00b357d0 : Vector<unsigned short>
+struct FUN_00b357d0 : Vector_copy_short<unsigned short>
 {
     FUN_00b357d0(const FUN_00b357d0& other);
 };
 // @fnv 0x00b357d0
-FUN_00b357d0::FUN_00b357d0(const FUN_00b357d0& other) : Vector<unsigned short>(other.allocator)
+FUN_00b357d0::FUN_00b357d0(const FUN_00b357d0& other) : Vector_copy_short<unsigned short>(other.allocator)
 {
     if (FUN_00b34cd0(other.size()))
     {
@@ -15734,10 +15713,11 @@ struct Elem313 : Value313<unsigned short>
         FUN_00b34d90();
     }
 };
-template <class T> struct Vector313 : ContainerAlloc31<Alloc31<T> >
+// Allocator plus first/last/end pointers; 0x00b32780 fills container elements, unlike the SIMD include/hkVector4.h.
+template <class T> struct AllocatorBackedSequence : ContainerAlloc31<Alloc31<T> >
 {
     Alloc31<T> al;
-    Vector313(Alloc31<T> a = Alloc31<T>()) : ContainerAlloc31<Alloc31<T> >(a), al(a)
+    AllocatorBackedSequence(Alloc31<T> a = Alloc31<T>()) : ContainerAlloc31<Alloc31<T> >(a), al(a)
     {}
     T* first;
     T* last;
@@ -15783,7 +15763,7 @@ template <class T> struct Vector313 : ContainerAlloc31<Alloc31<T> >
         }
     }
 };
-struct FUN_00b31350 : Vector313<Elem313>
+struct FUN_00b31350 : AllocatorBackedSequence<Elem313>
 {
     explicit FUN_00b31350(unsigned n);
 };
@@ -17334,7 +17314,7 @@ struct Forward : Input
 struct Bidirectional : Forward
 {
 };
-struct Random : Bidirectional
+struct RandomAccessTag : Bidirectional
 {
 };
 
@@ -17357,9 +17337,9 @@ template <class I, class O> inline NonScalar pointerCategory(I&, O&)
     NonScalar tag;
     return tag;
 }
-template <class I, class O> inline Random iteratorCategory(const I&, const O&)
+template <class I, class O> inline RandomAccessTag iteratorCategory(const I&, const O&)
 {
-    Random tag;
+    RandomAccessTag tag;
     return tag;
 }
 
@@ -17514,7 +17494,7 @@ template <class I, class O, class C> inline O copyBackward(I first, I last, O de
         *--dest = *--last;
     return dest;
 }
-template <class I, class O> inline O copyBackward(I first, I last, O dest, Random, NonScalar, Checked)
+template <class I, class O> inline O copyBackward(I first, I last, O dest, RandomAccessTag, NonScalar, Checked)
 {
     O result = dest - (last - first);
     copyBackward(first, last, checkedBase(dest), Forward(), NonScalar(), Checked());

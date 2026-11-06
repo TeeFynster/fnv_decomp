@@ -3,6 +3,134 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/speedtree/projectedshadow.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
+#include "../../include/IdvFileError.h"
+#include "../../include/NiPoint3.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3/CVec3; this unit's code depends on the stand-in's own overload set and inline bodies (its own NiPoint3/CVec3 bodies differ), so the shared class cannot replace it.
+#include "../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+
 // src/speedtree/projectedshadow.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/speedtree/projectedshadow.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 struct Sub
@@ -32,54 +160,39 @@ struct Vec2
 {
     float x, y;
 };
-struct Vec3
+inline LocalVec3::LocalVec3()
+{}
+inline LocalVec3::LocalVec3(const float* data)
 {
-    float x, y, z;
-    Vec3()
-    {}
-    Vec3(const float* data)
-    {
-        x = data[0];
-        y = data[1];
-        z = data[2];
-    }
-    Vec3& operator=(const Vec3& value)
-    {
-        x = value.x;
-        y = value.y;
-        z = value.z;
-        return *this;
-    }
-    Vec3 ScaleSwizzled(float scale) const;
-    Vec3 FUN_00b13040(const Vec3& other) const;
-    Vec3 AddVector(const Vec3& other) const;
-    float FUN_00b04d40(const Vec3& other) const;
-};
-Vec3 Vec3::ScaleSwizzled(float scale) const
+    x = data[0];
+    y = data[1];
+    z = data[2];
+}
+LocalVec3 LocalVec3::ScaleSwizzled(float scale) const
 {
-    Vec3 r;
+    LocalVec3 r;
     r.x = scale * x;
     r.y = scale * y;
     r.z = scale * z;
     return r;
 }
-Vec3 Vec3::FUN_00b13040(const Vec3& v) const
+LocalVec3 LocalVec3::FUN_00b13040(const LocalVec3& v) const
 {
-    Vec3 r;
+    LocalVec3 r;
     r.x = x - v.x;
     r.y = y - v.y;
     r.z = z - v.z;
     return r;
 }
-Vec3 Vec3::AddVector(const Vec3& v) const
+LocalVec3 LocalVec3::AddVector(const LocalVec3& v) const
 {
-    Vec3 r;
+    LocalVec3 r;
     r.x = v.x + x;
     r.y = v.y + y;
     r.z = v.z + z;
     return r;
 }
-float Vec3::FUN_00b04d40(const Vec3& v) const
+float LocalVec3::FUN_00b04d40(const LocalVec3& v) const
 {
     union FloatBits
     {
@@ -96,15 +209,17 @@ __forceinline float Id(float x)
 {
     return x;
 }
-__forceinline void Fill(Vec3* dst, const float* data)
+__forceinline void Fill(LocalVec3* dst, const float* data)
 {
-    Vec3 r;
+    LocalVec3 r;
     r.x = data[0];
     r.y = data[1];
     r.z = data[2];
     *dst = r;
 }
-struct Bounds
+// Optional texture sub-rectangle that 0x00b3ea10 remaps each projected shadow uv into (MapX/MapY lerp between
+// the lower and upper edges). Not the shared AABB Bounds.
+struct ShadowUVRect
 {
     float upperX, upperY, lowerX, unknown0C, unknown10, lowerY;
     __forceinline float MapX(float value) const
@@ -176,32 +291,32 @@ struct Scr
 };
 struct Agent
 {
-    Vec3 first, second;
-    Vec3 ProjectOntoLine(const Vec3& start, const Vec3& end, const Vec3& point);
-    void FUN_00b3ea10(Context*, Vec3, float, Bounds*);
+    LocalVec3 first, second;
+    LocalVec3 ProjectOntoLine(const LocalVec3& start, const LocalVec3& end, const LocalVec3& point);
+    void FUN_00b3ea10(Context*, LocalVec3, float, ShadowUVRect*);
 };
 // @fnv 0x00b3ea10
-void Agent::FUN_00b3ea10(Context* context, Vec3 point, float extent, Bounds* bounds)
+void Agent::FUN_00b3ea10(Context* context, LocalVec3 point, float extent, ShadowUVRect* bounds)
 {
-    Vec3 lowerAA = point.FUN_00b13040(first.ScaleSwizzled(extent));
-    Vec3 kUpperA = point.AddVector(first.ScaleSwizzled(extent));
-    Vec3 lowerB6 = point.FUN_00b13040(second.ScaleSwizzled(extent));
-    Vec3 upperB4 = point.AddVector(second.ScaleSwizzled(extent));
+    LocalVec3 lowerAA = point.FUN_00b13040(static_cast<const LocalVec3&>(first).ScaleSwizzled(extent));
+    LocalVec3 kUpperA = point.AddVector(static_cast<const LocalVec3&>(first).ScaleSwizzled(extent));
+    LocalVec3 lowerB6 = point.FUN_00b13040(static_cast<const LocalVec3&>(second).ScaleSwizzled(extent));
+    LocalVec3 upperB4 = point.AddVector(static_cast<const LocalVec3&>(second).ScaleSwizzled(extent));
     Scr::Touch();
     context->count = 0;
     for (unsigned short index3 = 0; index3 < (unsigned short)(context->points.Size() / 3); ++index3)
     {
         const float* input = context->FUN_00b30f80(index3);
-        Vec3 value2;
+        LocalVec3 value2;
         Fill(&value2, input);
-        Vec3 projectedA7 = ProjectOntoLine(lowerAA, kUpperA, value2);
+        LocalVec3 projectedA7 = ProjectOntoLine(lowerAA, kUpperA, value2);
         Vec2 uv5;
         uv5.x = lowerAA.FUN_00b04d40(projectedA7) / (extent * 2.0f);
         if (bounds)
         {
             uv5.x = bounds->MapX(uv5.x);
         }
-        Vec3 projectedB2 = ProjectOntoLine(lowerB6, upperB4, value2);
+        LocalVec3 projectedB2 = ProjectOntoLine(lowerB6, upperB4, value2);
         uv5.y = lowerB6.FUN_00b04d40(projectedB2) / (extent * 2.0f);
         if (bounds)
         {
@@ -218,33 +333,25 @@ template <> std::string& std::string::assign(const std::string&, unsigned int, u
 template <> std::string& std::string::assign(const char*);
 template <> std::_String_val<char, std::allocator<char> >::_String_val(std::allocator<char>);
 
-struct Point3
-{
-    float x, y, z;
-    void operator=(const Point3& r)
-    {
-        x = r.x;
-        y = r.y;
-        z = r.z;
-    }
-};
 
+inline void AssignPoint3(NiPoint3& destination, const NiPoint3& source)
+{
+    destination.x = source.x;
+    destination.y = source.y;
+    destination.z = source.z;
+}
 struct Vec3Ret
 {
     float x, y, z;
-    operator const Point3&() const
+    operator const NiPoint3&() const
     {
-        return *(const Point3*)this;
+        return *(const NiPoint3*)this;
     }
 };
 
-class IdvFileError : public std::runtime_error
-{
-  public:
-    IdvFileError(const std::string& message, bool system = false)
-        : std::runtime_error(message + " [" + (system ? std::string(strerror(errno)) : std::string("")) + "]")
-    {}
-};
+inline IdvFileError::IdvFileError(const std::string& message, bool system)
+    : std::runtime_error(message + " [" + (system ? std::string(strerror(errno)) : std::string("")) + "]")
+{}
 
 struct NarrowString : std::string
 {
@@ -264,7 +371,7 @@ struct ChunkReader
 
 struct FrondInfo
 {
-    Point3 p0, p1, p2;
+    NiPoint3 p0, p1, p2;
     std::string name;
     void FUN_00b3e750(ChunkReader*);
 };
@@ -278,13 +385,13 @@ void FrondInfo::FUN_00b3e750(ChunkReader* reader)
         switch (token)
         {
         case 0x4652:
-            p0 = reader->GetVector3();
+            AssignPoint3(p0, reader->GetVector3());
             break;
         case 0x4653:
-            p1 = reader->GetVector3();
+            AssignPoint3(p1, reader->GetVector3());
             break;
         case 0x4654:
-            p2 = reader->GetVector3();
+            AssignPoint3(p2, reader->GetVector3());
             break;
         case 0x4655: {
             NarrowString text(reader->FUN_00b3ee40());
@@ -292,7 +399,7 @@ void FrondInfo::FUN_00b3e750(ChunkReader* reader)
             break;
         }
         default:
-            throw IdvFileError(FUN_00b18860("malformed frond info (token %d)", token));
+            throw IdvFileError(FUN_00b18860("malformed frond info (token %d)", token), false);
         }
         token = reader->GetNextElement();
     } while (token != 0x4651);

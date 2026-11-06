@@ -1,15 +1,22 @@
-// Source layout: BGSEntryPointFunctionDataOneValue. PC corrections are in generate_headers.py.
-#ifndef FNV_BGSENTRYPOINTFUNCTIONDATAONEVALUE_H
-#define FNV_BGSENTRYPOINTFUNCTIONDATAONEVALUE_H
-#include "layout_support.h"
+#pragma once
+
 #include "BGSEntryPointFunctionData.h"
-#pragma pack(push, 4)
+
 class BGSEntryPointFunctionDataOneValue : public BGSEntryPointFunctionData
 {
-  public:
-    float fValue;  // +0x4
+public:
+    BGSEntryPointFunctionDataOneValue();
+    virtual ~BGSEntryPointFunctionDataOneValue();
+
+    virtual void Load(TESFile* file);
+
+    float fValue;
+
+    float FUN_006b9130();
+    float GetValue() const { return fValue; }
+    BGSEntryPointFunctionDataOneValue* FUN_005e6670();
+    bool FUN_005e6700(BGSEntryPointFunctionData* apCompare);
+    void FUN_005e6760();
+    bool FUN_005e6790(TESFile* apFile);
+    bool vf03(BGSEntryPointFunctionData* apCompare);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BGSEntryPointFunctionDataOneValue) == 0x8);
-FNV_STATIC_ASSERT(offsetof(BGSEntryPointFunctionDataOneValue, fValue) == 0x4);
-#endif

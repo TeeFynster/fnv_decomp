@@ -1,5 +1,6 @@
 #ifndef FNV_ORIGINAL_SETTING_INITIALIZERS_H
 #define FNV_ORIGINAL_SETTING_INITIALIZERS_H
+#include "layout_support.h"
 #include "SettingT_GameSettingCollection_.h"
 typedef void(FNV_CDECL* RuntimeSettingExitFunction)();
 extern "C" int FNV_CDECL atexit(RuntimeSettingExitFunction callback);

@@ -1,7 +1,7 @@
 #ifndef FNV_INTERFACE_REBASE_FNV_INTERFACE_PLAYER_OBJ_REFR_H
 #define FNV_INTERFACE_REBASE_FNV_INTERFACE_PLAYER_OBJ_REFR_H
 #include "interface_rebase_layout_support.h"
-#include "interface_rebase_NiPoint3.h"
+#include "../../../include/NiPoint3.h"
 class PlacedObjectInfo
 {
   public:

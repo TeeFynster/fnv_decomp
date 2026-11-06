@@ -1,3 +1,5 @@
+#define FNV64_NIPOINTER_COMPARE_DECLS
+#include "../../../../include/NiPointer.h"
 // Reconstructed source for gamebryo2.2/corelibs/nimain/nitarray.inl.
 //
 // Self-contained header: the task's bundled headers only forward-declare
@@ -9,53 +11,17 @@
 
 #include <stddef.h>
 
-template <class T> class NiPointer
-{
-public:
-    T* m_pObject;
-    NiPointer(T* pObject);
-    NiPointer(const NiPointer<T>& other);
-    bool operator!=(const NiPointer<T>& other) const;
-    ~NiPointer();
-    NiPointer<T>& operator=(const NiPointer<T>& other);
-};
+#include "../../../../include/NiPointer.h"
 template <class T> class NiTNewInterface;
 class NiAVObject;
 class BSTempEffect;
-class NiD3DShaderDeclaration { public: class ShaderDeclarationNestedClass; };
+// Element type of the NiTArray instantiation at 0x00a1e680 (identical code folded with other pointer arrays).
+class ShaderDeclarationNestedClass;
 
 class ActorCombatGroup;
 
-template <class T>
-class NiTMallocInterface
-{
-public:
-    static T* Allocate(unsigned short usNumElements);
-    static void Deallocate(T* pArray);
-};
-
-template <class T, class Allocator>
-class NiTArray
-{
-public:
-    virtual ~NiTArray();
-
-    void SetSize(unsigned int uiNewSize);
-    void RemoveAll();
-    T RemoveAt(unsigned int uiIndex);
-    void SetAt(unsigned int uiIndex, T& element);
-    void SetAt(unsigned int uiIndex, const T& element);
-    unsigned int SetAtGrow(unsigned int uiIndex, T& element);
-    unsigned int Add(T& element);
-    unsigned int SetAtGrow(unsigned int uiIndex, const T& element);
-    unsigned int Add(const T& element);
-
-    T* m_pBase;                 // +0x04
-    unsigned short m_usMaxSize; // +0x08
-    unsigned short m_usSize;    // +0x0A
-    unsigned short m_usESize;   // +0x0C
-    unsigned short m_usGrowBy;  // +0x0E
-};
+#include "../../../../include/NiTMallocInterface.h"
+#include "../../../../include/NiTArray.h"
 
 typedef NiTArray<NiPointer<NiAVObject>, NiTNewInterface<NiPointer<NiAVObject> > > NiTArray_NiPointer_NiAVObject;
 template<> void NiTArray<NiPointer<NiAVObject>, NiTNewInterface<NiPointer<NiAVObject> > >::SetSize(unsigned int uiNewSize);
@@ -90,8 +56,8 @@ unsigned int NiTArray<NiPointer<NiAVObject>, NiTNewInterface<NiPointer<NiAVObjec
 
 // @fnv 0x00a1e680
 template<>
-void NiTArray<NiD3DShaderDeclaration::ShaderDeclarationNestedClass*, NiTMallocInterface<NiD3DShaderDeclaration::ShaderDeclarationNestedClass*> >::SetAt(
-    unsigned int uiIndex, NiD3DShaderDeclaration::ShaderDeclarationNestedClass*& element)
+void NiTArray<ShaderDeclarationNestedClass*, NiTMallocInterface<ShaderDeclarationNestedClass*> >::SetAt(
+    unsigned int uiIndex, ShaderDeclarationNestedClass* const& element)
 {
     if (uiIndex >= m_usSize)
     {
@@ -164,7 +130,7 @@ void NiTArray<T, Allocator>::SetSize(unsigned int uiNewSize)
 
 // @fnv 0x0096ae90
 template <class T, class Allocator>
-void NiTArray<T, Allocator>::SetAt(unsigned int uiIndex, T& element)
+void NiTArray<T, Allocator>::SetAt(unsigned int uiIndex, const T& element)
 {
     if (uiIndex >= m_usSize)
     {
@@ -187,7 +153,7 @@ void NiTArray<T, Allocator>::SetAt(unsigned int uiIndex, T& element)
 
 // @fnv 0x00470000
 template <class T, class Allocator>
-unsigned int NiTArray<T, Allocator>::SetAtGrow(unsigned int uiIndex, T& element)
+unsigned int NiTArray<T, Allocator>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
     if (uiIndex >= m_usMaxSize)
         SetSize(uiIndex + m_usGrowBy);
@@ -196,7 +162,7 @@ unsigned int NiTArray<T, Allocator>::SetAtGrow(unsigned int uiIndex, T& element)
 }
 
 template <class T, class Allocator>
-unsigned int NiTArray<T, Allocator>::Add(T& element)
+unsigned int NiTArray<T, Allocator>::Add(const T& element)
 {
     return SetAtGrow(m_usSize, element);
 }

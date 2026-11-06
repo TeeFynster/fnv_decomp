@@ -3,14 +3,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <xmmintrin.h>
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pAllocator;
-};
+#include "../../../../../../include/hkMemoryRouter.h"
 
 __declspec(align(16)) struct VecElem
 {
@@ -26,7 +19,7 @@ struct VecList
     unsigned int m_uCapBits;
 };
 
-AllocHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void* allocator, VecList* list, unsigned int elemSize);
 
 struct FUN_00e3afb0_cls
@@ -47,10 +40,10 @@ struct FUN_00e3afb0_cls
 void FUN_00e3afb0_cls::Push(const __m128* apFirst, const __m128* apSecond, float afValue)
 {
     VecList* list = &m_kNode;
-    AllocHolder* holder = FUN_00c85750();
+    hkMemoryRouter* holder = FUN_00c85750();
     if (list->m_iArrayLength == (int)(list->m_uCapBits & 0x3fffffffu))
     {
-        ResizeAudioStream(holder->m_pAllocator, list, sizeof(VecElem));
+        ResizeAudioStream(holder->m_heap, list, sizeof(VecElem));
     }
     VecElem* slot = &list->m_pData[list->m_iArrayLength];
     list->m_iArrayLength++;
@@ -68,21 +61,12 @@ struct DFBFF0Allocator
     virtual void ReleaseBlock(void* p, int numBytes);
 };
 
-struct DFBFF0MemoryRouter
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+
+inline DFBFF0Allocator& heap(hkMemoryRouter& holder)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    DFBFF0Allocator* m_pStreamAllocator;
-
-    DFBFF0Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" DFBFF0MemoryRouter& __cdecl FUN_00c85750();
+    return *reinterpret_cast<DFBFF0Allocator*>(holder.m_heap);
+}
 
 struct FUN_00dfbff0
 {
@@ -95,7 +79,7 @@ struct FUN_00dfbff0
     static void operator delete(void* p, unsigned int nbytes)
     {
         FUN_00dfbff0* b = static_cast<FUN_00dfbff0*>(p);
-        FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        heap(FUN_00c85750()).ReleaseBlock(p, b->m_usMemSizeAndFlags);
     }
 };
 

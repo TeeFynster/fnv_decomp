@@ -1,8 +1,62 @@
+#include "../../include/NavMeshTriangle.h"
+#include "../../include/NiColorA.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/DFALL.h"
+#include "../../include/NiPointer.h"
 
 // src/staging/blk_006a0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/NavMeshEdgePoint.h"
+// PathPoint_blk_006a0000_od: local type (was include/PathPoint.h, which had no evidence of one real class); its methods are 0x004941c0 NiPoint3::operator/=, 0x00595c80 NiPoint3::SqrXYLength
+#include "../../include/NiPoint3.h"
+
+class PathPoint_blk_006a0000_od
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    PathPoint_blk_006a0000_od();
+    PathPoint_blk_006a0000_od(float, float, float);
+
+    PathPoint_blk_006a0000_od operator+(const PathPoint_blk_006a0000_od& pt) const;
+    PathPoint_blk_006a0000_od operator*(float fScalar) const;
+    void ScaleByInverse(float);
+    float GetSquaredXYLength();
+    NiPoint3 FUN_006a6eb0();
+};
+#include "../../include/PathNodeArray.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/GO.h"
+#include "../../include/NP.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/hkQuaternion.h"
+#include "../../include/NavMesh.h"
+#include "../../include/NavMeshPtr.h"
+#include "../../include/NavMeshSearch.h"
+#include "../../include/NiBound.h"
+#include "../../include/NavMeshEdgeData.h"
+#include "../../include/ObstacleData.h"
+#include "../../include/PathingLocation.h"
+#include "../../include/BSShaderNoLightingProperty.h"
+// Trivial point storage used by this unit's original unoptimized routines.
+struct Point3Storage
+{
+    float x, y, z;
+    Point3Storage& operator+=(const Point3Storage&);
+};
+
+
+
+struct Ret559
+{
+    bool FUN_00697730();
+};
 
 struct S006949d0
 {
@@ -529,23 +583,19 @@ int FUN_006b9400_Class::FUN_006b9400()
     return (int)this;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3& operator+=(const NiPoint3&);
-};
+
 
 struct FUN_006bb510_shell
 {
-    NiPoint3 a;
-    NiPoint3 b;
-    NiPoint3 c;
-    void AddToPoints(NiPoint3* p);
+    Point3Storage a;
+    Point3Storage b;
+    Point3Storage c;
+    void AddToPoints(Point3Storage* p);
 };
 
 // Adds the given point to both stored points a and b.
 // @fnv 0x006bb510
-void FUN_006bb510_shell::AddToPoints(NiPoint3* apPoint)
+void FUN_006bb510_shell::AddToPoints(Point3Storage* apPoint)
 {
     a += *apPoint;
     b += *apPoint;
@@ -702,20 +752,13 @@ AX* __thiscall AX::FUN_006bff00()
 
 extern int DAT_0106b56c;
 void __cdecl NiFreeAlias(void*);
-struct NiTPointerMap_006a64b0
-{
-    void __thiscall RemoveAll();
-    void* m_iWordAt00;
-    void* m_iWordAt04;
-    void* m_8;
-    void __thiscall FUN_006a64b0();
-};
+// RTTI at vftable 0x0106b56c identifies the DFALL map base for NavMesh* to NiPointer<NiNode>.
+typedef NiTMapBase<DFALL<NiTMapItem<NavMesh*, NiPointer<NiNode> > >, NavMesh*, NiPointer<NiNode> > NavMeshSceneNodeMapBase;
 // @fnv 0x006a64b0
-void __thiscall NiTPointerMap_006a64b0::FUN_006a64b0()
+template <> NavMeshSceneNodeMapBase::~NiTMapBase()
 {
-    m_iWordAt00 = &DAT_0106b56c;
     RemoveAll();
-    NiFreeAlias(m_8);
+    NiFreeAlias(m_ppkHashTable);
 }
 
 extern void NiFreeAlias(void*);
@@ -775,16 +818,16 @@ struct FUN_006a0520_class
 {
     float m_iWordAt00;
     float m_iWordAt04;
-    NiPoint3& FUN_006a0520(const NiPoint3& o);
+    Point3Storage& FUN_006a0520(const Point3Storage& o);
 };
 // @fnv 0x006a0520
-NiPoint3& FUN_006a0520_class::FUN_006a0520(const NiPoint3& o)
+Point3Storage& FUN_006a0520_class::FUN_006a0520(const Point3Storage& o)
 {
     float a = m_iWordAt00;
     float b5 = m_iWordAt04;
     m_iWordAt00 = a * o.x - b5 * o.y;
     m_iWordAt04 = b5 * o.x + a * o.y;
-    return *(NiPoint3*)this;
+    return *(Point3Storage*)this;
 }
 
 void __cdecl FUN_006a1b80();
@@ -968,7 +1011,8 @@ class Modifier
   public:
     float GetValue();
 };
-class ArrSI
+// Exe 0x006a1cf0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+class BlkOffset08View
 {
   public:
     unsigned int GetFlags();
@@ -979,11 +1023,11 @@ class Arr
     unsigned int* GetAt(int);
 };
 
-class SearchNode
+class PathSearchNode
 {
   public:
     char pad0[0x54];
-    SearchNode* pParent;
+    PathSearchNode* pParent;
 };
 
 struct FUN_006a2500;
@@ -1003,30 +1047,30 @@ typedef AStarConnectionArrayT<FUN_006a2500, FUN_006a25d0> ConnectionArray;
 class OpenList
 {
   public:
-    SearchNode* PopOpenNode();
-    void UnlinkFromList(SearchNode*);
-    void InsertSorted(SearchNode*);
+    PathSearchNode* PopOpenNode();
+    void UnlinkFromList(PathSearchNode*);
+    void InsertSorted(PathSearchNode*);
 };
 
 struct FUN_006a1cf0_shell
 {
     virtual void vf00();
-    virtual void GetConnections(SearchNode*, ConnectionArray*);
-    virtual bool HasReachedGoal(SearchNode*);
+    virtual void GetConnections(PathSearchNode*, ConnectionArray*);
+    virtual bool HasReachedGoal(PathSearchNode*);
     char pad004[0x1ff4 - 4];
     OpenList kOpenList;
     char pad1ff5[0x2048 - 0x1ff5];
-    SearchNode* pBestNode;
-    SearchNode* pCurrentNode;
+    PathSearchNode* pBestNode;
+    PathSearchNode* pCurrentNode;
     unsigned int unk2050;
     bool bYield;
-    SearchNode* FUN_006a1cf0();
+    PathSearchNode* FUN_006a1cf0();
 };
 
 // @fnv 0x006a1cf0
-SearchNode* FUN_006a1cf0_shell::FUN_006a1cf0()
+PathSearchNode* FUN_006a1cf0_shell::FUN_006a1cf0()
 {
-    SearchNode* pLast;
+    PathSearchNode* pLast;
     {
         ConnectionArray kConnections;
         pLast = pCurrentNode;
@@ -1044,9 +1088,9 @@ SearchNode* FUN_006a1cf0_shell::FUN_006a1cf0()
             }
             ((GlobalObject_00869f00*)&kConnections)->Clear(false);
             GetConnections(pCurrentNode, &kConnections);
-            for (unsigned int i = 0; i < ((ArrSI*)&kConnections)->GetFlags(); i++)
+            for (unsigned int i = 0; i < ((BlkOffset08View*)&kConnections)->GetFlags(); i++)
             {
-                SearchNode* pNode = (SearchNode*)*((Arr*)&kConnections)->GetAt(i);
+                PathSearchNode* pNode = (PathSearchNode*)*((Arr*)&kConnections)->GetAt(i);
                 kOpenList.UnlinkFromList(pNode);
                 if (pCurrentNode->pParent == pNode)
                     return 0;
@@ -1239,16 +1283,13 @@ FUN_006a6370_class* FUN_006a6370_class::FUN_006a6370(int aiCount)
 }
 
 void _NiFree(void*);
-struct S006a65b0 : NiTPointerMap_006a64b0
-{
-    void __thiscall FUN_006a65b0();
-};
+// RTTI at vftable 0x0106b58c identifies the corresponding TESObjectCELL* map base.
+typedef NiTMapBase<DFALL<NiTMapItem<TESObjectCELL*, NiPointer<NiNode> > >, TESObjectCELL*, NiPointer<NiNode> > CellSceneNodeMapBase;
 // @fnv 0x006a65b0
-void __thiscall S006a65b0::FUN_006a65b0()
+template <> CellSceneNodeMapBase::~NiTMapBase()
 {
-    *(const char**)this = " hj";
     RemoveAll();
-    _NiFree(m_8);
+    _NiFree(m_ppkHashTable);
 }
 
 extern char SG6202[];
@@ -1266,26 +1307,8 @@ FUN_006a6610::FUN_006a6610(int a)
     FUN_006a69b0(a, a);
 }
 
-struct FUN_006a65b0_class
-{
-    void __thiscall FUN_006a65b0();
-};
 void Deallocate(void*);
-struct FUN_006a6820_class
-{
-    void* __thiscall FUN_006a6820(unsigned int flags);
-};
-// Calls the cleanup routine on this object, frees it when flags has bit 0 set, and returns this.
-// @fnv 0x006a6820
-void* FUN_006a6820_class::FUN_006a6820(unsigned int flags)
-{
-    ((FUN_006a65b0_class*)this)->FUN_006a65b0();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
 
-extern "C" void __cdecl Deallocate(void*);
 struct FUN_006a6850_class
 {
     void __thiscall SetPhjAndClear();
@@ -1511,19 +1534,11 @@ FUN_006abf90_Obj* FUN_006abf90_Obj::InitVtable()
     return this;
 }
 
-struct NavMeshSearchLOSArray
+// PathBuilder appends PathingLocation values to this array (0x006cf1b0).
+// Its scalar deleting destructor is 0x006abfe0.
+template <> BSSimpleArray<PathingLocation, 1024>::~BSSimpleArray()
 {
-    void FUN_006abfc0();
-    void* FUN_006abfe0(unsigned int flags);
-};
-
-// @fnv 0x006abfe0
-void* NavMeshSearchLOSArray::FUN_006abfe0(unsigned int flags)
-{
-    FUN_006abfc0();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
+    Clear(true);
 }
 
 struct Elem_006ac070
@@ -1562,18 +1577,12 @@ void* _Mem_2064::FUN_006ac0b0(unsigned int flags)
     return this;
 }
 
-struct FUN_006ad180_Cls
-{
-    float m_iWordAt00;          // +0x0
-    float m_iWordAt04;  // +0x4
-    FUN_006ad180_Cls& Scale(float);
-};
 // Multiplies both float members by scale and returns a reference to this object.
 // @fnv 0x006ad180
-FUN_006ad180_Cls& FUN_006ad180_Cls::Scale(float scale)
+NiPoint2& NiPoint2::Scale(float scale)
 {
-    m_iWordAt00 *= scale;
-    m_iWordAt04 *= scale;
+    x *= scale;
+    y *= scale;
     return *this;
 }
 
@@ -1615,11 +1624,7 @@ FUN_006b3800_Host* FUN_006b3800_Host::FUN_006b3800()
 
 struct PathSmootherPOVAvoidanceNode;
 struct NavMeshEdgeSegment;
-template <class N, class L> struct AStarSearch
-{
-    virtual ~AStarSearch();
-    void* __thiscall FUN_006b3850(unsigned int);
-};
+
 void __cdecl _Deallocate(void*);
 // Destructs the AStarSearch object and, when bit 0 of flags is set, deallocates its memory; returns this.
 // @fnv 0x006b3850
@@ -1633,23 +1638,10 @@ template <class N, class L> void* __thiscall AStarSearch<N, L>::FUN_006b3850(uns
 template void* __thiscall AStarSearch<PathSmootherPOVAvoidanceNode, NavMeshEdgeSegment>::FUN_006b3850(unsigned int);
 
 struct PathSmootherPOVPoint;
-struct BSSimpleArray_PathSmootherPOV
-{
-    ~BSSimpleArray_PathSmootherPOV();
-};
-extern void Deallocate(void*);
-struct FUN_006b3880_class : BSSimpleArray_PathSmootherPOV
-{
-    void* __thiscall FUN_006b3880(unsigned int flags);
-};
-// Runs the BSSimpleArray_PathSmootherPOV destructor, then frees this if flags has bit 0 set, and returns this.
 // @fnv 0x006b3880
-void* __thiscall FUN_006b3880_class::FUN_006b3880(unsigned int flags)
+template <> BSSimpleArray<PathSmootherPOVPoint>::~BSSimpleArray()
 {
-    BSSimpleArray_PathSmootherPOV::~BSSimpleArray_PathSmootherPOV();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
+    Clear(true);
 }
 
 struct ASC
@@ -1657,16 +1649,6 @@ struct ASC
     float f0;
     float f4;
     ASC& operator=(const ASC&);
-};
-struct NavMeshEdgePoint
-{
-    float f0;
-    float f4;
-    float f8;
-    float fc;
-    float f10;
-    float f14;
-    NavMeshEdgePoint& operator=(const NavMeshEdgePoint&);
 };
 struct FUN_006b3910_S
 {
@@ -2121,50 +2103,34 @@ void* FUN_006b9660_class::FUN_006b9730(unsigned int flags)
     return this;
 }
 
-struct FUN_006b99e0_class
-{
-    float m_iWordAt00;
-    float m_iWordAt04;
-    float Dot2(const float* p);
-};
 
 // Returns the dot product of the two-component vector p with the stored pair of floats.
 // @fnv 0x006b99e0
-float FUN_006b99e0_class::Dot2(const float* afVec)
+float NiPoint2::Dot(const NiPoint2& afVec)
 {
-    return m_iWordAt00 * afVec[0] + m_iWordAt04 * afVec[1];
+    return x * afVec.x + y * afVec.y;
 }
 
-struct NiPoint3Ex
-{
-    NiPoint3Ex operator-(NiPoint3 const&) const;
-};
 struct S006bb540
 {
-    NiPoint3 m_iWordAt00;
-    NiPoint3 m_C;
-    NiPoint3Ex SubtractFromC();
+    Point3Storage m_iWordAt00;
+    Point3Storage m_C;
+    NiPoint3 SubtractFromC();
 };
 // @fnv 0x006bb540
-NiPoint3Ex S006bb540::SubtractFromC()
+NiPoint3 S006bb540::SubtractFromC()
 {
-    return ((NiPoint3Ex*)&m_C)->operator-(m_iWordAt00);
+    return ((NiPoint3*)&m_C)->operator-(reinterpret_cast<const NiPoint3&>(m_iWordAt00));
 }
 
-struct NiBound
-{
-    int m0;
-    int m4;
-    int m8;
-    NiBound();
-};
+
 struct FUN_006bc8b0
 {
-    NiBound m0;
-    NiBound mC;
+    NavMeshEdgeData m0;
+    NavMeshEdgeData mC;
     FUN_006bc8b0();
 };
-// Default-constructs the two NiBound members of the object.
+// Default-constructs the two navmesh edge records of the object.
 // @fnv 0x006bc8b0
 FUN_006bc8b0::FUN_006bc8b0()
 {}
@@ -2268,7 +2234,7 @@ void __thiscall S006beb80::FUN_006beb80()
 
 struct NH
 {
-    NiPoint3 const& __thiscall FUN_0068f0a0(unsigned short);
+    Point3Storage const& __thiscall FUN_0068f0a0(unsigned short);
 };
 struct P_006bf1d0
 {
@@ -2280,7 +2246,7 @@ struct P_006bf1d0
 struct S_006bf1d0
 {
     NH* m0;
-    bool __thiscall FUN_006bf220(NiPoint3 const&);
+    bool __thiscall FUN_006bf220(Point3Storage const&);
     bool __thiscall FUN_006bf1d0(P_006bf1d0*);
 };
 // @fnv 0x006bf1d0
@@ -2294,15 +2260,15 @@ bool __thiscall S_006bf1d0::FUN_006bf1d0(P_006bf1d0* p)
 namespace fnv_006bf2a0 {
 struct NH
 {
-    NiPoint3 const& __thiscall FUN_0068f0a0(unsigned short);
+    Point3Storage const& __thiscall FUN_0068f0a0(unsigned short);
 };
 struct S006bf2a0
 {
     NH* m_iWordAt00;
-    void __thiscall FUN_006bf2d0(NiPoint3 const&);
+    void __thiscall FUN_006bf2d0(Point3Storage const&);
     void __thiscall FUN_006bf2a0(unsigned short*);
 };
-// Looks up the NiPoint3 for the unsigned short at p via the NH object and passes it to FUN_006bf2d0.
+// Looks up the Point3Storage for the unsigned short at p via the NH object and passes it to FUN_006bf2d0.
 // @fnv 0x006bf2a0
 void __thiscall S006bf2a0::FUN_006bf2a0(unsigned short* p)
 {
@@ -2711,14 +2677,8 @@ int FUN_006b4060_class::GetNextIndex()
     return m_8 - 1;
 }
 
-struct NavMeshTriangle
-{
-    unsigned short GetBits13To15();
-};
-struct NavMesh
-{
-    NavMeshTriangle* GetTriangle(unsigned short index);
-};
+
+
 struct DA00694f80
 {
     unsigned short& GetAt(int index);
@@ -2732,17 +2692,17 @@ struct FUN_006bc940_class
 {
     NavMesh* mesh;
     void* p1;
-    ArrSI* flags;
+    BlkOffset08View* flags;
     unsigned int FUN_006bc940();
 };
 // @fnv 0x006bc940
 unsigned int FUN_006bc940_class::FUN_006bc940()
 {
     unsigned int result = 0;
-    for (unsigned int i = 0; i < ((ArrSI*)((char*)flags + 0x20))->GetFlags(); ++i)
+    for (unsigned int i = 0; i < ((BlkOffset08View*)((char*)flags + 0x20))->GetFlags(); ++i)
         result =
             MaxUnsigned(result, mesh->GetTriangle(((DA00694f80*)((char*)flags + 0x20))->GetAt(i))->GetBits13To15());
-    for (unsigned int j = 0; j < ((ArrSI*)((char*)flags + 0x30))->GetFlags(); ++j)
+    for (unsigned int j = 0; j < ((BlkOffset08View*)((char*)flags + 0x30))->GetFlags(); ++j)
         result =
             MaxUnsigned(result, mesh->GetTriangle(((EdgeArr*)((char*)flags + 0x30))->FUN_006a1440(j))->GetBits13To15());
     return result;
@@ -3042,7 +3002,7 @@ struct S006bf170
 // @fnv 0x006bf170
 unsigned int S006bf170::FindIndexByValue(unsigned short ausValue)
 {
-    for (unsigned int i = 0; i < ((ArrSI*)((char*)this + 0x1c))->GetFlags(); i++)
+    for (unsigned int i = 0; i < ((BlkOffset08View*)((char*)this + 0x1c))->GetFlags(); i++)
         if (*(unsigned short*)*(unsigned int*)((Arr*)((char*)this + 0x1c))->GetAt(i) == ausValue)
             return i;
     return (unsigned int)-1;
@@ -3144,10 +3104,6 @@ void FUN_006bfdd0_class::FUN_006bfe70(unsigned int requested, unsigned int saved
     }
 }
 
-struct BSSimpleArrayActor
-{
-    unsigned int Add(void*&);
-};
 struct FUN_006bde50
 {
     bool CanAddEdge(void*, void*);
@@ -3158,12 +3114,12 @@ struct FUN_006bde50
 // @fnv 0x006bde50
 void FUN_006bde50::DoWork()
 {
-    for (unsigned int i = 0; i < ((ArrSI*)((char*)this + 0x1c))->GetFlags(); i++)
+    for (unsigned int i = 0; i < ((BlkOffset08View*)((char*)this + 0x1c))->GetFlags(); i++)
     {
         void* actor = (void*)(*(unsigned int*)((Arr*)((char*)this + 0x1c))->GetAt(i));
         if (!((unsigned char*)actor)[2])
             continue;
-        for (unsigned int j = 0; j < ((ArrSI*)((char*)this + 0x1c))->GetFlags(); j++)
+        for (unsigned int j = 0; j < ((BlkOffset08View*)((char*)this + 0x1c))->GetFlags(); j++)
         {
             void* other = (void*)(*(unsigned int*)((Arr*)((char*)this + 0x1c))->GetAt(j));
             if (((unsigned char*)other)[6])
@@ -3173,25 +3129,20 @@ void FUN_006bde50::DoWork()
             if (CanAddEdge(actor, other))
             {
                 void* result = CreateObject(actor, other, 0);
-                ((BSSimpleArrayActor*)((char*)this + 0x30))->Add(result);
+                ((BSSimpleArray<void*>*)((char*)this + 0x30))->Add(result);
             }
         }
     }
 }
 
-struct BSSimpleArrayActorLocal
-{
-    void __thiscall Clear(bool);
-};
-
-void BSSimpleArrayActorLocal::Clear(bool)
+template <> void BSSimpleArray<Actor*>::Clear(bool)
 {}
 
 // @fnv 0x006a1890
 void FUN_006a1890_class::FUN_006a1890()
 {
     *reinterpret_cast<int**>(this) = &DAT_0106b3e8;
-    reinterpret_cast<BSSimpleArrayActorLocal*>(this)->Clear(true);
+    reinterpret_cast<BSSimpleArray<Actor*>*>(this)->Clear(true);
 }
 
 struct FUN_006a1f70_class
@@ -3274,10 +3225,6 @@ void StandIn::FUN_006a2770(unsigned int a, unsigned int b)
     }
 }
 
-struct GO
-{
-    ~GO();
-};
 struct FUN_006a68d0_Class
 {
     int m_iWordAt00;
@@ -3348,11 +3295,7 @@ FUN_006bbc30_class* __thiscall FUN_006bbc30_class::FUN_006bbc30()
     return this;
 }
 
-template <> class BSSimpleArray<unsigned short, 1024>
-{
-  public:
-    unsigned int ReserveIndex(unsigned short const& value);
-};
+
 
 struct FUN_006be660_class
 {
@@ -3362,19 +3305,19 @@ struct FUN_006be660_class
 // @fnv 0x006be660
 void FUN_006be660_class::FUN_006be660()
 {
-    for (unsigned int i = 0; i < reinterpret_cast<ArrSI*>(reinterpret_cast<char*>(this) + 0x1c)->GetFlags(); ++i)
+    for (unsigned int i = 0; i < reinterpret_cast<BlkOffset08View*>(reinterpret_cast<char*>(this) + 0x1c)->GetFlags(); ++i)
     {
         if (reinterpret_cast<unsigned char*>(
                 reinterpret_cast<Arr*>(reinterpret_cast<char*>(this) + 0x1c)->GetAt(i)[0])[2])
         {
             reinterpret_cast<BSSimpleArray<unsigned short, 1024>*>(
                 reinterpret_cast<char*>(*reinterpret_cast<void**>(this)) + 0xe4)
-                ->ReserveIndex(*reinterpret_cast<unsigned short const*>(
+                ->Add(*reinterpret_cast<unsigned short const*>(
                     reinterpret_cast<Arr*>(reinterpret_cast<char*>(this) + 0x1c)->GetAt(i)[0]));
 
             reinterpret_cast<BSSimpleArray<unsigned short, 1024>*>(
                 reinterpret_cast<char*>(*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 8)) + 0x60)
-                ->ReserveIndex(*reinterpret_cast<unsigned short const*>(
+                ->Add(*reinterpret_cast<unsigned short const*>(
                     reinterpret_cast<Arr*>(reinterpret_cast<char*>(this) + 0x1c)->GetAt(i)[0]));
         }
     }
@@ -3413,7 +3356,7 @@ void FUN_006be770_class::FUN_006be770()
         reinterpret_cast<FUN_00693bd0_class*>(m_00->GetTriangle((unsigned short)i))->FUN_00693bd0(m_44 + 1);
     }
 
-    for (unsigned int j = 0; j < reinterpret_cast<ArrSI*>(&m_08->m_30)->GetFlags(); ++j)
+    for (unsigned int j = 0; j < reinterpret_cast<BlkOffset08View*>(&m_08->m_30)->GetFlags(); ++j)
     {
         NavMeshTriangle* triangle = m_00->GetTriangle(m_08->m_30.FUN_006a1440(j));
 
@@ -3422,20 +3365,20 @@ void FUN_006be770_class::FUN_006be770()
 }
 
 extern float g_011c7278_arg1;
-bool __cdecl FUN_006c3570(NiPoint3 const&, void* const&, float, float);
+bool __cdecl FUN_006c3570(Point3Storage const&, void* const&, float, float);
 
 struct FUN_006bf2d0_class
 {
     int m_iWordAt00;
     void* m_iWordAt04;
     void* m_8;
-    bool FUN_006bf2d0(NiPoint3* p);
+    bool FUN_006bf2d0(Point3Storage* p);
 };
 
 // @fnv 0x006bf2d0
-bool FUN_006bf2d0_class::FUN_006bf2d0(NiPoint3* p)
+bool FUN_006bf2d0_class::FUN_006bf2d0(Point3Storage* p)
 {
-    for (unsigned int i = 0; i < ((ArrSI*)((char*)m_8 + 0x20))->GetFlags(); i++)
+    for (unsigned int i = 0; i < ((BlkOffset08View*)((char*)m_8 + 0x20))->GetFlags(); i++)
     {
         if (FUN_006c3570(*p, *(void**)&m_iWordAt04, g_011c7278_arg1, 32.0f))
             return true;
@@ -4168,14 +4111,6 @@ FUN_006a6450::~FUN_006a6450()
     DoCleanup();
 }
 
-struct ImageSpaceEffectParam
-{
-    float m_iWordAt00;
-    float m_iWordAt04;
-    float m_8;
-    float m_iThirdValue;
-    ImageSpaceEffectParam(float a, float b, float c, float d);
-};
 
 void operator delete(void*, void*)
 {}
@@ -4185,7 +4120,7 @@ void FUN_006a69b0_Class::ConstructParams(int aiBaseAddress, int aiCount)
 {
     for (unsigned int i = 0; i < (unsigned int)aiCount; ++i)
     {
-        new ((void*)(aiBaseAddress + i * 16)) ImageSpaceEffectParam(0.0f, 0.0f, 0.0f, 0.0f);
+        new ((void*)(aiBaseAddress + i * 16)) NiColorA(0.0f, 0.0f, 0.0f, 0.0f);
     }
 }
 
@@ -7158,14 +7093,6 @@ namespace std {
 float abs(float);
 }
 
-struct NiPoint2
-{
-    float x;
-    float y;
-    NiPoint2(const NiPoint2& o);
-    NiPoint2 operator-(const NiPoint2& rhs) const;
-    NiPoint2 operator+(const NiPoint2& rhs) const;
-};
 NiPoint2 operator*(float s, const NiPoint2& p);
 
 // Tests whether segments a-b and c-d cross and, if so, writes the intersection point to out and returns true.
@@ -7234,24 +7161,24 @@ bool __cdecl FUN_006ba240(const ThreeDimensionalVector* apSeg1Start, const Three
 // parameter interpolation of the second segment onto the output point.
 struct FUN_006ba7e0_cls
 {
-    void GetPoint(NiPoint3* out, unsigned int idx);
-    NiPoint3* Xform(NiPoint3* out, NiPoint3* p);
+    void GetPoint(Point3Storage* out, unsigned int idx);
+    Point3Storage* Xform(Point3Storage* out, Point3Storage* p);
 };
 
-NiPoint3* __cdecl FUN_006ba7e0_lerp(NiPoint3* out, float t, NiPoint3* p);
+Point3Storage* __cdecl FUN_006ba7e0_lerp(Point3Storage* out, float t, Point3Storage* p);
 
 // @fnv 0x006ba7e0
 bool __cdecl FUN_006ba7e0(unsigned int uiIndexA, FUN_006ba7e0_cls* a2, unsigned int uiIndexB, FUN_006ba7e0_cls* a4,
-                          NiPoint3* out)
+                          Point3Storage* out)
 {
     float t_;
     float _t1;
-    NiPoint3 pX;
-    NiPoint3 pA;
-    NiPoint3 p3;
+    Point3Storage pX;
+    Point3Storage pA;
+    Point3Storage p3;
     float t5;
-    NiPoint3 tmp5;
-    NiPoint3 tmp4;
+    Point3Storage tmp5;
+    Point3Storage tmp4;
 
     a4->GetPoint(&pA, uiIndexB);
     a2->GetPoint(&pX, uiIndexA);
@@ -7274,23 +7201,14 @@ bool __cdecl FUN_006ba7e0(unsigned int uiIndexA, FUN_006ba7e0_cls* a2, unsigned 
     return true;
 }
 
-struct Pt3
-{
-    float x, y, z;
-    Pt3();
-    Pt3 operator-(const Pt3& o) const;
-    Pt3 operator+(const Pt3& o) const;
-    float Dot(const Pt3& o) const;
-    float SqrLength() const;
-};
-Pt3 operator*(float s, const Pt3& p);
+NiPoint3 operator*(float s, const NiPoint3& p);
 
 // @fnv 0x006bab00
-bool FUN_006bab00(const Pt3& point, float radius, const Pt3& start, const Pt3& end)
+bool FUN_006bab00(const NiPoint3& point, float radius, const NiPoint3& start, const NiPoint3& end)
 {
-    Pt3 dir3 = end - start;
-    Pt3 kRel = point - start;
-    Pt3 closest;
+    NiPoint3 dir3 = end - start;
+    NiPoint3 kRel = point - start;
+    NiPoint3 closest;
     float proj = dir3.Dot(kRel);
     if (proj <= 0.0)
     {
@@ -7682,38 +7600,27 @@ bool Host120::BuildTrianglesFromEdgePairs()
     return changed;
 }
 
-class Vec3
-{
-  public:
-    float x, y, z;
-    Vec3 operator+(const Vec3& pt) const;
-    Vec3 operator*(float fScalar) const;
-};
 
-struct PathNode
+// LocalPathNode: 0x006bec40 reads a ushort node index at +0 of each node; include/PathNode.h has its NavMesh* there.
+struct LocalPathNode
 {
     unsigned short usIndex;
 };
 
 struct PathNodeList
 {
-    const Vec3& GetNodePos(unsigned short usIndex);
+    const PathPoint_blk_006a0000_od& GetNodePos(unsigned short usIndex);
 };
 
-struct PathNodeArray
-{
-    unsigned int GetSize();
-    PathNode*& GetAt(unsigned int uiIndex);
-};
 
 struct ObstacleDataPtr
 {
     void* m_pObject;
 };
 
-bool __cdecl FUN_006b9cf0(const Vec3& kA, const Vec3& kB, const Vec3& kC, const Vec3& kPoint, float& fDist,
+bool __cdecl FUN_006b9cf0(const PathPoint_blk_006a0000_od& kA, const PathPoint_blk_006a0000_od& kB, const PathPoint_blk_006a0000_od& kC, const PathPoint_blk_006a0000_od& kPoint, float& fDist,
                           float fRadius, float fAngleDifference);
-bool __cdecl FUN_006c3570(const Vec3& kPoint, const ObstacleDataPtr& kObstacle, float fRadius, float fAngleDifference);
+bool __cdecl FUN_006c3570(const PathPoint_blk_006a0000_od& kPoint, const ObstacleDataPtr& kObstacle, float fRadius, float fAngleDifference);
 
 struct PathTriangleCheck
 {
@@ -7726,22 +7633,22 @@ struct PathTriangleCheck
     int unk18;
     PathNodeArray kNodeArray;
 
-    bool FUN_006bec40(PathNode* pA, PathNode* pB, PathNode* pC);
+    bool FUN_006bec40(LocalPathNode* pA, LocalPathNode* pB, LocalPathNode* pC);
 };
 
 // @fnv 0x006bec40
-bool PathTriangleCheck::FUN_006bec40(PathNode* pNodeA, PathNode* pNodeB, PathNode* pNodeC)
+bool PathTriangleCheck::FUN_006bec40(LocalPathNode* pNodeA, LocalPathNode* pNodeB, LocalPathNode* pNodeC)
 {
-    Vec3 kA = pNodes->GetNodePos(pNodeA->usIndex);
-    Vec3 kB9 = pNodes->GetNodePos(pNodeB->usIndex);
-    Vec3 kC2 = pNodes->GetNodePos(pNodeC->usIndex);
-    Vec3 kCenter4 = (kA + kB9 + kC2) * 0.33333f;
+    PathPoint_blk_006a0000_od kA = pNodes->GetNodePos(pNodeA->usIndex);
+    PathPoint_blk_006a0000_od kB9 = pNodes->GetNodePos(pNodeB->usIndex);
+    PathPoint_blk_006a0000_od kC2 = pNodes->GetNodePos(pNodeC->usIndex);
+    PathPoint_blk_006a0000_od kCenter4 = (kA + kB9 + kC2) * 0.33333f;
     float fDist;
 
     for (unsigned int i4 = 0; i4 < kNodeArray.GetSize(); i4++)
     {
-        PathNode* pNode4 = kNodeArray.GetAt(i4);
-        Vec3 kPoint7 = pNodes->GetNodePos(pNode4->usIndex);
+        LocalPathNode* pNode4 = reinterpret_cast<LocalPathNode*>(kNodeArray.GetAt(i4));
+        PathPoint_blk_006a0000_od kPoint7 = pNodes->GetNodePos(pNode4->usIndex);
         if (pNode4 == pNodeA || pNode4 == pNodeB || pNode4 == pNodeC)
             continue;
         if (FUN_006b9cf0(kA, kB9, kC2, kPoint7, fDist, 128.0f, 180.0f))
@@ -8289,7 +8196,7 @@ void H2::FUN_006a8890(unsigned int newSize, unsigned char doShrink)
 struct SearchConnectionBuffer
 {
     void* vtable;
-    SearchNode** buffer;
+    PathSearchNode** buffer;
     unsigned int size;
     unsigned int capacity;
     void* heap;
@@ -8297,17 +8204,17 @@ struct SearchConnectionBuffer
     ~SearchConnectionBuffer();
     void FUN_008454f0(bool freeMemory);
     unsigned int FUN_0044ddc0();
-    SearchNode** FUN_00877a30(unsigned int index);
+    PathSearchNode** FUN_00877a30(unsigned int index);
 };
 struct PathSearch : FUN_006a1cf0_shell
 {
-    SearchNode* FUN_006b3a30();
+    PathSearchNode* FUN_006b3a30();
 };
 // @fnv 0x006b3a30
-SearchNode* PathSearch::FUN_006b3a30()
+PathSearchNode* PathSearch::FUN_006b3a30()
 {
     SearchConnectionBuffer connections;
-    SearchNode* previous = pCurrentNode;
+    PathSearchNode* previous = pCurrentNode;
     pCurrentNode = kOpenList.PopOpenNode();
     if (!pCurrentNode)
         return 0;
@@ -8324,7 +8231,7 @@ SearchNode* PathSearch::FUN_006b3a30()
         GetConnections(pCurrentNode, reinterpret_cast<ConnectionArray*>(&connections));
         for (unsigned int i = 0; i < connections.FUN_0044ddc0(); ++i)
         {
-            SearchNode* neighbor = *connections.FUN_00877a30(i);
+            PathSearchNode* neighbor = *connections.FUN_00877a30(i);
             kOpenList.UnlinkFromList(neighbor);
             if (pCurrentNode->pParent == neighbor)
                 return 0;
@@ -8497,8 +8404,8 @@ Vec3Ops* __cdecl FUN_004a3760(Vec3Ops* result, float amount, const Vec3Ops& valu
 extern double DAT_01012060;
 
 // @fnv 0x006ba100
-bool __cdecl FUN_006ba100(const NiPoint3* apSeg1Start, const NiPoint3* apSeg1End, const NiPoint3* apSeg2Start,
-                          const NiPoint3* apSeg2End, NiPoint3* apIntersection)
+bool __cdecl FUN_006ba100(const Point3Storage* apSeg1Start, const Point3Storage* apSeg1End, const Point3Storage* apSeg2Start,
+                          const Point3Storage* apSeg2End, Point3Storage* apIntersection)
 {
     float fStack_8 = (apSeg1Start->x - apSeg2End->x) * (apSeg1End->y - apSeg2End->y) -
                      (apSeg1Start->y - apSeg2End->y) * (apSeg1End->x - apSeg2End->x);
@@ -8515,7 +8422,7 @@ bool __cdecl FUN_006ba100(const NiPoint3* apSeg1Start, const NiPoint3* apSeg1End
             Vec3Ops temp4;
             Vec3Ops temp2c4;
             Vec3Ops temp38;
-            *apIntersection = *reinterpret_cast<const NiPoint3*>(
+            *apIntersection = *reinterpret_cast<const Point3Storage*>(
                 reinterpret_cast<const Vec3Ops&>(*apSeg1Start)
                     .Add(&temp38, *reinterpret_cast<const Vec3Ops*>(FUN_004a3760(
                                       &temp2c4, fStack5,
@@ -8566,11 +8473,11 @@ bool __cdecl ComputeCircleTangents(const TanPoint3& arCenter, float afRadius, co
 
 // Computes the closest point on segment start-end to point and returns whether its squared distance to point is less than radius squared.
 // @fnv 0x006ba9e0
-bool FUN_006ba9e0(const Pt3& start, const Pt3& end, const Pt3& point, float radius)
+bool FUN_006ba9e0(const NiPoint3& start, const NiPoint3& end, const NiPoint3& point, float radius)
 {
-    Pt3 dir3 = end - start;
-    Pt3 kRel = point - start;
-    Pt3 closest;
+    NiPoint3 dir3 = end - start;
+    NiPoint3 kRel = point - start;
+    NiPoint3 closest;
     float t2 = dir3.Dot(kRel);
     if (t2 <= DAT_01012060)
     {
@@ -8592,35 +8499,24 @@ bool FUN_006ba9e0(const Pt3& start, const Pt3& end, const Pt3& point, float radi
 }
 
 namespace CircleIntersection {
-struct Vec2
-{
-    float x, y;
-    Vec2();
-    Vec2& CopyFloatPair(const Vec2&);
-};
-struct Vec3
-{
-    float x, y, z;
-    void ScaleByInverse(float);
-    float GetSquaredXYLength();
-};
+// Use the assignment member address to retain the original out-of-line calls.
 struct Line
 {
-    Vec3 start, end;
+    PathPoint_blk_006a0000_od start, end;
     Line(const Line&);
-    void AddToPoints(const Vec3&);
-    void SubtractFromC(Vec3&);
+    void AddToPoints(const PathPoint_blk_006a0000_od&);
+    void SubtractFromC(PathPoint_blk_006a0000_od&);
 };
 struct Circle
 {
-    Vec3 center;
+    PathPoint_blk_006a0000_od center;
     float radius;
-    Vec3 FUN_004a0bd0();
+    PathPoint_blk_006a0000_od FUN_004a0bd0();
 };
 struct Hit
 {
     int type;
-    Vec2 point;
+    NiPoint2 point;
     float parameter;
 };
 struct Result
@@ -8646,22 +8542,23 @@ bool IntersectLineCircle(Circle* circle, const Line* pLine, Result* result)
     float radiusSlot20 = 1.0f;
     lineSlot1.start.ScaleByInverse(circle->radius);
     lineSlot1.end.ScaleByInverse(circle->radius);
-    Vec3 direction;
-    lineSlot1.SubtractFromC(direction);
+    // SubtractFromC fills this output; the original code does not construct it first.
+    float directionStorage[sizeof(PathPoint_blk_006a0000_od) / sizeof(float)];
+    lineSlot1.SubtractFromC(reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage));
     float radiusSquaredSlot0 = radiusSlot20 * radiusSlot20;
     bool useXSlot0;
-    if (direction.y == DAT_01012060 && direction.x != DAT_01012060)
+    if (reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).y == DAT_01012060 && reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).x != DAT_01012060)
         useXSlot0 = true;
-    else if (direction.y != DAT_01012060 && direction.x == DAT_01012060)
+    else if (reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).y != DAT_01012060 && reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).x == DAT_01012060)
         useXSlot0 = false;
-    else if (FUN_00408840(direction.x) > FUN_00408840(direction.y))
+    else if (FUN_00408840(reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).x) > FUN_00408840(reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).y))
         useXSlot0 = true;
     else
         useXSlot0 = false;
     if (useXSlot0)
     {
-        float inverseXSlot0 = 1.0f / direction.x;
-        float slopeXSlot12 = direction.y * inverseXSlot0;
+        float inverseXSlot0 = 1.0f / reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).x;
+        float slopeXSlot12 = reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).y * inverseXSlot0;
         float interceptXSlot13 = lineSlot1.start.y - slopeXSlot12 * lineSlot1.start.x;
         float slopeSquaredXSlot1 = slopeXSlot12 * slopeXSlot12;
         float coefficientXSlot14 = slopeSquaredXSlot1 + DAT_01012070;
@@ -8678,10 +8575,10 @@ bool IntersectLineCircle(Circle* circle, const Line* pLine, Result* result)
             result->type = 3;
             float singleInverseXSlot11 = 1.0f / (radiusSquaredSlot0 * coefficientXSlot14);
             float singleOffsetXSlot0 = interceptXSlot13 * radiusSlot20;
-            Vec2 singleXSlot0;
+            NiPoint2 singleXSlot0;
             singleXSlot0.x = -singleOffsetXSlot0 * slopeXSlot12 * singleInverseXSlot11;
             singleXSlot0.y = singleOffsetXSlot0 * singleInverseXSlot11;
-            firstSlot0->point.CopyFloatPair(singleXSlot0);
+            (firstSlot0->point.*&NiPoint2::operator=)(singleXSlot0);
             firstSlot0->parameter = (radiusSlot20 * firstSlot0->point.x - lineSlot1.start.x) * inverseXSlot0;
         }
         else
@@ -8690,21 +8587,21 @@ bool IntersectLineCircle(Circle* circle, const Line* pLine, Result* result)
             float pairInverseXSlot10 = 1.0f / (radiusSquaredSlot0 * coefficientXSlot14);
             float rootX = FUN_004019b0(discriminantXSlot0);
             float pairOffsetXSlot10 = interceptXSlot13 * radiusSlot20;
-            Vec2 positiveXSlot10;
+            NiPoint2 positiveXSlot10;
             positiveXSlot10.x = (-pairOffsetXSlot10 * slopeXSlot12 + rootX) * pairInverseXSlot10;
             positiveXSlot10.y = (slopeXSlot12 * rootX + pairOffsetXSlot10) * pairInverseXSlot10;
-            Vec2 negativeXSlot0;
+            NiPoint2 negativeXSlot0;
             negativeXSlot0.x = (-pairOffsetXSlot10 * slopeXSlot12 - rootX) * pairInverseXSlot10;
             negativeXSlot0.y = (pairOffsetXSlot10 - slopeXSlot12 * rootX) * pairInverseXSlot10;
-            if (direction.x < DAT_01012060)
+            if (reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).x < DAT_01012060)
             {
-                firstSlot0->point.CopyFloatPair(positiveXSlot10);
-                secondSlot21->point.CopyFloatPair(negativeXSlot0);
+                (firstSlot0->point.*&NiPoint2::operator=)(positiveXSlot10);
+                (secondSlot21->point.*&NiPoint2::operator=)(negativeXSlot0);
             }
             else
             {
-                firstSlot0->point.CopyFloatPair(negativeXSlot0);
-                secondSlot21->point.CopyFloatPair(positiveXSlot10);
+                (firstSlot0->point.*&NiPoint2::operator=)(negativeXSlot0);
+                (secondSlot21->point.*&NiPoint2::operator=)(positiveXSlot10);
             }
             firstSlot0->parameter = (radiusSlot20 * firstSlot0->point.x - lineSlot1.start.x) * inverseXSlot0;
             secondSlot21->parameter = (radiusSlot20 * secondSlot21->point.x - lineSlot1.start.x) * inverseXSlot0;
@@ -8712,8 +8609,8 @@ bool IntersectLineCircle(Circle* circle, const Line* pLine, Result* result)
     }
     else
     {
-        float inverseYSlot0 = 1.0f / direction.y;
-        float slopeYSlot0 = direction.x * inverseYSlot0;
+        float inverseYSlot0 = 1.0f / reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).y;
+        float slopeYSlot0 = reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).x * inverseYSlot0;
         float interceptYSlot0 = lineSlot1.start.x - slopeYSlot0 * lineSlot1.start.y;
         float slopeSquaredYSlot11 = slopeYSlot0 * slopeYSlot0;
         float coefficientYSlot11 = slopeSquaredYSlot11 + DAT_01012070;
@@ -8730,10 +8627,10 @@ bool IntersectLineCircle(Circle* circle, const Line* pLine, Result* result)
             result->type = 3;
             float singleInverseYSlot10 = 1.0f / (radiusSquaredSlot0 * coefficientYSlot11);
             float singleOffsetYSlot0 = interceptYSlot0 * radiusSlot20;
-            Vec2 singleYSlot0;
+            NiPoint2 singleYSlot0;
             singleYSlot0.x = singleOffsetYSlot0 * singleInverseYSlot10;
             singleYSlot0.y = -singleOffsetYSlot0 * slopeYSlot0 * singleInverseYSlot10;
-            firstSlot0->point.CopyFloatPair(singleYSlot0);
+            (firstSlot0->point.*&NiPoint2::operator=)(singleYSlot0);
             firstSlot0->parameter = (radiusSlot20 * firstSlot0->point.y - lineSlot1.start.y) * inverseYSlot0;
         }
         else
@@ -8742,21 +8639,21 @@ bool IntersectLineCircle(Circle* circle, const Line* pLine, Result* result)
             float pairInverseYSlot11 = 1.0f / (radiusSquaredSlot0 * coefficientYSlot11);
             float rootYSlot16 = FUN_004019b0(discriminantYSlot0);
             float pairOffsetYSlot0 = interceptYSlot0 * radiusSlot20;
-            Vec2 positiveYSlot0;
+            NiPoint2 positiveYSlot0;
             positiveYSlot0.x = (slopeYSlot0 * rootYSlot16 + pairOffsetYSlot0) * pairInverseYSlot11;
             positiveYSlot0.y = (-pairOffsetYSlot0 * slopeYSlot0 + rootYSlot16) * pairInverseYSlot11;
-            Vec2 negativeYSlot0;
+            NiPoint2 negativeYSlot0;
             negativeYSlot0.x = (pairOffsetYSlot0 - slopeYSlot0 * rootYSlot16) * pairInverseYSlot11;
             negativeYSlot0.y = (-pairOffsetYSlot0 * slopeYSlot0 - rootYSlot16) * pairInverseYSlot11;
-            if (direction.y < DAT_01012060)
+            if (reinterpret_cast<PathPoint_blk_006a0000_od&>(directionStorage).y < DAT_01012060)
             {
-                firstSlot0->point.CopyFloatPair(positiveYSlot0);
-                secondSlot21->point.CopyFloatPair(negativeYSlot0);
+                (firstSlot0->point.*&NiPoint2::operator=)(positiveYSlot0);
+                (secondSlot21->point.*&NiPoint2::operator=)(negativeYSlot0);
             }
             else
             {
-                firstSlot0->point.CopyFloatPair(negativeYSlot0);
-                secondSlot21->point.CopyFloatPair(positiveYSlot0);
+                (firstSlot0->point.*&NiPoint2::operator=)(negativeYSlot0);
+                (secondSlot21->point.*&NiPoint2::operator=)(positiveYSlot0);
             }
             firstSlot0->parameter = (radiusSlot20 * firstSlot0->point.y - lineSlot1.start.y) * inverseYSlot0;
             secondSlot21->parameter = (radiusSlot20 * secondSlot21->point.y - lineSlot1.start.y) * inverseYSlot0;
@@ -8809,7 +8706,7 @@ bool IntersectLineCircle(Circle* circle, const Line* pLine, Result* result)
         else if (!firstValidSlot0 && secondValidSlot0)
         {
             result->type = 1;
-            firstSlot0->point.CopyFloatPair(secondSlot21->point);
+            (firstSlot0->point.*&NiPoint2::operator=)(secondSlot21->point);
             firstSlot0->parameter = secondSlot21->parameter;
             if (firstSlot0->parameter < epsilonSlot18 || firstSlot0->parameter > 1.0f - epsilonSlot18)
                 result->first.type = 2;
@@ -8834,67 +8731,49 @@ bool IntersectLineCircle(Circle* circle, const Line* pLine, Result* result)
 }
 }
 
-struct Pt2_6bb8b0
-{
-    float x, y;
-    Pt2_6bb8b0();
-};
 
 struct Obstacle_6bb8b0
 {
-    bool FUN_006a0660(const Pt2_6bb8b0& pt);
-};
-
-struct Pt3_6bb8b0
-{
-    float x, y, z;
-    Pt3_6bb8b0 operator-(const Pt3_6bb8b0& rhs) const;
-    float SqrLength() const;
-    float SqrLength2D() const;
-};
-
-struct Sphere_6bb8b0 : public Pt3_6bb8b0
-{
-    float radius;
+    bool FUN_006a0660(const NiPoint2& pt);
 };
 
 float __cdecl my_sqrt(float f);
 
 // @fnv 0x006bb8b0
-bool __cdecl FUN_006bb8b0(const Sphere_6bb8b0* pSphereA, Obstacle_6bb8b0* pObstacle, const Sphere_6bb8b0* pSphereB)
+bool __cdecl FUN_006bb8b0(const NiBound* pSphereA, Obstacle_6bb8b0* pObstacle, const NiBound* pSphereB)
 {
-    if (pSphereA->radius == 0.0)
+    if (pSphereA->m_fRadius == 0.0)
         return true;
-    if (pSphereB->radius == 0.0)
+    if (pSphereB->m_fRadius == 0.0)
         return true;
-    Pt3_6bb8b0 c = *pSphereB - *pSphereA;
-    float p = c.SqrLength();
-    float l = c.SqrLength2D();
+    NiPoint3 c = pSphereB->m_kCenter.FUN_00439ef0(pSphereA->m_kCenter);
+    float p = c.FUN_004a7290();
+    float l = c.GetSquaredXYLength();
     if (l == 0.0)
         return false;
-    float h = pSphereA->radius + pSphereB->radius;
+    float h = pSphereA->m_fRadius + pSphereB->m_fRadius;
     if (h * h < l)
         return true;
     if (h * h < p)
         return true;
-    float q = pSphereA->radius - pSphereB->radius;
+    float q = pSphereA->m_fRadius - pSphereB->m_fRadius;
     if (l < q * q)
         return true;
     if (p < q * q)
         return true;
-    float k = pSphereA->radius * pSphereA->radius;
-    float cf = pSphereB->radius * pSphereB->radius;
+    float k = pSphereA->m_fRadius * pSphereA->m_fRadius;
+    float cf = pSphereB->m_fRadius * pSphereB->m_fRadius;
     float b = my_sqrt(l);
     float eb = 1.0f / b;
-    float f = 1.0f / pSphereA->radius;
+    float f = 1.0f / pSphereA->m_fRadius;
     float i = (k - cf + l) * 0.5 * eb;
     float e = i * i;
     float j;
     float ba = my_sqrt((j = k - e));
-    Pt2_6bb8b0 s;
+    NiPoint2 s;
     s.x = (i * c.x + ba * c.y) * f * eb;
     s.y = (i * c.y - ba * c.x) * f * eb;
-    Pt2_6bb8b0 a;
+    NiPoint2 a;
     a.x = (i * c.x - ba * c.y) * f * eb;
     a.y = (i * c.y + ba * c.x) * f * eb;
     if (pObstacle->FUN_006a0660(s))
@@ -8953,12 +8832,7 @@ struct BuildValue
     void FUN_00693bd0(unsigned int lastIndex);
 };
 
-class ObstacleData
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
+
 
 struct BuildManager
 {
@@ -9030,8 +8904,8 @@ struct BuildOutput
 
 struct BuildBounds
 {
-    NiBound m0;
-    NiBound mC;
+    NavMeshEdgeData m0;
+    NavMeshEdgeData mC;
     bool processed;
     BuildBounds();
 };
@@ -9952,15 +9826,9 @@ void S6bdcb0Owner::FUN_006bdcb0()
     }
 }
 
-struct NavMeshTriangle_6be830
-{
-    void SetEdge(int edge, unsigned short tri);
-};
 
-struct NavMesh_6be830
-{
-    NavMeshTriangle_6be830* GetTriangle(unsigned short idx);
-};
+
+
 
 struct EdgeSplit_6be830
 {
@@ -9982,7 +9850,7 @@ struct EdgeSplitArray_6be830
 
 struct NavMeshGen_6be830
 {
-    NavMesh_6be830* navMesh00;
+    NavMesh* navMesh00;
     int unk04[11];
     EdgeSplitArray_6be830 arr30;
 
@@ -10137,12 +10005,7 @@ struct EdgeHost
     unsigned int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
     EdgePairs edges;
 };
-struct EdgePoint2
-{
-    float x, y;
-    EdgePoint2(float, float);
-};
-bool __cdecl FUN_006ba010(const EdgePoint2&, const EdgePoint2&, const EdgePoint2&, const EdgePoint2&);
+bool __cdecl FUN_006ba010(const NiPoint2&, const NiPoint2&, const NiPoint2&, const NiPoint2&);
 
 // @fnv 0x006beea0
 bool FUN_006bde50::CanAddEdge(void* pVertexA, void* pVertexB)
@@ -10153,14 +10016,14 @@ bool FUN_006bde50::CanAddEdge(void* pVertexA, void* pVertexB)
         return false;
     if (!((EdgeVertex*)pVertexB)->enabled && ((EdgeVertex*)pVertexB)->blocked)
         return false;
-    const Vec3& a = (const Vec3&)((EdgeHost*)this)->mesh->FUN_0068f0a0(((EdgeVertex*)pVertexA)->index);
-    const Vec3& b = (const Vec3&)((EdgeHost*)this)->mesh->FUN_0068f0a0(((EdgeVertex*)pVertexB)->index);
-    EdgePoint2 p(a.x, a.y);
-    EdgePoint2 q(b.x, b.y);
+    const PathPoint_blk_006a0000_od& a = (const PathPoint_blk_006a0000_od&)((EdgeHost*)this)->mesh->FUN_0068f0a0(((EdgeVertex*)pVertexA)->index);
+    const PathPoint_blk_006a0000_od& b = (const PathPoint_blk_006a0000_od&)((EdgeHost*)this)->mesh->FUN_0068f0a0(((EdgeVertex*)pVertexB)->index);
+    NiPoint2 p(a.x, a.y);
+    NiPoint2 q(b.x, b.y);
     if (((EdgeVertex*)pVertexA)->enabled != ((EdgeVertex*)pVertexB)->enabled)
     {
-        Vec3 midpoint = (a + b) * 0.5f;
-        if (!((S_006bf1d0*)this)->FUN_006bf220((const NiPoint3&)midpoint))
+        PathPoint_blk_006a0000_od midpoint = (a + b) * 0.5f;
+        if (!((S_006bf1d0*)this)->FUN_006bf220((const Point3Storage&)midpoint))
             return false;
     }
     for (unsigned int i = ((EdgeHost*)this)->edges.FUN_0044ddc0() - 1; i != -1; --i)
@@ -10178,35 +10041,18 @@ bool FUN_006bde50::CanAddEdge(void* pVertexA, void* pVertexB)
             continue;
         if ((*((EdgeHost*)this)->edges.FUN_00877a30(i))->b == pVertexB)
             continue;
-        const NiPoint3& posEdgeA =
+        const Point3Storage& posEdgeA =
             ((EdgeHost*)this)->mesh->FUN_0068f0a0((*((EdgeHost*)this)->edges.FUN_00877a30(i))->a->index);
-        const NiPoint3& posEdgeB =
+        const Point3Storage& posEdgeB =
             ((EdgeHost*)this)->mesh->FUN_0068f0a0((*((EdgeHost*)this)->edges.FUN_00877a30(i))->b->index);
-        EdgePoint2 edgePointA(posEdgeA.x, posEdgeA.y);
-        EdgePoint2 edgePointB(posEdgeB.x, posEdgeB.y);
+        NiPoint2 edgePointA(posEdgeA.x, posEdgeA.y);
+        NiPoint2 edgePointB(posEdgeB.x, posEdgeB.y);
         if (FUN_006ba010(p, q, edgePointA, edgePointB))
             return false;
     }
     return true;
 }
 
-struct NP
-{
-    void* p;
-    NP(int);
-    ~NP();
-};
-struct hkQuaternion
-{
-    int unk00;
-    unsigned short unk04;
-    unsigned short unk06;
-    int unk08;
-    unsigned short unk0c;
-    unsigned char unk0e;
-    unsigned char unk0f;
-    hkQuaternion();
-};
 struct FUN_006bf570
 {
     int unk00;
@@ -10683,7 +10529,7 @@ int FUN_0040fc90();
 class FUN_006a1630_class : public FUN_006a1cf0_shell
 {
   public:
-    bool CopyNodeListToArrays(SearchNode* head, FUN_006b3cb0_arg2* a2, FUN_006b3cb0_arg3* a3);
+    bool CopyNodeListToArrays(PathSearchNode* head, FUN_006b3cb0_arg2* a2, FUN_006b3cb0_arg3* a3);
     bool ProcessSearchNode(FUN_006b3cb0_arg2* param_2, FUN_006b3cb0_arg3* param_3, bool useBestNode);
 };
 
@@ -10693,9 +10539,9 @@ bool FUN_006a1630_class::ProcessSearchNode(FUN_006b3cb0_arg2* param_2, FUN_006b3
 {
     bYield = FUN_00b00a00()->TestValue(FUN_0040fc90());
 
-    SearchNode* selectedNode;
+    PathSearchNode* selectedNode;
     bool result2;
-    SearchNode* currentNode = FUN_006a1cf0();
+    PathSearchNode* currentNode = FUN_006a1cf0();
     if (currentNode != 0)
     {
         result2 = true;
@@ -10719,21 +10565,7 @@ bool FUN_006a1630_class::ProcessSearchNode(FUN_006b3cb0_arg2* param_2, FUN_006b3
 
 // RTTI establishes NavMeshSearchHide -> NavMeshSearch -> AStarSearch.
 // The base extent ends where the derived request pointer begins at0x20a4.
-struct FUN_006a6a40
-{
-    virtual ~FUN_006a6a40();
-    // Same complete AStarSearch storage shapes supplied in this unit's other
-    // specializations: 16-byte tree,0x1fe0 workspace and0x54 search result.
-    MemberA_6a1500 tree;
-    MemberB_6a1500 workspace;
-    MemberC_6a1500 searchResult;
-    unsigned unk2048, unk204c, unk2050;
-    bool unk2054;
-    unsigned unk2058, unk205c, unk2060, unk2064, unk2068, unk206c;
-    unsigned unk2070, unk2074, unk2078, unk207c, unk2080, unk2084, unk2088;
-    unsigned unk208c, unk2090, unk2094, unk2098, unk209c, unk20a0;
-    FUN_006a6a40();
-};
+
 namespace Point441 {
 struct FUN_006815c0
 {
@@ -10746,7 +10578,7 @@ struct Location441
 {
     unsigned unk00, unk04, unk08, unk0c, unk10;
 };
-struct FUN_006a9cb0 : FUN_006a6a40
+struct FUN_006a9cb0 : NavMeshSearch
 {
     void* request;
     Location441 location;
@@ -10763,22 +10595,7 @@ FUN_006a9cb0::FUN_006a9cb0()
     request = 0;
 }
 
-class PathingLocation
-{
-  public:
-    PathingLocation();
-    ~PathingLocation();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-};
+
 
 class NavSearchPoint
 {
@@ -10789,2107 +10606,10 @@ class NavSearchPoint
     float z;
 };
 
-class NavMeshSearch
-{
-  public:
-    NavMeshSearch();
-    ~NavMeshSearch();
-    virtual void vf();
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28c;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29c;
-    int unk2a0;
-    int unk2a4;
-    int unk2a8;
-    int unk2ac;
-    int unk2b0;
-    int unk2b4;
-    int unk2b8;
-    int unk2bc;
-    int unk2c0;
-    int unk2c4;
-    int unk2c8;
-    int unk2cc;
-    int unk2d0;
-    int unk2d4;
-    int unk2d8;
-    int unk2dc;
-    int unk2e0;
-    int unk2e4;
-    int unk2e8;
-    int unk2ec;
-    int unk2f0;
-    int unk2f4;
-    int unk2f8;
-    int unk2fc;
-    int unk300;
-    int unk304;
-    int unk308;
-    int unk30c;
-    int unk310;
-    int unk314;
-    int unk318;
-    int unk31c;
-    int unk320;
-    int unk324;
-    int unk328;
-    int unk32c;
-    int unk330;
-    int unk334;
-    int unk338;
-    int unk33c;
-    int unk340;
-    int unk344;
-    int unk348;
-    int unk34c;
-    int unk350;
-    int unk354;
-    int unk358;
-    int unk35c;
-    int unk360;
-    int unk364;
-    int unk368;
-    int unk36c;
-    int unk370;
-    int unk374;
-    int unk378;
-    int unk37c;
-    int unk380;
-    int unk384;
-    int unk388;
-    int unk38c;
-    int unk390;
-    int unk394;
-    int unk398;
-    int unk39c;
-    int unk3a0;
-    int unk3a4;
-    int unk3a8;
-    int unk3ac;
-    int unk3b0;
-    int unk3b4;
-    int unk3b8;
-    int unk3bc;
-    int unk3c0;
-    int unk3c4;
-    int unk3c8;
-    int unk3cc;
-    int unk3d0;
-    int unk3d4;
-    int unk3d8;
-    int unk3dc;
-    int unk3e0;
-    int unk3e4;
-    int unk3e8;
-    int unk3ec;
-    int unk3f0;
-    int unk3f4;
-    int unk3f8;
-    int unk3fc;
-    int unk400;
-    int unk404;
-    int unk408;
-    int unk40c;
-    int unk410;
-    int unk414;
-    int unk418;
-    int unk41c;
-    int unk420;
-    int unk424;
-    int unk428;
-    int unk42c;
-    int unk430;
-    int unk434;
-    int unk438;
-    int unk43c;
-    int unk440;
-    int unk444;
-    int unk448;
-    int unk44c;
-    int unk450;
-    int unk454;
-    int unk458;
-    int unk45c;
-    int unk460;
-    int unk464;
-    int unk468;
-    int unk46c;
-    int unk470;
-    int unk474;
-    int unk478;
-    int unk47c;
-    int unk480;
-    int unk484;
-    int unk488;
-    int unk48c;
-    int unk490;
-    int unk494;
-    int unk498;
-    int unk49c;
-    int unk4a0;
-    int unk4a4;
-    int unk4a8;
-    int unk4ac;
-    int unk4b0;
-    int unk4b4;
-    int unk4b8;
-    int unk4bc;
-    int unk4c0;
-    int unk4c4;
-    int unk4c8;
-    int unk4cc;
-    int unk4d0;
-    int unk4d4;
-    int unk4d8;
-    int unk4dc;
-    int unk4e0;
-    int unk4e4;
-    int unk4e8;
-    int unk4ec;
-    int unk4f0;
-    int unk4f4;
-    int unk4f8;
-    int unk4fc;
-    int unk500;
-    int unk504;
-    int unk508;
-    int unk50c;
-    int unk510;
-    int unk514;
-    int unk518;
-    int unk51c;
-    int unk520;
-    int unk524;
-    int unk528;
-    int unk52c;
-    int unk530;
-    int unk534;
-    int unk538;
-    int unk53c;
-    int unk540;
-    int unk544;
-    int unk548;
-    int unk54c;
-    int unk550;
-    int unk554;
-    int unk558;
-    int unk55c;
-    int unk560;
-    int unk564;
-    int unk568;
-    int unk56c;
-    int unk570;
-    int unk574;
-    int unk578;
-    int unk57c;
-    int unk580;
-    int unk584;
-    int unk588;
-    int unk58c;
-    int unk590;
-    int unk594;
-    int unk598;
-    int unk59c;
-    int unk5a0;
-    int unk5a4;
-    int unk5a8;
-    int unk5ac;
-    int unk5b0;
-    int unk5b4;
-    int unk5b8;
-    int unk5bc;
-    int unk5c0;
-    int unk5c4;
-    int unk5c8;
-    int unk5cc;
-    int unk5d0;
-    int unk5d4;
-    int unk5d8;
-    int unk5dc;
-    int unk5e0;
-    int unk5e4;
-    int unk5e8;
-    int unk5ec;
-    int unk5f0;
-    int unk5f4;
-    int unk5f8;
-    int unk5fc;
-    int unk600;
-    int unk604;
-    int unk608;
-    int unk60c;
-    int unk610;
-    int unk614;
-    int unk618;
-    int unk61c;
-    int unk620;
-    int unk624;
-    int unk628;
-    int unk62c;
-    int unk630;
-    int unk634;
-    int unk638;
-    int unk63c;
-    int unk640;
-    int unk644;
-    int unk648;
-    int unk64c;
-    int unk650;
-    int unk654;
-    int unk658;
-    int unk65c;
-    int unk660;
-    int unk664;
-    int unk668;
-    int unk66c;
-    int unk670;
-    int unk674;
-    int unk678;
-    int unk67c;
-    int unk680;
-    int unk684;
-    int unk688;
-    int unk68c;
-    int unk690;
-    int unk694;
-    int unk698;
-    int unk69c;
-    int unk6a0;
-    int unk6a4;
-    int unk6a8;
-    int unk6ac;
-    int unk6b0;
-    int unk6b4;
-    int unk6b8;
-    int unk6bc;
-    int unk6c0;
-    int unk6c4;
-    int unk6c8;
-    int unk6cc;
-    int unk6d0;
-    int unk6d4;
-    int unk6d8;
-    int unk6dc;
-    int unk6e0;
-    int unk6e4;
-    int unk6e8;
-    int unk6ec;
-    int unk6f0;
-    int unk6f4;
-    int unk6f8;
-    int unk6fc;
-    int unk700;
-    int unk704;
-    int unk708;
-    int unk70c;
-    int unk710;
-    int unk714;
-    int unk718;
-    int unk71c;
-    int unk720;
-    int unk724;
-    int unk728;
-    int unk72c;
-    int unk730;
-    int unk734;
-    int unk738;
-    int unk73c;
-    int unk740;
-    int unk744;
-    int unk748;
-    int unk74c;
-    int unk750;
-    int unk754;
-    int unk758;
-    int unk75c;
-    int unk760;
-    int unk764;
-    int unk768;
-    int unk76c;
-    int unk770;
-    int unk774;
-    int unk778;
-    int unk77c;
-    int unk780;
-    int unk784;
-    int unk788;
-    int unk78c;
-    int unk790;
-    int unk794;
-    int unk798;
-    int unk79c;
-    int unk7a0;
-    int unk7a4;
-    int unk7a8;
-    int unk7ac;
-    int unk7b0;
-    int unk7b4;
-    int unk7b8;
-    int unk7bc;
-    int unk7c0;
-    int unk7c4;
-    int unk7c8;
-    int unk7cc;
-    int unk7d0;
-    int unk7d4;
-    int unk7d8;
-    int unk7dc;
-    int unk7e0;
-    int unk7e4;
-    int unk7e8;
-    int unk7ec;
-    int unk7f0;
-    int unk7f4;
-    int unk7f8;
-    int unk7fc;
-    int unk800;
-    int unk804;
-    int unk808;
-    int unk80c;
-    int unk810;
-    int unk814;
-    int unk818;
-    int unk81c;
-    int unk820;
-    int unk824;
-    int unk828;
-    int unk82c;
-    int unk830;
-    int unk834;
-    int unk838;
-    int unk83c;
-    int unk840;
-    int unk844;
-    int unk848;
-    int unk84c;
-    int unk850;
-    int unk854;
-    int unk858;
-    int unk85c;
-    int unk860;
-    int unk864;
-    int unk868;
-    int unk86c;
-    int unk870;
-    int unk874;
-    int unk878;
-    int unk87c;
-    int unk880;
-    int unk884;
-    int unk888;
-    int unk88c;
-    int unk890;
-    int unk894;
-    int unk898;
-    int unk89c;
-    int unk8a0;
-    int unk8a4;
-    int unk8a8;
-    int unk8ac;
-    int unk8b0;
-    int unk8b4;
-    int unk8b8;
-    int unk8bc;
-    int unk8c0;
-    int unk8c4;
-    int unk8c8;
-    int unk8cc;
-    int unk8d0;
-    int unk8d4;
-    int unk8d8;
-    int unk8dc;
-    int unk8e0;
-    int unk8e4;
-    int unk8e8;
-    int unk8ec;
-    int unk8f0;
-    int unk8f4;
-    int unk8f8;
-    int unk8fc;
-    int unk900;
-    int unk904;
-    int unk908;
-    int unk90c;
-    int unk910;
-    int unk914;
-    int unk918;
-    int unk91c;
-    int unk920;
-    int unk924;
-    int unk928;
-    int unk92c;
-    int unk930;
-    int unk934;
-    int unk938;
-    int unk93c;
-    int unk940;
-    int unk944;
-    int unk948;
-    int unk94c;
-    int unk950;
-    int unk954;
-    int unk958;
-    int unk95c;
-    int unk960;
-    int unk964;
-    int unk968;
-    int unk96c;
-    int unk970;
-    int unk974;
-    int unk978;
-    int unk97c;
-    int unk980;
-    int unk984;
-    int unk988;
-    int unk98c;
-    int unk990;
-    int unk994;
-    int unk998;
-    int unk99c;
-    int unk9a0;
-    int unk9a4;
-    int unk9a8;
-    int unk9ac;
-    int unk9b0;
-    int unk9b4;
-    int unk9b8;
-    int unk9bc;
-    int unk9c0;
-    int unk9c4;
-    int unk9c8;
-    int unk9cc;
-    int unk9d0;
-    int unk9d4;
-    int unk9d8;
-    int unk9dc;
-    int unk9e0;
-    int unk9e4;
-    int unk9e8;
-    int unk9ec;
-    int unk9f0;
-    int unk9f4;
-    int unk9f8;
-    int unk9fc;
-    int unka00;
-    int unka04;
-    int unka08;
-    int unka0c;
-    int unka10;
-    int unka14;
-    int unka18;
-    int unka1c;
-    int unka20;
-    int unka24;
-    int unka28;
-    int unka2c;
-    int unka30;
-    int unka34;
-    int unka38;
-    int unka3c;
-    int unka40;
-    int unka44;
-    int unka48;
-    int unka4c;
-    int unka50;
-    int unka54;
-    int unka58;
-    int unka5c;
-    int unka60;
-    int unka64;
-    int unka68;
-    int unka6c;
-    int unka70;
-    int unka74;
-    int unka78;
-    int unka7c;
-    int unka80;
-    int unka84;
-    int unka88;
-    int unka8c;
-    int unka90;
-    int unka94;
-    int unka98;
-    int unka9c;
-    int unkaa0;
-    int unkaa4;
-    int unkaa8;
-    int unkaac;
-    int unkab0;
-    int unkab4;
-    int unkab8;
-    int unkabc;
-    int unkac0;
-    int unkac4;
-    int unkac8;
-    int unkacc;
-    int unkad0;
-    int unkad4;
-    int unkad8;
-    int unkadc;
-    int unkae0;
-    int unkae4;
-    int unkae8;
-    int unkaec;
-    int unkaf0;
-    int unkaf4;
-    int unkaf8;
-    int unkafc;
-    int unkb00;
-    int unkb04;
-    int unkb08;
-    int unkb0c;
-    int unkb10;
-    int unkb14;
-    int unkb18;
-    int unkb1c;
-    int unkb20;
-    int unkb24;
-    int unkb28;
-    int unkb2c;
-    int unkb30;
-    int unkb34;
-    int unkb38;
-    int unkb3c;
-    int unkb40;
-    int unkb44;
-    int unkb48;
-    int unkb4c;
-    int unkb50;
-    int unkb54;
-    int unkb58;
-    int unkb5c;
-    int unkb60;
-    int unkb64;
-    int unkb68;
-    int unkb6c;
-    int unkb70;
-    int unkb74;
-    int unkb78;
-    int unkb7c;
-    int unkb80;
-    int unkb84;
-    int unkb88;
-    int unkb8c;
-    int unkb90;
-    int unkb94;
-    int unkb98;
-    int unkb9c;
-    int unkba0;
-    int unkba4;
-    int unkba8;
-    int unkbac;
-    int unkbb0;
-    int unkbb4;
-    int unkbb8;
-    int unkbbc;
-    int unkbc0;
-    int unkbc4;
-    int unkbc8;
-    int unkbcc;
-    int unkbd0;
-    int unkbd4;
-    int unkbd8;
-    int unkbdc;
-    int unkbe0;
-    int unkbe4;
-    int unkbe8;
-    int unkbec;
-    int unkbf0;
-    int unkbf4;
-    int unkbf8;
-    int unkbfc;
-    int unkc00;
-    int unkc04;
-    int unkc08;
-    int unkc0c;
-    int unkc10;
-    int unkc14;
-    int unkc18;
-    int unkc1c;
-    int unkc20;
-    int unkc24;
-    int unkc28;
-    int unkc2c;
-    int unkc30;
-    int unkc34;
-    int unkc38;
-    int unkc3c;
-    int unkc40;
-    int unkc44;
-    int unkc48;
-    int unkc4c;
-    int unkc50;
-    int unkc54;
-    int unkc58;
-    int unkc5c;
-    int unkc60;
-    int unkc64;
-    int unkc68;
-    int unkc6c;
-    int unkc70;
-    int unkc74;
-    int unkc78;
-    int unkc7c;
-    int unkc80;
-    int unkc84;
-    int unkc88;
-    int unkc8c;
-    int unkc90;
-    int unkc94;
-    int unkc98;
-    int unkc9c;
-    int unkca0;
-    int unkca4;
-    int unkca8;
-    int unkcac;
-    int unkcb0;
-    int unkcb4;
-    int unkcb8;
-    int unkcbc;
-    int unkcc0;
-    int unkcc4;
-    int unkcc8;
-    int unkccc;
-    int unkcd0;
-    int unkcd4;
-    int unkcd8;
-    int unkcdc;
-    int unkce0;
-    int unkce4;
-    int unkce8;
-    int unkcec;
-    int unkcf0;
-    int unkcf4;
-    int unkcf8;
-    int unkcfc;
-    int unkd00;
-    int unkd04;
-    int unkd08;
-    int unkd0c;
-    int unkd10;
-    int unkd14;
-    int unkd18;
-    int unkd1c;
-    int unkd20;
-    int unkd24;
-    int unkd28;
-    int unkd2c;
-    int unkd30;
-    int unkd34;
-    int unkd38;
-    int unkd3c;
-    int unkd40;
-    int unkd44;
-    int unkd48;
-    int unkd4c;
-    int unkd50;
-    int unkd54;
-    int unkd58;
-    int unkd5c;
-    int unkd60;
-    int unkd64;
-    int unkd68;
-    int unkd6c;
-    int unkd70;
-    int unkd74;
-    int unkd78;
-    int unkd7c;
-    int unkd80;
-    int unkd84;
-    int unkd88;
-    int unkd8c;
-    int unkd90;
-    int unkd94;
-    int unkd98;
-    int unkd9c;
-    int unkda0;
-    int unkda4;
-    int unkda8;
-    int unkdac;
-    int unkdb0;
-    int unkdb4;
-    int unkdb8;
-    int unkdbc;
-    int unkdc0;
-    int unkdc4;
-    int unkdc8;
-    int unkdcc;
-    int unkdd0;
-    int unkdd4;
-    int unkdd8;
-    int unkddc;
-    int unkde0;
-    int unkde4;
-    int unkde8;
-    int unkdec;
-    int unkdf0;
-    int unkdf4;
-    int unkdf8;
-    int unkdfc;
-    int unke00;
-    int unke04;
-    int unke08;
-    int unke0c;
-    int unke10;
-    int unke14;
-    int unke18;
-    int unke1c;
-    int unke20;
-    int unke24;
-    int unke28;
-    int unke2c;
-    int unke30;
-    int unke34;
-    int unke38;
-    int unke3c;
-    int unke40;
-    int unke44;
-    int unke48;
-    int unke4c;
-    int unke50;
-    int unke54;
-    int unke58;
-    int unke5c;
-    int unke60;
-    int unke64;
-    int unke68;
-    int unke6c;
-    int unke70;
-    int unke74;
-    int unke78;
-    int unke7c;
-    int unke80;
-    int unke84;
-    int unke88;
-    int unke8c;
-    int unke90;
-    int unke94;
-    int unke98;
-    int unke9c;
-    int unkea0;
-    int unkea4;
-    int unkea8;
-    int unkeac;
-    int unkeb0;
-    int unkeb4;
-    int unkeb8;
-    int unkebc;
-    int unkec0;
-    int unkec4;
-    int unkec8;
-    int unkecc;
-    int unked0;
-    int unked4;
-    int unked8;
-    int unkedc;
-    int unkee0;
-    int unkee4;
-    int unkee8;
-    int unkeec;
-    int unkef0;
-    int unkef4;
-    int unkef8;
-    int unkefc;
-    int unkf00;
-    int unkf04;
-    int unkf08;
-    int unkf0c;
-    int unkf10;
-    int unkf14;
-    int unkf18;
-    int unkf1c;
-    int unkf20;
-    int unkf24;
-    int unkf28;
-    int unkf2c;
-    int unkf30;
-    int unkf34;
-    int unkf38;
-    int unkf3c;
-    int unkf40;
-    int unkf44;
-    int unkf48;
-    int unkf4c;
-    int unkf50;
-    int unkf54;
-    int unkf58;
-    int unkf5c;
-    int unkf60;
-    int unkf64;
-    int unkf68;
-    int unkf6c;
-    int unkf70;
-    int unkf74;
-    int unkf78;
-    int unkf7c;
-    int unkf80;
-    int unkf84;
-    int unkf88;
-    int unkf8c;
-    int unkf90;
-    int unkf94;
-    int unkf98;
-    int unkf9c;
-    int unkfa0;
-    int unkfa4;
-    int unkfa8;
-    int unkfac;
-    int unkfb0;
-    int unkfb4;
-    int unkfb8;
-    int unkfbc;
-    int unkfc0;
-    int unkfc4;
-    int unkfc8;
-    int unkfcc;
-    int unkfd0;
-    int unkfd4;
-    int unkfd8;
-    int unkfdc;
-    int unkfe0;
-    int unkfe4;
-    int unkfe8;
-    int unkfec;
-    int unkff0;
-    int unkff4;
-    int unkff8;
-    int unkffc;
-    int unk1000;
-    int unk1004;
-    int unk1008;
-    int unk100c;
-    int unk1010;
-    int unk1014;
-    int unk1018;
-    int unk101c;
-    int unk1020;
-    int unk1024;
-    int unk1028;
-    int unk102c;
-    int unk1030;
-    int unk1034;
-    int unk1038;
-    int unk103c;
-    int unk1040;
-    int unk1044;
-    int unk1048;
-    int unk104c;
-    int unk1050;
-    int unk1054;
-    int unk1058;
-    int unk105c;
-    int unk1060;
-    int unk1064;
-    int unk1068;
-    int unk106c;
-    int unk1070;
-    int unk1074;
-    int unk1078;
-    int unk107c;
-    int unk1080;
-    int unk1084;
-    int unk1088;
-    int unk108c;
-    int unk1090;
-    int unk1094;
-    int unk1098;
-    int unk109c;
-    int unk10a0;
-    int unk10a4;
-    int unk10a8;
-    int unk10ac;
-    int unk10b0;
-    int unk10b4;
-    int unk10b8;
-    int unk10bc;
-    int unk10c0;
-    int unk10c4;
-    int unk10c8;
-    int unk10cc;
-    int unk10d0;
-    int unk10d4;
-    int unk10d8;
-    int unk10dc;
-    int unk10e0;
-    int unk10e4;
-    int unk10e8;
-    int unk10ec;
-    int unk10f0;
-    int unk10f4;
-    int unk10f8;
-    int unk10fc;
-    int unk1100;
-    int unk1104;
-    int unk1108;
-    int unk110c;
-    int unk1110;
-    int unk1114;
-    int unk1118;
-    int unk111c;
-    int unk1120;
-    int unk1124;
-    int unk1128;
-    int unk112c;
-    int unk1130;
-    int unk1134;
-    int unk1138;
-    int unk113c;
-    int unk1140;
-    int unk1144;
-    int unk1148;
-    int unk114c;
-    int unk1150;
-    int unk1154;
-    int unk1158;
-    int unk115c;
-    int unk1160;
-    int unk1164;
-    int unk1168;
-    int unk116c;
-    int unk1170;
-    int unk1174;
-    int unk1178;
-    int unk117c;
-    int unk1180;
-    int unk1184;
-    int unk1188;
-    int unk118c;
-    int unk1190;
-    int unk1194;
-    int unk1198;
-    int unk119c;
-    int unk11a0;
-    int unk11a4;
-    int unk11a8;
-    int unk11ac;
-    int unk11b0;
-    int unk11b4;
-    int unk11b8;
-    int unk11bc;
-    int unk11c0;
-    int unk11c4;
-    int unk11c8;
-    int unk11cc;
-    int unk11d0;
-    int unk11d4;
-    int unk11d8;
-    int unk11dc;
-    int unk11e0;
-    int unk11e4;
-    int unk11e8;
-    int unk11ec;
-    int unk11f0;
-    int unk11f4;
-    int unk11f8;
-    int unk11fc;
-    int unk1200;
-    int unk1204;
-    int unk1208;
-    int unk120c;
-    int unk1210;
-    int unk1214;
-    int unk1218;
-    int unk121c;
-    int unk1220;
-    int unk1224;
-    int unk1228;
-    int unk122c;
-    int unk1230;
-    int unk1234;
-    int unk1238;
-    int unk123c;
-    int unk1240;
-    int unk1244;
-    int unk1248;
-    int unk124c;
-    int unk1250;
-    int unk1254;
-    int unk1258;
-    int unk125c;
-    int unk1260;
-    int unk1264;
-    int unk1268;
-    int unk126c;
-    int unk1270;
-    int unk1274;
-    int unk1278;
-    int unk127c;
-    int unk1280;
-    int unk1284;
-    int unk1288;
-    int unk128c;
-    int unk1290;
-    int unk1294;
-    int unk1298;
-    int unk129c;
-    int unk12a0;
-    int unk12a4;
-    int unk12a8;
-    int unk12ac;
-    int unk12b0;
-    int unk12b4;
-    int unk12b8;
-    int unk12bc;
-    int unk12c0;
-    int unk12c4;
-    int unk12c8;
-    int unk12cc;
-    int unk12d0;
-    int unk12d4;
-    int unk12d8;
-    int unk12dc;
-    int unk12e0;
-    int unk12e4;
-    int unk12e8;
-    int unk12ec;
-    int unk12f0;
-    int unk12f4;
-    int unk12f8;
-    int unk12fc;
-    int unk1300;
-    int unk1304;
-    int unk1308;
-    int unk130c;
-    int unk1310;
-    int unk1314;
-    int unk1318;
-    int unk131c;
-    int unk1320;
-    int unk1324;
-    int unk1328;
-    int unk132c;
-    int unk1330;
-    int unk1334;
-    int unk1338;
-    int unk133c;
-    int unk1340;
-    int unk1344;
-    int unk1348;
-    int unk134c;
-    int unk1350;
-    int unk1354;
-    int unk1358;
-    int unk135c;
-    int unk1360;
-    int unk1364;
-    int unk1368;
-    int unk136c;
-    int unk1370;
-    int unk1374;
-    int unk1378;
-    int unk137c;
-    int unk1380;
-    int unk1384;
-    int unk1388;
-    int unk138c;
-    int unk1390;
-    int unk1394;
-    int unk1398;
-    int unk139c;
-    int unk13a0;
-    int unk13a4;
-    int unk13a8;
-    int unk13ac;
-    int unk13b0;
-    int unk13b4;
-    int unk13b8;
-    int unk13bc;
-    int unk13c0;
-    int unk13c4;
-    int unk13c8;
-    int unk13cc;
-    int unk13d0;
-    int unk13d4;
-    int unk13d8;
-    int unk13dc;
-    int unk13e0;
-    int unk13e4;
-    int unk13e8;
-    int unk13ec;
-    int unk13f0;
-    int unk13f4;
-    int unk13f8;
-    int unk13fc;
-    int unk1400;
-    int unk1404;
-    int unk1408;
-    int unk140c;
-    int unk1410;
-    int unk1414;
-    int unk1418;
-    int unk141c;
-    int unk1420;
-    int unk1424;
-    int unk1428;
-    int unk142c;
-    int unk1430;
-    int unk1434;
-    int unk1438;
-    int unk143c;
-    int unk1440;
-    int unk1444;
-    int unk1448;
-    int unk144c;
-    int unk1450;
-    int unk1454;
-    int unk1458;
-    int unk145c;
-    int unk1460;
-    int unk1464;
-    int unk1468;
-    int unk146c;
-    int unk1470;
-    int unk1474;
-    int unk1478;
-    int unk147c;
-    int unk1480;
-    int unk1484;
-    int unk1488;
-    int unk148c;
-    int unk1490;
-    int unk1494;
-    int unk1498;
-    int unk149c;
-    int unk14a0;
-    int unk14a4;
-    int unk14a8;
-    int unk14ac;
-    int unk14b0;
-    int unk14b4;
-    int unk14b8;
-    int unk14bc;
-    int unk14c0;
-    int unk14c4;
-    int unk14c8;
-    int unk14cc;
-    int unk14d0;
-    int unk14d4;
-    int unk14d8;
-    int unk14dc;
-    int unk14e0;
-    int unk14e4;
-    int unk14e8;
-    int unk14ec;
-    int unk14f0;
-    int unk14f4;
-    int unk14f8;
-    int unk14fc;
-    int unk1500;
-    int unk1504;
-    int unk1508;
-    int unk150c;
-    int unk1510;
-    int unk1514;
-    int unk1518;
-    int unk151c;
-    int unk1520;
-    int unk1524;
-    int unk1528;
-    int unk152c;
-    int unk1530;
-    int unk1534;
-    int unk1538;
-    int unk153c;
-    int unk1540;
-    int unk1544;
-    int unk1548;
-    int unk154c;
-    int unk1550;
-    int unk1554;
-    int unk1558;
-    int unk155c;
-    int unk1560;
-    int unk1564;
-    int unk1568;
-    int unk156c;
-    int unk1570;
-    int unk1574;
-    int unk1578;
-    int unk157c;
-    int unk1580;
-    int unk1584;
-    int unk1588;
-    int unk158c;
-    int unk1590;
-    int unk1594;
-    int unk1598;
-    int unk159c;
-    int unk15a0;
-    int unk15a4;
-    int unk15a8;
-    int unk15ac;
-    int unk15b0;
-    int unk15b4;
-    int unk15b8;
-    int unk15bc;
-    int unk15c0;
-    int unk15c4;
-    int unk15c8;
-    int unk15cc;
-    int unk15d0;
-    int unk15d4;
-    int unk15d8;
-    int unk15dc;
-    int unk15e0;
-    int unk15e4;
-    int unk15e8;
-    int unk15ec;
-    int unk15f0;
-    int unk15f4;
-    int unk15f8;
-    int unk15fc;
-    int unk1600;
-    int unk1604;
-    int unk1608;
-    int unk160c;
-    int unk1610;
-    int unk1614;
-    int unk1618;
-    int unk161c;
-    int unk1620;
-    int unk1624;
-    int unk1628;
-    int unk162c;
-    int unk1630;
-    int unk1634;
-    int unk1638;
-    int unk163c;
-    int unk1640;
-    int unk1644;
-    int unk1648;
-    int unk164c;
-    int unk1650;
-    int unk1654;
-    int unk1658;
-    int unk165c;
-    int unk1660;
-    int unk1664;
-    int unk1668;
-    int unk166c;
-    int unk1670;
-    int unk1674;
-    int unk1678;
-    int unk167c;
-    int unk1680;
-    int unk1684;
-    int unk1688;
-    int unk168c;
-    int unk1690;
-    int unk1694;
-    int unk1698;
-    int unk169c;
-    int unk16a0;
-    int unk16a4;
-    int unk16a8;
-    int unk16ac;
-    int unk16b0;
-    int unk16b4;
-    int unk16b8;
-    int unk16bc;
-    int unk16c0;
-    int unk16c4;
-    int unk16c8;
-    int unk16cc;
-    int unk16d0;
-    int unk16d4;
-    int unk16d8;
-    int unk16dc;
-    int unk16e0;
-    int unk16e4;
-    int unk16e8;
-    int unk16ec;
-    int unk16f0;
-    int unk16f4;
-    int unk16f8;
-    int unk16fc;
-    int unk1700;
-    int unk1704;
-    int unk1708;
-    int unk170c;
-    int unk1710;
-    int unk1714;
-    int unk1718;
-    int unk171c;
-    int unk1720;
-    int unk1724;
-    int unk1728;
-    int unk172c;
-    int unk1730;
-    int unk1734;
-    int unk1738;
-    int unk173c;
-    int unk1740;
-    int unk1744;
-    int unk1748;
-    int unk174c;
-    int unk1750;
-    int unk1754;
-    int unk1758;
-    int unk175c;
-    int unk1760;
-    int unk1764;
-    int unk1768;
-    int unk176c;
-    int unk1770;
-    int unk1774;
-    int unk1778;
-    int unk177c;
-    int unk1780;
-    int unk1784;
-    int unk1788;
-    int unk178c;
-    int unk1790;
-    int unk1794;
-    int unk1798;
-    int unk179c;
-    int unk17a0;
-    int unk17a4;
-    int unk17a8;
-    int unk17ac;
-    int unk17b0;
-    int unk17b4;
-    int unk17b8;
-    int unk17bc;
-    int unk17c0;
-    int unk17c4;
-    int unk17c8;
-    int unk17cc;
-    int unk17d0;
-    int unk17d4;
-    int unk17d8;
-    int unk17dc;
-    int unk17e0;
-    int unk17e4;
-    int unk17e8;
-    int unk17ec;
-    int unk17f0;
-    int unk17f4;
-    int unk17f8;
-    int unk17fc;
-    int unk1800;
-    int unk1804;
-    int unk1808;
-    int unk180c;
-    int unk1810;
-    int unk1814;
-    int unk1818;
-    int unk181c;
-    int unk1820;
-    int unk1824;
-    int unk1828;
-    int unk182c;
-    int unk1830;
-    int unk1834;
-    int unk1838;
-    int unk183c;
-    int unk1840;
-    int unk1844;
-    int unk1848;
-    int unk184c;
-    int unk1850;
-    int unk1854;
-    int unk1858;
-    int unk185c;
-    int unk1860;
-    int unk1864;
-    int unk1868;
-    int unk186c;
-    int unk1870;
-    int unk1874;
-    int unk1878;
-    int unk187c;
-    int unk1880;
-    int unk1884;
-    int unk1888;
-    int unk188c;
-    int unk1890;
-    int unk1894;
-    int unk1898;
-    int unk189c;
-    int unk18a0;
-    int unk18a4;
-    int unk18a8;
-    int unk18ac;
-    int unk18b0;
-    int unk18b4;
-    int unk18b8;
-    int unk18bc;
-    int unk18c0;
-    int unk18c4;
-    int unk18c8;
-    int unk18cc;
-    int unk18d0;
-    int unk18d4;
-    int unk18d8;
-    int unk18dc;
-    int unk18e0;
-    int unk18e4;
-    int unk18e8;
-    int unk18ec;
-    int unk18f0;
-    int unk18f4;
-    int unk18f8;
-    int unk18fc;
-    int unk1900;
-    int unk1904;
-    int unk1908;
-    int unk190c;
-    int unk1910;
-    int unk1914;
-    int unk1918;
-    int unk191c;
-    int unk1920;
-    int unk1924;
-    int unk1928;
-    int unk192c;
-    int unk1930;
-    int unk1934;
-    int unk1938;
-    int unk193c;
-    int unk1940;
-    int unk1944;
-    int unk1948;
-    int unk194c;
-    int unk1950;
-    int unk1954;
-    int unk1958;
-    int unk195c;
-    int unk1960;
-    int unk1964;
-    int unk1968;
-    int unk196c;
-    int unk1970;
-    int unk1974;
-    int unk1978;
-    int unk197c;
-    int unk1980;
-    int unk1984;
-    int unk1988;
-    int unk198c;
-    int unk1990;
-    int unk1994;
-    int unk1998;
-    int unk199c;
-    int unk19a0;
-    int unk19a4;
-    int unk19a8;
-    int unk19ac;
-    int unk19b0;
-    int unk19b4;
-    int unk19b8;
-    int unk19bc;
-    int unk19c0;
-    int unk19c4;
-    int unk19c8;
-    int unk19cc;
-    int unk19d0;
-    int unk19d4;
-    int unk19d8;
-    int unk19dc;
-    int unk19e0;
-    int unk19e4;
-    int unk19e8;
-    int unk19ec;
-    int unk19f0;
-    int unk19f4;
-    int unk19f8;
-    int unk19fc;
-    int unk1a00;
-    int unk1a04;
-    int unk1a08;
-    int unk1a0c;
-    int unk1a10;
-    int unk1a14;
-    int unk1a18;
-    int unk1a1c;
-    int unk1a20;
-    int unk1a24;
-    int unk1a28;
-    int unk1a2c;
-    int unk1a30;
-    int unk1a34;
-    int unk1a38;
-    int unk1a3c;
-    int unk1a40;
-    int unk1a44;
-    int unk1a48;
-    int unk1a4c;
-    int unk1a50;
-    int unk1a54;
-    int unk1a58;
-    int unk1a5c;
-    int unk1a60;
-    int unk1a64;
-    int unk1a68;
-    int unk1a6c;
-    int unk1a70;
-    int unk1a74;
-    int unk1a78;
-    int unk1a7c;
-    int unk1a80;
-    int unk1a84;
-    int unk1a88;
-    int unk1a8c;
-    int unk1a90;
-    int unk1a94;
-    int unk1a98;
-    int unk1a9c;
-    int unk1aa0;
-    int unk1aa4;
-    int unk1aa8;
-    int unk1aac;
-    int unk1ab0;
-    int unk1ab4;
-    int unk1ab8;
-    int unk1abc;
-    int unk1ac0;
-    int unk1ac4;
-    int unk1ac8;
-    int unk1acc;
-    int unk1ad0;
-    int unk1ad4;
-    int unk1ad8;
-    int unk1adc;
-    int unk1ae0;
-    int unk1ae4;
-    int unk1ae8;
-    int unk1aec;
-    int unk1af0;
-    int unk1af4;
-    int unk1af8;
-    int unk1afc;
-    int unk1b00;
-    int unk1b04;
-    int unk1b08;
-    int unk1b0c;
-    int unk1b10;
-    int unk1b14;
-    int unk1b18;
-    int unk1b1c;
-    int unk1b20;
-    int unk1b24;
-    int unk1b28;
-    int unk1b2c;
-    int unk1b30;
-    int unk1b34;
-    int unk1b38;
-    int unk1b3c;
-    int unk1b40;
-    int unk1b44;
-    int unk1b48;
-    int unk1b4c;
-    int unk1b50;
-    int unk1b54;
-    int unk1b58;
-    int unk1b5c;
-    int unk1b60;
-    int unk1b64;
-    int unk1b68;
-    int unk1b6c;
-    int unk1b70;
-    int unk1b74;
-    int unk1b78;
-    int unk1b7c;
-    int unk1b80;
-    int unk1b84;
-    int unk1b88;
-    int unk1b8c;
-    int unk1b90;
-    int unk1b94;
-    int unk1b98;
-    int unk1b9c;
-    int unk1ba0;
-    int unk1ba4;
-    int unk1ba8;
-    int unk1bac;
-    int unk1bb0;
-    int unk1bb4;
-    int unk1bb8;
-    int unk1bbc;
-    int unk1bc0;
-    int unk1bc4;
-    int unk1bc8;
-    int unk1bcc;
-    int unk1bd0;
-    int unk1bd4;
-    int unk1bd8;
-    int unk1bdc;
-    int unk1be0;
-    int unk1be4;
-    int unk1be8;
-    int unk1bec;
-    int unk1bf0;
-    int unk1bf4;
-    int unk1bf8;
-    int unk1bfc;
-    int unk1c00;
-    int unk1c04;
-    int unk1c08;
-    int unk1c0c;
-    int unk1c10;
-    int unk1c14;
-    int unk1c18;
-    int unk1c1c;
-    int unk1c20;
-    int unk1c24;
-    int unk1c28;
-    int unk1c2c;
-    int unk1c30;
-    int unk1c34;
-    int unk1c38;
-    int unk1c3c;
-    int unk1c40;
-    int unk1c44;
-    int unk1c48;
-    int unk1c4c;
-    int unk1c50;
-    int unk1c54;
-    int unk1c58;
-    int unk1c5c;
-    int unk1c60;
-    int unk1c64;
-    int unk1c68;
-    int unk1c6c;
-    int unk1c70;
-    int unk1c74;
-    int unk1c78;
-    int unk1c7c;
-    int unk1c80;
-    int unk1c84;
-    int unk1c88;
-    int unk1c8c;
-    int unk1c90;
-    int unk1c94;
-    int unk1c98;
-    int unk1c9c;
-    int unk1ca0;
-    int unk1ca4;
-    int unk1ca8;
-    int unk1cac;
-    int unk1cb0;
-    int unk1cb4;
-    int unk1cb8;
-    int unk1cbc;
-    int unk1cc0;
-    int unk1cc4;
-    int unk1cc8;
-    int unk1ccc;
-    int unk1cd0;
-    int unk1cd4;
-    int unk1cd8;
-    int unk1cdc;
-    int unk1ce0;
-    int unk1ce4;
-    int unk1ce8;
-    int unk1cec;
-    int unk1cf0;
-    int unk1cf4;
-    int unk1cf8;
-    int unk1cfc;
-    int unk1d00;
-    int unk1d04;
-    int unk1d08;
-    int unk1d0c;
-    int unk1d10;
-    int unk1d14;
-    int unk1d18;
-    int unk1d1c;
-    int unk1d20;
-    int unk1d24;
-    int unk1d28;
-    int unk1d2c;
-    int unk1d30;
-    int unk1d34;
-    int unk1d38;
-    int unk1d3c;
-    int unk1d40;
-    int unk1d44;
-    int unk1d48;
-    int unk1d4c;
-    int unk1d50;
-    int unk1d54;
-    int unk1d58;
-    int unk1d5c;
-    int unk1d60;
-    int unk1d64;
-    int unk1d68;
-    int unk1d6c;
-    int unk1d70;
-    int unk1d74;
-    int unk1d78;
-    int unk1d7c;
-    int unk1d80;
-    int unk1d84;
-    int unk1d88;
-    int unk1d8c;
-    int unk1d90;
-    int unk1d94;
-    int unk1d98;
-    int unk1d9c;
-    int unk1da0;
-    int unk1da4;
-    int unk1da8;
-    int unk1dac;
-    int unk1db0;
-    int unk1db4;
-    int unk1db8;
-    int unk1dbc;
-    int unk1dc0;
-    int unk1dc4;
-    int unk1dc8;
-    int unk1dcc;
-    int unk1dd0;
-    int unk1dd4;
-    int unk1dd8;
-    int unk1ddc;
-    int unk1de0;
-    int unk1de4;
-    int unk1de8;
-    int unk1dec;
-    int unk1df0;
-    int unk1df4;
-    int unk1df8;
-    int unk1dfc;
-    int unk1e00;
-    int unk1e04;
-    int unk1e08;
-    int unk1e0c;
-    int unk1e10;
-    int unk1e14;
-    int unk1e18;
-    int unk1e1c;
-    int unk1e20;
-    int unk1e24;
-    int unk1e28;
-    int unk1e2c;
-    int unk1e30;
-    int unk1e34;
-    int unk1e38;
-    int unk1e3c;
-    int unk1e40;
-    int unk1e44;
-    int unk1e48;
-    int unk1e4c;
-    int unk1e50;
-    int unk1e54;
-    int unk1e58;
-    int unk1e5c;
-    int unk1e60;
-    int unk1e64;
-    int unk1e68;
-    int unk1e6c;
-    int unk1e70;
-    int unk1e74;
-    int unk1e78;
-    int unk1e7c;
-    int unk1e80;
-    int unk1e84;
-    int unk1e88;
-    int unk1e8c;
-    int unk1e90;
-    int unk1e94;
-    int unk1e98;
-    int unk1e9c;
-    int unk1ea0;
-    int unk1ea4;
-    int unk1ea8;
-    int unk1eac;
-    int unk1eb0;
-    int unk1eb4;
-    int unk1eb8;
-    int unk1ebc;
-    int unk1ec0;
-    int unk1ec4;
-    int unk1ec8;
-    int unk1ecc;
-    int unk1ed0;
-    int unk1ed4;
-    int unk1ed8;
-    int unk1edc;
-    int unk1ee0;
-    int unk1ee4;
-    int unk1ee8;
-    int unk1eec;
-    int unk1ef0;
-    int unk1ef4;
-    int unk1ef8;
-    int unk1efc;
-    int unk1f00;
-    int unk1f04;
-    int unk1f08;
-    int unk1f0c;
-    int unk1f10;
-    int unk1f14;
-    int unk1f18;
-    int unk1f1c;
-    int unk1f20;
-    int unk1f24;
-    int unk1f28;
-    int unk1f2c;
-    int unk1f30;
-    int unk1f34;
-    int unk1f38;
-    int unk1f3c;
-    int unk1f40;
-    int unk1f44;
-    int unk1f48;
-    int unk1f4c;
-    int unk1f50;
-    int unk1f54;
-    int unk1f58;
-    int unk1f5c;
-    int unk1f60;
-    int unk1f64;
-    int unk1f68;
-    int unk1f6c;
-    int unk1f70;
-    int unk1f74;
-    int unk1f78;
-    int unk1f7c;
-    int unk1f80;
-    int unk1f84;
-    int unk1f88;
-    int unk1f8c;
-    int unk1f90;
-    int unk1f94;
-    int unk1f98;
-    int unk1f9c;
-    int unk1fa0;
-    int unk1fa4;
-    int unk1fa8;
-    int unk1fac;
-    int unk1fb0;
-    int unk1fb4;
-    int unk1fb8;
-    int unk1fbc;
-    int unk1fc0;
-    int unk1fc4;
-    int unk1fc8;
-    int unk1fcc;
-    int unk1fd0;
-    int unk1fd4;
-    int unk1fd8;
-    int unk1fdc;
-    int unk1fe0;
-    int unk1fe4;
-    int unk1fe8;
-    int unk1fec;
-    int unk1ff0;
-    int unk1ff4;
-    int unk1ff8;
-    int unk1ffc;
-    int unk2000;
-    int unk2004;
-    int unk2008;
-    int unk200c;
-    int unk2010;
-    int unk2014;
-    int unk2018;
-    int unk201c;
-    int unk2020;
-    int unk2024;
-    int unk2028;
-    int unk202c;
-    int unk2030;
-    int unk2034;
-    int unk2038;
-    int unk203c;
-    int unk2040;
-    int unk2044;
-    int unk2048;
-    int unk204c;
-    int unk2050;
-    int unk2054;
-    int unk2058;
-    int unk205c;
-    int unk2060;
-    int unk2064;
-    int unk2068;
-    int unk206c;
-    int unk2070;
-    int unk2074;
-    int unk2078;
-    int unk207c;
-    int unk2080;
-    int unk2084;
-    int unk2088;
-    int unk208c;
-    int unk2090;
-    int unk2094;
-    int unk2098;
-    int unk209c;
-    int unk20a0;
-};
 
-struct NavMeshSearch_d006a6b00 : NavMeshSearch
-{
-    ~NavMeshSearch_d006a6b00();
-};
-class FUN_006ac0e0 : public NavMeshSearch_d006a6b00
+
+
+class FUN_006ac0e0 : public NavMeshSearch
 {
   public:
     FUN_006ac0e0();
@@ -13269,7 +10989,6 @@ struct DbgObject
     void FUN_00439410(DbgObject* apProperty);
     void FUN_00a5b230(int aiValue);
     void FUN_0049ed90(int aiValue);
-    void FUN_00441130(int aiFlag, int aiValue);
 };
 
 struct DbgPropertyState : DbgObject
@@ -13282,12 +11001,6 @@ struct DbgAlphaProperty : DbgObject
 {
     DbgAlphaProperty();
     int iData[0x13];
-};
-
-struct DbgStencilProperty : DbgObject
-{
-    DbgStencilProperty();
-    int iData[0x20];
 };
 
 struct DbgPtr
@@ -13349,7 +11062,7 @@ struct FUN_006a2a20
     FUN_006a2a20();
 };
 
-// Constructs 17 colors, alpha values and octahedron shapes with line/point alpha and stencil properties, plus a state property and spAlpha (0.5).
+// Constructs 17 colors, alpha values and octahedron shapes with line/point alpha and no-lighting shader properties, plus a state property and spAlpha (0.5).
 // @fnv 0x006a2a20
 FUN_006a2a20::FUN_006a2a20()
     : m_pRootNode(0), spLines(0), spPoints(0), spState(0), spAlpha(0), kLines(0x25), kPoints(0x25)
@@ -13419,10 +11132,10 @@ FUN_006a2a20::FUN_006a2a20()
         aspPointAlpha[i].FUN_00559450()->FUN_0068c9f0(afPointAlpha[i]);
         aspShapes[i].FUN_0066b0d0(CreateOctahedron(DAT_0119cb84, &akColors[i], 1));
         aspShapes[i].FUN_00559450()->FUN_00439410(aspLineAlpha[i].FUN_00559450());
-        DbgPtr pStencilProperty = new DbgStencilProperty();
-        pStencilProperty.FUN_00559450()->FUN_00441130(0x20, 0);
+        DbgPtr spShaderProperty = reinterpret_cast<DbgObject*>(new BSShaderNoLightingProperty());
+        reinterpret_cast<BSShaderNoLightingProperty*>(spShaderProperty.FUN_00559450())->SetFlag(0x20, false);
         aspShapes[i].FUN_00559450()->FUN_00a5b230(3);
-        aspShapes[i].FUN_00559450()->FUN_00439410(pStencilProperty.FUN_00559450());
+        aspShapes[i].FUN_00559450()->FUN_00439410(spShaderProperty.FUN_00559450());
     }
     spAlpha.FUN_0066b0d0(new DbgAlphaProperty());
     spAlpha.FUN_00559450()->FUN_004bc450(&DAT_011a9b7c);
@@ -13484,13 +11197,10 @@ struct S006bede0_Vec
     S006bede0_Vec& FUN_00439e90();
     void ApplyScaled();
 };
-struct S006bede0_Mesh
-{
-    S006bede0_Vec const& FUN_0068f0a0(unsigned short);
-};
+
 struct S006bede0_Obj
 {
-    S006bede0_Mesh* m0;
+    NavMesh* m0;
     bool FUN_006bf220(S006bede0_Vec const&);
     bool FUN_006bede0(unsigned short const* a, unsigned short const* b, unsigned short const* c);
 };
@@ -13500,9 +11210,9 @@ struct S006bede0_Obj
 bool S006bede0_Obj::FUN_006bede0(unsigned short const* apIndexA, unsigned short const* apIndexB,
                                  unsigned short const* apIndexC)
 {
-    S006bede0_Vec pa4 = m0->FUN_0068f0a0(apIndexA[0]);
-    S006bede0_Vec pb4 = m0->FUN_0068f0a0(apIndexB[0]);
-    S006bede0_Vec pc2 = m0->FUN_0068f0a0(apIndexC[0]);
+    S006bede0_Vec pa4 = reinterpret_cast<const S006bede0_Vec&>(m0->FUN_0068f0a0(apIndexA[0]));
+    S006bede0_Vec pb4 = reinterpret_cast<const S006bede0_Vec&>(m0->FUN_0068f0a0(apIndexB[0]));
+    S006bede0_Vec pc2 = reinterpret_cast<const S006bede0_Vec&>(m0->FUN_0068f0a0(apIndexC[0]));
     S006bede0_Vec t1;
     S006bede0_Vec t2;
     S006bede0_Vec t7;
@@ -13571,14 +11281,6 @@ FUN_006bc230::FUN_006bc230() : state(0), first(32, 0), second(32, 0), table(37)
     flags = 0;
 }
 
-struct FUN_006a67f0 : NiTPointerMap_006a64b0
-{
-    virtual ~FUN_006a67f0();
-};
-// Empty destructor of a class derived from NiTPointerMap_006a64b0.
-// @fnv 0x006a67f0
-FUN_006a67f0::~FUN_006a67f0()
-{}
 
 class NavMeshStaticAvoidNode;
 struct FUN_006a7fe0
@@ -13606,34 +11308,19 @@ struct FUN_006a89d0 : AStarConnectionArray<NavMeshTriangleReference, NavMeshTria
 FUN_006a89d0::~FUN_006a89d0()
 {}
 
-struct PathSmootherPOVAvoidanceNode
-{
-    char _0;
-};
-struct FUN_006b38b0 : BSSimpleArray<PathSmootherPOVAvoidanceNode, 1024>
-{
-    virtual ~FUN_006b38b0();
-};
+#include "../../include/PathSmootherPOVAvoidanceNode.h"
 // @fnv 0x006b38b0
-FUN_006b38b0::~FUN_006b38b0()
-{}
+template <> BSSimpleArray<PathSmootherPOVAvoidanceNode>::~BSSimpleArray()
+{
+    Clear(true);
+}
 
 struct NavMeshEdgeSegment;
-template <class T, unsigned S> struct BSSimpleArray;
-template <> struct BSSimpleArray<NavMeshEdgeSegment, 1024>
-{
-    ~BSSimpleArray();
-};
-void _Deallocate(void*);
-struct FUN_006b38e0
-{
-    BSSimpleArray<NavMeshEdgeSegment, 1024> m;
-    virtual ~FUN_006b38e0();
-};
-// Empty destructor body; the BSSimpleArray member m is destroyed implicitly.
 // @fnv 0x006b38e0
-FUN_006b38e0::~FUN_006b38e0()
-{}
+template <> BSSimpleArray<NavMeshEdgeSegment>::~BSSimpleArray()
+{
+    Clear(true);
+}
 
 struct Base_b10083
 {
@@ -13895,15 +11582,12 @@ FUN_006b8e40::~FUN_006b8e40()
 }
 
 extern int DAT_0106c324;
-struct BSSimpleArray_SandBoxChoiceListItem_1024_
-{
-    void __thiscall Clear(bool);
-};
+struct SandBoxChoiceListItem;
 // @fnv 0x006bf870
 void __thiscall FUN_006bf870_class::FUN_006bf870()
 {
     *(int**)this = &DAT_0106c324;
-    reinterpret_cast<BSSimpleArray_SandBoxChoiceListItem_1024_*>(this)->Clear(true);
+    reinterpret_cast<BSSimpleArray<SandBoxChoiceListItem>*>(this)->Clear(true);
 }
 
 void* __cdecl operator new(unsigned int uiSize, void* pvMem);
@@ -13941,73 +11625,42 @@ extern double DAT_01020758;
 extern float DAT_0106b158;
 extern int DAT_011a9484;
 
+
+
+
 struct PtAll
 {
     float x, y, z;
-    NiPoint3& Subtract(const NiPoint3& o);
+    Point3Storage& Subtract(const Point3Storage& o);
     float FUN_00457990();
-    NiPoint3 FUN_0053d1a0(void* p);
+    Point3Storage FUN_0053d1a0(void* p);
 };
 struct PtOp
 {
     float x, y, z;
-    NiPoint3 operator-(const NiPoint3& o) const;
-    NiPoint3 operator+(const NiPoint3& o) const;
+    Point3Storage operator-(const Point3Storage& o) const;
+    Point3Storage operator+(const Point3Storage& o) const;
 };
 struct PtMul
 {
     float x, y, z;
-    NiPoint3 operator*(float s) const;
+    Point3Storage operator*(float s) const;
     PtMul& operator*=(float s);
 };
 struct FUN_0063c8a0_shell
 {
-    NiPoint3* FUN_0063c8a0(void* p);
-};
-struct NavMesh68
-{
-    const NavMeshInfo* FUN_0068efb0();
+    Point3Storage* FUN_0063c8a0(void* p);
 };
 
-class PathingLocation
-{
-  public:
-    int m_00, m_04, m_08, m_0c, m_10, m_14, m_18, m_1c, m_20, m_24;
-    PathingLocation(const NiPoint3& p, const NavMeshInfo* info);
-    ~PathingLocation();
-};
 
-class NavMeshPtr;
-class FUN_006dd0d0
-{
-  public:
-    int m_00, m_04, m_08, m_0c, m_10, m_14, m_18, m_1c, m_20, m_24;
-    FUN_006dd0d0(const NiPoint3* p, PathingLocation* loc);
-    ~FUN_006dd0d0();
-    bool FUN_006dd640(NavMeshPtr* ptA, unsigned short* w);
-};
 
-struct Ret559
-{
-    bool FUN_00697730();
-};
 
-class NavMeshPtr
-{
-  public:
-    NavMesh* m_p;
-    NavMeshPtr();
-    ~NavMeshPtr();
-    Ret559* FUN_00559450(unsigned int a, NiPoint3* bTmp, float* c, float d, float e);
-};
 
-class Point2D
-{
-  public:
-    float m_iWordAt00, m_iWordAt04;
-    Point2D(float a, float bTmp);
-    float NormalizeXY();
-};
+
+
+
+
+
 
 namespace Pathing {
 class CheckLineOfSightFilter;
@@ -14021,20 +11674,20 @@ struct Host
     char pad0[0x20a4];
     PathingLocation m_20a4;
     char pad20cc[0x20d8 - 0x20cc];
-    NiPoint3 m_20d8;
-    NiPoint3 m_20e4;
+    Point3Storage m_20d8;
+    Point3Storage m_20e4;
     float m_20f0;
     float m_20f4;
     float m_20f8;
     float m_20fc;
-    bool FUN_006ac8b0(NiPoint3* a1, NiPoint3* a2, NavMesh* a3, NiPoint3* a4);
+    bool FUN_006ac8b0(Point3Storage* a1, Point3Storage* a2, NavMesh* a3, Point3Storage* a4);
 };
 
 // Derives points from a1 and a2, requires several FUN_006d7350 checks between PathingLocations to pass, adjusts the point's height, and writes it to a4.
 // @fnv 0x006ac8b0
-bool Host::FUN_006ac8b0(NiPoint3* a1, NiPoint3* a2, NavMesh* apNavMesh, NiPoint3* apResult)
+bool Host::FUN_006ac8b0(Point3Storage* a1, Point3Storage* a2, NavMesh* apNavMesh, Point3Storage* apResult)
 {
-    NiPoint3 y;
+    Point3Storage y;
     y = *a1;
     ((PtAll&)y).Subtract(*a2);
     float p;
@@ -14050,28 +11703,28 @@ bool Host::FUN_006ac8b0(NiPoint3* a1, NiPoint3* a2, NavMesh* apNavMesh, NiPoint3
     float n;
     factor = this->m_20f4 / p;
     n = (this->m_20f4 + this->m_20fc) / p;
-    NiPoint3 hpt = ((PtMul&)y) * factor;
+    Point3Storage hpt = ((PtMul&)y) * factor;
     this->m_20e4 = ((PtMul&)y) * n;
-    NiPoint3 s;
+    Point3Storage s;
     s = *a2;
     ((FUN_0063c8a0_shell&)hpt).FUN_0063c8a0(a2);
     ((FUN_0063c8a0_shell&)this->m_20e4).FUN_0063c8a0(a2);
     this->m_20d8 = ((PtAll&)y).FUN_0053d1a0((void*)&DAT_011a9484);
-    NiPoint3 ptr = ((PtMul&)this->m_20d8) * this->m_20fc;
-    PathingLocation plA(this->m_20e4, ((NavMesh68*)apNavMesh)->FUN_0068efb0());
-    FUN_006dd0d0 o138(&s, &this->m_20a4);
+    Point3Storage ptr = ((PtMul&)this->m_20d8) * this->m_20fc;
+    PathingLocation plA(reinterpret_cast<const NiPoint3&>(this->m_20e4), apNavMesh->FUN_0068efb0());
+    PathingLocation o138(reinterpret_cast<const NiPoint3&>(s), this->m_20a4);
     if (!FUN_006d7350(plA, *(PathingLocation*)&o138, 0, 0))
         return false;
-    FUN_006dd0d0 o110(&(((PtOp&)this->m_20e4) - ptr), &plA);
-    FUN_006dd0d0 odc(&(((PtOp&)s) - ptr), (PathingLocation*)&o138);
+    PathingLocation o110(reinterpret_cast<const NiPoint3&>((((PtOp&)this->m_20e4) - ptr)), plA);
+    PathingLocation odc(reinterpret_cast<const NiPoint3&>((((PtOp&)s) - ptr)), o138);
     if (!FUN_006d7350(*(PathingLocation*)&o110, *(PathingLocation*)&odc, 0, 0))
         return false;
-    FUN_006dd0d0 o6c(&(((PtOp&)this->m_20e4) + ptr), &plA);
-    FUN_006dd0d0 dst6(&(((PtOp&)s) + ptr), (PathingLocation*)&o138);
+    PathingLocation o6c(reinterpret_cast<const NiPoint3&>((((PtOp&)this->m_20e4) + ptr)), plA);
+    PathingLocation dst6(reinterpret_cast<const NiPoint3&>((((PtOp&)s) + ptr)), o138);
     if (!FUN_006d7350(*(PathingLocation*)&o6c, *(PathingLocation*)&dst6, 0, 0))
         return false;
     {
-        FUN_006dd0d0 ob4Cur(&hpt, &plA);
+        PathingLocation ob4Cur(reinterpret_cast<const NiPoint3&>(hpt), plA);
         NavMeshPtr b171Tmp;
         float sq2Info;
         unsigned short cellRes;
@@ -14080,10 +11733,10 @@ bool Host::FUN_006ac8b0(NiPoint3* a1, NiPoint3* a2, NavMesh* apNavMesh, NiPoint3
         if (!bTmp)
             return false;
         bool j;
-        j = b171Tmp.FUN_00559450(cellRes, &hpt, &sq2Info, DAT_0106b158, DAT_0106b158)->FUN_00697730();
+        j = b171Tmp.FUN_00559450(cellRes, reinterpret_cast<NiPoint3*>(&hpt), &sq2Info, DAT_0106b158, DAT_0106b158)->FUN_00697730();
         if (DAT_01012060 > sq2Info && (s.z - this->m_20e4.z) > DAT_01012060)
         {
-            NiPoint3 kTheIter;
+            Point3Storage kTheIter;
             kTheIter = *a2;
             ((PtAll&)kTheIter).Subtract(hpt);
             float bok;
@@ -14091,8 +11744,8 @@ bool Host::FUN_006ac8b0(NiPoint3* a1, NiPoint3* a2, NavMesh* apNavMesh, NiPoint3
             float a;
             a = (bok - this->m_20f8) - this->m_20fc;
             ((PtMul&)kTheIter) *= (a / bok);
-            NiPoint3 vTmp = ((PtOp&)hpt) + kTheIter;
-            Point2D ni2Tmp(kTheIter.x, kTheIter.y);
+            Point3Storage vTmp = ((PtOp&)hpt) + kTheIter;
+            NiPoint2 ni2Tmp(kTheIter.x, kTheIter.y);
             float i;
             float pt2;
             i = ni2Tmp.NormalizeXY();
@@ -14109,9 +11762,9 @@ bool Host::FUN_006ac8b0(NiPoint3* a1, NiPoint3* a2, NavMesh* apNavMesh, NiPoint3
                 return false;
             float pObjStep;
             pObjStep = i - x;
-            ((FUN_006ad180_Cls&)ni2Tmp).Scale(pObjStep);
-            hpt.x += ni2Tmp.m_iWordAt00;
-            hpt.y += ni2Tmp.m_iWordAt04;
+            ni2Tmp.Scale(pObjStep);
+            hpt.x += ni2Tmp.x;
+            hpt.y += ni2Tmp.y;
         }
         hpt.z += sq2Info;
         *apResult = hpt;

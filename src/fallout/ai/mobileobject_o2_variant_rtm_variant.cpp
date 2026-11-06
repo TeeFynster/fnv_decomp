@@ -6,13 +6,35 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 class ExtraDismemberedLimbs;
 class bhkCharacterController;
+#include "../../../include/HitArray.h"
+#include "../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
 #include "../../../include/layout_support.h"
 #include "../../../include/Actor.h"
 #include "../../../include/BaseProcess.h"
 #include "mobileobject_private/mobileobject_types_TESPackage.h"
 #include "mobileobject_private/mobileobject_interface.h"
 #include "../../../include/BSAudio.h"
-#include "../../../include/SoundPlaybackHandle.h"
+#include "../../../include/BSSoundHandle.h"
 extern TESDataHandler* g_dataHandler;
 #include "mobileobject_private/mobileobject_packet.h"
 bhkCharacterController* CopyCharacterControllerVector(bhkCharacterController* output, const NiPoint3& point);
@@ -49,16 +71,8 @@ extern float DAT_01267bc4, DAT_010181bc, DAT_01017d00;
 extern float DAT_01011d78, DAT_01012054, DAT_011b014c, DAT_01267bb0;
 extern double DAT_01032980, DAT_0103c7c8;
 extern __m128 DAT_01267e30, DAT_01017d10, DAT_010c71e0, DAT_010c44d0;
-struct Point { float x,y,z;bool FUN_004390c0(const Point&)const;
-    __forceinline Point() {}
-    __forceinline Point(float fX,float fY,float fZ) { x=fX; y=fY; z=fZ; }
-    __forceinline Point operator/(float fScalar) const { float fInvScalar=1.0f/fScalar; return Point(x*fInvScalar,y*fInvScalar,z*fInvScalar); }
-    __forceinline Point operator*(float fScalar) const { return Point(fScalar*x,fScalar*y,fScalar*z); }
-    __forceinline Point& operator+=(const Point& rhs) { x=(float)(rhs.x+x);y=(float)(rhs.y+y);z=(float)(rhs.z+z);return *this; }
-    __forceinline Point& operator*=(float factor) { x=factor*x;y=factor*y;z=factor*z;return *this; }
-};
-__forceinline void AddMovement(Point& out,const Point& rhs){out.x=(float)(rhs.x+out.x);out.y=(float)(rhs.y+out.y);out.z=(float)(rhs.z+out.z);}
-extern Point DAT_011f426c;
+__forceinline void AddMovement(NiPoint3& out,const NiPoint3& rhs){out.x=(float)(rhs.x+out.x);out.y=(float)(rhs.y+out.y);out.z=(float)(rhs.z+out.z);}
+extern NiPoint3 DAT_011f426c;
 
 struct S00c73170_Flags { unsigned int value; __forceinline void Or(unsigned int m) { value |= m; } __forceinline void Clear(unsigned int m) { value &= ~m; } __forceinline void Set(unsigned int m, bool on) { if (on) Or(m); else Clear(m); } __forceinline bool Bit(int n) const { return (value >> n) & 1; } };
 class S00c73170_Bool { public: __forceinline S00c73170_Bool(bool b) { m_cBooleanValue = static_cast<char>(b); } __forceinline operator bool() const { return m_cBooleanValue != 0; } char m_cBooleanValue; };
@@ -172,10 +186,10 @@ __forceinline void S00c73170_Vec::SetRotatedDirection(const S00c73170_Vec& quat,
 __forceinline const S00c73170_Vec& S00c73170_Zero() { return reinterpret_cast<const S00c73170_Vec&>(DAT_01267e30); }
 __forceinline void SetInt(int& out,int v){out=v;}
 __forceinline bool EqualsV(__m128 a, __m128 b, float epsilon = 1e-3f) { S00c73170_Vec t; t.m_vComponents=_mm_sub_ps(b,a); t.setAbs4(t); S00c73170_Vec epsilon_v; epsilon_v.setAll3(epsilon); return (_mm_movemask_ps(_mm_cmple_ps(t.m_vComponents, epsilon_v.m_vComponents)) & 15) == 15; }
-__forceinline void ScaleV(float scale,Point& out,const Point& input){out.x=scale*input.x;out.y=scale*input.y;out.z=scale*input.z;}
+__forceinline void ScaleV(float scale,NiPoint3& out,const NiPoint3& input){out.x=scale*input.x;out.y=scale*input.y;out.z=scale*input.z;}
 struct MovementInput {
     float dt, angle, unk08, speed;
-    Point displacement; unsigned int unk1c;
+    NiPoint3 displacement; unsigned int unk1c;
     float scale; bool active;
 };
 struct Rotation {
@@ -202,7 +216,6 @@ struct BooleanFloatQuery {
     Block32 extra;
     void FUN_006212c0(const BooleanFloatQuery*);
 };
-struct HitArray { BooleanFloatQuery* data; int size; unsigned int capacity; __forceinline void Append(const BooleanFloatQuery* src); };
 struct Body {
         unsigned int unk000;
     unsigned int unk004;
@@ -382,9 +395,9 @@ __forceinline void HitArray::Append(const BooleanFloatQuery* src) {
     }
     ++size;
 }
-void __cdecl FUN_00458620(Point*,const S00c73170_Vec*);
-bool __cdecl AreVectorsEqual(Point*,Point*,float);
-void __cdecl FUN_004a3e00(S00c73170_Vec*,Point*);
+void __cdecl FUN_00458620(NiPoint3*,const S00c73170_Vec*);
+bool __cdecl AreVectorsEqual(NiPoint3*,NiPoint3*,float);
+void __cdecl FUN_004a3e00(S00c73170_Vec*,NiPoint3*);
 struct Inspect { unsigned int unk00,unk04,unk08,unk0c,unk10,unk14,unk18,unk1c,unk20,unk24,unk28,unk2c,count; };
 struct ReadyInterface {
     virtual void v00();
@@ -807,7 +820,7 @@ struct MovementController {
     S00c73170_RefPtr ref638;
     HitArray hits;
     void SubtractVectors(S00c73170_Vec*);
-    void FUN_005620e0(Point*);
+    void FUN_005620e0(NiPoint3*);
     void ClearList();
     Inspect* FUN_00621ad0();
     void FUN_00c6d150();
@@ -834,7 +847,7 @@ extern "C" int __fastcall FUN_00c73170(MovementController* self, void*, Movement
     Rotation rot;
     if (self->state.FUN_00ca9600()==4) {
         Trace(str_010c4ad8);
-        Point temp;
+        NiPoint3 temp;
         {
         S00c73170_Vec position;
         self->SubtractVectors(&position);
@@ -843,7 +856,7 @@ extern "C" int __fastcall FUN_00c73170(MovementController* self, void*, Movement
         AddMovement(temp,in->displacement);
         self->FUN_005620e0(&temp);
         self->actions->FUN_00cbc510(self->actionIndex)->update(self);
-        Point* v;
+        NiPoint3* v;
         if(in->dt>0) {
             ScaleV(1.0f/in->dt,temp,in->displacement);
             v=&temp;
@@ -888,10 +901,10 @@ extern "C" int __fastcall FUN_00c73170(MovementController* self, void*, Movement
     rot.FUN_00cb2450(&self->axis,-speed);
     self->time4e8=in->dt;
     self->inverse4ec=1.0f/in->dt;
-    Point* displacement=&in->displacement;
+    NiPoint3* displacement=&in->displacement;
     {
-        Point tempStore=*displacement;
-        Point& temp=tempStore;
+        NiPoint3 tempStore=*displacement;
+        NiPoint3& temp=tempStore;
         if(!self->FUN_009306b0() && !self->fl.Bit(11)) temp.z=0;
         temp.y=temp.y;
         float& reciprocal=speedTrace.value;

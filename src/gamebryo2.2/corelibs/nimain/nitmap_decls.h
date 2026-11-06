@@ -1,13 +1,4 @@
-// gamebryo2.2/corelibs/nimain/nitmap_decls.h: declares NiMapAllocator
-
 class BGSReconstructCellSubBlocksMap;
-class CombatThreatRecord;
-class TESGlobal;
-class NiMapAllocator
-{
-  public:
-    void* FUN_006f99e0();
-};
 class GlobalObject_004ee810
 {
   public:
@@ -15,18 +6,11 @@ class GlobalObject_004ee810
 };
 extern GlobalObject_004ee810 g_011d6a30;
 extern unsigned int DAT_011d6a20;
-template <class K, class V> class NiTMap
-{
-    unsigned int mapHeader[3];
-    NiMapAllocator allocator;
-
-  public:
-    void* NewItem();
-    void NewItem(void* item);
-    void FUN_00445370(void* item, int mode);
-};
-template <> class NiTMap<TESGlobal*, bool>
+// 0x0048eff0 forwards a loader request to 0x00445370 with its flag set.
+// That callee uses fields through +0x2c; this is not a NiTMap operation.
+class ModelLoader
 {
   public:
-    static void NewItem();
+    void FUN_0048eff0(unsigned int key);
+    void FUN_00445370(unsigned int key, bool flag);
 };

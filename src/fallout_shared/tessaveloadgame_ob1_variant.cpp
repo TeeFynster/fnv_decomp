@@ -3,15 +3,12 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /GF /Ob1 (unit src/fallout_shared/tessaveloadgame.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "tessaveloadgame_decls.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/RecursiveSpinLock.h"
 
 // Constructor: base list (10 slots, grow 1, entry size 0x78), counters cleared, a helper object
 // allocated through the class operator new, and the first entry's payload cached.
-struct MemoryManagerL
-{
-    void* Allocate(unsigned int auiSize);
-};
-extern MemoryManagerL g_memoryManagerL;
+extern MemoryManager g_memoryManagerL;
 
 struct EntryL
 {
@@ -71,19 +68,6 @@ FUN_00c3da50::FUN_00c3da50() : BaseListL(10, 1, 120)
 
 extern "C" void FUN_0044dd60(void* p);
 extern "C" long __stdcall InterlockedCompareExchange(long volatile* dest, long exchange, long comparand);
-
-class BSSpinLockS
-{
-  public:
-    unsigned int threadID;
-    int lockCount;
-    void Lock(const char* name);
-    void Unlock()
-    {
-        if (--lockCount == 0)
-            threadID = 0;
-    }
-};
 
 struct Node006c6fe0
 {
@@ -173,7 +157,7 @@ struct S_00c3e490 : C00449f80
 {
     int unk18;
     int unk1c;
-    BSSpinLockS m_lock;
+    RecursiveSpinLock m_lock;
     bool FUN_00c3e490(unsigned int a);
 };
 
@@ -186,10 +170,6 @@ bool S_00c3e490::FUN_00c3e490(unsigned int a)
     return r;
 }
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
 extern MemoryManager g_memoryManager;
 
 extern __declspec(thread) unsigned int DAT_000002b4;
@@ -297,12 +277,7 @@ FUN_00c3ec80::FUN_00c3ec80(unsigned int a, unsigned int b, unsigned int c)
 
 extern "C" void* __cdecl memset(void* pvDest, int iValue, unsigned int uiSize);
 
-class MemoryManagerC4
-{
-  public:
-    void* Allocate(unsigned int uiSize);
-};
-extern MemoryManagerC4 g_kMemoryManagerC4;
+extern MemoryManager g_kMemoryManagerC4;
 
 inline void* operator new[](unsigned int uiSize)
 {
@@ -403,12 +378,7 @@ class MemContextScopeC3
     int m_iOld;
 };
 
-class MemoryManagerC3
-{
-  public:
-    void* Allocate(unsigned int uiSize);
-};
-extern MemoryManagerC3 g_kMemoryManagerC3;
+extern MemoryManager g_kMemoryManagerC3;
 
 inline void* operator new[](unsigned int uiSize)
 {

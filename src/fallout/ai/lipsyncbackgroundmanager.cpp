@@ -2,16 +2,15 @@
 // src/fallout/ai/lipsyncbackgroundmanager.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/lipsyncbackgroundmanager.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/IOManager.h"
+#include "../../../include/LipTask.h"
+
 struct FUN_00c3d0e0_stub
 {
     bool __thiscall FUN_00c3d0e0(char* apDescription, unsigned int aiBufferSize, const char* apTag);
 };
 
-struct LipTask
-{
-    virtual ~LipTask();
-    bool FUN_00905e00(char* apDescription, unsigned int aiBufferSize);
-};
 
 // @fnv 0x00905e00
 bool LipTask::FUN_00905e00(char* apDescription, unsigned int aiBufferSize)
@@ -366,10 +365,6 @@ struct G
     int FUN_00559450(int a);
 };
 
-struct IOManager
-{
-    void FUN_0044ac40(int a);
-};
 extern IOManager* DAT_01202d98;
 
 // LockFreeMap<MobileObject*, NiPointer<LipTask> > - the base of the class below
@@ -408,12 +403,6 @@ FUN_00905e50_Class::~FUN_00905e50_Class()
 }
 
 namespace fnv_00905f30 {
-struct S_00905f30_Mem
-{
-    S_00905f30_Mem(int ctx, bool b, const char* file, int line);
-    ~S_00905f30_Mem();
-    int unk00;
-};
 struct FUN_00905ba0
 {
     FUN_00905ba0(int owner, int actor, const char* tag);
@@ -695,30 +684,6 @@ struct S_00905f30_Actor
     int unk64;
     S_00905f30_Proc* GetProc();
 };
-struct S_00905f30_Mgr
-{
-    virtual void m0();
-    virtual void m1();
-    virtual void m2();
-    virtual void m3();
-    virtual void m4();
-    virtual void m5();
-    virtual void m6();
-    virtual void m7();
-    virtual void m8();
-    virtual void m9();
-    virtual void m10();
-    virtual void m11();
-    virtual void m12();
-    virtual void m13();
-    virtual void m14();
-    virtual void m15();
-    virtual void m16();
-    virtual void m17();
-    virtual void Add(FUN_00905ba0* t);
-};
-extern S_00905f30_Mgr* DAT_01202d98;
-
 struct S_00905f30_Owner
 {
     virtual void v0();
@@ -734,13 +699,13 @@ struct S_00905f30_Owner
 // @fnv 0x00905f30
 void S_00905f30_Owner::StartLipSyncTask(S_00905f30_Actor* actor, const char* tag)
 {
-    S_00905f30_Mem ctx(0x35, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Ai\\LipSyncBackgroundManager.cpp",
+    AutoMemContext ctx(0x35, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout\\Ai\\LipSyncBackgroundManager.cpp",
                        0x61);
     FUN_00906050(actor);
     FUN_00905ba0* task = new FUN_00905ba0((int)this, (int)actor, tag);
     bool ok = Enqueue(actor, task, 0);
     actor->GetProc()->SetTarget(0);
-    DAT_01202d98->Add(task);
+    DAT_01202d98->AddTask(reinterpret_cast<QIOTask*>(task));
 }
 }  // namespace fnv_00905f30
 
@@ -748,14 +713,6 @@ extern unsigned int DAT_011c16bc;
 extern char str_010885e8[];
 
 struct BGSTerrainManager;
-
-class AutoMemContext
-{
-  public:
-    int iPrevContext;
-    AutoMemContext(int aeContext, bool abPush, const char* apFile, int aiLine);
-    ~AutoMemContext();
-};
 
 struct FUN_00905c50_Class
 {

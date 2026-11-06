@@ -3,7 +3,6 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/fallout/ai/combat/projectile.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "projectile_decls.h"
 
 extern "C" __declspec(thread) int tls_memContext;
 

@@ -1,6 +1,56 @@
+#include "../../include/InterfaceManager.h"
 // fallout_shared/bgsbodypart.cpp: BGSBodyPart, BodyPartInfo, BGSTextureModel, SomeClass (15 functions)
 
-#include "bgsbodypart_decls.h"
+#include "../../include/BSStringT.h"
+
+#include "../../include/BGSTextureModel.h"
+#include "../../include/TESFile.h"
+#include "../../include/BGSBodyPart.h"
+#include "../../include/BGSDebris.h"
+#include "../../include/BGSExplosion.h"
+#include "../../include/BGSImpactDataSet.h"
+#include "../../include/BodyPartInfo.h"
+#include "../../include/Actor.h"
+#include "../../include/EffectSetting.h"
+
+extern "C" void* _alloca(unsigned int);
+#pragma intrinsic(_alloca)
+int Warning(const char*, ...);
+class TESFileFormVersion
+{
+  public:
+    unsigned short GetFormVersion();
+};
+// Not DialogueItem: 0x005e3fa0 is a folded getter returning the dword at this + 0x6c.
+class FUN_005e3fa0_Field6C
+{
+  public:
+    unsigned int FUN_005e3fa0();
+};
+class Tile;
+
+#include "../../include/IO_TASK_PRIORITY.h"
+
+extern "C" NiPoint3 NiPoint3_ZERO;
+
+class ModelLoader
+{
+  public:
+    void ProcessModelRequest(TESModel*, int, QueuedFile*, bool, bool, bool, bool);
+};
+extern ModelLoader* g_modelLoader;
+
+extern "C" void* memset(void*, int, unsigned int);
+
+class Queueable18
+{
+  public:
+    virtual void Slot0() = 0;
+    virtual void Slot1() = 0;
+    virtual void Slot2() = 0;
+    virtual void Slot3() = 0;
+    virtual void QueueResourceLoad(IO_TASK_PRIORITY, QueuedFile*) = 0;
+};
 
 // @fnv 0x005e3a00
 void BodyPartInfo::Initialize()
@@ -32,7 +82,7 @@ void BodyPartInfo::Initialize()
 // @fnv 0x005e45e0
 void BGSBodyPart::QueueResourceLoad(IO_TASK_PRIORITY priority, QueuedFile* queuedFile)
 {
-    if (m_kModel.GetModelLength())
+    if (static_cast<const TESModel&>(m_kModel).GetModelLength())
         g_modelLoader->ProcessModelRequest(&m_kModel, priority, queuedFile, true, true, false, false);
     if (Data.m_pExplosion)
         ((Queueable18*)((char*)Data.m_pExplosion + 0x18))->QueueResourceLoad(priority, queuedFile);
@@ -43,9 +93,9 @@ void BGSBodyPart::QueueResourceLoad(IO_TASK_PRIORITY priority, QueuedFile* queue
     if (Data.m_pRelatedObject2)
         ((Queueable18*)((char*)Data.m_pRelatedObject2 + 0x64))->QueueResourceLoad(priority, queuedFile);
     if (Data.m_pRelatedObject3)
-        ((Queueable18*)((char*)Data.m_pRelatedObject3 + 0x18))->QueueResourceLoad(priority, queuedFile);
+        ((BGSPreloadable*)((char*)Data.m_pRelatedObject3 + 0x18))->QueueResourceLoad(priority, queuedFile);
     if (Data.m_pRelatedObject4)
-        ((Queueable18*)((char*)Data.m_pRelatedObject4 + 0x18))->QueueResourceLoad(priority, queuedFile);
+        ((BGSPreloadable*)((char*)Data.m_pRelatedObject4 + 0x18))->QueueResourceLoad(priority, queuedFile);
 }
 
 // Zeroes the 0x54-byte Data block, calls Data.Initialize(), then FUN_005e3d20().
@@ -60,9 +110,9 @@ BGSBodyPart::BGSBodyPart()
 // @fnv 0x005e3d80
 void BGSBodyPart::InitItem(TESForm* form)
 {
-    if (!form || form->GetInitialized())
+    if (!form || static_cast<const TESForm*>(form)->GetInitialized())
         return;
-    unsigned int formID = (unsigned int)((DialogueItem*)this)->SelectDefaultResponseList();
+    unsigned int formID = ((FUN_005e3fa0_Field6C*)this)->FUN_005e3fa0();
     if (formID)
     {
         TESForm::RemapFormIDForFile(formID, form->GetFile(-1));
@@ -179,7 +229,7 @@ bool BGSBodyPart::Load(TESFile* file)
         {
             char* modelName = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(modelName, 0);
-            m_kModel.vfn_18(modelName);
+            m_kModel.SetModelFilePath(modelName);
         }
         if (((TESFileFormVersion*)file)->GetFormVersion() < 3)
         {
@@ -214,14 +264,9 @@ bool BGSBodyPart::Load(TESFile* file)
     }
 }
 
-extern int DAT_0104540c;
-
 // @fnv 0x005e3be0
-TESModel* __fastcall FUN_005e3be0(TESModel* pThis)
+BGSTextureModel::BGSTextureModel()
 {
-    pThis->TESModel::TESModel();
-    *(int**)pThis = &DAT_0104540c;
-    return pThis;
 }
 
 void __fastcall _ref_006815c0(void*);
@@ -234,92 +279,26 @@ void* __fastcall FUN_005e3c00(char* pObject)
     return pObject;
 }
 
-struct FUN_005e3d20_shell : public BGSBodyPart
-{
-    void FUN_005e3d20();
-};
-
-struct VCall0
-{
-    virtual void v0();
-};
-
-// Calls v0 on two VCall0 objects referenced by the body part's fields.
+// Initializes the model and ragdoll model components.
 // @fnv 0x005e3d20
-void FUN_005e3d20_shell::FUN_005e3d20()
+void BGSBodyPart::FUN_005e3d20()
 {
-    reinterpret_cast<VCall0*>(&m_kModel)->v0();
-    reinterpret_cast<VCall0*>(&m_kRagdollModel)->v0();
+    m_kModel.Init();
+    m_kRagdollModel.Init();
 }
 
-struct BGSTextureModel
-{
-    virtual ~BGSTextureModel();
-    void* FUN_005e3c30(unsigned int);
-};
-// Runs the BGSTextureModel destructor and, when bit 0 of flags is set, frees the object with operator delete; returns this.
-// @fnv 0x005e3c30
-void* BGSTextureModel::FUN_005e3c30(unsigned int flags)
-{
-    this->BGSTextureModel::~BGSTextureModel();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
-struct Inner005e3d50
-{
-    virtual void F0()
-    {}
-    virtual void F1()
-    {}
-    char pad[20];
-};
-struct Outer005e3d50
-{
-    char pad0[0x2c];
-    Inner005e3d50 a;
-    Inner005e3d50 b;
-    void FUN_005e3d50();
-};
-// Calls the second virtual method on both inner objects a and b.
+// Frees the model and ragdoll model components.
 // @fnv 0x005e3d50
-void Outer005e3d50::FUN_005e3d50()
+void __fastcall FreeBodyPartModels(BGSBodyPart* part)
 {
-    a.F1();
-    b.F1();
+    part->m_kModel.Free();
+    part->m_kRagdollModel.Free();
 }
-
-struct FUN_005e3c60_psa
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    ~FUN_005e3c60_psa();
-};
-
-class FUN_005e3c60_cls
-{
-  public:
-    virtual ~FUN_005e3c60_cls();
-    void FUN_005e3d50();
-
-    BSStringT<char> NodeName;
-    BSStringT<char> TargetName;
-    BSStringT<char> m_kVATSNodeName;
-    BSStringT<char> m_kPartName;
-    BSStringT<char> m_kGoreName;
-    TESModel m_kModel;
-    FUN_005e3c60_psa m_kRagdollModel;
-};
 
 // @fnv 0x005e3c60
-FUN_005e3c60_cls::~FUN_005e3c60_cls()
+BGSBodyPart::~BGSBodyPart()
 {
-    FUN_005e3d50();
+    FreeBodyPartModels(this);
 }
 
 class PartList;
@@ -485,19 +464,8 @@ void __cdecl ApplyKeyToLeafNodes(unsigned int key, TreeNode* node)
 }
 }  // namespace fnv_005e4890
 
-extern "C" void __cdecl _Deallocate(void*);
-void __cdecl FUN_005e3c60(void*);
-
-struct FUN_005e50c0_shell
+// Emits the scalar deleting destructor at 0x005e50c0.
+void DestroyBodyPart(BGSBodyPart* part)
 {
-    virtual ~FUN_005e50c0_shell();
-};
-
-// Destructor that calls FUN_005e3c60 on this and then deallocates the object memory.
-// @fnv 0x005e50c0
-FUN_005e50c0_shell::~FUN_005e50c0_shell()
-{
-    FUN_005e3c60(this);
-    if (1)
-        _Deallocate(this);
+    delete part;
 }

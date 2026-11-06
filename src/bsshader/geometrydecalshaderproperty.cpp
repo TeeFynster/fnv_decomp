@@ -1,16 +1,7 @@
 // src/bsshader/geometrydecalshaderproperty.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/geometrydecalshaderproperty.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct StrArr
-{
-    char _pad[8];
-    unsigned short m_usMax;
-    unsigned short m_usSize;
-    char _pad2[2];
-    unsigned short m_usGrow;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
+#include "../../include/StrArr.h"
 void __stdcall FUN_00b71450(StrArr*);
 char* __cdecl _FUN_00a7d330(const char*);
 extern const char* DAT_012005b8;
@@ -21,7 +12,7 @@ void __stdcall FUN_00bb44a0(StrArr* apStrings)
     FUN_00b71450(apStrings);
     char* pString = _FUN_00a7d330(DAT_012005b8);
     unsigned int uiIndex = apStrings->m_usSize;
-    if (uiIndex >= apStrings->m_usMax)
-        apStrings->SetSize(uiIndex + apStrings->m_usGrow);
+    if (uiIndex >= apStrings->m_usMaxSize)
+        apStrings->SetSize(uiIndex + apStrings->m_usGrowBy);
     apStrings->SetAt(uiIndex, pString);
 }

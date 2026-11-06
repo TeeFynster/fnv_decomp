@@ -1,3 +1,84 @@
+#include "../../../../include/SettingT.h"
+#include "../../../../include/CombatState.h"
+#include "../../../../include/CombatManager.h"
+#include "../../../../include/ActorCombatGroup.h"
+#include "../../../../include/CombatSearchDoor.h"
+#include "../../../../include/CombatTarget.h"
+// NiPoint3_helper_combatgroup: local type (was include/NiPoint3_helper.h, which had no evidence of one real class); its methods are 0x00439ef0 NiPoint3::operator-
+#include "../../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+// In-class bodies of the former NiPoint3_ext stand-in.
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x - kRhs.x, y - kRhs.y, z - kRhs.z);
+}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x + kRhs.x, y + kRhs.y, z + kRhs.z);
+}
+inline float NiPoint3::operator*(const NiPoint3& point) const
+{
+    return x * point.x + y * point.y + z * point.z;
+}
+inline NiPoint3 operator*(float scalar, const NiPoint3& point)
+{
+    return NiPoint3(scalar * point.x, scalar * point.y, scalar * point.z);
+}
+
+class NiPoint3_helper_combatgroup
+{
+  public:
+    float x;
+    float y;
+    float z;
+
+    NiPoint3 operator*(float scalar) const;
+    NiPoint3 FUN_00439ef0(const NiPoint3& point) const;
+};
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPoint3.h"
+// 0x00575650 writes the four-float stack output consumed by the location evaluator.
+struct EventPositionOutput_00575650 { float x, y, z, w; };
+#include "../../../../include/CombatController.h"
+#include "../../../../include/BSSimpleArray.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/Actor.h"
+#include "../../../../include/BGSCameraPath.h"
+#include "../../../../include/CombatTargetTimestamp.h"
+#include "../../../../include/MobileObject.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/PathingSolution.h"
+#include "../../../../include/NiColorA.h"
+#include "../../../../include/Setting.h"
+#include "../../../../include/Sky.h"
+#include "../../../../include/SkyObject.h"
+#include "../../../../include/TESCombatStyle.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/TimeoutTimer.h"
+#include "../../../../include/PathingAvoidNodeArray.h"
 
 // src/fallout/ai/combat/combatgroup.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatgroup.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -72,12 +153,13 @@ bool __thiscall FUN_009871e0_shell::IsModifierZero()
     return (*(float*)((char*)this + 0x5c)) == _gModifierZero;
 }
 
-struct ArrSI
+// Exe 0x009877c0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct CombatgroupOffset08View
 {
     unsigned int GetFlags();
 };
 
-struct FUN_009877c0_shell : ArrSI
+struct FUN_009877c0_shell : CombatgroupOffset08View
 {
     unsigned int GetFlagsFromSubobject();
 };
@@ -85,7 +167,7 @@ struct FUN_009877c0_shell : ArrSI
 // @fnv 0x009877c0
 unsigned int FUN_009877c0_shell::GetFlagsFromSubobject()
 {
-    return ((ArrSI*)((char*)this + 0x138))->GetFlags();
+    return ((CombatgroupOffset08View*)((char*)this + 0x138))->GetFlags();
 }
 
 struct GlobalObject_00869f00
@@ -116,7 +198,8 @@ char FUN_00987800_shell::GetByteAtOffset154()
 }
 
 namespace fnv_00988750 {
-struct ArrSI
+// Exe 0x00988750: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct CombatgroupOffset08View
 {
     unsigned int GetFlags() const;
 };
@@ -129,7 +212,7 @@ struct FUN_00988750_shell
 // @fnv 0x00988750
 unsigned int FUN_00988750_shell::GetFlags() const
 {
-    return ((ArrSI*)(this + 0x110))->GetFlags();
+    return ((CombatgroupOffset08View*)(this + 0x110))->GetFlags();
 }
 }  // namespace fnv_00988750
 
@@ -165,17 +248,6 @@ struct FUN_00988790_shell
 void FUN_00988790_shell::FUN_00988790(unsigned int auiIndex) const
 {
     m_aiIndexedValues.FUN_006dad90(auiIndex);
-}
-
-struct ActorCombatGroup
-{
-    void* __thiscall FUN_009865d0(int);
-    unsigned char __thiscall GetByteAtOffset100(int);
-};
-
-void* __thiscall ActorCombatGroup::FUN_009865d0(int)
-{
-    return 0;
 }
 
 // Calls FUN_009865d0 with arg; if it returns non-null, returns byte at offset 0x64, otherwise 0.
@@ -235,15 +307,12 @@ void __thiscall FUN_0098a360_shell::FUN_0098a360(int a1, int a2)
         *(int*)(v1 + 4) = a2;
 }
 
-struct BSSimpleArray
-{
-    unsigned int& GetAt(int index);
-};
+
 
 struct FUN_0098de60_shell
 {
     unsigned char pad[0x138];
-    BSSimpleArray arr;  // +0x138
+    BSSimpleArray<unsigned int> arr;  // +0x138
     int GetArrayItem(char index);
 };
 
@@ -321,12 +390,6 @@ void FUN_0098f020_shell::ResetGlobalObject()
 }
 }  // namespace fnv_0098f020
 
-struct BGSLoadFormBuffer
-{
-    bool __thiscall ReadFormIdentifier(void*);
-    void __thiscall ReadTypedData(void*, unsigned int);
-};
-
 struct FUN_00985a50_shell
 {
     float f0;
@@ -341,21 +404,16 @@ struct FUN_00985a50_shell
 void FUN_00985a50_shell::FUN_00985a50(BGSLoadFormBuffer* buffer, FUN_0098de60_shell* obj)
 {
     buffer->ReadFormIdentifier(this);
-    buffer->ReadTypedData(&f4, 4);
-    buffer->ReadTypedData(&f8, 4);
-    buffer->ReadTypedData(&fc, 4);
+    buffer->ReadTypedData((void*)(&f4), 4u);
+    buffer->ReadTypedData((void*)(&f8), 4u);
+    buffer->ReadTypedData((void*)(&fc), 4u);
     char c = -1;
-    buffer->ReadTypedData(&c, 1);
+    buffer->ReadTypedData((void*)(&c), 1u);
     if (c != -1)
         p10 = (void*)obj->GetArrayItem(c);
     else
         p10 = 0;
 }
-
-struct BGSSaveFormBuffer
-{
-    void __thiscall SaveData(void* data, unsigned int size, int flags);
-};
 
 struct FUN_00985ae0_shell
 {
@@ -366,8 +424,8 @@ struct FUN_00985ae0_shell
 // @fnv 0x00985ae0
 void __thiscall FUN_00985ae0_shell::FUN_00985ae0(BGSSaveFormBuffer* buffer, int aiUnused)
 {
-    buffer->SaveData(this, 0x10, 0);
-    buffer->SaveData((char*)this + 0x10, 4, 0);
+    buffer->SaveData(this, 0x10u, 0);
+    buffer->SaveData((char*)this + 0x10, 4u, 0);
 }
 
 struct FUN_00985b10_shell
@@ -377,30 +435,21 @@ struct FUN_00985b10_shell
 // @fnv 0x00985b10
 void __thiscall FUN_00985b10_shell::FUN_00985b10(BGSLoadFormBuffer* buffer, int aiUnused)
 {
-    buffer->ReadTypedData(this, 0x10);
-    buffer->ReadTypedData((void*)((char*)this + 0x10), 4);
+    buffer->ReadTypedData((void*)(this), 0x10u);
+    buffer->ReadTypedData((void*)((void*)((char*)this + 0x10)), 4u);
 }
 
-struct CombatTarget
-{
-    char m_data[0x68];
-};
 
-struct BSSimpleArray_CombatTarget_1024
-{
-    void* __pad;
-    void* pBuffer;
-    unsigned int __thiscall FUN_0098f7b0();
-    void __thiscall FUN_0098f840(CombatTarget* pDest, unsigned int ItemUpdateArray);
-    unsigned int __thiscall FUN_0098eec0(const CombatTarget* aValue);
-};
+
+
 
 // @fnv 0x0098eec0
-unsigned int __thiscall BSSimpleArray_CombatTarget_1024::FUN_0098eec0(const CombatTarget* aValue)
+template <>
+unsigned int __thiscall BSSimpleArray<CombatTarget>::Add(const CombatTarget& aValue)
 {
-    unsigned int iElementIndex = FUN_0098f7b0();
-    FUN_0098f840((CombatTarget*)pBuffer + iElementIndex, 1);
-    *(CombatTarget*)((CombatTarget*)pBuffer + iElementIndex) = *aValue;
+    unsigned int iElementIndex = ReserveIndex();
+    InitializeItems((CombatTarget*)pBuffer + iElementIndex, 1);
+    *(CombatTarget*)((CombatTarget*)pBuffer + iElementIndex) = aValue;
     return iElementIndex;
 }
 
@@ -424,16 +473,8 @@ void* __thiscall FUN_0098eff0_shell::FUN_0098eff0()
     return this;
 }
 
-struct TESForm
-{
-    virtual ~TESForm()
-    {}
-};
-struct Actor : public TESForm
-{
-    virtual ~Actor()
-    {}
-};
+
+
 TESForm* __cdecl _ref_004839c0(unsigned int);
 struct Holder00985930
 {
@@ -463,30 +504,14 @@ struct FUN_009863b0
 FUN_009863b0::~FUN_009863b0()
 {}
 
-struct FUN_009865b0_shell : ActorCombatGroup
-{
-    bool FUN_009865b0(int param);
-};
-
 // @fnv 0x009865b0
-bool FUN_009865b0_shell::FUN_009865b0(int param)
+unsigned char ActorCombatGroup::FUN_009865b0(void* param)
 {
-    return (FUN_009865d0(param) != 0) ? true : false;
+    return (FUN_009865d0((int)param) != 0) ? true : false;
 }
 
 namespace fnv_009866d0 {
-struct Actor
-{
-    bool __thiscall FUN_008b0670(Actor*);
-};
-struct FUN_00903600_shell
-{
-    Actor* __thiscall GetIntAt(int);
-};
-struct FUN_00990890_shell
-{
-    unsigned int __thiscall GetCount();
-};
+
 struct FUN_009866d0_shell
 {
     bool __thiscall FUN_009866d0(Actor* target);
@@ -495,10 +520,10 @@ struct FUN_009866d0_shell
 // @fnv 0x009866d0
 bool __thiscall FUN_009866d0_shell::FUN_009866d0(Actor* target)
 {
-    unsigned int count = ((FUN_00990890_shell*)this)->GetCount();
+    unsigned int count = ((ActorCombatGroup*)this)->GetCount();
     for (unsigned int i = 0; i < count; ++i)
     {
-        Actor* actor = ((FUN_00903600_shell*)this)->GetIntAt(i);
+        Actor* actor = ((ActorCombatGroup*)this)->GetIntAt((int)i);
         if (actor && !actor->FUN_008b0670(target))
             return false;
     }
@@ -538,21 +563,13 @@ char __thiscall FUN_00986a80_shell::FUN_00986a80(int param)
 }
 
 namespace fnv_00986aa0 {
-struct PathingSolution
-{
-    unsigned int GetVirtualNodeCount();
-};
-struct Actor
-{
-};
+
+
 struct FUN_005a4320_shell
 {
     Actor* FUN_00968630(unsigned int);
 };
-struct FUN_008b0670_shell
-{
-    bool __thiscall FUN_008b0670(Actor*);
-};
+
 struct FUN_00986aa0_shell : PathingSolution
 {
     bool __thiscall FUN_00986aa0(Actor* actor);
@@ -564,7 +581,7 @@ bool __thiscall FUN_00986aa0_shell::FUN_00986aa0(Actor* actor)
     for (unsigned int i = 0; i < count; ++i)
     {
         Actor* target = reinterpret_cast<FUN_005a4320_shell*>(this)->FUN_00968630(i);
-        if (!reinterpret_cast<FUN_008b0670_shell*>(actor)->FUN_008b0670(target))
+        if (!actor->FUN_008b0670(target))
             return false;
     }
     return true;
@@ -586,22 +603,18 @@ void __thiscall FUN_009874b0_shell::FUN_009874b0(int a1)
         ++((unsigned short*)pcombatTarget->m_data)[0x4a / 2];
 }
 
-struct S_009874f0
-{
-    char pad[0x4A];
-    short f4A;
-};
+
 struct FUN_009874f0_obj
 {
     void __thiscall DecrementField4A(int);
 };
-// Retrieves an object via FUN_009865d0 and, if non-null, decrements its f4A field.
+// Decrements the target counter at offset 0x4A when a target is found.
 // @fnv 0x009874f0
 void __thiscall FUN_009874f0_obj::DecrementField4A(int a1)
 {
-    S_009874f0* p = (S_009874f0*)reinterpret_cast<ActorCombatGroup*>(this)->FUN_009865d0(a1);
+    CombatTarget* p = (CombatTarget*)reinterpret_cast<ActorCombatGroup*>(this)->FUN_009865d0(a1);
     if (p)
-        p->f4A--;
+        (*reinterpret_cast<short*>(p->m_data + 0x4A))--;
 }
 
 struct ThreeInts_00989010
@@ -624,10 +637,7 @@ void __thiscall StandIn_00989010::SetTripleAndValue(ThreeInts_00989010* apTriple
     v = aiValue;
 }
 
-struct CombatTargetTimestamp
-{
-    int v;
-};
+
 CombatTargetTimestamp* __fastcall FUN_004300a0(CombatTargetTimestamp*);
 struct MyClass
 {
@@ -639,54 +649,34 @@ int MyClass::GetResultForArg(int arg)
 {
     int result;
     bool b1;
-    CombatTargetTimestamp stamp;
+    // Storage is initialized by FUN_004300a0; the shared type has no default constructor.
+    unsigned int stamp;
     bool b2;
     result = -100;
-    FUN_004300a0(&stamp);
+    FUN_004300a0(reinterpret_cast<CombatTargetTimestamp*>(&stamp));
     b1 = false;
     b2 = false;
-    UpdateTargetPerception(0, arg, &result, &stamp, &b1, &b2);
+    UpdateTargetPerception(0, arg, &result, reinterpret_cast<CombatTargetTimestamp*>(&stamp), &b1, &b2);
     return result;
 }
 
-namespace fnv_00989090 {
-struct Actor
-{
-};
-struct CombatTargetTimestamp
-{
-    float m;
-    CombatTargetTimestamp(float f);
-};
 extern float DAT_0108d540;
-struct CombatTargetHack
-{
-    char pad[0x50];
-    CombatTargetTimestamp ts;
-};
-struct Holder : ActorCombatGroup
-{
-    CombatTargetTimestamp GetCombatTargetTimestamp(Actor* apTarget);
-};
+
 // Looks up the combat target for apTarget and returns its timestamp, or the negated DAT_0108d540 if none is found.
 // @fnv 0x00989090
-CombatTargetTimestamp Holder::GetCombatTargetTimestamp(Actor* apTarget)
+CombatTargetTimestamp ActorCombatGroup::GetLastDetectedTimestamp(Actor* apTarget)
 {
     CombatTarget* pcombatTarget;
     pcombatTarget = (CombatTarget*)FUN_009865d0((int)apTarget);
     if (pcombatTarget)
-        return ((CombatTargetHack*)pcombatTarget)->ts;
+        return *reinterpret_cast<CombatTargetTimestamp*>(pcombatTarget->m_data + 0x50);
     return CombatTargetTimestamp(-DAT_0108d540);
 }
-}  // namespace fnv_00989090
+
 
 namespace fnv_009890e0 {
-struct Actor
-{
-};
-struct TESForm
-{
-};
+
+
 struct CoordinateTriple
 {
     float _00;
@@ -695,12 +685,13 @@ struct CoordinateTriple
     void* _0c;
     unsigned int __thiscall _ref_0084e3a0();
 };
-struct CombatGroupStub
+// ActorCombatGroup query at 0x009890e0; its shared header lacks GetDetectedTargetLocation.
+struct DetectedTargetLocationQuery
 {
     bool __thiscall GetDetectedTargetLocation(Actor* apTarget, CoordinateTriple& arLastDetectedLocation);
 };
 // @fnv 0x009890e0
-bool __thiscall CombatGroupStub::GetDetectedTargetLocation(Actor* apTarget, CoordinateTriple& arLastDetectedLocation)
+bool __thiscall DetectedTargetLocationQuery::GetDetectedTargetLocation(Actor* apTarget, CoordinateTriple& arLastDetectedLocation)
 {
     CombatTarget* pcombatTarget;
     pcombatTarget = (CombatTarget*)((ActorCombatGroup*)this)->FUN_009865d0((int)apTarget);
@@ -749,6 +740,7 @@ void __thiscall FUN_009891d0_class::FUN_009891d0(TESAmmoInitCalls* p1, Calendar*
     }
 }
 
+// The shared Actor has no returning FUN_00575650(buffer, reference, radius) overload.
 struct Ref_997440
 {
     int __thiscall FUN_00575650(void* a, Ref_997440* b, float c);
@@ -810,35 +802,24 @@ struct CombatClusterMember
     float m_fClusterOffsetY;
     void* pCluster;
 };
-struct BSSimpleArray_CombatMember_1024
-{
-    void* __pad;
-    CombatClusterMember* pBuffer;
-    unsigned int iSize;
-    unsigned int SimpleArrayStorage;
-    unsigned int __thiscall FUN_007881d0();
-    unsigned int __thiscall FUN_0098fb40(CombatClusterMember* pDest, unsigned int ItemUpdateArray);
-    unsigned int __thiscall AddCombatMember(const CombatClusterMember* aValue);
-};
+
 // Appends a copy of the given combat member to the array and returns the index it was stored at.
 // @fnv 0x0098f180
-unsigned int __thiscall BSSimpleArray_CombatMember_1024::AddCombatMember(const CombatClusterMember* aValue)
+template <>
+unsigned int __thiscall BSSimpleArray<CombatClusterMember>::Add(const CombatClusterMember& aValue)
 {
-    unsigned int iElementIndex = FUN_007881d0();
-    FUN_0098fb40(&pBuffer[iElementIndex], 1);
-    pBuffer[iElementIndex] = *aValue;
+    unsigned int iElementIndex = ReserveIndex();
+    InitializeItems(&reinterpret_cast<CombatClusterMember*>(pBuffer)[iElementIndex], 1);
+    reinterpret_cast<CombatClusterMember*>(pBuffer)[iElementIndex] = aValue;
     return iElementIndex;
 }
 
-struct CTSHelper
-{
-    char _pad[8];
-    float __thiscall GetElapsedTime();
-};
+
 struct FUN_00985bb0_Class
 {
     char _pad[16];
-    CTSHelper _ts;
+    CombatTargetTimestamp _ts;
+    char _pad14[4];
     float _f18;
     float __thiscall FUN_00985bb0();
 };
@@ -873,15 +854,12 @@ void __thiscall FUN_00986560_shell::FUN_00986560(int a1)
     reinterpret_cast<FUN_0098ef10_shell*>(reinterpret_cast<char*>(this) + 8)->FUN_0098ef10(a1, 1);
 }
 
-struct RefObj
-{
-    unsigned int __thiscall _ref_0084e3a0();
-};
+
 struct SearchNode
 {
-    RefObj* p;
+    TESForm* p;
 };
-struct MyArr : ArrSI
+struct MyArr : CombatgroupOffset08View
 {
     SearchNode* __thiscall FUN_006dad90(unsigned int) const;
 };
@@ -891,7 +869,7 @@ struct C00986670
     MyArr arr;
     SearchNode* __thiscall FUN_00986670(unsigned int);
 };
-// Scans arr for the first SearchNode whose p->_ref_0084e3a0() equals a1 and returns it, or 0 if none match.
+// Scans arr for the first SearchNode whose p->FUN_0084e3a0() equals a1 and returns it, or 0 if none match.
 // @fnv 0x00986670
 SearchNode* __thiscall C00986670::FUN_00986670(unsigned int a1)
 {
@@ -899,7 +877,7 @@ SearchNode* __thiscall C00986670::FUN_00986670(unsigned int a1)
     for (i = 0; i < arr.GetFlags(); i++)
     {
         SearchNode* n = arr.FUN_006dad90(i);
-        if (n->p->_ref_0084e3a0() == a1)
+        if (n->p->FUN_0084e3a0() == a1)
             return n;
     }
     return 0;
@@ -908,12 +886,6 @@ SearchNode* __thiscall C00986670::FUN_00986670(unsigned int a1)
 struct FUN_00986b70_shell : ActorCombatGroup
 {
     void __thiscall FUN_00986b70();
-};
-
-struct FUN_00986b70_helper : ActorCombatGroup
-{
-    void* GetIntAt(int);
-    unsigned int GetCount();
 };
 
 struct Actor_vfn
@@ -1180,39 +1152,31 @@ struct Actor_vfn
 // @fnv 0x00986b70
 void __thiscall FUN_00986b70_shell::FUN_00986b70()
 {
-    unsigned int count = ((FUN_00986b70_helper*)this)->GetCount();
+    unsigned int count = ((ActorCombatGroup*)this)->GetCount();
     for (unsigned int i = 0; i < count; ++i)
     {
-        Actor_vfn* actor = (Actor_vfn*)((FUN_00986b70_helper*)this)->GetIntAt(i);
+        Actor_vfn* actor = (Actor_vfn*)((ActorCombatGroup*)this)->GetIntAt((int)i);
         actor->vfn_3fc(false);
     }
 }
 
-namespace fnv_009897a0 {
-struct CTSHelper
-{
-    float GetElapsedTime();
-};
-struct Setting_S
-{
-    float* Float();
-};
 class GameSettingCollection;
-template <class T> class SettingT
-{
-};
+namespace fnv_009897a0 {
+
+
+using ::SettingT;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting412;
 struct Host
 {
     char pad[0x50];
-    CTSHelper stamp;
+    CombatTargetTimestamp stamp;
     bool IsElapsedTimeBelowSetting();
 };
 // Returns whether stamp.GetElapsedTime() is less than the float value of originalRuntimeFloatSetting412.
 // @fnv 0x009897a0
 bool Host::IsElapsedTimeBelowSetting()
 {
-    return (double)stamp.GetElapsedTime() < *(((Setting_S*)&originalRuntimeFloatSetting412)->Float());
+    return (double)stamp.GetElapsedTime() < *(((Setting*)&originalRuntimeFloatSetting412)->Float());
 }
 }  // namespace fnv_009897a0
 
@@ -1271,16 +1235,13 @@ struct RegionPoint
 {
     float GetX();
 };
-struct CTSHelper
-{
-    float GetElapsedTime();
-};
+
 struct FUN_0098a470_shell
 {
     char pad[0x40];
     unsigned int m_kPointA;
     RegionPoint p44;
-    CTSHelper p45;
+    CombatTargetTimestamp p45;
     bool FUN_0098a470(unsigned int a, float b);
 };
 // @fnv 0x0098a470
@@ -1290,17 +1251,13 @@ bool FUN_0098a470_shell::FUN_0098a470(unsigned int a, float fTime)
         return true;
     if (m_kPointA != a)
         return true;
-    if (((CTSHelper*)((char*)this + 0x44))->GetElapsedTime() > fTime)
+    if (((CombatTargetTimestamp*)((char*)this + 0x44))->GetElapsedTime() > fTime)
         return true;
     return false;
 }
 }  // namespace fnv_0098a470
 
-struct CombatSearchDoor
-{
-    char pad[0x0a];
-    bool bReserved;
-};
+
 struct FUN_0098c590_shell
 {
     CombatSearchDoor* FindParentSpaceNode(int param);
@@ -1349,217 +1306,17 @@ float __thiscall FUN_00990500_host::GetCachedValue()
     return f14;
 }
 
-struct ActorS
-{
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual void vfn_8();
-    virtual void vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual void vfn_8c();
-    virtual void vfn_90();
-    virtual void vfn_94();
-    virtual void vfn_98();
-    virtual void vfn_9c();
-    virtual void vfn_a0();
-    virtual void vfn_a4();
-    virtual void vfn_a8();
-    virtual void vfn_ac();
-    virtual void vfn_b0();
-    virtual void vfn_b4();
-    virtual void vfn_b8();
-    virtual void vfn_bc();
-    virtual void vfn_c0();
-    virtual void vfn_c4();
-    virtual void vfn_c8();
-    virtual void vfn_cc();
-    virtual void vfn_d0();
-    virtual void vfn_d4();
-    virtual void vfn_d8();
-    virtual void vfn_dc();
-    virtual void vfn_e0();
-    virtual void vfn_e4();
-    virtual void vfn_e8();
-    virtual void vfn_ec();
-    virtual void vfn_f0();
-    virtual void vfn_f4();
-    virtual void vfn_f8();
-    virtual void vfn_fc();
-    virtual void vfn_100();
-    virtual void vfn_104();
-    virtual void vfn_108();
-    virtual void vfn_10c();
-    virtual void vfn_110();
-    virtual void vfn_114();
-    virtual void vfn_118();
-    virtual void vfn_11c();
-    virtual void vfn_120();
-    virtual void vfn_124();
-    virtual void vfn_128();
-    virtual void vfn_12c();
-    virtual void vfn_130();
-    virtual void vfn_134();
-    virtual void vfn_138();
-    virtual void vfn_13c();
-    virtual void vfn_140();
-    virtual void vfn_144();
-    virtual void vfn_148();
-    virtual void vfn_14c();
-    virtual void vfn_150();
-    virtual void vfn_154();
-    virtual void vfn_158();
-    virtual void vfn_15c();
-    virtual void vfn_160();
-    virtual void vfn_164();
-    virtual void vfn_168();
-    virtual void vfn_16c();
-    virtual void vfn_170();
-    virtual void vfn_174();
-    virtual void vfn_178();
-    virtual void vfn_17c();
-    virtual void vfn_180();
-    virtual void vfn_184();
-    virtual void vfn_188();
-    virtual void vfn_18c();
-    virtual void vfn_190();
-    virtual void vfn_194();
-    virtual void vfn_198();
-    virtual void vfn_19c();
-    virtual void vfn_1a0();
-    virtual void vfn_1a4();
-    virtual void vfn_1a8();
-    virtual void vfn_1ac();
-    virtual void vfn_1b0();
-    virtual void vfn_1b4();
-    virtual void vfn_1b8();
-    virtual void vfn_1bc();
-    virtual void vfn_1c0();
-    virtual void vfn_1c4();
-    virtual void vfn_1c8();
-    virtual void vfn_1cc();
-    virtual void vfn_1d0();
-    virtual void vfn_1d4();
-    virtual void vfn_1d8();
-    virtual void vfn_1dc();
-    virtual void vfn_1e0();
-    virtual void vfn_1e4();
-    virtual void vfn_1e8();
-    virtual void vfn_1ec();
-    virtual void vfn_1f0();
-    virtual void vfn_1f4();
-    virtual void vfn_1f8();
-    virtual void vfn_1fc();
-    virtual void vfn_200();
-    virtual void vfn_204();
-    virtual void vfn_208();
-    virtual void vfn_20c();
-    virtual void vfn_210();
-    virtual void vfn_214();
-    virtual void vfn_218();
-    virtual void vfn_21c();
-    virtual void vfn_220();
-    virtual void vfn_224();
-    virtual void vfn_228();
-    virtual bool vfn_22c(int a);
-    virtual void vfn_230();
-    virtual void vfn_234();
-    virtual void vfn_238();
-    virtual void vfn_23c();
-    virtual void vfn_240();
-    virtual void vfn_244();
-    virtual void vfn_248();
-    virtual void vfn_24c();
-    virtual void vfn_250();
-    virtual void vfn_254();
-    virtual void vfn_258();
-    virtual void vfn_25c();
-    virtual void vfn_260();
-    virtual void vfn_264();
-    virtual void vfn_268();
-    virtual void vfn_26c();
-    virtual void vfn_270();
-    virtual void vfn_274();
-    virtual void vfn_278();
-    virtual void vfn_27c();
-    virtual void vfn_280();
-    virtual void vfn_284();
-    virtual void vfn_288();
-    virtual void vfn_28c();
-    virtual void vfn_290();
-    virtual void vfn_294();
-    virtual void vfn_298();
-    virtual void vfn_29c();
-    virtual void vfn_2a0();
-    virtual void vfn_2a4();
-    virtual void vfn_2a8();
-    virtual void vfn_2ac();
-    virtual void vfn_2b0();
-    virtual void vfn_2b4();
-    virtual void vfn_2b8();
-    virtual void vfn_2bc();
-    virtual void vfn_2c0();
-    virtual void vfn_2c4();
-    virtual void vfn_2c8();
-    virtual void vfn_2cc();
-    virtual void vfn_2d0();
-    virtual void vfn_2d4();
-    virtual void vfn_2d8();
-    virtual void vfn_2dc();
-    virtual void vfn_2e0();
-    virtual void vfn_2e4();
-    virtual bool vfn_2e8();
-};
-struct ActorX
-{
-    bool FUN_00437bd0();
-};
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting403;
-extern Setting_S originalRuntimeFloatSetting404;
-extern Setting_S originalRuntimeFloatSetting405;
-extern Setting_S originalRuntimeFloatSetting406;
-extern Setting_S originalRuntimeFloatSetting407;
-extern Setting_S originalRuntimeFloatSetting408;
-extern Setting_S originalRuntimeFloatSetting409;
-extern Setting_S originalRuntimeFloatSetting410;
-struct GlobalObject_0045cfe0
-{
-    int* Int();
-};
-extern GlobalObject_0045cfe0 g_011cef50;
+
+extern Setting originalRuntimeFloatSetting403;
+extern Setting originalRuntimeFloatSetting404;
+extern Setting originalRuntimeFloatSetting405;
+extern Setting originalRuntimeFloatSetting406;
+extern Setting originalRuntimeFloatSetting407;
+extern Setting originalRuntimeFloatSetting408;
+extern Setting originalRuntimeFloatSetting409;
+extern Setting originalRuntimeFloatSetting410;
+
+extern Setting g_011cef50;
 struct AvoidSphere
 {
     float GetRadius() const;
@@ -1573,56 +1330,50 @@ struct RegionPoint
     float GetX();
 };
 extern float DAT_0108d540;
-struct CombatMemberS
-{
-    ActorS* pActor;
-    char pad04[0x44];
-    unsigned short w48;
-    unsigned short w4a;
-};
-struct CombatGroupS
+// ActorCombatGroup view: 0x00987220 and 0x00989880 need declarations and fields absent from its shared header.
+struct TargetExpiryGroupView
 {
     char pad00[0xd0];
     unsigned int ItemUpdateArray;
     Flt spSphere;
-    bool FUN_00987220(CombatMemberS* pMember);
-    void* FUN_00989880(ActorS* pActor, float fRadius);
+    bool FUN_00987220(CombatTarget* pMember);
+    void* FUN_00989880(Actor* pActor, float fRadius);
 };
 // @fnv 0x00987220
-bool CombatGroupS::FUN_00987220(CombatMemberS* pMember)
+bool TargetExpiryGroupView::FUN_00987220(CombatTarget* pMember)
 {
     if (((FUN_0098a2e0_shell*)this)->FUN_0098a2e0())
     {
-        if (((CTSHelper*)((char*)pMember + 0x50))->GetElapsedTime() > *originalRuntimeFloatSetting403.Float())
+        if (((CombatTargetTimestamp*)((char*)pMember + 0x50))->GetElapsedTime() > *originalRuntimeFloatSetting403.Float())
             return true;
-        if (((CTSHelper*)((char*)pMember + 0x50))->GetElapsedTime() > *originalRuntimeFloatSetting404.Float() &&
-            !FUN_00989880(pMember->pActor, *originalRuntimeFloatSetting405.Float()))
+        if (((CombatTargetTimestamp*)((char*)pMember + 0x50))->GetElapsedTime() > *originalRuntimeFloatSetting404.Float() &&
+            !FUN_00989880((*reinterpret_cast<Actor**>(pMember->m_data)), *originalRuntimeFloatSetting405.Float()))
             return true;
     }
-    if (((CTSHelper*)((char*)pMember + 0x58))->GetElapsedTime() > *originalRuntimeFloatSetting406.Float())
+    if (((CombatTargetTimestamp*)((char*)pMember + 0x58))->GetElapsedTime() > *originalRuntimeFloatSetting406.Float())
     {
-        if (pMember->w4a == 0)
+        if ((*reinterpret_cast<unsigned short*>(pMember->m_data + 0x4a)) == 0)
             return true;
-        if (((CTSHelper*)((char*)pMember + 0x58))->GetElapsedTime() > *originalRuntimeFloatSetting407.Float())
+        if (((CombatTargetTimestamp*)((char*)pMember + 0x58))->GetElapsedTime() > *originalRuntimeFloatSetting407.Float())
         {
             bool bnoSphere = false;
             if (ItemUpdateArray == 1 && spSphere && ((AvoidSphere*)(unsigned int)spSphere)->GetRadius() == 0.0)
                 bnoSphere = true;
-            if (bnoSphere || !FUN_00989880(pMember->pActor, *originalRuntimeFloatSetting408.Float()))
+            if (bnoSphere || !FUN_00989880((*reinterpret_cast<Actor**>(pMember->m_data)), *originalRuntimeFloatSetting408.Float()))
                 return true;
         }
     }
     if (ItemUpdateArray != 0)
     {
-        if (ItemUpdateArray > pMember->w48 + *g_011cef50.Int())
+        if (ItemUpdateArray > (*reinterpret_cast<unsigned short*>(pMember->m_data + 0x48)) + *g_011cef50.Int())
             return true;
-        if (((CTSHelper*)((char*)this + 0xe8))->GetElapsedTime() < *originalRuntimeFloatSetting410.Float() &&
-            ((CTSHelper*)((char*)pMember + 0x60))->GetElapsedTime() >= *originalRuntimeFloatSetting410.Float() &&
+        if (((CombatTargetTimestamp*)((char*)this + 0xe8))->GetElapsedTime() < *originalRuntimeFloatSetting410.Float() &&
+            ((CombatTargetTimestamp*)((char*)pMember + 0x60))->GetElapsedTime() >= *originalRuntimeFloatSetting410.Float() &&
             ((RegionPoint*)((char*)pMember + 0x50))->GetX() == -DAT_0108d540 &&
-            ((CTSHelper*)((char*)pMember + 0x58))->GetElapsedTime() > *originalRuntimeFloatSetting409.Float())
+            ((CombatTargetTimestamp*)((char*)pMember + 0x58))->GetElapsedTime() > *originalRuntimeFloatSetting409.Float())
             return true;
     }
-    if (((ActorX*)pMember->pActor)->FUN_00437bd0() || (pMember->pActor->vfn_22c(0) && !pMember->pActor->vfn_2e8()))
+    if ((*reinterpret_cast<Actor**>(pMember->m_data))->FUN_00437bd0() || ((*reinterpret_cast<Actor**>(pMember->m_data))->HasHealth(false) && !(*reinterpret_cast<Actor**>(pMember->m_data))->GetIsDying()))
         return true;
     return false;
 }
@@ -1635,23 +1386,22 @@ struct FUN_009859c0_shell
 {
     void __thiscall FUN_009859c0(BGSSaveFormBuffer* buffer, FUN_0098de30_class* obj);
 };
-struct SaveFormIDHelper
-{
-    void __thiscall SerializeFormData(void*, int);
-};
 // Saves the form ID, three 4-byte fields, and a byte derived from the object at offset 16 (0xFF if null) to the buffer.
 // @fnv 0x009859c0
 void __thiscall FUN_009859c0_shell::FUN_009859c0(BGSSaveFormBuffer* buffer, FUN_0098de30_class* obj)
 {
-    ((SaveFormIDHelper*)buffer)->SerializeFormData(*(void**)this, 0);
-    buffer->SaveData((char*)this + 4, 4, 0);
-    buffer->SaveData((char*)this + 8, 4, 0);
-    buffer->SaveData((char*)this + 12, 4, 0);
+    buffer->SerializeFormData(*(void**)this, 0);
+    buffer->SaveData((char*)this + 4, 4u, 0);
+    buffer->SaveData((char*)this + 8, 4u, 0);
+    buffer->SaveData((char*)this + 12, 4u, 0);
     char result = 0xFF;
     if (*(unsigned int*)((char*)this + 16))
         result = obj->FUN_0098de30(*(unsigned int**)((char*)this + 16));
-    buffer->SaveData(&result, 1, 0);
+    buffer->SaveData(&result, 1u, 0);
 }
+
+
+
 
 struct ActorV
 {
@@ -1773,18 +1523,7 @@ struct ActorV
     virtual void v073();
     virtual void* V1d0();
 };
-struct BGSCameraPath
-{
-    int HasNameForWarning();
-};
-struct MobileObject
-{
-    const char* GetFullName();
-};
-struct FormIDStandIn
-{
-    unsigned int _ref_0084e3a0();
-};
+
 void FNV_Warning(const char*, ...);
 struct S00986a80
 {
@@ -1798,62 +1537,54 @@ struct S00992700
 {
     void FUN_00992700(void*, ActorV*);
 };
-struct GlobalObject_0045cf30
-{
-    unsigned char* Bool();
-};
-extern GlobalObject_0045cf30 g_011f1878;
+
+extern Setting g_011f1878;
 int __cdecl FUN_005d8550(unsigned int);
-struct P3
-{
-    float x, y, z;
-    void Set(float, float, float);
-};
-struct RgbaColor
-{
-    float r, g, b, a;
-};
-void FUN_004b6360(void*, P3*, int);
+
+
+void FUN_004b6360(void*, NiPoint3*, int);
 struct FUN_0097f220_t
 {
     void FUN_0097f220();
 };
-struct CombatGroup_009867d0
+// ActorCombatGroup insertion at 0x009867d0 returns bool and accepts ActorV*, unlike its shared declaration.
+struct CombatMemberInsertionView
 {
     unsigned int m_uiActorFormID;
     bool FUN_009867d0(ActorV* apActor);
 };
 
 // @fnv 0x009867d0
-bool CombatGroup_009867d0::FUN_009867d0(ActorV* apActor)
+bool CombatMemberInsertionView::FUN_009867d0(ActorV* apActor)
 {
-    RgbaColor colorA;
-    P3 color;
+    // The original leaves this storage uninitialized until the color is copied below.
+    float colorA[4];
+    float color[3];
     if (!apActor)
         return false;
     if (((S00986a80*)this)->FUN_00986a80(apActor))
         return true;
     if (!((S00986aa0*)this)->FUN_00986aa0(apActor))
         return false;
-    if (((FUN_009865b0_shell*)this)->FUN_009865b0((int)apActor))
+    if (((ActorCombatGroup*)this)->FUN_009865b0(apActor))
     {
         FNV_Warning("COMBAT: Trying to add actor %08X %s to Combat Group member list when they are a target.",
-                    ((FormIDStandIn*)apActor)->_ref_0084e3a0(),
+                    ((TESForm*)apActor)->FUN_0084e3a0(),
                     ((BGSCameraPath*)apActor)->HasNameForWarning() ? apActor->V130()
                                                                    : ((MobileObject*)apActor)->GetFullName());
         return false;
     }
     {
         FUN_00986950_shell member;
-        ((BSSimpleArray_CombatMember_1024*)((char*)this + 0x18))
-            ->AddCombatMember((const CombatClusterMember*)member.FUN_00986950(apActor));
+        ((BSSimpleArray<CombatClusterMember>*)((char*)this + 0x18))
+            ->Add(*(const CombatClusterMember*)member.FUN_00986950(apActor));
     }
     ((S00992700*)BGSSaveLoadGlobalDataWorldspacePtr)->FUN_00992700(this, apActor);
     if (*g_011f1878.Bool() && apActor->V1d0())
     {
-        colorA = *(RgbaColor*)FUN_005d8550(m_uiActorFormID);
-        color.Set(colorA.r, colorA.g, colorA.b);
-        FUN_004b6360(apActor->V1d0(), &color, 0);
+        *reinterpret_cast<NiColorA*>(colorA) = *(NiColorA*)FUN_005d8550(m_uiActorFormID);
+        reinterpret_cast<NiPoint3*>(color)->Set(colorA[0], colorA[1], colorA[2]);
+        FUN_004b6360(apActor->V1d0(), reinterpret_cast<NiPoint3*>(color), 0);
     }
     ((FUN_0097f220_t*)((char*)this + 0xb0))->FUN_0097f220();
     return true;
@@ -1895,7 +1626,7 @@ void FUN_0098f040_shell::FUN_0098f040(unsigned int auiNewSize, bool abFreeMemory
             UpdateThreat(auiNewSize, iSize);
             iAllocSize = auiNewSize;
         }
-        ((BSSimpleArray_CombatMember_1024*)this)->FUN_0098fb40(&pBuffer[iSize], auiNewSize - iSize);
+        ((BSSimpleArray<CombatClusterMember>*)this)->InitializeItems(&pBuffer[iSize], auiNewSize - iSize);
         iSize = auiNewSize;
     }
     else if (auiNewSize < iSize)
@@ -1910,7 +1641,7 @@ void FUN_0098f040_shell::FUN_0098f040(unsigned int auiNewSize, bool abFreeMemory
     }
     else
     {
-        ((BSSimpleArray_CombatMember_1024*)this)->FUN_0098fb40(&pBuffer[iSize], auiNewSize - iSize);
+        ((BSSimpleArray<CombatClusterMember>*)this)->InitializeItems(&pBuffer[iSize], auiNewSize - iSize);
         iSize = auiNewSize;
     }
 }
@@ -1928,7 +1659,7 @@ struct FUN_0096a2b0_stub2
 // @fnv 0x00986500
 void FUN_00986500_shell::RemoveByTarget(int target)
 {
-    for (int i = 0; i < ((ArrSI*)((char*)this + 8))->GetFlags(); ++i)
+    for (int i = 0; i < ((CombatgroupOffset08View*)((char*)this + 8))->GetFlags(); ++i)
     {
         CombatTarget* combatTarget = ((FUN_0096a2b0_stub2*)((char*)this + 8))->FUN_0096a2b0(i);
         if (*(int*)combatTarget == target)
@@ -1939,15 +1670,12 @@ void FUN_00986500_shell::RemoveByTarget(int target)
     }
 }
 
-struct _ref_0084e3a0_fn
-{
-    unsigned int __thiscall FUN_0084e3a0();
-};
+
 
 struct FUN_00986610_shell
 {
     char pad[8];
-    BSSimpleArray_CombatMember_1024 arr;
+    BSSimpleArray<CombatClusterMember> arr;
     void* FUN_00986610(unsigned int value);
 };
 
@@ -1955,10 +1683,10 @@ struct FUN_00986610_shell
 // @fnv 0x00986610
 void* FUN_00986610_shell::FUN_00986610(unsigned int value)
 {
-    for (unsigned int i = 0; i < ((ArrSI*)((char*)this + 8))->GetFlags(); ++i)
+    for (unsigned int i = 0; i < ((CombatgroupOffset08View*)((char*)this + 8))->GetFlags(); ++i)
     {
         CombatClusterMember* m = (CombatClusterMember*)((FUN_0098ef10_shell*)((char*)this + 8))->FUN_0098ef10(i);
-        if (((_ref_0084e3a0_fn*)m->pActor)->FUN_0084e3a0() == value)
+        if (((TESForm*)m->pActor)->FUN_0084e3a0() == value)
             return m;
     }
     return 0;
@@ -1976,7 +1704,7 @@ struct _Mem_20a4
 struct FUN_00986b00_shell
 {
     char pad[0x18];
-    ArrSI arr;
+    CombatgroupOffset08View arr;
     void CopyArrayTo(XArr* dst);
 };
 // Resizes dst to the source array's count and copies each element from arr into dst by index.
@@ -1989,15 +1717,8 @@ void FUN_00986b00_shell::CopyArrayTo(XArr* dst)
         dst->SetAt(i, (XIdle*)((MyArr*)&arr)->FUN_006dad90(i));
 }
 
-struct Sky
-{
-    int a;
-    int b;
-};
-struct SkyObject
-{
-    void Update(Sky* a, int b);
-};
+
+
 struct FUN_00986bd0_shell : ActorCombatGroup
 {
     Actor* GetIntAt(int);
@@ -2024,42 +1745,30 @@ class CoordinateTriple
     void FUN_00527b70(void* pBuffer);
 };
 
-struct FUN_009a5f90_shell
-{
-    void SaveTimeStamp(void* pBuffer);
-};
 
-struct FUN_009856e0_shell
-{
-    Actor* pActor;
-    int m_field;
-    char pad[0x60];
-
-    void __thiscall FUN_009856e0(BGSSaveFormBuffer* pBuffer, ActorCombatGroup* pGroup);
-};
 
 // @fnv 0x009856e0
-void __thiscall FUN_009856e0_shell::FUN_009856e0(BGSSaveFormBuffer* pBuffer, ActorCombatGroup* pGroup)
+void CombatTarget::FUN_009856e0(CombatWriter* pBuffer, SavedCombatState* pGroup)
 {
-    ((SaveFormIDHelper*)pBuffer)->SerializeFormData(pActor, 0);
+    reinterpret_cast<BGSSaveFormBuffer*>(pBuffer)->SerializeFormData(*reinterpret_cast<Actor**>(m_data), 0);
 
-    pBuffer->SaveData((char*)this + 4, 4, 0);
-    pBuffer->SaveData((char*)this + 0x48, 2, 0);
-    pBuffer->SaveData((char*)this + 0x4A, 2, 0);
-    pBuffer->SaveData((char*)this + 0x64, 1, 0);
-    pBuffer->SaveData((char*)this + 0x65, 1, 0);
+    reinterpret_cast<BGSSaveFormBuffer*>(pBuffer)->SaveData((char*)this + 4, 4u, 0);
+    reinterpret_cast<BGSSaveFormBuffer*>(pBuffer)->SaveData((char*)this + 0x48, 2u, 0);
+    reinterpret_cast<BGSSaveFormBuffer*>(pBuffer)->SaveData((char*)this + 0x4A, 2u, 0);
+    reinterpret_cast<BGSSaveFormBuffer*>(pBuffer)->SaveData((char*)this + 0x64, 1u, 0);
+    reinterpret_cast<BGSSaveFormBuffer*>(pBuffer)->SaveData((char*)this + 0x65, 1u, 0);
 
-    ((CoordinateTriple*)((char*)this + 8))->FUN_00527b70(pBuffer);
-    ((CoordinateTriple*)((char*)this + 0x18))->FUN_00527b70(pBuffer);
-    ((CoordinateTriple*)((char*)this + 0x28))->FUN_00527b70(pBuffer);
-    ((CoordinateTriple*)((char*)this + 0x38))->FUN_00527b70(pBuffer);
+    ((CoordinateTriple*)((char*)this + 8))->FUN_00527b70(reinterpret_cast<BGSSaveFormBuffer*>(pBuffer));
+    ((CoordinateTriple*)((char*)this + 0x18))->FUN_00527b70(reinterpret_cast<BGSSaveFormBuffer*>(pBuffer));
+    ((CoordinateTriple*)((char*)this + 0x28))->FUN_00527b70(reinterpret_cast<BGSSaveFormBuffer*>(pBuffer));
+    ((CoordinateTriple*)((char*)this + 0x38))->FUN_00527b70(reinterpret_cast<BGSSaveFormBuffer*>(pBuffer));
 
-    ((FUN_009a5f90_shell*)((char*)this + 0x50))->SaveTimeStamp(pBuffer);
-    ((FUN_009a5f90_shell*)((char*)this + 0x54))->SaveTimeStamp(pBuffer);
-    ((FUN_009a5f90_shell*)((char*)this + 0x58))->SaveTimeStamp(pBuffer);
-    ((FUN_009a5f90_shell*)((char*)this + 0x4C))->SaveTimeStamp(pBuffer);
-    ((FUN_009a5f90_shell*)((char*)this + 0x5C))->SaveTimeStamp(pBuffer);
-    ((FUN_009a5f90_shell*)((char*)this + 0x60))->SaveTimeStamp(pBuffer);
+    ((CombatTargetTimestamp*)((char*)this + 0x50))->SaveTimeStamp(reinterpret_cast<BGSSaveFormBuffer*>(pBuffer));
+    ((CombatTargetTimestamp*)((char*)this + 0x54))->SaveTimeStamp(reinterpret_cast<BGSSaveFormBuffer*>(pBuffer));
+    ((CombatTargetTimestamp*)((char*)this + 0x58))->SaveTimeStamp(reinterpret_cast<BGSSaveFormBuffer*>(pBuffer));
+    ((CombatTargetTimestamp*)((char*)this + 0x4C))->SaveTimeStamp(reinterpret_cast<BGSSaveFormBuffer*>(pBuffer));
+    ((CombatTargetTimestamp*)((char*)this + 0x5C))->SaveTimeStamp(reinterpret_cast<BGSSaveFormBuffer*>(pBuffer));
+    ((CombatTargetTimestamp*)((char*)this + 0x60))->SaveTimeStamp(reinterpret_cast<BGSSaveFormBuffer*>(pBuffer));
 }
 
 struct FUN_00527ba0_Class
@@ -2068,15 +1777,7 @@ struct FUN_00527ba0_Class
     void __thiscall FUN_00527ba0(void* pBuffer);
 };
 
-struct CombatTimeStampLoadGame
-{
-    void __thiscall LoadGame(BGSLoadFormBuffer* pBuffer);
-};
 
-struct BGSLoadGameBufferVersion
-{
-    virtual unsigned char GetVersion();
-};
 
 struct FUN_00985800_shell
 {
@@ -2105,66 +1806,57 @@ void FUN_00985800_shell::FUN_00985800(BGSLoadFormBuffer* pBuffer, ActorCombatGro
 {
     pBuffer->ReadFormIdentifier(this);
 
-    pBuffer->ReadTypedData(&m4, 4);
-    pBuffer->ReadTypedData(m48, 2);
-    pBuffer->ReadTypedData(m4a, 2);
-    pBuffer->ReadTypedData(&m64, 1);
-    pBuffer->ReadTypedData(&m65, 1);
+    pBuffer->ReadTypedData((void*)(&m4), 4u);
+    pBuffer->ReadTypedData((void*)(m48), 2u);
+    pBuffer->ReadTypedData((void*)(m4a), 2u);
+    pBuffer->ReadTypedData((void*)(&m64), 1u);
+    pBuffer->ReadTypedData((void*)(&m65), 1u);
 
     m8.FUN_00527ba0(pBuffer);
     m18.FUN_00527ba0(pBuffer);
     m28.FUN_00527ba0(pBuffer);
 
-    if (reinterpret_cast<BGSLoadGameBufferVersion*>(pBuffer)->GetVersion() >= 0x0e)
+    if (pBuffer->GetVersion() >= 0x0e)
         m38.FUN_00527ba0(pBuffer);
 
-    reinterpret_cast<CombatTimeStampLoadGame*>(&m50)->LoadGame(pBuffer);
-    reinterpret_cast<CombatTimeStampLoadGame*>(&m54)->LoadGame(pBuffer);
-    reinterpret_cast<CombatTimeStampLoadGame*>(&m58)->LoadGame(pBuffer);
-    reinterpret_cast<CombatTimeStampLoadGame*>(&m4c)->LoadGame(pBuffer);
-    reinterpret_cast<CombatTimeStampLoadGame*>(&m5c)->LoadGame(pBuffer);
+    reinterpret_cast<CombatTargetTimestamp*>(&m50)->LoadGame(pBuffer);
+    reinterpret_cast<CombatTargetTimestamp*>(&m54)->LoadGame(pBuffer);
+    reinterpret_cast<CombatTargetTimestamp*>(&m58)->LoadGame(pBuffer);
+    reinterpret_cast<CombatTargetTimestamp*>(&m4c)->LoadGame(pBuffer);
+    reinterpret_cast<CombatTargetTimestamp*>(&m5c)->LoadGame(pBuffer);
 
-    if (reinterpret_cast<BGSLoadGameBufferVersion*>(pBuffer)->GetVersion() >= 0x0d)
-        reinterpret_cast<CombatTimeStampLoadGame*>(&m60)->LoadGame(pBuffer);
+    if (pBuffer->GetVersion() >= 0x0d)
+        reinterpret_cast<CombatTargetTimestamp*>(&m60)->LoadGame(pBuffer);
 }
 
 double DAT_0101db88;
 
-struct ImageSpaceEffectParam
-{
-    float f0;
-    float f4;
-    float f8;
-    float fc;
-
-    ImageSpaceEffectParam(float, float, float, float);
-};
 
 struct FUN_00985be0_shell : public FUN_00985bb0_Class
 {
-    ImageSpaceEffectParam* GetEffectColor(ImageSpaceEffectParam* result);
+    NiColorA* GetEffectColor(NiColorA* result);
 };
 
 // Reads a value from FUN_00985bb0 and returns a color: magenta above 50, blue above DAT_0101db88, otherwise yellow, all with alpha 0.5.
 // @fnv 0x00985be0
-ImageSpaceEffectParam* FUN_00985be0_shell::GetEffectColor(ImageSpaceEffectParam* result)
+NiColorA* FUN_00985be0_shell::GetEffectColor(NiColorA* result)
 {
-    ImageSpaceEffectParam color(0.0f, 0.0f, 0.0f, 0.0f);
+    NiColorA color(0.0f, 0.0f, 0.0f, 0.0f);
 
     {
         float value = FUN_00985bb0_Class::FUN_00985bb0();
 
         if (value > 50.0)
         {
-            color = ImageSpaceEffectParam(1.0f, 0.0f, 1.0f, 0.5f);
+            color = NiColorA(1.0f, 0.0f, 1.0f, 0.5f);
         }
         else if (value > DAT_0101db88)
         {
-            color = ImageSpaceEffectParam(0.0f, 0.0f, 1.0f, 0.5f);
+            color = NiColorA(0.0f, 0.0f, 1.0f, 0.5f);
         }
         else
         {
-            color = ImageSpaceEffectParam(1.0f, 1.0f, 0.0f, 0.5f);
+            color = NiColorA(1.0f, 1.0f, 0.0f, 0.5f);
         }
 
         *result = color;
@@ -2173,9 +1865,7 @@ ImageSpaceEffectParam* FUN_00985be0_shell::GetEffectColor(ImageSpaceEffectParam*
     return result;
 }
 
-struct NiAVObject
-{
-};
+
 
 void __cdecl FUN_004b6630(NiAVObject*);
 
@@ -2349,30 +2039,16 @@ void FUN_009869a0_shell::FUN_009869a0(Actor* apActor)
     }
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
 
-    NiPoint3 operator+(const NiPoint3& other) const;
-    NiPoint3 FUN_0053d280(float value) const;
-};
 
 struct B006815c0 : public NiPoint3
 {
     B006815c0();
 };
 
-struct TESCombatStyle
-{
-    void UpdateCombatStyle() const;
-};
 
-struct P3OperatorMinusHelper
-{
-    P3 operator-(const P3& other) const;
-};
+
+
 
 extern float _DAT_010162c0;
 
@@ -2389,11 +2065,11 @@ void FUN_00989eb0_shell::FUN_00989eb0(NiPoint3* result)
 
     this->UpdateBoundsFromActors(points, 0);
 
-    *result = (points[0] + points[7]).FUN_0053d280(_DAT_010162c0);
+    *reinterpret_cast<NiPoint3_helper_combatgroup*>(result) = (const NiPoint3_helper_combatgroup&)(points[0] + points[7]).FUN_0053d280(_DAT_010162c0);
 
-    P3 difference = ((P3OperatorMinusHelper*)&points[0])->operator-(*(P3*)&points[7]);
+    NiPoint3 difference = ((NiPoint3*)&points[0])->operator-(*(NiPoint3*)&points[7]);
 
-    ((TESCombatStyle*)&difference)->UpdateCombatStyle();
+    ((const TESCombatStyle*)&difference)->UpdateCombatStyle();
 }
 
 struct FUN_0098a390_shell
@@ -2409,21 +2085,13 @@ void FUN_0098a390_shell::SetElementValue(unsigned int uiIndex, unsigned int uiVa
     reinterpret_cast<CombatClusterMember*>(m_aiIndexedValues.FUN_006dad90(uiIndex))->m_uiGoalFlags = uiValue;
 }
 
-struct PathingSolution
-{
-    unsigned int __thiscall GetVirtualNodeCount();
-};
+
 
 namespace identity {
-struct ActorCombatGroup
-{
-    unsigned int __thiscall GetCount();
-    Actor* __thiscall GetIntAt(int index);
-};
 
 struct FUN_009871c0_shell
 {
-    S_009874f0* __thiscall FUN_009871c0(int index);
+    CombatTarget* __thiscall FUN_009871c0(int index);
 };
 }
 
@@ -2713,27 +2381,27 @@ void FUN_0098cf70_shell::CountActorsPerNode()
     {
         unsigned int uiNodeCount = reinterpret_cast<PathingSolution*>(this)->GetVirtualNodeCount();
         {
-            unsigned int uiActorCount = reinterpret_cast<identity::ActorCombatGroup*>(this)->GetCount();
+            unsigned int uiActorCount = reinterpret_cast<ActorCombatGroup*>(this)->GetCount();
             {
                 unsigned int i = 0;
                 for (; i < uiNodeCount; ++i)
                 {
                     {
-                        S_009874f0* target = reinterpret_cast<identity::FUN_009871c0_shell*>(this)->FUN_009871c0(i);
-                        target->f4A = 0;
+                        CombatTarget* target = reinterpret_cast<identity::FUN_009871c0_shell*>(this)->FUN_009871c0(i);
+                        *reinterpret_cast<short*>(target->m_data + 0x4A) = 0;
                         {
                             unsigned int j = 0;
                             for (; j < uiActorCount; ++j)
                             {
                                 {
-                                    Actor* actor = reinterpret_cast<identity::ActorCombatGroup*>(this)->GetIntAt(j);
+                                    Actor* actor = reinterpret_cast<ActorCombatGroup*>(this)->GetIntAt((int)j);
                                     if (actor == _g_thePlayer)
                                         continue;
 
                                     if (reinterpret_cast<ActorVirtual*>(actor)->GetID() ==
                                         *reinterpret_cast<int*>(target))
                                     {
-                                        ++target->f4A;
+                                        ++*reinterpret_cast<short*>(target->m_data + 0x4A);
                                     }
                                 }
                             }
@@ -2745,86 +2413,51 @@ void FUN_0098cf70_shell::CountActorsPerNode()
     }
 }
 
-struct BSSimpleArrayActor
-{
-    void __thiscall Clear(bool);
-};
-
-struct FUN_0098fa00_shell
-{
-    void __thiscall FUN_0098fa00(unsigned int, unsigned int);
-};
-
-struct AllocationBase
-{
-    virtual void Anchor()
-    {}
-    virtual CombatTarget* Allocate(unsigned int)
-    {
-        return 0;
-    }
-};
-
-struct FUN_0098ed80_shell : public AllocationBase
-{
-    CombatTarget* m_buffer;
-    unsigned int m_iElementCount;
-    unsigned int m_pRayCursor;
-
-    void __thiscall FUN_0098ed80(unsigned int, bool);
-};
-
 // @fnv 0x0098ed80
-void __thiscall FUN_0098ed80_shell::FUN_0098ed80(unsigned int auiCount, bool abShrink)
+template <>
+void __thiscall BSSimpleArray<CombatTarget>::SetSize(unsigned int auiCount, bool abShrink)
 {
     if (auiCount == 0)
     {
-        reinterpret_cast<BSSimpleArrayActor*>(this)->Clear(abShrink);
+        Clear(abShrink);
     }
-    else if (auiCount > m_pRayCursor)
+    else if (auiCount > SimpleArrayStorage)
     {
-        if (m_pRayCursor == 0)
+        if (SimpleArrayStorage == 0)
         {
-            m_buffer = this->Allocate(auiCount);
-            m_pRayCursor = auiCount;
+            pBuffer = this->_Allocate(auiCount);
+            SimpleArrayStorage = auiCount;
         }
         else
         {
-            reinterpret_cast<FUN_0098fa00_shell*>(this)->FUN_0098fa00(auiCount, m_iElementCount);
-            m_pRayCursor = auiCount;
+            ReallocateStorage(auiCount, iSize);
+            SimpleArrayStorage = auiCount;
         }
 
-        reinterpret_cast<BSSimpleArray_CombatTarget_1024*>(this)->FUN_0098f840(m_buffer + m_iElementCount, auiCount - m_iElementCount);
-        m_iElementCount = auiCount;
+        InitializeItems(pBuffer + iSize, auiCount - iSize);
+        iSize = auiCount;
     }
-    else if (auiCount < m_iElementCount)
+    else if (auiCount < iSize)
     {
-        reinterpret_cast<FUN_0072ba80_shell*>(this)->FUN_0072ba80(reinterpret_cast<char*>(m_buffer + auiCount),
-                                                                  m_iElementCount - auiCount);
-        m_iElementCount = auiCount;
+        ReleaseElements(pBuffer + auiCount, iSize - auiCount);
+        iSize = auiCount;
 
-        if (abShrink && auiCount <= m_pRayCursor / 4)
+        if (abShrink && auiCount <= SimpleArrayStorage / 4)
         {
-            reinterpret_cast<FUN_0098fa00_shell*>(this)->FUN_0098fa00(auiCount, auiCount);
-            m_pRayCursor = auiCount;
+            ReallocateStorage(auiCount, auiCount);
+            SimpleArrayStorage = auiCount;
         }
     }
     else
     {
-        reinterpret_cast<BSSimpleArray_CombatTarget_1024*>(this)->FUN_0098f840(m_buffer + m_iElementCount, auiCount - m_iElementCount);
-        m_iElementCount = auiCount;
+        InitializeItems(pBuffer + iSize, auiCount - iSize);
+        iSize = auiCount;
     }
 }
 
-struct GlobalObject_0040e0b0
-{
-    float* Float();
-};
 
-struct TimeoutTimer
-{
-    bool CheckTimer();
-};
+
+
 
 struct FUN_008d7f40_shell
 {
@@ -2853,10 +2486,10 @@ struct FUN_00986150_shell
     unsigned int GetCount();
 };
 
-extern Setting_S originalRuntimeFloatSetting487;
-extern Setting_S originalRuntimeFloatSetting488;
-extern Setting_S originalRuntimeFloatSetting493;
-extern GlobalObject_0040e0b0 g_011ceb44;
+extern Setting originalRuntimeFloatSetting487;
+extern Setting originalRuntimeFloatSetting488;
+extern Setting originalRuntimeFloatSetting493;
+extern Setting g_011ceb44;
 extern double _DAT_01012060;
 
 // @fnv 0x00986150
@@ -3102,33 +2735,29 @@ float CombatClock::GetAdjustedTime(TimeInput* timeInput)
         elapsed = timeInput->FUN_00527a40(this);
         elapsed = FUN_0040ebd0(elapsed, _DAT_0108d5a0);
         current -= elapsed / _DAT_0108d598;
-        if (*reinterpret_cast<int*>(&_ts._pad[4]) != 0)
+        if (*reinterpret_cast<int*>(&_pad14[0]) != 0)
             current += _DAT_01020758;
         return current;
     }
 }
 
-struct BSSimpleArrayForCall : BSSimpleArray
-{
-    void __thiscall CopyItemsTo(BSSimpleArrayForCall* other);
-};
+
 
 struct FUN_00986740_shell
 {
     void* unk00;
     void* unk04;
-    BSSimpleArrayForCall arr;
+    BSSimpleArray<CombatClusterMember> arr;
 
     void __thiscall FUN_00986740(FUN_00986740_shell* other);
 };
 
-void __thiscall BSSimpleArrayForCall::CopyItemsTo(BSSimpleArrayForCall* other)
-{}
+
 
 // @fnv 0x00986740
 void __thiscall FUN_00986740_shell::FUN_00986740(FUN_00986740_shell* other)
 {
-    other->arr.CopyItemsTo(&arr);
+    other->arr.CopyTo<1024>(&arr);
 }
 
 struct FUN_00986760_sub
@@ -3163,304 +2792,31 @@ void FUN_00986760_cls::FUN_00986760(int pTarget)
     }
 }
 
-struct Actor_987820;
-struct Ctrl_987820
-{
-    void FUN_00980a30(Actor_987820* apTarget);
-};
-struct Actor_987820
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual void v213();
-    virtual void v214();
-    virtual void v215();
-    virtual void v216();
-    virtual void v217();
-    virtual void v218();
-    virtual void v219();
-    virtual void v220();
-    virtual void v221();
-    virtual void v222();
-    virtual void v223();
-    virtual void v224();
-    virtual void v225();
-    virtual void v226();
-    virtual void v227();
-    virtual void v228();
-    virtual void v229();
-    virtual void v230();
-    virtual void v231();
-    virtual void v232();
-    virtual void v233();
-    virtual void v234();
-    virtual void v235();
-    virtual void v236();
-    virtual void v237();
-    virtual void v238();
-    virtual void v239();
-    virtual void v240();
-    virtual void v241();
-    virtual void v242();
-    virtual void v243();
-    virtual void v244();
-    virtual void v245();
-    virtual void v246();
-    virtual void v247();
-    virtual void v248();
-    virtual void v249();
-    virtual void v250();
-    virtual void v251();
-    virtual void v252();
-    virtual void v253();
-    virtual void v254();
-    virtual void v255();
-    virtual void v256();
-    virtual void v257();
-    virtual void v258();
-    virtual void v259();
-    virtual void v260();
-    virtual void v261();
-    virtual void v262();
-    virtual void v263();
-    virtual void v264();
-    virtual void v265();
-    virtual struct Ctrl_987820* v266();
-};
+
+
 struct Group_987820
 {
     unsigned int GetCount();
-    Actor_987820* GetAt(int idx);
-    void RemoveByTarget(Actor_987820* apTarget);
-    void FUN_00987820(Actor_987820* apTarget);
+    Actor* GetAt(int idx);
+    void RemoveByTarget(Actor* apTarget);
+    void FUN_00987820(Actor* apTarget);
 };
-// Calls FUN_00980a30 on each member's controller with apTarget, then calls RemoveByTarget if apTarget->v64() is nonzero.
+// Calls FUN_00980a30 on each member's controller with apTarget, then calls RemoveByTarget if apTarget->IsActor() is nonzero.
 // @fnv 0x00987820
-void Group_987820::FUN_00987820(Actor_987820* apTarget)
+void Group_987820::FUN_00987820(Actor* apTarget)
 {
     unsigned int p = GetCount();
     unsigned int h;
     for (h = 0; h < p; ++h)
     {
-        Actor_987820* j = GetAt(h);
-        Ctrl_987820* e = j->v266();
+        Actor* j = GetAt(h);
+        CombatController* e = j->GetCombatController();
         if (e)
         {
-            e->FUN_00980a30(apTarget);
+            e->FUN_00980a30(reinterpret_cast<int>(apTarget));
         }
     }
-    if (apTarget->v64())
+    if (apTarget->IsActor())
     {
         RemoveByTarget(apTarget);
     }
@@ -3512,6 +2868,9 @@ struct B989230Quad
     float w;
 };
 
+
+
+// Actor::FUN_00575650 has no matching POD return; the output-buffer form changes 0x00989230.
 class B989230Ref
 {
   public:
@@ -3587,13 +2946,6 @@ struct AvoidanceVectorData
     float x, y, z, r0, r1, r2, r3, r4, r5;
     AvoidanceVectorData(const AvoidVector&);
 };
-struct PathingAvoidNodeArray
-{
-    unsigned unk00, unk04, unk08, unk0c, unk10, unk14;
-    static void* operator new(unsigned);
-    PathingAvoidNodeArray();
-    void AppendNode(const AvoidanceVectorData&, float, float);
-};
 struct AvoidSetting
 {
     float* FUN_00403e20();
@@ -3635,11 +2987,7 @@ struct B9897F0Quad
     float w;
 };
 
-class B9897F0Ref
-{
-  public:
-    B9897F0Quad FUN_00575650();
-};
+
 
 class B9897F0Point
 {
@@ -3651,22 +2999,23 @@ class B9897F0List
 {
   public:
     unsigned int GetCount();
-    B9897F0Ref* GetAt(unsigned int uiIndex);
-    B9897F0Ref* FUN_009897f0(B9897F0Point* pkPoint, float fRadius, B9897F0Ref* pkExclude);
+    Actor* GetAt(unsigned int uiIndex);
+    Actor* FUN_009897f0(B9897F0Point* pkPoint, float fRadius, Actor* pkExclude);
 };
 
 // Scans the list for the first entry other than pkExclude whose squared distance to pkPoint is less than the squared radius, returning it or 0.
 // @fnv 0x009897f0
-B9897F0Ref* B9897F0List::FUN_009897f0(B9897F0Point* pkPoint, float afRadius, B9897F0Ref* pkExclude)
+Actor* B9897F0List::FUN_009897f0(B9897F0Point* pkPoint, float afRadius, Actor* pkExclude)
 {
     float fRadiusSq = afRadius * afRadius;
     unsigned int ItemUpdateArray = GetCount();
     for (unsigned int i = 0; i < ItemUpdateArray; i++)
     {
-        B9897F0Ref* pkRef = GetAt(i);
+        Actor* pkRef = GetAt(i);
         if (pkRef != pkExclude)
         {
-            B9897F0Quad kPosition = pkRef->FUN_00575650();
+            B9897F0Quad kPosition;
+        pkRef->FUN_00575650(reinterpret_cast<::Position*>(&kPosition));
             if (pkPoint->GetSquaredDistance(kPosition) < fRadiusSq)
                 return pkRef;
         }
@@ -3686,6 +3035,7 @@ struct LocalResult16
 };
 
 // Actor side: fills the caller supplied result block and returns its address.
+// This call needs the result-buffer address returned in EAX; the shared overload returns void.
 struct ActorRef00989880
 {
     int __thiscall FUN_00575650(void* pResult);
@@ -3694,11 +3044,11 @@ struct ActorRef00989880
 // Group side: takes the result block, the radius and the actor.
 struct GroupRef00989880
 {
-    void* __thiscall FUN_009897f0(int aResult, float aRadius, ActorS* pActor);
+    void* __thiscall FUN_009897f0(int aResult, float aRadius, Actor* pActor);
 };
 
 // @fnv 0x00989880
-void* CombatGroupS::FUN_00989880(ActorS* pActor, float afRadius)
+void* TargetExpiryGroupView::FUN_00989880(Actor* pActor, float afRadius)
 {
     LocalResult16 tResult;
     return ((GroupRef00989880*)this)
@@ -3709,24 +3059,8 @@ extern NiPoint3 NiPoint3_ZERO;
 extern "C" void* _alloca(unsigned int size);
 float __cdecl FUN_004579e0(float v);
 
-class NiPoint3_ext
-{
-  public:
-    float x;
-    float y;
-    float z;
-    NiPoint3_ext& operator+=(const NiPoint3& other);
-    NiPoint3 operator-(const NiPoint3& other) const;
-    float Dot(const NiPoint3& other) const;
-};
-class NiPoint3_helper
-{
-  public:
-    float x;
-    float y;
-    float z;
-    NiPoint3 operator*(float s) const;
-};
+
+
 struct FUN_004941c0_shell
 {
     float x;
@@ -3870,7 +3204,7 @@ struct ActorPos
     virtual void v124();
     virtual NiPoint3* GetPos();
 };
-struct FUN_005a4320_shell : FUN_00986b70_helper
+struct FUN_005a4320_shell : ActorCombatGroup
 {
     unsigned int FUN_005a4320();
     ActorPos* FUN_00968630(unsigned int);
@@ -3889,43 +3223,43 @@ bool Grp_Call2::FUN_009899a0()
         return false;
     NiPoint3* arr1 = (NiPoint3*)_alloca(a3 * sizeof(NiPoint3));
     NiPoint3* arr2 = (NiPoint3*)_alloca(b * sizeof(NiPoint3));
-    NiPoint3 v29 = NiPoint3_ZERO;
-    NiPoint3 vTmp = NiPoint3_ZERO;
+    NiPoint3_helper_combatgroup v29 = reinterpret_cast<const NiPoint3_helper_combatgroup&>(NiPoint3_ZERO);
+    NiPoint3_helper_combatgroup vTmp = reinterpret_cast<const NiPoint3_helper_combatgroup&>(NiPoint3_ZERO);
     for (unsigned int i = 0; i < a3; i++)
     {
-        ActorPos* obj = (ActorPos*)GetIntAt(i);
-        arr1[i] = *obj->GetPos();
-        ((NiPoint3_ext*)&v29)->operator+=(arr1[i]);
+        ActorPos* obj = (ActorPos*)GetIntAt((int)i);
+        reinterpret_cast<NiPoint3_helper_combatgroup&>(arr1[i]) = *reinterpret_cast<NiPoint3_helper_combatgroup*>(obj->GetPos());
+        ((NiPoint3*)&v29)->operator+=(arr1[i]);
     }
     for (unsigned int j = 0; j < b; j++)
     {
         ActorPos* obj = FUN_00968630(j);
-        arr2[j] = *obj->GetPos();
-        ((NiPoint3_ext*)&vTmp)->operator+=(arr2[j]);
+        reinterpret_cast<NiPoint3_helper_combatgroup&>(arr2[j]) = *reinterpret_cast<NiPoint3_helper_combatgroup*>(obj->GetPos());
+        ((NiPoint3*)&vTmp)->operator+=(arr2[j]);
     }
-    NiPoint3 sum23 = v29 + vTmp;
+    NiPoint3 sum23 = reinterpret_cast<const NiPoint3&>(v29) + reinterpret_cast<const NiPoint3&>(vTmp);
     ((FUN_004941c0_shell*)&v29)->ScaleByInverse((float)a3);
     ((FUN_004941c0_shell*)&vTmp)->ScaleByInverse((float)b);
     ((FUN_004941c0_shell*)&sum23)->ScaleByInverse((float)(a3 + b));
-    NiPoint3 d23 = ((NiPoint3_ext*)&vTmp)->operator-(v29);
-    NiPoint3 d5 = ((NiPoint3_ext*)&sum23)->operator-(v29);
-    float f6 = ((NiPoint3_ext*)&d5)->Dot(d23);
+    NiPoint3 d23 = ((NiPoint3*)&vTmp)->operator-(reinterpret_cast<const NiPoint3&>(v29));
+    NiPoint3 d5 = ((NiPoint3*)&sum23)->operator-(reinterpret_cast<const NiPoint3&>(v29));
+    float f6 = ((NiPoint3*)&d5)->Dot(d23);
     float t20 = FUN_004579e0(f6);
     float t4 = ((FUN_00457910_shell*)&d23)->FUN_00457910();
-    NiPoint3 base = v29 + ((NiPoint3_helper*)&d23)->operator*(t20);
-    NiPoint3 resid8 = ((NiPoint3_ext*)&v29)->operator-(base);
+    NiPoint3 base = reinterpret_cast<const NiPoint3&>(v29) + ((NiPoint3_helper_combatgroup*)&d23)->operator*(t20);
+    NiPoint3 resid8 = ((NiPoint3*)&v29)->operator-(base);
     unsigned int countA21 = 0;
     unsigned int countB = 0;
     for (unsigned int i = 0; i < a3; i++)
     {
-        NiPoint3 diff = ((NiPoint3_ext*)&arr1[i])->operator-(base);
-        if (((NiPoint3_ext*)&diff)->Dot(resid8) < 0.0)
+        NiPoint3 diff = ((NiPoint3*)&arr1[i])->operator-(base);
+        if (((NiPoint3*)&diff)->Dot(resid8) < 0.0)
             countA21++;
     }
     for (unsigned int j = 0; j < b; j++)
     {
-        NiPoint3 diff = ((NiPoint3_ext*)&arr2[j])->operator-(base);
-        if (((NiPoint3_ext*)&diff)->Dot(resid8) < 0.0)
+        NiPoint3 diff = ((NiPoint3*)&arr2[j])->operator-(base);
+        if (((NiPoint3*)&diff)->Dot(resid8) < 0.0)
             countB++;
     }
     float ratioA22 = (float)countA21 / (float)a3;
@@ -3969,14 +3303,15 @@ struct FUN_00989e20_cls
 // @fnv 0x00989e20
 void FUN_00989e20_cls::FUN_00989e20(NiPoint3* out)
 {
-    NiPoint3 v88;
-    NiPoint3 v7c3;
+    // These output buffers must not invoke NiPoint3 default constructors.
+    float v88[3];
+    float v7c3[3];
     B006815c0 arr[8];
     Blk_00989e20_cls pa0;
 
     this->ExpandBounds(arr, 0);
-    *out = *((Vec_00989e20_cls*)((Helper_00989e20_cls*)arr)->FUN_00439e90(&v7c3, (NiPoint3*)&arr[7], &v88))
-                ->FUN_0053d280(_DAT_010162c0);
+    *reinterpret_cast<NiPoint3_helper_combatgroup*>(out) = *reinterpret_cast<NiPoint3_helper_combatgroup*>(((Vec_00989e20_cls*)((Helper_00989e20_cls*)arr)->FUN_00439e90((NiPoint3*)v7c3, (NiPoint3*)&arr[7], (NiPoint3*)v88))
+                ->FUN_0053d280(_DAT_010162c0));
     ((Helper_00989e20_cls*)arr)->FUN_00439ef0(&pa0.t, (NiPoint3*)&arr[7]);
     pa0.t.FUN_004a7290();
 }
@@ -4443,13 +3778,14 @@ float FUN_0098a4d0_class::ComputeAverageRatio()
     return total;
 }
 
-struct Pt3
+
+// The returned position carries a fourth value after its three coordinates.
+struct ItemPositionResult
 {
-    float x;
-    float y;
-    float z;
+    NiPoint3 position;
     float w;
 };
+
 struct PosObj
 {
     bool IsEqual(const PosObj* other);
@@ -4467,7 +3803,7 @@ struct ItemObj
     float GetScore();
     unsigned int GetID();
     PosObj* GetPosObj();
-    float GetDistance(Pt3* pos);
+    float GetDistance(NiPoint3* pos);
 };
 struct ActorObj
 {
@@ -4738,7 +4074,7 @@ struct ActorObj
     virtual void vf420();
     virtual void vf424();
     virtual MgrObj* GetMgr();
-    Pt3 GetPos();
+    ItemPositionResult GetPos();
 };
 struct ItemList
 {
@@ -4751,7 +4087,7 @@ struct ItemList
 ItemObj* ItemList::FindBestItem(ActorObj* actor, unsigned char aucThreshold, ItemObj* target)
 {
     MgrObj* mgr_2 = actor->GetMgr();
-    Pt3 kPos = actor->GetPos();
+    ItemPositionResult kPos = actor->GetPos();
     int bestIdx3 = -1;
     float best = 0.0f;
     bool found3 = false;
@@ -4765,7 +4101,7 @@ ItemObj* ItemList::FindBestItem(ActorObj* actor, unsigned char aucThreshold, Ite
             bonus2 += 5.0;
         if (score2 + bonus2 < aucThreshold)
             continue;
-        float dist6 = item->GetDistance(&kPos) + bonus2;
+        float dist6 = item->GetDistance(&kPos.position) + bonus2;
         if (score2 < best)
             continue;
         if (mgr_2 && !mgr_2->GetTile()->CheckItem(item, 1, 0))
@@ -5485,287 +4821,17 @@ class B8EB30GroupInfo
     B8EB30Group* GetGroup();
 };
 
-class B8EB30Actor
-{
-  public:
-    virtual void vfn000();
-    virtual void vfn004();
-    virtual void vfn008();
-    virtual void vfn00C();
-    virtual void vfn010();
-    virtual void vfn014();
-    virtual void vfn018();
-    virtual void vfn01C();
-    virtual void vfn020();
-    virtual void vfn024();
-    virtual void vfn028();
-    virtual void vfn02C();
-    virtual void vfn030();
-    virtual void vfn034();
-    virtual void vfn038();
-    virtual void vfn03C();
-    virtual void vfn040();
-    virtual void vfn044();
-    virtual void vfn048();
-    virtual void vfn04C();
-    virtual void vfn050();
-    virtual void vfn054();
-    virtual void vfn058();
-    virtual void vfn05C();
-    virtual void vfn060();
-    virtual void vfn064();
-    virtual void vfn068();
-    virtual void vfn06C();
-    virtual void vfn070();
-    virtual void vfn074();
-    virtual void vfn078();
-    virtual void vfn07C();
-    virtual void vfn080();
-    virtual void vfn084();
-    virtual void vfn088();
-    virtual void vfn08C();
-    virtual void vfn090();
-    virtual void vfn094();
-    virtual void vfn098();
-    virtual void vfn09C();
-    virtual void vfn0A0();
-    virtual void vfn0A4();
-    virtual void vfn0A8();
-    virtual void vfn0AC();
-    virtual void vfn0B0();
-    virtual void vfn0B4();
-    virtual void vfn0B8();
-    virtual void vfn0BC();
-    virtual void vfn0C0();
-    virtual void vfn0C4();
-    virtual void vfn0C8();
-    virtual void vfn0CC();
-    virtual void vfn0D0();
-    virtual void vfn0D4();
-    virtual void vfn0D8();
-    virtual void vfn0DC();
-    virtual void vfn0E0();
-    virtual void vfn0E4();
-    virtual void vfn0E8();
-    virtual void vfn0EC();
-    virtual void vfn0F0();
-    virtual void vfn0F4();
-    virtual void vfn0F8();
-    virtual void vfn0FC();
-    virtual void vfn100();
-    virtual void vfn104();
-    virtual void vfn108();
-    virtual void vfn10C();
-    virtual void vfn110();
-    virtual void vfn114();
-    virtual void vfn118();
-    virtual void vfn11C();
-    virtual void vfn120();
-    virtual void vfn124();
-    virtual void vfn128();
-    virtual void vfn12C();
-    virtual void vfn130();
-    virtual void vfn134();
-    virtual void vfn138();
-    virtual void vfn13C();
-    virtual void vfn140();
-    virtual void vfn144();
-    virtual void vfn148();
-    virtual void vfn14C();
-    virtual void vfn150();
-    virtual void vfn154();
-    virtual void vfn158();
-    virtual void vfn15C();
-    virtual void vfn160();
-    virtual void vfn164();
-    virtual void vfn168();
-    virtual void vfn16C();
-    virtual void vfn170();
-    virtual void vfn174();
-    virtual void vfn178();
-    virtual void vfn17C();
-    virtual void vfn180();
-    virtual void vfn184();
-    virtual void vfn188();
-    virtual void vfn18C();
-    virtual void vfn190();
-    virtual void vfn194();
-    virtual void vfn198();
-    virtual void vfn19C();
-    virtual void vfn1A0();
-    virtual void vfn1A4();
-    virtual void vfn1A8();
-    virtual void vfn1AC();
-    virtual void vfn1B0();
-    virtual void vfn1B4();
-    virtual void vfn1B8();
-    virtual void vfn1BC();
-    virtual void vfn1C0();
-    virtual void vfn1C4();
-    virtual void vfn1C8();
-    virtual void vfn1CC();
-    virtual void vfn1D0();
-    virtual void vfn1D4();
-    virtual void vfn1D8();
-    virtual void vfn1DC();
-    virtual void vfn1E0();
-    virtual void vfn1E4();
-    virtual void vfn1E8();
-    virtual void vfn1EC();
-    virtual void vfn1F0();
-    virtual void vfn1F4();
-    virtual void vfn1F8();
-    virtual void vfn1FC();
-    virtual void vfn200();
-    virtual void vfn204();
-    virtual void vfn208();
-    virtual void vfn20C();
-    virtual void vfn210();
-    virtual void vfn214();
-    virtual void vfn218();
-    virtual void vfn21C();
-    virtual void vfn220();
-    virtual void vfn224();
-    virtual void vfn228();
-    virtual void vfn22C();
-    virtual void vfn230();
-    virtual void vfn234();
-    virtual void vfn238();
-    virtual void vfn23C();
-    virtual void vfn240();
-    virtual void vfn244();
-    virtual void vfn248();
-    virtual void vfn24C();
-    virtual void vfn250();
-    virtual void vfn254();
-    virtual void vfn258();
-    virtual void vfn25C();
-    virtual void vfn260();
-    virtual void vfn264();
-    virtual void vfn268();
-    virtual void vfn26C();
-    virtual void vfn270();
-    virtual void vfn274();
-    virtual void vfn278();
-    virtual void vfn27C();
-    virtual void vfn280();
-    virtual void vfn284();
-    virtual void vfn288();
-    virtual void vfn28C();
-    virtual void vfn290();
-    virtual void vfn294();
-    virtual void vfn298();
-    virtual void vfn29C();
-    virtual void vfn2A0();
-    virtual void vfn2A4();
-    virtual void vfn2A8();
-    virtual void vfn2AC();
-    virtual void vfn2B0();
-    virtual void vfn2B4();
-    virtual void vfn2B8();
-    virtual void vfn2BC();
-    virtual void vfn2C0();
-    virtual void vfn2C4();
-    virtual void vfn2C8();
-    virtual void vfn2CC();
-    virtual void vfn2D0();
-    virtual void vfn2D4();
-    virtual void vfn2D8();
-    virtual void vfn2DC();
-    virtual void vfn2E0();
-    virtual void vfn2E4();
-    virtual void vfn2E8();
-    virtual void vfn2EC();
-    virtual void vfn2F0();
-    virtual void vfn2F4();
-    virtual void vfn2F8();
-    virtual void vfn2FC();
-    virtual void vfn300();
-    virtual void vfn304();
-    virtual void vfn308();
-    virtual void vfn30C();
-    virtual void vfn310();
-    virtual void vfn314();
-    virtual void vfn318();
-    virtual void vfn31C();
-    virtual void vfn320();
-    virtual void vfn324();
-    virtual void vfn328();
-    virtual void vfn32C();
-    virtual void vfn330();
-    virtual void vfn334();
-    virtual void vfn338();
-    virtual void vfn33C();
-    virtual void vfn340();
-    virtual void vfn344();
-    virtual void vfn348();
-    virtual void vfn34C();
-    virtual void vfn350();
-    virtual void vfn354();
-    virtual void vfn358();
-    virtual void vfn35C();
-    virtual void vfn360();
-    virtual void vfn364();
-    virtual void vfn368();
-    virtual void vfn36C();
-    virtual void vfn370();
-    virtual void vfn374();
-    virtual void vfn378();
-    virtual void vfn37C();
-    virtual void vfn380();
-    virtual void vfn384();
-    virtual void vfn388();
-    virtual void vfn38C();
-    virtual void vfn390();
-    virtual void vfn394();
-    virtual void vfn398();
-    virtual void vfn39C();
-    virtual void vfn3A0();
-    virtual void vfn3A4();
-    virtual void vfn3A8();
-    virtual void vfn3AC();
-    virtual void vfn3B0();
-    virtual void vfn3B4();
-    virtual void vfn3B8();
-    virtual void vfn3BC();
-    virtual void vfn3C0();
-    virtual void vfn3C4();
-    virtual void vfn3C8();
-    virtual void vfn3CC();
-    virtual void vfn3D0();
-    virtual void vfn3D4();
-    virtual void vfn3D8();
-    virtual void vfn3DC();
-    virtual void vfn3E0();
-    virtual void vfn3E4();
-    virtual void vfn3E8();
-    virtual void vfn3EC();
-    virtual void vfn3F0();
-    virtual void vfn3F4();
-    virtual void vfn3F8();
-    virtual void vfn3FC();
-    virtual void vfn400();
-    virtual void vfn404();
-    virtual void vfn408();
-    virtual void vfn40C();
-    virtual void vfn410();
-    virtual void vfn414();
-    virtual void vfn418();
-    virtual void vfn41C();
-    virtual void vfn420();
-    virtual void vfn424();
-    virtual B8EB30GroupInfo* GetGroupInfo();
-};
 
-extern B8EB30Actor* g_thePlayer;
+
+extern Actor* g_thePlayer;
 
 class B8EB30Group
 {
   public:
     void UpdateBase();
     unsigned int GetCount();
-    B8EB30Actor* GetAt(int iIndex);
-    void RemoveMemberAt(B8EB30Actor* pkActor);
+    Actor* GetAt(int iIndex);
+    void RemoveMemberAt(Actor* pkActor);
     void RemoveActorsNotInGroup(void* pvUnused);
 };
 
@@ -5775,10 +4841,10 @@ void B8EB30Group::RemoveActorsNotInGroup(void* pvUnused)
     UpdateBase();
     for (unsigned int i = 0; i < GetCount(); i++)
     {
-        B8EB30Actor* pkActor2 = GetAt(i);
+        Actor* pkActor2 = GetAt(i);
         if (pkActor2 == g_thePlayer)
             continue;
-        B8EB30GroupInfo* pkInfo = pkActor2->GetGroupInfo();
+        B8EB30GroupInfo* pkInfo = reinterpret_cast<B8EB30GroupInfo*>(pkActor2->GetCombatController());
         if (!pkInfo || pkInfo->GetGroup() != this)
         {
             RemoveMemberAt(pkActor2);
@@ -6014,11 +5080,6 @@ struct Member138
     ~Member138();
     unsigned int FUN_0044ddc0();
     char*& FUN_006a7ad0(unsigned int);
-};
-struct CombatManager
-{
-    void SwapAndDispatch(void*, void*);
-    void FUN_008d0600(void*, void*);
 };
 extern CombatManager* g_011f1958;
 struct FUN_00985f90
@@ -6277,12 +5338,12 @@ struct MergeMember
     MergeActor* actor;
     void CopyFrom(MergeMember* other);
 };
-struct MergeTargets : ArrSI
+struct MergeTargets : CombatgroupOffset08View
 {
     unsigned int unk00, unk04, unk08, unk0c;
     MergeTarget* FUN_0096a2b0(unsigned int index);
 };
-struct MergeMembers : ArrSI
+struct MergeMembers : CombatgroupOffset08View
 {
     MergeMember* FUN_006dad90(unsigned int index);
 };
@@ -6444,11 +5505,6 @@ bool ActorMergeData::MergeFrom(ActorMergeData* other)
 struct DebugPoint
 {
     float x, y, z;
-};
-struct DebugColor
-{
-    float r, g, b, a;
-    DebugColor(float, float, float, float);
 };
 struct DebugMaterial
 {
@@ -6881,18 +5937,15 @@ struct DebugActor
 };
 extern DebugActor* DAT_011dea3c;
 extern DebugActor* DAT_011dea24;
-struct DebugSetting
-{
-    bool* FUN_00408d60();
-};
-extern DebugSetting DAT_011f1824, DAT_011f1858, DAT_011f1814;
+
+extern Setting DAT_011f1824, DAT_011f1858, DAT_011f1814;
 extern bool DAT_011a4d34;
 extern float DAT_011a4d2c;
 struct DebugSearchPoint
 {
     const DebugPoint& FUN_006815c0();
     unsigned int FUN_0084e3a0();
-    DebugColor GetEffectColor();
+    NiColorA GetEffectColor();
 };
 struct DebugMember
 {
@@ -6973,11 +6026,11 @@ struct DebugSearchPtr
     DebugSearch* ptr;
     DebugSearch* FUN_00559450();
 };
-const DebugColor& FUN_005d8550(int);
-DebugNode* FUN_00c5a0f0(const DebugPoint&, const DebugPoint&, float, float, const DebugColor*, const DebugColor*);
-DebugNode* FUN_00c58f00(float, int, const DebugColor*);
-DebugNode* FUN_00c58d30(float, float, float, int, int, const DebugColor*);
-DebugNode* FUN_00c56680(float, int, int, const DebugColor*);
+const NiColorA& FUN_005d8550(int);
+DebugNode* FUN_00c5a0f0(const DebugPoint&, const DebugPoint&, float, float, const NiColorA*, const NiColorA*);
+DebugNode* FUN_00c58f00(float, int, const NiColorA*);
+DebugNode* FUN_00c58d30(float, float, float, int, int, const NiColorA*);
+DebugNode* FUN_00c56680(float, int, int, const NiColorA*);
 void AttachLightingPropertyRecursive(DebugNode*);
 void FUN_00b57e30(DebugNode*, int, int);
 struct DebugGroup
@@ -7098,7 +6151,7 @@ void DebugGroup::RebuildDebugVisuals(bool clearOnly)
             DebugSearchPoint* spot = points.FUN_006a7ad0(i);
             if (!debug.FUN_00559450())
                 debug.FUN_0066b0d0(new DebugNode(0));
-            DebugColor color(0.5f, 0.0f, 0.5f, 0.5f);
+            NiColorA color(0.5f, 0.0f, 0.5f, 0.5f);
             bool found3 = false;
             DebugPoint position = spot->FUN_006815c0();
             unsigned int count2 = FUN_00990890();
@@ -7108,8 +6161,8 @@ void DebugGroup::RebuildDebugVisuals(bool clearOnly)
                 if (member->point == spot && member->actor->FUN_00575ca0() == space)
                 {
                     DebugPoint origin = member->actor->Position();
-                    DebugColor start(0.5f, 0.0f, 0.5f, 0.5f);
-                    DebugColor end_2(1.0f, 1.0f, 1.0f, 0.5f);
+                    NiColorA start(0.5f, 0.0f, 0.5f, 0.5f);
+                    NiColorA end_2(1.0f, 1.0f, 1.0f, 0.5f);
                     DebugNode* arrow = FUN_00c5a0f0(origin, position, 4.0f, 4.0f, &start, &end_2);
                     debug.FUN_00559450()->Attach(arrow, true);
                     found3 = true;
@@ -7140,7 +6193,7 @@ void DebugGroup::RebuildDebugVisuals(bool clearOnly)
             if (memberActor3->FUN_00575ca0() != space)
                 continue;
             float radius = memberActor3->FUN_008be1b0() * 1.5;
-            DebugColor memberColor = FUN_005d8550((int)id);
+            NiColorA memberColor = FUN_005d8550((int)id);
             memberColor.a = 0.5f;
             DebugNode* cylinder2 = FUN_00c58d30(radius, radius, 16.0f, 10, 10, &memberColor);
             cylinder2->FUN_00440460(memberActor3->Position());
@@ -7158,7 +6211,7 @@ void DebugGroup::RebuildDebugVisuals(bool clearOnly)
             DebugSearchPoint* point = ForwardToMember(p);
             if (point->FUN_0084e3a0() != space)
                 continue;
-            DebugColor pointColor3 = point->GetEffectColor();
+            NiColorA pointColor3 = point->GetEffectColor();
             DebugNode* sphere = FUN_00c56680(32.0f, 10, 10, &pointColor3);
             sphere->FUN_00440460(point->FUN_006815c0());
             debug.FUN_00559450()->Attach(sphere, true);
@@ -7173,13 +6226,13 @@ void DebugGroup::RebuildDebugVisuals(bool clearOnly)
                 pairActor = pair->second;
             if (!pairActor)
                 continue;
-            DebugColor pairColor_(0.0f, 0.0f, 0.0f, 0.0f);
+            NiColorA pairColor_(0.0f, 0.0f, 0.0f, 0.0f);
             if (pair->blue)
-                pairColor_ = DebugColor(0.0f, 0.0f, 1.0f, 0.5f);
+                pairColor_ = NiColorA(0.0f, 0.0f, 1.0f, 0.5f);
             else if (pair->green)
-                pairColor_ = DebugColor(0.0f, 1.0f, 0.0f, 0.5f);
+                pairColor_ = NiColorA(0.0f, 1.0f, 0.0f, 0.5f);
             else
-                pairColor_ = DebugColor(1.0f, 1.0f, 0.0f, 0.5f);
+                pairColor_ = NiColorA(1.0f, 1.0f, 0.0f, 0.5f);
             DebugPoint pairPosition = pairActor->Position();
             DebugNode* pillarX = FUN_00c58d30(32.0f, 32.0f, 256.0f, 10, 10, &pairColor_);
             pillarX->FUN_00440460(pairPosition);
@@ -7212,8 +6265,9 @@ void DebugGroup::RebuildDebugVisuals(bool clearOnly)
 }
 
 namespace CombatAssessment {
-struct Actor;
-struct Point;
+// These records are filled by the game and copied as raw storage.
+
+
 struct PositionData;
 typedef PositionData Position;
 struct Target;
@@ -7224,10 +6278,7 @@ struct Hit;
 extern float DAT_0108d540;
 float __cdecl FUN_00435dd0();
 float __cdecl FUN_0040ebd0(float, float);
-struct Setting
-{
-    float* FUN_00403e20();
-};
+
 extern Setting DAT_011cd45c, DAT_011ce9b4;
 struct Time
 {
@@ -7237,17 +6288,14 @@ struct Time
     float FUN_00435e00();
 };
 
-struct Point
-{
-    float x, y, z;
-};
+
 struct PositionData
 {
-    Point point;
+    float pointStorage[3];
     int cell;
     void FUN_0097ede0();
     float FUN_00527a40(Position*);
-    void SetTripleAndValue(Point*, void*);
+    void SetTripleAndValue(NiPoint3*, void*);
     int FUN_0084e3a0();
 };
 typedef PositionData Position;
@@ -7256,7 +6304,7 @@ struct SenseData
     int unk00;
     int unk04;
     int score;
-    Point point;
+    float pointStorage[3];
     Time time;
     bool detected;
     char unk1d;
@@ -7292,7 +6340,7 @@ struct Target
 struct Hit
 {
     int unk00;
-    Point point;
+    float pointStorage[3];
     Time time;
 };
 struct Process
@@ -7624,287 +6672,7 @@ struct DetectionViewData
 {
     bool FUN_0099a360();
 };
-struct CombatState
-{
-    Actor* FUN_004030b0();
-    DetectionViewData* FUN_00586150(Actor*, Actor*);
-};
-struct Actor
-{
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual void v214();
-    virtual void v218();
-    virtual void v21c();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual void v22c();
-    virtual void v230();
-    virtual void v234();
-    virtual void v238();
-    virtual void v23c();
-    virtual void v240();
-    virtual void v244();
-    virtual void v248();
-    virtual void v24c();
-    virtual void v250();
-    virtual void v254();
-    virtual void v258();
-    virtual void v25c();
-    virtual void v260();
-    virtual void v264();
-    virtual void v268();
-    virtual void v26c();
-    virtual void v270();
-    virtual void v274();
-    virtual void v278();
-    virtual void v27c();
-    virtual void v280();
-    virtual void v284();
-    virtual void v288();
-    virtual void v28c();
-    virtual void v290();
-    virtual void v294();
-    virtual void v298();
-    virtual void v29c();
-    virtual void v2a0();
-    virtual void v2a4();
-    virtual void v2a8();
-    virtual void v2ac();
-    virtual void v2b0();
-    virtual void v2b4();
-    virtual void v2b8();
-    virtual void v2bc();
-    virtual void v2c0();
-    virtual void v2c4();
-    virtual void v2c8();
-    virtual void v2cc();
-    virtual void v2d0();
-    virtual void v2d4();
-    virtual void v2d8();
-    virtual void v2dc();
-    virtual void v2e0();
-    virtual void v2e4();
-    virtual void v2e8();
-    virtual void v2ec();
-    virtual void v2f0();
-    virtual void v2f4();
-    virtual void v2f8();
-    virtual void v2fc();
-    virtual void v300();
-    virtual void v304();
-    virtual void v308();
-    virtual void v30c();
-    virtual void v310();
-    virtual void v314();
-    virtual void v318();
-    virtual void v31c();
-    virtual void v320();
-    virtual void v324();
-    virtual void v328();
-    virtual void v32c();
-    virtual void v330();
-    virtual void v334();
-    virtual void v338();
-    virtual void v33c();
-    virtual void v340();
-    virtual void v344();
-    virtual void v348();
-    virtual void v34c();
-    virtual void v350();
-    virtual void v354();
-    virtual void v358();
-    virtual void v35c();
-    virtual void v360();
-    virtual void v364();
-    virtual void v368();
-    virtual void v36c();
-    virtual void v370();
-    virtual void v374();
-    virtual void v378();
-    virtual void v37c();
-    virtual void v380();
-    virtual void v384();
-    virtual void v388();
-    virtual void v38c();
-    virtual void v390();
-    virtual void v394();
-    virtual void v398();
-    virtual void v39c();
-    virtual void v3a0();
-    virtual void v3a4();
-    virtual void v3a8();
-    virtual void v3ac();
-    virtual void v3b0();
-    virtual void v3b4();
-    virtual void v3b8();
-    virtual void v3bc();
-    virtual void v3c0();
-    virtual void v3c4();
-    virtual void v3c8();
-    virtual void v3cc();
-    virtual void v3d0();
-    virtual void v3d4();
-    virtual void v3d8();
-    virtual void v3dc();
-    virtual void v3e0();
-    virtual void v3e4();
-    virtual void v3e8();
-    virtual void v3ec();
-    virtual void v3f0();
-    virtual void v3f4();
-    virtual void v3f8();
-    virtual void v3fc();
-    virtual void v400();
-    virtual void v404();
-    virtual void v408();
-    virtual void v40c();
-    virtual void v410();
-    virtual void v414();
-    virtual void v418();
-    virtual void v41c();
-    virtual void v420();
-    virtual void v424();
-    virtual CombatState* v428();
-    virtual void* v42c();
-    Process* FUN_008d8520();
-    int FUN_00931850();
-    void FUN_00575650(Position*);
-    void* FUN_00575ca0();
-    void* FUN_005d43c0();
-};
+
 extern Actor* DAT_011dea3c;
 void __cdecl MarkBaseExtraListScriptEvent(void*, void*, int);
 struct Manager
@@ -8033,12 +6801,12 @@ void Group::UpdateTargetPerception(Actor* selected, Actor* subject, int* result,
             for (indexLocal5 = 0; indexLocal5 < countLocal20; indexLocal5++)
             {
                 memberLocal19 = GetIntAt(indexLocal5);
-                senseLocal1 = memberLocal19->FUN_008d8520()->v504(subject, 0);
+                senseLocal1 = reinterpret_cast<Process*>(memberLocal19->FUN_008d8520())->v504(subject, 0);
                 fallbackLocal15.FUN_0066e590();
                 if (memberLocal19->FUN_00931850() && subject->FUN_00931850())
                 {
-                    memberLocal19->FUN_00575650(&originLocal30);
-                    subject->FUN_00575650(&destinationLocal23);
+                    memberLocal19->FUN_00575650(reinterpret_cast<::Position*>(&originLocal30));
+                    subject->FUN_00575650(reinterpret_cast<::Position*>(&destinationLocal23));
                     if (originLocal30.FUN_00527a40(&destinationLocal23) < 67108864.0)
                     {
                         fallbackLocal15.score = 1;
@@ -8065,9 +6833,9 @@ void Group::UpdateTargetPerception(Actor* selected, Actor* subject, int* result,
                             senseLocal1->score20 > *DAT_011cd45c.FUN_00403e20())
                             scoreLocal7 = (int)*DAT_011cd45c.FUN_00403e20();
                     }
-                    stateLocal7 = memberLocal19->v428();
+                    stateLocal7 = reinterpret_cast<CombatState*>(memberLocal19->GetCombatController());
                     if (!stateLocal7 || stateLocal7->FUN_004030b0() != subject ||
-                        stateLocal7->FUN_00586150(memberLocal19, subject)->FUN_0099a360())
+                        reinterpret_cast<DetectionViewData*>(stateLocal7->FUN_00586150(memberLocal19, subject))->FUN_0099a360())
                     {
                         if (senseLocal1 && scoreLocal7 > maximumLocal6)
                         {
@@ -8085,7 +6853,7 @@ void Group::UpdateTargetPerception(Actor* selected, Actor* subject, int* result,
                     }
                     if (missingLocal40 && senseLocal1->time.FUN_006a7f50() > newestLocal2.FUN_006a7f50())
                     {
-                        nearestLocal9.SetTripleAndValue(&senseLocal1->point, memberLocal19->FUN_00575ca0());
+                        nearestLocal9.SetTripleAndValue(reinterpret_cast<NiPoint3*>(senseLocal1->pointStorage), memberLocal19->FUN_00575ca0());
                         newestLocal2 = senseLocal1->time;
                     }
                 }
@@ -8102,7 +6870,7 @@ void Group::UpdateTargetPerception(Actor* selected, Actor* subject, int* result,
                     {
                         member2Local23 = GetIntAt(index2Local31);
                         if (member2Local23 != DAT_011dea3c)
-                            MarkBaseExtraListScriptEvent(member2Local23->v42c(), member2Local23->FUN_005d43c0(), 0x8000);
+                            MarkBaseExtraListScriptEvent(member2Local23->GetCombatTarget(), member2Local23->FUN_005d43c0(), 0x8000);
                     }
                     DAT_011f1708->TryStartDialogue(bestLocal4, subject, 4, 3, 1, 0);
                 }
@@ -8112,7 +6880,7 @@ void Group::UpdateTargetPerception(Actor* selected, Actor* subject, int* result,
                 temp1Local7.FUN_00435de0(FUN_00435dd0());
                 targetLocal40->updateTime = temp1Local7;
             }
-            subject->FUN_00575650(&currentLocal8);
+            subject->FUN_00575650(reinterpret_cast<::Position*>(&currentLocal8));
             if (maximumLocal6 > 0)
             {
                 temp2Local6.FUN_00435de0(FUN_00435dd0());
@@ -8141,7 +6909,7 @@ void Group::UpdateTargetPerception(Actor* selected, Actor* subject, int* result,
             }
             if (highestLocal52 > *DAT_011cd45c.FUN_00403e20() && FUN_0097ef30())
             {
-                hitLocal9 = subject->FUN_008d8520()->vf8(subject);
+                hitLocal9 = reinterpret_cast<Process*>(subject->FUN_008d8520())->vf8(subject);
                 if (hitLocal9 && hitLocal9->time.FUN_00435e00() < 5.0 &&
                     hitLocal9->time.FUN_006a7f50() > targetLocal40->hitTime.FUN_006a7f50())
                 {
@@ -8151,7 +6919,7 @@ void Group::UpdateTargetPerception(Actor* selected, Actor* subject, int* result,
                     else
                         strengthLocal6 = (highestLocal52 - (int)*DAT_011cd45c.FUN_00403e20()) / 2.0 + 40.0;
                     impactLocal48.FUN_0097ede0();
-                    impactLocal48.SetTripleAndValue(&hitLocal9->point, subject->FUN_00575ca0());
+                    impactLocal48.SetTripleAndValue(reinterpret_cast<NiPoint3*>(hitLocal9->pointStorage), subject->FUN_00575ca0());
                     StoreRecord(&impactLocal48, strengthLocal6, 0);
                     targetLocal40->hitTime = hitLocal9->time;
                 }
@@ -8159,7 +6927,7 @@ void Group::UpdateTargetPerception(Actor* selected, Actor* subject, int* result,
         }
         else
         {
-            reusedLocal18 = selected ? selected->FUN_008d8520()->v504(subject, 0) : 0;
+            reusedLocal18 = selected ? reinterpret_cast<Process*>(selected->FUN_008d8520())->v504(subject, 0) : 0;
             if (reusedLocal18)
             {
                 *visible = reusedLocal18->visible;
@@ -8172,7 +6940,7 @@ void Group::UpdateTargetPerception(Actor* selected, Actor* subject, int* result,
 }
 }
 
-template <class T> class SettingT;
+using ::SettingT;
 class GameSettingCollection;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting382;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting383;
@@ -8374,19 +7142,10 @@ PathingAvoidNodeArray* FUN_009892a0_shell::FUN_009892a0(AvoidMember9892* pActor,
 }
 
 namespace CombatRegion {
-struct Actor;
+
 struct Group;
-struct Vec
-{
-    float x, y, z;
-    Vec();
-};
-struct Point
-{
-    float x, y, z;
-    float FUN_00435e00();
-    float FUN_006a7f50();
-};
+
+
 struct Target
 {
     unsigned int unk0;
@@ -8409,7 +7168,7 @@ struct Target
     unsigned int unk44;
     unsigned short unk48, flags;
     unsigned int unk4c;
-    Point point;
+    NiPoint3 point;
 };
 struct Location
 {
@@ -8429,7 +7188,7 @@ struct Timer
 struct Region
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
-    Region(const Vec&, unsigned int, unsigned int);
+    Region(const NiPoint3&, unsigned int, unsigned int);
     Region(Actor*);
     ~Region();
     bool FUN_006dd6f0(int);
@@ -8495,284 +7254,8 @@ struct ShapePtr
     Shape* FUN_00559450();
     void FUN_0066b0d0(Shape*);
 };
-struct Actor
-{
-    virtual void slot0();
-    virtual void slot4();
-    virtual void slot8();
-    virtual void slotc();
-    virtual void slot10();
-    virtual void slot14();
-    virtual void slot18();
-    virtual void slot1c();
-    virtual void slot20();
-    virtual void slot24();
-    virtual void slot28();
-    virtual void slot2c();
-    virtual void slot30();
-    virtual void slot34();
-    virtual void slot38();
-    virtual void slot3c();
-    virtual void slot40();
-    virtual void slot44();
-    virtual void slot48();
-    virtual void slot4c();
-    virtual void slot50();
-    virtual void slot54();
-    virtual void slot58();
-    virtual void slot5c();
-    virtual void slot60();
-    virtual void slot64();
-    virtual void slot68();
-    virtual void slot6c();
-    virtual void slot70();
-    virtual void slot74();
-    virtual void slot78();
-    virtual void slot7c();
-    virtual void slot80();
-    virtual void slot84();
-    virtual void slot88();
-    virtual void slot8c();
-    virtual void slot90();
-    virtual void slot94();
-    virtual void slot98();
-    virtual void slot9c();
-    virtual void slota0();
-    virtual void slota4();
-    virtual void slota8();
-    virtual void slotac();
-    virtual void slotb0();
-    virtual void slotb4();
-    virtual void slotb8();
-    virtual void slotbc();
-    virtual void slotc0();
-    virtual void slotc4();
-    virtual void slotc8();
-    virtual void slotcc();
-    virtual void slotd0();
-    virtual void slotd4();
-    virtual void slotd8();
-    virtual void slotdc();
-    virtual void slote0();
-    virtual void slote4();
-    virtual void slote8();
-    virtual void slotec();
-    virtual void slotf0();
-    virtual void slotf4();
-    virtual void slotf8();
-    virtual void slotfc();
-    virtual void slot100();
-    virtual void slot104();
-    virtual void slot108();
-    virtual void slot10c();
-    virtual void slot110();
-    virtual void slot114();
-    virtual void slot118();
-    virtual void slot11c();
-    virtual void slot120();
-    virtual void slot124();
-    virtual void slot128();
-    virtual void slot12c();
-    virtual void slot130();
-    virtual void slot134();
-    virtual void slot138();
-    virtual void slot13c();
-    virtual void slot140();
-    virtual void slot144();
-    virtual void slot148();
-    virtual void slot14c();
-    virtual void slot150();
-    virtual void slot154();
-    virtual void slot158();
-    virtual void slot15c();
-    virtual void slot160();
-    virtual void slot164();
-    virtual void slot168();
-    virtual void slot16c();
-    virtual void slot170();
-    virtual void slot174();
-    virtual void slot178();
-    virtual void slot17c();
-    virtual void slot180();
-    virtual void slot184();
-    virtual void slot188();
-    virtual void slot18c();
-    virtual void slot190();
-    virtual void slot194();
-    virtual void slot198();
-    virtual void slot19c();
-    virtual void slot1a0();
-    virtual void slot1a4();
-    virtual void slot1a8();
-    virtual void slot1ac();
-    virtual void slot1b0();
-    virtual void slot1b4();
-    virtual void slot1b8();
-    virtual void slot1bc();
-    virtual void slot1c0();
-    virtual void slot1c4();
-    virtual void slot1c8();
-    virtual void slot1cc();
-    virtual void slot1d0();
-    virtual void slot1d4();
-    virtual void slot1d8();
-    virtual void slot1dc();
-    virtual void slot1e0();
-    virtual void slot1e4();
-    virtual void slot1e8();
-    virtual void slot1ec();
-    virtual void slot1f0();
-    virtual void slot1f4();
-    virtual void slot1f8();
-    virtual void slot1fc();
-    virtual void slot200();
-    virtual void slot204();
-    virtual void slot208();
-    virtual void slot20c();
-    virtual void slot210();
-    virtual void slot214();
-    virtual void slot218();
-    virtual void slot21c();
-    virtual void slot220();
-    virtual void slot224();
-    virtual void slot228();
-    virtual void slot22c();
-    virtual void slot230();
-    virtual void slot234();
-    virtual void slot238();
-    virtual void slot23c();
-    virtual void slot240();
-    virtual void slot244();
-    virtual void slot248();
-    virtual void slot24c();
-    virtual void slot250();
-    virtual void slot254();
-    virtual void slot258();
-    virtual void slot25c();
-    virtual void slot260();
-    virtual void slot264();
-    virtual void slot268();
-    virtual void slot26c();
-    virtual void slot270();
-    virtual void slot274();
-    virtual void slot278();
-    virtual void slot27c();
-    virtual void slot280();
-    virtual void slot284();
-    virtual void slot288();
-    virtual void slot28c();
-    virtual void slot290();
-    virtual void slot294();
-    virtual void slot298();
-    virtual void slot29c();
-    virtual void slot2a0();
-    virtual void slot2a4();
-    virtual void slot2a8();
-    virtual void slot2ac();
-    virtual void slot2b0();
-    virtual void slot2b4();
-    virtual void slot2b8();
-    virtual float Heading(int);
-    virtual void slot2c0();
-    virtual void slot2c4();
-    virtual void slot2c8();
-    virtual void slot2cc();
-    virtual void slot2d0();
-    virtual void slot2d4();
-    virtual void slot2d8();
-    virtual void slot2dc();
-    virtual void slot2e0();
-    virtual void slot2e4();
-    virtual void slot2e8();
-    virtual void slot2ec();
-    virtual void slot2f0();
-    virtual void slot2f4();
-    virtual void slot2f8();
-    virtual void slot2fc();
-    virtual void slot300();
-    virtual void slot304();
-    virtual void slot308();
-    virtual void slot30c();
-    virtual void slot310();
-    virtual void slot314();
-    virtual void slot318();
-    virtual void slot31c();
-    virtual void slot320();
-    virtual void slot324();
-    virtual void slot328();
-    virtual void slot32c();
-    virtual void slot330();
-    virtual void slot334();
-    virtual void slot338();
-    virtual void slot33c();
-    virtual void slot340();
-    virtual void slot344();
-    virtual void slot348();
-    virtual void slot34c();
-    virtual void slot350();
-    virtual void slot354();
-    virtual void slot358();
-    virtual void slot35c();
-    virtual void slot360();
-    virtual void slot364();
-    virtual void slot368();
-    virtual void slot36c();
-    virtual void slot370();
-    virtual void slot374();
-    virtual void slot378();
-    virtual void slot37c();
-    virtual void slot380();
-    virtual void slot384();
-    virtual void slot388();
-    virtual void slot38c();
-    virtual void slot390();
-    virtual void slot394();
-    virtual void slot398();
-    virtual void slot39c();
-    virtual void slot3a0();
-    virtual void slot3a4();
-    virtual void slot3a8();
-    virtual void slot3ac();
-    virtual void slot3b0();
-    virtual void slot3b4();
-    virtual void slot3b8();
-    virtual void slot3bc();
-    virtual void slot3c0();
-    virtual void slot3c4();
-    virtual void slot3c8();
-    virtual void slot3cc();
-    virtual void slot3d0();
-    virtual void slot3d4();
-    virtual void slot3d8();
-    virtual void slot3dc();
-    virtual void slot3e0();
-    virtual void slot3e4();
-    virtual void slot3e8();
-    virtual void slot3ec();
-    virtual void slot3f0();
-    virtual void slot3f4();
-    virtual void slot3f8();
-    virtual void slot3fc();
-    virtual void slot400();
-    virtual void slot404();
-    virtual void slot408();
-    virtual void slot40c();
-    virtual void slot410();
-    virtual void slot414();
-    virtual void slot418();
-    virtual void slot41c();
-    virtual void slot420();
-    virtual void slot424();
-    virtual void slot428();
-    virtual Group* ActorCombatGroup();
-    bool FUN_008b3b90();
-    bool FUN_008b3bf0();
-    void* FUN_00575ca0();
-};
-struct Setting
-{
-    float* FUN_00403e20();
-};
+
+
 extern Setting DAT_011ce9b4, DAT_011ce528, DAT_011cf870, DAT_011cf42c, DAT_011ce43c;
 extern double DAT_0106d508;
 extern float DAT_0108d540;
@@ -8782,7 +7265,7 @@ struct Manager
     void TryStartDialogue(Actor*, Group*, int, int, int, int);
 };
 extern Manager* DAT_011f1708;
-bool FUN_006d6f80(unsigned int, unsigned int, const Vec&, Vec&);
+bool FUN_006d6f80(unsigned int, unsigned int, const NiPoint3&, NiPoint3&);
 float FUN_004b1480(float);
 void BuildPathNodeHolder(ShapePtr*, RegionArray*, FloatArray*);
 unsigned int FUN_00944460(unsigned int, unsigned int);
@@ -8847,7 +7330,7 @@ struct Group
     unsigned int unke8;
     Actor* focus;
     Location location;
-    Vec position;
+    NiPoint3 position;
     float radius;
     unsigned int unk110;
     unsigned int unk114;
@@ -8946,7 +7429,7 @@ void Group::FUN_0098a580()
                     unsigned int start = 0;
                     if (location.FUN_00527990(&start, &endSlot0))
                     {
-                        Vec selected;
+                        NiPoint3 selected;
                         if (FUN_006d6f80(endSlot0, start, position, selected))
                         {
                             Region region(selected, start, endSlot0);
@@ -8979,7 +7462,7 @@ void Group::FUN_0098a580()
                     if (memberRegionSlot0.FUN_0098ad70())
                     {
                         regionsSlot11.FUN_006cf1b0(memberRegionSlot0);
-                        headingsSlot11.AppendFloat(FUN_004b1480(member->Heading(0)));
+                        headingsSlot11.AppendFloat(FUN_004b1480(member->GetCurrentTargetDistance(false)));
                     }
                 }
                 if (regionsSlot11.FUN_0044ddc0())
@@ -8994,7 +7477,7 @@ void Group::FUN_0098a580()
             unsigned int actorCountSlot3 = FUN_00990890();
             unsigned int chosenSlot40 = FUN_00944460(0, actorCountSlot3);
             Actor* actor = GetIntAt(chosenSlot40);
-            Group* otherSlot37 = actor->ActorCombatGroup();
+            Group* otherSlot37 = reinterpret_cast<Group*>(actor->GetCombatTarget());
             if (actor != DAT_011dea3c && otherSlot37)
             {
                 Target* target = FUN_009865d0(otherSlot37);
@@ -9017,277 +7500,7 @@ class CE80Process
     bool IsAlive();
 };
 
-class CE80Actor
-{
-  public:
-    virtual void Unk000();
-    virtual void Unk004();
-    virtual void Unk008();
-    virtual void Unk00C();
-    virtual void Unk010();
-    virtual void Unk014();
-    virtual void Unk018();
-    virtual void Unk01C();
-    virtual void Unk020();
-    virtual void Unk024();
-    virtual void Unk028();
-    virtual void Unk02C();
-    virtual void Unk030();
-    virtual void Unk034();
-    virtual void Unk038();
-    virtual void Unk03C();
-    virtual void Unk040();
-    virtual void Unk044();
-    virtual void Unk048();
-    virtual void Unk04C();
-    virtual void Unk050();
-    virtual void Unk054();
-    virtual void Unk058();
-    virtual void Unk05C();
-    virtual void Unk060();
-    virtual void Unk064();
-    virtual void Unk068();
-    virtual void Unk06C();
-    virtual void Unk070();
-    virtual void Unk074();
-    virtual void Unk078();
-    virtual void Unk07C();
-    virtual void Unk080();
-    virtual void Unk084();
-    virtual void Unk088();
-    virtual void Unk08C();
-    virtual void Unk090();
-    virtual void Unk094();
-    virtual void Unk098();
-    virtual void Unk09C();
-    virtual void Unk0A0();
-    virtual void Unk0A4();
-    virtual void Unk0A8();
-    virtual void Unk0AC();
-    virtual void Unk0B0();
-    virtual void Unk0B4();
-    virtual void Unk0B8();
-    virtual void Unk0BC();
-    virtual void Unk0C0();
-    virtual void Unk0C4();
-    virtual void Unk0C8();
-    virtual void Unk0CC();
-    virtual void Unk0D0();
-    virtual void Unk0D4();
-    virtual void Unk0D8();
-    virtual void Unk0DC();
-    virtual void Unk0E0();
-    virtual void Unk0E4();
-    virtual void Unk0E8();
-    virtual void Unk0EC();
-    virtual void Unk0F0();
-    virtual void Unk0F4();
-    virtual void Unk0F8();
-    virtual void Unk0FC();
-    virtual void Unk100();
-    virtual void Unk104();
-    virtual void Unk108();
-    virtual void Unk10C();
-    virtual void Unk110();
-    virtual void Unk114();
-    virtual void Unk118();
-    virtual void Unk11C();
-    virtual void Unk120();
-    virtual void Unk124();
-    virtual void Unk128();
-    virtual void Unk12C();
-    virtual void Unk130();
-    virtual void Unk134();
-    virtual void Unk138();
-    virtual void Unk13C();
-    virtual void Unk140();
-    virtual void Unk144();
-    virtual void Unk148();
-    virtual void Unk14C();
-    virtual void Unk150();
-    virtual void Unk154();
-    virtual void Unk158();
-    virtual void Unk15C();
-    virtual void Unk160();
-    virtual void Unk164();
-    virtual void Unk168();
-    virtual void Unk16C();
-    virtual void Unk170();
-    virtual void Unk174();
-    virtual void Unk178();
-    virtual void Unk17C();
-    virtual void Unk180();
-    virtual void Unk184();
-    virtual void Unk188();
-    virtual void Unk18C();
-    virtual void Unk190();
-    virtual void Unk194();
-    virtual void Unk198();
-    virtual void Unk19C();
-    virtual void Unk1A0();
-    virtual void Unk1A4();
-    virtual void Unk1A8();
-    virtual void Unk1AC();
-    virtual void Unk1B0();
-    virtual void Unk1B4();
-    virtual void Unk1B8();
-    virtual void Unk1BC();
-    virtual void Unk1C0();
-    virtual void Unk1C4();
-    virtual void Unk1C8();
-    virtual void Unk1CC();
-    virtual void Unk1D0();
-    virtual void Unk1D4();
-    virtual void Unk1D8();
-    virtual void Unk1DC();
-    virtual void Unk1E0();
-    virtual void Unk1E4();
-    virtual void Unk1E8();
-    virtual void Unk1EC();
-    virtual void Unk1F0();
-    virtual void Unk1F4();
-    virtual void Unk1F8();
-    virtual void Unk1FC();
-    virtual void Unk200();
-    virtual void Unk204();
-    virtual void Unk208();
-    virtual void Unk20C();
-    virtual void Unk210();
-    virtual void Unk214();
-    virtual void Unk218();
-    virtual void Unk21C();
-    virtual void Unk220();
-    virtual void Unk224();
-    virtual void Unk228();
-    virtual void Unk22C();
-    virtual void Unk230();
-    virtual void Unk234();
-    virtual void Unk238();
-    virtual void Unk23C();
-    virtual void Unk240();
-    virtual void Unk244();
-    virtual void Unk248();
-    virtual void Unk24C();
-    virtual void Unk250();
-    virtual void Unk254();
-    virtual void Unk258();
-    virtual void Unk25C();
-    virtual void Unk260();
-    virtual void Unk264();
-    virtual void Unk268();
-    virtual void Unk26C();
-    virtual void Unk270();
-    virtual void Unk274();
-    virtual void Unk278();
-    virtual void Unk27C();
-    virtual void Unk280();
-    virtual void Unk284();
-    virtual void Unk288();
-    virtual void Unk28C();
-    virtual void Unk290();
-    virtual void Unk294();
-    virtual void Unk298();
-    virtual void Unk29C();
-    virtual void Unk2A0();
-    virtual void Unk2A4();
-    virtual void Unk2A8();
-    virtual void Unk2AC();
-    virtual void Unk2B0();
-    virtual void Unk2B4();
-    virtual void Unk2B8();
-    virtual void Unk2BC();
-    virtual void Unk2C0();
-    virtual void Unk2C4();
-    virtual void Unk2C8();
-    virtual void Unk2CC();
-    virtual void Unk2D0();
-    virtual void Unk2D4();
-    virtual void Unk2D8();
-    virtual void Unk2DC();
-    virtual void Unk2E0();
-    virtual void Unk2E4();
-    virtual void Unk2E8();
-    virtual void Unk2EC();
-    virtual void Unk2F0();
-    virtual void Unk2F4();
-    virtual void Unk2F8();
-    virtual void Unk2FC();
-    virtual void Unk300();
-    virtual void Unk304();
-    virtual void Unk308();
-    virtual void Unk30C();
-    virtual void Unk310();
-    virtual void Unk314();
-    virtual void Unk318();
-    virtual void Unk31C();
-    virtual void Unk320();
-    virtual void Unk324();
-    virtual void Unk328();
-    virtual void Unk32C();
-    virtual void Unk330();
-    virtual void Unk334();
-    virtual void Unk338();
-    virtual void Unk33C();
-    virtual void Unk340();
-    virtual void Unk344();
-    virtual void Unk348();
-    virtual void Unk34C();
-    virtual void Unk350();
-    virtual void Unk354();
-    virtual void Unk358();
-    virtual void Unk35C();
-    virtual void Unk360();
-    virtual void Unk364();
-    virtual void Unk368();
-    virtual void Unk36C();
-    virtual void Unk370();
-    virtual void Unk374();
-    virtual void Unk378();
-    virtual void Unk37C();
-    virtual void Unk380();
-    virtual void Unk384();
-    virtual void Unk388();
-    virtual void Unk38C();
-    virtual void Unk390();
-    virtual void Unk394();
-    virtual void Unk398();
-    virtual void Unk39C();
-    virtual void Unk3A0();
-    virtual void Unk3A4();
-    virtual void Unk3A8();
-    virtual void Unk3AC();
-    virtual void Unk3B0();
-    virtual void Unk3B4();
-    virtual void Unk3B8();
-    virtual void Unk3BC();
-    virtual void Unk3C0();
-    virtual void Unk3C4();
-    virtual void Unk3C8();
-    virtual void Unk3CC();
-    virtual void Unk3D0();
-    virtual void Unk3D4();
-    virtual void Unk3D8();
-    virtual void Unk3DC();
-    virtual void Unk3E0();
-    virtual void Unk3E4();
-    virtual void Unk3E8();
-    virtual void Unk3EC();
-    virtual void Unk3F0();
-    virtual void Unk3F4();
-    virtual void Unk3F8();
-    virtual void Unk3FC();
-    virtual void Unk400();
-    virtual void Unk404();
-    virtual void Unk408();
-    virtual void Unk40C();
-    virtual void Unk410();
-    virtual void Unk414();
-    virtual void Unk418();
-    virtual void Unk41C();
-    virtual void Unk420();
-    virtual void Unk424();
-    virtual CE80Process* GetProcess();
-};
+
 
 class CE80Group
 {
@@ -9379,7 +7592,7 @@ class CE80Group
     unsigned int m_uiOther;
 
     unsigned int GetCount();
-    CE80Actor* GetAt(int iIndex);
+    Actor* GetAt(int iIndex);
     void RecountActors();
 };
 
@@ -9393,8 +7606,8 @@ void CE80Group::RecountActors()
     unsigned int ItemUpdateArray = GetCount();
     for (unsigned int i = 0; i < ItemUpdateArray; i++)
     {
-        CE80Actor* pkActor = GetAt(i);
-        CE80Process* pkAI = pkActor->GetProcess();
+        Actor* pkActor = GetAt(i);
+        CE80Process* pkAI = reinterpret_cast<CE80Process*>(pkActor->GetCombatController());
         if (pkAI)
         {
             if (pkAI->IsFlagged())
@@ -9407,37 +7620,29 @@ void CE80Group::RecountActors()
     }
 }
 
-struct LoadBuf
-{
-    virtual unsigned char Version();
-    unsigned int FUN_00864a60();
-    void FUN_00864980(void*, unsigned int);
-    void FUN_008648e0(void*);
-    unsigned int FUN_008648a0();
-};
 struct LoadPair
 {
     int x, y;
-    void FUN_009a5f20(LoadBuf*);
+    void FUN_009a5f20(BGSLoadFormBuffer*);
 };
 struct LoadRef
 {
     int x;
-    void FUN_009a5ff0(LoadBuf*);
+    void FUN_009a5ff0(BGSLoadFormBuffer*);
 };
 struct LoadItem
 {
     int x00, x04, x08, x0c, x10;
     LoadItem();
-    void FUN_00985b10(LoadBuf*, void*);
+    void FUN_00985b10(BGSLoadFormBuffer*, void*);
 };
 struct LoadNode
 {
-    void FUN_00985800(LoadBuf*, void*);
+    void FUN_00985800(BGSLoadFormBuffer*, void*);
 };
 struct MemberNode
 {
-    void FUN_00985a50(LoadBuf*, void*);
+    void FUN_00985a50(BGSLoadFormBuffer*, void*);
 };
 struct LoadExtra
 {
@@ -9445,11 +7650,9 @@ struct LoadExtra
     LoadRef ref;
     int id;
     int value;
-    void FUN_00527ba0(LoadBuf*);
+    void FUN_00527ba0(BGSLoadFormBuffer*);
 };
-struct TESObjectREFR : TESForm
-{
-};
+
 struct ParentNode
 {
     TESObjectREFR* a;
@@ -9481,7 +7684,7 @@ struct LoadAnim
     int x50;
     LoadAnim();
     static void* operator new(unsigned int);
-    void FUN_006e0d20(LoadBuf*);
+    void FUN_006e0d20(BGSLoadFormBuffer*);
 };
 struct LoadPtr
 {
@@ -9494,12 +7697,6 @@ struct ArrItems
     int x0, x4, x8, xc;
     void SetSize(unsigned int, bool);
     LoadItem*& FUN_006a7ad0(unsigned int);
-};
-struct ArrNodes
-{
-    int x0, x4, x8, xc;
-    void FUN_0098ed80(unsigned int, bool);
-    LoadNode* FUN_0096a2b0(unsigned int);
 };
 struct ArrMembers
 {
@@ -9522,13 +7719,13 @@ struct ArrParents
 struct LoadHandle
 {
     int x0, x4, x8, xc;
-    void FUN_00527ba0(LoadBuf*);
+    void FUN_00527ba0(BGSLoadFormBuffer*);
 };
 struct GroupLoad
 {
     int unk000;
     int unk004;
-    ArrNodes nodes;
+    BSSimpleArray<CombatTarget> nodes;
     ArrMembers members;
     int strategy;
     char flag;
@@ -9572,11 +7769,11 @@ struct GroupLoad
     int unk14c;
     int unk150;
     char flag154;
-    void FUN_0098e3d0(LoadBuf* buffer);
+    void FUN_0098e3d0(BGSLoadFormBuffer* buffer);
 };
 // Reads item, node and member arrays plus strategy, flags, pairs, timers, active-state extras/parents and optional anim from the buffer.
 // @fnv 0x0098e3d0
-void GroupLoad::FUN_0098e3d0(LoadBuf* buffer)
+void GroupLoad::FUN_0098e3d0(BGSLoadFormBuffer* buffer)
 {
     {
         unsigned int countItems = buffer->FUN_00864a60();
@@ -9590,10 +7787,10 @@ void GroupLoad::FUN_0098e3d0(LoadBuf* buffer)
     }
     {
         unsigned int countNodes = buffer->FUN_00864a60();
-        nodes.FUN_0098ed80(countNodes, true);
+        nodes.SetSize(countNodes, true);
         for (unsigned int indexNodes = 0; indexNodes < countNodes; indexNodes++)
         {
-            LoadNode* node = nodes.FUN_0096a2b0(indexNodes);
+            LoadNode* node = reinterpret_cast<LoadNode*>(&nodes.GetAt(indexNodes));
             node->FUN_00985800(buffer, this);
         }
     }
@@ -9607,30 +7804,30 @@ void GroupLoad::FUN_0098e3d0(LoadBuf* buffer)
         }
     }
     char strategyIndex = -1;
-    buffer->FUN_00864980(&strategyIndex, 1);
+    buffer->FUN_00864980(&strategyIndex, 1u);
     if (strategyIndex != -1)
         strategy = FUN_0098e980(strategyIndex);
-    buffer->FUN_00864980(&flag, 1);
+    buffer->FUN_00864980(&flag, 1u);
     pair30.FUN_009a5f20(buffer);
     pair38.FUN_009a5f20(buffer);
-    buffer->FUN_00864980(&unk040, 4);
+    buffer->FUN_00864980(&unk040, 4u);
     ref44.FUN_009a5ff0(buffer);
     pair48.FUN_009a5f20(buffer);
     pairb0.FUN_009a5f20(buffer);
     paira8.FUN_009a5f20(buffer);
     for (unsigned int indexTimers = 0; indexTimers < 10; indexTimers++)
         timers[indexTimers].FUN_009a5f20(buffer);
-    buffer->FUN_00864980(&active, 4);
+    buffer->FUN_00864980(&active, 4u);
     if (active > 0)
     {
-        buffer->FUN_008648e0(&unk0ec);
-        buffer->FUN_00864980(&unk100, 12);
+        buffer->FUN_008648e0((void*)&unk0ec);
+        buffer->FUN_00864980(&unk100, 12u);
         paird8.FUN_009a5f20(buffer);
         paire0.FUN_009a5f20(buffer);
-        if (buffer->Version() >= 5)
+        if (buffer->GetVersion() >= 5)
             refe8.FUN_009a5ff0(buffer);
         handle.FUN_00527ba0(buffer);
-        buffer->FUN_00864980(&unk10c, 4);
+        buffer->FUN_00864980(&unk10c, 4u);
         {
             unsigned int countExtras = buffer->FUN_00864a60();
             extras.FUN_0098f2f0(countExtras, true);
@@ -9638,8 +7835,8 @@ void GroupLoad::FUN_0098e3d0(LoadBuf* buffer)
             {
                 LoadExtra* extra = extras.GetElementAt(indexExtras);
                 extra->FUN_00527ba0(buffer);
-                buffer->FUN_00864980(&extra->value, 4);
-                buffer->FUN_008648e0(&extra->id);
+                buffer->FUN_00864980(&extra->value, 4u);
+                buffer->FUN_008648e0((void*)&extra->id);
                 extra->ref.FUN_009a5ff0(buffer);
             }
         }
@@ -9651,13 +7848,13 @@ void GroupLoad::FUN_0098e3d0(LoadBuf* buffer)
                 ParentNode& parent = parents.GetAt(indexParents);
                 parent.a = dynamic_cast<TESObjectREFR*>(_ref_004839c0(buffer->FUN_008648a0()));
                 parent.b = dynamic_cast<TESObjectREFR*>(_ref_004839c0(buffer->FUN_008648a0()));
-                buffer->FUN_00864980(&parent.c, 1);
-                buffer->FUN_00864980(&parent.d, 1);
-                buffer->FUN_00864980(&parent.e, 1);
+                buffer->FUN_00864980(&parent.c, 1u);
+                buffer->FUN_00864980(&parent.d, 1u);
+                buffer->FUN_00864980(&parent.e, 1u);
             }
         }
         bool hasAnim = false;
-        buffer->FUN_00864980(&hasAnim, 1);
+        buffer->FUN_00864980(&hasAnim, 1u);
         if (hasAnim)
         {
             anim = new LoadAnim;
@@ -9666,12 +7863,12 @@ void GroupLoad::FUN_0098e3d0(LoadBuf* buffer)
         loaded = 1;
     }
     pair50.FUN_009a5f20(buffer);
-    buffer->FUN_00864980(&unk0c0, 4);
-    buffer->FUN_00864980(&unk0c4, 4);
-    buffer->FUN_00864980(&unk0c8, 4);
-    buffer->FUN_00864980(&unk0cc, 4);
+    buffer->FUN_00864980(&unk0c0, 4u);
+    buffer->FUN_00864980(&unk0c4, 4u);
+    buffer->FUN_00864980(&unk0c8, 4u);
+    buffer->FUN_00864980(&unk0cc, 4u);
     pairb8.FUN_009a5f20(buffer);
-    buffer->FUN_00864980(&flag154, 1);
+    buffer->FUN_00864980(&flag154, 1u);
 }
 
 struct UpdateOwner;
@@ -9689,11 +7886,7 @@ struct UpdateArray
     void FUN_0098ef10(unsigned int, unsigned int);
     void RemoveEntries(unsigned int, unsigned int);
 };
-struct UpdateManager
-{
-    void FUN_00992a50(unsigned int, UpdateOwner*);
-};
-extern UpdateManager* DAT_011f1958;
+extern CombatManager* DAT_011f1958;
 extern const unsigned int DAT_01183028, DAT_011846d4;
 void* FUN_00ec43fb(void*, int, const void*, const void*, int);
 struct UpdateOwner
@@ -9768,7 +7961,8 @@ void UpdateOwner::UpdateElements(unsigned int argument)
         UpdateElement* elementFirst = first.FUN_0096a2b0(indexFirst2);
         elementFirst->FUN_00985930(argument, this);
         if (elementFirst->data)
-            DAT_011f1958->FUN_00992a50(elementFirst->data, this);
+            DAT_011f1958->TargetLocalActor(reinterpret_cast<Actor*>(elementFirst->data),
+                                            reinterpret_cast<ActorCombatGroup*>(this));
         else
             removeFirst = true;
         if (removeFirst)
@@ -9805,13 +7999,15 @@ extern double DAT_01017a40;
 extern double DAT_01017a10;
 extern double __cdecl FUN_0047eeb0(unsigned int);
 
-struct FourFloatVector
+
+
+// 0x00527a40 is a world-location distance (pos + cell at +0x0c, FLT_MAX across cells; bgsworldlocation.cpp),
+// so the condition holds a location here, not a TimeoutTimer.
+struct ConditionLocation
 {
-    float x, y, z, w;
-};
-struct TimeoutTimer
-{
-    double __thiscall FUN_00527a40(int result);
+    float x, y, z;
+    void* cell;
+    double FUN_00527a40(int location);
 };
 struct CombatCondition
 {
@@ -9820,69 +8016,13 @@ struct CombatCondition
     unsigned char misc2;
     unsigned char misc3;
     unsigned int flags;
-    TimeoutTimer timer;
-};
-struct CombatState
-{
-    unsigned int id;
-    unsigned int type;
+    ConditionLocation location;
 };
 struct EventEvaluator
 {
-    int __thiscall FUN_00575650(FourFloatVector* values);
+    int __thiscall FUN_00575650(EventPositionOutput_00575650* values);
 };
-struct CombatController
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    EventEvaluator* evaluator;
-    void __thiscall FUN_0097f200();
-};
+
 struct CombatLogic
 {
     unsigned int unk000;
@@ -10019,8 +8159,8 @@ void CombatLogic::FUN_009a1280(bool update)
         controller->FUN_0097f200();
         if (update && condition && condition->mode == 1)
         {
-            FourFloatVector values;
-            if (condition->timer.FUN_00527a40(controller->evaluator->FUN_00575650(&values)) < DAT_01017a10)
+            float values[4];
+            if (condition->location.FUN_00527a40(reinterpret_cast<EventEvaluator*>(controller->m_pkAttacker)->FUN_00575650(reinterpret_cast<EventPositionOutput_00575650*>(values))) < DAT_01017a10)
             {
                 update = false;
             }
@@ -10094,11 +8234,8 @@ struct ConditionFlag
 {
     bool FUN_0076b610();
 };
-struct ConfigSwitch
-{
-    unsigned char* FUN_00408d60();
-};
-extern ConfigSwitch DAT_011f1840;
+
+extern Setting DAT_011f1840;
 extern float DAT_0108d540, DAT_0101ff50, DAT_0108d660, DAT_011a4d78, DAT_011a4d74;
 extern float DAT_011a4d70, DAT_011a4d6c, DAT_011a4d68, DAT_011a4d64, DAT_011a4d60;
 extern float DAT_011f18b0, DAT_01032adc, DAT_011a4d5c, DAT_011a4d58, DAT_011a4d54, DAT_011a4d50;
@@ -10539,17 +8676,17 @@ ActorSelect* ActorPicker::SelectActor(ActorSelect* actor)
 
 struct B989700Entry
 {
-    B9897F0Ref* m_pkRef;
+    Actor* m_pkRef;
     bool IsElapsedTimeBelowSetting();
 };
 struct B989700List
 {
     unsigned int FUN_005a4320();
     B989700Entry* FUN_009871c0(unsigned int uiIndex);
-    B9897F0Ref* FindRefInRadius(B9897F0Point* pkPoint, float fRadius, bool bCheck);
+    Actor* FindRefInRadius(B9897F0Point* pkPoint, float fRadius, bool bCheck);
 };
 // @fnv 0x00989700
-B9897F0Ref* B989700List::FindRefInRadius(B9897F0Point* pkPoint, float afRadius, bool bCheck)
+Actor* B989700List::FindRefInRadius(B9897F0Point* pkPoint, float afRadius, bool bCheck)
 {
     float fRadiusSqr = afRadius * afRadius;
     unsigned int ItemUpdateArray = FUN_005a4320();
@@ -10558,7 +8695,8 @@ B9897F0Ref* B989700List::FindRefInRadius(B9897F0Point* pkPoint, float afRadius, 
         B989700Entry* pkEntry = FUN_009871c0(i);
         if (!bCheck || pkEntry->IsElapsedTimeBelowSetting())
         {
-            B9897F0Quad kPos = pkEntry->m_pkRef->FUN_00575650();
+            B9897F0Quad kPos;
+            pkEntry->m_pkRef->FUN_00575650(reinterpret_cast<::Position*>(&kPos));
             if (pkPoint->GetSquaredDistance(kPos) < fRadiusSqr)
                 return pkEntry->m_pkRef;
         }
@@ -10569,21 +8707,22 @@ B9897F0Ref* B989700List::FindRefInRadius(B9897F0Point* pkPoint, float afRadius, 
 struct B9898B0Group
 {
     unsigned int FUN_00990890();
-    B9897F0Ref* GetIntAt(unsigned int uiIndex);
-    B9897F0Ref* FindClosestRef(B9897F0Point* pkPoint, B9897F0Ref* pkExclude, float fRadius);
+    Actor* GetIntAt(unsigned int uiIndex);
+    Actor* FindClosestRef(B9897F0Point* pkPoint, Actor* pkExclude, float fRadius);
 };
 // @fnv 0x009898b0
-B9897F0Ref* B9898B0Group::FindClosestRef(B9897F0Point* pkPoint, B9897F0Ref* pkExclude, float afMaxDist)
+Actor* B9898B0Group::FindClosestRef(B9897F0Point* pkPoint, Actor* pkExclude, float afMaxDist)
 {
     float fBestDistSqr2 = (afMaxDist == DAT_0108d540) ? DAT_0108d540 : (float)(afMaxDist * afMaxDist);
-    B9897F0Ref* pkClosest = 0;
+    Actor* pkClosest = 0;
     unsigned int uiCount2 = FUN_00990890();
     for (unsigned int i = 0; i < uiCount2; ++i)
     {
-        B9897F0Ref* pkRef = GetIntAt(i);
+        Actor* pkRef = GetIntAt(i);
         if (pkRef == pkExclude)
             continue;
-        B9897F0Quad kPos = pkRef->FUN_00575650();
+        B9897F0Quad kPos;
+        pkRef->FUN_00575650(reinterpret_cast<::Position*>(&kPos));
         float fDistSqr2 = pkPoint->GetSquaredDistance(kPos);
         if (fDistSqr2 < fBestDistSqr2)
         {
@@ -10801,11 +8940,6 @@ struct TgtLstQ
     int unk00;
     void FUN_0098eec0(TgtQ* pTarget);
 };
-struct GrpQ;
-struct UpdQ
-{
-    void FUN_009926c0(GrpQ* pGroup, ActQ* pActor);
-};
 struct GrpQ
 {
     int unk00, unk04;
@@ -10835,7 +8969,7 @@ bool GrpQ::FUN_00986410(ActQ* pActor)
     }
     TgtQ kTarget;
     kTargets.FUN_0098eec0(kTarget.Init(pActor, unkD0));
-    ((UpdQ*)DAT_011f1958)->FUN_009926c0(this, pActor);
+    DAT_011f1958->AddCombatGroupTarget(reinterpret_cast<ActorCombatGroup*>(this), reinterpret_cast<Actor*>(pActor));
     return true;
 }
 
@@ -11008,7 +9142,7 @@ struct FUN_00985d10
     MemberE8_985d10 m_e8;
     int m_ec;
     MemberF0_985d10 m_f0;
-    NiPoint3 m_100;
+    NiPoint3_helper_combatgroup m_100;
     float m_10c;
     Member110_985d10 m_110;
     Member120_985d10 m_120;
@@ -11028,7 +9162,7 @@ struct FUN_00985d10
 // @fnv 0x00985d10
 FUN_00985d10::FUN_00985d10(int a1)
     : m_00(0), m_04(a1), m_28(0), m_2c(false), m_40(0), m_c0(DAT_01012054), m_c4(DAT_01012054), m_c8(DAT_01012054),
-      m_cc(DAT_01012054), m_d0(0), m_d4(0), m_e8(-DAT_0108d540), m_ec(0), m_100(NiPoint3_ZERO), m_10c(0.0f), m_130(0),
+      m_cc(DAT_01012054), m_d0(0), m_d4(0), m_e8(-DAT_0108d540), m_ec(0), m_100(reinterpret_cast<const NiPoint3_helper_combatgroup&>(NiPoint3_ZERO)), m_10c(0.0f), m_130(0),
       m_134(false), m_148(0), m_14c(0), m_150(0), m_154(-1), m_158(0)
 {}
 
@@ -11067,13 +9201,8 @@ PathingAvoidNodeArray* __thiscall FUN_00989490_shell::FUN_00989490(int aiUnused1
     return pArray;
 }
 
-struct S009865d0_CombatGroup : ActorCombatGroup
-{
-    void* FUN_009865d0(int param);
-};
-
 // @fnv 0x009865d0
-void* S009865d0_CombatGroup::FUN_009865d0(int aiRef)
+void* ActorCombatGroup::FUN_009865d0(int aiRef)
 {
-    return reinterpret_cast<FUN_00986610_shell*>(this)->FUN_00986610(reinterpret_cast<RefObj*>(aiRef)->_ref_0084e3a0());
+    return reinterpret_cast<FUN_00986610_shell*>(this)->FUN_00986610(reinterpret_cast<TESForm*>(aiRef)->FUN_0084e3a0());
 }

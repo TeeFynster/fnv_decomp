@@ -1,41 +1,26 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit defines its own form
 
 // src/havok/common/base/math/matrix/hkmatrix6.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/math/matrix/hkmatrix6.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
+#include "../../../../../../include/hkMatrix3.h"
 
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
 
-struct hkVector4
+inline void hkVector4::add4(const hkVector4& v)
 {
-    __m128 m_vComponents;
-    void add4(const hkVector4& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-};
+    m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
+}
 
-struct hkMatrix3
+inline hkMatrix3::hkMatrix3()
 {
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-    void add(const hkMatrix3& a)
-    {
-        m_kColumn0.add4(a.m_kColumn0);
-        m_kColumn1.add4(a.m_kColumn1);
-        m_kColumn2.add4(a.m_kColumn2);
-    }
-};
+}
+
+inline void hkMatrix3::add(const hkMatrix3& a)
+{
+    m_kColumn0.add4(a.m_kColumn0);
+    m_kColumn1.add4(a.m_kColumn1);
+    m_kColumn2.add4(a.m_kColumn2);
+}
 
 struct FUN_00e29290_Block
 {
@@ -59,33 +44,20 @@ extern "C" void __cdecl FUN_00e29290(FUN_00e29290_Block* pDst, const FUN_00e2929
     pDst->f5.add4(pSrc->f5);
 }
 
-struct E29250Matrix3
-{
-    float m_kColumn0[4];
-    float m_kColumn1[4];
-    float m_kColumn2[4];
-
-    void SetFromMatrix(const E29250Matrix3& s);
-};
-
 struct E29250Matrix6
 {
-    E29250Matrix3 m_iUnknownValue2[2][2];
+    hkMatrix3 m_iUnknownValue2[2][2];
 };
 
 // @fnv 0x00e29250
 void __cdecl FUN_00e29250(E29250Matrix6& out, const E29250Matrix6& in)
 {
-    out.m_iUnknownValue2[0][0].SetFromMatrix(in.m_iUnknownValue2[0][0]);
-    out.m_iUnknownValue2[0][1].SetFromMatrix(in.m_iUnknownValue2[1][0]);
-    out.m_iUnknownValue2[1][0].SetFromMatrix(in.m_iUnknownValue2[0][1]);
-    out.m_iUnknownValue2[1][1].SetFromMatrix(in.m_iUnknownValue2[1][1]);
+    out.m_iUnknownValue2[0][0]._setTranspose(in.m_iUnknownValue2[0][0]);
+    out.m_iUnknownValue2[0][1]._setTranspose(in.m_iUnknownValue2[1][0]);
+    out.m_iUnknownValue2[1][0]._setTranspose(in.m_iUnknownValue2[0][1]);
+    out.m_iUnknownValue2[1][1]._setTranspose(in.m_iUnknownValue2[1][1]);
 }
 
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, int imm8);
-extern "C" __m128 _mm_load_ps(const float* p);
-extern "C" void _mm_store_ps(float* p, __m128 a);
 // @fnv 0x00e29510
 void FUN_00e29510(__m128* out, const __m128* aMatrix, const __m128* aVectors)
 {
@@ -127,24 +99,6 @@ __forceinline void AddPointers(__m128* dst, const __m128* src)
     *dst = _mm_add_ps(_mm_load_ps((float*)dst), _mm_load_ps((const float*)src));
 }
 
-struct LocalMatrix
-{
-    union
-    {
-        __m128 col0;
-        float values0[4];
-    };
-    union
-    {
-        __m128 col1;
-        float values1[4];
-    };
-    union
-    {
-        __m128 col2;
-        float values2[4];
-    };
-};
 struct PodPointer
 {
     void* p;
@@ -183,15 +137,15 @@ void __cdecl FUN_00e29470(void* apDest, WrappedPointer src, WrappedPointer rhs)
 
         {
 
-            LocalMatrix tempMatrix;
+            hkMatrix3 tempMatrix;
 
             FUN_00cd5530(&tempMatrix, source, right);
 
             FUN_00cd5530(cur - 2, source + 0x30, right + 0x60);
 
-            cur[-2] = _mm_add_ps(cur[-2], tempMatrix.col0);
-            AddVector(cur[-1], tempMatrix.col1);
-            *cur = _mm_add_ps(*cur, _mm_load_ps((float*)&tempMatrix.col2));
+            cur[-2] = _mm_add_ps(cur[-2], tempMatrix.m_kColumn0.m_vComponents);
+            AddVector(cur[-1], tempMatrix.m_kColumn1.m_vComponents);
+            *cur = _mm_add_ps(*cur, _mm_load_ps((float*)&tempMatrix.m_kColumn2.m_vComponents));
             right += 0x30;
 
             cur += 3;
@@ -203,7 +157,6 @@ void __cdecl FUN_00e29470(void* apDest, WrappedPointer src, WrappedPointer rhs)
     } while (--outer != 0);
 }
 
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
 __forceinline void subtract(__m128& a, const __m128& b)
 {
     a = _mm_sub_ps(a, b);

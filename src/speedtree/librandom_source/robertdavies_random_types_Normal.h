@@ -3,31 +3,7 @@
 #define FNV_NORMAL_H
 
 #include "layout_support.h"
-class Normal;
-class PosGen;
-class Random;
-class SymGen;
-#pragma pack(push, 4)
-class Random
-{
-  public:
-    virtual ~Random();
-    virtual float Next();
-    virtual char* Name();
-    virtual float Density(float value) const;
-    static float Raw();
-    static void Set(double value);
-    // Random
-    // void __cdecl Random::*(double)
-    // double __cdecl Random::*()
-    // void __cdecl Random::*(long)
-    // long __cdecl Random::*()
-    // float __cdecl Random::*()
-    // Random& __cdecl Random::*(const Random&)
-    // void __cdecl Random::*()
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(Random) == 4);
+#include "../../../include/Random.h"
 #pragma pack(push, 4)
 class PosGen : public Random
 {

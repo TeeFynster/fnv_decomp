@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
 
 // src/bshavok/bhkcollisionobject_h_unit_o2_nood_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/bshavok/bhkcollisionobject_h_unit_o2_nood_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
@@ -5,7 +7,8 @@
 // src/bshavok/bhkcollisionobject_h_unit_o2_nood_variant.cpp - flag-variant unit created 2026-10-28 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /GS /EHsc /Gy /O2 (unit src/bshavok/bhkcollisionobject_h_unit.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
-#include "bhkcollisionobject.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/hkVector4.h"
 
 #include <xmmintrin.h>
 
@@ -178,64 +181,25 @@ void Cls_00c658c0::FUN_00c658c0()
 }
 
 #include <xmmintrin.h>
+inline unsigned char NiAVObject::flagSet(unsigned bit) const
+{
+    return (m_uFlags >> bit) & 1;
+}
+
 namespace fnv_00c65b00 {
 #include <xmmintrin.h>
 
-class NiPoint3
-{
-  public:
-    float x, y, z;
-};
-class ThreeByThreeMatrix
-{
-  public:
-    float entry[3][3];
-};
-struct Transform
-{
-    ThreeByThreeMatrix rotate;
-    NiPoint3 translate;
-    float scale;
-};
-class NiAVObject
-{
-  public:
-    void* vtable;
-    int refCount;
-    const char* name;
-    void* extraData;
-    int extraCount;
-    void* controller;
-    NiAVObject* parent;
-    void* collision;
-    void* worldBound;
-    void* propertyHead;
-    void* propertyTail;
-    int propertyCount;
-    unsigned int flags;
-    Transform local;
-    Transform world;
-    void UpdateWorldLoc();
-    unsigned char flagSet(unsigned bit) const
-    {
-        return (flags >> bit) & 1;
-    }
-};
 struct Quaternion
 {
     float w, x, y, z;
-    void FUN_00a6df40(const ThreeByThreeMatrix*);
-};
-struct __declspec(align(16)) FourFloatVector
-{
-    __m128 quad;
+    void FUN_00a6df40(const NiMatrix3*);
 };
 struct __declspec(align(16)) HavokQuaternion
 {
     float x, y, z, w;
     void FUN_005611c0();
 };
-void __cdecl FUN_004a3e00(FourFloatVector*, const NiPoint3*);
+void __cdecl FUN_004a3e00(hkVector4*, const NiPoint3*);
 struct MotionData
 {
     int unk00;
@@ -348,8 +312,8 @@ struct MotionData
     int unk1a4;
     int unk1a8;
     int unk1ac;
-    FourFloatVector linearVelocity;
-    FourFloatVector angularVelocity;
+    hkVector4 linearVelocity;
+    hkVector4 angularVelocity;
 };
 struct Body;
 struct BodyVTable
@@ -407,18 +371,18 @@ struct BodyVTable
     void* methodc8;
     void* methodcc;
     void* methodd0;
-    void(__thiscall* getPosition)(Body*, FourFloatVector*);
+    void(__thiscall* getPosition)(Body*, hkVector4*);
     void* methodd8;
     void* methoddc;
     void* methode0;
     void* methode4;
-    void(__thiscall* SetGeometryTransform)(Body*, const FourFloatVector*, const HavokQuaternion*);
+    void(__thiscall* SetGeometryTransform)(Body*, const hkVector4*, const HavokQuaternion*);
 };
 struct PhysicsLock
 {
     int owner;
     int count;
-    void Wait(const char*);
+    void FUN_0040fbf0(const char*);
     void unlock()
     {
         if (--count == 0)
@@ -426,9 +390,9 @@ struct PhysicsLock
     }
 };
 extern PhysicsLock DAT_01267b80;
-extern FourFloatVector DAT_01267e30;
+extern hkVector4 DAT_01267e30;
 extern float DAT_01017d00;
-extern FourFloatVector DAT_01017d10;
+extern hkVector4 DAT_01017d10;
 struct Body
 {
     BodyVTable* vtable;
@@ -436,10 +400,10 @@ struct Body
     MotionData* data;
     void* FUN_00c87a40();
     void FUN_00c8e160(const NiPoint3*, const Quaternion*, PhysicsLock*);
-    FourFloatVector* FUN_00560d80();
-    FourFloatVector* FUN_00560e10();
-    void FUN_00561690(const FourFloatVector*);
-    void FUN_005617c0(const FourFloatVector*);
+    hkVector4* FUN_00560d80();
+    hkVector4* FUN_00560e10();
+    void FUN_00561690(const hkVector4*);
+    void FUN_005617c0(const hkVector4*);
 };
 char __cdecl FUN_00c8cce0(int*);
 struct CollisionSync
@@ -456,9 +420,9 @@ struct CollisionSync
     }
     void FUN_00c65b00();
 };
-__declspec(noinline) FourFloatVector* Body::FUN_00560e10()
+__declspec(noinline) hkVector4* Body::FUN_00560e10()
 {
-    FourFloatVector* p = data ? &data->angularVelocity : &DAT_01267e30;
+    hkVector4* p = data ? &data->angularVelocity : &DAT_01267e30;
     __m128 m = _mm_and_ps(p->quad, DAT_01017d10.quad);
     __m128 v0 = _mm_mul_ps(_mm_shuffle_ps(m, m, 0), _mm_set1_ps(1.0f));
     __m128 v1 = _mm_mul_ps(_mm_shuffle_ps(m, m, 85), _mm_set1_ps(2.0f));
@@ -490,12 +454,15 @@ __declspec(noinline) FourFloatVector* Body::FUN_00560e10()
 void CollisionSync::FUN_00c65b00()
 {
 
-    FourFloatVector forcedPos;
+    // The game fills aligned SIMD scratch storage through the shared vector type.
+    __m128 forcedPos;
     HavokQuaternion forcedQ;
-    FourFloatVector distancePos, old;
+    // Keep this one-vector buffer to preserve the original stack placement.
+    __m128 distancePos[1];
+    __m128 old;
 
     HavokQuaternion nearQ;
-    FourFloatVector flaggedPos;
+    __m128 flaggedPos;
     HavokQuaternion flaggedQ;
     NiAVObject* n = node;
     Body* b = body;
@@ -509,29 +476,29 @@ void CollisionSync::FUN_00c65b00()
         return;
     if (!b->data)
         return;
-    const Transform* world = &n->world;
+    const NiTransform* world = &n->m_kWorld;
     Quaternion rot;
-    rot.FUN_00a6df40(&world->rotate);
+    rot.FUN_00a6df40(&world->m_Rotate);
     if (flagSet(6))
     {
 
-        FUN_004a3e00(&forcedPos, &world->translate);
+        FUN_004a3e00(reinterpret_cast<hkVector4*>(&forcedPos), &world->m_Translate);
 
         forcedQ.x = rot.x;
         forcedQ.y = rot.y;
         forcedQ.z = rot.z;
         forcedQ.w = rot.w;
         forcedQ.FUN_005611c0();
-        DAT_01267b80.Wait(0);
-        b->vtable->SetGeometryTransform(b, &forcedPos, &forcedQ);
+        DAT_01267b80.FUN_0040fbf0(0);
+        b->vtable->SetGeometryTransform(b, reinterpret_cast<hkVector4*>(&forcedPos), &forcedQ);
         DAT_01267b80.unlock();
     }
     else if (!n->flagSet(22) && !n->flagSet(27) && !n->flagSet(3) && !n->flagSet(4))
     {
 
-        FUN_004a3e00(&distancePos, &world->translate);
-        b->vtable->getPosition(b, &old);
-        __m128 delta = _mm_sub_ps(distancePos.quad, old.quad);
+        FUN_004a3e00(reinterpret_cast<hkVector4*>(distancePos), &world->m_Translate);
+        b->vtable->getPosition(b, reinterpret_cast<hkVector4*>(&old));
+        __m128 delta = _mm_sub_ps(distancePos[0], old);
         __m128 sq = _mm_mul_ps(delta, delta);
         __m128 y = _mm_shuffle_ps(sq, sq, 0x55);
         __m128 z = _mm_shuffle_ps(sq, sq, 0xaa);
@@ -541,30 +508,30 @@ void CollisionSync::FUN_00c65b00()
         {
             if (FUN_0047b470())
             {
-                b->FUN_00c8e160(&world->translate, &rot, &DAT_01267b80);
+                b->FUN_00c8e160(&world->m_Translate, &rot, &DAT_01267b80);
                 return;
             }
             if (FUN_00c8cce0(&type))
             {
-                b->FUN_00c8e160(&world->translate, &rot, &DAT_01267b80);
+                b->FUN_00c8e160(&world->m_Translate, &rot, &DAT_01267b80);
                 return;
             }
 
-            FourFloatVector nearPos;
-            FUN_004a3e00(&nearPos, &world->translate);
+            __m128 nearPos;
+            FUN_004a3e00(reinterpret_cast<hkVector4*>(&nearPos), &world->m_Translate);
 
             nearQ.x = rot.x;
             nearQ.y = rot.y;
             nearQ.z = rot.z;
             nearQ.w = rot.w;
             nearQ.FUN_005611c0();
-            DAT_01267b80.Wait(0);
-            b->vtable->SetGeometryTransform(b, &nearPos, &nearQ);
+            DAT_01267b80.FUN_0040fbf0(0);
+            b->vtable->SetGeometryTransform(b, reinterpret_cast<hkVector4*>(&nearPos), &nearQ);
             DAT_01267b80.unlock();
         }
         else
         {
-            const FourFloatVector* linearPtr = b->FUN_00560d80();
+            const hkVector4* linearPtr = b->FUN_00560d80();
             __m128 scalarTolerance = _mm_load_ss(&DAT_01017d00);
             __m128 tolerance = _mm_shuffle_ps(scalarTolerance, scalarTolerance, 0);
             __m128 cmp =
@@ -581,24 +548,24 @@ void CollisionSync::FUN_00c65b00()
     {
         if (FUN_0047b470())
         {
-            b->FUN_00c8e160(&world->translate, &rot, &DAT_01267b80);
+            b->FUN_00c8e160(&world->m_Translate, &rot, &DAT_01267b80);
             return;
         }
         if (FUN_00c8cce0(&type))
         {
-            b->FUN_00c8e160(&world->translate, &rot, &DAT_01267b80);
+            b->FUN_00c8e160(&world->m_Translate, &rot, &DAT_01267b80);
             return;
         }
 
-        FUN_004a3e00(&flaggedPos, &world->translate);
+        FUN_004a3e00(reinterpret_cast<hkVector4*>(&flaggedPos), &world->m_Translate);
 
         flaggedQ.x = rot.x;
         flaggedQ.y = rot.y;
         flaggedQ.z = rot.z;
         flaggedQ.w = rot.w;
         flaggedQ.FUN_005611c0();
-        DAT_01267b80.Wait(0);
-        b->vtable->SetGeometryTransform(b, &flaggedPos, &flaggedQ);
+        DAT_01267b80.FUN_0040fbf0(0);
+        b->vtable->SetGeometryTransform(b, reinterpret_cast<hkVector4*>(&flaggedPos), &flaggedQ);
         DAT_01267b80.unlock();
     }
 }

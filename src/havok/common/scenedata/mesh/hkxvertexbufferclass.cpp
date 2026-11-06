@@ -1,3 +1,4 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/common/scenedata/mesh/hkxvertexbufferclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/mesh/hkxvertexbufferclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -27,26 +28,18 @@ struct DFD680MemoryRouter
 
 extern "C" DFD680MemoryRouter& __cdecl FUN_00c85750();
 
-template <class T> struct DFD680Array
+template<class T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& sharedAlloc)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+DFD680Allocator& alloc = reinterpret_cast<DFD680Allocator&>(sharedAlloc);
 
-    __forceinline void _clearAndDeallocate(DFD680Allocator& alloc)
-    {
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
+    
+}
 
-    __forceinline void ClearAndRelease()
-    {
-        _clearAndDeallocate(FUN_00c85750().heap());
-    }
-};
 
 struct DFD680Vector4
 {
@@ -58,11 +51,11 @@ struct DFD680Vector4
 
 struct DFD680MeshData
 {
-    DFD680Array<DFD680Vector4> m_kVertices;
-    DFD680Array<int> m_kIndices32;
-    DFD680Array<int> m_kMaterials;
-    DFD680Array<unsigned short> m_kIndices16;
-    DFD680Array<unsigned char> m_flags;
+    hkArrayBase<DFD680Vector4> m_kVertices;
+    hkArrayBase<int> m_kIndices32;
+    hkArrayBase<int> m_kMaterials;
+    hkArrayBase<unsigned short> m_kIndices16;
+    hkArrayBase<unsigned char> m_flags;
 
     void FUN_00dfd680();
 };
@@ -71,9 +64,9 @@ struct DFD680MeshData
 // @fnv 0x00dfd680
 void DFD680MeshData::FUN_00dfd680()
 {
-    m_flags.ClearAndRelease();
-    m_kIndices16.ClearAndRelease();
-    m_kMaterials.ClearAndRelease();
-    m_kIndices32.ClearAndRelease();
-    m_kVertices.ClearAndRelease();
+    m_flags._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
+    m_kIndices16._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
+    m_kMaterials._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
+    m_kIndices32._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
+    m_kVertices._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
 }

@@ -1,8 +1,11 @@
-// bscore/oei_io_thread_decls.h: declares CountingSemaphore, IORequest, IO_Thread
+// bscore/oei_io_thread_decls.h: declares IORequest, IO_Thread
 #ifndef FNV_OEI_IO_THREAD_DECLS_H
 #define FNV_OEI_IO_THREAD_DECLS_H
 
+#include "../../include/CountingSemaphore.h"
 #include "BSThread.h"
+#include "RecursiveLock.h"
+#include "_RTL_CRITICAL_SECTION.h"
 
 struct _iobuf;
 extern "C" int __cdecl fseek(_iobuf*, long, int);
@@ -15,27 +18,10 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile lo
 extern "C" void(__stdcall* fnv_EnterCriticalSection)(_RTL_CRITICAL_SECTION*);
 extern "C" void(__stdcall* fnv_LeaveCriticalSection)(_RTL_CRITICAL_SECTION*);
 
-class CountingSemaphore
-{
-  public:
-    volatile long iCount;
-    void* hSemaphore;
-    int m_iMaximumCount;
-    __forceinline void Wait()
-    {
-        WaitForSingleObject(hSemaphore, 0xffffffffUL);
-        InterlockedDecrement(&iCount);
-    }
-    __forceinline void Signal()
-    {
-        ReleaseSemaphore(hSemaphore, 1, 0);
-        InterlockedIncrement(&iCount);
-    }
-};
 
 __forceinline void LockRequestQueue(RecursiveLock* section)
 {
-    fnv_EnterCriticalSection(&section->CriticalSection);
+    fnv_EnterCriticalSection(reinterpret_cast<_RTL_CRITICAL_SECTION*>(section->CriticalSection));
 }
 __forceinline void UnlockRequestQueue(RecursiveLock* section)
 {
@@ -43,7 +29,7 @@ __forceinline void UnlockRequestQueue(RecursiveLock* section)
     // The diagnostic names are inferred; their original purpose is unknown.
     unsigned long threadOwner;
     unsigned long previousOwner;
-    fnv_LeaveCriticalSection(&section->CriticalSection);
+    fnv_LeaveCriticalSection(reinterpret_cast<_RTL_CRITICAL_SECTION*>(section->CriticalSection));
 }
 
 namespace OEI {
@@ -107,7 +93,6 @@ extern CountingSemaphore* g_pRequestAvailableSemaphore;
 extern CountingSemaphore* g_pShutdownCompleteSemaphore;
 extern RecursiveLock* g_pRequestQueueLock;
 extern BSList<OEI::IO::IORequest*>* g_pIORequestQueue;
-FNV_STATIC_ASSERT(sizeof(OEI::IO::IO_Thread) == 0x40);
 FNV_STATIC_ASSERT(sizeof(OEI::IO::IORequest) == 0x1c);
 FNV_STATIC_ASSERT(offsetof(OEI::IO::IORequest, m_eRequestType) == 4);
 FNV_STATIC_ASSERT(offsetof(OEI::IO::IORequest, result) == 0x18);

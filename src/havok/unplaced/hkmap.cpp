@@ -275,13 +275,14 @@ struct hkMapOperatorsCB19
 class hkMapBaseCB19
 {
   public:
-    struct Pair
+    // hkMapBase<KEY,VAL>::Pair (Havok hkMap.h: key, val); renamed so it does not take include/Pair.h's name
+    struct KeyValue
     {
         unsigned long key;
         unsigned long val;
     };
 
-    Pair* m_kPrimitiveElement;
+    KeyValue* m_kPrimitiveElement;
     int m_iCapacityFlags;
     int m_iPairCount;
 
@@ -639,12 +640,12 @@ struct MapOpsCB1C
 
 struct MapCB1C
 {
-    struct Pair
+    struct KeyValue
     {
         hkUint64CB1C key;
         hkUint64CB1C val;
     };
-    Pair* m_kPrimitiveElement;
+    KeyValue* m_kPrimitiveElement;
     int m_iCapacityFlags;
     int m_iPairCount;
     hkUint64CB1C FUN_00cb1cb0(hkUint64CB1C key, hkUint64CB1C def) const;
@@ -688,13 +689,13 @@ struct hkMapOperatorsU64
 class hkMapBaseU64
 {
   public:
-    struct Pair
+    struct KeyValue
     {
         unsigned __int64 key;
         unsigned __int64 val;
     };
 
-    Pair* m_kPrimitiveElement;
+    KeyValue* m_kPrimitiveElement;
     int m_iCapacityFlags;
     int m_iPairCount;
 

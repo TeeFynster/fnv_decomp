@@ -2,12 +2,10 @@
 #ifndef FNV_MENUTOPIC_H
 #define FNV_MENUTOPIC_H
 
-#include "layout_support.h"
-#include "TESQuest.h"
-#include "TESTopic.h"
-#include "TESTopicInfo.h"
-#include "layout_support.h"
-class MenuTopic;
+#include "menutopic_layout.h"
+#include "../../../include/TESQuest.h"
+#include "../../../include/TESTopic.h"
+#include "../../../include/TESTopicInfo.h"
 #pragma pack(push, 4)
 class MenuTopic
 {
@@ -57,6 +55,7 @@ class MenuTopic
     BSStringT<char> FUN_0083d8b0();
     void FUN_0083df80(TESQuest*, TESTopic*, TESTopicInfo*, MobileObject*);
     void FillResponseList();
+    void SaveTopic();
     TESTopicInfo* GetTopicInfo();
 };
 #pragma pack(pop)

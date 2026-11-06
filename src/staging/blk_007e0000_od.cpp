@@ -1,8 +1,26 @@
+#include "../../include/BSStringT.h"
 
 // src/staging/blk_007e0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+// Migration requires shared declarations to use the real types first:
+// BSAudio::FUN_00ad7550 returns BSSoundHandle, while FOPipboyManager
+// takes NiColorA in SetQuad/FUN_007f7fb0 and stores BSSoundHandle.
+#include "../../include/BSAudio.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/FOPipboyManager.h"
+#include "../../include/GO.h"
+#include "../../include/GameTimerRecord.h"
+#include "../../include/NavMeshPtr.h"
+#include "../../include/Menu.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiPointer.h"
+#include "../../include/ShadowSceneNode.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/RaceSexMenu.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/Tile.h"
 
 const char* __cdecl FUN_007ab810();
 
@@ -17,6 +35,7 @@ bool __thiscall FUN_007e6760_cls::FUN_007e6760()
     return FUN_007ab810() != 0;
 }
 
+// The approved BSAudio header lacks FUN_00ad8510(int, int).
 struct BSAudio_
 {
     void FUN_00ad8510(int, int);
@@ -55,12 +74,6 @@ void __cdecl FUN_007f7a50(float afValue1, float afValue2)
     DAT_011ae5d4 = 1;
 }
 
-struct FOPipboyManager
-{
-    void InitializeMenuLight();
-    void FUN_007fa200();
-};
-
 // @fnv 0x007fa200
 void FOPipboyManager::FUN_007fa200()
 {
@@ -72,21 +85,13 @@ struct Flt
     operator unsigned int();
 };
 
-struct FUN_007fa970_Class
-{
-    unsigned int FUN_007fa970();
-};
-
+// The shared manager has no declaration for this object accessor.
 // @fnv 0x007fa970
-unsigned int FUN_007fa970_Class::FUN_007fa970()
+NiAVObject* __fastcall FUN_007fa970(FOPipboyManager* manager)
 {
-    return ((Flt*)((char*)this + 0xe0))->operator unsigned int();
+    return manager->m_pPipBoyObject2;
 }
 
-struct GO
-{
-    void* operator=(void*);
-};
 struct FUN_007fd620_Class
 {
     char _0[0x24];
@@ -117,11 +122,6 @@ unsigned int FUN_007fd640Class::FUN_007fd640()
 }
 }  // namespace fnv_007fd640
 
-struct RaceSexMenu
-{
-    void OnRaceSelected(void*);
-    void FUN_007fe910(void* apList);
-};
 
 // @fnv 0x007fe910
 void RaceSexMenu::FUN_007fe910(void* apList)
@@ -129,15 +129,8 @@ void RaceSexMenu::FUN_007fe910(void* apList)
     OnRaceSelected(apList);
 }
 
-struct NavMeshPtr
-{
-    void* FUN_00458b50();
-};
-struct BSStr
-{
-    bool Set(const char*, unsigned int);
-};
-extern BSStr g_011daed8;
+
+extern ::BSStringT<char> g_011daed8;
 void __cdecl FUN_007e65b0();
 struct FUN_007e66a0_cls
 {
@@ -174,10 +167,6 @@ void* __thiscall FUN_007f69d0_Class::FUN_007f69d0(unsigned int flags)
     return this;
 }
 
-struct GameTimerRecord
-{
-    unsigned int GetTime() const;
-};
 extern GameTimerRecord g_timeGlobal;
 struct FUN_007f7880_Class
 {
@@ -297,14 +286,6 @@ bool __thiscall FUN_007eb8d0_Class::HasAllSlotsSet(int* piIndex)
     return true;
 }
 
-struct Tile
-{
-    void __thiscall Set(int, int);
-};
-struct Menu
-{
-    void __thiscall LoadMenuData();
-};
 struct SimpleList
 {
     SimpleList* __thiscall GetNext();
@@ -337,11 +318,6 @@ void __thiscall FUN_007f6a00_Class::DestroyList()
     l.ListX::~ListX();
 }
 
-struct NiPoint2
-{
-    float x;
-    float y;
-};
 
 extern NiPoint2 DAT_011f4980;
 
@@ -632,17 +608,6 @@ FUN_007f7790_cls::~FUN_007f7790_cls()
     delete m_pPointer;
 }
 
-class NiColor;
-
-struct ImageSpaceEffectParam
-{
-    float unk00;
-    float unk04;
-    float unk08;
-    float unk0C;
-    ImageSpaceEffectParam(float a, float b, float c, float d);
-};
-
 struct Dummy_00718c90;
 
 struct SystemColorManager
@@ -652,92 +617,30 @@ struct SystemColorManager
 
 Dummy_00718c90* __cdecl FUN_00718b60();
 
-struct PipboyStub : FOPipboyManager
-{
-    void SetQuad(ImageSpaceEffectParam* p);
-    void FUN_007f7fb0(ImageSpaceEffectParam* p);
-    void FUN_007f7f40();
-};
-
+// The shared manager has no declaration for this initialization helper.
 // @fnv 0x007f7f40
-void PipboyStub::FUN_007f7f40()
+void __fastcall FUN_007f7f40(FOPipboyManager* manager)
 {
-    ImageSpaceEffectParam p(0.0f, 0.0f, 0.0f, 0.0f);
-    if (reinterpret_cast<SystemColorManager*>(FUN_00718b60())->GetColor(4, *(NiColor*)&p))
+    NiColorA color(0.0f, 0.0f, 0.0f, 0.0f);
+    if (reinterpret_cast<SystemColorManager*>(FUN_00718b60())->GetColor(4, *(NiColor*)&color))
     {
-        SetQuad(&p);
-        FUN_007f7fb0(&p);
-        InitializeMenuLight();
+        manager->SetQuad(color);
+        manager->FUN_007f7fb0(color);
+        manager->InitializeMenuLight();
     }
 }
 
-struct FUN_007f7fb0_Value
-{
-    unsigned int field00;
-    unsigned int field04;
-    unsigned int field08;
-    unsigned int field0C;
-};
-
-struct FUN_007f7fb0_Class
-{
-    unsigned char unk00[0xC0];
-    FUN_007f7fb0_Value unkC0;
-
-    void __thiscall FUN_007f7fb0(const FUN_007f7fb0_Value* value);
-};
-
-// Copies the four-field value into the object's unkC0 member.
 // @fnv 0x007f7fb0
-void __thiscall FUN_007f7fb0_Class::FUN_007f7fb0(const FUN_007f7fb0_Value* value)
+void FOPipboyManager::FUN_007f7fb0(const NiColorA& color)
 {
-    unkC0 = *value;
+    m_kMenuLightColor = color;
 }
 
-struct Quad4
-{
-    unsigned int a;
-    unsigned int b;
-    unsigned int c;
-    unsigned int d;
-};
-
-struct FUN_007f7fe0_cls
-{
-    unsigned char _0[0xa8];
-    Quad4 m_q;
-    void __thiscall SetQuad(const Quad4* src);
-};
-
-// Copies the four unsigned ints from src into the m_q member of this object.
 // @fnv 0x007f7fe0
-void __thiscall FUN_007f7fe0_cls::SetQuad(const Quad4* apQuad)
+void FOPipboyManager::SetQuad(const NiColorA& color)
 {
-    m_q = *apQuad;
+    BackgroundColor = color;
 }
-
-struct SoundPlaybackHandle
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    SoundPlaybackHandle();
-    SoundPlaybackHandle& operator=(const SoundPlaybackHandle&);
-    ~SoundPlaybackHandle();
-};
-
-struct BSSoundHandleEx
-{
-    SoundPlaybackHandle base;
-    ~BSSoundHandleEx();
-    bool Play(bool);
-};
-
-struct BSAudio
-{
-    static BSAudio* GetSingleton();
-    BSSoundHandleEx GetSoundHandleByEditorID(const char*, unsigned int);
-};
 
 struct GlobalObject_0044f440
 {
@@ -748,177 +651,17 @@ extern GlobalObject_0044f440 g_011db288;
 
 extern bool g_burstSoundEnabled;
 
-struct FUN_007fa0f0_Class
-{
-
-    unsigned int unk000;
-
-    unsigned int unk004;
-
-    unsigned int unk008;
-
-    unsigned int unk00C;
-
-    unsigned int unk010;
-
-    unsigned int unk014;
-
-    unsigned int unk018;
-
-    unsigned int unk01C;
-
-    unsigned int unk020;
-
-    unsigned int unk024;
-
-    unsigned int unk028;
-
-    unsigned int unk02C;
-
-    unsigned int unk030;
-
-    unsigned int unk034;
-
-    unsigned int unk038;
-
-    unsigned int unk03C;
-
-    unsigned int unk040;
-
-    unsigned int unk044;
-
-    unsigned int unk048;
-
-    unsigned int unk04C;
-
-    unsigned int unk050;
-
-    unsigned int unk054;
-
-    unsigned int unk058;
-
-    unsigned int unk05C;
-
-    unsigned int unk060;
-
-    unsigned int unk064;
-
-    unsigned int unk068;
-
-    unsigned int unk06C;
-
-    unsigned int unk070;
-
-    unsigned int unk074;
-
-    unsigned int unk078;
-
-    unsigned int unk07C;
-
-    unsigned int unk080;
-
-    unsigned int unk084;
-
-    unsigned int unk088;
-
-    unsigned int unk08C;
-
-    unsigned int unk090;
-
-    unsigned int unk094;
-
-    unsigned int unk098;
-
-    unsigned int unk09C;
-
-    unsigned int unk0A0;
-
-    unsigned int unk0A4;
-
-    unsigned int unk0A8;
-
-    unsigned int unk0AC;
-
-    unsigned int unk0B0;
-
-    unsigned int unk0B4;
-
-    unsigned int unk0B8;
-
-    unsigned int unk0BC;
-
-    unsigned int unk0C0;
-
-    unsigned int unk0C4;
-
-    unsigned int unk0C8;
-
-    unsigned int unk0CC;
-
-    unsigned int unk0D0;
-
-    unsigned int unk0D4;
-
-    unsigned int unk0D8;
-
-    unsigned int unk0DC;
-
-    unsigned int unk0E0;
-
-    unsigned int unk0E4;
-
-    unsigned int unk0E8;
-
-    unsigned int unk0EC;
-
-    unsigned int unk0F0;
-
-    unsigned int unk0F4;
-
-    unsigned int unk0F8;
-
-    unsigned int unk0FC;
-
-    unsigned int unk100;
-
-    unsigned int unk104;
-
-    unsigned int unk108;
-
-    unsigned int unk10C;
-
-    unsigned int unk110;
-
-    unsigned int unk114;
-
-    unsigned int unk118;
-
-    unsigned int unk11C;
-
-    float unk120;
-
-    float unk124;
-
-    float unk128;
-
-    float unk12c;
-
-    float values[1];
-
-    void __thiscall SetValue(int index, bool play);
-};
-
 // @fnv 0x007fa0f0
-void FUN_007fa0f0_Class::SetValue(int index, bool play)
+void FOPipboyManager::SetValue(int index, bool play)
 {
-    if (unk120 != values[index])
+    if (m_fChartSecondPoint[2] != m_fTabKnobPositions[index])
     {
-        unk120 = values[index];
-        unk12c = *g_011db288.Float();
+        m_fChartSecondPoint[2] = m_fTabKnobPositions[index];
+        m_fGaugeValues2[2] = *g_011db288.Float();
         if (g_burstSoundEnabled && play)
         {
-            BSSoundHandleEx handle;
-            handle = BSAudio::GetSingleton()->GetSoundHandleByEditorID("UIPipBoyTab", 0x121);
+            BSSoundHandle handle;
+            handle = BSAudio::GetSingleton()->FUN_00ad7550("UIPipBoyTab", 0x121);
             handle.Play(false);
         }
     }
@@ -947,33 +690,7 @@ FUN_007fb730_Class* __thiscall FUN_007fb730_Class::Add(FUN_007fb730_Class* outpu
     return output;
 }
 
-class NiBound7FD
-{
-  public:
-    float GetRadius() const;
-};
-
-class NiAVObject7FD
-{
-  public:
-    const NiBound7FD& GetBoundingVolume() const;
-};
-
-template <class T> class NiPointer7FD
-{
-  public:
-    T* Get() const;
-
-    T* m_pObject;
-};
-
-class ShadowSceneNode7FD
-{
-  public:
-    void GetShadowSceneLight(NiAVObject7FD* pkLight, float fRadius);
-};
-
-ShadowSceneNode7FD* __cdecl FUN_00450b80(unsigned int uiIndex);
+ShadowSceneNode* __cdecl FUN_00450b80(unsigned int uiIndex);
 
 class Light7FD
 {
@@ -988,18 +705,17 @@ class Light7FD
     int unk0A0, unk0A4, unk0A8, unk0AC, unk0B0, unk0B4, unk0B8, unk0BC;
     int unk0C0, unk0C4, unk0C8, unk0CC, unk0D0, unk0D4, unk0D8, unk0DC;
     int unk0E0, unk0E4, unk0E8, unk0EC, unk0F0, unk0F4, unk0F8;
-    NiPointer7FD<NiAVObject7FD> m_spNode;
-    NiPointer7FD<NiAVObject7FD> m_spLight;
+    NiPointer<NiAVObject> m_spNode;
+    NiPointer<NiAVObject> m_spLight;
 };
 
 // @fnv 0x007fd660
 void Light7FD::FUN_007fd660(float fScale)
 {
-    float fRadius = m_spNode.Get()->GetBoundingVolume().GetRadius() * 3.0 * fScale;
-    FUN_00450b80(3)->GetShadowSceneLight(m_spLight.Get(), fRadius);
+    float fRadius = ((const NiAVObject*)m_spNode)->GetBoundingVolume().GetRadius() * 3.0 * fScale;
+    FUN_00450b80(3)->FUN_00b5ca70((NiNode*)(NiAVObject*)m_spLight, fRadius);
 }
 
-struct NiNode;
 template <class T> class NiPtrS
 {
   public:
@@ -1106,25 +822,18 @@ struct ValueX
     void SetFloat(int, float);
     void Finish(int);
 };
-struct MenuX
+// Tile's shared declarations lack the linear trait lookup at 0x00a00e90.
+// This adds only that call declaration; Tile supplies the complete object layout.
+struct TileTraitLookup : Tile
 {
-    struct TileX* Create(struct TileX*, const char*, int);
-};
-struct TileX
-{
-    MenuX* GetMenu();
-    void* GetValue(int);
-    void Set(int, int);
-    void Set(int, const char*, bool);
-    float GetFloat(int);
-    ValueX* GetAction(int);
+    ValueX* FindTraitValue(int);
 };
 struct Entry
 {
-    TileX* tile;
+    Tile* tile;
     int data;
     int extra;
-    Entry(TileX*, int*);
+    Entry(Tile*, int*);
 };
 struct Entries
 {
@@ -1138,24 +847,24 @@ struct ListOwner
 {
     int unk00;
     Entries entries;
-    TileX* parent;
+    Tile* parent;
     int unk10;
     int unk14;
     const char* templateName;
     unsigned short count;
     bool Test(unsigned int);
     void Refresh();
-    void Select(TileX*);
+    void Select(Tile*);
     void Update();
     int Mode();
-    TileX* FUN_007e0e70(int data, const char* text, void* compare, const char* name);
+    Tile* FUN_007e0e70(int data, const char* text, void* compare, const char* name);
 };
 // @fnv 0x007e0e70
-TileX* ListOwner::FUN_007e0e70(int data, const char* text, void* compare, const char* name)
+Tile* ListOwner::FUN_007e0e70(int data, const char* text, void* compare, const char* name)
 {
     if (parent && (templateName || name))
     {
-        TileX* tile = parent->GetMenu()->Create(parent, name ? name : templateName, 0);
+        Tile* tile = parent->GetMenu()->CreateTileFromTemplate(parent, name ? name : templateName, 0);
         if (!tile->GetValue(0xfaa))
             tile->Set(0xfaa, -1);
         if (text)
@@ -1178,7 +887,7 @@ TileX* ListOwner::FUN_007e0e70(int data, const char* text, void* compare, const 
         }
         if (Mode() == 1 && parent->GetFloat(GetTrait("_number_of_visible_items", -1)) > 0.0)
         {
-            ValueX* value = parent->GetAction(0xfb0);
+            ValueX* value = ((TileTraitLookup*)parent)->FindTraitValue(0xfb0);
             value->Clear();
             value->Copy(0x7d0, tile, 0xfb0);
             value->SetFloat(0x7d3, parent->GetFloat(GetTrait("_number_of_visible_items", -1)));
@@ -1504,12 +1213,14 @@ struct Ref
     Ref& operator=(void*);
     operator Accum*() const;
 };
-struct Pair
+// Not the shared (int, int) Pair: an int and a NiPointer-style Ref (ctor 0x00800170 constructs the Ref at +4 from 0,
+// dtor 0x00800190 releases it); real name unknown. FUN_007ffec0 holds one at +4 and 32 at +0x14.
+struct FUN_007ffec0_ValueRef
 {
     int value;
     Ref node;
-    Pair();
-    ~Pair();
+    FUN_007ffec0_ValueRef();
+    ~FUN_007ffec0_ValueRef();
 };
 struct FloatSetting
 {
@@ -1532,10 +1243,10 @@ void __cdecl LoadTexture(const char*, bool, Ref&, bool, bool);
 struct FUN_007ffec0
 {
     int unk000;
-    Pair first;
+    FUN_007ffec0_ValueRef first;
     int unk00c;
     int unk010;
-    Pair entries[32];
+    FUN_007ffec0_ValueRef entries[32];
     Ref unk114;
     bool unk118;
     bool active[16];
@@ -1660,7 +1371,7 @@ struct RemoveTile
 {
     virtual void* Destroy(unsigned int);
     float FUN_00a011b0(int);
-    void SetFloat(int, float, bool);
+    void FUN_00a012d0(int, float, bool);
 };
 struct RemoveOwned
 {
@@ -1714,7 +1425,7 @@ bool RemoveView::RemoveNodeFromList(RemoveNode* node, RemoveNode* previous)
         }
         if (container && (*node->FUN_006815c0())->filtered)
         {
-            container->SetFloat(FUN_00a01860("_num_filtered"),
+            container->FUN_00a012d0(FUN_00a01860("_num_filtered"),
                                     (float)(container->FUN_00a011b0(FUN_00a01860("_num_filtered")) - 1.0), true);
         }
         RemoveTile* tile_2 = (*node->FUN_006815c0())->tile;

@@ -7,6 +7,8 @@
 // to their real unit once identified.
 // src/havok/physics/collide/agent/convexagent/spheresphere/hkpspheresphereagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/spheresphere/hkpspheresphereagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../include/Transform.h"
+
 extern "C" void __cdecl FUN_00d3f6a0(void* a, void* b, void* c, void* d);
 void __stdcall FUN_00d3fcc0(void* a, void* c, void* b, void* d);
 struct S_00d3f660_Owner
@@ -49,28 +51,11 @@ struct S_00d3f780_Node
     }  // radius
 };
 
-struct S_00d3f780_Xf
-{  // the placement referenced by the bodies
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    float unk10;
-    float unk14;
-    float unk18;
-    float unk1C;
-    float unk20;
-    float unk24;
-    float unk28;
-    float unk2C;
-    __m128 unk30;  // position
-};
-
 struct S_00d3f780_In
 {
     S_00d3f780_Node* unk00;
     int unk04;
-    S_00d3f780_Xf* unk08;
+    Transform* unk08;
 };
 
 struct S_00d3f780_C
@@ -169,10 +154,10 @@ void S_00d3f780_Obj::FUN_00d3f780(S_00d3f780_In* a, S_00d3f780_In* b, S_00d3f780
     // the sum of the two radii and the extra offset
     S_00d3f780_Node* shapeA = a->unk00;
     S_00d3f780_Node* shapeB = b->unk00;
-    const __m128* posB = &b->unk08->unk30;
+    const __m128* posB = &b->unk08->r[3];
 
     // the vector between the two placements and its squared length
-    __m128 diff = _mm_sub_ps(a->unk08->unk30, *posB);
+    __m128 diff = _mm_sub_ps(a->unk08->r[3], *posB);
     float rad = shapeA->radius() + shapeB->radius() + c->unk08;
     __m128 sq = _mm_mul_ps(diff, diff);
     __m128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
@@ -264,10 +249,6 @@ struct Shape
         return radius;
     }
 };
-struct Transform
-{
-    __m128 rotation0, rotation1, rotation2, position;
-};
 struct Body
 {
     Shape* shape;
@@ -292,7 +273,9 @@ union ScalarScratch
         volatile unsigned int beginStamp, endStamp;
     } profiling;
 };
-struct Point
+// hkpCdPoint: hkContactPoint (position, separating normal) then m_cdBodyA/m_cdBodyB, handed to
+// hkpCdPointCollector::addCdPoint (slot 1). Local because Body is this unit's hkpCdBody view.
+struct CdPoint
 {
     __m128 position;
     __m128 normal;
@@ -302,7 +285,7 @@ struct Point
 struct Collector
 {
     virtual void v0();
-    virtual void AddContactPoint(const Point&);
+    virtual void AddContactPoint(const CdPoint&);
 };
 struct Event
 {
@@ -335,11 +318,11 @@ void __stdcall FUN_00d3f980(const Body* a, const Body* b, const Input* input, Co
     }
     const Shape* shapeA = a->shape;
     const Shape* shapeB = b->shape;
-    const __m128& posB = b->transform->position;
-    Point point;
+    const __m128& posB = b->transform->r[3];
+    CdPoint point;
     point.a = a;
     point.b = b;
-    __m128 diff = _mm_sub_ps(a->transform->position, posB);
+    __m128 diff = _mm_sub_ps(a->transform->r[3], posB);
     scratch.collision.distance = shapeB->getRadius() + shapeA->radius + input->tolerance;
     __m128 sq = _mm_mul_ps(diff, diff);
     __m128 add1 = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);

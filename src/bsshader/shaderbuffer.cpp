@@ -1,21 +1,12 @@
+#include "../../include/NiTStringPointerMap.h"
 // bsshader/shaderbuffer.cpp: ShaderBufferCollection, SpawnedObject (5 functions)
 
 #include "shaderbuffer_tables.h"
 #include "MemoryManager.h"
+#include "../../include/NiTStringPointerMap.h"
 
 class ShaderBufferRecord;
 
-template <class T> class NiTStringPointerMap
-{
-  public:
-    ~NiTStringPointerMap();
-    bool GetAt(const char* key, T& value);
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiHashSize;
-    void* m_ppkHashTable;
-    unsigned int m_uiAllocatorCount;
-    unsigned int m_uiCount;
-};
 
 class ShaderBufferCollection
 {

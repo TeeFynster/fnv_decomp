@@ -1,3 +1,14 @@
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiPalette.h"
+#include "../../../../include/NiPersistentSrcTextureRendererData.h"
+#include "../../../../include/NiPixelFormat.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiPointer.h"
+#include "../../../../include/NiTPointerMap.h"
+#include "../../../../include/NiTMap.h"
 
 // src/gamebryo2.2/corelibs/nimain/nipersistentsrctexturerendererdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nipersistentsrctexturerendererdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -10,15 +21,6 @@ char const* const* __cdecl FUN_00e91780()
     return &g_0126f9f8_arg1;
 }
 
-struct NiObject
-{
-};
-
-struct NiStream
-{
-    static void __cdecl UnregisterObjectLoader(char const*);
-    static int __cdecl RegisterObjectLoader(char const*, NiObject*(__cdecl*)(void));
-};
 
 extern char const* const DAT_0109f0a0;
 NiObject* __cdecl FUN_00a982d0();
@@ -32,15 +34,6 @@ void __cdecl RegisterNiStreamFactory()
 
 extern "C" void __cdecl _NiFreeAlias(void*);
 
-struct NiPersistentSrcTextureRendererData
-{
-    char pad[0x60];
-    unsigned char* m_pucPixels;
-    unsigned int* m_puiWidth;
-    unsigned int* m_puiHeight;
-    unsigned int* m_puiOffsetInBytes;
-    void FreePixelData();
-};
 
 // Frees m_pucPixels and clears the pixel pointer, width, height and offset fields.
 // @fnv 0x00a980e0
@@ -56,110 +49,52 @@ void NiPersistentSrcTextureRendererData::FreePixelData()
     }
 }
 
-namespace fnv_00a98110 {
+
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-struct NiObjectHelper
-{
-    virtual void LinkObject(NiStream&);
-};
-struct NiStreamHelper
-{
-    NiObject* GetLoadedObject();
-};
-struct NiPalette
-{
-    virtual ~NiPalette();
-    virtual void DeleteThis();
-    long m_iObjectReferenceCount;
-};
-struct NiPersistentSrcTextureRendererData
-{
-    char _pad[0x90];
-    NiPalette* m_spPalette;
-    void LinkPalette(NiStream&);
-};
+
 // Links the object to the stream, then swaps m_spPalette to the stream's palette, releasing the old one and incrementing the new one's refcount.
 // @fnv 0x00a98110
 void NiPersistentSrcTextureRendererData::LinkPalette(NiStream& kStream)
 {
-    ((NiObjectHelper*)this)->NiObjectHelper::LinkObject(kStream);
-    NiPalette* pkPalette = (NiPalette*)((NiStreamHelper*)&kStream)->GetLoadedObject();
+    NiObject::LinkObject(kStream);
+    NiPalette* pkPalette = (NiPalette*)kStream.GetLoadedObject();
     NiPalette* pkOld = m_spPalette;
     if (pkOld != pkPalette)
     {
-        if (pkOld && InterlockedDecrement((long volatile*)&pkOld->m_iObjectReferenceCount) == 0)
+        if (pkOld && InterlockedDecrement((long volatile*)&pkOld->m_uiRefCount) == 0)
             pkOld->DeleteThis();
         m_spPalette = pkPalette;
         if (pkPalette)
-            InterlockedIncrement((long volatile*)&pkPalette->m_iObjectReferenceCount);
+            InterlockedIncrement((long volatile*)&pkPalette->m_uiRefCount);
     }
 }
-}  // namespace fnv_00a98110
 
-namespace fnv_00a98170 {
-struct NiObjectHelper
-{
-    bool RegisterStreamables(NiStream&);
-};
-struct PaletteHelper
-{
-    virtual void vf00();
-    virtual void vf01();
-    virtual void vf02();
-    virtual void vf03();
-    virtual void vf04();
-    virtual void vf05();
-    virtual void vf06();
-    virtual void vf07();
-    virtual void vf08();
-    virtual void vf09();
-    virtual void vf10();
-    virtual void vf11();
-    virtual void vf12();
-    virtual void vf13();
-    virtual void vf14();
-    virtual void vf15();
-    virtual void vf16();
-    virtual void vf17();
-    virtual void vf18();
-    virtual void vf19();
-    virtual void vf20();
-    virtual bool RegisterStreamables(NiStream&);
-};
-struct NiPersistentSrcTextureRendererData
-{
-    char _pad0[0x90];
-    PaletteHelper* m_spPalette;
-    bool FUN_00a98170(NiStream&);
-};
+
 // Registers the object's streamables with kStream, then registers m_spPalette's streamables if it is set; returns false on failure.
 // @fnv 0x00a98170
 bool NiPersistentSrcTextureRendererData::FUN_00a98170(NiStream& kStream)
 {
-    if (!((NiObjectHelper*)this)->NiObjectHelper::RegisterStreamables(kStream))
+    if (!NiObject::RegisterStreamables(kStream))
         return false;
-    PaletteHelper* pkPalette = m_spPalette;
+    NiPalette* pkPalette = m_spPalette;
     if (pkPalette)
         pkPalette->RegisterStreamables(kStream);
     return true;
 }
-}  // namespace fnv_00a98170
+
 
 void __cdecl FUN_00a98240();
 void __cdecl _delete(void*, unsigned int);
-struct S
-{
-    void* DestroyIfFlagged(unsigned int);
-};
+
 // Calls FUN_00a98240, then deletes this with size 0x94 when f has bit 0 set, and returns this.
 // @fnv 0x00a98480
-void* S::DestroyIfFlagged(unsigned int auiFlags)
+void* __fastcall DestroyIfFlagged(NiPersistentSrcTextureRendererData* self, void*, unsigned int auiFlags)
 {
     FUN_00a98240();
     if (auiFlags & 1)
-        _delete(this, 0x94);
-    return this;
+        _delete(self, 0x94);
+    return self;
 }
 
 extern bool DAT_011f5f00;
@@ -202,61 +137,19 @@ template <class T> inline void NiStreamSaveBinary_s(NiStream& kStream, const T* 
 {
     NiBinaryStreamSave_s(*Ostr_s(kStream), pValue, uiNumEls);
 }
-struct NiStreamV_s
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void SaveLinkID(void*);
-};
-struct NiPixelFormat_s
-{
-    void FUN_00a7d1a0(NiStream&);
-};
-struct RendererDataBase_s
-{
-    void LinkObject(NiStream&);
-};
-struct NiPersistentSrcTextureRendererData_s : RendererDataBase_s
-{
-    char pad[0x14];
-    NiPixelFormat_s m_kPixelFormat;
-    char pad2[0x60 - 0x15];
-    unsigned char* m_pucPixels;
-    unsigned int* m_puiWidth;
-    unsigned int* m_puiHeight;
-    unsigned int* m_puiOffsetInBytes;
-    unsigned int m_uiPixelDataSize;
-    unsigned int m_uiMipmapLevels;
-    unsigned int m_uiPixelStride;
-    unsigned int m_uiFaces;
-    int m_iPaletteFormat;
-    unsigned char* m_pucPaletteData;
-    unsigned int m_uiPaletteSize;
-    unsigned int m_uiPaletteEntryCount;
-    void* m_spPalette;
-    void FUN_00a984b0(NiStream& kStream);
-};
+
 
 // Writes the renderer data to the stream: pixel format, palette link ID, mipmap levels, per-level dimensions and offsets, faces, and pixel data.
 // @fnv 0x00a984b0
-void NiPersistentSrcTextureRendererData_s::FUN_00a984b0(NiStream& kStream)
+void NiPersistentSrcTextureRendererData::SaveBinary(NiStream& kStream)
 {
-    RendererDataBase_s::LinkObject(kStream);
+    // The original calls the empty base hook at 0x00a89af0.
+    NiObject::LinkObject(kStream);
 
     bool bToolModeStreamingValid = DAT_011f5f00 && m_uiPaletteSize && m_uiPaletteEntryCount && m_pucPaletteData;
 
-    m_kPixelFormat.FUN_00a7d1a0(kStream);
-    ((NiStreamV_s*)&kStream)->SaveLinkID(m_spPalette);
+    m_kPixelFormat.SaveBinary(&kStream);
+    kStream.SaveLinkID(reinterpret_cast<const NiObject*>(m_spPalette));
     NiStreamSaveBinary_s(kStream, m_uiMipmapLevels);
     NiStreamSaveBinary_s(kStream, m_uiPixelStride);
 
@@ -287,106 +180,8 @@ void NiPersistentSrcTextureRendererData_s::FUN_00a984b0(NiStream& kStream)
         NiStreamSaveBinary_s(kStream, m_pucPixels, m_puiOffsetInBytes[m_uiMipmapLevels] * m_uiFaces);
 }
 
-struct NiRTTI
-{
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
 
-class NiObj_s
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual const NiRTTI* GetRTTI() const;
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual bool IsEqual(NiObj_s* pkObject);
-    unsigned int m_uiRefCount;
-};
-
-class NiPixFmt_s
-{
-  public:
-    bool operator!=(const NiPixFmt_s& kFormat) const;
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-};
-
-struct NiPtr_s
-{
-    NiObj_s* m_pObject;
-    operator NiObj_s*() const
-    {
-        return m_pObject;
-    }
-    NiObj_s* operator->() const
-    {
-        return m_pObject;
-    }
-};
-
-class PSTRData_s : public NiObj_s
-{
-  public:
-    static NiRTTI ms_kRTTI;
-    bool FUN_00a982f0(NiObj_s* pkObject);
-
-    int unk08;
-    int unk0C;
-    int unk10;
-    NiPixFmt_s m_kPixelFormat;
-    unsigned char* m_pucPixels;
-    unsigned int* m_puiWidth;
-    unsigned int* m_puiHeight;
-    unsigned int* m_puiOffsetInBytes;
-    unsigned int m_uiPixelDataSize;
-    unsigned int m_uiMipmapLevels;
-    unsigned int m_uiPixelStride;
-    unsigned int m_uiFaces;
-    int m_iPaletteFormat;
-    unsigned char* m_pucPaletteData;
-    unsigned int m_uiPaletteSize;
-    unsigned int m_uiPaletteEntryCount;
-    NiPtr_s m_spPalette;
-};
-
-inline bool IsKindOf_s(const NiRTTI* pkRTTI, NiObj_s* pkObject)
+inline bool IsKindOf_s(const NiRTTI* pkRTTI, NiObject* pkObject)
 {
     if (!pkObject)
         return false;
@@ -402,23 +197,29 @@ inline bool IsKindOf_s(const NiRTTI* pkRTTI, NiObj_s* pkObject)
 
 extern "C" int __cdecl memcmp(const void*, const void*, unsigned int);
 
+inline NiObject* PaletteObject(NiPalette* const& palette)
+{
+    return palette;
+}
+
 // @fnv 0x00a982f0
-bool PSTRData_s::FUN_00a982f0(NiObj_s* pkObject)
+bool NiPersistentSrcTextureRendererData::FUN_00a982f0(NiObject* pkObject)
 {
     if (!IsKindOf_s(&ms_kRTTI, pkObject))
         return false;
 
-    if (!NiObj_s::IsEqual(pkObject))
+    if (!NiObject::IsEqual(pkObject))
         return false;
 
-    PSTRData_s* pkData = (PSTRData_s*)pkObject;
+    NiPersistentSrcTextureRendererData* pkData = (NiPersistentSrcTextureRendererData*)pkObject;
 
     if (m_kPixelFormat != pkData->m_kPixelFormat)
         return false;
 
-    if (m_spPalette)
+    const NiObject* pkPalette = m_spPalette;
+    if (pkPalette)
     {
-        if (!m_spPalette->IsEqual(pkData->m_spPalette))
+        if (!pkPalette->IsEqual(PaletteObject(pkData->m_spPalette)))
             return false;
     }
 
@@ -471,47 +272,42 @@ struct ViewerArray
         return index;
     }
 };
-struct ViewerBase
-{
-    void AppendCameraPathEntries(ViewerArray*);
-};
+
 char* __cdecl FUN_00a7d330(const char*);
 char* __cdecl FUN_00a7d510(const char*, unsigned int);
 char* __cdecl FUN_00a7d5e0(const char*, const char*);
 extern const char* DAT_011f5f04;
-struct ViewerData : PSTRData_s
+
+inline unsigned int NiPersistentSrcTextureRendererData::GetWidth(unsigned int level) const
 {
-    unsigned int GetWidth(unsigned int level = 0) const
-    {
-        return m_puiWidth[level];
-    }
-    unsigned int GetHeight(unsigned int level = 0) const
-    {
-        return m_puiHeight[level];
-    }
-    const unsigned int& GetMipmapLevels() const
-    {
-        return m_uiMipmapLevels;
-    }
-    const unsigned int& GetFaces() const
-    {
-        return m_uiFaces;
-    }
-    unsigned int GetTotalSizeInBytes() const
-    {
-        return m_puiOffsetInBytes[m_uiMipmapLevels] * m_uiFaces;
-    }
-    unsigned int GetFaceSizeInBytes() const
-    {
-        return m_puiOffsetInBytes[m_uiMipmapLevels];
-    }
-    void AppendToStrings(ViewerArray*);
-};
+    return m_puiWidth[level];
+}
+inline unsigned int NiPersistentSrcTextureRendererData::GetHeight(unsigned int level) const
+{
+    return m_puiHeight[level];
+}
+inline const unsigned int& NiPersistentSrcTextureRendererData::GetMipmapLevels() const
+{
+    return m_uiMipmapLevels;
+}
+inline const unsigned int& NiPersistentSrcTextureRendererData::GetFaces() const
+{
+    return m_uiFaces;
+}
+inline unsigned int NiPersistentSrcTextureRendererData::GetTotalSizeInBytes() const
+{
+    return m_puiOffsetInBytes[m_uiMipmapLevels] * m_uiFaces;
+}
+inline unsigned int NiPersistentSrcTextureRendererData::GetFaceSizeInBytes() const
+{
+    return m_puiOffsetInBytes[m_uiMipmapLevels];
+}
+
 // Appends the texture's width, height, mipmap levels, faces, sizes and a target-platform string to the given string array.
 // @fnv 0x00a98740
-void ViewerData::AppendToStrings(ViewerArray* strings)
+void NiPersistentSrcTextureRendererData::AppendToStrings(ViewerArray* strings)
 {
-    ((ViewerBase*)this)->AppendCameraPathEntries(strings);
+    NiObject::AddViewerStrings((NiViewerStringsArray*)strings);
     char* value = FUN_00a7d330(DAT_011f5f04);
     strings->Add(value);
     value = FUN_00a7d510("Width", GetWidth());
@@ -735,126 +531,54 @@ template <class T> inline void Load(LoadStream& stream, T& value)
 {
     BinaryLoad(*stream.input, &value, 1);
 }
-struct PixelFormatLoad
-{
-    void LoadFormat(LoadStream&);
-};
-struct TextureLoad
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void Allocate(unsigned int, unsigned int, unsigned int);
-    unsigned int unk04, unk08, unk0c, unk10;
-    PixelFormatLoad format;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned char* pixels;
-    unsigned int* width;
-    unsigned int* height;
-    unsigned int* offsets;
-    unsigned int padOffset, levels, stride, faces, target;
-    unsigned char* pristine;
-    unsigned int pristineMax, pristinePad;
-    void LoadBase(LoadStream&);
-    void LoadTextureData(LoadStream&);
-};
+
+
 extern bool DAT_011f5f00;
 void* __cdecl NiMalloc(unsigned int);
 void* __cdecl memcpy(void*, const void*, unsigned int);
 // @fnv 0x00e917e0
-void TextureLoad::LoadTextureData(LoadStream& stream)
+void NiPersistentSrcTextureRendererData::LoadBinary(NiStream& kStream)
 {
-    LoadBase(stream);
-    format.LoadFormat(stream);
+    LoadStream& stream = (LoadStream&)kStream;
+    NiObject::LoadBinary(kStream);
+    m_kPixelFormat.LoadBinary(&kStream);
     stream.Resolve();
-    Load(stream, levels);
-    Load(stream, stride);
+    Load(stream, m_uiMipmapLevels);
+    Load(stream, m_uiPixelStride);
     unsigned int widths[16], heights[16], mipOffsets[16];
-    for (unsigned int level = 0; level < levels; ++level)
+    for (unsigned int level = 0; level < m_uiMipmapLevels; ++level)
     {
         Load(stream, widths[level]);
         Load(stream, heights[level]);
         Load(stream, mipOffsets[level]);
     }
-    Load(stream, mipOffsets[levels]);
+    Load(stream, mipOffsets[m_uiMipmapLevels]);
     if (stream.unk0d8 >= 0x14020006)
     {
-        padOffset = 0;
-        Load(stream, padOffset);
+        m_uiPixelDataSize = 0;
+        Load(stream, m_uiPixelDataSize);
     }
     else
-        padOffset = mipOffsets[levels];
-    Load(stream, faces);
+        m_uiPixelDataSize = mipOffsets[m_uiMipmapLevels];
+    Load(stream, m_uiFaces);
     {
         int platform;
         Load(stream, platform);
-        target = platform;
+        m_iPaletteFormat = platform;
     }
-    Allocate(levels, faces, mipOffsets[levels]);
-    unsigned int bytesPerLevel = levels * 4;
-    memcpy(width, widths, bytesPerLevel);
-    memcpy(height, heights, bytesPerLevel);
-    memcpy(offsets, mipOffsets, (levels + 1) * 4);
-    stream.input->ReadBytes(pixels, offsets[levels] * faces);
+    AllocateMipMap(m_uiMipmapLevels, m_uiFaces, mipOffsets[m_uiMipmapLevels]);
+    unsigned int bytesPerLevel = m_uiMipmapLevels * 4;
+    memcpy(m_puiWidth, widths, bytesPerLevel);
+    memcpy(m_puiHeight, heights, bytesPerLevel);
+    memcpy(m_puiOffsetInBytes, mipOffsets, (m_uiMipmapLevels + 1) * 4);
+    stream.input->ReadBytes(m_pucPixels, m_puiOffsetInBytes[m_uiMipmapLevels] * m_uiFaces);
     if (DAT_011f5f00)
     {
-        pristineMax = offsets[levels];
-        pristinePad = padOffset;
-        unsigned int bytes = pristineMax * faces;
-        pristine = (unsigned char*)NiMalloc(bytes);
-        memcpy(pristine, pixels, bytes);
+        m_uiPaletteSize = m_puiOffsetInBytes[m_uiMipmapLevels];
+        m_uiPaletteEntryCount = m_uiPixelDataSize;
+        unsigned int bytes = m_uiPaletteSize * m_uiFaces;
+        m_pucPaletteData = (unsigned char*)NiMalloc(bytes);
+        memcpy(m_pucPaletteData, m_pucPixels, bytes);
     }
 }
 
@@ -878,49 +602,8 @@ extern int DAT_011bf558;
 extern int DAT_0126f0ec;
 extern void* DAT_0126f108[256];
 
-struct MemoryManager
-{
-    void Deallocate(void*) throw();
-};
 extern MemoryManager DAT_011f6238;
 
-struct NiRefObject
-{
-    virtual void Unknown() throw();
-    virtual void DeleteThis() throw();
-    volatile long m_uiRefCount;
-    void Release() throw()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
-template <class T> struct NiPointer
-{
-    T* m_pObject;
-    NiPointer() : m_pObject(0)
-    {}
-    ~NiPointer() throw()
-    {
-        T* object = m_pObject;
-        if (object)
-        {
-            if (InterlockedDecrement(&object->m_uiRefCount) == 0)
-            {
-                object->DeleteThis();
-            }
-        }
-    }
-    operator T*() const throw()
-    {
-        return m_pObject;
-    }
-    T* operator->() const throw()
-    {
-        return m_pObject;
-    }
-};
 
 template <class T> struct NiPointerArray4
 {
@@ -936,7 +619,7 @@ template <class T> struct NiPointerArray4
             T* obj = *--p;
             if (obj)
             {
-                if (InterlockedDecrement(&obj->m_uiRefCount) == 0)
+                if (InterlockedDecrement((volatile long*)&obj->m_uiRefCount) == 0)
                     obj->DeleteThis();
             }
         }
@@ -944,72 +627,6 @@ template <class T> struct NiPointerArray4
     operator T**() throw()
     {
         return &m_iWordAt00;
-    }
-};
-
-struct NiTMapItem
-{
-    NiTMapItem* m_pkNext;
-    unsigned int m_key;
-    void* m_val;
-};
-
-template <class Alloc, class Key, class Val> struct NiTMapBase
-{
-    virtual ~NiTMapBase() throw()
-    {
-        RemoveAll();
-        NiFree(m_ppkHashTable);
-    }
-    virtual unsigned int KeyToHashIndex(Key key) const throw();
-    void RemoveAll() throw();
-    void RemoveAt(Key key) throw();
-    void InsertOrUpdate(Key key, void* val) throw();
-
-    void* GetFirstPos() const throw()
-    {
-        for (unsigned int i = 0; i < m_uiHashSize; i++)
-        {
-            if (m_ppkHashTable[i])
-                return m_ppkHashTable[i];
-        }
-        return 0;
-    }
-
-    void GetNext(void*& pos, Key& key, Val& val) throw()
-    {
-        NiTMapItem* pItem = (NiTMapItem*)pos;
-        void* next = pItem->m_pkNext;
-        key = (Key)pItem->m_key;
-        val = (Val)pItem->m_val;
-        if (next)
-        {
-            pos = next;
-            return;
-        }
-        unsigned int i = KeyToHashIndex((Key)pItem->m_key);
-        for (i++; i < m_uiHashSize; i++)
-        {
-            NiTMapItem* found = m_ppkHashTable[i];
-            if (found)
-            {
-                pos = found;
-                return;
-            }
-        }
-        pos = 0;
-    }
-
-    unsigned int m_uiHashSize;
-    NiTMapItem** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
-
-template <class Key, class Val> struct NiTPointerMap : public NiTMapBase<void, Key, Val>
-{
-    virtual ~NiTPointerMap() throw()
-    {
-        this->RemoveAll();
     }
 };
 
@@ -1070,66 +687,94 @@ struct GeometryCacheEntry : public NiRefObject
     virtual CachedGeometrySub* GetExtra() throw();
 };
 
-template <class T> class NiTPointerAllocator
-{
-};
+}  // namespace fnv_00e75a70
 
-class NiPointerCachedGeometry
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0)
+{}
+template <class T> inline NiPointer<T>::~NiPointer()
 {
-  public:
-    GeometryCacheEntry* m_pObject;
-    NiPointerCachedGeometry() : m_pObject(0)
-    {}
-    ~NiPointerCachedGeometry() throw()
+    T* pkNew = m_pObject;
+    if (pkNew)
     {
-        if (m_pObject)
+        if (InterlockedDecrement((volatile long*)&pkNew->m_uiRefCount) == 0)
+            pkNew->DeleteThis();
+    }
+}
+template <class T> inline NiPointer<T>::operator T*() const
+{
+    return m_pObject;
+}
+template <class T> inline T* NiPointer<T>::operator->() const
+{
+    return m_pObject;
+}
+
+template <class Alloc, class Key, class Val> inline NiTMapBase<Alloc, Key, Val>::~NiTMapBase()
+{
+    RemoveAll();
+    fnv_00e75a70::NiFree(m_ppkHashTable);
+}
+template <class Alloc, class Key, class Val> inline void* NiTMapBase<Alloc, Key, Val>::GetFirstPos() const
+{
+    for (unsigned int i = 0; i < m_uiHashSize; i++)
+    {
+        if (m_ppkHashTable[i])
+            return m_ppkHashTable[i];
+    }
+    return 0;
+}
+template <class Alloc, class Key, class Val>
+inline void NiTMapBase<Alloc, Key, Val>::GetNext(void*& pos, Key& key, Val& val) const
+{
+    NiTMapItem<Key, Val>* pItem = (NiTMapItem<Key, Val>*)pos;
+    void* next = pItem->m_pkNext;
+    key = pItem->m_key;
+    val = pItem->m_val;
+    if (next)
+    {
+        pos = next;
+        return;
+    }
+    unsigned int i = KeyToHashIndex(pItem->m_key);
+    for (i++; i < m_uiHashSize; i++)
+    {
+        NiTMapItem<Key, Val>* found = m_ppkHashTable[i];
+        if (found)
         {
-            if (InterlockedDecrement(&m_pObject->m_uiRefCount) == 0)
-                m_pObject->DeleteThis();
+            pos = found;
+            return;
         }
     }
-    operator GeometryCacheEntry*() const throw()
-    {
-        return m_pObject;
-    }
-    GeometryCacheEntry* operator->() const throw()
-    {
-        return m_pObject;
-    }
-};
+    pos = 0;
+}
 
+// Renderer cache map: vftable 0x010edb1c; GetNext 0x00e6e630 copies a NiPointer value (also used by TallGrassShaderProperty).
 template <>
-__declspec(noalias) void NiTMapBase<NiTPointerAllocator<unsigned int>, const char*, GeometryCacheEntry*>::GetNext(
-    void*& pos, const char*& key, GeometryCacheEntry*& val) throw();
+__declspec(noalias) void NiTMapBase<NiTPointerAllocator<unsigned int>, const char*,
+    NiPointer<fnv_00e75a70::GeometryCacheEntry> >::GetNext(void*& pos, const char*& key,
+    NiPointer<fnv_00e75a70::GeometryCacheEntry>& val) const;
 
-struct NiTPointerMap890 : public NiTMapBase<NiTPointerAllocator<unsigned int>, const char*, GeometryCacheEntry*>
+template <class Key, class Val> inline NiTPointerMap<Key, Val>::~NiTPointerMap()
 {
-    virtual ~NiTPointerMap890() throw()
-    {
-        this->RemoveAll();
-    }
-};
+    this->RemoveAll();
+}
+template <class Key, class Val> inline NiTMap<Key, Val>::~NiTMap()
+{
+    this->RemoveAll();
+}
 
-template <class Key, class Val> struct NiTMap : public NiTMapBase<void, Key, Val>
+#include "../../../../include/NiTMallocInterface.h"
+#include "../../../../include/NiTPrimitiveArray.h"
+// Gamebryo NiTArray.inl / NiTCollection.h bodies the original inlines into Member_900's destructor
+template <class T> inline void NiTMallocInterface<T>::Deallocate(T* pArray)
 {
-    virtual ~NiTMap() throw()
-    {
-        this->RemoveAll();
-    }
-};
-
-template <class T> struct NiTArray
+    fnv_00e75a70::NiFree(pArray);
+}
+template <class T, class TAlloc> inline NiTArray<T, TAlloc>::~NiTArray()
 {
-    virtual ~NiTArray() throw()
-    {
-        NiFree(m_pBase);
-    }
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usPad;
-};
+    TAlloc::Deallocate(m_pBase);
+}
+namespace fnv_00e75a70 {
 
 struct Member_900
 {
@@ -1818,7 +1463,7 @@ class FUN_00e75a70 : public Base_00a62b60
     int unk0884;
     int unk0888;
     int unk088c;
-    NiTPointerMap890 m_kMap890;
+    NiTPointerMap<const char*, NiPointer<GeometryCacheEntry> > m_kMap890;
     int unk08a0;
     int unk08a4;
     void* m_p8a8;
@@ -1947,10 +1592,11 @@ class FUN_00e75a70 : public Base_00a62b60
     int unk0ac8;
     int unk0acc;
     int unk0ad0;
-    NiTArray<unsigned int> m_kArrayAd4;
-    NiTArray<void*> m_kArrayAe4;
-    NiTArray<NiRefObject*> m_kArrayAf4;
-    NiTArray<void*> m_kArrayB04;
+    // element types from the RTTI of the vftables ~Member_900 stores (0x010edaec, 0x010edae4, 0x010edaf4)
+    NiTPrimitiveArray<bool(__cdecl*)(bool, void*)> m_kArrayAd4;
+    NiTPrimitiveArray<void*> m_kArrayAe4;
+    NiTPrimitiveArray<bool(__cdecl*)(void*)> m_kArrayAf4;
+    NiTPrimitiveArray<void*> m_kArrayB04;
     NiTMap<unsigned int, void*> m_kMapB14;
     int unk0b24;
     int unk0b28;
@@ -2010,7 +1656,7 @@ FUN_00e75a70::~FUN_00e75a70() throw()
         NiRefObject* obj = *p870;
         if (obj)
         {
-            if (InterlockedDecrement(&obj->m_uiRefCount) == 0)
+            if (InterlockedDecrement((volatile long*)&obj->m_uiRefCount) == 0)
                 obj->DeleteThis();
             *p870 = 0;
         }
@@ -2054,7 +1700,7 @@ FUN_00e75a70::~FUN_00e75a70() throw()
                 PrePackObject* nextVal = val->m_pkNext;
                 if (nextVal)
                 {
-                    m_kMap610.InsertOrUpdate(key, nextVal);
+                    m_kMap610.SetAt(key, nextVal);
                 }
                 else
                 {
@@ -2082,7 +1728,7 @@ FUN_00e75a70::~FUN_00e75a70() throw()
         do
         {
             const char* key890;
-            GeometryCacheEntry* output = 0;
+            NiPointer<GeometryCacheEntry> output;
             m_kMap890.GetNext(pos890, key890, output);
             GeometryCacheEntry* geom = output;
             if (geom)
@@ -2095,7 +1741,7 @@ FUN_00e75a70::~FUN_00e75a70() throw()
                         NiRefObject* obj = sub->m_pReferencedObject;
                         if (obj)
                         {
-                            if (InterlockedDecrement(&obj->m_uiRefCount) == 0)
+                            if (InterlockedDecrement((volatile long*)&obj->m_uiRefCount) == 0)
                                 obj->DeleteThis();
                             sub->m_pReferencedObject = 0;
                         }
@@ -2107,12 +1753,11 @@ FUN_00e75a70::~FUN_00e75a70() throw()
                     NiRefObject* obj = extra->m_pReferencedObject;
                     if (obj)
                     {
-                        if (InterlockedDecrement(&obj->m_uiRefCount) == 0)
+                        if (InterlockedDecrement((volatile long*)&obj->m_uiRefCount) == 0)
                             obj->DeleteThis();
                         extra->m_pReferencedObject = 0;
                     }
                 }
-                geom->Release();
             }
         } while (pos890);
     }
@@ -2172,7 +1817,7 @@ FUN_00e75a70::~FUN_00e75a70() throw()
         NiRefObject* obj = (NiRefObject*)DAT_0126f108[i];
         if (obj)
         {
-            if (InterlockedDecrement(&obj->m_uiRefCount) == 0)
+            if (InterlockedDecrement((volatile long*)&obj->m_uiRefCount) == 0)
                 obj->DeleteThis();
             DAT_0126f108[i] = 0;
         }
@@ -2197,43 +1842,11 @@ FUN_00e75a70::~FUN_00e75a70() throw()
 }  // namespace fnv_00e75a70
 
 void* __cdecl FUN_00aa1070(unsigned int size);
-namespace nsa98 {
-struct Cls
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0C;
-    void* unk10;
-    void* unk14;
-    void* unk18;
-    void* unk1C;
-    void* unk20;
-    void* unk24;
-    void* unk28;
-    void* unk2C;
-    void* unk30;
-    void* unk34;
-    void* unk38;
-    void* unk3C;
-    void* unk40;
-    void* unk44;
-    void* unk48;
-    void* unk4C;
-    void* unk50;
-    void* unk54;
-    void* unk58;
-    void* unk5C;
-    unsigned char* m_pucPixels;
-    unsigned int* m_puiWidth;
-    unsigned int* m_puiHeight;
-    unsigned int* m_puiOffsetInBytes;
-    void AllocateMipMap(unsigned int uiLevels, unsigned int uiFaces, unsigned int uiBytes);
-};
-}
+
+
 // Allocates a pixel buffer and sets m_puiWidth, m_puiHeight, and m_puiOffsetInBytes for a mip map with uiLevels and uiFaces.
 // @fnv 0x00a98090
-void nsa98::Cls::AllocateMipMap(unsigned int uiLevels, unsigned int uiFaces, unsigned int uiBytes)
+void NiPersistentSrcTextureRendererData::AllocateMipMap(unsigned int uiLevels, unsigned int uiFaces, unsigned int uiBytes)
 {
     unsigned int uiStride = (uiBytes + 3) & ~3;
     unsigned int uiTotal = *(volatile unsigned int*)&uiFaces * uiStride;

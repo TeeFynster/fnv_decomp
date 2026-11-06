@@ -117,11 +117,7 @@ class ImageSpaceShaderHDRSecondary
 };
 class ImageSpaceTexture;
 template <class T> class NiTMallocInterface;
-template <class T, class Allocator> class NiTArray
-{
-  public:
-    void SetSize(unsigned int);
-};
+#include "../../include/NiTArray.h"
 class ImageSpaceShaderHDRBase : public ImageSpaceShaderHDRInterface, public ImageSpaceShaderHDRSecondary
 {
   public:

@@ -1,3 +1,25 @@
+// ExtraObj_listbox: local type (was include/ExtraObj.h, which had no evidence of one real class); its methods are 0x00418770 ExtraDataList::GetCount, 0x00418800 ExtraDataList::GetScript, 0x004459e0 ItemChange::`scalar deleting destructor'
+class PkgObj;
+class FormObj;
+
+class ExtraObj_listbox
+{
+public:
+    PkgObj* FUN_0041cb10();
+    FormObj* FUN_00418800();
+    short FUN_00418770();
+    void* FUN_004459e0(unsigned int flags);
+};
+#include "../../../include/BSSimpleArray.h"
+#include "../../../include/Tile.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/InventoryChanges.h"
+#include "../../../include/ListBoxBase.h"
+#include "../../../include/SL.h"
+#include "../../../include/TESBoundObject.h"
+#include "../../../include/TESFullName.h"
+#include "../../../include/Menu.h"
+
 
 // src/fallout/interface/listbox_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /GF /Ob1 (unit src/fallout/interface/listbox.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
@@ -53,14 +75,13 @@ struct FUN_007a62e0_shell
     FUN_007a62e0_shell* __thiscall FUN_007a62e0(int param2, int* param3);
 };
 struct RecursiveLock;
-struct Menu;
 struct NiAVObject;
 struct NiNode;
-struct Tile;
 struct TileShaderProperty;
 struct MenuValueDescriptor;
 struct BGSSaveLoadFileEntry;
-struct ListBox
+// Exe 0x00a09130: unit-local ListBox view; declarations and layout are preserved.
+struct ListboxSelectionCallView
 {
     bool SetSelection(Tile* apItem, int apSelect);
     bool FUN_007d8d80(Tile* apSelectItem);
@@ -77,13 +98,13 @@ struct FUN_007d8eb0_shell
     void* __thiscall FUN_007d8eb0(unsigned int flags);
 };
 void __cdecl _Deallocate(void*);
-struct BSSimpleList
+struct ListBoxSortList
 {
     void __thiscall Sort(int(__cdecl* cmp)(void*, void*));
 };
 struct FUN_00721410_class
 {
-    BSSimpleList list;
+    ListBoxSortList list;
     void __thiscall FUN_00724360();
     void __thiscall FUN_00721410(void* param);
 };
@@ -116,32 +137,15 @@ struct FUN_007242c0_shell
 {
     bool __thiscall FUN_007242c0(unsigned int flags);
 };
-struct VATSMenu
-{
-    int GetSelectedTargetIndex();
-};
-struct TGF
-{
-    float GetFloat(int);
-};
 int GetTileValueID(const char*, int);
 extern int DAT_011d8cd8;
 extern int DAT_011d8cdc;
-struct FUN_0071ae60_shell : VATSMenu
-{
-    TGF* tile;
-    unsigned int __thiscall FUN_0071ae60();
-};
 void __cdecl FUN_00724930();
 struct FUN_00721bc0_shell
 {
     int x;
     void __thiscall FUN_00721bc0(int(__cdecl* param)(void*, void*));
     void __thiscall FUN_00724930();
-};
-struct Tile
-{
-    Menu* GetMenu();
 };
 struct FUN_00723030_Holder
 {
@@ -157,7 +161,7 @@ struct FUN_00725aa0_shell
 };
 struct FUN_00723310_shell
 {
-    BSSimpleList list;
+    ListBoxSortList list;
     void __thiscall FUN_00723310(int(__cdecl* cmp)(void*, void*));
 };
 struct FUN_00723ac0_shell
@@ -223,7 +227,7 @@ struct FUN_007643c0_p07 : Member_007a8b10
 {
     Member_007a8b10* __thiscall DestroySelf(unsigned int flags);
 };
-struct BSSimpleList;
+struct ListBoxSortList;
 struct FUN_007a6480_shell
 {
     void __thiscall FUN_007a6480();
@@ -289,7 +293,7 @@ struct FUN_007d7a80_shell
 void __cdecl UpdateSaveLoadList();
 struct FUN_007d8420_shell
 {
-    BSSimpleList list;
+    ListBoxSortList list;
     void __thiscall SortList(int(__cdecl* cmp)(void*, void*));
     void __thiscall UpdateSaveLoadList();
 };
@@ -301,31 +305,9 @@ struct FUN_007d86c0_shell
 {
     int* __thiscall FUN_007d86c0(int* apItem, unsigned char apSelect);
 };
-struct NavMeshSearchLOSArray
-{
-    int _00;
-    void* data;
-    int size;
-    int capacity;
-    void FUN_006a8500();
-    void FUN_007d9e80(void*, int);
-    void FUN_007d8e20(bool);
-};
 float __cdecl FUN_004e4430(float);
 int __cdecl FUN_00647b70(int, int);
 int FUN_00a01860(const char*);
-struct Tile_Set_Helper
-{
-    void Set(int, int);
-};
-struct TileF
-{
-    void Set(int, float, bool);
-};
-struct ListBoxBase
-{
-    virtual ~ListBoxBase();
-};
 struct ListBox_71ad30 : ListBoxBase
 {
     void* pListItem;
@@ -338,47 +320,22 @@ struct ListBox_71ad30 : ListBoxBase
     float m_fFirstListValue;
     void UpdateScrollPages();
 };
-struct TileSet
-{
-    void Set(int, int);
-};
 struct FUN_007d8810_shell
 {
     void* m0;
     void* m4;
     void* m8;
-    TileSet* mC;
+    Tile* mC;
     void __thiscall FUN_007d8810(bool abVal);
 };
 extern int DAT_011d95ac;
 extern int DAT_011d95b0;
-struct FUN_00765340_shell : VATSMenu
-{
-    int pad[3];
-    TGF* tile;
-    unsigned int __thiscall GetUnfilteredCount();
-};
 extern int DAT_011dac94;
 extern int DAT_011dac98;
-struct FUN_007d8700_shell : VATSMenu
-{
-    int pad0;
-    int pad1;
-    int pad2;
-    TGF* tile;
-    unsigned int GetFilteredItemCount();
-};
 struct FUN_007240c0
 {
     int* vptr;
     FUN_007240c0();
-};
-struct SL
-{
-    int a;
-    int b;
-    SL();
-    ~SL();
 };
 struct ListBox_SetSelectedTile_shell
 {
@@ -402,38 +359,6 @@ struct FUN_00721060 : FUN_007240c0
     FUN_00721060();
 };
 struct TileValue;
-struct Tile_GetValue_helper
-{
-    TileValue* __thiscall GetValue(int index);
-};
-struct Tile_GetChildByName_helper
-{
-    Tile* __thiscall GetNamedChild(const char* name);
-};
-struct Tile_FUN_0071aa60_helper
-{
-    void __thiscall FUN_0071aa60(bool value);
-};
-struct Tile_GetSpeechChallengeFailure_helper
-{
-    bool __thiscall GetSpeechChallengeFailure();
-};
-struct Tile_Set_helper
-{
-    void __thiscall Set(int trait, int value);
-};
-struct TAN
-{
-    void __thiscall SetImageFlags(int flags);
-};
-struct FUN_00a09130_shell
-{
-    void __thiscall FUN_00a09130(int index, Tile* tile, int value);
-};
-struct FUN_00a09410_shell
-{
-    void __thiscall FUN_00a09410(int value);
-};
 Tile* __cdecl FindNamedTile(Tile* tile, const char* name);
 extern "C" char str_0106f87c[];
 extern "C" char str_0106f884[];
@@ -450,10 +375,6 @@ struct FUN_00725c20_shell
 
     void __thiscall UpdateHighlightTiles();
 };
-struct Tile_IsTrue_helper
-{
-    bool __thiscall ContainsTrait(int);
-};
 struct FUN_007a6bd0_shell
 {
     char _base[0x0c];
@@ -466,10 +387,6 @@ struct FUN_007a79b0_shell
     Tile* m_pListTile;
     bool __thiscall FUN_007a79b0();
 };
-struct Tile_IsTrue_shell : Tile
-{
-    bool __thiscall ContainsTrait(int);
-};
 struct EntryProperty
 {
     int FUN_0044ddc0();
@@ -479,14 +396,15 @@ struct Entry
     int id;
     EntryProperty* property;
 };
-struct ListNode
+// Exe 0x00a09130: unit-local ListNode view; declarations and layout are preserved.
+struct ListboxListNodeView
 {
     Entry* item;
-    ListNode* next;
+    ListboxListNodeView* next;
     Entry** FUN_006815c0();
-    ListNode* FUN_00726070();
+    ListboxListNodeView* FUN_00726070();
 };
-struct TemporaryList : ListNode
+struct TemporaryList : ListboxListNodeView
 {
     TemporaryList();
     ~TemporaryList();
@@ -496,7 +414,7 @@ struct TemporaryList : ListNode
 struct FunctionOwner
 {
     int unk00;
-    ListNode entries;
+    ListboxListNodeView entries;
     void RemoveTile(int id);
     void FUN_0071a200(int entryType);
 };
@@ -514,22 +432,18 @@ struct FUN_00721150_cls
 };
 extern "C" char str_01070244[];
 int __cdecl FUN_00a00940(const char*, int);
-struct SelectedObject
-{
-    bool __thiscall IsTraitNonZero(int);
-};
 struct FUN_00721440_class
 {
     int unk00;
     int unk04;
     int unk08;
     int unk0c;
-    SelectedObject* selected;
+    Tile* selected;
 
     bool __thiscall FUN_00724430();
-    bool __thiscall ContainsKey(SelectedObject* object);
+    bool __thiscall ContainsKey(Tile* object);
     void __thiscall FUN_007244e0();
-    bool __thiscall SelectObject(SelectedObject* object);
+    bool __thiscall SelectObject(Tile* object);
 };
 extern int DAT_010702ec;
 struct FUN_00721850_shell
@@ -577,17 +491,13 @@ class FUN_007220d0_cls
     virtual ~FUN_007220d0_cls();
 };
 extern bool DAT_011d8909;
-struct LBTileObj
-{
-    virtual ~LBTileObj();
-};
 struct LBExtraObj
 {
     ~LBExtraObj();
 };
 struct LBItem
 {
-    LBTileObj* tile;
+    Tile* tile;
     LBExtraObj* extra;
 };
 struct LBNode
@@ -597,16 +507,12 @@ struct LBNode
     ~LBNode();
 };
 LBNode* __fastcall FUN_00726070(LBNode* node);
-struct LBTile
-{
-    void Set(int trait, float value, bool propagate);
-};
 struct LBListBox
 {
     void* vtbl;
     LBItem* pItem;
     LBNode* pNext;
-    LBTile* m_pListTile;
+    Tile* m_pListTile;
     int unk10;
     void FUN_00722140();
     bool FUN_007242c0(unsigned int flags);
@@ -619,21 +525,17 @@ struct LBListBox
 };
 extern "C" char _DAT_01070244[];
 int __cdecl FUN_00a00940(const char*, int);
-struct Tile_7223a0
-{
-    bool IsTraitNonZero(int);
-};
 struct ListBox_7223a0
 {
     int unk00;
     int unk04;
     int unk08;
     int unk0c;
-    Tile_7223a0* m_pSelected;
+    Tile* m_pSelected;
     bool FUN_00724fd0();
-    bool ContainsKey(Tile_7223a0*);
+    bool ContainsKey(Tile*);
     void FUN_00725080();
-    bool FUN_007223a0(Tile_7223a0* apTile);
+    bool FUN_007223a0(Tile* apTile);
 };
 // FUN_007227b0: constructor of a object with a base (vptr), a member sub-object
 // with its own ctor/dtor (state -1..0 EH frame), a few int/word/float fields and
@@ -724,24 +626,19 @@ class FUN_00723820_cls
 };
 extern "C" const char kListBoxEnabled[];
 int __cdecl FUN_00a00940(const char* pcTrait, int iIndex);
-class B23AF0Tile
-{
-  public:
-    bool GetBool(int m_iValueId);
-};
 class B23AF0ListBox
 {
   public:
     bool IsEnabled();
-    bool Contains(B23AF0Tile* pkTile);
+    bool Contains(Tile* pkTile);
     void Refresh();
-    bool FUN_00723af0(B23AF0Tile* pkTile);
+    bool FUN_00723af0(Tile* pkTile);
 
     int unk00;
     int unk04;
     int unk08;
     int unk0C;
-    B23AF0Tile* m_pkSelected;
+    Tile* m_pkSelected;
 };
 struct ListItem
 {
@@ -765,10 +662,6 @@ struct FUN_00724360_Item
     int** FUN_006815c0();
     void* FUN_00726070();
 };
-struct FUN_00724360_Obj
-{
-    void FUN_00700320(unsigned int a, unsigned int b);
-};
 struct FUN_00724360_cls
 {
     int unk00;
@@ -788,25 +681,17 @@ struct FUN_00724360_cls
 };
 extern "C" char str_01070244[];
 int __cdecl FUN_00a00940(const char* name, int value);
-struct Item_00724430
-{
-    bool __thiscall IsTraitNonZero(int value);
-};
 struct Owner_00724430
 {
     int unk00;
     int unk04;
     int unk08;
-    Item_00724430* item;
+    Tile* item;
     bool __thiscall FUN_00724430();
-};
-struct Obj00724930
-{
-    void __thiscall FUN_00700320(unsigned int a, int b);
 };
 struct Item00724930
 {
-    Obj00724930* unk00;
+    Tile* unk00;
     int unk04;
     unsigned char flag08;
 };
@@ -828,7 +713,7 @@ struct FUN_00724930_cls
     unsigned short unk1e;
     float m_20;
 
-    void __thiscall AccumulateTileHeight(Obj00724930* p);
+    void __thiscall AccumulateTileHeight(Tile* p);
     void __thiscall FUN_00724dd0();
     void __thiscall UpdateTraitDisplay();
     void FUN_00724930();
@@ -836,78 +721,51 @@ struct FUN_00724930_cls
 float __cdecl FUN_004e4430(float);
 int __cdecl FUN_00647b70(int, int);
 int FUN_00a01860(const char*);
-struct TileFloatGet
-{
-    float GetFloat(int);
-};
-struct TileFloatSet
-{
-    void Set(int, float, bool);
-};
-struct TileI
-{
-    void Set(int, int);
-};
-struct VATSMenuView
+// 0x00726710 counts list entries at +0x04 using a tile at +0x0c; these are list-box scroll fields, not the VATSMenu layout.
+struct ScrollPageList
 {
     int unk00;
     int unk04;
     int unk08;
-    TileFloatGet* pScrollTile;
+    Tile* pScrollTile;
     int unk10;
-    TileI* pCountTile;
+    Tile* pCountTile;
     int unk18;
     int unk1C;
     float fTotal;
     unsigned int FUN_00726710();
     void FUN_00724dd0();
 };
-struct TileProxy
-{
-    float FUN_00a011b0(int);
-    void SetFloat(int, float, bool);
-    void FUN_00700320(int, int);
-};
 struct OwnerProxy
 {
     int unk00, unk04, unk08;
-    TileProxy* tile0c;
+    Tile* tile0c;
     int unk10;
-    TileProxy* tile14;
+    Tile* tile14;
     int unk18, unk1c;
     float range;
     unsigned int FUN_007267c0();
     void FUN_007253a0();
-};
-struct FUN_00a01230_cls
-{
-    bool __thiscall IsTraitNonZero(int value);
 };
 struct FUN_007255a0_cls
 {
     int unk00;
     int unk04;
     int unk08;
-    FUN_00a01230_cls* m_0c;
+    Tile* m_0c;
     unsigned char FUN_007255a0();
 };
 int __cdecl FUN_00a00940(const char* name, int len);
 extern "C" char str_0106f90c[];
 extern "C" char str_0106f8f8[];
-struct TileA
-{
-    float GetFloat(int);
-    void SetF(int, float, bool);
-    void SetI(int, int);
-};
 struct S725970
 {
     int unk00;
     int unk04;
     int unk08;
-    TileA* tileA;
+    Tile* tileA;
     int unk10;
-    TileA* tileB;
+    Tile* tileB;
     int unk18;
     int unk1C;
     float fVal;
@@ -916,18 +774,13 @@ struct S725970
 };
 extern "C" const char kListBoxEnabled[];
 int __cdecl FUN_00a00940(const char* pcTrait, int iIndex);
-class B726160Tile
-{
-  public:
-    bool GetBool(int m_iValueId);
-};
 class B726160Menu
 {
   public:
     int unk00;
     int unk04;
     int unk08;
-    B726160Tile* m_pkTile;
+    Tile* m_pkTile;
     bool FUN_00726160();
 };
 struct Parent
@@ -974,16 +827,12 @@ struct FUN_00730e20_cls
 int __cdecl FUN_00a00940(const char* s, int n);
 extern "C" char _DAT_01070244[];
 int __cdecl FUN_00a00940(const char*, int);
-struct Tile_764e40
-{
-    bool IsTraitNonZero(int);
-};
 struct Cls_764e40
 {
     int unk00;
     int unk04;
     int unk08;
-    Tile_764e40* m_pTile0c;
+    Tile* m_pTile0c;
     bool FUN_00764e40();
 };
 struct Item
@@ -1003,22 +852,16 @@ struct Owner
     int* __thiscall FindItemData(int* key);
 };
 extern "C" char str_01070244[];
-struct FUN_007a23e0_arg
-{
-    int unk00;
-    bool IsTraitNonZero(int v);
-};
 struct FUN_007a23e0_cls
 {
     int unk00[4];
-    FUN_007a23e0_arg* m_10;
+    Tile* m_10;
     bool FUN_007a6550();
-    bool __thiscall ContainsKey(FUN_007a23e0_arg* arg);
+    bool __thiscall ContainsKey(Tile* arg);
     void FUN_007a6600();
-    bool FUN_007a23e0(FUN_007a23e0_arg* arg);
+    bool FUN_007a23e0(Tile* arg);
 };
 int __cdecl FUN_00a00940(const char* name, int len);
-class B7A27F0Tile;
 class B7A27F0Base
 {
   public:
@@ -1041,7 +884,7 @@ class FUN_007a27f0_cls : public B7A27F0Base, public B7A27F0List
     FUN_007a27f0_cls();
     virtual void VFunc00();
 
-    void SetSelectedTile(B7A27F0Tile* pkTile, bool bFlag);
+    void SetSelectedTile(Tile* pkTile, bool bFlag);
 
     void* m_pkParentTile;
     void* m_pkScrollBar;
@@ -1097,22 +940,14 @@ struct FUN_007a6310_cls
 };
 extern "C" char str_01070244[];
 int __cdecl FUN_00a00940(const char*, int);
-struct FUN_00a01230_shell
-{
-    bool __thiscall IsTraitNonZero(int);
-};
 struct FUN_007a6550_shell
 {
     int unk00;
     int unk04;
     int unk08;
-    FUN_00a01230_shell* target;
+    Tile* target;
 
     bool __thiscall FUN_007a6550();
-};
-struct FUN_00a01230_Target
-{
-    bool IsTraitNonZero(int handle);
 };
 int FUN_00a00940(const char* name, int len);
 struct FUN_007a7330_cls
@@ -1120,20 +955,16 @@ struct FUN_007a7330_cls
     int unk00;
     int unk04;
     int unk08;
-    FUN_00a01230_Target* m_0c;
+    Tile* m_0c;
 
     unsigned char FUN_007a7330();
-};
-struct FUN_007a81b0_target
-{
-    bool IsTraitNonZero(void* apKey);
 };
 struct FUN_007a81b0_cls
 {
     int m_00;
     int m_04;
     int m_08;
-    FUN_007a81b0_target* m_0c;
+    Tile* m_0c;
     bool FUN_007a81b0();
 };
 int __cdecl FUN_00a00940(const char* s, int n);
@@ -1187,20 +1018,11 @@ struct FUN_007d8da0_cls
     void FUN_007d8da0(bool bFlag);
 };
 int __cdecl FUN_00a00940(const char*, int);
-struct SelectionTile
-{
-    bool IsTraitNonZero(int);
-    void Set(int, int);
-};
 struct SelectionList
 {
     bool FUN_007d7580();
-    bool ContainsKey(SelectionTile*);
-    bool ApplySelectionAction(SelectionTile* item, int action);
-};
-struct TileHeight
-{
-    float __thiscall FUN_00a011b0(int);
+    bool ContainsKey(Tile*);
+    bool ApplySelectionAction(Tile* item, int action);
 };
 extern "C" char str_0106f90c[];
 extern "C" char str_0106f8f8[];
@@ -1209,9 +1031,9 @@ struct HeightList
     int unk00;
     int unk04;
     int unk08;
-    TileHeight* container;
+    Tile* container;
     int unk10;
-    Tile_Set_Helper* scrollbar;
+    Tile* scrollbar;
     int unk18;
     int unk1c;
     float totalHeight;
@@ -1221,12 +1043,6 @@ struct HeightList
 float __cdecl FUN_004e4430(float);
 int __cdecl FUN_00647b70(int, int);
 int FUN_00a01860(const char*);
-struct TileX
-{
-    float GetFloat(int trait);
-    void Set(int trait, float value, bool propagate);
-    void Set(int trait, int value);
-};
 struct ListBoxScrollBase
 {
     virtual ~ListBoxScrollBase();
@@ -1235,9 +1051,9 @@ struct ListBoxScroll : ListBoxScrollBase
 {
     void* pListItem;
     void* pListNext;
-    TileX* m_pListTile;
-    TileX* pSelected;
-    TileX* m_pHighlightedTile;
+    Tile* m_pListTile;
+    Tile* pSelected;
+    Tile* m_pHighlightedTile;
     const char* pTemplateName;
     unsigned short usItemCount;
     float m_fFirstListValue;
@@ -1264,17 +1080,6 @@ struct RecordList
 };
 int __cdecl strcpy_s(char*, unsigned int, const char*);
 int __cdecl strcat_s(char*, unsigned int, const char*);
-class TESBoundObject
-{
-  public:
-    virtual ~TESBoundObject();
-};
-class TESFullName
-{
-  public:
-    virtual ~TESFullName();
-    const char* GetFullName();
-};
 unsigned int __cdecl BSStringLength(const char*);
 struct InventoryEntry
 {
@@ -1291,10 +1096,6 @@ struct InventoryEntry
 struct InventoryList
 {
     ~InventoryList();
-};
-struct InventoryChanges
-{
-    InventoryEntry* GetNextInventoryEntry(InventoryList*);
 };
 struct InventoryOwner
 {
@@ -1325,7 +1126,7 @@ struct InventoryListBox
 };
 struct RemovalItem
 {
-    LBTileObj* tile;
+    Tile* tile;
     LBExtraObj* extra;
     bool counted;
 };
@@ -1344,15 +1145,15 @@ struct RemovalHeader
 };
 struct RemovalList : RemovalHeader, RemovalNode
 {
-    TileProxy* container;
-    LBTileObj* selected;
+    Tile* container;
+    Tile* selected;
     bool FUN_007242c0(unsigned int);
     void UpdateItems();
     bool RemoveNode(RemovalNode* node, RemovalNode* previous);
 };
 struct RemovalInterface
 {
-    void FUN_00715860(LBTileObj*, int, int);
+    void FUN_00715860(Tile*, int, int);
 };
 RemovalInterface* FUN_004b7210();
 extern "C" char str_0106f8d0[];
@@ -1543,22 +1344,10 @@ struct FUN_0071f700 : MenuBase_71f700
     ListBoxE_71f700 list270;
     virtual ~FUN_0071f700();
 };
-struct TileObjV
-{
-    virtual void* Del(unsigned int flags);
-};
-struct ExtraObj
-{
-    void* FUN_004459e0(unsigned int flags);
-};
 struct ItemS
 {
-    TileObjV* curNode;
-    ExtraObj* extra;
-};
-struct TileS
-{
-    void SetFloat(int trait, float value, bool propagate);
+    Tile* curNode;
+    ExtraObj_listbox* extra;
 };
 struct NodeS
 {
@@ -1572,7 +1361,7 @@ struct OwnerS
     void* vptr00;
     ItemS* pSingle;
     NodeS* pHead;
-    TileS* pTile;
+    Tile* pTile;
     int m10;
     int m14;
     int m18;
@@ -1584,14 +1373,9 @@ struct OwnerS
     void FUN_007244e0();
     void FUN_007211e0();
 };
-struct NavigationTile
-{
-    float FUN_00a011b0(int trait);
-    bool IsTraitNonZero(int trait);
-};
 struct NavigationItem
 {
-    NavigationTile* tile;
+    Tile* tile;
 };
 struct NavigationNode
 {
@@ -1607,17 +1391,17 @@ struct NavigationBase
     virtual void Slot2();
     virtual void Slot3();
     virtual void Slot4();
-    virtual NavigationTile* GetAt(int current, bool select);
+    virtual Tile* GetAt(int current, bool select);
 };
 struct NavigationList : NavigationBase, NavigationNode
 {
-    NavigationTile* container;
-    NavigationTile* selected;
-    NavigationTile* scrollbar;
+    Tile* container;
+    Tile* selected;
+    Tile* scrollbar;
     const char* templateName;
     unsigned short count;
     bool FUN_00724430();
-    NavigationTile* FUN_007214b0(unsigned int action);
+    Tile* FUN_007214b0(unsigned int action);
 };
 float __cdecl FUN_004bd510(float value, float step);
 int __cdecl LBGetTraitID(const char* apName);
@@ -1628,14 +1412,9 @@ struct LBClearList : LBListBox
     void FUN_00721990();
 };
 float __cdecl FUN_004bd510(float a, float b);
-struct Tile_721c60
-{
-    float FUN_00a011b0(int trait);
-    bool IsTraitNonZero(int trait);
-};
 struct Item_721c60
 {
-    Tile_721c60* tile;
+    Tile* tile;
 };
 struct Node_721c60
 {
@@ -1651,18 +1430,18 @@ struct Base_721c60
     virtual void VFunc08();
     virtual void VFunc0C();
     virtual void VFunc10();
-    virtual Tile_721c60* VFunc14(int index, bool flag);
+    virtual Tile* VFunc14(int index, bool flag);
 };
 struct Class_721c60 : Base_721c60, Node_721c60
 {
-    Tile_721c60* m_pScrollBar;
-    Tile_721c60* m_pSelected;
+    Tile* m_pScrollBar;
+    Tile* m_pSelected;
     int unk14;
     int unk18;
     unsigned short m_usItemCount;
 
     bool IsScrollBarTraitEnabled();
-    Tile_721c60* FUN_00721c60(int action);
+    Tile* FUN_00721c60(int action);
 };
 extern int DAT_01070314;
 struct FUN_00722000 : FUN_007240c0
@@ -1693,8 +1472,8 @@ struct ListBoxClear
     void* vtable;
     LBItem* pItem;
     LBNode* pNext;
-    TileF* m_pListTile;
-    LBTileObj* m_pSelectedTile;
+    Tile* m_pListTile;
+    Tile* m_pSelectedTile;
     void* m_pHighlightedTile;
     const char* pTemplateName;
     unsigned short usItemCount;
@@ -1706,14 +1485,9 @@ struct ListBoxClear
     void FUN_007230e0();
 };
 float __cdecl FUN_004bd510(float afValue, float afMin);
-struct LBKTile
-{
-    float GetFloat(int aiID);
-    bool GetBool(int aiID);
-};
 struct LBKItem
 {
-    LBKTile* pTile;
+    Tile* pTile;
 };
 struct LBKNode
 {
@@ -1729,18 +1503,18 @@ struct LBKBase
     virtual void v08();
     virtual void v0C();
     virtual void v10();
-    virtual LBKTile* GetTileByIndex(int aiIndex, int aiUnk);
+    virtual Tile* GetTileByIndex(int aiIndex, int aiUnk);
 };
 struct LBKListBox : LBKBase, LBKNode
 {
-    LBKTile* pParentTile;
-    LBKTile* pSelected;
-    LBKTile* m_pHighlightedTile;
+    Tile* pParentTile;
+    Tile* pSelected;
+    Tile* m_pHighlightedTile;
     const char* pTemplateName;
     unsigned short usItemCount;
 
     bool FUN_00725b70();
-    LBKTile* GetTileByKey(int aiKey);
+    Tile* GetTileByKey(int aiKey);
 };
 float __cdecl FUN_004bd510(float value, float one);
 struct ListBoxHelper
@@ -1750,51 +1524,23 @@ struct ListBoxHelper
     virtual void unk08();
     virtual void unk0c();
     virtual void unk10();
-    virtual TileHeight* GetItemAt(int index, int flag);
-    ListNode head;
-    TileHeight* m_0c;
-    TileHeight* m_10;
+    virtual Tile* GetItemAt(int index, int flag);
+    ListboxListNodeView head;
+    Tile* m_0c;
+    Tile* m_10;
     int unk14;
     int unk18;
     unsigned short m_1c;
     bool FUN_00726160();
-    TileHeight* FUN_00723b60(int code);
+    Tile* FUN_00723b60(int code);
 };
 int __cdecl FUN_00a00940(const char*, int);
 extern "C" char str_0106f87c[], str_0106f884[], str_0106f88c[], str_0106f894[], str_0106f898[], str_0106f8ac[],
     str_0106f8c0[];
-struct HighlightValue
-{
-    void FUN_00a09130(int, void*, int);
-    void FUN_00a09410(int);
-};
-struct HighlightTile
-{
-    HighlightValue* GetValue(int);
-    bool GetSpeechChallengeFailure();
-    HighlightTile* GetNamedChild(const char*);
-    void FUN_0071aa60(bool);
-    void SetImageFlags(int);
-    void Set(int, int);
-};
-HighlightTile* __cdecl FindNamedTile(HighlightTile*, const char*);
-struct HighlightList
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    HighlightTile* container;
-    HighlightTile* selected;
-    void FUN_007244e0();
-};
-class Tile724
-{
-  public:
-    void SetInt(int m_iValueId, int iValue);
-};
+Tile* __cdecl FindNamedTile(Tile*, const char*);
 struct Item724
 {
-    Tile724* m_pkTile;
+    Tile* m_pkTile;
     int unk04;
     bool m_bHidden;
 };
@@ -1815,7 +1561,7 @@ class MenuBase724
 class ListBox724 : public MenuBase724, public ItemList724
 {
   public:
-    void AddTile(Tile724* pkTile);
+    void AddTile(Tile* pkTile);
     void SortTiles();
     void UpdateScroll();
     void RefreshTiles();
@@ -1830,28 +1576,15 @@ class ListBox724 : public MenuBase724, public ItemList724
 };
 // Whether the list box tile is enabled (trait id resolved once and cached).
 int __cdecl C4FD0TraitNameToID(const char* pcName, int iDefault);
-class C4FD0Tile
-{
-  public:
-    bool GetBoolValue(int m_iValueId);
-};
 class C4FD0ListBox
 {
   public:
     int unk00;
     int unk04;
     int unk08;
-    C4FD0Tile* m_pkTile;
+    Tile* m_pkTile;
 
     bool FUN_00724fd0();
-};
-struct FUN_00a00f30_shell
-{
-    void* FUN_00a00f30(int);
-};
-struct FUN_00a07530_shell
-{
-    void SetChangeFlag(int);
 };
 struct FUN_007254d0_t
 {
@@ -1862,16 +1595,12 @@ struct FUN_007254d0_t
     Tile* selected;
     void UpdateSpeechChallengeTrait();
 };
-struct FUN_00725b70_inner
-{
-    bool IsTraitNonZero(void* apKey);
-};
 struct FUN_00725b70_cls
 {
     int m_00;
     int m_04;
     int m_08;
-    FUN_00725b70_inner* m_0c;
+    Tile* m_0c;
     bool FUN_00725b70();
 };
 int __cdecl FUN_00a00940(const char* s, int n);
@@ -1881,25 +1610,11 @@ struct VLPoint3
     float y;
     float z;
 };
-struct VLTile;
 struct VLListNode;
 struct VLTileList
 {
     VLListNode* GetHeadPos();
-    VLTile*& GetNext(VLListNode*& arpPos);
-};
-struct VLTile
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual int GetType();
-
-    VLTileList kChildren;
-
-    void SetFloat(int aiTrait, float afValue, bool abPropagate);
-    float GetFloat(int aiTrait);
-    const char* GetString(int aiTrait);
+    Tile*& GetNext(VLListNode*& arpPos);
 };
 struct VLFontManager
 {
@@ -1920,35 +1635,21 @@ struct VLList
     int unk1C;
     float fTotalHeight;
 
-    void AccumulateTileHeight(VLTile* apTile);
+    void AccumulateTileHeight(Tile* apTile);
 };
-struct Tile050;
 struct Value050
 {
     void RemoveFromReactions();
-    void FUN_00a09130(int, Tile050*, int);
+    void FUN_00a09130(int, Tile*, int);
     void AppendFloatAction(int, float);
     void FUN_00a09410(int);
 };
-struct Menu050
-{
-    Tile050* FUN_00a1ddb0(Tile050*, const char*, int);
-};
-struct Tile050
-{
-    Menu050* GetMenu();
-    void* FUN_00a00f30(int);
-    void FUN_00700320(int, int);
-    void FUN_00a01350(int, const char*, bool);
-    float FUN_00a011b0(int);
-    Value050* FindTraitValue(int);
-};
 struct FUN_007a62e0
 {
-    Tile050* tile;
+    Tile* tile;
     int data;
     bool flag;
-    FUN_007a62e0(Tile050*, int*);
+    FUN_007a62e0(Tile*, int*);
 };
 struct List050
 {
@@ -1961,46 +1662,36 @@ struct Owner050
 {
     int unk00;
     List050 entries;
-    Tile050* container;
+    Tile* container;
     int unk10;
     int unk14;
     const char* templateName;
     unsigned short count;
     bool FUN_007242c0(unsigned int);
     void FUN_00724360();
-    void AccumulateTileHeight(Tile050*);
+    void AccumulateTileHeight(Tile*);
     void FUN_00724800();
     unsigned int GetRaceCount();
-    Tile050* AddListEntry(int, const char*, int, const char*);
+    Tile* AddListEntry(int, const char*, int, const char*);
 };
 extern "C" char kListBoxNumFiltered[];
-struct ItemTile;
 struct ItemValue
 {
     void RemoveFromReactions();
-    void FUN_00a09130(int, ItemTile*, int);
+    void FUN_00a09130(int, Tile*, int);
     void AppendFloatAction(int, float);
     void FUN_00a09410(int);
 };
 struct ItemMenu
 {
-    ItemTile* Create(ItemTile*, const char*, int);
-};
-struct ItemTile
-{
-    ItemMenu* GetMenu();
-    void* GetValue(int);
-    void Set(int, int);
-    void Set(int, const char*, bool);
-    float FUN_00a011b0(int);
-    ItemValue* FindTraitValue(int);
+    Tile* Create(Tile*, const char*, int);
 };
 struct BoxItem
 {
-    ItemTile* tile;
+    Tile* tile;
     int data;
     char flag;
-    BoxItem(ItemTile*, int*);
+    BoxItem(Tile*, int*);
 };
 struct ItemList
 {
@@ -2015,32 +1706,28 @@ struct IntListBox
 {
     int unk00;
     ItemList items;
-    ItemTile* container;
+    Tile* container;
     int unk10;
     int unk14;
     const char* templateName;
     unsigned short nextIndex;
     bool FUN_007242c0(unsigned int);
     void Synchronize();
-    void AccumulateTileHeight(ItemTile*);
+    void AccumulateTileHeight(Tile*);
     void Update();
     int __thiscall Count();
-    ItemTile* FUN_00764430(int, const char*, int(__cdecl*)(BoxItem*, BoxItem*), const char*);
+    Tile* FUN_00764430(int, const char*, int(__cdecl*)(BoxItem*, BoxItem*), const char*);
 };
 extern bool DAT_011d8909;
 extern "C" char str_0106f8d0[];
 int FUN_00a01860(const char*);
-struct ClearTile
-{
-    virtual ~ClearTile();
-};
 struct ClearExtra
 {
     ~ClearExtra();
 };
 struct ClearTileExtraPair
 {
-    ClearTile* tile;
+    Tile* tile;
     ClearExtra* extra;
 };
 struct ClearNode
@@ -2050,16 +1737,12 @@ struct ClearNode
     void FUN_006ecd40(unsigned int);
     ~ClearNode();
 };
-struct ClearContainer
-{
-    void Set(int, float, bool);
-};
 struct ClearOwner
 {
     int unk00;
     ClearTileExtraPair* item;
     ClearNode* next;
-    ClearContainer* container;
+    Tile* container;
     int selection;
     int unk14;
     int unk18;
@@ -2070,14 +1753,9 @@ struct ClearOwner
     void Refresh();
     void FUN_007646d0();
 };
-class C764930Tile
-{
-  public:
-    void SetInt(int m_uiSoundID, int iValue);
-};
 struct C764930Item
 {
-    C764930Tile* m_pkTile;
+    Tile* m_pkTile;
     int unk04;
     bool m_bHidden;
 };
@@ -2098,7 +1776,7 @@ class C764930MenuBase
 class C764930ListMenu : public C764930MenuBase, public C764930ListNode
 {
   public:
-    void AddTile(C764930Tile* pkTile);
+    void AddTile(Tile* pkTile);
     void UpdateScrollBar();
     void UpdateSelection();
 
@@ -2122,20 +1800,14 @@ struct Cls_764ef0
 
     void __thiscall UpdateHighlightTile();
 };
-struct ScrollTile
-{
-    float FUN_00a011b0(int);
-    void Set(int, float, bool);
-    void FUN_00700320(int, int);
-};
 struct ScrollList
 {
     int unk00;
     int unk04;
     int unk08;
-    ScrollTile* container;
+    Tile* container;
     int unk10;
-    ScrollTile* scrollbar;
+    Tile* scrollbar;
     int unk18;
     int unk1c;
     float total;
@@ -2148,7 +1820,7 @@ class FUN_007a3ac0_ListBox
     void* vtbl;
     LBItem* pItem;
     LBNode* pNext;
-    LBTile* m_pListTile;
+    Tile* m_pListTile;
     int unk10;
     int unk14;
     int unk18;
@@ -2160,14 +1832,9 @@ class FUN_007a3ac0_ListBox
     void FUN_007a73e0();
     void FUN_007a3ac0();
 };
-struct NavTile
-{
-    float GetValue(int);
-    bool Enabled(int);
-};
 struct NavItem
 {
-    NavTile* tile;
+    Tile* tile;
 };
 struct NavNode
 {
@@ -2186,15 +1853,15 @@ struct Navigation
     virtual void v2();
     virtual void v3();
     virtual void v4();
-    virtual NavTile* At(int, bool);
+    virtual Tile* At(int, bool);
     NavNode items;
-    NavTile* container;
-    NavTile* selected;
+    Tile* container;
+    Tile* selected;
     int unk14;
     int unk18;
     unsigned short count;
     bool Active();
-    NavTile* FUN_007a4000(int key);
+    Tile* FUN_007a4000(int key);
 };
 struct ListBox_7a6600
 {
@@ -2208,31 +1875,20 @@ struct ListBox_7a6600
 };
 // Whether the list box tile is enabled (trait id resolved once and cached).
 int __cdecl D7580TraitNameToID(const char* pcName, int iDefault);
-class D7580Tile
-{
-  public:
-    bool GetBoolValue(int m_iValueId);
-};
 class D7580ListBox
 {
   public:
     int unk00;
     int unk04;
     int unk08;
-    D7580Tile* m_pkTile;
+    Tile* m_pkTile;
 
     bool FUN_007d7580();
 };
 extern "C" char str_0106f8d0[];
-struct P240Tile
-{
-    float FUN_00a011b0(int);
-    void FUN_00700320(int, int);
-    void FUN_00715c60(int, int);
-};
 struct P240Item
 {
-    P240Tile* tile;
+    Tile* tile;
     void* data;
     bool hidden;
 };
@@ -2250,29 +1906,24 @@ struct P240Base
     virtual void v2();
     virtual void v3();
     virtual void v4();
-    virtual P240Tile* v5(int, bool);
+    virtual Tile* v5(int, bool);
 };
 struct P240Owner : P240Base, P240List
 {
-    P240Tile* container;
-    P240Tile* selected;
-    P240Tile* scrollbar;
+    Tile* container;
+    Tile* selected;
+    Tile* scrollbar;
     const char* templateName;
     unsigned short count;
     float height;
-    void AccumulateTileHeight(P240Tile*);
+    void AccumulateTileHeight(Tile*);
     void FUN_007d9d50();
-    P240Tile* SelectLast();
+    Tile* SelectLast();
     void FUN_007d97a0();
     void ApplyFilter(bool(__cdecl* predicate)(void*));
 };
 // Selects a tile in the list box when the box is active and the tile is null or an enabled member of the list.
 int __cdecl C7D8950TraitNameToID(const char* pcName, int iDefault);
-class C7D8950Tile
-{
-  public:
-    bool GetBoolValue(int m_iValueId);
-};
 class C7D8950ListBox
 {
   public:
@@ -2280,40 +1931,27 @@ class C7D8950ListBox
     int unk04;
     int unk08;
     int unk0C;
-    C7D8950Tile* m_pkSelected;
+    Tile* m_pkSelected;
 
     bool IsActive();
-    bool Contains(C7D8950Tile* pkTile);
+    bool Contains(Tile* pkTile);
     void UpdateSelection();
-    bool FUN_007d8950(C7D8950Tile* pkTile);
+    bool FUN_007d8950(Tile* pkTile);
 };
 struct TileValue
 {
     void FUN_00a09130(int index, Tile* tile, int value);
     void FUN_00a09410(int value);
 };
-struct TileExt : Tile
-{
-    TileValue* GetValue(int index);
-    TileExt* GetNamedChild(const char* name);
-    void FUN_0071aa60(bool value);
-    bool GetSpeechChallengeFailure();
-    void Set(int trait, int value);
-    void SetImageFlags(int flags);
-};
 struct ListBoxExt
 {
     int unk00;
     int unk04;
     int unk08;
-    TileExt* tile0c;
-    TileExt* tile10;
+    Tile* tile0c;
+    Tile* tile10;
 
     void UpdateHighlightBox();
-};
-struct TileX2
-{
-    void SetChangeFlag(int);
 };
 struct ListBoxX
 {
@@ -2332,16 +1970,11 @@ struct N6815c0
 };
 struct RList71a5 : RemovalList
 {
-    bool RemoveTile(LBTileObj* tile);
-};
-struct Tile118
-{
-    float FUN_00a011b0(int);
-    bool IsTraitNonZero(int);
+    bool RemoveTile(Tile* tile);
 };
 struct Item118
 {
-    Tile118* tile;
+    Tile* tile;
 };
 struct Node118
 {
@@ -2359,28 +1992,18 @@ struct Box118
     virtual void slot2();
     virtual void slot3();
     virtual void slot4();
-    virtual Tile118* GetTile(int, int);
+    virtual Tile* GetTile(int, int);
     Node118 head;
-    Tile118* scroll;
-    Tile118* selected;
+    Tile* scroll;
+    Tile* selected;
     int unk14, unk18;
     unsigned short count, flags;
     bool FUN_00724fd0();
-    Tile118* FUN_00722410(unsigned int action);
+    Tile* FUN_00722410(unsigned int action);
 };
 
-struct TileValue_00a0a270;
-struct TileValueOwner_00a01000
-{
-    TileValue_00a0a270* GetOrCreateTraitValue(int index);
-};
 
-class AGMemoryManager
-{
-  public:
-    void* FUN_00aa3e40(unsigned int uiSize);
-};
-extern AGMemoryManager DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 class AGListItem
 {
   public:
@@ -2421,7 +2044,7 @@ void AGOwner::FUN_00a09130(int iIndex, Tile* pTile, int iValue)
     AGValueItem* pLast = m_pHead;
     AGValueItem* pItem = new AGValueItem;
     pItem->m_iIndex = iIndex;
-    pItem->m_pIntegerData = (TileValue*)((TileValueOwner_00a01000*)pTile)->GetOrCreateTraitValue(iValue);
+    pItem->m_pIntegerData = (TileValue*)pTile->GetOrCreateTraitValue(iValue);
     if (pLast)
     {
         while (pLast->m_pNext)

@@ -1,10 +1,59 @@
+#include "../../include/BSStringT.h"
+#include "../../include/InterfaceManager.h"
 // fallout_shared/tesworldspace.cpp: TESWorldSpace, TESObjectCELL, TESRegion, InterfaceManager and more (90 functions)
 
-#include "tesworldspace_packet.h"
+#include "../../include/BGSAcousticSpace.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESObjectACTI.h"
+#include "../../include/TESRegion.h"
+#include "../../include/BSOcclusionPlane.h"
+#include "../../include/StartMenu.h"
+#include "../../include/TESClimate.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESTexture.h"
+#include "../../include/TESWorldSpace.h"
+#include "../../include/NiTPointerMap.h"
+
+class BGSTerrainManager;
+extern TESDataHandler* g_dataHandler;
+extern NiTPointerMap<unsigned int, TESObjectREFR*>* DAT_011c40b0;
+
+class Tile;
+
+class TESSound;
+class TESQuest;
+class TESEffectShader;
+extern "C" void* memset(void*, int, unsigned int);
+extern float DAT_01031920;
+extern const char DAT_010187a0[];
+int Warning(const char*, ...);
+#include "../../include/AutoMemHelper.h"
+#include "../../include/DummyPointerMap.h"
+#include "../../include/GO.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/SL.h"
+#include "../../include/StrMem.h"
+// These methods are not yet declared by the shared cell header.
+struct CellRuntimeMethods : TESObjectCELL
+{
+    void SetFlag400(int);
+    void ResetCellData();
+    void FUN_0054de10(TESWorldSpace*);
+    void MoveReferencesToWorldCells(TESWorldSpace*);
+    bool FUN_00550200(TESObjectREFR*);
+    bool FUN_0054da20(const NiPoint3*, float, const NiPoint3*, float, int, unsigned int);
+    float FUN_0054fb70(const NiPoint3*);
+};
+
 // @fnv 0x00425fd0
 bool TESObjectCELL::IsCellInterior() const
 {
-    return (flags & 1) ? true : false;
+    return (reinterpret_cast<const unsigned char*>(this)[0x24] & 1) ? true : false;
 }
 // Sets the world space's map name from the given string and returns true.
 // @fnv 0x00583330
@@ -17,8 +66,8 @@ bool TESWorldSpace::SetDateTimeText(const char* name)
 // @fnv 0x00586170
 BGSTerrainManager* TESWorldSpace::GetWorldTerrainManager()
 {
-    if (GetParentWorld(USE_LAND))
-        return GetParentWorld(USE_LAND)->GetWorldTerrainManager();
+    if (GetParentWorld(PU_LOD))
+        return GetParentWorld(PU_LOD)->GetWorldTerrainManager();
     return terrain;
 }
 // Returns parent if it exists and GetParentUseFlag(flag) is set, otherwise returns null.
@@ -51,9 +100,9 @@ void TESWorldSpace::AddPersistentReference(TESObjectREFR* ref)
 // @fnv 0x004f1260
 void TESRegion::AssignWorldSpace(TESWorldSpace* apWorldSpace)
 {
-    world = apWorldSpace;
-    if (world && IsConstantGlobal() && !g_dataHandler->LoadDescriptionForForm())
-        world->SetHasRegions(true);
+    m_pContainingWorldspace = apWorldSpace;
+    if (m_pContainingWorldspace && IsConstantGlobal() && !g_dataHandler->LoadDescriptionForForm())
+        m_pContainingWorldspace->SetHasRegions(true);
 }
 // @fnv 0x00473ff0
 bool TESWorldSpace::IsFormIDOwnedByFile(unsigned int key, TESFile* file)
@@ -83,7 +132,7 @@ void TESWorldSpace::ClearWorldSpaceReferences()
     FUN_00584150(0.0f);
     FUN_00586110(DAT_01031920);
     FUN_00586130(0.0f);
-    ((TESFullName*)((char*)this + 0x24))->SetFullName(0);
+    ((TESFullName*)((char*)this + 0x24))->SetFullName((const char*)0);
     memset((char*)this + 0x80, 0, 16);
 }
 // Validates x and y are within -32768..32767, builds a key from them, and looks up the cell in cellMap, returning it or null.
@@ -105,7 +154,7 @@ TESObjectCELL* TESWorldSpace::GetCellAtGridPosition(int x, int y)
 // @fnv 0x00586150
 Tile* InterfaceManager::FUN_00586150()
 {
-    return pTile;
+    return pMenuRoot;
 }
 // @fnv 0x00584bc0
 void TESWorldSpace::SetFieldD0(unsigned int value)
@@ -152,14 +201,9 @@ void TESWorldSpace::FUN_00588270(BSSimpleArray<TESObjectREFR*, 1024>& doors)
         cell->AppendCellReferences(doors);
 }
 
-struct FUN_005861d0_shell : public TESWorldSpace
-{
-    void SetFlagBit0(bool);
-};
-
 // Sets or clears bit 0 of the byte at offset 0x4c on this TESWorldSpace based on abVal.
 // @fnv 0x005861d0
-void FUN_005861d0_shell::SetFlagBit0(bool abVal)
+void TESWorldSpace::SetFlagBit0(bool abVal)
 {
     if (abVal)
         *(unsigned char*)((char*)this + 0x4c) |= 1;
@@ -181,36 +225,6 @@ struct NiStream;
 struct blob12
 {
     char b[12];
-};
-struct NiPoint3
-{
-    static struct blob12 ComponentProduct(void*, void*);
-    float Length();
-    float SqrLength();
-    float XYLength();
-    float SqrXYLength();
-    float Dot(void*);
-    void Unitize();
-    float GetLengthSquared();
-    struct blob12 Cross(void*);
-    struct blob12 CrossProduct(void*);
-    struct blob12 Perpendicular();
-    static void LoadBinary(NiStream*, NiPoint3*, unsigned int);
-    void LoadBinary(NiStream*);
-    static void SaveBinary(NiStream*, NiPoint3*, unsigned int);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    static void InitializePoint3();
-    static void ShutdownPoint3();
-    static void ProcessPointArray(NiPoint3*, unsigned int, unsigned int);
-    static void ComputeMagnitude(NiPoint3*);
-    static float VectorLength(void*);
-    static void PointsPlusEqualFloatTimesPoints(NiPoint3*, float, void*, unsigned int);
-    static void WeightedPointsPlusWeightedPoints(NiPoint3*, float, void*, unsigned int);
-    static unsigned int* InitSqrtTable();
-    float x;
-    float y;
-    float z;
 };
 typedef char _sizecheck_NiPoint3[sizeof(NiPoint3) == 12 ? 1 : -1];
 
@@ -265,46 +279,22 @@ bool __cdecl FUN_00587c80(void* apRef)
     return bretval;
 }
 
-struct FUN_00588030_shell : public TESWorldSpace
-{
-    void FUN_00588030(TESObjectREFR*);
-};
-
-struct TESObjectCELL_RemoveReference_Helper : public TESObjectCELL
-{
-    void RemoveReference(TESObjectREFR*);
-};
-
 // If apRef is non-null, gets the interior cell and calls RemoveReference on it with apRef.
 // @fnv 0x00588030
-void FUN_00588030_shell::FUN_00588030(TESObjectREFR* apRef)
+void TESWorldSpace::FUN_00588030(TESObjectREFR* apRef)
 {
     if (apRef)
     {
         TESObjectCELL* poldcell = GetInteriorCell();
         if (poldcell)
         {
-            reinterpret_cast<TESObjectCELL_RemoveReference_Helper*>(poldcell)->RemoveReference(apRef);
+            poldcell->RemoveReference(apRef);
         }
     }
 }
 
-struct FUN_00588b00_shell : public TESWorldSpace
-{
-    void* GetOrCreateCellOffsetData(TESFile*);
-};
-
 void* __cdecl operator new(unsigned int);
 extern float const DAT_01015f5c;
-
-class NiPoint2
-{
-  public:
-    float x, y;
-    NiPoint2()
-    {}
-    NiPoint2(float, float);
-};
 
 struct OFFSET_DATA_24
 {
@@ -316,14 +306,8 @@ struct OFFSET_DATA_24
     OFFSET_DATA_24();
 };
 
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&) const;
-    void SetAt(unsigned int, unsigned int);
-};
-
 // @fnv 0x00588b00
-void* FUN_00588b00_shell::GetOrCreateCellOffsetData(TESFile* apFile)
+void* TESWorldSpace::GetOrCreateCellOffsetData(TESFile* apFile)
 {
     OFFSET_DATA_24* pdata = 0;
     TESFile* pmainfile = apFile;
@@ -380,48 +364,28 @@ void __fastcall FUN_006698d0(char* pThis)
     _ref_00726070(pThis + 0x6c);
 }
 
-struct FUN_005832f0_shell : public TESForm
-{
-    char* FUN_005832f0();
-};
-
 struct Flt
 {
     operator unsigned int() const;
 };
 // Returns the unsigned int at offset 0xc0 as a char pointer, or an empty string when that value is zero.
 // @fnv 0x005832f0
-char* FUN_005832f0_shell::FUN_005832f0()
+char* TESWorldSpace::GetName() const
 {
     return ((Flt*)((char*)this + 0xc0))->operator unsigned int()
                ? (char*)((Flt*)((char*)this + 0xc0))->operator unsigned int()
                : "";
 }
 
-struct FUN_00587670_shell : public TESWorldSpace
-{
-    bool FUN_00587670(TESObjectCELL*);
-};
-
-struct CellH
-{
-    int GetCellGridX();
-    int GetCellGridY();
-    bool IsCellPersistent();
-};
-struct S54de10
-{
-    void FUN_0054de10(TESWorldSpace*);
-};
 unsigned int __fastcall _ref_0084e3a0(void*);
 // @fnv 0x00587670
-bool FUN_00587670_shell::FUN_00587670(TESObjectCELL* apCell)
+bool TESWorldSpace::FUN_00587670(TESObjectCELL* apCell)
 {
     int key;
     TESObjectCELL* ignore;
     if (!apCell || apCell->IsCellInterior())
         return false;
-    if (((CellH*)apCell)->IsCellPersistent())
+    if (apCell->IsCellPersistent())
     {
         if (*(TESObjectCELL**)((char*)this + 0x34))
             return false;
@@ -429,30 +393,25 @@ bool FUN_00587670_shell::FUN_00587670(TESObjectCELL* apCell)
     }
     else
     {
-        key = TESWorldSpace::BuildCellKey(((CellH*)apCell)->GetCellGridX(), ((CellH*)apCell)->GetCellGridY());
+        key = TESWorldSpace::BuildCellKey(apCell->GetCellGridX(), apCell->GetCellGridY());
         if ((*(DummyPointerMap**)((char*)this + 0x30))->GetAt(key, (unsigned int&)ignore))
         {
             Warning("CELLS: Cell (%08X) %s already exists at coord (%i, %i ).", _ref_0084e3a0(ignore),
                     ((const char*(__thiscall*)(TESObjectCELL*))(*(void***)ignore)[0x130 / 4])(ignore),
-                    ((CellH*)apCell)->GetCellGridX(), ((CellH*)apCell)->GetCellGridY());
+                    apCell->GetCellGridX(), apCell->GetCellGridY());
             return false;
         }
         (*(DummyPointerMap**)((char*)this + 0x30))->SetAt(key, (unsigned int)apCell);
     }
-    ((S54de10*)apCell)->FUN_0054de10(this);
+    ((CellRuntimeMethods*)apCell)->FUN_0054de10(this);
     return true;
 }
 
-struct FUN_00587e40_shell : public TESWorldSpace
-{
-    void FUN_00587e40(TESObjectREFR*);
-};
-
-template <class T> struct BSSimpleList
+template <class T> struct WorldReferenceList
 {
     T item;
-    BSSimpleList<T>* next;
-    ~BSSimpleList();
+    WorldReferenceList<T>* next;
+    ~WorldReferenceList();
     void operator delete(void*);
 };
 struct ATM
@@ -476,10 +435,10 @@ struct MapH
 };
 bool __cdecl FUN_00587c80(void*);
 // @fnv 0x00587e40
-void FUN_00587e40_shell::FUN_00587e40(TESObjectREFR* apRef)
+void TESWorldSpace::FUN_00587e40(TESObjectREFR* apRef)
 {
     unsigned int ikey;
-    BSSimpleList<const char*>* preflist;
+    WorldReferenceList<const char*>* preflist;
     if (apRef && !apRef->IsTemporary())
     {
         g_011ca60c.QueryPerformanceCounter(0);
@@ -507,46 +466,18 @@ void FUN_00587e40_shell::FUN_00587e40(TESObjectREFR* apRef)
     }
 }
 
-struct FUN_00588070_shell : public TESWorldSpace
-{
-    TESObjectCELL* GetOrCreateCell();
-};
-
-namespace stub {
-struct TESObjectCELL
-{
-    TESObjectCELL();
-    char pad[0xe0];
-};
-}
-struct FUN_005516f0_s
-{
-    void SetFlag400(int);
-};
-struct FUN_00544630_shell
-{
-    void ResetCellData();
-};
-
 // Returns the TESObjectCELL stored at offset 0x34, creating and initializing it first if it is null.
 // @fnv 0x00588070
-TESObjectCELL* FUN_00588070_shell::GetOrCreateCell()
+TESObjectCELL* TESWorldSpace::GetOrCreateCell()
 {
-    if (!*(stub::TESObjectCELL**)((char*)this + 0x34))
+    if (!*(TESObjectCELL**)((char*)this + 0x34))
     {
-        *(stub::TESObjectCELL**)((char*)this + 0x34) = new stub::TESObjectCELL;
-        (*(FUN_005516f0_s**)((char*)this + 0x34))->SetFlag400(1);
-        (*(FUN_00544630_shell**)((char*)this + 0x34))->ResetCellData();
+        *(TESObjectCELL**)((char*)this + 0x34) = new TESObjectCELL;
+        (*(CellRuntimeMethods**)((char*)this + 0x34))->SetFlag400(1);
+        (*(CellRuntimeMethods**)((char*)this + 0x34))->ResetCellData();
     }
     return *(TESObjectCELL**)((char*)this + 0x34);
 }
-
-struct FileH
-{
-    bool __thiscall IsMasterFile(void);
-    bool __thiscall SetOffset(unsigned int);
-    unsigned int __thiscall GetFormID(void);
-};
 
 struct FormIDData
 {
@@ -558,14 +489,14 @@ extern unsigned int __fastcall _ref_00472660(void*);
 extern unsigned int __fastcall _ref_0084e3a0(void*);
 extern unsigned char DAT_0118730c;
 
-struct FUN_005858b0_shell
+struct WorldSpaceFileMethods : TESWorldSpace
 {
-    FormIDData* __thiscall FUN_00588a90(FileH* apFile);
-    bool IsFileFormIDMatching(FileH* apFile);
+    FormIDData* __thiscall FUN_00588a90(TESFile* apFile);
+    bool IsFileFormIDMatching(TESFile* apFile);
 };
 
 // @fnv 0x005858b0
-bool FUN_005858b0_shell::IsFileFormIDMatching(FileH* apFile)
+bool WorldSpaceFileMethods::IsFileFormIDMatching(TESFile* apFile)
 {
     FormIDData* pdata = FUN_00588a90(apFile);
     if (apFile && apFile->IsMasterFile() && pdata && pdata->formID)
@@ -582,73 +513,66 @@ bool FUN_005858b0_shell::IsFileFormIDMatching(FileH* apFile)
     return false;
 }
 
-struct TESClimate
-{
-    virtual ~TESClimate();  // polymorphic: its RTTI is used (rtti_fix.py)
-};
-
-class FUN_00585fe0_shell : public TESWorldSpace
-{
-  public:
-    TESClimate* FUN_00585fe0();
-};
-
 // Returns the climate of the parent world if one exists, otherwise the climate stored at offset 0x40 of this world space.
 // @fnv 0x00585fe0
-TESClimate* FUN_00585fe0_shell::FUN_00585fe0()
+TESClimate* TESWorldSpace::FUN_00585fe0()
 {
     if (GetParentWorld(PARENT_USE_FLAG(4)))
-        return ((FUN_00585fe0_shell*)GetParentWorld(PARENT_USE_FLAG(4)))->FUN_00585fe0();
-    return *reinterpret_cast<TESClimate**>(reinterpret_cast<unsigned char*>(this) + 0x40);
+        return GetParentWorld(PARENT_USE_FLAG(4))->FUN_00585fe0();
+    return climate;
 }
 
-struct FUN_00586020_shell
+// Missing worldspace methods are declared in adapters without duplicated fields.
+struct WorldSpaceImageMethods : TESWorldSpace
 {
-    char pad[0x44];
-    TESWorldSpace* field44;
-    TESWorldSpace* GetParentWorld(TESWorldSpace::PARENT_USE_FLAG);
     TESWorldSpace* GetWorldSpaceOrParentWorld();
 };
 
 // Returns field44 if set, otherwise recurses into the parent world space obtained via GetParentWorld with flag 5, or returns null.
 // @fnv 0x00586020
-TESWorldSpace* FUN_00586020_shell::GetWorldSpaceOrParentWorld()
+TESWorldSpace* WorldSpaceImageMethods::GetWorldSpaceOrParentWorld()
 {
-    TESWorldSpace* result = field44;
+    TESWorldSpace* result = reinterpret_cast<TESWorldSpace*>(imageSpace);
     if (!result)
     {
         if (GetParentWorld(static_cast<TESWorldSpace::PARENT_USE_FLAG>(5)))
         {
             result =
-                reinterpret_cast<FUN_00586020_shell*>(GetParentWorld(static_cast<TESWorldSpace::PARENT_USE_FLAG>(5)))
+                reinterpret_cast<WorldSpaceImageMethods*>(GetParentWorld(static_cast<TESWorldSpace::PARENT_USE_FLAG>(5)))
                     ->GetWorldSpaceOrParentWorld();
         }
     }
     return result;
 }
 
-struct FUN_00586210_shell
+// Flag accessors not yet declared in the shared header.
+struct WorldSpaceFlagMethods : TESWorldSpace
 {
-    unsigned char cFlags;
     bool HasFlag2();
+    bool IsFlag8Set();
+    void SetFlag8(bool);
+    bool IsFlagSet();
+    char IsFlag80Set();
+    bool FUN_00586320();
 };
 
 // @fnv 0x00586210
-bool FUN_00586210_shell::HasFlag2()
+bool WorldSpaceFlagMethods::HasFlag2()
 {
     if (((unsigned char)(*((unsigned char*)this + 0x4c)) & 2))
         return true;
     return false;
 }
 
-struct ArrSI
+// Exe 0x00586230: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct TesworldspaceOffset08View
 {
     unsigned int GetFlags(void);
     char HasFlag80000();
 };
 
 // @fnv 0x00586230
-char ArrSI::HasFlag80000()
+char TesworldspaceOffset08View::HasFlag80000()
 {
     unsigned int flags = GetFlags();
     if (flags & 0x80000)
@@ -656,28 +580,17 @@ char ArrSI::HasFlag80000()
     return 0;
 }
 
-struct FUN_00586260_shell
-{
-    bool IsFlag8Set();
-};
-
 // @fnv 0x00586260
-bool FUN_00586260_shell::IsFlag8Set()
+bool WorldSpaceFlagMethods::IsFlag8Set()
 {
     if (((unsigned char*)this)[0x4c] & 8)
         return 1;
     return 0;
 }
 
-struct FUN_00586280_shell
-{
-    unsigned char bFlags;  // +0x4c
-    void SetFlag8(bool bFlag);
-};
-
 // Sets or clears bit 3 (0x8) of the byte at offset 0x4c on this object based on bFlag.
 // @fnv 0x00586280
-void FUN_00586280_shell::SetFlag8(bool bFlag)
+void WorldSpaceFlagMethods::SetFlag8(bool bFlag)
 {
     if (bFlag)
         ((unsigned char*)this)[0x4c] |= 8;
@@ -685,82 +598,51 @@ void FUN_00586280_shell::SetFlag8(bool bFlag)
         ((unsigned char*)this)[0x4c] &= ~8;
 }
 
-struct FUN_005862c0_shell
-{
-    unsigned char cFlags;  // +0x4c
-    bool IsFlagSet();
-};
-
 // @fnv 0x005862c0
-bool FUN_005862c0_shell::IsFlagSet()
+bool WorldSpaceFlagMethods::IsFlagSet()
 {
     if (((unsigned char*)((char*)this + 0x4c))[0] & 0x10)
         return 1;
     return 0;
 }
 
-struct FUN_00586300_shell
-{
-    char IsFlag80Set();
-};
-
 // Returns 1 if the byte at offset 0x4c has bit 0x80 set, otherwise 0.
 // @fnv 0x00586300
-char FUN_00586300_shell::IsFlag80Set()
+char WorldSpaceFlagMethods::IsFlag80Set()
 {
-    if ((*(unsigned char*)(this + 0x4c) & 0x80) != 0)
+    if ((*(unsigned char*)((char*)this + 0x4c) & 0x80) != 0)
         return 1;
     return 0;
 }
 
-struct FUN_00586320_shell
-{
-    bool FUN_00586320();
-};
-
 // @fnv 0x00586320
-bool FUN_00586320_shell::FUN_00586320()
+bool WorldSpaceFlagMethods::FUN_00586320()
 {
     if ((*(unsigned char*)((char*)this + 0x4c) & 0x40) != 0)
         return false;
     return true;
 }
 
-struct FNStub
-{
-    const char* GetFullName();
-};
-
-struct FUN_00586440_shell : TESWorldSpace
-{
-    const char* FUN_00586440();
-};
-
 // Returns the full name of the parent worldspace if one exists, otherwise the full name of this worldspace.
 // @fnv 0x00586440
-const char* FUN_00586440_shell::FUN_00586440()
+const char* TESWorldSpace::FUN_00586440()
 {
     if (this->GetParentWorld(static_cast<TESWorldSpace::PARENT_USE_FLAG>(2)))
     {
-        return (reinterpret_cast<FNStub*>(
+        return (reinterpret_cast<TESFullName*>(
                     reinterpret_cast<char*>(this->GetParentWorld(static_cast<TESWorldSpace::PARENT_USE_FLAG>(2))) +
                     0x24))
             ->GetFullName();
     }
-    return (reinterpret_cast<FNStub*>(reinterpret_cast<char*>(this) + 0x24))->GetFullName();
+    return (reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(this) + 0x24))->GetFullName();
 }
-
-struct StartMenu
-{
-    char const* GetMenuTitle();
-};
 
 extern StartMenu g_011ca130;
 
 // @fnv 0x00586980
 char const* FUN_00586980()
 {
-    return g_011ca130.GetMenuTitle();
+    return reinterpret_cast<const char*>(g_011ca130.GetMenuTitle());
 }
 
 // Splits a 32-bit value into its high and low 16-bit halves, storing the high half in *b and the low half in *c.
@@ -777,26 +659,16 @@ extern "C"
     int __cdecl TruncateFloatToInt(float);
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-
-struct FUN_00587550_shell : TESWorldSpace
-{
-    TESObjectCELL* FUN_00587550(const NiPoint3& aCoord);
-};
+}  // namespace fnv_00587550
 
 // @fnv 0x00587550
-TESObjectCELL* FUN_00587550_shell::FUN_00587550(const NiPoint3& aCoord)
+TESObjectCELL* TESWorldSpace::FUN_00587550(const NiPoint3& aCoord)
 {
-    int icellx = TruncateFloatToInt(aCoord.x) >> 12;
-    int icelly = TruncateFloatToInt(aCoord.y) >> 12;
+
+    int icellx = fnv_00587550::TruncateFloatToInt(aCoord.x) >> 12;
+    int icelly = fnv_00587550::TruncateFloatToInt(aCoord.y) >> 12;
     return GetCellAtGridPosition(icellx, icelly);
 }
-}  // namespace fnv_00587550
 
 extern "C"
 {
@@ -815,21 +687,21 @@ TESWaterForm* __fastcall FUN_00586070(TESWorldSpace* apWorldSpace)
     return DAT_011ca53c;
 }
 
-template <class T> class BSSimpleList;
+template <class T> class WorldReferenceList;
 
 struct FUN_0054b8c0_shell
 {
-    void AddStaticRefsToList(BSSimpleList<const char*>*);
+    void AddStaticRefsToList(WorldReferenceList<const char*>*);
 };
 
-struct FUN_00588520_shell
+struct WorldSpaceStaticReferenceMethods : TESWorldSpace
 {
-    void FUN_00588520(BSSimpleList<const char*>*);
+    void FUN_00588520(WorldReferenceList<const char*>*);
 };
 
 // If list is non-null, gets the interior cell from this world space and forwards the list to the cell's method.
 // @fnv 0x00588520
-void __thiscall FUN_00588520_shell::FUN_00588520(BSSimpleList<const char*>* list)
+void __thiscall WorldSpaceStaticReferenceMethods::FUN_00588520(WorldReferenceList<const char*>* list)
 {
     if (list)
     {
@@ -916,21 +788,7 @@ TESObjectCELL* FUN_00528560_Host::GetCellAtGridCoord(unsigned short ausGridX, un
     return v5(key);
 }
 
-struct FUN_00582e00_host
-{
-    void FUN_00582e30();
-    void* FUN_00582e00(unsigned int);
-};
 void __cdecl _Deallocate(void*);
-// Calls FUN_00582e30, then deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x00582e00
-void* FUN_00582e00_host::FUN_00582e00(unsigned int flags)
-{
-    FUN_00582e30();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
 
 struct S_00583040
 {
@@ -949,7 +807,6 @@ void* S_00583040::FUN_00583040(unsigned int flags)
 }
 
 namespace fnv_00584530 {
-struct FileH;
 
 struct FormIDData
 {
@@ -960,14 +817,14 @@ struct FormIDData
     float f10;
 };
 
-struct FUN_005858b0_shell
+struct WorldSpaceFileMethods : TESWorldSpace
 {
-    FormIDData* FUN_00588a90(FileH*);
-    int FUN_00584530(FileH* file, int x, int y);
+    FormIDData* FUN_00588a90(TESFile*);
+    int FUN_00584530(TESFile* file, int x, int y);
 };
 
 // @fnv 0x00584530
-int FUN_005858b0_shell::FUN_00584530(FileH* file, int x, int y)
+int WorldSpaceFileMethods::FUN_00584530(TESFile* file, int x, int y)
 {
     FormIDData* pdata = FUN_00588a90(file);
     if (!pdata)
@@ -984,32 +841,25 @@ int FUN_005858b0_shell::FUN_00584530(FileH* file, int x, int y)
 
 class TESWaterForm;
 extern TESWaterForm* DAT_011ca53c;
-struct FUN_005860c0_shell : TESWorldSpace
-{
-    TESWaterForm* FUN_005860c0();
-};
+
 // @fnv 0x005860c0
-TESWaterForm* FUN_005860c0_shell::FUN_005860c0()
+TESWaterForm* TESWorldSpace::FUN_005860c0()
 {
-    if (GetParentWorld(TESWorldSpace::USE_LAND))
-        return ((FUN_005860c0_shell*)GetParentWorld(TESWorldSpace::USE_LAND))->FUN_005860c0();
-    if (*(TESWaterForm**)((char*)this + 0x78))
-        return *(TESWaterForm**)((char*)this + 0x78);
+    if (GetParentWorld(TESWorldSpace::PU_LOD))
+        return GetParentWorld(TESWorldSpace::PU_LOD)->FUN_005860c0();
+    if (lodWater)
+        return lodWater;
     return DAT_011ca53c;
 }
 
-struct Unk00586340
-{
-    bool FUN_00586340(int);
-};
 // Returns true if a is outside 0..5 or if the bit for a is set in the 16-bit mask at offset 0x4E of this.
 // @fnv 0x00586340
-bool Unk00586340::FUN_00586340(int aiIndex)
+bool TESWorldSpace::GetParentUseFlag(PARENT_USE_FLAG aiIndex)
 {
     if (aiIndex >= 0 && aiIndex < 6)
     {
         unsigned char mask = 1 << aiIndex;
-        if (*(unsigned short*)((char*)this + 0x4E) & mask)
+        if (field4E & mask)
             return true;
         return false;
     }
@@ -1017,124 +867,78 @@ bool Unk00586340::FUN_00586340(int aiIndex)
 }
 
 struct PointerPairData;
-struct FUN_00586400_shell : TESWorldSpace
-{
-    PointerPairData* FUN_00586400();
-};
+
 // Returns the parent world's result if GetParentWorld(2) is set, otherwise returns this object offset by 0x80.
 // @fnv 0x00586400
-PointerPairData* FUN_00586400_shell::FUN_00586400()
+PointerPairData* TESWorldSpace::FUN_00586400()
 {
     if (GetParentWorld((PARENT_USE_FLAG)2))
-        return ((FUN_00586400_shell*)GetParentWorld((PARENT_USE_FLAG)2))->FUN_00586400();
+        return GetParentWorld((PARENT_USE_FLAG)2)->FUN_00586400();
     return (PointerPairData*)((char*)this + 0x80);
 }
 
-namespace fnv_00587760 {
-struct CellH
-{
-    int GetCellGridX();
-    int GetCellGridY();
-};
-struct MapH
-{
-    bool RemoveAt(unsigned int);
-};
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&) const;
-};
-struct S54de10
-{
-    void FUN_0054de10(TESWorldSpace*);
-};
-
-struct FUN_00587760_shell : TESWorldSpace
-{
-    void RemoveCellFromMap(TESObjectCELL* cell);
-};
-
 // @fnv 0x00587760
-void FUN_00587760_shell::RemoveCellFromMap(TESObjectCELL* cell)
+void TESWorldSpace::RemoveCellFromMap(TESObjectCELL* cell)
 {
+
     if (!cell || cell->IsCellInterior())
         return;
 
     unsigned int entry7;
-    unsigned int key = TESWorldSpace::BuildCellKey((short)reinterpret_cast<CellH*>(cell)->GetCellGridX(),
-                                                   (short)reinterpret_cast<CellH*>(cell)->GetCellGridY());
+    unsigned int key = TESWorldSpace::BuildCellKey((short)cell->GetCellGridX(),
+                                                   (short)cell->GetCellGridY());
 
     if (reinterpret_cast<DummyPointerMap*>(cellMap)->GetAt(key, entry7) &&
         cell == reinterpret_cast<TESObjectCELL*>(entry7))
     {
-        reinterpret_cast<MapH*>(cellMap)->RemoveAt(key);
-        reinterpret_cast<S54de10*>(cell)->FUN_0054de10(0);
+        cellMap->RemoveAt(key);
+        reinterpret_cast<CellRuntimeMethods*>(cell)->FUN_0054de10(0);
     }
 }
-}  // namespace fnv_00587760
 
 namespace fnv_00587870 {
-struct CellH
-{
-    int GetCellGridX();
-    int GetCellGridY();
-};
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&) const;
-};
-template <class T> struct BSSimpleList
+template <class T> struct WorldReferenceList
 {
 };
-struct OverlapHolder
+struct OverlapHolder : TESWorldSpace
 {
-    char pad[0x68];
-    DummyPointerMap* map68;
-    BSSimpleList<TESObjectREFR*>* FUN_00587870(CellH* apCell);
+    WorldReferenceList<TESObjectREFR*>* FUN_00587870(TESObjectCELL* apCell);
 };
 // Looks up the cell's key in map68 and returns the stored TESObjectREFR list, or null if map68 is unset.
 // @fnv 0x00587870
-BSSimpleList<TESObjectREFR*>* OverlapHolder::FUN_00587870(CellH* apCell)
+WorldReferenceList<TESObjectREFR*>* OverlapHolder::FUN_00587870(TESObjectCELL* apCell)
 {
-    BSSimpleList<TESObjectREFR*>* preflist = 0;
+    WorldReferenceList<TESObjectREFR*>* preflist = 0;
     unsigned int ikey;
-    if (map68)
+    if (reinterpret_cast<DummyPointerMap*>(m_pFourthTreePointer))
     {
         ikey = TESWorldSpace::BuildCellKey(apCell->GetCellGridX(), apCell->GetCellGridY());
-        map68->GetAt(ikey, (unsigned int&)preflist);
+        reinterpret_cast<DummyPointerMap*>(m_pFourthTreePointer)->GetAt(ikey, (unsigned int&)preflist);
     }
     return preflist;
 }
 }  // namespace fnv_00587870
 
-struct CellCaller
-{
-    void MoveReferencesToWorldCells(TESWorldSpace*);
-};
-struct FUN_00588120_host
+struct WorldSpaceCellMoveMethods : TESWorldSpace
 {
     void FUN_00588120();
 };
 // Gets the interior cell from this worldspace and, if one exists, calls MoveReferencesToWorldCells on it with this worldspace.
 // @fnv 0x00588120
-void FUN_00588120_host::FUN_00588120()
+void WorldSpaceCellMoveMethods::FUN_00588120()
 {
     TESObjectCELL* cell = ((TESWorldSpace*)this)->GetInteriorCell();
     if (cell)
-        ((CellCaller*)cell)->MoveReferencesToWorldCells((TESWorldSpace*)this);
+        ((CellRuntimeMethods*)cell)->MoveReferencesToWorldCells((TESWorldSpace*)this);
 }
 
-struct FUN_005884e0_owner : TESWorldSpace
-{
-    void FUN_005884e0(TESObjectREFR*);
-};
 struct CellProxy
 {
     void FUN_0054b830(TESObjectREFR*);
 };
 // If a1 is non-null and the world space has an interior cell, forwards a1 to that cell's FUN_0054b830.
 // @fnv 0x005884e0
-void FUN_005884e0_owner::FUN_005884e0(TESObjectREFR* apRef)
+void TESWorldSpace::FUN_005884e0(TESObjectREFR* apRef)
 {
     TESObjectCELL* cell;
     if (apRef != 0)
@@ -1148,20 +952,16 @@ void FUN_005884e0_owner::FUN_005884e0(TESObjectREFR* apRef)
 }
 
 namespace fnv_00588a90 {
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&) const;
-};
 struct FormIDData
 {
     int dummy;
 };
-struct TESWorldSpace_shell
+struct WorldSpaceFileLookupMethods : TESWorldSpace
 {
     FormIDData* FUN_00588a90(TESFile* file);
 };
 // @fnv 0x00588a90
-FormIDData* TESWorldSpace_shell::FUN_00588a90(TESFile* file)
+FormIDData* WorldSpaceFileLookupMethods::FUN_00588a90(TESFile* file)
 {
     FormIDData* result = 0;
     TESFile* current = file;
@@ -1216,119 +1016,24 @@ BGSCameraPath* FUN_0095f530_shell::FUN_0095f530(TESObjectREFR* apActionRef, TESO
     return ((Caller_0095f590*)this)->FUN_0095f590(nv);
 }
 
-namespace fnv_00582c20 {
-struct TESFormBase
-{
-    TESFormBase();
-    ~TESFormBase();
-    virtual void V();
-    int x[5];
-};
-namespace stand {
-struct TESFullName
-{
-    TESFullName();
-    ~TESFullName();
-    virtual void V();
-    int x[2];
-};
-}
-struct TESTexture
-{
-    TESTexture();
-    ~TESTexture();
-    virtual void V();
-    int x[2];
-};
-struct FUN_0057cd10
-{
-    FUN_0057cd10();
-    ~FUN_0057cd10();
-    int x;
-};
-struct FUN_00588fa0
-{
-    FUN_00588fa0(unsigned int);
-    ~FUN_00588fa0();
-    int x[4];
-};
-struct SL
-{
-    SL();
-    ~SL();
-    int x[2];
-};
-struct GO
-{
-    GO(int);
-    ~GO();
-    int x;
-};
-struct FUN_006815c0
-{
-    float x, y;
-    FUN_006815c0();
-};
-struct FUN_00588fd0
-{
-    FUN_00588fd0(int);
-    ~FUN_00588fd0();
-    int x[4];
-};
-struct StrMem
-{
-    StrMem();
-    ~StrMem();
-    int x[2];
-};
-struct FUN_00589000
-{
-    FUN_00589000(unsigned int);
-    int x[4];
-};
-struct SFTX
-{
-    void SetFormType(int);
-};
+namespace worldspace_cell_map {
 extern float _DAT_01015f5c;
-struct FUN_00582c20 : public TESFormBase, public stand::TESFullName, public TESTexture
-{
-    FUN_00589000* pCellNavMeshInfoMap;
-    void* m_pCell;
-    FUN_0057cd10 m_kFirstTreeComponent;
-    void* m_pThirdTreePointer;
-    int pad40[4];
-    FUN_00588fa0 m_kSecondTreeComponent;
-    SL m_kThirdTreeComponent;
-    void* m_pFourthTreePointer;
-    GO m_kFourthTreeComponent;
-    int pad70[12];
-    FUN_006815c0 m_kFirstPoint;
-    FUN_006815c0 m_kEndPoint;
-    FUN_00588fd0 OffsetDataMap;
-    StrMem name;
-    int padc8[3];
-    TESTexture CanopyShadowTexture;
-    TESTexture m_kLeafShadowTexture;
-    FUN_00582c20();
-    void FUN_00583070();
-};
+}
 
 // @fnv 0x00582c20
-FUN_00582c20::FUN_00582c20() : m_kSecondTreeComponent(0x25), m_kFourthTreeComponent(0), OffsetDataMap(0x25)
+TESWorldSpace::TESWorldSpace() : m_kSecondTreeComponent(0x25), m_kFourthTreeComponent(0), OffsetDataMap(0x25)
 {
-    ((SFTX*)this)->SetFormType(0x41);
+    SetFormType(static_cast<ENUM_FORM_ID>(0x41));
     m_pThirdTreePointer = 0;
-    pCellNavMeshInfoMap = new FUN_00589000(0x25);
+    pCellNavMeshInfoMap = new NiTPointerMap<unsigned int, TESObjectREFR*>(0x25);
     m_pFourthTreePointer = 0;
     m_pCell = 0;
     m_kFirstPoint.y = 3.4028234663852886e+38f;
     m_kFirstPoint.x = 3.4028234663852886e+38f;
-    m_kEndPoint.y = _DAT_01015f5c;
-    m_kEndPoint.x = _DAT_01015f5c;
+    m_kEndPoint.y = worldspace_cell_map::_DAT_01015f5c;
+    m_kEndPoint.x = worldspace_cell_map::_DAT_01015f5c;
     FUN_00583070();
 }
-}  // namespace fnv_00582c20
 
 namespace fnv_005857b0 {
 struct FileH
@@ -1339,17 +1044,17 @@ struct FileH
     float m_fScalarPart;
     float m_fVectorX;
 };
-struct FUN_005858b0_shell
+struct WorldSpaceFileMethods : TESWorldSpace
 {
     FileH* FUN_00588a90(int);
 };
-struct FUN_005857b0_shell : FUN_005858b0_shell
+struct WorldSpaceOffsetMethods : WorldSpaceFileMethods
 {
     int FUN_00584530(int, int, int);
     void FUN_005857b0(int a, int b);
 };
 // @fnv 0x005857b0
-void FUN_005857b0_shell::FUN_005857b0(int a, int aiDelta)
+void WorldSpaceOffsetMethods::FUN_005857b0(int a, int aiDelta)
 {
     FileH* p = FUN_00588a90(a);
     if (p && p->m_uiData && aiDelta)
@@ -1385,17 +1090,14 @@ struct MyMap
     void RemoveAll();
     virtual ~MyMap();
 };
-struct NiTMap
+struct WorldEntryMap
 {
     void GetNext(void*&, unsigned int&, void*&);
 };
-struct FUN_00587bb0_shell
-{
-    void DestroyMapEntries();
-};
+
 // Iterates the map at this+0x68, deletes each non-null value list, then clears and deletes the map and nulls the pointer.
 // @fnv 0x00587bb0
-void FUN_00587bb0_shell::DestroyMapEntries()
+void TESWorldSpace::DestroyMapEntries()
 {
     if (*(MapX**)((char*)this + 0x68))
     {
@@ -1404,7 +1106,7 @@ void FUN_00587bb0_shell::DestroyMapEntries()
         {
             void* key = 0;
             void* val = 0;
-            ((NiTMap*)*(MapX**)((char*)this + 0x68))->GetNext(pos, (unsigned int&)key, val);
+            ((WorldEntryMap*)*(MapX**)((char*)this + 0x68))->GetNext(pos, (unsigned int&)key, val);
             if (val)
             {
                 ((List_009e03e0*)val)->RemoveAll();
@@ -1426,49 +1128,35 @@ struct MyMap
 {
     void RemoveAll();
 };
-struct NiTMap
+// Unit-local view of NiTMap for 0x00588c80 (namespace fnv_00588c80): built on the shared NiTMap, that code does not compile or does not match.
+struct NiTMap_00588c80
 {
     void GetNext(void*&, unsigned int&, void*&);
 };
 void __cdecl _Deallocate(void*);
-struct FUN_00588c80
-{
-    void PerformNoArgumentOperation();
-};
+
 // Iterates the map at offset 0xb0, deallocating each entry's referenced object and the entry itself, then clears the map.
+}  // namespace fnv_00588c80
+
 // @fnv 0x00588c80
-void FUN_00588c80::PerformNoArgumentOperation()
+void TESWorldSpace::FUN_00588c80()
 {
-    void* iterA = ((MapX*)((char*)this + 0xb0))->GetFirstPos();
+
+    void* iterA = ((fnv_00588c80::MapX*)((char*)this + 0xb0))->GetFirstPos();
     while (iterA)
     {
         void* preflist9 = 0;
         unsigned int iignore5 = 0;
-        ((NiTMap*)((char*)this + 0xb0))->GetNext(iterA, iignore5, preflist9);
+        ((fnv_00588c80::NiTMap_00588c80*)((char*)this + 0xb0))->GetNext(iterA, iignore5, preflist9);
         void* ref = *(void**)preflist9;
-        _Deallocate(ref);
+        fnv_00588c80::_Deallocate(ref);
         void* p2 = preflist9;
-        _Deallocate(p2);
+        fnv_00588c80::_Deallocate(p2);
     }
-    ((MyMap*)((char*)this + 0xb0))->RemoveAll();
+    ((fnv_00588c80::MyMap*)((char*)this + 0xb0))->RemoveAll();
 }
-}  // namespace fnv_00588c80
 
 namespace fnv_00583070 {
-struct FUN_00583070_shell : public TESWorldSpace
-{
-    void FUN_00583070();
-};
-
-struct FUN_005861d0_shell
-{
-    void SetFlagBit0(bool);
-};
-
-struct GO
-{
-    void operator=(void*);
-};
 
 struct FormProxy : TESForm
 {
@@ -1480,16 +1168,19 @@ struct WorldSpaceVirtual
     virtual void Call();
 };
 
+}  // namespace fnv_00583070
+
 // @fnv 0x00583070
-void FUN_00583070_shell::FUN_00583070()
+void TESWorldSpace::FUN_00583070()
 {
+
     *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x70) = 0;
     *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0xd0) = 0;
     *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x4c) = 0;
     *reinterpret_cast<unsigned short*>(reinterpret_cast<char*>(this) + 0x4e) = 0;
 
-    if (!reinterpret_cast<FormProxy*>(this)->IsReservedFormID())
-        reinterpret_cast<FUN_005861d0_shell*>(this)->SetFlagBit0(true);
+    if (!reinterpret_cast<fnv_00583070::FormProxy*>(this)->IsReservedFormID())
+        SetFlagBit0(true);
 
     *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x40) = 0;
     *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x44) = 0;
@@ -1509,16 +1200,9 @@ void FUN_00583070_shell::FUN_00583070()
 
     reinterpret_cast<GO*>(reinterpret_cast<char*>(this) + 0x6c)->operator=(0);
 
-    reinterpret_cast<WorldSpaceVirtual*>(reinterpret_cast<char*>(this) + 0xd4)->Call();
-    reinterpret_cast<WorldSpaceVirtual*>(reinterpret_cast<char*>(this) + 0xe0)->Call();
+    reinterpret_cast<fnv_00583070::WorldSpaceVirtual*>(reinterpret_cast<char*>(this) + 0xd4)->Call();
+    reinterpret_cast<fnv_00583070::WorldSpaceVirtual*>(reinterpret_cast<char*>(this) + 0xe0)->Call();
 }
-}  // namespace fnv_00583070
-
-struct GO
-{
-    operator unsigned int() const;
-    void operator=(void*);
-};
 
 struct A51BF0Base
 {
@@ -1534,32 +1218,24 @@ struct FUN_00c5a9d0 : A51BF0Base
 
 extern unsigned int _data_011c16bc;
 
-struct FUN_005831d0_shell
+struct WorldSpaceObjectMethods : TESWorldSpace
 {
-    unsigned char padding[0x6c];
-    GO go;
-
     unsigned int GetOrCreateObject();
 };
 
 // Returns the stored object pointer, allocating and storing a new FUN_00c5a9d0 first if it is null.
 // @fnv 0x005831d0
-unsigned int FUN_005831d0_shell::GetOrCreateObject()
+unsigned int WorldSpaceObjectMethods::GetOrCreateObject()
 {
-    if (!static_cast<unsigned int>(this->go))
+    if (!static_cast<unsigned int>((*reinterpret_cast<GO*>(&m_kFourthTreeComponent))))
     {
-        this->go.operator=(new FUN_00c5a9d0());
+        (*reinterpret_cast<GO*>(&m_kFourthTreeComponent)).operator=(new FUN_00c5a9d0());
     }
 
-    return static_cast<unsigned int>(this->go);
+    return static_cast<unsigned int>((*reinterpret_cast<GO*>(&m_kFourthTreeComponent)));
 }
 
 namespace fnv_00588150 {
-struct CellH
-{
-    int GetCellGridX();
-    int GetCellGridY();
-};
 
 struct ATM
 {
@@ -1569,173 +1245,28 @@ struct ATM
 
 extern ATM g_011ca60c;
 
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&);
-};
-
-struct BSSimpleList
+struct WorldReferenceList
 {
     bool _ref_008256d0();
     TESObjectREFR** _ref_006815c0();
-    BSSimpleList* _ref_00726070();
-};
-
-struct BSOcclusionPlane
-{
-    int GetCullResult() const;
-
-    virtual void V0() = 0;
-    virtual void V1() = 0;
-    virtual void V2() = 0;
-    virtual void V3() = 0;
-    virtual void V4() = 0;
-    virtual void V5() = 0;
-    virtual void V6() = 0;
-    virtual void V7() = 0;
-    virtual void V8() = 0;
-    virtual void V9() = 0;
-    virtual void V10() = 0;
-    virtual void V11() = 0;
-    virtual void V12() = 0;
-    virtual void V13() = 0;
-    virtual void V14() = 0;
-    virtual void V15() = 0;
-    virtual void V16() = 0;
-    virtual void V17() = 0;
-    virtual void V18() = 0;
-    virtual void V19() = 0;
-    virtual void V20() = 0;
-    virtual void V21() = 0;
-    virtual void V22() = 0;
-    virtual void V23() = 0;
-    virtual void V24() = 0;
-    virtual void V25() = 0;
-    virtual void V26() = 0;
-    virtual void V27() = 0;
-    virtual void V28() = 0;
-    virtual void V29() = 0;
-    virtual void V30() = 0;
-    virtual void V31() = 0;
-    virtual void V32() = 0;
-    virtual void V33() = 0;
-    virtual void V34() = 0;
-    virtual void V35() = 0;
-    virtual void V36() = 0;
-    virtual void V37() = 0;
-    virtual void V38() = 0;
-    virtual void V39() = 0;
-    virtual void V40() = 0;
-    virtual void V41() = 0;
-    virtual void V42() = 0;
-    virtual void V43() = 0;
-    virtual void V44() = 0;
-    virtual void V45() = 0;
-    virtual void V46() = 0;
-    virtual void V47() = 0;
-    virtual void V48() = 0;
-    virtual void V49() = 0;
-    virtual void V50() = 0;
-    virtual void V51() = 0;
-    virtual void V52() = 0;
-    virtual void V53() = 0;
-    virtual void V54() = 0;
-    virtual void V55() = 0;
-    virtual void V56() = 0;
-    virtual void V57() = 0;
-    virtual void V58() = 0;
-    virtual void V59() = 0;
-    virtual void V60() = 0;
-    virtual void V61() = 0;
-    virtual void V62() = 0;
-    virtual void V63() = 0;
-    virtual void V64() = 0;
-    virtual void V65() = 0;
-    virtual void V66() = 0;
-    virtual void V67() = 0;
-    virtual void V68() = 0;
-    virtual void V69() = 0;
-    virtual void V70() = 0;
-    virtual void V71() = 0;
-    virtual void V72() = 0;
-    virtual void V73() = 0;
-    virtual void V74() = 0;
-    virtual void V75() = 0;
-    virtual void V76() = 0;
-    virtual void V77() = 0;
-    virtual void V78() = 0;
-    virtual void V79() = 0;
-    virtual void V80() = 0;
-    virtual void V81() = 0;
-    virtual void V82() = 0;
-    virtual void V83() = 0;
-    virtual void V84() = 0;
-    virtual void V85() = 0;
-    virtual void V86() = 0;
-    virtual void V87() = 0;
-    virtual void V88() = 0;
-    virtual void V89() = 0;
-    virtual void V90() = 0;
-    virtual void V91() = 0;
-    virtual void V92() = 0;
-    virtual void V93() = 0;
-    virtual void V94() = 0;
-    virtual void V95() = 0;
-    virtual void V96() = 0;
-    virtual void V97() = 0;
-    virtual void V98() = 0;
-    virtual void V99() = 0;
-    virtual void V100() = 0;
-    virtual void V101() = 0;
-    virtual void V102() = 0;
-    virtual void V103() = 0;
-    virtual void V104() = 0;
-    virtual void V105() = 0;
-    virtual void V106() = 0;
-    virtual void V107() = 0;
-    virtual void V108() = 0;
-    virtual void V109() = 0;
-    virtual void V110() = 0;
-    virtual void V111() = 0;
-    virtual void V112() = 0;
-    virtual void V113() = 0;
-    virtual void V114() = 0;
-    virtual void V115() = 0;
-    virtual void V116() = 0;
-    virtual void V117() = 0;
-    virtual void V118() = 0;
-    virtual void V119() = 0;
-    virtual void V120() = 0;
-    virtual void V121() = 0;
-    virtual void V122() = 0;
-    virtual void V123() = 0;
-    virtual void V124() = 0;
-
-    virtual TESObjectREFR* FUN_0125() = 0;
-};
-
-struct FUN_00550200_shell : public TESObjectCELL
-{
-    bool FUN_00550200(TESObjectREFR*);
-};
-
-struct FUN_00588150_shell : public TESWorldSpace
-{
-    void AddCellReferences(TESObjectCELL*);
+    WorldReferenceList* _ref_00726070();
 };
 
 // Looks up the cell's reference list by key and adds each reference to the cell, filtering the second list by cull result and a cell check.
+}  // namespace fnv_00588150
+
 // @fnv 0x00588150
-void FUN_00588150_shell::AddCellReferences(TESObjectCELL* cell)
+void TESWorldSpace::AddCellReferences(TESObjectCELL* cell)
 {
-    BSSimpleList* pCurrentElementNext;
+
+    fnv_00588150::WorldReferenceList* pCurrentElementNext;
     unsigned int ikey;
 
     if (cell != 0)
     {
-        g_011ca60c.QueryPerformanceCounter(0);
-        ikey = TESWorldSpace::BuildCellKey(reinterpret_cast<CellH*>(cell)->GetCellGridX(),
-                                           reinterpret_cast<CellH*>(cell)->GetCellGridY());
+        fnv_00588150::g_011ca60c.QueryPerformanceCounter(0);
+        ikey = TESWorldSpace::BuildCellKey(cell->GetCellGridX(),
+                                           cell->GetCellGridY());
 
         {
             TESObjectREFR* pref;
@@ -1753,16 +1284,16 @@ void FUN_00588150_shell::AddCellReferences(TESObjectCELL* cell)
 
         {
             TESObjectREFR* pref;
-            pCurrentElementNext = reinterpret_cast<BSSimpleList*>(reinterpret_cast<char*>(this) + 0x60);
+            pCurrentElementNext = reinterpret_cast<fnv_00588150::WorldReferenceList*>(reinterpret_cast<char*>(this) + 0x60);
 
             while (pCurrentElementNext != 0 && !pCurrentElementNext->_ref_008256d0())
             {
                 pref = *pCurrentElementNext->_ref_006815c0();
 
-                if (reinterpret_cast<BSOcclusionPlane*>(pref)->GetCullResult() != reinterpret_cast<int>(cell))
+                if (reinterpret_cast<const BSOcclusionPlane*>(pref)->GetCullResult() != reinterpret_cast<int>(cell))
                 {
-                    if (reinterpret_cast<FUN_00550200_shell*>(cell)->FUN_00550200(
-                            reinterpret_cast<BSOcclusionPlane*>(pref)->FUN_0125()))
+                    if (reinterpret_cast<CellRuntimeMethods*>(cell)->FUN_00550200(
+                            ((TESObjectREFR*(__thiscall*)(TESObjectREFR*))(*(void***)pref)[125])(pref)))
                     {
                         cell->AddReference(pref, false);
                     }
@@ -1772,19 +1303,19 @@ void FUN_00588150_shell::AddCellReferences(TESObjectCELL* cell)
             }
         }
 
-        g_011ca60c.WaitForTasksDuringRendering();
+        fnv_00588150::g_011ca60c.WaitForTasksDuringRendering();
     }
 }
-}  // namespace fnv_00588150
 
 namespace fnv_00588560 {
-class NiTMap
+// Unit-local view of NiTMap for 0x00588560 (namespace fnv_00588560): built on the shared NiTMap, that code does not compile or does not match.
+class NiTMap_00588560
 {
   public:
     void GetNext(void*& position, unsigned int& key, void*& value);
 };
 
-class MapX : public NiTMap
+class MapX : public NiTMap_00588560
 {
   public:
     void* GetFirstPos();
@@ -1874,30 +1405,27 @@ class FUN_00588560_entry
     virtual const char* f76() = 0;
 };
 
-struct FUN_00588560_shell
+struct WorldSpaceEntryMethods : TESWorldSpace
 {
-    unsigned char pad[0x30];
-    MapX* map;
-
     void* FindEntryByName(const char* name);
 };
 
 // Iterates the map's entries and returns the first whose f76() string matches name case-insensitively, or null.
 // @fnv 0x00588560
-void* FUN_00588560_shell::FindEntryByName(const char* name)
+void* WorldSpaceEntryMethods::FindEntryByName(const char* name)
 {
     void* result2 = 0;
     void* position;
 
     if (name)
     {
-        position = this->map->GetFirstPos();
+        position = reinterpret_cast<MapX*>(cellMap)->GetFirstPos();
 
         while (position && !result2)
         {
             void* value3 = 0;
             unsigned int key;
-            this->map->GetNext(position, key, value3);
+            reinterpret_cast<MapX*>(cellMap)->GetNext(position, key, value3);
 
             if (value3)
             {
@@ -1921,23 +1449,14 @@ struct RefAt48
 {
     void* FUN_0040f2a0(int deletionFlags);
 };
-struct FUN_00583180_Class
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c,
-        unk40, unk44;
-    RefAt48* m_ref;
-    int unk4c, unk50, unk54, unk58, unk5c, unk60, unk64, unk68;
-    HelperAt6c m_container;
-    void FUN_00583180();
-};
 // @fnv 0x00583180
-void FUN_00583180_Class::FUN_00583180()
+void TESWorldSpace::FUN_00583180()
 {
-    m_container.FUN_0066b0d0(0);
-    RefAt48* node = m_ref;
+    reinterpret_cast<HelperAt6c*>(&m_kFourthTreeComponent)->FUN_0066b0d0(0);
+    RefAt48* node = reinterpret_cast<RefAt48*>(data);
     RefAt48* doomed = node;
     doomed ? doomed->FUN_0040f2a0(1) : 0;
-    m_ref = 0;
+    data = 0;
 }
 
 struct FUN_00583270_sub_cls
@@ -1956,28 +1475,30 @@ struct FUN_00583270_tgt_cls
 int __fastcall FUN_00726070_cb(void* p);
 void* __cdecl FUN_00450b80_cb(int v);
 
-struct FUN_00583270_cls
+struct WorldSpaceNodeMethods : TESWorldSpace
 {
-    char pad[0x6c];
-    FUN_00583270_sub_cls sub;
     void FUN_00583270();
 };
 
 // @fnv 0x00583270
-void FUN_00583270_cls::FUN_00583270()
+void WorldSpaceNodeMethods::FUN_00583270()
 {
-    if (sub.FUN_00559450())
+    if ((*reinterpret_cast<FUN_00583270_sub_cls*>(&m_kFourthTreeComponent)).FUN_00559450())
     {
-        if (FUN_00726070_cb(sub.FUN_00559450()) == 1)
+        if (FUN_00726070_cb((*reinterpret_cast<FUN_00583270_sub_cls*>(&m_kFourthTreeComponent)).FUN_00559450()) == 1)
         {
-            if (reinterpret_cast<FUN_00583270_mid_cls*>(FUN_00450b80_cb(0))->FUN_00454b30() == (int)sub.FUN_00559450())
+            if (reinterpret_cast<FUN_00583270_mid_cls*>(FUN_00450b80_cb(0))->FUN_00454b30() == (int)(*reinterpret_cast<FUN_00583270_sub_cls*>(&m_kFourthTreeComponent)).FUN_00559450())
             {
                 reinterpret_cast<FUN_00583270_tgt_cls*>(FUN_00450b80_cb(0))->FUN_00b5ddf0(0);
             }
-            sub.FUN_0066b0d0(0);
+            (*reinterpret_cast<FUN_00583270_sub_cls*>(&m_kFourthTreeComponent)).FUN_0066b0d0(0);
         }
     }
 }
+
+// These legacy calls retain the original full-width result and form-skip entry point.
+unsigned int __fastcall GetCurrentFormType(TESFile*);
+void __fastcall SkipCurrentForm(TESFile*);
 
 struct TypeGroupInfo
 {
@@ -1985,20 +1506,6 @@ struct TypeGroupInfo
     unsigned int unk04;
     unsigned int label;
     unsigned int groupType;
-};
-struct FileReader
-{
-    bool FUN_00471c20();
-    bool SetOffset(unsigned int);
-    bool FUN_004734d0(void*);
-    bool FUN_00472150(bool);
-    TypeGroupInfo* FUN_00462270();
-    void FUN_00473660();
-    int GetNextChunk();
-    bool GetChunkData(void*, unsigned int);
-    bool FUN_00401680();
-    bool FUN_004726f0();
-    void SkipCurrentForm();
 };
 struct Offsets
 {
@@ -2017,17 +1524,17 @@ int FUN_005442c0(int, int);
 extern unsigned int kGroupFormType;
 extern unsigned int DAT_011872b4;
 extern unsigned int DAT_01187338;
-struct WorldReader
+struct WorldSpaceCellReadMethods : TESWorldSpace
 {
-    Offsets* FUN_00588a90(FileReader*);
-    int FUN_00584530(FileReader*, int, int);
-    bool SeekToCellInWorld(FileReader*, int, int);
+    Offsets* FUN_00588a90(TESFile*);
+    int FUN_00584530(TESFile*, int, int);
+    bool SeekToCellInWorld(TESFile*, int, int);
 };
 // Seeks the file to the world block/sub-block for cell (x,y), scanning group headers and cell chunks until the matching cell is found.
 // @fnv 0x005854f0
-bool WorldReader::SeekToCellInWorld(FileReader* file, int x, int y)
+bool WorldSpaceCellReadMethods::SeekToCellInWorld(TESFile* file, int x, int y)
 {
-    if (file && file->FUN_00471c20())
+    if (file && file->IsMasterFile())
     {
         Offsets* offsets = FUN_00588a90(file);
         if (offsets && offsets->offsets)
@@ -2049,11 +1556,11 @@ bool WorldReader::SeekToCellInWorld(FileReader* file, int x, int y)
     bool found = false;
     int block = GetCellCoordKey(x, y);
     subBlock = FUN_005442c0(x, y);
-    if (file && file->FUN_004734d0(this))
+    if (file && file->FUN_004734d0(reinterpret_cast<TESForm*>(this)))
     {
         file->FUN_00472150(true);
         bool done = false;
-        TypeGroupInfo* header = file->FUN_00462270();
+        TypeGroupInfo* header = reinterpret_cast<TypeGroupInfo*>(file->GetRecordHeader());
         while (header && !done)
         {
             if (header->type == kGroupFormType)
@@ -2078,7 +1585,7 @@ bool WorldReader::SeekToCellInWorld(FileReader* file, int x, int y)
                 if (!done)
                 {
                     if (skip)
-                        file->FUN_00473660();
+                        file->IsGroupOpen();
                     else
                         file->FUN_00472150(true);
                 }
@@ -2093,18 +1600,18 @@ bool WorldReader::SeekToCellInWorld(FileReader* file, int x, int y)
                 else
                 {
                     bool read = false;
-                    int chunk = file->GetNextChunk();
+                    int chunk = file->FUN_004726b0();
                     while (chunk && !read)
                     {
                         if (chunk == 0x434c4358)
                         {
-                            file->GetChunkData(&cellCoords, 12);
-                            if (file->FUN_00401680())
+                            file->FUN_00472890(&cellCoords, 12);
+                            if (file->IsEndianConversionRequired())
                                 cellCoords.FUN_00462230();
                             read = true;
                         }
-                        if (file->FUN_004726f0())
-                            chunk = file->GetNextChunk();
+                        if (file->NextChunk())
+                            chunk = file->FUN_004726b0();
                         else
                             chunk = 0;
                     }
@@ -2113,7 +1620,7 @@ bool WorldReader::SeekToCellInWorld(FileReader* file, int x, int y)
                 {
                     found = true;
                     done = true;
-                    file->SkipCurrentForm();
+                    SkipCurrentForm(file);
                 }
                 else
                     file->FUN_00472150(true);
@@ -2129,11 +1636,8 @@ bool WorldReader::SeekToCellInWorld(FileReader* file, int x, int y)
     return found;
 }
 
-struct FUN_005877e0_shell : public TESWorldSpace
-{
-    void FUN_005877e0();
-    bool Probe();
-};
+// The shared worldspace header does not declare the cell-map ownership query.
+bool __fastcall IsWorldCellMapShared(TESWorldSpace*);
 
 struct FUN_005877e0_Val5
 {
@@ -2144,106 +1648,41 @@ struct FUN_005877e0_Val5
     virtual unsigned int v4(int);
 };
 
-struct FUN_005877e0_Map
-{
-    void* First();
-    void Next(void** it, unsigned int* key, FUN_005877e0_Val5** out);
-    void Done();
-};
-
 // If Probe fails, iterates cellMap calling v4(1) on each entry, then always calls Done on cellMap.
 // @fnv 0x005877e0
-void FUN_005877e0_shell::FUN_005877e0()
+void TESWorldSpace::FUN_005877e0()
 {
-    if (!Probe())
+    if (!IsWorldCellMapShared(this))
     {
-        void* it = reinterpret_cast<FUN_005877e0_Map*>(cellMap)->First();
+        void* it = cellMap->GetFirstPos();
         while (it != 0)
         {
             FUN_005877e0_Val5* item;
             unsigned int key;
             FUN_005877e0_Val5* out4 = 0;
-            reinterpret_cast<FUN_005877e0_Map*>(cellMap)->Next(&it, &key, &out4);
+            cellMap->GetNext(it, key, reinterpret_cast<TESObjectREFR*&>(out4));
             FUN_005877e0_Val5* tmp4 = out4;
             item = tmp4;
             (item != 0) ? item->v4(1) : 0;
         }
     }
-    reinterpret_cast<FUN_005877e0_Map*>(cellMap)->Done();
+    cellMap->RemoveAll();
 }
-
-struct Pt3
-{
-    float x;
-    float y;
-    float z;
-    Pt3();
-    Pt3& operator*=(float);
-    Pt3 operator-(const Pt3&) const;
-    Pt3 operator+(const Pt3&) const;
-};
 
 extern float const DAT_01016248;
 
-struct WorldOffsetHost
-{
-    int unk00;
-    float GetOffsetX();
-    float GetOffsetY();
-};
-
 float __fastcall GetWorldScale(void* apWorld);
 
-struct FUN_00588e40_shell : WorldOffsetHost
+// Local method adapter for world transforms, absent from the shared header.
+struct WorldPointTransformMethods : TESWorldSpace
 {
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    float m_fGridOriginX;
-    float afWorldOriginY;
-    float kPointArrayBench;
-    float m_fWorldTransformCoefficient4;
-    void TransformWorldPoint(Pt3* apPoint, bool abInverse);
+    float GetOffsetX();
+    float GetOffsetY();
+    void TransformWorldPoint(NiPoint3*, bool);
 };
 
 // @fnv 0x00588e40
-void FUN_00588e40_shell::TransformWorldPoint(Pt3* apPoint, bool abInverse)
+void WorldPointTransformMethods::TransformWorldPoint(NiPoint3* apPoint, bool abInverse)
 {
     if (abInverse)
     {
@@ -2252,12 +1691,12 @@ void FUN_00588e40_shell::TransformWorldPoint(Pt3* apPoint, bool abInverse)
     }
     if (GetWorldScale(this) != 1.0 && GetWorldScale(this) != 0.0)
     {
-        Pt3 kCenter4;
-        kCenter4.x = m_fGridOriginX + kPointArrayBench;
-        kCenter4.y = afWorldOriginY + m_fWorldTransformCoefficient4;
+        NiPoint3 kCenter4;
+        kCenter4.x = m_kFirstPoint.x + m_kEndPoint.x;
+        kCenter4.y = m_kFirstPoint.y + m_kEndPoint.y;
         kCenter4.z = 0.0f;
         kCenter4 *= DAT_01016248;
-        Pt3 kDelta = *apPoint - kCenter4;
+        NiPoint3 kDelta = *apPoint - kCenter4;
         kDelta *= abInverse ? 1.0 / GetWorldScale(this) : GetWorldScale(this);
         *apPoint = kCenter4 + kDelta;
     }
@@ -2268,59 +1707,10 @@ void FUN_00588e40_shell::TransformWorldPoint(Pt3* apPoint, bool abInverse)
     }
 }
 
-struct FUN_00483630_holder
-{
-    virtual ~FUN_00483630_holder();
-    unsigned int flags, formID, fileData, changedFlags, recordData;
-};
-struct FUN_00591300
-{
-    virtual ~FUN_00591300();
-    unsigned int nameData, nameLength;
-};
-struct TESTexture
-{
-    virtual ~TESTexture();
-    unsigned int textureData, textureLength;
-};
-struct FUN_0048e2e0
-{
-    unsigned int type, data, length;
-    ~FUN_0048e2e0();
-};
-struct FUN_0057ce90_shell
-{
-    unsigned int head;
-    ~FUN_0057ce90_shell();
-};
-struct FUN_00589130
-{
-    unsigned int table, count, allocator, entries;
-    ~FUN_00589130();
-};
-struct FUN_00589230
-{
-    unsigned int entries, size, capacity, allocator;
-    ~FUN_00589230();
-};
-struct BSStringTChar
-{
-    unsigned int data, length;
-    ~BSStringTChar();
-};
-struct GO633
-{
-    void* node;
-    ~GO633();
-};
 struct WorldTerrain
 {
     void FUN_006fca70();
     ~WorldTerrain();
-};
-struct WorldCellMap
-{
-    virtual ~WorldCellMap();
 };
 struct WorldLandMap
 {
@@ -2330,37 +1720,10 @@ struct WorldLandMap
     virtual void v3();
     virtual ~WorldLandMap();
 };
-struct FUN_00582e30 : FUN_00483630_holder, FUN_00591300, TESTexture
-{
-    WorldCellMap* cellMap;
-    WorldLandMap* landMap;
-    FUN_0057ce90_shell cellList;
-    WorldTerrain* terrain;
-    unsigned int water, parentUseFlags, climate, worldFlags;
-    FUN_00589130 offsetMap;
-    BSSimpleList<int> regionList;
-    unsigned int worldspaceID;
-    GO633 node;
-    unsigned int parent, music, encounterZone, location, mapScale, mapX, mapY;
-    unsigned int minX, minY, maxX, maxY, landHeight, waterHeight, lodWater;
-    unsigned int lodWaterType, impactData;
-    FUN_00589230 offsetArray;
-    BSStringTChar mapName;
-    float usableX, usableY;
-    unsigned int mapDimensions;
-    FUN_0048e2e0 m_kCloudLayerTextures;
-    FUN_0048e2e0 waterTexture;
-    virtual ~FUN_00582e30();
-    void ClearAllLists();
-    void DestroyMapEntries();
-    void FUN_00583180();
-    void FUN_005877e0();
-    void FUN_00588c80();
-};
-extern FUN_00582e30* DAT_011c3f44;
+extern TESWorldSpace* DAT_011c3f44;
 // Clears the global worldspace pointer if it is this object, then releases terrain, cell and land maps and other owned resources.
 // @fnv 0x00582e30
-FUN_00582e30::~FUN_00582e30()
+TESWorldSpace::~TESWorldSpace()
 {
     if (DAT_011c3f44 == this)
         DAT_011c3f44 = 0;
@@ -2368,27 +1731,19 @@ FUN_00582e30::~FUN_00582e30()
     DestroyMapEntries();
     if (terrain)
     {
-        terrain->FUN_006fca70();
-        delete terrain;
+        reinterpret_cast<WorldTerrain*>(terrain)->FUN_006fca70();
+        delete reinterpret_cast<WorldTerrain*>(terrain);
         terrain = 0;
     }
     FUN_00583180();
     FUN_005877e0();
     delete cellMap;
     cellMap = 0;
-    delete landMap;
-    landMap = 0;
+    delete reinterpret_cast<WorldLandMap*>(m_pCell);
+    m_pCell = 0;
     FUN_00588c80();
 }
 
-struct WorldRecordFile : TESFile
-{
-    unsigned int GetNextChunk();
-    void GetChunkData(void*, unsigned int);
-    bool FUN_00401680();
-    bool FUN_00471c20();
-    bool FUN_004726f0();
-};
 struct BoundsPoint
 {
     float x, y;
@@ -2403,96 +1758,55 @@ struct BoundsOffsetData
 void BSEndian(float*, EndianSizeTag<4>);
 float FUN_0040ebd0(float, float);
 float FUN_00404010(float, float);
-struct WorldBounds
+// Local method adapter: the shared header does not yet declare FUN_00583360.
+struct WorldSpaceBoundsMethods : TESWorldSpace
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9C;
-    float minX, minY, maxX, maxY;
-    BoundsOffsetData* GetOrCreateCellOffsetData(WorldRecordFile*);
-    bool FUN_00583360(WorldRecordFile*);
+    bool FUN_00583360(TESFile*);
 };
 // @fnv 0x00583360
-bool WorldBounds::FUN_00583360(WorldRecordFile* file)
+bool WorldSpaceBoundsMethods::FUN_00583360(TESFile* file)
 {
     unsigned int type = 0;
-    while (type = file->GetNextChunk())
+    while (type = file->FUN_004726b0())
     {
         switch (type)
         {
         case 0x304d414e: {
-            BoundsPoint minimum;
-            file->GetChunkData(&minimum, 8);
-            if (file->FUN_00401680())
+            ::BoundsPoint minimum;
+            file->FUN_00472890(&minimum, 8);
+            if (file->IsEndianConversionRequired())
             {
                 BSEndian(&minimum.x, EndianSizeTag<4>());
                 BSEndian(&minimum.y, EndianSizeTag<4>());
             }
-            minX = FUN_0040ebd0(minX, minimum.x);
-            minY = FUN_0040ebd0(minY, minimum.y);
-            if (file->FUN_00471c20())
+            m_kFirstPoint.x = FUN_0040ebd0(m_kFirstPoint.x, minimum.x);
+            m_kFirstPoint.y = FUN_0040ebd0(m_kFirstPoint.y, minimum.y);
+            if (file->IsMasterFile())
             {
-                BoundsOffsetData* data = GetOrCreateCellOffsetData(file);
+                BoundsOffsetData* data = reinterpret_cast<BoundsOffsetData*>(GetOrCreateCellOffsetData(file));
                 data->minimum = minimum;
             }
             break;
         }
         case 0x394d414e: {
-            BoundsPoint maximum;
-            file->GetChunkData(&maximum, 8);
-            if (file->FUN_00401680())
+            ::BoundsPoint maximum;
+            file->FUN_00472890(&maximum, 8);
+            if (file->IsEndianConversionRequired())
             {
                 BSEndian(&maximum.x, EndianSizeTag<4>());
                 BSEndian(&maximum.y, EndianSizeTag<4>());
             }
-            maxX = FUN_00404010(maxX, maximum.x);
-            maxY = FUN_00404010(maxY, maximum.y);
-            if (file->FUN_00471c20())
+            m_kEndPoint.x = FUN_00404010(m_kEndPoint.x, maximum.x);
+            m_kEndPoint.y = FUN_00404010(m_kEndPoint.y, maximum.y);
+            if (file->IsMasterFile())
             {
-                BoundsOffsetData* data = GetOrCreateCellOffsetData(file);
+                BoundsOffsetData* data = reinterpret_cast<BoundsOffsetData*>(GetOrCreateCellOffsetData(file));
                 data->maximum = maximum;
             }
             break;
         }
         }
-        if (!file->FUN_004726f0())
+        if (!file->NextChunk())
             break;
     }
     return true;
@@ -2542,113 +1856,91 @@ void AppendChunk(unsigned int, void*, unsigned int);
 void FUN_004858f0(unsigned int, unsigned char);
 void FUN_00485710(unsigned int, unsigned int*, unsigned int);
 void FUN_004856f0(unsigned int, void*, unsigned int);
-struct SaveWorld
+// Saving helpers missing from the shared header; all fields come from TESWorldSpace.
+struct WorldSpaceSaveMethods : TESWorldSpace
 {
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14;
-    SaveFullName fullName;
-    SaveTexture texture;
-    unsigned int unk30, unk34, unk38, unk3c, unk40, unk44;
-    SaveForm* extra;
-    unsigned char flags, unk4d;
-    unsigned short parentFlags;
-    unsigned int unk50, unk54, unk58, unk5c, unk60, unk64, unk68, unk6c;
-    SaveForm* parent;
-    unsigned int unk74, unk78, unk7c;
-    SaveMap map;
-    SaveOffset offset;
-    unsigned int unk9c;
-    unsigned int minimumX, minimumY, maximumX, maximumY;
-    unsigned int unkb0, unkb4, unkb8, unkbc, unkc0, unkc4;
-    float landHeight, waterHeight;
-    SaveForm* encounterZone;
-    SaveGameString canopy, waterNoise;
-    void FUN_004855a0();
-    void FUN_00485680();
-    bool FUN_00586340(int);
-    SaveForm* FUN_00585fe0();
-    SaveForm* FUN_00586070();
-    SaveForm* FUN_005860c0();
+    ::SaveForm* FUN_00586070();
     float FUN_0045cd80();
-    SaveForm* FUN_008041a0();
-    SaveForm* FUN_00586150();
+    ::SaveForm* FUN_008041a0();
+    ::SaveForm* FUN_00586150();
     void FUN_00584170();
 };
 // Writes the world record's encounter zone, parent, canopy, water noise, heights, map, offset, bounds and flags to the save stream.
 // @fnv 0x00584170
-void SaveWorld::FUN_00584170()
+void WorldSpaceSaveMethods::FUN_00584170()
 {
     FUN_004855a0();
-    fullName.FUN_00487010();
+    TESFullName::FUN_00487010();
     unsigned int formID = 0;
-    if (encounterZone)
+    if (reinterpret_cast<::SaveForm*>(fieldD0))
     {
-        formID = encounterZone->GetFormID();
+        formID = reinterpret_cast<::SaveForm*>(fieldD0)->GetFormID();
         FUN_00485910(0x4e5a4558, formID);
     }
     if (parent)
     {
         formID = parent->GetFormID();
         FUN_00485910(0x4d414e57, formID);
-        FUN_00485950(0x4d414e50, parentFlags);
+        FUN_00485950(0x4d414e50, field4E);
     }
-    if (!FUN_00586340(4) && FUN_00585fe0())
+    if (!GetParentUseFlag(static_cast<PARENT_USE_FLAG>(4)) && FUN_00585fe0())
     {
-        formID = FUN_00585fe0()->GetFormID();
+        formID = reinterpret_cast<::SaveForm*>(FUN_00585fe0())->GetFormID();
         FUN_00485910(0x4d414e43, formID);
     }
-    if (!FUN_00586340(3) && FUN_00586070())
+    if (!GetParentUseFlag(static_cast<PARENT_USE_FLAG>(3)) && FUN_00586070())
     {
         formID = FUN_00586070()->GetFormID();
         FUN_00485910(0x324d414e, formID);
     }
-    if (!FUN_00586340(1) && FUN_005860c0())
+    if (!GetParentUseFlag(static_cast<PARENT_USE_FLAG>(1)) && FUN_005860c0())
     {
-        formID = FUN_005860c0()->GetFormID();
+        formID = reinterpret_cast<::SaveForm*>(FUN_005860c0())->GetFormID();
         FUN_00485910(0x334d414e, formID);
         _FUN_00485910(0x344d414e, FUN_0045cd80());
     }
-    if (!FUN_00586340(0))
+    if (!GetParentUseFlag(static_cast<PARENT_USE_FLAG>(0)))
     {
         SavePair pairHeights;
-        pairHeights.land = landHeight;
-        pairHeights.water = waterHeight;
+        pairHeights.land = fC8;
+        pairHeights.water = fCC;
         if (FUN_00401500())
             pairHeights.FUN_00462230();
         AppendChunk(0x4d414e44, &pairHeights, 8);
         if (FUN_00401500())
             pairHeights.FUN_00462230();
     }
-    if (!FUN_00586340(2))
+    if (!GetParentUseFlag(static_cast<PARENT_USE_FLAG>(2)))
     {
-        texture.FUN_0048e370(0x4e4f4349);
+        TESTexture::Save(0x4e4f4349);
         if (FUN_00401500())
-            map.FUN_005840b0();
-        AppendChunk(0x4d414e4d, &map, 16);
+            (*reinterpret_cast<SaveMap*>(unk80)).FUN_005840b0();
+        AppendChunk(0x4d414e4d, &(*reinterpret_cast<SaveMap*>(unk80)), 16);
         if (FUN_00401500())
-            map.FUN_005840b0();
+            (*reinterpret_cast<SaveMap*>(unk80)).FUN_005840b0();
     }
     if (FUN_00401500())
-        offset.FUN_005a6b10();
-    AppendChunk(0x4d414e4f, &offset, 12);
+        (*reinterpret_cast<SaveOffset*>(unk80 + 16)).FUN_005a6b10();
+    AppendChunk(0x4d414e4f, &(*reinterpret_cast<SaveOffset*>(unk80 + 16)), 12);
     if (FUN_00401500())
-        offset.FUN_005a6b10();
-    if (!FUN_00586340(5) && FUN_008041a0())
+        (*reinterpret_cast<SaveOffset*>(unk80 + 16)).FUN_005a6b10();
+    if (!GetParentUseFlag(static_cast<PARENT_USE_FLAG>(5)) && FUN_008041a0())
     {
         formID = FUN_008041a0()->GetFormID();
         FUN_00485910(0x4d414e49, formID);
     }
-    FUN_004858f0(0x41544144, flags);
-    FUN_00485710(0x304d414e, &minimumX, 2);
-    FUN_00485710(0x394d414e, &maximumX, 2);
+    FUN_004858f0(0x41544144, flags4C);
+    FUN_00485710(0x304d414e, &(*reinterpret_cast<unsigned int*>(&m_kFirstPoint.x)), 2);
+    FUN_00485710(0x394d414e, &(*reinterpret_cast<unsigned int*>(&m_kEndPoint.x)), 2);
     if (FUN_00586150())
     {
         formID = FUN_00586150()->GetFormID();
         FUN_00485910(0x4d414e5a, formID);
     }
-    FUN_004856f0(0x4d414e4e, canopy.FUN_00408da0(), canopy.FUN_0048cee0() + 1);
-    FUN_004856f0(0x4d414e58, waterNoise.FUN_00408da0(), waterNoise.FUN_0048cee0() + 1);
-    if (extra)
-        extra->Save();
+    FUN_004856f0(0x4d414e4e, (*reinterpret_cast<SaveGameString*>(&CanopyShadowTexture)).FUN_00408da0(), (*reinterpret_cast<SaveGameString*>(&CanopyShadowTexture)).FUN_0048cee0() + 1);
+    FUN_004856f0(0x4d414e58, (*reinterpret_cast<SaveGameString*>(&m_kLeafShadowTexture)).FUN_00408da0(), (*reinterpret_cast<SaveGameString*>(&m_kLeafShadowTexture)).FUN_0048cee0() + 1);
+    if (reinterpret_cast<::SaveForm*>(data))
+        reinterpret_cast<::SaveForm*>(data)->Save();
     FUN_00485680();
 }
 
@@ -2749,13 +2041,6 @@ struct FUN_0058efd0
     ~FUN_0058efd0();
     void CopyFrom(FUN_0058efd0*);
 };
-struct CopyMap
-{
-    void RemoveAll();
-    void* GetFirstPos();
-    void GetNext(void*&, unsigned int&, unsigned int&);
-    void SetAt(unsigned int, unsigned int);
-};
 struct CopyArray
 {
     virtual void Destroy();
@@ -2763,66 +2048,9 @@ struct CopyArray
     virtual void CopyFrom(const CopyArray&);
     unsigned int count, capacity;
 };
-struct WorldCopy
+// Copy helpers missing from the shared header; no local worldspace layout.
+struct WorldSpaceCopyMethods : TESWorldSpace
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    CopyMap* cells;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    TESClimate* climate;
-    void* imageSpace;
-    FUN_0058efd0* data;
-    unsigned char flags;
-    unsigned char unk4d;
-    unsigned short parentFlags;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    TESWorldSpace* parent;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    unsigned int unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
-    unsigned int unkc4;
-    float landHeight;
-    float waterHeight;
-    unsigned int unkd0;
-    CopyArray arrayD4;
-    CopyArray arrayE0;
-
     void FUN_00584fa0(TESForm*);
     void CopyBase(TESForm*);
     TESClimate* GetWorldClimate();
@@ -2837,59 +2065,50 @@ struct WorldCopy
     void SetMusic(int);
 };
 // @fnv 0x00584fa0
-void WorldCopy::FUN_00584fa0(TESForm* form)
+void WorldSpaceCopyMethods::FUN_00584fa0(TESForm* form)
 {
-    WorldCopy* source = (WorldCopy*)_FNV_DynamicCast(form, 0, &_FNV_RTTI_TESForm, &_FNV_RTTI_TESWorldSpace, 0);
+    WorldSpaceCopyMethods* source = (WorldSpaceCopyMethods*)_FNV_DynamicCast(form, 0, &_FNV_RTTI_TESForm, &_FNV_RTTI_TESWorldSpace, 0);
     if (!source)
         return;
     CopyBase((TESForm*)source);
-    flags = source->flags;
-    parentFlags = source->parentFlags;
+    flags4C = source->flags4C;
+    field4E = source->field4E;
     parent = source->parent;
-    unkd0 = source->unkd0;
+    fieldD0 = source->fieldD0;
     climate = source->GetWorldClimate();
     imageSpace = source->GetImageSpace();
-    if (source->data)
+    if (reinterpret_cast<FUN_0058efd0*&>(source->data))
     {
-        if (!data)
-            data = new FUN_0058efd0;
-        data->CopyFrom(source->data);
+        if (!reinterpret_cast<FUN_0058efd0*&>(data))
+            reinterpret_cast<FUN_0058efd0*&>(data) = new FUN_0058efd0;
+        reinterpret_cast<FUN_0058efd0*&>(data)->CopyFrom(reinterpret_cast<FUN_0058efd0*&>(source->data));
     }
-    else if (data)
+    else if (reinterpret_cast<FUN_0058efd0*&>(data))
     {
-        delete data;
-        data = 0;
+        delete reinterpret_cast<FUN_0058efd0*&>(data);
+        reinterpret_cast<FUN_0058efd0*&>(data) = 0;
     }
     SetWater(source->GetWater());
     SetLODWater(source->GetLODWater());
     SetHeight(source->GetHeight());
-    landHeight = source->landHeight;
-    waterHeight = source->waterHeight;
-    memcpy(&unk80, &source->unk80, 16);
-    memcpy(&unk90, &source->unk90, 12);
+    fC8 = source->fC8;
+    fCC = source->fCC;
+    memcpy(unk80, source->unk80, 16);
+    memcpy(unk80 + 16, source->unk80 + 16, 12);
     SetMusic(source->GetMusic());
-    cells->RemoveAll();
-    void* position = source->cells->GetFirstPos();
+    cellMap->RemoveAll();
+    void* position = source->cellMap->GetFirstPos();
     while (position)
     {
         unsigned int value = 0;
         unsigned int key;
-        source->cells->GetNext(position, key, value);
-        cells->SetAt(key, value);
+        source->cellMap->GetNext(position, key, reinterpret_cast<TESObjectREFR*&>(value));
+        cellMap->SetAt(key, reinterpret_cast<TESObjectREFR*>(value));
     }
-    arrayD4.CopyFrom(source->arrayD4);
-    arrayE0.CopyFrom(source->arrayE0);
+    reinterpret_cast<CopyArray*>(&CanopyShadowTexture)->CopyFrom(*reinterpret_cast<CopyArray*>(&source->CanopyShadowTexture));
+    reinterpret_cast<CopyArray*>(&m_kLeafShadowTexture)->CopyFrom(*reinterpret_cast<CopyArray*>(&source->m_kLeafShadowTexture));
 }
 
-struct DataFile
-{
-    DataFile* FUN_004739b0();
-    bool FUN_004723a0(unsigned int);
-    unsigned int FUN_00472660();
-    unsigned int GetNextChunk();
-    unsigned int GetField25C();
-    bool GetChunkData(void*, unsigned int);
-};
 struct CellOffsetData
 {
     unsigned int* offsets;
@@ -2900,22 +2119,22 @@ void* FormHeap_Allocate(unsigned int);
 void FormHeap_Free(void*);
 void FUN_00403d30(void*, int, unsigned int);
 int FUN_00404dc0(const char*, const char*);
-struct WorldData
+struct WorldSpaceEditorLookupMethods : TESWorldSpace
 {
     unsigned int GetSourceFileCount();
-    DataFile* FUN_00484e60(unsigned int);
-    CellOffsetData* FUN_00588a90(DataFile*);
-    int FUN_00584530(DataFile*, int, int);
+    TESFile* FUN_00484e60(unsigned int);
+    CellOffsetData* FUN_00588a90(TESFile*);
+    int FUN_00584530(TESFile*, int, int);
     bool FindCellByEditorID(const char*, int*, int*);
 };
 // Scans every loaded worldspace cell grid for a cell whose EDID chunk matches editorID, writing its grid coordinates to outX/outY and returning true when found.
 // @fnv 0x00585940
-bool WorldData::FindCellByEditorID(const char* editorID, int* outX, int* outY)
+bool WorldSpaceEditorLookupMethods::FindCellByEditorID(const char* editorID, int* outX, int* outY)
 {
     unsigned int count = GetSourceFileCount();
     for (unsigned int i = 0; i < count; i++)
     {
-        DataFile* data = FUN_00484e60(i)->FUN_004739b0();
+        TESFile* data = FUN_00484e60(i)->GetParentTESFile();
         CellOffsetData* file = FUN_00588a90(data);
         if (file)
         {
@@ -2933,16 +2152,16 @@ bool WorldData::FindCellByEditorID(const char* editorID, int* outX, int* outY)
                         unsigned int offset = file->offsets[index];
                         if (offset)
                         {
-                            data->FUN_004723a0(offset + file->baseOffset);
-                            if (data->FUN_00472660() == 0x39)
+                            data->SetOffset(offset + file->baseOffset);
+                            if (GetCurrentFormType(data) == 0x39)
                             {
-                                unsigned int chunkID = data->GetNextChunk();
+                                unsigned int chunkID = data->FUN_004726b0();
                                 if (chunkID == 0x44494445)
                                 {
                                     unsigned int uiBufferSize = data->GetField25C() + 1;
                                     char* size = (char*)FormHeap_Allocate(uiBufferSize);
                                     FUN_00403d30(size, 0, uiBufferSize);
-                                    data->GetChunkData(size, 0);
+                                    data->FUN_00472890(size, 0);
                                     if (!FUN_00404dc0(size, editorID))
                                     {
                                         *outX = x;
@@ -2962,96 +2181,14 @@ bool WorldData::FindCellByEditorID(const char* editorID, int* outX, int* outY)
     return false;
 }
 
-struct AutoMemHelper
-{
-    int previousContext;
-    AutoMemHelper(int, bool, const char*, int);
-    ~AutoMemHelper();
-};
 extern const char DAT_01031f18[];
 extern const char DAT_01031ec0[];
-struct CellOperations
+struct CellOperations : CellRuntimeMethods
 {
-    virtual void virtual0();
-    virtual void virtual1();
-    virtual void virtual2();
-    virtual void virtual3();
-    virtual void virtual4();
-    virtual void virtual5();
-    virtual void virtual6();
-    virtual void virtual7();
-    virtual void virtual8();
-    virtual void virtual9();
-    virtual void virtual10();
-    virtual void virtual11();
-    virtual void virtual12();
-    virtual void virtual13();
-    virtual void virtual14();
-    virtual void virtual15();
-    virtual void virtual16();
-    virtual void virtual17();
-    virtual void virtual18();
-    virtual void virtual19();
-    virtual void virtual20();
-    virtual void virtual21();
-    virtual void virtual22();
-    virtual void virtual23();
-    virtual void virtual24();
-    virtual void virtual25();
-    virtual void virtual26();
-    virtual void virtual27();
-    virtual void virtual28();
-    virtual void virtual29();
-    virtual void virtual30();
-    virtual void virtual31();
-    virtual void virtual32();
-    virtual void virtual33();
-    virtual void FinishLoad();
-    virtual void virtual35();
-    virtual void virtual36();
-    virtual void virtual37();
-    virtual void virtual38();
-    virtual void virtual39();
-    virtual void virtual40();
-    virtual void virtual41();
-    virtual void virtual42();
-    virtual void virtual43();
-    virtual void virtual44();
-    virtual void virtual45();
-    virtual void virtual46();
-    virtual void virtual47();
-    virtual void virtual48();
-    virtual void virtual49();
-    virtual void virtual50();
-    virtual void virtual51();
-    virtual void virtual52();
-    virtual void virtual53();
-    virtual void virtual54();
-    virtual void virtual55();
-    virtual void virtual56();
-    virtual void virtual57();
-    virtual void virtual58();
-    virtual void virtual59();
-    virtual void virtual60();
-    virtual void virtual61();
-    virtual void virtual62();
-    virtual void virtual63();
-    virtual void virtual64();
-    virtual void virtual65();
-    virtual void virtual66();
-    virtual void virtual67();
-    virtual void virtual68();
-    virtual void virtual69();
-    virtual void virtual70();
-    virtual void virtual71();
-    virtual void virtual72();
-    virtual void virtual73();
-    virtual void SetWorldData(void*, bool);
     bool FUN_00551420();
     void FUN_00544300(bool);
-    void ResetCellData();
     void SetExteriorCellCoordinates(int, int);
-    bool FUN_00550500(FileReader*);
+    bool FUN_00550500(TESFile*);
     void FUN_00551440(bool);
 };
 struct SaveLoadOperations
@@ -3062,129 +2199,45 @@ struct SaveLoadOperations
 };
 extern SaveLoadOperations* DAT_011de45c;
 extern TESWorldSpace* DAT_011c3f34;
-bool __cdecl FUN_004601d0(CellOperations*, FileReader*);
-struct WorldCellLoader
+bool __cdecl FUN_004601d0(CellOperations*, TESFile*);
+struct WorldSpaceCellLoadMethods : TESWorldSpace
 {
-    virtual void virtual0();
-    virtual void virtual1();
-    virtual void virtual2();
-    virtual void virtual3();
-    virtual void virtual4();
-    virtual void virtual5();
-    virtual void virtual6();
-    virtual void virtual7();
-    virtual void virtual8();
-    virtual void virtual9();
-    virtual void virtual10();
-    virtual void virtual11();
-    virtual void virtual12();
-    virtual void virtual13();
-    virtual void virtual14();
-    virtual void virtual15();
-    virtual void virtual16();
-    virtual void virtual17();
-    virtual void virtual18();
-    virtual void virtual19();
-    virtual void virtual20();
-    virtual void virtual21();
-    virtual void virtual22();
-    virtual void virtual23();
-    virtual void virtual24();
-    virtual void virtual25();
-    virtual void virtual26();
-    virtual void virtual27();
-    virtual void virtual28();
-    virtual void virtual29();
-    virtual void virtual30();
-    virtual void virtual31();
-    virtual void virtual32();
-    virtual void virtual33();
-    virtual void virtual34();
-    virtual void virtual35();
-    virtual void virtual36();
-    virtual void virtual37();
-    virtual void virtual38();
-    virtual void virtual39();
-    virtual void virtual40();
-    virtual void virtual41();
-    virtual void virtual42();
-    virtual void virtual43();
-    virtual void virtual44();
-    virtual void virtual45();
-    virtual void virtual46();
-    virtual void virtual47();
-    virtual void virtual48();
-    virtual void virtual49();
-    virtual void virtual50();
-    virtual void virtual51();
-    virtual void virtual52();
-    virtual void virtual53();
-    virtual void virtual54();
-    virtual void virtual55();
-    virtual void virtual56();
-    virtual void virtual57();
-    virtual void virtual58();
-    virtual void virtual59();
-    virtual void virtual60();
-    virtual void virtual61();
-    virtual void virtual62();
-    virtual void virtual63();
-    virtual void virtual64();
-    virtual void virtual65();
-    virtual void virtual66();
-    virtual void virtual67();
-    virtual void virtual68();
-    virtual void virtual69();
-    virtual void virtual70();
-    virtual void virtual71();
-    virtual void virtual72();
-    virtual void virtual73();
-    virtual void virtual74();
-    virtual void virtual75();
-    virtual const char* GetWorldName();
-    CellOperations* FUN_005875a0(int, int);
     unsigned int GetSourceFileCount();
-    FileReader* FUN_00484e60(unsigned int);
-    bool SeekToCellInWorld(FileReader*, int, int);
-    void FUN_00587670(CellOperations*);
+    TESFile* FUN_00484e60(unsigned int);
+    bool SeekToCellInWorld(TESFile*, int, int);
     unsigned int FUN_0084e3a0();
-    void AddCellReferences(CellOperations*);
     CellOperations* FUN_00585b30(int x, int y);
 };
-struct ThreadFile
-{
-    FileReader* FUN_004739b0();
-};
 // @fnv 0x00585b30
-CellOperations* WorldCellLoader::FUN_00585b30(int x, int y)
+CellOperations* WorldSpaceCellLoadMethods::FUN_00585b30(int x, int y)
 {
     AutoMemHelper j(26, true, DAT_01031f18, 1942);
     bool i = true;
-    CellOperations* p = FUN_005875a0(x, y);
+    CellOperations* p = reinterpret_cast<CellOperations*>(GetCellAtGridPosition(x, y));
     DAT_011c3f34 = reinterpret_cast<TESWorldSpace*>(this);
     if (!p || !p->FUN_00551420())
     {
         unsigned int fileCount = GetSourceFileCount();
         for (unsigned int fileIndex = 0; fileIndex < fileCount; ++fileIndex)
         {
-            FileReader* file = reinterpret_cast<ThreadFile*>(FUN_00484e60(fileIndex))->FUN_004739b0();
+            TESFile* file = FUN_00484e60(fileIndex)->GetParentTESFile();
             bool loaded = file && SeekToCellInWorld(file, x, y);
             if (loaded)
             {
                 if (!p)
                 {
-                    p = reinterpret_cast<CellOperations*>(new stub::TESObjectCELL);
+                    p = reinterpret_cast<CellOperations*>(new TESObjectCELL);
                     p->FUN_00544300(false);
                     p->ResetCellData();
                     p->SetExteriorCellCoordinates(x, y);
-                    FUN_00587670(p);
+                    FUN_00587670(reinterpret_cast<TESObjectCELL*>(p));
                     void* worldData = 0;
                     worldData = DAT_011de45c->RemoveCommand(FUN_0084e3a0(), x, y);
                     if (worldData)
-                        p->SetWorldData(worldData, true);
+                        ((void(__thiscall*)(TESObjectCELL*, void*, bool))(*(void***)p)[74])(p, worldData, true);
                     i = FUN_004601d0(p, file);
                 }
-                else if (!(file->FUN_00462270()->label & 0x4000))
+                else if (!(reinterpret_cast<TypeGroupInfo*>(file->GetRecordHeader())->label & 0x4000))
                 {
                     FUN_004601d0(p, file);
                 }
@@ -3197,30 +2250,24 @@ CellOperations* WorldCellLoader::FUN_00585b30(int x, int y)
             p->FUN_00551440(true);
             bool loading = DAT_011de45c->FUN_0047c850();
             DAT_011de45c->FUN_004534f0(!loading);
-            p->FinishLoad();
+            ((void(__thiscall*)(TESObjectCELL*))(*(void***)p)[34])(p);
             DAT_011de45c->FUN_004534f0(loading);
-            AddCellReferences(p);
+            AddCellReferences(reinterpret_cast<TESObjectCELL*>(p));
         }
     }
     if (!i)
-        Warning(DAT_01031ec0, x, y, GetWorldName(), FUN_0084e3a0());
+        Warning(DAT_01031ec0, x, y, GetName(), FUN_0084e3a0());
     return p;
 }
 
-struct FUN_00585ee0_shell : public TESWorldSpace
+struct WorldSpaceParentFileMethods : public TESWorldSpace
 {
     bool FindParentFile(int a1, int a2, unsigned int* a3, unsigned int* a4);
     int GetFileCount();
     TESFile* GetFileForm(int aIndex);
 };
 
-struct FileX
-{
-    TESFile* GetParentFile();
-    unsigned int GetOff();
-};
-
-struct WorldX
+struct WorldSpaceParentReadMethods : TESWorldSpace
 {
     bool ReadWorldData(TESFile* apFile, int a1, int a2);
 };
@@ -3228,7 +2275,7 @@ struct WorldX
 bool __cdecl LoadedCheck(TESFile* apFile);
 
 // @fnv 0x00585ee0
-bool FUN_00585ee0_shell::FindParentFile(int a1, int a2, unsigned int* apuiFileOut, unsigned int* apuiOffsetOut)
+bool WorldSpaceParentFileMethods::FindParentFile(int a1, int a2, unsigned int* apuiFileOut, unsigned int* apuiOffsetOut)
 {
     bool bFound = false;
     *apuiFileOut = 0;
@@ -3240,11 +2287,11 @@ bool FUN_00585ee0_shell::FindParentFile(int a1, int a2, unsigned int* apuiFileOu
         {
             for (int iFileIndex = iFileCount - 1; iFileIndex >= 0; iFileIndex--)
             {
-                TESFile* pParentFile = ((FileX*)GetFileForm(iFileIndex))->GetParentFile();
-                if (pParentFile && ((WorldX*)this)->ReadWorldData(pParentFile, a1, a2) && LoadedCheck(pParentFile))
+                TESFile* pParentFile = GetFileForm(iFileIndex)->GetParentTESFile();
+                if (pParentFile && ((WorldSpaceParentReadMethods*)this)->ReadWorldData(pParentFile, a1, a2) && LoadedCheck(pParentFile))
                 {
                     *apuiFileOut = (unsigned int)pParentFile;
-                    *apuiOffsetOut = ((FileX*)pParentFile)->GetOff();
+                    *apuiOffsetOut = pParentFile->GetOffset();
                     bFound = true;
                     break;
                 }
@@ -3253,7 +2300,7 @@ bool FUN_00585ee0_shell::FindParentFile(int a1, int a2, unsigned int* apuiFileOu
     }
     else
     {
-        bFound = ((FUN_00585ee0_shell*)GetParentWorld((TESWorldSpace::PARENT_USE_FLAG)0))
+        bFound = ((WorldSpaceParentFileMethods*)GetParentWorld((TESWorldSpace::PARENT_USE_FLAG)0))
                      ->FindParentFile(a1, a2, apuiFileOut, apuiOffsetOut);
     }
     return bFound;
@@ -3264,7 +2311,7 @@ struct GlobalObject_006815c0
     GlobalObject_006815c0();
     float x, y, z;
 };
-typedef GlobalObject_006815c0 Point;
+typedef GlobalObject_006815c0 RegionSamplePoint;
 struct RegionForm
 {
     virtual void v0();
@@ -3399,7 +2446,7 @@ struct Region
     virtual int Priority();
     virtual void v4();
     virtual void v5();
-    virtual float Weight(Point const&, TESWorldSpace*, bool);
+    virtual float Weight(RegionSamplePoint const&, TESWorldSpace*, bool);
 };
 struct Entry
 {
@@ -3436,16 +2483,11 @@ struct Selection
 };
 struct CellRegions
 {
-    void* FUN_004f6800(int, Point const&, TESWorldSpace*);
+    void* FUN_004f6800(int, RegionSamplePoint const&, TESWorldSpace*);
 };
 struct CellProxyNew
 {
     CellRegions* GetRegionList(bool);
-};
-struct Handler
-{
-    CellProxyNew* FUN_00461bc0(float, float, TESWorldSpace*, bool);
-    Selection* GetRegionDataManager();
 };
 struct GlobalObject_0096a2d0
 {
@@ -3468,20 +2510,20 @@ struct RegionResult
 };
 int __cdecl FUN_00406d00(char*, int, const char*, ...);
 float __cdecl FUN_0053ca40();
-struct World : TESWorldSpace
+struct WorldSpaceRegionMethods : TESWorldSpace
 {
     void BuildRegionResults(float, float, float, float, RegionResult*, unsigned);
 };
 // Selects regions around the center of the given bounds, fills each result with region data and samples region weights at a 3x3 grid of points.
 // @fnv 0x00586990
-void World::BuildRegionResults(float minX, float minY, float maxX, float maxY, RegionResult* results, unsigned count)
+void WorldSpaceRegionMethods::BuildRegionResults(float minX, float minY, float maxX, float maxY, RegionResult* results, unsigned count)
 {
     Entry* l = 0;
     Region** k = 0;
     Region* b = 0;
     RegionForm* a = 0;
-    Point s[9];
-    Point h;
+    RegionSamplePoint s[9];
+    RegionSamplePoint h;
     if (!g_dataHandler || !count)
         return;
     h.x = (minX + maxX) / 2.0;
@@ -3489,7 +2531,7 @@ void World::BuildRegionResults(float minX, float minY, float maxX, float maxY, R
     h.z = 0;
     float q = (maxX - minX) / 2.0;
     float c = (maxY - minY) / 2.0;
-    CellProxyNew* e = ((Handler*)g_dataHandler)->FUN_00461bc0(h.x, h.y, this, false);
+    CellProxyNew* e = reinterpret_cast<CellProxyNew*>(g_dataHandler->GetCellByWorldPosition(h.x, h.y, this, false));
     if (!e || !e->GetRegionList(true))
         return;
     unsigned i;
@@ -3500,7 +2542,7 @@ void World::BuildRegionResults(float minX, float minY, float maxX, float maxY, R
         s[i].z = 0;
     }
     Selection* eb =
-        ((Handler*)g_dataHandler)->GetRegionDataManager()->Select(e->GetRegionList(true)->FUN_004f6800(6, h, this));
+        reinterpret_cast<Selection*>(g_dataHandler->GetRegionDataManager())->Select(e->GetRegionList(true)->FUN_004f6800(6, h, this));
     if (!eb)
         return;
     GlobalObject_0096a2d0* cf = new GlobalObject_0096a2d0;
@@ -3615,12 +2657,7 @@ struct WsListNode
     WsListNode* GetNext();
 };
 
-struct WsDataHandler
-{
-    WsListNode* GetWorldSpaces();
-};
-
-struct FUN_005883c0_shell : public TESWorldSpace
+struct WorldSpaceMapNameMethods : public TESWorldSpace
 {
     void AddMapNames(WsNameList* apList);
     WsNameList* BuildMapNameList(bool abNoChildren);
@@ -3628,12 +2665,12 @@ struct FUN_005883c0_shell : public TESWorldSpace
 
 // Builds a WsNameList from the parent world's list or a new list with this world's map names plus those of child worlds unless abNoChildren.
 // @fnv 0x005883c0
-WsNameList* FUN_005883c0_shell::BuildMapNameList(bool abNoChildren)
+WsNameList* WorldSpaceMapNameMethods::BuildMapNameList(bool abNoChildren)
 {
     WsNameList* pNameList = 0;
     if (GetParentWorld((PARENT_USE_FLAG)2) && !abNoChildren)
     {
-        pNameList = ((FUN_005883c0_shell*)GetParentWorld((PARENT_USE_FLAG)2))->BuildMapNameList(false);
+        pNameList = ((WorldSpaceMapNameMethods*)GetParentWorld((PARENT_USE_FLAG)2))->BuildMapNameList(false);
     }
     else
     {
@@ -3641,13 +2678,13 @@ WsNameList* FUN_005883c0_shell::BuildMapNameList(bool abNoChildren)
         AddMapNames(pNameList);
         if (!abNoChildren)
         {
-            WsListNode* pNode = ((WsDataHandler*)g_dataHandler)->GetWorldSpaces();
+            WsListNode* pNode = reinterpret_cast<WsListNode*>(g_dataHandler->GetWorldSpaces());
             while (pNode)
             {
                 TESWorldSpace* pWorld = *pNode->Item();
                 if (pWorld && pWorld->GetParentWorld((PARENT_USE_FLAG)2) == this)
                 {
-                    ((FUN_005883c0_shell*)pWorld)->AddMapNames(pNameList);
+                    ((WorldSpaceMapNameMethods*)pWorld)->AddMapNames(pNameList);
                 }
                 pNode = pNode->GetNext();
             }
@@ -3657,20 +2694,13 @@ WsNameList* FUN_005883c0_shell::BuildMapNameList(bool abNoChildren)
 }
 
 extern const double DAT_010231b0;
-struct CELL_SHELL : public TESObjectCELL
+struct WorldSpaceRadiusMethods : public TESWorldSpace
 {
-    bool FUN_0054da20(const NiPoint3* point, float distance, const NiPoint3* otherPoint, float otherDistance,
-                      int options, unsigned int context);
-    float FUN_0054fb70(const NiPoint3* point);
-};
-struct WORLD_SHELL : public TESWorldSpace
-{
-    CELL_SHELL* FUN_005875a0(int, int);
     void ProcessCellsInRadius(const NiPoint3* point, float distance, const NiPoint3* otherPoint, float otherDistance,
                               int options, unsigned int context);
 };
 // @fnv 0x005885f0
-void WORLD_SHELL::ProcessCellsInRadius(const NiPoint3* point, float distance, const NiPoint3* otherPoint,
+void WorldSpaceRadiusMethods::ProcessCellsInRadius(const NiPoint3* point, float distance, const NiPoint3* otherPoint,
                                        float otherDistance, int options, unsigned int context)
 {
     if (options == 0)
@@ -3682,10 +2712,10 @@ void WORLD_SHELL::ProcessCellsInRadius(const NiPoint3* point, float distance, co
         int i;
         int x;
         {
-            CELL_SHELL* cell;
+            CellRuntimeMethods* cell;
             {
                 int y = (int)point->y >> 12;
-                cell = FUN_005875a0(width, y);
+                cell = reinterpret_cast<CellRuntimeMethods*>(GetCellAtGridPosition(width, y));
                 if (cell != 0)
                 {
                     if (!cell->FUN_0054da20(point, distance, otherPoint, otherDistance, options, context))
@@ -3700,7 +2730,7 @@ void WORLD_SHELL::ProcessCellsInRadius(const NiPoint3* point, float distance, co
                         found = 0;
                         for (i = 0; i < j; i++)
                         {
-                            cell = FUN_005875a0(width, y);
+                            cell = reinterpret_cast<CellRuntimeMethods*>(GetCellAtGridPosition(width, y));
                             if (cell != 0 && (distance == DAT_010231b0 || cell->FUN_0054fb70(point) < distance) &&
                                 (otherDistance == DAT_010231b0 || cell->FUN_0054fb70(otherPoint) < otherDistance))
                             {
@@ -3712,7 +2742,7 @@ void WORLD_SHELL::ProcessCellsInRadius(const NiPoint3* point, float distance, co
                         }
                         for (x = 0; x < j; x++)
                         {
-                            cell = FUN_005875a0(width, y);
+                            cell = reinterpret_cast<CellRuntimeMethods*>(GetCellAtGridPosition(width, y));
                             if (cell != 0 && (distance == DAT_010231b0 || cell->FUN_0054fb70(point) < distance) &&
                                 (otherDistance == DAT_010231b0 || cell->FUN_0054fb70(otherPoint) < otherDistance))
                             {
@@ -3724,7 +2754,7 @@ void WORLD_SHELL::ProcessCellsInRadius(const NiPoint3* point, float distance, co
                         }
                         for (i = 0; i < j; i++)
                         {
-                            cell = FUN_005875a0(width, y);
+                            cell = reinterpret_cast<CellRuntimeMethods*>(GetCellAtGridPosition(width, y));
                             if (cell != 0 && (distance == DAT_010231b0 || cell->FUN_0054fb70(point) < distance) &&
                                 (otherDistance == DAT_010231b0 || cell->FUN_0054fb70(otherPoint) < otherDistance))
                             {
@@ -3736,7 +2766,7 @@ void WORLD_SHELL::ProcessCellsInRadius(const NiPoint3* point, float distance, co
                         }
                         for (x = 0; x < j; x++)
                         {
-                            cell = FUN_005875a0(width, y);
+                            cell = reinterpret_cast<CellRuntimeMethods*>(GetCellAtGridPosition(width, y));
                             if (cell != 0 && (distance == DAT_010231b0 || cell->FUN_0054fb70(point) < distance) &&
                                 (otherDistance == DAT_010231b0 || cell->FUN_0054fb70(otherPoint) < otherDistance))
                             {
@@ -3747,7 +2777,7 @@ void WORLD_SHELL::ProcessCellsInRadius(const NiPoint3* point, float distance, co
                             y -= 1;
                         }
                     }
-                    cell = (CELL_SHELL*)GetInteriorCell();
+                    cell = (CellRuntimeMethods*)GetInteriorCell();
                     if (cell != 0)
                         cell->FUN_0054da20(point, distance, otherPoint, otherDistance, options, context);
                 }
@@ -3761,7 +2791,7 @@ struct QueryPoint2
     float x, y;
     QueryPoint2(float x, float y);
 };
-struct WorldQuery;
+struct WorldSpacePointQueryMethods;
 struct AreaQuery
 {
     bool FUN_004f8360(const QueryPoint2* point);
@@ -3790,17 +2820,17 @@ struct CellQuery
 {
     bool FUN_00549580();
     bool FUN_00440d80();
-    WorldQuery* FUN_007af430();
+    WorldSpacePointQueryMethods* FUN_007af430();
     QueryLink<AreaQuery>* FUN_00441110();
 };
-struct WorldQuery
+struct WorldSpacePointQueryMethods : TESWorldSpace
 {
     bool IsFlag8Set();
     bool ContainsPoint(const NiPoint3* position);
 };
 
 // @fnv 0x00588d10
-bool WorldQuery::ContainsPoint(const NiPoint3* position)
+bool WorldSpacePointQueryMethods::ContainsPoint(const NiPoint3* position)
 {
     if (!IsFlag8Set())
         return true;
@@ -3830,32 +2860,20 @@ namespace fnv_00583560 {
 extern "C" void* _alloca(unsigned int);
 void* operator new(unsigned int);
 void operator delete(void*);
-class File583
-{
-  public:
-    int FUN_00472660();
-    bool FUN_00471c20();
-    unsigned int GetOffset();
-    int GetChunkID();
-    unsigned int GetChunkSize();
-    bool GetChunkData(void*, unsigned int);
-    bool ReadChunkInt(void*);
-    bool ReadChunkData(unsigned short*);
-    bool FUN_00401680();
-    bool GetNextChunk();
-};
 struct B006815c0
 {
     float x, y;
     B006815c0();
 };
-struct OffsetData583
+// OFST/NAM0/NAM9 use a 24-byte cell-offset/bounds record; the unrelated OffsetData is 8 bytes.
+struct WorldCellOffsetRecord
 {
     unsigned int* offsets;
     B006815c0 minimum, maximum;
     unsigned int offset;
 };
-struct Pair583
+// DNAM holds two float heights and uses the 0x00462230 endian swap helper.
+struct WorldDefaultHeightChunk
 {
     float x, y;
     void FUN_00462230();
@@ -3870,16 +2888,8 @@ struct Extra583
     unsigned int x, y, z;
     void FUN_005a6b10();
 };
-struct Full583
-{
-    unsigned int a, b, c;
-};
-struct Icon583
-{
-    unsigned int a, b, c;
-};
-void FUN_0048e3d0(Icon583*, File583*);
-void ReadFullName(Full583*, File583*);
+void FUN_0048e3d0(TESTexture*, TESFile*);
+void ReadFullName(TESFullName*, TESFile*);
 void FUN_00401080(void*, bool);
 float FUN_0040ebd0(float, float);
 float FUN_00404010(float, float);
@@ -3974,150 +2984,21 @@ class FUN_0058efd0
     unsigned int unk154;
     unsigned int unk158;
     FUN_0058efd0();
-    void FUN_0058f180(File583*);
+    void FUN_0058f180(TESFile*);
 };
-class FUN_00589000
+
+// These loading entry points are not yet declared by the shared worldspace header.
+class WorldSpaceLoadMethods : public TESWorldSpace
 {
   public:
-    virtual ~FUN_00589000();
-    unsigned int a, b, c;
-    FUN_00589000(unsigned int);
-    unsigned int FUN_0084e3a0();
-};
-class Name583
-{
-  public:
-    unsigned int a, b, c;
-    void SetFullName(const char*);
-};
-class Base583
-{
-  public:
-    virtual void virtual000();
-    virtual void virtual004();
-    virtual void virtual008();
-    virtual void virtual00C();
-    virtual void virtual010();
-    virtual void virtual014();
-    virtual void virtual018();
-    virtual void virtual01C();
-    virtual void virtual020();
-    virtual void virtual024();
-    virtual void virtual028();
-    virtual void virtual02C();
-    virtual void virtual030();
-    virtual void virtual034();
-    virtual void virtual038();
-    virtual void virtual03C();
-    virtual void virtual040();
-    virtual void virtual044();
-    virtual void virtual048();
-    virtual void virtual04C();
-    virtual void virtual050();
-    virtual void virtual054();
-    virtual void virtual058();
-    virtual void virtual05C();
-    virtual void virtual060();
-    virtual void virtual064();
-    virtual void virtual068();
-    virtual void virtual06C();
-    virtual void virtual070();
-    virtual void virtual074();
-    virtual void virtual078();
-    virtual void virtual07C();
-    virtual void virtual080();
-    virtual void virtual084();
-    virtual void virtual088();
-    virtual void virtual08C();
-    virtual void virtual090();
-    virtual void virtual094();
-    virtual void virtual098();
-    virtual void virtual09C();
-    virtual void virtual0A0();
-    virtual void virtual0A4();
-    virtual void virtual0A8();
-    virtual void virtual0AC();
-    virtual void virtual0B0();
-    virtual void virtual0B4();
-    virtual void virtual0B8();
-    virtual void virtual0BC();
-    virtual void virtual0C0();
-    virtual void virtual0C4();
-    virtual void virtual0C8();
-    virtual void virtual0CC();
-    virtual void virtual0D0();
-    virtual void virtual0D4();
-    virtual void virtual0D8();
-    virtual void virtual0DC();
-    virtual void LoadBounds(File583*);
-    virtual void virtual0E4();
-    virtual void virtual0E8();
-    virtual void virtual0EC();
-    virtual void virtual0F0();
-    virtual void virtual0F4();
-    virtual void virtual0F8();
-    virtual void virtual0FC();
-    virtual void virtual100();
-    virtual void virtual104();
-    virtual void virtual108();
-    virtual void virtual10C();
-    virtual void virtual110();
-    virtual void virtual114();
-    virtual void virtual118();
-    virtual void virtual11C();
-    virtual void virtual120();
-    virtual void virtual124();
-    virtual void virtual128();
-    virtual void virtual12C();
-    virtual void virtual130();
-    virtual void SetEditorID(char*);
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-};
-class World583 : public Base583, public Full583, public Icon583
-{
-  public:
-    FUN_00589000* cellMap;
-    unsigned int unk34, unk38, unk3C, unk40, unk44;
-    FUN_0058efd0* imageSpace;
-    unsigned char flags4C, unk4D;
-    unsigned short field4E;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    MapData583 mapData;
-    Extra583 extra;
-    unsigned int unk9C;
-    float minX, minY, maxX, maxY;
-    unsigned int unkB0, unkB4, unkB8, unkBC, unkC0, unkC4;
-    float fC8, fCC;
-    unsigned int fieldD0;
-    Name583 nameD4, nameE0;
-    OffsetData583* GetOrCreateCellOffsetData(File583*);
-    void LoadRecordHeader(File583*);
     void FUN_00484ab0(int);
     void FUN_0087ce80(unsigned int);
     void FUN_008d8040(unsigned int);
     void FUN_004febb0(unsigned int);
     void FUN_00442a80(unsigned int);
-    void FUN_00584150(float);
-    void SetParent(unsigned int);
     void SetAssociatedActorValue(unsigned int);
-    bool GetSmallWorld();
     bool FUN_00484e40();
-    bool FUN_00583560(File583*);
+    bool FUN_00583560(TESFile*);
 };
 
 struct EndianFlag583
@@ -4125,15 +3006,15 @@ struct EndianFlag583
     bool value;
 };
 // @fnv 0x00583560
-bool World583::FUN_00583560(File583* file)
+bool WorldSpaceLoadMethods::FUN_00583560(TESFile* file)
 {
     int chunk;
-    unsigned char type = file->FUN_00472660();
+    unsigned char type = file->GetTESForm();
     if (type != 0x41)
         return false;
-    if (file->FUN_00471c20())
+    if (file->IsMasterFile())
     {
-        OffsetData583* data = GetOrCreateCellOffsetData(file);
+        WorldCellOffsetRecord* data = reinterpret_cast<WorldCellOffsetRecord*>(GetOrCreateCellOffsetData(file));
         data->offset = file->GetOffset();
     }
     LoadRecordHeader(file);
@@ -4145,11 +3026,11 @@ bool World583::FUN_00583560(File583* file)
         case 0x44494445: {
             char* editorID = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(editorID, 0x200);
-            SetEditorID(editorID);
+            SetEditorID_AtRuntime(editorID);
             break;
         }
         case 0x444e424f:
-            LoadBounds(file);
+            readOBNDSubRecord(file);
             break;
         case 0x4e4f4349:
             FUN_0048e3d0(this, file);
@@ -4161,7 +3042,7 @@ bool World583::FUN_00583560(File583* file)
             if (file->GetChunkSize() == 4)
             {
                 unsigned int flags = 0;
-                file->ReadChunkInt(&flags);
+                file->GetChunkData(&flags);
                 flags4C = (unsigned char)flags;
             }
             else
@@ -4172,15 +3053,15 @@ bool World583::FUN_00583560(File583* file)
             unsigned int size = file->GetChunkSize();
             if (size)
             {
-                OffsetData583* data;
+                WorldCellOffsetRecord* data;
                 {
                     unsigned int count = size >> 2;
-                    data = GetOrCreateCellOffsetData(file);
+                    data = reinterpret_cast<WorldCellOffsetRecord*>(GetOrCreateCellOffsetData(file));
                     if (data->offsets)
                         delete data->offsets;
                     data->offsets = new unsigned int[count];
                     file->GetChunkData(data->offsets, 0);
-                    if (file->FUN_00401680())
+                    if (file->IsEndianConversionRequired())
                     {
                         for (unsigned int i = 0; i < count; i++)
                             FUN_00401080(&data->offsets[i], EndianFlag583().value);
@@ -4191,85 +3072,85 @@ bool World583::FUN_00583560(File583* file)
         }
         case 0x4e5a4558: {
             unsigned int value = 0;
-            file->ReadChunkInt(&value);
+            file->GetChunkData(&value);
             fieldD0 = value;
             break;
         }
         case 0x4d414e43: {
             unsigned int value = 0;
-            file->ReadChunkInt(&value);
+            file->GetChunkData(&value);
             FUN_0087ce80(value);
             break;
         }
         case 0x4d414e49: {
             unsigned int value = 0;
-            file->ReadChunkInt(&value);
+            file->GetChunkData(&value);
             FUN_008d8040(value);
             break;
         }
         case 0x324d414e: {
             unsigned int value = 0;
-            file->ReadChunkInt(&value);
+            file->GetChunkData(&value);
             FUN_004febb0(value);
             break;
         }
         case 0x334d414e: {
             unsigned int value = 0;
-            file->ReadChunkInt(&value);
+            file->GetChunkData(&value);
             FUN_00442a80(value);
             break;
         }
         case 0x344d414e: {
             float value = 0;
-            file->ReadChunkInt(&value);
+            file->GetChunkData(reinterpret_cast<unsigned int*>(&value));
             FUN_00584150(value);
             break;
         }
         case 0x4d414e57: {
             unsigned int value = 0;
-            file->ReadChunkInt(&value);
-            SetParent(value);
+            file->GetChunkData(&value);
+            SetParent(reinterpret_cast<TESWorldSpace*>(value));
             field4E = 0xffff;
             break;
         }
         case 0x4d414e50:
-            file->ReadChunkData(&field4E);
+            file->GetChunkData(&field4E);
             break;
         case 0x4d414e44: {
-            Pair583 value;
+            WorldDefaultHeightChunk value;
             file->GetChunkData(&value, 8);
-            if (file->FUN_00401680())
+            if (file->IsEndianConversionRequired())
                 value.FUN_00462230();
             fC8 = value.x;
             fCC = value.y;
             break;
         }
         case 0x4d414e4d:
-            file->GetChunkData(&mapData, 16);
-            if (file->FUN_00401680())
-                mapData.FUN_005840b0();
+            file->GetChunkData(&(*reinterpret_cast<MapData583*>(unk80)), 16);
+            if (file->IsEndianConversionRequired())
+                (*reinterpret_cast<MapData583*>(unk80)).FUN_005840b0();
             break;
         case 0x4d414e4f:
-            file->GetChunkData(&extra, 12);
-            if (file->FUN_00401680())
-                extra.FUN_005a6b10();
+            file->GetChunkData(&(*reinterpret_cast<Extra583*>(unk80 + 16)), 12);
+            if (file->IsEndianConversionRequired())
+                (*reinterpret_cast<Extra583*>(unk80 + 16)).FUN_005a6b10();
             break;
         case 0x4d414e53: {
             unsigned int value = 0;
-            file->ReadChunkInt(&value);
+            file->GetChunkData(&value);
             break;
         }
         case 0x4d414e5a: {
             unsigned int value = 0;
-            file->ReadChunkInt(&value);
+            file->GetChunkData(&value);
             SetAssociatedActorValue(value);
             break;
         }
         case 0x46504d49:
         case 0x53504d49:
-            if (!imageSpace)
-                imageSpace = new FUN_0058efd0;
-            imageSpace->FUN_0058f180(file);
+            if (!reinterpret_cast<FUN_0058efd0*&>(data))
+                reinterpret_cast<FUN_0058efd0*&>(data) = new FUN_0058efd0;
+            reinterpret_cast<FUN_0058efd0*&>(data)->FUN_0058f180(file);
             break;
         case 0x4d414e4e: {
             unsigned int size = file->GetChunkSize();
@@ -4277,7 +3158,7 @@ bool World583::FUN_00583560(File583* file)
             {
                 char* text = (char*)_alloca(size);
                 file->GetChunkData(text, size);
-                nameD4.SetFullName(text);
+                (*reinterpret_cast<TESFullName*>(&CanopyShadowTexture)).SetFullName(text);
             }
             break;
         }
@@ -4287,23 +3168,23 @@ bool World583::FUN_00583560(File583* file)
             {
                 char* text = (char*)_alloca(size);
                 file->GetChunkData(text, size);
-                nameE0.SetFullName(text);
+                (*reinterpret_cast<TESFullName*>(&m_kLeafShadowTexture)).SetFullName(text);
             }
             break;
         }
         case 0x304d414e: {
             B006815c0 value;
             file->GetChunkData(&value, 8);
-            if (file->FUN_00401680())
+            if (file->IsEndianConversionRequired())
             {
                 FUN_00401080(&value.x, EndianFlag583().value);
                 FUN_00401080(&value.y, EndianFlag583().value);
             }
-            minX = FUN_0040ebd0(minX, value.x);
-            minY = FUN_0040ebd0(minY, value.y);
-            if (file->FUN_00471c20())
+            m_kFirstPoint.x = FUN_0040ebd0(m_kFirstPoint.x, value.x);
+            m_kFirstPoint.y = FUN_0040ebd0(m_kFirstPoint.y, value.y);
+            if (file->IsMasterFile())
             {
-                OffsetData583* data = GetOrCreateCellOffsetData(file);
+                WorldCellOffsetRecord* data = reinterpret_cast<WorldCellOffsetRecord*>(GetOrCreateCellOffsetData(file));
                 data->minimum = value;
             }
             break;
@@ -4311,16 +3192,16 @@ bool World583::FUN_00583560(File583* file)
         case 0x394d414e: {
             B006815c0 value;
             file->GetChunkData(&value, 8);
-            if (file->FUN_00401680())
+            if (file->IsEndianConversionRequired())
             {
                 FUN_00401080(&value.x, EndianFlag583().value);
                 FUN_00401080(&value.y, EndianFlag583().value);
             }
-            maxX = FUN_00404010(maxX, value.x);
-            maxY = FUN_00404010(maxY, value.y);
-            if (file->FUN_00471c20())
+            m_kEndPoint.x = FUN_00404010(m_kEndPoint.x, value.x);
+            m_kEndPoint.y = FUN_00404010(m_kEndPoint.y, value.y);
+            if (file->IsMasterFile())
             {
-                OffsetData583* data = GetOrCreateCellOffsetData(file);
+                WorldCellOffsetRecord* data = reinterpret_cast<WorldCellOffsetRecord*>(GetOrCreateCellOffsetData(file));
                 data->maximum = value;
             }
             break;
@@ -4329,13 +3210,13 @@ bool World583::FUN_00583560(File583* file)
         if (!file->GetNextChunk())
             break;
     }
-    if (!cellMap->FUN_0084e3a0() && !GetSmallWorld())
+    if (!cellMap->GetCount() && !GetSmallWorld())
     {
         delete cellMap;
         if (FUN_00484e40())
-            cellMap = new FUN_00589000(7001);
+            cellMap = new NiTPointerMap<unsigned int, TESObjectREFR*>(7001);
         else
-            cellMap = new FUN_00589000(701);
+            cellMap = new NiTPointerMap<unsigned int, TESObjectREFR*>(701);
     }
     return true;
 }
@@ -4356,17 +3237,6 @@ class StrList
     int a;
     int b;
     StrList();
-};
-class DummyPointerMap
-{
-  public:
-    int a;
-    int b;
-    int c;
-    int d;
-    DummyPointerMap(int);
-    bool GetAt(unsigned int, int&) const;
-    void SetAt(unsigned int, unsigned int);
 };
 class SetAtHelper
 {
@@ -4507,16 +3377,15 @@ class RefObj
 };
 bool BoundIntersectsCell(RefObj*, int, int);
 int TruncateFloatToInt(float);
-class WorldObj
+// Local method adapter for overlap references, absent from the shared header.
+class WorldSpaceOverlapMethods : public TESWorldSpace
 {
   public:
-    char pad68[0x68];
-    DummyPointerMap* map;
     void FUN_005878d0(RefObj*);
 };
 
 // @fnv 0x005878d0
-void WorldObj::FUN_005878d0(RefObj* pRef)
+void WorldSpaceOverlapMethods::FUN_005878d0(RefObj* pRef)
 {
     if (pRef)
     {
@@ -4538,15 +3407,15 @@ void WorldObj::FUN_005878d0(RefObj* pRef)
                     {
                         if (BoundIntersectsCell(pRef, i_, j2))
                         {
-                            if (!map)
-                                map = new DummyPointerMap(0x25);
+                            if (!reinterpret_cast<DummyPointerMap*&>(m_pFourthTreePointer))
+                                reinterpret_cast<DummyPointerMap*&>(m_pFourthTreePointer) = new DummyPointerMap(0x25);
                             unsigned int key3 = TESWorldSpace::BuildCellKey((short)i_, (short)j2);
                             int val = 0;
-                            map->GetAt(key3, val);
+                            reinterpret_cast<DummyPointerMap*&>(m_pFourthTreePointer)->GetAt(key3, val);
                             if (!val)
                             {
                                 val = (int)new StrList();
-                                map->SetAt(key3, val);
+                                reinterpret_cast<DummyPointerMap*&>(m_pFourthTreePointer)->SetAt(key3, val);
                             }
                             ((SetAtHelper*)val)->FUN_005ae3d0((void**)&pRef);
                         }
@@ -4558,17 +3427,7 @@ void WorldObj::FUN_005878d0(RefObj* pRef)
 }
 }  // namespace fnv_005878d0
 
-struct String65
-{
-    char* text;
-    unsigned short length, capacity;
-    String65();
-    ~String65();
-    bool Set(const char*, unsigned = 0);
-    operator const char*() const;
-    unsigned Length();
-    int StrCmp(const char*, bool = true) const;
-};
+
 struct Pos65
 {
     float x, y, z;
@@ -4605,7 +3464,7 @@ struct Data65
     virtual void v1c();
     virtual void v20();
     virtual void v24();
-    virtual void v28(String65*);
+    virtual void v28(BSStringT<char>*);
 };
 struct Manager65
 {
@@ -4615,16 +3474,9 @@ struct Manager65
     virtual void v0c();
     virtual Data65* v10(void*);
 };
-struct Region65
-{
-    bool FUN_00440d80();
-    void* FUN_007af430();
-    AreaList65* FUN_00441110();
-    void* FUN_009611e0();
-};
 struct RegionNode65
 {
-    Region65** FUN_006815c0();
+    TESRegion** FUN_006815c0();
     RegionNode65* FUN_00726070();
 };
 struct RegionPrefix65
@@ -4641,34 +3493,27 @@ struct Type65
 struct Cell65
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14;
-    FNStub fullName;
+    TESFullName fullName;
     AreaList65* FUN_00547110(bool);
 };
-struct Handler65
+// Local method adapter: the shared header has no position-name lookup yet.
+struct WorldSpacePositionNameMethods : TESWorldSpace
 {
-    Cell65* FUN_00461bc0(float, float, void*, bool);
-    Manager65* GetRegionDataManager();
-    RegionHead65* FUN_004169d0();
-};
-struct World65
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14;
-    FNStub fullName;
-    bool FUN_00586500(String65*, Pos65);
+    bool FUN_00586500(BSStringT<char>*, Pos65);
 };
 // Selects a name for pos from its cell or matching regions, falls back to this world's full name or FUN_00586980, and reports whether output changed.
 // @fnv 0x00586500
-bool World65::FUN_00586500(String65* output, Pos65 pos)
+bool WorldSpacePositionNameMethods::FUN_00586500(BSStringT<char>* output, Pos65 pos)
 {
-    static String65 lastName;
+    static BSStringT<char> lastName;
     static Pos65 lastPos;
-    static World65* lastWorld;
+    static WorldSpacePositionNameMethods* lastWorld;
     Data65* data7 = 0;
     if (!g_dataHandler)
         return false;
     if (lastWorld == this && lastPos.FUN_004390c0(pos))
     {
-        output->Set(lastName);
+        output->Set((const char*)lastName, 0);
         return false;
     }
     if (lastWorld != this)
@@ -4676,11 +3521,10 @@ bool World65::FUN_00586500(String65* output, Pos65 pos)
     lastWorld = this;
     lastPos = pos;
     output->Set("");
-    Cell65* cellVal = ((Handler65*)g_dataHandler)->FUN_00461bc0(pos.x, pos.y, this, false);
+    Cell65* cellVal = reinterpret_cast<Cell65*>(g_dataHandler->GetCellByWorldPosition(pos.x, pos.y, reinterpret_cast<TESWorldSpace*>(this), false));
     if (cellVal)
     {
-        data7 = cellVal->FUN_00547110(true) ? ((Handler65*)g_dataHandler)
-                                                  ->GetRegionDataManager()
+        data7 = cellVal->FUN_00547110(true) ? reinterpret_cast<Manager65*>(g_dataHandler->GetRegionDataManager())
                                                   ->v10(cellVal->FUN_00547110(true)->FUN_004f6800(4, pos, this))
                                             : 0;
         if (data7)
@@ -4690,9 +3534,9 @@ bool World65::FUN_00586500(String65* output, Pos65 pos)
     }
     else
     {
-        Region65* region4;
+        TESRegion* region4;
         Area65* area;
-        RegionNode65* node5 = ((Handler65*)g_dataHandler)->FUN_004169d0();
+        RegionNode65* node5 = reinterpret_cast<RegionHead65*>(g_dataHandler->GetRegionList());
         AreaList65* areas = 0;
         Point65 point2(pos);
         int priority6 = -1;
@@ -4702,21 +3546,20 @@ bool World65::FUN_00586500(String65* output, Pos65 pos)
         {
             contains3 = false;
             region4 = *node5->FUN_006815c0();
-            if (region4->FUN_00440d80() || region4->FUN_007af430() != this || !region4->FUN_00441110() ||
-                region4->FUN_00441110()->FUN_008256d0())
+            if (region4->IsDeleted() || region4->GetParentWorldSpace() != reinterpret_cast<TESWorldSpace*>(this) || !reinterpret_cast<AreaList65*>(region4->GetRegionPointLists()) ||
+                reinterpret_cast<AreaList65*>(region4->GetRegionPointLists())->FUN_008256d0())
             {
                 node5 = node5->FUN_00726070();
                 continue;
             }
-            data7 = ((Handler65*)g_dataHandler)
-                        ->GetRegionDataManager()
-                        ->v10(((Type65*)region4->FUN_009611e0())->FUN_004f35b0(4));
+            data7 = reinterpret_cast<Manager65*>(g_dataHandler->GetRegionDataManager())
+                        ->v10(((Type65*)region4->GetDataList())->FUN_004f35b0(4));
             if (!data7)
             {
                 node5 = node5->FUN_00726070();
                 continue;
             }
-            areas = region4->FUN_00441110();
+            areas = reinterpret_cast<AreaList65*>(region4->GetRegionPointLists());
             while (areas && *areas->FUN_006815c0())
             {
                 area = *areas->FUN_006815c0();
@@ -4752,21 +3595,16 @@ bool World65::FUN_00586500(String65* output, Pos65 pos)
         }
     }
     if (!output->Length())
-        output->Set(fullName.GetFullName());
+        output->Set(TESFullName::GetFullName());
     if (!output->Length())
         output->Set(FUN_00586980());
-    if (output->StrCmp(lastName))
+    if (output->StrCmp(lastName, true))
     {
-        lastName.Set(*output);
+        lastName.Set((const char*)*output, 0);
         return true;
     }
     return false;
 }
-
-struct WorldSpaceRefShell : public TESWorldSpace
-{
-    void FUN_00587d10(TESObjectREFR*);
-};
 
 struct ATM_587D10
 {
@@ -4920,18 +3758,10 @@ struct RefListNode_587D10 : RefList_587D10
 {
     RefListNode_587D10();
 };
-struct SetAt_587D10
-{
-    void SetAt(unsigned int, unsigned int);
-};
-struct PtrMap_587D10
-{
-    bool GetAt(unsigned int, unsigned int&);
-};
 
 // Adds apRef to a list directly or to a coordinate-keyed list, skipping null and temporary references.
 // @fnv 0x00587d10
-void WorldSpaceRefShell::FUN_00587d10(TESObjectREFR* apRef)
+void TESWorldSpace::FUN_00587d10(TESObjectREFR* apRef)
 {
     if (apRef && !apRef->IsTemporary())
     {
@@ -4944,11 +3774,11 @@ void WorldSpaceRefShell::FUN_00587d10(TESObjectREFR* apRef)
         {
             unsigned int ikey = WsH_587D10::GetKeyForWorldCoord(*((RefV_587D10*)apRef)->GetPos());
             RefListNode_587D10* preflist = 0;
-            ((PtrMap_587D10*)((char*)this + 0x50))->GetAt(ikey, (unsigned int&)preflist);
+            ((NiTPointerMap<unsigned int, unsigned int>*)((char*)this + 0x50))->GetAt(ikey, (unsigned int&)preflist);
             if (!preflist)
             {
                 preflist = new RefListNode_587D10;
-                ((SetAt_587D10*)((char*)this + 0x50))->SetAt(ikey, (unsigned int)preflist);
+                ((NiTPointerMap<unsigned int, unsigned int>*)((char*)this + 0x50))->SetAt(ikey, (unsigned int)preflist);
             }
             preflist->AddHead((int*)&apRef);
         }

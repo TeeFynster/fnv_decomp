@@ -1,142 +1,55 @@
+#include "../../../../../../../include/hkArrayBase.h"
+#include "../../../../../../../include/hkpContactPointViewer.h"
+#include "../../../../../../../include/hkpWorldViewerBase.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../include/hkProcess.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/hkpWorldPostSimulationListener.h"
 
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkpcontactpointviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/collide/hkpcontactpointviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct Prefix32
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-};
 struct Context
 {
     void FUN_00c93920(void* value);
 };
-struct Secondary
-{
-    int unk00;
-    int unk04;
-    int child;
-    void FUN_00de2950(Context* context);
-};
-struct Owner : Prefix32, Secondary
-{
-};
-// Computes the address of the child member (or null if the owner is null) and passes it to context->FUN_00c93920.
+
 // @fnv 0x00de2950
-void Secondary::FUN_00de2950(Context* context)
+void hkpPhysicsContextWorldListener::WorldAddedCallback(hkpWorld* world)
 {
-    Owner* owner = reinterpret_cast<Owner*>(reinterpret_cast<char*>(this) - sizeof(Prefix32));
+    hkpContactPointViewer* owner = reinterpret_cast<hkpContactPointViewer*>(reinterpret_cast<char*>(this) - sizeof(hkReferencedObject) - sizeof(hkProcess));
     void* value;
     if (owner)
-        value = &child;
+        value = reinterpret_cast<char*>(this) + sizeof(hkpPhysicsContextWorldListener) + sizeof(ContactArray*);
     else
         value = 0;
-    context->FUN_00c93920(value);
+    reinterpret_cast<Context*>(world)->FUN_00c93920(value);
 }
 
-struct S_00de2980_B2
-{
-    virtual void f2();
-};
 struct S_00de2980_World
 {
-    int ClearValue(S_00de2980_B2* p);
-};
-struct S_00de2980_B0
-{
-    virtual void f0();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-};
-struct S_00de2980_B1
-{
-    virtual void FUN_00de2980(S_00de2980_World* w);
-    int unk04;
-};
-struct S_00de2980_D : S_00de2980_B0, S_00de2980_B1, S_00de2980_B2
-{
-    virtual void FUN_00de2980(S_00de2980_World* w);
+    int ClearValue(hkpWorldPostSimulationListener* p);
 };
 
 // @fnv 0x00de2980
-void S_00de2980_D::FUN_00de2980(S_00de2980_World* pWorld)
+__declspec(noinline) void hkpPhysicsContextWorldListener::FUN_00de2980(void* world) throw()
 {
-    pWorld->ClearValue(this);
+    hkpContactPointViewer* owner = reinterpret_cast<hkpContactPointViewer*>(reinterpret_cast<char*>(this) - sizeof(hkReferencedObject) - sizeof(hkProcess));
+    hkpWorldPostSimulationListener* listener;
+    if (owner)
+        listener = reinterpret_cast<hkpWorldPostSimulationListener*>(reinterpret_cast<char*>(this) + sizeof(hkpPhysicsContextWorldListener) + sizeof(ContactArray*));
+    else
+        listener = 0;
+    reinterpret_cast<S_00de2980_World*>(world)->ClearValue(listener);
 }
-
-struct DE29B0PartA
-{
-    virtual void vfuncA();
-    int unk04;
-};
-
-struct DE29B0PartB
-{
-    virtual void vfuncB();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-struct DE29B0PartC
-{
-    virtual void vfuncC();
-    int unk04;
-};
-
-struct DE29B0Base : DE29B0PartA, DE29B0PartB, DE29B0PartC
-{
-    DE29B0Base(void* owner);
-};
-
-struct DE29B0Listener
-{
-    virtual void vfuncD();
-};
-
-struct FUN_00de29b0 : DE29B0Base, DE29B0Listener
-{
-    float m_uiFilterValue;
-    void* m_ulUserData;
-
-    FUN_00de29b0(void* owner, void* userData);
-};
 
 // Initializes the base with owner, sets the float member to 0.0f and stores userData in the pointer member.
 // @fnv 0x00de29b0
-FUN_00de29b0::FUN_00de29b0(void* owner, void* userData)
-    : DE29B0Base(owner), m_uiFilterValue(0.0f), m_ulUserData(userData)
+hkpContactPointViewer::hkpContactPointViewer(void* owner, void* userData)
+    : hkpWorldViewerBase(owner), m_uiFilterValue(0.0f), m_ulUserData(userData)
 {}
 
-struct hkBaseObject
-{
-    virtual void base0() throw();
-    int unk04;
-};
-struct hkProcess
-{
-    virtual void process0() throw();
-    virtual void process1() throw();
-    virtual void process2() throw();
-    virtual void process3() throw();
-    virtual void process4() throw();
-    virtual void process5() throw();
-    virtual void process6() throw();
-    int unk04, unk08, unk0c, unk10, unk14;
-};
 struct ContactArray
 {
     int unk00;
@@ -169,34 +82,9 @@ struct ContactArray
     void** data;
     int size;
 };
-struct hkpPhysicsContextWorldListener
-{
-    virtual void world0() throw();
-    virtual void world1() throw();
-    virtual void world2() throw();
-    ContactArray* contacts;
-    void FUN_00de2980(void*) throw();
-};
-struct hkpWorldViewerBase : hkBaseObject, hkProcess, hkpPhysicsContextWorldListener
-{
-    void FUN_00ddcc60() throw();
-};
-struct hkpWorldPostSimulationListener
-{
-    virtual void post0() throw();
-    virtual void post1() throw();
-    virtual void post2() throw();
-    __forceinline ~hkpWorldPostSimulationListener() throw();
-};
 __forceinline hkpWorldPostSimulationListener::~hkpWorldPostSimulationListener() throw()
 {
-    ((hkpWorldViewerBase*)((char*)this - 0x28))->FUN_00ddcc60();
 }
-struct hkpContactPointViewer : hkpWorldViewerBase, hkpWorldPostSimulationListener
-{
-    __forceinline virtual ~hkpContactPointViewer() throw();
-    void DestroyContactPointViewer() throw();
-};
 __forceinline hkpContactPointViewer::~hkpContactPointViewer() throw()
 {
     for (int i = 0; this->contacts && i < this->contacts->size; ++i)
@@ -208,74 +96,21 @@ void hkpContactPointViewer::DestroyContactPointViewer() throw()
     this->hkpContactPointViewer::~hkpContactPointViewer();
 }
 
-struct SpawnedSub
-{
-    virtual void v00();
-    virtual void v04(void* apItem);
-};
-
-struct SpawnedList
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    void** m_6c;
-    int m_70;
-};
-
-struct FUN_00de2a00_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    SpawnedSub m_18;
-    SpawnedList* m_1c;
-
-    void ProcessSpawnedList();
-};
-
-// Iterates the entries of m_1c up to m_70 and passes each m_6c element to m_18.v04.
+// Iterates the context worlds and registers this viewer with each one.
 // @fnv 0x00de2a00
-void FUN_00de2a00_cls::ProcessSpawnedList()
+void hkpContactPointViewer::init()
 {
-    SpawnedList* list = m_1c;
+    ContactArray* list = contacts;
     int i = 0;
     while (list != 0)
     {
-        if (i >= list->m_70)
+        if (i >= list->size)
         {
             break;
         }
-        m_18.v04(list->m_6c[i]);
+        WorldAddedCallback(reinterpret_cast<hkpWorld*>(list->data[i]));
         ++i;
-        list = m_1c;
+        list = contacts;
     }
 }
 
@@ -287,14 +122,6 @@ extern "C"
 }
 
 extern unsigned long DAT_0126835c;
-
-struct StringCursor
-{
-    int unk0;
-    char* m_ptr;
-    int unk8;
-    char* m_kRayEnd;
-};
 
 struct S_00de2fa0_Array
 {
@@ -336,15 +163,15 @@ struct S_00de2fa0 : S_00de2fa0_Base0, S_00de2fa0_Listener
 // @fnv 0x00de2fa0
 void S_00de2fa0::PostSimulationCallback(S_00de2fa0_Arg* apArg)
 {
-    StringCursor* stream = (StringCursor*)TlsGetValue(DAT_0126835c);
-    char* p = stream->m_ptr;
-    if (p < stream->m_kRayEnd)
+    hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* p = stream->m_end.m_storage;
+    if (p < stream->m_capacityMinus16.m_storage)
     {
         *(const char**)p = "TthkpActiveContactPointViewer::postSimulationCallback";
         _ReadWriteBarrier();
         unsigned uiTimestamp = (unsigned)__rdtsc();
         *(unsigned*)(p + 4) = *(volatile unsigned*)&uiTimestamp;
-        stream->m_ptr = p + 12;
+        stream->m_end.m_storage = p + 12;
     }
 
     S_00de2fa0_Array* arr = vfn_0c(apArg);
@@ -353,15 +180,15 @@ void S_00de2fa0::PostSimulationCallback(S_00de2fa0_Arg* apArg)
         FUN_00de2da0(arr->m_data[i]);
     }
 
-    StringCursor* stream2 = (StringCursor*)TlsGetValue(DAT_0126835c);
-    char* pCursor2 = stream2->m_ptr;
-    if (pCursor2 < stream2->m_kRayEnd)
+    hkMonitorStream* stream2 = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* pCursor2 = stream2->m_end.m_storage;
+    if (pCursor2 < stream2->m_capacityMinus16.m_storage)
     {
         *(const char**)pCursor2 = "Et";
         _ReadWriteBarrier();
         unsigned uiTimestamp2 = (unsigned)__rdtsc();
         *(unsigned*)(pCursor2 + 4) = *(volatile unsigned*)&uiTimestamp2;
-        stream2->m_ptr = pCursor2 + 12;
+        stream2->m_end.m_storage = pCursor2 + 12;
     }
 }
 
@@ -503,12 +330,6 @@ inline StackHeap* GetStackHeap67()
     return (StackHeap*)FUN_00c85750();
 }
 
-struct Sub
-{
-    virtual void unk00();
-    virtual int Get();
-};
-
 struct Vec67
 {
     float x, y, z, w;
@@ -531,22 +352,23 @@ struct Target
     virtual void Draw(const Vec67* a, const Vec67* b, int color, void* body, int tag);
 };
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00de2da0 FUN_00de2da0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-};
-extern "C" __m128 _mm_load_ps(const float*);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" float _mm_cvtss_f32(__m128);
-extern "C" void _mm_store_ps(float*, __m128);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" float _mm_cvtss_f32(LocalM128);
+extern "C" void _mm_store_ps(float*, LocalM128);
 static __declspec(noinline) void FUN_00de2aa0(Target* context, Contact67* volatile contact, const Vec67* normal,
                                               int color, void* body, int tag)
 {
-    __m128 n = _mm_load_ps(&normal->x);
-    __m128 sq = _mm_mul_ps(n, n);
+    LocalM128 n = _mm_load_ps(&normal->x);
+    LocalM128 sq = _mm_mul_ps(n, n);
     float len = _mm_cvtss_f32(_mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq)));
     if (len < 0.000001f)
         return;
@@ -555,28 +377,24 @@ static __declspec(noinline) void FUN_00de2aa0(Target* context, Contact67* volati
     context->Draw(&contact->position, &endpoint, color, body, tag);
 }
 
-struct Arr
-{
+struct ContactIdStackArray : hkArrayBase<unsigned short>
+{ // distinct from Arr: 0x00de2da0 uses a contact-viewer scratch array with a stack-save pointer at +0x0c beyond shared hkArrayBase storage; it restores a 0x200-byte scratch allocation.
 
-    unsigned short* data;
 
-    int count;
-
-    unsigned cap;
 
     unsigned short* stk;
     __forceinline unsigned short& operator[](int index)
     {
-        return data[index];
+        return m_data[index];
     }
 
     __forceinline void Clear(Allocator* a)
     {
-        count = 0;
-        if ((cap & 0x80000000) == 0)
-            a->Free(data, (cap & 0x3fffffff) * 2);
-        data = 0;
-        cap = 0x80000000;
+        m_iElementCount = 0;
+        if ((m_iCapacityState & 0x80000000) == 0)
+            a->Free(m_data, (m_iCapacityState & 0x3fffffff) * 2);
+        m_data = 0;
+        m_iCapacityState = 0x80000000;
     }
 };
 
@@ -621,7 +439,7 @@ struct Obj
 
     virtual Contact67* GetItem(unsigned short i);
 
-    virtual void Fill(Arr* arr);
+    virtual void Fill(ContactIdStackArray* arr);
 
     virtual int IsSkipped();
 
@@ -746,29 +564,9 @@ struct Cont
     int unk60;
 };
 
-struct Node
-{
-
-    int unk00, unk04;
-
-    Sub sub;
-
-    int unk0c, unk10, unk14;
-
-    Target* unk18;
-
-    int unk1c, unk20, unk24, unk28;
-
-    float unk2c;
-
-    int unk30;
-
-    void FUN_00de2da0(Cont* c);
-};
-
 // Iterates contact records in c, and for each unskipped object whose float value is at least unk2c, draws a point via FUN_00de2aa0.
 // @fnv 0x00de2da0
-void Node::FUN_00de2da0(Cont* apCont)
+void hkpContactPointViewer::FUN_00de2da0(Cont* apCont)
 
 {
 
@@ -829,11 +627,11 @@ void Node::FUN_00de2da0(Cont* apCont)
                             continue;
 
                         {
-                            Arr m;
+                            ContactIdStackArray m;
 
-                            m.data = 0;
-                            m.count = 0;
-                            m.cap = 0x80000000;
+                            m.m_data = 0;
+                            m.m_iElementCount = 0;
+                            m.m_iCapacityState = 0x80000000;
 
                             StackHeap* pStackHeap = GetStackHeap67();
 
@@ -842,32 +640,32 @@ void Node::FUN_00de2da0(Cont* apCont)
 
                                 pStackHeap->top = pStackHeap->top + 0x200;
 
-                                m.data = pStackTop;
+                                m.m_data = pStackTop;
                                 m.stk = pStackTop;
                             }
-                            m.cap = 0x80000100;
+                            m.m_iCapacityState = 0x80000100;
 
                             pObj->Fill((&m));
 
                             {
                                 i = 0;
-                                for (; i < m.count;)
+                                for (; i < m.m_iElementCount;)
                                 {
                                     {
                                         Contact67* y = pObj->GetItem(m[i]);
 
                                         value = pObj->GetFloat(m[i]);
 
-                                        if (!(*value < unk2c))
+                                        if (!(*value < m_uiFilterValue))
                                         {
 
                                             PointContext67* volatile v = pObj->unk74->slot[pObj->unk74->index];
 
                                             {
-                                                int h = sub.Get();
+                                                int h = GetOperationType();
 
-                                                int color = unk30;
-                                                FUN_00de2aa0(unk18, y, &y->normal, color, &v->value10, h);
+                                                int color = reinterpret_cast<int>(m_ulUserData);
+                                                FUN_00de2aa0(reinterpret_cast<Target*>(hkProcess::unk10), y, &y->normal, color, &v->value10, h);
                                             }
                                         }
                                     }
@@ -877,9 +675,9 @@ void Node::FUN_00de2da0(Cont* apCont)
 
                             {
                                 unsigned short* pStackSaved = m.stk;
-                                bool result = pStackSaved == m.data;
+                                bool result = pStackSaved == m.m_data;
                                 if (0 != result)
-                                    m.count = 0;
+                                    m.m_iElementCount = 0;
 
                                 GetStackHeap67()->top = (char*)pStackSaved;
 
@@ -908,3 +706,4 @@ void Node::FUN_00de2da0(Cont* apCont)
         }
     }
 }
+

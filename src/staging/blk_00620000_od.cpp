@@ -1,8 +1,30 @@
+#include "../../include/SettingT.h"
 
 // src/staging/blk_00620000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+// Enable the shared comparison operators used by the NiAVObject pointer array.
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "../../include/AnimIdle.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/Clouds.h"
+#include "../../include/HighProcess.h"
+#include "../../include/INISettingCollection.h"
+#include "../../include/INIPrefSettingCollection.h"
+#include "../../include/Mat3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTransform.h"
+#include "../../include/NiTMap.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/GO.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/SkyShaderProperty.h"
+#include "../../include/bhkFilter.h"
+#include "../../include/hkRotation.h"
+#include "../../include/hkStringPtr.h"
+#include "../../include/hkpShapePhantom.h"
 
 extern "C" void* __cdecl _NiMalloc(unsigned int);
 extern "C" void* __cdecl memset(void*, int, unsigned int);
@@ -30,11 +52,6 @@ FUN_006318b0_Class* __thiscall FUN_006318b0_Class::FUN_006318b0(int count)
     return this;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3* ScaleTo(NiPoint3* dst, float scale);
-};
 // Multiplies this point's x, y and z by scale, stores the result in dst and returns dst.
 // @fnv 0x00633b40
 NiPoint3* NiPoint3::ScaleTo(NiPoint3* dst, float scale)
@@ -88,17 +105,13 @@ void __thiscall FUN_006205c0_Class::ForwardToMember(void* arg)
 }
 
 struct TESIdleForm;
-struct HighProcess
-{
-    TESIdleForm* GetSelectedIdleForm();
-};
 // Returns the idle form from the given process, or null if the process pointer is null.
 // @fnv 0x00621480
 TESIdleForm* FUN_00621480(HighProcess* process)
 {
     TESIdleForm* result;
     if (process)
-        result = process->GetSelectedIdleForm();
+        result = process->HighProcess::GetSelectedIdleForm();
     else
         result = 0;
     return result;
@@ -120,7 +133,8 @@ void __fastcall FUN_006218d0_Class::FUN_006218d0(float f)
     ((AlphaColor*)((char*)this + 8))->FUN_0052ce20(f);
 }
 
-struct ArrSI
+// Exe 0x00621ad0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int GetFlags();
 };
@@ -137,7 +151,7 @@ struct FUN_00621ad0_Class
 // @fnv 0x00621ad0
 void __thiscall FUN_00621ad0_Class::FUN_00621ad0()
 {
-    FUN_00621480(((ArrSI*)((ObjHelper*)this)->FUN_00621a90())->GetFlags());
+    FUN_00621480(((BlkOffset08View*)((ObjHelper*)this)->FUN_00621a90())->GetFlags());
 }
 
 struct FUN_00621b20_Class
@@ -212,10 +226,6 @@ unsigned int FUN_006228e0_shell::FUN_006227b0(unsigned int arg)
     return FUN_006228e0(*(unsigned short*)((char*)this + 0xa), (void*)arg);
 }
 
-struct hkStringPtr
-{
-    void operator=(const char*);
-};
 struct FUN_00622f60_Class
 {
     hkStringPtr m_str;
@@ -313,12 +323,6 @@ float __thiscall FUN_00624050_Class::FUN_00624050()
 {
     return FUN_00577bf0(reinterpret_cast<unsigned char*>(this) + 4);
 }
-
-struct bhkFilter
-{
-    int __thiscall FUN_004d9da0();
-    int __thiscall FUN_006240b0();
-};
 
 // @fnv 0x006240b0
 int bhkFilter::FUN_006240b0()
@@ -442,10 +446,6 @@ void __cdecl NoOpLoop(int unused, int count)
     }
 }
 
-struct TESObjectREFR
-{
-    void __thiscall SetFlags(unsigned int);
-};
 struct FUN_00626d00_Class
 {
     void SetObjectFlags(unsigned int flags);
@@ -819,15 +819,10 @@ int* __thiscall FUN_006347a0_Class::FUN_006347a0(int index)
     return (int*)((char*)this + 0x34 + index * 0xc);
 }
 
-struct FUN_00634850_Class
-{
-    NiPoint3* __thiscall GetPointAt(int index);
-};
-
 // @fnv 0x00634850
-NiPoint3* __thiscall FUN_00634850_Class::GetPointAt(int index)
+NiColor& Clouds::GetPointAt(int index)
 {
-    return reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0x28 + index * 0xc);
+    return pColors[index];
 }
 
 extern float DAT_011ff8b4[4];
@@ -936,20 +931,12 @@ Holder* Holder::FUN_00628950(Holder* apFirst, Holder* apSecond)
 
 extern "C" void __cdecl NiFreeAlias(void*);
 extern int DAT_0104e170;
-struct NiTPointerMap_00629eb0
-{
-    void __thiscall RemoveAll();
-    void* m_data;
-};
-struct FUN_00629eb0_Class
-{
-    void __thiscall FUN_00629eb0();
-};
+// RTTI at vtable 0x0104e170 identifies NiTMapBase<DFALL<NiTMapItem<bhkRigidBody*, unsigned short> >, bhkRigidBody*, unsigned short>.
 // @fnv 0x00629eb0
-void __thiscall FUN_00629eb0_Class::FUN_00629eb0()
+template <>
+NiTMapBase<DFALL<NiTMapItem<bhkRigidBody*, unsigned short> >, bhkRigidBody*, unsigned short>::~NiTMapBase()
 {
-    *(int*)this = (int)&DAT_0104e170;
-    ((NiTPointerMap_00629eb0*)this)->RemoveAll();
+    RemoveAll();
     NiFreeAlias(*(void**)((char*)this + 8));
 }
 
@@ -1011,10 +998,6 @@ void* FUN_00620230_Class::FUN_00620230(unsigned int flags)
     return this;
 }
 
-struct AnimIdle
-{
-    int GetSection();
-};
 struct FUN_0057b700_class
 {
     void FUN_0057b700(int);
@@ -1049,7 +1032,7 @@ FUN_00620810_List* FUN_00620810_List::FindByFlags(unsigned int flags)
     FUN_00620810_List* cur = this;
     while (cur)
     {
-        if (reinterpret_cast<ArrSI*>(cur)->GetFlags() == flags)
+        if (reinterpret_cast<BlkOffset08View*>(cur)->GetFlags() == flags)
             break;
         cur = reinterpret_cast<FUN_00620810_List*>(reinterpret_cast<BSSimpleList<int*>*>(cur)->GetNext());
     }
@@ -1174,17 +1157,15 @@ void __thiscall S219c0::DestroyDate()
 }
 
 struct hkpRigidBody;
-struct ScriptLocalsX
+// GetLocalData binds to 0x004ae750, the nullable Havok-object accessor, rather than script-local storage.
+struct NullablePhysicsObjectAccess
 {
     void* __thiscall GetLocalData();
 };
-struct ScriptX
+// GetLocalData binds to the physics access no-op at 0x00a29680; no Script layout or script state is used.
+struct PhysicsAccessNotification
 {
     void __thiscall GetLocalData();
-};
-struct hkpShapePhantom
-{
-    void SetWorldPosition(hkpRigidBody* body, float pos);
 };
 struct FUN_006219f0_Class
 {
@@ -1193,12 +1174,12 @@ struct FUN_006219f0_Class
 // @fnv 0x006219f0
 void __thiscall FUN_006219f0_Class::FUN_006219f0(hkpRigidBody* body)
 {
-    ScriptX* flag = (ScriptX*)((ScriptLocalsX*)this)->GetLocalData();
+    void* flag = ((NullablePhysicsObjectAccess*)this)->GetLocalData();
     if (flag)
     {
-        ((ScriptX*)this)->GetLocalData();
+        ((PhysicsAccessNotification*)this)->GetLocalData();
         ((hkpShapePhantom*)flag)->SetWorldPosition(body, 0.0f);
-        ((ScriptX*)this)->GetLocalData();
+        ((PhysicsAccessNotification*)this)->GetLocalData();
     }
 }
 
@@ -1361,14 +1342,6 @@ FUN_00621e40Class* __thiscall FUN_00621e40Class::FUN_00622840(unsigned int flags
 }
 
 namespace fnv_00622f20 {
-struct ScriptLocalsX
-{
-    void* GetLocalData();
-};
-struct ScriptX
-{
-    void GetLocalData();
-};
 struct FUN_00622f20_Class
 {
     void FUN_00622f20(const char* s);
@@ -1376,25 +1349,17 @@ struct FUN_00622f20_Class
 // @fnv 0x00622f20
 void FUN_00622f20_Class::FUN_00622f20(const char* s)
 {
-    void* flag = ((ScriptLocalsX*)this)->GetLocalData();
+    void* flag = ((NullablePhysicsObjectAccess*)this)->GetLocalData();
     if (flag)
     {
-        ((ScriptX*)this)->GetLocalData();
+        ((PhysicsAccessNotification*)this)->GetLocalData();
         ((FUN_00622f60_Class*)flag)->SetString(s);
-        ((ScriptX*)this)->GetLocalData();
+        ((PhysicsAccessNotification*)this)->GetLocalData();
     }
 }
 }  // namespace fnv_00622f20
 
 namespace fnv_00623150 {
-struct ScriptLocalsX
-{
-    void* __thiscall GetLocalData();
-};
-struct ScriptX
-{
-    void __thiscall GetLocalData();
-};
 struct FUN_00623150_Class
 {
     void __thiscall FUN_00623150(void* arg);
@@ -1402,12 +1367,12 @@ struct FUN_00623150_Class
 // @fnv 0x00623150
 void __thiscall FUN_00623150_Class::FUN_00623150(void* arg)
 {
-    void* result = ((ScriptLocalsX*)this)->GetLocalData();
-    if (result && ((ArrSI*)result)->GetFlags())
+    void* result = ((NullablePhysicsObjectAccess*)this)->GetLocalData();
+    if (result && ((BlkOffset08View*)result)->GetFlags())
     {
-        ((ScriptX*)this)->GetLocalData();
+        ((PhysicsAccessNotification*)this)->GetLocalData();
         ((void(__thiscall*)(void*, int, int)) * (int**)(*(int**)result + 0x44 / 4))(result, (int)arg, 0);
-        ((ScriptX*)this)->GetLocalData();
+        ((PhysicsAccessNotification*)this)->GetLocalData();
     }
 }
 }  // namespace fnv_00623150
@@ -1436,18 +1401,11 @@ void __thiscall FUN_00623310_Class::FUN_00623310(float scale)
 }
 }  // namespace fnv_00623310
 
-struct H0043b4d0
-{
-    int __thiscall FUN_0043b4d0();
-};
-struct C00624070
-{
-    bool __thiscall FUN_00624070();
-};
+// The shared class does not yet declare this predicate; keep its ECX argument ABI here.
 // @fnv 0x00624070
-bool __thiscall C00624070::FUN_00624070()
+bool __fastcall FUN_00624070(bhkFilter* filter)
 {
-    int el = ((H0043b4d0*)this)->FUN_0043b4d0();
+    int el = filter->FUN_0043b4d0();
     return el == 8 || el == 0x1d;
 }
 
@@ -1775,11 +1733,6 @@ void* __thiscall FUN_005545b0::FUN_0062a4e0(unsigned int flags)
 }
 }  // namespace fnv_0062a4e0
 
-struct hkRotation
-{
-    char d[48];
-    hkRotation();
-};
 struct FUN_008cd6a0_Class
 {
     void __thiscall FUN_00cb2d90(void*);
@@ -1926,13 +1879,6 @@ void* __thiscall S_6319b0::FUN_006319b0(unsigned int flags)
     return this;
 }
 
-struct GO
-{
-    void* m_p;
-    GO(int);
-    void operator=(void*);
-    ~GO();
-};
 struct FUN_006319e0_Class
 {
     GO m_kPointA;
@@ -2064,10 +2010,6 @@ void __thiscall FUN_00633ba0_Class::FUN_00633ba0(bool set, unsigned short mask)
 }
 
 namespace fnv_00633d90 {
-struct GO
-{
-    void* operator=(void*);
-};
 struct FUN_00633d90_Class
 {
     int m_auiShapeKeys;
@@ -2112,10 +2054,6 @@ float FUN_006397c0()
     return f;
 }
 
-struct SetHelper
-{
-    struct NiPoint3* __thiscall Set(float, float, float);
-};
 struct FUN_006397f0_Obj
 {
     void __thiscall SetFromFloats(float, float, float);
@@ -2124,8 +2062,7 @@ struct FUN_006397f0_Obj
 // @fnv 0x006397f0
 void __thiscall FUN_006397f0_Obj::SetFromFloats(float afX, float afY, float afZ)
 {
-    NiPoint3 tmp;
-    *(NiPoint3*)this = *((SetHelper*)&tmp)->Set(afX, afY, afZ);
+    *(NiPoint3*)this = NiPoint3(afX, afY, afZ);
 }
 
 struct FUN_006399a0_Class
@@ -2314,19 +2251,6 @@ void __thiscall FUN_00624d70_Class::ExtractTes4Prefix(char* path)
     }
 }
 
-struct NiTexture;
-struct SkyShaderProperty
-{
-    void SetTexture(NiTexture*);
-};
-struct FUN_00634900_shell
-{
-    void FUN_00634900(void*);
-};
-struct Clouds
-{
-    int GetOffset58();
-};
 struct PropHelper
 {
     void* GetProperty(unsigned int);
@@ -2347,28 +2271,18 @@ void __fastcall FUN_006349e0(void* self)
             if (obj)
             {
                 ((SkyShaderProperty*)obj)->SetTexture(0);
-                ((FUN_00634900_shell*)obj)->FUN_00634900(&DAT_011f49e0);
+                ((SkyShaderProperty*)obj)->FUN_00634900(&DAT_011f49e0);
             }
         }
     }
 }
 
 namespace fnv_006369a0 {
-struct NiTexture;
-struct SkyShaderProperty
-{
-    void SetTexture(NiTexture*);
-};
-struct FUN_00634900_shell
-{
-    void FUN_00634900(void*);
-};
-
 struct PropHelper
 {
     void* GetProperty(unsigned int);
 };
-struct SkyShaderProperty* DynamicCastByRTTI(const void* rtti, void* p);
+SkyShaderProperty* DynamicCastByRTTI(const void* rtti, void* p);
 extern const char* const DAT_012005b8;
 extern int DAT_011f49e0;
 struct FUN_006369a0_Class
@@ -2386,14 +2300,14 @@ void FUN_006369a0_Class::FUN_006369a0()
     if (s)
     {
         s->SetTexture(0);
-        ((FUN_00634900_shell*)s)->FUN_00634900(&DAT_011f49e0);
+        s->FUN_00634900(&DAT_011f49e0);
     }
     p2 = ((PropHelper*)((Flt*)((char*)this + 0x14))->operator unsigned int())->GetProperty(3);
     s = (SkyShaderProperty*)DynamicCastByRTTI(&DAT_012005b8, p2);
     if (s)
     {
         s->SetTexture(0);
-        ((FUN_00634900_shell*)s)->FUN_00634900(&DAT_011f49e0);
+        s->FUN_00634900(&DAT_011f49e0);
     }
 }
 }  // namespace fnv_006369a0
@@ -2562,21 +2476,12 @@ FUN_0062a460_Class::FUN_0062a460_Class()
 
 extern int DAT_011cc694;
 
-struct FUN_00632ec0
-{
-    unsigned char m_data[0x114];
-    FUN_00632ec0();
-};
-
-FUN_00632ec0::FUN_00632ec0()
-{}
-
-// Allocates a FUN_00632ec0 instance and stores it in DAT_011cc694 if that global is currently null.
+// Allocates an INIPrefSettingCollection instance and stores it in DAT_011cc694 if that global is currently null.
 // @fnv 0x00632e30
 void FUN_00632e30()
 {
     if (!DAT_011cc694)
-        DAT_011cc694 = (int)new FUN_00632ec0;
+        DAT_011cc694 = (int)new INIPrefSettingCollection;
 }
 
 int __cdecl GetRandomNumber();
@@ -2782,9 +2687,10 @@ FUN_006211b0_Class::~FUN_006211b0_Class()
 FUN_00622d00_Class::~FUN_00622d00_Class()
 {}
 
-class NiNode623;
+class PhysicsDebugTarget;
 
-class NiAVObject623
+// Uses virtual slot 0x9c to attach to a physics/debug target; NiAVObject uses that slot for GetObjectByName.
+class PhysicsAttachmentAccess
 {
   public:
     virtual void unkv000();
@@ -2826,30 +2732,24 @@ class NiAVObject623
     virtual void unkv090();
     virtual void unkv094();
     virtual void unkv098();
-    virtual void SetParentNode(NiNode623* pkNode);
+    virtual void SetParentNode(PhysicsDebugTarget* pkNode);
 };
 
-class NiNode623
+// AttachHighlight binds to Havok 0x00c68e30, not a NiNode member; this is the physics debug target interface.
+class PhysicsDebugTarget
 {
   public:
-    void AttachHighlight(NiAVObject623* pkObject, unsigned int uiColor);
+    void AttachHighlight(PhysicsAttachmentAccess* pkObject, unsigned int uiColor);
 };
 
-template <class T> class NiPointer623
-{
-  public:
-    T* Get() const;
-
-    T* m_pObject;
-};
 
 unsigned int __cdecl MakeColor623(int iR, int iG, int iB, int iA);
 
 class Owner623
 {
   public:
-    NiNode623* GetCurrentNode();
-    void FUN_006231a0(NiNode623* pkNode);
+    PhysicsDebugTarget* GetCurrentNode();
+    void FUN_006231a0(PhysicsDebugTarget* pkNode);
 
     int unk000, unk004, unk008, unk00C, unk010, unk014, unk018, unk01C;
     int unk020, unk024, unk028, unk02C, unk030, unk034, unk038, unk03C;
@@ -2880,18 +2780,18 @@ class Owner623
     int unk340, unk344, unk348, unk34C, unk350, unk354, unk358, unk35C;
     int unk360, unk364, unk368, unk36C, unk370, unk374, unk378, unk37C;
     int unk380, unk384, unk388, unk38C, unk390, unk394, unk398, unk39C;
-    NiPointer623<NiAVObject623> m_pReferencedObject;
+    NiPointer<PhysicsAttachmentAccess> m_pReferencedObject;
 };
 
 // If the stored object exists and the current node differs from pkNode, reparents the stored object to pkNode and attaches a red highlight to it.
 // @fnv 0x006231a0
-void Owner623::FUN_006231a0(NiNode623* pkNode)
+void Owner623::FUN_006231a0(PhysicsDebugTarget* pkNode)
 {
-    if (m_pReferencedObject.Get() && GetCurrentNode() != pkNode)
+    if (m_pReferencedObject.operator->() && GetCurrentNode() != pkNode)
     {
-        m_pReferencedObject.Get()->SetParentNode(pkNode);
+        m_pReferencedObject.operator->()->SetParentNode(pkNode);
         if (pkNode)
-            pkNode->AttachHighlight(m_pReferencedObject.Get(), MakeColor623(0xff, 0x10, 0x10, 0x19));
+            pkNode->AttachHighlight(m_pReferencedObject.operator->(), MakeColor623(0xff, 0x10, 0x10, 0x19));
     }
 }
 
@@ -2942,7 +2842,6 @@ struct SubObj
     IdleAnim* __thiscall FUN_00559450();
 };
 
-struct HighProcess;
 
 struct Owner
 {
@@ -3016,6 +2915,7 @@ struct C626680TypeTag
 void C626680Destruct(C626680Element* pkElements, int iCount, C626680TypeTag kTag);
 void C626680Copy(C626680Element* pkDest, C626680Element* pkSrc);
 
+// local form of hkArrayBase: 0x00626680 needs the standalone /Od removeAt helper; the shared forced-inline specialization changes bytes.
 class C626680Array
 {
   public:
@@ -3051,6 +2951,7 @@ struct B6266F0PodTag
 void ResizeAudioStream(B6266F0Allocator* pkAlloc, void* pkArray, int iElemSize);
 void B6266F0Construct(B6266F0Entry* pkDst, int iCount, const B6266F0Entry& kValue, B6266F0PodTag kTag);
 
+// local form of hkArrayBase: 0x006266f0 needs the /Od append/capacity split with the call at 0x0062a100; the shared form changes bytes.
 class B6266F0Array
 {
   public:
@@ -3843,13 +3744,6 @@ FUN_0062a220_cls::FUN_0062a220_cls()
     FUN_0062a290();
 }
 
-struct A3B0Filter
-{
-    unsigned int m_uiFilterInfo;
-
-    int GetLayer();
-};
-
 void __cdecl SetSelectedTargetMask(int iLayer, unsigned __int64 uiMask);
 
 struct A3B0Controller
@@ -3882,21 +3776,21 @@ struct A3B0Controller
     int unk64;
     int unk68;
     int unk6C;
-    A3B0Filter m_kFilter;
+    bhkFilter m_kFilter;
     float m_fTimer;
 
-    void SetFilter(int iLayer, const A3B0Filter& kFilter);
+    void SetFilter(int iLayer, const bhkFilter& kFilter);
 };
 
 // @fnv 0x0062a3b0
-void A3B0Controller::SetFilter(int iLayer, const A3B0Filter& kFilter)
+void A3B0Controller::SetFilter(int iLayer, const bhkFilter& kFilter)
 {
     m_fTimer = 0.0f;
     m_kFilter = kFilter;
     if (iLayer < 0x23)
         iLayer = 0x27;
     unsigned __int64 uiMask = 0x22757;
-    uiMask |= (unsigned __int64)1 << m_kFilter.GetLayer();
+    uiMask |= (unsigned __int64)1 << m_kFilter.FUN_0043b4d0();
     SetSelectedTargetMask(iLayer, uiMask);
 }
 
@@ -3909,7 +3803,6 @@ int __cdecl FUN_0062aad0()
 }
 
 struct NiTriBasedGeom;
-struct TESObjectREFR;
 struct TES;
 struct FUN_00559450_h
 {
@@ -3918,11 +3811,6 @@ struct FUN_00559450_h
 struct Col_0043b4f0
 {
     int __thiscall FUN_0043b540();
-};
-struct GlobalObject_008c71b0
-{
-    int m_uiFilterValue;
-    GlobalObject_008c71b0(int value);
 };
 struct FUN_00457880_Class
 {
@@ -3941,10 +3829,10 @@ unsigned int __cdecl FUN_0062b150(unsigned int param_1, unsigned int uiValue)
         FUN_004a3a40(reinterpret_cast<TESObjectREFR*>(reinterpret_cast<FUN_00559450_h*>(param_1)->FUN_00559450()));
     if (iStack_8 == 0)
     {
-        GlobalObject_008c71b0 local(
+        bhkFilter local(
             reinterpret_cast<Col_0043b4f0*>(reinterpret_cast<FUN_00624020_Class*>(param_1)->GetLastNode())
                 ->FUN_0043b540());
-        if (reinterpret_cast<H0043b4d0*>(&local)->FUN_0043b4d0() == 0x11)
+        if (local.FUN_0043b4d0() == 0x11)
         {
             uiResult = reinterpret_cast<FUN_00457880_Class*>(g_TES)->FUN_00457880(uiValue);
         }
@@ -3961,11 +3849,7 @@ unsigned int __cdecl FUN_0062b150(unsigned int param_1, unsigned int uiValue)
 }
 
 class GameSettingCollection;
-template <class T> class SettingT
-{
-  public:
-    float* Float();
-};
+using ::SettingT;
 class GlobalObject_0040e0b0
 {
   public:
@@ -4270,15 +4154,7 @@ FUN_00636a40::FUN_00636a40() : m_04(0), m_08(0)
 }  // namespace fnv_00636a40
 
 namespace fnv_00637890 {
-struct Pt3
-{
-    float x, y, z;
-    Pt3();
-    Pt3(float fx, float fy, float afDepth);
-    Pt3 operator*(float s) const;
-    Pt3 operator+(const Pt3& o) const;
-};
-Pt3 operator*(float s, const Pt3& p);
+NiPoint3 operator*(float s, const NiPoint3& p);
 
 struct Pt2
 {
@@ -4287,28 +4163,23 @@ struct Pt2
     Pt2(float fx, float fy);
 };
 
-struct Mat3
-{
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    Pt3 operator*(const Pt3& p) const;
-};
 
 struct Xform
 {
     Mat3 m_rot;
-    Pt3 m_trans;
+    NiPoint3 m_trans;
     float m_vScale;
     Xform();
     void Invert(Xform& dst) const;
     Xform operator*(const Xform& o) const;
-    Pt3 operator*(const Pt3& p) const;
+    NiPoint3 operator*(const NiPoint3& p) const;
 };
 
 struct Bnd
 {
-    Pt3 m_kCenterPosition;
+    NiPoint3 m_kCenterPosition;
     float m_fSphereRadius;
-    const Pt3& GetNavMeshData() const;
+    const NiPoint3& GetNavMeshData() const;
     float GetRadius() const;
     void SetRadius(float r);
     void SetGridPosition(float cx, float cy, float cz);
@@ -4363,7 +4234,7 @@ struct Obj
     virtual void v39(float a, int b, float* out);
     virtual void v40();
     virtual void v41();
-    virtual void v42(Pt3* out, Pt3* in);
+    virtual void v42(NiPoint3* out, NiPoint3* in);
 
     Obj* GetFirstChild();
     Obj* GetNextSibling();
@@ -4383,7 +4254,7 @@ struct Obj
     Obj* GetData();
     unsigned short GetVertexCount();
     unsigned short GetTriListLength();
-    Pt3* GetVertices();
+    NiPoint3* GetVertices();
     Pt2* GetUVs();
     unsigned short* GetTriangleList();
     Obj* GetObjA();
@@ -4401,7 +4272,7 @@ struct Obj
     void AttachProperty(Obj* p);
     void SetFlags(int f);
     void Activate(int a);
-    void SetDataConsistency(int a, Pt3* p, int size, int b);
+    void SetDataConsistency(int a, NiPoint3* p, int size, int b);
     void SetActive(int a, int b, int c, int d, unsigned short n, int e, int f);
     void SetSequenceTime(int f);
 };
@@ -4432,7 +4303,7 @@ struct TriData : Obj
     int unk58;
     static void* operator new(unsigned int size);
     static void operator delete(void* p, unsigned int);
-    TriData(unsigned short nVerts, Pt3* verts, Pt3* normals, void* colors, Pt2* uvs, unsigned short nSets, int flags,
+    TriData(unsigned short nVerts, NiPoint3* verts, NiPoint3* normals, void* colors, Pt2* uvs, unsigned short nSets, int flags,
             unsigned short nTris, unsigned short* tris, int a, int b);
 };
 
@@ -4551,7 +4422,7 @@ struct PartCtrl : Obj
     int unk9C;
     static void* operator new(unsigned int size);
     static void operator delete(void* p, unsigned int);
-    PartCtrl(unsigned short n, float life, Pt3* dir, Pt3* minp, Pt3* maxp, int flag, int mode);
+    PartCtrl(unsigned short n, float life, NiPoint3* dir, NiPoint3* minp, NiPoint3* maxp, int flag, int mode);
 };
 
 bool __cdecl FUN_0043b300(Rtti* r, Obj* o);
@@ -4634,8 +4505,8 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
         count8 = (unsigned short)ratio5;
         lit = 0.0f;
         Xform XA;
-        Pt3 minPt3;
-        Pt3 mask2;
+        NiPoint3 minPt3;
+        NiPoint3 mask2;
         if (FUN_0043b300(&DAT_01202538, node))
         {
             int aIi;
@@ -4675,9 +4546,9 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
                 unsigned short* aTb;
                 Pt2* aU0;
                 int aTop;
-                Pt3* srcp_2;
+                NiPoint3* srcp_2;
                 unsigned short* saB;
-                Pt3* aV1;
+                NiPoint3* aV1;
                 Obj* sgB;
                 Pt2* sn5;
                 Obj* gl3;
@@ -4691,7 +4562,7 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
                 sn5 = gl3->GetUVs();
                 saB = gl3->GetTriangleList();
                 count8 = MinUnsignedShort(count8, 0xffff / pElem9);
-                aV1 = new Pt3[pElem9 * count8];
+                aV1 = new NiPoint3[pElem9 * count8];
                 aU0 = new Pt2[pElem9 * count8];
                 aTb = (unsigned short*)FUN_00aa1070(t2 * count8 * 2);
                 aTop = 0;
@@ -4718,7 +4589,7 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
             Pt2* buffer5;
             unsigned short* bt5;
             int bits7;
-            Pt3* bVisible4;
+            NiPoint3* bVisible4;
             int nTmp;
             int n4;
             bits7 = 0;
@@ -4744,7 +4615,7 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
             count8 = MinUnsignedShort(count8, 0xffff / pElem9);
             nTmp = count8 * 2;
             n4 = count8 * 4;
-            bVisible4 = new Pt3[n4];
+            bVisible4 = new NiPoint3[n4];
             buffer5 = new Pt2[n4];
             bt5 = (unsigned short*)FUN_00aa1070(nTmp * 3 * 2);
             for (unsigned int b2 = 0; b2 < count8; b2++)
@@ -4754,10 +4625,10 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
                 int bE4;
                 b6 = lim3->GetAnimationSpeed();
                 b3a = b2 * 4;
-                bVisible4[b3a] = b6 * Pt3(DAT_01012054, 0.0f, DAT_01012054);
-                bVisible4[b3a + 1] = b6 * Pt3(1.0f, 0.0f, DAT_01012054);
-                bVisible4[b3a + 2] = b6 * Pt3(1.0f, 0.0f, 1.0f);
-                bVisible4[b3a + 3] = b6 * Pt3(DAT_01012054, 0.0f, 1.0f);
+                bVisible4[b3a] = fnv_00637890::operator*(b6, NiPoint3(DAT_01012054, 0.0f, DAT_01012054));
+                bVisible4[b3a + 1] = fnv_00637890::operator*(b6, NiPoint3(1.0f, 0.0f, DAT_01012054));
+                bVisible4[b3a + 2] = fnv_00637890::operator*(b6, NiPoint3(1.0f, 0.0f, 1.0f));
+                bVisible4[b3a + 3] = fnv_00637890::operator*(b6, NiPoint3(DAT_01012054, 0.0f, 1.0f));
                 buffer5[b3a] = Pt2(0.0f, 1.0f);
                 buffer5[b3a + 1] = Pt2(1.0f, 1.0f);
                 buffer5[b3a + 2] = Pt2(1.0f, 0.0f);
@@ -4784,16 +4655,16 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
         playerPosA = lim3->GetAngle2() + lim3->GetAngle2Var() * FUN_006397c0();
         FUN_00639730(playerPosA, &pSel_, &aPc1);
         FUN_00639730(desc4, &dstEnd7, &D9);
-        Pt3 diff2(dstEnd7 * aPc1, dstEnd7 * pSel_, D9);
-        Pt3 v30 = fSpeed2 * diff2;
+        NiPoint3 diff2(dstEnd7 * aPc1, dstEnd7 * pSel_, D9);
+        NiPoint3 v30 = fnv_00637890::operator*(fSpeed2, diff2);
         kScale = lim3->GetScaleMult();
         Obj* boxA7;
         Obj* meanB;
         PartData* data8;
         Obj* CX;
-        Pt3* pos5;
+        NiPoint3* pos5;
         PartCtrl* ct5;
-        Pt3 local7;
+        NiPoint3 local7;
         int modeB;
         Obj* spA;
         boxA7 = 0;
@@ -4809,9 +4680,9 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
             w1.Invert(inv);
             XA = inv * w0;
             local7 = XA * v30;
-            minPt3 = Pt3(-(boxA7->GetWidth() / DAT_01011590), -(boxA7->GetHeight() / DAT_01011590),
+            minPt3 = NiPoint3(-(boxA7->GetWidth() / DAT_01011590), -(boxA7->GetHeight() / DAT_01011590),
                          FUN_0040ebd0(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
-            mask2 = Pt3(boxA7->GetWidth() / DAT_01011590, boxA7->GetHeight() / DAT_01011590,
+            mask2 = NiPoint3(boxA7->GetWidth() / DAT_01011590, boxA7->GetHeight() / DAT_01011590,
                         FUN_00404010(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
         }
         else if (FUN_0043b300(&DAT_01202510, lim3))
@@ -4824,8 +4695,8 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
             XA = inv * w0;
             local7 = XA * v30;
             minPt3 =
-                Pt3(-CX->GetWidth(), -CX->GetWidth(), FUN_0040ebd0(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
-            mask2 = Pt3(CX->GetWidth(), CX->GetWidth(), FUN_00404010(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
+                NiPoint3(-CX->GetWidth(), -CX->GetWidth(), FUN_0040ebd0(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
+            mask2 = NiPoint3(CX->GetWidth(), CX->GetWidth(), FUN_00404010(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
         }
         else if (FUN_0043b300(&DAT_01202508, lim3))
         {
@@ -4837,8 +4708,8 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
             XA = inv * w0;
             local7 = XA * v30;
             minPt3 =
-                Pt3(-spA->GetWidth(), -spA->GetWidth(), FUN_0040ebd0(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
-            mask2 = Pt3(spA->GetWidth(), spA->GetWidth(), FUN_00404010(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
+                NiPoint3(-spA->GetWidth(), -spA->GetWidth(), FUN_0040ebd0(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
+            mask2 = NiPoint3(spA->GetWidth(), spA->GetWidth(), FUN_00404010(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
         }
         else if (FUN_0043b300(&DAT_01202500, lim3))
         {
@@ -4851,11 +4722,11 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
             XA = minDistTmp * m4;
             local7 = XA * v30;
             Bnd m_ = *meanB->GetShape(0)->GetBound();
-            Pt3 kTargetCenter = m_.GetNavMeshData();
+            NiPoint3 kTargetCenter = m_.GetNavMeshData();
             radiusX = m_.GetRadius();
-            minPt3 = Pt3(kTargetCenter.x - radiusX, kTargetCenter.y - radiusX,
+            minPt3 = NiPoint3(kTargetCenter.x - radiusX, kTargetCenter.y - radiusX,
                          FUN_0040ebd0(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
-            mask2 = Pt3(kTargetCenter.x + radiusX, kTargetCenter.y + radiusX,
+            mask2 = NiPoint3(kTargetCenter.x + radiusX, kTargetCenter.y + radiusX,
                         FUN_00404010(XA.m_trans.z, kScale * local7.z + XA.m_trans.z));
         }
         else
@@ -4865,15 +4736,15 @@ Obj* ParticleMgr::CreateParticleShape(Obj* node, int unused, unsigned char flag)
         }
         int total5;
         total5 = pElem9 * count8;
-        pos5 = new Pt3[total5];
-        Pt3 node2;
-        Pt3 D8 = kScale * local7;
+        pos5 = new NiPoint3[total5];
+        NiPoint3 node2;
+        NiPoint3 D8 = fnv_00637890::operator*(kScale, local7);
         for (int _k2 = 0; _k2 < count8; _k2++)
         {
-            Pt3 p2;
+            NiPoint3 p2;
             if (boxA7)
             {
-                p2 = Pt3(boxA7->GetWidth() * (FUN_00639780() - DAT_01011588),
+                p2 = NiPoint3(boxA7->GetWidth() * (FUN_00639780() - DAT_01011588),
                          boxA7->GetHeight() * (FUN_00639780() - DAT_01011588), 0.0f);
                 p2 = XA.m_rot * p2;
                 p2 = D8 * FUN_00639780() + p2;
@@ -4995,7 +4866,8 @@ ContOwner_620* ContOwner_620::FUN_00620180()
     return static_cast<ContOwner_620*>(FUN_00726070());
 }
 
-class Data620
+// Four-byte list payload; shared Data is 16 bytes and would move the Link620 base from +4.
+class ListPayloadWord
 {
   public:
     int m_iValue;
@@ -5009,7 +4881,7 @@ class Link620
     Link620* m_pkNext;
 };
 
-class Node620 : public Data620, public Link620
+class Node620 : public ListPayloadWord, public Link620
 {
   public:
     ~Node620();
@@ -5137,16 +5009,10 @@ struct GlobalObject_0045cfe0
 {
     int* __thiscall Int();
 };
-struct AutoMemContext
-{
-    int unk00;
-    AutoMemContext(MEM_CONTEXT, bool, const char*, int);
-    ~AutoMemContext();
-};
 // @fnv 0x00624bf0
 void __cdecl FUN_00624bf0()
 {
-    AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_HAVOK, true, (const char*)&DAT_0104de50, 0xac);
+    AutoMemContext context(static_cast<MEM_CONTEXT>(16), true, (const char*)&DAT_0104de50, 0xac);
     char path[260];
     InitHavokPhysics();
     FUN_00cb0db0();
@@ -5500,6 +5366,7 @@ struct IsPodTag629
 void __cdecl ReserveMore629(HeapAllocator629& kAlloc, void* apvArray, int iElemSize);
 void __cdecl Construct629(int* piDest, int iCount, const int& iValue, IsPodTag629 kTag);
 
+// local form of hkArrayBase: 0x00629ad0 needs the /Od append/capacity split with the call at 0x0062a100; the shared form changes bytes.
 class IntArray629
 {
   public:
@@ -5521,27 +5388,12 @@ void IntArray629::FUN_00629ad0(HeapAllocator629& kAlloc, const int& iValue)
     m_iElementCount++;
 }
 
-class NiTMapBase629
-{
-  public:
-    virtual ~NiTMapBase629();
-
-    void RemoveAll();
-
-    unsigned int m_uiHashSize;
-    void** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
-
-class FUN_00629e50_Map : public NiTMapBase629
-{
-  public:
-    virtual ~FUN_00629e50_Map();
-};
 
 // Destructor for the map class that calls RemoveAll to clear all entries.
+// RTTI at vtable 0x0104e150 identifies NiTMap<bhkRigidBody*, unsigned short>.
 // @fnv 0x00629e50
-FUN_00629e50_Map::~FUN_00629e50_Map()
+template <>
+NiTMap<bhkRigidBody*, unsigned short>::~NiTMap()
 {
     RemoveAll();
 }
@@ -6118,6 +5970,9 @@ class SkySound
   public:
     ~SkySound();
 };
+// The shared list template does not declare the destructor used by this specialization.
+#include "../../include/BSSimpleList.h"
+
 class FUN_0063a0b0
 {
   public:
@@ -6372,18 +6227,10 @@ struct Shape62b3
     int FUN_006205a0();
 };
 
-struct Filter62b3
-{
-    unsigned int m_uiFilter;
-    Filter62b3();
-    bool FUN_00624070();
-    int FUN_006240b0();
-};
-
 struct WorldObject62b3
 {
     Shape62b3* FUN_004ae6a0();
-    Filter62b3 FUN_0043b4f0();
+    bhkFilter FUN_0043b4f0();
 };
 
 extern GlobalObject_0040e0b0 g_011d0e64;
@@ -6413,8 +6260,8 @@ float GetObjectMass(WorldObject62b3* pkObject)
         fMass = FUN_0062b1e0(pkWorldShape->FUN_006205a0());
     }
     float fMult = 1.0f;
-    Filter62b3 kFilter = pkObject->FUN_0043b4f0();
-    if (kFilter.FUN_00624070())
+    bhkFilter kFilter = pkObject->FUN_0043b4f0();
+    if (FUN_00624070(&kFilter))
     {
         if (fMass > 0.0)
         {
@@ -6978,14 +6825,7 @@ void BoundaryOwner::BuildWalls(TESObjectCELL* cell, const BoundaryBox* apInputBo
     }
 }
 
-struct Point628
-{
-    float x, y, z;
-    void FUN_006815c0();
-    Point628* FUN_00439ef0(Point628* result, const Point628* rhs) const;
-    Point628* FUN_00439e90(Point628* result, const Point628* rhs) const;
-    float& FUN_004a51b0(unsigned int);
-};
+// The adjacent point and transform use PDB NiPoint3/NiTransform layouts and calls 0x00439ef0/0x00476a80.
 struct __declspec(align(16)) Vec628
 {
     __m128 value;
@@ -6996,13 +6836,6 @@ struct __declspec(align(16)) PhysicsTransform628
 {
     Vec628 row0, row1, row2, translation;
     void FUN_0056ded0();
-};
-struct Transform628
-{
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    Point628 position;
-    float scale;
-    void FUN_00476a80();
 };
 struct __declspec(align(16)) Bounds628
 {
@@ -7250,21 +7083,21 @@ struct Body628
     bool IsNonZero(int);
     void* GetSourceFilesFromObject();
     BodyCollection628* GetReferenceFlags();
-    void FUN_005610f0(const Point628*);
+    void FUN_005610f0(const NiPoint3*);
     void FUN_00561690(const Vec628*);
     void FUN_005617c0(const Vec628*);
     Smart628* FUN_00931ed0(Smart628*);
     void GetAabb(Bounds628*);
 };
 Body628* __cdecl FUN_0062b4e0(void*);
-Transform628* __cdecl FUN_00624ad0(Transform628*, PhysicsTransform628*);
+NiTransform* __cdecl FUN_00624ad0(NiTransform*, PhysicsTransform628*);
 void __cdecl AppendSpawnedPtr(BodyCollection628*, Group628*);
 Body628* __cdecl FUN_004b5a80(const Handle628*);
 float __cdecl FUN_004587d0(float);
 float __cdecl FUN_00408840(float);
 struct Mover628
 {
-    void FUN_006296d0(Body628*, Point628*, Point628*);
+    void FUN_006296d0(Body628*, NiPoint3*, NiPoint3*);
     void MoveToDestination(Body628*, Group628*);
 };
 // Moves body, or its group, to a destination from FUN_006296d0 plus a bounds height, setting position and rotation, and zero velocity for group members.
@@ -7274,18 +7107,15 @@ void Mover628::MoveToDestination(Body628* body, Group628* moved)
     if (body && !body->IsNonZero(32))
     {
         Body628* reference = FUN_0062b4e0(body->GetSourceFilesFromObject());
-        Point628 destination;
-        destination.FUN_006815c0();
+        NiPoint3 destination;
         PhysicsTransform628 world;
         world.FUN_0056ded0();
         body->world(&world);
-        Transform628 transform;
-        transform.FUN_00476a80();
+        NiTransform transform;
         FUN_00624ad0(&transform, &world);
-        FUN_006296d0(reference, &transform.position, &destination);
+        FUN_006296d0(reference, &transform.m_Translate, &destination);
         bool grouped = false;
-        Point628 delta;
-        destination.FUN_00439ef0(&delta, &transform.position);
+        NiPoint3 delta = destination - transform.m_Translate;
         BodyCollection628* bodies = body->GetReferenceFlags();
         for (int scan = 0; scan < bodies->FUN_00c9c380() && !grouped; ++scan)
         {
@@ -7309,19 +7139,16 @@ void Mover628::MoveToDestination(Body628* body, Group628* moved)
                 bounds.FUN_00629560(&itemBounds.max);
                 bounds.FUN_00629560(&itemBounds.min);
             }
-            delta.FUN_004a51b0(2) += bounds.max.FUN_00560d30(2) - bounds.min.FUN_00560d30(2);
+            delta[2u] += bounds.max.FUN_00560d30(2) - bounds.min.FUN_00560d30(2);
             for (int moveIndex = 0; moveIndex < group.FUN_00726070(); ++moveIndex)
             {
-                Point628 position;
-                position.FUN_006815c0();
+                NiPoint3 position;
                 PhysicsTransform628 bodyWorld;
                 bodyWorld.FUN_0056ded0();
                 body->world(&bodyWorld);
-                Transform628 bodyTransform;
-                bodyTransform.FUN_00476a80();
+                NiTransform bodyTransform;
                 FUN_00624ad0(&bodyTransform, &bodyWorld);
-                Point628 additionResult;
-                position = *bodyTransform.position.FUN_00439e90(&additionResult, &delta);
+                position = bodyTransform.m_Translate + delta;
                 Body628* member = FUN_004b5a80(group.FUN_00629ab0(moveIndex));
                 if (body != member)
                     moved->FUN_006299c0(&group.FUN_00629ab0(moveIndex));
@@ -7350,7 +7177,7 @@ void Mover628::MoveToDestination(Body628* body, Group628* moved)
             body->GetAabb(&soloBounds);
             float height = FUN_004587d0(soloBounds.max.FUN_00560d30(2)) +
                            FUN_00408840(FUN_004587d0(soloBounds.min.FUN_00560d30(2)));
-            destination.FUN_004a51b0(2) += height;
+            destination[2u] += height;
             body->FUN_005610f0(&destination);
             Vec628 rotation;
             rotation.FUN_005532a0(0.0f, 0.0f, 0.01f, 0.0f);
@@ -7385,16 +7212,10 @@ FUN_00639bf0::FUN_00639bf0(LocalSoundHandle sound, int a, int b, int c)
 
 class NiAVObject;
 
-template <> class NiPointer<NiAVObject>
-{
-  public:
-    NiAVObject* m_pObject;
-    NiPointer(NiAVObject* object = 0);
-    ~NiPointer();
-    NiPointer<NiAVObject>& operator=(const NiPointer<NiAVObject>& other);
-    bool operator==(const NiPointer<NiAVObject>& other) const;
-    bool operator!=(const NiPointer<NiAVObject>& other) const;
-};
+// These helpers are provided by the game; NiAVObject need only be forward declared here.
+template <> NiPointer<NiAVObject>::NiPointer(NiAVObject* object);
+template <> NiPointer<NiAVObject>::~NiPointer();
+template <> NiPointer<NiAVObject>& NiPointer<NiAVObject>::operator=(const NiPointer<NiAVObject>& other);
 
 struct FUN_00622920_Array
 {
@@ -7460,13 +7281,6 @@ FUN_00629a80_Class* __thiscall FUN_00629a80_Class::FUN_00629a80()
 }
 }  // namespace fnv_00629a80
 
-struct FUN_0062a020 : FUN_00629eb0_Class
-{
-    virtual ~FUN_0062a020();
-};
-// @fnv 0x0062a020
-FUN_0062a020::~FUN_0062a020()
-{}
 
 struct CB75D0Base
 {
@@ -7531,22 +7345,9 @@ struct FUN_00631880 : GlobalObject_00631850
 FUN_00631880::~FUN_00631880()
 {}
 
-namespace fnv_00632ec0 {
-extern int DAT_0104e6ac;
-struct INISettingCollection
-{
-    INISettingCollection();
-};
-struct FUN_00632ec0 : INISettingCollection
-{
-    FUN_00632ec0();
-};
 // @fnv 0x00632ec0
-FUN_00632ec0::FUN_00632ec0()
-{
-    ((int*)this)[0] = (int)&DAT_0104e6ac;
-}
-}  // namespace fnv_00632ec0
+INIPrefSettingCollection::INIPrefSettingCollection()
+{}
 
 struct FUN_00632f60
 {

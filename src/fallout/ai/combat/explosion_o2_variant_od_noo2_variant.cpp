@@ -1,3 +1,27 @@
+#include "../../../../include/NiTArray.h"
+#include "../../../../include/Explosion.h"
+#include "../../../../include/bhkLiquidAction.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/BSOcclusionPlane.h"
+#include "../../../../include/NavMeshPtr.h"
+#include "../../../../include/hkMemoryAllocator.h"
+// HavokAllocatorContext_explosion: local type (was include/HavokAllocatorContext.h, which had no evidence of one real class); no method of it is bound to a named game function
+class HavokMemoryRouter;
+class hkMemoryAllocator;
+
+class HavokAllocatorContext_explosion
+{
+public:
+    int unk00;
+    int unk04;
+    int unk08;
+    int unk0c;
+    union
+    {
+        HavokMemoryRouter* m_router;
+        hkMemoryAllocator* m_alloc;
+    };
+};
 
 // src/fallout/ai/combat/explosion_o2_variant_od_noo2_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy (unit src/fallout/ai/combat/explosion_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -7,45 +31,12 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 // src/fallout/ai/combat/explosion.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/explosion.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct ActorCause
-{
-};
-struct NiPointer
-{
-    NiPointer& operator=(ActorCause*);
-};
-struct FUN_009ac170_shell
-{
-    char m_auiShapeKeys[0xd0];
-    NiPointer m_actorCause;
-    void __thiscall FUN_009ac170(ActorCause* apActorCause);
-};
-struct Explosion
-{
-    virtual ~Explosion();
-    void* Destroy(unsigned int flags);
-};
 void __cdecl _Deallocate(void*);
-struct NiRTTI;
-struct bhkLiquidAction
-{
-    const NiRTTI* __thiscall GetRTTI() const;
-};
 extern NiRTTI g_01268420;
-struct NavMesh;
-struct NavMeshPtr
-{
-    NavMesh* FUN_00458b50();
-};
 struct FUN_009afc30_shell
 {
     NavMeshPtr m_navMeshPtr;
     NavMesh* FUN_009afc30();
-};
-struct BSOcclusionPlane
-{
-    int __thiscall GetCullResult() const;
-    int __thiscall IsNotCulled();
 };
 struct FUN_009afbb0_shell
 {
@@ -320,91 +311,13 @@ extern __declspec(thread) int g_memoryContext;
 void __cdecl FUN_00c876f0();
 void __cdecl FUN_00c87700();
 void* __cdecl FUN_00aa13e0(unsigned int size);
-struct AutoMemContext
-{
-    int oldContext;
-    AutoMemContext()
-    {
-        oldContext = g_memoryContext;
-        g_memoryContext = 16;
-    }
-    ~AutoMemContext()
-    {
-        g_memoryContext = oldContext;
-    }
-};
-struct FUN_00cbc550_class
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    static void* __cdecl operator new(unsigned int size)
-    {
-        return FUN_00aa13e0(size);
-    }
-    FUN_00cbc550_class();
-};
 struct FUN_00cbca20_class
 {
-    void __thiscall FUN_00c86800(FUN_00cbc550_class* obj, int flags);
-    FUN_00cbc550_class* __thiscall FUN_00cbca20(int flags);
+    void __thiscall FUN_00c86800(bhkLiquidAction* obj, int flags);
+    bhkLiquidAction* __thiscall FUN_00cbca20(int flags);
 };
-struct HavokAllocator
-{
-    virtual void vf00();
-    virtual void* allocate(int size);
-    virtual void deallocate(void* p, int size);
-};
-struct HavokAllocatorContext
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    HavokAllocator* m_alloc;
-};
-extern "C" HavokAllocatorContext* __cdecl FUN_00c85750();
-struct HavokObj
-{
-    int unk00;
-    short m_flags;
-    short m_ref;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-
-    static void* operator new(size_t size)
-    {
-        HavokAllocatorContext* tm = FUN_00c85750();
-        HavokObj* p = (HavokObj*)tm->m_alloc->allocate(size);
-        p->m_flags = (short)size;
-        return p;
-    }
-    static void operator delete(void* p);
-
-    HavokObj(void* a1, int a2);
-    void removeReference();
-};
+extern "C" HavokAllocatorContext_explosion* __cdecl FUN_00c85750();
+struct HavokObj;
 struct DynCastHelper2
 {
     int unk00;
@@ -505,30 +418,19 @@ struct TargetClass
     void FUN_00cbcbd0(void* p);
     void FUN_00cbd520(ArgStruct* arg);
 };
-class NiViewerStringArray
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-  public:
-    virtual ~NiViewerStringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
+    return SetAtGrow(m_usSize, element);
+}
 
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > NiViewerStringArray;
 class FUN_00cbd650_base
 {
   public:
@@ -577,15 +479,8 @@ struct StateOwner
 };
 
 #include <xmmintrin.h>
-struct BSFadeNode
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*);
-};
-struct NiPoint3
-{
-    float x, y, z;
-};
+#include "../../../../include/AutoMemContext.h"
+#include "../../../../include/NiPoint3.h"
 struct Upd;
 struct Obj;
 struct Sub
@@ -765,178 +660,6 @@ struct Cell
 {
     Obj* __thiscall FUN_004543c0();
 };
-struct This
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    float f8c;
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void W1c8(int a);
-    virtual void v115();
-    virtual Obj* W1d0();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual NiPoint3* W1f4();
-    bool __thiscall IsNotCulled();
-    float __thiscall FUN_00644930();
-    Proj* __thiscall FUN_004181e0();
-    NiPoint3* __thiscall FUN_00430830();
-    Cell* __thiscall FUN_008d6f30();
-    float __thiscall FUN_00507e10();
-    void __thiscall FUN_00810550(float a);
-    void __thiscall FUN_009ad670();
-};
 struct SettingColl
 {
     int* __thiscall Int();
@@ -995,8 +718,10 @@ struct FloatConfiguredObject
     ~FloatConfiguredObject();
 };
 void* __cdecl FUN_00aa13e0(unsigned int n);
-struct BigObj : BSFadeNode
+struct BigObj
 {
+    static void* operator new(unsigned int);
+    static void operator delete(void*);
     int unk04;
     int unk08;
     int unk0c;
@@ -1109,8 +834,10 @@ struct PathReq
 {
     void __thiscall SetGridPosition(float a);
 };
-struct InitObj : BSFadeNode
+struct InitObj
 {
+    static void* operator new(unsigned int);
+    static void operator delete(void*);
     int unk00;
     int unk04;
     int unk08;
@@ -1120,8 +847,10 @@ struct InitObj : BSFadeNode
     void* __thiscall Init(void* a);
     void __thiscall FUN_00c6b980(void* a);
 };
-struct Sphere : BSFadeNode
+struct Sphere
 {
+    static void* operator new(unsigned int);
+    static void operator delete(void*);
     int unk00;
     int unk04;
     int unk08;
@@ -1205,8 +934,10 @@ struct Temp622
 };
 void* __cdecl FUN_005dbe10();
 void* __cdecl FUN_00559450(void* a);
-struct Body : BSFadeNode
+struct Body
 {
+    static void* operator new(unsigned int);
+    static void operator delete(void*);
     int unk00;
     int unk04;
     int unk08;
@@ -1220,8 +951,10 @@ struct Body : BSFadeNode
     void* __thiscall FUN_004ae750();
     void __thiscall FUN_00c8ef80(void* a);
 };
-struct Acc : BSFadeNode
+struct Acc
 {
+    static void* operator new(unsigned int);
+    static void operator delete(void*);
     int unk00;
     int unk04;
     int unk08;
@@ -1285,27 +1018,6 @@ extern float DAT_011a5804;
 extern float DAT_011a5808;
 extern float DAT_011a580c;
 extern float DAT_011a5810;
-struct A140 : BSFadeNode
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    A140(S1fc*);
-    void* __thiscall Ctor(S1fc* a);
-};
 struct Upd
 {
     float time;
@@ -1342,23 +1054,19 @@ struct Seq
 extern void* g_011f36ac;
 bool __cdecl FUN_0043b300(void* rtti, void* a);
 void __cdecl FUN_00a6d2d0(Obj* a);
-struct Fade
-{
-    void __thiscall SetRange(float a, float b);
-};
 extern float DAT_01016970;
 // @fnv 0x009ad670
-void This::FUN_009ad670()
+void Explosion::FUN_009ad670()
 {
-    W1c8(0);
-    Obj* obj = W1d0();
+    GenerateNiNode(false);
+    Obj* obj = (Obj*)GetNiNode();
     if (obj)
     {
         float scale = 1.0f;
         if (IsNotCulled())
         {
             Chain* node = obj->V0c();
-            Fade* fade = node ? (Fade*)((Sub*)node)->V10() : 0;
+            BSFadeNode* fade = node ? (BSFadeNode*)((Sub*)node)->V10() : 0;
             if (fade)
                 fade->SetRange(DAT_01016970, DAT_01016970);
         }
@@ -1384,7 +1092,7 @@ void This::FUN_009ad670()
             }
         }
         obj->FUN_00440490(scale);
-        obj->FUN_00440460(W1f4());
+        obj->FUN_00440460(static_cast<const Explosion*>(this)->GetPos());
         NiPoint3 angles = *FUN_00430830();
         Local70 rotation;
         rotation.Ctor6815c0();
@@ -1393,8 +1101,8 @@ void This::FUN_009ad670()
         if (*g_011d0fe4.Int() > 1)
         {
             ((PathReq*)FUN_004181e0())->SetGridPosition(DAT_011a5810);
-            f8c = DAT_011a580c;
-            NiPoint3 position = *W1f4();
+            f3DLifetime = DAT_011a580c;
+            NiPoint3 position = *static_cast<const Explosion*>(this)->GetPos();
             void* extra = obj->FUN_00a5bdd0((void*)&FUN_00448a80());
             if (extra)
             {
@@ -1431,7 +1139,7 @@ void This::FUN_009ad670()
                 actionInfo.fb = DAT_011a5804;
                 actionInfo.fc = DAT_011a5800;
                 actionInfo.fd = DAT_011a57fc;
-                A140* action = new A140(&actionInfo);
+                bhkLiquidAction* action = new bhkLiquidAction(&actionInfo);
                 body->FUN_00c8ef80(action);
             }
             if (FUN_008d6f30() && FUN_008d6f30()->FUN_004543c0())

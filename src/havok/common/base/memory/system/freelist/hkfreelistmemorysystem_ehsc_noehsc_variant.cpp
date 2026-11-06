@@ -1,3 +1,6 @@
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/Pair.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
 
 // src/havok/common/base/memory/system/freelist/hkfreelistmemorysystem_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/common/base/memory/system/freelist/hkfreelistmemorysystem.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -71,24 +74,7 @@ struct FUN_00cd0940_shell
 {
     void __thiscall ResetRecordState(int* param, unsigned char mode);
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiBytes) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 struct PtrArrayMember
 {
     void** m_ppData;
@@ -97,12 +83,12 @@ struct PtrArrayMember
 
     ~PtrArrayMember() throw()
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
         unsigned int uCapacity = m_uCapacity;
         m_iArrayLength = 0;
         if ((uCapacity & 0x80000000) == 0)
-            pAllocator->FreeArray(m_ppData, (uCapacity & 0x3fffffff) * 4);
+            pAllocator->bufFree(m_ppData, (uCapacity & 0x3fffffff) * 4);
         m_ppData = 0;
         m_uCapacity = 0x80000000;
     }
@@ -190,11 +176,6 @@ struct Gap400
     Gap040 g0d;
     Gap040 g0e;
     Gap040 g0f;
-};
-struct Pair
-{
-    int a;
-    int b;
 };
 struct Flags
 {

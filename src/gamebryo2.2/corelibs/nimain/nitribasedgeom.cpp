@@ -1,24 +1,23 @@
 // gamebryo2.2/corelibs/nimain/nitribasedgeom.cpp: BSTextureSet, NiGeometry, NiTriBasedGeom (5 functions)
 #include "nitribasedgeom_decls.h"
+// NiPointer's default constructor is inline in Gamebryo (it only nulls the pointer).
+template <class T> __forceinline NiPointer<T>::NiPointer() : m_pObject(0) {}
 #pragma optimize("", off)
 // @fnv 0x0051d190
 BSTextureSet::BSTextureSet()
 {
-    vtable = BSTextureSet_vtable;
 }
 #pragma optimize("", on)
 // Initializes the NiGeometry object by setting model, skin and shader pointers to null.
 // @fnv 0x00a80540
 NiGeometry::NiGeometry()
 {
-    model = 0;
-    skin = 0;
-    shader = 0;
+    m_spShader = 0;
 }
 
 #pragma optimize("", off)
 // @fnv 0x0051d020
-void NiTriBasedGeom::SetBitfield(unsigned short value, unsigned short mask, unsigned short shift)
+void FUN_0051d020_FlagsAtAC::SetBitfield(unsigned short value, unsigned short mask, unsigned short shift)
 {
     flags = (flags & ~mask) | (value << shift);
 }
@@ -39,11 +38,7 @@ void __fastcall FUN_0051d060(DummyClass* _this, StackByte aByteValue)
     _this->FUN_0051d080_mem(aByteValue.v, 8);
 }
 
-class NiMemObject
-{
-  public:
-    static void __cdecl operator delete(void*, size_t);
-};
+#include "../../../../include/NiMemObject.h"
 
 void __fastcall FUN_0051d1c0(void* pThis);
 

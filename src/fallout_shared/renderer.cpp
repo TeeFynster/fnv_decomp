@@ -1,20 +1,24 @@
-// fallout_shared/renderer.cpp: Renderer, SettingS (13 functions)
+// fallout_shared/renderer.cpp: Renderer, Setting (13 functions)
+#include "../../include/NiColorA.h"
 
 #include "renderer_decls.h"
+#include "../../include/GO.h"
+#include "../../include/Setting.h"
+#include "../../include/SettingT_GameSettingCollection_.h"
 
-// Stores color into DAT_011c74b8 and, if FUN_004bc3f0() succeeds, sends a copy with alpha 0.0f to its vfn_ac and returns true.
+// Stores color into DAT_011c74b8 and, if FUN_004bc3f0() succeeds, passes a copy with alpha 0.0f to its SetBackgroundColor (slot 43) and returns true.
 // @fnv 0x004dce50
 bool Renderer::SetBackgroundColor(NiColor& color)
 {
     DAT_011c74b8 = color;
     if (FUN_004bc3f0())
     {
-        RgbaColor background;
+        NiColorA background(0.0f, 0.0f, 0.0f, 0.0f);
         background.r = DAT_011c74b8.r;
         background.g = DAT_011c74b8.g;
         background.b = DAT_011c74b8.b;
         background.a = 0.0f;
-        FUN_004bc3f0()->vfn_ac(background);
+        FUN_004bc3f0()->SetBackgroundColor(reinterpret_cast<NiVector4*>(&background)); // slot 43 (+0xac)
         return true;
     }
     return false;
@@ -36,13 +40,15 @@ float __cdecl FUN_004dd150(float _X, float _Y)
     return (float)FUN_00ec9ac0(_X, _Y);
 }
 
-struct S_004ed780
+// Renderer setting operations not yet declared by the shared Setting header.
+struct RendererSetting : public Setting
 {
     void SetValue(float);
-    S_004ed780* FUN_004ed780(float f);
+    RendererSetting* FUN_004ed780(float f);
+    void FUN_004de2d0(int);
 };
 // @fnv 0x004ed780
-S_004ed780* S_004ed780::FUN_004ed780(float f)
+RendererSetting* RendererSetting::FUN_004ed780(float f)
 {
     SetValue(f);
     return this;
@@ -101,12 +107,6 @@ unsigned int __cdecl GetFltValueAt(unsigned int auiIndex)
 }
 }  // namespace fnv_004dcdb0
 
-struct GO
-{
-    operator unsigned int() const;
-    void operator=(void*);
-};
-
 struct ShaderReference
 {
     unsigned int _ref_00726070();
@@ -126,7 +126,7 @@ void __cdecl FUN_004da4d0(bool abFinalKill)
 
     if (abFinalKill)
     {
-        if (g_011c73b4 && reinterpret_cast<ShaderReference*>(g_011c73b4.operator unsigned int())->_ref_00726070() != 1)
+        if (g_011c73b4.operator unsigned int() && reinterpret_cast<ShaderReference*>(g_011c73b4.operator unsigned int())->_ref_00726070() != 1)
         {
             FUN_00461300();
 
@@ -148,20 +148,6 @@ void __cdecl FUN_004da4d0(bool abFinalKill)
 }
 
 namespace fnv_004da570 {
-struct Setting
-{
-    Setting& FUN_005e0190(char const* param);
-};
-
-struct StartMenu : public Setting
-{
-    char const* GetMenuTitle();
-};
-
-struct GlobalObject2_004a4a40 : public StartMenu
-{
-};
-
 struct FUN_004da650_shell
 {
     void* GetFieldAt204();
@@ -172,7 +158,7 @@ struct TgtOps : public FUN_004da650_shell
     void* GetPosition();
 };
 
-extern GlobalObject2_004a4a40 g_011c72c0;
+extern Setting g_011c72c0;
 extern char DAT_01021184[];
 
 void* __cdecl FUN_004dce30();
@@ -196,13 +182,13 @@ bool __cdecl FUN_004da570()
                 void* position = target->GetPosition();
             }
 
-            if (__stricmp(g_011c72c0.GetMenuTitle(), pcMenuState) != 0)
+            if (__stricmp(g_011c72c0.String(), pcMenuState) != 0)
                 return true;
         }
     }
 
     ___insecure_strcpy(buffer, DAT_01021184);
-    FUN_00ec6380(buffer, g_011c72c0.GetMenuTitle());
+    FUN_00ec6380(buffer, g_011c72c0.String());
     FUN_00ec6380(buffer, DAT_01021184);
     g_011c72c0.FUN_005e0190(buffer);
     return false;
@@ -252,16 +238,11 @@ struct GRRendererPtr
     operator GRRenderer*() const;
 };
 
-struct GRSetting
-{
-    void SetFloat(float afValue);
-};
-
 float __cdecl GRApplyGamma(float afValue, float afGamma);
 
 extern bool g_bGRGammaDirty;
 extern float g_fGRGamma;
-extern GRSetting g_kGRGammaSetting;
+extern RendererSetting g_kGRGammaSetting;
 extern GRRendererPtr g_spGRRenderer;
 
 // Clears the gamma-dirty flag, stores g_fGRGamma, builds a 256-entry gamma ramp via GRApplyGamma and applies it to swap chain 0 with SetGammaRamp.
@@ -272,7 +253,7 @@ void __cdecl ApplyGammaRamp()
     unsigned short i;
 
     g_bGRGammaDirty = false;
-    g_kGRGammaSetting.SetFloat(g_fGRGamma);
+    g_kGRGammaSetting.FUN_004ed780(g_fGRGamma);
     for (i = 0; i < 256; i++)
     {
         kRamp4.red[i] = (unsigned short)(GRApplyGamma((float)(i / 255.0), g_fGRGamma) * 65535.0 + 0.5);
@@ -290,17 +271,9 @@ struct P03MM
 };
 extern P03MM _g_memoryManager;
 
-struct SettingS
-{
-    void* pVtbl;
-    char* pValue;
-    char* pKey;
-    SettingS* FUN_00c33170(const char* apString);
-};
-
-// Copies apString to pValue; if pKey exists, copies it into a new buffer, changes its first byte to 'S', and frees old pKey only when it starts with 'S'.
+// Copies apString to the string value; if pKey exists, copies it into a new buffer, changes its first byte to 'S', and frees old pKey only when it starts with 'S'.
 // @fnv 0x00c33170
-SettingS* SettingS::FUN_00c33170(const char* apString)
+Setting& Setting::FUN_00c33170(const char* apString)
 {
     if (this)
     {
@@ -329,7 +302,7 @@ SettingS* SettingS::FUN_00c33170(const char* apString)
                                         {
                                             cp = pstr + ikeyLen;
                                             strcpy(cp, apString);
-                                            pValue = cp;
+                                            *reinterpret_cast<const char**>(&uValue) = cp;
                                             if (ikeyLen)
                                             {
                                                 psrc = pKey;
@@ -337,7 +310,7 @@ SettingS* SettingS::FUN_00c33170(const char* apString)
                                                 *pstr = 'S';
                                                 if (*pKey == 'S')
                                                 {
-                                                    pold = pKey;
+                                                    pold = const_cast<char*>(pKey);
                                                     _g_memoryManager._DeallocateAlias(pold);
                                                 }
                                                 pKey = pstr;
@@ -346,7 +319,7 @@ SettingS* SettingS::FUN_00c33170(const char* apString)
                                     }
                                     else
                                     {
-                                        pValue = 0;
+                                        *reinterpret_cast<const char**>(&uValue) = 0;
                                     }
                                 }
                             }
@@ -356,44 +329,17 @@ SettingS* SettingS::FUN_00c33170(const char* apString)
             }
         }
     }
-    return this;
+    return *this;
 }
 
 namespace fnv_004da670 {
-union SETTING_VALUE
-{
-    int i;
-    bool b;
-    short sh;
-};
-class SettingT_GameSettingCollection_
-{
-  public:
-    SETTING_VALUE* Int();
-    SETTING_VALUE* Bool();
-};
 struct S4eb0
 {
     int context;
     S4eb0(int, bool, const char*, int);
     ~S4eb0();
 };
-struct GlobalObject_004a4a40
-{
-    int FUN_004503f0();
-    void FUN_0045ce80(int);
-    SETTING_VALUE* Int();
-};
-struct G1690
-{
-    bool GetBoolValue();
-};
 struct RendObj;
-struct RefObj_011c73b4
-{
-    void FUN_0066b0d0(int);
-    RendObj* FUN_00559450();
-};
 struct Rect4
 {
     int a;
@@ -426,11 +372,6 @@ int __cdecl FUN_004dc2a0();
 bool __cdecl DispatchFormValue(int, int);
 int __cdecl FUN_00b4f4a0();
 int __cdecl FUN_00ec9774(void*, const char*, ...);
-struct G7790
-{
-    void FUN_004de2d0(int);
-    SETTING_VALUE* Bool();
-};
 int __cdecl FUN_00e76210(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int);
 __declspec(dllimport) int __stdcall IMP_fdf2b8(int, int, int, int, int, int, int, int, int, int, int, int);
 __declspec(dllimport) int __stdcall IMP_fdf2ec(int, int);
@@ -449,19 +390,19 @@ extern int DAT_011a2fe8;
 extern int DAT_011c70cc;
 extern SettingT_GameSettingCollection_ DAT_011c7628;
 extern SettingT_GameSettingCollection_ DAT_011c7418;
-extern GlobalObject_004a4a40 DAT_011c73dc;
-extern GlobalObject_004a4a40 DAT_011c718c;
-extern GlobalObject_004a4a40 DAT_011c73f4;
-extern GlobalObject_004a4a40 DAT_011c7654;
-extern GlobalObject_004a4a40 DAT_011c75d4;
-extern G1690 DAT_011c771c;
-extern G1690 DAT_011c77b4;
+extern Setting DAT_011c73dc;
+extern Setting DAT_011c718c;
+extern Setting DAT_011c73f4;
+extern Setting DAT_011c7654;
+extern Setting DAT_011c75d4;
+extern Setting DAT_011c771c;
+extern Setting DAT_011c77b4;
 extern SettingT_GameSettingCollection_ DAT_011c76c0;
-extern G7790 DAT_011c7790;
+extern RendererSetting DAT_011c7790;
 extern unsigned char DAT_011f9421;
 extern char DAT_01021568;
 extern char DAT_01021518;
-extern RefObj_011c73b4 DAT_011c73b4;
+extern GO DAT_011c73b4;
 extern char DAT_0102156c;
 
 struct DevObj
@@ -1329,7 +1270,7 @@ extern SettingT_GameSettingCollection_ DAT_011c7520;
 extern SettingT_GameSettingCollection_ DAT_011c72d8;
 extern SettingT_GameSettingCollection_ DAT_011c72e4;
 extern SettingT_GameSettingCollection_ DAT_011c7504;
-extern G7790 DAT_011c71dc;
+extern RendererSetting DAT_011c71dc;
 extern unsigned char DAT_011f941e;
 extern unsigned char DAT_011f94a8;
 extern unsigned char DAT_011f94a9;
@@ -1343,16 +1284,8 @@ extern int DAT_011f9430;
 extern int DAT_011f9434;
 extern int DAT_0118946c;
 extern int DAT_01189468;
-struct ImageSpaceEffectParam
-{
-    float m0;
-    float m1;
-    float m2;
-    float m3;
-    ImageSpaceEffectParam(float, float, float, float);
-};
-extern ImageSpaceEffectParam DAT_011ad840;
-extern ImageSpaceEffectParam DAT_011f961c;
+extern NiColorA DAT_011ad840;
+extern NiColorA DAT_011f961c;
 int __cdecl DetectGpuVendor(int, int, int, void*, void*, int);
 int __cdecl FUN_004dc060(int);
 int __cdecl FUN_004dc0b0();
@@ -1589,15 +1522,14 @@ extern char DAT_010211dc;
 extern char DAT_010211c0;
 extern char DAT_010211a4;
 extern char DAT_01021188;
-extern G1690 DAT_011c7b20;
-extern G1690 DAT_011c7b6c;
-extern G1690 DAT_011c7ac4;
-extern G1690 DAT_011c7b48;
+extern Setting DAT_011c7b20;
+extern Setting DAT_011c7b6c;
+extern Setting DAT_011c7ac4;
+extern Setting DAT_011c7b48;
 extern SettingT_GameSettingCollection_ DAT_011c3ea4;
 bool __cdecl FUN_004dc0a0();
 int __cdecl FUN_00b7faf0();
 void __cdecl FUN_00ec9907(void*);
-struct FloatSetting;
 extern int DAT_011ad830;
 extern SettingT_GameSettingCollection_ DAT_011c752c;
 extern int DAT_011f91b0;
@@ -1633,41 +1565,33 @@ extern SettingT_GameSettingCollection_ DAT_011c710c;
 extern SettingT_GameSettingCollection_ DAT_011c7774;
 extern SettingT_GameSettingCollection_ DAT_011c7308;
 extern SettingT_GameSettingCollection_ DAT_011c76cc;
-extern FloatSetting DAT_011c7488;
-extern FloatSetting DAT_011c7170;
-extern FloatSetting DAT_011c7574;
-extern FloatSetting DAT_011c7510;
-extern FloatSetting DAT_011c7740;
-extern FloatSetting DAT_011c76b4;
-extern FloatSetting DAT_011c7568;
-extern FloatSetting DAT_011c7400;
-extern FloatSetting DAT_011c7598;
-extern FloatSetting DAT_011c7634;
-extern FloatSetting DAT_011c7374;
-extern FloatSetting DAT_011c73e8;
-extern FloatSetting DAT_011c7160;
-extern FloatSetting DAT_011c72f0;
-extern FloatSetting DAT_011c72cc;
-extern FloatSetting DAT_011c7428;
-extern FloatSetting DAT_011c72fc;
-extern FloatSetting DAT_011c7344;
-extern FloatSetting DAT_011c735c;
-extern FloatSetting DAT_011c7464;
-extern FloatSetting DAT_011c75e0;
-extern FloatSetting DAT_011c73d0;
-extern FloatSetting DAT_011c77cc;
-extern FloatSetting DAT_011c75f8;
+extern Setting DAT_011c7488;
+extern Setting DAT_011c7170;
+extern Setting DAT_011c7574;
+extern Setting DAT_011c7510;
+extern Setting DAT_011c7740;
+extern Setting DAT_011c76b4;
+extern Setting DAT_011c7568;
+extern Setting DAT_011c7400;
+extern Setting DAT_011c7598;
+extern Setting DAT_011c7634;
+extern Setting DAT_011c7374;
+extern Setting DAT_011c73e8;
+extern Setting DAT_011c7160;
+extern Setting DAT_011c72f0;
+extern Setting DAT_011c72cc;
+extern Setting DAT_011c7428;
+extern Setting DAT_011c72fc;
+extern Setting DAT_011c7344;
+extern Setting DAT_011c735c;
+extern Setting DAT_011c7464;
+extern Setting DAT_011c75e0;
+extern Setting DAT_011c73d0;
+extern Setting DAT_011c77cc;
+extern Setting DAT_011c75f8;
 void __cdecl SetBSStringCapacity(int);
 
-struct Setting_S
-{
-    float f;
-};
-struct FloatSetting
-{
-    Setting_S* Float();
-};
-extern FloatSetting DAT_011c71ac;
+extern Setting DAT_011c71ac;
 void __cdecl FUN_004dc2d0(float);
 int __cdecl FUN_00b4f3e0();
 int __cdecl FUN_00b4f380(int);
@@ -1686,9 +1610,9 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
     {
         _fclose(file32);
     }
-    DAT_011c6fb0 = DAT_011c7628.Int()->i;
-    DAT_0118947c = DAT_011c73dc.FUN_004503f0();
-    DAT_01189480 = DAT_011c718c.FUN_004503f0();
+    DAT_011c6fb0 = *DAT_011c7628.FUN_0043d4d0();
+    DAT_0118947c = DAT_011c73dc.GetUInt();
+    DAT_01189480 = DAT_011c718c.GetUInt();
     if (DAT_011c771c.GetBoolValue())
     {
         InitEyefinityDisplayInfo();
@@ -1697,7 +1621,7 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
     {
         DAT_0118947c = (unsigned int)FUN_004de0c0();
         DAT_01189480 = (unsigned int)FUN_004de0d0();
-        DAT_011c73f4.FUN_0045ce80((DAT_011c73f4.Int()->i < 2) ? DAT_011c73f4.Int()->i : 2);
+        DAT_011c73f4.FUN_0045ce80((*DAT_011c73f4.Int() < 2) ? *DAT_011c73f4.Int() : 2);
     }
     if (FUN_004dc710(1))
     {
@@ -1718,10 +1642,10 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
             IMP_fdf310(&rect13, IMP_fdf2e8(DAT_011c6fc0, -16, IMP_fdf2ec(DAT_011c6fbc, -8)));
             int w3 = rect13.c - rect13.a;
             int h11 = rect13.d - rect13.b;
-            IMP_fdf2a4(DAT_011c6fc0, 0, DAT_011c75d4.FUN_004503f0(), DAT_011c7654.FUN_004503f0(), w3, h11, 0x40);
+            IMP_fdf2a4(DAT_011c6fc0, 0, DAT_011c75d4.GetUInt(), DAT_011c7654.GetUInt(), w3, h11, 0x40);
         }
         DAT_011c70cc = 0;
-        if (DAT_011c7418.Bool()->b)
+        if (*DAT_011c7418.FUN_00408d60())
         {
             if (DAT_011c70cc == 0)
             {
@@ -1745,20 +1669,20 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
                 }
             }
         }
-        DAT_011c73b4.FUN_0066b0d0(FUN_00e76210(FUN_004dc1f0(), FUN_004dc200(), FUN_004dc220(), FUN_004dc1e0(),
+        DAT_011c73b4.operator=(reinterpret_cast<void*>(FUN_00e76210(FUN_004dc1f0(), FUN_004dc200(), FUN_004dc220(), FUN_004dc1e0(),
                                                FUN_004dc1e0(), FUN_004dc210(), FUN_004dc230(), FUN_004dc270(),
                                                FUN_004dc280(), FUN_004dc2a0(), FUN_004dc240(), FUN_004dc290(),
-                                               FUN_004dc250(), FUN_004dc260(), flag2));
+                                               FUN_004dc250(), FUN_004dc260(), flag2)));
     }
     else
     {
         return 0;
     }
-    if (DAT_011c73f4.Int()->i > 0)
+    if (*DAT_011c73f4.Int() > 0)
     {
-        if (DispatchFormValue(DAT_011c73f4.Int()->i, 0x71) || !DAT_011c76c0.Bool()->b)
+        if (DispatchFormValue(*DAT_011c73f4.Int(), 0x71) || !*DAT_011c76c0.FUN_00408d60())
         {
-            switch (DAT_011c73f4.FUN_004503f0())
+            switch (DAT_011c73f4.GetUInt())
             {
             default:
                 DAT_011c70cc = 0;
@@ -1783,18 +1707,18 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
             file32 = FUN_00ec9a47(buf21, (const char*)&DAT_01021568);
             if (file32 != 0)
             {
-                FUN_00ec9774(file32, (const char*)&DAT_01021518, DAT_011c73f4.Int()->i);
+                FUN_00ec9774(file32, (const char*)&DAT_01021518, *DAT_011c73f4.Int());
             }
             DAT_011c7790.FUN_004de2d0(0);
             DAT_011f9421 = 0;
         }
     }
-    if (DAT_011c73b4.FUN_00559450() != 0)
+    if (reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int()) != 0)
     {
-        DAT_011c73b4.FUN_00559450()->vfn_b0(FUN_004dc2c0());
+        reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->vfn_b0(FUN_004dc2c0());
         if (DAT_011c6fba != 0)
         {
-            RendObj* sub = DAT_011c73b4.FUN_00559450()->FUN_004dc020();
+            RendObj* sub = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc020();
             if (sub != 0)
             {
                 sub->vfn_13c((float)FUN_004dc2b0());
@@ -1842,42 +1766,42 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
             wval40 = 0x60;
         }
     }
-    int hr62 = DAT_011c73b4.FUN_00559450()->FUN_004dc040()->vfn_28(0, 1, 0x16, 0x80000, 3, 0x71);
+    int hr62 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc040()->vfn_28(0, 1, 0x16, 0x80000, 3, 0x71);
     DAT_011c70ea = (int)(hr62 >= 0);
-    hr62 = DAT_011c73b4.FUN_00559450()->FUN_004dc040()->vfn_28(0, 1, 0x16, 0x20000, 3, 0x71);
+    hr62 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc040()->vfn_28(0, 1, 0x16, 0x20000, 3, 0x71);
     DAT_011f941f = (int)(hr62 >= 0);
-    DAT_011ad810 = DAT_011c7284.Int()->i;
-    DAT_011ad814 = DAT_011c7784.Int()->i;
-    DAT_011ad818 = DAT_011c7680.Int()->i;
+    DAT_011ad810 = *DAT_011c7284.FUN_0043d4d0();
+    DAT_011ad814 = *DAT_011c7784.FUN_0043d4d0();
+    DAT_011ad818 = *DAT_011c7680.FUN_0043d4d0();
     DAT_011f9420 = ((sub13013->f40 & 0x400) != 0);
     bool b12;
     b12 = ((sub13013->f3c & 2) != 0 && (sub13013->f3c & 0x100) == 0) ? 0 : 1;
-    DAT_011f9183 = (b12 && !DAT_011c7538.Bool()->b) ? 1 : 0;
-    DAT_0126efc4 = DAT_011c779c.Int()->i;
-    DAT_0126efc8 = DAT_011c7254.Int()->i;
+    DAT_011f9183 = (b12 && !*DAT_011c7538.FUN_00408d60()) ? 1 : 0;
+    DAT_0126efc4 = *DAT_011c779c.FUN_0043d4d0();
+    DAT_0126efc8 = *DAT_011c7254.FUN_0043d4d0();
     DAT_011f9426 = DAT_011c70ec;
     if (DAT_011c70ec != 0)
     {
-        float rf = (float)(((double)(unsigned int)DAT_01189480 - DAT_011c718c.Int()->i) /
+        float rf = (float)(((double)(unsigned int)DAT_01189480 - *DAT_011c718c.Int()) /
                            (double)(unsigned int)DAT_01189480 / 2.0);
-        DAT_011ad840 = ImageSpaceEffectParam(0.0f, 1.0f, 1.0f - rf, rf);
-        DAT_011f9430 = DAT_011c73dc.Int()->i;
-        DAT_011f9434 = DAT_011c718c.Int()->i;
+        DAT_011ad840 = NiColorA(0.0f, 1.0f, 1.0f - rf, rf);
+        DAT_011f9430 = *DAT_011c73dc.Int();
+        DAT_011f9434 = *DAT_011c718c.Int();
     }
-    DAT_011f941e = (DAT_011c76c0.Bool()->b && DAT_011c70ea != 0) ? 1 : 0;
-    DAT_011f94a8 = DAT_011c747c.Bool()->b;
-    DAT_011f94a9 = DAT_011c75b0.Bool()->b;
-    DAT_011f9422 = (!DAT_011f941e && DAT_011c7768.Bool()->b) ? 1 : 0;
-    DAT_011f91a3 = DAT_011c73a4.Bool()->b;
-    DetectGpuVendor(DAT_01189468, DAT_0118946c, DAT_011c74e0.Bool()->b, spells117, spells218, wval40);
+    DAT_011f941e = (*DAT_011c76c0.FUN_00408d60() && DAT_011c70ea != 0) ? 1 : 0;
+    DAT_011f94a8 = *DAT_011c747c.FUN_00408d60();
+    DAT_011f94a9 = *DAT_011c75b0.FUN_00408d60();
+    DAT_011f9422 = (!DAT_011f941e && *DAT_011c7768.FUN_00408d60()) ? 1 : 0;
+    DAT_011f91a3 = *DAT_011c73a4.FUN_00408d60();
+    DetectGpuVendor(DAT_01189468, DAT_0118946c, *DAT_011c74e0.FUN_00408d60(), spells117, spells218, wval40);
     if (FUN_004dc060(0) < 5)
     {
         DAT_011c71dc.FUN_004de2d0(0);
     }
-    *(short*)&DAT_011ad830 = DAT_011c7520.Int()->sh;
+    *(short*)&DAT_011ad830 = *reinterpret_cast<short*>(DAT_011c7520.FUN_0043d4d0());
     if (FUN_004dc0b0() == 1)
     {
-        hr62 = DAT_011c73b4.FUN_00559450()->FUN_004dc040()->vfn_28(0, 1, 0x16, 0, 1, 0x434f5441);
+        hr62 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc040()->vfn_28(0, 1, 0x16, 0, 1, 0x434f5441);
     }
     else if (FUN_004dc0b0() == 2)
     {
@@ -1891,8 +1815,8 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
     {
         hr62 = (int)0x88760866;
     }
-    DAT_011f9421 = (hr62 >= 0 && DAT_011c7790.Bool()->b && DAT_011c73f4.Int()->i > 1) ? 1 : 0;
-    FUN_004dc100(FUN_00647b70(DAT_011c72e4.Int()->i, DAT_011c72d8.Int()->i));
+    DAT_011f9421 = (hr62 >= 0 && *DAT_011c7790.Bool() && *DAT_011c73f4.Int() > 1) ? 1 : 0;
+    FUN_004dc100(FUN_00647b70(*DAT_011c72e4.FUN_0043d4d0(), *DAT_011c72d8.FUN_0043d4d0()));
     bool flag27 = true;
     if (FUN_004dc0b0() == 2)
     {
@@ -1979,7 +1903,7 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
         {
         }
     }
-    if (flag27 && DAT_011c7504.Bool()->b)
+    if (flag27 && *DAT_011c7504.FUN_00408d60())
     {
         FUN_004dc090(1);
     }
@@ -2055,7 +1979,7 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
                 fmt33 = 0;
                 break;
             }
-            dev413 = DAT_011c73b4.FUN_00559450()->FUN_004dc040();
+            dev413 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc040();
             rr1 = dev413->vfn_28(0, 1, 0x16, 0, 3, fmt33);
             if (rr1 >= 0)
             {
@@ -2066,11 +1990,11 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
                 DAT_011f9194[li10] = 0;
             }
         }
-        dev53 = DAT_011c73b4.FUN_00559450()->FUN_004dc040();
+        dev53 = reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int())->FUN_004dc040();
         r510 = dev53->vfn_28(0, 1, 0x16, 0x80000, 3, 0x24);
         DAT_011ad832 = (int)(r510 >= 0);
     }
-    FUN_004dc2d0(DAT_011c71ac.Float()->f);
+    FUN_004dc2d0(*DAT_011c71ac.Float());
     int t1404 = FUN_00b4f4a0();
     _sprintf_s(buf21, 260, "%sRendererInfo.txt", FUN_004dc110());
     file32 = FUN_00ec9a47(buf21, (const char*)&DAT_01021568);
@@ -2115,39 +2039,39 @@ int __cdecl FUN_004da670(int aiWidth, int aiHeight)
         FUN_00ec9774(file32, (const char*)&DAT_010211c0,
                      DAT_011f9421 ? (const char*)&DAT_01021388 : (const char*)&DAT_01021384);
         FUN_00ec9774(file32, (const char*)&DAT_010211a4, FUN_00b7faf0());
-        FUN_00ec9774(file32, (const char*)&DAT_01021188, DAT_011c3ea4.Int()->i);
+        FUN_00ec9774(file32, (const char*)&DAT_01021188, *DAT_011c3ea4.FUN_0043d4d0());
         FUN_00ec9907(file32);
     }
-    DAT_011f9190 = DAT_011c76c0.Bool()->b ? DAT_011c7488.Float()->f : DAT_011c7170.Float()->f;
-    DAT_011f918c = DAT_011c7574.Float()->f;
-    DAT_011f9188 = DAT_011c7510.Float()->f;
-    DAT_011f9444 = DAT_011c7740.Float()->f;
-    DAT_011f9448 = DAT_011c7740.Float()->f + DAT_011c76b4.Float()->f;
-    DAT_011f944c = DAT_011c7568.Float()->f;
-    DAT_011f9450 = DAT_011c7568.Float()->f + DAT_011c7400.Float()->f;
-    DAT_011f9454 = DAT_011c7598.Float()->f;
-    DAT_011f9458 = DAT_011c7598.Float()->f + DAT_011c7634.Float()->f;
-    DAT_011f945c = DAT_011c7374.Float()->f;
-    DAT_011f9460 = DAT_011c73e8.Float()->f;
-    DAT_011f9464 = DAT_011c7160.Float()->f;
-    DAT_011f9468 = DAT_011c72f0.Float()->f;
-    DAT_011f946c = DAT_011c72cc.Float()->f;
-    DAT_011f9470 = DAT_011c7428.Float()->f;
-    DAT_011f9474 = DAT_011c72fc.Float()->f;
-    DAT_011f9478 = DAT_011c7344.Float()->f;
-    DAT_011f9488 = DAT_011c7610.Bool()->b;
-    DAT_011ad834 = DAT_011c735c.Float()->f;
+    DAT_011f9190 = *DAT_011c76c0.FUN_00408d60() ? *DAT_011c7488.Float() : *DAT_011c7170.Float();
+    DAT_011f918c = *DAT_011c7574.Float();
+    DAT_011f9188 = *DAT_011c7510.Float();
+    DAT_011f9444 = *DAT_011c7740.Float();
+    DAT_011f9448 = *DAT_011c7740.Float() + *DAT_011c76b4.Float();
+    DAT_011f944c = *DAT_011c7568.Float();
+    DAT_011f9450 = *DAT_011c7568.Float() + *DAT_011c7400.Float();
+    DAT_011f9454 = *DAT_011c7598.Float();
+    DAT_011f9458 = *DAT_011c7598.Float() + *DAT_011c7634.Float();
+    DAT_011f945c = *DAT_011c7374.Float();
+    DAT_011f9460 = *DAT_011c73e8.Float();
+    DAT_011f9464 = *DAT_011c7160.Float();
+    DAT_011f9468 = *DAT_011c72f0.Float();
+    DAT_011f946c = *DAT_011c72cc.Float();
+    DAT_011f9470 = *DAT_011c7428.Float();
+    DAT_011f9474 = *DAT_011c72fc.Float();
+    DAT_011f9478 = *DAT_011c7344.Float();
+    DAT_011f9488 = *DAT_011c7610.FUN_00408d60();
+    DAT_011ad834 = *DAT_011c735c.Float();
     DAT_011f9489 = 0;
-    DAT_011f94b4 = DAT_011c710c.Bool()->b;
-    DAT_011f9425 = DAT_011c7774.Bool()->b;
-    DAT_011f9428 = DAT_011c7464.Float()->f;
-    DAT_011ad838 = DAT_011c75e0.Float()->f;
-    DAT_011f91b0 = (DAT_011c752c.Int()->i >= 0 && DAT_011c752c.Int()->i <= 3) ? DAT_011c752c.Int()->i : 3;
+    DAT_011f94b4 = *DAT_011c710c.FUN_00408d60();
+    DAT_011f9425 = *DAT_011c7774.FUN_00408d60();
+    DAT_011f9428 = *DAT_011c7464.Float();
+    DAT_011ad838 = *DAT_011c75e0.Float();
+    DAT_011f91b0 = (*DAT_011c752c.FUN_0043d4d0() >= 0 && *DAT_011c752c.FUN_0043d4d0() <= 3) ? *DAT_011c752c.FUN_0043d4d0() : 3;
     DAT_011f9490 = DAT_011c70cc;
     DAT_011f961c =
-        ImageSpaceEffectParam(DAT_011c75f8.Float()->f, DAT_011c77cc.Float()->f, DAT_011c73d0.Float()->f, 1.0f);
-    SetBSStringCapacity(DAT_011c76cc.Int()->i);
-    DAT_011f948a = DAT_011c7308.Bool()->b;
-    return (int)DAT_011c73b4.FUN_00559450();
+        NiColorA(*DAT_011c75f8.Float(), *DAT_011c77cc.Float(), *DAT_011c73d0.Float(), 1.0f);
+    SetBSStringCapacity(*DAT_011c76cc.FUN_0043d4d0());
+    DAT_011f948a = *DAT_011c7308.FUN_00408d60();
+    return (int)reinterpret_cast<RendObj*>(DAT_011c73b4.operator unsigned int());
 }
 }  // namespace fnv_004da670

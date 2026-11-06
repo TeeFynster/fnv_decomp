@@ -1,7 +1,19 @@
 // bscore/memorymanager.cpp: MemoryManager, TESQuest, TESActorBaseData, Actor and more (21 functions)
 
 #include "memorymanager_identity.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/MemoryPool.h"
 #include "memorymanager_memory.h"
+#include "../../include/Actor.h"
+#include "../../include/BSExtraData.h"
+#include "../../include/BaseExtraList.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/ExtraHealth.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESQuest.h"
+#include "../../include/AutoMemContext.h"
 #include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
@@ -60,13 +72,13 @@ unsigned int MemoryManager::Size(const void* pointer)
 // @fnv 0x005f5760
 PerkEntryConditionSet* TESQuest::GetConditions()
 {
-    return reinterpret_cast<PerkEntryConditionSet*>(reinterpret_cast<unsigned char*>(this) + 0x54);
+    return &m_kInfoConditions;
 }
 
 // @fnv 0x00461580
 bool TESActorBaseData::GetFlag(unsigned int flag) const
 {
-    return m_uiActorFlags & flag;
+    return actorData.m_uiActorFlags & flag;
 }
 
 // @fnv 0x0087f4c0
@@ -79,7 +91,7 @@ SEX Actor::GetSex()
 // @fnv 0x00419970
 void ExtraDataList::SetExtraHealth(float health)
 {
-    ExtraHealth* extra = static_cast<ExtraHealth*>(GetExtraData(0x25));
+    ExtraHealth* extra = static_cast<ExtraHealth*>(BaseExtraList::GetExtraData(0x25));
     if (extra)
         extra->fHealthPercent = health;
     else
@@ -102,48 +114,28 @@ ScrapHeapBuffer* MemoryManager::GetGeneralAllocator()
 {
     unsigned long threadID = GetCurrentThreadId();
     ScrapHeapBuffer* heap = 0;
-    threadScrapHeaps.GetAt(threadID, heap);
+    reinterpret_cast<BSMapBase<unsigned long, ScrapHeapBuffer*>*>(&kThreadScrapHeapMap)->GetAt(threadID, heap);
     if (!heap)
     {
         heap = new ScrapHeapBuffer;
-        threadScrapHeaps.SetAt(threadID, heap);
+        reinterpret_cast<BSMapBase<unsigned long, ScrapHeapBuffer*>*>(&kThreadScrapHeapMap)->SetAt(threadID, heap);
     }
     return heap;
 }
-
-struct FUN_00473960_shell : public TESFile
-{
-    void FUN_00473960();
-};
 
 void __cdecl Deallocate(void*);
 
 // If the pointer at offset 0x420 is non-null, deallocates it and clears the pointer and the count at offset 0x424.
 // @fnv 0x00473960
-void FUN_00473960_shell::FUN_00473960()
+void TESFile::ClearDecompressedFormBuffer()
 {
-    if (*(void**)((char*)this + 0x420) != 0)
+    if (m_pDecompressedFormBuffer != 0)
     {
-        Deallocate(*(void**)((char*)this + 0x420));
-        *(void**)((char*)this + 0x420) = 0;
-        *(unsigned int*)((char*)this + 0x424) = 0;
+        Deallocate(m_pDecompressedFormBuffer);
+        m_pDecompressedFormBuffer = 0;
+        m_uiAuxBufferSize = 0;
     }
 }
-
-struct AutoMemContext
-{
-    void Enter(int, bool, char*, int);
-    void Leave();
-    void* __vecDelDtor(unsigned int);
-    int m_eMemoryContext;
-    unsigned int m_pFileName;
-    int m_iLineNumber;
-};
-typedef char _sizecheck_AutoMemContext[sizeof(AutoMemContext) == 12 ? 1 : -1];
-struct FUN_00aa3cc0_shell : public MemoryManager
-{
-    void CreateMemoryPool(unsigned int, unsigned int, char*);
-};
 
 extern __declspec(thread) int g_tlsMemContext;
 struct MemCtxGuard
@@ -167,33 +159,21 @@ struct MemCtxGuard
         SetCtx(iOld);
     }
 };
-struct MemoryPoolView : public MemoryPool
-{
-    bool HasMemory()
-    {
-        return *(void**)((char*)this + 4) != 0;
-    }
-};
 // Creates a MemoryPool with the given block and pool sizes and description, deleting it if it has no memory; returns early when aiBlockSize is below 8.
 // @fnv 0x00aa3cc0
-void FUN_00aa3cc0_shell::CreateMemoryPool(unsigned int aiBlockSize, unsigned int aiPoolSize, char* apDesc)
+void MemoryManager::CreateMemoryPool(unsigned int aiBlockSize, unsigned int aiPoolSize, const char* apDesc)
 {
     MemCtxGuard tempMemContext(3);
     if (aiBlockSize < 8)
         return;
     m_bPoolAllocationEnabled = false;
     MemoryPool* pnewPool = new MemoryPool(aiBlockSize, aiPoolSize, apDesc);
-    if (!static_cast<MemoryPoolView*>(pnewPool)->HasMemory())
+    if (!pnewPool->IsHeapValid())
     {
         delete pnewPool;
     }
     m_bPoolAllocationEnabled = true;
 }
-
-struct FUN_00aa3a10_shell
-{
-    void ClearFlagAndSetByte();
-};
 
 struct FUN_00aa3a10_tls_struct
 {
@@ -205,28 +185,28 @@ __declspec(thread) FUN_00aa3a10_tls_struct g_fun_tls;
 
 // Clears the TLS flag and sets the first byte of this object to 1.
 // @fnv 0x00aa3a10
-void __thiscall FUN_00aa3a10_shell::ClearFlagAndSetByte()
+void MemoryManager::InitializeStandard()
 {
     g_fun_tls.flag = 0;
-    *(unsigned char*)this = 1;
+    bInitialized = true;
 }
 
-struct _RTL_CRITICAL_SECTION;
+// These APIs use this unit's alternate import slots in the game image.
+namespace memorymanager_imports {
 __declspec(dllimport) void __stdcall EnterCriticalSection(_RTL_CRITICAL_SECTION*);
+__declspec(dllimport) void __stdcall LeaveCriticalSection(_RTL_CRITICAL_SECTION*);
+}
 extern _RTL_CRITICAL_SECTION DAT_011f6234;
 // @fnv 0x00aa4460
 void FUN_00aa4460()
 {
-    EnterCriticalSection(&DAT_011f6234);
+    memorymanager_imports::EnterCriticalSection(&DAT_011f6234);
 }
 
-struct _RTL_CRITICAL_SECTION;
-__declspec(dllimport) void __stdcall LeaveCriticalSection(_RTL_CRITICAL_SECTION*);
-extern _RTL_CRITICAL_SECTION DAT_011f6234;
 // @fnv 0x00aa4470
 void FUN_00aa4470()
 {
-    LeaveCriticalSection(&DAT_011f6234);
+    memorymanager_imports::LeaveCriticalSection(&DAT_011f6234);
 }
 
 extern char DAT_011f6230;
@@ -257,30 +237,18 @@ char __cdecl FUN_00aa44b0()
     return DAT_011f6230;
 }
 
-struct FUN_00aa46a0_holder
-{
-    char pad0[2];
-    unsigned short countA;
-    unsigned short countB;
-    char pad1[2];
-    void** tableA;
-    char pad2[0x118];
-    void** tableB;
-    void* GetEntryAt(unsigned int index);
-};
-
-// Returns the entry at index from tableA if index < countA, otherwise from tableB at index - countA when that offset is < countB; returns 0 otherwise.
+// Returns the entry at index from tableA if index < iNumHeaps, otherwise from tableB at index - countA when that offset is < countB; returns 0 otherwise.
 // @fnv 0x00aa46a0
-void* FUN_00aa46a0_holder::GetEntryAt(unsigned int index)
+void* MemoryManager::GetEntryAt(unsigned int index)
 {
     void* pEntry = 0;
-    if (index < countA)
+    if (index < iNumHeaps)
     {
-        pEntry = tableA[index];
+        pEntry = ppHeaps[index];
     }
-    else if (index - countA < countB)
+    else if (index - iNumHeaps < iNumPhysicalHeaps)
     {
-        pEntry = tableB[index - countA];
+        pEntry = ppPhysicalHeaps[index - iNumHeaps];
     }
     return pEntry;
 }
@@ -295,29 +263,19 @@ extern __declspec(thread) FUN_00aa39c0_tls g_tls;
 
 void ClearMemoryPoolTables();
 
-class FUN_00aa39c0_cls
-{
-  public:
-    unsigned char m_00;
-    void InitializeHeaps();
-    void FUN_00866770();
-    void FUN_00483710();
-    void FUN_00aa39c0();
-};
-
 // Calls ClearMemoryPoolTables, InitializeHeaps, FUN_00866770 and FUN_00483710, sets m_00 to 1 and clears g_tls.m_2b4.
 // @fnv 0x00aa39c0
-void FUN_00aa39c0_cls::FUN_00aa39c0()
+void MemoryManager::Initialize()
 {
     ClearMemoryPoolTables();
     InitializeHeaps();
-    m_00 = 1;
+    bInitialized = true;
     FUN_00866770();
     FUN_00483710();
     g_tls.m_2b4 = 0;
 }
 
-extern FUN_00aa46a0_holder DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 extern unsigned short DAT_011f623a;
 extern unsigned short DAT_011f623c;
 struct S_00aa4400_Obj
@@ -432,15 +390,7 @@ inline void FUN_00aa5950()
     delete DAT_011f63b4;
     DAT_011f63b4 = 0;
 }
-struct PoolView
-{
-    ~PoolView();
-    static __forceinline void operator delete(void* p)
-    {
-        g_memoryManager.Deallocate(p);
-    }
-};
-extern PoolView* DAT_011f67b8[256];
+extern MemoryPool* DAT_011f67b8[256];
 inline void DestroyMemoryPools()
 {
     for (unsigned int i = 0; i < 256; ++i)
@@ -450,54 +400,40 @@ inline void DestroyMemoryPools()
     }
 }
 extern "C" void* __cdecl fnv_zlib_memset(void*, int, unsigned int);
-struct FUN_00aa3a40
-{
-    bool unk00;
-    unsigned char unk01;
-    unsigned short unk02;
-    unsigned short unk04;
-    unsigned short unk06;
-    HeapView** unk08;
-    void* unk0C[66];
-    MapView unk114;
-    HeapView** unk124;
-    void FUN_00483710();
-    ~FUN_00aa3a40();
-};
 // @fnv 0x00aa3a40
-FUN_00aa3a40::~FUN_00aa3a40()
+MemoryManager::~MemoryManager()
 {
-    WeightedMapNode* position = unk114.First();
+    WeightedMapNode* position = reinterpret_cast<MapView*>(&kThreadScrapHeapMap)->First();
     unsigned long key;
     ScrapView* heap;
     while (position)
     {
-        unk114.FUN_00a0c850(position, key, heap);
+        reinterpret_cast<MapView*>(&kThreadScrapHeapMap)->FUN_00a0c850(position, key, heap);
         delete heap;
     }
-    unk114.ClearAll();
+    reinterpret_cast<MapView*>(&kThreadScrapHeapMap)->ClearAll();
     FUN_00aa5950();
     FUN_00483710();
     DestroyMemoryPools();
-    fnv_zlib_memset(unk0C, 0, 0x108);
-    unk00 = false;
-    if (unk08)
+    fnv_zlib_memset(pHeapsByContextA, 0, 0x108);
+    bInitialized = false;
+    if (ppHeaps)
     {
-        for (unsigned short i = 0; i < unk02; ++i)
+        for (unsigned short i = 0; i < iNumHeaps; ++i)
         {
-            delete unk08[i];
-            unk08[i] = 0;
+            delete ppHeaps[i];
+            ppHeaps[i] = 0;
         }
-        delete[] unk08;
+        delete[] ppHeaps;
     }
-    if (unk124)
+    if (ppPhysicalHeaps)
     {
-        for (unsigned short j = 0; j < unk04; ++j)
+        for (unsigned short j = 0; j < iNumPhysicalHeaps; ++j)
         {
-            delete unk124[j];
-            unk124[j] = 0;
+            delete ppPhysicalHeaps[j];
+            ppPhysicalHeaps[j] = 0;
         }
-        delete[] unk124;
+        delete[] ppPhysicalHeaps;
     }
 }
 
@@ -515,32 +451,18 @@ class ItemAA43
     virtual void Update();
 };
 
-class FUN_00aa46a0_holder
-{
-  public:
-    short unk00;
-    unsigned short m_count2;
-    unsigned short m_count4;
-
-    int GetCount()
-    {
-        return m_count2 + m_count4;
-    }
-    void* GetEntryAt(unsigned int index);
-    void FUN_00aa43a0(int unused);
-};
+}  // namespace fnv_00aa43a0
 
 // Calls FUN_00aa7370, then iterates over all entries and calls Update on each ItemAA43.
 // @fnv 0x00aa43a0
-void FUN_00aa46a0_holder::FUN_00aa43a0(int unused)
+void MemoryManager::FUN_00aa43a0(int unused)
 {
-    FUN_00aa7370();
-    ItemAA43* pkItem;
+    fnv_00aa43a0::FUN_00aa7370();
+    fnv_00aa43a0::ItemAA43* pkItem;
     int ItemUpdateArray = GetCount();
     for (int i = 0; i < ItemUpdateArray; i++)
     {
-        pkItem = (ItemAA43*)GetEntryAt(i);
+        pkItem = (fnv_00aa43a0::ItemAA43*)GetEntryAt(i);
         pkItem->Update();
     }
 }
-}  // namespace fnv_00aa43a0

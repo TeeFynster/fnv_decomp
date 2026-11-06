@@ -1,9 +1,10 @@
 // bsshader/imagespaceeffectmenubg.cpp: free functions (1 function)
+#include "NiRefObject_inline.h"
 
 #include "imagespaceeffectmenubg_decls.h"
 
 // @fnv 0x00c04730
-void ImageSpaceEffectMenuBackground::Setup(ImageSpaceManager* manager, ImageSpaceEffectParam* parameters)
+void ImageSpaceEffectMenuBackground::Setup(ImageSpaceManager* manager, MenuBgEffectParamLocalForm* parameters)
 {
     SetTextureArrayCount(1);
     pTextures.SetSize(3);
@@ -20,5 +21,5 @@ void ImageSpaceEffectMenuBackground::Setup(ImageSpaceManager* manager, ImageSpac
     shaderParameters->SetShaderConstantVector4(0, 0.0f, 0.0f, 0.0f, 0.0f);
     pEffectParamList.SetAt(0, shaderParameters);
     SetTextureArrayAt(0, 1, 2, NiTexturingProperty::FILTER_BILERP, NiTexturingProperty::FILTER_NEAREST);
-    SetEffectAt(0, manager->pEffectList.m_pBase[ImageSpaceManager::EFFECT_SHADER_MENUBG], shaderParameters, 0);
+    SetEffectAt(0, reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(manager->pEffectList)->m_pBase[ImageSpaceManager::EFFECT_SHADER_MENUBG], shaderParameters, 0);
 }

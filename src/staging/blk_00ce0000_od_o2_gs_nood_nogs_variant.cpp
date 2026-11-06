@@ -1,6 +1,8 @@
 // staging/blk_00ce0000_od_o2_gs_nood_nogs_variant.cpp: RayCaster (3 functions)
 
 #include <windows.h>
+#include "../../include/hkMonitorStream.h"
+#include "../../include/hkMonitorStream.h"
 // src/staging/blk_00ce0000_od_o2_gs_nood_nogs_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/staging/blk_00ce0000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
@@ -61,21 +63,6 @@ extern "C" void _ReadWriteBarrier(void);
 extern DWORD DAT_0126835c;
 
 unsigned __int64 __cdecl __rdtsc(void);
-
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
-
-struct ProfBuf
-{
-    DWORD unk00;
-    ProfRec* m_pCur;
-    DWORD unk08;
-    ProfRec* m_pRecordEnd;
-};
 
 struct RayInput
 {
@@ -141,15 +128,15 @@ class RayCaster
 void RayCaster::FUN_00cfaa40(RayWorld* world, RayInput* input, char* source, int a4)
 {
     volatile DWORD tick;
-    ProfBuf* pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+    hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
     {
-        ProfRec* pRec = pBuf->m_pCur;
-        pRec->m_pName = "TtRayCastSimpl";
+        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+        pRec->m_commandAndMonitor = "TtRayCastSimpl";
         _ReadWriteBarrier();
         tick = (DWORD)__rdtsc();
-        pRec->m_iTick = tick;
-        pBuf->m_pCur = pRec + 1;
+        pRec->m_time0 = tick;
+        pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
     }
 
     m_pInput = input;
@@ -169,14 +156,14 @@ void RayCaster::FUN_00cfaa40(RayWorld* world, RayInput* input, char* source, int
     _mm_store_ps((float*)&q.m_vFrom, from);
     world->CastRay(&q, this, 0);
 
-    pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+    pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
     {
-        ProfRec* pRec = pBuf->m_pCur;
-        pRec->m_pName = "Et";
+        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+        pRec->m_commandAndMonitor = "Et";
         _ReadWriteBarrier();
         tick = (DWORD)__rdtsc();
-        pRec->m_iTick = tick;
-        pBuf->m_pCur = pRec + 1;
+        pRec->m_time0 = tick;
+        pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
     }
 }

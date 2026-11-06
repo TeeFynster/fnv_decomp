@@ -6,6 +6,10 @@
 // src/staging/blk_00dc0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkArray.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkLargeBlockAllocator.h"
+#include "../../include/hkMemoryRouter.h"
 struct FUN_00dd4b10_struct
 {
     void __thiscall AssignFromSource(const void* p);
@@ -630,7 +634,8 @@ static __declspec(noinline) FNVInt64 S_00dcc8a0_ParseInt(S_00dcc8a0_Handle h, un
         return 0;
     return (FNVInt64)reader->read(count);
 }
-struct hkEntryDCB1
+// 0x00dcb1a0 reads the first int of each eight-byte table entry; no shared hkEntry type is defined.
+struct FilterValueTableEntry
 {
     int m_uiFilterValue;
     int m_04;
@@ -640,7 +645,7 @@ struct hkTableDCB1
     int m_00;
     int m_04;
     int m_08;
-    hkEntryDCB1* m_entries;
+    FilterValueTableEntry* m_entries;
 };
 class hkOwnerDCB1;
 struct hkRefDCB1
@@ -714,21 +719,8 @@ struct Allocator388
 static void FUN_00dd8fd0(unsigned char* a, unsigned char* b);
 extern "C" unsigned char* GetPtr();
 void Caller(unsigned char* a);
-class hkMemoryAllocatorDDFB;
-struct hkMemoryRouterDDFB
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorDDFB* m_pStreamAllocator;
-    hkMemoryAllocatorDDFB& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
 namespace hkRouterDDFB {
-extern "C" hkMemoryRouterDDFB& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
 void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iElemSize);
 struct hkPairDDFB
@@ -743,32 +735,12 @@ struct hkPairDDFB
         return p;
     }
 };
-template <class T> class hkArrayDDFB
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void AddBack(const T& t)
-    {
-        hkMemoryAllocatorDDFB& kAlloc = hkRouterDDFB::FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&kAlloc, this, sizeof(T));
-        new (m_data + m_iElementCount) T(t);
-        m_iElementCount++;
-    }
-};
 class hkOwnerDDFB
 {
   public:
     int unk00;
     int unk04;
-    hkArrayDDFB<hkPairDDFB> m_pairs;
+    hkArray<hkPairDDFB> m_pairs;
 
     void AddPairIfKeyAbsent(void* object, void* key);
 };
@@ -943,64 +915,6 @@ struct S00dcd270_cls
     int unk30;
     S00dcd270_Arr arr;
     S00dcd270_Rec* AddRecord(const S00dcd270_Rec* a0);
-};
-class hkBoolDD8
-{
-  public:
-    hkBoolDD8(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
-struct MemChunkDD8
-{
-    enum
-    {
-        PINUSE_BIT = 1,
-        CINUSE_BIT = 2,
-        INUSE_BITS = 3,
-        PAYLOAD_OFFSET = 16
-    };
-    unsigned int m_uiPreviousChunkSize;
-    unsigned int head;
-    hkBoolDD8 isInuse() const
-    {
-        return (head & CINUSE_BIT) != 0;
-    }
-    hkBoolDD8 isPinuse() const
-    {
-        return (head & PINUSE_BIT) != 0;
-    }
-    unsigned int getChunkSize() const
-    {
-        return head & ~(unsigned int)INUSE_BITS;
-    }
-    const MemChunkDD8* chunkPlusOffset(unsigned int s) const
-    {
-        return (const MemChunkDD8*)((const char*)this + s);
-    }
-    const MemChunkDD8* chunkMinusOffset(unsigned int s) const
-    {
-        return (const MemChunkDD8*)((const char*)this - s);
-    }
-    static const MemChunkDD8* toChunk(const void* in)
-    {
-        return (const MemChunkDD8*)((const char*)in - PAYLOAD_OFFSET);
-    }
-};
-class hkLargeBlockAllocatorDD8
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    const MemChunkDD8* m_pMemoryChunk;
-    bool IsValidChunk(const void* in) const;
 };
 
 #include <xmmintrin.h>

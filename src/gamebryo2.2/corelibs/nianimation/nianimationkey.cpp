@@ -2,6 +2,8 @@
 // src/gamebryo2.2/corelibs/nianimation/nianimationkey.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/nianimationkey.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/MemoryManager.h"
+
 // UpdateSlotStates - recursive tree walk over 3-child state nodes with a float test
 // and a dispatch-table callback.
 
@@ -66,10 +68,6 @@ void __cdecl UpdateSlotStates(int aiSlotGroup, int a2, void** apSlotData, int* a
     pCallback(afValueB, apSlotData, apiState);
 }
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
 extern MemoryManager _g_memoryManager;
 
 struct Inner_00a6db50

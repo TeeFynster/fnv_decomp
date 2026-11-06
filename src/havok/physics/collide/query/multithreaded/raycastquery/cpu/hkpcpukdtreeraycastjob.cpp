@@ -1,6 +1,9 @@
 // src/havok/physics/collide/query/multithreaded/raycastquery/cpu/hkpcpukdtreeraycastjob.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/query/multithreaded/raycastquery/cpu/hkpcpukdtreeraycastjob.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+
 struct FUN_00e4dd90_shell
 {
     void __thiscall FUN_00e4dd90(float* output);
@@ -71,23 +74,7 @@ FUN_00e4dde0::FUN_00e4dde0()
     unk8C = 0;
 }
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize);
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct FUN_00e4e3c0
 {
@@ -135,9 +122,11 @@ struct FUN_00e4e3c0
 
     static void operator delete(void* apMemory)
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(apMemory, sizeof(FUN_00e4e3c0));
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        // Free occupies vtable slot 2 in this allocator interface.
+        typedef void (__thiscall* FreeFunction)(hkMemoryAllocator*, void*, unsigned int);
+        (*reinterpret_cast<FreeFunction**>(pAllocator))[2](pAllocator, apMemory, sizeof(FUN_00e4e3c0));
     }
 };
 

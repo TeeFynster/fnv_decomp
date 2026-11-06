@@ -3,7 +3,15 @@
 
 // src/havok/animation/animation/animation/waveletcompressed/hkawaveletcompressedanimation.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/animation/waveletcompressed/hkawaveletcompressedanimation.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkaWaveletCompressedAnimation.h"
+#include "../../../../../../include/hkaWaveletCompressedAnimation.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkStreamWriter.h"
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+
+typedef unsigned short hkUint16;
+struct hkQsTransform;
 int __cdecl FUN_00e51da0(int aiValue, const char* apBytes);
 unsigned int __fastcall FUN_00e2f9f0(hkaWaveletCompressedAnimation* self, int, unsigned int a);
 struct FUN_00e2f8c0_Class
@@ -115,22 +123,6 @@ volatile int g_e2f910_a4 = 0;
 e2f910_Stream* volatile g_e2f910_stream = 0;
 static void FUN_00e2f910(e2f910_Cls* anim, int arg1, e2f910_Stream* stream, int count);
 void e2f910_probe_caller(void);
-struct hkBoolE2FA
-{
-    char m_cBooleanValue;
-    hkBoolE2FA()
-    {}
-};
-class hkStreamWriterE2FA
-{
-  public:
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    virtual void vfn_0C();
-    virtual void vfn_10();
-    virtual hkBoolE2FA write(const void* buf, int nbytes);
-};
 class hkBufferE2FA
 {
   public:
@@ -151,7 +143,7 @@ class hkBufferE2FA
     int unk38[11];
     char* m_data;
 
-    void Write(hkStreamWriterE2FA* writer);
+    void Write(hkStreamWriter* writer);
 };
 extern unsigned char DAT_0126ef84;
 void __cdecl FUN_00e63c60(void*);
@@ -343,47 +335,6 @@ static __declspec(noinline) void FUN_00e300b0(unsigned int x, S00e306d0_Args arg
     p[1] = args.f18;
     p[2] = args.f04;
 }
-struct S00e306d0_Stream
-{
-    int unk00;
-    char* m_curr;
-    int unk08;
-    char* m_kRayEnd;
-
-    void timerBegin()
-    {
-        char* p = m_curr;
-        if (p < m_kRayEnd)
-        {
-            *(const char**)p = str_010eb358;
-            _ReadWriteBarrier();
-            unsigned int tb = (unsigned int)__rdtsc();
-            _ReadWriteBarrier();
-            *(unsigned int*)(p + 4) = *&tb;
-            if (0)
-                memmove(&tb, &tb, 4);
-            p += 12;
-            m_curr = p;
-        }
-    }
-
-    void timerEnd()
-    {
-        char* p = m_curr;
-        if (p < m_kRayEnd)
-        {
-            *(const char**)p = str_010c41f8;
-            _ReadWriteBarrier();
-            unsigned int te = (unsigned int)__rdtsc();
-            _ReadWriteBarrier();
-            *(unsigned int*)(p + 4) = *&te;
-            if (0)
-                memmove(&te, &te, 4);
-            p += 12;
-            m_curr = p;
-        }
-    }
-};
 struct S00e306d0_Obj
 {
     int unk00;
@@ -531,73 +482,47 @@ extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern "C" unsigned __int64 __rdtsc();
 extern "C" unsigned long DAT_0126835c;
 extern "C" void _ReadWriteBarrier();
-struct TimerRecord
-{
-    const char* name;
-    unsigned int time, secondary;
-};
-struct ObjectTimerRecord : TimerRecord
-{
-    const char* object;
-};
-struct MonitorStream
-{
-    char* start;
-    char* current;
-    char* capacity;
-    char* end;
-};
 inline void monitorBegin(const char* name, const char* object, unsigned& stamp)
 {
-    MonitorStream* stream = static_cast<MonitorStream*>(TlsGetValue(DAT_0126835c));
-    if (stream->current < stream->end)
+    hkMonitorStream* stream = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+    if (stream->m_end.m_storage < stream->m_capacityMinus16.m_storage)
     {
-        ObjectTimerRecord* record = reinterpret_cast<ObjectTimerRecord*>(stream->current);
-        record->name = name;
-        record->object = object;
+        hkMonitorStream::TimerBeginListCommand* record = reinterpret_cast<hkMonitorStream::TimerBeginListCommand*>(stream->m_end.m_storage);
+        record->m_commandAndMonitor = name;
+        record->m_nameOfFirstSplit = object;
         _ReadWriteBarrier();
         stamp = (unsigned int)__rdtsc();
-        record->time = static_cast<const volatile unsigned&>(stamp);
-        stream->current = reinterpret_cast<char*>(record + 1);
+        record->m_time0 = static_cast<const volatile unsigned&>(stamp);
+        stream->m_end.m_storage = reinterpret_cast<char*>(record + 1);
     }
 }
 inline void monitorEarlySplit(const char* name, unsigned& stamp)
 {
-    MonitorStream* stream = static_cast<MonitorStream*>(TlsGetValue(DAT_0126835c));
-    if (stream->current < stream->end)
+    hkMonitorStream* stream = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+    if (stream->m_end.m_storage < stream->m_capacityMinus16.m_storage)
     {
-        TimerRecord* record = reinterpret_cast<TimerRecord*>(stream->current);
-        record->name = name;
+        hkMonitorStream::TimerCommand* record = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream->m_end.m_storage);
+        record->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         stamp = (unsigned int)__rdtsc();
-        record->time = static_cast<const volatile unsigned&>(stamp);
-        stream->current = reinterpret_cast<char*>(record + 1);
+        record->m_time0 = static_cast<const volatile unsigned&>(stamp);
+        stream->m_end.m_storage = reinterpret_cast<char*>(record + 1);
     }
 }
 inline void monitorSplit(const char* name)
 {
-    MonitorStream* stream = static_cast<MonitorStream*>(TlsGetValue(DAT_0126835c));
-    if (stream->current < stream->end)
+    hkMonitorStream* stream = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+    if (stream->m_end.m_storage < stream->m_capacityMinus16.m_storage)
     {
-        TimerRecord* record = reinterpret_cast<TimerRecord*>(stream->current);
-        record->name = name;
+        hkMonitorStream::TimerCommand* record = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream->m_end.m_storage);
+        record->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         unsigned int stamp = (unsigned int)__rdtsc();
-        record->time = static_cast<const volatile unsigned&>(stamp);
-        stream->current = reinterpret_cast<char*>(record + 1);
+        record->m_time0 = static_cast<const volatile unsigned&>(stamp);
+        stream->m_end.m_storage = reinterpret_cast<char*>(record + 1);
     }
 }
-class hkStackAllocator
-{
-  public:
-    char* m_pTileTemplate;
-};
-class NineIntegerRecord
-{
-  public:
-    hkStackAllocator m_aiEntries;
-};
-extern "C" NineIntegerRecord* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
 struct Chunk
 {
     const hkUint8* data;
@@ -708,9 +633,9 @@ static void FUN_00e300b0(WaveletParameters parameters, float* output)
 
     unsigned int bytes = FUN_00e51da0(parameters.blockSize, &quantization);
 
-    NineIntegerRecord* router = FUN_00c85750();
-    float* temporary = reinterpret_cast<float*>(router->m_aiEntries.m_pTileTemplate);
-    router->m_aiEntries.m_pTileTemplate += (bytes + 127) & ~127u;
+    hkMemoryRouter* router = FUN_00c85750();
+    float* temporary = reinterpret_cast<float*>(router->m_stack.m_next.m_storage);
+    router->m_stack.m_next.m_storage = (char*)router->m_stack.m_next.m_storage + ((bytes + 127) & ~127u);
 
     const hkUint8* data = parameters.data;
 
@@ -739,7 +664,7 @@ static void FUN_00e300b0(WaveletParameters parameters, float* output)
         output += parameters.blockSize;
     }
 
-    FUN_00c85750()->m_aiEntries.m_pTileTemplate = reinterpret_cast<char*>(temporary);
+    FUN_00c85750()->m_stack.m_next.m_storage = (void*)(reinterpret_cast<int>(temporary));
 }
 void __cdecl FUN_00e30200(unsigned int frame, float weight, unsigned int numTransforms, hkQsTransform* transforms,
                           unsigned int numFloats, float* floats, const Chunk* chunks, int chunkCount);

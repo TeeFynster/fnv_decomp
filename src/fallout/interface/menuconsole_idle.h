@@ -1,9 +1,10 @@
+#include "../../../include/NiTListBase.h"
 // Authored layout header for fallout/interface/menuconsole.cpp.
 //
 // The NiTList<BSStringT<char>> machinery and the ConsoleManager body layout below
 // assert. The member-function declarations (ConsoleManager/Init/Instance,
-// pInstance) and the minimal ScriptCompiler declaration are the only additions
-// needed to compile this unit; they do not change the layout.
+// pInstance) are the only additions needed to compile this unit; they do not
+// change the layout.
 #ifndef FNV_MENUCONSOLE_IDLE_H
 #define FNV_MENUCONSOLE_IDLE_H
 
@@ -12,19 +13,10 @@
 class DFALL_NiTListItem_BSStringT_char_____;
 class ConsoleManager;
 class NiTList_BSStringT_char___;
-class NiTListBase_DFALL_NiTListItem_BSStringT_char______BSStringT_char___;
+typedef NiTListBase<DFALL_NiTListItem_BSStringT_char_____, BSStringT<char> > NiTListBase_DFALL_NiTListItem_BSStringT_char______BSStringT_char___;
 class NiTListBase_DFALL_NiTListItem_BSStringT_char______BSStringT_char_____AntiBloatAllocator;
 class NiTListItem_BSStringT_char___;
 class NiTPointerListBase_DFALL_NiTListItem_BSStringT_char______BSStringT_char___;
-
-// ScriptCompiler is only referenced here through a pointer and a single
-// `new ScriptCompiler` allocation; its full declaration lives outside this
-// unit, so only the size-1 shape and the default constructor are declared.
-class ScriptCompiler
-{
-  public:
-    ScriptCompiler();
-};
 
 #pragma pack(push, 4)
 class DFALL_NiTListItem_BSStringT_char_____
@@ -48,35 +40,7 @@ FNV_STATIC_ASSERT(sizeof(NiTListBase_DFALL_NiTListItem_BSStringT_char______BSStr
 FNV_STATIC_ASSERT(offsetof(NiTListBase_DFALL_NiTListItem_BSStringT_char______BSStringT_char_____AntiBloatAllocator,
                            m_uiCount) == 0);
 #pragma pack(push, 4)
-class NiTListBase_DFALL_NiTListItem_BSStringT_char______BSStringT_char___
-{
-  public:
-    void* DereferenceIfNotNull(void*);
-    BSStringT<char>& AddEight(void*);
-    void AssignString(const BSStringT<char>&);
-    BSStringT<char> PopFront();
-    void RemoveAll();
-    NiTListItem_BSStringT_char___* m_pkHead;  // +0x0, 4 bytes
-    NiTListItem_BSStringT_char___* m_pkTail;  // +0x4, 4 bytes
-    NiTListBase_DFALL_NiTListItem_BSStringT_char______BSStringT_char_____AntiBloatAllocator
-        m_kItemCount;  // +0x8, 4 bytes
-    // unsigned int __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*()
-    // bool __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*()
-    // void* __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*()
-    // void* __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*()
-    // void* __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*(void*)
-    // void* __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*(void*)
-    // void __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*(void*, void*)
-    // void __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*(void*, void*)
-    // NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >
-    // void __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*()
-    // void __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*(NiTListItem<BSStringT<char> >*)
-    // void __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*(NiTListItem<BSStringT<char> >*)
-    // void* __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*(void*, NiTListItem<BSStringT<char> >*)
-    // void* __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*(void*, NiTListItem<BSStringT<char> >*)
-    // NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >& __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*(const NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >&)
-    // void* __cdecl NiTListBase<DFALL<NiTListItem<BSStringT<char> > >,BSStringT<char> >::*(unsigned int)
-};
+
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTListBase_DFALL_NiTListItem_BSStringT_char______BSStringT_char___) == 12);
 FNV_STATIC_ASSERT(offsetof(NiTListBase_DFALL_NiTListItem_BSStringT_char______BSStringT_char___, m_pkHead) == 0);

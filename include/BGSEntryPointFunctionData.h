@@ -1,15 +1,16 @@
-// Source layout: BGSEntryPointFunctionData. PC corrections are in generate_headers.py.
-#ifndef FNV_BGSENTRYPOINTFUNCTIONDATA_H
-#define FNV_BGSENTRYPOINTFUNCTIONDATA_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+class TESFile;
+class TESForm;
+
 class BGSEntryPointFunctionData
 {
-  public:
-    void** m_ppVirtualMethodTable;  // +0x0
+public:
+    virtual ~BGSEntryPointFunctionData();
+    virtual unsigned char GetType();
+    virtual BGSEntryPointFunctionData* Duplicate();
+    virtual bool Compare(BGSEntryPointFunctionData* other);
+    virtual void Save();
+    virtual void Load(TESFile* file);
+    virtual void InitItem(TESForm* form);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BGSEntryPointFunctionData) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BGSEntryPointFunctionData, m_ppVirtualMethodTable) == 0x0);
-#endif

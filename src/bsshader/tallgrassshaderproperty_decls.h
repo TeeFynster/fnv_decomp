@@ -1,49 +1,31 @@
-// bsshader/tallgrassshaderproperty_decls.h: declares Entry, MemoryManager, TallGrassShaderProperty, TallGrassCacheData, TallGrassRefObject and more
+// bsshader/tallgrassshaderproperty_decls.h: declares Entry, TallGrassShaderProperty, TallGrassCacheData, NiRefObject and more
 #ifndef TALLGRASS_PRIVATE_H
 #define TALLGRASS_PRIVATE_H
+
+#include "../../include/MemoryManager.h"
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "../../include/NiPointer.h"
+#include "../../include/NiRefObject.h"
 
 extern unsigned long DAT_011c9f6c;
 extern unsigned int DAT_011f9ef4, DAT_011f9ef8;
 class NiShader;
-template <class A, class K, class V> class NiTMapBase;
 class TallGrassShaderProperty;
-template <class T> class NiTPointerAllocator
+#include "../../include/NiTPointerAllocator.h"
+#include "../../include/NiTMapBase.h"
+template <class A, class K, class V> inline unsigned int NiTMapBase<A, K, V>::GetCount() const
 {
-};
-template <class A, class K, class V> class NiTMapBase
+    return m_kItemCount.m_uiCount;
+}
+template <class A, class K, class V> inline void* NiTMapBase<A, K, V>::GetFirstPos() const
 {
-  public:
-    struct Entry
-    {
-        Entry* next;
-        K key;
-        V value;
-    };
-    void* vtable;
-    unsigned int hashSize;
-    Entry** buckets;
-    unsigned int count;
-    void RemoveAll();
-    unsigned int GetCount() const
-    {
-        return count;
-    }
-    __declspec(noalias) void GetNext(void*&, K&, V&);
-    void* GetFirstPos() const
-    {
-        for (unsigned int i = 0; i < hashSize; ++i)
-            if (buckets[i])
-                return buckets[i];
-        return 0;
-    }
-};
+    for (unsigned int i = 0; i < m_uiHashSize; ++i)
+        if (m_ppkHashTable[i])
+            return m_ppkHashTable[i];
+    return 0;
+}
+
 typedef NiTMapBase<NiTPointerAllocator<unsigned int>, const char*, NiShader*> GrassMap;
-class MemoryManager
-{
-  public:
-    static MemoryManager& Instance();
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 inline MemoryManager& MemoryManager::Instance()
 {
@@ -72,7 +54,7 @@ class TallGrassShaderProperty
     static void ClearCacheData();
     class GeometryCacheEntry;
     __declspec(noalias) static NiTMapBase<NiTPointerAllocator<unsigned int>, const char*,
-                                          class NiPointerCachedGeometry>* GetGeometryCacheMap();
+                                          NiPointer<GeometryCacheEntry> >* GetGeometryCacheMap();
     static void ClearCaches();
 };
 template <class T> inline void DestroyGrass(T* pointer)
@@ -84,60 +66,33 @@ template <class T> inline void DestroyGrass(T* pointer)
     }
 }
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-class TallGrassRefObject
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)))
+        DeleteThis();
+}
+class TallGrassShaderProperty::GeometryCacheEntry : public NiRefObject
 {
   public:
-    virtual void vfn_00();
-    virtual void DeleteThis();
-    volatile long refs;
-    void DecRef()
-    {
-        if (!InterlockedDecrement(&refs))
-            DeleteThis();
-    }
-};
-template <class T> class NiPointer
-{
-  public:
-    T* pointer;
-    NiPointer() : pointer(0)
-    {}
-    ~NiPointer()
-    {
-        if (pointer)
-            pointer->DecRef();
-    }
-    T* operator->() const
-    {
-        return pointer;
-    }
-    operator T*() const
-    {
-        return pointer;
-    }
-    void Reset()
-    {
-        if (pointer)
-        {
-            pointer->DecRef();
-            pointer = 0;
-        }
-    }
-};
-class TallGrassShaderProperty::GeometryCacheEntry : public TallGrassRefObject
-{
-  public:
-    NiPointer<TallGrassRefObject> geometry;
+    NiPointer<NiRefObject> geometry;
     void* data;
     unsigned int field10;
-    NiPointer<TallGrassRefObject> field14;
-    NiPointer<TallGrassRefObject> field18;
-    NiPointer<TallGrassRefObject> field1c;
-    NiPointer<TallGrassRefObject> field20;
+    NiPointer<NiRefObject> field14;
+    NiPointer<NiRefObject> field18;
+    NiPointer<NiRefObject> field1c;
+    NiPointer<NiRefObject> field20;
     unsigned char padding[14];
     bool owned;
 };
-class NiPointerCachedGeometry : public NiPointer<TallGrassShaderProperty::GeometryCacheEntry>
-{
-};
+template <> __declspec(noalias) void NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned long,
+    TallGrassShaderProperty::TallGrassCacheData*>::GetNext(void*&, unsigned long&,
+    TallGrassShaderProperty::TallGrassCacheData*&) const;
+template <> __declspec(noalias) void NiTMapBase<NiTPointerAllocator<unsigned int>, const char*,
+    NiPointer<TallGrassShaderProperty::GeometryCacheEntry> >::GetNext(void*&, const char*&,
+    NiPointer<TallGrassShaderProperty::GeometryCacheEntry>&) const;
 #endif

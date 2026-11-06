@@ -29,7 +29,10 @@ void __thiscall FnvVehicleDefaultVelocityDamper::FUN_00e43ae0(float timeStep, co
     const float* state = *reinterpret_cast<const float* const*>(dataBase + 0x18);
 
     __declspec(align(16)) hkVector4 values;
-    values = *reinterpret_cast<const hkVector4*>(state + 0x1C0 / 4);
+    unsigned int* scalarCopy = reinterpret_cast<unsigned int*>(&values);
+    const unsigned int* scalarSource = reinterpret_cast<const unsigned int*>(state + 0x1C0 / 4);
+    scalarCopy[0] = scalarSource[0]; scalarCopy[1] = scalarSource[1];
+    scalarCopy[2] = scalarSource[2]; scalarCopy[3] = scalarSource[3];
 
     __m128 vector = _mm_load_ps(&values.x);
     __m128 squares = _mm_mul_ps(vector, vector);

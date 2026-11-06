@@ -2,26 +2,36 @@
 // src/havok/physics/dynamics/world/memory/default/hkpdefaultworldmemorywatchdog.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/memory/default/hkpdefaultworldmemorywatchdog.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpDefaultWorldMemoryWatchDog.h"
+#include "../../../../../../../include/hkpEntity.h"
+#include "../../../../../../../include/hkpWorld.h"
+#include "../../../../../../../include/hkBoolResult.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
 
-struct FnvCpu_FUN_00e48260_CpuObject
+// The getter at 0x00e48260 reads the same +0x08 memory limit used by ProcessList at 0x00e48300.
+class WatchdogReclaimer
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    int value;
-    int FUN_00e48260();
+  public:
+    int unk00;
+    int unk04;
+    int m_memoryLimit;
+    int GetMemoryLimit();
+    void ProcessList(hkpWorld* pkWorld);
 };
+
 // @fnv 0x00e48260
-int FnvCpu_FUN_00e48260_CpuObject::FUN_00e48260()
+int WatchdogReclaimer::GetMemoryLimit()
 {
-    return value;
+    return m_memoryLimit;
 }
 
+// The call at 0x00e48270 passes two arguments to 0x00c91620; the shared world method declares one.
 struct WatchdogCallback
 {
     void ProcessTarget(void** source, int value);
 };
 
+// The callback shim reads a callback at +0x18 and an indirect value at +0x48 in this state record.
 struct WatchdogState
 {
     void* unk00;
@@ -51,78 +61,35 @@ void __stdcall NotifyWatchdogCallback(WatchdogState* pState, int unused)
     pState->callback18->ProcessTarget(reinterpret_cast<void**>(&pState), *pState->value48);
 }
 
-class hkMemoryAllocatorE482
+// The original allocator invokes its bool-returning allocation check through vtable slot +0x24.
+__forceinline bool hkMemoryAllocator::canAllocTotal(int bytes)
 {
-  public:
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual bool IsStreamValid(void* param);
-};
-
-struct hkMemoryRouterE482
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorE482* m_pStreamAllocator;
-
-    hkMemoryAllocatorE482& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-namespace hkRouterE482 {
-extern "C" hkMemoryRouterE482& __cdecl FUN_00c85750() throw();
+    typedef bool (__thiscall *AllocationCheck)(hkMemoryAllocator*, int);
+    return (*reinterpret_cast<AllocationCheck**>(this))[9](this, bytes);
 }
 
-struct hkJobE482
-{
-    char unk00[0xd0];
-    signed char m_priority;
-};
 
-struct hkResultE482
-{
-    hkResultE482()
-    {}
-    int m_pClassEnum;
-};
-
-class hkQueueE482
-{
-  public:
-    hkResultE482 ProcessTarget(hkJobE482* job);
-};
-
-struct hkSchedulerE482
+// This island view uses a world pointer at +0x18; the shared island declares it at +0x0c.
+struct EntityRemovalIsland
 {
     int unk00[6];
-    hkQueueE482* m_queue;
+    hkpWorld* m_world;
     int unk1C[11];
-    hkJobE482** m_jobs;
-    int m_numJobs;
+    hkpEntity** m_entities;
+    int m_numEntities;
 };
 
 // @fnv 0x00e48290
-void __cdecl FUN_00e48290(hkSchedulerE482* pScheduler, int level, void* param, int* piMaxLevel)
+void __cdecl FUN_00e48290(EntityRemovalIsland* pIsland, int level, int bytes, int* piMaxLevel)
 {
-    for (int i = pScheduler->m_numJobs - 1; i >= 0; i--)
+    for (int i = pIsland->m_numEntities - 1; i >= 0; i--)
     {
-        hkJobE482* job = pScheduler->m_jobs[i];
-        int iPriority = job->m_priority;
+        hkpEntity* entity = pIsland->m_entities[i];
+        int iPriority = entity->m_iAutoRemoveLevel;
         if (iPriority >= level)
         {
-            pScheduler->m_queue->ProcessTarget(job);
-            if (!hkRouterE482::FUN_00c85750().heap().IsStreamValid(param))
+            pIsland->m_world->ProcessTarget(reinterpret_cast<hkpRigidBody*>(entity));
+            if (!reinterpret_cast<hkMemoryAllocator&>((&hkMemoryRouter::getInstance())->heap()).canAllocTotal(bytes))
                 return;
         }
         else
@@ -132,78 +99,31 @@ void __cdecl FUN_00e48290(hkSchedulerE482* pScheduler, int level, void* param, i
     }
 }
 
-class hkMemoryAllocatorE483
-{
-  public:
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual bool unk24(void* pvCtx);
-};
-
-struct hkMemoryRouterE483
-{
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorE483* m_pStreamAllocator;
-    hkMemoryAllocatorE483& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" hkMemoryRouterE483& __cdecl FUN_00c85750();
-void __cdecl FUN_00e48290(void* pvItem, int iFlags, void* pvCtx, int* piOut);
-
-struct ListE483
-{
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24;
-    void** m_ppPos;
-    int m_iPosSize;
-    int unk30;
-    char* m_pcNeg;
-    int m_iNegSize;
-};
-
-class HostE483
-{
-  public:
-    int unk00;
-    int unk04;
-    void* m_pvCtx;
-    void ProcessList(ListE483* pkList);
-};
-
-// Repeatedly walks pkList from the last positive entry down through the negative entries calling FUN_00e48290, stopping if the heap's unk24(pvCtx) returns true.
+// Remove entities by descending auto-remove level until the heap can satisfy the memory limit.
 // @fnv 0x00e48300
-void HostE483::ProcessList(ListE483* pkList)
+void WatchdogReclaimer::ProcessList(hkpWorld* pkWorld)
 {
-    void* pvCtx = m_pvCtx;
+    int bytes = m_memoryLimit;
     int iFlags = 0x7f;
     do
     {
         int iOut = 0;
-        int i = pkList->m_iPosSize - 1;
-        while (i >= -pkList->m_iNegSize)
+        int i = pkWorld->m_kActiveSimulationIslands.m_iElementCount - 1;
+        while (i >= -pkWorld->m_kInactiveSimulationIslands.m_iElementCount)
         {
-            if (i >= pkList->m_iPosSize)
+            if (i >= pkWorld->m_kActiveSimulationIslands.m_iElementCount)
             {
-                i = pkList->m_iPosSize - 1;
-                if (i < -pkList->m_iNegSize)
+                i = pkWorld->m_kActiveSimulationIslands.m_iElementCount - 1;
+                if (i < -pkWorld->m_kInactiveSimulationIslands.m_iElementCount)
                     return;
             }
-            void* pvItem;
+            EntityRemovalIsland* island;
             if (i >= 0)
-                pvItem = pkList->m_ppPos[i];
+                island = static_cast<EntityRemovalIsland*>(pkWorld->m_kActiveSimulationIslands.m_data[i]);
             else
-                pvItem = *(void**)(pkList->m_pcNeg - (i * 4 + 4));
-            FUN_00e48290(pvItem, iFlags, pvCtx, &iOut);
-            if (FUN_00c85750().heap().unk24(pvCtx))
+                island = static_cast<EntityRemovalIsland*>(pkWorld->m_kInactiveSimulationIslands.m_data[-i - 1]);
+            FUN_00e48290(island, iFlags, bytes, &iOut);
+            if (reinterpret_cast<hkMemoryAllocator&>((&hkMemoryRouter::getInstance())->heap()).canAllocTotal(bytes))
                 return;
             i--;
         }

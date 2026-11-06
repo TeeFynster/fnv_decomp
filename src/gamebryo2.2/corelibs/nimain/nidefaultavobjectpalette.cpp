@@ -1,13 +1,29 @@
-// gamebryo2.2/corelibs/nimain/nidefaultavobjectpalette.cpp: NiDefaultAVObjectPalette, Map, PaletteOwner, PaletteShell and more (18 functions)
+#include "../../../../include/NiTArray.h"
+// gamebryo2.2/corelibs/nimain/nidefaultavobjectpalette.cpp: NiDefaultAVObjectPalette, Map, PaletteOwner and more (18 functions)
 
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/BSStreamHeader.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiTPointerAllocator_unsigned_int_.h"
+#include "../../../../include/NiTMapBase.h"
+#include "../../../../include/NiTransform.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiAVObjectPalette.h"
+#include "../../../../include/NiDefaultAVObjectPalette.h"
 #include "nidefaultavobjectpalette_types_NiDefaultAVObjectPalette.h"
-#include "nidefaultavobjectpalette_types_NiAVObject.h"
-#include "nidefaultavobjectpalette_types_NiStream.h"
-#include "nidefaultavobjectpalette_types_NiInterpolator.h"
-#include "nidefaultavobjectpalette_types_NiGlobalStringTable.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiInterpolator.h"
+#include "../../../../include/NiGlobalStringTable.h"
 #include "nidefaultavobjectpalette_decls.h"
 
 void AddObjectToPalette(NiAVObject*, NiDefaultAVObjectPalette*);
+
+// The bare handle of an NiFixedString whose constructor and destructor these functions spell out inline (NiMain
+// has no exception frames; a real NiFixedString local would add one to this /EHsc unit).
+struct FixedStringHandle
+{
+    char* m_kHandle;
+};
 
 struct NiDefaultPaletteNodeChildren
 {
@@ -28,7 +44,7 @@ void AddObjectToPalette(NiAVObject* object, NiDefaultAVObjectPalette* palette)
     if (object->m_kName.m_kHandle)
         palette->AddNamedAVObject(object->m_kName, object);
 
-    NiNode* node = object->GetNiNode();
+    NiNode* node = object->IsSceneNode();
     if (node)
     {
         NiDefaultPaletteNodeChildren* children = (NiDefaultPaletteNodeChildren*)node;
@@ -67,9 +83,9 @@ void NiDefaultAVObjectPalette::LoadBinary(NiStream& stream)
             NiAVObject* object = (NiAVObject*)stream.DeserializeObject();
             if (string && object)
             {
-                NiFixedString name;
+                FixedStringHandle name;
                 name.m_kHandle = NiGlobalStringTable::AddString(string);
-                AddNamedAVObject(name, object);
+                AddNamedAVObject(reinterpret_cast<NiFixedString&>(name), object);
                 if (name.m_kHandle != EmptyFS.m_kHandle)
                 {
                     InterlockedDecrement((volatile long*)(name.m_kHandle - 8));
@@ -80,26 +96,7 @@ void NiDefaultAVObjectPalette::LoadBinary(NiStream& stream)
     }
 }
 
-struct FUN_00a6e960_shell : public NiDefaultAVObjectPalette
-{
-    void FUN_00a6e960();
-};
-
-// @fnv 0x00a6e960
-void FUN_00a6e960_shell::FUN_00a6e960()
-{
-    if (m_pkScene)
-    {
-        m_kObjectMap.RemoveAll();
-        AddObjectToPalette(m_pkScene, this);
-    }
-}
-
-struct P03MM
-{
-    void* __thiscall Allocate(unsigned int);
-};
-extern P03MM g_memoryManager;
+extern MemoryManager g_memoryManager;
 
 // @fnv 0x00a6ef50
 void* __cdecl FUN_00a6ef50()
@@ -130,10 +127,6 @@ void __stdcall AssignSharedPtr(void* apTarget, void* apSource, void* apValue)
     *(void**)((char*)apTarget + 8) = apValue;
 }
 
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern int DAT_0109ca08;
 extern int DAT_0109ca18;
 struct FUN_00a6eb20_Holder
@@ -144,14 +137,14 @@ struct FUN_00a6eb20_Holder
 // @fnv 0x00a6eb20
 void* __thiscall FUN_00a6eb20_Holder::DestroyHolder(unsigned int auiFlags)
 {
-    NiTFixedStringMap_NiAVObject___* p = (NiTFixedStringMap_NiAVObject___*)this;
+    PaletteObjectMapView* p = (PaletteObjectMapView*)this;
     *(void**)this = (void*)&DAT_0109ca18;
     p->RemoveAll();
     *(void**)this = (void*)&DAT_0109ca08;
     p->RemoveAll();
     NiFree(*(void**)((char*)this + 8));
     if (auiFlags & 1)
-        ((MemoryManager*)&g_memoryManager)->Deallocate(this);
+        g_memoryManager.Deallocate(this);
     return this;
 }
 
@@ -211,7 +204,7 @@ void __cdecl AddObjectToPaletteRecursive(NiAVObject* apObject, NiDefaultAVObject
         return;
     if (apObject->m_kName.m_kHandle != 0)
         apPalette->AddNamedAVObject(apObject->m_kName, apObject);
-    NodeChildrenView_cls* node = (NodeChildrenView_cls*)apObject->GetNiNode();
+    NodeChildrenView_cls* node = (NodeChildrenView_cls*)apObject->IsSceneNode();
     if (node == 0)
         return;
     unsigned int i = 0;
@@ -225,71 +218,20 @@ void __cdecl AddObjectToPaletteRecursive(NiAVObject* apObject, NiDefaultAVObject
     }
 }
 
-struct S_00a6e8e0_Object
-{
-    virtual void vf00();
-    virtual void vf01();
-    virtual void vf02();
-    virtual NiDefaultPaletteNodeChildren* vf03();
-    int unk04;
-    int m_08;
-};
-
-struct S_00a6e8e0_Palette
-{
-    virtual void vf00();
-    virtual void vf01();
-    virtual void vf02();
-    virtual void vf03();
-    virtual void vf04();
-    virtual void vf05();
-    virtual void vf06();
-    virtual void vf07();
-    virtual void vf08();
-    virtual void vf09();
-    virtual void vf10();
-    virtual void vf11();
-    virtual void vf12();
-    virtual void vf13();
-    virtual void vf14();
-    virtual void vf15();
-    virtual void vf16();
-    virtual void vf17();
-    virtual void vf18();
-    virtual void vf19();
-    virtual void vf20();
-    virtual void vf21();
-    virtual void vf22();
-    virtual void vf23();
-    virtual void vf24();
-    virtual void vf25();
-    virtual void vf26();
-    virtual void vf27();
-    virtual void vf28();
-    virtual void vf29();
-    virtual void vf30();
-    virtual void vf31();
-    virtual void vf32();
-    virtual void vf33();
-    virtual void vf34();
-    virtual void vf35();
-    virtual void vf36(int* name, int flag);
-};
-
 // @fnv 0x00a6e8e0
-void __cdecl FUN_00a6e8e0(S_00a6e8e0_Object* object, S_00a6e8e0_Palette* palette)
+void __cdecl FUN_00a6e8e0(NiAVObject* object, NiDefaultAVObjectPalette* palette)
 {
     if (object == 0)
         return;
     if (palette == 0)
         return;
-    if (object->m_08 != 0)
-        palette->vf36(&object->m_08, 0);
-    NiDefaultPaletteNodeChildren* children = object->vf03();
+    if (object->m_kName.m_kHandle != 0)
+        palette->AddNamedAVObject(object->m_kName, 0);
+    NiDefaultPaletteNodeChildren* children = (NiDefaultPaletteNodeChildren*)object->IsSceneNode();
     if (children == 0)
         return;
     for (unsigned int i = 0; i < children->m_usArraySize; ++i)
-        FUN_00a6e8e0((S_00a6e8e0_Object*)children->m_children[i], palette);
+        FUN_00a6e8e0((NiAVObject*)children->m_children[i], palette);
 }
 
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int size);
@@ -298,43 +240,25 @@ extern "C" void* __cdecl FUN_00ec61c0(void* buffer, int value, unsigned int size
 extern "C" unsigned char DAT_01096284;
 extern "C" unsigned char DAT_01096114;
 extern "C" unsigned char DAT_0109618c;
-struct PaletteBase
+// The shared class has no initializing constructor declaration; this adapter adds initialization only.
+struct PaletteObject : NiDefaultAVObjectPalette
 {
-    void* vtable;
-    unsigned int unknown;
-    void __thiscall FUN_00a5d3a0();
-    __forceinline PaletteBase() throw()
-    {
-        FUN_00a5d3a0();
-        vtable = &DAT_01096284;
-    }
-};
-struct PaletteHash
-{
-    void* vtable;
-    unsigned int capacity;
-    void* buckets;
-    unsigned int count;
-    __forceinline PaletteHash() throw()
-    {
-        vtable = &DAT_01096114;
-        capacity = 37;
-        count = 0;
-        buckets = FUN_00aa1070(148);
-        FUN_00ec61c0(buckets, 0, capacity * 4);
-        vtable = &DAT_0109618c;
-    }
-};
-struct PaletteObject : PaletteBase
-{
-    PaletteHash hash;
-    void* scene;
     static __forceinline void* operator new(unsigned int size) throw()
     {
         return FUN_00aa13e0(size);
     }
-    __forceinline PaletteObject() throw() : PaletteBase(), hash(), scene(0)
-    {}
+    __forceinline PaletteObject() throw()
+    {
+        *(void**)this = &DAT_01096284;
+        PaletteObjectMapView& hash = reinterpret_cast<PaletteObjectMapView&>(m_kObjectMap);
+        hash.m_ppVirtualMethodTable = (void**)&DAT_01096114;
+        hash.m_uiHashSize = 37;
+        hash.m_kItemCount.m_uiCount = 0;
+        hash.m_ppkHashTable = (NiTMapItem<NiFixedString, NiAVObject*>**)FUN_00aa1070(148);
+        FUN_00ec61c0(hash.m_ppkHashTable, 0, hash.m_uiHashSize * 4);
+        hash.m_ppVirtualMethodTable = (void**)&DAT_0109618c;
+        m_pkScene = 0;
+    }
 };
 struct PaletteOwner
 {
@@ -379,11 +303,8 @@ template <class T> class BC1F550MallocInterface
     static T* Allocate(unsigned int auiCount);
 };
 
-template <class T, class TAlloc> class BC1F550Array
+template <class T, class TAlloc> inline NiTArray<T, TAlloc>::NiTArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
 {
-  public:
-    BC1F550Array(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) throw()
-    {
         m_usMaxSize = (unsigned short)uiMaxSize;
         m_usGrowBy = (unsigned short)uiGrowBy;
         m_usSize = 0;
@@ -393,29 +314,21 @@ template <class T, class TAlloc> class BC1F550Array
         else
             m_pBase = 0;
     }
-    virtual ~BC1F550Array();
 
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
-
-template <class T> class BC1F550ObjectArray : public BC1F550Array<T, BC1F550NewInterface<T> >
+template <class T> class BC1F550ObjectArray : public NiTArray<T, BC1F550NewInterface<T> >
 {
   public:
     BC1F550ObjectArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) throw()
-        : BC1F550Array<T, BC1F550NewInterface<T> >(uiMaxSize, uiGrowBy)
+        : NiTArray<T, BC1F550NewInterface<T> >(uiMaxSize, uiGrowBy)
     {}
     virtual ~BC1F550ObjectArray();
 };
 
-template <class T> class BC1F550PrimitiveArray : public BC1F550Array<T, BC1F550MallocInterface<T> >
+template <class T> class BC1F550PrimitiveArray : public NiTArray<T, BC1F550MallocInterface<T> >
 {
   public:
     BC1F550PrimitiveArray(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1) throw()
-        : BC1F550Array<T, BC1F550MallocInterface<T> >(uiMaxSize, uiGrowBy)
+        : NiTArray<T, BC1F550MallocInterface<T> >(uiMaxSize, uiGrowBy)
     {}
     virtual ~BC1F550PrimitiveArray();
 };
@@ -467,12 +380,6 @@ FUN_00c1f550_cls::FUN_00c1f550_cls() throw()
       m_kEmitterPoint(g_kC1F550Zero)
 {}
 
-template <class Alloc, class K, class V> class NiTMapBase
-{
-  public:
-    bool GetAt(const K key, V& val) const;
-};
-
 class CloningProcess
 {
   public:
@@ -484,7 +391,7 @@ struct NiObjectCloneBase
     void ProcessClone(CloningProcess& kCloning);
 };
 
-inline void* FirstPos(const NiTFixedStringMap_NiAVObject___& m)
+inline void* FirstPos(const PaletteObjectMapView& m)
 {
     for (unsigned int i = 0; i < m.m_uiHashSize; i++)
     {
@@ -494,21 +401,16 @@ inline void* FirstPos(const NiTFixedStringMap_NiAVObject___& m)
     return 0;
 }
 
-struct PaletteShell : public NiDefaultAVObjectPalette
-{
-    void FUN_00a6e5b0(CloningProcess& kCloning);
-};
-
 // @fnv 0x00a6e5b0
-void PaletteShell::FUN_00a6e5b0(CloningProcess& kCloning)
+void NiDefaultAVObjectPalette::ProcessClone(CloningProcess& kCloning)
 {
     ((NiObjectCloneBase*)this)->ProcessClone(kCloning);
 
-    NiFixedString kName;
+    FixedStringHandle kName;
     NiObject*& pkClone = reinterpret_cast<NiObject*&>(kName.m_kHandle);
     pkClone = 0;
     kCloning.m_pCloneMap->GetAt(this, pkClone);
-    PaletteShell* pkDest = (PaletteShell*)pkClone;
+    NiDefaultAVObjectPalette* pkDest = (NiDefaultAVObjectPalette*)pkClone;
 
     if (m_pkScene)
     {
@@ -516,19 +418,19 @@ void PaletteShell::FUN_00a6e5b0(CloningProcess& kCloning)
         pkDest->m_pkScene = (NiAVObject*)pkClone;
     }
 
-    if (m_kObjectMap.m_kItemCount.m_uiCount)
+    if (reinterpret_cast<PaletteObjectMapView&>(m_kObjectMap).m_kItemCount.m_uiCount)
     {
-        void* pos = FirstPos(m_kObjectMap);
+        void* pos = FirstPos(reinterpret_cast<PaletteObjectMapView&>(m_kObjectMap));
         while (pos)
         {
             kName.m_kHandle = EmptyFS.m_kHandle;
             NiAVObject* pkObj;
-            m_kObjectMap.GetNext(pos, kName, pkObj);
+            m_kObjectMap.GetNext(pos, reinterpret_cast<NiFixedString&>(kName), pkObj);
             if (kName.m_kHandle && pkObj)
             {
                 NiObject* pkObjClone;
                 if (kCloning.m_pCloneMap->GetAt(pkObj, pkObjClone))
-                    pkDest->AddNamedAVObject(kName, (NiAVObject*)pkObjClone);
+                    pkDest->AddNamedAVObject(reinterpret_cast<NiFixedString&>(kName), (NiAVObject*)pkObjClone);
             }
             if (kName.m_kHandle != EmptyFS.m_kHandle)
                 InterlockedDecrement((volatile long*)(kName.m_kHandle - 8));
@@ -556,61 +458,23 @@ struct PaletteMap
     void* FUN_00ee8ac0();
     void FUN_00a8f770(void** iterator, char** key, void** object);
 };
-class FUN_00a6e7b0_class
+// Keep the equality implementation here until the shared class declares its override and base call.
+struct PaletteEquality : NiDefaultAVObjectPalette
 {
-  public:
-    virtual void vf0();
-    virtual void vf1();
-    virtual void vf2();
-    virtual void vf3();
-    virtual void vf4();
-    virtual void vf5();
-    virtual void vf6();
-    virtual void vf7();
-    virtual void vf8();
-    virtual void vf9();
-    virtual void vf10();
-    virtual void vf11();
-    virtual void vf12();
-    virtual void vf13();
-    virtual void vf14();
-    virtual void vf15();
-    virtual void vf16();
-    virtual void vf17();
-    virtual void vf18();
-    virtual void vf19();
-    virtual void vf20();
-    virtual void vf21();
-    virtual void vf22();
-    virtual void vf23();
-    virtual void vf24();
-    virtual void vf25();
-    virtual void vf26();
-    virtual void vf27();
-    virtual void vf28();
-    virtual void vf29();
-    virtual void vf30();
-    virtual void vf31();
-    virtual void vf32();
-    virtual void vf33();
-    virtual void vf34();
-    virtual int vf35(char** key);
-    int unk04;
-    PaletteMap m_map;
-    bool FUN_00a88a50(FUN_00a6e7b0_class* other);
-    bool FUN_00a6e7b0(FUN_00a6e7b0_class* other);
+    bool BaseEquals(PaletteEquality* other);
+    bool Equals(PaletteEquality* other);
 };
 // @fnv 0x00a6e7b0
-bool FUN_00a6e7b0_class::FUN_00a6e7b0(FUN_00a6e7b0_class* other)
+bool PaletteEquality::Equals(PaletteEquality* other)
 {
-    if (!FUN_00a88a50(other))
+    if (!BaseEquals(other))
         return false;
-    unsigned int num = m_map.m_uiItemCount;
-    if (other->m_map.m_uiItemCount != num)
+    unsigned int num = reinterpret_cast<PaletteMap&>(m_kObjectMap).m_uiItemCount;
+    if (reinterpret_cast<PaletteMap&>(other->m_kObjectMap).m_uiItemCount != num)
         return false;
     if (num)
     {
-        void* iterator = m_map.FUN_00ee8ac0();
+        void* iterator = reinterpret_cast<PaletteMap&>(m_kObjectMap).FUN_00ee8ac0();
         if (iterator)
         {
             void(__stdcall * deallocate)(void*) = DAT_00fdf1c4;
@@ -618,8 +482,8 @@ bool FUN_00a6e7b0_class::FUN_00a6e7b0(FUN_00a6e7b0_class* other)
             {
                 char* key = DAT_0109b220;
                 void* object;
-                m_map.FUN_00a8f770(&iterator, &key, &object);
-                if (!other->vf35(&key))
+                reinterpret_cast<PaletteMap&>(m_kObjectMap).FUN_00a8f770(&iterator, &key, &object);
+                if (!other->FindAVObject(reinterpret_cast<const NiFixedString&>(key)))
                 {
                     if (key != DAT_0109b220)
                         deallocate(key - 8);
@@ -633,27 +497,22 @@ bool FUN_00a6e7b0_class::FUN_00a6e7b0(FUN_00a6e7b0_class* other)
     return true;
 }
 
-struct MapNoAlias : NiTFixedStringMap_NiAVObject___
+struct MapNoAlias : PaletteObjectMapView
 {
     __declspec(noalias) void GetNext(void*&, NiFixedString&, NiAVObject*&) const;
 };
-struct StreamSaveShell : public NiStream
-{
-    void FUN_00a64160(const char* pcString);
-};
 
+// The shared class does not yet declare its SaveBinary override.
 struct PaletteSaveShell : public NiDefaultAVObjectPalette
 {
     void FUN_00a6e6c0(NiStream& kStream);
     void FUN_00a724d0(NiStream& kStream);
 };
 
-typedef void(__thiscall* NiStreamLinkObject)(NiStream*, NiAVObject*);
-
 template <class T> void WriteBinaryArray(NiBinaryStream& kOstr, const T* pValue, unsigned int uiNumValues)
 {
     unsigned int uiComponentSize = sizeof(T);
-    kOstr.m_uiStreamFlags += kOstr.m_pfnWrite(&kOstr, pValue, sizeof(T) * uiNumValues, &uiComponentSize, 1);
+    kOstr.m_uiAbsoluteCurrentPos += kOstr.m_pfnWrite(&kOstr, pValue, sizeof(T) * uiNumValues, &uiComponentSize, 1);
 }
 
 // @fnv 0x00a6e6c0
@@ -661,25 +520,25 @@ void PaletteSaveShell::FUN_00a6e6c0(NiStream& kStream)
 {
     FUN_00a724d0(kStream);
 
-    ((NiStreamLinkObject)kStream.m_ppVirtualMethodTable[12])(&kStream, m_pkScene);
+    kStream.SaveLinkID(m_pkScene);
 
-    unsigned int uiObjectCount = m_kObjectMap.m_kItemCount.m_uiCount;
-    NiBinaryStream* pkOstr = kStream.m_pBackingStream;
+    unsigned int uiObjectCount = reinterpret_cast<PaletteObjectMapView&>(m_kObjectMap).m_kItemCount.m_uiCount;
+    NiBinaryStream* pkOstr = kStream.m_pkOstr;
     WriteBinaryArray(*pkOstr, &uiObjectCount, 1);
 
-    if (m_kObjectMap.m_kItemCount.m_uiCount != 0)
+    if (reinterpret_cast<PaletteObjectMapView&>(m_kObjectMap).m_kItemCount.m_uiCount != 0)
     {
-        void* pvPos = FirstPos(m_kObjectMap);
+        void* pvPos = FirstPos(reinterpret_cast<PaletteObjectMapView&>(m_kObjectMap));
         while (pvPos)
         {
-            NiFixedString kKey;
+            FixedStringHandle kKey;
             const char* pcKey;
             kKey.m_kHandle = EmptyFS.m_kHandle;
             NiAVObject* pkObject;
-            ((MapNoAlias&)m_kObjectMap).GetNext(pvPos, kKey, pkObject);
+            ((MapNoAlias&)m_kObjectMap).GetNext(pvPos, reinterpret_cast<NiFixedString&>(kKey), pkObject);
             pcKey = kKey.m_kHandle;
-            ((StreamSaveShell&)kStream).FUN_00a64160(pcKey);
-            ((NiStreamLinkObject)kStream.m_ppVirtualMethodTable[12])(&kStream, pkObject);
+            kStream.FUN_00a64160(pcKey);
+            kStream.SaveLinkID(pkObject);
             if (pcKey != EmptyFS.m_kHandle)
                 InterlockedDecrement((volatile long*)(pcKey - 8));
         }
@@ -695,11 +554,7 @@ void __cdecl FUN_00aa1000()
 
 // Adapted from another contributor's unverified best attempt; prior model was not supplied.
 
-struct ViewerMemoryManager
-{
-    void* Allocate(unsigned int uiSize) throw();
-};
-extern ViewerMemoryManager g_viewerMemoryManager;
+extern MemoryManager g_viewerMemoryManager;
 extern "C" int __cdecl sprintf(char*, const char*, ...);
 char* FUN_00a7d330(const char* pcName);
 extern const char* g_011f4a04;
@@ -772,6 +627,7 @@ struct PaletteHashViewer
     }
     __declspec(noalias) void GetNext(void*& pos, ViewerFixedString& kName, NiAVObject*& pkObj) const throw();
 };
+// The shared class does not yet declare its viewer override.
 struct NiDefaultAVObjectPaletteViewer : public NiDefaultAVObjectPalette
 {
     void FUN_00a6ed90(ViewerStrings* pkStrings);
@@ -786,7 +642,7 @@ void NiDefaultAVObjectPaletteViewer::FUN_00a6ed90(ViewerStrings* pkStrings)
     char* pcScene = (char*)g_viewerMemoryManager.Allocate(0x60);
     sprintf(pcScene, "m_pkScene = %s", m_pkScene->m_kName.m_kHandle ? m_pkScene->m_kName.m_kHandle : "UNKNOWN");
     pkStrings->Add(pcScene);
-    if (m_kObjectMap.m_kItemCount.m_uiCount)
+    if (reinterpret_cast<PaletteObjectMapView&>(m_kObjectMap).m_kItemCount.m_uiCount)
     {
         PaletteHashViewer* pkHash = (PaletteHashViewer*)&m_kObjectMap;
         void* pos = pkHash->GetFirstPos();
@@ -806,6 +662,7 @@ void NiDefaultAVObjectPaletteViewer::FUN_00a6ed90(ViewerStrings* pkStrings)
 }
 
 #include <string.h>
+#include "NiRefObject_inline.h"
 extern int DAT_0109ca08;
 extern int DAT_0109ca18;
 extern NiFixedString EmptyFS;
@@ -833,25 +690,20 @@ __forceinline Key::Key(const char* value)
 {
     text = StringPool::AddString(value);
 }
-struct Obj
-{
-    int vptr;
-    int refs;
-    const char* name;
-};
 struct Item
 {
     Item* next;
     const char* key;
-    Obj* value;
+    NiAVObject* value;
 };
-struct Map
+// Exe 0x00a6eb60: unit-local Map view; declarations and layout are preserved.
+struct NidefaultavobjectpaletteMapView
 {
     void* vtable;
     unsigned int size;
     Item** buckets;
     unsigned int count;
-    __forceinline Map()
+    __forceinline NidefaultavobjectpaletteMapView()
     {
         vtable = &DAT_0109ca08;
         size = 37;
@@ -876,10 +728,10 @@ struct Map
                 return buckets[index];
         return 0;
     }
-    void __thiscall FUN_00a8f770(void*&, Key&, Obj*&);
+    void __thiscall FUN_00a8f770(void*&, Key&, NiAVObject*&);
     void __thiscall FUN_00a6e980(const Key&, const void*);
     void __thiscall RemoveKey(const Key&);
-    __forceinline bool GetAt(const Key& key, Obj*& value)
+    __forceinline bool GetAt(const Key& key, NiAVObject*& value)
     {
         Item* item = buckets[(unsigned int)key.text % size];
         while (item)
@@ -899,8 +751,8 @@ extern "C" void(__stdcall* DAT_00fdf1c0)(void*);
 struct MapDispatch
 {
     void* destroy;
-    Item*(__thiscall* allocate)(Map*);
-    void(__thiscall* release)(Map*, Item*);
+    Item*(__thiscall* allocate)(NidefaultavobjectpaletteMapView*);
+    void(__thiscall* release)(NidefaultavobjectpaletteMapView*, Item*);
 };
 __declspec(noinline) void __stdcall AssignEntry(Item* item, const Key& key, const void* value)
 {
@@ -913,9 +765,9 @@ __declspec(noinline) void __stdcall AssignEntry(Item* item, const Key& key, cons
             DAT_00fdf1c4((long*)item->key - 2);
         item->key = fresh;
     }
-    item->value = (Obj*)value;
+    item->value = (NiAVObject*)value;
 }
-__declspec(noinline) void Map::FUN_00a6e980(const Key& key, const void* value)
+__declspec(noinline) void NidefaultavobjectpaletteMapView::FUN_00a6e980(const Key& key, const void* value)
 {
     unsigned int hash = (unsigned int)key.text % size;
     Item* cursor = buckets[hash];
@@ -935,7 +787,7 @@ __declspec(noinline) void Map::FUN_00a6e980(const Key& key, const void* value)
     ++count;
 }
 
-__declspec(noinline) void Map::RemoveKey(const Key& key)
+__declspec(noinline) void NidefaultavobjectpaletteMapView::RemoveKey(const Key& key)
 {
     unsigned int hash = (unsigned int)key.text % size;
     Item** link = buckets + hash;
@@ -953,11 +805,9 @@ __declspec(noinline) void Map::RemoveKey(const Key& key)
     }
 }
 
-struct Palette
+// Keep the undeclared post-link implementation on the shared palette layout.
+struct Palette : NiDefaultAVObjectPalette
 {
-    int vptr;
-    int refs;
-    Map map;
     void __thiscall CloneBase(void*);
     void __thiscall FUN_00a6eb60(void*);
 };
@@ -966,17 +816,17 @@ struct Palette
 void Palette::FUN_00a6eb60(void* apDest)
 {
     CloneBase(apDest);
-    Map changes;
-    apDest = map.First();
+    NidefaultavobjectpaletteMapView changes;
+    apDest = reinterpret_cast<NidefaultavobjectpaletteMapView&>(m_kObjectMap).First();
     while (apDest)
     {
         Key key;
         key.text = EmptyFS.m_kHandle;
-        Obj* object;
-        map.FUN_00a8f770(apDest, key, object);
+        NiAVObject* object;
+        reinterpret_cast<NidefaultavobjectpaletteMapView&>(m_kObjectMap).FUN_00a8f770(apDest, key, object);
         const char* pcKey;
         const char* name;
-        if (key.text && object && (pcKey = key.text, (name = object->name) != 0) && strcmp(pcKey, name))
+        if (key.text && object && (pcKey = key.text, (name = object->m_kName.m_kHandle) != 0) && strcmp(pcKey, name))
         {
             changes.FUN_00a6e980(key, name);
             if (pcKey != EmptyFS.m_kHandle)
@@ -990,8 +840,8 @@ void Palette::FUN_00a6eb60(void* apDest)
     {
         Key key;
         key.text = EmptyFS.m_kHandle;
-        Obj* name;
-        Obj* object = 0;
+        NiAVObject* name;
+        NiAVObject* object = 0;
         changes.FUN_00a8f770(apDest, key, name);
         if (key.text && name)
         {
@@ -999,10 +849,10 @@ void Palette::FUN_00a6eb60(void* apDest)
             Key keyNew((const char*)name);
             Key keyOld;
             keyOld.text = pcKey;
-            map.GetAt(keyOld, object);
+            reinterpret_cast<NidefaultavobjectpaletteMapView&>(m_kObjectMap).GetAt(keyOld, object);
             const char* pcNewKey = keyNew.text;
-            map.FUN_00a6e980(keyNew, object);
-            map.RemoveKey(key);
+            reinterpret_cast<NidefaultavobjectpaletteMapView&>(m_kObjectMap).FUN_00a6e980(keyNew, object);
+            reinterpret_cast<NidefaultavobjectpaletteMapView&>(m_kObjectMap).RemoveKey(key);
             if (pcNewKey != EmptyFS.m_kHandle)
                 DAT_00fdf1c4((long*)pcNewKey - 2);
             if (pcKey != EmptyFS.m_kHandle)

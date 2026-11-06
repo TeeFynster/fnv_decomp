@@ -1,3 +1,4 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/physics/collide/agent3/machine/hkpagentmachineutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent3/machine/hkpagentmachineutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -69,24 +70,7 @@ template <typename T> __forceinline T* hkAddByteOffset(T* p, int offset)
     return (T*)((char*)p + offset);
 }
 
-struct S_00d97360_SectorArray
-{
-    S_00d97360_Sector** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline S_00d97360_Sector* operator[](int i) const
-    {
-        return m_data[i];
-    }
-};
+typedef hkArrayBase<S_00d97360_Sector*> S_00d97360_SectorArray;
 
 struct S_00d97360_Track
 {
@@ -1648,20 +1632,7 @@ struct S_00d97130_Input
     S_00d97130_Dispatcher* m_pCollisionDispatcher;
 };
 
-struct S_00d97130_Sectors
-{
-    char** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    char*& operator[](int i) const
-    {
-        return m_data[i];
-    }
-};
+typedef hkArrayBase<char*> S_00d97130_Sectors;
 
 struct S_00d97130_Track
 {

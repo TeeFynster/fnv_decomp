@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+
 
 // src/fallout_shared/teswater_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy /Ob1 /GF /Oy- (unit src/fallout_shared/teswater_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy /Ob1 /GF). Declarations copied from that unit's skeleton; move the functions
@@ -5,8 +7,65 @@
 
 // src/fallout_shared/teswater_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/teswater.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
-#include "teswater_decls.h"
-#include "teswater_work.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiPoint3.h"
+// LocalPoint3Ext: unit-local copy of the former shared stand-in NiPoint3_ext. Same layout as NiPoint3; with NiPoint3, 0x004ecef0 (NiPoint3.h's inline constructor/Dot change its code) does not match.
+#include "../../include/NiPoint3.h"
+class LocalPoint3Ext
+{
+  public:
+    float x;
+    float y;
+    float z;
+
+    typedef LocalPoint3Ext AimVector;
+
+    __forceinline LocalPoint3Ext()
+    {}
+    LocalPoint3Ext(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+    {}
+
+    LocalPoint3Ext operator+(const LocalPoint3Ext& point) const
+    {
+        return LocalPoint3Ext(x + point.x, y + point.y, z + point.z);
+    }
+    LocalPoint3Ext operator-(const LocalPoint3Ext& point) const
+    {
+        return LocalPoint3Ext(x - point.x, y - point.y, z - point.z);
+    }
+    NiPoint3 operator-(const NiPoint3& point) const;
+    float operator*(const LocalPoint3Ext& point) const
+    {
+        return x * point.x + y * point.y + z * point.z;
+    }
+    LocalPoint3Ext& operator*=(float scalar);
+    LocalPoint3Ext& operator+=(const NiPoint3& point);
+    friend LocalPoint3Ext operator*(float scalar, const LocalPoint3Ext& point)
+    {
+        return LocalPoint3Ext(scalar * point.x, scalar * point.y, scalar * point.z);
+    }
+
+    float Dot(const NiPoint3& point) const;
+    float Dot(const LocalPoint3Ext& point) const;
+    LocalPoint3Ext& Subtract(const LocalPoint3Ext& point);
+    float GetLengthSquared();
+    void ComputeMagnitude();
+    float GetSquaredXYLength() const;
+    float Length() const;
+
+    AimVector FUN_00439ef0(const AimVector& point) const;
+    LocalPoint3Ext FUN_00439ef0(const NiPoint3& point) const;
+    NiPoint3* FUN_00439ef0(NiPoint3* output, const NiPoint3& point) const;
+    AimVector FUN_00439e90(const AimVector& point) const;
+    bool FUN_00439090(const AimVector& point) const;
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    void FUN_006815c0();
+    float FUN_004a7290() const;
+    float FUN_00457910();
+    LocalPoint3Ext& FUN_0063c8a0(const NiPoint3& point);
+    NiPoint3 FUN_004a0bd0() const;
+};
 extern int DAT_0109cb9c;
 void __fastcall FUN_00a5a390(void* p);
 struct FUN_00a6fae0_Class
@@ -211,29 +270,18 @@ struct NiMatrixEx : NiMatrix
 {
     float unk40, unk44;
 };
-struct __declspec(align(16)) hkVector4
-{
-    float x, y, z, w;
-    hkVector4();
-};
+#include "../../include/hkVector4.h"
+
 struct CameraMatrixSource
 {
     const void* GetOffset980();
     const void* GetOffsetPointer();
 };
 CameraMatrixSource* FUN_004a0e90();
-struct NiPoint3_ext : NiPoint3
-{
-    float Dot(const NiPoint3&) const;
-};
 NiPoint3* FUN_004ed180();
 struct NiVec4
 {
     float x, y, z, w;
-};
-struct NiRenderer
-{
-    void CallFooForEachElement(int, int, const NiVec4*);
 };
 NiRenderer* FUN_0043c4b0();
 extern "C" void* __stdcall D3DXMatrixInverse(void*, float*, const void*);
@@ -251,11 +299,11 @@ void WaterPlaneHost::FUN_004ecef0(float x, float y, float z, float w, int unused
     NiMatrixEx translated;
     translated.CopyFrom(FUN_004a0e90()->GetOffset980());
     translated.m41 =
-        -static_cast<NiPoint3_ext*>(FUN_004ed180())->Dot(NiPoint3(translated.m11, translated.m21, translated.m31));
+        -reinterpret_cast<LocalPoint3Ext*>(FUN_004ed180())->Dot(NiPoint3(translated.m11, translated.m21, translated.m31));
     translated.m42 =
-        -static_cast<NiPoint3_ext*>(FUN_004ed180())->Dot(NiPoint3(translated.m12, translated.m22, translated.m32));
+        -reinterpret_cast<LocalPoint3Ext*>(FUN_004ed180())->Dot(NiPoint3(translated.m12, translated.m22, translated.m32));
     translated.m43 =
-        -static_cast<NiPoint3_ext*>(FUN_004ed180())->Dot(NiPoint3(translated.m13, translated.m23, translated.m33));
+        -reinterpret_cast<LocalPoint3Ext*>(FUN_004ed180())->Dot(NiPoint3(translated.m13, translated.m23, translated.m33));
     NiMatrixEx project;
     project.CopyFrom(FUN_004a0e90()->GetOffsetPointer());
     NiMatrix transform = translated.FUN_004ed140(project);

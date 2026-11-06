@@ -7,7 +7,18 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include <windows.h>
 #include <commctrl.h>
-#include "../../include/layout_support.h"
+#include "../../include/GO.h"
+#include "../../include/INISettingCollection.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiControllerSequence.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTexturingProperty.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/SkyTextureManager.h"
 struct FUN_004dfdd0_StandIn
 {
     float m_f0;
@@ -36,7 +47,8 @@ struct FUN_004d7490_Class
 {
     void FUN_004d7490();
 };
-struct ArrSI
+// Exe 0x004dcdf0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int GetFlags();
 };
@@ -150,10 +162,6 @@ struct GlobalObject_004aff00
 struct FUN_004def90_Class
 {
     void FUN_004def90();
-};
-struct GO
-{
-    GO& operator=(void*);
 };
 struct FUN_004dfe80_Class
 {
@@ -325,7 +333,8 @@ struct FUN_004d8560_Outer
     char _0[0x10];
     FUN_004d8560_Inner _10;
 };
-struct ScriptLocalsX
+// 0x004ae750 also binds bhkWorldObject::FUN_004ae750, the physics-object accessor used by 0x004d8560.
+struct NullablePhysicsObjectAccess
 {
     FUN_004d8560_Outer* GetLocalData();
 };
@@ -465,11 +474,6 @@ struct FUN_004de550_StandIn
 {
     void __thiscall FUN_0045d240();
     void* __thiscall FUN_004de550(unsigned int);
-};
-struct NiTexture;
-struct SkyTextureManager
-{
-    static void __cdecl LoadTextureFromPath(NiPointer<NiTexture>*, char const*);
 };
 extern NiPointer<NiTexture> DAT_011c7804[];
 bool __cdecl FUN_004deed0(char const* a, unsigned char b);
@@ -689,49 +693,8 @@ struct FUN_004d74c0_Item
 void __cdecl ExpandTreeItemsRecursively(void* tree, int startingItem, int expandFlags);
 int FUN_00406d30(char* pcDest, unsigned int uiSize, const char* pcSrc);
 int FUN_00406d50(char* pcDest, unsigned int uiSize, const char* pcSrc);
-class NiObject
-{
-  public:
-    int m_aiObject[2];
-};
-class NiFixedString
-{
-  public:
-    operator const char*() const;
-    const char* m_kHandle;
-};
-struct NiUpdateData
-{
-    float m_fTime;
-    bool m_bUpdate;
-    bool m_bIsMultiThreaded;
-    int m_pkUpdateProcess;
-    NiUpdateData(float fTime, bool m_bUpdateEnabled, bool bIsMultiThreaded);
-};
-class NiAVObject : public NiObject
-{
-  public:
-    void FUN_00450f90(bool bCulled);
-    void FUN_00a5a040();
-    void Update(NiUpdateData& kUpdateData);
-    NiFixedString& GetName();
-};
-class NiStream
-{
-  public:
-    NiStream();
-    ~NiStream();
-    void InsertObject(NiObject* pkObject);
-    bool FUN_00a640b0(const char* pcFileName);
-    int m_kNextStreamField[0x172];
-};
 int FUN_004d78c0(NiObject* pkObject, int iType, int iCommand);
 struct NiObject;
-struct NiRTTI
-{
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
 extern const NiRTTI DAT_012024e0;
 NiObject* __cdecl FUN_00653270(const NiRTTI*, NiObject*);
 const char* __cdecl PrepareScriptMessage(const char* msg, bool flag);
@@ -909,16 +872,13 @@ struct TreeInsert4d86
 };
 typedef void*(__stdcall* SendMessage4d86)(void*, int, int, int);
 const char* PrepareScriptMessage(const char* pcText, bool bFlag);
-struct MediaSet4d86
-{
-    int FUN_008041a0();
-};
+// 0x00495d20 also binds NiControllerManager::GetSequenceAt; 0x008041a0 is NiControllerSequence::GetState.
 struct Palette4d86;
 struct Object4d86
 {
     Palette4d86* GetStringAtOffset();
     unsigned int FUN_00495d00();
-    MediaSet4d86* FUN_00495d20(unsigned int uiIndex);
+    NiControllerSequence* FUN_00495d20(unsigned int uiIndex);
 };
 struct TreeCtrl4d86
 {
@@ -927,7 +887,7 @@ struct TreeCtrl4d86
     void* m_hWnd;
     void* m_hTreeWnd;
     void AddNameItems(void* hParent, Palette4d86* pkPalette);
-    void FUN_004d8b90(void* hParent, MediaSet4d86* pkSet);
+    void FUN_004d8b90(void* hParent, NiControllerSequence* pkSet);
     void PopulateObjectTree(void* hParent, Object4d86* pkObject);
 };
 struct TreeItem4d88
@@ -1080,11 +1040,6 @@ struct FUN_004de3f0_Class
 {
     void __thiscall FUN_004de420();
     void* __thiscall FUN_004de3f0(int flags);
-};
-struct INISettingCollection
-{
-    INISettingCollection();
-    virtual void v0();
 };
 struct FUN_004de530 : public INISettingCollection
 {

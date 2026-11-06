@@ -2,12 +2,51 @@
 // src/gamebryo2.2/corelibs/nicollision/niboxsphereintersector.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/niboxsphereintersector.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct Vec3
+#include "../../../../include/NiPoint3.h"
+
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ)
 {
-    float x;
-    float y;
-    float z;
-};
+    x = fX;
+    y = fY;
+    z = fZ;
+}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x - kRhs.x, y - kRhs.y, z - kRhs.z);
+}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x + kRhs.x, y + kRhs.y, z + kRhs.z);
+}
+inline NiPoint3 operator*(float fScalar, const NiPoint3& pt)
+{
+    return NiPoint3(fScalar * pt.x, fScalar * pt.y, fScalar * pt.z);
+}
+inline NiPoint3 NiPoint3::operator*(float fScalar) const
+{
+    return fScalar * *this;
+}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+inline float NiPoint3::SqrLength() const
+{
+    return x * x + y * y + z * z;
+}
+inline void NiPoint3::Sub(const NiPoint3& a, const NiPoint3& b)
+{
+    x = a.x - b.x;
+    y = a.y - b.y;
+    z = a.z - b.z;
+}
+inline void NiPoint3::Accumulate(NiPoint3 pt)
+{
+    NiPoint3& dest = *this;
+    dest.x += pt.x;
+    dest.y += pt.y;
+    dest.z += pt.z;
+}
 
 struct Blk15
 {
@@ -45,7 +84,7 @@ struct FUN_00eb3ca0_cls
     int unk30;
     int unk34;
     Blk15* m_pBlk;
-    Vec3* m_pVec;
+    NiPoint3* m_pVec;
     float m_40;
     float m_44;
     float m_48;
@@ -62,7 +101,7 @@ float FUN_00eb3ca0_cls::AccumulateAndEvaluate(const float* a, const float* b, fl
 {
     float fScaledX = a[0] * afScale;
     Blk15 blkAccum = *(Blk15*)((char*)m_pBlk + 4);
-    Vec3 vecSum;
+    NiPoint3 vecSum;
     vecSum.x = fScaledX;
     vecSum.y = a[1] * afScale;
     vecSum.z = a[2] * afScale;
@@ -74,7 +113,7 @@ float FUN_00eb3ca0_cls::AccumulateAndEvaluate(const float* a, const float* b, fl
     vecSum.y = b[1] * afScale;
     vecSum.z = b[2] * afScale;
 
-    Vec3* c = (Vec3*)((char*)m_pVec + 4);
+    NiPoint3* c = (NiPoint3*)((char*)m_pVec + 4);
     float fSumY = c->y + vecSum.y;
     float fSumZ = c->z + vecSum.z;
     vecSum.x = c->x + vecSum.x;
@@ -84,64 +123,6 @@ float FUN_00eb3ca0_cls::AccumulateAndEvaluate(const float* a, const float* b, fl
     return (float)(GetSqrDistanceToOrientedBox(&vecSum.x, &blkAccum.f00, &m_44, &m_48, &m_4c) * m_40 - DAT_01012070);
 }
 
-// Adapted from an unverified contribution by another contributor (2026-10-21).
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-    NiPoint3 operator+(const NiPoint3& pt) const
-    {
-        return NiPoint3(x + pt.x, y + pt.y, z + pt.z);
-    }
-    NiPoint3 operator-(const NiPoint3& pt) const
-    {
-        return NiPoint3(x - pt.x, y - pt.y, z - pt.z);
-    }
-    NiPoint3 operator*(float fScalar) const
-    {
-        return fScalar * *this;
-    }
-    friend NiPoint3 operator*(float fScalar, const NiPoint3& pt)
-    {
-        return NiPoint3(fScalar * pt.x, fScalar * pt.y, fScalar * pt.z);
-    }
-    NiPoint3 operator-() const
-    {
-        return NiPoint3(-x, -y, -z);
-    }
-    NiPoint3& operator+=(const NiPoint3& pt)
-    {
-        x += pt.x;
-        y += pt.y;
-        z += pt.z;
-        return *this;
-    }
-    float SqrLength() const
-    {
-        return x * x + y * y + z * z;
-    }
-    void Sub(const NiPoint3& a, const NiPoint3& b)
-    {
-        x = a.x - b.x;
-        y = a.y - b.y;
-        z = a.z - b.z;
-    }
-    void Accumulate(NiPoint3 pt)
-    {
-        NiPoint3& dest = *this;
-        dest.x += pt.x;
-        dest.y += pt.y;
-        dest.z += pt.z;
-    }
-    void Unitize();
-};
 static __forceinline NiPoint3 AddInitial(const NiPoint3* aPtr, const NiPoint3* bPtr)
 {
     const NiPoint3& a = *aPtr;
@@ -232,7 +213,7 @@ void S_00eb3d90::FUN_00eb3d90(const NiPoint3& start, const NiPoint3& end)
     {
         const NiPoint3& kBoxCenter = m_frame->m_kBoundsBox.m_kCenter;
         const NiPoint3& kSphereCenter = m_pSphere->m_kCenterPosition;
-        m_pos = (kSphereCenter + kBoxCenter) * 0.5;
+        m_pos = (kSphereCenter + kBoxCenter) * 0.5f;
     }
     m_dir = m_pSphere->m_kCenterPosition - m_pos;
     m_dir.Unitize();

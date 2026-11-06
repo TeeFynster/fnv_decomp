@@ -2,7 +2,8 @@
 // src/havok/common/scenedata/alignscene/hkalignscenetonodeoptions.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/alignscene/hkalignscenetonodeoptions.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkAlignSceneToNodeOptions.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkReferencedObject.h"
 
 struct Inner
 {
@@ -26,27 +27,9 @@ void FUN_00e4a540_cls::FUN_00e4a540()
     m_14->Run();
 }
 
-class hkMemoryAllocatorE4AF
-{
-  public:
-    virtual ~hkMemoryAllocatorE4AF() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterE4AF
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorE4AF* m_pStreamAllocator;
-    hkMemoryAllocatorE4AF& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterE4AF& __cdecl FUN_00c85750();
+// The TLS accessor at 0x00c85750 supplies the heap at +0x10; no include/hkMemoryRouter.h exists yet.
+#include "../../../../../include/hkMemoryRouter.h"
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 
 class FUN_00cb0c00_class
 {
@@ -60,72 +43,50 @@ class FUN_00cb0c00_class
     }
 };
 
-class hkReferencedObjectE4AF
+
+
+inline void hkReferencedObject::operator delete(void* p)
+{
+    FUN_00c85750().heap().blockFree(p, static_cast<hkReferencedObject*>(p)->m_usMemSizeAndFlags);
+}
+
+// The reflected layout is 0x18 bytes; no include/ header exists for these options yet.
+class hkAlignSceneToNodeOptions : public hkReferencedObject
 {
   public:
-    virtual ~hkReferencedObjectE4AF() throw()
-    {}
-    hkUint16 m_usMemSizeAndFlags;
-    hkInt16 m_sReferenceCount;
-
-    static void operator delete(void* p) throw()
-    {
-        FUN_00c85750().heap().ReleaseBlock(p, static_cast<hkReferencedObjectE4AF*>(p)->m_usMemSizeAndFlags);
-    }
-};
-
-class hkAlignSceneToNodeOptionsE4AF : public hkReferencedObjectE4AF
-{
-  public:
-    hkBool m_bOption1;
-    hkBool m_bOption2;
-    hkBool m_bOption3;
-    hkBool m_bOption4;
-    hkBool m_bOption5;
-    hkBool m_bOption6;
-    hkBool m_bOption7;
-    hkInt32 m_iOptionValue;
+    char m_bOption1;
+    char m_bOption2;
+    char m_bOption3;
+    char m_bOption4;
+    char m_bOption5;
+    char m_bOption6;
+    char m_bOption7;
+    int m_iOptionValue;
     FUN_00cb0c00_class m_kNodeName;
 
-    hkAlignSceneToNodeOptionsE4AF* FUN_00e4afa0(unsigned int uiFlags) throw();
+    hkAlignSceneToNodeOptions* FUN_00e4afa0(unsigned int uiFlags) throw();
 };
 
 // Destroys the object and, when uiFlags has bit 0 set, frees its memory via operator delete; returns this.
 // @fnv 0x00e4afa0
-hkAlignSceneToNodeOptionsE4AF* hkAlignSceneToNodeOptionsE4AF::FUN_00e4afa0(unsigned int uiFlags) throw()
+hkAlignSceneToNodeOptions* hkAlignSceneToNodeOptions::FUN_00e4afa0(unsigned int uiFlags) throw()
 {
-    this->hkAlignSceneToNodeOptionsE4AF::~hkAlignSceneToNodeOptionsE4AF();
+    this->hkAlignSceneToNodeOptions::~hkAlignSceneToNodeOptions();
     if (uiFlags & 1)
-        hkAlignSceneToNodeOptionsE4AF::operator delete(this);
+        hkAlignSceneToNodeOptions::operator delete(this);
     return this;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00e4a5a0 FUN_00e4a5a0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setzero_ps();
-struct HeapAllocE4
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void ReturnMemory(void* p, int numBytes) throw();
-};
-struct RouterE4
-{
-    int unk00, unk04, unk08, unk0c;
-    HeapAllocE4* m_pStreamAllocator;
-    HeapAllocE4& heap() throw()
-    {
-        return *m_pStreamAllocator;
-    }
-};
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setzero_ps();
 struct Vec4E4
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     __forceinline Vec4E4& operator=(const Vec4E4& v) throw()
     {
         m_vComponents = v.m_vComponents;
@@ -140,6 +101,7 @@ struct Vec4E4
         return ((float*)&m_vComponents)[i];
     }
 };
+// local form of hkMatrix4: 0x00e4a5a0 needs inline setIdentity; shared out-of-line call cannot reproduce exe bytes.
 struct Matrix4E4
 {
     Vec4E4 m_kColumn0, m_kColumn1, m_kColumn2, m_kColumn3;
@@ -191,10 +153,10 @@ template <class T, int N> struct InplaceArrE4
     }
     __forceinline void release() throw()
     {
-        HeapAllocE4& h = ((RouterE4*)&FUN_00c85750())->heap();
+        hkMemoryAllocator& h = FUN_00c85750().heap();
         m_iElementCount = 0;
         if (!(m_iCapacityState & 0x80000000))
-            h.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
+            h.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
     }
     __forceinline ~InplaceArrE4() throw()
     {

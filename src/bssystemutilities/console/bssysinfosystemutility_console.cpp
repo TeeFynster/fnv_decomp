@@ -1,5 +1,7 @@
 
 // bssystemutilities/console/bssysinfosystemutility_console.cpp: BSSysInfoSystemUtility (1 function)
+#include "../../../include/BSSysInfoSystemUtility.h"
+
 struct SystemLocaleState
 {
     void* vtable;
@@ -9,12 +11,6 @@ struct SystemLocaleState
 extern SystemLocaleState gSystemLocaleState;
 extern unsigned int gCachedLanguage;
 extern "C" int __cdecl _strnicmp(const char* left, const char* right, unsigned int count);
-
-class BSSysInfoSystemUtility
-{
-  public:
-    static unsigned int GetRandomGenerator(void);
-};
 
 // Returns the cached language code, detecting it once by comparing gSystemLocaleState.language against ENGLISH, FRENCH, ITALIAN, GERMAN and SPANISH.
 // @fnv 0x00a22cb0

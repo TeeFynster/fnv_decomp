@@ -8,6 +8,15 @@
 // src/staging/blk_00b20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+// BaseTag_blk_00b20000_od_ob1_variant_rtm_variant: local type (was include/BaseTag.h, which had no evidence of one real class); no method of it is bound to a named game function
+class BaseTag_blk_00b20000_od_ob1_variant_rtm_variant
+{
+};
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/Random.h"
+#include "../../include/CVec3.h"
+#include "../../include/CVec3.h"
 extern "C" void __cdecl FUN_00b02c90();
 struct FUN_00b274a0_class
 {
@@ -30,13 +39,6 @@ extern int DAT_010a5890;
 struct FUN_00b3f0a0_Class
 {
     void __thiscall FUN_00b3f0a0();
-};
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    NiPoint3& __thiscall FUN_00b2a1c0(const NiPoint3& other);
 };
 unsigned int __cdecl FUN_00ec7c56();
 struct FUN_00b393b0_Class
@@ -144,11 +146,6 @@ struct FUN_00b3f030_Class
 {
     int* vtbl;
     FUN_00b3f030_Class();
-};
-struct Random
-{
-    void* vtbl;
-    void* __thiscall DestroyRandom(unsigned int flags);
 };
 extern const int vftable_Random[];
 void _Deallocate(void*);
@@ -1194,11 +1191,11 @@ struct Obj : ObjFields
     }
     void FUN_00b32de0(unsigned n, Value val);
 };
-struct Vector342;
+struct CheckedIntSequence;
 struct Aux342
 {
-    const Vector342* container;
-    const Vector342* GetContainer() const
+    const CheckedIntSequence* container;
+    const CheckedIntSequence* GetContainer() const
     {
         return container;
     }
@@ -1212,12 +1209,12 @@ struct IteratorOwner342
 struct ConstIterator342 : IteratorOwner342
 {
     int* pointer;
-    const Vector342* GetContainer() const
+    const CheckedIntSequence* GetContainer() const
     {
         return owner ? owner->GetContainer() : 0;
     }
     ConstIterator342& FUN_00ac1000(int offset);
-    ConstIterator342(int*, const Vector342*);
+    ConstIterator342(int*, const CheckedIntSequence*);
     bool IsContainerSet() const
     {
         return owner != 0;
@@ -1235,7 +1232,7 @@ struct ConstIterator342 : IteratorOwner342
 };
 struct Iterator342 : ConstIterator342
 {
-    Iterator342(int* pointer, const Vector342* vector) : ConstIterator342(pointer, vector)
+    Iterator342(int* pointer, const CheckedIntSequence* vector) : ConstIterator342(pointer, vector)
     {}
     Iterator342& operator+=(int offset)
     {
@@ -1248,7 +1245,8 @@ struct Iterator342 : ConstIterator342
         return temporary += offset;
     }
 };
-struct Vector342
+// Checked int container: owner/allocator fields precede first/last/end at 0x0c/0x10/0x14; 0x00abc320 and 0x00b33240 insert elements.
+struct CheckedIntSequence
 {
     const Aux342* owner;
     int unk04, unk08;
@@ -1266,7 +1264,7 @@ struct Vector342
     void FUN_00abc320(ConstIterator342 where, unsigned int count, const int& value);
     Iterator342 FUN_00b33240(ConstIterator342 where, const int& value);
 };
-inline ConstIterator342::ConstIterator342(int* value, const Vector342* vector)
+inline ConstIterator342::ConstIterator342(int* value, const CheckedIntSequence* vector)
 {
     if (!vector || vector->first > value || value > vector->last)
         FUN_00ec7c56();
@@ -1297,7 +1295,8 @@ struct Container445
 {
     Aux445* proxy;
 };
-struct Vector445 : Container445
+// Checked ushort container: proxy/allocator fields precede first/last at 0x0c/0x10; iterator 0x00b359d0 checks its range.
+struct CheckedUShortSequence : Container445
 {
     unsigned allocator04, allocator08;
     unsigned short* first;
@@ -1382,21 +1381,11 @@ struct BufferGroup
 struct PointRecord
 {
     int unk00;
-    struct Vec3
-    {
-        float x, y, z;
-        __forceinline Vec3& operator=(const Vec3& rhs)
-        {
-            x = rhs.x;
-            y = rhs.y;
-            z = rhs.z;
-            return *this;
-        }
-    } position;
+    CVec3 position;
     unsigned char index;
     unsigned int value;
     int unk18;
-    Vec3 normal, tangent, bitangent;
+    CVec3 normal, tangent, bitangent;
     unsigned char kind;
     float weight;
     unsigned char selector;
@@ -1533,7 +1522,8 @@ struct ElemB9F1
 {
     int unk00;
 };
-struct VectorB9F1 : public ContainerBaseAuxB9F1
+// Checked element container: auxiliary/allocator fields precede first/last/end at 0x0c/0x10/0x14; iterator 0x00b2abc0 advances elements.
+struct CheckedElementSequence : public ContainerBaseAuxB9F1
 {
     AuxContB9F1* _Myownedaux;
     int _Alaux;
@@ -1931,17 +1921,13 @@ struct BxLengthError : public BxLogicError
     {}
 };
 
-struct Point3
-{
-    float x, y, z;
-};
 struct FUN_00b2e680
 {
     unsigned char flag;
-    Point3 position;
+    NiPoint3 position;
     float value;
     BxString name;
-    Point3 first, second, third;
+    NiPoint3 first, second, third;
 };
 typedef char FUN_00b2e680SizeCheck[(sizeof(FUN_00b2e680) == 0x54) ? 1 : -1];
 struct CheckedRange
@@ -3250,19 +3236,11 @@ struct BoundsB3
 };
 extern const float DAT_01016970;
 extern const float DAT_01015f5c;
-struct Vector3
-{
-    float values[3];
-    float& operator[](int index)
-    {
-        return values[index];
-    }
-};
 struct RangeInitializer
 {
-    Vector3 first;
+    CVec3 first;
     float unk0c, unk10, unk14;
-    Vector3 second;
+    CVec3 second;
     void FUN_00b3cc30();
 };
 void FUN_00b2e140();
@@ -3923,7 +3901,7 @@ struct FUN_00b20ba0 : Container
         auxiliaryAllocator.deallocate((Container*)proxy, 1);
     }
 };
-template <class T> struct Vector;
+template <class T> struct Vector_copy_short;
 struct Universal
 {
 };
@@ -3982,13 +3960,14 @@ inline unsigned short* __cdecl FUN_00b362c0(Iterator first, Iterator last, unsig
     return initializeCopy(checkedBase(first), checkedBase(last), dest, allocator, pointerCategory(first, dest),
                           CheckedRange());
 }
-template <class T> struct Vector : FUN_00b20ba0
+// Unit-local view of Vector for the code in namespace copy_short: built on the shared Vector, that code does not compile or does not match.
+template <class T> struct Vector_copy_short : FUN_00b20ba0
 {
     Allocator allocator;
     unsigned short* first;
     unsigned short* last;
     unsigned short* limit;
-    Vector(Allocator source) : FUN_00b20ba0(source), allocator(source)
+    Vector_copy_short(Allocator source) : FUN_00b20ba0(source), allocator(source)
     {}
     unsigned int size() const
     {
@@ -4046,18 +4025,18 @@ template <class T> struct Vector : FUN_00b20ba0
 };
 inline Iterator::Iterator(unsigned short* position, const Container* owner)
 {
-    if (!owner || ((const Vector<unsigned short>*)owner)->first > position ||
-        position > ((const Vector<unsigned short>*)owner)->last)
+    if (!owner || ((const Vector_copy_short<unsigned short>*)owner)->first > position ||
+        position > ((const Vector_copy_short<unsigned short>*)owner)->last)
         FUN_00ec7c56();
     setContainer(owner);
     pointer = position;
 }
-struct FUN_00b357d0 : Vector<unsigned short>
+struct FUN_00b357d0 : Vector_copy_short<unsigned short>
 {
     FUN_00b357d0(const FUN_00b357d0& other);
 };
 // @fnv 0x00b357d0
-FUN_00b357d0::FUN_00b357d0(const FUN_00b357d0& other) : Vector<unsigned short>(other.allocator)
+FUN_00b357d0::FUN_00b357d0(const FUN_00b357d0& other) : Vector_copy_short<unsigned short>(other.allocator)
 {
     if (FUN_00b34cd0(other.size()))
     {
@@ -4284,9 +4263,6 @@ struct ScalarTag
 struct RangeTag
 {
 };
-struct BaseTag
-{
-};
 
 template <class I, class O> inline ScalarTag category(const I&, const O&)
 {
@@ -4299,14 +4275,14 @@ inline unsigned short* pointer(const _Vector_const_iteratorS<unsigned short>* it
     return it->_Myptr;
 }
 
-inline unsigned short* base(const _Vector_const_iteratorS<unsigned short>& it, BaseTag)
+inline unsigned short* base(const _Vector_const_iteratorS<unsigned short>& it, BaseTag_blk_00b20000_od_ob1_variant_rtm_variant)
 {
     return pointer(&it);
 }
 
 inline unsigned short* base(const _Vector_const_iteratorS<unsigned short>& it)
 {
-    BaseTag tag;
+    BaseTag_blk_00b20000_od_ob1_variant_rtm_variant tag;
     return base(it, tag);
 }
 

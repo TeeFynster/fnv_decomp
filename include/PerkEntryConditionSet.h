@@ -1,18 +1,32 @@
-#ifndef FNV_TESCONDITION_H
-#define FNV_TESCONDITION_H
-#include "layout_support.h"
-#pragma pack(push, 4)
+#pragma once
+
+#include "BSSimpleList.h"
+
+class BGSPerkEntry;
+class TESConditionItem;
+class TESFile;
+class TESForm;
+class TESObjectREFR;
+
 class PerkEntryConditionSet
 {
-  public:
-    BSSimpleList<TESConditionItem*> m_kConditionItems;  // +0x0
-    bool ContainsTrait(TESObjectREFR* subject, TESObjectREFR* target);
+public:
+    // a list of conditions: the constructor 0x006808b0 constructs it (EH-framed list constructor call)
+    BSSimpleList<TESConditionItem*> m_kConditionItems;
+
     PerkEntryConditionSet();
     ~PerkEntryConditionSet();
+
+    bool ContainsTrait(TESObjectREFR* subject, TESObjectREFR* target);
+    bool ContainsTrait(TESObjectREFR* subject, TESObjectREFR* target, bool& result, bool arg3);
+    void InitItem(TESForm* form);
+    bool Compare(PerkEntryConditionSet* other);
     void InitializeConditionItems();
     void Load(TESFile* file);
+    BGSPerkEntry*& GetItem();
+    void ProcessItems();
+    void CopyConditions(PerkEntryConditionSet* source, PerkEntryConditionSet* other);
+    TESConditionItem* GetItemByIndex(int index);
+    void Destroy();
+    void* DeleteConditions(unsigned int flags);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(PerkEntryConditionSet) == 0x8);
-FNV_STATIC_ASSERT(offsetof(PerkEntryConditionSet, m_kConditionItems) == 0x0);
-#endif

@@ -3,7 +3,7 @@
 #define FNV_GRENADEPROJECTILE_PRIVATE_TYPES_H
 
 #include "layout_support.h"
-#include "SoundPlaybackHandle.h"
+#include "BSSoundHandle.h"
 #include "InventoryStackRecord.h"
 #include "MobileObject_decl_grenadeprojectile.h"
 #include "NiPoint3_decl_grenadeprojectile.h"
@@ -12,7 +12,7 @@
 class ActorCause;
 class GrenadeProjectile;
 class NiLight;
-class ThreeByThreeMatrix;
+class NiMatrix3_Xbox360;
 class NiPoint4;
 class NiTransform;
 class Projectile;
@@ -78,7 +78,9 @@ class NiPoint4
 FNV_STATIC_ASSERT(sizeof(NiPoint4) == 16);
 FNV_STATIC_ASSERT(offsetof(NiPoint4, m_kComponents) == 0);
 FNV_STATIC_ASSERT(offsetof(NiPoint4, m_afExtents) == 0);
-class ThreeByThreeMatrix
+// Xbox 360 layout of Gamebryo's NiMatrix3 (Fallout_Release_Beta.pdb: size 0x30, m_pEntry = three NiPoint4 rows) from this
+// CodeView dump; the PC game's NiMatrix3 is include/NiMatrix3.h (float[3][3], 36 bytes).
+class NiMatrix3_Xbox360
 {
   public:
     void FUN_00439f50(int column, NiPoint3& out) const;  // declared for the original code (decl_variants.py)
@@ -92,12 +94,12 @@ class ThreeByThreeMatrix
     // operator*
     // Inverse
 };
-FNV_STATIC_ASSERT(sizeof(ThreeByThreeMatrix) == 48);
-FNV_STATIC_ASSERT(offsetof(ThreeByThreeMatrix, m_afEntries) == 0);
+FNV_STATIC_ASSERT(sizeof(NiMatrix3_Xbox360) == 48);
+FNV_STATIC_ASSERT(offsetof(NiMatrix3_Xbox360, m_afEntries) == 0);
 class NiTransform
 {
   public:
-    ThreeByThreeMatrix m_kOrientation;  // +0x0, 48 bytes
+    NiMatrix3_Xbox360 m_kOrientation;  // +0x0, 48 bytes
     NiPoint3 m_kTranslation;   // +0x30, 12 bytes
     float m_fScale;            // +0x3C, 4 bytes
     // void __cdecl NiTransform::*()
@@ -154,8 +156,8 @@ class Projectile : public MobileObject
     NiPointer<ProjectileAuxiliaryData> m_pExplosionEffect;  // +0x134, 4 bytes
     NiPointer<ActorCause> m_pActorCause;                    // +0x138, 4 bytes
     float m_fLifetime;                                      // +0x13C, 4 bytes
-    SoundPlaybackHandle m_kFirstValue;                            // +0x140, 12 bytes
-    SoundPlaybackHandle m_kSecondValue;                           // +0x14C, 12 bytes
+    BSSoundHandle m_kFirstValue;                            // +0x140, 12 bytes
+    BSSoundHandle m_kSecondValue;                           // +0x14C, 12 bytes
     ProjectileSupportData* pTarget;                         // +0x158, 4 bytes
     InventoryStackRecord* m_pTargetData;                              // +0x15C, 4 bytes
     bool m_bHasTarget;                                      // +0x160, 1 bytes

@@ -2,6 +2,8 @@
 // src/gamebryo2.2/corelibs/niparticle/nipsysupdatectlr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysupdatectlr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/StrArr.h"
+
 struct GlobalObjectO2_00a7b610;
 
 extern GlobalObjectO2_00a7b610 g_01202690;
@@ -163,18 +165,6 @@ void FnvNode::FUN_00c27290(FnvNode* pTarget)
     }
 }
 
-struct StrArr
-{
-    int _m0;
-    int _m4;
-    unsigned short m_usAlloc;
-    unsigned short m_usSize;
-    unsigned short _mC;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
-
 void __stdcall FUN_00a6d830(StrArr*);
 char* __cdecl FUN_00a7d330(const char*);
 
@@ -190,7 +180,7 @@ void __stdcall FUN_00c27300(StrArr* pkStrings)
     FUN_00a6d830(pkStrings);
     char* str = FUN_00a7d330(g_01202690.m_pcName);
     unsigned int size = pkStrings->m_usSize;
-    if (size >= pkStrings->m_usAlloc)
+    if (size >= pkStrings->m_usMaxSize)
     {
         pkStrings->SetSize(size + pkStrings->m_usGrowBy);
     }
@@ -214,7 +204,7 @@ template <class T> struct S_a6d590_Ptr
     T* m_pObject;
     ~S_a6d590_Ptr() throw()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
 };

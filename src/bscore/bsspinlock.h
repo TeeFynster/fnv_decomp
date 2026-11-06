@@ -9,26 +9,7 @@
 
 #include "layout_support.h"
 
-#pragma pack(push, 4)
-class FNV_ALIGN(32) RecursiveSpinLock
-{
-  public:
-    volatile unsigned int m_uiOwningThreadID;
-    unsigned int m_uiRecursionCount;
-    unsigned char layoutPadding8[24];
-
-    void Lock(const char* name);
-    bool TryLock();
-    void Unlock();
-    void UnlockUnconditional();
-    bool IsLocked();
-    bool IsLockedByUs();
-    void Wait();
-
-    static unsigned int ms_uiFirstValue;
-    static unsigned int ms_uiSecondValue;
-};
-#pragma pack(pop)
+#include "../../include/RecursiveSpinLock.h"
 
 FNV_STATIC_ASSERT(sizeof(RecursiveSpinLock) == 0x20);
 FNV_STATIC_ASSERT(offsetof(RecursiveSpinLock, m_uiOwningThreadID) == 0x0);

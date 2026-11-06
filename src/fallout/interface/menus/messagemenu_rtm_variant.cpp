@@ -2,9 +2,15 @@
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 #include "MessageMenu.h"
+#include "../../../../include/MessageHandler.h"
+#include "../../../../include/BSSimpleArray.h"
+#include "../../../../include/TESFullName.h"
+#include "../../../../include/Script.h"
+#include "../../../../include/TESObjectREFR.h"
 static const int kGetClassValue = 1001;
 
-struct ArrSI
+// Exe 0x007aa5c0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct MessagemenuOffset08View
 {
     unsigned int GetFlags();
 };
@@ -30,12 +36,6 @@ struct GlobalObject_00869f00
 struct GlobalObject_007ab590;
 extern GlobalObject_007ab590 g_011da53c;
 extern unsigned int DAT_011da4f4;
-class MessageHandler
-{
-  public:
-    static MessageHandler* pHandler;
-    void FUN_00aa4c40(unsigned int);
-};
 struct FUN_007aa500
 {
     ~FUN_007aa500();
@@ -51,11 +51,11 @@ void FUN_007aa5c0()
         unsigned int uiID = ((MessageQueueEntryView*)FUN_007a92a0())->m_uiMessageFlags;
         MessageHandler::pHandler->FUN_00aa4c40(uiID);
         FUN_007aa6a0(true);
-        for (unsigned int i = DAT_011da4f4; i < ((ArrSI*)&g_011da53c)->GetFlags(); i++)
+        for (unsigned int i = DAT_011da4f4; i < ((MessagemenuOffset08View*)&g_011da53c)->GetFlags(); i++)
         {
             if ((*((MessageQueueComparisonArray*)&g_011da53c)->FUN_00877a30(i))->m_uiMessageFlags == uiID)
             {
-                FUN_007aa500* pEntry = (FUN_007aa500*)((BSSimpleArray<unsigned int, 1024>*)&g_011da53c)->GetAt(i);
+                FUN_007aa500* pEntry = (FUN_007aa500*)((BSSimpleArray<unsigned int, 1024>*)&g_011da53c)->GetAt(static_cast<int>(i));
                 delete pEntry;
                 ((GlobalObject_00869f00*)&g_011da53c)->Remove(i--, true);
             }
@@ -64,18 +64,8 @@ void FUN_007aa5c0()
 }
 
 namespace fnv_007aae70 {
-class ScriptLocals;
-class TESBoundObject;
-class Script
-{
-  public:
-    bool Run(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
-};
-struct TESObjectREFR_acc
-{
-    bool Activate(TESObjectREFR*, bool, TESBoundObject*, int);
-};
-struct ArrSI
+// Exe 0x007aae70: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct MessagemenuOffset08View
 {
     unsigned int GetFlags();
 };
@@ -103,21 +93,20 @@ void FUN_007aae70()
     unsigned int ibuttonClicked;
     int icount;
     ibuttonClicked = FUN_00703fa0();
-    if (ibuttonClicked != ((ArrSI*)&g_011da524)->GetFlags() - 1)
+    if (ibuttonClicked != ((MessagemenuOffset08View*)&g_011da524)->GetFlags() - 1)
     {
-        ((PerkActivationEntry*)((BSSimpleArray<unsigned int, 1024>*)&g_011da524)->GetAt(ibuttonClicked))
+        ((PerkActivationEntry*)((BSSimpleArray<unsigned int, 1024>*)&g_011da524)->GetAt(static_cast<int>(ibuttonClicked)))
             ->pScript->Run(
-                ((PerkActivationEntry*)((BSSimpleArray<unsigned int, 1024>*)&g_011da524)->GetAt(ibuttonClicked))->pRef,
-                0, 0, false);
+                ((PerkActivationEntry*)((BSSimpleArray<unsigned int, 1024>*)&g_011da524)->GetAt(static_cast<int>(ibuttonClicked)))->pRef,
+                (ScriptLocals*)0, (TESObjectREFR*)0, false);
     }
     else
     {
         icount = FUN_00778930(
-            ((PerkActivationEntry*)((BSSimpleArray<unsigned int, 1024>*)&g_011da524)->GetAt(ibuttonClicked))->pRef);
-        ((TESObjectREFR_acc*)((PerkActivationEntry*)((BSSimpleArray<unsigned int, 1024>*)&g_011da524)
-                                  ->GetAt(ibuttonClicked))
-             ->pRef)
-            ->Activate((TESObjectREFR*)g_thePlayer, false, 0, icount);
+            ((PerkActivationEntry*)((BSSimpleArray<unsigned int, 1024>*)&g_011da524)->GetAt(static_cast<int>(ibuttonClicked)))->pRef);
+        ((PerkActivationEntry*)((BSSimpleArray<unsigned int, 1024>*)&g_011da524)
+                                  ->GetAt(static_cast<int>(ibuttonClicked)))
+            ->pRef->Activate((TESObjectREFR*)g_thePlayer, false, (TESBoundObject*)0, icount);
     }
     ((GlobalObject_00869f00*)&g_011da524)->Clear(true);
 }

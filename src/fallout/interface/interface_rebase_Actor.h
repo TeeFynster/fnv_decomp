@@ -8,7 +8,7 @@
 #include "interface_rebase_MagicTarget.h"
 #include "interface_rebase_MobileObject.h"
 #include "interface_rebase_ModifierList.h"
-#include "interface_rebase_NiPoint3.h"
+#include "../../../include/NiPoint3.h"
 class Actor : public MobileObject,
               public MagicCaster,
               public MagicTarget,

@@ -1,13 +1,49 @@
+#define FNV64_HKENUM_INLINE_BODIES
+// Keep this unit's original intrinsic lane representation for matching code generation.
+#ifndef _INCLUDED_MM2
+#define _INCLUDED_MM2
+// Exe 0x00def570 FUN_00def570: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    unsigned __int32 m128_u32[4];
+} __m128, LocalM128;
+extern "C"
+{
+    extern LocalM128 _mm_add_ss(LocalM128 _A, LocalM128 _B);
+    extern LocalM128 _mm_add_ps(LocalM128 _A, LocalM128 _B);
+    extern LocalM128 _mm_sub_ps(LocalM128 _A, LocalM128 _B);
+    extern LocalM128 _mm_mul_ps(LocalM128 _A, LocalM128 _B);
+    extern LocalM128 _mm_shuffle_ps(LocalM128 _A, LocalM128 _B, unsigned int _Imm8);
+    extern void _mm_store_ss(float* _V, LocalM128 _A);
+};
+#endif
+
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkHalf.h"
+#include "../../../../../../../include/hkSimdReal.h"
+#include "../../../../../../../include/hkMatrix3.h"
+#include "../../../../../../../include/hkRotation.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkStackMemory.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+
+inline hkMemoryAllocator& GetStreamAllocator(hkMemoryRouter& stream)
+{
+    return *stream.m_heap;
+}
 
 // src/havok/physics/dynamics/collide/filter/pair/hkppaircollisionfilter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/collide/filter/pair/hkppaircollisionfilter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-extern void* FUN_00c85750();
+extern hkMemoryRouter* FUN_00c85750();
 
 struct HashCls
 {
     __int64 FUN_00cb1cb0(unsigned __int64 key, int a2, int a3);
-    void InsertKeyValue(unsigned long f0, __int64 m, __int64 n);
+    void InsertKeyValue(hkMemoryAllocator& f0, __int64 m, __int64 n);
 
     int InsertPair(int p1, int p2);
 };
@@ -24,37 +60,13 @@ int HashCls::InsertPair(int aiFirst, int aiSecond)
 
     HashCls* pHash = (HashCls*)((char*)this + 0x30);
     __int64 n = pHash->FUN_00cb1cb0(m, 0, 0) + 1;
-    unsigned long f0 = *(unsigned long*)((char*)FUN_00c85750() + 0x10);
+    hkMemoryAllocator& f0 = *FUN_00c85750()->m_heap;
     pHash->InsertKeyValue(f0, m, n);
     return (int)n;
 }
 
 namespace fnv_00def350 {
-struct DEF350Allocator
-{
-    virtual void vfunc00();
-};
-
-struct DEF350MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    DEF350Allocator* m_pStreamAllocator;
-
-    DEF350Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" DEF350MemoryRouter& __cdecl FUN_00c85750();
-
-struct DEF350ReferencedObject
-{
-    void RetainReference();
-};
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 
 struct DEF350PointerMap
 {
@@ -64,10 +76,10 @@ struct DEF350PointerMap
 
     DEF350PointerMap() : m_kPrimitiveElement(0), m_iCapacityFlags(0), m_iPairCount(-1)
     {
-        reserve(FUN_00c85750().heap(), 0);
+        reserve(GetStreamAllocator(FUN_00c85750()), 0);
     }
 
-    void reserve(DEF350Allocator& alloc, int numElements);
+    void reserve(hkMemoryAllocator& alloc, int numElements);
 };
 
 struct DEF350Base
@@ -115,17 +127,17 @@ struct FUN_00def350 : DEF350Base, DEF350ListenerA, DEF350ListenerB, DEF350Listen
     int unk28;
     int unk2C;
     DEF350PointerMap m_map;
-    DEF350ReferencedObject* m_object;
+    hkReferencedObject* m_object;
 
-    FUN_00def350(DEF350ReferencedObject* object);
+    FUN_00def350(hkReferencedObject* object);
 };
 
 // @fnv 0x00def350
-FUN_00def350::FUN_00def350(DEF350ReferencedObject* object) : m_object(object)
+FUN_00def350::FUN_00def350(hkReferencedObject* object) : m_object(object)
 {
     unk20 = 5;
     if (object)
-        object->RetainReference();
+        object->addReference();
 }
 }  // namespace fnv_00def350
 
@@ -406,24 +418,8 @@ DEF120Bool DEF120Wrapper::FUN_00def120(const void* pvA, const void* pvB) const
     return !m_pkOwnerManager || m_pkOwnerManager->m_kFilter.IsCollisionEnabled(pvA, pvB);
 }
 
-struct DEF1E0Allocator;
-
-struct DEF1E0MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    DEF1E0Allocator* m_pStreamAllocator;
-
-    DEF1E0Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
 namespace fnvc_adapt {
-extern "C" DEF1E0MemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 }
 
 typedef unsigned __int64 DEF1E0Uint64;
@@ -435,7 +431,7 @@ struct DEF1E0PairMap
     int m_iPairCount;
 
     DEF1E0Uint64 FindValueForKey(DEF1E0Uint64 key, DEF1E0Uint64 def) const;
-    int insert(DEF1E0Allocator& alloc, DEF1E0Uint64 key, DEF1E0Uint64 val);
+    int insert(hkMemoryAllocator& alloc, DEF1E0Uint64 key, DEF1E0Uint64 val);
     void remove(DEF1E0Uint64 key);
 };
 
@@ -471,27 +467,12 @@ int DEF1E0PairCounter::DecrementPairCount(int idA, int idB)
         return 0;
     count--;
     if (count > 0)
-        map.insert(fnvc_adapt::FUN_00c85750().heap(), key, count);
+        map.insert(GetStreamAllocator(fnvc_adapt::FUN_00c85750()), key, count);
     else
         map.remove(key);
     return (int)count;
 }
 
-class hkBoolDEF0
-{
-  public:
-    hkBoolDEF0()
-    {}
-    hkBoolDEF0(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
 
 class hkBase0DEF0
 {
@@ -504,7 +485,7 @@ class hkFilterDEF0
 {
   public:
     virtual ~hkFilterDEF0();
-    virtual hkBoolDEF0 IsCollisionEnabled(const void* a, const void* b, const void* c, const void* d,
+    virtual hkBool IsCollisionEnabled(const void* a, const void* b, const void* c, const void* d,
                                           const void* e) const;
 };
 
@@ -518,12 +499,12 @@ class hkListDEF0
     int unk00[12];
     hkFilterImplDEF0* m_iFilter;
 
-    hkBoolDEF0 FUN_00def020(const void* a, const void* b, const void* c, const void* d, const void* e) const;
+    hkBool FUN_00def020(const void* a, const void* b, const void* c, const void* d, const void* e) const;
 };
 
 // Returns true if m_iFilter is null or if m_iFilter->IsCollisionEnabled returns true for the given arguments.
 // @fnv 0x00def020
-hkBoolDEF0 hkListDEF0::FUN_00def020(const void* a, const void* b, const void* c, const void* d, const void* e) const
+hkBool hkListDEF0::FUN_00def020(const void* a, const void* b, const void* c, const void* d, const void* e) const
 {
     return !m_iFilter || m_iFilter->IsCollisionEnabled(a, b, c, d, e);
 }
@@ -642,28 +623,8 @@ extern int DAT_010c3b98;
 extern int DAT_010c3b80;
 extern int DAT_0102e388;
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
-
-struct FUN_00def160_Ref
-{
-    void FUN_00c905b0();
-};
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct FUN_00def160_Sub
 {
@@ -691,7 +652,7 @@ class FUN_00def160_cls
     int unk28;
     int unk2C;
     FUN_00def160_Sub m_sub;
-    FUN_00def160_Ref* m_pReference;
+    hkReferencedObject* m_pReference;
 
     void FUN_00def160();
 };
@@ -699,7 +660,7 @@ class FUN_00def160_cls
 // @fnv 0x00def160
 void FUN_00def160_cls::FUN_00def160()
 {
-    AudioHolder* pHolder;
+    hkMemoryRouter* pHolder;
     FUN_00def160_Sub* pSub;
 
     m_vp00 = (void*)&DAT_010da0c8;
@@ -710,12 +671,12 @@ void FUN_00def160_cls::FUN_00def160()
 
     if (m_pReference != 0)
     {
-        m_pReference->FUN_00c905b0();
+        m_pReference->removeReference();
     }
 
     pSub = &m_sub;
     pHolder = FUN_00c85750();
-    pSub->FUN_00cb1e40(pHolder->m_pAllocator);
+    pSub->FUN_00cb1e40(pHolder->m_heap);
     pSub->FUN_00a29680();
 
     m_vp14 = (void*)&DAT_010c3b8c;
@@ -727,21 +688,7 @@ void FUN_00def160_cls::FUN_00def160()
 }  // namespace fnv_00def160
 
 namespace fnv_00def500 {
-struct CpuAllocator
-{
-    virtual void slot00();
-    virtual void slot04();
-    virtual void Invoke(void* block, unsigned int size);
-};
-struct CpuAllocatorHolder
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    CpuAllocator* allocator;
-};
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 struct CpuObject
 {
     unsigned int unk00;
@@ -749,15 +696,15 @@ struct CpuObject
     void FUN_00def160();
     CpuObject* FUN_00def500(unsigned int flags);
 };
-// Calls FUN_00def160, and if the low bit of flags is set, invokes the CpuAllocator from FUN_00c85750 with this and size, then returns this.
+// Calls FUN_00def160, and if the low bit of flags is set, releases this through the memory router allocator, then returns this.
 // @fnv 0x00def500
 CpuObject* CpuObject::FUN_00def500(unsigned int flags)
 {
     FUN_00def160();
     if (flags & 1)
     {
-        CpuAllocatorHolder* holder = FUN_00c85750();
-        holder->allocator->Invoke(this, size);
+        hkMemoryRouter* holder = FUN_00c85750();
+        holder->m_heap->blockFree(this, size);
     }
     return this;
 }
@@ -779,159 +726,21 @@ template <typename TYPE> __forceinline const TYPE* __cdecl hkAddByteOffsetConst(
 {
     return reinterpret_cast<const TYPE*>(reinterpret_cast<const char*>(base) + offset);
 }
-class hkHalf
-{
-  public:
-    inline hkHalf()
-    {}
 
-  private:
-    hkInt16 m_uiFilterValue;
-};
-template <typename ENUM, typename STORAGE> class hkEnum
-{
-  public:
-    hkEnum()
-    {}
-    operator ENUM() const
-    {
-        return static_cast<ENUM>(m_kStorage);
-    }
-    void operator=(ENUM e)
-    {
-        m_kStorage = static_cast<STORAGE>(e);
-    }
-
-  private:
-    STORAGE m_kStorage;
-};
-template <typename TYPE> class ValueWrapper
-{
-  public:
-    __forceinline ValueWrapper()
-    {}
-
-  private:
-    TYPE m_kStorage;
-};
-namespace vc_attributes {
-enum YesNoMaybe
-{
-    No = 0x0fff0001,
-    Maybe = 0x0fff0010,
-    Yes = 0x0fff0100
-};
-enum AccessType
-{
-    NoAccess = 0,
-    Read = 1,
-    Write = 2,
-    ReadWrite = 3
-};
-[repeatable][source_annotation_attribute(Parameter)] struct PreAttribute
-{
-    PreAttribute();
-    unsigned int Deref;
-    YesNoMaybe Valid;
-    YesNoMaybe Null;
-    YesNoMaybe Tainted;
-    AccessType Access;
-    size_t ValidElementsConst;
-    size_t ValidBytesConst;
-    const wchar_t* ValidElements;
-    const wchar_t* ValidBytes;
-    const wchar_t* ValidElementsLength;
-    const wchar_t* ValidBytesLength;
-    size_t WritableElementsConst;
-    size_t WritableBytesConst;
-    const wchar_t* WritableElements;
-    const wchar_t* WritableBytes;
-    const wchar_t* WritableElementsLength;
-    const wchar_t* WritableBytesLength;
-    size_t ElementSizeConst;
-    const wchar_t* ElementSize;
-    YesNoMaybe NullTerminated;
-    const wchar_t* Condition;
-};
-};
-const ::vc_attributes::YesNoMaybe SA_Yes = ::vc_attributes::Yes;
-const ::vc_attributes::YesNoMaybe SA_No = ::vc_attributes::No;
-const ::vc_attributes::AccessType SA_Read = ::vc_attributes::Read;
-typedef ::vc_attributes::PreAttribute SA_Pre;
-class hkMemoryAllocator
-{
-  public:
-    __forceinline void* __cdecl operator new(hk_size_t, void* p)
-    {
-        return p;
-    }
-    virtual void* AllocateMemoryBlock(int numBytes) = 0;
-    virtual void ReleaseBlock(void* p, int numBytes) = 0;
-
-  public:
-    enum MemoryState
-    {
-        MEMORY_STATE_OK,
-        MEMORY_STATE_OUT_OF_MEMORY
-    };
-};
-struct StringPointerTriple
-{
-  public:
-    __forceinline StringPointerTriple();
-
-  protected:
-    ValueWrapper<void*> m_next;
-};
-class NineIntegerRecord
-{
-  public:
-    __forceinline void* __cdecl operator new(hk_size_t, void* p)
-    {
-        return p;
-    }
-    typedef hkMemoryAllocator Allocator;
-    static NineIntegerRecord& __cdecl GetMonitorStream();
-    inline Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-
-  protected:
-    StringPointerTriple m_aiEntries;
-    Allocator* m_pStreamAllocator;
-};
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    unsigned __int32 m128_u32[4];
-} __m128;
-extern "C"
-{
-    extern __m128 _mm_add_ss(__m128 _A, __m128 _B);
-    extern __m128 _mm_add_ps(__m128 _A, __m128 _B);
-    extern __m128 _mm_sub_ps(__m128 _A, __m128 _B);
-    extern __m128 _mm_mul_ps(__m128 _A, __m128 _B);
-    extern __m128 _mm_shuffle_ps(__m128 _A, __m128 _B, unsigned int _Imm8);
-    extern void _mm_store_ss(float* _V, __m128 _A);
-};
-typedef __m128 hkQuadReal;
-class hkVector4;
+#include "../../../../../../../include/hkEnum.h"
+using ::hkEnum;
+typedef LocalM128 hkQuadReal;
 typedef const hkVector4& hkVector4Parameter;
-class VectorComponentValue
-{
-  public:
-    VectorComponentValue(const hkQuadReal& x) : m_vValue(x)
-    {}
-    operator hkReal() const
-    {
-        hkReal s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
 
-  private:
-    hkQuadReal m_vValue;
-};
+inline hkSimdReal::hkSimdReal(const LocalM128& x) : m_vValue(x)
+{}
+
+inline hkSimdReal::operator float() const
+{
+    float s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
 extern "C"
 {
     double __cdecl fabs([SA_Pre(Null = SA_No)][SA_Pre(Deref = 1, Valid = SA_Yes, Access = SA_Read)] double _X);
@@ -954,100 +763,32 @@ template <typename T> inline T __cdecl min2(T x, T y)
     return x < y ? x : y;
 }
 }
-class hkMatrix3;
-class hkVector4
-{
-  public:
-    __forceinline void* __cdecl operator new(hk_size_t nbytes)
-    {
-        ;
-        void* obj = NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));
-        ;
-        return obj;
-    }
-    __forceinline void setZero4();
-    __forceinline void add4(const hkVector4& a);
-    __forceinline void sub4(const hkVector4& a);
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b);
-    __forceinline void mul4(const hkVector4& a);
-    __forceinline void setMul4(hkVector4Parameter a, hkVector4Parameter b);
-    void SetRotatedVector(const hkMatrix3& a, const hkVector4& b);
-    __forceinline VectorComponentValue horizontalAdd3() const;
-    __forceinline hkReal& operator()(int i);
-    __forceinline const hkReal& operator()(int i) const;
 
-  private:
-    hkQuadReal m_vComponents;
+__forceinline hkMatrix3::hkMatrix3()
+{}
 
-  public:
-    operator hkQuadReal() const
-    {
-        return m_vComponents;
-    }
-};
-class hkMatrix3
-{
-  public:
-    __forceinline void* __cdecl operator new(hk_size_t nbytes)
-    {
-        ;
-        void* obj = NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));
-        ;
-        return obj;
-    }
-    __forceinline hkVector4& getColumn(int i);
-    __forceinline const hkVector4& getColumn(int i) const;
-    __forceinline void setZero();
-    inline void operator=(const hkMatrix3& a);
+__forceinline hkRotation::hkRotation()
+{}
 
-  protected:
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-};
-class __declspec(align(16)) hkRotation : public hkMatrix3
+// The approved hkVector4 header does not yet declare the matrix rotation helper.
+class MatrixRotatedVector : public hkVector4
 {
   public:
-    __forceinline void* __cdecl operator new(hk_size_t nbytes)
-    {
-        ;
-        void* obj = NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));
-        ;
-        return obj;
-    }
+    void SetRotatedVector(const hkMatrix3& matrix, const hkVector4& vector);
 };
-inline void hkVector4::add4(const hkVector4& v)
-{
-    m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-}
-inline void hkVector4::sub4(const hkVector4& v)
-{
-    m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents);
-}
-inline void hkVector4::setSub4(const hkVector4& v0, const hkVector4& v1)
-{
-    m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
-}
-inline void hkVector4::mul4(const hkVector4& v)
-{
-    m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
-}
-inline void hkVector4::setMul4(const hkVector4& a, const hkVector4& b)
-{
-    m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-}
-inline VectorComponentValue hkVector4::horizontalAdd3() const
+
+__forceinline hkSimdReal hkVector4::horizontalAdd3() const
 {
     hkQuadReal xySum = _mm_add_ss(
         _mm_shuffle_ps(m_vComponents, m_vComponents, (((1) << 6) | ((1) << 4) | ((1) << 2) | ((1)))), m_vComponents);
     return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, (((2) << 6) | ((2) << 4) | ((2) << 2) | ((2)))),
                       xySum);
 }
-inline hkReal& hkVector4::operator()(int a)
+__forceinline hkReal& hkVector4::operator()(int a)
 {
     return reinterpret_cast<hkReal*>(&m_vComponents)[a];
 }
-inline const hkReal& hkVector4::operator()(int a) const
+__forceinline const hkReal& hkVector4::operator()(int a) const
 {
     return reinterpret_cast<const hkReal*>(&m_vComponents)[a];
 }
@@ -1061,7 +802,7 @@ class QuantizedBoundsData
     __forceinline void* __cdecl operator new(hk_size_t nbytes)
     {
         ;
-        void* obj = NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));
+        void* obj = GetStreamAllocator(hkMemoryRouter::getInstance()).blockAlloc(static_cast<int>(nbytes));
         ;
         return obj;
     }
@@ -1103,7 +844,7 @@ class QuantizedBoundsData
     }
     hkVector4& getScratch1()
     {
-        return m_kCoreFromWorldMatrix.getColumn(0);
+        return m_kCoreFromWorldMatrix.m_kColumn0;
     }
     const hkVector4& getScratch0() const
     {
@@ -1111,7 +852,7 @@ class QuantizedBoundsData
     }
     const hkVector4& getScratch1() const
     {
-        return m_kCoreFromWorldMatrix.getColumn(0);
+        return m_kCoreFromWorldMatrix.m_kColumn0;
     }
 
   public:
@@ -1127,7 +868,7 @@ class QuantizedBoundsData
         this->m_vLinearVelocity.setZero4();
         this->m_vAngularVelocity.setZero4();
         this->getCenterOfMassInWorld().setZero4();
-        this->getCoreFromWorldMatrix().setZero();
+        reinterpret_cast<hkMatrix3&>(this->getCoreFromWorldMatrix()).setZero();
     }
 };
 struct ConstraintSolverInfo
@@ -1147,7 +888,7 @@ struct ConstraintSolverInfo
         __forceinline void* __cdecl operator new(hk_size_t nbytes)
         {
             ;
-            void* obj = NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));
+            void* obj = GetStreamAllocator(hkMemoryRouter::getInstance()).blockAlloc(static_cast<int>(nbytes));
             ;
             return obj;
         }
@@ -1156,7 +897,7 @@ struct ConstraintSolverInfo
             if (p)
             {
                 ;
-                NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(
+                GetStreamAllocator(hkMemoryRouter::getInstance()).blockFree(
                     p, sizeof(ConstraintSolverInfo::FloatAndHalfRecord));
             }
         }
@@ -1227,7 +968,7 @@ struct ConstraintInstanceBuffer
     __forceinline void* __cdecl operator new(hk_size_t nbytes)
     {
         ;
-        void* obj = NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));
+        void* obj = GetStreamAllocator(hkMemoryRouter::getInstance()).blockAlloc(static_cast<int>(nbytes));
         ;
         return obj;
     }
@@ -1250,7 +991,7 @@ class ContactImpulseInfo
     __forceinline void* __cdecl operator new(hk_size_t nbytes)
     {
         ;
-        void* obj = NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));
+        void* obj = GetStreamAllocator(hkMemoryRouter::getInstance()).blockAlloc(static_cast<int>(nbytes));
         ;
         return obj;
     }
@@ -2132,13 +1873,13 @@ void FUN_00def570(const ConstraintSolverInfo& info, const FloatRecord* solverInp
             mA = &nonConstAccumA;
             nonConstAccumB = *mB;
             mB = &nonConstAccumB;
-            hkVector4 deltaVelA;
+            MatrixRotatedVector deltaVelA;
             deltaVelA.SetRotatedVector(schema->m_kAngularToLinearVelocityMatrixA, mA->m_vAngularVelocity);
-            hkVector4 deltaSumVelA;
+            MatrixRotatedVector deltaSumVelA;
             deltaSumVelA.SetRotatedVector(schema->m_kAngularToLinearVelocityMatrixA, mA->getSumAngularVel());
-            hkVector4 deltaVelB;
+            MatrixRotatedVector deltaVelB;
             deltaVelB.SetRotatedVector(schema->m_kAngularToLinearVelocityMatrixB, mB->m_vAngularVelocity);
-            hkVector4 deltaSumVelB;
+            MatrixRotatedVector deltaSumVelB;
             deltaSumVelB.SetRotatedVector(schema->m_kAngularToLinearVelocityMatrixB, mB->getSumAngularVel());
             nonConstAccumA.m_vLinearVelocity.add4(deltaVelA);
             nonConstAccumA.getSumLinearVel().add4(deltaSumVelA);
@@ -2243,23 +1984,24 @@ void FUN_00def570(const ConstraintSolverInfo& info, const FloatRecord* solverInp
                                                     srWriter);
                         {
                             AngularMotorState* motorState = chain->getChildConstraintStatusBase() + c;
+                            // Unsigned indices preserve the original x86 base/index encoding.
                             if (motorState->GetReferenceTimeStep(i) == 3)
                             {
                                 const hkReal virtMass = (j2AngInChain + i)->getInvJacDiag();
-                                const hkReal minDeltaVel = motorState->m_kAngularMotors[i].m_fMaximumForce / virtMass;
+                                const hkReal minDeltaVel = motorState->m_kAngularMotors[static_cast<size_t>(i)].m_fMaximumForce / virtMass;
                                 const hkReal factor = 1.5f;
                                 const hkReal minRhs =
-                                    minDeltaVel * info.m_fTimeStep / motorState->m_kAngularMotors[i].m_fTau * factor;
+                                    minDeltaVel * info.m_fTimeStep / motorState->m_kAngularMotors[static_cast<size_t>(i)].m_fTau * factor;
                                 rhsa = MathUtilities::max2(rhsa, minRhs);
                                 hkSolverExportWriteRhs(rhsa, solverOut + 3 + i);
                             }
                             if (motorState->GetReferenceTimeStep(i) == 1)
                             {
                                 const hkReal virtMass = (j2AngInChain + i)->getInvJacDiag();
-                                const hkReal maxDeltaVel = motorState->m_kAngularMotors[i].m_fMinimumForce / virtMass;
+                                const hkReal maxDeltaVel = motorState->m_kAngularMotors[static_cast<size_t>(i)].m_fMinimumForce / virtMass;
                                 const hkReal factor = 1.5f;
                                 const hkReal maxRhs =
-                                    maxDeltaVel * info.m_fTimeStep / motorState->m_kAngularMotors[i].m_fTau * factor;
+                                    maxDeltaVel * info.m_fTimeStep / motorState->m_kAngularMotors[static_cast<size_t>(i)].m_fTau * factor;
                                 rhsa = MathUtilities::min2(rhsa, maxRhs);
                                 hkSolverExportWriteRhs(rhsa, solverOut + 3 + i);
                             }

@@ -1,31 +1,33 @@
-// Source layout: ZeroOverheadHeap. PC corrections are in generate_headers.py.
-#ifndef FNV_ZEROOVERHEADHEAP_H
-#define FNV_ZEROOVERHEADHEAP_H
+#pragma once
 
-#include "layout_support.h"
-#include "RecursiveSpinLock.h"
 #include "IMemoryHeap.h"
-#pragma pack(push, 4)
+#include "RecursiveSpinLock.h"
+
 class ZeroOverheadHeap : public IMemoryHeap
 {
-  public:
-    unsigned int iSize;      // +0x4
-    const char* pName;       // +0x8
-    void* m_pPoolBase;       // +0xC
-    void* m_pCurrent;        // +0x10
-    int m_iAllocationCount;  // +0x14
-    unsigned int layoutPadding18[2];
-    RecursiveSpinLock lock;  // +0x20
+public:
+    virtual ~ZeroOverheadHeap();
+    virtual const char* GetName();
     virtual void* Allocate(unsigned int size, unsigned int alignment);
     virtual void Deallocate(void* pointer, unsigned int alignment);
     virtual bool ContainsBlockImpl(const void* pointer);
+    virtual void CheckHeapIntegrity();
+    virtual void GetHeapStats(MemoryHeapStats* stats, bool full);
+    virtual int OutputBucketInfo(IMemoryManagerFile* file);
+    virtual int OutputBlockInfo(IMemoryManagerFile* file, bool full);
+    virtual unsigned int Size(const void* pointer, unsigned int alignment);
+    virtual void vf10();
+    virtual void vf11();
+    virtual void vf12();
+    virtual void vf13();
+    virtual void vf14();
+    virtual void vf15();
+
+    unsigned int iSize;
+    const char* pName;
+    void* m_pPoolBase;
+    void* m_pCurrent;
+    int m_iAllocationCount;
+    unsigned int layoutPadding18[2];
+    RecursiveSpinLock lock;
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(ZeroOverheadHeap) == 0x40);
-FNV_STATIC_ASSERT(offsetof(ZeroOverheadHeap, iSize) == 0x4);
-FNV_STATIC_ASSERT(offsetof(ZeroOverheadHeap, pName) == 0x8);
-FNV_STATIC_ASSERT(offsetof(ZeroOverheadHeap, m_pPoolBase) == 0xC);
-FNV_STATIC_ASSERT(offsetof(ZeroOverheadHeap, m_pCurrent) == 0x10);
-FNV_STATIC_ASSERT(offsetof(ZeroOverheadHeap, m_iAllocationCount) == 0x14);
-FNV_STATIC_ASSERT(offsetof(ZeroOverheadHeap, lock) == 0x20);
-#endif

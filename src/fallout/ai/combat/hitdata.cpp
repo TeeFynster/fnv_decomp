@@ -1,6 +1,11 @@
-
+#include "../../../../include/BSSimpleArray.h"
 // src/fallout/ai/combat/hitdata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/hitdata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../include/Actor.h"
+#include "../../../../include/BGSBodyPart.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/Setting.h"
 
 struct FUN_009b7040_shell
 {
@@ -61,17 +66,12 @@ bool FUN_0066de30(int a)
 extern float DAT_011f4270;
 extern float DAT_011f4274;
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-
 extern NiPoint3 _NiPoint3_ZERO;
 
-struct BooleanFloatQuery
+// HitData is 0x64 bytes; keep its local definition until include/HitData.h is available.
+class HitData
 {
+  public:
     void* m_pAggressor;
     void* pTarget;
     void* m_pSourceReference;
@@ -94,10 +94,11 @@ struct BooleanFloatQuery
     float m_fHitValueAtOffset5C;
     int BackgroundTask;
     void FUN_009b4dc0();
+    void FUN_009b4ec0(const HitData& src);
 };
 
 // @fnv 0x009b4dc0
-void BooleanFloatQuery::FUN_009b4dc0()
+void HitData::FUN_009b4dc0()
 {
     m_pAggressor = 0;
     pTarget = 0;
@@ -172,17 +173,7 @@ FUN_009b7940_shell* FUN_009b7940_shell::Initialize()
     return this;
 }
 
-template <typename T, int N> struct BSSimpleArray
-{
-    void* pData;
-    unsigned int uiSize;
-    unsigned int uiCapacity;
-    unsigned int uiPad;
-    unsigned int Add(T&);
-};
-struct BGSBodyPart
-{
-};
+
 struct WeightedResultList
 {
     BSSimpleArray<void*, 1024> kResults;
@@ -231,16 +222,11 @@ struct FUN_009b4d90
 // @fnv 0x009b4d90
 FUN_009b4d90::FUN_009b4d90()
 {
-    ((BooleanFloatQuery*)this)->FUN_009b4dc0();
+    ((HitData*)this)->FUN_009b4dc0();
 }
 
-struct HitDataEx : BooleanFloatQuery
-{
-    void FUN_009b4ec0(const BooleanFloatQuery& src);
-};
-
 // @fnv 0x009b4ec0
-void HitDataEx::FUN_009b4ec0(const BooleanFloatQuery& src)
+void HitData::FUN_009b4ec0(const HitData& src)
 {
     m_pAggressor = src.m_pAggressor;
     pTarget = src.pTarget;
@@ -349,7 +335,6 @@ FUN_009b7870::FUN_009b7870()
     m20 = 0;
 }
 
-class Actor;
 void __cdecl ApplyPerkModifiers(int aeEntry, Actor* apActor, ...);
 float __cdecl GetWeaponDPS(void* apOwner, void* apWeapon);
 float& __fastcall FUN_00403e20(float* apSetting);
@@ -367,229 +352,11 @@ struct FUN_009b7060_weapon
     unsigned int GetField1CC();
 };
 
-struct FUN_009b7060_actor
+// Actor.h does not yet declare the detection query at 0x0088b880.
+// Keep only that external method declaration here until it is shared.
+struct ActorDetectionQuery
 {
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual bool v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual bool v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual bool v139(int aiFlag);
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual void v213();
-    virtual void v214();
-    virtual void v215();
-    virtual bool v216();
-    bool FUN_004997b0();
-    bool FUN_008bc700(Actor* apActor);
-    bool FUN_0088b880(int a1, Actor* apActor, int a3, int a4, int a5);
-    int FUN_008a0d10(int a1, Actor* apActor, char* apDetected, int a4, int a5, int a6, int a7);
+    bool FUN_0088b880(int, Actor*, int, int, int);
 };
 
 struct FUN_009b7060_shell
@@ -611,7 +378,7 @@ struct FUN_009b7060_shell
 // @fnv 0x009b7060
 void FUN_009b7060_shell::ApplyCriticalHit()
 {
-    if (pTarget && ((FUN_009b7060_actor*)((char*)pTarget + 0x94))->v004())
+    if (pTarget && reinterpret_cast<MagicTarget*>((char*)pTarget + 0x94)->CanReceiveMagicEffects())
         return;
     if (FUN_0058cba0(0x800))
         return;
@@ -625,12 +392,12 @@ void FUN_009b7060_shell::ApplyCriticalHit()
         fCritChance += FUN_00403e20((float*)&DAT_011ce46c);
     fCritChance *= 10.0;
 
-    if (pSource && ((FUN_009b7060_actor*)pSource)->v216() && pTarget && ((FUN_009b7060_actor*)pTarget)->v064() &&
-        !((FUN_009b7060_actor*)pTarget)->v139(0) && ((FUN_009b7060_actor*)pSource)->FUN_004997b0() &&
-        !((FUN_009b7060_actor*)pTarget)->FUN_008bc700(pSource))
+    if (pSource && pSource->IsPlayerRef() && pTarget && pTarget->IsActor() &&
+        !pTarget->HasHealth(false) && pSource->FUN_004997b0() &&
+        !pTarget->IsCombatTargetHostile(pSource))
     {
-        char cDetected = ((FUN_009b7060_actor*)pTarget)->FUN_0088b880(0, pSource, 1, 0, 0);
-        int iDetection = ((FUN_009b7060_actor*)pTarget)->FUN_008a0d10(0, pSource, &cDetected, 0, 0, 0, 0);
+        bool cDetected = reinterpret_cast<ActorDetectionQuery*>(pTarget)->FUN_0088b880(0, pSource, 1, 0, 0);
+        int iDetection = pTarget->CalculateDetectionLevel(0, pSource, &cDetected, false, 0, false, 0);
         if (iDetection <= 0)
         {
             fCritChance *= FUN_00403e20((float*)&DAT_011ce858);
@@ -662,205 +429,6 @@ struct Process;
 struct ActorBase;
 struct Parts;
 struct Part;
-struct ValueInterface
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual float Value(int);
-};
-struct StateInterface
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual bool Test();
-};
-struct ActorCore
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool Ready();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual bool IsPlayer();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    StateInterface state;
-    int unk98;
-    int unk9c;
-    int unka0;
-};
-struct Actor : ActorCore, ValueInterface
-{
-    Process* ProcessNow();
-    ActorBase* Base();
-};
 struct Process
 {
     virtual void v0();
@@ -1064,7 +632,9 @@ struct Part
     bool Critical();
     signed char ValueIndex();
 };
-struct Command
+// Record behind the hit data's +0x54 pointer (VATS queued action); ApplyDamageEffects (0x009b73d0) reads only the
+// shot count byte at +0x08. Not the console-command Command.
+struct VATSQueuedAction
 {
     int unk00;
     int unk04;
@@ -1074,14 +644,10 @@ struct Weapon
 {
     bool Check();
 };
-struct Setting
-{
-    float* Float();
-};
 extern Setting originalRuntimeFloatSetting748;
 extern Setting g_011cf794;
 extern Weapon* DAT_011ca278;
-void Compute(ValueInterface*, Weapon*, int, int, int, bool, bool*, bool*);
+void Compute(ActorValueOwner*, Weapon*, int, int, int, bool, bool*, bool*);
 struct Hit
 {
     Actor* source;
@@ -1101,7 +667,7 @@ struct Hit
     NiPoint3 offset1;
     NiPoint3 offset2;
     void* critical;
-    Command* command;
+    VATSQueuedAction* command;
     unsigned flags;
     float bonus;
     int refs;
@@ -1112,9 +678,9 @@ struct Hit
 // @fnv 0x009b73d0
 void Hit::ApplyDamageEffects()
 {
-    if (!target || !target->Ready())
+    if (!target || !target->IsActor())
         return;
-    if (target->state.Test())
+    if (reinterpret_cast<MagicTarget*>((char*)target + 0x94)->CanReceiveMagicEffects())
         return;
     if (bonus > 0.0)
     {
@@ -1126,7 +692,7 @@ void Hit::ApplyDamageEffects()
                 bonus *= *g_011cf794.Float();
         }
         health *= bonus;
-        if (source && !source->IsPlayer() && skill == 45)
+        if (source && !source->IsCreature() && skill == 45)
             fatigue *= bonus;
         total *= bonus;
     }
@@ -1138,14 +704,14 @@ void Hit::ApplyDamageEffects()
     bool criticalFlagX = false;
     if (limb == 14)
     {
-        Item* item_ = target->ProcessNow()->GetItem();
+        Item* item_ = reinterpret_cast<Process*>(target->FUN_008d8520())->GetItem();
         Parts* flags_ = item_ ? item_->Flags() : 0;
         if (flags_)
         {
             float itemHealth4 = item_->Health(0);
             if (itemHealth4 - limbDamage <= 0.0)
             {
-                if (target->IsPlayer() || flags_->Special())
+                if (target->IsCreature() || flags_->Special())
                     SetFlag(0x200, true);
                 else
                     SetFlag(0x100, true);
@@ -1154,7 +720,7 @@ void Hit::ApplyDamageEffects()
     }
     else if (limb != -1)
     {
-        Parts* partsX = target->Base()->GetParts();
+        Parts* partsX = reinterpret_cast<ActorBase*>(target->Base())->GetParts();
         if (partsX)
         {
             Part* part = partsX->Find(limb);
@@ -1164,13 +730,13 @@ void Hit::ApplyDamageEffects()
                 criticalFlagX = part->Critical();
                 guaranteed = criticalFlagX && current >= 100;
                 int index7 = part->ValueIndex();
-                float valueVal = target->Value(index7);
+                float valueVal = target->GetCurrentActorValue(static_cast<ActorValue::Index>(index7));
                 if (valueVal > 0.0 && valueVal - limbDamage <= 0.0)
                     SetFlag(0x80, true);
             }
         }
     }
-    float chance9 = target->Value(16);
+    float chance9 = target->GetCurrentActorValue(static_cast<ActorValue::Index>(16));
     if (chance9 - health * count <= 0.0)
     {
         SetFlag(0x10, true);
@@ -1179,7 +745,7 @@ void Hit::ApplyDamageEffects()
             bool explodeTmp = false;
             bool dismember8 = guaranteed;
             if (!dismember8)
-                Compute(static_cast<ValueInterface*>(target), weapon ? weapon : (skill == 45 ? DAT_011ca278 : 0),
+                Compute(static_cast<ActorValueOwner*>(target), weapon ? weapon : (skill == 45 ? DAT_011ca278 : 0),
                         current, 0, 0, criticalFlagX, &explodeTmp, &dismember8);
             if (explodeTmp)
                 SetFlag(0x20, true);

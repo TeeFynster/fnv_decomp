@@ -1,235 +1,105 @@
+#include <xmmintrin.h>
 
 // src/havok/physics/utilities/weapons/hkpgravitygun.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/weapons/hkpgravitygun.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpGravityGun.h"
 
-struct FUN_00e45fb0_class
+
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/FinishingFlag.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkStringPtr.h"
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkSimdReal.h"
+#include "../../../../../include/hkpFirstPersonGun.h"
+#include "../../../../../include/hkpGravityGun.h"
+#include "../../../../../include/hkpRigidBody.h"
+
+typedef float hkReal;
+typedef unsigned char hkUint8;
+typedef unsigned short hkUint16;
+typedef short hkInt16;
+typedef int hkInt32;
+typedef unsigned int hkUint32;
+
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+template <typename T> void hkMemoryAllocator::_bufFree(void* p, int n) { bufFree(p, n * sizeof(T)); }
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*) { return FUN_00c85750().heap(); }
+template <class T> __forceinline void hkArrayBase<T>::clear()
 {
-    void FUN_00e45e60(int);
-    void FUN_00e45fb0(int, int, int);
-};
+    for (int i = 0; i < m_iElementCount; ++i) m_data[i].~T();
+    m_iElementCount = 0;
+}
+template <class T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
+{
+    clear();
+    if ((m_iCapacityState & 0x80000000) == 0) alloc._bufFree<T>(m_data, getCapacity());
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray() { clearAndDeallocate(); }
+inline void hkReferencedObject::operator delete(void* p)
+{
+    FUN_00c85750().heap().blockFree(p, static_cast<hkReferencedObject*>(p)->m_usMemSizeAndFlags);
+}
+
+struct GGTransform;
+struct GGWorld;
+struct GunTransform;
+class hkpWorld;
+struct GunArg3;
+
+// The shared base lacks the finish-loaded constructor at 0x00e466a0.
+
+// The shared class lacks both constructors and the release, attach and action methods defined here.
 
 // @fnv 0x00e45fb0
-void FUN_00e45fb0_class::FUN_00e45fb0(int, int, int)
+void hkpGravityGun::FUN_00e45fb0(int, int, int)
 {
-    if (*(int*)((char*)this + 0x24) != 0)
+    if (m_kPickedBodies.m_iElementCount != 0)
         FUN_00e45e60(0);
 }
 
-struct DDCC60World
-{
-    void removeReference();
-};
-
-struct FUN_00e45fc0_class
-{
-    unsigned char m_unknown[0x20];
-    DDCC60World** m_kExternalLinks;
-    int m_sReferenceCount;
-
-    void RemoveAllReferences(int);
-};
 
 // @fnv 0x00e45fc0
-void FUN_00e45fc0_class::RemoveAllReferences(int)
+void hkpGravityGun::RemoveAllReferences(int)
 {
     int i = 0;
-    if (m_sReferenceCount > 0)
+    if (m_kPickedBodies.m_iElementCount > 0)
     {
         do
         {
-            m_kExternalLinks[i]->removeReference();
+            ((hkReferencedObject*)m_kPickedBodies.m_data[i])->removeReference();
             ++i;
-        } while (i < m_sReferenceCount);
+        } while (i < m_kPickedBodies.m_iElementCount);
     }
-    m_sReferenceCount = 0;
+    m_kPickedBodies.m_iElementCount = 0;
 }
 
-struct hkFinishLoadedObjectFlagE463
-{
-    int m_bFinishing;
-};
-
-template <class T> class hkArrayE463
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArrayE463() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
-
-class FUN_00e466a0
-{
-  public:
-    FUN_00e466a0(hkFinishLoadedObjectFlagE463 flag);
-    virtual ~FUN_00e466a0();
-
-    hkUint16 m_usMemSizeAndFlags;
-    hkInt16 m_sReferenceCount;
-    hkUint8 m_type;
-    const char* m_name;
-    hkUint8 m_uiKeyboardKey;
-    hkArrayE463<void*> m_kListeners;
-};
-
-class hkpRigidBodyE463;
-
-class FUN_00e46300 : public FUN_00e466a0
-{
-  public:
-    hkArrayE463<hkpRigidBodyE463*> m_kPickedBodies;
-
-    FUN_00e46300(hkFinishLoadedObjectFlagE463 flag);
-    virtual ~FUN_00e46300();
-};
-
 // @fnv 0x00e46300
-FUN_00e46300::FUN_00e46300(hkFinishLoadedObjectFlagE463 flag) : FUN_00e466a0(flag)
+hkpGravityGun::hkpGravityGun(FinishingFlag flag) : hkpFirstPersonGun(flag)
 {
     if (flag.m_bFinishing)
         m_type = 3;
 }
 
-namespace fnv_00e46340 {
-class hkMemoryAllocatorE463
-{
-  public:
-    virtual ~hkMemoryAllocatorE463() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void* AllocateBufferWithSize(int& iReqNumBytesInOut) throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-
-    template <typename T> void _bufFree(void* p, int aiNumElements)
-    {
-        ReturnMemory(p, aiNumElements * sizeof(T));
-    }
-};
-
-struct hkMemoryRouterE463
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorE463* m_pStreamAllocator;
-    hkMemoryAllocatorE463& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterE463& __cdecl FUN_00c85750();
-
-template <class T> __forceinline void destructE463(T* t, int n)
-{
-    for (int i = 0; i < n; i++)
-        t[i].~T();
-}
-
-template <class T> class hkArrayE463
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    ~hkArrayE463() throw()
-    {
-        ClearAndRelease(FUN_00c85750().heap());
-    }
-    __forceinline void clear()
-    {
-        destructE463(m_data, m_iElementCount);
-        m_iElementCount = 0;
-    }
-    __forceinline void ClearAndRelease(hkMemoryAllocatorE463& kAlloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc._bufFree<T>(m_data, getCapacity());
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
-
-class FUN_00cb0c00_class
-{
-  public:
-    const char* m_pcText;
-
-    void FUN_00cb0c00() throw();
-    ~FUN_00cb0c00_class()
-    {
-        FUN_00cb0c00();
-    }
-};
-
-struct FUN_00d1df70
-{
-    void FUN_00c90510() throw();
-    void removeReference() throw();
-};
-
-class hkReferencedObjectE463
-{
-  public:
-    virtual ~hkReferencedObjectE463() throw()
-    {}
-    hkUint16 m_usMemSizeAndFlags;
-    hkInt16 m_sReferenceCount;
-
-    static void operator delete(void* p) throw()
-    {
-        FUN_00c85750().heap().ReleaseBlock(p, static_cast<hkReferencedObjectE463*>(p)->m_usMemSizeAndFlags);
-    }
-};
-
-class FUN_00e466e0 : public hkReferencedObjectE463
-{
-  public:
-    int m_08;
-    FUN_00cb0c00_class m_name;
-    int m_10;
-    hkArrayE463<FUN_00d1df70*> m_children;
-
-    virtual ~FUN_00e466e0() throw();
-};
-
-class hkDerivedE463 : public FUN_00e466e0
-{
-  public:
-    hkArrayE463<int> m_iSlotIds;
-
-    hkDerivedE463* DestroyAndFree(unsigned int uiFlags) throw();
-};
-
 // Destroys the object and, when bit 0 of uiFlags is set, frees its memory via operator delete; returns this.
 // @fnv 0x00e46340
-hkDerivedE463* hkDerivedE463::DestroyAndFree(unsigned int uiFlags) throw()
+hkpGravityGun* hkpGravityGun::DestroyAndFree(unsigned int uiFlags) throw()
 {
-    this->hkDerivedE463::~hkDerivedE463();
+    // The original scalar-deleting wrapper tears down members and the base without a derived vptr store.
+    m_kPickedBodies.~hkArray();
+    this->hkpFirstPersonGun::~hkpFirstPersonGun();
     if (uiFlags & 1)
-        hkDerivedE463::operator delete(this);
+        hkpGravityGun::operator delete(this);
     return this;
 }
-}  // namespace fnv_00e46340
+
 
 extern "C" double __cdecl fabs(double);
-
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 
 namespace MathUtilities {
 inline hkReal fabs(hkReal r)
@@ -238,133 +108,7 @@ inline hkReal fabs(hkReal r)
 }
 }
 
-struct GGVector4
-{
-    __m128 m_vComponents;
 
-    void operator=(const GGVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    hkReal& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-    void SetTransformedPosition(const struct GGTransform& t, const GGVector4& v);
-};
-
-struct GGMotion
-{
-    int m00;
-    int m04;
-    int m08;
-    int m0c;
-    int m10;
-    int m14;
-    int m18;
-    int m1c;
-    int m20;
-    int m24;
-    int m28;
-    int m2c;
-    int m30;
-    int m34;
-    int m38;
-    int m3c;
-    int m40;
-    int m44;
-    int m48;
-    int m4c;
-    GGVector4 m_vCenterOfMass0;
-    GGVector4 m_vCenterOfMass1;
-    hkReal GetMassValue() const;
-};
-
-struct GGCollidable
-{
-    int c00;
-    int c04;
-    int c08;
-    int c0c;
-    int c10;
-    int c14;
-    int c18;
-    int c1c;
-    int c20;
-    int c24;
-    int c28;
-    int c2c;
-    int c30;
-    int c34;
-    int c38;
-    int c3c;
-    int c40;
-    int c44;
-    int c48;
-    int c4c;
-    int c50;
-    int c54;
-    int c58;
-    int c5c;
-    int c60;
-    int c64;
-    int c68;
-    int c6c;
-    int c70;
-    int c74;
-    int c78;
-    int c7c;
-    int c80;
-    int c84;
-    int c88;
-    int c8c;
-    int c90;
-    int c94;
-    int c98;
-    int c9c;
-    int ca0;
-    int ca4;
-    int ca8;
-    int cac;
-    int cb0;
-    int cb4;
-    int cb8;
-    int cbc;
-    int cc0;
-    int cc4;
-    int cc8;
-    int ccc;
-};
-
-struct GGRigidBody
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    GGCollidable m_kCollidable;
-    GGMotion m_pMotionState;
-
-    const GGVector4& getCenterOfMassInWorld() const
-    {
-        return m_pMotionState.m_vCenterOfMass1;
-    }
-    const GGCollidable* getCollidable() const
-    {
-        return &m_kCollidable;
-    }
-    hkReal GetMassValue() const
-    {
-        return m_pMotionState.GetMassValue();
-    }
-};
-
-struct GGEntityArray
-{
-    GGRigidBody** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
 
 struct GGSimulationIsland
 {
@@ -386,20 +130,15 @@ struct GGSimulationIsland
     int unk3c;
     int unk40;
     int unk44;
-    GGEntityArray m_kActorEntries;
+    hkArrayBase<hkpRigidBody*> m_kActorEntries;
 };
 
-struct GGIslandArray
-{
-    GGSimulationIsland** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+
 
 struct GGWorldRayCastInput
 {
-    GGVector4 m_vFrom;
-    GGVector4 m_vTo;
+    hkVector4 m_vFrom;
+    hkVector4 m_vTo;
     hkBool m_bEnableShapeCollectionFilter;
     hkUint32 m_uiFilterInfo;
     GGWorldRayCastInput() : m_bEnableShapeCollectionFilter(false), m_uiFilterInfo(0)
@@ -423,7 +162,7 @@ struct GGRayHitCollector
 
 struct GGShapeRayCastCollectorOutput
 {
-    GGVector4 m_vHitNormal;
+    hkVector4 m_vHitNormal;
     hkReal m_fHitFraction;
     hkInt32 m_iExtraInfo;
     int unk18;
@@ -462,7 +201,7 @@ struct GGShapeRayCastOutput : GGShapeRayCastCollectorOutput
 
 struct GGWorldRayCastOutput : GGShapeRayCastOutput
 {
-    const GGCollidable* m_pRootCollidable;
+    const hkpCollidable* m_pRootCollidable;
 
     GGWorldRayCastOutput()
     {
@@ -503,21 +242,30 @@ struct GGWorld
     int unk1c;
     int unk20;
     int unk24;
-    GGIslandArray m_kActiveSimulationIslands;
-    GGIslandArray m_kInactiveSimulationIslands;
+    hkArrayBase<GGSimulationIsland*> m_kActiveSimulationIslands;
+    hkArrayBase<GGSimulationIsland*> m_kInactiveSimulationIslands;
 
     void RayCast(const GGWorldRayCastInput& input, GGRayHitCollector& collector) const;
 };
 
 struct GGTransform
 {
-    GGVector4 m_kColumn0, m_kColumn1, m_kColumn2;
-    GGVector4 m_vTranslation;
+    hkVector4 m_kColumn0, m_kColumn1, m_kColumn2;
+    hkVector4 m_vTranslation;
 };
 
-struct GravityGun : hkpGravityGun
+inline const hkVector4& hkpRigidBody::getCenterOfMassInWorld() const
 {
-    bool isGrabbed(const GGRigidBody* body) const
+    return m_pMotionState.m_kMotionState.m_kSweptTransform.m_vCenterOfMass1;
+}
+
+inline hkReal gravityGunBodyMass(hkpRigidBody* body)
+{
+    return body->m_pMotionState.GetMassValue();
+}
+
+// The shared gravity-gun declarations still use the opaque GGRigidBody pointer type.
+bool hkpGravityGun::isGrabbed(const GGRigidBody* body) const
     {
         for (int i = 0; i < m_kPickedBodies.m_iElementCount; i++)
         {
@@ -529,18 +277,15 @@ struct GravityGun : hkpGravityGun
         return false;
     }
 
-    GGRigidBody* FUN_00e45a60(const GGTransform& viewTransform, const GGRigidBody* characterBody, const GGWorld* world);
-};
-
 // Finds the best rigid body to grab by scoring candidates in active and inactive islands, then ray-casting to verify line of sight.
 // @fnv 0x00e45a60
-GGRigidBody* GravityGun::FUN_00e45a60(const GGTransform& viewTransform, const GGRigidBody* characterBody,
+GGRigidBody* hkpGravityGun::FUN_00e45a60(const GGTransform& viewTransform, const GGRigidBody* characterBody,
                                       const GGWorld* world)
 {
-    GGRigidBody* pickedBody = 0;
+    hkpRigidBody* pickedBody = 0;
     hkReal bestValue = 0.35f;
 
-    const GGIslandArray* islands = &world->m_kActiveSimulationIslands;
+    const hkArrayBase<GGSimulationIsland*>* islands = &world->m_kActiveSimulationIslands;
     for (int iIslandSet = 0; iIslandSet < 2; iIslandSet++)
     {
         for (int i = 0; i < islands->m_iElementCount; i++)
@@ -548,14 +293,14 @@ GGRigidBody* GravityGun::FUN_00e45a60(const GGTransform& viewTransform, const GG
             GGSimulationIsland* island = islands->m_data[i];
             for (int e = 0; e < island->m_kActorEntries.m_iElementCount; e++)
             {
-                GGRigidBody* body = island->m_kActorEntries.m_data[e];
-                const GGVector4& vCenterOfMass = body->getCenterOfMassInWorld();
+                hkpRigidBody* body = island->m_kActorEntries.m_data[e];
+                const hkVector4& vCenterOfMass = body->getCenterOfMassInWorld();
 
-                GGVector4 posInView;
-                posInView.SetTransformedPosition(viewTransform, vCenterOfMass);
+                hkVector4 posInView;
+                posInView.SetTransformedPosition(reinterpret_cast<const hkTransform&>(viewTransform), vCenterOfMass);
 
                 hkReal x = posInView(0);
-                if (x < 0.1f || x > m_fMaxPickDistance || body == characterBody)
+                if (x < 0.1f || x > m_fMaxPickDistance || body == reinterpret_cast<const hkpRigidBody*>(characterBody))
                 {
                     continue;
                 }
@@ -563,7 +308,7 @@ GGRigidBody* GravityGun::FUN_00e45a60(const GGTransform& viewTransform, const GG
                 hkReal value = MathUtilities::fabs(posInView(2)) + MathUtilities::fabs(posInView(1));
                 value = value / (x + 1.0);
 
-                if (body->GetMassValue() > m_fMaxPickMass)
+                if (gravityGunBodyMass(body) > m_fMaxPickMass)
                 {
                     value += 0.1f;
                 }
@@ -573,7 +318,7 @@ GGRigidBody* GravityGun::FUN_00e45a60(const GGTransform& viewTransform, const GG
                     continue;
                 }
 
-                if (isGrabbed(body))
+                if (isGrabbed(reinterpret_cast<const GGRigidBody*>(body)))
                 {
                     continue;
                 }
@@ -587,7 +332,7 @@ GGRigidBody* GravityGun::FUN_00e45a60(const GGTransform& viewTransform, const GG
                     world->RayCast(input, collector);
 
                     if (collector.m_kClosestHit.m_pRootCollidable == 0 ||
-                        collector.m_kClosestHit.m_pRootCollidable == body->getCollidable())
+                        collector.m_kClosestHit.m_pRootCollidable == &body->m_kCollidable)
                     {
                         bestValue = value;
                         pickedBody = body;
@@ -597,15 +342,8 @@ GGRigidBody* GravityGun::FUN_00e45a60(const GGTransform& viewTransform, const GG
         }
         islands = &world->m_kInactiveSimulationIslands;
     }
-    return pickedBody;
+    return reinterpret_cast<GGRigidBody*>(pickedBody);
 }
-
-struct DDCC60World;
-
-struct __declspec(align(16)) MyVec
-{
-    float x, y, z, w;
-};
 
 struct GunArg3
 {
@@ -627,7 +365,7 @@ struct GunArg3
     int unk0f0, unk0f4, unk0f8, unk0fc;
     int unk100, unk104, unk108, unk10c;
     int unk110, unk114, unk118, unk11c;
-    MyVec unk120;
+    hkVector4 unk120;
 };
 
 struct GunTransform
@@ -635,7 +373,7 @@ struct GunTransform
     int unk00, unk04, unk08, unk0c;
     int unk10, unk14, unk18, unk1c;
     int unk20, unk24, unk28, unk2c;
-    MyVec m_vTranslation;
+    hkVector4 m_vTranslation;
 };
 
 struct GunListener
@@ -645,26 +383,16 @@ struct GunListener
     virtual void func2();
     virtual void func3();
     virtual void func4();
-    virtual void gunAction(const MyVec& from, const MyVec* to = 0);
-};
-
-struct hkpGravityGunEx : public hkpGravityGun
-{
-    void FUN_00e45ee0(GunTransform* a4, GunArg3* a3, DDCC60World* world);
-    void FUN_00e46080(GunTransform* a4, GunArg3* a3, DDCC60World* world);
-    void FUN_00e45fb0(GunTransform* a4, GunArg3* a3, DDCC60World* world);
-    void FUN_00e45c90(hkReal dt, GunTransform* a4, GunArg3* a3);
-
-    void FUN_00e46140(hkReal dt, DDCC60World* world, GunArg3* a3, GunTransform* a4, bool b1, bool b2);
+    virtual void gunAction(const hkVector4& from, const hkVector4* to = 0);
 };
 
 // Dispatches a gun action to listeners based on b1/b2 and picked-body capacity, then calls FUN_00e45c90 with dt, a4, a3.
 // @fnv 0x00e46140
-void hkpGravityGunEx::FUN_00e46140(hkReal dt, DDCC60World* world, GunArg3* a3, GunTransform* apGunTransform, bool b1,
+void hkpGravityGun::FUN_00e46140(hkReal dt, hkpWorld* world, GunArg3* a3, GunTransform* apGunTransform, bool b1,
                                    bool b2)
 {
-    MyVec v1;
-    MyVec v2;
+    hkVector4 v1;
+    hkVector4 v2;
 
     if (b1)
     {
@@ -703,176 +431,36 @@ void hkpGravityGunEx::FUN_00e46140(hkReal dt, DDCC60World* world, GunArg3* a3, G
 
 extern "C" __m128 _mm_shuffle_ps(__m128 _A, __m128 _B, unsigned int _Imm8);
 extern "C" void _mm_store_ss(float* _V, __m128 _A);
-class hkMemoryAllocatorE460;
-
-struct hkMemoryRouterE460
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorE460* m_pStreamAllocator;
-};
-
-namespace hkRouterE460 {
-extern "C" hkMemoryRouterE460& __cdecl FUN_00c85750() throw();
-}
-void __cdecl ResizeAudioStream(void* alloc, void* arr, int elemSize) throw();
-
-struct hkBoolE460
-{
-    char m_cBooleanValue;
-    hkBoolE460()
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-
-template <class T> __forceinline void constructWithCopyE460(T* p, int n, const T& t)
+template <class T> __forceinline void constructWithCopy(T* p, int n, const T& t)
 {
     for (int i = 0; i < n; i++)
         p[i] = t;
 }
 
-template <class T> struct hkArrayE460
+template <class T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& e)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+    if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
+        hkArrayUtil::_reserveMore(alloc, this, sizeof(T));
+    constructWithCopy<T>(m_data + m_iElementCount, 1, e);
+    m_iElementCount++;
+}
 
-    void AddBack(const T& e)
-    {
-        hkMemoryRouterE460& router = hkRouterE460::FUN_00c85750();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(router.m_pStreamAllocator, this, sizeof(T));
-        constructWithCopyE460<T>(m_data + m_iElementCount, 1, e);
-        m_iElementCount++;
-    }
-};
-
-struct hkSimdRealE460
-{
-    __m128 m_vValue;
-    operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-};
-
-struct hkVector4E460
-{
-    __m128 m_vComponents;
-    hkSimdRealE460 getW() const
-    {
-        hkSimdRealE460 r;
-        r.m_vValue = _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
-        return r;
-    }
-};
-
-class hkEntityE460
-{
-  public:
-    int unk00[104];
-    hkVector4E460 m_vec1a0;
-
-    void FUN_00c90510();
-    void FUN_00ca88e0(float f);
-};
-
-class hkWorldE460
-{
-  public:
-    int unk00[8];
-    hkArrayE460<hkEntityE460*> m_kActorEntries;
-
-    void FUN_00e46000(hkEntityE460* e);
-};
-
-// Calls e->FUN_00c90510, appends e to m_kActorEntries, then calls e->FUN_00ca88e0 with the w component of m_vec1a0 times 100.
+// Retains the body, appends it to the picked bodies, and scales its inverse mass by 100.
 // @fnv 0x00e46000
-void hkWorldE460::FUN_00e46000(hkEntityE460* apEntity)
+void hkpGravityGun::FUN_00e46000(hkpRigidBody* apEntity)
 {
-    apEntity->FUN_00c90510();
-    m_kActorEntries.AddBack(apEntity);
-    float w = apEntity->m_vec1a0.getW();
+    apEntity->addReference();
+    m_kPickedBodies.pushBack(apEntity);
+    float w = apEntity->m_pMotionState.m_kInertiaAndMassInv.getW();
     float f = (float)(w * 100.0);
     apEntity->FUN_00ca88e0(f);
 }
 
 extern "C" __m128 _mm_setr_ps(float, float, float, float);
 
-class hkStringPtrE462
-{
-  public:
-    char* m_pcText;
-    void FUN_00cb0c10(const char* pcString) throw();
-    void operator=(const char* pcString)
-    {
-        FUN_00cb0c10(pcString);
-    }
-};
-
-template <class T> class hkArrayE462
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArrayE462() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
-
-struct __declspec(align(16)) hkVector4E462
-{
-    __m128 m_vComponents;
-    void set(float x, float y, float z, float w = 0.0f)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
-
-class hkpFirstPersonGunListenerE462;
-class hkpRigidBodyE462;
-
-class FUN_00e46660
-{
-  public:
-    virtual ~FUN_00e46660() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    unsigned char m_type;
-    hkStringPtrE462 m_name;
-    unsigned char m_uiKeyboardKey;
-    hkArrayE462<hkpFirstPersonGunListenerE462*> m_kListeners;
-
-    FUN_00e46660() throw();
-};
-
-class FUN_00e46260 : public FUN_00e46660
-{
-  public:
-    hkArrayE462<hkpRigidBodyE462*> m_kPickedBodies;
-    int m_iMaxPickedBodies;
-    float m_fMaxPickMass;
-    float m_fMaxPickDistance;
-    float m_fPickAngle;
-    float m_fHoldDistance;
-    hkVector4E462 m_kGrabPosition;
-    hkVector4E462 m_kTargetPosition;
-
-    FUN_00e46260() throw();
-    virtual ~FUN_00e46260() throw();
-};
-
 // Constructs a GravityGun object, initializing pick limits, grab and target positions, and setting the type and name fields.
 // @fnv 0x00e46260
-FUN_00e46260::FUN_00e46260() throw()
+hkpGravityGun::hkpGravityGun() throw()
     : m_iMaxPickedBodies(10), m_fMaxPickMass(200.0f), m_fMaxPickDistance(50.0f), m_fPickAngle(100.0f),
       m_fHoldDistance(50.0f)
 {
@@ -881,3 +469,18 @@ FUN_00e46260::FUN_00e46260() throw()
     m_kGrabPosition.set(2.5f, 0.6f, 0.0f);
     m_kTargetPosition.set(0.0f, 1.0f, 0.0f);
 }
+
+__forceinline float hkVector4::getW() const
+{
+    __m128 lane = _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
+    float value;
+    _mm_store_ss(&value, lane);
+    return value;
+}
+__forceinline void hkVector4::set(float x, float y, float z, float w)
+{
+    m_vComponents = _mm_setr_ps(x, y, z, w);
+}
+inline void hkStringPtr::operator=(const char* text) throw() { Assign(text); }
+
+__forceinline float& hkVector4::operator()(int i) { return m_vComponents.m128_f32[i]; }

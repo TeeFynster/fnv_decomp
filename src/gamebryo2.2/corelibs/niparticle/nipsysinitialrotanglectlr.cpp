@@ -1,8 +1,13 @@
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiObjectNET.h"
+#include "../../../../include/NiParticleSystem.h"
+#include "../../../../include/NiPSysModifier.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/StrArr.h"
 
 // src/gamebryo2.2/corelibs/niparticle/nipsysinitialrotanglectlr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysinitialrotanglectlr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiRTTI;
 extern NiRTTI g_012026f0;
 
 // @fnv 0x00c2a1a0
@@ -11,39 +16,19 @@ const NiRTTI* __cdecl FUN_00c2a1a0()
     return &g_012026f0;
 }
 
-struct NiRTTI
-{
-    const char* m_pcName;
-    NiRTTI* m_pBaseRTTI;
-};
 extern NiRTTI _g_01202528;
-struct NiObject
+inline bool NiObject::IsKindOfType(const NiRTTI* pkRTTI) const
 {
-    virtual ~NiObject();
-    virtual void _U4();
-    virtual const NiRTTI* GetRTTI() const;
-    bool IsKindOfType(const NiRTTI* pkRTTI) const
+    const NiRTTI* pkMy = GetRTTI();
+    while (pkMy)
     {
-        const NiRTTI* pkMy = GetRTTI();
-        while (pkMy)
-        {
-            if (pkMy == pkRTTI)
-                return true;
-            pkMy = pkMy->m_pBaseRTTI;
-        }
-        return false;
+        if (pkMy == pkRTTI)
+            return true;
+        pkMy = pkMy->m_pBaseRTTI;
     }
-};
-struct NiPSysModifier : NiObject
-{
-};
-struct B00c1bff0
-{
-    void* FUN_00c1b0f0(void*);
-};
-struct NiObjectNET : B00c1bff0
-{
-};
+    return false;
+}
+
 struct BaseStandIn
 {
     bool IsTargetParticleSystem(NiObjectNET*);
@@ -57,17 +42,13 @@ bool NiPSysInitialRotAngleCtlr::IsModifierOfType(NiObjectNET* pkTarget)
 {
     if (!BaseStandIn::IsTargetParticleSystem(pkTarget))
         return false;
-    NiPSysModifier* pkModifier = (NiPSysModifier*)pkTarget->FUN_00c1b0f0((void*)((char*)this + 0x38));
+    NiPSysModifier* pkModifier = static_cast<NiParticleSystem*>(pkTarget)->GetModifier(
+        *reinterpret_cast<const NiFixedString*>((char*)this + 0x38));
     if (!pkModifier)
         return false;
     return pkModifier->IsKindOfType(&_g_01202528);
 }
 
-struct StrArr
-{
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 char* __cdecl FUN_00a7d330(const char*);
 void __stdcall FUN_00c32f60(StrArr*);
 // @fnv 0x00c2a260

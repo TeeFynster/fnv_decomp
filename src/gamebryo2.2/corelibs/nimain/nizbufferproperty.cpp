@@ -1,13 +1,23 @@
-// gamebryo2.2/corelibs/nimain/nizbufferproperty.cpp: NiAlphaProperty, AlphaPropInit_cls (11 functions)
+// gamebryo2.2/corelibs/nimain/nizbufferproperty.cpp: NiAlphaAccumulator, AlphaPropInit_cls (11 functions)
 
-#include "nizbufferproperty_decls.h"
+#include "../../../../include/NiAlphaAccumulator.h"
+#include "../../../../include/NiAlphaProperty.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiStream.h"
+
+extern unsigned int kVtbl_NiAlphaAccumulator;
+// The original calls the out-of-line base initializer with this in ECX.
+NiBackToFrontAccumulator* __fastcall InitializeBackToFrontAccumulator(NiBackToFrontAccumulator* self);
+
 // @fnv 0x00a9b480
-NiAlphaProperty::NiAlphaProperty()
+NiAlphaAccumulator* __fastcall InitializeAlphaAccumulator(NiAlphaAccumulator* self)
 {
-    flag1 = 0;
-    flag2 = 0;
-    *(unsigned int*)this = (unsigned int)&kVtbl_NiAlphaAccumulator;
-    enabled = 1;
+    InitializeBackToFrontAccumulator(self);
+    self->m_bSortByClosestPoint = 0;
+    self->m_bInterfaceSort = 0;
+    *(unsigned int*)self = (unsigned int)&kVtbl_NiAlphaAccumulator;
+    self->m_bObserveNoSortHint = 1;
+    return self;
 }
 
 extern char const* const g_011f4454_arg1;
@@ -82,8 +92,6 @@ fail:
     return false;
 }
 
-struct CloningProcess;
-
 class A5F510Property
 {
   public:
@@ -132,67 +140,45 @@ A5F510Property* A5F510FlagProperty::FUN_00a5f510(CloningProcess& kCloning)
     return this;
 }
 
-struct NiBinaryStreamStandIn
+inline unsigned int NiBinaryStream::BinaryRead(void* pvBuffer, unsigned int uiTotalBytes,
+                                               unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void SetEndianSwap(bool bSwap);
+    unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    m_uiAbsoluteCurrentPos += uiBytesRead;
+    return uiBytesRead;
+}
 
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(NiBinaryStreamStandIn* pkThis, void* pvBuffer, unsigned int uiBytes,
-                                     unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-    template <class T> unsigned int Read(T* pValue)
-    {
-        unsigned int uiSize = sizeof(T);
-        return BinaryRead(pValue, sizeof(T), &uiSize, 1);
-    }
-};
-
-struct FUN_00a5f580_Stream
+template <class T> inline void NiBinaryStream::Read(T& value)
 {
-    char pad0[0xd8];
-    unsigned int m_uiFormatVersion;
-    char pad1[0x24c - 0xdc];
-    NiBinaryStreamStandIn* m_pUnderlyingStream;
-    char pad2[0x288 - 0x250];
-    unsigned short m_usFlags;
-};
+    unsigned int uiSize = sizeof(T);
+    BinaryRead(&value, sizeof(T), &uiSize, 1);
+}
 
 struct FUN_00a5f580_Obj
 {
     char pad0[0x18];
     unsigned short m_usValue;
 
-    void FUN_00a5d7f0(FUN_00a5f580_Stream* pkStream);
-    void ReadValue(FUN_00a5f580_Stream* pkStream);
+    void FUN_00a5d7f0(NiStream* pkStream);
+    void ReadValue(NiStream* pkStream);
 };
 
 // @fnv 0x00a5f580
-void FUN_00a5f580_Obj::ReadValue(FUN_00a5f580_Stream* pkStream)
+void FUN_00a5f580_Obj::ReadValue(NiStream* pkStream)
 {
     FUN_00a5d7f0(pkStream);
-    if (pkStream->m_uiFormatVersion < 0xa000102)
+    if (pkStream->m_uiNifFileVersion < 0xa000102)
     {
-        m_usValue = pkStream->m_usFlags & 3;
+        m_usValue = pkStream->m_usNiPropertyFlags & 3;
     }
     else
     {
-        pkStream->m_pUnderlyingStream->Read(&m_usValue);
+        pkStream->m_pkIstr->Read(m_usValue);
     }
-    if (pkStream->m_uiFormatVersion >= 0x4010005 && pkStream->m_uiFormatVersion < 0x14010002)
+    if (pkStream->m_uiNifFileVersion >= 0x4010005 && pkStream->m_uiNifFileVersion < 0x14010002)
     {
         unsigned int uiVal;
-        pkStream->m_pUnderlyingStream->Read(&uiVal);
+        pkStream->m_pkIstr->Read(uiVal);
         m_usValue = (unsigned short)((m_usValue & 0xffc3) | (uiVal * 4));
     }
 }

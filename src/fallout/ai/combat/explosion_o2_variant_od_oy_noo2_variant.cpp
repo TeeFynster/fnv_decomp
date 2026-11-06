@@ -1,3 +1,35 @@
+#include <string.h>
+// Preserve trivial vector copies under this unit's /Od flags.
+#pragma intrinsic(memcpy)
+#include "../../../../include/Actor.h"
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/Setting.h"
+#include "../../../../include/hkMemoryAllocator.h"
+// AudioMgr_BSAudio: this unit's view of BSAudio (0x00453a70 BSAudio::QInstance; 0x00ad73b0 GetSoundHandleByFormID,
+// 0x00ad7480 GetSoundHandleByFilename, 0x00ad7550 GetSoundHandleByEditorName, 0x00ad8570 per the community PDB). It
+// returns this unit's own sound-handle copy, so it stays local until that copy moves onto BSSoundHandle.
+class AudioPlaybackHandle;
+class Snd;
+class SndForm;
+class SndSrc;
+class AudioMgr_BSAudio
+{
+public:
+    static AudioMgr_BSAudio* Get();
+    AudioPlaybackHandle Make(int id, SndForm* form);
+    AudioPlaybackHandle Make2(int id);
+    bool PlayAt(void* node, float f, int flags);
+    AudioPlaybackHandle GetHandle(const char* name, int flags, int a);
+    AudioPlaybackHandle GetSoundByEditorID(const char* editorID, int flags, int a);
+    AudioPlaybackHandle GetSoundByEditorID(const char* editorID, int flags);
+    Snd Make(void* a, SndSrc* b);
+};
+#include "../../../../include/bhkLiquidAction.h"
+#include "../../../../include/BSOcclusionPlane.h"
+#include "../../../../include/Explosion.h"
+#include "../../../../include/HitArray.h"
+#include "../../../../include/NavMeshPtr.h"
+#include "../../../../include/NiPoint3.h"
 
 // src/fallout/ai/combat/explosion_o2_variant_od_oy_noo2_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /GS /EHsc /Gy /Oy- (unit src/fallout/ai/combat/explosion_o2_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -7,45 +39,12 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 // src/fallout/ai/combat/explosion.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/explosion.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct ActorCause
-{
-};
-struct NiPointer
-{
-    NiPointer& operator=(ActorCause*);
-};
-struct FUN_009ac170_shell
-{
-    char m_auiShapeKeys[0xd0];
-    NiPointer m_actorCause;
-    void __thiscall FUN_009ac170(ActorCause* apActorCause);
-};
-struct Explosion
-{
-    virtual ~Explosion();
-    void* Destroy(unsigned int flags);
-};
 void __cdecl _Deallocate(void*);
-struct NiRTTI;
-struct bhkLiquidAction
-{
-    const NiRTTI* __thiscall GetRTTI() const;
-};
 extern NiRTTI g_01268420;
-struct NavMesh;
-struct NavMeshPtr
-{
-    NavMesh* FUN_00458b50();
-};
 struct FUN_009afc30_shell
 {
     NavMeshPtr m_navMeshPtr;
     NavMesh* FUN_009afc30();
-};
-struct BSOcclusionPlane
-{
-    int __thiscall GetCullResult() const;
-    int __thiscall IsNotCulled();
 };
 struct FUN_009afbb0_shell
 {
@@ -320,19 +319,6 @@ extern __declspec(thread) int g_memoryContext;
 void __cdecl FUN_00c876f0();
 void __cdecl FUN_00c87700();
 void* __cdecl FUN_00aa13e0(unsigned int size);
-struct AutoMemContext
-{
-    int oldContext;
-    AutoMemContext()
-    {
-        oldContext = g_memoryContext;
-        g_memoryContext = 16;
-    }
-    ~AutoMemContext()
-    {
-        g_memoryContext = oldContext;
-    }
-};
 struct FUN_00cbc550_class
 {
     int unk00;
@@ -364,16 +350,8 @@ struct FUN_00cbca20_class
 };
 
 #include <xmmintrin.h>
-struct Vec4810;
-struct Vec810
-{
-    float x, y, z;
-    Vec810();
-    Vec810 operator-(const Vec810&) const;
-    Vec810& operator=(const Vec4810&);
-    double FUN_00457990();
-};
-Vec810 __cdecl FUN_004a3760(float, const Vec810&);
+#include "../../../../include/AutoMemContext.h"
+NiPoint3 __cdecl FUN_004a3760(float, const NiPoint3&);
 struct Color810
 {
     float r, g, b, a;
@@ -617,15 +595,6 @@ struct __declspec(align(16)) Snapshot810
     Snapshot810();
     ~Snapshot810();
 };
-struct HitArray810
-{
-    int FUN_00726070();
-    void* GetEntryAt(int);
-};
-struct HitContainer810
-{
-    HitArray810* FUN_00460140();
-};
 struct __declspec(align(16)) Query810
 {
     __m128 m_quad000;
@@ -671,10 +640,10 @@ struct __declspec(align(16)) Query810
     unsigned unk0ac;
     Query810();
     void FUN_004a3f70(unsigned);
-    void FUN_004a3da0(const Vec810&);
-    void FUN_004a3eb0(const Vec810&);
+    void FUN_004a3da0(const NiPoint3&);
+    void FUN_004a3eb0(const NiPoint3&);
     void FUN_004a3fb0(Snapshot810*);
-    HitContainer810* FUN_008cdd90();
+    HitArray* FUN_008cdd90();
 };
 struct Filter810
 {
@@ -683,15 +652,10 @@ struct Filter810
     void FUN_004a39f0(int);
     void FUN_0059ce80(void*);
 };
-struct Setting810
-{
-    float* FUN_00403e20();
-    int* FUN_0043d4d0();
-};
-extern Setting810 DAT_011d1344, DAT_011d150c, DAT_011d0a78;
+extern Setting DAT_011d1344, DAT_011d150c, DAT_011d0a78;
 struct Position810
 {
-    Vec810* FUN_006815c0();
+    NiPoint3* FUN_006815c0();
     float FUN_0084d030();
 };
 struct Object810
@@ -769,156 +733,7 @@ struct Test810
 {
     bool FUN_00452370();
 };
-struct Actor810
-{
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual bool v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual Body810* v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual int v214();
-    Body810* FUN_00950bb0(int);
-    Cell810* FUN_008d6f30();
-    Process810* FUN_009306d0();
-};
-extern Actor810* pPlayer;
-struct Vec4810
-{
-    float x, y, z;
-};
-struct Array810
-{
-    Vec4810 ApplyScaled(float);
-    float* FUN_004a51b0(int);
-};
+extern Actor* pPlayer;
 struct Host810
 {
     unsigned unk000;
@@ -982,68 +797,68 @@ struct Host810
     unsigned unk0e8;
     unsigned unk0ec;
     unsigned unk0f0;
-    Array810 array;
+    NiPoint3 array;
     Object810* FUN_004181e0();
     Test810* GetFieldC8();
-    bool FUN_009b1810(Vec810, Actor810*);
+    bool FUN_009b1810(NiPoint3, Actor*);
 };
 void __cdecl FUN_00c82870(int, unsigned __int64);
 void* __cdecl FUN_005dbe10();
 void __cdecl FUN_005b5e40(const char*);
-void* __cdecl FUN_004b3890(const Vec810&, const Color810&, const Vec810&, const Color810&, int);
+void* __cdecl FUN_004b3890(const NiPoint3&, const Color810&, const NiPoint3&, const Color810&, int);
 struct Debug810
 {
     void FUN_00458e20(void*, float);
 };
 extern Debug810* DAT_011dea10;
 // @fnv 0x009b1810
-bool Host810::FUN_009b1810(Vec810 pos, Actor810* actor)
+bool Host810::FUN_009b1810(NiPoint3 pos, Actor* actor)
 {
     Object810* base = FUN_004181e0();
     if (base->HasAnyFlags(16))
         return true;
-    Body810* body = actor ? actor->v1d0() : 0;
+    Body810* body = actor ? (Body810*)actor->GetNiNode() : 0;
     if (actor == pPlayer)
-        body = pPlayer->FUN_00950bb0(0);
+        body = (Body810*)((PlayerCharacter*)pPlayer)->FUN_00950bb0(0);
     if (!body || !body->FUN_004b2960())
         return false;
-    World810* world = actor->FUN_008d6f30() ? actor->FUN_008d6f30()->FUN_004543c0() : 0;
+    World810* world = actor->FUN_008d6f30() ? ((Cell810*)actor->FUN_008d6f30())->FUN_004543c0() : 0;
     if (!world)
         return false;
     unsigned mask = 0x26206;
     FUN_00c82870(39, mask);
-    Vec810 points[7];
-    points[0] = *body->FUN_0043d450()->FUN_006815c0();
+    NiPoint3 points[7];
+    memcpy(&points[0], body->FUN_0043d450()->FUN_006815c0(), sizeof(points[0]));
     bool multiple = false;
-    if (actor->v100())
+    if (actor->IsActor())
     {
-        Actor810* checkActor = actor;
-        if (checkActor->v214())
+        Actor* checkActor = actor;
+        if (checkActor->GetSitSleepState())
         {
             multiple = true;
-            points[1] = points[0];
+            memcpy(&points[1], &points[0], sizeof(points[1]));
             points[1].z += body->FUN_0043d450()->FUN_0084d030() * 2.0f;
-            points[2] = points[0];
+            memcpy(&points[2], &points[0], sizeof(points[2]));
             points[2].z -= body->FUN_0043d450()->FUN_0084d030() * 2.0f;
-            points[3] = points[0];
+            memcpy(&points[3], &points[0], sizeof(points[3]));
             points[3].y += body->FUN_0043d450()->FUN_0084d030() * 2.0f;
-            points[4] = points[0];
+            memcpy(&points[4], &points[0], sizeof(points[4]));
             points[4].y -= body->FUN_0043d450()->FUN_0084d030() * 2.0f;
-            points[5] = points[0];
+            memcpy(&points[5], &points[0], sizeof(points[5]));
             points[5].x += body->FUN_0043d450()->FUN_0084d030() * 2.0f;
-            points[6] = points[0];
+            memcpy(&points[6], &points[0], sizeof(points[6]));
             points[6].x -= body->FUN_0043d450()->FUN_0084d030() * 2.0f;
         }
     }
     Query810 query;
     Filter810 filter(0);
     filter.FUN_004a39f0(39);
-    Actor810* checkActor = actor->v100() ? actor : 0;
+    Actor* checkActor = actor->IsActor() ? actor : 0;
     if (checkActor && checkActor->FUN_009306d0())
-        filter.FUN_0059ce80(checkActor->FUN_009306d0()->FUN_00819250());
+        filter.FUN_0059ce80(((Process810*)checkActor->FUN_009306d0())->FUN_00819250());
     else
         filter.FUN_0059ce80(FUN_005dbe10());
-    pos = array.ApplyScaled(*DAT_011d1344.FUN_00403e20());
+    pos.FUN_0063c8a0(&array.ApplyScaled(*DAT_011d1344.FUN_00403e20()));
     query.FUN_004a3f70(filter.value);
     query.FUN_004a3da0(pos);
     query.FUN_004a3eb0(points[0]);
@@ -1054,9 +869,9 @@ bool Host810::FUN_009b1810(Vec810 pos, Actor810* actor)
     for (int i = 0; !blocked && i < query.FUN_008cdd90()->FUN_00460140()->FUN_00726070(); i++)
     {
         Hit810 hit(query.FUN_008cdd90()->FUN_00460140()->GetEntryAt(i));
-        Vec810 dir = points[0] - pos;
-        Vec810 delta = FUN_004a3760(hit.unk10, dir);
-        if (!(*array.FUN_004a51b0(2) < -0.98) || !(delta.FUN_00457990() < *DAT_011d150c.FUN_00403e20()))
+        NiPoint3 dir = points[0] - pos;
+        NiPoint3 delta = FUN_004a3760(hit.unk10, dir);
+        if (!(array[2] < -0.98) || !(delta.FUN_00457990() < *DAT_011d150c.FUN_00403e20()))
         {
             if (!GetFieldC8() || !GetFieldC8()->FUN_00452370())
             {
@@ -1084,9 +899,9 @@ bool Host810::FUN_009b1810(Vec810 pos, Actor810* actor)
             for (int j = 0; !blocked && j < query.FUN_008cdd90()->FUN_00460140()->FUN_00726070(); j++)
             {
                 Hit810 hit(query.FUN_008cdd90()->FUN_00460140()->GetEntryAt(j));
-                Vec810 dir = points[j] - pos;
-                Vec810 delta = FUN_004a3760(hit.unk10, dir);
-                if (!(*array.FUN_004a51b0(2) < -0.98) || !(delta.FUN_00457990() < *DAT_011d150c.FUN_00403e20()))
+                NiPoint3 dir = points[j] - pos;
+                NiPoint3 delta = FUN_004a3760(hit.unk10, dir);
+                if (!(array[2] < -0.98) || !(delta.FUN_00457990() < *DAT_011d150c.FUN_00403e20()))
                     blocked = true;
             }
         }
@@ -1094,19 +909,7 @@ bool Host810::FUN_009b1810(Vec810 pos, Actor810* actor)
     return !blocked;
 }
 
-struct Vec3
-{
-    float x, y, z;
-    Vec3();
-    Vec3 FUN_00439ef0(const Vec3& o) const;
-    Vec3 FUN_00439e90(const Vec3& o) const;
-    Vec3 ApplyScaled(float f) const;
-    double FUN_00457990() const;
-    void Subtract(const Vec3& o);
-    bool FUN_004390c0(const Vec3* o) const;
-    void FUN_004a0c10();
-    float DotProduct(const Vec3& o) const;
-};
+
 
 struct Color4
 {
@@ -1126,13 +929,9 @@ struct Ptr4
     void* FUN_00559450();
 };
 
-struct Setting
-{
-    int* FUN_0043d4d0();
-};
 extern Setting g_setA;
 extern Setting g_setB;
-extern Vec3 g_zeroVec;
+extern NiPoint3 g_zeroVec;
 extern int g_dummy;
 
 struct FloatSetting
@@ -1172,8 +971,8 @@ struct __declspec(align(16)) Elem70
     unsigned int unk68;
     unsigned int unk6C;
     Elem70* FUN_00632d40(const Elem70* o);
-    Vec3* FUN_006815c0();
-    Vec3* FUN_00460140();
+    NiPoint3* FUN_006815c0();
+    NiPoint3* FUN_00460140();
 };
 
 struct HitInfo
@@ -1200,17 +999,9 @@ struct HitInfo
     HitInfo* FUN_00696c30(const HitInfo* o);
 };
 
-struct HitArray
-{
-    HitArray* FUN_00460140();
-    int FUN_00726070();
-    HitInfo* GetEntryAt(int i);
-};
 
-struct HitHolder
-{
-    HitArray* FUN_00460140();
-};
+
+
 
 struct Flag1
 {
@@ -1251,21 +1042,21 @@ struct ProjList
 struct Shape
 {
     void FUN_00a5a040();
-    void FUN_00440460(const Vec3* p);
+    void FUN_00440460(const NiPoint3* p);
 };
 
 struct Drawer
 {
     void FUN_00458e20(Shape* s, float t);
-    int FUN_00457880(const Vec3* p);
-    struct Mgr* FUN_004519d0(Vec3 p);
+    int FUN_00457880(const NiPoint3* p);
+    struct Mgr* FUN_004519d0(NiPoint3 p);
 };
 extern Drawer* g_drawer;
 
 struct Params
 {
-    Vec3 unk00;
-    Vec3 unk0C;
+    NiPoint3 unk00;
+    NiPoint3 unk0C;
     unsigned int unk18;
     unsigned int unk1C;
     unsigned int unk20;
@@ -1439,7 +1230,7 @@ struct Query
     void FUN_006233c0(int a);
     void FUN_004a1a10(int a, int b);
     void FUN_006231a0(void* t);
-    void FUN_00623090(const Vec3* p, NodeList* l);
+    void FUN_00623090(const NiPoint3* p, NodeList* l);
 };
 
 struct NameHolder
@@ -1759,16 +1550,16 @@ struct __declspec(align(16)) Big570
     unsigned int unkA8;
     unsigned int unkAC;
     Big570();
-    void FUN_004a3da0(const Vec3* p);
-    void FUN_007f68a0(const Vec3* p);
+    void FUN_004a3da0(const NiPoint3* p);
+    void FUN_007f68a0(const NiPoint3* p);
     void FUN_004a3f70(void* p);
     void FUN_004a3fb0(Big4c0* p);
-    HitHolder* FUN_008cdd90();
+    HitArray* FUN_008cdd90();
 };
 
 struct PlayerX
 {
-    Vec3* FUN_0045bb80();
+    NiPoint3* FUN_0045bb80();
 };
 
 struct Cell
@@ -1785,17 +1576,17 @@ struct CellPtr
 
 extern "C" void __cdecl FUN_00cbd960();
 extern "C" void __cdecl FUN_009b2e00(void* a, int b);
-extern "C" void __cdecl FUN_00458620(Vec3* out, const Vec3* in);
-extern "C" void __cdecl FUN_004a3970(Vec3* out, const Vec3* in);
+extern "C" void __cdecl FUN_00458620(NiPoint3* out, const NiPoint3* in);
+extern "C" void __cdecl FUN_004a3970(NiPoint3* out, const NiPoint3* in);
 extern "C" Shape* __cdecl CreateOctahedron(float r, const Color4* c, int a);
-extern "C" Shape* __cdecl FUN_004b3890(const Vec3* a, const Color4* c, const Vec3* b, const Color4* c2, int f);
-Vec3 __cdecl FUN_004a3760(float f, const Vec3& v);
+extern "C" Shape* __cdecl FUN_004b3890(const NiPoint3* a, const Color4* c, const NiPoint3* b, const Color4* c2, int f);
+NiPoint3 __cdecl FUN_004a3760(float f, const NiPoint3& v);
 extern "C" void* __cdecl FUN_004b5820(void* p);
 extern "C" Proc* __cdecl FUN_0056f930(void* p);
 extern "C" Owner* __cdecl FUN_004a3a40(void* p);
 extern "C" PlayerX* __cdecl FUN_00524c90();
 extern "C" bool __cdecl FUN_00525420();
-extern "C" bool __cdecl FUN_004b61d0(Vec3 p, PlayerX* pl, float f);
+extern "C" bool __cdecl FUN_004b61d0(NiPoint3 p, PlayerX* pl, float f);
 extern "C" float __cdecl FUN_00476b70(float a, float b);
 extern "C" Query* __cdecl FUN_00622a70(float a, int b);
 extern "C" float __cdecl FUN_004a4240();
@@ -1804,12 +1595,8 @@ extern "C" void* __cdecl FUN_004b59f0(RefObj* r);
 extern "C" Sub* __cdecl FUN_00c85ef0(Hand8* out, void* a, void* b);
 extern "C" Sub* __cdecl FUN_00c7fa90(RefObj* r);
 extern "C" bool __cdecl IsAcousticSpaceFormTypeAllowed(Proc* p, int a);
-extern "C" void __cdecl FUN_006890b0(void* a, float f, char* name, Vec3 d, Vec3 p, float s, int b, int c);
-struct AudioMgr
-{
-    Snd FUN_00ad7480(void* a, SndSrc* b);
-};
-extern "C" AudioMgr* __cdecl FUN_00453a70();
+extern "C" void __cdecl FUN_006890b0(void* a, float f, char* name, NiPoint3 d, NiPoint3 p, float s, int b, int c);
+extern "C" AudioMgr_BSAudio* __cdecl FUN_00453a70();
 extern double g_maxLen;
 extern float g_f1;
 extern float g_f2;
@@ -1889,8 +1676,8 @@ struct ProjCls
     unsigned int unkDC;
     unsigned int unkE0;
     int unkE4;
-    Vec3 unkE8;
-    Vec3 unkF4;
+    NiPoint3 unkE8;
+    NiPoint3 unkF4;
     void FUN_009ae6e0();
     void FUN_009afef0();
     void ProcessHits();
@@ -2155,7 +1942,7 @@ struct SelfVt
     virtual void v7a();
     virtual void v7b();
     virtual void v7c();
-    virtual Vec3* GetPos();
+    virtual NiPoint3* GetPos();
 };
 
 // @fnv 0x009ae6e0
@@ -2181,9 +1968,9 @@ void ProjCls::FUN_009ae6e0()
             {
                 Elem70 e;
                 e.FUN_00632d40(list.FUN_009afc30() + i);
-                Vec3 a;
+                NiPoint3 a;
                 FUN_00458620(&a, e.FUN_006815c0());
-                Vec3 b;
+                NiPoint3 b;
                 FUN_004a3970(&b, e.FUN_00460140());
                 Color4 c;
                 c.FUN_00414430(1.0f, 0.0f, 0.0f, g_f1);
@@ -2206,18 +1993,18 @@ void ProjCls::FUN_009ae6e0()
                 Proc* u = FUN_0056f930(r);
                 if (!u || !((ProjVt*)u)->IsDead())
                 {
-                    Vec3 pos;
+                    NiPoint3 pos;
                     FUN_00458620(&pos, e.FUN_006815c0());
-                    Vec3 dir;
+                    NiPoint3 dir;
                     FUN_004a3970(&dir, e.FUN_00460140());
                     Big4c0 q;
                     Big570 p;
-                    Vec3 v = *((SelfVt*)this)->GetPos();
-                    Vec3 w = FUN_004a3760(g_f4, pos.FUN_00439ef0(v));
+                    NiPoint3 v = *((SelfVt*)this)->GetPos();
+                    NiPoint3 w = FUN_004a3760(g_f4, pos.FUN_00439ef0(v));
                     if (w.FUN_00457990() < g_maxLen)
                     {
                         v.Subtract(dir.ApplyScaled(g_f5));
-                        w = dir.ApplyScaled(g_f6);
+                        memcpy(&w, &dir.ApplyScaled(g_f6), sizeof(w));
                     }
                     p.FUN_004a3da0(&v);
                     p.FUN_007f68a0(&w);
@@ -2268,9 +2055,9 @@ void ProjCls::FUN_009ae6e0()
                     }
                     if (found)
                     {
-                        unkE8 = pos;
+                        memcpy(&unkE8, &pos, sizeof(unkE8));
                         if (unkF4.FUN_004390c0(&g_zeroVec))
-                            unkF4 = dir;
+                            memcpy(&unkF4, &dir, sizeof(unkF4));
                         if (*g_setB.FUN_0043d4d0() > 1)
                         {
                             Color4 c;
@@ -2287,7 +2074,7 @@ void ProjCls::FUN_009ae6e0()
                         if (wt)
                         {
                             bool flag = true;
-                            Vec3 dd = pos.FUN_00439ef0(*FUN_00524c90()->FUN_0045bb80());
+                            NiPoint3 dd = pos.FUN_00439ef0(*FUN_00524c90()->FUN_0045bb80());
                             if (FUN_00525420() || dd.FUN_00457990() > *g_floatSetting.FUN_00403e20() ||
                                 !FUN_004b61d0(pos, FUN_00524c90(), g_f6))
                                 flag = false;
@@ -2358,8 +2145,8 @@ void ProjCls::FUN_009ae6e0()
                                                     continue;
                                                 Mgr* mg = g_drawer->FUN_004519d0(pos);
                                                 Params prm;
-                                                prm.unk00 = unkE8;
-                                                prm.unk0C = unkF4;
+                                                memcpy(&prm.unk00, &unkE8, sizeof(prm.unk00));
+                                                memcpy(&prm.unk0C, &unkF4, sizeof(prm.unk0C));
                                                 prm.unk38 = spd;
                                                 prm.unk3C = spd;
                                                 prm.unk40 = wt->GetNestedValue();
@@ -2395,27 +2182,27 @@ void ProjCls::FUN_009ae6e0()
                                 char* name = wt->unk18.GetName();
                                 if (name && *name)
                                 {
-                                    Vec3 dv;
+                                    NiPoint3 dv;
                                     switch (wt->FUN_005f36f0())
                                     {
                                     case 0:
-                                        dv = dir;
+                                        memcpy(&dv, &dir, sizeof(dv));
                                         dv.FUN_004a0c10();
                                         break;
                                     case 1:
-                                        dv = ((SelfVt*)this)->GetPos()->FUN_00439ef0(pos);
+                                        memcpy(&dv, &((SelfVt*)this)->GetPos()->FUN_00439ef0(pos), sizeof(dv));
                                         dv.FUN_004a0c10();
                                         break;
                                     case 2: {
-                                        Vec3 a = ((SelfVt*)this)->GetPos()->FUN_00439ef0(pos);
+                                        NiPoint3 a = ((SelfVt*)this)->GetPos()->FUN_00439ef0(pos);
                                         a.FUN_004a0c10();
-                                        Vec3 b = dir;
+                                        NiPoint3 b = dir;
                                         b.FUN_004a0c10();
-                                        dv = FUN_004a3760((float)(b.DotProduct(a) * g_dmul), b).FUN_00439ef0(a);
+                                        memcpy(&dv, &FUN_004a3760((float)(b.DotProduct(a) * g_dmul), b).FUN_00439ef0(a), sizeof(dv));
                                         break;
                                     }
                                     default:
-                                        dv = dir;
+                                        memcpy(&dv, &dir, sizeof(dv));
                                         dv.FUN_004a0c10();
                                         break;
                                     }
@@ -2425,14 +2212,14 @@ void ProjCls::FUN_009ae6e0()
                             SndSrc* s1 = wt->GetField4C();
                             if (s1)
                             {
-                                Snd snd = FUN_00453a70()->FUN_00ad7480(s1->FUN_00511840(0x4102), s1);
+                                Snd snd = FUN_00453a70()->Make(s1->FUN_00511840(0x4102), s1);
                                 snd.FUN_00ad8b60(pos.x, pos.y, pos.z);
                                 snd.FUN_00ad8830(0);
                             }
                             SndSrc* s2 = wt->GetGrass();
                             if (s2)
                             {
-                                Snd snd = FUN_00453a70()->FUN_00ad7480(s2->FUN_00511840(0x4102), s2);
+                                Snd snd = FUN_00453a70()->Make(s2->FUN_00511840(0x4102), s2);
                                 snd.FUN_00ad8b60(pos.x, pos.y, pos.z);
                                 snd.FUN_00ad8830(0);
                             }

@@ -1,4 +1,4 @@
-// fallout_shared/pathfinding/navmesh.h: declares CenterCalculation
+// fallout_shared/pathfinding/navmesh.h: defines NavMesh::GetNavMeshData
 #ifndef FNV_NAVMESH_H
 #define FNV_NAVMESH_H
 
@@ -6,16 +6,13 @@
 // @fnv 0x00558220
 NiPoint3 NavMesh::GetNavMeshData(unsigned short m_usTriangleID)
 {
-    struct CenterCalculation
+    NavMeshTriangle* pTriangle = GetTriangle(m_usTriangleID);
     {
-        NiPoint3 Center;
-        NavMeshTriangle* pTriangle;
-    } calculation;
-    calculation.pTriangle = GetTriangle(m_usTriangleID);
-    calculation.Center = FUN_0068f0a0(calculation.pTriangle->FUN_005582d0(0));
-    calculation.Center += FUN_0068f0a0(calculation.pTriangle->FUN_005582d0(1));
-    calculation.Center += FUN_0068f0a0(calculation.pTriangle->FUN_005582d0(2));
-    calculation.Center *= DAT_0102f200;
-    return calculation.Center;
+        NiPoint3 Center = FUN_0068f0a0(pTriangle->FUN_005582d0(0));
+        Center += FUN_0068f0a0(pTriangle->FUN_005582d0(1));
+        Center += FUN_0068f0a0(pTriangle->FUN_005582d0(2));
+        Center *= DAT_0102f200;
+        return Center;
+    }
 }
 #endif

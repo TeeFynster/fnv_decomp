@@ -1,6 +1,14 @@
-// gamebryo2.2/corelibs/niparticle/nipsysmodifierctlr.cpp: NiPSysModifierCtlr, NiPSysModifierCtlrRuntime, ModifierControllerStandin (9 functions)
+// gamebryo2.2/corelibs/niparticle/nipsysmodifierctlr.cpp: particle modifier controllers (9 functions)
 
+#include "../../../../include/NiTStringPointerMap.h"
 #include "nipsysmodifierctlr_decls.h"
+#include "../../../../include/NiPSysModifierCtlr.h"
+#include "../../../../include/NiSingleInterpController.h"
+#include "../../../../include/NiObjectNET.h"
+#include "../../../../include/NiParticleSystem.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/NiTimeController.h"
+#include "../../../../include/NiStream.h"
 
 // @fnv 0x00c31340
 void NiPSysModifierCtlr::ProcessClone(CloningProcess& aCloneProcess)
@@ -12,137 +20,47 @@ void NiPSysModifierCtlr::ProcessClone(CloningProcess& aCloneProcess)
     if (m_pkTarget && destination->m_pkTarget)
     {
         aCloneProcess.m_pCloneMap->GetAt((const char*)m_pkTargetModifier, (ShaderBufferRecord*&)clone);
-        destination->m_pkTargetModifier = clone;
+        destination->m_pkTargetModifier = reinterpret_cast<NiPSysModifier*>(clone);
     }
 }
 
-struct NiObjectNET
-{
-    virtual ~NiObjectNET();
-};
-struct NiTimeController
-{
-    virtual void SetTarget(NiObjectNET*);
-};
-struct NiParticleSystem
-{
-    void FindModifier();
-};
-struct NiPSysModifierCtlr_shell : public NiTimeController, public NiParticleSystem
-{
-    void FUN_00c31500(NiObjectNET* pkTarget);
-};
-// Clears the pointer at offset 0x3c, calls NiTimeController::SetTarget, and if the pointer at 0x2c is set, invokes the particle system method.
+// These routines are absent from the shared class declarations. The unused EDX
+// parameter preserves their thiscall stack arguments without another class copy.
 // @fnv 0x00c31500
-void NiPSysModifierCtlr_shell::FUN_00c31500(NiObjectNET* pkTarget)
+void __fastcall SetModifierTarget(NiPSysModifierCtlr* controller, void*, NiObjectNET* pkTarget)
 {
-    *(void**)((char*)this + 0x3c) = 0;
-    NiTimeController::SetTarget(pkTarget);
-    if (*(void**)((char*)this + 0x2c))
-        ((NiParticleSystem*)((char*)this + 0))->FindModifier();
+    controller->m_pkTargetModifier = 0;
+    controller->NiTimeController::SetTarget(pkTarget);
+    if (controller->m_pkTarget)
+        reinterpret_cast<NiParticleSystem*>(controller)->FindModifier();
 }
-
-struct NiStream
-{
-    void SerializeString(char const*);
-};
-
-struct FUN_00a39010_shell
-{
-    void FUN_00a39010(NiStream&);
-};
-
-struct FUN_00a57130_shell
-{
-    void FUN_00a57130(NiStream&);
-};
 
 // @fnv 0x00a57130
-void FUN_00a57130_shell::FUN_00a57130(NiStream& kStream)
+void __fastcall SaveModifierController(NiPSysModifierCtlr* controller, void*, NiStream& kStream)
 {
-    FUN_00a39010_shell* pBase = (FUN_00a39010_shell*)this;
-    pBase->FUN_00a39010(kStream);
-    kStream.SerializeString((char const*)((char*)this + 0x38));
+    controller->NiSingleInterpController::SaveBinary(kStream);
+    kStream.SerializeString(reinterpret_cast<const char*>(&controller->m_kTargetModifierName));
 }
 
-struct S_00c313a0_Field
-{
-    virtual int v00() = 0;
-    virtual int v01() = 0;
-    virtual int v02() = 0;
-    virtual int v03() = 0;
-    virtual int v04() = 0;
-    virtual int v05() = 0;
-    virtual int v06() = 0;
-    virtual int v07() = 0;
-    virtual int v08() = 0;
-    virtual int v09() = 0;
-    virtual int v10() = 0;
-    virtual int v11() = 0;
-    virtual int v12() = 0;
-    virtual int v13() = 0;
-    virtual int v14() = 0;
-    virtual int v15() = 0;
-    virtual int v16() = 0;
-    virtual int v17() = 0;
-    virtual int v18() = 0;
-    virtual int v19() = 0;
-    virtual int v20() = 0;
-    virtual int v21() = 0;
-    virtual int v22() = 0;
-
-    virtual bool FUN_00c313a0_Field_005c(S_00c313a0_Field*) = 0;
-};
-
-struct S_00c313a0
-{
-    virtual ~S_00c313a0()
-    {}
-
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    S_00c313a0_Field* unk3c;
-
-    unsigned char IsEquivalentTo(S_00c313a0* other);
-};
-
-struct S_00a39030_Callee
-{
-    bool IsCompatibleWith(S_00c313a0* other);
-};
-
-// Compares this object with other via IsCompatibleWith, matching unk3c presence and contents, and returns whether unk38 is equal.
 // @fnv 0x00c313a0
-unsigned char S_00c313a0::IsEquivalentTo(S_00c313a0* other)
+unsigned char __fastcall IsModifierControllerEquivalent(NiPSysModifierCtlr* controller, void*, NiPSysModifierCtlr* other)
 {
-    if (!reinterpret_cast<S_00a39030_Callee*>(this)->IsCompatibleWith(other))
+    if (!static_cast<const NiSingleInterpController*>(controller)->NiSingleInterpController::IsEqual(other))
         return 0;
 
-    if (unk3c && !other->unk3c)
+    if (controller->m_pkTargetModifier && !other->m_pkTargetModifier)
         return 0;
 
-    if (!unk3c && other->unk3c)
+    if (!controller->m_pkTargetModifier && other->m_pkTargetModifier)
         return 0;
 
-    if (unk3c && other->unk3c)
+    if (controller->m_pkTargetModifier && other->m_pkTargetModifier)
     {
-        if (!unk3c->FUN_00c313a0_Field_005c(other->unk3c))
+        if (!controller->m_pkTargetModifier->IsEqual(other->m_pkTargetModifier))
             return 0;
     }
 
-    return unk38 == other->unk38;
+    return controller->m_kTargetModifierName.m_kHandle == other->m_kTargetModifierName.m_kHandle;
 }
 
 extern int DAT_010c08ac;
@@ -150,68 +68,36 @@ extern int DAT_0109b220;
 extern int(__stdcall* DAT_00fdf1c4)(void* apMemory);
 void __cdecl FUN_00aa1460(void* apMemory, unsigned int auiSize);
 
-struct NiPSysModifierRef
-{
-    virtual void v00();
-    virtual void Release();
-    int m_iRefCount;
-};
-
-struct FUN_00c314a0_cls
-{
-    int m_vptr;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    NiPSysModifierRef* m_pModifier;
-    char* m_kTargetModifierName;
-
-    void FUN_00a6d290();
-    FUN_00c314a0_cls* Destroy(unsigned char acFlags);
-};
+void __fastcall DestroyTimeController(NiTimeController* controller);
 
 // Frees the name buffer and modifier reference, calls FUN_00a6d290, and optionally deallocates the object when acFlags bit 0 is set.
 // @fnv 0x00c314a0
-FUN_00c314a0_cls* FUN_00c314a0_cls::Destroy(unsigned char acFlags)
+NiPSysModifierCtlr* __fastcall DestroyModifierController(NiPSysModifierCtlr* controller, void*, unsigned char acFlags)
 {
     int(__stdcall * pfnFree)(void*) = DAT_00fdf1c4;
-    *(volatile int*)&m_vptr = (int)&DAT_010c08ac;
-    char* pName = *(char* volatile*)&m_kTargetModifierName;
+    *(volatile int*)controller = (int)&DAT_010c08ac;
+    char* pName = *(char* volatile*)&controller->m_kTargetModifierName.m_kHandle;
     if (pName != (char*)DAT_0109b220)
     {
         pfnFree(pName - 8);
     }
-    NiPSysModifierRef* pModifier = m_pModifier;
+    NiInterpolator* pModifier = controller->m_spControllerInterpolator.m_pObject;
     if (pModifier != 0)
     {
-        if (pfnFree(&pModifier->m_iRefCount) == 0)
+        if (pfnFree(&pModifier->m_uiRefCount) == 0)
         {
-            pModifier->Release();
+            pModifier->DeleteThis();
         }
     }
-    FUN_00a6d290();
+    DestroyTimeController(controller);
     if (acFlags & 1)
     {
-        FUN_00aa1460(this, 0x40);
+        FUN_00aa1460(controller, 0x40);
     }
-    return this;
+    return controller;
 }
 
 namespace fnv_00c31530 {
-struct NiRTTI
-{
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
 extern NiRTTI DAT_012024e0;
 extern void* DAT_0109b220;
 
@@ -223,13 +109,8 @@ struct NiParticleSystemRuntime
     void* FUN_00c1b0f0(const void* pkName);
 };
 
-struct NiPSysModifierCtlrRuntime : NiPSysModifierCtlr
-{
-    bool IsTargetParticleSystem(NiParticleSystemRuntime* pkTarget);
-};
-
 // @fnv 0x00c31530
-bool NiPSysModifierCtlrRuntime::IsTargetParticleSystem(NiParticleSystemRuntime* pkTarget)
+bool __fastcall IsTargetParticleSystem(NiPSysModifierCtlr* controller, void*, NiParticleSystemRuntime* pkTarget)
 {
     if (pkTarget != 0)
     {
@@ -238,9 +119,9 @@ bool NiPSysModifierCtlrRuntime::IsTargetParticleSystem(NiParticleSystemRuntime* 
         {
             if (pkRTTI == &DAT_012024e0)
             {
-                if (m_kTargetModifierName != DAT_0109b220 && m_pkTarget != 0)
+                if (controller->m_kTargetModifierName.m_kHandle != DAT_0109b220 && controller->m_pkTarget != 0)
                 {
-                    if (pkTarget->FUN_00c1b0f0(&m_kTargetModifierName))
+                    if (pkTarget->FUN_00c1b0f0(&controller->m_kTargetModifierName))
                     {
                         return true;
                     }
@@ -254,34 +135,12 @@ bool NiPSysModifierCtlrRuntime::IsTargetParticleSystem(NiParticleSystemRuntime* 
 }
 }  // namespace fnv_00c31530
 
-struct NiStream;
-struct ControllerStandin
-{
-    void __thiscall FUN_00a89af0(NiStream& stream);
-    unsigned int unknown_00;
-    unsigned int unknown_04;
-    unsigned int unknown_08;
-    unsigned int unknown_0c;
-    unsigned int unknown_10;
-    unsigned int unknown_14;
-    unsigned int unknown_18;
-    unsigned int unknown_1c;
-    unsigned int unknown_20;
-    unsigned int unknown_24;
-    unsigned int unknown_28;
-    void* target_2c;
-};
-struct ModifierControllerStandin : ControllerStandin
-{
-    void __thiscall FUN_00c31400();
-    void __thiscall FUN_00c31590(NiStream& stream);
-};
 // @fnv 0x00c31590
-void ModifierControllerStandin::FUN_00c31590(NiStream& stream)
+void NiPSysModifierCtlr::LinkObject(NiStream& stream)
 {
-    ControllerStandin::FUN_00a89af0(stream);
-    if (target_2c)
-        FUN_00c31400();
+    NiObject::LinkObject(stream);
+    if (m_pkTarget)
+        reinterpret_cast<NiParticleSystem*>(this)->FindModifier();
 }
 
 struct FUN_00c315b0_arr
@@ -296,33 +155,13 @@ struct FUN_00c315b0_arr
     void FUN_0096ae90(unsigned int index, void*& item);
 };
 
-struct FUN_00c315b0_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    void* m_pModifierName;
-    void AppendModifierInfo(void* arg);
-};
-
 extern void __stdcall FUN_00a390a0(FUN_00c315b0_arr* arr);
 extern void* __cdecl FUN_00a7d330(void* p);
 extern void* __cdecl FUN_00a7d5e0(const char* fmt, void* p);
 extern void* DAT_012027c8;
 
 // @fnv 0x00c315b0
-void FUN_00c315b0_cls::AppendModifierInfo(void* arg)
+void __fastcall AppendModifierInfo(NiPSysModifierCtlr* controller, void*, void* arg)
 {
     FUN_00c315b0_arr* arr = (FUN_00c315b0_arr*)arg;
     FUN_00a390a0(arr);
@@ -338,7 +177,7 @@ void FUN_00c315b0_cls::AppendModifierInfo(void* arg)
         arg = v1;
     }
     arr->FUN_0096ae90(count, arg);
-    void* pModifierName = m_pModifierName;
+    void* pModifierName = controller->m_kTargetModifierName.m_kHandle;
     void* pNameString = FUN_00a7d5e0("Modifier Name", pModifierName);
     count = arr->m_iArrayLength;
     if (count >= arr->m_iCap)
@@ -353,16 +192,8 @@ void FUN_00c315b0_cls::AppendModifierInfo(void* arg)
     arr->FUN_0096ae90(count, arg);
 }
 
-struct BaseFake
-{
-    bool RegisterInterpolatorStreamables(NiStream&);
-};
-struct FUN_00a57780_shell : BaseFake
-{
-    bool FUN_00a57780(NiStream&);
-};
 // @fnv 0x00a57780
-bool FUN_00a57780_shell::FUN_00a57780(NiStream& stream)
+bool __fastcall RegisterModifierController(NiPSysModifierCtlr* controller, void*, NiStream& stream)
 {
-    return RegisterInterpolatorStreamables(stream);
+    return controller->NiSingleInterpController::RegisterStreamables(stream);
 }

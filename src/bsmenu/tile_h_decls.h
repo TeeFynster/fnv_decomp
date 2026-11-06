@@ -3,11 +3,8 @@
 #define FNV_TILE_H_DECLS_H
 
 #include "MemoryManager.h"
-class NiFixedString
-{
-  public:
-    char* m_kHandle;
-};
+#include "../../include/NiExtraData.h"
+#include "../../include/Tile.h"
 
 extern float DAT_01094c4c;
 extern const char DAT_01093f80[];
@@ -20,10 +17,6 @@ extern MemoryManager g_memoryManager;
 extern "C" void __cdecl TileTemplateDisposeAlias();
 extern "C" void __cdecl DeallocateAlias(void*);
 
-class Tile
-{
-    static bool IsSpecialTileName(const char*);
-};
 
 class Tile__MenuStringMap
 {
@@ -64,24 +57,6 @@ extern "C" unsigned int __security_cookie;
 extern void* DAT_01094cfc;
 extern const char DAT_010954cc[];
 class NiNode;
-class NiExtraData
-{
-  public:
-    void* vtable;
-    unsigned int refs;
-    char* name;
-    void FUN_00a7b2e0();
-};
-class NiGlobalStringTable
-{
-  public:
-    static char* AddString(const char*);
-};
-class NiAVObject
-{
-  public:
-    void SetName(const NiFixedString&);
-};
 class Tile__Extra : public NiExtraData
 {
   public:

@@ -6,8 +6,14 @@
 // with the unit's own flags (/O2). Nothing of this unit's own follows the include, so no accepted function is affected.
 #pragma optimize("", on)
 
-extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
-extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
+
+// Stands in for the NiTPointerMap<NiObject *,bool> member (layout_support.h, included first, keeps a non-polymorphic
+// NiTPointerMap of its own); the calls go to NiTMapBase<NiTPointerAllocator<unsigned int>,NiObject *,bool>.
+struct FUN_00b63b10_ObjectMap : NiTMapBase<NiTPointerAllocator<unsigned int>, NiObject*, bool>
+{
+    virtual NiTMapItem<NiObject*, bool>* NewItem();
+    virtual void DeleteItem(NiTMapItem<NiObject*, bool>* pkItem);
+};
 
 struct SharedAccumulatorState
 {
@@ -120,7 +126,7 @@ struct SharedAccumulatorState
     unsigned int unk1a8;
     unsigned int unk1ac;
     unsigned int unk1b0;
-    NiTMapBase<NiTPointerAllocator<unsigned int>, NiObject*, bool> sharedObjects;
+    FUN_00b63b10_ObjectMap sharedObjects;
     unsigned int unk1c4;
     unsigned int unk1c8;
     unsigned int unk1cc;
@@ -145,10 +151,10 @@ struct SharedAccumulatorState
 bool SharedAccumulatorState::FUN_00b63b10(NiObject* object)
 {
     bool value = false;
-    EnterCriticalSection(&sharedLock);
+    EnterCriticalSection(reinterpret_cast<LPCRITICAL_SECTION>(&sharedLock));
     const bool bFound = sharedObjects.GetAt(object, value);
     if (!bFound)
         sharedObjects.SetAt(object, true);
-    LeaveCriticalSection(&sharedLock);
+    LeaveCriticalSection(reinterpret_cast<LPCRITICAL_SECTION>(&sharedLock));
     return !bFound;
 }

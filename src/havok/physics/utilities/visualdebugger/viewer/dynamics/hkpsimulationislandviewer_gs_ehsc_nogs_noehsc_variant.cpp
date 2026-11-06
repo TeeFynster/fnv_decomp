@@ -5,6 +5,10 @@
 
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/hkpsimulationislandviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/hkpsimulationislandviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#define FNV_VEC4_SIMD
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkArray.h"
+
 struct Base0
 {
     char pad[0x20];
@@ -236,14 +240,6 @@ extern void* DAT_01268fdc;
 extern const char str_010d19d0[];
 extern void RegisterCallback();
 void FUN_00d651c0();
-template <typename T> struct hkArrayD64A
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    hkArrayD64A() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
 class hkListenerD64A
 {
   public:
@@ -298,8 +294,8 @@ class FUN_00d64a50 : public FUN_00ddccb0, public hkListenerD64A
   public:
     FlagD64A m_flagA;
     FlagD64A m_flagB;
-    hkArrayD64A<void*> m_arrayA;
-    hkArrayD64A<void*> m_arrayB;
+    hkArray<void*> m_arrayA;
+    hkArray<void*> m_arrayB;
     FUN_00d64a50(void* pkInfo) throw();
     virtual ~FUN_00d64a50() throw();
 };
@@ -417,7 +413,7 @@ struct Count
         return --value;
     }
 };
-struct Vec;
+struct hkArrayHeader;
 struct DeallocCtx
 {
     virtual void v0();
@@ -426,7 +422,7 @@ struct DeallocCtx
     virtual void v3();
     virtual void v4(void* pData, int iSize);
     void __cdecl FUN_00c908c0(void*, int, int);
-    __forceinline void Grow(Vec* v, int need, int elemSize);
+    __forceinline void Grow(hkArrayHeader* v, int need, int elemSize);
 };
 
 struct Singleton
@@ -438,14 +434,16 @@ struct Singleton
     DeallocCtx* m_10;
 };
 
-struct Vec
+// Untyped Havok hkArray<T> header: m_data, m_size, m_capacityAndFlags (0x80000000 = DONT_DEALLOCATE);
+// FUN_00c908c0 is the reserve helper. No shared hkArray header exists.
+struct hkArrayHeader
 {
     void* m_pData;
     int m_iArrayLength;
     int m_iCapacity;
 };
 
-__forceinline void DeallocCtx::Grow(Vec* v, int need, int elemSize)
+__forceinline void DeallocCtx::Grow(hkArrayHeader* v, int need, int elemSize)
 {
     _ReadWriteBarrier();
     int cap = v->m_iCapacity & 0x3fffffff;
@@ -457,29 +455,20 @@ __forceinline void DeallocCtx::Grow(Vec* v, int need, int elemSize)
         FUN_00c908c0(v, g, elemSize);
     }
 }
-inline void GrowVec10(Vec* v, int need, int elemSize)
+inline void GrowVec10(hkArrayHeader* v, int need, int elemSize)
 {
     Singleton* router = (Singleton*)FUN_00c85750();
     DeallocCtx* ctx = router->m_10;
     _ReadWriteBarrier();
     ctx->Grow(v, need, elemSize);
 }
-inline void GrowVec0c(Vec* v, int need, int elemSize)
+inline void GrowVec0c(hkArrayHeader* v, int need, int elemSize)
 {
     Singleton* router = (Singleton*)FUN_00c85750();
     DeallocCtx* ctx = router->m_0c;
     _ReadWriteBarrier();
     ctx->Grow(v, need, elemSize);
 }
-
-struct Vec4
-{
-    union
-    {
-        __m128 v;
-        float elements[4];
-    };
-};
 
 struct FUN_00de1210
 {
@@ -541,7 +530,7 @@ struct Cont
 __forceinline void Cont::Resize(int need)
 {
     Cont* cont = this;
-    GrowVec10((Vec*)cont, need, 0x80);
+    GrowVec10((hkArrayHeader*)cont, need, 0x80);
     int n = cont->m_iArrayLength - need;
     Elem* e = cont->m_pData + need;
     for (int k = 0; k < n; ++k)
@@ -773,14 +762,14 @@ void ThisCls::FUN_00d64c00(Param* pParam)
         offsets.m_pData = 0;
         offsets.m_iArrayLength = 0;
         offsets.m_iCapacity = (int)0x80000000;
-        GrowVec0c((Vec*)&offsets, pRec, 4);
+        GrowVec0c((hkArrayHeader*)&offsets, pRec, 4);
         offsets.m_iArrayLength = pRec;
         int boundsCount = pParam->active.count;
         Vec20 item;
         item.m_pData = 0;
         item.m_iArrayLength = 0;
         item.m_iCapacity = (int)0x80000000;
-        GrowVec0c((Vec*)&item, boundsCount, 0x20);
+        GrowVec0c((hkArrayHeader*)&item, boundsCount, 0x20);
         item.m_iArrayLength = boundsCount;
         int z = 0;
         if (z < pParam->active.count)
@@ -844,7 +833,7 @@ void ThisCls::FUN_00d64c00(Param* pParam)
         offsets.m_pData = 0;
         offsets.m_iArrayLength = 0;
         offsets.m_iCapacity = (int)0x80000000;
-        GrowVec10((Vec*)&offsets, pRec, 4);
+        GrowVec10((hkArrayHeader*)&offsets, pRec, 4);
         offsets.m_iArrayLength = pRec;
         int z = 0;
         if (z < islandsB.size())

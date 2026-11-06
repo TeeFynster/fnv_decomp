@@ -1,35 +1,73 @@
-// fallout/interface/menus/repairmenu.cpp: RepairMenu, RepairAction, PreviewMenu (18 functions)
+// fallout/interface/menus/repairmenu.cpp: RepairMenu and local menu handlers (18 functions)
 
+#include "../../../../include/RepairMenu.h"
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/InventoryMenu.h"
+#include "../../../../include/ListBox_ItemChange___.h"
+#include "../../../../include/Menu.h"
+#include "../../../../include/Tile.h"
+// TileListBoxCalls_repairmenu: local type (was include/TileListBoxCalls.h, which had no evidence of one real class); its methods are 0x00a011b0 Tile::GetFloat
+#include "../../../../include/Tile.h"
+
+class TileListBoxCalls_repairmenu : public Tile
+{
+  public:
+    float GetFloat(int trait);
+};
 #include "repairmenu_packet.h"
+#include "../../../../include/hkMemoryAllocator.h"
+// AudioMgr_BSAudio: this unit's view of BSAudio (0x00453a70 BSAudio::QInstance; 0x00ad73b0 GetSoundHandleByFormID,
+// 0x00ad7480 GetSoundHandleByFilename, 0x00ad7550 GetSoundHandleByEditorName, 0x00ad8570 per the community PDB). It
+// returns this unit's own sound-handle copy, so it stays local until that copy moves onto BSSoundHandle.
+class AudioPlaybackHandle;
+class Snd;
+class SndForm;
+class SndSrc;
+class AudioMgr_BSAudio
+{
+public:
+    static AudioMgr_BSAudio* Get();
+    AudioPlaybackHandle Make(int id, SndForm* form);
+    AudioPlaybackHandle Make2(int id);
+    bool PlayAt(void* node, float f, int flags);
+    AudioPlaybackHandle GetHandle(const char* name, int flags, int a);
+    AudioPlaybackHandle GetSoundByEditorID(const char* editorID, int flags, int a);
+    AudioPlaybackHandle GetSoundByEditorID(const char* editorID, int flags);
+    Snd Make(void* a, SndSrc* b);
+};
+#include "../../../../include/ExtraDataList.h"
+#include "../../../../include/Setting.h"
+#include "../../../../include/TESBoundObject.h"
+#include "../../../../include/TESObjectWEAP.h"
 static const int kGetClassValue = 1035;
 // @fnv 0x007b54b0
 int RepairMenu::GetClass()
 {
     return kGetClassValue;
 }
-// Applies the accumulated movement offset to the menu's X/Y tile values and resets movement to zero.
+// Applies the accumulated movement offset at 0x274 to the menu's X/Y tile values and resets it to zero.
 // @fnv 0x0077f700
 void RepairMenu::UpdateRepairList()
 {
-    static float baseX = ((TileListBoxCalls*)pMenu)->GetFloat(4001);
-    static float baseY = ((TileListBoxCalls*)pMenu)->GetFloat(4002);
+    static float baseX = ((TileListBoxCalls_repairmenu*)pMenu)->GetFloat(4001);
+    static float baseY = ((TileListBoxCalls_repairmenu*)pMenu)->GetFloat(4002);
     float x = 0.0f;
     float y = 0.0f;
-    if (movement > 0.0)
+    if (reinterpret_cast<float*>(this)[0x274 / sizeof(float)] > 0.0)
     {
         DAT_011d9e91 = true;
         FUN_004169a0(FUN_004a4240(), x, y);
-        x *= movement;
-        y *= movement;
+        x *= reinterpret_cast<float*>(this)[0x274 / sizeof(float)];
+        y *= reinterpret_cast<float*>(this)[0x274 / sizeof(float)];
     }
     if (DAT_011d9e91)
     {
-        pMenu->Set(4001, baseX + x, true);
-        pMenu->Set(4002, baseY + y, true);
+        ((Tile*)pMenu)->Set(4001, baseX + x, true);
+        ((Tile*)pMenu)->Set(4002, baseY + y, true);
     }
-    if (movement == 0.0)
+    if (reinterpret_cast<float*>(this)[0x274 / sizeof(float)] == 0.0)
         DAT_011d9e91 = false;
-    movement = 0.0f;
+    reinterpret_cast<float*>(this)[0x274 / sizeof(float)] = 0.0f;
 }
 // Loads repair_menu.xml, stores the resulting RepairMenu, initializes its list and tiles, and returns the tile or null on failure.
 // @fnv 0x007b5520
@@ -44,7 +82,7 @@ Tile* RepairMenu::Create()
         delete pExistingMenu;
     pTile = pInterface->FUN_00586150()->ReadFile("Data\\Menus\\repair_menu.xml");
     DAT_011da75c = (RepairMenu*)pTile->GetMenu();
-    if (DAT_011da75c && DAT_011da75c->GetID() == FUN_007b5720())
+    if (DAT_011da75c && DAT_011da75c->GetClass() == FUN_007b5720())
     {
         DAT_011da75c->SetTileMenu((TileMenu*)pTile, false);
         ((InventoryMenu*)DAT_011da75c)->FUN_00867a20();
@@ -53,10 +91,10 @@ Tile* RepairMenu::Create()
             Warning("MENUS: Repair Menu Creation Failed... Are your menu and art resources up to date?");
             return 0;
         }
-        if (((TileListBoxCalls*)pTile)->GetFloat(4007) == 6006.0 || ((TileListBoxCalls*)pTile)->GetFloat(4007) == 102.0)
+        if (((TileListBoxCalls_repairmenu*)pTile)->GetFloat(4007) == 6006.0 || ((TileListBoxCalls_repairmenu*)pTile)->GetFloat(4007) == 102.0)
             pTile->Set(4013, Tile::GetInterfaceScale(), true);
-        DAT_011da75c->m_kRepairList.Initialize(DAT_011da75c->m_pTiles[1], "RM_RepairListTemplate");
-        DAT_011da75c->m_kRepairList.FUN_007a1930(false);
+        DAT_011da75c->m_kItemList.Initialize(DAT_011da75c->m_pTiles[1], "RM_RepairListTemplate");
+        DAT_011da75c->m_kItemList.FUN_007a1930(false);
         DAT_011da75c->m_pTiles[5]->SetTraitFloat(DAT_011da754, 1.0f);
         DAT_011da75c->m_pTiles[10]->SetTraitFloat(DAT_011da754, 1.0f);
         DAT_011da75c->SetMenuVisibility(true);
@@ -70,14 +108,9 @@ Tile* RepairMenu::Create()
     return 0;
 }
 
-struct FUN_007b5730_shell : public RepairMenu
-{
-    bool FUN_007b5730();
-};
-
 // Checks the 13 entries at offset 0x28 and returns true only if none of them is zero.
 // @fnv 0x007b5730
-bool FUN_007b5730_shell::FUN_007b5730()
+bool RepairMenu::FUN_007b5730()
 {
     for (int iIndex = 0; iIndex < 13; ++iIndex)
     {
@@ -93,35 +126,16 @@ int FUN_007b5720()
     return 0x40b;
 }
 
-struct Host007b54f0
-{
-    void FUN_007b5770();
-    void* DestroyIfFlagged(unsigned int);
-};
-void _Deallocate(void*);
-// Calls FUN_007b5770, then deallocates this if bit 0 of flags is set, and returns this.
-// @fnv 0x007b54f0
-void* Host007b54f0::DestroyIfFlagged(unsigned int flags)
-{
-    FUN_007b5770();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct Tile_Set_Helper
-{
-    void Set(int, int);
-};
 struct Box071ae60
 {
     unsigned int FUN_0071ae60();
 };
+// Retained: RepairMenu.h does not declare this handler (0x007b6a00).
 struct Standin007b6a00
 {
     char _00[0x48];
-    Tile_Set_Helper* _48;
-    Tile_Set_Helper* _4c;
+    Tile* _48;
+    Tile* _4c;
     char _50[0x0C];
     Box071ae60 _5c;
     void FUN_007b6a00(int aiID, Tile* apTarget);
@@ -140,10 +154,8 @@ void Standin007b6a00::FUN_007b6a00(int aiID, Tile* apTarget)
     }
 }
 
-struct Interface
-{
-    static void __cdecl PlayUISound(int);
-};
+void __cdecl PlayUISound(int);
+// Retained: RepairMenu.h does not declare the HandleMenuInput override.
 struct FUN_007b6a50_Host
 {
     virtual void Vf0() = 0;
@@ -160,38 +172,18 @@ bool FUN_007b6a50_Host::HandleButton(int aiButton, float afValue)
     {
     case 6:
     case 10:
-        Interface::PlayUISound(3);
+        PlayUISound(3);
         this->Vf3(12, 0);
         break;
     }
     return bhandled;
 }
 
-struct FUN_007308e0
-{
-    virtual ~FUN_007308e0();
-};
-struct TileRemoveFade
-{
-    void UpdateTrait(int);
-};
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-};
-struct FUN_007b5770 : public Menu_007a8b10
-{
-    char pad2[0x44];
-    Tile* tile;
-    char pad3[0x10];
-    FUN_007308e0 helper;
-    virtual ~FUN_007b5770();
-};
-// Removes the tile via TileRemoveFade with id 0xfa9 and clears DAT_011da75c.
+// Removes the tile with id 0xfa9 and clears DAT_011da75c.
 // @fnv 0x007b5770
-FUN_007b5770::~FUN_007b5770()
+RepairMenu::~RepairMenu()
 {
-    ((TileRemoveFade*)tile)->UpdateTrait(0xfa9);
+    m_pTiles[8]->UpdateTrait(0xfa9);
     DAT_011da75c = 0;
 }
 
@@ -304,46 +296,21 @@ void UpdateRepairTile(RepairTile* apTile, HealthOwner* apItem)
     apTile->SetFloat(0x1004, fResult, true);
 }
 
-struct FUN_007b6970_tile
-{
-    void SetString(int, const char*, bool);
-    void Set(int, int);
-    bool FUN_00a07ed0(int);
-    void StartFade(int, float, float, float, bool);
-};
-struct FUN_007b6970_shell : public RepairMenu
-{
-    void SetRepairMenuText(const char* apText);
-};
-
 // @fnv 0x007b6970
-void FUN_007b6970_shell::SetRepairMenuText(const char* apText)
+void RepairMenu::SetRepairMenuText(const char* apText)
 {
-    ((FUN_007b6970_tile*)m_pTiles[8])->SetString(4036, apText, true);
-    ((FUN_007b6970_tile*)m_pTiles[9])->Set(4003, 0);
-    ((FUN_007b6970_tile*)m_pTiles[8])->Set(4003, 1);
-    if (!((FUN_007b6970_tile*)m_pTiles[8])->FUN_00a07ed0(4009))
+    m_pTiles[8]->SetString(4036, apText, true);
+    m_pTiles[9]->Set(4003, 0);
+    m_pTiles[8]->Set(4003, 1);
+    if (!m_pTiles[8]->FUN_00a07ed0(4009))
     {
-        ((FUN_007b6970_tile*)m_pTiles[8])->StartFade(4009, 255.0f, 64.0f, 2.0f, true);
+        m_pTiles[8]->StartFade(4009, 255.0f, 64.0f, 2.0f, true);
     }
 }
 
 namespace fnv_007b6fb0 {
-class RepairMenu;
-
 extern RepairMenu* DAT_011da75c;
 extern int DAT_011da760;
-
-class RmMenu
-{
-  public:
-    virtual ~RmMenu();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10();
-    virtual void vf14(int, int);
-};
 
 class RmSub
 {
@@ -365,23 +332,14 @@ class RmTile
     void CallB(int, int);
 };
 
-struct RmView
-{
-    RmMenu m_fMinimumV;
-    char m_gap04[0x48 - 0x04];
-    RmTile* m_p48;
-    char m_gap4c[0x5c - 0x4c];
-    RmSub m_sub;
-};
-
 // @fnv 0x007b6fb0
 void ResetRepairMenu()
 {
-    ((RmView*)DAT_011da75c)->m_sub.vf1c();
+    reinterpret_cast<RmSub*>(&DAT_011da75c->m_kItemList)->vf1c();
     DAT_011da760 = 0;
-    ((RmView*)DAT_011da75c)->m_fMinimumV.vf14(0xe, 0);
-    ((RmView*)DAT_011da75c)->m_p48->CallA(0xfa9);
-    ((RmView*)DAT_011da75c)->m_p48->CallB(0xfa3, 0);
+    DAT_011da75c->HandleMouseoverTileAlt(0xe, 0);
+    reinterpret_cast<RmTile*>(DAT_011da75c->m_pTiles[8])->CallA(0xfa9);
+    reinterpret_cast<RmTile*>(DAT_011da75c->m_pTiles[8])->CallB(0xfa3, 0);
 }
 }  // namespace fnv_007b6fb0
 
@@ -400,7 +358,7 @@ struct RepairForm
 };
 struct RepairTile
 {
-    void SetFloat(int id, float value, int flag);
+    void FUN_00a012d0(int id, float value, int flag);
     void FUN_00700320(int id, int value);
     void FUN_00a01350(int id, const char* text);
     void FUN_00a01350(int id, const char* text, int flag);
@@ -422,14 +380,6 @@ struct RepairList
     virtual void vf1c();
     virtual void vf20(void(__cdecl*)());
     void FUN_007314c0(void(__cdecl*)(), int, int);
-};
-struct RepairMenuVirtual
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10(int, int);
 };
 struct RepairHud
 {
@@ -472,7 +422,7 @@ void __cdecl FUN_007b7020(int target)
             DAT_011da760 = reinterpret_cast<RepairInventory*>(target);
         }
         float percent = DAT_011da760->FUN_004bcdb0(1) / DAT_01017a40;
-        reinterpret_cast<RepairTile*>(DAT_011da75c->m_pTiles[4])->SetFloat(0x1004, percent, 1);
+        reinterpret_cast<RepairTile*>(DAT_011da75c->m_pTiles[4])->FUN_00a012d0(0x1004, percent, 1);
         reinterpret_cast<RepairTile*>(DAT_011da75c->m_pTiles[4])->FUN_00700320(0xfa3, 1);
         RepairForm* form = DAT_011da760->FUN_0044ddc0();
         int type = form->FUN_00401170();
@@ -525,8 +475,8 @@ void __cdecl FUN_007b7020(int target)
                 ->FUN_00a01350(0xfcc, DAT_011da760->GetIconFilename(0, 1));
             PopulateRepairMenu();
         }
-        reinterpret_cast<RepairList*>(&DAT_011da75c->m_kRepairList)->FUN_007314c0(&UpdateRepairTile, 0, 0x7fffffff);
-        reinterpret_cast<RepairList*>(&DAT_011da75c->m_kRepairList)->vf20(&CompareSortEntries);
+        reinterpret_cast<RepairList*>(&DAT_011da75c->m_kItemList)->FUN_007314c0(&UpdateRepairTile, 0, 0x7fffffff);
+        reinterpret_cast<RepairList*>(&DAT_011da75c->m_kItemList)->vf20(&CompareSortEntries);
         reinterpret_cast<RepairTile*>(DAT_011da75c->m_pTiles[0])
             ->FUN_00700320(
                 DAT_011da754,
@@ -534,11 +484,11 @@ void __cdecl FUN_007b7020(int target)
         if (target && FUN_004b71d0())
         {
             reinterpret_cast<RepairManager*>(
-                FUN_004b7210(reinterpret_cast<RepairList*>(&DAT_011da75c->m_kRepairList)->vf14(1, 0, 0xfc3, 1)))
+                FUN_004b7210(reinterpret_cast<RepairList*>(&DAT_011da75c->m_kItemList)->vf14(1, 0, 0xfc3, 1)))
                 ->FUN_00715860();
         }
-        reinterpret_cast<RepairMenuVirtual*>(DAT_011da75c)
-            ->vf10(0xe, reinterpret_cast<RepairList*>(&DAT_011da75c->m_kRepairList)->vf04());
+        DAT_011da75c
+            ->HandleMouseover(0xe, reinterpret_cast<Tile*>(reinterpret_cast<RepairList*>(&DAT_011da75c->m_kItemList)->vf04()));
         if (target != 0)
         {
             FUN_007044c0(1, 0, 0);
@@ -557,12 +507,6 @@ struct ValueList_7b
 {
     ValueObj_7b** Find(int aiID);
 };
-struct FUN_00a01230_shell
-{
-    int unk00;
-    ValueList_7b list;
-    bool IsTraitNonZero(int aiFlag);
-};
 struct FUN_004bddd0_shell
 {
     float GetHealth(bool abFlag);
@@ -570,7 +514,7 @@ struct FUN_004bddd0_shell
 };
 struct SortEntry_7b
 {
-    FUN_00a01230_shell* pItem;
+    Tile* pItem;
     FUN_004bddd0_shell* pData;
 };
 
@@ -583,8 +527,8 @@ int CompareSortEntries(SortEntry_7b* apA, SortEntry_7b* apB)
     int iResult = 0;
     bool bHasA6 = apA->pItem->IsTraitNonZero(DAT_011da748);
     bool bHasB = apB->pItem->IsTraitNonZero(DAT_011da748);
-    bool bLowA = (*apA->pItem->list.Find(0xfa9))->GetValue() < 255.0;
-    bool bLowB4 = (*apB->pItem->list.Find(0xfa9))->GetValue() < 255.0;
+    bool bLowA = (*((ValueList_7b*)((char*)apA->pItem + 4))->Find(0xfa9))->GetValue() < 255.0;
+    bool bLowB4 = (*((ValueList_7b*)((char*)apB->pItem + 4))->Find(0xfa9))->GetValue() < 255.0;
     if (bHasA6 && !bHasB)
     {
         iResult = -1;
@@ -663,261 +607,14 @@ struct AudioPlaybackHandle
     ~AudioPlaybackHandle();
     void Play();
 };
-struct AudioMgr
-{
-    AudioPlaybackHandle GetSoundByEditorID(const char*, int, int);
-};
-AudioMgr* GetAudio();
-struct InterfaceStub
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void Repair(int, int, int, int, int, int, int, int, int, int);
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual void v213();
-    virtual void v214();
-    virtual void v215();
-    virtual void v216();
-    virtual void v217();
-    virtual void v218();
-    virtual void v219();
-    virtual void v220();
-    virtual void v221();
-    virtual void v222();
-    virtual void v223();
-    virtual void v224();
-    virtual void v225();
-    virtual void v226();
-    virtual void v227();
-    virtual void v228();
-    virtual void v229();
-    virtual void v230();
-    virtual void v231();
-    virtual void v232();
-    virtual void v233();
-    virtual void v234();
-    virtual void v235();
-    virtual void v236();
-    virtual void v237();
-    virtual void v238();
-    virtual void v239();
-    virtual void v240();
-    virtual void Refresh();
-};
-extern InterfaceStub* DAT_011dea3c;
+AudioMgr_BSAudio* GetAudio();
+// The player singleton at 0x011dea3c uses RemoveItem (slot 0x5f) and Update (slot 0xf1).
+extern PlayerCharacter* DAT_011dea3c;
 void UpdateRepair(int);
 void UpdateEquip();
 void PlayMenu(int);
 void CloseMenu(int, int, int);
+// Retained: the shared HandleRepairAction symbol is bound to 0x007b7d80, not this handler.
 struct FUN_007b5b40_cls
 {
     virtual void v0();
@@ -949,7 +646,7 @@ void FUN_007b5b40_cls::HandleRepairMenuAction(int aiActionId, ClickTile* apTarge
                 ItemStub* item5 = list.Selected();
                 int base = item5->GetForm() ? *item5->GetForm()->GetBase() : 0;
                 DoRepair(item5);
-                DAT_011dea3c->Repair(item5->GetObject(), base, 1, 0, 0, 0, 0, 0, 1, 0);
+                DAT_011dea3c->RemoveItem(reinterpret_cast<TESForm*>(item5->GetObject()), reinterpret_cast<ExtraDataList*>(base), 1, 0, 0, 0, 0, 0, 1, 0);
                 GetAudio()->GetSoundByEditorID("UIRepairWeapon", 0x121, 0).Play();
                 list.Remove(list.SelectedIndex());
                 if (list.Count() == 1 || DAT_011da760->GetHealthPercent(true) >= 99.0)
@@ -958,7 +655,7 @@ void FUN_007b5b40_cls::HandleRepairMenuAction(int aiActionId, ClickTile* apTarge
                     UpdateRepair(0);
                 if (item5->Equipped(false))
                 {
-                    DAT_011dea3c->Refresh();
+                    DAT_011dea3c->Update();
                     UpdateEquip();
                 }
             }
@@ -971,33 +668,11 @@ void FUN_007b5b40_cls::HandleRepairMenuAction(int aiActionId, ClickTile* apTarge
     }
 }
 
-class TESBoundObject
+// ExtraDataList exposes its deleting-destructor slot as BaseExtraList::vf00.
+// Use the destructor ABI for deletion without redeclaring its shared layout.
+struct RepairExtraDeletion
 {
-  public:
-    virtual ~TESBoundObject();
-};
-class TESObjectWEAP : public TESBoundObject
-{
-  public:
-    int GetModdedValue(bool);
-};
-struct ExtraDataList
-{
-    virtual ~ExtraDataList();
-    int flags04;
-    int flags08;
-    int flags0c;
-    int flags10;
-    int flags14;
-    int flags18;
-    int flags1c;
-    ExtraDataList();
-    short FUN_00418770();
-    void FUN_00412380(ExtraDataList*);
-    void FUN_00419ad0(int);
-    void SetExtraHealth(float);
-    bool FUN_004126c0(ExtraDataList*, bool, bool);
-    void FUN_00419f80(void*);
+    virtual ~RepairExtraDeletion();
 };
 struct RepairExtraNode
 {
@@ -1020,17 +695,13 @@ struct RepairInventoryChanges
 RepairInventoryChanges* __cdecl FUN_004bf220(PlayerStub*);
 unsigned int __cdecl FUN_004873d0(TESBoundObject*);
 void __cdecl FUN_004d5c60(int);
-struct RepairAction : RepairMenu
-{
-    void ApplyRepair(HealthOwner* source);
-};
 // Computes a repair amount from skill and health, applies it to the item's extra data, and merges the repaired entry into the inventory changes list.
 // @fnv 0x007b5d80
-void RepairAction::ApplyRepair(HealthOwner* source)
+void RepairMenu::ApplyRepair(void* source)
 {
     float repairVal = 0.0f;
     repairVal = ComputeRepairAmount(g_thePlayer->skills.GetSkill(39), DAT_011da760->GetHealthPercent(true),
-                                    source->GetHealthPercent(true), 0) /
+                                    static_cast<HealthOwner*>(source)->GetHealthPercent(true), 0) /
                 100.0;
     repairVal = FUN_0040ebd0(repairVal, 1.0f);
     TESObjectWEAP* bound = dynamic_cast<TESObjectWEAP*>(((RepairInventoryItem*)DAT_011da760)->FUN_0044ddc0());
@@ -1083,8 +754,8 @@ void RepairAction::ApplyRepair(HealthOwner* source)
     }
     if (found9 || count == 1)
     {
-        repairA->FUN_00419f80(0);
-        delete repairA;
+        repairA->FUN_00419f80((void*)0);
+        delete reinterpret_cast<RepairExtraDeletion*>(repairA);
     }
 }
 
@@ -1139,6 +810,7 @@ float WeaponValue(PreviewForm*, float, PreviewItem*, int);
 float AdjustWeapon(float, float);
 double ArmorValue(int, float);
 float MaxPreview(float, float);
+// Retained: RepairMenu.h does not declare UpdatePreviewComparison.
 struct PreviewMenu
 {
     int unk00;
@@ -1349,42 +1021,10 @@ struct Box
     UITile* Add(Item*, const char*, int, int);
     void Remove(UITile*);
 };
-struct RepairView
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    UITile* tile28;
-    int unk2c;
-    UITile* tile30;
-    int unk34;
-    UITile* tile38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    UITile* tile4c;
-    int unk50;
-    UITile* tile54;
-    UITile* tile58;
-    Box box;
-    UITile* Root();
-};
-struct Setting
-{
-    const char* String();
-};
 extern Setting gSystemLocaleState;
 extern Setting g_011d4378, g_011d4030, g_011d4da4, g_011d1f2c, g_011d29f4;
 extern Item* selectedItem;
-extern RepairView* repairView;
+extern RepairMenu* repairView;
 extern void* playerObject;
 extern int DAT_011da748, DAT_011da74c;
 float RoundHealth(float);
@@ -1428,7 +1068,7 @@ void __cdecl PopulateRepairMenu()
                 if (!index)
                 {
                     item = node->Head();
-                    n = repairView->box.Add(item, item->Name(), 0, 0);
+                    n = reinterpret_cast<Box*>(&repairView->m_kItemList)->Add(item, item->Name(), 0, 0);
                     if (n && item->Form() == selectedItem->Form())
                     {
                         Extra* x;
@@ -1440,9 +1080,9 @@ void __cdecl PopulateRepairMenu()
                             selectedItem = item;
                             n->SetInt(DAT_011da748, 1);
                             Value* healthValue;
-                            healthValue = repairView->tile30->GetValue(0xfb0);
+                            healthValue = reinterpret_cast<UITile*>(repairView->m_pTiles[2])->GetValue(0xfb0);
                             Value* p;
-                            p = repairView->tile30->GetValue(0xfa2);
+                            p = reinterpret_cast<UITile*>(repairView->m_pTiles[2])->GetValue(0xfa2);
                             healthValue->Clear();
                             healthValue->Link(0x7d0, n, 0xfb0);
                             healthValue->SetNumber(0x7d2, 1.0f);
@@ -1452,7 +1092,7 @@ void __cdecl PopulateRepairMenu()
                             p->Finish(0);
                         }
                         else if (tmp || item->Equipped(false))
-                            repairView->box.Remove(n);
+                            reinterpret_cast<Box*>(&repairView->m_kItemList)->Remove(n);
                     }
                 }
                 else
@@ -1461,19 +1101,19 @@ void __cdecl PopulateRepairMenu()
                     for (ExtraNode* extraNode = node->Head()->Extras(); extraNode && extraNode->Head();
                          extraNode = extraNode->Next())
                         ((ExtraList*)item->Extras())->AddHead(extraNode->Head());
-                    n = repairView->box.Add(item, item->Name(), 0, 0);
+                    n = reinterpret_cast<Box*>(&repairView->m_kItemList)->Add(item, item->Name(), 0, 0);
                 }
             }
         }
     }
     if (CompareText(gSystemLocaleState.String(), "ENGLISH"))
     {
-        repairView->Root()->Child("RM_Headline_Title")->SetString(0xfc4, g_011d4378.String(), true);
-        repairView->tile28->SetString(DAT_011da74c, g_011d4030.String(), true);
-        repairView->tile38->SetString(DAT_011da74c, g_011d4da4.String(), true);
-        repairView->tile4c->SetString(DAT_011da74c, g_011d4da4.String(), true);
-        repairView->tile54->SetString(0xfc4, g_011d1f2c.String(), true);
-        repairView->tile58->SetString(0xfc4, g_011d29f4.String(), true);
+        reinterpret_cast<UITile*>(repairView->FUN_00726070())->Child("RM_Headline_Title")->SetString(0xfc4, g_011d4378.String(), true);
+        reinterpret_cast<UITile*>(repairView->m_pTiles[0])->SetString(DAT_011da74c, g_011d4030.String(), true);
+        reinterpret_cast<UITile*>(repairView->m_pTiles[4])->SetString(DAT_011da74c, g_011d4da4.String(), true);
+        reinterpret_cast<UITile*>(repairView->m_pTiles[9])->SetString(DAT_011da74c, g_011d4da4.String(), true);
+        reinterpret_cast<UITile*>(repairView->m_pTiles[11])->SetString(0xfc4, g_011d1f2c.String(), true);
+        reinterpret_cast<UITile*>(repairView->m_pTiles[12])->SetString(0xfc4, g_011d29f4.String(), true);
     }
 }
 }  // namespace fnv_007b6aa0

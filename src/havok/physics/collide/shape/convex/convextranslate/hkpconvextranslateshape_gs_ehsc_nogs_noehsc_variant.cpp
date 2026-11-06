@@ -5,7 +5,9 @@
 
 // src/havok/physics/collide/shape/convex/convextranslate/hkpconvextranslateshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/convextranslate/hkpconvextranslateshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpConvexTranslateShape.h"
+#include "../../../../../../../include/hkpConvexTranslateShape.h"
+#include "../../../../../../../include/hkpConvexShape.h"
+#include "../../../../../../../include/hkSphere.h"
 // FUN_00dd5e60 : the stub family - load a sub-object pointer out of `this`
 // and tail-jump to one of its virtuals.
 //   mov ecx,[ecx+0x18] / mov eax,[ecx] / mov edx,[eax+0x2c] / jmp edx
@@ -37,36 +39,6 @@ struct Own_dd5e60
     int unk14;
     Sub_dd5e60* m_sub;  // at +0x18
     void __thiscall FUN_00dd5e60();
-};
-class hkpShapeCollectionDD5E
-{
-  public:
-    virtual void V0() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual void V3() throw();
-    virtual void V4() throw();
-    virtual void V5() throw();
-    virtual int getChildShapes(int iKey, int iBufferSize) throw();
-};
-class hkpShapeBufferDD5E
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    hkpShapeCollectionDD5E* m_pShapeCollection;
-    int m_offset;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    hkpShapeCollectionDD5E m_inlineCollection;
-
-    int GetChildShapes(int iKey, int iBufferSize);
 };
 struct Sub_dd5e70
 {
@@ -174,58 +146,23 @@ void __thiscall Own_dd5f10::FUN_00dd5f10(float* a, float* b)
     *pb = _mm_add_ps(m_trans, *pb);
 }
 
-struct __declspec(align(16)) hkVector4DD60
-{
-    __m128 m_vComponents;
-    void setAdd4(const hkVector4DD60& a, const hkVector4DD60& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-};
-
-class hkpConvexVerticesShapeDD60
+// Slots 0x2c/0x30 are GetNumCollisionSpheres/GetCollisionSpheres (the convex-vertices implementations bind at 0x00d58d10/0x00d58d80).
+// The shared translate-shape header does not yet declare this override.
+class ConvexTranslateCollisionSpheresView : public hkpConvexTranslateShape
 {
   public:
-    virtual void V0() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual void V3() throw();
-    virtual void V4() throw();
-    virtual void V5() throw();
-    virtual void V6() throw();
-    virtual void V7() throw();
-    virtual void V8() throw();
-    virtual void V9() throw();
-    virtual void V10() throw();
-    virtual int getNumVertices() const throw();
-    virtual const hkVector4DD60* GetIndexedVertices(hkVector4DD60* pBuffer) const throw();
-};
-
-class hkpTranslateShapeDD60
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    const hkpConvexVerticesShapeDD60* m_pContainedShape;
-    int unk1C;
-    hkVector4DD60 m_vTranslation;
-
-    hkVector4DD60* FUN_00dd6000(hkVector4DD60* pBuffer) const;
+    virtual const hkSphere* GetCollisionSpheres(hkSphere* pBuffer) const;
 };
 
 // @fnv 0x00dd6000
-hkVector4DD60* hkpTranslateShapeDD60::FUN_00dd6000(hkVector4DD60* pBuffer) const
+const hkSphere* ConvexTranslateCollisionSpheresView::GetCollisionSpheres(hkSphere* pBuffer) const
 {
-    hkVector4DD60* pDst = pBuffer;
-    const hkVector4DD60* m_pkDeltas = m_pContainedShape->GetIndexedVertices(pDst);
-    int iEntryIndex = m_pContainedShape->getNumVertices();
+    hkSphere* pDst = pBuffer;
+    const hkSphere* m_pkDeltas = static_cast<const hkpConvexShape*>(m_pContainedShape.m_pContainedShape)->GetCollisionSpheres(pDst);
+    int iEntryIndex = static_cast<const hkpConvexShape*>(m_pContainedShape.m_pContainedShape)->GetNumCollisionSpheres();
     for (int i = 0; i < iEntryIndex; ++i)
     {
-        pDst->setAdd4(*m_pkDeltas, m_vTranslation);
+        pDst->m_pos.m_vComponents = _mm_add_ps(m_pkDeltas->m_pos.m_vComponents, m_vTranslation.m_vComponents);
         ++m_pkDeltas;
         ++pDst;
     }

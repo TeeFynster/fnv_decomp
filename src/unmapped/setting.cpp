@@ -1,7 +1,12 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "Setting.h"
+#include "layout_support.h"
+#include "../../include/SETTING_VALUE.h"
+#include "../../include/AutoMemHelper.h"
+#include "../../include/DummyPointerMap.h"
+#include "../../include/GameSettingCollection.h"
+#include "../../include/SettingCollectionMap.h"
 
 extern void __cdecl FUN_0044f700();
 extern void* DAT_0101772c;
@@ -61,12 +66,6 @@ struct FUN_00404920
     FUN_00404920(int, int);
     ~FUN_00404920();
 };
-struct GameSettingCollection
-{
-    static GameSettingCollection* __cdecl Instance();
-    virtual void v0();
-    virtual void v1(void*);
-};
 struct FUN_0040e0b0
 {
     virtual void v0();
@@ -113,56 +112,40 @@ extern int _data_011c16bc;
 extern char const str_010121d0[];
 extern char const str_01012220[];
 
-struct AutoMemHelper
-{
-    AutoMemHelper(int, bool, char const*, int);
-    ~AutoMemHelper();
-    void* padding;
-};
 
-struct ArrSI
+// Exe 0x00404de0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct SettingOffset08View
 {
     unsigned int __thiscall GetFlags();
 };
 
-struct DummyPointerMap
-{
-    bool __thiscall GetAt(unsigned int, unsigned int&);
-};
 
 struct TESGlobalMap
 {
     void __thiscall SetAt(char const*, TESGlobal*);
 };
 
-struct Setting;
-
 void __cdecl FUN_00c335a0(char const*, ...);
 
-struct SettingCollectionMap
-{
-    void* padding[67];
-
-    void __thiscall AddSetting(Setting*);
-};
 
 // @fnv 0x00404de0
-void __thiscall SettingCollectionMap::AddSetting(Setting* apSetting)
+template <>
+void __thiscall SettingCollectionMap<Setting>::AddSetting(Setting* apSetting)
 {
     AutoMemHelper tempMemContext(9, true, str_01012220, 539);
 
-    if (apSetting && reinterpret_cast<ArrSI*>(apSetting)->GetFlags())
+    if (apSetting && reinterpret_cast<SettingOffset08View*>(apSetting)->GetFlags())
     {
         unsigned int key;
         if (reinterpret_cast<DummyPointerMap*>(reinterpret_cast<char*>(this) + 0x10c)
-                ->GetAt(reinterpret_cast<ArrSI*>(apSetting)->GetFlags(), key))
+                ->GetAt(reinterpret_cast<SettingOffset08View*>(apSetting)->GetFlags(), key))
         {
-            FUN_00c335a0(str_010121d0, reinterpret_cast<ArrSI*>(apSetting)->GetFlags());
+            FUN_00c335a0(str_010121d0, reinterpret_cast<SettingOffset08View*>(apSetting)->GetFlags());
         }
         else
         {
             reinterpret_cast<TESGlobalMap*>(reinterpret_cast<char*>(this) + 0x10c)
-                ->SetAt(reinterpret_cast<char const*>(reinterpret_cast<ArrSI*>(apSetting)->GetFlags()),
+                ->SetAt(reinterpret_cast<char const*>(reinterpret_cast<SettingOffset08View*>(apSetting)->GetFlags()),
                         reinterpret_cast<TESGlobal*>(apSetting));
         }
     }

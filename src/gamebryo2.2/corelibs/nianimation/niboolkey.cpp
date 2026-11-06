@@ -180,22 +180,19 @@ void WriteEnabledFlag(SStream* stream, SObj* object)
     output->written += write(output, &enabled, 1, &size, 1);
 }
 
-struct AnimationKey
-{
-    float m_fTime;
-};
+#include "../../../../include/NiAnimationKey.h"
 
-struct BooleanKey : public AnimationKey
+struct BooleanKey : public NiAnimationKey
 {
     bool m_bValue;
 };
 
-typedef void(__cdecl* InterpFn)(float, const AnimationKey*, const AnimationKey*, void*);
+typedef void(__cdecl* InterpFn)(float, const NiAnimationKey*, const NiAnimationKey*, void*);
 extern InterpFn DAT_011f3d08[];
 
 // Returns the single BooleanKey value for one key or sentinel time; otherwise interpolates between bracketing keys and returns the result.
 // @fnv 0x00a29250
-bool InterpolateBooleanKey(float fTime, const AnimationKey* pkKeys, unsigned int uiType, unsigned int uiNumKeys,
+bool InterpolateBooleanKey(float fTime, const NiAnimationKey* pkKeys, unsigned int uiType, unsigned int uiNumKeys,
                            unsigned int* puiLastIdx, unsigned char ucKeySize)
 {
     if (uiNumKeys == 1 || fTime == -3.4028234663852886e+38)
@@ -203,7 +200,7 @@ bool InterpolateBooleanKey(float fTime, const AnimationKey* pkKeys, unsigned int
 
     unsigned int uiNumKeysM1 = uiNumKeys - 1;
     unsigned int uiLastIdx = *puiLastIdx;
-    float fLastTime = ((const AnimationKey*)((const char*)pkKeys + uiLastIdx * ucKeySize))->m_fTime;
+    float fLastTime = ((const NiAnimationKey*)((const char*)pkKeys + uiLastIdx * ucKeySize))->m_fTime;
 
     if (fTime < fLastTime)
     {
@@ -217,7 +214,7 @@ bool InterpolateBooleanKey(float fTime, const AnimationKey* pkKeys, unsigned int
     __assume(i <= uiNumKeysM1);
     for (; i <= uiNumKeysM1; i++)
     {
-        const AnimationKey* pkKey = (const AnimationKey*)((const char*)pkKeys + i * ucKeySize);
+        const NiAnimationKey* pkKey = (const NiAnimationKey*)((const char*)pkKeys + i * ucKeySize);
         fNextTime = pkKey->m_fTime;
         if (fTime <= fNextTime)
             break;
@@ -226,11 +223,11 @@ bool InterpolateBooleanKey(float fTime, const AnimationKey* pkKeys, unsigned int
     }
 
     float fNormTime = (fTime - fLastTime) / (fNextTime - fLastTime);
-    const AnimationKey* pkKey0 = (const AnimationKey*)((const char*)pkKeys + uiLastIdx * ucKeySize);
-    const AnimationKey* pkKey1 = (const AnimationKey*)((const char*)pkKeys + i * ucKeySize);
+    const NiAnimationKey* pkKey0 = (const NiAnimationKey*)((const char*)pkKeys + uiLastIdx * ucKeySize);
+    const NiAnimationKey* pkKey1 = (const NiAnimationKey*)((const char*)pkKeys + i * ucKeySize);
 
     bool bResult;
-    typedef void(__cdecl * InterpFnType)(float, const AnimationKey*, const AnimationKey*, void*);
+    typedef void(__cdecl * InterpFnType)(float, const NiAnimationKey*, const NiAnimationKey*, void*);
     InterpFnType pfnInterp = DAT_011f3d08[uiType];
     pfnInterp(fNormTime, pkKey0, pkKey1, &bResult);
 

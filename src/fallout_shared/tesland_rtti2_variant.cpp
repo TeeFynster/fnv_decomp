@@ -4,18 +4,12 @@
 // their real unit once its classes are.
 
 #include "tesland_decls.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESObjectLAND.h"
 #pragma optimize("", off)
 int TruncateFloatToInt(float value);
 
-struct TESForm
-{
-    virtual ~TESForm();
-    void Revert(unsigned int);
-};
-
-struct TESObjectLAND : ::TESForm
-{
-};
 struct LandDuplicateCalls
 {
     ::TESForm* FUN_004867a0(bool createEditorID, void* copyMap);
@@ -32,15 +26,6 @@ struct LandDuplicateEntry : LandDuplicateCalls
     return duplicate;
 }
 
-__if_exists(::TESForm::Revert)
-{
-    __if_not_exists(::TESObjectCELL::Revert)
-    {
-        struct TESObjectCELL : ::TESForm
-        {
-        };
-    }
-}
 extern void* DAT_01187020;
 
 TESForm* FUN_004839c0(unsigned int auiFormId);
@@ -53,28 +38,9 @@ struct LandSaveGroup5391
     unsigned int groupType;
 };
 
-struct LandSaveCell5391
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual bool ContainsGroup(LandSaveGroup5391* group);
-};
-
 struct FUN_005391d0_class
 {
-    LandSaveCell5391* __thiscall FUN_007af430();
+    TESObjectCELL* __thiscall FUN_007af430();
     bool __thiscall FUN_005391d0(LandSaveGroup5391* apGroupFORM);
 };
 
@@ -94,8 +60,8 @@ bool FUN_005391d0_class::FUN_005391d0(LandSaveGroup5391* apGroupFORM)
             break;
         }
         default: {
-            LandSaveCell5391* pCell = FUN_007af430();
-            bretval = pCell->ContainsGroup(apGroupFORM);
+            TESObjectCELL* pCell = FUN_007af430();
+            bretval = pCell->Unk_0E(apGroupFORM);
             break;
         }
         }

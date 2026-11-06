@@ -1,3 +1,5 @@
+#include "../../../include/BSStringT.h"
+#include "../../../include/TESSaveLoadGame.h"
 
 // src/fallout/dialogue/dialogueresponse.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/dialogue/dialogueresponse.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -38,10 +40,6 @@ unsigned int FUN_0083d890_shell::FUN_0083d890()
     return Length();
 }
 
-struct TESSaveLoadGame
-{
-    void FUN_008579b0(void*, int);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct Flt
@@ -200,20 +198,15 @@ struct FUN_008579e0_shell
 };
 extern FUN_008579e0_shell* g_TESSaveLoadGame;
 void FUN_00403d30(void*, int, unsigned int);
-struct BSStr
-{
-    char* data;
-    unsigned short length, capacity;
-    bool Set(const char*, unsigned int);
-};
+
 struct Record
 {
-    BSStr first;
+    ::BSStringT<char> first;
     unsigned int flags, value;
-    BSStr second;
+    ::BSStringT<char> second;
     void FUN_0083d550();
 };
-// Reads two BSStr fields, flags, and value from g_TESSaveLoadGame via FUN_008579e0, setting empty strings when lengths are zero.
+// Reads two ::BSStringT<char> fields, flags, and value from g_TESSaveLoadGame via FUN_008579e0, setting empty strings when lengths are zero.
 // @fnv 0x0083d550
 void Record::FUN_0083d550()
 {

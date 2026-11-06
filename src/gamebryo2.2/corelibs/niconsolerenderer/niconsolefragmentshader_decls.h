@@ -1,11 +1,6 @@
 // gamebryo2.2/corelibs/niconsolerenderer/niconsolefragmentshader_decls.h: declares ShaderData, ShaderEntry, Device, ShaderCache
 
-class RecursiveSpinLock
-{
-  public:
-    unsigned int value;
-    void Lock(const char*);
-};
+#include "../../../../include/RecursiveSpinLock.h"
 template <class T> class PoolAllocatorBase
 {
   public:

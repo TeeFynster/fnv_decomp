@@ -1,6 +1,123 @@
 // fallout/ai/combat/projectile.cpp: Projectile, BGSProjectile, Holder, PlayerCharacter and more (71 functions)
+#include "../../../../include/NiColorA.h"
 
-#include "projectile_decls.h"
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/BSSimpleList.h"
+#include "../../../../include/PROCESS_TYPE.h"
+#include "../../../../include/Actor.h"
+// ActorDeletionQueue_projectile: local type (was include/ActorDeletionQueue.h, which had no evidence of one real class); its methods are 0x0096d450 ProcessLists::AddReference, 0x0096d470 ProcessLists::RemoveReference, 0x0096d490 ProcessLists::GetSystemTimeClock
+// PathfindQueueStorage_projectile: local type (was include/PathfindQueueStorage.h, which had no evidence of one real class); its methods are 0x0096aaf0 ProcessArray::RemoveActor
+class MobileObject;
+
+class PathfindQueueStorage_projectile
+{
+public:
+    void FUN_0096aaf0(MobileObject* apObject, int aeLevel);
+};
+
+class MobileObject;
+class ActorSV;
+struct ReferenceView;
+
+class ActorDeletionQueue_projectile
+{
+public:
+    unsigned int pad;
+    PathfindQueueStorage_projectile storage;
+    unsigned char unk05[3];
+
+    void FUN_0096d470(MobileObject*, int);
+    void FUN_0096d470(ActorSV*, int);
+    void FUN_0096d470(ReferenceView*, int);
+    float FUN_0096d490();
+    void FUN_0096d450(MobileObject*, int, bool, bool, bool);
+    void FUN_0096d450(ActorSV*, int, bool, bool, ActorSV*);
+};
+#include "../../../../include/TESObjectCELL.h"
+#include "../../../../include/BGSProjectile.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/BSMultiBoundRoom.h"
+#include "../../../../include/BaseProcess.h"
+#include "../../../../include/Creature.h"
+#include "../../../../include/FlameProjectile.h"
+#include "../../../../include/BeamProjectile.h"
+#include "../../../../include/HighProcess.h"
+#include "../../../../include/MobileObject.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/PathingRequest.h"
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/Projectile.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/TESObjectLIGH.h"
+// TESObjectWEAP forward-declares an enum where BaseProcess uses a typedef.
+// This file only needs the weapon RTTI; isolate the unused weapon sound enum.
+#define SOUND_LEVEL ProjectileWeaponSoundLevel
+#include "../../../../include/TESObjectWEAP.h"
+#undef SOUND_LEVEL
+#include "../../../../include/BSOcclusionPlane.h"
+#include "../../../../include/BSSoundHandle.h"
+#include "../../../../include/EffectSetting.h"
+#include "../../../../include/GO.h"
+#include "../../../../include/InventoryStackRecord.h"
+#include "../../../../include/NiNode.h"
+#include "../../../../include/NiPlane.h"
+#include "../../../../include/NiPointLight.h"
+#include "../../../../include/NiTimeController.h"
+#include "../../../../include/RecursiveSpinLock.h"
+#include "../../../../include/Setting.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/TESWorldSpace.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/hkReferencedObject.h"
+#include "../../../../include/hkpCharacterContext.h"
+
+
+
+class TESFile;
+
+
+class TESObjectREFR_LoadProxy
+{
+  public:
+    bool Load(TESFile* file);
+};
+
+
+extern float DAT_01016970;
+extern float DAT_01022958;
+#include "../../../../include/ActorValueOwner.h"
+#include "../../../../include/BGSLoadGameBuffer.h"
+#include "../../../../include/FormChangeMask.h"
+#include "../../../../include/CachedValuesOwner.h"
+#include "../../../../include/ExtraDataList.h"
+#include "../../../../include/NiAdditionalGeometryData.h"
+#include "../../../../include/TESModel.h"
+
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/NP.h"
+#include "../../../../include/NiPoint3.h"
 
 // @fnv 0x0094df60
 bool PlayerCharacter::IsSleepingOrResting()
@@ -28,9 +145,9 @@ bool FlameProjectile::IsProximityDetonationTriggered()
 }
 
 // @fnv 0x009bbc70
-Projectile::Projectile(bool) : visualA(0), visualB(0), cause(0)
+Projectile::Projectile(bool) : m_pMenuLight(0), m_pExplosionEffect(0), m_pActorCause(0)
 {
-    word68 = 0;
+    m_pBaseProcess = 0;
     wordC8 = 0;
     floatCC = 1.0f;
     floatD0 = 1.0f;
@@ -41,19 +158,19 @@ Projectile::Projectile(bool) : visualA(0), visualB(0), cause(0)
     float110 = 0.0f;
     floatEC = 0.0f;
     floatF0 = 0.0f;
-    *reinterpret_cast<NiPoint3*>(&position) = NiPoint3::ZERO;
+    *reinterpret_cast<NiPoint3*>(&kMovementDirection) = *reinterpret_cast<const NiPoint3*>(&NiPoint3::ZERO);
     wordF8 = 0;
     wordFC = 0;
     word100 = 0;
-    visualA = 0;
-    visualB = 0;
-    cause = 0;
+    m_pMenuLight = 0;
+    m_pExplosionEffect = 0;
+    m_pActorCause = 0;
     byte118 = 0;
     float124 = 0.0f;
     floatE4 = DAT_01016970;
     floatE8 = 0.0f;
     byte90 = 0;
-    transform.ResetToIdentity();
+    m_kImpactTransform.ResetToIdentity();
     word140 = 0;
     word144 = 0;
     floatF4 = 1.0f;
@@ -62,15 +179,11 @@ Projectile::Projectile(bool) : visualA(0), visualB(0), cause(0)
     SetInitializationState(false);
 }
 
-struct FUN_00453700_shell : public Projectile
-{
-    float FUN_00453700();
-};
-
+// The shared Projectile has no declaration for this field accessor.
 // @fnv 0x00453700
-float FUN_00453700_shell::FUN_00453700()
+float __fastcall GetProjectileTransformFlag(Projectile* projectile)
 {
-    return *(float*)((char*)this + 0xd0);
+    return projectile->TransformFlagFloatData;
 }
 
 struct blob1
@@ -145,79 +258,68 @@ void* DelStandIn::Destroy(unsigned int flags)
 }
 }
 
-namespace fnv_0080f7b0 {
-struct ActiveEffect;
-struct Actor;
-struct ActorMover;
-struct AlchemyItem;
-struct Animation;
+class ActiveEffect;
+class ActorMover;
+class AlchemyItem;
 struct BGSImpactDataSet;
-struct BGSLoadFormBuffer;
-struct BGSPerk;
-struct BGSPerkEntry;
-struct BGSSaveFormBuffer;
-struct BGSTextureSet;
-struct BSAnimGroupSequence;
-struct BSAnimNote;
-struct BSFaceGenAnimationData;
+class BGSPerk;
+class BGSPerkEntry;
+class BGSTextureSet;
+class BSAnimGroupSequence;
+class BSAnimNote;
+class BSFaceGenAnimationData;
+class CombatController;
+class ActorCombatGroup;
+class ContinuousBeamProjectile;
+class EffectItem;
+class FurnitureMark;
+class IDebugText;
+class MagicCaster;
+class MagicItem;
+class MagicProjectile;
+class MagicTarget;
+class PathingAvoidNodeArray;
+class PathingLocation;
+class QueuedFile;
+class SpellItem;
+class TESActorBase;
+class TESBoundObject;
+class TESClass;
+class TESCombatStyle;
+class TESFaction;
+class TESIdleForm;
+class TESObject;
+class TESObjectBOOK;
+class TESObjectCELL;
+class TESPackage;
+class TESRace;
+class TESSkill;
+class TESTopic;
+class TargetEntry;
+class TrespassPackage;
+class WeaponObject;
+class bhkCharacterController;
+class bhkRagdollController;
+class bhkRigidBody;
+class hkStatisticsCollector;
+class hkVector4;
+class hkpRigidBody;
+namespace fnv_0080f7b0 {
+struct Animation;
 struct BipedAnim;
 struct CombatGroupCollection;
-struct CombatController;
-struct ActorCombatGroup;
-struct ContinuousBeamProjectile;
 struct Crime;
 struct DialogueResponse;
 struct DetectionParameters;
-struct EffectItem;
-struct ExtraDataList;
-struct FurnitureMark;
 struct BooleanFloatQuery;
-struct IDebugText;
-struct InventoryStackRecord;
-struct MagicCaster;
-struct MagicItem;
 struct MagicEffectCollection;
-struct MagicProjectile;
-struct MagicTarget;
-struct NiAVObject;
-struct NiNode;
 struct LocationDescriptor;
-struct PathingAvoidNodeArray;
-struct PathingLocation;
-struct PathingRequest;
-struct QueuedFile;
-struct SpellItem;
-struct TESActorBase;
-struct TESBoundObject;
-struct TESClass;
-struct TESCombatStyle;
-struct TESFaction;
-struct TESIdleForm;
-struct TESObject;
-struct TESObjectBOOK;
-struct TESObjectCELL;
-struct TESObjectREFR;
-struct TESObjectWEAP;
-struct TESPackage;
-struct TESRace;
-struct TESSkill;
-struct TESTopic;
-struct TESWorldSpace;
-struct TargetEntry;
 struct TrapEntry;
-struct TrespassPackage;
-struct WeaponObject;
-struct bhkCharacterController;
-struct bhkRagdollController;
 struct bhkRagdollPenetrationUtil;
-struct bhkRigidBody;
 struct PhysicsSimulationContext;
-struct hkStatisticsCollector;
-struct hkVector4;
 struct CharacterProxyConfiguration;
 struct Vector4Data;
 struct hkpCharacterProxy;
-struct hkpRigidBody;
 struct CharacterPhysicsController;
 struct blob1
 {
@@ -227,59 +329,22 @@ struct blob12
 {
     char b[12];
 };
-struct ActorValueOwner
-{
-    virtual int GetBaseActorValue(int);
-    virtual float GetBaseActorValueFloat(int);
-    virtual int GetActorValue(int);
-    virtual float GetCurrentActorValue(int);
-    virtual float GetPermanentActorValueFloat(int);
-    virtual float GetTemporaryActorValue(int);
-    virtual float GetDamageActorValue(int);
-    virtual int GetPermanentActorValue(int);
-    virtual float GetPermanentActorValueAdjustment(int);
-    virtual TESForm* GetActorValueOwnerForm();
-    virtual unsigned short GetActorValueOwnerType();
-    int GetActorValueAsInteger(int);
-    float GetActorValueFloatByIndex(int);
-};
+
 typedef char _sizecheck_ActorValueOwner[sizeof(ActorValueOwner) == 4 ? 1 : -1];
-struct CachedValuesOwner
-{
-    virtual float GetFloatValue0();
-    virtual float GetFloatValue1();
-    virtual float GetFloatValue2();
-    virtual float GetFloatValue3();
-    virtual float GetFloatValue4();
-    virtual float GetFloatValue5();
-    virtual float GetFloatValue6();
-    virtual float GetFloatValue7();
-    virtual float GetFloatValue8();
-    virtual float GetFloatValue9();
-    virtual float GetFloatValue10();
-    virtual float GetFloatValue11();
-    virtual int GetIntegerValue12();
-    virtual int GetIntegerValue13();
-    virtual float GetFloatValue14();
-    virtual float GetFloatValue15();
-    virtual bool GetBooleanValue16();
-    void PrecalculateCachedValues();
-};
+
 typedef char _sizecheck_CachedValuesOwner[sizeof(CachedValuesOwner) == 4 ? 1 : -1];
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+using ::NiMemObject;
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct FUN_0080f7b0_shell : public MobileObject
+// The shared MobileObject has no setter for this flag.
+struct MobileObjectFlagSetter : MobileObject
 {
-    void FUN_0080f7b0(bool);
+    void SetThirdActorFlag(bool value);
 };
 
 // @fnv 0x0080f7b0
-void FUN_0080f7b0_shell::FUN_0080f7b0(bool bVal)
+void MobileObjectFlagSetter::SetThirdActorFlag(bool bVal)
 {
-    ((char*)this)[0x87] = (char)bVal;
+    *reinterpret_cast<char*>(&m_bThirdActorFlag) = static_cast<char>(bVal);
 }
 }  // namespace fnv_0080f7b0
 
@@ -295,16 +360,12 @@ void __thiscall FUN_00978f10_shell::FUN_00978f10()
     FUN_0077eac0();
 }
 
-struct hkReferencedObject
-{
-    void removeReference();
-};
-
 struct FUN_009bb940
 {
     char _pad[0x1c];
     hkReferencedObject* ref;
     ~FUN_009bb940();
+    void* FUN_009b3490(unsigned int flags);  // scalar deleting destructor
 };
 
 // Releases the referenced object if present and clears the pointer.
@@ -370,11 +431,6 @@ void* FUN_00458820_shell::FUN_00458820()
     return (void*)((char*)this + 0x10);
 }
 
-struct PathingRequest
-{
-    float GetTargetRadius();
-    bool IsRandomBelowRadiusThreshold();
-};
 
 extern unsigned int DialogueRandom();
 extern double g_d100;
@@ -391,29 +447,16 @@ bool PathingRequest::IsRandomBelowRadiusThreshold()
 }
 
 void __cdecl _Deallocate(void*);
-struct DtorHelper
-{
-    void FUN_009bb940();
-};
-struct FUN_009b3490_shell
-{
-    void* FUN_009b3490(unsigned int);
-};
-// Runs the object's destructor helper, then frees the object when the low flag bit is set, and returns the object pointer.
+// Runs the destructor (0x009bb940), then frees the object when the low flag bit is set, and returns the object pointer.
 // @fnv 0x009b3490
-void* FUN_009b3490_shell::FUN_009b3490(unsigned int flags)
+void* FUN_009bb940::FUN_009b3490(unsigned int flags)
 {
-    ((DtorHelper*)this)->FUN_009bb940();
+    this->FUN_009bb940::~FUN_009bb940();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-struct BGSProjectile
-{
-    bool GetFlag(unsigned int) const;
-    bool FUN_009bc870();
-};
 
 // @fnv 0x009bc870
 bool BGSProjectile::FUN_009bc870()
@@ -421,37 +464,20 @@ bool BGSProjectile::FUN_009bc870()
     return this->GetFlag(0x80);
 }
 
-namespace fnv_009c2e60 {
-struct BGSProjectile
-{
-    bool GetFlag(unsigned int) const;
-    bool IsFlag200Set() const;
-};
+
 // @fnv 0x009c2e60
 bool BGSProjectile::IsFlag200Set() const
 {
     return GetFlag(0x200);
 }
-}  // namespace fnv_009c2e60
+
 
 struct ShadowSceneNode;
-struct NiAVObject;
 struct Flt
 {
     operator unsigned int() const;
 };
-struct NP
-{
-    NP& operator=(void*);
-};
-struct ExtraDataList
-{
-    void Set3DObject(NiAVObject*);
-};
-struct NiAdditionalGeometryData
-{
-    static ShadowSceneNode* GetShadowSceneNodeForIndex(int);
-};
+
 struct Holder
 {
     char _pad[0x114];
@@ -465,7 +491,7 @@ void Holder::FUN_009c3e10()
     {
         ((ExtraDataList*)NiAdditionalGeometryData::GetShadowSceneNodeForIndex(0))
             ->Set3DObject((NiAVObject*)(unsigned int)m);
-        ((NP*)&m)->operator=(0);
+        ((NP*)&m)->operator=(static_cast<void*>(0));
     }
 }
 
@@ -476,10 +502,7 @@ struct Flt
 {
     operator unsigned int() const;
 };
-struct NiPointLight
-{
-    void FUN_0050dd20(float);
-};
+
 struct Holder
 {
     char _a[0xE0];
@@ -534,11 +557,7 @@ Item9c* FUN_009c3ee0_shell::FindItemByKey(void* key)
     return result;
 }
 
-struct Setting_S
-{
-    float* __thiscall Float();
-};
-extern Setting_S originalRuntimeFloatSetting657;
+extern Setting originalRuntimeFloatSetting657;
 
 // Returns (a * b + (1.0 - b) * *originalRuntimeFloatSetting657.Float()) * c, blending a with the runtime float setting and scaling by c.
 // @fnv 0x009c3f50
@@ -560,7 +579,7 @@ struct Dummy009c4e60
 // @fnv 0x009c4e60
 void Dummy009c4e60::FUN_009c4e60(NiPoint3 a, bool b)
 {
-    *(NiPoint3*)((char*)this + 0x104) = a;
+    *(NiPoint3*)((char*)this + 0x104) = *(const NiPoint3*)&a;
     if (b)
     {
         *(float*)((char*)this + 0x110) += ((NiPoint3Helper*)((char*)this + 0x104))->GetLengthSquared();
@@ -571,12 +590,6 @@ void Dummy009c4e60::FUN_009c4e60(NiPoint3 a, bool b)
     }
 }
 
-struct SndX
-{
-    bool IsValid();
-    void Stop();
-    void PausePlayback();
-};
 struct FUN_009c4f90_This
 {
     void StopSound();
@@ -584,11 +597,11 @@ struct FUN_009c4f90_This
 // @fnv 0x009c4f90
 void FUN_009c4f90_This::StopSound()
 {
-    if (reinterpret_cast<SndX*>(reinterpret_cast<char*>(this) + 0x134)->IsValid())
+    if (reinterpret_cast<BSSoundHandle*>(reinterpret_cast<char*>(this) + 0x134)->IsValid())
     {
-        reinterpret_cast<SndX*>(reinterpret_cast<char*>(this) + 0x134)->Stop();
-        if (reinterpret_cast<SndX*>(reinterpret_cast<char*>(this) + 0x134)->IsValid())
-            reinterpret_cast<SndX*>(reinterpret_cast<char*>(this) + 0x134)->PausePlayback();
+        reinterpret_cast<BSSoundHandle*>(reinterpret_cast<char*>(this) + 0x134)->Stop();
+        if (reinterpret_cast<BSSoundHandle*>(reinterpret_cast<char*>(this) + 0x134)->IsValid())
+            reinterpret_cast<BSSoundHandle*>(reinterpret_cast<char*>(this) + 0x134)->Release();
     }
 }
 
@@ -875,7 +888,7 @@ struct FUN_009baba0_shell
 // @fnv 0x009baba0
 bool FUN_009baba0_shell::FUN_009baba0()
 {
-    return val == 4 || ((Projectile*)this)->IsProximityDetonationTriggered();
+    return val == 4 || ((Projectile*)this)->Projectile::IsProximityDetonationTriggered();
 }
 
 struct FUN_009c0050_shell
@@ -890,13 +903,6 @@ void FUN_009c0050_shell::SetField(int value)
 {
     _field = value;
 }
-
-struct BGSLoadFormBuffer
-{
-    virtual unsigned char GetVersion();
-    bool ReadFormIdentifier(void*);
-    void ReadTypedData(void*, unsigned int);
-};
 
 struct FUN_009bba90_shell
 {
@@ -917,149 +923,20 @@ struct FUN_009bba90_shell
 // @fnv 0x009bba90
 void FUN_009bba90_shell::FUN_009bba90(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    apLoadGameBuffer->ReadTypedData(&m_04, 12);
-    apLoadGameBuffer->ReadTypedData(&m_10, 12);
-    apLoadGameBuffer->ReadTypedData(&m_20, 4);
-    apLoadGameBuffer->ReadTypedData(&m_24, 4);
-    apLoadGameBuffer->ReadTypedData(&m_28, 1);
+    apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_04), 12u);
+    apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_10), 12u);
+    apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_20), 4u);
+    apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_24), 4u);
+    apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_28), 1u);
     if (apLoadGameBuffer->GetVersion() >= 0x11)
     {
-        apLoadGameBuffer->ReadTypedData(&m_2a, 2);
-        apLoadGameBuffer->ReadTypedData(&m_2c, 2);
+        apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_2a), 2u);
+        apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_2c), 2u);
     }
     apLoadGameBuffer->ReadFormIdentifier(this);
 }
 
 namespace fnv_009bbb40 {
-struct NiAVObject;
-
-struct TESObjectREFR
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual const char* GetName();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual NiAVObject* Get3D();
-
-    unsigned int _ref_0084e3a0();
-};
-
-struct hkReferencedObject
-{
-    void RetainReference();
-};
 
 int __cdecl FUN_004b6ae0(NiAVObject*);
 hkReferencedObject* __cdecl FindCollisionObjectByIndex(NiAVObject*, int);
@@ -1086,40 +963,25 @@ void FUN_009bbb40_shell::ValidateWorldObjectCount(void* apLoadGameBuffer)
 {
     if (m_2a && m_2c != -1 && m_00)
     {
-        short count = FUN_004b6ae0(m_00->Get3D());
+        short count = FUN_004b6ae0(reinterpret_cast<NiAVObject*>(m_00->GetNiNode()));
         if (m_2a != count)
         {
             _fnv_call_845cc0("AI: World object count has changed on object %s %08 from %i to %i", m_00->GetName(),
-                             m_00->_ref_0084e3a0(), m_2a, count);
+                             m_00->FUN_0084e3a0(), m_2a, count);
         }
         else if (m_2c != -1)
         {
-            m_1c = FindCollisionObjectByIndex(m_00->Get3D(), m_2c);
+            m_1c = FindCollisionObjectByIndex(reinterpret_cast<NiAVObject*>(m_00->GetNiNode()), m_2c);
             if (m_1c)
-                m_1c->RetainReference();
+                m_1c->addReference();
         }
     }
 }
 }  // namespace fnv_009bbb40
 
+class NiObjectNET;
 namespace fnv_009bdff0 {
-struct NiNode;
-struct TESObjectREFR;
-struct NiObjectNET;
 
-struct NiAVObject
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual NiNode* vfn_0c();
-    void FUN_00440490(float);
-};
-
-struct NiTimeController
-{
-    static void __cdecl UpdateControllersForTarget(NiObjectNET*);
-};
 
 void __cdecl FUN_00578060(TESObjectREFR*);
 bool __cdecl FUN_005784b0(NiNode*);
@@ -1257,105 +1119,15 @@ void FUN_009bdff0_shell::FUN_009bdff0()
     {
         pn->FUN_00440490(1.0f);
         UpdateNodeTransform(1, 0);
-        if (pn->vfn_0c() && FUN_005784b0(pn->vfn_0c()))
-            FUN_00578060((TESObjectREFR*)pn->vfn_0c());
+        if (pn->IsSceneNode() && FUN_005784b0(pn->IsSceneNode()))
+            FUN_00578060((TESObjectREFR*)pn->IsSceneNode());
         NiTimeController::UpdateControllersForTarget((NiObjectNET*)pn);
     }
 }
 }  // namespace fnv_009bdff0
 
 namespace fnv_009bf370 {
-struct NiPoint3Ex
-{
-    NiPoint3 operator-(const NiPoint3&) const;
-};
 
-struct hkpCharacterContext
-{
-    static float __cdecl GetReferenceTimeStep();
-};
-
-struct ActorSubObj
-{
-    virtual void v0();
-    virtual void v1();
-    virtual int GetAv(int);
-};
-
-struct Actor
-{
-    char pad_00[0xa4];
-    ActorSubObj m_a4;
-};
-
-struct TESObjectREFR
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-};
 
 struct Dummy009c4e60
 {
@@ -1501,18 +1273,18 @@ struct FUN_009bf370_shell : Dummy009c4e60
 // @fnv 0x009bf370
 void FUN_009bf370_shell::ApplySpeedAndVector(float afSpeed, NiPoint3 arVector)
 {
-    NiPoint3 vecStartPos = *GetPos();
+    NiPoint3 vecStartPos = *reinterpret_cast<const NiPoint3*>(GetPos());
     if (m_fc && m_fc->IsActor())
     {
         Actor* actor = (Actor*)m_fc;
-        if (actor->m_a4.GetAv(0x33) > 0)
+        if (actor->GetActorValue(static_cast<ActorValue::Index>(0x33)) > 0)
         {
             afSpeed *= 1.0f / hkpCharacterContext::GetReferenceTimeStep();
         }
     }
     FUN_0092f260(afSpeed, arVector, 0xf);
-    NiPoint3 vecEndPos = *GetPos();
-    FUN_009c4e60(((NiPoint3Ex*)&vecEndPos)->operator-(vecStartPos), true);
+    NiPoint3 vecEndPos = *reinterpret_cast<const NiPoint3*>(GetPos());
+    FUN_009c4e60(((NiPoint3*)&vecEndPos)->operator-(*reinterpret_cast<const NiPoint3*>(&vecStartPos)), true);
 }
 }  // namespace fnv_009bf370
 
@@ -1520,11 +1292,6 @@ struct _ref_006815c0
 {
     _ref_006815c0();
     char pad[12];
-};
-
-struct NiPlane
-{
-    bool FUN_004390c0(NiPoint3 const&);
 };
 
 struct FUN_009bffb0
@@ -1548,7 +1315,7 @@ struct FUN_009bffb0
 FUN_009bffb0::FUN_009bffb0() : m_29(1)
 {
     m_00 = 0;
-    *(NiPoint3*)&m_04 = NiPoint3::ZERO;
+    *(NiPoint3*)&m_04 = *(const NiPoint3*)&NiPoint3::ZERO;
     ((NiPlane*)&m_10)->FUN_004390c0(NiPoint3::ZERO);
     m_1c = 0;
     m_20 = 0x24;
@@ -1568,169 +1335,11 @@ struct FUN_009baf30_shell
     bool HasFlag8() const;
 };
 
-struct BSMultiBoundRoom
-{
-    void* FUN_006ab360();
-};
-
-struct TESModel
-{
-    unsigned int GetModelLength();
-};
 
 int __fastcall FUN_00874480(char*);
 
-struct Actor
-{
-    bool FUN_008a8870();
-};
 
 void __cdecl FUN_009bb6d0(void*, void*);
-
-struct TESObjectREFR
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual bool vfn_22c(bool);
-    virtual bool vfn_230();
-};
 
 struct FUN_009c2ff0_shell
 {
@@ -1746,7 +1355,7 @@ void FUN_009c2ff0_shell::FUN_009c2ff0()
         TESObjectREFR* ref = (TESObjectREFR*)FUN_00874480((char*)this);
         Actor* actor = (ref && ref->IsActor()) ? (Actor*)ref : 0;
 
-        if (ref && !ref->vfn_22c(false) && !ref->vfn_230())
+        if (ref && !ref->HasHealth(false) && !ref->GetHasKnockedState())
         {
             if (!actor || !actor->FUN_008a8870())
             {
@@ -1762,298 +1371,6 @@ struct S9b46c0
     bool FUN_00444d00(int);
 };
 
-struct TESObjectREFR
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-};
-
-struct Actor
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual void v213();
-    virtual void v214();
-    virtual void v215();
-    virtual bool vfn_360();
-
-    bool IsCombatTargetHostile(Actor*);
-    void SpawnProjectile(Actor*, bool, void*, int);
-};
 
 struct FUN_009c30d0_shell
 {
@@ -2071,7 +1388,7 @@ void FUN_009c30d0_shell::NotifyActorIfEligible(Actor* apTarget, bool abFlag)
     {
         bool bResult = true;
         Actor* pActor = (Actor*)m_fc;
-        if (!pActor->vfn_360() && ((S9b46c0*)this)->FUN_00444d00(0x80000) && !pActor->IsCombatTargetHostile(apTarget))
+        if (!pActor->IsPlayerRef() && ((S9b46c0*)this)->FUN_00444d00(0x80000) && !pActor->IsCombatTargetHostile(apTarget))
             bResult = false;
         if (bResult)
             pActor->SpawnProjectile(apTarget, abFlag, this, 0);
@@ -2079,10 +1396,10 @@ void FUN_009c30d0_shell::NotifyActorIfEligible(Actor* apTarget, bool abFlag)
 }
 }  // namespace fnv_009c30d0
 
+class TESFaction;
 namespace fnv_009c3930 {
 typedef int FIGHT_REACTION;
 
-struct TESFaction;
 
 struct GlobalObject2_0040c150
 {
@@ -2097,154 +1414,6 @@ struct FUN_008b8290_shell
     int FUN_008b8290(TESFaction*, bool);
 };
 
-struct ActorH
-{
-    int GetReactionToActor(void*, bool*);
-};
-
-struct Actor
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual bool vfn_22c(bool);
-};
 
 struct FUN_009c3930_shell
 {
@@ -2263,13 +1432,13 @@ bool FUN_009c3930_shell::IsFightReactionAllowed(Actor* apTarget, Actor* apShoote
 
     if (bconsiderShooter || apTarget != (Actor*)FUN_00874480((char*)this))
     {
-        if (!apTarget->vfn_22c(false))
+        if (!apTarget->HasHealth(false))
         {
             if (!apOwnerFaction || ((FUN_008b8290_shell*)apTarget)->FUN_008b8290(apOwnerFaction, true) == -1)
             {
                 eFightReaction =
                     apShooterActor
-                        ? (FIGHT_REACTION)((ActorH*)apShooterActor)->GetReactionToActor(apTarget, &bcrimeCaused)
+                        ? (FIGHT_REACTION)apShooterActor->GetReactionToActor(apTarget, &bcrimeCaused)
                         : (FIGHT_REACTION)0;
                 if (eFightReaction == 0 || eFightReaction == 1)
                     bresult = true;
@@ -2282,10 +1451,6 @@ bool FUN_009c3930_shell::IsFightReactionAllowed(Actor* apTarget, Actor* apShoote
 }  // namespace fnv_009c3930
 
 namespace fnv_009c4ec0 {
-struct SndX
-{
-    bool IsValid();
-};
 
 struct XActor
 {
@@ -2302,20 +1467,10 @@ struct S3c60
     int GetArchetype();
 };
 
-struct Date
-{
-    int m1, m2, m3;
-    ~Date();
-};
-
-struct SH_00418890
-{
-    void FUN_copy(const Date&);
-};
 
 struct FUN_00933150_shell
 {
-    Date PlaySoundByFormID(unsigned int, bool, unsigned int, bool);
+    BSSoundHandle PlaySoundByFormID(unsigned int, bool, unsigned int, bool);
 };
 
 struct FUN_009c4ec0_shell
@@ -2327,29 +1482,20 @@ struct FUN_009c4ec0_shell
 // @fnv 0x009c4ec0
 void FUN_009c4ec0_shell::InitSoundFromArchetype()
 {
-    if (!((SndX*)((char*)this + 0x134))->IsValid())
+    if (!((BSSoundHandle*)((char*)this + 0x134))->IsValid())
     {
         if (((S3c60*)((XActor*)this)->GetActorBase())->GetArchetype())
         {
             unsigned int isoundFileID =
                 ((SoundH*)((S3c60*)((XActor*)this)->GetActorBase())->GetArchetype())->_ref_0084e3a0();
-            ((SH_00418890*)((char*)this + 0x134))
-                ->FUN_copy(((FUN_00933150_shell*)this)->PlaySoundByFormID(isoundFileID, false, 0x40000102, true));
+            ((BSSoundHandle*)((char*)this + 0x134))
+                ->operator=(((FUN_00933150_shell*)this)->PlaySoundByFormID(isoundFileID, false, 0x40000102, true));
         }
     }
 }
 }  // namespace fnv_009c4ec0
 
 namespace fnv_009c5af0 {
-struct BSOcclusionPlane
-{
-    int GetCullResult() const;
-};
-
-struct MobileObjectCellAccess
-{
-    bool FUN_004518e0() const;
-};
 
 float __fastcall FUN_005471e0(void*);
 
@@ -2369,10 +1515,6 @@ struct FUN_004587f0_shell
     NiPoint3& FUN_004587f0(NiPoint3&);
 };
 
-struct NiPoint3Ex
-{
-    NiPoint3 operator-(const NiPoint3&) const;
-};
 
 struct FUN_009c5af0_shell : BSOcclusionPlane
 {
@@ -2383,7 +1525,7 @@ struct FUN_009c5af0_shell : BSOcclusionPlane
 bool FUN_009c5af0_shell::GetWaterPlaneIntersection(Proxy* apProxy, float* apWaterHeight)
 {
     void* cell5 = (void*)GetCullResult();
-    if (cell5 && ((MobileObjectCellAccess*)cell5)->FUN_004518e0())
+    if (cell5 && ((TESObjectCELL*)cell5)->HasWater())
     {
         float fRate = FUN_005471e0(cell5);
         _ref_006815c0 kPos9;
@@ -2393,7 +1535,7 @@ bool FUN_009c5af0_shell::GetWaterPlaneIntersection(Proxy* apProxy, float* apWate
 
         if (kPos9.z > fRate && kPos2.z <= fRate)
         {
-            NiPoint3 kDiff2 = ((NiPoint3Ex*)&kPos2)->operator-(*(NiPoint3*)&kPos9);
+            NiPoint3 kDiff2 = ((NiPoint3*)&kPos2)->operator-(*(NiPoint3*)&kPos9);
             float fDist = fRate - kPos9.z;
             *apWaterHeight = fDist / ((_ref_006815c0*)&kDiff2)->z;
             return true;
@@ -2404,20 +1546,7 @@ bool FUN_009c5af0_shell::GetWaterPlaneIntersection(Proxy* apProxy, float* apWate
 }  // namespace fnv_009c5af0
 
 namespace fnv_009c3d90 {
-struct TESObjectLIGH
-{
-    void* CreateLight(void*, void*, bool);
-};
 
-struct EffectSetting
-{
-    TESObjectLIGH* GetLight();
-};
-
-struct GO
-{
-    void operator=(void*);
-};
 
 struct RefH
 {
@@ -2559,505 +1688,21 @@ void XActor::FUN_009c3d90()
         {
             reinterpret_cast<GO*>(reinterpret_cast<char*>(this) + 0x114)
                 ->
-                operator=(reinterpret_cast<EffectSetting*>(this->GetActorBase())
-                              ->GetLight()
-                              ->CreateLight(this, this->VirtualResult(), false));
+                operator=(reinterpret_cast<TESObjectLIGH*>(reinterpret_cast<EffectSetting*>(this->GetActorBase())->GetLight())->CreateLight(this, this->VirtualResult(), false));
         }
     }
 }
 }  // namespace fnv_009c3d90
 
 namespace fnv_009bb970 {
-struct NiAVObject;
 
-struct NiAVObject
-{
-    virtual NiAVObject* m0()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m1()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m2()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m3()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m4()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m5()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m6()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m7()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m8()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m9()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m10()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m11()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m12()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m13()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m14()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m15()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m16()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m17()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m18()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m19()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m20()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m21()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m22()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m23()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m24()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m25()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m26()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m27()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m28()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m29()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m30()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m31()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m32()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m33()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m34()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m35()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m36()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m37()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m38()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m39()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m40()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m41()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m42()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m43()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m44()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m45()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m46()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m47()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m48()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m49()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m50()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m51()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m52()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m53()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m54()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m55()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m56()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m57()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m58()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m59()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m60()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m61()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m62()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m63()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m64()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m65()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m66()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m67()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m68()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m69()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m70()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m71()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m72()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m73()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m74()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m75()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m76()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m77()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m78()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m79()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m80()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m81()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m82()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m83()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m84()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m85()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m86()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m87()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m88()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m89()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m90()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m91()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m92()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m93()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m94()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m95()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m96()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m97()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m98()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m99()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m100()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m101()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m102()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m103()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m104()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m105()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m106()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m107()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m108()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m109()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m110()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m111()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m112()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m113()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m114()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m115()
-    {
-        return 0;
-    }
-    virtual NiAVObject* m116()
-    {
-        return 0;
-    }
-};
 
 int __cdecl FUN_004b6ae0(NiAVObject*);
 int __cdecl FUN_004b6b60(NiAVObject*, void*);
 
-struct SaveFormIDHelper
-{
-    void SerializeFormData(void*, int);
-};
-
-struct BGSSaveFormBuffer : public SaveFormIDHelper
-{
-    void SaveData(void*, int, int);
-};
-
 struct FUN_009bb970_shell
 {
-    NiAVObject* m_object;
+    TESObjectREFR* m_object;
     unsigned char m_data4[12];
     unsigned char m_data10[12];
     void* m_field1c;
@@ -3086,8 +1731,8 @@ void FUN_009bb970_shell::SaveToBuffer(BGSSaveFormBuffer* buffer)
 
     if (m_object && m_field1c)
     {
-        m_field2a = FUN_004b6ae0(m_object->m116());
-        m_field2c = FUN_004b6b60(m_object->m116(), m_field1c);
+        m_field2a = FUN_004b6ae0(m_object->GetNiNode());
+        m_field2c = FUN_004b6b60(m_object->GetNiNode(), m_field1c);
     }
 
     buffer->SaveData(&m_field2a, 2, 0);
@@ -3096,10 +1741,6 @@ void FUN_009bb970_shell::SaveToBuffer(BGSSaveFormBuffer* buffer)
 }
 }  // namespace fnv_009bb970
 
-struct Point
-{
-    float x, y, z;
-};
 struct Matrix
 {
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
@@ -3108,10 +1749,10 @@ struct Matrix
 struct SceneNode
 {
     void FUN_0043fa80(const Matrix&);
-    void FUN_00440460(const Point&);
+    void FUN_00440460(const NiPoint3&);
     void FUN_00450f90(bool);
     const Matrix& FUN_00461130();
-    const Point& FUN_0045bb80();
+    const NiPoint3& FUN_0045bb80();
 };
 struct VirtualObject
 {
@@ -3265,123 +1906,46 @@ struct PathHolder
     Path* FUN_00559450();
 };
 extern Owner* g_thePlayer;
-struct ProjectileView : VirtualObject
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    unsigned char flag90;
-    Matrix rotation;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    PathHolder path;
-    bool FUN_00440d80();
-    float FUN_00885bd0();
-    void UpdateDetonation(float);
-    Owner* FUN_00874480();
-    void FUN_009c6330(const Matrix&);
-    void FUN_00575830(const Point&);
-    float GetE0();
-    void FUN_009bc8f0();
-    BaseData* FUN_004181e0();
-    void FUN_00979330(float);
-};
+// The shared Projectile header lacks these calls. Use their addresses with the original thiscall signatures.
+namespace projectile_update_calls {
+void __cdecl GetAge();                 // 0x00885bd0
+void __cdecl UpdateDetonation();       // 0x009c3190
+void __cdecl GetOwner();               // 0x00874480
+void __cdecl SetRotation();            // 0x009c6330
+void __cdecl SetPosition();            // 0x00575830
+void __cdecl GetAlpha();               // 0x00644660
+void __cdecl FinishProjectile();       // 0x009bc8f0
+}
+
+// PDB: 0x00979330 is BeamProjectile::UpdateProjectile.
 // @fnv 0x00979330
-void ProjectileView::FUN_00979330(float delta)
+void BeamProjectile::UpdateProjectile(float delta)
 {
     if (FUN_00440d80())
         return;
-    if (FUN_00885bd0() == 0.0)
-        UpdateDetonation(delta);
-    SceneNode* node = FUN_00874480() ? FUN_00874480()->v131() : 0;
-    SceneNode* parent = v116();
+    if (reinterpret_cast<float(__thiscall*)(Projectile*)>(&projectile_update_calls::GetAge)(this) == 0.0)
+        reinterpret_cast<void(__thiscall*)(Projectile*, float)>(&projectile_update_calls::UpdateDetonation)(this, delta);
+    SceneNode* node = reinterpret_cast<Owner*(__thiscall*)(Projectile*)>(&projectile_update_calls::GetOwner)(this) ? reinterpret_cast<Owner*(__thiscall*)(Projectile*)>(&projectile_update_calls::GetOwner)(this)->v131() : 0;
+    SceneNode* parent = reinterpret_cast<SceneNode*>(GetNiNode());
     if (node && parent)
     {
-        if (FUN_00874480() == g_thePlayer)
+        if (reinterpret_cast<Owner*(__thiscall*)(Projectile*)>(&projectile_update_calls::GetOwner)(this) == g_thePlayer)
         {
-            parent->FUN_0043fa80(rotation.FUN_0043f8d0(node->FUN_00461130()));
-            FUN_009c6330(rotation.FUN_0043f8d0(node->FUN_00461130()));
+            parent->FUN_0043fa80(reinterpret_cast<Matrix&>(m_kImpactTransform.m_Rotate).FUN_0043f8d0(node->FUN_00461130()));
+            reinterpret_cast<void(__thiscall*)(Projectile*, const Matrix&)>(&projectile_update_calls::SetRotation)(this, reinterpret_cast<Matrix&>(m_kImpactTransform.m_Rotate).FUN_0043f8d0(node->FUN_00461130()));
         }
         parent->FUN_00440460(node->FUN_0045bb80());
-        FUN_00575830(node->FUN_0045bb80());
+        reinterpret_cast<void(__thiscall*)(Projectile*, const NiPoint3&)>(&projectile_update_calls::SetPosition)(this, node->FUN_0045bb80());
     }
-    if (path.FUN_00559450())
-        path.FUN_00559450()->FUN_0051b840(GetE0());
-    if (FUN_00885bd0() > 5.0)
-        FUN_009bc8f0();
-    if (flag90 && FUN_00885bd0() >= FUN_004181e0()->GetField90Float())
+    if (reinterpret_cast<PathHolder*>(reinterpret_cast<char*>(this) + 0x150)->FUN_00559450())
+        reinterpret_cast<PathHolder*>(reinterpret_cast<char*>(this) + 0x150)->FUN_00559450()->FUN_0051b840(reinterpret_cast<float(__thiscall*)(Projectile*)>(&projectile_update_calls::GetAlpha)(this));
+    if (reinterpret_cast<float(__thiscall*)(Projectile*)>(&projectile_update_calls::GetAge)(this) > 5.0)
+        reinterpret_cast<void(__thiscall*)(Projectile*)>(&projectile_update_calls::FinishProjectile)(this);
+    if (byte90 && reinterpret_cast<float(__thiscall*)(Projectile*)>(&projectile_update_calls::GetAge)(this) >= reinterpret_cast<BaseData*>(FUN_004181e0())->GetField90Float())
     {
-        if (v116())
-            v116()->FUN_00450f90(true);
-        FUN_009bc8f0();
+        if (reinterpret_cast<SceneNode*>(GetNiNode()))
+            reinterpret_cast<SceneNode*>(GetNiNode())->FUN_00450f90(true);
+        reinterpret_cast<void(__thiscall*)(Projectile*)>(&projectile_update_calls::FinishProjectile)(this);
     }
 }
 
@@ -3774,10 +2338,6 @@ void ProjX::FUN_009bd860()
 }  // namespace fnv_009bd860
 
 namespace fnv_009c2c80 {
-struct NiRTTI_S
-{
-    int unk00;
-};
 struct NiAVObj_S;
 struct NiNode_S;
 
@@ -3990,11 +2550,11 @@ struct ProjData
 };
 
 extern PlayerChar* g_thePlayer;
-extern NiRTTI_S g_01268444;
+extern NiRTTI g_01268444;
 
 void* GetEntity(CdBody* body);
 WorldObjF* GetUserData(void* entity);
-bool IsKindOfRTTI(const NiRTTI_S* rtti, WorldObjF* obj);
+bool IsKindOfRTTI(const NiRTTI* rtti, WorldObjF* obj);
 ColObj* FindCollisionObject(NiNode_S* node);
 
 // @fnv 0x009c2c80
@@ -4048,17 +2608,9 @@ bool __cdecl CanProjectileHit(RefObj* ref, CdBody* body, int unused, ProjData* d
 
 float FUN_004e44b0(float);
 float cos(float);
-class NiPoint3Ex
-{
-  public:
-    float x, y, z;
-    NiPoint3Ex(float, float, float);
-    NiPoint3Ex operator*(float) const;
-    NiPoint3Ex operator+(const NiPoint3Ex&) const;
-};
 // Fills count output points around center using yaw, pitch, spread, radius and offset to vary the spherical direction per index.
 // @fnv 0x009c3f90
-void GenerateSpherePoints(NiPoint3Ex* output, int count, NiPoint3Ex center, float yaw, float pitch, float spread,
+void GenerateSpherePoints(NiPoint3* output, int count, NiPoint3 center, float yaw, float pitch, float spread,
                           float radius, float offset)
 {
     for (int p = 0; p < count; ++p)
@@ -4070,326 +2622,13 @@ void GenerateSpherePoints(NiPoint3Ex* output, int count, NiPoint3Ex center, floa
         float eb = FUN_004e44b0(s);
         float cf = cos(q);
         float a = FUN_004e44b0(q);
-        NiPoint3Ex f(a * i, cf * i, -eb);
+        NiPoint3 f(a * i, cf * i, -eb);
         output[p] = center + f * radius;
     }
 }
 
-struct BaseProcess9c
-{
-    virtual ~BaseProcess9c();
-    virtual void CopyFrom(BaseProcess9c* other);
-    virtual void b2();
-    virtual void b3();
-    virtual void b4();
-    virtual void b5();
-    virtual void b6();
-    virtual void b7();
-    virtual void b8();
-    virtual void b9();
-    virtual void b10();
-    virtual void b11();
-    virtual void b12();
-    virtual void b13();
-    virtual void b14();
-    virtual void b15();
-    virtual void b16();
-    virtual void b17();
-    virtual void Activate18();
-    int GetProcessLevel();
-};
-struct HighProcess : public BaseProcess9c
-{
-    HighProcess();
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-    int unk280;
-    int unk284;
-    int unk288;
-    int unk28C;
-    int unk290;
-    int unk294;
-    int unk298;
-    int unk29C;
-    int unk2A0;
-    int unk2A4;
-    int unk2A8;
-    int unk2AC;
-    int unk2B0;
-    int unk2B4;
-    int unk2B8;
-    int unk2BC;
-    int unk2C0;
-    int unk2C4;
-    int unk2C8;
-    int unk2CC;
-    int unk2D0;
-    int unk2D4;
-    int unk2D8;
-    int unk2DC;
-    int unk2E0;
-    int unk2E4;
-    int unk2E8;
-    int unk2EC;
-    int unk2F0;
-    int unk2F4;
-    int unk2F8;
-    int unk2FC;
-    int unk300;
-    int unk304;
-    int unk308;
-    int unk30C;
-    int unk310;
-    int unk314;
-    int unk318;
-    int unk31C;
-    int unk320;
-    int unk324;
-    int unk328;
-    int unk32C;
-    int unk330;
-    int unk334;
-    int unk338;
-    int unk33C;
-    int unk340;
-    int unk344;
-    int unk348;
-    int unk34C;
-    int unk350;
-    int unk354;
-    int unk358;
-    int unk35C;
-    int unk360;
-    int unk364;
-    int unk368;
-    int unk36C;
-    int unk370;
-    int unk374;
-    int unk378;
-    int unk37C;
-    int unk380;
-    int unk384;
-    int unk388;
-    int unk38C;
-    int unk390;
-    int unk394;
-    int unk398;
-    int unk39C;
-    int unk3A0;
-    int unk3A4;
-    int unk3A8;
-    int unk3AC;
-    int unk3B0;
-    int unk3B4;
-    int unk3B8;
-    int unk3BC;
-    int unk3C0;
-    int unk3C4;
-    int unk3C8;
-    int unk3CC;
-    int unk3D0;
-    int unk3D4;
-    int unk3D8;
-    int unk3DC;
-    int unk3E0;
-    int unk3E4;
-    int unk3E8;
-    int unk3EC;
-    int unk3F0;
-    int unk3F4;
-    int unk3F8;
-    int unk3FC;
-    int unk400;
-    int unk404;
-    int unk408;
-    int unk40C;
-    int unk410;
-    int unk414;
-    int unk418;
-    int unk41C;
-    int unk420;
-    int unk424;
-    int unk428;
-    int unk42C;
-    int unk430;
-    int unk434;
-    int unk438;
-    int unk43C;
-    int unk440;
-    int unk444;
-    int unk448;
-    int unk44C;
-    int unk450;
-    int unk454;
-    int unk458;
-    int unk45C;
-    int unk460;
-    int unk464;
-    int unk468;
-};
-struct GlobalLock9c
-{
-    void Lock(const char* name);
-    void Unlock();
-};
-extern GlobalLock9c g_lock9c;
+
+extern RecursiveSpinLock g_lock9c;
 struct Mob9c;
 struct ProcessLists9c
 {
@@ -4552,7 +2791,7 @@ struct Mob9c
     int unk5C;
     int unk60;
     int unk64;
-    BaseProcess9c* process;
+    BaseProcess* process;
     bool FUN_009c47d0();
 };
 
@@ -4566,94 +2805,31 @@ bool Mob9c::FUN_009c47d0()
         g_processLists9c.RemoveActor(this, level);
     }
     HighProcess* pHighProcess = new HighProcess;
-    pHighProcess->CopyFrom(process);
+    pHighProcess->Copy(process);
     delete process;
     process = pHighProcess;
     g_processLists9c.AddActor(this, 0, 0, 0, 0);
-    g_lock9c.Unlock();
+    g_lock9c.Leave();
     SetProcessFlag(0);
-    process->Activate18();
+    process->ClearIdleAnimation();
     return true;
 }
 
-struct LockObj_9c4a40
-{
-    void Lock(const char* name);
-    void Unlock();
-};
-extern LockObj_9c4a40 g_projectileLock_9c4a40;
+extern RecursiveSpinLock g_projectileLock_9c4a40;
 
 struct Process_9c4a40
 {
     int GetProcessLevel();
 };
 
-struct ProcessLists
-{
-    void FUN_0096d470(MobileObject* obj, int level);
-    void FUN_0096d450(MobileObject* obj, int a, bool b, bool c, bool d);
-};
-extern ProcessLists DAT_011e0e80;
+extern ActorDeletionQueue_projectile DAT_011e0e80;
 
-struct BaseProcess_9c4a40
-{
-    virtual ~BaseProcess_9c4a40();
-    virtual void CopyFrom(BaseProcess_9c4a40* other);
-    int GetProcessLevel();
-};
 
-struct FUN_0092c950 : BaseProcess_9c4a40
+// 0x0092c950 constructs MiddleLowProcess (0xC8); its shared header has no constructor declaration.
+struct LevelTwoProcess : BaseProcess
 {
-    FUN_0092c950();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
+    LevelTwoProcess();
+    char processData[0xC8 - sizeof(BaseProcess)];
 };
 
 struct Owner_9c4a40
@@ -4684,7 +2860,7 @@ struct Owner_9c4a40
     int unk5C;
     int unk60;
     int unk64;
-    BaseProcess_9c4a40* process;
+    BaseProcess* process;
     bool FUN_009c4a40();
 };
 
@@ -4697,12 +2873,12 @@ bool Owner_9c4a40::FUN_009c4a40()
         int level = process->GetProcessLevel();
         DAT_011e0e80.FUN_0096d470((MobileObject*)this, level);
     }
-    BaseProcess_9c4a40* newProcess = new FUN_0092c950;
-    newProcess->CopyFrom(process);
+    BaseProcess* newProcess = new LevelTwoProcess;
+    newProcess->Copy(process);
     delete process;
     process = newProcess;
     DAT_011e0e80.FUN_0096d450((MobileObject*)this, 2, 0, 0, 0);
-    g_projectileLock_9c4a40.Unlock();
+    g_projectileLock_9c4a40.Leave();
     return true;
 }
 
@@ -4723,7 +2899,7 @@ struct ProjectileCalls
     ProjectileBaseCalls* FUN_004181e0();
     float GetFieldE4Float();
 };
-extern Setting_S setting11cf3f0, setting11cea74, setting11ceabc, setting11cf764;
+extern Setting setting11cf3f0, setting11cea74, setting11ceabc, setting11cf764;
 float ComputeExplosionDamageFalloff(float, float, float);
 extern float DAT_0108e2b0;
 struct FUN_009a52f0_shell
@@ -4816,15 +2992,6 @@ struct PrjCausePtr
     PrjCausePtr& operator=(PrjCause* apObject);
 };
 
-struct PrjSoundHandle
-{
-    unsigned int uiID;
-    unsigned int uiState;
-    unsigned int uiFlags;
-
-    PrjSoundHandle();
-    ~PrjSoundHandle();
-};
 
 struct PrjSetting
 {
@@ -5214,8 +3381,8 @@ struct FUN_009bbef0 : PrjMobile
     PrjNodePtr spNode11C;
     PrjCausePtr spCause120;
     float fUnk124;
-    PrjSoundHandle kSound128;
-    PrjSoundHandle kSound134;
+    BSSoundHandle kSound128;
+    BSSoundHandle kSound134;
     int iUnk140;
     int iUnk144;
     bool bUnk148;
@@ -5350,16 +3517,7 @@ struct P062Values
     virtual void v1();
     virtual int value(int);
 };
-struct P062Sound
-{
-    unsigned int id;
-    unsigned int flags;
-    unsigned int state;
-    void FUN_00418900(const P062Sound&);
-    void SetPositionFromArray(void*);
-    void FUN_00ad8f20(P062Scene*);
-    void FUN_00ad8830(bool);
-};
+
 struct P062Object
 {
     virtual void v0();
@@ -5630,7 +3788,7 @@ struct P062Object
     unsigned int unk11c;
     unsigned int unk120;
     unsigned int unk124;
-    P062Sound sound;
+    BSSoundHandle sound;
     unsigned int unk134;
     unsigned int unk138;
     unsigned int unk13c;
@@ -5708,13 +3866,12 @@ struct FUN_0066e010
     unsigned int field18;
     FUN_0066e010(P062Object*);
 };
-struct BSSoundHandleEx : P062Sound
-{
-    ~BSSoundHandleEx();
-};
+
 struct P062Audio
 {
-    BSSoundHandleEx FUN_00ad7480(int, int, P062Ammo*);
+    BSSoundHandle FUN_00ad7480(int, int, P062Ammo*);
+    // BSAudio's shared declaration still returns a legacy sound handle for this overload.
+    BSSoundHandle FUN_00ad7480(const char*, unsigned int, void*);
 };
 P062Audio* __cdecl FUN_00453a70();
 P062Object* __cdecl FindProjectObject(P062Object*, P062Ammo*);
@@ -5762,16 +3919,16 @@ P062Object* __cdecl CreateProjectile(P062Ammo* ammo, P062Object* owner, P062Obje
         switch (ammo->FUN_004fd4f0())
         {
         case 0x10000:
-            projectile = new FUN_009b7af0(ammo, owner, weapon, position, yaw, pitch);
+            projectile = new FUN_009b7af0(ammo, owner, weapon, *reinterpret_cast<NiPoint3*>(&position), yaw, pitch);
             break;
         case 0x20000:
-            projectile = new FUN_009b4020(ammo, owner, weapon, position, yaw, pitch);
+            projectile = new FUN_009b4020(ammo, owner, weapon, *reinterpret_cast<NiPoint3*>(&position), yaw, pitch);
             break;
         case 0x40000:
-            projectile = new FUN_00979070(ammo, owner, weapon, position, yaw, pitch);
+            projectile = new FUN_00979070(ammo, owner, weapon, *reinterpret_cast<NiPoint3*>(&position), yaw, pitch);
             break;
         case 0x100000:
-            projectile = new FUN_009ab090(ammo, owner, weapon, position, yaw, pitch);
+            projectile = new FUN_009ab090(ammo, owner, weapon, *reinterpret_cast<NiPoint3*>(&position), yaw, pitch);
             break;
         case 0x80000:
             projectile = FindProjectObject(owner, ammo);
@@ -5783,7 +3940,7 @@ P062Object* __cdecl CreateProjectile(P062Ammo* ammo, P062Object* owner, P062Obje
             }
             else
             {
-                projectile = new FUN_009b31f0(ammo, owner, weapon, position, yaw, pitch);
+                projectile = new FUN_009b31f0(ammo, owner, weapon, *reinterpret_cast<NiPoint3*>(&position), yaw, pitch);
             }
             break;
         }
@@ -5846,15 +4003,15 @@ P062Object* __cdecl CreateProjectile(P062Ammo* ammo, P062Object* owner, P062Obje
     {
         if (!ammo->FUN_009bc870() && !(ammo->FUN_00975300() && !(ammo->FUN_0045cd80() <= 0.0)))
         {
-            projectile->sound.FUN_00418900(
+            projectile->sound.operator=(
                 FUN_00453a70()->FUN_00ad7480(ammo->FUN_004fd3e0()->FUN_00511840(), 0x40000012, ammo->FUN_004fd3e0()));
-            projectile->sound.SetPositionFromArray(owner->soundContext());
-            projectile->sound.FUN_00ad8f20(projectile->scene());
+            projectile->sound.SetPosition(*reinterpret_cast<const NiPoint3*>(owner->soundContext()));
+            projectile->sound.SetObjectToFollow(reinterpret_cast<::NiAVObject*>(projectile->scene()));
             projectile->soundPercent = ammo->FUN_004fd3e0()->GetField45() * 100;
         }
         if (projectile->FUN_00444d00(1))
         {
-            projectile->sound.FUN_00ad8830(true);
+            projectile->sound.Play(true);
             projectile->soundReady = true;
         }
     }
@@ -6475,201 +4632,7 @@ struct ProjectileRuntime : Projectile
     void UpdateNodePlacement();
     void FUN_009bec90();
 
-    virtual void projSlot1();
-    virtual void projSlot2();
-    virtual void projSlot3();
-    virtual void projSlot4();
-    virtual void projSlot5();
-    virtual void projSlot6();
-    virtual void projSlot7();
-    virtual void projSlot8();
-    virtual void projSlot9();
-    virtual void projSlot10();
-    virtual void projSlot11();
-    virtual void projSlot12();
-    virtual void projSlot13();
-    virtual void projSlot14();
-    virtual void projSlot15();
-    virtual void projSlot16();
-    virtual void projSlot17();
-    virtual void projSlot18();
-    virtual void projSlot19();
-    virtual void projSlot20();
-    virtual void projSlot21();
-    virtual void projSlot22();
-    virtual void projSlot23();
-    virtual void projSlot24();
-    virtual void projSlot25();
-    virtual void projSlot26();
-    virtual void projSlot27();
-    virtual void projSlot28();
-    virtual void projSlot29();
-    virtual void projSlot30();
-    virtual void projSlot31();
-    virtual void projSlot32();
-    virtual void projSlot33();
-    virtual void projSlot34();
-    virtual void projSlot35();
-    virtual void projSlot36();
-    virtual void projSlot37();
-    virtual void projSlot38();
-    virtual void projSlot39();
-    virtual void projSlot40();
-    virtual void projSlot41();
-    virtual void projSlot42();
-    virtual void projSlot43();
-    virtual void projSlot44();
-    virtual void projSlot45();
-    virtual void projSlot46();
-    virtual void projSlot47();
-    virtual void projSlot48();
-    virtual void projSlot49();
-    virtual void projSlot50();
-    virtual void projSlot51();
-    virtual void projSlot52();
-    virtual void projSlot53();
-    virtual void projSlot54();
-    virtual void projSlot55();
-    virtual void projSlot56();
-    virtual void projSlot57();
-    virtual void projSlot58();
-    virtual void projSlot59();
-    virtual void projSlot60();
-    virtual void projSlot61();
-    virtual void projSlot62();
-    virtual void projSlot63();
-    virtual void projSlot64();
-    virtual void projSlot65();
-    virtual void projSlot66();
-    virtual void projSlot67();
-    virtual void projSlot68();
-    virtual void projSlot69();
-    virtual void projSlot70();
-    virtual void projSlot71();
-    virtual void projSlot72();
-    virtual void projSlot73();
-    virtual void projSlot74();
-    virtual void projSlot75();
-    virtual void projSlot76();
-    virtual void projSlot77();
-    virtual void projSlot78();
-    virtual void projSlot79();
-    virtual void projSlot80();
-    virtual void projSlot81();
-    virtual void projSlot82();
-    virtual void projSlot83();
-    virtual void projSlot84();
-    virtual void projSlot85();
-    virtual void projSlot86();
-    virtual void projSlot87();
-    virtual void projSlot88();
-    virtual void projSlot89();
-    virtual void projSlot90();
-    virtual void projSlot91();
-    virtual void projSlot92();
-    virtual void projSlot93();
-    virtual void projSlot94();
-    virtual void projSlot95();
-    virtual void projSlot96();
-    virtual void projSlot97();
-    virtual void projSlot98();
-    virtual void projSlot99();
-    virtual void projSlot100();
-    virtual void projSlot101();
-    virtual void projSlot102();
-    virtual void projSlot103();
-    virtual void projSlot104();
-    virtual void projSlot105();
-    virtual void projSlot106();
-    virtual void projSlot107();
-    virtual void projSlot108();
-    virtual void projSlot109();
-    virtual void projSlot110();
-    virtual void projSlot111();
-    virtual void projSlot112();
-    virtual void UpdateAction();
-    virtual void projSlot114();
-    virtual void projSlot115();
-    virtual ActionObject* GetAction();
-    virtual void projSlot117();
-    virtual void projSlot118();
-    virtual void projSlot119();
-    virtual void projSlot120();
-    virtual void projSlot121();
-    virtual void projSlot122();
-    virtual void projSlot123();
-    virtual void projSlot124();
-    virtual void projSlot125();
-    virtual void projSlot126();
-    virtual void projSlot127();
-    virtual void projSlot128();
-    virtual void projSlot129();
-    virtual void projSlot130();
-    virtual void projSlot131();
-    virtual void projSlot132();
-    virtual void projSlot133();
-    virtual void projSlot134();
-    virtual void projSlot135();
-    virtual void projSlot136();
-    virtual void projSlot137();
-    virtual void SetTarget(int);
-    virtual void projSlot139();
-    virtual void projSlot140();
-    virtual void projSlot141();
-    virtual void projSlot142();
-    virtual void projSlot143();
-    virtual void projSlot144();
-    virtual void projSlot145();
-    virtual void projSlot146();
-    virtual void projSlot147();
-    virtual void projSlot148();
-    virtual void projSlot149();
-    virtual void projSlot150();
-    virtual void projSlot151();
-    virtual void projSlot152();
-    virtual void projSlot153();
-    virtual void projSlot154();
-    virtual void projSlot155();
-    virtual void projSlot156();
-    virtual void projSlot157();
-    virtual void projSlot158();
-    virtual void projSlot159();
-    virtual void projSlot160();
-    virtual void projSlot161();
-    virtual void projSlot162();
-    virtual void projSlot163();
-    virtual void projSlot164();
-    virtual void projSlot165();
-    virtual void projSlot166();
-    virtual void projSlot167();
-    virtual void projSlot168();
-    virtual void projSlot169();
-    virtual void projSlot170();
-    virtual void projSlot171();
-    virtual void projSlot172();
-    virtual void projSlot173();
-    virtual void projSlot174();
-    virtual void projSlot175();
-    virtual void projSlot176();
-    virtual void projSlot177();
-    virtual void projSlot178();
-    virtual void projSlot179();
-    virtual void projSlot180();
-    virtual void projSlot181();
-    virtual void projSlot182();
-    virtual void projSlot183();
-    virtual void projSlot184();
-    virtual void projSlot185();
-    virtual void projSlot186();
-    virtual void projSlot187();
-    virtual void projSlot188();
-    virtual void projSlot189();
-    virtual void projSlot190();
-    virtual void projSlot191();
-    virtual void projSlot192();
-    virtual void projSlot193();
-    virtual void projSlot194();
-    virtual void FinalizeAction();
+
 };
 
 // @fnv 0x009bda10
@@ -6688,31 +4651,31 @@ void ProjectileRuntime::FUN_009bda10()
     FUN_005de0a0(0x10000, 1);
     if (FUN_00874480(reinterpret_cast<char*>(this)) && !inactive)
     {
-        SetTarget(reinterpret_cast<int>(
+        SetParentCell(reinterpret_cast<TESObjectCELL*>(
             reinterpret_cast<ProjectileRuntime*>(FUN_00874480(reinterpret_cast<char*>(this)))->FUN_008d6f30()));
     }
     byte118 = 0;
-    unsigned char newlyCreated = word68 == 0;
+    unsigned char newlyCreated = m_pBaseProcess == 0;
     if (newlyCreated)
     {
-        word68 = reinterpret_cast<unsigned int>(new SpawnedResource);
+        m_pBaseProcess = reinterpret_cast<BaseProcess*>(new SpawnedResource);
     }
-    if (!FUN_00444d00(2) && word68 != 0)
+    if (!FUN_00444d00(2) && m_pBaseProcess != 0)
     {
-        if (reinterpret_cast<SpawnedResource*>(word68)->FUN_0045cd60() <= 1)
+        if (reinterpret_cast<SpawnedResource*>(m_pBaseProcess)->FUN_0045cd60() <= 1)
         {
-            if (!GetAction())
+            if (!reinterpret_cast<ActionObject*>(GetNiNode()))
                 FUN_009bdff0();
-            UpdateAction();
-            if (GetAction())
+            AnimateNiNode();
+            if (reinterpret_cast<ActionObject*>(GetNiNode()))
             {
-                if (GetAction()->GetTarget())
+                if (reinterpret_cast<ActionObject*>(GetNiNode())->GetTarget())
                 {
-                    GetAction()->GetTarget()->FUN_00476ab0();
+                    reinterpret_cast<ActionObject*>(GetNiNode())->GetTarget()->FUN_00476ab0();
                 }
                 else
                 {
-                    FUN_00b6bb30(GetAction()->GetAmount(), 1.0f);
+                    FUN_00b6bb30(reinterpret_cast<ActionObject*>(GetNiNode())->GetAmount(), 1.0f);
                 }
             }
         }
@@ -6767,20 +4730,20 @@ void ProjectileRuntime::FUN_009bda10()
     if (flags5->FUN_004fd4f0() == 0x40000)
     {
         ActionConsumer* firstOwner = reinterpret_cast<ActionConsumer*>(this);
-        firstOwner->MarkGeometryDataMutable(GetAction());
+        firstOwner->MarkGeometryDataMutable(reinterpret_cast<ActionObject*>(GetNiNode()));
     }
     else if (flags5->FUN_004fd4f0() == 0x100000)
     {
         ActionConsumer* secondOwner = reinterpret_cast<ActionConsumer*>(this);
-        secondOwner->MarkGeometryDataMutable(GetAction());
+        secondOwner->MarkGeometryDataMutable(reinterpret_cast<ActionObject*>(GetNiNode()));
     }
-    FinalizeAction();
-    if (GetAction())
+    reinterpret_cast<::Projectile*>(this)->HandleTracer();
+    if (reinterpret_cast<ActionObject*>(GetNiNode()))
     {
         GameVector parameters(DAT_011c3c08, 1, 0);
-        GetAction()->ApplyVector(&parameters, 0);
+        reinterpret_cast<ActionObject*>(GetNiNode())->ApplyVector(&parameters, 0);
     }
-    visualB = static_cast<NiAVObject*>(0);
+    m_pExplosionEffect = static_cast<NiRefObject*>(0);
 }
 }  // namespace fnv_009bda10
 
@@ -7096,7 +5059,7 @@ struct GameScreen
     MenuObject* FUN_009b4440();
     void FUN_009bf190();
 };
-extern Setting_S DAT_011ced88;
+extern Setting DAT_011ced88;
 struct UIController
 {
     UIController* FUN_00825c00(GameScreen*);
@@ -7141,15 +5104,7 @@ void GameScreen::FUN_009bf190()
 }
 }  // namespace fnv_009bf190
 
-struct Vec
-{
-    float x, y, z;
-    Vec FUN_004a0bd0() const;
-    void FUN_004a0c10();
-    Vec operator-(Vec const&) const;
-    Vec operator+(Vec const&) const;
-    Vec operator*(float) const;
-};
+
 struct WorldObject
 {
     void* GetReferenceFlags();
@@ -7171,7 +5126,7 @@ struct Node
 {
     NodeName& FUN_00413f40();
     void FUN_00a5a040();
-    void FUN_00440460(Vec const&);
+    void FUN_00440460(NiPoint3 const&);
 };
 struct Obj
 {
@@ -7300,7 +5255,7 @@ struct Obj
     virtual void v122();
     virtual void v123();
     virtual void v124();
-    virtual Vec& GetPosition();
+    virtual NiPoint3& GetPosition();
     virtual void v126();
     virtual void v127();
     virtual void v128();
@@ -7428,7 +5383,7 @@ struct Obj
     virtual void v250();
     virtual void v251();
     virtual void Mark(bool);
-    BodyPart* FUN_008b3d70(Vec, Vec);
+    BodyPart* FUN_008b3d70(NiPoint3, NiPoint3);
     int FUN_008b3ef0(BodyPart*);
     void FUN_00564db0(bool);
     int FUN_00474cb0();
@@ -7477,7 +5432,7 @@ Shape* __cdecl FUN_004a3a40(void*);
 struct Hit
 {
     Obj* ref;
-    Vec point, normal;
+    NiPoint3 point, normal;
     void* collision;
     int material, part;
     bool unk28, unk29;
@@ -7500,14 +5455,14 @@ struct Impact
 };
 struct TESProxy
 {
-    int FUN_00457880(Vec const&);
-    Impact* FUN_0070ec90(Vec, float);
+    int FUN_00457880(NiPoint3 const&);
+    Impact* FUN_0070ec90(NiPoint3, float);
     void FUN_00458e20(Node*, float);
 };
 extern TESProxy* g_TES;
 struct Queue
 {
-    void FUN_0087b760(float, Vec const*);
+    void FUN_0087b760(float, NiPoint3 const*);
 };
 Queue* __cdecl FUN_004537b0();
 bool __cdecl FUN_008c7aa0();
@@ -7517,22 +5472,14 @@ struct RefPair
     Obj* ref;
     Wrapper node;
 };
-struct Creature
-{
-    float FUN_00821640();
-};
+
 struct HitList
 {
     void FUN_005ae3d0(Hit*&);
     int head, next;
 };
-struct ImageSpaceEffectParam
-{
-    ImageSpaceEffectParam(float, float, float, float);
-    float r, g, b, a;
-};
-Node* __cdecl CreateOctahedron(float, ImageSpaceEffectParam const&, bool);
-Node* __cdecl FUN_004b3890(Vec const&, ImageSpaceEffectParam const&, Vec const&, ImageSpaceEffectParam const&, bool);
+Node* __cdecl CreateOctahedron(float, NiColorA const&, bool);
+Node* __cdecl FUN_004b3890(NiPoint3 const&, NiColorA const&, NiPoint3 const&, NiColorA const&, bool);
 struct ProjectileHit
 {
     virtual void v0();
@@ -7792,7 +5739,7 @@ struct ProjectileHit
     int unkf8;
     int unkfc;
     Obj* target;
-    Vec position;
+    NiPoint3 position;
     bool FUN_00444d00(int);
     RefPair* FUN_008d8b80();
     int FUN_009c0070();
@@ -7801,10 +5748,10 @@ struct ProjectileHit
     Creature* FUN_00476c90();
     Obj* FUN_00874480();
     void FUN_009ab9a0(Obj*);
-    bool ProcessHit(Obj*, Vec const&, Vec const&, Buffer*, int, int);
+    bool ProcessHit(Obj*, NiPoint3 const&, NiPoint3 const&, Buffer*, int, int);
 };
 // @fnv 0x009bf5a0
-bool ProjectileHit::ProcessHit(Obj* object, Vec const& point, Vec const& normal, Buffer* buffer, int index,
+bool ProjectileHit::ProcessHit(Obj* object, NiPoint3 const& point, NiPoint3 const& normal, Buffer* buffer, int index,
                                int material)
 {
     Hit* hit = (Hit*)new FUN_009bffb0;
@@ -7812,8 +5759,8 @@ bool ProjectileHit::ProcessHit(Obj* object, Vec const& point, Vec const& normal,
     {
         hit->ref = target;
         hit->collision = 0;
-        hit->point = target->GetPosition();
-        hit->normal = position.FUN_004a0bd0();
+        *reinterpret_cast<NiPoint3*>(&hit->point) = *reinterpret_cast<const NiPoint3*>(&target->GetPosition());
+        *reinterpret_cast<NiPoint3*>(&hit->normal) = *reinterpret_cast<const NiPoint3*>(&static_cast<const NiPoint3&>(position).FUN_004a0bd0());
         hit->normal.FUN_004a0c10();
         hit->part = 0;
         hit->material = 0;
@@ -7821,7 +5768,7 @@ bool ProjectileHit::ProcessHit(Obj* object, Vec const& point, Vec const& normal,
         {
             hit->material = 6;
             Obj* actor = target;
-            BodyPart* body = actor->FUN_008b3d70(hit->point - position, hit->point);
+            BodyPart* body = actor->FUN_008b3d70(*reinterpret_cast<const NiPoint3*>(&(hit->point - position)), *reinterpret_cast<const NiPoint3*>(&hit->point));
             if (body)
             {
                 hit->part = actor->FUN_008b3ef0(body);
@@ -7835,8 +5782,8 @@ bool ProjectileHit::ProcessHit(Obj* object, Vec const& point, Vec const& normal,
     else
     {
         hit->ref = object;
-        hit->point = point;
-        hit->normal = normal;
+        *reinterpret_cast<NiPoint3*>(&hit->point) = *reinterpret_cast<const NiPoint3*>(&point);
+        *reinterpret_cast<NiPoint3*>(&hit->normal) = *reinterpret_cast<const NiPoint3*>(&normal);
         hit->collision = buffer ? buffer->FUN_004b59d0() : 0;
         if (hit->collision)
         {
@@ -7868,7 +5815,7 @@ bool ProjectileHit::ProcessHit(Obj* object, Vec const& point, Vec const& normal,
         if (hitMaterial == 8)
         {
             if (!FUN_008c7aa0())
-                g_TES->FUN_0070ec90(point, 0.01f)->SpawnGroupNodeNearPlayer();
+                g_TES->FUN_0070ec90(*reinterpret_cast<const NiPoint3*>(&point), 0.01f)->SpawnGroupNodeNearPlayer();
             else
                 FUN_004537b0()->FUN_0087b760(0.01f, &point);
         }
@@ -7917,13 +5864,13 @@ bool ProjectileHit::ProcessHit(Obj* object, Vec const& point, Vec const& normal,
     }
     if (*g_011f20ec.FUN_00408d60() || *g_011f20b8.FUN_00408d60())
     {
-        ImageSpaceEffectParam color(0, 0, 1, 0.1f);
+        NiColorA color(0, 0, 1, 0.1f);
         if (hit->ref && hit->ref->IsActor())
-            color = ImageSpaceEffectParam(0, 1, 0, 0.1f);
+            color = NiColorA(0, 1, 0, 0.1f);
         if (!valid)
-            color = ImageSpaceEffectParam(1, 0, 0, 0.65f);
+            color = NiColorA(1, 0, 0, 0.65f);
         if (hit->unk29)
-            color = ImageSpaceEffectParam(0.5f, 0, 0, 0.65f);
+            color = NiColorA(0.5f, 0, 0, 0.65f);
         Node* node = CreateOctahedron(5.0f, color, true);
         node->FUN_00a5a040();
         node->FUN_00440460(hit->point);
@@ -8857,34 +6804,8 @@ void ZProjectile::UpdateDetonation(float elapsed)
 }
 
 namespace fnv_009c4b60 {
-class RecursiveSpinLock
-{
-};
-struct GlobalObject_0096a2d0
-{
-    void Lock(const char*);
-};
-struct BSSpinLockUnlock
-{
-    void Unlock();
-};
-class ActorDeletionQueue
-{
-  public:
-    void FUN_0096d470(MobileObject*, int);
-};
-struct Host096d450
-{
-    void FUN_0096d450(MobileObject*, int, bool, bool, bool);
-};
-enum PROCESS_TYPE
-{
-    PROCESS_TYPE_Default = 0
-};
-struct BaseProcess
-{
-    PROCESS_TYPE GetProcessLevel();
-};
+
+
 class Base_0092c950
 {
   public:
@@ -8939,28 +6860,28 @@ class Base_0092c950
     int unkB0;
 };
 extern RecursiveSpinLock DAT_011f11a0;
-extern ActorDeletionQueue DAT_011e0e80;
-struct FUN_009c4b60_shell : public MobileObject
+extern ActorDeletionQueue_projectile DAT_011e0e80;
+struct MobileObjectProcessReplacement : public MobileObject
 {
     bool FUN_009c4b60();
 };
 
 // @fnv 0x009c4b60
-bool FUN_009c4b60_shell::FUN_009c4b60()
+bool MobileObjectProcessReplacement::FUN_009c4b60()
 {
-    ((GlobalObject_0096a2d0*)&DAT_011f11a0)->Lock(0);
-    if (this->word68 != 0)
+    DAT_011f11a0.Lock(0);
+    if (this->m_pBaseProcess != 0)
     {
-        PROCESS_TYPE level = ((BaseProcess*)this->word68)->GetProcessLevel();
+        PROCESS_TYPE level = static_cast<PROCESS_TYPE>(((BaseProcess*)this->m_pBaseProcess)->GetProcessLevel());
         DAT_011e0e80.FUN_0096d470(this, level);
     }
     Base_0092c950* newProcess = new Base_0092c950();
-    newProcess->FUN_0092c950((Base_0092c950*)this->word68);
+    newProcess->FUN_0092c950((Base_0092c950*)this->m_pBaseProcess);
 
-    delete (Base_0092c950*)this->word68;
-    this->word68 = (unsigned int)newProcess;
-    ((Host096d450*)&DAT_011e0e80)->FUN_0096d450(this, 3, 0, 0, 0);
-    ((BSSpinLockUnlock*)&DAT_011f11a0)->Unlock();
+    delete (Base_0092c950*)this->m_pBaseProcess;
+    this->m_pBaseProcess = reinterpret_cast<BaseProcess*>(newProcess);
+    DAT_011e0e80.FUN_0096d450(this, 3, 0, 0, 0);
+    DAT_011f11a0.Leave();
     return true;
 }
 }  // namespace fnv_009c4b60
@@ -9073,9 +6994,7 @@ void RemOwner::FUN_009c4c80(RemForm* apForm)
     }
 }
 
-class TESObjectWEAP : public TESForm
-{
-};
+
 TESForm* __cdecl FUN_004839c0(unsigned int);
 ActorCause* __cdecl FindStateByValue(unsigned int);
 struct LoadBuf52 : BGSLoadFormBuffer
@@ -9102,122 +7021,6 @@ struct List52
 };
 struct LoadProjectile52 : Projectile
 {
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual int v116();
     void FUN_00932a00(LoadBuf52*);
     void LoadProjectile(LoadBuf52*);
 };
@@ -9226,42 +7029,42 @@ struct LoadProjectile52 : Projectile
 void LoadProjectile52::LoadProjectile(LoadBuf52* buffer)
 {
     FUN_00932a00(buffer);
-    buffer->ReadTypedData(&wordC8, 4);
-    buffer->ReadTypedData(&floatCC, 4);
-    buffer->ReadTypedData(&floatD4, 4);
-    buffer->ReadTypedData(&floatD0, 4);
-    buffer->ReadTypedData(&floatD8, 4);
-    buffer->ReadTypedData(&floatDC, 4);
-    buffer->ReadTypedData(&floatE0, 4);
-    buffer->ReadTypedData(&floatE4, 4);
-    buffer->ReadTypedData(&floatE8, 4);
+    buffer->ReadTypedData(static_cast<void*>(&wordC8), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&floatCC), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&floatD4), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&floatD0), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&floatD8), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&floatDC), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&floatE0), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&floatE4), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&floatE8), 4u);
     wordF8 = (unsigned int)dynamic_cast<TESObjectWEAP*>(FUN_004839c0(buffer->FUN_008648a0()));
-    buffer->ReadFormIdentifier(&wordFC);
-    buffer->ReadFormIdentifier(&word100);
-    buffer->ReadTypedData(&position, 12);
-    buffer->ReadTypedData(&float110, 4);
-    buffer->ReadTypedData(&byte118, 1);
-    buffer->ReadTypedData(&float124, 4);
-    buffer->FUN_00864a20(&transform, 36);
+    buffer->ReadFormIdentifier(static_cast<void*>(&wordFC));
+    buffer->ReadFormIdentifier(static_cast<void*>(&word100));
+    buffer->ReadTypedData(static_cast<void*>(&kMovementDirection), 12u);
+    buffer->ReadTypedData(static_cast<void*>(&float110), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&byte118), 1u);
+    buffer->ReadTypedData(static_cast<void*>(&float124), 4u);
+    buffer->FUN_00864a20(&m_kImpactTransform, 36);
     if (buffer->GetVersion() >= 13)
     {
-        buffer->ReadTypedData(&transform.storage[36], 12);
-        buffer->ReadTypedData(&transform.storage[48], 4);
+        buffer->ReadTypedData(static_cast<void*>(&m_kImpactTransform.m_Translate), 12u);
+        buffer->ReadTypedData(static_cast<void*>(&m_kImpactTransform.m_fScale), 4u);
     }
     if (buffer->GetVersion() >= 8)
     {
-        buffer->ReadTypedData(&floatEC, 4);
-        buffer->ReadTypedData(&floatF0, 4);
+        buffer->ReadTypedData(static_cast<void*>(&floatEC), 4u);
+        buffer->ReadTypedData(static_cast<void*>(&floatF0), 4u);
     }
     if (buffer->GetVersion() >= 14)
-        buffer->ReadTypedData(&floatF4, 4);
+        buffer->ReadTypedData(static_cast<void*>(&floatF4), 4u);
     unsigned int causeId = -1;
-    buffer->ReadTypedData(&causeId, 4);
-    cause = FindStateByValue(causeId);
+    buffer->ReadTypedData(static_cast<void*>(&causeId), 4u);
+    m_pActorCause = FindStateByValue(causeId);
     if (buffer->GetVersion() >= 3)
     {
         bool hasExtra = false;
-        buffer->ReadTypedData(&hasExtra, 1);
+        buffer->ReadTypedData(static_cast<void*>(&hasExtra), 1u);
         if (hasExtra)
         {
             word144 = (unsigned int)new FUN_0076b630;
@@ -9281,13 +7084,13 @@ void LoadProjectile52::LoadProjectile(LoadBuf52* buffer)
         {
             FUN_009bffb0* item = new FUN_009bffb0;
             ((FUN_009bba90_shell*)item)->FUN_009bba90(buffer);
-            if (!v116())
+            if (!GetNiNode())
                 item->m_28 = 0;
-            ((List52*)&list)->FUN_00905820(item);
+            ((List52*)&kImpacts)->FUN_00905820(item);
         }
     }
     if (buffer->GetVersion() >= 16)
-        buffer->ReadTypedData(&byte90, 1);
+        buffer->ReadTypedData(static_cast<void*>(&byte90), 1u);
 }
 
 TESForm* __cdecl FUN_004839c0(unsigned int auiFormId);
@@ -9354,16 +7157,11 @@ struct Pt9bf
 {
     float x, y, z;
 };
-class NiAVObject;
 struct FUN_00440460_S
 {
     void FUN_00440460(const V3*);
 };
-class TESObjectREFR
-{
-  public:
-    const NiPoint3& GetAngleOnReference() const;
-};
+
 class B006815c0
 {
   public:
@@ -9385,11 +7183,7 @@ struct FUN_009b7010_shell
 };
 void* __fastcall FUN_006a9540(char*);
 float __cdecl FUN_004b54c0(float);
-class NiAVObject
-{
-  public:
-    void FUN_0043fa80(const void*);
-};
+
 
 class Ref9bf
 {
@@ -9543,8 +7337,8 @@ void Ref9bf::UpdateNodeTransform(bool bRotate, bool bAlign)
             B006815c0 kAlign_ = *(B006815c0*)FUN_006a9540((char*)pkNodeX);
             float fX, fNewY, fZ;
             ((ST_00a59400*)&kAlign_)->FUN_00a59400(&fX, &fNewY, &fZ);
-            NiPoint3 kNewPos;
-            fNewY = -FUN_004b54c0(((Pt9bf&)((FUN_009b7010_shell*)this)->FUN_009b7010(kNewPos)).z);
+            float kNewPos[3];
+            fNewY = -FUN_004b54c0(((Pt9bf&)((FUN_009b7010_shell*)this)->FUN_009b7010(*reinterpret_cast<NiPoint3*>(kNewPos))).z);
             kAlign_.FUN_00a59660(fX, fNewY, fZ);
             pkNodeX->FUN_0043fa80(&kAlign_);
         }
@@ -10658,285 +8452,49 @@ struct Parent9b34
     virtual AVObject9b34* GetAttachNode();
 };
 
-struct List9b34
-{
-    bool FUN_008256d0();
-    void* m_pkItem;
-    void* m_pkNext;
-};
 
-struct Projectile9b34
+// PDB: 0x009b34c0 is FlameProjectile::UpdateProjectile; the shared header lacks its override declaration.
+// A by-value argument preserves thiscall's stack float while fastcall passes the projectile in ECX.
+struct FlameUpdateArguments
 {
-    virtual void V000();
-    virtual void V001();
-    virtual void V002();
-    virtual void V003();
-    virtual void V004();
-    virtual void V005();
-    virtual void V006();
-    virtual void V007();
-    virtual void V008();
-    virtual void V009();
-    virtual void V010();
-    virtual void V011();
-    virtual void V012();
-    virtual void V013();
-    virtual void V014();
-    virtual void V015();
-    virtual void V016();
-    virtual void V017();
-    virtual void V018();
-    virtual void V019();
-    virtual void V020();
-    virtual void V021();
-    virtual void V022();
-    virtual void V023();
-    virtual void V024();
-    virtual void V025();
-    virtual void V026();
-    virtual void V027();
-    virtual void V028();
-    virtual void V029();
-    virtual void V030();
-    virtual void V031();
-    virtual void V032();
-    virtual void V033();
-    virtual void V034();
-    virtual void V035();
-    virtual void V036();
-    virtual void V037();
-    virtual void V038();
-    virtual void V039();
-    virtual void V040();
-    virtual void V041();
-    virtual void V042();
-    virtual void V043();
-    virtual void V044();
-    virtual void V045();
-    virtual void V046();
-    virtual void V047();
-    virtual void V048();
-    virtual void V049();
-    virtual void V050();
-    virtual void V051();
-    virtual void V052();
-    virtual void V053();
-    virtual void V054();
-    virtual void V055();
-    virtual void V056();
-    virtual void V057();
-    virtual void V058();
-    virtual void V059();
-    virtual void V060();
-    virtual void V061();
-    virtual void V062();
-    virtual void V063();
-    virtual void V064();
-    virtual void V065();
-    virtual void V066();
-    virtual void V067();
-    virtual void V068();
-    virtual void V069();
-    virtual void V070();
-    virtual void V071();
-    virtual void V072();
-    virtual void V073();
-    virtual void V074();
-    virtual void V075();
-    virtual void V076();
-    virtual void V077();
-    virtual void V078();
-    virtual void V079();
-    virtual void V080();
-    virtual void V081();
-    virtual void V082();
-    virtual void V083();
-    virtual void V084();
-    virtual void V085();
-    virtual void V086();
-    virtual void V087();
-    virtual void V088();
-    virtual void V089();
-    virtual void V090();
-    virtual void V091();
-    virtual void V092();
-    virtual void V093();
-    virtual void V094();
-    virtual void V095();
-    virtual void V096();
-    virtual void V097();
-    virtual void V098();
-    virtual void V099();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual Node9b34* Get3D();
-    virtual void W117();
-    virtual void W118();
-    virtual void W119();
-    virtual void W120();
-    virtual void W121();
-    virtual void W122();
-    virtual void W123();
-    virtual void W124();
-    virtual void W125();
-    virtual void W126();
-    virtual void W127();
-    virtual void W128();
-    virtual void W129();
-    virtual void W130();
-    virtual void W131();
-    virtual void W132();
-    virtual void W133();
-    virtual void W134();
-    virtual void W135();
-    virtual void W136();
-    virtual void W137();
-    virtual void W138();
-    virtual void W139();
-    virtual void W140();
-    virtual void W141();
-    virtual void W142();
-    virtual void W143();
-    virtual void W144();
-    virtual void W145();
-    virtual void W146();
-    virtual void W147();
-    virtual void W148();
-    virtual void W149();
-    virtual void W150();
-    virtual void W151();
-    virtual void W152();
-    virtual void W153();
-    virtual void W154();
-    virtual void W155();
-    virtual void W156();
-    virtual void W157();
-    virtual void W158();
-    virtual void W159();
-    virtual void W160();
-    virtual void W161();
-    virtual void W162();
-    virtual void W163();
-    virtual void W164();
-    virtual void W165();
-    virtual void W166();
-    virtual void W167();
-    virtual void W168();
-    virtual void W169();
-    virtual void W170();
-    virtual void W171();
-    virtual void W172();
-    virtual void W173();
-    virtual void W174();
-    virtual void W175();
-    virtual void W176();
-    virtual void W177();
-    virtual void W178();
-    virtual void W179();
-    virtual void W180();
-    virtual void W181();
-    virtual void W182();
-    virtual void W183();
-    virtual void W184();
-    virtual void W185();
-    virtual void W186();
-    virtual void W187();
-    virtual void W188();
-    virtual void W189();
-    virtual void W190();
-    virtual void W191();
-    virtual void W192();
-    virtual void W193();
-    virtual void W194();
-    virtual void W195();
-    virtual void W196();
-    virtual void W197();
-    virtual void W198();
-    virtual void W199();
-    virtual void W200();
-    virtual void W201();
-    virtual void UpdateMovement();
-    char m_acForm[0x84];
-    List9b34 m_kImpacts;
-    unsigned char m_bHit;
-    char m_acPad91[3];
-    Matrix9b34 m_kRotate;
-    char m_acPadB8[0x98];
-    float m_fXValue;
-    bool FUN_00440d80();
-    Parent9b34* FUN_00874480();
-    void FUN_009c6330(const Matrix9b34& kRotate);
-    void FUN_00575830(const NiPoint3& kPosition);
-    void UpdateDetonation(float fTimeDelta);
-    void FUN_009bc8f0();
-    void UpdateProjectile(float fTimeDelta);
+    float timeDelta;
 };
-
 // @fnv 0x009b34c0
-void Projectile9b34::UpdateProjectile(float fTimeDelta)
+void __fastcall UpdateFlameProjectile(FlameProjectile* projectile, FlameUpdateArguments args)
 {
-    if (FUN_00440d80())
+    if (projectile->FUN_00440d80())
         return;
-    AVObject9b34* pkRoot = FUN_00874480() ? FUN_00874480()->GetAttachNode() : 0;
-    Node9b34* pkNode = Get3D();
+    AVObject9b34* pkRoot = reinterpret_cast<Parent9b34*(__thiscall*)(Projectile*)>(&projectile_update_calls::GetOwner)(projectile) ? reinterpret_cast<Parent9b34*(__thiscall*)(Projectile*)>(&projectile_update_calls::GetOwner)(projectile)->GetAttachNode() : 0;
+    Node9b34* pkNode = reinterpret_cast<Node9b34*>(projectile->GetNiNode());
     if (pkRoot && pkNode)
     {
-        pkNode->FUN_0043fa80(m_kRotate.FUN_0043f8d0(pkRoot->FUN_00461130()));
-        FUN_009c6330(m_kRotate.FUN_0043f8d0(pkRoot->FUN_00461130()));
+        pkNode->FUN_0043fa80(reinterpret_cast<Matrix9b34&>(projectile->m_kImpactTransform.m_Rotate).FUN_0043f8d0(pkRoot->FUN_00461130()));
+        reinterpret_cast<void(__thiscall*)(Projectile*, const Matrix9b34&)>(&projectile_update_calls::SetRotation)(projectile, reinterpret_cast<Matrix9b34&>(projectile->m_kImpactTransform.m_Rotate).FUN_0043f8d0(pkRoot->FUN_00461130()));
         pkNode->FUN_00440460(pkRoot->FUN_0045bb80());
-        FUN_00575830(pkRoot->FUN_0045bb80());
+        reinterpret_cast<void(__thiscall*)(Projectile*, const NiPoint3&)>(&projectile_update_calls::SetPosition)(projectile, pkRoot->FUN_0045bb80());
     }
-    if (m_fXValue == 0.0)
+    if (*reinterpret_cast<float*>(reinterpret_cast<char*>(projectile) + 0x150) == 0.0)
     {
-        UpdateMovement();
-        UpdateDetonation(fTimeDelta);
+        projectile->IsProximityDetonationTriggered();
+        reinterpret_cast<void(__thiscall*)(Projectile*, float)>(&projectile_update_calls::UpdateDetonation)(projectile, args.timeDelta);
     }
-    if (m_fXValue == 0.0)
+    if (*reinterpret_cast<float*>(reinterpret_cast<char*>(projectile) + 0x150) == 0.0)
     {
-        FUN_00578060(Get3D()->GetUserData());
-        Get3D()->FUN_00450f90(false);
+        FUN_00578060(reinterpret_cast<Node9b34*>(projectile->GetNiNode())->GetUserData());
+        reinterpret_cast<Node9b34*>(projectile->GetNiNode())->FUN_00450f90(false);
     }
-    else if (m_fXValue > DAT_010290d0)
+    else if (*reinterpret_cast<float*>(reinterpret_cast<char*>(projectile) + 0x150) > DAT_010290d0)
     {
-        Get3D()->FUN_00450f90(true);
-        FUN_00578170(Get3D()->GetUserData());
+        reinterpret_cast<Node9b34*>(projectile->GetNiNode())->FUN_00450f90(true);
+        FUN_00578170(reinterpret_cast<Node9b34*>(projectile->GetNiNode())->GetUserData());
     }
-    m_fXValue += fTimeDelta;
-    if (m_fXValue > 1.0)
+    *reinterpret_cast<float*>(reinterpret_cast<char*>(projectile) + 0x150) += args.timeDelta;
+    if (*reinterpret_cast<float*>(reinterpret_cast<char*>(projectile) + 0x150) > 1.0)
     {
-        if (m_kImpacts.FUN_008256d0() || m_bHit)
-            FUN_009bc8f0();
+        if (projectile->kImpacts.IsEmpty() || projectile->byte90)
+            reinterpret_cast<void(__thiscall*)(Projectile*)>(&projectile_update_calls::FinishProjectile)(projectile);
     }
 }
-
-class FUN_00865df0_buf
-{
-  public:
-    void FUN_00865df0(void* ref, int unk = 0);
-};
-
-class BGSSaveFormBuffer : public FUN_00865df0_buf
-{
-  public:
-    void FUN_00865e50(void* data, unsigned int size, int unk = 0);
-    void SaveQuaternion(void* data, unsigned int size, int unk = 0);
-    unsigned int FUN_00865f20();
-    void FUN_00865ff0(int count, unsigned int pos);
-};
 
 class ActorCauseHelper
 {
@@ -10994,19 +8552,19 @@ void ProjectileHelper::SaveProjectile(BGSSaveFormBuffer* buf)
     buf->FUN_00865df0((void*)this->wordF8, 0);
     buf->FUN_00865df0((void*)this->wordFC, 0);
     buf->FUN_00865df0((void*)this->word100, 0);
-    buf->FUN_00865e50(&this->position, 0xc, 0);
+    buf->FUN_00865e50(&this->kMovementDirection, 0xc, 0);
     buf->FUN_00865e50(&this->float110, 4, 0);
     buf->FUN_00865e50(&this->byte118, 1, 0);
     buf->FUN_00865e50(&this->float124, 4, 0);
-    buf->SaveQuaternion(&this->transform, 0x24, 0);
-    buf->FUN_00865e50(&this->transform.storage[0x24], 0xc, 0);
-    buf->FUN_00865e50(&this->transform.storage[0x30], 4, 0);
+    buf->SaveQuaternion(&this->m_kImpactTransform, 0x24, 0);
+    buf->FUN_00865e50(&this->m_kImpactTransform.m_Translate, 0xc, 0);
+    buf->FUN_00865e50(&this->m_kImpactTransform.m_fScale, 4, 0);
     buf->FUN_00865e50(&this->floatEC, 4, 0);
     buf->FUN_00865e50(&this->floatF0, 4, 0);
     buf->FUN_00865e50(&this->floatF4, 4, 0);
 
-    unsigned int causeRef5 = ((NiPointerCauseHelper*)&this->cause)->FUN_00559450()
-                                 ? ((NiPointerCauseHelper*)&this->cause)->FUN_00559450()->FUN_00825c00()
+    unsigned int causeRef5 = ((NiPointerCauseHelper*)&this->m_pActorCause)->FUN_00559450()
+                                 ? ((NiPointerCauseHelper*)&this->m_pActorCause)->FUN_00559450()->FUN_00825c00()
                                  : 0xFFFFFFFF;
     buf->FUN_00865e50(&causeRef5, 4, 0);
 
@@ -11019,7 +8577,7 @@ void ProjectileHelper::SaveProjectile(BGSSaveFormBuffer* buf)
 
     unsigned int count2 = 0;
     unsigned int pos5 = buf->FUN_00865f20();
-    ListNodeHelper* curr = (ListNodeHelper*)&this->list;
+    ListNodeHelper* curr = (ListNodeHelper*)&this->kImpacts;
     while (curr)
     {
         ItemChangeHelper* item = curr->FUN_006815c0()->item;
@@ -11045,15 +8603,7 @@ struct ListItem9c58
     int m_kNextStreamField[4];
 };
 
-struct ItemList9c58
-{
-    ListItem9c58** FUN_006815c0();
-    void FUN_0063f7b0();
-    ListItem9c58* m_pkItem;
-    ItemList9c58* m_pkNext;
-};
 
-bool __fastcall FUN_008256d0(ItemList9c58* pkList);
 
 struct Owned9c58
 {
@@ -11061,275 +8611,44 @@ struct Owned9c58
     int m_kNextStreamField[4];
 };
 
-struct Projectile9c58
-{
-    virtual void V000();
-    virtual void V001();
-    virtual void V002();
-    virtual void V003();
-    virtual void V004();
-    virtual void V005();
-    virtual void V006();
-    virtual void V007();
-    virtual void V008();
-    virtual void V009();
-    virtual void V010();
-    virtual void V011();
-    virtual void V012();
-    virtual void V013();
-    virtual void V014();
-    virtual void V015();
-    virtual void V016();
-    virtual void V017();
-    virtual void V018();
-    virtual void V019();
-    virtual void V020();
-    virtual void V021();
-    virtual void V022();
-    virtual void V023();
-    virtual void V024();
-    virtual void V025();
-    virtual void V026();
-    virtual void V027();
-    virtual void V028();
-    virtual void V029();
-    virtual void V030();
-    virtual void V031();
-    virtual void V032();
-    virtual void V033();
-    virtual void V034();
-    virtual void V035();
-    virtual void V036();
-    virtual void V037();
-    virtual void V038();
-    virtual void V039();
-    virtual void V040();
-    virtual void V041();
-    virtual void V042();
-    virtual void V043();
-    virtual void V044();
-    virtual void V045();
-    virtual void V046();
-    virtual void V047();
-    virtual void V048();
-    virtual void V049();
-    virtual void V050();
-    virtual void V051();
-    virtual void V052();
-    virtual void V053();
-    virtual void V054();
-    virtual void V055();
-    virtual void V056();
-    virtual void V057();
-    virtual void V058();
-    virtual void V059();
-    virtual void V060();
-    virtual void V061();
-    virtual void V062();
-    virtual void V063();
-    virtual void V064();
-    virtual void V065();
-    virtual void V066();
-    virtual void V067();
-    virtual void V068();
-    virtual void V069();
-    virtual void V070();
-    virtual void V071();
-    virtual void V072();
-    virtual void V073();
-    virtual void V074();
-    virtual void V075();
-    virtual void V076();
-    virtual void V077();
-    virtual void V078();
-    virtual void V079();
-    virtual void V080();
-    virtual void V081();
-    virtual void V082();
-    virtual void V083();
-    virtual void V084();
-    virtual void V085();
-    virtual void V086();
-    virtual void V087();
-    virtual void V088();
-    virtual void V089();
-    virtual void V090();
-    virtual void V091();
-    virtual void V092();
-    virtual void V093();
-    virtual void V094();
-    virtual void V095();
-    virtual void V096();
-    virtual void V097();
-    virtual void V098();
-    virtual void V099();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual void V125();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
-    virtual void V144();
-    virtual void V145();
-    virtual void V146();
-    virtual void V147();
-    virtual void V148();
-    virtual void V149();
-    virtual void V150();
-    virtual void V151();
-    virtual void V152();
-    virtual void V153();
-    virtual void V154();
-    virtual void V155();
-    virtual void V156();
-    virtual void V157();
-    virtual void V158();
-    virtual void V159();
-    virtual void V160();
-    virtual void V161();
-    virtual void V162();
-    virtual void V163();
-    virtual void V164();
-    virtual void V165();
-    virtual void V166();
-    virtual void V167();
-    virtual void V168();
-    virtual void V169();
-    virtual void V170();
-    virtual void V171();
-    virtual void V172();
-    virtual void V173();
-    virtual void V174();
-    virtual void V175();
-    virtual void V176();
-    virtual void V177();
-    virtual void V178();
-    virtual void V179();
-    virtual void V180();
-    virtual void V181();
-    virtual void V182();
-    virtual void V183();
-    virtual void V184();
-    virtual void V185();
-    virtual void V186();
-    virtual void V187();
-    virtual void V188();
-    virtual void V189();
-    virtual void V190();
-    virtual void V191();
-    virtual void V192();
-    virtual void V193();
-    virtual void ResetState();
-    char m_acForm[0x84];
-    ItemList9c58 m_kChanges;
-    unsigned char m_ucFlags90;
-    char m_acPad91[3];
-    NiTransform m_kTransform;
-    unsigned int m_uiStateC8;
-    float m_fScaleCC;
-    float m_fScaleD0;
-    float m_fD4;
-    float m_fD8;
-    float m_fDC;
-    float m_fScaleE0;
-    float m_fRangeE4;
-    float m_fE8;
-    float m_fEC;
-    float m_fF0;
-    float m_fScaleF4;
-    unsigned int m_uiF8;
-    unsigned int m_uiFC;
-    unsigned int m_ui100;
-    NiPoint3 m_kPoint104;
-    float m_f110;
-    NiPointer<NiAVObject> m_spVisualA;
-    unsigned char m_ucFlag118;
-    char m_acPad119[3];
-    NiPointer<NiAVObject> m_spVisualB;
-    NiPointer<ActorCause> m_spCause;
-    float m_f124;
-    int m_aiSounds[6];
-    unsigned int m_ui140;
-    Owned9c58* m_pkOwned144;
-    void FUN_00932f60(LoadBuffer9c58* pkBuffer);
-    void FUN_009c58e0(LoadBuffer9c58* pkBuffer);
-};
 
-// Calls FUN_00932f60, clears the change list, resets projectile fields to defaults, deletes m_pkOwned144, and calls ResetState if the buffer check passes.
+// Reverts the mobile object, clears impacts and owned data, and restores projectile defaults.
 // @fnv 0x009c58e0
-void Projectile9c58::FUN_009c58e0(LoadBuffer9c58* pkBuffer)
+void Projectile::FUN_009c58e0(BGSLoadFormBuffer* pkBuffer)
 {
-    FUN_00932f60(pkBuffer);
-    while (!FUN_008256d0(&m_kChanges))
+    MobileObject::Revert(pkBuffer);
+    while (!kImpacts.IsEmpty())
     {
-        delete *m_kChanges.FUN_006815c0();
-        m_kChanges.FUN_0063f7b0();
+        delete reinterpret_cast<BSSimpleList<ListItem9c58*>*>(&kImpacts)->GetItem();
+        kImpacts.RemoveHead();
     }
-    m_uiStateC8 = 0;
-    m_fScaleCC = 1.0f;
-    m_fScaleD0 = 1.0f;
-    m_fD4 = 0.0f;
-    m_fD8 = 0.0f;
-    m_fDC = 0.0f;
-    m_fScaleE0 = 1.0f;
-    m_f110 = 0.0f;
-    m_kPoint104 = NiPoint3::ZERO;
-    m_uiF8 = 0;
-    m_uiFC = 0;
-    m_ui100 = 0;
-    m_spVisualA = 0;
-    m_spVisualB = 0;
-    m_spCause = 0;
-    m_ucFlag118 = 0;
-    m_f124 = 0.0f;
-    m_fRangeE4 = DAT_01016970;
-    m_fE8 = 0.0f;
-    m_fScaleF4 = 1.0f;
-    m_ucFlags90 = 0;
-    m_kTransform.ResetToIdentity();
-    m_ui140 = 0;
-    delete m_pkOwned144;
-    m_pkOwned144 = 0;
-    if (pkBuffer->FUN_00562d00())
-        ResetState();
+    wordC8 = 0;
+    floatCC = 1.0f;
+    floatD0 = 1.0f;
+    floatD4 = 0.0f;
+    floatD8 = 0.0f;
+    floatDC = 0.0f;
+    floatE0 = 1.0f;
+    float110 = 0.0f;
+    *reinterpret_cast<NiPoint3*>(&kMovementDirection) = *reinterpret_cast<const NiPoint3*>(&NiPoint3::ZERO);
+    wordF8 = 0;
+    wordFC = 0;
+    word100 = 0;
+    reinterpret_cast<NiPointer<NiAVObject>*>(&m_pMenuLight)->operator=(0);
+    reinterpret_cast<NiPointer<NiAVObject>*>(&m_pExplosionEffect)->operator=(0);
+    m_pActorCause = 0;
+    byte118 = 0;
+    float124 = 0.0f;
+    floatE4 = DAT_01016970;
+    floatE8 = 0.0f;
+    floatF4 = 1.0f;
+    byte90 = 0;
+    m_kImpactTransform.ResetToIdentity();
+    word140 = 0;
+    delete reinterpret_cast<Owned9c58*>(word144);
+    word144 = 0;
+    if (reinterpret_cast<LoadBuffer9c58*>(pkBuffer)->FUN_00562d00())
+        Do3DLoaded();
 }
 
 namespace fnv_009b41b0 {
@@ -11352,34 +8671,6 @@ struct SoundObj
     char* FUN_00511840();
 };
 
-struct BGSProjectile
-{
-    SoundObj* FUN_004fd3e0();
-    bool FUN_00975300();
-    float FUN_0045cd80();
-    bool FUN_005de080();
-};
-
-struct BSSndHStruct
-{
-    unsigned int m0;
-    bool m4;
-    unsigned char m0b;
-    int m8;
-    BSSndHStruct();
-    ~BSSndHStruct();
-    bool SetPositionFromArray(NiPoint3*);
-    bool FUN_00ad8830(bool);
-};
-
-struct BSAudio
-{
-    BSSndHStruct FUN_00ad7480(const char*, unsigned int, SoundObj*);
-};
-struct BSAudioS
-{
-    static BSAudio* GetSingleton();
-};
 
 struct FloatSetting
 {
@@ -11552,12 +8843,12 @@ void S9b41b0::Update(float afTime)
         FUN_00c6a3d0(v1d0(), FUN_005dbe10(), 1, 0);
         b150 = 1;
         if (FUN_004181e0() && FUN_004181e0()->FUN_004fd3e0() &&
-            !GetFlagMask(FUN_004181e0()->FUN_004fd3e0()->CopyBig().v4))
+            !GetFlagMask(reinterpret_cast<SoundObj*>(FUN_004181e0()->FUN_004fd3e0())->CopyBig().v4))
         {
-            BSSndHStruct h = BSAudioS::GetSingleton()->FUN_00ad7480(FUN_004181e0()->FUN_004fd3e0()->FUN_00511840(),
-                                                                    0x102, FUN_004181e0()->FUN_004fd3e0());
-            h.SetPositionFromArray(v1f4());
-            h.FUN_00ad8830(false);
+            BSSoundHandle h = FUN_00453a70()->FUN_00ad7480(reinterpret_cast<SoundObj*>(FUN_004181e0()->FUN_004fd3e0())->FUN_00511840(),
+                                                                    0x102, reinterpret_cast<void*>(FUN_004181e0()->FUN_004fd3e0()));
+            h.SetPosition(*v1f4());
+            h.Play(false);
         }
     }
     float f;
@@ -11579,21 +8870,12 @@ void S9b41b0::Update(float afTime)
 }
 }  // namespace fnv_009b41b0
 
-class NiPoint3B300
-{
-  public:
-    float x;
-    float y;
-    float z;
-
-    NiPoint3B300* FUN_00416870(float fX, float fY, float fZ);
-};
 
 class ObjB300
 {
   public:
     float FUN_009669c0();
-    void ApplySpeedAndVector(float fScale, NiPoint3B300 kVec);
+    void ApplySpeedAndVector(float fScale, NiPoint3 kVec);
     void ApplyScale(float fScale);
 };
 
@@ -11602,18 +8884,12 @@ class ObjB300
 void ObjB300::ApplyScale(float fScale)
 {
     float fA = fScale;
-    NiPoint3B300 kVec;
-    kVec.FUN_00416870(0.0f, FUN_009669c0() * fA, 0.0f);
+    NiPoint3 kVec(0.0f, FUN_009669c0() * fA, 0.0f);
     ApplySpeedAndVector(fA, kVec);
 }
 
 namespace fnv_009c39e0 {
-struct Vector3
-{
-    float unk00, unk04, unk08;
-    Vector3 FUN_00439ef0(const Vector3&) const;
-    float FUN_004a7290() const;
-};
+
 struct Virtuals
 {
     virtual void unk000();
@@ -11741,7 +9017,7 @@ struct Virtuals
     virtual void unk1E8();
     virtual void unk1EC();
     virtual void unk1F0();
-    virtual const Vector3& Position();
+    virtual const NiPoint3& Position();
     virtual void unk1F8();
     virtual void unk1FC();
     virtual void unk200();
@@ -11752,56 +9028,8 @@ struct Virtuals
     virtual void unk214();
     virtual bool IsCreature();
 };
-struct ActorValues
-{
-    int FUN_0066ef20(int);
-};
-struct Actor : Virtuals
-{
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    ActorValues unkA4;
-    bool FUN_0087f390();
-    bool FUN_008ace90();
-};
+
+
 struct ActorBase
 {
     float FUN_0045cd80();
@@ -11820,10 +9048,7 @@ union SettingValue
     float value;
     int integer;
 };
-struct Setting
-{
-    float* FUN_00403e20();
-};
+
 extern Setting DAT_011cf7e0, DAT_011cf7ac;
 extern Actor* DAT_011dea3c;
 struct Actors
@@ -11943,11 +9168,11 @@ bool Proj::FUN_009c39e0()
             continue;
         if (actor->FUN_0087f390())
             continue;
-        if (actor->IsDead(0))
+        if (actor->GetIsChildSize(false))
             continue;
         if (actor->FUN_008ace90())
             continue;
-        float distance = candidate1->Position().FUN_00439ef0(Position()).FUN_004a7290();
+        float distance = (*reinterpret_cast<const NiPoint3*>(static_cast<const MobileObject*>(candidate1)->GetPos())).FUN_00439ef0(Position()).FUN_004a7290();
         if (distance < radiusSq2 && IsFightReactionAllowed(actor, ownerActor53, ownerForm4))
         {
             found = true;
@@ -11957,7 +9182,7 @@ bool Proj::FUN_009c39e0()
     if (!FUN_00444d00(0x4000) && !found)
     {
         candidate1 = DAT_011dea3c;
-        float distancePlayer = candidate1->Position().FUN_00439ef0(Position()).FUN_004a7290();
+        float distancePlayer = (*reinterpret_cast<const NiPoint3*>(static_cast<const MobileObject*>(candidate1)->GetPos())).FUN_00439ef0(Position()).FUN_004a7290();
         if (distancePlayer < radiusSq2 && IsFightReactionAllowed(DAT_011dea3c, ownerActor53, ownerForm4))
         {
             float chance = 100.0f;
@@ -11970,9 +9195,9 @@ bool Proj::FUN_009c39e0()
     }
     if (found && candidate1)
     {
-        if (candidate1->IsCreature() || candidate1 == DAT_011dea3c)
+        if (candidate1->IsCharacter() || candidate1 == DAT_011dea3c)
             unkE4 = *DAT_011cf7ac.FUN_00403e20() +
-                    FUN_004181e0()->FUN_00644790() * candidate1->unkA4.FUN_0066ef20(35) / 100.0f;
+                    FUN_004181e0()->FUN_00644790() * candidate1->GetActorValueAsInteger(35) / 100.0f;
         else
             unkE4 = *DAT_011cf7ac.FUN_00403e20();
     }
@@ -11980,37 +9205,21 @@ bool Proj::FUN_009c39e0()
 }
 }  // namespace fnv_009c39e0
 
-struct FUN_009bbc40 : Projectile
-{
-    virtual ~FUN_009bbc40();
-};
-
-// @fnv 0x009bbc40
-FUN_009bbc40::~FUN_009bbc40()
-{}
-
+class TESActorBase;
 namespace fnv_009bc470 {
-struct NiNode;
-class NiAVObject
+// This unit uses the projectile-specific deleting destructor at 0x009b3490.
+class ProjectileInventoryStackRecordLifetime : public InventoryStackRecord
 {
-  public:
-    virtual void Unk0();
-    virtual void Unk1();
-    virtual void Unk2();
-    virtual NiNode* GetNiNode();
+public:
+    ~ProjectileInventoryStackRecordLifetime();
 };
+// This entry uses the projectile-specific deleting destructor at 0x009b3490.
+// The shared InventoryStackRecord deleting destructor targets 0x004459e0.
+
 
 bool FUN_005784b0(NiNode*);
 void FUN_00578170(NiNode*);
 
-class TESActorBase;
-class Actor;
-class TESObjectREFR
-{
-  public:
-    NiAVObject* Get3DSimple();
-    virtual void Set3D(NiNode*, bool);
-};
 
 class FUN_009c4f90_This
 {
@@ -12018,17 +9227,6 @@ class FUN_009c4f90_This
     void StopSound();
 };
 
-class BGSProjectile
-{
-  public:
-    bool FUN_009bc870();
-};
-
-class BSSoundHandleEx : public SoundPlaybackHandle
-{
-  public:
-    bool FUN_00ad8da0(int);
-};
 
 class VATS
 {
@@ -12046,77 +9244,16 @@ class FUN_00444d00_Class
     bool FUN_00444d00(int);
 };
 
-class FUN_009bc470;
 
-template <class T> class BSSimpleListEx : public BSSimpleList<T>
-{
-  public:
-    void Remove(const T&);
-    bool FUN_008256d0();
-    struct Node
-    {
-        T data;
-    };
-    Node* FUN_006815c0();
-    void FUN_0063f7b0();
-};
+
 
 class FUN_004610f0_Class
 {
   public:
-    BSSimpleListEx<FUN_009bc470*>* GetOffset70Ptr();
+    BSSimpleList<Projectile*>* GetOffset70Ptr();
 };
 extern FUN_004610f0_Class DAT_011e0e80;
 
-class BaseProcess
-{
-  public:
-    virtual void p0(), p1(), p2(), p3(), p4(), p5(), p6(), p7(), p8(), p9();
-    virtual void p10(), p11(), p12(), p13(), p14(), p15(), p16(), p17(), p18(), p19();
-    virtual void p20(), p21(), p22(), p23(), p24(), p25(), p26(), p27(), p28(), p29();
-    virtual void p30(), p31(), p32(), p33(), p34(), p35(), p36(), p37(), p38(), p39();
-    virtual void p40(), p41(), p42(), p43(), p44(), p45(), p46(), p47(), p48(), p49();
-    virtual void p50(), p51(), p52(), p53(), p54(), p55(), p56(), p57(), p58(), p59();
-    virtual void p60(), p61(), p62(), p63(), p64(), p65(), p66(), p67(), p68(), p69();
-    virtual void p70(), p71(), p72(), p73(), p74(), p75(), p76(), p77(), p78(), p79();
-    virtual void p80(), p81(), p82(), p83(), p84(), p85(), p86(), p87(), p88(), p89();
-    virtual void p90(), p91(), p92(), p93(), p94(), p95(), p96(), p97(), p98(), p99();
-    virtual void p100(), p101(), p102(), p103(), p104(), p105(), p106(), p107(), p108(), p109();
-    virtual void p110(), p111(), p112(), p113(), p114(), p115(), p116(), p117(), p118(), p119();
-    virtual void p120(), p121(), p122(), p123(), p124(), p125(), p126(), p127(), p128(), p129();
-    virtual void p130(), p131(), p132(), p133(), p134(), p135(), p136(), p137(), p138(), p139();
-    virtual void p140(), p141(), p142(), p143(), p144(), p145(), p146(), p147(), p148(), p149();
-    virtual void p150(), p151(), p152(), p153(), p154(), p155(), p156(), p157(), p158(), p159();
-    virtual void p160(), p161(), p162(), p163(), p164(), p165(), p166(), p167(), p168(), p169();
-    virtual void p170(), p171(), p172(), p173(), p174(), p175(), p176(), p177(), p178(), p179();
-    virtual void p180(), p181(), p182(), p183(), p184(), p185(), p186(), p187(), p188(), p189();
-    virtual void p190(), p191(), p192(), p193(), p194(), p195(), p196(), p197(), p198(), p199();
-    virtual void p200(), p201(), p202(), p203(), p204(), p205(), p206(), p207(), p208(), p209();
-    virtual void p210(), p211(), p212(), p213(), p214(), p215(), p216(), p217(), p218(), p219();
-    virtual void p220(), p221(), p222(), p223(), p224();
-    virtual void Virtual384(int);
-};
-
-class Actor
-{
-  public:
-    virtual void a0(), a1(), a2(), a3(), a4(), a5(), a6(), a7(), a8(), a9();
-    virtual void a10(), a11(), a12(), a13(), a14(), a15(), a16(), a17(), a18(), a19();
-    virtual void a20(), a21(), a22(), a23(), a24(), a25(), a26(), a27(), a28(), a29();
-    virtual void a30(), a31(), a32(), a33(), a34(), a35(), a36(), a37(), a38(), a39();
-    virtual void a40(), a41(), a42(), a43(), a44(), a45(), a46(), a47(), a48(), a49();
-    virtual void a50(), a51(), a52(), a53(), a54(), a55(), a56(), a57(), a58(), a59();
-    virtual void a60(), a61(), a62(), a63();
-    virtual bool Virtual100();
-    virtual void b65(), b66(), b67(), b68(), b69();
-    virtual void b70(), b71(), b72(), b73(), b74(), b75(), b76(), b77(), b78(), b79();
-    virtual void b80(), b81(), b82(), b83(), b84(), b85(), b86(), b87(), b88(), b89();
-    virtual void b90(), b91(), b92(), b93(), b94();
-    virtual void Virtual17c(TESActorBase*, int, int, int, int, int, int, int, int, int);
-
-    BaseProcess* GetCurrentAIProcess();
-    TESActorBase* GetActorBase();
-};
 
 class FUN_009b4440_shell
 {
@@ -12128,12 +9265,6 @@ class Holder
 {
   public:
     void FUN_009c3e10();
-};
-
-class InventoryStackRecord
-{
-  public:
-    ~InventoryStackRecord();
 };
 
 class DH
@@ -12152,14 +9283,9 @@ class ST_009333e0
 class WorldSpaceTarget
 {
   public:
-    void RemoveEntryForRef(FUN_009bc470*);
+    void RemoveEntryForRef(Projectile*);
 };
 
-class TESWorldSpace
-{
-  public:
-    WorldSpaceTarget* FUN_00825c00();
-};
 extern TESWorldSpace* BGSSaveLoadGlobalDataWorldspacePtr;
 
 class Class140
@@ -12174,73 +9300,47 @@ class Class144
     ~Class144();
 };
 
-class FUN_009bc470 : public MobileObject
-{
-  public:
-    virtual ~FUN_009bc470();
-    BSSimpleListEx<InventoryStackRecord*> list;
-    unsigned char byte90;
-    char pad91, pad92, pad93;
-    NiTransform transform;
-    unsigned int wordC8;
-    float floatCC, floatD0, floatD4, floatD8, floatDC, floatE0;
-    float floatE4, floatE8, floatEC, floatF0, floatF4;
-    unsigned int wordF8, wordFC, word100;
-    NiPoint2 position;
-    float positionZ;
-    float float110;
-    NiPointer<NiAVObject> visualA;
-    unsigned char byte118;
-    char pad119, pad11A, pad11B;
-    NiPointer<NiAVObject> visualB;
-    NiPointer<ActorCause> cause;
-    float float124;
-    SoundPlaybackHandle soundA, soundB;
-    Class140* word140;
-    Class144* word144;
-    unsigned char byte148;
-    char pad149, pad14A, pad14B;
-    float float14C;
-};
-
 // Deletes word144, list entries, and word140; clears 3D and cause pointers and conditionally calls actor methods.
+}  // namespace fnv_009bc470
+
 // @fnv 0x009bc470
-FUN_009bc470::~FUN_009bc470()
+Projectile::~Projectile()
 {
+    using namespace fnv_009bc470;
     if (word144)
     {
-        delete word144;
+        delete reinterpret_cast<Class144*>(pRockItLauncherEntry);
     }
     word144 = 0;
 
     if (reinterpret_cast<TESObjectREFR*>(this)->Get3DSimple() &&
-        reinterpret_cast<TESObjectREFR*>(this)->Get3DSimple()->GetNiNode() &&
-        FUN_005784b0(reinterpret_cast<TESObjectREFR*>(this)->Get3DSimple()->GetNiNode()))
+        reinterpret_cast<TESObjectREFR*>(this)->Get3DSimple()->IsSceneNode() &&
+        FUN_005784b0(reinterpret_cast<TESObjectREFR*>(this)->Get3DSimple()->IsSceneNode()))
     {
-        FUN_00578170(reinterpret_cast<TESObjectREFR*>(this)->Get3DSimple()->GetNiNode());
+        FUN_00578170(reinterpret_cast<TESObjectREFR*>(this)->Get3DSimple()->IsSceneNode());
     }
     reinterpret_cast<TESObjectREFR*>(this)->TESObjectREFR::Set3D(0, 1);
 
-    reinterpret_cast<FUN_009c4f90_This*>(this)->StopSound();
+    reinterpret_cast<fnv_009bc470::FUN_009c4f90_This*>(this)->StopSound();
 
     if (reinterpret_cast<Actor*>(this)->GetActorBase() &&
         !reinterpret_cast<BGSProjectile*>(reinterpret_cast<Actor*>(this)->GetActorBase())->FUN_009bc870())
     {
-        reinterpret_cast<BSSoundHandleEx*>(&soundA)->FUN_00ad8da0(1000);
+        reinterpret_cast<BSSoundHandle*>(&kSound)->FadeOutAndRelease(1000);
     }
 
-    if (DAT_011f2250.FUN_00441110() == this)
+    if (fnv_009bc470::DAT_011f2250.FUN_00441110() == this)
     {
-        DAT_011f2250.FUN_009c8b90(0);
+        fnv_009bc470::DAT_011f2250.FUN_009c8b90(0);
     }
-    if (DAT_011f2250.FUN_007af430() == this)
+    if (fnv_009bc470::DAT_011f2250.FUN_007af430() == this)
     {
-        DAT_011f2250.SetValue(0);
+        fnv_009bc470::DAT_011f2250.SetValue(0);
     }
 
     if (reinterpret_cast<FUN_00444d00_Class*>(this)->FUN_00444d00(0x80))
     {
-        BSSimpleListEx<FUN_009bc470*>* pList = DAT_011e0e80.GetOffset70Ptr();
+        BSSimpleList<Projectile*>* pList = fnv_009bc470::DAT_011e0e80.GetOffset70Ptr();
         if (pList)
         {
             pList->Remove(this);
@@ -12248,66 +9348,51 @@ FUN_009bc470::~FUN_009bc470()
     }
 
     if (reinterpret_cast<FUN_00444d00_Class*>(this)->FUN_00444d00(0x400) &&
-        reinterpret_cast<FUN_009b4440_shell*>(this)->FUN_009b4440())
+        reinterpret_cast<fnv_009bc470::FUN_009b4440_shell*>(this)->FUN_009b4440())
     {
-        if (reinterpret_cast<FUN_009b4440_shell*>(this)->FUN_009b4440()->Virtual100())
+        if (reinterpret_cast<fnv_009bc470::FUN_009b4440_shell*>(this)->FUN_009b4440()->IsActor())
         {
-            Actor* shooter = reinterpret_cast<FUN_009b4440_shell*>(this)->FUN_009b4440();
+            Actor* shooter = reinterpret_cast<fnv_009bc470::FUN_009b4440_shell*>(this)->FUN_009b4440();
             if (shooter->GetCurrentAIProcess())
             {
                 shooter->GetCurrentAIProcess()->Virtual384(0);
             }
         }
-        reinterpret_cast<FUN_009b4440_shell*>(this)->FUN_009b4440()->Virtual17c(
-            reinterpret_cast<Actor*>(this)->GetActorBase(), 0, 1, 0, 0, 0, 0, 0, 1, 0);
+        reinterpret_cast<fnv_009bc470::FUN_009b4440_shell*>(this)->FUN_009b4440()->RemoveItem(
+            reinterpret_cast<TESForm*>(reinterpret_cast<Actor*>(this)->GetActorBase()), 0, 1, 0, 0, 0, 0, 0, 1, 0);
     }
 
-    reinterpret_cast<Holder*>(this)->FUN_009c3e10();
+    reinterpret_cast<fnv_009bc470::Holder*>(this)->FUN_009c3e10();
 
-    while (!list.FUN_008256d0())
+    while (!reinterpret_cast<BSSimpleList<InventoryStackRecord*>*>(&kImpacts)->IsEmpty())
     {
-        InventoryStackRecord* item = list.FUN_006815c0()->data;
-        delete item;
-        list.FUN_0063f7b0();
+        InventoryStackRecord* item = reinterpret_cast<BSSimpleList<InventoryStackRecord*>*>(&kImpacts)->GetItem();
+        delete reinterpret_cast<ProjectileInventoryStackRecordLifetime*>(item);
+        reinterpret_cast<BSSimpleList<InventoryStackRecord*>*>(&kImpacts)->RemoveHead();
     }
 
     if (!g_dataHandler->FUN_004226e0())
     {
         reinterpret_cast<ST_009333e0*>(this)->FUN_0092ed60(0);
-        BGSSaveLoadGlobalDataWorldspacePtr->FUN_00825c00()->RemoveEntryForRef(this);
+        reinterpret_cast<fnv_009bc470::WorldSpaceTarget*>(BGSSaveLoadGlobalDataWorldspacePtr->FUN_00825c00())->RemoveEntryForRef(this);
     }
 
     if (word140)
     {
-        delete word140;
+        delete reinterpret_cast<Class140*>(pProjectileTarget);
         word140 = 0;
     }
 
-    visualB = 0;
-    cause = 0;
+    m_pExplosionEffect = 0;
+    m_pActorCause = 0;
 }
-}  // namespace fnv_009bc470
+
 
 struct NiRTTI;
 extern NiRTTI const _g_01202e7c;
 
 bool __cdecl FUN_0043b300(NiRTTI const*, NiAVObject*);
 int __fastcall FUN_0045bb80(int);
-
-struct NiNode
-{
-    unsigned int GetNumChildren();
-    NiAVObject* GetAt(unsigned int);
-};
-
-class NiAVObject
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual NiNode* vfn_0c();
-};
 
 struct ProjectileBlastSearch
 {
@@ -12330,7 +9415,7 @@ bool ProjectileBlastSearch::FUN_009c6380(NiAVObject* apRoot, NiPoint3& aBlastPos
         *(NiPoint3*)&aBlastPosition = *(NiPoint3*)FUN_0045bb80((int)apRoot);
     }
 
-    pnode = apRoot->vfn_0c();
+    pnode = apRoot->IsSceneNode();
     if (pnode)
     {
         for (unsigned int i = 0; !bblastNodeFound && i < pnode->GetNumChildren(); ++i)

@@ -6,46 +6,31 @@
 // src/staging/blk_008c0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/hkVector4.h"
+#include "../../include/Setting.h"
+#include "../../include/bhkFilter.h"
+#include "../../include/bhkCollisionObject.h"
+#include "../../include/bhkRigidBody.h"
 
-struct NiPoint3Local
-{
-    float x, y, z;
-};
-struct hkVector4D90
-{
-    unsigned char m_packedComponents[16];
-    void FUN_006815c0();
-};
-hkVector4D90* __cdecl FUN_004a3e00(hkVector4D90* destination, const NiPoint3Local* source);
+hkVector4* __cdecl FUN_004a3e00(hkVector4* destination, const NiPoint3* source);
 class FUN_008c5d90_Class
 {
   public:
-    void FUN_008c5df0(hkVector4D90* converted);
-    void FUN_008c5d90(const NiPoint3Local* source);
+    void FUN_008c5df0(hkVector4* converted);
+    void FUN_008c5d90(const NiPoint3* source);
 };
+// Preserve the original stack-cookie coverage after replacing the local vector representation.
+#pragma strict_gs_check(push, on)
 // @fnv 0x008c5d90
-void FUN_008c5d90_Class::FUN_008c5d90(const NiPoint3Local* source)
+void FUN_008c5d90_Class::FUN_008c5d90(const NiPoint3* source)
 {
-    __declspec(align(16)) hkVector4D90 vector;
-    vector.FUN_006815c0();
+    __declspec(align(16)) hkVector4 vector;
     FUN_008c5df0(FUN_004a3e00(&vector, source));
 }
+#pragma strict_gs_check(pop)
 
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3& operator*=(float fScalar);
-    NiPoint3 operator+(const NiPoint3& kPt) const;
-    NiPoint3 operator*(float fScalar) const;
-    float Length() const;
-};
-
-class ThreeByThreeMatrix
-{
-  public:
-    float m_afEntries[3][3];
-};
 
 struct __declspec(align(16)) Rotation_8cc740
 {
@@ -63,7 +48,7 @@ struct ProjectionData_8cc740
     NiPoint3 m_kValue;
     int m_iArrayLength;
     int m_iFlags;
-    ThreeByThreeMatrix m_kRotationMatrix;
+    NiMatrix3 m_kRotationMatrix;
     ProjectionData_8cc740();
 };
 
@@ -72,14 +57,9 @@ struct Source_8cc740
     const char* FUN_00807080();
 };
 
-struct Transform_8cc740
-{
-    NiPoint3 FUN_004b4500(const NiPoint3& kPt);
-};
-
 struct Node_8cc740
 {
-    Transform_8cc740* FUN_00461130();
+    NiMatrix3* FUN_00461130();
 };
 
 struct Listener_8cc740;
@@ -418,10 +398,9 @@ struct Grid_8cc740
     unsigned int FUN_00457880(const NiPoint3& kPos);
 };
 
-void __cdecl FUN_00525340(NiPoint3* pkPt);
 void __cdecl FUN_00458620(NiPoint3* pkOut, const Rotation_8cc740* pkRot);
 
-extern ThreeByThreeMatrix DAT_011a9448;
+extern NiMatrix3 DAT_011a9448;
 extern NiPoint3 DAT_011a9478;
 extern NiPoint3 DAT_011f426c;
 extern Grid_8cc740* DAT_011dea10;
@@ -577,7 +556,7 @@ void Owner_8cc740::FUN_008cc740(const NiPoint3& kPos, const NiPoint3& kWorldPosi
 {
     m_pUserData = new ProjectionData_8cc740;
     NiPoint3 kIntersectionOffset = m_kOffset;
-    FUN_00525340(&kIntersectionOffset);
+    NiPoint3::FUN_00525340(kIntersectionOffset);
     kIntersectionOffset *= 24.0f;
     m_pUserData->m_iFadeIndex = 2;
     m_pUserData->m_iFlags = 0;
@@ -592,7 +571,7 @@ void Owner_8cc740::FUN_008cc740(const NiPoint3& kPos, const NiPoint3& kWorldPosi
         if (kRot.FUN_00458700(0).FUN_004586d0() == -DAT_01085910)
         {
             if (GetNode())
-                m_pUserData->m_kValue = GetNode()->FUN_00461130()->FUN_004b4500(DAT_011a9478 * m_fScale);
+                m_pUserData->m_kValue = GetNode()->FUN_00461130()->operator*(DAT_011a9478 * m_fScale);
         }
         else
             FUN_00458620(&m_pUserData->m_kValue, &kRot);
@@ -639,19 +618,8 @@ void Owner_8cc740::FUN_008cc740(const NiPoint3& kPos, const NiPoint3& kWorldPosi
         FUN_008cc6d0(3);
 }
 
-struct xP3
-{
-    float x, y, z;
-    bool FUN_00439090(const xP3&) const;
-    xP3 operator*(float) const;
-};
-extern xP3 xg_NiPoint3_ZERO;
-extern xP3 xg_11a9478;
-struct xMat
-{
-    float m[9];
-};
-extern xMat xg_11a9448;
+extern NiPoint3 xg_11a9478;
+extern NiMatrix3 xg_11a9448;
 extern const float xg_1085910;
 union __declspec(align(16)) xM128
 {
@@ -661,7 +629,7 @@ union __declspec(align(16)) xM128
 struct __declspec(align(16)) xVec4
 {
     xM128 m_vComponents;
-    xVec4(const xP3&);
+    xVec4(const NiPoint3&);
     xVec4 FUN_00458700(int) const;
     float FUN_004586d0() const;
 };
@@ -669,26 +637,22 @@ struct xData
 {
     xData();
     int m_iWordAt00;
-    xP3 m_iWordAt04;
-    xP3 m_10;
-    xP3 m_1c;
+    NiPoint3 m_iWordAt04;
+    NiPoint3 m_10;
+    NiPoint3 m_1c;
     int m_28;
     int m_2c;
-    xMat m_30;
+    NiMatrix3 m_30;
 };
 struct xHolder
 {
-    const xP3* FUN_00807080();
-};
-struct xDH
-{
-    xP3 FUN_004b4500(const xP3&);
+    const NiPoint3* FUN_00807080();
 };
 struct xDHOwner
 {
-    xDH* FUN_00461130();
+    NiMatrix3* FUN_00461130();
 };
-void xFUN_00458620(xP3*, xVec4*);
+void xFUN_00458620(NiPoint3*, xVec4*);
 struct xActor
 {
     virtual void v0();
@@ -814,17 +778,17 @@ struct xActor
     int m_90, m_94;
     float m_98;
     xHolder* FUN_009306d0();
-    void FUN_008ccce0(const xP3& akA, const xP3& akB);
+    void FUN_008ccce0(const NiPoint3& akA, const NiPoint3& akB);
 };
 
 // @fnv 0x008ccce0
-void xActor::FUN_008ccce0(const xP3& akA, const xP3& akB)
+void xActor::FUN_008ccce0(const NiPoint3& akA, const NiPoint3& akB)
 {
     if (m_88)
     {
-        if (akB.FUN_00439090(xg_NiPoint3_ZERO))
+        if (akB != NiPoint3::ZERO)
             m_88->m_10 = akB;
-        if (akA.FUN_00439090(xg_NiPoint3_ZERO))
+        if (akA != NiPoint3::ZERO)
             m_88->m_iWordAt04 = akA;
         m_88->m_iWordAt00 = 3;
         m_88->m_28 = 0;
@@ -837,14 +801,14 @@ void xActor::FUN_008ccce0(const xP3& akA, const xP3& akB)
     m_88->m_10 = akB;
     m_88->m_iWordAt04 = akA;
     m_88->m_30 = xg_11a9448;
-    m_88->m_1c = xg_NiPoint3_ZERO;
+    m_88->m_1c = NiPoint3::ZERO;
     if (FUN_009306d0())
     {
         xVec4 V(*FUN_009306d0()->FUN_00807080());
         if (V.FUN_00458700(0).FUN_004586d0() == -xg_1085910)
         {
             if (FUN_1d0())
-                m_88->m_1c = FUN_1d0()->FUN_00461130()->FUN_004b4500(xg_11a9478 * m_98);
+                m_88->m_1c = FUN_1d0()->FUN_00461130()->operator*(xg_11a9478 * m_98);
         }
         else
             xFUN_00458620(&m_88->m_1c, &V);
@@ -853,19 +817,8 @@ void xActor::FUN_008ccce0(const xP3& akA, const xP3& akB)
 }
 
 namespace fnv_008ccfb0 {
-struct xP3
-{
-    float x, y, z;
-    bool FUN_00439090(const xP3&) const;
-    xP3 operator*(float) const;
-};
-extern xP3 xg_NiPoint3_ZERO;
-extern xP3 xg_11a9478;
-struct xMat
-{
-    float m[9];
-};
-extern xMat xg_11a9448;
+extern NiPoint3 xg_11a9478;
+extern NiMatrix3 xg_11a9448;
 extern const float xg_1085910;
 union __declspec(align(16)) xM128
 {
@@ -875,7 +828,7 @@ union __declspec(align(16)) xM128
 struct __declspec(align(16)) xVec4
 {
     xM128 m_vComponents;
-    xVec4(const xP3&);
+    xVec4(const NiPoint3&);
     xVec4 FUN_00458700(int) const;
     float FUN_004586d0() const;
 };
@@ -883,26 +836,22 @@ struct xData
 {
     xData();
     int m_iWordAt00;
-    xP3 m_iWordAt04;
-    xP3 m_10;
-    xP3 m_1c;
+    NiPoint3 m_iWordAt04;
+    NiPoint3 m_10;
+    NiPoint3 m_1c;
     int m_28;
     int m_2c;
-    xMat m_30;
+    NiMatrix3 m_30;
 };
 struct xHolder
 {
-    const xP3* FUN_00807080();
-};
-struct xDH
-{
-    xP3 FUN_004b4500(const xP3&);
+    const NiPoint3* FUN_00807080();
 };
 struct xDHOwner
 {
-    xDH* FUN_00461130();
+    NiMatrix3* FUN_00461130();
 };
-void xFUN_00458620(xP3*, xVec4*);
+void xFUN_00458620(NiPoint3*, xVec4*);
 struct xActor
 {
     virtual void v0();
@@ -1042,17 +991,17 @@ void xActor::FUN_008ccfb0(int aiValue)
         m_88->m_iWordAt00 = 4;
         m_88->m_2c = 0;
         m_88->m_28 = aiValue;
-        m_88->m_10 = xg_NiPoint3_ZERO;
-        m_88->m_iWordAt04 = xg_NiPoint3_ZERO;
+        m_88->m_10 = NiPoint3::ZERO;
+        m_88->m_iWordAt04 = NiPoint3::ZERO;
         m_88->m_30 = xg_11a9448;
-        m_88->m_1c = xg_NiPoint3_ZERO;
+        m_88->m_1c = NiPoint3::ZERO;
         if (FUN_009306d0())
         {
             xVec4 V(*FUN_009306d0()->FUN_00807080());
             if (V.FUN_00458700(0).FUN_004586d0() == -xg_1085910)
             {
                 if (FUN_1d0())
-                    m_88->m_1c = FUN_1d0()->FUN_00461130()->FUN_004b4500(xg_11a9478 * m_98);
+                    m_88->m_1c = FUN_1d0()->FUN_00461130()->operator*(xg_11a9478 * m_98);
             }
             else
                 xFUN_00458620(&m_88->m_1c, &V);
@@ -1063,28 +1012,6 @@ void xActor::FUN_008ccfb0(int aiValue)
 }  // namespace fnv_008ccfb0
 
 #include <xmmintrin.h>
-class TESFormRef8CD
-{
-  public:
-    TESFormRef8CD();
-    int GetValue() const;
-    int GetType() const;
-    void* m_pkForm;
-};
-
-class MagicItem8CD;
-class TESObjectREFR8CD
-{
-  public:
-    MagicItem8CD* GetMagicItem();
-};
-
-class MagicItem8CD
-{
-  public:
-    TESFormRef8CD GetSpell() const;
-    float GetRange() const;
-};
 
 class SpellHandle8CD
 {
@@ -1094,12 +1021,6 @@ class SpellHandle8CD
     int m_iHandle;
 };
 
-class Transform8CD
-{
-  public:
-    Transform8CD();
-    __m128 m_vComponents;
-};
 
 class Caster8CD
 {
@@ -1164,7 +1085,7 @@ class Caster8CD
     virtual void vc0e4();
     virtual void vc0e8();
     virtual void vc0ec();
-    virtual void GetTransform(Transform8CD& kOut);
+    virtual void GetTransform(hkVector4& kOut);
     void SetHandle(SpellHandle8CD kHandle);
 };
 
@@ -1200,10 +1121,11 @@ class Target8CD
 
 void* __cdecl FUN_004b5260(void* pvTarget);
 void __cdecl FUN_00c6a350(void* pvSource, int a, int b, int c, int d);
-void __cdecl FUN_0062a7e0(Transform8CD* pkTransform, void* pvTarget);
+void __cdecl FUN_0062a7e0(hkVector4* pkTransform, void* pvTarget);
 void __cdecl FUN_005b5e40(const char* pcMessage);
 
-class Projectile8CD
+// 0x008cd520 binds ArrowProjectile::HandleType1; its collision pointer is at +0x88, unlike Projectile.
+class ArrowImpactHandler
 {
   public:
     virtual void vp000();
@@ -1413,19 +1335,21 @@ class Projectile8CD
     bool FUN_008cd520(Caster8CD* pkCaster);
 };
 
+// Preserve the original stack-cookie coverage after replacing the local vector representation.
+#pragma strict_gs_check(push, on)
 // @fnv 0x008cd520
-bool Projectile8CD::FUN_008cd520(Caster8CD* pkCaster)
+bool ArrowImpactHandler::FUN_008cd520(Caster8CD* pkCaster)
 {
     Prepare();
     if (m_pkTarget->m_iActive)
     {
-        TESObjectREFR8CD* pkRef = (TESObjectREFR8CD*)FUN_004b5260(m_pkTarget->m_pvTarget);
+        bhkCollisionObject* pkRef = (bhkCollisionObject*)FUN_004b5260(m_pkTarget->m_pvTarget);
         if (!pkRef)
             return false;
-        MagicItem8CD* pkItem = pkRef->GetMagicItem();
+        bhkRigidBody* pkItem = static_cast<bhkRigidBody*>(pkRef->FUN_006fa820());
         FUN_00c6a350(GetSource(), 4, 1, 0, 1);
-        SpellHandle8CD kHandle(6, pkItem->GetSpell().GetValue(), 0);
-        if (pkItem->GetSpell().GetType() != 4)
+        SpellHandle8CD kHandle(6, pkItem->FUN_0043b4f0().FUN_004a3a20(), 0);
+        if (pkItem->FUN_0043b4f0().FUN_0043b4d0() != 4)
             kHandle.SetFlags(0xf);
         pkCaster->SetHandle(kHandle);
         Listener8CD* pkListener = g_kListeners8CD.Get();
@@ -1433,9 +1357,9 @@ bool Projectile8CD::FUN_008cd520(Caster8CD* pkCaster)
             pkListener->Add((void*)this);
         if (pkCaster)
         {
-            if (pkItem->GetRange() > 0.0)
+            if (pkItem->GetBodyMass() > 0.0)
             {
-                Transform8CD kTransform;
+                hkVector4 kTransform;
                 pkCaster->GetTransform(kTransform);
                 FUN_0062a7e0(&kTransform, m_pkTarget->m_pvTarget);
             }
@@ -1449,35 +1373,14 @@ bool Projectile8CD::FUN_008cd520(Caster8CD* pkCaster)
     }
     return true;
 }
+#pragma strict_gs_check(pop)
 
-struct Vec3D0020
-{
-    float x, y, z;
-};
-struct __declspec(align(16)) VecD0020
-{
-    __m128 quad;
-    VecD0020();
-    VecD0020(float);
-    void FUN_0062aea0();
-    void FUN_00627920(const VecD0020&);
-};
-void __cdecl FUN_004a3e00(VecD0020*, const Vec3D0020*);
-struct SettingD0020
-{
-    float& FUN_00403e20();
-};
-extern SettingD0020 DAT_011ce3e4;
-extern SettingD0020 DAT_011cecac;
-extern SettingD0020 DAT_011cf9d4;
-extern SettingD0020 DAT_011ce798;
-extern SettingD0020 DAT_011cf114;
-extern SettingD0020 DAT_011ce224;
-struct TypeD0020
-{
-    int value;
-    int FUN_0043b4d0();
-};
+extern Setting DAT_011ce3e4;
+extern Setting DAT_011cecac;
+extern Setting DAT_011cf9d4;
+extern Setting DAT_011ce798;
+extern Setting DAT_011cf114;
+extern Setting DAT_011ce224;
 struct BodyD0020
 {
     void FUN_00483710();
@@ -1527,19 +1430,21 @@ struct ObjectD0020
     virtual void v24();
     virtual void v25();
     virtual BodyD0020* GetBody();
-    void FUN_0043b4f0(TypeD0020*);
+    bhkFilter FUN_0043b4f0();
     float FUN_004b5400();
-    ResultD0020* FUN_004ae750(const VecD0020&, const VecD0020&);
+    ResultD0020* FUN_004ae750(const hkVector4&, const hkVector4&);
 };
 struct TargetD0020
 {
     bool GetByteAtOffsetC3();
     float FUN_008d01e0();
     void SetByteAtOffsetC3(bool);
-    void FUN_008d0020(Vec3D0020 position, Vec3D0020 direction, ObjectD0020* object);
+    void FUN_008d0020(NiPoint3 position, NiPoint3 direction, ObjectD0020* object);
 };
+// Preserve the original stack-cookie coverage after replacing the local vector representation.
+#pragma strict_gs_check(push, on)
 // @fnv 0x008d0020
-void TargetD0020::FUN_008d0020(Vec3D0020 position, Vec3D0020 direction, ObjectD0020* object)
+void TargetD0020::FUN_008d0020(NiPoint3 position, NiPoint3 direction, ObjectD0020* object)
 {
     if (!object || GetByteAtOffsetC3())
         return;
@@ -1547,33 +1452,32 @@ void TargetD0020::FUN_008d0020(Vec3D0020 position, Vec3D0020 direction, ObjectD0
     if (body)
     {
         float strength = FUN_008d01e0();
-        TypeD0020 type;
-        object->FUN_0043b4f0(&type);
+        bhkFilter type = object->FUN_0043b4f0();
         switch (type.FUN_0043b4d0())
         {
         case 14:
-            strength *= DAT_011ce3e4.FUN_00403e20();
+            strength *= *DAT_011ce3e4.FUN_00403e20();
             break;
         case 8:
-            strength *= DAT_011cecac.FUN_00403e20();
+            strength *= *DAT_011cecac.FUN_00403e20();
             break;
         case 10:
-            strength *= DAT_011cf9d4.FUN_00403e20();
+            strength *= *DAT_011cf9d4.FUN_00403e20();
             break;
         default:
-            strength *= DAT_011ce798.FUN_00403e20();
+            strength *= *DAT_011ce798.FUN_00403e20();
             break;
         }
         float weight = object->FUN_004b5400();
-        if (weight < DAT_011cf114.FUN_00403e20())
-            strength *= weight / DAT_011cf114.FUN_00403e20();
-        strength *= DAT_011ce224.FUN_00403e20();
-        VecD0020 dir;
+        if (weight < *DAT_011cf114.FUN_00403e20())
+            strength *= weight / *DAT_011cf114.FUN_00403e20();
+        strength *= *DAT_011ce224.FUN_00403e20();
+        hkVector4 dir;
         FUN_004a3e00(&dir, &direction);
-        VecD0020 pos;
+        hkVector4 pos;
         FUN_004a3e00(&pos, &position);
         dir.FUN_0062aea0();
-        VecD0020 scale(strength);
+        hkSimdReal scale(strength);
         dir.FUN_00627920(scale);
         body->FUN_00483710();
         object->FUN_004ae750(dir, pos)->ApplyVirtualCall();
@@ -1581,6 +1485,7 @@ void TargetD0020::FUN_008d0020(Vec3D0020 position, Vec3D0020 direction, ObjectD0
     }
     SetByteAtOffsetC3(true);
 }
+#pragma strict_gs_check(pop)
 
 struct __declspec(align(16)) Quat08
 {
@@ -1650,12 +1555,6 @@ struct FUN_00807770_Class
     int FUN_00807770(int);
 };
 void* __cdecl FUN_004b59f0(const void*);
-struct GlobalObject_008c71b0
-{
-    int value;
-    GlobalObject_008c71b0(int);
-    int FUN_0043b4d0();
-};
 void* __cdecl GetReferenceFromObject(Col_0043b4f0*);
 struct FUN_0089f4e0_shell
 {
@@ -1676,7 +1575,7 @@ void Holder00807080::FUN_008d1180(FUN_00807770_Class* nodes, Data08* data)
         Rec08* record = &data->records[i];
         Node08* node = (Node08*)nodes->FUN_00807770(i);
         void* collision = FUN_004b59f0(node->collision);
-        GlobalObject_008c71b0 filter(node->collision->FUN_0043b540());
+        bhkFilter filter(node->collision->FUN_0043b540());
         int layer = filter.FUN_0043b4d0();
         if (!collision)
         {

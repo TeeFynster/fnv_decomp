@@ -1,3 +1,25 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkQuaternion.h"
+#include "../../../../../../include/hkTransform.h"
+#include <string.h>
+#include "../../../../../../include/hkSimdReal.h"
+
+inline hkSimdReal::hkSimdReal(const __m128& v) : value(v)
+{}
+
+inline const __m128& hkSimdReal::getQuad() const
+{
+    return value;
+}
+
 // src/havok/animation/animation/motion/default/hkadefaultanimatedreferenceframe_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/animation/animation/motion/default/hkadefaultanimatedreferenceframe_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -54,15 +76,6 @@ struct Projection363_Input
     int unk08;
     float unk0C;
 };
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
-};
-struct Projection363_Helper
-{
-    __m128 rotation;
-    int FUN_00cb2ca0(void* p, Vec4* f2, float* f1);
-};
 __forceinline __m128 Dot363(const __m128& a, const __m128& b)
 {
     __m128 m = _mm_mul_ps(a, b);
@@ -80,140 +93,104 @@ __forceinline __m128 Cross363(const __m128& v1, const __m128& v2)
     const __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1, v1, 0xd2), _mm_shuffle_ps(v2, v2, 0xc9));
     return _mm_sub_ps(cross0, cross1);
 }
-struct OutVec
-{
-    __m128 m_vComponents;
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline void add4(const __m128& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v);
-    }
-};
 struct Motion363
 {
     __m128 vector;
-    Projection363_Helper angular;
+    hkQuaternion angular;
 };
-void FUN_00e41220(Projection363_Owner* a, Motion363* __restrict b, Projection363_Input* c, OutVec* out);
-struct VectorComponentValue
+void FUN_00e41220(Projection363_Owner* a, Motion363* __restrict b, Projection363_Input* c, hkVector4* out);
+inline hkVector4::hkVector4(const hkVector4& a)
 {
-    __m128 value;
-    VectorComponentValue(const __m128& v) : value(v)
-    {}
-    const __m128& getQuad() const
-    {
-        return value;
-    }
-};
-struct hkQuaternion;
-struct hkVector4
+    memcpy(m_f, a.m_f, sizeof(m_f));
+}
+inline void hkVector4::operator=(const hkVector4& a)
 {
-    __m128 v;
-    hkVector4()
-    {}
-    hkVector4(const hkVector4& a) : v(a.v)
-    {}
-    void operator=(const hkVector4& a)
-    {
-        v = a.v;
-    }
-    __m128& getQuad()
-    {
-        return v;
-    }
-    const __m128& getQuad() const
-    {
-        return v;
-    }
-    operator __m128() const
-    {
-        return v;
-    }
-    void setAdd4(const hkVector4& a, const hkVector4& b)
-    {
-        v = _mm_add_ps(a.v, b.v);
-    }
-    void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        v = _mm_sub_ps(a.v, b.v);
-    }
-    void setMul4(const hkVector4& a, const hkVector4& b)
-    {
-        v = _mm_mul_ps(a.v, b.v);
-    }
-    void setAddMul4(const hkVector4& a, const hkVector4& b, const hkVector4& c)
-    {
-        v = _mm_add_ps(a.v, _mm_mul_ps(b.v, c.v));
-    }
-    void addMul4(const hkVector4& a, const hkVector4& b)
-    {
-        v = _mm_add_ps(v, _mm_mul_ps(a.v, b.v));
-    }
-    void add4(const hkVector4& a)
-    {
-        v = _mm_add_ps(v, a.v);
-    }
-    void sub4(const hkVector4& a)
-    {
-        v = _mm_sub_ps(v, a.v);
-    }
-    void SetAllComponents(float a)
-    {
-        v = _mm_set1_ps(a);
-    }
-    void SetAllComponents(const VectorComponentValue& a)
-    {
-        v = _mm_shuffle_ps(a.getQuad(), a.getQuad(), 0);
-    }
-    void broadcast(int i)
-    {
-        if (i == 0)
-            v = _mm_shuffle_ps(v, v, 0);
-        else if (i == 1)
-            v = _mm_shuffle_ps(v, v, 0x55);
-        else if (i == 2)
-            v = _mm_shuffle_ps(v, v, 0xaa);
-        else if (i == 3)
-            v = _mm_shuffle_ps(v, v, 0xff);
-    }
-    void setBroadcast(const hkVector4& a, int i)
-    {
-        if (i == 0)
-            v = _mm_shuffle_ps(a.v, a.v, 0);
-        else if (i == 1)
-            v = _mm_shuffle_ps(a.v, a.v, 0x55);
-        else if (i == 2)
-            v = _mm_shuffle_ps(a.v, a.v, 0xaa);
-        else if (i == 3)
-            v = _mm_shuffle_ps(a.v, a.v, 0xff);
-    }
-    VectorComponentValue dot3(const hkVector4& a) const
-    {
-        __m128 prod = _mm_mul_ps(v, a.v);
-        __m128 xy = _mm_add_ss(_mm_shuffle_ps(prod, prod, 0x55), prod);
-        return _mm_add_ss(_mm_shuffle_ps(prod, prod, 0xaa), xy);
-    }
-    void setCross(const hkVector4& a, const hkVector4& b)
-    {
-        __m128 first = _mm_mul_ps(_mm_shuffle_ps(a.v, a.v, 0xc9), _mm_shuffle_ps(b.v, b.v, 0xd2));
-        __m128 second = _mm_mul_ps(_mm_shuffle_ps(a.v, a.v, 0xd2), _mm_shuffle_ps(b.v, b.v, 0xc9));
-        v = _mm_sub_ps(first, second);
-    }
-    void setXYZW(const hkVector4& a, const hkVector4& b)
-    {
-        __m128 high = _mm_unpackhi_ps(a.v, b.v);
-        v = _mm_shuffle_ps(a.v, high, 0xc4);
-    }
-    void setReciprocal3(const hkVector4& a);
-    void setXYZ0(const hkVector4& a);
-    void setNeg4(const hkVector4& a);
-    void setNeg3(const hkVector4& a);
-    __forceinline void SetRotatedDirection(const hkQuaternion& q, const hkVector4& direction);
-    __forceinline void setRotatedInverseDir(const hkQuaternion& q, const hkVector4& direction);
-};
+    m_vComponents = a.m_vComponents;
+}
+inline __m128& hkVector4::getQuad()
+{
+    return m_vComponents;
+}
+inline const __m128& hkVector4::getQuad() const
+{
+    return m_vComponents;
+}
+inline void hkVector4::setAdd4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
+}
+inline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+inline void hkVector4::setMul4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+}
+inline void hkVector4::setAddMul4(const hkVector4& a, const hkVector4& b, const hkVector4& c)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(b.m_vComponents, c.m_vComponents));
+}
+inline void hkVector4::addMul4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents));
+}
+inline void hkVector4::add4(const hkVector4& a)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
+}
+inline void hkVector4::sub4(const hkVector4& a)
+{
+    m_vComponents = _mm_sub_ps(m_vComponents, a.m_vComponents);
+}
+inline void hkVector4::SetAllComponents(float a)
+{
+    m_vComponents = _mm_set1_ps(a);
+}
+inline void hkVector4::SetAllComponents(const hkSimdReal& a)
+{
+    m_vComponents = _mm_shuffle_ps(a.getQuad(), a.getQuad(), 0);
+}
+inline void hkVector4::broadcast(int i)
+{
+    if (i == 0)
+        m_vComponents = _mm_shuffle_ps(m_vComponents, m_vComponents, 0);
+    else if (i == 1)
+        m_vComponents = _mm_shuffle_ps(m_vComponents, m_vComponents, 0x55);
+    else if (i == 2)
+        m_vComponents = _mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa);
+    else if (i == 3)
+        m_vComponents = _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
+}
+inline void hkVector4::setBroadcast(const hkVector4& a, int i)
+{
+    if (i == 0)
+        m_vComponents = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0);
+    else if (i == 1)
+        m_vComponents = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0x55);
+    else if (i == 2)
+        m_vComponents = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xaa);
+    else if (i == 3)
+        m_vComponents = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xff);
+}
+inline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    __m128 prod = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    __m128 xy = _mm_add_ss(_mm_shuffle_ps(prod, prod, 0x55), prod);
+    return _mm_add_ss(_mm_shuffle_ps(prod, prod, 0xaa), xy);
+}
+inline void hkVector4::setCross(const hkVector4& a, const hkVector4& b)
+{
+    __m128 first = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9), _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2));
+    __m128 second = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2), _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(first, second);
+}
+inline void hkVector4::setXYZW(const hkVector4& a, const hkVector4& b)
+{
+    __m128 high = _mm_unpackhi_ps(a.m_vComponents, b.m_vComponents);
+    m_vComponents = _mm_shuffle_ps(a.m_vComponents, high, 0xc4);
+}
+
 extern const hkVector4 DAT_010c71e0, DAT_010c7170;
 extern const hkVector4 DAT_010c4c10, DAT_010c4c00, DAT_010c44d0;
 inline __m128 reciprocal(__m128 x)
@@ -227,56 +204,51 @@ inline void hkVector4::setReciprocal3(const hkVector4& a)
     one.getQuad() = DAT_010c7170.getQuad();
     hkVector4 joined;
     joined.setXYZW(a, one);
-    v = reciprocal(joined.v);
+    m_vComponents = reciprocal(joined.m_vComponents);
 }
 inline void hkVector4::setXYZ0(const hkVector4& a)
 {
-    v = _mm_and_ps(a, DAT_010c4c10.v);
+    m_vComponents = _mm_and_ps(a, DAT_010c4c10.m_vComponents);
 }
 inline void hkVector4::setNeg4(const hkVector4& a)
 {
-    v = _mm_xor_ps(a.v, DAT_010c44d0.v);
+    m_vComponents = _mm_xor_ps(a.m_vComponents, DAT_010c44d0.m_vComponents);
 }
 inline void hkVector4::setNeg3(const hkVector4& a)
 {
-    v = _mm_xor_ps(a.v, DAT_010c4c00.v);
+    m_vComponents = _mm_xor_ps(a.m_vComponents, DAT_010c4c00.m_vComponents);
 }
-struct hkQuaternion
+inline const hkVector4& hkQuaternion::getImag() const
 {
-    hkVector4 m_vec;
-    const hkVector4& getImag() const
-    {
-        return m_vec;
-    }
-    void SetConjugate(const hkQuaternion& q)
-    {
-        m_vec.setNeg3(q.getImag());
-    }
-    void FUN_00c66320(const hkQuaternion& a, const hkQuaternion& b);
-};
+    return *reinterpret_cast<const hkVector4*>(&unk00);
+}
+inline void hkQuaternion::SetConjugate(const hkQuaternion& q)
+{
+    reinterpret_cast<hkVector4*>(&unk00)->setNeg3(q.getImag());
+}
 inline void hkQuaternion::FUN_00c66320(const hkQuaternion& a, const hkQuaternion& b)
 {
     hkVector4 imaginary;
     imaginary.setCross(a.getImag(), b.getImag());
     hkVector4 aw;
-    aw.setBroadcast(a.m_vec, 3);
+    aw.setBroadcast(a.getImag(), 3);
     hkVector4 bw;
-    bw.setBroadcast(b.m_vec, 3);
+    bw.setBroadcast(b.getImag(), 3);
     imaginary.addMul4(aw, b.getImag());
     imaginary.addMul4(bw, a.getImag());
     hkVector4 dot;
-    dot.SetAllComponents(a.m_vec.dot3(b.m_vec));
+    dot.SetAllComponents(a.getImag().dot3(b.getImag()));
     hkVector4 product;
-    product.setMul4(a.m_vec, b.m_vec);
+    product.setMul4(a.getImag(), b.getImag());
     product.sub4(dot);
-    m_vec.setXYZW(imaginary, product);
+    reinterpret_cast<hkVector4*>(&unk00)->setXYZW(imaginary, product);
 }
 __forceinline void hkVector4::SetRotatedDirection(const hkQuaternion& q, const hkVector4& direction)
 {
     hkVector4 half;
     half.getQuad() = DAT_010c71e0.getQuad();
     hkVector4 real;
-    real.setBroadcast(q.m_vec, 3);
+    real.setBroadcast(q.getImag(), 3);
     hkVector4 factor;
     factor.setAddMul4(half, real, real);
     hkVector4 sum;
@@ -295,7 +267,7 @@ __forceinline void hkVector4::setRotatedInverseDir(const hkQuaternion& q, const 
     hkVector4 half;
     half.getQuad() = DAT_010c71e0.getQuad();
     hkVector4 real;
-    real.setBroadcast(q.m_vec, 3);
+    real.setBroadcast(q.getImag(), 3);
     hkVector4 factor;
     factor.setAddMul4(half, real, real);
     hkVector4 sum;
@@ -309,37 +281,6 @@ __forceinline void hkVector4::setRotatedInverseDir(const hkQuaternion& q, const 
     sum.addMul4(real, cross);
     setAdd4(sum, sum);
 }
-struct hkTransform
-{
-    hkVector4 m_vTranslation;
-    hkQuaternion m_rotation;
-    hkVector4 m_vScale;
-    __forceinline hkTransform()
-    {}
-    __forceinline void SetConjugate(const hkTransform& a)
-    {
-        m_vTranslation.setRotatedInverseDir(a.m_rotation, a.m_vTranslation);
-        m_vTranslation.setNeg4(m_vTranslation);
-        m_rotation.SetConjugate(a.m_rotation);
-        hkVector4 scale;
-        scale.setReciprocal3(a.m_vScale);
-        m_vScale.setXYZ0(scale);
-    }
-    __forceinline void SetProduct(const hkTransform& a, const hkTransform& b)
-    {
-        hkVector4 shift;
-        shift.SetRotatedDirection(a.m_rotation, b.m_vTranslation);
-        m_vTranslation.setAdd4(a.m_vTranslation, shift);
-        m_rotation.FUN_00c66320(a.m_rotation, b.m_rotation);
-        m_vScale.setMul4(a.m_vScale, b.m_vScale);
-    }
-    __forceinline void SetMulInverse(const hkTransform& a, const hkTransform& b)
-    {
-        hkTransform inv;
-        inv.SetConjugate(a);
-        SetProduct(inv, b);
-    }
-};
 struct AnimatedFrame
 {
     virtual void v00();
@@ -354,47 +295,25 @@ struct AnimatedFrame
 
 extern __m128 DAT_010ec7f0;
 
-struct __declspec(align(16)) S00e41100_Vec4
-{
-    float m_v[4];
-    __m128 getQuad() const
-    {
-        return _mm_load_ps(m_v);
-    }
-    void setQuad(__m128 q)
-    {
-        _mm_store_ps(m_v, q);
-    }
-};
 
-struct S00e41100_Quat
-{
-    S00e41100_Vec4 m_vec;
-    void FUN_00cb2450(const S00e41100_Vec4& axis, float angle);
-};
+#include "../../../../../../include/hkQsTransform.h"
 
-struct S00e41100_hkQsTransform
-{
-    S00e41100_Vec4 m_vTranslation;
-    S00e41100_Quat m_rotation;
-    S00e41100_Vec4 m_vScale;
-};
 
 struct S00e41100_LinearKeyTrack
 {
     virtual ~S00e41100_LinearKeyTrack();
-    S00e41100_Vec4 m_kAxisEndPoints;
-    S00e41100_Vec4 m_unk20;
+    hkVector4 m_kAxisEndPoints;
+    hkVector4 m_unk20;
     float m_fAnimationDuration;
-    S00e41100_Vec4* m_keys;
+    hkVector4* m_keys;
     int m_numKeys;
     int m_iCapacityState;
 
-    void FUN_00e41100(float time, S00e41100_hkQsTransform& out);
+    void FUN_00e41100(float time, hkQsTransform& out);
 };
 
 // @fnv 0x00e41100
-void S00e41100_LinearKeyTrack::FUN_00e41100(float time, S00e41100_hkQsTransform& out)
+void S00e41100_LinearKeyTrack::FUN_00e41100(float time, hkQsTransform& out)
 {
     int last = m_numKeys - 1;
     float dt = m_fAnimationDuration / last;
@@ -415,13 +334,13 @@ void S00e41100_LinearKeyTrack::FUN_00e41100(float time, S00e41100_hkQsTransform&
             i--;
         }
         float f = time / dt - i;
-        S00e41100_Vec4 a = m_keys[i];
-        S00e41100_Vec4 b = m_keys[i + 1];
+        hkVector4 a = m_keys[i];
+        hkVector4 b = m_keys[i + 1];
         __m128 t = _mm_load_ss(&f);
         t = _mm_shuffle_ps(t, t, 0);
         v = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, t), a.getQuad()), _mm_mul_ps(b.getQuad(), t));
     }
-    out.m_vTranslation.setQuad(v);
+    out.m_vTranslation.getQuad() = v;
     out.m_rotation.FUN_00cb2450(m_kAxisEndPoints, v.m128_f32[3]);
-    out.m_vScale.setQuad(_mm_set_ps1(1.0f));
+    out.m_vScale.getQuad() = _mm_set_ps1(1.0f);
 }

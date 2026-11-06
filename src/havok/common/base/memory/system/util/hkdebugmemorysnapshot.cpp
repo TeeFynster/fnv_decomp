@@ -2,151 +2,42 @@
 // src/havok/common/base/memory/system/util/hkdebugmemorysnapshot.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/memory/system/util/hkdebugmemorysnapshot.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkMemoryBlock
-{
-    unsigned int m_uiSize;
-};
-struct MemoryBlockList
-{
-    hkMemoryBlock* m_pBlocks;
-    unsigned int m_uiBlockCount;
-    unsigned int m_uiBlockCapacity;
-    void Sort();
-    void FUN_00dd7090(MemoryBlockList& other);
-};
-// @fnv 0x00dd7090
-void MemoryBlockList::FUN_00dd7090(MemoryBlockList& other)
-{
-    Sort();
-    other.Sort();
-    hkMemoryBlock* a = m_pBlocks;
-    hkMemoryBlock* aEnd = a + m_uiBlockCapacity;
-    hkMemoryBlock* b = other.m_pBlocks;
-    hkMemoryBlock* pBlockBEnd = b + other.m_uiBlockCapacity;
-    while (a < aEnd && b < pBlockBEnd)
-    {
-        if (a->m_uiSize == b->m_uiSize)
-        {
-            a->m_uiSize = 0;
-            ++a;
-            ++b;
-        }
-        else if (a->m_uiSize < b->m_uiSize)
-            ++a;
-        else
-            ++b;
-    }
-}
+#include "../../../../../../../include/hkMemoryAllocator.h"
 
-class hkMemoryAllocatorDD6E
-{
-  public:
-    virtual ~hkMemoryAllocatorDD6E() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
+// The router returned by 0x00c85750 exposes the debug allocator at offset 0x14.
 
-struct hkMemoryRouterDD6E
+class DebugAllocatorRouter
 {
+public:
     int unk00;
     int unk04;
     int unk08;
-    int unk0C;
-    hkMemoryAllocatorDD6E* m_pStreamAllocator;
-    hkMemoryAllocatorDD6E* m_pSolver;
-    hkMemoryAllocatorDD6E& solver()
+    union
     {
-        return *m_pSolver;
-    }
-};
+        int unk0C;
+        int unk0c;
+    };
+    hkMemoryAllocator* m_pStreamAllocator;
 
-namespace hkRouterDD6E {
-extern "C" hkMemoryRouterDD6E& __cdecl FUN_00c85750() throw();
-}
-
-template <typename T> inline void hkDeallocateChunkDD6E(T* p, int n)
-{
-    hkRouterDD6E::FUN_00c85750().solver().ReleaseBlock(p, n * sizeof(T));
-}
-
-struct hkEntryDD6E
-{
-    int unk00[18];
-};
-
-class hkBufferDD6E
-{
-  public:
-    int* m_ppIndices;
-    hkEntryDD6E* m_entries;
-    int m_pRayCursor;
-
-    void FreeBuffers();
-};
-
-// Deallocates the two arrays when the first pointer is set, then nulls both pointers and the count.
-// @fnv 0x00dd6ec0
-void hkBufferDD6E::FreeBuffers()
-{
-    if (m_ppIndices)
+    hkMemoryAllocator& heap()
     {
-        hkDeallocateChunkDD6E(m_ppIndices, m_pRayCursor);
-        hkDeallocateChunkDD6E(m_entries, m_pRayCursor);
+        return *m_pStreamAllocator;
     }
-    m_ppIndices = 0;
-    m_entries = 0;
-    m_pRayCursor = 0;
-}
 
-struct hkMemoryAllocatorQ
-{
-    virtual void vf00();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
+    hkMemoryAllocator& debug();
 };
 
-struct hkMemoryRouterQ
+inline hkMemoryAllocator& DebugAllocatorRouter::debug()
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    hkMemoryAllocatorQ* m_pDebugAllocator;
-    hkMemoryAllocatorQ& debug()
-    {
-        return *m_pDebugAllocator;
-    }
-};
-
-hkMemoryRouterQ* __cdecl FUN_00c85750();
-
-template <typename T> inline T* hkAllocateDebug(int n)
-{
-    return (T*)FUN_00c85750()->debug().AllocateMemoryBlock(n * sizeof(T));
-}
-
-template <typename T> inline void hkDeallocateDebug(T* p, int n)
-{
-    FUN_00c85750()->debug().ReleaseBlock(p, n * sizeof(T));
+    // The debug allocator follows the stream allocator in the router layout.
+    return **reinterpret_cast<hkMemoryAllocator**>(
+        reinterpret_cast<char*>(&m_pStreamAllocator) + sizeof(m_pStreamAllocator));
 }
 
 typedef unsigned int hkSnapshotAddress;
 
-bool __cdecl LessThan(const hkSnapshotAddress* a, const hkSnapshotAddress* b);
-void __cdecl FUN_00dd7d00(const hkSnapshotAddress** p, int lo, int hi,
-                          bool(__cdecl* cmp)(const hkSnapshotAddress*, const hkSnapshotAddress*));
-
-inline void hkQuickSortQ(const hkSnapshotAddress** p, int size,
-                         bool(__cdecl* cmp)(const hkSnapshotAddress*, const hkSnapshotAddress*))
-{
-    if (size > 1)
-    {
-        FUN_00dd7d00(p, 0, size - 1, cmp);
-    }
-}
-
-struct hkSnapshotInfo
+// Snapshot metadata is 72 bytes (size, sixteen trace addresses, count); hkEntry is 12 bytes.
+struct SnapshotAllocationInfo
 {
     int unk00;
     int unk04;
@@ -168,17 +59,92 @@ struct hkSnapshotInfo
     int unk44;
 };
 
-struct hkDebugMemorySnapshotQ
+// Both snapshot call sites use this 12-byte layout; no shared snapshot header exists yet.
+class hkDebugMemorySnapshot
 {
+public:
     hkSnapshotAddress* m_pAddressList;
-    hkSnapshotInfo* m_info;
+    SnapshotAllocationInfo* m_info;
     int m_iElementCount;
 
+    void FreeBuffers();
     void Sort();
+    void FUN_00dd7090(hkDebugMemorySnapshot& other);
 };
+// @fnv 0x00dd7090
+void hkDebugMemorySnapshot::FUN_00dd7090(hkDebugMemorySnapshot& other)
+{
+    Sort();
+    other.Sort();
+    hkSnapshotAddress* a = m_pAddressList;
+    hkSnapshotAddress* aEnd = a + m_iElementCount;
+    hkSnapshotAddress* b = other.m_pAddressList;
+    hkSnapshotAddress* pBlockBEnd = b + other.m_iElementCount;
+    while (a < aEnd && b < pBlockBEnd)
+    {
+        if (*a == *b)
+        {
+            *a = 0;
+            ++a;
+            ++b;
+        }
+        else if (*a < *b)
+            ++a;
+        else
+            ++b;
+    }
+}
+
+namespace hkRouterDD6E {
+extern "C" DebugAllocatorRouter& __cdecl FUN_00c85750() throw();
+}
+
+template <typename T> inline void hkDeallocateChunkDD6E(T* p, int n)
+{
+    hkRouterDD6E::FUN_00c85750().debug().blockFree(p, n * sizeof(T));
+}
+
+// Deallocates the two arrays when the first pointer is set, then nulls both pointers and the count.
+// @fnv 0x00dd6ec0
+void hkDebugMemorySnapshot::FreeBuffers()
+{
+    if (m_pAddressList)
+    {
+        hkDeallocateChunkDD6E(m_pAddressList, m_iElementCount);
+        hkDeallocateChunkDD6E(m_info, m_iElementCount);
+    }
+    m_pAddressList = 0;
+    m_info = 0;
+    m_iElementCount = 0;
+}
+
+DebugAllocatorRouter* __cdecl FUN_00c85750();
+
+template <typename T> inline T* hkAllocateDebug(int n)
+{
+    return (T*)FUN_00c85750()->debug().blockAlloc(n * sizeof(T));
+}
+
+template <typename T> inline void hkDeallocateDebug(T* p, int n)
+{
+    FUN_00c85750()->debug().blockFree(p, n * sizeof(T));
+}
+
+bool __cdecl LessThan(const hkSnapshotAddress* a, const hkSnapshotAddress* b);
+void __cdecl FUN_00dd7d00(const hkSnapshotAddress** p, int lo, int hi,
+                          bool(__cdecl* cmp)(const hkSnapshotAddress*, const hkSnapshotAddress*));
+
+inline void hkQuickSortQ(const hkSnapshotAddress** p, int size,
+                         bool(__cdecl* cmp)(const hkSnapshotAddress*, const hkSnapshotAddress*))
+{
+    if (size > 1)
+    {
+        FUN_00dd7d00(p, 0, size - 1, cmp);
+    }
+}
 
 // @fnv 0x00dd6f20
-void hkDebugMemorySnapshotQ::Sort()
+void hkDebugMemorySnapshot::Sort()
 {
     if (m_iElementCount > 1)
     {
@@ -190,7 +156,7 @@ void hkDebugMemorySnapshotQ::Sort()
         hkQuickSortQ(sorted, m_iElementCount, LessThan);
 
         hkSnapshotAddress* pointers = hkAllocateDebug<hkSnapshotAddress>(m_iElementCount);
-        hkSnapshotInfo* info = hkAllocateDebug<hkSnapshotInfo>(m_iElementCount);
+        SnapshotAllocationInfo* info = hkAllocateDebug<SnapshotAllocationInfo>(m_iElementCount);
         for (int i = 0; i < m_iElementCount; i++)
         {
             pointers[i] = *sorted[i];

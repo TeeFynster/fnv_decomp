@@ -3,12 +3,6 @@
 #define FNV_FALLOUT_SHARED_SKY_SKY_DEPENDENCIES_H
 #include "../../../include/layout_support.h"
 #include "../../../include/AutoMemContext.h"
-class TESWeather
-{
-  public:
-    bool IsRainy();
-    float GetWeatherData(int data, float maximum, float minimum);
-};
 void* __cdecl operator new(unsigned int size);
 void __cdecl operator delete(void* pointer);
 #endif

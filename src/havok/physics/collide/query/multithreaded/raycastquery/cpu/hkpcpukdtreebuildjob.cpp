@@ -4,6 +4,7 @@
 
 #include <xmmintrin.h>
 #include <windows.h>
+#include "../../../../../../../../include/Pair.h"
 extern DWORD DAT_0126835c;
 extern "C" void _ReadWriteBarrier(void);
 unsigned __int64 __cdecl __rdtsc(void);
@@ -232,12 +233,9 @@ int __cdecl BuildKdTreeDistributed(ContextHandle ctx, ArgStruct* input, ...)
     {
         InElem in[4];
         __m128 initial = _mm_load_ps(DAT_012684d0);
-        struct Pair
-        {
-            void* x;
-            void* y;
-        };
-        Pair pairs[4];
+        // The helper fills these pairs without running Pair constructors.
+        int pairStorage[4 * sizeof(Pair) / sizeof(int)];
+        Pair* pairs = reinterpret_cast<Pair*>(pairStorage);
         head.s2 = 0;
         head.s1 = 0;
         head.s0 = 0;

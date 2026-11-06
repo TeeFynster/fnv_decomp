@@ -2,7 +2,47 @@
 // src/havok/physics/utilities/actions/spring/hkpspringaction.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/actions/spring/hkpspringaction.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpSpringAction.h"
+// Keep the original intrinsic lanes: the SDK's byte-array aliases trigger /GS on vector temporaries.
+#define _INCLUDED_MM2
+// Exe 0x00d4d390 UpdatePivotsAndRestLength: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_sqrt_ss(LocalM128 a);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
+
+#include "../../../../../../include/hkBaseObject.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkSimdReal.h"
+#include "../../../../../../include/hkTransform.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkpEntity.h"
+
+inline hkSimdReal::hkSimdReal(const LocalM128& x) : m_vValue(x)
+{}
+
+inline hkSimdReal::operator float() const
+{
+    float s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
+
+inline hkSimdReal hkVector4::length3() const
+{
+    const LocalM128 x2 = _mm_mul_ps(m_vComponents, m_vComponents);
+    const LocalM128 sum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    return _mm_sqrt_ss(_mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), sum));
+}
+
+// GetMonitorStream is 0x00c85750; the shared router stores its Havok heap allocator at +0x10.
 
 extern int g_unk01269168;
 
@@ -146,250 +186,68 @@ FUN_00d4d340::FUN_00d4d340(void* a, void* b, unsigned long c) : FUN_00cf4d80(a, 
     *(volatile bool*)&m_bEnableState = true;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_sqrt_ss(__m128 a);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-
-struct hkSimdRealD4D3
-{
-    __m128 m_vValue;
-
-    hkSimdRealD4D3(const __m128& x) : m_vValue(x)
-    {}
-    operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-};
-
-struct hkTransformD4D3;
-
-struct hkVector4D4D3
-{
-    __m128 m_vComponents;
-
-    void FUN_00c7f690(const hkTransformD4D3& kT, const hkVector4D4D3& kV);
-    void setSub4(const hkVector4D4D3& a, const hkVector4D4D3& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    hkSimdRealD4D3 length3() const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, m_vComponents);
-        const __m128 sum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return _mm_sqrt_ss(_mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), sum));
-    }
-};
-
-struct hkTransformD4D3
-{
-    hkVector4D4D3 m_rotation[3];
-    hkVector4D4D3 m_vTranslation;
-};
-
-struct hkpEntityD4D3
-{
-    unsigned int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
-    unsigned int unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C, unk50, unk54, unk58, unk5C;
-    unsigned int unk60, unk64, unk68, unk6C, unk70, unk74, unk78, unk7C, unk80, unk84, unk88, unk8C;
-    unsigned int unk90, unk94, unk98, unk9C, unkA0, unkA4, unkA8, unkAC, unkB0, unkB4, unkB8, unkBC;
-    unsigned int unkC0, unkC4, unkC8, unkCC, unkD0, unkD4, unkD8, unkDC, unkE0, unkE4, unkE8, unkEC;
-    hkTransformD4D3 m_kMotionTransform;
-};
-
-class hkBaseObjectD4D3
+class hkpStiffSpringWrapperD4D3 : public hkBaseObject
 {
   public:
-    virtual ~hkBaseObjectD4D3() throw();
-};
-
-class hkpStiffSpringWrapperD4D3 : public hkBaseObjectD4D3
-{
-  public:
-    void UpdatePivotsAndRestLength(const hkVector4D4D3& kPivotAW, const hkVector4D4D3& kPivotBW);
+    void UpdatePivotsAndRestLength(const hkVector4& kPivotAW, const hkVector4& kPivotBW);
 
     unsigned int unk04, unk08, unk0C, unk10, unk14;
-    hkpEntityD4D3* m_pEntityA;
-    hkpEntityD4D3* m_pEntityB;
+    hkpEntity* m_pEntityA;
+    hkpEntity* m_pEntityB;
     unsigned int unk20, unk24, unk28, unk2C;
-    hkVector4D4D3 m_kPivotInA;
-    hkVector4D4D3 m_kPivotInB;
+    hkVector4 m_kPivotInA;
+    hkVector4 m_kPivotInB;
     float m_fSpringRestLength;
 };
 
 // Transforms world-space pivots into local entity space, then stores their 3D distance as the spring rest length.
 // @fnv 0x00d4d390
-void hkpStiffSpringWrapperD4D3::UpdatePivotsAndRestLength(const hkVector4D4D3& kPivotAW, const hkVector4D4D3& kPivotBW)
+void hkpStiffSpringWrapperD4D3::UpdatePivotsAndRestLength(const hkVector4& kPivotAW, const hkVector4& kPivotBW)
 {
-    hkpEntityD4D3* pkA = m_pEntityA;
-    hkpEntityD4D3* pkB = m_pEntityB;
-    m_kPivotInA.FUN_00c7f690(pkA->m_kMotionTransform, kPivotAW);
-    m_kPivotInB.FUN_00c7f690(pkB->m_kMotionTransform, kPivotBW);
-    hkVector4D4D3 kDiff;
+    hkpEntity* pkA = m_pEntityA;
+    hkpEntity* pkB = m_pEntityB;
+    m_kPivotInA.FUN_00c7f690(pkA->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotAW);
+    m_kPivotInB.FUN_00c7f690(pkB->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotBW);
+    hkVector4 kDiff;
     kDiff.setSub4(kPivotAW, kPivotBW);
     m_fSpringRestLength = kDiff.length3();
 }
 
 namespace fnv_00d4d410 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_sqrt_ss(__m128 a);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-
-struct hkSimdRealD4D41
-{
-    __m128 m_vValue;
-
-    hkSimdRealD4D41(const __m128& x) : m_vValue(x)
-    {}
-    operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-};
-
-struct hkTransformD4D41;
-
-struct hkVector4D4D41
-{
-    __m128 m_vComponents;
-
-    hkVector4D4D41()
-    {}
-    hkVector4D4D41(const hkVector4D4D41& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void operator=(const hkVector4D4D41& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void FUN_00c7f640(const hkTransformD4D41& kT, const hkVector4D4D41& kV);
-    void setSub4(const hkVector4D4D41& a, const hkVector4D4D41& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    hkSimdRealD4D41 length3() const
-    {
-        const __m128 x2 = _mm_mul_ps(m_vComponents, m_vComponents);
-        const __m128 sum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return _mm_sqrt_ss(_mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), sum));
-    }
-};
-
-struct hkTransformD4D41
-{
-    hkVector4D4D41 m_rotation[3];
-    hkVector4D4D41 m_vTranslation;
-};
-
-struct hkpEntityD4D41
-{
-    unsigned int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
-    unsigned int unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C, unk50, unk54, unk58, unk5C;
-    unsigned int unk60, unk64, unk68, unk6C, unk70, unk74, unk78, unk7C, unk80, unk84, unk88, unk8C;
-    unsigned int unk90, unk94, unk98, unk9C, unkA0, unkA4, unkA8, unkAC, unkB0, unkB4, unkB8, unkBC;
-    unsigned int unkC0, unkC4, unkC8, unkCC, unkD0, unkD4, unkD8, unkDC, unkE0, unkE4, unkE8, unkEC;
-    hkTransformD4D41 m_kMotionTransform;
-};
-
-class hkBaseObjectD4D41
+class hkpStiffSpringWrapperD4D41 : public hkBaseObject
 {
   public:
-    virtual ~hkBaseObjectD4D41() throw();
-};
-
-class hkpStiffSpringWrapperD4D41 : public hkBaseObjectD4D41
-{
-  public:
-    void SetPivots(const hkVector4D4D41& kPivotA, const hkVector4D4D41& kPivotB);
+    void SetPivots(const hkVector4& kPivotA, const hkVector4& kPivotB);
 
     unsigned int unk04, unk08, unk0C, unk10, unk14;
-    hkpEntityD4D41* m_pEntityA;
-    hkpEntityD4D41* m_pEntityB;
+    hkpEntity* m_pEntityA;
+    hkpEntity* m_pEntityB;
     unsigned int unk20, unk24, unk28, unk2C;
-    hkVector4D4D41 m_kPivotInA;
-    hkVector4D4D41 m_kPivotInB;
+    hkVector4 m_kPivotInA;
+    hkVector4 m_kPivotInB;
     float m_fSpringRestLength;
 };
 
 // Stores the given pivot vectors and computes the spring rest length from the world-space distance between the two pivots.
 // @fnv 0x00d4d410
-void hkpStiffSpringWrapperD4D41::SetPivots(const hkVector4D4D41& kPivotA, const hkVector4D4D41& kPivotB)
+void hkpStiffSpringWrapperD4D41::SetPivots(const hkVector4& kPivotA, const hkVector4& kPivotB)
 {
-    hkpEntityD4D41* pkA = m_pEntityA;
-    hkpEntityD4D41* pkB = m_pEntityB;
+    hkpEntity* pkA = m_pEntityA;
+    hkpEntity* pkB = m_pEntityB;
     m_kPivotInA = kPivotA;
     m_kPivotInB = kPivotB;
-    hkVector4D4D41 kPivotAW;
-    kPivotAW.FUN_00c7f640(pkA->m_kMotionTransform, kPivotA);
-    hkVector4D4D41 kPivotBW;
-    kPivotBW.FUN_00c7f640(pkB->m_kMotionTransform, kPivotB);
-    hkVector4D4D41 kDiff;
+    hkVector4 kPivotAW;
+    kPivotAW.FUN_00c7f640(pkA->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotA);
+    hkVector4 kPivotBW;
+    kPivotBW.FUN_00c7f640(pkB->m_pMotionState.m_kMotionState.m_kMotionTransform, kPivotB);
+    hkVector4 kDiff;
     kDiff.setSub4(kPivotAW, kPivotBW);
     m_fSpringRestLength = kDiff.length3();
 }
 }  // namespace fnv_00d4d410
 
 namespace fnv_00d4d4a0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-
-struct hkVector4D4A0
-{
-    __m128 m_vComponents;
-
-    void operator=(const hkVector4D4A0& value)
-    {
-        m_vComponents = value.m_vComponents;
-    }
-};
-
-struct hkMemoryAllocatorD4A0
-{
-    virtual void v00();
-    virtual void* AllocateMemoryBlock(int numBytes);
-};
-
-struct hkMemoryRouterD4A0
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    hkMemoryAllocatorD4A0* m_pStreamAllocator;
-
-    hkMemoryAllocatorD4A0& heap() const
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-hkMemoryRouterD4A0* __cdecl FUN_00c85750();
 
 struct hkpEntityPairD4A0
 {
@@ -407,7 +265,7 @@ struct S00d4d4a0_Obj
 {
     static void* operator new(unsigned int size)
     {
-        S00d4d4a0_Obj* memory = reinterpret_cast<S00d4d4a0_Obj*>(FUN_00c85750()->heap().AllocateMemoryBlock(size));
+        S00d4d4a0_Obj* memory = reinterpret_cast<S00d4d4a0_Obj*>(hkMemoryRouter::getInstance().heap().blockAlloc(size));
         memory->m_usMemSizeAndFlags = static_cast<unsigned short>(size);
         return memory;
     }
@@ -425,9 +283,9 @@ struct S00d4d4a0_Obj
     void* unk14;
     void* m_pEntityA;
     void* m_pEntityB;
-    hkVector4D4A0 m_kLastForce;
-    hkVector4D4A0 m_kPivotInA;
-    hkVector4D4A0 m_kPivotInB;
+    hkVector4 m_kLastForce;
+    hkVector4 m_kPivotInA;
+    hkVector4 m_kPivotInB;
     float m_fRestLength;
     float m_fSpringStrength;
     float m_fMotorDamping;

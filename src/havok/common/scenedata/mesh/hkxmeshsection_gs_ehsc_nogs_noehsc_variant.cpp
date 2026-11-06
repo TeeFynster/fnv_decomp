@@ -5,7 +5,8 @@
 
 // src/havok/common/scenedata/mesh/hkxmeshsection.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/mesh/hkxmeshsection.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkxMeshSection.h"
+#include "../../../../../include/hkxMeshSection.h"
+#include "../../../../../include/hkxIndexBuffer.h"
 extern int DAT_010e9b7c;
 struct IndexArray
 {
@@ -139,7 +140,6 @@ template <class T> class hkArrayE6
     int m_iCapacityState;
 };
 class hkxVertexBufferE6;
-class hkxIndexBufferE6;
 class hkxMaterialE6;
 class hkxMeshSectionE6 : public hkReferencedObjectE6
 {
@@ -151,17 +151,6 @@ class hkxMeshSectionE6 : public hkReferencedObjectE6
     hkArrayE6<hkRefVariantE6> m_kUserChannels;
 };
 
-class hkxIndexBuffer : public hkReferencedObject
-{
-  public:
-    hkInt8 m_eIndexType;
-    hkInt8 unk09;
-    hkInt16 unk0A;
-    hkArray<hkUint16> m_kIndices16;
-    hkArray<hkUint32> m_kIndices32;
-    hkUint32 m_uiVertexBaseOffset;
-    hkUint32 m_fRestLength;
-};
 
 struct hkGeometryTriangle
 {
@@ -170,6 +159,8 @@ struct hkGeometryTriangle
     int m_iThirdValue;
     int m_iMaterialIndex;
 };
+
+class hkVector4;
 
 struct hkGeometryData
 {

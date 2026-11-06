@@ -1,5 +1,15 @@
 
 #include "niconsolefragmentshader_decls.h"
+#include "../../../../include/BSShaderBloodSplatter.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiFragmentShaderInstanceDescriptor.h"
+#include "../../../../include/NiRenderer.h"
+#include "../../../../include/NiD3DShader.h"
+#include "../../../../include/NiD3DShaderConstantMap.h"
+#include "../../../../include/NiD3DPass.h"
+#include "../../../../include/NiTPointerListBase.h"
+#include "../../../../include/NiTPointerAllocator.h"
+#include "../../../../include/NiTListItem.h"
 // @fnv 0x00e8b560
 void ShaderCache::BindGPUProgram()
 {
@@ -18,7 +28,7 @@ void ShaderCache::BindGPUProgram()
         node->next = PoolAllocatorBase<unsigned int>::ms_pFreeList;
         PoolAllocatorBase<unsigned int>::ms_pFreeList = node;
         if (--DAT_011c5f84 == 0)
-            PoolAllocatorBase<unsigned int>::ms_kPoolState.value = 0;
+            PoolAllocatorBase<unsigned int>::ms_kPoolState.m_uiOwningThreadID = 0;
         --count;
         ShaderData* data = entry->data;
         typedef void(__stdcall * SetFunction)(Device*, unsigned int, unsigned int);
@@ -28,22 +38,12 @@ void ShaderCache::BindGPUProgram()
     current = initial;
 }
 
-struct NiD3DShader
-{
-    bool Initialize(void);
-};
-
-struct FUN_00e8d230_shell : NiD3DShader
-{
-    char EnsureInitialized(int arg);
-};
-
 // @fnv 0x00e8d230
-char FUN_00e8d230_shell::EnsureInitialized(int arg)
+char __fastcall EnsureD3DShaderInitialized(NiD3DShader* shader, void*, int arg)
 {
-    if (*(reinterpret_cast<unsigned char*>(this) + 0x10))
+    if (shader->m_bInitialized)
         return 1;
-    char result = Initialize() ? 1 : 0;
+    char result = shader->NiD3DShader::Initialize() ? 1 : 0;
     return result;
 }
 
@@ -57,10 +57,6 @@ char const* const* __cdecl FUN_00e8d360()
 
 extern int DAT_010efeb4;
 
-struct MemoryManager
-{
-    void* __thiscall _DeallocateAlias(void* p);
-};
 extern MemoryManager g_memoryManager;
 
 struct NiShaderInstanceDescriptor
@@ -98,40 +94,25 @@ GlobalObjectO2_00a7b610* __cdecl FUN_00e8d580()
     return &g_0126f9d8;
 }
 
-struct NodePoolView
-{
-    void* __thiscall AddHead(void);
-};
-
-struct NiTPointerListBase_00e8b5f0
-{
-    void* m_pFirstNode;
-    void* m_pTail;
-    unsigned int m_uiItemCount;
-    void* __thiscall InsertHead(void* arg);
-};
-
-// Allocates a node from the pool at this+8, links it before the current head, updates the tail when the list was empty, increments the count and returns the node.
+// 0x0043a010 is NiTPointerAllocator<unsigned int>::Allocate; the list uses head/tail/count at 0/4/8.
 // @fnv 0x00e8b5f0
-void* __thiscall NiTPointerListBase_00e8b5f0::InsertHead(void* arg)
+template <>
+void NiTPointerListBase<NiTPointerAllocator<unsigned int>, void*>::AddHead(void* const& element)
 {
-    NodePoolView* pool = (NodePoolView*)((char*)this + 8);
-    void* node = pool->AddHead();
-    void* next = *(void**)((char*)arg + 0);
-    *(void**)((char*)node + 8) = next;
-    *(void**)((char*)node + 4) = 0;
-    *(void**)node = this->m_pFirstNode;
-    if (this->m_pFirstNode)
+    NiTListItem<void*>* node = (NiTListItem<void*>*)m_kItemCount.Allocate();
+    node->m_element = element;
+    node->m_pkPrev = 0;
+    node->m_pkNext = m_pkHead;
+    if (m_pkHead)
     {
-        *(void**)((char*)this->m_pFirstNode + 4) = node;
-        ++this->m_uiItemCount;
-        this->m_pFirstNode = node;
-        return node;
+        m_pkHead->m_pkPrev = node;
+        ++m_kItemCount.m_uiCount;
+        m_pkHead = node;
+        return;
     }
-    ++this->m_uiItemCount;
-    this->m_pTail = node;
-    this->m_pFirstNode = node;
-    return node;
+    ++m_kItemCount.m_uiCount;
+    m_pkTail = node;
+    m_pkHead = node;
 }
 
 void __cdecl FUN_00e81470();
@@ -141,10 +122,6 @@ void __cdecl FUN_00e8d340()
     return FUN_00e81470();
 }
 
-struct NiRenderer
-{
-    static NiRenderer* ms_pRenderer;
-};
 
 struct NiD3DVertexDeclaration
 {
@@ -177,12 +154,6 @@ void __cdecl DispatchByIndex(void* a1, unsigned int auiArg2, unsigned int auiArg
 
 extern int EmptyFS;
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-struct NiFragmentShaderInstanceDescriptor
-{
-    int _vtbl;
-    void* m_pDescriptorData;
-    void* __thiscall FUN_00e8d540(unsigned int);
-};
 // @fnv 0x00e8d540
 void* __thiscall NiFragmentShaderInstanceDescriptor::FUN_00e8d540(unsigned int flags)
 {
@@ -194,11 +165,6 @@ void* __thiscall NiFragmentShaderInstanceDescriptor::FUN_00e8d540(unsigned int f
     return this;
 }
 
-struct NiRefObject;
-struct BSShaderBloodSplatter
-{
-    void FUN_00b80600(NiRefObject*);
-};
 extern BSShaderBloodSplatter* DAT_0126f74c;
 int __fastcall FUN_00b79950(char*, int, NiRefObject*);
 struct FUN_00e8d5f0_Param
@@ -477,56 +443,20 @@ void __cdecl FUN_00e8d330()
     FUN_00e80590();
 }
 
-struct NiD3DShaderConstantMap
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    NiD3DShaderConstantMap(void* pkRenderer, int eType) throw();
-    static void* operator new(unsigned int uiSize);
-};
-
-struct NiD3DPass
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    NiD3DShaderConstantMap* m_spFirstShaderConstantMap;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    NiD3DShaderConstantMap* m_spSecondShaderConstantMap;
-    void SetPixelConstantMap(NiD3DShaderConstantMap* pkMap);
-    void SetVertexConstantMap(NiD3DShaderConstantMap* pkMap);
-};
 
 extern NiD3DPass* g_pD3DPass;
 extern void* g_pD3DRenderer;
+
+inline void* __cdecl operator new(size_t, void* storage) throw()
+{
+    return storage;
+}
+
+static __forceinline NiD3DShaderConstantMap* CreateShaderConstantMap(int type)
+{
+    void* storage = NiD3DShaderConstantMap::operator new(sizeof(NiD3DShaderConstantMap));
+    return storage ? ::new (storage) NiD3DShaderConstantMap(g_pD3DRenderer, type) : 0;
+}
 
 // Returns the pass's vertex or pixel constant map for shader type 0, creating and registering it if absent.
 // @fnv 0x00e8dca0
@@ -540,19 +470,19 @@ NiD3DShaderConstantMap* __stdcall GetOrCreateShaderConstantMap(unsigned int auiS
     NiD3DShaderConstantMap* pkMap = 0;
     if (eMapType == 0)
     {
-        pkMap = pkPass->m_spSecondShaderConstantMap;
+        pkMap = pkPass->m_spVertexConstantMap.m_pObject;
         if (!pkMap)
         {
-            pkMap = new NiD3DShaderConstantMap(g_pD3DRenderer, 0);
+            pkMap = CreateShaderConstantMap(0);
             pkPass->SetVertexConstantMap(pkMap);
         }
     }
     else if (eMapType == 1)
     {
-        pkMap = pkPass->m_spFirstShaderConstantMap;
+        pkMap = pkPass->m_spPixelConstantMap.m_pObject;
         if (!pkMap)
         {
-            pkMap = new NiD3DShaderConstantMap(g_pD3DRenderer, 2);
+            pkMap = CreateShaderConstantMap(2);
             pkPass->SetPixelConstantMap(pkMap);
         }
     }

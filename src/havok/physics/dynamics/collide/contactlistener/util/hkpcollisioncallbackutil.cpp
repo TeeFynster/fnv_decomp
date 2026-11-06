@@ -2,6 +2,11 @@
 // src/havok/physics/dynamics/collide/contactlistener/util/hkpcollisioncallbackutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/collide/contactlistener/util/hkpcollisioncallbackutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/Data.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkThreadMemory.h"
+
 struct FUN_00d0b1e0
 {
     void* unk00;
@@ -132,21 +137,6 @@ extern DWORD DAT_0126835c;
 
 unsigned __int64 __cdecl __rdtsc(void);
 
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
-
-struct ProfBuf
-{
-    DWORD unk00;
-    ProfRec* m_pCur;
-    DWORD unk08;
-    ProfRec* m_pRecordEnd;
-};
-
 typedef LPVOID(WINAPI* PFN_TlsGetValue)(DWORD dwTlsIndex);
 
 struct Collider
@@ -183,14 +173,6 @@ struct Params
     void* unk18;
 };
 
-struct Data
-{
-    int kind;
-    Node* a;
-    void* b;
-    void* c;
-};
-
 extern "C" void __cdecl DispatchCollisionEvents(void* obj, Data* data);
 extern "C" void __cdecl FUN_00cfffb0(void* obj, Data* data);
 
@@ -199,80 +181,67 @@ extern "C" void __cdecl FUN_00cfffb0(void* obj, Data* data);
 void __stdcall FUN_00d0ae80(Params* p)
 {
     PFN_TlsGetValue pfnTls = TlsGetValue;
-    Data data;
+    // Collision records use uninitialized storage; Data's unrelated lifecycle is not invoked.
+    unsigned int dataStorage[sizeof(Data) / sizeof(unsigned int)];
+    Data& data = *(Data*)dataStorage;
     volatile DWORD tickEnter;
     {
-        ProfBuf* pBuf = (ProfBuf*)pfnTls(DAT_0126835c);
-        if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+        hkMonitorStream* pBuf = (hkMonitorStream*)pfnTls(DAT_0126835c);
+        if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
         {
-            ProfRec* pRec = pBuf->m_pCur;
-            pRec->m_pName = "TtCollLtUtil";
+            hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+            pRec->m_commandAndMonitor = "TtCollLtUtil";
             _ReadWriteBarrier();
             tickEnter = (DWORD)__rdtsc();
-            pRec->m_iTick = tickEnter;
-            pBuf->m_pCur = pRec + 1;
+            pRec->m_time0 = tickEnter;
+            pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
         }
     }
 
     Collider* pCollider = p->unk0c;
     if (pCollider->v20() == 11)
     {
-        data.c = pCollider->GetBase();
+        *(void**)&data.uiSubCategoryID = pCollider->GetBase();
         Node* a = p->unk14;
         void* b = p->unk18;
-        data.kind = 2;
-        data.a = a;
-        data.b = b;
+        data.eReqSkill = (ActorValue::Index)2;
+        *(Node**)&data.iReqSkillLevel = a;
+        *(void**)&data.uiCategoryID = b;
         DispatchCollisionEvents(a->unk08, &data);
-        data.kind = 0;
+        data.eReqSkill = (ActorValue::Index)0;
         FUN_00cfffb0(a, &data);
-        data.kind = 1;
+        data.eReqSkill = (ActorValue::Index)1;
         FUN_00cfffb0(b, &data);
     }
 
     volatile DWORD tickExit;
     {
-        ProfBuf* pBuf = (ProfBuf*)pfnTls(DAT_0126835c);
-        if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+        hkMonitorStream* pBuf = (hkMonitorStream*)pfnTls(DAT_0126835c);
+        if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
         {
-            ProfRec* pRec = pBuf->m_pCur;
-            pRec->m_pName = "Et";
+            hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+            pRec->m_commandAndMonitor = "Et";
             _ReadWriteBarrier();
             tickExit = (DWORD)__rdtsc();
-            pRec->m_iTick = tickExit;
-            pBuf->m_pCur = pRec + 1;
+            pRec->m_time0 = tickExit;
+            pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
         }
     }
 }
 
 extern DWORD hkMonitorStreamTls;
 
-struct S_00d0af60_TimerCommand
-{
-    const char* m_pCommandName;
-    unsigned int m_uiStartTicks;
-    unsigned int m_uiEndTicks;
-};
-
-struct S_00d0af60_MonitorStream
-{
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    char* m_pRayCursor;
-    char* m_pCurrentCommand;
-};
-
 static inline void S_00d0af60_Timer(const char* name)
 {
-    S_00d0af60_MonitorStream* s = (S_00d0af60_MonitorStream*)TlsGetValue(hkMonitorStreamTls);
-    if (s->m_kRayEnd < s->m_pCurrentCommand)
+    hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(hkMonitorStreamTls);
+    if (s->m_end.m_storage < s->m_capacityMinus16.m_storage)
     {
-        S_00d0af60_TimerCommand* h = (S_00d0af60_TimerCommand*)s->m_kRayEnd;
-        h->m_pCommandName = name;
+        hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)s->m_end.m_storage;
+        h->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         volatile unsigned int t = (unsigned int)__rdtsc();
-        h->m_uiStartTicks = t;
-        s->m_kRayEnd = (char*)(h + 1);
+        h->m_time0 = t;
+        s->m_end.m_storage = reinterpret_cast<char*>(h + 1);
     }
 }
 
@@ -297,14 +266,6 @@ struct S_00d0af60_Entity
     void* unk8;
 };
 
-struct S_00d0af60_Event
-{
-    int m_type;
-    S_00d0af60_Entity* m_kPointA;
-    S_00d0af60_Entity* m_kPointB;
-    void* m_obj;
-};
-
 struct S_00d0af60_Input
 {
     int unk0;
@@ -316,8 +277,8 @@ struct S_00d0af60_Input
     S_00d0af60_Entity* unk18;
 };
 
-void FUN_00d00de0(void*, S_00d0af60_Event*);
-void FUN_00d00060(S_00d0af60_Entity*, S_00d0af60_Event*);
+void FUN_00d00de0(void*, Data*);
+void FUN_00d00060(S_00d0af60_Entity*, Data*);
 
 // Between two profiler timers, if the shape's type is 11, builds an event and calls FUN_00d00de0 with a->unk8, then FUN_00d00060 for each entity.
 // @fnv 0x00d0af60
@@ -327,18 +288,19 @@ void __stdcall FUN_00d0af60(S_00d0af60_Input* in)
     S_00d0af60_Shape* shape = in->unkC;
     if (shape->getType() == 11)
     {
-        S_00d0af60_Event ev;
+        unsigned int eventStorage[sizeof(Data) / sizeof(unsigned int)];
+        Data& ev = *(Data*)eventStorage;
         void* obj = shape->FUN_00d92820();
         S_00d0af60_Entity* a = in->unk14;
         S_00d0af60_Entity* b = in->unk18;
-        ev.m_obj = obj;
-        ev.m_type = 2;
-        ev.m_kPointA = a;
-        ev.m_kPointB = b;
+        *(void**)&ev.uiSubCategoryID = obj;
+        ev.eReqSkill = (ActorValue::Index)2;
+        *(S_00d0af60_Entity**)&ev.iReqSkillLevel = a;
+        *(S_00d0af60_Entity**)&ev.uiCategoryID = b;
         FUN_00d00de0(a->unk8, &ev);
-        ev.m_type = 0;
+        ev.eReqSkill = (ActorValue::Index)0;
         FUN_00d00060(a, &ev);
-        ev.m_type = 1;
+        ev.eReqSkill = (ActorValue::Index)1;
         FUN_00d00060(b, &ev);
     }
     S_00d0af60_Timer("Et");
@@ -391,21 +353,13 @@ struct Derived : PrimaryBase, SecondaryBase
 Derived::Derived()
 {}
 
-namespace fnv_00d0b040 {
 struct hkMemory
 {
     virtual void unk00();
     virtual void* allocateChunk(int size);
 };
 
-struct hkThreadMemory
-{
-    char pad00[0x10];
-    hkMemory* m_pMemoryAllocator;
-};
-
-extern "C" hkThreadMemory* __cdecl FUN_00c85750();
-
+namespace fnv_00d0b040 {
 struct SubObj
 {
     void __thiscall PassObjectToTarget(void* obj);
@@ -444,7 +398,7 @@ void __cdecl FUN_00d0b040(TargetClass* obj)
         return;
     }
 
-    hkThreadMemory* threadMem = FUN_00c85750();
+    hkThreadMemory* threadMem = hkThreadMemory::GetMonitorStream();
     hkpCollisionCallbackUtil* mem = (hkpCollisionCallbackUtil*)threadMem->m_pMemoryAllocator->allocateChunk(0x4c);
     mem->m_usMemSizeAndFlags = 0x4c;
     util = mem->Initialize();

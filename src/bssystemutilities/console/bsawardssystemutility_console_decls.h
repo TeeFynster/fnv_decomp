@@ -2,6 +2,7 @@
 #define FNV_BSAWARDSSYSTEMUTILITY_CONSOLE_DECLS_H
 
 
+#include "layout_support.h"
 #include "MemoryManager.h"
 
 extern MemoryManager g_memoryManager;

@@ -2,7 +2,61 @@
 // src/havok/physics/collide/shape/convex/convextransform/hkpconvextransformshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/convextransform/hkpconvextransformshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpConvexTransformShape.h"
+#include "../../../../../../../include/hkBool.h"
+#define FNV64_HKVECTOR4_OWN_COPY
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#include "../../../../../../../include/hkVector4.h"
+#include "../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../include/hkMatrix3.h"
+#include "../../../../../../../include/hkRotation.h"
+#include "../../../../../../../include/hkTransform.h"
+#include <string.h>
+
+// Retain the scalar aggregate copy operations used by this unit.
+__forceinline hkVector4::hkVector4(const hkVector4& other)
+{
+    memcpy(this, &other, sizeof(*this));
+}
+
+__forceinline void hkVector4::operator=(const hkVector4& other)
+{
+    memcpy(this, &other, sizeof(*this));
+}
+
+
+#include "../../../../../../../include/hkpShape.h"
+#include "../../../../../../../include/hkpConvexShape.h"
+#include "../../../../../../../include/hkpConvexTransformShape.h"
+#include "../../../../../../../include/hkVector4q.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkpCdBody.h"
+
+
+// Keep the original intrinsic representation: its aliasing affects SIMD register allocation.
+namespace fnv_simd {
+// Exe 0x00d5d800 GetAabb: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" void _ReadWriteBarrier(void);
+
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_load_ps1(const float*);
+extern "C" void _mm_store_ss(float*, LocalM128);
+}
+typedef fnv_simd::LocalM128 ShapeQuad;
 
 extern const char* const g_01268970_arg1;
 
@@ -118,11 +172,6 @@ struct Shape_00d5d800
     virtual void getAabb(const hkTransform& t, float tol, Aabb_00d5d800& out) = 0;
 };
 
-struct Xf_00d5d800 : hkTransform
-{
-    void FUN_00cb2240(const hkTransform& a, const hkTransform& b);
-};
-
 struct Cls_00d5d800
 {
     int unk00;
@@ -141,29 +190,12 @@ struct Cls_00d5d800
 // @fnv 0x00d5d800
 void Cls_00d5d800::GetAabb(const hkTransform& t, float tol, Aabb_00d5d800& out)
 {
-    __declspec(align(16)) Xf_00d5d800 tmp;
+    __declspec(align(16)) ShapeQuad storage[4];
+    hkTransform& tmp = reinterpret_cast<hkTransform&>(storage);
     tmp.FUN_00cb2240(t, m_kMotionTransform);
     reinterpret_cast<Shape_00d5d800*>(m_pContainedShape)->getAabb(tmp, tol, out);
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_load_ps(const float*);
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-}
 
 extern "C" unsigned long DAT_0126835c;
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
@@ -172,36 +204,7 @@ extern "C" void _ReadWriteBarrier(void);
 extern const char str_010d1074[];
 extern const char str_010c41f8[];
 
-struct StringCursor
-{
-    int unk0;
-    char* m_ptr;
-    int unk8;
-    char* m_kRayEnd;
-};
 
-struct hkBoolResult
-{
-    char m_cBooleanValue;
-    hkBoolResult()
-    {}
-    hkBoolResult(const hkBoolResult& o) : m_cBooleanValue(o.m_cBooleanValue)
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-
-struct hkVector4q
-{
-    __m128 m_vComponents;
-};
-
-struct hkVector4Rot : public hkVector4
-{
-    void SetRotatedDirection(const hkRotation& r, const hkVector4& v);
-};
 
 struct hkTransformq
 {
@@ -211,8 +214,28 @@ struct hkTransformq
     hkVector4q m_vTranslation;
 };
 
-struct ShapeRayCastQuery
+__forceinline void hkVector4q::SetTransformedPoint(const hkTransformq& t, const hkVector4q& b)
 {
+    const ShapeQuad input = reinterpret_cast<const ShapeQuad&>(b);
+    const ShapeQuad column1 = reinterpret_cast<const ShapeQuad&>(t.m_kColumn1);
+    const ShapeQuad column0 = reinterpret_cast<const ShapeQuad&>(t.m_kColumn0);
+    const ShapeQuad column2 = reinterpret_cast<const ShapeQuad&>(t.m_kColumn2);
+    const ShapeQuad translation = reinterpret_cast<const ShapeQuad&>(t.m_vTranslation);
+    const ShapeQuad first = fnv_simd::_mm_add_ps(fnv_simd::_mm_mul_ps(fnv_simd::_mm_shuffle_ps(input, input, 0x55), column1),
+                                   fnv_simd::_mm_mul_ps(fnv_simd::_mm_shuffle_ps(input, input, 0), column0));
+    const ShapeQuad second = fnv_simd::_mm_add_ps(fnv_simd::_mm_mul_ps(fnv_simd::_mm_shuffle_ps(input, input, 0xaa), column2), translation);
+    reinterpret_cast<ShapeQuad&>(*this) = fnv_simd::_mm_add_ps(first, second);
+}
+
+
+struct __declspec(align(16)) ShapeRayCastQuery
+{
+    // Preserve the original whole-query copy with the shared vector constructors.
+    __forceinline ShapeRayCastQuery(const ShapeRayCastQuery& other)
+    {
+        memcpy(this, &other, sizeof(*this));
+    }
+
     hkVector4q m_vFrom;
     hkVector4q m_vTo;
     int unk20;
@@ -220,7 +243,6 @@ struct ShapeRayCastQuery
     int unk28;
     int unk2c;
 };
-
 struct ShapeRayCastOutput
 {
     hkVector4 m_vHitNormal;
@@ -232,79 +254,67 @@ struct ShapeRayCastOutput
     int m_uiShapeKeyIndex;
 };
 
-static __forceinline __m128 rt_inv(const hkTransformq& tr, const hkVector4q& in)
+static __forceinline ShapeQuad rt_inv(const hkTransformq& tr, const hkVector4q& in)
 {
-    __m128 t0 = _mm_sub_ps(in.m_vComponents, tr.m_vTranslation.m_vComponents);
-    __m128 c0 = tr.m_kColumn0.m_vComponents;
-    __m128 c1 = tr.m_kColumn1.m_vComponents;
-    __m128 c2 = tr.m_kColumn2.m_vComponents;
-    __m128 tmp = _mm_unpacklo_ps(c0, c1);
-    __m128 ctmp = _mm_unpackhi_ps(c0, c1);
-    c0 = _mm_movelh_ps(tmp, c2);
-    ctmp = _mm_shuffle_ps(ctmp, c2, 0xe4);
-    c1 = _mm_shuffle_ps(_mm_movehl_ps(c0, tmp), c2, 0xd4);
+    ShapeQuad t0 = fnv_simd::_mm_sub_ps(reinterpret_cast<const ShapeQuad&>(in), reinterpret_cast<const ShapeQuad&>(tr.m_vTranslation));
+    ShapeQuad c0 = reinterpret_cast<const ShapeQuad&>(tr.m_kColumn0);
+    ShapeQuad c1 = reinterpret_cast<const ShapeQuad&>(tr.m_kColumn1);
+    ShapeQuad c2 = reinterpret_cast<const ShapeQuad&>(tr.m_kColumn2);
+    ShapeQuad tmp = fnv_simd::_mm_unpacklo_ps(c0, c1);
+    ShapeQuad ctmp = fnv_simd::_mm_unpackhi_ps(c0, c1);
+    c0 = fnv_simd::_mm_movelh_ps(tmp, c2);
+    ctmp = fnv_simd::_mm_shuffle_ps(ctmp, c2, 0xe4);
+    c1 = fnv_simd::_mm_shuffle_ps(fnv_simd::_mm_movehl_ps(c0, tmp), c2, 0xd4);
     c2 = ctmp;
-    __m128 b0 = _mm_shuffle_ps(t0, t0, 0x00);
-    __m128 r0 = _mm_mul_ps(c0, b0);
-    __m128 b1 = _mm_shuffle_ps(t0, t0, 0x55);
-    __m128 r1 = _mm_mul_ps(c1, b1);
-    __m128 b2 = _mm_shuffle_ps(t0, t0, 0xaa);
-    __m128 r2 = _mm_mul_ps(c2, b2);
-    return _mm_add_ps(_mm_add_ps(r0, r1), r2);
+    ShapeQuad b0 = fnv_simd::_mm_shuffle_ps(t0, t0, 0x00);
+    ShapeQuad r0 = fnv_simd::_mm_mul_ps(c0, b0);
+    ShapeQuad b1 = fnv_simd::_mm_shuffle_ps(t0, t0, 0x55);
+    ShapeQuad r1 = fnv_simd::_mm_mul_ps(c1, b1);
+    ShapeQuad b2 = fnv_simd::_mm_shuffle_ps(t0, t0, 0xaa);
+    ShapeQuad r2 = fnv_simd::_mm_mul_ps(c2, b2);
+    return fnv_simd::_mm_add_ps(fnv_simd::_mm_add_ps(r0, r1), r2);
 }
-
-struct RtChild : public hkpShape
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual hkBoolResult RayCast(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
-};
 
 struct RtStandin : public hkpConvexTransformShape
 {
-    hkBoolResult FUN_00d5d940(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
+    hkBool FUN_00d5d940(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const;
 };
 
 static __forceinline void timer_begin(const char* name)
 {
-    StringCursor* stream = (StringCursor*)TlsGetValue(DAT_0126835c);
-    char* ptr = stream->m_ptr;
-    if (ptr < stream->m_kRayEnd)
+    hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* ptr = stream->m_end.m_storage;
+    if (ptr < stream->m_capacityMinus16.val())
     {
         *(const char**)ptr = name;
         _ReadWriteBarrier();
         volatile unsigned int t = (unsigned int)__rdtsc();
         *(unsigned int*)(ptr + 4) = t;
         ptr += 12;
-        stream->m_ptr = ptr;
+        stream->m_end.m_storage = ptr;
     }
 }
 
 // Transforms the ray endpoints into local space, delegates to the contained child shape, and rotates the hit direction back to world space.
 // @fnv 0x00d5d940
-hkBoolResult RtStandin::FUN_00d5d940(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const
+hkBool RtStandin::FUN_00d5d940(const ShapeRayCastQuery& input, ShapeRayCastOutput& output) const
 {
     timer_begin(str_010d1074);
 
     ShapeRayCastQuery localInput = input;
-    localInput.m_vFrom.m_vComponents = rt_inv(reinterpret_cast<const hkTransformq&>(m_kMotionTransform), input.m_vFrom);
+    reinterpret_cast<ShapeQuad&>(localInput.m_vFrom) = rt_inv(reinterpret_cast<const hkTransformq&>(m_kMotionTransform), reinterpret_cast<const hkVector4q&>(input.m_vFrom));
 
-    localInput.m_vTo.m_vComponents = rt_inv(reinterpret_cast<const hkTransformq&>(m_kMotionTransform), input.m_vTo);
+    reinterpret_cast<ShapeQuad&>(localInput.m_vTo) = rt_inv(reinterpret_cast<const hkTransformq&>(m_kMotionTransform), reinterpret_cast<const hkVector4q&>(input.m_vTo));
 
     ++output.m_uiShapeKeyIndex;
-    const RtChild* child = (const RtChild*)m_pContainedShape.m_pContainedShape;
-    hkBoolResult res = child->RayCast(localInput, output);
+    const hkpShape* child = m_pContainedShape.m_pContainedShape;
+    hkBool res = child->IntersectRayWithShape(localInput, output);
     --output.m_uiShapeKeyIndex;
 
     if (res)
     {
         hkVector4 temp = output.m_vHitNormal;
-        static_cast<hkVector4Rot&>(output.m_vHitNormal).SetRotatedDirection(m_kMotionTransform.m_rotation, temp);
+        output.m_vHitNormal.SetRotatedDirection(m_kMotionTransform.m_rotation, temp);
         output.m_uiShapeKeys[output.m_uiShapeKeyIndex] = 0;
     }
 
@@ -312,45 +322,32 @@ hkBoolResult RtStandin::FUN_00d5d940(const ShapeRayCastQuery& input, ShapeRayCas
     return res;
 }
 
-namespace fnv_00d5dae0 {
-extern "C" void _ReadWriteBarrier(void);
-union __declspec(intrin_type) __declspec(align(16)) __m128
+__forceinline hkpCdBody::hkpCdBody(const hkpCdBody* parent, const void* motionState)
 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_unpacklo_ps(__m128, __m128);
-extern "C" __m128 _mm_unpackhi_ps(__m128, __m128);
-extern "C" __m128 _mm_movelh_ps(__m128, __m128);
-extern "C" __m128 _mm_movehl_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
+    m_pMotionState = motionState;
+    m_parent = parent;
+}
 
+__forceinline void hkpCdBody::SetCollisionShapeAndKey(const hkpShape* shape, unsigned int key)
+{
+    m_pCollisionShape = shape;
+    m_uiCollisionShapeKey = key;
+}
+
+namespace fnv_00d5dae0 {
 extern "C" unsigned long DAT_0126835c;
 extern "C" const char str_010d1084[];
 extern "C" const char str_010c41f8[];
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 extern "C" unsigned __int64 __rdtsc(void);
 
-struct MonitorEntry
-{
-    const char* m_name;
-    unsigned int m_uiCommandId;
-    int unk08;
-};
-
-struct MonitorStream
-{
-    int unk00;
-    MonitorEntry* m_stream;
-    int unk08;
-    MonitorEntry* m_kRayEnd;
-};
-
 struct ShapeRayCastQuery
 {
+    __forceinline ShapeRayCastQuery(const ShapeRayCastQuery& other)
+    {
+        memcpy(this, &other, sizeof(*this));
+    }
+
     hkVector4 m_vFrom;
     hkVector4 m_vTo;
     int unk20;
@@ -359,70 +356,25 @@ struct ShapeRayCastQuery
     int unk2c;
 };
 
-struct hkpCdBody
-{
-    const hkpShape* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_kMotionState;
-    const hkpCdBody* m_parent;
-    __forceinline hkpCdBody(const hkpCdBody* parent, const void* motionState)
-    {
-        m_kMotionState = motionState;
-        m_parent = parent;
-    }
-    __forceinline void SetCollisionShapeAndKey(const hkpShape* shape, unsigned int key)
-    {
-        m_pCollisionShape = shape;
-        m_uiCollisionShapeKey = key;
-    }
-};
 
-static __forceinline __m128 rotateInverse(const hkTransform& a, const hkVector4& b)
+
+static __forceinline ShapeQuad rotateInverse(const hkTransform& a, const hkVector4& b)
 {
-    __m128 t = _mm_sub_ps((const __m128&)b, (const __m128&)a.m_vTranslation);
-    __m128 c0 = (const __m128&)a.m_rotation.m_kColumn0;
-    __m128 c1 = (const __m128&)a.m_rotation.m_kColumn1;
-    __m128 c2 = (const __m128&)a.m_rotation.m_kColumn2;
-    __m128 tmp = _mm_unpacklo_ps(c0, c1);
-    __m128 ctmp = _mm_unpackhi_ps(c0, c1);
-    c0 = _mm_movelh_ps(tmp, c2);
-    c1 = _mm_movehl_ps(c0, tmp);
-    c1 = _mm_shuffle_ps(c1, c2, 0xd4);
-    c2 = _mm_shuffle_ps(ctmp, c2, 0xe4);
-    __m128 b0 = _mm_shuffle_ps(t, t, 0x00);
-    __m128 b1 = _mm_shuffle_ps(t, t, 0x55);
-    __m128 b2 = _mm_shuffle_ps(t, t, 0xaa);
-    return _mm_add_ps(_mm_add_ps(_mm_mul_ps(b0, c0), _mm_mul_ps(b1, c1)), _mm_mul_ps(b2, c2));
+    ShapeQuad t = fnv_simd::_mm_sub_ps((const ShapeQuad&)b, (const ShapeQuad&)a.m_vTranslation);
+    ShapeQuad c0 = (const ShapeQuad&)a.m_rotation.m_kColumn0;
+    ShapeQuad c1 = (const ShapeQuad&)a.m_rotation.m_kColumn1;
+    ShapeQuad c2 = (const ShapeQuad&)a.m_rotation.m_kColumn2;
+    ShapeQuad tmp = fnv_simd::_mm_unpacklo_ps(c0, c1);
+    ShapeQuad ctmp = fnv_simd::_mm_unpackhi_ps(c0, c1);
+    c0 = fnv_simd::_mm_movelh_ps(tmp, c2);
+    c1 = fnv_simd::_mm_movehl_ps(c0, tmp);
+    c1 = fnv_simd::_mm_shuffle_ps(c1, c2, 0xd4);
+    c2 = fnv_simd::_mm_shuffle_ps(ctmp, c2, 0xe4);
+    ShapeQuad b0 = fnv_simd::_mm_shuffle_ps(t, t, 0x00);
+    ShapeQuad b1 = fnv_simd::_mm_shuffle_ps(t, t, 0x55);
+    ShapeQuad b2 = fnv_simd::_mm_shuffle_ps(t, t, 0xaa);
+    return fnv_simd::_mm_add_ps(fnv_simd::_mm_add_ps(fnv_simd::_mm_mul_ps(b0, c0), fnv_simd::_mm_mul_ps(b1, c1)), fnv_simd::_mm_mul_ps(b2, c2));
 }
-
-struct MyVector4 : public hkVector4
-{
-    __forceinline void _setTransformedInversePos(const hkTransform& a, const hkVector4& b)
-    {
-        (__m128&)* this = rotateInverse(a, b);
-    }
-};
-
-struct MyTransform : public hkTransform
-{
-    void FUN_00cb2240(const void* motionState, const hkTransform* transform);
-};
-
-struct hkpRayHitCollector;
-
-struct MyShape : public hkpShape
-{
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void castRayWithCollector(const ShapeRayCastQuery& input, const hkpCdBody& cdBody,
-                                      hkpRayHitCollector& collector) const;
-};
 
 class hkpConvexTransformShapeWrapper : public hkpConvexTransformShape
 {
@@ -435,42 +387,46 @@ class hkpConvexTransformShapeWrapper : public hkpConvexTransformShape
 void hkpConvexTransformShapeWrapper::FUN_00d5dae0(const ShapeRayCastQuery& input, const hkpCdBody& cdBody,
                                                   hkpRayHitCollector& collector) const
 {
-    MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-    MonitorEntry* pMonitorEntry = stream->m_stream;
-    if (pMonitorEntry < stream->m_kRayEnd)
+    hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    hkMonitorStream::TimerCommand* pMonitorEntry =
+        (hkMonitorStream::TimerCommand*)stream->m_end.val();
+    if ((char*)pMonitorEntry < stream->m_capacityMinus16.val())
     {
-        pMonitorEntry->m_name = str_010d1084;
+        pMonitorEntry->m_commandAndMonitor = str_010d1084;
         _ReadWriteBarrier();
         volatile unsigned int t = (unsigned int)__rdtsc();
-        pMonitorEntry->m_uiCommandId = t;
-        stream->m_stream = pMonitorEntry + 1;
+        pMonitorEntry->m_time0 = t;
+        stream->m_end.m_storage = (char*)(pMonitorEntry + 1);
     }
 
-    __m128 vFromLocal = rotateInverse(m_kMotionTransform, input.m_vFrom);
+    ShapeQuad vFromLocal = rotateInverse(m_kMotionTransform, input.m_vFrom);
 
     ShapeRayCastQuery localInput = input;
-    (__m128&)localInput.m_vFrom = vFromLocal;
+    (ShapeQuad&)localInput.m_vFrom = vFromLocal;
 
-    __m128 vToLocal = rotateInverse(m_kMotionTransform, input.m_vTo);
-    (__m128&)localInput.m_vTo = vToLocal;
+    ShapeQuad vToLocal = rotateInverse(m_kMotionTransform, input.m_vTo);
+    (ShapeQuad&)localInput.m_vTo = vToLocal;
 
-    MyTransform transform;
-    transform.FUN_00cb2240(cdBody.m_kMotionState, &m_kMotionTransform);
+    __declspec(align(16)) ShapeQuad storage[4];
+    hkTransform& transform = reinterpret_cast<hkTransform&>(storage);
+    transform.FUN_00cb2240(*static_cast<const hkTransform*>(cdBody.m_pMotionState), m_kMotionTransform);
 
-    hkpCdBody childCdBody(&cdBody, &transform);
+    hkpCdBody childCdBody(&cdBody, (const void*)&transform);
     childCdBody.SetCollisionShapeAndKey(m_pContainedShape.m_pContainedShape, 0);
 
-    ((MyShape*)m_pContainedShape.m_pContainedShape)->castRayWithCollector(localInput, childCdBody, collector);
+    m_pContainedShape.m_pContainedShape->CastRayWithCollector(
+        reinterpret_cast<const ::ShapeRayCastQuery&>(localInput), childCdBody, collector);
 
-    MonitorStream* endStream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-    MonitorEntry* endEntry = endStream->m_stream;
-    if (endEntry < endStream->m_kRayEnd)
+    hkMonitorStream* endStream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    hkMonitorStream::TimerCommand* endEntry =
+        (hkMonitorStream::TimerCommand*)endStream->m_end.val();
+    if ((char*)endEntry < endStream->m_capacityMinus16.val())
     {
-        endEntry->m_name = str_010c41f8;
+        endEntry->m_commandAndMonitor = str_010c41f8;
         _ReadWriteBarrier();
         volatile unsigned int uiEndTimestamp = (unsigned int)__rdtsc();
-        endEntry->m_uiCommandId = uiEndTimestamp;
-        endStream->m_stream = endEntry + 1;
+        endEntry->m_time0 = uiEndTimestamp;
+        endStream->m_end.m_storage = (char*)(endEntry + 1);
     }
 }
 }  // namespace fnv_00d5dae0
@@ -498,28 +454,10 @@ struct FUN_00d5de40_Child
     {}
 };
 
+// An explicit vtable word keeps this layout at +0x18/+0x20 with the aligned shared vectors.
 struct FUN_00d5de40_Obj
 {
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10();
-    virtual void vf14();
-    virtual void vf18();
-    virtual void vf1c();
-    virtual void vf20();
-    virtual void vf24();
-    virtual void vf28();
-    virtual void vf2c();
-    virtual void vf30();
-    virtual void vf34();
-    virtual void vf38();
-    virtual void vf3c();
-    virtual void vf40();
-    virtual void vf44(hkVector4* value)
-    {}
-
+    const void* m_vtable;
     int unk04;
     int unk08;
     int unk0c;
@@ -540,115 +478,30 @@ void FUN_00d5de40_Obj::FUN_00d5de40(hkVector4* value)
 {
     unk18->vf44(value);
 
-    __m128 input = *reinterpret_cast<const __m128*>(value);
-    __m128 column1 = *reinterpret_cast<const __m128*>(&unk30);
-    __m128 column0 = *reinterpret_cast<const __m128*>(&unk20);
-    __m128 column2 = *reinterpret_cast<const __m128*>(&unk40);
-    __m128 translation = *reinterpret_cast<const __m128*>(&unk50);
+    ShapeQuad input = *reinterpret_cast<const ShapeQuad*>(value);
+    ShapeQuad column1 = *reinterpret_cast<const ShapeQuad*>(&unk30);
+    ShapeQuad column0 = *reinterpret_cast<const ShapeQuad*>(&unk20);
+    ShapeQuad column2 = *reinterpret_cast<const ShapeQuad*>(&unk40);
+    ShapeQuad translation = *reinterpret_cast<const ShapeQuad*>(&unk50);
 
-    __m128 first = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(input, input, 0x55), column1),
-                              _mm_mul_ps(_mm_shuffle_ps(input, input, 0), column0));
-    __m128 second = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(input, input, 0xaa), column2), translation);
+    ShapeQuad first = fnv_simd::_mm_add_ps(fnv_simd::_mm_mul_ps(fnv_simd::_mm_shuffle_ps(input, input, 0x55), column1),
+                              fnv_simd::_mm_mul_ps(fnv_simd::_mm_shuffle_ps(input, input, 0), column0));
+    ShapeQuad second = fnv_simd::_mm_add_ps(fnv_simd::_mm_mul_ps(fnv_simd::_mm_shuffle_ps(input, input, 0xaa), column2), translation);
 
-    *reinterpret_cast<__m128*>(value) = _mm_add_ps(first, second);
+    *reinterpret_cast<ShapeQuad*>(value) = fnv_simd::_mm_add_ps(first, second);
 }
 
-namespace fnv_00d5dea0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-
-struct hkTransformD5DE;
-
-struct hkVector4D5DE
-{
-    __m128 m_vComponents;
-
-    void _setTransformedPos(const hkTransformD5DE& t, const hkVector4D5DE& b);
-};
-
-struct hkTransformD5DE
-{
-    hkVector4D5DE m_kColumn0;
-    hkVector4D5DE m_kColumn1;
-    hkVector4D5DE m_kColumn2;
-    hkVector4D5DE m_vTranslation;
-};
-
-__forceinline void hkVector4D5DE::_setTransformedPos(const hkTransformD5DE& t, const hkVector4D5DE& b)
-{
-    const __m128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
-    const __m128 r0 = _mm_mul_ps(t.m_kColumn0.m_vComponents, b0);
-    const __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
-    const __m128 r1 = _mm_mul_ps(t.m_kColumn1.m_vComponents, b1);
-    const __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
-    const __m128 r2 = _mm_mul_ps(t.m_kColumn2.m_vComponents, b2);
-    m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), _mm_add_ps(r2, t.m_vTranslation.m_vComponents));
-}
-
-class hkpShapeD5DE
-{
-  public:
-    virtual ~hkpShapeD5DE() throw();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2C();
-    virtual void v30();
-    virtual void getCentre(hkVector4D5DE& kCentreOut) const;
-};
-
-class hkBaseObjectD5DE
-{
-  public:
-    virtual ~hkBaseObjectD5DE() throw();
-};
-
-class hkpTransformShapeD5DE : public hkBaseObjectD5DE
-{
-  public:
-    void FUN_00d5dea0(hkVector4D5DE& kCentreOut) const;
-
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    unsigned int m_ulUserData;
-    unsigned int m_type;
-    unsigned int unk10, unk14;
-    hkpShapeD5DE* m_pContainedShape;
-    unsigned int unk1C;
-    hkTransformD5DE m_kMotionTransform;
-};
-
-// Gets the centre of the contained shape and transforms it by the motion transform into kCentreOut.
+// The child call at vtable +0x34 is GetFirstVertex; the transform at +0x20 identifies the convex transform shape.
+// The shared host header omits this override; unused EDX preserves its thiscall ABI without a local class copy.
 // @fnv 0x00d5dea0
-void hkpTransformShapeD5DE::FUN_00d5dea0(hkVector4D5DE& kCentreOut) const
+void __fastcall GetConvexTransformFirstVertex(const hkpConvexTransformShape* self, void*, hkVector4q& vertexOut)
 {
-    hkVector4D5DE kChildCentre;
-    m_pContainedShape->getCentre(kChildCentre);
-    kCentreOut._setTransformedPos(m_kMotionTransform, kChildCentre);
+    __declspec(align(16)) hkVector4 childVertex;
+    static_cast<const hkpConvexShape*>(self->m_pContainedShape.m_pContainedShape)->GetFirstVertex(childVertex);
+    vertexOut.SetTransformedPoint(reinterpret_cast<const hkTransformq&>(self->m_kMotionTransform),
+                                 reinterpret_cast<const hkVector4q&>(childVertex));
 }
-}  // namespace fnv_00d5dea0
 
-struct FnvCpu_FUN_00d5d770_CpuData0
-{
-    __m128 field00;
-    __m128 field10;
-    __m128 field20;
-    __m128 field30;
-};
 struct FnvCpu_FUN_00d5d770_CpuObject
 {
     unsigned int unk00;
@@ -659,20 +512,20 @@ struct FnvCpu_FUN_00d5d770_CpuObject
     unsigned int unk14;
     unsigned int unk18;
     unsigned int unk1c;
-    __m128 field20;
-    __m128 field30;
-    __m128 field40;
-    __m128 field50;
-    void CopyFromCpuData(FnvCpu_FUN_00d5d770_CpuData0* input0);
+    ShapeQuad field20;
+    ShapeQuad field30;
+    ShapeQuad field40;
+    ShapeQuad field50;
+    void CopyFromCpuData(hkTransform* input0);
 };
-// Copies four __m128 values from a CpuData0 input into the object's field20 through field50.
+// Copies the transform columns into the object's field20 through field50.
 // @fnv 0x00d5d770
-void FnvCpu_FUN_00d5d770_CpuObject::CopyFromCpuData(FnvCpu_FUN_00d5d770_CpuData0* apCpuData)
+void FnvCpu_FUN_00d5d770_CpuObject::CopyFromCpuData(hkTransform* apCpuData)
 {
-    this->field20 = apCpuData->field00;
-    this->field30 = apCpuData->field10;
-    this->field40 = apCpuData->field20;
-    this->field50 = apCpuData->field30;
+    this->field20 = reinterpret_cast<const ShapeQuad&>(apCpuData->m_kColumn0);
+    this->field30 = reinterpret_cast<const ShapeQuad&>(apCpuData->m_kColumn1);
+    this->field40 = reinterpret_cast<const ShapeQuad&>(apCpuData->m_kColumn2);
+    this->field50 = reinterpret_cast<const ShapeQuad&>(apCpuData->m_vTranslation);
 }
 
 extern int DAT_010d102c;
@@ -680,14 +533,6 @@ extern int DAT_010d102c;
 struct BaseHelper
 {
     void* FUN_00c9e340(int a, float r, const hkpConvexShape* child, int refPolicy);
-};
-
-struct AlignedTransform
-{
-    __m128 r0;
-    __m128 r1;
-    __m128 r2;
-    __m128 r3;
 };
 
 struct Standin
@@ -700,25 +545,24 @@ struct Standin
     int unk14;
     int unk18;
     int unk1c;
-    AlignedTransform m_kMotionTransform;
+    hkTransform m_kMotionTransform;
 
-    Standin* FUN_00d5d7a0(const hkpConvexShape* childShape, const AlignedTransform& transform, int refPolicy);
+    Standin* FUN_00d5d7a0(const hkpConvexShape* childShape, const hkTransform& transform, int refPolicy);
 };
 
 // Calls FUN_00c9e340 with childShape and its m_fSphereRadius, sets the vtable, copies the four rows of transform into m_kMotionTransform, and returns this.
 // @fnv 0x00d5d7a0
-Standin* Standin::FUN_00d5d7a0(const hkpConvexShape* childShape, const AlignedTransform& transform, int refPolicy)
+Standin* Standin::FUN_00d5d7a0(const hkpConvexShape* childShape, const hkTransform& transform, int refPolicy)
 {
     ((BaseHelper*)this)->FUN_00c9e340(0xc, childShape->m_fSphereRadius, childShape, refPolicy);
     this->vtable = &DAT_010d102c;
-    this->m_kMotionTransform.r0 = transform.r0;
-    this->m_kMotionTransform.r1 = transform.r1;
-    this->m_kMotionTransform.r2 = transform.r2;
-    this->m_kMotionTransform.r3 = transform.r3;
+    reinterpret_cast<ShapeQuad&>(this->m_kMotionTransform.m_kColumn0) = reinterpret_cast<const ShapeQuad&>(transform.m_kColumn0);
+    reinterpret_cast<ShapeQuad&>(this->m_kMotionTransform.m_kColumn1) = reinterpret_cast<const ShapeQuad&>(transform.m_kColumn1);
+    reinterpret_cast<ShapeQuad&>(this->m_kMotionTransform.m_kColumn2) = reinterpret_cast<const ShapeQuad&>(transform.m_kColumn2);
+    reinterpret_cast<ShapeQuad&>(this->m_kMotionTransform.m_vTranslation) = reinterpret_cast<const ShapeQuad&>(transform.m_vTranslation);
     return this;
 }
 
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
 
 struct TransformChild
 {
@@ -758,37 +602,34 @@ struct TransformHost
     void __thiscall FUN_00d5dd40(int a, int b, float* c);
 };
 
-struct __declspec(align(16)) LocalTransform
-{
-    hkVector4 c0, c1, c2, c3;
-};
 // Calls unk18->vf3c(a, b, c), then transforms the b vectors in c in place by the matrix made from unk20, unk30, unk40 and unk50.
 // @fnv 0x00d5dd40
 void __thiscall TransformHost::FUN_00d5dd40(int a, int aiCount, float* apPoints)
 {
     unk18->vf3c(a, aiCount, (int)apPoints);
-    LocalTransform localTransform;
-    localTransform.c0 = unk20;
-    localTransform.c1 = unk30;
-    localTransform.c2 = unk40;
-    localTransform.c3 = unk50;
-    __m128 c0 = _mm_load_ps(&localTransform.c0.x);
-    __m128 c1 = _mm_load_ps(&localTransform.c1.x);
-    __m128 c2 = _mm_load_ps(&localTransform.c2.x);
-    __m128 c3 = _mm_load_ps(&localTransform.c3.x);
+    __declspec(align(16)) ShapeQuad storage[4];
+    hkTransform& localTransform = reinterpret_cast<hkTransform&>(storage);
+    reinterpret_cast<hkVector4&>(localTransform.m_kColumn0) = unk20;
+    reinterpret_cast<hkVector4&>(localTransform.m_kColumn1) = unk30;
+    reinterpret_cast<hkVector4&>(localTransform.m_kColumn2) = unk40;
+    reinterpret_cast<hkVector4&>(localTransform.m_vTranslation) = unk50;
+    ShapeQuad c0 = fnv_simd::_mm_load_ps(&reinterpret_cast<const hkVector4&>(localTransform.m_kColumn0).x);
+    ShapeQuad c1 = fnv_simd::_mm_load_ps(&reinterpret_cast<const hkVector4&>(localTransform.m_kColumn1).x);
+    ShapeQuad c2 = fnv_simd::_mm_load_ps(&reinterpret_cast<const hkVector4&>(localTransform.m_kColumn2).x);
+    ShapeQuad c3 = fnv_simd::_mm_load_ps(&reinterpret_cast<const hkVector4&>(localTransform.m_vTranslation).x);
     int i = aiCount - 1;
     float* p = apPoints + i * 4;
     do
     {
-        __m128 v = _mm_load_ps(p);
-        __m128 vy = _mm_shuffle_ps(v, v, 0x55);
-        __m128 vx = _mm_shuffle_ps(v, v, 0);
-        __m128 px = _mm_mul_ps(vx, c0);
-        __m128 py = _mm_mul_ps(vy, c1);
-        __m128 r = _mm_add_ps(_mm_add_ps(py, px), _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), c2), c3));
+        ShapeQuad v = fnv_simd::_mm_load_ps(p);
+        ShapeQuad vy = fnv_simd::_mm_shuffle_ps(v, v, 0x55);
+        ShapeQuad vx = fnv_simd::_mm_shuffle_ps(v, v, 0);
+        ShapeQuad px = fnv_simd::_mm_mul_ps(vx, c0);
+        ShapeQuad py = fnv_simd::_mm_mul_ps(vy, c1);
+        ShapeQuad r = fnv_simd::_mm_add_ps(fnv_simd::_mm_add_ps(py, px), fnv_simd::_mm_add_ps(fnv_simd::_mm_mul_ps(fnv_simd::_mm_shuffle_ps(v, v, 0xaa), c2), c3));
         _ReadWriteBarrier();
-        __m128 old = _mm_load_ps(p);
-        _mm_store_ps(p, _mm_shuffle_ps(r, _mm_unpackhi_ps(r, old), 0xc4));
+        ShapeQuad old = fnv_simd::_mm_load_ps(p);
+        fnv_simd::_mm_store_ps(p, fnv_simd::_mm_shuffle_ps(r, fnv_simd::_mm_unpackhi_ps(r, old), 0xc4));
         --i;
         p -= 4;
     } while (i >= 0);
@@ -797,12 +638,6 @@ void __thiscall TransformHost::FUN_00d5dd40(int a, int aiCount, float* apPoints)
 struct hkSphereq
 {
     hkVector4q m_pos;
-};
-
-union hkVector4U
-{
-    hkVector4 m_vec;
-    __m128 m_vComponents;
 };
 
 class hkpConvexShapeSpheres
@@ -836,26 +671,26 @@ class hkpConvexTransformShapeSpheres : public hkpConvexTransformShape
 static __forceinline void hkTransformPoints(const hkTransform& t, const hkVector4q* vectorsIn, int numVectors,
                                             hkVector4q* vectorsOut)
 {
-    hkVector4U c0;
-    c0.m_vec = t.m_rotation.m_kColumn0;
-    hkVector4U c1;
-    c1.m_vec = t.m_rotation.m_kColumn1;
-    hkVector4U c2;
-    c2.m_vec = t.m_rotation.m_kColumn2;
-    hkVector4U trans;
-    trans.m_vec = t.m_vTranslation;
+    hkVector4q c0;
+    *reinterpret_cast<hkVector4*>(&c0) = t.m_rotation.m_kColumn0;
+    hkVector4q c1;
+    *reinterpret_cast<hkVector4*>(&c1) = t.m_rotation.m_kColumn1;
+    hkVector4q c2;
+    *reinterpret_cast<hkVector4*>(&c2) = t.m_rotation.m_kColumn2;
+    hkVector4q trans;
+    *reinterpret_cast<hkVector4*>(&trans) = reinterpret_cast<const hkVector4&>(t.m_vTranslation);
     int i = numVectors - 1;
     do
     {
-        const __m128 b = vectorsIn[i].m_vComponents;
-        const __m128 b0 = _mm_shuffle_ps(b, b, 0x00);
-        const __m128 r0 = _mm_mul_ps(c0.m_vComponents, b0);
-        const __m128 b1 = _mm_shuffle_ps(b, b, 0x55);
-        const __m128 r1 = _mm_mul_ps(c1.m_vComponents, b1);
-        const __m128 b2 = _mm_shuffle_ps(b, b, 0xaa);
-        const __m128 r2 = _mm_mul_ps(c2.m_vComponents, b2);
-        const __m128 p = _mm_add_ps(_mm_add_ps(r0, r1), _mm_add_ps(r2, trans.m_vComponents));
-        vectorsOut[i].m_vComponents = _mm_shuffle_ps(p, _mm_unpackhi_ps(p, vectorsIn[i].m_vComponents), 0xc4);
+        const ShapeQuad b = reinterpret_cast<const ShapeQuad&>(vectorsIn[i]);
+        const ShapeQuad b0 = fnv_simd::_mm_shuffle_ps(b, b, 0x00);
+        const ShapeQuad r0 = fnv_simd::_mm_mul_ps(reinterpret_cast<const ShapeQuad&>(c0), b0);
+        const ShapeQuad b1 = fnv_simd::_mm_shuffle_ps(b, b, 0x55);
+        const ShapeQuad r1 = fnv_simd::_mm_mul_ps(reinterpret_cast<const ShapeQuad&>(c1), b1);
+        const ShapeQuad b2 = fnv_simd::_mm_shuffle_ps(b, b, 0xaa);
+        const ShapeQuad r2 = fnv_simd::_mm_mul_ps(reinterpret_cast<const ShapeQuad&>(c2), b2);
+        const ShapeQuad p = fnv_simd::_mm_add_ps(fnv_simd::_mm_add_ps(r0, r1), fnv_simd::_mm_add_ps(r2, reinterpret_cast<const ShapeQuad&>(trans)));
+        reinterpret_cast<ShapeQuad&>(vectorsOut[i]) = fnv_simd::_mm_shuffle_ps(p, fnv_simd::_mm_unpackhi_ps(p, reinterpret_cast<const ShapeQuad&>(vectorsIn[i])), 0xc4);
     } while (--i >= 0);
 }
 
@@ -869,17 +704,6 @@ const hkSphereq* hkpConvexTransformShapeSpheres::FUN_00d5df10(hkSphereq* sphereB
     return sphereBuffer;
 }
 
-extern "C"
-{
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_load_ps1(const float*);
-    void _mm_store_ss(float*, __m128);
-}
-
-struct __declspec(align(16)) Vec4_d5d8
-{
-    float x, y, z, w;
-};
 
 class ConvexChild_d5d8
 {
@@ -887,7 +711,7 @@ class ConvexChild_d5d8
     virtual void v00();
     virtual void v01();
     virtual void v02();
-    virtual float getMaximumProjection(const Vec4_d5d8& direction) const;
+    virtual float getMaximumProjection(const hkVector4q& direction) const;
 };
 
 class TransformShape_d5d8
@@ -901,45 +725,45 @@ class TransformShape_d5d8
     int unk14;
     ConvexChild_d5d8* m_pContainedShape;
     int unk1c;
-    __m128 m_kColumn0;
-    __m128 m_kColumn1;
-    __m128 m_kColumn2;
-    __m128 m_vTranslation;
+    ShapeQuad m_kColumn0;
+    ShapeQuad m_kColumn1;
+    ShapeQuad m_kColumn2;
+    ShapeQuad m_vTranslation;
 
-    float FUN_00d5d840(const __m128& direction);
+    float FUN_00d5d840(const ShapeQuad& direction);
 };
 
 // @fnv 0x00d5d840
-float TransformShape_d5d8::FUN_00d5d840(const __m128& direction)
+float TransformShape_d5d8::FUN_00d5d840(const ShapeQuad& direction)
 {
-    __m128 c0 = m_kColumn0;
-    __m128 c1 = m_kColumn1;
-    __m128 c2 = m_kColumn2;
+    ShapeQuad c0 = m_kColumn0;
+    ShapeQuad c1 = m_kColumn1;
+    ShapeQuad c2 = m_kColumn2;
     {
-        __m128 t = _mm_unpacklo_ps(c0, c1);
-        __m128 ct = _mm_unpackhi_ps(c0, c1);
-        c0 = _mm_movelh_ps(t, c2);
-        c1 = _mm_movehl_ps(c0, t);
-        c1 = _mm_shuffle_ps(c1, c2, 0xd4);
-        c2 = _mm_shuffle_ps(ct, c2, 0xe4);
+        ShapeQuad t = fnv_simd::_mm_unpacklo_ps(c0, c1);
+        ShapeQuad ct = fnv_simd::_mm_unpackhi_ps(c0, c1);
+        c0 = fnv_simd::_mm_movelh_ps(t, c2);
+        c1 = fnv_simd::_mm_movehl_ps(c0, t);
+        c1 = fnv_simd::_mm_shuffle_ps(c1, c2, 0xd4);
+        c2 = fnv_simd::_mm_shuffle_ps(ct, c2, 0xe4);
     }
-    __m128 dir = direction;
-    __m128 b1 = _mm_shuffle_ps(dir, dir, 0x55);
-    __m128 b0 = _mm_shuffle_ps(dir, dir, 0x00);
-    __m128 b2 = _mm_shuffle_ps(dir, dir, 0xaa);
-    Vec4_d5d8 localDir;
-    *(__m128*)&localDir = _mm_add_ps(_mm_add_ps(_mm_mul_ps(b1, c1), _mm_mul_ps(b0, c0)), _mm_mul_ps(b2, c2));
+    ShapeQuad dir = direction;
+    ShapeQuad b1 = fnv_simd::_mm_shuffle_ps(dir, dir, 0x55);
+    ShapeQuad b0 = fnv_simd::_mm_shuffle_ps(dir, dir, 0x00);
+    ShapeQuad b2 = fnv_simd::_mm_shuffle_ps(dir, dir, 0xaa);
+    hkVector4q localDir;
+    *(ShapeQuad*)&localDir = fnv_simd::_mm_add_ps(fnv_simd::_mm_add_ps(fnv_simd::_mm_mul_ps(b1, c1), fnv_simd::_mm_mul_ps(b0, c0)), fnv_simd::_mm_mul_ps(b2, c2));
 
     float projection = m_pContainedShape->getMaximumProjection(localDir);
 
-    __m128 support = _mm_mul_ps(_mm_load_ps1(&projection), *(const __m128*)&localDir);
-    __m128 world =
-        _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(support, support, 0x55), m_kColumn1),
-                              _mm_mul_ps(_mm_shuffle_ps(support, support, 0x00), m_kColumn0)),
-                   _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(support, support, 0xaa), m_kColumn2), m_vTranslation));
-    __m128 prod = _mm_mul_ps(world, direction);
-    __m128 sum = _mm_add_ss(_mm_shuffle_ps(prod, prod, 0xaa), _mm_add_ss(_mm_shuffle_ps(prod, prod, 0x55), prod));
+    ShapeQuad support = fnv_simd::_mm_mul_ps(fnv_simd::_mm_load_ps1(&projection), *(const ShapeQuad*)&localDir);
+    ShapeQuad world =
+        fnv_simd::_mm_add_ps(fnv_simd::_mm_add_ps(fnv_simd::_mm_mul_ps(fnv_simd::_mm_shuffle_ps(support, support, 0x55), m_kColumn1),
+                              fnv_simd::_mm_mul_ps(fnv_simd::_mm_shuffle_ps(support, support, 0x00), m_kColumn0)),
+                   fnv_simd::_mm_add_ps(fnv_simd::_mm_mul_ps(fnv_simd::_mm_shuffle_ps(support, support, 0xaa), m_kColumn2), m_vTranslation));
+    ShapeQuad prod = fnv_simd::_mm_mul_ps(world, direction);
+    ShapeQuad sum = fnv_simd::_mm_add_ss(fnv_simd::_mm_shuffle_ps(prod, prod, 0xaa), fnv_simd::_mm_add_ss(fnv_simd::_mm_shuffle_ps(prod, prod, 0x55), prod));
     float result;
-    _mm_store_ss(&result, sum);
+    fnv_simd::_mm_store_ss(&result, sum);
     return result;
 }

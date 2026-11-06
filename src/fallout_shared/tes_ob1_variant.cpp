@@ -1,3 +1,75 @@
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/NavMeshInfoMap.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+
+// ProcessTarget_tes_ob1_variant: local type (was include/ProcessTarget.h, which had no evidence of one real class); its methods are 0x008d0430 BaseProcess::GetCurrentPackageInstanceData, 0x0091ab30 MiddleHighProcess::GetTargetForPackage, 0x0091ae00 MiddleHighProcess::SetTargetData, 0x009611e0 NiAVObject::GetParent
+class Actor;
+class PackageRuntime;
+class PackageTargetData;
+class TargetOwner;
+class TESPackage;
+
+class TESPackage;
+
+class ProcessTarget_tes_ob1_variant
+{
+public:
+    TESObjectREFR* FUN_0091ae00(Actor*, TESPackage*, PackageTargetData*);
+    PackageRuntime* FUN_008d0430();
+    TESObjectREFR* FUN_0091ab30(Actor*, TESPackage*);
+    TargetOwner* GetOwner();
+};
+#include "../../include/AutoMemContext.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/GO.h"
+#include "../../include/GridCellArray.h"
+#include "../../include/NP.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/PlaceableWaterData.h"
+#include "../../include/Setting.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESObjectLAND.h"
+#include "../../include/BGSAddonNode.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/BGSPlaceableWater.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TES.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/NiObject.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/BSTempNodeManager.h"
+#include "../../include/BSTempNode.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiAdditionalGeometryData.h"
+#include "../../include/NiCamera.h"
+#include "../../include/NiNode.h"
+#include "../../include/QueuedFile.h"
+#include "../../include/Sky.h"
+#include "../../include/TESObjectTREE.h"
+#include "../../include/TESWaterForm.h"
+#include "../../include/TESSaveLoadGame.h"
 
 // src/fallout_shared/tes_ob1_variant.cpp - flag-variant unit created 2026-10-25 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/fallout_shared/tes.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -9,17 +81,9 @@ struct GlobalObject_00a7b610
 {
 };
 extern GlobalObject_00a7b610 g_01202df8;
-struct NiRTTI
-{
-};
 struct FUN_00450620_shell
 {
     const NiRTTI* GetNiRTTI() const;
-};
-struct BSTempNodeManager
-{
-    virtual ~BSTempNodeManager();
-    void* FUN_00450630(unsigned int flags);
 };
 extern "C" void __cdecl FUN_00c44e20(BSTempNodeManager*);
 extern void __cdecl __Dummy_00b6fef0(void*, unsigned int);
@@ -30,10 +94,6 @@ struct FUN_004512a0_shell
 };
 extern char DAT_01189184;
 void FUN_00451520(unsigned char value);
-struct NP
-{
-    NP& operator=(void*);
-};
 extern NP DAT_011f95e8;
 void FUN_00451570(void* arg);
 extern unsigned char DAT_011ad86c;
@@ -50,8 +110,6 @@ struct BGSVoiceType;
 struct FormRecordHeader;
 struct InventoryChanges;
 struct InventoryStackRecord;
-struct NiAVObject;
-struct NiPoint3;
 struct NiTriBasedGeom;
 struct Script;
 struct TESAmmoEffect;
@@ -64,7 +122,6 @@ struct TESCombatStyle;
 struct TESEffectShader;
 struct TESFaction;
 struct TESFile;
-struct TESForm;
 struct TESGlobal;
 struct TESIdleForm;
 struct TESLandTexture;
@@ -73,7 +130,6 @@ struct TESObject;
 struct TESObjectANIO;
 struct TESObjectCELL;
 struct TESFormList;
-struct TESObjectREFR;
 struct TESQuest;
 struct TESRace;
 struct TESRecipe;
@@ -88,354 +144,6 @@ struct TESWorldSpace;
 struct blob12
 {
     char b[12];
-};
-struct TESDataHandler
-{
-    static bool LoadForm(TESForm*, TESFile*);
-    bool SaveForm(TESForm*, bool);
-    char* GetFormName(unsigned char);
-    void OutputFormList();
-    void SetModelSizeOutputEnabled(bool);
-    void OutputModelSizeList();
-    void CheckTexturesRecurse(NiAVObject*, char*);
-    static bool CheckDismemberSkinInstanceRecurse(NiAVObject*, char*);
-    void PrintTextureInfo(void*, NiTriBasedGeom*, char*, char*, bool);
-    void OutputTextureInfo();
-    void CheckTexturePath(char*);
-    bool AddFormToDataHandler(TESForm*);
-    void ReleaseForm(TESForm*);
-    unsigned char NotUniqueID(char*);
-    void GetObjectCounts();
-    void GetReferenceCounts();
-    void GetRegions();
-    void InitializeMagicSystem();
-    void GetReferencesInArea(TESObjectCELL*, void*, float, void*, float, int*, long);
-    void GetReferencesInArea(void*, float, void*, float, int*, long);
-    void EnumReferencesCloseToRef(TESObjectREFR*, float, void*, float, int*, long);
-    static bool ReferenceBaseSearchEnumFunc(TESObjectREFR*, long);
-    bool FindTeleportPathBetweenSmallSpaces(TESForm*, TESForm*, void*);
-    bool FindTeleportPathBetweenWorlds(TESWorldSpace*, TESWorldSpace*, void*);
-    bool FindTeleportPathFromSmallSpaceToWorld(TESForm*, TESWorldSpace*, void*, bool);
-    TESObjectREFR* FindFirstReference(TESObject*);
-    TESObjectREFR* FindFirstReference(char*);
-    bool FindConnectedWorld(TESWorldSpace*, TESWorldSpace*, void*);
-    bool FindConnectedSmallSpace(TESForm*, TESForm*, void*, void*);
-    TESWorldSpace* BuildPathNodeLocation(TESForm*, NiPoint3*, void*);
-    TESObjectREFR* FindClosestReference(TESBoundObject*, void*, TESObjectCELL*);
-    TESObjectREFR* FindClosestReference(char*, void*, TESObjectCELL*);
-    TESObjectREFR* GetReference(char*);
-    TESObjectREFR* GetReference(unsigned int);
-    TESLandTexture* GetLandTexture(char*);
-    TESLandTexture* GetLandTexture(unsigned int);
-    TESRace* GetRace(char*);
-    TESRace* GetRace(unsigned int);
-    TESClass* GetClass(char*);
-    TESClass* GetClass(unsigned int);
-    Script* GetScript(char*);
-    Script* GetScript(unsigned int);
-    TESSound* GetSoundByEditorID(char*);
-    TESSound* GetSoundByEditorID(unsigned int);
-    TESGlobal* GetGlobal(char*);
-    TESGlobal* GetGlobal(unsigned int);
-    BGSVoiceType* GetVoiceType(unsigned int);
-    TESFaction* GetFactionByFormID(char*);
-    TESFaction* GetFactionByFormID(unsigned int);
-    TESReputation* GetReputation(char*);
-    TESReputation* GetReputation(unsigned int);
-    TESRecipe* GetRecipe(char*);
-    TESRecipe* GetRecipe(unsigned int);
-    TESRecipeCategory* GetRecipeCategory(char*);
-    TESRecipeCategory* GetRecipeCategory(unsigned int);
-    TESCasino* GetCasino(char*);
-    TESCasino* GetCasino(unsigned int);
-    TESCaravanDeck* GetCaravanDeck(char*);
-    TESCaravanDeck* GetCaravanDeck(unsigned int);
-    TESTopic* GetAudioBackendData(int, int);
-    TESTopic* GetAudioBackendData(char*);
-    TESTopic* GetAudioBackendData(unsigned int);
-    TESChallenge* GetChallenge(char*);
-    TESAmmoEffect* GetAmmoEffect(char*);
-    TESQuest* GetQuest(char*);
-    TESCombatStyle* GetCombatStyle(char*);
-    TESEffectShader* GetEffectShader(char*);
-    BGSProjectile* GetProjectileData(char*);
-    BGSExplosion* GetExplosion(char*);
-    BGSDebris* GetDebris(char*);
-    BGSPerk* GetPerk(char*);
-    BGSMessage* GetMessage(char*);
-    TESLoadScreenType* GetLoadScreenType(char*);
-    TESLoadScreenType* GetLoadScreenType(unsigned int);
-    TESFormList* GetObjectList();
-    void* GetFileList();
-    void* GetPartDataList();
-    void* GetPerks();
-    void* GetDebrisList();
-    void* GetExplosionList();
-    void* GetProjectileList();
-    void* GetRadiationStageList();
-    void* GetDehydrationStageList();
-    void* GetHungerStageList();
-    void* GetSleepDeprevationStageList();
-    void* GetEffectShaderList();
-    void* GetWaterList();
-    void* GetLoadScreenList();
-    void* GetAnimObjectList();
-    TESObjectANIO* GetAnimObject(TESIdleForm*, int);
-    void* GetCombatStyleList();
-    void* GetPackageList();
-    void* GetWorldSpaceList();
-    void* GetClimateList();
-    void* GetImageSpaceList();
-    void* GetImageSpaceModifierList();
-    void* GetWeatherList();
-    void* GetEnchantmentItemList();
-    void* GetSpellItemList();
-    void* GetLandTextList();
-    void* GetCameraShotList();
-    void* GetHeadPartList();
-    void* GetHairList();
-    void* GetEyesList();
-    void* GetRaceList();
-    void* GetZoneList();
-    void* GetClassList();
-    void* GetFactionList();
-    void* GetReputationList();
-    void* GetChallengeList();
-    void* GetRecipeList();
-    void* GetRecipeCategoryList();
-    void* GetAmmoEffectList();
-    void* GetCasinoList();
-    void* GetCaravanDeckList();
-    void* GetSoundList();
-    void* GetAcousticSpaceList();
-    void* GetRagdollList();
-    void* GetGlobalList();
-    void* GetVoiceTypeList();
-    void* GetImpactDataList();
-    void* GetImpactDataSetList();
-    void* GetBadFormList();
-    TESRegionList* GetRegionList();
-    void* GetTopicList();
-    void* GetTopicInfoList();
-    void* GetNoteList();
-    void* GetMenuIconList();
-    void* GetListFormList();
-    void* GetMessageList();
-    void* GetLightingTemplateList();
-    void* GetMusicTypeList();
-    void* GetLoadScreenTypeList();
-    void* GetMediaSetList();
-    void* GetMediaLocationControllerList();
-    void AddTopic(TESTopic*);
-    void RemoveTopic(TESTopic*);
-    void AddTopicInfo(TESTopicInfo*);
-    void RemoveTopicInfo(TESTopicInfo*);
-    void* GetScriptList();
-    void SortScriptList();
-    void* GetQuestList();
-    void AddQuest(TESQuest*);
-    void RemoveQuest(TESQuest*);
-    unsigned int GetAddonNodeCount();
-    BGSAddonNode* GetAddonNodeByIndex(unsigned int);
-    void RegisterAddonNode(BGSAddonNode*);
-    void RemoveAddonNode(BGSAddonNode*);
-    TESObjectCELL* GetCellByNameAndGrid(char*);
-    TESObjectCELL* GetCellByNameAndGrid(char*, int, int, TESWorldSpace*);
-    unsigned int GetInteriorCellCount();
-    TESObjectCELL* GetCellByInteriorIndex(unsigned int);
-    void RefreshCellList();
-    unsigned int GetCellCount();
-    TESObjectCELL* GetCellByIndex(unsigned int);
-    TESObjectCELL* GetCellByNumericID(unsigned int);
-    TESObjectCELL* LookupCellByEditorID(char*);
-    TESWorldSpace* GetWorldSpaceByEditorID(char*, int*, int*);
-    TESObjectCELL* GetCellByWorldPosition(float, float, TESWorldSpace*, bool);
-    TESObjectCELL* GetCellAtGridPosition(int, int, TESWorldSpace*, bool);
-    TESWorldSpace* GetWorldSpaceForCell(TESObjectCELL*);
-    void RemoveCell(TESObjectCELL*);
-    void RemoveCell(int, int, TESWorldSpace*);
-    void RemoveCell(char*);
-    TESObjectREFR* CreateReferenceInLoadedArea(TESBoundObject*, void*, void*, bool, BGSPrimitive*, void*);
-    TESObjectREFR* PlaceReferenceAtLocation(TESBoundObject*, void*, void*, TESObjectCELL*, TESWorldSpace*,
-                                            TESObjectREFR*, BGSPrimitive*, void*);
-    TESObjectCELL* SelectCell(struct blob12, bool*, TESWorldSpace*);
-    bool AssignToCell(TESObjectCELL*, TESObjectREFR*);
-    bool PlaceInExterior(TESObjectREFR*, TESWorldSpace*);
-    void RemoveDuplicateReferences();
-    TESObjectREFR* CreateProjectileAtLocation(TESBoundObject*, void*, void*, TESObjectCELL*, TESWorldSpace*);
-    TESObjectREFR* PlaceObjectAtLocation(TESBoundObject*, void*, void*, TESObjectCELL*, TESWorldSpace*);
-    TESFile* LookupTESFile(unsigned int);
-    TESFile* LookupTESFile(char*);
-    bool RemoveListFile(TESFile*);
-    static void FileCacheCompleteCallback(char*);
-    char* GetActiveFileName();
-    void SetActiveFile(TESFile*);
-    TESFile* GetActiveFile();
-    void RemoveIDFromDataHandler(unsigned int);
-    unsigned int GetNextID();
-    void AddCompiledFile(TESFile*);
-    void ClearFileList();
-    bool UpdateLoadingStatusCallback(char*);
-    void BuildCompiledFileList();
-    int CountCheckedFiles(int);
-    unsigned int CountFiles();
-    unsigned int CountCompiled();
-    bool LoadPluginFiles(bool);
-    bool ClearData();
-    bool SaveActiveData(char*, bool);
-    void CloseAllTES();
-    bool LoadTESFile(TESFile*, bool);
-    void ClearLoadedFormCount();
-    unsigned int AddDownloadedContentToFileList();
-    void RunAllPersistentRefScripts();
-    bool ConstructObject(TESFile*, bool, TESForm*, bool);
-    bool FormGroupLoadsInGame(TESFile*, FormRecordHeader*);
-    static TESForm* CreateFormForType(unsigned char);
-    bool ResetOffsetData(TESFile*);
-    void FixAllScriptIDs();
-    void SetSaveLoadGameState(int);
-    bool GetMasterSave();
-    void SetMasterSave(bool);
-    bool GetSaveLoadGame();
-    void SetSaveLoadGame(bool);
-    bool GetSaveLoad();
-    void SetSaveLoad(bool);
-    bool GetAutoSaving();
-    void SetAutoSaving(bool);
-    bool GetClearingData();
-    void SetClearingData(bool);
-    bool GetHasDesiredFiles();
-    void SetHasDesiredFiles(bool);
-    bool IsSavingLoading();
-    void SetCheckingModels(bool);
-    bool GetCheckingModels();
-    void SetLoadingFiles(bool);
-    bool GetLoadingFiles();
-    bool GetGameSettingsLoaded();
-    void MarkGameSettingsLoaded();
-    void FlushSoundBuffers();
-    void SetBarterContainer(TESObjectREFR*);
-    void AddBarterItem(InventoryStackRecord*, int, TESObjectREFR*);
-    void ClearBarterContainer();
-    InventoryChanges* GetBarterContainer();
-    void CreateRecipeContainer(TESObjectREFR*);
-    void RemoveItemRecipeContainer(InventoryStackRecord*, int, TESObjectREFR*);
-    void ClearRecipeContainer();
-    InventoryChanges* GetRecipeContainer();
-    TESRegionDataManager* GetRegionDataManager();
-    TESFile* GetCompiledFileByIndex(int);
-    unsigned int GetNextFormID();
-    void SetNextFormID(unsigned int);
-    bool FormIDExists(unsigned int);
-    AlchemyItem* DoesPotionMatch(AlchemyItem*);
-    void SetDontRemoveIDs(bool);
-    bool GetDontRemoveIDs();
-    void* QArrayInteriorCells();
-    TESEffectShader* GetSpotterShader();
-    TESEffectShader* GetItemDetectedShader();
-    TESEffectShader* GetCateyeShader();
-    void SetSpotterShader(TESEffectShader*);
-    void SetItemDetectedShader(TESEffectShader*);
-    void SetCateyeShader(TESEffectShader*);
-    void ClearDLCFlags();
-    int GetNumDLCInstalled();
-    void DataError(int);
-    bool IsFormIDRemapped(unsigned int);
-    void AdvanceNextID();
-    char* GetDLCFlags();
-    bool IsDLCFlagSet(char);
-    void SetDLCFlag(char, bool);
-    int GetDLCIndex(char*);
-    unsigned int LoadFilesInDirectory(char*, void*);
-    void* __vecDelDtor(unsigned int);
-    char m_cDLCFlagCount;
-    char _pad_1[3];
-    TESFormList* m_pBoundObjectList;
-    char m_kPackages[8];
-    char m_kWorldSpaceList[8];
-    char m_kClimateList[8];
-    char m_kImageSpaceList[8];
-    char m_kImageSpaceModifierList[8];
-    char m_kWeatherList[8];
-    char m_kEnchantmentItemList[8];
-    char m_kSpellList[8];
-    char m_kHeadPartList[8];
-    char m_kHairList[8];
-    char m_kEyeList[8];
-    char m_kRaceList[8];
-    char m_kEncounterZoneList[8];
-    char m_kLandTextureList[8];
-    char m_kCameraShotList[8];
-    char m_kClassList[8];
-    char m_pVoiceType[8];
-    char m_kReputationList[8];
-    char m_kChallengeList[8];
-    char m_kCraftingRecipeList[8];
-    char m_kRecipeCategoryList[8];
-    char m_kAmmoEffectList[8];
-    char m_kCasinoList[8];
-    char m_kCaravanDeckList[8];
-    char m_kScriptList[8];
-    char m_kSoundList[8];
-    char m_kAcousticSpaceList[8];
-    char m_kRagdollList[8];
-    char m_kGlobalList[8];
-    char m_kVoiceTypeList[8];
-    char m_kImpactEffectList[8];
-    char m_kImpactDataSetList[8];
-    char m_kTopicList[8];
-    char m_kTopicInfoList[8];
-    char m_kQuestList[8];
-    char m_kCombatStyleList[8];
-    char m_kLoadScreenList[8];
-    char m_kWaterFormList[8];
-    char m_kEffectShaderList[8];
-    char m_kProjectileList[8];
-    char m_kExplosionList[8];
-    char m_kRadiationStageList[8];
-    char m_kDehydrationStageList[8];
-    char m_kHungerStageList[8];
-    char m_kSleepDeprivationStageList[8];
-    char m_kDebrisList[8];
-    char m_kPerkList[8];
-    char m_kBodyPartDataList[8];
-    char m_kNoteList[8];
-    char m_kListFormList[8];
-    char m_kMenuIconList[8];
-    char m_kFourthDataList[8];
-    char m_kMessageList[8];
-    char m_kLightingTemplateList[8];
-    char m_kMusicTypeList[8];
-    char m_kLoadScreenTypeList[8];
-    char m_kMediaSetList[8];
-    char m_kMediaLocationControllerList[8];
-    TESRegionList* m_pRegions;
-    char m_kFirstArrayStorage[16];
-    char m_kSecondArrayStorage[16];
-    char m_kThirdArrayStorage[12];
-    unsigned int m_uiFormCount;
-    TESFile* m_pActiveFile;
-    char m_kModInfoList[8];
-    unsigned int m_iLoadedModCount;
-    char m_ppLoadedMods[1020];
-    bool m_bLoadingFiles;
-    bool m_bGameSettingsLoaded;
-    bool m_bMasterSave;
-    bool m_bSaveLoadGame;
-    bool m_bFirstStateField;
-    bool m_bSecondStateField;
-    bool m_bThirdStateField;
-    bool m_bFourthStateFlag;
-    bool m_bFifthStateFlag;
-    bool m_bSixthStateFlag;
-    unsigned char m_ucInternalStateByte;
-    char _pad_623[1];
-    TESRegionDataManager* m_pRegionDataManager;
-    InventoryChanges* m_pFirstInventoryChanges;
-    InventoryChanges* m_pSecondInventoryChanges;
-    TESEffectShader* m_pFirstEffectShader;
-    TESEffectShader* m_pSecondEffectShader;
-    TESEffectShader* m_pThirdEffectShader;
 };
 typedef char _sizecheck_TESDataHandler[sizeof(TESDataHandler) == 1596 ? 1 : -1];
 struct FUN_004516b0_shell : public TESDataHandler
@@ -452,101 +160,10 @@ struct SaveLoadChangeHistory;
 struct LoadGameSubBufferQueue;
 struct BGSSaveLoadReferencesMap;
 struct IDebugText;
-struct TESForm;
 struct TESObjectCELL;
-struct TESObjectREFR;
 struct blob4
 {
     char b[4];
-};
-struct BGSSaveLoadGame
-{
-    static void Create();
-    static void Destroy();
-    void ApplyFormChanges(BGSSaveLoadChangesMap*, FormIDConverter*);
-    void LoadCellChanges(bool);
-    void LoadForm(TESForm*);
-    void SetFormLoaded(TESForm*, bool);
-    bool ShouldUnloadForm(TESForm*);
-    void FormReconstructionMap(TESObjectCELL*);
-    bool ContainsReference(unsigned int);
-    bool ShouldSaveForm(TESForm*, bool);
-    void NotifyFormIDChanged(TESForm*, struct blob4, bool);
-    bool HasFormChangeFlags(TESForm*, struct blob4);
-    bool GetOldChange(TESForm*, struct blob4);
-    bool IsFormChanged(TESForm*);
-    void ClearFormChangeFlags(TESForm*, struct blob4);
-    void HasFormChanges(TESForm*);
-    void ClearAllForms();
-    void CleanupExpiredData();
-    void ProcessSubBuffer(int, BGSLoadFormBuffer*, TESForm*);
-    void ClearForm(TESForm*);
-    void ClearFormID(unsigned int);
-    void DeleteForm(TESForm*);
-    void ChangeFormID(unsigned int, unsigned int);
-    unsigned int GetNewFormID(unsigned int);
-    bool IsFormIDRemapped(unsigned int);
-    void AreStringsEqual(char*, char*);
-    void DisplayReferenceDebugText(TESObjectREFR*, IDebugText*);
-    void DisplayCellDebugText(TESObjectREFR*, IDebugText*);
-    FormIDConverter* GetFormIDMap();
-    FormIDConverter* GetWorldspaceFormIDMap();
-    SaveLoadChangeHistory* GetHistory();
-    BGSReconstructFormsInAllFilesMap* GetReconstructFormsMap();
-    unsigned char GetConvertedFileIndex(unsigned char);
-    unsigned char GetReverseConvertedFileIndex(unsigned char);
-    unsigned char GetLoadState();
-    bool SetGlobalAllowChanges(bool);
-    bool GetGlobalAllowChanges();
-    void SetDeferInitForms(bool);
-    bool GetDeferInitForms();
-    void SetSaveGameLoading(bool);
-    bool GetSaveGameLoading();
-    void SetSaveGameSaving(bool);
-    bool GetSaveGameSaving();
-    void SetInitingForms(bool);
-    bool GetInitingForms();
-    void SetPositioningPlayerCharacter(bool);
-    bool GetPositioningPlayerCharacter();
-    void SetPlayerLocationInvalid(bool);
-    bool GetPlayerLocationInvalid();
-    void SetSaveLoadFailed(bool);
-    bool GetSaveLoadFailed();
-    bool SetThreadAllowChanges(bool);
-    bool GetThreadAllowChanges();
-    void SetLoadingMovedRefs(bool);
-    bool GetLoadingMovedRefs();
-    void SetReconstructingForms(bool);
-    bool GetReconstructingForms();
-    bool GetAllowChanges();
-    void SaveGame(SaveLoadFile*);
-    bool LoadGame(SaveLoadFile*, bool);
-    void PrepareLoadGame(SaveLoadFile*);
-    bool IsValidSaveGame(SaveLoadFile*);
-    unsigned int LoadFormRecord(SaveLoadFile*, BGSLoadFormBuffer*, FormIDConverter*);
-    bool FindFormByID(TESForm**, struct blob4, bool);
-    void InitializePackageLocations(Actor*);
-    void CancelInitPackageLocations(Actor*);
-    void ClearFormChanges();
-    BGSSaveLoadChangesMap* GetChangesMap();
-    void* __vecDelDtor(unsigned int);
-    BGSSaveLoadChangesMap* m_pFormChangesMap;
-    BGSSaveLoadChangesMap* m_pSecondChangesMap;
-    FormIDConverter* m_pSecondSaveLoadData;
-    FormIDConverter* m_pSaveLoadData;
-    BGSSaveLoadReferencesMap* m_pReferencesMap;
-    LoadGameSubBufferQueue* m_pSaveLoadMap;
-    void* m_pAuxiliaryData;
-    SaveLoadChangeHistory* m_pNoteHandler;
-    BGSReconstructFormsInAllFilesMap* m_pFormReconstructionMap;
-    char LoadFormBufferArray[16];
-    char m_acTextBuffer[16];
-    char m_acFirstTextBuffer[255];
-    char m_acSecondTextBuffer[255];
-    char _pad_242[2];
-    unsigned int m_uiInitializationFlags;
-    unsigned char m_ucSaveLoadState;
-    char _pad_249[3];
 };
 typedef char _sizecheck_BGSSaveLoadGame[sizeof(BGSSaveLoadGame) == 588 ? 1 : -1];
 struct FUN_004523c0_shell : public BGSSaveLoadGame
@@ -570,15 +187,6 @@ struct FUN_00452440_shell
 struct FUN_004e32c0_shell
 {
     bool __thiscall HasFlags(int arg);
-};
-struct PlaceableWaterData
-{
-    unsigned int flags;
-};
-struct BGSPlaceableWater
-{
-    PlaceableWaterData* FUN_00624700();
-    bool __thiscall HasFlags(unsigned int flags);
 };
 extern unsigned char DAT_0119b8c8;
 unsigned char FUN_00452480();
@@ -647,10 +255,7 @@ struct KFModel;
 struct LoadedFile;
 struct MagicItem;
 struct Model;
-struct NiAVObject;
 struct NiControllerSequence;
-struct NiNode;
-struct QueuedFile;
 struct QueuedReference;
 struct QueuedTexture;
 struct TESAnimGroup;
@@ -658,8 +263,6 @@ struct TESBoundObject;
 struct TESModel;
 struct TESNPC;
 struct TESObjectCELL;
-struct TESObjectREFR;
-struct TESObjectTREE;
 struct FileEntryList;
 struct FileEntryListCollection;
 struct ModelLoadData;
@@ -799,32 +402,13 @@ struct Flt
 };
 extern Flt g_011deb7c;
 unsigned int FUN_0045c670();
-struct TESObjectREFR;
 void FUN_00578060(TESObjectREFR* self);
 void FUN_00578170(TESObjectREFR* self);
 void FUN_0045c680(TESObjectREFR* arg, bool flag);
 extern "C" double _gModifierZero;
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-struct NiCamera
-{
-    float x;
-    float y;
-    float z;
-    float w;
-    int __thiscall ClassifyPoint(const NiPoint3* other);
-};
 struct FUN_00451cd0_shell
 {
     unsigned char FUN_00451cd0();
-};
-struct TESObjectCELL
-{
-    bool IsInterior(void);
 };
 struct TESObjectCELL_AddToInteriorBuffer
 {
@@ -882,10 +466,6 @@ struct FNVHelper
     FNVHelper* _FNV_GetObjectReference();
     unsigned char _FNV_GetFormType();
 };
-struct TES
-{
-    bool IsRefUsable(TESObjectREFR* apRef);
-};
 extern int DAT_01000000;
 struct FUN_00452370_shell
 {
@@ -928,10 +508,6 @@ struct FUN_00455640_shell
     void* m8;
     void FUN_00455640();
 };
-struct NiNode
-{
-    NiAVObject* GetAt(unsigned int);
-};
 struct TESObjectCELLHelper
 {
     NiAVObject* GetCellChildAt(int);
@@ -947,12 +523,6 @@ struct FUN_00557090_shell
 struct FUN_005570b0_shell
 {
     void __thiscall IsSet();
-};
-struct Unk_C44EA0
-{
-    void FUN_00c44ed0(float);
-    void FUN_00a5e1f0(float*, unsigned int);
-    void FUN_00c44ea0(float*, unsigned int);
 };
 struct FUN_00452390_shell
 {
@@ -1001,12 +571,6 @@ struct FUN_00454e70_shell
     void MoveCellToFront(TESObjectCELL* apCell);
 };
 struct TESObjectLAND;
-struct NiNode;
-struct NiPoint2
-{
-    float x;
-    float y;
-};
 struct L_GetHitSound
 {
     TESWorldSpace* GetHitSound();
@@ -1030,10 +594,6 @@ struct S00551440
 struct FUN_004ba5a0_shell
 {
     bool IsOutdoorCell(unsigned int, unsigned int);
-};
-struct GridCellArrayStandin
-{
-    void SetCellAt(unsigned int, unsigned int, TESObjectCELL*);
 };
 struct GridCellArray_Target
 {
@@ -1077,10 +637,6 @@ struct GlobalObject_0045cf30
     unsigned char* Bool();
 };
 extern GlobalObject_0045cf30 g_011c7adc;
-struct MobileObjectCellAccess
-{
-    bool FUN_004518e0() const;
-};
 struct S451cd0
 {
     unsigned char FUN_00451cd0();
@@ -1115,15 +671,6 @@ struct TES_00451a50
     unsigned int unk5C;
     bool m_bHasCurrentRegion;
     void FUN_00451a50(int aiGridX, int aiGridY, int aiCellX, int aiCellY);
-};
-struct Setting_S
-{
-    float* Float();
-};
-struct Sky
-{
-    float GetFieldCC();
-    void Update(float);
 };
 struct Animation
 {
@@ -1163,7 +710,7 @@ void __cdecl FUN_00c74550(float, float);
 void __fastcall FUN_00975080(char*);
 extern float DAT_011c3c08;
 extern GlobalObject_0045cfe0 g_011c3ea4;
-extern Setting_S g_011c5724;
+extern Setting g_011c5724;
 extern int DAT_011e0e80;
 extern Twin_0084d030 g_timeGlobal;
 struct Zt5TES
@@ -1202,21 +749,12 @@ struct Zt5TES
     void FUN_004537c0();
     void FUN_00453550(float afTime);
 };
-struct TESForm_0045c6b0
-{
-    unsigned int FUN_0045c6b0();
-};
-int FUN_0045c6b0(TESForm_0045c6b0* apObj);
+int FUN_0045c6b0(TESForm* apObj);
 struct FUN_00453490_shell
 {
     bool ContainsCell(TESObjectCELL*);
     bool FUN_00454e20(TESObjectCELL*);
     bool FUN_00453490(TESObjectCELL* cell);
-};
-struct FUN_00455400_sky : Sky
-{
-    int FUN_00476c90();
-    void SetMode(int mode);
 };
 struct FUN_00455400_cell : TESObjectCELL
 {
@@ -1224,29 +762,12 @@ struct FUN_00455400_cell : TESObjectCELL
 };
 struct FUN_00455400_tes
 {
-    FUN_00455400_sky* GetLogDate();
+    Sky* GetLogDate();
     void UpdateSkyModeForCell(TESObjectCELL* apCell);
-};
-struct GO
-{
-    int mObject;
-    int mObject2;
-    int mObject3;
-    GO(int);
-    ~GO();
-    void operator=(void*);
 };
 struct FUN_0045ab30_shell : GO
 {
     FUN_0045ab30_shell();
-};
-struct GridCellArray
-{
-    void* Get(unsigned int, unsigned int);
-};
-struct NiAdditionalGeometryData
-{
-    static void* __cdecl GetShadowSceneNodeForIndex(int);
 };
 struct FUN_00b5ddb0_self
 {
@@ -1268,10 +789,6 @@ struct LLD_DataHandler
 {
     LLD_Cell* GetOrCreateCell(int, int, TESWorldSpace*, bool);
 };
-struct TESSaveLoadGame
-{
-    void* GetHitSound();
-};
 struct FUN_00451900_shell
 {
     TESObjectCELL* FUN_00451900(int aiCellX, int aiCellY);
@@ -1292,134 +809,6 @@ struct FUN_00454fc0_shell
 
     void CompactQueuedCells();
 };
-struct A51BF0Base
-{
-    static void* operator new(unsigned int size)
-    {
-        return ::operator new(size);
-    }
-};
-struct NiAVObject : A51BF0Base
-{
-    virtual void v00()
-    {}
-    virtual void v01()
-    {}
-    virtual void v02()
-    {}
-    virtual void v03()
-    {}
-    virtual void v04()
-    {}
-    virtual void v05()
-    {}
-    virtual void v06()
-    {}
-    virtual void v07()
-    {}
-    virtual void v08()
-    {}
-    virtual void v09()
-    {}
-    virtual void v10()
-    {}
-    virtual void v11()
-    {}
-    virtual void v12()
-    {}
-    virtual void v13()
-    {}
-    virtual void v14()
-    {}
-    virtual void v15()
-    {}
-    virtual void v16()
-    {}
-    virtual void v17()
-    {}
-    virtual void v18()
-    {}
-    virtual void v19()
-    {}
-    virtual void v20()
-    {}
-    virtual void v21()
-    {}
-    virtual void v22()
-    {}
-    virtual void v23()
-    {}
-    virtual void v24()
-    {}
-    virtual void v25()
-    {}
-    virtual void v26()
-    {}
-    virtual void v27()
-    {}
-    virtual void v28()
-    {}
-    virtual void v29()
-    {}
-    virtual void v30()
-    {}
-    virtual void v31()
-    {}
-    virtual void v32()
-    {}
-    virtual void v33()
-    {}
-    virtual void v34()
-    {}
-    virtual void v35()
-    {}
-    virtual void v36()
-    {}
-    virtual void v37()
-    {}
-    virtual void v38()
-    {}
-    virtual void v39()
-    {}
-    virtual void v40()
-    {}
-    virtual void v41()
-    {}
-    virtual void v42()
-    {}
-    virtual void v43()
-    {}
-    virtual void v44()
-    {}
-    virtual void v45()
-    {}
-    virtual void v46()
-    {}
-    virtual void v47()
-    {}
-    virtual void v48()
-    {}
-    virtual void v49()
-    {}
-    virtual void v50()
-    {}
-    virtual void v51()
-    {}
-    virtual void v52()
-    {}
-    virtual void v53()
-    {}
-    virtual void v54()
-    {}
-
-    virtual void SetDebugObject(NiAVObject*, int);
-
-    void UpdateSceneObject();
-};
-void NiAVObject::SetDebugObject(NiAVObject*, int)
-{}
-void NiAVObject::UpdateSceneObject()
-{}
 struct Calendar : NiAVObject
 {
     Calendar* GetDaysPassed();
@@ -1428,15 +817,6 @@ Calendar* Calendar::GetDaysPassed()
 {
     return this;
 }
-struct FUN_00458ef0 : NiAVObject
-{
-    unsigned char padding[172];
-
-    FUN_00458ef0(float);
-};
-FUN_00458ef0::FUN_00458ef0(float)
-{}
-typedef FUN_00458ef0 BSTempNode;
 struct FUN_00458e20_shell : Calendar
 {
     void FUN_00458e20(NiAVObject*, float);
@@ -1482,10 +862,6 @@ struct FUN_0045c840_shell
 };
 extern unsigned char DAT_0101784c[];
 unsigned int __fastcall _ref_0084e3a0(void* object);
-struct TESObjectLAND
-{
-    bool GetLandHeightAtPosition(const NiPoint3& coord, float& height);
-};
 struct FUN_004572e0_shell : public TES
 {
     TESObjectCELL* FUN_00451900(int cellX, int cellY);
@@ -1524,7 +900,6 @@ struct FUN_004511e0_cls
 };
 // Clear an actor's pending state: if it is flagged, has a current process target and is active,
 // notify the target's owner, then reset two state flags.
-class ProcessTarget;
 class TargetOwner
 {
   public:
@@ -1586,143 +961,12 @@ class TargetOwner
     virtual void Unk_37();
     virtual void Unk_38();
     virtual void Unk_39();
-    virtual void OnTargetCleared(ProcessTarget* pTarget);
-};
-class ProcessTarget
-{
-  public:
-    TargetOwner* GetOwner();
-};
-class ActorLike
-{
-  public:
-    virtual void Unk_00();
-    virtual void Unk_01();
-    virtual void Unk_02();
-    virtual void Unk_03();
-    virtual void Unk_04();
-    virtual void Unk_05();
-    virtual void Unk_06();
-    virtual void Unk_07();
-    virtual void Unk_08();
-    virtual void Unk_09();
-    virtual void Unk_0A();
-    virtual void Unk_0B();
-    virtual void Unk_0C();
-    virtual void Unk_0D();
-    virtual void Unk_0E();
-    virtual void Unk_0F();
-    virtual void Unk_10();
-    virtual void Unk_11();
-    virtual void Unk_12();
-    virtual void Unk_13();
-    virtual void Unk_14();
-    virtual void Unk_15();
-    virtual void Unk_16();
-    virtual void Unk_17();
-    virtual void Unk_18();
-    virtual void Unk_19();
-    virtual void Unk_1A();
-    virtual void Unk_1B();
-    virtual void Unk_1C();
-    virtual void Unk_1D();
-    virtual void Unk_1E();
-    virtual void Unk_1F();
-    virtual void Unk_20();
-    virtual void Unk_21();
-    virtual void Unk_22();
-    virtual void Unk_23();
-    virtual void Unk_24();
-    virtual void Unk_25();
-    virtual void Unk_26();
-    virtual void Unk_27();
-    virtual void Unk_28();
-    virtual void Unk_29();
-    virtual void Unk_2A();
-    virtual void Unk_2B();
-    virtual void Unk_2C();
-    virtual void Unk_2D();
-    virtual void Unk_2E();
-    virtual void Unk_2F();
-    virtual void Unk_30();
-    virtual void Unk_31();
-    virtual void Unk_32();
-    virtual void Unk_33();
-    virtual void Unk_34();
-    virtual void Unk_35();
-    virtual void Unk_36();
-    virtual void Unk_37();
-    virtual void Unk_38();
-    virtual void Unk_39();
-    virtual void Unk_3A();
-    virtual void Unk_3B();
-    virtual void Unk_3C();
-    virtual void Unk_3D();
-    virtual void Unk_3E();
-    virtual void Unk_3F();
-    virtual void Unk_40();
-    virtual void Unk_41();
-    virtual void Unk_42();
-    virtual void Unk_43();
-    virtual void Unk_44();
-    virtual void Unk_45();
-    virtual void Unk_46();
-    virtual void Unk_47();
-    virtual void Unk_48();
-    virtual void Unk_49();
-    virtual void Unk_4A();
-    virtual void Unk_4B();
-    virtual void Unk_4C();
-    virtual void Unk_4D();
-    virtual void Unk_4E();
-    virtual void Unk_4F();
-    virtual void Unk_50();
-    virtual void Unk_51();
-    virtual void Unk_52();
-    virtual void Unk_53();
-    virtual void Unk_54();
-    virtual void Unk_55();
-    virtual void Unk_56();
-    virtual void Unk_57();
-    virtual void Unk_58();
-    virtual void Unk_59();
-    virtual void Unk_5A();
-    virtual void Unk_5B();
-    virtual void Unk_5C();
-    virtual void Unk_5D();
-    virtual void Unk_5E();
-    virtual void Unk_5F();
-    virtual void Unk_60();
-    virtual void Unk_61();
-    virtual void Unk_62();
-    virtual void Unk_63();
-    virtual void Unk_64();
-    virtual void Unk_65();
-    virtual void Unk_66();
-    virtual void Unk_67();
-    virtual void Unk_68();
-    virtual void Unk_69();
-    virtual void Unk_6A();
-    virtual void Unk_6B();
-    virtual void Unk_6C();
-    virtual void Unk_6D();
-    virtual void Unk_6E();
-    virtual void Unk_6F();
-    virtual void Unk_70();
-    virtual void Unk_71();
-    virtual void Unk_72();
-    virtual void Unk_73();
-    virtual ProcessTarget* GetProcessTarget();
-
-    bool IsFlagged();
-    bool IsActive();
-    void SetPending(int iValue);
-    void SetActive(bool bActive);
+    virtual void OnTargetCleared(ProcessTarget_tes_ob1_variant* pTarget);
 };
 class ActorStateHandler
 {
   public:
-    void FUN_00451da0(ActorLike* pActor);
+    void FUN_00451da0(TESObjectREFR* pActor);
 };
 extern "C" int __fastcall FUN_004503f0(void*);
 extern "C" unsigned char __fastcall FUN_00450ff0(void*);
@@ -1970,28 +1214,9 @@ struct FUN_00459920_shell
     FUN_00459920_reference* FUN_005f36f0();
     void FUN_00459920();
 };
-struct AutoMemContext
-{
-    int iPrevContext;
-    AutoMemContext(int aeContext, bool abPush, const char* apFile, int aiLine);
-    ~AutoMemContext();
-};
 unsigned int __fastcall FUN_0070ec90(char* apName);
 extern GlobalObject_0045cf30 g_011c7b98;
 struct NiSourceTexture;
-template <class T> struct NiPointer
-{
-    T* m_pObject;
-    NiPointer(T* apObject);
-    ~NiPointer();
-    operator T*() const;
-};
-struct TESWaterForm
-{
-    unsigned int HasTexture();
-    const char* GetTexturePath() const;
-    void SetTexture(NiSourceTexture* apTexture);
-};
 struct WaterFormNode
 {
     bool IsEmpty();
@@ -2009,10 +1234,6 @@ struct WaterTES
 struct WaterTextureLoader
 {
     void LoadWaterTextures();
-};
-struct NiObject
-{
-    NiObject* Clone();
 };
 struct ModelPtr
 {
@@ -2458,44 +1679,23 @@ struct FUN_00c3dfa0_Class
     void FUN_00c3dfa0(int);
 };
 extern FUN_00c3dfa0_Class* DAT_01202d98;
-struct NiPoint3Ex : NiPoint3
-{
-    NiPoint3Ex(float, float, float);
-};
-extern NiPoint3Ex DAT_011a9478;
-void FUN_0057d0a0(NiPoint3Ex position, NiPoint3Ex direction, float scale);
-struct Setting4512
-{
-    float* FUN_00403e20();
-};
-extern Setting4512 originalRuntimeFloatSetting16;
-struct Interface
+extern NiPoint3 DAT_011a9478;
+void FUN_0057d0a0(NiPoint3 position, NiPoint3 direction, float scale);
+extern Setting originalRuntimeFloatSetting16;
+// Exe 0x00452ff0: unit-local Interface view; declarations and layout are preserved.
+struct TesInterfaceView
 {
     void FUN_00700960(int, float, bool);
 };
-extern Interface* DAT_011d8804;
+extern TesInterfaceView* DAT_011d8804;
 struct Process4512
 {
     void FUN_00972d30();
     void FUN_00972bb0();
 };
-struct NiUpdateData
-{
-    float time;
-    bool updateControllers;
-    bool isMultiThreaded;
-    bool flag6;
-    bool flag7;
-    bool flag8;
-    NiUpdateData(float, bool, bool);
-};
 struct Node4512
 {
     void FUN_00a59c60(NiUpdateData&);
-};
-struct Data4512
-{
-    void ProcessAllFiles();
 };
 extern bool DAT_011c3ed0;
 struct TES4512
@@ -2551,137 +1751,13 @@ struct FUN_004516d0_shell
     unsigned int unk00;
     unsigned int unk04;
     GridCellArray* cells;
-    MobileObjectCellAccess** FUN_004516d0();
-};
-class TESBoundObject
-{
-  public:
-    virtual void Reserved();
-    unsigned int FUN_00401170();
-    bool FUN_00452440();
-    void FUN_004534f0(void*);
+    TESObjectCELL** FUN_004516d0();
 };
 extern const double DAT_010179e0;
 struct TreeDimensions
 {
     float x;
     float y;
-};
-class TESObjectTREE : public TESBoundObject
-{
-  public:
-    TreeDimensions* FUN_0045bb80();
-    virtual void Reserved1();
-    virtual void Reserved2();
-    virtual void Reserved3();
-    virtual void Reserved4();
-    virtual void Reserved5();
-    virtual void Reserved6();
-    virtual void Reserved7();
-    virtual void Reserved8();
-    virtual void Reserved9();
-    virtual void Reserved10();
-    virtual void Reserved11();
-    virtual void Reserved12();
-    virtual void Reserved13();
-    virtual void Reserved14();
-    virtual void Reserved15();
-    virtual void FinalizeAttach();
-    virtual void Reserved17();
-    virtual void Reserved18();
-    virtual void Reserved19();
-    virtual void Reserved20();
-    virtual void Reserved21();
-    virtual void Reserved22();
-    virtual void Reserved23();
-    virtual void Reserved24();
-    virtual void Reserved25();
-    virtual void Reserved26();
-    virtual void Reserved27();
-    virtual void Reserved28();
-    virtual void Reserved29();
-    virtual void Reserved30();
-    virtual void Reserved31();
-    virtual void Reserved32();
-    virtual void Reserved33();
-    virtual void Reserved34();
-    virtual void Reserved35();
-    virtual void Reserved36();
-    virtual void Reserved37();
-    virtual void Reserved38();
-    virtual void Reserved39();
-    virtual void Reserved40();
-    virtual void Reserved41();
-    virtual void Reserved42();
-    virtual void Reserved43();
-    virtual void Reserved44();
-    virtual void Reserved45();
-    virtual void Reserved46();
-    virtual void Reserved47();
-    virtual void Reserved48();
-    virtual void Reserved49();
-    virtual void Reserved50();
-    virtual void Reserved51();
-    virtual void Reserved52();
-    virtual void Reserved53();
-    virtual void Reserved54();
-    virtual void Reserved55();
-    virtual void Reserved56();
-    virtual void Reserved57();
-    virtual void Reserved58();
-    virtual void Reserved59();
-    virtual void Reserved60();
-    virtual void Reserved61();
-    virtual void Reserved62();
-    virtual void Reserved63();
-    virtual void Reserved64();
-    virtual void Reserved65();
-    virtual void Reserved66();
-    virtual void Reserved67();
-    virtual void Reserved68();
-    virtual void Reserved69();
-    virtual void Reserved70();
-    virtual void Reserved71();
-    virtual void Reserved72();
-    virtual void Reserved73();
-    virtual void Reserved74();
-    virtual void Reserved75();
-    virtual void Reserved76();
-    virtual void Reserved77();
-    virtual void Reserved78();
-    virtual void Reserved79();
-    virtual void Reserved80();
-    virtual void Reserved81();
-    virtual void Reserved82();
-    virtual void Reserved83();
-    virtual void Reserved84();
-    virtual void Reserved85();
-    virtual void Reserved86();
-    virtual void Reserved87();
-    virtual void Reserved88();
-    virtual void Reserved89();
-    virtual void Reserved90();
-    virtual void Reserved91();
-    virtual void Reserved92();
-    virtual void Reserved93();
-    virtual void Reserved94();
-    virtual void Reserved95();
-    virtual void Reserved96();
-    virtual void Reserved97();
-    virtual void Reserved98();
-    virtual void Reserved99();
-    virtual void Reserved100();
-    virtual void Reserved101();
-    virtual void Reserved102();
-    virtual void Reserved103();
-    virtual void Reserved104();
-    virtual void Reserved105();
-    virtual void Reserved106();
-    virtual void Reserved107();
-    virtual void Reserved108();
-    virtual void Reserved109();
-    virtual void Reserved110();
-    virtual double GetTreeScale(float);
 };
 struct AttachNode;
 struct AttachRoot
@@ -2967,7 +2043,7 @@ struct AttachRef
     void* FUN_00430830();
     void FUN_00565730();
     void* FUN_005d43c0();
-    double GetScale();
+    double FUN_00567400();
     void FUN_008c4640();
     unsigned int FUN_0084e3a0();
 };
@@ -3004,10 +2080,6 @@ struct Profile
     ~Profile();
 };
 extern const char DAT_01017874[];
-struct Setting
-{
-    const unsigned int* FUN_0043d4d0();
-};
 extern Setting DAT_011c63cc;
 struct Update
 {
@@ -3174,10 +2246,6 @@ void Grid::RefreshGrid()
 }
 }
 
-struct S_004537c0_Sky : Sky
-{
-    void FUN_0063ac70(float f);
-};
 struct S_004537c0_Mgr
 {
     void FUN_00a59c60(void* p);
@@ -3748,10 +2816,6 @@ struct FixedStr
     FixedStr(const char* apString);
     ~FixedStr();
 };
-struct FileFinderStub
-{
-    static int Exist(const char* apPath, char* apOut, unsigned int auiFlags, unsigned int auiMask);
-};
 struct SourceTextureStub
 {
     static NiSourceTexture* Create(const FixedStr& arName, NiTextureFormatPrefs& arPrefs, bool abA, bool abB);
@@ -3791,7 +2855,6 @@ struct FUN_00456d00_shell
     FUN_00456fc0_ref* FUN_005f36f0();
     void FUN_00456d00(int aiType, bool abShow, bool abGrid);
 };
-struct NiPoint3;
 extern const NiPoint3 NiPoint3_ZERO;
 struct FUN_004571c0_obj
 {
@@ -3879,10 +2942,6 @@ struct WS458200_Shell
     void FUN_00450d80();
     void FUN_00458200(WS458200_World* apWorld);
 };
-struct Point458
-{
-    float x, y, z;
-};
 class Ref458
 {
   public:
@@ -3964,13 +3023,13 @@ class Ref458
     virtual void vfn12C();
     virtual void vfn130();
     virtual void vfn134();
-    virtual bool PlaySound(int iSound, Point458 kPos);
+    virtual bool PlaySound(int iSound, NiPoint3 kPos);
 };
 class Manager458
 {
   public:
     Ref458* GetDefaultRef();
-    bool PlaySoundOnRef(int iSound, Point458 kPos, Ref458* pkRef);
+    bool PlaySoundOnRef(int iSound, NiPoint3 kPos, Ref458* pkRef);
 };
 struct SaveWriter : SaveState
 {
@@ -4142,11 +3201,6 @@ struct CellTest
     void MoveToCell(EmptyStructPlaceholder*, unsigned int, int);
     void FUN_00459ae0(unsigned int);
 };
-struct QueuedFile
-{
-    unsigned int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24;
-    QueuedFile(int priority);
-};
 struct AddonQueuePointer
 {
     QueuedFile* object;
@@ -4157,22 +3211,6 @@ struct AddonFormBase
 {
     virtual void ReservedForm0();
     unsigned int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
-};
-struct TESModel
-{
-    virtual void Reserved0();
-    virtual void Reserved1();
-    virtual void Reserved2();
-    virtual void Reserved3();
-    virtual void Reserved4();
-    virtual char* GetModelPath();
-};
-struct BGSAddonNode : AddonFormBase, TESModel
-{
-    bool FUN_00448bf0();
-    unsigned int GetGrass();
-    int FUN_0059e300();
-    unsigned short GetShortAtOffset58();
 };
 struct AddonParticleNode : NiNode
 {
@@ -4281,38 +3319,11 @@ struct Target
     FUN_0045ae20* head;
     void FUN_0045ac80();
 };
-class NavMeshInfoMap45A
-{
-  public:
-    NavMeshInfoMap45A();
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-};
-class TESDataHandler45A
-{
-  public:
-    bool IsLoading();
-};
-extern TESDataHandler45A* g_pkDataHandler45A;
+extern TESDataHandler* g_pkDataHandler45A;
 class Owner45A
 {
   public:
-    NavMeshInfoMap45A* FUN_0045af00();
+    NavMeshInfoMap* FUN_0045af00();
 
     int unk000;
     int unk004;
@@ -4361,7 +3372,7 @@ class Owner45A
     int unk0B0;
     int unk0B4;
     int unk0B8;
-    NavMeshInfoMap45A* m_pkNavMeshInfoMap;
+    NavMeshInfoMap* m_pkNavMeshInfoMap;
 };
 extern float DAT_01015f5c;
 struct CellView : public TESObjectCELL
@@ -4488,183 +3499,52 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volati
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 extern const double DAT_01012060;
 
-struct StandRTTI
+inline void NiAVObject::IncRefCount()
 {
-    const char* m_pcName;
-    const StandRTTI* m_pBaseRTTI;
-};
-struct StandRef
+    InterlockedIncrement(reinterpret_cast<long volatile*>(&m_uiRefCount));
+}
+inline void NiAVObject::DecRefCount()
 {
-    virtual ~StandRef();
-    virtual void DeleteThis();
-    virtual const StandRTTI* GetRTTI() const;
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-template <class T> struct StandPtr
+    if (InterlockedDecrement(reinterpret_cast<long volatile*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0)
 {
-    T* m_pObject;
-    StandPtr(T* p = 0) : m_pObject(p)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~StandPtr()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-};
-struct StandNode;
-struct StandChildren
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::~NiPointer()
 {
-    virtual ~StandChildren();
-    StandRef** data;
-    unsigned short capacity;
-    unsigned short firstFree;
-    unsigned short size;
-    unsigned short grow;
-    StandRef* const& GetAt(unsigned int i) const
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+inline float BSTempNode::UpdateTime(float f)
+{
+    float delta = time != DAT_01012060 ? f - time : time;
+    time = f;
+    return delta;
+}
+inline NiAVObject* BSTempNode::GetChild(unsigned int i)
+{
+    NiAVObject* const& entry = m_kChildren.m_pBase[i].m_pObject;
     {
-        StandRef* const& item = data[i];
+        NiAVObject* item = entry;
         return item;
     }
-};
-struct StandNode : StandRef
+}
+inline void BSTempNode::SetTime(float f)
 {
-    virtual void Unk0c();
-    virtual void Unk10();
-    virtual void Unk14();
-    virtual void Unk18();
-    virtual void Unk1c();
-    virtual void Unk20();
-    virtual void Unk24();
-    virtual void Unk28();
-    virtual void Unk2c();
-    virtual void Unk30();
-    virtual void Unk34();
-    virtual void Unk38();
-    virtual void Unk3c();
-    virtual void Unk40();
-    virtual void Unk44();
-    virtual void Unk48();
-    virtual void Unk4c();
-    virtual void Unk50();
-    virtual void Unk54();
-    virtual void Unk58();
-    virtual void Unk5c();
-    virtual void Unk60();
-    virtual void Unk64();
-    virtual void Unk68();
-    virtual void Unk6c();
-    virtual void Unk70();
-    virtual void Unk74();
-    virtual void Unk78();
-    virtual void Unk7c();
-    virtual void Unk80();
-    virtual void Unk84();
-    virtual void Unk88();
-    virtual void Unk8c();
-    virtual void Unk90();
-    virtual void Unk94();
-    virtual void Unk98();
-    virtual void Unk9c();
-    virtual void Unka0();
-    virtual void Unka4();
-    virtual void Unka8();
-    virtual void Unkac();
-    virtual void Unkb0();
-    virtual void Unkb4();
-    virtual void Unkb8();
-    virtual void Unkbc();
-    virtual void Unkc0();
-    virtual void Unkc4();
-    virtual void Unkc8();
-    virtual void Unkcc();
-    virtual void Unkd0();
-    virtual void Unkd4();
-    virtual void Unkd8();
-    virtual void Unkdc();
-    virtual void Unke0();
-    virtual void Unke4();
-    virtual void Unke8();
-    virtual void RemoveAt(unsigned int i, StandPtr<StandRef>& removed);
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    StandChildren children;
-    float time;
-    float UpdateTime(float f)
-    {
-        float delta = time != DAT_01012060 ? f - time : time;
-        time = f;
-        return delta;
-    }
-    StandRef* GetChild(unsigned int i)
-    {
-        StandRef* const& entry = children.data[i];
-        {
-            StandRef* item = entry;
-            return item;
-        }
-    }
-    void SetTime(float f)
-    {
-        time = f;
-        if (time < DAT_01012060)
-            time = 0.0f;
-    }
-    bool Expired() const
-    {
-        return time == DAT_01012060;
-    }
-    void FUN_00c44ed0(float);
-};
-__forceinline bool IsKindOfType(const StandRTTI* target, const StandRef* object)
+    time = f;
+    if (time < DAT_01012060)
+        time = 0.0f;
+}
+inline bool BSTempNode::Expired() const
 {
-    const StandRTTI* rtti = object->GetRTTI();
+    return time == DAT_01012060;
+}
+__forceinline bool IsKindOfType(const NiRTTI* target, const NiAVObject* object)
+{
+    const NiRTTI* rtti = object->GetRTTI();
     while (rtti)
     {
         if (rtti == target)
@@ -4673,28 +3553,28 @@ __forceinline bool IsKindOfType(const StandRTTI* target, const StandRef* object)
     }
     return false;
 }
-__forceinline StandNode* CastNode(StandRef* object)
+__forceinline BSTempNode* CastNode(NiAVObject* object)
 {
     if (!object)
         return 0;
-    return IsKindOfType(reinterpret_cast<const StandRTTI*>(&g_01202e00), object) ? static_cast<StandNode*>(object) : 0;
+    return IsKindOfType(reinterpret_cast<const NiRTTI*>(&g_01202e00), object) ? static_cast<BSTempNode*>(object) : 0;
 }
 // @fnv 0x00c44ed0
-void StandNode::FUN_00c44ed0(float f)
+void BSTempNode::FUN_00c44ed0(float f)
 {
-    StandPtr<StandRef> spRemoved;
+    NiPointer<NiAVObject> spRemoved;
     float delta = UpdateTime(f);
     {
-        unsigned int i = children.firstFree;
+        unsigned int i = m_kChildren.m_usSize;
         while (i--)
         {
-            StandRef* object = GetChild(i);
-            StandNode* child = CastNode(object);
+            NiAVObject* object = GetChild(i);
+            BSTempNode* child = CastNode(object);
             if (child)
             {
                 child->SetTime(child->time - delta);
                 if (child->Expired())
-                    RemoveAt(i, spRemoved);
+                    RemoveNthObject2(i, &spRemoved.m_pObject);
             }
         }
     }

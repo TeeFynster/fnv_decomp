@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 // src/staging/blk_00e00000_od_o2_nood_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00e00000_od_o2_nood_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -7,10 +9,7 @@
 // src/staging/blk_00e00000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-struct FinishFlag
-{
-    int value;
-};
+#include "../../include/FinishingFlag.h"
 struct __declspec(align(16)) FinishedObject
 {
     void* vtable;
@@ -29,16 +28,12 @@ struct __declspec(align(16)) FinishedObject
     int unk34;
     int unk38;
     int unk3c;
-    FinishedObject(FinishFlag);
+    FinishedObject(FinishingFlag);
 };
 void* __cdecl FUN_00e005f0();
 // Havok type-registration helper: construct the class in finish-loading mode (flag 0) on the stack,
 // then return its static registration data.
 extern char DAT_010e8ab0[];
-struct hkFinishLoadedObjectFlagX
-{
-    int m_bFinishing;
-};
 struct __declspec(align(16)) S_00e00cd0_Obj
 {
     void* m_vtbl;
@@ -65,18 +60,12 @@ struct __declspec(align(16)) S_00e00cd0_Obj
     unsigned int m_54;
     unsigned int m_58;
     unsigned int m_5c;
-    S_00e00cd0_Obj(hkFinishLoadedObjectFlagX flag);
+    S_00e00cd0_Obj(FinishingFlag flag);
 };
 const char* __cdecl FUN_00e00cd0();
 // Havok vtable getter: finish-construct a throwaway instance in an aligned scratch buffer (the
 // FinishingFlag constructor only re-installs the vtable and runs the members'
 // finish constructors) and return its vtable pointer.
-struct FinishingFlag
-{
-    int m_bFinishing;
-    FinishingFlag() : m_bFinishing(0)
-    {}
-};
 struct hkFinishMemberE01710
 {
     void* m_ptr;
@@ -103,12 +92,6 @@ struct __declspec(align(16)) hkObjectE01710
 void* FUN_00e01710();
 // RTTI identifies hkpNullCollisionFilter. The finish constructor installs its
 // primary and four interface type headers; its filter kind is at offset0x20.
-struct FinishLoadedFlag402
-{
-    int finishing;
-    FinishLoadedFlag402(int value) : finishing(value)
-    {}
-};
 struct __declspec(align(16)) FUN_00e00a80
 {
     virtual ~FUN_00e00a80();
@@ -120,7 +103,7 @@ struct __declspec(align(16)) FUN_00e00a80
     void* rayCollidableFilterInterface;
     unsigned unk18, unk1c;
     unsigned filterType;
-    FUN_00e00a80(FinishLoadedFlag402);
+    FUN_00e00a80(FinishingFlag);
 };
 // Complete, naturally padded object representation backs the placement lifetime.
 struct __declspec(align(16)) FilterStorage402
@@ -494,14 +477,10 @@ class __declspec(align(16)) S00e01230_Object
     int unk3C;
 };
 const void* __cdecl FUN_00e01230();
-struct FinishLoadedObjectFlag
-{
-    int m_bFinishing;
-};
 struct LoadedPointer
 {
     int m_uiFilterValue;
-    LoadedPointer(FinishLoadedObjectFlag flag);
+    LoadedPointer(FinishingFlag flag);
 };
 struct __declspec(align(16)) LoadedObject
 {
@@ -510,7 +489,7 @@ struct __declspec(align(16)) LoadedObject
     LoadedPointer m_pHeadNode;
     LoadedPointer m_iSecondInteger;
     LoadedPointer m_third;
-    LoadedObject(FinishLoadedObjectFlag flag) : m_pHeadNode(flag), m_iSecondInteger(flag), m_third(flag)
+    LoadedObject(FinishingFlag flag) : m_pHeadNode(flag), m_iSecondInteger(flag), m_third(flag)
     {}
 };
 const void* FUN_00e01830();
@@ -589,7 +568,7 @@ struct S_00e11530_Node
     int unk04;
     int unk08;
     int unk0c;
-    __m128 bounds;
+    LocalM128 bounds;
 };
 struct S_00e11530_Owner
 {
@@ -600,7 +579,7 @@ struct S_00e11530_Owner
     int unk10;
     S_00e11530_Node* unk14;
 
-    __m128* FUN_00e11530(__m128* out);
+    LocalM128* FUN_00e11530(LocalM128* out);
 };
 struct VecQ
 {
@@ -626,23 +605,11 @@ struct __declspec(align(16)) Rot
 {
     unsigned __int64 d[6];
 };
-struct __declspec(align(16)) Transform
-{
-    float r0[4];
-    float r1[4];
-    float r2[4];
-    float t[4];
-};
+#include "../../include/hkTransform.h"
 struct Owner
 {
-    void FUN_00e11a90(const Transform* xf);
-    void FUN_00e11ca0(const __m128* src);
-};
-struct S00e00d70_Arg
-{
-    int value;
-    S00e00d70_Arg(int v) : value(v)
-    {}
+    void FUN_00e11a90(const hkTransform* xf);
+    void FUN_00e11ca0(const LocalM128* src);
 };
 struct __declspec(align(16)) S00e00d70_Object
 {
@@ -670,32 +637,30 @@ struct __declspec(align(16)) S00e00d70_Object
     int unk54;
     int unk58;
     int unk5c;
-    void FUN_00d57b20(S00e00d70_Arg arg);
+    void FUN_00d57b20(FinishingFlag arg);
 };
 int __cdecl FUN_00e00d70();
 namespace N {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    N::__m128 _mm_load_ps(const float*);
-    N::__m128 _mm_load_ss(const float*);
-    N::__m128 _mm_set_ss(float);
-    N::__m128 _mm_set1_ps(float);
-    N::__m128 _mm_shuffle_ps(N::__m128, N::__m128, int);
-    N::__m128 _mm_mul_ps(N::__m128, N::__m128);
-    N::__m128 _mm_add_ps(N::__m128, N::__m128);
-    N::__m128 _mm_add_ss(N::__m128, N::__m128);
-    void _mm_store_ps(float*, N::__m128);
-    float _mm_cvtss_f32(N::__m128);
+    N::LocalM128 _mm_load_ps(const float*);
+    N::LocalM128 _mm_load_ss(const float*);
+    N::LocalM128 _mm_set_ss(float);
+    N::LocalM128 _mm_set1_ps(float);
+    N::LocalM128 _mm_shuffle_ps(N::LocalM128, N::LocalM128, unsigned int);
+    N::LocalM128 _mm_mul_ps(N::LocalM128, N::LocalM128);
+    N::LocalM128 _mm_add_ps(N::LocalM128, N::LocalM128);
+    N::LocalM128 _mm_add_ss(N::LocalM128, N::LocalM128);
+using ::_mm_store_ps;
+using ::_mm_cvtss_f32;
 }
 }
-struct __declspec(align(16)) Vector4f
+// Exe 0x00e11630: unit-local Vector4f view; declarations and layout are preserved.
+struct __declspec(align(16)) BlkVector4fView
 {
     float v[4];
-    void addScaled(const N::__m128& scale, const Vector4f& n)
+    void addScaled(const N::LocalM128& scale, const BlkVector4fView& n)
     {
         N::_mm_store_ps(v, N::_mm_add_ps(N::_mm_mul_ps(N::_mm_shuffle_ps(scale, scale, 0), N::_mm_load_ps(n.v)),
                                          N::_mm_load_ps(v)));
@@ -705,7 +670,7 @@ inline float maxScore(float a, float b)
 {
     return a > b ? a : b;
 }
-inline N::__m128 scaleNormal(const Vector4f& n, const N::__m128& s)
+inline N::LocalM128 scaleNormal(const BlkVector4fView& n, const N::LocalM128& s)
 {
     return N::_mm_mul_ps(N::_mm_shuffle_ps(s, s, 0), N::_mm_load_ps(n.v));
 }
@@ -715,9 +680,9 @@ struct Vertex
     Vertex* prev;
     int unk08;
     int unk0c;
-    Vector4f position;
-    Vector4f normal;
-    Vector4f extra;
+    BlkVector4fView position;
+    BlkVector4fView normal;
+    BlkVector4fView extra;
     int handle40;
     int handle44;
     Vertex() : handle40(-1), handle44(-1)
@@ -954,9 +919,13 @@ struct EdgeProcessor
     void FUN_00e195c0(float threshold, float distance, const EdgeMesh* mesh);
 };
 
-struct hkVector4
+#include "../../include/hkVector4.h"
+
+// 0x00e11630 returns its result as a plain 16-byte value: the original stores it once through the hidden return
+// pointer, which only a POD return type compiles to (the shared hkVector4 has a user copy assignment).
+struct FUN_00e11630_Result
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 
 struct FUN_00e11630_Vec
@@ -980,12 +949,12 @@ struct FUN_00e11630_Params
 extern float DAT_0106c2e0;
 
 // @fnv 0x00e11630
-hkVector4 __stdcall FUN_00e11630(const FUN_00e11630_Params* p)
+FUN_00e11630_Result __stdcall FUN_00e11630(const FUN_00e11630_Params* p)
 {
-    hkVector4 r;
+    FUN_00e11630_Result r;
     r.m_vComponents = _mm_add_ps(p->m_p0c->m_v10.m_vComponents, p->m_p08->m_v10.m_vComponents);
     r.m_vComponents = _mm_add_ps(r.m_vComponents, p->m_p10->m_v10.m_vComponents);
-    __m128 k = _mm_load_ss(&DAT_0106c2e0);
+    LocalM128 k = _mm_load_ss(&DAT_0106c2e0);
     k = _mm_shuffle_ps(k, k, 0);
     r.m_vComponents = _mm_mul_ps(r.m_vComponents, k);
     return r;

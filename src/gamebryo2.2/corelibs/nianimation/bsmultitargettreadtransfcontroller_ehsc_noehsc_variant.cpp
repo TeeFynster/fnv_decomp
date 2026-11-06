@@ -4,6 +4,10 @@
 // to their real unit once identified.
 
 #include "bsmultitargettreadtransfcontroller_decls.h"
+#include "../../../../include/NiQuaternion.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiQuatTransform.h"
+#include "../../../../include/NiInterpController.h"
 struct FUN_00a35950_shell : public BSMultiTargetTreadTransfController
 {
     void* FUN_00a35950();
@@ -16,10 +20,6 @@ struct FUN_00a35e90_shell : public BSMultiTargetTreadTransfController
 struct FUN_00a35fc0_shell
 {
     void __thiscall SetSlotValue(unsigned short idx, void* val);
-};
-struct NiInterpController
-{
-    static unsigned short INVALID_INDEX;
 };
 struct FUN_00a35910_shell
 {
@@ -195,24 +195,7 @@ struct FUN_00a35900_cls
 };
 extern char DAT_01096694;
 void* __cdecl FUN_00aa13e0(unsigned int size) throw();
-struct FUN_00a2f8c0
-{
-    void* vtable;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    FUN_00a2f8c0() throw();
-};
-struct TreadInterpolator : FUN_00a2f8c0
+struct TreadInterpolator : NiInterpController
 {
     unsigned int unk34;
     unsigned short unk38;
@@ -227,7 +210,7 @@ struct TreadInterpolator : FUN_00a2f8c0
     }
     TreadInterpolator() throw()
     {
-        vtable = &DAT_01096694;
+        *reinterpret_cast<void**>(this) = &DAT_01096694;
         unk34 = 0;
         unk38 = 0;
         unk40 = 0;
@@ -328,22 +311,22 @@ template <class T> class SmartPtr
   public:
     SmartPtr(T* p = 0) throw() : m_pObject(p)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~SmartPtr() throw()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     SmartPtr& operator=(const SmartPtr& ptr) throw()
     {
         if (m_pObject != ptr.m_pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = ptr.m_pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -379,44 +362,13 @@ void Holder::AssignInterpolatorRef(unsigned int idx, SmartPtr<RefObj>& out) thro
 struct NiStream;
 extern void __cdecl LoadBinary(NiStream*);
 void __cdecl FUN_00a35840(NiStream* stream);
-struct Vec112
-{
-    float x, y, z;
-    Vec112()
-    {}
-    Vec112(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    Vec112 operator*(const float& s) const
-    {
-        return Vec112(x * s, y * s, z * s);
-    }
-    Vec112 operator+(const Vec112& b) const
-    {
-        return Vec112(x + b.x, y + b.y, z + b.z);
-    }
-};
 struct Mat112
 {
     float xx, xy, xz, yx, yy, yz, zx, zy, zz;
 };
-class NiQuaternion
-{
-  public:
-    float w, x, y, z;
-    void Slerp(float, const NiQuaternion&, const NiQuaternion&);
-    void FUN_004f0180(Mat112*);
-};
-extern Vec112 DAT_011a8400;
+extern NiPoint3 DAT_011a8400;
 extern NiQuaternion DAT_011f3704;
 extern float DAT_01096b8c;
-struct Transform112
-{
-    Vec112 position;
-    NiQuaternion rotation;
-    float scale;
-    Transform112() : position(DAT_011a8400), rotation(DAT_011f3704), scale(DAT_01096b8c)
-    {}
-};
 struct Blend112
 {
     virtual void v00();
@@ -454,7 +406,7 @@ struct Blend112
     virtual void v32();
     virtual void v33();
     virtual void v34();
-    virtual bool Update(float, void*, Transform112&);
+    virtual bool Update(float, void*, NiQuatTransform&);
     int field04, field08, field0c, field10, field14, field18, field1c, field20, field24, field28, field2c;
     float weight;
 };
@@ -467,21 +419,22 @@ struct Node112
         return flags >> 1;
     }
     Mat112 matrix;
-    Vec112 position;
+    NiPoint3 position;
 };
-struct Data112
+// 0x00a35c00 blends two poses in this 0x3C-byte record; include/Data.h holds 0x10 bytes of skill/category data.
+struct TreadPosePair
 {
-    Vec112 position0;
+    NiPoint3 position0;
     NiQuaternion rotation0;
     float scale0;
-    Vec112 position1;
+    NiPoint3 position1;
     NiQuaternion rotation1;
 };
 struct Link112
 {
     unsigned short index;
     Node112* node;
-    Data112* data;
+    TreadPosePair* data;
 };
 struct Controller112
 {

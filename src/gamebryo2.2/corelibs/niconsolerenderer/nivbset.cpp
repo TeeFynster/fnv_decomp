@@ -1,39 +1,13 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiVBBlock
-{
-    void* m_pBuffer;
-    char _04[8];
-    unsigned int m_uiSize;
-    char _10[12];
-    unsigned long m_uiValue1C;
-    unsigned int m_uiValue20;
-    unsigned int m_uiValue24;
-    unsigned int m_uiValue28;
-    void FreeVBBlock(unsigned int);
-};
+#include "../../../../include/NiVBBlock.h"
+#include "../../../../include/NiVBSet.h"
 
 void __stdcall InsertSortedNode(NiVBBlock*);
 
-struct NiVBSetBlockArray
-{
-    unsigned int _00;
-    NiVBBlock** m_pData;
-    void FUN_00a93c50(unsigned int);
-};
-
-struct NiVBSet
-{
-    unsigned int m_uiPosition;
-    char _04[8];
-    unsigned int m_uiIndexCapacity;
-    char _10[12];
-    NiVBSetBlockArray m_kBlockArray;
-    void RemoveNode(NiVBBlock*);
-    void FUN_00e94330(NiVBBlock*);
-    void FUN_00e94490(unsigned int uiArrayIndex, unsigned int uiChipIndex);
-};
+// The shared NiVBSet header lacks the list head, threshold, InsertSortedNode,
+// RemoveFirstNodeAtLeast and FUN_00e94580 used by the local set views below.
 
 // @fnv 0x00e94490
 void NiVBSet::FUN_00e94490(unsigned int uiArrayIndex, unsigned int uiChipIndex)
@@ -62,27 +36,6 @@ void NiVBSet::FUN_00e94490(unsigned int uiArrayIndex, unsigned int uiChipIndex)
 // InsertSortedNode: insert a block into a key-sorted doubly linked list owned by this set.
 // Head pointer lives at +0x2c; each node has key at +0x24, next at +0x3c, prev at +0x40.
 
-struct FUN_00e94220_node
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int m_key;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    FUN_00e94220_node* m_next;
-    FUN_00e94220_node* m_pSecondNode;
-};
-
 struct FUN_00e94220_cls
 {
     unsigned int unk00;
@@ -96,41 +49,41 @@ struct FUN_00e94220_cls
     unsigned int unk20;
     unsigned int unk24;
     unsigned int unk28;
-    FUN_00e94220_node* m_pFirstNode;
+    NiVBBlock* m_pFirstNode;
 
-    void InsertSortedNode(FUN_00e94220_node* node);
+    void InsertSortedNode(NiVBBlock* node);
 };
 
-// Inserts node into the doubly linked list ordered by m_key, updating head, next and back pointers.
+// Inserts a block into the doubly linked list ordered by m_24, updating head, next and back pointers.
 // @fnv 0x00e94220
-void FUN_00e94220_cls::InsertSortedNode(FUN_00e94220_node* node)
+void FUN_00e94220_cls::InsertSortedNode(NiVBBlock* node)
 {
     if (m_pFirstNode != 0)
     {
-        FUN_00e94220_node* prev = 0;
-        FUN_00e94220_node* cur = m_pFirstNode;
-        unsigned int key = node->m_key;
+        NiVBBlock* prev = 0;
+        NiVBBlock* cur = m_pFirstNode;
+        unsigned int key = node->m_24;
         do
         {
-            if (cur->m_key > key)
+            if (cur->m_24 > key)
             {
                 goto found;
             }
             prev = cur;
-            cur = cur->m_next;
+            cur = reinterpret_cast<NiVBBlock*>(cur->m_3c);
         } while (cur != 0);
-        prev->m_next = node;
-        node->m_pSecondNode = prev;
-        node->m_next = 0;
+        prev->m_3c = reinterpret_cast<unsigned int>(node);
+        node->m_40 = reinterpret_cast<unsigned int>(prev);
+        node->m_3c = 0;
         return;
     found:
         if (prev != 0)
         {
-            prev->m_next = node;
+            prev->m_3c = reinterpret_cast<unsigned int>(node);
         }
-        cur->m_pSecondNode = node;
-        node->m_next = cur;
-        node->m_pSecondNode = prev;
+        cur->m_40 = reinterpret_cast<unsigned int>(node);
+        node->m_3c = reinterpret_cast<unsigned int>(cur);
+        node->m_40 = reinterpret_cast<unsigned int>(prev);
         if (cur != m_pFirstNode)
         {
             return;
@@ -140,75 +93,55 @@ void FUN_00e94220_cls::InsertSortedNode(FUN_00e94220_node* node)
     else
     {
         m_pFirstNode = node;
-        node->m_next = 0;
-        m_pFirstNode->m_pSecondNode = 0;
+        node->m_3c = 0;
+        m_pFirstNode->m_40 = 0;
     }
 }
 
 extern unsigned int DAT_011c0cdc;
 extern int DAT_010f0f8c;
 void* __cdecl FUN_00aa13e0(unsigned int);
-struct LinkedVBBlock
+__forceinline NiVBBlock* InitializeVBBlock(NiVBBlock* block)
 {
-    NiVBBlock block;
-    void* type;
-    unsigned int index;
-    unsigned short a;
-    unsigned short b;
-    unsigned short c;
-    unsigned short used;
-    LinkedVBBlock* previous;
-    LinkedVBBlock* next;
-    void FUN_00e942d0();
-    __forceinline LinkedVBBlock* Initialize()
-    {
-        a = 0;
-        used = 1;
-        b = 0;
-        c = 0;
-        index = 0;
-        type = &DAT_010f0f8c;
-        FUN_00e942d0();
-        return this;
-    }
-};
-extern LinkedVBBlock* DAT_0126fa30;
-// Allocates DAT_011c0cdc LinkedVBBlock objects, initializes each, and links them into a doubly linked list headed by DAT_0126fa30.
+    block->m_chips.unk34 = 0;
+    block->m_chips.unk3A = 1;
+    block->m_chips.m_36 = 0;
+    block->m_chips.m_38 = 0;
+    block->m_chips.m_30 = 0;
+    block->m_chips.unk00 = &DAT_010f0f8c;
+    block->FUN_00e942d0();
+    return block;
+}
+extern NiVBBlock* DAT_0126fa30;
+// Allocates DAT_011c0cdc NiVBBlock objects, initializes each, and links them into a doubly linked list headed by DAT_0126fa30.
 // @fnv 0x00e944f0
 void __cdecl AllocateVBBlocks()
 {
     for (unsigned int i = 0; i < DAT_011c0cdc; ++i)
     {
-        LinkedVBBlock* pRawBlock = static_cast<LinkedVBBlock*>(FUN_00aa13e0(sizeof(LinkedVBBlock)));
-        LinkedVBBlock* p = pRawBlock ? pRawBlock->Initialize() : 0;
-        LinkedVBBlock* previous = p->previous;
-        LinkedVBBlock* next = p->next;
+        NiVBBlock* pRawBlock = static_cast<NiVBBlock*>(FUN_00aa13e0(sizeof(NiVBBlock)));
+        NiVBBlock* p = pRawBlock ? InitializeVBBlock(pRawBlock) : 0;
+        NiVBBlock* previous = reinterpret_cast<NiVBBlock*>(p->m_3c);
+        NiVBBlock* next = reinterpret_cast<NiVBBlock*>(p->m_40);
         if (previous)
-            previous->next = next;
+            previous->m_40 = reinterpret_cast<unsigned int>(next);
         if (next)
-            next->previous = previous;
+            next->m_3c = reinterpret_cast<unsigned int>(previous);
         if (DAT_0126fa30)
-            DAT_0126fa30->next = p;
-        p->previous = DAT_0126fa30;
-        p->next = 0;
+            DAT_0126fa30->m_40 = reinterpret_cast<unsigned int>(p);
+        p->m_3c = reinterpret_cast<unsigned int>(DAT_0126fa30);
+        p->m_40 = 0;
         DAT_0126fa30 = p;
     }
 }
-
-struct VBBlock
-{
-    char _00[0x24];
-    unsigned int m_uiValue24;
-    void* FUN_00e98660(unsigned int uiSize);
-};
 
 struct VBSet
 {
     char _00[0x30];
     unsigned int m_uiThreshold;
-    VBBlock* RemoveFirstNodeAtLeast(unsigned int uiSize);
-    VBBlock* FUN_00e94580(unsigned int uiSize);
-    void InsertSortedNode(VBBlock* pkBlock);
+    NiVBBlock* RemoveFirstNodeAtLeast(unsigned int uiSize);
+    NiVBBlock* FUN_00e94580(unsigned int uiSize);
+    void InsertSortedNode(NiVBBlock* pkBlock);
     void* FUN_00e94650(unsigned int uiSize, bool bForceNew);
 };
 
@@ -216,7 +149,7 @@ struct VBSet
 void* VBSet::FUN_00e94650(unsigned int uiSize, bool bForceNew)
 {
     void* pvChip = 0;
-    VBBlock* pkBlock = 0;
+    NiVBBlock* pkBlock = 0;
     if (!bForceNew)
         pkBlock = RemoveFirstNodeAtLeast(uiSize);
     if (!pkBlock)
@@ -237,6 +170,7 @@ struct VBArray
     VBLayout** m_pData;
     void FUN_00ba3aa0(unsigned int, VBLayout**);
 };
+// Chip layout used by the block's chip array and the chip free list.
 struct VBLayout
 {
     void* m_pBuffer;
@@ -247,18 +181,14 @@ struct VBLayout
     unsigned int m_uiValueBeforeCount;
     VBLayout* m_pkNext;
     VBLayout* m_pkPrev;
-    unsigned int m_uiValue20;
-    unsigned int m_uiValue24;
-    unsigned int m_uiValue28;
-    VBArray m_kBlockArray;
 };
 extern VBLayout* g_pkFreeList;
 // @fnv 0x00e98500
 unsigned int __fastcall FreeVBBlock(NiVBBlock* object, void*, unsigned int index)
 {
-    VBLayout* pLayout = reinterpret_cast<VBLayout*>(object);
+    NiVBBlock* pLayout = object;
     unsigned int result = 0;
-    VBLayout* block = pLayout->m_kBlockArray.m_pData[index];
+    VBLayout* block = reinterpret_cast<VBLayout**>(pLayout->m_chips.m_30)[index];
     if (block)
     {
         result = block->m_uiValueBeforeCount;
@@ -267,7 +197,7 @@ unsigned int __fastcall FreeVBBlock(NiVBBlock* object, void*, unsigned int index
             pLayout->m_uiValue20 = 0;
             if (index > 0)
             {
-                VBLayout** ppCursor = pLayout->m_kBlockArray.m_pData;
+                VBLayout** ppCursor = reinterpret_cast<VBLayout**>(pLayout->m_chips.m_30);
                 unsigned int remain = index;
                 do
                 {
@@ -285,7 +215,7 @@ unsigned int __fastcall FreeVBBlock(NiVBBlock* object, void*, unsigned int index
         pLayout->m_uiValue24 = pLayout->m_uiSize - pLayout->m_uiValue20;
         pLayout->m_uiValue28 += result;
         VBLayout* removed = 0;
-        pLayout->m_kBlockArray.FUN_00ba3aa0(index, &removed);
+        reinterpret_cast<VBArray*>(&pLayout->m_chips)->FUN_00ba3aa0(index, &removed);
         block->m_pkPrev = 0;
         block->m_pkNext = g_pkFreeList;
         if (g_pkFreeList)
@@ -337,30 +267,9 @@ void HashTableBase::InsertOrUpdate(unsigned int key, unsigned int value)
     ++elementCount;
 }
 
-struct VBBlk
-{
-    void* m_pSet;
-    unsigned int m_uiPosition;
-    unsigned int m_uiVB;
-    unsigned int m_uiSize;
-    unsigned int m_u10;
-    unsigned int m_u14;
-    unsigned int m_u18;
-    unsigned int m_u1C;
-    unsigned int m_u20;
-    unsigned int m_u24;
-    unsigned int m_u28;
-    unsigned int m_u2C;
-    unsigned int m_u30;
-    unsigned int m_u34;
-    unsigned int m_u38;
-    VBBlk* m_pNext;
-    VBBlk* m_pListObject;
-};
-
 struct VBArr
 {
-    unsigned int FUN_00a64330(VBBlk** ppBlock);
+    unsigned int FUN_00a64330(NiVBBlock** ppBlock);
 };
 
 struct VBDev;
@@ -381,25 +290,25 @@ struct VBSetX
     unsigned int m_u14;
     unsigned int m_u18;
     VBArr m_kArr;
-    VBBlk* FUN_00e94580(unsigned int uiSize);
+    NiVBBlock* FUN_00e94580(unsigned int uiSize);
 };
 
-__forceinline VBBlk* PopBlock()
+__forceinline NiVBBlock* PopBlock()
 {
     if (!DAT_0126fa30)
         AllocateVBBlocks();
-    VBBlk* block = (VBBlk*)DAT_0126fa30;
-    DAT_0126fa30 = (LinkedVBBlock*)((VBBlk*)DAT_0126fa30)->m_pNext;
+    NiVBBlock* block = DAT_0126fa30;
+    DAT_0126fa30 = reinterpret_cast<NiVBBlock*>(DAT_0126fa30->m_3c);
     if (DAT_0126fa30)
-        ((VBBlk*)DAT_0126fa30)->m_pListObject = 0;
-    block->m_pNext = 0;
-    block->m_pListObject = 0;
+        DAT_0126fa30->m_40 = 0;
+    block->m_3c = 0;
+    block->m_40 = 0;
     return block;
 }
 
-// Allocates a VBBlk of at least uiSize bytes via the device, fills its fields, and inserts it into the VBArr.
+// Allocates a NiVBBlock of at least uiSize bytes via the device, fills its fields, and inserts it into the VBArr.
 // @fnv 0x00e94580
-VBBlk* VBSetX::FUN_00e94580(unsigned int uiSize)
+NiVBBlock* VBSetX::FUN_00e94580(unsigned int uiSize)
 {
     unsigned int uiAllocSize = uiSize;
     if ((m_u08 & 0x10000000) == 0)
@@ -411,19 +320,19 @@ VBBlk* VBSetX::FUN_00e94580(unsigned int uiSize)
     if (m_pDev->m_pVtbl[26](m_pDev, uiAllocSize, m_u14, m_u04, m_u18, &uiSize, 0) < 0)
         return 0;
 
-    VBBlk* p = PopBlock();
-    p->m_pSet = this;
-    p->m_uiVB = uiSize;
+    NiVBBlock* p = PopBlock();
+    p->m_00 = reinterpret_cast<unsigned int>(this);
+    p->m_08 = uiSize;
     p->m_uiSize = uiAllocSize;
-    p->m_u24 = uiAllocSize;
-    p->m_u28 = uiAllocSize;
-    p->m_u10 = m_u04;
-    p->m_u14 = m_u08;
-    p->m_u1C = m_u18;
-    VBBlk* pBlock = p;
-    VBBlk* __restrict usageBlock = p;
-    usageBlock->m_u18 = m_u14;
-    p->m_uiPosition = m_kArr.FUN_00a64330(&pBlock);
+    p->m_24 = uiAllocSize;
+    p->m_28 = uiAllocSize;
+    p->m_10 = m_u04;
+    p->m_14 = m_u08;
+    p->m_1c = m_u18;
+    NiVBBlock* pBlock = p;
+    NiVBBlock* __restrict usageBlock = p;
+    usageBlock->m_18 = m_u14;
+    p->m_04 = m_kArr.FUN_00a64330(&pBlock);
     return p;
 }
 
@@ -435,31 +344,29 @@ struct VBReleaseInterface
     virtual unsigned long __stdcall Release() = 0;
 };
 
-template <class T> class NiTMallocInterface
+#include "../../../../include/NiTMallocInterface.h"
+#include "../../../../include/NiTArray.h"
+// Gamebryo NiTArray.inl / NiTCollection.h bodies the original inlines (FUN_00aa10f0 = NiFree)
+template <class T> inline void NiTMallocInterface<T>::Deallocate(T* pArray)
 {
-};
-template <class T, class Alloc> class NiTArray
+    FUN_00aa10f0(pArray);
+}
+template <class T, class TAlloc> inline NiTArray<T, TAlloc>::~NiTArray()
 {
-  public:
-    T* data;
-    unsigned short capacity, size, used, grow;
-    virtual ~NiTArray()
-    {
-        FUN_00aa10f0(data);
-    }
-    T RemoveAt(unsigned int index)
-    {
-        if (index >= size)
-            return T(0);
-        T item = data[index];
-        data[index] = T(0);
-        if (item)
-            --used;
-        if (index == (unsigned short)(size - 1))
-            --size;
-        return item;
-    }
-};
+    TAlloc::Deallocate(m_pBase);
+}
+template <class T, class TAlloc> inline T NiTArray<T, TAlloc>::RemoveAt(unsigned int uiIndex)
+{
+    if (uiIndex >= m_usSize)
+        return T(0);
+    T item = m_pBase[uiIndex];
+    m_pBase[uiIndex] = T(0);
+    if (item)
+        --m_usESize;
+    if (uiIndex == (unsigned short)(m_usSize - 1))
+        --m_usSize;
+    return item;
+}
 typedef NiTArray<NiVBBlock*, NiTMallocInterface<NiVBBlock*> > CleanupBlockArray;
 
 struct VBSetCleanup
@@ -479,32 +386,31 @@ struct VBSetCleanup
 // @fnv 0x00e943c0
 void VBSetCleanup::FUN_00e943c0()
 {
-    for (unsigned int i = 0; i < blocks.size; ++i)
+    for (unsigned int i = 0; i < blocks.m_usSize; ++i)
     {
-        LinkedVBBlock* block = reinterpret_cast<LinkedVBBlock*>(blocks.RemoveAt(i));
+        NiVBBlock* block = blocks.RemoveAt(i);
         if (block)
         {
-            VBBlk* view = reinterpret_cast<VBBlk*>(block);
-            if (view->m_uiVB)
+            if (block->m_08)
             {
-                reinterpret_cast<VBReleaseInterface*>(view->m_uiVB)->Release();
-                view->m_uiVB = 0;
+                reinterpret_cast<VBReleaseInterface*>(block->m_08)->Release();
+                block->m_08 = 0;
             }
             block->FUN_00e942d0();
-            LinkedVBBlock* previous = block->previous;
-            LinkedVBBlock* next = block->next;
+            NiVBBlock* previous = reinterpret_cast<NiVBBlock*>(block->m_3c);
+            NiVBBlock* next = reinterpret_cast<NiVBBlock*>(block->m_40);
             if (previous)
-                previous->next = next;
+                previous->m_40 = reinterpret_cast<unsigned int>(next);
             if (next)
-                next->previous = previous;
-            LinkedVBBlock* head = DAT_0126fa30;
+                next->m_3c = reinterpret_cast<unsigned int>(previous);
+            NiVBBlock* head = DAT_0126fa30;
             if (head)
             {
-                head->next = block;
+                head->m_40 = reinterpret_cast<unsigned int>(block);
                 head = DAT_0126fa30;
             }
-            block->previous = head;
-            block->next = 0;
+            block->m_3c = reinterpret_cast<unsigned int>(head);
+            block->m_40 = 0;
             DAT_0126fa30 = block;
         }
     }

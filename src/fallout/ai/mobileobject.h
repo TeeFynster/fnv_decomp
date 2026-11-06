@@ -1,8 +1,8 @@
 #ifndef FNV_MOBILEOBJECT_UNIT_H
 #define FNV_MOBILEOBJECT_UNIT_H
 
+#include "mobileobject_topicinfo.h"  // first: its shared headers include <windows.h> before layout_support.h
 #include "mobileobject_decls.h"
-#include "mobileobject_topicinfo.h"
 
 // @fnv 0x008ae4c0
 NiPoint3* MobileObject::GetPos() const

@@ -1,6 +1,28 @@
 // fallout/ai/highactorculler.cpp: HighActorCuller (1 function)
 
-#include "highactorculler_decls.h"
+#include "../../../include/BSFadeNodeCuller.h"
+#include "../../../include/BSMultiBoundNode.h"
+#include "../../../include/BSMultiBoundSphere.h"
+#include "../../../include/BSOcclusionPlane.h"
+#include "../../../include/BSPortalGraph.h"
+#include "../../../include/HighActorCuller.h"
+#include "../../../include/MobIterOperator.h"
+#include "../../../include/MobileObject.h"
+#include "../../../include/NiBound.h"
+#include "../../../include/NiCamera.h"
+#include "../../../include/NiCullingProcess.h"
+#include "../../../include/NiFrustumPlanes.h"
+#include "../../../include/NiPlane.h"
+#include "../../../include/TES.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESWorldSpace.h"
+#include "../../../include/BSFadeNode.h"
+#include "../../../include/TESObjectCELL.h"
+
+extern TES* g_TES;
+
+#include <string.h>
+#pragma intrinsic(memcpy)
 
 // @fnv 0x008d6d40
 void HighActorCuller::Operate(MobileObject* mobile)
@@ -9,15 +31,17 @@ void HighActorCuller::Operate(MobileObject* mobile)
     if (object)
     {
         m_kFadeNodeCuller.Process(object);
-        BSFadeNode* fade = object->GetFadeNode();
+        BSFadeNode* fade = object->IsFadeNode();
         if (fade && !fade->FUN_00552470())
         {
-            NiBound bound = fade->GetBoundingVolume();
-            m_spMultiBoundSphere->SetGridPosition(bound.GetNavMeshData());
-            m_spMultiBoundSphere->FUN_00819a50(bound.FUN_0084d030());
+            // Preserve the original trivial snapshot; NiBound has an out-of-line copy constructor.
+            unsigned __int64 bound[sizeof(NiBound) / sizeof(unsigned __int64)];
+            memcpy(bound, &static_cast<const NiAVObject*>(fade)->GetBoundingVolume(), sizeof(bound));
+            m_spMultiBoundSphere->SetGridPosition(reinterpret_cast<const NiBound*>(bound)->GetNavMeshData());
+            m_spMultiBoundSphere->FUN_00819a50(reinterpret_cast<const NiBound*>(bound)->FUN_0084d030());
             BSPortalGraph* graph = 0;
             if (g_TES->GetInteriorCell())
-                graph = static_cast<HighActorCullerCell*>(g_TES->GetInteriorCell())->FUN_009d9f20();
+                graph = g_TES->GetInteriorCell()->FUN_009d9f20();
             else if (g_TES->GetParentWorldSpace())
                 graph = g_TES->GetParentWorldSpace()->FUN_006698d0();
             if (graph)
@@ -27,7 +51,7 @@ void HighActorCuller::Operate(MobileObject* mobile)
                 while (position)
                 {
                     BSOcclusionPlane* plane = occluders.GetNext(position);
-                    if (plane && plane->GetCullResult() == 1)
+                    if (plane && static_cast<const BSOcclusionPlane*>(plane)->GetCullResult() == 1)
                     {
                         if (!m_pMultiBoundNode->CheckProcStateAndPlane(m_kFadeNodeCuller.GetCamera()->FUN_0045bb80(),
                                                                        m_kFadeNodeCuller, plane))

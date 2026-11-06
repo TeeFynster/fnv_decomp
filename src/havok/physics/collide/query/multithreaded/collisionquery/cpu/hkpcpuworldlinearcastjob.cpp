@@ -22,7 +22,8 @@ float FUN_00df71c0_Class::FUN_00df71c0()
     return unk10->value;
 }
 
-struct Data
+// record whose +0x20 pointer FUN_00df72c0 loads and forwards to CastAgainstCollidable on this-8; identity unknown
+struct CastRecord20
 {
     int unk00;
     int unk04;
@@ -32,20 +33,20 @@ struct Data
     int unk14;
     int unk18;
     int unk1c;
-    volatile Data* value;
+    volatile CastRecord20* value;
 };
 struct TargetBase
 {
-    void CastAgainstCollidable(volatile Data* value);
+    void CastAgainstCollidable(volatile CastRecord20* value);
 };
 struct FUN_00df72c0_class
 {
     int unk00;
     int unk04;
-    void ForwardToBase(volatile Data* value);
+    void ForwardToBase(volatile CastRecord20* value);
 };
 // @fnv 0x00df72c0
-void FUN_00df72c0_class::ForwardToBase(volatile Data* value)
+void FUN_00df72c0_class::ForwardToBase(volatile CastRecord20* value)
 {
     value = value->value;
     char* p = (char*)this;

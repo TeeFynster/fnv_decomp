@@ -1,47 +1,17 @@
+#include "../../include/BSStringT.h"
 
 // tesscriptcompiler_ctx_variant.cpp: context variant of src/fallout_shared/tesscriptcompiler.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
+#include "../../include/ScriptReferencedObject.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectREFR.h"
 #include "tesscriptcompiler_packet_decls.h"
 ScriptFunctionInfo* GetFunctionByOpcode(SCRIPT_OUTPUT output);
 
 int FUN_00404dc0(const char*, const char*);
 void* __cdecl operator new(unsigned int);
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-    int FUN_00401170();
-};
-class TESObjectREFR : public TESForm
-{
-  public:
-    bool FUN_005653d0();
-};
 extern TESForm* g_thePlayer;
-struct BSStringT_char
-{
-    char* data;
-    unsigned short length, capacity;
-    int FUN_00408a80(const char*, bool) const;
-    bool Set(const char*, unsigned int);
-};
-class ScriptReferencedObject
-{
-  public:
-    BSStringT_char name;
-    TESForm* form;
-    unsigned int variableID;
-    ScriptReferencedObject();
-    ~ScriptReferencedObject();
-};
-template <class T> struct BSSimpleList
-{
-    T item;
-    BSSimpleList* next;
-    T& FUN_006815c0();
-    BSSimpleList* FUN_00726070();
-    void FUN_00905820(const T&);
-};
+#include "../../include/BSSimpleList.h"
 struct ScriptInfo
 {
     unsigned int variableCount, m_uiReferenceID, dataSize, lastID;
@@ -64,7 +34,7 @@ struct CStringArgument
     char* scriptText;
     unsigned int textOffset;
     int runtimeMode;
-    BSStringT_char scriptName;
+    ::BSStringT<char> scriptName;
     unsigned int errorCode;
     bool partialScript;
     unsigned int curLineNumber;
@@ -88,20 +58,20 @@ bool CStringArgument::FUN_005afad0(ScriptToken* token, bool variable, bool allow
     bool result = false;
     unsigned int index = 1;
     BSSimpleList<ScriptReferencedObject*>* entry = &refVars;
-    while (entry && entry->FUN_006815c0())
+    while (entry && entry->GetItem())
     {
-        if (!entry->FUN_006815c0()->name.FUN_00408a80(token->name, true))
+        if (!reinterpret_cast<const ::BSStringT<char>*>(&entry->GetItem()->m_kFormName)->StrCmp(token->name, true))
         {
             token->refIndex = index;
-            token->form = entry->FUN_006815c0()->form;
+            token->form = entry->GetItem()->pForm;
             if (variable)
-                entry->FUN_006815c0()->variableID = token->variableID;
+                entry->GetItem()->m_uiFormID = token->variableID;
             else
-                token->variableID = entry->FUN_006815c0()->variableID;
+                token->variableID = entry->GetItem()->m_uiFormID;
             result = true;
             break;
         }
-        entry = entry->FUN_00726070();
+        entry = entry->GetNext();
         index++;
     }
     if (!result)
@@ -113,16 +83,16 @@ bool CStringArgument::FUN_005afad0(ScriptToken* token, bool variable, bool allow
         {
             if (!FUN_00404dc0(token->name, "Player"))
             {
-                reference->form = g_thePlayer;
+                reference->pForm = g_thePlayer;
                 result = true;
             }
             if (!result)
             {
-                reference->form = FUN_00483a00(token->name);
-                if (reference->form)
+                reference->pForm = FUN_00483a00(token->name);
+                if (reference->pForm)
                 {
-                    if (reference->form->FUN_00401170() == 3)
-                        reference->form = 0;
+                    if (reference->pForm->FUN_00401170() == 3)
+                        reference->pForm = 0;
                     else
                         result = true;
                 }
@@ -133,14 +103,14 @@ bool CStringArgument::FUN_005afad0(ScriptToken* token, bool variable, bool allow
                 unsigned int formID = FUN_005afe10(token->name, &end, 16);
                 if (formID && end && !*end)
                 {
-                    reference->form = FUN_004839c0(formID);
-                    if (reference->form)
+                    reference->pForm = FUN_004839c0(formID);
+                    if (reference->pForm)
                         result = true;
                 }
             }
             if (result && runtimeMode != 1)
             {
-                TESObjectREFR* refr = dynamic_cast<TESObjectREFR*>(reference->form);
+                TESObjectREFR* refr = dynamic_cast<TESObjectREFR*>(reference->pForm);
                 if (refr && !refr->FUN_005653d0())
                 {
                     ReportScriptError(this, "Non-persistent reference '%s' cannot be used in a script.", token->name);
@@ -153,17 +123,17 @@ bool CStringArgument::FUN_005afad0(ScriptToken* token, bool variable, bool allow
             result = true;
             if (variable)
             {
-                reference->form = 0;
-                reference->variableID = token->variableID;
+                reference->pForm = 0;
+                reference->m_uiFormID = token->variableID;
             }
             else
             {
-                token->form = reference->form;
-                reference->variableID = 0;
+                token->form = reference->pForm;
+                reference->m_uiFormID = 0;
             }
-            reference->name.Set(token->name, 0);
+            reinterpret_cast<::BSStringT<char>*>(&reference->m_kFormName)->Set(token->name, 0);
             info.m_uiReferenceID++;
-            FUN_005d43c0()->FUN_00905820(reference);
+            FUN_005d43c0()->AddTail(reference);
             token->refIndex = info.m_uiReferenceID;
         }
         else
@@ -190,13 +160,7 @@ struct CompileWord
     CompileWord();
 };
 
-struct CompileString
-{
-    char* text;
-    unsigned short length, capacity;
-    void FUN_004037f0(const char*, unsigned);
-    const char* FUN_00559450();
-};
+
 
 struct CompileVariable
 {
@@ -206,21 +170,13 @@ struct CompileVariable
     unsigned char unk11;
     unsigned short unk12;
     unsigned unk14;
-    CompileString name;
+    ::BSStringT<char> name;
     CompileVariable();
 };
 
 struct CompileVariables
 {
-    void FUN_00905820(CompileVariable* const&);
-};
-
-struct CompileReference
-{
-    unsigned unk00, unk04;
-    TESForm* form;
-    unsigned variableID;
-    const char* FUN_00559450();
+    void AddTail(CompileVariable* const&);
 };
 
 struct CompileScript
@@ -238,7 +194,7 @@ struct CompileState
     bool partial;
     CompileVariables* FUN_005a8080();
     bool FUN_005afad0(CompileWord*, bool, bool);
-    CompileReference* GetNodeValue(unsigned);
+    ScriptReferencedObject* GetNodeValue(unsigned);
 };
 
 struct CompileLine
@@ -469,9 +425,9 @@ bool LineCompiler::FUN_005aff40(CompileScript* script, CompileState* compiler, C
 
             variableInfo0->integer = (line->kind != 20 && line->kind != 31) ? 1 : 0;
 
-            variableInfo0->name.FUN_004037f0(variableName1, 0);
+            variableInfo0->name.Set(variableName1, 0);
 
-            if (script->FUN_005ac6a0(variableInfo0->name.FUN_00559450(), variableInfo0))
+            if (script->FUN_005ac6a0(variableInfo0->name.String(), variableInfo0))
             {
             }
             else
@@ -479,7 +435,7 @@ bool LineCompiler::FUN_005aff40(CompileScript* script, CompileState* compiler, C
                 compiler->variableCount++;
                 variableInfo0->id = compiler->variableCount;
             }
-            compiler->FUN_005a8080()->FUN_00905820(variableInfo0);
+            compiler->FUN_005a8080()->AddTail(variableInfo0);
 
             if (line->kind == 31)
             {
@@ -650,16 +606,16 @@ bool LineCompiler::FUN_005aff40(CompileScript* script, CompileState* compiler, C
             }
             if (command->requiresReference && line->refIndex > 0)
             {
-                CompileReference* ref2 = compiler->GetNodeValue(line->refIndex);
+                ScriptReferencedObject* ref2 = compiler->GetNodeValue(line->refIndex);
 
-                TESObjectREFR* object = dynamic_cast<TESObjectREFR*>(ref2->form);
+                TESObjectREFR* object = dynamic_cast<TESObjectREFR*>(ref2->pForm);
 
-                if (!object && !ref2->variableID)
+                if (!object && !ref2->m_uiFormID)
                 {
                     ReportScriptError(
                         compiler,
                         "Syntax error.  Invalid reference '%s' (only object references and reference variables are allowed in this context).",
-                        ref2->FUN_00559450());
+                        reinterpret_cast<::BSStringT<char>*>(&ref2->m_kFormName)->String());
                     return false;
                 }
             }

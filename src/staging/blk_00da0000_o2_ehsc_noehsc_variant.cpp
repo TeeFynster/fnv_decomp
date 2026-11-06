@@ -6,6 +6,12 @@
 // src/staging/blk_00da0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkResult.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/BSAudio.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkArray.h"
+#include "../../include/hkBool.h"
 extern "C" void __cdecl FUN_00cb0a70(void*);
 extern int DAT_010d461c;
 struct FUN_00da07b0_class
@@ -326,11 +332,6 @@ struct DB7570Pair
     unsigned int m_key;
     unsigned int m_uiFilterValue;
 };
-enum DB7570Result
-{
-    DB7570_SUCCESS = 0,
-    DB7570_FAILURE = 1
-};
 class DB7570Map
 {
   public:
@@ -338,7 +339,7 @@ class DB7570Map
     DB7570Pair* m_data;
     int m_iElementCount;
 
-    DB7570Result Lookup(unsigned int key, unsigned int& valueOut) const;
+    hkResult Lookup(unsigned int key, unsigned int& valueOut) const;
 };
 extern "C" int __cdecl CompareStringsCaseInsensitive(int a1, int a2);
 struct FUN_00db75b0_entry
@@ -370,22 +371,10 @@ class FUN_00db78a0_cls
     virtual void vSlot0c(void* field, void* item);
     void FUN_00db78a0(FUN_00db78a0_item** a, void** b);
 };
-struct hkMemoryAllocator;
-struct AudioMgr
-{
-    int unk00, unk04, unk08;
-    hkMemoryAllocator* unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
+inline hkMemoryRouter* audio()
 {
-    return (AudioMgr*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
 struct MapPair
 {
@@ -489,23 +478,7 @@ struct DBB100Writer
 };
 static void FUN_00dbb100(const DBB100Registry* registry, const void* object, DBB100Writer* writer);
 void DBB100WriteClassNames(const DBB100Registry* registry, const void** objects, DBB100Writer* writer);
-struct hkMemoryAllocator
-{
-    virtual void vSlot00();
-    virtual void vSlot04();
-    virtual void vSlot08();
-    virtual void vSlot0C(void* field, void* item);
-    virtual void free(void* p, unsigned int nbytes);
-};
-struct AudioRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* unk10;
-};
-AudioRouter* __cdecl da06d0_getRouter();
+hkMemoryRouter* __cdecl da06d0_getRouter();
 struct Elem
 {
     int unk00;
@@ -610,14 +583,6 @@ struct DBA430Inner
 {
     void __thiscall Sync(DBA430Listener* listener);
     void __thiscall Mark();
-};
-struct BSAudio
-{
-    virtual void vf00();
-    int unk04;
-    int unk08;
-    int unk0c;
-    DBA430Listener* m_10;
 };
 BSAudio* __cdecl FUN_00c85750();
 struct DBA430Owner
@@ -740,14 +705,6 @@ struct DA2D70Listener
     virtual void vf04();
     virtual void vf08(void* object, int value);
 };
-struct DA2D70Audio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    DA2D70Listener* m_10;
-};
 struct DA2D70Object
 {
     int unk00;
@@ -766,19 +723,6 @@ void* __cdecl FUN_00da6e10(void* a, void* b, void* c);
 extern int DAT_010cf7d4;
 extern int DAT_010cf804;
 extern char str_010cf830[];
-struct Allocator
-{
-    virtual void Reserved();
-    virtual void* Alloc(unsigned int bytes);
-};
-struct Manager
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    Allocator* heap;
-};
 struct SubObject
 {
     int unk00;
@@ -1000,89 +944,40 @@ struct FUN_00db7c80_class
     int* FUN_00db7c80();
 };
 
-class hkMemoryAllocatorDA24
-{
-  public:
-    virtual ~hkMemoryAllocatorDA24() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void* AllocateBufferWithSize(int& iReqNumBytes) throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
 
-struct hkMemoryRouterDA24
-{
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorDA24* m_pStreamAllocator;
-    hkMemoryAllocatorDA24& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
 
 namespace hkRouterDA24 {
-extern "C" hkMemoryRouterDA24& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
 
-namespace hkArrayUtilDA24 {
-template <class T> __forceinline void destruct(T* t, int numElements)
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    for (int i = 0; i < numElements; i++)
-        t[i].~T();
-}
+    return hkRouterDA24::FUN_00c85750().heap();
 }
 
-template <class T> class hkArrayDA24
+template <class T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
 {
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+    for (int i = 0; i < m_iElementCount; i++)
+        m_data[i].~T();
+    m_iElementCount = 0;
+    if ((m_iCapacityState & DONT_DEALLOCATE_FLAG) == 0)
+        alloc.bufFree(m_data, getCapacity() * sizeof(T));
+    m_data = 0;
+    m_iCapacityState = DONT_DEALLOCATE_FLAG;
+}
 
-    enum
-    {
-        CAPACITY_MASK = 0x3fffffff,
-        DONT_DEALLOCATE_FLAG = 0x80000000
-    };
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & CAPACITY_MASK;
-    }
-
-    __forceinline void _clearAndDeallocate(hkMemoryAllocatorDA24& alloc)
-    {
-        hkArrayUtilDA24::destruct(m_data, m_iElementCount);
-        m_iElementCount = 0;
-        if ((m_iCapacityState & DONT_DEALLOCATE_FLAG) == 0)
-            alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = DONT_DEALLOCATE_FLAG;
-    }
-
-    ~hkArrayDA24() throw()
-    {
-        _clearAndDeallocate(hkRouterDA24::FUN_00c85750().heap());
-    }
-
-    hkArrayDA24() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(DONT_DEALLOCATE_FLAG)
-    {}
-};
-
-struct hkBoolDA24
+template <class T, class Allocator> __forceinline hkArray<T, Allocator>::~hkArray()
 {
-    char m_cBooleanValue;
-    hkBoolDA24(bool b) throw() : m_cBooleanValue((char)b)
-    {}
-};
+    hkArrayBase<T>::_clearAndDeallocate(Allocator().get(this));
+}
 
-void __cdecl FUN_00da12b0(int iParam, float fParam, hkBoolDA24 bFlag, hkArrayDA24<int>& kFirst,
-                          hkArrayDA24<int>& kSecond) throw();
+void __cdecl FUN_00da12b0(int iParam, float fParam, hkBool bFlag, hkArray<int>& kFirst,
+                          hkArray<int>& kSecond) throw();
 
 // @fnv 0x00da24b0
 void __cdecl FUN_00da24b0(int iParam, float fParam)
 {
-    hkArrayDA24<int> kFirst;
-    hkArrayDA24<int> kSecond;
+    hkArray<int> kFirst;
+    hkArray<int> kSecond;
     FUN_00da12b0(iParam, fParam, false, kFirst, kSecond);
 }

@@ -82,14 +82,14 @@ extern "C" void FnvAttackDtorAlias();
 extern "C" void FnvActorBaseDtorAlias();
 extern "C" unsigned int __security_cookie;
 
-class CreatureSoundCollection
+class CreatureSounds
 {
   public:
-    bool IsDifferentFrom(CreatureSoundCollection* other);  // declared for the original code (decl_variants.py)
+    bool IsDifferentFrom(CreatureSounds* other);  // declared for the original code (decl_variants.py)
   public:
     unsigned char soundLists[0x58];
-    CreatureSoundCollection();
-    ~CreatureSoundCollection();
+    CreatureSounds();
+    ~CreatureSounds();
 };
 
 class TESActorBaseData
@@ -367,14 +367,14 @@ class TESCreature : public TESActorBase, public TESAttackDamageForm, public TESM
     float FUN_00567470();
     float FUN_00821660();
     int FUN_009c0070();
-    CreatureSoundCollection* GetCreatureSounds();
+    CreatureSounds* GetCreatureSounds();
     TESCreature* GetSoundCreature();
     int GetImpactDataSet();
     int GetField158();  // declared for the original code (decl_variants.py)
   public:
     union
     {
-        CreatureSoundCollection* m_pCreatureSounds;
+        CreatureSounds* m_pCreatureSounds;
         TESCreature* m_pCreature;
     };
     unsigned char dataPadding;
@@ -401,7 +401,7 @@ class TESCreature : public TESActorBase, public TESAttackDamageForm, public TESM
     void ClearData();
     void ResetFormData();
     void LoadGame(BGSLoadFormBuffer* buffer);
-    CreatureSoundCollection* GetMutableCreatureSounds();
+    CreatureSounds* GetMutableCreatureSounds();
     void SetCreatureSoundsFrom(TESCreature* soundCreature);
     void SetBodyPartData(BGSBodyPartData* bodyPartData);
     void Revert(BGSLoadFormBuffer* buffer);

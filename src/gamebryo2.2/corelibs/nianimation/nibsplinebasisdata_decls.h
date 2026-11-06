@@ -3,6 +3,7 @@
 #define FNV_NIBSPLINEBASISDATA_DECLS_H
 
 
+#include "layout_support.h"
 #include "NiRefObject.h"
 
 class NiStream;

@@ -1,43 +1,11 @@
 
-// pathfind_ctxr_variant.cpp: rename variant for 0x006d34d0 (integration 2026-10-30): the unit's skeleton with PathingLocation renamed, whose names are bound elsewhere.
+// Pathfinding context variant for 0x006d34d0.
 #include "pathfind_decls.h"
-class PathingLocation_r006d34d0
-{
-  public:
-    void** m_ppVirtualMethodTable;                         // +0x0
-    NiPoint3 Location;                       // +0x4
-    const NavMeshInfo* m_pLocationNavMesh;   // +0x10
-    const void* pNavMeshInfoArray;           // +0x14 (BSSimpleArray<const NavMeshInfo*,1024>*)
-    TESObjectCELL* pCell;                    // +0x18
-    TESWorldSpace* m_pContainingWorldspace;  // +0x1C
-    unsigned int m_uiPathingFlags;           // +0x20
-    unsigned short m_usTriangleID;           // +0x24
-    unsigned char uiFlags;                   // +0x26
-    unsigned char
-        layoutPadding27;  // scalar, not [1]: a char array member makes /GS protect PathingLocation_r006d34d0 locals
-    PathingLocation_r006d34d0();
-    PathingLocation_r006d34d0(const NiPoint3&, TESObjectCELL*, TESWorldSpace*);
-    ~PathingLocation_r006d34d0();
-    bool HasValidTriangle();
-    bool IsPathingLocationValid();
-    bool FindNavMeshTriangle(NavMeshPtr&, unsigned short&);
-    void ResetLocation();
-    PathingLocation_r006d34d0(const PathingLocation_r006d34d0&);  // 0x006dcc40 (called out of line by unmatched code)
-    PathingLocation_r006d34d0(const NiPoint3&, const PathingLocation_r006d34d0&);  // 0x006dd0d0
-    PathingLocation_r006d34d0& operator=(
-        const PathingLocation_r006d34d0&);  // out of line in the original (no rep movsd)
-    NiPoint3 GetLocation() const;           // 0x005c3420
-};
+#include "../../../include/NavMeshPtr.h"
+#include "../../../include/PathBuilder.h"
+#include "../../../include/PathingLocation.h"
+#include "../../../include/PathingSolution.h"
 
-struct ReqX
-{
-    PathingLocation_r006d34d0* GetOffsetC();
-};
-struct NavPtrX
-{
-    void* m_pObject;
-    void* FUN_00458b50();
-};
 struct Info
 {
     NavMesh* mesh;
@@ -621,26 +589,19 @@ struct Ctx12
     float z;
     float w;
 };
-struct Pt3
-{
-    float x;
-    float y;
-    float z;
-    Pt3();
-};
-Pt3 __cdecl FUN_006bbad0(NiPoint3* a, NiPoint3* b, NiPoint3* c);
+NiPoint3 __cdecl FUN_006bbad0(NiPoint3* a, NiPoint3* b, NiPoint3* c);
 
 // @fnv 0x006d34d0
 bool __cdecl FUN_006d34d0(void* req, NiPoint3* out)
 {
-    if (!((ReqX*)req)->GetOffsetC()->HasValidTriangle())
+    if (!((PathingRequest*)req)->GetOffsetC().HasValidTriangle())
         return false;
     NavMeshPtr navPtr;
     unsigned short tri3 = 0xffff;
-    if (!((ReqX*)req)->GetOffsetC()->FindNavMeshTriangle(navPtr, tri3))
+    if (!((PathingRequest*)req)->GetOffsetC().FindNavMeshTriangle(navPtr, tri3))
         return false;
     Info info2;
-    info2.mesh = (NavMesh*)((NavPtrX*)&navPtr)->FUN_00458b50();
+    info2.mesh = navPtr.FUN_00458b50();
     info2.tri = tri3;
     BigSearch big3;
     ArrD arrD3(0x20, 0, 0);
@@ -648,7 +609,7 @@ bool __cdecl FUN_006d34d0(void* req, NiPoint3* out)
     if (!big3.Search(req, &info2, &arrD3, &arrE3))
         return false;
     Elem20 elem = *arrD3.FUN_006b3160(arrD3.FUN_0044ddc0() - 1);
-    Pt3 pts[3];
+    NiPoint3 pts[3];
     TriX* triPtr7 = ((MeshX*)elem.mesh)->FUN_005582f0(elem.tri);
     *(NiPoint3*)&pts[0] = ((MeshX*)elem.mesh)->FUN_0068f0a0(triPtr7->FUN_005582d0(0));
     *(NiPoint3*)&pts[1] = ((MeshX*)elem.mesh)->FUN_0068f0a0(triPtr7->FUN_005582d0(1));

@@ -2,7 +2,37 @@
 // src/staging/blk_00640000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
+// Use the shared scene declarations alongside legacy layout-support containers.
 #include "../../include/layout_support.h"
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/BSSimpleArray.h"
+#include "../../include/SETTING_VALUE.h"
+#include "../../include/SkyShaderProperty.h"
+#include "../../include/ActorValueOwner.h"
+#include "../../include/GO.h"
+#include "../../include/Pair.h"
+#include "../../include/Setting.h"
+#include "../../include/BSFaceGenModel.h"
+#include "../../include/BSFaceGenManager.h"
+#include "../../include/NiExtraData.h"
+// This unit defines the constructor, including the original vtable initialization.
+#define novtable
+#include "../../include/BSFaceGenModelExtraData.h"
+#undef novtable
+#include "../../include/BSFaceGenModelMap.h"
+#include "../../include/GameSettingCollection.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiGeometryData.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiSkinInstance.h"
+#include "../../include/NiSkinPartition.h"
+#include "../../include/NiTriBasedGeom.h"
+#include "../../include/PathingSolution.h"
+#include "../../include/StartMenu.h"
+#include "../../include/BGSTerrainManager.h"
+#include "../../include/FaceGenMatrix.h"
 
 struct FUN_006427a0_Class
 {
@@ -26,12 +56,8 @@ void FUN_00642890_Class::FUN_00642890()
     ((char*)this)[0x24] = 0;
 }
 
-struct GlobalObject_0040e0b0
-{
-    float* Float();
-};
 
-GlobalObject_0040e0b0 g_011ce00c;
+extern Setting g_011ce00c;
 
 // @fnv 0x00643f70
 float ScaleByGlobalFloat(float value)
@@ -39,11 +65,7 @@ float ScaleByGlobalFloat(float value)
     return value * *reinterpret_cast<float*>(g_011ce00c.Float());
 }
 
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting289;
+extern Setting originalRuntimeFloatSetting289;
 extern double DAT_01011588;
 
 // Returns a plus the product of the float setting from originalRuntimeFloatSetting289 and DAT_01011588.
@@ -55,11 +77,7 @@ float AddScaledSetting(float afValue)
 }
 
 namespace fnv_00643fd0 {
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting289;
+extern Setting originalRuntimeFloatSetting289;
 
 // @fnv 0x00643fd0
 float __cdecl AddRuntimeFloatSetting(float afValue)
@@ -114,27 +132,14 @@ void GlobalObject_00869f00::ResetPointer()
 }
 
 namespace fnv_00644520 {
-struct Setting_S
-{
-    float* Float();
-};
 
-struct GameSettingCollection
-{
-    float* Float();
-};
 
-template <class T> struct SettingT
-{
-    float* Float();
-};
-
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting509;
+extern Setting originalRuntimeFloatSetting509;
 
 // @fnv 0x00644520
 float FUN_00644520()
 {
-    float f = ((Setting_S*)&originalRuntimeFloatSetting509)->Float()[0];
+    float f = ((Setting*)&originalRuntimeFloatSetting509)->Float()[0];
     return f;
 }
 }  // namespace fnv_00644520
@@ -554,23 +559,15 @@ FUN_00658aa0_class* __thiscall FUN_00658aa0_class::Initialize(int a, unsigned ch
 
 extern "C" void* __cdecl NiFreeAlias(void*);
 
-struct NiTStringTemplateMap
-{
-    int m_auiShapeKeys[1];
-    int m_pObject;
-};
 
-struct BSFaceGenModelMap
-{
-    void FUN_00658b80(NiTStringTemplateMap* pStringMap);
-};
 
 // If the byte at offset 0x10 of this map is set, frees the object pointer held by the given string map via NiFreeAlias.
 // @fnv 0x00658b80
-void BSFaceGenModelMap::FUN_00658b80(NiTStringTemplateMap* pStringMap)
+// 0x00658b80 frees the hash-node key at +4 when the map owns strings; its parameter is a map item, not a map.
+void BSFaceGenModelMap::FreeStringMapObject(NiTMapItem<const char*, void*>* pStringMap)
 {
     if (*(unsigned char*)((char*)this + 0x10))
-        NiFreeAlias((void*)pStringMap->m_pObject);
+        NiFreeAlias((void*)pStringMap->m_key);
 }
 
 struct FUN_00658d30_class
@@ -1282,15 +1279,8 @@ void FUN_00642860_Class::FUN_00642860()
         reinterpret_cast<FUN_00b64d60_Class*>(reinterpret_cast<void*>(p))->UpdateQueries();
 }
 
-struct GameSettingCollection
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual float GetFloat(unsigned int index);
-};
-extern Setting_S originalRuntimeFloatSetting332;
-extern Setting_S originalRuntimeFloatSetting333;
+extern Setting originalRuntimeFloatSetting332;
+extern Setting originalRuntimeFloatSetting333;
 
 // Returns a float setting scaled by collection->GetFloat(0x2d) plus an offset when index is 0x38, otherwise 0.0f.
 // @fnv 0x00643ed0
@@ -1304,28 +1294,15 @@ float FUN_00643ed0(GameSettingCollection* collection, int index)
 }
 
 namespace fnv_00643f20 {
-struct GameSettingCollection
-{
-    float f;
-    float* Float();
-};
-template <typename T> struct SettingT
-{
-    float* Float();
-};
-template <> struct SettingT<GameSettingCollection> : public GameSettingCollection
-{
-    float* Float();
-};
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting287;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting288;
+extern Setting originalRuntimeFloatSetting287;
+extern Setting originalRuntimeFloatSetting288;
 float FUN_00404010(float a, float b);
 // Returns FUN_00404010 called with value times the float setting and value minus another float setting.
 // @fnv 0x00643f20
 float FUN_00643f20(float value)
 {
-    return FUN_00404010(value * ((GameSettingCollection*)originalRuntimeFloatSetting288.Float())->f,
-                        value - ((GameSettingCollection*)originalRuntimeFloatSetting287.Float())->f);
+    return FUN_00404010(value * *originalRuntimeFloatSetting288.Float(),
+                        value - *originalRuntimeFloatSetting287.Float());
 }
 }  // namespace fnv_00643f20
 
@@ -1382,15 +1359,8 @@ void* __thiscall FUN_006444e0_Class::FUN_006444e0(int aiFirst, int aiSecond, int
 }
 
 namespace fnv_00644540 {
-struct GameSettingCollection
-{
-};
-template <class T> struct SettingT
-{
-    float* Float();
-};
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting334;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting335;
+extern Setting originalRuntimeFloatSetting334;
+extern Setting originalRuntimeFloatSetting335;
 
 // Multiplies value by one of two runtime float game settings, choosing the second when flag is set.
 // @fnv 0x00644540
@@ -1407,8 +1377,8 @@ float ScaleByGameSetting(float value, float, bool abUseSecondSetting)
 }
 }  // namespace fnv_00644540
 
-GlobalObject_0040e0b0 g_011ce840;
-GlobalObject_0040e0b0 g_011cfd8c;
+extern Setting g_011ce840;
+extern Setting g_011cfd8c;
 
 // Converts value to float and returns the sum of g_011ce840's float setting plus g_011cfd8c's float setting multiplied by that value.
 // @fnv 0x006463a0
@@ -1416,7 +1386,7 @@ float FUN_006463a0(int value)
 {
     float f = (float)value;
     float result =
-        *reinterpret_cast<Setting_S*>(&g_011ce840)->Float() + *reinterpret_cast<Setting_S*>(&g_011cfd8c)->Float() * f;
+        *reinterpret_cast<Setting*>(&g_011ce840)->Float() + *reinterpret_cast<Setting*>(&g_011cfd8c)->Float() * f;
     return result;
 }
 
@@ -1430,13 +1400,9 @@ void __cdecl ClampUInt(unsigned int* puiValue, unsigned int low, unsigned int hi
         *puiValue = low;
 }
 
-struct ActorValueOwner
-{
-    float GetActorValueFloatByIndex(ActorValue::Index);
-};
 extern double g_d100;
-extern Setting_S g_011d17d0;
-extern Setting_S originalRuntimeFloatSetting1216;
+extern Setting g_011d17d0;
+extern Setting originalRuntimeFloatSetting1216;
 // Computes carry weight from actor value 37 divided by g_d100, scaled by a setting and offset by another setting.
 // @fnv 0x00649530
 float __cdecl FUN_00649530(ActorValueOwner* apOwner)
@@ -1451,13 +1417,9 @@ float __cdecl FUN_00649530(ActorValueOwner* apOwner)
 }
 
 namespace fnv_00649580 {
-struct ActorValueOwner
-{
-    float GetActorValueFloatByIndex(int);
-};
 extern double g_d100;
-extern Setting_S g_011d1854;
-extern Setting_S originalRuntimeFloatSetting1217;
+extern Setting g_011d1854;
+extern Setting originalRuntimeFloatSetting1217;
 // Reads actor value 44, divides it by g_d100, scales it by a runtime setting and adds another setting's float value, returning the sum.
 // @fnv 0x00649580
 float __cdecl GetActorValueScaledSetting(ActorValueOwner* apActorValueOwner)
@@ -1502,11 +1464,6 @@ void* __thiscall FUN_0064db20_Class::GetEntryAt(unsigned int auiIndex)
 struct Caller
 {
     void __thiscall Increment();
-};
-struct Pair
-{
-    int a;
-    int b;
 };
 struct Tgt
 {
@@ -1649,10 +1606,6 @@ unsigned int __thiscall FUN_006505d0_class::GetFloatValue()
 }
 }  // namespace fnv_006505d0
 
-struct BSFaceGenManager
-{
-    static void* __stdcall GetFaceGenManager(float a1, int a2, int a3);
-};
 struct Holder00aad6b0
 {
     void __thiscall FUN_00aad6b0();
@@ -1773,11 +1726,6 @@ FUN_00658f00_Class* __thiscall FUN_00658f00_Class::FUN_00658f00(unsigned int fla
     return this;
 }
 
-struct Pair590
-{
-    int a;
-    int b;
-};
 struct S_006590c0
 {
     void* __thiscall CopyPairTo(void* p, int q);
@@ -1786,9 +1734,9 @@ struct S_006590c0
 // @fnv 0x006590c0
 void* __thiscall S_006590c0::CopyPairTo(void* apDest, int q)
 {
-    Pair590 tmp = *(Pair590*)this;
+    Pair tmp = *(Pair*)this;
     ((FUN_00659170*)this)->FUN_00659170::FUN_00659170();
-    *(Pair590*)apDest = tmp;
+    *(Pair*)apDest = tmp;
     return apDest;
 }
 
@@ -1921,13 +1869,13 @@ struct NarrowString
     char* p;
     ~NarrowString();
 };
-struct FaceGenMatrix
+struct FaceGenMatrixStorage
 {
-    ~FaceGenMatrix();
+    ~FaceGenMatrixStorage();
 };
 struct FUN_006593e0_Class
 {
-    FaceGenMatrix m_iWordAt00;
+    FaceGenMatrixStorage m_iWordAt00;
     char m_20[28];
     NarrowString m_40;
     ~FUN_006593e0_Class();
@@ -1937,11 +1885,6 @@ FUN_006593e0_Class::~FUN_006593e0_Class()
 {}
 
 namespace fnv_00659440 {
-template <typename T> struct FaceGenMatrix
-{
-    ~FaceGenMatrix();
-    char data[32];
-};
 struct FUN_00659440
 {
     char pad[8];
@@ -2026,14 +1969,9 @@ int Holder::FUN_0065cec0(unsigned int auiIndex)
     return auiIndex * 0x58 + *(int*)((char*)this + 0xC);
 }
 
-struct Pair65cf50
-{
-    int a;
-    int b;
-};
 struct Holder65cf50
 {
-    Pair65cf50 data;
+    Pair data;
     void __thiscall FUN_0065dae0();
     void* __thiscall CopyDataAfterCallback(void* p, int q);
 };
@@ -2041,9 +1979,9 @@ struct Holder65cf50
 // @fnv 0x0065cf50
 void* __thiscall Holder65cf50::CopyDataAfterCallback(void* pDest, int iUnused)
 {
-    Pair65cf50 tmp = data;
+    Pair tmp = data;
     FUN_0065dae0();
-    *(Pair65cf50*)pDest = tmp;
+    *(Pair*)pDest = tmp;
     return pDest;
 }
 
@@ -2635,7 +2573,8 @@ unsigned int __thiscall FUN_0065f7f0_Class::FUN_0065f7f0() const
 }
 
 namespace fnv_0065f960 {
-struct Interface
+// Exe 0x0065f960: unit-local Interface view; declarations and layout are preserved.
+struct BlkInterfaceView
 {
     static void __cdecl PrintDebugMessage(int a, int b, int c, int d);
 };
@@ -2644,7 +2583,7 @@ unsigned char __cdecl FUN_0065e750(int* a, int* b);
 void CallInterfaceWithResult(int aiValue1, int aiValue2, int aiValue3, int aiValue4)
 {
     unsigned char r = FUN_0065e750(&aiValue1, &aiValue2);
-    Interface::PrintDebugMessage(aiValue1, aiValue2, aiValue3, (int)r);
+    BlkInterfaceView::PrintDebugMessage(aiValue1, aiValue2, aiValue3, (int)r);
 }
 }  // namespace fnv_0065f960
 
@@ -2723,16 +2662,10 @@ void __thiscall FUN_0065ff60_class::FUN_0065ff60(int aiArg1, int aiArg2, int aiA
 
 struct NiRTTI;
 struct NiProperty;
-struct NiTexture;
 
 struct PropHelper
 {
     void* GetProperty(unsigned int);
-};
-struct SkyShaderProperty
-{
-    void SetTexture(NiTexture*);
-    void FUN_00634900(int*);
 };
 void* DynamicCastByRTTI(const NiRTTI*, NiProperty*);
 extern int DAT_011f49e0;
@@ -3090,17 +3023,8 @@ void FUN_0065f240::Clear()
     m_cap = 0;
 }
 
-struct StartMenu
-{
-    char const* GetMenuTitle();
-};
-
-struct GlobalObject_0040c150 : public StartMenu
-{
-};
-
-extern GlobalObject_0040c150 g_011d30b4;
-extern GlobalObject_0040c150 g_011d41a4;
+extern const StartMenu g_011d30b4;
+extern const StartMenu g_011d41a4;
 
 int __cdecl _sprintf_s(char* buffer, unsigned int sizeOfBuffer, char const* format, ...);
 
@@ -3122,16 +3046,16 @@ void __cdecl FormatMenuText(int menuType, char const* text, char* buffer, unsign
     case 30:
         if (text)
         {
-            _sprintf_s(buffer, bufferSize, "%s %s", text, g_011d30b4.StartMenu::GetMenuTitle());
+            _sprintf_s(buffer, bufferSize, "%s %s", text, g_011d30b4.GetMenuTitle());
         }
         else
         {
-            _sprintf_s(buffer, bufferSize, "%s", g_011d30b4.StartMenu::GetMenuTitle());
+            _sprintf_s(buffer, bufferSize, "%s", g_011d30b4.GetMenuTitle());
         }
         break;
 
     case 31:
-        _sprintf_s(buffer, bufferSize, "%s", g_011d41a4.StartMenu::GetMenuTitle());
+        _sprintf_s(buffer, bufferSize, "%s", g_011d41a4.GetMenuTitle());
         break;
     }
 }
@@ -3157,10 +3081,6 @@ int __thiscall FUN_0064daa0_Class::FUN_0064daa0(int aiIndex, int b)
     return (*(int**)((char*)this + 0x58))[aiIndex];
 }
 
-struct BGSTerrainManager
-{
-    unsigned int GetMinLevel();
-};
 
 struct Calendar : public BGSTerrainManager
 {
@@ -3190,10 +3110,6 @@ void FUN_00653000(float value, Calendar* calendars, bool flag)
     }
 }
 
-struct GO
-{
-    ~GO();
-};
 
 struct Helper62d0
 {
@@ -3514,17 +3430,17 @@ float __cdecl FUN_006429e0(float afValue, float afLimit)
     return r;
 }
 
-extern GlobalObject_0040e0b0 g_011cddec;
-extern Setting_S originalRuntimeFloatSetting112;
-extern Setting_S originalRuntimeFloatSetting117;
-extern Setting_S originalRuntimeFloatSetting113;
-extern Setting_S originalRuntimeFloatSetting114;
-extern GlobalObject_0040e0b0 g_011cdc28;
-extern GlobalObject_0040e0b0 g_011cdfa8;
-extern GlobalObject_0040e0b0 g_011cddc4;
-extern GlobalObject_0040e0b0 g_011cd890;
-extern Setting_S originalRuntimeFloatSetting116;
-extern GlobalObject_0040e0b0 g_011cd438;
+extern Setting g_011cddec;
+extern Setting originalRuntimeFloatSetting112;
+extern Setting originalRuntimeFloatSetting117;
+extern Setting originalRuntimeFloatSetting113;
+extern Setting originalRuntimeFloatSetting114;
+extern Setting g_011cdc28;
+extern Setting g_011cdfa8;
+extern Setting g_011cddc4;
+extern Setting g_011cd890;
+extern Setting originalRuntimeFloatSetting116;
+extern Setting g_011cd438;
 
 // Sums base, a level-scaled term, and several setting-weighted terms (some skipped when flag is set) plus extra, returning the total.
 // @fnv 0x00642a60
@@ -3552,10 +3468,10 @@ int FUN_00642a60(int base, int level, int a2, int a3, int a4, int a5, int a6, in
     return total;
 }
 
-extern Setting_S DAT_011cdf78;
-extern Setting_S DAT_011cdf44;
-extern Setting_S DAT_011cde50;
-extern Setting_S DAT_011cdce8;
+extern Setting DAT_011cdf78;
+extern Setting DAT_011cdf44;
+extern Setting DAT_011cde50;
+extern Setting DAT_011cdce8;
 
 struct FUN_0066ef50_Class
 {
@@ -3940,7 +3856,7 @@ int __thiscall FUN_0064bda0_Class::FUN_0064bda0()
 
 struct FUN_0040fbf0_lock
 {
-    void Wait(int);
+    void FUN_0040fbf0(int);
     void Leave();
 };
 struct FUN_0064be40_shell
@@ -3960,7 +3876,7 @@ void __cdecl FUN_005330e0(float* value, float minimum, float maximum);
 // @fnv 0x0064be40
 bool FUN_0064be40_shell::FUN_0064be40(float elapsed, int unused)
 {
-    ((FUN_0040fbf0_lock*)((char*)this + 0x1a0))->Wait(0);
+    ((FUN_0040fbf0_lock*)((char*)this + 0x1a0))->FUN_0040fbf0(0);
     bool updateNeeded = !*(bool*)((char*)this + 0x18e);
     if (updateNeeded)
     {
@@ -4099,7 +4015,8 @@ class Iter64D : public ConstIter64D
     Iter64D();
 };
 
-class Vector64D
+// Range erasure calls begin (0x0044a170) and end (0x0065f550), rather than SSE math operations.
+class SlotIdRange
 {
   public:
     Iter64D begin();
@@ -4110,7 +4027,7 @@ class Vector64D
 
 // Erases all elements of the vector by calling erase with begin() and end().
 // @fnv 0x0064db70
-void Vector64D::FUN_0064db70()
+void SlotIdRange::FUN_0064db70()
 {
     erase(begin(), end());
 }
@@ -4159,7 +4076,8 @@ struct Vec2i
     int y;
 };
 
-struct Vector4f
+// Exe 0x0064dcf0: unit-local Vector4f view; declarations and layout are preserved.
+struct BlkVector4fView
 {
     int a;
     int b;
@@ -4186,14 +4104,14 @@ class FUN_0064dcf0_cls
     Vec2i* GetFirst(Vec2i* out);
     Vec2i* GetSecond(Vec2i* out);
     Ret8 Combine(Vec2i b, Vec2i a);
-    void Apply(Vec2i c, int a1, Vector4f* q);
-    void ApplyToCopy(int a1, const Vector4f* a2);
+    void Apply(Vec2i c, int a1, BlkVector4fView* q);
+    void ApplyToCopy(int a1, const BlkVector4fView* a2);
 };
 
 // @fnv 0x0064dcf0
-void FUN_0064dcf0_cls::ApplyToCopy(int a1, const Vector4f* pSource)
+void FUN_0064dcf0_cls::ApplyToCopy(int a1, const BlkVector4fView* pSource)
 {
-    Vector4f local2 = *pSource;
+    BlkVector4fView local2 = *pSource;
     Vec2i t7;
     Vec2i a = *GetFirst(&t7);
     Vec2i t1;
@@ -4494,12 +4412,6 @@ FUN_0064fe10_cls::~FUN_0064fe10_cls()
     reinterpret_cast<FUN_00438af0_cls*>(&m_04)->FUN_00438af0();
 }
 
-struct PathingSolution
-{
-    void IncRefCount();
-    void DecRefCount();
-};
-
 struct PathingSolutionBase
 {
     int unk04;
@@ -4639,7 +4551,8 @@ struct Holder_657c50
     void __thiscall Fin();
 };
 
-struct Pair_657c50
+// A single-word entry position uses checked distance helper 0x006580b0; Pair holds two words.
+struct EntryPosition
 {
     int m_iWordAt00;
     void* __thiscall Method(void* p);
@@ -4657,11 +4570,11 @@ struct FUN_00657c50_cls
     void* __thiscall Get1(void* out);
     Holder_657c50* __thiscall Get3(void* out, void* a, void* x);
     void __thiscall Apply(int a, int b, int c, int d);
-    void* __thiscall FUN_00657c50(void* a, Pair_657c50 b, int c, int d);
+    void* __thiscall FUN_00657c50(void* a, EntryPosition b, int c, int d);
 };
 
 // @fnv 0x00657c50
-void* FUN_00657c50_cls::FUN_00657c50(void* a, Pair_657c50 pair, int c, int d)
+void* FUN_00657c50_cls::FUN_00657c50(void* a, EntryPosition pair, int c, int d)
 {
     Blk_657c50 t14;
     int t12;
@@ -5086,51 +4999,14 @@ FUN_00659710_cls::~FUN_00659710_cls()
     m_04[1].Init();
 }
 
-void* FUN_00607340();
+const NiFixedString& FUN_00607340();
 
-class OwnerBase
-{
-  public:
-    virtual ~OwnerBase();
-    int m_iWordAt04;
-    int m_8;
-
-    OwnerBase(void* p);
-};
-
-class SubMember
-{
-  public:
-    int m_iWordAt00;
-    int m_iWordAt04;
-    int m_8;
-
-    SubMember(bool flag);
-    ~SubMember();
-    void Apply(int value);
-};
-
-class SubMember_d0045cec0 : public SubMember
-{
-  public:
-    SubMember_d0045cec0(bool f) : SubMember(f)
-    {}
-    ~SubMember_d0045cec0();
-};
-class FUN_0065be60 : public OwnerBase
-{
-  public:
-    SubMember_d0045cec0 m_iThirdValue;
-
-    FUN_0065be60(int a);
-    virtual ~FUN_0065be60();
-};
-
-// Constructs the object with a base from FUN_00607340 and a SubMember initialized to false, then applies a to the SubMember.
+// Attaches the model to named face-generation extra data.
 // @fnv 0x0065be60
-FUN_0065be60::FUN_0065be60(int aiValue) : OwnerBase(FUN_00607340()), m_iThirdValue(false)
+BSFaceGenModelExtraData::BSFaceGenModelExtraData(int model)
+    : NiExtraData(FUN_00607340()), m_spModel(0)
 {
-    m_iThirdValue.Apply(aiValue);
+    m_spModel = (BSFaceGenModel*)model;
 }
 
 struct FUN_0065cfb0
@@ -6661,12 +6537,7 @@ int __cdecl FUN_0065ffe0(int a, int b, int c, int d)
 }
 }  // namespace fnv_0065ffe0
 
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
+#include "../../include/NiMemObject.h"
 struct FUN_0064ec10_obj
 {
     virtual void v00();
@@ -7479,124 +7350,6 @@ Elem64e9* __cdecl FUN_0064e9c0(Elem64e9* _First, Elem64e9* _Last, Elem64e9* _Des
     return _Dest;
 }
 
-class BSFaceGenModelExtraData : public NiMemObject
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    BSFaceGenModelExtraData(int);
-};
-class NiRefObject
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
-
-class NiExtraData;
-
-class NiObject : public NiRefObject
-{
-  public:
-    virtual ~NiObject();
-    NiObject* Clone();
-    void ResolveObjectPointer(NiPointer<NiObject>& spCopy);
-};
-
-class NiObjectNET : public NiObject
-{
-  public:
-    bool AddExtraData(NiExtraData* pExtraData);
-};
-
-class NiGeometryData : public NiObject
-{
-  public:
-};
-
-class NiGeometry : public NiObjectNET
-{
-  public:
-    NiGeometryData* FUN_005495f0();
-    virtual void vfn00();
-    virtual void vfn01();
-    virtual void vfn02();
-    virtual void vfn03();
-    virtual void vfn04();
-    virtual void vfn05();
-    virtual void vfn06();
-    virtual void vfn07();
-    virtual void vfn08();
-    virtual void vfn09();
-    virtual void vfn0a();
-    virtual void vfn0b();
-    virtual void vfn0c();
-    virtual void vfn0d();
-    virtual void vfn0e();
-    virtual void vfn0f();
-    virtual void vfn10();
-    virtual void vfn11();
-    virtual void vfn12();
-    virtual void vfn13();
-    virtual void vfn14();
-    virtual void vfn15();
-    virtual void vfn16();
-    virtual void vfn17();
-    virtual void vfn18();
-    virtual void vfn19();
-    virtual void vfn1a();
-    virtual void vfn1b();
-    virtual void vfn1c();
-    virtual void vfn1d();
-    virtual void vfn1e();
-    virtual void vfn1f();
-    virtual void vfn20();
-    virtual void vfn21();
-    virtual void vfn22();
-    virtual void vfn23();
-    virtual void vfn24();
-    virtual void vfn25();
-    virtual void vfn26();
-    virtual void vfn27();
-    virtual void vfn28();
-    virtual void vfn29();
-    virtual void vfn2a();
-    virtual void vfn2b();
-    virtual void vfn2c();
-    virtual void vfn2d();
-    virtual void vfn2e();
-    virtual void vfn2f();
-    virtual void vfn30();
-    virtual void vfn31();
-    virtual void vfn32();
-    virtual void vfn33();
-    virtual void vfn34();
-    virtual void vfn35();
-    virtual void vfn36();
-    virtual void vfn37();
-    virtual void ReplaceModelData(NiGeometryData* pData);
-};
-
-class NiSkinPartition : public NiObject
-{
-  public:
-};
-
-class NiSkinInstance
-{
-  public:
-    NiSkinPartition* FUN_0043b230();
-    void FUN_004addc0(NiSkinPartition* pPartition);
-};
-
-class NiTriBasedGeom : public NiGeometry
-{
-  public:
-    NiSkinInstance* FUN_0043fad0();
-};
-
 class FUN_006624c0 : public NiMemObject
 {
   public:
@@ -7609,8 +7362,9 @@ class FUN_006624c0 : public NiMemObject
     FUN_006624c0(NiTriBasedGeom* pGeom, int a2, int a3);
 };
 
-struct FaceGenModelData
+class FaceGenGeometryModel
 {
+  public:
     int unk00;
     int unk04;
     int unk08;
@@ -7620,46 +7374,36 @@ struct FaceGenModelData
     int unk18;
 };
 
-class BSFaceGenModel
-{
-  public:
-    int unk00;
-    int unk04;
-    FaceGenModelData* unk08;
-
-    bool CloneTriBasedGeom(NiPointer<NiTriBasedGeom>& out);
-};
-
 // Clones the model's geometry, copies its geometry data and skin partition, attaches extra data, and returns true on success.
 // @fnv 0x0065bbc0
 bool BSFaceGenModel::CloneTriBasedGeom(NiPointer<NiTriBasedGeom>& out)
 {
-    NiPointer<NiGeometryData> spModelData;
-    NiPointer<NiSkinPartition> spSkinPartition;
+    NiPointer<NiGeometryData> spModelData(0);
+    NiPointer<NiSkinPartition> spSkinPartition(0);
 
     out = 0;
-    if (!unk08 || !unk08->spGeom || !unk08->spGeom->FUN_005495f0())
+    if (!m_pGeometryModel || !m_pGeometryModel->spGeom || !m_pGeometryModel->spGeom->GetModelData())
     {
         return false;
     }
 
-    out = (NiTriBasedGeom*)unk08->spGeom->Clone();
+    out = (NiTriBasedGeom*)m_pGeometryModel->spGeom->Clone();
 
-    NiPointer<NiObject> spDataCopy3;
-    unk08->spGeom->FUN_005495f0()->ResolveObjectPointer(spDataCopy3);
+    NiPointer<NiObject> spDataCopy3(0);
+    m_pGeometryModel->spGeom->GetModelData()->ResolveObjectPointer(spDataCopy3);
     spModelData = (NiGeometryData*)(NiObject*)spDataCopy3;
     out->ReplaceModelData(spModelData);
 
-    NiSkinInstance* pObjectInstance = out->FUN_0043fad0();
+    NiSkinInstance* pObjectInstance = out->GetSkinInstance();
     if (pObjectInstance && pObjectInstance->FUN_0043b230())
     {
-        NiPointer<NiObject> spPartitionCopy;
+        NiPointer<NiObject> spPartitionCopy(0);
         pObjectInstance->FUN_0043b230()->ResolveObjectPointer(spPartitionCopy);
         spSkinPartition = (NiSkinPartition*)(NiObject*)spPartitionCopy;
         pObjectInstance->FUN_004addc0(spSkinPartition);
     }
 
-    FUN_006624c0* pExtra3 = new FUN_006624c0(out, unk08->unk14, unk08->unk18);
+    FUN_006624c0* pExtra3 = new FUN_006624c0(out, m_pGeometryModel->unk14, m_pGeometryModel->unk18);
     if (pExtra3)
     {
         out->AddExtraData((NiExtraData*)pExtra3);
@@ -7779,19 +7523,20 @@ struct ObjectPointer64ce20
     ~ObjectPointer64ce20();
 };
 
-struct Vector64ce20
+// Three storage pointers and cleanup at 0x0065c7c0 identify a slot-ID buffer, rather than an SSE math Vector.
+struct SlotIdBuffer
 {
     void* m_pHeadNode;
     void* m_last;
     void* m_kRayEnd;
     void FUN_0064db70();
-    ~Vector64ce20();
+    ~SlotIdBuffer();
 };
 
 struct FUN_0064ce20 : Base64ce20
 {
     ObjectPointer64ce20 m_object;
-    Vector64ce20 m_iSlotIds;
+    SlotIdBuffer m_iSlotIds;
     ~FUN_0064ce20();
 };
 
@@ -8026,25 +7771,20 @@ bool VecF380::FUN_0065f380(unsigned int _Capacity)
 }
 
 #include <math.h>
-template <class Collection> class SettingT
-{
-  public:
-    float* Float();
-};
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting86;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting87;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting90;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting92;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting93;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting97;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting98;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting99;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting100;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting101;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting102;
-extern SettingT<GameSettingCollection> originalRuntimeFloatSetting150;
-extern GlobalObject_0040e0b0 g_011cd080;
-extern GlobalObject_0040e0b0 g_011cdb84;
+extern Setting originalRuntimeFloatSetting86;
+extern Setting originalRuntimeFloatSetting87;
+extern Setting originalRuntimeFloatSetting90;
+extern Setting originalRuntimeFloatSetting92;
+extern Setting originalRuntimeFloatSetting93;
+extern Setting originalRuntimeFloatSetting97;
+extern Setting originalRuntimeFloatSetting98;
+extern Setting originalRuntimeFloatSetting99;
+extern Setting originalRuntimeFloatSetting100;
+extern Setting originalRuntimeFloatSetting101;
+extern Setting originalRuntimeFloatSetting102;
+extern Setting originalRuntimeFloatSetting150;
+extern Setting g_011cd080;
+extern Setting g_011cdb84;
 float FUN_00404010(float, float);
 
 // Sums a base setting with distance-falloff terms for quantity, value, level and resistance and returns it as int; a total between 0 and 1 becomes 1.
@@ -8147,10 +7887,7 @@ int __thiscall FUN_00659310_Class::FUN_00659310(int a)
 }  // namespace fnv_00659310
 
 struct BGSLoadGameBuffer;
-struct Interface
-{
-    static void __cdecl PrintDebugMessage(BGSLoadGameBuffer*);
-};
+void __cdecl PrintDebugMessage(BGSLoadGameBuffer*);
 struct FUN_0065e9a0_Class
 {
     void __thiscall FUN_0065e9a0(BGSLoadGameBuffer* p);
@@ -8158,7 +7895,7 @@ struct FUN_0065e9a0_Class
 // @fnv 0x0065e9a0
 void __thiscall FUN_0065e9a0_Class::FUN_0065e9a0(BGSLoadGameBuffer* apBuffer)
 {
-    Interface::PrintDebugMessage(apBuffer);
+    PrintDebugMessage(apBuffer);
 }
 
 void __cdecl FUN_0065eb20(void*);

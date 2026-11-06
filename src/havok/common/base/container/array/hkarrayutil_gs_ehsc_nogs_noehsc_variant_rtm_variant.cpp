@@ -1,3 +1,5 @@
+#include "../../../../../../include/hkMemoryAllocator.h"
+
 // src/havok/common/base/container/array/hkarrayutil_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/base/container/array/hkarrayutil_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -68,17 +70,8 @@ struct AudioStream
     int m_iArrayLength;
     int m_uCapacity;
 };
-struct AudioAllocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void* AllocBlock(int* pSize);
-    virtual void unk10();
-    virtual void* ResizeBlock(void* pData, int size, int* pSize);
-};
 extern "C" void* __cdecl FNV_block_copy(void* dst, const void* src, unsigned int size);
-void ResizeAudioStream(AudioAllocator* pAlloc, AudioStream* pStream, int elemSize);
+void ResizeAudioStream(hkMemoryAllocator* pAlloc, AudioStream* pStream, int elemSize);
 typedef unsigned int hkUlong;
 extern void __cdecl FUN_00c908c0(void* alloc, void* arr, int n, int sizeElem);
 extern void __cdecl ResizeAudioStream(void* alloc, void* arr, int sizeElem);

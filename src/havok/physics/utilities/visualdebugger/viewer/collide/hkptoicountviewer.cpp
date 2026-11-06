@@ -2,6 +2,15 @@
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkptoicountviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/collide/hkptoicountviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/BSAudio.h"
+#include "../../../../../../../include/NiPoint3.h"
+#include "../../../../../../../include/hkpContactListener.h"
+#include "../../../../../../../include/hkpEntityListener.h"
+#include "../../../../../../../include/hkpWorldPostSimulationListener.h"
+
+
 // @fnv 0x00d60b90
 void __stdcall ClearTwoInts(int* piFirst, int* piSecond)
 {
@@ -79,30 +88,6 @@ class FUN_00ddccb0 : public PrimaryBase, public ProcessBase, public WorldListene
   public:
     FUN_00ddccb0(int);
 };
-class hkpContactListener
-{
-  public:
-    virtual void contact0();
-    virtual void contact1();
-    virtual void contact2();
-};
-class hkpWorldPostSimulationListener
-{
-  public:
-    virtual void post0();
-    virtual void post1();
-    virtual void post2();
-};
-class hkpEntityListener
-{
-  public:
-    virtual void entity0();
-    virtual void entity1();
-    virtual void entity2();
-    virtual void entity3();
-    virtual void entity4();
-    virtual void entity5();
-};
 struct CountArray
 {
     int* data;
@@ -110,14 +95,9 @@ struct CountArray
     int capacity;
     CountArray() : data(0), size(0), capacity(-1)
     {}
-    void EnsureCapacity(void*, int);
+    __declspec(nothrow) void EnsureCapacity(void*, int);
 };
-struct BSAudio
-{
-    int unk00, unk04, unk08, unk0C;
-    void* allocator;
-};
-BSAudio* FUN_00c85750();
+__declspec(nothrow) hkMemoryRouter* FUN_00c85750();
 class FUN_00d67ce0 : public FUN_00ddccb0,
                      public hkpContactListener,
                      public hkpWorldPostSimulationListener,
@@ -140,15 +120,14 @@ class FUN_00d67ce0 : public FUN_00ddccb0,
     virtual void contact0();
     virtual void contact1();
     virtual void contact2();
-    virtual void post0();
-    virtual void post1();
-    virtual void post2();
-    virtual void entity0();
-    virtual void entity1();
-    virtual void entity2();
-    virtual void entity3();
-    virtual void entity4();
-    virtual void entity5();
+    virtual ~FUN_00d67ce0() throw();
+    virtual void postSimulationCallback(hkpWorld*);
+    virtual void EntityRemovalCallback(hkpEntity*);
+    virtual void EntityAddedCallback(hkpEntity*);
+    virtual void EntityRemovedCallback(hkpEntity*);
+    virtual void EntityShapeSetCallback(hkpEntity*);
+    virtual void entitySetMotionTypeCallback(hkpEntity*);
+    virtual void EntityDeletionCallback(hkpEntity*);
     CountArray counts;
     FUN_00d67ce0(int context);
 };
@@ -157,24 +136,11 @@ class FUN_00d67ce0 : public FUN_00ddccb0,
 // @fnv 0x00d67ce0
 FUN_00d67ce0::FUN_00d67ce0(int context) : FUN_00ddccb0(context)
 {
-    BSAudio* audio = FUN_00c85750();
-    counts.EnsureCapacity(audio->allocator, 0);
+    hkMemoryRouter* audio = FUN_00c85750();
+    counts.EnsureCapacity(audio->m_heap, 0);
 }
 
 namespace fnv_00d67d60 {
-struct Heap
-{
-    virtual void* unused();
-    virtual void* Allocate(unsigned int);
-};
-struct Global
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    Heap* heap10;
-};
 extern void* FUN_00c85750();
 struct hkpToiCountViewer
 {
@@ -187,8 +153,8 @@ struct hkpToiCountViewer
 // @fnv 0x00d67d60
 void* __cdecl AllocateToiCountViewer(unsigned int arg)
 {
-    Global* global = (Global*)FUN_00c85750();
-    hkpToiCountViewer* pViewer = (hkpToiCountViewer*)global->heap10->Allocate(0x40);
+    hkMemoryRouter* global = (hkMemoryRouter*)FUN_00c85750();
+    hkpToiCountViewer* pViewer = (hkpToiCountViewer*)reinterpret_cast<hkMemoryAllocator*>(global->m_heap)->blockAlloc(0x40);
     pViewer->size = 0x40;
     pViewer = pViewer->FUN_00d67ce0(arg);
     if (pViewer)
@@ -213,14 +179,8 @@ void RegisterToiCounter()
     g_00d67e10_toiCounterId = g_00d67e10_registry->Register("TOI counter", AllocateToiCountViewer);
 }
 
-struct BSAudio;
-__declspec(nothrow) BSAudio* FUN_00c85750();
+__declspec(nothrow) hkMemoryRouter* FUN_00c85750();
 
-struct AudioHeap
-{
-    char pad[0x10];
-    void* heap;
-};
 
 struct ItemList
 {
@@ -280,7 +240,7 @@ struct Member : MemberBase
     __declspec(nothrow) void Release(void* heap);
     ~Member()
     {
-        Release(((AudioHeap*)FUN_00c85750())->heap);
+        Release(FUN_00c85750()->m_heap);
     }
 };
 
@@ -299,12 +259,6 @@ FUN_00d67fa0::~FUN_00d67fa0()
         Remove(list->items[i]);
 }
 
-struct Point3
-{
-    float x;
-    float y;
-    float z;
-};
 struct EntryListNode
 {
     void** entries;
@@ -338,7 +292,7 @@ struct Query
     int unk04;
     int unk08;
     int unk0c;
-    Point3 direction;
+    NiPoint3 direction;
     int unk1c;
     Node* direct;
     int unk24;
@@ -508,21 +462,13 @@ struct SpawnedObject
     void ClearValue(void* listener) throw();
 };
 
-struct Alloc
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void Grow(SpawnedObject** out, unsigned int size);
-};
 
-struct BSAudio;
-BSAudio* FUN_00c85750() throw();
+hkMemoryRouter* FUN_00c85750() throw();
 
 void __cdecl ResizeAudioStream(void* a, void* arr, unsigned int size) throw();
 
-struct Map
+// Exe 0x00d67e30: unit-local Map view; declarations and layout are preserved.
+struct HkptoicountviewerMapView
 {
     Entry* m_kPrimitiveElement;
     int m_iCapacityFlags;
@@ -566,13 +512,13 @@ struct Array
 
     void clear()
     {
-        BSAudio* h = FUN_00c85750();
-        Alloc* al = (Alloc*)h->allocator;
+        hkMemoryRouter* h = FUN_00c85750();
+        hkMemoryAllocator* al = reinterpret_cast<hkMemoryAllocator*>(h->m_heap);
         int cap = m_iCapacityState;
         m_iElementCount = 0;
         if ((cap & 0x80000000) == 0)
         {
-            al->Grow(m_data, (cap & 0x3fffffff) * 4);
+            al->bufFree(m_data, (cap & 0x3fffffff) * 4);
         }
     }
 };
@@ -585,7 +531,7 @@ class FUN_00d67e30_cls
     unsigned int unk08;
     unsigned int unk0C;
     unsigned int unk10;
-    Map m_14;
+    HkptoicountviewerMapView m_14;
 
     void RemoveEntriesForObject(SpawnedObject* a1);
 };
@@ -603,10 +549,10 @@ void FUN_00d67e30_cls::RemoveEntriesForObject(SpawnedObject* a1)
         SpawnedObject* obj = m_14.m_kPrimitiveElement[it].obj;
         if (obj->m_08 == a1)
         {
-            BSAudio* h = FUN_00c85750();
+            hkMemoryRouter* h = FUN_00c85750();
             if (out.m_iElementCount == (int)(out.m_iCapacityState & 0x3fffffffu))
             {
-                ResizeAudioStream(h->allocator, &out, 4);
+                ResizeAudioStream(h->m_heap, &out, 4);
             }
             out.m_data[out.m_iElementCount] = obj;
             out.m_iElementCount++;
@@ -746,22 +692,7 @@ void FUN_00d67da0_cls::FUN_00d67da0()
     st->clear();
 }
 
-struct AudioAllocator
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void Free(void* ptr, unsigned int count);
-};
 
-struct AudioCoreView
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    AudioAllocator* m_pThreadAllocator;
-};
 
 struct BSAudioString
 {
@@ -782,10 +713,10 @@ struct BSAudioString
 
     void Release()
     {
-        AudioAllocator* allocator = ((AudioCoreView*)FUN_00c85750())->m_pThreadAllocator;
+        hkMemoryAllocator* allocator = (hkMemoryAllocator*)FUN_00c85750()->m_temp;
         m_fRestLength = 0;
         if ((m_pRayCursor & 0x80000000) == 0)
-            allocator->Free(m_data, m_pRayCursor & 0x3fffffff);
+            allocator->bufFree(m_data, m_pRayCursor & 0x3fffffff);
     }
 };
 
@@ -922,23 +853,9 @@ AdjDerived::AdjDerived()
 {}
 
 namespace fnv_00d68230 {
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize);
-};
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct FUN_00d68230
 {
@@ -948,10 +865,10 @@ struct FUN_00d68230
     virtual ~FUN_00d68230();
     static void operator delete(void* apMemory)
     {
-        AudioHolder* pHolder = FUN_00c85750();
+        hkMemoryRouter* pHolder = FUN_00c85750();
         unsigned int uiSize = ((FUN_00d68230*)apMemory)->m_u04;
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(apMemory, uiSize);
+        hkMemoryAllocator* pAllocator = (hkMemoryAllocator*)pHolder->m_heap;
+        pAllocator->blockFree(apMemory, uiSize);
     }
 };
 
@@ -965,9 +882,7 @@ FUN_00d68230::FUN_00d68230()
 }  // namespace fnv_00d68230
 
 namespace fnv_00d67c30 {
-struct Holder;
-
-extern "C" Holder* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
 extern "C" char DAT_01000001;
 extern "C" char DAT_00ffffff;
 
@@ -999,14 +914,6 @@ struct ArgBlock
     int unk10;
 };
 
-struct Holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int m_10;
-};
 
 struct FUN_00d67c30_cls
 {
@@ -1052,8 +959,8 @@ void FUN_00d67c30_cls::FUN_00d67c30(ArgBlock* apBlock)
         }
         else
         {
-            Holder* h = FUN_00c85750();
-            t->Attach(h->m_10, (int)item, (int)&DAT_01000001);
+            hkMemoryRouter* h = FUN_00c85750();
+            t->Attach((int)h->m_heap, (int)item, (int)&DAT_01000001);
             char* owner = ((char*)this - 0x28) != 0 ? (char*)this + 8 : 0;
             item->Apply((int)owner);
         }

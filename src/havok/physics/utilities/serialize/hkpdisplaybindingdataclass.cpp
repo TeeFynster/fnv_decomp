@@ -2,23 +2,12 @@
 // src/havok/physics/utilities/serialize/hkpdisplaybindingdataclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/serialize/hkpdisplaybindingdataclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/BSAudio.h"
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct RefElem_t
 {
@@ -62,33 +51,14 @@ FUN_00dff640_cls* FUN_00dff640_cls::FUN_00dff640(unsigned char acFlags)
     this->RefBase_cls::~RefBase_cls();
     if (bShouldFree)
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(this, m_uSize);
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        pAllocator->blockFree(this, m_uSize);
     }
     return this;
 }
 
 namespace fnv_00dff730 {
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
 
 struct PtrElem
@@ -117,8 +87,8 @@ struct FUN_00dff730_cls
 // @fnv 0x00dff730
 void FUN_00dff730_cls::ClearArrays()
 {
-    AudioHolder* pHolder = (AudioHolder*)FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     PtrElem** pData1 = m_pData1;
     int iCount1 = m_iCount1;
     for (int i = 0; i < iCount1; i++)
@@ -133,13 +103,13 @@ void FUN_00dff730_cls::ClearArrays()
     m_iCount1 = 0;
     if ((uCapBits1 & 0x80000000u) == 0)
     {
-        pAllocator->FreeArray(m_pData1, (uCapBits1 & 0x3fffffffu) * 4);
+        pAllocator->bufFree(m_pData1, (uCapBits1 & 0x3fffffffu) * 4);
     }
     m_pData1 = 0;
     m_uCapBits1 = 0x80000000u;
 
-    AudioHolder* pHolder2 = (AudioHolder*)FUN_00c85750();
-    AudioAllocator* pAllocator2 = pHolder2->m_pAllocator;
+    hkMemoryRouter* pHolder2 = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
     PtrElem** pData2 = (PtrElem**)m_pData2;
     int iCount2 = m_iCount2;
     for (int j = 0; j < iCount2; j++)
@@ -154,7 +124,7 @@ void FUN_00dff730_cls::ClearArrays()
     m_iCount2 = 0;
     if ((m_uCapBits2 & 0x80000000u) == 0)
     {
-        pAllocator2->FreeArray(m_pData2, (uCapBits2 & 0x3fffffffu) * 4);
+        pAllocator2->bufFree(m_pData2, (uCapBits2 & 0x3fffffffu) * 4);
     }
     m_pData2 = 0;
     m_uCapBits2 = 0x80000000u;
@@ -163,17 +133,6 @@ void FUN_00dff730_cls::ClearArrays()
 }  // namespace fnv_00dff730
 
 namespace fnv_00dff810 {
-struct Allocator
-{
-    virtual void unknown00() = 0;
-    virtual void unknown04() = 0;
-    virtual void Release(void* object, unsigned int bytes) = 0;
-};
-struct BSAudio
-{
-    unsigned int unk00, unk04, unk08, unk0c;
-    Allocator* allocator;
-};
 BSAudio* FUN_00c85750();
 struct Owner
 {
@@ -191,28 +150,14 @@ Owner* Owner::FUN_00dff810(unsigned int flags)
     {
         BSAudio* audio = FUN_00c85750();
         unsigned int bytes = size4;
-        audio->allocator->Release(this, bytes);
+        reinterpret_cast<hkMemoryAllocator*>(((hkMemoryRouter*)audio)->m_heap)->blockFree(this, bytes);
     }
     return this;
 }
 }  // namespace fnv_00dff810
 
 namespace fnv_00dff840 {
-struct CpuAllocator
-{
-    virtual void slot00();
-    virtual void slot04();
-    virtual void Invoke(void* block, unsigned int size);
-};
-struct CpuAllocatorHolder
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    CpuAllocator* allocator;
-};
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 struct CpuObject
 {
     unsigned int unk00;
@@ -226,8 +171,8 @@ CpuObject* CpuObject::FUN_00dff840(unsigned int flags)
     ClearArrays();
     if (flags & 1)
     {
-        CpuAllocatorHolder* holder = FUN_00c85750();
-        holder->allocator->Invoke(this, size);
+        hkMemoryRouter* holder = FUN_00c85750();
+        reinterpret_cast<hkMemoryAllocator*>(holder->m_heap)->blockFree(this, size);
     }
     return this;
 }

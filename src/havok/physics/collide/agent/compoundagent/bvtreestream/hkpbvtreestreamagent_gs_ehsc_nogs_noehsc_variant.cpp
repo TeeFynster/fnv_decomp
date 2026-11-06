@@ -1,3 +1,7 @@
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkpSymmetricAgentFlipBodyCollector.h"
+#include "../../../../../../../include/hkpSymmetricAgentFlipCollector.h"
 
 // src/havok/physics/collide/agent/compoundagent/bvtreestream/hkpbvtreestreamagent_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/collide/agent/compoundagent/bvtreestream/hkpbvtreestreamagent.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -50,26 +54,6 @@ struct FUN_00d2ddf0_Class
 {
     void __thiscall FUN_00d2ddf0(float a, float b, void* c);
 };
-struct hkMemoryAllocator
-{
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-};
-struct AudioMgr
-{
-    int unk00, unk04, unk08, unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-struct BSAudio;
-BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
-{
-    return (AudioMgr*)FUN_00c85750();
-}
 struct RefObj
 {
     void* vtbl;
@@ -83,7 +67,7 @@ struct Obj : RefObj
 };
 inline void* hkAlloc(int n)
 {
-    RefObj* p = (RefObj*)audio()->heap().AllocateMemoryBlock(n);
+    RefObj* p = (RefObj*)hkMemoryRouter::getInstance().heap().blockAlloc(n);
     p->m_usMemSizeAndFlags = (short)n;
     return p;
 }
@@ -134,39 +118,9 @@ struct S_00d2e8e0_Dispatcher
     void FUN_00cfbbe0(S_00d2e8e0_AgentFuncs& f, int typeA, int typeB);
 };
 void FUN_00d2e8e0(S_00d2e8e0_Dispatcher* dispatcher);
-extern float g_D2E9B0MaxDistance;
-struct D2E9B0CollectorBase
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-
-    float m_fEarlyOutDistance;
-
-    D2E9B0CollectorBase() : m_fEarlyOutDistance(g_D2E9B0MaxDistance)
-    {}
-};
-struct D2E9B0Collector : D2E9B0CollectorBase
-{
-    int m_iData;
-
-    D2E9B0Collector(int iData) : m_iData(iData)
-    {}
-
-    virtual void unk00();
-    virtual void unk04();
-};
-void __cdecl FUN_00d31110(int a, int b, int c, D2E9B0CollectorBase* collector);
+void __cdecl FUN_00d31110(int a, int b, int c, hkpCdPointCollector* collector);
 void __cdecl FUN_00d2e9b0(int a, int b, int c, int d);
 extern float DAT_0104da48;
-struct hkpSymmetricAgentFlipCollector
-{
-    virtual void dispose();
-    virtual void collect(float value);
-    virtual void process(void* value);
-    float threshold;
-    void* object;
-};
 struct Context
 {
     void FUN_00d43880(void* first, void* second, void* third, hkpSymmetricAgentFlipCollector* collector);
@@ -217,13 +171,6 @@ struct BufOwner
     PackedBuffer m_buf;
     void __thiscall VisitPackedBuffer(VisitTarget* target, int flags);
 };
-extern "C" const void* DAT_010ce81c;
-struct Collector
-{
-    const void* vtable;
-    char flip;
-    void* collector;
-};
 void __cdecl FUN_00d2e970(void* bodyA, void* bodyB, void* arg3, void* orig_collector);
 struct FUN_00d2eb50_nib
 {
@@ -262,21 +209,6 @@ struct CallTarget_00d2de20
 struct SearchObject
 {
     int CallTarget(unsigned int arg0, unsigned int arg1, unsigned int arg2, unsigned int arg3);
-};
-// Havok style body collector: a virtual table pointer, an "active" flag and a payload pointer.
-struct hkpCollectorBase
-{
-    char active;
-    hkpCollectorBase()
-    {
-        active = 0;
-    }
-};
-struct hkpSymmetricAgentFlipBodyCollector : hkpCollectorBase
-{
-    virtual void addBody();
-    virtual void reset();
-    void* payload;
 };
 // Game side wrapper that fills the collector and hands it to the query routine.
 struct FUN_00d43cd0_class
@@ -383,7 +315,6 @@ struct S2ee10_Output
     S2ee10_ToiInfo m_fTimeOfImpact;
 };
 
-struct hkpCdBody;
 struct CollisionAgentContext;
 class hkpAgentBase
 {

@@ -5,7 +5,15 @@
 
 // src/havok/common/serialize/resourcedatabase/hkresourcehandle.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/resourcedatabase/hkresourcehandle.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkResourceHandle.h"
+#include "../../../../../include/hkResourceHandle.h"
+#include "../../../../../include/MemoryManager.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkBoolResult.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkOstream.h"
+#include "../../../../../include/hkErrStream.h"
+#include "../../../../../include/hkStringPtr.h"
 struct FUN_00e2df60_class
 {
     int __thiscall FUN_00e2df60(int);
@@ -72,19 +80,6 @@ struct FUN_00e2ea40_class
 {
     virtual void FUN_00e2ea40();
 };
-struct FUN_00e2f210_manager
-{
-    virtual void unused();
-    virtual void unused2();
-    virtual void __thiscall release(void* resource, unsigned short handle);
-};
-struct FUN_00e2f210_router
-{
-    void* vftable;
-    unsigned char padding[0x0c];
-    FUN_00e2f210_manager* manager;
-};
-FUN_00e2f210_router* _D1A0E0GetMemoryRouter();
 struct FUN_00e2f210_class : public FUN_00e2ea40_class
 {
     unsigned short m_handle;
@@ -149,22 +144,6 @@ struct Entry
     virtual void m30();
     virtual void process(int);
 };
-struct MemoryManager
-{
-    virtual void m00();
-    virtual void m04();
-    virtual void m08();
-    virtual void m0c();
-    virtual void freeBlock(void*, int);
-};
-struct MemoryRouter
-{
-    void* vt;
-    int unk04;
-    int unk08;
-    int unk0c;
-    MemoryManager* manager;
-};
 struct EntryArray
 {
     Entry** data;
@@ -172,51 +151,8 @@ struct EntryArray
     int capacityAndFlags;
 };
 void __stdcall FUN_00e2e2e0(EntryArray*);
-MemoryRouter* __cdecl FUN_00c85750();
 void __stdcall FUN_00e2e960(int x);
-class hkMemoryAllocatorE2E2;
-struct hkMemoryRouterE2E2
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorE2E2* m_pStreamAllocator;
-};
-namespace hkRouterE2E2 {
-extern "C" hkMemoryRouterE2E2& __cdecl FUN_00c85750() throw();
-}
-void __cdecl ResizeAudioStream(void* alloc, void* arr, int elemSize) throw();
-struct hkBoolE2E2
-{
-    char m_cBooleanValue;
-    hkBoolE2E2()
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-template <class T> __forceinline void constructWithCopyE2E2(T* p, int n, const T& t)
-{
-    for (int i = 0; i < n; i++)
-        p[i] = t;
-}
-template <class T> struct hkArrayE2E2
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    void AddBack(const T& e)
-    {
-        hkMemoryRouterE2E2& router = hkRouterE2E2::FUN_00c85750();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(router.m_pStreamAllocator, this, sizeof(T));
-        constructWithCopyE2E2<T>(m_data + m_iElementCount, 1, e);
-        m_iElementCount++;
-    }
-};
 class hkNodeE2E2
 {
   public:
@@ -235,51 +171,9 @@ class hkNodeE2E2
     virtual void vfn_30();
     virtual hkNodeE2E2* vfn_34(int a, hkNodeE2E2* prev);
 
-    void FUN_00e2e2e0(hkArrayE2E2<hkNodeE2E2*>& out);
+    void FUN_00e2e2e0(hkArray<hkNodeE2E2*>& out);
 };
-class hkMemoryAllocatorE2E3;
-struct hkMemoryRouterE2E3
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorE2E3* m_pStreamAllocator;
-};
-namespace hkRouterE2E3 {
-extern "C" hkMemoryRouterE2E3& __cdecl FUN_00c85750() throw();
-}
-void __cdecl ResizeAudioStream(void* alloc, void* arr, int elemSize) throw();
-struct hkBoolE2E3
-{
-    char m_cBooleanValue;
-    hkBoolE2E3()
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-template <class T> __forceinline void constructWithCopyE2E3(T* p, int n, const T& t)
-{
-    for (int i = 0; i < n; i++)
-        p[i] = t;
-}
-template <class T> struct hkArrayE2E3
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    void AddBack(const T& e)
-    {
-        hkMemoryRouterE2E3& router = hkRouterE2E3::FUN_00c85750();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(router.m_pStreamAllocator, this, sizeof(T));
-        constructWithCopyE2E3<T>(m_data + m_iElementCount, 1, e);
-        m_iElementCount++;
-    }
-};
 class hkNodeE2E3
 {
   public:
@@ -298,7 +192,7 @@ class hkNodeE2E3
     virtual void vfn_30();
     virtual hkNodeE2E3* vfn_34(int a, hkNodeE2E3* prev);
 
-    void FUN_00e2e380(hkArrayE2E3<hkNodeE2E3*>& out);
+    void FUN_00e2e380(hkArray<hkNodeE2E3*>& out);
 };
 struct S00e2e3f0_Pair
 {
@@ -335,18 +229,11 @@ void S00e2e3f0_Obj::FUN_00e2e3f0()
 
 extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
 extern "C" int __cdecl FUN_00cb0fa0(const char*, const char*);
-struct String839
+
+// Two tagged strings (release at 0x00cb0c00), unlike include/Pair.h's integer/reference pair.
+struct ResourceLinkStringPair
 {
-    unsigned int tagged;
-    void FUN_00cb0c00();
-    const char* text() const
-    {
-        return reinterpret_cast<const char*>(tagged & ~1u);
-    }
-};
-struct Pair839
-{
-    String839 name, value;
+    hkStringPtr name, value;
 };
 __forceinline void CopyWords839(void* destination, const void* source, int words)
 {
@@ -362,7 +249,7 @@ __forceinline void CopyWords839(void* destination, const void* source, int words
 struct Container839
 {
     int unk00, unk04, unk08, unk0C;
-    Pair839* pairs;
+    ResourceLinkStringPair* pairs;
     int size, capacity;
     void FUN_00e2e430(const char*);
 };
@@ -555,7 +442,7 @@ struct S00e2e0b0_Array
     S00e2e0b0_Output* unk00;
     int unk04;
     int unk08;
-    void reserve(MemoryManager& allocator, int count);
+    void reserve(hkMemoryAllocator& allocator, int count);
     S00e2e0b0_Output* expandByUnchecked(int n)
     {
         int oldSize = unk04;
@@ -575,15 +462,7 @@ struct S00e2e0b0_Entry
 void FUN_00c908c0(void*, S00e2e0b0_Array*, int, int);
 const char* FUN_00cb1140(const char*, int);
 void FUN_00cb1260(char*, const char*, int);
-struct S00e2e0b0_Stream
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    void FUN_00cb1600(char*, int);
-    S00e2e0b0_Stream* FUN_00cc01c0(const char*);
-    void FUN_00cc00e0();
-};
+
 struct S00e2e0b0_Error
 {
     virtual void slot00();
@@ -592,11 +471,11 @@ struct S00e2e0b0_Error
     virtual void report(int, unsigned int, const char*, const char*, int);
 };
 extern S00e2e0b0_Error* DAT_01268360;
-static __forceinline MemoryManager& S00e2e0b0_heap(MemoryRouter* router)
+static __forceinline hkMemoryAllocator& S00e2e0b0_heap(hkMemoryRouter* router)
 {
-    return *router->manager;
+    return *reinterpret_cast<hkMemoryAllocator*>(router->m_heap);
 }
-inline void S00e2e0b0_Array::reserve(MemoryManager& allocator, int count)
+inline void S00e2e0b0_Array::reserve(hkMemoryAllocator& allocator, int count)
 {
     int capacity = unk08 & 0x3fffffff;
     if (capacity < count)
@@ -633,11 +512,9 @@ static __forceinline S00e2e0b0_Member* S00e2e0b0_lookup(char*& object, const cha
         if (member->unk0c != 25)
         {
             char message[512];
-            S00e2e0b0_Stream stream;
-            stream.FUN_00cb1600(message, 512);
-            stream.FUN_00cc01c0("Member is not of type struct : ")->FUN_00cc01c0(memberName);
+            hkOstream stream(message, 512);
+            stream << "Member is not of type struct : " << memberName;
             DAT_01268360->report(1, 0xf032edfe, message, ".\\ResourceDatabase\\hkResourceHandle.cpp", 128);
-            stream.FUN_00cc00e0();
             return 0;
         }
         pClassInfo = member->FUN_00d86920();
@@ -651,7 +528,7 @@ void S00e2e0b0_Viewer::FUN_00e2e0b0(S00e2e0b0_Array* array)
 {
     array->unk04 = 0;
     int count = unk14;
-    array->reserve(S00e2e0b0_heap(FUN_00c85750()), count);
+    array->reserve(S00e2e0b0_heap((&hkMemoryRouter::getInstance())), count);
     for (int i = 0; i < unk14; ++i)
     {
         const char* name;
@@ -670,11 +547,9 @@ void S00e2e0b0_Viewer::FUN_00e2e0b0(S00e2e0b0_Array* array)
         {
             array->popBack();
             char message[512];
-            S00e2e0b0_Stream stream;
-            stream.FUN_00cb1600(message, 512);
-            stream.FUN_00cc01c0("Cannot find member : ")->FUN_00cc01c0(name);
+            hkOstream stream(message, 512);
+            stream << "Cannot find member : " << name;
             DAT_01268360->report(1, 0xf032edf1, message, ".\\ResourceDatabase\\hkResourceHandle.cpp", 146);
-            stream.FUN_00cc00e0();
         }
     }
 }
@@ -684,24 +559,10 @@ extern const char str_010eb234[];
 extern const char str_010eb20c[];
 extern const char str_010eb1c4[];
 
-class hkBoolR
-{
-  public:
-    char m_cBooleanValue;
-    hkBoolR(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    bool operator!() const
-    {
-        return m_cBooleanValue == 0;
-    }
-};
-
 struct hkClassR
 {
     const char* FUN_00d46d40() const;
-    hkBoolR FUN_00d46d80(const hkClassR& other) const;
+    hkBoolResult FUN_00d46d80(const hkClassR& other) const;
 };
 
 struct hkClassMemberR
@@ -729,27 +590,27 @@ struct LinkR
     hkClassMemberAccessorR m_kMemberAccessor;
 };
 
-inline MemoryManager& heapOf(MemoryRouter* r)
+inline hkMemoryAllocator& heapOf(hkMemoryRouter* r)
 {
-    return *r->manager;
+    return *reinterpret_cast<hkMemoryAllocator*>(r->m_heap);
 }
 
-struct LinkArray
-{
+struct LinkArrayLocalForm
+{ // local form of hkArray: 0x00e2e4c0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     LinkR* m_data;
     int m_iElementCount;
     int m_iCapacityState;
-    LinkArray() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
+    LinkArrayLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {}
-    ~LinkArray()
+    ~LinkArrayLocalForm()
     {
-        _clearAndDeallocate(heapOf(FUN_00c85750()));
+        _clearAndDeallocate(heapOf((&hkMemoryRouter::getInstance())));
     }
-    void _clearAndDeallocate(MemoryManager& a)
+    void _clearAndDeallocate(hkMemoryAllocator& a)
     {
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
-            a.freeBlock(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(LinkR));
+            a.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(LinkR));
         m_data = 0;
         m_iCapacityState = 0x80000000;
     }
@@ -761,16 +622,6 @@ struct LinkArray
     {
         return m_data[i];
     }
-};
-
-struct hkErrStreamR
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    void FUN_00cb1600(void* buf, int size);
-    hkErrStreamR& operator<<(const char* s);
-    void FUN_00cc00e0();
 };
 
 struct hkErrorR
@@ -800,14 +651,14 @@ struct hkResourceHandleR
     virtual void v20();
     virtual void v24();
     virtual void RemoveLink(const char* memberName);
-    virtual void GetLinks(LinkArray& linksOut);
+    virtual void GetLinks(LinkArrayLocalForm& linksOut);
     void FUN_00e2e4c0(hkResourceContainerR* container);
 };
 
 // @fnv 0x00e2e4c0
 void hkResourceHandleR::FUN_00e2e4c0(hkResourceContainerR* container)
 {
-    LinkArray links;
+    LinkArrayLocalForm links;
     GetLinks(links);
     for (int i = links.GetLogicalSize() - 1; i >= 0; i--)
     {
@@ -821,11 +672,9 @@ void hkResourceHandleR::FUN_00e2e4c0(hkResourceContainerR* container)
             if (!expected->FUN_00d46d80(*pClassInfo) && pClassInfo != expected)
             {
                 char assertBuf[512];
-                hkErrStreamR ostr;
-                ostr.FUN_00cb1600(assertBuf, sizeof(assertBuf));
+                hkOstream ostr(static_cast<void*>(assertBuf), sizeof(assertBuf));
                 ostr << str_010eb20c << pClassInfo->FUN_00d46d40() << str_010eb234 << expected->FUN_00d46d40();
                 DAT_01268360->message(1, 0xf034ed21, assertBuf, str_010eb1c4, 0xb2);
-                ostr.FUN_00cc00e0();
                 continue;
             }
             if (object == GetUnderlyingObject())
@@ -840,43 +689,19 @@ void hkResourceHandleR::FUN_00e2e4c0(hkResourceContainerR* container)
 namespace fnv_00e2edb0 {
 int __cdecl FUN_00cb0fa0(const char* a, const char* b);
 
-struct hkBoolResult
-{
-    char m_cBooleanValue;
-    hkBoolResult(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
-
 struct hkClassE2
 {
     const char* FUN_00d46d40() const;
     hkBoolResult FUN_00d46d80(const hkClassE2* k) const;
 };
 
-struct hkMemAllocatorE2
-{
-    virtual void m00();
-    virtual void m04();
-    virtual void m08();
-    virtual void m0c();
-    virtual void ReturnMemory(void* p, int numBytes);
-};
+void __cdecl FUN_00c908c0(hkMemoryAllocator* alloc, void* array, int numElements, int sizeElem);
 
-struct hkMemRouterE2
+inline hkMemoryAllocator& heapE2(hkMemoryRouter* router)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    hkMemAllocatorE2* m_pStreamAllocator;
-    hkMemAllocatorE2& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-void __cdecl FUN_00c908c0(hkMemAllocatorE2* alloc, void* array, int numElements, int sizeElem);
+    // This string buffer uses the allocator slot at 0x0c rather than the stream allocator.
+    return *reinterpret_cast<hkMemoryAllocator*>(router->m_temp);
+}
 
 struct hkStringBufE2
 {
@@ -890,7 +715,7 @@ struct hkStringBufE2
         m_data = m_kStorage;
         m_iElementCount = 0;
         m_iCapacityState = (int)0x80000080;
-        hkMemAllocatorE2& heap = ((hkMemRouterE2*)FUN_00c85750())->heap();
+        hkMemoryAllocator& heap = heapE2((&hkMemoryRouter::getInstance()));
         int cap = m_iCapacityState & 0x3fffffff;
         if (cap < 1)
         {
@@ -908,11 +733,11 @@ struct hkStringBufE2
 
     ~hkStringBufE2()
     {
-        hkMemAllocatorE2& heap = ((hkMemRouterE2*)FUN_00c85750())->heap();
+        hkMemoryAllocator& heap = heapE2((&hkMemoryRouter::getInstance()));
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
         {
-            heap.ReturnMemory(m_data, m_iCapacityState & 0x3fffffff);
+            heap.bufFree(m_data, m_iCapacityState & 0x3fffffff);
         }
     }
 };
@@ -929,16 +754,6 @@ struct hkResourceHandleE2
     virtual const hkClassE2* GetVariantValue() const;
 };
 
-struct hkErrStreamE2
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    void FUN_00cb1600(char* buf, int bufSize);
-    hkErrStreamE2& FUN_00cc01c0(const char* s);
-    void FUN_00cc00e0();
-};
-
 struct hkErrorE2
 {
     virtual void m00();
@@ -949,21 +764,7 @@ struct hkErrorE2
 
 extern hkErrorE2* DAT_01268360;
 
-struct hkHandleArrayE2
-{
-    hkResourceHandleE2** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    hkResourceHandleE2* operator[](int i) const
-    {
-        return m_data[i];
-    }
-};
+typedef hkArrayBase<hkResourceHandleE2*> hkHandleArrayE2;
 
 struct hkMemoryResourceContainerE2
 {
@@ -1006,14 +807,12 @@ hkResourceHandleE2* hkMemoryResourceContainerE2::FUN_00e2edb0(const char* object
                 if (objectName)
                 {
                     char assertBuf[512];
-                    hkErrStreamE2 ostr;
-                    ostr.FUN_00cb1600(assertBuf, sizeof(assertBuf));
+                    hkOstream ostr(assertBuf, sizeof(assertBuf));
                     ostr.FUN_00cc01c0("Class mismatch, cannot resolve link: ")
                         .FUN_00cc01c0(pClassInfo->FUN_00d46d40())
                         .FUN_00cc01c0(" != ")
                         .FUN_00cc01c0(handleClass->FUN_00d46d40());
                     DAT_01268360->message(1, 0xf034ed22, assertBuf, ".\\ResourceDatabase\\hkResourceHandle.cpp", 0x138);
-                    ostr.FUN_00cc00e0();
                     return 0;
                 }
                 continue;
@@ -1025,37 +824,7 @@ hkResourceHandleE2* hkMemoryResourceContainerE2::FUN_00e2edb0(const char* object
 }
 }  // namespace fnv_00e2edb0
 
-struct hkStringPtrHolder
-{
-    const char* m_pcText;
-};
-
-class hkOstreamE2E : public hkReferencedObject
-{
-  public:
-    hkOstreamE2E& operator<<(const char* s) throw();
-    hkOstreamE2E& operator<<(const hkStringPtrHolder& s) throw();
-    ~hkOstreamE2E() throw();
-    void* m_pStreamWriter;
-};
-
-class hkErrStreamE2E : public hkOstreamE2E
-{
-  public:
-    hkErrStreamE2E(void* buf, int bufSize) throw();
-};
-
-class hkMemoryAllocatorE2E;
-struct hkMemoryRouterE2E
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocatorE2E* m_pStreamAllocator;
-    static hkMemoryRouterE2E* GetMonitorStream() throw();
-};
-void __cdecl hkArrayUtil_reserveMore(hkMemoryAllocatorE2E* alloc, void* array, int elemSize) throw();
+void __cdecl hkArrayUtil_reserveMore(hkMemoryAllocator* alloc, void* array, int elemSize) throw();
 
 template <class T> struct hkRefPtrE2E
 {
@@ -1098,8 +867,8 @@ __forceinline void hkMemUtil_memCpy(void* dst, const void* src, int nbytes) thro
     }
 }
 
-template <class T> struct hkRefArrayE2E
-{
+template <class T> struct hkRefArrayE2ELocalForm
+{ // local form of hkArray: 0x00e2e790 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     hkRefPtrE2E<T>* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -1123,10 +892,10 @@ template <class T> struct hkRefArrayE2E
     }
     __forceinline void AddBack(const hkRefPtrE2E<T>& t) throw()
     {
-        hkMemoryRouterE2E* router = hkMemoryRouterE2E::GetMonitorStream();
+        hkMemoryRouter* router = (&hkMemoryRouter::getInstance());
         if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
         {
-            hkArrayUtil_reserveMore(router->m_pStreamAllocator, this, sizeof(hkRefPtrE2E<T>));
+            hkArrayUtil_reserveMore(reinterpret_cast<hkMemoryAllocator*>(router->m_heap), this, sizeof(hkRefPtrE2E<T>));
         }
         new (m_data + m_iElementCount) hkRefPtrE2E<T>(t.m_pRetainedObject);
         m_iElementCount++;
@@ -1136,8 +905,6 @@ template <class T> struct hkRefArrayE2E
 class hkMemoryResourceContainer : public hkResourceBase
 {
   public:
-    virtual void v04();
-    virtual void v08();
     virtual void v0c();
     virtual void v10();
     virtual void v14();
@@ -1151,10 +918,10 @@ class hkMemoryResourceContainer : public hkResourceBase
 
     int FUN_00e2e790(hkMemoryResourceContainer* newParent);
 
-    hkStringPtrHolder m_name;
+    hkStringPtr m_name;
     hkMemoryResourceContainer* m_parent;
     hkArray<void*> m_kHandles;
-    hkRefArrayE2E<hkMemoryResourceContainer> m_children;
+    hkRefArrayE2ELocalForm<hkMemoryResourceContainer> m_children;
 };
 
 // @fnv 0x00e2e790
@@ -1165,8 +932,8 @@ int hkMemoryResourceContainer::FUN_00e2e790(hkMemoryResourceContainer* newParent
         if (c == this)
         {
             char buf[0x200];
-            hkErrStreamE2E os(buf, sizeof(buf));
-            os << "Cannot parent '" << m_name << "' to '" << newParent->m_name
+            hkErrStream os(buf, sizeof(buf));
+            static_cast<hkOstream&>(os) << "Cannot parent '" << m_name << "' to '" << newParent->m_name
                << "' as this would create a circular dependency ";
             DAT_01268360->report(1, 0xabba4554, buf, ".\\ResourceDatabase\\hkResourceHandle.cpp", 0x198);
             return 1;

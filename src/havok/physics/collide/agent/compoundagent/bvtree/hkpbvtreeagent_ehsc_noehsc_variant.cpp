@@ -5,6 +5,9 @@
 
 // src/havok/physics/collide/agent/compoundagent/bvtree/hkpbvtreeagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/compoundagent/bvtree/hkpbvtreeagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/Transform.h"
+
 struct S_d2f5a0_Obj
 {
     virtual void v0();
@@ -24,20 +27,7 @@ struct S_d2f5a0_Entry
     int unk4;
     S_d2f5a0_Obj* m_obj;
 };
-struct S_d2f5a0_Array
-{
-    S_d2f5a0_Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    S_d2f5a0_Entry* begin()
-    {
-        return m_data;
-    }
-    S_d2f5a0_Entry* end()
-    {
-        return m_data + m_iElementCount;
-    }
-};
+typedef hkArrayBase<S_d2f5a0_Entry> S_d2f5a0_Array;
 struct S_d2f5a0
 {
     int unk0;
@@ -45,27 +35,6 @@ struct S_d2f5a0
     int unk8;
     S_d2f5a0_Array m_aiIndexedValues;
     void FUN_00d2f5a0(int a);
-};
-struct __declspec(align(16)) Transform
-{
-    float m_f00;
-    float m_f04;
-    float m_f08;
-    float m_f0c;
-    float m_f10;
-    float m_f14;
-    float m_f18;
-    float m_f1c;
-    float m_f20;
-    float m_f24;
-    float m_f28;
-    float m_f2c;
-    float m_f30;
-    float m_f34;
-    float m_f38;
-    float m_f3c;
-
-    Transform(void* apFirst, void* apSecond);
 };
 struct TargetObject
 {
@@ -257,29 +226,13 @@ struct EntryD2F5
     int unk04;
     ListenerD2F5* m_pkListener;
 };
-template <class T> class hkArrayD2F5
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    T* begin()
-    {
-        return m_data;
-    }
-    T* end()
-    {
-        return m_data + m_iElementCount;
-    }
-};
 class OwnerD2F5
 {
   public:
     virtual ~OwnerD2F5();
 
     int unk04[2];
-    hkArrayD2F5<EntryD2F5> m_entries;
+    hkArray<EntryD2F5> m_entries;
 
     void FUN_00d2f550(void* pArg);
 };

@@ -3,15 +3,15 @@
 // with declarations corrected to what the original code does (TESTopicInfo.h: TESTopicInfo += TESQuest* FUN_006733e0();). Move the function to its real unit once
 // that unit declares it this way.
 
+#include "../../include/BSSimpleList.h"
 #include "TESTopic.h"
-#include "TESTopicInfo_decl_testopic.h"
+#include "TESTopicInfo.h"
 #include "TESQuest.h"
 #include "QuestDialogueInfo.h"
-#include "INFO_LINK_ELEMENT.h"
 #include "TESTopicInfoData.h"
 #include "DialogueItem.h"
-#include "MobileObject.h"
-#include "PlayerCharacter.h"
+#include "../../include/MobileObject.h"
+#include "../../include/PlayerCharacter.h"
 #include "game_constants.h"
 extern PlayerCharacter* g_thePlayer;
 extern unsigned int DialogueRandom();
@@ -35,7 +35,7 @@ TESTopicInfo* FUN_0061af30(TESTopicInfo* input, bool& deferredResult, TESObjectR
     while (a && a->GetItem() && !h)
     {
         TESTopicInfo* info = a->GetItem();
-        TESQuest* quest = info->FUN_006733e0();
+        TESQuest* quest = info->GetParentQuest();
         a = a->GetNext();
         if (quest && quest->GetEnabled() && quest->GetConditions()->ContainsTrait(speaker, listener))
         {

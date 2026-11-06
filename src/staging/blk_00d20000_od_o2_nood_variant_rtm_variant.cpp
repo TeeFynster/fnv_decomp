@@ -8,33 +8,9 @@
 // src/staging/blk_00d20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    float _mm_cvtss_f32(__m128);
-    void _mm_store_ss(float*, __m128);
-}
-struct hkVector4
-{
-    __m128 m_vComponents;
-
-    __forceinline float lengthSquared3() const
-    {
-        __m128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 y = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-        __m128 z = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), y);
-        float r;
-        _mm_store_ss(&r, z);
-        return r;
-    }
-};
+#include "../../include/FinishingFlag.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkpCollisionDispatcher.h"
 struct ContactBody
 {
     char unk00[0xa];
@@ -58,10 +34,6 @@ inline void* operator new(unsigned int, void* p) throw()
 }
 inline void operator delete(void*, void*) throw()
 {}
-struct FinishingFlag
-{
-    int m_bFinishing;
-};
 static inline FinishingFlag NotFinishing()
 {
     FinishingFlag flag;
@@ -142,78 +114,8 @@ extern "C" void FUN_00d36520(SortPair* arr, int lo, int hi, unsigned int extra)
         lo = i;
     }
 }
-struct hkpAgent3FuncsD367
-{
-    hkpAgent3FuncsD367()
-    {
-        m_bIsPredictive = false;
-        m_bAgentFlag1 = false;
-        m_bAgentFlag2 = false;
-        m_pAgentFunction7 = 0;
-        m_pAgentFunction8 = 0;
-        m_pUpdateFilterFunc = 0;
-        m_pAgentFunction10 = 0;
-        m_pAgentFunction11 = 0;
-    }
-
-    void* m_pCreateFunc;
-    void* m_pAgent3DestroyFuncs;
-    void* m_pAgentFunction3;
-    void* m_pAgentFunction4;
-    void* m_pAgentFunction5;
-    void* m_createZeroContactFunc;
-    void* m_pAgentFunction7;
-    void* m_pAgentFunction8;
-    void* m_pUpdateFilterFunc;
-    void* m_pAgentFunction10;
-    void* m_pAgentFunction11;
-    void* m_setCollisionQualityFunc;
-    bool m_bIsPredictive;
-    bool m_bAgentFlag1;
-    bool m_bAgentFlag2;
-};
-void __cdecl FUN_00d367b0(hkpAgent3FuncsD367& kFuncs);
-class hkpCollisionDispatcherD367
-{
-  public:
-    void AddEntry(const hkpAgent3FuncsD367& kFuncs, int iTypeA, int iTypeB);
-};
-void __cdecl FUN_00d367d0(hkpCollisionDispatcherD367* pkDispatcher);
-struct hkpAgent3FuncsD398
-{
-    hkpAgent3FuncsD398()
-    {
-        m_bAgentFlag1 = false;
-        m_bAgentFlag2 = false;
-        m_pAgentFunction8 = 0;
-        m_pUpdateFilterFunc = 0;
-        m_pAgentFunction10 = 0;
-        m_pAgentFunction11 = 0;
-        m_pAgentFunction7 = 0;
-        m_bIsPredictive = false;
-    }
-
-    void* m_pCreateFunc;
-    void* m_pAgent3DestroyFuncs;
-    void* m_pAgentFunction3;
-    void* m_pAgentFunction4;
-    void* m_pAgentFunction5;
-    void* m_createZeroContactFunc;
-    void* m_pAgentFunction7;
-    void* m_pAgentFunction8;
-    void* m_pUpdateFilterFunc;
-    void* m_pAgentFunction10;
-    void* m_pAgentFunction11;
-    void* m_setCollisionQualityFunc;
-    bool m_bIsPredictive;
-    bool m_bAgentFlag1;
-    bool m_bAgentFlag2;
-};
-class hkpCollisionDispatcherD398
-{
-  public:
-    void AddEntry(const hkpAgent3FuncsD398& kFuncs, int iTypeA, int iTypeB);
-};
+void __cdecl FUN_00d367b0(hkpCollisionDispatcher::Agent3FunctionTable& kFuncs);
+void __cdecl FUN_00d367d0(hkpCollisionDispatcher* pkDispatcher);
 void InitOutputDefaults();
 void FUN_00d39130();
 void ReleaseHandles();
@@ -222,7 +124,7 @@ void InsertIntoSlotArray();
 void FUN_00d39090();
 void FUN_00d39150();
 void FUN_00d39390();
-void __cdecl FUN_00d39840(hkpCollisionDispatcherD398* pkDispatcher);
+void __cdecl FUN_00d39840(hkpCollisionDispatcher* pkDispatcher);
 extern "C"
 {
     __m128 _mm_set_ps1(float a);
@@ -250,24 +152,25 @@ static __forceinline void Dot3(float& result, __m128 u, __m128 v)
 int FUN_00d231b0(const __m128* pa, const __m128* pb, const __m128* pc, const __m128* pd, ClosestPointResult* out);
 
 namespace MoppSimd {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00d2f0d0 FUN_00d2f0d0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x, y, z, w;
     };
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_load_ps1(const float*);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_load_ss(const float*);
+    LocalM128 _mm_set_ps1(float);
+    LocalM128 _mm_set_ss(float);
+    LocalM128 _mm_load_ps1(const float*);
 
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
 }
 }
 
@@ -276,7 +179,7 @@ extern "C" void _ReadWriteBarrier(void);
 extern "C" unsigned __int64 __rdtsc(void);
 extern unsigned long DAT_0126835c;
 extern float DAT_01016248;
-extern MoppSimd::__m128 DAT_010ec7f0;
+extern MoppSimd::LocalM128 DAT_010ec7f0;
 extern char DAT_010ce8e8[];
 extern char DAT_010c41f8[];
 
@@ -293,30 +196,14 @@ struct MoppCastProfBuf
     unsigned long unk08;
     MoppCastProfRec* end;
 };
-struct MoppCastQuad
-{
-    union
-    {
-        MoppSimd::__m128 v;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-};
 struct MoppCastMatrix
 {
-    MoppCastQuad col0, col1, col2, translation;
+    hkVector4 col0, col1, col2, translation;
     void FUN_00cb22f0(const MoppCastMatrix*, const MoppCastMatrix*);
-};
-struct MoppCastVector
-{
-    MoppCastQuad quad;
-    void FUN_004b4ab0(const MoppCastMatrix*, const MoppCastVector*);
 };
 struct MoppCastBounds
 {
-    MoppCastQuad min, max;
+    hkVector4 min, max;
 };
 struct MoppCastInner
 {
@@ -342,11 +229,11 @@ struct MoppCastInput
     float tolerance;
     int unk0c;
     MoppCastMatrix transform;
-    MoppCastVector direction;
+    hkVector4 direction;
 };
 struct MoppCastQuery
 {
-    MoppCastQuad start, end, radius;
+    hkVector4 start, end, radius;
     MoppCastInput* input;
     MoppCastBody* a;
     MoppCastBody* b;
@@ -385,7 +272,7 @@ struct MoppCastCastGeometry
 {
     MoppCastBounds bounds;
     MoppCastQuery query;
-    MoppCastVector direction;
+    hkVector4 direction;
     int unk70;
     int unk74;
     int unk78;
@@ -396,28 +283,30 @@ struct MoppCastCastGeometry
 void __cdecl FUN_00d2f0d0(MoppCastBody* a, MoppCastBody* b, MoppCastInput* c, int d, int e)
 {
     ProfMark(DAT_010ce8e8);
-    MoppCastCastGeometry ls;
+    // Preserve uninitialized scratch storage without vector constructors or a GS buffer.
+    __declspec(align(16)) void* geometryStorage[sizeof(MoppCastCastGeometry) / sizeof(void*)];
+    MoppCastCastGeometry& ls = *(MoppCastCastGeometry*)geometryStorage;
     ls.relative.FUN_00cb22f0(b->transform, a->transform);
 
     a->shape->Eval(&ls.relative, c->tolerance, &ls.bounds);
 
-    ls.direction.FUN_004b4ab0(b->transform, &c->direction);
+    ls.direction.FUN_004b4ab0(*(const hkRotation*)b->transform, c->direction);
 
     float tolerance = c->tolerance;
-    MoppSimd::__m128 scalarHalf = MoppSimd::_mm_load_ss(&DAT_01016248);
-    MoppSimd::__m128 half = MoppSimd::_mm_shuffle_ps(MoppSimd::_mm_load_ss(&DAT_01016248), scalarHalf, 0);
-    (MoppSimd::__m128&)ls.query.start = MoppSimd::_mm_add_ps(
-        MoppSimd::_mm_mul_ps(MoppSimd::_mm_sub_ps(DAT_010ec7f0, half), (MoppSimd::__m128&)ls.bounds.min),
-        MoppSimd::_mm_mul_ps(half, (MoppSimd::__m128&)ls.bounds.max));
-    (MoppSimd::__m128&)ls.query.end =
-        MoppSimd::_mm_add_ps((MoppSimd::__m128&)ls.direction.quad, (MoppSimd::__m128&)ls.query.start);
-    MoppSimd::__m128 radius = MoppSimd::_mm_add_ps(
+    MoppSimd::LocalM128 scalarHalf = MoppSimd::_mm_load_ss(&DAT_01016248);
+    MoppSimd::LocalM128 half = MoppSimd::_mm_shuffle_ps(MoppSimd::_mm_load_ss(&DAT_01016248), scalarHalf, 0);
+    (MoppSimd::LocalM128&)ls.query.start = MoppSimd::_mm_add_ps(
+        MoppSimd::_mm_mul_ps(MoppSimd::_mm_sub_ps(DAT_010ec7f0, half), (MoppSimd::LocalM128&)ls.bounds.min),
+        MoppSimd::_mm_mul_ps(half, (MoppSimd::LocalM128&)ls.bounds.max));
+    (MoppSimd::LocalM128&)ls.query.end =
+        MoppSimd::_mm_add_ps((MoppSimd::LocalM128&)ls.direction.m_vComponents, (MoppSimd::LocalM128&)ls.query.start);
+    MoppSimd::LocalM128 radius = MoppSimd::_mm_add_ps(
         MoppSimd::_mm_mul_ps(MoppSimd::_mm_shuffle_ps(scalarHalf, scalarHalf, 0),
-                             MoppSimd::_mm_sub_ps((MoppSimd::__m128&)ls.bounds.max, (MoppSimd::__m128&)ls.bounds.min)),
+                             MoppSimd::_mm_sub_ps((MoppSimd::LocalM128&)ls.bounds.max, (MoppSimd::LocalM128&)ls.bounds.min)),
         MoppSimd::_mm_shuffle_ps(MoppSimd::_mm_load_ss(&tolerance), MoppSimd::_mm_load_ss(&tolerance), 0));
     ls.query.a = a;
     ls.query.b = b;
-    (MoppSimd::__m128&)ls.query.radius = radius;
+    (MoppSimd::LocalM128&)ls.query.radius = radius;
     ls.query.input = c;
     ls.collector.FUN_00da8180(&ls.query, d, e);
     ProfMark(DAT_010c41f8);

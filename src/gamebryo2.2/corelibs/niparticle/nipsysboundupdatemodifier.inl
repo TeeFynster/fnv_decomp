@@ -1,6 +1,21 @@
 
 #include "nipsysboundupdatemodifier_decls.h"
 
+inline NiBound::NiBound()
+{
+}
+
+inline void* NiBound::operator new[](size_t size)
+{
+    return g_memoryManager.Allocate(size);
+}
+
+inline void NiBound::SetCenterAndRadius(const NiPoint3& center, float radius)
+{
+    m_kCenter = center;
+    m_fRadius = radius;
+}
+
 // @fnv 0x00c2d720
 void NiPSysBoundUpdateModifier::SetUpdateSkipCounter(int iUpdateSkip)
 {

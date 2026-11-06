@@ -1,3 +1,9 @@
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/hkArray.h"
+#include "../../../include/hkBool.h"
+#include "../../../include/hkMemoryAllocator.h"
+
+
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -101,20 +107,7 @@ void FUN_00d87760_class::ClearEntries()
     m_iCapacityFlags = 0;
 }
 
-struct FUN_00d877d0_allocator
-{
-    virtual void FUN_00d877d0_virtual0() = 0;
-    virtual void FUN_00d877d0_virtual1() = 0;
-    virtual void FUN_00d877d0_free(void* p, unsigned int size) = 0;
-};
-
-struct FUN_00d877d0_router
-{
-    unsigned char m_auiShapeKeys[0x10];
-    FUN_00d877d0_allocator* m_pThreadAllocator;
-};
-
-FUN_00d877d0_router* _D1A0E0GetMemoryRouter();
+hkMemoryRouter* _D1A0E0GetMemoryRouter();
 
 struct FUN_00d877d0_class
 {
@@ -127,8 +120,8 @@ struct FUN_00d877d0_class
 // @fnv 0x00d877d0
 void FUN_00d877d0_class::FreeBuffer()
 {
-    FUN_00d877d0_router* router = _D1A0E0GetMemoryRouter();
-    router->m_pThreadAllocator->FUN_00d877d0_free(m_kPrimitiveElement, 12 * (m_iPairCount + 1));
+    hkMemoryRouter* router = _D1A0E0GetMemoryRouter();
+    reinterpret_cast<hkMemoryAllocator*>(router->m_heap)->blockFree(m_kPrimitiveElement, 12 * (m_iPairCount + 1));
 }
 
 struct FUN_00d87820_Class
@@ -158,28 +151,10 @@ struct FUN_00dc7750_class
     void FUN_00dc7750();
 };
 
-struct FUN_allocator_class
-{
-// @fnv 0x00dc8080
-    virtual void FUN_00dc8080_0()
-    {}
-    virtual void FUN_00dc8080_1()
-    {}
-    virtual void FUN_00dc8080_2(void* p, unsigned int size)
-    {}
-};
-
-struct FUN_router_class
-{
-    void* m_iWordAt00;
-    void* m_iWordAt04;
-    void* m_8;
-};
-
 extern int DAT_010d7510;
 extern int _DAT_0102e388;
 
-FUN_router_class* _D1A0E0GetMemoryRouter();
+hkMemoryRouter* _D1A0E0GetMemoryRouter();
 
 struct FUN_00dc8080_class
 {
@@ -199,10 +174,10 @@ void FUN_00dc8080_class::FUN_00dc8080()
     {
         object->FUN_00dc7750();
 
-        FUN_router_class* router = _D1A0E0GetMemoryRouter();
-        FUN_allocator_class* allocator =
-            *reinterpret_cast<FUN_allocator_class**>(reinterpret_cast<unsigned char*>(router) + 0x10);
-        allocator->FUN_00dc8080_2(object, 0x88);
+        hkMemoryRouter* router = _D1A0E0GetMemoryRouter();
+        hkMemoryAllocator* allocator =
+            reinterpret_cast<hkMemoryAllocator*>(router->m_heap);
+        allocator->blockFree(object, 0x88);
     }
 
     m_vptr = &_DAT_0102e388;
@@ -243,23 +218,7 @@ int FUN_00d87820_Class::FindStringKey(int key)
     return table->m_iPairCount + 1;
 }
 
-struct Allocator
-{
-    virtual void v0() = 0;
-    virtual void* alloc(int size) = 0;
-    virtual void free(void* p, unsigned int size) = 0;
-};
-
-struct MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    Allocator* m_pThreadAllocator;
-};
-
-MemoryRouter* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 extern "C" void* FUN_00cb1280(void*, int, unsigned int);
 
 struct FUN_00d87790
@@ -274,8 +233,8 @@ struct FUN_00d87790
 // @fnv 0x00d87790
 FUN_00d87790::FUN_00d87790(int a)
 {
-    MemoryRouter* router = FUN_00c85750();
-    void* p = router->m_pThreadAllocator->alloc(0xc0);
+    hkMemoryRouter* router = FUN_00c85750();
+    void* p = reinterpret_cast<hkMemoryAllocator*>(router->m_heap)->blockAlloc(0xc0);
     m_kPrimitiveElement = p;
     FUN_00cb1280(p, 0xff, 0x40);
     m_iCapacityFlags = 0;
@@ -297,19 +256,6 @@ int hkObjectD878::GetValue(int a, int aiDefault)
     return iValue;
 }
 
-struct hkBoolD876
-{
-    char m_cBooleanValue;
-    hkBoolD876(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-
 class hkStringMapD876
 {
   public:
@@ -318,7 +264,7 @@ class hkStringMapD876
     int unk08;
 
     int FindStringKey(const char* key);
-    hkBoolD876 SetBoolFromThreshold(int it);
+    hkBool SetBoolFromThreshold(int it);
     int FUN_00d87440(int it);
     void FUN_00d874d0(const char* key, int val);
     int GetOrSetInt(const char* key, int def);
@@ -335,19 +281,6 @@ int hkStringMapD876::GetOrSetInt(const char* key, int iDefault)
     return iDefault;
 }
 
-struct hkBoolD8765
-{
-    char m_cBooleanValue;
-    hkBoolD8765(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-
 class hkStringMapD8765
 {
   public:
@@ -356,7 +289,7 @@ class hkStringMapD8765
     int unk08;
 
     int FindStringKey(const char* key);
-    hkBoolD8765 SetBoolFromThreshold(int it);
+    hkBool SetBoolFromThreshold(int it);
     int FUN_00d87440(int it);
     int FUN_00d87650(const char* key, int* out);
 };
@@ -374,26 +307,8 @@ int hkStringMapD8765::FUN_00d87650(const char* key, int* piOut)
     return 1;
 }
 
-class hkMemoryAllocatorD878
-{
-  public:
-    virtual ~hkMemoryAllocatorD878() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterD878
-{
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorD878* m_pStreamAllocator;
-    hkMemoryAllocatorD878& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
 namespace fnvc_adapt {
-extern "C" hkMemoryRouterD878& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
 
 class FUN_00d874d0_s
@@ -413,8 +328,8 @@ void FUN_00d874d0_s::FUN_00d87860(int iNewCap)
 {
     int iOldCap = m_iPairCount + 1;
     unsigned int* puiOldElements = m_kPrimitiveElement;
-    hkMemoryAllocatorD878& kAlloc = fnvc_adapt::FUN_00c85750().heap();
-    m_kPrimitiveElement = (unsigned int*)kAlloc.AllocateMemoryBlock(iNewCap * 3 * sizeof(unsigned int));
+    hkMemoryAllocator& kAlloc = reinterpret_cast<hkMemoryAllocator&>(fnvc_adapt::FUN_00c85750().heap());
+    m_kPrimitiveElement = (unsigned int*)kAlloc.blockAlloc(iNewCap * 3 * sizeof(unsigned int));
     FUN_00cb1280(m_kPrimitiveElement, 0xff, iNewCap * sizeof(unsigned int));
     m_iCapacityFlags = 0;
     m_iPairCount = iNewCap - 1;
@@ -425,7 +340,7 @@ void FUN_00d874d0_s::FUN_00d87860(int iNewCap)
             FUN_00d874d0((const char*)puiOldElements[iOldCap + i], puiOldElements[i + 2 * iOldCap]);
     }
 
-    kAlloc.ReleaseBlock(puiOldElements, iOldCap * 3 * sizeof(unsigned int));
+    kAlloc.blockFree(puiOldElements, iOldCap * 3 * sizeof(unsigned int));
 }
 
 struct S00d876a0_Map
@@ -533,39 +448,11 @@ KEY_FOUND:
 }
 
 namespace fnv_00e02800 {
-class AllocatorE028
-{
-  public:
-    virtual void v00();
-    virtual void* AllocateMemoryBlock(int iNumBytes);
-};
-
-struct RouterE028
-{
-    int unk00, unk04, unk08, unk0C;
-    AllocatorE028* m_pStreamAllocator;
-
-    AllocatorE028& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
 namespace hkRouterE028 {
-extern "C" RouterE028& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
 
-void __cdecl ResizeAudioStream(AllocatorE028* pAlloc, void* pArray, int iElemSize);
-char* __cdecl FUN_00cb1160(const char* pcString, AllocatorE028& kAlloc);
-
-struct hkBoolE028
-{
-    char m_cBooleanValue;
-    hkBoolE028(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
+char* __cdecl FUN_00cb1160(const char* pcString, hkMemoryAllocator& kAlloc);
 
 class FUN_00d87790
 {
@@ -575,11 +462,11 @@ class FUN_00d87790
     int m_iPairCount;
     int unk0C;
 
-    FUN_00d87790(hkBoolE028 bOwnsKeys) throw();
+    FUN_00d87790(hkBool bOwnsKeys) throw();
 
     static void* operator new(unsigned int uiSize)
     {
-        return hkRouterE028::FUN_00c85750().heap().AllocateMemoryBlock(uiSize);
+        return reinterpret_cast<hkMemoryAllocator&>(hkRouterE028::FUN_00c85750().heap()).blockAlloc(uiSize);
     }
     static void operator delete(void* p);
 
@@ -600,7 +487,7 @@ class FUN_00d87790
 class StringMapE028 : public FUN_00d87790
 {
   public:
-    StringMapE028() throw() : FUN_00d87790(hkBoolE028(false))
+    StringMapE028() throw() : FUN_00d87790(hkBool(false))
     {}
 };
 
@@ -610,42 +497,11 @@ struct EntryE028
     const char* m_pcName;
 };
 
-template <class T> __forceinline void constructWithCopyE028(T* p, int n, const T& t)
-{
-    for (int i = 0; i < n; i++)
-        p[i] = t;
-}
-
-template <class T> class hkArrayE028
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    __forceinline void _pushBack(RouterE028& kRouter, const T& t)
-    {
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&kRouter.heap(), this, sizeof(T));
-        constructWithCopyE028(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-    void AddBack(const T& t)
-    {
-        _pushBack(hkRouterE028::FUN_00c85750(), t);
-    }
-};
-
 class NamedObjectsE028
 {
   public:
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20;
-    hkArrayE028<EntryE028> m_kEntries;
+    hkArray<EntryE028> m_kEntries;
     StringMapE028* m_pkPool;
 
     void FUN_00e02800(void* pkObject, const char* pcName);
@@ -662,7 +518,7 @@ void NamedObjectsE028::FUN_00e02800(void* pkObject, const char* pcName)
     const char* pcPooled;
     if (!pkPool->isValid(iIt))
     {
-        pcPooled = FUN_00cb1160(pcName, hkRouterE028::FUN_00c85750().heap());
+        pcPooled = FUN_00cb1160(pcName, reinterpret_cast<hkMemoryAllocator&>(hkRouterE028::FUN_00c85750().heap()));
         pkPool->FUN_00d874d0(pcPooled, 0);
     }
     else
@@ -673,6 +529,27 @@ void NamedObjectsE028::FUN_00e02800(void* pkObject, const char* pcName)
     EntryE028 kEntry;
     kEntry.m_pPointer = pkObject;
     kEntry.m_pcName = pcPooled;
-    m_kEntries.AddBack(kEntry);
+    m_kEntries.pushBack(kEntry);
 }
 }  // namespace fnv_00e02800
+// hkArrayUtil::_reserveMore is the 0x00c90940 growth helper used by this unit.
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+    return reinterpret_cast<hkMemoryAllocator&>(fnvc_adapt::FUN_00c85750().heap());
+}
+
+template <typename T>
+static __forceinline void constructWithCopy(T* p, int n, const T& t)
+{
+    for (int i = 0; i < n; i++)
+        p[i] = t;
+}
+
+template <typename T>
+__forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& t)
+{
+    if (m_iElementCount == getCapacity())
+        hkArrayUtil::_reserveMore(alloc, this, sizeof(T));
+    constructWithCopy(m_data + m_iElementCount, 1, t);
+    m_iElementCount++;
+}

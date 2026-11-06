@@ -1,6 +1,19 @@
 // fallout/magic/concussioneffect.cpp: ConcussionEffect (7 functions)
 
+#include "../../../include/ActiveEffect.h"
+#include "../../../include/Actor.h"
+#include "../../../include/ActorMover.h"
+#include "../../../include/BSAudio.h"
+#include "../../../include/BaseProcess.h"
+#include "../../../include/ConcussionEffect.h"
+#include "../../../include/ImageSpaceModifierInstanceForm.h"
+#include "../../../include/MagicProjectile.h"
+#include "../../../include/MagicTarget.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/TESImageSpaceModifier.h"
 #include "concussioneffect_decls.h"
+#include "../../../include/TESForm.h"
 
 const char kConcussionFXCrippleHead[] = "FXCrippleHead";
 
@@ -10,7 +23,7 @@ bool ConcussionEffect::IsEffectValid(MagicTarget* target)
     Actor* actor = target ? target->GetOwnerActor() : 0;
     if (actor)
     {
-        if (!actor->HasHealth(false) && !actor->vfn_2e8())
+        if (!actor->HasHealth(false) && !actor->GetIsDying())
             return true;
     }
     return false;
@@ -21,9 +34,7 @@ void ConcussionEffect::Update(float deltaTime)
 {
     ((MagicProjectile*)this)->Process(deltaTime);
     m_fPackageValue += deltaTime;
-    Actor* actor = ((ActorMover*)this)->GetCurrentMoveModeType()
-                       ? ((MagicTarget*)((ActorMover*)this)->GetCurrentMoveModeType())->GetOwnerActor()
-                       : 0;
+    Actor* actor = GetTarget() ? GetTarget()->GetOwnerActor() : 0;
     if (actor)
         ApplyConcussion(actor);
 }
@@ -33,65 +44,47 @@ ActiveEffect* ConcussionEffect::Copy()
 {
     ConcussionEffect* copy = new ConcussionEffect(m_pEffectInstance, pSpell, pEffect);
     copy->m_fPackageValue = m_fPackageValue;
-    CopyFrom(copy);
+    CopyData(copy);
     return copy;
 }
 
 // @fnv 0x0080be40
 void ConcussionEffect::ApplyConcussion(Actor* actor)
 {
-    if (m_fPackageValue > DAT_011d1ba4.Float()->value)
+    if (m_fPackageValue > DAT_011d1ba4.Float()->f)
     {
         m_fPackageValue = 0.0f;
         if (actor->FUN_008be870() == 0.0)
         {
-            if (!actor->second.vfn_8(0x48))
+            if (!actor->GetActorValue(static_cast<ActorValue::Index>(0x48)))
             {
                 DAT_011dbe50 = true;
                 if (actor->IsPlayerRef() && !g_thePlayer->IsSleepingOrResting())
                 {
                     ImageSpaceModifierInstanceForm::Trigger(TESImageSpaceModifier::GetConcussionModifier(),
-                                                            DAT_011cf834.Float()->value, 0);
-                    ((BSAudio*)FUN_00453a70())->GetSoundHandleByEditorID(kConcussionFXCrippleHead, 0x101).Play(false);
+                                                            DAT_011cf834.Float()->f, 0);
+                    BSAudio::GetSingleton()->GetSoundHandleByEditorID(kConcussionFXCrippleHead, 0x101).Play(false);
                 }
-                actor->GetProcess()->vfn_44(actor, 0, 2, 1, 0, 1);
+                actor->GetProcess()->StartIdleAnimation(actor, 0, static_cast<ANIM_IDLE_PLAY_TYPE>(2), true, false, true);
                 DAT_011dbe50 = false;
             }
         }
     }
 }
 
-extern int DAT_01079bdc;
-struct FUN_0080bc70_base
-{
-    FUN_0080bc70_base(MagicCaster*, MagicItem*, EffectItem*);
-    char pad[0x48];
-};
-struct FUN_0080bc70_cls : public FUN_0080bc70_base
-{
-    float f;
-    FUN_0080bc70_cls(MagicCaster* c, MagicItem* s, EffectItem* e);
-};
-// Initializes the base with the caster, magic item and effect item, sets the vtable pointer and zeroes the float member f.
 // @fnv 0x0080bc70
-FUN_0080bc70_cls::FUN_0080bc70_cls(MagicCaster* apCaster, MagicItem* apMagicItem, EffectItem* apEffectItem)
-    : FUN_0080bc70_base(apCaster, apMagicItem, apEffectItem)
+ConcussionEffect::ConcussionEffect(MagicCaster* apCaster, MagicItem* apMagicItem, EffectItem* apEffectItem)
+    : ActiveEffect(apCaster, apMagicItem, apEffectItem)
 {
-    *(int**)this = &DAT_01079bdc;
-    f = 0.0f;
+    m_fPackageValue = 0.0f;
 }
-
-struct TESForm
-{
-    virtual ~TESForm();
-};
 
 TESForm* __cdecl GetFormByID(unsigned int);
 extern unsigned char DAT_0118abb1;
 extern TESImageSpaceModifier* DAT_011c9704;
 
 // @fnv 0x0080bfa0
-TESImageSpaceModifier* __cdecl FUN_0080bfa0()
+TESImageSpaceModifier* TESImageSpaceModifier::GetConcussionModifier()
 {
     if (!DAT_0118abb1)
         return 0;

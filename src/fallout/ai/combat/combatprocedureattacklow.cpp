@@ -1,34 +1,13 @@
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/IDebugText.h"
+#include "../../../../include/CombatProcedure.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/CombatProcedureAttackLow.h"
+#include "../../../../include/TESObjectWEAP.h"
 
 // src/fallout/ai/combat/combatprocedureattacklow.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatprocedureattacklow.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-
-struct BGSSaveGameBuffer
-{
-    virtual ~BGSSaveGameBuffer();
-};
-struct BGSSaveFormBuffer : BGSSaveGameBuffer
-{
-    virtual ~BGSSaveFormBuffer();
-    void SaveData(void* pData, int aSize, int aFlags);
-    void SerializeFormData(void* pObj, int aFlags);
-};
-struct CombatProcedure
-{
-    virtual ~CombatProcedure();
-    void SaveGame(BGSSaveFormBuffer* apBuffer);
-};
-struct TESObjectWEAP
-{
-    virtual ~TESObjectWEAP();
-};
-struct CombatProcedureAttackLow : CombatProcedure
-{
-    int m_10;
-    int m_14;
-    int m_18;
-    TESObjectWEAP* pWeapon;
-    void FUN_009cbfd0(BGSSaveFormBuffer* apSaveGameBuffer);
-};
 
 // @fnv 0x009cbfd0
 void CombatProcedureAttackLow::FUN_009cbfd0(BGSSaveFormBuffer* apSaveGameBuffer)
@@ -77,24 +56,6 @@ void* FUN_009cbb20_shell::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-struct FNStub
-{
-    char* GetFullName();
-};
-
-typedef int DEBUGTEXT_LOCATION;
-typedef int DEBUGTEXT_JUSTIFY;
-
-struct IDebugText
-{
-    virtual void FUN_009cbf10_0();
-    virtual void FUN_009cbf10_1();
-    virtual void FUN_009cbf10_2();
-    virtual void FUN_009cbf10_3();
-    virtual void FUN_009cbf10_4();
-    virtual void DisplayText(DEBUGTEXT_LOCATION location, DEBUGTEXT_JUSTIFY justify, const char* text, ...);
-};
-
 extern const char $SG2706[];
 extern const char str_01090a98[];
 extern const char str_010676a0[];
@@ -113,40 +74,27 @@ void FUN_009cbf10_shell::DisplayAttackDebugText(IDebugText* apDebugText, DEBUGTE
     switch (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x10))
     {
     case 0:
-        apDebugText->DisplayText(aeLocation, aeJustify, $SG2706);
+        apDebugText->Print(aeLocation, aeJustify, $SG2706);
         break;
 
     case 1:
-        apDebugText->DisplayText(aeLocation, aeJustify, str_01090a98);
+        apDebugText->Print(aeLocation, aeJustify, str_01090a98);
 
-        apDebugText->DisplayText(
+        apDebugText->Print(
             aeLocation, aeJustify, str_01090b50,
             *reinterpret_cast<TESObjectWEAP**>(reinterpret_cast<char*>(this) + 0x1c)
-                ? reinterpret_cast<FNStub*>(reinterpret_cast<char*>(*reinterpret_cast<TESObjectWEAP**>(
-                                                reinterpret_cast<char*>(this) + 0x1c)) +
-                                            0x30)
-                      ->GetFullName()
+                ? (*reinterpret_cast<TESObjectWEAP**>(reinterpret_cast<char*>(this) + 0x1c))->TESFullName::GetFullName()
                 : str_010676a0,
             *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x14));
         break;
     }
 }
 
-struct BGSLoadFormBuffer
-{
-    unsigned int ReadFormIdentifier();
-    void ReadTypedData(void* pData, unsigned int size);
-};
-
 struct CombatProcedure_Helper
 {
     void LoadGame(BGSLoadFormBuffer* apBuffer);
 };
 
-struct TESForm
-{
-    virtual ~TESForm();
-};
 
 extern void* _DAT_01183028;
 
@@ -168,19 +116,13 @@ void FUN_009cc040_shell::FUN_009cc040(BGSLoadFormBuffer* apLoadGameBuffer)
 {
     reinterpret_cast<CombatProcedure_Helper*>(this)->LoadGame(apLoadGameBuffer);
 
-    apLoadGameBuffer->ReadTypedData(&m_10, 4);
-    apLoadGameBuffer->ReadTypedData(&m_14, 4);
-    apLoadGameBuffer->ReadTypedData(&m_18, 4);
+    apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_10), 4u);
+    apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_14), 4u);
+    apLoadGameBuffer->ReadTypedData(static_cast<void*>(&m_18), 4u);
 
     pWeapon = dynamic_cast<TESObjectWEAP*>(_ref_004839c0(apLoadGameBuffer->ReadFormIdentifier()));
 }
 
-template <class T> class NiPointer
-{
-  public:
-    operator T*() const;
-    T* m_pObject;
-};
 class AnimIdle;
 
 struct FUN_009b4d90
@@ -203,12 +145,6 @@ struct FUN_004459e0
 {
     ~FUN_004459e0();
     float FUN_004bcdb0(int aiFlag);
-};
-
-struct FUN_00525980_weap
-{
-    int FUN_00522c80();
-    void* FUN_00525980(void* apActor);
 };
 
 struct FUN_00645d00_base
@@ -320,19 +256,19 @@ struct FUN_009cbb70_actorbase
 struct FUN_009cbb70_actor : FUN_009cbb70_actorbase, FUN_00645d00_base
 {
     int FUN_00575ca0();
-    FUN_004459e0* FUN_00576260(FUN_00525980_weap* apWeapon, int aiFlag);
+    FUN_004459e0* FUN_00576260(TESObjectWEAP* apWeapon, int aiFlag);
     bool FUN_008a6650(int aiFlag);
     void FUN_0089a760(AnimIdle* apPackage, int aiFlag);
-    bool FUN_008a8dd0(FUN_00525980_weap* apWeapon);
+    bool FUN_008a8dd0(TESObjectWEAP* apWeapon);
     int FUN_00575610(void* apAmmo);
 };
 
 struct FUN_0099a2d0_state
 {
-    FUN_00525980_weap* GetBestWeapon();
+    TESObjectWEAP* GetBestWeapon();
     float FUN_0097ac90(int aiType);
     void SetAttacker(bool abFlag);
-    FUN_00525980_weap* FUN_0097c150(int aiType);
+    TESObjectWEAP* FUN_0097c150(int aiType);
 };
 
 struct FUN_00586150_ctrl
@@ -343,7 +279,7 @@ struct FUN_00586150_ctrl
 float& __fastcall FUN_00403e20(float* apSetting);
 float RandomFloat(float afMin, float afMax);
 void __cdecl FUN_009b5720(AnimIdle* apPackage, FUN_009cbb70_actor* apActor, FUN_009cbb70_actor* apTarget, float afTime);
-float __cdecl FUN_00645d00(FUN_00645d00_base* apActor, FUN_00525980_weap* apWeapon, int aiFlag);
+float __cdecl FUN_00645d00(FUN_00645d00_base* apActor, TESObjectWEAP* apWeapon, int aiFlag);
 int FUN_00647b70(int a, int b);
 int MinInt(int a, int b);
 extern float DAT_011ce230;
@@ -358,7 +294,7 @@ struct FUN_009cbb70_shell
     int iState;
     float fTime;
     float fTimeCur;
-    FUN_00525980_weap* pWeapon;
+    TESObjectWEAP* pWeapon;
     FUN_009cbb70_actor* FUN_00996de0();
     FUN_009cbb70_actor* FUN_00996e00();
     void FUN_009caac0(const char* apReason);
@@ -412,9 +348,9 @@ void FUN_009cbb70_shell::FUN_009cbb70()
         pTarget->FUN_0089a760(spPackage, 0);
     }
 
-    if (pWeapon && pWeapon->FUN_00525980(kActor) && kActor->FUN_008a8dd0(pWeapon))
+    if (pWeapon && pWeapon->GetCurrentAmmo(reinterpret_cast<Actor*>(kActor)) && kActor->FUN_008a8dd0(pWeapon))
     {
-        void* pAmmoA = pWeapon->FUN_00525980(kActor);
+        void* pAmmoA = pWeapon->GetCurrentAmmo(reinterpret_cast<Actor*>(kActor));
         int iCountCur = kActor->FUN_00575610(pAmmoA);
         int iClip = FUN_00645d00(kActor, pWeapon, 0);
         iClip = FUN_00647b70(iClip, 1);

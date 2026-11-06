@@ -1,22 +1,32 @@
-// Source layout: TESGlobal. PC corrections are in generate_headers.py.
-#ifndef FNV_TESGLOBAL_H
-#define FNV_TESGLOBAL_H
-#include "layout_support.h"
+#pragma once
+
 #include "TESForm.h"
-#pragma pack(push, 4)
+#if !defined(FNV_LAYOUT_SUPPORT_H) && !defined(FNV64_BSSTRINGT_DEFINED)
+#include "BSStringT.h"
+#endif
+#include "TESFullName.h"
+
 class TESGlobal : public TESForm
 {
-  public:
-    BSStringT<char> cGlobalEditorID;  // +0x18
-    char cType;                       // +0x20
+public:
+    BSStringT<char> cGlobalEditorID;
+    char cType;
     unsigned char layoutPadding21;
     unsigned short layoutPadding22;
-    float fValue;  // +0x24
+    float fValue;
+
+    TESGlobal();
+    virtual ~TESGlobal();
+    virtual bool LoadForm(TESFile* modInfo);
+    virtual void SaveForm(void);
+    virtual void CopyFrom(const TESForm* form);
+    virtual bool Compare(TESForm* form);
+    virtual char* GetName(void) const;
+    virtual bool SetEditorID_AtRuntime(const char* edid);
+
+    bool Load(TESFile* file);
     void SetValue(float value);
+    float GetValue();
+    bool IsConstantGlobal();
+    float FUN_00526ac0();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(TESGlobal) == 0x28);
-FNV_STATIC_ASSERT(offsetof(TESGlobal, cGlobalEditorID) == 0x18);
-FNV_STATIC_ASSERT(offsetof(TESGlobal, cType) == 0x20);
-FNV_STATIC_ASSERT(offsetof(TESGlobal, fValue) == 0x24);
-#endif

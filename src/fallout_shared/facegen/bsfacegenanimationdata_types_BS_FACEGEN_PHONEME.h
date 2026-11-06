@@ -2,7 +2,6 @@
 #ifndef FNV_BS_FACEGEN_PHONEME_H
 #define FNV_BS_FACEGEN_PHONEME_H
 
-#include "layout_support.h"
 enum BS_FACEGEN_PHONEME
 {
     BS_FACEGEN_PHONEME_BS_FG_PHONEME_NONE = -1,

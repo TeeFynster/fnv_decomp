@@ -2,6 +2,8 @@
 // src/fallout/misc/saveload/bgsunloadedformbuffer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/misc/saveload/bgsunloadedformbuffer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/BGSLoadFormBuffer.h"
+
 extern int DAT_0107f494;
 
 struct FUN_0084b4e0_shell
@@ -103,25 +105,6 @@ unsigned int FUN_008663e0_shell::FUN_008663e0()
 void* __cdecl operator new(unsigned int);
 unsigned int _data_011c16bc;
 
-struct BGSLoadFormBuffer
-{
-    unsigned int field00;
-    unsigned int field04;
-    unsigned int field08;
-    unsigned int field0C;
-    unsigned int field10;
-    unsigned int field14;
-    unsigned int field18;
-    unsigned int field1C;
-    unsigned int field20;
-    unsigned int field24;
-    unsigned int field28;
-    unsigned int field2C;
-
-    BGSLoadFormBuffer();
-    void SetBuffer(char* buffer, unsigned int size, unsigned int position);
-    void FUN_008a8150(unsigned char value);
-};
 
 struct FUN_0084b450_Class
 {

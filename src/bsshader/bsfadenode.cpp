@@ -1,23 +1,134 @@
+#include "../../include/SettingT.h"
 // bsshader/bsfadenode.cpp: BSFadeNode, NiFixedString, BSShaderManager, FadeViewer and more (22 functions)
 
-#include "bsfadenode_decls.h"
-
-#pragma optimize("", off)
-// @fnv 0x00438170
-__forceinline NiFixedString::NiFixedString(const char* apString)
+#include "../../include/BSFadeNode.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiNode.h"
+#include "../../include/BSTreeNode.h"
+#include "../../include/NiAlphaProperty.h"
+#include "../../include/Bound.h"
+// LocalPt3: unit-local copy of the former shared stand-in Pt3. Same layout as NiPoint3; with NiPoint3 (its __forceinline constructor and in-class Dot), FadeNodeObj::FUN_00b4e490 (0x00b4e490) does not match.
+class LocalPt3
 {
-    if (!apString)
-        m_kHandle = EmptyFS.m_kHandle;
-    else
-        m_kHandle = NiGlobalStringTable::AddString(apString);
+public:
+    float x;
+    float y;
+    float z;
+
+    LocalPt3();
+    LocalPt3(float fX, float fY, float fZ);
+
+    LocalPt3 operator+(const LocalPt3& other) const;
+    LocalPt3 operator-(const LocalPt3& other) const;
+    LocalPt3 operator-() const;
+    LocalPt3 operator*(float scale) const;
+    LocalPt3& operator*=(float scale);
+    bool operator!=(const LocalPt3& other) const;
+
+    float Dot(const LocalPt3& other) const;
+    float DotAccumulated(const LocalPt3& other) const;
+    float DotPlane(const LocalPt3& other) const;
+    float DotProduct(const LocalPt3& other) const;
+    LocalPt3 Cross(const LocalPt3& other) const;
+    float SqrLength() const;
+    float Length2() const;
+    float Length() const;
+    float Len() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+
+    void FUN_004a0c10();
+    LocalPt3* FUN_00439ef0(LocalPt3* out, LocalPt3* other);
+    LocalPt3 FUN_00439ef0(const LocalPt3& rhs);
+    bool FUN_00439090(LocalPt3* other);
+    float FUN_00457990() const;
+
+    static const LocalPt3 ms_kFirstPoint;
+    static const LocalPt3 ms_kSecondPoint;
+    static const LocalPt3 ms_kThirdPoint;
+};
+#include "../../include/NiPoint3.h"
+#include <math.h>
+#include "../../include/BSShaderManager.h"
+#include "../../include/ImageSpaceManager.h"
+#include "../../include/Setting.h"
+#include "../../include/NiStream.h"
+#include "../../include/MemoryManager.h"
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
+
+extern MemoryManager g_memoryManager;
+
+using ::SettingT;
+
+typedef char BSFadeNodeSizeCheck[sizeof(BSFadeNode) == 0xE4 ? 1 : -1];
+typedef char NiAlphaPropertySizeCheck[sizeof(NiAlphaProperty) == 0x1C ? 1 : -1];
+// PC depth texture forwarding declarations. The singleton has no known
+// canonical data name, so its address-based name is kept here.
+extern ImageSpaceManager* DAT_011f91ac;
+
+// Keep the original inline bodies with the shared class declarations.
+inline NiAlphaProperty::NiAlphaProperty() : m_usAlphaArg(0xEC), m_ucAlphaArg2(0)
+{}
+
+inline void NiObjectNET::DecRefCount()
+{
+    if (!InterlockedDecrement((volatile long*)&m_uiRefCount))
+        DeleteThis();
 }
-#pragma optimize("", on)
+
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (pkNew)
+            InterlockedIncrement((volatile long*)&pkNew->m_uiRefCount);
+    }
+    return *this;
+}
+
+template <class T> inline T* NiPointer<T>::operator->() const
+{
+    return m_pObject;
+}
+
+inline void* NiFixedString::operator new(size_t n)
+{
+    return g_memoryManager.Allocate(n);
+}
+
+
+inline LocalPt3::LocalPt3()
+{}
+
+inline LocalPt3::LocalPt3(float fx, float fy, float fz) : x(fx), y(fy), z(fz)
+{}
+
+inline float LocalPt3::Dot(const LocalPt3& pt) const
+{
+    return x * pt.x + y * pt.y + z * pt.z;
+}
+
+inline LocalPt3 LocalPt3::operator-(const LocalPt3& other) const
+{
+    return LocalPt3(x - other.x, y - other.y, z - other.z);
+}
+
+inline float LocalPt3::Length() const
+{
+    return sqrtf(x * x + y * y + z * z);
+}
+
 
 // @fnv 0x00b4e270
 void BSFadeNode::InitializeMultiBounds()
 {
     ms_pAlphaProperty = new NiAlphaProperty;
-    ms_pAlphaProperty->m_uiObjectFlags |= 1;
+    ms_pAlphaProperty->m_usAlphaArg |= 1;
     ms_pFadeNodeAnimationName = new NiFixedString("FadeNode Anim");
 }
 
@@ -33,7 +144,8 @@ NiObject* BSFadeNode::CreateObject()
 void BSFadeNode::SetRange(float nearDistance, float farDistance)
 {
     float minDistance =
-        (float)static_cast<const volatile SettingT<INISettingCollection>&>(ms_kMinimumFadeDistanceSetting).uValue.i;
+        (float)reinterpret_cast<const volatile int&>(
+            static_cast<const volatile SettingT<INISettingCollection>&>(ms_kMinimumFadeDistanceSetting).uValue);
     if (nearDistance < minDistance)
     {
         nearDistance = minDistance;
@@ -50,56 +162,6 @@ BSRenderedTexture* BSShaderManager::GetSceneDepthRenderedTexture()
     return DAT_011f91ac->GetDepthRenderedTexture();
 }
 
-struct BSTreeModel;
-struct CSpeedTreeRT;
-struct NiBinaryStream;
-struct NiCullingProcess;
-struct NiObjectGroup;
-struct NiSearchPath;
-struct NiStream;
-struct NiTexture;
-struct NiTexturingProperty;
-struct NiThread;
-struct NiTriBasedGeom;
-struct NiUpdateData;
-struct bhkSimpleShapePhantom;
-struct BSTreeNode : public BSFadeNode
-{
-    virtual void __vslot_0();
-    virtual BSTreeModel* GetModelFilePath();
-    virtual NiNode* GetBranchesNode();
-    virtual NiNode* GetFrondNode();
-    virtual NiNode* GetLeavesNode();
-    virtual NiTriBasedGeom* GetBranchMesh(unsigned short);
-    virtual NiTriBasedGeom* GetFrondMesh(unsigned short);
-    virtual NiTriBasedGeom* GetLeafMesh();
-    virtual bool SetBranchGeometry(unsigned short, NiTriBasedGeom*);
-    virtual bool SetFrondGeometry(unsigned short, NiTriBasedGeom*);
-    virtual void SetBillboardObject(NiTriBasedGeom*);
-    virtual bool SetBranchVisible(bool);
-    virtual bool SetFrondVisible(bool);
-    virtual bool SetLeavesVisible(bool);
-    virtual bool SetBranchTextureVariant(unsigned short, unsigned char);
-    virtual bool SetFrondTextureVariant(unsigned short, unsigned char);
-    virtual bool SetLeafTextureVariant(unsigned char);
-    virtual bool SetTexturingProperty(NiTexturingProperty*);
-    virtual void SetWindAmplitude(float);
-    virtual void* GetRTTI();
-    virtual void GetViewerStrings(void*);
-    virtual void OnVisible(NiCullingProcess*);
-    virtual void UpdateDownwardPass(NiUpdateData*, unsigned int);
-    virtual void UpdateSelectedDownwardPass(NiUpdateData*, unsigned int);
-    void UpdateSpeedTree(CSpeedTreeRT*, float);
-    bhkSimpleShapePhantom* GetLeafObject();
-    bool CheckForCollision(float);
-    char _pad_e4[44];
-    char m_pRenderedNodeEntry[4];
-    void* m_pSpeedTreeData;
-    void* m_pTreeModelData;
-    char m_ucTreeFlags[4];
-    float m_fTreeWindTime;
-    char _pad_124[12];
-};
 typedef char _sizecheck_BSTreeNode[sizeof(BSTreeNode) == 304 ? 1 : -1];
 struct FUN_00b4def0_shell : public BSFadeNode
 {
@@ -141,12 +203,6 @@ void __cdecl SetFlagOnVirtualResult(Dummy* apDummy)
     }
 }
 
-class P03MM
-{
-  public:
-    void _DeallocateAlias(void* p);
-};
-
 // Recursively frees the linked list hanging off self[1], deallocating each node, then clears self[0].
 // @fnv 0x00b4df30
 void __fastcall FUN_00b4df30(void* p)
@@ -164,7 +220,7 @@ void __fastcall FUN_00b4df30(void* p)
             if (pCurrent)
             {
                 FUN_00b4df30(pCurrent);
-                ((P03MM*)&g_memoryManager)->_DeallocateAlias(pCurrent);
+                g_memoryManager._DeallocateAlias(pCurrent);
             }
             self[1] = next;
         } while (next);
@@ -197,16 +253,11 @@ void FUN_00b4dec0_shell::FUN_00b4dec0(int aeMultType)
     *(int*)((char*)this + 0xc4) = aeMultType;
 }
 
-struct NiNode_Helper : public NiNode
-{
-    void CopyMemberData(NiNode*, void*);
-};
-
 // @fnv 0x00b4e3f0
 void* __fastcall FUN_00b4e3f0(void* apSource, int dummy, void* kCloning)
 {
     BSFadeNode* pFadeNode = new BSFadeNode();
-    ((NiNode_Helper*)apSource)->CopyMemberData((NiNode*)pFadeNode, kCloning);
+    ((NiNode*)apSource)->CopyMemberData((NiNode*)pFadeNode, *(CloningProcess*)kCloning);
     *(unsigned int*)((char*)pFadeNode + 0x30) &= 0xfffd3fff;
     *(float*)((char*)pFadeNode + 0xac) = *(float*)((char*)apSource + 0xac);
     *(float*)((char*)pFadeNode + 0xb0) = *(float*)((char*)apSource + 0xb0);
@@ -230,13 +281,6 @@ FUN_00b4ed40_t* FUN_00b4ed40_t::FUN_00b4ed40(unsigned char flags)
     return this;
 }
 
-extern char* DAT_0109b220;
-
-struct MM_Dealloc_b4e380
-{
-    void Deallocate(void* p);
-};
-
 // @fnv 0x00b4e380
 void __cdecl ReleaseFadeNodeResources()
 {
@@ -248,13 +292,8 @@ void __cdecl ReleaseFadeNodeResources()
     NiFixedString* animName = BSFadeNode::ms_pFadeNodeAnimationName;
     if (BSFadeNode::ms_pFadeNodeAnimationName)
     {
-        char* handle = BSFadeNode::ms_pFadeNodeAnimationName->m_kHandle;
-        if (handle != DAT_0109b220)
-        {
-            // the interned string block keeps its long refcount 8 bytes before the handle
-            InterlockedDecrement((long*)handle - 2);
-        }
-        ((MM_Dealloc_b4e380*)&g_memoryManager)->Deallocate(animName);
+        BSFadeNode::ms_pFadeNodeAnimationName->~NiFixedString();
+        g_memoryManager.Deallocate(animName);
     }
     BSFadeNode::ms_pFadeNodeAnimationName = 0;
 }
@@ -377,11 +416,6 @@ struct ViewerBool
 };
 char* __cdecl FlagString(const char*, ViewerBool);
 int __cdecl FUN_00406d00(char*, unsigned int, const char*, ...);
-struct Allocator
-{
-    void* Allocate(unsigned int);
-};
-extern Allocator _g_memoryManager;
 struct FadeViewer
 {
     unsigned int field00;
@@ -443,19 +477,19 @@ void FadeViewer::FUN_00b4ed70(Strings* strings)
         strings->Add(text);
         float fNearDist = nearDist;
         float fFarDist = farDist;
-        text = (char*)_g_memoryManager.Allocate(64);
+        text = (char*)g_memoryManager.Allocate(64);
         if (fNearDist == 3.4028234663852886e38)
             FUN_00406d00(text, 64, "fNearDistSqr = DISABLED");
         else
             FUN_00406d00(text, 64, "fNearDistSqr = %.2f", fNearDist);
         strings->Add(text);
-        text = (char*)_g_memoryManager.Allocate(64);
+        text = (char*)g_memoryManager.Allocate(64);
         if (fFarDist == 3.4028234663852886e38)
             FUN_00406d00(text, 64, "fFarDistSqr = DISABLED");
         else
             FUN_00406d00(text, 64, "fFarDistSqr = %.2f", fFarDist);
         strings->Add(text);
-        text = (char*)_g_memoryManager.Allocate(64);
+        text = (char*)g_memoryManager.Allocate(64);
         FUN_00406d00(text, 64, "eMultType = %d", multType);
         strings->Add(text);
         text = FUN_00a7d550("fLastFade", lastFade);
@@ -529,16 +563,6 @@ bool Cls00b4df20::FUN_00b4df20(Cls00b4df20* other)
     return FUN_00a5e600(other);
 }
 
-struct Vec
-{
-    float x, y, z;
-    float FUN_00457990();
-};
-struct Bound
-{
-    int unk00, unk04, unk08;
-    float unk0c;
-};
 struct Fade
 {
     int unk00;
@@ -624,7 +648,7 @@ bool Fade::UpdateFade(Fade* camera, int unused)
     if (DAT_011ad7b4)
     {
         float scale = camera->unk110;
-        Vec vDelta;
+        NiPoint3 vDelta;
         vDelta.x = unk8c - camera->unk8c;
         vDelta.y = unk90 - camera->unk90;
         vDelta.z = unk94 - camera->unk94;
@@ -652,7 +676,7 @@ bool Fade::UpdateFade(Fade* camera, int unused)
             }
         }
         if (unk20)
-            unkbc = unk20->unk0c;
+            unkbc = unk20->radius;
         if (unkc4 == 1 || unkc4 == 5 || unkc4 == 4 || unkc4 == 6)
         {
             unkc8 = DAT_011f9138;
@@ -691,17 +715,8 @@ bool Fade::UpdateFade(Fade* camera, int unused)
     return true;
 }
 
-#include <math.h>
-struct NiCamera;
-struct CloningProcess;
-struct NiPoint2;
-struct NiPoint3;
-struct NiStream;
-struct NiUpdateData;
-struct blob12
-{
-    char b[12];
-};
+class NiCamera;
+
 struct FUN_00b4e030_shell : public BSFadeNode
 {
     bool IsWithinFadeDistance(NiCamera*, float);
@@ -710,16 +725,6 @@ struct FUN_00b4e030_shell : public BSFadeNode
 extern float DAT_011ad7b8[];
 extern float DAT_011ad7f4;
 
-struct Pt3
-{
-    float x, y, z;
-    Pt3(float fx, float fy, float afDepth) : x(fx), y(fy), z(afDepth)
-    {}
-    float Dot(const Pt3& pt) const
-    {
-        return x * pt.x + y * pt.y + z * pt.z;
-    }
-};
 
 // Checks whether the camera is within the node's fade distance, adjusted by a per-state factor, and returns true if the scaled distance is below the fade limit.
 // @fnv 0x00b4e030
@@ -734,9 +739,9 @@ bool FUN_00b4e030_shell::IsWithinFadeDistance(NiCamera* apCamera, float afDistMu
         if (fdiff != 0.0f)
             ffadeAdjust = ffadeAdjust / fdiff;
     }
-    const Pt3& kA = *(Pt3*)((char*)this + 0x8c);
-    const Pt3& kB = *(Pt3*)((char*)apCamera + 0x8c);
-    Pt3 kDiff(kA.x - kB.x, kA.y - kB.y, kA.z - kB.z);
+    const LocalPt3& kA = *(LocalPt3*)((char*)this + 0x8c);
+    const LocalPt3& kB = *(LocalPt3*)((char*)apCamera + 0x8c);
+    LocalPt3 kDiff(kA.x - kB.x, kA.y - kB.y, kA.z - kB.z);
     float fDist = sqrtf(kDiff.Dot(kDiff)) * afDistMult;
     if (fDist < 0.0f)
         fDist = 0.0f;
@@ -747,22 +752,6 @@ bool FUN_00b4e030_shell::IsWithinFadeDistance(NiCamera* apCamera, float afDistMu
 }
 
 namespace fnv_00b4e490 {
-struct FadePt3
-{
-    float x, y, z;
-    FadePt3()
-    {}
-    FadePt3(float ax, float ay, float az) : x(ax), y(ay), z(az)
-    {}
-    FadePt3 operator-(const FadePt3& o) const
-    {
-        return FadePt3(x - o.x, y - o.y, z - o.z);
-    }
-    float Length() const
-    {
-        return sqrtf(x * x + y * y + z * z);
-    }
-};
 
 struct FadeCamera
 {
@@ -801,7 +790,7 @@ struct FadeCamera
     void* unk80;
     void* unk84;
     void* unk88;
-    FadePt3 m_kWorldTranslate;  // 0x8c
+    LocalPt3 m_kWorldTranslate;  // 0x8c
     void* unk98;
     void* unk9C;
     void* unkA0;
@@ -914,7 +903,7 @@ struct FadeNodeObj
     int unk80;
     int unk84;
     int unk88;
-    FadePt3 m_kWorldTranslate;  // 0x8c
+    LocalPt3 m_kWorldTranslate;  // 0x8c
     int unk98;
     int unk9C;
     int unkA0;
@@ -974,7 +963,7 @@ void FadeNodeObj::FUN_00b4e490(FadeCuller& culler)
     float fMult = DAT_011ad7b8[eMultType];
     FadeCamera* pCamera = culler.m_pCamera;
     float fDist;
-    FadePt3 kDiff;
+    LocalPt3 kDiff;
     if (fMult > 0.0f)
     {
         fDist = pCamera->m_fTrailingValue / fMult;

@@ -1,6 +1,25 @@
 // gamebryo2.2/corelibs/nicollision/nicollisionutils.cpp: RayTriangleIntersector (1 function)
 
 #include "nicollisionutils_decls.h"
+
+inline NiPoint3::NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
+{}
+
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& p) const
+{
+    return NiPoint3(x - p.x, y - p.y, z - p.z);
+}
+
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& p) const
+{
+    return NiPoint3(x + p.x, y + p.y, z + p.z);
+}
+
+inline NiPoint3 NiPoint3::Cross(const NiPoint3& p) const
+{
+    return NiPoint3(y * p.z - z * p.y, z * p.x - x * p.z, x * p.y - y * p.x);
+}
+
 // @fnv 0x00eadb90
 bool RayTriangleIntersector::IntersectRayTriangle(const NiPoint3& aOrigin, const NiPoint3& aDirection,
                                                   const NiPoint3& aVertex0, const NiPoint3& aVertex1,

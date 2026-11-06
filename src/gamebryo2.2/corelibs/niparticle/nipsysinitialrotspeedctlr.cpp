@@ -1,3 +1,4 @@
+#include "../../../../include/StrArr.h"
 
 // src/gamebryo2.2/corelibs/niparticle/nipsysinitialrotspeedctlr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysinitialrotspeedctlr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -12,11 +13,6 @@ void* __cdecl FUN_00c29f90()
 
 void* __cdecl FUN_00a7d330(const void*);
 extern void* g_012026e0;
-struct StrArr
-{
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 struct NiPSysInitialRotSpeedCtlr
 {
     void __thiscall FUN_00c32f60(StrArr*);

@@ -1,20 +1,37 @@
-// Source layout: BSSysInfoSystemUtility. PC corrections are in generate_headers.py.
-#ifndef FNV_BSSYSINFOSYSTEMUTILITY_H
-#define FNV_BSSYSINFOSYSTEMUTILITY_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+
 class BSSysInfoSystemUtility
 {
-  public:
-    void** m_ppVirtualMethodTable;                               // +0x0
-    BSSysInfoSystemUtility__LANGUAGE m_eLanguage;  // +0x4
-    unsigned int SystemUtilityData[16];            // +0x8
-    void Initialize();
+public:
+    enum LANGUAGE
+    {
+        LANGUAGE_JAPANESE = 0,
+        LANGUAGE_ENGLISH = 1,
+        LANGUAGE_FRENCH = 2,
+        LANGUAGE_SPANISH = 3,
+        LANGUAGE_GERMAN = 4,
+        LANGUAGE_ITALIAN = 5,
+        LANGUAGE_DUTCH = 6,
+        LANGUAGE_PORTUGUESE = 7,
+        LANGUAGE_RUSSIAN = 8,
+        LANGUAGE_KOREAN = 9,
+        LANGUAGE_CHINESE_TRADITIONAL = 10,
+        LANGUAGE_CHINESE_SIMPLIFIED = 11,
+        LANGUAGE_FINNISH = 12,
+        LANGUAGE_SWEDISH = 13,
+        LANGUAGE_DANISH = 14,
+        LANGUAGE_NORWEGIAN = 15,
+        LANGUAGE_UNKNOWN = 16,
+        MAX_LANGUAGES = 17,
+    };
+
+    virtual void* vf00(unsigned int flags);
+    virtual void Initialize();
+    virtual void Destroy();
+
+    LANGUAGE m_eLanguage;
+    unsigned int SystemUtilityData[16];
+
+    static unsigned int GetRandomGenerator();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BSSysInfoSystemUtility) == 0x48);
-FNV_STATIC_ASSERT(offsetof(BSSysInfoSystemUtility, m_ppVirtualMethodTable) == 0x0);
-FNV_STATIC_ASSERT(offsetof(BSSysInfoSystemUtility, m_eLanguage) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BSSysInfoSystemUtility, SystemUtilityData) == 0x8);
-#endif

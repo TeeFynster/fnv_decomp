@@ -1,3 +1,20 @@
+#include "../../../../../../../../include/hkArray.h"
+#include "../../../../../../../../include/CodeInfo.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/hkStackMemory.h"
+#include "../../../../../../../../include/hkSimdReal.h"
+#include "../../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../../include/hkBool.h"
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../../include/hkVector4.h"
+#include "../../../../../../../../include/hkpMoppCode.h"
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/FinishingFlag.h"
+#include "../../../../../../../../include/NiPoint3.h"
+#include "../../../../../../../../include/Pair.h"
 // src/havok/physics/internal/collide/mopp/builder/assembler/hkpmoppdefaultassembler_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-31 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/internal/collide/mopp/builder/assembler/hkpmoppdefaultassembler.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
@@ -347,21 +364,7 @@ struct S_e07c50_Item
     int unk58;
     int m_kRayEnd;
 };
-struct Allocator
-{
-    virtual void* unk00(void* p);
-    virtual void* unk04(void* p);
-    virtual void __thiscall ReleaseBlock(void* p, unsigned short size);
-};
-struct Router
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    Allocator* allocator;
-};
-extern "C" Router* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
 struct FUN_00e09640_class
 {
     virtual void unknownVirtual();
@@ -614,15 +617,9 @@ struct S_00e06e00_Cls
     int FUN_00e06e00(S_00e06e00_A0* a, S_00e06e00_A1* b, S_00e06e00_A2* c);
     void WriteOp(int idx, S_00e06e00_Item* item);
 };
-struct Vec3
-{
-    float x;
-    float y;
-    float z;
-};
 extern const double g_thresholdA;
 extern const double g_thresholdB;
-int __stdcall ClassifyVec3Region(const Vec3* pVec);
+int __stdcall ClassifyVec3Region(const NiPoint3* pVec);
 struct S_00e07070_Pair
 {
     int unk00;
@@ -825,22 +822,6 @@ struct S_00e07da0_Tree
     int ClassifyVec3Region(void* p);
     void FUN_00e07880(S_00e07da0_Node* node, S_00e07da0_Region* region, int* lo, int* hi);
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 struct BSAudio;
 extern int DAT_010ea5dc;
 extern int DAT_0102e388;
@@ -1033,11 +1014,6 @@ struct Arg1Flags
     unsigned char unk00[0x3b];
     unsigned char m_3b[3];
 };
-struct Pair
-{
-    int m_ucLowNibble;
-    int m_ucHighNibble;
-};
 struct Arg2Layout
 {
     int unk00;
@@ -1223,20 +1199,6 @@ struct S_00e07d60
     void FUN_00e07d60(const S_00e07d60_Info& info);
 };
 namespace e083 {
-struct Alloc;
-struct Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkc;
-    Alloc* unk10;
-};
-struct Pair
-{
-    int a;
-    int b;
-};
 struct PairArray
 {
     Pair* m_data;
@@ -1248,68 +1210,46 @@ struct SrcW
     PairArray* p;
 };
 }
-void __cdecl ResizeAudioStream(e083::Alloc* a, void* arr, int elemSize);
+void __cdecl ResizeAudioStream(hkMemoryAllocator* a, void* arr, int elemSize);
 static void FUN_00e08320(e083::PairArray* srcp, e083::PairArray* dst, int delta);
 void e08320_caller(e083::SrcW sw, e083::PairArray* dst, int delta);
-struct BvAllocator
-{
-    virtual void v0();
-    virtual void* AllocateMemoryBlock(unsigned int);
-    virtual void v8();
-    virtual void vc();
-    virtual void ReleaseBlock(void*, int);
-};
 void __cdecl ResizeAudioStream(void*, void*, int);
-inline BvAllocator& GetHeap()
+inline hkMemoryAllocator& GetHeap()
 {
-    return *(BvAllocator*)FUN_00c85750()->allocator;
+    return *(hkMemoryAllocator*)FUN_00c85750()->m_heap;
 }
-struct BvHeapRouter
+inline hkMemoryRouter* GetBvRouter()
 {
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    BvAllocator* allocator;
-};
-inline BvHeapRouter* GetBvRouter()
-{
-    return (BvHeapRouter*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
-template <class T> struct BvArray
+template <class T>
+static __forceinline void BvArray_clear(hkArrayBase<T>& self)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+        for (int i = 0; i < self.m_iElementCount; ++i)
+            self.m_data[i].~T();
+        self.m_iElementCount = 0;
+    }
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
+template <class T>
+static __forceinline void BvArray_ClearAndRelease(hkArrayBase<T>& self, hkMemoryAllocator& alloc)
+{
+        BvArray_clear(self);
+        if ((self.m_iCapacityState & 0x80000000u) == 0)
+            alloc.ReturnMemory(self.m_data, self.getCapacity() * sizeof(T));
+        self.m_data = 0;
+        self.m_iCapacityState = 0x80000000;
     }
-    void clear()
-    {
-        for (int i = 0; i < m_iElementCount; ++i)
-            m_data[i].~T();
-        m_iElementCount = 0;
-    }
-    void ClearAndRelease(BvAllocator& alloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000u) == 0)
-            alloc.ReleaseBlock(m_data, getCapacity() * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    void AddBack(Router& router, const T& t)
-    {
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(router.allocator, this, sizeof(T));
-        T* p = m_data + m_iElementCount;
+
+template <class T>
+static __forceinline void BvArray_AddBack(hkArrayBase<T>& self, hkMemoryRouter& router, const T& t)
+{
+        if (self.m_iElementCount == self.getCapacity())
+            ResizeAudioStream(router.m_heap, (&self), sizeof(T));
+        T* p = self.m_data + self.m_iElementCount;
         for (int i = 0; i < 1; i++)
             p[i] = t;
-        m_iElementCount++;
+        self.m_iElementCount++;
     }
-};
 struct BvFixup
 {
     int offset;
@@ -1323,7 +1263,7 @@ struct FUN_00e065f0
     int m_pRayCursor;
     int m_offset;
     unsigned char* m_data;
-    BvArray<BvFixup> m_buffer;
+    hkArrayBase<BvFixup> m_buffer;
 
     void FillWithPattern(int);
     void FUN_00e06480();
@@ -1331,7 +1271,7 @@ struct FUN_00e065f0
     void Destroy();
     void* operator new(unsigned int n)
     {
-        FUN_00e065f0* p = static_cast<FUN_00e065f0*>(GetBvRouter()->allocator->AllocateMemoryBlock(n));
+        FUN_00e065f0* p = static_cast<FUN_00e065f0*>(reinterpret_cast<hkMemoryAllocator*>(GetBvRouter()->m_heap)->blockAlloc(n));
         p->m_usMemSizeAndFlags = (unsigned short)n;
         return p;
     }
@@ -1410,11 +1350,11 @@ struct BvRange
 };
 void __stdcall FUN_00e07c50(struct BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack);
 void* __cdecl FUN_00cb1260(void*, const void*, int);
-static void FUN_00e08320(BvArray<BvFixup>* destination, BvArray<BvFixup>* source, int adjustment)
+static void FUN_00e08320(hkArrayBase<BvFixup>* destination, hkArrayBase<BvFixup>* source, int adjustment)
 {
     for (int i = 0; i < source->m_iElementCount; ++i)
     {
-        BvAllocator& heap = GetHeap();
+        hkMemoryAllocator& heap = GetHeap();
         if (destination->m_iElementCount == destination->getCapacity())
             ResizeAudioStream(&heap, destination, sizeof(BvFixup));
         BvFixup* out = destination->m_data + destination->m_iElementCount;
@@ -1423,7 +1363,7 @@ static void FUN_00e08320(BvArray<BvFixup>* destination, BvArray<BvFixup>* source
         out->offset = source->m_data[i].offset + adjustment;
     }
 }
-static int FUN_00e08380(BvTree* tree, FUN_00e065f0* source, BvArray<int>* refs, FUN_00e065f0* destination);
+static int FUN_00e08380(BvTree* tree, FUN_00e065f0* source, hkArrayBase<int>* refs, FUN_00e065f0* destination);
 struct BvBuilder
 {
     int unk00;
@@ -1444,7 +1384,7 @@ struct BvBuilder
     void FUN_00e08470(BvNode* node);
     void FUN_00e07510(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, BvRange* range);
     void FUN_00e07ca0(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, BvRange* range);
-    void FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth, BvArray<int>* refs);
+    void FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth, hkArrayBase<int>* refs);
 };
 inline void* operator new(unsigned int, void* p)
 {
@@ -1455,24 +1395,7 @@ template <class T> __forceinline void constructCopy(T* p, int n, const T& value)
     for (int i = 0; i < n; ++i)
         p[i] = value;
 }
-struct P154Allocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void Free(void*, unsigned);
-};
-struct P154System
-{
-    int unk00, unk04, unk08, unk0c;
-    P154Allocator* allocator;
-};
-struct P154Memory
-{
-    static P154System* FUN_00c85750();
-};
-void __cdecl ResizeAudioStream(P154Allocator*, void*, int);
+void __cdecl ResizeAudioStream(hkMemoryAllocator*, void*, int);
 struct P154Array
 {
     int* data;
@@ -1480,28 +1403,28 @@ struct P154Array
     unsigned capacity;
     P154Array() : data(0), count(0), capacity(0x80000000)
     {}
-    void Search(P154Allocator*, int, int*, int);
+    void Search(hkMemoryAllocator*, int, int*, int);
     void append(const int& v)
     {
-        P154System* s = P154Memory::FUN_00c85750();
+        hkMemoryRouter* s = FUN_00c85750();
         if (count == int(capacity & 0x3fffffff))
-            ResizeAudioStream(s->allocator, this, 4);
+            ResizeAudioStream(reinterpret_cast<hkMemoryAllocator*>(s->m_heap), this, 4);
         constructCopy(data + count, 1, v);
         ++count;
     }
     void insert(int* src, int pos, int n)
     {
-        P154System* r = P154Memory::FUN_00c85750();
-        P154Allocator* a = r->allocator;
+        hkMemoryRouter* r = FUN_00c85750();
+        hkMemoryAllocator* a = reinterpret_cast<hkMemoryAllocator*>(r->m_heap);
         Search(a, pos, src, n);
     }
     void clear()
     {
-        P154System* r = P154Memory::FUN_00c85750();
-        P154Allocator* a = r->allocator;
+        hkMemoryRouter* r = FUN_00c85750();
+        hkMemoryAllocator* a = reinterpret_cast<hkMemoryAllocator*>(r->m_heap);
         count = 0;
         if (!(capacity & 0x80000000))
-            a->Free(data, (capacity & 0x3fffffff) * 4);
+            a->bufFree(data, (capacity & 0x3fffffff) * 4);
         data = 0;
         capacity = 0x80000000;
     }
@@ -1517,9 +1440,9 @@ struct P154PairArray
     unsigned capacity;
     P154Pair& grow()
     {
-        P154System* s = P154Memory::FUN_00c85750();
+        hkMemoryRouter* s = FUN_00c85750();
         if (count == int(capacity & 0x3fffffff))
-            ResizeAudioStream(s->allocator, this, 8);
+            ResizeAudioStream(reinterpret_cast<hkMemoryAllocator*>(s->m_heap), this, 8);
         for (int i = 0; i < 1; ++i)
             new (data + count + i) P154Pair;
         return data[count++];
@@ -1599,54 +1522,28 @@ struct P154Tree
     int FUN_00e084f0(P154Node*, P154Region*, P154Region*, P154Array*);
 };
 
+// Inline implementations used by the original assembler constructor.
+inline hkSimdReal::hkSimdReal(const __m128& value) : m_vValue(value) {}
+inline const __m128& hkSimdReal::getQuad() const { return m_vValue; }
+inline __m128 hkSimdReal::broadcast() const
+{
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+template <typename TYPE> inline TYPE* hkMemoryAllocator::_bufAlloc(int& reqNumInOut)
+{
+    const int SIZE_ELEM = sizeof(TYPE);
+    int n = reqNumInOut * SIZE_ELEM;
+    void* p = bufAlloc(n);
+    reqNumInOut = n / SIZE_ELEM;
+    return static_cast<TYPE*>(p);
+}
+
 typedef signed char hkInt8;
 typedef signed short hkInt16;
 typedef unsigned char hkUint8;
 typedef unsigned short hkUint16;
 typedef unsigned __w64 hk_size_t;
-class FinishingFlag
-{
-  public:
-    FinishingFlag() : m_bFinishing(0)
-    {}
-    int m_bFinishing;
-};
 class hkClass;
-class hkBool
-{
-  public:
-    typedef char CompileTimeTrueType;
-    inline hkBool& operator=(bool e)
-    {
-        m_cBooleanValue = static_cast<char>(e);
-        return *this;
-    }
-
-  private:
-    char m_cBooleanValue;
-};
-template <typename ENUM, typename STORAGE> class hkEnum
-{
-  public:
-    hkEnum()
-    {}
-    hkEnum(ENUM e)
-    {
-        m_kStorage = static_cast<STORAGE>(e);
-    }
-
-  private:
-    STORAGE m_kStorage;
-};
-template <typename TYPE> class ValueWrapper
-{
-  public:
-    __forceinline ValueWrapper()
-    {}
-
-  private:
-    TYPE m_kStorage;
-};
 template <typename T> struct TypeSizeConstant
 {
     enum
@@ -1654,193 +1551,17 @@ template <typename T> struct TypeSizeConstant
         val = sizeof(T)
     };
 };
-class hkMemoryAllocator
+
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-  public:
-    __forceinline void* __cdecl operator new(hk_size_t, void* p)
-    {
-        return p;
-    }
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes) = 0;
-    virtual void ReleaseBlock(void* p, int numBytes) = 0;
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    template <typename TYPE> inline TYPE* _bufAlloc(int& reqNumInOut)
-    {
-        const int SIZE_ELEM = TypeSizeConstant<TYPE>::val;
-        int n = reqNumInOut * SIZE_ELEM;
-        void* p = AllocateBufferWithSize(n);
-        reqNumInOut = n / SIZE_ELEM;
-        return static_cast<TYPE*>(p);
-    }
-
-  public:
-    enum MemoryState
-    {
-        MEMORY_STATE_OK,
-        MEMORY_STATE_OUT_OF_MEMORY
-    };
-};
-struct StringPointerTriple
-{
-  public:
-    __forceinline StringPointerTriple();
-
-  protected:
-    ValueWrapper<void*> m_next;
-    ValueWrapper<void*> m_kRayStart;
-    ValueWrapper<void*> m_kRayEnd;
-};
-class NineIntegerRecord
-{
-  public:
-    __forceinline void* __cdecl operator new(hk_size_t, void* p)
-    {
-        return p;
-    }
-    typedef hkMemoryAllocator Allocator;
-    static NineIntegerRecord& __cdecl GetMonitorStream();
-    inline Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-
-  protected:
-    StringPointerTriple m_aiEntries;
-    Allocator* m_pTemp;
-    Allocator* m_pStreamAllocator;
-    Allocator* m_pDebugAllocator;
-};
-class hkBaseObject
-{
-  public:
-    static const struct ClassMemberDescriptor Members[];
-
-  public:
-    __forceinline hkBaseObject()
-    {}
-};
-class hkReferencedObject : public hkBaseObject
-{
-  public:
-    __forceinline void* __cdecl operator new(hk_size_t nbytes)
-    {
-        ;
-        hkReferencedObject* b = static_cast<hkReferencedObject*>(
-            NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));
-        b->m_usMemSizeAndFlags = static_cast<hkUint16>(nbytes);
-        ;
-        return b;
-    }
-    __forceinline hkReferencedObject();
-    virtual ~hkReferencedObject()
-    {}
-
-  public:
-    enum
-    {
-        MASK_MEMSIZE = 0x7fff
-    };
-    hkUint16 m_usMemSizeAndFlags;
-    mutable hkInt16 m_sReferenceCount;
-
-  public:
-    hkReferencedObject(class FinishingFlag flag)
-    {}
-};
-__forceinline hkReferencedObject::hkReferencedObject() : m_sReferenceCount(1)
-{}
-template <bool N> struct BooleanTypeConstant
-{
-    typedef BooleanTypeConstant<N> type;
-    enum
-    {
-        result = N
-    };
-};
-typedef BooleanTypeConstant<true> hkTypeIsPod;
-struct RouterHeapAllocatorProvider
-{
-    hkMemoryAllocator& get(const void*)
-    {
-        return NineIntegerRecord::GetMonitorStream().heap();
-    }
-};
-template <typename T> class HavokElementArray
-{
-  public:
-    typedef HavokElementArray<T> ThisType;
-    __forceinline HavokElementArray();
-
-  protected:
-    __forceinline HavokElementArray(const HavokElementArray& a)
-    {
-        ;
-    }
-
-  public:
-    __forceinline void _useExternalArray(T*, int cap);
-    __forceinline T& operator[](int i);
-    __forceinline void setOwnedData(T* ptr, int size, int capacity);
-
-  protected:
-    __forceinline HavokElementArray<T>& copyFromArray(hkMemoryAllocator&, const HavokElementArray<T>& src, hkTypeIsPod);
-
-  public:
-    enum
-    {
-        CAPACITY_MASK = int(0x3FFFFFFF),
-        FLAG_MASK = int(0xC0000000),
-        DONT_DEALLOCATE_FLAG = int(0x80000000),
-        FORCE_SIGNED = -1
-    };
-
-  protected:
-    friend class hkStatisticsCollector;
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-  public:
-    HavokElementArray(FinishingFlag f)
-    {}
-};
-template <typename T, typename Allocator = RouterHeapAllocatorProvider> class hkArray : public HavokElementArray<T>
-{
-  public:
-    typedef Allocator AllocatorType;
-    __forceinline hkArray() : HavokElementArray<T>()
-    {}
-    explicit __forceinline hkArray(int size);
-
-  protected:
-    __forceinline hkArray(const hkArray& a);
-
-  public:
-    __forceinline hkArray& operator=(const HavokElementArray<T>& a);
-};
-template <typename T> __forceinline T& HavokElementArray<T>::operator[](int i)
-{
-    ;
-    return m_data[i];
+    return hkMemoryRouter::getInstance().heap();
 }
-template <typename T>
-__forceinline HavokElementArray<T>::HavokElementArray() : m_data(0), m_iElementCount(0), m_iCapacityState(DONT_DEALLOCATE_FLAG)
-{}
-template <typename T> void HavokElementArray<T>::setOwnedData(T* ptr, int size, int capacity)
-{
-    ;
-    ;
-    m_data = ptr;
-    m_iElementCount = size;
-    m_iCapacityState = capacity;
-}
-template <typename T, typename Allocator> __forceinline hkArray<T, Allocator>::hkArray(int n) : HavokElementArray<T>()
+template <typename T, typename Allocator> __forceinline hkArray<T, Allocator>::hkArray(int n) : hkArrayBase<T>()
 {
     hkMemoryAllocator& a = Allocator().get(this);
     T* p = n ? a._bufAlloc<T>(n) : 0;
-    int cap = n ? n : HavokElementArray<T>::DONT_DEALLOCATE_FLAG;
-    HavokElementArray<T>::setOwnedData(p, n, cap);
+    int cap = n ? n : hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
+    hkArrayBase<T>::setOwnedData(p, n, cap);
 }
 typedef float hkReal;
 extern "C"
@@ -1857,64 +1578,22 @@ extern "C"
     extern __m128 _mm_setr_ps(float _A, float _B, float _C, float _D);
 };
 typedef __m128 hkQuadReal;
-class VectorComponentValue
-{
-  public:
-    VectorComponentValue(const hkQuadReal& x) : m_vValue(x)
-    {}
-    __forceinline hkQuadReal broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-    __forceinline const hkQuadReal& getQuad() const
-    {
-        return m_vValue;
-    }
-
-  private:
-    hkQuadReal m_vValue;
-};
-class hkVector4
-{
-  public:
-    __forceinline void* __cdecl operator new(hk_size_t nbytes)
-    {
-        ;
-        void* obj = NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));
-        ;
-        return obj;
-    }
-    __forceinline void set(hkReal x, hkReal y, hkReal z, hkReal w = 0);
-    __forceinline void setZero4();
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const;
-    __forceinline VectorComponentValue lengthInverse3() const;
-    __forceinline void normalize3();
-
-  private:
-    hkQuadReal m_vComponents;
-
-  public:
-    operator hkQuadReal() const
-    {
-        return m_vComponents;
-    }
-};
 inline void hkVector4::set(hkReal a, hkReal b, hkReal c, hkReal d)
 {
     m_vComponents = _mm_setr_ps(a, b, c, d);
 }
-inline VectorComponentValue hkVector4::dot3(const hkVector4& a) const
+inline hkSimdReal hkVector4::dot3(const hkVector4& a) const
 {
     hkQuadReal x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
     hkQuadReal xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, (((1) << 6) | ((1) << 4) | ((1) << 2) | ((1)))), x2);
     return _mm_add_ss(_mm_shuffle_ps(x2, x2, (((2) << 6) | ((2) << 4) | ((2) << 2) | ((2)))), xySum);
 }
-inline VectorComponentValue hkVector4::lengthInverse3() const
+static inline hkSimdReal MoppLengthInverse3(const hkVector4& vector)
 {
     const hkQuadReal half = _mm_set_ss(0.5f);
     const hkQuadReal three = _mm_set_ss(3.0f);
     const hkQuadReal zero = _mm_set_ss(0.0f);
-    const hkQuadReal len2 = this->dot3(*this).getQuad();
+    const hkQuadReal len2 = vector.dot3(vector).getQuad();
     const hkQuadReal len2EqualsZero = _mm_cmpeq_ss(len2, zero);
     const hkQuadReal approx = _mm_rsqrt_ss(len2);
     const hkQuadReal refined =
@@ -1923,78 +1602,9 @@ inline VectorComponentValue hkVector4::lengthInverse3() const
 }
 inline void hkVector4::normalize3()
 {
-    hkQuadReal lenInv = lengthInverse3().broadcast();
+    hkQuadReal lenInv = MoppLengthInverse3(*this).broadcast();
     m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
 }
-class hkpMoppCode : public hkReferencedObject
-{
-  public:
-    __forceinline void* __cdecl operator new(hk_size_t nbytes)
-    {
-        ;
-        hkReferencedObject* b = static_cast<hkReferencedObject*>(
-            NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));
-        b->m_usMemSizeAndFlags = static_cast<hkUint16>(nbytes);
-        ;
-        return b;
-    }
-    enum BuildType
-    {
-        BUILT_WITH_CHUNK_SUBDIVISION,
-        BUILT_WITHOUT_CHUNK_SUBDIVISION,
-        BUILD_NOT_SET
-    };
-    struct CodeInfo
-    {
-        __forceinline void* __cdecl operator new(hk_size_t nbytes)
-        {
-            ;
-            void* obj = NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));
-            ;
-            return obj;
-        }
-        __forceinline void __cdecl operator delete(void* p)
-        {
-            if (p)
-            {
-                ;
-                NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(p, sizeof(hkpMoppCode::CodeInfo));
-            }
-        }
-        __forceinline void* __cdecl operator new(hk_size_t n, void* p)
-        {
-            ;
-            return p;
-        }
-        __forceinline void* __cdecl operator new[](hk_size_t, void* p)
-        {
-            return p;
-        }
-        __forceinline void __cdecl operator delete(void*, void*)
-        {}
-        __forceinline void __cdecl operator delete[](void*, void*)
-        {}
-        class CommandArgument;
-        static const struct ClassMemberDescriptor Members[];
-        static const hkClass& __cdecl staticClass();
-        struct DefaultStruct;
-        inline hkReal getScale() const;
-        inline void setScale(hkReal inVal);
-        hkVector4 m_offset;
-    };
-
-  public:
-    hkpMoppCode()
-    {
-        m_info.m_offset.setZero4();
-        m_eBuildType = BUILD_NOT_SET;
-    }
-
-  public:
-    struct CodeInfo m_info;
-    hkArray<hkUint8> m_data;
-    hkEnum<BuildType, hkInt8> m_eBuildType;
-};
 class hkpMoppMediator;
 class hkpMoppNodeMgr;
 class hkpMoppCodeGenerator;
@@ -2012,7 +1622,7 @@ class hkpMoppAssembler : public hkReferencedObject
     {
         ;
         hkReferencedObject* b = static_cast<hkReferencedObject*>(
-            NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));
+            hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes)));
         b->m_usMemSizeAndFlags = static_cast<hkUint16>(nbytes);
         ;
         return b;
@@ -2022,7 +1632,7 @@ class hkpMoppAssembler : public hkReferencedObject
         __forceinline void* __cdecl operator new(hk_size_t nbytes)
         {
             ;
-            void* obj = NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));
+            void* obj = hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));
             ;
             return obj;
         }
@@ -2031,7 +1641,7 @@ class hkpMoppAssembler : public hkReferencedObject
             if (p)
             {
                 ;
-                NineIntegerRecord::GetMonitorStream().heap().ReleaseBlock(
+                hkMemoryRouter::getInstance().heap().blockFree(
                     p, sizeof(hkpMoppAssembler::MoppAssemblerSettings));
             }
         }
@@ -2076,8 +1686,8 @@ class FUN_00e090c0 : public hkpMoppAssembler
     int m_iFirstValue;
     int m_iSecondValue;
     int m_iThirdValue;
-    hkpMoppCode::CodeInfo m_kMoppInfo;
-    hkArray<MoppSplitPlane, RouterHeapAllocatorProvider> kMoppArray;
+    CodeInfo m_kMoppInfo;
+    hkArray<MoppSplitPlane> kMoppArray;
     MoppAssemblerSettings m_params;
 };
 // @fnv 0x00e090c0

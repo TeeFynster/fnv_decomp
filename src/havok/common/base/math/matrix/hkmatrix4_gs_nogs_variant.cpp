@@ -5,87 +5,11 @@
 
 // src/havok/common/base/math/matrix/hkmatrix4.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/math/matrix/hkmatrix4.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct FUN_00de8f30_Class
-{
-    float m_data[16];
-    void TransposeTo(float* dst);
-};
-struct FUN_00de8f10_Class
-{
-    float m_data[16];
-    void FUN_00de8f10();
-};
-struct FUN_00de8fa0_Class
-{
-    float m_data[16];
-    void FUN_00de8fa0(const float* src);
-};
-struct FUN_00de9010_Class
-{
-    float m_data[16];
-    void CopyTo(float* dst);
-};
-struct FUN_00de9080_Class
-{
-    float m_data[16];
-    void CopyFromFloats(const float* src);
-};
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-struct __declspec(align(16)) hkVector4
-{
-    float x, y, z, w;
-    void operator=(const hkVector4& o)
-    {
-        *(__m128*)&x = *(const __m128*)&o.x;
-    }
-};
-struct hkMatrix4
-{
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-    hkVector4 m_kColumn3;
-    void FUN_00de8da0(const hkMatrix4& a, const hkMatrix4& b);
-    void FUN_00de8e50(const hkMatrix4& b);
-    void operator=(const hkMatrix4& o)
-    {
-        m_kColumn0 = o.m_kColumn0;
-        m_kColumn1 = o.m_kColumn1;
-        m_kColumn2 = o.m_kColumn2;
-        m_kColumn3 = o.m_kColumn3;
-    }
-};
-struct FUN_00de90f0_Class
-{
-    __m128 rows[4];
-    void FUN_00de90f0(const __m128* source);
-};
+#include "../../../../../../include/hkMatrix4.h"
+
 struct CB20B0_Class
 {
     void FUN_00cb20b0(void* src);
-};
-struct Matrix44_shell
-{
-    float m_data[16];
-    void FUN_00de9130(CB20B0_Class* dst);
-};
-struct Owner
-{
-    __m128 row00;
-    __m128 row10;
-    __m128 row20;
-    __m128 row30;
-    void FUN_00de8910(float value);
-    void FUN_00de8c50(const __m128* source, float value);
 };
 struct SourceBlockCDF
 {
@@ -144,39 +68,6 @@ struct FUN_00cdf230_cls
     TargetBlockCDF m_kRoomNode;
     void FUN_00cdf230(int iArg);
 };
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-struct Row
-{
-    __m128 v;
-    void operator+=(const Row& o)
-    {
-        __m128 t = o.v;
-        v = _mm_add_ps(t, v);
-    }
-};
-struct MatR
-{
-    Row m_row0;
-    Row m_row1;
-    Row m_row2;
-    Row m_row3;
-    const MatR* Add(const MatR* other);
-};
-extern float DAT_0104da4c;
-__declspec(align(16)) struct S00de9270_Vec
-{
-    float m_uiX;
-    float m_uiY;
-    float m_uiZ;
-    float m_w;
-};
-struct S00de9270_Mat
-{
-    S00de9270_Vec m_r0;
-    S00de9270_Vec m_r1;
-    S00de9270_Vec m_r2;
-    S00de9270_Vec m_r3;
-};
 struct FUN_00de8910_Class
 {
     float unk00;
@@ -205,7 +96,7 @@ struct S00de9270_cls
     float unk04;
     float unk08;
     float unk0c;
-    void FUN_00de9270(void* dst, const S00de9270_Mat* src);
+    void FUN_00de9270(void* dst, const hkMatrix4* src);
 };
 
 extern "C"
@@ -312,6 +203,7 @@ enum S00de92d0_Result
     S00de92d0_FAILURE = 1
 };
 
+// local form of hkMatrix3: 0x00de92d0 needs inline construction/rows/vector operations; shared form gives 320 bytes vs exe 311.
 class S00de92d0_Matrix3
 {
   public:

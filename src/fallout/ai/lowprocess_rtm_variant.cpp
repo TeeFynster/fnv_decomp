@@ -1,23 +1,61 @@
 // src/fallout/ai/lowprocess_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/fallout/ai/lowprocess.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /Od /Oy- /GS /EHsc /Gy /GF (unit lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton.
 
-#include "lowprocess_decls.h"
+// Reuse the unit's process dependencies with the shared NPC hierarchy.
+// include/TESFile.h needs the Windows types before layout_support.h stubs them.
+#define WIN32_LEAN_AND_MEAN
+#define NOGDI
+#include <windows.h>
+#include "lowprocess_support.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/TESObjectCELL.h"
+#include "../../../include/TESDataHandler.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESBoundObject.h"
 
-__if_not_exists(TESNPC::InitWornForm)
+#include "../../../include/ActiveEffect.h"
+#include "../../../include/ActorMover.h"
+#include "../../../include/BGSDehydrationStage.h"
+#include "../../../include/BGSListForm.h"
+#include "../../../include/BGSLoadFormBuffer.h"
+#include "../../../include/BGSLoadGameBuffer.h"
+#include "../../../include/BGSPickupPutdownSounds.h"
+#include "../../../include/CombatProcedure.h"
+#include "../../../include/EffectSetting.h"
+#include "../../../include/ExtraLock.h"
+#include "../../../include/HighProcess.h"
+#include "../../../include/LowProcess.h"
+#include "../../../include/TES.h"
+#include "../../../include/TESFaction.h"
+#include "../../../include/TESGlobal.h"
+#include "../../../include/TESRecipe.h"
+#include "../../../include/TESTopicInfo.h"
+#include "../../../include/TESValueForm.h"
+class TargetDoorController
 {
-    class TESNPC : public ::TESBoundObject
-    {
-      public:
-        void InitWornForm(::Actor*, ::ValidBip01Names*, bool);
-    };
-}
+  public:
+    TESObjectREFR* pObject;
+    TESBoundObject* pItem;
+    bool bActivate;
+    bool m_bUseSpecialAction;
+    unsigned char layoutPaddingA[2];
+    int iCount;
+    float fDistance;
+    float fValue;
+    int eType;
+    ~TargetDoorController();
+};
+
+extern TESValueForm DAT_011e0e80;
+#include "../../../include/TESNPC.h"
 
 namespace acquire907_rework {
 using ::TESForm;
 using ::TESObjectREFR;
 using ::TESBoundObject;
 
-class AcquireBase907;
+class AcquireActorBaseView;
 
 class Acq907
 {
@@ -201,13 +239,13 @@ class Act907
     TESForm* FUN_007af430();
 };
 
-class ProjSub907
+class AcquireAIServiceQuery
 {
   public:
     bool FUN_0047f600(TESBoundObject* item);
 };
 
-class AcquireBase907
+class AcquireActorBaseView
 {
   public:
     unsigned int unk00;
@@ -246,35 +284,28 @@ class AcquireBase907
     unsigned int unk84;
     unsigned int unk88;
     unsigned int unk8C;
-    ProjSub907 sub90;
+    AcquireAIServiceQuery sub90;
 };
 
-class Ref907
+// Actor-base view: 0x004181e0 binds Actor::GetActorBase; base + 0x90 queries TESAIForm services at 0x0047f600.
+class AcquireActorReference
 {
   public:
-    int FUN_00569160();
-};
-
-class Projectile907
-{
-  public:
-    AcquireBase907* FUN_004181e0() const;
-};
-
-class Proc907 : public ::LowProcess
-{
-  public:
-    void FUN_00907d90(Act907* arg);
+    AcquireActorBaseView* FUN_004181e0() const;
 };
 
 extern "C" TESBoundObject* DAT_011ca268;
 int __cdecl FUN_0048e8a0(TESBoundObject* item);
 
+}
+
+using namespace acquire907_rework;
+
 // @fnv 0x00907d90
-void Proc907::FUN_00907d90(Act907* arg)
+void LowProcess::ProcessAcquire(Actor* arg)
 {
     List907* itF = reinterpret_cast<List907*>(&this->m_kDetectionDataList);
-    Shell8e* pkg_h = (Shell8e*)this->vfn_27c();
+    Shell8e* pkg_h = (Shell8e*)static_cast<const LowProcess*>(this)->GetOneTimePackage();
     bool bA7 = pkg_h ? pkg_h->FUN_008e30e0() : false;
     bool bBI = pkg_h ? pkg_h->IsFlag400Set() : false;
     bool bCB = pkg_h ? pkg_h->FUN_008e3100() : false;
@@ -298,32 +329,32 @@ void Proc907::FUN_00907d90(Act907* arg)
                 bValid7 = false;
         }
 
-        if ((pRefA->GetOwner() && pRefA->GetOwner() != arg->FUN_007af430()) || pRefA->IsActor())
+        if ((pRefA->GetOwner() && pRefA->GetOwner() != reinterpret_cast<Act907*>(arg)->FUN_007af430()) || pRefA->IsActor())
         {
             bool b313 = false;
             bool b32Ptr = false;
             int nG = FUN_0048e8a0(pItemR);
             TESNPC* pNPCA = 0;
 
-            if (!pRefA->vfn_22c(false) && arg->FUN_00891d70() >= nG)
+            if (!pRefA->HasHealth(false) && reinterpret_cast<Act907*>(arg)->FUN_00891d70() >= nG)
             {
-                Projectile907* pProjQ = 0;
-                if (pRefA->vfn_218())
+                AcquireActorReference* pProjQ = 0;
+                if (pRefA->IsCharacter())
                 {
-                    pProjQ = (Projectile907*)pRefA;
+                    pProjQ = (AcquireActorReference*)pRefA;
                 }
                 else
                 {
                     pNPCA = dynamic_cast<TESNPC*>(pRefA->GetOwner());
                     if (pNPCA)
-                        pProjQ = (Projectile907*)DAT_011e0e80.GetValueFromForm(pNPCA, false);
+                        pProjQ = (AcquireActorReference*)DAT_011e0e80.GetValueFromForm(pNPCA, false);
                 }
                 if (pProjQ && bA7 && pProjQ->FUN_004181e0()->sub90.FUN_0047f600(pItemR))
                 {
-                    if (!arg->FUN_00493bb0())
+                    if (!reinterpret_cast<Act907*>(arg)->FUN_00493bb0())
                     {
                         pNodeM->eType = 2;
-                        pNodeM->iB = (int)arg->FUN_005723b0(pRefA, 0, 0);
+                        pNodeM->iB = (int)reinterpret_cast<Act907*>(arg)->FUN_005723b0(pRefA, 0, 0);
                         bDoneZ = true;
                     }
                     else
@@ -340,11 +371,11 @@ void Proc907::FUN_00907d90(Act907* arg)
                     if (bBI)
                         b313 = true;
                 }
-                else if (pRefA->vfn_22c(false))
+                else if (pRefA->HasHealth(false))
                 {
                     bValid7 = true;
                 }
-                else if (pRefA->vfn_218())
+                else if (pRefA->IsCharacter())
                 {
                     pOther3 = pRefA;
                     if (bBI)
@@ -361,8 +392,8 @@ void Proc907::FUN_00907d90(Act907* arg)
                         {
                             int x = 0;
                             pNodeM->eType = 4;
-                            bool okD = arg->FUN_00891db0(DAT_011ca268, 0, 1, 0, &x);
-                            if (!okD && ((Ref907*)pRefA)->FUN_00569160())
+                            bool okD = reinterpret_cast<Act907*>(arg)->FUN_00891db0(DAT_011ca268, 0, 1, 0, &x);
+                            if (!okD && pRefA->GetLock())
                                 bValid7 = false;
                         }
                         else
@@ -372,7 +403,7 @@ void Proc907::FUN_00907d90(Act907* arg)
                     }
                     else if (b313)
                     {
-                        if (!arg->FUN_00493bb0())
+                        if (!reinterpret_cast<Act907*>(arg)->FUN_00493bb0())
                         {
                             pNodeM->eType = 4;
                         }
@@ -383,7 +414,7 @@ void Proc907::FUN_00907d90(Act907* arg)
                     }
                     else if (b32Ptr)
                     {
-                        if (!arg->FUN_00493bb0() && !arg->FUN_00566950())
+                        if (!reinterpret_cast<Act907*>(arg)->FUN_00493bb0() && !reinterpret_cast<Act907*>(arg)->FUN_00566950())
                         {
                             if (!actor_p || (actor_p && !actor_p->FUN_00566950()))
                                 pNodeM->eType = 5;
@@ -398,12 +429,12 @@ void Proc907::FUN_00907d90(Act907* arg)
                 }
                 else
                 {
-                    if (arg->v21c())
+                    if (reinterpret_cast<Act907*>(arg)->v21c())
                     {
                         bValid7 = false;
                     }
-                    else if (pRefA->IsActor() && !pRefA->vfn_218() && pRefA->GetOwner() != arg->FUN_007af430() &&
-                             !arg->FUN_00566950())
+                    else if (pRefA->IsActor() && !pRefA->IsCharacter() && pRefA->GetOwner() != reinterpret_cast<Act907*>(arg)->FUN_007af430() &&
+                             !reinterpret_cast<Act907*>(arg)->FUN_00566950())
                     {
                         if (actor_p && !actor_p->FUN_00566950())
                         {
@@ -420,7 +451,7 @@ void Proc907::FUN_00907d90(Act907* arg)
         }
         else
         {
-            pNodeM->iB = (int)arg->FUN_005723b0(pRefA, 0, 0);
+            pNodeM->iB = (int)reinterpret_cast<Act907*>(arg)->FUN_005723b0(pRefA, 0, 0);
         }
 
         if (bValid7)
@@ -437,4 +468,3 @@ void Proc907::FUN_00907d90(Act907* arg)
     reinterpret_cast<List907&>(this->m_kDetectionDataList).FUN_00470470();
 }
 
-}

@@ -5,13 +5,8 @@
 
 // src/havok/physics/collide/shape/convex/cylinder/hkpcylindershape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/convex/cylinder/hkpcylindershape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpCylinderShape.h"
+#include "../../../../../../../include/hkpCylinderShape.h"
 int __cdecl FUN_00d571b0();
-// FUN_00d571a0: __thiscall getter returning the float at this+0x14,
-class hkpCylinderShapeGetCylRadius : public hkpCylinderShape {
-public:
-    hkReal FUN_00d571a0();
-};
 extern char DAT_01268940[];
 void __cdecl FUN_00c90360(void* item, const char* type);
 void __cdecl FUN_00d571c0(void* item, const char*);

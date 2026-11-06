@@ -1,20 +1,11 @@
-// fallout_shared/creaturesounds_decls.h: declares TESCreature, TESSound, SoundListEntry, SoundListView
+// fallout_shared/creaturesounds_decls.h: declares SoundListEntry, SoundListView
 #ifndef CREATURESOUNDS_DECLS_H
 #define CREATURESOUNDS_DECLS_H
 
 
 #include "creaturesounds_types_CREATURE_SOUND_TYPE.h"
-#include "TESForm.h"
-
-class TESCreature : public TESForm
-{
-};
-
-class TESSound : public TESForm
-{
-  public:
-    static TESSound* FindSoundByFilename(const char* filename);
-};
+#include "layout_support.h"
+#include "../../include/TESForm.h"
 
 class SoundListEntry
 {

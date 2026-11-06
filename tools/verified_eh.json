@@ -1,0 +1,308 @@
+{
+ "note": "EH code of units the owner has built against the game at a commit where it differs from main (compare_builds.py eh). The check accepts these digests as they are. Updated by the owner.",
+ "units": {
+  "src/bsaudio/bsaudiomanager_ob1_variant.cpp": [
+   "1386e5f5c00c8395244cb1ef76bec909b2dcd6f22ac79a24311c48bdcf9aca5e"
+  ],
+  "src/bscore/bssimplelist_h_unit.cpp": [
+   "5f3d53d45804ab72bda3c94017cee71bcbc2a286e1e32445a34fdf48a22427ba"
+  ],
+  "src/bsmenu/tileimage.cpp": [
+   "ad39848854f4858c5e4a87f255b251beb729e6c8d5ffd23daa27256ef6dbfae9"
+  ],
+  "src/bsshader/debugshader.cpp": [
+   "a7ac5802c3b3b0941ed7c6665a7af4fd59455527d1ebd82f01c5c639f67da672"
+  ],
+  "src/bssystem/console/bsconsolefilecache.cpp": [
+   "d3e12996577b7d1a3a9e294bd0fc1f354abf8bd0fa1526d2337433690b977d57"
+  ],
+  "src/fallout/ai/highprocess.cpp": [
+   "bfdf0e26deafa789cbe5ce4d1e6414bc15d433f56ff49822eaedb2af180aff9a"
+  ],
+  "src/fallout/ai/movement/actormover.cpp": [
+   "86ece5e326c8ef576a2ca5bf66bf244fdf81071812d25dbe6568eca0efaee2fb"
+  ],
+  "src/fallout/ai/playercharacter.cpp": [
+   "e6f994a082f12f722ff112c6d97da87f7fb1cff1718b63c5b6ef0bbe3f07103c"
+  ],
+  "src/fallout/interface/interface.cpp": [
+   "7c24d80c078a8e52ea8ec18759558256239b187f9f0a605c3f78729b7352ffc3"
+  ],
+  "src/fallout/interface/interfacemanager.cpp": [
+   "211b319d67a90b52bd5b3f5004ff82c2e7701c59a58f1f8d19f30ac420ed839b"
+  ],
+  "src/fallout/interface/listbox.cpp": [
+   "fe6c76b24a3867a7479f06bea1163748ee9af51df525b33b4c2ce134f92ab6bc"
+  ],
+  "src/fallout/interface/menumanager.cpp": [
+   "300230dab92dfd0ec8e410d4533854dee8784c0f7617ab5006e5280231bcc979"
+  ],
+  "src/fallout/interface/menus/computersmenu.cpp": [
+   "60a2de6a05ef227a5fbbf9952b358c6a4f3ee26c9a76f6d63c4397b46295d49d"
+  ],
+  "src/fallout/interface/menus/levelupmenu.cpp": [
+   "b0611398d20d274cfc60f479c3e27f35057a708171d34b5010762329e4ed877f"
+  ],
+  "src/fallout/interface/menus/mapmenu.cpp": [
+   "900d61a0a702227789718bb2db0cb9b62886dda80588210c206277c89b01ae95"
+  ],
+  "src/fallout/interface/menus/recipemenu.cpp": [
+   "e08a3c2f5ea78c9ca135b1bd053f47b36f8ed7ec7ab6f018c0b3d5afb35fcc18"
+  ],
+  "src/fallout/interface/menus/repairservicesmenu.cpp": [
+   "395e26f29aa61d06f592da16e84737760f7a43e74ab41d83e16fe29befd86cd1"
+  ],
+  "src/fallout/interface/menus/roulettemenu_ctx_variant.cpp": [
+   "ab427972f2d7673d5f0ae5d5c14f63acbb5a699a8ab0b37e02532d47def46283"
+  ],
+  "src/fallout/interface/menus/startmenu.cpp": [
+   "553cbb0ba9e14f5702863125faf3d4192ccb7f88e44111cdfd24c8fdc136219f"
+  ],
+  "src/fallout/magic/magicprojectile.cpp": [
+   "91900937a8f3097c075b3b3f2834e2d463e2d3323a739de096cc9705fb53d9d3"
+  ],
+  "src/fallout_shared/actorvalue.cpp": [
+   "8237b6c8747d1bd3f5441dd859e223e5ace895828bf1a29d8262d822027e7520"
+  ],
+  "src/fallout_shared/animation.cpp": [
+   "12e053b49f2bdef2efdfb4193a183f1ab854b11c5ba0baa3633fab7af0249f87"
+  ],
+  "src/fallout_shared/bgsbodypartdata.cpp": [
+   "44272c7900d184c30ab0ef9f1dde4ce86bea98e238cefa9aeaadff5c088c68be"
+  ],
+  "src/fallout_shared/bgscamerapath.cpp": [
+   "1ef3efeda78d175db1e6485fed13daef0ec5a7a4adb24a2daab5690581fb08a6"
+  ],
+  "src/fallout_shared/bgsdebris.cpp": [
+   "6ffa87f20059d3c569d90c9f98b8cdc06742d75e39330dd6605c8a83673a9e1d"
+  ],
+  "src/fallout_shared/bgsdefaultobjectmanager.cpp": [
+   "ea2bf3302f04f8181513796a11fe6a8a380517d70ed1f09032c011071646caaa"
+  ],
+  "src/fallout_shared/bgsexplosion.cpp": [
+   "301d52de6136e1c9fb152334bc7a89f07126bef85d39ef6fad0afccbc676ea98"
+  ],
+  "src/fallout_shared/bgsheadpart.cpp": [
+   "1e62ee3e1afdb1ba7e20e859ac282486ed526bd8e095d97884437798a3d77696"
+  ],
+  "src/fallout_shared/bgsimpactdata.cpp": [
+   "1954e2bedb1fdf4c7226e1544e6bf59ca78d7b8d025deab06baf2528d893241a"
+  ],
+  "src/fallout_shared/bgslistform.cpp": [
+   "71725765cfde7ff79de26e9ba0c7d45a6b8501772e5aefba7c0033d07419aa08"
+  ],
+  "src/fallout_shared/bgsmessage.cpp": [
+   "9a9499e037b192cb418b70c909cf8068df267f9db881af6da926c01a34ea4f96"
+  ],
+  "src/fallout_shared/bgsperk.cpp": [
+   "7adc27edd1518f8d33bfe37827da144dc8ab9ddc72f09e03dde5938f1d065a6c"
+  ],
+  "src/fallout_shared/bgsplaceablewater.cpp": [
+   "77bdd5ddec6bf5e7cf6ab9ad9020f331edecb40ac6cb614ae1948f2991b252c1"
+  ],
+  "src/fallout_shared/bgsprojectile.cpp": [
+   "64c75f2b2f593d97952c3d3234233812d0c9548669883e4bf2bcfbc6b9263e25"
+  ],
+  "src/fallout_shared/bgsragdoll.cpp": [
+   "2c274fed44ffef57efe9bd1c248590826a8de2eb7af2a849c61229837c84a903"
+  ],
+  "src/fallout_shared/bgstalkingactivator.cpp": [
+   "927bcccb06cfc5fe4e955236756ec08a7f5e89d5bc96d712e98ae307e8fb9af8"
+  ],
+  "src/fallout_shared/bgstextureset.cpp": [
+   "e61bc9ec3813b8cfcdf0a46ad727e89f33124b9464e7aa5de287e9e7c048ecb6"
+  ],
+  "src/fallout_shared/distant terrain system/bgsdistantobjectblock.cpp": [
+   "3c5eae4a44031ee8420f23c8af4dc9df8fed9e1b56261f60649274b84536e60c"
+  ],
+  "src/fallout_shared/distant terrain system/bgsterrainchunk_decl_variant.cpp": [
+   "2af62c8e998b7724990536f9eb93c90a401ec96a2ae76dd3467aa26dc105d8ea"
+  ],
+  "src/fallout_shared/extradatacell.cpp": [
+   "1d80ca98983b0e59f4e88c7725cab1f42c67b07740f7c5964315a89d1c5f17b9"
+  ],
+  "src/fallout_shared/extradatalist.cpp": [
+   "6aee7ee368ef42f9daf8de1b73349404ed535e6778e92797f4d0d34fd33bf6ce"
+  ],
+  "src/fallout_shared/extradataobjects.cpp": [
+   "eb105d97a9538f76921bff972f7932befbb709e2f4db890193848a54433c86cf"
+  ],
+  "src/fallout_shared/facegen/bsfacegenmanager.cpp": [
+   "d518ac2d218c999b83355a233f8bece6f3ff646da366900ebea7f79c7a81859d"
+  ],
+  "src/fallout_shared/facegen/bsfacegenmorph.cpp": [
+   "bb7d9cf6bf3211e7609e5fcf55dda1bfaa75686d6ec7138c482626a52315d847"
+  ],
+  "src/fallout_shared/imagespacemodifierinstance.cpp": [
+   "24aea9f69394f016bbfa0209d8ee04c98093bf51319e660272a945615da6b3a1"
+  ],
+  "src/fallout_shared/magic/alchemyitem.cpp": [
+   "f2950bb4129c81b472556777025ee2a81bc2b416b16c0c779320e7eb2a2e9d29"
+  ],
+  "src/fallout_shared/mediaset.cpp": [
+   "d52f7e138ec8e4920d7722338a790fa18c08e91a6636b005777a586e5ee56ef7"
+  ],
+  "src/fallout_shared/modelloader.cpp": [
+   "f5dcda503ec79dddfa3d2e1215067cb84b0c4618458a532f0d86e5becd14167e"
+  ],
+  "src/fallout_shared/pathfinding/navmesh_util.cpp": [
+   "8755404c5478da32ff134705d3f4bad6504de73be5087fb83ccac935e3876293"
+  ],
+  "src/fallout_shared/pathfinding/navmeshinfomap.cpp": [
+   "eaf96dfbf2932d9ecaad725c54bea18e5514b718c7328088e7e577e530df58c2"
+  ],
+  "src/fallout_shared/pathfinding/navmeshobstaclemanager.cpp": [
+   "3d4905d8b36fbfb51c5c14f8b2eeab278960d896d43c766320ac850e2056846c"
+  ],
+  "src/fallout_shared/pathfinding/navmeshobstacletask.cpp": [
+   "53e12d0db03895b2996277e6cc590edea88f0a31ed317379cecbd75d2f86eddd"
+  ],
+  "src/fallout_shared/pathfinding/pathfind.cpp": [
+   "95b4a4683b457d8941a85dc456d3e17acadb3aa7428c2cbfd7bf7881bee8a73b"
+  ],
+  "src/fallout_shared/pathfinding/pathingrequest.cpp": [
+   "3b27c1e71464b9d58c7abe7c2274ee87f68198e92998ad49da6af21268f5ee2b"
+  ],
+  "src/fallout_shared/pathfinding/pathingsolution.cpp": [
+   "d32a826156b0f4c44f4bc049ce0a62c294a79262fbe1a1fcfbe765ab90d3cb2d"
+  ],
+  "src/fallout_shared/tesammo.cpp": [
+   "42c57f9168f2ce0ad537f9a828a3904cc94f92051a8896893c9eb743bcf89c62"
+  ],
+  "src/fallout_shared/tescaravan.cpp": [
+   "225c14979d4f503c3a28500c86a1ca7d2176d5d4f856f57522c02d7f7f1ef43a"
+  ],
+  "src/fallout_shared/tescasinochips.cpp": [
+   "806c9e885270c70527343e0e566dcac9b90aa2eface36bf2e932e992b73033f5"
+  ],
+  "src/fallout_shared/tescreature.cpp": [
+   "e84db93e90b6cdd81e9f95179ea3142938e3739fa9ae83f402be6c7809f96492"
+  ],
+  "src/fallout_shared/teseyes.cpp": [
+   "9103c6abe932b3f67b680a01e711b0a2f2f5c390d6ff13fe520252c67f60bfc6"
+  ],
+  "src/fallout_shared/tesfaction.cpp": [
+   "d74f3863cd5b75b59a4b677877aaf8e7ebaeef677378c33286502b382d2a958c"
+  ],
+  "src/fallout_shared/tesimagespacemodifier.cpp": [
+   "1997295abe5c533e58c1eca904b0e63cab668fd6c0cfb8328d061992cb5b09e1"
+  ],
+  "src/fallout_shared/teslevcharacter.cpp": [
+   "6e6f51e397f6d3664e9e1755a993f0811773357b1d8dd84f56f9b0e7ec2b9fcd"
+  ],
+  "src/fallout_shared/teslevcreature.cpp": [
+   "7d7803f1ff830dd96d181905aa13a6578870bea69413be5fd2ff0347d34d11e2"
+  ],
+  "src/fallout_shared/tesleveledlist.cpp": [
+   "5a85b5cfeba99fab934bf8a9e9d4eb1bc2387a9cf4f8b698b68f67053162b909"
+  ],
+  "src/fallout_shared/teslevitem.cpp": [
+   "d1a5238c8875a7e316c6ebc19e3123f1ac779709f2d428bd8656225dc9f861be"
+  ],
+  "src/fallout_shared/teslight.cpp": [
+   "345d0fcdb23d4db3d97e43cdf381a1c8e718e68ebcf29f9c4950a97fe9574191"
+  ],
+  "src/fallout_shared/tesnpc.cpp": [
+   "093f64844296c390504f6b3b4d567b384fd3f7264e03d09719696f5b01e72c69"
+  ],
+  "src/fallout_shared/tesobjectacti.cpp": [
+   "d409d4736865b090082e8a7eb0cb78b8d75eb4d010f295226cd10e467445d162"
+  ],
+  "src/fallout_shared/tesobjectbook.cpp": [
+   "0cac9964d85846fa720a138588103da30691bbf6d846f42001d9a82ab3e5bc49"
+  ],
+  "src/fallout_shared/tesobjectcell.cpp": [
+   "5a865cb4e7a633bd302e6426cd9f038ae05377d635894dbbd84db6f1c4ba5274"
+  ],
+  "src/fallout_shared/tesobjectclot.cpp": [
+   "d57794258881955c92877da2884a0524f6955a0945821a66e9e7a5f152d224fb"
+  ],
+  "src/fallout_shared/tesobjectcont.cpp": [
+   "a5dfa278d1f5fad3f3a598e0ced44a0b4df569521116db36062616586763c602"
+  ],
+  "src/fallout_shared/tesobjectdoor.cpp": [
+   "0e2444a8e23d3d284dd46d0314f4a44ede05b44daa72d9743b5ddaa7fc6721d4"
+  ],
+  "src/fallout_shared/tesobjectrefr.cpp": [
+   "d31ddc9775e92c2c580f02c86ab759e15e160fe6123c5f8c009c6c27f19744f0"
+  ],
+  "src/fallout_shared/tesquest.cpp": [
+   "47736dc6dc8b2b122d2b9e485d71a0cd9017468d8e4cf4fc0409d49f43c52830"
+  ],
+  "src/fallout_shared/tesrace.cpp": [
+   "6c24d3d892c46daaa8c852475ee393f70cdf796e378569086ca19f9f9b79cfba"
+  ],
+  "src/fallout_shared/tesscriptcompiler.cpp": [
+   "6d3f6e8b2493cc0177d0143370b1f484d4f7ffeb7c7bbc8716aff25bc00d72ea"
+  ],
+  "src/fallout_shared/tessound.cpp": [
+   "f570c839fa19af663178e56571139cc234a8d585bced1391512100875223def3"
+  ],
+  "src/fallout_shared/testopic.cpp": [
+   "58cf639fa345bd273e607925f5d5c02900152b640d3c57308eca02127f22e68a"
+  ],
+  "src/fallout_shared/testopicinfo.cpp": [
+   "76609dbda088fe67c8d53b39a6d1ceeb0dd098ea14844693082451297bc00dd6"
+  ],
+  "src/fallout_shared/teswater.cpp": [
+   "7757a1623d916994b18c7a3d836fccbae89d7140a966099cdd8e8da41f1724b0"
+  ],
+  "src/fallout_shared/tesweather.cpp": [
+   "d17f9a134a6dd71963b98b24118fc572aa5fa394226268b1900df8fac8bbc06a"
+  ],
+  "src/gamebryo2.2/corelibs/nimain/nistream.cpp": [
+   "2e5a201195fad2a39480333cfcb857245dc61d544435e0480fe2e4afee119a22"
+  ],
+  "src/staging/blk_00420000_od.cpp": [
+   "58d24ffa504b7b2beed8dafb1c0fd732faa4e4382999cdbd1f8967ae46f17909"
+  ],
+  "src/staging/blk_00440000_od.cpp": [
+   "e46e0fdad1ed4315cbd1165f850ad83f4e042657b28f5caf16392968052cd8c9"
+  ],
+  "src/staging/blk_00540000_od.cpp": [
+   "f908afe7ee0b2ce9af3c7a38b21af65624c74fbda144b38335ed5aa509506d6d"
+  ],
+  "src/staging/blk_00580000_od.cpp": [
+   "4c2c9a2b7bf4024bc989c302b46dbef325666ac6ec11a798e30feb1733b90ef0"
+  ],
+  "src/staging/blk_00680000_od.cpp": [
+   "37cc34267dc3151539bac8e9ff7aadd38de2d1599c3a33550042114845fc01a4"
+  ],
+  "src/staging/blk_006a0000_od.cpp": [
+   "904a702818784b7ad24976539923b7be90cb6eb54fe93a451db66e7d1fd80cf4"
+  ],
+  "src/staging/blk_006c0000_od.cpp": [
+   "ab3b377f126f713ec58d1c9c6144d1d1231c450e24cff8a72be9978b63d1a889"
+  ],
+  "src/staging/blk_00740000_od.cpp": [
+   "69c97af05affac1974fbb7a8038b295e185813acc31d6ecca8a6c966050337aa"
+  ],
+  "src/staging/blk_00760000_od.cpp": [
+   "916cba2fd21b0fa7e549b149a8c3eb37c258b1394be6c335b9c913e6373c187f"
+  ],
+  "src/staging/blk_008c0000_od.cpp": [
+   "d6023fe0cd67e867d8f8c8b2061f308984523fd4da9b5a26d507b365a91f5441"
+  ],
+  "src/staging/blk_00ba0000_o2.cpp": [
+   "07fd2430eb5da3cf7c3f15b7731280b74bb3afe9535cf79d60e6391d4a3ced08"
+  ],
+  "src/staging/blk_00bc0000_o2.cpp": [
+   "f6ea1f628d69dc7a22f72b445c0fef8f6528f50f215ff91662e5d70cea818ea8"
+  ],
+  "src/teslandtexture.cpp": [
+   "07c59692d545254f5fb65d6e36dd191705167c1291f74c6c8d414347c4b33ecd"
+  ],
+  "src/tesloadscreen.cpp": [
+   "b14219412f5196fa9db53358274e273e45c86ab02aaf45161c2d7e0f35cbfa02"
+  ],
+  "src/tesobjectarmo.cpp": [
+   "a44f48dcc61dc317d9eac867f75d9302aaf9ed596612ee8feb6c0761006cf758"
+  ],
+  "src/tesobjecttree.cpp": [
+   "1b6c644a3d5851c27a4f67ac01fd310662d25c91865a1f3545055c49932ccadb"
+  ],
+  "src/tesregiondatasound.cpp": [
+   "901b1a4ea6059eff604e6eef5b901e1023f686f1afe3ca13e1c2af6bc3938a46"
+  ]
+ }
+}

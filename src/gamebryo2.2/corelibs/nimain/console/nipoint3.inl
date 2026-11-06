@@ -13,7 +13,7 @@ float NiPoint3::ComputeMagnitude() const
 // @fnv 0x00457910
 float NiPoint3::GetLengthSquared()
 {
-    float fScaleMultiplier = ComputeMagnitude();
+    float fScaleMultiplier = static_cast<const NiPoint3*>(this)->ComputeMagnitude();
     if (fScaleMultiplier > DAT_01017cf8)
     {
         float fInvLength = 1.0f / fScaleMultiplier;
@@ -38,7 +38,7 @@ NiPoint3 NiPoint3::CrossProduct(const NiPoint3& kPoint) const
         y * kPoint.z - z * kPoint.y,
         z * kPoint.x - x * kPoint.z,
         x * kPoint.y - y * kPoint.x);
-    float fScaleMultiplier = kCross.ComputeMagnitude();
+    float fScaleMultiplier = static_cast<const NiPoint3&>(kCross).ComputeMagnitude();
     if (fScaleMultiplier > DAT_01017cf8)
         return kCross.FUN_0053d280(fScaleMultiplier);
     else
@@ -48,9 +48,9 @@ NiPoint3 NiPoint3::CrossProduct(const NiPoint3& kPoint) const
 #pragma optimize("gty", on)
 // @fnv 0x00a69990
 NiPlane::NiPlane(const NiPoint3& kNormal, const NiPoint3& kPoint)
-    : m_kPlaneNormal(kNormal),
-      m_fPlaneConstant(kNormal.x * kPoint.x + kNormal.y * kPoint.y + kNormal.z * kPoint.z)
 {
+    *reinterpret_cast<NiPoint3*>(&x) = kNormal;
+    c = kNormal.x * kPoint.x + kNormal.y * kPoint.y + kNormal.z * kPoint.z;
 }
 #pragma optimize("", off)
 

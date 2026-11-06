@@ -2,10 +2,16 @@
 // src/gamebryo2.2/corelibs/niparticle/nipsysgravitymodifier.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysgravitymodifier.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+#include "../../../../include/NiPSysBombModifier.h"
+#include "../../../../include/NiPSysModifier.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/NiTransform.h"
+#include "../../../../include/NiMatrix3.h"
+
+#include "../../../../include/NiMemObject.h"
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
 
 extern NiMemObject g_01202548;
@@ -25,34 +31,12 @@ void* __cdecl FUN_00c2e540()
 }
 
 namespace fnv_00c22b00 {
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+using ::NiMemObject;
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct CloningProcess
-{
-    void __dflt_ctor_closure();
-    void* __vecDelDtor(unsigned int);
-    void* m_pCloneMap;
-    void* m_pProcessMap;
-    int m_eCloneCopyMode;
-    char m_bExactType;
-    char _pad_d[3];
-};
-typedef char _sizecheck_NiCloningProcess[sizeof(CloningProcess) == 16 ? 1 : -1];
 
-struct NiPoint3
-{
-    float x, y, z;
-};
-struct NiPSysModifier
-{
-    char _pad[0x1c];
-    void CopyMemberData(NiPSysModifier*, CloningProcess&);
-};
 struct NiPSysGravityModifier : NiPSysModifier
 {
+    NiObject* m_pkGravityObject;
     NiPoint3 m_kGravityDirection;
     float m_fDistanceDecay;
     float m_fValue;
@@ -85,55 +69,12 @@ NiPSysGravityModifier* NiPSysGravityModifier::FUN_00c22b00(CloningProcess& proce
 }
 }  // namespace fnv_00c22b00
 
-namespace fnv_00c2e520 {
-struct NiAVObject;
-struct NiBinaryStream;
-struct NiFixedString;
-struct NiObject;
-struct NiObjectGroup;
-struct NiSearchPath;
-struct NiTexture;
-struct NiThread;
-struct NiMemObject
-{
-    char _pad_0[1];
-};
-typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-
-struct NiStream
-{
-    NiObject* GetLoadedObject(void);
-};
-
-struct NiPSysModifier
-{
-    virtual void LinkObject(NiStream&);
-};
-
-struct NiPSysBombModifier : NiPSysModifier
-{
-    char _pad[0x14];
-    NiObject* m_pPointer;  // +0x18
-    void LinkObject(NiStream&);
-};
-
+// @fnv 0x00c2e520
 void NiPSysBombModifier::LinkObject(NiStream& stream)
 {
     NiPSysModifier::LinkObject(stream);
-    m_pPointer = stream.GetLoadedObject();
+    m_pkBombObject = stream.GetLoadedObject();
 }
-
-struct FUN_00c2e520_shell : NiPSysBombModifier
-{
-    void LinkObject(NiStream&);
-};
-
-// @fnv 0x00c2e520
-void FUN_00c2e520_shell::LinkObject(NiStream& stream)
-{
-    NiPSysBombModifier::LinkObject(stream);
-}
-}  // namespace fnv_00c2e520
 
 struct S_00c236b0_BinaryStream;
 typedef unsigned int(__cdecl* S_00c236b0_ReadFn)(S_00c236b0_BinaryStream* pkThis, void* pvBuffer, unsigned int uiBytes,
@@ -320,29 +261,10 @@ template <class T> inline void S_00c236b0_StreamLoadBinary(S_00c236b0_Stream& kS
     S_00c236b0_BinaryStreamLoad(*kStream.m_pUnderlyingStream, &value, 1);
 }
 
-struct S_00c236b0_Member1C
+struct S_00c236b0_Obj : NiPSysModifier
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    void FUN_00a59be0(S_00c236b0_Stream& kStream);
-};
-
-struct S_00c236b0_Base
-{
-    void* vtbl;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    void FUN_00c318b0(S_00c236b0_Stream& kStream);  // LoadBinary
-};
-
-struct S_00c236b0_Obj : S_00c236b0_Base
-{
-    S_00c236b0_Member1C m_1C;
+    NiObject* m_pkGravityObject;
+    NiPoint3 m_1C;
     int m_28;
     int m_2C;
     int m_30;
@@ -357,9 +279,9 @@ struct S_00c236b0_Obj : S_00c236b0_Base
 // @fnv 0x00c236b0
 void S_00c236b0_Obj::LoadFromStream(S_00c236b0_Stream& kStream)
 {
-    FUN_00c318b0(kStream);
+    NiPSysModifier::LoadBinary(reinterpret_cast<NiStream&>(kStream));
     kStream.FUN_00a645b0();
-    m_1C.FUN_00a59be0(kStream);
+    m_1C.LoadBinary(reinterpret_cast<NiStream&>(kStream));
     S_00c236b0_StreamLoadBinary(kStream, m_28);
     S_00c236b0_StreamLoadBinary(kStream, m_2C);
     int iValue;
@@ -432,7 +354,7 @@ void FNVSerializer::WriteToStream(FNVStreamArchive* stream)
         writer->write(writer, reinterpret_cast<char*>(this) + 0x3c, 1, reinterpret_cast<unsigned int*>(&length), 1);
 }
 
-struct NiViewerStringsArray
+struct GravityViewerStringsArray
 {
     void* m_vtbl;
     char** m_pBase;
@@ -453,35 +375,18 @@ struct NiViewerStringsArray
     }
 };
 
-struct NiRTTIStandIn
-{
-    const char* m_pcName;
-};
-extern NiRTTIStandIn g_kGravityModifierRTTI_01202548;
+extern NiRTTI g_kGravityModifierRTTI_01202548;
 
 char* __cdecl FUN_00a7d330(const char* pcName);
 char* __cdecl FUN_00a7d5e0(const char* pcPrefix, const char* pcValue);
 char* __cdecl FUN_00a7d550(const char* pcPrefix, float fValue);
 char* __cdecl FUN_00a7d370(const char* pcPrefix, bool bValue);
 
-struct NiPoint3StandIn
-{
-    float x, y, z;
-    char* FUN_00a59af0(const char* pcPrefix) const;
-};
-
-struct NiAVObjectStandIn
-{
-    int unk00;
-    int unk04;
-    const char* m_kName;
-};
-
 struct NiPSysGravityModifierImpl
 {
     char pad00[0x18];
-    NiAVObjectStandIn* m_pkGravityObject;
-    NiPoint3StandIn m_kGravityDirection;
+    NiAVObject* m_pkGravityObject;
+    NiPoint3 m_kGravityDirection;
     float m_fDistanceDecay;
     float m_fValue;
     int m_eForceType;
@@ -489,19 +394,19 @@ struct NiPSysGravityModifierImpl
     float m_fTurbulenceScale;
     bool m_bFieldFlag;
 
-    void FUN_00c319e0(NiViewerStringsArray* pkStrings);
-    void AddViewerStrings(NiViewerStringsArray* pkStrings);
+    void FUN_00c319e0(GravityViewerStringsArray* pkStrings);
+    void AddViewerStrings(GravityViewerStringsArray* pkStrings);
 };
 
 // Appends the gravity modifier's RTTI name, gravity object, axis, decay, strength, turbulence, force type and world-aligned flag to the viewer strings array.
 // @fnv 0x00c238c0
-void NiPSysGravityModifierImpl::AddViewerStrings(NiViewerStringsArray* pkStrings)
+void NiPSysGravityModifierImpl::AddViewerStrings(GravityViewerStringsArray* pkStrings)
 {
     FUN_00c319e0(pkStrings);
     pkStrings->Add(FUN_00a7d330(g_kGravityModifierRTTI_01202548.m_pcName));
     const char* pcGravityObjName;
     if (m_pkGravityObject)
-        pcGravityObjName = m_pkGravityObject->m_kName;
+        pcGravityObjName = m_pkGravityObject->m_kName.m_kHandle;
     else
         pcGravityObjName = "None";
     pkStrings->Add(FUN_00a7d5e0("Gravity Object", pcGravityObjName));
@@ -549,13 +454,6 @@ struct Node18
     virtual bool v5c(void* p);
 };
 
-struct SubObj
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-};
-
 struct FUN_00c235f0_cls
 {
     unsigned int unk00;
@@ -565,7 +463,7 @@ struct FUN_00c235f0_cls
     unsigned int unk10;
     unsigned int unk14;
     Node18* m_18;
-    SubObj m_1c;
+    NiPoint3 m_1c;
     float m_28;
     float m_2c;
     int m_30;
@@ -574,7 +472,6 @@ struct FUN_00c235f0_cls
     char m_3c;
 
     bool FUN_00c31830(FUN_00c235f0_cls* o);
-    bool FUN_00439090(void* p);
     bool IsEqual(FUN_00c235f0_cls* o);
 };
 
@@ -588,7 +485,7 @@ bool FUN_00c235f0_cls::IsEqual(FUN_00c235f0_cls* apOther)
             return false;
         if (m_18 && apOther->m_18 && !m_18->v5c(apOther->m_18))
             return false;
-        if (((FUN_00c235f0_cls*)&apOther->m_1c)->FUN_00439090(&m_1c))
+        if (apOther->m_1c != m_1c)
             return false;
         if (apOther->m_28 != m_28)
             return false;
@@ -615,108 +512,57 @@ inline float DecayExp(float value)
     return (float)exp(value);
 }
 
-struct VectorC22
+inline float& GravityX(NiPoint3& p) { return p.x; }
+inline float& GravityY(NiPoint3& p) { return p.y; }
+inline float& GravityZ(NiPoint3& p) { return p.z; }
+inline const float& GravityX(const NiPoint3& p) { return p.x; }
+inline const float& GravityY(const NiPoint3& p) { return p.y; }
+inline const float& GravityZ(const NiPoint3& p) { return p.z; }
+inline float& GravityComponent(NiPoint3& p, unsigned i) { return p.components[i]; }
+
+inline NiPoint3& AddGravityVector(NiPoint3& target, const NiPoint3& p)
 {
-
-    union
-    {
-        struct
-        {
-            float x, y, z;
-        };
-        float components[3];
-    };
-    float& operator[](unsigned i)
-    {
-        return components[i];
-    }
-    const float& operator[](unsigned i) const
-    {
-        return components[i];
-    }
-    __forceinline float& X()
-    {
-        return x;
-    }
-    __forceinline float& Y()
-    {
-        return y;
-    }
-    __forceinline float& Z()
-    {
-        return z;
-    }
-    __forceinline const float& X() const
-    {
-        return x;
-    }
-    __forceinline const float& Y() const
-    {
-        return y;
-    }
-    __forceinline const float& Z() const
-    {
-        return z;
-    }
-
-    __forceinline void CopyAxis(VectorC22 source)
-    {
-        memcpy(&z, &source.z, 4);
-        memcpy(&y, &source.y, 4);
-        memcpy(&x, &source.x, 4);
-    }
-
-    VectorC22()
-    {}
-
-    VectorC22(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-
-    VectorC22 operator-(const VectorC22& p) const
-    {
-        VectorC22 result(x - p.x, y - p.y, z - p.z);
-        return result;
-    }
-
-    VectorC22 operator*(float k) const
-    {
-        VectorC22 result(x * k, y * k, z * k);
-        return result;
-    }
-
-    VectorC22 operator+(const VectorC22& p) const
-    {
-        VectorC22 result(x + p.x, y + p.y, z + p.z);
-        return result;
-    }
-
-    VectorC22& operator+=(const VectorC22& p)
-    {
-        X() += p.X();
-        Y() += p.Y();
-        Z() += p.Z();
-        return *this;
-    }
-
-    float Dot(const VectorC22& p) const
-    {
-        return x * p.x + y * p.y + z * p.z;
-    }
-
-    float Length() const
-    {
-        return (float)sqrt((double)(float)(x * x + y * y + z * z));
-    }
-};
-
-inline VectorC22 operator*(float scale, const VectorC22& point)
-{
-    return VectorC22(point.x * scale, point.y * scale, point.z * scale);
+    GravityX(target) += GravityX(p);
+    GravityY(target) += GravityY(p);
+    GravityZ(target) += GravityZ(p);
+    return target;
 }
 
-__declspec(noinline) void __fastcall FUN_004a0c10(VectorC22* point)
+// Keep the particle update's vector arithmetic inline, as in the original unit.
+inline NiPoint3::NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
+{}
+
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& p) const
 {
-    float length = point->Length();
+    NiPoint3 result(x - p.x, y - p.y, z - p.z);
+    return result;
+}
+
+inline NiPoint3 NiPoint3::operator*(float k) const
+{
+    NiPoint3 result(x * k, y * k, z * k);
+    return result;
+}
+
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& p) const
+{
+    NiPoint3 result(x + p.x, y + p.y, z + p.z);
+    return result;
+}
+
+inline float NiPoint3::Length() const
+{
+    return (float)sqrt((double)(float)(x * x + y * y + z * z));
+}
+
+inline NiPoint3 operator*(float scale, const NiPoint3& point)
+{
+    return NiPoint3(point.x * scale, point.y * scale, point.z * scale);
+}
+
+__declspec(noinline) void __fastcall FUN_004a0c10(NiPoint3* point)
+{
+    float length = static_cast<const NiPoint3*>(point)->Length();
     if (length > 9.999999974752427e-07)
     {
         float inverse = 1.0f / length;
@@ -730,9 +576,9 @@ __declspec(noinline) void __fastcall FUN_004a0c10(VectorC22* point)
     }
 }
 
-__declspec(noinline) float __fastcall FUN_00457910(VectorC22* point)
+__declspec(noinline) float __fastcall FUN_00457910(NiPoint3* point)
 {
-    float length = point->Length();
+    float length = static_cast<const NiPoint3*>(point)->Length();
     if (length > 9.999999974752427e-07)
     {
         float inverse = 1.0f / length;
@@ -748,75 +594,31 @@ __declspec(noinline) float __fastcall FUN_00457910(VectorC22* point)
     return length;
 }
 
-struct MatrixC22
-{
-
-    float xx, xy, xz, yx, yy, yz, zx, zy, zz;
-
-    VectorC22 FUN_004b4500(const VectorC22* source) const;
-};
-
-struct TransformC22
-{
-
-    __forceinline TransformC22& operator=(const TransformC22& other)
-    {
-        memcpy(this, &other, sizeof(*this));
-        return *this;
-    }
-
-    TransformC22()
-    {}
-
-    __forceinline TransformC22(const TransformC22& other)
-    {
-        memcpy(this, &other, sizeof(*this));
-    }
-
-    MatrixC22 rotation;
-
-    VectorC22 translation;
-
-    float scale;
-
-    TransformC22* FUN_004b4880(TransformC22* destination);
-
-    void FUN_0062c250(const TransformC22* lhs, const TransformC22* rhs);
-};
-
-struct SourceC22
-{
-
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-
-    int unk20, unk24, unk28, unk2c, unk30;
-
-    TransformC22 localTransform;
-
-    TransformC22 worldTransform;
-};
+// NiTransform uses the original inverse/product targets 0x004b4880/0x0062c250.
+inline NiTransform::NiTransform()
+{}
 
 struct ParticleC22
 {
 
-    VectorC22 position;
+    NiPoint3 position;
 
     float unk0c, unk10, activeTime, unk18;
     float GetActiveTime() const
     {
         return activeTime;
     }
-    VectorC22& GetPosition()
+    NiPoint3& GetPosition()
     {
         return position;
     }
 
-    __forceinline void ApplyMotion(VectorC22 motion, float elapsed)
+    __forceinline void ApplyMotion(NiPoint3 motion, float elapsed)
     {
 
         float step = elapsed - activeTime;
 
-        VectorC22 displacement = motion * step;
+        NiPoint3 displacement = motion * step;
 
         position.x += displacement.x;
 
@@ -831,7 +633,7 @@ struct EmitterC22
 
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
 
-    VectorC22* sourcePositions;
+    NiPoint3* sourcePositions;
 
     int unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40, unk44, unk48, unk4c;
 
@@ -846,7 +648,7 @@ struct EmitterC22
     {
         return particles;
     }
-    VectorC22* GetSourcePositions() const
+    NiPoint3* GetSourcePositions() const
     {
         return sourcePositions;
     }
@@ -863,13 +665,13 @@ struct EffectC22
 
     int unk00, unk04, unk08, unk0c;
 
-    SourceC22* sourceTransform;
+    NiAVObject* sourceTransform;
 
     int unk14;
 
-    SourceC22* directionSource;
+    NiAVObject* directionSource;
 
-    VectorC22 location;
+    NiPoint3 location;
 
     float radialStrength;
 
@@ -899,13 +701,13 @@ struct EffectC22
         return spread;
     }
 
-    __forceinline VectorC22 Axis(const TransformC22& local)
+    __forceinline NiPoint3 Axis(const NiTransform& local)
     {
-        VectorC22 result;
+        NiPoint3 result;
         if (useSource)
-            result = directionSource->localTransform.rotation.FUN_004b4500(&location);
+            result = directionSource->m_kLocal.m_Rotate.operator*(location);
         else
-            result = local.rotation.FUN_004b4500(&location);
+            result = local.m_Rotate.operator*(location);
         return result;
     }
 
@@ -920,26 +722,27 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
     if (!emitter->GetActiveCount() || !directionSource)
         return;
 
-    TransformC22 x = directionSource->worldTransform;
+    NiTransform x;
+    memcpy(&x, &directionSource->m_kWorld, sizeof(x));
 
-    TransformC22 pForm;
+    NiTransform pForm;
 
-    pForm = sourceTransform->worldTransform;
+    memcpy(&pForm, &sourceTransform->m_kWorld, sizeof(pForm));
 
-    TransformC22 ptr;
+    NiTransform ptr;
 
     pForm.FUN_004b4880(&ptr);
 
-    ptr.FUN_0062c250(&pForm, &x);
+    ptr.FUN_0062c250(&pForm, x);
 
-    VectorC22 vForceDirection;
+    NiPoint3 vForceDirection;
     if (useSource)
     {
-        const MatrixC22& m = directionSource->localTransform.rotation;
-        vForceDirection = m.FUN_004b4500(&location);
+        const NiMatrix3& m = directionSource->m_kLocal.m_Rotate;
+        vForceDirection = m.operator*(location);
     }
     else
-        vForceDirection = pForm.rotation.FUN_004b4500(&location);
+        vForceDirection = pForm.m_Rotate.operator*(location);
 
     FUN_004a0c10(&vForceDirection);
 
@@ -960,7 +763,7 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
 
             unsigned short i;
             float s;
-            VectorC22* p;
+            NiPoint3* p;
             (void)i;
             (void)s;
             (void)p;
@@ -972,7 +775,7 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
 
                 s = (elapsed - pParticle->GetActiveTime()) * fSourceStrength;
 
-                VectorC22 vDisplacement = vForceDirection * s;
+                NiPoint3 vDisplacement = vForceDirection * s;
                 p = &pParticle->position;
                 float& deltaz = vDisplacement.z;
                 p->x += vDisplacement.x;
@@ -991,10 +794,10 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
             for (unsigned short i = 0; i < j; ++i, ++pParticle)
             {
 
-                VectorC22 kIter;
+                NiPoint3 kIter;
                 kIter = fSourceStrength * vForceDirection;
 
-                VectorC22 vOffset;
+                NiPoint3 vOffset;
 
                 vOffset.x = FUN_006397c0() * randomScale;
 
@@ -1002,7 +805,7 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
 
                 vOffset.z = FUN_006397c0() * randomScale;
 
-                pParticle->position += (kIter + vOffset) * (elapsed - pParticle->activeTime);
+                AddGravityVector(pParticle->position, (kIter + vOffset) * (elapsed - pParticle->activeTime));
             }
         }
         else if (radialStrength != 0.0f && GetTurbulence() == 0.0f)
@@ -1011,15 +814,15 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
             ParticleC22* pParticle;
             pParticle = emitter->GetParticles();
 
-            VectorC22* y;
+            NiPoint3* y;
             y = emitter->GetSourcePositions();
 
             for (unsigned short i = 0; i < j; ++i, ++pParticle, ++y)
             {
 
-                VectorC22 z;
+                NiPoint3 z;
 
-                z = pForm.translation - *y;
+                z = pForm.m_Translate - *y;
 
                 float fDot;
 
@@ -1031,8 +834,8 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
                 else
                     fDecay = DecayExp(fDot * -GetDecay());
 
-                pParticle->GetPosition() +=
-                    vForceDirection * ((elapsed - pParticle->GetActiveTime()) * (fSourceStrength * fDecay));
+                AddGravityVector(pParticle->GetPosition(),
+                    vForceDirection * ((elapsed - pParticle->GetActiveTime()) * (fSourceStrength * fDecay)));
             }
         }
         else if (GetDecay() != 0.0f && GetTurbulence() != 0.0f)
@@ -1042,7 +845,7 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
 
             pParticle = emitter->GetParticles();
 
-            VectorC22* y;
+            NiPoint3* y;
             y = emitter->GetSourcePositions();
 
             float randomScale;
@@ -1052,9 +855,9 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
             for (unsigned short i = 0; i < j; ++i, ++pParticle, ++y)
             {
 
-                VectorC22 vOffset;
+                NiPoint3 vOffset;
 
-                VectorC22 kIter = fSourceStrength * vForceDirection;
+                NiPoint3 kIter = fSourceStrength * vForceDirection;
 
                 vOffset.x = FUN_006397c0() * randomScale;
 
@@ -1062,7 +865,7 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
 
                 vOffset.z = FUN_006397c0() * randomScale;
 
-                VectorC22 z = pForm.translation - *y;
+                NiPoint3 z = pForm.m_Translate - *y;
 
                 float v;
 
@@ -1090,22 +893,22 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
             ParticleC22* pParticle;
             pParticle = emitter->GetParticles();
 
-            VectorC22* y;
+            NiPoint3* y;
             y = emitter->GetSourcePositions();
 
             for (unsigned short i = 0; i < j; ++i, ++pParticle, ++y)
             {
 
-                vForceDirection.X() = pForm.translation.X() - y->X();
+                GravityX(vForceDirection) = GravityX(pForm.m_Translate) - GravityX(*y);
 
-                vForceDirection.Y() = pForm.translation.Y() - y->Y();
+                GravityY(vForceDirection) = GravityY(pForm.m_Translate) - GravityY(*y);
 
-                vForceDirection.Z() = pForm.translation.Z() - y->Z();
+                GravityZ(vForceDirection) = GravityZ(pForm.m_Translate) - GravityZ(*y);
 
                 FUN_004a0c10(&vForceDirection);
 
                 float s = (elapsed - pParticle->activeTime) * fSourceStrength;
-                pParticle->GetPosition() += vForceDirection * s;
+                AddGravityVector(pParticle->GetPosition(), vForceDirection * s);
             }
         }
         else if (GetDecay() == 0.0f && dispersion != 0.0f)
@@ -1115,20 +918,20 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
 
             ParticleC22* pParticle = emitter->GetParticles();
 
-            VectorC22* y = emitter->GetSourcePositions();
+            NiPoint3* y = emitter->GetSourcePositions();
 
             for (unsigned short i = 0; i < j; ++i, ++pParticle, ++y)
             {
 
-                vForceDirection.X() = pForm.translation.X() - y->x;
+                GravityX(vForceDirection) = GravityX(pForm.m_Translate) - y->x;
 
-                vForceDirection.Y() = pForm.translation[1] - y->Y();
+                GravityY(vForceDirection) = GravityComponent(pForm.m_Translate, 1) - GravityY(*y);
 
-                vForceDirection.Z() = pForm.translation.Z() - y->Z();
+                GravityZ(vForceDirection) = GravityZ(pForm.m_Translate) - GravityZ(*y);
 
                 FUN_004a0c10(&vForceDirection);
 
-                VectorC22 vOffset;
+                NiPoint3 vOffset;
 
                 vOffset.x = FUN_006397c0() * randomScale;
 
@@ -1136,14 +939,14 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
 
                 vOffset.z = FUN_006397c0() * randomScale;
 
-                pParticle->GetPosition() +=
-                    (fSourceStrength * vForceDirection + vOffset) * (elapsed - pParticle->GetActiveTime());
+                AddGravityVector(pParticle->GetPosition(),
+                    (fSourceStrength * vForceDirection + vOffset) * (elapsed - pParticle->GetActiveTime()));
             }
         }
         else if (GetDecay() != 0.0f && GetTurbulence() == 0.0f)
         {
 
-            VectorC22* y;
+            NiPoint3* y;
 
             ParticleC22* pParticle;
 
@@ -1154,16 +957,16 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
             for (unsigned short i = 0; i < j; ++i, ++pParticle, ++y)
             {
 
-                vForceDirection.X() = pForm.translation.X() - y->x;
+                GravityX(vForceDirection) = GravityX(pForm.m_Translate) - y->x;
 
-                vForceDirection.Y() = pForm.translation.Y() - y->Y();
+                GravityY(vForceDirection) = GravityY(pForm.m_Translate) - GravityY(*y);
 
-                vForceDirection.Z() = pForm.translation.Z() - y->z;
+                GravityZ(vForceDirection) = GravityZ(pForm.m_Translate) - y->z;
 
                 float fDecay = DecayExp((float)(-GetDecay() * FUN_00457910(&vForceDirection)));
 
                 float s = fDecay * fSourceStrength * (elapsed - pParticle->GetActiveTime());
-                pParticle->GetPosition() += vForceDirection * s;
+                AddGravityVector(pParticle->GetPosition(), vForceDirection * s);
             }
         }
         else if (GetDecay() != 0.0f && dispersion != 0.0f)
@@ -1171,7 +974,7 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
 
             ParticleC22* pParticle = emitter->GetParticles();
 
-            VectorC22* y;
+            NiPoint3* y;
 
             y = emitter->GetSourcePositions();
 
@@ -1181,9 +984,9 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
             for (unsigned short i = 0; i < j; ++i, ++pParticle, ++y)
             {
 
-                VectorC22 vOffset;
+                NiPoint3 vOffset;
 
-                VectorC22 kIter = vForceDirection * fSourceStrength;
+                NiPoint3 kIter = vForceDirection * fSourceStrength;
 
                 vOffset.x = FUN_006397c0() * randomScale;
 
@@ -1191,7 +994,7 @@ void EffectC22::FUN_00c22b70(float elapsed, EmitterC22* emitter)
 
                 vOffset.z = FUN_006397c0() * randomScale;
 
-                VectorC22 z = pForm.translation - *y;
+                NiPoint3 z = pForm.m_Translate - *y;
 
                 float fDecay;
                 fDecay = DecayExp((float)(-GetDecay() * FUN_00457910(&z)));

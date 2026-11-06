@@ -1,8 +1,10 @@
+#include "../../include/BSStringT.h"
 
 // src/staging/blk_00720000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/Tile.h"
+#include "../../include/VATSMenu.h"
 
 struct FUN_00726d50_class
 {
@@ -43,12 +45,9 @@ void FUN_00730490(char* apString, int aiSize)
     FUN_00ecbc5b(apString, aiSize);
 }
 
-struct BSS
-{
-    ~BSS();
-};
+
 void __cdecl Deallocate(void*);
-struct FUN_00726cf0 : BSS
+struct FUN_00726cf0 : ::BSStringT<char>
 {
     void* m_p;
     ~FUN_00726cf0();
@@ -165,27 +164,13 @@ void FUN_00726db0_class::FUN_00726db0(bool abEnabled)
 
 int GetTileValueID(char const*, int);
 
-struct TGF
-{
-    float GetFloat(int);
-};
-
-struct VATSMenu
-{
-    void* p0;
-    int p1;
-    void* p2;
-    TGF* tile;
-
-    int GetSelectedTargetIndex();
-    unsigned int GetFilteredCount();
-};
 
 // @fnv 0x00726b40
 unsigned int VATSMenu::GetFilteredCount()
 {
     static int numFiltered = GetTileValueID("_num_filtered", -1);
-    return GetSelectedTargetIndex() - (unsigned int)tile->GetFloat(numFiltered);
+    // This routine reads its tile from the template-list link slot (offset 0x0C).
+    return GetSelectedTargetIndex() - (unsigned int)reinterpret_cast<Tile*>(m_kTileTemplateList.m_pkNext)->GetFloat(numFiltered);
 }
 
 struct FUN_0073ac90_shell
@@ -199,14 +184,9 @@ void* FUN_0073ac90_shell::FUN_0073ac90()
     return (char*)(void*)*(void**)this + 8;
 }
 
-struct Target_b9969
-{
-    void Call(int a, int b);
-};
-
 struct Inner_b9969
 {
-    Target_b9969* m_00;
+    Tile* m_00;
     int m_04;
     unsigned char m_08;
 };
@@ -229,13 +209,13 @@ struct FUN_00725aa0_cls
     unsigned short m_1c;
     float m_20;
 
-    void Log(Target_b9969* v);
+    void Log(Tile* v);
     void Finish1();
     void Finish2();
     void ProcessSlots();
 };
 
-// Resets m_1c and m_20, iterates the node list calling Call(0xfac, m_1c++) and Log on each slot with m_08 == 0, then calls Finish1 and Finish2.
+// Resets m_1c and m_20, iterates the node list calling Set(0xfac, m_1c++) and Log on each slot with m_08 == 0, then calls Finish1 and Finish2.
 // @fnv 0x00725aa0
 void FUN_00725aa0_cls::ProcessSlots()
 {
@@ -245,7 +225,7 @@ void FUN_00725aa0_cls::ProcessSlots()
     {
         if ((*cur->Slot())->m_08 == 0)
         {
-            (*cur->Slot())->m_00->Call(0xfac, m_1c++);
+            (*cur->Slot())->m_00->Set(0xfac, m_1c++);
             Log((*cur->Slot())->m_00);
         }
     }
@@ -253,13 +233,6 @@ void FUN_00725aa0_cls::ProcessSlots()
     Finish2();
 }
 
-class Tile
-{
-  public:
-    float GetFloat(int value);
-    void Set(int value, float amount, bool mode);
-    void Set(int value, int count);
-};
 extern double DAT_01012060;
 extern float __cdecl FUN_004e4430(float value);
 extern int __cdecl FUN_00647b70(int lower, int upper);
@@ -315,11 +288,6 @@ struct FNVNodeLink
     void*** GetRef();
 };
 
-struct FNVObj
-{
-    void Notify(int a, unsigned int b);
-};
-
 struct FUN_00726090_cls
 {
     int unk00;
@@ -350,7 +318,7 @@ void FUN_00726090_cls::FUN_00726090()
     {
         if (((unsigned char*)*cur->GetRef())[8] == 0)
         {
-            ((FNVObj*)**cur->GetRef())->Notify(0xfac, m_1c++);
+            ((Tile*)**cur->GetRef())->Set(0xfac, m_1c++);
             Remove(**cur->GetRef());
         }
     }
@@ -364,14 +332,9 @@ int __cdecl FUN_007273e0()
     return (int)1077u;
 }
 
-struct Fnv72c700Obj
-{
-    void FUN_00700320(int a, int b);
-};
-
 struct Fnv72c700Holder
 {
-    Fnv72c700Obj* m_00;
+    Tile* m_00;
     int m_04;
     unsigned char m_08;
 };
@@ -395,7 +358,7 @@ struct FUN_0072c700_cls
     unsigned short unk1e;
     float m_20;
 
-    void AccumulateTileHeight(Fnv72c700Obj* o);
+    void AccumulateTileHeight(Tile* o);
     void FUN_0072cba0();
     void FUN_0072c880();
     void FUN_0072c700();

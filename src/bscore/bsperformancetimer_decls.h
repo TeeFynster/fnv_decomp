@@ -2,14 +2,10 @@
 #ifndef BSPERFORMANCETIMER_DECLS_H
 #define BSPERFORMANCETIMER_DECLS_H
 
+#include "../../include/NiPointer.h"
+
 class PerformanceMeasurement;
 class NiAVObject;
-template <class T> class NiPointer
-{
-  public:
-    T* ptr;
-    NiPointer<T>& operator=(T*);
-};
 struct BSPerformanceTimerFrameData
 {
     bool active;

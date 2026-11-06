@@ -1,6 +1,143 @@
-// fallout_shared/teswater.cpp: BGSPlaceableWater, TESObjectCELL, WaterZoneManager, Owner and more (135 functions)
+#include "../../include/NiRect.h"
+#include "../../include/NiFrustum.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiCamera.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiNode.h"
+#include "../../include/BSShaderAccumulator.h"
 
-#include "teswater_decls.h"
+// Allocation-only view of the shared layout.
+// local form of BSShaderAccumulator: 0x004eaa00/0x004eaf80/0x004ebef0 need sized constructor-unwind delete (0x00aa1460).
+class WaterAccumulatorAllocation : public BSShaderAccumulator
+{
+public:
+    WaterAccumulatorAllocation(int mode, unsigned int first, unsigned int last); // exe 0x00b660d0
+    static void operator delete(void* memory, unsigned int bytes); // exe 0x00aa1460
+};
+
+#include "../../include/BGSPlaceableWater.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/GO.h"
+#include "../../include/ImageSpaceManager.h"
+#include "../../include/NP.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiTPointerMap.h"
+// LocalPoint3Ext: unit-local copy of the former shared stand-in NiPoint3_ext. Same layout as NiPoint3; with NiPoint3, 0x004ebbe0 (NiPoint3.h's inline constructor/Dot change its code) does not match.
+#include "../../include/NiPoint3.h"
+class LocalPoint3Ext
+{
+  public:
+    float x;
+    float y;
+    float z;
+
+    typedef LocalPoint3Ext AimVector;
+
+    __forceinline LocalPoint3Ext()
+    {}
+    LocalPoint3Ext(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+    {}
+
+    LocalPoint3Ext operator+(const LocalPoint3Ext& point) const
+    {
+        return LocalPoint3Ext(x + point.x, y + point.y, z + point.z);
+    }
+    LocalPoint3Ext operator-(const LocalPoint3Ext& point) const
+    {
+        return LocalPoint3Ext(x - point.x, y - point.y, z - point.z);
+    }
+    NiPoint3 operator-(const NiPoint3& point) const;
+    float operator*(const LocalPoint3Ext& point) const
+    {
+        return x * point.x + y * point.y + z * point.z;
+    }
+    LocalPoint3Ext& operator*=(float scalar);
+    LocalPoint3Ext& operator+=(const NiPoint3& point);
+    friend LocalPoint3Ext operator*(float scalar, const LocalPoint3Ext& point)
+    {
+        return LocalPoint3Ext(scalar * point.x, scalar * point.y, scalar * point.z);
+    }
+
+    float Dot(const NiPoint3& point) const;
+    float Dot(const LocalPoint3Ext& point) const;
+    LocalPoint3Ext& Subtract(const LocalPoint3Ext& point);
+    float GetLengthSquared();
+    void ComputeMagnitude();
+    float GetSquaredXYLength() const;
+    float Length() const;
+
+    AimVector FUN_00439ef0(const AimVector& point) const;
+    LocalPoint3Ext FUN_00439ef0(const NiPoint3& point) const;
+    NiPoint3* FUN_00439ef0(NiPoint3* output, const NiPoint3& point) const;
+    AimVector FUN_00439e90(const AimVector& point) const;
+    bool FUN_00439090(const AimVector& point) const;
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    void FUN_006815c0();
+    float FUN_004a7290() const;
+    float FUN_00457910();
+    LocalPoint3Ext& FUN_0063c8a0(const NiPoint3& point);
+    NiPoint3 FUN_004a0bd0() const;
+};
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/Setting.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include <string.h>
+#pragma intrinsic(memcpy)
+#include "../../include/AutoMemContext.h"
+#include "../../include/AutoMemHelper.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/NiColorA.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/NiMemObject.h"
+#include "../../include/BSMultiBoundShape.h"
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
+// The inline Gamebryo bodies the BSMultiBound constructor expands (/Ob1).
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+// Inline bodies used by BSMultiBound's constructor.
+template <class T> inline NiPointer<T>::NiPointer()
+{
+    m_pObject = 0;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::NiPointer(T* object) : m_pObject(object)
+{
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* object)
+{
+    if (m_pObject != object)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = object;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+#include "../../include/BSMultiBound.h"
 
 // Initializes the two members of BSMultiBound to zero.
 // @fnv 0x00c35e00
@@ -10,7 +147,11 @@ BSMultiBound::BSMultiBound()
     pShape = 0;
 }
 
+// Keep the unrelated legacy world declarations separate from shared renderer types.
+// fallout_shared/teswater.cpp: BGSPlaceableWater, TESObjectCELL, TESWaterSystem, Owner and more (135 functions)
+
 #include "teswater_work.h"
+#include "../../include/ImageSpaceEffectParam.h"
 
 // Updates the exterior cell grid around location, queues neighbouring cells, refreshes worldspace and physics, and returns 1 when the grid changed or 0 otherwise.
 // @fnv 0x00452580
@@ -51,7 +192,7 @@ int TES::FindCellAtPosition(const NiPoint3* location, bool updatePhysics)
     int iGridDeltaX = position.x - ((iFirstValue << 12) + 2048);
     int iDeltaY = position.y - ((iSecondValue << 12) + 2048);
     float fThreshold = 4096.0f;
-    if (DAT_011c63cc.Int()->ui == 3)
+    if ((unsigned int)*DAT_011c63cc.Int() == 3)
         fThreshold = 3072.0f;
     m_fFirstWorldspaceValue = fThreshold - FUN_00ec7d40(iGridDeltaX);
     m_fSecondWorldspaceValue = fThreshold - FUN_00ec7d40(iDeltaY);
@@ -59,15 +200,15 @@ int TES::FindCellAtPosition(const NiPoint3* location, bool updatePhysics)
     bIsLoading = g_BGSSaveLoadGame->FUN_0042ce10();
     if (m_fFirstWorldspaceValue > 0.0 && m_fSecondWorldspaceValue > 0.0 && !bIsLoading)
     {
-        if (DAT_011c9670.Bool()->b && !IsCellInterior())
+        if (*DAT_011c9670.Bool() && !IsCellInterior())
         {
             int iQueueX = position.x >> 12;
             int iQueueY = position.y >> 12;
             if (m_iGridWidth != iQueueX || m_iGridHeight != iQueueY)
             {
-                if (DAT_011c3d40.Bool()->b && GetInteriorBufferCount(true))
+                if (*DAT_011c3d40.Bool() && GetInteriorBufferCount(true))
                     SetTESActive(false);
-                int iHalfGridCount = DAT_011c63cc.Int()->ui >> 1;
+                int iHalfGridCount = (unsigned int)*DAT_011c63cc.Int() >> 1;
                 int iQueuedX = m_iGridWidth;
                 int iQueueDX;
                 if (iQueueDX = iQueueX - m_iGridWidth)
@@ -127,7 +268,7 @@ int TES::FindCellAtPosition(const NiPoint3* location, bool updatePhysics)
         DAT_011c9618->FUN_005282d0();
     if (!IsCellInterior() || bIsLoading)
     {
-        if (DAT_011c3d40.Bool()->b && GetInteriorBufferCount(true))
+        if (*DAT_011c3d40.Bool() && GetInteriorBufferCount(true))
             SetTESActive(false);
         if (!GetParentWorldSpace())
             AssignWorldSpace(g_dataHandler->GetSourceFiles()->GetItem());
@@ -175,25 +316,25 @@ int TES::FindCellAtPosition(const NiPoint3* location, bool updatePhysics)
     SetTESActive(false);
     RefreshWorldSpace();
     if (!IsCellInterior())
-        m_pContainingWorldspace->GetWorldTerrainManager()->Update(g_thePlayer->GetPos(), 15);
+        m_pContainingWorldspace->GetWorldTerrainManager()->Update(*((const TESObjectREFR*)g_thePlayer)->GetPos(), 15);
     FUN_00452e40(true);
     return 1;
 }
 
 // @fnv 0x004e59f0
-WaterSurface* WaterZoneManager::GetWaterZone(TESObjectREFR* apWaterRef, TESObjectREFR* apLookupRef, float afHeight)
+WaterSurface* TESWaterSystem::GetWaterZone(TESObjectREFR* apWaterRef, TESObjectREFR* apLookupRef, float afHeight)
 {
     NiPoint3 kNormal(0.0f, 0.0f, 1.0f);
     NiPoint3 kPosition = NiPoint3::ZERO;
     TESWaterForm* m_pOwningWater = 0;
     if (apWaterRef)
     {
-        if (!apWaterRef->GetNiNode_v())
+        if (!apWaterRef->GetNiNode())
             return 0;
-        kNormal = apWaterRef->GetNiNode_v()->FUN_00461130() * kNormal;
+        kNormal = apWaterRef->GetNiNode()->FUN_00461130().m_Rotate * kNormal;
         kNormal.ComputeMagnitude();
-        kPosition = apWaterRef->GetNiNode_v()->FUN_0045bb80();
-        m_pOwningWater = apWaterRef->GetObjectReference()->GetAssociatedWaterForm();
+        kPosition = apWaterRef->GetNiNode()->FUN_0045bb80();
+        m_pOwningWater = ((const TESObject*)apWaterRef->GetObjectReference())->GetAssociatedWaterForm();
     }
     else
     {
@@ -207,10 +348,10 @@ WaterSurface* WaterZoneManager::GetWaterZone(TESObjectREFR* apWaterRef, TESObjec
         WaterSurface* pWaterGroup = 0;
         while (pGroupPos)
         {
-            pNextPos = m_kWaterZoneList.DereferenceIfNotNull(pGroupPos);
+            pNextPos = m_kWaterZoneList.GetNextPos(pGroupPos);
             if (pGroupPos)
             {
-                pWaterGroup = m_kWaterZoneList.AddEight(pGroupPos);
+                pWaterGroup = m_kWaterZoneList.Get(pGroupPos);
                 if (AreVectorsEqual(pWaterGroup->m_kWaterPlane.GetPlaneNormal(), m_kFogPlane.GetPlaneNormal(), 0.01f) &&
                     IsApproximatelyEqual(pWaterGroup->m_kWaterPlane.FUN_0084d030(), m_kFogPlane.FUN_0084d030(),
                                          0.01f) &&
@@ -223,10 +364,10 @@ WaterSurface* WaterZoneManager::GetWaterZone(TESObjectREFR* apWaterRef, TESObjec
                         void* pPlaceablePos = pWaterGroup->m_kWaterReferences.GetHeadPos();
                         for (void* pNextRef = 0; pPlaceablePos;)
                         {
-                            pNextRef = pWaterGroup->m_kWaterReferences.DereferenceIfNotNull(pPlaceablePos);
+                            pNextRef = pWaterGroup->m_kWaterReferences.GetNextPos(pPlaceablePos);
                             if (pPlaceablePos)
                             {
-                                TESObjectREFR* pRef = pWaterGroup->m_kWaterReferences.AddEight(pPlaceablePos);
+                                TESObjectREFR* pRef = pWaterGroup->m_kWaterReferences.Get(pPlaceablePos);
                                 if (!apWaterRef || pRef == apWaterRef)
                                     return pWaterGroup;
                                 pPlaceablePos = pNextRef;
@@ -242,7 +383,7 @@ WaterSurface* WaterZoneManager::GetWaterZone(TESObjectREFR* apWaterRef, TESObjec
 }
 
 // @fnv 0x004e5df0
-void WaterZoneManager::UpdateWaterZone(TESObjectREFR* apWaterRef, TESObjectREFR* apLookupRef, float afHeight)
+void TESWaterSystem::UpdateWaterZone(TESObjectREFR* apWaterRef, TESObjectREFR* apLookupRef, float afHeight)
 {
     if (!apWaterRef && (!apLookupRef || !apLookupRef->GetParentCell()))
         return;
@@ -251,6 +392,8 @@ void WaterZoneManager::UpdateWaterZone(TESObjectREFR* apWaterRef, TESObjectREFR*
         return;
     RemoveReferenceFromCell(apLookupRef, pGroup);
 }
+
+
 
 struct FUN_004e2120_s
 {
@@ -265,15 +408,10 @@ void FUN_004e2120_s::f(bool abUnderWater)
 struct BSMultiBoundNode;
 struct BSParticleSystemManager;
 struct BSRenderedTexture;
-struct BSShaderAccumulator;
 struct Controls;
 struct EngineGraphicsType;
 struct HINSTANCE__;
 struct HWND__;
-struct ImageSpaceManager;
-struct NiAVObject;
-struct NiCamera;
-struct NiGeometry;
 struct NiRenderedTexture;
 struct GraphicsRenderer;
 struct SceneGraph;
@@ -437,10 +575,8 @@ struct FUN_004e2190_shell : public Main
     BSShaderAccumulator* FUN_004e2190();
 };
 
-template <typename T> struct BSStringT
-{
-    operator const char*() const;
-};
+namespace teswater_detail {
+}
 
 // @fnv 0x004e2190
 BSShaderAccumulator* FUN_004e2190_shell::FUN_004e2190()
@@ -476,11 +612,6 @@ void __cdecl WrapValueToRange(float* aVal, float aMin, float aMax)
 }
 
 namespace fnv_004e6540 {
-template <typename T> class BSStringT
-{
-  public:
-    operator const T*() const;
-};
 
 // @fnv 0x004e6540
 const char* __fastcall FUN_004e6540(char* this_ptr)
@@ -489,19 +620,23 @@ const char* __fastcall FUN_004e6540(char* this_ptr)
 }
 }  // namespace fnv_004e6540
 
-struct NiRenderer
-{
-    int FUN_004e9530(void);
-};
+unsigned int __fastcall GetRendererFrameState(NiRenderer* renderer);
 
 NiRenderer* __cdecl FUN_0043c4b0(void);
 
 // @fnv 0x004e9510
 bool __cdecl FUN_004e9510()
 {
-    return FUN_0043c4b0()->FUN_004e9530() == 0;
+    return GetRendererFrameState(FUN_0043c4b0()) == 0;
 }
 
+// S9c10::GetPoint, S9c50::FUN_004e9c50 and FUN_004e8ec0_cls::UpdateWaterObjects construct a point with the out-of-line /Od NiPoint3() (0x006815c0), which the shared header's
+// inline constructor does not reproduce under this unit's /Ob1.
+struct NiPoint3_OutOfLineCtor : public NiPoint3
+{
+    NiPoint3_OutOfLineCtor();
+    using NiPoint3::operator=;
+};
 struct M9c10
 {
     void FUN_00439f50(unsigned int, NiPoint3&);
@@ -516,7 +651,7 @@ struct S9c10
 // @fnv 0x004e9c10
 NiPoint3 S9c10::GetPoint()
 {
-    NiPoint3 k;
+    NiPoint3_OutOfLineCtor k;
     m.FUN_00439f50(1, k);
     return k;
 }
@@ -535,7 +670,7 @@ struct S9c50
 // @fnv 0x004e9c50
 NiPoint3 S9c50::FUN_004e9c50()
 {
-    NiPoint3 k;
+    NiPoint3_OutOfLineCtor k;
     m.FUN_00439f50(2, k);
     return k;
 }
@@ -561,7 +696,6 @@ struct BSRenderedTexture;
 struct ImageSpaceEffect;
 struct ImageSpaceEffectParam;
 struct ImageSpaceTexture;
-struct RgbaColor;
 struct NiScreenElements;
 struct NiTexture;
 struct GraphicsRenderer;
@@ -569,177 +703,14 @@ struct blob16
 {
     char b[16];
 };
-struct ImageSpaceManager
-{
-    void Initialize();
-    void Shutdown();
-    void InitDefaultParameter();
-    ImageSpaceEffect* GetEffect(int);
-    void AddEffect(int, ImageSpaceEffect*);
-    bool IsEffectActive(int);
-    void SetupEffects();
-    void SetupShader();
-    void RenderEndOfFrameEffects(GraphicsRenderer*, BSRenderedTexture**, BSRenderedTexture**);
-    void RenderEffect(ImageSpaceEffect*, GraphicsRenderer*, NiTexture*, BSRenderedTexture*, ImageSpaceEffectParam*,
-                      bool);
-    void RenderEffect(int, GraphicsRenderer*, NiTexture*, NiTexture*, BSRenderedTexture*, ImageSpaceEffectParam*, bool);
-    void RenderEffect(int, GraphicsRenderer*, NiTexture*, BSRenderedTexture*, ImageSpaceEffectParam*, bool);
-    void RenderEffect(ImageSpaceEffect*, GraphicsRenderer*, BSRenderedTexture*, BSRenderedTexture*, BSRenderedTexture*,
-                      ImageSpaceEffectParam*, bool);
-    void RenderEffect(ImageSpaceEffect*, GraphicsRenderer*, BSRenderedTexture*, BSRenderedTexture*,
-                      ImageSpaceEffectParam*, bool);
-    void RenderEffect(int, GraphicsRenderer*, BSRenderedTexture*, ImageSpaceEffectParam*, bool);
-    void RenderEffect(int, GraphicsRenderer*, BSRenderedTexture*, BSRenderedTexture*, ImageSpaceEffectParam*, bool);
-    void ModifyParameterData(int, unsigned int, int, float);
-    void ApplyCurrentParameterData(bool);
-    void SetBaseParameterData(void*);
-    void SetOverrideBaseParameterData(void*);
-    void ResetToBaseParameterData();
-    void ResetWeatherData();
-    void BeginParamModifiers();
-    void ApplyParamModifier(int, unsigned int, float*, float);
-    void ApplyParamModifierWeather(int, unsigned int, float*, float);
-    void ApplyTintColorParamModifier(RgbaColor*);
-    void ApplyTintColorParamModifierWeather(RgbaColor*);
-    void SetFadeColorParamModifier(RgbaColor*);
-    void ApplyFadeColorParamModifierWeather(RgbaColor*);
-    void SetBlurRadiusParamModifier(float);
-    void ApplyBlurRadiusParamModifierWeather(float);
-    void ApplyDoubleVisionParamModifier(float);
-    void ApplyDoubleVisionParamModifierWeather(float);
-    void SetRadialBlurParameters(float, float, float, float, float, void*);
-    void ApplyRadialBlurParamModifierWeather(float, float, float, float, float, void*);
-    void ApplyDepthOfFieldModifier(float, unsigned int, float, float, float, float, void*);
-    void ApplyDepthOfFieldModifier(float, unsigned int, float, float, void*);
-    void SetDepthOfFieldParameters(float, unsigned int, float, float, float);
-    void SetDepthOfFieldParameters(float, unsigned int, float, void*);
-    void ApplyDepthOfFieldParamModifierWeather(float, unsigned int, float, float, float);
-    void ApplyMotionBlurStrengthParamModifier(float);
-    void ApplyMotionBlurStrengthParamModifierWeather(float);
-    void EndWeatherModifiers();
-    void EndParamModifiers();
-    float ApplyOperation(int, float, float);
-    void GetRadialBlurCenterFromWorldBound(void*, NiPoint2*);
-    void GetDepthOfFieldParamsFromWorldBound(void*, NiPoint2*);
-    void EnableSunbeams(bool);
-    void SetSunPosition(void*);
-    BSRenderedTexture* GetRefractionNormalsTexture(bool);
-    BSRenderedTexture* GetVolumetricFogTexture();
-    void ReturnVolumetricFogTexture();
-    float GetHDREmissiveMult();
-    float GetHDRBlurRadius();
-    float GetHDRBrightClamp();
-    float GetHDRBrightScale();
-    float GetHDREyeAdaptSpeed();
-    float GetHDRTargetLUM();
-    float GetHDRUpperLUMClamp();
-    void SetVolumetricFogProps(struct blob16);
-    void SetMotionBlurConst(float);
-    void SetMenuBGBlendEnabled(bool);
-    void SetMenuBGBlendValue(float);
-    void EnablePartialRender(bool, NiScreenElements*);
-    void SetMenuBackgroundBlend(float, float, void*);
-    NiTexture* GetDepthTexture();
-    ImageSpaceTexture* GetDepthImageSpaceTexture();
-    BSRenderedTexture* GetDepthRenderedTexture();
-    void SetDepthTexture(BSRenderedTexture*);
-    void SetDepthTexture(NiTexture*);
-    void ReturnDepthTexture();
-    NiScreenElements* GetMenuUnpackGeom();
-    void SetMenuUnpackGeom(NiScreenElements*);
-    void SetRefractionTint(void*);
-    void* GetRefractionTint();
-    void SetCustomViewPort(float, float, float, float);
-    void ClearCustomViewPort();
-    void* GetCustomViewport();
-    BSRenderedTexture* GetSwapTarget();
-    void InitEffects();
-    void CreateMenuBackgroundGeometry();
-    void ShutdownEffects();
-    void ShutdownGeometry();
-    void PrepareEndOfFrameEffects();
-    void* __vecDelDtor(unsigned int);
-    BSRenderedTexture* m_pCurrentRenderedTexture;
-    char pEffectList[16];
-    char m_kBlendedParameterData[152];
-    void* m_pCurrentModifierParameterData;
-    void* m_pPreviousModifierParameterData;
-    char m_kModifierParameterData[304];
-    bool m_bEndOfFrameEffectsEnabled;
-    char _pad_1e5[3];
-    int m_iEndOfFrameEffectCount;
-    int m_eEndOfFrameEffect;
-    char m_pMenuBackgroundScreenGeometry[4];
-    char m_pMenuBackgroundScreenElementsData[4];
-    char m_pMenuBackgroundScreenElements[4];
-    bool m_bPartialRenderEnabled;
-    char _pad_1fd[3];
-    char m_pPartialRenderScreenElements[4];
-    char m_kDepthTexture[16];
-    char m_kModifierColor[16];
-    char m_kPartialRenderColor[16];
-    float m_fPartialRenderBlend;
-    char m_kAccumulatedColor[16];
-    char m_kWeatherFadeColor[16];
-    float m_fFadeColorAlpha;
-    float m_fDoubleVisionStrength;
-    float m_fWeatherBlurRadius;
-    float m_fWeatherDoubleVisionStrength;
-    float m_fAdditionalImageSpaceValue;
-    float m_fRadialBlurStrength;
-    float m_fRadialBlurRampUp;
-    float m_fRadialBlurStart;
-    float m_fRadialBlurRampDown;
-    float m_fRadialBlurDownStart;
-    float m_fWeatherRadialBlurStrength;
-    float m_fWeatherRadialBlurRampUp;
-    float m_fWeatherRadialBlurStart;
-    float m_fWeatherRadialBlurRampDown;
-    float m_fWeatherRadialBlurDownStart;
-    NiPoint2 m_kRadialBlurCenter;
-    NiPoint2 m_kWeatherRadialBlurCenter;
-    float m_fDepthOfFieldStrength;
-    float m_fDepthOfFieldMaskConstant;
-    float m_fDepthOfFieldDistance;
-    float m_fDepthOfFieldRange;
-    float m_fDepthOfFieldEffectStrength;
-    float m_fDepthOfFieldEffectDistance;
-    float m_fDepthOfFieldEffectRange;
-    float m_fDepthOfFieldMaskValue;
-    int m_eDepthOfFieldMode;
-    int m_eDepthOfFieldTargetMode;
-    bool m_bDepthOfFieldUsesObject;
-    bool m_bMenuBackgroundBlendEnabled;
-    char _pad_2ce[2];
-    float m_fBlurRadius;
-    float m_fRadialBlurTransition;
-    float m_fRadialBlurStartValue;
-    float m_fRadialBlurDistance;
-    float m_fRadialBlurRange;
-    NiPoint2 m_kRadialBlurOrigin;
-    int m_eRadialBlurMode;
-    float m_fMenuBackgroundBlendValue;
-    float m_fMenuBackgroundBlendTarget;
-    char m_kMenuBackgroundTint[16];
-    char m_kMenuBackgroundRect[16];
-    BSRenderedTexture* m_pMenuBackgroundTexture;
-};
-typedef char _sizecheck_ImageSpaceManager[sizeof(ImageSpaceManager) == 796 ? 1 : -1];
-struct FUN_004ebbc0_shell : public ImageSpaceManager
-{
-    ImageSpaceEffect* FUN_004ebbc0(int);
-};
 
-template <class T, int N> class BSSimpleArray
-{
-  public:
-    T& GetAt(unsigned int);
-};
+typedef char _sizecheck_ImageSpaceManager[sizeof(ImageSpaceManager) == 796 ? 1 : -1];
+
 
 // @fnv 0x004ebbc0
-ImageSpaceEffect* FUN_004ebbc0_shell::FUN_004ebbc0(int aiIndex)
+ImageSpaceEffect* ImageSpaceManager::FUN_004ebbc0(int aiIndex)
 {
-    return (ImageSpaceEffect*)((BSSimpleArray<unsigned int, 1024>*)pEffectList)->GetAt(aiIndex);
+    return (ImageSpaceEffect*)((BSSimpleArray<unsigned int, 1024>*)pEffectList)->GetAt(static_cast<unsigned int>(aiIndex));
 }
 
 extern double DAT_010231e8;
@@ -816,17 +787,13 @@ unsigned int S5460::FUN_00845460()
     return count - 1;
 }
 
-class GlobalObject_0045cf30
-{
-  public:
-    SETTING_VALUE* Bool();
-};
-extern GlobalObject_0045cf30 g_011c7b20;
+
+extern Setting g_011c7b20;
 
 // @fnv 0x004e2160
 bool FUN_004e2160()
 {
-    return g_011c7b20.Bool()->b;
+    return *g_011c7b20.Bool();
 }
 
 extern unsigned char DAT_011c7a59;
@@ -845,16 +812,11 @@ int* __cdecl FUN_004e3260()
     return &g_011ca13c;
 }
 
-struct FUN_004e32c0_shell
-{
-    void __thiscall HasFlags(int);
-    void __thiscall FUN_004e32c0();
-};
 
 // @fnv 0x004e32c0
-void __thiscall FUN_004e32c0_shell::FUN_004e32c0()
+void __fastcall CheckWaterFlag8000000(BGSPlaceableWater* water)
 {
-    HasFlags(0x8000000);
+    water->HasFlags(0x8000000);
 }
 
 struct FUN_004e45e0_shell
@@ -951,10 +913,6 @@ int FUN_004e69d0()
     return DAT_011ff370;
 }
 
-struct NP
-{
-    NP& operator=(void*);
-};
 
 struct FUN_004e69e0_shell
 {
@@ -969,10 +927,7 @@ void FUN_004e69e0_shell::FUN_004e69e0(void* arg)
 }
 
 namespace fnv_004e6a00 {
-struct NP
-{
-    NP& operator=(void*);
-};
+
 
 struct FUN_004e6a00_shell
 {
@@ -988,10 +943,7 @@ void FUN_004e6a00_shell::AssignMember238(void* arg)
 }  // namespace fnv_004e6a00
 
 namespace fnv_004e6a20 {
-struct NP
-{
-    NP& operator=(void*);
-};
+
 
 struct FUN_004e6a20_shell
 {
@@ -1002,15 +954,12 @@ struct FUN_004e6a20_shell
 // @fnv 0x004e6a20
 void FUN_004e6a20_shell::SetParam(void* apParam)
 {
-    *(reinterpret_cast<NP*>(this) + 0x248) = apParam;
+    *reinterpret_cast<NP*>(reinterpret_cast<char*>(this) + 0x248) = apParam;
 }
 }  // namespace fnv_004e6a20
 
 namespace fnv_004e6a40 {
-struct NP
-{
-    NP& operator=(void*);
-};
+
 
 struct FUN_004e6a40_shell
 {
@@ -1041,7 +990,7 @@ int __cdecl FUN_004e6a70()
     return DAT_0120006c;
 }
 
-extern SettingT_GameSettingCollection_ g_011c7b2c;
+extern Setting g_011c7b2c;
 
 struct FUN_004e7600_shell
 {
@@ -1051,22 +1000,15 @@ struct FUN_004e7600_shell
 // @fnv 0x004e7600
 int __thiscall FUN_004e7600_shell::GetIntValue()
 {
-    return g_011c7b2c.Int()->i;
+    return *g_011c7b2c.Int();
 }
-
-namespace fnv_004e9530 {
-struct NiRenderer
-{
-    virtual ~NiRenderer();
-    unsigned int FUN_004e9530();
-};
 
 // @fnv 0x004e9530
-unsigned int NiRenderer::FUN_004e9530()
+unsigned int __fastcall GetRendererFrameState(NiRenderer* renderer)
 {
-    return *(unsigned int*)((char*)this + 0x200);
+    return renderer->m_eFrameState;
 }
-}  // namespace fnv_004e9530
+
 
 extern unsigned short DAT_011f941c;
 
@@ -1094,25 +1036,11 @@ void FUN_004ea860_shell::FUN_004ea860(unsigned char abFlag)
     *(unsigned char*)(this + 0x164) = abFlag;
 }
 
-struct FUN_00452460_shell
-{
-    bool HasFlags(int b);
-};
-
-bool FUN_00452460_shell::HasFlags(int b)
-{
-    return b == 0x40;
-}
-
-struct FUN_004ea930_shell
-{
-    bool FUN_004ea930();
-};
 
 // @fnv 0x004ea930
-bool FUN_004ea930_shell::FUN_004ea930()
+bool BGSPlaceableWater::IsRestricted()
 {
-    return reinterpret_cast<FUN_00452460_shell*>(this)->HasFlags(0x40);
+    return HasFlags(0x40);
 }
 
 extern "C" void __cdecl UpdateSpawnedObjectFlags(int, int, int, int, int, int, int);
@@ -1145,16 +1073,11 @@ void FUN_004ec7c0_shell::FUN_004ec7c0(bool value)
     ((char*)this)[0x165] = value;
 }
 
-struct FUN_004ec7e0_shell
-{
-    void __thiscall HasFlags(int);
-    void __thiscall FUN_004ec7e0();
-};
 
 // @fnv 0x004ec7e0
-void FUN_004ec7e0_shell::FUN_004ec7e0()
+void __fastcall CheckWaterFlag400(BGSPlaceableWater* water)
 {
-    this->HasFlags(0x400);
+    water->HasFlags(0x400);
 }
 
 struct FUN_004ecaf0_shell
@@ -1190,8 +1113,15 @@ void __cdecl FUN_004ecb40(unsigned int auiAmount)
     UpdateRendererStateCount(0, 0);
 }
 
-struct BSRenderStateManager
+// BSRenderStateManager_teswater: local type (was include/BSRenderStateManager.h, which had no evidence of one real class); its methods are 0x00b97fa0 BSRenderState::SetAlphaBlendEnable, 0x00b98380 BSRenderState::SetColorWriteEnable
+#include "../../include/BSRENDERSTATE_LOCK.h"
+
+class BSRenderStateManager_teswater
 {
+public:
+    static void __cdecl SetDepthBufferEnabled(bool, BSRENDERSTATE_LOCK);
+    static void __cdecl SetDepthBufferEnabled(bool, int);
+    static void __cdecl SetColorWriteMask(unsigned int, BSRENDERSTATE_LOCK);
     static void __cdecl SetColorWriteMask(unsigned int, unsigned int);
 };
 
@@ -1201,7 +1131,7 @@ extern unsigned int DAT_011ffa18;
 void __cdecl FUN_004eced0(unsigned int auiAmount)
 {
     DAT_011ffa18 -= auiAmount;
-    BSRenderStateManager::SetColorWriteMask(7, 0);
+    BSRenderStateManager_teswater::SetColorWriteMask(7, 0);
 }
 
 extern void* __cdecl _memmove(void* dst, const void* src, unsigned int count);
@@ -1300,26 +1230,11 @@ void FUN_004e2140_shell::SetValue(int value)
     *(int*)((char*)this + 0x168) = value;
 }
 
-struct BGSPlaceableWater
-{
-    bool HasFlags(unsigned int);
-};
-
-bool BGSPlaceableWater::HasFlags(unsigned int)
-{
-    return true;
-}
-
-struct FUN_004e32a0_shell
-{
-    BGSPlaceableWater m_water;
-    void FUN_004e32a0();
-};
 
 // @fnv 0x004e32a0
-void FUN_004e32a0_shell::FUN_004e32a0()
+void __fastcall SetWaterFlag800(BGSPlaceableWater* water)
 {
-    m_water.HasFlags(0x800);
+    water->HasFlags(0x800);
 }
 
 struct FUN_004e45c0_shell
@@ -1333,10 +1248,8 @@ float __thiscall FUN_004e45c0_shell::GetField130()
     return *(float*)((char*)this + 0x130);
 }
 
-struct GlobalObject2_0045cfe0 : SettingT_GameSettingCollection_
-{
-};
-extern GlobalObject2_0045cfe0 g_011c7bb0;
+
+extern Setting g_011c7bb0;
 
 struct FUN_004e7620_shell
 {
@@ -1346,20 +1259,12 @@ struct FUN_004e7620_shell
 // @fnv 0x004e7620
 int __thiscall FUN_004e7620_shell::GetGameSettingInt()
 {
-    return g_011c7bb0.Int()->i;
+    return *g_011c7bb0.Int();
 }
 
-struct Setting_S
-{
-    float* Float();
-};
 
-struct GlobalObject_0044f440
-{
-    float* Float();
-};
 
-extern GlobalObject_0044f440 g_011c7bd8;
+extern Setting g_011c7bd8;
 
 struct FUN_004e7640_shell
 {
@@ -1372,66 +1277,34 @@ float __thiscall FUN_004e7640_shell::FUN_004e7640()
     return *g_011c7bd8.Float();
 }
 
-namespace fnv_004ea8b0 {
-struct BGSPlaceableWater
-{
-    bool HasFlags(unsigned int);
-    bool FUN_004ea8b0();
-};
 
 // @fnv 0x004ea8b0
 bool BGSPlaceableWater::FUN_004ea8b0()
 {
     return BGSPlaceableWater::HasFlags(4);
 }
-}  // namespace fnv_004ea8b0
 
-namespace fnv_004ea8d0 {
-struct BGSPlaceableWater
-{
-    bool HasFlags(unsigned int);
-    bool FUN_004ea8d0();
-};
-
-bool BGSPlaceableWater::HasFlags(unsigned int)
-{
-    return HasFlags(8);
-}
 
 // @fnv 0x004ea8d0
 bool BGSPlaceableWater::FUN_004ea8d0()
 {
     return HasFlags(8);
 }
-}  // namespace fnv_004ea8d0
 
-namespace fnv_004ea8f0 {
-struct BGSPlaceableWater
-{
-    bool HasFlags(unsigned int);
-    bool FUN_004ea8f0();
-};
 
 // @fnv 0x004ea8f0
 bool BGSPlaceableWater::FUN_004ea8f0()
 {
     return HasFlags(0x10);
 }
-}  // namespace fnv_004ea8f0
 
-namespace fnv_004ea910 {
-struct BGSPlaceableWater
-{
-    bool HasFlags(unsigned int);
-    bool FUN_004ea910();
-};
 
 // @fnv 0x004ea910
 bool BGSPlaceableWater::FUN_004ea910()
 {
     return HasFlags(0x20);
 }
-}  // namespace fnv_004ea910
+
 
 namespace std {
 float abs(float);
@@ -1444,20 +1317,12 @@ bool IsApproximatelyEqual(float afA, float afB, float afEpsilon)
 }
 
 namespace fnv_004e32e0 {
-struct BGSPlaceableWater
-{
-    bool HasFlags(unsigned int);
-};
 
-struct FUN_004e32e0_shell : BGSPlaceableWater
-{
-    void FUN_004e32e0();
-};
 
 // @fnv 0x004e32e0
-void FUN_004e32e0_shell::FUN_004e32e0()
+void __fastcall SetWaterFlag10000000(BGSPlaceableWater* water)
 {
-    HasFlags(0x10000000);
+    water->HasFlags(0x10000000);
 }
 }  // namespace fnv_004e32e0
 
@@ -1480,11 +1345,8 @@ void* Fake52::FUN_004e52c0(unsigned int flags)
 namespace fnv_004e65d0 {
 extern unsigned char DAT_01189624;
 extern unsigned char DAT_011ad86e;
-struct GlobalObject_0045cf30
-{
-    SETTING_VALUE* Bool();
-};
-extern GlobalObject_0045cf30 g_011c7adc;
+
+extern Setting g_011c7adc;
 struct S_004e65d0
 {
     void FUN_004e6370(int, int, int);
@@ -1496,7 +1358,7 @@ bool S_004e65d0::FUN_004e65d0()
     DAT_011ad86e = 1;
     if (!DAT_01189624)
     {
-        if (g_011c7adc.Bool()->b)
+        if (*g_011c7adc.Bool())
         {
             DAT_01189624 = 1;
             FUN_004e6370(1, 0, 0);
@@ -1507,15 +1369,18 @@ bool S_004e65d0::FUN_004e65d0()
 }
 }  // namespace fnv_004e65d0
 
-struct S004e7530
+// Eight-byte NiPoint2 sound-centroid view: 0x004e7530 divides XY; the shared header lacks operator/= (or DivideBy).
+struct WaterSoundVector2
 {
     float x;
     float y;
-    S004e7530& DivideBy(float);
+    WaterSoundVector2& DivideBy(float);
+    float NormalizeXY();
+    WaterSoundVector2 operator*(float) const;
 };
 // Divides x and y by f and returns a reference to this object.
 // @fnv 0x004e7530
-S004e7530& S004e7530::DivideBy(float afDivisor)
+WaterSoundVector2& WaterSoundVector2::DivideBy(float afDivisor)
 {
     x /= afDivisor;
     y /= afDivisor;
@@ -1523,11 +1388,8 @@ S004e7530& S004e7530::DivideBy(float afDivisor)
 }
 
 namespace fnv_004e7660 {
-struct GlobalObject_0044f440
-{
-    float* Float();
-};
-extern GlobalObject_0044f440 g_011c7ba4;
+
+extern Setting g_011c7ba4;
 
 struct FUN_004e7660_shell
 {
@@ -1680,11 +1542,6 @@ unsigned int FUN_004ea980_shell::GetFloatAsUInt()
     return ((Flt*)((char*)this + 0x134))->operator unsigned int();
 }
 
-struct ImageSpaceEffectParam
-{
-    void FUN_004eba90();
-    void* DestroyIfFlagged(unsigned int);
-};
 void _Deallocate(void*);
 // Calls FUN_004eba90, then deallocates this when flags has bit 0 set, and returns this.
 // @fnv 0x004ebb00
@@ -1720,11 +1577,7 @@ void FUN_004ebb50_shell::FUN_004ebb50()
     InitAndDeallocate();
 }
 
-struct GO
-{
-    int v;
-    GO(int);
-};
+
 struct FUN_004ebb70
 {
     unsigned char a;
@@ -1758,27 +1611,16 @@ R S::FUN_004ed140(int a)
     return tmp;
 }
 
-namespace fnv_006db840 {
-struct S5460
-{
-    unsigned int FUN_00845460();
-};
-struct BSSimpleArray
-{
-    unsigned int m_uiItemCount;
-    NiPoint2* pBuffer;
-    void ConstructElements(NiPoint2* p, int i);
-    unsigned int InsertAtEnd(const NiPoint2& value);
-};
 // @fnv 0x006db840
-unsigned int BSSimpleArray::InsertAtEnd(const NiPoint2& value)
+template <>
+unsigned int BSSimpleArray<NiPoint2, 1024>::Add(const NiPoint2& value)
 {
-    unsigned int index = ((S5460*)this)->FUN_00845460();
-    ConstructElements(pBuffer + index, 1);
-    pBuffer[index] = value;
+    unsigned int index = ReserveIndex();
+    InitializeItems(reinterpret_cast<NiPoint2*>(pBuffer) + index, 1);
+    reinterpret_cast<NiPoint2*>(pBuffer)[index] = value;
     return index;
 }
-}  // namespace fnv_006db840
+
 
 extern int g_TES;
 
@@ -1929,7 +1771,7 @@ void FUN_004e3590_shell::FUN_004e3520(void* apList)
     void* pvItem2 = 0;
     while (uiCount2)
     {
-        pvItem2 = ((NiTPointerList<WaterSurface>*)((char*)apList + 0x24))->DereferenceIfNotNull((void*)uiCount2);
+        pvItem2 = ((NiTPointerList<WaterSurface>*)((char*)apList + 0x24))->GetNextPos((void*)uiCount2);
         if (uiCount2)
         {
             void* pvNext = *(void**)((FUN_006317a0_struct*)((char*)apList + 0x24))->AddEight(uiCount2);
@@ -1940,33 +1782,25 @@ void FUN_004e3590_shell::FUN_004e3520(void* apList)
 }
 }  // namespace fnv_004e3520
 
-struct NiPoint3_ext
-{
-    float x, y, z;
-    float Length() const;
-};
+
 extern double DAT_01017cf8;
 
-struct FUN_004e7560_shell
-{
-    float NormalizeXY();
-};
 
 // Computes the vector length; if it exceeds DAT_01017cf8, scales x and y by its inverse, otherwise zeroes x and y and returns 0.
 // @fnv 0x004e7560
-float FUN_004e7560_shell::NormalizeXY()
+float __fastcall NormalizeWaterXY(LocalPoint3Ext* point)
 {
-    float len = ((NiPoint3_ext*)this)->Length();
+    float len = point->Length();
     if (len > DAT_01017cf8)
     {
         float fInvLength = 1.0f / len;
-        ((NiPoint3_ext*)this)->x *= fInvLength;
-        ((NiPoint3_ext*)this)->y *= fInvLength;
+        point->x *= fInvLength;
+        point->y *= fInvLength;
     }
     else
     {
-        ((NiPoint3_ext*)this)->x = 0.0f;
-        ((NiPoint3_ext*)this)->y = 0.0f;
+        point->x = 0.0f;
+        point->y = 0.0f;
         len = 0.0f;
     }
     return len;
@@ -1997,10 +1831,6 @@ struct FUN_006317a0_struct : public NiTPointerList<WaterSurface*>
     int AddEight(int);
 };
 
-struct GO : public FUN_006317a0_struct
-{
-    operator unsigned int() const;
-};
 
 struct FUN_004e5640_shell
 {
@@ -2025,11 +1855,11 @@ void FUN_004e5640_shell::SetBitFlagsOnListItems()
 
     while (current)
     {
-        next = go.DereferenceIfNotNull(current);
+        next = reinterpret_cast<NiTPointerList<WaterSurface*>*>(&go)->GetNextPos(current);
 
         if (current)
         {
-            object = *reinterpret_cast<void**>(reinterpret_cast<void*>(go.AddEight(reinterpret_cast<int>(current))));
+            object = *reinterpret_cast<void**>(reinterpret_cast<void*>(reinterpret_cast<FUN_006317a0_struct*>(&go)->AddEight(reinterpret_cast<int>(current))));
 
             *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(object) + 0xac) = 1 << count;
 
@@ -2057,13 +1887,6 @@ struct FUN_00a74480 : A51BF0Base
 
 typedef FUN_00a74480 BSRenderedTexture;
 
-struct AutoMemHelper
-{
-    void* p;
-
-    AutoMemHelper(int context, bool flag, const char* file, int line);
-    ~AutoMemHelper();
-};
 
 extern const char str_0102301c[];
 
@@ -2202,14 +2025,15 @@ struct S_004e46b0_Obj
 };
 struct S_004e46b0_Cls
 {
-    void FUN_004e4730(S_004e46b0_Obj*, const NiPoint3*, const ThreeByThreeMatrix*);
+    void FUN_004e4730(S_004e46b0_Obj*, const NiPoint3*, const NiMatrix3*);
     void FUN_004e46b0(S_004e46b0_Obj* a);
 };
 // @fnv 0x004e46b0
 void S_004e46b0_Cls::FUN_004e46b0(S_004e46b0_Obj* pObj)
 {
     NiPoint3 pos = pObj->vfn_1d0()->FUN_0045bb80();
-    ThreeByThreeMatrix rot = pObj->vfn_1d0()->FUN_00461130();
+    NiMatrix3 rot;
+    rot = pObj->vfn_1d0()->FUN_00461130().m_Rotate;
     FUN_004e4730(pObj, &pos, &rot);
 }
 
@@ -2626,7 +2450,7 @@ class FUN_004e52f0_arg
 class FUN_004e52f0_cls
 {
   public:
-    void RemoveWaterRef(FUN_004e52f0_arg* a, const NiPoint3* pos, const ThreeByThreeMatrix* mat);
+    void RemoveWaterRef(FUN_004e52f0_arg* a, const NiPoint3* pos, const NiMatrix3* mat);
     void FUN_004e52f0(FUN_004e52f0_arg* arg);
 };
 
@@ -2634,7 +2458,8 @@ class FUN_004e52f0_cls
 void FUN_004e52f0_cls::FUN_004e52f0(FUN_004e52f0_arg* arg)
 {
     NiPoint3 pos = arg->vfn_1d0()->FUN_0045bb80();
-    ThreeByThreeMatrix mat = arg->vfn_1d0()->FUN_00461130();
+    NiMatrix3 mat;
+    mat = arg->vfn_1d0()->FUN_00461130().m_Rotate;
     RemoveWaterRef(arg, &pos, &mat);
 }
 
@@ -2866,7 +2691,7 @@ bool __cdecl ProcessNode(void* aNode, void* aParam);
 // @fnv 0x004e62e0
 bool FUN_004e62e0_cls::FUN_004e62e0(TESObjectREFR* aRef, void* aParam)
 {
-    NiNode* node = aRef->GetNiNode_v();
+    NiNode* node = aRef->GetNiNode();
     if (node != 0)
     {
         if (CheckFlagPair(&DAT_01202e74, reinterpret_cast<SceneNodeOps*>(node)->GetChild(0)))
@@ -2900,7 +2725,7 @@ struct WaterRefr : TESObjectREFR
     PlaceableWaterBase* GetPlaceableWaterBase();
 };
 
-struct WaterSystem6370 : WaterZoneManager
+struct WaterSystem6370 : TESWaterSystem
 {
     void FUN_004e6370(bool abShow, bool abCheckBase, bool abToggle);
 };
@@ -2913,45 +2738,45 @@ void WaterSystem6370::FUN_004e6370(bool abShow, bool abCheckBase, bool abToggle)
     void* next_ = 0;
     while (pos2)
     {
-        next_ = m_kWaterZoneList.DereferenceIfNotNull(pos2);
+        next_ = m_kWaterZoneList.GetNextPos(pos2);
         if (pos2)
         {
-            WaterSurface* pGroup3 = m_kWaterZoneList.AddEight(pos2);
+            WaterSurface* pGroup3 = m_kWaterZoneList.Get(pos2);
             void* waterPosB = pGroup3->m_kWaterReferences.GetHeadPos();
             void* waterNext9 = 0;
             while (waterPosB)
             {
-                waterNext9 = pGroup3->m_kWaterReferences.DereferenceIfNotNull(waterPosB);
+                waterNext9 = pGroup3->m_kWaterReferences.GetNextPos(waterPosB);
                 if (waterPosB)
                 {
                     if (abCheckBase)
                     {
-                        WaterRefr* pRef = static_cast<WaterRefr*>(pGroup3->m_kWaterReferences.AddEight(waterPosB));
+                        WaterRefr* pRef = static_cast<WaterRefr*>(pGroup3->m_kWaterReferences.Get(waterPosB));
                         PlaceableWaterBase* pBase = pRef->GetPlaceableWaterBase();
                         if (pBase->IsEnabled())
                         {
                             if (abToggle)
                             {
-                                static_cast<WaterAVObject*>(pRef->GetNiNode_v())
-                                    ->SetAppCulled(!static_cast<WaterAVObject*>(pRef->GetNiNode_v())->GetAppCulled());
+                                static_cast<WaterAVObject*>(pRef->GetNiNode())
+                                    ->SetAppCulled(!static_cast<WaterAVObject*>(pRef->GetNiNode())->GetAppCulled());
                             }
                             else
                             {
-                                static_cast<WaterAVObject*>(pRef->GetNiNode_v())->SetAppCulled(!abShow);
+                                static_cast<WaterAVObject*>(pRef->GetNiNode())->SetAppCulled(!abShow);
                             }
                         }
                     }
                     else
                     {
-                        TESObjectREFR* pRef = pGroup3->m_kWaterReferences.AddEight(waterPosB);
+                        TESObjectREFR* pRef = pGroup3->m_kWaterReferences.Get(waterPosB);
                         if (abToggle)
                         {
-                            static_cast<WaterAVObject*>(pRef->GetNiNode_v())
-                                ->SetAppCulled(!static_cast<WaterAVObject*>(pRef->GetNiNode_v())->GetAppCulled());
+                            static_cast<WaterAVObject*>(pRef->GetNiNode())
+                                ->SetAppCulled(!static_cast<WaterAVObject*>(pRef->GetNiNode())->GetAppCulled());
                         }
                         else
                         {
-                            static_cast<WaterAVObject*>(pRef->GetNiNode_v())->SetAppCulled(!abShow);
+                            static_cast<WaterAVObject*>(pRef->GetNiNode())->SetAppCulled(!abShow);
                         }
                     }
                 }
@@ -2962,39 +2787,13 @@ void WaterSystem6370::FUN_004e6370(bool abShow, bool abCheckBase, bool abToggle)
     }
 }
 
-struct Vec_004e83e0
-{
-    float x, y, z;
-    Vec_004e83e0 FUN_00439ef0(const Vec_004e83e0&) const;
-    float FUN_00457990() const;
-};
-struct WaterActor_004e83e0 : PlayerCharacter
-{
-    virtual void vfn_1f8();
-    virtual void vfn_1fc();
-    virtual void vfn_200();
-    virtual void vfn_204();
-    virtual void vfn_208();
-    virtual void vfn_20c();
-    virtual void vfn_210();
-    virtual void vfn_214();
-    virtual void vfn_218();
-    virtual void vfn_21c();
-    virtual void vfn_220();
-    virtual void vfn_224();
-    virtual void vfn_228();
-    virtual bool IsExcludedFromWaterCheck(int);
-};
-struct RangeSetting_004e83e0
-{
-    float* FUN_00403e20();
-};
-extern RangeSetting_004e83e0 DAT_011c7b54;
+
+extern Setting DAT_011c7b54;
 struct WaterList_004e83e0
 {
     void* FUN_00559450() const;
     void* DereferenceIfNotNull(void*) const;
-    WaterActor_004e83e0*& AddEight(void*) const;
+    TESObjectREFR*& AddEight(void*) const;
 };
 struct WaterScanner_004e83e0
 {
@@ -3014,15 +2813,15 @@ bool WaterScanner_004e83e0::IsPlayerNearWaterActor(void* collection)
                        ->DereferenceIfNotNull(nextPosition);
         if (nextPosition)
         {
-            WaterActor_004e83e0* object =
+            TESObjectREFR* object =
                 reinterpret_cast<WaterList_004e83e0*>(reinterpret_cast<char*>(collection) + 0x3c)
                     ->AddEight(nextPosition);
             if (g_thePlayer == object)
                 return true;
-            else if (!object->IsExcludedFromWaterCheck(0))
+            else if (!object->HasHealth(0))
             {
-                Vec_004e83e0 vPlayerPos = *reinterpret_cast<const Vec_004e83e0*>(&g_thePlayer->GetPos());
-                Vec_004e83e0 distance = *reinterpret_cast<const Vec_004e83e0*>(&object->GetPos());
+                LocalPoint3Ext vPlayerPos = *reinterpret_cast<const LocalPoint3Ext*>(((const TESObjectREFR*)g_thePlayer)->GetPos());
+                LocalPoint3Ext distance = *reinterpret_cast<const LocalPoint3Ext*>(((const TESObjectREFR*)object)->GetPos());
                 vPlayerPos.z = 0.0f;
                 distance.z = 0.0f;
                 float playerPos = vPlayerPos.FUN_00439ef0(distance).FUN_00457990();
@@ -3036,10 +2835,7 @@ bool WaterScanner_004e83e0::IsPlayerNearWaterActor(void* collection)
 }
 
 namespace fnv_004e8a00 {
-struct Pt3
-{
-    float x, y, z;
-};
+
 struct Pt2
 {
     float x, y;
@@ -3051,9 +2847,9 @@ struct WRef
     virtual void v0();
     TESObjectREFR* dummy();
     char pad[0x4];
-    const Pt3& GetPos_v();
+    const NiPoint3& GetPos_v();
     float FUN_008d6f30(float);
-    bool FUN_00885520(const Pt3&, float);
+    bool FUN_00885520(const NiPoint3&, float);
     bool FUN_004938e0();
 };
 
@@ -3104,13 +2900,13 @@ struct WGroup
 struct WData
 {
     float f0, f4, f8, fc;
-    Pt3 m5;
+    NiPoint3 m5;
     WData();
 };
 
 struct WMap
 {
-    bool Lookup(void*, WData*&);
+    bool FUN_00853130(void*, WData*&);
     void FUN_00844700(void*, WData*);
     void RemoveKey(void*);
 };
@@ -3277,9 +3073,9 @@ struct WVirt
     virtual void p7a();
     virtual void p7b();
     virtual void p7c();
-    virtual const Pt3& GetPos();
+    virtual const NiPoint3& GetPos();
     void* FUN_008d6f30(float);
-    bool FUN_00885520(const Pt3&, void*);
+    bool FUN_00885520(const NiPoint3&, void*);
     bool FUN_004938e0();
 };
 
@@ -3328,11 +3124,11 @@ void WSys::FUN_004e8a00()
                             if (!group->list58.FUN_00559450())
                                 group->list58.FUN_0066b0d0(
                                     CreateWaterShaderNode(group, FUN_004e7ff0(*DAT_011c7b54.FUN_00403e20())));
-                            Pt3 ny = ((WVirt*)DAT_011dea3c)->GetPos();
-                            Pt3 refPos = ref->GetPos();
+                            NiPoint3 ny = ((WVirt*)DAT_011dea3c)->GetPos();
+                            NiPoint3 refPos = ref->GetPos();
                             refPos.z = group->plane.FUN_0084d030();
                             WData* ea = 0;
-                            if (!map.Lookup(ref, ea))
+                            if (!map.FUN_00853130(ref, ea))
                             {
                                 ea = new WData;
                                 ea->m5 = refPos;
@@ -3353,7 +3149,7 @@ void WSys::FUN_004e8a00()
                         else
                         {
                             WData* old = 0;
-                            if (map.Lookup(ref, old))
+                            if (map.FUN_00853130(ref, old))
                                 map.RemoveKey(ref);
                         }
                     }
@@ -3372,20 +3168,14 @@ struct Vec2
     unsigned int y;
     void FUN_006815c0();
 };
-struct Vec3
-{
-    unsigned int x;
-    unsigned int y;
-    unsigned int z;
-    void FUN_006815c0();
-};
-extern Vec3 DAT_011f426c;
+
+extern NiPoint3 DAT_011f426c;
 
 struct FUN_004e8e40_owner
 {
     Vec2 first;
     Vec2 second;
-    Vec3 third;
+    NiPoint3 third;
     FUN_004e8e40_owner* FUN_004e8e40();
 };
 // Calls FUN_006815c0 on first, second and third, then assigns DAT_011f4980 to first and second and DAT_011f426c to third, returning this.
@@ -3397,7 +3187,7 @@ FUN_004e8e40_owner* FUN_004e8e40_owner::FUN_004e8e40()
     third.FUN_006815c0();
     first = *reinterpret_cast<const Vec2*>(&DAT_011f4980);
     second = *reinterpret_cast<const Vec2*>(&DAT_011f4980);
-    third = DAT_011f426c;
+    memcpy(&third, &DAT_011f426c, sizeof(third));
     return this;
 }
 
@@ -3470,25 +3260,8 @@ struct FUN_004eba90
 FUN_004eba90::~FUN_004eba90()
 {}
 
-enum MEM_CONTEXT
-{
-    MC_Water = 0x1d
-};
-struct AutoMemContext
-{
-    int iPrevious;
-    AutoMemContext(MEM_CONTEXT aeMemoryContext, bool bPush, const char* pFile, int iLine);
-    ~AutoMemContext();
-};
+#include "../../include/MEM_CONTEXT.h"
 
-struct WaterColorParam
-{
-    float r;
-    float g;
-    float b;
-    float a;
-    WaterColorParam(float fR, float fG, float fB, float fA);
-};
 
 struct NiRenderTargetGroup;
 struct WaterRenderedTexture
@@ -3541,9 +3314,9 @@ struct WaterRenderer
     virtual void v40();
     virtual void v41();
     virtual void v42();
-    virtual void SetBackgroundColor(const WaterColorParam& kColor);
+    virtual void SetBackgroundColor(const NiColorA& kColor);
     virtual void v44();
-    virtual void GetBackgroundColor(WaterColorParam& kColor);
+    virtual void GetBackgroundColor(NiColorA& kColor);
 };
 
 struct WaterTextureManager
@@ -3564,12 +3337,12 @@ struct TESWaterStub
 // @fnv 0x004ed290
 WaterRenderedTexture* TESWaterStub::FUN_004ed290()
 {
-    AutoMemContext kMemContext(MC_Water, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
+    AutoMemContext kMemContext(MEM_CONTEXT_MEM_CONTEXT_WATER, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
                                0x138a);
-    WaterColorParam kOldColor2(0.0f, 0.0f, 0.0f, 0.0f);
+    NiColorA kOldColor2(0.0f, 0.0f, 0.0f, 0.0f);
     WaterRenderedTexture* pTexture7 = GetWaterTextureManager()->CreateTexture(GetWaterRenderer(), 8, 0, 0, 0);
     GetWaterRenderer()->GetBackgroundColor(kOldColor2);
-    GetWaterRenderer()->SetBackgroundColor(WaterColorParam(0.5f, 0.5f, 0.5f, 0.5f));
+    GetWaterRenderer()->SetBackgroundColor(NiColorA(0.5f, 0.5f, 0.5f, 0.5f));
     SetRenderTargetGroup(7, pTexture7->GetGroup());
     ClearRenderTarget();
     GetWaterRenderer()->SetBackgroundColor(kOldColor2);
@@ -3651,10 +3424,6 @@ struct WaterPlayer
 {
     WaterCell* FUN_008d6f30();
 };
-struct WaterCamera
-{
-    WaterPoint& FUN_0045bb80();
-};
 struct WaterContext
 {
     int old;
@@ -3710,7 +3479,7 @@ extern bool waterSkip, waterEnabled, waterOverride, waterUnder, waterRenderUnder
     waterHasWorld, waterNewFrame, waterForceA, waterForceB;
 extern float waterCameraZ, waterLightX, waterLightY, waterLightZ, waterIntensity, waterOffsetX, waterOffsetY,
     waterOffsetZ, waterBlend;
-extern WaterCamera* waterCamera;
+extern NiCamera* waterCamera;
 void WaterSetUpdate(int);
 void WaterSetColor(int, WaterColor);
 void WaterSetFlag(int);
@@ -3737,16 +3506,16 @@ struct WaterUpdate
     unsigned unk34;
     unsigned unk38;
     WaterState state;
-    void UpdateWaterGroup(WaterCamera*, bool);
-    void UpdateWaterGroups(WaterCamera*, bool);
+    void UpdateWaterGroup(NiCamera*, bool);
+    void UpdateWaterGroups(NiCamera*, bool);
     bool FUN_004e8950();
     void FUN_004e8a00();
     void UpdateWaterObjects();
     void UpdateWaterSound();
-    void FUN_004e1bc0(WaterCamera*, void*);
+    void FUN_004e1bc0(NiCamera*, void*);
 };
 // @fnv 0x004e1bc0
-void WaterUpdate::FUN_004e1bc0(WaterCamera* camera, void* unused)
+void WaterUpdate::FUN_004e1bc0(NiCamera* camera, void* unused)
 {
     WaterContext context(29, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp", 279);
     unk00 = 0;
@@ -3760,7 +3529,7 @@ void WaterUpdate::FUN_004e1bc0(WaterCamera* camera, void* unused)
     }
     WaterSetUpdate(0);
     waterTime.FUN_00483710();
-    WaterPoint position4 = camera->FUN_0045bb80();
+    WaterPoint position4 = reinterpret_cast<const WaterPoint&>(camera->FUN_0045bb80());
     WaterSetColor(30, WaterColor(position4.x, position4.y, position4.z, 0.0f));
     waterCamera = camera;
     if (!waterEnabled)
@@ -4678,6 +4447,7 @@ void FUN_004e21b0_cls::UpdateWaterGroups(WActor* actor, bool force)
 }
 }  // namespace fnv_004e21b0
 
+class NiProperty;
 namespace fnv_004e3320 {
 struct WaterGroup : WaterSurface
 {
@@ -4785,15 +4555,8 @@ struct WaterShaderProperty
     unsigned int unk138;
     WaterNodeLink node;
 };
-struct NiProperty;
-struct NiGeometry
-{
-    NiProperty* GetProperty(int);
-};
-struct NiAVObject
-{
-    bool FUN_00456610();
-};
+
+
 struct InteriorState
 {
     void* FUN_005f36f0();
@@ -4801,7 +4564,7 @@ struct InteriorState
 extern WaterNodeLink DAT_011c7ad4, DAT_011c7c2c;
 extern bool DAT_011c7a66, DAT_011c7a67;
 void FNV_Warning(const char*);
-struct WaterSystemUpdate : WaterZoneManager
+struct WaterSystemUpdate : TESWaterSystem
 {
     WaterGroup* group;
     bool FUN_004e62e0(TESObjectREFR*, void*);
@@ -4826,12 +4589,12 @@ void WaterSystemUpdate::UpdateWaterGroup(void* context, bool force)
         void* nextPosition = 0;
         while (position)
         {
-            nextPosition = group->m_kWaterReferences.DereferenceIfNotNull(position);
+            nextPosition = group->m_kWaterReferences.GetNextPos(position);
             if (position)
             {
-                TESObjectREFR* reference = group->m_kWaterReferences.AddEight(position);
-                if ((reference->GetNiNode_v() &&
-                     !reinterpret_cast<NiAVObject*>(reference->GetNiNode_v())->FUN_00456610() &&
+                TESObjectREFR* reference = group->m_kWaterReferences.Get(position);
+                if ((reference->GetNiNode() &&
+                     !reinterpret_cast<NiAVObject*>(reference->GetNiNode())->FUN_00456610() &&
                      FUN_004e62e0(reference, context)) ||
                     force)
                 {
@@ -4839,7 +4602,7 @@ void WaterSystemUpdate::UpdateWaterGroup(void* context, bool force)
                     NiGeometry* geometry = FUN_004e8030(reference);
                     if (geometry)
                     {
-                        NiProperty* property = geometry->GetProperty(3);
+                        NiProperty* property = reinterpret_cast<NiProperty*>(geometry->GetProperty(3));
                         WaterShaderProperty* waterProperty = reinterpret_cast<WaterShaderProperty*>(property);
                         if (!FUN_004e2180())
                         {
@@ -4860,12 +4623,12 @@ void WaterSystemUpdate::UpdateWaterGroup(void* context, bool force)
                         }
                     }
                 }
-                else if (reference->GetNiNode_v())
+                else if (reference->GetNiNode())
                 {
                     NiGeometry* geometry = FUN_004e8030(reference);
                     if (geometry)
                     {
-                        NiProperty* property = geometry->GetProperty(3);
+                        NiProperty* property = reinterpret_cast<NiProperty*>(geometry->GetProperty(3));
                         WaterShaderProperty* waterProperty = reinterpret_cast<WaterShaderProperty*>(property);
                         waterProperty->node.FUN_0066b0d0(0);
                     }
@@ -4880,21 +4643,15 @@ void WaterSystemUpdate::UpdateWaterGroup(void* context, bool force)
 }  // namespace fnv_004e3320
 
 namespace PlaneRegistry {
-struct Vector
-{
-    float x, y, z;
-    Vector(float, float, float);
-    void FUN_004a0c10();
-};
 struct Matrix
 {
-    Vector FUN_004b4500(const Vector&);
+    ::NiPoint3 FUN_004b4500(const ::NiPoint3&);
 };
 struct Plane
 {
     float x, y, z, d;
-    Plane(const Vector&, const Vector&);
-    const Vector& FUN_006815c0();
+    Plane(const ::NiPoint3&, const ::NiPoint3&);
+    const ::NiPoint3& FUN_006815c0();
     float FUN_0084d030();
 };
 struct Update
@@ -4956,8 +4713,8 @@ struct Node
     virtual void v44();
     virtual void v45();
     virtual void UpdateNode(Update*);
-    const Vector& FUN_0045bb80();
-    void FUN_00440460(const Vector&);
+    const ::NiPoint3& FUN_0045bb80();
+    void FUN_00440460(const ::NiPoint3&);
     String* FUN_00413f40();
 };
 struct Physics
@@ -5168,7 +4925,7 @@ struct Object
     virtual void v115();
     virtual Node* GetNode();
     Base* FUN_007af430();
-    void FUN_00575830(const Vector&);
+    void FUN_00575830(const ::NiPoint3&);
     Physics* FUN_008d6f30();
 };
 struct ReferenceListNode
@@ -5240,8 +4997,8 @@ struct FloatSetting
 extern FloatSetting DAT_011c7a7c;
 extern float DAT_01012054, DAT_01013ea4;
 extern char DAT_01023130[];
-bool AreVectorsEqual(const Vector&, const Vector&, float);
-bool IsApproximatelyEqual(float, float, float);
+
+
 void FUN_005b5e40(const char*, ...);
 struct Water
 {
@@ -5274,19 +5031,19 @@ struct Owner
     void FUN_004e3590(Record*, Object*);
     void FUN_004e65d0();
     void SetBitFlagsOnListItems();
-    bool FUN_004e4730(Object*, const Vector*, Matrix*);
+    bool FUN_004e4730(Object*, const ::NiPoint3*, Matrix*);
 };
 // @fnv 0x004e4730
-bool Owner::FUN_004e4730(Object* object, const Vector* origin, Matrix* rotation)
+bool Owner::FUN_004e4730(Object* object, const ::NiPoint3* origin, Matrix* rotation)
 {
     if (!DAT_011c7adc.FUN_00408d60())
         return false;
-    Vector normal9(0.0f, 0.0f, 1.0f);
-    Vector oppositeX(0.0f, 0.0f, DAT_01012054);
+    ::NiPoint3 normal9(0.0f, 0.0f, 1.0f);
+    ::NiPoint3 oppositeX(0.0f, 0.0f, DAT_01012054);
     normal9 = rotation->FUN_004b4500(normal9);
-    normal9.FUN_004a0c10();
+    normal9.Unitize();
     oppositeX = rotation->FUN_004b4500(oppositeX);
-    oppositeX.FUN_004a0c10();
+    oppositeX.Unitize();
     Plane plane(normal9, *origin);
     Plane reverse4(oppositeX, *origin);
     Base* base = object->FUN_007af430();
@@ -5309,7 +5066,7 @@ bool Owner::FUN_004e4730(Object* object, const Vector* origin, Matrix* rotation)
                     if (!object->IsSpecial() &&
                         !IsApproximatelyEqual(record->first.FUN_0084d030(), plane.FUN_0084d030(), DAT_01013ea4))
                     {
-                        Vector location = object->GetNode()->FUN_0045bb80();
+                        ::NiPoint3 location = object->GetNode()->FUN_0045bb80();
                         location.z = (float)record->first.FUN_0084d030();
                         object->GetNode()->FUN_00440460(location);
                         object->FUN_00575830(location);
@@ -6001,7 +5758,7 @@ Reference61* Main61::CreateWaterReference(Node61* geometry, World61* world, Node
 }
 }  // namespace fnv_004e4c80
 
-extern GlobalObject_0045cf30 g_011c7adc;
+extern Setting g_011c7adc;
 
 struct WaterPtrList
 {
@@ -6163,7 +5920,7 @@ class WaterSystem5370
 // @fnv 0x004e5370
 bool WaterSystem5370::RemoveWaterRef(TESObjectREFR* apRef, const NiPoint3* apPos, const WaterRotation* apRot)
 {
-    if (DAT_01189624 && g_011c7adc.Bool()->b)
+    if (DAT_01189624 && *g_011c7adc.Bool())
     {
         NiPoint3 kNormal2(0.0f, 0.0f, 1.0f);
         NiPoint3 kPoint3 = NiPoint3::ZERO;
@@ -6676,11 +6433,6 @@ struct OtherService
     void FUN_00ba1250();
     void FUN_00a29680();
 };
-struct IdFlagState
-{
-    bool FUN_00ad8ce0();
-    void FUN_00ad8d10();
-};
 extern unsigned char DAT_01189624, DAT_011ad86e;
 extern int DAT_011c7a68;
 extern ClearPtr DAT_011c7b68, DAT_011c7b64;
@@ -6717,7 +6469,7 @@ struct WaterCleanup
     int unk080;
     int unk084;
     int unk088;
-    IdFlagState sound;
+    BSSoundHandle sound;
     WaterGeometry* FUN_004e8030(void*);
     void FUN_004e6370(int, int, int);
     bool ReleaseWaterResources(bool release, bool keep);
@@ -6813,8 +6565,8 @@ bool WaterCleanup::ReleaseWaterResources(bool release, bool keep)
             ((OtherService*)FUN_004e6a70())->FUN_00ba1250();
         if (((OtherService*)FUN_004e6a60()))
             ((OtherService*)FUN_004e6a60())->FUN_00a29680();
-        if (sound.FUN_00ad8ce0())
-            sound.FUN_00ad8d10();
+        if (sound.IsValid())
+            sound.Clear();
         if (((WaterService*)FUN_004e69d0()))
             ((WaterService*)FUN_004e69d0())->FUN_004e6a40(0);
     }
@@ -6833,24 +6585,12 @@ struct WaterCell098
     float FUN_005471e0();
     bool FUN_00550200(const NiPoint3*);
 };
-struct Point2098
-{
-    float x, y;
-    Point2098& DivideBy(float);
-    float NormalizeXY();
-    Point2098 operator*(float) const;
-};
-struct Color098
-{
-    float r, g, b, a;
-    Color098(float, float, float, float);
-};
 struct DebugNode098
 {
     void FUN_00440460(const NiPoint3*);
 };
-DebugNode098* CreateOctahedron(float, const Color098*, bool);
-DebugNode098* FUN_004b3890(const NiPoint3*, const Color098*, const NiPoint3*, const Color098*, bool);
+DebugNode098* CreateOctahedron(float, const NiColorA*, bool);
+DebugNode098* FUN_004b3890(const NiPoint3*, const NiColorA*, const NiPoint3*, const NiColorA*, bool);
 struct SoundData098
 {
     unsigned int flags0, flags;
@@ -6886,32 +6626,17 @@ struct TES098
     bool GetLandHeightAt(const NiPoint3*, float*);
     void FUN_00458e20(DebugNode098*, float);
 };
-struct BSSoundHandleEx
-{
-    unsigned int soundID, state, extra;
-    ~BSSoundHandleEx();
-};
 struct Audio098
 {
-    BSSoundHandleEx FUN_00ad73b0(unsigned int, unsigned int);
+    BSSoundHandle FUN_00ad73b0(unsigned int, unsigned int);
 };
 Audio098* FUN_00453a70();
-struct Handle098
-{
-    bool FUN_00ad8ce0();
-    bool FUN_00ad8b60(float, float, float);
-    bool FUN_00ad8930();
-    void FUN_00ad88f0();
-    void FUN_00ad8d10();
-    bool FUN_00ad8830(bool);
-    Handle098& FUN_00418900(const void*);
-};
 struct WaterSound098
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34,
         unk38, unk3c, unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c, unk60, unk64, unk68, unk6c, unk70, unk74,
         unk78, unk7c, unk80, unk84, unk88;
-    Handle098 handle;
+    BSSoundHandle handle;
     unsigned int GetIntValue();
     unsigned int GetGameSettingInt();
     double FUN_004e7640();
@@ -6933,7 +6658,7 @@ void WaterSound098::UpdateWaterSound()
     if (cell && cell->FUN_004518e0())
     {
         float center = cell->FUN_005471e0();
-        Point2098 amount = *(Point2098*)&DAT_011f4980;
+        WaterSoundVector2 amount = *(WaterSoundVector2*)&DAT_011f4980;
         float height;
         if (cell->IsInterior())
         {
@@ -6980,7 +6705,7 @@ void WaterSound098::UpdateWaterSound()
                         amount.y += samples.y;
                         if (DAT_011c7a64)
                         {
-                            DebugNode098* node = CreateOctahedron(10.0f, &Color098(0, 1, 0, 0), true);
+                            DebugNode098* node = CreateOctahedron(10.0f, &NiColorA(0, 1, 0, 0), true);
                             node->FUN_00440460(
                                 &NiPoint3(samples.x, samples.y, FUN_00404010(cell->FUN_005471e0(), range) + 10.0));
                             ((TES098*)DAT_011dea10)->FUN_00458e20(node, 10.0f);
@@ -6988,7 +6713,7 @@ void WaterSound098::UpdateWaterSound()
                     }
                     else if (DAT_011c7a64)
                     {
-                        DebugNode098* node = CreateOctahedron(10.0f, &Color098(0, 0, 1, 0), true);
+                        DebugNode098* node = CreateOctahedron(10.0f, &NiColorA(0, 0, 1, 0), true);
                         node->FUN_00440460(
                             &NiPoint3(samples.x, samples.y, FUN_00404010(cell->FUN_005471e0(), range) + 10.0));
                         ((TES098*)DAT_011dea10)->FUN_00458e20(node, 10.0f);
@@ -7012,30 +6737,30 @@ void WaterSound098::UpdateWaterSound()
         amount = amount * (float)((1.0 - height) * GetIntValue());
         amount.x += ((Player098*)g_thePlayer)->FUN_00436aa0()->x;
         amount.y += ((Player098*)g_thePlayer)->FUN_00436aa0()->y;
-        if (handle.FUN_00ad8ce0())
+        if (handle.IsValid())
         {
             if (DAT_011c7a64)
             {
-                NiPoint3 line = g_thePlayer->GetPos();
+                NiPoint3 line = *((const TESObjectREFR*)g_thePlayer)->GetPos();
                 line.z += 10.0;
                 NiPoint3 node(amount.x, amount.y, line.z);
-                DebugNode098* point = CreateOctahedron(10.0f, &Color098(1, 0, 0, 0), true);
+                DebugNode098* point = CreateOctahedron(10.0f, &NiColorA(1, 0, 0, 0), true);
                 point->FUN_00440460(&node);
                 ((TES098*)DAT_011dea10)->FUN_00458e20(point, 10.0f);
-                DebugNode098* range = FUN_004b3890(&line, &Color098(1, 1, 0, 0), &node, &Color098(1, 1, 0, 0), true);
+                DebugNode098* range = FUN_004b3890(&line, &NiColorA(1, 1, 0, 0), &node, &NiColorA(1, 1, 0, 0), true);
                 ((TES098*)DAT_011dea10)->FUN_00458e20(range, 10.0f);
             }
-            handle.FUN_00ad8b60(amount.x, amount.y, cell->FUN_005471e0());
-            if (handle.FUN_00ad8930() && height <= 0.0)
+            handle.SetPosition(amount.x, amount.y, cell->FUN_005471e0());
+            if (handle.IsPlaying() && height <= 0.0)
             {
                 DAT_011c7cfc = 0;
-                handle.FUN_00ad88f0();
-                handle.FUN_00ad8d10();
+                handle.Stop();
+                handle.Clear();
             }
-            else if (!handle.FUN_00ad8930() && height > 0.0)
+            else if (!handle.IsPlaying() && height > 0.0)
             {
                 DAT_011c7cfc = 1;
-                handle.FUN_00ad8830(true);
+                handle.Play(true);
             }
         }
         else if (height > 0.0 && g_thePlayer && ((Player098*)g_thePlayer)->FUN_008d6f30() &&
@@ -7046,24 +6771,18 @@ void WaterSound098::UpdateWaterSound()
             Sound098* flags = ((Player098*)g_thePlayer)->FUN_008d6f30()->FUN_00547770()->FUN_00407840();
             sound = GetFlagMask(flags->CopyBig().flags);
             sound |= (flags->CopyBig().flags & 0x40) ? 0x8000001 : 2;
-            handle.FUN_00418900(&FUN_00453a70()->FUN_00ad73b0(
-                ((Player098*)g_thePlayer)->FUN_008d6f30()->FUN_00547770()->FUN_00407840()->FUN_0084e3a0(), sound));
+            handle = FUN_00453a70()->FUN_00ad73b0(
+                ((Player098*)g_thePlayer)->FUN_008d6f30()->FUN_00547770()->FUN_00407840()->FUN_0084e3a0(), sound);
         }
     }
-    else if (DAT_011c7cfc && handle.FUN_00ad8ce0())
+    else if (DAT_011c7cfc && handle.IsValid())
     {
         DAT_011c7cfc = 0;
-        handle.FUN_00ad88f0();
+        handle.Stop();
     }
     DAT_011c7a64 = 0;
 }
 
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void*, unsigned int);
-};
 
 struct SpRef4e8
 {
@@ -7091,6 +6810,8 @@ class FUN_00b6abb0 : public NiMemObject
     char pad14c[4];
 
     FUN_00b6abb0();
+    // NiMemObject's operator delete (0x00aa1460) takes the size; the shared header also declares a one-argument form.
+    static void operator delete(void*, unsigned int);
 };
 
 struct Prop4e8
@@ -7098,14 +6819,15 @@ struct Prop4e8
     void CloneToTarget(FUN_00b6abb0* pkShader);
 };
 
-struct Type4e8
+// 0x004030b0 returns geometry +0xC0 (its shader); 0x008d8520 reads shader +0x68, not the 12-byte Type name record.
+struct WaterShaderInfo
 {
     unsigned int FUN_008d8520();
 };
 
 struct Geom4e8
 {
-    Type4e8* FUN_004030b0();
+    WaterShaderInfo* FUN_004030b0();
     Prop4e8* FUN_00a59d30(unsigned int uiType);
 };
 
@@ -7115,65 +6837,6 @@ struct Node4e8
     void FUN_00439410(FUN_00b6abb0* pkProperty);
 };
 
-struct Renderer4e8
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void Precache(Node4e8* pkNode, bool bFlag);
-};
 
 struct Player4e8
 {
@@ -7222,7 +6885,7 @@ struct Water4e8
     unsigned int uiac;
 };
 
-Renderer4e8* __cdecl FUN_004e7ff0();
+::NiNode* __cdecl FUN_004e7ff0();
 void __cdecl FUN_00b57e30(Node4e8* pkNode, int iA, int iB);
 
 struct FUN_004e8160_shell
@@ -7246,7 +6909,7 @@ Node4e8* FUN_004e8160_shell::CreateWaterShaderNode(Water4e8* pkWater, int iUnuse
         pkANode->FUN_00440460(DAT_011dea3c->FUN_00436aa0());
     else
         pkANode->FUN_00440460(&kPos);
-    FUN_004e7ff0()->Precache(pkANode, true);
+    FUN_004e7ff0()->AttachChildInAvailableSlot(reinterpret_cast<::NiAVObject*>(pkANode), true);
     FUN_00b6abb0* pkShader = new FUN_00b6abb0;
     pkANode->FUN_00439410(pkShader);
     FUN_00b57e30(pkANode, 0, 0);
@@ -7258,7 +6921,7 @@ Node4e8* FUN_004e8160_shell::CreateWaterShaderNode(Water4e8* pkWater, int iUnuse
         if (pkGeom)
         {
             Geom4e8* pkFTemp = pkGeom;
-            Type4e8* pkType = pkFTemp->FUN_004030b0();
+            WaterShaderInfo* pkType = pkFTemp->FUN_004030b0();
             if (pkType && pkType->FUN_008d8520() == 0xd)
             {
                 Prop4e8* pkProp = pkGeom->FUN_00a59d30(3);
@@ -7393,8 +7056,8 @@ void OwnerW::SpawnGroupNodeNearPlayer(float x, float y, float z, float size)
     {
         Point2W playerPos7;
         Point2W offset_;
-        playerPos7.x = g_thePlayer->GetPos().x;
-        playerPos7.y = g_thePlayer->GetPos().y;
+        playerPos7.x = ((const TESObjectREFR*)g_thePlayer)->GetPos()->x;
+        playerPos7.y = ((const TESObjectREFR*)g_thePlayer)->GetPos()->y;
         offset_.x = x;
         offset_.y = y;
         float distance8 = (playerPos7 - offset_).Length();
@@ -7416,7 +7079,7 @@ void OwnerW::SpawnGroupNodeNearPlayer(float x, float y, float z, float size)
                             DAT_011fffec = true;
                         }
                         group8->node = CalculateNode(group8, FUN_004e7ff0(), *DAT_011c7b54.FUN_00403e20());
-                        NiPoint3 position6 = g_thePlayer->GetPos();
+                        NiPoint3 position6 = *((const TESObjectREFR*)g_thePlayer)->GetPos();
                         position6.z = group8->plane.Height();
                         group8->node.Get()->SetPosition(position6);
                         UpdateW update(0.0f, false, false);
@@ -7425,8 +7088,8 @@ void OwnerW::SpawnGroupNodeNearPlayer(float x, float y, float z, float size)
                 }
                 _pos = next4;
             }
-            offset_.x = x - g_thePlayer->GetPos().x;
-            offset_.y = y - g_thePlayer->GetPos().y;
+            offset_.x = x - ((const TESObjectREFR*)g_thePlayer)->GetPos()->x;
+            offset_.y = y - ((const TESObjectREFR*)g_thePlayer)->GetPos()->y;
             offset_.x = LinearInterpolate(DAT_0102295c, DAT_01016248, DAT_0102319c, DAT_010231a0, offset_.x);
             offset_.y = LinearInterpolate(DAT_0102295c, DAT_01016248, DAT_0102319c, DAT_010231a0, offset_.y);
             offset_ += Point2W(size / 2.0, size / 2.0);
@@ -7665,8 +7328,8 @@ void FUN_004e8ec0_cls::UpdateWaterObjects()
                 group9 = list.GetAt(cur);
             cur = next;
         }
-        NiPoint3 _pos = g_thePlayer->GetPos();
-        NiPoint3 pos4;
+        NiPoint3 _pos = *((const TESObjectREFR*)g_thePlayer)->GetPos();
+        NiPoint3_OutOfLineCtor pos4;
         if (group9->obj.Get())
         {
             pos4 = group9->obj.Get()->GetWorldPos();
@@ -7794,86 +7457,6 @@ struct WUpdate
     int flags04, flags08;
     WUpdate(float, bool, bool);
 };
-struct Camera9550
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    Camera9550();
-    ~Camera9550();
-    void FUN_00440460(const NiPoint3&);
-    void FUN_00a6faf0(const Frustum9550&);
-    void FUN_00a59c60(WUpdate&);
-    void SetLookAt(const NiPoint3&, const NiPoint3&);
-    void* FUN_004a0d10();
-    const Frustum9550& FUN_0045bbe0();
-};
 struct Culler9550
 {
     int unk000;
@@ -7927,7 +7510,7 @@ struct Culler9550
     int unk0c0;
     Culler9550(void*);
     ~Culler9550();
-    void FUN_0041fd00(Camera9550*);
+    void FUN_0041fd00(NiCamera*);
     void FUN_00a694a0(const Frustum9550&);
 };
 
@@ -8064,7 +7647,7 @@ extern WPlayer* DAT_011dea3c;
 struct WRenderer
 {
     void FUN_004a0dd0(void*);
-    void SetFromCamera(Camera9550*);
+    void SetFromCamera(NiCamera*);
 };
 
 extern bool DAT_011ff375;
@@ -8175,14 +7758,14 @@ struct WSystem
     int unk038;
     WList regions;
     WGeometry* FUN_004e8030(WRef*);
-    bool FUN_004e62e0(WRef*, Camera9550*);
+    bool FUN_004e62e0(WRef*, NiCamera*);
     void UpdateRegions();
 };
 // Computes the min/max region level, builds an orthographic frustum and camera, renders the scene, then updates geometry data for each region's refs.
 // @fnv 0x004e9550
 void WSystem::UpdateRegions()
 {
-    Camera9550 c;
+    NiCamera c;
     NiPoint3 eb = NiPoint3::ZERO;
     float b = 3.402823466e+38F;
     float j = 3.402823466e+38F;
@@ -8211,17 +7794,17 @@ void WSystem::UpdateRegions()
     ba.bottom = -(*DAT_011c7b54.FUN_00403e20() / 2.0);
     ba.farPlane = std::abs(j - b) + 100.0;
     c.FUN_00440460(NiPoint3(DAT_011dea3c->GetPosition().x, DAT_011dea3c->GetPosition().y, b + 50.0));
-    c.FUN_00a6faf0(ba);
+    c.FUN_00a6faf0(reinterpret_cast<const NiFrustum&>(ba));
     WUpdate l(0.0f, false, false);
-    c.FUN_00a59c60(l);
+    c.FUN_00a59c60(reinterpret_cast<NiUpdateData&>(l));
     NiPoint3 e(DAT_011dea3c->GetPosition().x, DAT_011dea3c->GetPosition().y, b);
-    c.SetLookAt(e, DAT_011a9478);
+    c.AimAt(reinterpret_cast<const ::NiPoint3&>(e), reinterpret_cast<const ::NiPoint3&>(DAT_011a9478));
     ((WRenderer*)FUN_0043c4b0())->FUN_004a0dd0(c.FUN_004a0d10());
     DAT_011ff375 = true;
     Culler9550 cf(0);
     cf.FUN_0041fd00(&c);
     ((WRenderer*)FUN_0043c4b0())->SetFromCamera(&c);
-    cf.FUN_00a694a0(c.FUN_0045bbe0());
+    cf.FUN_00a694a0(reinterpret_cast<const Frustum9550&>(c.GetViewFrustum()));
     q = regions.FUN_00559450();
     k = 0;
     while (q)
@@ -8272,41 +7855,29 @@ void WSystem::UpdateRegions()
 }
 }  // namespace fnv_004e9550
 
-class Point4E9
-{
-  public:
-    float x, y, z;
-};
 
-class Frustum4E9
-{
-  public:
-    float m_fLeftBound, m_fRightBound, m_fTopBound, m_fBottomBound, m_fNearPlane, m_fFarPlane;
-    bool m_bOrthographic;
-};
 
-class Viewport4E9
-{
-  public:
-    float m_fMinimumU, m_fMaximumU, m_fMinimumV, m_fMaximumV;
-};
 
+
+
+// Retained: NiCamera lacks the vector-returning accessors at 0x0045bba0 and
+// 0x004e9c50 used by CameraState4E9::SetFromCamera.
 class Camera4E9
 {
   public:
-    const Viewport4E9& GetViewPort() const;
-    Point4E9 GetWorldForwardVector() const;
-    Point4E9 GetWorldTranslation() const;
-    Point4E9 GetWorldUpVector() const;
-    const Frustum4E9& GetViewFrustum() const;
+    const ::NiRect<float>& GetViewPort() const;
+    ::NiPoint3 GetWorldForwardVector() const;
+    ::NiPoint3 GetWorldTranslation() const;
+    ::NiPoint3 GetWorldUpVector() const;
+    const ::NiFrustum& GetViewFrustum() const;
     unsigned int GetLODAdjust() const;
 };
 
 class CameraState4E9
 {
   public:
-    void Set(const Viewport4E9& kPort, const Point4E9& kLoc, const Point4E9& kWorldPosition, const Point4E9& kUp,
-             const Frustum4E9& kFrustum, unsigned int uiLODAdjust);
+    void Set(const ::NiRect<float>& kPort, const ::NiPoint3& kLoc, const ::NiPoint3& kWorldPosition, const ::NiPoint3& kUp,
+             const ::NiFrustum& kFrustum, unsigned int uiLODAdjust);
     void SetFromCamera(const Camera4E9& kCamera);
 };
 
@@ -8322,308 +7893,10 @@ struct RefActor;
 struct N;
 struct C;
 struct Camera;
-class AutoMemHelper
-{
-    int old;
 
-  public:
-    AutoMemHelper(int, bool, const char*, int);
-    ~AutoMemHelper();
-};
-struct P3
-{
-    float x, y, z;
-};
-struct FUN_00414430
-{
-    float r, g, b, a;
-    FUN_00414430(float, float, float, float);
-};
-struct NiMemObject
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-struct FUN_00a712f0 : NiMemObject
-{
-    FUN_00a712f0();
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkc;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-};
-struct FUN_00b660d0 : NiMemObject
-{
-    virtual void v0();
-    virtual void v4();
-    virtual void v8();
-    virtual void vc();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c(FUN_00a712f0*);
-    int unk4;
-    int unk8;
-    int unkc;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    FUN_00b660d0(int, int, int);
-    void FUN_004a1020(N*);
-    void FUN_004ea860(int);
-    void SetAccumulate(int);
-    void FUN_004a1040(int);
-    void FUN_004ea880(FUN_00414430*);
-};
 struct Process
 {
-    P3& FUN_004ea950();
+    NiPoint3& FUN_004ea950();
     N* FUN_007fa950();
 };
 struct NodeVector
@@ -8886,7 +8159,7 @@ struct RefActor
     virtual void v1cc();
     virtual N* v1d0();
     Process* FUN_008d8520();
-    P3& FUN_00891170();
+    NiPoint3& FUN_00891170();
     F* FUN_007af430();
     RN* FUN_008d6f30();
     int FUN_005f36f0();
@@ -8906,20 +8179,20 @@ struct ColorObj
 };
 struct RefAcc
 {
-    FUN_00b660d0* pointer;
-    FUN_00b660d0* FUN_00559450();
-    void FUN_0066b0d0(FUN_00b660d0*);
+    BSShaderAccumulator* pointer;
+    BSShaderAccumulator* FUN_00559450();
+    void FUN_0066b0d0(BSShaderAccumulator*);
 };
 struct RefCam
 {
-    FUN_00a712f0* pointer;
-    FUN_00a712f0* FUN_00559450();
-    void FUN_0066b0d0(FUN_00a712f0*);
+    NiCamera* pointer;
+    NiCamera* FUN_00559450();
+    void FUN_0066b0d0(NiCamera*);
 };
 struct NList
 {
     int a, b, c;
-    void RemoveAll();
+    void FUN_004ed900();
     void FUN_0076b660(RenderBase* const&);
 };
 struct IterList
@@ -8928,9 +8201,10 @@ struct IterList
     void* FUN_00559450();
     RefActor*& FUN_0057cbe0(void**);
 };
-struct Map
+// Exe 0x004e9d40: unit-local Map view; declarations and layout are preserved.
+struct TeswaterMapView
 {
-    bool Lookup(RefActor*, RefActor**);
+    bool FUN_00853130(RefActor*, RefActor**);
     void FUN_00844700(RefActor*, RefActor*);
 };
 struct State
@@ -8938,7 +8212,7 @@ struct State
     int unk0, unk4, unk8, unkc, unk10, unk14, unk18, unk1c, unk20;
     IterList refs;
     int unk30, unk34, unk38, unk3c, unk40, unk44, unk48, unk4c, unk50;
-    P3 vector;
+    NiPoint3 vector;
     bool colored;
     unsigned char unk61, unk62, unk63;
     NList nodes, more;
@@ -8947,10 +8221,7 @@ struct State
     int unk98, index, unka0;
     RefCam camera;
 };
-struct Setting
-{
-    unsigned char* FUN_00408d60();
-};
+
 extern Setting DAT_011c7cc0, DAT_011c7ae8;
 struct GridSetting
 {
@@ -8966,13 +8237,13 @@ extern GlobalList DAT_011c7b8c;
 extern RefActor* DAT_011dea10;
 struct Manager
 {
-    void FUN_00ba3390(FUN_00a712f0*, int, int, NList*, NList*, FUN_00b660d0*, int, int, int);
+    void FUN_00ba3390(NiCamera*, int, int, NList*, NList*, BSShaderAccumulator*, int, int, int);
     void FUN_00ba30f0(int, int);
 };
 Manager* __cdecl FUN_004ea970();
 bool __cdecl FUN_004e2160();
 ColorObj* __cdecl FUN_00450b80(int);
-void __cdecl FUN_00c4bf40(void*, void*, FUN_00a712f0*);
+void __cdecl FUN_00c4bf40(void*, void*, NiCamera*);
 bool __cdecl FUN_0045bad0(const char*, N*);
 char __cdecl FUN_006fd150();
 void __cdecl FUN_006fd1a0();
@@ -9000,7 +8271,7 @@ struct Target
     int unk40;
     int unk44;
     int unk48;
-    Map map;
+    TeswaterMapView map;
     N* FUN_004e8030(RefActor*);
     bool FUN_004e62e0(RefActor*, void*);
     void FUN_004e9d40(void*, State*, bool);
@@ -9020,29 +8291,29 @@ void Target::FUN_004e9d40(void* input, State* state, bool special)
                     bool b, d, e;
                     if (!FUN_004e2160() || !input)
                         return;
-                    state->camera.FUN_0066b0d0(new FUN_00a712f0);
+                    state->camera.FUN_0066b0d0(new NiCamera);
                     FUN_00c4bf40(input, &state->unk4, state->camera.FUN_00559450());
                     if (!state->acc.FUN_00559450())
-                        state->acc.FUN_0066b0d0(new FUN_00b660d0(99, 1, 759));
+                        state->acc.FUN_0066b0d0(new WaterAccumulatorAllocation(99, 1, 759));
                     state->acc.FUN_00559450()->FUN_004a1020((N*)FUN_00450b80(0));
                     state->acc.FUN_00559450()->FUN_004ea860(1);
-                    state->acc.FUN_00559450()->v8c(state->camera.FUN_00559450());
+                    state->acc.FUN_00559450()->StartAccumulating(state->camera.FUN_00559450());
                     state->acc.FUN_00559450()->SetAccumulate(1);
                     if (state->colored)
                     {
                         state->acc.FUN_00559450()->FUN_004a1040(15);
-                        P3 light = DAT_011dea10->FUN_008d8520()->FUN_004ea950();
-                        P3 tint = FUN_00450b80(0)->GetFloatAsUInt()->FUN_00891170();
-                        FUN_00414430 color(light.x * tint.x, light.y * tint.y, light.z * tint.z, 1.0f);
-                        state->acc.FUN_00559450()->FUN_004ea880(&color);
+                        NiPoint3 light = DAT_011dea10->FUN_008d8520()->FUN_004ea950();
+                        NiPoint3 tint = FUN_00450b80(0)->GetFloatAsUInt()->FUN_00891170();
+                        NiColorA color(light.x * tint.x, light.y * tint.y, light.z * tint.z, 1.0f);
+                        state->acc.FUN_00559450()->FUN_004ea880(reinterpret_cast<const NiColorA*>(&color));
                     }
                     a = false;
                     d = false;
                     c = false;
                     e = false;
                     b = false;
-                    state->nodes.RemoveAll();
-                    state->more.RemoveAll();
+                    state->nodes.FUN_004ed900();
+                    state->more.FUN_004ed900();
                     iter = state->refs.FUN_00559450();
                     while (iter)
                     {
@@ -9071,8 +8342,8 @@ void Target::FUN_004e9d40(void* input, State* state, bool special)
                                                  (form && form->FUN_004ea8b0() && !d && !DAT_011dea10->FUN_005f36f0())))
                                 {
                                     d = true;
-                                    for (unsigned int i = 0; i < DAT_011c63cc.Int()->ui; ++i)
-                                        for (unsigned int j = 0; j < DAT_011c63cc.Int()->ui; ++j)
+                                    for (unsigned int i = 0; i < (unsigned int)*DAT_011c63cc.Int(); ++i)
+                                        for (unsigned int j = 0; j < (unsigned int)*DAT_011c63cc.Int(); ++j)
                                         {
                                             CellHandle* owner = DAT_011dea10->FUN_00457050(i, j);
                                             Cell* cell = owner->cell;
@@ -9126,7 +8397,7 @@ void Target::FUN_004e9d40(void* input, State* state, bool special)
                                         if (list->FUN_006815c0()->flags & 1)
                                         {
                                             RefActor* item = list->FUN_006815c0()->ref;
-                                            if (item->v1d0() && !map.Lookup(item, &item) &&
+                                            if (item->v1d0() && !map.FUN_00853130(item, &item) &&
                                                 (DAT_011dea10->FUN_005f36f0() ||
                                                  (!DAT_011dea10->FUN_005f36f0() && !item->FUN_00564e60())))
                                             {
@@ -9143,7 +8414,7 @@ void Target::FUN_004e9d40(void* input, State* state, bool special)
                                     while (list && !list->FUN_008256d0())
                                     {
                                         RefActor* item = list->FUN_006815c0();
-                                        if (item && item->v1d0() && !map.Lookup(item, &item) &&
+                                        if (item && item->v1d0() && !map.FUN_00853130(item, &item) &&
                                             !item->FUN_00564e60())
                                         {
                                             state->nodes.FUN_0076b660(item->v1d0());
@@ -9163,7 +8434,7 @@ void Target::FUN_004e9d40(void* input, State* state, bool special)
                         if (iter)
                         {
                             RefActor* item = DAT_011c7b8c.AddEight(iter);
-                            if (item->v1d0() && !map.Lookup(item, &item))
+                            if (item->v1d0() && !map.FUN_00853130(item, &item))
                             {
                                 state->more.FUN_0076b660(item->v1d0());
                                 map.FUN_00844700(item, item);
@@ -9198,295 +8469,9 @@ struct Plane60
     float x, y, z, w;
     Plane60(const Vector60&, const Vector60&);
 };
-struct Color60
-{
-    float r, g, b, a;
-    Color60(float, float, float, float);
-};
 struct RGB60
 {
     float r, g, b;
-};
-struct Camera60
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    Camera60();
-};
-struct Accumulator60
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void SetCamera(Camera60*);
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    Accumulator60(int, int, int);
-    void FUN_004a1020(void*);
-    void FUN_004ea860(int);
-    void SetAccumulate(int);
-    void FUN_004a1040(int);
-    void FUN_004ea880(const Color60&);
 };
 template <class T> struct Smart60
 {
@@ -9502,7 +8487,7 @@ struct Node60
 };
 struct List60
 {
-    void RemoveAll();
+    void FUN_004ed900();
     void FUN_0076b660(Node60* const&);
 };
 struct Weather60
@@ -9662,11 +8647,11 @@ struct Player60
 };
 struct RenderJob60
 {
-    void FUN_00ba3390(Camera60*, int, int, List60*, List60*, Accumulator60*, int, int, int);
+    void FUN_00ba3390(NiCamera*, int, int, List60*, List60*, BSShaderAccumulator*, int, int, int);
     void FUN_00ba30f0(int, int);
 };
-extern Smart60<Camera60> DAT_011c7b44;
-extern Smart60<Accumulator60> DAT_011c7cb8;
+extern Smart60<NiCamera> DAT_011c7b44;
+extern Smart60<BSShaderAccumulator> DAT_011c7cb8;
 extern Toggle60 DAT_011c7a90, DAT_011c7aa8, DAT_011c7c00;
 extern World60* DAT_011dea10;
 extern Player60* DAT_011dea3c;
@@ -9675,7 +8660,7 @@ extern int DAT_011c7a6c;
 extern char DAT_0102301c[];
 bool FUN_004e2160();
 Renderer60* FUN_00450b80(int);
-void FUN_00c4bf40(void*, const Plane60&, Camera60*);
+void FUN_00c4bf40(void*, const Plane60&, NiCamera*);
 Node60* FUN_0045c670();
 char FUN_006fd150();
 void FUN_006fd1a0();
@@ -9732,27 +8717,27 @@ void Main60::FUN_004eaa00(void* target)
     Scope60 scope6(0x1d, 1, DAT_0102301c, 0xfe3);
     if (!FUN_004e2160() || !target)
         return;
-    DAT_011c7b44.FUN_0066b0d0(new Camera60);
+    DAT_011c7b44.FUN_0066b0d0(new NiCamera);
     Vector60 normal3(0.0f, 0.0f, 1.0f);
     Vector60 point1(0.0f, 0.0f, DAT_011dea10->FUN_004fd3e0()->FUN_0045cd80());
     Plane60 plane2(normal3, point1);
     FUN_00c4bf40(target, plane2, DAT_011c7b44.FUN_00559450());
     if (!DAT_011c7cb8.FUN_00559450())
-        DAT_011c7cb8.FUN_0066b0d0(new Accumulator60(0x63, 1, 0x2f7));
+        DAT_011c7cb8.FUN_0066b0d0(new WaterAccumulatorAllocation(0x63, 1, 0x2f7));
     DAT_011c7cb8.FUN_00559450()->FUN_004a1020(FUN_00450b80(0));
     DAT_011c7cb8.FUN_00559450()->FUN_004ea860(1);
-    DAT_011c7cb8.FUN_00559450()->SetCamera(DAT_011c7b44.FUN_00559450());
+    DAT_011c7cb8.FUN_00559450()->StartAccumulating(DAT_011c7b44.FUN_00559450());
     DAT_011c7cb8.FUN_00559450()->SetAccumulate(1);
     if (*DAT_011c7a90.FUN_00408d60() || *DAT_011c7aa8.FUN_00408d60())
     {
         DAT_011c7cb8.FUN_00559450()->FUN_004a1040(0xf);
         RGB60 ambientColor = *DAT_011dea10->FUN_008d8520()->FUN_004ea950();
         RGB60 tint = *FUN_00450b80(0)->GetFloatAsUInt()->FUN_00891170();
-        Color60 color(ambientColor.r * tint.r, ambientColor.g * tint.g, ambientColor.b * tint.b, 1.0f);
-        DAT_011c7cb8.FUN_00559450()->FUN_004ea880(color);
+        NiColorA color(ambientColor.r * tint.r, ambientColor.g * tint.g, ambientColor.b * tint.b, 1.0f);
+        DAT_011c7cb8.FUN_00559450()->FUN_004ea880(reinterpret_cast<const NiColorA*>(&color));
     }
-    DAT_011c7ce4.RemoveAll();
-    DAT_011c7b80.RemoveAll();
+    DAT_011c7ce4.FUN_004ed900();
+    DAT_011c7b80.FUN_004ed900();
     if (*DAT_011c7c00.FUN_00408d60())
     {
         if (!DAT_011dea3c->FUN_004eaf60())
@@ -9793,7 +8778,6 @@ void Main60::FUN_004eaa00(void* target)
 }  // namespace fnv_004eaa00
 
 struct WRNode;
-struct WRCamera;
 struct WRScene;
 
 struct WRPoint3
@@ -9813,305 +8797,23 @@ struct WRPlane
     WRPlane(const WRPoint3& arNormal, const WRPoint3& arPoint);
 };
 
-struct WRReflectNode
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
 
-    static void* __cdecl operator new(unsigned int auiSize);
-    static void __cdecl operator delete(void* apMem, unsigned int);
-    WRReflectNode();
-};
-
-struct WRAccumulator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2C();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3C();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4C();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5C();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6C();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7C();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void SetCullingNode(WRReflectNode* apNode);
-
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25C;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26C;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27C;
-
-    static void* __cdecl operator new(unsigned int auiSize);
-    static void __cdecl operator delete(void* apMem, unsigned int);
-    WRAccumulator(int aiMode, unsigned int auiUnk1, unsigned int auiUnk2);
-    void SetRenderScene(WRScene* apScene);
-    void FUN_004ea860(bool abFlag);
-    void SetAccumulate(bool abFlag);
-};
 
 struct WRNodePtr
 {
-    WRReflectNode* p;
+    NiCamera* p;
 
-    WRNodePtr& operator=(WRReflectNode* apNode);
-    operator WRReflectNode*() const;
+    WRNodePtr& operator=(NiCamera* apNode);
+    operator NiCamera*() const;
 };
 
 struct WRAccumPtr
 {
-    WRAccumulator* p;
+    BSShaderAccumulator* p;
 
-    WRAccumPtr& operator=(WRAccumulator* apAccum);
-    operator WRAccumulator*() const;
-    WRAccumulator* operator->() const;
+    WRAccumPtr& operator=(BSShaderAccumulator* apAccum);
+    operator BSShaderAccumulator*() const;
+    BSShaderAccumulator* operator->() const;
 };
 
 struct WRList
@@ -10138,15 +8840,15 @@ struct WRTES
 
 struct WRRenderer
 {
-    void RenderReflections(WRReflectNode* apNode, int aiUnk1, int aiUnk2, WRList* apList1, WRList* apList2,
-                           WRAccumulator* apAccum, int aiUnk3, int aiFrame, int aiUnk4);
+    void RenderReflections(NiCamera* apNode, int aiUnk1, int aiUnk2, WRList* apList1, WRList* apList2,
+                           BSShaderAccumulator* apAccum, int aiUnk3, int aiFrame, int aiUnk4);
     void SetFrame(int aiUnk, int aiFrame);
 };
 
 bool __cdecl WRIsEnabled();
 WRScene* __cdecl WRGetScene(int aiIndex);
 WRRenderer* __cdecl WRGetRenderer();
-void __cdecl WRCullScene(WRCamera* apCamera, WRPlane& arPlane, WRReflectNode* apNode);
+void __cdecl WRCullScene(NiCamera* apCamera, WRPlane& arPlane, NiCamera* apNode);
 
 extern WRNodePtr g_spWaterReflectNode;
 extern WRAccumPtr g_spWaterAccumulator;
@@ -10157,29 +8859,29 @@ extern WRTES* g_pWRTES;
 
 struct WRWaterManager
 {
-    void UpdateWaterReflection(WRCamera* apCamera);
+    void UpdateWaterReflection(NiCamera* apCamera);
 };
 
 // Builds a water reflection node, culls the scene against the water plane, and renders reflections into the water accumulator for the next frame.
 // @fnv 0x004eaf80
-void WRWaterManager::UpdateWaterReflection(WRCamera* apCamera)
+void WRWaterManager::UpdateWaterReflection(NiCamera* apCamera)
 {
-    AutoMemContext kMemContext4(MC_Water, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
+    AutoMemContext kMemContext4(MEM_CONTEXT_MEM_CONTEXT_WATER, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
                                 0x1054);
     if (!WRIsEnabled() || !apCamera)
         return;
 
-    g_spWaterReflectNode = new WRReflectNode;
+    g_spWaterReflectNode = new NiCamera;
     WRPoint3 kNormal(0.0f, 0.0f, 1.0f);
     WRPoint3 kPoint(0.0f, 0.0f, g_pWRTES->GetParentWorldSpace()->UpdateTESState());
     WRPlane kPlaneTmp(kNormal, kPoint);
     WRCullScene(apCamera, kPlaneTmp, g_spWaterReflectNode);
 
     if (!g_spWaterAccumulator)
-        g_spWaterAccumulator = new WRAccumulator(0x63, 1, 0x2f7);
-    g_spWaterAccumulator->SetRenderScene(WRGetScene(0));
+        g_spWaterAccumulator = new WaterAccumulatorAllocation(0x63, 1, 0x2f7);
+    g_spWaterAccumulator->FUN_004a1020(WRGetScene(0));
     g_spWaterAccumulator->FUN_004ea860(true);
-    g_spWaterAccumulator->SetCullingNode(g_spWaterReflectNode);
+    g_spWaterAccumulator->StartAccumulating((NiCamera*)g_spWaterReflectNode);
     g_spWaterAccumulator->SetAccumulate(true);
 
     g_kWaterListA.RemoveAll();
@@ -10240,19 +8942,19 @@ WaterPassThread* FUN_004ea970();
 void FUN_00b6c0d0(WaterPassTexture*, WaterPassTexture*, int);
 struct WaterPassOwner
 {
-    void FUN_004ecef0(WaterColorParam);
+    void FUN_004ecef0(NiColorA);
     void FUN_004eb220(WaterPass* pass);
 };
 // @fnv 0x004eb220
 void WaterPassOwner::FUN_004eb220(WaterPass* pass)
 {
-    AutoMemContext clear(MC_Water, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
+    AutoMemContext clear(MEM_CONTEXT_MEM_CONTEXT_WATER, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
                          0x1082);
     if (!FUN_004e2160() || !pass->target)
         return;
-    WaterColorParam saved(0.0f, 0.0f, 0.0f, 0.0f);
+    NiColorA saved(0.0f, 0.0f, 0.0f, 0.0f);
     GetWaterRenderer()->GetBackgroundColor(saved);
-    WaterColorParam context = saved;
+    NiColorA context = saved;
     context.a = 0.0f;
     GetWaterRenderer()->SetBackgroundColor(context);
     if (!pass->texture)
@@ -10266,7 +8968,7 @@ void WaterPassOwner::FUN_004eb220(WaterPass* pass)
         ->FUN_004a0dd0(static_cast<WaterPassTexture*>(pass->target)->FUN_004a0d10());
     FUN_004ea970()->FUN_00ba3130(1, pass->index + 1);
     static_cast<WaterPassRenderer*>(FUN_0043c4b0())->SetFromCamera(pass->target);
-    FUN_004ecef0(WaterColorParam(pass->plane.FUN_006815c0().x, pass->plane.FUN_006815c0().y,
+    FUN_004ecef0(NiColorA(pass->plane.FUN_006815c0().x, pass->plane.FUN_006815c0().y,
                                  pass->plane.FUN_006815c0().z, -pass->plane.FUN_0084d030(0)));
     UpdateSpawnedObjectFlags(1, 0, 0, 0, 0, 0, 0);
     FUN_00b6c0d0(pass->target, pass->scene, 0);
@@ -10279,61 +8981,7 @@ void WaterPassOwner::FUN_004eb220(WaterPass* pass)
 }
 }  // namespace fnv_004eb220
 
-struct Color197
-{
-    float r, g, b, a;
-    Color197(float, float, float, float);
-};
-struct Renderer197
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void SetColor(const Color197&);
-    virtual void v44();
-    virtual void GetColor(Color197&);
-};
-Renderer197* FUN_004a0e90();
+NiRenderer* FUN_004a0e90();
 struct Texture197
 {
     void* FUN_00b6b260();
@@ -10357,7 +9005,7 @@ struct Uint197
 extern Uint197 g_011c7c1c;
 struct Manager197
 {
-    Texture197* FUN_00b6e110(Renderer197*, int, int, int, int);
+    Texture197* FUN_00b6e110(NiRenderer*, int, int, int, int);
     void FUN_00b6da10(Texture197*);
 };
 Manager197* __stdcall FUN_004a0ea0();
@@ -10365,7 +9013,8 @@ struct Node197
 {
     void FUN_00450f90();
 };
-struct Actor197
+// Player global 0x011dea3c and 0x004eaf60 (+0x64A) identify PlayerCharacter; its shared header lacks this slot-0x74 overload.
+struct WaterPlayerSceneAccess
 {
     virtual void actor0();
     virtual void actor1();
@@ -10486,7 +9135,7 @@ struct Actor197
     virtual Node197* GetNode(int);
     bool FUN_004eaf60();
 };
-extern Actor197* g_011dea3c;
+extern WaterPlayerSceneAccess* g_011dea3c;
 struct RendererOps197
 {
     void FUN_004a0dd0(void*);
@@ -10538,7 +9187,7 @@ struct Effect197
 struct Effects197
 {
     Effect197* FUN_004ebbc0(int);
-    void FUN_00b97550(unsigned int, Renderer197*, Texture197*, Texture197*, EffectParam197*, bool);
+    void FUN_00b97550(unsigned int, NiRenderer*, Texture197*, Texture197*, EffectParam197*, bool);
 };
 Effects197* FUN_004e3270();
 extern float DAT_012003c4;
@@ -10584,21 +9233,21 @@ struct Water197
     int unk94;
     int unk98;
     bool enabled;
-    void FUN_004ecef0(Color197);
+    void FUN_004ecef0(NiColorA);
     void UpdateWaterRendering();
 };
 // @fnv 0x004eb540
 void Water197::UpdateWaterRendering()
 {
-    AutoMemContext normal(MC_Water, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
+    AutoMemContext normal(MEM_CONTEXT_MEM_CONTEXT_WATER, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
                           0x10b8);
     if (!FUN_004e2160() || !g_011c7b44.FUN_00559450())
         return;
-    Color197 oldColor(0.0f, 0.0f, 0.0f, 0.0f);
-    FUN_004a0e90()->GetColor(oldColor);
-    Color197 plane = oldColor;
+    NiColorA oldColor(0.0f, 0.0f, 0.0f, 0.0f);
+    FUN_004a0e90()->GetBackgroundColor(reinterpret_cast<NiVector4*>(&oldColor));
+    NiColorA plane = oldColor;
     plane.a = 0.0f;
-    FUN_004a0e90()->SetColor(plane);
+    FUN_004a0e90()->SetBackgroundColor(reinterpret_cast<NiVector4*>(&plane));
     if (!g_011c7ad4.FUN_00559450())
         g_011c7ad4.FUN_0066b0d0(FUN_004a0ea0()->FUN_00b6e110(FUN_004a0e90(), 9, 0, 0, 0));
     bool memory = (unsigned char)FUN_006fd150() && !*g_011c7c00.FUN_00408d60();
@@ -10614,14 +9263,14 @@ void Water197::UpdateWaterRendering()
     Plane197 toggle(clearColor, point);
     ((RendererOps197*)FUN_0043c4b0())->SetFromCamera(g_011c7b44.FUN_00559450());
     FUN_004ecef0(
-        Color197(toggle.FUN_006815c0().x, toggle.FUN_006815c0().y, toggle.FUN_006815c0().z, -toggle.FUN_0084d030(0)));
+        NiColorA(toggle.FUN_006815c0().x, toggle.FUN_006815c0().y, toggle.FUN_006815c0().z, -toggle.FUN_0084d030(0)));
     UpdateSpawnedObjectFlags(1, 0, 0, 0, 0, 0, 0);
     FUN_00b6c0d0(g_011c7b44.FUN_00559450(), g_011c7cb8.FUN_00559450(), 0);
     FUN_004eb510(0);
     FUN_00b6b790();
     if (!((Player197*)DAT_011dea10)->FUN_005f36f0() && memory)
         FUN_006fd1e0();
-    FUN_004a0e90()->SetColor(oldColor);
+    FUN_004a0e90()->SetBackgroundColor(reinterpret_cast<NiVector4*>(&oldColor));
     g_011c7b44.FUN_0066b0d0(0);
     if (*g_011c7c48.FUN_00408d60())
     {
@@ -10707,9 +9356,9 @@ struct RenderOps
     virtual void slot41();
     virtual void slot42();
 
-    virtual void SetColor(const WaterColorParam&);
+    virtual void SetColor(const NiColorA&);
     virtual void slot44();
-    virtual void GetColor(WaterColorParam&);
+    virtual void GetColor(NiColorA&);
     void SetData(void*);
     void SetTexture(TextureOps*);
 };
@@ -10739,20 +9388,20 @@ struct PlaneWater : NiPlane
 };
 struct WaterPass
 {
-    void SetWaterColorParameter(WaterColorParam, int);
+    void SetWaterColorParameter(NiColorA, int);
     void FUN_004ebbe0();
 };
 // Saves the renderer color, creates the water target if missing, sets water data and texture, draws and copies the water, then restores the color.
 // @fnv 0x004ebbe0
 void WaterPass::FUN_004ebbe0()
 {
-    AutoMemContext context2(MC_Water, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
+    AutoMemContext context2(MEM_CONTEXT_MEM_CONTEXT_WATER, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
                             0x1114);
     if (!FUN_004e2160() || !waterSource.Resolve())
         return;
-    WaterColorParam oldColor(0, 0, 0, 0);
+    NiColorA oldColor(0, 0, 0, 0);
     RendererWater()->GetColor(oldColor);
-    WaterColorParam newColor3 = oldColor;
+    NiColorA newColor3 = oldColor;
     newColor3.a = 0;
     RendererWater()->SetColor(newColor3);
     if (!waterTarget.Resolve())
@@ -10767,7 +9416,7 @@ void WaterPass::FUN_004ebbe0()
     NiPoint3 point(0, 0, waterTes->World()->Height());
     NiPlane plane(normal, point);
     ((RenderOps*)FUN_0043c4b0())->SetTexture(waterSource.Resolve());
-    SetWaterColorParameter(WaterColorParam(((PlaneWater&)plane).Normal().x, ((PlaneWater&)plane).Normal().y,
+    SetWaterColorParameter(NiColorA(((PlaneWater&)plane).Normal().x, ((PlaneWater&)plane).Normal().y,
                                            ((PlaneWater&)plane).Normal().z, -plane.FUN_0084d030()),
                            0);
     DrawWater(1, 0, 0, 0, 0, 0, 0);
@@ -10785,11 +9434,6 @@ struct CellFlag074
 {
     bool FUN_00450ff0();
 };
-struct NiMemObject
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
 struct Update074
 {
     float time;
@@ -10798,296 +9442,7 @@ struct Update074
     int frame;
     void FUN_0043d410(float, bool, bool);
 };
-struct Camera074
-{
-    void* FUN_0045bb80();
-    void* FUN_00461130();
-    float FUN_008d01e0();
-    float GetMaxFarNearRatio() const;
-    void* GetViewFrustum() const;
-};
-struct FUN_00a712f0 : NiMemObject
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    FUN_00a712f0();
-    void FUN_00440460(void*);
-    void FUN_0043fa80(void*);
-    void FUN_00440490(float);
-    void FUN_00507700(float);
-    void FUN_00a6faf0(void*);
-    void FUN_00a59c60(Update074&);
-    void* FUN_00a59d30(int);
-};
-struct BSShaderAccumulator : NiMemObject
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void Attach(FUN_00a712f0*);
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    BSShaderAccumulator(int, unsigned int, unsigned int);
-    void FUN_004a1020(void*);
-    void FUN_004ec7c0(bool);
-    void SetAccumulate(bool);
-};
+
 struct Ref074
 {
     virtual void v00();
@@ -11206,14 +9561,14 @@ struct Ref074
     virtual void v1c4();
     virtual void v1c8();
     virtual void v1cc();
-    virtual FUN_00a712f0* Get3D();
+    virtual NiAVObject* Get3D();
     void* FUN_008d6f30();
     void* FUN_007af430();
     struct Extra074* FUN_005d43c0();
 };
 struct Cell074
 {
-    FUN_00a712f0* GetCellNodeAt(unsigned int);
+    NiAVObject* GetCellNodeAt(unsigned int);
 };
 struct Extra074
 {
@@ -11238,12 +9593,18 @@ struct List074
     Ref074*& AddEight(void*);
     int unk00, unk04, unk08;
 };
-struct PtrFUN_00a712f0
+struct PtrWaterObject074
 {
-    FUN_00a712f0* p;
-    FUN_00a712f0* FUN_00559450();
-    void FUN_0066b0d0(FUN_00a712f0*);
-    void FUN_006e5cc0(PtrFUN_00a712f0&);
+    NiAVObject* p;
+    NiAVObject* FUN_00559450();
+    void FUN_0066b0d0(NiAVObject*);
+    void FUN_006e5cc0(PtrWaterObject074&);
+};
+struct PtrNiCamera074
+{
+    NiCamera* p;
+    NiCamera* FUN_00559450();
+    void FUN_0066b0d0(NiCamera*);
 };
 struct PtrBSShaderAccumulator
 {
@@ -11259,7 +9620,7 @@ struct Array074
 struct Map074
 {
     int unk00, unk04, unk08, unk0c;
-    bool Lookup(Ref074*, Ref074*&);
+    bool FUN_00853130(Ref074*, Ref074*&);
     void FUN_00844700(Ref074*, Ref074*);
 };
 struct Property074
@@ -11345,7 +9706,7 @@ struct Property074
     int unk138;
     int unk13c;
     int unk140;
-    PtrFUN_00a712f0 object;
+    PtrWaterObject074 object;
 };
 struct State074
 {
@@ -11381,20 +9742,16 @@ struct State074
     int unk9c;
     int count;
     int unka4;
-    PtrFUN_00a712f0 camera;
+    PtrNiCamera074 camera;
 };
 struct Render074
 {
-    void FUN_00ba3390(FUN_00a712f0*, int, int, Array074*, Array074*, BSShaderAccumulator*, int, int, int);
+    void FUN_00ba3390(NiCamera*, int, int, Array074*, Array074*, BSShaderAccumulator*, int, int, int);
     void FUN_00ba30f0(int, int);
 };
 struct Texture074
 {
-    FUN_00a712f0* FUN_00b6e110(int, int, int, int);
-};
-struct Setting074
-{
-    unsigned int* FUN_0043d4d0();
+    NiAVObject* FUN_00b6e110(int, int, int, int);
 };
 struct Grid074
 {
@@ -11412,7 +9769,7 @@ struct Player074
     bool FUN_004eaf60();
 };
 extern char DAT_0102301c[];
-extern PtrFUN_00a712f0 DAT_011c7b68;
+extern PtrWaterObject074 DAT_011c7b68;
 
 extern Player074* DAT_011dea3c;
 
@@ -11446,16 +9803,16 @@ struct Owner074
     int unk54;
     int unk58;
     Map074 seen;
-    FUN_00a712f0* FUN_004e8030(Ref074*);
-    bool FUN_004e62e0(Ref074*, Camera074*);
-    void RenderWaterRefs(Camera074*, State074*);
+    NiAVObject* FUN_004e8030(Ref074*);
+    bool FUN_004e62e0(Ref074*, NiCamera*);
+    void RenderWaterRefs(NiCamera*, State074*);
 };
 // @fnv 0x004ebef0
-void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
+void Owner074::RenderWaterRefs(NiCamera* camera, State074* state)
 {
     void* position;
     {
-        AutoMemContext memory(MC_Water, true, DAT_0102301c, 0x114f);
+        AutoMemContext memory(MEM_CONTEXT_MEM_CONTEXT_WATER, true, DAT_0102301c, 0x114f);
         {
             bool didGrid;
             bool didActors;
@@ -11463,19 +9820,19 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                 Update074 update;
                 if (!FUN_004e2160() || !camera)
                     return;
-                state->camera.FUN_0066b0d0(new FUN_00a712f0);
+                state->camera.FUN_0066b0d0(new NiCamera);
                 state->camera.FUN_00559450()->FUN_00440460(camera->FUN_0045bb80());
-                state->camera.FUN_00559450()->FUN_0043fa80(camera->FUN_00461130());
+                state->camera.FUN_00559450()->FUN_0043fa80(&camera->FUN_00461130());
                 state->camera.FUN_00559450()->FUN_00440490(camera->FUN_008d01e0());
                 state->camera.FUN_00559450()->FUN_00507700(camera->GetMaxFarNearRatio());
                 state->camera.FUN_00559450()->FUN_00a6faf0(camera->GetViewFrustum());
                 update.FUN_0043d410(0.0f, false, false);
-                state->camera.FUN_00559450()->FUN_00a59c60(update);
+                state->camera.FUN_00559450()->FUN_00a59c60(reinterpret_cast<NiUpdateData&>(update));
                 if (!state->accumulator.FUN_00559450())
-                    state->accumulator.FUN_0066b0d0(new BSShaderAccumulator(99, 1, 759));
+                    state->accumulator.FUN_0066b0d0(new WaterAccumulatorAllocation(99, 1, 759));
                 state->accumulator.FUN_00559450()->FUN_004a1020(FUN_00450b80(0));
                 state->accumulator.FUN_00559450()->FUN_004ec7c0(true);
-                state->accumulator.FUN_00559450()->Attach(state->camera.FUN_00559450());
+                state->accumulator.FUN_00559450()->StartAccumulating(state->camera.FUN_00559450());
                 state->accumulator.FUN_00559450()->SetAccumulate(true);
                 if (!DAT_011c7b68.FUN_00559450())
                     DAT_011c7b68.FUN_0066b0d0(FUN_004a0ea0(FUN_004a0e90())->FUN_00b6e110(17, 0, 0, 0));
@@ -11487,11 +9844,11 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                     Ref074* ref = state->refs.FUN_0057cbe0(position);
                     if (ref && ref->FUN_008d6f30() && ((CellFlag074*)ref->FUN_008d6f30())->FUN_00450ff0())
                     {
-                        FUN_00a712f0* node = FUN_004e8030(ref);
+                        NiAVObject* node = FUN_004e8030(ref);
                         Property074* property = 0;
                         if (node)
                         {
-                            void* found = node->FUN_00a59d30(3);
+                            void* found = node->GetProperty(3);
                             property = (Property074*)found;
                         }
                         if (property && FUN_004e62e0(ref, camera))
@@ -11503,9 +9860,9 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                                 if (object && object->FUN_004e32a0() && !didActors)
                                 {
                                     didActors = true;
-                                    for (unsigned int x = 0; x < *((Setting074*)&DAT_011c63cc)->FUN_0043d4d0(); x++)
+                                    for (unsigned int x = 0; x < *reinterpret_cast<unsigned int*>(reinterpret_cast<::Setting*>(&DAT_011c63cc)->Int()); x++)
                                     {
-                                        for (unsigned int y = 0; y < *((Setting074*)&DAT_011c63cc)->FUN_0043d4d0(); y++)
+                                        for (unsigned int y = 0; y < *reinterpret_cast<unsigned int*>(reinterpret_cast<::Setting*>(&DAT_011c63cc)->Int()); y++)
                                         {
                                             Cell074** value = ((Grid074*)DAT_011dea10)->FUN_00457050(x, y);
                                             Cell074* cell = *value;
@@ -11513,7 +9870,7 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                                             {
                                                 for (int i = 0; i < 4; i++)
                                                 {
-                                                    FUN_00a712f0* child = (*value)->GetCellNodeAt(i);
+                                                    NiAVObject* child = (*value)->GetCellNodeAt(i);
                                                     state->nodes.FUN_0076b660(static_cast<void*>(child));
                                                 }
                                             }
@@ -11531,7 +9888,7 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                                         Ref074* actor = state->actors.AddEight(nextActor);
                                         if ((actor != (Ref074*)DAT_011dea3c ||
                                              (actor == (Ref074*)DAT_011dea3c && DAT_011dea3c->FUN_004eaf60())) &&
-                                            actor->Get3D() && !seen.Lookup(actor, actor))
+                                            actor->Get3D() && !seen.FUN_00853130(actor, actor))
                                         {
                                             state->actorNodes.FUN_0076b660(actor->Get3D());
                                             seen.FUN_00844700(actor, actor);
@@ -11545,7 +9902,7 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                                     if ((*link->FUN_006815c0())->flags & 2)
                                     {
                                         Ref074* linked = (*link->FUN_006815c0())->ref;
-                                        if (linked->Get3D() && !seen.Lookup(linked, linked))
+                                        if (linked->Get3D() && !seen.FUN_00853130(linked, linked))
                                         {
                                             state->nodes.FUN_0076b660(linked->Get3D());
                                             seen.FUN_00844700(linked, linked);
@@ -11563,7 +9920,7 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                                     if (otherNext)
                                     {
                                         Ref074* other = state->otherRefs.AddEight(otherNext);
-                                        if (other->Get3D() && !seen.Lookup(other, other))
+                                        if (other->Get3D() && !seen.FUN_00853130(other, other))
                                         {
                                             state->actorNodes.FUN_0076b660(other->Get3D());
                                             seen.FUN_00844700(other, other);
@@ -11577,7 +9934,7 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
                                     while (special && !special->FUN_008256d0())
                                     {
                                         Ref074* entry = (Ref074*)*special->FUN_006815c0();
-                                        if (entry && entry->Get3D() && !seen.Lookup(entry, entry))
+                                        if (entry && entry->Get3D() && !seen.FUN_00853130(entry, entry))
                                         {
                                             state->nodes.FUN_0076b660(entry->Get3D());
                                             seen.FUN_00844700(entry, entry);
@@ -11599,16 +9956,12 @@ void Owner074::RenderWaterRefs(Camera074* camera, State074* state)
 }  // namespace fnv_004ebef0
 
 namespace fnv_004ec800 {
-struct Vec
-{
-    float x, y, z;
-};
 struct Plane
 {
-    Vec normal;
-    float constant;
+    // A plane stores four scalar coefficients; Normal() views the first three.
+    float coefficients[4];
     float Distance() const;
-    const Vec& Normal() const;
+    const NiPoint3& Normal() const;
 };
 struct Camera
 {
@@ -11625,14 +9978,10 @@ struct SmartTexture
     operator Texture*() const;
     SmartTexture& operator=(Texture*);
 };
-struct Accum
-{
-    void Set(int);
-};
 struct SmartAccum
 {
-    Accum* object;
-    operator Accum*() const;
+    BSShaderAccumulator* object;
+    operator BSShaderAccumulator*() const;
 };
 struct WaterPass
 {
@@ -11683,10 +10032,7 @@ struct RenderHelper
 {
     void Setup(int, int);
 };
-struct Setting
-{
-    float* Float();
-};
+
 extern Setting g_011c7c10;
 extern NiPoint2 DAT_011f9614;
 extern Plane DAT_011f9604;
@@ -11698,7 +10044,7 @@ void FUN_00b98180(int, int, int, int);
 void FUN_00b980c0(int, int, int, int);
 void AddToSlot(int, int);
 void UpdateSpawnedObjectFlags(int, int, int, int, int, int, int);
-void CopyTexture(Texture*, Accum*, int);
+void CopyTexture(Texture*, BSShaderAccumulator*, int);
 void FUN_004eb510(int);
 struct Device
 {
@@ -11743,14 +10089,14 @@ void FUN_004ecb40(int);
 void FUN_004ecb10(int);
 struct WaterSetup
 {
-    void Apply(WaterColorParam, int);
+    void Apply(NiColorA, int);
     void FUN_004ec800(WaterPass*, unsigned short);
 };
 // Sets up the renderer for a water pass, applies reflection/refraction planes and color, copies the target texture into the accumulator, and resets state.
 // @fnv 0x004ec800
 void WaterSetup::FUN_004ec800(WaterPass* pass, unsigned short flags)
 {
-    AutoMemContext context(MC_Water, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
+    AutoMemContext context(MEM_CONTEXT_MEM_CONTEXT_WATER, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESWater.cpp",
                            0x1209);
     if (!FUN_004e2160() || !(Texture*)pass->target)
         return;
@@ -11758,14 +10104,14 @@ void WaterSetup::FUN_004ec800(WaterPass* pass, unsigned short flags)
     FUN_004ea970()->Setup(1, pass->count + 1);
     GetPassRenderer()->UseTexture(pass->target);
     DAT_011f9614 = NiPoint2(pass->camera->Width(), pass->camera->Height());
-    ((Accum*)pass->accumulator)->Set(14);
+    ((BSShaderAccumulator*)pass->accumulator)->FUN_004a1040(14);
     UpdateRendererStateCount(1, 1);
     FUN_00b98180(2, 255, flags, 1);
     FUN_00b980c0(0, 0, 0, 1);
     AddToSlot(0, 1);
     GetPassRenderer()->UseTexture(pass->target);
     DAT_011f9604 = pass->reflect;
-    Apply(WaterColorParam(pass->refract.Normal().x, pass->refract.Normal().y, pass->refract.Normal().z,
+    Apply(NiColorA(pass->refract.Normal().x, pass->refract.Normal().y, pass->refract.Normal().z,
                           -pass->refract.Distance() + *g_011c7c10.Float()),
           0);
     UpdateSpawnedObjectFlags(1, 0, 0, 0, 0, 0, 0);
@@ -11781,105 +10127,6 @@ void WaterSetup::FUN_004ec800(WaterPass* pass, unsigned short flags)
 }  // namespace fnv_004ec800
 
 namespace fnv_004ecb60 {
-struct NiFrustum;
-struct NiUpdateData
-{
-    float time;
-    bool updateControllers, multithreaded;
-    unsigned int flags;
-    NiUpdateData(float, bool, bool);
-};
-struct NiCamera
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    void FUN_00440460(const NiPoint3&);
-    void FUN_0043fa80(const ThreeByThreeMatrix*);
-    void FUN_00440490(float);
-    void* FUN_004a0d10();
-    void FUN_00507700(float);
-    void FUN_00a6faf0(const NiFrustum&);
-    void Update(const NiUpdateData&);
-    const NiPoint3& FUN_0045bb80() const;
-    const ThreeByThreeMatrix& FUN_00461130() const;
-    float FUN_008d01e0() const;
-    float GetMaxFarNearRatio() const;
-    const NiFrustum& GetViewFrustum() const;
-    void FUN_00a6fae0();
-};
-struct FUN_00a712f0 : NiCamera
-{
-    FUN_00a712f0();
-    ~FUN_00a712f0();
-};
 struct NiVisibleArray;
 struct FUN_004a0eb0
 {
@@ -11978,7 +10225,7 @@ void WaterPass::RenderWaterGroup(NiCamera* camera, WaterSurface* group, int unus
         return;
     DAT_011ff375 = true;
     FUN_00b98380(0, 1);
-    FUN_00a712f0 h;
+    NiCamera h;
     h.FUN_00440460(camera->FUN_0045bb80());
     h.FUN_0043fa80(&camera->FUN_00461130());
     h.FUN_00440490(camera->FUN_008d01e0());
@@ -11986,7 +10233,7 @@ void WaterPass::RenderWaterGroup(NiCamera* camera, WaterSurface* group, int unus
     h.FUN_00507700(camera->GetMaxFarNearRatio());
     h.FUN_00a6faf0(camera->GetViewFrustum());
     NiUpdateData s(0.0f, false, false);
-    h.Update(s);
+    h.Update(static_cast<const NiUpdateData&>(s));
     FUN_004a0eb0 p(0);
     p.FUN_0041fd00(&h);
     reinterpret_cast<WaterPassRenderer*>(FUN_0043c4b0())->SetFromCamera(&h);
@@ -11995,10 +10242,10 @@ void WaterPass::RenderWaterGroup(NiCamera* camera, WaterSurface* group, int unus
     void* i = 0;
     while (a)
     {
-        i = group->m_kWaterReferences.DereferenceIfNotNull(a);
+        i = group->m_kWaterReferences.GetNextPos(a);
         if (a)
         {
-            Reference* reference = reinterpret_cast<Reference*>(group->m_kWaterReferences.AddEight(a));
+            Reference* reference = reinterpret_cast<Reference*>(group->m_kWaterReferences.Get(a));
             if (reference && reference->FUN_008d6f30() && reference->FUN_008d6f30()->FUN_00450ff0())
             {
                 SceneObject* object = FUN_004e8030(reference);
@@ -12036,13 +10283,6 @@ class FUN_0042f1d0_shell
 
 extern FUN_0042f1d0_shell* __fastcall FUN_005d43c0(TESObjectREFR* a1);
 
-template <class KEY, class VALUE> class NiTPointerMap
-{
-  public:
-    void* GetFirstPos();
-    void GetNext(void*&, KEY&, VALUE&);
-    bool GetAt(KEY, VALUE&) const;
-};
 
 class XL
 {
@@ -12056,11 +10296,6 @@ class SoundH
     unsigned int Deallocate();
 };
 
-class NiTMap_S
-{
-  public:
-    bool RemoveKey(unsigned int);
-};
 
 extern bool __fastcall FUN_0057b200(TESObjectREFR*);
 
@@ -12140,7 +10375,7 @@ class TESObjectREFR_Water
     virtual bool HasWater();
 };
 
-class TESWaterSystem_Impl : public WaterZoneManager
+class TESWaterSystem_Impl : public TESWaterSystem
 {
   public:
     void FUN_004e5fe0(TESObjectREFR* a1);
@@ -12162,12 +10397,12 @@ void TESWaterSystem_Impl::FUN_004e5fe0(TESObjectREFR* apRef)
         {
             while (a != 0 && !b)
             {
-                n = ((NiTPointerList<TESObjectREFR*>*)&m_kWaterZoneList)->DereferenceIfNotNull(a);
+                n = ((NiTPointerList<TESObjectREFR*>*)&m_kWaterZoneList)->GetNextPos(a);
                 if (a)
                 {
                     bool pObj;
                     pObj = true;
-                    kIter = (WaterSurface*)((NiTPointerList<TESObjectREFR*>*)&m_kWaterZoneList)->AddEight(a);
+                    kIter = (WaterSurface*)((NiTPointerList<TESObjectREFR*>*)&m_kWaterZoneList)->Get(a);
                     if (map)
                     {
                         void* q;
@@ -12186,11 +10421,11 @@ void TESWaterSystem_Impl::FUN_004e5fe0(TESObjectREFR* apRef)
                             while (i)
                             {
                                 res = ((NiTPointerList<TESObjectREFR*>*)&kIter->m_kWaterReferences)
-                                          ->DereferenceIfNotNull(i);
+                                          ->GetNextPos(i);
                                 if (i)
                                 {
                                     TESObjectREFR* c;
-                                    c = ((NiTPointerList<TESObjectREFR*>*)&kIter->m_kWaterReferences)->AddEight(i);
+                                    c = ((NiTPointerList<TESObjectREFR*>*)&kIter->m_kWaterReferences)->Get(i);
                                     if (c == (TESObjectREFR*)s)
                                     {
                                         pObj = false;
@@ -12222,20 +10457,20 @@ void TESWaterSystem_Impl::FUN_004e5fe0(TESObjectREFR* apRef)
                         {
                             if (((TESObjectREFR_Water*)apRef)->HasWater())
                                 ptr = ((NiTPointerList<TESObjectREFR*>*)((char*)kIter + 0x3c))
-                                          ->DereferenceIfNotNull(nextPos);
+                                          ->GetNextPos(nextPos);
                             else
                                 ptr = ((NiTPointerList<TESObjectREFR*>*)((char*)kIter + 0x30))
-                                          ->DereferenceIfNotNull(nextPos);
+                                          ->GetNextPos(nextPos);
                             if (nextPos)
                             {
                                 TESObjectREFR* item44;
                                 item44 = 0;
                                 if (((TESObjectREFR_Water*)apRef)->HasWater())
                                     item44 =
-                                        ((NiTPointerList<TESObjectREFR*>*)((char*)kIter + 0x3c))->AddEight(nextPos);
+                                        ((NiTPointerList<TESObjectREFR*>*)((char*)kIter + 0x3c))->Get(nextPos);
                                 else
                                     item44 =
-                                        ((NiTPointerList<TESObjectREFR*>*)((char*)kIter + 0x30))->AddEight(nextPos);
+                                        ((NiTPointerList<TESObjectREFR*>*)((char*)kIter + 0x30))->Get(nextPos);
                                 if (item44 == apRef)
                                 {
                                     val = true;
@@ -12258,7 +10493,7 @@ void TESWaterSystem_Impl::FUN_004e5fe0(TESObjectREFR* apRef)
                                 if (((NiTPointerMap<unsigned int, unsigned int>*)((char*)this + 0x7c))
                                         ->GetAt((unsigned int)apRef, z))
                                 {
-                                    ((NiTMap_S*)((char*)this + 0x7c))->RemoveKey((unsigned int)apRef);
+                                    ((NiTPointerMap<unsigned int, unsigned int>*)((char*)this + 0x7c))->RemoveAt((unsigned int)apRef);
                                 }
                             }
                             else
@@ -12382,7 +10617,7 @@ struct Cell
 
 struct ReferenceIntegerMap
 {
-    bool Lookup(Ref* pkRef, int* piValue);
+    bool FUN_00853130(Ref* pkRef, int* piValue);
     void RemoveKey(Ref* pkRef);
 };
 
@@ -12463,7 +10698,7 @@ void Owner::RemoveReferenceFromCell(Ref* pkRef, Cell* pkCell)
         {
             pkCell->m_kActors.FUN_0049f590(pkMatch);
             int iValue = 0;
-            if (m_kActorMap.Lookup(pkRef, &iValue))
+            if (m_kActorMap.FUN_00853130(pkRef, &iValue))
                 m_kActorMap.RemoveKey(pkRef);
         }
         else
@@ -12495,11 +10730,6 @@ Big* Holder::CopyBig(Big* out)
     return out;
 }
 
-struct FUN_00414430
-{
-    float r, g, b, a;
-    FUN_00414430(float, float, float, float);
-};
 struct WaterForm3590
 {
     unsigned int FUN_004f9bf0();
@@ -12605,7 +10835,7 @@ struct WaterMaterial125
     bool enabled;
     bool flag80, flag81, flag82, unk83;
     int unk84;
-    FUN_00414430 color88, color98, colora8;
+    NiColorA color88, color98, colora8;
     float valueb8;
     float valuebc;
     float valuec0;
@@ -12701,7 +10931,7 @@ struct System125
 };
 extern float DAT_011ff108;
 bool FUN_004e3c40();
-extern SettingT<INISettingCollection> g_011c7b6c, g_011c7c60, g_011c7bbc;
+extern Setting g_011c7b6c, g_011c7c60, g_011c7bbc;
 // For geometry with shader result 13, copies water form properties into its enabled water material and updates related flags.
 // @fnv 0x004e3590
 void System125::FUN_004e3590(Parent125* parent, Ref125* reference)
@@ -12716,19 +10946,19 @@ void System125::FUN_004e3590(Parent125* parent, Ref125* reference)
             WaterMaterial125* property = geometry->FUN_00a59d30(3);
             WaterMaterial125* base = property;
             Base125* material = (Base125*)reference->FUN_007af430();
-            WaterForm3590* water = reinterpret_cast<WaterForm3590*>(material->GetAssociatedWaterForm());
+            WaterForm3590* water = reinterpret_cast<WaterForm3590*>(((const TESObject*)material)->GetAssociatedWaterForm());
             if (base && water && base->enabled)
             {
                 unsigned int color = water->FUN_004f9bf0();
-                base->color88 = FUN_00414430((unsigned char)(color & 255) / 255.0,
+                base->color88 = NiColorA((unsigned char)(color & 255) / 255.0,
                                              (unsigned char)(((unsigned short)color >> 8) & 255) / 255.0,
                                              (unsigned char)((color >> 16) & 255) / 255.0, 1.0f);
                 color = water->FUN_009ee040();
-                base->color98 = FUN_00414430((unsigned char)(color & 255) / 255.0,
+                base->color98 = NiColorA((unsigned char)(color & 255) / 255.0,
                                              (unsigned char)(((unsigned short)color >> 8) & 255) / 255.0,
                                              (unsigned char)((color >> 16) & 255) / 255.0, 1.0f);
                 color = water->FUN_008d80e0();
-                base->colora8 = FUN_00414430((unsigned char)(color & 255) / 255.0,
+                base->colora8 = NiColorA((unsigned char)(color & 255) / 255.0,
                                              (unsigned char)(((unsigned short)color >> 8) & 255) / 255.0,
                                              (unsigned char)((color >> 16) & 255) / 255.0, 1.0f);
                 base->valueb8 = water->FUN_00644930();
@@ -12763,9 +10993,9 @@ void System125::FUN_004e3590(Parent125* parent, Ref125* reference)
                     bool flag81 = base->flag80;
                     bool flag63 = base->flag81;
                     bool flag80 = base->flag63;
-                    base->flag80 = material->FUN_004e3c50() && g_011c7b6c.Bool()->b;
-                    base->flag81 = material->FUN_004e3280() && g_011c7c60.Bool()->b;
-                    base->flag63 = material->FUN_004e32e0() && g_011c7bbc.Bool()->b;
+                    base->flag80 = material->FUN_004e3c50() && *g_011c7b6c.Bool();
+                    base->flag81 = material->FUN_004e3280() && *g_011c7c60.Bool();
+                    base->flag63 = material->FUN_004e32e0() && *g_011c7bbc.Bool();
                     if (base->flag80 != flag81 || base->flag81 != flag63 || base->flag63 != flag80)
                     {
                         base->FUN_004e3c00();

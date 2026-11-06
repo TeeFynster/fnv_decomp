@@ -6,6 +6,11 @@
 // src/fallout/interface/menus/vatsmenu_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout/interface/menus/vatsmenu.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 #include "vatsmenu_decls.h"
+#include "../../../../include/Menu.h"
+#include "../../../../include/AnimIdle.h"
+#include "../../../../include/GameTimerRecord.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/TESObjectREFR.h"
 struct ItemListElement;
 struct ItemList
 {
@@ -37,7 +42,8 @@ struct FUN_007ebd30_This
 };
 extern int DAT_011db0d4;
 void __cdecl FUN_007f3bd0(int a1);
-struct ArrSI
+// Exe 0x007f68a0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct VatsmenuOffset08View
 {
     unsigned int GetFlags();
 };
@@ -52,7 +58,6 @@ struct FUN_007ef710_This
     bool m_bFirstFlag;
     bool __thiscall HandleKey(int aiKey);
 };
-struct Tile;
 struct FUN_0070ec70_This
 {
     int __thiscall FUN_0070ec70();
@@ -72,42 +77,25 @@ struct Vec2Tmp
     float y;
     Vec2Tmp DivideBy(float) const;
 };
-struct TESObjectREFR
-{
-};
-struct BSSimpleList
+struct VatsTargetEntryList
 {
     bool FUN_008256d0();
     ItemListContainer** FUN_006815c0();
-    BSSimpleList* FUN_00726070();
+    VatsTargetEntryList* FUN_00726070();
 };
 struct StandIn
 {
-    BSSimpleList* FindListEntryForTarget(TESObjectREFR* apTarget);
-};
-struct Tile;
-struct Menu
-{
-    Tile* CreateTileFromTemplate(Tile*, char const*, Tile*);
+    VatsTargetEntryList* FindListEntryForTarget(TESObjectREFR* apTarget);
 };
 void __cdecl _FNV_Warning(char const*);
 void __cdecl _FUN_007037e0();
 void __cdecl ShutdownVats();
 Tile* FUN_007f4830(Tile* apParent, char const* axName);
-struct Tile;
 Tile* __cdecl FindNamedTile(Tile*, char const*);
 void __cdecl _FNV_Warning(char const*);
 void __cdecl _FUN_007037e0();
 void __cdecl ShutdownVats();
 Tile* __cdecl FUN_007f4890(Tile* a1, char const* a2);
-struct AnimIdle
-{
-    int GetSection();
-};
-class GameTimerRecord
-{
-    char _d;
-};
 extern GameTimerRecord g_timeGlobal;
 struct DAT_Pointee_7f4bb0
 {
@@ -117,8 +105,8 @@ struct DAT_Pointee_7f4bb0
     int t;
 };
 bool FUN_007f4bb0();
-struct Tile;
-struct ListBox
+// Exe 0x007f68a0: unit-local ListBox view; declarations and layout are preserved.
+struct VatsListCallView
 {
     virtual void v0();
     virtual void v1();
@@ -130,9 +118,6 @@ struct ListBox
     Tile* FUN_007f6fb0();
 };
 
-struct NiPoint3
-{
-};
 
 struct __declspec(align(16)) B006815c0
 {
@@ -156,12 +141,6 @@ void Class_007f68a0::FUN_007f68a0(const NiPoint3& pt)
     ForwardToSubObject(FUN_004a3e00(&vec, pt));
 }
 
-struct Point007f6af0
-{
-    float x, y, z;
-    Point007f6af0();
-    Point007f6af0 operator*(float) const;
-};
 struct Quest007f6af0
 {
     float FUN_00792760();
@@ -172,7 +151,7 @@ struct Light007f6af0
 };
 struct Anim007f6af0
 {
-    void MapScreenToRay(int, int, Point007f6af0*, Point007f6af0*, int);
+    void MapScreenToRay(int, int, NiPoint3*, NiPoint3*, int);
 };
 struct Node007f6af0
 {
@@ -217,8 +196,8 @@ struct __declspec(align(16)) Ray007f6af0
     char field_00[176];
     Ray007f6af0();
     void FUN_004a3f70(int);
-    void FUN_004a3da0(Point007f6af0*);
-    void FUN_007f68a0(Point007f6af0 const&);
+    void FUN_004a3da0(NiPoint3*);
+    void FUN_007f68a0(NiPoint3 const&);
     void FUN_004a3fb0(Collector007f6af0*);
     Response007f6af0* FUN_008cdd90();
 };
@@ -304,8 +283,8 @@ bool __fastcall FUN_007f6af0(Owner007f6af0* self)
     if (self->field_10e)
         return false;
     float distance = DAT_011a0b74;
-    Point007f6af0 origin;
-    Point007f6af0 direction;
+    NiPoint3 origin;
+    NiPoint3 direction;
     FUN_0045c670()->FUN_006629f0()->MapScreenToRay((int)((Light007f6af0*)FUN_004b7210())->FUN_009a9350(),
                                                    (int)((Quest007f6af0*)FUN_004b7210())->FUN_00792760(), &origin,
                                                    &direction, 0);
@@ -333,7 +312,7 @@ bool __fastcall FUN_007f6af0(Owner007f6af0* self)
         TESObjectREFR* ref = FUN_0056f930(object);
         if (object)
         {
-            BSSimpleList* entry = ((StandIn*)self)->FindListEntryForTarget(ref);
+            VatsTargetEntryList* entry = ((StandIn*)self)->FindListEntryForTarget(ref);
             if (entry && *(ItemListContainer**)*entry->FUN_006815c0() == DAT_011f21cc)
             {
                 return false;

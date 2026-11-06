@@ -1,9 +1,14 @@
 // fallout_shared/pathfinding/pathingrequest.cpp: PathingRequest, PathingAvoidNodeArray, PathingRequestDebugView (24 functions)
 
+#include "../../../include/PathingLocation.h"
+// The unit type header also includes an older local PathingLocation header.
+#define FNV_PATHINGLOCATION_H
 #include "pathingrequest_types_PathingRequest.h"
 #include "pathingrequest_types_TESPackage.h"
 #include "TESObjectREFR.h"
 #include "pathingrequest_decls.h"
+#include "../../../include/BGSSaveGameBuffer.h"
+#include "../../../include/BGSSaveFormBuffer.h"
 
 // @fnv 0x006e38d0
 void PathingRequest::InitLoadGame(BGSLoadFormBuffer* buffer)
@@ -28,55 +33,55 @@ void PathingRequest::InitLoadGame(BGSLoadFormBuffer* buffer)
 // @fnv 0x006e34f0
 void PathingRequest::LoadGame(BGSLoadFormBuffer* buffer)
 {
-    reinterpret_cast<PathingLocationLoadView*>(&Origin)->LoadGame(buffer);
-    reinterpret_cast<PathingLocationLoadView*>(&Destination)->LoadGame(buffer);
-    buffer->ReadTypedData(&m_fFirstValueAfterActorData, 4);
-    buffer->ReadTypedData(&m_fSecondValueAfterActorData, 4);
-    buffer->ReadTypedData(&PathingActorSpatialData, 4);
-    buffer->ReadTypedData(&fWeaponSpread, 4);
-    buffer->ReadTypedData(&m_fCenterRadius, 4);
-    buffer->ReadTypedData(&m_fFloatAfterCenter, 4);
-    buffer->ReadTypedData(&m_fPathingRadius, 4);
-    buffer->ReadTypedData(&bFaceTargetAtGoal, 1);
-    buffer->ReadTypedData(&bCantOpenDoors, 1);
-    buffer->ReadTypedData(&PathingOptions, 1);
-    buffer->ReadTypedData(&bAllowIncompletePath, 1);
-    buffer->ReadTypedData(&m_bAllowDoorTraversal, 1);
-    buffer->ReadTypedData(&bCanSwim, 1);
+    Origin.LoadGame(buffer);
+    Destination.LoadGame(buffer);
+    buffer->ReadTypedData(static_cast<void*>(&m_fFirstValueAfterActorData), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&m_fSecondValueAfterActorData), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&PathingActorSpatialData), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&fWeaponSpread), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&m_fCenterRadius), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&m_fFloatAfterCenter), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&m_fPathingRadius), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&bFaceTargetAtGoal), 1u);
+    buffer->ReadTypedData(static_cast<void*>(&bCantOpenDoors), 1u);
+    buffer->ReadTypedData(static_cast<void*>(&PathingOptions), 1u);
+    buffer->ReadTypedData(static_cast<void*>(&bAllowIncompletePath), 1u);
+    buffer->ReadTypedData(static_cast<void*>(&m_bAllowDoorTraversal), 1u);
+    buffer->ReadTypedData(static_cast<void*>(&bCanSwim), 1u);
     if (buffer->GetVersion() >= 13)
     {
-        buffer->ReadTypedData(&m_bCanWalk, 1);
+        buffer->ReadTypedData(static_cast<void*>(&m_bCanWalk), 1u);
     }
     if (buffer->GetVersion() >= 15)
     {
-        buffer->ReadTypedData(&m_fAvoidanceRadius, 4);
-        buffer->ReadTypedData(&m_bCanJump, 1);
-        buffer->ReadTypedData(&m_bCanClimb, 1);
+        buffer->ReadTypedData(static_cast<void*>(&m_fAvoidanceRadius), 4u);
+        buffer->ReadTypedData(static_cast<void*>(&m_bCanJump), 1u);
+        buffer->ReadTypedData(static_cast<void*>(&m_bCanClimb), 1u);
     }
     if (buffer->GetVersion() >= 18)
     {
-        buffer->ReadTypedData(&Center, 12);
-        buffer->ReadTypedData(&m_bCanUseDoors, 1);
-        buffer->ReadTypedData(&m_bCanRun, 1);
-        buffer->ReadTypedData(&bIgnoreLocks, 1);
-        buffer->ReadTypedData(&m_iRequestType, 4);
+        buffer->ReadTypedData(static_cast<void*>(&Center), 12u);
+        buffer->ReadTypedData(static_cast<void*>(&m_bCanUseDoors), 1u);
+        buffer->ReadTypedData(static_cast<void*>(&m_bCanRun), 1u);
+        buffer->ReadTypedData(static_cast<void*>(&bIgnoreLocks), 1u);
+        buffer->ReadTypedData(static_cast<void*>(&m_iRequestType), 4u);
     }
     if (buffer->GetVersion() >= 20)
     {
-        buffer->ReadTypedData(&bCanFly, 1);
+        buffer->ReadTypedData(static_cast<void*>(&bCanFly), 1u);
     }
     if (buffer->GetVersion() >= 21)
     {
-        buffer->ReadTypedData(&m_bCanOpenDoors, 1);
+        buffer->ReadTypedData(static_cast<void*>(&m_bCanOpenDoors), 1u);
     }
     unsigned int count = buffer->ReadElementCount();
     if (count)
     {
-        reinterpret_cast<PathingAvoidPointerView*>(&m_pPathingAvoidNodeArray)->Assign(new PathingAvoidNodeArray);
+        reinterpret_cast<PathingAvoidPointerView*>(&m_pPathingAvoidNodeArray)->Assign(reinterpret_cast<PathingAvoidNodeArray*>(new PathingAvoidNodeArrayStorage));
         reinterpret_cast<PathingAvoidPointerView*>(&m_pPathingAvoidNodeArray)->Get()->SetSize(count, true);
         for (unsigned int i = 0; i < count; ++i)
         {
-            PathingAvoidanceNode* node =
+            PathingAvoidNode* node =
                 reinterpret_cast<PathingAvoidPointerView*>(&m_pPathingAvoidNodeArray)->Get()->FUN_006a1400(i);
             node->LoadPathingAvoidNode(buffer);
         }
@@ -98,7 +103,7 @@ PathingRequest* PathingRequest::CreateRequestForType(PATHING_REQUEST_TYPE type)
     case 3:
         return new PathingRequestFlee;
     case 4:
-        return new PathingRequestCoveredMove;
+        return new PathingRequestHide;
     case 5:
         return new PathingRequestLOS;
     case 7:
@@ -176,22 +181,22 @@ PathingRequest::PathingRequest() : m_pPathingAvoidNodeArray(0)
 
 // Calls Destruct on this, frees the object with operator delete when flags has bit 0 set, and returns this.
 // @fnv 0x006e3880
-PathingAvoidNodeArray* PathingAvoidNodeArray::Destroy(unsigned int flags)
+PathingAvoidNodeArrayStorage* PathingAvoidNodeArrayStorage::Destroy(unsigned int flags)
 {
     reinterpret_cast<PathingAvoidNodeArrayDestructionView*>(this)->Destruct();
     if (flags & 1)
-        PathingAvoidNodeArray::operator delete(this, 24);
+        PathingAvoidNodeArrayStorage::operator delete(this, 24);
     return this;
 }
 // @fnv 0x006e3850
-PathingAvoidNodeArray::PathingAvoidNodeArray()
+PathingAvoidNodeArrayStorage::PathingAvoidNodeArrayStorage()
 {
     FUN_006e3960();
     *reinterpret_cast<void**>(data) = &DAT_0106d1e4;
     *reinterpret_cast<void**>(data + 16) = &DAT_0106d1d8;
 }
 // @fnv 0x006e38b0
-PathingAvoidNodeArray::~PathingAvoidNodeArray()
+PathingAvoidNodeArrayStorage::~PathingAvoidNodeArrayStorage()
 {
     FUN_006e39d0();
 }
@@ -282,7 +287,7 @@ struct FUN_006e3a80
     FUN_006e3a80();
     ~FUN_006e3a80();
 };
-struct FUN_006e3960 : public FUN_006e3a80, public PathingInfo
+struct FUN_006e3960 : public FUN_006e3a80, public NiRefObject
 {
     FUN_006e3960();
     ~FUN_006e3960();
@@ -323,11 +328,6 @@ struct EBase
     virtual void vfn0();
     ~EBase();
 };
-struct _Mem_2064
-{
-    unsigned char data[0x28];
-    ~_Mem_2064();
-};
 struct PathingRequestMember94
 {
     unsigned char data[4];
@@ -336,8 +336,8 @@ struct PathingRequestMember94
 class FUN_006e2620 : public EBase
 {
   public:
-    _Mem_2064 m0c;
-    _Mem_2064 m34;
+    PathingLocation m0c;
+    PathingLocation m34;
     unsigned char pad5c[0x38];
     PathingRequestMember94 m94;
     ~FUN_006e2620();
@@ -348,14 +348,14 @@ FUN_006e2620::~FUN_006e2620()
 
 struct BSSimpleArray_PathingAvoidNode_1024
 {
-    PathingAvoidanceNode* AllocateBuffer(unsigned int aiSizeInItem);
+    PathingAvoidNode* AllocateBuffer(unsigned int aiSizeInItem);
 };
 
 // Allocates a buffer of aiSizeInItem elements of 0x24 bytes each and returns the pointer.
 // @fnv 0x006e3c10
-PathingAvoidanceNode* BSSimpleArray_PathingAvoidNode_1024::AllocateBuffer(unsigned int aiSizeInItem)
+PathingAvoidNode* BSSimpleArray_PathingAvoidNode_1024::AllocateBuffer(unsigned int aiSizeInItem)
 {
-    PathingAvoidanceNode* pBuffer = static_cast<PathingAvoidanceNode*>(operator new(aiSizeInItem * 0x24));
+    PathingAvoidNode* pBuffer = static_cast<PathingAvoidNode*>(operator new(aiSizeInItem * 0x24));
     return pBuffer;
 }
 
@@ -394,17 +394,10 @@ void FUN_006e2b90::SetFlag(unsigned char value)
     ((unsigned char*)this)[0x9e] = value;
 }
 
-struct BGSSaveGameBuffer
-{
-    void FUN_00865f60(unsigned int);
-};
 
-struct BGSSaveFormBuffer : public BGSSaveGameBuffer
-{
-    void SaveData(void*, int, int);
-};
 
-struct ArrSI
+// Exe 0x006e3230: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct PathingrequestOffset08View
 {
     unsigned int GetFlags();
 };
@@ -412,11 +405,6 @@ struct ArrSI
 struct FUN_006dc890_Class
 {
     void FUN_006dc890(BGSSaveFormBuffer*);
-};
-
-struct PathingLocationStandIn
-{
-    virtual void SaveGame(BGSSaveFormBuffer*) = 0;
 };
 
 struct FUN_006e3230_shell
@@ -430,10 +418,10 @@ void FUN_006e3230_shell::FUN_006e3230(BGSSaveFormBuffer* buffer)
 {
     unsigned int i;
     unsigned int isaveGameCount;
-    PathingAvoidanceNode* avoidNode;
+    PathingAvoidNode* avoidNode;
 
-    reinterpret_cast<PathingLocationStandIn*>(reinterpret_cast<char*>(this) + 0x0c)->SaveGame(buffer);
-    reinterpret_cast<PathingLocationStandIn*>(reinterpret_cast<char*>(this) + 0x34)->SaveGame(buffer);
+    reinterpret_cast<PathingLocation*>(reinterpret_cast<char*>(this) + 0x0c)->SaveGame(buffer);
+    reinterpret_cast<PathingLocation*>(reinterpret_cast<char*>(this) + 0x34)->SaveGame(buffer);
 
     buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x68), 4, 0);
     buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x6c), 4, 0);
@@ -461,7 +449,7 @@ void FUN_006e3230_shell::FUN_006e3230(BGSSaveFormBuffer* buffer)
     buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0xac), 1, 0);
 
     i = reinterpret_cast<PathingAvoidPointerView*>(reinterpret_cast<char*>(this) + 0x94)->Get()
-            ? reinterpret_cast<ArrSI*>(
+            ? reinterpret_cast<PathingrequestOffset08View*>(
                   reinterpret_cast<PathingAvoidPointerView*>(reinterpret_cast<char*>(this) + 0x94)->Get())
                   ->GetFlags()
             : 0;
@@ -487,22 +475,6 @@ struct Base_006e26a0
     ~Base_006e26a0();
 };
 
-struct Member28_006e26a0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-
-    Member28_006e26a0();
-    ~Member28_006e26a0();
-};
 
 struct Member20_006e26a0
 {
@@ -545,8 +517,8 @@ struct Owner_006e26a0
 
 struct FUN_006e26a0 : Base_006e26a0
 {
-    Member28_006e26a0 m_0C;
-    Member28_006e26a0 m_34;
+    PathingLocation m_0C;
+    PathingLocation m_34;
     Member20_006e26a0 m_5C;
     Member18_006e26a0 m_7C;
     Member4_006e26a0 m_94;
@@ -562,10 +534,6 @@ FUN_006e26a0::FUN_006e26a0(Owner_006e26a0* owner) : m_94(0)
     owner->Attach(this);
 }
 
-struct PathingLocationTextView
-{
-    void FormatDebugString(char*, unsigned int);
-};
 struct PathingDebugOutput
 {
     virtual void v00();
@@ -584,9 +552,9 @@ struct PathingRequestDebugView : PathingRequest
 void PathingRequestDebugView::PrintDebugInfo(PathingDebugOutput* output)
 {
     char text[256];
-    ((PathingLocationTextView*)&Origin)->FormatDebugString(text, 256);
+    Origin.WriteDebugString(text, 256);
     output->Print(0, 1, "Origin: %s", text);
-    ((PathingLocationTextView*)&Destination)->FormatDebugString(text, 256);
+    Destination.WriteDebugString(text, 256);
     output->Print(0, 1, "Destination: %s", text);
     output->Print(0, 1, "Actor Radius: %f", m_fFirstValueAfterActorData);
     output->Print(0, 1, "Goal Z Delta: %f", PathingActorSpatialData);

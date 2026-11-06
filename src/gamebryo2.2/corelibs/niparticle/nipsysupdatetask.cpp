@@ -2,6 +2,9 @@
 // src/gamebryo2.2/corelibs/niparticle/nipsysupdatetask.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/niparticle/nipsysupdatetask.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/NiPSysUpdateTask.h"
+#include "../../../../include/NiRefObject.h"
+
 extern "C" void* g_01202580;
 
 // @fnv 0x00c25870
@@ -10,126 +13,78 @@ void* __cdecl FUN_00c25870()
     return &g_01202580;
 }
 
-struct NiRefObject
-{
-    ~NiRefObject();
-};
 extern int DAT_010be45c;
 extern int DAT_01069674;
 extern int(__stdcall* DAT_00fdf1c4)(void*);
-struct Obj
-{
-    virtual void u0();
-    virtual void u1();
-    int m_ref;
-};
-struct S
-{
-    void* vf;
-    int _4;
-    int _8;
-    Obj* volatile _c;
-    void Destroy();
-};
 // @fnv 0x00c25880
-void S::Destroy()
+void NiPSysUpdateTask::Destroy()
 {
     int(__stdcall * f)(void*) = DAT_00fdf1c4;
     *(void* volatile*)this = (void*)&DAT_010be45c;
-    Obj* p = _c;
+    NiRefObject* p = reinterpret_cast<NiRefObject*>(reinterpret_cast<NiParticleSystem* volatile&>(m_pkParticleSystem));
     if (p)
     {
-        if (f(&p->m_ref) == 0)
-            p->u1();
-        _c = 0;
+        if (f(&p->m_uiRefCount) == 0)
+            p->DeleteThis();
+        m_pkParticleSystem = 0;
     }
-    p = _c;
+    p = reinterpret_cast<NiRefObject*>(reinterpret_cast<NiParticleSystem* volatile&>(m_pkParticleSystem));
     if (p)
     {
-        if (f(&p->m_ref) == 0)
-            p->u1();
+        if (f(&p->m_uiRefCount) == 0)
+            p->DeleteThis();
     }
     *(void* volatile*)this = (void*)&DAT_01069674;
-    ((NiRefObject*)this)->~NiRefObject();
+    this->NiRefObject::~NiRefObject();
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
-struct Ref_00c258e0
+inline void NiRefObject::IncRefCount()
 {
-    virtual void F0();
-    virtual void F1();
-    volatile long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            F1();
-    }
-};
-struct Host_00c258e0
+    InterlockedIncrement((volatile long*)&m_uiRefCount);
+}
+inline void NiRefObject::DecRefCount()
 {
-    char _pad[12];
-    Ref_00c258e0* m_ptr;
-    float m_f;
-    void AssignRefAndValue(Ref_00c258e0* pkObject, float fNew);
-};
+    if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
 // @fnv 0x00c258e0
-void Host_00c258e0::AssignRefAndValue(Ref_00c258e0* pkObject, float afValue)
+void NiPSysUpdateTask::AssignRefAndValue(NiParticleSystem* pkObject, float afValue)
 {
-    if (m_ptr != pkObject)
+    if (m_pkParticleSystem != pkObject)
     {
-        if (m_ptr)
-            m_ptr->DecRefCount();
-        m_ptr = pkObject;
-        if (m_ptr)
-            m_ptr->IncRefCount();
+        if (m_pkParticleSystem)
+            reinterpret_cast<NiRefObject*>(m_pkParticleSystem)->DecRefCount();
+        m_pkParticleSystem = pkObject;
+        if (m_pkParticleSystem)
+            reinterpret_cast<NiRefObject*>(m_pkParticleSystem)->IncRefCount();
     }
-    m_f = afValue;
+    m_fUpdateTime = afValue;
 }
 
 extern unsigned char DAT_011f5b08;
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
-struct FakeSys
-{
-    void** vtbl;
-    volatile long ref;
-};
-struct Task
-{
-    void** vtbl;
-    int _a;
-    int _b;
-    FakeSys* sys;
-    float tm;
-    void ReleaseSysAndDispatch();
-};
 // @fnv 0x00c25930
-void Task::ReleaseSysAndDispatch()
+void NiPSysUpdateTask::ReleaseSysAndDispatch()
 {
-    FakeSys* p = sys;
+    NiParticleSystem* p = m_pkParticleSystem;
     if (p && !DAT_011f5b08)
     {
-        ((void(__thiscall*)(FakeSys*, float))p->vtbl[61])(p, tm);
-        FakeSys* pSysRef = sys;
+        ((void(__thiscall*)(NiParticleSystem*, float))(*(void***)p)[61])(p, m_fUpdateTime);
+        NiRefObject* pSysRef = reinterpret_cast<NiRefObject*>(m_pkParticleSystem);
         if (pSysRef)
         {
-            if (InterlockedDecrement(&pSysRef->ref) == 0)
-                ((void(__thiscall*)(FakeSys*))pSysRef->vtbl[1])(pSysRef);
-            sys = 0;
+            if (InterlockedDecrement((volatile long*)&pSysRef->m_uiRefCount) == 0)
+                pSysRef->DeleteThis();
+            m_pkParticleSystem = 0;
         }
     }
-    ((void(__thiscall*)(Task*))vtbl[37])(this);
+    vf37();
 }
 
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
-struct NiPSysUpdateTask
-{
-};
 struct PoolHelper
 {
     void __thiscall AppendRecords(int);
@@ -296,16 +251,6 @@ void LinkIDSet_00c25b30::AppendRecords(unsigned int count)
     m_pFirstNode = pBlock;
 }
 
-struct S_00c25be0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    Obj* volatile unk0c;
-
-    bool FUN_00c25be0();
-};
-
 struct S_00e7ec00
 {
     void __thiscall FindOrAdd(void*);
@@ -315,23 +260,23 @@ extern void(__stdcall* DAT_00fdf05c)(void*);
 extern void(__stdcall* DAT_00fdf100)(void*);
 
 // @fnv 0x00c25be0
-bool S_00c25be0::FUN_00c25be0()
+bool NiPSysUpdateTask::FUN_00c25be0()
 {
-    Obj* pObj = unk0c;
+    NiRefObject* pObj = reinterpret_cast<NiRefObject*>(reinterpret_cast<NiParticleSystem* volatile&>(m_pkParticleSystem));
 
     if (pObj != 0)
     {
-        if (DAT_00fdf1c4(reinterpret_cast<void*>(reinterpret_cast<char*>(pObj) + 4)) == 0)
+        if (DAT_00fdf1c4(&pObj->m_uiRefCount) == 0)
         {
-            pObj->u1();
+            pObj->DeleteThis();
         }
 
-        unk0c = 0;
+        m_pkParticleSystem = 0;
     }
 
     DAT_00fdf05c(&DAT_01202600);
 
-    S_00c25be0* pSelf = this;
+    NiPSysUpdateTask* pSelf = this;
     reinterpret_cast<S_00e7ec00*>(&DAT_011aeb98)->FindOrAdd(&pSelf);
 
     DAT_00fdf100(&DAT_01202600);
@@ -339,51 +284,37 @@ bool S_00c25be0::FUN_00c25be0()
     return true;
 }
 
-class FUN_00a5d3d0
-{
-  public:
-    ~FUN_00a5d3d0();
-};
 void __cdecl operator delete(void* pv, int iSize);
 void __cdecl FUN_00aa1490(void* pv, unsigned int uiSize);
 
-struct Elem_c25 : FUN_00a5d3d0
+__forceinline void NiPSysUpdateTask::Destruct()
 {
-    void* m_vf;
-    int m_iWordAt04;
-    int m_8;
-    Obj* volatile m_iThirdValue;
-    int m_10;
-    __forceinline void Destruct()
+    *(int* volatile*)this = &DAT_010be45c;
+    NiRefObject* pkObj = reinterpret_cast<NiRefObject*>(reinterpret_cast<NiParticleSystem* volatile&>(m_pkParticleSystem));
+    if (pkObj)
     {
-        *(int* volatile*)this = &DAT_010be45c;
-        Obj* pkObj = m_iThirdValue;
-        if (pkObj)
-        {
-            if (InterlockedDecrement((volatile long*)&pkObj->m_ref) == 0)
-                pkObj->u1();
-            m_iThirdValue = 0;
-        }
-        Obj* pkObjCur = m_iThirdValue;
-        if (pkObjCur)
-        {
-            if (InterlockedDecrement((volatile long*)&pkObjCur->m_ref) == 0)
-                pkObjCur->u1();
-        }
-        *(int**)this = &DAT_01069674;
-        this->FUN_00a5d3d0::~FUN_00a5d3d0();
+        if (InterlockedDecrement((volatile long*)&pkObj->m_uiRefCount) == 0)
+            pkObj->DeleteThis();
+        m_pkParticleSystem = 0;
     }
-    void* DestroyElements(unsigned int uiFlags);
-};
+    NiRefObject* pkObjCur = reinterpret_cast<NiRefObject*>(reinterpret_cast<NiParticleSystem* volatile&>(m_pkParticleSystem));
+    if (pkObjCur)
+    {
+        if (InterlockedDecrement((volatile long*)&pkObjCur->m_uiRefCount) == 0)
+            pkObjCur->DeleteThis();
+    }
+    *(int**)this = &DAT_01069674;
+    this->NiRefObject::~NiRefObject();
+}
 
 // @fnv 0x00c259f0
-void* Elem_c25::DestroyElements(unsigned int uiFlags)
+void* NiPSysUpdateTask::DestroyElements(unsigned int uiFlags)
 {
     if (uiFlags & 2)
     {
         int* piCount = (int*)this - 1;
         int iCount = *piCount;
-        Elem_c25* pkElem = this + iCount;
+        NiPSysUpdateTask* pkElem = this + iCount;
         while (--iCount >= 0)
         {
             --pkElem;
@@ -393,8 +324,8 @@ void* Elem_c25::DestroyElements(unsigned int uiFlags)
             FUN_00aa1490(piCount, 0x14);
         return piCount;
     }
-    ((S*)this)->Destroy();
+    Destroy();
     if (uiFlags & 1)
-        operator delete(this, 0x14);
+        ::operator delete(this, 0x14);
     return this;
 }

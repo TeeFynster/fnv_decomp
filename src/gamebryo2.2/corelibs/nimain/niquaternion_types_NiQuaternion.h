@@ -4,7 +4,7 @@
 
 #include "layout_support.h"
 class NiQuaternion;
-class ThreeByThreeMatrix;
+class NiMatrix3_Xbox360;
 #pragma pack(push, 4)
 class NiQuaternion
 {
@@ -14,7 +14,7 @@ class NiQuaternion
     float m_fVectorZ;     // +0x8, 4 bytes
     float m_fScalarPart;  // +0xC, 4 bytes
     void EnsureCanonicalSign();
-    void ToRotationMatrix(ThreeByThreeMatrix&);
+    void ToRotationMatrix(NiMatrix3_Xbox360&);
     // NiQuaternion
     // void __cdecl NiQuaternion::*(float)
     // void __cdecl NiQuaternion::*(float)

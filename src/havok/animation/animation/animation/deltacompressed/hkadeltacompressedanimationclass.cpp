@@ -2,25 +2,11 @@
 // src/havok/animation/animation/animation/deltacompressed/hkadeltacompressedanimationclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/animation/deltacompressed/hkadeltacompressedanimationclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void FreeLow(void* apMemory, unsigned int auiSize) throw();
-    virtual void v0c();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct FUN_00dfbb80_cls
 {
@@ -66,22 +52,22 @@ struct FUN_00dfbb80_cls
 // @fnv 0x00dfbb80
 FUN_00dfbb80_cls* FUN_00dfbb80_cls::ReleaseBuffer(unsigned char acFlags)
 {
-    AudioHolder* pAudioHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pAudioHolder->m_pAllocator;
+    hkMemoryRouter* pAudioHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     unsigned int uiCap = m_iCap;
     m_iArrayLength = 0;
     if ((uiCap & 0x80000000u) == 0)
     {
-        pAllocator->Free(m_pData, uiCap & 0x3fffffff);
+        pAllocator->bufFree(m_pData, uiCap & 0x3fffffff);
     }
     m_pData = 0;
     m_iCap = 0x80000000;
     BaseRelease();
     if (acFlags & 1)
     {
-        AudioHolder* pHolder2 = FUN_00c85750();
-        AudioAllocator* pAllocator2 = pHolder2->m_pAllocator;
-        pAllocator2->FreeLow(this, m_uSize);
+        hkMemoryRouter* pHolder2 = FUN_00c85750();
+        hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
+        pAllocator2->blockFree(this, m_uSize);
     }
     return this;
 }

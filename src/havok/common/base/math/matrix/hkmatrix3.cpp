@@ -1,6 +1,45 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
 // src/havok/common/base/math/matrix/hkmatrix3.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/math/matrix/hkmatrix3.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+// Keep the original intrinsic union: the CRT version adds byte arrays that
+// trigger different /GS instrumentation with the original compiler.
+#ifndef _INCLUDED_MM2
+// Exe 0x00cd4bf0 FUN_00cd4bf0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" LocalM128 _mm_unpacklo_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_unpackhi_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_movelh_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_movehl_ps(LocalM128 a, LocalM128 b);
+#define _INCLUDED_MM2
+#endif
+
+#include "../../../../../../include/Vec4.h"
+#include "../../../../../../include/hkMatrix3.h"
+
+inline hkVector4::hkVector4(const hkVector4& v) { m_vComponents = v.m_vComponents; }
+inline void hkVector4::operator=(const hkVector4& v) { m_vComponents = v.m_vComponents; }
+inline hkMatrix3::hkMatrix3() {}
+__forceinline hkSimdReal::hkSimdReal(const LocalM128& q) : m_vValue(q) {}
+__forceinline hkVector4& hkMatrix3::getColumn(int i) { return (&m_kColumn0)[i]; }
+__forceinline const hkVector4& hkMatrix3::getColumn(int i) const { return (&m_kColumn0)[i]; }
 
 struct CD4AF0Bool
 {
@@ -26,44 +65,33 @@ struct CD4AF0Vector4
     CD4AF0Bool IsStreamValid() const;
 };
 
-struct CD4AF0Matrix3
-{
-    CD4AF0Vector4 m_kColumn0;
-    CD4AF0Vector4 m_kColumn1;
-    CD4AF0Vector4 m_kColumn2;
+#include "../../../../../../include/hkMatrix3.h"
 
-    CD4AF0Bool FUN_00cd4af0() const;
-};
 
 // @fnv 0x00cd4af0
-CD4AF0Bool CD4AF0Matrix3::FUN_00cd4af0() const
+hkBool hkMatrix3::FUN_00cd4af0() const
 {
-    return m_kColumn0.IsStreamValid() && m_kColumn1.IsStreamValid() && m_kColumn2.IsStreamValid();
+    return reinterpret_cast<const CD4AF0Vector4&>(m_kColumn0).IsStreamValid() && reinterpret_cast<const CD4AF0Vector4&>(m_kColumn1).IsStreamValid() && reinterpret_cast<const CD4AF0Vector4&>(m_kColumn2).IsStreamValid();
 }
 
 // @fnv 0x00cd4b50
-int __cdecl FUN_00cd4b50()
+const hkMatrix3& __cdecl hkMatrix3::GetIdentityTransform() throw()
 {
-    return 0x1268370;
+    return *reinterpret_cast<const hkMatrix3*>(0x1268370);
 }
 
-struct S_00cd4b60
-{
-    float m[3][4];
-    void FUN_00cd4b60();
-};
-static inline void S_00cd4b60_Swap(float& a, float& b)
+static inline void matrixSwap(float& a, float& b)
 {
     float t = a;
     a = b;
     b = t;
 }
 // @fnv 0x00cd4b60
-void S_00cd4b60::FUN_00cd4b60()
+void hkMatrix3::transpose() throw()
 {
-    S_00cd4b60_Swap(m[1][0], m[0][1]);
-    S_00cd4b60_Swap(m[2][0], m[0][2]);
-    S_00cd4b60_Swap(m[2][1], m[1][2]);
+    matrixSwap(m_kColumn1.m_f[0], m_kColumn0.m_f[1]);
+    matrixSwap(m_kColumn2.m_f[0], m_kColumn0.m_f[2]);
+    matrixSwap(m_kColumn2.m_f[1], m_kColumn1.m_f[2]);
 }
 
 struct S_00cd55a0
@@ -76,29 +104,20 @@ void FUN_00cd55a0(S_00cd55a0* p)
     p->FUN_00cd5050();
 }
 
-struct CD4BA0Matrix3
-{
-    float m_kColumn0[4];
-    float m_kColumn1[4];
-    float m_kColumn2[4];
-
-    void Transpose(const CD4BA0Matrix3& s);
-};
-
 // Copies the transpose of s into this matrix: diagonal entries copied directly, off-diagonal entries swapped, and the fourth column zeroed.
 // @fnv 0x00cd4ba0
-void CD4BA0Matrix3::Transpose(const CD4BA0Matrix3& s)
+__declspec(noinline) void hkMatrix3::_setTranspose(const hkMatrix3& s)
 {
-    m_kColumn0[0] = s.m_kColumn0[0];
-    m_kColumn1[1] = s.m_kColumn1[1];
-    m_kColumn2[2] = s.m_kColumn2[2];
-    m_kColumn2[3] = m_kColumn1[3] = m_kColumn0[3] = 0.0f;
-    m_kColumn0[1] = s.m_kColumn1[0];
-    m_kColumn1[0] = s.m_kColumn0[1];
-    m_kColumn0[2] = s.m_kColumn2[0];
-    m_kColumn2[0] = s.m_kColumn0[2];
-    m_kColumn1[2] = s.m_kColumn2[1];
-    m_kColumn2[1] = s.m_kColumn1[2];
+    m_kColumn0.m_f[0] = s.m_kColumn0.m_f[0];
+    m_kColumn1.m_f[1] = s.m_kColumn1.m_f[1];
+    m_kColumn2.m_f[2] = s.m_kColumn2.m_f[2];
+    m_kColumn2.m_f[3] = m_kColumn1.m_f[3] = m_kColumn0.m_f[3] = 0.0f;
+    m_kColumn0.m_f[1] = s.m_kColumn1.m_f[0];
+    m_kColumn1.m_f[0] = s.m_kColumn0.m_f[1];
+    m_kColumn0.m_f[2] = s.m_kColumn2.m_f[0];
+    m_kColumn2.m_f[0] = s.m_kColumn0.m_f[2];
+    m_kColumn1.m_f[2] = s.m_kColumn2.m_f[1];
+    m_kColumn2.m_f[1] = s.m_kColumn1.m_f[2];
 }
 
 struct Matrix3x4
@@ -134,175 +153,63 @@ bool CMatrixOps::FUN_00cd4e90(float epsilon)
     return *FUN_00cd4e00(&out, &temp, epsilon) != 0;
 }
 
-struct CdOwner_cls;
-
-struct CdPairOut_cls
-{
-    unsigned int m_00;
-    unsigned int m_04;
-    void FUN_00cd5610(CdOwner_cls* owner, unsigned int a1);
-};
-
-__declspec(align(16)) struct CdBlob_cls
-{
-    unsigned int m_00;
-    unsigned int m_04;
-    unsigned int m_08;
-    unsigned int m_0c;
-    unsigned int m_10;
-    unsigned int m_14;
-    unsigned int m_18;
-    unsigned int m_1c;
-    unsigned int m_20;
-    unsigned int m_24;
-    unsigned int m_28;
-    unsigned int m_2c;
-};
-
-struct FUN_00cd5880_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    void FUN_00cd55b0(unsigned int a1, CdPairOut_cls* out);
-    void FUN_00cd5880(unsigned int a1);
-};
-
-struct CdOwner_cls
-{
-    unsigned int unk00;
-    unsigned int unk04;
-};
-
 // @fnv 0x00cd5880
-void FUN_00cd5880_cls::FUN_00cd5880(unsigned int a1)
+void hkMatrix3::SetFromRotation(const hkRotation& rotation) throw()
 {
-    CdBlob_cls blob;
-    ((CdPairOut_cls*)&blob.m_00)->FUN_00cd5610((CdOwner_cls*)this, a1);
-    this->FUN_00cd55b0(a1, (CdPairOut_cls*)&blob.m_00);
+    hkMatrix3 blob;
+    blob._setMul(*this, reinterpret_cast<const hkMatrix3&>(rotation));
+    this->SetProduct(reinterpret_cast<const hkMatrix3&>(rotation), blob);
 }
 
-#ifndef _INCLUDED_MM2
-union __declspec(intrin_type) __declspec(align(16)) __m128
+static __forceinline void matrixRotatedDir(hkVector4& dst, const hkMatrix3& r, const hkVector4& b)
 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-#endif
-
-#ifndef _INCLUDED_MM2
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-#endif
-#ifndef _INCLUDED_MM2
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-#endif
-#ifndef _INCLUDED_MM2
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-#endif
-#ifndef _INCLUDED_MM2
-extern "C" __m128 _mm_unpacklo_ps(__m128 a, __m128 b);
-#endif
-#ifndef _INCLUDED_MM2
-extern "C" __m128 _mm_unpackhi_ps(__m128 a, __m128 b);
-#endif
-#ifndef _INCLUDED_MM2
-extern "C" __m128 _mm_movelh_ps(__m128 a, __m128 b);
-#endif
-#ifndef _INCLUDED_MM2
-extern "C" __m128 _mm_movehl_ps(__m128 a, __m128 b);
-#endif
-
-class hkMatrix3CD4B;
-
-struct hkVector4CD4B
-{
-    __m128 m_vComponents;
-
-    hkVector4CD4B()
-    {}
-    hkVector4CD4B(const hkVector4CD4B& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void operator=(const hkVector4CD4B& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void _setRotatedDir(const hkMatrix3CD4B& r, const hkVector4CD4B& b);
-};
-
-class hkMatrix3CD4B
-{
-  public:
-    void FUN_00cd4bf0(const hkMatrix3CD4B& kA, const hkMatrix3CD4B& kB);
-
-    hkVector4CD4B& getColumn(int i)
-    {
-        return (&m_kColumn0)[i];
-    }
-    const hkVector4CD4B& getColumn(int i) const
-    {
-        return (&m_kColumn0)[i];
-    }
-    void transpose()
-    {
-        __m128 tmp = _mm_unpacklo_ps(m_kColumn0.m_vComponents, m_kColumn1.m_vComponents);
-        __m128 ctmp = _mm_shuffle_ps(_mm_unpackhi_ps(m_kColumn0.m_vComponents, m_kColumn1.m_vComponents),
-                                     m_kColumn2.m_vComponents, 0xe4);
-        m_kColumn0.m_vComponents = _mm_movelh_ps(tmp, m_kColumn2.m_vComponents);
-        tmp = _mm_movehl_ps(m_kColumn0.m_vComponents, tmp);
-        m_kColumn1.m_vComponents = _mm_shuffle_ps(tmp, m_kColumn2.m_vComponents, 0xd4);
-        m_kColumn2.m_vComponents = ctmp;
-    }
-
-    hkVector4CD4B m_kColumn0;
-    hkVector4CD4B m_kColumn1;
-    hkVector4CD4B m_kColumn2;
-};
-
-__forceinline void hkVector4CD4B::_setRotatedDir(const hkMatrix3CD4B& r, const hkVector4CD4B& b)
-{
-    const __m128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
-    const __m128 r0 = _mm_mul_ps(r.m_kColumn0.m_vComponents, b0);
-    const __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
-    const __m128 r1 = _mm_mul_ps(r.m_kColumn1.m_vComponents, b1);
-    const __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
-    const __m128 r2 = _mm_mul_ps(r.m_kColumn2.m_vComponents, b2);
-    m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
+    const LocalM128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
+    const LocalM128 r0 = _mm_mul_ps(r.m_kColumn0.m_vComponents, b0);
+    const LocalM128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
+    const LocalM128 r1 = _mm_mul_ps(r.m_kColumn1.m_vComponents, b1);
+    const LocalM128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
+    const LocalM128 r2 = _mm_mul_ps(r.m_kColumn2.m_vComponents, b2);
+    dst.m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
 
 // Transposes kA, applies the transposed matrix to each column of kB, and stores those results here.
 // @fnv 0x00cd4bf0
-void hkMatrix3CD4B::FUN_00cd4bf0(const hkMatrix3CD4B& kA, const hkMatrix3CD4B& kB)
+void hkMatrix3::FUN_00cd4bf0(char* a, char* b)
 {
-    hkMatrix3CD4B kATrans;
+    const hkMatrix3& kA = *reinterpret_cast<const hkMatrix3*>(a);
+    const hkMatrix3& kB = *reinterpret_cast<const hkMatrix3*>(b);
+    hkMatrix3 kATrans;
     kATrans.m_kColumn0 = kA.m_kColumn0;
     kATrans.m_kColumn1 = kA.m_kColumn1;
     kATrans.m_kColumn2 = kA.m_kColumn2;
-    kATrans.transpose();
+    LocalM128 tmp = _mm_unpacklo_ps(kATrans.m_kColumn0.m_vComponents, kATrans.m_kColumn1.m_vComponents);
+    LocalM128 ctmp = _mm_shuffle_ps(_mm_unpackhi_ps(kATrans.m_kColumn0.m_vComponents, kATrans.m_kColumn1.m_vComponents),
+                                 kATrans.m_kColumn2.m_vComponents, 0xe4);
+    kATrans.m_kColumn0.m_vComponents = _mm_movelh_ps(tmp, kATrans.m_kColumn2.m_vComponents);
+    tmp = _mm_movehl_ps(kATrans.m_kColumn0.m_vComponents, tmp);
+    kATrans.m_kColumn1.m_vComponents = _mm_shuffle_ps(tmp, kATrans.m_kColumn2.m_vComponents, 0xd4);
+    kATrans.m_kColumn2.m_vComponents = ctmp;
     for (int i = 0; i < 3; i++)
     {
-        hkVector4CD4B kCol = kB.getColumn(i);
-        getColumn(i)._setRotatedDir(kATrans, kCol);
+        hkVector4 kCol = kB.getColumn(i);
+        matrixRotatedDir(getColumn(i), kATrans, kCol);
     }
 }
 
 struct S_V4
 {
-    __m128 q;
+    LocalM128 q;
 };
-struct S_00cd4c70
-{
-    S_V4 r0, r1, r2;
-    const S_V4& Multiply(const S_V4& s);
-};
-// Multiplies each of r0, r1, r2 by the x component of s and returns s.
+
+// Multiplies each column by the scalar value.
 // @fnv 0x00cd4c70
-const S_V4& S_00cd4c70::Multiply(const S_V4& apFactor)
+void hkMatrix3::Multiply(const hkSimdReal& factor)
 {
-    r0.q = _mm_mul_ps(_mm_shuffle_ps(apFactor.q, apFactor.q, 0), r0.q);
-    r1.q = _mm_mul_ps(_mm_shuffle_ps(apFactor.q, apFactor.q, 0), r1.q);
-    r2.q = _mm_mul_ps(_mm_shuffle_ps(apFactor.q, apFactor.q, 0), r2.q);
-    return apFactor;
+    const S_V4& apFactor = reinterpret_cast<const S_V4&>(factor);
+    reinterpret_cast<S_V4&>(m_kColumn0).q = _mm_mul_ps(_mm_shuffle_ps(apFactor.q, apFactor.q, 0), reinterpret_cast<S_V4&>(m_kColumn0).q);
+    reinterpret_cast<S_V4&>(m_kColumn1).q = _mm_mul_ps(_mm_shuffle_ps(apFactor.q, apFactor.q, 0), reinterpret_cast<S_V4&>(m_kColumn1).q);
+    reinterpret_cast<S_V4&>(m_kColumn2).q = _mm_mul_ps(_mm_shuffle_ps(apFactor.q, apFactor.q, 0), reinterpret_cast<S_V4&>(m_kColumn2).q);
+
 }
 
 #include <math.h>
@@ -421,24 +328,14 @@ float S_00cd53a0_Matrix3::FUN_00cd53a0()
     return sqrtf(sum);
 }
 
-namespace cd5400 {
-struct Vec4
+__forceinline float& hkMatrix3::operator()(int row, int col)
 {
-    float x, y, z, w;
-};
-struct Mat3
-{
-    Vec4 col[3];
-    float& operator()(int r, int c)
-    {
-        return (&col[c].x)[r];
-    }
-};
+    return (&getColumn(col).x)[row];
 }
 
 // Finds the element with the largest absolute value in the upper triangle of m and stores its row and column indices.
 // @fnv 0x00cd5400
-static void FUN_00cd5400(cd5400::Mat3& m, int& rowOut, int& colOut)
+static void FUN_00cd5400(hkMatrix3& m, int& rowOut, int& colOut)
 {
     float maxVal = 0.0f;
     for (int i = 0; i < 3; i++)
@@ -459,14 +356,14 @@ static void FUN_00cd5400(cd5400::Mat3& m, int& rowOut, int& colOut)
     }
 }
 
-void cd5400_caller(cd5400::Mat3& m, int* r, int* c)
+void cd5400_caller(hkMatrix3& m, int* r, int* c)
 {
     FUN_00cd5400(m, *r, *c);
 }
 
 struct VProduct
 {
-    __m128 q;
+    LocalM128 q;
     VProduct()
     {}
     VProduct(const VProduct& a) : q(a.q)
@@ -488,6 +385,7 @@ struct VProduct
         q = _mm_shuffle_ps(a.q, a.q, lane);
     }
 };
+
 struct MProduct
 {
     VProduct columns[3];
@@ -513,8 +411,8 @@ void MProduct::FUN_00cd55b0(const MProduct& aLeft, const MProduct& aRight)
     }
 }
 
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" void _mm_store_ps(float* p, __m128 a);
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" void _mm_store_ps(float* p, LocalM128 a);
 
 struct SrcRec
 {
@@ -552,66 +450,57 @@ void S00cd54d0_wrap(const SrcRec* src, Matrix34* dest)
     FUN_00cd54d0(dest, src);
 }
 
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 
 struct S00cd4cc0_V
 {
-    __m128 q;
+    LocalM128 q;
     __forceinline void set(float a, float b, float c, float d = 0.0f)
     {
         q = _mm_setr_ps(a, b, c, d);
     }
 };
 
-struct S00cd4cc0_M
-{
-    S00cd4cc0_V c0;
-    S00cd4cc0_V c1;
-    S00cd4cc0_V c2;
-    void FUN_00cd4cc0(const float* r);
-};
-
 // Builds the three column vectors of a cross-product matrix from the components of the input vector r.
 // @fnv 0x00cd4cc0
-void S00cd4cc0_M::FUN_00cd4cc0(const float* apVec)
+void hkMatrix3::SetDiagonalElements(const hkVector4& r) throw()
 {
-    c0.set(0.0f, apVec[2], -apVec[1]);
-    c1.set(-apVec[2], 0.0f, apVec[0]);
-    c2.set(apVec[1], -apVec[0], 0.0f);
+    const float* apVec = r.m_f;
+    reinterpret_cast<S00cd4cc0_V&>(m_kColumn0).set(0.0f, apVec[2], -apVec[1]);
+    reinterpret_cast<S00cd4cc0_V&>(m_kColumn1).set(-apVec[2], 0.0f, apVec[0]);
+    reinterpret_cast<S00cd4cc0_V&>(m_kColumn2).set(apVec[1], -apVec[0], 0.0f);
 }
 
 extern "C" double __cdecl fabs(double);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_load_ss(const float* p);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-extern "C" __m128 _mm_div_ss(__m128 a, __m128 b);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_load_ss(const float* p);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
+extern "C" LocalM128 _mm_div_ss(LocalM128 a, LocalM128 b);
 
 extern float DAT_01012068;
 
-typedef __m128 VectorComponentValue;
-
-struct hkVector4
+struct MatrixInverseVector
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 
-    __forceinline void setCross(const hkVector4& v0, const hkVector4& v1)
+    __forceinline void setCross(const MatrixInverseVector& v0, const MatrixInverseVector& v1)
     {
-        __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
+        LocalM128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
                                    _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
-        __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
+        LocalM128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
                                    _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
         m_vComponents = _mm_sub_ps(cross0, cross1);
     }
 
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
+    __forceinline LocalM128 dot3(const MatrixInverseVector& a) const
     {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+        LocalM128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+        LocalM128 sum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
         return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), sum);
     }
 
-    __forceinline void setMul4(VectorComponentValue r, const hkVector4& v)
+    __forceinline void setMul4(LocalM128 r, const MatrixInverseVector& v)
     {
         m_vComponents = _mm_mul_ps(_mm_shuffle_ps(r, r, 0), v.m_vComponents);
     }
@@ -622,98 +511,67 @@ struct hkVector4
     }
 };
 
-struct hkMatrix3
+static __forceinline MatrixInverseVector& inverseColumn(hkMatrix3& m, int i)
 {
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
+    return reinterpret_cast<MatrixInverseVector*>(&m.m_kColumn0)[i];
+}
 
-    __forceinline hkVector4& getColumn(int i)
-    {
-        return (&m_kColumn0)[i];
-    }
-    __forceinline const hkVector4& getColumn(int i) const
-    {
-        return (&m_kColumn0)[i];
-    }
-
-    float& operator()(int r, int c)
-    {
-        return getColumn(c)(r);
-    }
-
-    void transpose()
-    {
-        float h1 = (*this)(0, 1);
-        (*this)(0, 1) = (*this)(1, 0);
-        (*this)(1, 0) = h1;
-        float h2 = (*this)(0, 2);
-        (*this)(0, 2) = (*this)(2, 0);
-        (*this)(2, 0) = h2;
-        float h3 = (*this)(1, 2);
-        (*this)(1, 2) = (*this)(2, 1);
-        (*this)(2, 1) = h3;
-    }
-
-    int FUN_00cd4f10(float epsilon);
-};
-
-// Computes the inverse of the matrix via cofactor columns and transpose, returning 0 on success or 1 if the determinant is near zero.
+// Computes the inverse via cofactor columns, returning 0 on success.
 // @fnv 0x00cd4f10
 int hkMatrix3::FUN_00cd4f10(float epsilon)
 {
-    hkVector4 r0;
-    r0.setCross(getColumn(1), getColumn(2));
-    hkVector4 r1;
-    r1.setCross(getColumn(2), getColumn(0));
-    hkVector4 r2;
-    r2.setCross(getColumn(0), getColumn(1));
+    MatrixInverseVector r0;
+    r0.setCross(inverseColumn(*this, 1), inverseColumn(*this, 2));
+    MatrixInverseVector r1;
+    r1.setCross(inverseColumn(*this, 2), inverseColumn(*this, 0));
+    MatrixInverseVector r2;
+    r2.setCross(inverseColumn(*this, 0), inverseColumn(*this, 1));
 
-    VectorComponentValue det = getColumn(0).dot3(r0);
+    LocalM128 det = inverseColumn(*this, 0).dot3(r0);
     float d;
     _mm_store_ss(&d, det);
 
     if ((float)fabs(d) > epsilon * epsilon * epsilon)
     {
-        VectorComponentValue dinv = _mm_div_ss(_mm_load_ss(&DAT_01012068), det);
-        getColumn(0).setMul4(dinv, r0);
-        getColumn(1).setMul4(dinv, r1);
-        getColumn(2).setMul4(dinv, r2);
+        LocalM128 dinv = _mm_div_ss(_mm_load_ss(&DAT_01012068), det);
+        inverseColumn(*this, 0).setMul4(dinv, r0);
+        inverseColumn(*this, 1).setMul4(dinv, r1);
+        inverseColumn(*this, 2).setMul4(dinv, r2);
         transpose();
         return 0;
     }
     return 1;
 }
 
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_load_ss(const float* p);
-extern "C" void _mm_store_ss(float* p, __m128 a);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_load_ss(const float* p);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
 
 extern double DAT_010cb418;
 extern float DAT_010cb414;
 
 struct InvScale
 {
-    __m128 q;
+    LocalM128 q;
     InvScale(float f)
     {
         q = _mm_load_ss(&f);
         q = _mm_shuffle_ps(q, q, 0);
     }
-    __m128 get() const
+    LocalM128 get() const
     {
         return q;
     }
 };
 struct hkVecInv
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     void setCross(const hkVecInv& v1, const hkVecInv& v2)
     {
-        __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
+        LocalM128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
                                    _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
+        LocalM128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
                                    _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
         m_vComponents = _mm_sub_ps(cross0, cross1);
     }
@@ -723,71 +581,57 @@ struct hkVecInv
     }
     float dot3(const hkVecInv& a) const
     {
-        __m128 x = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(x, x, 0xaa), _mm_add_ss(_mm_shuffle_ps(x, x, 0x55), x));
+        LocalM128 x = _mm_mul_ps(m_vComponents, a.m_vComponents);
+        LocalM128 s = _mm_add_ss(_mm_shuffle_ps(x, x, 0xaa), _mm_add_ss(_mm_shuffle_ps(x, x, 0x55), x));
         float r;
         _mm_store_ss(&r, s);
         return r;
     }
 };
 
-struct hkMatInv
-{
-    hkVecInv m_kColumn0;
-    hkVecInv m_kColumn1;
-    hkVecInv m_kColumn2;
-    hkVecInv& getColumn(int i)
-    {
-        return (&m_kColumn0)[i];
-    }
-};
+#include "../../../../../../include/hkMatrix3.h"
+
 
 // Computes three column cross products, substitutes a value when the determinant is below a threshold, then scales the columns by its reciprocal.
 // @fnv 0x00cd5050
 void S_00cd55a0::FUN_00cd5050()
 {
-    hkMatInv* m = (hkMatInv*)this;
+    hkMatrix3* m = (hkMatrix3*)this;
     hkVecInv r0;
-    r0.setCross(m->getColumn(1), m->getColumn(2));
+    r0.setCross(reinterpret_cast<hkVecInv&>(m->getColumn(1)), reinterpret_cast<hkVecInv&>(m->getColumn(2)));
     hkVecInv r1;
-    r1.setCross(m->getColumn(2), m->getColumn(0));
+    r1.setCross(reinterpret_cast<hkVecInv&>(m->getColumn(2)), reinterpret_cast<hkVecInv&>(m->getColumn(0)));
     hkVecInv r2;
-    r2.setCross(m->getColumn(0), m->getColumn(1));
-    float det = m->getColumn(0).dot3(r0);
+    r2.setCross(reinterpret_cast<hkVecInv&>(m->getColumn(0)), reinterpret_cast<hkVecInv&>(m->getColumn(1)));
+    float det = reinterpret_cast<hkVecInv&>(m->getColumn(0)).dot3(r0);
     if (det < DAT_010cb418)
         det = DAT_010cb414;
     float fInvDet = 1.0f / det;
     InvScale d(fInvDet);
-    m->getColumn(0).scale(d, r0);
-    m->getColumn(1).scale(d, r1);
-    m->getColumn(2).scale(d, r2);
+    reinterpret_cast<hkVecInv&>(m->getColumn(0)).scale(d, r0);
+    reinterpret_cast<hkVecInv&>(m->getColumn(1)).scale(d, r1);
+    reinterpret_cast<hkVecInv&>(m->getColumn(2)).scale(d, r2);
 }
 
-struct FUN_00cd5180_cls
-{
-    __declspec(align(16)) float m_v[12];
-
-    const __m128* Subtract(const __m128* p);
-};
-
-// Subtracts the three __m128 values at p from the corresponding values in m_v, then returns p.
+// Subtracts the three columns of other from this matrix.
 // @fnv 0x00cd5180
-const __m128* FUN_00cd5180_cls::Subtract(const __m128* apVector)
+void hkMatrix3::sub(const hkMatrix3& other) throw()
 {
-    const __m128* b = apVector;
-    __m128* a = (__m128*)m_v;
+    const LocalM128* apVector = reinterpret_cast<const LocalM128*>(&other);
+    const LocalM128* b = apVector;
+    LocalM128* a = (LocalM128*)&m_kColumn0;
     a[0] = _mm_sub_ps(a[0], b[0]);
     a[1] = _mm_sub_ps(a[1], b[1]);
     a[2] = _mm_sub_ps(a[2], b[2]);
-    return apVector;
+
 }
 
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 struct DiagVec
 {
     union
     {
-        __m128 q;
+        LocalM128 q;
         float f[4];
     };
     DiagVec()
@@ -849,7 +693,7 @@ int DiagMat::FUN_00cd56c0(DiagMat& apEigenvectors, DiagVec& apEigenvalues, int a
     while (!(norm < tolerance) && iteration < aiMaxIterations)
     {
         int p = 0, q = 0;
-        FUN_00cd5400((cd5400::Mat3&)current, p, q);
+        FUN_00cd5400((hkMatrix3&)current, p, q);
         JacobiRot rotation;
         FUN_00cd5270((const Mat34&)current, p, q, &rotation);
         DiagMat jacobi;
@@ -870,49 +714,30 @@ int DiagMat::FUN_00cd56c0(DiagMat& apEigenvectors, DiagVec& apEigenvalues, int a
 
 extern const float DAT_01011d78;
 
-class FUN_00cd51c0_cls
-{
-  public:
-    float m_00;
-    float unk04;
-    float unk08;
-    float unk0C;
-    float m_10;
-    float unk14;
-    float unk18;
-    float unk1C;
-    float m_20;
-    float unk24;
-    float unk28;
-    float unk2C;
-
-    __m128 FUN_00cd51c0();
-};
-
 // @fnv 0x00cd51c0
-__m128 FUN_00cd51c0_cls::FUN_00cd51c0()
+hkSimdReal hkMatrix3::GetDeterminant() throw()
 {
-    __m128 a = _mm_setr_ps(unk04, unk14, unk24, DAT_01011d78);
-    __m128 b = _mm_setr_ps(unk08, unk18, unk28, DAT_01011d78);
-    __m128 v = _mm_setr_ps(m_00, m_10, m_20, DAT_01011d78);
+    LocalM128 a = _mm_setr_ps(m_kColumn0.m_f[1], m_kColumn1.m_f[1], m_kColumn2.m_f[1], DAT_01011d78);
+    LocalM128 b = _mm_setr_ps(m_kColumn0.m_f[2], m_kColumn1.m_f[2], m_kColumn2.m_f[2], DAT_01011d78);
+    LocalM128 v = _mm_setr_ps(m_kColumn0.m_f[0], m_kColumn1.m_f[0], m_kColumn2.m_f[0], DAT_01011d78);
 
-    __m128 a4 = _mm_shuffle_ps(a, a, 0xD2);
-    __m128 b3 = _mm_shuffle_ps(b, b, 0xC9);
-    __m128 vProduct1 = _mm_mul_ps(b3, a4);
-    __m128 aS = _mm_shuffle_ps(a, a, 0xC9);
-    __m128 b2 = _mm_shuffle_ps(b, b, 0xD2);
-    __m128 vProduct2 = _mm_mul_ps(b2, aS);
-    __m128 c = _mm_sub_ps(vProduct2, vProduct1);
-    __m128 d = _mm_mul_ps(c, v);
+    LocalM128 a4 = _mm_shuffle_ps(a, a, 0xD2);
+    LocalM128 b3 = _mm_shuffle_ps(b, b, 0xC9);
+    LocalM128 vProduct1 = _mm_mul_ps(b3, a4);
+    LocalM128 aS = _mm_shuffle_ps(a, a, 0xC9);
+    LocalM128 b2 = _mm_shuffle_ps(b, b, 0xD2);
+    LocalM128 vProduct2 = _mm_mul_ps(b2, aS);
+    LocalM128 c = _mm_sub_ps(vProduct2, vProduct1);
+    LocalM128 d = _mm_mul_ps(c, v);
 
-    __m128 t = _mm_add_ss(_mm_shuffle_ps(d, d, 0x55), d);
+    LocalM128 t = _mm_add_ss(_mm_shuffle_ps(d, d, 0x55), d);
     return _mm_add_ss(_mm_shuffle_ps(d, d, 0xAA), t);
 }
 
-extern "C" __m128 _mm_and_ps(__m128, __m128);
-extern "C" __m128 _mm_cmple_ps(__m128, __m128);
-extern "C" int _mm_movemask_ps(__m128);
-extern "C" __declspec(align(16)) const __m128 g_signClear;
+extern "C" LocalM128 _mm_and_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_cmple_ps(LocalM128, LocalM128);
+extern "C" int _mm_movemask_ps(LocalM128);
+extern "C" __declspec(align(16)) const LocalM128 g_signClear;
 
 // Compares each column of m_mat against other within epsilon and stores the result as a byte in out.
 // @fnv 0x00cd4e00
@@ -920,8 +745,8 @@ unsigned char* CMatrixOps::FUN_00cd4e00(unsigned char* apResult, const Matrix3x4
 {
     const hkMatrix3& lhs = *reinterpret_cast<const hkMatrix3*>(&m_mat);
     const hkMatrix3& rhs = *reinterpret_cast<const hkMatrix3*>(other);
-    const __m128 scalar = _mm_load_ss(&epsilon);
-    const __m128 limit = _mm_shuffle_ps(scalar, scalar, 0);
+    const LocalM128 scalar = _mm_load_ss(&epsilon);
+    const LocalM128 limit = _mm_shuffle_ps(scalar, scalar, 0);
     bool ok =
         ((_mm_movemask_ps(_mm_cmple_ps(
               _mm_and_ps(_mm_sub_ps(lhs.m_kColumn0.m_vComponents, rhs.m_kColumn0.m_vComponents), g_signClear), limit)) &
@@ -936,56 +761,28 @@ unsigned char* CMatrixOps::FUN_00cd4e00(unsigned char* apResult, const Matrix3x4
     return apResult;
 }
 
-struct TransposeReceiver : CD4BA0Matrix3
-{
-    void Transpose(const CD4BA0Matrix3& source);
-};
-__declspec(noinline) void TransposeReceiver::Transpose(const CD4BA0Matrix3& source)
-{
-    m_kColumn0[0] = source.m_kColumn0[0];
-    m_kColumn1[1] = source.m_kColumn1[1];
-    m_kColumn2[2] = source.m_kColumn2[2];
-    m_kColumn0[3] = 0.0f;
-    m_kColumn1[3] = 0.0f;
-    m_kColumn2[3] = 0.0f;
-    m_kColumn0[1] = source.m_kColumn1[0];
-    m_kColumn1[0] = source.m_kColumn0[1];
-    m_kColumn0[2] = source.m_kColumn2[0];
-    m_kColumn2[0] = source.m_kColumn0[2];
-    m_kColumn1[2] = source.m_kColumn2[1];
-    m_kColumn2[1] = source.m_kColumn1[2];
-}
-struct MatrixProduct
-{
-    hkVector4CD4B m_kColumn0, m_kColumn1, m_kColumn2;
-    hkVector4CD4B& getColumn(int i)
-    {
-        return (&m_kColumn0)[i];
-    }
-    void FUN_00cd5610(const hkMatrix3CD4B& a, const CD4BA0Matrix3& b);
-};
 // Multiplies a by the transpose of b and stores the result in this object's columns.
 // @fnv 0x00cd5610
-void MatrixProduct::FUN_00cd5610(const hkMatrix3CD4B& apLeft, const CD4BA0Matrix3& apRight)
+void hkMatrix3::_setMul(const hkMatrix3& apLeft, const hkMatrix3& apRight)
 {
-    hkMatrix3CD4B t;
-    reinterpret_cast<TransposeReceiver&>(t).Transpose(apRight);
-    hkMatrix3CD4B aaLeft = apLeft;
+    hkMatrix3 t;
+    t._setTranspose(apRight);
+    hkMatrix3 aaLeft = apLeft;
     for (int i = 2; i >= 0; i--)
     {
-        const hkVector4CD4B& src = t.getColumn(i);
-        __m128 vSrc = src.m_vComponents;
-        __m128 b0 = _mm_shuffle_ps(src.m_vComponents, src.m_vComponents, 0x00);
-        __m128 r0 = _mm_mul_ps(aaLeft.m_kColumn0.m_vComponents, b0);
-        __m128 b1 = _mm_shuffle_ps(vSrc, vSrc, 0x55);
-        __m128 r1 = _mm_mul_ps(aaLeft.m_kColumn1.m_vComponents, b1);
-        __m128 b2 = _mm_shuffle_ps(src.m_vComponents, src.m_vComponents, 0xaa);
-        __m128 r2 = _mm_mul_ps(aaLeft.m_kColumn2.m_vComponents, b2);
+        const hkVector4& src = t.getColumn(i);
+        LocalM128 vSrc = src.m_vComponents;
+        LocalM128 b0 = _mm_shuffle_ps(src.m_vComponents, src.m_vComponents, 0x00);
+        LocalM128 r0 = _mm_mul_ps(aaLeft.m_kColumn0.m_vComponents, b0);
+        LocalM128 b1 = _mm_shuffle_ps(vSrc, vSrc, 0x55);
+        LocalM128 r1 = _mm_mul_ps(aaLeft.m_kColumn1.m_vComponents, b1);
+        LocalM128 b2 = _mm_shuffle_ps(src.m_vComponents, src.m_vComponents, 0xaa);
+        LocalM128 r2 = _mm_mul_ps(aaLeft.m_kColumn2.m_vComponents, b2);
         getColumn(i).m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
     }
 }
 
-extern "C" __m128 _mm_load_ps(float const* p);
+extern "C" LocalM128 _mm_load_ps(float const* p);
 
 struct FUN_00cd55b0_cls
 {
@@ -994,9 +791,9 @@ struct FUN_00cd55b0_cls
 
 struct FUN_00cd5680_cls
 {
-    __m128 m_v0;
-    __m128 m_v1;
-    __m128 m_v2;
+    LocalM128 m_v0;
+    LocalM128 m_v1;
+    LocalM128 m_v2;
 
     void FUN_00cd5680(int arg);
 };
@@ -1028,43 +825,39 @@ void FUN_00cd5680_cls::FUN_00cd5680(int arg)
     this->m_v2 = _mm_load_ps((float*)&tmp.unk20);
 }
 
-extern "C" __m128 _mm_load_ps(const float* p);
+extern "C" LocalM128 _mm_load_ps(const float* p);
 
-struct MatrixAddReceiver : hkMatrix3
-{
-    const __m128* FUN_00cd5140(const __m128* rhs);
-};
-
-// Adds the three column vectors of rhs to the corresponding columns of this hkMatrix3 and returns rhs.
+// Adds the three columns of other to this matrix.
 // @fnv 0x00cd5140
-const __m128* MatrixAddReceiver::FUN_00cd5140(const __m128* apOther)
+void hkMatrix3::add(const hkMatrix3& other)
 {
+    const LocalM128* apOther = reinterpret_cast<const LocalM128*>(&other);
     _mm_store_ps((float*)&m_kColumn0.m_vComponents, _mm_add_ps(_mm_load_ps((const float*)apOther + 0),
                                                                _mm_load_ps((const float*)&m_kColumn0.m_vComponents)));
     _mm_store_ps((float*)&m_kColumn1.m_vComponents, _mm_add_ps(_mm_load_ps((const float*)apOther + 4),
                                                                _mm_load_ps((const float*)&m_kColumn1.m_vComponents)));
     m_kColumn2.m_vComponents =
         _mm_add_ps(_mm_load_ps((const float*)apOther + 8), _mm_load_ps((const float*)&m_kColumn2.m_vComponents));
-    return apOther;
+
 }
 
-extern "C" __m128 _mm_load_ps(const float* p);
+extern "C" LocalM128 _mm_load_ps(const float* p);
 
 // out[i] = m * in[i] for the three columns of a 3x4 SSE matrix (columns processed last to first).
 // @fnv 0x00cd5530
 void __cdecl FUN_00cd5530(float* out, const float* apMatrix, const float* in)
 {
-    __m128 r0 = _mm_load_ps(apMatrix);
-    __m128 r1 = _mm_load_ps(apMatrix + 4);
-    __m128 r2 = _mm_load_ps(apMatrix + 8);
+    LocalM128 r0 = _mm_load_ps(apMatrix);
+    LocalM128 r1 = _mm_load_ps(apMatrix + 4);
+    LocalM128 r2 = _mm_load_ps(apMatrix + 8);
     int i = 2;
     for (; i >= 0; --i)
     {
         const float* col = in + i * 4;
-        __m128 v = _mm_load_ps(col);
-        __m128 x = _mm_mul_ps(_mm_shuffle_ps(_mm_load_ps(col), _mm_load_ps(col), 0), r0);
-        __m128 y = _mm_mul_ps(_mm_shuffle_ps(v, v, 85), r1);
-        __m128 result = _mm_add_ps(x, y);
+        LocalM128 v = _mm_load_ps(col);
+        LocalM128 x = _mm_mul_ps(_mm_shuffle_ps(_mm_load_ps(col), _mm_load_ps(col), 0), r0);
+        LocalM128 y = _mm_mul_ps(_mm_shuffle_ps(v, v, 85), r1);
+        LocalM128 result = _mm_add_ps(x, y);
         result = _mm_add_ps(result, _mm_mul_ps(_mm_shuffle_ps(v, v, 170), r2));
         _mm_store_ps(out + i * 4, result);
     }
@@ -1076,10 +869,10 @@ extern "C" void FUN_00cd55a0(void*);
 
 class ChainScalar
 {
-    __m128 value;
+    LocalM128 value;
 
   public:
-    ChainScalar(const __m128& v) : value(v)
+    ChainScalar(const LocalM128& v) : value(v)
     {}
     operator float() const
     {
@@ -1092,18 +885,18 @@ class ChainVec
 {
     union
     {
-        __m128 value;
+        LocalM128 value;
         float lanes[4];
     };
 
   public:
     ChainVec()
     {}
-    ChainVec(const __m128& q)
+    ChainVec(const LocalM128& q)
     {
         value = q;
     }
-    void operator=(const __m128& q)
+    void operator=(const LocalM128& q)
     {
         value = q;
     }
@@ -1111,7 +904,7 @@ class ChainVec
     {
         value = q.value;
     }
-    void set(const __m128& q)
+    void set(const LocalM128& q)
     {
         value = q;
     }
@@ -1123,7 +916,7 @@ class ChainVec
     {
         value = v.value;
     }
-    operator __m128() const
+    operator LocalM128() const
     {
         return value;
     }
@@ -1141,7 +934,7 @@ class ChainVec
     }
     __forceinline void product(const ChainVec& a, const ChainVec& b)
     {
-        value = _mm_mul_ps((__m128)a, (__m128)b);
+        value = _mm_mul_ps((LocalM128)a, (LocalM128)b);
     }
     __forceinline void mul(const ChainVec& a)
     {
@@ -1157,11 +950,11 @@ class ChainVec
     }
     __forceinline void splat(const ChainVec& a, int lane)
     {
-        value = _mm_shuffle_ps((__m128)a, (__m128)a, 255);
+        value = _mm_shuffle_ps((LocalM128)a, (LocalM128)a, 255);
     }
     __forceinline ChainScalar sum() const
     {
-        __m128 xy = _mm_add_ss(_mm_shuffle_ps(value, value, 85), value);
+        LocalM128 xy = _mm_add_ss(_mm_shuffle_ps(value, value, 85), value);
         return _mm_add_ss(_mm_shuffle_ps(value, value, 170), xy);
     }
 };

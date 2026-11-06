@@ -3,6 +3,15 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/NiTPointerList.h"
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/BaseFormComponent.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESRecipeCategory.h"
+#include "../../include/TESRecipe.h"
+#include "../../include/Script.h"
+#include "../../include/NiNode.h"
 
 struct FUN_005a3740_cls
 {
@@ -42,26 +51,16 @@ void FUN_005a7840_Class::ClearFlag(unsigned char bFlag)
     *(unsigned char*)((char*)this + 0x24) &= ~bFlag;
 }
 
-struct FUN_005a8040_class
-{
-    void SetField54(int param_2);
-};
-
 // @fnv 0x005a8040
-void FUN_005a8040_class::SetField54(int aiValue)
+void TESRecipe::SetCategory(TESRecipeCategory* apCategory)
 {
-    *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x54) = aiValue;
+    pCategory = apCategory;
 }
 
-struct FUN_005a8080
-{
-    void* GetField();
-};
-
 // @fnv 0x005a8080
-void* FUN_005a8080::GetField()
+BSSimpleList<RecipeItem*>* TESRecipe::FUN_005a8080()
 {
-    return (void*)((char*)this + 0x3c);
+    return reinterpret_cast<BSSimpleList<RecipeItem*>*>(&kIngredients);
 }
 
 extern unsigned char DAT_0118c684;
@@ -219,10 +218,6 @@ struct Flt
     operator unsigned int();
 };
 extern Flt g_011c786c;
-struct NiNode
-{
-    unsigned int FUN_00453470();
-};
 // Returns false if g_011c786c is null, otherwise returns whether its FUN_00453470 result is greater than zero.
 // @fnv 0x005bac20
 bool __cdecl FUN_005bac20()
@@ -296,32 +291,9 @@ struct FUN_00402d00
     FUN_00402d00();
     ~FUN_00402d00();
 };
-struct FUN_00680890
-{
-    unsigned int first;
-    unsigned int second;
-    FUN_00680890();
-    ~FUN_00680890();
-};
-struct FUN_0096a2d0
-{
-    unsigned int first;
-    unsigned int second;
-    FUN_0096a2d0();
-    ~FUN_0096a2d0();
-};
-struct FUN_005a7c50 : FUN_00483370, FUN_00402d00
-{
-    FUN_00680890 member34;
-    FUN_0096a2d0 member3c;
-    FUN_0096a2d0 member44;
-    FUN_0096a2d0 member4c;
-    FUN_005a7c50();
-    void FUN_004f15a0(unsigned int);
-};
 // Constructs the object and calls FUN_004f15a0 with 0x6a.
 // @fnv 0x005a7c50
-FUN_005a7c50::FUN_005a7c50()
+TESRecipe::TESRecipe()
 {
     FUN_004f15a0(0x6a);
 }
@@ -362,7 +334,7 @@ struct FUN_005a77b0 : FUN_00483370, FUN_00402d00
 // @fnv 0x005a77b0
 FUN_005a77b0::FUN_005a77b0()
 {
-    ((FUN_005a7c50*)this)->FUN_004f15a0(0x6b);
+    ((TESRecipe*)this)->FUN_004f15a0(0x6b);
     ((FUN_005a7840_Class*)this)->ClearFlag(1);
 }
 
@@ -375,25 +347,9 @@ struct FUN_005a78a0 : FUN_00483370, FUN_00402d00
 FUN_005a78a0::~FUN_005a78a0()
 {}
 
-struct FUN_004855a0_shell
-{
-    void FUN_004855a0();
-};
-struct FUN_00487010_shell
-{
-    void FUN_00487010();
-};
 struct FUN_00483710_shell
 {
     void FUN_00483710();
-};
-struct FUN_00485e20_shell
-{
-    void FUN_00485e20(int, int);
-};
-struct FUN_00485680_shell
-{
-    void FUN_00485680();
 };
 unsigned char __cdecl FUN_00401500();
 
@@ -421,14 +377,14 @@ struct FUN_005a7a90_shell
 // @fnv 0x005a7a90
 void FUN_005a7a90_shell::FUN_005a7a90()
 {
-    ((FUN_004855a0_shell*)this)->FUN_004855a0();
-    ((FUN_00487010_shell*)((char*)this + 0x18))->FUN_00487010();
+    ((TESForm*)this)->FUN_004855a0();
+    ((TESFullName*)((char*)this + 0x18))->FUN_00487010();
     if (FUN_00401500())
         ((FUN_00483710_shell*)((char*)this + 0x24))->FUN_00483710();
-    ((FUN_00485e20_shell*)this)->FUN_00485e20((int)((char*)this + 0x24), 1);
+    ((TESForm*)this)->FUN_00485e20((char*)this + 0x24, 1);
     if (FUN_00401500())
         ((FUN_00483710_shell*)((char*)this + 0x24))->FUN_00483710();
-    ((FUN_00485680_shell*)this)->FUN_00485680();
+    ((TESForm*)this)->FUN_00485680();
 }
 
 struct FUN_005a7b00_Record
@@ -645,16 +601,7 @@ bool SubChallenge::IsNotEqual(void* input)
 
 extern "C" int __cdecl memcmp(const void* a, const void* b, unsigned int n);
 
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
 
-class TESRecipeCategory : public TESForm
-{
-  public:
-};
 
 struct FUN_008ad910_rd;
 
@@ -709,33 +656,6 @@ void* DeletingObject::Destroy(unsigned int flags)
     return this;
 }
 
-namespace fnv_005a8490 {
-class BaseFormComponent
-{
-  public:
-    virtual ~BaseFormComponent();
-};
-class TESForm : public BaseFormComponent
-{
-  public:
-    unsigned char formType;
-    unsigned char unk05;
-    unsigned short unk06;
-    unsigned int flags;
-    unsigned int formID;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int GetFormID();
-    void FUN_004855a0();
-    void FUN_00485680();
-    void FUN_00485e20(void*, int);
-};
-class TESFullName : public BaseFormComponent
-{
-  public:
-    BSStringT<char> fullName;
-    void FUN_00487010();
-};
 struct RecipeItem
 {
     unsigned int quantity;
@@ -758,22 +678,6 @@ struct RecipeData
     void FUN_00414220();
 };
 void FUN_00485910(unsigned int type, unsigned int value);
-class TESRecipe : public TESForm, public TESFullName
-{
-  public:
-    RecipeData data;
-    RecipeItemProcessor conditions;
-    BSSimpleList<RecipeItem*> ingredients;
-    BSSimpleList<RecipeItem*> outputs;
-    BSSimpleList<RecipeItem*> unk4c;
-    RecipeItemProcessor* FUN_006a9540();
-    TESForm* GetField54();
-    TESForm* FUN_006286d0();
-    RecipeData* FUN_00430830();
-    BSSimpleList<RecipeItem*>* FUN_005a8080();
-    BSSimpleList<RecipeItem*>* FUN_005d43c0();
-    void FUN_005a8490();
-};
 // Stores category and subcategory form IDs, then calls FUN_00485910 with the form ID and count of each ingredient and each output item.
 // @fnv 0x005a8490
 void TESRecipe::FUN_005a8490()
@@ -784,10 +688,10 @@ void TESRecipe::FUN_005a8490()
     FUN_00430830()->category = reinterpret_cast<TESForm*>(GetField54() ? GetField54()->GetFormID() : 0);
     FUN_00430830()->subcategory = reinterpret_cast<TESForm*>(FUN_006286d0() ? FUN_006286d0()->GetFormID() : 0);
     if (FUN_00401500())
-        data.FUN_00414220();
-    FUN_00485e20(&data, 16);
+        reinterpret_cast<RecipeData*>(&kData)->FUN_00414220();
+    FUN_00485e20(&kData, 16);
     if (FUN_00401500())
-        data.FUN_00414220();
+        reinterpret_cast<RecipeData*>(&kData)->FUN_00414220();
     BSSimpleList<RecipeItem*>* iter = FUN_005a8080();
     RecipeItem* item = 0;
     while (iter && iter->GetItem())
@@ -808,7 +712,6 @@ void TESRecipe::FUN_005a8490()
     }
     FUN_00485680();
 }
-}  // namespace fnv_005a8490
 
 struct FUN_005a7870_cls
 {
@@ -818,14 +721,6 @@ struct FUN_005a7870_cls
 // @fnv 0x005a7870
 FUN_005a7870_cls::~FUN_005a7870_cls()
 {}
-
-struct ScriptLocals;
-
-struct Script
-{
-    static bool __cdecl GetValue(double& result, char const* format, unsigned int& value, TESObjectREFR* reference1,
-                                 TESObjectREFR* reference2, Script* script, ScriptLocals* locals, bool evaluate);
-};
 
 void* memset(void* destination, int value, unsigned int size);
 

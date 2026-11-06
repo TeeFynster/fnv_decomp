@@ -1,64 +1,23 @@
 // fallout_shared/tesconditionitem.cpp: TESConditionItem, ConditionSerializer (11 functions)
 
-#define TESFile TESFileStub
 #include "layout_support.h"
-#undef TESFile
+#include "../../include/Actor.h"
+#include "../../include/NiPointer.h"
+#include "../../include/TESConditionItem.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESGlobal.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESQuest.h"
+#include "../../include/TESTopic.h"
+#include "../../include/TESTopicInfo.h"
+#include "../../include/TESTopicInfoData.h"
 #include "tesconditionitem_packet.h"
-#include "tesconditionitem_decls.h"
 
 enum
 {
     kConditionDataChunk = 0x41445443
-};
-
-// TESConditionItem has no generated header in this task folder; the layout
-#pragma pack(push, 4)
-class TESConditionItem
-{
-  public:
-    char m_flags;  // +0x00
-    unsigned char m_pad01[3];
-    union
-    {
-        float m_comparisonValue;  // +0x04
-        TESGlobal* m_comparisonGlobal;
-    };
-    unsigned short m_usFunctionCode;  // +0x08
-    unsigned char m_pad0A[2];
-    unsigned int m_data0C;       // +0x0C
-    unsigned int m_data10;       // +0x10
-    int m_objectType;            // +0x14
-    TESObjectREFR* m_objectRef;  // +0x18
-
-    TESConditionItem();
-    float GetConditionValue();
-    void Load(TESFile* file);
-    void SetFunction(int functionCode);
-    void FixupAfterLoad();
-    void SetObjectType(int objectType);
-    bool GetParamCount();
-    void InitItem(TESForm*);
-    bool ContainsTrait(TESObjectREFR*, TESObjectREFR*, bool&);
-    unsigned int FUN_005eb680();
-    int GetComparisonCondition();
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(TESConditionItem) == 28);
-FNV_STATIC_ASSERT(offsetof(TESConditionItem, m_flags) == 0x00);
-FNV_STATIC_ASSERT(offsetof(TESConditionItem, m_comparisonValue) == 0x04);
-FNV_STATIC_ASSERT(offsetof(TESConditionItem, m_comparisonGlobal) == 0x04);
-FNV_STATIC_ASSERT(offsetof(TESConditionItem, m_usFunctionCode) == 0x08);
-FNV_STATIC_ASSERT(offsetof(TESConditionItem, m_data0C) == 0x0C);
-FNV_STATIC_ASSERT(offsetof(TESConditionItem, m_data10) == 0x10);
-FNV_STATIC_ASSERT(offsetof(TESConditionItem, m_objectType) == 0x14);
-FNV_STATIC_ASSERT(offsetof(TESConditionItem, m_objectRef) == 0x18);
-
-// 0x00526ac0 reads the float at +0x24 of the comparison global. The
-// generated TESGlobal header declares no getter, so this TU calls it through
-// a derived helper instead of editing shared headers.
-struct TESGlobalValueReader : public TESGlobal
-{
-    float GetValue();
 };
 
 #include <cstring>
@@ -79,7 +38,7 @@ float TESConditionItem::GetConditionValue()
     if (GetParamCount())
     {
         if (m_comparisonGlobal)
-            value = ((TESGlobalValueReader*)m_comparisonGlobal)->GetValue();
+            value = m_comparisonGlobal->GetValue();
     }
     else
     {
@@ -140,7 +99,7 @@ bool TESConditionItem::ContainsTrait(TESObjectREFR* pSubjectRef, TESObjectREFR* 
         if (pSubjectRef && pSubjectRef->IsActor())
         {
             Actor* pActor = (Actor*)pSubjectRef;
-            pTarget = pActor->vfn_42c();
+            pTarget = pActor->GetCombatTarget();
         }
         break;
     case 4:
@@ -160,10 +119,10 @@ bool TESConditionItem::ContainsTrait(TESObjectREFR* pSubjectRef, TESObjectREFR* 
         {
             float fComparison;
             if (m_comparisonGlobal && GetParamCount())
-                fComparison = ((TESGlobalValueReader*)m_comparisonGlobal)->GetValue();
+                fComparison = m_comparisonGlobal->GetValue();
             else
                 fComparison = m_comparisonValue;
-            pData = Compare(GetComparisonCondition(), (float)pParam, fComparison);
+            pData = ::Compare(GetComparisonCondition(), (float)pParam, fComparison);
             if (!pData)
             {
                 unsigned int uiFunction = FUN_005eb680() + 0x1000;
@@ -198,7 +157,7 @@ void TESConditionItem::InitItem(TESForm* owner)
         if (!m_objectRef)
         {
             if (owner)
-                Warning(DAT_010694b0, referenceID, owner->FUN_00440e30(), owner->GetEditorID(), owner->GetFormID());
+                Warning(DAT_010694b0, referenceID, owner->FUN_00440e30(), owner->GetName(), owner->GetFormID());
             else
                 Warning(DAT_01069458, referenceID);
         }
@@ -206,7 +165,7 @@ void TESConditionItem::InitItem(TESForm* owner)
     if (!g_scriptCommands[FUN_005eb680()].eval)
     {
         char buffer[0x410];
-        if (owner->GetFormType() == 0x46)
+        if (((const TESForm*)owner)->GetFormType() == 0x46)
         {
             TESTopicInfo* topic = dynamic_cast<TESTopicInfo*>(owner);
             TESTopic* quest = TESTopic::GetTopicFromInfo(topic);
@@ -216,12 +175,12 @@ void TESConditionItem::InitItem(TESForm* owner)
             BSStringT<char> info;
             topic->FormatDebugInfo(info, false);
             sprintf(buffer, DAT_0104cae0, topic->GetFormID(), ((NiPointer<NiNode>*)&info)->operator->(),
-                    text ? text->vfn_138() : g_011c72c0_arg1, text ? text->GetFormID() : 0,
-                    quest ? quest->GetEditorID() : g_011c72c0_arg1, quest ? quest->GetFormID() : 0);
+                    text ? text->GetEditorName() : g_011c72c0_arg1, text ? text->GetFormID() : 0,
+                    quest ? quest->GetName() : g_011c72c0_arg1, quest ? quest->GetFormID() : 0);
         }
         else
         {
-            sprintf(buffer, DAT_01069440, owner->FUN_00440e30(), owner->GetEditorID(), owner->GetFormID());
+            sprintf(buffer, DAT_01069440, owner->FUN_00440e30(), owner->GetName(), owner->GetFormID());
         }
         Warning(DAT_010693d8, buffer, ((TESDataHandler*)owner->GetFile(-1))->GetTESImageSpaceList(),
                 g_scriptCommands[FUN_005eb680()].name);
@@ -234,7 +193,7 @@ void TESConditionItem::InitItem(TESForm* owner)
         if (!m_comparisonGlobal)
         {
             char buffer[0x410];
-            if (owner->GetFormType() == 0x46)
+            if (((const TESForm*)owner)->GetFormType() == 0x46)
             {
                 TESTopicInfo* topic = dynamic_cast<TESTopicInfo*>(owner);
                 TESTopic* quest = TESTopic::GetTopicFromInfo(topic);
@@ -244,12 +203,12 @@ void TESConditionItem::InitItem(TESForm* owner)
                 BSStringT<char> info;
                 topic->FormatDebugInfo(info, false);
                 FUN_00eca38d(buffer, 0x410, DAT_0104cae0, topic->GetFormID(), ((NiPointer<NiNode>*)&info)->operator->(),
-                             text ? text->vfn_138() : g_011c72c0_arg1, text ? text->GetFormID() : 0,
-                             quest ? quest->GetEditorID() : g_011c72c0_arg1, quest ? quest->GetFormID() : 0);
+                             text ? text->GetEditorName() : g_011c72c0_arg1, text ? text->GetFormID() : 0,
+                             quest ? quest->GetName() : g_011c72c0_arg1, quest ? quest->GetFormID() : 0);
             }
             else
             {
-                FUN_00eca38d(buffer, 0x410, DAT_01069440, owner->FUN_00440e30(), owner->GetEditorID(),
+                FUN_00eca38d(buffer, 0x410, DAT_01069440, owner->FUN_00440e30(), owner->GetName(),
                              owner->GetFormID());
             }
             Warning(DAT_01069378, globalID, buffer);
@@ -257,17 +216,13 @@ void TESConditionItem::InitItem(TESForm* owner)
     }
 }
 
-struct FUN_00600ab0_shell : public TESConditionItem
-{
-    void FUN_00600ab0(int);
-};
-
 // @fnv 0x00600ab0
-void FUN_00600ab0_shell::FUN_00600ab0(int aeCheck)
+void TESConditionItem::SetObjectType(int aeCheck)
 {
     m_objectType = aeCheck;
 }
 
+// The approved TESConditionItem header does not yet declare ClearAndSetFunctionCode.
 struct FUN_00681460_helper : public TESConditionItem
 {
     void ClearAndSetFunctionCode(int functionCode);
@@ -286,16 +241,13 @@ template <int N> struct EndianSizeTag
 void __cdecl BSEndian(int*, EndianSizeTag<2>);
 void __cdecl BSEndian(int*, EndianSizeTag<3>);
 void __cdecl BSEndian(unsigned int*, EndianSizeTag<2>);
+// FUNCTION_DATA has no shared header yet; this is its endian-fixup entry point.
 struct FUN_00681110_shell
 {
     void ClearFields();
 };
-struct FUN_00681170_shell
-{
-    void SwapEndianAndProcess();
-};
 // @fnv 0x00681170
-void __thiscall FUN_00681170_shell::SwapEndianAndProcess()
+void TESConditionItem::FixupAfterLoad()
 {
     BSEndian(reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 4), EndianSizeTag<2>());
     BSEndian(reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x18), EndianSizeTag<2>());
@@ -303,24 +255,22 @@ void __thiscall FUN_00681170_shell::SwapEndianAndProcess()
     reinterpret_cast<FUN_00681110_shell*>(reinterpret_cast<char*>(this) + 8)->ClearFields();
 }
 
+// The approved TESConditionItem header does not yet declare its 0x006815c0 data accessor.
 struct S_006815c0
 {
     void* _ref_006815c0();
 };
 int __cdecl _memcmp(const void*, const void*, int);
-struct S_006815d0
-{
-    bool IsDifferentFrom(TESConditionItem* apCompare);
-};
 // Compares 0x1C bytes of apCompare's referenced data against this object and returns true if they differ.
 // @fnv 0x006815d0
-bool S_006815d0::IsDifferentFrom(TESConditionItem* apCompare)
+bool TESConditionItem::IsDifferentFrom(TESConditionItem* apCompare)
 {
     if (_memcmp(((S_006815c0*)apCompare)->_ref_006815c0(), this, 0x1C))
         return true;
     return false;
 }
 
+// The approved TESConditionItem header does not yet declare the serialization entry point.
 struct SavedCondition
 {
     unsigned int flags;
@@ -331,18 +281,14 @@ struct SavedCondition
     unsigned int reference;
     void SwapEndianAndProcess();
 };
-struct ConditionForm
-{
-    unsigned int FUN_0084e3a0();
-};
 struct ConditionSerializer
 {
     unsigned int flags;
-    ConditionForm* comparison;
+    TESForm* comparison;
     unsigned int function;
     unsigned int params[2];
     int objectType;
-    ConditionForm* reference;
+    TESForm* reference;
     int FUN_00413f40();
     bool FUN_006814e0();
     void SerializeCondition();
@@ -363,7 +309,7 @@ void ConditionSerializer::SerializeCondition()
     {
         if (FUN_006822a0(functionCode, index))
         {
-            ConditionForm* form = reinterpret_cast<ConditionForm*>(savedCondition.params[index]);
+            TESForm* form = reinterpret_cast<TESForm*>(savedCondition.params[index]);
             if (form)
                 savedCondition.params[index] = form->FUN_0084e3a0();
         }
@@ -380,11 +326,7 @@ void ConditionSerializer::SerializeCondition()
 }
 
 namespace fnv_00681220 {
-struct FUN_00681460_helper
-{
-    void ClearAndSetFunctionCode(int function);
-};
-
+// These setters are absent from the approved TESConditionItem header.
 struct FUN_00681500_class
 {
     void SetValueIfNoParams(float value);
@@ -395,18 +337,11 @@ struct FUN_00681530_class
     void FUN_00681530(int count);
 };
 
-struct FUN_00681220_class
-{
-    unsigned int m_flags;
-    unsigned int m_comparisonValue;
-    unsigned int m_usFunctionCode;
-    unsigned int m_data0C;
-    void FUN_00681220(int functionCode);
-};
+}  // namespace fnv_00681220
 
 // Normalizes functionCode into the 0x280 range, applies it via ClearAndSetFunctionCode, then sets count and value based on the function code.
 // @fnv 0x00681220
-void FUN_00681220_class::FUN_00681220(int functionCode)
+void TESConditionItem::SetFunction(int functionCode)
 {
     int iNormalizedFunction = functionCode;
     if (functionCode >= 0x1000 && functionCode < 0x1280)
@@ -439,23 +374,22 @@ void FUN_00681220_class::FUN_00681220(int functionCode)
         case 0x106F:
         case 0x1070:
         case 0x1136:
-            ((FUN_00681530_class*)this)->FUN_00681530(0);
-            ((FUN_00681500_class*)this)->SetValueIfNoParams(1.0f);
+            ((fnv_00681220::FUN_00681530_class*)this)->FUN_00681530(0);
+            ((fnv_00681220::FUN_00681500_class*)this)->SetValueIfNoParams(1.0f);
             break;
         case 0x1001:
-            ((FUN_00681530_class*)this)->FUN_00681530(4);
-            ((FUN_00681500_class*)this)->SetValueIfNoParams(100.0f);
+            ((fnv_00681220::FUN_00681530_class*)this)->FUN_00681530(4);
+            ((fnv_00681220::FUN_00681500_class*)this)->SetValueIfNoParams(100.0f);
             break;
         case 0x106B:
-            ((FUN_00681530_class*)this)->FUN_00681530(1);
-            ((FUN_00681500_class*)this)->SetValueIfNoParams(0.0f);
+            ((fnv_00681220::FUN_00681530_class*)this)->FUN_00681530(1);
+            ((fnv_00681220::FUN_00681500_class*)this)->SetValueIfNoParams(0.0f);
             break;
         case 0x10F7:
             m_data0C = 0x28;
-            ((FUN_00681530_class*)this)->FUN_00681530(0);
-            ((FUN_00681500_class*)this)->SetValueIfNoParams(1.0f);
+            ((fnv_00681220::FUN_00681530_class*)this)->FUN_00681530(0);
+            ((fnv_00681220::FUN_00681500_class*)this)->SetValueIfNoParams(1.0f);
             break;
         }
     }
 }
-}  // namespace fnv_00681220

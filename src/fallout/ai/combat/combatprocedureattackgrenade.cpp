@@ -1,16 +1,124 @@
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/Projectile.h"
+#include "../../../../include/PathingRequest.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/CombatProcedureAttackGrenade.h"
+#include "../../../../include/IDebugText.h"
+#include "../../../../include/InterfaceManager.h"
+// LocalPoint: unit-local copy of the former shared stand-in Point. Same layout as NiPoint3 with the stand-in's own inline operators; with NiPoint3, WriteDebugText (0x009cb890) does not match.
+class Scalar;
+class Vector;
+
+class LocalPoint
+{
+public:
+    float x;
+    float y;
+    float z;
+
+    __forceinline LocalPoint()
+    {
+    }
+    __forceinline LocalPoint(float px, float py, float pz)
+        : x(px), y(py), z(pz)
+    {
+    }
+
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    LocalPoint operator+(const LocalPoint& other) const;
+    LocalPoint operator-(const LocalPoint& other) const;
+    inline LocalPoint operator-() const
+    {
+        return LocalPoint(-x, -y, -z);
+    }
+    __forceinline LocalPoint operator*(float scalar) const
+    {
+        return LocalPoint(scalar * x, scalar * y, scalar * z);
+    }
+    __forceinline LocalPoint operator/(float scalar) const
+    {
+        float inverse = 1.0f / scalar;
+        return LocalPoint(x * inverse, y * inverse, z * inverse);
+    }
+    __forceinline LocalPoint& operator+=(const LocalPoint& other)
+    {
+        x = (float)(other.x + x);
+        y = (float)(other.y + y);
+        z = (float)(other.z + z);
+        return *this;
+    }
+    __forceinline LocalPoint& operator*=(float scalar)
+    {
+        x = scalar * x;
+        y = scalar * y;
+        z = scalar * z;
+        return *this;
+    }
+    inline bool operator==(const LocalPoint& other) const
+    {
+        return other.x == x && other.y == y && other.z == z;
+    }
+
+    LocalPoint ApplyScaled(float scalar);
+    LocalPoint Cross(const LocalPoint& other) const;
+    float Dot(const LocalPoint& other) const;
+    double DotProduct(const LocalPoint& other);
+    float Length() const;
+    float Distance(LocalPoint* other);
+    float GetX();
+    float GetY();
+
+    bool FUN_004390c0(const LocalPoint& other) const;
+    LocalPoint FUN_00439ef0(const LocalPoint& other);
+    LocalPoint FUN_00439e90(const LocalPoint& other);
+    void FUN_004a0c10();
+    char* FUN_00a59af0(const char* text);
+    float FUN_004a7290() const;
+    float FUN_00435e00();
+    float FUN_006a7f50();
+
+    float& at(int index);
+    float at(int index) const;
+    void add(const LocalPoint& a, const LocalPoint& b);
+    void difference(const LocalPoint& a, const LocalPoint& b);
+    void absolute();
+    void scale(float scalar);
+
+    void flip();
+    void setZero4();
+    void setSub4(const LocalPoint& a, const LocalPoint& b);
+    void setAdd4(const LocalPoint& a, const LocalPoint& b);
+    void setMul4(const Scalar& scalar, const LocalPoint& point);
+    void addMul4(const Scalar& scalar, const LocalPoint& point);
+    void setCross(const LocalPoint& a, const LocalPoint& b);
+    Scalar dot3(const LocalPoint& point) const;
+    Scalar lengthSquared3() const;
+    Scalar length3() const;
+    const Vector& pos() const;
+    const Vector& dir() const;
+};
+
+namespace loader
+{
+    struct LocalPoint
+    {
+        float x;
+        float y;
+        float z;
+
+        LocalPoint(float x, float y, float z);
+    };
+}
+#include "../../../../include/TimeoutTimer.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/Setting.h"
 
 // src/fallout/ai/combat/combatprocedureattackgrenade.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatprocedureattackgrenade.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct CombatProcedure
-{
-    void RunProcedure();
-};
-
-struct CombatProcedureAttackGrenade : CombatProcedure
-{
-    void FUN_009cafc0();
-};
 
 // @fnv 0x009cafc0
 void CombatProcedureAttackGrenade::FUN_009cafc0()
@@ -63,15 +171,7 @@ void FUN_009cafa0_shell::FUN_009cafa0()
     reinterpret_cast<FUN_009ca6c0_shell*>(this)->FUN_009ca6c0();
 }
 
-struct Setting_S
-{
-    float* Float();
-};
-extern Setting_S originalRuntimeFloatSetting375;
-struct Projectile
-{
-    void __thiscall FUN_00966a00(float);
-};
+extern Setting originalRuntimeFloatSetting375;
 struct IMH
 {
     struct FUN_009cb440_shell* FUN_00586150();
@@ -99,10 +199,6 @@ void __thiscall FUN_009cb830_shell::FUN_009cb830(Projectile* apProjectile)
     }
 }
 
-struct BGSSaveFormBuffer
-{
-    void __thiscall SaveData(void* p, int a, int b);
-};
 struct FUN_009a5eb0_shell
 {
     void __thiscall FUN_009a5eb0(BGSSaveFormBuffer* p);
@@ -127,15 +223,7 @@ void __thiscall FUN_009cb9c0_shell::FUN_009cb9c0(BGSSaveFormBuffer* pBuffer)
     ((FUN_009a5eb0_shell*)((char*)this + 0x34))->FUN_009a5eb0(pBuffer);
 }
 
-struct BGSLoadFormBuffer
-{
-    void __thiscall ReadTypedData(void* p, unsigned int size);
-};
 struct CombatProcedure_LoadGame
-{
-    void __thiscall LoadGame(BGSLoadFormBuffer* p);
-};
-struct TimeoutTimer
 {
     void __thiscall LoadGame(BGSLoadFormBuffer* p);
 };
@@ -207,25 +295,11 @@ void __thiscall FUN_009cba50_shell::FUN_009cba50(BGSLoadFormBuffer* buffer)
     ((TimeoutTimer*)((char*)this + 0x34))->LoadGame(buffer);
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    void __thiscall FUN_006815c0();
-};
-struct NonPodPoint3
-{
-    float x;
-    float y;
-    float z;
-    NonPodPoint3();
-};
 NiPoint3* __cdecl FUN_009a8050(NiPoint3* result, void* actor);
 void __cdecl GetTargetLocationWithOffset(NiPoint3* result, void* target, int mode);
-NonPodPoint3 __cdecl GetTriple12(void* target);
+NiPoint3 __cdecl GetTriple12(void* target);
 unsigned char __cdecl FUN_009a7670(void* actor, void* target, unsigned int flags, NiPoint3 origin, NiPoint3 direction,
-                                   NonPodPoint3 offset, unsigned int mode, unsigned int category, float scale);
+                                   NiPoint3 offset, unsigned int mode, unsigned int category, float scale);
 
 // @fnv 0x009a7580
 unsigned char __cdecl FUN_009a7580(void* actor, void* target, unsigned int flags, NiPoint3* optionalOrigin,
@@ -233,30 +307,25 @@ unsigned char __cdecl FUN_009a7580(void* actor, void* target, unsigned int flags
 {
     if (!actor || !target)
         return 0;
-    NiPoint3 offset;
-    offset.FUN_006815c0();
+    float offset[3];
+    reinterpret_cast<NiPoint3*>(offset)->FUN_006815c0();
     if (optionalOrigin)
-        offset = *optionalOrigin;
+        reinterpret_cast<NiPoint3&>(offset) = *optionalOrigin;
     else
     {
-        NiPoint3 temp;
-        offset = *FUN_009a8050(&temp, actor);
+        float temp[3];
+        reinterpret_cast<NiPoint3&>(offset) = *FUN_009a8050(reinterpret_cast<NiPoint3*>(temp), actor);
     }
-    NiPoint3 origin;
-    GetTargetLocationWithOffset(&origin, target, 2);
-    NonPodPoint3 direction = GetTriple12(target);
-    return FUN_009a7670(actor, target, flags, offset, origin, direction, mode, category, scale);
+    float origin[3];
+    GetTargetLocationWithOffset(reinterpret_cast<NiPoint3*>(origin), target, 2);
+    NiPoint3 direction = GetTriple12(target);
+    return FUN_009a7670(actor, target, flags, reinterpret_cast<NiPoint3&>(offset), reinterpret_cast<NiPoint3&>(origin), direction, mode, category, scale);
 }
 
-struct Vec3
-{
-    int m_uiX;
-    int m_uiY;
-    int m_uiZ;
-};
+
 
 extern int DAT_010909bc;
-extern Vec3 DAT_011f426c;
+extern NiPoint3 DAT_011f426c;
 
 struct CombatBaseObj
 {
@@ -278,8 +347,8 @@ struct FUN_009cadf0_cls : CombatBaseObj
 {
     int m_10;
     unsigned char m_14;
-    Vec3 m_18;
-    Vec3 m_24;
+    float m_18[3];
+    float m_24[3];
     unsigned char m_30;
     CombatMember34 m_34;
     FUN_009cadf0_cls();
@@ -292,21 +361,14 @@ FUN_009cadf0_cls::FUN_009cadf0_cls()
     m_vptr = &DAT_010909bc;
     m_10 = 0;
     m_14 = 0;
-    m_18 = DAT_011f426c;
-    m_24 = DAT_011f426c;
+    reinterpret_cast<NiPoint3&>(m_18) = DAT_011f426c;
+    reinterpret_cast<NiPoint3&>(m_24) = DAT_011f426c;
     m_30 = 0;
     m_34.Init();
 }
 
 namespace fnv_009caee0 {
-struct Vec3_b6365
-{
-    unsigned int m_00;
-    unsigned int m_04;
-    unsigned int m_08;
-};
-
-extern Vec3_b6365 DAT_011f426c;
+extern NiPoint3 DAT_011f426c;
 
 class Base_b6365
 {
@@ -341,22 +403,22 @@ class FUN_009caee0 : public Base_b6365
   public:
     virtual ~FUN_009caee0();
     unsigned char m_14;
-    Vec3_b6365 m_18;
-    Vec3_b6365 m_24;
+    float m_18[3];
+    float m_24[3];
     unsigned char m_30;
     Member_b6365 m_34;
 
-    FUN_009caee0(const Vec3_b6365* src, unsigned char flag);
+    FUN_009caee0(const NiPoint3* src, unsigned char flag);
 };
 
 // Initialises the object: stores a copy of src into m_18, sets m_24 from DAT_011f426c, m_14 to 1, m_30 to flag, and resets m_34.
 // @fnv 0x009caee0
-FUN_009caee0::FUN_009caee0(const Vec3_b6365* src, unsigned char flag) : Base_b6365()
+FUN_009caee0::FUN_009caee0(const NiPoint3* src, unsigned char flag) : Base_b6365()
 {
     m_10 = 0;
     m_14 = 1;
-    m_18 = *src;
-    m_24 = DAT_011f426c;
+    reinterpret_cast<NiPoint3&>(m_18) = *src;
+    reinterpret_cast<NiPoint3&>(m_24) = DAT_011f426c;
     m_30 = flag;
     m_34.Reset();
 }
@@ -385,12 +447,6 @@ class B9CB380World
     bool IsThreatWithinLimits(B9CB380Mobile* pkMobile, B9CB380Form* pkForm, int iArg, float fArg);
 };
 
-class B9CB380Setting
-{
-  public:
-    float* Float();
-};
-
 class B9CB380Timer
 {
   public:
@@ -402,7 +458,7 @@ class B9CB380Timer
 };
 
 extern B9CB380World* g_pkB9CB380World;
-extern B9CB380Setting g_kB9CB380Setting;
+extern Setting g_kB9CB380Setting;
 
 class B9CB380Package
 {
@@ -450,30 +506,10 @@ bool B9CB380Package::FUN_009cb380(B9CB380Form* pkForm, int iArg, float fArg)
 }
 
 namespace fnv_009cb6e0 {
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    NiPoint3();
-};
 extern const NiPoint3 NiPoint3_ZERO;
 
-extern Setting_S originalRuntimeFloatSetting375;
+extern Setting originalRuntimeFloatSetting375;
 
-struct Actor;
-struct PathingRequest
-{
-    float GetFloatAtOffset68();
-};
-struct TESObjectREFR
-{
-    PathingRequest* GetOrFallback(Actor* actor);
-};
-struct InterfaceManager
-{
-    TESObjectREFR* FUN_007031c0();
-};
 
 NiPoint3 __cdecl ComputeTrajectory(Actor* actor, void* target, int unused, PathingRequest* req, float dist, bool flag);
 NiPoint3 __cdecl FUN_009a8d80(Actor* actor, NiPoint3* point, int unused, PathingRequest* req, float dist, bool flag);
@@ -520,140 +556,6 @@ NiPoint3 CombatProcedureShell::GetPathingPoint()
 }
 }  // namespace fnv_009cb6e0
 
-struct Point
-{
-    float x, y, z;
-    Point();
-};
-struct Target
-{
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void slot25();
-    virtual void slot26();
-    virtual void slot27();
-    virtual void slot28();
-    virtual void slot29();
-    virtual void slot30();
-    virtual void slot31();
-    virtual void slot32();
-    virtual void slot33();
-    virtual void slot34();
-    virtual void slot35();
-    virtual void slot36();
-    virtual void slot37();
-    virtual void slot38();
-    virtual void slot39();
-    virtual void slot40();
-    virtual void slot41();
-    virtual void slot42();
-    virtual void slot43();
-    virtual void slot44();
-    virtual void slot45();
-    virtual void slot46();
-    virtual void slot47();
-    virtual void slot48();
-    virtual void slot49();
-    virtual void slot50();
-    virtual void slot51();
-    virtual void slot52();
-    virtual void slot53();
-    virtual void slot54();
-    virtual void slot55();
-    virtual void slot56();
-    virtual void slot57();
-    virtual void slot58();
-    virtual void slot59();
-    virtual void slot60();
-    virtual void slot61();
-    virtual void slot62();
-    virtual void slot63();
-    virtual void slot64();
-    virtual void slot65();
-    virtual void slot66();
-    virtual void slot67();
-    virtual void slot68();
-    virtual void slot69();
-    virtual void slot70();
-    virtual void slot71();
-    virtual void slot72();
-    virtual void slot73();
-    virtual void slot74();
-    virtual void slot75();
-    virtual void slot76();
-    virtual void slot77();
-    virtual void slot78();
-    virtual void slot79();
-    virtual void slot80();
-    virtual void slot81();
-    virtual void slot82();
-    virtual void slot83();
-    virtual void slot84();
-    virtual void slot85();
-    virtual void slot86();
-    virtual void slot87();
-    virtual void slot88();
-    virtual void slot89();
-    virtual void slot90();
-    virtual void slot91();
-    virtual void slot92();
-    virtual void slot93();
-    virtual void slot94();
-    virtual void slot95();
-    virtual void slot96();
-    virtual void slot97();
-    virtual void slot98();
-    virtual void slot99();
-    virtual void slot100();
-    virtual void slot101();
-    virtual void slot102();
-    virtual void slot103();
-    virtual void slot104();
-    virtual void slot105();
-    virtual void slot106();
-    virtual void slot107();
-    virtual void slot108();
-    virtual void slot109();
-    virtual void slot110();
-    virtual void slot111();
-    virtual void slot112();
-    virtual void slot113();
-    virtual void slot114();
-    virtual void slot115();
-    virtual void slot116();
-    virtual void slot117();
-    virtual void slot118();
-    virtual void slot119();
-    virtual void slot120();
-    virtual void slot121();
-    virtual void slot122();
-    virtual void slot123();
-    virtual void slot124();
-    virtual Point* Position();
-};
 struct Item
 {
     void* Sound();
@@ -677,26 +579,26 @@ struct Procedure
     Owner* owner;
     int unk08, unk0c, unk10;
     unsigned char active;
-    Point origin;
-    Point destination;
+    LocalPoint origin;
+    LocalPoint destination;
     unsigned char category;
     void* ActorGet();
-    Target* TargetGet();
-    bool Validate(void*, Point*, float);
+    TESObjectREFR* TargetGet();
+    bool Validate(void*, LocalPoint*, float);
     void Reset();
-    bool FUN_009cb460(Point* output, Point* input);
+    bool FUN_009cb460(LocalPoint* output, LocalPoint* input);
 };
-extern Point zeroPoint;
+extern LocalPoint zeroPoint;
 extern const float scaleValue;
-unsigned char Arc(void*, Target*, Item*, Point, Point, Point, unsigned char*, Point*, float);
-unsigned char Direct(void*, Target*, Item*, Point*, unsigned char*, Point*, float);
-float Distance(Item*, Point, Point, unsigned char, float);
+unsigned char Arc(void*, TESObjectREFR*, Item*, LocalPoint, LocalPoint, LocalPoint, unsigned char*, LocalPoint*, float);
+unsigned char Direct(void*, TESObjectREFR*, Item*, LocalPoint*, unsigned char*, LocalPoint*, float);
+float Distance(Item*, LocalPoint, LocalPoint, unsigned char, float);
 // @fnv 0x009cb460
-bool Procedure::FUN_009cb460(Point* output, Point* input)
+bool Procedure::FUN_009cb460(LocalPoint* output, LocalPoint* input)
 {
     void* i;
     i = ActorGet();
-    Target* targetVal;
+    TESObjectREFR* targetVal;
     targetVal = TargetGet();
     Manager* sound;
     sound = owner->ManagerGet();
@@ -724,13 +626,13 @@ bool Procedure::FUN_009cb460(Point* output, Point* input)
     }
     if (ptr && pForm)
     {
-        Point position7;
+        LocalPoint position7;
         if (active)
             position7 = origin;
         else
         {
             position7 = destination;
-            position7.z = targetVal->Position()->z;
+            position7.z = static_cast<const TESObjectREFR*>(targetVal)->GetPos()->z;
         }
         float distance7;
         distance7 = Distance(z, *input, position7, category, 0.0f);
@@ -746,15 +648,6 @@ bool Procedure::FUN_009cb460(Point* output, Point* input)
 }
 
 namespace fnv_009cafe0 {
-struct Pt3
-{
-    float x;
-    float y;
-    float z;
-    Pt3* FUN_00439ef0(Pt3* out, Pt3* other);
-    float GetSquaredXYLength();
-    bool FUN_00439090(Pt3* other);
-};
 
 struct Obj70
 {
@@ -1166,7 +1059,7 @@ struct ActorObj
     virtual void vfn_1e8();
     virtual void vfn_1ec();
     virtual void vfn_1f0();
-    virtual Pt3* vfn_1f4();
+    virtual NiPoint3* vfn_1f4();
 };
 struct SoundObj
 {
@@ -1202,7 +1095,7 @@ struct Member34
     void FUN_00910b10();
 };
 void __cdecl FUN_009a9180(Sub04* a, Obj703* b, float* x, float* y, float* z);
-unsigned char __cdecl FUN_009a7580(ActorObj* a, ActorObj* b, MidObj* c, void* d, unsigned char* e, Pt3* f, float g);
+unsigned char __cdecl FUN_009a7580(ActorObj* a, ActorObj* b, MidObj* c, void* d, unsigned char* e, NiPoint3* f, float g);
 bool __cdecl IsExplosionRadiusValid(SoundObj* a);
 
 struct Package
@@ -1215,8 +1108,8 @@ struct Package
     unsigned char m_14;
     unsigned char m_15;
     short m_16;
-    Pt3 m_18;
-    Pt3 m_24;
+    NiPoint3 m_18;
+    NiPoint3 m_24;
     unsigned char m_30;
     unsigned char m_31;
     unsigned char m_32;
@@ -1226,9 +1119,9 @@ struct Package
     ActorObj* FUN_00996e00();
     void FUN_009caac0(const char* msg);
     void FUN_00996ea0();
-    void SetLookAtPoint(Pt3* p, int a);
-    Pt3* GetPathingPoint(Pt3* out);
-    bool FUN_009cb380(SoundObj* s, Pt3* p, float f);
+    void SetLookAtPoint(NiPoint3* p, int a);
+    NiPoint3* GetPathingPoint(NiPoint3* out);
+    bool FUN_009cb380(SoundObj* s, NiPoint3* p, float f);
     void UpdateWeaponFire();
 };
 
@@ -1272,22 +1165,22 @@ void Package::UpdateWeaponFire()
         return;
     }
     DAT_011f1708->FUN_00983970(m_04, 2, 0, 0);
-    Pt3 AJ;
-    m_24 = *GetPathingPoint(&AJ);
-    Pt3 dir3;
-    dir3.x = 0.0f;
-    dir3.y = 0.0f;
-    dir3.z = 0.0f;
-    FUN_009a9180(m_04, s, &dir3.x, &dir3.y, &dir3.z);
-    Pt3 kIter;
-    m_24.FUN_00439ef0(&kIter, actor2->vfn_1f4());
-    if (kIter.GetSquaredXYLength() > dir3.z * dir3.z)
+    float AJ[3];
+    m_24 = *GetPathingPoint(&reinterpret_cast<NiPoint3&>(AJ));
+    float dir3[3];
+    reinterpret_cast<NiPoint3&>(dir3).x = 0.0f;
+    reinterpret_cast<NiPoint3&>(dir3).y = 0.0f;
+    reinterpret_cast<NiPoint3&>(dir3).z = 0.0f;
+    FUN_009a9180(m_04, s, &reinterpret_cast<NiPoint3&>(dir3).x, &reinterpret_cast<NiPoint3&>(dir3).y, &reinterpret_cast<NiPoint3&>(dir3).z);
+    float kIter[3];
+    m_24.FUN_00439ef0(&reinterpret_cast<NiPoint3&>(kIter), actor2->vfn_1f4());
+    if (reinterpret_cast<NiPoint3&>(kIter).GetSquaredXYLength() > reinterpret_cast<NiPoint3&>(dir3).z * reinterpret_cast<NiPoint3&>(dir3).z)
     {
         FUN_00996ea0();
         m_10 = 0;
         return;
     }
-    if (m_24.FUN_00439090((Pt3*)&DAT_011f426c))
+    if (m_24.FUN_00439090((NiPoint3*)&DAT_011f426c))
     {
         SetLookAtPoint(&m_24, 4);
     }
@@ -1301,13 +1194,13 @@ void Package::UpdateWeaponFire()
     }
     SoundObj* idx;
     idx = s->GetOrFallback(actor2)->FUN_004fd3c0();
-    Pt3* AP;
-    Pt3 CTmp;
+    NiPoint3* AP;
+    float CTmp[3];
     if (idx)
     {
         AP = m_14 ? &m_18 : i->vfn_1f4();
-        CTmp = *AP;
-        if (!FUN_009cb380(idx, &CTmp, 0.0f))
+        reinterpret_cast<NiPoint3&>(CTmp) = *AP;
+        if (!FUN_009cb380(idx, &reinterpret_cast<NiPoint3&>(CTmp), 0.0f))
         {
             return;
         }
@@ -1336,15 +1229,6 @@ void Package::UpdateWeaponFire()
 }
 }  // namespace fnv_009cafe0
 
-struct IDebugText
-{
-    virtual void V01();
-    virtual void V02();
-    virtual void V03();
-    virtual void V04();
-    virtual void V05();
-    virtual void __cdecl Write(int location, int justify, const char* format, ...);
-};
 
 struct CTSHelper
 {
@@ -1362,33 +1246,33 @@ struct FUN_009cb890_shell
     void __thiscall WriteDebugText(IDebugText* debugText, int location, int justify);
 };
 
-// Writes debug lines for the state, targeted point, high-arc flag and blocked-timer values via debugText->Write.
+// Writes debug lines for the state, targeted point, high-arc flag and blocked-timer values via debugText->Print.
 // @fnv 0x009cb890
 void FUN_009cb890_shell::WriteDebugText(IDebugText* debugText, int location, int justify)
 {
     switch (*reinterpret_cast<int*>(reinterpret_cast<unsigned char*>(this) + 0x10))
     {
     case 0:
-        debugText->Write(location, justify, "IDLE");
+        debugText->Print(static_cast<DEBUGTEXT_LOCATION>(location), static_cast<DEBUGTEXT_JUSTIFY>(justify), "IDLE");
         break;
     case 1:
-        debugText->Write(location, justify, "ATTACKING");
+        debugText->Print(static_cast<DEBUGTEXT_LOCATION>(location), static_cast<DEBUGTEXT_JUSTIFY>(justify), "ATTACKING");
         break;
     }
 
-    debugText->Write(location, justify, "Targeted Point: %.02f, %.02f, %.02f",
+    debugText->Print(static_cast<DEBUGTEXT_LOCATION>(location), static_cast<DEBUGTEXT_JUSTIFY>(justify), "Targeted Point: %.02f, %.02f, %.02f",
                      *reinterpret_cast<float*>(reinterpret_cast<unsigned char*>(this) + 0x24),
                      *reinterpret_cast<float*>(reinterpret_cast<unsigned char*>(this) + 0x28),
                      *reinterpret_cast<float*>(reinterpret_cast<unsigned char*>(this) + 0x2c));
 
     if (*reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(this) + 0x30))
     {
-        debugText->Write(location, justify, "HIGH ARC");
+        debugText->Print(static_cast<DEBUGTEXT_LOCATION>(location), static_cast<DEBUGTEXT_JUSTIFY>(justify), "HIGH ARC");
     }
 
     if (reinterpret_cast<Modifier*>(reinterpret_cast<unsigned char*>(this) + 0x34)->FUN_0097fa50())
     {
-        debugText->Write(location, justify, "Explosive Projectile Blocked Timer: %.02f/%.02f",
+        debugText->Print(static_cast<DEBUGTEXT_LOCATION>(location), static_cast<DEBUGTEXT_JUSTIFY>(justify), "Explosive Projectile Blocked Timer: %.02f/%.02f",
                          reinterpret_cast<CTSHelper*>(reinterpret_cast<unsigned char*>(this) + 0x34)->GetElapsedTime(),
                          reinterpret_cast<Modifier*>(reinterpret_cast<unsigned char*>(this) + 0x34)->GetValue());
     }

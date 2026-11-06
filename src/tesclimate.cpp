@@ -1,5 +1,13 @@
-// tesclimate.cpp: TESClimate, ClimateCopy (12 functions)
+// tesclimate.cpp: TESClimate (12 functions)
 
+#include <windows.h>
+#include "layout_support.h"
+#include "../include/FileEntryList.h"
+#include "../include/TESForm.h"
+#include "../include/TESFile.h"
+#include "../include/TESModel.h"
+#include "../include/TESTexture.h"
+#include "../include/TESWeather.h"
 #include "tesclimate_types.h"
 #include <string.h>
 #include <new>
@@ -105,115 +113,43 @@ bool TESClimate::Load(TESFile* file)
     return true;
 }
 
-struct FUN_0052b260_shell : public TESClimate
-{
-    void FUN_0052b260(bool);
-};
-
-// Sets or clears bit 0x80 of the byte at offset 0x55 on this TESClimate based on abUses.
 // @fnv 0x0052b260
-void FUN_0052b260_shell::FUN_0052b260(bool abUses)
+void TESClimate::SetUsesMasser(bool abUses)
 {
-    abUses ? *(unsigned char*)((char*)this + 0x55) |= 0x80 : *(unsigned char*)((char*)this + 0x55) &= ~0x80;
+    abUses ? m_ucTimeSettings[5] |= 0x80 : m_ucTimeSettings[5] &= ~0x80;
 }
 
-struct FUN_0052b2c0_shell : public TESClimate
-{
-    void FUN_0052b2c0(bool);
-};
-
-// Sets or clears bit 0x40 in the byte at offset 0x55 of this TESClimate based on abUses.
 // @fnv 0x0052b2c0
-void FUN_0052b2c0_shell::FUN_0052b2c0(bool abUses)
+void TESClimate::SetUsesSecunda(bool abUses)
 {
-    abUses ? *(unsigned char*)((char*)this + 0x55) |= 0x40 : *(unsigned char*)((char*)this + 0x55) &= ~0x40;
+    abUses ? m_ucTimeSettings[5] |= 0x40 : m_ucTimeSettings[5] &= ~0x40;
 }
-
-void _Deallocate(void*);
-struct FUN_0052ab50_shell
-{
-    void FUN_0052ab80();
-    void* FUN_0052ab50(unsigned int flags);
-};
-// Calls FUN_0052ab80, then if bit 0 of flags is set calls _Deallocate on this, and returns this.
-// @fnv 0x0052ab50
-void* FUN_0052ab50_shell::FUN_0052ab50(unsigned int flags)
-{
-    FUN_0052ab80();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct FUN_0052ac50_shell : public TESClimate
-{
-    void FUN_0052ac50(unsigned int);
-};
 
 int __cdecl MinInt(int, int);
+
 // @fnv 0x0052ac50
-void FUN_0052ac50_shell::FUN_0052ac50(unsigned int auiDays)
+void TESClimate::SetMoonPhaseDays(unsigned int auiDays)
 {
-    *(unsigned char*)((char*)this + 0x55) =
-        (*(unsigned char*)((char*)this + 0x55) & 0xC0) | MinInt(auiDays, 0xFFFFFF3F);
+    m_ucTimeSettings[5] = (m_ucTimeSettings[5] & 0xC0) | MinInt(auiDays, 0xFFFFFF3F);
 }
 
-struct FUN_004855a0
-{
-    void M();
-};
-struct FUN_00485680
-{
-    void M();
-};
-struct FUN_0048e370_obj
-{
-    void FUN_0048e370(unsigned int);
-};
-struct FUN_004891d0_obj
-{
-    void WriteToBuffer(unsigned int, unsigned int);
-};
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
-void __cdecl WriteWeatherList(unsigned int);
-struct FUN_0052ae80_shell
-{
-    void Init();
-};
+
 // @fnv 0x0052ae80
-void FUN_0052ae80_shell::Init()
+void TESClimate::SaveForm()
 {
-    ((FUN_004855a0*)this)->M();
-    ((void(__thiscall*)(void*, unsigned int))WriteWeatherList)((char*)this + 0x30, 0x54534c57);
+    TESForm::FUN_004855a0();
+    weatherList.WriteWeatherList(0x54534c57);
     int i = 0;
     for (; i < 2; ++i)
-        ((FUN_0048e370_obj*)((char*)this + 0x38 + i * 0xc))->FUN_0048e370(0x4d414e46 + i);
-    ((FUN_004891d0_obj*)((char*)this + 0x18))->WriteToBuffer(0x4c444f4d, 0x54444f4d);
-    FUN_004856f0(0x4d414e54, (char*)this + 0x50, 6);
-    ((FUN_00485680*)this)->M();
+        m_kSunTextures[i].Save(0x4d414e46 + i);
+    m_kStarsModel.WriteToBuffer(0x4c444f4d, 0x54444f4d);
+    FUN_004856f0(0x4d414e54, m_ucTimeSettings, 6);
+    TESForm::FUN_00485680();
 }
 
-struct FUN_005e79a0_t
-{
-    bool FUN_00485270(TESForm* form);
-    bool IsClimateDifferent(TESForm* form);
-};
-
-struct FUN_0052afe0_compare_t
-{
-    virtual void FUN_00000000();
-    virtual void FUN_00000004();
-    virtual bool FUN_00000008(void* other);
-    virtual bool FUN_0000000c(void* other);
-};
-
-struct FUN_00582690_weather_t
-{
-    bool IsDifferentFrom(TESWeatherList* other);
-};
-
 // @fnv 0x0052afe0
-bool FUN_005e79a0_t::IsClimateDifferent(TESForm* apCompare)
+bool TESClimate::Compare(TESForm* apCompare)
 {
     int iIndex;
     TESClimate* i = dynamic_cast<TESClimate*>(apCompare);
@@ -221,86 +157,50 @@ bool FUN_005e79a0_t::IsClimateDifferent(TESForm* apCompare)
     if (!i)
         return true;
 
-    if (this->FUN_00485270(i))
+    if (TESForm::Compare(i))
         return true;
 
     for (iIndex = 0; iIndex < 2; ++iIndex)
     {
-        if (((FUN_0052afe0_compare_t*)((unsigned char*)this + 0x38 + iIndex * 0xc))
-                ->FUN_0000000c((void*)((unsigned char*)i + 0x38 + iIndex * 0xc)))
+        if (m_kSunTextures[iIndex].CompareWithBase(static_cast<BaseFormComponent*>(&i->m_kSunTextures[iIndex])))
             return true;
     }
 
-    if (((FUN_0052afe0_compare_t*)((unsigned char*)this + 0x18))->FUN_0000000c((void*)((unsigned char*)i + 0x18)))
+    if (m_kStarsModel.CompareWithBase(static_cast<BaseFormComponent*>(&i->m_kStarsModel)))
         return true;
 
-    if (((FUN_00582690_weather_t*)((unsigned char*)this + 0x30))
-            ->IsDifferentFrom((TESWeatherList*)((unsigned char*)i + 0x30)))
+    if (weatherList.IsDifferentFrom(&i->weatherList))
         return true;
 
-    if (memcmp((void*)((unsigned char*)this + 0x50), (void*)((unsigned char*)i + 0x50), 6) != 0)
+    if (memcmp(m_ucTimeSettings, i->m_ucTimeSettings, 6) != 0)
         return true;
 
     return false;
 }
 
-struct FUN_0052ab80_base
-{
-    virtual ~FUN_0052ab80_base();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-};
-
-struct FUN_0052ab80 : public FUN_0052ab80_base
-{
-    TESModel m_kStarsModel;
-    TESWeatherList weatherList;
-    TESTexture m_kSunTextures[2];
-
-    void Reset();
-    virtual ~FUN_0052ab80();
-};
-
 // @fnv 0x0052ab80
-FUN_0052ab80::~FUN_0052ab80()
+TESClimate::~TESClimate()
 {
-    Reset();
+    TESForm::ClearData();
 }
 
-class ClimateCopy : public TESClimate
-{
-  public:
-    void FUN_004851b0(TESForm*);
-    void FUN_0052af10(TESForm*);
-};
-
-class WeatherListCopy : public TESWeatherList
-{
-  public:
-    void CopyWeatherList(const TESWeatherList*, bool);
-};
-
-// Copies climate data from a source TESForm into this ClimateCopy, including weather list, sun textures, stars model, and time settings.
 // @fnv 0x0052af10
-void ClimateCopy::FUN_0052af10(TESForm* source)
+void TESClimate::CopyFrom(const TESForm* source)
 {
     TESClimate* climate;
-    climate = dynamic_cast<TESClimate*>(source);
+    climate = dynamic_cast<TESClimate*>(const_cast<TESForm*>(source));
     if (!climate)
         return;
 
-    FUN_004851b0(climate);
-    static_cast<WeatherListCopy&>(weatherList).CopyWeatherList(&climate->weatherList, false);
+    TESForm::CopyFrom(climate);
+    weatherList.CopyWeatherList(&climate->weatherList, false);
 
     {
         int i;
         for (i = 0; i < 2; ++i)
-            m_kSunTextures[i].CopyFromBase(&climate->m_kSunTextures[i]);
+            m_kSunTextures[i].CopyFromBase(static_cast<BaseFormComponent*>(&climate->m_kSunTextures[i]));
     }
 
-    m_kStarsModel.CopyFromBase(&climate->m_kStarsModel);
+    m_kStarsModel.CopyFromBase(static_cast<BaseFormComponent*>(&climate->m_kStarsModel));
     memcpy(m_ucTimeSettings, climate->m_ucTimeSettings, 6);
 }

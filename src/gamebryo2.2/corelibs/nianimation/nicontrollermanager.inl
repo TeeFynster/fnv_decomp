@@ -9,8 +9,8 @@ bool NiControllerManager::StopSequence(NiControllerSequence* sequence,float ease
 bool NiControllerManager::ActivateControllerSequence(NiControllerSequence* sequence,int priority,bool startOver,float weight,float easeIn,NiControllerSequence* sync) { return sequence->Activate((char)priority,startOver,weight,easeIn,sync,false); }
 // @fnv 0x0048fef0
 void NiControllerManager::DeactivateAllSequences(float easeOut) {
- for(unsigned int i=0;i<sequences.GetSize();++i) {
-  NiControllerSequence* sequence=sequences.FUN_00629ab0(i);
+ for(unsigned int i=0;i<reinterpret_cast<NiControllerManagerPlayingSequences&>(m_kPlayingSequences).GetSize();++i) {
+  NiControllerSequence* sequence=reinterpret_cast<NiControllerManagerPlayingSequences&>(m_kPlayingSequences).GetAt(i);
   StopSequence(sequence,easeOut);
  }
 }

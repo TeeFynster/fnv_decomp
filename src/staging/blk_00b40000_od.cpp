@@ -3,33 +3,23 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/CIdvCamera.h"
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-struct CIdvCamera
-{
-    CIdvCamera& FUN_00b3f0c0(CIdvCamera const&);
-    CIdvCamera& FUN_00b402d0(CIdvCamera const& src);
-};
 // @fnv 0x00b402d0
-CIdvCamera& CIdvCamera::FUN_00b402d0(CIdvCamera const& src)
+CIdvCamera& CIdvCameraClone::FUN_00b402d0(CIdvCamera const& src)
 {
     if (&src != this)
     {
-        FUN_00b3f0c0(src);
-        *(unsigned char*)((char*)this + 0x10) = *(unsigned char*)((char*)&src + 0x10);
-        *(int*)((char*)this + 0x14) = *(int*)((char*)&src + 0x14);
-        *(unsigned char*)((char*)this + 0x18) = *(unsigned char*)((char*)&src + 0x18);
-        *(NiPoint3*)((char*)this + 0x1c) = *(NiPoint3*)((char*)&src + 0x1c);
-        *(unsigned char*)((char*)this + 0x40) = *(unsigned char*)((char*)&src + 0x40);
-        *(float*)((char*)this + 0x44) = *(float*)((char*)&src + 0x44);
-        *(int*)((char*)this + 0x48) = *(int*)((char*)&src + 0x48);
-        *(NiPoint3*)((char*)this + 0x28) = *(NiPoint3*)((char*)&src + 0x28);
-        *(NiPoint3*)((char*)this + 0x34) = *(NiPoint3*)((char*)&src + 0x34);
+        CIdvCamera::FUN_00b3f0c0(src);
+        unk10 = static_cast<const CIdvCameraClone&>(src).unk10;
+        unk14 = static_cast<const CIdvCameraClone&>(src).unk14;
+        unk18 = static_cast<const CIdvCameraClone&>(src).unk18;
+        unk1C = static_cast<const CIdvCameraClone&>(src).unk1C;
+        unk40 = static_cast<const CIdvCameraClone&>(src).unk40;
+        unk44 = static_cast<const CIdvCameraClone&>(src).unk44;
+        unk48 = static_cast<const CIdvCameraClone&>(src).unk48;
+        unk28 = static_cast<const CIdvCameraClone&>(src).unk28;
+        unk34 = static_cast<const CIdvCameraClone&>(src).unk34;
     }
     return *this;
 }
@@ -62,25 +52,11 @@ FUN_00b42980& FUN_00b42980::Set(unsigned int v, FUN_00b42980 const& src)
 
 void* operator new(unsigned int);
 
-struct FUN_00b40150 : CIdvCamera
-{
-    unsigned char data[76];
-    FUN_00b40150();
-};
-
-FUN_00b40150::FUN_00b40150()
-{}
-
-struct FUN_00b403a0_t : CIdvCamera
-{
-    CIdvCamera& CloneCamera();
-};
-
 // Allocates a new camera object, copies this camera into it via FUN_00b402d0, and returns the new object by reference.
 // @fnv 0x00b403a0
-CIdvCamera& FUN_00b403a0_t::CloneCamera()
+CIdvCamera& CIdvCameraClone::CloneCamera()
 {
-    FUN_00b40150* p = new FUN_00b40150;
+    CIdvCameraClone* p = new CIdvCameraClone;
     p->FUN_00b402d0(*this);
     return *p;
 }
@@ -106,45 +82,28 @@ char FUN_00b40800_t::GetNextChar()
     return *(char*)(p[3] + idx);
 }
 
-struct FUN_00b40070_Point
-{
-    float x;
-    float y;
-    float z;
-};
-
 extern int DAT_010a58fc;
 
-struct FUN_00b40070_Class
+// The shared camera header does not yet declare this parameterized initializer.
+// Keep its declarations here while using the shared camera layout.
+struct CIdvCameraInitializer : CIdvCameraClone
 {
-    void* unk00;
-    NiPoint3 unk04;
-    unsigned char unk10;
-    int unk14;
-    unsigned char unk18;
-    FUN_00b40070_Point unk1C;
-    FUN_00b40070_Point unk28;
-    FUN_00b40070_Point unk34;
-    unsigned char unk40;
-    float unk44;
-    int unk48;
-
     void FUN_00b3f030();
-    FUN_00b40070_Class* __thiscall FUN_00b40070(NiPoint3* position, unsigned char value18, unsigned char value10,
+    CIdvCameraInitializer* __thiscall FUN_00b40070(NiPoint3* position, unsigned char value18, unsigned char value10,
                                                 float value, int result);
 };
 
 // Calls FUN_00b3f030, sets unk00 to &DAT_010a58fc, stores value10, value18, value and result, zeroes three points, and copies position into unk04.
 // @fnv 0x00b40070
-FUN_00b40070_Class* __thiscall FUN_00b40070_Class::FUN_00b40070(NiPoint3* position, unsigned char value18,
+CIdvCameraInitializer* __thiscall CIdvCameraInitializer::FUN_00b40070(NiPoint3* position, unsigned char value18,
                                                                 unsigned char value10, float value, int result)
 {
-    FUN_00b40070_Point* firstPointA;
-    FUN_00b40070_Point* thirdPointA;
-    FUN_00b40070_Point* secondPointA;
+    NiPoint3* firstPointA;
+    NiPoint3* thirdPointA;
+    NiPoint3* secondPointA;
 
     this->FUN_00b3f030();
-    this->unk00 = &DAT_010a58fc;
+    *(void**)this = &DAT_010a58fc;
     this->unk10 = value10;
     this->unk14 = -1;
     this->unk18 = value18;
@@ -167,24 +126,18 @@ FUN_00b40070_Class* __thiscall FUN_00b40070_Class::FUN_00b40070(NiPoint3* positi
     this->unk40 = 0;
     this->unk44 = value;
     this->unk48 = result;
-    this->unk04 = *position;
+    reinterpret_cast<NiPoint3&>(this->m_kTranslation) = *position;
 
     return this;
 }
 
 extern float DAT_01016248;
-struct S_00b40850_P3
-{
-    float x;
-    float y;
-    float z;
-};
 struct FUN_00b40850
 {
     float unk00;
     float unk04;
     float unk08;
-    S_00b40850_P3 unk0C;
+    float unk0C[3];
     float unk18;
     FUN_00b40850();
 };
@@ -195,7 +148,7 @@ FUN_00b40850::FUN_00b40850()
     unk00 = DAT_01016248;
     unk04 = DAT_01016248;
     unk08 = 0.0f;
-    S_00b40850_P3* p = &unk0C;
+    NiPoint3* p = (NiPoint3*)unk0C;
     p->x = 0.0f;
     p->y = 0.0f;
     p->z = 0.0f;
@@ -538,25 +491,13 @@ S_00b41ae0_Bits* S_00b41ae0_Bits::SetBit(bool bSet)
     return this;
 }
 
-struct FUN_00b40430_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    unsigned int unk14;
-
-    float* FUN_00b40430(float* pOut);
-};
-
 // Divides the three low bytes of unk14 by 255.0, low byte first, writes them to pOut[0], pOut[1] and pOut[2], and returns pOut.
 // @fnv 0x00b40430
-float* FUN_00b40430_cls::FUN_00b40430(float* pOut)
+float* CIdvCamera::FUN_00b40430(float* pOut)
 {
-    float fGr = (unk14 & 0xff) / 255.0;
-    float fRed = ((unk14 & 0xff00) >> 8) / 255.0;
-    float fBl = ((unk14 & 0xff0000) >> 16) / 255.0;
+    float fGr = (static_cast<unsigned int>(static_cast<CIdvCameraClone*>(this)->unk14) & 0xff) / 255.0;
+    float fRed = ((static_cast<unsigned int>(static_cast<CIdvCameraClone*>(this)->unk14) & 0xff00) >> 8) / 255.0;
+    float fBl = ((static_cast<unsigned int>(static_cast<CIdvCameraClone*>(this)->unk14) & 0xff0000) >> 16) / 255.0;
     pOut[0] = fGr;
     pOut[1] = fRed;
     pOut[2] = fBl;

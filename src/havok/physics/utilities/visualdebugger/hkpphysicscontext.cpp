@@ -1,3 +1,14 @@
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkBaseObject.h"
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkProcessContext.h"
+#include "../../../../../include/InplaceArray6.h"
+#include "../../../../../include/hkpActionListener.h"
+#include "../../../../../include/hkpConstraintListener.h"
+#include "../../../../../include/hkpEntityListener.h"
+#include "../../../../../include/hkpPhantomListener.h"
+#include "../../../../../include/hkpWorldDeletionListener.h"
 
 // src/havok/physics/utilities/visualdebugger/hkpphysicscontext.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/hkpphysicscontext.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -368,55 +379,39 @@ struct Holder
     Device* device;
 };
 extern void* __cdecl FUN_00c85750();
-struct FUN_00cd27f0
-{
-    virtual void v0() = 0;
-    int unk04;
-    int buffer2;
-    int unk0c;
-    int count2;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int buffer1;
-    volatile int unk30;
-    int count1;
-    virtual ~FUN_00cd27f0();
-};
+}  // namespace fnv_00cd27f0
+
 // @fnv 0x00cd27f0
-FUN_00cd27f0::~FUN_00cd27f0()
+hkProcessContext::~hkProcessContext() throw()
 {
-    Holder* holder = (Holder*)FUN_00c85750();
+    using namespace fnv_00cd27f0;
+    Holder* holder = (Holder*)fnv_00cd27f0::FUN_00c85750();
     Device* device = holder->device;
-    int count = count1;
-    unk30 = 0;
+    int count = m_2c.capacityAndFlags;
+    *(volatile int*)&m_2c.size = 0;
     if ((unsigned int)count & 0x80000000)
         goto skipFirstRelease;
     {
         unsigned int bytes = (count & 0x3fffffff) * 4;
-        device->Release((void*)buffer1, bytes);
+        device->Release((void*)m_2c.data, bytes);
     }
 skipFirstRelease:
-    buffer1 = 0;
-    count1 = 0x80000000;
-    holder = (Holder*)FUN_00c85750();
+    m_2c.data = 0;
+    m_2c.capacityAndFlags = 0x80000000;
+    holder = (Holder*)fnv_00cd27f0::FUN_00c85750();
     device = holder->device;
-    int secondCount = count2;
-    unk0c = 0;
+    int secondCount = m_08.capacityAndFlags;
+    m_08.size = 0;
     if ((unsigned int)secondCount & 0x80000000)
         goto skipSecondRelease;
     {
         unsigned int bytes = (secondCount & 0x3fffffff) * 4;
-        device->Release((void*)buffer2, bytes);
+        device->Release((void*)m_08.data, bytes);
     }
 skipSecondRelease:
-    buffer2 = 0;
-    count2 = 0x80000000;
+    m_08.data = 0;
+    m_08.capacityAndFlags = 0x80000000;
 }
-}  // namespace fnv_00cd27f0
 
 namespace fnv_00cd2900 {
 struct DeleteInterface
@@ -832,29 +827,7 @@ done_search:
     lists->FUN_00c905b0();
 }
 
-template <typename T> struct CD2210Array
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++)
-        {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            m_data[index] = m_data[m_iElementCount];
-    }
-};
 
 struct CD2210Listener;
 
@@ -893,7 +866,7 @@ struct CD2210World
     int unk78;
     int unk7C;
     int unk80;
-    CD2210Array<CD2210Listener*> m_kListeners;
+    hkArrayBase<CD2210Listener*> m_kListeners;
 
     void RemoveListener(CD2210Listener* listener);
 };
@@ -926,29 +899,7 @@ struct CD2260Listener
     virtual void objectRemovedCallback(CD2260Object* object);
 };
 
-template <typename T> struct CD2260Array
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; i++)
-        {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            m_data[index] = m_data[m_iElementCount];
-    }
-};
 
 class CD2260Primary
 {
@@ -985,11 +936,11 @@ class CD2260World : public CD2260Primary, public CD2260Interface
     int unk60;
     int unk64;
     int unk68;
-    CD2260Array<CD2260Object*> m_kTrackedObjects;
+    hkArrayBase<CD2260Object*> m_kTrackedObjects;
     int unk78;
     int unk7C;
     int unk80;
-    CD2260Array<CD2260Listener*> m_kListeners;
+    hkArrayBase<CD2260Listener*> m_kListeners;
 
     void removeInternal(CD2260Object* object);
     void FUN_00cd2260(CD2260Object* object);
@@ -1328,28 +1279,6 @@ notFound:
     RegisterWithRegistry(pItem);
 }
 
-struct FUN_00cd2870_cls
-{
-    int unk00;
-    int unk04;
-
-    void BaseRelease();
-
-    FUN_00cd2870_cls* FUN_00cd2870(unsigned int aFlags);
-    static void operator delete(void* apMemory) throw();
-};
-
-// @fnv 0x00cd2870
-FUN_00cd2870_cls* FUN_00cd2870_cls::FUN_00cd2870(unsigned int aFlags)
-{
-    BaseRelease();
-    if (aFlags & 1)
-    {
-        operator delete(this);
-    }
-    return this;
-}
-
 struct CD2890Class
 {
     const char* m_name;
@@ -1368,45 +1297,9 @@ const CD2890Class* CD2890World::FUN_00cd2890() const
     return &g_CD2890WorldClass;
 }
 
-struct hkBaseObject
-{
-    virtual void destroy();
-    virtual void b04();
-    virtual void b08();
-};
 
-struct hkReferencedObject : hkBaseObject
-{
-    unsigned short memSizeAndFlags;
-    short refCount;
 
-    hkReferencedObject()
-    {
-        refCount = 1;
-    }
-    virtual void r04();
-    virtual void r08();
-};
 
-struct InplaceArray6
-{
-    void* data;
-    int size;
-    unsigned int capacityAndFlags;
-    void* buffer0;
-    void* buffer1;
-    void* buffer2;
-    void* buffer3;
-    void* buffer4;
-    void* buffer5;
-
-    InplaceArray6()
-    {
-        size = 0;
-        data = &buffer0;
-        capacityAndFlags = 0x80000006u;
-    }
-};
 
 struct EmptyArray
 {
@@ -1420,62 +1313,6 @@ struct EmptyArray
         size = 0;
         capacityAndFlags = 0x80000000u;
     }
-};
-
-struct hkProcessContext : hkBaseObject
-{
-    int m_04;
-    InplaceArray6 m_08;
-    InplaceArray6 m_2c;
-
-    hkProcessContext() : m_04(0)
-    {}
-    virtual void p04();
-    virtual void p08();
-};
-
-struct hkpWorldDeletionListener : hkBaseObject
-{
-    virtual void destroy();
-    virtual void w04();
-    virtual void w08();
-};
-
-struct hkpEntityListener : hkBaseObject
-{
-    virtual void destroy();
-    virtual void e04();
-    virtual void e08();
-    virtual void e0c();
-    virtual void e10();
-    virtual void e14();
-};
-
-struct hkpPhantomListener : hkBaseObject
-{
-    virtual void destroy();
-    virtual void p04();
-    virtual void p08();
-    virtual void p0c();
-    virtual void p10();
-};
-
-struct hkpConstraintListener : hkBaseObject
-{
-    virtual void destroy();
-    virtual void c04();
-    virtual void c08();
-    virtual void c0c();
-    virtual void c10();
-    virtual void c14();
-    virtual void c18();
-};
-
-struct hkpActionListener : hkBaseObject
-{
-    virtual void destroy();
-    virtual void a04();
-    virtual void a08();
 };
 
 struct FUN_00cd25d0 : hkReferencedObject,
@@ -1500,79 +1337,34 @@ struct FUN_00cd25d0 : hkReferencedObject,
 FUN_00cd25d0::FUN_00cd25d0()
 {}
 
-class hkMemoryAllocatorD269
+inline hkMemoryAllocator& physicsContextHeap(AllocatorState* state)
 {
-  public:
-    virtual ~hkMemoryAllocatorD269() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void unk0C() throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-};
-
-inline hkMemoryAllocatorD269& heapD269(AllocatorState* pkState)
-{
-    return *(hkMemoryAllocatorD269*)pkState->allocator;
+    return *(hkMemoryAllocator*)state->allocator;
 }
 
-template <class T> class hkArrayD269
+template <typename T>
+static __forceinline void destructPhysicsContextElements(T* t, int n)
 {
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+    for (int i = 0; i < n; i++)
+        t[i].~T();
+}
 
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-
-    static __forceinline void destruct(T* t, int n)
-    {
-        for (int i = 0; i < n; i++)
-            t[i].~T();
-    }
-
-    __forceinline void _clearAndDeallocate(hkMemoryAllocatorD269& alloc)
-    {
-        destruct(m_data, m_iElementCount);
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-
-    __forceinline ~hkArrayD269() throw()
-    {
-        _clearAndDeallocate(heapD269(FUN_00c85750()));
-    }
-};
-
-class hkReferencedObjectD269
+template <typename T>
+__forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
 {
-  public:
-    virtual ~hkReferencedObjectD269() throw()
-    {}
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
+    destructPhysicsContextElements(m_data, m_iElementCount);
+    m_iElementCount = 0;
+    if ((m_iCapacityState & 0x80000000) == 0)
+        alloc.bufFree(m_data, getCapacity() * sizeof(T));
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
 
-class BaseD269_08
+template <typename T, typename Allocator>
+__forceinline hkArray<T, Allocator>::~hkArray()
 {
-  public:
-    virtual ~BaseD269_08() throw();
-    int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28;
-    int unk2C, unk30, unk34, unk38, unk3C, unk40, unk44, unk48, unk4C;
-};
+    this->_clearAndDeallocate(physicsContextHeap(FUN_00c85750()));
+}
 
 class ListenerD269_58
 {
@@ -1616,8 +1408,8 @@ class ElementD269
     int unkC0, unkC4, unkC8, unkCC, unkD0, unkD4, unkD8, unkDC, unkE0, unkE4, unkE8, unkEC;
 };
 
-class FUN_00cd2690 : public hkReferencedObjectD269,
-                     public BaseD269_08,
+class FUN_00cd2690 : public hkReferencedObject,
+                     public hkProcessContext,
                      public ListenerD269_58,
                      public ListenerD269_5C,
                      public ListenerD269_60,
@@ -1629,9 +1421,9 @@ class FUN_00cd2690 : public hkReferencedObjectD269,
 
     void FUN_00cd2260(void* pkObject);
 
-    hkArrayD269<void*> m_kTrackedObjects;
-    hkArrayD269<ElementD269> m_elements;
-    hkArrayD269<void*> m_kListeners;
+    hkArray<void*> m_kTrackedObjects;
+    hkArray<ElementD269> m_elements;
+    hkArray<void*> m_kListeners;
 };
 
 // Destructor that iterates m_kTrackedObjects in reverse and calls FUN_00cd2260 on each element.
@@ -1658,26 +1450,12 @@ inline void memMoveCD2A(void* pvDst, const void* pvSrc, int iNumBytes)
     }
 }
 
-template <typename T> struct hkArrayCD2A
+template <typename T>
+__forceinline void hkArrayBase<T>::removeAtAndCopy(int iIndex)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    void removeAtAndCopy(int iIndex)
-    {
-        m_iElementCount--;
-        memMoveCD2A(m_data + iIndex, m_data + iIndex + 1, (m_iElementCount - iIndex) * sizeof(T));
-    }
-};
+    m_iElementCount--;
+    memMoveCD2A(m_data + iIndex, m_data + iIndex + 1, (m_iElementCount - iIndex) * sizeof(T));
+}
 
 struct ValueCD2A
 {
@@ -1698,7 +1476,7 @@ class OwnerCD2A
 {
   public:
     int unk00[0x78 / 4];
-    hkArrayCD2A<EntryCD2A> m_entries;
+    hkArray<EntryCD2A> m_entries;
 
     ValueCD2A FUN_00cd2a50(int iKey);
 };
@@ -2010,4 +1788,12 @@ int __thiscall FUN_00cd1eb0_StandIn::FUN_00cd1eb0(int aiFlags)
         FormHeap_Free(this);
     }
     return (int)this;
+}
+
+
+template <typename T> __forceinline void hkArrayBase<T>::removeAt(int index)
+{
+    m_iElementCount--;
+    if (m_iElementCount != index)
+        m_data[index] = m_data[m_iElementCount];
 }

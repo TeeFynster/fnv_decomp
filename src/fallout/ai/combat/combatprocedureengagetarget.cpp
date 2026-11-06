@@ -1,100 +1,84 @@
+#include "../../../../include/Actor.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/CombatProcedure.h"
+#include "../../../../include/CombatProcedureEngageTarget.h"
+#include "../../../../include/CombatTargetTimestamp.h"
+#include "../../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+// PathRequest_combatprocedureengagetarget: local type (was include/PathRequest.h, which had no evidence of one real class); its methods are 0x0048d150 TESModel::GetTextureList, 0x006a9560 TESCombatStyle::GetPowerAttackL, 0x006e2980 PathingRequest::SetCenterRadius, 0x006e2b20 PathingRequest::SetActorLockData
+class RawPoint;
+class PathActor;
+
+class PathRequest_combatprocedureengagetarget
+{
+public:
+    unsigned int unk00[44];
+
+    PathRequest_combatprocedureengagetarget();
+    ~PathRequest_combatprocedureengagetarget();
+    RawPoint* GetDirection(RawPoint* out);
+    void SetDirection(RawPoint* dir, float dist);
+    void Update(PathActor*);
+    bool IsValid();
+    float GetCenterRadius();
+};
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/TimeoutTimer.h"
+#include "../../../../include/Vec4.h"
 
 // src/fallout/ai/combat/combatprocedureengagetarget.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatprocedureengagetarget.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct Actor
-{
-    void StopMoving();
-};
-
-struct CombatProcedure
-{
-    void RunProcedure();
-};
-
-struct CombatProcedureEngageTarget : public CombatProcedure
-{
-    void FUN_00996e40();
-    Actor* FUN_00996de0();
-    void FUN_009d3b50();
-};
-
 // @fnv 0x009d3b50
-void CombatProcedureEngageTarget::FUN_009d3b50()
+void CombatProcedureEngageTarget::Unk0c()
 {
-    FUN_00996e40();
-    FUN_00996de0()->StopMoving();
+    ResetCombatState();
+    GetActor()->StopMoving();
     ((CombatProcedure*)this)->RunProcedure();
 }
 
 void __cdecl operator delete(void*);
 
-struct FUN_009d3b00_shell
-{
-    void FUN_009d3b30();
-    void* Destroy(unsigned int flags);
-};
-
-// Calls FUN_009d3b30, then deletes this if flags has bit 1 set, and returns this.
-// @fnv 0x009d3b00
-void* FUN_009d3b00_shell::Destroy(unsigned int flags)
-{
-    FUN_009d3b30();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
-struct FUN_009ca6c0_shell
-{
-    void FUN_009ca6c0();
-};
-extern void* DAT_01091514;
-struct FUN_009d3b30_shell
-{
-    void FUN_009d3b30();
-};
+// The compiler also supplies the scalar deleting destructor at 0x009d3b00.
 // @fnv 0x009d3b30
-void FUN_009d3b30_shell::FUN_009d3b30()
-{
-    *reinterpret_cast<void**>(this) = &DAT_01091514;
-    reinterpret_cast<FUN_009ca6c0_shell*>(this)->FUN_009ca6c0();
-}
-
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-};
+CombatProcedureEngageTarget::~CombatProcedureEngageTarget()
+{}
 
 struct CoordinateTriple
 {
     void FUN_00527b70(void*);
 };
 
-struct CombatTargetTimestamp
-{
-    void SaveTimeStamp(void*);
-};
-
-struct CombatProcedureSaveGameHelper
-{
-    void SaveGame(BGSSaveFormBuffer*);
-};
-
+// Retained: TimeoutTimer.h does not declare SaveGame (0x009a5eb0).
 struct FUN_009a5eb0_shell
 {
     void FUN_009a5eb0(BGSSaveFormBuffer*);
 };
 
-struct FUN_009d5880_shell
-{
-    void FUN_009d5880(BGSSaveFormBuffer*);
-};
-
 // @fnv 0x009d5880
-void FUN_009d5880_shell::FUN_009d5880(BGSSaveFormBuffer* buffer)
+void CombatProcedureEngageTarget::SaveGame(BGSSaveFormBuffer* buffer)
 {
-    reinterpret_cast<CombatProcedureSaveGameHelper*>(this)->SaveGame(buffer);
+    CombatProcedure::SaveGame(buffer);
 
     buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x10), 4, 0);
     buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x14), 4, 0);
@@ -118,30 +102,6 @@ void FUN_009d5880_shell::FUN_009d5880(BGSSaveFormBuffer* buffer)
 }
 
 namespace fnv_009d5990 {
-struct BGSLoadGameBuffer
-{
-    virtual unsigned char GetVersion();
-};
-
-struct BGSLoadFormBuffer : public BGSLoadGameBuffer
-{
-    void ReadTypedData(void* data, unsigned int size);
-};
-
-struct CombatProcedure_Helper
-{
-    void LoadGame(BGSLoadFormBuffer* buffer);
-};
-
-struct TimeoutTimer
-{
-    void LoadGame(BGSLoadFormBuffer* buffer);
-};
-
-struct CombatTargetTimestamp
-{
-    void LoadGame(BGSLoadGameBuffer* buffer);
-};
 
 struct FUN_00527ba0_Class
 {
@@ -150,24 +110,22 @@ struct FUN_00527ba0_Class
 
 extern float DAT_01022958;
 
-struct FUN_009d5990_shell : public CombatProcedureEngageTarget
-{
-    void FUN_009d5990(BGSLoadFormBuffer* buffer);
-};
+}  // namespace fnv_009d5990
 
 // Loads the combat procedure's fields from the buffer, reading a version-gated float and two sub-objects, with extra fields for versions 10 and 14.
 // @fnv 0x009d5990
-void FUN_009d5990_shell::FUN_009d5990(BGSLoadFormBuffer* buffer)
+void CombatProcedureEngageTarget::LoadGame(BGSLoadFormBuffer* buffer)
 {
-    reinterpret_cast<CombatProcedure_Helper*>(this)->LoadGame(buffer);
+    using namespace fnv_009d5990;
+    CombatProcedure::LoadGame(buffer);
 
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x10), 4);
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x14), 4);
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x18), 4);
+    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x10), 4u);
+    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x14), 4u);
+    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x18), 4u);
 
     if (buffer->GetVersion() >= 14)
     {
-        buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x1c), 4);
+        buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x1c), 4u);
     }
     else
     {
@@ -177,30 +135,25 @@ void FUN_009d5990_shell::FUN_009d5990(BGSLoadFormBuffer* buffer)
     reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x20)->LoadGame(buffer);
     reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x28)->LoadGame(buffer);
 
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x30), 1);
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x31), 1);
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x32), 1);
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x34), 12);
+    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x30), 1u);
+    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x31), 1u);
+    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x32), 1u);
+    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x34), 12u);
 
     reinterpret_cast<FUN_00527ba0_Class*>(reinterpret_cast<char*>(this) + 0x40)->FUN_00527ba0(buffer);
     reinterpret_cast<FUN_00527ba0_Class*>(reinterpret_cast<char*>(this) + 0x50)->FUN_00527ba0(buffer);
 
     if (buffer->GetVersion() >= 10)
     {
-        buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x33), 1);
+        buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x33), 1u);
         reinterpret_cast<CombatTargetTimestamp*>(reinterpret_cast<char*>(this) + 0x60)->LoadGame(buffer);
     }
 }
-}  // namespace fnv_009d5990
 
 namespace Engage {
 extern const double DAT_01020998, DAT_01011588;
 extern const float DAT_0101e57c;
 extern bool DAT_011a5b70;
-struct Vec4
-{
-    float x, y, z, w;
-};
 struct Timer
 {
     float value;
@@ -277,55 +230,6 @@ struct RequestA
     void FUN_006e4ef0(float);
     void FUN_006e4320(float);
 };
-struct RequestB
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    RequestB();
-    ~RequestB();
-};
 struct Controller
 {
     bool FUN_0099e840(float, float, float, float, Query*, bool);
@@ -335,140 +239,7 @@ struct Context
 {
     Controller* FUN_00586150();
 };
-struct Actor
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void* Destination();
-    void* FUN_00575d70(float);
-    void* FUN_008d6f30();
-    void PathToLocation(void*, void*, void*, void*, bool);
-    bool SetPathingRequestAvoidNodes(void*);
-    Vec4 FUN_00575650();
-};
+// Retained: CombatProcedureEngageTarget.h lacks these fields and the pathing helper declarations.
 struct Procedure
 {
     int unk00;
@@ -497,7 +268,7 @@ bool Procedure::CheckAndApply(bool mode)
         Actor* actor = FUN_00996de0();
         Actor* targetActor3 = FUN_00996e00();
         RequestA request;
-        actor->PathToLocation(&request, targetActor3->Destination(), actor->FUN_008d6f30(),
+        actor->PathToLocation(&request, static_cast<const Actor*>(targetActor3)->GetPos(), actor->FUN_008d6f30(),
                               actor->FUN_00575d70(DAT_0101e57c), false);
         request.FUN_00507610(range);
         request.FUN_006e5ee0(height);
@@ -520,7 +291,7 @@ bool Procedure::CheckAndApply(bool mode)
             return false;
         if (!controller5->FUN_009a02a0(query2.FUN_006815c0(), true, false))
             return false;
-        RequestB request2;
+        PathRequest_combatprocedureengagetarget request2;
         actor2->PathToLocation(&request2, query2.FUN_0097b940(), actor2->FUN_008d6f30(),
                                actor2->FUN_00575d70(DAT_0101e57c), false);
         if (!actor2->SetPathingRequestAvoidNodes(&request2))
@@ -553,15 +324,13 @@ static const char text_15[] = "MOVING_TO_TARGET";
 static const char text_16[] = "Optimal location pathing CheckMovement failed: %.02f/%.02f";
 static const char text_17[] = "Optimal location pathing LOS check failed: %.02f/%.02f";
 static const char text_18[] = "Optimal location path building failed: %.02f/%.02f";
-struct Point
+/// Position + cell/world id at +0x0c (16 bytes); Distance at 0x00527a80 (FUN_00527a80_shell::DistanceTo in
+// bgsworldlocation.cpp) returns FLT_MAX when the ids differ. Not the 12-byte shared NiPoint3.
+struct WorldLocation
 {
     float x, y, z;
     int world;
-    float Distance(Point*);
-};
-struct Ref
-{
-    Point Location();
+    float Distance(WorldLocation*);
 };
 struct Timer
 {
@@ -581,6 +350,7 @@ struct Output
     virtual void slot4();
     virtual void __cdecl Print(int, int, const char*, ...);
 };
+// Retained: CombatProcedureEngageTarget.h lacks this debug view and PrintDebugInfo.
 struct Engage
 {
     int unk00, unk04, unk08, unk0c;
@@ -592,16 +362,16 @@ struct Engage
     char unk31, unk32;
     signed char result;
     int unk34, unk38, unk3c, unk40, unk44, unk48, unk4c;
-    Point target;
+    WorldLocation target;
     Timer timer60;
-    Ref* GetRef();
+    Actor* GetRef();
     void PrintDebugInfo(Output* out, int a, int b);
 };
 // Prints state-specific debug text for the engage state, plus a timer-based message when timer60 has elapsed less than 5 seconds.
 // @fnv 0x009d5410
 void Engage::PrintDebugInfo(Output* pOutput, int a, int b)
 {
-    Ref* actor = GetRef();
+    Actor* actor = GetRef();
     switch (state)
     {
     case 0:
@@ -620,7 +390,7 @@ void Engage::PrintDebugInfo(Output* pOutput, int a, int b)
         pOutput->Print(a, b, text_6, range14, range18);
         if (actor)
         {
-            Point location = actor->Location();
+            WorldLocation location = actor->FUN_00575650<WorldLocation>();
             pOutput->Print(a, b, text_7, location.Distance(&target), 200.0);
         }
         break;
@@ -629,7 +399,7 @@ void Engage::PrintDebugInfo(Output* pOutput, int a, int b)
         pOutput->Print(a, b, text_9, range14, range18);
         if (actor)
         {
-            Point location = actor->Location();
+            WorldLocation location = actor->FUN_00575650<WorldLocation>();
             pOutput->Print(a, b, text_10, location.Distance(&target), 200.0);
         }
         break;
@@ -668,18 +438,14 @@ void Engage::PrintDebugInfo(Output* pOutput, int a, int b)
 }
 }  // namespace fnv_009d5410
 
-namespace fnv_009d3b80 {
-struct NiPoint3
+class RawPoint
 {
-    float x, y, z;
-    NiPoint3();
-};
-
-struct RawPoint
-{
+public:
     float x, y, z;
     void FUN_005c3420();
 };
+
+namespace fnv_009d3b80 {
 
 struct Location
 {
@@ -698,24 +464,6 @@ struct Stamp
     float m_fTime;
     Stamp(float t);
     float Elapsed();
-};
-
-struct TimeoutTimer : public Stamp
-{
-    float m_fEnd;
-    void Start(float t);
-    bool Expired();
-    void Reset();
-    bool IsRunning();
-};
-
-struct PathRequest
-{
-    unsigned int unk00[44];
-    PathRequest();
-    ~PathRequest();
-    RawPoint* GetDirection(RawPoint* out);
-    void SetDirection(RawPoint* dir, float dist);
 };
 
 struct SearchRequest
@@ -988,148 +736,13 @@ struct ProcessObj
     virtual bool CheckFlag(int flag);
 };
 
-struct ActorObj
+// These pathing methods are not declared by Actor.h yet. The shared Actor supplies
+// the complete object layout and virtual table; this helper adds declarations only.
+struct ActorPathingAccess : Actor
 {
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v00a();
-    virtual void v00b();
-    virtual void v00c();
-    virtual void v00d();
-    virtual void v00e();
-    virtual void v00f();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v01a();
-    virtual void v01b();
-    virtual void v01c();
-    virtual void v01d();
-    virtual void v01e();
-    virtual void v01f();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v02a();
-    virtual void v02b();
-    virtual void v02c();
-    virtual void v02d();
-    virtual void v02e();
-    virtual void v02f();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v03a();
-    virtual void v03b();
-    virtual void v03c();
-    virtual void v03d();
-    virtual void v03e();
-    virtual void v03f();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v04a();
-    virtual void v04b();
-    virtual void v04c();
-    virtual void v04d();
-    virtual void v04e();
-    virtual void v04f();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v05a();
-    virtual void v05b();
-    virtual void v05c();
-    virtual void v05d();
-    virtual void v05e();
-    virtual void v05f();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v06a();
-    virtual void v06b();
-    virtual void v06c();
-    virtual void v06d();
-    virtual void v06e();
-    virtual void v06f();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v07a();
-    virtual void v07b();
-    virtual void v07c();
-    virtual NiPoint3* GetLookPos();
-    void GetLocation(Location* out);
-    void BuildPathTo(PathRequest* req, NiPoint3* pos, void* cell, float radius, int flags);
-    bool StartPath(PathRequest* req);
-    int GetPathCell();
-    int GetPathPos();
-    void BuildPathAt(PathRequest* req, void* target, int a, int b, float radius, int flags);
-    ProcessObj* GetProcess();
-    bool IsMoving();
-    bool PathFailed();
+    void BuildPathTo(PathRequest_combatprocedureengagetarget* req, NiPoint3* pos, void* cell, float radius, int flags);
     bool PathHasError();
-    void StopPath();
-    bool PathDone();
     void StopPathAlt();
-    bool PathBusy();
     bool GetFallbackPos(NiPoint3* out);
 };
 
@@ -1177,8 +790,9 @@ bool __cdecl RandChance(float p);
 float __cdecl GetCurrentTime();
 void __cdecl UpdateRanges(CombatOwner* owner, void* group, float* a, float* b, float* c);
 bool __cdecl FindNavPos(int a, int b, NiPoint3* pos, NiPoint3* out);
-bool __cdecl CheckLineOfFire(ActorObj* actor, ActorObj* target, NiPoint3* pos, NiPoint3* look, int a, int b);
+bool __cdecl CheckLineOfFire(Actor* actor, Actor* target, NiPoint3* pos, NiPoint3* look, int a, int b);
 
+// Retained: CombatProcedureEngageTarget.h lacks this layout and the engagement helper declarations.
 class EngageProc
 {
   public:
@@ -1201,8 +815,8 @@ class EngageProc
     Location m_lastTarget;
     Stamp m_stamp60;
 
-    ActorObj* GetActor();
-    ActorObj* GetTarget();
+    Actor* GetActor();
+    Actor* GetTarget();
     void SetAvoid(NiPoint3* pos, bool b);
     void UpdatePlayerStatus(int mode);
     void StopMove();
@@ -1216,8 +830,8 @@ class EngageProc
 // @fnv 0x009d3b80
 void EngageProc::UpdateEngagement()
 {
-    ActorObj* actorZ = GetActor();
-    ActorObj* target = GetTarget();
+    Actor* actorZ = GetActor();
+    Actor* target = GetTarget();
     CombatCtrlObj* ctrlD = m_pSharedOwner->GetCombatCtrl();
     if (target == 0)
     {
@@ -1242,9 +856,9 @@ void EngageProc::UpdateEngagement()
         changed = true;
     }
     Location targetLocX;
-    target->GetLocation(&targetLocX);
+    target->FUN_00575650(static_cast<void*>(&targetLocX));
     Location actorLocY;
-    actorZ->GetLocation(&actorLocY);
+    actorZ->FUN_00575650(static_cast<void*>(&actorLocY));
     float distSqD = actorLocY.GetDistSq(&targetLocX);
     bool tooFar4 = distSqD > m_fMaxRange * m_fMaxRange;
     bool tooClose4 = distSqD < m_fMinRange * m_fMinRange;
@@ -1261,9 +875,10 @@ void EngageProc::UpdateEngagement()
         if (ctrlD->GetLastSeen().Elapsed() > DAT_01011588 && distSqD < DAT_01091138 &&
             ctrlD->CanReach(&targetLocX, 1, 0))
         {
-            PathRequest req;
-            actorZ->BuildPathTo(&req, targetLocX.GetPos(), targetLocX.GetContainingCell(), DAT_01012054, 0);
-            if (actorZ->StartPath(&req))
+            PathRequest_combatprocedureengagetarget req;
+            static_cast<ActorPathingAccess*>(actorZ)->BuildPathTo(
+                &req, targetLocX.GetPos(), targetLocX.GetContainingCell(), DAT_01012054, 0);
+            if (actorZ->SetPathingRequestAvoidNodes(&req))
             {
                 m_dest = targetLocX;
                 UpdatePlayerStatus(1);
@@ -1273,7 +888,7 @@ void EngageProc::UpdateEngagement()
         }
         if (m_bCovered)
         {
-            if (m_timer20.Elapsed() < DAT_01011588)
+            if (reinterpret_cast<CombatTargetTimestamp*>(&m_timer20)->ElapsedTime() < DAT_01011588)
             {
                 if (!ctrlD->IsCovered())
                 {
@@ -1288,15 +903,17 @@ void EngageProc::UpdateEngagement()
         }
         if (m_bDodging)
         {
-            if (m_timer20.Expired() || m_timer20.Elapsed() > DAT_01012070)
+            if (m_timer20.Expired() || reinterpret_cast<CombatTargetTimestamp*>(&m_timer20)->ElapsedTime() > DAT_01012070)
             {
                 m_bCovered = false;
                 m_bDodging = false;
                 m_bDodgeWait = ctrlD->IsCovered();
                 m_timer28.Reset();
-                PathRequest req2;
-                actorZ->BuildPathAt(&req2, &m_dodgePos, actorZ->GetPathPos(), actorZ->GetPathCell(), 0.0f, 0);
-                if (actorZ->StartPath(&req2))
+                PathRequest_combatprocedureengagetarget req2;
+                actorZ->PathToLocation(reinterpret_cast<PathingRequest*>(&req2), *reinterpret_cast<const NiPoint3*>(&m_dodgePos),
+                                       actorZ->FUN_008d6f30(), reinterpret_cast<void*>(actorZ->FUN_00575d70()),
+                                       0.0f, 0);
+                if (actorZ->SetPathingRequestAvoidNodes(&req2))
                 {
                     UpdatePlayerStatus(1);
                     m_iFadeIndex = 7;
@@ -1311,7 +928,7 @@ void EngageProc::UpdateEngagement()
             {
                 threshold = DAT_0101e2bc;
             }
-            if (m_timer20.Expired() || threshold < m_timer20.Elapsed())
+            if (m_timer20.Expired() || threshold < reinterpret_cast<CombatTargetTimestamp*>(&m_timer20)->ElapsedTime())
             {
                 if (TryAttack(veryFar5))
                 {
@@ -1331,13 +948,14 @@ void EngageProc::UpdateEngagement()
                     float dodgeDist = RandRange(DAT_0101e704, DAT_01032adc);
                     if (ctrlD->FindDodge(&search, tooFar4 ? 4 : 8, 0, dodgeDist, DAT_0104e0e8))
                     {
-                        PathRequest req34;
-                        actorZ->BuildPathAt(&req34, search.GetResult(), actorZ->GetPathPos(), actorZ->GetPathCell(),
-                                            DAT_0101e57c, 0);
+                        PathRequest_combatprocedureengagetarget req34;
+                        actorZ->PathToLocation(
+                            reinterpret_cast<PathingRequest*>(&req34), *reinterpret_cast<const NiPoint3*>(search.GetResult()),
+                            actorZ->FUN_008d6f30(), reinterpret_cast<void*>(actorZ->FUN_00575d70()), DAT_0101e57c, 0);
                         RawPoint dir;
                         req34.GetDirection(&dir)->FUN_005c3420();
                         req34.SetDirection(&dir, dodgeDist + DAT_010231d8);
-                        if (!actorZ->StartPath(&req34))
+                        if (!actorZ->SetPathingRequestAvoidNodes(&req34))
                         {
                             Fail("Cannot setup path to dodge location");
                             return;
@@ -1351,10 +969,10 @@ void EngageProc::UpdateEngagement()
                 {
                     if (ctrlD->CanReach(&targetLocX, 1, 0))
                     {
-                        PathRequest req4;
-                        actorZ->BuildPathTo(&req4, targetLocX.GetPos(), targetLocX.GetContainingCell(), DAT_0101e704,
-                                            0);
-                        if (!actorZ->StartPath(&req4))
+                        PathRequest_combatprocedureengagetarget req4;
+                        static_cast<ActorPathingAccess*>(actorZ)->BuildPathTo(
+                            &req4, targetLocX.GetPos(), targetLocX.GetContainingCell(), DAT_0101e704, 0);
+                        if (!actorZ->SetPathingRequestAvoidNodes(&req4))
                         {
                             Fail("Cannot setup path to target location");
                             return;
@@ -1374,9 +992,11 @@ void EngageProc::UpdateEngagement()
                         {
                             if (ctrlD->CanReachPos(&navPos3, targetLocX.GetContainingCell(), 1, 0))
                             {
-                                PathRequest req5;
-                                actorZ->BuildPathAt(&req5, &navPos3, coordX3, coordY, DAT_0101e704, 0);
-                                if (!actorZ->StartPath(&req5))
+                                PathRequest_combatprocedureengagetarget req5;
+                                actorZ->PathToLocation(
+                                    reinterpret_cast<PathingRequest*>(&req5), *reinterpret_cast<const NiPoint3*>(&navPos3),
+                                    reinterpret_cast<void*>(coordX3), reinterpret_cast<void*>(coordY), DAT_0101e704, 0);
+                                if (!actorZ->SetPathingRequestAvoidNodes(&req5))
                                 {
                                     Fail("Cannot setup path to target location");
                                     return;
@@ -1395,7 +1015,8 @@ void EngageProc::UpdateEngagement()
         if (m_timer20.Expired())
         {
             bool canDodge = true;
-            if (!actorZ->GetProcess()->CheckFlag(5) || !actorZ->GetProcess()->CheckFlag(6))
+            if (!reinterpret_cast<ProcessObj*>(actorZ->FUN_008d8520())->CheckFlag(5) ||
+                !reinterpret_cast<ProcessObj*>(actorZ->FUN_008d8520())->CheckFlag(6))
             {
                 canDodge = false;
             }
@@ -1415,19 +1036,21 @@ void EngageProc::UpdateEngagement()
                 SearchRequest search2;
                 if (ctrlD->FindDodge(&search2, 3, 0, dist, DAT_0104e0e8))
                 {
-                    PathRequest req62;
-                    actorZ->BuildPathAt(&req62, search2.GetResult(), actorZ->GetPathPos(), actorZ->GetPathCell(),
-                                        DAT_0101e57c, 0);
+                    PathRequest_combatprocedureengagetarget req62;
+                    actorZ->PathToLocation(
+                        reinterpret_cast<PathingRequest*>(&req62), *reinterpret_cast<const NiPoint3*>(search2.GetResult()),
+                        actorZ->FUN_008d6f30(), reinterpret_cast<void*>(actorZ->FUN_00575d70()), DAT_0101e57c, 0);
                     RawPoint dir2;
                     req62.GetDirection(&dir2)->FUN_005c3420();
                     req62.SetDirection(&dir2, dist + DAT_010231d8);
-                    if (!actorZ->StartPath(&req62))
+                    if (!actorZ->SetPathingRequestAvoidNodes(&req62))
                     {
                         Fail("Cannot setup path to dodge location");
                         return;
                     }
                     m_bCovered = true;
-                    m_dodgePos = *actorZ->GetLookPos();
+                    // Preserve the original trivial coordinate copy across NiPoint3's explicit assignment operator.
+                    *reinterpret_cast<::NiPoint3*>(&m_dodgePos) = *reinterpret_cast<::NiPoint3*>(static_cast<const Actor*>(actorZ)->GetPos());
                     UpdatePlayerStatus(1);
                     m_iFadeIndex = 7;
                     return;
@@ -1435,7 +1058,7 @@ void EngageProc::UpdateEngagement()
             }
             if (IsAimingWeapon())
             {
-                bool moving = actorZ->IsMoving();
+                bool moving = actorZ->FUN_004997b0();
                 if (moving)
                 {
                     if (RandChance(DAT_01016248))
@@ -1465,13 +1088,14 @@ void EngageProc::UpdateEngagement()
     case 6:
     case 7:
         m_bDodging = false;
-        if (actorZ->PathFailed())
+        if (actorZ->FUN_008b3b90())
         {
-            if (!actorZ->PathHasError())
+            if (!static_cast<ActorPathingAccess*>(actorZ)->PathHasError())
             {
                 ctrlD->OnPathFailed();
             }
-            Fail(actorZ->PathHasError() ? "Pathing failed while dodging" : "Path Building failed to dodge");
+            Fail(static_cast<ActorPathingAccess*>(actorZ)->PathHasError() ? "Pathing failed while dodging"
+                                                                      : "Path Building failed to dodge");
             return;
         }
         if (m_iFadeIndex == 7)
@@ -1485,12 +1109,12 @@ void EngageProc::UpdateEngagement()
             }
             else if (m_timer28.Expired())
             {
-                actorZ->StopPath();
+                actorZ->StopMoving();
                 m_bDodgeWait = false;
                 m_timer28.Reset();
             }
         }
-        if (actorZ->PathDone())
+        if (actorZ->FUN_008b3bb0())
         {
             if (IsAimingWeapon() && RandChance(DAT_01016248))
             {
@@ -1511,9 +1135,9 @@ void EngageProc::UpdateEngagement()
         m_bDodging = false;
         bool done = false;
         bool fallback = false;
-        if (actorZ->PathFailed())
+        if (actorZ->FUN_008b3b90())
         {
-            if (!actorZ->PathHasError())
+            if (!static_cast<ActorPathingAccess*>(actorZ)->PathHasError())
             {
                 if (m_iFadeIndex == 4 || m_iFadeIndex == 3)
                 {
@@ -1534,19 +1158,19 @@ void EngageProc::UpdateEngagement()
                 switch (m_iFadeIndex)
                 {
                 case 8:
-                    Fail(actorZ->PathHasError() ? "Pathing failed while moving to target"
+                    Fail(static_cast<ActorPathingAccess*>(actorZ)->PathHasError() ? "Pathing failed while moving to target"
                                                 : "Path Building failed to move to target");
                     break;
                 case 5:
-                    Fail(actorZ->PathHasError() ? "Pathing failed while approaching target"
+                    Fail(static_cast<ActorPathingAccess*>(actorZ)->PathHasError() ? "Pathing failed while approaching target"
                                                 : "Path Building failed to approach target");
                     break;
                 case 3:
-                    Fail(actorZ->PathHasError() ? "Pathing failed while moving to optimal far location"
+                    Fail(static_cast<ActorPathingAccess*>(actorZ)->PathHasError() ? "Pathing failed while moving to optimal far location"
                                                 : "Path Building failed to move to optimal far location");
                     break;
                 case 4:
-                    Fail(actorZ->PathHasError() ? "Pathing failed while moving to optimal close location"
+                    Fail(static_cast<ActorPathingAccess*>(actorZ)->PathHasError() ? "Pathing failed while moving to optimal close location"
                                                 : "Path Building failed to move to optimal close location");
                     break;
                 }
@@ -1579,17 +1203,17 @@ void EngageProc::UpdateEngagement()
         }
         if (m_iFadeIndex == 3 || m_iFadeIndex == 4)
         {
-            if (!done && m_cFallback == 0 && !actorZ->PathBusy())
+            if (!done && m_cFallback == 0 && !actorZ->FUN_008b3bf0())
             {
                 m_cFallback = 1;
                 NiPoint3 fallbackPos;
-                if (actorZ->GetFallbackPos(&fallbackPos))
+                if (static_cast<ActorPathingAccess*>(actorZ)->GetFallbackPos(&fallbackPos))
                 {
                     if (!ctrlD->CanReachPos(&fallbackPos, actorLocY.GetContainingCell(), 0, 0))
                     {
                         m_cFallback = -1;
                     }
-                    else if (!CheckLineOfFire(actorZ, target, &fallbackPos, target->GetLookPos(), 0, -1))
+                    else if (!CheckLineOfFire(actorZ, target, &fallbackPos, static_cast<const Actor*>(target)->GetPos(), 0, -1))
                     {
                         m_cFallback = -2;
                     }
@@ -1614,14 +1238,14 @@ void EngageProc::UpdateEngagement()
         {
             if (fallback)
             {
-                actorZ->StopPathAlt();
+                static_cast<ActorPathingAccess*>(actorZ)->StopPathAlt();
             }
             else
             {
-                actorZ->StopPath();
+                actorZ->StopMoving();
             }
         }
-        if (actorZ->PathDone() || done)
+        if (actorZ->FUN_008b3bb0() || done)
         {
             if (IsAimingWeapon() && RandChance(DAT_01016248))
             {
@@ -1655,6 +1279,7 @@ struct FUN_009ca680
     ~FUN_009ca680();
 };
 
+// Retained: TimeoutTimer.h lacks the default constructor at 0x00906f60.
 struct FUN_00906f60
 {
     int a, b;
@@ -1684,6 +1309,7 @@ struct NiPoint3_T
 extern NiPoint3_T DAT_011f426c;
 extern float DAT_010914d0;
 
+// Retained: CombatProcedureEngageTarget.h lacks the constructor and member layout.
 struct FUN_009d3a00 : public FUN_009ca680
 {
     int unk10;

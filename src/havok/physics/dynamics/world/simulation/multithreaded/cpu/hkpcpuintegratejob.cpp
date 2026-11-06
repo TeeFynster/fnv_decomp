@@ -1,6 +1,9 @@
 // src/havok/physics/dynamics/world/simulation/multithreaded/cpu/hkpcpuintegratejob.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/simulation/multithreaded/cpu/hkpcpuintegratejob.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../../include/hkMonitorStream.h"
+
 struct Owner {
     unsigned int field00, field04, field08, field0c;
     unsigned int field10, field14, field18, field1c;
@@ -470,18 +473,22 @@ struct BuildCollection {
     int m_iEntryCapacity;
 };
 struct SolveCollection { SolveTask* m_pTasks; unsigned short m_usTaskCount; };
-struct MonitorStream {
-    struct CommandTimingEntry { const char* m_pCommandName; unsigned int m_uiStartTicks,m_uiEndTicks; };
-    struct CommandFilterEntry { const char* m_pCommandName; float m_uiFilterValue; };
-    char* start;
-    char* current;
-    char* capacity;
-    char* limit;
-    static MonitorStream& GetMonitorStream() { return *(MonitorStream*)TlsGetValue(DAT_0126835c); }
-    FlagByte memoryAvailable() { return current<limit; }
-    char* GetStreamEnd() { return current; }
-    void setEnd(char* ptr) { current=ptr; }
+// A unit-local view: the original inlines a differently shaped variant of this Havok accessor.
+// hkMonitorStream as the original reads it in FUN_00d95130's value records: bare char* members and a flat value
+// command. The real header's hkPadSpu members and Command-based records change that function's register choice.
+// src: HAVOK_SRC (shape)
+struct hkMonitorStream_raw {
+    struct AddValueCommand { const char* m_commandAndMonitor; float m_value; };
+    char* m_start; char* m_end; char* m_capacity; char* m_capacityMinus16;
+    static hkMonitorStream_raw& get();
+    FlagByte __cdecl memoryAvailable() { return m_end<m_capacityMinus16; }
+    char* __cdecl getEnd() { return m_end; }
+    void __cdecl setEnd(char* ptr) { m_end=ptr; }
 };
+struct hkMonitorStream_hkpcpuintegratejob : hkMonitorStream { FlagByte __cdecl memoryAvailable(); };
+__forceinline FlagByte __cdecl hkMonitorStream_hkpcpuintegratejob::memoryAvailable() { return m_end.m_storage<m_capacityMinus16.m_storage; }
+__forceinline char* __cdecl hkMonitorStream::getEnd() { return m_end.m_storage; }
+__forceinline void __cdecl hkMonitorStream::setEnd(char* ptr) { m_end.m_storage=ptr; }
 template<class T> T* byteAdvance(T* ptr,long offset) { return (T*)((char*)ptr+offset); }
 template<class A,class B> int byteDistance(A* first,B* last) { return (int)((char*)last-(char*)first); }
 struct __declspec(align(8)) ProbeEntry {
@@ -613,16 +620,16 @@ void FUN_00d95130(SceneInput island, FlagByte coherent, JobHeader* header,
     const DWORD& initialTimerIndex=DAT_0126835c;
     SceneIsland* scene = island;
     {
-        MonitorStream& stream=*(MonitorStream*)TlsGetValue(initialTimerIndex);
-        if(stream.memoryAvailable()) {
-            MonitorStream::CommandTimingEntry* event=(MonitorStream::CommandTimingEntry*)bytesCopy(stream.GetStreamEnd());
-            event->m_pCommandName=str_010d3f1c; _ReadWriteBarrier();
+        hkMonitorStream& stream=*(hkMonitorStream*)TlsGetValue(initialTimerIndex);
+        if(static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable()) {
+            hkMonitorStream::TimerCommand* event=(hkMonitorStream::TimerCommand*)bytesCopy(stream.getEnd());
+            event->m_commandAndMonitor=str_010d3f1c; _ReadWriteBarrier();
             DWORD ticks;
             __asm {
                 rdtsc
                 mov dword ptr[ticks], eax
             }
-            event->m_uiStartTicks=ticks;
+            event->m_time0=ticks;
             stream.setEnd((char*)(event+1));
         }
     }
@@ -676,31 +683,31 @@ void FUN_00d95130(SceneInput island, FlagByte coherent, JobHeader* header,
         taskTempFree(mapStorage, mapWords);
     }
     {
-        MonitorStream& stream = MonitorStream::GetMonitorStream();
+        hkMonitorStream_raw& stream = hkMonitorStream_raw::get();
         if (stream.memoryAvailable()) {
-            MonitorStream::CommandFilterEntry* event = reinterpret_cast<MonitorStream::CommandFilterEntry*>(stream.GetStreamEnd());
-            event->m_pCommandName = str_010d3d60;
-            event->m_uiFilterValue = (float)bodyCount;
+            hkMonitorStream_raw::AddValueCommand* event = reinterpret_cast<hkMonitorStream_raw::AddValueCommand*>(stream.getEnd());
+            event->m_commandAndMonitor = str_010d3d60;
+            event->m_value = (float)bodyCount;
             stream.setEnd((char*)(event+1));
         }
     }
     {
-        MonitorStream& stream = MonitorStream::GetMonitorStream();
+        hkMonitorStream_raw& stream = hkMonitorStream_raw::get();
         if (stream.memoryAvailable()) {
-            MonitorStream::CommandFilterEntry* event = reinterpret_cast<MonitorStream::CommandFilterEntry*>(stream.GetStreamEnd());
+            hkMonitorStream_raw::AddValueCommand* event = reinterpret_cast<hkMonitorStream_raw::AddValueCommand*>(stream.getEnd());
             SceneIsland* valueOwner=island.p;
-            event->m_pCommandName = str_010d3f08;
-            event->m_uiFilterValue = (float)valueOwner->m_iConstraintCount;
+            event->m_commandAndMonitor = str_010d3f08;
+            event->m_value = (float)valueOwner->m_iConstraintCount;
             stream.setEnd((char*)(event+1));
         }
     }
     {
-        MonitorStream& stream = MonitorStream::GetMonitorStream();
+        hkMonitorStream_raw& stream = hkMonitorStream_raw::get();
         if (stream.memoryAvailable()) {
-            MonitorStream::CommandFilterEntry* event = reinterpret_cast<MonitorStream::CommandFilterEntry*>(stream.GetStreamEnd());
+            hkMonitorStream_raw::AddValueCommand* event = reinterpret_cast<hkMonitorStream_raw::AddValueCommand*>(stream.getEnd());
             SceneIsland* valueOwner=island.p;
-            event->m_pCommandName = str_010d3d70;
-            event->m_uiFilterValue = (float)valueOwner->m_kConstraintInfo.m_iSolverResultCount;
+            event->m_commandAndMonitor = str_010d3d70;
+            event->m_value = (float)valueOwner->m_kConstraintInfo.m_iSolverResultCount;
             stream.setEnd((char*)(event+1));
         }
     }
@@ -783,20 +790,29 @@ void FUN_00d95130(SceneInput island, FlagByte coherent, JobHeader* header,
     high.closeArray();
     normal.closeArray();
     {
-        MonitorStream& stream=*(MonitorStream*)TlsGetValue(DAT_0126835c);
-        if(stream.memoryAvailable()) {
-            MonitorStream::CommandTimingEntry* event=(MonitorStream::CommandTimingEntry*)stream.GetStreamEnd();
-            event->m_pCommandName=str_010c41f8; _ReadWriteBarrier();
+        hkMonitorStream& stream=*(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        if(static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable()) {
+            hkMonitorStream::TimerCommand* event=(hkMonitorStream::TimerCommand*)stream.getEnd();
+            event->m_commandAndMonitor=str_010c41f8; _ReadWriteBarrier();
             DWORD ticks;
             __asm {
                 rdtsc
                 mov dword ptr[ticks], eax
             }
-            event->m_uiStartTicks=ticks;
+            event->m_time0=ticks;
             stream.setEnd((char*)(event+1));
         }
     }
     }
+}
+
+__forceinline void hkMonitorStream::TimerCommand::setTime() {
+    unsigned int ticks;
+    __asm {
+        rdtsc
+        mov dword ptr[ticks], eax
+    }
+    m_time0 = ticks;
 }
 
 namespace fnv_00d95cf0 {
@@ -843,37 +859,16 @@ struct SyncCheck {
     template <class T> static __forceinline void verify(int id, const T& obj) {}
 };
 
-struct MonitorStream {
-    PaddedPtr<char*> start;
-    PaddedPtr<char*> current;
-    PaddedPtr<char*> capacity;
-    PaddedPtr<char*> limit;
-    struct EventHeader { const char* tag; };
-    struct CommandTimingEntry : EventHeader {
-        unsigned int time0;
-        unsigned int time1;
-        __forceinline void setTime();
-    };
-    struct SplitTimerCommand : CommandTimingEntry { const char* splitTag; };
-    static __forceinline MonitorStream& GetMonitorStream();
-    __forceinline char* __cdecl GetStreamEnd() { return current.val(); }
-    __forceinline char* __cdecl getLimit() { return limit.val(); }
-    __forceinline FlagByte __cdecl memoryAvailable() { return GetStreamEnd() < getLimit(); }
-    __forceinline void __cdecl setEnd(char* ptr) { current = ptr; }
-};
 
-__forceinline void MonitorStream::CommandTimingEntry::setTime() {
-    unsigned int ticks;
-    __asm {
-        rdtsc
-        mov dword ptr[ticks], eax
-    }
-    time0 = ticks;
-}
 
-extern TlsSlot<MonitorStream*> DAT_0126835c;
+extern TlsSlot<hkMonitorStream*> DAT_0126835c;
 extern TlsSlot<int> DAT_012687c8;
-__forceinline MonitorStream& MonitorStream::GetMonitorStream() { return *DAT_0126835c.get(); }
+}  // namespace fnv_00d95cf0
+
+__forceinline hkMonitorStream& hkMonitorStream::getInstance() { return *fnv_00d95cf0::DAT_0126835c.get(); }
+__forceinline hkMonitorStream_raw& hkMonitorStream_raw::get() { return *(hkMonitorStream_raw*)fnv_00d95cf0::DAT_0126835c.get(); }
+
+namespace fnv_00d95cf0 {
 
 struct TaskAllocator {
     virtual ~TaskAllocator();
@@ -943,13 +938,15 @@ struct PacketBase {
         : subType((byte)sub), kind(k), mode(m), size(sz), affinity(-1) {}
 };
 
-struct Command : PacketBase {
+// hkJobQueue job slot (JobQueueEntry): 0x80 bytes, hkJob header in PacketBase + payload; the queue methods
+// 0x00d05190 / 0x00d04b50 take it by reference. Not the console-command Command.
+struct JobQueueEntry : PacketBase {
     int unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     int unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c, unk60, unk64, unk68, unk6c, unk70, unk74, unk78, unk7c;
-    __forceinline Command() {}
+    __forceinline JobQueueEntry() {}
 };
 
-struct __declspec(align(16)) QueueStorage : Command {
+struct __declspec(align(16)) QueueStorage : JobQueueEntry {
     int unk80, unk84, unk88, unk8c, unk90, unk94, unk98, unk9c;
     int unka0, unka4, unka8, unkac, unkb0, unkb4, unkb8, unkbc;
     int unkc0, unkc4, unkc8, unkcc, unkd0, unkd4, unkd8, unkdc;
@@ -961,14 +958,14 @@ struct __declspec(align(16)) QueueStorage : Command {
 };
 
 struct Queue {
-    int __thiscall FUN_00d05190(Command& cmd, int waitMode);
-    void __thiscall FUN_00d04b50(Command& cmd, int priority);
-    void __thiscall FUN_00d04d80(const Command* cmd, int flag);
+    int __thiscall FUN_00d05190(JobQueueEntry& cmd, int waitMode);
+    void __thiscall FUN_00d04b50(JobQueueEntry& cmd, int priority);
+    void __thiscall FUN_00d04d80(const JobQueueEntry* cmd, int flag);
     void* __thiscall FUN_00d04400(void* storage);
     void __thiscall FUN_00d04b00(void* token, const PacketBase& cmd, int priority);
     void __thiscall FUN_00d04420(void* token);
-    int __thiscall FUN_00d05020(int kind, int priority, Command& next, int waitMode);
-    int __thiscall ProcessCallback(const PacketBase* prev, Command& next, int waitMode);
+    int __thiscall FUN_00d05020(int kind, int priority, JobQueueEntry& next, int waitMode);
+    int __thiscall ProcessCallback(const PacketBase* prev, JobQueueEntry& next, int waitMode);
 };
 
 struct QueryStepBase {
@@ -1207,7 +1204,7 @@ __forceinline int estimateIslandSize(int numEntities, int numConstraints) { retu
 __forceinline bool checkIslandSparse(Settings* world, int size) { return size < int(world->minIslandSize); }
 
 // @fnv 0x00d95cf0
-int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, Command& nextJobOut)
+int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, JobQueueEntry& nextJobOut)
 {
     const DynamicsPacket& currentJob = reinterpret_cast<DynamicsPacket&>(nextJobOut);
     SceneIsland* island = currentJob.island;
@@ -1222,7 +1219,7 @@ int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, Command& nextJobOut)
         buffer = solverBufAlloc<char>(bufferCapacity);
         while (!buffer)
         {
-            Command retryJob;
+            JobQueueEntry retryJob;
             int prevThread = DAT_012687c8.get();
             DAT_012687c8.set(1);
             int status = queue.FUN_00d05190(retryJob, 1);
@@ -1230,7 +1227,7 @@ int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, Command& nextJobOut)
             if (status == 0)
             {
                 queue.FUN_00d04b50(nextJobOut, 1);
-                Command stopJob;
+                JobQueueEntry stopJob;
                 stopJob.kind = PACKET_DYNAMICS;
                 stopJob.subType = 16;
                 queue.FUN_00d04d80(&stopJob, 0);
@@ -1255,12 +1252,12 @@ int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, Command& nextJobOut)
     }
 
     {
-        MonitorStream& stream = MonitorStream::GetMonitorStream();
-        if (stream.memoryAvailable())
+        hkMonitorStream& stream = hkMonitorStream::getInstance();
+        if (static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable())
         {
-            MonitorStream::SplitTimerCommand* ev = reinterpret_cast<MonitorStream::SplitTimerCommand*>(stream.GetStreamEnd());
-            ev->tag = DAT_010cc5c4;
-            ev->splitTag = DAT_010cc5bc;
+            hkMonitorStream::TimerBeginListCommand* ev = reinterpret_cast<hkMonitorStream::TimerBeginListCommand*>(stream.getEnd());
+            ev->m_commandAndMonitor = DAT_010cc5c4;
+            ev->m_nameOfFirstSplit = DAT_010cc5bc;
             ev->setTime();
             stream.setEnd((char*)(ev + 1));
         }
@@ -1271,11 +1268,11 @@ int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, Command& nextJobOut)
     {
         const TaskArrayBase<Observer*>& observers = island->observers;
         {
-            MonitorStream& stream = MonitorStream::GetMonitorStream();
-            if (stream.memoryAvailable())
+            hkMonitorStream& stream = hkMonitorStream::getInstance();
+            if (static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable())
             {
-                MonitorStream::CommandTimingEntry* ev = reinterpret_cast<MonitorStream::CommandTimingEntry*>(stream.GetStreamEnd());
-                ev->tag = DAT_010cc5b0;
+                hkMonitorStream::TimerCommand* ev = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream.getEnd());
+                ev->m_commandAndMonitor = DAT_010cc5b0;
                 ev->setTime();
                 stream.setEnd((char*)(ev + 1));
             }
@@ -1293,11 +1290,11 @@ int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, Command& nextJobOut)
     JobHeader* header = new JobHeader;
 
     {
-        MonitorStream& stream = MonitorStream::GetMonitorStream();
-        if (stream.memoryAvailable())
+        hkMonitorStream& stream = hkMonitorStream::getInstance();
+        if (static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable())
         {
-            MonitorStream::CommandTimingEntry* ev = reinterpret_cast<MonitorStream::CommandTimingEntry*>(stream.GetStreamEnd());
-            ev->tag = DAT_010d3f64;
+            hkMonitorStream::TimerCommand* ev = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream.getEnd());
+            ev->m_commandAndMonitor = DAT_010d3f64;
             ev->setTime();
             stream.setEnd((char*)(ev + 1));
         }
@@ -1319,11 +1316,11 @@ int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, Command& nextJobOut)
     int splitRequested = 0;
 
     {
-        MonitorStream& stream = MonitorStream::GetMonitorStream();
-        if (stream.memoryAvailable())
+        hkMonitorStream& stream = hkMonitorStream::getInstance();
+        if (static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable())
         {
-            MonitorStream::CommandTimingEntry* ev = reinterpret_cast<MonitorStream::CommandTimingEntry*>(stream.GetStreamEnd());
-            ev->tag = DAT_010d3f54;
+            hkMonitorStream::TimerCommand* ev = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream.getEnd());
+            ev->m_commandAndMonitor = DAT_010d3f54;
             ev->setTime();
             stream.setEnd((char*)(ev + 1));
         }
@@ -1393,11 +1390,11 @@ int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, Command& nextJobOut)
             header->openJobs = motionJobs;
 
             {
-                MonitorStream& stream = MonitorStream::GetMonitorStream();
-                if (stream.memoryAvailable())
+                hkMonitorStream& stream = hkMonitorStream::getInstance();
+                if (static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable())
                 {
-                    MonitorStream::CommandTimingEntry* ev = reinterpret_cast<MonitorStream::CommandTimingEntry*>(stream.GetStreamEnd());
-                    ev->tag = DAT_01076f38;
+                    hkMonitorStream::TimerCommand* ev = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream.getEnd());
+                    ev->m_commandAndMonitor = DAT_01076f38;
                     ev->setTime();
                     stream.setEnd((char*)(ev + 1));
                 }
@@ -1415,11 +1412,11 @@ int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, Command& nextJobOut)
         }
 
         {
-            MonitorStream& stream = MonitorStream::GetMonitorStream();
-            if (stream.memoryAvailable())
+            hkMonitorStream& stream = hkMonitorStream::getInstance();
+            if (static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable())
             {
-                MonitorStream::CommandTimingEntry* ev = reinterpret_cast<MonitorStream::CommandTimingEntry*>(stream.GetStreamEnd());
-                ev->tag = DAT_010d3f48;
+                hkMonitorStream::TimerCommand* ev = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream.getEnd());
+                ev->m_commandAndMonitor = DAT_010d3f48;
                 ev->setTime();
                 stream.setEnd((char*)(ev + 1));
             }
@@ -1437,11 +1434,11 @@ int __cdecl FUN_00d95cf0(TaskOwner& owner, Queue& queue, Command& nextJobOut)
     if (estimatedConstraints < owner.secondary->constraintLimit)
     {
         {
-            MonitorStream& stream = MonitorStream::GetMonitorStream();
-            if (stream.memoryAvailable())
+            hkMonitorStream& stream = hkMonitorStream::getInstance();
+            if (static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable())
             {
-                MonitorStream::CommandTimingEntry* ev = reinterpret_cast<MonitorStream::CommandTimingEntry*>(stream.GetStreamEnd());
-                ev->tag = DAT_010d3f38;
+                hkMonitorStream::TimerCommand* ev = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream.getEnd());
+                ev->m_commandAndMonitor = DAT_010d3f38;
                 ev->setTime();
                 stream.setEnd((char*)(ev + 1));
             }
@@ -1463,11 +1460,11 @@ FINISH_BROAD_PHASE:
             FUN_00d942f0(island, header->splitIslands);
         }
         {
-            MonitorStream& stream = MonitorStream::GetMonitorStream();
-            if (stream.memoryAvailable())
+            hkMonitorStream& stream = hkMonitorStream::getInstance();
+            if (static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable())
             {
-                MonitorStream::CommandTimingEntry* ev = reinterpret_cast<MonitorStream::CommandTimingEntry*>(stream.GetStreamEnd());
-                ev->tag = DAT_01076f38;
+                hkMonitorStream::TimerCommand* ev = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream.getEnd());
+                ev->m_commandAndMonitor = DAT_01076f38;
                 ev->setTime();
                 stream.setEnd((char*)(ev + 1));
             }
@@ -1482,11 +1479,11 @@ FINISH_BROAD_PHASE:
 
     {
         {
-            MonitorStream& stream = MonitorStream::GetMonitorStream();
-            if (stream.memoryAvailable())
+            hkMonitorStream& stream = hkMonitorStream::getInstance();
+            if (static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable())
             {
-                MonitorStream::CommandTimingEntry* ev = reinterpret_cast<MonitorStream::CommandTimingEntry*>(stream.GetStreamEnd());
-                ev->tag = DAT_010d3f2c;
+                hkMonitorStream::TimerCommand* ev = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream.getEnd());
+                ev->m_commandAndMonitor = DAT_010d3f2c;
                 ev->setTime();
                 stream.setEnd((char*)(ev + 1));
             }
@@ -1517,11 +1514,11 @@ FINISH_BROAD_PHASE:
         SolveCollection outSolves;
         FUN_00d95130(island, stepCtx.buildOnSpu, header, &outBuilds, &outSolves);
         {
-            MonitorStream& stream = MonitorStream::GetMonitorStream();
-            if (stream.memoryAvailable())
+            hkMonitorStream& stream = hkMonitorStream::getInstance();
+            if (static_cast<hkMonitorStream_hkpcpuintegratejob&>(stream).memoryAvailable())
             {
-                MonitorStream::CommandTimingEntry* ev = reinterpret_cast<MonitorStream::CommandTimingEntry*>(stream.GetStreamEnd());
-                ev->tag = DAT_01076f38;
+                hkMonitorStream::TimerCommand* ev = reinterpret_cast<hkMonitorStream::TimerCommand*>(stream.getEnd());
+                ev->m_commandAndMonitor = DAT_01076f38;
                 ev->setTime();
                 stream.setEnd((char*)(ev + 1));
             }

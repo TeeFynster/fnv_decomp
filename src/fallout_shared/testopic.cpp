@@ -1,15 +1,35 @@
+#include "../../include/BSStringT.h"
+#include "../../include/BSSimpleArray.h"
 // fallout_shared/testopic.cpp: TESTopic, NavShell2, TopicFlagStandIn, TopicSaver and more (49 functions)
 
-#include "TESTopic.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/NiTLargeArray.h"
+#include "../../include/NavMeshTriangleEdgeReference.h"
+#include "../../include/TESTopic.h"
 #include "TESTopicInfo.h"
 #include "TESQuest.h"
 #include "QuestDialogueInfo.h"
-#include "INFO_LINK_ELEMENT.h"
 #include "TESTopicInfoData.h"
 #include "DialogueItem.h"
-#include "MobileObject.h"
-#include "PlayerCharacter.h"
+#include "../../include/MobileObject.h"
+#include "../../include/PlayerCharacter.h"
 #include "game_constants.h"
+// INFO_LINK_ELEMENT and DIALOGUE_TYPE as in include/INFO_LINK_ELEMENT.h and include/layout_support.h (no include/ home yet).
+#include "../../include/DIALOGUE_TYPE.h"
+class INFO_LINK_ELEMENT
+{
+  public:
+    unsigned int nID;     // +0x0
+    TESTopicInfo* pInfo;  // +0x4
+    int m_iIndex;         // +0x8
+};
+#include "../../include/AutoMemContext.h"
+#include "../../include/BSTempEffectDebris.h"
+#include "../../include/TESObject.h"
+#include "../../include/GridArray.h"
+#include "../../include/NavMeshPtr.h"
+#include "../../include/StrMem.h"
+#include "../../include/SL.h"
 extern PlayerCharacter* g_thePlayer;
 extern unsigned int DialogueRandom();
 
@@ -197,11 +217,6 @@ TESTopicInfo* TESTopic::FindMatchingTopicInfo(const TESTopic* originalTopic, boo
     }
 }
 
-struct TESObject
-{
-    TESObject* GetNext();
-    int _FNV_GetFormType();
-};
 struct FUN_00616f40_shell
 {
     bool BuildVoiceFilePath(TESObject* o, int a, int b, int c, int d);
@@ -213,7 +228,7 @@ bool FUN_00616f40_shell::DispatchOnNextFormType(TESObject* obj, int a, int b, in
 {
     if (obj)
     {
-        switch (obj->GetNext()->_FNV_GetFormType())
+        switch (static_cast<int>(obj->GetNext()->_FNV_GetFormType()))
         {
         case 0x16:
         case 0x2a:
@@ -264,7 +279,7 @@ QuestDialogueInfo* FUN_006195d0_shell::GetOrCreateQuestInfo(TESQuest* apQuest, b
     if (!apQuest)
         return 0;
 
-    BSSimpleList<QuestDialogueInfo*>* pList = GetQuestInfoList();
+    BSSimpleList<QuestDialogueInfo*>* pList = static_cast<const TESTopic*>(this)->GetQuestInfoList();
     QuestDialogueInfo* pQuestInfo = 0;
 
     while (pList && pList->GetItem() && !pQuestInfo)
@@ -292,7 +307,7 @@ QuestDialogueInfo* FUN_006195d0_shell::GetOrCreateQuestInfo(TESQuest* apQuest, b
     {
         pQuestInfo = new QuestDialogueInfo;
         pQuestInfo->pQuest = apQuest;
-        GetQuestInfoList()->AddTail(pQuestInfo);
+        static_cast<const TESTopic*>(this)->GetQuestInfoList()->AddTail(pQuestInfo);
     }
 
     return pQuestInfo;
@@ -339,7 +354,7 @@ TESQuest* FUN_00619d00_shell::FindQuestForTopicInfo(TESTopicInfo* apInfo)
         return reinterpret_cast<FUN_00619d00_shell*>(TESTopic::GetAudioBackendData(DIALOGUE_TYPE_DT_CONVERSATION, 5))
             ->FindQuestForTopicInfo(apInfo);
 
-    const BSSimpleList<QuestDialogueInfo*>* pList = GetQuestInfoList();
+    const BSSimpleList<QuestDialogueInfo*>* pList = static_cast<const TESTopic*>(this)->GetQuestInfoList();
     unsigned int maxSize = 0;
 
     while (
@@ -388,7 +403,7 @@ struct FUN_00619e10_impl : public TESTopic
 // @fnv 0x00619e10
 TESTopicInfo* FUN_00619e10_impl::FindTopicInfoByFormID(unsigned int aiInfoID, bool abReverse)
 {
-    BSSimpleList<QuestDialogueInfo*>* pList = GetQuestInfoList();
+    BSSimpleList<QuestDialogueInfo*>* pList = static_cast<const TESTopic*>(this)->GetQuestInfoList();
     unsigned int maxSize = 0;
 
     while (pList && pList->GetItem())
@@ -460,14 +475,6 @@ void FUN_00619fe0(TopicInfoArray* apInfoArray)
     }
 }
 
-class AutoMemContext
-{
-    int dummy;
-
-  public:
-    AutoMemContext(MEM_CONTEXT, bool, const char*, int);
-    ~AutoMemContext();
-};
 
 class TESGlobal;
 class TESGlobalMap
@@ -476,110 +483,16 @@ class TESGlobalMap
     void SetAt(const char*, TESGlobal*);
 };
 
-struct FullNameEx
-{
-    int dummy;
-    void SetFullName(const char* name);
-};
-
-struct TESTopicEx
-{
-    char pad1[0x14];
-    FullNameEx fullName;
-    char pad2[0x2c];
-
-    TESTopicEx(int type);
-
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void SetFormID(unsigned int id, bool bUpdate);
-    virtual void v75();
-    virtual void v76();
-    virtual void SetEditorID(const char* id);
-};
-
 struct TopicDefaultEntry
 {
-    TESTopicEx* topic;
+    TESTopic* topic;
     unsigned int formID;
     const char* editorID;
 };
 
 struct DataHandlerEx
 {
-    void AddTopic(TESTopicEx* topic);
+    void AddTopic(TESTopic* topic);
 };
 
 extern int DAT_0119a41c[];
@@ -599,10 +512,10 @@ void __cdecl CreateDefaultTopics()
         {
             if (DAT_0119a43c[i][j].topic == 0)
             {
-                DAT_0119a43c[i][j].topic = new TESTopicEx(i);
-                DAT_0119a43c[i][j].topic->SetFormID(DAT_0119a43c[i][j].formID, true);
-                DAT_0119a43c[i][j].topic->SetEditorID(DAT_0119a43c[i][j].editorID);
-                DAT_0119a43c[i][j].topic->fullName.SetFullName(
+                DAT_0119a43c[i][j].topic = new TESTopic(i);
+                DAT_0119a43c[i][j].topic->SetRefID(DAT_0119a43c[i][j].formID, true);
+                DAT_0119a43c[i][j].topic->SetEditorID_AtRuntime(DAT_0119a43c[i][j].editorID);
+                DAT_0119a43c[i][j].topic->SetFullName(
                     PrepareScriptMessage(DAT_0119a43c[i][j].editorID, false));
                 g_dataHandler->AddTopic(DAT_0119a43c[i][j].topic);
                 DAT_011c54c8->SetAt(DAT_0119a43c[i][j].editorID, (TESGlobal*)DAT_0119a43c[i][j].topic);
@@ -844,11 +757,6 @@ Dummy_0061bf20* __fastcall ConstructDummy(Dummy_0061bf20* apObject)
     return apObject;
 }
 
-struct NavMeshPtr
-{
-    int p;
-    ~NavMeshPtr();
-};
 struct S2f850
 {
     unsigned int AppendValue(const NavMeshPtr&);
@@ -878,20 +786,6 @@ bool TopicFlagStandIn::FUN_0061aef0()
 }
 
 void* __cdecl memset(void*, int, unsigned int);
-struct SL
-{
-    int a;
-    int b;
-    SL();
-    ~SL();
-};
-struct StrMem
-{
-    int a;
-    int b;
-    StrMem();
-    ~StrMem();
-};
 struct SFTX
 {
     void SetFormType(int);
@@ -901,15 +795,11 @@ struct DDX
     unsigned char type;
     unsigned char flags;
 };
-struct SL_d0046ffb0 : SL
-{
-    ~SL_d0046ffb0();
-};
 struct FUN_00618580 : public TESForm, public TESFullName
 {
     DDX m_Data;
     float m_fTopicParamB;
-    SL_d0046ffb0 m_kQuestInfoList;
+    SL m_kQuestInfoList;
     StrMem m_kDummyPrompt;
     int m_iTopicFlags;
     StrMem cPrompt2;
@@ -938,10 +828,6 @@ struct DHStub
     void FUN_00460270(TESTopicInfo*, bool);
 };
 extern DHStub* g_dataHandler;
-struct Arr
-{
-    unsigned int* GetAt(int);
-};
 struct TopicSaver
 {
     bool SaveTopicInfo(FileStub* apFile);
@@ -960,7 +846,7 @@ bool TopicSaver::SaveTopicInfo(FileStub* apFile)
     ((TESTopic*)this)->SaveForm();
     apFile->RunProbe(this);
     mastersave = g_dataHandler->GetByteAt618();
-    pList6 = ((TESTopic*)this)->GetQuestInfoList();
+    pList6 = ((const TESTopic*)this)->GetQuestInfoList();
     while (pList6 && pList6->GetItem())
     {
         pQuestInfo = pList6->GetItem();
@@ -969,7 +855,7 @@ bool TopicSaver::SaveTopicInfo(FileStub* apFile)
         aMaxSize = ((TESForm*)pArray)->GetFormID();
         for (i4 = 0; i4 < aMaxSize; ++i4)
         {
-            info = (TESTopicInfo*)*((Arr*)pArray)->GetAt(i4);
+            info = pArray->GetAt(i4);
             if (info)
                 g_dataHandler->FUN_00460270(info, apFile->IsMasterFile());
         }
@@ -1012,14 +898,8 @@ bool FUN_0061af10_shell::HasFlag4()
     return (*GetRankDataList() & 4) != 0;
 }
 
-struct BSStr
-{
-    bool Set(const char*, unsigned int);
-};
-struct BSStringT_char
-{
-    int StrCmp(const char*, bool) const;
-};
+
+
 unsigned int __cdecl BSStringLength(const char*);
 struct TaskQueueInterface
 {
@@ -1037,9 +917,9 @@ bool TESTopic_shell::SetStringIfDifferent(const char* apString)
     unsigned int n = BSStringLength(apString) + 1;
     p2 = (char*)_alloca(n);
     TaskQueueInterface::CopyStringToBuffer(p2, n, apString);
-    if (((BSStringT_char*)((char*)this + 0x40))->StrCmp(p2, true) == 0)
+    if (((::BSStringT<char>*)((char*)this + 0x40))->StrCmp(p2, true) == 0)
         return false;
-    ((BSStr*)((char*)this + 0x40))->Set(p2, 0);
+    ((::BSStringT<char>*)((char*)this + 0x40))->Set(p2, 0);
     return true;
 }
 
@@ -1097,14 +977,6 @@ struct FUN_00619b20_shell
 {
     bool FUN_00619b20();
 };
-struct Arr
-{
-    unsigned int* GetAt(int);
-};
-struct BSTempEffectDebris
-{
-    bool IsNew();
-};
 struct FUN_00619a90_shell
 {
     void ProcessTopicInfoList(unsigned int param);
@@ -1121,7 +993,7 @@ void __thiscall FUN_00619a90_shell::ProcessTopicInfoList(unsigned int param)
         unsigned int i = 0;
         for (; i < count; ++i)
         {
-            TESTopicInfo* info = *(TESTopicInfo**)((Arr*)list)->GetAt(i);
+            TESTopicInfo* info = reinterpret_cast<TopicInfoArray*>(list)->GetAt(i);
             if (info && ((FUN_00619b20_shell*)info)->FUN_00619b20() && ((BSTempEffectDebris*)info)->IsNew())
                 ((FUN_0061f280_shell*)info)->FUN_0061f280();
         }
@@ -1208,21 +1080,14 @@ struct TESFileRef
 };
 void __cdecl _ref_00487050(void*, ::TESFile*);
 
-struct ArrSI
+// Exe 0x00618aa0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct TestopicOffset08View
 {
     unsigned int GetFlags();
-};
-struct TESConditionItem
-{
-    void SetObjectType(int);
 };
 struct GlobalObject_00869f00
 {
     void Clear(bool);
-};
-struct NiTLargeArraySetSizeHelper
-{
-    void SetSize(unsigned int);
 };
 struct ArrX
 {
@@ -1241,17 +1106,7 @@ struct ParentSpaceNode
     int b;
     int c;
 };
-struct NavMeshTriangleEdgeReference
-{
-    int a;
-    int b;
-    int c;
-};
-template <> class BSSimpleArray<NavMeshTriangleEdgeReference, 1024>
-{
-  public:
-    unsigned int Add(const NavMeshTriangleEdgeReference&);
-};
+
 extern int DAT_0119a41c[];
 extern void* DAT_0119a43c[];
 typedef BSSimpleArray<ParentSpaceNode, 1024> PSNArr;
@@ -1282,7 +1137,7 @@ bool FUN_00618aa0_t::FUN_00618aa0(::TESFile* pFile)
 
     LoadRecordHeader(pFile);
 
-    BSSimpleList<QuestDialogueInfo*>* pQuestInfoList = GetQuestInfoList();
+    BSSimpleList<QuestDialogueInfo*>* pQuestInfoList = static_cast<const TESTopic*>(this)->GetQuestInfoList();
     while (pQuestInfoList && *(int*)((TESTopicInfoData*)pQuestInfoList)->GetLinkFromList() != 0)
     {
         QuestDialogueInfo* pQuestInfo = *(QuestDialogueInfo**)((TESTopicInfoData*)pQuestInfoList)->GetLinkFromList();
@@ -1308,7 +1163,7 @@ bool FUN_00618aa0_t::FUN_00618aa0(::TESFile* pFile)
             readOBNDSubRecord(pFile);
             break;
         case 0x4c4c5546:
-            _ref_00487050(this ? (void*)&tESFullNameComponent : 0, pFile);
+            _ref_00487050((void*)static_cast<TESFullName*>(this), pFile);
             break;
         case 0x49545351: {
             unsigned int uiChunkType = 0;
@@ -1318,9 +1173,9 @@ bool FUN_00618aa0_t::FUN_00618aa0(::TESFile* pFile)
             if (pQuestInfo)
             {
                 pLastQuestInfo = pQuestInfo;
-                unsigned int uiOldSize = ((ArrSI*)pQuestInfo->GetInfoArray())->GetFlags();
-                ((NiTLargeArraySetSizeHelper*)pQuestInfo->GetInfoArray())->SetSize(uiOldSize + 100);
-                ((TESConditionItem*)pQuestInfo->GetInfoArray())->SetObjectType(10);
+                unsigned int uiOldSize = ((TestopicOffset08View*)pQuestInfo->GetInfoArray())->GetFlags();
+                pQuestInfo->GetInfoArray()->SetSize(uiOldSize + 100);
+                pQuestInfo->GetInfoArray()->SetGrowBy(10);
             }
             break;
         }
@@ -1345,10 +1200,10 @@ bool FUN_00618aa0_t::FUN_00618aa0(::TESFile* pFile)
             if (pLastQuestInfo)
             {
                 int IdxJustAdded;
-                if ((IdxJustAdded = ((ArrSI*)((char*)pLastQuestInfo + 0x1c))->GetFlags() - 1) >= 0)
+                if ((IdxJustAdded = ((TestopicOffset08View*)((char*)pLastQuestInfo + 0x1c))->GetFlags() - 1) >= 0)
                 {
                     *(int*)((char*)&((PSNArr*)((char*)pLastQuestInfo + 0x1c))->GetAt(IdxJustAdded) + 8) = m_iIndex;
-                    int size = ((ArrSI*)((char*)pLastQuestInfo + 0x1c))->GetFlags();
+                    int size = ((TestopicOffset08View*)((char*)pLastQuestInfo + 0x1c))->GetFlags();
                     for (int iter = 0; iter < IdxJustAdded; iter++)
                     {
                         if (*(int*)&((PSNArr*)((char*)pLastQuestInfo + 0x1c))->GetAt(iter) ==
@@ -1417,7 +1272,7 @@ struct FUN_00619430_shell : TESTopic
 bool FUN_00619430_shell::FUN_00619430(TESForm* apForm)
 {
     bool bResult = false;
-    switch (FNV_GetFormType(apForm))
+    switch (::FNV_GetFormType(apForm))
     {
     case 0x46: {
         TESTopicInfo* pTopicInfo = dynamic_cast<TESTopicInfo*>(apForm);
@@ -1457,7 +1312,7 @@ struct FUN_00619c50_shell : TESTopic
 // @fnv 0x00619c50
 TESTopic* FUN_00619c50_shell::FindTopicByInfoID(unsigned int topicID)
 {
-    BSSimpleList<QuestDialogueInfo*>* pList = GetQuestInfoList();
+    BSSimpleList<QuestDialogueInfo*>* pList = static_cast<const TESTopic*>(this)->GetQuestInfoList();
     unsigned int count_2 = 0;
     while (pList && pList->GetItem())
     {
@@ -1483,33 +1338,6 @@ extern DH* g_dataHandler;
 struct FUN_004612e0_shell
 {
     void* FUN_004612e0();
-};
-struct ListX
-{
-    ~ListX();
-};
-struct SL : ListX
-{
-    SL();
-    void* m_item;
-    void* m_next;
-};
-struct G2
-{
-    void AddHead(int*);
-};
-struct GridArray
-{
-    int GetCenterX() const;
-};
-struct ItemList
-{
-    void FUN_0063f7b0();
-};
-struct VATSCommand;
-struct VATS_CommandList
-{
-    void FUN_00905330(VATSCommand* const&);
 };
 bool __fastcall _ref_008256d0(void*);
 struct TopicSort_0061a5a0
@@ -1541,14 +1369,14 @@ void SortTopicList(bool abSortByPriority, BSSimpleList<TESTopic*>* apTopicList)
             {
                 if (plastlist)
                 {
-                    ((VATS_CommandList*)plastlist)->FUN_00905330((VATSCommand* const&)ptopic1);
+                    ((SL*)plastlist)->FUN_00905330((Actor* const&)ptopic1);
                     pCurrentElementNext = ((BSSimpleList<TESTopic*>*)((GridArray*)(plastlist))->GetCenterX());
                 }
                 else
                 {
-                    ((ItemList*)pCurrentElementNext)->FUN_0063f7b0();
+                    ((SL*)pCurrentElementNext)->FUN_0063f7b0();
                 }
-                ((G2*)&sortlist)->AddHead((int*)&ptopic1);
+                sortlist.AddHead((SkySoundObj**)&ptopic1);
                 badvanced = true;
             }
         }
@@ -1558,10 +1386,10 @@ void SortTopicList(bool abSortByPriority, BSSimpleList<TESTopic*>* apTopicList)
             pCurrentElementNext = ((BSSimpleList<TESTopic*>*)((GridArray*)(pCurrentElementNext))->GetCenterX());
         }
     }
-    while (!_ref_008256d0(&sortlist))
+    while (!fnv_0061a5a0::_ref_008256d0(&sortlist))
     {
         TESTopic* pMenuTopicEntry = (*(TESTopic**)((TESTopicInfoData*)(&sortlist))->GetLinkFromList());
-        ((ItemList*)&sortlist)->FUN_0063f7b0();
+        sortlist.FUN_0063f7b0();
         TopicSort_0061a5a0::AddTopicToList(pMenuTopicEntry, pBaseList, abSortByPriority);
     }
 }
@@ -1578,7 +1406,7 @@ bool FUN_00619bc0_shell::HasInfoForQuest(TESQuest* apQuest, bool apCheck)
 {
     if (!apQuest)
         return false;
-    BSSimpleList<QuestDialogueInfo*>* pList = GetQuestInfoList();
+    BSSimpleList<QuestDialogueInfo*>* pList = static_cast<const TESTopic*>(this)->GetQuestInfoList();
     while (pList && pList->GetItem())
     {
         QuestDialogueInfo* pInfo = pList->GetItem();
@@ -1599,7 +1427,7 @@ struct FUN_00619f70_shell : public TESTopic
 // @fnv 0x00619f70
 TopicInfoArray* FUN_00619f70_shell::FindQuestInfoArray(TESTopicInfo* apInfo)
 {
-    BSSimpleList<QuestDialogueInfo*>* list = GetQuestInfoList();
+    BSSimpleList<QuestDialogueInfo*>* list = static_cast<const TESTopic*>(this)->GetQuestInfoList();
     while (list && list->GetItem())
     {
         QuestDialogueInfo* info = list->GetItem();
@@ -1706,12 +1534,6 @@ struct BSSimpleArray_Helper
     void RemoveAt(int index, bool flag = true);
 };
 
-struct NiTLargeArray_TESTopicInfo
-{
-    void Compact();
-    void SetSize(unsigned int size);
-};
-
 struct TopicInfoStandin : public TESTopicInfo
 {
     void SetOwnerQuest(TESQuest* quest);
@@ -1736,7 +1558,7 @@ void TESTopic_Shell::InitializeTopic()
     if (GetInitialized())
         return;
 
-    BSSimpleList<QuestDialogueInfo*>* pIter = GetQuestInfoList();
+    BSSimpleList<QuestDialogueInfo*>* pIter = static_cast<const TESTopic*>(this)->GetQuestInfoList();
     BSSimpleList<QuestDialogueInfo*>* prev = 0;
     while (pIter && pIter->GetItem())
     {
@@ -1820,8 +1642,8 @@ void TESTopic_Shell::InitializeTopic()
             array = questInfo->GetInfoArray();
             if (array)
             {
-                ((NiTLargeArray_TESTopicInfo*)array)->Compact();
-                ((NiTLargeArray_TESTopicInfo*)array)->SetSize(array->GetSize());
+                array->Compact();
+                array->SetSize(array->GetSize());
                 unsigned int infoCount = array->GetSize();
                 for (unsigned int i = 0; i < infoCount; i++)
                 {
@@ -1847,13 +1669,6 @@ void TESTopic_Shell::InitializeTopic()
 }
 }  // namespace fnv_00619030
 
-class TopicInfoArrayMethods : public TopicInfoArray
-{
-  public:
-    void FUN_0061bd20(unsigned int index, TESTopicInfo*& value);
-    void FUN_00864240(unsigned int index, TESTopicInfo*& value);
-    void FUN_0061bdc0();
-};
 class TopicInfoMethods : public TESTopicInfo
 {
   public:
@@ -1889,8 +1704,7 @@ bool TopicMethods::AddTopicInfo(TESQuest* quest, TESTopicInfo* info, unsigned in
                     if (previousInfoID != 0xffffffffu && info->GetInfoIndex() != 0xffff)
                     {
                         TESTopicInfo* empty = 0;
-                        static_cast<TopicInfoArrayMethods*>(questInfo->GetInfoArray())
-                            ->FUN_0061bd20(info->GetInfoIndex(), empty);
+                        questInfo->GetInfoArray()->SetAt(info->GetInfoIndex(), empty);
                     }
                     if (previousInfoID != 0xffffffffu)
                     {
@@ -1931,7 +1745,7 @@ bool TopicMethods::AddTopicInfo(TESQuest* quest, TESTopicInfo* info, unsigned in
                             lastIndex--;
                         lastIndex++;
                         static_cast<TopicInfoMethods*>(info)->FUN_0061f340((unsigned short)lastIndex);
-                        static_cast<TopicInfoArrayMethods*>(questInfo->GetInfoArray())->FUN_00864240(lastIndex, info);
+                        questInfo->GetInfoArray()->SetAtGrow(lastIndex, info);
                     }
                 }
             }
@@ -1941,7 +1755,7 @@ bool TopicMethods::AddTopicInfo(TESQuest* quest, TESTopicInfo* info, unsigned in
     {
         questInfo->GetInfoArray()->InsertInfoAt(0, info);
     }
-    static_cast<TopicInfoArrayMethods*>(questInfo->GetInfoArray())->FUN_0061bdc0();
+    questInfo->GetInfoArray()->Compact();
     FUN_00619fe0(questInfo->GetInfoArray());
     return true;
 }

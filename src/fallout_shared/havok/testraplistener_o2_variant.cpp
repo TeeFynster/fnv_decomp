@@ -1,3 +1,7 @@
+#include "../../../include/CombatWorldStateListNode.h"
+#include "../../../include/bhkTrapListener.h"
+#include "../../../include/TESTrapListener.h"
+#include "../../../include/hkpCdBodyPairCollector.h"
 
 // src/fallout_shared/havok/testraplistener_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/havok/testraplistener.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
@@ -9,26 +13,12 @@ struct FUN_0062d2f0_shell
     void* GetOffset160();
 };
 extern int DAT_0104e328;
-struct hkpCdBodyPairCollector
-{
-    void FUN_0062d420();
-};
-struct bhkTrapListener
-{
-    void FUN_0062d760();
-    void* DestroyIfFlagged(unsigned int);
-};
 void* __cdecl _Deallocate(void*);
 extern int DAT_0104e3d0;
 struct FUN_0062d740_shell
 {
     int m_field;
     void FUN_0062d740();
-};
-struct CombatWorldStateListNode
-{
-    CombatWorldStateListNode* GetNext();
-    int _ref_0084e3a0();
 };
 struct FUN_0062dee0_shell
 {
@@ -51,11 +41,6 @@ struct FUN_0062dfe0_shell
 struct FUN_0062d710_shell : FUN_0062d740_shell
 {
     void* FUN_0062d710(unsigned int flags);
-};
-struct TESTrapListener
-{
-    void FUN_0062d8a0();
-    void* FUN_0062d870(unsigned int flags);
 };
 struct FUN_0062e200_shell
 {

@@ -1,3 +1,130 @@
+#include "../../include/Pair.h"
+// LocalVec3: unit-local copy of the former shared stand-in Vec3. Same layout as NiPoint3/CVec3; this unit's code depends on the stand-in's own overload set and inline bodies (its own NiPoint3/CVec3 bodies differ), so the shared class cannot replace it.
+#include "../../include/NiPoint3.h"
+class Allocator;
+class Elem16;
+struct Mat;
+struct Matrix4;
+class NiPoint3;
+
+struct LocalVec3
+{
+public:
+    union
+    {
+        float x;
+        unsigned int xb;
+    };
+    union
+    {
+        float y;
+        unsigned int yb;
+    };
+    union
+    {
+        float z;
+        unsigned int zb;
+    };
+
+    LocalVec3();
+    // Keep the implicit copy constructor trivial for by-value calls.
+    LocalVec3(float x, float y = 0.0f, float z = 0.0f);
+    LocalVec3(const float* data);
+
+    __forceinline LocalVec3& operator=(const LocalVec3& other)
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    LocalVec3 operator+(const LocalVec3& other) const;
+    LocalVec3 operator-(const LocalVec3& other) const;
+    NiPoint3 operator-(const NiPoint3& other) const;
+    LocalVec3 operator-() const;
+    LocalVec3 operator*(float scale) const;
+    LocalVec3 operator*(double scale) const;
+    LocalVec3& operator+=(const LocalVec3& other);
+    LocalVec3& operator*=(float scale);
+    LocalVec3& operator/=(float scale);
+    bool operator==(const LocalVec3& other) const;
+    bool operator!=(const LocalVec3& other) const;
+    float& operator[](int index);
+    float& operator[](unsigned int index);
+
+    LocalVec3* Self();
+    void Set(float x, float y, float z);
+    void AssignOutput(const LocalVec3& other);
+    LocalVec3 Neg() const;
+    LocalVec3 Add(const LocalVec3& other) const;
+    LocalVec3 Added(const LocalVec3& other) const;
+    LocalVec3& AddTo(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other);
+    LocalVec3 AddVector(const LocalVec3& other) const;
+    void Subtract(const LocalVec3& other);
+    LocalVec3 Scale(float scale) const;
+    LocalVec3 ApplyScaled(float scale);
+    LocalVec3 ApplyScaled(float scale) const;
+    LocalVec3 ScaleSwizzled(float scale);
+    LocalVec3 ScaleSwizzled(float scale) const;
+    void ScaleByInverse(float scale);
+    void Normalize();
+    void Unitize();
+    LocalVec3 Cross(const LocalVec3& other) const;
+    float Dot(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3& other);
+    float DotProduct(const LocalVec3& other) const;
+    float DotProduct(const LocalVec3* other) const;
+    float Length() const;
+    float LengthSquared() const;
+    float GetSquaredXYLength();
+    float GetSquaredXYLength() const;
+    Elem16& expand(Allocator& allocator);
+
+    void FUN_00416870(float x, float y, float z);
+    bool FUN_00439090(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other);
+    bool FUN_004390c0(const LocalVec3* other) const;
+    bool FUN_004390c0(const char* other);
+    void FUN_00439180(float scale);
+    LocalVec3 FUN_00439e90(const LocalVec3& other);
+    LocalVec3 FUN_00439e90(const LocalVec3& other) const;
+    void FUN_00439ef0();
+    LocalVec3 FUN_00439ef0(const LocalVec3& other);
+    LocalVec3 FUN_00439ef0(const LocalVec3& other) const;
+    LocalVec3 FUN_00439ef0(LocalVec3* other);
+    LocalVec3 FUN_00439ef0(const LocalVec3* other);
+    void FUN_00439ef0(LocalVec3* output, const LocalVec3* other);
+    LocalVec3* FUN_00439ef0(void* output, void* other);
+    void FUN_0043d410(float x, int y, int z);
+    void FUN_0043d410(float x, unsigned int y, unsigned int z);
+    float FUN_00457910();
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    LocalVec3 FUN_004b3800(const LocalVec3& other) const;
+    LocalVec3 FUN_0053d280(float divisor);
+    float FUN_00589850();
+    float FUN_00589850() const;
+    void FUN_0063c8a0(const LocalVec3* other);
+    void FUN_0063c8a0(void* other);
+    void FUN_006815c0();
+    float FUN_00b04d40(LocalVec3* other);
+    float FUN_00b04d40(const LocalVec3& other) const;
+    LocalVec3 FUN_00b05000(const Mat& matrix);
+    LocalVec3 FUN_00b05000(const Matrix4* matrix);
+    void FUN_00b12790();
+    LocalVec3 FUN_00b13040(void* other);
+    LocalVec3 FUN_00b13040(const LocalVec3& other) const;
+    float FUN_00b2a180(void* other);
+    LocalVec3& FUN_00b2a1c0(void* other);
+    void FUN_00ddc870();
+    void FUN_00e0f6e0();
+};
+
 
 // src/speedtree/indexedgeometry_ob1_variant.cpp - flag-variant unit created 2026-10-25 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/speedtree/indexedgeometry.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -367,7 +494,8 @@ template <class T> struct ValueBase : FUN_00b39460
     ValueBase(Allocator<T> al = Allocator<T>()) : FUN_00b39460(al), valueAlloc(al)
     {}
 };
-template <class T> struct Vector : ValueBase<T>
+// Unit-local view of Vector for the code in namespace StripJoin: built on the shared Vector, that code does not compile or does not match.
+template <class T> struct Vector_StripJoin : ValueBase<T>
 {
 
     T* first;
@@ -375,11 +503,11 @@ template <class T> struct Vector : ValueBase<T>
     T* last;
 
     T* capacity;
-    Vector() : ValueBase<T>()
+    Vector_StripJoin() : ValueBase<T>()
     {
         buy(0);
     }
-    ~Vector()
+    ~Vector_StripJoin()
     {
         tidy();
     }
@@ -407,7 +535,7 @@ template <class T> struct Vector : ValueBase<T>
         T* ptr;
         ConstIterator() : aux(0)
         {}
-        ConstIterator(T* p, const Vector* v) : aux(0)
+        ConstIterator(T* p, const Vector_StripJoin* v) : aux(0)
         {
             aux = v->aux;
             ptr = p;
@@ -423,7 +551,7 @@ template <class T> struct Vector : ValueBase<T>
     {
         Iterator()
         {}
-        Iterator(T* p, const Vector* v) : ConstIterator(p, v)
+        Iterator(T* p, const Vector_StripJoin* v) : ConstIterator(p, v)
         {}
         Iterator operator+(int n) const
         {
@@ -471,7 +599,7 @@ template <class T> struct Vector : ValueBase<T>
     }
 };
 
-struct Lengths : Vector<unsigned short>
+struct Lengths : Vector_StripJoin<unsigned short>
 {
 
     void FUN_00b32410(const unsigned short& value)
@@ -485,7 +613,7 @@ struct Lengths : Vector<unsigned short>
     void FUN_00b32540();
 };
 
-struct Strips : Vector<unsigned short*>
+struct Strips : Vector_StripJoin<unsigned short*>
 {
 
     void FUN_00b15390(unsigned short* const& value)
@@ -699,7 +827,7 @@ struct Mesh
 
     unsigned int unk70, unk74, unk78, unk7c, unk80, unk84;
 
-    Vector<unsigned int> triangles;
+    Vector_StripJoin<unsigned int> triangles;
 
     void FUN_00b2ed70(bool);
 
@@ -804,38 +932,15 @@ void Mesh::FUN_00b2ed70(bool preserve)
 }
 }
 
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+#pragma intrinsic(memcpy)
 void* __cdecl _memmove(void*, const void*, unsigned int);
-struct Matrix366
+struct Matrix4
 {
     float m[4][4];
 };
-struct Point366
-{
-    float x, y, z;
-    void Set(float a, float b, float c)
-    {
-        x = a;
-        y = b;
-        z = c;
-    }
-
-    Point366()
-    {}
-    Point366(float a, float b, float c)
-    {
-        x = a;
-        y = b;
-        z = c;
-    }
-    Point366 operator*(const Matrix366& m) const
-    {
-        float a = m.m[0][0] * x + m.m[1][0] * y + m.m[2][0] * z + m.m[3][0];
-        float b = m.m[0][1] * x + m.m[1][1] * y + m.m[2][1] * z + m.m[3][1];
-        float c = m.m[0][2] * x + m.m[1][2] * y + m.m[2][2] * z + m.m[3][2];
-        return Point366(a, b, c);
-    }
-};
-struct Vector366
+// 24-byte checked float container (first/last at 0x0c/0x10), unlike the shared SIMD Vector.
+struct GeometryFloatBuffer
 {
     int unk00, unk04, unk08;
     float *first, *last;
@@ -885,26 +990,26 @@ struct Geometry366
     int unk7c;
     int unk80;
     int unk84;
-    Vector366 vertices;
-    Vector366 normalData;
+    GeometryFloatBuffer vertices;
+    GeometryFloatBuffer normalData;
     float* GetVertex(int);
     float* GetPlaneNormal(int);
-    void FUN_00b2fc50(const Matrix366&);
+    void FUN_00b2fc50(const Matrix4&);
 };
 // @fnv 0x00b2fc50
-void Geometry366::FUN_00b2fc50(const Matrix366& matrix)
+void Geometry366::FUN_00b2fc50(const Matrix4& matrix)
 {
     unsigned short count;
     int i;
     float* vertex2;
-    Point366 point2;
+    LocalVec3 point2;
     float* normal;
     count = vertices.size() / 3;
     for (i = 0; i < count; i++)
     {
         vertex2 = GetVertex(i);
         point2.Set(vertex2[0], vertex2[1], vertex2[2]);
-        point2 = point2 * matrix;
+        memcpy(&point2, &point2.FUN_00b05000(&matrix), sizeof(point2));
         _memmove(vertex2, &point2, 12);
         if (normals)
         {
@@ -912,7 +1017,7 @@ void Geometry366::FUN_00b2fc50(const Matrix366& matrix)
             {
                 normal = GetPlaneNormal(i);
                 point2.Set(normal[0], normal[1], normal[2]);
-                point2 = point2 * matrix;
+                memcpy(&point2, &point2.FUN_00b05000(&matrix), sizeof(point2));
                 _memmove(normal, &point2, 12);
             }
         }
@@ -3579,42 +3684,41 @@ template <class T> struct DataVector
         return first[i];
     }
 };
-struct Matrix4
+// Keep default construction empty; origin initialization is explicit where required.
+__forceinline LocalVec3::LocalVec3()
 {
-    float m[4][4];
-};
-struct Vec3
-{
-    float x, y, z;
-    __forceinline Vec3()
-    {
-        x = y = z = 0.0f;
-    }
-    __forceinline Vec3(float a, float b, float c)
-    {
-        x = a;
-        y = b;
-        z = c;
-    }
-    __forceinline void Set(float a, float b, float c)
-    {
-        x = a;
-        y = b;
-        z = c;
-    }
+}
 
-    __forceinline float& operator[](int i)
-    {
-        return (&x)[i];
-    }
-    inline Vec3 FUN_00b05000(const Matrix4* matrix)
-    {
-        float ax = matrix->m[0][0] * x + matrix->m[1][0] * y + matrix->m[2][0] * z + matrix->m[3][0];
-        float ay = matrix->m[0][1] * x + matrix->m[1][1] * y + matrix->m[2][1] * z + matrix->m[3][1];
-        float az = matrix->m[0][2] * x + matrix->m[1][2] * y + matrix->m[2][2] * z + matrix->m[3][2];
-        return Vec3(ax, ay, az);
-    }
-};
+__forceinline LocalVec3::LocalVec3(float a, float b, float c)
+{
+    x = a;
+    y = b;
+    z = c;
+}
+
+__forceinline void LocalVec3::Set(float a, float b, float c)
+{
+    x = a;
+    y = b;
+    z = c;
+}
+
+__forceinline float& LocalVec3::operator[](int i)
+{
+    return (&x)[i];
+}
+
+inline LocalVec3 LocalVec3::FUN_00b05000(const Matrix4* matrix)
+{
+    float ax = matrix->m[0][0] * x + matrix->m[1][0] * y + matrix->m[2][0] * z + matrix->m[3][0];
+    float ay = matrix->m[0][1] * x + matrix->m[1][1] * y + matrix->m[2][1] * z + matrix->m[3][1];
+    float az = matrix->m[0][2] * x + matrix->m[1][2] * y + matrix->m[2][2] * z + matrix->m[3][2];
+    return LocalVec3(ax, ay, az);
+}
+__forceinline void InitializeOrigin(LocalVec3& position)
+{
+    position.x = position.y = position.z = 0.0f;
+}
 struct VertexCountRow
 {
     DataVector<U16> counts;
@@ -3657,6 +3761,9 @@ __forceinline float Blend(float original, float target, float factor)
 {
     return original + (target - original) * factor;
 }
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+#pragma intrinsic(memcpy)
+
 // @fnv 0x00b30800
 unsigned char GeometryProcessor::FUN_00b30800(U16 index)
 {
@@ -3668,8 +3775,10 @@ unsigned char GeometryProcessor::FUN_00b30800(U16 index)
             processedVertices = new unsigned char[vertexCountVal];
         for (int vertex8 = 0; vertex8 < vertexCountVal; ++vertex8)
             processedVertices[vertex8] = 0;
-        Vec3 transformed;
-        Vec3 _interpolatedPosition;
+        LocalVec3 transformed;
+        InitializeOrigin(transformed);
+        LocalVec3 _interpolatedPosition;
+        InitializeOrigin(_interpolatedPosition);
         for (int group4 = 0; group4 < FUN_00b0a9a0(index); ++group4)
         {
             for (int kEntry = 0; kEntry < vertexCounts[index].counts[group4]; ++kEntry)
@@ -3678,14 +3787,15 @@ unsigned char GeometryProcessor::FUN_00b30800(U16 index)
                 if (!processedVertices[vertexId])
                 {
                     float factor5 = blendFactors[vertexId];
-                    Vec3* original = (Vec3*)(&originalPositions[0] + vertexId * 3);
+                    LocalVec3* original = (LocalVec3*)(&originalPositions[0] + vertexId * 3);
                     transformed.Set(original->x, original->y, original->z);
                     U16 pose3 = transformIndices[vertexId];
-                    transformed = transformed.FUN_00b05000(Matrix(pose3));
+                    // Preserve the original trivial assignment's bitwise copy.
+                    memcpy(&transformed, &transformed.FUN_00b05000(Matrix(pose3)), sizeof(transformed));
                     _interpolatedPosition.Set(Blend(original->x, transformed[0], factor5),
                                               Blend(original->y, transformed[1], factor5),
                                               Blend(original->z, transformed[2], factor5));
-                    FUN_00ec44d0((Vec3*)(&outputPositions[0] + vertexId * 3), &_interpolatedPosition, 12);
+                    FUN_00ec44d0((LocalVec3*)(&outputPositions[0] + vertexId * 3), &_interpolatedPosition, 12);
                     processedVertices[vertexId] = 1;
                 }
             }
@@ -3695,6 +3805,8 @@ unsigned char GeometryProcessor::FUN_00b30800(U16 index)
     }
     return changed;
 }
+
+#pragma function(memcpy)
 
 unsigned int __cdecl FUN_00ec7c56(void);
 
@@ -3717,7 +3829,7 @@ struct VecVal : BaseAlloc
     Al alval;
 };
 
-struct Vec;
+struct IntStdVector;
 
 struct IterBase
 {
@@ -3733,15 +3845,16 @@ struct IterBase
 struct CIter : IterBase
 {
     int* ptr;
-    CIter(int* p, const Vec* v);
+    CIter(int* p, const IntStdVector* v);
 };
 
 struct Iter : CIter
 {
-    Iter(int* p, const Vec* v);
+    Iter(int* p, const IntStdVector* v);
 };
 
-struct Vec : VecVal
+// std::vector of 4-byte elements with checked iterators (first/last/end at +0x0c/+0x10/+0x14): 0x00b32120 = clear() via erase(begin(), end()).
+struct IntStdVector : VecVal
 {
     int* first;
     int* last;
@@ -3752,7 +3865,7 @@ struct Vec : VecVal
     void FUN_00b32120();
 };
 
-inline CIter::CIter(int* p, const Vec* v)
+inline CIter::CIter(int* p, const IntStdVector* v)
 {
     {
         if (!(v != 0 && v->first <= p && p <= v->last))
@@ -3764,20 +3877,20 @@ inline CIter::CIter(int* p, const Vec* v)
     ptr = p;
 }
 
-inline Iter::Iter(int* p, const Vec* v) : CIter(p, v)
+inline Iter::Iter(int* p, const IntStdVector* v) : CIter(p, v)
 {}
 
-inline Iter Vec::begin()
+inline Iter IntStdVector::begin()
 {
     return Iter(first, this);
 }
 
-inline Iter Vec::end()
+inline Iter IntStdVector::end()
 {
     return Iter(last, this);
 }
 
-inline CIter Vec::FUN_00b33030(CIter a, CIter b)
+inline CIter IntStdVector::FUN_00b33030(CIter a, CIter b)
 {
     int s0, s1, s2, s3, s4, s5, s6, s7;
     int t0, t1, t2, t3, t4, t5, t6, t7;
@@ -3820,7 +3933,7 @@ inline CIter Vec::FUN_00b33030(CIter a, CIter b)
 }
 
 // @fnv 0x00b32120
-void Vec::FUN_00b32120()
+void IntStdVector::FUN_00b32120()
 {
     FUN_00b33030(begin(), end());
 }
@@ -4305,7 +4418,7 @@ template <class T> struct NativeAllocator
 {
     void deallocate(T* ptr, unsigned int)
     {
-        FormHeap_Free(ptr);
+        fnv_00b2c890::FormHeap_Free(ptr);
     }
     T* allocate(unsigned int count)
     {
@@ -4522,11 +4635,6 @@ inline ConstFloatIterator::ConstFloatIterator(float* position, const ContainerAu
     setContainer(owner);
     ptr = position;
 }
-struct Pair
-{
-    float x;
-    float y;
-};
 inline NonScalarTag PtrCat(Pair*&, Pair*&)
 {
     NonScalarTag cat;

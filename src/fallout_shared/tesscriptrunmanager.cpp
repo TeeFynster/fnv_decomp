@@ -1,20 +1,29 @@
+#include "../../include/ScriptExecutor.h"
 // fallout_shared/tesscriptrunmanager.cpp: ScriptRunner, ScriptExecutor (11 functions)
 
-#include "tesscriptrunmanager_layout.h"
-#include "tesscriptrunmanager_form.h"
-#include "Script.h"
-#include "ScriptReferencedObject.h"
-#include "ScriptFunctionInfo.h"
-#include "TESObjectREFR.h"
-#include "original_script.h"
+#include "../../include/BSStringT.h"
+#include "../../include/ScriptRunner.h"
+#include "../../include/Script.h"
+#include "../../include/ScriptReferencedObject.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/ScriptLocals.h"
+#include "../../include/TESQuest.h"
+#include "../../include/TESGlobal.h"
 #include "game_constants.h"
-#include "ScriptHeaderData.h"
-#include "ScriptLocals.h"
-#include "ExpressionEvaluator.h"
-#include "TESQuest.h"
-#include "TESGlobal.h"
 #include <new>
-#include "tesscriptrunmanager_decls.h"
+
+
+
+ScriptFunctionInfo* GetFunctionByOpcode(SCRIPT_OUTPUT output);
+int Warning(const char* format, ...);
+bool ExtractArgs(const ScriptParameter* parameters, const char* data, unsigned int* offset,
+                 TESObjectREFR* reference, TESObjectREFR* container, Script* script, ScriptLocals* locals, ...);
+extern "C" const char g_nestedScriptRunFormat[];
+extern "C" char g_scriptRunLock;
+extern int __cdecl InitScriptRunLock(void* lock);
+extern void __cdecl FinishScriptRunLock(void* lock);
 extern ScriptFunctionInfo g_scriptBlocks[kScriptBlockCount];
 extern const char* g_expressionErrorStrings[];
 extern void DebugLog(const char* format, ...);
@@ -435,26 +444,25 @@ bool ScriptExecutor::Run(Script* script, TESObjectREFR* reference, ScriptLocals*
 
 void* __cdecl memset(void*, int, unsigned int);
 
-// Zeroes out all fields of the object pointed to by pThis and returns pThis.
+// Initializes the runner's script state and execution stacks.
 // @fnv 0x005e0c60
-void* __fastcall FUN_005e0c60(char* pThis)
+ScriptRunner::ScriptRunner()
 {
-    *(int*)(pThis + 0x20) = 0;
-    *(int*)(pThis + 0x4c) = 0;
-    *(int*)(pThis + 0x18) = 0;
-    *(int*)(pThis + 0x1c) = 0;
-    memset(pThis + 0x24, 0, 0x28);
-    memset(pThis + 0x50, 0, 0x28);
-    memset(pThis + 0x78, 0, 0x28);
-    *(int*)(pThis + 0x00) = 0;
-    *(int*)(pThis + 0x04) = 0;
-    *(int*)(pThis + 0x08) = 0;
-    *(int*)(pThis + 0x0c) = 0;
-    *(int*)(pThis + 0x10) = 0;
-    *(int*)(pThis + 0x14) = 0;
-    *(char*)(pThis + 0xa0) = 0;
-    *(char*)(pThis + 0xa1) = 0;
-    return pThis;
+    m_iIfStackDepth = 0;
+    m_iBlockStackDepth = 0;
+    m_eScriptError = SCRIPT_ERROR_ERROR_SCRIPT_NOERROR;
+    m_eExpressionError = EXPRESSION_ERROR_ERROR_EXPRESSION_NOERROR;
+    memset(m_aiIfStack, 0, sizeof(m_aiIfStack));
+    memset(m_aiBlockOffsets, 0, sizeof(m_aiBlockOffsets));
+    memset(m_aiBlockSizes, 0, sizeof(m_aiBlockSizes));
+    m_pReference = 0;
+    m_pScriptObject = 0;
+    m_pScriptLocals = 0;
+    m_pTopicInfo = 0;
+    m_pGlobal = 0;
+    m_pScript = 0;
+    m_bScriptCompileFailed = false;
+    m_bExecutionFlagSet = false;
 }
 
 struct TLSData_005e23f0
@@ -475,7 +483,7 @@ int __cdecl FUN_00407000(char* buffer, char const* format, char* varArgs);
 
 // Formats a message into a local buffer, logs it via DebugLog or Warning, then zeroes the script header size and flags the runner as failed.
 // @fnv 0x005e2410
-void LogScriptCompileError(ScriptRunner* scriptRunner, Script* apScript, char* apFormat, ...)
+void ScriptRunner::SetErrorMessage(Script* apScript, char* apFormat, ...)
 {
     char buffer[260];
     char* varArgs;
@@ -494,118 +502,52 @@ void LogScriptCompileError(ScriptRunner* scriptRunner, Script* apScript, char* a
     }
 
     apScript->GetHeader()->dataSize = 0;
-    scriptRunner->m_bScriptCompileFailed = true;
+    m_bScriptCompileFailed = true;
 }
 
-struct FUN_005e24b0_shell
-{
-    char pad[0x18];
-    void* m_18;
-    void SetPointer(void* a, void* b);
-};
-
 // @fnv 0x005e24b0
-void FUN_005e24b0_shell::SetPointer(void* a, void* apValue)
+void ScriptRunner::SetError(Script* script, SCRIPT_ERROR error)
 {
-    m_18 = apValue;
+    m_eScriptError = error;
 }
 
 extern void __cdecl _Deallocate(void*);
 
-struct FUN_005e2550_shell
-{
-    void* m_00;
-    void* m_04;
-    void Release();
-};
-
-// Deallocates m_00 via _Deallocate and nulls m_00 and m_04.
+// Releases the reusable runner and clears the active runner.
 // @fnv 0x005e2550
-void FUN_005e2550_shell::Release()
+ScriptExecutor::~ScriptExecutor()
 {
     void* tmp;
-    if (m_00)
+    if (m_pReusableScriptRunner)
     {
-        tmp = m_00;
+        tmp = m_pReusableScriptRunner;
         _Deallocate(tmp);
-        m_00 = 0;
+        m_pReusableScriptRunner = 0;
     }
-    m_04 = 0;
+    m_pActiveScriptRunner = 0;
 }
 
-struct FUN_005e2730_shell : public ScriptExecutor
-{
-    bool FUN_005e2730(Script*, TESObjectREFR*, ScriptLocals*);
-};
-
-struct FUN_005e2850_class
-{
-    bool FUN_005e2850();
-};
-struct FUN_005e1160_shell
-{
-    void RunScript(Script*, TESObjectREFR*, ScriptLocals*);
-};
+// The shared runner header does not yet declare the active-state query.
+extern bool __fastcall IsScriptRunnerActive(ScriptRunner* runner);
 
 // Creates a ScriptRunner if needed, then calls RunScript on either it or a temporary runner.
 // @fnv 0x005e2730
-bool FUN_005e2730_shell::FUN_005e2730(Script* apScript, TESObjectREFR* apOwnerObject, ScriptLocals* apOwnerVars)
+bool ScriptExecutor::FUN_005e2730(Script* apScript, TESObjectREFR* apOwnerObject, ScriptLocals* apOwnerVars)
 {
-    if (!*(ScriptRunner**)this)
-        *(ScriptRunner**)this = new ScriptRunner;
-    if (((FUN_005e2850_class*)*(ScriptRunner**)this)->FUN_005e2850())
+    if (!m_pReusableScriptRunner)
+        m_pReusableScriptRunner = new ScriptRunner;
+    if (IsScriptRunnerActive(m_pReusableScriptRunner))
     {
         ScriptRunner* pTempScriptRunner = new ScriptRunner;
-        ((FUN_005e1160_shell*)pTempScriptRunner)->RunScript(apScript, apOwnerObject, apOwnerVars);
+        pTempScriptRunner->RunScript(apScript, apOwnerObject, apOwnerVars);
         delete pTempScriptRunner;
     }
     else
     {
-        ((FUN_005e1160_shell*)*(ScriptRunner**)this)->RunScript(apScript, apOwnerObject, apOwnerVars);
+        m_pReusableScriptRunner->RunScript(apScript, apOwnerObject, apOwnerVars);
     }
     return true;
 }
-
-namespace fnv_005e1160 {
-class TESObjectREFR
-{
-  public:
-    virtual void Set3D(NiNode* niNode, bool unloadArt);
-    void Get3D(NiNode* niNode, bool unloadArt);
-    TESObject* GetObjectReference();
-};
-
-class ScriptRunner
-{
-  public:
-    TESObjectREFR* m_pReference;
-    TESObject* m_pScriptObject;
-    ScriptLocals* m_pScriptLocals;
-    TESTopicInfo* m_pTopicInfo;
-    TESGlobal* m_pGlobal;
-    Script* m_pScript;
-    SCRIPT_ERROR m_eScriptError;
-    EXPRESSION_ERROR m_eExpressionError;
-    int m_iIfStackDepth;
-    int m_aiIfStack[10];
-    int m_iBlockStackDepth;
-    int m_aiBlockOffsets[10];
-    int m_aiBlockSizes[10];
-    bool m_bScriptCompileFailed;
-    bool m_bExecutionFlagSet;
-
-    ScriptRunner();
-    bool ParseOutput(Script* script, SCRIPT_OUTPUT& output, unsigned int& offset, int& lineSize,
-                     TESObjectREFR** reference, bool skipReference);
-    void SetErrorMessage(Script* script, char* message, ...);
-    bool ParseBlock(Script* script, const SCRIPT_OUTPUT output, TESObjectREFR* reference, int& blockSize,
-                    const unsigned int inputOffset, unsigned int& lineOffset, const unsigned int lineNumber, bool skip,
-                    bool skipBlock);
-    void SetError(Script* script, SCRIPT_ERROR error);
-    bool RunScript(Script* script, TESObjectREFR* reference, ScriptLocals* locals);
-    bool Run(Script* script, TESObjectREFR* reference, ScriptLocals* locals, TESObjectREFR* target, bool arg5,
-             bool arg6, bool arg7, float arg8);
-};
 
 // Parses script output blocks, updates m_pScriptObject and m_pScriptLocals, and returns true after the loop.
 // @fnv 0x005e1160
@@ -661,4 +603,3 @@ bool ScriptRunner::RunScript(Script* script, TESObjectREFR* reference, ScriptLoc
     m_pScript = 0;
     return true;
 }
-}  // namespace fnv_005e1160

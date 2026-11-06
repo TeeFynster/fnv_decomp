@@ -1,8 +1,7 @@
 // bssystemutilities/bsdiscbootsystemutility.cpp: BSDiscBootSystemUtility (3 functions)
 
-#include "bsdiscbootsystemutility_local.h"
-
-typedef void(__thiscall* DestroyFn)(BSDiscBootSystemUtility*);
+#include "../../include/BSDiscBootSystemUtility.h"
+#include "../../include/MemoryManager.h"
 
 extern "C" int __cdecl strcpy_s(char*, unsigned int, const char*);
 
@@ -13,7 +12,7 @@ void BSDiscBootSystemUtility::Destroy()
 // @fnv 0x00af3aa0
 void BSDiscBootSystemUtility::Initialize(const char* titleID, unsigned int parentalLevel)
 {
-    ((DestroyFn)m_ppVirtualMethodTable[2])(this);
+    Destroy();
     if (titleID)
     {
         strcpy_s(m_acTitleID, 0x40, titleID);
@@ -21,20 +20,17 @@ void BSDiscBootSystemUtility::Initialize(const char* titleID, unsigned int paren
     m_uiParentalLevel = parentalLevel;
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
-struct FUN_00af3af0_Class
-{
-    void InitPointer();
-    void* FUN_00af3af0(unsigned int);
-};
+// The original destructor resets the vtable and expects this in ECX.
+extern "C" void BSDiscBootSystemUtility_ResetVtable();
 // @fnv 0x00af3af0
-void* FUN_00af3af0_Class::FUN_00af3af0(unsigned int flags)
+void* BSDiscBootSystemUtility::vf00(unsigned int flags)
 {
-    InitPointer();
+    __asm
+    {
+        mov ecx, this
+        call BSDiscBootSystemUtility_ResetVtable
+    }
     if (flags & 1)
         g_memoryManager.Deallocate(this);
     return this;

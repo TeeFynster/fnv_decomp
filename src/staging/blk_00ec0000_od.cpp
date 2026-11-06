@@ -3,16 +3,15 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/MoviePlayer.h"
+#include "../../include/BGSMoviePlayer.h"
 
-struct BGSMoviePlayer
-{
-    void __thiscall FUN_00ec2760(int a);
-};
 extern BGSMoviePlayer* DAT_0126fac4;
 // @fnv 0x00ec16b0
 int __stdcall FUN_00ec16b0(int a)
 {
-    DAT_0126fac4->FUN_00ec2760(a);
+    DAT_0126fac4->SetPlaybackOption(a);
     return 0;
 }
 
@@ -86,10 +85,6 @@ void __thiscall FUN_00ec1f40Class::FUN_00ec1f40()
 }
 
 namespace fnv_00ec20a0 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 // @fnv 0x00ec20a0
 void __stdcall FUN_00ec20a0(void* apMemory)
@@ -98,12 +93,8 @@ void __stdcall FUN_00ec20a0(void* apMemory)
 }
 }  // namespace fnv_00ec20a0
 
-struct FUN_00ec29b0_class
-{
-    void FUN_00ec29b0();
-};
 // @fnv 0x00ec29b0
-void FUN_00ec29b0_class::FUN_00ec29b0()
+void BGSMoviePlayer::RequestInterruption()
 {
     ((char*)this)[0x21] = 1;
 }
@@ -162,10 +153,6 @@ void __fastcall FUN_00ec1570(FUN_00ec1570_t* p)
     p->j = false;
 }
 
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 struct FUN_00ec15e0_shell
 {
     void __thiscall FUN_00ec15e0();
@@ -2300,14 +2287,6 @@ struct MovieJob
     unsigned char m_0024;
 };
 
-struct MoviePlayer
-{
-    int m_0000;
-    int m_0004;
-    int m_0008;
-    MovieJob* m_000c;
-    void __thiscall WaitForJobCompletion();
-};
 
 // Sleeps 1 ms in a loop while m_0008 is set and the job is missing or its m_0024 flag is nonzero.
 // @fnv 0x00ec29d0
@@ -2466,21 +2445,9 @@ extern "C" __declspec(dllimport) int __stdcall PeekMessageA(PlaybackMessage*, vo
 extern "C" __declspec(dllimport) int __stdcall TranslateMessage(const PlaybackMessage*);
 extern "C" __declspec(dllimport) long __stdcall DispatchMessageA(const PlaybackMessage*);
 
-struct PlaybackContinueState : MoviePlayer
-{
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    bool unk20;
-    unsigned char interrupted;
-
-    bool __thiscall FUN_00ec1840(bool allowInterruption);
-};
-
 // Pumps pending Windows messages and returns false if the playback was interrupted, otherwise true.
 // @fnv 0x00ec1840
-bool __thiscall PlaybackContinueState::FUN_00ec1840(bool allowInterruption)
+bool __thiscall BGSMoviePlayer::CheckPlaybackContinue(bool allowInterruption)
 {
     PlaybackMessage msg;
     while (PeekMessageA(&msg, 0, 0, 0, 1))
@@ -2488,7 +2455,7 @@ bool __thiscall PlaybackContinueState::FUN_00ec1840(bool allowInterruption)
         TranslateMessage(&msg);
         DispatchMessageA(&msg);
     }
-    unsigned char c = interrupted;
+    unsigned char c = ((unsigned char*)this)[0x21];
     if (c)
         return false;
     return true;

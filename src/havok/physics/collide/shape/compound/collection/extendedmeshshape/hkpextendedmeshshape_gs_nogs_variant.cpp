@@ -1,3 +1,9 @@
+#include "../../../../../../../../include/hkArray.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/BSAudio.h"
+#include "../../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../../include/hkVector4.h"
+
 
 // src/havok/physics/collide/shape/compound/collection/extendedmeshshape/hkpextendedmeshshape_gs_nogs_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHsc /Gy (unit src/havok/physics/collide/shape/compound/collection/extendedmeshshape/hkpextendedmeshshape.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -16,54 +22,34 @@ struct FUN_00d56040_shell
 {
     void __thiscall FUN_00d56040(void* first, float value, int last);
 };
-struct hkMemoryAllocator;
-struct AudioMgr
-{
-    int unk00, unk04, unk08, unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-struct BSAudio;
 __declspec(nothrow) BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
+inline hkMemoryRouter* audio()
 {
-    return (AudioMgr*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
 __declspec(nothrow) void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
-struct hkShortArray
+static __forceinline void hkShortArray_reserveExactly(hkArrayBase<short>& self, int n)
 {
-    short* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+        hkMemoryRouter* m = audio();
+        if (self.getCapacity() < n)
+            FUN_00c908c0(m->heap(), (&self), n, sizeof(short));
+    }
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void reserveExactly(int n)
-    {
-        AudioMgr* m = audio();
-        if (getCapacity() < n)
-            FUN_00c908c0(m->heap(), this, n, sizeof(short));
-    }
-    __forceinline void reserve(int n)
-    {
+static __forceinline void hkShortArray_reserve(hkArrayBase<short>& self, int n)
+{
         hkMemoryAllocator& alloc = audio()->heap();
-        if (getCapacity() < n)
+        if (self.getCapacity() < n)
         {
-            int cap = 2 * getCapacity();
-            FUN_00c908c0(alloc, this, n < cap ? cap : n, sizeof(short));
+            int cap = 2 * self.getCapacity();
+            FUN_00c908c0(alloc, (&self), n < cap ? cap : n, sizeof(short));
         }
     }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        reserve(n);
-        m_iElementCount = n;
+
+static __forceinline void hkShortArray_SetSizeAndGrow(hkArrayBase<short>& self, int n)
+{
+        hkShortArray_reserve(self, n);
+        self.m_iElementCount = n;
     }
-};
 struct Elem
 {
     char pad0[0x14];
@@ -79,26 +65,9 @@ struct FUN_00d56070_class
     Elem* m_pElements;
     int m_iCapacityFlags;
     char pad1[0xcc - 0xbc];
-    hkShortArray m_aiIndexedValues;
+    hkArrayBase<short> m_aiIndexedValues;
     void SetShortAtKey(int key, short value);
 };
-struct S_00d56880_Alloc
-{
-};
-struct S_00d56880_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkc;
-    S_00d56880_Alloc* m_pStreamAllocator;
-    static S_00d56880_Router& FUN_00c85750();
-    S_00d56880_Alloc& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-void __cdecl FUN_00c908c0(S_00d56880_Alloc& a, void* arr, int n, int elemSize);
 inline void* operator new(unsigned int, void* p)
 {
     return p;
@@ -148,7 +117,7 @@ struct S_00d56880_Array
     {
         return m_cap & 0x3fffffff;
     }
-    __forceinline void GrowArrayCapacity(S_00d56880_Alloc& a, int n)
+    __forceinline void GrowArrayCapacity(hkMemoryAllocator& a, int n)
     {
         if (getCapacity() < n)
         {
@@ -159,7 +128,7 @@ struct S_00d56880_Array
     }
     __forceinline S_00d56880_Elem* expandBy(int n)
     {
-        S_00d56880_Alloc& a = S_00d56880_Router::FUN_00c85750().heap();
+        hkMemoryAllocator& a = audio()->heap();
         int oldsize = m_iElementCount;
         GrowArrayCapacity(a, oldsize + n);
         S_00d56880_Elem* p = m_data + m_iElementCount;
@@ -383,13 +352,6 @@ struct FUN_00d55a90_cls
 
     int __thiscall FUN_00d55a90(int a1, int a2);
 };
-struct __declspec(align(16)) S_00d55bd0_Vector4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
 struct S_00d55bd0_Bool
 {
     char m_cBooleanValue;
@@ -413,12 +375,12 @@ struct S_00d55bd0_TriangleShape : S_00d55bd0_Shape
     int unk14;
     int unk18;
     int unk1c;
-    S_00d55bd0_Vector4 m_kVertexA;
-    S_00d55bd0_Vector4 m_kVertexB;
-    S_00d55bd0_Vector4 m_kVertexC;
+    hkVector4 m_kVertexA;
+    hkVector4 m_kVertexB;
+    hkVector4 m_kVertexC;
 };
-S_00d55bd0_Bool IsDegenerateTriangle(const S_00d55bd0_Vector4& a, const S_00d55bd0_Vector4& b,
-                                     const S_00d55bd0_Vector4& c, float tolerance);
+S_00d55bd0_Bool IsDegenerateTriangle(const hkVector4& a, const hkVector4& b,
+                                     const hkVector4& c, float tolerance);
 struct S_00d55bd0_TrianglesSubpart
 {
     int unk0;
@@ -522,10 +484,6 @@ struct S_00d55bd0_MeshShape
 
     unsigned int FindNextNonDegenerateShapeKey(unsigned int initialKey) const;
 };
-struct hkReferencedObject
-{
-    void removeReference();
-};
 struct BufferAllocator
 {
     virtual void Slot0();
@@ -534,15 +492,6 @@ struct BufferAllocator
     virtual void Slot3();
     virtual void Release(void* data, unsigned bytes);
 };
-struct BSAudio
-{
-    unsigned unk00;
-    unsigned unk04;
-    unsigned unk08;
-    unsigned unk0c;
-    BufferAllocator* allocator;
-};
-BSAudio* FUN_00c85750();
 struct Container
 {
     unsigned unk00;
@@ -634,21 +583,6 @@ struct bhkShapeOwner
 };
 void __stdcall FUN_00d554e0(int a);
 void __stdcall FUN_00d554f0(int a0);
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setzero_ps();
-struct hkVector4D562
-{
-    __m128 m_vComponents;
-
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-};
 struct ElemD562
 {
     unsigned char m_b0;
@@ -660,7 +594,7 @@ struct ElemD562
     int m_iC;
     int m_i10;
     int unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
-    hkVector4D562 m_kVec;
+    hkVector4 m_kVec;
     int unk40, unk44;
     unsigned char unk48;
     unsigned char m_b49;
@@ -684,41 +618,31 @@ struct ElemD562
         m_i50 = 0;
     }
 };
-struct ArrayD562
+static __forceinline void ArrayD562_reserve(hkArrayBase<ElemD562>& self, hkMemoryAllocator& alloc, int n)
 {
-    ElemD562* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void reserve(hkMemoryAllocator& alloc, int n)
-    {
-        if (getCapacity() < n)
+        if (self.getCapacity() < n)
         {
-            int cap = 2 * getCapacity();
-            FUN_00c908c0(alloc, this, n < cap ? cap : n, sizeof(ElemD562));
+            int cap = 2 * self.getCapacity();
+            FUN_00c908c0(alloc, (&self), n < cap ? cap : n, sizeof(ElemD562));
         }
     }
-    __forceinline ElemD562& AllocatePair()
-    {
+
+static __forceinline ElemD562& ArrayD562_AllocatePair(hkArrayBase<ElemD562>& self)
+{
         hkMemoryAllocator& alloc = audio()->heap();
-        int oldSize = m_iElementCount;
-        reserve(alloc, oldSize + 1);
-        new (m_data + m_iElementCount) ElemD562();
-        m_iElementCount += 1;
-        return m_data[oldSize];
+        int oldSize = self.m_iElementCount;
+        ArrayD562_reserve(self, alloc, oldSize + 1);
+        new (self.m_data + self.m_iElementCount) ElemD562();
+        self.m_iElementCount += 1;
+        return self.m_data[oldSize];
     }
-};
 struct OwnerD562
 {
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
     ElemD562 m_kInline;
     int unk80, unk84, unk88, unk8C, unk90, unk94, unk98, unk9C, unkA0, unkA4, unkA8, unkAC;
     int unkB0;
-    ArrayD562 m_kArray;
+    hkArrayBase<ElemD562> m_kArray;
 
     ElemD562* FUN_00d562f0();
 };

@@ -1,3 +1,5 @@
+#include "../../../../../include/hkErrStream.h"
+#include "../../../../../include/hkError.h"
 
 // src/havok/animation/ragdoll/utils/hkaragdollutils_gs_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /Gy (unit src/havok/animation/ragdoll/utils/hkaragdollutils.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -62,23 +64,6 @@ struct Obj
     char pad0[0xc];
     Inner* inner;
 };
-struct hkErrStream
-{
-    void* p1;
-    void* p2;
-    void* p3;
-    hkErrStream(void* buf, int size) throw();
-    ~hkErrStream() throw();
-    hkErrStream& operator<<(const char* str) throw();
-};
-struct hkError
-{
-    virtual ~hkError() throw();
-    virtual void unk0();
-    virtual void unk1();
-    virtual int message(int type, int id, const char* desc, const char* file, int line) throw();
-};
-extern hkError* DAT_01268360;
 static bool IsSupportedRagdollConstraint(Obj* obj, bool reportError) throw();
 void caller(Obj* obj);
 struct SpawnedAllocator
@@ -182,7 +167,7 @@ static __declspec(noinline) void* FUN_00ce9c40(ShapeOwner* owner)
         char buf[0x200];
         hkErrStream os(buf, sizeof(buf));
         os << str_010cbd50;
-        DAT_01268360->message(1, 0xabbabf3b, buf, str_010cbd34, 0xb4);
+        hkError::s_instance->message(1, 0xabbabf3b, buf, str_010cbd34, 0xb4);
     }
         return 0;
     }

@@ -2,7 +2,7 @@
 // src/gamebryo2.2/corelibs/nimain/nicamera_od_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/nimain/nicamera.cpp functions whose prologue its flags cannot
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "fnv_a3d_camera.h"
+#include "../../../../include/NiPlane.h"
 // The stream scalar operation is expanded in this unit, rather than defining an
 // implementation owned by NiBinaryStream or introducing an out-of-line helper.
 #define FNV_READ_SCALAR(value)                                                                                         \
@@ -16,11 +16,6 @@
 #pragma optimize("", off)
 #pragma optimize("", on)
 
-struct NiPlane
-{
-    char pad[16];
-    NiPlane();
-};
 struct FUN_0045c620
 {
     NiPlane arr[6];

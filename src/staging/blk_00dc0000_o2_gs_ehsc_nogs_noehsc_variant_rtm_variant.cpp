@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
 // src/staging/blk_00dc0000_o2_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00dc0000_o2_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -8,6 +10,11 @@
 // src/staging/blk_00dc0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkSimdReal.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkArray.h"
+#include "../../include/hkLargeBlockAllocator.h"
 struct FUN_00dd4b10_struct
 {
     void __thiscall AssignFromSource(const void* p);
@@ -632,7 +639,8 @@ static __declspec(noinline) FNVInt64 S_00dcc8a0_ParseInt(S_00dcc8a0_Handle h, un
         return 0;
     return (FNVInt64)reader->read(count);
 }
-struct hkEntryDCB1
+// 0x00dcb1a0 indexes these 8-byte dictionary records and returns their first word.
+struct DictionaryMemberLookupEntry
 {
     int m_uiFilterValue;
     int m_04;
@@ -642,7 +650,7 @@ struct hkTableDCB1
     int m_00;
     int m_04;
     int m_08;
-    hkEntryDCB1* m_entries;
+    DictionaryMemberLookupEntry* m_entries;
 };
 class hkOwnerDCB1;
 struct hkRefDCB1
@@ -716,23 +724,7 @@ struct Allocator388
 static void FUN_00dd8fd0(unsigned char* a, unsigned char* b);
 extern "C" unsigned char* GetPtr();
 void Caller(unsigned char* a);
-class hkMemoryAllocatorDDFB;
-struct hkMemoryRouterDDFB
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorDDFB* m_pStreamAllocator;
-    hkMemoryAllocatorDDFB& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-namespace hkRouterDDFB {
-extern "C" hkMemoryRouterDDFB& __cdecl FUN_00c85750() throw();
-}
-void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iElemSize);
+// The copied router/resize scaffolding was used only by the obsolete local array implementation.
 struct hkPairDDFB
 {
     void* m_object;
@@ -745,32 +737,12 @@ struct hkPairDDFB
         return p;
     }
 };
-template <class T> class hkArrayDDFB
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void AddBack(const T& t)
-    {
-        hkMemoryAllocatorDDFB& kAlloc = hkRouterDDFB::FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&kAlloc, this, sizeof(T));
-        new (m_data + m_iElementCount) T(t);
-        m_iElementCount++;
-    }
-};
 class hkOwnerDDFB
 {
   public:
     int unk00;
     int unk04;
-    hkArrayDDFB<hkPairDDFB> m_pairs;
+    hkArray<hkPairDDFB> m_pairs;
 
     void AddPairIfKeyAbsent(void* object, void* key);
 };
@@ -946,64 +918,7 @@ struct S00dcd270_cls
     S00dcd270_Arr arr;
     S00dcd270_Rec* AddRecord(const S00dcd270_Rec* a0);
 };
-class hkBoolDD8
-{
-  public:
-    hkBoolDD8(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
-struct MemChunkDD8
-{
-    enum
-    {
-        PINUSE_BIT = 1,
-        CINUSE_BIT = 2,
-        INUSE_BITS = 3,
-        PAYLOAD_OFFSET = 16
-    };
-    unsigned int m_uiPreviousChunkSize;
-    unsigned int head;
-    hkBoolDD8 isInuse() const
-    {
-        return (head & CINUSE_BIT) != 0;
-    }
-    hkBoolDD8 isPinuse() const
-    {
-        return (head & PINUSE_BIT) != 0;
-    }
-    unsigned int getChunkSize() const
-    {
-        return head & ~(unsigned int)INUSE_BITS;
-    }
-    const MemChunkDD8* chunkPlusOffset(unsigned int s) const
-    {
-        return (const MemChunkDD8*)((const char*)this + s);
-    }
-    const MemChunkDD8* chunkMinusOffset(unsigned int s) const
-    {
-        return (const MemChunkDD8*)((const char*)this - s);
-    }
-    static const MemChunkDD8* toChunk(const void* in)
-    {
-        return (const MemChunkDD8*)((const char*)in - PAYLOAD_OFFSET);
-    }
-};
-class hkLargeBlockAllocatorDD8
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    const MemChunkDD8* m_pMemoryChunk;
-    bool IsValidChunk(const void* in) const;
-};
+// The copied chunk-validation declarations have no callers or definitions in this RTM unit.
 #include <xmmintrin.h>
 extern __m128 DAT_010ce1c0;
 static bool FUN_00dd2fb0(const __m128* a, const __m128* b);
@@ -1024,78 +939,62 @@ extern "C" void _ReadWriteBarrier(void);
 extern "C" void _WriteBarrier(void);
 extern "C" void _ReadBarrier(void);
 
-struct VectorComponentValue
-{
-    __m128 m;
-    VectorComponentValue(float f)
-    {
-        m = _mm_set_ss(f);
-    }
-};
-inline __m128 bcast(const VectorComponentValue& r)
+inline __m128 bcast(const hkSimdReal& r)
 {
     return _mm_shuffle_ps(r.m, r.m, 0);
 }
-struct hkVector4
-{
-    union
-    {
-        __m128 m_vComponents;
-        float m_q[4];
-    };
-    __m128& q()
-    {
-        return m_vComponents;
-    }
-    const __m128& q() const
-    {
-        return m_vComponents;
-    }
-    void setZero4()
-    {
-        q() = _mm_setzero_ps();
-    }
-    void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        q() = _mm_sub_ps(a.q(), b.q());
-    }
-    void mul4(const float& s)
-    {
-        __m128 t = _mm_load_ss(&s);
-        q() = _mm_mul_ps(_mm_shuffle_ps(t, t, 0), q());
-    }
-    void setSubMul(const hkVector4& a, const hkVector4& b, const VectorComponentValue& s)
-    {
-        q() = _mm_mul_ps(_mm_shuffle_ps(s.m, s.m, 0), _mm_sub_ps(a.q(), b.q()));
-    }
-    void setMul4(const VectorComponentValue& s, const hkVector4& a)
-    {
-        q() = _mm_mul_ps(_mm_shuffle_ps(s.m, s.m, 0), a.q());
-    }
-    void mul4s(const VectorComponentValue& s)
-    {
-        q() = _mm_mul_ps(_mm_shuffle_ps(s.m, s.m, 0), q());
-    }
-    void scale(const __m128& s)
-    {
-        q() = _mm_mul_ps(_mm_shuffle_ps(s, s, 0), q());
-    }
-    void operator=(const hkVector4& v)
-    {
-        q() = v.q();
-    }
-};
 
-struct hkBool
+inline __m128& hkVector4::q()
 {
-    char m_cBooleanValue;
-    hkBool()
-    {}
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
+    return m_vComponents;
+}
+
+inline const __m128& hkVector4::q() const
+{
+    return m_vComponents;
+}
+
+inline void hkVector4::setZero4()
+{
+    q() = _mm_setzero_ps();
+}
+
+inline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    q() = _mm_sub_ps(a.q(), b.q());
+}
+
+inline void hkVector4::mul4(const float& s)
+{
+    __m128 t = _mm_load_ss(&s);
+    q() = _mm_mul_ps(_mm_shuffle_ps(t, t, 0), q());
+}
+
+inline void hkVector4::setSubMul(const hkVector4& a, const hkVector4& b, const hkSimdReal& s)
+{
+    q() = _mm_mul_ps(_mm_shuffle_ps(s.m, s.m, 0), _mm_sub_ps(a.q(), b.q()));
+}
+
+inline void hkVector4::setMul4(const hkSimdReal& s, const hkVector4& a)
+{
+    q() = _mm_mul_ps(_mm_shuffle_ps(s.m, s.m, 0), a.q());
+}
+
+inline void hkVector4::mul4s(const hkSimdReal& s)
+{
+    q() = _mm_mul_ps(_mm_shuffle_ps(s.m, s.m, 0), q());
+}
+
+inline void hkVector4::scale(const __m128& s)
+{
+    q() = _mm_mul_ps(_mm_shuffle_ps(s, s, 0), q());
+}
+
+inline void hkVector4::operator=(const hkVector4& v)
+{
+    q() = v.q();
+}
+
 
 struct MoppCodeInfo
 {

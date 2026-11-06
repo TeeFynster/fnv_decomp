@@ -5,60 +5,8 @@
 
 // src/havok/physics/utilities/weapons/hkpgravitygun.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/weapons/hkpgravitygun.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-#include "havok/hkpGravityGun.h"
-struct FUN_00e45fb0_class
-{
-    void FUN_00e45e60(int);
-    void FUN_00e45fb0(int, int, int);
-};
-struct DDCC60World
-{
-    void removeReference();
-};
-struct FUN_00e45fc0_class
-{
-    unsigned char m_unknown[0x20];
-    DDCC60World** m_kExternalLinks;
-    int m_sReferenceCount;
-
-    void RemoveAllReferences(int);
-};
-struct hkFinishLoadedObjectFlagE463
-{
-    int m_bFinishing;
-};
-template <class T> class hkArrayE463
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArrayE463() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
-class FUN_00e466a0
-{
-  public:
-    FUN_00e466a0(hkFinishLoadedObjectFlagE463 flag);
-    virtual ~FUN_00e466a0();
-
-    hkUint16 m_usMemSizeAndFlags;
-    hkInt16 m_sReferenceCount;
-    hkUint8 m_type;
-    const char* m_name;
-    hkUint8 m_uiKeyboardKey;
-    hkArrayE463<void*> m_kListeners;
-};
-class hkpRigidBodyE463;
-class FUN_00e46300 : public FUN_00e466a0
-{
-  public:
-    hkArrayE463<hkpRigidBodyE463*> m_kPickedBodies;
-
-    FUN_00e46300(hkFinishLoadedObjectFlagE463 flag);
-    virtual ~FUN_00e46300();
-};
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/FinishingFlag.h"
 
 #include <xmmintrin.h>
 extern double DAT_01016408;

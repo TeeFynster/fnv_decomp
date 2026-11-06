@@ -2,16 +2,30 @@
 // src/gamebryo2.2/corelibs/nicollision/niobbnode.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/niobbnode.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiOBBNode
+#include "../../../../include/NiOBBNode.h"
+#include "../../../../include/NiPoint3.h"
+
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kPt) const
 {
-    char pad1[0x80];
-    int m_0x80;
-    int m_0x84;
-    bool FUN_00eb6b70();
-};
+    return NiPoint3(x + kPt.x, y + kPt.y, z + kPt.z);
+}
+
+inline bool NiPoint3::operator==(const NiPoint3& kPt) const
+{
+    return x == kPt.x && y == kPt.y && z == kPt.z;
+}
+
+// The shared layout leaves the cached bounds ID opaque.
+static __forceinline int& boundsId(NiOBBNode* node)
+{
+    return *(int*)((char*)node + 0x88);
+}
 
 // @fnv 0x00eb6b70
-bool NiOBBNode::FUN_00eb6b70()
+bool NiOBBNode::HasChildren()
 {
     return m_0x80 || m_0x84;
 }
@@ -22,74 +36,27 @@ struct QueryContext
     void UpdateWorldBounds(void* detail);
     int IntersectRay(void* a1, void* a2);
 };
-struct ChildTest
-{
-    virtual void Slot00() = 0;
-    virtual void Slot04() = 0;
-    virtual void Slot08() = 0;
-    virtual void Slot0c() = 0;
-    virtual int Test(void* a1, void* a2, int a3, int a4, void* a5, int a6) = 0;
-};
-struct RayNode
-{
-    void* unk00;
-    QueryContext context;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    ChildTest* m_0x80;
-    ChildTest* m_0x84;
-    int m_0x88;
-    int TestChildren(void* a1, void* a2, int a3, int a4, void* a5, int a6);
-};
 // Updates the context when a6 differs from m_0x88, rejects via context.IntersectRay, then returns the first child Test result >= 1, else 0.
 // @fnv 0x00eb9430
-int RayNode::TestChildren(void* a1, void* a2, int a3, int a4, void* a5, int a6)
+int NiOBBNode::TestChildren(void* a1, void* a2, int a3, int a4, void* a5, int a6)
 {
-    if (a6 != m_0x88)
+    if (a6 != boundsId(this))
     {
-        context.UpdateWorldBounds((char*)a5 + 0x68);
-        m_0x88 = a6;
+        ((QueryContext*)pad1)->UpdateWorldBounds((char*)a5 + 0x68);
+        boundsId(this) = a6;
     }
-    if (!context.IntersectRay(a1, a2))
+    if (!((QueryContext*)pad1)->IntersectRay(a1, a2))
         return 0;
     int result;
     if (m_0x80 != 0)
     {
-        result = m_0x80->Test(a1, a2, a3, a4, a5, a6);
+        result = ((NiOBBNode*)m_0x80)->TestChildren(a1, a2, a3, a4, a5, a6);
         if (result >= 1)
             return result;
     }
     if (m_0x84 != 0)
     {
-        result = m_0x84->Test(a1, a2, a3, a4, a5, a6);
+        result = ((NiOBBNode*)m_0x84)->TestChildren(a1, a2, a3, a4, a5, a6);
         if (result >= 1)
             return result;
     }
@@ -331,8 +298,8 @@ struct RayNodeW7
     int unk74;
     int unk78;
     int unk7c;
-    ChildTest* m_0x80;
-    ChildTest* m_0x84;
+    NiOBBNode* m_0x80;
+    NiOBBNode* m_0x84;
     int m_0x88;
     void ComputeWeightedCovariance(void* out, unsigned short* a1, V3* a2, int a3, int a4, int a5, int a6, int* a7);
     void ComputeTriangleBounds(int a0, unsigned short* a1, V3* a2, int a3, int a4, int a5, int a6, int* a7);
@@ -527,39 +494,27 @@ struct MyContext
     int FUN_00eba680(void* other);
 };
 
-struct MyNode
-{
-    virtual void Slot00();
-    virtual bool IsTerminalNode();
-    virtual bool CompareTreeRecursive(MyNode* other, char* a2, char* a3, int depthA, int depthB, int idA, int idB);
-
-    MyContext context;
-    MyNode* m_0x80;
-    MyNode* m_0x84;
-    int m_0x88;
-};
-
 // Recursively compares this node's context with another node's, refreshing cached ids, and descends into child nodes up to the given depths.
 // @fnv 0x00eb9180
-bool MyNode::CompareTreeRecursive(MyNode* other, char* apThisData, char* apOtherData, int depthA, int depthB, int idA,
+bool NiOBBNode::CompareTreeRecursive(NiOBBNode* other, char* apThisData, char* apOtherData, int depthA, int depthB, int idA,
                                   int idB)
 {
     if (!other)
         return false;
 
-    if (idA != this->m_0x88)
+    if (idA != boundsId(this))
     {
-        this->context.UpdateWorldBounds(apThisData + 0x68);
-        this->m_0x88 = idA;
+        (*(MyContext*)this->pad1).UpdateWorldBounds(apThisData + 0x68);
+        boundsId(this) = idA;
     }
 
-    if (idB != other->m_0x88)
+    if (idB != boundsId(other))
     {
-        other->context.UpdateWorldBounds(apOtherData + 0x68);
-        other->m_0x88 = idB;
+        (*(MyContext*)other->pad1).UpdateWorldBounds(apOtherData + 0x68);
+        boundsId(other) = idB;
     }
 
-    if (!this->context.FUN_00eba680(&other->context))
+    if (!(*(MyContext*)this->pad1).FUN_00eba680(&(*(MyContext*)other->pad1)))
         return false;
 
     if (!depthA || !depthB)
@@ -570,56 +525,36 @@ bool MyNode::CompareTreeRecursive(MyNode* other, char* apThisData, char* apOther
         if (other->IsTerminalNode())
             return true;
 
-        if (!((NiOBBNode*)other)->FUN_00eb6b70())
+        if (!((NiOBBNode*)other)->HasChildren())
             return true;
 
-        return this->CompareTreeRecursive(other->m_0x80, apThisData, apOtherData, depthA, depthB - 1, idA, idB) ||
-               this->CompareTreeRecursive(other->m_0x84, apThisData, apOtherData, depthA, depthB - 1, idA, idB);
+        return this->CompareTreeRecursive(((NiOBBNode*)other->m_0x80), apThisData, apOtherData, depthA, depthB - 1, idA, idB) ||
+               this->CompareTreeRecursive(((NiOBBNode*)other->m_0x84), apThisData, apOtherData, depthA, depthB - 1, idA, idB);
     }
 
     if (other->IsTerminalNode())
     {
-        if (!this->m_0x80 || !this->m_0x84)
+        if (!((NiOBBNode*)this->m_0x80) || !((NiOBBNode*)this->m_0x84))
             return true;
 
-        return this->m_0x80->CompareTreeRecursive(other, apThisData, apOtherData, depthA - 1, depthB, idA, idB) ||
-               this->m_0x84->CompareTreeRecursive(other, apThisData, apOtherData, depthA - 1, depthB, idA, idB);
+        return ((NiOBBNode*)this->m_0x80)->CompareTreeRecursive(other, apThisData, apOtherData, depthA - 1, depthB, idA, idB) ||
+               ((NiOBBNode*)this->m_0x84)->CompareTreeRecursive(other, apThisData, apOtherData, depthA - 1, depthB, idA, idB);
     }
 
-    if (!this->m_0x80 || !this->m_0x84)
+    if (!((NiOBBNode*)this->m_0x80) || !((NiOBBNode*)this->m_0x84))
         return true;
 
     int iChildDepthA = depthA - 1;
     int iChildDepthB = depthB - 1;
-    return this->m_0x80->CompareTreeRecursive(other->m_0x80, apThisData, apOtherData, iChildDepthA, iChildDepthB, idA,
+    return ((NiOBBNode*)this->m_0x80)->CompareTreeRecursive(((NiOBBNode*)other->m_0x80), apThisData, apOtherData, iChildDepthA, iChildDepthB, idA,
                                               idB) ||
-           this->m_0x80->CompareTreeRecursive(other->m_0x84, apThisData, apOtherData, iChildDepthA, iChildDepthB, idA,
+           ((NiOBBNode*)this->m_0x80)->CompareTreeRecursive(((NiOBBNode*)other->m_0x84), apThisData, apOtherData, iChildDepthA, iChildDepthB, idA,
                                               idB) ||
-           this->m_0x84->CompareTreeRecursive(other->m_0x80, apThisData, apOtherData, iChildDepthA, iChildDepthB, idA,
+           ((NiOBBNode*)this->m_0x84)->CompareTreeRecursive(((NiOBBNode*)other->m_0x80), apThisData, apOtherData, iChildDepthA, iChildDepthB, idA,
                                               idB) ||
-           this->m_0x84->CompareTreeRecursive(other->m_0x84, apThisData, apOtherData, iChildDepthA, iChildDepthB, idA,
+           ((NiOBBNode*)this->m_0x84)->CompareTreeRecursive(((NiOBBNode*)other->m_0x84), apThisData, apOtherData, iChildDepthA, iChildDepthB, idA,
                                               idB);
 }
-
-struct NiPoint3
-{
-    float x, y, z;
-
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    NiPoint3 operator+(const NiPoint3& kPt) const
-    {
-        return NiPoint3(x + kPt.x, y + kPt.y, z + kPt.z);
-    }
-    bool operator==(const NiPoint3& kPt) const
-    {
-        return x == kPt.x && y == kPt.y && z == kPt.z;
-    }
-
-    static const NiPoint3 ZERO;
-};
 
 struct OBBShape
 {
@@ -705,7 +640,7 @@ int OBBLeaf::FUN_00eb9b00(OBBLeaf* pkOther, int iA, int iB, int iC, int iD, bool
     OBBShape* pkShape1 = pkOther->m_pkShape;
     NiPoint3 kV1 = pkShape1->m_kValue;
     int iCollide;
-    if (kV0 == NiPoint3::ZERO && kV1 == NiPoint3::ZERO)
+    if ((const NiPoint3&)kV0 == NiPoint3::ZERO && (const NiPoint3&)kV1 == NiPoint3::ZERO)
     {
         kRecord.m_fTime = 0.0f;
         NiPoint3 kSum = m_kCenter + pkOther->m_kCenter;

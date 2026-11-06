@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
 
 // src/staging/blk_00540000_o2_od_noo2_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /GS /EHsc /Gy /Od (unit src/staging/blk_00540000_o2.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -7,7 +9,7 @@
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
 
-#include <xmmintrin.h>
+#include "../../include/hkVector4.h"
 typedef unsigned int U32;
 struct FUN_006815c0
 {
@@ -15,12 +17,6 @@ struct FUN_006815c0
     FUN_006815c0();
 
     float* FUN_00560d30(int);
-};
-struct FourFloatVector
-{
-    __m128 values;
-    FourFloatVector* FUN_005532a0(float, float, float, float);
-    void FUN_004a3f10(FourFloatVector*);
 };
 struct FUN_00404eb0
 {
@@ -35,7 +31,7 @@ struct FUN_00404eb0
 struct __declspec(align(16)) FUN_00c681c0
 {
     U32 header0, header1, header2, header3;
-    FourFloatVector orientation;
+    hkVector4 orientation;
     U32 unk20;
     U32 unk24;
     U32 unk28;
@@ -288,8 +284,8 @@ ParticleSystem* __cdecl FUN_00554010(const FUN_006815c0* origin)
 {
     FUN_00404eb0 context(16, 1, str_0102ed68, 0x3c1b);
     FUN_00c681c0 source;
-    FourFloatVector rotation;
-    source.orientation.FUN_004a3f10(rotation.FUN_005532a0(0.0f, 0.0f, DAT_011ca158, 0.0f));
+    __declspec(align(16)) unsigned char rotation[sizeof(hkVector4)];
+    source.orientation.FUN_004a3f10(reinterpret_cast<hkVector4*>(rotation)->FUN_005532a0(0.0f, 0.0f, DAT_011ca158, 0.0f));
     source.FUN_00c90db0(FUN_004a3e90(DAT_0102f104));
     FUN_006815c0 direction;
     direction = *origin;

@@ -1,6 +1,30 @@
 // bssystemutilities/console/bsdlcsystemutility_console.cpp: DownloadableContentManager, BSSystemUtility, OwnQ (11 functions)
 
-#include "bsdlcsystemutility_console.h"
+#include <stddef.h>
+#include "../../../include/BSSystemUtility.h"
+#include "../../../include/BSSimpleList.h"
+#include "../../../include/MemoryManager.h"
+
+// No shared DownloadableContentManager definition is available yet.
+class ContentMountRecord;
+class DownloadableContentEntry;
+class DownloadableContentInfo;
+class DownloadableContentManager
+{
+  public:
+    typedef void(__cdecl* MOUNT_CALLBACK)(unsigned int, unsigned int, bool, const ContentMountRecord*);
+    unsigned int m_uiContentCount;
+    DownloadableContentEntry* m_pFirstService;
+    DownloadableContentInfo* m_pSecondService;
+    BSSimpleList<ContentMountRecord*> m_kContentEntries;
+    BSSimpleList<ContentMountRecord*> m_kMountedPackages;
+    BSSimpleList<char*> m_kMountedPackageNames;
+    static DownloadableContentManager& GetRandomGenerator();
+    bool IsDLCAvailable();
+    bool IsContentAvailable();
+    void UnmountDLC();
+    unsigned int MountDownloadableContent(unsigned int userIndex, MOUNT_CALLBACK callback);
+};
 
 // @fnv 0x004c69f0
 bool DownloadableContentManager::IsDLCAvailable()
@@ -69,35 +93,25 @@ unsigned int DownloadableContentManager::MountDownloadableContent(unsigned int u
     }
 }
 
-struct SLX
-{
-    void* item;
-    SLX* next;
-};
-// Zeroes the object's first three words and clears three SLX nodes at offsets 0xc, 0x14 and 0x1c, then returns self.
+// Zeroes the object's first three words and clears three list nodes at offsets 0xc, 0x14 and 0x1c, then returns self.
 // @fnv 0x00af27c0
 DownloadableContentManager* __fastcall FUN_00af27c0(DownloadableContentManager* self)
 {
     *(unsigned int*)((char*)self + 0) = 0;
     *(unsigned int*)((char*)self + 4) = 0;
     *(unsigned int*)((char*)self + 8) = 0;
-    SLX* a = (SLX*)((char*)self + 0xc);
-    a->item = 0;
-    a->next = 0;
-    SLX* b = (SLX*)((char*)self + 0x14);
-    b->item = 0;
-    b->next = 0;
-    SLX* c = (SLX*)((char*)self + 0x1c);
-    c->item = 0;
-    c->next = 0;
+    BSSimpleList<void*>* a = (BSSimpleList<void*>*)((char*)self + 0xc);
+    a->m_item = 0;
+    a->m_pkNext = 0;
+    BSSimpleList<void*>* b = (BSSimpleList<void*>*)((char*)self + 0x14);
+    b->m_item = 0;
+    b->m_pkNext = 0;
+    BSSimpleList<void*>* c = (BSSimpleList<void*>*)((char*)self + 0x1c);
+    c->m_item = 0;
+    c->m_pkNext = 0;
     return self;
 }
 
-class MemoryManager
-{
-  public:
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00af2850
 {
@@ -216,12 +230,6 @@ struct FUN_00af2940_shell : public DownloadableContentManager
     unsigned int AddInstalledDlcPackages(unsigned int, unsigned int);
 };
 
-struct P03MM
-{
-    void* Allocate(unsigned int);
-    void Deallocate(void*);
-};
-extern P03MM _g_memoryManager;
 class ISteamApps
 {
   public:
@@ -245,11 +253,11 @@ struct FUN_00b008b0
 {
     __forceinline static void* operator new(unsigned int s)
     {
-        return _g_memoryManager.Allocate(s);
+        return g_memoryManager.Allocate(s);
     }
     __forceinline static void operator delete(void* p)
     {
-        _g_memoryManager.Deallocate(p);
+        g_memoryManager.Deallocate(p);
     }
     FUN_00b008b0(unsigned int);
     int a;
@@ -365,18 +373,13 @@ int FUN_00af28f0_cls::FUN_00af28f0(int a1)
     }
 }
 
-struct PoolQ
-{
-    void FUN_00aa4060(void* p);
-};
-extern PoolQ DAT_011f6238;
 struct ItmQ
 {
     ~ItmQ();
     void operator delete(void* p)
     {
         int aiD[3];
-        DAT_011f6238.FUN_00aa4060(p);
+        g_memoryManager.Deallocate(p);
     }
 };
 struct NodQ

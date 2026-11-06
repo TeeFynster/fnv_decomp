@@ -1,7 +1,15 @@
 // fallout/misc/saveload/bgssaveloadhistory.cpp: SaveLoadChangeHistory (12 functions)
 
+#include "../../../../include/NiTPointerMap.h"
+
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/BGSLoadGameBuffer.h"
+#include "../../../../include/BGSSaveGameBuffer.h"
+#include "../../../../include/BGSSaveLoadChangesMap.h"
+#include "../../../../include/CombatTargetMap.h"
+#include "../../../../include/SettingT.h"
+
 #include "bgssaveloadhistory_types_BGSSaveLoadHistory.h"
-#include "bgssaveloadhistory_types_CombatTargetMap.h"
 #include "bgssaveloadhistory_types_TaskQueueInterface.h"
 #include "bgssaveloadhistory_decls.h"
 #include <stdarg.h>
@@ -47,7 +55,7 @@ void SaveLoadChangeHistory::AddNoteWithArguments(const char* format, char* argum
 {
     BGSSaveLoadHistoryNoteLocals locals;
     int length;
-    if (!*reinterpret_cast<unsigned char*>(reinterpret_cast<SettingT<INISettingCollection>*>(0x11de0a4)->Bool()))
+    if (!*reinterpret_cast<unsigned char*>(reinterpret_cast<Setting*>(0x11de0a4)->Bool()))
         return;
     length = FUN_00407000(locals.buffer, format, arguments);
     if (length > 0)
@@ -69,7 +77,7 @@ void SaveLoadChangeHistory::Load(SaveLoadFile* file)
         BGSLoadGameBuffer* pBuffer = &buffer;
         {
             unsigned int count = 0;
-            pBuffer->ReadTypedData(&count, 4);
+            pBuffer->ReadTypedData(static_cast<void*>(&count), 4);
             for (unsigned int i = 0; i < count; i++)
             {
                 char* note = pBuffer->LoadString(0);
@@ -134,7 +142,8 @@ FUN_0084df30::~FUN_0084df30()
     DeleteAllElements();
 }
 
-struct ArrSI
+// Exe 0x0084df90: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BgssaveloadhistoryOffset08View
 {
     unsigned int GetFlags();
 };
@@ -142,7 +151,7 @@ struct _Mem_20a4
 {
     void SetSize(unsigned int, bool);
 };
-struct FUN_0084df90_shell : ArrSI
+struct FUN_0084df90_shell : BgssaveloadhistoryOffset08View
 {
     unsigned int& GetAt(int);
     void DeleteAllElements();
@@ -180,47 +189,29 @@ void FUN_0084e250_shell::DeleteItemsFrom(unsigned int uiStartIndex)
     UpdateEntryValue(uiStartIndex, (unsigned int)size - uiStartIndex);
 }
 
-class NavMeshInfo84E;
-class SaveTarget84E;
-
-class BGSSaveGameBuffer84E
-{
-  public:
-    BGSSaveGameBuffer84E();
-    ~BGSSaveGameBuffer84E();
-    void SaveData(void* pvData, int iSize, int iUnk);
-    void SaveNavMeshInfo(NavMeshInfo84E* pkInfo, int iUnk);
-    void WriteTo(SaveTarget84E* pkTarget);
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-};
-
-class NavMeshInfoArray84E
+// 0x00865e70 is SaveGameString; this view iterates history note strings, not NavMeshInfo objects.
+class HistoryNotesView
 {
   public:
     unsigned int GetSize();
-    NavMeshInfo84E*& GetAt(int iIndex);
-    void SaveTo(SaveTarget84E* pkTarget);
+    char*& GetAt(int iIndex);
+    void SaveTo(SaveLoadFile* pkTarget);
 };
 
-// Saves the array size and each NavMeshInfo element into a BGSSaveGameBuffer, then writes the buffer to pkTarget.
+// Saves the note count and each string into a BGSSaveGameBuffer, then writes the buffer to pkTarget.
 // @fnv 0x0084e0d0
-void NavMeshInfoArray84E::SaveTo(SaveTarget84E* pkTarget)
+void HistoryNotesView::SaveTo(SaveLoadFile* pkTarget)
 {
-    BGSSaveGameBuffer84E kBuffer;
-    BGSSaveGameBuffer84E* pkBuffer6 = &kBuffer;
+    BGSSaveGameBuffer kBuffer;
+    BGSSaveGameBuffer* pkBuffer6 = &kBuffer;
 
     unsigned int ItemUpdateArray = GetSize();
-    pkBuffer6->SaveData(&ItemUpdateArray, 4, 0);
+    pkBuffer6->SaveData(static_cast<void*>(&ItemUpdateArray), 4, 0);
     for (unsigned int uiIndex = 0; uiIndex < ItemUpdateArray; uiIndex++)
     {
-        NavMeshInfo84E* pkInfo = GetAt(uiIndex);
-        pkBuffer6->SaveNavMeshInfo(pkInfo, 0);
+        char* note = GetAt(uiIndex);
+        pkBuffer6->SaveGameString(static_cast<const char*>(note), 0);
     }
 
-    kBuffer.WriteTo(pkTarget);
+    kBuffer.Save(pkTarget);
 }

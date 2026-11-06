@@ -1,4 +1,4 @@
-// gamebryo2.2/corelibs/nimain/nioldscreenspace_decls.h: declares ScreenReference, ScreenPointer, NiScreenPolygon
+// gamebryo2.2/corelibs/nimain/nioldscreenspace_decls.h: declares ScreenReference, ScreenPointer
 #ifndef NIOLD_SCREENSPACE_DECLS_H
 #define NIOLD_SCREENSPACE_DECLS_H
 
@@ -41,31 +41,6 @@ class ScreenPointer
         pointer = other.pointer;
         if (pointer)
             pointer->AcquireReference();
-        return *this;
-    }
-};
-class NiScreenPolygon
-{
-  public:
-    ScreenReference* properties[7];
-    NiScreenPolygon(const NiScreenPolygon& other);
-    __forceinline NiScreenPolygon& operator=(const NiScreenPolygon& other)
-    {
-        for (unsigned short i = 0; i < 7; ++i)
-        {
-            ScreenReference* old = properties[i];
-            if (old != other.properties[i])
-            {
-                if (old)
-                {
-                    if (!InterlockedDecrement(&old->references))
-                        old->DeleteThis();
-                }
-                properties[i] = other.properties[i];
-                if (properties[i])
-                    InterlockedIncrement(&properties[i]->references);
-            }
-        }
         return *this;
     }
 };

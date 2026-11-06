@@ -1,9 +1,6 @@
+#include "../../../../include/NiRefObject.h"
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-};
 
 struct NiTexture_RendererData : NiRefObject
 {

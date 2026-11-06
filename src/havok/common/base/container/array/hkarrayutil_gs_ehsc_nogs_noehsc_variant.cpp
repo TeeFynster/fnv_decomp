@@ -66,17 +66,9 @@ struct AudioStream
     int m_iArrayLength;
     int m_uCapacity;
 };
-struct AudioAllocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void* AllocBlock(int* pSize);
-    virtual void unk10();
-    virtual void* ResizeBlock(void* pData, int size, int* pSize);
-};
+#include "../../../../../../include/hkMemoryAllocator.h"
 extern "C" void* __cdecl FNV_block_copy(void* dst, const void* src, unsigned int size);
-void ResizeAudioStream(AudioAllocator* pAlloc, AudioStream* pStream, int elemSize);
+void ResizeAudioStream(hkMemoryAllocator* pAlloc, AudioStream* pStream, int elemSize);
 typedef unsigned int hkUlong;
 extern void __cdecl FUN_00c908c0(void* alloc, void* arr, int n, int sizeElem);
 extern void __cdecl ResizeAudioStream(void* alloc, void* arr, int sizeElem);

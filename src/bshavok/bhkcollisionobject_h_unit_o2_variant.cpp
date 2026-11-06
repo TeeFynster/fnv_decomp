@@ -1,17 +1,46 @@
+#include "../../include/NiTArray.h"
 
 // src/bshavok/bhkcollisionobject_h_unit_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/bshavok/bhkcollisionobject_h_unit.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "bhkcollisionobject.h"
+#include "bhkcollisionobject_decls.h"
+#include "../../include/WeaponObject.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/Mat3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/hkVector4.h"
 
-struct BSFadeNode
+// @fnv 0x0056d5b0
+const NiRTTI* bhkCollisionObject::GetRTTI() const
 {
-    static void* __cdecl operator new(unsigned int);
-};
+    return &ms_kRTTI;
+}
+
+// @fnv 0x0043b610
+bhkCollisionObject* bhkCollisionObject::GetFromNiAVObject(NiAVObject* object)
+{
+    const char* collision = reinterpret_cast<BGSBodyPart*>(object)->GetPartName();
+    return reinterpret_cast<bhkCollisionObject*>(
+        DynamicCastByRTTI(const_cast<NiRTTI*>(&ms_kRTTI), reinterpret_cast<NiNode*>(const_cast<char*>(collision))));
+}
+
+// @fnv 0x004b5a20
+bhkCollisionObject* bhkCollisionObject::GetFromRigidBody(const hkpRigidBody* body)
+{
+    NiAVObject* collision = NiShader::DynamicCast(reinterpret_cast<NiAVObject*>(const_cast<hkpRigidBody*>(body)));
+    return reinterpret_cast<bhkCollisionObject*>(
+        DynamicCastByRTTI(const_cast<NiRTTI*>(&ms_kRTTI), reinterpret_cast<NiNode*>(collision)));
+}
+
 void* __fastcall FUN_00c6b910(void*);
 extern int DAT_0103046c;
-struct MyType : BSFadeNode
+struct MyType
 {
+    // This collision object shares the allocator, not the BSFadeNode layout.
+    static void* __cdecl operator new(unsigned int size)
+    {
+        return BSFadeNode::operator new(size);
+    }
     char d[0x14];
     MyType()
     {
@@ -25,21 +54,13 @@ void* FUN_00c65830()
     return new MyType;
 }
 
-struct hkVector4
-{
-    float x, y, z, w;
-};
 void __cdecl SetNiPoint3FromHkVector4(void*, hkVector4 const&);
 extern int _NiPoint3_ZERO;
 extern int DAT_011f4270;
 extern int DAT_011f4274;
 extern float DAT_01267e30;
-struct WeaponObject
-{
-    void* FUN_00c65ef0(void*);
-};
 // @fnv 0x00c65ef0
-void* WeaponObject::FUN_00c65ef0(void* a1)
+void* WeaponObject::GetTranslation(void* a1)
 {
     void* p = *(void**)((char*)this + 0x10);
     if (p)
@@ -576,30 +597,15 @@ struct MemContextGuard
     }
 };
 
-struct StrAllocator
+template <class T, class A> inline unsigned int NiTArray<T, A>::Add(const T& element)
 {
-};
-template <class T, class A> class StrArray
-{
-  public:
-    virtual ~StrArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, T& element);
-    unsigned int Add(T element)
-    {
         unsigned int uiIndex = m_usSize;
         if (uiIndex >= m_usMaxSize)
             SetSize(uiIndex + m_usGrowBy);
         SetAt(uiIndex, element);
         return uiIndex;
     }
-};
-typedef StrArray<char*, StrAllocator> ViewerStrings;
+typedef NiTArray<char*, NiTMallocInterface<char*> > ViewerStrings;
 
 struct RttiStub
 {
@@ -643,18 +649,10 @@ void CollisionObj::FUN_00c66060(ViewerStrings* apViewerStrings)
     apViewerStrings->Add(NiGetViewerStringB("bUseVel", GetUseVel()));
 }
 
-struct Mat3
-{
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-};
-struct Pt3
-{
-    float x, y, z;
-};
 struct Xform
 {
     Mat3 m_kOrientation;
-    Pt3 m_kTranslation;
+    NiPoint3 m_kTranslation;
     float m_fScale;
 };
 struct Quat
@@ -736,7 +734,7 @@ struct BhkBody
     int unk04;
     HkEntity* pNode08;
     void FUN_00560c20(Quat& a1);
-    void FUN_00560bc0(Pt3& a1);
+    void FUN_00560bc0(NiPoint3& a1);
 };
 
 struct CollObj
@@ -811,7 +809,9 @@ void CollObj::FUN_00c65a80()
         return;
     }
     Quat q;
-    Xform t;
+    // The body getters fill the transform without calling Mat3/NiPoint3 constructors.
+    void* transformStorage[sizeof(Xform) / sizeof(void*)];
+    Xform& t = *reinterpret_cast<Xform*>(transformStorage);
     pBody->FUN_00560c20(q);
     q.FUN_004f0180(t.m_kOrientation);
     pBody->FUN_00560bc0(t.m_kTranslation);

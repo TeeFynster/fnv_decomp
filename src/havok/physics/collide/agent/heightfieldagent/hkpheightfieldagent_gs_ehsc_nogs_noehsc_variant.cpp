@@ -5,14 +5,11 @@
 
 // src/havok/physics/collide/agent/heightfieldagent/hkpheightfieldagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/heightfieldagent/hkpheightfieldagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../include/BSAudio.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkArray.h"
+
 extern char DAT_010ceaa8[];
-struct hkMemoryAllocator {
-    virtual ~hkMemoryAllocator();
-};
-struct BSAudio {
-    int unk00, unk04, unk08, unk0c;
-    hkMemoryAllocator* unk10;
-};
 BSAudio* FUN_00c85750();
 void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
 struct SizeSource {
@@ -24,40 +21,12 @@ struct SizeSource {
 struct SourceRef {
     SizeSource* m_p;
 };
-struct hkArrayU16 {
-    unsigned short* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline void init() { m_data = 0; m_iElementCount = 0; m_iCapacityState = 0x80000000; }
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    __forceinline void reserve(int n)
-    {
-        BSAudio* a = FUN_00c85750();
-        hkMemoryAllocator* alloc = a->unk10;
-        int c = m_iCapacityState & 0x3fffffff;
-        if (c < n) {
-            c = c * 2;
-            FUN_00c908c0(*alloc, this, n < c ? c : n, 2);
-        }
-    }
-    __forceinline void SetSizeAndGrow(int n, const unsigned short& fill)
-    {
-        reserve(n);
-        int num = n - m_iElementCount;
-        unsigned short* p = m_data + m_iElementCount;
-        for (int i = 0; i < num; ++i) {
-            p[i] = fill;
-        }
-        m_iElementCount = n;
-    }
-};
 struct FUN_00d32060_Class {
     void* m_vtbl;
     short m_usMemSizeAndFlags;
     short m_sReferenceCount;
     int m_flag;
-    hkArrayU16 m_aiIndexedValues;
+    hkArray<unsigned short> m_aiIndexedValues;
 
     FUN_00d32060_Class* Init(const SourceRef& src, int b, int c, int flag);
 };
@@ -266,8 +235,9 @@ extern "C" void __cdecl FUN_00d31d30(void* arg0,void* arg1,void* arg2,void* arg3
     relativeTransform.FUN_00cb22f0(bodyB->transform,bodyA->transform);
     int count=shape->count();
     BSAudio* scratch=FUN_00c85750();
-    int savedStack=scratch->unk00;
-    scratch->unk00=savedStack+((count*16+127)&~127);
+    // This Havok scratch pointer uses the first word as its stack cursor.
+    int savedStack=*reinterpret_cast<int*>(scratch);
+    *reinterpret_cast<int*>(scratch)=savedStack+((count*16+127)&~127);
     __m128 c0=bodyB->transform->r0.v;
     __m128 c1=bodyB->transform->r1.v;
     __m128 c2=bodyB->transform->r2.v;
@@ -316,7 +286,7 @@ extern "C" void __cdecl FUN_00d31d30(void* arg0,void* arg1,void* arg2,void* arg3
         heightField->CastSphere(sphereInput,*bodyB,collector);
         ++spheres;
     } while(--remaining); }
-    FUN_00c85750()->unk00=savedStack;
+    *reinterpret_cast<int*>(FUN_00c85750())=savedStack;
     event((TimerStream*)TlsGetValue(DAT_0126835c),"lt");
     }
 }
@@ -369,12 +339,11 @@ struct ManagerD {
     virtual unsigned short add(const BodyD&, const BodyD&, const InputD&, OutputD&, int, ContactD*);
     virtual void v10(); virtual void remove(unsigned short id, int constraint);
 };
-struct ArenaD { __m128* top; };
 static __forceinline __m128* reserve(int n) {
-    ArenaD* arena = (ArenaD*)FUN_00c85750();
-    __m128* p = arena->top;
+    __m128** top = reinterpret_cast<__m128**>(FUN_00c85750());
+    __m128* p = *top;
     int bytes = (n * 16 + 127) & -128;
-    arena->top = (__m128*)((char*)p + bytes);
+    *top = (__m128*)((char*)p + bytes);
     return p;
 }
 static __forceinline __m128 point(const Matrix& m, __m128 v) {
@@ -441,8 +410,8 @@ void AgentD::FUN_00d324e0(const BodyD& a, const BodyD& b, const InputD& input, O
             c->id = *id;
         }
     }
-    ((ArenaD*)FUN_00c85750())->top = planes;
-    ((ArenaD*)FUN_00c85750())->top = transformed;
+    *reinterpret_cast<__m128**>(FUN_00c85750()) = planes;
+    *reinterpret_cast<__m128**>(FUN_00c85750()) = transformed;
     timer(DAT_010c41f8);
 }
 }  // namespace fnv_00d324e0

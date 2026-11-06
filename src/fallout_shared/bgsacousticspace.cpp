@@ -1,7 +1,16 @@
 // fallout_shared/bgsacousticspace.cpp: BGSAcousticSpace (12 functions)
 
-#include "bgsacousticspace.h"
+#include "../../include/BGSAcousticSpace.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSAddonNode.h"
+#include "../../include/BSOcclusionPlane.h"
+#include "../../include/TESTopicInfo.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESRegion.h"
 #include <malloc.h>
+#include "../../include/NiFormArray.h"
+
+int Warning(const char* apFormat, ...);
 
 static const char s_kAcousticDawnSoundWarning[] =
     "MASTERFILE: Could not find pDawnSound (%08X) for activator '%s' (%08X).";
@@ -35,13 +44,13 @@ void BGSAcousticSpace::ResetFormData()
 void BGSAcousticSpace::InitItem()
 {
     unsigned int formID;
-    if (static_cast<TESFormInitFlag*>(static_cast<TESForm*>(this))->IsFormInitialized())
+    if (IsFormInitialized())
         return;
     formID = reinterpret_cast<unsigned int>(pDawnSound);
     if (formID)
     {
         RemapFormIDForFile(formID, GetFile(-1));
-        pDawnSound = dynamic_cast<TESSound*>(TESFormInitFlag::GetFormByID(formID));
+        pDawnSound = dynamic_cast<TESSound*>(TESForm::GetFormByID(formID));
         if (!pDawnSound)
             Warning(s_kAcousticDawnSoundWarning, formID, GetName(), GetFormID());
     }
@@ -49,7 +58,7 @@ void BGSAcousticSpace::InitItem()
     if (formID)
     {
         RemapFormIDForFile(formID, GetFile(-1));
-        pNoonSound = dynamic_cast<TESSound*>(TESFormInitFlag::GetFormByID(formID));
+        pNoonSound = dynamic_cast<TESSound*>(TESForm::GetFormByID(formID));
         if (!pNoonSound)
             Warning(s_kAcousticNoonSoundWarning, formID, GetName(), GetFormID());
     }
@@ -57,7 +66,7 @@ void BGSAcousticSpace::InitItem()
     if (formID)
     {
         RemapFormIDForFile(formID, GetFile(-1));
-        pDuskSound = dynamic_cast<TESSound*>(TESFormInitFlag::GetFormByID(formID));
+        pDuskSound = dynamic_cast<TESSound*>(TESForm::GetFormByID(formID));
         if (!pDuskSound)
             Warning(s_kAcousticDuskSoundWarning, formID, GetName(), GetFormID());
     }
@@ -65,7 +74,7 @@ void BGSAcousticSpace::InitItem()
     if (formID)
     {
         RemapFormIDForFile(formID, GetFile(-1));
-        pNightSound = dynamic_cast<TESSound*>(TESFormInitFlag::GetFormByID(formID));
+        pNightSound = dynamic_cast<TESSound*>(TESForm::GetFormByID(formID));
         if (!pNightSound)
             Warning(s_kAcousticNightSoundWarning, formID, GetName(), GetFormID());
     }
@@ -73,7 +82,7 @@ void BGSAcousticSpace::InitItem()
     if (formID)
     {
         RemapFormIDForFile(formID, GetFile(-1));
-        pRegion = dynamic_cast<TESRegion*>(TESFormInitFlag::GetFormByID(formID));
+        pRegion = dynamic_cast<TESRegion*>(TESForm::GetFormByID(formID));
         if (!pRegion)
             Warning(s_kAcousticRegionWarning, formID, GetName(), GetFormID());
     }
@@ -81,7 +90,7 @@ void BGSAcousticSpace::InitItem()
     if (formID)
     {
         RemapFormIDForFile(formID, GetFile(-1));
-        pWallaSound = dynamic_cast<TESSound*>(TESFormInitFlag::GetFormByID(formID));
+        pWallaSound = dynamic_cast<TESSound*>(TESForm::GetFormByID(formID));
         if (!pWallaSound)
             Warning(s_kAcousticWallaSoundWarning, formID, GetName(), GetFormID());
     }
@@ -188,28 +197,13 @@ void* Standin00589930::FUN_00589930(unsigned int flags)
     return this;
 }
 
-struct NiFormArray
-{
-    TESForm* GetFormAt(unsigned int);
-};
-struct BGSCameraPath
-{
-    virtual ~BGSCameraPath()
-    {}
-};
-struct FUN_0058b630_shell
-{
-    char _pad[0x2c];
-    NiFormArray* m_aiIndexedValues;
-    BGSCameraPath* GetCameraPathAt(unsigned int);
-};
 // Returns the BGSCameraPath at index idx from the form array, or null if the array is absent or the form is not a camera path.
 // @fnv 0x0058b630
-BGSCameraPath* FUN_0058b630_shell::GetCameraPathAt(unsigned int uiIndex)
+BGSCameraPath* BGSCameraPath::GetCameraPathAt(unsigned int uiIndex)
 {
     BGSCameraPath* result = 0;
-    if (m_aiIndexedValues)
-        result = dynamic_cast<BGSCameraPath*>(m_aiIndexedValues->GetFormAt(uiIndex));
+    if (m_pPathArray)
+        result = dynamic_cast<BGSCameraPath*>(m_pPathArray->GetFormAt(uiIndex));
     return result;
 }
 
@@ -237,31 +231,13 @@ struct FUN_00792780_Class
 {
     void SetByteAtOffset30(unsigned char);
 };
-struct CP_008c48d0
-{
-    TESSound* GetPrevPath();
-};
-struct TESTopicInfo
-{
-    TESSound* GetConversationData();
-    TESRegion* GetParentQuest();
-};
 struct EP_008c48d0
 {
     TESSound* GetEntryPoint();
 };
-struct BSOcclusionPlane
-{
-    TESSound* GetCullResult();
-};
 struct Idle_008b2010
 {
     TESSound* GetState();
-};
-struct BGSAddonNode
-{
-    unsigned int GetIndex();
-    void SetIndex(unsigned int);
 };
 struct FUN_005e78f0_t
 {
@@ -278,14 +254,14 @@ void FUN_0058a120_shell::CopyFromAcousticSpace(TESForm* apCopy)
     BGSAcousticSpace* pcopy = dynamic_cast<BGSAcousticSpace*>(apCopy);
     if (!pcopy)
         return;
-    ((FUN_00792780_Class*)this)->SetByteAtOffset30(GetByteAtOffset48(pcopy));
-    SetDawnSound(((CP_008c48d0*)pcopy)->GetPrevPath());
-    SetNoonSound(((TESTopicInfo*)pcopy)->GetConversationData());
+    ((FUN_00792780_Class*)this)->SetByteAtOffset30(::GetByteAtOffset48(pcopy));
+    SetDawnSound(reinterpret_cast<TESSound*>(((BGSCameraPath*)pcopy)->GetPrevPath()));
+    SetNoonSound(reinterpret_cast<TESSound*>(((TESTopicInfo*)pcopy)->GetConversationData()));
     SetDuskSound(((EP_008c48d0*)pcopy)->GetEntryPoint());
-    SetNightSound(((BSOcclusionPlane*)pcopy)->GetCullResult());
+    SetNightSound(reinterpret_cast<TESSound*>(((BSOcclusionPlane*)pcopy)->GetCullResult()));
     SetWallaSound(((Idle_008b2010*)pcopy)->GetState());
     ((BGSAddonNode*)this)->SetIndex(((BGSAddonNode*)pcopy)->GetIndex());
-    SetRegion(((TESTopicInfo*)pcopy)->GetParentQuest());
+    SetRegion(reinterpret_cast<TESRegion*>(((TESTopicInfo*)pcopy)->GetParentQuest()));
     SetListenerID((CELL_ENVIRO_TYPE)((FUN_0068a810_shell*)pcopy)->GetField4C());
     ((FUN_005e78f0_t*)this)->FUN_004851b0(pcopy);
 }
@@ -321,9 +297,9 @@ void FUN_00589f70_shell::FUN_00589f70()
     reinterpret_cast<FUN_004855a0*>(this)->M();
 
     questFormID = 0;
-    if (reinterpret_cast<CP_008c48d0*>(this)->GetPrevPath() != 0)
+    if (reinterpret_cast<BGSCameraPath*>(this)->GetPrevPath() != 0)
     {
-        questFormID = reinterpret_cast<TESForm*>(reinterpret_cast<CP_008c48d0*>(this)->GetPrevPath())->GetFormID();
+        questFormID = reinterpret_cast<TESForm*>(reinterpret_cast<BGSCameraPath*>(this)->GetPrevPath())->GetFormID();
     }
     _FUN_00485910(0x4d414e53, questFormID);
 
@@ -408,7 +384,7 @@ bool FUN_0058a220_shell::IsNotEqual(TESForm* apCompare)
     if (reinterpret_cast<FUN_005e79a0_t*>(this)->FUN_00485270(pcomp))
         return true;
 
-    if (reinterpret_cast<CP_008c48d0*>(this)->GetPrevPath() != reinterpret_cast<CP_008c48d0*>(pcomp)->GetPrevPath())
+    if (reinterpret_cast<BGSCameraPath*>(this)->GetPrevPath() != reinterpret_cast<BGSCameraPath*>(pcomp)->GetPrevPath())
         return true;
 
     if (reinterpret_cast<TESTopicInfo*>(this)->GetConversationData() !=
@@ -458,6 +434,6 @@ class FUN_005898c0 : public FUN_0050e820
 // @fnv 0x005898c0
 FUN_005898c0::FUN_005898c0()
 {
-    SetFormType(ENUM_FORM_ID_ASPC_ID);
+    SetFormType(static_cast<ENUM_FORM_ID>(14));  // ASPC
     FUN_00589980();
 }

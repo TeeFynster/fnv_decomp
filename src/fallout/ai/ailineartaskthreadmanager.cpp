@@ -2,38 +2,24 @@
 
 #include <new>
 #include "ailineartaskthreadmanager_rendering.h"
+#include "../../../include/AILinearTaskThread.h"
+#include "../../../include/BSThread.h"
+#include "../../../include/ActorMover.h"
+#include "../../../include/AutoMemHelper.h"
+#include "../../../include/BSAudio.h"
+#include "../../../include/BGSDestructibleObjectForm.h"
+#include "../../../include/CombatTargetMap.h"
+#include "../../../include/CountingSemaphore.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/RecursiveSpinLock.h"
+#include "../../../include/SkyObject.h"
+#include "../../../include/SettingT_GameSettingCollection_.h"
+#include "../../../include/NavMeshObstacleManager.h"
 
 typedef void(__cdecl* AIThreadFunction)();
 
-class BSThread
-{
-  public:
-    enum StackSize
-    {
-        INHERIT_MAIN = 0,
-        SMALL_STACK_SIZE = 16384,
-        MEDIUM_STACK_SIZE = 32768,
-        LARGE_STACK_SIZE = 65536,
-        MAINTHREAD_STACK_SIZE = 131072
-    };
-    void Initialize(StackSize, const char*, bool);
-    void SetSchedulingPriority(unsigned int);
-    void SetThreadPriority(int);
-    void SetName(const char*);
-};
 
-class AILinearTaskThread : public BSThread
-{
-  public:
-    AILinearTaskThread(AIThreadFunction);
-    unsigned char layoutPadding[0x78];
-};
 
-class MemoryManager
-{
-  public:
-    static void* Allocate(unsigned int);
-};
 
 class AIThreadManager
 {
@@ -53,21 +39,6 @@ class AIThreadManager
     static void SetThreadingEnabled(bool);
 };
 
-union SETTING_VALUE
-{
-    int value;
-};
-class SettingT_GameSettingCollection_
-{
-  public:
-    SETTING_VALUE* Int();
-};
-class ActorMover
-{
-  public:
-    unsigned int GetCurrentMoveModeType();
-};
-extern "C" __declspec(dllimport) void* __stdcall CreateEventA(void*, int, int, const char*);
 extern "C" int __cdecl sprintf_s(char*, unsigned int, const char*, ...);
 extern "C" unsigned int gPreferredMoveMode;
 
@@ -83,16 +54,16 @@ void AIThreadManager::StartRenderingTaskThread()
     for (; j <= 7; ++j)
         threadHandles2[j] = CreateEventA(0, 1, 0, 0);
 
-    if (((SettingT_GameSettingCollection_*)0x011c3ea4)->Int()->value > 2)
+    if (*reinterpret_cast<int*>(((SettingT_GameSettingCollection_*)0x011c3ea4)->Int()) > 2)
     {
-        LaunchWorkerThread(AI_THREAD_1, ((SettingT_GameSettingCollection_*)0x011dfb34)->Int()->value,
+        LaunchWorkerThread(AI_THREAD_1, *reinterpret_cast<int*>(((SettingT_GameSettingCollection_*)0x011dfb34)->Int()),
                            (AIThreadFunction)0x008c7da0, "AI Linear Task Thread 1", (BSThread::StackSize)0x10000);
-        LaunchWorkerThread(AI_THREAD_2, ((SettingT_GameSettingCollection_*)0x011dfb18)->Int()->value,
+        LaunchWorkerThread(AI_THREAD_2, *reinterpret_cast<int*>(((SettingT_GameSettingCollection_*)0x011dfb18)->Int()),
                            (AIThreadFunction)0x008c7f50, "AI Linear Task Thread 2", (BSThread::StackSize)0x10000);
     }
     else
     {
-        LaunchWorkerThread(AI_THREAD_1, ((SettingT_GameSettingCollection_*)0x011dfb34)->Int()->value,
+        LaunchWorkerThread(AI_THREAD_1, *reinterpret_cast<int*>(((SettingT_GameSettingCollection_*)0x011dfb34)->Int()),
                            (AIThreadFunction)0x008c7bd0, "AI Linear Task Thread", (BSThread::StackSize)0x10000);
     }
 
@@ -132,11 +103,6 @@ void AIThreadManager::SetThreadingEnabled(bool rendering)
     DAT_011dfa18 = rendering;
 }
 
-class CountingSemaphore
-{
-  public:
-    void Wait();
-};
 
 struct FUN_008c7490_this
 {
@@ -240,16 +206,6 @@ struct TaskQueueInterface
 };
 typedef char _sizecheck_TaskQueueInterface[sizeof(TaskQueueInterface) == 16 ? 1 : -1];
 
-class GlobalObject2_0040c150
-{
-  public:
-    int* Int();
-};
-class BSAudio
-{
-  public:
-    void* GetAudioBackendData();
-};
 unsigned int __cdecl gm_GetCurrentThreadId(void);
 bool __cdecl FUN_00713d90(void);
 bool __fastcall FUN_0087a730(void*);
@@ -257,7 +213,7 @@ bool __cdecl FUN_008c7bc0(void);
 void* __stdcall FUN_00713d80(int);
 unsigned int __fastcall GetValueWithItemResult(void*);
 unsigned long __fastcall _ref_0084e3a0(void*);
-extern GlobalObject2_0040c150 g_011c3ea4;
+extern SettingT_GameSettingCollection_ g_011c3ea4;
 extern BSAudio* g_osGlobals;
 
 // @fnv 0x008c7aa0
@@ -265,7 +221,7 @@ bool __cdecl FUN_008c7aa0()
 {
     bool bretval = false;
     bool bretvalBug44071 = false;
-    if (*g_011c3ea4.Int() > 1 && FUN_00713d90())
+    if (*reinterpret_cast<int*>(g_011c3ea4.Int()) > 1 && FUN_00713d90())
     {
         TaskQueueInterface* pqueueInterface = TaskQueueInterface::GetInstance();
         if (FUN_0087a730(pqueueInterface))
@@ -337,10 +293,6 @@ void FUN_0087a6d0_shell::FUN_0087a6d0()
 }
 
 namespace fnv_008c74b0 {
-struct CountingSemaphore
-{
-    void Signal();
-};
 
 struct FUN_008c74b0_shell
 {
@@ -366,11 +318,6 @@ bool FUN_008c7bc0()
 }
 
 namespace fnv_008c80b0 {
-class CountingSemaphore
-{
-  public:
-    void Wait();
-};
 
 extern CountingSemaphore g_011dfafc;
 
@@ -382,10 +329,6 @@ void FUN_008c80b0()
 }  // namespace fnv_008c80b0
 
 namespace fnv_008c80c0 {
-struct CountingSemaphore
-{
-    void Signal();
-};
 extern CountingSemaphore g_011dfafc;
 
 // @fnv 0x008c80c0
@@ -452,12 +395,6 @@ void FUN_008c7d80_shell::SetCurrent(int aiIndex, int aiValue)
     aiCurrent[aiIndex] = aiValue;
 }
 
-struct AutoMemHelper
-{
-    int aiMemoryContext;
-    AutoMemHelper(int, bool, const char*, int);
-    ~AutoMemHelper();
-};
 struct ArrHelper
 {
     unsigned int GetSize();
@@ -469,10 +406,6 @@ struct Arr
 struct Twin_0084d030
 {
     float GetStoredFloatValue();
-};
-struct CombatTargetMap
-{
-    void ResetTargetMap();
 };
 struct FUN_00986c40_obj
 {
@@ -550,20 +483,8 @@ void FUN_008c73a0_shell::FUN_008c73a0()
 }
 
 namespace fnv_008c7bd0 {
-struct BSAudio
-{
-};
 
-struct GlobalObject_0045cf30
-{
-    unsigned char* Bool();
-};
 
-struct RecursiveSpinLock
-{
-    void Lock(const char*);
-    void Unlock();
-};
 
 struct Zt5TES
 {
@@ -575,16 +496,7 @@ struct TaskQueueInterface
     static TaskQueueInterface* __cdecl GetInstance();
 };
 
-struct NavMeshObstacleManager
-{
-    static NavMeshObstacleManager* __cdecl GetSingleton();
-    void Update();
-};
 
-struct BGSDestructibleObjectForm
-{
-    static void __cdecl UpdateDestructionMap();
-};
 
 struct FUN_008c79e0_shell
 {
@@ -626,12 +538,9 @@ struct FUN_00455640_shell
     void FUN_00455640();
 };
 
-struct SkyObject
-{
-    void Update(float, int);
-};
 
-struct ProcessLists
+// ProcessListsView: unit-local view (declares only what 0x008c7bd0 calls), not the shared ProcessLists; renamed so no local type keeps the shared name
+struct ProcessListsView
 {
     void RunActorUpdates();
 };
@@ -657,7 +566,7 @@ void __fastcall FUN_00991dc0(void*);
 
 extern BSAudio* g_osGlobals;
 extern int g_TES;
-extern GlobalObject_0045cf30 g_011d73e4;
+extern SettingT_GameSettingCollection_ g_011d73e4;
 extern int DAT_011e0e80;
 extern RecursiveSpinLock DAT_011f11a0;
 extern void* BGSSaveLoadGlobalDataWorldspacePtr;
@@ -692,7 +601,7 @@ void __cdecl FUN_008c7bd0()
     reinterpret_cast<GlobalObject_0096d020*>(&DAT_011e0e80)->UpdateDetection();
     reinterpret_cast<GlobalObject_0096d020*>(&DAT_011e0e80)->FUN_0096db30(0.0f, 0, 0);
     reinterpret_cast<SkyObject*>(&DAT_011e0e80)->Update(0.0f, 0);
-    reinterpret_cast<ProcessLists*>(&DAT_011e0e80)->RunActorUpdates();
+    reinterpret_cast<ProcessListsView*>(&DAT_011e0e80)->RunActorUpdates();
     reinterpret_cast<FUN_0096cb50_shell*>(&DAT_011e0e80)->UpdateHighProcessActors();
     BGSDestructibleObjectForm::UpdateDestructionMap();
     DAT_011f11a0.Unlock();
@@ -702,7 +611,7 @@ void __cdecl FUN_008c7bd0()
     reinterpret_cast<FUN_008c7d80_shell*>(FUN_00713d80(1))->SetCurrent(6);
     FUN_008c80d0();
 
-    if (*g_011d73e4.Bool())
+    if (*reinterpret_cast<unsigned char*>(g_011d73e4.Bool()))
         NavMeshObstacleManager::GetSingleton()->Update();
 
     reinterpret_cast<FUN_0087a6d0_shell*>(TaskQueueInterface::GetInstance())->FUN_0087a6d0();
@@ -714,8 +623,8 @@ void __cdecl FUN_008c7bd0()
 }
 }  // namespace fnv_008c7bd0
 
-namespace fnv_008c7f50 {
 class Sky;
+namespace fnv_008c7f50 {
 
 struct Zt5TES
 {
@@ -754,15 +663,7 @@ struct FUN_008c7a70_shell
     void WaitForEvent(int);
 };
 
-struct SkyObject
-{
-    void Update(float, int);
-};
 
-struct BGSDestructibleObjectForm
-{
-    static void __cdecl UpdateDestructionMap();
-};
 
 struct FUN_0096cb50_shell
 {
@@ -858,7 +759,8 @@ struct TaskQueueInterface
     static TaskQueueInterface* __cdecl GetInstance();
 };
 
-struct ProcessLists
+// ProcessListsView: unit-local view (declares only what 0x008c7da0 calls), not the shared ProcessLists; renamed so no local type keeps the shared name
+struct ProcessListsView
 {
     void FUN_0096cca0();
     void FUN_0096cda0();
@@ -867,26 +769,14 @@ struct ProcessLists
     void RunActorUpdates();
 };
 
-struct GlobalObject_0045cf30
-{
-    unsigned char* Bool();
-};
 
-struct NavMeshObstacleManager
-{
-    static NavMeshObstacleManager* __cdecl GetSingleton();
-    void Update();
-};
 
-struct BSAudio
-{
-};
 
 extern BSAudio* g_osGlobals;
 extern FUN_00455640_shell* g_TES;
 extern void* BGSSaveLoadGlobalDataWorldspacePtr;
 extern int DAT_011e0e80;
-extern GlobalObject_0045cf30 g_011d73e4;
+extern SettingT_GameSettingCollection_ g_011d73e4;
 
 void* __cdecl FUN_00713d80();
 void __fastcall FUN_0086fd70(void*);
@@ -904,8 +794,8 @@ void __cdecl FUN_008c7da0()
     reinterpret_cast<FUN_008c79e0_shell*>(FUN_00713d80())->SignalThreadEvent(0, 1);
     reinterpret_cast<FUN_0087a6b0_shell*>(TaskQueueInterface::GetInstance())->FUN_0087a6b0();
     reinterpret_cast<FUN_00991500_shell*>(BGSSaveLoadGlobalDataWorldspacePtr)->FUN_00991500(FUN_005c42d0());
-    reinterpret_cast<ProcessLists*>(&DAT_011e0e80)->FUN_0096cca0();
-    reinterpret_cast<ProcessLists*>(&DAT_011e0e80)->FUN_0096cda0();
+    reinterpret_cast<ProcessListsView*>(&DAT_011e0e80)->FUN_0096cca0();
+    reinterpret_cast<ProcessListsView*>(&DAT_011e0e80)->FUN_0096cda0();
     reinterpret_cast<FUN_008c79e0_shell*>(FUN_00713d80())->SignalThreadEvent(0, 2);
     g_TES->FUN_00455640();
     reinterpret_cast<FUN_008c79e0_shell*>(FUN_00713d80())->SignalThreadEvent(0, 3);
@@ -913,20 +803,20 @@ void __cdecl FUN_008c7da0()
     reinterpret_cast<FUN_008c79e0_shell*>(FUN_00713d80())->SignalThreadEvent(0, 4);
     reinterpret_cast<FUN_009784c0_shell*>(&DAT_011e0e80)->FUN_009784c0();
     reinterpret_cast<FUN_008c79e0_shell*>(FUN_00713d80())->SignalThreadEvent(0, 5);
-    reinterpret_cast<ProcessLists*>(&DAT_011e0e80)->FUN_0096bcd0(0.0f, 0);
+    reinterpret_cast<ProcessListsView*>(&DAT_011e0e80)->FUN_0096bcd0(0.0f, 0);
     reinterpret_cast<FUN_008c79e0_shell*>(FUN_00713d80())->SignalThreadEvent(0, 6);
-    ProcessLists::ProcessPlayerCellActors();
+    ProcessListsView::ProcessPlayerCellActors();
     reinterpret_cast<FUN_008c79e0_shell*>(FUN_00713d80())->SignalThreadEvent(0, 10);
     reinterpret_cast<FUN_008c7a70_shell*>(FUN_00713d80())->WaitForEvent(1, 1);
     reinterpret_cast<FUN_008c7a70_shell*>(FUN_00713d80())->WaitForEvent(1, 3);
-    reinterpret_cast<ProcessLists*>(&DAT_011e0e80)->RunActorUpdates();
+    reinterpret_cast<ProcessListsView*>(&DAT_011e0e80)->RunActorUpdates();
     reinterpret_cast<FUN_008c79e0_shell*>(FUN_00713d80())->SignalThreadEvent(0, 7);
     reinterpret_cast<FUN_0087a6d0_shell*>(TaskQueueInterface::GetInstance())->FUN_0087a6d0();
     reinterpret_cast<FUN_008c79e0_shell*>(FUN_00713d80())->SignalThreadEvent(0, 8);
     reinterpret_cast<FUN_008c7a70_shell*>(FUN_00713d80())->WaitForEvent(1, 7);
     FUN_008c80d0();
     reinterpret_cast<FUN_008c79e0_shell*>(FUN_00713d80())->SignalThreadEvent(0, 9);
-    if (*g_011d73e4.Bool())
+    if (*reinterpret_cast<unsigned char*>(g_011d73e4.Bool()))
         NavMeshObstacleManager::GetSingleton()->Update();
     FUN_005ae270();
     FUN_005a9d60();

@@ -1,11 +1,12 @@
 // teslandtexture.cpp: TESLandTexture, BGSTextureSet, LTCopy (11 functions)
 
 #include "teslandtexture_decls.h"
+#include "../include/TESLandTexture.h"
 
 // @fnv 0x00540c50
 TESLandTexture::TESLandTexture()
 {
-    SetFormType(FORM_ID_LTEX);
+    SetFormType(ENUM_FORM_ID_LTEX_ID);
     SetInitializationState(true);
     ResetFormData();
 }
@@ -24,7 +25,7 @@ void TESLandTexture::ResetFormData()
 bool TESLandTexture::Load(TESFile* file)
 {
     unsigned char formType = file->GetTESForm();
-    if (formType != FORM_ID_LTEX)
+    if (formType != ENUM_FORM_ID_LTEX_ID)
         return false;
     LoadRecordHeader(file);
     do
@@ -69,7 +70,7 @@ bool TESLandTexture::Load(TESFile* file)
 // @fnv 0x00540fe0
 void TESLandTexture::InitItem()
 {
-    if (GetInitialized())
+    if (static_cast<const TESForm*>(this)->GetInitialized())
         return;
     BSSimpleList<TESGrass*>* current = GetGrassList();
     BSSimpleList<TESGrass*>* previous = 0;
@@ -114,10 +115,10 @@ void TESLandTexture::InitItem()
                     GetFormID());
         if (m_pTextureSet)
         {
-            if (!m_pTextureSet->GetTexturePath(BSShaderProperty::BASE))
+            if (!m_pTextureSet->GetTexture(BSShaderProperty::TEXTYPE_DIFFUSE))
                 Warning("MASTERFILE: TextureSet '%s' (%08X) missing diffuse texture (required for landscape textures).",
                         m_pTextureSet->GetName(), m_pTextureSet->GetFormID());
-            if (!m_pTextureSet->GetTexturePath(BSShaderProperty::NORMAL))
+            if (!m_pTextureSet->GetTexture(BSShaderProperty::TEXTYPE_NORMAL))
                 Warning("MASTERFILE: TextureSet '%s' (%08X) missing normal texture (required for landscape textures).",
                         m_pTextureSet->GetName(), m_pTextureSet->GetFormID());
             m_pTextureSet->SetHasSpecular(false);
@@ -126,106 +127,52 @@ void TESLandTexture::InitItem()
     SetInitializationState(true);
 }
 
-// Sets or clears bit 0 of textureFlags according to hasSpecular.
+// Sets or clears bit 0 of iFlags according to hasSpecular.
 // @fnv 0x00541250
 void BGSTextureSet::SetHasSpecular(bool hasSpecular)
 {
     if (hasSpecular)
-        textureFlags &= ~1;
+        iFlags &= ~1;
     else
-        textureFlags |= 1;
+        iFlags |= 1;
 }
 
 void _Deallocate(void*);
-struct Dummy
-{
-    void FUN_00540d10();
-    void* FUN_00540ce0(unsigned int);
-};
 // @fnv 0x00540ce0
-void* Dummy::FUN_00540ce0(unsigned int flags)
+void* TESLandTexture::Delete(unsigned int flags)
 {
-    FUN_00540d10();
+    this->~TESLandTexture();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-struct List_009e03e0
-{
-    void RemoveAll();
-};
-struct FUN_00540dc0_shell : TESFile
-{
-    const char* GetName();
-    void FUN_00540dc0();
-};
 // @fnv 0x00540dc0
-void FUN_00540dc0_shell::FUN_00540dc0()
+void TESLandTexture::ClearData()
 {
-    ((List_009e03e0*)(void*)GetName())->RemoveAll();
+    GetGrassList()->RemoveAll();
 }
-
-class FUN_00540d10_base
-{
-  public:
-    virtual ~FUN_00540d10_base();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-};
-
-class FUN_00540d10_member
-{
-  public:
-    ~FUN_00540d10_member();
-};
-
-class FUN_00540d10_cls : public FUN_00540d10_base
-{
-  public:
-    virtual ~FUN_00540d10_cls();
-    void Reset();
-    FUN_00540d10_member m_20;
-};
 
 // @fnv 0x00540d10
-FUN_00540d10_cls::~FUN_00540d10_cls()
+TESLandTexture::~TESLandTexture()
 {
-    Reset();
+    TESLandTexture::ClearData();
 }
 
-struct GrassHelper
-{
-    void Clear();
-};
-struct LTHelper
-{
-    void CopyBase(TESForm* src);
-    BGSTextureSet* GetTextureSet();
-};
 void MemCopy(void* dst, const void* src, unsigned int n);
-struct LTCopy : TESLandTexture
-{
-    void FUN_00540de0(TESForm* pForm);
-};
 // Copies land texture data from pForm into this object, clearing and rebuilding the grass list from the source's grass entries.
 // @fnv 0x00540de0
-void LTCopy::FUN_00540de0(TESForm* pForm)
+void TESLandTexture::CopyFrom(const TESForm* pForm)
 {
-    TESLandTexture* src = dynamic_cast<TESLandTexture*>(pForm);
+    TESLandTexture* src = dynamic_cast<TESLandTexture*>(const_cast<TESForm*>(pForm));
     if (!src)
         return;
     BSSimpleList<TESGrass*>* node = 0;
-    ((GrassHelper*)GetGrassList())->Clear();
-    ((LTHelper*)this)->CopyBase(src);
+    GetGrassList()->RemoveAll();
+    TESForm::CopyFrom(src);
     MemCopy(&LandTextureParameters, &src->LandTextureParameters, 3);
     m_ucTextureTiling = src->m_ucTextureTiling;
-    m_pTextureSet = ((LTHelper*)src)->GetTextureSet();
+    m_pTextureSet = src->GetTextureSet();
     node = src->GetGrassList();
     while (node && !node->IsEmpty())
     {
@@ -244,13 +191,8 @@ void __cdecl Cb_00485990(unsigned int tag, void* data, unsigned int size);
 void __cdecl Cb_004858f0(unsigned int tag, unsigned int value);
 void __fastcall Cb_00485680(void* self);
 
-struct FUN_00541440_cls : public TESLandTexture
-{
-    void WriteToStream();
-};
-
 // @fnv 0x00541440
-void FUN_00541440_cls::WriteToStream()
+void TESLandTexture::SaveForm()
 {
     unsigned int formId;
     BSSimpleList<TESGrass*>* node3;
@@ -288,17 +230,9 @@ void FUN_00541440_cls::WriteToStream()
 }
 
 #include <string.h>
-struct TextureGetter
-{
-    BGSTextureSet* FUN_009611e0();
-};
-struct FUN_00540ec0_shell : TESLandTexture
-{
-    bool IsDifferentFrom(TESForm*);
-};
 // Returns true if form is not a TESLandTexture or differs in base compare, parameters, tiling, texture set or grass list.
 // @fnv 0x00540ec0
-bool FUN_00540ec0_shell::IsDifferentFrom(TESForm* apOther)
+bool TESLandTexture::Compare(TESForm* apOther)
 {
     TESLandTexture* other = dynamic_cast<TESLandTexture*>(apOther);
     if (!other)
@@ -309,7 +243,7 @@ bool FUN_00540ec0_shell::IsDifferentFrom(TESForm* apOther)
         return true;
     if (m_ucTextureTiling != other->m_ucTextureTiling)
         return true;
-    if (m_pTextureSet != ((TextureGetter*)other)->FUN_009611e0())
+    if (m_pTextureSet != other->GetTextureSet())
         return true;
     BSSimpleList<TESGrass*>* pGrassList = GetGrassList();
     BSSimpleList<TESGrass*>* pOtherGrassList = other->GetGrassList();

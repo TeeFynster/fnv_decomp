@@ -1,6 +1,15 @@
 // gamebryo2.2/corelibs/nimain/niimageconverter.cpp: NiImageConverter, ImageOwner (17 functions)
 
-#include "niimageconverter_worker.h"
+#include "../../../../include/NiImageConverter.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiFile.h"
+#include "../../../../include/NiPalette.h"
+#include "../../../../include/NiPixelData.h"
+#include "../../../../include/NiPixelFormat.h"
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiGlobalStringTable.h"
+
+extern NiImageConverter* DAT_011f4a7c;
 
 // @fnv 0x00a76640
 NiImageConverter* NiImageConverter::GetSharedImageConverter()
@@ -11,26 +20,28 @@ NiImageConverter* NiImageConverter::GetSharedImageConverter()
 __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 extern long volatile DAT_011f4400;
-struct NiRefObject2
+inline NiRefObject::NiRefObject() : m_uiRefCount(0)
 {
-    virtual ~NiRefObject2();
-    virtual void DeleteThis();
-    long refs;
-    NiRefObject2() throw()
-    {
-        refs = 0;
-        InterlockedIncrement(&DAT_011f4400);
-    }
-};
+    InterlockedIncrement(&DAT_011f4400);
+}
+inline NiRefObject::~NiRefObject()
+{
+    InterlockedDecrement(&DAT_011f4400);
+}
+inline void NiRefObject::DecRef()
+{
+    if (!InterlockedDecrement((long volatile*)&m_uiRefCount))
+        DeleteThis();
+}
+inline void NiRefObject::AcquireReference()
+{
+    InterlockedIncrement((long volatile*)&m_uiRefCount);
+}
 struct Sub80
 {
     void FUN_00a8ae50() throw();
 };
-struct BSFadeNode
-{
-    static void* operator new(unsigned int) throw();
-};
-struct NiImageConverter2 : NiRefObject2
+struct NiImageConverter2 : NiRefObject
 {
     char pad[0x78];
     Sub80 s;
@@ -44,35 +55,27 @@ struct NiImageConverter2 : NiRefObject2
         return BSFadeNode::operator new(n);
     }
 };
-inline void Rel(NiRefObject2* o)
+inline void Rel(NiRefObject* o)
 {
-    if (!InterlockedDecrement(&o->refs))
+    if (!InterlockedDecrement((long volatile*)&o->m_uiRefCount))
         o->DeleteThis();
 }
 // Allocates a NiImageConverter2, releases the previous global converter, stores the new one in DAT_011f4a7c and increments its reference count.
 // @fnv 0x00a76ab0
 void CreateImageConverter()
 {
-    NiRefObject2* p = new NiImageConverter2();
-    if ((NiRefObject2*)DAT_011f4a7c != p)
+    NiRefObject* p = new NiImageConverter2();
+    if ((NiRefObject*)DAT_011f4a7c != p)
     {
         if (DAT_011f4a7c)
-            Rel((NiRefObject2*)DAT_011f4a7c);
+            Rel((NiRefObject*)DAT_011f4a7c);
         DAT_011f4a7c = (NiImageConverter*)p;
         if (p)
-            InterlockedIncrement(&p->refs);
+            InterlockedIncrement((long volatile*)&p->m_uiRefCount);
     }
 }
 
-struct NiFile;
 struct NiImageReader;
-struct NiPixelData;
-struct NiPixelFormat;
-struct NiStream;
-struct blob68
-{
-    char b[68];
-};
 
 struct VTable_FUN_00a76d40
 {
@@ -97,21 +100,11 @@ bool __fastcall FUN_00a76d40(const VTable_FUN_00a76d40* pThis, int, const NiPixe
 }
 
 namespace fnv_00a76650 {
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-extern long volatile DAT_011f4400;
 struct Sub80
 {
     void FUN_00a8ae50() throw();
 };
-struct NiRefObject
-{
-    unsigned int m_uiRefCount;
-    NiRefObject() : m_uiRefCount(0)
-    {
-        InterlockedIncrement(&DAT_011f4400);
-    }
-    virtual ~NiRefObject();
-};
+
 struct FUN_00a76650 : NiRefObject
 {
     FUN_00a76650();
@@ -126,22 +119,13 @@ FUN_00a76650::FUN_00a76650()
 }  // namespace fnv_00a76650
 
 namespace fnv_00a76680 {
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-extern long volatile DAT_011f4400;
 extern void* DAT_011f4a78;
 void _NiFreeAlias(void*) throw();
 struct Sub80
 {
     void FUN_00a8ada0() throw();
 };
-struct NiRefObject
-{
-    unsigned int m_uiRefCount;
-    virtual ~NiRefObject()
-    {
-        InterlockedDecrement(&DAT_011f4400);
-    }
-};
+
 struct FUN_00a76680 : NiRefObject
 {
     virtual ~FUN_00a76680();
@@ -157,17 +141,12 @@ FUN_00a76680::~FUN_00a76680()
 }
 }  // namespace fnv_00a76680
 
-struct FUN_00a76890_eq
-{
-    bool operator==(const NiPixelFormat&) const;
-};
-
 // @fnv 0x00a76890
 bool __stdcall ArePixelFormatsEqual(void* apFormatA, void* apFormatB)
 {
     NiPixelFormat& a = *(NiPixelFormat*)apFormatA;
     NiPixelFormat& b = *(NiPixelFormat*)apFormatB;
-    return (*(FUN_00a76890_eq*)&a).operator==(b);
+    return a.operator==(b);
 }
 
 namespace fnv_00a76960 {
@@ -179,10 +158,6 @@ struct FileNameComponents
     void FUN_00aa29d0(char* pcPath, unsigned int uiLen);
     char m_acHead[0x303];
     char m_acTail[0x100];
-};
-struct NiGlobalStringTable
-{
-    static char* AddString(const char*);
 };
 int strcpy_s(char*, unsigned int, const char*);
 extern const char* DAT_011f4a78;
@@ -220,57 +195,30 @@ void FUN_00a76960(char** apszSource, char** apszDest)
 }  // namespace fnv_00a76960
 
 namespace fnv_00a76b30 {
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-struct RefObj
-{
-    virtual void Unk0();
-    virtual void Unk1();
-    long m_refs;
-    void DecRef()
-    {
-        if (!InterlockedDecrement(&m_refs))
-            Unk1();
-    }
-};
-// If the global RefObj pointer DAT_011f4a7c is set, decrements its reference count and clears the pointer.
+
+// If the global NiRefObject pointer DAT_011f4a7c is set, decrements its reference count and clears the pointer.
 // @fnv 0x00a76b30
 void FUN_00a76b30()
 {
     if (DAT_011f4a7c)
     {
-        ((RefObj*)DAT_011f4a7c)->DecRef();
+        ((NiRefObject*)DAT_011f4a7c)->DecRef();
         DAT_011f4a7c = 0;
     }
 }
 }  // namespace fnv_00a76b30
 
 namespace fnv_00a76b60 {
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-struct RefObj
-{
-    virtual void Unk0();
-    virtual void Unk1();
-    long m_refs;
-    void AcquireReference()
-    {
-        InterlockedIncrement(&m_refs);
-    }
-    void DecRef()
-    {
-        if (!InterlockedDecrement(&m_refs))
-            Unk1();
-    }
-};
+
 // Replaces the global image converter pointer, releasing the previous reference and incrementing the new one's reference count.
 // @fnv 0x00a76b60
 void AssignImageConverter(NiImageConverter* conv)
 {
-    RefObj* p = (RefObj*)conv;
-    if ((RefObj*)DAT_011f4a7c != p)
+    NiRefObject* p = (NiRefObject*)conv;
+    if ((NiRefObject*)DAT_011f4a7c != p)
     {
         if (DAT_011f4a7c)
-            ((RefObj*)DAT_011f4a7c)->DecRef();
+            ((NiRefObject*)DAT_011f4a7c)->DecRef();
         DAT_011f4a7c = conv;
         if (p)
             p->AcquireReference();
@@ -278,119 +226,31 @@ void AssignImageConverter(NiImageConverter* conv)
 }
 }  // namespace fnv_00a76b60
 
-namespace fnv_00a76c10 {
-struct NiPixelData;
-struct NiStream;
-struct blob68
+inline NiPalette* NiPixelData::GetPalette() const throw()
 {
-    char b[68];
-};
-struct NiMemObject
-{
-    char _pad_0[1];
-};
-typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct NiPixelFormat
-{
-    void SetField(unsigned char, unsigned char, unsigned char);
-    unsigned char GetField(unsigned char, unsigned char);
-    void SetBit(bool, unsigned char);
-    bool GetBit(unsigned char);
-    static struct blob68 BuildPixelFormat(unsigned char, unsigned int, unsigned int, unsigned int, unsigned int);
-    int GetFormat();
-    unsigned char GetBitsPerPixel();
-    unsigned int GetRendererHint();
-    unsigned int GetExtraData();
-    int GetTiling();
-    bool GetLittleEndian();
-    void SetFormat(int);
-    void SetBitsPerPixel(unsigned char);
-    void SetRendererHint(unsigned int);
-    void SetExtraData(unsigned int);
-    void SetTiling(int);
-    void SetLittleEndian(bool);
-    bool GetComponent(unsigned int, int*, int*, unsigned char*, bool*);
-    void SetComponent(unsigned int, int, int, unsigned char, bool);
-    unsigned int GetNumComponents();
-    bool GetPalettized();
-    bool GetPaletteHasAlpha();
-    bool GetCompressed();
-    unsigned int GetMask(int);
-    unsigned char GetPixelBitData(int);
-    unsigned char GetShift(int);
-    unsigned char QBitsPerPixel();
-    void LoadBinary(NiStream*);
-    void SaveBinary(NiStream*);
-    void InitPixelFormat(int, unsigned char, int, bool, unsigned int, int, int, unsigned char, bool, int, int,
-                         unsigned char, bool, int, int, unsigned char, bool, int, int, unsigned char, bool);
-    void SetComponentFormat(int, unsigned char, unsigned int*);
-    static unsigned int CalcMaskSize(unsigned int);
-    unsigned char m_uiObjectFlags;
-    unsigned char m_ucBitsPerPixel;
-    char _pad_2[2];
-    int m_eFormat;
-    int m_eTiling;
-    unsigned int m_uiRendererHint;
-    unsigned int m_uiExtraData;
-    char m_akComponents[48];
-};
-typedef char _sizecheck_NiPixelFormat[sizeof(NiPixelFormat) == 68 ? 1 : -1];
-struct FUN_00a76c10_shell : public NiImageConverter
-{
-    NiPixelData* FUN_00a76c10(void*, void*, NiPixelData*, bool);
-};
+    return (NiPalette*)m_spPalette.value;
+}
 
 void* _memmove(void* dst, const void* src, unsigned int size);
-struct BSFadeNode
+// The shared palette supplies the layout and construction; only its assignment
+// entry point is still missing from the header.
+struct PaletteCopyAccess : NiPalette
 {
-    static void* __cdecl operator new(unsigned int size);
-};
-struct PixelFormatOps
-{
-    bool operator==(const NiPixelFormat& other) const;
-    bool operator!=(const NiPixelFormat& other) const;
-};
-struct NiPalette
-{
-    char data[0x24];
-    NiPalette(const NiPalette& other);
-    void FUN_00a8b190(const NiPalette& other);
-    static void* operator new(unsigned int, void* p)
-    {
-        return p;
-    }
-};
-struct NiPixelData
-{
-    char base[8];
-    NiPixelFormat m_kPixelFormat;
-    NiPalette* m_spPalette;
-    unsigned char* m_pucPixels;
-    unsigned int* m_puiWidth;
-    unsigned int* m_puiHeight;
-    unsigned int* m_puiOffsetInBytes;
-    unsigned int m_uiMipmapLevels;
-    char tail[0x10];
-    void FUN_00a76a60(NiPalette* pal);
-    NiPalette* GetPalette() const
-    {
-        return m_spPalette;
-    }
-    NiPixelData* FUN_00a7c030(const NiPixelData& src);
+    void CopyFrom(const NiPalette& other);
 };
 
+
 // @fnv 0x00a76c10
-NiPixelData* FUN_00a76c10_shell::FUN_00a76c10(void* src, void* apDestFmt, NiPixelData* pkOptDest, bool bMipmap)
+NiPixelData* NiImageConverter::ConvertImageData(const NiPixelData& kSrc, const NiPixelFormat& kDestFmt,
+                                                 NiPixelData* pkOptDest, bool bMipmap)
 {
-    const NiPixelData& kSrc = *(const NiPixelData*)src;
-    const NiPixelFormat& kDestFmt = *(const NiPixelFormat*)apDestFmt;
-    if (((const PixelFormatOps*)&kSrc.m_kPixelFormat)->operator!=(kDestFmt))
+    if (kSrc.m_kPixelFormat.operator!=(kDestFmt))
         return 0;
     if (pkOptDest)
     {
         if (pkOptDest == &kSrc)
             return pkOptDest;
-        if (((const PixelFormatOps*)&pkOptDest->m_kPixelFormat)->operator==(kDestFmt) &&
+        if (pkOptDest->m_kPixelFormat.operator==(kDestFmt) &&
             *pkOptDest->m_puiWidth == *kSrc.m_puiWidth && *pkOptDest->m_puiHeight == *kSrc.m_puiHeight &&
             pkOptDest->m_uiMipmapLevels <= kSrc.m_uiMipmapLevels)
         {
@@ -401,15 +261,15 @@ NiPixelData* FUN_00a76c10_shell::FUN_00a76c10(void* src, void* apDestFmt, NiPixe
                          kSrc.m_pucPixels + kSrc.m_puiOffsetInBytes[uiMip],
                          kSrc.m_puiOffsetInBytes[uiMip + 1] - kSrc.m_puiOffsetInBytes[uiMip]);
             }
-            if (kSrc.m_spPalette)
+            if (kSrc.m_spPalette.value)
             {
-                if (!pkOptDest->m_spPalette)
+                if (!pkOptDest->m_spPalette.value)
                 {
                     void* pal = BSFadeNode::operator new(0x24);
                     pkOptDest->FUN_00a76a60(pal ? new (pal) NiPalette(*kSrc.GetPalette()) : 0);
                 }
                 else
-                    pkOptDest->m_spPalette->FUN_00a8b190(*kSrc.m_spPalette);
+                    ((PaletteCopyAccess*)pkOptDest->m_spPalette.value)->CopyFrom(*(NiPalette*)kSrc.m_spPalette.value);
             }
             return pkOptDest;
         }
@@ -417,23 +277,6 @@ NiPixelData* FUN_00a76c10_shell::FUN_00a76c10(void* src, void* apDestFmt, NiPixe
     void* pNewPixelData = BSFadeNode::operator new(0x74);
     return pNewPixelData ? ((NiPixelData*)pNewPixelData)->FUN_00a7c030(kSrc) : 0;
 }
-}  // namespace fnv_00a76c10
-
-class NiFile
-{
-  public:
-    enum OpenMode
-    {
-        READ_ONLY,
-        WRITE_ONLY,
-        APPEND_ONLY
-    };
-
-    virtual ~NiFile();
-    virtual operator bool() const;
-
-    static NiFile* GetFile(const char* pcName, OpenMode eMode, unsigned int uiBufferSize);
-};
 
 struct FUN_00aa27d0
 {
@@ -516,7 +359,6 @@ void FUN_00a76d70(unsigned int uiWidth, unsigned int uiHeight, unsigned int, uns
     }
 }
 
-struct NiPalette;
 struct PixelFormatBitLayout;
 void __cdecl FUN_00a76d70(unsigned int, unsigned int, unsigned int, unsigned char*, NiPalette const*,
                           PixelFormatBitLayout const&, unsigned char const*, PixelFormatBitLayout const&);
@@ -577,22 +419,13 @@ char* GetPathWithExtension(const char* pcPath)
 }
 
 namespace fnv_00a76bb0 {
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-extern long volatile DAT_011f4400;
 extern void* DAT_011f4a78;
 void _NiFreeAlias(void*) throw();
 struct Sub80
 {
     void FUN_00a8ada0() throw();
 };
-struct NiRefObject
-{
-    unsigned int m_uiRefCount;
-    virtual ~NiRefObject()
-    {
-        InterlockedDecrement(&DAT_011f4400);
-    }
-};
+
 struct FUN_00a76bb0 : NiRefObject
 {
     char m_data[0x778];
@@ -624,17 +457,11 @@ struct PathParts
         return extension;
     }
 };
-struct InputFile
-{
-    virtual ~InputFile();
-    virtual operator bool() const;
-    static InputFile* __cdecl FUN_00aa1a20(const char*, int, unsigned);
-};
 struct ImageLoader
 {
     virtual ~ImageLoader();
     virtual bool Supports(const char*) const;
-    virtual ImageResult* Read(InputFile&, ImageResult*);
+    virtual ImageResult* Read(NiFile&, ImageResult*);
 };
 
 struct ImageOwner
@@ -672,17 +499,17 @@ struct ImageOwner
     int unk78;
     int unk7c;
     ImageLoader loader;
-    ImageResult* LoadImage(const char* name, ImageResult* destination, InputFile* supplied);
+    ImageResult* LoadImage(const char* name, ImageResult* destination, NiFile* supplied);
 };
 // Loads an image from a file path using the loader, returning the result or null on failure.
 // @fnv 0x00a767c0
-ImageResult* ImageOwner::LoadImage(const char* apPath, ImageResult* destination, InputFile* apInputFile)
+ImageResult* ImageOwner::LoadImage(const char* apPath, ImageResult* destination, NiFile* apInputFile)
 {
 
     PathParts pathParts(apPath);
     if (loader.Supports(pathParts.Ext()))
     {
-        InputFile* pInputFile = apInputFile ? apInputFile : InputFile::FUN_00aa1a20(apPath, 0, 32768);
+        NiFile* pInputFile = apInputFile ? apInputFile : NiFile::GetFile(apPath, NiFile::READ_ONLY, 32768);
         if (!pInputFile || !*pInputFile)
         {
             delete pInputFile;

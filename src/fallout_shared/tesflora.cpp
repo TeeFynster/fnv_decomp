@@ -2,6 +2,8 @@
 // src/fallout_shared/tesflora.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/tesflora.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/TESFlora.h"
+
 struct S_00477f20
 {
     void FUN_00477f20();
@@ -49,17 +51,10 @@ void FUN_00508920_obj::FUN_00508920()
     reinterpret_cast<FUN_00485680*>(this)->M();
 }
 
-struct TESForm
-{
-    virtual void f00();
-};
-struct FUN_005e78f0_t : TESForm
+// The shared TESForm does not yet declare this out-of-line copy helper.
+struct FloraFormCopy
 {
     void FUN_004851b0(TESForm*);
-};
-struct TESFlora : FUN_005e78f0_t
-{
-    void FUN_00508990(TESForm*);
 };
 // @fnv 0x00508990
 void TESFlora::FUN_00508990(TESForm* apCopy)
@@ -67,7 +62,7 @@ void TESFlora::FUN_00508990(TESForm* apCopy)
     TESFlora* pcopy = dynamic_cast<TESFlora*>(apCopy);
     if (!pcopy)
         return;
-    FUN_004851b0(apCopy);
+    reinterpret_cast<FloraFormCopy*>(this)->FUN_004851b0(apCopy);
 }
 
 void __cdecl Deallocate(void*);
@@ -126,9 +121,9 @@ extern "C" void* __cdecl _alloca(unsigned int uiSize);
 struct FloraFile
 {
     unsigned int GetField25C();
-    int GetNextChunk();
+    int FUN_004726b0();
     bool FUN_004726f0();
-    void GetChunkData(void* pvBuffer, unsigned int uiSize);
+    void FUN_00472890(void* pvBuffer, unsigned int uiSize);
     void ReadChunkInt(unsigned int* puiFormID);
     unsigned short FUN_00403570();
 };
@@ -266,13 +261,13 @@ bool FloraFull::FUN_00508610(FloraFile* pkFile)
     FloraFormBase::CallWithThis(pkFile);
     FloraFormBase::FUN_00484ab0(0);
     int iChunk;
-    while ((iChunk = pkFile->GetNextChunk()) != 0)
+    while ((iChunk = pkFile->FUN_004726b0()) != 0)
     {
         switch (iChunk)
         {
         case 0x44494445: {
             char* pcEditorID = (char*)_alloca(pkFile->GetField25C());
-            pkFile->GetChunkData(pcEditorID, 0x200);
+            pkFile->FUN_00472890(pcEditorID, 0x200);
             SetEditorID(pcEditorID);
             break;
         }
@@ -291,7 +286,7 @@ bool FloraFull::FUN_00508610(FloraFile* pkFile)
         case 0x53444f4d: {
             unsigned int uiSizeX = pkFile->GetField25C();
             char* pcDataZ = (char*)_alloca(uiSizeX);
-            pkFile->GetChunkData(pcDataZ, uiSizeX);
+            pkFile->FUN_00472890(pcDataZ, uiSizeX);
             FloraModel::LoadTextureSwapList(pcDataZ, uiSizeX, pkFile->FUN_00403570());
             break;
         }
@@ -310,7 +305,7 @@ bool FloraFull::FUN_00508610(FloraFile* pkFile)
         }
         case 0x43504650: {
             int m_ucSortOrder;
-            pkFile->GetChunkData(&m_ucSortOrder, 4);
+            pkFile->FUN_00472890(&m_ucSortOrder, 4);
             FloraProduce::CopyFromSource(&m_ucSortOrder);
             break;
         }

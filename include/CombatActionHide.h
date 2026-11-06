@@ -1,0 +1,11 @@
+#pragma once
+
+#include "CombatAction.h"
+
+class CombatActionHide : public CombatAction
+{
+public:
+    CombatActionHide(COMBAT_ACTION type);
+    void FUN_0097d370(char* apDebugText, unsigned int aiMaxLength, int aiActionValue);
+    void FUN_0097d2d0(CombatController* apCombatController, int aiActionValue);
+};

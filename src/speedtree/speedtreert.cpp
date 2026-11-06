@@ -2,6 +2,9 @@
 // src/speedtree/speedtreert.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/speedtree/speedtreert.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/MemoryManager.h"
+#include "../../include/CVec3.h"
+
 struct FUN_00b02e00_class
 {
     void FUN_00b02e00();
@@ -682,10 +685,6 @@ void __thiscall FUN_00b02d40_class::ClearFields()
     m_38 = 0;
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00b02e80
 {
@@ -719,32 +718,27 @@ extern int DAT_011f8ea4;
 extern int DAT_011f8eac;
 extern int DAT_011f8eb0;
 extern int DAT_011f8eb4;
-struct Vector3D
-{
-    float x;
-    float y;
-    float z;
-};
 // Copies the global camera position and direction into the two output vectors, or reports an error if either pointer is NULL.
 // @fnv 0x00b06b70
 void __cdecl FUN_00b06b70(float* pPosition, float* pDirection)
 {
     if (pPosition && pDirection)
     {
-        Vector3D cCameraPos;
-        Vector3D cCameraDirection;
-        cCameraPos.z = 0.0f;
-        cCameraPos.y = 0.0f;
-        cCameraPos.x = 0.0f;
-        cCameraDirection.z = 0.0f;
-        cCameraDirection.y = 0.0f;
-        cCameraDirection.x = 0.0f;
-        *(int*)&cCameraPos.x = DAT_011f8e9c;
-        *(int*)&cCameraPos.y = DAT_011f8ea0;
-        *(int*)&cCameraPos.z = DAT_011f8ea4;
-        *(int*)&cCameraDirection.x = DAT_011f8eac;
-        *(int*)&cCameraDirection.y = DAT_011f8eb0;
-        *(int*)&cCameraDirection.z = DAT_011f8eb4;
+        // These temporaries are filled explicitly, without calling CVec3 constructors.
+        float cCameraPos[sizeof(CVec3) / sizeof(float)];
+        float cCameraDirection[sizeof(CVec3) / sizeof(float)];
+        reinterpret_cast<CVec3*>(cCameraPos)->z = 0.0f;
+        reinterpret_cast<CVec3*>(cCameraPos)->y = 0.0f;
+        reinterpret_cast<CVec3*>(cCameraPos)->x = 0.0f;
+        reinterpret_cast<CVec3*>(cCameraDirection)->z = 0.0f;
+        reinterpret_cast<CVec3*>(cCameraDirection)->y = 0.0f;
+        reinterpret_cast<CVec3*>(cCameraDirection)->x = 0.0f;
+        *(int*)&reinterpret_cast<CVec3*>(cCameraPos)->x = DAT_011f8e9c;
+        *(int*)&reinterpret_cast<CVec3*>(cCameraPos)->y = DAT_011f8ea0;
+        *(int*)&reinterpret_cast<CVec3*>(cCameraPos)->z = DAT_011f8ea4;
+        *(int*)&reinterpret_cast<CVec3*>(cCameraDirection)->x = DAT_011f8eac;
+        *(int*)&reinterpret_cast<CVec3*>(cCameraDirection)->y = DAT_011f8eb0;
+        *(int*)&reinterpret_cast<CVec3*>(cCameraDirection)->z = DAT_011f8eb4;
         _memmove(pPosition, &cCameraPos, 0xc);
         _memmove(pDirection, &cCameraDirection, 0xc);
     }
@@ -958,11 +952,7 @@ void FUN_00b09f70_Class::FUN_00b09f70()
     _Tidy(true, 0);
 }
 
-struct P03MM
-{
-    void* Allocate(unsigned int size);
-};
-extern P03MM _g_memoryManager;
+extern MemoryManager _g_memoryManager;
 unsigned int _strlen(const char* s);
 
 // Allocates nLength4 + 1 bytes from _g_memoryManager, copies pOrig into the new buffer with _memmove, and returns the copy.
@@ -1474,75 +1464,76 @@ void FUN_00b0d5f0_Class::InitBoundingBoxCorners()
 {
     if (m_bFlag)
     {
-        Vector3D pMax6;
-        Vector3D pt0;
-        Vector3D pForm2;
+        // Keep the original constructor-free temporaries while using the shared layout.
+        float pMax6[sizeof(CVec3) / sizeof(float)];
+        float pt0[sizeof(CVec3) / sizeof(float)];
+        float pForm2[sizeof(CVec3) / sizeof(float)];
         float* idx;
         float pObj2;
-        Vector3D ptr;
-        Vector3D pt2;
+        float ptr[sizeof(CVec3) / sizeof(float)];
+        float pt2[sizeof(CVec3) / sizeof(float)];
         float* valVal;
         float* v9;
         Vec2 corner3;
         Vec2 kIter_2;
         Vec2 r;
-        Vector3D n4;
+        float n4[sizeof(CVec3) / sizeof(float)];
         float* pt4;
         Vec2 dst3;
         float* max;
         float* c;
 
         idx = m_pBoundingBox;
-        pt0.x = idx[0];
-        pt0.y = idx[1];
-        pt0.z = idx[2];
+        reinterpret_cast<CVec3*>(pt0)->x = idx[0];
+        reinterpret_cast<CVec3*>(pt0)->y = idx[1];
+        reinterpret_cast<CVec3*>(pt0)->z = idx[2];
 
         valVal = m_pBoundingBox + 3;
-        pForm2.x = valVal[0];
-        pForm2.y = valVal[1];
-        pForm2.z = valVal[2];
+        reinterpret_cast<CVec3*>(pForm2)->x = valVal[0];
+        reinterpret_cast<CVec3*>(pForm2)->y = valVal[1];
+        reinterpret_cast<CVec3*>(pForm2)->z = valVal[2];
 
-        pObj2 = (pt0.z + pForm2.z) * 0.5;
+        pObj2 = (reinterpret_cast<CVec3*>(pt0)->z + reinterpret_cast<CVec3*>(pForm2)->z) * 0.5;
 
-        kIter_2.x = pForm2.x;
-        kIter_2.y = pForm2.y;
-        pMax6.x = kIter_2.x;
-        pMax6.y = kIter_2.y;
-        pMax6.z = pObj2;
+        kIter_2.x = reinterpret_cast<CVec3*>(pForm2)->x;
+        kIter_2.y = reinterpret_cast<CVec3*>(pForm2)->y;
+        reinterpret_cast<CVec3*>(pMax6)->x = kIter_2.x;
+        reinterpret_cast<CVec3*>(pMax6)->y = kIter_2.y;
+        reinterpret_cast<CVec3*>(pMax6)->z = pObj2;
         v9 = &m_point00;
-        v9[0] = pMax6.x;
-        v9[1] = pMax6.y;
-        v9[2] = pMax6.z;
+        v9[0] = reinterpret_cast<CVec3*>(pMax6)->x;
+        v9[1] = reinterpret_cast<CVec3*>(pMax6)->y;
+        v9[2] = reinterpret_cast<CVec3*>(pMax6)->z;
 
-        corner3.x = pt0.x;
-        corner3.y = pForm2.y;
-        pt2.x = corner3.x;
-        pt2.y = corner3.y;
-        pt2.z = pObj2;
+        corner3.x = reinterpret_cast<CVec3*>(pt0)->x;
+        corner3.y = reinterpret_cast<CVec3*>(pForm2)->y;
+        reinterpret_cast<CVec3*>(pt2)->x = corner3.x;
+        reinterpret_cast<CVec3*>(pt2)->y = corner3.y;
+        reinterpret_cast<CVec3*>(pt2)->z = pObj2;
         c = &m_point00 + 3;
-        c[0] = pt2.x;
-        c[1] = pt2.y;
-        c[2] = pt2.z;
+        c[0] = reinterpret_cast<CVec3*>(pt2)->x;
+        c[1] = reinterpret_cast<CVec3*>(pt2)->y;
+        c[2] = reinterpret_cast<CVec3*>(pt2)->z;
 
-        dst3.x = pt0.x;
-        dst3.y = pt0.y;
-        ptr.x = dst3.x;
-        ptr.y = dst3.y;
-        ptr.z = pObj2;
+        dst3.x = reinterpret_cast<CVec3*>(pt0)->x;
+        dst3.y = reinterpret_cast<CVec3*>(pt0)->y;
+        reinterpret_cast<CVec3*>(ptr)->x = dst3.x;
+        reinterpret_cast<CVec3*>(ptr)->y = dst3.y;
+        reinterpret_cast<CVec3*>(ptr)->z = pObj2;
         pt4 = &m_point00 + 6;
-        pt4[0] = ptr.x;
-        pt4[1] = ptr.y;
-        pt4[2] = ptr.z;
+        pt4[0] = reinterpret_cast<CVec3*>(ptr)->x;
+        pt4[1] = reinterpret_cast<CVec3*>(ptr)->y;
+        pt4[2] = reinterpret_cast<CVec3*>(ptr)->z;
 
-        r.x = pForm2.x;
-        r.y = pt0.y;
-        n4.x = r.x;
-        n4.y = r.y;
-        n4.z = pObj2;
+        r.x = reinterpret_cast<CVec3*>(pForm2)->x;
+        r.y = reinterpret_cast<CVec3*>(pt0)->y;
+        reinterpret_cast<CVec3*>(n4)->x = r.x;
+        reinterpret_cast<CVec3*>(n4)->y = r.y;
+        reinterpret_cast<CVec3*>(n4)->z = pObj2;
         max = &m_point00 + 9;
-        max[0] = n4.x;
-        max[1] = n4.y;
-        max[2] = n4.z;
+        max[0] = reinterpret_cast<CVec3*>(n4)->x;
+        max[1] = reinterpret_cast<CVec3*>(n4)->y;
+        max[2] = reinterpret_cast<CVec3*>(n4)->z;
     }
 }
 
@@ -1638,11 +1629,7 @@ struct FUN_00b029f0 : BasePart
 FUN_00b029f0::FUN_00b029f0() : m_38(-1.0f), m_74(-1.0f)
 {}
 
-struct FUN_00aa4060_shell
-{
-    void __thiscall FUN_00aa4060(void* p);
-};
-extern FUN_00aa4060_shell DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 
 struct FUN_0044a730_shell
 {
@@ -1672,22 +1659,22 @@ class FUN_00b04420_class
     void FUN_00b04420();
 };
 
-// Releases m04, m0c, and m14 via DAT_011f6238.FUN_00aa4060, nulls them, and calls m18.FUN_0044a730(true, 0).
+// Releases m04, m0c, and m14 via DAT_011f6238.Deallocate, nulls them, and calls m18.FUN_0044a730(true, 0).
 // @fnv 0x00b04420
 void FUN_00b04420_class::FUN_00b04420()
 {
     void* n;
     FUN_00b04420_pad v_;
     n = m04;
-    DAT_011f6238.FUN_00aa4060(n);
+    DAT_011f6238.Deallocate(n);
     m04 = 0;
     void* c;
     c = m0c;
-    DAT_011f6238.FUN_00aa4060(c);
+    DAT_011f6238.Deallocate(c);
     m0c = 0;
     void* v0c;
     v0c = m14;
-    DAT_011f6238.FUN_00aa4060(v0c);
+    DAT_011f6238.Deallocate(v0c);
     m14 = 0;
     m18.FUN_0044a730(true, 0);
 }
@@ -1923,12 +1910,7 @@ struct FUN_00b09730_Local
     int unk10;
 };
 
-struct FUN_00b09730_MemoryManager
-{
-    void __thiscall FUN_00aa4060(void* p);
-};
-
-extern FUN_00b09730_MemoryManager DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 
 struct FUN_00b09730_Class : FUN_0044d6f0_This
 {
@@ -1948,7 +1930,7 @@ void* __thiscall FUN_00b09730_Class::FUN_00b09730(unsigned int flags)
 
     if ((flags & 1) != 0)
     {
-        DAT_011f6238.FUN_00aa4060(this);
+        DAT_011f6238.Deallocate(this);
     }
 
     return this;

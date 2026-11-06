@@ -5,16 +5,16 @@
 
 // src/havok/common/serialize/util/hkserializeutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/util/hkserializeutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkStringPtr.h"
+#include "../../../../../include/Pair.h"
+
 void __cdecl FUN_00d48620(int a, int b, int c);
 void __cdecl FUN_00d48640(int a, int b);
 extern "C" void __cdecl FUN_00d485a0(int, int, int, int, int);
 void __cdecl FUN_00d48660(int a, int b, int c);
 extern int DAT_0102e388;
 extern int DAT_010d7540;
-struct hkReferencedObject
-{
-    void removeReference();
-};
 struct FUN_00dcc160_cls
 {
     void* vtbl;
@@ -131,16 +131,6 @@ static inline int S_00d49350_Compare(const char* a, const char* b)
     }
     return b ? -1 : 0;
 }
-struct S_00d49350
-{
-    unsigned int m_pcText;
-
-    const char* cString() const
-    {
-        return (const char*)(m_pcText & ~1u);
-    }
-    int Equals(const char* s) const;
-};
 struct FUN_00d493a0_cls
 {
     char m_00;
@@ -168,11 +158,6 @@ struct D493E0Loader
     D493E0Registry* m_registry;
 
     D493E0Ref FindObject(const void* key, int flags) const;
-};
-struct Pair
-{
-    void* first;
-    void* second;
 };
 struct Vt4Obj
 {
@@ -263,11 +248,6 @@ struct S00d48d30_Stream
     virtual void v1();
     virtual void v2();
     virtual S00d48d30_Bool IsStreamValid() const;
-};
-struct hkStringPtr
-{
-    void* m_pcText;
-    void operator=(const char* s);
 };
 struct S00d48d30_Result
 {

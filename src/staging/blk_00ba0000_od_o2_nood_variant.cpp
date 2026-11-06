@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
 
 // src/staging/blk_00ba0000_od_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_moves.py: the bytes and the matched neighbours of these functions
 // say /MT /O2 /GS /EHsc /Gy (unit src/staging/blk_00ba0000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions to their real
@@ -6,6 +8,10 @@
 // src/staging/blk_00ba0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/Transform.h"
+#include "../../include/hkVector4.h"
+#include <string.h>
+#include "../../include/NiPoint3.h"
 
 struct Matrix
 {
@@ -13,20 +19,6 @@ struct Matrix
 };
 struct __declspec(align(16)) AlignedMatrix : Matrix
 {
-};
-struct FourFloatVector
-{
-    float x, y, z, w;
-};
-struct Point3
-{
-    float x, y, z;
-};
-struct Transform
-{
-    float r11, r12, r13, r21, r22, r23, r31, r32, r33;
-    Point3 position;
-    float scale;
 };
 struct Camera
 {
@@ -65,7 +57,7 @@ struct Camera
     unsigned int unk080;
     unsigned int unk084;
     unsigned int unk088;
-    Point3 direction;
+    NiPoint3 direction;
     unsigned int unk098;
     unsigned int unk09c;
     unsigned int unk0a0;
@@ -81,8 +73,8 @@ struct Camera
     unsigned int unk0c8;
     unsigned int unk0cc;
     unsigned int unk0d0;
-    Point3 position;
-    Point3 up;
+    NiPoint3 position;
+    NiPoint3 up;
 };
 struct Geometry
 {
@@ -143,9 +135,9 @@ struct Scene
     Geometry** geometries;
 };
 extern Scene* DAT_011f91e0;
-extern Point3 DAT_011f474c;
-extern FourFloatVector DAT_01200510, DAT_01200520, DAT_01200540, DAT_01200570;
-void __cdecl FUN_00b71a40(AlignedMatrix*, const Transform*, const Point3*, float);
+extern NiPoint3 DAT_011f474c;
+extern hkVector4 DAT_01200510, DAT_01200520, DAT_01200540, DAT_01200570;
+void __cdecl FUN_00b71a40(AlignedMatrix*, const Transform*, const NiPoint3*, float);
 Matrix* __stdcall D3DXMatrixMultiply(Matrix*, const Matrix*, const Matrix*);
 Matrix* __stdcall D3DXMatrixTranspose(Matrix*, const Matrix*);
 struct Shader
@@ -259,8 +251,8 @@ struct Shader
     unsigned int unk1a4;
     unsigned int unk1a8;
     unsigned int unk1ac;
-    FourFloatVector position;
-    FourFloatVector direction;
+    hkVector4 position;
+    hkVector4 direction;
 };
 // @fnv 0x00baa850
 void Shader::FUN_00baa850(int identity, const Transform* transform)
@@ -275,7 +267,7 @@ void Shader::FUN_00baa850(int identity, const Transform* transform)
         result.m41 = result.m42 = result.m43 = 0.0f;
 
     if (!identity)
-        FUN_00b71a40(&world, transform, &transform->position, transform->scale);
+        FUN_00b71a40(&world, transform, reinterpret_cast<const NiPoint3*>(&transform->position), transform->scale);
     world.m41 += DAT_011f474c.x;
     world.m42 += DAT_011f474c.y;
     world.m43 += DAT_011f474c.z;
@@ -285,31 +277,31 @@ void Shader::FUN_00baa850(int identity, const Transform* transform)
     result = product;
     D3DXMatrixTranspose(&result, &result);
     {
-        FourFloatVector value = {result.m11, result.m12, result.m13, result.m14};
-        DAT_01200510 = value;
+        float value[4] = {result.m11, result.m12, result.m13, result.m14};
+        memcpy(&DAT_01200510, value, sizeof(value));
     }
     {
-        FourFloatVector value = {result.m21, result.m22, result.m23, result.m24};
-        DAT_01200520 = value;
+        float value[4] = {result.m21, result.m22, result.m23, result.m24};
+        memcpy(&DAT_01200520, value, sizeof(value));
     }
     {
-        FourFloatVector value = {result.m31, result.m32, result.m33, result.m34};
-        DAT_01200540 = value;
+        float value[4] = {result.m31, result.m32, result.m33, result.m34};
+        memcpy(&DAT_01200540, value, sizeof(value));
     }
     {
-        FourFloatVector value = {result.m41, result.m42, result.m43, result.m44};
-        DAT_01200570 = value;
+        float value[4] = {result.m41, result.m42, result.m43, result.m44};
+        memcpy(&DAT_01200570, value, sizeof(value));
     }
     Camera* camera = DAT_011f91e0->geometries[0]->camera;
-    Point3 eye = camera->position;
-    Point3 forward = camera->direction;
-    Point3 up = camera->up;
+    NiPoint3 eye = camera->position;
+    NiPoint3 forward = camera->direction;
+    NiPoint3 up = camera->up;
     {
-        FourFloatVector value = {eye.x, eye.y, eye.z, 1.0f};
-        position = value;
+        float value[4] = {eye.x, eye.y, eye.z, 1.0f};
+        memcpy(&position, value, sizeof(value));
     }
     {
-        FourFloatVector value = {forward.x, forward.y, forward.z, up.x};
-        direction = value;
+        float value[4] = {forward.x, forward.y, forward.z, up.x};
+        memcpy(&direction, value, sizeof(value));
     }
 }

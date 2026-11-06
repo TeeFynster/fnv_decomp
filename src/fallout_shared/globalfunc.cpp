@@ -1,6 +1,225 @@
+#include "../../include/SettingT.h"
+#include "../../include/PathingGraphNode.h"
 // fallout_shared/globalfunc.cpp: BipedNodeNames, NiAVObject, ActorMover, PathingGraphNode and more (110 functions)
 
-#include "globalfunc_decls.h"
+#include "../../include/NiPointer.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/bhkWorld.h"
+#include "../../include/ActorMover.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSSysInfoSystemUtility.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiControllerManager.h"
+#include "../../include/NiLines.h"
+#include "../../include/NiTexture.h"
+#include "../../include/NiColorA.h"
+#include "../../include/TES.h"
+#include "../../include/TESRecipe.h"
+#include "../../include/TESTopicInfoData.h"
+#include "../../include/bhkMouseSpringAction.h"
+#include "../../include/bhkSerializable.h"
+#include "../../include/bhkUnaryAction.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+// In-class bodies of the former NiPoint3_ext stand-in.
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x - kRhs.x, y - kRhs.y, z - kRhs.z);
+}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x + kRhs.x, y + kRhs.y, z + kRhs.z);
+}
+inline float NiPoint3::operator*(const NiPoint3& point) const
+{
+    return x * point.x + y * point.y + z * point.z;
+}
+inline NiPoint3 operator*(float scalar, const NiPoint3& point)
+{
+    return NiPoint3(scalar * point.x, scalar * point.y, scalar * point.z);
+}
+#include "../../include/BSShaderProperty.h"
+#include "../../include/BSShaderNoLightingProperty.h"
+#include "../../include/BSXFlags.h"
+#include "../../include/FOPipboyManager.h"
+#include "../../include/MobileObject.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiShadeProperty.h"
+#include "../../include/NiShader.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/bhkCollisionObject.h"
+#include "../../include/bhkRefObject.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiPlane.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiMultiTargetTransformController.h"
+#include "../../include/NiTimeController.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiControllerSequence.h"
+#include "../../include/NiTextKeyExtraData.h"
+#include "../../include/SETTING_VALUE.h"
+#include "../../include/NiMemObject.h"
+#include "../../include/NiTransform.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/NiGeometryData.h"
+#include "../../include/NiFrustumPlanes.h"
+#include "../../include/NiPick.h"
+
+#include "../../include/TESCombatStyle.h"
+
+#include "../../include/hkpMotion.h"
+
+// Unit-specific declarations; shared base classes come from include/.
+
+// Keep original out-of-line calls, including NiPoint3 copy assignment.
+#pragma inline_depth(0)
+
+class BSShaderPPLightingProperty;
+
+void* __cdecl operator new(unsigned int);
+void __cdecl operator delete(void*);
+
+class BipedNodeNames
+{
+  public:
+    static void InitializeMultiBounds();
+};
+extern NiFixedString* DAT_011c61a4;
+extern NiFixedString* DAT_011c61a8;
+extern NiFixedString* DAT_011c61ac;
+extern NiFixedString* DAT_011c61b0;
+extern NiFixedString* DAT_011c61b4;
+extern NiFixedString* DAT_011c61b8;
+extern NiFixedString* DAT_011c61bc;
+extern NiFixedString* DAT_011c61c0;
+extern NiFixedString* DAT_011c61c4;
+extern NiFixedString* DAT_011c61c8;
+extern NiFixedString* DAT_011c61cc;
+extern NiFixedString* DAT_011c61d0;
+extern NiFixedString* DAT_011c61d4;
+extern NiFixedString* DAT_011c61d8;
+extern NiFixedString* DAT_011c61dc;
+extern NiFixedString* DAT_011c61e0;
+extern NiFixedString* DAT_011c61e4;
+extern NiFixedString* DAT_011c61e8;
+extern NiFixedString* DAT_011c61ec;
+extern NiFixedString* DAT_011c61f0;
+extern NiFixedString* DAT_011c61f4;
+extern NiFixedString* DAT_011c61f8;
+extern NiFixedString* DAT_011c61fc;
+extern NiFixedString* DAT_011c6200;
+extern NiFixedString* DAT_011c6204;
+extern NiFixedString* DAT_011c6208;
+extern NiFixedString* DAT_011c620c;
+extern NiFixedString* DAT_011c6210;
+extern NiFixedString* DAT_011c6214;
+extern NiFixedString* DAT_011c6218;
+extern NiFixedString* DAT_011c621c;
+extern NiFixedString* DAT_011c6220;
+extern NiFixedString* DAT_011c6224;
+extern NiFixedString* DAT_011c6228;
+extern NiFixedString* DAT_011c622c;
+extern NiFixedString* DAT_011c6230;
+extern NiFixedString* DAT_011c6234;
+extern NiFixedString* DAT_011c6238;
+extern NiFixedString* DAT_011c623c;
+extern NiFixedString* DAT_011c6240;
+extern NiFixedString* DAT_011c6244;
+extern NiFixedString* DAT_011c6248;
+extern NiFixedString* DAT_011c624c;
+extern NiFixedString* DAT_011c6250;
+extern NiFixedString* DAT_011c6254;
+extern NiFixedString* DAT_011c6258;
+extern NiFixedString* DAT_011c625c;
+extern NiFixedString* DAT_011c6260;
+extern NiFixedString* DAT_011c6264;
+extern NiFixedString* DAT_011c6268;
+extern NiFixedString* DAT_011c626c;
+extern NiFixedString* DAT_011c6270;
+extern NiFixedString* DAT_011c6274;
+extern NiFixedString* DAT_011c6278;
+#include "../../include/LANGUAGE.h"
+int FUN_004b71a0();
+LANGUAGE GetConfiguredLanguage();
+const char* LocateString(const char*, const char*);
+template <class T> unsigned int BSStringLength(const T*);
+int strcat_s(char*, unsigned int, const char*);
+extern "C" int memcpy_s(void*, unsigned int, const void*, unsigned int);
+extern "C" void* __cdecl memcpy(void*, const void*, unsigned int);
+#pragma intrinsic(memcpy)
+extern "C" unsigned int strlen(const char*);
+extern const char* DAT_01189038[4];
+extern const char* DAT_01188f84[5];
+
+class NiSourceTexture;
+
+extern TES* g_TES;
+extern NiRTTI DAT_011f444c;
+bool FUN_0043b300(const NiRTTI*, NiAVObject*);
+
+class TESTopic;
+template <class T> class BSSimpleList;
+
+extern NiNode* DAT_011c6328;
+extern NiAVObjectPalette* DAT_011c6324;
+extern NiRTTI DAT_011f36ac;
+const NiFixedString& FUN_00448a80();
+const NiFixedString& FUN_004b5f60();
+const NiFixedString& FUN_004b5f70();
+const NiFixedString& FUN_004b5f80();
+const NiFixedString& FUN_004b5f90();
+int FUN_00404dc0(const char*, const char*);
+extern "C" int _strnicmp(const char*, const char*, unsigned int);
+
+extern NiRTTI DAT_012024e0;
+int FUN_004a2c20(NiProperty*);
+class TESObjectLIGH;
+
+extern "C" float logf(float);
+struct CollisionObjectCountContext
+{
+    void* pCurrentObject;
+    bool bRecurse;
+    unsigned int uiTraversalFlags;
+    int iCount;
+    void* pUserData;
+    void* pAuxiliaryData;
+    unsigned int uiFilterFlags;
+};
+void FUN_004b6740(NiCollisionObject*, CollisionObjectCountContext*);
+void FUN_00c68900(NiAVObject*, CollisionObjectCountContext*,
+                  void (*)(NiCollisionObject*, CollisionObjectCountContext*));
+
+
+
+class INISettingCollection;
+using ::SettingT;
+extern SettingT<INISettingCollection> DAT_011d5a30;
+extern bool DAT_012677a3;
 
 // @fnv 0x004b7920
 void BipedNodeNames::InitializeMultiBounds()
@@ -163,12 +382,16 @@ bool UpdateObjectVisibility(NiAVObject* object)
                                    : 0;
         if (textures)
         {
-            unsigned int count = textures->GetTextureCount();
+            // These texture operations use the original virtual slots; the shared
+            // BSShaderPPLightingProperty declarations are nonvirtual.
+            unsigned int count = reinterpret_cast<unsigned short (__thiscall*)(NiProperty*)>(
+                (*reinterpret_cast<void***>(textures))[0xe8 / 4])(textures);
             for (unsigned int i = 0; i < count; ++i)
             {
                 for (int type = 0; type < 6; ++type)
                 {
-                    NiTexture* texture = textures->GetTexture(type, i);
+                    NiTexture* texture = reinterpret_cast<NiTexture* (__thiscall*)(NiProperty*, int, unsigned int)>(
+                        (*reinterpret_cast<void***>(textures))[0xf4 / 4])(textures, type, i);
                     if (texture && FUN_0043b300(&DAT_011f444c, reinterpret_cast<NiAVObject*>(texture)))
                     {
                         bool swapped;
@@ -183,12 +406,14 @@ bool UpdateObjectVisibility(NiAVObject* object)
                             if (swapped && replacement[0])
                             {
                                 NiPointer<NiTexture> newTexture(0);
-                                g_TES->CreateTextureImage(replacement,
+                                g_TES->CreateTextureImage(static_cast<const char*>(replacement),
                                                           reinterpret_cast<NiPointer<NiSourceTexture>&>(newTexture),
                                                           false, false);
                                 if (newTexture)
                                 {
-                                    textures->SetTexture(type, i, static_cast<NiTexture*>(newTexture));
+                                    reinterpret_cast<void (__thiscall*)(NiProperty*, int, unsigned int, NiTexture*)>(
+                                        (*reinterpret_cast<void***>(textures))[0xf0 / 4])(
+                                        textures, type, i, static_cast<NiTexture*>(newTexture));
                                     changed = true;
                                 }
                             }
@@ -197,10 +422,10 @@ bool UpdateObjectVisibility(NiAVObject* object)
                 }
             }
         }
-        NiNode* node = object->GetAsNiNode();
+        NiNode* node = object->IsSceneNode();
         if (node)
         {
-            unsigned int count = node->FUN_0043b480();
+            unsigned int count = node->GetNumChildren();
             for (unsigned int i = 0; i < count; ++i)
                 if (UpdateObjectVisibility(node->GetAt(i)))
                     changed = true;
@@ -245,10 +470,14 @@ bool RemoveInvalidChildNodes(NiNode* apNode)
     {
         if (DAT_011c6324)
         {
-            DAT_011c6324->vfn_90(FUN_004b5f60(), 0);
-            DAT_011c6324->vfn_90(FUN_004b5f70(), 0);
-            DAT_011c6324->vfn_90(FUN_004b5f80(), 0);
-            DAT_011c6324->vfn_90(FUN_004b5f90(), 0);
+            reinterpret_cast<void* (__thiscall*)(NiAVObjectPalette*, const NiFixedString&, int)>(
+                (*reinterpret_cast<void***>(DAT_011c6324))[0x90 / 4])(DAT_011c6324, FUN_004b5f60(), 0);
+            reinterpret_cast<void* (__thiscall*)(NiAVObjectPalette*, const NiFixedString&, int)>(
+                (*reinterpret_cast<void***>(DAT_011c6324))[0x90 / 4])(DAT_011c6324, FUN_004b5f70(), 0);
+            reinterpret_cast<void* (__thiscall*)(NiAVObjectPalette*, const NiFixedString&, int)>(
+                (*reinterpret_cast<void***>(DAT_011c6324))[0x90 / 4])(DAT_011c6324, FUN_004b5f80(), 0);
+            reinterpret_cast<void* (__thiscall*)(NiAVObjectPalette*, const NiFixedString&, int)>(
+                (*reinterpret_cast<void***>(DAT_011c6324))[0x90 / 4])(DAT_011c6324, FUN_004b5f90(), 0);
         }
         if (apNode->GetParent())
             apNode->GetParent()->RemoveObject(apNode);
@@ -259,12 +488,12 @@ bool RemoveInvalidChildNodes(NiNode* apNode)
         }
         return true;
     }
-    for (unsigned int i = 0; i < apNode->FUN_0043b480(); ++i)
+    for (unsigned int i = 0; i < apNode->GetNumChildren(); ++i)
     {
         NiAVObject* child = apNode->GetAt(i);
         if (child)
         {
-            NiNode* node = child->GetAsNiNode();
+            NiNode* node = child->IsSceneNode();
             if (node)
             {
                 removed = RemoveInvalidChildNodes(node);
@@ -293,7 +522,7 @@ bool HandleUnparentedObjectNode(NiNode* object)
 {
     if (!object)
         return false;
-    for (unsigned int i = 0; i < object->FUN_0043b480(); ++i)
+    for (unsigned int i = 0; i < object->GetNumChildren(); ++i)
     {
         NiAVObject* child = object->GetAt(i);
         if (child)
@@ -309,7 +538,7 @@ bool HandleUnparentedObjectNode(NiNode* object)
                     return true;
                 }
                 else if (!_strnicmp(name, "FadeNode ", 9))
-                    return HandleUnparentedObjectNode(child->GetAsNiNode());
+                    return HandleUnparentedObjectNode(child->IsSceneNode());
             }
         }
     }
@@ -321,7 +550,7 @@ void SetObjectFormID(NiAVObject* object, unsigned int referenceID)
 {
     if (!object)
         return;
-    if (object->GetAsNiGeometry())
+    if (object->IsGeometry())
     {
         NiProperty* property = object->GetProperty(3);
         NiProperty* lighting = FUN_004a2c20(property) ? property : 0;
@@ -330,9 +559,9 @@ void SetObjectFormID(NiAVObject* object, unsigned int referenceID)
     }
     else
     {
-        NiNode* node = object->GetAsNiNode();
+        NiNode* node = object->IsSceneNode();
         if (node)
-            for (unsigned int i = 0; i < node->FUN_0043b480(); ++i)
+            for (unsigned int i = 0; i < node->GetNumChildren(); ++i)
                 SetObjectFormID(node->GetAt(i), referenceID);
     }
 }
@@ -344,9 +573,9 @@ bool IsObjectNetValid(NiObjectNET* object)
         return false;
     if (FUN_0043b300(&DAT_012024e0, reinterpret_cast<NiAVObject*>(object)))
         return true;
-    NiNode* node = object->GetAsNiNode();
+    NiNode* node = object->IsSceneNode();
     if (node)
-        for (unsigned int i = 0; i < node->FUN_0043b480(); ++i)
+        for (unsigned int i = 0; i < node->GetNumChildren(); ++i)
         {
             NiAVObject* child = node->GetAt(i);
             if (IsObjectNetValid(child))
@@ -400,7 +629,7 @@ int CountCollisionObjects(NiAVObject* object, bool skipPhantoms, bool skipBlendO
 // @fnv 0x004b2960
 int NiAVObject::IsVisualObject()
 {
-    return m_spWorldBound && m_spWorldBound->FUN_0084d030() != 0.0;
+    return m_kWorldBound && reinterpret_cast<NiBound*>(m_kWorldBound)->FUN_0084d030() != 0.0;
 }
 
 // If a look-at target exists, copies the stored look-at point into point and returns true; otherwise returns false.
@@ -431,13 +660,13 @@ LANGUAGE GetConfiguredLanguage()
 // @fnv 0x00430830
 RecipeCraftingInfo* TESRecipe::GetData()
 {
-    return &data;
+    return reinterpret_cast<RecipeCraftingInfo*>(&kData);
 }
 
 // @fnv 0x00605d20
 bool IsSettingEnabled()
 {
-    return DAT_011d5a30.Bool()->b;
+    return *reinterpret_cast<const bool*>(DAT_011d5a30.Bool());
 }
 
 // @fnv 0x00888960
@@ -462,18 +691,6 @@ float __cdecl FUN_004b1520(float _X, float _Y)
     return (float)FUN_00ec9130((double)_X, (double)_Y);
 }
 
-class NiPick
-{
-  public:
-    bool PerformPick(const NiPoint3&, const NiPoint3&, bool);
-};
-
-class FOPipboyManager
-{
-  public:
-    void FUN_00705fc0(NiNode*);
-};
-
 extern const NiPoint3 NiPoint3_ZERO;
 bool __cdecl PickObjectsInRadius(NiPick*, int, int, float, int);
 
@@ -485,7 +702,7 @@ bool __cdecl FUN_004b2780(NiPick* pPicker, int p2, int p3, float p4, int p5, boo
     {
         if (p6)
         {
-            ((FOPipboyManager*)pPicker)->FUN_00705fc0(0);
+            pPicker->FUN_00705fc0(static_cast<void*>(0));
             pPicker->PerformPick(NiPoint3_ZERO, NiPoint3_ZERO, false);
         }
         bResult = PickObjectsInRadius(pPicker, p2, p3, p4, p5);
@@ -500,98 +717,17 @@ float LinearInterpolate(float x1, float x2, float y1, float y2, float value)
     return x1 + (value - y1) / (y2 - y1) * (x2 - x1);
 }
 
-struct FourByFourMatrix
-{
-    float _11;
-    float _12;
-    float _13;
-    float _14;
-    float _21;
-    float _22;
-    float _23;
-    float _24;
-    float _31;
-    float _32;
-    float _33;
-    float _34;
-    float _41;
-    float _42;
-    float _43;
-    float _44;
-};
-typedef char _sizecheck__XMMATRIX[sizeof(FourByFourMatrix) == 64 ? 1 : -1];
-struct SwizzledMatrix : public FourByFourMatrix
-{
-    void SetUnswizzled(float*, float*, float);
-    void SetUnswizzled(float*);
-    void SwizzleFrom(void*);
-    void SwizzleFrom4X3(void*);
-    void SwizzleTo(SwizzledMatrix*);
-    void SwizzleTo4X3(SwizzledMatrix*);
-    void SwizzleTo4X4(SwizzledMatrix*);
-    void TransposeTo(SwizzledMatrix*);
-    void Set(void*);
-};
-typedef char _sizecheck_BSMatrix[sizeof(SwizzledMatrix) == 64 ? 1 : -1];
-struct FourComponentNumericValue
-{
-    char u[16];
-};
-typedef char _sizecheck___vector4[sizeof(FourComponentNumericValue) == 16 ? 1 : -1];
-struct FUN_004b4500_shell : public SwizzledMatrix
-{
-    void FUN_004b4500(SwizzledMatrix*);
-};
-
-struct NiPoint3b : public NiPoint3
-{
-    NiPoint3b(float, float, float);
-};
-struct M_004b4500 : public SwizzledMatrix
-{
-    NiPoint3b FUN_004b4500(const NiPoint3* v);
-};
-// Multiplies the 3x3 part of this matrix by vector v and returns the resulting NiPoint3.
+// M * v: each output coordinate is one matrix row dotted with v (x, y, z terms in that order)
+#define M3_ROW_DOT_V(i) m_pEntry[i][0] * kV.x + m_pEntry[i][1] * kV.y + m_pEntry[i][2] * kV.z
 // @fnv 0x004b4500
-NiPoint3b M_004b4500::FUN_004b4500(const NiPoint3* apVector)
+NiPoint3 NiMatrix3::operator*(const NiPoint3& kV) const
 {
-    return NiPoint3b(reinterpret_cast<float*>(this)[0] * reinterpret_cast<const float*>(apVector)[0] +
-                         reinterpret_cast<float*>(this)[1] * reinterpret_cast<const float*>(apVector)[1] +
-                         reinterpret_cast<float*>(this)[2] * reinterpret_cast<const float*>(apVector)[2],
-                     reinterpret_cast<float*>(this)[3] * reinterpret_cast<const float*>(apVector)[0] +
-                         reinterpret_cast<float*>(this)[4] * reinterpret_cast<const float*>(apVector)[1] +
-                         reinterpret_cast<float*>(this)[5] * reinterpret_cast<const float*>(apVector)[2],
-                     reinterpret_cast<float*>(this)[6] * reinterpret_cast<const float*>(apVector)[0] +
-                         reinterpret_cast<float*>(this)[7] * reinterpret_cast<const float*>(apVector)[1] +
-                         reinterpret_cast<float*>(this)[8] * reinterpret_cast<const float*>(apVector)[2]);
+    return NiPoint3(M3_ROW_DOT_V(0), M3_ROW_DOT_V(1), M3_ROW_DOT_V(2));
 }
-
-struct NiFrustumPlanes
-{
-    void Set(void*, void*);
-    void Set(void*);
-    void* GetPlane(unsigned int);
-    void SetWaterColorParameter(unsigned int, void*);
-    bool IsPlaneActive(unsigned int);
-    bool IsAnyPlaneActive();
-    bool AreAllPlanesActive();
-    void EnablePlane(unsigned int);
-    void DisablePlane(unsigned int);
-    void EnableAllPlanes();
-    void DisableAllPlanes();
-    unsigned int GetActivePlaneState();
-    void SetActivePlaneState(unsigned int);
-    char m_akPlanes[96];
-    unsigned int m_uiActivePlaneMask;
-};
-typedef char _sizecheck_NiFrustumPlanes[sizeof(NiFrustumPlanes) == 100 ? 1 : -1];
-struct FUN_004b4cf0_shell : public NiFrustumPlanes
-{
-    void* FUN_004b4cf0(unsigned int);
-};
+#undef M3_ROW_DOT_V
 
 // @fnv 0x004b4cf0
-void* FUN_004b4cf0_shell::FUN_004b4cf0(unsigned int ePlane)
+void* NiFrustumPlanes::GetPlane(unsigned int ePlane)
 {
     return reinterpret_cast<char*>(this) + (ePlane * 16);
 }
@@ -613,7 +749,6 @@ struct FourDimensionalVector
     float fZ;
     float fW;
 };
-typedef char _sizecheck_bhkVector4[sizeof(FourDimensionalVector) == 16 ? 1 : -1];
 struct FUN_004b4e50_shell : public FourDimensionalVector
 {
     FourDimensionalVector* SetFromScaledVector3(void*);
@@ -631,15 +766,6 @@ FourDimensionalVector* FUN_004b4e50_shell::SetFromScaledVector3(void* arSrc)
     return this;
 }
 
-template <class T> class BSSimpleList;
-class BGSRagdoll;
-
-class TESDataHandler
-{
-  public:
-    BSSimpleList<BGSRagdoll*>* GetBGSRagdollList();
-};
-
 int __fastcall FUN_004b4f20(void* pThis);
 
 // @fnv 0x004b4f00
@@ -648,9 +774,9 @@ int __fastcall FUN_004b4f00(TESDataHandler* apDataHandler)
     return FUN_004b4f20(apDataHandler->GetBGSRagdollList());
 }
 
+class hkQuaternion;
+class hkVector4;
 namespace fnv_004b4ff0 {
-struct hkQuaternion;
-struct hkVector4;
 struct FourDimensionalVector
 {
     hkQuaternion* ToHK(hkQuaternion*);
@@ -666,7 +792,6 @@ struct FourDimensionalVector
     float fZ;
     float fW;
 };
-typedef char _sizecheck_bhkVector4[sizeof(FourDimensionalVector) == 16 ? 1 : -1];
 struct FUN_004b4ff0_shell : public FourDimensionalVector
 {
     void FUN_004b4ff0(float, float, float, float);
@@ -704,7 +829,6 @@ struct hkpEntityListener;
 struct hkpLinkedCollidable;
 struct hkpMaterial;
 struct hkpMaxSizeMotion;
-struct hkpMotion;
 struct hkpRigidBody;
 struct WorldPhysicsSettings;
 struct hkpSimulationIsland;
@@ -730,15 +854,10 @@ float __fastcall FUN_004b5400(void* pThis)
 
 bool __cdecl FUN_004b5470(const NiPoint3& aPt, float afCompLength);
 
-struct NiPoint3_sub : public NiPoint3
-{
-    NiPoint3 operator-(const NiPoint3& pt) const;
-};
-
 // @fnv 0x004b5440
 bool __cdecl FUN_004b5440(const NiPoint3& aPt1, const NiPoint3& aPt2, float afCompLength)
 {
-    return FUN_004b5470(((const NiPoint3_sub&)aPt1) - aPt2, afCompLength);
+    return FUN_004b5470(aPt1 - aPt2, afCompLength);
 }
 
 float __cdecl FUN_004b5530(float);
@@ -799,12 +918,6 @@ void* __cdecl FUN_004b59f0(const void* collidable)
     return 0;
 }
 
-class NiShader
-{
-  public:
-    static NiAVObject* __cdecl DynamicCast(NiAVObject*);
-};
-
 extern char const* const g_012683d0_arg1;
 void* __cdecl DynamicCastByRTTI(const void*, NiAVObject*);
 
@@ -815,66 +928,34 @@ void* __cdecl FUN_004b5ad0(NiAVObject* apPhantom)
     return DynamicCastByRTTI(&g_012683d0_arg1, pc);
 }
 
-class BSXFlags
-{
-  public:
-    unsigned int GetFlags(unsigned int) const;
-};
-
 // @fnv 0x004b5fa0
 bool __fastcall FUN_004b5fa0(const BSXFlags* pThis)
 {
     return pThis->GetFlags(0x20) != 0;
 }
 
-struct NiPlane_004b6100
-{
-    float Distance(void*);
-};
-struct B_004b6100
-{
-    float cx, cy, cz, radius;
-    int ClassifySphereAgainstPlane(NiPlane_004b6100* m_kFogPlane);
-};
 // Computes the plane distance to this sphere and returns 2 if fully behind, 1 if fully in front, or 0 if straddling.
 // @fnv 0x004b6100
-int B_004b6100::ClassifySphereAgainstPlane(NiPlane_004b6100* m_kFogPlane)
+int NiBound::WhichSide(void* plane)
 {
-    float fDistance = m_kFogPlane->Distance(this);
-    if (fDistance <= -radius)
+    float fDistance = static_cast<NiPlane*>(plane)->Distance(*reinterpret_cast<const NiPoint3*>(this));
+    if (fDistance <= -m_fRadius)
         return 2;
-    else if (fDistance >= radius)
+    else if (fDistance >= m_fRadius)
         return 1;
     else
         return 0;
 }
 
-struct NiPoint3_ext : NiPoint3
-{
-    float Dot(const NiPoint3& pt) const;
-};
-
-struct FUN_004b6160_class
-{
-    NiPoint3_ext normal;
-    float d;
-    float EvaluatePlane(const NiPoint3& pt) const;
-};
-
 // @fnv 0x004b6160
-float FUN_004b6160_class::EvaluatePlane(const NiPoint3& aPoint) const
+float NiPlane::Distance(const NiPoint3& aPoint) const
 {
-    return normal.Dot(aPoint) - d;
+    return reinterpret_cast<const NiPoint3*>(this)->Dot(aPoint) - c;
 }
-
-struct FUN_004b6190_shell : public NiPoint3
-{
-    float DotProduct(void*);
-};
 
 // Returns the dot product of this NiPoint3 with the NiPoint3 pointed to by pt.
 // @fnv 0x004b6190
-float FUN_004b6190_shell::DotProduct(void* apPoint)
+float NiPoint3::Dot(void* apPoint)
 {
     return x * static_cast<const NiPoint3*>(apPoint)->x + y * static_cast<const NiPoint3*>(apPoint)->y +
            z * static_cast<const NiPoint3*>(apPoint)->z;
@@ -883,12 +964,6 @@ float FUN_004b6190_shell::DotProduct(void* apPoint)
 int __cdecl FUN_00408b20(const char*, const char*);
 extern NiRTTI DAT_011f9140;
 extern NiRTTI g_0126817c;
-
-class TESObjectREFR
-{
-  public:
-    unsigned int GetFlags();
-};
 
 // Skips incrementing the counter at data+0xc when the object matches the RTTI checks or is an Arrow; otherwise increments it.
 // @fnv 0x004b6740
@@ -910,16 +985,12 @@ void __cdecl FUN_004b6740(NiAVObject* apObject, char* data)
     *(int*)(data + 0xc) += 1;
 }
 
-template <typename T> class BSStringT
-{
-  public:
-    operator const T*() const;
-};
+extern "C" const char* __fastcall GetBSStringData(const BSStringT<char>*);
 
 // @fnv 0x004b6e70
 const char* __fastcall GetStringAtOffset13C(const char* pThis)
 {
-    return *(const BSStringT<char>*)(pThis + 0x13c);
+    return GetBSStringData(reinterpret_cast<const BSStringT<char>*>(pThis + 0x13c));
 }
 
 bool __cdecl FUN_004b71d0(void);
@@ -934,12 +1005,6 @@ int FUN_004b71a0()
     return result;
 }
 
-class MobileObject
-{
-  public:
-    bool GetCharControllerFlag() const;
-};
-
 extern bool DAT_011d8a84;
 extern MobileObject g_011d8c4c;
 void* __cdecl FUN_004b7210(void);
@@ -951,15 +1016,10 @@ bool __cdecl FUN_004b71d0()
     return DAT_011d8a84 && (FUN_004b7210(), g_011d8c4c.GetCharControllerFlag());
 }
 
-struct FUN_0063f790_shell : public NiBound
-{
-    void FUN_0063f790(float);
-};
-
 // @fnv 0x0063f790
-void FUN_0063f790_shell::FUN_0063f790(float afRadius)
+void NiBound::SetRadius(float afRadius)
 {
-    *(float*)((char*)this + 0xc) = afRadius;
+    m_fRadius = afRadius;
 }
 
 struct tagRECT
@@ -968,16 +1028,6 @@ struct tagRECT
     long top;
     long right;
     long bottom;
-};
-typedef char _sizecheck_tagRECT[sizeof(tagRECT) == 16 ? 1 : -1];
-
-struct NiPoint3Ex : public NiPoint3
-{
-    NiPoint3Ex(float fX, float fY, float fZ);
-    NiPoint3Ex operator+(const NiPoint3Ex& pt) const;
-    NiPoint3Ex operator-(const NiPoint3& pt) const;
-    float Length() const;
-    void ComputeMagnitude();
 };
 
 // @fnv 0x004b1e80
@@ -1020,9 +1070,9 @@ bool FUN_004b1e80(const tagRECT* aTestRect, const NiPoint3* aStartPt, const NiPo
             {
                 bIntersect = true;
                 if (aStartPt->y > aEndPt->y)
-                    *aOutputIntersectPt = NiPoint3Ex(aStartPt->x, aTestRect->top, 0.0f);
+                    *aOutputIntersectPt = NiPoint3(aStartPt->x, aTestRect->top, 0.0f);
                 else
-                    *aOutputIntersectPt = NiPoint3Ex(aStartPt->x, aTestRect->bottom, 0.0f);
+                    *aOutputIntersectPt = NiPoint3(aStartPt->x, aTestRect->bottom, 0.0f);
             }
         }
         else if (aEndPt->y == aStartPt->y)
@@ -1031,17 +1081,17 @@ bool FUN_004b1e80(const tagRECT* aTestRect, const NiPoint3* aStartPt, const NiPo
             {
                 bIntersect = true;
                 if (aStartPt->x > aEndPt->x)
-                    *aOutputIntersectPt = NiPoint3Ex(aTestRect->right, aStartPt->y, 0.0f);
+                    *aOutputIntersectPt = NiPoint3(aTestRect->right, aStartPt->y, 0.0f);
                 else
-                    *aOutputIntersectPt = NiPoint3Ex(aTestRect->left, aStartPt->y, 0.0f);
+                    *aOutputIntersectPt = NiPoint3(aTestRect->left, aStartPt->y, 0.0f);
             }
         }
     }
     else
     {
         int intersectsFound = 0;
-        NiPoint3Ex intersect1(3.402823466e+38F, 3.402823466e+38F, 3.402823466e+38F);
-        NiPoint3Ex intersect2(3.402823466e+38F, 3.402823466e+38F, 3.402823466e+38F);
+        NiPoint3 intersect1(3.402823466e+38F, 3.402823466e+38F, 3.402823466e+38F);
+        NiPoint3 intersect2(3.402823466e+38F, 3.402823466e+38F, 3.402823466e+38F);
         float slope = (aEndPt->y - aStartPt->y) / (aEndPt->x - aStartPt->x);
         float intercept = aEndPt->y - aEndPt->x * slope;
 
@@ -1051,9 +1101,9 @@ bool FUN_004b1e80(const tagRECT* aTestRect, const NiPoint3* aStartPt, const NiPo
             if (YatBorder <= aTestRect->top && YatBorder >= aTestRect->bottom)
             {
                 if (intersectsFound == 0)
-                    intersect1 = NiPoint3Ex(aTestRect->left, YatBorder, 0.0f);
+                    intersect1 = NiPoint3(aTestRect->left, YatBorder, 0.0f);
                 else
-                    intersect2 = NiPoint3Ex(aTestRect->left, YatBorder, 0.0f);
+                    intersect2 = NiPoint3(aTestRect->left, YatBorder, 0.0f);
                 intersectsFound++;
             }
         }
@@ -1063,9 +1113,9 @@ bool FUN_004b1e80(const tagRECT* aTestRect, const NiPoint3* aStartPt, const NiPo
             if (XatBorder <= aTestRect->right && XatBorder >= aTestRect->left)
             {
                 if (intersectsFound == 0)
-                    intersect1 = NiPoint3Ex(XatBorder, aTestRect->top, 0.0f);
+                    intersect1 = NiPoint3(XatBorder, aTestRect->top, 0.0f);
                 else
-                    intersect2 = NiPoint3Ex(XatBorder, aTestRect->top, 0.0f);
+                    intersect2 = NiPoint3(XatBorder, aTestRect->top, 0.0f);
                 intersectsFound++;
             }
         }
@@ -1075,9 +1125,9 @@ bool FUN_004b1e80(const tagRECT* aTestRect, const NiPoint3* aStartPt, const NiPo
             if (YatBorder <= aTestRect->top && YatBorder >= aTestRect->bottom)
             {
                 if (intersectsFound == 0)
-                    intersect1 = NiPoint3Ex(aTestRect->right, YatBorder, 0.0f);
+                    intersect1 = NiPoint3(aTestRect->right, YatBorder, 0.0f);
                 else
-                    intersect2 = NiPoint3Ex(aTestRect->right, YatBorder, 0.0f);
+                    intersect2 = NiPoint3(aTestRect->right, YatBorder, 0.0f);
                 intersectsFound++;
             }
         }
@@ -1087,9 +1137,9 @@ bool FUN_004b1e80(const tagRECT* aTestRect, const NiPoint3* aStartPt, const NiPo
             if (XatBorder <= aTestRect->right && XatBorder >= aTestRect->left)
             {
                 if (intersectsFound == 0)
-                    intersect1 = NiPoint3Ex(XatBorder, aTestRect->bottom, 0.0f);
+                    intersect1 = NiPoint3(XatBorder, aTestRect->bottom, 0.0f);
                 else
-                    intersect2 = NiPoint3Ex(XatBorder, aTestRect->bottom, 0.0f);
+                    intersect2 = NiPoint3(XatBorder, aTestRect->bottom, 0.0f);
                 intersectsFound++;
             }
         }
@@ -1102,8 +1152,8 @@ bool FUN_004b1e80(const tagRECT* aTestRect, const NiPoint3* aStartPt, const NiPo
                 if (aStartPt->x > aTestRect->left && aStartPt->x < aTestRect->right &&
                     aStartPt->y > aTestRect->bottom && aStartPt->y < aTestRect->top)
                 {
-                    NiPoint3Ex linevect = (const NiPoint3Ex&)*aEndPt - *aStartPt;
-                    NiPoint3Ex intersect1vect = intersect1 - *aStartPt;
+                    NiPoint3 linevect = *aEndPt - *aStartPt;
+                    NiPoint3 intersect1vect = intersect1 - *aStartPt;
                     linevect.z = 0.0f;
                     intersect1vect.z = 0.0f;
                     linevect.ComputeMagnitude();
@@ -1131,28 +1181,10 @@ bool FUN_004b1e80(const tagRECT* aTestRect, const NiPoint3* aStartPt, const NiPo
     return bIntersect;
 }
 
-struct bhkRefObject
-{
-    bhkRefObject* Initialize();
-};
-
-extern unsigned char DAT_0102023c;
-
-struct FUN_004b5120 : bhkRefObject
-{
-    void* vtbl;
-    int m_iValueAfterStandIn;
-    int m_pAuxiliaryObject;
-    int m_pad3;
-    FUN_004b5120();
-};
-
 // Calls Initialize, installs the vtable pointer at offset 0 and zeroes the int at offset 0xc.
 // @fnv 0x004b5120
-FUN_004b5120::FUN_004b5120()
+bhkSerializable::bhkSerializable()
 {
-    Initialize();
-    *reinterpret_cast<void**>(this) = &DAT_0102023c;
     *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0xc) = 0;
 }
 
@@ -1234,10 +1266,7 @@ const NiFixedString& FUN_004b5f90()
 }
 
 struct bhkWorldObject;
-struct bhkCollisionObject
-{
-    bhkWorldObject* FUN_006fa820();
-};
+
 int __fastcall GetReferenceFlags(void*);
 
 // Gets the collision object's world object and, if it exists and GetReferenceFlags returns nonzero, increments the fourth int of arg.
@@ -1250,11 +1279,6 @@ void __cdecl FUN_004b6b20(bhkCollisionObject* apCollisionObject, void* apData)
 }
 
 namespace fnv_004b6bc0 {
-struct bhkWorldObject;
-struct bhkCollisionObject
-{
-    bhkWorldObject* FUN_006fa820(void);
-};
 
 int __fastcall GetReferenceFlags(bhkWorldObject*);
 
@@ -1278,17 +1302,13 @@ void FUN_004b6bc0(bhkCollisionObject* apCollisionObject, void* dest)
 }  // namespace fnv_004b6bc0
 
 namespace fnv_004b6c70 {
-struct bhkCollisionObject
-{
-    int* FUN_006fa820();
-};
 
 int __fastcall GetReferenceFlags(int* obj);
 
 // @fnv 0x004b6c70
 void __cdecl FUN_004b6c70(bhkCollisionObject* apCollisionObject, int* arg2)
 {
-    int* obj = apCollisionObject->FUN_006fa820();
+    int* obj = reinterpret_cast<int*>(apCollisionObject->FUN_006fa820());
     if (obj)
     {
         int result = GetReferenceFlags(obj);
@@ -1317,28 +1337,18 @@ UIRoot* FUN_004b7210()
 }  // namespace fnv_004b7210
 
 namespace fnv_004b50f0 {
-struct FUN_004b5120
-{
-    FUN_004b5120();
-};
 
-extern int DAT_0102016c;
 extern int DAT_01268154;
 
-struct FUN_004b50f0 : FUN_004b5120
+struct FUN_004b50f0 : bhkSerializable
 {
-    int* m_p;
     FUN_004b50f0();
 };
-
-FUN_004b5120::FUN_004b5120()
-{}
 
 // Sets m_p to the address of DAT_0102016c and increments DAT_01268154.
 // @fnv 0x004b50f0
 FUN_004b50f0::FUN_004b50f0()
 {
-    m_p = &DAT_0102016c;
     ++DAT_01268154;
 }
 }  // namespace fnv_004b50f0
@@ -1355,12 +1365,6 @@ char const* const* __thiscall FUN_004b5150_shell::FUN_004b5150()
 {
     return &g_01268100_arg1;
 }
-
-struct bhkSerializable
-{
-    void Destroy();
-    void* FUN_004b5160(unsigned int flags);
-};
 
 extern void _delete(void* ptr, unsigned int size);
 
@@ -1387,19 +1391,16 @@ const char* const* FUN_004b5190_shell::FUN_004b5190()
     return &g_0126811c_arg1;
 }
 
-struct bhkUnaryAction
-{
-    void __thiscall FUN_00c86720();
-};
 extern void __cdecl _delete(void* ptr, unsigned int size);
 
-struct FUN_004b51e0_shell : bhkUnaryAction
+// The shared base lacks this deleting-destructor entry.
+struct UnaryActionDeletingDestructor : bhkUnaryAction
 {
     void* __thiscall FUN_004b51e0(unsigned int flags);
 };
 
 // @fnv 0x004b51e0
-void* __thiscall FUN_004b51e0_shell::FUN_004b51e0(unsigned int flags)
+void* __thiscall UnaryActionDeletingDestructor::FUN_004b51e0(unsigned int flags)
 {
     this->FUN_00c86720();
     if (flags & 1)
@@ -1424,10 +1425,7 @@ void const* __cdecl FUN_004b59c0(char const* arg)
 }
 
 namespace fnv_004b4d10 {
-struct bhkUnaryAction
-{
-    void Set(float, float, float, float);
-};
+
 struct UnaryActionSettings
 {
     float f00;
@@ -1446,23 +1444,14 @@ bhkUnaryAction* UnaryActionSettings::ApplyToAction(bhkUnaryAction* apAction)
 }  // namespace fnv_004b4d10
 
 namespace fnv_004b4ec0 {
-struct BSSimpleList_Ragdoll;
 struct FUN_004b4ee0_shell
 {
     void FUN_004b4ee0();
 };
-struct TESDataHandler
-{
-    BSSimpleList_Ragdoll* GetBGSRagdollList();
-};
-struct FUN_004b4ec0_shell
-{
-    void FUN_004b4ec0();
-};
 // @fnv 0x004b4ec0
-void FUN_004b4ec0_shell::FUN_004b4ec0()
+void __fastcall FUN_004b4ec0(TESDataHandler* dataHandler)
 {
-    ((FUN_004b4ee0_shell*)((TESDataHandler*)this)->GetBGSRagdollList())->FUN_004b4ee0();
+    ((FUN_004b4ee0_shell*)dataHandler->GetBGSRagdollList())->FUN_004b4ee0();
 }
 }  // namespace fnv_004b4ec0
 
@@ -1554,11 +1543,6 @@ Fake004b50c0* Fake004b50c0::FUN_004b50c0()
     return this;
 }
 
-struct bhkMouseSpringAction
-{
-    void __thiscall FUN_00c86cb0();
-    void* __thiscall FUN_004b5230(unsigned int);
-};
 void __cdecl _delete(void*, unsigned int);
 // Calls FUN_00c86cb0, frees this with _delete when flags has bit 0 set, and returns this.
 // @fnv 0x004b5230
@@ -1571,23 +1555,20 @@ void* __thiscall bhkMouseSpringAction::FUN_004b5230(unsigned int flags)
 }
 
 namespace fnv_004b5260 {
-struct bhkCollisionObject
-{
-    static NiAVObject* GetFromNiAVObject(NiAVObject*);
-};
+
 // @fnv 0x004b5260
 NiAVObject* FUN_004b5260(NiAVObject* object)
 {
     NiAVObject* result = 0;
     if (object)
     {
-        result = bhkCollisionObject::GetFromNiAVObject(object);
+        result = reinterpret_cast<NiAVObject*>(bhkCollisionObject::GetFromNiAVObject(object));
         if (!result)
         {
-            NiNode* node = object->GetAsNiNode();
+            NiNode* node = object->IsSceneNode();
             if (node)
             {
-                unsigned int count = node->FUN_0043b480();
+                unsigned int count = node->GetNumChildren();
                 for (unsigned int i = 0; i < count; ++i)
                 {
                     result = FUN_004b5260(node->GetAt(i));
@@ -1601,10 +1582,6 @@ NiAVObject* FUN_004b5260(NiAVObject* object)
 }
 }  // namespace fnv_004b5260
 
-struct TESCombatStyle
-{
-    float UpdateCombatStyle();
-};
 // @fnv 0x004b5470
 int FUN_004b5470(TESCombatStyle* apCombatStyle, float afValue)
 {
@@ -1644,22 +1621,19 @@ float __cdecl FUN_004b54c0(float afValue)
     }
 }
 
-struct GlobalObjectO2_00a7b610
-{
-};
-extern GlobalObjectO2_00a7b610 g_011f3728;
+extern NiRTTI g_011f3728;
 // Returns true if object or any descendant NiNode child has a controller matching g_011f3728; recurses through children.
 // @fnv 0x004b5bf0
 bool FUN_004b5bf0(NiAVObject* object)
 {
     if (!object)
         return false;
-    if (object->GetController(reinterpret_cast<const NiRTTI*>(&g_011f3728)))
+    if (object->GetController(&g_011f3728))
         return true;
-    NiNode* node = object->GetAsNiNode();
+    NiNode* node = object->IsSceneNode();
     if (node)
     {
-        for (unsigned int i = 0; i < node->FUN_0043b480(); ++i)
+        for (unsigned int i = 0; i < node->GetNumChildren(); ++i)
         {
             NiAVObject* child = node->GetAt(i);
             if (FUN_004b5bf0(child))
@@ -1670,10 +1644,6 @@ bool FUN_004b5bf0(NiAVObject* object)
 }
 
 class NiCamera;
-struct FUN_0043d450_Owner
-{
-    NiBound* FUN_0043d450();
-};
 bool __cdecl IsBoundVisible(NiBound*, NiCamera*);
 // Returns false if apObject is null, otherwise tests the object's bound against apCamera via IsBoundVisible.
 // @fnv 0x004b5fc0
@@ -1681,7 +1651,7 @@ bool __cdecl FUN_004b5fc0(NiAVObject* apObject, NiCamera* apCamera)
 {
     if (apObject)
     {
-        return IsBoundVisible(((FUN_0043d450_Owner*)apObject)->FUN_0043d450(), apCamera);
+        return IsBoundVisible(const_cast<NiBound*>(&apObject->FUN_0043d450()), apCamera);
         goto done;
     }
     return false;
@@ -1712,8 +1682,8 @@ int FUN_004b6ae0(NiAVObject* apRoot)
     return recData._0C;
 }
 
+class hkpWorldObject;
 namespace fnv_004b6c20 {
-struct hkpWorldObject;
 namespace CollisionObjectCount {
 struct IntegerAndByteRecord
 {
@@ -1806,52 +1776,27 @@ Owner0066d650* Owner0066d650::Reset()
 }
 
 namespace fnv_004b2800 {
-struct NiPick
-{
-    void FUN_00705fc0(void*);
-    bool PerformPick(const NiPoint3&, const NiPoint3&, bool);
-};
-struct FUN_00456630_helper
-{
-    bool FUN_00456610();
-};
-struct FUN_0043d450_Owner
-{
-    NiBound* FUN_0043d450();
-};
-struct Pt
-{
-    float x, y, z;
-    float Length() const;
-};
-struct NiPoint3Ex
-{
-    float x, y, z;
-    NiPoint3Ex operator-(const NiPoint3&) const;
-};
-struct FUN_004b2800_Bound
-{
-    float x, y, z, r;
-};
 bool __fastcall GetByteAtOffset17(const char*);
-NiPoint3Ex* __fastcall _ref_006815c0(FUN_004b2800_Bound*);
+NiPoint3* __fastcall _ref_006815c0(NiBound*);
 
 // @fnv 0x004b2800
 bool PickObjectsInRadius(NiPick* pick, const NiPoint3& origin, const NiPoint3& dir, float radius, NiAVObject* object)
 {
     bool result = false;
-    if (pick && object && (!GetByteAtOffset17((const char*)pick) || !((FUN_00456630_helper*)object)->FUN_00456610()))
+    if (pick && object && (!GetByteAtOffset17((const char*)pick) || !object->FUN_00456610()))
     {
         if (!object->IsVisualObject())
             return false;
-        FUN_004b2800_Bound kBound = *(FUN_004b2800_Bound*)((FUN_0043d450_Owner*)object)->FUN_0043d450();
-        NiPoint3Ex kDiff = *_ref_006815c0(&kBound) - origin;
-        if (((Pt*)&kDiff)->Length() < ((NiBound*)&kBound)->FUN_0084d030() + radius)
+        // Preserve the original trivial bound copy without calling its shared copy constructor.
+        unsigned int boundStorage[sizeof(NiBound) / sizeof(unsigned int)];
+        memcpy(boundStorage, &object->FUN_0043d450(), sizeof(NiBound));
+        NiPoint3 kDiff = *_ref_006815c0(reinterpret_cast<NiBound*>(boundStorage)) - origin;
+        if (kDiff.Length() < reinterpret_cast<NiBound*>(boundStorage)->FUN_0084d030() + radius)
         {
-            NiNode* node = object->GetAsNiNode();
+            NiNode* node = object->IsSceneNode();
             if (node)
             {
-                int count = node->FUN_0043b480();
+                int count = node->GetNumChildren();
                 for (int i = 0; i < count; i++)
                 {
                     NiAVObject* child = node->GetAt(i);
@@ -1861,7 +1806,7 @@ bool PickObjectsInRadius(NiPick* pick, const NiPoint3& origin, const NiPoint3& d
             }
             else
             {
-                pick->FUN_00705fc0(object);
+                pick->FUN_00705fc0(static_cast<void*>(object));
                 if (pick->PerformPick(origin, dir, true))
                     result = true;
             }
@@ -1876,8 +1821,6 @@ struct BSShaderTextureSet;
 struct BSTextureSet;
 struct NiAdditionalGeometryData;
 struct CloningProcess;
-struct NiGeometry;
-struct NiObject;
 struct NiStream;
 struct NiTriBasedGeom;
 struct ShadowSceneLight;
@@ -1885,370 +1828,25 @@ struct blob16
 {
     char b[16];
 };
-struct NiShadeProperty : public NiProperty
-{
-    virtual void __vslot_0();
-    virtual void* GetRTTI();
-    virtual NiObject* MakeClone(CloningProcess*);
-    void CopyMemberData(NiShadeProperty*, CloningProcess*);
-    virtual void LoadBinary(NiStream*);
-    virtual void LinkObject(NiStream*);
-    virtual bool RegisterStreamables(NiStream*);
-    virtual void SaveBinary(NiStream*);
-    virtual bool IsEqual(NiObject*);
-    static NiObject* CreateObject();
-    virtual void GetViewerStrings(void*);
-    void SetField(unsigned short, unsigned short, unsigned short);
-    unsigned short GetField(unsigned short, unsigned short);
-    void SetBit(bool, unsigned short);
-    bool GetBit(unsigned short);
-    void SetSmooth(bool);
-    bool GetSmooth();
-    bool IsEqualFast(void*);
-    virtual int Type();
-    static int GetType();
-    static NiShadeProperty* GetDefault();
-    static void InitializePoint3();
-    static void ShutdownPoint3();
-    int GetShaderPropertyType();
-    void __local_vftable_ctor_closure();
-    char _pad_4[20];
-    unsigned short m_uiObjectFlags;
-    char _pad_1a[2];
-    int m_iShaderType;
-};
-typedef char _sizecheck_NiShadeProperty[sizeof(NiShadeProperty) == 32 ? 1 : -1];
-struct BSShaderProperty : public NiShadeProperty
-{
-    virtual void __vslot_0();
-    virtual void CopyTo(BSShaderProperty*);
-    virtual void CopyToMembers(BSShaderProperty*);
-    virtual bool SetupGeometry(NiGeometry*);
-    virtual void* CreateRenderPasses(NiGeometry*, int, unsigned short*, unsigned int, BSShaderAccumulator*, bool);
-    virtual unsigned short GetNumberofPasses(NiGeometry*);
-    virtual void* GetSIBlockRenderPasses();
-    virtual void* GetRenderDepthPass(NiGeometry*);
-    virtual BSShaderProperty* ClarifyShader(NiGeometry*, bool, bool);
-    virtual NiTexture* GetBaseTexture();
-    virtual void* GetWaterFogPassList(NiGeometry*);
-    virtual void GetTextureUse(int*, void*);
-    virtual void PrecacheTextures();
-    virtual void* GetRTTI();
-    virtual NiObject* MakeClone(CloningProcess*);
-    void CopyMemberData(BSShaderProperty*, CloningProcess*);
-    virtual void GetViewerStrings(void*);
-    virtual void LoadBinary(NiStream*);
-    virtual void LinkObject(NiStream*);
-    virtual bool RegisterStreamables(NiStream*);
-    virtual void SaveBinary(NiStream*);
-    virtual bool IsEqual(NiObject*);
-    static NiObject* CreateObject();
-    virtual void PostLinkObject(NiStream*);
-    void* QRenderPasses();
-    void CheckCreateRenderPassArray(int);
-    void CheckCreateDepthMapRenderPassArray(int);
-    void CheckCreateLocalMapRenderPassArray(int);
-    void CheckCreateSIBlockRenderPassArray(int);
-    void CheckCreateConstAlphaRenderPassArray(int);
-    void CheckCreateWaterFogRenderPassArray(int);
-    void CheckSilhouetteRenderPassArray(int);
-    void SetLastRenderPassState(int);
-    bool CompareFlags(BSShaderProperty*);
-    bool GetFlag(unsigned int);
-    void SetFlag(unsigned int, bool);
-    void SetAlpha(float);
-    float GetAlpha();
-    float GetFadeAlpha();
-    void SetFadeAlpha(float);
-    void FreeRenderPasses();
-    void ClearRenderPasses();
-    void SetObjectType(unsigned int);
-    unsigned int GetObjectType();
-    int QShader();
-    void SetShader(int);
-    float QEnvmapScale();
-    void SetEnvmapScale(float);
-    static void ToggleMotionBlurRecurse(NiAVObject*);
-    static void SetMotionBlurRecurse(NiAVObject*, bool);
-    static void SetFlagRecurse(NiAVObject*, int, bool);
-    bool Get1stPerson();
-    void Set1stPerson(bool);
-    float GetDepthBias();
-    void SetDepthBias(float);
-    static void ResetDebugStats();
-    static void GetDebugStats(unsigned int*);
-    void SetMotionBlurred(bool);
-    float GetCameraDistance();
-    static void ClearRenderPassGarbage();
-    void __local_vftable_ctor_closure();
-    char ulFlags[8];
-    float fAlpha;
-    float fFadeAlpha;
-    float m_fAmbientReflectionScale;
-    float m_fSpecularExponent;
-    int iLastRenderPassState;
-    void* pRenderPassList;
-    void* m_pRenderPassArray1;
-    void* m_pRenderPassArray2;
-    void* m_pRenderPassArray3;
-    void* m_pRenderPassArray4;
-    void* m_pRenderPassArray5;
-    void* m_pRenderPassArray6;
-    int m_iRenderPassCount;
-    float fDepthBias;
-    float m_fValueAfterDepthBias;
-    float m_fEnvironmentMapScale;
-};
-typedef char _sizecheck_BSShaderProperty[sizeof(BSShaderProperty) == 104 ? 1 : -1];
-struct BSShaderLightingProperty : public BSShaderProperty
-{
-    virtual void __vslot_0();
-    virtual void CopyTo(BSShaderLightingProperty*);
-    virtual void CopyToMembers(BSShaderLightingProperty*);
-    virtual void* GetRTTI();
-    virtual NiObject* MakeClone(CloningProcess*);
-    void CopyMemberData(BSShaderLightingProperty*, CloningProcess*);
-    virtual void GetViewerStrings(void*);
-    virtual void LoadBinary(NiStream*);
-    virtual void LinkObject(NiStream*);
-    virtual bool RegisterStreamables(NiStream*);
-    virtual void SaveBinary(NiStream*);
-    virtual bool IsEqual(NiObject*);
-    static NiObject* CreateObject();
-    bool CopyLightingDataTo(ShadowSceneLight*, NiBound*, void**);
-    void ResortLights(NiBound*);
-    bool AreLightsSorted(NiBound*);
-    ShadowSceneLight* GetFirstAttachedLight(void**);
-    ShadowSceneLight* GetFirstActiveLight(void**);
-    ShadowSceneLight* GetFirstActiveNonShadowLight(void**);
-    ShadowSceneLight* GetNextLight(void**);
-    ShadowSceneLight* GetNextAttachedLight(void**);
-    ShadowSceneLight* GetNextVisibleNonShadowLight(void**);
-    void AttachLight(ShadowSceneLight*, NiBound*);
-    void RemoveLight(ShadowSceneLight*);
-    unsigned short GetNumberofLights();
-    unsigned short GetNumberOfActiveLights();
-    unsigned short GetNumberofActiveNonShadowLights();
-    static void SetShaderConstant(int, struct blob16);
-    static void SetLight(unsigned int, ShadowSceneLight*, float);
-    static void SetLight1x2x(unsigned int, ShadowSceneLight*, float);
-    static void SetPointLight3x(unsigned int, ShadowSceneLight*, float);
-    static void SetSpotLight3x(unsigned int, ShadowSceneLight*, float);
-    static void ResetLights(int);
-    void SetForcedDarkness(float);
-    float GetForcedDarkness();
-    void SetReferenceID(unsigned int);
-    unsigned int GetReferenceID();
-    void FenceAllLights();
-    void ClearLights(NiTriBasedGeom*);
-    void SetLightListChanged(bool);
-    void __local_vftable_ctor_closure();
-    char m_kShadowSceneLights[12];
-    float m_fForcedDarkness;
-    unsigned int m_uiLightCount;
-    bool m_bHasForcedDarkness;
-    char _pad_7d[3];
-    void* m_pLightData;
-};
-typedef char _sizecheck_BSShaderLightingProperty[sizeof(BSShaderLightingProperty) == 132 ? 1 : -1];
-struct BSShaderPPLightingProperty : public BSShaderLightingProperty
-{
-    virtual void __vslot_0();
-    virtual void CopyTo(BSShaderPPLightingProperty*);
-    virtual void CopyToMembers(BSShaderPPLightingProperty*);
-    virtual NiAdditionalGeometryData* CreateRendererSpecificProperty(NiGeometry*);
-    virtual int GetClampD3D();
-    virtual void SetClampD3D(int);
-    virtual int GetClampNI();
-    virtual void SetClampNI(int);
-    virtual unsigned short GetTextureCount();
-    virtual unsigned short QLandscapeTextureCount();
-    virtual void SetTexture(int, unsigned int, NiTexture*);
-    virtual NiTexture* GetTexture(int, unsigned int);
-    virtual void SetRectangleBounds(BSShaderTextureSet*);
-    virtual void SetDiffuseTexture(unsigned int, NiTexture*);
-    virtual void SetNormalTexture(unsigned int, NiTexture*);
-    virtual void SetSpecularTexture(unsigned int, NiTexture*);
-    virtual void SetGlowTexture(unsigned int, NiTexture*);
-    virtual void SetFlagsFromTextures();
-    virtual float GetSpecularLODFade();
-    virtual float GetEnvMapLODFade();
-    virtual void GetRenderPasses_1x(NiGeometry*, int, unsigned short*, unsigned int, BSShaderAccumulator*, bool);
-    virtual void GetRenderPasses_2x(NiGeometry*, int, unsigned short*, unsigned int, BSShaderAccumulator*, bool);
-    virtual void* GetRTTI();
-    virtual NiObject* MakeClone(CloningProcess*);
-    void CopyMemberData(BSShaderPPLightingProperty*, CloningProcess*);
-    virtual void GetViewerStrings(void*);
-    virtual void LoadBinary(NiStream*);
-    virtual void LinkObject(NiStream*);
-    virtual bool RegisterStreamables(NiStream*);
-    virtual void SaveBinary(NiStream*);
-    virtual bool IsEqual(NiObject*);
-    static NiObject* CreateObject();
-    virtual void PostLinkObject(NiStream*);
-    virtual bool SetupGeometry(NiGeometry*);
-    virtual void* CreateRenderPasses(NiGeometry*, int, unsigned short*, unsigned int, BSShaderAccumulator*, bool);
-    virtual unsigned short GetNumberofPasses(NiGeometry*);
-    virtual void* GetRenderDepthPass(NiGeometry*);
-    virtual NiTexture* GetBaseTexture();
-    NiTexture* GetDiffuseTextureIndex(unsigned int);
-    NiTexture* GetNormalMapTexture(unsigned int);
-    NiTexture* GetSpecularTexture(unsigned int);
-    NiTexture* GetGlowTexture(unsigned int);
-    void* GetExtraDataPointers();
-    NiPoint3* GetTangentExtraData();
-    NiPoint3* GetBinormalExtraData();
-    void StoreExtraDataPointers(void*);
-    void StoreTextureSplatVertexDataPointers(float*);
-    static bool GetForceNoProjectedShadowTexture();
-    static void SetForceNoProjectedShadowTexture(bool);
-    void SetLandscapeSpecularExponents(unsigned char, unsigned char, unsigned char, unsigned char, unsigned char,
-                                       unsigned char, unsigned char, unsigned char, unsigned char, unsigned char);
-    void SetForLandscapeTextures();
-    void SetLandscapeTextureSet(unsigned int, BSTextureSet*);
-    NiTexture* GetLandscapeTexture(unsigned short);
-    bool GetTextureSpecular(int);
-    float GetTextureSpecularExponent(int);
-    void SetTextureEffectData(void*);
-    void* GetTextureEffectData();
-    static void UpdateRefractionRecurse(NiAVObject*, bool, float, bool, float, bool);
-    static bool HasRefractionRecurse(NiAVObject*);
-    float GetRefractionPower();
-    void SetRefractionPower(float);
-    int GetRefractionFirePeriod();
-    void SetRefractionFirePeriod(int);
-    float GetParallaxOccMaxPasses();
-    void SetParallaxOccMaxPasses(float);
-    float GetParallaxOccScale();
-    void SetParallaxOccScale(float);
-    bool QRemappableTextures();
-    void SetTextureSet(BSTextureSet*);
-    void CopyTextureSet(BSTextureSet*);
-    void LoadTextureSet(char*, BSTextureSet*);
-    void EnsureNormalMap();
-    virtual BSShaderProperty* ClarifyShader(NiGeometry*, bool, bool);
-    virtual void* GetWaterFogPassList(NiGeometry*);
-    virtual void GetTextureUse(int*, void*);
-    float GetTerrainTexOffsetX();
-    float GetTerrainTexOffsetY();
-    float GetTerrainTexFade();
-    float GetTerrainDetailTexScale();
-    void SetTerrainTexParams(float, float, float);
-    void SetTerrainDetailTexScale(float);
-    virtual void PrecacheTextures();
-    void* AddZOnlyPass_1x(NiGeometry*, unsigned short*, bool, bool*, bool, bool);
-    void* AddZOnlyTextureEffectPass_1x(NiGeometry*, unsigned short*, bool, bool*, bool);
-    void AddConstAlphaPass_1x(NiGeometry*, bool, bool);
-    void* AddAmbientPass_1x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool, bool);
-    void* AddAmbDiffTexPass_1x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool, bool,
-                               bool, bool, bool);
-    void* AddAmbDiffDirAndPtPass_1x(NiGeometry*, ShadowSceneLight*, ShadowSceneLight*, unsigned short*, bool, bool*,
-                                    bool, bool);
-    void* AddDiffusePass_1x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool, bool);
-    void* AddAmbientDiffuseTexturePass_1x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool,
-                                          bool, bool, bool, bool);
-    void* AddSpecularPass_1x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool, bool, bool,
-                             bool);
-    void* AddEnvmapPass_1x(NiGeometry*, unsigned short*, bool, bool*, bool, bool);
-    void* AddFogPass_1x(NiGeometry*, unsigned short*, bool, bool*, bool, bool, bool);
-    void AddLandscapePasses_1x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool);
-    void* AddTextureEffectPass_1x(NiGeometry*, unsigned short*, bool, bool*, bool);
-    void* AddTextureEffectPass_2x(NiGeometry*, unsigned short*, bool, bool*, bool);
-    void* AddRenderNormalsPass_1x(NiGeometry*, unsigned short*, bool, bool*, bool, bool);
-    void* AddRenderNormalsClearPass_1x(NiGeometry*, unsigned short*, bool, bool*, bool);
-    void* AddVelocityPass_2x(NiGeometry*, unsigned short*, bool, bool*, bool);
-    void* AddSelfIllumAlphaPass(NiGeometry*, unsigned short*, bool, bool, bool);
-    void* AddSelfIllumAlphaBlockPass(NiGeometry*, unsigned short*, bool, bool);
-    void* AddAmbDiff2Pass_2x(NiGeometry*, ShadowSceneLight*, ShadowSceneLight*, unsigned short*, bool, bool*, bool,
-                             bool, bool, bool, bool, bool, bool);
-    void* AddAmbDiff3Pass_2x(NiGeometry*, ShadowSceneLight*, ShadowSceneLight*, ShadowSceneLight*, unsigned short*,
-                             bool, bool*, bool, bool, bool, bool, bool, bool, bool);
-    void* AddAmbDiffTexPass_2x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool, bool,
-                               bool, bool, bool, bool, bool, bool, bool);
-    void* AddAmbDiffTex2Pass_2x(NiGeometry*, ShadowSceneLight*, ShadowSceneLight*, unsigned short*, bool, bool*, bool,
-                                bool, bool, bool, bool, bool, bool, bool);
-    void* AddAmbDiffTexSpecularPass_2x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool,
-                                       bool, bool, bool, bool, bool);
-    void* AddAmbDiffTexSpecular2Pass_2x(NiGeometry*, ShadowSceneLight*, ShadowSceneLight*, unsigned short*, bool, bool*,
-                                        bool, bool, bool, bool, bool, bool, bool, bool);
-    void* AddAmbDiffTexSpecular10Pass_2x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool,
-                                         bool, bool);
-    void* AddDiffusePt2Pass_2x(NiGeometry*, ShadowSceneLight*, ShadowSceneLight*, unsigned short*, bool, bool*, bool,
-                               bool, bool, bool, bool);
-    void* AddDiffusePt3Pass_2x(NiGeometry*, ShadowSceneLight*, ShadowSceneLight*, ShadowSceneLight*, unsigned short*,
-                               bool, bool*, bool, bool, bool, bool, bool);
-    void* AddTexturePass_2x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool, bool, bool,
-                            bool, bool, bool);
-    void* AddSpecularPass_2x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool, bool, bool, bool,
-                             bool);
-    void* AddSpecularPt2Pass_2x(NiGeometry*, ShadowSceneLight*, ShadowSceneLight*, unsigned short*, bool, bool*, bool,
-                                bool, bool, bool);
-    void* AddSpecularPt3Pass_2x(NiGeometry*, ShadowSceneLight*, ShadowSceneLight*, ShadowSceneLight*, unsigned short*,
-                                bool, bool*, bool, bool, bool, bool);
-    void* AddEnvmapPass_2x(NiGeometry*, ShadowSceneLight*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool,
-                           bool);
-    void AddLandscapePasses_2x(NiGeometry*, ShadowSceneLight*, unsigned short*, bool, bool*, bool, bool);
-    void AddDepthMapPass_2x(NiGeometry*, bool, bool, BSShaderAccumulator*);
-    void AddLocalMapPass_2x(NiGeometry*, bool, bool);
-    void AddSilhouettePass_2x(NiGeometry*, bool);
-    void __local_vftable_ctor_closure();
-    float m_fEmissiveMultiple;
-    float m_fSpecularScale;
-    char m_kEmissiveColor[16];
-    char m_kSpecularColor[16];
-    char m_spTextureSet[4];
-    unsigned short m_usTextureFlags;
-    char _pad_b2[2];
-    char m_ppTextureSlots[28];
-    unsigned char* m_pTextureFlags;
-    unsigned short m_usTextureIndex;
-    char _pad_d6[2];
-    bool* m_pbTextureHasAlpha;
-    char m_spTangentSpaceData[4];
-    float* m_pfTextureSpecularExponents;
-    int m_eClampMode;
-    char spTexEffectData[4];
-    float m_fValueBeforeTextureCount;
-    int m_iTextureCount;
-    float m_fFirstFloatAfterTextureCount;
-    float m_fSecondFloatAfterTextureCount;
-    float m_fThirdFloatAfterTextureCount;
-    float m_fFourthFloatAfterTextureCount;
-    float m_fFifthFloatAfterTextureCount;
-    float m_fSixthFloatAfterTextureCount;
-    void* m_pRenderPassEntry;
-};
-typedef char _sizecheck_BSShaderPPLightingProperty[sizeof(BSShaderPPLightingProperty) == 272 ? 1 : -1];
 
-struct NiNode_00558310
-{
-    NiAVObject* FUN_0045bc00(unsigned int);
-};
-struct VObj_004b5710
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual NiNode* IsSceneNode();
-};
 int __cdecl FUN_00438220();
 BSShaderPPLightingProperty* __cdecl FindAcceptedForm(NiNode*);
 // Scans the node's children in reverse for a BSShaderPPLightingProperty, returning it if found, otherwise falling back to FindAcceptedForm.
 // @fnv 0x004b5710
 BSShaderPPLightingProperty* __cdecl FindPPLightingProperty(NiNode* apNode)
 {
-    if (!apNode->FUN_0043b480())
+    if (!apNode->GetNumChildren())
         return 0;
-    unsigned int n = apNode->FUN_0043b480() - 1;
+    unsigned int n = apNode->GetNumChildren() - 1;
     while (true)
     {
         NiAVObject* pobj = apNode->GetAt(n);
         if (pobj)
         {
-            NiNode* pnode = ((VObj_004b5710*)pobj)->IsSceneNode();
+            NiNode* pnode = pobj->IsSceneNode();
             if (pnode)
             {
-                NiAVObject* pchild = ((NiNode_00558310*)pnode)->FUN_0045bc00(0);
+                NiAVObject* pchild = pnode->FUN_0045bc00(0u);
                 if (pchild)
                 {
                     NiShadeProperty* pproperty = (NiShadeProperty*)pchild->GetProperty(FUN_00438220());
@@ -2301,33 +1899,20 @@ float __cdecl FUN_004b15e0(float startAngle, float targetAngle, float* pfOutDir)
     return angleDelta;
 }
 
-struct Model
-{
-    NiNode* GetObject3D();
-};
-struct CtlV
-{
-    CtlV* GetNext();
-};
-struct FUN_00621b20_Class
-{
-    void FUN_00621b20(float);
-    CtlV* GetNext();
-};
 extern const NiRTTI DAT_011f4428;
 // @fnv 0x004b70f0
 void FUN_004b70f0(NiNode* apNode, float afPhase)
 {
     if (!apNode)
         return;
-    NiTimeController* pcont = (NiTimeController*)((Model*)apNode)->GetObject3D();
+    NiTimeController* pcont = static_cast<const NiObjectNET*>(apNode)->GetControllers();
     while (pcont)
     {
-        ((FUN_00621b20_Class*)pcont)->FUN_00621b20(afPhase);
-        pcont = (NiTimeController*)((FUN_00621b20_Class*)pcont)->GetNext();
+        pcont->SetSequenceTime(afPhase);
+        pcont = pcont->GetNext();
     }
     unsigned int n = 0;
-    for (; n < apNode->FUN_0043b480(); ++n)
+    for (; n < apNode->GetNumChildren(); ++n)
     {
         NiAVObject* pobj = apNode->GetAt(n);
         if (pobj && FUN_0043b300(&DAT_011f4428, pobj))
@@ -2336,29 +1921,17 @@ void FUN_004b70f0(NiNode* apNode, float afPhase)
 }
 
 struct NiCamera;
-struct NiBoundStandIn
-{
-    float m_afRadius;
-    float m_acCenter[3];
-    NiBoundStandIn();
-};
-bool IsBoundVisible(NiBoundStandIn*, NiCamera*);
-struct FUN_0098ddd0_shell
-{
-    void FUN_0098ddd0(NiPoint3&);
-};
-struct PackageTargetRecord
-{
-    void SetTargAcquireRadius(float);
-};
+
+bool IsBoundVisible(NiBound*, NiCamera*);
+
 // @fnv 0x004b61d0
 bool FUN_004b61d0(NiPoint3 location, NiCamera* camera, float radius)
 {
     if (!camera)
         return false;
-    NiBoundStandIn sphere;
-    ((FUN_0098ddd0_shell*)&sphere)->FUN_0098ddd0(location);
-    ((PackageTargetRecord*)&sphere)->SetTargAcquireRadius(radius);
+    NiBound sphere;
+    sphere.SetGridPosition(&location);
+    sphere.SetRadius(radius);
     return IsBoundVisible(&sphere, camera);
 }
 
@@ -2376,11 +1949,11 @@ void FUN_004b6630(NiAVObject* object)
     PropHelper* result = (PropHelper*)_UseSaveGameBlocks(&g_0120043c_arg1, object->GetProperty(3));
     if (result)
         result->AssignRefObj(0);
-    NiNode* node = object->GetAsNiNode();
+    NiNode* node = object->IsSceneNode();
     if (node)
     {
         unsigned int i = 0;
-        for (; i < node->FUN_0043b480(); ++i)
+        for (; i < node->GetNumChildren(); ++i)
         {
             if (node->GetAt(i))
                 FUN_004b6630(node->GetAt(i));
@@ -2388,27 +1961,11 @@ void FUN_004b6630(NiAVObject* object)
     }
 }
 
-namespace fnv_004b4ea0 {
-struct hkpMotion
-{
-    float GetMassValue(void);
-};
-
-typedef hkpMotion BSSimpleList_Ragdoll;
-
-class TESDataHandler
-{
-  public:
-    BSSimpleList_Ragdoll* GetBGSRagdollList(void);
-    float FUN_004b4ea0();
-};
-
 // @fnv 0x004b4ea0
 float TESDataHandler::FUN_004b4ea0()
 {
-    return GetBGSRagdollList()->GetMassValue();
+    return reinterpret_cast<hkpMotion*>(GetBGSRagdollList())->GetMassValue();
 }
-}  // namespace fnv_004b4ea0
 
 struct FUN_004b5020_shell
 {
@@ -2431,7 +1988,8 @@ int __cdecl FUN_00408b20(char const*, char const*);
 extern void const* const DAT_011f9140;
 extern NiRTTI g_0126817c;
 
-struct ArrSI
+// Exe 0x004b68a0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct GlobalfuncOffset08View
 {
     unsigned int GetFlags();
 };
@@ -2442,14 +2000,14 @@ struct FUN_004b68a0_data
     void* field_04;
     void* field_08;
     int field_0c;
-    ArrSI* field_10;
+    GlobalfuncOffset08View* field_10;
     int field_14;
     unsigned int field_18;
 };
 
 // Checks RTTI and fade-node conditions on object, resets field_14 when object matches field_10, then increments field_0c.
 // @fnv 0x004b68a0
-void FUN_004b68a0(ArrSI* object, FUN_004b68a0_data* data)
+void FUN_004b68a0(GlobalfuncOffset08View* object, FUN_004b68a0_data* data)
 {
     if ((data->field_18 & 1) && FUN_0043b300(&g_0126817c, reinterpret_cast<NiAVObject*>(object)))
         return;
@@ -2477,7 +2035,8 @@ void FUN_004b68a0(ArrSI* object, FUN_004b68a0_data* data)
 }
 }  // namespace fnv_004b68a0
 
-struct ArrSI
+// Exe 0x004b6a00: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct GlobalfuncOffset08View
 {
     unsigned int GetFlags();
 };
@@ -2495,7 +2054,6 @@ struct FUN_004b6a00_data
 
 extern NiRTTI DAT_011f9140;
 extern NiRTTI g_0126817c;
-extern const char $SG20273[];
 
 int __cdecl FUN_00408b20(char const*, char const*);
 
@@ -2511,25 +2069,25 @@ void __cdecl ProcessObjectMatch(NiAVObject* object, FUN_004b6a00_data* data)
 
     if (data->field_18 & 2)
     {
-        if (FUN_0043b300(&DAT_011f9140, reinterpret_cast<NiAVObject*>(reinterpret_cast<ArrSI*>(object)->GetFlags())))
+        if (FUN_0043b300(&DAT_011f9140, reinterpret_cast<NiAVObject*>(reinterpret_cast<GlobalfuncOffset08View*>(object)->GetFlags())))
             return;
     }
 
     if (data->field_18 & 2)
     {
-        if (reinterpret_cast<ArrSI*>(object)->GetFlags())
+        if (reinterpret_cast<GlobalfuncOffset08View*>(object)->GetFlags())
         {
             if (reinterpret_cast<BSFadeNode*>(
-                    reinterpret_cast<TESTopicInfoData*>(reinterpret_cast<ArrSI*>(object)->GetFlags())
+                    reinterpret_cast<TESTopicInfoData*>(reinterpret_cast<GlobalfuncOffset08View*>(object)->GetFlags())
                         ->GetLinkToList())
                     ->FUN_0043b1b0())
             {
                 if (!FUN_00408b20(static_cast<char const*>(
                                       reinterpret_cast<BSFadeNode*>(reinterpret_cast<TESTopicInfoData*>(
-                                                                        reinterpret_cast<ArrSI*>(object)->GetFlags())
+                                                                        reinterpret_cast<GlobalfuncOffset08View*>(object)->GetFlags())
                                                                         ->GetLinkToList())
                                           ->FUN_0043b1b0()),
-                                  $SG20273))
+                                  "Arrow"))
                     return;
             }
         }
@@ -2542,43 +2100,23 @@ void __cdecl ProcessObjectMatch(NiAVObject* object, FUN_004b6a00_data* data)
 }
 
 namespace fnv_004b6e90 {
-class NiObject
-{
-};
-
-struct A51BF0Base : NiObject
-{
-    static void* __cdecl operator new(unsigned int size);
-    static void operator delete(void*, unsigned int);
-};
-
-struct BSShaderLightingProperty : A51BF0Base
-{
-    unsigned char m_data[128];
-    BSShaderLightingProperty();
-};
-
-struct NiAVObject_Attach
-{
-    void AttachProperty(NiObject* property);
-};
 
 void AttachLightingPropertyRecursive(NiAVObject* object);
 
-// Recursively attaches a new BSShaderLightingProperty to geometry objects lacking property 3, descending through NiNode children.
+// Recursively attaches a new BSShaderNoLightingProperty to geometry objects lacking property 3, descending through NiNode children.
 // @fnv 0x004b6e90
 void AttachLightingPropertyRecursive(NiAVObject* object)
 {
-    if (object->GetAsNiGeometry() && !object->GetProperty(3))
+    if (object->IsGeometry() && !object->GetProperty(3))
     {
-        BSShaderLightingProperty* lightingProperty = new BSShaderLightingProperty();
-        ((NiAVObject_Attach*)object)->AttachProperty(lightingProperty);
+        BSShaderNoLightingProperty* lightingProperty = new BSShaderNoLightingProperty();
+        object->AttachProperty(lightingProperty);
     }
 
-    NiNode* node = object->GetAsNiNode();
+    NiNode* node = object->IsSceneNode();
     if (node)
     {
-        for (unsigned int index = 0; index < node->FUN_0043b480(); ++index)
+        for (unsigned int index = 0; index < node->GetNumChildren(); ++index)
         {
             NiAVObject* child = node->GetAt(index);
             if (child)
@@ -2588,55 +2126,23 @@ void AttachLightingPropertyRecursive(NiAVObject* object)
 }
 }  // namespace fnv_004b6e90
 
-struct NiAVObject_004b5b00
-{
-    char unk00[0x34];
-    void* m_pExtraDataArray;
-
-    void* GetExtraDataAt(unsigned short index);
-};
-
 // @fnv 0x004b5b00
-void* NiAVObject_004b5b00::GetExtraDataAt(unsigned short index)
+NiBlendTransformInterpolator* NiMultiTargetTransformController::GetBlendInterpolator(unsigned short index)
 {
-    return reinterpret_cast<char*>(m_pExtraDataArray) + index * 0x30;
+    return m_pkBlendInterpolators + index;
 }
 
-class NiRTTI;
 extern NiRTTI DAT_011f36ac;
 
-struct FixedStr6220
-{
-    char* m_kHandle;
-    operator const char*() const;
-};
+NiObject* NiDynamicCast(const NiRTTI*, NiObject*);
 
-class NiObj6220;
-class NiObj6220
+class TimedTextEntry
 {
   public:
-    NiObj6220* GetControllers() const;
-};
-NiObj6220* NiDynamicCast(const NiRTTI*, NiObj6220*);
-
-struct AnimEntry6220
-{
     int unk00;
     int unk04;
-    FixedStr6220* GetName();
+    NiFixedString* GetName();
     float GetValue();
-};
-struct AnimData6220
-{
-    AnimEntry6220* GetEntries(unsigned int* count);
-};
-struct Seq6220
-{
-    AnimData6220* GetData();
-};
-struct Mgr6220
-{
-    Seq6220* GetControllerSequence(const NiFixedString& name);
 };
 
 template <class T> unsigned int BSStringLength(const T*);
@@ -2644,19 +2150,19 @@ extern "C" int _strnicmp(const char*, const char*, unsigned int);
 
 // Looks up the named sequence on obj's controller manager and returns the value of the first entry whose name starts with prefix, else 0.
 // @fnv 0x004b6220
-float GetAnimValueByPrefix(NiObj6220* obj, const char* name, const char* prefix)
+float GetAnimValueByPrefix(NiObjectNET* obj, const char* name, const char* prefix)
 {
     if (!obj)
         return 0.0f;
-    Mgr6220* mgr = (Mgr6220*)NiDynamicCast(&DAT_011f36ac, obj->GetControllers());
+    NiControllerManager* mgr = (NiControllerManager*)NiDynamicCast(&DAT_011f36ac, obj->GetControllers());
     if (mgr)
     {
-        Seq6220* seq3 = mgr->GetControllerSequence(NiFixedString(name));
+        NiControllerSequence* seq3 = mgr->FUN_0047a520(NiFixedString(name));
         if (seq3)
         {
-            AnimData6220* data8 = seq3->GetData();
+            NiTextKeyExtraData* data8 = seq3->FUN_00700300();
             unsigned int aCount;
-            AnimEntry6220* entries3 = data8->GetEntries(&aCount);
+            TimedTextEntry* entries3 = data8->FUN_00495f30(&aCount);
             unsigned int len = BSStringLength(prefix);
             if (len > 0)
             {
@@ -2781,7 +2287,7 @@ class FUN_004b6ce0_cls
     virtual void* vfn_1c();
     FUN_004b6ce0_cls* FUN_00a59d30(int);
     int FUN_00441110();
-    unsigned int FUN_0043b480();
+    unsigned int GetNumChildren();
     FUN_004b6ce0_cls* FUN_0043b4a0(unsigned int);
 };
 
@@ -2828,82 +2334,36 @@ void FUN_004b6ce0(FUN_004b6ce0_cls* p)
         c = p->vfn_c();
         if (c != 0)
         {
-            for (i2 = 0; i2 < c->FUN_0043b480(); i2++)
+            for (i2 = 0; i2 < c->GetNumChildren(); i2++)
                 FUN_004b6ce0(c->FUN_0043b4a0(i2));
         }
     }
 }
 
-struct LightingProp80
-{
-    LightingProp80();
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    void SetShaderFlag(unsigned int, bool);
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-};
-
-struct AVObjectEx : public NiAVObject
-{
-    void AttachProperty(void*);
-    void UpdatePropertyState();
-};
-
 void __cdecl FUN_00b57e30(NiAVObject*, int, int);
 
-// Adds a LightingProp80 with shader flag 0x30 to a geometry lacking property 3, or recurses into a visual node's children.
+// Adds a BSShaderNoLightingProperty with shader flag 0x30 to a geometry lacking property 3, or recurses into a visual node's children.
 // @fnv 0x004b6f90
-void __cdecl EnsureLightingProperty(AVObjectEx* apObject)
+void __cdecl EnsureLightingProperty(NiAVObject* apObject)
 {
-    if (apObject->GetAsNiGeometry() && !apObject->GetProperty(3))
+    if (apObject->IsGeometry() && !apObject->GetProperty(3))
     {
-        LightingProp80* pProp = new LightingProp80;
-        pProp->SetShaderFlag(0x30, true);
+        BSShaderNoLightingProperty* pProp = new BSShaderNoLightingProperty;
+        pProp->SetFlag(0x30, true);
         apObject->AttachProperty(pProp);
-        apObject->UpdatePropertyState();
+        apObject->FUN_00a5a040();
         FUN_00b57e30(apObject, 0, 0);
     }
     else
     {
-        NiNode* pNode = apObject->GetAsNiNode();
+        NiNode* pNode = apObject->IsSceneNode();
         if (pNode && pNode->IsVisualObject())
         {
-            for (unsigned int i = 0; i < pNode->FUN_0043b480(); i++)
+            for (unsigned int i = 0; i < pNode->GetNumChildren(); i++)
             {
                 NiAVObject* pChild = pNode->GetAt(i);
                 if (pChild)
-                    EnsureLightingProperty((AVObjectEx*)pChild);
+                    EnsureLightingProperty(pChild);
             }
         }
     }
@@ -3288,87 +2748,26 @@ const char* __cdecl FUN_004b1b60(unsigned char type)
     }
 }
 
-namespace stand {
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-    NiPoint3(float, float, float);
-};
-}
-struct RgbaColor
-{
-    float r, g, b, a;
-    RgbaColor();
-};
-struct NiLines : NiAVObject
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    NiLines(unsigned short, stand::NiPoint3*, RgbaColor*, void*, void*, void*, bool*);
-    void AttachProperty(LightingProp80*);
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    unsigned int unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
-};
-// Builds a 4-vertex square NiLines from four corner points at +/-extent, fills all vertex colors with color, and optionally attaches a LightingProp80.
+// Builds a 4-vertex square NiLines from four corner points at +/-extent, fills all vertex colors with color, and optionally attaches a BSShaderNoLightingProperty.
 // @fnv 0x004b3b90
-NiLines* __cdecl CreateSquareLines(float extent, const RgbaColor& color, bool addLighting)
+NiLines* __cdecl CreateSquareLines(float extent, const NiColorA& color, bool addLighting)
 {
-    stand::NiPoint3* pVertices = new stand::NiPoint3[4];
-    RgbaColor* pColors = new RgbaColor[4];
+    NiPoint3* pVertices = new NiPoint3[4];
+    NiColorA* pColors = new NiColorA[4];
     bool* pEnabled = new bool[4];
-    pVertices[0] = stand::NiPoint3(-extent, -extent, 0.0f);
-    pVertices[1] = stand::NiPoint3(-extent, extent, 0.0f);
-    pVertices[2] = stand::NiPoint3(extent, extent, 0.0f);
-    pVertices[3] = stand::NiPoint3(extent, -extent, 0.0f);
+    pVertices[0] = NiPoint3(-extent, -extent, 0.0f);
+    pVertices[1] = NiPoint3(-extent, extent, 0.0f);
+    pVertices[2] = NiPoint3(extent, extent, 0.0f);
+    pVertices[3] = NiPoint3(extent, -extent, 0.0f);
     for (int i = 0; i < 4; ++i)
     {
         pColors[i] = color;
         pEnabled[i] = true;
     }
-    NiLines* lines = new NiLines(4, pVertices, pColors, 0, 0, 0, pEnabled);
+    NiLines* lines = new NiLines(4, reinterpret_cast<stand::NiPoint3*>(pVertices), reinterpret_cast<NiColorA*>(pColors), 0, 0, 0, pEnabled);
     if (addLighting)
     {
-        LightingProp80* property = new LightingProp80;
+        BSShaderNoLightingProperty* property = new BSShaderNoLightingProperty;
         lines->AttachProperty(property);
         FUN_00b57e30((NiAVObject*)lines, 0, 0);
     }
@@ -3380,43 +2779,7 @@ struct AuxPoint
     float x, y;
     AuxPoint();
 };
-struct Point
-{
-    float x, y, z;
-    Point();
-    Point operator-(const Point&) const;
-    float Length() const;
-    void FUN_004a0c10();
-    Point& operator+=(const Point&);
-};
-struct Matrix
-{
-    float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    Matrix();
-    Matrix FUN_004b45b0() const;
-    Matrix operator*(const Matrix&) const;
-    Point FUN_004b4500(const Point*);
-};
-struct Transform : Matrix
-{
-    Point translation;
-    float scale;
-    Transform();
-    Transform& Relative(Transform&, const Transform&);
-    void FUN_004b4880(Transform&);
-};
-struct GeometryData
-{
-    void FUN_00a67090(unsigned int);
-};
-struct Geometry
-{
-    Point* FUN_0049ec60();
-    Point* FUN_004a8030();
-    unsigned short FUN_00456650();
-    Transform& FUN_00461130();
-    GeometryData* FUN_005495f0();
-};
+
 struct Entry
 {
     unsigned int first, second;
@@ -3432,42 +2795,42 @@ struct PairMap
     void* FUN_004b9ba0();
     void GetNextEntry(void*&, unsigned int&, Entry&);
 };
-Point* CreateElementArray(Geometry*);
+NiPoint3* CreateElementArray(NiGeometry*);
 bool FUN_0040eb10(float, float, float);
-Point FUN_004a3760(float, const Point&);
-extern Geometry* DAT_011c6320;
+NiPoint3 FUN_004a3760(float, const NiPoint3&);
+extern NiGeometry* DAT_011c6320;
 void __cdecl operator delete(void*);
 // @fnv 0x004b3e60
-bool __cdecl MatchGeometryVertices(Geometry* source, Geometry* target, float threshold, float unused, bool adjust)
+bool __cdecl MatchGeometryVertices(NiGeometry* source, NiGeometry* target, float threshold, float unused, bool adjust)
 {
     PairMap map30(37);
-    Matrix rotation4;
-    Transform aTransform;
+    NiMatrix3 rotation4;
+    NiTransform aTransform;
     AuxPoint point12;
     bool bChangedB = false;
     if (!source || !target || source == target)
         return false;
-    Point* sourceVertices7 = source->FUN_0049ec60();
-    Point* sourceNormals2 = source->FUN_004a8030();
-    unsigned int uiCountX = source->FUN_00456650();
+    NiPoint3* sourceVertices7 = reinterpret_cast<NiPoint3*>(source->GetVertices());
+    NiPoint3* sourceNormals2 = reinterpret_cast<NiPoint3*>(source->GetNormals());
+    unsigned int uiCountX = source->GetVertexCount();
     if (!sourceVertices7 || !sourceNormals2 || !uiCountX)
         return false;
-    Point* targetVertices5 = target->FUN_0049ec60();
-    Point* targetNormals2 = target->FUN_004a8030();
-    unsigned int uiCountVal = target->FUN_00456650();
+    NiPoint3* targetVertices5 = reinterpret_cast<NiPoint3*>(target->GetVertices());
+    NiPoint3* targetNormals2 = reinterpret_cast<NiPoint3*>(target->GetNormals());
+    unsigned int uiCountVal = target->GetVertexCount();
     if (!targetVertices5 || !targetNormals2 || !uiCountVal)
         return false;
-    Point* sourcePositions = CreateElementArray(source);
+    NiPoint3* sourcePositions = CreateElementArray(source);
     if (!sourcePositions)
         return false;
-    Point* targetVertices = CreateElementArray(target);
+    NiPoint3* targetVertices = CreateElementArray(target);
     if (!targetVertices)
     {
         delete sourcePositions;
         return false;
     }
     target->FUN_00461130().FUN_004b4880(aTransform);
-    rotation4 = target->FUN_00461130().FUN_004b45b0() * source->FUN_00461130();
+    rotation4 = target->FUN_00461130().m_Rotate.Inverse() * source->FUN_00461130().m_Rotate;
     unsigned int best4;
     float bestDist3;
     float bestDistance10;
@@ -3517,7 +2880,7 @@ bool __cdecl MatchGeometryVertices(Geometry* source, Geometry* target, float thr
         {
             iCount++;
             map30.GetNextEntry(position, aHKey, existing);
-            targetNormals2[existing.first] = rotation4.FUN_004b4500(&sourceNormals2[aHKey]);
+            reinterpret_cast<NiPoint3&>(targetNormals2[existing.first]) = rotation4.operator*(reinterpret_cast<const NiPoint3&>(sourceNormals2[aHKey]));
             targetNormals2[existing.first].FUN_004a0c10();
             if (existing.second < uiCountVal)
             {
@@ -3538,8 +2901,8 @@ bool __cdecl MatchGeometryVertices(Geometry* source, Geometry* target, float thr
     if (bChangedB)
     {
         if (adjust)
-            source->FUN_005495f0()->FUN_00a67090(3);
-        target->FUN_005495f0()->FUN_00a67090(3);
+            source->FUN_005495f0()->SetDirtyFlags(3);
+        target->FUN_005495f0()->SetDirtyFlags(3);
     }
     if (sourcePositions)
         delete sourcePositions;
@@ -3571,31 +2934,15 @@ void FUN_004b4ee0_cls::FUN_004b4ee0()
     ((FUN_004b4ee0_sub*)unk10.FUN_006815c0())->FUN_00436aa0();
 }
 
-struct S4b52f0_List
-{
-    unsigned int FUN_0043b480();
-    void* FUN_0043b4a0(unsigned int index);
-};
-struct S4b52f0_Obj
-{
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    virtual S4b52f0_List* vfn_0c();
-};
-struct S4b52f0_Ref
-{
-    void* FUN_006fa820();
-};
-S4b52f0_Ref* __cdecl FUN_0043b610(void* obj);
+bhkCollisionObject* __cdecl FUN_0043b610(void* obj);
 
 // Recursively picks, among an object's list children and its ref target, the one with the greatest FUN_004b5400 value; returns 0 for a null object.
 // @fnv 0x004b52f0
 void* __cdecl FUN_004b52f0(void* object)
 {
     void* bestX;
-    S4b52f0_List* list6;
-    S4b52f0_Ref* ref;
+    NiNode* list6;
+    bhkCollisionObject* ref;
     void* other;
     unsigned int count7;
     unsigned int i4;
@@ -3603,10 +2950,10 @@ void* __cdecl FUN_004b52f0(void* object)
     if (object != 0)
     {
         bestX = 0;
-        list6 = ((S4b52f0_Obj*)object)->vfn_0c();
+        list6 = ((NiObject*)object)->IsSceneNode();
         if (list6 != 0)
         {
-            count7 = list6->FUN_0043b480();
+            count7 = list6->GetNumChildren();
             for (i4 = 0; i4 < count7; i4++)
             {
                 child2 = FUN_004b52f0(list6->FUN_0043b4a0(i4));
@@ -3636,30 +2983,6 @@ void* __cdecl FUN_004b52f0(void* object)
 
 class NiCamera;
 
-struct NiPlaneS
-{
-    float m_kNormalX;
-    float m_kNormalY;
-    float m_kNormalZ;
-    float m_fPlaneConstant;
-};
-
-struct NiBoundS
-{
-    float m_fCenterX;
-    float m_fCenterY;
-    float m_fCenterZ;
-    float m_fBoundRadius;
-    int WhichSide(NiPlaneS* m_kFogPlane);
-};
-
-struct NiFrustumPlanesS : public NiFrustumPlanes
-{
-    NiFrustumPlanesS();
-    void SetFromCamera(NiCamera* pkCamera);
-    NiPlaneS* GetPlaneS(unsigned int uiPlane);
-};
-
 struct TimeGlobalS
 {
     unsigned int GetFrameCount();
@@ -3676,57 +2999,39 @@ bool __cdecl IsBoundVisible(NiBound* pkBound, NiCamera* pkCamera)
     if (!pkCamera)
         return false;
 
-    static NiFrustumPlanesS g_kFrustumPlanes;
+    static NiFrustumPlanes g_kFrustumPlanes;
 
     if (s_pkLastCamera != pkCamera || s_uiLastFrame != g_timeGlobal.GetFrameCount())
     {
-        g_kFrustumPlanes.SetFromCamera(pkCamera);
+        g_kFrustumPlanes.Set(pkCamera);
         s_uiLastFrame = g_timeGlobal.GetFrameCount();
         s_pkLastCamera = pkCamera;
     }
 
     for (unsigned int i = 0; i < 6; i++)
     {
-        NiPlaneS m_kFogPlane = *g_kFrustumPlanes.GetPlaneS(i);
-        if (((NiBoundS*)pkBound)->WhichSide(&m_kFogPlane) == 2)
+        NiPlane m_kFogPlane = *static_cast<NiPlane*>(g_kFrustumPlanes.GetPlane(i));
+        if (pkBound->WhichSide(static_cast<void*>(&m_kFogPlane)) == 2)
             return false;
     }
     return true;
 }
 
-struct ImageSpaceEffectParam
-{
-    float x, y, z, w;
-    ImageSpaceEffectParam(float, float, float, float);
-};
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
 class FUN_00b668b0 : public NiMemObject
 {
   public:
     FUN_00b668b0();
+    // This unit uses the sized allocation cleanup entry.
+    static void operator delete(void*, unsigned int);
     unsigned int vtable;
     unsigned int referenceCount;
     unsigned int flags;
-    ImageSpaceEffectParam color0;
-    ImageSpaceEffectParam color1;
-    ImageSpaceEffectParam color2;
-    ImageSpaceEffectParam color3;
-    ImageSpaceEffectParam color4;
+    NiColorA color0;
+    NiColorA color1;
+    NiColorA color2;
+    NiColorA color3;
+    NiColorA color4;
     unsigned int mode0, mode1, mode2, mode3, mode4, mode5;
-};
-template <> class NiPointer<FUN_00b668b0>
-{
-  public:
-    FUN_00b668b0* m_pObject;
-    NiPointer(FUN_00b668b0*);
-    ~NiPointer();
-    NiPointer& operator=(FUN_00b668b0*);
-    operator FUN_00b668b0*() const;
 };
 struct Property6360
 {
@@ -3742,10 +3047,10 @@ void FUN_004b6360(NiAVObject* object, const NiPoint3* color, FUN_00b668b0* prope
     {
         shared = new FUN_00b668b0;
         property = shared;
-        ((FUN_00b668b0*)shared)->color2 = ImageSpaceEffectParam(color->x, color->y, color->z, 0.5f);
-        ((FUN_00b668b0*)shared)->color3 = ImageSpaceEffectParam(color->x, color->y, color->z, 0.5f);
-        ((FUN_00b668b0*)shared)->color0 = ImageSpaceEffectParam(color->x, color->y, color->z, 0.5f);
-        ((FUN_00b668b0*)shared)->color1 = ImageSpaceEffectParam(color->x, color->y, color->z, 0.5f);
+        ((FUN_00b668b0*)shared)->color2 = NiColorA(color->x, color->y, color->z, 0.5f);
+        ((FUN_00b668b0*)shared)->color3 = NiColorA(color->x, color->y, color->z, 0.5f);
+        ((FUN_00b668b0*)shared)->color0 = NiColorA(color->x, color->y, color->z, 0.5f);
+        ((FUN_00b668b0*)shared)->color1 = NiColorA(color->x, color->y, color->z, 0.5f);
         ((FUN_00b668b0*)shared)->mode0 = 9;
         ((FUN_00b668b0*)shared)->mode1 = 10;
         ((FUN_00b668b0*)shared)->mode2 = 1;
@@ -3754,10 +3059,10 @@ void FUN_004b6360(NiAVObject* object, const NiPoint3* color, FUN_00b668b0* prope
     Property6360* material = FUN_00653270(&DAT_011fa010, object->GetProperty(3));
     if (material)
         material->AssignRefObj(shared);
-    NiNode* node = object->GetAsNiNode();
+    NiNode* node = object->IsSceneNode();
     if (node)
     {
-        for (unsigned int i = 0; i < node->FUN_0043b480(); ++i)
+        for (unsigned int i = 0; i < node->GetNumChildren(); ++i)
         {
             if (node->GetAt(i))
                 FUN_004b6360(node->GetAt(i), color, property);

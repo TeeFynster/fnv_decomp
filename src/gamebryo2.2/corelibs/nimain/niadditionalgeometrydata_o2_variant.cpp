@@ -1,8 +1,13 @@
+#include "../../../../include/NiTArray.h"
 
 // src/gamebryo2.2/corelibs/nimain/niadditionalgeometrydata_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/nimain/niadditionalgeometrydata.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "niadditionalgeometrydata_decls.h"
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/MemoryManager.h"
 
 struct P03MM
 {
@@ -49,15 +54,7 @@ NiAGDDataBlock* __cdecl FUN_00a727c0()
 }  // namespace fnv_00a727c0
 
 namespace fnv_00a73080 {
-struct NiRefObject
-{
-    virtual ~NiRefObject();
-};
 extern int DAT_0102e274;
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 void _NiFreeAlias(void*);
 struct S
@@ -169,195 +166,34 @@ void __thiscall FUN_00a72530_owner::FUN_00a72530(unsigned int value)
     DAT_011f6238.FUN_00aa4060(value);
 }
 
-class NiBinaryStreamStub;
-typedef unsigned int (*BinReadFn)(NiBinaryStreamStub* pThis, void* pvBuffer, unsigned int uiBytes,
-                                  unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-class NiBinaryStreamStub
+// The shared stream is opaque; retain this unit's inlined transfer operations.
+inline unsigned int NiBinaryStream::BinaryRead(void* pvBuffer, unsigned int uiTotalBytes,
+                                               unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-  public:
-    virtual ~NiBinaryStreamStub();
-    unsigned int m_uiStreamFlags;
-    BinReadFn m_pfnRead;
+    unsigned int uiBytesRead = (*reinterpret_cast<ReadFunction*>(reinterpret_cast<char*>(this) + 8))(
+        this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4) += uiBytesRead;
+    return uiBytesRead;
+}
 
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
 
-struct NiStreamStub
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    NiBinaryStreamStub* m_pUnderlyingStream;
-};
-
-template <class T> inline void NiBinaryStreamLoad(NiBinaryStreamStub* pkStream, T* pValue, unsigned int uiNumEls)
+template <class T> inline void NiBinaryStreamLoad(NiBinaryStream* pkStream, T* pValue, unsigned int uiNumEls)
 {
     unsigned int uiCompSize = sizeof(T);
     pkStream->BinaryRead(pValue, uiNumEls * uiCompSize, &uiCompSize, 1);
 }
 
-template <class T> inline void LoadBinary(NiStreamStub& kStream, T& val)
+template <class T> inline void LoadBinary(NiStream& kStream, T& val)
 {
-    NiBinaryStreamLoad(kStream.m_pUnderlyingStream, &val, 1);
+    NiBinaryStreamLoad(kStream.m_pkIstr, &val, 1);
 }
 
-template <class T> inline void LoadBinaryArray(NiStreamStub& kStream, T* pVal, unsigned int uiElementCount)
+template <class T> inline void LoadBinaryArray(NiStream& kStream, T* pVal, unsigned int uiElementCount)
 {
-    NiBinaryStreamLoad(kStream.m_pUnderlyingStream, pVal, uiElementCount);
+    NiBinaryStreamLoad(kStream.m_pkIstr, pVal, uiElementCount);
 }
 
-inline unsigned int ReadUInt(NiStreamStub& kStream)
+inline unsigned int ReadUInt(NiStream& kStream)
 {
     unsigned int uiValue;
     LoadBinary(kStream, uiValue);
@@ -383,11 +219,11 @@ class DataBlockStub
     unsigned char m_bLoadComplete;
     unsigned char m_bOld;
 
-    void FUN_00a72eb0(NiStreamStub& kStream, int a2, int a3, int a4, unsigned short m_usPassCountLocal);
+    void FUN_00a72eb0(NiStream& kStream, int a2, int a3, int a4, unsigned short m_usPassCountLocal);
 };
 
 // @fnv 0x00a72eb0
-void DataBlockStub::FUN_00a72eb0(NiStreamStub& kStream, int a2, int a3, int a4, unsigned short m_usPassCountLocal)
+void DataBlockStub::FUN_00a72eb0(NiStream& kStream, int a2, int a3, int a4, unsigned short m_usPassCountLocal)
 {
     LoadBinary(kStream, m_uiSize);
     m_bOld = m_usPassCountLocal < 0x40;
@@ -406,7 +242,7 @@ void DataBlockStub::FUN_00a72eb0(NiStreamStub& kStream, int a2, int a3, int a4, 
         LoadBinaryArray(kStream, auiCompSizes, uiNumComps);
 
         char* pcDest = m_pcData + auiOffsets[i];
-        NiBinaryStreamStub* pkIstr = kStream.m_pUnderlyingStream;
+        NiBinaryStream* pkIstr = kStream.m_pkIstr;
         unsigned int uiStride = SumSizes(auiCompSizes, uiNumComps);
         pkIstr->BinaryRead(pcDest, uiStride * m_usPassCountLocal, auiCompSizes, uiNumComps);
     }
@@ -472,11 +308,9 @@ void FUN_00a730e0_cls::FUN_00a730e0(unsigned int newCount)
 }
 }  // namespace fnv_00a730e0
 
-class ArrayBase
+typedef NiTArray<int, NiTMallocInterface<int> > ArrayBase;
+template <> inline NiTArray<int, NiTMallocInterface<int> >::NiTArray(unsigned int uiMaxSize, unsigned int uiGrowBy)
 {
-  public:
-    ArrayBase(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1)
-    {
         m_usMaxSize = (unsigned short)uiMaxSize;
         m_usGrowBy = (unsigned short)uiGrowBy;
         m_usSize = 0;
@@ -485,22 +319,13 @@ class ArrayBase
             m_usGrowBy = 1;
         m_pBase = 0;
     }
-    virtual void v0();
-
-    void RemoveAll()
-    {
+template <> inline void NiTArray<int, NiTMallocInterface<int> >::RemoveAll()
+{
         for (unsigned short i = 0; i < m_usSize; i++)
             m_pBase[i] = 0;
         m_usSize = 0;
         m_usESize = 0;
     }
-
-    int* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
 
 class PrimArray : public ArrayBase
 {
@@ -510,15 +335,7 @@ class PrimArray : public ArrayBase
     virtual void v0();
 };
 
-class ObjBase
-{
-  public:
-    ObjBase();
-    virtual void v0();
-    int m_iRefCount;
-};
-
-class FUN_00a734c0 : public ObjBase
+class FUN_00a734c0 : public NiObject
 {
   public:
     FUN_00a734c0();
@@ -625,183 +442,16 @@ bool A2440Buffer::FUN_00a72440(const A2440Buffer& kOther) const
     return true;
 }
 
-struct LBBinaryStream
-{
-    void* pVtable;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(LBBinaryStream* apThis, void* apvBuffer, unsigned int auiBytes,
-                                     unsigned int* apuiComponentSizes, unsigned int auiNumComponents);
-
-    unsigned int BinaryRead(void* apvBuffer, unsigned int auiTotalBytes, unsigned int* apuiComponentSizes,
-                            unsigned int auiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, apvBuffer, auiTotalBytes, apuiComponentSizes, auiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
-
-template <class T> inline unsigned int LBBinaryStreamLoad(LBBinaryStream& arStream, T* apValue, unsigned int auiNumEls)
+template <class T> inline unsigned int LBBinaryStreamLoad(NiBinaryStream& arStream, T* apValue, unsigned int auiNumEls)
 {
     unsigned int uiComponentSize = sizeof(T);
     return arStream.BinaryRead(apValue, auiNumEls * sizeof(T), &uiComponentSize, 1);
 }
 
-struct LBStream
-{
-    virtual void v00();
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    LBBinaryStream* m_pUnderlyingStream;
-};
 
-template <class T> inline void LBStreamLoadBinary(LBStream& arStream, T& arValue)
+template <class T> inline void LBStreamLoadBinary(NiStream& arStream, T& arValue)
 {
-    LBBinaryStreamLoad(*arStream.m_pUnderlyingStream, &arValue, 1);
+    LBBinaryStreamLoad(*arStream.m_pkIstr, &arValue, 1);
 }
 
 struct LBMemoryManager
@@ -827,12 +477,12 @@ struct LBKey
     int unk18;
 
     LBKey() throw();
-    void LoadBinary(LBStream& arStream);
+    void LoadBinary(NiStream& arStream);
 };
 
 struct LBBlock
 {
-    void LoadBinary(LBStream& arStream, unsigned int auiIndex, LBKey* apKeys, unsigned int auiNumKeys,
+    void LoadBinary(NiStream& arStream, unsigned int auiIndex, LBKey* apKeys, unsigned int auiNumKeys,
                     unsigned short ausKeyType);
 };
 
@@ -871,67 +521,27 @@ template <class T> struct LBTArray
     }
 };
 
-struct LBObjectBase
+struct LBObject : NiObject
 {
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2C();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3C();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4C();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5C();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6C();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7C();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8C();
+    virtual void Unk8C();
     virtual LBBlock* CreateBlock();
 
-    int unk04;
     int unk08;
-
-    void LoadBinary(LBStream& arStream);
-};
-
-struct LBObject : LBObjectBase
-{
     unsigned short m_usKeyType;
     unsigned int m_uiNumKeys;
     LBKey* m_pKeyArray;
     int unk18;
     LBTArray<LBBlock*> m_kBlocks;
 
-    void FUN_00a73160(LBStream& arStream);
+    // Legacy base loader at 0x00a5d610, distinct from NiObject::LoadBinary.
+    void LoadBaseBinary(NiStream& arStream);
+    void FUN_00a73160(NiStream& arStream);
 };
 
 // @fnv 0x00a73160
-void LBObject::FUN_00a73160(LBStream& arStream)
+void LBObject::FUN_00a73160(NiStream& arStream)
 {
-    LBObjectBase::LoadBinary(arStream);
+    LoadBaseBinary(arStream);
     LBStreamLoadBinary(arStream, m_usKeyType);
     LBStreamLoadBinary(arStream, m_uiNumKeys);
     if (m_uiNumKeys)
@@ -961,25 +571,14 @@ void LBObject::FUN_00a73160(LBStream& arStream)
     }
 }
 
-struct NiBinaryStream;
-typedef unsigned int(__cdecl* NiBinWriteFn)(NiBinaryStream* pkStream, const void* pvBuffer, unsigned int uiBytes,
-                                            unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-struct NiBinaryStream
+inline unsigned int NiBinaryStream::BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes,
+                                                unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    void* m_pfnRead;
-    NiBinWriteFn m_pfnWrite;
-
-    unsigned int BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                             unsigned int uiNumComponents)
-    {
-        unsigned int uiBytes = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytes;
-        return uiBytes;
-    }
-};
+    unsigned int uiBytes = (*reinterpret_cast<WriteFunction*>(reinterpret_cast<char*>(this) + 12))(
+        this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4) += uiBytes;
+    return uiBytes;
+}
 
 template <class T>
 inline unsigned int WriteBinaryArray(NiBinaryStream& kStream, const T* pValue, unsigned int uiNumEls = 1)
@@ -988,162 +587,10 @@ inline unsigned int WriteBinaryArray(NiBinaryStream& kStream, const T* pValue, u
     return kStream.BinaryWrite(pValue, uiNumEls * sizeof(T), &uiSize, 1);
 }
 
-struct SaveStream
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    NiBinaryStream* sink;
-};
 
-template <class T> inline void SerializeValue(SaveStream* kStream, const T& val)
+template <class T> inline void SerializeValue(NiStream* kStream, const T& val)
 {
-    WriteBinaryArray(*kStream->sink, &val, 1);
+    WriteBinaryArray(*kStream->m_pkOstr, &val, 1);
 }
 
 struct ChildElem
@@ -1155,12 +602,12 @@ struct ChildElem
     int unk10;
     int unk14;
     int unk18;
-    void FUN_00a72db0(SaveStream* stream);
+    void FUN_00a72db0(NiStream* stream);
 };
 
 struct ChildObj
 {
-    void FUN_00a728d0(SaveStream* stream, unsigned int index, ChildElem* elems, unsigned int count, unsigned int flags);
+    void FUN_00a728d0(NiStream* stream, unsigned int index, ChildElem* elems, unsigned int count, unsigned int flags);
 };
 
 struct FUN_00a73370Node
@@ -1177,12 +624,12 @@ struct FUN_00a73370Node
     ChildObj** children;
     unsigned short unk24;
     unsigned short childCount;
-    void LinkObject(SaveStream* stream);
-    void FUN_00a73370(SaveStream* stream);
+    void LinkObject(NiStream* stream);
+    void FUN_00a73370(NiStream* stream);
 };
 
 // @fnv 0x00a73370
-void FUN_00a73370Node::FUN_00a73370(SaveStream* stream)
+void FUN_00a73370Node::FUN_00a73370(NiStream* stream)
 {
     LinkObject(stream);
     SerializeValue(stream, flags);
@@ -1244,61 +691,55 @@ void FUN_00a73d90_cls::FUN_00a73d90(ArrayArg* p)
     AddVal(p, FUN_00a7d5a0(str_0109d2dc, m_08));
 }
 
-template <class T> class NiTViewerArray
+#include "../../../../include/NiTMallocInterface.h"
+#include "../../../../include/NiTPrimitiveArray.h"
+// Gamebryo NiTArray.inl bodies this unit's original inlines (the shared NiTArray declares them):
+template <class T, class TAlloc> inline void NiTArray<T, TAlloc>::SetAt(unsigned int uiSlot, const T& kItem)
 {
-  public:
-    virtual void v0();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, const T& element)
+    if (uiSlot >= this->m_usSize)
     {
-        if (uiIndex >= m_usSize)
+        this->m_usSize = (unsigned short)(uiSlot + 1);
+        if (kItem != T(0))
+            this->m_usESize++;
+    }
+    else
+    {
+        if (kItem != T(0))
         {
-            m_usSize = (unsigned short)(uiIndex + 1);
-            if (element != T(0))
-                m_usESize++;
+            if (this->m_pBase[uiSlot] == T(0))
+                this->m_usESize++;
         }
         else
         {
-            if (element != T(0))
-            {
-                if (m_pBase[uiIndex] == T(0))
-                    m_usESize++;
-            }
-            else
-            {
-                if (m_pBase[uiIndex] != T(0))
-                    m_usESize--;
-            }
+            if (this->m_pBase[uiSlot] != T(0))
+                this->m_usESize--;
         }
-        m_pBase[uiIndex] = element;
     }
-    unsigned int SetAtGrow(unsigned int uiIndex, const T& element)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
-    }
-    unsigned int Add(const T& element)
-    {
-        return SetAtGrow(m_usSize, element);
-    }
-    unsigned int GetSize() const
-    {
-        return m_usSize;
-    }
-    T GetAt(unsigned int uiIndex) const
-    {
-        return m_pBase[uiIndex];
-    }
-};
-typedef NiTViewerArray<char*> NiViewerStringsArray;
+    this->m_pBase[uiSlot] = kItem;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiSlot, const T& kItem)
+{
+    if (uiSlot >= this->m_usMaxSize)
+        SetSize(uiSlot + this->m_usGrowBy);
+    SetAt(uiSlot, kItem);
+    return uiSlot;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& kItem)
+{
+    return SetAtGrow(this->m_usSize, kItem);
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::GetSize() const
+{
+    return this->m_usSize;
+}
+template <class T, class TAlloc> inline const T& NiTArray<T, TAlloc>::GetAt(unsigned int uiSlot) const
+{
+    return this->m_pBase[uiSlot];
+}
+template <class T, class TAlloc> inline T& NiTArray<T, TAlloc>::GetAt(unsigned int uiSlot)
+{
+    return this->m_pBase[uiSlot];
+}
 
 char* CreateDebugString(const char* pcName);
 char* CreateDebugString(const char* pcName, unsigned short usValue);
@@ -1327,15 +768,7 @@ class NiAGDDataBlock
     void GetViewerStrings(NiViewerStringsArray* pkStrings);
 };
 
-class NiObjectViewer
-{
-  public:
-    virtual void v0();
-    int m_uiRefCount;
-    void GetViewerStrings(NiViewerStringsArray* pkStrings);
-};
-
-class NiAGDViewer : public NiObjectViewer
+class NiAGDViewer : public NiObject
 {
   public:
     int m_uiRevID;
@@ -1343,15 +776,18 @@ class NiAGDViewer : public NiObjectViewer
     unsigned int m_uiDataStreamCount;
     AdditionalGeometryDataRecord* m_aDataStreamEntries;
     int m_uiDataStreamEntryUnk;
-    NiTViewerArray<NiAGDDataBlock*> m_aDataBlocks;
+    NiTPrimitiveArray<NiAGDDataBlock*> m_aDataBlocks;
 
+    // This unit calls the legacy base viewer routine at 0x00a5d6e0.
+    // The shared NiObject viewer declaration names a different routine.
+    void AppendBaseViewerStrings(NiViewerStringsArray* pkStrings);
     void FUN_00a73e40(NiViewerStringsArray* pkStrings);
 };
 
 // @fnv 0x00a73e40
 void NiAGDViewer::FUN_00a73e40(NiViewerStringsArray* pkStrings)
 {
-    NiObjectViewer::GetViewerStrings(pkStrings);
+    AppendBaseViewerStrings(pkStrings);
 
     pkStrings->Add(CreateDebugString(g_pcAdditionalGeometryDataName));
     pkStrings->Add(CreateDebugString("m_usVertexCount", m_usVertexCount));
@@ -1378,26 +814,15 @@ void NiAGDViewer::FUN_00a73e40(NiViewerStringsArray* pkStrings)
     }
 }
 
-class Input517;
-typedef unsigned int (*Read517)(Input517*, void*, unsigned int, unsigned int*, unsigned int);
-class Input517
+// This legacy load path dispatches through the callback at offset 0x0c.
+inline unsigned int ReadBinary517(NiBinaryStream* input, void* data, unsigned int size,
+                                  unsigned int* components, unsigned int count)
 {
-  public:
-    virtual ~Input517();
-    unsigned int position;
-    void* write;
-    Read517 read;
-    unsigned int BinaryRead(void* data, unsigned int size, unsigned int* components, unsigned int count)
-    {
-        unsigned int n = read(this, data, size, components, count);
-        position += n;
-        return n;
-    }
-};
-struct Stream517 : NiStreamStub
-{
-    Input517* input;
-};
+    unsigned int n = (*reinterpret_cast<NiBinaryStream::ReadFunction*>(reinterpret_cast<char*>(input) + 12))(
+        input, data, size, components, count);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(input) + 4) += n;
+    return n;
+}
 struct Descriptor517
 {
     unsigned int unk00, type, unk08, unk0c, stride, block, offset;
@@ -1409,32 +834,32 @@ class Owner517
     virtual void v0();
     unsigned int size;
     char* data;
-    void FUN_00a728d0(Stream517& stream, unsigned int block, Descriptor517* entries, unsigned int count,
+    void FUN_00a728d0(NiStream& stream, unsigned int block, Descriptor517* entries, unsigned int count,
                       unsigned short vertices);
 };
-template <class T> inline void BinaryLoad517(Input517* input, T* value, unsigned int count)
+template <class T> inline void BinaryLoad517(NiBinaryStream* input, T* value, unsigned int count)
 {
     unsigned int component = sizeof(T);
-    input->BinaryRead(value, count * component, &component, 1);
+    ReadBinary517(input, value, count * component, &component, 1);
 }
-template <class T> inline void Load517(Stream517& stream, T& v)
+template <class T> inline void Load517(NiStream& stream, T& v)
 {
-    BinaryLoad517(stream.input, &v, 1);
+    BinaryLoad517(stream.m_pkOstr, &v, 1);
 }
-template <class T> inline void LoadArray517(Stream517& stream, T* v, unsigned int count)
+template <class T> inline void LoadArray517(NiStream& stream, T* v, unsigned int count)
 {
-    BinaryLoad517(stream.input, v, count);
+    BinaryLoad517(stream.m_pkOstr, v, count);
 }
-inline void ReadComponents517(Input517* input, void* destination, unsigned short vertices, unsigned int* components,
+inline void ReadComponents517(NiBinaryStream* input, void* destination, unsigned short vertices, unsigned int* components,
                               unsigned int count)
 {
     unsigned int sum = 0;
     for (unsigned int i = 0; i < count; i++)
         sum += components[i];
-    input->BinaryRead(destination, sum * vertices, components, count);
+    ReadBinary517(input, destination, sum * vertices, components, count);
 }
 // @fnv 0x00a728d0
-void Owner517::FUN_00a728d0(Stream517& stream, unsigned int block, Descriptor517* entries, unsigned int count,
+void Owner517::FUN_00a728d0(NiStream& stream, unsigned int block, Descriptor517* entries, unsigned int count,
                             unsigned short vertices)
 {
     Descriptor517* idx = entries;
@@ -1497,7 +922,7 @@ void Owner517::FUN_00a728d0(Stream517& stream, unsigned int block, Descriptor517
         Load517(stream, readCount);
         LoadArray517(stream, components, readCount);
 
-        ReadComponents517(stream.input, (sorted[begin]->offset + data), vertices, components, readCount);
+        ReadComponents517(stream.m_pkOstr, (sorted[begin]->offset + data), vertices, components, readCount);
     }
 }
 
@@ -1735,13 +1160,6 @@ void Descriptor73530::FUN_00a73530(StringArray73530* output)
     AppendConsistency(output);
 }
 
-class NiObject
-{
-  public:
-    virtual void v0();
-    int m_uiRefCount;
-    bool IsSameAs(NiObject* pkObject);
-};
 class NiAGDStream
 {
   public:
@@ -1763,25 +1181,6 @@ class NiAGDStream
             return false;
         }
         return true;
-    }
-};
-template <class T> class NiTPrimitiveArray
-{
-  public:
-    virtual void v0();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    unsigned int GetSize() const
-    {
-        return m_usSize;
-    }
-    T GetAt(unsigned int uiIndex) const
-    {
-        return m_pBase[uiIndex];
     }
 };
 class NiAGDObject : public NiObject

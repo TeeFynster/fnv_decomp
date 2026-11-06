@@ -10,7 +10,7 @@ class FORenderedMenu;
 class NiAVObject;
 class NiCamera;
 class NiColor;
-class RgbaColor;
+class NiColorA;
 class NiGeometry;
 class NiPointLight;
 class NiScreenElements;
@@ -45,37 +45,12 @@ FNV_STATIC_ASSERT(sizeof(NiColor) == 12);
 FNV_STATIC_ASSERT(offsetof(NiColor, r) == 0);
 FNV_STATIC_ASSERT(offsetof(NiColor, g) == 4);
 FNV_STATIC_ASSERT(offsetof(NiColor, b) == 8);
-class RgbaColor
-{
-  public:
-    float r;  // +0x0, 4 bytes
-    float g;  // +0x4, 4 bytes
-    float b;  // +0x8, 4 bytes
-    float a;  // +0xC, 4 bytes
-    // void __cdecl RgbaColor::*(float, float, float, float)
-    // bool __cdecl RgbaColor::*(const RgbaColor&)
-    // bool __cdecl RgbaColor::*(const RgbaColor&)
-    // RgbaColor __cdecl RgbaColor::*(const RgbaColor&)
-    // operator-
-    // operator*
-    // operator/
-    // RgbaColor& __cdecl RgbaColor::*(const RgbaColor&)
-    // RgbaColor& __cdecl RgbaColor::*(const RgbaColor&)
-    // operator*=
-    // operator/=
-    // void __cdecl RgbaColor::*()
-    // void __cdecl RgbaColor::*()
-    // LoadBinary
-    // SaveBinary
-    // char* __cdecl RgbaColor::*(const char*)
-    // float __cdecl RgbaColor::*()
-    // void __cdecl RgbaColor::*()
-};
-FNV_STATIC_ASSERT(sizeof(RgbaColor) == 16);
-FNV_STATIC_ASSERT(offsetof(RgbaColor, r) == 0);
-FNV_STATIC_ASSERT(offsetof(RgbaColor, g) == 4);
-FNV_STATIC_ASSERT(offsetof(RgbaColor, b) == 8);
-FNV_STATIC_ASSERT(offsetof(RgbaColor, a) == 12);
+#include "../../../include/NiColorA.h"
+FNV_STATIC_ASSERT(sizeof(NiColorA) == 16);
+FNV_STATIC_ASSERT(offsetof(NiColorA, r) == 0);
+FNV_STATIC_ASSERT(offsetof(NiColorA, g) == 4);
+FNV_STATIC_ASSERT(offsetof(NiColorA, b) == 8);
+FNV_STATIC_ASSERT(offsetof(NiColorA, a) == 12);
 class FORenderedMenu
 {
   public:
@@ -129,12 +104,12 @@ class FORenderedMenu
     float m_fDistortVerticalScale;    // +0x9C, 4 bytes
     float fDistortDuration;           // +0xA0, 4 bytes
     float m_fDistortTimeRemaining;    // +0xA4, 4 bytes
-    RgbaColor BackgroundColor;        // +0xA8, 16 bytes
+    NiColorA BackgroundColor;        // +0xA8, 16 bytes
     bool m_bMenuLightEnabled;         // +0xB8, 1 bytes
     bool m_bMenuLightCreated;         // +0xB9, 1 bytes
     unsigned char layoutPaddingBA[2];
     NiPointer<NiTexture> m_pMenuLightShadowNode;  // +0xBC, 4 bytes
-    RgbaColor m_kMenuLightColor;                  // +0xC0, 16 bytes
+    NiColorA m_kMenuLightColor;                  // +0xC0, 16 bytes
     bool m_bMenuLightVisible;                     // +0xD0, 1 bytes
     bool m_bMenuLightShadowed;                    // +0xD1, 1 bytes
     bool m_bMenuLightAttached;                    // +0xD2, 1 bytes
@@ -142,8 +117,8 @@ class FORenderedMenu
     NiPointer<BSShaderAccumulator> m_pMenuLightNode;  // +0xD4, 4 bytes
     // FORenderedMenu
     // bool __cdecl FORenderedMenu::*()
-    // void __cdecl FORenderedMenu::*(const RgbaColor&)
-    // RgbaColor __cdecl FORenderedMenu::*()
+    // void __cdecl FORenderedMenu::*(const NiColorA&)
+    // NiColorA __cdecl FORenderedMenu::*()
     // void __cdecl FORenderedMenu::*(NiColor&)
     // void __cdecl FORenderedMenu::*(const float)
     // void __cdecl FORenderedMenu::*(const float)
@@ -163,8 +138,8 @@ class FORenderedMenu
     // NiPointLight* __cdecl FORenderedMenu::*()
     // void __cdecl FORenderedMenu::*(NiCamera*)
     // NiCamera* __cdecl FORenderedMenu::*()
-    // void __cdecl FORenderedMenu::*(const RgbaColor&)
-    // const RgbaColor& __cdecl FORenderedMenu::*()
+    // void __cdecl FORenderedMenu::*(const NiColorA&)
+    // const NiColorA& __cdecl FORenderedMenu::*()
     // BSShaderNoLightingProperty* __cdecl FORenderedMenu::*()
     // void __cdecl FORenderedMenu::*(const float)
     // void __cdecl FORenderedMenu::*(const float)
@@ -262,7 +237,7 @@ class FOPipboyManager : public FORenderedMenu
     float m_fPipBoyTargetAlpha;  // +0x14C, 4 bytes
     bool m_bPipBoyFadeActive;    // +0x150, 1 bytes
     unsigned char layoutPadding151[3];
-    SoundPlaybackHandle m_kPipBoyLightData;  // +0x154, 12 bytes
+    BSSoundHandle m_kPipBoyLightData;  // +0x154, 12 bytes
     bool b1stPersonLightOn;            // +0x160, 1 bytes
     bool b3rdPersonLightOn;            // +0x161, 1 bytes
     bool m_bPipBoyLightOn;             // +0x162, 1 bytes

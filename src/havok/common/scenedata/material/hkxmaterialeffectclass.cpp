@@ -2,25 +2,23 @@
 // src/havok/common/scenedata/material/hkxmaterialeffectclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/material/hkxmaterialeffectclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, int aiSize) throw();
-};
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
 
-struct AudioHolder
+// This allocator uses virtual free operations; the shared declarations are nonvirtual.
+static __forceinline void FreeAudioBlock(hkMemoryAllocator* pAllocator, void* pMemory, unsigned int uiSize) throw()
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
+    typedef void (__thiscall *FreeFunction)(hkMemoryAllocator*, void*, unsigned int);
+    reinterpret_cast<FreeFunction>((*reinterpret_cast<void***>(pAllocator))[2])(pAllocator, pMemory, uiSize);
+}
 
-AudioHolder* __cdecl FUN_00c85750() throw();
+static __forceinline void FreeAudioArray(hkMemoryAllocator* pAllocator, void* pMemory, int iSize) throw()
+{
+    typedef void (__thiscall *FreeFunction)(hkMemoryAllocator*, void*, int);
+    reinterpret_cast<FreeFunction>((*reinterpret_cast<void***>(pAllocator))[4])(pAllocator, pMemory, iSize);
+}
+
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct SpawnedMember
 {
@@ -52,13 +50,13 @@ struct FUN_00e022d0_cls : SpawnedBase
 // @fnv 0x00e022d0
 FUN_00e022d0_cls* FUN_00e022d0_cls::FUN_00e022d0(unsigned char acFlags)
 {
-    AudioHolder* pHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uDataFlags = m_uiObjectFlags;
     m_i14 = 0;
     if ((uDataFlags & 0x80000000u) == 0)
     {
-        pAllocator->FreeArray(m_pData, uDataFlags & 0x3fffffff);
+        FreeAudioArray(pAllocator, m_pData, uDataFlags & 0x3fffffff);
     }
     m_pData = 0;
     m_uiObjectFlags = 0x80000000;
@@ -66,9 +64,9 @@ FUN_00e022d0_cls* FUN_00e022d0_cls::FUN_00e022d0(unsigned char acFlags)
     this->SpawnedBase::~SpawnedBase();
     if (acFlags & 1)
     {
-        AudioHolder* pHolder2 = FUN_00c85750();
-        AudioAllocator* pAllocator2 = pHolder2->m_pAllocator;
-        pAllocator2->Free(this, m_uSize);
+        hkMemoryRouter* pHolder2 = FUN_00c85750();
+        hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
+        FreeAudioBlock(pAllocator2, this, m_uSize);
     }
     return this;
 }

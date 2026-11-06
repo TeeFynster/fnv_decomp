@@ -12,7 +12,7 @@
 #ifndef FNV_NIPOSDATA_INL
 #define FNV_NIPOSDATA_INL
 
-#include "niposdata_local.h"
+#include "../../../../include/NiPosData.h"
 // @fnv 0x004a3760
 NiPoint3* NiPosData::ComputePositionAtTime(NiPoint3* pOut, float fTime, const NiPoint3* pIn)
 {

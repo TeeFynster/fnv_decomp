@@ -1,15 +1,24 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/physics/dynamics/constraint/constraintkit/hkpconstraintconstructionkit.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/constraintkit/hkpconstraintconstructionkit.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00d524d0 FUN_00d524d0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     double m128_f64[2];
-} __m128;
+} __m128, LocalM128;
 
-extern "C" __m128 _mm_setr_ps(float x, float y, float z, float w);
-extern "C" void _mm_store_ps(float* p, __m128 v);
+extern "C" LocalM128 _mm_setr_ps(float x, float y, float z, float w);
+extern "C" void _mm_store_ps(float* p, LocalM128 v);
+
+#include "../../../../../../include/hkVector4.h"
+
+__forceinline void hkVector4::set(float x, float y, float z, float w)
+{
+    m_vComponents = _mm_setr_ps(x, y, z, w);
+}
 
 struct FUN_00d522b0_Ctx
 {
@@ -70,7 +79,7 @@ int FUN_00d522b0_cls::AddVertexCommand(unsigned char aFlag, float aX, float aY)
     *piFlagSlot = flag;
     ++pCmds->m_uiItemCount;
 
-    __m128 v = _mm_setr_ps(aX, aY, 0.0f, 0.0f);
+    LocalM128 v = _mm_setr_ps(aX, aY, 0.0f, 0.0f);
     int iOldVertexCount = m_04->m_verts.m_uiItemCount;
 
     FUN_00d522b0_Vec* vert = &m_04->m_verts;
@@ -87,15 +96,6 @@ int FUN_00d522b0_cls::AddVertexCommand(unsigned char aFlag, float aX, float aY)
     return iOldVertexCount;
 }
 
-struct __declspec(align(16)) FUN_00c7f690_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    void FUN_00c7f690(const __m128* m, const __m128* v);
-};
-
 struct FUN_00d52140_cls
 {
     int unk00;
@@ -106,18 +106,18 @@ struct FUN_00d52140_cls
     int unk14;
     unsigned char m_18;
     unsigned char m_19;
-    int FUN_00d52000(FUN_00c7f690_cls* t);
-    void FUN_00d520a0(FUN_00c7f690_cls* t);
-    int FUN_00d52140(char* a1, char* a2, const __m128* a3);
+    int FUN_00d52000(hkVector4* t);
+    void FUN_00d520a0(hkVector4* t);
+    int FUN_00d52140(char* a1, char* a2, const LocalM128* a3);
 };
 
 // @fnv 0x00d52140
-int FUN_00d52140_cls::FUN_00d52140(char* a1, char* a2, const __m128* a3)
+int FUN_00d52140_cls::FUN_00d52140(char* a1, char* a2, const LocalM128* a3)
 {
-    FUN_00c7f690_cls t1;
-    FUN_00c7f690_cls t2;
-    t1.FUN_00c7f690((const __m128*)(a1 + 0xf0), a3);
-    t2.FUN_00c7f690((const __m128*)(a2 + 0xf0), a3);
+    hkVector4 t1;
+    hkVector4 t2;
+    t1.FUN_00c7f690((const hkTransform*)(a1 + 0xf0), (const hkVector4*)a3);
+    t2.FUN_00c7f690((const hkTransform*)(a2 + 0xf0), (const hkVector4*)a3);
     int iResult = this->FUN_00d52000(&t1);
     this->FUN_00d520a0(&t2);
     this->m_18 = 1;
@@ -140,20 +140,6 @@ struct hkMemoryRouterD
 
 void __cdecl ResizeAudioStream(hkMemoryAllocatorD* pkAlloc, void* pkArray, int iElemSize);
 
-struct hkVector4D521
-{
-    __m128 m_vComponents;
-
-    void operator=(const hkVector4D521& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void set(float a, float b, float c, float d)
-    {
-        m_vComponents = _mm_setr_ps(a, b, c, d);
-    }
-};
-
 template <class T> __forceinline void constructWithCopyD(T* p, int n, const T& t)
 {
     for (int i = 0; i < n; i++)
@@ -162,31 +148,17 @@ template <class T> __forceinline void constructWithCopyD(T* p, int n, const T& t
     }
 }
 
-template <class T> struct hkArrayD
+template <class T>
+static __forceinline void hkArrayD_AddBack(hkArrayBase<T>& self, const T& t)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void AddBack(const T& t)
-    {
         hkMemoryAllocatorD& kAlloc = static_cast<hkMemoryRouterD*>(FUN_00c85750())->heap();
-        if (m_iElementCount == getCapacity())
+        if (self.m_iElementCount == self.getCapacity())
         {
-            ResizeAudioStream(&kAlloc, this, sizeof(T));
+            ResizeAudioStream(&kAlloc, (&self), sizeof(T));
         }
-        constructWithCopyD<T>(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
+        constructWithCopyD<T>(self.m_data + self.m_iElementCount, 1, t);
+        self.m_iElementCount++;
     }
-};
 
 struct hkGeometryBufferD
 {
@@ -194,8 +166,8 @@ struct hkGeometryBufferD
     int m_iNumBytes;
     int m_iNumCommands;
     int m_iNumParams;
-    hkArrayD<hkVector4D521> m_params;
-    hkArrayD<int> m_commands;
+    hkArrayBase<hkVector4> m_params;
+    hkArrayBase<int> m_commands;
 };
 
 class hkCommandWriterD
@@ -211,12 +183,12 @@ class hkCommandWriterD
 // @fnv 0x00d521b0
 int hkCommandWriterD::FUN_00d521b0(unsigned char ucKind, float fX, float fY)
 {
-    m_pBuffer->m_commands.AddBack(0x10);
-    m_pBuffer->m_commands.AddBack(ucKind);
+    hkArrayD_AddBack(m_pBuffer->m_commands, 0x10);
+    hkArrayD_AddBack<int>(m_pBuffer->m_commands, ucKind);
     const int iIndex = m_pBuffer->m_params.GetLogicalSize();
-    hkVector4D521 kParam;
+    hkVector4 kParam;
     kParam.set(fX, fY, 0.0f, 0.0f);
-    m_pBuffer->m_params.AddBack(kParam);
+    hkArrayD_AddBack(m_pBuffer->m_params, kParam);
     hkGeometryBufferD* pkBuffer = m_pBuffer;
     pkBuffer->m_iNumBytes += 0x40;
     pkBuffer->m_iNumCommands += 1;
@@ -252,7 +224,7 @@ struct Draw328_intarr
 
 struct Draw328_vecarr
 {
-    __m128* data;
+    LocalM128* data;
     int count;
     unsigned int capFlags;
 };
@@ -299,7 +271,7 @@ unsigned int Draw328_cls::AppendHeaderAndVector(unsigned char a1, float a2)
     ++ints->count;
 
     float x = cosf(a2);
-    __m128 v = _mm_setr_ps(x, DAT_01016410, DAT_01011d78, DAT_01011d78);
+    LocalM128 v = _mm_setr_ps(x, DAT_01016410, DAT_01011d78, DAT_01011d78);
 
     Draw328_mgr* mgr = m_pMgr;
     unsigned int uiIndex = (unsigned int)mgr->m_vec.count;
@@ -348,49 +320,21 @@ template <class T> __forceinline void hkConstructWithCopy(T* p, int n, const T& 
     }
 }
 
-template <class T> struct hkArr
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void _pushBack(hkMemAlloc& alloc, const T& t)
-    {
-        if (m_iElementCount == getCapacity())
-        {
-            ResizeAudioStream(&alloc, this, sizeof(T));
-        }
-        hkConstructWithCopy(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-    __forceinline void AddBack(const T& t)
-    {
-        _pushBack(getRouter()->heap(), t);
-    }
-};
-
-struct hkVec4
+// hkContainerHeapAllocator::get: hkMemoryRouter::getInstance().heap() (the unit's MemRouter stand-in).
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    __m128 m_vComponents;
-    __forceinline hkVec4()
-    {}
-    __forceinline hkVec4(const hkVec4& v)
+    return reinterpret_cast<hkMemoryAllocator&>(getRouter()->heap());
+}
+template <class T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& t)
+{
+    if (m_iElementCount == getCapacity())
     {
-        m_vComponents = v.m_vComponents;
+        ResizeAudioStream(&alloc, this, sizeof(T));
     }
-    __forceinline void operator=(const hkVec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void set(float x, float y, float z, float w)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
+    hkConstructWithCopy(m_data + m_iElementCount, 1, t);
+    m_iElementCount++;
+}
 
 struct GeomBuffer
 {
@@ -398,8 +342,8 @@ struct GeomBuffer
     int m_iVertexCount;
     int m_uiVertexCount;
     int m_numPrims;
-    hkArr<hkVec4> m_verts;
-    hkArr<int> m_cmds;
+    hkArray<hkVector4> m_verts;
+    hkArray<int> m_cmds;
 };
 
 struct GeomWriter
@@ -413,13 +357,13 @@ struct GeomWriter
 // @fnv 0x00d524d0
 int GeomWriter::FUN_00d524d0(unsigned char a1, unsigned char a2, float a3, float a4)
 {
-    m_buffer->m_cmds.AddBack(0x13);
-    m_buffer->m_cmds.AddBack(a1);
-    m_buffer->m_cmds.AddBack(a2);
-    hkVec4 v;
+    m_buffer->m_cmds.pushBack(0x13);
+    m_buffer->m_cmds.pushBack(a1);
+    m_buffer->m_cmds.pushBack(a2);
+    hkVector4 v;
     v.set(sin(a3), sin(a4), 0.0f, 0.0f);
     int index = m_buffer->m_verts.m_iElementCount;
-    m_buffer->m_verts.AddBack(v);
+    m_buffer->m_verts.pushBack(v);
     GeomBuffer* b = m_buffer;
     b->m_uiVertexCount++;
     b->m_iVertexCount += 0x30;

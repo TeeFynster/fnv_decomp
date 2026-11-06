@@ -6,13 +6,9 @@
 // src/staging/blk_00d00000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_add_ps(__m128, __m128);
+#include "../../include/hkpShapePhantom.h"
+#include "../../include/hkpAabbPhantom.h"
+#include "../../include/hkTransform.h"
 
 struct hkVector4f
 {
@@ -28,27 +24,10 @@ union hkQuadVector
     __m128 q;
 };
 
-struct hkTransformf
-{
-    hkVector4f m_kColumn0;
-    hkVector4f m_kColumn1;
-    hkVector4f m_kColumn2;
-    hkVector4f m_vTranslation;
-};
-
 struct hkAabbf
 {
     hkVector4f m_kMinimumCorner;
     hkVector4f m_kMaximumCorner;
-};
-
-struct hkTransform
-{
-    __m128 m_kColumn0;
-    __m128 m_kColumn1;
-    __m128 m_kColumn2;
-    __m128 m_vTranslation;
-    void FUN_00cb23e0(const hkTransform& t);
 };
 
 union hkAabbQ
@@ -59,117 +38,6 @@ union hkAabbQ
         __m128 m_kMinimumCorner;
         __m128 m_kMaximumCorner;
     } q;
-};
-
-class hkpPhantom
-{
-  public:
-    virtual ~hkpPhantom();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0C();
-    virtual void vf10();
-    virtual int getType() const;
-};
-
-class hkpShapePhantom : public hkpPhantom
-{
-  public:
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    hkTransformf m_kMotionState;
-    void FUN_00c9e910(const hkTransform& t);
-};
-
-class hkpAabbPhantom : public hkpPhantom
-{
-  public:
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    hkAabbf m_kBounds;
-    void FUN_00cf24a0(const hkAabbQ& aabb);
 };
 
 // @fnv 0x00d05df0
@@ -184,11 +52,12 @@ void __cdecl FUN_00d05df0(hkpPhantom* phantom, const hkTransform& transform)
         hkQuadVector c1;
         hkQuadVector c2;
         hkQuadVector t;
-        c0.v = sp->m_kMotionState.m_kColumn0;
-        c1.v = sp->m_kMotionState.m_kColumn1;
-        c2.v = sp->m_kMotionState.m_kColumn2;
-        t.v = sp->m_kMotionState.m_vTranslation;
-        hkTransform current;
+        c0.v = reinterpret_cast<const hkVector4f&>(sp->m_kMotionState.m_kMotionTransform.m_kColumn0);
+        c1.v = reinterpret_cast<const hkVector4f&>(sp->m_kMotionState.m_kMotionTransform.m_kColumn1);
+        c2.v = reinterpret_cast<const hkVector4f&>(sp->m_kMotionState.m_kMotionTransform.m_kColumn2);
+        t.v = reinterpret_cast<const hkVector4f&>(sp->m_kMotionState.m_kMotionTransform.m_vTranslation);
+        __m128 currentStorage[4];
+        hkTransform& current = reinterpret_cast<hkTransform&>(currentStorage);
         current.m_kColumn0 = c0.q;
         current.m_kColumn1 = c1.q;
         current.m_kColumn2 = c2.q;
@@ -200,7 +69,7 @@ void __cdecl FUN_00d05df0(hkpPhantom* phantom, const hkTransform& transform)
     case 0: {
         hkpAabbPhantom* ap = static_cast<hkpAabbPhantom*>(phantom);
         hkAabbQ aabb;
-        aabb.f = ap->m_kBounds;
+        aabb.f = reinterpret_cast<const hkAabbf&>(ap->m_kBounds);
         aabb.q.m_kMinimumCorner = _mm_add_ps(transform.m_vTranslation, aabb.q.m_kMinimumCorner);
         aabb.q.m_kMaximumCorner = _mm_add_ps(transform.m_vTranslation, aabb.q.m_kMaximumCorner);
         ap->FUN_00cf24a0(aabb);

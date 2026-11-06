@@ -2,7 +2,7 @@
 #ifndef FNV_TASKQUEUEINTERFACE_H
 #define FNV_TASKQUEUEINTERFACE_H
 
-#include "layout_support.h"
+#include <stddef.h>
 class PackedTaskQueueProcessor;
 class TaskQueueInterface;
 #pragma pack(push, 4)
@@ -83,9 +83,9 @@ class TaskQueueInterface
     // void* __cdecl TaskQueueInterface::*(unsigned int)
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(TaskQueueInterface) == 16);
-FNV_STATIC_ASSERT(offsetof(TaskQueueInterface, m_pPrimaryTaskProcessor) == 0);
-FNV_STATIC_ASSERT(offsetof(TaskQueueInterface, m_pSecondaryTaskProcessor) == 4);
-FNV_STATIC_ASSERT(offsetof(TaskQueueInterface, m_pTaskQueueProcessor) == 8);
-FNV_STATIC_ASSERT(offsetof(TaskQueueInterface, m_uiTaskFlags) == 12);
+typedef char TaskQueueInterfaceSizeCheck[sizeof(TaskQueueInterface) == 16 ? 1 : -1];
+typedef char TaskQueueInterfacePrimaryTaskProcessorOffsetCheck[offsetof(TaskQueueInterface, m_pPrimaryTaskProcessor) == 0 ? 1 : -1];
+typedef char TaskQueueInterfaceSecondaryTaskProcessorOffsetCheck[offsetof(TaskQueueInterface, m_pSecondaryTaskProcessor) == 4 ? 1 : -1];
+typedef char TaskQueueInterfaceTaskQueueProcessorOffsetCheck[offsetof(TaskQueueInterface, m_pTaskQueueProcessor) == 8 ? 1 : -1];
+typedef char TaskQueueInterfaceTaskFlagsOffsetCheck[offsetof(TaskQueueInterface, m_uiTaskFlags) == 12 ? 1 : -1];
 #endif

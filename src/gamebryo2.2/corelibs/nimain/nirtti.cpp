@@ -1,19 +1,7 @@
 
 // NiRTTI: the Gamebryo runtime type descriptor.
 #include "layout_support.h"
-
-class NiRTTI
-{
-  public:
-    NiRTTI(const char* pcName, const NiRTTI* pkBaseRTTI);
-
-    const char* GetName() const;
-    const NiRTTI* GetBaseRTTI() const;
-
-  protected:
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
+#include "../../../../include/NiRTTI.h"
 
 FNV_STATIC_ASSERT(sizeof(NiRTTI) == 0x8);
 

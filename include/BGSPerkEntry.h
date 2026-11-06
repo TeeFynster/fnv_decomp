@@ -1,28 +1,39 @@
-// Source layout: BGSPerkEntry. PC corrections are in generate_headers.py.
-#ifndef FNV_BGSPERKENTRY_H
-#define FNV_BGSPERKENTRY_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+class Actor;
+class TESBoundObject;
+class TESFile;
+class TESForm;
+class TESWorldSpace;
+
 class BGSPerkEntry
 {
-  public:
-    unsigned char m_ucRank;               // +0x4
-    unsigned char m_ucRegionPriority;  // +0x5
-    unsigned short layoutPadding6;
+public:
+    BGSPerkEntry();  // 0x005e9530: vftable 0x01046b48, m_ucRank = m_ucRegionPriority = 0
+    unsigned char m_ucRank;
+    unsigned char m_ucRegionPriority;
+    unsigned short unk06;
+
     virtual bool CheckConditionFilters(unsigned int count, TESForm** subjects);
     virtual unsigned char GetFunction();
     virtual void* GetFunctionData();
+    virtual ~BGSPerkEntry();
+    virtual unsigned char GetEntryPoint();
+    virtual void ClearData();
     virtual void InitItem(TESForm* form);
-    virtual void Save();
-    virtual bool Load(TESFile* file);
+    virtual BGSPerkEntry* Duplicate();
     virtual void Copy(BGSPerkEntry* entry);
     virtual bool Compare(BGSPerkEntry* entry);
-    virtual void ClearData();
-    virtual ~BGSPerkEntry();
+    virtual void Save();
+    virtual bool Load(TESFile* file);
+    virtual void ApplyEntryPointEffect(Actor* actor, bool apply);
+    virtual void RemoveEntryPointEffect(Actor* actor, bool remove);
+
+    void LoadFromSaveData(const void* data);
+    void* Destroy(unsigned int);
+    int GetInnerValue();
+    void FUN_00558c60(int value);
+    TESBoundObject* FUN_007af430();
+    TESWorldSpace* FUN_00575d70();
+    bool FUN_00440da0();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BGSPerkEntry) == 0x8);
-FNV_STATIC_ASSERT(offsetof(BGSPerkEntry, m_ucRank) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BGSPerkEntry, m_ucRegionPriority) == 0x5);
-#endif

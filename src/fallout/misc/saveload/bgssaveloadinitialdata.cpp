@@ -1,11 +1,30 @@
-// fallout/misc/saveload/bgssaveloadinitialdata.cpp: BGSSaveLoadInitialDataPacket, ReferencePlacementData, BGSNumericIDIndex3 (20 functions)
+// fallout/misc/saveload/bgssaveloadinitialdata.cpp: BGSSaveLoadInitialData, ReferencePlacementData, BGSNumericIDIndex3 (20 functions)
+
+#include "../../../../include/MobileObject.h"
+#include "../../../../include/Actor.h"
+#include "../../../../include/Explosion.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+
+#include "../../../../include/BGSChangeFlags.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/BGSSaveLoadGame.h"
+#include "../../../../include/ExtraDataList.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/TES.h"
+#include "../../../../include/TESBoundObject.h"
+#include "../../../../include/TESDataHandler.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/TESObjectCELL.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/TESRecipe.h"
+#include "../../../../include/TESWorldSpace.h"
 
 #include "bgssaveloadinitialdata_packet.h"
-
 // @fnv 0x0084e700
-INITIAL_DATA_TYPE BGSSaveLoadInitialDataPacket::DetermineInitialDataType(TESForm* apForm, FormChangeMask eChangeFlags)
+INITIAL_DATA_TYPE BGSSaveLoadInitialData::DetermineInitialDataType(TESForm* apForm, InitialDataChangeMask eChangeFlags)
 {
-    return DetermineInitialDataType(apForm->GetFormID(), apForm->GetFormType(), eChangeFlags);
+    return DetermineInitialDataType(apForm->GetFormID(), ((const TESForm*)apForm)->GetFormType(), eChangeFlags);
 }
 
 // @fnv 0x00849280
@@ -29,8 +48,8 @@ bool ReferencePlacementData::GetCellAndWorld(TESObjectCELL*& apCell, TESWorldSpa
 
 // Loads a cell or reference change record from the save buffer and applies its location, angle and cell/worldspace to the form.
 // @fnv 0x0084f330
-INITIAL_DATA_TYPE BGSSaveLoadInitialDataPacket::LoadInitialDataForForm(BGSLoadFormBuffer* apBuffer, TESForm* apForm,
-                                                                       FormChangeMask eChangeFlags)
+INITIAL_DATA_TYPE BGSSaveLoadInitialData::LoadInitialDataForForm(BGSLoadFormBuffer* apBuffer, TESForm* apForm,
+                                                                       InitialDataChangeMask eChangeFlags)
 {
     INITIAL_DATA_TYPE eType = DetermineInitialDataType(apForm, eChangeFlags);
     if (FUN_0084f860(eType))
@@ -58,7 +77,7 @@ INITIAL_DATA_TYPE BGSSaveLoadInitialDataPacket::LoadInitialDataForForm(BGSLoadFo
                 m_pWorldReferenceInfo->SetLocationOnReference(kRefData.Location);
                 m_pWorldReferenceInfo->SetReferencePosition(kRefData.Angle);
                 if (pLocationCell)
-                    m_pWorldReferenceInfo->vfn_228(pLocationCell);
+                    m_pWorldReferenceInfo->SetParentCell(pLocationCell);
                 else if (pWorld)
                     m_pWorldReferenceInfo->GetExtraData()->CallExtraDataListMethod35(pWorld->GetInteriorCell());
             }
@@ -125,20 +144,21 @@ INITIAL_DATA_TYPE BGSSaveLoadInitialDataPacket::LoadInitialDataForForm(BGSLoadFo
                     LogWarning(DAT_0107f894, kRefData.m_uiLocationFormID, m_pWorldReferenceInfo->GetName(),
                                m_pWorldReferenceInfo->GetFormID());
                 }
-                if (m_pWorldReferenceInfo->vfn_1d0() && (!pLocationCell || !g_TES->IsCellBuffered(pLocationCell, false)))
+                if (m_pWorldReferenceInfo->GetNiNode() && (!pLocationCell || !g_TES->IsCellBuffered(pLocationCell, false)))
                 {
-                    m_pWorldReferenceInfo->vfn_1cc(0, 0);
+                    m_pWorldReferenceInfo->Set3D(0, 0);
                 }
-                else if (m_pWorldReferenceInfo->vfn_1d0() && m_pWorldReferenceInfo->IsActor())
+                else if (m_pWorldReferenceInfo->GetNiNode() && m_pWorldReferenceInfo->IsActor())
                 {
-                    m_pWorldReferenceInfo->vfn_1c4();
+                    m_pWorldReferenceInfo->AnimateNiNode();
                 }
             }
             if (m_pWorldReferenceInfo->IsActor())
             {
                 TESObjectREFR* pActor = m_pWorldReferenceInfo;
                 g_BGSSaveLoadGame->RemoveActorFromMap(pActor);
-                if (eType == INITIAL_DATA_TYPE_INITIAL_DATA_MOVED_REFERENCE && !pActor->vfn_290())
+                // The shared MobileObject slot 0xA4 has a void declaration; this caller consumes its bool result.
+                if (eType == INITIAL_DATA_TYPE_INITIAL_DATA_MOVED_REFERENCE && !((bool (__thiscall*)(TESObjectREFR*))(*(void***)pActor)[0xA4])(pActor))
                 {
                     TESForm* pOriginal = TESForm::GetFormByID(kRefData.m_uiOriginalBaseFormID);
                     pActor->FUN_0084f8c0(pOriginal);
@@ -169,11 +189,6 @@ unsigned int __cdecl FUN_0084e800(int aeType)
 unsigned int __cdecl FUN_0084e830(int);
 int __cdecl FUN_0084e930(void*, int, void*);
 
-struct BGSLoadFormBuffer_Accessor : public BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-};
-
 // If aeType is non-zero, reads isize bytes from apFile into pbuffer and passes them with aeType and apInitialDataBuffer to FUN_0084e930; returns 0 for aeType 0.
 // @fnv 0x0084e8c0
 int __cdecl LoadFormData(BGSLoadFormBuffer* apFile, int aeType, void* apInitialDataBuffer)
@@ -185,7 +200,7 @@ int __cdecl LoadFormData(BGSLoadFormBuffer* apFile, int aeType, void* apInitialD
         return 0;
 
     isize = FUN_0084e830(aeType);
-    ((BGSLoadFormBuffer_Accessor*)apFile)->ReadTypedData(pbuffer, isize);
+    apFile->ReadTypedData(pbuffer, isize);
     return FUN_0084e930(pbuffer, aeType, apInitialDataBuffer);
 }
 
@@ -242,41 +257,20 @@ BGSNumericIDIndex3* __thiscall BGSNumericIDIndex3::FUN_0084eb20()
 }
 }  // namespace fnv_0084eb20
 
-struct FUN_0084f880_shell
-{
-    int m_kPointA;                // +0x00
-    int m_kPointB;                // +0x04
-    int m_iThirdValue;                // +0x08
-    int m_iFourthElementInteger;                // +0x0C
-    int m_usTrailingValue;  // +0x10
-    int m_f;                // +0x14
-    int m_g;                // +0x18
-    int m_h;                // +0x1C
-    int m_i;                // +0x20
-    int m_iUnknownValue;    // +0x24
-    unsigned int m_flags;   // +0x28
-    void SetFlag10(bool value);
-};
-
-// Sets or clears bit 0x10 in m_flags according to value.
+// Sets or clears the cell-changed bit in the load buffer flags.
 // @fnv 0x0084f880
-void FUN_0084f880_shell::SetFlag10(bool abSet)
+void BGSLoadFormBuffer::SetCellChanged(bool abSet)
 {
     if (abSet)
-        m_flags |= 0x10;
+        iFlags |= 0x10;
     else
-        m_flags &= ~0x10;
+        iFlags &= ~0x10;
 }
 
-struct FUN_0084f8c0_shell
-{
-    void FUN_0084f8c0(int value);
-};
-
 // @fnv 0x0084f8c0
-void FUN_0084f8c0_shell::FUN_0084f8c0(int value)
+void TESObjectREFR::FUN_0084f8c0(TESForm* value)
 {
-    *(int*)((char*)this + 0x170) = value;
+    ((Actor*)this)->FormReferenceState = value;
 }
 
 struct FUN_0084e6a0_shell
@@ -314,24 +308,22 @@ struct Dummy84eaf0
     void ClearNumericIDIndex();
     char _pad[3];
 };
-struct S84eac0
-{
-    void _ref_006815c0();
-    char _pad[12];
-};
+
+#pragma pack(push, 1)
 struct Outer84eac0 : Dummy84eaf0
 {
-    S84eac0 m1;
-    S84eac0 m2;
+    NiPoint3 m1;
+    NiPoint3 m2;
     Outer84eac0* FUN_0084eac0();
 };
-// Calls ClearNumericIDIndex, then invokes _ref_006815c0 on m1 and m2, and returns this.
+#pragma pack(pop)
+// Calls ClearNumericIDIndex, then invokes FUN_006815c0 on m1 and m2, and returns this.
 // @fnv 0x0084eac0
 Outer84eac0* Outer84eac0::FUN_0084eac0()
 {
     Dummy84eaf0::ClearNumericIDIndex();
-    m1._ref_006815c0();
-    m2._ref_006815c0();
+    m1.FUN_006815c0();
+    m2.FUN_006815c0();
     return this;
 }
 
@@ -382,177 +374,18 @@ unsigned int __cdecl FUN_0084e850(GameFileBuf* apFile, int aeType, void* apIniti
     return (unsigned int)FUN_0084e930(acBuffer, aeType, apInitialDataBuffer);
 }
 
-struct ReferenceAccess
-{
-    virtual void vfn_0();
-    virtual void vfn_4();
-    virtual void vfn_8();
-    virtual void vfn_c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual void vfn_8c();
-    virtual void vfn_90();
-    virtual void vfn_94();
-    virtual void vfn_98();
-    virtual void vfn_9c();
-    virtual void vfn_a0();
-    virtual void vfn_a4();
-    virtual void vfn_a8();
-    virtual void vfn_ac();
-    virtual void vfn_b0();
-    virtual void vfn_b4();
-    virtual void vfn_b8();
-    virtual void vfn_bc();
-    virtual void vfn_c0();
-    virtual void vfn_c4();
-    virtual void vfn_c8();
-    virtual void vfn_cc();
-    virtual void vfn_d0();
-    virtual void vfn_d4();
-    virtual void vfn_d8();
-    virtual void vfn_dc();
-    virtual void vfn_e0();
-    virtual void vfn_e4();
-    virtual void vfn_e8();
-    virtual void vfn_ec();
-    virtual bool IsReference();
-    virtual void vfn_f4();
-    virtual void vfn_f8();
-    virtual void vfn_fc();
-    virtual bool IsActor();
-    virtual void vfn_104();
-    virtual void vfn_108();
-    virtual void vfn_10c();
-    virtual void vfn_110();
-    virtual void vfn_114();
-    virtual void vfn_118();
-    virtual void vfn_11c();
-    virtual void vfn_120();
-    virtual void vfn_124();
-    virtual void SetFormID(unsigned int, bool);
-    TESBoundObject* FUN_007af430();
-    ExtraDataList* FUN_005d43c0();
-    void FUN_00575690(TESBoundObject*);
-    void FUN_00565480(bool);
-};
-struct DataHandlerAccess
-{
-    bool FUN_00469860(unsigned int);
-};
-struct SaveLoadAccess
-{
-    void FUN_0084a880(TESForm*);
-};
 struct ProjectileAccess
 {
     int GetKindCode();
 };
-struct ExtraAccess
-{
-    TESBoundObject* FUN_004216f0();
-};
-struct FUN_009abf30 : TESObjectREFR
-{
-    FUN_009abf30();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    unsigned int unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
-    unsigned int unkc4;
-    unsigned int unkc8;
-    unsigned int unkcc;
-    unsigned int unkd0;
-    unsigned int unkd4;
-    unsigned int unkd8;
-    unsigned int unkdc;
-    unsigned int unke0;
-    unsigned int unke4;
-    unsigned int unke8;
-    unsigned int unkec;
-    unsigned int unkf0;
-    unsigned int unkf4;
-    unsigned int unkf8;
-    unsigned int unkfc;
-    unsigned int unk100;
-};
+
 TESForm* __cdecl FUN_004839c0(unsigned int);
 TESObjectREFR* __cdecl FUN_00564480(unsigned char, bool);
 void __cdecl FUN_00845cc0(const char*, ...);
 extern const char DAT_0107fa20[];
 extern const char DAT_0107f9b8[];
+
+TESBoundObject* __fastcall FUN_004216f0(ExtraDataList*);
 
 // @fnv 0x0084f8e0
 TESForm* __cdecl ResolveReferenceForm(unsigned int formID, ReferencePlacementData* data, TESForm* existing)
@@ -563,7 +396,7 @@ TESForm* __cdecl ResolveReferenceForm(unsigned int formID, ReferencePlacementDat
         {
             if (!form)
                 form = FUN_004839c0(formID);
-            if (((DataHandlerAccess*)g_dataHandler)->FUN_00469860(data->m_uiBaseFormID))
+            if (g_dataHandler->FUN_00469860(data->m_uiBaseFormID))
                 data->m_uiBaseFormID = 0;
             TESBoundObject* bound = dynamic_cast<TESBoundObject*>(FUN_004839c0(data->m_uiBaseFormID));
             if (!bound)
@@ -574,23 +407,23 @@ TESForm* __cdecl ResolveReferenceForm(unsigned int formID, ReferencePlacementDat
             if (form)
             {
                 bool remove = false;
-                if (!((ReferenceAccess*)form)->IsReference())
+                if (!((TESObjectREFR*)form)->GetIsReference())
                     remove = true;
                 else
                 {
-                    ReferenceAccess* ref = (ReferenceAccess*)form;
+                    TESObjectREFR* ref = (TESObjectREFR*)form;
                     {
                         TESBoundObject* current = ref->FUN_007af430();
                         if (current != bound)
                         {
-                            if (!ref->IsActor() || ((ExtraAccess*)ref->FUN_005d43c0())->FUN_004216f0() != bound)
+                            if (!ref->IsActor() || FUN_004216f0(ref->FUN_005d43c0()) != bound)
                                 remove = true;
                         }
                     }
                 }
                 if (remove)
                 {
-                    ((SaveLoadAccess*)g_BGSSaveLoadGame)->FUN_0084a880(form);
+                    g_BGSSaveLoadGame->ClearForm(form);
                     form = 0;
                 }
             }
@@ -600,7 +433,7 @@ TESForm* __cdecl ResolveReferenceForm(unsigned int formID, ReferencePlacementDat
                 TESObjectREFR* created = 0;
                 {
                     int type = 58;
-                    switch (bound->GetFormType())
+                    switch (((const TESForm*)bound)->GetFormType())
                     {
                     case ENUM_FORM_ID_CREA_ID:
                         type = 60;
@@ -614,7 +447,7 @@ TESForm* __cdecl ResolveReferenceForm(unsigned int formID, ReferencePlacementDat
                         break;
                     }
                     case ENUM_FORM_ID_EXPL_ID:
-                        created = new FUN_009abf30;
+                        created = new Explosion;
                         break;
                     }
                     if (flags & 4)
@@ -623,8 +456,8 @@ TESForm* __cdecl ResolveReferenceForm(unsigned int formID, ReferencePlacementDat
                     {
                         if (!created)
                             created = FUN_00564480((unsigned char)type, true);
-                        ((ReferenceAccess*)created)->FUN_00575690(bound);
-                        ((ReferenceAccess*)created)->SetFormID(formID, true);
+                        ((TESObjectREFR*)created)->FUN_00575690(bound);
+                        ((TESObjectREFR*)created)->SetRefID(formID, true);
                         form = created;
                     }
                     else
@@ -633,8 +466,8 @@ TESForm* __cdecl ResolveReferenceForm(unsigned int formID, ReferencePlacementDat
             }
             if (form && (flags & 2))
             {
-                ReferenceAccess* deleted = (ReferenceAccess*)form;
-                deleted->FUN_00565480(true);
+                TESObjectREFR* deleted = (TESObjectREFR*)form;
+                deleted->SetPersistentFlag(true);
             }
             if (form)
                 ((TESObjectREFR*)form)->FUN_0046a010(1);
@@ -644,20 +477,6 @@ TESForm* __cdecl ResolveReferenceForm(unsigned int formID, ReferencePlacementDat
 }
 
 void __cdecl FUN_00845cc0(const char*, ...);
-
-class BGSSaveFormBuffer
-{
-  public:
-    void SaveData(const void*, unsigned int, int);
-    unsigned int FUN_00865f20();
-    unsigned int FUN_0084e3a0();
-    void FUN_00865ff0(int, unsigned int);
-};
-
-struct BGSSaveLoadGame_Accessor : public BGSSaveLoadGame
-{
-    void* FUN_0084e3a0();
-};
 
 struct BGSSaveLoadGame_SubAccessor
 {
@@ -669,163 +488,8 @@ struct FUN_00853570_shell
     void WriteFormIDBytes(unsigned int);
 };
 
-struct FUN_00546af0_shell
-{
-    unsigned int FUN_00546af0();
-};
-
-struct TESObjectCELL_Accessor : public TESObjectCELL
-{
-    TESWorldSpace* FUN_0054ddd0();
-    short FUN_00544c30();
-    short FUN_00544c60();
-};
-
-struct StandaloneREFR
-{
-    virtual void _v_0();
-    virtual void _v_4();
-    virtual void _v_8();
-    virtual void _v_c();
-    virtual void _v_10();
-    virtual void _v_14();
-    virtual void _v_18();
-    virtual void _v_1c();
-    virtual void _v_20();
-    virtual void _v_24();
-    virtual void _v_28();
-    virtual void _v_2c();
-    virtual void _v_30();
-    virtual void _v_34();
-    virtual void _v_38();
-    virtual void _v_3c();
-    virtual void _v_40();
-    virtual void _v_44();
-    virtual void _v_48();
-    virtual void _v_4c();
-    virtual void _v_50();
-    virtual void _v_54();
-    virtual void _v_58();
-    virtual void _v_5c();
-    virtual void _v_60();
-    virtual void _v_64();
-    virtual void _v_68();
-    virtual void _v_6c();
-    virtual void _v_70();
-    virtual void _v_74();
-    virtual void _v_78();
-    virtual void _v_7c();
-    virtual void _v_80();
-    virtual void _v_84();
-    virtual void _v_88();
-    virtual void _v_8c();
-    virtual void _v_90();
-    virtual void _v_94();
-    virtual void _v_98();
-    virtual void _v_9c();
-    virtual void _v_a0();
-    virtual void _v_a4();
-    virtual void _v_a8();
-    virtual void _v_ac();
-    virtual void _v_b0();
-    virtual void _v_b4();
-    virtual void _v_b8();
-    virtual void _v_bc();
-    virtual void _v_c0();
-    virtual void _v_c4();
-    virtual void _v_c8();
-    virtual void _v_cc();
-    virtual void _v_d0();
-    virtual void _v_d4();
-    virtual void _v_d8();
-    virtual void _v_dc();
-    virtual void _v_e0();
-    virtual void _v_e4();
-    virtual void _v_e8();
-    virtual void _v_ec();
-    virtual bool vfn_f0();
-    virtual void _v_f4();
-    virtual void _v_f8();
-    virtual bool vfn_fc();
-    virtual bool IsActor();
-    virtual void _v_104();
-    virtual void _v_108();
-    virtual void _v_10c();
-    virtual void _v_110();
-    virtual void _v_114();
-    virtual void _v_118();
-    virtual void _v_11c();
-    virtual void _v_120();
-    virtual void _v_124();
-    virtual void _v_128();
-    virtual void _v_12c();
-    virtual const char* GetName();
-    virtual void _v_134();
-    virtual bool vfn_138(NiPoint3&, NiPoint3&, TESForm*&, bool);
-    virtual void _v_13c();
-    virtual void _v_140();
-    virtual void _v_144();
-    virtual void _v_148();
-    virtual void _v_14c();
-    virtual void _v_150();
-    virtual void _v_154();
-    virtual void _v_158();
-    virtual void _v_15c();
-    virtual void _v_160();
-    virtual void _v_164();
-    virtual void _v_168();
-    virtual void _v_16c();
-    virtual void _v_170();
-    virtual void _v_174();
-    virtual void _v_178();
-    virtual void _v_17c();
-    virtual void _v_180();
-    virtual void _v_184();
-    virtual void _v_188();
-    virtual void _v_18c();
-    virtual void _v_190();
-    virtual void _v_194();
-    virtual void _v_198();
-    virtual void _v_19c();
-    virtual void _v_1a0();
-    virtual void _v_1a4();
-    virtual void _v_1a8();
-    virtual void _v_1ac();
-    virtual void _v_1b0();
-    virtual void _v_1b4();
-    virtual void _v_1b8();
-    virtual void _v_1bc();
-    virtual void _v_1c0();
-    virtual void _v_1c4();
-    virtual void _v_1c8();
-    virtual void _v_1cc();
-    virtual void* vfn_1d0();
-    virtual void _v_1d4();
-    virtual void _v_1d8();
-    virtual void _v_1dc();
-    virtual void _v_1e0();
-    virtual void _v_1e4();
-    virtual void _v_1e8();
-    virtual void _v_1ec();
-    virtual void _v_1f0();
-    virtual NiPoint3* vfn_1f4();
-    NiPoint3* FUN_00436aa0();
-    NiPoint3* FUN_00430830();
-    TESBoundObject* GetObjectReference();
-    bool FUN_005653d0();
-    void FUN_00562de0(BGSSaveFormBuffer*);
-    TESObjectCELL* GetParentCell();
-    unsigned int GetFormID();
-    ExtraDataList* GetExtraData();
-};
-
-class MobileObject
-{
-  public:
-    bool FUN_00574900();
-};
-
-struct S_00422b90
+// Save-specific entry point not declared by the shared ExtraDataList header.
+struct ExtraDataListSaveAccess : ExtraDataList
 {
     char* FUN_00422b90();
 };
@@ -844,12 +508,7 @@ class CF845 : public FakeBGSLoadGameSubBuffer
     void* FUN_00559450();
 };
 
-struct BGSChangeFlags_s
-{
-    bool Test(unsigned int);
-};
-
-TESWorldSpace* __fastcall FUN_00575d70(StandaloneREFR*);
+TESWorldSpace* __fastcall FUN_00575d70(TESObjectREFR*);
 TESBoundObject* __fastcall FUN_004216f0(ExtraDataList*);
 
 struct ExteriorCellCharData
@@ -903,60 +562,66 @@ struct MovedRefInitialData
     MovedRefInitialData* FUN_0084eb50();
 };
 
+// Save-specific entry point not declared by the shared TESObjectREFR header.
+struct TESObjectREFRSaveAccess : TESObjectREFR
+{
+    void FUN_00562de0(BGSSaveFormBuffer*);
+};
+
 // Determines the initial-data type for a form, writes the matching cell or reference record to the save buffer, and optionally saves extra data.
 // @fnv 0x0084eb80
-INITIAL_DATA_TYPE __cdecl FUN_0084eb80(BGSSaveFormBuffer* apFile, TESForm* apForm, FormChangeMask eChangeFlags)
+INITIAL_DATA_TYPE __cdecl FUN_0084eb80(BGSSaveFormBuffer* apFile, TESForm* apForm, InitialDataChangeMask eChangeFlags)
 {
-    INITIAL_DATA_TYPE eType = BGSSaveLoadInitialDataPacket::DetermineInitialDataType(apForm, eChangeFlags);
+    INITIAL_DATA_TYPE eType = BGSSaveLoadInitialData::DetermineInitialDataType(apForm, eChangeFlags);
     switch (eType)
     {
     case INITIAL_DATA_TYPE_INITIAL_DATA_EXTERIOR_CELL_CHAR: {
         ExteriorCellCharData data;
-        TESObjectCELL_Accessor* cell = (TESObjectCELL_Accessor*)apForm;
-        data.worldID = ((BGSSaveLoadGame_SubAccessor*)((BGSSaveLoadGame_Accessor*)g_BGSSaveLoadGame)->FUN_0084e3a0())
-                           ->FUN_00846c90(cell->FUN_0054ddd0()->GetFormID());
-        data.cellX = (char)cell->FUN_00544c30();
-        data.cellY = (char)cell->FUN_00544c60();
-        data.detachTime = ((FUN_00546af0_shell*)cell)->FUN_00546af0();
+        TESObjectCELL* cell = (TESObjectCELL*)apForm;
+        data.worldID = ((BGSSaveLoadGame_SubAccessor*)g_BGSSaveLoadGame->FUN_0084e3a0())
+                           ->FUN_00846c90(cell->GetParentWorldSpace()->GetFormID());
+        data.cellX = (char)cell->GetCellGridX();
+        data.cellY = (char)cell->GetCellGridY();
+        data.detachTime = cell->FUN_00546af0();
         apFile->SaveData(&data, sizeof(data), 0);
         break;
     }
     case INITIAL_DATA_TYPE_INITIAL_DATA_EXTERIOR_CELL_SHORT: {
         ExteriorCellShortData data;
-        TESObjectCELL_Accessor* cell = (TESObjectCELL_Accessor*)apForm;
-        data.worldID = ((BGSSaveLoadGame_SubAccessor*)((BGSSaveLoadGame_Accessor*)g_BGSSaveLoadGame)->FUN_0084e3a0())
-                           ->FUN_00846c90(cell->FUN_0054ddd0()->GetFormID());
-        data.cellX = cell->FUN_00544c30();
-        data.cellY = cell->FUN_00544c60();
-        *(unsigned int*)&data.detachTimeLow = ((FUN_00546af0_shell*)cell)->FUN_00546af0();
+        TESObjectCELL* cell = (TESObjectCELL*)apForm;
+        data.worldID = ((BGSSaveLoadGame_SubAccessor*)g_BGSSaveLoadGame->FUN_0084e3a0())
+                           ->FUN_00846c90(cell->GetParentWorldSpace()->GetFormID());
+        data.cellX = cell->GetCellGridX();
+        data.cellY = cell->GetCellGridY();
+        *(unsigned int*)&data.detachTimeLow = cell->FUN_00546af0();
         apFile->SaveData(&data, sizeof(data), 0);
         break;
     }
     case INITIAL_DATA_TYPE_INITIAL_DATA_INTERIOR_CELL: {
-        TESObjectCELL_Accessor* pCell = (TESObjectCELL_Accessor*)apForm;
-        unsigned int detachTime = ((FUN_00546af0_shell*)pCell)->FUN_00546af0();
+        TESObjectCELL* pCell = (TESObjectCELL*)apForm;
+        unsigned int detachTime = pCell->FUN_00546af0();
         apFile->SaveData(&detachTime, sizeof(detachTime), 0);
         break;
     }
     case INITIAL_DATA_TYPE_INITIAL_DATA_REFERENCE_LOCATION: {
-        StandaloneREFR* pRefr = (StandaloneREFR*)apForm;
+        TESObjectREFR* pRefr = (TESObjectREFR*)apForm;
         TESForm* cell = (TESForm*)FUN_00575d70(pRefr);
         if (!cell)
         {
             cell = (TESForm*)pRefr->GetParentCell();
         }
-        NiPoint3 pos3 = *pRefr->FUN_00436aa0();
+        NiPoint3 pos3 = *pRefr->GetPos();
         NiPoint3 rot_2 = *pRefr->FUN_00430830();
         if (!cell)
         {
-            if (!pRefr->vfn_138(pos3, rot_2, cell, false))
+            if (!pRefr->GetStartingPosition(&pos3, &rot_2, &cell, 0))
             {
-                cell = (TESForm*)FUN_00575d70((StandaloneREFR*)g_thePlayer);
+                cell = (TESForm*)FUN_00575d70((TESObjectREFR*)g_thePlayer);
                 if (!cell)
                 {
-                    cell = (TESForm*)((StandaloneREFR*)g_thePlayer)->GetParentCell();
+                    cell = (TESForm*)((TESObjectREFR*)g_thePlayer)->GetParentCell();
                 }
-                pos3 = *pRefr->FUN_00436aa0();
+                pos3 = *pRefr->GetPos();
                 rot_2 = *pRefr->FUN_00430830();
             }
         }
@@ -969,7 +634,7 @@ INITIAL_DATA_TYPE __cdecl FUN_0084eb80(BGSSaveFormBuffer* apFile, TESForm* apFor
         break;
     }
     case INITIAL_DATA_TYPE_INITIAL_DATA_CREATED_REFERENCE: {
-        StandaloneREFR* pRefr = (StandaloneREFR*)apForm;
+        TESObjectREFR* pRefr = (TESObjectREFR*)apForm;
         TESForm* kLoc = (TESForm*)FUN_00575d70(pRefr);
         if (!kLoc)
         {
@@ -978,10 +643,10 @@ INITIAL_DATA_TYPE __cdecl FUN_0084eb80(BGSSaveFormBuffer* apFile, TESForm* apFor
         CreatedRefInitialData createdRefData;
         createdRefData.FUN_0084eb20();
         ((FUN_00853570_shell*)&createdRefData)->WriteFormIDBytes(kLoc->GetFormID());
-        *(NiPoint3*)&createdRefData.base.pos = *pRefr->vfn_1f4();
+        *(NiPoint3*)&createdRefData.base.pos = *((const TESObjectREFR*)pRefr)->GetPos();
         *(NiPoint3*)&createdRefData.base.rot = *pRefr->FUN_00430830();
         TESBoundObject* baseObject3 = pRefr->GetObjectReference();
-        if (pRefr->IsActor() && ((BGSChangeFlags_s*)&eChangeFlags)->Test(0x40000))
+        if (pRefr->IsActor() && ((BGSChangeFlags*)&eChangeFlags)->Test(0x40000))
         {
             TESBoundObject* boundObj4 = FUN_004216f0(pRefr->GetExtraData());
             if (boundObj4)
@@ -995,9 +660,9 @@ INITIAL_DATA_TYPE __cdecl FUN_0084eb80(BGSSaveFormBuffer* apFile, TESForm* apFor
         {
             createdRefData.flags |= 2;
         }
-        if (pRefr->vfn_fc())
+        if (pRefr->IsMobileObject())
         {
-            StandaloneREFR* aTalkingRef = pRefr;
+            TESObjectREFR* aTalkingRef = pRefr;
             if (((MobileObject*)aTalkingRef)->FUN_00574900())
             {
                 createdRefData.flags |= 4;
@@ -1007,24 +672,24 @@ INITIAL_DATA_TYPE __cdecl FUN_0084eb80(BGSSaveFormBuffer* apFile, TESForm* apFor
         break;
     }
     case INITIAL_DATA_TYPE_INITIAL_DATA_MOVED_REFERENCE: {
-        StandaloneREFR* pRefr = (StandaloneREFR*)apForm;
+        TESObjectREFR* pRefr = (TESObjectREFR*)apForm;
         TESForm* locMain = (TESForm*)FUN_00575d70(pRefr);
         if (!locMain)
         {
             locMain = (TESForm*)pRefr->GetParentCell();
         }
-        NiPoint3 pos3 = *pRefr->FUN_00436aa0();
+        NiPoint3 pos3 = *pRefr->GetPos();
         NiPoint3 rot_2 = *pRefr->FUN_00430830();
         if (!locMain)
         {
-            if (!pRefr->vfn_138(pos3, rot_2, locMain, false))
+            if (!pRefr->GetStartingPosition(&pos3, &rot_2, &locMain, 0))
             {
-                locMain = (TESForm*)FUN_00575d70((StandaloneREFR*)g_thePlayer);
+                locMain = (TESForm*)FUN_00575d70((TESObjectREFR*)g_thePlayer);
                 if (!locMain)
                 {
-                    locMain = (TESForm*)((StandaloneREFR*)g_thePlayer)->GetParentCell();
+                    locMain = (TESForm*)((TESObjectREFR*)g_thePlayer)->GetParentCell();
                 }
-                pos3 = *pRefr->FUN_00436aa0();
+                pos3 = *pRefr->GetPos();
                 rot_2 = *pRefr->FUN_00430830();
             }
         }
@@ -1036,7 +701,7 @@ INITIAL_DATA_TYPE __cdecl FUN_0084eb80(BGSSaveFormBuffer* apFile, TESForm* apFor
         NiPoint3 editorPos;
         NiPoint3 editorRot5;
         TESForm* editorCell = 0;
-        if (pRefr->vfn_138(editorPos, editorRot5, editorCell, false))
+        if (pRefr->GetStartingPosition(&editorPos, &editorRot5, &editorCell, 0))
         {
             ((FUN_00853570_shell*)&movedRefDataTmp.orig0)->WriteFormIDBytes(editorCell->GetFormID());
             movedRefDataTmp.originalCellX = (short)(TruncateFloatToInt(editorPos.x) >> 12);
@@ -1055,16 +720,16 @@ INITIAL_DATA_TYPE __cdecl FUN_0084eb80(BGSSaveFormBuffer* apFile, TESForm* apFor
     }
     }
 
-    if (((StandaloneREFR*)apForm)->vfn_f0() && ((BGSChangeFlags_s*)&eChangeFlags)->Test(4))
+    if (((TESObjectREFR*)apForm)->GetIsReference() && ((BGSChangeFlags*)&eChangeFlags)->Test(4))
     {
-        StandaloneREFR* pRefr = (StandaloneREFR*)apForm;
-        CF845 holder_(((S_00422b90*)pRefr->GetExtraData())->FUN_00422b90());
-        if (pRefr->vfn_1d0() || !holder_.FUN_00559450())
+        TESObjectREFR* pRefr = (TESObjectREFR*)apForm;
+        CF845 holder_(((ExtraDataListSaveAccess*)pRefr->GetExtraData())->FUN_00422b90());
+        if (pRefr->GetNiNode() || !holder_.FUN_00559450())
         {
             unsigned int offsetBefore6;
             unsigned int bookmark8 = apFile->FUN_00865f20();
             offsetBefore6 = apFile->FUN_0084e3a0();
-            pRefr->FUN_00562de0(apFile);
+            ((TESObjectREFRSaveAccess*)pRefr)->FUN_00562de0(apFile);
             unsigned int offsetAfter = apFile->FUN_0084e3a0();
             apFile->FUN_00865ff0(offsetAfter - offsetBefore6, bookmark8);
         }

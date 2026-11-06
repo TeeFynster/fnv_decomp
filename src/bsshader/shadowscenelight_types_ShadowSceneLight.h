@@ -4,7 +4,6 @@
 
 #include "layout_support.h"
 #include "NiPoint3.h"
-#include "shadowscenelight_refobject.h"
 #include "layout_support.h"
 class BSMultiBoundNode;
 class BSPortal;
@@ -110,14 +109,7 @@ class NiTAbstractPoolAllocator_unsigned_int_
 };
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTAbstractPoolAllocator_unsigned_int_) == 1);
-#pragma pack(push, 4)
-class NiTPointerAllocator_unsigned_int_ : public NiTAbstractPoolAllocator_unsigned_int_
-{
-  public:
-    // void* __cdecl NiTPointerAllocator<unsigned int>::*()
-    // void __cdecl NiTPointerAllocator<unsigned int>::*(void*)
-};
-#pragma pack(pop)
+#include "../../include/NiTPointerAllocator_unsigned_int_.h"
 FNV_STATIC_ASSERT(sizeof(NiTPointerAllocator_unsigned_int_) == 1);
 #pragma pack(push, 4)
 class NiTListBase_NiTPointerAllocator_unsigned_int__NiPointer_NiTriBasedGeom_____AntiBloatAllocator
@@ -311,54 +303,9 @@ class NiTPointerList_NiPointer_NiAVObject___
 };
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTPointerList_NiPointer_NiAVObject___) == 12);
-#pragma pack(push, 4)
-class NiPlane
-{
-  public:
-    NiPlane();
-    NiPoint3 m_kPlaneNormal;  // +0x0, 12 bytes
-    float m_fPlaneConstant;   // +0xC, 4 bytes
-    // NiPlane
-    // bool __cdecl NiPlane::*(const NiPlane&)
-    // bool __cdecl NiPlane::*(const NiPlane&)
-    // NiPlane __cdecl NiPlane::*()
-    // void __cdecl NiPlane::*(const NiPoint3&)
-    // const NiPoint3& __cdecl NiPlane::*()
-    // void __cdecl NiPlane::*(float)
-    // float __cdecl NiPlane::*()
-    // float __cdecl NiPlane::*(const NiPoint3&)
-    // int __cdecl NiPlane::*(const NiPoint3&)
-    // void __cdecl NiPlane::*(NiStream&)
-    // void __cdecl NiPlane::*(NiStream&)
-    // char* __cdecl NiPlane::*(const char*)
-};
-#pragma pack(pop)
+#include "../../include/NiPlane.h"
 FNV_STATIC_ASSERT(sizeof(NiPlane) == 16);
-FNV_STATIC_ASSERT(offsetof(NiPlane, m_kPlaneNormal) == 0);
-FNV_STATIC_ASSERT(offsetof(NiPlane, m_fPlaneConstant) == 12);
-#pragma pack(push, 4)
-class NiFrustumPlanes
-{
-  public:
-    NiFrustumPlanes() : m_uiActivePlaneMask(63)
-    {}
-    NiPlane m_akPlanes[6];             // +0x0, 96 bytes
-    unsigned int m_uiActivePlaneMask;  // +0x60, 4 bytes
-    // NiFrustumPlanes
-    // Set
-    // const NiPlane& __cdecl NiFrustumPlanes::*(unsigned int)
-    // void __cdecl NiFrustumPlanes::*(unsigned int, const NiPlane&)
-    // bool __cdecl NiFrustumPlanes::*(unsigned int)
-    // bool __cdecl NiFrustumPlanes::*()
-    // bool __cdecl NiFrustumPlanes::*()
-    // void __cdecl NiFrustumPlanes::*(unsigned int)
-    // void __cdecl NiFrustumPlanes::*(unsigned int)
-    // void __cdecl NiFrustumPlanes::*()
-    // void __cdecl NiFrustumPlanes::*()
-    // unsigned int __cdecl NiFrustumPlanes::*()
-    // void __cdecl NiFrustumPlanes::*(unsigned int)
-};
-#pragma pack(pop)
+#include "../../include/NiFrustumPlanes.h"
 FNV_STATIC_ASSERT(sizeof(NiFrustumPlanes) == 100);
 FNV_STATIC_ASSERT(offsetof(NiFrustumPlanes, m_akPlanes) == 0);
 FNV_STATIC_ASSERT(offsetof(NiFrustumPlanes, m_uiActivePlaneMask) == 96);

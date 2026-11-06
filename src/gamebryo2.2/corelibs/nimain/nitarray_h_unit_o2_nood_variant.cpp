@@ -7,6 +7,7 @@
 // No @fnv markers here; the covered template members are defined and
 // marked in the header. This translation unit only forces the covered
 // COMDATs to be emitted so their bytes can be compared.
+#include "../../../../include/StrArr.h"
 #include "nitarray.inl"
 void NiTArray_UnitReference()
 {
@@ -18,12 +19,6 @@ void NiTArray_UnitReference()
 }
 struct Arr
 {
-    unsigned int GetSize();
-};
-struct StrArr
-{
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
     unsigned int GetSize();
 };
 struct FUN_0096aca0_shell : Arr

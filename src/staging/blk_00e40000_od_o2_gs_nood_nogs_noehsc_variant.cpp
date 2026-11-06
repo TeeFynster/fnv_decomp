@@ -6,44 +6,9 @@
 // src/staging/blk_00e40000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-
-class hkOstream
-{
-  public:
-    void* m_ppVirtualMethodTable;
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    void* m_pStreamWriter;
-    hkOstream(char* buf, int bufSize);     // FUN_00cb1600
-    ~hkOstream();                          // FUN_00cc00e0
-    hkOstream& operator<<(const char* s);  // FUN_00cc01c0
-    hkOstream& operator<<(const void* p);  // WriteName
-};
-
-class hkError
-{
-  public:
-    virtual void slot00();
-    virtual void slot04();
-    virtual void slot08();
-    virtual int message(int type, int id, const char* description, const char* file, int line);
-};
-extern hkError* DAT_01268360;
+#include "../../include/hkError.h"
+#include "../../include/hkOstream.h"
+#include "../../include/hkVector4.h"
 
 extern const char str_010ecd48[];
 extern const char str_010eccfc[];
@@ -69,7 +34,7 @@ int AttributeHolder::FUN_00e5ca80(const char* name, unsigned char warn, hkVector
     VectorAttribute* attr = FUN_00e5c650(name);
     if (attr)
     {
-        out = *attr->m_uiFilterValue;
+        out.m_vComponents = attr->m_uiFilterValue->m_vComponents;
         return 0;
     }
     if (warn)
@@ -77,7 +42,7 @@ int AttributeHolder::FUN_00e5ca80(const char* name, unsigned char warn, hkVector
         char assertBuf[512];
         hkOstream ostr(assertBuf, sizeof(assertBuf));
         ostr << str_010ecd48 << name << str_010eccfc << (const void*)this << str_010ecd0c;
-        DAT_01268360->message(1, 0xabbaab81, assertBuf, str_010eccc8, 0xa2);
+        hkError::s_instance->message(1, 0xabbaab81, assertBuf, str_010eccc8, 0xa2);
     }
     return 1;
 }

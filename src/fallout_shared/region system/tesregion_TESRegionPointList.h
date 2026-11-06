@@ -4,39 +4,10 @@
 
 #include "layout_support.h"
 #include "layout_support.h"
-class NiPoint2;
+#include "../../../include/NiPoint2.h"
 class RegionPoint;
 class RegionPointList;
 class TESRegionPointList__ScaleResult;
-class NiPoint2
-{
-  public:
-    float x;  // +0x0, 4 bytes
-    float y;  // +0x4, 4 bytes
-    // NiPoint2
-    // operator[]
-    // bool __cdecl NiPoint2::*(const NiPoint2&)
-    // bool __cdecl NiPoint2::*(const NiPoint2&)
-    // NiPoint2 __cdecl NiPoint2::*(const NiPoint2&)
-    // operator-
-    // operator*
-    // NiPoint2 __cdecl NiPoint2::*(float)
-    // NiPoint2 __cdecl NiPoint2::*(const NiPoint2&, const NiPoint2&)
-    // NiPoint2& __cdecl NiPoint2::*(const NiPoint2&)
-    // NiPoint2& __cdecl NiPoint2::*(const NiPoint2&)
-    // NiPoint2& __cdecl NiPoint2::*(float)
-    // NiPoint2& __cdecl NiPoint2::*(float)
-    // float __cdecl NiPoint2::*()
-    // float __cdecl NiPoint2::*()
-    // float __cdecl NiPoint2::*(const NiPoint2&)
-    // float __cdecl NiPoint2::*()
-    // LoadBinary
-    // SaveBinary
-    // char* __cdecl NiPoint2::*(const char*)
-};
-FNV_STATIC_ASSERT(sizeof(NiPoint2) == 8);
-FNV_STATIC_ASSERT(offsetof(NiPoint2, x) == 0);
-FNV_STATIC_ASSERT(offsetof(NiPoint2, y) == 4);
 class RegionPointList : public BSSimpleList<RegionPoint*>
 {
   public:

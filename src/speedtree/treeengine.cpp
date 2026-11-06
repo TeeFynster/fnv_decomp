@@ -1,3 +1,4 @@
+#include "../../include/CTreeEngine.h"
 
 // src/speedtree/treeengine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/speedtree/treeengine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -15,12 +16,6 @@ void FUN_00b2bcf0_shell::FUN_00b2bcf0(float* a, float* b)
     *b = *(float*)((char*)this + 0x50);
 }
 
-struct CTreeEngine
-{
-    float* m_pfTreeSize;
-    float* m_pfTreeSizeVariance;
-    void FUN_00b2bd20(float fSize, float fVariance);
-};
 
 // @fnv 0x00b2bd20
 void CTreeEngine::FUN_00b2bd20(float afValue, float fVariance)

@@ -9,22 +9,19 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <xmmintrin.h>
+#include "../../../../../../../../../include/hkSimdReal.h"
 
-class VectorComponentValue
+inline hkSimdReal::hkSimdReal(float x)
 {
-  public:
-    __m128 m_vValue;
-    VectorComponentValue(float x)
-    {
-        m_vValue = _mm_load_ss(&x);
-    }
-    __forceinline __m128 broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-};
+    m_vValue = _mm_load_ss(&x);
+}
 
-typedef const VectorComponentValue& hkSimdRealParameter;
+__forceinline __m128 hkSimdReal::broadcast() const
+{
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+
+typedef const hkSimdReal& hkSimdRealParameter;
 
 struct hkTransformD;
 struct hkRotationD;
@@ -41,6 +38,7 @@ struct hkVector4D
     }
 };
 
+// local form of hkRotation: 0x00de7f20 needs implicit rotation construction; shared form gives 376 bytes vs exe 355.
 struct hkRotationD
 {
     hkVector4D m_kColumn0;

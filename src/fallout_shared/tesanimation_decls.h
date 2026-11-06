@@ -10,6 +10,7 @@ class ActorValueOwner
 };
 class TESForm;
 template <class T> unsigned int BSStringLength(const T*);
+#include "layout_support.h"
 #include "BaseFormComponent.h"
 
 class TESAnimation : public BaseFormComponent

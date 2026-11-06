@@ -1,47 +1,23 @@
+#include "../../../include/SettingT_GameSettingCollection_.h"
 // fallout/ai/actor_packet.h: declares NiPoint3, MiddleHighProcess, NiCamera, NiControllerSequence, NiAVObject and more
+#include "../../../include/MiddleHighProcess.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiCamera.h"
+#include "../../../include/NiControllerSequence.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/TESBoundObject.h"
 #ifndef ACTOR_PACKET_H
 #define ACTOR_PACKET_H
 
 #include "layout_support.h"
-#define FNV_NIPOINT3_H
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-    NiPoint3(float, float, float);
-    void Set(float, float, float);
-};
+#include "NiPoint3.h"
 class ActiveEffect;
 template <class T> class BSSimpleList;
-class MiddleHighProcess
-{
-  public:
-    char padding[0x1b8];
-    BSSimpleList<ActiveEffect*>* pActiveEffects;
-    BSSimpleList<ActiveEffect*>* GetActiveEffectList();
-};
-class NiCamera
-{
-  public:
-    const NiPoint3& FUN_0045bb80() const;
-};
 extern NiCamera* DAT_011e07d0;
 
 class Actor;
 class Animation;
-class NiControllerSequence
-{
-  public:
-    float FUN_00508100();
-    void FUN_0098adb0(float);
-};
 class NiNode;
-class NiAVObject
-{
-  public:
-    NiNode* GetParent();
-};
 class ActorPacketView
 {
   public:
@@ -763,18 +739,9 @@ class Animation
     void Update(Actor*, float, float);
     void UpdateMovement(Actor*);
 };
-template <> class NiPointer<NiNode>
-{
-  public:
-    NiNode* m_pObject;
-    NiNode* operator->() const;
-};
+// NiPointer<NiNode>::operator-> is called out of line in these units.
+template <> NiNode* NiPointer<NiNode>::operator->() const;
 class ParentSpaceNode;
-class TESBoundObject
-{
-  public:
-    int GetFormType() const;
-};
 class VATS
 {
   public:
@@ -796,16 +763,7 @@ class GlobalObject_0044f440
     char data;
 };
 class GameSettingCollection;
-class PlayerCharacter
-{
-  public:
-    bool HasCombatState();
-};
-class SettingT_GameSettingCollection_
-{
-  public:
-    SETTING_VALUE* Float();
-};
+
 extern GlobalObject_0045d260 g_011df69c;
 extern GlobalObject_0044f440 g_011f2ac4, g_011f2ad8, g_011f2b10, g_011f2c10;
 extern VATS DAT_011f2250;

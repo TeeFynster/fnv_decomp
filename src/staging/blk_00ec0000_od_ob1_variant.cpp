@@ -1,3 +1,4 @@
+#include "../../include/NiTMapItem.h"
 
 // src/staging/blk_00ec0000_od_ob1_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/staging/blk_00ec0000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,17 +7,12 @@
 // src/staging/blk_00ec0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-struct BGSMoviePlayer
-{
-    void __thiscall FUN_00ec2760(int a);
-};
+#include "../../include/BGSMoviePlayer.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/AutoMemContext.h"
 extern BGSMoviePlayer* DAT_0126fac4;
 int __stdcall FUN_00ec16b0(int a);
-struct P03MM
-{
-    void* Allocate(unsigned int);
-};
-extern P03MM g_memoryManager;
+extern MemoryManager g_memoryManager;
 struct FUN_00ec1a40_Class
 {
     void* FUN_00ec1a40();
@@ -76,10 +72,6 @@ struct FUN_00ec1570_t
     bool j;
 };
 void __fastcall FUN_00ec1570(FUN_00ec1570_t* p);
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 struct FUN_00ec15e0_shell
 {
     void __thiscall FUN_00ec15e0();
@@ -436,11 +428,7 @@ class BEC16D0MoviePlayerThread
 };
 extern int DAT_010f1ca4;
 void __cdecl FUN_00aa10f0(int aValue);
-struct FUN_00ec1df0_pool
-{
-    void FUN_00aa4060(void* apMemory);
-};
-extern FUN_00ec1df0_pool DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 struct FUN_00ec1df0_cls
 {
     int m_vptr;
@@ -715,10 +703,11 @@ struct Scope2490
         g_thread2490.context = restored;
     }
 };
-struct Movie2490
+// Movie has the 0x28-byte playback layout; constructor 0x00ec1f20, background initializer 0x00ec1f60. No shared Movie.h yet.
+struct Movie
 {
     int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24;
-    Movie2490();
+    Movie();
     static void* operator new(unsigned int size)
     {
         return g_memoryManager.Allocate(size);
@@ -729,9 +718,9 @@ struct Movie2490
 struct FUN_00ec2490_Class
 {
     int unk00, unk04, unk08;
-    Movie2490* movie;
+    Movie* movie;
     int unk10;
-    Movie2490* cached;
+    Movie* cached;
     bool hasCached;
     void PauseMovie();
     void FUN_00ec25e0();
@@ -750,7 +739,7 @@ unsigned char FUN_00ec2490_Class::FUN_00ec2490(int value, unsigned char option)
     }
     else
     {
-        movie = new Movie2490;
+        movie = new Movie;
     }
     unsigned char result = movie->InitAndCheck(value, option);
     if (!result)
@@ -759,11 +748,6 @@ unsigned char FUN_00ec2490_Class::FUN_00ec2490(int value, unsigned char option)
 }
 
 namespace fnv_00ec2ca0 {
-struct MemMgr_cls
-{
-    int unk00;
-    void* FUN_00aa3e40(unsigned int size);
-};
 
 struct SpawnedObject
 {
@@ -781,7 +765,7 @@ struct SpawnedObject
     SpawnedObject();
     static __forceinline void* operator new(unsigned int size) throw()
     {
-        return reinterpret_cast<MemMgr_cls*>(&DAT_011f6238)->FUN_00aa3e40(size);
+        return DAT_011f6238.Allocate(size);
     }
     void FUN_00ec0ac0(int a, int b, int c, int d);
 };
@@ -820,12 +804,7 @@ struct ScopedAllocTag
     }
 };
 
-struct MovieMemMgr
-{
-    void* Allocate(unsigned int size);
-    void Deallocate(void* p);
-};
-extern MovieMemMgr g_movieMem;
+extern MemoryManager g_movieMem;
 
 struct MovieBoolSetting
 {
@@ -943,18 +922,9 @@ void MoviePlayerA::FUN_00ec2760(const char* list)
 
 void __cdecl NiFree1BB0(void* pvMem);
 
-struct MemoryManager1BB0
-{
-    void Deallocate(void* pvMem);
-};
-extern MemoryManager1BB0 g_kMemoryManager1BB0;
+extern MemoryManager g_kMemoryManager1BB0;
 
-struct MapItem1BB0
-{
-    MapItem1BB0* m_pkNext;
-    const char* m_key;
-    void* m_val;
-};
+
 
 class MapBase1BB0
 {
@@ -970,17 +940,17 @@ class MapBase1BB0
     }
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(MapItem1BB0* pkItem, const char* key, void* val);
-    virtual void ClearValue(MapItem1BB0* pkItem);
-    virtual MapItem1BB0* NewItem();
-    virtual void DeleteItem(MapItem1BB0* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, void*>* pkItem, const char* key, void* val);
+    virtual void ClearValue(NiTMapItem<const char*, void*>* pkItem);
+    virtual NiTMapItem<const char*, void*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, void*>* pkItem);
     void RemoveAll()
     {
         for (unsigned int i = 0; i < m_uiHashSize; i++)
         {
             while (m_ppkHashTable[i])
             {
-                MapItem1BB0* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, void*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -989,7 +959,7 @@ class MapBase1BB0
         m_uiCount = 0;
     }
     unsigned int m_uiHashSize;
-    MapItem1BB0** m_ppkHashTable;
+    NiTMapItem<const char*, void*>** m_ppkHashTable;
     unsigned int m_uiCount;
 };
 class FUN_00ec1bb0 : public MapBase1BB0
@@ -1183,10 +1153,6 @@ struct TlsData
 };
 extern __declspec(thread) TlsData g_tls;
 
-struct MemPoolCalls
-{
-    void* FUN_00aa3e40(unsigned int size);
-};
 
 inline unsigned int GetAllocContext()
 {
@@ -1215,16 +1181,11 @@ struct ScopedAllocContext
 void* __stdcall FUN_00ec1ff0(unsigned int size)
 {
     ScopedAllocContext ctx(0x14);
-    return ((MemPoolCalls*)&DAT_011f6238)->FUN_00aa3e40(size);
+    return DAT_011f6238.Allocate(size);
 }
 
 extern __declspec(thread) unsigned int t_uiMemContextEC2200;
-struct MemoryManagerEC2200
-{
-    void* Allocate(unsigned int uiSize);
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerEC2200 g_kMemoryEC2200;
+extern MemoryManager g_kMemoryEC2200;
 inline unsigned int GetMemContextEC2200()
 {
     return t_uiMemContextEC2200;
@@ -1233,20 +1194,15 @@ inline void SetMemContextEC2200(unsigned int m_uiGeometryShaderFlags)
 {
     t_uiMemContextEC2200 = m_uiGeometryShaderFlags;
 }
-class AutoMemContextEC2200
+inline AutoMemContext::AutoMemContext(int context)
 {
-  public:
-    AutoMemContextEC2200(unsigned int m_uiGeometryShaderFlags)
-    {
-        m_uiPrevious = GetMemContextEC2200();
-        SetMemContextEC2200(m_uiGeometryShaderFlags);
-    }
-    ~AutoMemContextEC2200()
-    {
-        SetMemContextEC2200(m_uiPrevious);
-    }
-    unsigned int m_uiPrevious;
-};
+    m_eMemoryContext = (MEM_CONTEXT)GetMemContextEC2200();
+    SetMemContextEC2200(context);
+}
+inline AutoMemContext::~AutoMemContext()
+{
+    SetMemContextEC2200(m_eMemoryContext);
+}
 class PlaybackFileEC2200
 {
   public:
@@ -1285,7 +1241,7 @@ class PlaybackEC2200
 // @fnv 0x00ec2200
 bool PlaybackEC2200::FUN_00ec2200(const char* pcName, bool bA, bool bB, bool bC)
 {
-    AutoMemContextEC2200 kContext(20);
+    AutoMemContext kContext(20);
     m_pFile = new PlaybackFileEC2200;
     bool bSuccess = m_pFile->FindString(pcName, bA, bB, bC);
     if (!bSuccess)
@@ -1669,16 +1625,12 @@ NiTStringMapCopy::~NiTStringMapCopy()
     }
 }
 
-struct MapItemE40
-{
-    MapItemE40* m_pkNext;
-    int m_key;
-    int m_val;
-};
+
+// RTTI vftable 0x010f1cc4 is NiTMap<const char*, char*>; its nodes use the same key/value types.
 struct BaseE40
 {
     unsigned int m_uiHashSize;
-    MapItemE40** m_ppkHashTable;
+    NiTMapItem<const char*, char*>** m_ppkHashTable;
     int m_uiCount;
     virtual ~BaseE40()
     {
@@ -1687,17 +1639,17 @@ struct BaseE40
     }
     virtual unsigned int KeyToHashIndex(int key) const;
     virtual bool IsKeysEqual(int a, int b) const;
-    virtual void SetValue(MapItemE40* pkItem, int key, int val);
-    virtual void ClearValue(MapItemE40* pkItem);
-    virtual MapItemE40* NewItem();
-    virtual void DeleteItem(MapItemE40* pkItem);
+    virtual void SetValue(NiTMapItem<const char*, char*>* pkItem, int key, int val);
+    virtual void ClearValue(NiTMapItem<const char*, char*>* pkItem);
+    virtual NiTMapItem<const char*, char*>* NewItem();
+    virtual void DeleteItem(NiTMapItem<const char*, char*>* pkItem);
     void FUN_00438af0()
     {
         for (unsigned int i = 0; i < m_uiHashSize; i++)
         {
             while (m_ppkHashTable[i])
             {
-                MapItemE40* pkSave = m_ppkHashTable[i];
+                NiTMapItem<const char*, char*>* pkSave = m_ppkHashTable[i];
                 m_ppkHashTable[i] = m_ppkHashTable[i]->m_pkNext;
                 ClearValue(pkSave);
                 DeleteItem(pkSave);
@@ -1707,7 +1659,7 @@ struct BaseE40
     }
     static void operator delete(void* p)
     {
-        DAT_011f6238.FUN_00aa4060(p);
+        DAT_011f6238.Deallocate(p);
     }
 };
 struct FUN_00ec1e40 : BaseE40
@@ -1723,6 +1675,8 @@ void MakeE40()
     new FUN_00ec1e40;
 }
 
+template <class TKEY, class TVAL> class NiTMapItem;
+template <class T> class DFALL;
 namespace fnv_00ec15e0 {
 extern "C" __declspec(dllimport) void* __stdcall CreateSemaphoreA(void*, long, long, const char*);
 extern "C" __declspec(dllimport) int __stdcall CloseHandle(void*);
@@ -1737,19 +1691,18 @@ class MovieSemaphore
         CloseHandle(handle);
     }
 };
-template <class K, class V> class NiTMapItem;
 
 extern MemoryManager g_movieHeap;
 inline void NiFree(void* p)
 {
     g_movieHeap.Deallocate(p);
 }
-template <class T> class DFALL;
 typedef void* NiTMapIterator;
-template <class A, class K, class V> class NiTMapBase
+// Unit-local view of NiTMapBase for 0x00ec15e0 (namespace fnv_00ec15e0): built on the shared NiTMapBase, that code does not compile or does not match.
+template <class A, class K, class V> class NiTMapBase_00ec15e0
 {
   public:
-    virtual ~NiTMapBase();
+    virtual ~NiTMapBase_00ec15e0();
     unsigned int hashSize;
     NiTMapItem<K, V>** buckets;
     unsigned int count;
@@ -1765,18 +1718,20 @@ template <class A, class K, class V> class NiTMapBase
     void GetNext(NiTMapIterator& pos, K& key, V& val) const;
     void RemoveAll();
 };
-template <class K, class V> class NiTMap : public NiTMapBase<DFALL<NiTMapItem<K, V> >, K, V>
+// Unit-local view of NiTMap for 0x00ec15e0 (namespace fnv_00ec15e0): built on the shared NiTMap, that code does not compile or does not match.
+template <class K, class V> class NiTMap_00ec15e0 : public NiTMapBase_00ec15e0<DFALL<NiTMapItem<K, V> >, K, V>
 {
   public:
-    virtual ~NiTMap();
+    virtual ~NiTMap_00ec15e0();
 };
-template <class Base, class V> class NiTStringTemplateMap : public Base
+// Unit-local view of NiTStringTemplateMap for 0x00ec15e0 (namespace fnv_00ec15e0): built on the shared NiTStringTemplateMap, that code does not compile or does not match.
+template <class Base, class V> class NiTStringTemplateMap_00ec15e0 : public Base
 {
   public:
     bool copyStrings;
-    virtual ~NiTStringTemplateMap();
+    virtual ~NiTStringTemplateMap_00ec15e0();
 };
-template <class V> class NiTStringMap : public NiTStringTemplateMap<NiTMap<const char*, V>, V>
+template <class V> class NiTStringMap : public NiTStringTemplateMap_00ec15e0<NiTMap_00ec15e0<const char*, V>, V>
 {
   public:
 };
@@ -1822,6 +1777,8 @@ BSMoviePlayer::~BSMoviePlayer()
 }
 }  // namespace fnv_00ec15e0
 
+template <class TKEY, class TVAL> class NiTMapItem;
+template <class T> class DFALL;
 namespace fnv_00ec20c0 {
 extern "C" __declspec(dllimport) void* __stdcall CreateSemaphoreA(void*, long, long, const char*);
 extern "C" __declspec(dllimport) int __stdcall CloseHandle(void*);
@@ -1840,8 +1797,6 @@ class MovieSemaphore
         CloseHandle(handle);
     }
 };
-template <class K, class V> class NiTMapItem;
-template <class T> class DFALL;
 void* __cdecl NiMalloc(unsigned int size);
 extern "C" void* __cdecl memset(void* dst, int val, unsigned int size);
 inline void* NiAllocBytes(unsigned int uiBytes)
@@ -1852,14 +1807,15 @@ inline void NiZeroBytes(void* pvDest, unsigned int uiBytes)
 {
     memset(pvDest, 0, uiBytes);
 }
-template <class A, class K, class V> class NiTMapBase
+// Unit-local view of NiTMapBase for 0x00ec20c0 (namespace fnv_00ec20c0): built on the shared NiTMapBase, that code does not compile or does not match.
+template <class A, class K, class V> class NiTMapBase_00ec20c0
 {
   public:
-    virtual ~NiTMapBase();
+    virtual ~NiTMapBase_00ec20c0();
     unsigned int hashSize;
     NiTMapItem<K, V>** buckets;
     unsigned int count;
-    NiTMapBase(unsigned int uiHashSize)
+    NiTMapBase_00ec20c0(unsigned int uiHashSize)
     {
         hashSize = uiHashSize;
         count = 0;
@@ -1867,27 +1823,29 @@ template <class A, class K, class V> class NiTMapBase
         NiZeroBytes(buckets, sizeof(NiTMapItem<K, V>*) * hashSize);
     }
 };
-template <class K, class V> class NiTMap : public NiTMapBase<DFALL<NiTMapItem<K, V> >, K, V>
+// Unit-local view of NiTMap for 0x00ec20c0 (namespace fnv_00ec20c0): built on the shared NiTMap, that code does not compile or does not match.
+template <class K, class V> class NiTMap_00ec20c0 : public NiTMapBase_00ec20c0<DFALL<NiTMapItem<K, V> >, K, V>
 {
   public:
-    NiTMap(unsigned int size = 37) : NiTMapBase<DFALL<NiTMapItem<K, V> >, K, V>(size)
+    NiTMap_00ec20c0(unsigned int size = 37) : NiTMapBase_00ec20c0<DFALL<NiTMapItem<K, V> >, K, V>(size)
     {}
-    virtual ~NiTMap()
+    virtual ~NiTMap_00ec20c0()
     {}
 };
-template <class Base, class V> class NiTStringTemplateMap : public Base
+// Unit-local view of NiTStringTemplateMap for 0x00ec20c0 (namespace fnv_00ec20c0): built on the shared NiTStringTemplateMap, that code does not compile or does not match.
+template <class Base, class V> class NiTStringTemplateMap_00ec20c0 : public Base
 {
   public:
     bool copyStrings;
-    NiTStringTemplateMap(unsigned int size = 37, bool copy = true) : Base(size), copyStrings(copy)
+    NiTStringTemplateMap_00ec20c0(unsigned int size = 37, bool copy = true) : Base(size), copyStrings(copy)
     {}
-    virtual ~NiTStringTemplateMap()
+    virtual ~NiTStringTemplateMap_00ec20c0()
     {}
 };
-template <class V> class NiTStringMap : public NiTStringTemplateMap<NiTMap<const char*, V>, V>
+template <class V> class NiTStringMap : public NiTStringTemplateMap_00ec20c0<NiTMap_00ec20c0<const char*, V>, V>
 {
   public:
-    NiTStringMap(unsigned int size = 37, bool copy = true) : NiTStringTemplateMap<NiTMap<const char*, V>, V>(size, copy)
+    NiTStringMap(unsigned int size = 37, bool copy = true) : NiTStringTemplateMap_00ec20c0<NiTMap_00ec20c0<const char*, V>, V>(size, copy)
     {}
     virtual ~NiTStringMap()
     {}
@@ -2126,14 +2084,6 @@ struct S0EDevice
     virtual long __stdcall SetRenderTarget(unsigned long RenderTargetIndex, S0ESurface* pRenderTarget);
 };
 
-struct S0EMoviePlayer
-{
-    virtual void v00();
-    virtual void BeginA();
-    virtual void EndA();
-    virtual void BeginB();
-    virtual void EndB();
-};
 
 struct S0EBink
 {
@@ -2189,9 +2139,9 @@ unsigned char S0EPlaybackFile::FUN_00ec0e00(const char* pcName, bool b1, bool b2
     m_bBusy = false;
 
     if (b6)
-        ((S0EMoviePlayer*)DAT_0126fac4)->BeginA();
+        DAT_0126fac4->BeginMoviePlayback();
     if (b7)
-        ((S0EMoviePlayer*)DAT_0126fac4)->BeginB();
+        DAT_0126fac4->vf03();
 
     pkCast2 =
         DynamicCastBufferData(S0ERenderer::GetRenderer()->GetDefaultRenderTargetGroup()->GetRenderTargetBuffer(0));
@@ -2218,8 +2168,8 @@ unsigned char S0EPlaybackFile::FUN_00ec0e00(const char* pcName, bool b1, bool b2
     bRet = m_uiFrame >= m_pkBink->m_uiFrames;
     FUN_00ec1020();
     if (b6)
-        ((S0EMoviePlayer*)DAT_0126fac4)->EndA();
+        DAT_0126fac4->EndMoviePlayback();
     if (b7)
-        ((S0EMoviePlayer*)DAT_0126fac4)->EndB();
+        DAT_0126fac4->vf04();
     return bRet;
 }

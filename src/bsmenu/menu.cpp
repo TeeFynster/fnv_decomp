@@ -1,44 +1,107 @@
+#define FNV64_BSSIMPLELIST_CUSTOM_DELETE
+#include "../../include/BSSimpleList.h"
+#include "../../include/NiTListItem.h"
 // bsmenu/menu.cpp: Menu (27 functions)
 
 #include <string.h>
+#include "../../include/BSStringT.h"
+#include "../../include/IMemoryHeap.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/MemoryManager.h"
+extern MemoryManager g_memoryManager;
+template <class T> inline BSSimpleList<T>::BSSimpleList() : m_item(0), m_pkNext(0) {}
+template <class T> inline BSSimpleList<T>::~BSSimpleList() { RemoveAll(); }
+template <class T> inline void BSSimpleList<T>::RemoveAll()
+{
+    while (m_pkNext)
+    {
+        BSSimpleList<T>* next = m_pkNext->m_pkNext;
+        m_pkNext->m_pkNext = 0;
+        delete m_pkNext;
+        m_pkNext = next;
+    }
+    m_item = 0;
+}
+template <class T> inline void BSSimpleList<T>::operator delete(void* p) { ::g_memoryManager.Deallocate(p); }
+// This unit supplies the inline behavior of the container support types.
+#include "../../include/BSSimpleList.h"
 
+#include "../../include/BSFile.h"
+#include "../../include/MemoryPool.h"
+#include "../../include/Menu.h"
+#include "../../include/NiBinaryStream.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/OSGlobals.h"
+#include "../../include/Tile.h"
+// TileChildList_menu: local type (was include/TileChildList.h, which had no evidence of one real class); its methods are 0x00559450 NiPointer<PathingSolution>::operator->, 0x0057cbe0 NiTPointerListBase<NiTPointerAllocator<unsigned int>,Tile *>::GetNext, 0x00683520 NiTPointerListBase<NiTPointerAllocator<unsigned int>,Tile *>::GetPrev
 class Tile;
-class TileMenu;
-class Tile__TileTemplate;
+class TileChildNode;
+class InterfaceLocalTile;
 
-class Tile
+class TileChildList_menu
+{
+public:
+    TileChildNode* m_pkHead;
+    TileChildNode* m_pkTail;
+    unsigned int m_uiCount;
+
+    void* GetHeadPos();
+    TileChildNode* GetHeadPos() const { return m_pkHead; }
+    Tile*& GetNext(void*& rkPos);
+    Tile*& GetNext(void*& kPos) const;
+    Tile*& GetNext(TileChildNode*& kPos) const;
+    InterfaceLocalTile*& GetPrev(void*& pos);
+};
+#include "../../include/TileMenu.h"
+
+// Stream callback and status fields are opaque in the shared stream headers.
+inline bool BSFile::Good() const { return *((const bool*)this + 0x2c); }
+inline bool BSFile::IsGood() { return *((bool*)this + 0x2c); }
+inline unsigned int BSFile::BinaryRead(void* buffer, unsigned int bytes, unsigned int* sizes, unsigned int count)
+{
+    unsigned int result = (*(NiBinaryStream::ReadFunction*)((char*)this + 8))(this, buffer, bytes, sizes, count);
+    *(unsigned int*)((char*)this + 4) += result;
+    return result;
+}
+inline unsigned int ReadFileData(BSFile* file, void* buffer, unsigned int bytes)
+{
+    unsigned int size = 1;
+    unsigned int result = file->BinaryRead(buffer, bytes, &size, 1);
+    return result;
+}
+inline unsigned int NiBinaryStream::BinaryWrite(const void* buffer, unsigned int bytes, unsigned int* sizes, unsigned int count)
+{
+    unsigned int result = (*(WriteFunction*)((char*)this + 12))(this, buffer, bytes, sizes, count);
+    *(unsigned int*)((char*)this + 4) += result;
+    return result;
+}
+inline unsigned int NiBinaryStream::Write(const void* buffer, unsigned int bytes)
+{
+    unsigned int size = 1;
+    unsigned int result = BinaryWrite(buffer, bytes, &size, 1);
+    return result;
+}
+inline void* BSFile::operator new(size_t size) { return g_memoryManager.Allocate(size); }
+
+void ClearInterfaceState(Tile*);
+class InputManager
 {
   public:
-    void Set(int aiTrait, float afValue, bool abClearActions);
+    int FUN_00a24660(int, int);
+    void SetFlag(unsigned short flag)
+    {
+        *reinterpret_cast<unsigned short*>(reinterpret_cast<char*>(this) + 0x1b92) |= flag;
+    }
 };
 
-class TileMenu : public Tile
+// Operations whose declarations are not yet part of the shared Menu interface.
+class MenuOperations : public Menu
 {
-};
-
-class Interface
-{
-  public:
-    static void ClearInterfaceState(Tile* apTile);
-};
-
-template <class T> class BSSimpleList
-{
-  public:
-    T m_item;
-    BSSimpleList<T>* m_pkNext;
-    BSSimpleList() : m_item(0), m_pkNext(0)
-    {}
-    void AddHead(T& item);
-};
-
-template <class T> class BSStringT
-{
-  public:
-    T* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    bool Set(const T* apText, unsigned int auLength);
+public:
+    void FinishShow();
+    void FinishHide();
+    void AddTileTemplate(Tile__TileTemplate*);
+    void* DeleteThis(unsigned int);
 };
 
 class MenuClassArray
@@ -51,36 +114,13 @@ extern BSStringT<char> g_menuParsedXML;
 extern MenuClassArray g_menuByClassArray;
 extern unsigned short g_menuByClassCount;
 
-class Menu
-{
-  public:
-    virtual ~Menu();
-    TileMenu* pMenu;
-    BSSimpleList<Tile__TileTemplate*> m_kTileTemplateList;
-    Tile* m_pMenuTile;
-    int m_iModalMenuId;
-    int m_iSecondaryValue;
-    bool m_bIsSpecial;
-    bool m_bVisible;
-    unsigned char layoutPadding1E[2];
-    int m_iMenuId;
-    int m_eFadeState;
-    Menu();
-    static const char* GetMenuPath(const char* apPath);
-    void SetMenuVisibility(bool abVisible);
-    void UnloadMenuData();
-    static float GetMenuScale();
-    void ParseMenuXML(const char* apXML);
-    static void SetMenuRootTile(int aiClass, Tile* apTile);
-};
-
 // @fnv 0x00a1c4a0
 Menu::Menu()
 {
     pMenu = 0;
     m_pMenuTile = 0;
     m_iModalMenuId = 0;
-    m_eFadeState = 4;
+    m_eFadeState = Interface::FADE_HIDDEN;
     m_bVisible = true;
     m_iSecondaryValue = 0;
     m_bIsSpecial = false;
@@ -120,55 +160,13 @@ void Menu::SetMenuVisibility(bool abVisible)
     pTileMenu->Set(0xFA3, 0.0f, true);
     if (!abVisible)
         UnloadMenuData();
-    Interface::ClearInterfaceState(0);
+    ClearInterfaceState(0);
     (void)GetMenuScale();
 }
 
-class NiGlobalStringTable
-{
-  public:
-    static char* __cdecl AddString(const char*);
-};
 
-class MemoryManager
-{
-  public:
-    void* Allocate(unsigned int);
-    void Deallocate(void*);
-};
-
-extern MemoryManager g_memoryManager;
-
-class NiFixedString;
-extern NiFixedString EmptyFS;
-
-class NiFixedString
-{
-  public:
-    char* m_kHandle;
-
-    void* operator new(unsigned int stSize)
-    {
-        return g_memoryManager.Allocate(stSize);
-    }
-
-    void operator delete(void* pvMem)
-    {
-        g_memoryManager.Deallocate(pvMem);
-    }
-
-    NiFixedString(const char* pcString)
-    {
-        if (pcString == 0)
-        {
-            m_kHandle = EmptyFS.m_kHandle;
-        }
-        else
-        {
-            m_kHandle = NiGlobalStringTable::AddString(pcString);
-        }
-    }
-};
+inline void* NiFixedString::operator new(size_t size) { return g_memoryManager.Allocate(size); }
+inline void NiFixedString::operator delete(void* memory) { g_memoryManager.Deallocate(memory); }
 
 extern NiFixedString* DAT_011f34cc;
 
@@ -221,96 +219,65 @@ MenuValueDescriptor* __cdecl GetOrLoadXML(const char* apFilename, bool abAdd)
     return foundXML;
 }
 
-struct FUN_00a1d910_shell : public Menu
-{
-    void FUN_00a1d910();
-};
-
-struct TileQ
-{
-    bool ContainsTrait(int aiTrait);
-    float GetFloat(int aiTrait);
-};
 extern double _gModifierZero;
 void __cdecl FUN_00706f50(Menu* m, float f);
 void __cdecl FUN_00706fd0(int a, int b);
 void __cdecl FUN_00706f70();
 // @fnv 0x00a1d910
-void FUN_00a1d910_shell::FUN_00a1d910()
+void Menu::LoadMenuData()
 {
-    TileQ* t = (TileQ*)pMenu;
+    Tile* t = pMenu;
     float ffade;
     if (!t->ContainsTrait(0xfa3))
         return;
-    ffade = ((TileQ*)pMenu)->GetFloat(0xfc1);
+    ffade = pMenu->GetFloat(0xfc1);
     if (ffade == _gModifierZero)
-        ffade = ((TileQ*)pMenu)->GetFloat(0xfc2);
+        ffade = pMenu->GetFloat(0xfc2);
     FUN_00706f50(this, ffade);
-    m_eFadeState = 2;
+    m_eFadeState = Interface::FADING_OUT;
     if (m_iModalMenuId)
     {
-        TileQ* t2 = (TileQ*)pMenu;
+        Tile* t2 = pMenu;
         if (t2->ContainsTrait(0x1772))
         {
             FUN_00706fd0(m_iModalMenuId, 0);
-            Interface::ClearInterfaceState(0);
+            ClearInterfaceState(0);
         }
     }
     FUN_00706f70();
 }
 
-struct FUN_00a1db20_shell : public Menu
-{
-    void FUN_00a1db20();
-};
-
-class TileEx : public Tile
-{
-  public:
-    float GetFloat(int aiTrait);
-};
-
 void __cdecl FUN_00706f50(Menu* apMenu, float afFade);
 void __cdecl FUN_00706f70();
 
 // @fnv 0x00a1db20
-void FUN_00a1db20_shell::FUN_00a1db20()
+void Menu::UnloadMenuData()
 {
-    float ffade = pMenu ? reinterpret_cast<TileEx*>(pMenu)->GetFloat(0xfc1) : 0.25f;
+    float ffade = pMenu ? pMenu->GetFloat(0xfc1) : 0.25f;
     if (ffade == 0.0)
-        ffade = reinterpret_cast<TileEx*>(pMenu)->GetFloat(0xfc2);
+        ffade = pMenu->GetFloat(0xfc2);
     FUN_00706f50(this, ffade);
-    m_eFadeState = 8;
+    m_eFadeState = Interface::FADING_IN;
     FUN_00706f70();
 }
 
-struct FUN_00a0c7c0_Helper
-{
-    void AddToHead(Tile__TileTemplate** pItem);
-};
-
-class FUN_00a1dd80_Class : public Menu
-{
-  public:
-    void FUN_00a1dd80(Tile__TileTemplate* apTemplate);
-};
-
 // @fnv 0x00a1dd80
-void FUN_00a1dd80_Class::FUN_00a1dd80(Tile__TileTemplate* apTemplate)
+void MenuOperations::AddTileTemplate(Tile__TileTemplate* apTemplate)
 {
     int u1;
     int u2;
     int u3;
     if (apTemplate != 0)
     {
-        reinterpret_cast<FUN_00a0c7c0_Helper*>(&this->m_kTileTemplateList)->AddToHead(&apTemplate);
+        m_kTileTemplateList.AddHead(apTemplate);
     }
 }
 
 namespace fnv_00a1ca20 {
 namespace fnv_00a0be10 {
 struct MenuValueDescriptor;
-struct XMLStorageX
+// 0x00a0be10 deletes the 8-byte XML buffer (length +0, data +4); no shared XMLStorage header exists yet.
+struct XMLStorage
 {
     MenuValueDescriptor* FUN_00a0be10(unsigned int);
 };
@@ -327,11 +294,7 @@ template <class K, class V> class BSMapBase
 };
 extern BSMapBase<unsigned long, ScrapHeapBuffer*> DAT_011f34e0;
 extern BSMapBase<unsigned long, ScrapHeapBuffer*> DAT_011f34f4;
-class MemoryManager
-{
-  public:
-    void Deallocate(void* pointer);
-};
+
 extern MemoryManager g_memoryManager;
 struct BuildStorageX
 {
@@ -359,10 +322,10 @@ void RemoveMenuEntries(const char* apFilename, Menu* apMenu)
             DAT_011f34e0.GetAt((unsigned long)pFilename, pXmlStorage);
             if (pXmlStorage)
             {
-                fnv_00a0be10::XMLStorageX* t2;
+                fnv_00a0be10::XMLStorage* t2;
                 {
-                    fnv_00a0be10::XMLStorageX* t1;
-                    t1 = (fnv_00a0be10::XMLStorageX*)pXmlStorage;
+                    fnv_00a0be10::XMLStorage* t1;
+                    t1 = (fnv_00a0be10::XMLStorage*)pXmlStorage;
                     t2 = t1;
                     t2 ? t2->FUN_00a0be10(1) : 0;
                 }
@@ -396,49 +359,24 @@ void RemoveMenuEntries(const char* apFilename, Menu* apMenu)
 }
 }  // namespace fnv_00a1ca20
 
-struct FUN_00a1dc70_shell : public Menu
-{
-    void FUN_00a1dc70(TileMenu*, bool);
-};
-
 void FUN_00706fb0(int, int);
 Tile* FUN_00707040();
 void FUN_00707050(Tile*);
 Menu* GetFieldD0();
 void FUN_00707080(Menu*);
-struct TileGF
-{
-    float GetFloat(int);
-};
-struct MenuVt13
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual int v13();
-};
+
 // @fnv 0x00a1dc70
-void FUN_00a1dc70_shell::FUN_00a1dc70(TileMenu* apMenu, bool abDontAddToStack)
+void Menu::SetTileMenu(TileMenu* apMenu, bool abDontAddToStack)
 {
     pMenu = apMenu;
     if (apMenu)
     {
-        if (((TileGF*)apMenu)->GetFloat(0xfa7) == 102.0 || ((TileGF*)apMenu)->GetFloat(0xfa7) == 6006.0 ||
-            ((TileGF*)apMenu)->GetFloat(0xfa7) == 103.0 || ((TileGF*)apMenu)->GetFloat(0xfa7) == 6007.0)
+        if (apMenu->GetFloat(0xfa7) == 102.0 || apMenu->GetFloat(0xfa7) == 6006.0 ||
+            apMenu->GetFloat(0xfa7) == 103.0 || apMenu->GetFloat(0xfa7) == 6007.0)
         {
-            m_iModalMenuId = ((MenuVt13*)this)->v13();
+            m_iModalMenuId = GetClass();
             if (!abDontAddToStack)
-                FUN_00706fb0(((MenuVt13*)this)->v13(), 0);
+                FUN_00706fb0(GetClass(), 0);
             if (GetFieldD0() != this)
             {
                 if (FUN_00707040())
@@ -453,11 +391,7 @@ void FUN_00a1dc70_shell::FUN_00a1dc70(TileMenu* apMenu, bool abDontAddToStack)
     }
 }
 
-struct BSFile;
-struct NiBinaryStream;
-struct NiFile;
 struct SaveContentDescriptor;
-struct _iobuf;
 struct blob16
 {
     char b[16];
@@ -467,69 +401,29 @@ struct blob308
     char b[308];
 };
 
-class MemoryManager;
 extern MemoryManager g_memoryManager;
-struct P03MM
-{
-    void* Allocate(unsigned int auSize);
-    void _DeallocateAlias(void* apMem);
-};
+
 inline void* operator new(size_t auSize)
 {
-    return ((P03MM*)&g_memoryManager)->Allocate(auSize);
+    return g_memoryManager.Allocate(auSize);
 }
 inline void* operator new[](size_t auSize)
 {
-    return ((P03MM*)&g_memoryManager)->Allocate(auSize);
+    return g_memoryManager.Allocate(auSize);
 }
 inline void operator delete(void* apMem)
 {
-    ((P03MM*)&g_memoryManager)->_DeallocateAlias(apMem);
+    g_memoryManager._DeallocateAlias(apMem);
 }
 inline void operator delete[](void* apMem)
 {
-    ((P03MM*)&g_memoryManager)->_DeallocateAlias(apMem);
+    g_memoryManager._DeallocateAlias(apMem);
 }
 struct FileFinder
 {
     static NiFile* __cdecl GetFile(const char* apName, int aeMode, unsigned int auiBufferSize, unsigned int auiUnk);
 };
-struct BSFile
-{
-    virtual ~BSFile();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual unsigned int GetSize();
-    unsigned int m_uiStreamFlags;
-    unsigned int (*m_pfnRead)(BSFile* apThis, void* apBuffer, unsigned int auiBytes, unsigned int* apuiSizes,
-                              unsigned int auiNum);
-    char pad0C[0x20];
-    bool m_bGood;
-    bool IsGood()
-    {
-        return m_bGood;
-    }
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-    unsigned int Read(void* pvBuffer, unsigned int uiBytes)
-    {
-        unsigned int uiSize = 1;
-        unsigned int uiBytesRead = BinaryRead(pvBuffer, uiBytes, &uiSize, 1);
-        return uiBytesRead;
-    }
-};
+
 struct CompressedXML
 {
     int iSize;
@@ -555,7 +449,7 @@ CompressedXML* LoadCompressedXML(const char* apFilename, const char* apFileData)
         ifileSize = pfile->GetSize();
         pfileData = new char[ifileSize];
         bdeletefiledata = true;
-        pfile->Read(pfileData, ifileSize);
+        ReadFileData(pfile, pfileData, ifileSize);
         delete pfile;
     }
     else
@@ -648,20 +542,12 @@ void __cdecl FUN_00a1cb60(char const* a1, int aiValue)
     ((FUN_00a0c900_shell*)&DAT_011f34f4)->FUN_00a0c900(a1, aiValue);
 }
 
-namespace fnv_00a1d9e0 {
 void FUN_00706f90(Menu* apMenu);
 void FUN_00707010(void* apTile, float a, float b);
 void __cdecl FUN_00706fd0(int a, int b);
-struct TileQ
-{
-    bool ContainsTrait(int aiTrait);
-};
-struct FUN_00a1d9e0_shell : Menu
-{
-    void FUN_00a1d9e0();
-};
+
 // @fnv 0x00a1d9e0
-void FUN_00a1d9e0_shell::FUN_00a1d9e0()
+void Menu::FUN_00a1d9e0()
 {
     if (m_eFadeState != 4)
     {
@@ -672,31 +558,27 @@ void FUN_00a1d9e0_shell::FUN_00a1d9e0()
         pTile_c = pMenu;
         pTile_c->Set(0xfa3, 0.0f, true);
         pTile_b = pMenu;
-        pTile_a = (TileMenu*)*(void**)((char*)pTile_b + 0x2c);
+        pTile_a = (TileMenu*)pTile_b->m_pRenderedNodeEntry.m_pObject;
         FUN_00707010(pTile_a, 1.0f, 0.0f);
-        m_eFadeState = 2;
+        m_eFadeState = Interface::FADING_OUT;
         if (m_iModalMenuId)
         {
             pTile_d = pMenu;
-            if (((TileQ*)pTile_d)->ContainsTrait(0x1772))
+            if (pTile_d->ContainsTrait(0x1772))
             {
                 FUN_00706fd0(m_iModalMenuId, 0);
-                Interface::ClearInterfaceState(0);
+                ClearInterfaceState(0);
             }
         }
         FUN_00706f90(this);
     }
 }
-}  // namespace fnv_00a1d9e0
 
 void FUN_00706f90(Menu* apMenu);
 void FUN_00707010(void* apTile_c, float a, float b);
-struct FUN_00a1daa0_shell : Menu
-{
-    void FUN_00a1daa0();
-};
+
 // @fnv 0x00a1daa0
-void FUN_00a1daa0_shell::FUN_00a1daa0()
+void MenuOperations::FinishShow()
 {
     if (m_eFadeState == 2)
     {
@@ -706,21 +588,18 @@ void FUN_00a1daa0_shell::FUN_00a1daa0()
         pTile_c = pMenu;
         pTile_c->Set(0xfa3, 1.0f, true);
         pTile_b = pMenu;
-        pTile_a = *(void**)((char*)pTile_b + 0x2c);
+        pTile_a = pTile_b->m_pRenderedNodeEntry.m_pObject;
         FUN_00707010(pTile_a, 1.0f, 0.0f);
-        m_eFadeState = 1;
+        m_eFadeState = Interface::FADE_SHOWN;
         FUN_00706f90(this);
     }
 }
 
 void FUN_00706f90(Menu* apMenu);
 void FUN_00707010(void* apTile_c, float a, float b);
-struct FUN_00a1dba0_shell : Menu
-{
-    void FUN_00a1dba0();
-};
+
 // @fnv 0x00a1dba0
-void FUN_00a1dba0_shell::FUN_00a1dba0()
+void MenuOperations::FinishHide()
 {
     if (m_eFadeState == 8)
     {
@@ -730,38 +609,24 @@ void FUN_00a1dba0_shell::FUN_00a1dba0()
         pTile_c = pMenu;
         pTile_c->Set(0xfa3, 0.0f, true);
         pTile_b = pMenu;
-        pTile_a = *(void**)((char*)pTile_b + 0x2c);
+        pTile_a = pTile_b->m_pRenderedNodeEntry.m_pObject;
         FUN_00707010(pTile_a, 1.0f, 0.0f);
-        m_eFadeState = 4;
+        m_eFadeState = Interface::FADE_HIDDEN;
         FUN_00706f90(this);
     }
 }
 
-namespace fnv_00a1e170 {
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-};
-class MemoryManager
-{
-  public:
-    void _DeallocateAlias(void* apMem);
-};
 extern MemoryManager g_memoryManager;
-struct FUN_00a1e170_shell : Menu_007a8b10
-{
-    void* FUN_00a1e170(unsigned int flags);
-};
-// Destructs the Menu_007a8b10 base and, if flags has bit 0 set, deallocates this object via g_memoryManager, then returns this.
+
+// Destructs Menu and, if flags has bit 0 set, deallocates this object, then returns this.
 // @fnv 0x00a1e170
-void* FUN_00a1e170_shell::FUN_00a1e170(unsigned int flags)
+void* MenuOperations::DeleteThis(unsigned int flags)
 {
-    this->Menu_007a8b10::~Menu_007a8b10();
+    this->Menu::~Menu();
     if (flags & 1)
         g_memoryManager._DeallocateAlias(this);
     return this;
 }
-}  // namespace fnv_00a1e170
 
 struct FUN_00a1e4d0_shell
 {
@@ -806,11 +671,7 @@ ScrapHeapBuffer* LookupByKey(unsigned long auKey)
 }  // namespace fnv_00a1cb30
 
 namespace fnv_00a1d280 {
-struct MemoryManager
-{
-    void* Allocate(unsigned int auSize);
-    void Deallocate(void* apMem);
-};
+
 extern MemoryManager g_memoryManager;
 inline void* operator new[](size_t stSize)
 {
@@ -820,24 +681,7 @@ inline void operator delete[](void* pvMem)
 {
     g_memoryManager.Deallocate(pvMem);
 }
-class NiBinaryStream
-{
-  public:
-    virtual ~NiBinaryStream();
-    virtual operator bool() const;
-    virtual void Seek(int iNumBytes);
-    virtual unsigned int GetPosition() const;
-    virtual void SetEndianSwap(bool bDoSwap);
-    virtual unsigned int ReadIntoBuffer(void* pvBuffer, unsigned int uiBytes);
-    virtual unsigned int WriteFromBuffer(const void* pvBuffer, unsigned int uiBytes);
-    virtual unsigned int GetFileSize() const;
-};
-class BSFile : public NiBinaryStream
-{
-  public:
-    virtual void SeekFrom(int iOffset, int iWhence);
-    unsigned int Read(void* apBuffer, unsigned int auSize);
-};
+
 struct XMLHeader
 {
     unsigned int uiVersion;
@@ -866,7 +710,7 @@ bool FUN_00a1d280()
     BSFile* pkFile = FUN_00afdf00("DATA\\FINAL_MASTER_XML.DAT", 0, 0);
     if (pkFile)
     {
-        pkFile->SeekFrom(0, 0);
+        pkFile->Open(false, false);
         unsigned int uiBytesRead;
         XMLHeader kHeader;
         uiBytesRead = pkFile->Read(&kHeader, sizeof(kHeader));
@@ -900,93 +744,32 @@ bool FUN_00a1d280()
 }
 }  // namespace fnv_00a1d280
 
-struct NiStream;
 struct blob12
 {
     char b[12];
 };
-struct NiPoint3
-{
-    static struct blob12 ComponentProduct(void*, void*);
-    float Length();
-    float SqrLength();
-    float XYLength();
-    float SqrXYLength();
-    float Dot(void*);
-    void Unitize();
-    float GetLengthSquared();
-    struct blob12 Cross(void*);
-    struct blob12 CrossProduct(void*);
-    struct blob12 Perpendicular();
-    static void LoadBinary(NiStream*, NiPoint3*, unsigned int);
-    void LoadBinary(NiStream*);
-    static void SaveBinary(NiStream*, NiPoint3*, unsigned int);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    static void InitializePoint3();
-    static void ShutdownPoint3();
-    static void ProcessPointArray(NiPoint3*, unsigned int, unsigned int);
-    static void ComputeMagnitude(NiPoint3*);
-    static float VectorLength(void*);
-    static void PointsPlusEqualFloatTimesPoints(NiPoint3*, float, void*, unsigned int);
-    static void WeightedPointsPlusWeightedPoints(NiPoint3*, float, void*, unsigned int);
-    static unsigned int* InitSqrtTable();
-    float x;
-    float y;
-    float z;
-};
 typedef char _sizecheck_NiPoint3[sizeof(NiPoint3) == 12 ? 1 : -1];
 
-struct TileListItem
+typedef NiTListItem<Tile* > TileListItem;
+inline void* TileChildList_menu::GetHeadPos()
 {
-    TileListItem* m_pkNext;
-    TileListItem* m_pkPrev;
-    Tile* m_element;
-};
-struct TileChildList
+    return m_pkHead;
+}
+inline Tile*& TileChildList_menu::GetNext(void*& kPos) const
 {
-    TileListItem* m_pkHead;
-    void* GetHeadPos() const
-    {
-        return m_pkHead;
-    }
-    Tile*& GetNext(void*& kPos) const
-    {
-        Tile*& element = ((TileListItem*)kPos)->m_element;
-        kPos = ((TileListItem*)kPos)->m_pkNext;
-        return element;
-    }
-};
-struct NiNode;
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-};
+    Tile*& element = ((TileListItem*)kPos)->m_element;
+    kPos = ((TileListItem*)kPos)->m_pkNext;
+    return element;
+}
+template <class T> inline T* NiPointer<T>::operator->() const { return m_pObject; }
 struct InterfaceRoot
 {
     static Tile* __cdecl GetPrimaryInterfaceTile();
 };
-struct TileH
-{
-    Menu* GetMenu();
-};
-struct TGF
-{
-    float GetFloat(int);
-};
-struct MenuInfo : public Menu
-{
-    int GetMenuThickness() const
-    {
-        return m_iSecondaryValue;
-    }
-};
+
 Tile* __cdecl GetNextTile();
+inline int GetMenuThickness(Menu* menu) { return menu->m_iSecondaryValue; }
+inline void SetTileMenuOwner(TileMenu* tile, Menu* owner) { tile->pMenu = owner; }
 inline float NiMaxF(float a, float b)
 {
     return a > b ? a : b;
@@ -1002,14 +785,14 @@ float FUN_00a1dfb0()
     float z;
     Tile* proot = InterfaceRoot::GetPrimaryInterfaceTile();
 
-    xelem = ((TileChildList*)((char*)proot + 4))->GetHeadPos();
+    xelem = ((TileChildList_menu*)((char*)proot + 4))->GetHeadPos();
     while (xelem)
     {
-        Tile* ptile = ((TileChildList*)((char*)proot + 4))->GetNext(xelem);
-        if (ptile && ((TileH*)ptile)->GetMenu())
+        Tile* ptile = ((const TileChildList_menu*)((char*)proot + 4))->GetNext(xelem);
+        if (ptile && ptile->GetMenu())
         {
             float fdepth =
-                static_cast<MenuInfo*>(((TileH*)ptile)->GetMenu())->GetMenuThickness() + ((TGF*)ptile)->GetFloat(4013);
+                GetMenuThickness(ptile->GetMenu()) + ptile->GetFloat(4013);
             fmaxdepth = (fmaxdepth > fdepth) ? fmaxdepth : fdepth;
         }
     }
@@ -1019,88 +802,28 @@ float FUN_00a1dfb0()
         GetNextTile()->Set(4013, z, true);
         NiPoint3 xyz;
         Tile* pcursor = GetNextTile();
-        xyz = *(NiPoint3*)((char*)((NiPointer<NiNode>*)((char*)pcursor + 0x2c))->operator->() + 0x58);
+        // Preserve the original trivial copies independently of NiPoint3 copy operators.
+        *(blob12*)&xyz = *(blob12*)((char*)pcursor->m_pRenderedNodeEntry.operator->() + 0x58);
         xyz.y = z * DAT_0106f290;
-        *(NiPoint3*)((char*)((NiPointer<NiNode>*)((char*)pcursor + 0x2c))->operator->() + 0x58) = xyz;
+        *(blob12*)((char*)pcursor->m_pRenderedNodeEntry.operator->() + 0x58) = *(blob12*)&xyz;
     }
     return fmaxdepth + 2.0;
 }
 
-namespace fnv_00a1ddb0 {
-struct NiFixedString
-{
-    bool Exists();
-    unsigned int GetLength();
-    unsigned int GetRefCount();
-    bool Equals(char*);
-    bool EqualsNoCase(char*);
-    bool Contains(char*);
-    bool HasSuffix(char*);
-    unsigned int QHandle();
-    void Init();
-    void* __vecDelDtor(unsigned int);
-    char* m_kHandle;
-};
 typedef char _sizecheck_NiFixedString[sizeof(NiFixedString) == 4 ? 1 : -1];
-struct FUN_00a1ddb0_shell : public Menu
-{
-    Tile* FUN_00a1ddb0(Tile*, char*, Tile*);
-};
 
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
 
 int __cdecl FUN_00ec6da0(char const*, char const*);
-extern char* _EmptyFS;
 
-struct NiGlobalStringTable
+inline bool NiFixedString::Equals(char* p)
 {
-    static char* __cdecl AddString(char const*);
-    static char* GetRealBufferStart(char* const& kHandle)
-    {
-        return kHandle - 8;
-    }
-    static long NiAtomicSubtract(long& value)
-    {
-        return InterlockedDecrement(&value);
-    }
-    static void DecRefCount(char*& kHandle)
-    {
-        if (kHandle == _EmptyFS)
-            return;
-        NiAtomicSubtract(((long*)GetRealBufferStart(kHandle))[0]);
-    }
-};
+    if (m_kHandle == p) return true;
+    if (!p || !m_kHandle) return false;
+    return !FUN_00ec6da0(m_kHandle, p);
+}
 
-struct P03MM
-{
-    void* Allocate(unsigned int);
-    void _DeallocateAlias(void*);
-};
-extern P03MM _g_memoryManager;
 
-struct NiFixedStringL
-{
-    char* m_kHandle;
-    NiFixedStringL(const char* pcString)
-    {
-        if (pcString == 0)
-            m_kHandle = _EmptyFS;
-        else
-            m_kHandle = NiGlobalStringTable::AddString(pcString);
-    }
-    ~NiFixedStringL()
-    {
-        NiGlobalStringTable::DecRefCount(m_kHandle);
-    }
-    bool Equals(char* p)
-    {
-        if (m_kHandle == p)
-            return true;
-        if (!p || !m_kHandle)
-            return false;
-        return !FUN_00ec6da0(m_kHandle, p);
-    }
-};
+extern MemoryManager _g_memoryManager;
 
 class Tile__TileTemplate
 {
@@ -1149,32 +872,20 @@ struct FUN_00a0ac80 : public FUN_00a0ad40
 
 extern FUN_00a0ac80* DAT_011f32d0;
 
-struct TmplNode_00a1ddb0
-{
-    Tile__TileTemplate* m_item;
-    TmplNode_00a1ddb0* m_pkNext;
-};
+Tile* __fastcall CreateMenuTiles(Tile*, void*);
 
-struct FUN_00a031b0_shell
-{
-    Tile* CreateMenuTiles(void*);
-};
-
-struct FUN_00a033b0_shell
-{
-    void FUN_00a033b0(Tile__TileTemplate*);
-};
+void __fastcall ApplyTileTemplate(Tile*, Tile__TileTemplate*);
 
 // Looks up a tile template by name in a linked list, builds a tile from it under apParent, and returns the new tile or null.
 // @fnv 0x00a1ddb0
-Tile* FUN_00a1ddb0_shell::FUN_00a1ddb0(Tile* apParent, char* axName, Tile* apLast)
+Tile* Menu::CreateTileFromTemplate(Tile* apParent, const char* axName, Tile* apLast)
 {
     Tile* preturn_val = 0;
     if (apLast)
         m_pMenuTile = apLast;
     Tile__TileTemplate* ptemplate = 0;
-    TmplNode_00a1ddb0* pCurrentElementNext = (TmplNode_00a1ddb0*)&m_kTileTemplateList;
-    NiFixedStringL nm(axName);
+    BSSimpleList<Tile__TileTemplate*>* pCurrentElementNext = &m_kTileTemplateList;
+    NiFixedString nm(axName);
     while (pCurrentElementNext)
     {
         ptemplate = pCurrentElementNext->m_item;
@@ -1187,24 +898,21 @@ Tile* FUN_00a1ddb0_shell::FUN_00a1ddb0(Tile* apParent, char* axName, Tile* apLas
         FUN_00a0ac80* pbuild = DAT_011f32d0;
         DAT_011f32d0 = new FUN_00a0ac80;
         ((Tile__BuildStorage*)DAT_011f32d0)->SetTileTemplate(ptemplate);
-        preturn_val = ((FUN_00a031b0_shell*)apParent)->CreateMenuTiles(ptemplate);
-        ((FUN_00a033b0_shell*)preturn_val)->FUN_00a033b0(ptemplate);
+        preturn_val = ((Tile*(__thiscall*)(Tile*, void*)) &CreateMenuTiles)(apParent, ptemplate);
+        ((void(__thiscall*)(Tile*, Tile__TileTemplate*)) &ApplyTileTemplate)(preturn_val, ptemplate);
         DAT_011f32d0->pTemplate = 0;
         delete DAT_011f32d0;
         DAT_011f32d0 = pbuild;
     }
     return preturn_val;
 }
-}  // namespace fnv_00a1ddb0
-
-class Tile;
 
 void* g_pTileItemFreeList;
 
 void LockTileItemPool();
 void UnlockTileItemPool();
 
-template <class T> class NiTPointerAllocator
+template <class T> class TileItemAllocator
 {
   public:
     void Deallocate(void* apMem)
@@ -1227,7 +935,7 @@ class TileElement
     Tile* m_pkElement;
 };
 
-template <class TAlloc, class T, class TItem> class NiTPointerListBase
+template <class TAlloc, class T, class TItem> class TileItemPointerListBase
 {
   public:
     TItem* m_pkHead;
@@ -1257,7 +965,7 @@ struct TileItemListBase_00a1bbd0
 };
 
 struct FUN_00a1bbd0 : TileItemListBase_00a1bbd0,
-                      NiTPointerListBase<NiTPointerAllocator<unsigned int>, Tile*, TileElement>
+                      TileItemPointerListBase<TileItemAllocator<unsigned int>, Tile*, TileElement>
 {
     ~FUN_00a1bbd0();
 };
@@ -1272,193 +980,37 @@ FUN_00a1bbd0::~FUN_00a1bbd0()
 namespace fnv_00a1cb80 {
 extern "C" void* __cdecl fnv_zlib_memset(void* dst, int val, unsigned int size);
 
-struct IMemoryHeap
-{
-    virtual void Unk00();
-    virtual void Unk01();
-    virtual void Unk02();
-    virtual void Deallocate(void*, bool);
-};
-struct MemoryPool
-{
-    int unk00;
-    unsigned int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    unsigned int unk50;
-    void Free(void*);
-};
 extern MemoryPool* DAT_011f63b8[256];
+}  // namespace fnv_00a1cb80
 
-struct MemoryManager
+inline void MemoryManager::DeallocateAlias(void* pvBuffer)
 {
-    void* Allocate(unsigned int uiSize);
-    bool unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    int unkF0;
-    int unkF4;
-    int unkF8;
-    int unkFC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    IMemoryHeap* unk110;
-    void FreePointer(void*, int);
-    IMemoryHeap* GetHeapForPointer(const void*);
-    void Deallocate(void* pvBuffer)
+    if (!pvBuffer) return;
+    if (!bInitialized)
     {
-        if (!pvBuffer)
-            return;
-        if (!unk00)
-        {
-            FreePointer(pvBuffer, 0);
-            return;
-        }
-        IMemoryHeap* heap = unk110;
-        if (!heap)
-        {
-            FreePointer(pvBuffer, 0);
-            return;
-        }
-        MemoryPool* pool = DAT_011f63b8[(unsigned int)pvBuffer >> 24];
-        if (pool && (unsigned int)pvBuffer >= pool->unk04 && (unsigned int)pvBuffer < pool->unk04 + pool->unk50)
-        {
-            pool->Free(pvBuffer);
-            return;
-        }
-        IMemoryHeap* owner = GetHeapForPointer(pvBuffer);
-        if (owner)
-            owner->Deallocate(pvBuffer, false);
-        else
-            FreePointer(pvBuffer, 0);
+        FreePointer(pvBuffer, 0);
+        return;
     }
-};
+    IMemoryHeap* heap = pHeapsByContextA[65];
+    if (!heap)
+    {
+        FreePointer(pvBuffer, 0);
+        return;
+    }
+    MemoryPool* pool = fnv_00a1cb80::DAT_011f63b8[(unsigned int)pvBuffer >> 24];
+    if (pool && (unsigned int)pvBuffer >= (unsigned int)pool->m_pPoolBase &&
+        (unsigned int)pvBuffer < (unsigned int)pool->m_pPoolBase + pool->m_uiPoolSize)
+    {
+        pool->Free(pvBuffer);
+        return;
+    }
+    IMemoryHeap* owner = GetHeapForPointer((const void*)pvBuffer);
+    if (owner) owner->Deallocate(pvBuffer, false);
+    else FreePointer(pvBuffer, 0);
+}
+namespace fnv_00a1cb80 {
+
 extern MemoryManager _g_memoryManager;
-
-class BSFile
-{
-  public:
-    virtual ~BSFile();
-    virtual void Unk01();
-    virtual void Unk02();
-    virtual void Unk03();
-    virtual void Unk04();
-    virtual void Unk05();
-    virtual void Unk06();
-    virtual void Unk07();
-    virtual void Unk08();
-    virtual void Unk09();
-    virtual unsigned int GetFileSize();
-
-    unsigned int m_uiStreamFlags;
-    unsigned int (*m_pfnRead)(BSFile* pThis, void* pvBuffer, unsigned int uiBytes, unsigned int* puiComponentSizes,
-                              unsigned int uiNumComponents);
-    unsigned int (*m_pfnWrite)(BSFile* pThis, const void* pvBuffer, unsigned int uiBytes,
-                               unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    bool m_bGood;
-
-    inline bool Good() const
-    {
-        return m_bGood;
-    }
-
-    inline unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                                   unsigned int uiNumComponents = 1)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-
-    inline unsigned int Read(void* pvBuffer, unsigned int uiBytes)
-    {
-        unsigned int uiComponentSize = 1;
-        unsigned int uiBytesRead = BinaryRead(pvBuffer, uiBytes, &uiComponentSize, 1);
-        return uiBytesRead;
-    }
-};
 
 class FileFinder
 {
@@ -1538,11 +1090,11 @@ int LoadMasterMenuFiles()
     char* xml2;
     CompressedXML* pXML2;
 
-    size3 = pFile7->GetFileSize() + 1;
+    size3 = pFile7->GetSize() + 1;
     buffer3 = (char*)_g_memoryManager.Allocate(size3);
     count7 = 0;
 
-    size3 = pFile7->Read(buffer3, size3);
+    size3 = ReadFileData(pFile7, buffer3, size3);
 
     delete pFile7;
 
@@ -1579,7 +1131,7 @@ int LoadMasterMenuFiles()
         }
     }
 
-    _g_memoryManager.Deallocate(buffer3);
+    _g_memoryManager.DeallocateAlias(buffer3);
     return count7;
 }
 }  // namespace fnv_00a1cb80
@@ -1653,10 +1205,6 @@ struct EntryMap
 };
 extern EntryMap DAT_011f34e0;
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int auiSize);
-};
 extern MemoryManager DAT_011f6238;
 
 struct EntryArray
@@ -1715,45 +1263,6 @@ struct NameArray
     }
 };
 
-struct BSFileX
-{
-    virtual ~BSFileX();
-    unsigned int m_uiStreamFlags;
-    int m_iUnk08;
-    unsigned int(__cdecl* m_pfnWrite)(BSFileX* apThis, const void* apBuffer, unsigned int auiBytes,
-                                      unsigned int* apuiComponentSizes, unsigned int auiNumComponents);
-    unsigned int unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
-    unsigned int unk30, unk34, unk38, unk3c, unk40, unk44, unk48, unk4c;
-    unsigned int unk50, unk54, unk58, unk5c, unk60, unk64, unk68, unk6c;
-    unsigned int unk70, unk74, unk78, unk7c, unk80, unk84, unk88, unk8c;
-    unsigned int unk90, unk94, unk98, unk9c, unka0, unka4, unka8, unkac;
-    unsigned int unkb0, unkb4, unkb8, unkbc, unkc0, unkc4, unkc8, unkcc;
-    unsigned int unkd0, unkd4, unkd8, unkdc, unke0, unke4, unke8, unkec;
-    unsigned int unkf0, unkf4, unkf8, unkfc, unk100, unk104, unk108, unk10c;
-    unsigned int unk110, unk114, unk118, unk11c, unk120, unk124, unk128, unk12c;
-    unsigned int unk130, unk134, unk138, unk13c, unk140, unk144, unk148, unk14c;
-    unsigned int unk150, unk154;
-    BSFileX(const char* apName, int aiMode, unsigned int auiBufferSize, bool abFlag);
-    static void* operator new(unsigned int auiSize)
-    {
-        return DAT_011f6238.Allocate(auiSize);
-    }
-    static void operator delete(void* apMem);
-    unsigned int BinaryWrite(const void* apBuffer, unsigned int auiTotalBytes, unsigned int* apuiComponentSizes,
-                             unsigned int auiNumComponents)
-    {
-        unsigned int uiBytesWritten = m_pfnWrite(this, apBuffer, auiTotalBytes, apuiComponentSizes, auiNumComponents);
-        m_uiStreamFlags += uiBytesWritten;
-        return uiBytesWritten;
-    }
-    unsigned int Write(const void* apBuffer, unsigned int auiBytes)
-    {
-        unsigned int uiSize = 1;
-        unsigned int uiBytesWritten = BinaryWrite(apBuffer, auiBytes, &uiSize, 1);
-        return uiBytesWritten;
-    }
-};
-
 struct FileHeader
 {
     unsigned int m_uiFormatVersion;
@@ -1773,7 +1282,7 @@ bool WriteCompressedEntryArchive()
             g.m_uiTotal = 0;
             g.m_uiCount = 0;
             {
-                BSFileX* b;
+                BSFile* b;
                 {
                     EntryArray records;
                     NameArray names;
@@ -1796,8 +1305,8 @@ bool WriteCompressedEntryArchive()
                             }
                         }
                     }
-                    b = new BSFileX(DAT_01095528, 1, 0x4000, false);
-                    a = b->Write(&g, 12);
+                    b = new BSFile(DAT_01095528, 1, 0x4000, false);
+                    a = b->NiBinaryStream::Write((const void*)&g, 12);
                     if (a == 12)
                     {
                         for (unsigned int i = 0; i < g.m_uiCount; ++i)
@@ -1809,13 +1318,13 @@ bool WriteCompressedEntryArchive()
                                     const char* name = names.GetAt(i);
                                     FUN_00ec61c0(filename, 0, 128);
                                     FUN_00ec65a6(filename, 128, name);
-                                    a = b->Write(filename, 128);
+                                    a = b->NiBinaryStream::Write((const void*)filename, 128);
                                     if (a != 128)
                                         f = false;
-                                    a = b->Write(element, 4);
+                                    a = b->NiBinaryStream::Write((const void*)element, 4);
                                     if (a != 4)
                                         f = false;
-                                    a = b->Write(element->m_pCompressedData, element->m_uiCharacterCount);
+                                    a = b->NiBinaryStream::Write((const void*)element->m_pCompressedData, element->m_uiCharacterCount);
                                     if (a != element->m_uiCharacterCount)
                                         f = false;
                                     if (!f)
@@ -1842,40 +1351,10 @@ extern bool DAT_011f308f[];
 int FUN_00706fd0(int, bool);
 void FUN_00a1e130(int, Tile*);
 int FUN_007023c0();
-class MemoryManager
-{
-  public:
-    void* Deallocate(void* p);
-};
+
 extern MemoryManager g_memoryManager;
-class InputManager
-{
-  public:
-    int FUN_00a24660(int, int);
-    void SetFlag(unsigned short flag)
-    {
-        *reinterpret_cast<unsigned short*>(reinterpret_cast<char*>(this) + 0x1b92) |= flag;
-    }
-};
-class OSGlobals
-{
-  public:
-    InputManager* FUN_00877720();
-};
+
 extern OSGlobals* g_osGlobals;
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* p);
-extern const char* g_nullFixedString;
-struct TemplateName
-{
-    const char* m_kHandle;
-    ~TemplateName()
-    {
-        if (m_kHandle == g_nullFixedString)
-            return;
-        long* p = (long*)(m_kHandle - 8);
-        InterlockedDecrement(p);
-    }
-};
 struct TemplateItemNode
 {
     void* m_item;
@@ -1894,7 +1373,7 @@ struct TemplateItemList : TemplateItemNode
 class TileCollection
 {
   public:
-    TemplateName kName;
+    NiFixedString kName;
     int unk04;
     TemplateItemList kItems;
     void Destroy();
@@ -1907,76 +1386,22 @@ class TileCollection
         g_memoryManager.Deallocate(p);
     }
 };
-class MenuOwner;
-struct TileOwner
-{
-    virtual ~TileOwner();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    MenuOwner* pMenu;
-    void SetMenu(MenuOwner* menu)
-    {
-        pMenu = menu;
-    }
-};
-struct TemplateList
-{
-    TileCollection* m_item;
-    TemplateList* m_pkNext;
-    void RemoveAll()
-    {
-        while (m_pkNext)
-        {
-            TemplateList* next = m_pkNext->m_pkNext;
-            m_pkNext->m_pkNext = 0;
-            delete m_pkNext;
-            m_pkNext = next;
-        }
-        m_item = 0;
-    }
-    ~TemplateList()
-    {
-        RemoveAll();
-    }
-    void operator delete(void* p)
-    {
-        g_memoryManager.Deallocate(p);
-    }
-};
-class FUN_00a1c520
-{
-  public:
-    virtual ~FUN_00a1c520();
-    TileOwner* pMenu;
-    TemplateList m_kTileTemplateList;
-    Tile* m_pMenuTile;
-    int m_iModalMenuId;
-    int m_iSecondaryValue;
-    bool m_bIsSpecial;
-    bool m_bVisible;
-    int m_iMenuId;
-    int m_eFadeState;
-};
+
 inline void ClearMenuClass(int menuClass)
 {
     if (menuClass >= 1001 && menuClass <= 1084)
         DAT_011f308f[menuClass] = false;
 }
-// Clears the menu class, conditionally calls FUN_00706fd0, deletes the menu owner and visible tile collections, and removes template-list nodes.
+}  // namespace fnv_00a1c520
+using fnv_00a1c520::ClearMenuClass;
+using fnv_00a1c520::FUN_00706fd0;
+using fnv_00a1c520::FUN_00a1e130;
+using fnv_00a1c520::TileCollection;
+using fnv_00a1c520::FUN_007023c0;
+using fnv_00a1c520::g_osGlobals;
+// Clears the menu class, deletes its tiles, and removes template-list nodes.
 // @fnv 0x00a1c520
-FUN_00a1c520::~FUN_00a1c520()
+Menu::~Menu()
 {
     ClearMenuClass(m_iMenuId);
     if (m_iModalMenuId)
@@ -1984,16 +1409,16 @@ FUN_00a1c520::~FUN_00a1c520()
     FUN_00a1e130(m_iMenuId, 0);
     if (pMenu)
     {
-        pMenu->SetMenu(0);
+        SetTileMenuOwner(pMenu, 0);
         delete pMenu;
     }
     pMenu = 0;
     if (m_bVisible)
     {
-        TemplateList* item = &m_kTileTemplateList;
+        BSSimpleList<Tile__TileTemplate*>* item = &m_kTileTemplateList;
         while (item)
         {
-            TileCollection* value = item->m_item;
+            TileCollection* value = (TileCollection*)item->m_item;
             if (value)
                 delete value;
             item = item->m_pkNext;
@@ -2003,4 +1428,3 @@ FUN_00a1c520::~FUN_00a1c520()
     if (!FUN_007023c0() && g_osGlobals->FUN_00877720()->FUN_00a24660(14, 0))
         g_osGlobals->FUN_00877720()->SetFlag(8);
 }
-}  // namespace fnv_00a1c520

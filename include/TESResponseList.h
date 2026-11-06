@@ -1,15 +1,22 @@
-#ifndef FNV_RESPONSELISTWRAPPER_H
-#define FNV_RESPONSELISTWRAPPER_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+class TESResponse;
+
 class TESResponseList
 {
-  public:
-    TESResponse* pHead;  // +0x0
+public:
+    TESResponse* pHead;
+
+    TESResponseList();
+    ~TESResponseList();
+    operator unsigned int() const;
+    TESResponse* QResponseList();
+    void AddTail(TESResponse*);
+    void Remove(TESResponse*);
+    unsigned int GetListCount();
     void ClearResponses();
+    void SetResponseList(TESResponse*);
+    void ResetFaceGen();
+    void InsertBefore(TESResponse*, TESResponse*);
+    void InsertAfter(TESResponse*, TESResponse*);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(TESResponseList) == 0x4);
-FNV_STATIC_ASSERT(offsetof(TESResponseList, pHead) == 0x0);
-#endif

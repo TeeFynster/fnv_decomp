@@ -1,15 +1,29 @@
-// Source layout: BSAudioListener. PC corrections are in generate_headers.py.
-#ifndef FNV_BSAUDIOLISTENER_H
-#define FNV_BSAUDIOLISTENER_H
+#pragma once
 
-#include "layout_support.h"
 #include "NiPoint3.h"
-#pragma pack(push, 4)
+
+// BSAudioListener: abstract listener base, RTTI .?AVBSAudioListener@@, vftable 0x010a3bb4 (13 slots; slots 1, 2, 5
+// and 8 are _purecall, 0x00aa7830 is the shared empty /Od body). BSWin32AudioListener (vftable 0x010a3b7c) derives
+// from it. Layout from the /Od bodies: vptr at 0x00, position 0x04, velocity 0x10, forward 0x1C, up 0x28,
+// flags 0x44 (written by slot 10, cleared by the slot-0 deleting destructor); size 0x48.
 class BSAudioListener
 {
-  public:
-    void** m_ppVirtualMethodTable;                 // +0x0
-    NiPoint3 m_kListenerPosition;    // +0x4
+public:
+    virtual void* Destroy(unsigned int auiFlags);           // 0x00 0x00aeabb0
+    virtual void vfn_4() = 0;                               // 0x04
+    virtual void vfn_8(NiPoint3* pos) = 0;                  // 0x08
+    virtual NiPoint3& FUN_00aeaad0();                       // 0x0C
+    virtual void vfn_10();                                  // 0x10 0x00aa7830
+    virtual void vfn_14(NiPoint3* front, NiPoint3* top) = 0; // 0x14
+    virtual NiPoint3* FUN_00aeaaf0();                       // 0x18
+    virtual NiPoint3& FUN_00aeab10();                       // 0x1C
+    virtual void vfn_20(NiPoint3* velocity) = 0;            // 0x20
+    virtual void FUN_00aeab30(float afGain);                // 0x24
+    virtual void SetListenerID(unsigned int);               // 0x28 0x00aeab50
+    virtual unsigned int GetListenerID();                   // 0x2C 0x00aeab70
+    virtual void SetRolloffFactor(float afRolloffFactor);   // 0x30 0x00aeab90
+
+    NiPoint3 m_kListenerPosition;    // +0x04
     NiPoint3 m_kListenerVelocity;    // +0x10
     NiPoint3 m_kForward;             // +0x1C
     NiPoint3 m_kUp;                  // +0x28
@@ -18,19 +32,4 @@ class BSAudioListener
     float m_fDopplerScale;           // +0x3C
     float m_fDistanceScale;          // +0x40
     unsigned int m_uiListenerFlags;  // +0x44
-    void SetListenerID(unsigned int);
-    unsigned int GetListenerID();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BSAudioListener) == 0x48);
-FNV_STATIC_ASSERT(offsetof(BSAudioListener, m_ppVirtualMethodTable) == 0x0);
-FNV_STATIC_ASSERT(offsetof(BSAudioListener, m_kListenerPosition) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BSAudioListener, m_kListenerVelocity) == 0x10);
-FNV_STATIC_ASSERT(offsetof(BSAudioListener, m_kForward) == 0x1C);
-FNV_STATIC_ASSERT(offsetof(BSAudioListener, m_kUp) == 0x28);
-FNV_STATIC_ASSERT(offsetof(BSAudioListener, m_uiListenerID) == 0x34);
-FNV_STATIC_ASSERT(offsetof(BSAudioListener, m_fGain) == 0x38);
-FNV_STATIC_ASSERT(offsetof(BSAudioListener, m_fDopplerScale) == 0x3C);
-FNV_STATIC_ASSERT(offsetof(BSAudioListener, m_fDistanceScale) == 0x40);
-FNV_STATIC_ASSERT(offsetof(BSAudioListener, m_uiListenerFlags) == 0x44);
-#endif

@@ -2,7 +2,79 @@
 // src/staging/blk_004e0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
+// Isolate legacy support declarations that shared headers also define.
+#define _ULARGE_INTEGER LegacySupport__ULARGE_INTEGER
 #include "../../include/layout_support.h"
+#undef _ULARGE_INTEGER
+#include "../../include/BSTextureManager.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/Setting.h"
+// NiNodeHolder_blk_004e0000_od: local type (was include/NiNodeHolder.h, which had no evidence of one real class); its methods are 0x00559450 NiPointer<PathingSolution>::operator->, 0x0066b0d0 NiPointer<PathingSolution>::operator=
+#include "../../include/NiRefObject.h"
+
+class NiNode;
+class CleanupObject;
+
+class NiNodeHolder_blk_004e0000_od
+{
+public:
+    NiRefObject* value;
+
+    NiNodeHolder_blk_004e0000_od(NiRefObject* p);
+    ~NiNodeHolder_blk_004e0000_od();
+    operator NiNode*() const;
+    void FUN_0066b0d0(CleanupObject* object);
+    CleanupObject* FUN_00559450();
+};
+#include "../../include/NiAVObject.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiInterpController.h"
+#include "../../include/MagicTarget.h"
+// NiTexture and NiNode currently declare different NiTArray interfaces.
+#include "../../include/NiSourceTexture.h"
+#include "../../include/AnimIdle.h"
+#include "../../include/BGSPlaceableWater.h"
+#include "../../include/BGSProjectile.h"
+#include "../../include/BGSTalkingActivator.h"
+#include "../../include/FileEntryList.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESLandTexture.h"
+#include "../../include/TESObjectACTI.h"
+#include "../../include/TESObjectMISC.h"
+#include "../../include/BGSConstructibleObject.h"
+#include "../../include/TESDescription.h"
+
+
+#include "../../include/BSTempEffect.h"
+#include "../../include/DummyPointerMap.h"
+#include "../../include/GO.h"
+#include "../../include/MagicProjectile.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/TESForm.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/SL.h"
+#include "../../include/TESRegionData.h"
 
 // Returns the smaller of the two arguments: a if a is less than b, otherwise b.
 // @fnv 0x004e2050
@@ -27,10 +99,7 @@ void FUN_004e2100_Class::SetByteAtOffset166(int value)
     ((unsigned char*)this)[0x166] = (unsigned char)value;
 }
 
-struct BGSPlaceableWater
-{
-    bool HasFlags(unsigned int);
-};
+
 
 struct FUN_004e3280_shell
 {
@@ -45,10 +114,7 @@ void FUN_004e3280_shell::FUN_004e3280()
 }
 
 namespace fnv_004e3300 {
-struct BGSPlaceableWater
-{
-    bool HasFlags(unsigned int);
-};
+
 
 struct FUN_004e3300_shell : BGSPlaceableWater
 {
@@ -90,30 +156,20 @@ void FUN_004e3c20_class::ClearField()
     *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x10) = 0;
 }
 
-namespace fnv_004e3c50 {
-struct BGSPlaceableWater
-{
-    bool HasFlags(unsigned int);
-    bool FUN_004e3c50();
-};
+
+
 
 // @fnv 0x004e3c50
 bool BGSPlaceableWater::FUN_004e3c50()
 {
     return HasFlags(1);
 }
-}  // namespace fnv_004e3c50
+
 
 namespace fnv_004e3c70 {
-struct BGSPlaceableWater
-{
-    bool HasFlags(unsigned int a);
-};
 
-bool BGSPlaceableWater::HasFlags(unsigned int a)
-{
-    return a == 0x80000000;
-}
+
+
 
 struct FUN_004e3c70_shell : BGSPlaceableWater
 {
@@ -127,18 +183,14 @@ bool FUN_004e3c70_shell::FUN_004e3c70()
 }
 }  // namespace fnv_004e3c70
 
-namespace fnv_004e3ca0 {
-struct BGSPlaceableWater
-{
-    void HasFlags(unsigned int);
-    void FUN_004e3ca0();
-};
+
+
 // @fnv 0x004e3ca0
 void BGSPlaceableWater::FUN_004e3ca0()
 {
     HasFlags(0x20000000);
 }
-}  // namespace fnv_004e3ca0
+
 
 struct FUN_004e3cc0_Class
 {
@@ -202,6 +254,7 @@ unsigned char FUN_004e89e0()
 {
     return *g_011c7ac4.Bool();
 }
+
 
 extern NiPointer<NiNode> g_011d86bc;
 struct Flt
@@ -292,13 +345,10 @@ struct FUN_00456630_helper
     bool FUN_00456630(unsigned int);
 };
 
-struct FUN_004f0140_class
-{
-    bool FUN_004f0140();
-};
+
 
 // @fnv 0x004f0140
-bool FUN_004f0140_class::FUN_004f0140()
+bool NiAVObject::FUN_004f0140()
 {
     return ((FUN_00456630_helper*)this)->FUN_00456630(2);
 }
@@ -352,10 +402,6 @@ struct GlobalObject_00633c90;
 extern GlobalObject_00633c90 g_011c7ef8;
 extern GlobalObject_00633c90 g_011c7f0c;
 
-struct GO
-{
-    void operator=(void*);
-};
 
 // @fnv 0x004f3310
 void __cdecl ClearGlobalObjects()
@@ -419,10 +465,6 @@ void __thiscall FUN_004f8a60_class::SetField108(int aiValue)
     *(int*)((char*)this + 0x108) = aiValue;
 }
 
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&);
-};
 
 struct FUN_004f8a90_Class
 {
@@ -436,10 +478,7 @@ void FUN_004f8a90_Class::FUN_004f8a90(unsigned int key, unsigned int& value)
     ((DummyPointerMap*)((char*)this + 0x10c))->GetAt(key, value);
 }
 
-struct FileEntryList
-{
-    void FUN_00488ff0();
-};
+
 
 struct FUN_004f9ef0_shell
 {
@@ -452,7 +491,7 @@ struct FUN_004f9ef0_shell
 // @fnv 0x004f9ef0
 void FUN_004f9ef0_shell::CallInnerMethod()
 {
-    m2.FUN_00488ff0();
+    m2.FileEntryList::~FileEntryList();
 }
 
 struct FUN_004fb970_class
@@ -466,10 +505,6 @@ unsigned char FUN_004fb970_class::GetByteAtOffsetD9() const
     return ((const unsigned char*)this)[0xd9];
 }
 
-struct MagicProjectile
-{
-    EffectSetting* __thiscall FUN_004fd400();
-};
 
 // @fnv 0x004fd400
 EffectSetting* __thiscall MagicProjectile::FUN_004fd400()
@@ -488,11 +523,7 @@ int __thiscall FUN_004fd4f0_Class::FUN_004fd4f0()
     return *(int*)((char*)this + 0x60) & 0x1f0000;
 }
 
-struct BGSProjectile
-{
-    bool GetFlag(unsigned int) const;
-    bool FUN_004fdf20() const;
-};
+
 
 // @fnv 0x004fdf20
 bool BGSProjectile::FUN_004fdf20() const
@@ -500,19 +531,15 @@ bool BGSProjectile::FUN_004fdf20() const
     return GetFlag(0x20);
 }
 
-namespace fnv_004fdf40 {
-struct BGSProjectile
-{
-    bool GetFlag(unsigned int) const;
-    bool FUN_004fdf40();
-};
+
+
 
 // @fnv 0x004fdf40
 bool BGSProjectile::FUN_004fdf40()
 {
     return GetFlag(0x40);
 }
-}  // namespace fnv_004fdf40
+
 
 struct FUN_004ffa60_class
 {
@@ -635,10 +662,9 @@ unsigned int FUN_004e7ff0()
 }
 
 namespace fnv_004e8000 {
-struct NiNode
-{
-    void FUN_004def90();
-};
+struct IdleCleanup { void FUN_004def90(); };
+
+
 extern GlobalObject_00633c90 g_011c7c28;
 
 // If the global object holds a non-null pointer, calls FUN_004def90 on it, then assigns 0 to the global object.
@@ -646,7 +672,7 @@ extern GlobalObject_00633c90 g_011c7c28;
 void FUN_004e8000()
 {
     if (reinterpret_cast<Flt*>(&g_011c7c28)->operator unsigned int())
-        reinterpret_cast<NiNode*>(reinterpret_cast<Flt*>(&g_011c7c28)->operator unsigned int())->FUN_004def90();
+        reinterpret_cast<IdleCleanup*>(reinterpret_cast<Flt*>(&g_011c7c28)->operator unsigned int())->FUN_004def90();
     reinterpret_cast<GO*>(&g_011c7c28)->operator=(0);
 }
 }  // namespace fnv_004e8000
@@ -724,12 +750,6 @@ void __thiscall FUN_004f32e0_class::SetMaskedBits(unsigned short set, unsigned s
     *(unsigned short*)((char*)this + 4) = (*(unsigned short*)((char*)this + 4) & ~clear) | (set << shift);
 }
 
-struct SL
-{
-    int _0;
-    int _4;
-    SL();
-};
 struct FUN_004f3330 : SL
 {
     bool m_8;
@@ -762,12 +782,6 @@ FUN_004f5590::FUN_004f5590(int aiFirst, int aiSecond)
 }
 
 namespace fnv_004f5db0 {
-struct SL
-{
-    int m0;
-    int m1;
-    SL();
-};
 struct FUN_004f5db0 : SL
 {
     virtual ~FUN_004f5db0();
@@ -784,10 +798,6 @@ FUN_004f5db0::FUN_004f5db0(unsigned char aucValue)
 }
 }  // namespace fnv_004f5db0
 
-struct NiPoint3
-{
-    float __thiscall GetLengthSquared();
-};
 float __cdecl FUN_004f6e40(float);
 struct Vec3i
 {
@@ -929,11 +939,9 @@ void __thiscall FUN_004f8a60_class::FUN_004f8ac0(int apSource)
         ((char*)this)[4] = 0;
 }
 
-struct BGSTalkingActivator
-{
-    bool IsRadioStation();
-};
-struct ArrSI
+
+// Exe 0x004fee20: unit-local ArrSI view; declarations and layout are preserved.
+struct BlkOffset08View
 {
     bool HasFlag10000000();
 };
@@ -945,18 +953,11 @@ struct S_004fee20
 // @fnv 0x004fee20
 bool S_004fee20::FUN_004fee20()
 {
-    return ((BGSTalkingActivator*)this)->IsRadioStation() && ((ArrSI*)this)->HasFlag10000000();
+    return ((BGSTalkingActivator*)this)->IsRadioStation() && ((BlkOffset08View*)this)->HasFlag10000000();
 }
 
 namespace fnv_004fee60 {
-struct TESForm
-{
-    int GetFormType() const;
-};
-struct BGSTalkingActivator
-{
-    bool IsRadioStation() const;
-};
+
 struct FUN_004fee20_shell
 {
     bool FUN_004fee20() const;
@@ -980,7 +981,7 @@ struct FUN_004e83e0_class
 {
     bool __thiscall IsPlayerNearWaterActor(void* arg);
 };
-struct NiTPointerList
+struct ReferenceList4e
 {
     void* DereferenceIfNotNull(void*);
 };
@@ -1002,7 +1003,7 @@ bool __thiscall FUN_004e8950_class::FUN_004e8950()
         void* next = 0;
         while (count)
         {
-            next = reinterpret_cast<NiTPointerList*>(reinterpret_cast<unsigned char*>(this) + 0x3c)
+            next = reinterpret_cast<ReferenceList4e*>(reinterpret_cast<unsigned char*>(this) + 0x3c)
                        ->DereferenceIfNotNull(reinterpret_cast<void*>(count));
             if (count)
             {
@@ -1088,52 +1089,18 @@ bool FUN_004f70b0_Class::FUN_004f70b0(RegionPoint* other)
     return false;
 }
 
-extern int DAT_010245a4;
-extern int DAT_0102458c;
-extern int DAT_01024568;
-extern int DAT_01024548;
-extern int DAT_01024534;
-extern int DAT_01024514;
-extern int DAT_01024500;
-extern int DAT_010244ec;
-extern int DAT_010244d8;
-extern int DAT_010244c4;
 
-struct TESObjectMISC
-{
-    TESObjectMISC();
-    ~TESObjectMISC();
-    void SetFormType(int);
-    void FUN_004f9570();
-};
 
-struct FUN_004f93b0 : public TESObjectMISC
-{
-    FUN_004f93b0();
-};
 
 // @fnv 0x004f93b0
-FUN_004f93b0::FUN_004f93b0()
+BGSConstructibleObject::BGSConstructibleObject()
 {
-    *reinterpret_cast<void**>(this) = &DAT_010245a4;
-    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x30) = &DAT_0102458c;
-    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x3c) = &DAT_01024568;
-    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x5c) = &DAT_01024548;
-    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x68) = &DAT_01024534;
-    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x74) = &DAT_01024514;
-    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x7c) = &DAT_01024500;
-    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x84) = &DAT_010244ec;
-    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x8c) = &DAT_010244d8;
-    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x9c) = &DAT_010244c4;
     SetFormType(0x32);
     FUN_004f9570();
 }
 
+class ActorCombatGroup;
 extern int DAT_010232b4;
-struct NiTMallocInterface_0096afc0
-{
-    static void* __cdecl Allocate(unsigned short size);
-};
 struct FUN_004edf70
 {
     int* vtbl;
@@ -1154,17 +1121,12 @@ FUN_004edf70::FUN_004edf70(unsigned short ausSize, unsigned short y)
     b = 0;
     c = 0;
     if (a > 0)
-        data = NiTMallocInterface_0096afc0::Allocate(a);
+        data = NiTMallocInterface<ActorCombatGroup*>::Allocate(a);
     else
         data = 0;
 }
 
 namespace fnv_004edfe0 {
-struct ActorCombatGroup;
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short);
-};
 extern int DAT_010232c4;
 struct FUN_004edfe0
 {
@@ -1185,23 +1147,17 @@ FUN_004edfe0::FUN_004edfe0(unsigned short ausCount, unsigned short b)
     m0a = 0;
     m0c = 0;
     if (count > 0)
-        data = NiTMallocInterface_0096afc0::Allocate(count);
+        data = NiTMallocInterface<ActorCombatGroup*>::Allocate(count);
     else
         data = 0;
 }
 }  // namespace fnv_004edfe0
 
-struct NiPointer_004ee2e0
-{
-    void* m_pObject;
-    NiPointer_004ee2e0(void*);
-    ~NiPointer_004ee2e0();
-};
 
 extern unsigned int DAT_011d6a20;
 struct GlobalObject_004ee810
 {
-    void Remove(const NiPointer_004ee2e0&);
+    void Remove(const NiPointer<NiRefObject>&);
 };
 extern GlobalObject_004ee810 g_011d6a30;
 
@@ -1210,7 +1166,7 @@ extern GlobalObject_004ee810 g_011d6a30;
 void __cdecl FUN_004ee2e0(void* apObject)
 {
     {
-        NiPointer_004ee2e0 tmp(apObject);
+        NiPointer<NiRefObject> tmp(static_cast<NiRefObject*>(apObject));
         g_011d6a30.Remove(tmp);
     }
     DAT_011d6a20 -= 1;
@@ -1244,37 +1200,22 @@ void* __thiscall FUN_004ede90_Class::InsertBefore(void* apNode, void** apNewNode
     return apNewNode;
 }
 
-namespace fnv_004f0640 {
-struct NiAVObject;
 
-struct NiNode
-{
-    unsigned int GetNumChildren();
-    NiAVObject* GetAt(unsigned int index);
-};
 
-struct NiAVObject
-{
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual NiNode* GetNode();
-};
 
-struct FUN_0043b3b0_class
+
+
+
+
+
+
+
+
+// Call declarations for target-list helpers not exposed by the shared controller.
+struct InterpControllerTargetAccess
 {
     unsigned short FUN_0043b3b0(unsigned int value);
-};
-
-struct S_0043b320
-{
     void FUN_0043b320(unsigned short index, TaskQueueInterface* queue);
-};
-
-struct NiInterpController
-{
-    static unsigned short INVALID_INDEX;
-    void FUN_004f0640(NiAVObject* object);
 };
 
 // @fnv 0x004f0640
@@ -1283,16 +1224,16 @@ void NiInterpController::FUN_004f0640(NiAVObject* object)
     if (object)
     {
         unsigned short index;
-        index = reinterpret_cast<FUN_0043b3b0_class*>(this)->FUN_0043b3b0(reinterpret_cast<unsigned int>(object));
+        index = reinterpret_cast<InterpControllerTargetAccess*>(this)->FUN_0043b3b0(reinterpret_cast<unsigned int>(object));
 
         if (index != NiInterpController::INVALID_INDEX)
         {
-            reinterpret_cast<S_0043b320*>(this)->FUN_0043b320(index, 0);
+            reinterpret_cast<InterpControllerTargetAccess*>(this)->FUN_0043b320(index, 0);
         }
     }
 
     NiNode* node;
-    node = object->GetNode();
+    node = object->IsSceneNode();
     if (node)
     {
         unsigned int i;
@@ -1302,31 +1243,17 @@ void NiInterpController::FUN_004f0640(NiAVObject* object)
         }
     }
 }
-}  // namespace fnv_004f0640
 
-class NiAVObject;
 
-class NiNode
-{
-  public:
-    unsigned int GetNumChildren();
-    NiAVObject* GetAt(unsigned int index);
-};
 
-class NiAVObject
-{
-  public:
-    virtual void m0();
-    virtual void m1();
-    virtual void m2();
-    virtual NiNode* GetController();
-};
 
-class NiInterpController
-{
-  public:
-    static unsigned short INVALID_INDEX;
-};
+
+
+
+
+
+
+
 
 class FUN_00a35fc0_shell
 {
@@ -1355,7 +1282,7 @@ void FUN_00a35910_shell::FUN_004f06d0(NiAVObject* object)
                 self->SetSlotValue(index, 0);
         }
 
-        node = object->GetController();
+        node = object->IsSceneNode();
         if (node)
         {
             for (unsigned int i = 0; i < node->GetNumChildren(); ++i)
@@ -1374,261 +1301,10 @@ struct FUN_00564f40_shell
     void FUN_00564f40(int value);
 };
 
-struct LodObject
-{
-    virtual void v0()
-    {}
-    virtual void v1()
-    {}
-    virtual void v2()
-    {}
-    virtual void v3()
-    {}
-    virtual TaskQueueInterface* v4();
-    void SetAppCulled(bool value);
-};
-
-struct TESSound
-{
-    virtual void v000()
-    {}
-    virtual void v001()
-    {}
-    virtual void v002()
-    {}
-    virtual void v003()
-    {}
-    virtual void v004()
-    {}
-    virtual void v005()
-    {}
-    virtual void v006()
-    {}
-    virtual void v007()
-    {}
-    virtual void v008()
-    {}
-    virtual void v009()
-    {}
-    virtual void v010()
-    {}
-    virtual void v011()
-    {}
-    virtual void v012()
-    {}
-    virtual void v013()
-    {}
-    virtual void v014()
-    {}
-    virtual void v015()
-    {}
-    virtual void v016()
-    {}
-    virtual void v017()
-    {}
-    virtual void v018()
-    {}
-    virtual void v019()
-    {}
-    virtual void v020()
-    {}
-    virtual void v021()
-    {}
-    virtual void v022()
-    {}
-    virtual void v023()
-    {}
-    virtual void v024()
-    {}
-    virtual void v025()
-    {}
-    virtual void v026()
-    {}
-    virtual void v027()
-    {}
-    virtual void v028()
-    {}
-    virtual void v029()
-    {}
-    virtual void v030()
-    {}
-    virtual void v031()
-    {}
-    virtual void v032()
-    {}
-    virtual void v033()
-    {}
-    virtual void v034()
-    {}
-    virtual void v035()
-    {}
-    virtual void v036()
-    {}
-    virtual void v037()
-    {}
-    virtual void v038()
-    {}
-    virtual void v039()
-    {}
-    virtual void v040()
-    {}
-    virtual void v041()
-    {}
-    virtual void v042()
-    {}
-    virtual void v043()
-    {}
-    virtual void v044()
-    {}
-    virtual void v045()
-    {}
-    virtual void v046()
-    {}
-    virtual void v047()
-    {}
-    virtual void v048()
-    {}
-    virtual void v049()
-    {}
-    virtual void v050()
-    {}
-    virtual void v051()
-    {}
-    virtual void v052()
-    {}
-    virtual void v053()
-    {}
-    virtual void v054()
-    {}
-    virtual void v055()
-    {}
-    virtual void v056()
-    {}
-    virtual void v057()
-    {}
-    virtual void v058()
-    {}
-    virtual void v059()
-    {}
-    virtual void v060()
-    {}
-    virtual void v061()
-    {}
-    virtual void v062()
-    {}
-    virtual void v063()
-    {}
-    virtual void v064()
-    {}
-    virtual void v065()
-    {}
-    virtual void v066()
-    {}
-    virtual void v067()
-    {}
-    virtual void v068()
-    {}
-    virtual void v069()
-    {}
-    virtual void v070()
-    {}
-    virtual void v071()
-    {}
-    virtual void v072()
-    {}
-    virtual void v073()
-    {}
-    virtual void v074()
-    {}
-    virtual void v075()
-    {}
-    virtual const char* v076();
-    virtual void v077()
-    {}
-    virtual void v078()
-    {}
-    virtual void v079()
-    {}
-    virtual void v080()
-    {}
-    virtual void v081()
-    {}
-    virtual void v082()
-    {}
-    virtual void v083()
-    {}
-    virtual void v084()
-    {}
-    virtual void v085()
-    {}
-    virtual void v086()
-    {}
-    virtual void v087()
-    {}
-    virtual void v088()
-    {}
-    virtual void v089()
-    {}
-    virtual void v090()
-    {}
-    virtual void v091()
-    {}
-    virtual void v092()
-    {}
-    virtual void v093()
-    {}
-    virtual void v094()
-    {}
-    virtual void v095()
-    {}
-    virtual void v096()
-    {}
-    virtual void v097()
-    {}
-    virtual void v098()
-    {}
-    virtual void v099()
-    {}
-    virtual void v100()
-    {}
-    virtual void v101()
-    {}
-    virtual void v102()
-    {}
-    virtual void v103()
-    {}
-    virtual void v104()
-    {}
-    virtual void v105()
-    {}
-    virtual void v106()
-    {}
-    virtual void v107()
-    {}
-    virtual void v108()
-    {}
-    virtual void v109()
-    {}
-    virtual void v110()
-    {}
-    virtual void v111()
-    {}
-    virtual void v112()
-    {}
-    virtual void v113()
-    {}
-    virtual void v114()
-    {}
-    virtual void v115()
-    {}
-    virtual LodObject* v116();
-    unsigned int Deallocate();
-};
-
 void _FNV_Warning(int value1, const char* value2, const char* value3, unsigned int value4);
 
 // @fnv 0x004f24e0
-void FUN_004f24e0(TESSound* object, bool visible, bool useDefault)
+void FUN_004f24e0(TESObjectREFR* object, bool visible, bool useDefault)
 {
     if (object == 0)
         return;
@@ -1636,28 +1312,28 @@ void FUN_004f24e0(TESSound* object, bool visible, bool useDefault)
     if (!reinterpret_cast<FUN_00564f00_shell*>(object)->FUN_00564f00())
     {
         reinterpret_cast<FUN_00564f40_shell*>(object)->FUN_00564f40(1);
-        _FNV_Warning(0xe, "SetImposterVisible: ObjectREFR is not flagged as an imposter (%s:%X)", object->v076(),
-                     object->Deallocate());
+        _FNV_Warning(0xe, "SetImposterVisible: ObjectREFR is not flagged as an imposter (%s:%X)", object->GetName(),
+                     object->GetFormID());
     }
 
     TaskQueueInterface* task = 0;
-    if (object->v116())
-        task = object->v116()->v4();
+    if (object->GetNiNode())
+        task = reinterpret_cast<TaskQueueInterface*>(object->GetNiNode()->IsFadeNode());
 
     if (task == 0)
         useDefault = true;
 
     if (useDefault)
     {
-        if (object && object->v116())
+        if (object && object->GetNiNode())
         {
-            object->v116()->SetAppCulled(!visible);
-            reinterpret_cast<TaskQueueInterface*>(object->v116())->FUN_004f2620(visible);
+            object->GetNiNode()->SetAppCulled(!visible);
+            reinterpret_cast<TaskQueueInterface*>(object->GetNiNode())->FUN_004f2620(visible);
         }
     }
     else if (visible)
     {
-        object->v116()->SetAppCulled(false);
+        object->GetNiNode()->SetAppCulled(false);
         task->FUN_004f2620(true);
     }
     else
@@ -2522,17 +2198,8 @@ RDLItem* FUN_004f6850_Class::FUN_004f6850(int arg0, int arg1, int arg2)
     return resultD;
 }
 
-class TESForm
-{
-  public:
-    virtual void v0();
-};
 
-class TESLandTexture
-{
-  public:
-    virtual void v0();
-};
+
 
 class FUN_004f6f70_cls
 {
@@ -2724,25 +2391,16 @@ void FUN_004ff0e0_cls::FUN_004ff0e0(FUN_004ff0e0_arg* a1)
     }
 }
 
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void*, unsigned int);
-};
 
-class AnimIdle : public NiMemObject
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
+
+
 
 class FUN_00a5ecb0 : public AnimIdle
 {
   public:
-    char pad00[0xac];
+    char pad00[0xa4];
     FUN_00a5ecb0(unsigned int uiValue);
+    static void operator delete(void*, unsigned int);
 };
 
 class FUN_006815c0
@@ -2810,83 +2468,20 @@ class FUN_00438170
     FUN_00438170(const char* pcName);
 };
 
-struct Setting4e1
-{
-    bool* FUN_00408d60();
-};
 
 struct Value4e1
 {
     int& FUN_0043d4d0();
 };
 
-struct Renderer4e1
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void Precache(AnimIdle* pkObject, bool bFlag);
-};
 
 struct TES4e1
 {
-    Renderer4e1* FUN_0084e3a0();
+    NiNode* FUN_0084e3a0();
 };
 
 extern TES4e1* DAT_011dea10;
-extern Setting4e1 DAT_011c7bbc;
+extern Setting DAT_011c7bbc;
 extern bool DAT_011ff100;
 extern bool DAT_011ad86e;
 extern const float DAT_01016248;
@@ -2944,7 +2539,7 @@ FUN_004e1650::FUN_004e1650()
     if (!FUN_004e7ff0())
     {
         *(NiPointer<AnimIdle>*)&g_011c7c28 = new FUN_00a5ecb0(0);
-        DAT_011dea10->FUN_0084e3a0()->Precache(*(NiPointer<AnimIdle>*)&g_011c7c28, true);
+        DAT_011dea10->FUN_0084e3a0()->AttachChildInAvailableSlot(reinterpret_cast<NiAVObject*>(static_cast<AnimIdle*>(*(NiPointer<AnimIdle>*)&g_011c7c28)), true);
     }
     DAT_011ff3b8 = FUN_00414430(0.0f, DAT_01016248, DAT_01016248, 1.0f);
     DAT_011ff3c8 = FUN_00414430(0.0f, 0.0f, DAT_0101e2bc, 1.0f);
@@ -2973,10 +2568,6 @@ struct TexName_4e19c0
 struct TexList_4e19c0
 {
     void RemoveAll();
-};
-struct BSTextureManager
-{
-    void ReleaseByName(const char* name);
 };
 BSTextureManager* __stdcall FUN_004a0ea0();
 
@@ -3090,32 +2681,26 @@ FUN_004e19c0::~FUN_004e19c0()
 }
 }  // namespace fnv_004e19c0
 
-namespace fnv_004ed3e0 {
 struct CleanupObject
 {
     unsigned int FUN_00726070();
     void ClearTextureAndShaderTextures();
     void FUN_00b6da10();
 };
-struct NiNodeHolder
-{
-    CleanupObject* object;
-    ~NiNodeHolder();
-    void FUN_0066b0d0(CleanupObject* object);
-    CleanupObject* FUN_00559450();
-};
+
+namespace fnv_004ed3e0 {
 struct GlobalObject_0048f200
 {
     void* head;
     void* tail;
     unsigned int count;
     ~GlobalObject_0048f200();
-    void RemoveAll();
+    void FUN_004ed900();
 };
 struct CleanupOwner
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c;
-    NiNodeHolder node;
+    NiNodeHolder_blk_004e0000_od node;
 };
 struct CleanupRegistry
 {
@@ -3193,18 +2778,18 @@ struct FUN_004ed3e0
     GlobalObject_0048f200 list30;
     GlobalObject_0048f200 list3c;
     GlobalObject_0048f200 list48;
-    NiNodeHolder ptr54;
-    NiNodeHolder ptr58;
+    NiNodeHolder_blk_004e0000_od ptr54;
+    NiNodeHolder_blk_004e0000_od ptr58;
     unsigned int unk5c, unk60;
     GlobalObject_0048f200 list64;
     GlobalObject_0048f200 list70;
     GlobalObject_0048f200 list7c;
     GlobalObject_0048f200 list88;
-    NiNodeHolder ptr94;
-    NiNodeHolder ptr98;
+    NiNodeHolder_blk_004e0000_od ptr94;
+    NiNodeHolder_blk_004e0000_od ptr98;
     unsigned int unk9c, unka0;
-    NiNodeHolder ptra4;
-    NiNodeHolder ptra8;
+    NiNodeHolder_blk_004e0000_od ptra4;
+    NiNodeHolder_blk_004e0000_od ptra8;
     ~FUN_004ed3e0();
 };
 
@@ -3219,8 +2804,8 @@ FUN_004ed3e0::~FUN_004ed3e0()
         FUN_004a0ea0(owner->node.FUN_00559450())->FUN_00b6da10();
         owner->node.FUN_0066b0d0(0);
     }
-    list30.RemoveAll();
-    list3c.RemoveAll();
+    list30.FUN_004ed900();
+    list3c.FUN_004ed900();
     if (ptr58.FUN_00559450())
     {
         ((CleanupManager*)FUN_004e7ff0())->Release(ptr58.FUN_00559450());
@@ -3323,15 +2908,6 @@ FUN_004ee9f0::FUN_004ee9f0(const void* pvTarget, Source4EE* pkSource)
     pkSource->Register(this, kInfo);
 }
 
-struct TESRegionData
-{
-    TESRegionData();
-    virtual ~TESRegionData();
-    virtual void v0();
-    unsigned char m_04;
-    unsigned char m_05;
-    unsigned char m_06;
-};
 
 struct FUN_004f5e20
 {
@@ -3368,11 +2944,12 @@ class Base4F4
     int unk04;
 };
 
-class Data4F4
+// Region sound collection state: constructor 0x004f43c0 builds list members; shared Data::Data is 0x0067ff70.
+class RegionSoundCollectionState
 {
   public:
-    Data4F4();
-    ~Data4F4();
+    RegionSoundCollectionState();
+    ~RegionSoundCollectionState();
 
     int m_iFirst;
     int unk04;
@@ -3395,7 +2972,7 @@ class FUN_004f42a0 : public Base4F4
     FUN_004f42a0();
     virtual ~FUN_004f42a0();
 
-    Data4F4 m_kData;
+    RegionSoundCollectionState m_kData;
     List4F4 m_kList;
 };
 
@@ -3427,14 +3004,9 @@ float __cdecl FUN_004f72a0(B4F72A0Point* pkCurrentObject, B4F72A0Point* pkSecond
            (fSecondTime - fTime) * ((pkCurrentObject->GetValue() - fSecondValue) / (pkCurrentObject->GetTime() - fSecondTime));
 }
 
-struct Point
-{
-    float GetX();
-    float GetY();
-};
 // Returns false if any point is null or the segments' bounding boxes don't overlap, then tests the segment intersection parameters against the denominator.
 // @fnv 0x004f7310
-bool __cdecl FUN_004f7310(Point* apSeg1Start, Point* apSeg1End, Point* apSeg2Start, Point* apSeg2End)
+bool __cdecl FUN_004f7310(NiPoint3* apSeg1Start, NiPoint3* apSeg1End, NiPoint3* apSeg2Start, NiPoint3* apSeg2End)
 {
     if (!apSeg1Start || !apSeg1End || !apSeg2Start || !apSeg2End)
         return false;
@@ -3530,7 +3102,7 @@ struct Polygon : PolygonNode
     float GetMaxY();
     bool FUN_004f8360(PolygonPoint*);
 };
-// Point-in-polygon test (even-odd crossing rule) after a bounding-box reject.
+// NiPoint3-in-polygon test (even-odd crossing rule) after a bounding-box reject.
 // @fnv 0x004f8360
 bool Polygon::FUN_004f8360(PolygonPoint* pPoint)
 {
@@ -3736,12 +3308,6 @@ int Owner4FF::FUN_004ff070(Ref4FF* pkRef)
     return iResult;
 }
 
-class BSTempEffect
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
 struct NodeLinkX
 {
     int unk0;
@@ -3768,67 +3334,6 @@ void ListX::FUN_004ee920()
     m_spNode = NiPointer<BSTempEffect>(0);
 }
 
-class TESFormBase4FFB
-{
-  public:
-    virtual void vfn_00();
-    unsigned int unk04[11];
-};
-
-class TESBase304FFB
-{
-  public:
-    virtual void vfn_30();
-    unsigned int unk34[2];
-};
-
-class TESBase3C4FFB
-{
-  public:
-    virtual void vfn_3C();
-    unsigned int unk40[7];
-};
-
-class TESBase5C4FFB
-{
-  public:
-    virtual void vfn_5C();
-    unsigned int unk60[2];
-};
-
-class TESBase684FFB
-{
-  public:
-    virtual void vfn_68();
-    unsigned int unk6C;
-};
-
-class TESBase704FFB
-{
-  public:
-    virtual void vfn_70();
-    unsigned int unk74[7];
-};
-
-class TESBase904FFB
-{
-  public:
-    virtual void vfn_90();
-    unsigned int unk94;
-};
-
-class TESObjectACTI : public TESFormBase4FFB,
-                      public TESBase304FFB,
-                      public TESBase3C4FFB,
-                      public TESBase5C4FFB,
-                      public TESBase684FFB,
-                      public TESBase704FFB,
-                      public TESBase904FFB
-{
-  public:
-    virtual ~TESObjectACTI();
-};
-
 class List_009e03e0
 {
   public:
@@ -3837,7 +3342,8 @@ class List_009e03e0
     ~List_009e03e0();
 };
 
-class FUN_004ffba0 : public TESObjectACTI
+// The terminal description component follows the activator base at 0x90.
+class FUN_004ffba0 : public TESObjectACTI, public TESDescription
 {
   public:
     List_009e03e0 m_kList;
@@ -4330,19 +3836,11 @@ struct Map6c
     void FUN_0084d310(Obj20* obj, bool value);
 };
 extern GlobalObject_0045cf30 g_011c7b98;
-class NiSourceTexture
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
+
+
 struct TESObj
 {
     void FUN_004568c0(void* arg);
-};
-struct BSTextureManager
-{
-    void* FUN_00b6e110(void* a1, int a2, int a3, int a4, int a5);
 };
 struct ImgMgr
 {

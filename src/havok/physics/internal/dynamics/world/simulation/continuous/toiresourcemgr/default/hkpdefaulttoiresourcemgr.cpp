@@ -2,7 +2,12 @@
 // src/havok/physics/internal/dynamics/world/simulation/continuous/toiresourcemgr/default/hkpdefaulttoiresourcemgr.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/dynamics/world/simulation/continuous/toiresourcemgr/default/hkpdefaulttoiresourcemgr.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpDefaultToiResourceMgr.h"
+#include "../../../../../../../../../../include/hkArray.h"
+#include "../../../../../../../../../../include/hkBool.h"
+#include "../../../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../../../include/hkResult.h"
+#include "../../../../../../../../../../include/MemoryManager.h"
+#include "../../../../../../../../../../include/hkMemoryRouter.h"
 
 extern char g_0126955c_arg0;
 
@@ -14,116 +19,85 @@ void __stdcall FUN_00d9fb50(void* self, int aiUnused)
     (*(void(__thiscall**)(void*))(*(char**)self + 0x1c))(self);
 }
 
+struct hkpToiEvent;
+
+// Local until include/hkpToiResources.h exists; the resource buffer is at +0x18.
+struct hkpToiResources
+{
+    int m_iFirstValue;
+    int m_iSecondInteger;
+    int m_iThirdValue;
+    int m_iFourthValue;
+    int m_iFifthInteger;
+    int m_numRequiredStepsForSolver;
+    char* m_pCharacterBuffer;
+    int m_iCharacterBufferSize;
+};
+
+// Local until include/hkpDefaultToiResourceMgr.h exists; reflected size is 0x10.
+class hkpDefaultToiResourceMgr
+{
+  public:
+    hkpDefaultToiResourceMgr();
+    virtual ~hkpDefaultToiResourceMgr();
+    unsigned short m_usMemSizeAndFlags;
+    short m_sReferenceCount;
+    int m_iNumToiResources;
+    int m_iMaxNumToiResources;
+
+    void* AllocateMemory(int, int, hkpToiResources*);
+    void* FUN_00d9fc70(unsigned char flag);
+
+    hkBool FUN_00d9fb40(const hkpToiEvent& event) throw();
+    hkResult AllocateToiResources(const hkpToiEvent& event, const hkArray<hkpToiEvent>& otherEvents,
+                                    hkpToiResources& resourcesOut);
+};
+
 extern int DAT_010d4310;
 
-struct FUN_00d9fb90
-{
-    void* m_ppVirtualMethodTable;  // +0x00
-    short m_pad4;    // +0x04
-    short m_pad6;    // +0x06
-    int m_pad8;      // +0x08
-    int m_fieldC;    // +0x0c
-
-    FUN_00d9fb90();
-};
-
 // @fnv 0x00d9fb90
-FUN_00d9fb90::FUN_00d9fb90()
+hkpDefaultToiResourceMgr::hkpDefaultToiResourceMgr()
 {
-    m_pad6 = 1;
-    m_ppVirtualMethodTable = (void*)&DAT_010d4310;
-    m_fieldC = 0x20000;
+    m_sReferenceCount = 1;
+    *(void**)this = (void*)&DAT_010d4310;
+    m_iMaxNumToiResources = 0x20000;
 }
 
-struct FUN_00d9fc30Arg
-{
-    unsigned char pad_00[0x18];
-    int memoryType;
-};
+hkMemoryRouter* __cdecl _D1A0E0GetMemoryRouter();
 
-struct MemoryManager
-{
-    virtual void* Function0() = 0;
-    virtual void* Function1() = 0;
-    virtual void* Function2() = 0;
-    virtual void* Function3() = 0;
-    virtual void* Function4(int, int) = 0;
-};
-
-struct MemoryRouter
-{
-    unsigned char pad_00[0x18];
-    MemoryManager* pMemoryManager;
-};
-
-MemoryRouter* __cdecl _D1A0E0GetMemoryRouter();
-
-struct FUN_00d9fc30Class
-{
-    void* pVftable;
-    void* pUnknown;
-    int allocationSize;
-
-    void* AllocateMemory(int, int, FUN_00d9fc30Arg*);
-};
-
-// Allocates this object's allocationSize bytes from the memory manager obtained via the memory router, using the memory type from pInfo.
+// Returns the resource buffer through the solver allocator, using the allocated byte count.
 // @fnv 0x00d9fc30
-void* FUN_00d9fc30Class::AllocateMemory(int, int, FUN_00d9fc30Arg* pInfo)
+void* hkpDefaultToiResourceMgr::AllocateMemory(int, int, hkpToiResources* pInfo)
 {
-    int size = this->allocationSize;
-    int memoryType = pInfo->memoryType;
-    MemoryRouter* pRouter = _D1A0E0GetMemoryRouter();
-    return pRouter->pMemoryManager->Function4(memoryType, size);
+    int size = m_iNumToiResources;
+    char* buffer = pInfo->m_pCharacterBuffer;
+    hkMemoryRouter* pRouter = _D1A0E0GetMemoryRouter();
+    // The solver allocator occupies the router slot at 0x18.
+    MemoryManager* manager = *(MemoryManager**)((char*)pRouter + 0x18);
+    typedef void* (__thiscall* ReturnBufferFunction)(MemoryManager*, char*, int);
+    return (*(ReturnBufferFunction**)manager)[4](manager, buffer, size);
 }
 
-namespace fnv_00d9fc70 {
-struct FUN_00d9fc70_MemoryManager;
+typedef void(__thiscall* FUN_00d9fc70_Callback)(MemoryManager*, void*, unsigned short);
 
-typedef void(__thiscall* FUN_00d9fc70_Callback)(FUN_00d9fc70_MemoryManager*, void*, unsigned short);
-
-struct FUN_00d9fc70_MemoryManager
-{
-    FUN_00d9fc70_Callback* vtable;
-};
-
-struct FUN_00d9fc70_Router
-{
-    void* vtable;
-    unsigned char padding[12];
-    FUN_00d9fc70_MemoryManager* memoryManager;
-};
-
-struct FUN_00d9fc70_Class
-{
-    void* vtable;
-    unsigned short value;
-
-    void __thiscall FUN_00d9fb30();
-    void* __thiscall FUN_00d9fc70(unsigned char flag);
-};
-
-FUN_00d9fc70_Router* _D1A0E0GetMemoryRouter();
-
-// Calls FUN_00d9fb30, then if flag bit 0 is set, invokes the memory manager's vtable[2] callback with this and value, and returns this.
+// Destroys the manager, optionally releases its storage, and returns this.
 // @fnv 0x00d9fc70
-void* __thiscall FUN_00d9fc70_Class::FUN_00d9fc70(unsigned char flag)
+void* hkpDefaultToiResourceMgr::FUN_00d9fc70(unsigned char flag)
 {
-    FUN_00d9fb30();
+    this->hkpDefaultToiResourceMgr::~hkpDefaultToiResourceMgr();
 
     if (flag & 1)
     {
-        FUN_00d9fc70_Router* router = _D1A0E0GetMemoryRouter();
-        FUN_00d9fc70_MemoryManager* memoryManager = router->memoryManager;
-        unsigned short size = value;
-        FUN_00d9fc70_Callback callback = memoryManager->vtable[2];
+        hkMemoryRouter* router = _D1A0E0GetMemoryRouter();
+        MemoryManager* memoryManager = reinterpret_cast<MemoryManager*>(router->m_heap);
+        unsigned short size = m_usMemSizeAndFlags;
+        FUN_00d9fc70_Callback callback = (*(FUN_00d9fc70_Callback**)memoryManager)[2];
 
         callback(memoryManager, this, size);
     }
 
     return this;
 }
-}  // namespace fnv_00d9fc70
 
 // @fnv 0x00d9fb70
 int __cdecl FUN_00d9fb70()
@@ -149,103 +123,37 @@ int __stdcall FUN_00d9fb80(int arg0)
     return 0;
 }
 
-class hkMemoryAllocatorD9FB
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+
+inline hkMemoryAllocator& solverAllocator(hkMemoryRouter& router)
 {
-  public:
-    virtual ~hkMemoryAllocatorD9FB() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void* AllocateBufferWithSize(int& iReqNumBytesInOut) throw();
-};
+    return **(hkMemoryAllocator**)((char*)&router + 0x18);
+}
 
-struct hkMemoryRouterD9FB
-{
-    int unk00, unk04, unk08, unk0C, unk10, unk14;
-    hkMemoryAllocatorD9FB* m_pSolver;
-
-    hkMemoryAllocatorD9FB& solver()
-    {
-        return *m_pSolver;
-    }
-};
-
-extern "C" hkMemoryRouterD9FB& __cdecl FUN_00c85750() throw();
-
-struct hkBoolD9FB
-{
-    char m_cBooleanValue;
-    hkBoolD9FB()
-    {}
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
-
-enum hkResultD9FB
-{
-    HK_SUCCESS_D9FB = 0,
-    HK_FAILURE_D9FB = 1
-};
-
-struct hkpToiEventD9FB;
-template <class T> struct hkArrayD9FB
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-
-struct hkpToiResourcesD9FB
-{
-    int m_iFirstValue;
-    int m_iSecondInteger;
-    int m_iThirdValue;
-    int m_iFourthValue;
-    int m_iFifthInteger;
-    int m_numRequiredStepsForSolver;
-    char* m_pCharacterBuffer;
-    int m_iCharacterBufferSize;
-};
-
-class hkpDefaultToiResourceMgrD9FB
-{
-  public:
-    virtual ~hkpDefaultToiResourceMgrD9FB();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    int m_iNumToiResources;
-    int m_iMaxNumToiResources;
-
-    hkBoolD9FB FUN_00d9fb40(const hkpToiEventD9FB& event) throw();
-    hkResultD9FB AllocateToiResources(const hkpToiEventD9FB& event, const hkArrayD9FB<hkpToiEventD9FB>& otherEvents,
-                                      hkpToiResourcesD9FB& resourcesOut);
-};
-
-template <class T> inline T* bufAllocD9FB(hkMemoryAllocatorD9FB& a, int& n)
+template <class T> inline T* hkMemoryAllocator::_bufAlloc(int& n)
 {
     int nb = n * sizeof(T);
-    T* p = static_cast<T*>(a.AllocateBufferWithSize(nb));
+    T* p = static_cast<T*>(bufAlloc(nb));
     n = nb / sizeof(T);
     return p;
 }
 
 // @fnv 0x00d9fbb0
-hkResultD9FB hkpDefaultToiResourceMgrD9FB::AllocateToiResources(const hkpToiEventD9FB& event,
-                                                                const hkArrayD9FB<hkpToiEventD9FB>& otherEvents,
-                                                                hkpToiResourcesD9FB& resourcesOut)
+hkResult hkpDefaultToiResourceMgr::AllocateToiResources(const hkpToiEvent& event,
+                                                       const hkArray<hkpToiEvent>& otherEvents,
+                                                       hkpToiResources& resourcesOut)
 {
     if (FUN_00d9fb40(event))
     {
         m_iNumToiResources = resourcesOut.m_iCharacterBufferSize = m_iMaxNumToiResources;
-        resourcesOut.m_pCharacterBuffer = bufAllocD9FB<char>(FUN_00c85750().solver(), m_iNumToiResources);
+        resourcesOut.m_pCharacterBuffer = solverAllocator(FUN_00c85750())._bufAlloc<char>(m_iNumToiResources);
         resourcesOut.m_iThirdValue = 1000;
         resourcesOut.m_iFourthValue = 1000;
         resourcesOut.m_iSecondInteger = 1000;
         resourcesOut.m_iFifthInteger = 3;
         resourcesOut.m_numRequiredStepsForSolver = 4;
         resourcesOut.m_iFirstValue = 3;
-        return HK_SUCCESS_D9FB;
+        return HK_SUCCESS;
     }
-    return HK_FAILURE_D9FB;
+    return HK_FAILURE;
 }

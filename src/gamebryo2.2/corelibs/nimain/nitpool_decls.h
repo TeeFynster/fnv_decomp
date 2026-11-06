@@ -1,5 +1,27 @@
-// gamebryo2.2/corelibs/nimain/nitpool_decls.h: declares D3DRenderStateGroup, NiStreamLinkIDSet
+// gamebryo2.2/corelibs/nimain/nitpool_decls.h: declares D3DRenderStateGroup
 
+#include "layout_support.h"
+// NiStreamLinkIDSet_nitpool_decls: local type (was include/NiStreamLinkIDSet.h, which had no evidence of one real class); its methods are 0x00a311e0 NiTSet<NiScreenGeometryData::ScreenElement *,NiTMallocInterface<NiScreenGeometryData::ScreenElement *> >::Add, 0x00a543b0 NiTSet::Ptr::Add
+class Item;
+class NiGeomMorpherUpdateTask;
+class D3DRenderStateGroup;
+
+class NiStreamLinkIDSet_nitpool_decls
+{
+public:
+    void* m_kPointA;
+    unsigned int m_uiItemCount;
+    unsigned int m_pRayCursor;
+
+    void Realloc(unsigned int);
+    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    unsigned int Find(Item* item);
+    int Find(unsigned int value);
+    void Add(Item* item);
+    void Add(NiGeomMorpherUpdateTask* pkTask);
+    void Add(D3DRenderStateGroup* p);
+    void AddUnique(Item* item);
+};
 #include "MemoryManager.h"
 extern MemoryManager g_memoryManager;
 struct D3DRenderStateGroup
@@ -7,19 +29,12 @@ struct D3DRenderStateGroup
     unsigned char data[20];
 };
 D3DRenderStateGroup* FUN_00e7f0a0(unsigned int);
-class NiStreamLinkIDSet
+inline void NiStreamLinkIDSet_nitpool_decls::Add(D3DRenderStateGroup* p)
 {
-  public:
-    D3DRenderStateGroup** m_pBase;
-    unsigned int m_uiElementCount, m_uiAllocatedCapacity;
-    void Realloc(unsigned int);
-    void Add(D3DRenderStateGroup* p)
-    {
-        if (m_uiAllocatedCapacity == m_uiElementCount)
-            Realloc(m_uiElementCount > 0 ? m_uiElementCount * 2 : 1);
-        m_pBase[m_uiAllocatedCapacity++] = p;
-    }
-};
+    if (m_pRayCursor == m_uiItemCount)
+        Realloc(m_uiItemCount > 0 ? m_uiItemCount * 2 : 1);
+    static_cast<D3DRenderStateGroup**>(m_kPointA)[m_pRayCursor++] = p;
+}
 template <class T, class A> class ObjectPoolBlock
 {
   public:
@@ -47,7 +62,7 @@ template <class T, class A> class ObjectPoolBlock
 template <class T, class A> class ObjectPool
 {
   public:
-    NiStreamLinkIDSet freeObjects;
+    NiStreamLinkIDSet_nitpool_decls freeObjects;
     ObjectPoolBlock<T, A>* containers;
     unsigned int currentSize, initialSize;
     void AddPoolBlock(unsigned int n);

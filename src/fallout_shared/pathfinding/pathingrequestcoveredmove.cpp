@@ -1,4 +1,6 @@
 
+#include "../../../include/NiPoint3.h"
+
 // src/fallout_shared/pathfinding/pathingrequestcoveredmove.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/pathfinding/pathingrequestcoveredmove.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -93,22 +95,15 @@ void* FUN_006e4cd0_shell::FUN_006e4cd0(unsigned int flags)
     return this;
 }
 
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-};
-extern NiPoint3 NiPoint3_ZERO;
 struct FUN_006e4f50_shell
 {
     void FUN_006e4f50();
 };
-// Sets the NiPoint3 at offset 0xd4 to NiPoint3_ZERO and clears the byte at offset 0xe0.
+// Sets the NiPoint3 at offset 0xd4 to NiPoint3::ZERO and clears the byte at offset 0xe0.
 // @fnv 0x006e4f50
 void FUN_006e4f50_shell::FUN_006e4f50()
 {
-    *(NiPoint3*)((char*)this + 0xd4) = NiPoint3_ZERO;
+    *(NiPoint3*)((char*)this + 0xd4) = NiPoint3::ZERO;
     *(char*)((char*)this + 0xe0) = 0;
 }
 

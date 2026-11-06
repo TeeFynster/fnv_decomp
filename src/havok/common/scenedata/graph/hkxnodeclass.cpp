@@ -1,3 +1,4 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/common/scenedata/graph/hkxnodeclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/graph/hkxnodeclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -65,14 +66,8 @@ template <class T> __forceinline void DFD840Destruct(T* p, int n)
         p[i].~T();
 }
 
-template <class T> struct DFD840Array
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline ~DFD840Array() throw()
-    {
         DFD840Allocator& alloc = DFD840GetMemoryRouter().heap();
         DFD840Destruct(m_data, m_iElementCount);
         m_iElementCount = 0;
@@ -80,15 +75,15 @@ template <class T> struct DFD840Array
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-};
+    
+}
 
 class FUN_00dfd840 : public DFD840Base
 {
   public:
     ~FUN_00dfd840() throw();
 
-    DFD840Array<DFD840Entry> m_kEntries;
+    hkArray<DFD840Entry> m_kEntries;
 };
 
 // @fnv 0x00dfd840

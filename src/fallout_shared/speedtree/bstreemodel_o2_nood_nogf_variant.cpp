@@ -1,3 +1,14 @@
+#include "../../../include/NiPointer.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/hkVector4.h"
+#include "../../../include/AutoMemContext.h"
+#include "../../../include/BSStream.h"
+#include "../../../include/NiStream.h"
+#include "../../../include/BSTreeModel.h"
+#include "../../../include/NiAlphaProperty.h"
+#include "../../../include/TESModel.h"
+#include "../../../include/TESObjectTREE.h"
+#include "../../../include/bhkCollisionObject.h"
 
 // src/fallout_shared/speedtree/bstreemodel_o2_nood_nogf_variant.cpp - flag-variant unit created 2026-10-24 by flag_moves.py: the bytes and the matched neighbours of these functions
 // say /MT /O2 /GS /EHsc /Gy (unit src/fallout_shared/speedtree/bstreemodel.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions to their real
@@ -5,12 +16,6 @@
 
 // src/fallout_shared/speedtree/bstreemodel.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/speedtree/bstreemodel.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct BSTreeModel
-{
-    virtual ~BSTreeModel();
-    void* DestroyAndFree(unsigned int flags);
-    static void operator delete(void* p, unsigned int flags);
-};
 struct FUN_00666f00_shell
 {
     int m_04;
@@ -73,28 +78,13 @@ struct S_00666910
     void* FUN_00666910(unsigned int);
 };
 void _Deallocate(void*);
-struct NiAlphaProperty
-{
-    char m_auiShapeKeys[0x1c];
-    NiAlphaProperty();
-    ~NiAlphaProperty();
-    void FUN_0049ed90(bool);
-    void SetFlag512(bool);
-    void SetFlags(unsigned short);
-    void FUN_0094db80(unsigned char);
-    static void* operator new(unsigned int);
-};
 NiAlphaProperty* FUN_006698f0();
 struct RefBase
 {
     virtual ~RefBase();
     unsigned int m_uiRefCount;
 };
-struct NiPtr
-{
-    void* m_pObject;
-    ~NiPtr();
-};
+
 struct TreeData
 {
     ~TreeData();
@@ -103,25 +93,19 @@ struct FUN_00666800 : RefBase
 {
     int unk08;
     TreeData* pData;
-    NiPtr spNode10;
+    ::NiPointer< ::NiObject> spNode10;
     int unk14;
     int unk18;
-    NiPtr spNode1C;
-    NiPtr spNode20;
+    ::NiPointer< ::NiObject> spNode1C;
+    ::NiPointer< ::NiObject> spNode20;
     int unk24;
     int unk28;
-    NiPtr spNode2C;
-    NiPtr spNode30;
-    NiPtr spNode34;
-    NiPtr spNode38;
+    ::NiPointer< ::NiObject> spNode2C;
+    ::NiPointer< ::NiObject> spNode30;
+    ::NiPointer< ::NiObject> spNode34;
+    ::NiPointer< ::NiObject> spNode38;
     virtual ~FUN_00666800();
     void ReleaseData();
-};
-struct Point3X
-{
-    float x, y, z;
-    Point3X();
-    Point3X(float afX, float afY, float afZ);
 };
 struct Point2X
 {
@@ -149,7 +133,7 @@ struct LeafDataX : public MemObjX
 struct StripsDataX : public MemObjX
 {
     char _pad[0x50];
-    StripsDataX(unsigned int a1, Point3X* a2, Point3X* a3, unsigned int a4, Point2X* a5, unsigned int a6,
+    StripsDataX(unsigned int a1, NiPoint3* a2, NiPoint3* a3, unsigned int a4, Point2X* a5, unsigned int a6,
                 unsigned int a7, unsigned int a8, unsigned int a9, unsigned short* a10, unsigned short* a11);
     void FUN_00a67050(unsigned int auiFlags);
     void SetByteAtOffset38(unsigned char aucFlags);
@@ -209,7 +193,7 @@ struct UIntArrayX
     unsigned int GetSize();
     unsigned int* GetAt(unsigned int auiIndex);
 };
-extern const Point3X xDAT_011a9484;
+extern const NiPoint3 xDAT_011a9484;
 extern "C" int xIsNaN(double adValue);
 extern "C" void* xNiMalloc(unsigned int auiSize);
 extern "C" void* xmemcpy(void* apDst, const void* apSrc, unsigned int auiSize);
@@ -239,33 +223,11 @@ struct GlobalObject_0044fae0
 };
 extern GlobalObject_0044fae0 g_011d5df8;
 extern unsigned char treeCloneActive;
-struct AutoMemContext
-{
-    int previous;
-    AutoMemContext(int, bool, const char*, int);
-    ~AutoMemContext();
-};
 struct TreeCloneProcess
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
     TreeCloneProcess(float);
     ~TreeCloneProcess();
-};
-struct NiNode
-{
-    NiNode* Clone();
-    NiNode* CloneWithProcess(TreeCloneProcess*);
-};
-template <class T> struct NiPointer
-{
-    T* object;
-    NiPointer();
-    ~NiPointer();
-    NiPointer& operator=(const NiPointer&);
-    NiPointer& operator=(T*);
-    operator T*();
-    static void* operator new[](unsigned int);
-    static void operator delete[](void*);
 };
 struct TreeRuntimeCopy
 {
@@ -333,48 +295,10 @@ class FileFinder
     };
     static FILE_LOCATION Exist(const char* apPath, char* apOut, unsigned int auiArg, unsigned int auiArgCur);
 };
-struct NiRTTI;
 extern const NiRTTI DAT_011f4280;
-class NiAVObject;
 NiAVObject* NiDynamicCast(const NiRTTI* apRTTI, NiAVObject* apObject);
 struct bhkWorldObject;
-struct bhkCollisionObject
-{
-    bhkWorldObject* FUN_006fa820();
-};
 bhkCollisionObject* FUN_004a8b00(NiNode* apNode);
-class NiStream
-{
-  public:
-    int m_kNextStreamField[0x5cc / 4];
-    virtual ~NiStream();
-    bool FUN_00c3a8a0(const char* apPath, bool abFlag);
-    int GetRefAt21C();
-    NiAVObject* GetStringAt(unsigned int auiIndex);
-};
-class BSStream : public NiStream
-{
-  public:
-    BSStream();
-    virtual ~BSStream();
-};
-class TESModel
-{
-  public:
-    virtual ~TESModel();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual const char* GetModelFileName();
-};
-class TESObjectTREE
-{
-  public:
-    char pad[0x30];
-    TESModel kModel;
-    bool FUN_0051d250();
-};
 NiNode* __cdecl FUN_00c81380(float afArg, float afArgCur);
 struct ModelName
 {
@@ -878,17 +802,12 @@ Tree* Model::CreateTree(float scale)
 }
 }
 
-#include <xmmintrin.h>
-struct hkVector4C813
-{
-    __m128 m_vComponents;
-};
 struct __declspec(align(16)) CapsuleParams
 {
     int flags;
     float radius;
     int unk08, unk0c;
-    hkVector4C813 endpoints[2];
+    hkVector4 endpoints[2];
 };
 struct FUN_0066d6a0 : MemObjX
 {
@@ -929,12 +848,12 @@ struct __declspec(align(16)) FUN_00c8f510
     void* shape24;
     int unk28;
     int unk2c;
-    hkVector4C813 position;
-    hkVector4C813 rotation;
-    hkVector4C813 linearVelocity;
-    hkVector4C813 angularVelocity;
-    hkVector4C813 inertiaTensor[3];
-    hkVector4C813 centerOfMass;
+    hkVector4 position;
+    hkVector4 rotation;
+    hkVector4 linearVelocity;
+    hkVector4 angularVelocity;
+    hkVector4 inertiaTensor[3];
+    hkVector4 centerOfMass;
     float valueb0;
     int unkb4;
     int unkb8;
@@ -966,6 +885,8 @@ struct FUN_0056d380 : MemObjX
 };
 extern float DAT_01267e44;
 extern float DAT_01018180;
+// hkVector4 has a constructor, so retain /GS coverage for the capsule buffer.
+#pragma strict_gs_check(push, on)
 // @fnv 0x00c81380
 NiNode* __cdecl FUN_00c81380(float a, float b)
 {
@@ -1002,3 +923,4 @@ NiNode* __cdecl FUN_00c81380(float a, float b)
     }
     return result;
 }
+#pragma strict_gs_check(pop)

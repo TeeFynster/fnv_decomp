@@ -126,14 +126,10 @@ struct S_00d6cb30_Vector4
     }
 };
 
-struct S_00d6cb30_Rotation
-{
-    S_00d6cb30_Vector4 m_kColumn0;
-    S_00d6cb30_Vector4 m_kColumn1;
-    S_00d6cb30_Vector4 m_kColumn2;
-};
+#include "../../../../../../include/hkRotation.h"
 
-inline void S_00d6cb30_setRotatedDir(S_00d6cb30_Vector4& out, const S_00d6cb30_Rotation& m, const S_00d6cb30_Vector4& v)
+
+inline void S_00d6cb30_setRotatedDir(S_00d6cb30_Vector4& out, const hkRotation& m, const S_00d6cb30_Vector4& v)
 {
     const __m128 b = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55);
     const __m128 r1 = _mm_mul_ps(b, m.m_kColumn1.m_vComponents);
@@ -163,7 +159,7 @@ struct S_00d6cb30_Accumulator
     int unk44;
     int unk48;
     int unk4C;
-    S_00d6cb30_Rotation m_coreFromWorldMatrix;
+    hkRotation m_coreFromWorldMatrix;
 };
 
 struct S_00d6cb30_Jacobian

@@ -6,6 +6,9 @@
 // src/staging/blk_00de0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/FinishingFlag.h"
+#define FNV_VEC4_SCALAR
+#include "../../include/Vec4.h"
 
 struct __declspec(align(8)) Entry8
 {
@@ -20,11 +23,6 @@ void FUN_00df32a0(Entry8* table, int index, int n)
     e.m_key = 0x7fffffff;
     table[index] = e;
 }
-
-struct FinishingFlag
-{
-    int m_bFinishing;
-};
 
 __declspec(align(16)) struct HavokObjDfd
 {
@@ -50,11 +48,6 @@ void* __cdecl FUN_00dfd320()
     return o.m_ppVirtualMethodTable;
 }
 
-struct DFFFinishFlag
-{
-    int m_bFinishing;
-};
-
 struct __declspec(align(16)) DFFObject
 {
     void* m_vtbl;
@@ -73,22 +66,17 @@ struct __declspec(align(16)) DFFObject
     int unk34;
     int unk38;
     int unk3C;
-    DFFObject(DFFFinishFlag flag);
+    DFFObject(FinishingFlag flag);
 };
 
 // @fnv 0x00dff1a0
 void* FUN_00dff1a0()
 {
-    DFFFinishFlag f;
+    FinishingFlag f;
     f.m_bFinishing = 0;
     DFFObject o(f);
     return o.m_vtbl;
 }
-
-struct FinishFlag
-{
-    int m_bFinishing;
-};
 
 struct __declspec(align(16)) FinishLoadedShape
 {
@@ -100,13 +88,13 @@ struct __declspec(align(16)) FinishLoadedShape
     int unk14;
     int unk18;
     int unk1c;
-    FinishLoadedShape(FinishFlag flag);
+    FinishLoadedShape(FinishingFlag flag);
 };
 
 // @fnv 0x00dff550
 void* __cdecl FUN_00dff550()
 {
-    FinishFlag f;
+    FinishingFlag f;
     f.m_bFinishing = 0;
     FinishLoadedShape o(f);
     return *(void**)&o;
@@ -185,16 +173,6 @@ void S_00de2010_Class::FUN_00de2010(const S_00de2010_Vec* arg0, const S_00de2010
     unk40 = arg1[3];
 }
 
-struct __declspec(align(16)) Vec4
-{
-    __m128 m_vComponents;
-
-    void operator=(const Vec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-
 struct __declspec(align(16)) SetupTarget
 {
     int unk00;
@@ -236,19 +214,14 @@ struct __declspec(align(16)) SetupTarget
 void SetupTarget::FUN_00de4950(float f98, float f90, float f94, int i9C, const Vec4& v80, const Vec4& v60,
                                const Vec4& v70)
 {
-    m_vec80 = v80;
-    m_vec60 = v60;
-    m_vec70 = v70;
+    reinterpret_cast<__m128&>(m_vec80) = reinterpret_cast<const __m128&>(v80);
+    reinterpret_cast<__m128&>(m_vec60) = reinterpret_cast<const __m128&>(v60);
+    reinterpret_cast<__m128&>(m_vec70) = reinterpret_cast<const __m128&>(v70);
     m_float90 = f90;
     m_float94 = f94;
     m_int9C = i9C;
     m_float98 = f98;
 }
-
-struct S00de49b0_Vec4
-{
-    float x, y, z, w;
-};
 
 struct S00de49b0_Quad
 {
@@ -263,6 +236,7 @@ struct S00de49b0_Quad
     }
 };
 
+// local form of hkRotation: 0x00de49b0 needs implicit construction and inline setIdentity; shared form gives 202 bytes vs exe 199.
 struct S00de49b0_Rotation
 {
     S00de49b0_Quad m_kColumn0;
@@ -315,13 +289,13 @@ class __declspec(novtable) S00de49b0_Base : public S00de49b0_RefObject
 class FUN_00de49b0 : public S00de49b0_Base
 {
   public:
-    FUN_00de49b0(const S00de49b0_Vec4& kC, const S00de49b0_Vec4& kA, const S00de49b0_Vec4& kB, float f1, float f2,
+    FUN_00de49b0(const Vec4& kC, const Vec4& kA, const Vec4& kB, float f1, float f2,
                  float f3, int i1);
     virtual void vf00();
 
-    S00de49b0_Vec4 m_kA;
-    S00de49b0_Vec4 m_kB;
-    S00de49b0_Vec4 m_kC;
+    Vec4 m_kA;
+    Vec4 m_kB;
+    Vec4 m_kC;
     float m_f90;
     float m_f94;
     float m_f98;
@@ -329,7 +303,7 @@ class FUN_00de49b0 : public S00de49b0_Base
 };
 
 // @fnv 0x00de49b0
-FUN_00de49b0::FUN_00de49b0(const S00de49b0_Vec4& kC, const S00de49b0_Vec4& kA, const S00de49b0_Vec4& kB, float f1,
+FUN_00de49b0::FUN_00de49b0(const Vec4& kC, const Vec4& kA, const Vec4& kB, float f1,
                            float f2, float f3, int i1)
     : m_kA(kA), m_kB(kB), m_kC(kC), m_f90(f1), m_f94(f2), m_f98(f3), m_i9C(i1)
 {}
@@ -358,11 +332,6 @@ void FUN_00de5370_cls::FUN_00de5370(float f1, float f2, int i1, const __m128* p1
     m_i80 = i1;
 }
 
-struct S00de53b0_Vec4
-{
-    float x, y, z, w;
-};
-
 struct S00de53b0_Quad
 {
     __m128 m_vComponents;
@@ -376,6 +345,7 @@ struct S00de53b0_Quad
     }
 };
 
+// local form of hkRotation: 0x00de53b0 needs implicit construction and inline setIdentity; shared form gives 155 bytes vs exe 152.
 struct S00de53b0_Rotation
 {
     S00de53b0_Quad m_kColumn0;
@@ -428,18 +398,18 @@ class __declspec(novtable) S00de53b0_Base : public S00de53b0_RefObject
 class FUN_00de53b0 : public S00de53b0_Base
 {
   public:
-    FUN_00de53b0(float f1, float f2, int i1, const S00de53b0_Vec4& p1, const S00de53b0_Vec4& p2);
+    FUN_00de53b0(float f1, float f2, int i1, const Vec4& p1, const Vec4& p2);
     virtual void vf00();
 
-    S00de53b0_Vec4 m_v60;
-    S00de53b0_Vec4 m_v70;
+    Vec4 m_v60;
+    Vec4 m_v70;
     int m_i80;
     float m_f84;
     float m_f88;
 };
 
 // @fnv 0x00de53b0
-FUN_00de53b0::FUN_00de53b0(float f1, float f2, int i1, const S00de53b0_Vec4& p1, const S00de53b0_Vec4& p2)
+FUN_00de53b0::FUN_00de53b0(float f1, float f2, int i1, const Vec4& p1, const Vec4& p2)
     : m_v60(p2), m_v70(p1), m_i80(i1), m_f84(f1), m_f88(f2)
 {}
 
@@ -524,7 +494,8 @@ void __stdcall FUN_00df3120(__m128* dest, unsigned int index, __m128* src)
     *(__m128*)((char*)dest + (index << 4)) = *src;
 }
 
-struct Vector4f
+// Exe 0x00df32d0: unit-local Vector4f view; declarations and layout are preserved.
+struct BlkVector4fView
 {
     unsigned int a, b, c, d;
 };
@@ -535,9 +506,9 @@ struct MetaEntry
 };
 
 // @fnv 0x00df32d0
-void __cdecl FUN_00df32d0(MetaEntry* meta, Vector4f* src, __m128* dst, unsigned int metaIndex, unsigned int index)
+void __cdecl FUN_00df32d0(MetaEntry* meta, BlkVector4fView* src, __m128* dst, unsigned int metaIndex, unsigned int index)
 {
-    __declspec(align(16)) Vector4f u = src[index];
+    __declspec(align(16)) BlkVector4fView u = src[index];
     MetaEntry e;
     e.index = index & 0x7fffffff;
     e.state = 1;
@@ -570,11 +541,6 @@ __m128* __cdecl FUN_00df5d20(__m128* fields, const __m128* input, __m128* outA, 
     *outB = _mm_and_ps(*outB, DAT_010cbfc0);
     return fields;
 }
-
-struct FUN_00c93d10_arg
-{
-    int m_uiFilterValue;
-};
 
 struct __declspec(align(16)) Holder
 {
@@ -789,14 +755,14 @@ struct __declspec(align(16)) Holder
     unsigned int unk340;
     unsigned int unk344;
     unsigned int unk348;
-    void FUN_00c93d10(FUN_00c93d10_arg arg);
+    void FUN_00c93d10(FinishingFlag arg);
 };
 
 // @fnv 0x00df6470
 void* FUN_00df6470()
 {
     Holder holder;
-    FUN_00c93d10_arg arg = {0};
+    FinishingFlag arg(0);
     holder.FUN_00c93d10(arg);
     return holder.m_pVTable;
 }
@@ -840,11 +806,6 @@ extern "C" char DAT_010d0d70;
 extern "C" char DAT_010d0dac;
 extern "C" char DAT_010c6fd0;
 
-struct FinishFlag
-{
-    int m_bFinishing;
-};
-
 struct ShapeChild
 {
     int unk00;
@@ -871,11 +832,11 @@ struct FUN_00dfb2d0
     __m128 unk20;
     char* unk30;
 
-    FUN_00dfb2d0(FinishFlag flag);
+    FUN_00dfb2d0(FinishingFlag flag);
 };
 
 // @fnv 0x00dfb2d0
-FUN_00dfb2d0::FUN_00dfb2d0(FinishFlag flag)
+FUN_00dfb2d0::FUN_00dfb2d0(FinishingFlag flag)
 {
     this->unk00 = &DAT_010305a8;
 
@@ -1020,11 +981,6 @@ const void* __cdecl FUN_00dfc7a0()
     return kObject.m_ppVirtualMethodTable;
 }
 
-struct DFC830Zero
-{
-    int m_uiFilterValue;
-};
-
 struct __declspec(align(16)) DFC830Obj
 {
     int unk00;
@@ -1119,14 +1075,14 @@ struct __declspec(align(16)) DFC830Obj
     int unk164;
     int unk168;
     int unk16C;
-    void FUN_00dfc850(DFC830Zero arg);
+    void FUN_00dfc850(FinishingFlag arg);
 };
 
 // @fnv 0x00dfc830
 void* FUN_00dfc830()
 {
     DFC830Obj holder;
-    DFC830Zero zero = {0};
+    FinishingFlag zero(0);
     holder.FUN_00dfc850(zero);
     return *(void**)&holder.unk00;
 }
@@ -1163,13 +1119,9 @@ const void* __cdecl FUN_00dfcb70()
     return kObject.m_ppVirtualMethodTable;
 }
 
-struct Handle_dfce10
-{
-    int m_v;
-};
 struct __declspec(align(16)) FUN_00d53df0
 {
-    FUN_00d53df0(Handle_dfce10 kHandle);
+    FUN_00d53df0(FinishingFlag kHandle);
     int m_iResult;
     int unk04;
     int unk08;
@@ -1190,7 +1142,7 @@ struct __declspec(align(16)) FUN_00d53df0
 // @fnv 0x00dfce10
 int __cdecl FUN_00dfce10()
 {
-    Handle_dfce10 kHandle = {0};
+    FinishingFlag kHandle(0);
     FUN_00d53df0 kQuery(kHandle);
     return kQuery.m_iResult;
 }
@@ -1330,11 +1282,6 @@ const void* __cdecl FUN_00dfd280()
 //
 // The simple aligned ESP frame is /O2 WITHOUT /Oy- output (dfc830/d4b330 twins:
 // proofs accepted). Source mirrors the accepted dfc830 draft.
-struct Zero
-{
-    int v;
-};
-
 struct __declspec(align(16)) Dfd630Obj
 {
     int unk00;  // vptr slot written by the ctor
@@ -1365,29 +1312,24 @@ struct __declspec(align(16)) Dfd630Obj
     int unk64;
     int unk68;
     int unk6C;
-    void FUN_00e3e380(Zero arg);
+    void FUN_00e3e380(FinishingFlag arg);
 };
 
 // @fnv 0x00dfd630
 void* FUN_00dfd630()
 {
     Dfd630Obj holder;
-    Zero z = {0};
+    FinishingFlag z(0);
     holder.FUN_00e3e380(z);
     return *(void**)&holder.unk00;
 }
 
 unsigned int DAT_010e33dc;
 
-struct FUN_00dfd9b0_arg
-{
-    int m_uiFilterValue;
-};
-
 struct FUN_00dfd9b0_sub
 {
     int m_00;
-    void FUN_00cb0a70(FUN_00dfd9b0_arg arg);
+    void FUN_00cb0a70(FinishingFlag arg);
 };
 
 struct __declspec(align(16)) FUN_00dfd9b0_holder
@@ -1430,7 +1372,7 @@ struct __declspec(align(16)) FUN_00dfd9b0_holder
 unsigned int* FUN_00dfd9b0()
 {
     FUN_00dfd9b0_holder holder;
-    FUN_00dfd9b0_arg arg = {0};
+    FinishingFlag arg(0);
     holder.m_pTable = &DAT_010e33dc;
     holder.m_sub.FUN_00cb0a70(arg);
     return holder.m_pTable;
@@ -1490,15 +1432,10 @@ const void* __cdecl FUN_00dfe280()
 
 int DAT_010cb864;
 
-struct ZArgDFE2F0
-{
-    int m_uiFilterValue;
-};
-
 struct ZSubDFE2F0
 {
     int m_00;
-    void FUN_00ce5360(ZArgDFE2F0 arg);
+    void FUN_00ce5360(FinishingFlag arg);
 };
 
 struct __declspec(align(16)) ZHolderDFE2F0
@@ -1541,16 +1478,11 @@ struct __declspec(align(16)) ZHolderDFE2F0
 int* FUN_00dfe2f0()
 {
     ZHolderDFE2F0 holder;
-    ZArgDFE2F0 arg = {0};
+    FinishingFlag arg(0);
     holder.unk00 = (int)&DAT_010cb864;
     holder.m_sub.FUN_00ce5360(arg);
     return *(int**)&holder.unk00;
 }
-
-struct FUN_00dfe440_arg
-{
-    int m_uiFilterValue;
-};
 
 struct __declspec(align(16)) FUN_00dfe440_obj
 {
@@ -1594,24 +1526,20 @@ struct __declspec(align(16)) FUN_00dfe440_obj
     unsigned int unk94;
     unsigned int unk98;
     unsigned int unk9C;
-    void FUN_00e40ca0(FUN_00dfe440_arg arg);
+    void FUN_00e40ca0(FinishingFlag arg);
 };
 
 // @fnv 0x00dfe440
 int FUN_00dfe440()
 {
     FUN_00dfe440_obj obj;
-    obj.FUN_00e40ca0(FUN_00dfe440_arg());
+    obj.FUN_00e40ca0(FinishingFlag());
     return obj.m_pVTable;
 }
 
-struct Handle_dff130
-{
-    int m_v;
-};
 struct FUN_00dff130_sub
 {
-    void FUN_00cb0a70(Handle_dff130 kHandle);
+    void FUN_00cb0a70(FinishingFlag kHandle);
     int m_00;
 };
 extern int DAT_010cc2fc;
@@ -1642,7 +1570,7 @@ struct __declspec(align(16)) FUN_00dff130_obj
 // @fnv 0x00dff130
 int* __cdecl FUN_00dff130()
 {
-    Handle_dff130 kHandle = {0};
+    FinishingFlag kHandle(0);
     FUN_00dff130_obj kObj;
     kObj.m_pVtbl = &DAT_010cc2fc;
     kObj.m_kSub.FUN_00cb0a70(kHandle);
@@ -1854,10 +1782,6 @@ const void* __cdecl FUN_00dfffa0()
     return *reinterpret_cast<const void**>(&kObject);
 }
 
-struct Vec4_de1190
-{
-    float v[4];
-};  // unaligned 4-float argument type (copied by dwords)
 struct __declspec(align(16)) Quad_de1190
 {
     float q[4];
@@ -1902,25 +1826,27 @@ struct TransformShape_de1190 : RefObject_de1190
 
 struct Shape_de1190 : TransformShape_de1190
 {
-    Vec4_de1190 m_kMin;
-    Vec4_de1190 m_kMax;
-    Shape_de1190(const Vec4_de1190& kMinBoundsCur, const Vec4_de1190& kMaxPoint);
+    Vec4 m_kMin;
+    Vec4 m_kMax;
+    Shape_de1190(const Vec4& kMinBoundsCur, const Vec4& kMaxPoint);
     virtual ~Shape_de1190();
 };
 
 // @fnv 0x00de1190
-Shape_de1190::Shape_de1190(const Vec4_de1190& kMinBoundsCur, const Vec4_de1190& kMaxPoint)
+Shape_de1190::Shape_de1190(const Vec4& kMinBoundsCur, const Vec4& kMaxPoint)
+    : m_kMin(Vec4::Uninitialized), m_kMax(Vec4::Uninitialized)
 {
     m_kMin = kMinBoundsCur;
     m_kMax = kMaxPoint;
 }
 
 namespace SIMD56 {
-struct __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00df56a0 FUN_00df56a0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef struct __declspec(intrin_type) __declspec(align(16)) {
     float x, y, z, w;
-};
-extern "C" __m128 _mm_and_ps(__m128, __m128);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_and_ps(LocalM128, LocalM128);
 }
 struct SplitB
 {
@@ -1938,12 +1864,12 @@ struct Node56
     int m14;
     int m18;
     int m1c;
-    SIMD56::__m128 m20;
+    SIMD56::LocalM128 m20;
     int m30;
     int m34;
     int m38;
     int m3c;
-    SIMD56::__m128 m40;
+    SIMD56::LocalM128 m40;
 };
 
 struct W2
@@ -1971,8 +1897,8 @@ struct Pairs56
     SplitB r[2];
 };
 
-extern SIMD56::__m128 DAT_012684d0;
-extern SIMD56::__m128 DAT_01268460[];
+extern SIMD56::LocalM128 DAT_012684d0;
+extern SIMD56::LocalM128 DAT_01268460[];
 
 struct Output56
 {
@@ -1989,8 +1915,8 @@ struct Output56
 int FUN_00df32a0(Output56* a, int b, int c);
 int FUN_00df32d0(Output56* a, int b, int c, int d, int e, int f);
 int FUN_00df3330(Output56* a, int b, int c, int d, int e, int f, int g);
-__declspec(noalias) int FUN_00df4ec0(SplitB* a, int b, int c, SplitA* sa, int* p5, SplitB* sb, SIMD56::__m128* v20,
-                                     SIMD56::__m128* v40);
+__declspec(noalias) int FUN_00df4ec0(SplitB* a, int b, int c, SplitA* sa, int* p5, SplitB* sb, SIMD56::LocalM128* v20,
+                                     SIMD56::LocalM128* v40);
 
 // @fnv 0x00df56a0
 int FUN_00df56a0(Node56* p, Output56** p2, int p3, int* p4, int* p5)
@@ -2064,8 +1990,8 @@ int FUN_00df56a0(Node56* p, Output56** p2, int p3, int* p4, int* p5)
         t[2] = 3;
         struct
         {
-            SIMD56::__m128 table;
-            SIMD56::__m128 result;
+            SIMD56::LocalM128 table;
+            SIMD56::LocalM128 result;
         } masks;
         masks.table = DAT_01268460[t[a]];
         masks.result = SIMD56::_mm_and_ps(masks.table, p->m40);
@@ -2129,8 +2055,8 @@ class __declspec(align(16)) S00dfe5e0_Object
   public:
     S00dfe5e0_Object(FinishingFlag flag)
     {
-        FUN_00dfd9b0_arg arg;
-        arg.m_uiFilterValue = flag.m_bFinishing;
+        FinishingFlag arg;
+        arg.m_bFinishing = flag.m_bFinishing;
         m_kFirst.FUN_00cb0a70(arg);
         m_kSecond.FUN_00cb0a70(arg);
     }
@@ -2318,7 +2244,7 @@ class __declspec(align(16)) AnimationBindingVtableProbe
   public:
     AnimationBindingVtableProbe(FinishingFlag flag)
     {
-        FUN_00dfd9b0_arg argument = {flag.m_bFinishing};
+        FinishingFlag argument(flag.m_bFinishing);
         m_skeletonName.FUN_00cb0a70(argument);
     }
     virtual void vf00();
@@ -2378,7 +2304,7 @@ struct __declspec(align(16)) SpringVtableObject
 // @fnv 0x00dfef90
 const void* __cdecl FUN_00dfef90()
 {
-    Handle_dff130 finish = {0};
+    FinishingFlag finish(0);
     SpringVtableObject object;
     object.m_ppVirtualMethodTable = &DAT_010cc2fc;
     object.m_name.FUN_00cb0a70(finish);
@@ -2415,7 +2341,7 @@ struct __declspec(align(16)) ContactSystemView
 // @fnv 0x00dff220
 const void* __cdecl FUN_00dff220()
 {
-    FUN_00dfd9b0_arg flag = {0};
+    FinishingFlag flag(0);
     ContactSystemView object;
     object.table = &DAT_010cce28;
     object.name.FUN_00cb0a70(flag);
@@ -2455,7 +2381,7 @@ struct __declspec(align(16)) VtableProbeDff2b0
 // @fnv 0x00dff2b0
 const void* __cdecl FUN_00dff2b0()
 {
-    Handle_dff130 flag = {0};
+    FinishingFlag flag(0);
     VtableProbeDff2b0 object;
     object.m_ppVirtualMethodTable = &DAT_010cc2fc;
     object.m_name.FUN_00cb0a70(flag);
@@ -2503,7 +2429,7 @@ struct __declspec(align(16)) DashpotTypeInfoObject
 // @fnv 0x00dff9f0
 int* __cdecl FUN_00dff9f0()
 {
-    Handle_dff130 finishing = {0};
+    FinishingFlag finishing(0);
     DashpotTypeInfoObject object;
     object.m_pAction.m_pVtbl = &DAT_010cc2fc;
     object.m_pAction.m_kSub.FUN_00cb0a70(finishing);
@@ -2535,7 +2461,7 @@ struct __declspec(align(16)) AngularActionVtableObject
 // @fnv 0x00dffc20
 const void* __cdecl FUN_00dffc20()
 {
-    Handle_dff130 flag = {0};
+    FinishingFlag flag(0);
     AngularActionVtableObject object;
     object.m_ppVirtualMethodTable = &DAT_010cc2fc;
     object.m_name.FUN_00cb0a70(flag);

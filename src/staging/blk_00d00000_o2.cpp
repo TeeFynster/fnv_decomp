@@ -3,6 +3,17 @@
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/hkMemoryRouter.h"
+// Exe 0x00d1b290 QueryKdTree: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+
+#define FNV_VEC4_NO_SSE
+#define FNV_VEC4_SIMD
+#include "../../include/Vec4.h"
 
 // @fnv 0x00d1a300
 void __cdecl InitArrayEntries(int** apEntries, int count)
@@ -98,23 +109,15 @@ void FUN_00d1fa20_t::ResetEntries()
     *(unsigned char*)((char*)this + 0x24) = 0;
 }
 
-struct SpawnedAllocator
+class Allocator
 {
+public:
     virtual void v0();
     virtual void* Alloc(unsigned int size);
     virtual void Free(void* p, unsigned int size);
 };
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    SpawnedAllocator* m_pAllocator;
-};
-
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 extern "C" void __cdecl FUN_00ec44d0(void* dst, const void* src, unsigned int size);
 
 struct FUN_00d06c30_cls
@@ -127,8 +130,8 @@ struct FUN_00d06c30_cls
 // @fnv 0x00d06c30
 extern "C" void __cdecl FUN_00d06c30(FUN_00d06c30_cls* self, unsigned int newCap, unsigned int elemSize)
 {
-    AllocHolder* holder = FUN_00c85750();
-    SpawnedAllocator* alloc = holder->m_pAllocator;
+    hkMemoryRouter* holder = FUN_00c85750();
+    Allocator* alloc = reinterpret_cast<Allocator*>(holder->m_heap);
     char* newBuf = (char*)alloc->Alloc(newCap * elemSize);
     FUN_00ec44d0(newBuf, self->m_pData, self->m_usElementCount * elemSize);
     if ((self->m_usCap & 0x8000) == 0)
@@ -136,7 +139,7 @@ extern "C" void __cdecl FUN_00d06c30(FUN_00d06c30_cls* self, unsigned int newCap
         unsigned int size = (self->m_usCap & 0x3fff) * elemSize;
         char* oldBuf = self->m_pData;
         holder = FUN_00c85750();
-        alloc = holder->m_pAllocator;
+        alloc = reinterpret_cast<Allocator*>(holder->m_heap);
         alloc->Free(oldBuf, size);
     }
     self->m_pData = newBuf;
@@ -576,9 +579,9 @@ int __thiscall FUN_00d07070_s::FUN_00d07070(unsigned char flag)
 
     if (flag & 1)
     {
-        AllocHolder* holder = FUN_00c85750();
+        hkMemoryRouter* holder = FUN_00c85750();
         unsigned short value = unk04;
-        holder->m_pAllocator->Free(reinterpret_cast<void*>(this), value);
+        holder->m_heap->blockFree(reinterpret_cast<void*>(this), value);
     }
 
     return reinterpret_cast<int>(this);
@@ -948,14 +951,9 @@ FUN_00d107d0_t* FUN_00d107d0_t::FUN_00d107d0(int v)
     return this;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 
-extern "C" __m128 _mm_load_ps(const float* p);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
+extern "C" LocalM128 _mm_load_ps(const float* p);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
 
 struct S00d1b7f0_Input
 {
@@ -987,10 +985,10 @@ struct S00d1b7f0_Frame
     int v1;
     int v2;
     int v3;
-    __m128 diff;
+    LocalM128 diff;
 };
 
-extern "C" void __cdecl QueryKdTree(int a, int b, int c, const __m128* d, const int* e, int f, int g);
+extern "C" void __cdecl QueryKdTree(int a, int b, int c, const LocalM128* d, const int* e, int f, int g);
 
 // Subtracts the vector at p+0x30 from the one at p+0x40 and calls QueryKdTree with p->m00 twice, p->m1C, the difference and the p+0x30 values.
 // @fnv 0x00d1b7f0
@@ -1006,7 +1004,7 @@ void __cdecl FUN_00d1b7f0(S00d1b7f0_Input* p, int argB, int argC)
 
     int m1c = p->m1C;
 
-    frame.diff = _mm_sub_ps(*reinterpret_cast<const __m128*>(&p->m40), *reinterpret_cast<const __m128*>(&p->m30));
+    frame.diff = _mm_sub_ps(*reinterpret_cast<const LocalM128*>(&p->m40), *reinterpret_cast<const LocalM128*>(&p->m30));
 
     QueryKdTree(first, first, m1c, &frame.diff, &frame.v0, argB, argC);
 }
@@ -1155,10 +1153,10 @@ int* MyClass::GetField20()
     return &unk20;
 }
 
-extern __m128 DAT_011b3810;
+extern LocalM128 DAT_011b3810;
 
 // @fnv 0x00d1b280
-__m128 __cdecl FUN_00d1b280()
+LocalM128 __cdecl FUN_00d1b280()
 {
     return DAT_011b3810;
 }
@@ -1170,11 +1168,6 @@ extern "C" void _ReadWriteBarrier(void);
 extern unsigned int DAT_0126835c;
 extern char DAT_010cd648[];
 extern char DAT_010c41f8[];
-
-struct __declspec(align(16)) Vec4
-{
-    float q[4];
-};
 
 struct HkTimer
 {
@@ -1198,8 +1191,8 @@ struct QueryObj
     int unk24;
     int unk28;
     int unk2c;
-    __m128 min;
-    __m128 max;
+    LocalM128 min;
+    LocalM128 max;
 };
 
 void __cdecl FUN_00d1b4d0(const void* a, int b, const Vec4* c, const Vec4* d, int e, int f, int g, int h, int i, int j);
@@ -1222,7 +1215,7 @@ void __cdecl FUN_00d1b850(QueryObj* obj, int arg1, int arg2)
     void* verts = obj->unk00;
     int vcount = obj->unk1c;
     Vec4 mn = *(const Vec4*)&obj->min;
-    __m128 dv = _mm_sub_ps(obj->max, obj->min);
+    LocalM128 dv = _mm_sub_ps(obj->max, obj->min);
     const Vec4* delta = (const Vec4*)&dv;
     int count = obj->unk0c > 0 ? obj->unk0c : 128;
     FUN_00d1b4d0(verts, vcount, delta, &mn, arg1, count, arg2, 0, 0, 0);
@@ -1239,16 +1232,16 @@ void __cdecl FUN_00d1b850(QueryObj* obj, int arg1, int arg2)
     }
 }
 
-extern "C" void __cdecl FUN_00d1b4d0(int, int, const __m128*, const int*, int, int, int, int, int, int);
+extern "C" void __cdecl FUN_00d1b4d0(int, int, const LocalM128*, const int*, int, int, int, int, int, int);
 
 // Builds a frame from the vectors at p->m30 and p->m40 (start and difference) and calls FUN_00d1b4d0 with count m0C, or 128 if that is not positive.
 // @fnv 0x00d1b930
 void __cdecl FUN_00d1b930(S00d1b7f0_Input* p, int argB, int argC, int argD)
 {
     S00d1b7f0_Frame frame;
-    __m128 end = _mm_load_ps(reinterpret_cast<const float*>(&p->m40));
-    __m128 start = _mm_load_ps(reinterpret_cast<const float*>(&p->m30));
-    __m128 difference = _mm_sub_ps(end, start);
+    LocalM128 end = _mm_load_ps(reinterpret_cast<const float*>(&p->m40));
+    LocalM128 start = _mm_load_ps(reinterpret_cast<const float*>(&p->m30));
+    LocalM128 difference = _mm_sub_ps(end, start);
     int first = p->m00;
     int second = p->m1C;
     frame.v0 = p->m30;
@@ -1328,18 +1321,18 @@ extern "C"
     __m128i _mm_unpackhi_epi16(__m128i, __m128i);
     __m128i _mm_slli_epi32(__m128i, int);
     __m128i _mm_srli_epi32(__m128i, int);
-    __m128 _mm_cvtepi32_ps(__m128i);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_cmple_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    int _mm_movemask_ps(__m128);
+    LocalM128 _mm_cvtepi32_ps(__m128i);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_cmple_ps(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    int _mm_movemask_ps(LocalM128);
     __m128i _mm_load_si128(__m128i const*);
 }
 
 extern double DAT_010217d0;
 extern float DAT_010cd644;
-extern __m128 DAT_011b3810;
+extern LocalM128 DAT_011b3810;
 extern "C" void _ReadWriteBarrier(void);
 
 void __cdecl ResizeAudioStream(void* allocator, void* arr, int elemSize);
@@ -1400,17 +1393,17 @@ struct __declspec(align(16)) RawWords
     int d0, d1, d2, d3;
 };
 
-static __forceinline __m128 u32_to_f(__m128i x, const ScaleSplat& magic)
+static __forceinline LocalM128 u32_to_f(__m128i x, const ScaleSplat& magic)
 {
     __m128i hi = _mm_srli_epi32(x, 16);
     __m128i lo = _mm_srli_epi32(_mm_slli_epi32(x, 16), 16);
-    return _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(hi), *(__m128*)&magic), _mm_cvtepi32_ps(lo));
+    return _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(hi), *(LocalM128*)&magic), _mm_cvtepi32_ps(lo));
 }
 
 struct FloatPair
 {
-    __m128 lo;
-    __m128 hi;
+    LocalM128 lo;
+    LocalM128 hi;
 };
 static __forceinline void convertPair(__m128i raw, __m128i zero, const ScaleSplat& c1, const ScaleSplat& c2,
                                       FloatPair& out)
@@ -1498,29 +1491,29 @@ void __cdecl QueryKdTree(void* tree, KdNode* node, const Aabb16* prims, const fl
         key.s.lo = prim[-4];
         key.s.hi = prim[0];
 
-        __m128 sc = _mm_mul_ps(_mm_load_ps(scale), DAT_011b3810);
+        LocalM128 sc = _mm_mul_ps(_mm_load_ps(scale), DAT_011b3810);
         RawWords bits;
         bits.d0 = ((const Aabb16*)(prim - 7))->words.d0;
         bits.d1 = ((const Aabb16*)(prim - 7))->words.d1;
         bits.d2 = ((const Aabb16*)(prim - 7))->words.d2;
         bits.d3 = ((const Aabb16*)(prim - 7))->words.d3;
 
-        __m128 off = _mm_load_ps(offset);
+        LocalM128 off = _mm_load_ps(offset);
         __m128i raw = _mm_load_si128((const __m128i*)&bits);
         FloatPair decoded;
         convertPair(raw, zero, kHi, kLo, decoded);
-        __m128 lower, upper;
+        LocalM128 lower, upper;
         upper = off;
         lower = off;
         upper = _mm_add_ps(_mm_mul_ps(decoded.hi, sc), lower);
         lower = _mm_add_ps(_mm_mul_ps(decoded.lo, sc), off);
-        __m128 cmp =
+        LocalM128 cmp =
             _mm_and_ps(_mm_cmple_ps(lower, _mm_load_ps(query->max)), _mm_cmple_ps(_mm_load_ps(query->min), upper));
         if ((_mm_movemask_ps(cmp) & 7) == 7)
         {
-            AllocHolder* holder = (AllocHolder*)MemSource::FUN_00c85750();
+            hkMemoryRouter* holder = (hkMemoryRouter*)MemSource::FUN_00c85750();
             if (hits->size == (hits->capacity & 0x3fffffff))
-                ResizeAudioStream((void*)holder->unk0C, hits, 4);
+                ResizeAudioStream((void*)holder->m_temp, hits, 4);
             int* dst = hits->data + hits->size;
             for (int once = 0; once < 1; ++once)
                 dst[once] = key.packed;
@@ -1531,22 +1524,22 @@ void __cdecl QueryKdTree(void* tree, KdNode* node, const Aabb16* prims, const fl
     } while (count);
 }
 
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" __m128 _mm_cmpeq_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_and_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_andnot_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_or_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_rcp_ps(__m128 a);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" LocalM128 _mm_cmpeq_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_and_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_or_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_rcp_ps(LocalM128 a);
 
-extern __m128 DAT_01267e30;
-extern __m128 DAT_010c7170;
-extern __m128 DAT_010cd670;
+extern LocalM128 DAT_01267e30;
+extern LocalM128 DAT_010c7170;
+extern LocalM128 DAT_010cd670;
 
-static inline __m128 quadRecip(__m128 r)
+static inline LocalM128 quadRecip(LocalM128 r)
 {
-    __m128 e = _mm_rcp_ps(r);
+    LocalM128 e = _mm_rcp_ps(r);
     return _mm_sub_ps(_mm_add_ps(e, e), _mm_mul_ps(_mm_mul_ps(e, r), e));
 }
 class HkVec4
@@ -1556,11 +1549,11 @@ class HkVec4
     {
         m_vComponents = v.m_vComponents;
     }
-    void operator=(const __m128& q)
+    void operator=(const LocalM128& q)
     {
         m_vComponents = q;
     }
-    operator __m128() const
+    operator LocalM128() const
     {
         return m_vComponents;
     }
@@ -1568,11 +1561,11 @@ class HkVec4
     {
         m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
     }
-    void select32(const HkVec4& a, const HkVec4& b, const __m128& mask)
+    void select32(const HkVec4& a, const HkVec4& b, const LocalM128& mask)
     {
         m_vComponents = _mm_or_ps(_mm_and_ps(mask, b.m_vComponents), _mm_andnot_ps(mask, a.m_vComponents));
     }
-    __m128 compareEqual4(const HkVec4& a) const
+    LocalM128 compareEqual4(const HkVec4& a) const
     {
         return _mm_cmpeq_ps(m_vComponents, a.m_vComponents);
     }
@@ -1582,7 +1575,7 @@ class HkVec4
     }
 
   private:
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 struct HkBundle
 {
@@ -1601,7 +1594,7 @@ struct HkRayBundle
         for (int i = 0; i < 3; i++)
         {
             delta.m_data[i].setSub4(to.m_data[i], m_vFrom.m_data[i]);
-            __m128 isZero = delta.m_data[i].compareEqual4(kZero);
+            LocalM128 isZero = delta.m_data[i].compareEqual4(kZero);
             HkVec4 maskedDelta;
             maskedDelta.select32(delta.m_data[i], kOne, isZero);
             HkVec4 invDelta;
@@ -1632,7 +1625,7 @@ HkRayBundle __cdecl FUN_00d1bb50(const HkVec4& from0, const HkVec4& to0, const H
     bundleTo.m_data[2] = to2;
     tmpTo = to3;
     {
-        __m128 tmp3, tmp2, tmp1, tmp0;
+        LocalM128 tmp3, tmp2, tmp1, tmp0;
 
         tmp0 = _mm_shuffle_ps((bundleFrom.m_data[0]), (bundleFrom.m_data[1]), 0x44);
         tmp2 = _mm_shuffle_ps((bundleFrom.m_data[0]), (bundleFrom.m_data[1]), 0xEE);
@@ -1645,7 +1638,7 @@ HkRayBundle __cdecl FUN_00d1bb50(const HkVec4& from0, const HkVec4& to0, const H
         (tmpFrom) = _mm_shuffle_ps(tmp2, tmp3, 0xDD);
     }
     {
-        __m128 tmp3, tmp2, tmp1, tmp0;
+        LocalM128 tmp3, tmp2, tmp1, tmp0;
 
         tmp0 = _mm_shuffle_ps((bundleTo.m_data[0]), (bundleTo.m_data[1]), 0x44);
         tmp2 = _mm_shuffle_ps((bundleTo.m_data[0]), (bundleTo.m_data[1]), 0xEE);
@@ -1683,7 +1676,7 @@ void __cdecl FUN_00d1b9b0(QueryObj* pQuery, int p1, int p2)
     int b = pQuery->unk1c;
     Vec4 vMin = *(const Vec4*)&pQuery->min;
     Vec4 vExtent;
-    *(__m128*)&vExtent = _mm_sub_ps(pQuery->max, pQuery->min);
+    *(LocalM128*)&vExtent = _mm_sub_ps(pQuery->max, pQuery->min);
     int count = pQuery->unk0c;
     if (count <= 0)
         count = 0x80;
@@ -1704,40 +1697,40 @@ void __cdecl FUN_00d1b9b0(QueryObj* pQuery, int p1, int p2)
 // Today's unit (blk_00d00000_o2.cpp) declares __m128 and most SSE1 intrinsics as
 // extern "C" functions instead of including <xmmintrin.h>; declare the four the
 // matched code needs that the unit does not have.
-extern "C" __m128 _mm_max_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_min_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" float _mm_cvtss_f32(__m128 a);
+extern "C" LocalM128 _mm_max_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_min_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" float _mm_cvtss_f32(LocalM128 a);
 
 // Returns the squared distance from the point at b to the box with min at a and max at a+4 floats, or 0.0f when the point is inside.
 // @fnv 0x00d1bad0
 float __cdecl FUN_00d1bad0(float* a, float* b)
 {
-    __m128 va2 = *reinterpret_cast<__m128*>(a + 4);
-    __m128 vb = *reinterpret_cast<__m128*>(b);
-    __m128 va = *reinterpret_cast<__m128*>(a);
-    __m128 overlap = _mm_and_ps(_mm_cmple_ps(va, vb), _mm_cmple_ps(vb, va2));
+    LocalM128 va2 = *reinterpret_cast<LocalM128*>(a + 4);
+    LocalM128 vb = *reinterpret_cast<LocalM128*>(b);
+    LocalM128 va = *reinterpret_cast<LocalM128*>(a);
+    LocalM128 overlap = _mm_and_ps(_mm_cmple_ps(va, vb), _mm_cmple_ps(vb, va2));
     int mask = _mm_movemask_ps(overlap);
     if ((mask & 7) == 7)
         return 0.0f;
-    __m128 clamped = _mm_max_ps(_mm_min_ps(vb, va2), va);
-    __m128 delta = _mm_sub_ps(clamped, vb);
-    __m128 squared = _mm_mul_ps(delta, delta);
-    __m128 y = _mm_shuffle_ps(squared, squared, 0x55);
-    __m128 z = _mm_shuffle_ps(squared, squared, 0xaa);
-    __m128 sum = _mm_add_ss(y, squared);
+    LocalM128 clamped = _mm_max_ps(_mm_min_ps(vb, va2), va);
+    LocalM128 delta = _mm_sub_ps(clamped, vb);
+    LocalM128 squared = _mm_mul_ps(delta, delta);
+    LocalM128 y = _mm_shuffle_ps(squared, squared, 0x55);
+    LocalM128 z = _mm_shuffle_ps(squared, squared, 0xaa);
+    LocalM128 sum = _mm_add_ss(y, squared);
     sum = _mm_add_ss(z, sum);
     return _mm_cvtss_f32(sum);
 }
 
-extern "C" __m128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_setzero_ps(void);
 
 struct FUN_00d1f9f0
 {
     short boneBegin;
     short boneEnd;
-    __m128 penetrationPoint;
-    __m128 penetrationNormal;
+    LocalM128 penetrationPoint;
+    LocalM128 penetrationNormal;
 
     FUN_00d1f9f0();
 };
@@ -1809,14 +1802,14 @@ struct S00d1b4d0_Callback
 };
 struct S00d1b4d0_Aabb
 {
-    __m128 m_kMinimumCorner;
-    __m128 m_kMaximumCorner;
+    LocalM128 m_kMinimumCorner;
+    LocalM128 m_kMaximumCorner;
 };
 struct RealVec
 {
     union
     {
-        __m128 q;
+        LocalM128 q;
         float f[4];
     };
     RealVec()
@@ -1853,18 +1846,18 @@ struct IVector
 };
 struct FVector
 {
-    __m128 q;
-    void convert(const IVector& a, __m128 bias)
+    LocalM128 q;
+    void convert(const IVector& a, LocalM128 bias)
     {
         __m128i hi = _mm_srli_epi32(a.q, 16);
         __m128i lo = _mm_srli_epi32(_mm_slli_epi32(a.q, 16), 16);
         q = _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(hi), bias), _mm_cvtepi32_ps(lo));
     }
-    void mul(const FVector& a, __m128 b)
+    void mul(const FVector& a, LocalM128 b)
     {
         q = _mm_mul_ps(a.q, b);
     }
-    void add(const FVector& a, __m128 b)
+    void add(const FVector& a, LocalM128 b)
     {
         q = _mm_add_ps(a.q, b);
     }
@@ -1883,11 +1876,11 @@ int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const R
     S00d1b4d0_Id id;
     __declspec(align(16)) S00d1b4d0_NodeCopy n;
     n.set(cur);
-    AllocHolder* alloc = FUN_00c85750();
-    S00d1b4d0_Node** base = (S00d1b4d0_Node**)alloc->unk00;
+    hkMemoryRouter* alloc = FUN_00c85750();
+    S00d1b4d0_Node** base = (S00d1b4d0_Node**)alloc->m_stack.m_next.m_storage;
     S00d1b4d0_Node** top = base;
     int bytes = (capacity * 4 + 127) & ~127;
-    alloc->unk00 = (int)((char*)base + bytes);
+    alloc->m_stack.m_next.m_storage = (void*)((int)((char*)base + bytes));
     S00d1b4d0_Bounds bounds = *query;
     int found = 0;
     for (;;)
@@ -1920,8 +1913,8 @@ int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const R
             if (count > i)
             {
                 __m128i packedData;
-                __m128 biasLo;
-                __m128 biasHi;
+                LocalM128 biasLo;
+                LocalM128 biasHi;
                 __m128i zeroData;
                 biasLo.m128_f32[0] = 1e16f;
                 biasLo.m128_f32[1] = 1e16f;
@@ -1937,7 +1930,7 @@ int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const R
                 {
                     id.lo = p[-4];
                     id.hi = p[0];
-                    __m128 factor = _mm_mul_ps(DAT_011b3810, scale.q);
+                    LocalM128 factor = _mm_mul_ps(DAT_011b3810, scale.q);
                     packedData.m128i_i32[0] =
                         ((const S00d1b4d0_Entry*)((const char*)p - offsetof(S00d1b4d0_Entry, unk0e)))->word0;
                     packedData.m128i_i32[1] =
@@ -1946,7 +1939,7 @@ int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const R
                         ((const S00d1b4d0_Entry*)((const char*)p - offsetof(S00d1b4d0_Entry, unk0e)))->word2;
                     packedData.m128i_i32[3] =
                         ((const S00d1b4d0_Entry*)((const char*)p - offsetof(S00d1b4d0_Entry, unk0e)))->word3;
-                    __m128 off = offset.q;
+                    LocalM128 off = offset.q;
                     IVector data = {packedData}, zero = {zeroData};
                     IVector lo, hi;
                     lo.unpackLo(data, zero);
@@ -1961,8 +1954,8 @@ int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const R
                     S00d1b4d0_Aabb box;
                     box.m_kMinimumCorner = vmin.q;
                     box.m_kMaximumCorner = vmax.q;
-                    __m128 mincomp = _mm_cmple_ps(box.m_kMinimumCorner, *(const __m128*)query->max);
-                    __m128 maxcomp = _mm_cmple_ps(*(const __m128*)query->min, box.m_kMaximumCorner);
+                    LocalM128 mincomp = _mm_cmple_ps(box.m_kMinimumCorner, *(const LocalM128*)query->max);
+                    LocalM128 maxcomp = _mm_cmple_ps(*(const LocalM128*)query->min, box.m_kMaximumCorner);
                     if ((_mm_movemask_ps(_mm_and_ps(mincomp, maxcomp)) & 7) == 7)
                     {
                         if (callback)
@@ -1972,9 +1965,9 @@ int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const R
                         }
                         else if (list)
                         {
-                            AllocHolder* grow = FUN_00c85750();
+                            hkMemoryRouter* grow = FUN_00c85750();
                             if (list->size == (int)(list->capacity & 0x3fffffff))
-                                ResizeAudioStream((void*)grow->unk0C, list, 4);
+                                ResizeAudioStream((void*)grow->m_temp, list, 4);
                             copyResult(list->data + list->size, 1, *(unsigned*)&id);
                             list->size++;
                         }
@@ -1996,6 +1989,6 @@ int __cdecl FUN_00d1b4d0(S00d1b4d0_Node* node, S00d1b4d0_Entry* entries, const R
         n.set(cur);
     }
 done:
-    FUN_00c85750()->unk00 = (int)base;
+    FUN_00c85750()->m_stack.m_next.m_storage = (void*)((int)base);
     return found;
 }

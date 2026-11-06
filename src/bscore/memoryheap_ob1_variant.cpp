@@ -4,6 +4,7 @@
 // to their real unit once identified.
 
 #include "memoryheap_decls.h"
+#include "../../include/MemoryManager.h"
 __declspec(dllimport) int __stdcall VirtualFree(void*, unsigned long, unsigned long);
 struct FUN_00aa7ab0_s
 {
@@ -42,10 +43,6 @@ struct FUN_00aa7d60_cls
     char pad0[0x10];
     unsigned int m_uiPage;
     void FUN_00aa7d60(FUN_00aa7d60_blk* pBlock);
-};
-struct MemoryManager
-{
-    void _DeallocateAlias(void*);
 };
 extern MemoryManager g_memoryManager;
 struct FakeHeap

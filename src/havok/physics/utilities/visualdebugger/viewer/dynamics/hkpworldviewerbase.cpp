@@ -1,3 +1,4 @@
+#include "../../../../../../../include/hkArray.h"
 
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/hkpworldviewerbase.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/hkpworldviewerbase.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -155,22 +156,7 @@ class BDDCCB0PhysicsContext : public BDDCCB0ReferencedObject, public BDDCCB0Proc
     void RetainReference();
 };
 
-template <class T> class BDDCCB0Array
-{
-  public:
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    T& operator[](int i) const
-    {
-        return m_data[i];
-    }
 
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
 
 class BDDCCB0Process
 {
@@ -195,14 +181,14 @@ class BDDCCB0WorldAddedListener
 class FUN_00ddccb0_cls : public BDDCCB0ReferencedObject, public BDDCCB0Process, public BDDCCB0WorldAddedListener
 {
   public:
-    FUN_00ddccb0_cls(const BDDCCB0Array<BDDCCB0ProcessContext*>& kContexts) throw();
+    FUN_00ddccb0_cls(const hkArrayBase<BDDCCB0ProcessContext*>& kContexts) throw();
     virtual ~FUN_00ddccb0_cls();
 
     BDDCCB0PhysicsContext* m_pkContext;
 };
 
 // @fnv 0x00ddccb0
-FUN_00ddccb0_cls::FUN_00ddccb0_cls(const BDDCCB0Array<BDDCCB0ProcessContext*>& kContexts) throw()
+FUN_00ddccb0_cls::FUN_00ddccb0_cls(const hkArrayBase<BDDCCB0ProcessContext*>& kContexts) throw()
     : BDDCCB0Process(true), m_pkContext(0)
 {
     int iSize = kContexts.GetLogicalSize();

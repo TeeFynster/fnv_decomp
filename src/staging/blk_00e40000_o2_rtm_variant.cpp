@@ -1,11 +1,22 @@
+#define FNV64_HKVECTOR4_OWN_DEFAULT
+#define FNV64_HKVECTOR4_OWN_ASSIGN
+#include "../../include/hkArray.h"
 // src/staging/blk_00e40000_o2_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00e40000_o2.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
 #include "fnv_asm_helpers.h"
+#include "../../include/hkpConstraintInstance.h"
+#include "../../include/hkpConstraintData.h"
 // src/staging/blk_00e40000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/Actor.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/V4.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkpRemoveTerminalsMoppModifier2.h"
 struct FUN_00e428f0_class {
     void Remove(void*);
     void FUN_00e428f0(void* p);
@@ -365,25 +376,17 @@ struct E4AAA0Element {
     int m_iThirdValue;
     int m_iFourthElementInteger;
 };
-struct E4AAA0Array {
-    E4AAA0Element* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+static __forceinline void E4AAA0Array_reserve(hkArrayBase<E4AAA0Element>& self, E4AAA0Allocator& alloc, int n);
 
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-
-    void reserve(E4AAA0Allocator& alloc, int n)
-    {
-        const int cap = getCapacity();
+static __forceinline void E4AAA0Array_reserve(hkArrayBase<E4AAA0Element>& self, E4AAA0Allocator& alloc, int n)
+{
+        const int cap = self.getCapacity();
         if (cap < n) {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(E4AAA0Element));
+            FUN_00c908c0(&alloc, (&self), newSize, sizeof(E4AAA0Element));
         }
     }
-
-    void InsertElements(E4AAA0Allocator& alloc, int index, int numdel, const E4AAA0Element* p, int numtoinsert);
-};
 class E4AE50ReferencedObject {
 public:
     unsigned short m_usMemSizeAndFlags;
@@ -551,15 +554,6 @@ struct E53230Color {
     float a;
 
     E53230Color& DivideByScalar(float fScalar);
-};
-struct FourFloatVector {
-    float x;
-    float y;
-    float z;
-    float w;
-
-    FourFloatVector& FUN_00e531a0(int parameter);
-    FourFloatVector FUN_00e53260(int parameter);
 };
 struct S_e53300_Vec;
 struct S_e53300_Vec {
@@ -1243,35 +1237,6 @@ struct ExtendedListeners {
         return ((AllocationHeap*)mgr->m_pAllocator)->Allocate(sz);
     }
 };
-struct ActorEntry {
-    int unk000; int unk004; int unk008; int unk00c; int unk010; int unk014; int unk018; int unk01c;
-    int unk020; int unk024; int unk028; int unk02c; int unk030; int unk034; int unk038; int unk03c;
-    int unk040; int unk044; int unk048; int unk04c; int unk050; int unk054; int unk058; int unk05c;
-    int unk060; int unk064; int unk068; int unk06c; int unk070; int unk074; int unk078; int unk07c;
-    int unk080; int unk084; int unk088; int unk08c; int unk090; int unk094; int unk098; int unk09c;
-    int unk0a0; int unk0a4; int unk0a8; int unk0ac; int unk0b0; int unk0b4; int unk0b8; int unk0bc;
-    int unk0c0; int unk0c4; int unk0c8; int unk0cc; int unk0d0; int unk0d4; int unk0d8; int unk0dc;
-    int unk0e0; int unk0e4; int unk0e8; int unk0ec; int unk0f0; int unk0f4; int unk0f8; int unk0fc;
-    int unk100; int unk104; int unk108; int unk10c; int unk110; int unk114; int unk118; int unk11c;
-    int unk120; int unk124; int unk128; int unk12c; int unk130; int unk134; int unk138; int unk13c;
-    int unk140; int unk144; int unk148; int unk14c; int unk150; int unk154; int unk158; int unk15c;
-    int unk160; int unk164; int unk168; int unk16c; int unk170; int unk174; int unk178; int unk17c;
-    int unk180; int unk184; int unk188; int unk18c; int unk190; int unk194; int unk198; int unk19c;
-    int unk1a0; int unk1a4; int unk1a8; int unk1ac; int unk1b0; int unk1b4; int unk1b8; int unk1bc;
-    int unk1c0; int unk1c4; int unk1c8; int unk1cc; int unk1d0; int unk1d4; int unk1d8; int unk1dc;
-    int unk1e0; int unk1e4; int unk1e8; int unk1ec; int unk1f0; int unk1f4; int unk1f8; int unk1fc;
-    int unk200; int unk204; int unk208; int unk20c; int unk210;
-    ExtendedListeners* m_pExtendedListeners;
-
-    ExtendedListeners* getExtendedListeners() {
-        if (!m_pExtendedListeners) {
-            m_pExtendedListeners = new ExtendedListeners;
-        }
-        return m_pExtendedListeners;
-    }
-
-    void __thiscall FUN_00c9c670(CListener* el);
-};
 template <typename T>
 struct HkArray {
     T* m_data;
@@ -1316,7 +1281,7 @@ struct CShape : CBase0, CBase8, CBaseC, CBase10, CBase14 {
     int unk2c;
 };
 struct FUN_00e46900 : CShape, CListener {
-    HkArray<ActorEntry*> m_kActorEntries;
+    HkArray<Actor*> m_kActorEntries;
 
     virtual ~FUN_00e46900() throw();
 };
@@ -1324,8 +1289,7 @@ struct Ref { void FUN_00c90510(); };
 int FUN_00e60cb0(unsigned char,int);
 struct Entry { Ref* name; Ref* pClassInfo; unsigned char type; unsigned char flags; unsigned short reserved; int count; unsigned char storage; unsigned char ReplaceImpactData; unsigned short reserved12; void* data; int unk18; int unk1c; int length() const { int t=type; return FUN_00e60cb0(t,count); } };
 struct Allocator {};
-struct Router { int a,b,c,d; Allocator* heap; Allocator& getHeap() {return *heap;} };
-Router* getRouter();
+hkMemoryRouter* getRouter();
 int FUN_00e60cb0(unsigned char type,int count);
 extern "C" void FUN_00c908c0(Allocator*,void*,int,int);
 void FUN_00cb1260(void*,const void*,int);
@@ -1399,32 +1363,20 @@ struct FloatArrayRef {
 };
 int __cdecl FUN_00e57210(FloatArrayRef* array, int count);
 struct ArrayAllocator;
-struct FloatArray;
-void FUN_00c908c0(ArrayAllocator* alloc, FloatArray* arr, int newCap, int elemSize);
-struct FloatArray {
-    float* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    void reserve(ArrayAllocator& alloc, int n)
-    {
-        int cap = getCapacity();
+
+void FUN_00c908c0(ArrayAllocator* alloc, hkArrayBase<float>* arr, int newCap, int elemSize);
+static __forceinline void FloatArray_reserve(hkArrayBase<float>& self, ArrayAllocator& alloc, int n);
+
+static __forceinline void FloatArray_reserve(hkArrayBase<float>& self, ArrayAllocator& alloc, int n)
+{
+        int cap = self.getCapacity();
         if (cap < n) {
             int c = 2 * cap;
-            FUN_00c908c0(&alloc, this, n < c ? c : n, 4);
+            FUN_00c908c0(&alloc, (&self), n < c ? c : n, 4);
         }
     }
-};
-struct MemoryRouter {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    ArrayAllocator* m_pStreamAllocator;
-    ArrayAllocator& heap() { return *m_pStreamAllocator; }
-};
-MemoryRouter* GetMemoryRouter();
-int RemoveAdjacentDuplicates(FloatArray* arr, int last);
+hkMemoryRouter* GetMemoryRouter();
+int RemoveAdjacentDuplicates(hkArrayBase<float>* arr, int last);
 // Element-wise subtract another matrix of the same shape from this one.
 class E87E0Matrix {
 public:
@@ -1673,12 +1625,6 @@ struct E58E80Object {
 };
 E87E0Matrix* __fastcall FUN_00e58e80(int setting, int unused, E58E80Object* object, const E87E0Matrix& right);
 void __cdecl PrefixSum(float* afValues, unsigned int n);
-class hkBool
-{
-public:
-    hkBool(bool b) { m_cBooleanValue = (char)b; }
-    char m_cBooleanValue;
-};
 hkBool __cdecl InvertMatrix2x2(const float* afMatrix, float* afInverse, float fEps);
 struct E5B110Ref { void FUN_00c90510(); };
 struct E5B110Obj {
@@ -1880,13 +1826,6 @@ struct LoadedObject {
     LoadedObject* Initialize(LoadedFlag flag);
 };
 void* operator new(size_t, void* p) { return p; }
-struct Actor : ActorEntry {
-    void FUN_00c9c5b0(CListener* listener);
-    __forceinline ExtendedListeners* listeners() {
-        if (!m_pExtendedListeners) m_pExtendedListeners = new ExtendedListeners;
-        return m_pExtendedListeners;
-    }
-};
 template<class T> struct EntityArray : HkArray<T> {
     __forceinline int indexOf(const T& element) const {
         for (int i = 0; i < this->m_iElementCount; ++i) {
@@ -2153,7 +2092,6 @@ __declspec(noinline) Quat4::Quat4(float fX, float fY, float fZ, float fW)
 float __cdecl EvaluateBasisFunction(int iDegree, int iNumKnots, const float* const* ppKnots, int i, float fT);
 int __cdecl GetRunLength(int lo, int hi, float** arr);
 template<class T> struct CurveArg { T value; };
-struct V4 { float x, y, z, w; };
 float __cdecl FUN_00e54cb0(int a3, int a4, int a5, int a6, float* p, int a9, int a10, float a11, float a12);
 void __cdecl FUN_00e54630(V4* out, int a3, int a4, int a5, int a6, float v);
 struct CurvePointOps {
@@ -2244,12 +2182,6 @@ struct Mid : RefObject, CollectorBase {
     HkArr m_ppData;
     int m_18;
     Mid() throw() : m_18(0) {}
-};
-struct hkpRemoveTerminalsMoppModifier2 : Mid {
-    int m_1c;
-    hkpRemoveTerminalsMoppModifier2(int a, int c) throw();
-    virtual ~hkpRemoveTerminalsMoppModifier2() throw();
-    virtual void Dummy0() throw();
 };
 struct FnvCpu_FUN_00e49bb0_CpuObject { char* FUN_00e49bb0(); };
 extern double __cdecl FUN_00ec9e10(double x);
@@ -2628,11 +2560,10 @@ static __declspec(noinline) void FUN_00e5b130(const Se5b160_RagdollAtoms* source
         if (*motor) (*motor)->FUN_00c90510();
     }
 }
-enum Se5b160_Type { S5b160_T0, S5b160_T1, S5b160_LIMITEDHINGE, S5b160_T3, S5b160_T4, S5b160_T5, S5b160_T6, S5b160_RAGDOLL };
 struct Se5b160_Data : Se5b160_RefObj {
     virtual void v1(); virtual void v2(); virtual void v3();
     virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
-    virtual Se5b160_Type getType() const;
+    virtual hkpConstraintData::ConstraintType getType() const;
     int unk08; int unk0c;
 };
 struct FUN_00cb9090 : Se5b160_Data {
@@ -2657,10 +2588,9 @@ struct Se5b160_StrPtr {
     void FUN_00cb0c10(const char* s);
 };
 struct Se5b160_Entity;
-enum Se5b160_Prio { S5b160_PRIO_INVALID, S5b160_PRIO_PSI, S5b160_PRIO_TOI };
 struct Se5b160_PrioEnum {
     unsigned char m_kStorage;
-    operator Se5b160_Prio() const { return static_cast<Se5b160_Prio>(m_kStorage); }
+    operator hkpConstraintInstance::ConstraintPriority() const { return static_cast<hkpConstraintInstance::ConstraintPriority>(m_kStorage); }
 };
 struct FUN_00cf3ea0 : Se5b160_RefObj {
     int unk08;
@@ -2675,8 +2605,8 @@ struct FUN_00cf3ea0 : Se5b160_RefObj {
     int unk24;
     Se5b160_StrPtr m_name;
     int unk2c; int unk30; int unk34;
-    FUN_00cf3ea0(Se5b160_Entity* a, Se5b160_Entity* b, Se5b160_Data* data, Se5b160_Prio priority) throw();
-    Se5b160_Prio getPriority() const { return m_priority; }
+    FUN_00cf3ea0(Se5b160_Entity* a, Se5b160_Entity* b, Se5b160_Data* data, hkpConstraintInstance::ConstraintPriority priority) throw();
+    hkpConstraintInstance::ConstraintPriority getPriority() const { return m_priority; }
     Se5b160_Entity* getEntityA() const { return m_pEntityA; }
     Se5b160_Entity* getEntityB() const { return m_pEntityB; }
 };
@@ -2792,57 +2722,72 @@ struct S00e58310_Util {
     template <typename T>
     static __forceinline void destruct(T*, int, S00e58310_TypeIsPod) {}
 };
-template <typename T>
-struct S00e58310_ArrayBase {
-    enum { CAPACITY_MASK = 0x3FFFFFFF, DONT_DEALLOCATE_FLAG = 0x80000000 };
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int GetLogicalSize() const { return m_iElementCount; }
-    int getCapacity() const { return m_iCapacityState & CAPACITY_MASK; }
-    static __forceinline void copy(T* dst, const T* src, int n)
-    {
+template <class T>
+static __forceinline void S00e58310_ArrayBase_copy(T* dst, const T* src, int n);
+
+template <class T>
+static __forceinline void S00e58310_ArrayBase_init(hkArrayBase<T>& self);
+
+template <class T>
+static __forceinline void S00e58310_ArrayBase_clear(hkArrayBase<T>& self);
+
+template <class T>
+static __forceinline void S00e58310_ArrayBase__clearAndDeallocate(hkArrayBase<T>& self, S00e58310_Allocator& alloc);
+
+template <class T>
+static __forceinline hkArrayBase<T>& S00e58310_ArrayBase_copyFromArray(hkArrayBase<T>& self, S00e58310_Allocator& alloc, const hkArrayBase<T>& a, S00e58310_TypeIsPod);
+
+template <class T>
+static __forceinline void S00e58310_ArrayBase_copy(T* dst, const T* src, int n)
+{
         for (int i = 0; i < n; ++i) {
             dst[i] = src[i];
         }
     }
-    __forceinline void init()
-    {
-        m_data = 0;
-        m_iElementCount = 0;
-        m_iCapacityState = DONT_DEALLOCATE_FLAG;
+
+template <class T>
+static __forceinline void S00e58310_ArrayBase_init(hkArrayBase<T>& self)
+{
+        self.m_data = 0;
+        self.m_iElementCount = 0;
+        self.m_iCapacityState = hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
     }
-    __forceinline void clear()
-    {
-        S00e58310_Util::destruct(m_data, m_iElementCount, S00e58310_TypeIsPod());
-        m_iElementCount = 0;
+
+template <class T>
+static __forceinline void S00e58310_ArrayBase_clear(hkArrayBase<T>& self)
+{
+        S00e58310_Util::destruct(self.m_data, self.m_iElementCount, S00e58310_TypeIsPod());
+        self.m_iElementCount = 0;
     }
-    __forceinline void _clearAndDeallocate(S00e58310_Allocator& alloc)
-    {
-        clear();
-        if ((m_iCapacityState & DONT_DEALLOCATE_FLAG) == 0) {
-            alloc._bufFree<T>(m_data, getCapacity());
+
+template <class T>
+static __forceinline void S00e58310_ArrayBase__clearAndDeallocate(hkArrayBase<T>& self, S00e58310_Allocator& alloc)
+{
+        S00e58310_ArrayBase_clear(self);
+        if ((self.m_iCapacityState & hkArrayBase<T>::DONT_DEALLOCATE_FLAG) == 0) {
+            alloc._bufFree<T>(self.m_data, self.getCapacity());
         }
-        m_data = 0;
-        m_iCapacityState = DONT_DEALLOCATE_FLAG;
+        self.m_data = 0;
+        self.m_iCapacityState = hkArrayBase<T>::DONT_DEALLOCATE_FLAG;
     }
-    __forceinline S00e58310_ArrayBase<T>& copyFromArray(S00e58310_Allocator& alloc, const S00e58310_ArrayBase<T>& a, S00e58310_TypeIsPod)
-    {
-        if (getCapacity() < a.GetLogicalSize()) {
-            if ((m_iCapacityState & DONT_DEALLOCATE_FLAG) == 0) {
-                alloc._bufFree<T>(m_data, getCapacity());
+
+template <class T>
+static __forceinline hkArrayBase<T>& S00e58310_ArrayBase_copyFromArray(hkArrayBase<T>& self, S00e58310_Allocator& alloc, const hkArrayBase<T>& a, S00e58310_TypeIsPod)
+{
+        if (self.getCapacity() < a.GetLogicalSize()) {
+            if ((self.m_iCapacityState & hkArrayBase<T>::DONT_DEALLOCATE_FLAG) == 0) {
+                alloc._bufFree<T>(self.m_data, self.getCapacity());
             }
             int n = a.GetLogicalSize();
-            m_data = alloc._bufAlloc<T>(n);
-            m_iCapacityState = n;
+            self.m_data = alloc._bufAlloc<T>(n);
+            self.m_iCapacityState = n;
         }
-        m_iElementCount = a.GetLogicalSize();
-        copy(m_data, a.m_data, m_iElementCount);
-        return *this;
+        self.m_iElementCount = a.GetLogicalSize();
+        S00e58310_ArrayBase_copy(self.m_data, a.m_data, self.m_iElementCount);
+        return *(&self);
     }
-};
 template <typename T>
-struct S00e58310_Array : S00e58310_ArrayBase<T> {
+struct S00e58310_Array : hkArrayBase<T> {
     __forceinline S00e58310_Array<T>& operator=(const S00e58310_Array<T>& a)
     {
         copyFromArray(S00e58310_HeapAllocator().get(this), a, S00e58310_TypeIsPod());
@@ -3377,13 +3322,9 @@ struct S00e568f0_Vec4 {
 
 void ArrayReserve(void* heap, void* arr, int newCap, int elemSize);
 
-struct S00e568f0_Vec4Array {
-    S00e568f0_Vec4* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
 
-static void S00e568f0_SetArraySize(void* heap, FloatArray* arr, int size)
+
+static void S00e568f0_SetArraySize(void* heap, hkArrayBase<float>* arr, int size)
 {
     int cap = arr->getCapacity();
     if (cap < size) {
@@ -3396,8 +3337,8 @@ static void S00e568f0_SetArraySize(void* heap, FloatArray* arr, int size)
 // @fnv 0x00e568f0
 void __cdecl FUN_00e568f0(int n, int a2, void* s)
 {
-    S00e568f0_Vec4Array* pts = (S00e568f0_Vec4Array*)a2;
-    FloatArray* out = (FloatArray*)s;
+    hkArrayBase<S00e568f0_Vec4>* pts = (hkArrayBase<S00e568f0_Vec4>*)a2;
+    hkArrayBase<float>* out = (hkArrayBase<float>*)s;
     int count = n + 1;
     HolderView* holder = reinterpret_cast<HolderView*>(FUN_00c85750());
     S00e568f0_SetArraySize(holder->m_pAllocator, out, count);

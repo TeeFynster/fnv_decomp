@@ -1,27 +1,68 @@
-// bsshader/tileshader.cpp: TileShader, TileStandin, TileShaderS, PassShader (18 functions)
+#define FNV64_NIPOINTER_COMPARE_DECLS
+#include "../../include/NiPointer.h"
+// bsshader/tileshader.cpp: TileShader and render helpers (18 functions)
 
 #include "tileshader_decls.h"
+// NiRectF_tileshader: local type (was include/NiRectF.h, which had no evidence of one real class); no method of it is bound to a named game function
+class NiRectF_tileshader
+{
+public:
+    float m_fMinimumU;
+    float m_fMaximumU;
+    float m_fMinimumV;
+    float m_fMaximumV;
+};
+#include "../../include/NiColorA.h"
+#include "../../include/NiD3DGPUProgramCache.h"
+#include "../../include/NiShader.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSShader.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiD3DPixelShader.h"
+#include "../../include/NiD3DShaderConstantMap.h"
+#include "../../include/NiD3DVertexShader.h"
+
+inline NiColorA::NiColorA(float fR, float fG, float fB, float fA)
+{
+    r = fR;
+    g = fG;
+    b = fB;
+    a = fA;
+}
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
+
+template <class T> inline void ReleaseShaderReference(T* object)
+{
+    if (InterlockedDecrement((volatile long*)&object->m_uiRefCount) == 0)
+        object->DeleteThis();
+}
+
+template <class T> inline void AcquireShaderReference(T* object)
+{
+    InterlockedIncrement((volatile long*)&object->m_uiRefCount);
+}
+
+inline void ReleasePassReference(NiD3DPass* object)
+{
+    if (--object->m_uiRefCount == 0)
+        object->DestroyPass();
+}
 
 // @fnv 0x00bcac60
 void TileShader::UpdateMaterial(const NiPropertyState* state)
 {
-    NiMaterialPropertyView* material = (NiMaterialPropertyView*)state->m_spProperties[3];
-    if (material->m_bUnknown)
+    TileShaderProperty* material = (TileShaderProperty*)state->m_aspProps[3];
+    if (material->m_bUnkAC)
         AddToCounterIfIdle(0, 0);
 
-    NiRendererSpecificPropertyView* rendererSpecific = (NiRendererSpecificPropertyView*)state->m_spProperties[4];
-    if (rendererSpecific && (rendererSpecific->m_ucFlags & 1))
+    NiStencilProperty* rendererSpecific = (NiStencilProperty*)state->m_aspProps[4];
+    if (rendererSpecific && (rendererSpecific->m_18 & 1))
         UpdateRendererStateCount(0, 0);
 }
 
 class NiGPUProgram;
-
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-    NiPointer<T>& operator=(T* pObject);
-};
 
 extern NiGPUProgram* DAT_012021e0;
 extern NiGPUProgram* DAT_012021e4;
@@ -88,117 +129,27 @@ void __fastcall SetFlagState(void* thisptr, int, int a3)
     ((VFunc)vtable[0x24 / 4])(obj34);
 }
 
-struct VShader
-{
-    virtual void f00() = 0;
-    virtual void f01() = 0;
-    virtual void f02() = 0;
-    virtual void f03() = 0;
-    virtual void f04() = 0;
-    virtual void f05() = 0;
-    virtual void f06() = 0;
-    virtual void f07() = 0;
-    virtual void f08() = 0;
-    virtual void f09() = 0;
-    virtual void f10() = 0;
-    virtual void f11() = 0;
-    virtual void f12() = 0;
-    virtual void f13() = 0;
-    virtual void f14() = 0;
-    virtual void f15() = 0;
-    virtual void f16() = 0;
-    virtual void f17() = 0;
-    virtual void f18() = 0;
-    virtual void f19() = 0;
-    virtual void f20() = 0;
-    virtual void f21() = 0;
-    virtual void f22() = 0;
-    virtual void f23() = 0;
-    virtual void f24() = 0;
-    virtual void f25() = 0;
-    virtual void f26() = 0;
-    virtual void f27() = 0;
-    virtual void f28() = 0;
-    virtual void f29() = 0;
-    virtual void f30() = 0;
-    virtual void f31() = 0;
-    virtual void f32() = 0;
-    virtual void f33() = 0;
-    virtual void f34() = 0;
-    virtual void f35() = 0;
-    virtual void f36() = 0;
-    virtual void f37() = 0;
-    virtual void f38() = 0;
-    virtual void f39() = 0;
-    virtual void UnkA0() = 0;
-};
-struct PShader
-{
-    virtual void g00() = 0;
-    virtual void g01() = 0;
-    virtual void g02() = 0;
-    virtual void g03() = 0;
-    virtual void g04() = 0;
-    virtual void g05() = 0;
-    virtual void g06() = 0;
-    virtual void g07() = 0;
-    virtual void g08() = 0;
-    virtual void g09() = 0;
-    virtual void g10() = 0;
-    virtual void g11() = 0;
-    virtual void g12() = 0;
-    virtual void g13() = 0;
-    virtual void g14() = 0;
-    virtual void g15() = 0;
-    virtual void g16() = 0;
-    virtual void g17() = 0;
-    virtual void g18() = 0;
-    virtual void g19() = 0;
-    virtual void g20() = 0;
-    virtual void g21() = 0;
-    virtual void g22() = 0;
-    virtual void g23() = 0;
-    virtual void g24() = 0;
-    virtual void g25() = 0;
-    virtual void g26() = 0;
-    virtual void g27() = 0;
-    virtual void g28() = 0;
-    virtual void g29() = 0;
-    virtual void g30() = 0;
-    virtual void g31() = 0;
-    virtual void g32() = 0;
-    virtual void g33() = 0;
-    virtual void Unk88() = 0;
-};
-struct TileStandin
-{
-    char _0[0x28];
-    int unk28;
-    char _1[0x44];
-    VShader* vs[3];
-    PShader* ps[3];
-    void FUN_00be08b0();
-    void FUN_00bca070();
-};
+
+
 // Calls UnkA0 on each non-null vertex shader when unk28 is set, then Unk88 on each non-null pixel shader, and finally calls FUN_00be08b0.
 // @fnv 0x00bca070
-void TileStandin::FUN_00bca070()
+void TileShader::RebuildPrograms()
 {
     unsigned int i;
-    if (unk28)
+    if (m_spShaderDecl.m_pObject)
     {
         for (i = 0; i < 3; i++)
         {
-            VShader* p = vs[i];
+            NiD3DVertexShader* p = m_apVertexShaders[i];
             if (p)
-                p->UnkA0();
+                p->BuildVertexShader();
         }
     }
     for (i = 0; i < 3; i++)
     {
-        PShader* p = ps[i];
+        NiD3DPixelShader* p = m_apPixelShaders[i];
         if (p)
-            p->Unk88();
+            p->BuildVertexShader();
     }
     FUN_00be08b0();
 }
@@ -239,19 +190,20 @@ struct RefObj
     }
 };
 
-template <class T> class NiPointer
+// Unit-local view of NiPointer for 0x00bcaca0 (namespace fnv_00bcaca0): built on the shared NiPointer, that code does not compile or does not match.
+template <class T> class NiPointer_00bcaca0
 {
   public:
-    NiPointer()
+    NiPointer_00bcaca0()
     {
         m_pObject = 0;
     }
-    ~NiPointer()
+    ~NiPointer_00bcaca0()
     {
         if (m_pObject)
             ((RefObj*)m_pObject)->DecRefCount();
     }
-    NiPointer& operator=(T* pObject)
+    NiPointer_00bcaca0& operator=(T* pObject)
     {
         if (m_pObject != pObject)
         {
@@ -266,41 +218,20 @@ template <class T> class NiPointer
     T* m_pObject;
 };
 
-class NiD3DPass;
-class NiD3DPixelShader;
-class NiD3DVertexShader;
 
-struct RgbaColor
-{
-    float r, g, b, a;
-    RgbaColor(float fR, float fG, float fB, float fA)
-    {
-        r = fR;
-        g = fG;
-        b = fB;
-        a = fA;
-    }
-};
 
-extern RgbaColor DAT_01202188;
-extern RgbaColor DAT_012021a8;
+extern NiColorA DAT_01202188;
+extern NiColorA DAT_012021a8;
 
-struct BSShader
-{
-    BSShader();
-    virtual ~BSShader();
-    char pad04[0x60];
-    bool m_b64;
-    int m_i68;
-};
+
 
 struct FUN_00bcaca0 : public BSShader
 {
-    NiPointer<NiD3DPass> m_spPass[1];
-    NiPointer<NiD3DPixelShader> m_spPS1[3];
-    NiPointer<NiD3DPixelShader> m_spPS2[3];
-    NiPointer<NiD3DVertexShader> m_sp88;
-    NiPointer<NiD3DVertexShader> m_sp8c;
+    NiPointer_00bcaca0<NiD3DPass> m_spPass[1];
+    NiPointer_00bcaca0<NiD3DPixelShader> m_spPS1[3];
+    NiPointer_00bcaca0<NiD3DPixelShader> m_spPS2[3];
+    NiPointer_00bcaca0<NiD3DVertexShader> m_sp88;
+    NiPointer_00bcaca0<NiD3DVertexShader> m_sp8c;
     FUN_00bcaca0(NiD3DVertexShader* p1, NiD3DVertexShader* p2);
     virtual ~FUN_00bcaca0();
 };
@@ -308,12 +239,12 @@ struct FUN_00bcaca0 : public BSShader
 // @fnv 0x00bcaca0
 FUN_00bcaca0::FUN_00bcaca0(NiD3DVertexShader* pVertexShader1, NiD3DVertexShader* pVertexShader2)
 {
-    m_b64 = true;
-    m_i68 = 0x14;
+    bFirstPass = true;
+    iShaderType = 0x14;
     m_sp88 = pVertexShader1;
     m_sp8c = pVertexShader2;
-    DAT_01202188 = RgbaColor(1.0f, 1.0f, 1.0f, 1.0f);
-    DAT_012021a8 = RgbaColor(1.0f, 1.0f, 1.0f, 1.0f);
+    DAT_01202188 = NiColorA(1.0f, 1.0f, 1.0f, 1.0f);
+    DAT_012021a8 = NiColorA(1.0f, 1.0f, 1.0f, 1.0f);
 }
 }  // namespace fnv_00bcaca0
 
@@ -324,65 +255,22 @@ struct FUN_00bcaff0_shell : public TileShader
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-    static void __cdecl operator delete(void*);
-};
-struct NiD3DShaderConstantMap : public BSFadeNode
-{
-    virtual void v0();
-    virtual void DeleteThis();
-    virtual int AddEntry(const char*, unsigned int, unsigned int, unsigned int, unsigned int, const char*, unsigned int,
-                         unsigned int, const void*, bool);
-    long m_uiRefCount;
-    char pad8[0x3c];
-    NiD3DShaderConstantMap(void*, int);
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-template <class T> struct NiPtr
-{
-    T* m_pObject;
-    NiPtr& operator=(T* p)
-    {
-        if (m_pObject != p)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = p;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    bool operator==(T* p) const
-    {
-        return m_pObject == p;
-    }
-};
+
+
+template <> inline NiPointer<NiD3DShaderConstantMap>& NiPointer<NiD3DShaderConstantMap>::operator=(NiD3DShaderConstantMap* p) {
+    if(m_pObject!=p) { if(m_pObject) ReleaseShaderReference(m_pObject); m_pObject=p; if(m_pObject) AcquireShaderReference(m_pObject); } return *this;
+}
+template <> inline NiD3DShaderConstantMap* NiPointer<NiD3DShaderConstantMap>::operator->() const { return m_pObject; }
+template <> inline NiPointer<NiD3DShaderConstantMap>::operator NiD3DShaderConstantMap*() const { return m_pObject; }
+template <> inline bool NiPointer<NiD3DShaderConstantMap>::operator==(NiD3DShaderConstantMap* p) const { return m_pObject==p; }
+
 struct TileShaderLayout
 {
     char pad0[0x18];
     void* m_pOwnerShader;
     char pad1c[0x14];
-    NiPtr<NiD3DShaderConstantMap> m_spSecondShaderConstantMap;
-    NiPtr<NiD3DShaderConstantMap> m_spFirstShaderConstantMap;
+    NiPointer<NiD3DShaderConstantMap> m_spSecondShaderConstantMap;
+    NiPointer<NiD3DShaderConstantMap> m_spFirstShaderConstantMap;
 };
 extern float DAT_01202188[4];
 extern float DAT_01202198[4];
@@ -395,38 +283,20 @@ void FUN_00bcaff0_shell::CreateShaderConstantMaps()
     if (p->m_spSecondShaderConstantMap == 0)
     {
         p->m_spSecondShaderConstantMap = new NiD3DShaderConstantMap(p->m_pOwnerShader, 2);
-        p->m_spSecondShaderConstantMap->AddEntry("tintcolor", 0x10000007, 0, 0, 1, "", 0x10, 4, DAT_01202188, false);
+        p->m_spSecondShaderConstantMap->SetConstant("tintcolor", 0x10000007, 0, 0, 1, "", 0x10, 4, DAT_01202188, false);
     }
     if (p->m_spFirstShaderConstantMap == 0)
     {
         p->m_spFirstShaderConstantMap = new NiD3DShaderConstantMap(p->m_pOwnerShader, 0);
-        p->m_spFirstShaderConstantMap->AddEntry("WorldViewProjTranspose", 0x20000009, 0, 0, 4, 0, 0, 0, 0, false);
-        p->m_spFirstShaderConstantMap->AddEntry("TexScroll", 0x10000007, 0, 4, 1, "", 0x10, 4, DAT_01202198, false);
+        p->m_spFirstShaderConstantMap->SetConstant("WorldViewProjTranspose", 0x20000009, 0, 0, 4, 0, 0, 0, 0, false);
+        p->m_spFirstShaderConstantMap->SetConstant("TexScroll", 0x10000007, 0, 4, 1, "", 0x10, 4, DAT_01202198, false);
     }
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-struct _D3DXMACRO
-{
-    const char* Name;
-    const char* Definition;
-};
-struct NiD3DVertexShader
-{
-    virtual void v0();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (!InterlockedDecrement(&m_uiRefCount))
-            DeleteThis();
-    }
-};
+#include "../../include/_D3DXMACRO.h"
+
 struct VSPtr_bca0d0
 {
     NiD3DVertexShader* m_pObject;
@@ -435,21 +305,15 @@ struct VSPtr_bca0d0
         if (m_pObject != pObject)
         {
             if (m_pObject)
-                m_pObject->DecRefCount();
+                ReleaseShaderReference(m_pObject);
             m_pObject = pObject;
             if (m_pObject)
-                m_pObject->IncRefCount();
+                AcquireShaderReference(m_pObject);
         }
         return *this;
     }
 };
-struct BSShader
-{
-    virtual ~BSShader();
-    unsigned int m_uiRefCount;  // +04
-    static void __cdecl GetShaderPath(char const*, char*);
-    NiD3DVertexShader* CompileVertexShader(char const*, _D3DXMACRO const*, char const*, char const*);
-};
+
 int __cdecl _sprintf_s(char*, unsigned int, const char*, ...);
 extern const char $SG3295[];
 void* _fnv_zlib_memset(void*, int, unsigned int);
@@ -460,31 +324,6 @@ struct TileShaderDef_bca0d0
 };
 struct FUN_00bca0d0_shell : BSShader
 {
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
     unsigned int unk6C;
     VSPtr_bca0d0 m_spVertexShaders[3];
     void CreateTileVertexShaders();
@@ -519,14 +358,7 @@ void FUN_00bca0d0_shell::CreateTileVertexShaders()
     }
 }
 
-struct NiShader
-{
-    virtual void Initialize();
-};
-struct NiD3DPass
-{
-    void DestroyPass();
-};
+
 struct FUN_00bca6c0_shell : NiShader
 {
     bool FUN_00bca6c0();
@@ -748,610 +580,18 @@ extern unsigned int DAT_011ffce8;
 extern unsigned long DAT_011ff9d8[];
 extern void* DAT_011f9508;
 
-struct SlotObj
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void Target(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-};
-
-struct Renderer8b8
-{
-    unsigned int unk000;
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int unk100;
-    unsigned int unk104;
-    unsigned int unk108;
-    unsigned int unk10c;
-    unsigned int unk110;
-    unsigned int unk114;
-    unsigned int unk118;
-    unsigned int unk11c;
-    unsigned int unk120;
-    unsigned int unk124;
-    unsigned int unk128;
-    unsigned int unk12c;
-    unsigned int unk130;
-    unsigned int unk134;
-    unsigned int unk138;
-    unsigned int unk13c;
-    unsigned int unk140;
-    unsigned int unk144;
-    unsigned int unk148;
-    unsigned int unk14c;
-    unsigned int unk150;
-    unsigned int unk154;
-    unsigned int unk158;
-    unsigned int unk15c;
-    unsigned int unk160;
-    unsigned int unk164;
-    unsigned int unk168;
-    unsigned int unk16c;
-    unsigned int unk170;
-    unsigned int unk174;
-    unsigned int unk178;
-    unsigned int unk17c;
-    unsigned int unk180;
-    unsigned int unk184;
-    unsigned int unk188;
-    unsigned int unk18c;
-    unsigned int unk190;
-    unsigned int unk194;
-    unsigned int unk198;
-    unsigned int unk19c;
-    unsigned int unk1a0;
-    unsigned int unk1a4;
-    unsigned int unk1a8;
-    unsigned int unk1ac;
-    unsigned int unk1b0;
-    unsigned int unk1b4;
-    unsigned int unk1b8;
-    unsigned int unk1bc;
-    unsigned int unk1c0;
-    unsigned int unk1c4;
-    unsigned int unk1c8;
-    unsigned int unk1cc;
-    unsigned int unk1d0;
-    unsigned int unk1d4;
-    unsigned int unk1d8;
-    unsigned int unk1dc;
-    unsigned int unk1e0;
-    unsigned int unk1e4;
-    unsigned int unk1e8;
-    unsigned int unk1ec;
-    unsigned int unk1f0;
-    unsigned int unk1f4;
-    unsigned int unk1f8;
-    unsigned int unk1fc;
-    unsigned int unk200;
-    unsigned int unk204;
-    unsigned int unk208;
-    unsigned int unk20c;
-    unsigned int unk210;
-    unsigned int unk214;
-    unsigned int unk218;
-    unsigned int unk21c;
-    unsigned int unk220;
-    unsigned int unk224;
-    unsigned int unk228;
-    unsigned int unk22c;
-    unsigned int unk230;
-    unsigned int unk234;
-    unsigned int unk238;
-    unsigned int unk23c;
-    unsigned int unk240;
-    unsigned int unk244;
-    unsigned int unk248;
-    unsigned int unk24c;
-    unsigned int unk250;
-    unsigned int unk254;
-    unsigned int unk258;
-    unsigned int unk25c;
-    unsigned int unk260;
-    unsigned int unk264;
-    unsigned int unk268;
-    unsigned int unk26c;
-    unsigned int unk270;
-    unsigned int unk274;
-    unsigned int unk278;
-    unsigned int unk27c;
-    unsigned int unk280;
-    unsigned int unk284;
-    unsigned int unk288;
-    unsigned int unk28c;
-    unsigned int unk290;
-    unsigned int unk294;
-    unsigned int unk298;
-    unsigned int unk29c;
-    unsigned int unk2a0;
-    unsigned int unk2a4;
-    unsigned int unk2a8;
-    unsigned int unk2ac;
-    unsigned int unk2b0;
-    unsigned int unk2b4;
-    unsigned int unk2b8;
-    unsigned int unk2bc;
-    unsigned int unk2c0;
-    unsigned int unk2c4;
-    unsigned int unk2c8;
-    unsigned int unk2cc;
-    unsigned int unk2d0;
-    unsigned int unk2d4;
-    unsigned int unk2d8;
-    unsigned int unk2dc;
-    unsigned int unk2e0;
-    unsigned int unk2e4;
-    unsigned int unk2e8;
-    unsigned int unk2ec;
-    unsigned int unk2f0;
-    unsigned int unk2f4;
-    unsigned int unk2f8;
-    unsigned int unk2fc;
-    unsigned int unk300;
-    unsigned int unk304;
-    unsigned int unk308;
-    unsigned int unk30c;
-    unsigned int unk310;
-    unsigned int unk314;
-    unsigned int unk318;
-    unsigned int unk31c;
-    unsigned int unk320;
-    unsigned int unk324;
-    unsigned int unk328;
-    unsigned int unk32c;
-    unsigned int unk330;
-    unsigned int unk334;
-    unsigned int unk338;
-    unsigned int unk33c;
-    unsigned int unk340;
-    unsigned int unk344;
-    unsigned int unk348;
-    unsigned int unk34c;
-    unsigned int unk350;
-    unsigned int unk354;
-    unsigned int unk358;
-    unsigned int unk35c;
-    unsigned int unk360;
-    unsigned int unk364;
-    unsigned int unk368;
-    unsigned int unk36c;
-    unsigned int unk370;
-    unsigned int unk374;
-    unsigned int unk378;
-    unsigned int unk37c;
-    unsigned int unk380;
-    unsigned int unk384;
-    unsigned int unk388;
-    unsigned int unk38c;
-    unsigned int unk390;
-    unsigned int unk394;
-    unsigned int unk398;
-    unsigned int unk39c;
-    unsigned int unk3a0;
-    unsigned int unk3a4;
-    unsigned int unk3a8;
-    unsigned int unk3ac;
-    unsigned int unk3b0;
-    unsigned int unk3b4;
-    unsigned int unk3b8;
-    unsigned int unk3bc;
-    unsigned int unk3c0;
-    unsigned int unk3c4;
-    unsigned int unk3c8;
-    unsigned int unk3cc;
-    unsigned int unk3d0;
-    unsigned int unk3d4;
-    unsigned int unk3d8;
-    unsigned int unk3dc;
-    unsigned int unk3e0;
-    unsigned int unk3e4;
-    unsigned int unk3e8;
-    unsigned int unk3ec;
-    unsigned int unk3f0;
-    unsigned int unk3f4;
-    unsigned int unk3f8;
-    unsigned int unk3fc;
-    unsigned int unk400;
-    unsigned int unk404;
-    unsigned int unk408;
-    unsigned int unk40c;
-    unsigned int unk410;
-    unsigned int unk414;
-    unsigned int unk418;
-    unsigned int unk41c;
-    unsigned int unk420;
-    unsigned int unk424;
-    unsigned int unk428;
-    unsigned int unk42c;
-    unsigned int unk430;
-    unsigned int unk434;
-    unsigned int unk438;
-    unsigned int unk43c;
-    unsigned int unk440;
-    unsigned int unk444;
-    unsigned int unk448;
-    unsigned int unk44c;
-    unsigned int unk450;
-    unsigned int unk454;
-    unsigned int unk458;
-    unsigned int unk45c;
-    unsigned int unk460;
-    unsigned int unk464;
-    unsigned int unk468;
-    unsigned int unk46c;
-    unsigned int unk470;
-    unsigned int unk474;
-    unsigned int unk478;
-    unsigned int unk47c;
-    unsigned int unk480;
-    unsigned int unk484;
-    unsigned int unk488;
-    unsigned int unk48c;
-    unsigned int unk490;
-    unsigned int unk494;
-    unsigned int unk498;
-    unsigned int unk49c;
-    unsigned int unk4a0;
-    unsigned int unk4a4;
-    unsigned int unk4a8;
-    unsigned int unk4ac;
-    unsigned int unk4b0;
-    unsigned int unk4b4;
-    unsigned int unk4b8;
-    unsigned int unk4bc;
-    unsigned int unk4c0;
-    unsigned int unk4c4;
-    unsigned int unk4c8;
-    unsigned int unk4cc;
-    unsigned int unk4d0;
-    unsigned int unk4d4;
-    unsigned int unk4d8;
-    unsigned int unk4dc;
-    unsigned int unk4e0;
-    unsigned int unk4e4;
-    unsigned int unk4e8;
-    unsigned int unk4ec;
-    unsigned int unk4f0;
-    unsigned int unk4f4;
-    unsigned int unk4f8;
-    unsigned int unk4fc;
-    unsigned int unk500;
-    unsigned int unk504;
-    unsigned int unk508;
-    unsigned int unk50c;
-    unsigned int unk510;
-    unsigned int unk514;
-    unsigned int unk518;
-    unsigned int unk51c;
-    unsigned int unk520;
-    unsigned int unk524;
-    unsigned int unk528;
-    unsigned int unk52c;
-    unsigned int unk530;
-    unsigned int unk534;
-    unsigned int unk538;
-    unsigned int unk53c;
-    unsigned int unk540;
-    unsigned int unk544;
-    unsigned int unk548;
-    unsigned int unk54c;
-    unsigned int unk550;
-    unsigned int unk554;
-    unsigned int unk558;
-    unsigned int unk55c;
-    unsigned int unk560;
-    unsigned int unk564;
-    unsigned int unk568;
-    unsigned int unk56c;
-    unsigned int unk570;
-    unsigned int unk574;
-    unsigned int unk578;
-    unsigned int unk57c;
-    unsigned int unk580;
-    unsigned int unk584;
-    unsigned int unk588;
-    unsigned int unk58c;
-    unsigned int unk590;
-    unsigned int unk594;
-    unsigned int unk598;
-    unsigned int unk59c;
-    unsigned int unk5a0;
-    unsigned int unk5a4;
-    unsigned int unk5a8;
-    unsigned int unk5ac;
-    unsigned int unk5b0;
-    unsigned int unk5b4;
-    unsigned int unk5b8;
-    unsigned int unk5bc;
-    unsigned int unk5c0;
-    unsigned int unk5c4;
-    unsigned int unk5c8;
-    unsigned int unk5cc;
-    unsigned int unk5d0;
-    unsigned int unk5d4;
-    unsigned int unk5d8;
-    unsigned int unk5dc;
-    unsigned int unk5e0;
-    unsigned int unk5e4;
-    unsigned int unk5e8;
-    unsigned int unk5ec;
-    unsigned int unk5f0;
-    unsigned int unk5f4;
-    unsigned int unk5f8;
-    unsigned int unk5fc;
-    unsigned int unk600;
-    unsigned int unk604;
-    unsigned int unk608;
-    unsigned int unk60c;
-    unsigned int unk610;
-    unsigned int unk614;
-    unsigned int unk618;
-    unsigned int unk61c;
-    unsigned int unk620;
-    unsigned int unk624;
-    unsigned int unk628;
-    unsigned int unk62c;
-    unsigned int unk630;
-    unsigned int unk634;
-    unsigned int unk638;
-    unsigned int unk63c;
-    unsigned int unk640;
-    unsigned int unk644;
-    unsigned int unk648;
-    unsigned int unk64c;
-    unsigned int unk650;
-    unsigned int unk654;
-    unsigned int unk658;
-    unsigned int unk65c;
-    unsigned int unk660;
-    unsigned int unk664;
-    unsigned int unk668;
-    unsigned int unk66c;
-    unsigned int unk670;
-    unsigned int unk674;
-    unsigned int unk678;
-    unsigned int unk67c;
-    unsigned int unk680;
-    unsigned int unk684;
-    unsigned int unk688;
-    unsigned int unk68c;
-    unsigned int unk690;
-    unsigned int unk694;
-    unsigned int unk698;
-    unsigned int unk69c;
-    unsigned int unk6a0;
-    unsigned int unk6a4;
-    unsigned int unk6a8;
-    unsigned int unk6ac;
-    unsigned int unk6b0;
-    unsigned int unk6b4;
-    unsigned int unk6b8;
-    unsigned int unk6bc;
-    unsigned int unk6c0;
-    unsigned int unk6c4;
-    unsigned int unk6c8;
-    unsigned int unk6cc;
-    unsigned int unk6d0;
-    unsigned int unk6d4;
-    unsigned int unk6d8;
-    unsigned int unk6dc;
-    unsigned int unk6e0;
-    unsigned int unk6e4;
-    unsigned int unk6e8;
-    unsigned int unk6ec;
-    unsigned int unk6f0;
-    unsigned int unk6f4;
-    unsigned int unk6f8;
-    unsigned int unk6fc;
-    unsigned int unk700;
-    unsigned int unk704;
-    unsigned int unk708;
-    unsigned int unk70c;
-    unsigned int unk710;
-    unsigned int unk714;
-    unsigned int unk718;
-    unsigned int unk71c;
-    unsigned int unk720;
-    unsigned int unk724;
-    unsigned int unk728;
-    unsigned int unk72c;
-    unsigned int unk730;
-    unsigned int unk734;
-    unsigned int unk738;
-    unsigned int unk73c;
-    unsigned int unk740;
-    unsigned int unk744;
-    unsigned int unk748;
-    unsigned int unk74c;
-    unsigned int unk750;
-    unsigned int unk754;
-    unsigned int unk758;
-    unsigned int unk75c;
-    unsigned int unk760;
-    unsigned int unk764;
-    unsigned int unk768;
-    unsigned int unk76c;
-    unsigned int unk770;
-    unsigned int unk774;
-    unsigned int unk778;
-    unsigned int unk77c;
-    unsigned int unk780;
-    unsigned int unk784;
-    unsigned int unk788;
-    unsigned int unk78c;
-    unsigned int unk790;
-    unsigned int unk794;
-    unsigned int unk798;
-    unsigned int unk79c;
-    unsigned int unk7a0;
-    unsigned int unk7a4;
-    unsigned int unk7a8;
-    unsigned int unk7ac;
-    unsigned int unk7b0;
-    unsigned int unk7b4;
-    unsigned int unk7b8;
-    unsigned int unk7bc;
-    unsigned int unk7c0;
-    unsigned int unk7c4;
-    unsigned int unk7c8;
-    unsigned int unk7cc;
-    unsigned int unk7d0;
-    unsigned int unk7d4;
-    unsigned int unk7d8;
-    unsigned int unk7dc;
-    unsigned int unk7e0;
-    unsigned int unk7e4;
-    unsigned int unk7e8;
-    unsigned int unk7ec;
-    unsigned int unk7f0;
-    unsigned int unk7f4;
-    unsigned int unk7f8;
-    unsigned int unk7fc;
-    unsigned int unk800;
-    unsigned int unk804;
-    unsigned int unk808;
-    unsigned int unk80c;
-    unsigned int unk810;
-    unsigned int unk814;
-    unsigned int unk818;
-    unsigned int unk81c;
-    unsigned int unk820;
-    unsigned int unk824;
-    unsigned int unk828;
-    unsigned int unk82c;
-    unsigned int unk830;
-    unsigned int unk834;
-    unsigned int unk838;
-    unsigned int unk83c;
-    unsigned int unk840;
-    unsigned int unk844;
-    unsigned int unk848;
-    unsigned int unk84c;
-    unsigned int unk850;
-    unsigned int unk854;
-    unsigned int unk858;
-    unsigned int unk85c;
-    unsigned int unk860;
-    unsigned int unk864;
-    unsigned int unk868;
-    unsigned int unk86c;
-    unsigned int unk870;
-    unsigned int unk874;
-    unsigned int unk878;
-    unsigned int unk87c;
-    unsigned int unk880;
-    unsigned int unk884;
-    unsigned int unk888;
-    unsigned int unk88c;
-    unsigned int unk890;
-    unsigned int unk894;
-    unsigned int unk898;
-    unsigned int unk89c;
-    unsigned int unk8a0;
-    unsigned int unk8a4;
-    unsigned int unk8a8;
-    unsigned int unk8ac;
-    unsigned int unk8b0;
-    unsigned int unk8b4;
-    SlotObj* m_pk08b8;
-};
-
-// If the counter at DAT_011ff9d8[idx] is zero, calls Target(0xae, a1 & 0xFF, 0, 0) on m_pk08b8, then adds a2 to the counter.
+// If the counter at DAT_011ff9d8[idx] is zero, sets render state 0xAE through NiDX9Renderer::pRenderState, then adds a2 to the counter.
 // @fnv 0x00b984f0
 void AddToCounterIfIdle(unsigned int uiValue, unsigned int uiIncrement)
 {
     unsigned int idx = DAT_011ffce8;
     if (DAT_011ff9d8[idx] == 0)
     {
-        Renderer8b8* pR = (Renderer8b8*)DAT_011f9508;
-        SlotObj* p = pR->m_pk08b8;
-        p->Target(0xae, uiValue & 0xFF, 0, 0);
+        NiDX9Renderer* pR = (NiDX9Renderer*)DAT_011f9508;
+        NiDX9RenderState* p = pR->pRenderState;
+        // The shared render-state header has slot 26, but does not yet declare its four arguments.
+        typedef void (__thiscall *SetRenderState)(NiDX9RenderState*, unsigned int, unsigned int, unsigned int, unsigned int);
+        ((SetRenderState)(*(void***)p)[26])(p, 0xae, uiValue & 0xFF, 0, 0);
     }
     DAT_011ff9d8[idx] += uiIncrement;
 }
@@ -1359,27 +599,8 @@ void AddToCounterIfIdle(unsigned int uiValue, unsigned int uiIncrement)
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 
-class NiD3DGPUProgramCache
-{
-  public:
-    static const char* __cdecl GetPixelShaderProfile(bool);
-};
 
-struct NiD3DPixelShader
-{
-    virtual void v0();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (!InterlockedDecrement(&m_uiRefCount))
-            DeleteThis();
-    }
-};
+
 
 struct PSPtr_bca240
 {
@@ -1389,10 +610,10 @@ struct PSPtr_bca240
         if (m_pObject != pObject)
         {
             if (m_pObject)
-                m_pObject->DecRefCount();
+                ReleaseShaderReference(m_pObject);
             m_pObject = pObject;
             if (m_pObject)
-                m_pObject->IncRefCount();
+                AcquireShaderReference(m_pObject);
         }
         return *this;
     }
@@ -1408,37 +629,11 @@ struct TileShaderDef_bca240
 
 struct FUN_00bca240_shell : BSShader
 {
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
     unsigned int unk6C;
     unsigned int unk70;
     unsigned int unk74;
     unsigned int unk78;
     PSPtr_bca240 m_spPixelShaders[3];
-    NiD3DPixelShader* CompilePixelShader(char const*, _D3DXMACRO const*, char const*, char const*);
     void CreateTilePixelShaders();
 };
 
@@ -1502,89 +697,26 @@ struct FUN_00b66f20
         }
     }
 };
-struct PassObject
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int refs;
-    void DestroyPass();
-    void Dec()
-    {
-        if (--refs == 0)
-            DestroyPass();
-    }
-};
+
 struct FUN_00b79930
 {
-    PassObject* object;
+    NiD3DPass* object;
     ~FUN_00b79930()
     {
         if (object)
-            object->Dec();
+            ReleasePassReference(object);
     }
     void Clear()
     {
         if (object)
         {
-            object->Dec();
+            ReleasePassReference(object);
             object = 0;
         }
     }
 };
-struct FUN_00be0f10
-{
-    virtual ~FUN_00be0f10();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int value60;
-    unsigned char enabled64;
-    unsigned int unk68;
-};
-struct FUN_00bca510 : FUN_00be0f10
+
+struct FUN_00bca510 : BSShader
 {
     FUN_00b79930 pass[1];
     FUN_00b66f20 vertex[3];
@@ -1602,9 +734,9 @@ FUN_00bca510::~FUN_00bca510()
     for (unsigned int i = 0; i < 3; ++i)
         pixel[i].Clear();
     pass[0].Clear();
-    enabled64 = 0;
+    bFirstPass = 0;
     other88.Clear();
-    value60 = 0;
+    ePass = 0;
 }
 
 struct Stage321
@@ -1680,20 +812,6 @@ bool Shader321::ConfigurePassStages()
 }
 
 namespace fnv_00bca980 {
-struct RgbaColor
-{
-    float r;
-    float g;
-    float b;
-    float a;
-};
-struct NiRectF
-{
-    float left;
-    float right;
-    float top;
-    float bottom;
-};
 struct NiRectI
 {
     int left;
@@ -1702,12 +820,12 @@ struct NiRectI
     int bottom;
 };
 
-extern RgbaColor DAT_01202188;
+extern NiColorA DAT_01202188;
 extern float DAT_01202198;
 extern float DAT_0120219c;
 extern float DAT_012021a0;
 extern float DAT_012021a4;
-extern NiRectF DAT_011ad840;
+extern NiRectF_tileshader DAT_011ad840;
 extern unsigned char DAT_011f9426;
 extern char DAT_011f4288;
 
@@ -1715,13 +833,6 @@ void AccumulateAndDispatch(int, int, int, int, int);
 void FUN_00b980c0(unsigned int, unsigned int, unsigned int, unsigned int);
 void FUN_00b98180(unsigned int, unsigned int, unsigned int, unsigned int);
 
-struct RenderTarget
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    unsigned int unk0C;
-};
 
 struct ShaderCtxB8
 {
@@ -1848,66 +959,7 @@ struct AlphaProp
     float unk3C;
 };
 
-struct MaterialProp
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    RgbaColor unk68;
-    float unk78;
-    float unk7C;
-    float unk80;
-    float unk84;
-    float unk88;
-    char unk8C;
-    char unk8D;
-    char unk8E;
-    char unk8F;
-    char unk90;
-    bool unk91;
-    char unk92;
-    char unk93;
-    int unk94;
-    int unk98;
-    NiRectI unk9C;
-    bool unkAC;
-};
 
-struct FlagProp
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    unsigned short unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-};
 
 struct Shader
 {
@@ -1944,162 +996,88 @@ struct Shader
     virtual void Draw(void*, ShaderCtx*, void*, int, void*, const NiPropertyState*, int, void*, void*, int, int);
 };
 
-struct Renderer
-{
-    virtual void d00();
-    virtual void d01();
-    virtual void d02();
-    virtual void d03();
-    virtual void d04();
-    virtual void d05();
-    virtual void d06();
-    virtual void d07();
-    virtual void d08();
-    virtual void d09();
-    virtual void d10();
-    virtual void d11();
-    virtual void d12();
-    virtual void d13();
-    virtual void d14();
-    virtual void d15();
-    virtual void d16();
-    virtual void d17();
-    virtual void d18();
-    virtual void d19();
-    virtual void d20();
-    virtual void d21();
-    virtual void d22();
-    virtual void d23();
-    virtual void d24();
-    virtual void d25();
-    virtual void d26();
-    virtual void d27();
-    virtual void d28();
-    virtual void d29();
-    virtual void d30();
-    virtual void d31();
-    virtual void d32();
-    virtual void d33();
-    virtual void d34();
-    virtual void d35();
-    virtual void d36();
-    virtual void d37();
-    virtual void d38();
-    virtual void d39();
-    virtual void d40();
-    virtual void d41();
-    virtual void d42();
-    virtual void d43();
-    virtual void d44();
-    virtual void d45();
-    virtual void d46();
-    virtual void d47();
-    virtual void d48();
-    virtual void d49();
-    virtual int GetC8();
-    virtual int GetCC();
-    virtual void d52();
-    virtual RenderTarget* GetD4();
-};
-extern Renderer* DAT_011f4748;
+extern NiRenderer* DAT_011f4748;
 
 struct ShaderProp
 {
     void FUN_00e6fbb0(void*, int);
 };
 
-struct TileShaderS
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    ShaderProp* unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    Shader* unk30;
-    Shader* unk34;
-    void FUN_00bca980(const NiPropertyState* state);
-};
+}  // namespace fnv_00bca980
 
 // @fnv 0x00bca980
-void TileShaderS::FUN_00bca980(const NiPropertyState* state)
+void TileShader::SetupMaterial(const NiPropertyState* state)
 {
-    ShaderManager* mgr = DAT_011f91e0;
+    using namespace fnv_00bca980;
+    ShaderManager* mgr = fnv_00bca980::DAT_011f91e0;
     if (!mgr)
         return;
     ShaderCtx* ctx = mgr->unk00;
     void* sub68 = &ctx->unk68;
     void* v20 = ctx->unk20;
     if (!v20)
-        v20 = &DAT_011f4288;
+        v20 = &fnv_00bca980::DAT_011f4288;
     void* p34 = ctx->unkB8->unk34;
     void* vBC = ctx->unkBC;
-    MaterialProp* mat = (MaterialProp*)state->m_spProperties[3];
-    unk18->FUN_00e6fbb0(sub68, 0);
+    TileShaderProperty* mat = (TileShaderProperty*)state->m_aspProps[3];
+    ((ShaderProp*)m_pkD3DRenderer)->FUN_00e6fbb0(sub68, 0);
 
-    if (mat->unk91)
+    if (mat->m_bUnk91)
     {
-        DAT_01202198 = mat->unk7C;
-        DAT_0120219c = mat->unk80;
-        DAT_012021a0 = mat->unk84;
-        DAT_012021a4 = mat->unk88;
+        fnv_00bca980::DAT_01202198 = mat->m_afUnk7C[0];
+        fnv_00bca980::DAT_0120219c = mat->m_afUnk7C[1];
+        fnv_00bca980::DAT_012021a0 = mat->m_afUnk7C[2];
+        fnv_00bca980::DAT_012021a4 = mat->m_afUnk7C[3];
     }
     float scale = 1.0f;
-    DAT_01202188 = mat->unk68;
-    AlphaProp* pAlpha = (AlphaProp*)state->m_spProperties[2];
+    fnv_00bca980::DAT_01202188 = *(NiColorA*)mat->m_afUnk68;
+    AlphaProp* pAlpha = (AlphaProp*)state->m_aspProps[2];
     if (pAlpha)
         scale = pAlpha->unk3C;
-    DAT_01202188.a = mat->unk78 * scale;
+    fnv_00bca980::DAT_01202188.a = mat->m_fAlpha * scale;
 
-    Shader* pShader = unk30;
+    Shader* pShader = (Shader*)m_spPixelConstantMap.m_pObject;
     if (pShader)
     {
-        void* q = DAT_0126f74c->unk44;
+        void* q = fnv_00bca980::DAT_0126f74c->unk44;
         if (q)
             pShader->Draw(q, ctx, vBC, 0, p34, state, 0, sub68, v20, 0, 1);
     }
-    pShader = unk34;
+    pShader = (Shader*)m_spVertexConstantMap.m_pObject;
     if (pShader)
     {
-        void* q = DAT_0126f74c->unk5C;
+        void* q = fnv_00bca980::DAT_0126f74c->unk5C;
         if (q)
             pShader->Draw(q, ctx, vBC, 0, p34, state, 0, sub68, v20, 0, 1);
     }
 
-    if (mat->unkAC)
+    if (mat->m_bUnkAC)
     {
-        NiRectI rect = mat->unk9C;
-        if (DAT_011f9426)
+        NiRectI rect = *(NiRectI*)mat->m_auiUnk9C;
+        if (fnv_00bca980::DAT_011f9426)
         {
-            Renderer* dev = DAT_011f4748;
-            if (DAT_011f4748->GetCC() == dev->GetC8())
+            NiRenderer* dev = fnv_00bca980::DAT_011f4748;
+            if (fnv_00bca980::DAT_011f4748->GetCurrentRT() == dev->GetDefaultRT())
             {
-                NiRectF vp = DAT_011ad840;
-                unsigned int h1 = DAT_011f4748->GetD4()->unk0C;
-                RenderTarget* rt = DAT_011f4748->GetD4();
-                rect.top = (int)(h1 * vp.bottom + rect.top * (vp.top - vp.bottom));
-                rect.bottom = (int)(rt->unk0C * vp.bottom + rect.bottom * (vp.top - vp.bottom));
+                NiRectF_tileshader vp = fnv_00bca980::DAT_011ad840;
+                unsigned int h1 = fnv_00bca980::DAT_011f4748->GetDefaultBackBuffer()->m_uiImageHeight;
+                Ni2DBuffer* rt = fnv_00bca980::DAT_011f4748->GetDefaultBackBuffer();
+                rect.top = (int)(h1 * vp.m_fMaximumV + rect.top * (vp.m_fMinimumV - vp.m_fMaximumV));
+                rect.bottom = (int)(rt->m_uiImageHeight * vp.m_fMaximumV + rect.bottom * (vp.m_fMinimumV - vp.m_fMaximumV));
             }
         }
         AddToCounterIfIdle(1, 0);
         AccumulateAndDispatch(rect.left, rect.top, rect.right, rect.bottom, 0);
     }
 
-    FlagProp* pFlag = (FlagProp*)state->m_spProperties[4];
-    if (pFlag && (pFlag->unk18 & 1))
+    NiStencilProperty* pFlag = (NiStencilProperty*)state->m_aspProps[4];
+    if (pFlag && (pFlag->mode & 1))
     {
         UpdateRendererStateCount(1, 0);
-        FUN_00b980c0((pFlag->unk18 >> 1) & 7, (pFlag->unk18 >> 4) & 7, (pFlag->unk18 >> 7) & 7, 0);
-        FUN_00b98180(pFlag->unk18 >> 12, pFlag->unk1C, pFlag->unk20, 0);
+        FUN_00b980c0((pFlag->mode >> 1) & 7, (pFlag->mode >> 4) & 7, (pFlag->mode >> 7) & 7, 0);
+        FUN_00b98180(pFlag->mode >> 12, pFlag->m_1c, pFlag->m_20, 0);
     }
 }
-}  // namespace fnv_00bca980
 
 namespace fnv_00bca760 {
 template <class T> struct FieldPtr
@@ -2224,12 +1202,12 @@ template <class T> class RefPtr
   public:
     __forceinline RefPtr(T* p) : m_pObject(p)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     __forceinline ~RefPtr()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     __forceinline T* operator->() const

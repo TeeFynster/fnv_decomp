@@ -1,21 +1,17 @@
-// Source layout: BSExtraData. PC corrections are in generate_headers.py.
-#ifndef FNV_BSEXTRADATA_H
-#define FNV_BSEXTRADATA_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
 class BSExtraData
 {
-  public:
-    void** m_ppVirtualMethodTable;       // +0x0
-    unsigned char m_ucExtraDataType;  // +0x4
-    unsigned char layoutPadding5;
-    unsigned short layoutPadding6;
-    BSExtraData* pNext;  // +0x8
+public:
+    virtual ~BSExtraData();
+    virtual bool Compare(BSExtraData* extra);
+
+    BSExtraData(unsigned char type);
+    void* __thiscall FUN_0040ecd0(unsigned int flags);
+
+    unsigned char type;
+    unsigned char unknown05;
+    unsigned char unknown06;
+    unsigned char unknown07;
+    BSExtraData* next;
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BSExtraData) == 0xC);
-FNV_STATIC_ASSERT(offsetof(BSExtraData, m_ppVirtualMethodTable) == 0x0);
-FNV_STATIC_ASSERT(offsetof(BSExtraData, m_ucExtraDataType) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BSExtraData, pNext) == 0x8);
-#endif

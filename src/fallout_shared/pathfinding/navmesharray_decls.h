@@ -2,14 +2,7 @@
 #define NAVMESHARRAY_DECLS_H
 
 class NavMesh;
-template <class T> class NiPointer
-{
-  public:
-    T* ptr;
-    NiPointer(const NiPointer&);
-    ~NiPointer();
-};
-typedef NiPointer<NavMesh> NavMeshPtr;
+#include "../../../include/NavMeshPtr.h"
 class GlobalObject_00869f00
 {
   public:

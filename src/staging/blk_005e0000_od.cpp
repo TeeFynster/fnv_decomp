@@ -1,8 +1,55 @@
+#include "../../include/BSStringT.h"
 
 // src/staging/blk_005e0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
+// Isolate overlapping legacy support declarations from the checked headers.
+#include "../../include/NiPointer.h"
 #include "../../include/layout_support.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/NiTMallocInterface.h"
+#define __local_vftable_ctor_closure SharedVtableConstructorClosure
+#include "../../include/BSSimpleArray.h"
+#include "../../include/Actor.h"
+#include "../../include/BGSPreloadable.h"
+#include "../../include/NavMeshPtr.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/Script.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESAttributes.h"
+#include "../../include/TESChallenge.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESSound.h"
+
+#include "../../include/hkMemoryAllocator.h"
+// AudioMgr_BSAudio: this unit's view of BSAudio (0x00453a70 BSAudio::QInstance; 0x00ad73b0 GetSoundHandleByFormID,
+// 0x00ad7480 GetSoundHandleByFilename, 0x00ad7550 GetSoundHandleByEditorName, 0x00ad8570 per the community PDB). It
+// returns this unit's own sound-handle copy, so it stays local until that copy moves onto BSSoundHandle.
+class AudioPlaybackHandle;
+class Snd;
+class SndForm;
+class SndSrc;
+class AudioMgr_BSAudio
+{
+public:
+    static AudioMgr_BSAudio* Get();
+    AudioPlaybackHandle Make(int id, SndForm* form);
+    AudioPlaybackHandle Make2(int id);
+    bool PlayAt(void* node, float f, int flags);
+    AudioPlaybackHandle GetHandle(const char* name, int flags, int a);
+    AudioPlaybackHandle GetSoundByEditorID(const char* editorID, int flags, int a);
+    AudioPlaybackHandle GetSoundByEditorID(const char* editorID, int flags);
+    Snd Make(void* a, SndSrc* b);
+};
+#include "../../include/GO.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESSoundFile.h"
+#include "../../include/TESSound__SOUND_DATA.h"
+#include "../../include/BGSBodyPartData.h"
+#include "../../include/TESSaveLoadGame.h"
+#undef __local_vftable_ctor_closure
 
 struct GlobalObject_0045cf30
 {
@@ -60,11 +107,6 @@ FUN_005e0310_class* __thiscall FUN_005e0310_class::FUN_005e0310(void* apArg, voi
 
 struct ActorCombatGroup;
 
-struct NiTMallocInterface_
-{
-    static void __cdecl Deallocate(ActorCombatGroup**);
-};
-
 struct FUN_005e0340Class
 {
     int m_vtbl;
@@ -74,12 +116,12 @@ struct FUN_005e0340Class
 
 extern int DAT_0103d3f8;
 
-// Sets the vtable pointer to DAT_0103d3f8 and deallocates m_ptr through NiTMallocInterface_::Deallocate.
+// Sets the vtable pointer to DAT_0103d3f8 and deallocates m_ptr through NiTMallocInterface<ActorCombatGroup*>::Deallocate.
 // @fnv 0x005e0340
 void FUN_005e0340Class::FUN_005e0340()
 {
     m_vtbl = (int)&DAT_0103d3f8;
-    NiTMallocInterface_::Deallocate(m_ptr);
+    NiTMallocInterface<ActorCombatGroup*>::Deallocate(m_ptr);
 }
 
 extern int DAT_0103d400;
@@ -97,12 +139,6 @@ void* FUN_005e0370_Class::FUN_005e0370(int aiArg1, int aiArg2)
     vtbl = &DAT_0103d400;
     return this;
 }
-
-struct NavMeshPtr
-{
-    void* FUN_00458b50();
-    void* FUN_005e05b0(int index);
-};
 
 // @fnv 0x005e05b0
 void* NavMeshPtr::FUN_005e05b0(int index)
@@ -122,15 +158,16 @@ void QuantityData::FUN_005e0b80(unsigned int quantity)
     SetQuantity(quantity);
 }
 
-struct FUN_005e1140_Class
+// Script.h has no profiling-time mutator; keep the operation here using its layout.
+struct ScriptRuntimeOperations
 {
-    void FUN_005e1140(float value);
+    void AddProfileTime(float value);
 };
 
 // @fnv 0x005e1140
-void FUN_005e1140_Class::FUN_005e1140(float value)
+void ScriptRuntimeOperations::AddProfileTime(float value)
 {
-    *(float*)((char*)this + 0x34) += value;
+    reinterpret_cast<Script*>(this)->m_fValueAtOffset34 += value;
 }
 
 struct FUN_005e2850_class
@@ -223,69 +260,40 @@ void GlobalObject_00869f00::ResetToGlobal()
     Clear(true);
 }
 
-extern int DAT_010472f8;
-
-struct FUN_005ef910_class
-{
-    int __thiscall FUN_005ef910(int, int);
-};
-
-struct FUN_005eefc0_class
-{
-    FUN_005eefc0_class* __thiscall FUN_005eefc0();
-};
+class FootIK_DATA__FootIK_Leg_DATA;
 
 // @fnv 0x005eefc0
-FUN_005eefc0_class* FUN_005eefc0_class::FUN_005eefc0()
+template <>
+BSSimpleArray<FootIK_DATA__FootIK_Leg_DATA, 1024>::BSSimpleArray()
 {
-    *reinterpret_cast<int**>(this) = &DAT_010472f8;
-    reinterpret_cast<FUN_005ef910_class*>(this)->FUN_005ef910(0, 0);
-    return this;
+    _InitialSetup(0, 0);
 }
-
-namespace fnv_005eeff0 {
-extern int DAT_010472f8;
-
-struct GlobalObject_00869f00
-{
-    void Clear(bool);
-    void FUN_005eeff0();
-};
 
 // @fnv 0x005eeff0
-void GlobalObject_00869f00::FUN_005eeff0()
+template <>
+BSSimpleArray<FootIK_DATA__FootIK_Leg_DATA, 1024>::~BSSimpleArray()
 {
-    *reinterpret_cast<int**>(this) = &DAT_010472f8;
     Clear(true);
 }
-}  // namespace fnv_005eeff0
 
 void* __cdecl operator new(unsigned int);
 
-struct FUN_005ef150_class
-{
-    void* __thiscall FUN_005ef150(int a);
-};
-
-// Allocates a block of a * 0x38 bytes via operator new and returns the pointer.
 // @fnv 0x005ef150
-void* __thiscall FUN_005ef150_class::FUN_005ef150(int a)
+template <>
+FootIK_DATA__FootIK_Leg_DATA* BSSimpleArray<FootIK_DATA__FootIK_Leg_DATA, 1024>::_Allocate(unsigned int a)
 {
     void* p = operator new(a * 0x38);
-    return p;
+    return static_cast<FootIK_DATA__FootIK_Leg_DATA*>(p);
 }
 
 extern "C" void* __cdecl _Reallocate(void* p, size_t size);
 
-struct FUN_005ef180_Class
-{
-    void* __thiscall FUN_005ef180(int n, int m);
-};
-
 // @fnv 0x005ef180
-void* __thiscall FUN_005ef180_Class::FUN_005ef180(int n, int iCount)
+template <>
+FootIK_DATA__FootIK_Leg_DATA* BSSimpleArray<FootIK_DATA__FootIK_Leg_DATA, 1024>::_Reallocate(
+    FootIK_DATA__FootIK_Leg_DATA* n, unsigned int iCount)
 {
-    return _Reallocate((void*)n, iCount * 0x38);
+    return static_cast<FootIK_DATA__FootIK_Leg_DATA*>(::_Reallocate(n, iCount * 0x38));
 }
 
 extern int DAT_0104730c;
@@ -349,227 +357,106 @@ void* __thiscall FUN_005ef360_class::FUN_005ef360(unsigned int n, unsigned int m
     return Reallocate((void*)n, m * 0x28);
 }
 
-extern int DAT_01047320;
+// RTTI at 0x01047320 identifies BSSimpleArray<GrabIK_DATA::GrabIK_Arm_DATA, 1024>.
+class GrabIK_DATA__GrabIK_Arm_DATA;
 
-struct FUN_005efd40_class
-{
-    void* vtbl;
-    void FUN_005efd40(int a, int b);
-    FUN_005efd40_class* FUN_005ef380();
-};
-
-// Sets the vtbl to DAT_01047320, calls FUN_005efd40(0, 0), and returns this.
 // @fnv 0x005ef380
-FUN_005efd40_class* FUN_005efd40_class::FUN_005ef380()
+template <>
+BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>::BSSimpleArray()
 {
-    vtbl = &DAT_01047320;
-    FUN_005efd40(0, 0);
-    return this;
+    _InitialSetup(0, 0);
 }
-
-struct FUN_005ef510_Class
-{
-    void* __thiscall AllocateSixTimesSize(int n);
-};
 
 // Allocates n * 6 bytes with operator new and returns the pointer.
 // @fnv 0x005ef510
-void* __thiscall FUN_005ef510_Class::AllocateSixTimesSize(int n)
+template <>
+GrabIK_DATA__GrabIK_Arm_DATA* BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>::_Allocate(unsigned int n)
 {
     void* p = operator new(n * 6);
-    return p;
+    return static_cast<GrabIK_DATA__GrabIK_Arm_DATA*>(p);
 }
 
 extern "C" void* __cdecl _Reallocate(void* p, size_t n);
 
-struct FUN_005ef540_class
-{
-    void* __thiscall FUN_005ef540(int a, int b);
-};
-
 // @fnv 0x005ef540
-void* __thiscall FUN_005ef540_class::FUN_005ef540(int a, int b)
+template <>
+GrabIK_DATA__GrabIK_Arm_DATA* BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>::_Reallocate(
+    GrabIK_DATA__GrabIK_Arm_DATA* a, unsigned int b)
 {
-    return _Reallocate(reinterpret_cast<void*>(a), b * 6);
+    return static_cast<GrabIK_DATA__GrabIK_Arm_DATA*>(::_Reallocate(a, b * 6));
 }
 
-struct TESAttributes
-{
-    unsigned char GetAttributeValue(int);
-};
-
-struct FUN_005f1210_shell : TESAttributes
-{
-    unsigned char FUN_005f1210();
-};
-
 // @fnv 0x005f1210
-unsigned char FUN_005f1210_shell::FUN_005f1210()
+unsigned char TESAttributes::GetPerception()
 {
     return GetAttributeValue(6);
 }
 
-namespace fnv_005f1250 {
-struct TESAttributes
-{
-    unsigned char GetAttributeValue(int);
-};
-
-struct FUN_005f1250_shell : TESAttributes
-{
-    unsigned char FUN_005f1250();
-};
-
 // @fnv 0x005f1250
-unsigned char FUN_005f1250_shell::FUN_005f1250()
+unsigned char TESAttributes::GetCharisma()
 {
     return GetAttributeValue(8);
 }
-}  // namespace fnv_005f1250
-
-namespace fnv_005f1270 {
-struct TESAttributes
-{
-    unsigned char GetAttributeValue(int);
-    unsigned char FUN_005f1270();
-};
 
 // @fnv 0x005f1270
-unsigned char TESAttributes::FUN_005f1270()
+unsigned char TESAttributes::GetIntelligence()
 {
     return GetAttributeValue(9);
 }
-}  // namespace fnv_005f1270
-
-namespace fnv_005f12b0 {
-struct TESAttributes
-{
-    int GetAttributeValue(int);
-};
-
-struct FUN_005f12b0_shell : TESAttributes
-{
-    int FUN_005f12b0();
-};
 
 // @fnv 0x005f12b0
-int FUN_005f12b0_shell::FUN_005f12b0()
+unsigned char TESAttributes::GetLuck()
 {
     return GetAttributeValue(0xb);
 }
-}  // namespace fnv_005f12b0
-
-namespace fnv_005f14b0 {
-struct TESAttributes
-{
-    void SetAttributeValue(unsigned int index, unsigned char value, bool flag);
-};
 
 void TESAttributes::SetAttributeValue(unsigned int index, unsigned char value, bool flag)
 {}
 
-struct FUN_005f14b0_Class
-{
-    void SetAttribute5(unsigned char value);
-};
-
 // @fnv 0x005f14b0
-void FUN_005f14b0_Class::SetAttribute5(unsigned char value)
+void TESAttributes::SetStrength(unsigned char value)
 {
-    reinterpret_cast<TESAttributes*>(this)->SetAttributeValue(5, value, true);
+    SetAttributeValue(5U, value, true);
 }
-}  // namespace fnv_005f14b0
-
-namespace fnv_005f14d0 {
-struct TESAttributes
-{
-    void SetAttributeValue(unsigned char index, unsigned char value, bool force);
-    void FUN_005f14d0(unsigned char index);
-};
 
 void TESAttributes::SetAttributeValue(unsigned char index, unsigned char value, bool force)
 {}
 
 // @fnv 0x005f14d0
-void TESAttributes::FUN_005f14d0(unsigned char index)
+void TESAttributes::SetPerception(unsigned char index)
 {
-    SetAttributeValue(6, index, true);
+    SetAttributeValue((unsigned char)6, index, true);
 }
-}  // namespace fnv_005f14d0
 
-namespace fnv_005f14f0 {
-struct TESAttributes
-{
-    void SetAttributeValue(ActorValue::Index index, unsigned char value, bool flag);
-    void FUN_005f14f0(bool argument0);
-};
 // @fnv 0x005f14f0
-void TESAttributes::FUN_005f14f0(bool abValue)
+void TESAttributes::SetEndurance(unsigned char abValue)
 {
     SetAttributeValue(static_cast<ActorValue::Index>(7), static_cast<unsigned char>(abValue), true);
 }
-}  // namespace fnv_005f14f0
 
-namespace fnv_005f1510 {
-struct TESAttributes
-{
-    void SetAttributeValue(unsigned int index, unsigned char value, bool flag);
-};
-struct FUN_005f1510
-{
-    void SetFlag(bool flag);
-};
 // @fnv 0x005f1510
-void FUN_005f1510::SetFlag(bool flag)
+void TESAttributes::SetCharisma(unsigned char flag)
 {
-    ((TESAttributes*)this)->SetAttributeValue(8, flag, true);
+    SetAttributeValue(8U, flag, true);
 }
-}  // namespace fnv_005f1510
-
-namespace fnv_005f1530 {
-struct TESAttributes
-{
-    void SetAttributeValue(unsigned int index, unsigned char value, bool flag);
-    void FUN_005f1530(unsigned char value);
-};
 
 // @fnv 0x005f1530
-void TESAttributes::FUN_005f1530(unsigned char value)
+void TESAttributes::SetIntelligence(unsigned char value)
 {
-    SetAttributeValue(9, value, true);
+    SetAttributeValue(9U, value, true);
 }
-}  // namespace fnv_005f1530
-
-namespace fnv_005f1550 {
-struct TESAttributes
-{
-    void SetAttributeValue(unsigned char index, unsigned char value, bool flag);
-    void SetAttribute(unsigned char index);
-};
-
-void __thiscall TESAttributes::SetAttributeValue(unsigned char index, unsigned char value, bool flag)
-{}
 
 // @fnv 0x005f1550
 void __thiscall TESAttributes::SetAttribute(unsigned char index)
 {
-    SetAttributeValue(10, index, true);
+    SetAttributeValue((unsigned char)10, index, true);
 }
-}  // namespace fnv_005f1550
-
-namespace fnv_005f1570 {
-struct TESAttributes
-{
-    void SetAttributeValue(unsigned char, unsigned char, bool);
-    void FUN_005f1570(unsigned char index);
-};
 
 // @fnv 0x005f1570
-void TESAttributes::FUN_005f1570(unsigned char index)
+void TESAttributes::SetLuck(unsigned char index)
 {
-    SetAttributeValue(0xb, index, true);
+    SetAttributeValue((unsigned char)0xb, index, true);
 }
-}  // namespace fnv_005f1570
 
 struct FUN_005f3710_Class
 {
@@ -662,12 +549,6 @@ int FUN_005f60c0_Class::HasFlag8()
     return ((int*)this)[0x1c] & 8;
 }
 
-struct TESChallenge
-{
-    void MarkForSave();
-    void FUN_005f60e0(int amount);
-};
-
 // Adds amount to the int at offset 0x6c of this object and calls MarkForSave.
 // @fnv 0x005f60e0
 void TESChallenge::FUN_005f60e0(int amount)
@@ -675,12 +556,6 @@ void TESChallenge::FUN_005f60e0(int amount)
     *(int*)((char*)this + 0x6c) += amount;
     MarkForSave();
 }
-
-struct TESActorBaseData
-{
-    void UpdateFlagBit(int, bool, bool);
-    void FUN_005f9010(bool set);
-};
 
 // @fnv 0x005f9010
 void TESActorBaseData::FUN_005f9010(bool set)
@@ -764,10 +639,6 @@ void __thiscall Standin005e03a0::FUN_005e03a0()
     FUN_004ede70(m4);
 }
 
-struct NiBound
-{
-    NiBound();
-};
 int __cdecl FUN_005e0aa0(void* a, int b);
 struct FUN_005e05d0 : NiBound
 {
@@ -988,7 +859,7 @@ void __cdecl FUN_005e0b40(void*, void*);
 struct FUN_005e0b10_Cls
 {
     NavMeshPtr m0;
-    char _pad[7];
+    char _pad[4];
     NavMeshPtr m8;
     void __thiscall FUN_005e0b10();
 };
@@ -1077,24 +948,6 @@ GlobalObject_00869f00* __thiscall GlobalObject_00869f00_Deleting::FUN_005ef590(u
 }
 
 void __cdecl operator delete(void*);
-struct FUN_005eeff0_shell
-{
-    void __thiscall FUN_005eeff0();
-};
-struct FUN_005ef5c0_class
-{
-    void* __thiscall FUN_005ef5c0(unsigned int flags);
-};
-// Calls FUN_005eeff0 on this, deletes this when flags has bit 0 set, and returns this.
-// @fnv 0x005ef5c0
-void* __thiscall FUN_005ef5c0_class::FUN_005ef5c0(unsigned int flags)
-{
-    ((FUN_005eeff0_shell*)this)->FUN_005eeff0();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
 struct FUN_005ef1d0_class
 {
     void __thiscall FUN_005ef1d0();
@@ -1117,59 +970,32 @@ void* __thiscall FUN_005ef5f0_class::FUN_005ef5f0(unsigned int flags)
 
 void __cdecl operator delete(void*);
 
-struct FUN_005ef3b0
-{
-    void __thiscall FUN_005ef3b0_dtor();
-    FUN_005ef3b0* __thiscall FUN_005ef620(unsigned int flags);
-};
+// The virtual destructor emits the scalar deleting destructor at 0x005ef620.
 
-// Calls the destructor on this object and, when bit 0 of flags is set, frees the object's memory, then returns this.
-// @fnv 0x005ef620
-FUN_005ef3b0* __thiscall FUN_005ef3b0::FUN_005ef620(unsigned int flags)
-{
-    this->FUN_005ef3b0_dtor();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
-struct NavMeshSearchLOSArray
-{
-    void FUN_006a8500();
-    void FUN_005efe70(void*, void*, int);
-};
-struct FUN_005ef860_class
-{
-    virtual void v0();
-    virtual void* v4(int a);
-    virtual void v8();
-    virtual void* vC(int a, int b);
-    void* m4;
-    int m8;
-    int mC;
-    void FUN_005ef860(int a, int b);
-};
+// The common array storage-release helper calls virtual slot 2 and clears pBuffer.
+void __fastcall FreeSimpleArrayStorage(void* array);
 // @fnv 0x005ef860
-void FUN_005ef860_class::FUN_005ef860(int a, int b)
+template <>
+void BSSimpleArray<FootIK_DATA__FootIK_Leg_DATA, 1024>::ReallocateStorage(unsigned int a, unsigned int b)
 {
-    if (m4)
+    if (pBuffer)
     {
-        if (b == mC)
+        if (b == SimpleArrayStorage)
         {
-            m4 = vC((int)m4, a);
+            pBuffer = _Reallocate(pBuffer, a);
         }
         else
         {
-            void* r = v4(a);
-            ((NavMeshSearchLOSArray*)this)->FUN_005efe70(r, m4, b);
-            ((NavMeshSearchLOSArray*)this)->FUN_006a8500();
-            m4 = r;
+            FootIK_DATA__FootIK_Leg_DATA* r = _Allocate(a);
+            UpdateEntryValue(r, pBuffer, b);
+            FreeSimpleArrayStorage(this);
+            pBuffer = r;
         }
     }
     else
     {
-        m4 = v4(a);
-        mC = a;
+        pBuffer = _Allocate(a);
+        SimpleArrayStorage = a;
     }
 }
 
@@ -1258,67 +1084,23 @@ void __thiscall FUN_005f2b20_Class::SetEntryFloat(unsigned int uiIndex, float fV
     *(float*)(m38 + uiIndex * 16 + 8) = fValue;
 }
 
-struct FUN_005f6000_Class : TESChallenge
-{
-    int m_flags;
-    void SetFlagAndMarkForSave(bool bFlag);
-};
-
 // @fnv 0x005f6000
-void FUN_005f6000_Class::SetFlagAndMarkForSave(bool abSet)
+void TESChallenge::SetCompletedRecurring(bool abSet)
 {
     !abSet ? *(int*)((char*)this + 0x70) &= ~2 : *(int*)((char*)this + 0x70) |= 2;
     MarkForSave();
 }
 
-struct FUN_005f6060_class
-{
-    int m0;
-    int m4;
-    int m8;
-    int mc;
-    int m10;
-    int m14;
-    int m18;
-    int m1c;
-    int m20;
-    int m24;
-    int m28;
-    int m2c;
-    int m30;
-    int m34;
-    int m38;
-    int m3c;
-    int m40;
-    int m44;
-    int m48;
-    int m4c;
-    int m50;
-    int m54;
-    int m58;
-    int m5c;
-    int m60;
-    int m64;
-    int m68;
-    int m6c;
-    int m70;
-    void MarkForSave();
-    void FUN_005f6060(bool show);
-};
 // @fnv 0x005f6060
-void FUN_005f6060_class::FUN_005f6060(bool show)
+void TESChallenge::SetShowZero(bool show)
 {
-    !show ? m70 &= ~4 : m70 |= 4;
+    !show ? nFlags &= ~4 : nFlags |= 4;
     MarkForSave();
 }
 
-struct FUN_005f6570 : public TESChallenge
-{
-    void SetFlag(bool set);
-};
 // Sets or clears bit 0 of the flags at offset 0x70 based on set, then calls MarkForSave.
 // @fnv 0x005f6570
-void FUN_005f6570::SetFlag(bool set)
+void TESChallenge::MarkCompleted(bool set)
 {
     !set ? *(int*)((char*)this + 0x70) &= ~1 : *(int*)((char*)this + 0x70) |= 1;
     MarkForSave();
@@ -1702,48 +1484,43 @@ void __thiscall FUN_005efdd0_class::FUN_005efdd0(char* pDest, char* pSrc, unsign
 
 void* __cdecl FUN_00ec7230(char* dst, const char* src, unsigned int size);
 
-struct FUN_005efe70_shell
-{
-    void __thiscall FUN_005efe70(char* a, char* b, unsigned int c);
-};
-
 // @fnv 0x005efe70
-void __thiscall FUN_005efe70_shell::FUN_005efe70(char* pDest, char* pSrc, unsigned int c)
+template <>
+void BSSimpleArray<FootIK_DATA__FootIK_Leg_DATA, 1024>::UpdateEntryValue(
+    FootIK_DATA__FootIK_Leg_DATA* destination, FootIK_DATA__FootIK_Leg_DATA* source, unsigned int c)
 {
     if (c <= 0)
         return;
-    if (pDest < pSrc)
+    if (destination < source)
     {
         for (unsigned int i = 0; i < c; ++i)
-            FUN_00ec7230(pDest + i * 0x38, pSrc + i * 0x38, 0x38);
+            FUN_00ec7230(reinterpret_cast<char*>(destination) + i * 0x38, reinterpret_cast<char*>(source) + i * 0x38, 0x38);
     }
-    else if (pDest > pSrc)
+    else if (destination > source)
     {
         for (int i = c - 1; i >= 0; --i)
-            FUN_00ec7230(pDest + i * 0x38, pSrc + i * 0x38, 0x38);
+            FUN_00ec7230(reinterpret_cast<char*>(destination) + i * 0x38, reinterpret_cast<char*>(source) + i * 0x38, 0x38);
     }
 }
 
 void* __cdecl FUN_00ec7230(char* dst, const char* src, unsigned int count);
-struct FUN_005eff10_class
-{
-    void __thiscall FUN_005eff10(char* dst, const char* src, unsigned int count);
-};
 // Copies count 6-byte elements from src to dst, iterating forward when dst<src and backward when dst>src to handle overlap.
 // @fnv 0x005eff10
-void __thiscall FUN_005eff10_class::FUN_005eff10(char* dst, const char* src, unsigned int count)
+template <>
+void BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>::UpdateEntryValue(
+    GrabIK_DATA__GrabIK_Arm_DATA* destination, GrabIK_DATA__GrabIK_Arm_DATA* source, unsigned int count)
 {
     if (count <= 0)
         return;
-    if (dst < src)
+    if (destination < source)
     {
         for (unsigned int i = 0; i < count; i++)
-            FUN_00ec7230(dst + i * 6, src + i * 6, 6);
+            FUN_00ec7230(reinterpret_cast<char*>(destination) + i * 6, reinterpret_cast<const char*>(source) + i * 6, 6);
     }
-    else if (dst > src)
+    else if (destination > source)
     {
         for (int i = (int)count - 1; i >= 0; i--)
-            FUN_00ec7230(dst + i * 6, src + i * 6, 6);
+            FUN_00ec7230(reinterpret_cast<char*>(destination) + i * 6, reinterpret_cast<const char*>(source) + i * 6, 6);
     }
 }
 
@@ -1751,12 +1528,7 @@ struct FNStub
 {
     char* __thiscall GetFullName();
 };
-struct TESSaveLoadGame
-{
-    void FUN_008579b0(void*, int);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
-int BSStringLength(const char*);
 
 struct FUN_005f6f70_Class
 {
@@ -1782,10 +1554,6 @@ void FUN_005f6f70_Class::FUN_005f6f70()
         g_TESSaveLoadGame->FUN_008579b0(((FNStub*)((char*)this + 0x2c))->GetFullName(), a);
 }
 
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short);
-};
 struct FUN_005e0950
 {
     int m0;
@@ -1805,16 +1573,12 @@ FUN_005e0950::FUN_005e0950(unsigned short ausSize, unsigned short b)
     ma = 0;
     mc = 0;
     if (m8 > 0)
-        m4 = (int)NiTMallocInterface_0096afc0::Allocate(m8);
+        m4 = (int)NiTMallocInterface<ActorCombatGroup*>::Allocate(m8);
     else
         m4 = 0;
 }
 
 namespace fnv_005e09c0 {
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short size);
-};
 struct FUN_005e09c0
 {
     int* vtbl;
@@ -1834,7 +1598,7 @@ FUN_005e09c0::FUN_005e09c0(unsigned short ausCount, unsigned short ausCapacity)
     m0a = 0;
     m0c = 0;
     if (count > 0)
-        data = NiTMallocInterface_0096afc0::Allocate(count);
+        data = NiTMallocInterface<ActorCombatGroup*>::Allocate(count);
     else
         data = 0;
 }
@@ -1842,10 +1606,6 @@ FUN_005e09c0::FUN_005e09c0(unsigned short ausCount, unsigned short ausCapacity)
 
 namespace fnv_005e0a30 {
 extern int DAT_0103d418;
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned short);
-};
 struct FUN_005e0a30_t
 {
     void* __thiscall FUN_005e0a30(unsigned short a, unsigned short b);
@@ -1859,17 +1619,13 @@ void* FUN_005e0a30_t::FUN_005e0a30(unsigned short ausCapacity, unsigned short b)
     *(unsigned short*)((char*)this + 10) = 0;
     *(unsigned short*)((char*)this + 12) = 0;
     if (*(unsigned short*)((char*)this + 8) > 0)
-        *(void**)((char*)this + 4) = (void*)NiTMallocInterface_0096afc0::Allocate(*(unsigned short*)((char*)this + 8));
+        *(void**)((char*)this + 4) = (void*)NiTMallocInterface<ActorCombatGroup*>::Allocate(*(unsigned short*)((char*)this + 8));
     else
         *(void**)((char*)this + 4) = 0;
     return this;
 }
 }  // namespace fnv_005e0a30
 
-struct FUN_006c8a30_Class
-{
-    void FUN_006a8500();
-};
 
 struct FUN_005ef6a0Class
 {
@@ -1895,7 +1651,7 @@ void FUN_005ef6a0Class::SetOrReplace(int a, int b)
         {
             void* pNew = v4(a);
             ((FUN_005efdd0_class*)this)->FUN_005efdd0((char*)pNew, (char*)p, (unsigned int)b);
-            ((FUN_006c8a30_Class*)this)->FUN_006a8500();
+            FreeSimpleArrayStorage(this);
             p = pNew;
         }
     }
@@ -1938,89 +1694,55 @@ void* __thiscall FUN_005ef7f0_Data::FUN_005ef7f0()
     return this;
 }
 
-struct FUN_005ef910_vt
-{
-    virtual void v0();
-    virtual int Write(int);
-};
-
-struct FUN_005ef910 : FUN_005ef910_vt
-{
-    int iSize;
-    int iPosition;
-    int iDataLength;
-    void ConstructSpawnItems(int, int);
-    void __thiscall RecordRequestedSize(unsigned int requested, unsigned int savedSize);
-};
-
 // @fnv 0x005ef910
-void FUN_005ef910::RecordRequestedSize(unsigned int requested, unsigned int savedSize)
+template <>
+void BSSimpleArray<FootIK_DATA__FootIK_Leg_DATA, 1024>::_InitialSetup(unsigned int requested, unsigned int savedSize)
 {
+    pBuffer = 0;
     iSize = 0;
-    iPosition = 0;
-    iDataLength = 0;
+    SimpleArrayStorage = 0;
     if (savedSize > requested)
     {
         requested = savedSize;
     }
     if (requested > 0)
     {
-        iSize = Write(requested);
-        iDataLength = requested;
+        pBuffer = _Allocate(requested);
+        SimpleArrayStorage = requested;
     }
     if (savedSize > 0)
     {
-        ConstructSpawnItems(iSize, savedSize);
-        iPosition = savedSize;
+        InitializeItems(pBuffer, savedSize);
+        iSize = savedSize;
     }
 }
 
-namespace fnv_005efc90 {
-struct FUN_006c8a30_Class
-{
-    void FUN_006a8500();
-};
-struct FUN_005efc90_class
-{
-    virtual void v0();
-    virtual void* v1(void*);
-    virtual void* v2(void*, void*);
-    virtual void* v3(void*, void*);
-    void* m4;
-    void* m8;
-    void* mc;
-    void FUN_005efc90(void* a, void* b);
-};
 // @fnv 0x005efc90
-void FUN_005efc90_class::FUN_005efc90(void* a, void* b)
+template <>
+void BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>::ReallocateStorage(unsigned int a, unsigned int b)
 {
-    if (m4)
+    if (pBuffer)
     {
-        if (b == mc)
+        if (b == SimpleArrayStorage)
         {
-            m4 = v3(m4, a);
+            pBuffer = _Reallocate(pBuffer, a);
         }
         else
         {
-            void* t = v1(a);
-            ((FUN_005eff10_class*)this)->FUN_005eff10((char*)t, (char const*)m4, (unsigned int)b);
-            ((FUN_006c8a30_Class*)this)->FUN_006a8500();
-            m4 = t;
+            GrabIK_DATA__GrabIK_Arm_DATA* t = _Allocate(a);
+            UpdateEntryValue(t, pBuffer, b);
+            FreeSimpleArrayStorage(this);
+            pBuffer = t;
         }
     }
     else
     {
-        m4 = v1(a);
-        mc = a;
+        pBuffer = _Allocate(a);
+        SimpleArrayStorage = a;
     }
 }
-}  // namespace fnv_005efc90
 
 void __cdecl FUN_005e0b60(void*);
-struct GO
-{
-    operator unsigned int();
-};
 struct FUN_005e0600_Class
 {
     void FUN_005e0600();
@@ -2032,14 +1754,10 @@ void FUN_005e0600_Class::FUN_005e0600()
 }
 
 void* __cdecl FUN_00885750();
-struct BSSimpleList_005e0b60
-{
-    BSSimpleList_005e0b60* GetItem();
-};
 // @fnv 0x005e0b60
 void FUN_005e0b60(void* p)
 {
-    reinterpret_cast<QuantityData*>(reinterpret_cast<BSSimpleList_005e0b60*>(FUN_00885750())->GetItem())
+    reinterpret_cast<QuantityData*>(&reinterpret_cast<BSSimpleList<unsigned int>*>(FUN_00885750())->GetItem())
         ->FUN_005e0b80((unsigned int)p);
 }
 
@@ -2088,22 +1806,14 @@ void* FUN_005ef560_Class::FUN_005ef560(unsigned int flags)
     return this;
 }
 
-struct FUN_005f11f0_shell : TESAttributes
-{
-    unsigned char GetAttributeValue5();
-};
 // @fnv 0x005f11f0
-unsigned char FUN_005f11f0_shell::GetAttributeValue5()
+unsigned char TESAttributes::GetAttributeValue5()
 {
     return GetAttributeValue(5);
 }
 
-struct FUN_005f1290_shell : TESAttributes
-{
-    unsigned char GetAttributeValue10();
-};
 // @fnv 0x005f1290
-unsigned char FUN_005f1290_shell::GetAttributeValue10()
+unsigned char TESAttributes::GetAttributeValue10()
 {
     return GetAttributeValue(10);
 }
@@ -2379,10 +2089,10 @@ struct EntryArray
     void SetEntryCount(unsigned int, bool);
 };
 
-int BSStringLength(const char*);
 int strcpy_s(char* dst, unsigned int size, const char* src);
 
-struct Data005ecb30
+// 0x005ecb30 also binds FootIKOperations::CopyData; its flag, seven floats and two arrays differ from Data.h.
+struct FootIKConfiguration
 {
     unsigned char flag;
     float f04;
@@ -2394,12 +2104,12 @@ struct Data005ecb30
     float f1C;
     StrArray strings;
     EntryArray entries;
-    void FUN_005ecb30(Data005ecb30* other);
+    void FUN_005ecb30(FootIKConfiguration* other);
 };
 
 // Clears entries and strings, copies the other object's entry array and deep-copies its strings, then copies the float fields and flag.
 // @fnv 0x005ecb30
-void Data005ecb30::FUN_005ecb30(Data005ecb30* other)
+void FootIKConfiguration::FUN_005ecb30(FootIKConfiguration* other)
 {
     entries.Clear(true);
     for (unsigned int i = 0; i < strings.GetSize(); i++)
@@ -2594,18 +2304,14 @@ struct EFBC0Item
     short m_sValue2;
 };
 
-class EFBC0Array
-{
-  public:
-    void ConstructItems(EFBC0Item* pkItems, unsigned int ItemUpdateArray);
-};
-
 // Default-constructs each of the given number of EFBC0Item elements in place.
 // @fnv 0x005efbc0
-void EFBC0Array::ConstructItems(EFBC0Item* pkItems, unsigned int ItemUpdateArray)
+template <>
+void BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>::InitializeItems(
+    GrabIK_DATA__GrabIK_Arm_DATA* base, unsigned int ItemUpdateArray)
 {
     for (unsigned int i = 0; i < ItemUpdateArray; i++)
-        new (&pkItems[i]) EFBC0Item;
+        new (&reinterpret_cast<EFBC0Item*>(base)[i]) EFBC0Item;
 }
 
 struct Vec3Sub
@@ -2749,13 +2455,6 @@ void __thiscall FUN_005f2ac0_cls::SetRecordValue(unsigned int uiIndex, float afV
     m_38[uiIndex].m_04 = (unsigned char)(afValue * DAT_010484f0);
 }
 
-struct Pt3
-{
-    float x;
-    float y;
-    float z;
-};
-
 struct Ext
 {
     float GetMult();
@@ -2798,14 +2497,6 @@ struct AudioPlaybackHandle
     void Play(bool b);
 };
 
-struct AudioMgr
-{
-    static AudioMgr* Get();
-    AudioPlaybackHandle Make(int id, SndForm* form);
-    AudioPlaybackHandle Make2(int id);
-    bool PlayAt(void* node, float f, int flags);
-};
-
 struct SndList
 {
     SndForm* GetSoundByEditorID(int idx);
@@ -2837,11 +2528,6 @@ struct StrElem
 struct ArrHolder
 {
     StrElem* GetArr();
-};
-
-struct Script
-{
-    ArrHolder* GetData(int* found);
 };
 
 struct Proc
@@ -2976,7 +2662,7 @@ struct Ref
     virtual void v7A();
     virtual void v7B();
     virtual void v7C();
-    virtual Pt3* GetPos();
+    virtual NiPoint3* GetPos();
     virtual void v7E();
     virtual void v7F();
     virtual void v80();
@@ -3014,10 +2700,10 @@ extern float g_fVolume;
 extern double g_dZero;
 
 int __cdecl GetFlagBits(int v);
-bool __cdecl CheckDist(SndForm* form, Pt3 pos3, float f);
+bool __cdecl CheckDist(SndForm* form, NiPoint3 pos3, float f);
 void __cdecl DoTypeA(Ref* r, int type);
 void __cdecl DoTypeB(Ref* r, int n);
-void __cdecl DoShake(float f, Pt3* pos3);
+void __cdecl DoShake(float f, NiPoint3* pos3);
 double __cdecl StrToD(const char* s);
 
 struct FUN_005f2b60_cls
@@ -3052,12 +2738,12 @@ void FUN_005f2b60_cls::ProcessSoundEntries(Ref* ref, float fFrom, float fTo, Scr
             {
                 bool bLoopTmp = (pEntry7->pForm->GetInfo().m04 & 0x40) ? true : false;
                 int iBits7 = GetFlagBits(pEntry7->pForm->GetInfo().m04);
-                Pt3 pos3 = *ref->GetPos();
+                NiPoint3 pos3 = *ref->GetPos();
                 if (iBits7 != 0 || CheckDist(pEntry7->pForm, pos3, 1.0f))
                 {
                     if (pExt6 != 0 && GetKind() >= 0xb1 && GetKind() <= 0xc7)
                         fMultVal *= ref->GetExt()->GetMult();
-                    AudioPlaybackHandle snd = AudioMgr::Get()->Make(
+                    AudioPlaybackHandle snd = AudioMgr_BSAudio::Get()->Make(
                         pEntry7->pForm->GetSoundId((bLoopTmp ? 1 : 2) | 0x100 |
                                                    ((ref == g_pPlayer && !g_pPlayer->IsSomething()) ? 0x40000 : 0) |
                                                    (ref != g_pPlayer ? 0 : 0x200000) | iBits7 | 0x40000000),
@@ -3086,7 +2772,7 @@ void FUN_005f2b60_cls::ProcessSoundEntries(Ref* ref, float fFrom, float fTo, Scr
                         unsigned int uOff_2 = (pEntry7->data.u & 0xffffff00) >> 8;
                         fVal8 = (float)StrToD(pStr7 + uOff_2 + 0x11);
                     }
-                    AudioMgr::Get()->PlayAt(ref->GetNode(), fVal8, 0x40000000);
+                    AudioMgr_BSAudio::Get()->PlayAt(ref->GetNode(), fVal8, 0x40000000);
                     break;
                 }
                 case 0:
@@ -3114,10 +2800,10 @@ void FUN_005f2b60_cls::ProcessSoundEntries(Ref* ref, float fFrom, float fTo, Scr
                             SndList* pList5 = ref->GetSndList();
                             SndForm* pSnd2 =
                                 pList5->GetSoundByEditorID(pEntry7->ucType < 0x16 ? pEntry7->ucType : pEntry7->ucType - 0xb);
-                            Pt3 pos7 = *ref->GetPos();
+                            NiPoint3 pos7 = *ref->GetPos();
                             if (pSnd2 != 0 && CheckDist(pSnd2, pos7, 1.0f))
                             {
-                                AudioPlaybackHandle snd2 = AudioMgr::Get()->Make2(
+                                AudioPlaybackHandle snd2 = AudioMgr_BSAudio::Get()->Make2(
                                     pSnd2->GetId2((ref != g_pPlayer ? 0 : 0x200000) | 0x40000102));
                                 if (pExt6 != 0 && GetKind() >= 0xb1 && GetKind() <= 0xc7)
                                     fMultVal *= ref->GetExt()->GetMult();
@@ -3144,17 +2830,17 @@ void FUN_005f2b60_cls::ProcessSoundEntries(Ref* ref, float fFrom, float fTo, Scr
                         {
                             SndTable* pSearchEntries = pHolder3->GetTable();
                             SndForm* pSnd3 = pSearchEntries->GetSoundByEditorID(pEntry7->ucType);
-                            Pt3 pos = *ref->GetPos();
+                            NiPoint3 pos = *ref->GetPos();
                             if (pSnd3 != 0 && CheckDist(pSnd3, pos, 1.0f))
                             {
                                 AudioPlaybackHandle snd3;
                                 if (ref == g_pPlayer)
                                 {
-                                    snd3 = AudioMgr::Get()->Make2(pSnd3->GetId2(0x40200101));
+                                    snd3 = AudioMgr_BSAudio::Get()->Make2(pSnd3->GetId2(0x40200101));
                                 }
                                 else
                                 {
-                                    snd3 = AudioMgr::Get()->Make2(pSnd3->GetId2(0x40000102));
+                                    snd3 = AudioMgr_BSAudio::Get()->Make2(pSnd3->GetId2(0x40000102));
                                     snd3.SetPos(pos.x, pos.y, pos.z);
                                     snd3.SetNode(ref->GetNode());
                                 }
@@ -3182,9 +2868,9 @@ void FUN_005f2b60_cls::ProcessSoundEntries(Ref* ref, float fFrom, float fTo, Scr
                             SndForm* pSnd4 = pProc5->GetSoundByEditorID();
                             if (pSnd4 != 0)
                             {
-                                AudioPlaybackHandle snd5 = AudioMgr::Get()->Make2(
+                                AudioPlaybackHandle snd5 = AudioMgr_BSAudio::Get()->Make2(
                                     pSnd4->GetId2((ref != g_pPlayer ? 0 : 0x200000) | 0x40000102));
-                                Pt3 pos_ = *ref->GetPos();
+                                NiPoint3 pos_ = *ref->GetPos();
                                 snd5.SetPos(pos_.x, pos_.y, pos_.z);
                                 snd5.SetNode(ref->GetNode());
                                 snd5.SetVolume(g_fVolume);
@@ -3827,13 +3513,14 @@ struct SpawnItem : FUN_005ef7f0_Data
 
 // Constructs count SpawnItem objects in place at base + i * 0x38 for each i from 0 to count-1.
 // @fnv 0x005ef750
-void FUN_005ef910::ConstructSpawnItems(int base, int count)
+template <>
+void BSSimpleArray<FootIK_DATA__FootIK_Leg_DATA, 1024>::InitializeItems(FootIK_DATA__FootIK_Leg_DATA* base, unsigned int count)
 {
     unsigned int i;
 
     for (i = 0; i < count; ++i)
     {
-        new ((void*)(base + i * 0x38)) SpawnItem;
+        new ((void*)(reinterpret_cast<char*>(base) + i * 0x38)) SpawnItem;
     }
 }
 
@@ -3894,15 +3581,6 @@ struct ChallengeDescription
 };
 struct ChallengeView : TESChallenge
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    ChallengeName name;
-    ChallengeDescription description;
-    ChallengeNode rewards;
     int FUN_005a6150();
     int FUN_005f5f60();
     int FUN_005f5930();
@@ -3963,15 +3641,15 @@ bool __cdecl FUN_005f6110(ChallengeView* pSourceChallenge, int amount)
             found->FUN_005f60e0(amount);
             if (found->FUN_005e3fa0() >= found->FUN_006286d0())
             {
-                if (found->rewards.FUN_00726070())
-                    ((ChallengeReward*)found->rewards.FUN_00726070())->RunScriptOnTarget(DAT_011dea3c, 0);
+                if (reinterpret_cast<ChallengeNode*>(reinterpret_cast<char*>(found) + sizeof(TESForm) + sizeof(TESFullName) + sizeof(TESDescription))->FUN_00726070())
+                    ((ChallengeReward*)reinterpret_cast<ChallengeNode*>(reinterpret_cast<char*>(found) + sizeof(TESForm) + sizeof(TESFullName) + sizeof(TESDescription))->FUN_00726070())->RunScriptOnTarget(DAT_011dea3c, 0);
                 if (found->GetField54() != 11 || found->GetShortAtOffset64() != 27)
                     FUN_004d5c60(27);
-                if (found->name.FUN_00408da0() && found->description.GetText(0, 0x43534544) && *g_011cb4d4.Bool())
+                if (reinterpret_cast<ChallengeName*>(reinterpret_cast<char*>(found) + sizeof(TESForm))->FUN_00408da0() && reinterpret_cast<ChallengeDescription*>(reinterpret_cast<char*>(found) + sizeof(TESForm) + sizeof(TESFullName))->GetText(0, 0x43534544) && *g_011cb4d4.Bool())
                 {
                     char message[512];
-                    FUN_00406d00(message, 512, "%s   %d\\%d\n%s", found->name.FUN_00408da0(), found->FUN_006286d0(),
-                                 found->FUN_006286d0(), found->description.GetText(0, 0x43534544));
+                    FUN_00406d00(message, 512, "%s   %d\\%d\n%s", reinterpret_cast<ChallengeName*>(reinterpret_cast<char*>(found) + sizeof(TESForm))->FUN_00408da0(), found->FUN_006286d0(),
+                                 found->FUN_006286d0(), reinterpret_cast<ChallengeDescription*>(reinterpret_cast<char*>(found) + sizeof(TESForm) + sizeof(TESFullName))->GetText(0, 0x43534544));
                     QueueUIMessage(message, 0, FUN_0048e730(found, 0), 0, 2.0f, false);
                     FUN_00706f30(21);
                 }
@@ -3996,13 +3674,13 @@ bool __cdecl FUN_005f6110(ChallengeView* pSourceChallenge, int amount)
                 {
                     if (current == 0)
                     {
-                        if (found->name.FUN_00408da0() && found->description.GetText(0, 0x43534544) &&
+                        if (reinterpret_cast<ChallengeName*>(reinterpret_cast<char*>(found) + sizeof(TESForm))->FUN_00408da0() && reinterpret_cast<ChallengeDescription*>(reinterpret_cast<char*>(found) + sizeof(TESForm) + sizeof(TESFullName))->GetText(0, 0x43534544) &&
                             *g_011cb4d4.Bool())
                         {
                             char message[512];
-                            FUN_00406d00(message, 512, "%s   %d\\%d\n%s", found->name.FUN_00408da0(),
+                            FUN_00406d00(message, 512, "%s   %d\\%d\n%s", reinterpret_cast<ChallengeName*>(reinterpret_cast<char*>(found) + sizeof(TESForm))->FUN_00408da0(),
                                          found->FUN_005e3fa0(), found->FUN_006286d0(),
-                                         found->description.GetText(0, 0x43534544));
+                                         reinterpret_cast<ChallengeDescription*>(reinterpret_cast<char*>(found) + sizeof(TESForm) + sizeof(TESFullName))->GetText(0, 0x43534544));
                             QueueUIMessage(message, 0, FUN_0048e730(found, 0), 0, 2.0f, false);
                         }
                     }
@@ -4017,9 +3695,7 @@ bool __cdecl FUN_005f6110(ChallengeView* pSourceChallenge, int amount)
 }
 
 int __cdecl FUN_00408b20(const char*, const char*);
-struct NavMeshStaticAvoidNode : FUN_005ecd10_cls
-{
-};
+#include "../../include/NavMeshStaticAvoidNode.h"
 struct NodeArray : BSSimpleArray<NavMeshStaticAvoidNode*, 1024>
 {
     NavMeshStaticAvoidNode* FUN_00691750(int index);
@@ -4047,7 +3723,7 @@ unsigned char FUN_005ece50_class::FUN_005ece50(FUN_005ece50_class* other)
             {
                 bStack_5 =
                     (bStack_5 == 0 &&
-                     m14.FUN_00691750((int)uStack_18)->FUN_005ece20((int)other->m14.FUN_00691750((int)uStack_18)) == 0)
+                     reinterpret_cast<FUN_005ecd10_cls*>(m14.FUN_00691750((int)uStack_18))->FUN_005ece20((int)other->m14.FUN_00691750((int)uStack_18)) == 0)
                         ? 0
                         : 1;
             }
@@ -4069,12 +3745,6 @@ unsigned char FUN_005ece50_class::FUN_005ece50(FUN_005ece50_class* other)
     return bStack_5;
 }
 
-struct PlayerCharacter
-{
-    bool IsSneaking();
-    bool MovingCheck();
-};
-struct TESSound;
 struct SoundDataHandler
 {
     TESSound* GetSoundByEditorID(const char*);
@@ -4127,20 +3797,17 @@ const char* __cdecl GetStringByIndex(int index)
     return 0;
 }
 
-struct BSStr
-{
-    bool Set(const char* a, unsigned int b);
-};
+
 struct FUN_005e2c10_shell
 {
-    BSStr m3c;
+    ::BSStringT<char> m3c;
     bool SetString(const char* a);
 };
-// Calls Set on the BSStr at offset 0x3c with the given string and a zero argument, then returns true.
+// Calls Set on the ::BSStringT<char> at offset 0x3c with the given string and a zero argument, then returns true.
 // @fnv 0x005e2c10
 bool FUN_005e2c10_shell::SetString(const char* apString)
 {
-    ((BSStr*)((char*)this + 0x3c))->Set(apString, 0);
+    ((::BSStringT<char>*)((char*)this + 0x3c))->Set(apString, 0);
     return true;
 }
 
@@ -4176,54 +3843,7 @@ void* FUN_005e2c70_s::FUN_005e2c70(unsigned int flags)
     return this;
 }
 
-struct SoundData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-};
-
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
-
-class TESSound : public TESForm
-{
-  public:
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    SoundData soundData;
-    unsigned char unk68;
-
-    void FUN_004851b0(TESForm* form);
-    SoundData CopyBig();
-
-    void CopyFromSound(TESForm* form);
-};
-
-// Casts form to TESSound, copies unk68, calls FUN_004851b0, then copies soundData from CopyBig.
+// Copies the sound flag, base form data, and playback parameters.
 // @fnv 0x005e2d20
 void TESSound::CopyFromSound(TESForm* form)
 {
@@ -4232,84 +3852,47 @@ void TESSound::CopyFromSound(TESForm* form)
     {
         return;
     }
-    unk68 = sound->unk68;
+    m_cSoundFlag = sound->m_cSoundFlag;
     FUN_004851b0(form);
-    soundData = sound->CopyBig();
+    reinterpret_cast<SoundPlaybackParameters&>(data) = sound->CopyBig();
 }
 
 void __cdecl FUN_004858f0(unsigned int chunkId, unsigned char value);
 void __cdecl AppendChunk(unsigned int chunkId, void* data, unsigned int size);
 unsigned char __cdecl FUN_00401500();
 
-struct FUN_005e2fa0_SoundFile
+// The shared sound header has no save/compare declarations. This method-only
+// adapter supplies those operations without duplicating the sound layout.
+class SoundRecordOperations
 {
-    void __thiscall FUN_0048cea0();
-};
-
-struct FUN_005e2fa0_SoundData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    void __thiscall SwapEndian();
-};
-
-struct FUN_005e2fa0_standin
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    FUN_005e2fa0_SoundFile unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    FUN_005e2fa0_SoundData unk44;
-    unsigned char unk68;
-
-    void __thiscall FUN_004855a0();
-    void __thiscall FUN_00485680();
-    void __thiscall WriteToStream();
+public:
+    void Save();
+    bool Compare(TESForm* other);
+    bool CompareBase(TESForm* other);
 };
 
 // @fnv 0x005e2fa0
-void FUN_005e2fa0_standin::WriteToStream()
+void SoundRecordOperations::Save()
 {
-    this->FUN_004855a0();
-    this->unk30.FUN_0048cea0();
-    FUN_004858f0(0x4d414e52, this->unk68);
+    reinterpret_cast<TESSound*>(this)->FUN_004855a0();
+    reinterpret_cast<TESSound*>(this)->TESSoundFile::Save();
+    FUN_004858f0(0x4d414e52, reinterpret_cast<TESSound*>(this)->m_cSoundFlag);
 
     if (FUN_00401500() != 0)
     {
-        this->unk44.SwapEndian();
+        reinterpret_cast<TESSound*>(this)->data.SwapEndian();
     }
 
-    AppendChunk(0x44444e53, &this->unk44, 0x24);
+    AppendChunk(0x44444e53, &reinterpret_cast<TESSound*>(this)->data, 0x24);
 
     if (FUN_00401500() != 0)
     {
-        this->unk44.SwapEndian();
+        reinterpret_cast<TESSound*>(this)->data.SwapEndian();
     }
 
-    this->FUN_00485680();
+    reinterpret_cast<TESSound*>(this)->FUN_00485680();
 }
 
-class TESSound;
 struct ContNode;
 int __cdecl FUN_00404dc0(char const* a, char const* b);
 bool __fastcall FUN_008256d0(ContNode* node);
@@ -4371,11 +3954,6 @@ extern unsigned int DAT_011caf04[10];
 extern char DAT_011caf2c[10];
 extern char DAT_011caf36;
 
-template <class T> struct BSSimpleListEx : public BSSimpleList<T>
-{
-    int GetSize();
-};
-
 // Searches a directory for a .wav or .ogg file, picks one at random avoiding recent repeats, writes its path into a1 and returns whether one was found.
 // @fnv 0x005e3630
 bool FindDialogueFile(char* apPath)
@@ -4409,7 +3987,7 @@ bool FindDialogueFile(char* apPath)
 
     if (pFileList != NULL)
     {
-        unsigned int aCount = ((BSSimpleListEx<char*>*)pFileList)->GetSize();
+        unsigned int aCount = pFileList->ItemsInList();
         if (aCount != 0)
         {
             unsigned int uiChosen = DialogueRandom() % aCount;
@@ -4767,7 +4345,7 @@ struct A8 : Vt130
     bool FUN_004013e0();
     SLoc* FUN_005abf60();
     Clist* FUN_00500940();
-    void FUN_005e1140(float value);
+    void AddProfileTime(float value);
 };
 
 struct Big79
@@ -4899,66 +4477,23 @@ bool Runner::RunScript(A8* apScript, void* apObject, SLoc* a3, int a4, bool a5, 
     {
         QueryPerformanceCounter(&vo);
         float elapsed = (float)((double)(vo - ve) / (double)DAT_011caec8);
-        apScript->FUN_005e1140(elapsed);
+        reinterpret_cast<ScriptRuntimeOperations*>(apScript)->AddProfileTime(elapsed);
     }
 
     return this->m_a1;
 }
 
 // Stand-in for the native TESBoundAnimObject base subobject (size 0x30).
-class SoundBoundAnimBase
-{
-  public:
-    virtual ~SoundBoundAnimBase();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-};
-class TESSoundFile
-{
-  public:
-    virtual ~TESSoundFile();
-    BSStringT<char> soundFile;
-};
+
 // Native TESSound destructor; both bases and the string member own their lifetimes.
-class FUN_005e2ca0 : public SoundBoundAnimBase, public TESSoundFile
-{
-  public:
-    BSStringT<char> editorID;
-    virtual ~FUN_005e2ca0();
-};
-// Empty destructor of a class deriving from SoundBoundAnimBase and TESSoundFile with an editorID string member.
+
+// The sound bases and filename member own their lifetimes.
 // @fnv 0x005e2ca0
-FUN_005e2ca0::~FUN_005e2ca0()
+TESSound::~TESSound()
 {}
 
 void BSEndian(unsigned int*, EndianSizeTag<0>);
 void BSEndian(unsigned short*, EndianSizeTag<0>);
-struct TESSound__SOUND_DATA
-{
-    unsigned char minAttenuation;
-    unsigned char maxAttenuation;
-    signed char frequencyAdjustment;
-    unsigned char unk03;
-    unsigned int soundFlags;
-    unsigned short staticAttenuation;
-    unsigned short stopTime;
-    unsigned short attenuationCurve[5];
-    unsigned short reverbAttenuation;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    signed char frequencyVariance;
-    void SwapEndian();
-};
 // Swaps the byte order of the multi-byte fields in the TESSound__SOUND_DATA structure using BSEndian.
 // @fnv 0x005e3020
 void TESSound__SOUND_DATA::SwapEndian()
@@ -4984,7 +4519,8 @@ struct InitTag5E35
 void __cdecl FUN_00401080(int* p, InitTag5E35 tag);
 void __cdecl FUN_00407a90(short* p, InitTag5E35 tag);
 
-struct Data5E35
+// 0x005e3510 also binds TESSound__SOUND_DATA2::Endian; it swaps a word and two shorts at 0x04/0x08/0x0a, unlike Data.h.
+struct SoundConversionFields
 {
     int unk00;
     int m_04;
@@ -4996,7 +4532,7 @@ struct Data5E35
 
 // Initializes m_04, m_08, and m_0A by calling FUN_00401080 and FUN_00407a90 with InitTag5E35.
 // @fnv 0x005e3510
-void Data5E35::FUN_005e3510()
+void SoundConversionFields::FUN_005e3510()
 {
     FUN_00401080(&m_04, InitTag5E35());
     FUN_00407a90(&m_08, InitTag5E35());
@@ -5019,51 +4555,9 @@ void* DeletingObject::FUN_005e4b90(unsigned int flags)
     return this;
 }
 
-class FUN_00483630_holder
-{
-  public:
-    virtual ~FUN_00483630_holder();
 
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class TESModel
-{
-  public:
-    virtual ~TESModel();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class BGSPreloadable
-{
-  public:
-    virtual void Preload();
-};
-
-class BGSBodyPartData
-{
-  public:
-    virtual void ClearData();
-};
-
-class FUN_005e4bc0 : public FUN_00483630_holder, public TESModel, public BGSPreloadable
-{
-  public:
-    virtual ~FUN_005e4bc0();
-};
-
-// Destructor whose body casts this to BGSBodyPartData and calls its ClearData.
 // @fnv 0x005e4bc0
-FUN_005e4bc0::~FUN_005e4bc0()
+BGSBodyPartData::~BGSBodyPartData()
 {
     reinterpret_cast<BGSBodyPartData*>(this)->BGSBodyPartData::ClearData();
 }
@@ -5251,11 +4745,6 @@ void PartitionOwner::ApplyPartitionState(SceneObject* target, SceneObject* root,
 }  // namespace fnv_005e5750
 
 namespace s5e5d20 {
-
-struct Actor
-{
-    float FUN_006b9130();
-};
 
 bool FUN_005e5b80(int iArg0, int iArg1, void* pvArg2, void* pvArg3, unsigned char ucArg4, float** ppfValue,
                   Actor* pkActor);
@@ -5446,112 +4935,56 @@ bool EquivData_5ecd10::IsEqual(const EquivData_5ecd10& other)
     return bEqual;
 }
 
-struct BSSimpleArrayActor
-{
-    void Clear(bool);
-};
-struct FUN_005ef3b0_class : BSSimpleArrayActor
-{
-    int* p;
-    void FUN_005ef3b0();
-};
 // @fnv 0x005ef3b0
-void FUN_005ef3b0_class::FUN_005ef3b0()
+template <>
+BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>::~BSSimpleArray()
 {
-    p = &DAT_01047320;
     Clear(true);
 }
 
-struct FUN_005efbc0_s
-{
-    virtual void v0();
-    virtual int v4(unsigned int);
-    void ConstructItems(int, unsigned int);
-};
-struct FUN_005efd40_s : FUN_005efbc0_s
-{
-    int m4;
-    int m8;
-    int mc;
-    void FUN_005efd40(unsigned int requested, unsigned int savedSize);
-};
-// Zeroes m4/m8/mc, sets m4 from v4(max(requested, savedSize)) with mc as that size, then calls ConstructItems and sets m8 to savedSize if nonzero.
 // @fnv 0x005efd40
-void FUN_005efd40_s::FUN_005efd40(unsigned int requested, unsigned int savedSize)
+template <>
+void BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>::_InitialSetup(
+    unsigned int requested, unsigned int savedSize)
 {
-    m4 = 0;
-    m8 = 0;
-    mc = 0;
+    pBuffer = 0;
+    iSize = 0;
+    SimpleArrayStorage = 0;
     if (savedSize > requested)
         requested = savedSize;
     if (requested > 0)
     {
-        m4 = v4(requested);
-        mc = requested;
+        pBuffer = _Allocate(requested);
+        SimpleArrayStorage = requested;
     }
     if (savedSize > 0)
     {
-        ConstructItems(m4, savedSize);
-        m8 = savedSize;
+        InitializeItems(pBuffer, savedSize);
+        iSize = savedSize;
     }
 }
 
-class FUN_005e2d90_TESSound : public TESForm
-{
-  public:
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned char minAttenuation;
-    unsigned char maxAttenuation;
-    signed char frequencyAdjustment;
-    unsigned char unk47;
-    unsigned int soundFlags;
-    unsigned short staticAttenuation;
-    unsigned short stopTime;
-    unsigned short attenuationCurve[5];
-    unsigned short reverbAttenuation;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    signed char frequencyVariance;
-    bool FUN_00485270(TESForm*);
-    bool FUN_005e2d90(TESForm* other);
-};
 // Returns true if other is not a TESSound, any compared field differs, or FUN_00485270 reports a difference; otherwise false.
 // @fnv 0x005e2d90
-bool FUN_005e2d90_TESSound::FUN_005e2d90(TESForm* other)
+bool SoundRecordOperations::Compare(TESForm* other)
 {
-    FUN_005e2d90_TESSound* sound = (FUN_005e2d90_TESSound*)dynamic_cast<TESSound*>(other);
+    TESSound* sound = dynamic_cast<TESSound*>(other);
     if (!sound)
         return true;
-    if (sound->frequencyVariance != frequencyVariance)
+    if (sound->data.frequencyVariance != reinterpret_cast<TESSound*>(this)->data.frequencyVariance)
         return true;
     for (int index = 0; index < 5; index++)
     {
-        if (sound->attenuationCurve[index] != attenuationCurve[index])
+        if (sound->data.attenuationCurve[index] != reinterpret_cast<TESSound*>(this)->data.attenuationCurve[index])
             return true;
     }
-    if (sound->soundFlags != soundFlags || sound->maxAttenuation != maxAttenuation ||
-        sound->minAttenuation != minAttenuation || sound->frequencyAdjustment != frequencyAdjustment ||
-        sound->staticAttenuation != staticAttenuation || sound->stopTime != stopTime ||
-        sound->reverbAttenuation != reverbAttenuation || sound->unk5c != unk5c || sound->unk60 != unk60 ||
-        sound->unk64 != unk64)
+    if (sound->data.soundFlags != reinterpret_cast<TESSound*>(this)->data.soundFlags || sound->data.maxAttenuation != reinterpret_cast<TESSound*>(this)->data.maxAttenuation ||
+        sound->data.minAttenuation != reinterpret_cast<TESSound*>(this)->data.minAttenuation || sound->data.frequencyAdjustment != reinterpret_cast<TESSound*>(this)->data.frequencyAdjustment ||
+        sound->data.staticAttenuation != reinterpret_cast<TESSound*>(this)->data.staticAttenuation || sound->data.stopTime != reinterpret_cast<TESSound*>(this)->data.stopTime ||
+        sound->data.reverbAttenuation != reinterpret_cast<TESSound*>(this)->data.reverbAttenuation || sound->data.unk18 != reinterpret_cast<TESSound*>(this)->data.unk18 || sound->data.unk1c != reinterpret_cast<TESSound*>(this)->data.unk1c ||
+        sound->data.unk20 != reinterpret_cast<TESSound*>(this)->data.unk20)
         return true;
-    if (FUN_00485270(sound))
+    if (CompareBase(sound))
         return true;
     return false;
 }
@@ -5621,24 +5054,6 @@ void* __cdecl FUN_005e6280(int aiType)
 
 class AnimIdle;
 
-struct IdlePointerArrayBase
-{
-    ~IdlePointerArrayBase();
-};
-
-template <> struct NiPointer<AnimIdle> : IdlePointerArrayBase
-{
-    void* value;
-
-    NiPointer();
-};
-
-NiPointer<AnimIdle>::NiPointer() : value(0)
-{}
-
-IdlePointerArrayBase::~IdlePointerArrayBase()
-{}
-
 // Allocates an array of NiPointer<AnimIdle> of the given count and returns it as a char pointer.
 // @fnv 0x005e0ba0
 char** FUN_005e0ba0(unsigned int count)
@@ -5674,11 +5089,6 @@ struct ClassDataLoad5F
 
 struct ClassLoad5F : TESForm
 {
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
     FullNameEx fullName;
     unsigned int unk24;
     unsigned int unk28;
@@ -5715,3 +5125,4 @@ void ClassLoad5F::FUN_005f7050()
         alternateName.SetFullName(szAlternateName);
     }
 }
+

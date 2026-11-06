@@ -1,3 +1,6 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
+#include "../../include/hkArray.h"
 // src/staging/blk_00c80000_o2_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00c80000_o2.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -5,6 +8,237 @@
 // src/staging/blk_00c80000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiTLargeArray.h"
+#include "../../include/NiTLargePrimitiveArray.h"
+#include "../../include/ObstacleData.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/NiMatrix3.h"
+#include "../../include/bhkBoxShape.h"
+#include "../../include/bhkListShape.h"
+#include "../../include/bhkTransformShape.h"
+#include "../../include/bhkWorldObject.h"
+#include "../../include/bhkWorld.h"
+#include "../../include/hkpListShape.h"
+#include "../../include/hkpShapeContainer.h"
+#include "../../include/Pair.h"
+// LocalVec: unit-local copy of the former shared stand-in Vec. This unit uses the stand-in's matrix/SpeedTree members (FUN_00c7f640/FUN_00c7f700 transforms, FUN_00b12790/FUN_00b13040), which NiPoint3 does not have.
+#include <xmmintrin.h>
+class Matrix;
+class Scalar;
+class Simd;
+class Tok;
+class Mask;
+class Elem;
+class Iter;
+class CIter;
+class CMutIter;
+class Mat3;
+class Mat4;
+class hkVector4;
+class hkQuaternion;
+
+class LocalVec
+{
+public:
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+        };
+        struct
+        {
+            void* m_pData;
+            int m_iArrayLength;
+            int m_iCapacity;
+        };
+    };
+
+    LocalVec();
+    LocalVec(float a, float b, float c);
+    // Keep the implicit copy constructor, copy assignment and destructor trivial.
+
+    void negative(const LocalVec& n);
+    void inv(const Matrix& m, const LocalVec& n);
+    void point(const Matrix& m, const LocalVec& b);
+    void difference(const LocalVec& a, const LocalVec& b);
+    Scalar dot(const LocalVec& n) const;
+    Scalar at(int i) const;
+    void set(float a, float b, float c, float d);
+
+    Simd lengthSquared() const;
+    void mul(const Simd& factor);
+    void SetProduct(const Simd& factor, const LocalVec& v);
+
+    void resize(unsigned n);
+    Tok& operator[](unsigned i);
+    void release(int elemSize);
+
+    LocalVec& operator-=(const LocalVec& v);
+    LocalVec& operator+=(const LocalVec& v);
+    LocalVec operator*(float scale) const;
+    LocalVec operator+(const LocalVec& v) const;
+    LocalVec operator-(const LocalVec& v) const;
+    float Squared() const;
+    float Length() const;
+    float Normalize();
+    float Dot(const LocalVec& v) const;
+    LocalVec Cross(const LocalVec& v) const;
+    LocalVec ApplyScaled(float scale);
+    LocalVec ApplyScaled(float scale) const;
+    void FUN_00acf580(unsigned n, Tok value);
+    LocalVec FUN_004a0bd0();
+    LocalVec FUN_004a0bd0() const;
+    LocalVec FUN_0053d1a0(const LocalVec& v);
+    LocalVec FUN_004b3800(const LocalVec& v);
+    LocalVec FUN_004b3800(const LocalVec& v) const;
+    LocalVec FUN_00439e90(const LocalVec& v);
+    LocalVec FUN_00439e90(const LocalVec& v) const;
+    LocalVec FUN_00439ef0(const LocalVec& v);
+    LocalVec FUN_00439ef0(const LocalVec& v) const;
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    void FUN_006815c0();
+    void FUN_00439180(float scale);
+    LocalVec& FUN_0063c8a0(const LocalVec& v);
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    void FUN_004b4db0(const float* values);
+    void FUN_00a38560();
+    void FUN_004f0180(void* value);
+
+    LocalVec& ScaleByInverse(float divisor);
+    float FUN_00457910();
+    LocalVec* FUN_006a6eb0();
+    bool FUN_004390c0(const LocalVec& v);
+
+    LocalM128 get() const;
+    void set(LocalM128 value);
+    void operator=(const LocalM128& value);
+    operator LocalM128() const;
+    LocalM128& getQuad();
+    const LocalM128& getQuad() const;
+    LocalM128& quad();
+    const LocalM128& quad() const;
+    float& operator()(int component);
+    const float& operator()(int component) const;
+    void setZero4();
+    void setSub4(const LocalVec& a, const LocalVec& b);
+    void setAdd4(const LocalVec& a, const LocalVec& b);
+    void setMul4(const LocalVec& a, const LocalVec& b);
+    void setMul4(const Scalar& a, const LocalVec& b);
+    void add4(const LocalVec& v);
+    void mul4(const LocalVec& v);
+    void mul4(const Scalar& value);
+    void add3clobberW(const LocalVec& v);
+    void sub3clobberW(const LocalVec& v);
+    void setBroadcast3clobberW(const LocalVec& v, int component);
+    Scalar horizontalAdd3() const;
+    void setCross(const LocalVec& a, const LocalVec& b);
+    Scalar dot3(const LocalVec& v) const;
+    Scalar lengthSquared3() const;
+    Scalar lengthInverse3() const;
+    void normalize3();
+    Scalar getSimdAt(int component) const;
+    void setInterpolate4(const LocalVec& a, const LocalVec& b, const Scalar& fraction);
+    void setAddMul4(const LocalVec& a, const LocalVec& b, const Scalar& scale);
+    void setNeg4(const LocalVec& v);
+    Mask compareLessThanZero4() const;
+    void SetRotatedDirection(const hkQuaternion& rotation, const LocalVec& direction);
+    void setRotatedTranslation(const hkQuaternion& rotation, const LocalVec& direction);
+    void cross(const LocalVec& a, const LocalVec& b);
+    Scalar squared() const;
+    Scalar inverseLength() const;
+    void normalize();
+    void negate(const LocalVec& v);
+
+    void FUN_00c7f640(const void* matrix, const hkVector4& point);
+    void FUN_00c7f640(Mat4* matrix, void* point);
+    void FUN_00c7f640(const void* matrix, const LocalVec* point);
+    void FUN_00c7f640(const void* matrix, const void* point);
+    void FUN_00c7f700(Mat3* matrix, void* point);
+    void FUN_00c7f700(const void* matrix, const LocalVec* point);
+    void FUN_00b12790();
+    void FUN_00b13040(LocalVec* out, const LocalVec* v);
+    LocalVec* ScaleSwizzled(LocalVec* out, float factor);
+    void AddVector(LocalVec* out, const LocalVec* v);
+    float Dot(const LocalVec& v);
+    LocalVec* FUN_004a3c90(const LocalVec* v);
+    LocalVec* FUN_0062b0a0(LocalVec* out, LocalVec* v);
+    LocalVec* FUN_0062af00(LocalVec* target);
+
+    void FUN_00cf7690(Elem* value);
+    void FUN_00b1e970();
+    Iter begin();
+    Iter end();
+    CIter FUN_00b33030(CIter first, CIter last);
+    void FUN_00b32120();
+    unsigned int size() const;
+    unsigned int capacity() const;
+    void FUN_00b2df90();
+    void FUN_00b2e140(Elem* first, Elem* last);
+    bool InitBuffer(unsigned int count);
+    Elem* _Ucopy(Elem* first, Elem* last, Elem* out);
+    LocalVec& FUN_00b2db10(const LocalVec& v);
+    CMutIter FUN_00aceb80(CMutIter first, CMutIter last);
+    void FUN_00acac40();
+    LocalVec& FUN_00ad61e0(const LocalVec& v);
+};
+#include "../../include/NiPoint3.h"
+#include "../../include/NiTriShape.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiAllocator.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/AnimIdle.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiBinaryStream.h"
+#include "../../include/NiColor.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiPlane.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/bhkBlendCollisionObject.h"
+#include "../../include/bhkRefObject.h"
+#include "../../include/hkReferencedObject.h"
+// ScriptOutBlock_blk_00c80000_o2_rtm_variant: local type (was include/ScriptOutBlock.h, which had no evidence of one real class); no method of it is bound to a named game function
+class ScriptOutBlock_blk_00c80000_o2_rtm_variant
+{
+public:
+    int unk00;
+    int unk04;
+    void* unk08;
+};
+// ScriptOwnerBase_blk_00c80000_o2_rtm_variant: local type (was include/ScriptOwnerBase.h, which had no evidence of one real class); its methods are 0x00c879e0 bhkAction::CopyCinfo
+class ScriptOutBlock_blk_00c80000_o2_rtm_variant;
+
+class ScriptOwnerBase_blk_00c80000_o2_rtm_variant
+{
+public:
+    void FUN_00c879e0(ScriptOutBlock_blk_00c80000_o2_rtm_variant* pOut);
+};
+// ScriptTarget_blk_00c80000_o2_rtm_variant: local type (was include/ScriptTarget.h, which had no evidence of one real class); no method of it is bound to a named game function
+class ScriptTarget_blk_00c80000_o2_rtm_variant
+{
+public:
+    int unk00;
+    int unk04;
+    int unk08;
+    int unk0c;
+    int unk10;
+    int unk14;
+    int m_18;
+    void* m_1c;
+};
 extern int DAT_010c53dc;
 extern int DAT_01267e60;
 struct FUN_00c6c290_holder
@@ -19,22 +253,6 @@ void* __cdecl FUN_00c81c50(void*);
 float FUN_00c82580(void* arg);
 extern int DAT_011b09d8[];
 void __cdecl FUN_00c84cd0(int aiIndex, void* apOut);
-struct bhkRefObject
-{
-    void UpdateReference(bool);
-};
-struct bhkBoxShape
-{
-    int m_auiShapeKeys;
-    int m_pAuxiliaryObject;
-    void* m_next;
-    void FUN_00c84e50(bool b);
-};
-struct NiStream;
-struct NiObject
-{
-    virtual void LinkObject(NiStream&);
-};
 struct FUN_00c87670_Class : NiObject
 {
     void FUN_00c87670(NiStream& stream);
@@ -60,10 +278,6 @@ struct FUN_00c8aa40_cls
     void FUN_00c8aa40(int* arg);
 };
 char FUN_00c8cce0(int* piValue);
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 void FUN_00c8cd00(void* apBlock);
 struct FUN_00c9a6e0_struct
@@ -94,10 +308,6 @@ struct FUN_00c80630_holder
 struct FUN_00c81640_cls
 {
     void* __thiscall FUN_00c81640(bool flag);
-};
-struct NiPoint3
-{
-    float x, y, z;
 };
 extern NiPoint3 DAT_011a9490;
 int __stdcall FUN_00c84ec0(void* apObject);
@@ -183,7 +393,8 @@ struct FUN_00c9eba0_IFace
     virtual void v13();
     virtual void FUN_00c9eba0_call(int a, int b, int c, int d);
 };
-struct ScriptX
+// 0x00c9eba0 is also bound as ShapePhantom::LinearCast; this callback interface is unrelated to TESForm-derived Script.
+struct ShapeCastCallbackInterface
 {
     void GetLocalData();
     void InvokeInterfaceCall(int a, int b, int c, int d);
@@ -199,64 +410,13 @@ struct FUN_00c6b910 : A51BF0Base
 {
     FUN_00c6b910();
 };
-struct bhkBlendCollisionObject : FUN_00c6b910
-{
-    void* m_vtbl;
-    unsigned char m_pad_04[8];
-    unsigned short m_flags;
-    unsigned char m_pad_0e[6];
-    unsigned char m_flag14;
-    unsigned char m_pad_15[3];
-    float m_f18;
-    float m_f1c;
-    int m_i20;
-    int m_i24;
-    int m_i28;
-
-    void __thiscall FUN_00c657f0(void* p, int value);
-
-    bhkBlendCollisionObject()
-    {
-        m_vtbl = &DAT_010c53dc;
-        ++DAT_01267e60;
-        m_f18 = 0.0f;
-        m_flags &= 0xfeff;
-        m_f1c = 1.0f;
-        m_i20 = 8;
-        m_i24 = 0;
-        m_i28 = 0;
-        m_flag14 = 0;
-    }
-
-    bhkBlendCollisionObject* FUN_00c81670(int value);
-};
-struct NiGlobalStringTable
-{
-    static char* __cdecl AddString(char const* str);
-};
 extern int _data_011c16bc;
-extern char* _EmptyFS;
 extern char const* const g_0126817c_arg1;
 struct DynCastHelper
 {
     NiObject* __thiscall DynamicCast(unsigned int const* rtti);
 };
 int* __cdecl FUN_00c4b470(int, int, int);
-struct StringHolder
-{
-    char* p;
-
-    StringHolder(char const* str) : p(NiGlobalStringTable::AddString(str))
-    {}
-
-    ~StringHolder()
-    {
-        if (p != _EmptyFS)
-        {
-            InterlockedDecrement(reinterpret_cast<long*>(p - 8));
-        }
-    }
-};
 float GetFloatProperty(int aiObject, char const* apName);
 struct FUN_00c85ec0_t
 {
@@ -472,15 +632,6 @@ struct WalkNode_cls
     unsigned short m_a6;
 };
 void SetFlagRecursive(bool abSet, WalkNode_cls* node);
-class AnimIdle
-{
-  public:
-    virtual void FUN_00c80570_slot0();
-    virtual void FUN_00c80570_slot1();
-    long refs;
-    void IncRefCount();
-    void DecRefCount();
-};
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* p);
 struct MM
 {
@@ -521,10 +672,6 @@ inline void* __cdecl operator new(unsigned int, void* placement)
     return placement;
 }
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* addend);
-struct NiAllocator
-{
-    void* __thiscall FUN_00aa3e40(unsigned int size);
-};
 extern NiAllocator DAT_011f6238;
 struct RefObject
 {
@@ -883,14 +1030,6 @@ extern unsigned int DAT_012043f8;
 void SetTreeValue(TreeNode_cls* node, unsigned int value);
 extern unsigned __int64 selected_target_masks[];
 void SetSelectionMask(unsigned int uiIndexA, unsigned int uiIndexB, bool bSelected);
-struct NiColor
-{
-    float r, g, b;
-    NiColor()
-    {}
-    NiColor(float fR, float fG, float fB) : r(fR), g(fG), b(fB)
-    {}
-};
 extern NiColor DAT_011a9b7c;
 void __cdecl GetLayerColor(unsigned int layer, NiColor& rColor);
 struct ObjA
@@ -1166,7 +1305,6 @@ class FUN_00c84f50_cls
     unsigned int m_flags10;
     bool FUN_00c84f50(int a1, unsigned int a2);
 };
-struct NiStream;
 struct BaseThunk
 {
     bool FUN_00a81fe0(NiStream& stream);
@@ -2180,14 +2318,6 @@ struct NiObjectData
     void* m_pc;
     unsigned int m_uiFilterValue;
 };
-struct FUN_00c879e0_Class
-{
-    void* m_p0;
-    void* m_p4;
-    NiObjectData* m_p8;
-
-    void __thiscall FUN_00c879e0(unsigned int* result);
-};
 struct C87A10HavokObject
 {
     int unk00;
@@ -3071,10 +3201,6 @@ struct S_00c89a30_Obj
     bool FUN_00c89a30(S_00c89a30_Obj* other);
 };
 extern __declspec(thread) int DAT_tls_field;
-struct hkReferencedObject
-{
-    void removeReference();
-};
 struct FUN_009ba5f0_shell
 {
     void SetChildObject(int);
@@ -3555,37 +3681,13 @@ struct FUN_00c8a7a0_cls
     void Init(unsigned int a);
     void FUN_00c8a7a0(unsigned int a1);
 };
-// Result block filled in by WriteScriptTargetInfo.
-struct ScriptOutBlock
-{
-    int unk00;
-    int unk04;
-    void* unk08;
-};
-// Object reached through the member pointer of the owner.
-struct ScriptTarget
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int m_18;
-    void* m_1c;
-};
-class ScriptOwnerBase
-{
-  public:
-    void FUN_00c879e0(ScriptOutBlock* pOut);
-};
-class FUN_00c8a800_cls : public ScriptOwnerBase
+class FUN_00c8a800_cls : public ScriptOwnerBase_blk_00c80000_o2_rtm_variant
 {
   public:
     int unk00;
     int unk04;
-    ScriptTarget* m_pFlagTarget;
-    void WriteScriptTargetInfo(ScriptOutBlock* pOut);
+    ScriptTarget_blk_00c80000_o2_rtm_variant* m_pFlagTarget;
+    void WriteScriptTargetInfo(ScriptOutBlock_blk_00c80000_o2_rtm_variant* pOut);
 };
 struct Ca980Block
 {
@@ -4020,41 +4122,7 @@ struct ViewerStrings
         return uiIndex;
     }
 };
-struct NiRTTIStub
-{
-    const char* m_pcName;
-    const NiRTTIStub* m_pBaseRTTI;
-};
-extern NiRTTIStub bhkListShape_ms_RTTI;
-struct hkpShapeContainerStub
-{
-    virtual ~hkpShapeContainerStub();
-    virtual int GetNumChildShapes();
-};
-struct hkpListShapeStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkpShapeContainerStub kContainer;
-};
-struct bhkShapeCollectionBase
-{
-    void GetViewerStrings_base(ViewerStrings* pkStrings);
-};
-struct bhkListShapeStub : bhkShapeCollectionBase
-{
-    int unk00;
-    int unk04;
-    hkpListShapeStub* m_pHavokObject;
-
-    void FUN_00c8bcd0(ViewerStrings* pkStrings);
-};
-static inline hkpListShapeStub* GetHkListShape(bhkListShapeStub* p)
-{
-    return p ? p->m_pHavokObject : 0;
-}
+extern NiRTTI bhkListShape_ms_RTTI;
 class C8CCC0Base
 {
   public:
@@ -4300,12 +4368,6 @@ struct FUN_00c9a660_cls
 };
 struct FUN_00c9a840_cls
 {
-    struct Vec3
-    {
-        float x;
-        float y;
-        float z;
-    };
     int unk00;
     int unk04;
     int unk08;
@@ -4321,7 +4383,7 @@ struct FUN_00c9a840_cls
     int unk30;
     int unk34;
     int unk38;
-    Vec3* m_pVerts;
+    NiPoint3* m_pVerts;
     int unk40;
     int unk44;
     unsigned int m_uiItemCount;
@@ -4837,170 +4899,6 @@ class C11F0Owner
 };
 void AttachEmissiveMaterial(C11F0Object* pkObject, C11F0Owner* pkOwner, int m_uiSoundID, C11F0Color* pkColor);
 typedef int(__cdecl* NiBinaryStream_fn)(void* s, void* buf, unsigned int n, int* out, int flag);
-struct NiBinaryStream
-{
-    void* m_00;
-    unsigned int m_04;
-    NiBinaryStream_fn m_08;
-
-    unsigned int BinaryRead(void* p, unsigned int n, int* sizes, unsigned int count)
-    {
-        unsigned int read = m_08(this, p, n, sizes, count);
-        m_04 += read;
-        return read;
-    }
-};
-struct NiStream
-{
-    int m_00;
-    unsigned int m_04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    int unkF0;
-    int unkF4;
-    int unkF8;
-    int unkFC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    NiBinaryStream* m_24c;
-};
 template <class T> inline void NiBinaryStreamLoad(NiBinaryStream* kIstr, T* pValue, unsigned int uiNumEls = 1)
 {
     int uiSize = sizeof(T);
@@ -5097,23 +4995,6 @@ __forceinline bool GetFlagBit9(unsigned short f)
 {
     return (f >> 9) & 1;
 }
-struct FUN_00c825b0_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    unsigned short m_usFlags;
-    unsigned short unk0e;
-    int unk10;
-    int unk14;
-    float m_f18;
-    float m_f1c;
-    int unk20;
-    int m_i24;
-
-    void FUN_00c66060(ViewerStrings* pkStrings);
-    void AddToViewerStrings(ViewerStrings* pkStrings);
-};
 struct FUN_00c84900_vtbl
 {
     virtual void v0();
@@ -5400,158 +5281,7 @@ struct Owner_00c85880
 
     void FillOutputFromState(Out_00c85880* o);
 };
-struct NiFixedStrX
-{
-    char* m_str;
-    NiFixedStrX(const char* str)
-    {
-        m_str = NiGlobalStringTable::AddString(str);
-    }
-    __forceinline ~NiFixedStrX()
-    {
-        if (m_str != _EmptyFS)
-            InterlockedDecrement((long*)(m_str - 8));
-    }
-};
-struct NiNodeX
-{
-    int unk00;
-    int unk04;
-    char* m_name;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    NiNodeX(unsigned short count);
-    void SetName(const NiFixedStrX& name);
-    static void* operator new(unsigned int size);
-};
-struct bhkWorldX
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void AddDebugNode(NiNodeX* node, NiPoint3* offset);
-};
-struct WorldHolder
-{
-    int unk00;
-    int unk04;
-    bhkWorldX* m_pOwningWorld;
-};
-struct PhantomData
-{
-    WorldHolder* m_holder;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int m_pCollisionShape;
-};
-struct WorldObjectX
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    PhantomData m_data;
-};
 void __cdecl GetLayerColor(int shape, NiPoint3* out);
-struct bhkWorldObjectX
-{
-    int unk00;
-    int unk04;
-    WorldObjectX* m_obj;
-    NiNodeX* AddDebugNodeToWorld(NiNodeX* node);
-};
 extern __declspec(thread) int g_iC88760AllocTag;
 struct BC88760AllocTagScope
 {
@@ -5598,34 +5328,6 @@ class BC88760Derived : public BC88760Base
     void CopyMemberData(BC88760Derived* pkDest, BC88760CloningProcess& kCloning);
     BC88760Derived* FUN_00c88760(BC88760CloningProcess& kCloning);
 };
-class NiNode;
-class NiAVObject;
-class NiFixedString
-{
-  public:
-    char* m_kHandle;
-    NiFixedString(const char* pcString) : m_kHandle(NiGlobalStringTable::AddString(pcString))
-    {}
-    ~NiFixedString()
-    {
-        if (m_kHandle != _EmptyFS)
-            InterlockedDecrement(reinterpret_cast<long*>(m_kHandle - 8));
-    }
-};
-class NiUpdateData
-{
-  public:
-    float m_fTime;
-    bool m_bUpdate;
-    bool m_bIsMultiThreaded;
-    bool m_bUpdateGeomorphs;
-    bool m_bUpdateShadowSceneNode;
-    bool m_bUnk8;
-    NiUpdateData()
-        : m_fTime(0.0f), m_bUpdate(false), m_bIsMultiThreaded(false), m_bUpdateGeomorphs(false),
-          m_bUpdateShadowSceneNode(false), m_bUnk8(false)
-    {}
-};
 struct FUN_00c88810_Collision
 {
     virtual void Unk_00();
@@ -5671,60 +5373,6 @@ struct FUN_00c88810_Collision
     virtual void Unk_28();
     virtual void Unk_29();
     virtual void Unk_2A();
-};
-class NiAVObject
-{
-  public:
-    virtual void Unk_00();
-    virtual void Unk_01();
-    virtual void Unk_02();
-    virtual NiNode* IsSceneNode();
-    char pad04[0x14];
-    NiNode* m_pParentNode;
-    FUN_00c88810_Collision* m_spCollisionObject;
-    void Update(const NiUpdateData& kUpdateData);
-};
-class NiNode : public NiAVObject
-{
-  public:
-    virtual void Unk_04();
-    virtual void Unk_05();
-    virtual void Unk_06();
-    virtual void Unk_07();
-    virtual void Unk_08();
-    virtual void Unk_09();
-    virtual void Unk_0A();
-    virtual void Unk_0B();
-    virtual void Unk_0C();
-    virtual void Unk_0D();
-    virtual void Unk_0E();
-    virtual void Unk_0F();
-    virtual void Unk_10();
-    virtual void Unk_11();
-    virtual void Unk_12();
-    virtual void Unk_13();
-    virtual void Unk_14();
-    virtual void Unk_15();
-    virtual void Unk_16();
-    virtual void Unk_17();
-    virtual void Unk_18();
-    virtual void Unk_19();
-    virtual void Unk_1A();
-    virtual void Unk_1B();
-    virtual void Unk_1C();
-    virtual void Unk_1D();
-    virtual void Unk_1E();
-    virtual void Unk_1F();
-    virtual void Unk_20();
-    virtual void Unk_21();
-    virtual void Unk_22();
-    virtual void Unk_23();
-    virtual void Unk_24();
-    virtual void Unk_25();
-    virtual void Unk_26();
-    virtual NiAVObject* GetObjectByName(const NiFixedString& kName);
-    char pad20[0x9c - 0x20];
-    NiTObjectArray<NiAVObject*> m_kChildList;
 };
 void FUN_00c6a350(NiNode* apNode, int aiArg, bool abA, bool abB, bool abC);
 void UpdateChainCollision(NiAVObject* apObject);
@@ -5999,48 +5647,49 @@ class C8B4D0Group
 };
 SpawnedAllocHolder* FUN_00c85750();
 struct C8B8A0Alloc;
-struct C8B8A0Array;
-void FUN_00c908c0(C8B8A0Alloc* allocator, C8B8A0Array* arr, int capacity, int elemSize);
-struct C8B8A0Array
+
+void FUN_00c908c0(C8B8A0Alloc* allocator, hkArrayBase<int>* arr, int capacity, int elemSize);
+static __forceinline void C8B8A0Array_GrowArrayCapacity(hkArrayBase<int>& self, C8B8A0Alloc& alloc, int n);
+
+static __forceinline void C8B8A0Array__setSize(hkArrayBase<int>& self, C8B8A0Alloc& alloc, int n);
+
+static __forceinline void C8B8A0Array_SetSizeAndGrow(hkArrayBase<int>& self, int n);
+
+static __forceinline void C8B8A0Array_clear(hkArrayBase<int>& self);
+
+static __forceinline void C8B8A0Array_GrowArrayCapacity(hkArrayBase<int>& self, C8B8A0Alloc& alloc, int n)
 {
-    int* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void GrowArrayCapacity(C8B8A0Alloc& alloc, int n)
-    {
-        const int capacity = getCapacity();
+        const int capacity = self.getCapacity();
         if (capacity < n)
         {
             int cap2 = 2 * capacity;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(&alloc, this, newSize, sizeof(int));
+            FUN_00c908c0(&alloc, (&self), newSize, sizeof(int));
         }
     }
-    void _setSize(C8B8A0Alloc& alloc, int n)
-    {
-        GrowArrayCapacity(alloc, n);
-        m_iElementCount = n;
+
+static __forceinline void C8B8A0Array__setSize(hkArrayBase<int>& self, C8B8A0Alloc& alloc, int n)
+{
+        C8B8A0Array_GrowArrayCapacity(self, alloc, n);
+        self.m_iElementCount = n;
     }
-    void SetSizeAndGrow(int n)
-    {
+
+static __forceinline void C8B8A0Array_SetSizeAndGrow(hkArrayBase<int>& self, int n)
+{
         SpawnedAllocHolder* router = FUN_00c85750();
         C8B8A0Alloc* allocator = (C8B8A0Alloc*)router->m_pAllocator;
-        _setSize(*allocator, n);
+        C8B8A0Array__setSize(self, *allocator, n);
     }
-    void clear()
-    {
-        m_iElementCount = 0;
+
+static __forceinline void C8B8A0Array_clear(hkArrayBase<int>& self)
+{
+        self.m_iElementCount = 0;
     }
-};
 struct C8B8A0Out
 {
     int unk00;
-    C8B8A0Array m_keys;
-    C8B8A0Array m_iSlotIds;
+    hkArrayBase<int> m_keys;
+    hkArrayBase<int> m_iSlotIds;
 };
 struct C8B8A0Iface
 {
@@ -6096,16 +5745,7 @@ class C8B9E0Heap
     void* Allocate(unsigned int uiSize);
 };
 extern C8B9E0Heap g_kC8B9E0Heap;
-template <class T> class C8B9E0Array
-{
-  public:
-    C8B9E0Array() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
 
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
 class C8B9E0Listener
 {
   public:
@@ -6119,8 +5759,8 @@ class C8B9E0Listener
     {}
 
     void* m_pkOwnerManager;
-    C8B9E0Array<void*> m_kAdded;
-    C8B9E0Array<void*> m_kRemoved;
+    hkArrayBase<void*> m_kAdded;
+    hkArrayBase<void*> m_kRemoved;
 };
 class C8B9E0Owner
 {
@@ -6249,70 +5889,16 @@ struct AllocTagScopeC9A
         g_iAllocTagC9A = m_iSaved;
     }
 };
-class ObstacleDataC9A
-{
-  public:
-    virtual ~ObstacleDataC9A();
-    virtual void DeleteThis();
-
-    void IncRefCount()
-    {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    unsigned int m_uiRefCount;
-};
-template <class T> class NiPointerC9A
-{
-  public:
-    NiPointerC9A(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointerC9A()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-
-    T* m_pObject;
-};
 void __cdecl FreeNodeC9A(void* pvNode);
-template <class T> class BSSimpleListC9A
-{
-  public:
-    __declspec(noinline) void Remove(const T& kItem)
-    {
-        for (BSSimpleListC9A* pkNode = this; pkNode->m_pkNext; pkNode = pkNode->m_pkNext)
-        {
-            BSSimpleListC9A* pkNext = pkNode->m_pkNext;
-            if (pkNext->m_item.m_pObject == kItem.m_pObject)
-            {
-                pkNode->m_pkNext = pkNext->m_pkNext;
-                FreeNodeC9A(pkNext);
-                return;
-            }
-        }
-    }
-
-    T m_item;
-    BSSimpleListC9A* m_pkNext;
-};
 class ObstacleManagerC9A
 {
   public:
     int unk00;
     int unk04;
     int unk08;
-    BSSimpleListC9A<NiPointerC9A<ObstacleDataC9A> > m_kObstacles;
+    BSSimpleList<NiPointer<ObstacleData> > m_kObstacles;
 
-    void FUN_00c9a520(ObstacleDataC9A* pkData);
+    void FUN_00c9a520(ObstacleData* pkData);
 };
 struct FUN_00c9abc0_cls
 {
@@ -6978,12 +6564,12 @@ struct ControllerPtr
     IdleController* m_pObject;
     __forceinline ControllerPtr(IdleController* p) : m_pObject(p)
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     __forceinline ~ControllerPtr()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     ControllerPtr& operator=(const ControllerPtr& other);
@@ -8072,37 +7658,7 @@ struct ArenaManagedOwner
 };
 void FUN_00c80240(ArenaManagedOwner* owner);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-class RefObject0AA0
-{
-  public:
-    virtual ~RefObject0AA0();
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    long m_uiRefCount;
-};
-template <class T> class NiPointer0AA0
-{
-  public:
-    NiPointer0AA0(const NiPointer0AA0& ptr)
-    {
-        m_pObject = ptr.m_pObject;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    NiPointer0AA0& operator=(const NiPointer0AA0& ptr);
-    operator T*() const
-    {
-        return m_pObject;
-    }
-    T* m_pObject;
-};
-struct MemoryManager0AA0
-{
-    void* Allocate(unsigned int uiSize);
-};
-extern MemoryManager0AA0 g_kMemoryManager0AA0;
+extern MemoryManager g_kMemoryManager0AA0;
 class ListNode0AA0
 {
   public:
@@ -8110,13 +7666,13 @@ class ListNode0AA0
     {
         return g_kMemoryManager0AA0.Allocate(uiSize);
     }
-    ListNode0AA0(const NiPointer0AA0<RefObject0AA0>& spRetainedObject) : m_pReferencedObject(spRetainedObject)
+    ListNode0AA0(const NiPointer<NiRefObject>& spRetainedObject) : m_pReferencedObject(spRetainedObject)
     {
         m_pkNext = 0;
     }
-    void FUN_00c80aa0(const NiPointer0AA0<RefObject0AA0>& spRetainedObject);
+    void FUN_00c80aa0(const NiPointer<NiRefObject>& spRetainedObject);
 
-    NiPointer0AA0<RefObject0AA0> m_pReferencedObject;
+    NiPointer<NiRefObject> m_pReferencedObject;
     ListNode0AA0* m_pkNext;
 };
 struct FUN_00c819f0_stream
@@ -8156,7 +7712,7 @@ struct MeshMemoryScope
 };
 inline void* __cdecl operator new[](unsigned int size)
 {
-    return DAT_011f6238.FUN_00aa3e40(size);
+    return DAT_011f6238.Allocate(size);
 }
 struct FourFloatComponents
 {
@@ -8178,68 +7734,6 @@ void __cdecl FUN_00458620(NiPoint3*, const FourFloatComponents*);
 struct GeometryData
 {
     void EnsureNormals(bool);
-};
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*);
-};
-class NiTriShape : public NiMemObject
-{
-  public:
-    NiTriShape(unsigned short, NiPoint3*, NiPoint3*, void*, void*, unsigned short, unsigned int, unsigned short,
-               unsigned short*);
-    void SetName(const NiFixedString&);
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8c;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9c;
-    unsigned int unka0;
-    unsigned int unka4;
-    unsigned int unka8;
-    unsigned int unkac;
-    unsigned int unkb0;
-    unsigned int unkb4;
-    GeometryData* unkb8;
-    unsigned int unkbc;
-    unsigned int unkc0;
 };
 void __cdecl AttachEmissiveMaterial(NiTriShape*, unsigned int, unsigned int, unsigned int);
 struct MeshBuilder
@@ -8374,14 +7868,6 @@ struct C87c90HkRef
 {
     void FUN_00c90510();
 };
-struct NiPlane
-{
-    int unk00;
-    int unk04;
-    int unk08;
-
-    bool operator==(const NiPlane& other) const;
-};
 struct Mat364
 {
     int unk00;
@@ -8439,11 +7925,13 @@ struct Poly89730
     virtual void slot0();
     virtual void Scale(int iUnused, Process89730* pkProcess);
 };
-struct Data89730Base
+// GetData returns this secondary base at +4 of a polymorphic physics clone object, unlike shared Data.
+struct PhysicsClonePayload
 {
     int unk00;
 };
-struct Data89730 : public Poly89730, public Data89730Base
+// Layout: vtable, secondary payload, padding, Havok object pointers at 0x0c/0x10; shared Data has no vtable.
+struct PhysicsCloneObjectPair : public Poly89730, public PhysicsClonePayload
 {
     int unk08;
     HavokObject253* m_pkFirst;
@@ -8496,7 +7984,7 @@ struct Owner89730
     virtual void slot42();
     virtual void slot43();
     virtual void slot44();
-    virtual Data89730Base* GetData(bool* pbTemporary);
+    virtual PhysicsClonePayload* GetData(bool* pbTemporary);
     void FUN_00c87600(void* pkDestination, Process89730* pkProcess);
     void FUN_00c89730(void* pkDestination, Process89730* pkProcess);
 };
@@ -9525,20 +9013,6 @@ inline void SetMemContextC877(unsigned int m_uiGeometryShaderFlags)
 {
     t_uiMemContextC877 = m_uiGeometryShaderFlags;
 }
-class AutoMemContextC877
-{
-  public:
-    AutoMemContextC877(unsigned int m_uiGeometryShaderFlags)
-    {
-        m_uiPrevious = GetMemContextC877();
-        SetMemContextC877(m_uiGeometryShaderFlags);
-    }
-    ~AutoMemContextC877()
-    {
-        SetMemContextC877(m_uiPrevious);
-    }
-    unsigned int m_uiPrevious;
-};
 struct BlockPool_c877
 {
     void FUN_00aa4060(void* pvBlock);
@@ -9934,11 +9408,6 @@ struct Heap674
 {
     virtual void v0();
     virtual void* Allocate(unsigned int);
-};
-struct Router674
-{
-    int unk00, unk04, unk08, unk0C;
-    Heap674* heap;
 };
 struct Base674
 {
@@ -10632,18 +10101,6 @@ struct S00c90090_Self
     }
     void FUN_00c90090(S00c90090_Self* src);
 };
-struct NiMatrix3Stub
-{
-    float m[9];
-    char* FormatToBuffer(const char* pcName) const;
-};
-struct bhkTransformShapeStub : FUN_00c825b0_cls
-{
-    int unk28;
-    NiMatrix3Stub m_kAdditionalRotation;
-
-    void FUN_00c90240(ViewerStrings* pkStrings);
-};
 extern const float DAT_01017870;
 extern const float DAT_010177e8;
 extern const float DAT_01018180;
@@ -11169,37 +10626,6 @@ struct FUN_00c90030_holder
 };
 extern char DAT_010c6b0c[];
 void* __cdecl NiMalloc(unsigned int size);
-struct NiTLargeArrayStub
-{
-    void* m_vtbl;
-    void** m_pBase;
-    unsigned int m_uiMaxSize;
-    unsigned int m_uiSize;
-    unsigned int m_uiESize;
-    unsigned int m_uiGrowBy;
-
-    NiTLargeArrayStub(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1)
-    {
-        m_vtbl = &DAT_010c6b04;
-        m_uiMaxSize = uiMaxSize;
-        m_uiGrowBy = uiGrowBy;
-        m_uiSize = 0;
-        m_uiESize = 0;
-        if (m_uiMaxSize > 0)
-            m_pBase = (void**)NiMalloc(sizeof(void*) * m_uiMaxSize);
-        else
-            m_pBase = 0;
-    }
-};
-struct NiTLargePrimitiveArrayStub : NiTLargeArrayStub
-{
-    NiTLargePrimitiveArrayStub(unsigned int uiMaxSize = 0, unsigned int uiGrowBy = 1)
-        : NiTLargeArrayStub(uiMaxSize, uiGrowBy)
-    {
-        m_vtbl = DAT_010c6b0c;
-    }
-    ~NiTLargePrimitiveArrayStub();
-};
 struct BaseC9
 {
     virtual void v00();
@@ -11207,10 +10633,12 @@ struct BaseC9
     BaseC9();
     ~BaseC9();
 };
+// Vftable 0x010c6b0c identifies NiTLargePrimitiveArray<BLENDKEY> (Gamebryo blend keys).
+class BLENDKEY;
 struct FUN_00c9aeb0 : BaseC9
 {
     int unk34;
-    NiTLargePrimitiveArrayStub m_kArray;
+    NiTLargePrimitiveArray<BLENDKEY> m_kArray;
     float unk50;
     float unk54;
     int unk58;
@@ -11751,33 +11179,6 @@ struct ShareChildEntry
     int unk8;
     int unkC;
 };
-struct ShareListData : hkpListShapeStub
-{
-    int unk14;
-    ShareChildEntry* arr;
-};
-class ListShapeSharingView : public bhkListShapeStub
-{
-  public:
-    __forceinline ShareListData* GetNode()
-    {
-        return this != 0 ? (ShareListData*)m_pHavokObject : 0;
-    }
-
-    unsigned char FUN_00c8b440(int a1);
-};
-
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned char m128_u8[16];
-};
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_sqrt_ss(__m128);
-extern "C" void _mm_store_ss(float*, __m128);
 
 extern unsigned int DAT_0126818c;
 
@@ -11787,7 +11188,7 @@ extern int DAT_010c5398, DAT_0108ffb4;
 
 struct FnvMat4
 {
-    __m128 m_uiX, m_uiY, m_uiZ, m_w;
+    LocalM128 m_uiX, m_uiY, m_uiZ, m_w;
 };
 
 struct ChildGroup;
@@ -11922,13 +11323,7 @@ struct RuntimeObject
     virtual void GetMatrix(FnvMat4*);
 };
 
-struct Vec
-{
 
-    __m128 value;
-
-    void FUN_00c7f640(const void*, const void*);
-};
 
 struct CastObject;
 
@@ -11991,7 +11386,7 @@ struct AlternativeNode : RuntimeObject
     int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40,
         unk44, unk48, unk4c;
 
-    __m128 position, unk60, unk70, unk80, rotation;
+    LocalM128 position, unk60, unk70, unk80, rotation;
 
     AlternativeNode* FUN_00cdf6c0();
 };
@@ -12014,7 +11409,7 @@ struct CastObject
 struct ResultData
 {
 
-    __m128 unk00, unk10, position, rotation;
+    LocalM128 unk00, unk10, position, rotation;
 
     float unk40, distance;
 };
@@ -12089,12 +11484,13 @@ struct Handle
     }
 };
 
-struct ListNode
+// Exe 0x00c80ce0: unit-local ListNode view; declarations and layout are preserved.
+struct BlkListNodeView
 {
 
     CastObject* item;
 
-    ListNode* next;
+    BlkListNodeView* next;
 
     void FUN_00c80a30(const Handle&);
 
@@ -12104,7 +11500,7 @@ struct ListNode
 struct Parent
 {
     int unk00, unk04, unk08, unk0c, unk10;
-    ListNode entries;
+    BlkListNodeView entries;
 };
 
 struct ChildGroup
@@ -12568,12 +11964,12 @@ static __forceinline Endpoint* getSecond(GraphicsObject* p)
     return d ? d->body : 0;
 }
 
-static __forceinline float length3(__m128 value)
+static __forceinline float length3(LocalM128 value)
 {
 
-    __m128 n = _mm_mul_ps(value, value);
+    LocalM128 n = _mm_mul_ps(value, value);
 
-    __m128 sq = _mm_shuffle_ps(n, n, 0x55);
+    LocalM128 sq = _mm_shuffle_ps(n, n, 0x55);
 
     sq = _mm_add_ss(sq, n);
 
@@ -12622,7 +12018,7 @@ void __cdecl FUN_00c80ce0(SceneObjectLocal* owner, int notification)
         if (parent)
         {
 
-            ListNode* entries = &parent->entries;
+            BlkListNodeView* entries = &parent->entries;
 
             for (; entries && entries->item; entries = entries->next)
             {
@@ -12636,7 +12032,7 @@ void __cdecl FUN_00c80ce0(SceneObjectLocal* owner, int notification)
 
                     Endpoint* context = 0;
 
-                    Vec pos, rot;
+                    LocalM128 pos[1], rot[1];
 
                     switch (kind(current->GetBody()))
                     {
@@ -12645,8 +12041,8 @@ void __cdecl FUN_00c80ce0(SceneObjectLocal* owner, int notification)
 
                         AlternativeNode* node = current->GetBody();
 
-                        pos.value = node->position;
-                        rot.value = node->rotation;
+                        pos[0] = node->position;
+                        rot[0] = node->rotation;
 
                         first = getFirst(current);
                         context = getSecond(current);
@@ -12658,8 +12054,8 @@ void __cdecl FUN_00c80ce0(SceneObjectLocal* owner, int notification)
 
                         AlternativeNode* node = current->GetBody();
 
-                        pos.value = node->position;
-                        rot.value = node->rotation;
+                        pos[0] = node->position;
+                        rot[0] = node->rotation;
 
                         first = getFirst(current);
                         context = getSecond(current);
@@ -12674,8 +12070,8 @@ void __cdecl FUN_00c80ce0(SceneObjectLocal* owner, int notification)
                         if (kind(node) == 7)
                         {
 
-                            pos.value = node->position;
-                            rot.value = node->rotation;
+                            pos[0] = node->position;
+                            rot[0] = node->rotation;
 
                             first = getFirst(current);
                             context = getSecond(current);
@@ -12684,8 +12080,8 @@ void __cdecl FUN_00c80ce0(SceneObjectLocal* owner, int notification)
                         if (kind(node) == 2)
                         {
 
-                            pos.value = node->position;
-                            rot.value = node->rotation;
+                            pos[0] = node->position;
+                            rot[0] = node->rotation;
 
                             first = getFirst(current);
                             context = getSecond(current);
@@ -12710,25 +12106,25 @@ void __cdecl FUN_00c80ce0(SceneObjectLocal* owner, int notification)
 
                         if (second.synthesized)
                         {
-                            second.synthesized->position = pos.value;
-                            second.synthesized->rotation = rot.value;
+                            second.synthesized->position = pos[0];
+                            second.synthesized->rotation = rot[0];
                         }
 
                         FnvMat4 firstRecord, secondRecord;
 
-                        Vec transformedFirst, transformedSecond;
+                        LocalM128 transformedFirst[1], transformedSecond[1];
 
                         first->GetMatrix(&firstRecord);
 
                         context->GetMatrix(&secondRecord);
 
-                        transformedFirst.FUN_00c7f640(&firstRecord, &pos);
+                        reinterpret_cast<LocalVec*>(&transformedFirst)->FUN_00c7f640(&firstRecord, static_cast<const void*>(&pos));
 
-                        transformedSecond.FUN_00c7f640(&secondRecord, &rot);
+                        reinterpret_cast<LocalVec*>(&transformedSecond)->FUN_00c7f640(&secondRecord, static_cast<const void*>(&rot));
 
-                        transformedFirst.value = _mm_sub_ps(transformedFirst.value, transformedSecond.value);
+                        transformedFirst[0] = _mm_sub_ps(transformedFirst[0], transformedSecond[0]);
 
-                        float distance = length3(transformedFirst.value);
+                        float distance = length3(transformedFirst[0]);
 
                         if (distance == 0.0f)
                             distance = DAT_01017d00;
@@ -12766,19 +12162,15 @@ void __cdecl FUN_00c80ce0(SceneObjectLocal* owner, int notification)
 }
 
 namespace BlendTransformDetail {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned char m128_u8[16];
-};
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
+typedef ::__m128 LocalM128;
+using ::_mm_load_ss;
+using ::_mm_shuffle_ps;
+using ::_mm_sub_ps;
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
 struct VecLocal
 {
-    __m128 v;
+    LocalM128 v;
     VecLocal& operator=(const VecLocal& b)
     {
         v = b.v;
@@ -12888,7 +12280,7 @@ struct TargetLocal
 struct LockLocal
 {
     unsigned int owner, count;
-    void Wait(char*);
+    void FUN_0040fbf0(char*);
     void Unlock()
     {
         if (--count == 0)
@@ -12899,7 +12291,7 @@ extern LockLocal DAT_01267b80;
 extern float DAT_011afe64;
 extern float DAT_01267e6c;
 extern VecLocal DAT_01267e30;
-extern __m128 DAT_010ec7f0;
+extern LocalM128 DAT_010ec7f0;
 void VisitAndFetchThree(RotLocal*, const MatrixLocal*);
 extern "C" void __cdecl FUN_00624b10(MatrixLocal*, RotLocal*);
 void FUN_00458620(NiPoint3*, VecLocal*);
@@ -13023,7 +12415,7 @@ void BlendLocal::FUN_00c81e30()
             rigid->FUN_00561690(DAT_01267e30);
             rigid->FUN_005617c0(DAT_01267e30);
         }
-        DAT_01267b80.Wait(0);
+        DAT_01267b80.FUN_0040fbf0(0);
         FUN_00c65f40(desiredMotion, rigid, false);
         DAT_01267b80.Unlock();
         motion = desiredMotion;
@@ -13050,7 +12442,7 @@ void BlendLocal::FUN_00c81e30()
         rigid->GetRotation(currentRotation);
         VecLocal blendedPosition;
         float blend = heirGain;
-        __m128 t = _mm_load_ss(&blend);
+        LocalM128 t = _mm_load_ss(&blend);
         t = _mm_shuffle_ps(t, t, 0);
         blendedPosition.v =
             _mm_add_ps(_mm_mul_ps(_mm_sub_ps(DAT_010ec7f0, t), currentPosition.v), _mm_mul_ps(position.v, t));
@@ -13400,16 +12792,7 @@ struct Shape892
     int unk14;
     float scale18, scale1C;
     int mode;
-    struct Pair
-    {
-        volatile int first, second;
-        Pair& operator=(const Pair& other)
-        {
-            first = other.first;
-            second = other.second;
-            return *this;
-        }
-    } values;
+    volatile Pair values;
     Shape892* FUN_00653290(int*);
     void FUN_00c6b980(SharedBody*);
     void FUN_00c89050(int, int, int, int);
@@ -13428,10 +12811,10 @@ void Shape892::FUN_00c892c0(int arg0, int arg1, int arg2, Shape892* source, int 
         {
             scale18 = settings->scale18;
             scale1C = settings->scale1C;
-            value = settings->values.first;
-            values.first = value;
-            value = settings->values.second;
-            values.second = value;
+            value = settings->values.a;
+            values.a = value;
+            value = settings->values.b;
+            values.b = value;
             value = settings->mode;
             mode = value;
         }
@@ -13485,8 +12868,8 @@ struct EventE610
     int unk44;
     const void* m_pkPair;
     int unk4c;
-    __m128 m_vContactPosition;
-    __m128 m_vHitNormal;
+    LocalM128 m_vContactPosition;
+    LocalM128 m_vHitNormal;
 };
 
 class ListenerE610
@@ -13733,7 +13116,8 @@ struct EntityE610
     WorldE610* m_pkWorld;
 };
 
-struct PairE610
+// 0x00c9e610 reads an entity link using the byte at 0x10; shared Pair has only two integers (8 bytes).
+struct CollisionEntityLink
 {
     int unk00;
     int unk04;
@@ -13746,7 +13130,7 @@ struct PairE610
 };
 
 // @fnv 0x00c9e610
-void __stdcall FUN_00c9e610(void* pvSource, const PairE610* pkPair, void* pvUnused)
+void __stdcall FUN_00c9e610(void* pvSource, const CollisionEntityLink* pkPair, void* pvUnused)
 {
     EventE610 kEvent;
     kEvent.m_pvSource = pvSource;
@@ -14198,21 +13582,14 @@ void __stdcall FUN_00c9e700(const RayInputE700& kInput, const CdBodyE700& kBody,
 }
 
 namespace RigidCinfoSimd {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    struct
-    {
-        float x, y, z, w;
-    };
-    unsigned char m128_u8[16];
-};
-extern "C" __m128 _mm_load_ps(float const*);
-extern "C" void _mm_store_ps(float*, __m128);
+typedef ::__m128 LocalM128;
+using ::_mm_load_ps;
+using ::_mm_store_ps;
 }
 
 struct __declspec(align(16)) Vector482
 {
-    RigidCinfoSimd::__m128 value;
+    RigidCinfoSimd::LocalM128 value;
 };
 
 struct Config482
@@ -14471,20 +13848,16 @@ void Wrapper482::FUN_00c8cfd0(Info482* info)
 }
 
 namespace WorldPositionDetail {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned char m128_u8[16];
-};
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_and_ps(__m128, __m128);
-extern "C" __m128 _mm_cmple_ps(__m128, __m128);
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" int _mm_movemask_ps(__m128);
+typedef ::__m128 LocalM128;
+using ::_mm_sub_ps;
+using ::_mm_and_ps;
+using ::_mm_cmple_ps;
+using ::_mm_set_ps1;
+using ::_mm_movemask_ps;
 
 extern "C" double fabs(double);
 
-extern __m128 DAT_01017d10;
+extern LocalM128 DAT_01017d10;
 extern float DAT_01016248;
 
 struct WorldWrapAdjust : FUN_00c9a070_shell
@@ -14529,7 +13902,7 @@ struct MotionBounds
     int unk54;
     int unk58;
     int unk5C;
-    __m128 m_60;
+    LocalM128 m_60;
     int unk70;
     int unk74;
     int unk78;
@@ -14548,16 +13921,16 @@ struct MotionBounds
     int unkAC;
     float m_b0[3];
 
-    bool FUN_00c9a1f0(__m128* value);
+    bool FUN_00c9a1f0(LocalM128* value);
 };
 
 // @fnv 0x00c9a1f0
-bool MotionBounds::FUN_00c9a1f0(__m128* value)
+bool MotionBounds::FUN_00c9a1f0(LocalM128* value)
 {
     bool hit = false;
-    __m128 base = m_60;
-    __m128 input = *value;
-    __m128 d = _mm_sub_ps(input, base);
+    LocalM128 base = m_60;
+    LocalM128 input = *value;
+    LocalM128 d = _mm_sub_ps(input, base);
     for (unsigned int i = 0; i < 3; ++i)
     {
         if (hit)
@@ -14569,9 +13942,9 @@ bool MotionBounds::FUN_00c9a1f0(__m128* value)
     {
         d = input;
         ((WorldWrapAdjust*)this)->AdjustVector((float*)&d);
-        __m128 diff = _mm_sub_ps(d, base);
-        __m128 absdiff = _mm_and_ps(diff, DAT_01017d10);
-        __m128 cmp = _mm_cmple_ps(absdiff, _mm_set_ps1(DAT_01016248));
+        LocalM128 diff = _mm_sub_ps(d, base);
+        LocalM128 absdiff = _mm_and_ps(diff, DAT_01017d10);
+        LocalM128 cmp = _mm_cmple_ps(absdiff, _mm_set_ps1(DAT_01016248));
         unsigned int mask = _mm_movemask_ps(cmp) & 7;
         bool result = mask != 7;
         if (result)

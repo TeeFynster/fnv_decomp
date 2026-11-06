@@ -1,12 +1,71 @@
 // fallout_shared/facegen/bsfacegenninode.cpp: FaceNode, FaceGenNode, DumpNode (33 functions)
 
-#include "bsfacegenninode.h"
+#include <stddef.h>
 
-class NiNode
+#include "../../../include/DIALOGUE_EMOTION.h"
+#include "../../../include/PACKAGE_OBJECT_TYPE.h"
+#include "../../../include/SIT_SLEEP_STATE.h"
+#include "../../../include/PROCESS_TYPE.h"
+#include "../../../include/BSFaceGenAnimationData.h"
+#include "../../../include/BSFaceGenNiNode.h"
+#include "../../../include/NiUpdateData.h"
+#include "../../../include/Setting.h"
+#include "../../../include/BaseProcess.h"
+#include "../../../include/MobileObject.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiTriBasedGeom.h"
+#include "../../../include/BSFaceGenMorphData.h"
+#include "../../../include/NiAVObject.h"
+#include "../../../include/NiNode.h"
+
+template <class T> inline NiPointer<T>::~NiPointer()
 {
-  public:
-    const NiPoint3& FUN_0045bb80() const;
-};
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (pkNew != 0)
+            pkNew->IncRefCount();
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = pkNew;
+    }
+    return *this;
+}
+
+// @fnv 0x006629e0
+const NiRTTI* BSFaceGenNiNode::GetRTTI() const
+{
+    return &ms_kRTTI;
+}
+
+// @fnv 0x006629f0
+BSFaceGenAnimationData* BSFaceGenNiNode::GetAnimationData()
+{
+    return spAnimationData;
+}
+
+// @fnv 0x00439920
+void BSFaceGenNiNode::SetAnimationData(BSFaceGenAnimationData* apData)
+{
+    spAnimationData = apData;
+}
+
+// @fnv 0x00662a60
+void BSFaceGenNiNode::SetAnimationUpdate(bool abUpdate)
+{
+    bAnimationUpdate = abUpdate;
+}
+
+// @fnv 0x0097ce70
+void BSFaceGenNiNode::SetApplyRotToParent(bool abApply)
+{
+    bApplyRotationToParent = abApply;
+}
 
 extern NiNode* DAT_011d59ec;
 extern const NiPoint3 _NiPoint3_ZERO;
@@ -14,7 +73,7 @@ extern const NiPoint3 _NiPoint3_ZERO;
 // @fnv 0x006633f0
 const NiPoint3& FUN_006633f0()
 {
-    return DAT_011d59ec ? DAT_011d59ec->FUN_0045bb80() : _NiPoint3_ZERO;
+    return DAT_011d59ec ? static_cast<const NiNode*>(DAT_011d59ec)->FUN_0045bb80() : _NiPoint3_ZERO;
 }
 
 struct GeometryVertexBuffer
@@ -49,13 +108,15 @@ void FUN_00663a10_shell::FUN_00663a10(bool abShouldHeadTrack)
     *((bool*)((char*)this + 0x189)) = abShouldHeadTrack;
 }
 
-class ProcessLists
+// 0x00408d60 is a folded byte-pointer getter (also ProcessLists::GetLifeStateControlFlag); g_011d5a5c and g_011df6d0
+// are not the ProcessLists singleton 0x011e0e80
+class FlagGetterView
 {
   public:
     unsigned char* GetLifeStateControlFlag(void);
 };
 
-extern ProcessLists g_011d5a5c;
+extern FlagGetterView g_011d5a5c;
 
 // @fnv 0x00663a30
 unsigned char FUN_00663a30()
@@ -70,30 +131,12 @@ char __fastcall GetByteAt1D(char* pThis)
 }
 
 namespace fnv_00663a70 {
-struct NiUpdateData
-{
-    float fTime;
-    bool m_bUpdateEnabled;
-    bool m_bRender;
-    bool m_bInterpolate;
-    bool m_bTimeToDie;
-    bool m_bVisible;
-    char _pad_9[3];
-};
 typedef char _sizecheck_NiUpdateData[sizeof(NiUpdateData) == 12 ? 1 : -1];
 struct FUN_00663a70_shell : public BSFaceGenNiNode
 {
     void UpdateFaceGenNode(NiUpdateData*, unsigned int);
 };
 
-struct NiAVObject
-{
-    bool FUN_00456610();
-};
-struct NiNode
-{
-    void UpdateDownwardPass(NiUpdateData*, unsigned int);
-};
 struct Stand663
 {
     void UpdateFaceGenAnimation(NiUpdateData*);
@@ -103,7 +146,7 @@ void FUN_00663a70_shell::UpdateFaceGenNode(NiUpdateData* UpdateData, unsigned in
 {
     if (!((NiAVObject*)this)->FUN_00456610())
         ((Stand663*)this)->UpdateFaceGenAnimation(UpdateData);
-    ((NiNode*)this)->UpdateDownwardPass(UpdateData, uFlags);
+    ((NiNode*)this)->NiNode::UpdateDownwardPass(*UpdateData, uFlags);
 }
 }  // namespace fnv_00663a70
 
@@ -111,13 +154,10 @@ struct BSFadeNode;
 struct BSMultiBoundNode;
 struct BSResizableTriShape;
 struct BSSegmentedTriShape;
-struct NiAVObject;
 struct NiCullingProcess;
 struct NiGeometry;
 struct NiLines;
-struct NiNode;
 struct NiParticles;
-struct NiTriBasedGeom;
 struct NiTriShape;
 struct NiTriStrips;
 struct NiVisibleArray;
@@ -125,10 +165,8 @@ struct bhkBlendCollisionObject;
 struct bhkLimitedHingeConstraint;
 struct bhkNiCollisionObject;
 struct bhkRigidBody;
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+#include "../../../include/NiMemObject.h"
+#include "../../../include/ProcessLists.h"
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
 struct FUN_00663ae0_shell : public BSFaceGenNiNode
 {
@@ -136,21 +174,12 @@ struct FUN_00663ae0_shell : public BSFaceGenNiNode
 };
 
 struct NiBound;
-struct NiAVObject
-{
-    NiBound& GetBoundingVolume();
-};
 
 struct DummyAccum
 {
     int GetField19C();
     void RenderBound(NiBound&, int);
     void DispatchBatchRenderer();
-};
-
-struct DummyNode
-{
-    void FUN_00a5dbe0(NiCullingProcess*);
 };
 
 DummyAccum* __fastcall GetStringAtOffsetC4(NiCullingProcess*);
@@ -164,7 +193,7 @@ void FUN_00663ae0_shell::CullWithBoundAccum(NiCullingProcess* arCuller)
     {
         paccum->RenderBound(((NiAVObject*)this)->GetBoundingVolume(), 0);
     }
-    ((DummyNode*)this)->FUN_00a5dbe0(arCuller);
+    ((NiNode*)this)->NiNode::OnVisible(*arCuller);
     if (kmode == 0)
     {
         paccum->DispatchBatchRenderer();
@@ -237,33 +266,7 @@ void FUN_00662aa0_shell::SetFixedNormals(bool abFixedNormals)
     *reinterpret_cast<char*>(reinterpret_cast<unsigned char*>(this) + 0xd5) = abFixedNormals;
 }
 
-void _delete(void* ptr, unsigned int size);
-
-struct FUN_00662ac0_shell
-{
-    void* DestroyIfFlagged(unsigned int flags);
-    void FUN_00662b00();
-};
-
-// Calls FUN_00662b00, then frees this with _delete when flags has bit 0 set, and returns this.
-// @fnv 0x00662ac0
-void* FUN_00662ac0_shell::DestroyIfFlagged(unsigned int flags)
-{
-    this->FUN_00662b00();
-    if (flags & 1)
-        _delete(this, 0xf0);
-    return this;
-}
-
 namespace fnv_00663ab0 {
-struct NiUpdateData
-{
-};
-
-struct NiNode
-{
-    virtual void UpdateTransformAndBounds(NiUpdateData&);
-};
 
 struct FUN_00663ab0_class : NiNode
 {
@@ -319,434 +322,9 @@ char FUN_009a0240_shell::GetFixedNormals()
     return reinterpret_cast<const unsigned char*>(this)[0xd5];
 }
 
-namespace fnv_00663510 {
 class Actor;
 class PlayerCharacter;
-class BaseProcess
-{
-  public:
-    virtual void vp000();
-    virtual void vp004();
-    virtual void vp008();
-    virtual void vp00c();
-    virtual void vp010();
-    virtual void vp014();
-    virtual void vp018();
-    virtual void vp01c();
-    virtual void vp020();
-    virtual void vp024();
-    virtual void vp028();
-    virtual void vp02c();
-    virtual void vp030();
-    virtual void vp034();
-    virtual void vp038();
-    virtual void vp03c();
-    virtual void vp040();
-    virtual void vp044();
-    virtual void vp048();
-    virtual void vp04c();
-    virtual void vp050();
-    virtual void vp054();
-    virtual void vp058();
-    virtual void vp05c();
-    virtual void vp060();
-    virtual void vp064();
-    virtual void vp068();
-    virtual void vp06c();
-    virtual void vp070();
-    virtual void vp074();
-    virtual bool IsArrested();
-    virtual void vq000();
-    virtual void vq004();
-    virtual void vq008();
-    virtual void vq00c();
-    virtual void vq010();
-    virtual void vq014();
-    virtual void vq018();
-    virtual void vq01c();
-    virtual void vq020();
-    virtual void vq024();
-    virtual void vq028();
-    virtual Actor* GetCombatTarget();
-    virtual void vr000();
-    virtual void vr004();
-    virtual void vr008();
-    virtual void vr00c();
-    virtual void vr010();
-    virtual void vr014();
-    virtual void vr018();
-    virtual void vr01c();
-    virtual void vr020();
-    virtual void vr024();
-    virtual void vr028();
-    virtual void vr02c();
-    virtual void vr030();
-    virtual void vr034();
-    virtual void vr038();
-    virtual void vr03c();
-    virtual void vr040();
-    virtual void vr044();
-    virtual void vr048();
-    virtual void vr04c();
-    virtual void vr050();
-    virtual void vr054();
-    virtual void vr058();
-    virtual void vr05c();
-    virtual void vr060();
-    virtual void vr064();
-    virtual void vr068();
-    virtual void vr06c();
-    virtual void vr070();
-    virtual void vr074();
-    virtual void vr078();
-    virtual void vr07c();
-    virtual void vr080();
-    virtual void vr084();
-    virtual void vr088();
-    virtual void vr08c();
-    virtual void vr090();
-    virtual void vr094();
-    virtual void vr098();
-    virtual void vr09c();
-    virtual void vr0a0();
-    virtual void vr0a4();
-    virtual void vr0a8();
-    virtual void vr0ac();
-    virtual void vr0b0();
-    virtual void vr0b4();
-    virtual void vr0b8();
-    virtual void vr0bc();
-    virtual void vr0c0();
-    virtual void vr0c4();
-    virtual void vr0c8();
-    virtual void vr0cc();
-    virtual void vr0d0();
-    virtual void vr0d4();
-    virtual void vr0d8();
-    virtual void vr0dc();
-    virtual void vr0e0();
-    virtual void vr0e4();
-    virtual void vr0e8();
-    virtual void vr0ec();
-    virtual void vr0f0();
-    virtual void vr0f4();
-    virtual void vr0f8();
-    virtual void vr0fc();
-    virtual void vr100();
-    virtual void vr104();
-    virtual void vr108();
-    virtual void vr10c();
-    virtual void vr110();
-    virtual void vr114();
-    virtual void vr118();
-    virtual void vr11c();
-    virtual void vr120();
-    virtual void vr124();
-    virtual void vr128();
-    virtual void vr12c();
-    virtual void vr130();
-    virtual void vr134();
-    virtual void vr138();
-    virtual void vr13c();
-    virtual void vr140();
-    virtual void vr144();
-    virtual void vr148();
-    virtual void vr14c();
-    virtual void vr150();
-    virtual void vr154();
-    virtual void vr158();
-    virtual void vr15c();
-    virtual void vr160();
-    virtual void vr164();
-    virtual void vr168();
-    virtual void vr16c();
-    virtual void vr170();
-    virtual void vr174();
-    virtual void vr178();
-    virtual void vr17c();
-    virtual void vr180();
-    virtual void vr184();
-    virtual void vr188();
-    virtual void vr18c();
-    virtual void vr190();
-    virtual void vr194();
-    virtual void vr198();
-    virtual void vr19c();
-    virtual void vr1a0();
-    virtual void vr1a4();
-    virtual void vr1a8();
-    virtual void vr1ac();
-    virtual void vr1b0();
-    virtual void vr1b4();
-    virtual void vr1b8();
-    virtual void vr1bc();
-    virtual void vr1c0();
-    virtual void vr1c4();
-    virtual void vr1c8();
-    virtual void vr1cc();
-    virtual void vr1d0();
-    virtual void vr1d4();
-    virtual void vr1d8();
-    virtual void vr1dc();
-    virtual void vr1e0();
-    virtual void vr1e4();
-    virtual void vr1e8();
-    virtual void vr1ec();
-    virtual void vr1f0();
-    virtual void vr1f4();
-    virtual void vr1f8();
-    virtual void vr1fc();
-    virtual void vr200();
-    virtual void vr204();
-    virtual void vr208();
-    virtual void vr20c();
-    virtual void vr210();
-    virtual void vr214();
-    virtual void vr218();
-    virtual void vr21c();
-    virtual void vr220();
-    virtual void vr224();
-    virtual void vr228();
-    virtual void vr22c();
-    virtual void vr230();
-    virtual void vr234();
-    virtual void vr238();
-    virtual void vr23c();
-    virtual void vr240();
-    virtual void vr244();
-    virtual void vr248();
-    virtual void vr24c();
-    virtual void vr250();
-    virtual void vr254();
-    virtual void vr258();
-    virtual void vr25c();
-    virtual void vr260();
-    virtual void vr264();
-    virtual void vr268();
-    virtual void vr26c();
-    virtual void vr270();
-    virtual void vr274();
-    virtual void vr278();
-    virtual void vr27c();
-    virtual void vr280();
-    virtual void vr284();
-    virtual void vr288();
-    virtual void vr28c();
-    virtual void vr290();
-    virtual void vr294();
-    virtual void vr298();
-    virtual void vr29c();
-    virtual void vr2a0();
-    virtual void vr2a4();
-    virtual void vr2a8();
-    virtual void vr2ac();
-    virtual void vr2b0();
-    virtual void vr2b4();
-    virtual void vr2b8();
-    virtual void vr2bc();
-    virtual void vr2c0();
-    virtual void vr2c4();
-    virtual void vr2c8();
-    virtual void vr2cc();
-    virtual void vr2d0();
-    virtual void vr2d4();
-    virtual void vr2d8();
-    virtual void vr2dc();
-    virtual void vr2e0();
-    virtual void vr2e4();
-    virtual void vr2e8();
-    virtual void vr2ec();
-    virtual void vr2f0();
-    virtual void vr2f4();
-    virtual void vr2f8();
-    virtual void vr2fc();
-    virtual void vr300();
-    virtual void vr304();
-    virtual void vr308();
-    virtual void vr30c();
-    virtual void vr310();
-    virtual void vr314();
-    virtual void vr318();
-    virtual void vr31c();
-    virtual void vr320();
-    virtual void vr324();
-    virtual void vr328();
-    virtual void vr32c();
-    virtual void vr330();
-    virtual void vr334();
-    virtual void vr338();
-    virtual void vr33c();
-    virtual void vr340();
-    virtual void vr344();
-    virtual void vr348();
-    virtual void vr34c();
-    virtual void vr350();
-    virtual void vr354();
-    virtual void vr358();
-    virtual void vr35c();
-    virtual void vr360();
-    virtual void vr364();
-    virtual void vr368();
-    virtual void vr36c();
-    virtual void vr370();
-    virtual void vr374();
-    virtual void vr378();
-    virtual void vr37c();
-    virtual void vr380();
-    virtual void vr384();
-    virtual void vr388();
-    virtual void vr38c();
-    virtual void vr390();
-    virtual void vr394();
-    virtual void vr398();
-    virtual void vr39c();
-    virtual void vr3a0();
-    virtual void vr3a4();
-    virtual void vr3a8();
-    virtual void vr3ac();
-    virtual void vr3b0();
-    virtual void vr3b4();
-    virtual void vr3b8();
-    virtual void vr3bc();
-    virtual void vr3c0();
-    virtual void vr3c4();
-    virtual void vr3c8();
-    virtual void vr3cc();
-    virtual void vr3d0();
-    virtual void vr3d4();
-    virtual void vr3d8();
-    virtual void vr3dc();
-    virtual void vr3e0();
-    virtual void vr3e4();
-    virtual void vr3e8();
-    virtual void vr3ec();
-    virtual void vr3f0();
-    virtual void vr3f4();
-    virtual void vr3f8();
-    virtual void vr3fc();
-    virtual void vr400();
-    virtual void vr404();
-    virtual void vr408();
-    virtual void vr40c();
-    virtual void vr410();
-    virtual void vr414();
-    virtual void vr418();
-    virtual void vr41c();
-    virtual void vr420();
-    virtual void vr424();
-    virtual void vr428();
-    virtual void vr42c();
-    virtual void vr430();
-    virtual void vr434();
-    virtual void vr438();
-    virtual void vr43c();
-    virtual void vr440();
-    virtual void vr444();
-    virtual void vr448();
-    virtual void vr44c();
-    virtual void vr450();
-    virtual void vr454();
-    virtual void vr458();
-    virtual void vr45c();
-    virtual void vr460();
-    virtual void vr464();
-    virtual void vr468();
-    virtual void vr46c();
-    virtual void vr470();
-    virtual void vr474();
-    virtual void vr478();
-    virtual void vr47c();
-    virtual void vr480();
-    virtual void vr484();
-    virtual void vr488();
-    virtual void vr48c();
-    virtual void vr490();
-    virtual void vr494();
-    virtual void vr498();
-    virtual void vr49c();
-    virtual void vr4a0();
-    virtual void vr4a4();
-    virtual void vr4a8();
-    virtual void vr4ac();
-    virtual void vr4b0();
-    virtual void vr4b4();
-    virtual void vr4b8();
-    virtual void vr4bc();
-    virtual void vr4c0();
-    virtual void vr4c4();
-    virtual void vr4c8();
-    virtual void vr4cc();
-    virtual void vr4d0();
-    virtual void vr4d4();
-    virtual void vr4d8();
-    virtual void vr4dc();
-    virtual void vr4e0();
-    virtual void vr4e4();
-    virtual void vr4e8();
-    virtual void vr4ec();
-    virtual void vr4f0();
-    virtual void vr4f4();
-    virtual void vr4f8();
-    virtual void vr4fc();
-    virtual void vr500();
-    virtual void vr504();
-    virtual void vr508();
-    virtual void vr50c();
-    virtual void vr510();
-    virtual void vr514();
-    virtual void vr518();
-    virtual void vr51c();
-    virtual void vr520();
-    virtual void vr524();
-    virtual void vr528();
-    virtual void vr52c();
-    virtual void vr530();
-    virtual void vr534();
-    virtual void vr538();
-    virtual void vr53c();
-    virtual void vr540();
-    virtual void vr544();
-    virtual void vr548();
-    virtual void vr54c();
-    virtual void vr550();
-    virtual void vr554();
-    virtual void vr558();
-    virtual void vr55c();
-    virtual void vr560();
-    virtual void vr564();
-    virtual void vr568();
-    virtual void vr56c();
-    virtual void vr570();
-    virtual void vr574();
-    virtual void vr578();
-    virtual void vr57c();
-    virtual void vr580();
-    virtual void vr584();
-    virtual void vr588();
-    virtual void vr58c();
-    virtual void vr590();
-    virtual void vr594();
-    virtual void vr598();
-    virtual void vr59c();
-    virtual void vr5a0();
-    virtual void vr5a4();
-    virtual void vr5a8();
-    virtual void vr5ac();
-    virtual void vr5b0();
-    virtual void vr5b4();
-    virtual void vr5b8();
-    virtual void vr5bc();
-    virtual void vr5c0();
-    virtual void vr5c4();
-    virtual void vr5c8();
-    virtual void* GetCurrentPackage678();
-};
-class MobileObject
-{
-  public:
-    BaseProcess* GetCurrentAIProcess() const;
-    unsigned int GetCurrentProcessLevel();
-};
+namespace fnv_00663510 {
 extern PlayerCharacter* g_thePlayer;
 
 class FaceGenAnimData
@@ -906,59 +484,38 @@ class FaceGenNode
     void UpdateStateByDistance(int);
     void FUN_00663050(bool);
 };
-class NiAVObject
-{
-  public:
-    bool FUN_00456610();
-    bool FUN_004f0140();
-};
 class Calendar
 {
   public:
     unsigned int GetDaysPassed();
-};
-class Setting_S
-{
-  public:
-    float* Float();
 };
 class Twin_0084d030
 {
   public:
     float GetStoredFloatValue();
 };
-class ProcessLists
-{
-  public:
-    unsigned char* GetLifeStateControlFlag();
-    bool CanAddActorToList(Actor*, int);
-};
-class Interface
+// Exe 0x00663510: unit-local Interface view; declarations and layout are preserved.
+class BsfacegenninodeInterfaceView
 {
   public:
     static bool __cdecl IsSaveLoadActive();
 };
-extern Setting_S g_011c5724;
+extern Setting g_011c5724;
 extern Twin_0084d030 g_timeGlobal;
-extern ProcessLists g_011df6d0;
+extern FlagGetterView g_011df6d0;
 extern ProcessLists DAT_011e0e80;
 unsigned char __cdecl FUN_00663a30();
 unsigned char __fastcall FUN_006639f0(char*);
 unsigned char __fastcall GetByteAt1D(char*);
 void __cdecl FUN_00652510(Actor*);
 
-struct FaceGenUpdateData663510
-{
-    float fTime;
-    bool m_bUpdateEnabled;
-};
 struct FUN_00663510_t
 {
-    void UpdateFaceGenAnimation(FaceGenUpdateData663510* UpdateData);
+    void UpdateFaceGenAnimation(NiUpdateData* UpdateData);
 };
 
 // @fnv 0x00663510
-void FUN_00663510_t::UpdateFaceGenAnimation(FaceGenUpdateData663510* UpdateData)
+void FUN_00663510_t::UpdateFaceGenAnimation(NiUpdateData* UpdateData)
 {
     if (((NiAVObject*)this)->FUN_00456610())
         return;
@@ -969,8 +526,10 @@ void FUN_00663510_t::UpdateFaceGenAnimation(FaceGenUpdateData663510* UpdateData)
     if (FUN_00663a30() && !((FaceGenNode*)this)->GetByteAtOffsetE1() && UpdateData->fTime > 0.0)
         ((FaceGenNode*)this)->UpdateStateByDistance(-1);
 
+    // NiUpdateData has its controller flag at +4; FaceGenUpdateData is a separate 32-byte morph context.
     if (!((FaceGenNode*)this)->GetAnimationData() ||
-        (!UpdateData->m_bUpdateEnabled && !((FaceGenNode*)this)->GetAnimationData()->NeedsUpdate()))
+        (!*reinterpret_cast<const bool*>(reinterpret_cast<const char*>(UpdateData) + 4) &&
+         !((FaceGenNode*)this)->GetAnimationData()->NeedsUpdate()))
         return;
 
     *(float*)((char*)this + 0xdc) = UpdateData->fTime;
@@ -991,7 +550,7 @@ void FUN_00663510_t::UpdateFaceGenAnimation(FaceGenUpdateData663510* UpdateData)
 
     if (((BSFaceGenNiNode*)this)->bAnimationUpdate && *(Actor**)((char*)this + 0xe8) &&
         ((MobileObject*)*(Actor**)((char*)this + 0xe8))->GetCurrentAIProcess() &&
-        ((MobileObject*)*(Actor**)((char*)this + 0xe8))->GetCurrentAIProcess()->GetCurrentPackage678() &&
+        ((MobileObject*)*(Actor**)((char*)this + 0xe8))->GetCurrentAIProcess()->GetPrimaryTargetReference() &&
         FUN_006639f0((char*)((FaceGenNode*)this)->GetAnimationData()) &&
         ((BSFaceGenNiNode*)this)->bApplyRotationToParent && !*g_011df6d0.GetLifeStateControlFlag() &&
         ((NiAVObject*)this)->FUN_004f0140())
@@ -1016,14 +575,14 @@ void FUN_00663510_t::UpdateFaceGenAnimation(FaceGenUpdateData663510* UpdateData)
         {
             if (((FaceGenNode*)this)->GetAnimationData()->IsDead() ||
                 DAT_011e0e80.CanAddActorToList(*(Actor**)((char*)this + 0xe8), inumallowedtoupdate) ||
-                *(Actor**)((char*)this + 0xe8) == (Actor*)g_thePlayer || Interface::IsSaveLoadActive())
+                *(Actor**)((char*)this + 0xe8) == (Actor*)g_thePlayer || BsfacegenninodeInterfaceView::IsSaveLoadActive())
                 bupdate = true;
             if (*(Actor**)((char*)this + 0xe8) &&
                 !((MobileObject*)*(Actor**)((char*)this + 0xe8))->GetCurrentProcessLevel() &&
-                ((MobileObject*)*(Actor**)((char*)this + 0xe8))->GetCurrentAIProcess()->IsArrested() &&
-                ((MobileObject*)*(Actor**)((char*)this + 0xe8))->GetCurrentAIProcess()->GetCombatTarget() &&
-                ((MobileObject*)*(Actor**)((char*)this + 0xe8))->GetCurrentAIProcess()->GetCombatTarget() ==
-                    (Actor*)g_thePlayer)
+                ((MobileObject*)*(Actor**)((char*)this + 0xe8))->GetCurrentAIProcess()->IsAsleep() &&
+                ((MobileObject*)*(Actor**)((char*)this + 0xe8))->GetCurrentAIProcess()->GetMobileObject() &&
+                ((MobileObject*)*(Actor**)((char*)this + 0xe8))->GetCurrentAIProcess()->GetMobileObject() ==
+                    (::MobileObject*)g_thePlayer)
                 bupdate = true;
         }
         if (bupdate || *(bool*)((char*)this + 0xe4))
@@ -1103,25 +662,19 @@ FUN_006628c0* FUN_006628c0::FUN_00663b80(CloningProcess& cloneData)
     return pnode;
 }
 
-struct S_00a953b0_Node
-{
-    void CopyMemberData(S_00a953b0_Node*, void*);
-};
-
 struct Helper62d0
 {
     void* operator=(void const*);
     void* value;
 };
 
-struct FUN_00663c30_shell : S_00a953b0_Node
+struct FUN_00663c30_shell : NiNode
 {
     struct Block36
     {
         int values[9];
     };
 
-    unsigned char padding[0xab];
     Helper62d0 helper;
     Block36 block;
     unsigned char value_d4;
@@ -1144,7 +697,7 @@ void FUN_00663c30_shell::FUN_00663c30(FUN_00663c30_shell* pDest, void* pCloneDat
     }
     else
     {
-        S_00a953b0_Node::CopyMemberData(pDest, pCloneData);
+        NiNode::CopyMemberData(pDest, *static_cast<CloningProcess*>(pCloneData));
 
         pDest->helper.operator=(&helper);
 
@@ -1581,18 +1134,8 @@ void FUN_00662f70_cls::FUN_00662f70(FUN_00662f70_arg* a1)
     }
 }
 
-class B663450Point3
-{
-  public:
-    float x;
-    float y;
-    float z;
 
-    B663450Point3 operator-(const B663450Point3& kPt) const;
-    float Length() const;
-};
-
-const B663450Point3& B663450GetCenter();
+const NiPoint3& B663450GetCenter();
 float B663450GetRadius();
 
 class B663450Actor;
@@ -1602,7 +1145,7 @@ void __cdecl FUN_00653e50(B663450Actor* pkActor, int iState);
 class B663450Actor
 {
   public:
-    const B663450Point3& GetPosition();
+    const NiPoint3& GetPosition();
     bool GetByteAtE0();
     void UpdateStateByDistance(int iState);
 };
@@ -1611,7 +1154,7 @@ class B663450Actor
 // @fnv 0x00663450
 void B663450Actor::UpdateStateByDistance(int iState)
 {
-    B663450Point3 kCenter3 = B663450GetCenter();
+    NiPoint3 kCenter3 = B663450GetCenter();
     float fMargin = 10.0f;
     float fDist = (kCenter3 - GetPosition()).Length();
     if ((fDist > B663450GetRadius() + fMargin && !GetByteAtE0()) || iState == 0)
@@ -1849,48 +1392,17 @@ void FaceNode::AttachBones(SceneNode* parent, bool warn)
 }
 
 namespace fnv_00663050 {
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3 operator-(const NiPoint3&) const;
-    float FUN_00457990();
-};
-struct BSFaceGenMorphData
-{
-    void* vertices;
-    void* normals;
-    void* tangents;
-};
 class MorphGeometryData
 {
   public:
     bool FUN_00a67360(bool);
-    void FUN_00a67410(BSFaceGenMorphData*);
+    void FUN_00a67410(BSFaceGenMorphData::Buffers*);
     void FUN_00a673d0();
-};
-class NiTriBasedGeom
-{
-  public:
-    MorphGeometryData* FUN_005495f0();
-    unsigned short FUN_00456650();
-};
-class NiAVObject
-{
-  public:
-    virtual void Unk_000();
-    virtual void Unk_004();
-    virtual void Unk_008();
-    virtual void Unk_00c();
-    virtual void Unk_010();
-    virtual void Unk_014();
-    virtual void Unk_018();
-    virtual NiTriBasedGeom* AsTriBasedGeom();
 };
 struct FUN_00663430
 {
     NiTriBasedGeom* geometry;
-    BSFaceGenMorphData morph;
+    BSFaceGenMorphData::Buffers morph;
     FUN_00663430();
 };
 class AnimationState
@@ -2098,7 +1610,7 @@ class FaceGenNode
 };
 void* FUN_00653230(void*);
 NiExtraData* GetExtraDataIfPresent(NiAVObject*);
-void FUN_00653340(NiTriBasedGeom*, BSFaceGenMorphData*);
+void FUN_00653340(NiTriBasedGeom*, BSFaceGenMorphData::Buffers*);
 const NiPoint3& FUN_006633f0();
 float FUN_006633d0();
 float FUN_006633e0();
@@ -2122,10 +1634,10 @@ void FaceGenNode::FUN_00663050(bool update)
         aUnknownObject = FUN_0043b4a0(index_);
         if (!aUnknownObject)
             continue;
-        context_2.geometry = aUnknownObject->AsTriBasedGeom();
+        context_2.geometry = aUnknownObject->IsTriBasedGeometry();
         if (!context_2.geometry)
             continue;
-        if (!context_2.geometry->FUN_005495f0())
+        if (!((MorphGeometryData*)context_2.geometry->GetModelData()))
             continue;
         data8 = FUN_00653230(context_2.geometry);
         if (!data8)
@@ -2133,10 +1645,10 @@ void FaceGenNode::FUN_00663050(bool update)
         extra2 = GetExtraDataIfPresent((NiAVObject*)context_2.geometry);
         if (!extra2)
             continue;
-        if (!context_2.geometry->FUN_005495f0()->FUN_00a67360(true))
+        if (!((MorphGeometryData*)context_2.geometry->GetModelData())->FUN_00a67360(true))
             continue;
-        context_2.geometry->FUN_005495f0()->FUN_00a67410(&context_2.morph);
-        kTotal = context_2.geometry->FUN_00456650();
+        ((MorphGeometryData*)context_2.geometry->GetModelData())->FUN_00a67410(&context_2.morph);
+        kTotal = context_2.geometry->GetVertexCount();
         if (update || resetMorph)
         {
             FUN_00653340(context_2.geometry, &context_2.morph);
@@ -2192,7 +1704,7 @@ void FaceGenNode::FUN_00663050(bool update)
         {
             GetAnimation()->Update(0.0f, true, true, true, true, false);
         }
-        context_2.geometry->FUN_005495f0()->FUN_00a673d0();
+        ((MorphGeometryData*)context_2.geometry->GetModelData())->FUN_00a673d0();
     }
     refreshMorph = false;
 }
@@ -2406,86 +1918,10 @@ void DumpNode::DumpToArray(DumpArray* out)
     }
 }
 
-struct FaceNodeBase662b00
-{
-    virtual void Slot00();
-    ~FaceNodeBase662b00();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    unsigned int unk9C;
-    unsigned int unkA0;
-    unsigned int unkA4;
-    unsigned int unkA8;
-};
-
-struct AnimationDataPtr662b00
-{
-    BSFaceGenAnimationData* m_pObject;
-    ~AnimationDataPtr662b00();
-};
-
-struct FUN_00662b00 : FaceNodeBase662b00
-{
-    AnimationDataPtr662b00 m_animationData;
-    unsigned int unkB0;
-    unsigned int unkB4;
-    unsigned int unkB8;
-    unsigned int unkBC;
-    unsigned int unkC0;
-    unsigned int unkC4;
-    unsigned int unkC8;
-    unsigned int unkCC;
-    unsigned int unkD0;
-    unsigned int unkD4;
-    unsigned int unkD8;
-    unsigned int unkDC;
-    unsigned int unkE0;
-    unsigned int unkE4;
-    void* unkE8;
-    ~FUN_00662b00();
-};
-
-// The destructor sets unkE8 to null.
 // @fnv 0x00662b00
-FUN_00662b00::~FUN_00662b00()
+BSFaceGenNiNode::~BSFaceGenNiNode()
 {
-    unkE8 = 0;
+    *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0xe8) = 0;
 }
 
 struct NiPtr6628
@@ -2512,56 +1948,8 @@ struct Block6628
 
 extern Block6628 DAT_011a9448;
 
-struct NodeBase6628
-{
-    NodeBase6628(unsigned short usChildren);
-    virtual ~NodeBase6628();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-};
-
 namespace fg6628 {
-struct FUN_006628c0 : NodeBase6628
+struct FUN_006628c0 : NiNode
 {
     FUN_006628c0();
     virtual ~FUN_006628c0();
@@ -2585,7 +1973,7 @@ struct FUN_006628c0 : NodeBase6628
 
 // Constructs the node, initializes spAnimationData, copies DAT_011a9448 into block, and assigns the listed fields.
 // @fnv 0x006628c0
-fg6628::FUN_006628c0::FUN_006628c0() : NodeBase6628(0), spAnimationData(0)
+fg6628::FUN_006628c0::FUN_006628c0() : NiNode(0), spAnimationData(0)
 {
     unkD5 = false;
     unkD4 = false;

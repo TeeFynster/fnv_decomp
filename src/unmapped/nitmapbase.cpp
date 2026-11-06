@@ -1,5 +1,25 @@
+#include "../../include/NiPointer.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/NiTMapItem.h"
+#include "../../include/DFALL.h"
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+// CombatThreatRecord_nitmapbase: local type (was include/CombatThreatRecord.h, which had no evidence of one real class); its methods are 0x009a4f40 SandBoxChoiceListItem::InitLoadGame, 0x009a5170 CombatThreat::IsExpired, 0x009a5e50 NiTMapBase<DFALL<NiTMapItem<unsigned int,CombatThreat *> >,unsigned int,CombatThreat *>::~NiTMapBase<DFALL<NiTMapItem<unsigned int,CombatThreat *> >,unsigned int,CombatThreat *>
+class BGSLoadGameBuffer;
+
+class CombatThreatRecord_nitmapbase
+{
+public:
+    void* vfn_00;
+    int pad_04;
+    void* p_08;
+
+    ~CombatThreatRecord_nitmapbase();
+    bool IsXLessThan(float);
+    void LoadGame(BGSLoadGameBuffer*);
+    void __thiscall FUN_009a5e50();
+};
 
 extern int DAT_01189c40;
 
@@ -37,32 +57,19 @@ FUN_00404d00_class::FUN_00404d00_class()
 }
 
 struct AnimSequenceBase;
-struct NiTMapItem
-{
-    NiTMapItem* m_pkNext;
-    unsigned short m_usKey;
-    AnimSequenceBase* m_pkValue;
-};
-struct NiTMapBase
-{
-    virtual ~NiTMapBase();
-    unsigned int m_uiHashSize;
-    NiTMapItem** m_ppkHashTable;
-    virtual unsigned int FUN_0049c390_hash(unsigned short key);
-    virtual bool FUN_0049c390_match(unsigned short key, unsigned short usKey);
-    bool Lookup(unsigned short key, AnimSequenceBase*& value);
-};
+
 // Hashes the key, walks the bucket chain matching keys, and returns the stored value via the out parameter on a hit.
 // @fnv 0x0049c390
-bool NiTMapBase::Lookup(unsigned short key, AnimSequenceBase*& value)
+template <>
+bool NiTMapBase<DFALL<NiTMapItem<unsigned short, AnimSequenceBase*> >, unsigned short, AnimSequenceBase*>::GetAt(unsigned short key, AnimSequenceBase*& value) const
 {
-    unsigned int uiIndex = FUN_0049c390_hash(key);
-    NiTMapItem* pkItem = m_ppkHashTable[uiIndex];
+    unsigned int uiIndex = KeyToHashIndex(key);
+    NiTMapItem<unsigned short, AnimSequenceBase*>* pkItem = m_ppkHashTable[uiIndex];
     while (pkItem)
     {
-        if (FUN_0049c390_match(key, pkItem->m_usKey))
+        if (IsKeysEqual(key, pkItem->m_key))
         {
-            value = pkItem->m_pkValue;
+            value = pkItem->m_val;
             return true;
         }
         pkItem = pkItem->m_pkNext;
@@ -70,75 +77,39 @@ bool NiTMapBase::Lookup(unsigned short key, AnimSequenceBase*& value)
     return false;
 }
 
-namespace fnv_00853130 {
-struct CombatThreatRecord
-{
-    void* m_pThreatActor;
-    float fRadius;
-    void* m_fStartTime;
-};
-
-struct NiTMapItem
-{
-    NiTMapItem* pkNext;
-    unsigned int uiHash;
-    CombatThreatRecord* pkData;
-};
-
-struct NiTMapBase
-{
-    int m_uiHashSize;
-    NiTMapItem** m_ppkHashTable;
-    virtual ~NiTMapBase();
-    virtual unsigned int __thiscall GetHash(unsigned int key);
-    virtual bool __thiscall Matches(unsigned int key, unsigned int uiHash);
-    bool __thiscall Lookup(unsigned int key, CombatThreatRecord*& value);
-};
-
 // Looks up key in the hash table, returning true and setting value to the matching item's data, or false if not found.
 // @fnv 0x00853130
-bool __thiscall NiTMapBase::Lookup(unsigned int key, CombatThreatRecord*& value)
+template <>
+bool NiTMapBase<DFALL<NiTMapItem<unsigned int, CombatThreatRecord_nitmapbase*> >, unsigned int, CombatThreatRecord_nitmapbase*>::GetAt(unsigned int key, CombatThreatRecord_nitmapbase*& value) const
 {
-    NiTMapItem* item;
-    unsigned int index = GetHash(key);
+    NiTMapItem<unsigned int, CombatThreatRecord_nitmapbase*>* item;
+    unsigned int index = KeyToHashIndex(key);
     item = m_ppkHashTable[index];
     while (item)
     {
-        if (Matches(key, item->uiHash))
+        if (IsKeysEqual(key, item->m_key))
         {
-            value = item->pkData;
+            value = item->m_val;
             return true;
         }
-        item = item->pkNext;
+        item = item->m_pkNext;
     }
     return false;
 }
-}  // namespace fnv_00853130
 
-struct CombatThreatRecord
-{
-    ~CombatThreatRecord();
-};
-struct FUN_009a5270_class
-{
-    void* __thiscall GetFirstPos();
-    void __thiscall GetNext(void*&, unsigned int&, CombatThreatRecord*&);
-    void __thiscall RemoveAll();
-    void __thiscall DeleteAllEntries();
-};
 // Iterates the container's entries, deletes each stored object, then removes all entries.
 // @fnv 0x009a5270
-void __thiscall FUN_009a5270_class::DeleteAllEntries()
+void __fastcall DeleteAllEntries(NiTMapBase<DFALL<NiTMapItem<unsigned int, CombatThreatRecord_nitmapbase*> >, unsigned int, CombatThreatRecord_nitmapbase*>* map)
 {
-    void* position = GetFirstPos();
+    void* position = map->GetFirstPos();
     while (position)
     {
         unsigned int key = 0;
-        CombatThreatRecord* pEntry = 0;
-        GetNext(position, key, pEntry);
+        CombatThreatRecord_nitmapbase* pEntry = 0;
+        map->GetNext(position, key, pEntry);
         delete pEntry;
     }
-    RemoveAll();
+    map->RemoveAll();
 }
 
 void* __cdecl FormHeap_Allocate(unsigned int size);
@@ -259,106 +230,48 @@ class FUN_00404b90 : public B90Base
 FUN_00404b90::FUN_00404b90(int iSize) : m_kBuffer(iSize, 0)
 {}
 
-struct FUN_00438af0_Item
-{
-    FUN_00438af0_Item* next;
-};
-
-struct FUN_00438af0_Class
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void vf10(FUN_00438af0_Item*);
-    virtual void vf14();
-    virtual void vf18(FUN_00438af0_Item*);
-
-    unsigned int unk04;
-    FUN_00438af0_Item** unk08;
-    int unk0C;
-
-    void __thiscall FUN_00438af0();
-};
-
-// Empty virtual function body; does nothing.
+// Removes every map item and resets the entry count.
 // @fnv 0x00438af0
-inline void FUN_00438af0_Class::vf00()
-{}
-inline void FUN_00438af0_Class::vf04()
-{}
-inline void FUN_00438af0_Class::vf08()
-{}
-inline void FUN_00438af0_Class::vf0c()
-{}
-inline void FUN_00438af0_Class::vf10(FUN_00438af0_Item*)
-{}
-inline void FUN_00438af0_Class::vf14()
-{}
-inline void FUN_00438af0_Class::vf18(FUN_00438af0_Item*)
-{}
-
-void __thiscall FUN_00438af0_Class::FUN_00438af0()
+template <>
+void NiTMapBase<DFALL<NiTMapItem<unsigned int, CombatThreatRecord_nitmapbase*> >, unsigned int, CombatThreatRecord_nitmapbase*>::RemoveAll()
 {
     unsigned int index;
 
-    for (index = 0; index < this->unk04; ++index)
+    for (index = 0; index < this->m_uiHashSize; ++index)
     {
-        while (this->unk08[index] != 0)
+        while (this->m_ppkHashTable[index] != 0)
         {
-            FUN_00438af0_Item* item = this->unk08[index];
-            this->unk08[index] = this->unk08[index]->next;
-            this->vf10(item);
-            this->vf18(item);
+            NiTMapItem<unsigned int, CombatThreatRecord_nitmapbase*>* item = this->m_ppkHashTable[index];
+            this->m_ppkHashTable[index] = this->m_ppkHashTable[index]->m_pkNext;
+            this->ClearValue(item);
+            this->DeleteItem(item);
         }
     }
 
-    this->unk0C = 0;
+    this->m_kItemCount.m_uiCount = 0;
 }
 
-struct AnimSequenceBase;
-struct MapEntry49c250
-{
-    MapEntry49c250* m_pkNext;
-    unsigned short m_usKey;
-    AnimSequenceBase* m_pkValue;
-};
-struct FUN_0049c250_shell
-{
-    virtual ~FUN_0049c250_shell();
-    virtual unsigned int KeyToHashIndex(unsigned short key);
-    virtual bool IsKeysEqual(unsigned short left, unsigned short right);
-    virtual void SetValue(MapEntry49c250* entry, unsigned short key, AnimSequenceBase* value);
-    virtual void ClearValue(MapEntry49c250* entry);
-    virtual MapEntry49c250* NewItem();
-    virtual void DeleteItem(MapEntry49c250* entry);
-
-    unsigned int m_uiHashSize;
-    MapEntry49c250** m_ppkHashTable;
-    unsigned int m_uiCount;
-
-    bool FUN_0049c250(unsigned short key);
-};
 // @fnv 0x0049c250
-bool FUN_0049c250_shell::FUN_0049c250(unsigned short key)
+template <>
+bool NiTMapBase<DFALL<NiTMapItem<unsigned short, AnimSequenceBase*> >, unsigned short, AnimSequenceBase*>::RemoveAt(unsigned short key)
 {
     unsigned int hashIndex = KeyToHashIndex(key);
-    MapEntry49c250* item = m_ppkHashTable[hashIndex];
+    NiTMapItem<unsigned short, AnimSequenceBase*>* item = m_ppkHashTable[hashIndex];
     if (item != 0)
     {
-        if (IsKeysEqual(key, item->m_usKey))
+        if (IsKeysEqual(key, item->m_key))
         {
             m_ppkHashTable[hashIndex] = item->m_pkNext;
             ClearValue(item);
             DeleteItem(item);
-            m_uiCount -= 1;
+            m_kItemCount.m_uiCount -= 1;
             return true;
         }
         else
         {
-            MapEntry49c250* prior = item;
-            MapEntry49c250* next = prior->m_pkNext;
-            while (next != 0 && !IsKeysEqual(key, next->m_usKey))
+            NiTMapItem<unsigned short, AnimSequenceBase*>* prior = item;
+            NiTMapItem<unsigned short, AnimSequenceBase*>* next = prior->m_pkNext;
+            while (next != 0 && !IsKeysEqual(key, next->m_key))
             {
                 prior = next;
                 next = next->m_pkNext;
@@ -368,7 +281,7 @@ bool FUN_0049c250_shell::FUN_0049c250(unsigned short key)
                 prior->m_pkNext = next->m_pkNext;
                 ClearValue(next);
                 DeleteItem(next);
-                m_uiCount -= 1;
+                m_kItemCount.m_uiCount -= 1;
                 return true;
             }
         }
@@ -376,275 +289,150 @@ bool FUN_0049c250_shell::FUN_0049c250(unsigned short key)
     return false;
 }
 
-struct C6b7f20_Node
-{
-    C6b7f20_Node* next;
-    unsigned int key;
-    void* value;
-};
-struct C6b7f20_Map
-{
-    virtual void unknownVirtual();
-    virtual unsigned int GetBucket(unsigned int key);
-    unsigned int bucketCount;
-    C6b7f20_Node** buckets;
-    void __thiscall FUN_006b7f20(C6b7f20_Node** position, unsigned int* outKey, void** outValue);
-};
 // Reads the key and value of the node at position, then advances position to the next node or the next non-empty bucket, or null.
 // @fnv 0x006b7f20
-void C6b7f20_Map::FUN_006b7f20(C6b7f20_Node** position, unsigned int* outKey, void** outValue)
+template <>
+void NiTMapBase<DFALL<NiTMapItem<unsigned int, CombatThreatRecord_nitmapbase*> >, unsigned int, CombatThreatRecord_nitmapbase*>::GetNext(void*& position, unsigned int& outKey, CombatThreatRecord_nitmapbase*& outValue) const
 {
     unsigned int bucket;
     {
-        C6b7f20_Node* current = *position;
-        *outKey = current->key;
-        *outValue = current->value;
-        if (current->next != 0)
+        NiTMapItem<unsigned int, CombatThreatRecord_nitmapbase*>* current = static_cast<NiTMapItem<unsigned int, CombatThreatRecord_nitmapbase*>*>(position);
+        outKey = current->m_key;
+        outValue = current->m_val;
+        if (current->m_pkNext != 0)
         {
-            *position = current->next;
+            position = current->m_pkNext;
         }
         else
         {
-            bucket = GetBucket(current->key);
+            bucket = KeyToHashIndex(current->m_key);
             ++bucket;
-            for (; bucket < bucketCount; ++bucket)
+            for (; bucket < m_uiHashSize; ++bucket)
             {
-                current = buckets[bucket];
+                current = m_ppkHashTable[bucket];
                 if (current != 0)
                 {
-                    *position = current;
+                    position = current;
                     return;
                 }
             }
-            *position = 0;
+            position = 0;
         }
     }
 }
 
-struct FUN_00844700_Node
-{
-    FUN_00844700_Node* next;
-    unsigned int key;
-    unsigned int value;
-};
-
-struct FUN_00844700_Class
-{
-    virtual void vf00();
-    virtual int vf04(unsigned int key);
-    virtual bool vf08(unsigned int key, unsigned int nodeKey);
-    virtual void vf0c(void* node, unsigned int key, unsigned int value);
-    virtual void vf10();
-    virtual void* vf14();
-
-    int unk04;
-    FUN_00844700_Node** nodes;
-    int count;
-
-    void __thiscall FUN_00844700(unsigned int key, unsigned int value);
-};
-
-// Empty inline virtual method body; does nothing.
+// Inserts or updates the unsigned integer value for a key.
 // @fnv 0x00844700
-inline void FUN_00844700_Class::vf00()
-{}
-inline int FUN_00844700_Class::vf04(unsigned int)
+template <>
+void NiTMapBase<DFALL<NiTMapItem<unsigned int, unsigned int> >, unsigned int, unsigned int>::SetAt(unsigned int key, unsigned int value)
 {
-    return 0;
-}
-inline bool FUN_00844700_Class::vf08(unsigned int, unsigned int)
-{
-    return false;
-}
-inline void FUN_00844700_Class::vf0c(void*, unsigned int, unsigned int)
-{}
-inline void FUN_00844700_Class::vf10()
-{}
-inline void* FUN_00844700_Class::vf14()
-{
-    return 0;
-}
-
-void __thiscall FUN_00844700_Class::FUN_00844700(unsigned int key, unsigned int value)
-{
-    int counter = this->vf04(key);
-    FUN_00844700_Node* node = this->nodes[counter];
+    unsigned int counter = this->KeyToHashIndex(key);
+    NiTMapItem<unsigned int, unsigned int>* node = this->m_ppkHashTable[counter];
     int index = 0;
 
     while (node != 0)
     {
         ++index;
 
-        if (this->vf08(key, node->key))
+        if (this->IsKeysEqual(key, node->m_key))
         {
-            node->value = value;
+            node->m_val = value;
             return;
         }
 
-        node = node->next;
+        node = node->m_pkNext;
     }
 
-    node = static_cast<FUN_00844700_Node*>(this->vf14());
-    this->vf0c(node, key, value);
-    node->next = this->nodes[counter];
-    this->nodes[counter] = node;
-    ++this->count;
+    node = this->NewItem();
+    this->SetValue(node, key, value);
+    node->m_pkNext = this->m_ppkHashTable[counter];
+    this->m_ppkHashTable[counter] = node;
+    ++this->m_kItemCount.m_uiCount;
 }
-
-struct AnimSequenceBase;
-
-struct FUN_00a0c6c0_node
-{
-    FUN_00a0c6c0_node* m_pkNext;
-    unsigned int m_uiKey;
-    AnimSequenceBase* m_pkValue;
-};
-
-struct FUN_00a0c6c0_cls
-{
-    virtual void FUN_00a0c6c0_v0();
-    virtual unsigned int FUN_00a0c6c0_hash(unsigned int key);
-    virtual bool FUN_00a0c6c0_match(unsigned int key, unsigned int usKey);
-    virtual void FUN_00a0c6c0_v3(FUN_00a0c6c0_node* node, unsigned int key, AnimSequenceBase* value);
-    virtual void FUN_00a0c6c0_v4();
-    virtual FUN_00a0c6c0_node* FUN_00a0c6c0_v5();
-    unsigned int m_uiHashSize;
-    FUN_00a0c6c0_node** m_ppkHashTable;
-    unsigned int m_uiCount;
-    void InsertOrUpdate(unsigned int key, AnimSequenceBase* value);
-};
 
 // Looks up the bucket for key, updates the matching node's value, or allocates a new node, links it into the bucket and increments the count.
 // @fnv 0x00a0c6c0
-void FUN_00a0c6c0_cls::InsertOrUpdate(unsigned int key, AnimSequenceBase* value)
+template <>
+void NiTMapBase<DFALL<NiTMapItem<unsigned int, AnimSequenceBase*> >, unsigned int, AnimSequenceBase*>::SetAt(unsigned int key, AnimSequenceBase* value)
 {
-    unsigned int index = FUN_00a0c6c0_hash(key);
-    FUN_00a0c6c0_node* item = m_ppkHashTable[index];
+    unsigned int index = KeyToHashIndex(key);
+    NiTMapItem<unsigned int, AnimSequenceBase*>* item = m_ppkHashTable[index];
     unsigned int n = 0;
     while (item != 0)
     {
         n++;
-        if (FUN_00a0c6c0_match(key, item->m_uiKey))
+        if (IsKeysEqual(key, item->m_key))
         {
-            item->m_pkValue = value;
+            item->m_val = value;
             return;
         }
         item = item->m_pkNext;
     }
-    item = FUN_00a0c6c0_v5();
-    FUN_00a0c6c0_v3(item, key, value);
+    item = NewItem();
+    SetValue(item, key, value);
     item->m_pkNext = m_ppkHashTable[index];
     m_ppkHashTable[index] = item;
-    m_uiCount++;
+    m_kItemCount.m_uiCount++;
 }
 
 class NiAVObject;
-template <class T> class NiPointer
-{
-  public:
-    T* object;
-    NiPointer(const NiPointer&);
-    ~NiPointer();
-    NiPointer& operator=(const NiPointer&);
-};
-struct MapItem6920
-{
-    MapItem6920* next;
-    unsigned int key;
-    NiPointer<NiAVObject> value;
-};
-struct Map6920
-{
-    virtual ~Map6920();
-    virtual unsigned int Hash(unsigned int);
-    virtual bool Equal(unsigned int, unsigned int);
-    virtual void Set(MapItem6920*, unsigned int, NiPointer<NiAVObject>);
-    virtual void Free(MapItem6920*);
-    virtual MapItem6920* Allocate();
-    unsigned int hashSize;
-    MapItem6920** buckets;
-    unsigned int size;
-    void FUN_006c6920(unsigned int key, NiPointer<NiAVObject> value);
-};
 // Looks up key in the bucket chain, replaces the value if found, otherwise allocates a new item, inserts it at the bucket head and increments size.
 // @fnv 0x006c6920
-void Map6920::FUN_006c6920(unsigned int key, NiPointer<NiAVObject> value)
+template <>
+void NiTMapBase<DFALL<NiTMapItem<unsigned int, NiPointer<NiAVObject> > >, unsigned int, NiPointer<NiAVObject> >::SetAt(unsigned int key, NiPointer<NiAVObject> value)
 {
-    unsigned int index = Hash(key);
-    MapItem6920* item = buckets[index];
+    unsigned int index = KeyToHashIndex(key);
+    NiTMapItem<unsigned int, NiPointer<NiAVObject> >* item = m_ppkHashTable[index];
     unsigned int count = 0;
     while (item)
     {
         count++;
-        if (Equal(key, item->key))
+        if (IsKeysEqual(key, item->m_key))
         {
-            item->value = value;
+            item->m_val = value;
             return;
         }
-        item = item->next;
+        item = item->m_pkNext;
     }
-    item = Allocate();
-    Set(item, key, value);
-    item->next = buckets[index];
-    buckets[index] = item;
-    size++;
+    item = NewItem();
+    SetValue(item, key, value);
+    item->m_pkNext = m_ppkHashTable[index];
+    m_ppkHashTable[index] = item;
+    m_kItemCount.m_uiCount++;
 }
-
-struct RMapItem
-{
-    RMapItem* m_pkNext;
-    unsigned int m_key;
-};
-
-class RMapBase
-{
-  public:
-    virtual void v00();
-    virtual unsigned int KeyToHashIndex(unsigned int key);
-    virtual bool IsKeysEqual(unsigned int key1, unsigned int key2);
-    virtual void v0C();
-    virtual void ClearValue(RMapItem* pkItem);
-    virtual void v14();
-    virtual void DeleteItem(RMapItem* pkItem);
-
-    unsigned int m_uiHashSize;
-    RMapItem** m_ppkHashTable;
-    unsigned int m_uiCount;
-
-    bool FUN_00a1e240(unsigned int key);
-};
 
 // Looks up the hash bucket for key, unlinks the matching item, clears and deletes it, decrements the count, and returns whether it was found.
 // @fnv 0x00a1e240
-bool RMapBase::FUN_00a1e240(unsigned int key)
+template <>
+bool NiTMapBase<DFALL<NiTMapItem<unsigned int, void*> >, unsigned int, void*>::RemoveAt(unsigned int soughtKey)
 {
-    unsigned int uiIndex = KeyToHashIndex(key);
-    RMapItem* pkItem = m_ppkHashTable[uiIndex];
-    if (pkItem)
+    unsigned int bucket = KeyToHashIndex(soughtKey);
+    NiTMapItem<unsigned int, void*>* head = m_ppkHashTable[bucket];
+    if (head)
     {
-        if (IsKeysEqual(key, pkItem->m_key))
+        if (IsKeysEqual(soughtKey, head->m_key))
         {
-            m_ppkHashTable[uiIndex] = pkItem->m_pkNext;
-            ClearValue(pkItem);
-            DeleteItem(pkItem);
-            m_uiCount--;
+            m_ppkHashTable[bucket] = head->m_pkNext;
+            ClearValue(head);
+            DeleteItem(head);
+            m_kItemCount.m_uiCount--;
             return true;
         }
-        else
+        else // src: GAMEBRYO_SRC (shape)
         {
-            RMapItem* pkPrev = pkItem;
-            RMapItem* pkCurr = pkPrev->m_pkNext;
-            while (pkCurr && !IsKeysEqual(key, pkCurr->m_key))
+            NiTMapItem<unsigned int, void*>* previous = head;
+            NiTMapItem<unsigned int, void*>* current = previous->m_pkNext;
+            for (; current && !IsKeysEqual(soughtKey, current->m_key);)
             {
-                pkPrev = pkCurr;
-                pkCurr = pkCurr->m_pkNext;
+                previous = current;
+                current = current->m_pkNext;
             }
-            if (pkCurr)
+            if (current)
             {
-                pkPrev->m_pkNext = pkCurr->m_pkNext;
-                ClearValue(pkCurr);
-                DeleteItem(pkCurr);
-                m_uiCount--;
+                previous->m_pkNext = current->m_pkNext;
+                this->ClearValue(current);
+                this->DeleteItem(current);
+                m_kItemCount.m_uiCount--;
                 return true;
             }
         }
@@ -652,76 +440,35 @@ bool RMapBase::FUN_00a1e240(unsigned int key)
     return false;
 }
 
-struct E60Val
-{
-    int a, b;
-    void __thiscall FUN_006e5cc0(E60Val* src);
-};
-struct E60Item
-{
-    E60Item* m_pNext;
-    unsigned int m_key;
-    E60Val m_val;
-};
-class E60Map
-{
-  public:
-    virtual void v00();
-    virtual unsigned int KeyToHashIndex(unsigned int key);
-    virtual bool IsKeysEqual(unsigned int a, unsigned int b);
-    unsigned int m_uiHashSize;
-    E60Item** m_ppHashTable;
-    bool LookupValue(unsigned int key, E60Val& val);
-};
 // Hashes the key, walks the bucket chain comparing keys, copies the matching value into val and returns true, else false.
 // @fnv 0x00ae7e60
-bool E60Map::LookupValue(unsigned int key, E60Val& val)
+template <>
+bool NiTMapBase<DFALL<NiTMapItem<unsigned int, NiPointer<NiAVObject> > >, unsigned int, NiPointer<NiAVObject> >::GetAt(unsigned int key, NiPointer<NiAVObject>& val) const
 {
     unsigned int uiIndex = KeyToHashIndex(key);
-    E60Item* pkItem = m_ppHashTable[uiIndex];
+    NiTMapItem<unsigned int, NiPointer<NiAVObject> >* pkItem = m_ppkHashTable[uiIndex];
     int u1, u2;
     while (pkItem)
     {
         if (IsKeysEqual(key, pkItem->m_key))
         {
-            val.FUN_006e5cc0(&pkItem->m_val);
+            val = pkItem->m_val;
             return true;
         }
-        pkItem = pkItem->m_pNext;
+        pkItem = pkItem->m_pkNext;
     }
     return false;
 }
 
-namespace nae7 {
-struct Val
-{
-    int m_p;
-    Val& FUN_006e5cc0(const Val& o);
-    Val& operator=(const Val& o);
-};
-struct Item
-{
-    Item* m_pkNext;
-    unsigned int m_key;
-    Val m_val;
-};
-struct Map
-{
-    virtual void v0();
-    virtual unsigned int KeyToHashIndex(unsigned int key) const;
-    unsigned int m_uiHashSize;
-    Item** m_ppkHashTable;
-    void FUN_00ae7ee0(Item*& pos, unsigned int& key, Val& val) const;
-};
-}
 // Copies the key and value of the item at pos out, then advances pos to the next item in its chain or the next occupied bucket, or to null at the end.
 // @fnv 0x00ae7ee0
-void nae7::Map::FUN_00ae7ee0(Item*& pos, unsigned int& key, Val& val) const
+template <>
+void NiTMapBase<DFALL<NiTMapItem<unsigned int, NiPointer<NiAVObject> > >, unsigned int, NiPointer<NiAVObject> >::GetNext(void*& pos, unsigned int& key, NiPointer<NiAVObject>& val) const
 {
     __int64 spare;
-    Item* pkItem = pos;
+    NiTMapItem<unsigned int, NiPointer<NiAVObject> >* pkItem = static_cast<NiTMapItem<unsigned int, NiPointer<NiAVObject> >*>(pos);
     key = pkItem->m_key;
-    val.FUN_006e5cc0(pkItem->m_val);
+    val = pkItem->m_val;
     if (pkItem->m_pkNext)
     {
         pos = pkItem->m_pkNext;

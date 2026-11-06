@@ -2,6 +2,10 @@
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkpbroadphaseviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/collide/hkpbroadphaseviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+
 struct Container
 {
     int ClearValue(void* value);
@@ -230,25 +234,7 @@ FUN_00d6a940::FUN_00d6a940(void* a) : WorldViewerBase(a)
     }
 }
 
-struct AudioAllocator
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0c();
-    virtual void FreeData(void* apMemory, unsigned int auiSize);
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct SpawnedItem
 {
@@ -367,8 +353,8 @@ FUN_00d6ac40_cls::~FUN_00d6ac40_cls() throw()
             m_pSharedOwner->m_ppItems[i]->ClearValue(static_cast<SubObject*>(this));
         }
     }
-    AudioHolder* pAudioHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pAudioHolder->m_pAllocator;
+    hkMemoryRouter* pAudioHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     SpawnedItem* p = m_pData;
     if (m_iField30 > 0)
     {
@@ -384,27 +370,17 @@ FUN_00d6ac40_cls::~FUN_00d6ac40_cls() throw()
     unsigned int uiAllocFlags = m_uiObjectFlags;
     if ((uiAllocFlags & 0x80000000u) == 0)
     {
-        pAllocator->FreeData(m_pData, (uiAllocFlags & 0x3fffffffu) * 0x80);
+        // FreeData occupies vtable slot 4 in the game.
+        (*reinterpret_cast<void (__thiscall**)(hkMemoryAllocator*, void*, unsigned int)>(
+            *reinterpret_cast<char**>(pAllocator) + 0x10))(
+                pAllocator, m_pData, (uiAllocFlags & 0x3fffffffu) * 0x80);
     }
     m_pData = 0;
     m_uiObjectFlags = 0x80000000u;
 }
 
 namespace fnv_00d6ad00 {
-struct AllocatorIface
-{
-    virtual void* release();
-    virtual void* allocate(int size);
-};
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    AllocatorIface* m_pAllocator;
-};
-AllocHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct SpawnedObject
 {
@@ -430,9 +406,10 @@ struct SpawnedObject
 // @fnv 0x00d6ad00
 int FUN_00d6ad00(int arg)
 {
-    AllocHolder* pAllocHolder = FUN_00c85750();
-    AllocatorIface* pAllocator = pAllocHolder->m_pAllocator;
-    SpawnedObject* pObject = (SpawnedObject*)pAllocator->allocate(0x38);
+    hkMemoryRouter* pAllocHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pAllocHolder->m_heap);
+    SpawnedObject* pObject = (SpawnedObject*)(*reinterpret_cast<void* (__thiscall**)(hkMemoryAllocator*, int)>(
+        *reinterpret_cast<char**>(pAllocator) + 4))(pAllocator, 0x38);
     pObject->m_wSize = 0x38;
     int iInitResult = pObject->Init(arg);
     return iInitResult != 0 ? iInitResult + 8 : 0;
@@ -527,26 +504,18 @@ D6AD90Object::D6AD90Object()
 {}
 
 namespace fnv_00d6ada0 {
-struct S_00d6ada0_Allocator
-{
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void unk04();
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
+hkMemoryRouter* FUN_00c85750();
 
-struct S_00d6ada0_Router
+inline hkMemoryAllocator& Heap(hkMemoryRouter* holder)
 {
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00d6ada0_Allocator* m_pStreamAllocator;
-    S_00d6ada0_Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-S_00d6ada0_Router* FUN_00c85750();
+    return *reinterpret_cast<hkMemoryAllocator*>(holder->m_heap);
+}
+
+inline void ReleaseBlock(hkMemoryAllocator& allocator, void* p, int numBytes)
+{
+    (*reinterpret_cast<void (__thiscall**)(hkMemoryAllocator*, void*, int)>(
+        *reinterpret_cast<char**>(&allocator) + 8))(&allocator, p, numBytes);
+}
 
 struct S_00d6ada0_ReferencedObject
 {
@@ -555,7 +524,7 @@ struct S_00d6ada0_ReferencedObject
     void operator delete(void* p, unsigned int)
     {
         S_00d6ada0_ReferencedObject* b = static_cast<S_00d6ada0_ReferencedObject*>(p);
-        FUN_00c85750()->heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
+        ReleaseBlock(Heap(FUN_00c85750()), p, b->m_usMemSizeAndFlags);
     }
     virtual ~S_00d6ada0_ReferencedObject()
     {}

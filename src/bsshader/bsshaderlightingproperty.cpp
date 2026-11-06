@@ -1,7 +1,58 @@
+#include "../../include/NiTListItem.h"
 // bsshader/bsshaderlightingproperty.cpp: BSShaderLightingProperty, NewObj, LList, FalloffProperty and more (45 functions)
 
+#include <windows.h>
+
+// The generated layout support predates the shared scene-object hierarchy.
+#include "layout_support.h"
+#define FNV_NIREFOBJECT_H
+#define FNV_NIOBJECT_H
+#define FNV_NIPROPERTY_H
+#define FNV_NIOBJECTNET_H
+#define FNV_NIFIXEDSTRING_H
+#include "NiMemObject.h"
+#include "../../include/NiTexturingProperty.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSShaderPPLightingProperty.h"
+#include "../../include/NiColor.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiColorA.h"
+#include "../../include/ShadowSceneLight.h"
+#include "../../include/NiProperty.h"
+#include <new>
 #include "bsshaderlightingproperty_types_BSShaderLightingProperty.h"
 #include "bsshaderlightingproperty_globals.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiRTTI.h"
+
+enum LightingAllocationTag { LightingAllocation };
+inline void* operator new(size_t size, LightingAllocationTag) { return NiMemObjectAllocation_bsshaderlightingproperty_types_BSShaderLightingProperty::operator new(size); }
+inline void operator delete(void* memory, LightingAllocationTag) { NiMemObjectAllocation_bsshaderlightingproperty_types_BSShaderLightingProperty::operator delete(memory); }
+
+inline NiColor::NiColor() {}
+inline NiColor::NiColor(float red, float green, float blue) : r(red), g(green), b(blue) {}
+inline NiColor NiColor::operator*(float scalar) const
+{
+    NiColor result = *this;
+    result.r *= scalar; result.g *= scalar; result.b *= scalar;
+    return result;
+}
+inline NiColor& NiColor::operator*=(float scalar)
+{
+    r *= scalar; g *= scalar; b *= scalar;
+    return *this;
+}
+inline NiColorA::NiColorA(float red, float green, float blue, float alpha) : r(red), g(green), b(blue), a(alpha) {}
+inline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz) {}
+inline NiPoint3 NiPoint3::operator*(float scalar) const { return NiPoint3(x * scalar, y * scalar, z * scalar); }
+
+// The shade property uses the LOD virtual at +0x10c; the shared declaration is nonvirtual.
+__forceinline float GetSpecularLODFadeVirtual(BSShaderPPLightingProperty* property)
+{
+    typedef float (__thiscall *GetFade)(BSShaderPPLightingProperty*);
+    return (*reinterpret_cast<GetFade**>(property))[0x10c / sizeof(void*)](property);
+}
 
 // @fnv 0x00b70490
 ShadowSceneLight* BSShaderLightingProperty::GetFirstAttachedLight(void*& iter)
@@ -16,7 +67,7 @@ ShadowSceneLight* BSShaderLightingProperty::GetFirstAttachedLight(void*& iter)
 
 // Allocates a node from the pool at this+8, links it after source in the list, and increments the count.
 // @fnv 0x00b713c0
-void BSShaderLightingProperty::CopyMemberData(BSShaderLightingProperty* source, CloningProcess& process)
+void ShadowSceneLightPointerList::InsertAfter(void* source, void* const& process)
 {
     bsshaderlightingproperty_NodePool* allocator = (bsshaderlightingproperty_NodePool*)((char*)this + 8);
     void* node = allocator->FUN_0043a010();
@@ -37,7 +88,7 @@ void BSShaderLightingProperty::CopyMemberData(BSShaderLightingProperty* source, 
 }
 
 // @fnv 0x00b71300
-void BSShaderLightingProperty::ClearLights()
+void ShadowSceneLightPointerList::RemoveAll()
 {
     FNVPointerListBase* list = (FNVPointerListBase*)this;
     FNVPointerListItem* item = list->m_pkHead;
@@ -46,14 +97,14 @@ void BSShaderLightingProperty::ClearLights()
         FNVPointerListItem* current = item;
         item = item->m_pkNext;
         current->m_element = 0;
-        PoolAllocatorBase<unsigned int>::ms_kPoolState.Lock(0);
+        NiTAbstractPoolAllocator<unsigned int>::ms_kCriticalSection.Lock(0);
         current->m_pkPrev = 0;
-        current->m_pkNext = (FNVPointerListItem*)PoolAllocatorBase<unsigned int>::ms_pFreeList;
+        current->m_pkNext = (FNVPointerListItem*)NiTAbstractPoolAllocator<unsigned int>::ms_pkFreeMem;
         --DAT_011c5f84;
-        PoolAllocatorBase<unsigned int>::ms_pFreeList =
-            (PoolAllocatorBase<unsigned int>::LinkedListEntry*)current;
+        NiTAbstractPoolAllocator<unsigned int>::ms_pkFreeMem =
+            (NiTAbstractPoolAllocator<unsigned int>::AllocNode*)current;
         if (!DAT_011c5f84)
-            *(unsigned int*)&PoolAllocatorBase<unsigned int>::ms_kPoolState = 0;
+            *(unsigned int*)&NiTAbstractPoolAllocator<unsigned int>::ms_kCriticalSection = 0;
     }
     list->m_kItemCount.m_uiCount = 0;
     list->m_pkHead = 0;
@@ -84,21 +135,21 @@ ShadowSceneLight* BSShaderLightingProperty::GetFirstActiveLight(void*& iter)
     return 0;
 }
 
+// 0x00b6fe00 and 0x00b6fe80 allocate 0x80 bytes and run 0x00b6fc90: BSShaderNoLightingProperty.
 // @fnv 0x00b6fe00
-NiObject* BSShaderLightingProperty::MakeClone(CloningProcess& process)
+NiObject* BSShaderNoLightingProperty::MakeClone(CloningProcess& process)
 {
-    BSShaderLightingProperty* clone = new BSShaderLightingProperty;
-    CopyLightingDataTo(clone, process);
+    BSShaderNoLightingProperty* clone = ::new (LightingAllocation) BSShaderNoLightingProperty;
+    CopyMembers(clone, process);
     return clone;
 }
 
 extern unsigned int _data_011c16bc;
 
-// Allocates and returns a new BSShaderLightingProperty object.
 // @fnv 0x00b6fe80
-BSShaderLightingProperty* CreateShaderLightingProperty()
+NiObject* BSShaderNoLightingProperty::CreateObject()
 {
-    return new BSShaderLightingProperty;
+    return ::new (LightingAllocation) BSShaderNoLightingProperty;
 }
 
 void __fastcall FUN_00b6fd30(void* pThis);
@@ -184,13 +235,6 @@ void __fastcall FUN_00b70290(Dummy_00b70290* pThis, int edx_val, int arg)
     pThis->v50(arg);
 }
 
-struct NiRTTI
-{
-    char* GetName();
-    void* GetBaseRTTI();
-    char* m_pcName;
-    void* m_pBaseRTTI;
-};
 typedef char _sizecheck_NiRTTI[sizeof(NiRTTI) == 8 ? 1 : -1];
 struct FUN_00b702b0_shell : public NiRTTI
 {
@@ -318,25 +362,17 @@ struct Helper_00b707d0_Obj
     unsigned char flags;
 };
 
-struct Helper_00b707d0_Light
-{
-    char pad0[0xec];
-    bool byteEC;
-    char pad1[0xf8 - 0xed];
-    Helper_00b707d0_Obj* objF8;
-    char pad2[0x110 - 0xfc];
-    unsigned short word110;
-};
+
 
 struct Helper_00b707d0_Node
 {
     Helper_00b707d0_Node* next;
     Helper_00b707d0_Node* prev;
-    Helper_00b707d0_Light* element;
+    ShadowSceneLight* element;
 
-    __forceinline Helper_00b707d0_Light* const& GetNext(Helper_00b707d0_Node*& pos)
+    __forceinline ShadowSceneLight* const& GetNext(Helper_00b707d0_Node*& pos)
     {
-        Helper_00b707d0_Light* const& elem = pos->element;
+        ShadowSceneLight* const& elem = pos->element;
         pos = pos->next;
         return elem;
     }
@@ -350,8 +386,8 @@ int __fastcall FUN_00b707d0(void* thisPtr)
     Helper_00b707d0_Node* pos = *(Helper_00b707d0_Node**)((char*)thisPtr + 0x60);
     while (pos)
     {
-        Helper_00b707d0_Light* light = pos->GetNext(pos);
-        if (light && light->word110 != 0xFF && !(light->objF8->flags & 1) && !light->byteEC)
+        ShadowSceneLight* light = pos->GetNext(pos);
+        if (light && light->usFrustumCull != 0xFF && !(reinterpret_cast<Helper_00b707d0_Obj*>(light->spLight.m_pObject)->flags & 1) && !light->bCastShadow)
             ++count;
     }
     return count;
@@ -392,137 +428,25 @@ void* __fastcall FUN_00b71720(char* pThis)
     return pThis;
 }
 
-struct NiPoint3
+
+
+
+// WaterTintRecord_bsshaderlightingproperty: local type (was include/WaterTintRecord.h, which had no evidence of one real class); no method of it is bound to a named game function
+struct WaterTintRecord_bsshaderlightingproperty
 {
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
-    {}
-    NiPoint3 operator*(float f) const
-    {
-        return NiPoint3(x * f, y * f, z * f);
-    }
-    NiPoint3& operator*=(float f);
-    void ComputeMagnitude();
-};
-struct NiColor
-{
-    float r, g, b;
-    NiColor()
-    {}
-    NiColor(float fR, float fG, float fB) : r(fR), g(fG), b(fB)
-    {}
-    NiColor operator*(float fScalar) const
-    {
-        NiColor kResult = *this;
-        kResult.r *= fScalar;
-        kResult.g *= fScalar;
-        kResult.b *= fScalar;
-        return kResult;
-    }
-    NiColor& operator*=(float fScalar)
-    {
-        r *= fScalar;
-        g *= fScalar;
-        b *= fScalar;
-        return *this;
-    }
-};
-struct RgbaColor
-{
-    float r, g, b, a;
-    RgbaColor()
-    {}
-    RgbaColor(float fR, float fG, float fB, float fA) : r(fR), g(fG), b(fB), a(fA)
+    float r;
+    float g;
+    float b;
+    float a;
+
+    WaterTintRecord_bsshaderlightingproperty(float fR, float fG, float fB, float fA)
+        : r(fR), g(fG), b(fB), a(fA)
     {}
 };
-struct WaterTintRecord
-{
-    float r, g, b, a;
-    WaterTintRecord(float fR, float fG, float fB, float fA) : r(fR), g(fG), b(fB), a(fA)
-    {}
-};
-void SetWaterTintRecord(int, WaterTintRecord);
+void SetWaterTintRecord(int, WaterTintRecord_bsshaderlightingproperty);
 float FUN_0040ebd0(float, float);
-struct WaterShaderStub
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v3a();
-    virtual void v3b();
-    virtual void v3c();
-    virtual void v3d();
-    virtual void v3e();
-    virtual void v3f();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual float GetFloat10c();
-    char pad04[0x18];
-    int iType;
-};
-struct GeomStub
-{
-    char pad00[0xa8];
-    WaterShaderStub* pShader;
-};
+
+
 struct WaterDataStub
 {
     char pad00[0x8c];
@@ -550,12 +474,12 @@ struct WaterStub
     char padF6[2];
     WaterDataStub* pData;  // +0xf8
 };
-extern RgbaColor DAT_011a9bd0;
-extern RgbaColor DAT_011fa0c0;
-extern RgbaColor DAT_011fa0d0[8];
-extern RgbaColor DAT_011fa1f0[8];
+extern NiColorA DAT_011a9bd0;
+extern NiColorA DAT_011fa0c0;
+extern NiColorA DAT_011fa0d0[8];
+extern NiColorA DAT_011fa1f0[8];
 extern unsigned int DAT_011fa070[8];
-extern GeomStub** DAT_011f91e0;
+extern NiGeometry** DAT_011f91e0;
 extern bool DAT_011f91de;
 extern bool DAT_011f941e;
 extern bool DAT_011f9427;
@@ -580,24 +504,26 @@ void UpdateWaterTint(unsigned int uiIndex, WaterStub* apWater, float fScale)
     bool bF5 = apWater->bF5;
     WaterDataStub* pData = apWater->pData;
     bool bF4 = apWater->bF4;
-    WaterShaderStub* pProp = (*DAT_011f91e0)->pShader;
-    WaterShaderStub* pShader = (pProp && pProp->iType >= 8 && pProp->iType <= 12) ? pProp : 0;
+    BSShaderPPLightingProperty* pProp = reinterpret_cast<BSShaderPPLightingProperty*>((*DAT_011f91e0)->m_PropertyState.m_aspProps[3]);
+    BSShaderPPLightingProperty* pShader = (pProp && pProp->iShaderPropertyType >= 8 && pProp->iShaderPropertyType <= 12) ? pProp : 0;
 
     if (!bF4)
     {
         if (pData)
         {
-            NiPoint3 kWorldPosition = pData->kWorldPosition;
+            NiPoint3 kWorldPosition;
+    memcpy(&kWorldPosition, &pData->kWorldPosition, sizeof(kWorldPosition));
             kWorldPosition.ComputeMagnitude();
-            float f = pShader ? pShader->GetFloat10c() : 1.0f;
+            float f = pShader ? GetSpecularLODFadeVirtual(pShader) : 1.0f;
             SetWaterTintRecord(uiIndex + 0x13,
-                               WaterTintRecord(kWorldPosition.x, kWorldPosition.y, kWorldPosition.z, f));
+                               WaterTintRecord_bsshaderlightingproperty(kWorldPosition.x, kWorldPosition.y, kWorldPosition.z, f));
         }
     }
     else if (pData)
     {
-        NiPoint3 kTint = pData->kTint;
-        SetWaterTintRecord(uiIndex + 0xb, WaterTintRecord(kTint.x, kTint.y, kTint.z, 1.0f));
+        NiPoint3 kTint;
+    memcpy(&kTint, &pData->kTint, sizeof(kTint));
+        SetWaterTintRecord(uiIndex + 0xb, WaterTintRecord_bsshaderlightingproperty(kTint.x, kTint.y, kTint.z, 1.0f));
     }
     if (!bF4 && (!DAT_011f91de || bF5))
     {
@@ -622,7 +548,7 @@ void UpdateWaterTint(unsigned int uiIndex, WaterStub* apWater, float fScale)
             }
         }
         kColor *= fScale;
-        DAT_011fa0c0 = RgbaColor(kColor.r, kColor.g, kColor.b, 1.0f);
+        DAT_011fa0c0 = NiColorA(kColor.r, kColor.g, kColor.b, 1.0f);
     }
 
     float fV = pData->fC4;
@@ -641,12 +567,13 @@ void UpdateWaterTint(unsigned int uiIndex, WaterStub* apWater, float fScale)
     float fAlpha = apWater->fD4;
     unsigned short usId = (unsigned short)DAT_011f91e4;
     if (usId >= 0x154 && usId <= 0x177 && pShader)
-        kColor *= pShader->GetFloat10c();
-    DAT_011fa0d0[uiIndex] = RgbaColor(kColor.r, kColor.g, kColor.b, fAlpha);
+        kColor *= GetSpecularLODFadeVirtual(pShader);
+    DAT_011fa0d0[uiIndex] = NiColorA(kColor.r, kColor.g, kColor.b, fAlpha);
     if (bF4)
     {
-        NiPoint3 kE0 = pData->kE0;
-        DAT_011fa1f0[uiIndex] = RgbaColor(kE0.x, 0.0f, 0.0f, 1.0f);
+        NiPoint3 kE0;
+    memcpy(&kE0, &pData->kE0, sizeof(kE0));
+        DAT_011fa1f0[uiIndex] = NiColorA(kE0.x, 0.0f, 0.0f, 1.0f);
     }
     DAT_011f91a6 = bF4;
     DAT_011fa070[uiIndex] = bF4 ? 2 : 1;
@@ -748,10 +675,6 @@ struct SmartPtr
     }
 };
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 
 struct MyArray
@@ -811,20 +734,12 @@ struct FUN_00b70600_flags
     char pad[0x30];
     unsigned char flags;
 };
-struct FUN_00b70600_obj
-{
-    char pad0[0xec];
-    char state;
-    char pad1[0xb];
-    FUN_00b70600_flags* info;
-    char pad2[0x14];
-    unsigned short id;
-};
+
 struct FUN_00b70600_node
 {
     FUN_00b70600_node* next;
     int pad;
-    FUN_00b70600_obj* data;
+    ShadowSceneLight* data;
 };
 struct FUN_00b70600_list
 {
@@ -833,23 +748,23 @@ struct FUN_00b70600_list
 };
 
 // @fnv 0x00b70600
-FUN_00b70600_obj* __fastcall FUN_00b70600(FUN_00b70600_list* self, int unused, FUN_00b70600_node** it)
+ShadowSceneLight* __fastcall FUN_00b70600(FUN_00b70600_list* self, int unused, FUN_00b70600_node** it)
 {
     FUN_00b70600_node* n = self->head;
     *it = n;
     if (!n)
         return 0;
     *it = n->next;
-    FUN_00b70600_obj* o = n->data;
+    ShadowSceneLight* o = n->data;
     while (*it && o)
     {
-        if (o->id != 0xff && !(o->info->flags & 1) && o->state != 1)
+        if (o->usFrustumCull != 0xff && !(reinterpret_cast<FUN_00b70600_flags*>(o->spLight.m_pObject)->flags & 1) && o->bCastShadow != 1)
             break;
         FUN_00b70600_node* c = *it;
         *it = c->next;
         o = c->data;
     }
-    if (o && (o->id == 0xff || (o->info->flags & 1) || o->state == 1))
+    if (o && (o->usFrustumCull == 0xff || (reinterpret_cast<FUN_00b70600_flags*>(o->spLight.m_pObject)->flags & 1) || o->bCastShadow == 1))
         o = 0;
     return o;
 }
@@ -859,18 +774,12 @@ struct FUN_00b70790_flags
     char pad[0x30];
     unsigned char flags;
 };
-struct FUN_00b70790_light
-{
-    char pad[0xf8];
-    FUN_00b70790_flags* m_pMenuLight;
-    char pad2[0x110 - 0xfc];
-    unsigned short cull;
-};
+
 struct FUN_00b70790_node
 {
     FUN_00b70790_node* next;
     int pad;
-    FUN_00b70790_light* item;
+    ShadowSceneLight* item;
 };
 struct FUN_00b70790_owner
 {
@@ -885,17 +794,17 @@ unsigned int __fastcall FUN_00b70790(FUN_00b70790_owner* self)
     while (it)
     {
         FUN_00b70790_node* cur = it;
-        FUN_00b70790_light*& r = cur->item;
+        ShadowSceneLight*& r = cur->item;
         it = it->next;
-        FUN_00b70790_light* l = r;
-        if (l && l->cull != 0xff && !(l->m_pMenuLight->flags & 1))
+        ShadowSceneLight* l = r;
+        if (l && l->usFrustumCull != 0xff && !(reinterpret_cast<FUN_00b70790_flags*>(l->spLight.m_pObject)->flags & 1))
             ++n;
     }
     return n;
 }
 
-struct GeomStub;
-extern GeomStub** DAT_011f91e0;
+
+extern NiGeometry** DAT_011f91e0;
 struct FUN_00b71360_water
 {
     char pad[0xf4];
@@ -906,19 +815,15 @@ struct FUN_00b71360_inner
     char pad[0x68];
     int type;
 };
-struct FUN_00b71360_geom
-{
-    char pad[0xc0];
-    FUN_00b71360_inner* inner;
-};
+
 void __cdecl UpdateWaterTint(unsigned int, FUN_00b71360_water*, float);
 void __cdecl ApplyWaterLighting(unsigned int, FUN_00b71360_water*, float);
 void __cdecl SetLightColor(unsigned int, FUN_00b71360_water*, float);
 // @fnv 0x00b71360
 void __cdecl FUN_00b71360(unsigned int id, FUN_00b71360_water* w, float fValue)
 {
-    FUN_00b71360_geom* g = (FUN_00b71360_geom*)*DAT_011f91e0;
-    if (g->inner->type == 0x11)
+    NiGeometry* g = *DAT_011f91e0;
+    if (reinterpret_cast<FUN_00b71360_inner*>(g->m_spShader)->type == 0x11)
     {
         if (w->flag)
             SetLightColor(id, w, fValue);
@@ -960,12 +865,10 @@ struct _Helper_00ba8b10
 {
     void FUN_00ba8b10(char*, void*);
 };
-struct BSFadeNode
+
+struct FUN_00ba8e50
 {
-    static void* __cdecl operator new(unsigned int);
-};
-struct FUN_00ba8e50 : BSFadeNode
-{
+    static void* operator new(unsigned int size) { return BSFadeNode::operator new(size); }
     FUN_00ba8e50();
     virtual void vf();
     char p0[0x18];
@@ -1009,12 +912,10 @@ NewObj* __fastcall FUN_00b71800(_Helper_00ba8b10* self, int unused, void* arg)
 }
 }  // namespace fnv_00b71800
 
-struct BSFadeNode
+
+struct FUN_00b71720
 {
-    static void* __cdecl operator new(unsigned int);
-};
-struct FUN_00b71720 : BSFadeNode
-{
+    static void* operator new(unsigned int size) { return BSFadeNode::operator new(size); }
     FUN_00b71720();
     virtual void vf();
     char p0[0x18];
@@ -1088,24 +989,19 @@ void FUN_00bb95e0(int aiIndex, int aiE, int aiF, int aiG, int aiH, int aiA, int 
 }
 }  // namespace fnv_00bb95e0
 
-struct Light_b70700;
-struct ListItem_b70700
-{
-    ListItem_b70700* m_pkNext;
-    ListItem_b70700* m_pkPrev;
-    Light_b70700* m_element;
-};
 
-static inline Light_b70700* GetNext_b70700(ListItem_b70700*& kPos)
+
+
+static inline ShadowSceneLight* GetNext_b70700(NiTListItem<ShadowSceneLight*>*& kPos)
 {
     if (kPos == 0)
         return 0;
-    Light_b70700*& element = kPos->m_element;
+    ShadowSceneLight*& element = kPos->m_element;
     kPos = kPos->m_pkNext;
     return element;
 }
 
-static inline bool Skip_b70700(Light_b70700* p)
+static inline bool Skip_b70700(ShadowSceneLight* p)
 {
     char* l = reinterpret_cast<char*>(p);
     return *reinterpret_cast<unsigned short*>(l + 0x110) == 0xff ||
@@ -1114,9 +1010,9 @@ static inline bool Skip_b70700(Light_b70700* p)
 }
 
 // @fnv 0x00b70700
-Light_b70700* __stdcall FUN_00b70700(ListItem_b70700*& kPos)
+ShadowSceneLight* __stdcall FUN_00b70700(NiTListItem<ShadowSceneLight*>*& kPos)
 {
-    Light_b70700* p = 0;
+    ShadowSceneLight* p = 0;
     if (kPos)
     {
         p = GetNext_b70700(kPos);
@@ -1207,7 +1103,7 @@ void SetLightColor(unsigned int uiLightIndex, LProp* pLightProp, float fIntensit
 }  // namespace fnv_00b71130
 
 typedef NiTPointerListBase<NiTPointerAllocator<unsigned int>, char*> CharPtrList;
-typedef PoolAllocatorBase<unsigned int>::LinkedListEntry PoolNode;
+typedef NiTAbstractPoolAllocator<unsigned int>::AllocNode PoolNode;
 extern RecursiveSpinLock g_011c5f80;
 
 struct LightingElem
@@ -1233,10 +1129,10 @@ static inline void FreeNode(LItem* item)
 {
     g_011c5f80.Lock(0);
     item->m_pkPrev = 0;
-    item->m_pkNext = (LItem*)PoolAllocatorBase<unsigned int>::ms_pFreeList;
-    PoolAllocatorBase<unsigned int>::ms_pFreeList = (PoolNode*)item;
+    item->m_pkNext = (LItem*)NiTAbstractPoolAllocator<unsigned int>::ms_pkFreeMem;
+    NiTAbstractPoolAllocator<unsigned int>::ms_pkFreeMem = (PoolNode*)item;
     if (--DAT_011c5f84 == 0)
-        g_011c5f80.m_lock = 0;
+        g_011c5f80.m_uiOwningThreadID = 0;
 }
 __forceinline void LList::RemoveItem(LItem* cur)
 {
@@ -1488,13 +1384,7 @@ template <class T> inline void B6FC20SaveBinary(B6FC20Stream& kStream, const T& 
     kStream.m_pBackingStream->Write(&value, sizeof(T));
 }
 
-struct B6FC20Color
-{
-    float r;
-    float g;
-    float b;
-    float a;
-};
+
 
 class B6FC20Base
 {
@@ -1534,7 +1424,7 @@ class B6FC20Object : public B6FC20Base
     const char* m_pcName;
     int unk68;
     unsigned int m_uiType;
-    B6FC20Color m_kFogTint;
+    NiColorA m_kFogTint;
 
     void SaveToStream(B6FC20Stream& kStream);
 };
@@ -1550,7 +1440,7 @@ void B6FC20Object::SaveToStream(B6FC20Stream& kStream)
     B6FC20SaveBinary(kStream, m_kFogTint);
 }
 
-struct NiViewerStringsArray
+struct ViewerStringsArray
 {
     void* vtbl;
     char** m_pBase;
@@ -1606,7 +1496,7 @@ struct ViewerBaseProperty
     int unk18;
     int unk1C;
     unsigned int m_uiValue1;
-    void GetViewerStrings(NiViewerStringsArray* pkStrings);
+    void GetViewerStrings(ViewerStringsArray* pkStrings);
 };
 
 struct FalloffProperty : ViewerBaseProperty
@@ -1634,12 +1524,12 @@ struct FalloffProperty : ViewerBaseProperty
     float m_fFalloffStopAngle;
     float m_fFalloffStartOpacity;
     float m_fFalloffStopOpacity;
-    void FUN_00b6ff20(NiViewerStringsArray* pkStrings);
+    void FUN_00b6ff20(ViewerStringsArray* pkStrings);
 };
 
 // Appends the falloff RTTI name, base texture and, when flag 0x40 is set, the falloff angle and opacity values to pkStrings.
 // @fnv 0x00b6ff20
-void FalloffProperty::FUN_00b6ff20(NiViewerStringsArray* pkStrings)
+void FalloffProperty::FUN_00b6ff20(ViewerStringsArray* pkStrings)
 {
     ViewerBaseProperty::GetViewerStrings(pkStrings);
     pkStrings->Add(CreateDebugString(g_kFalloffRTTI.m_pcName));
@@ -1664,9 +1554,9 @@ struct C4
 extern const float DAT_01017d00;
 // Clears DAT_011fa070 from idx to 7 and copies the default color into slots i+18 and DAT_011a9bd0's color into slots i.
 // @fnv 0x00b704c0
-void __cdecl ResetColorSlots(int aiStartIndex)
+__declspec(dllexport) inline void __cdecl ResetColorSlots(int aiStartIndex)
 {
-    static RgbaColor kDef(DAT_01017d00, 0.0f, 0.0f, 0.0f);
+    static NiColorA kDef(DAT_01017d00, 0.0f, 0.0f, 0.0f);
     for (int iIndex = aiStartIndex; iIndex < 8; iIndex++)
     {
         DAT_011fa070[iIndex] = 0;
@@ -1814,68 +1704,8 @@ struct GeometryState
     unsigned int unk14;
     unsigned char flags;
 };
-class NiGeometry
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual const void* GetRTTI();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2C();
-    virtual void* GetSpecialGeometry();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7C;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-    unsigned int unk8C;
-    unsigned int unk90;
-    unsigned int unk94;
-    unsigned int unk98;
-    GeometryProperties properties;
-    unsigned int unkA8;
-    unsigned int unkAC;
-    unsigned int unkB0;
-    unsigned int unkB4;
-    GeometryData* data;
-};
-struct ShaderPassEntry
+
+struct RenderPassEntry_b6f5c0
 {
     unsigned int unk00;
     unsigned short unk04;
@@ -1885,7 +1715,7 @@ class BSShaderProperty__RenderPassArray
 {
   public:
     unsigned int unk00;
-    ShaderPassEntry** passes;
+    RenderPassEntry_b6f5c0** passes;
     unsigned int unk08;
     unsigned int unk0C;
     unsigned int count;
@@ -1981,7 +1811,7 @@ BSShaderProperty__RenderPassArray* RenderProperty::BuildRenderPassList(NiGeometr
                                                                        unsigned int unused, int type,
                                                                        PassRenderer* renderer, unsigned int unused2)
 {
-    GeometryProperties* properties = &geometry->properties;
+    GeometryProperties* properties = reinterpret_cast<GeometryProperties*>(&geometry->m_PropertyState);
     int fullState = (type << 8) | state;
     state = fullState;
     bool special = false;
@@ -1997,21 +1827,21 @@ BSShaderProperty__RenderPassArray* RenderProperty::BuildRenderPassList(NiGeometr
         ((FUN_00ba8ab0_shell*)this)->FUN_00ba8ab0(alpha);
     }
     if (iLastRenderPassState == fullState)
-        return pRenderPassList;
+        return (BSShaderProperty__RenderPassArray*)pRenderPassList;
 
     FUN_00ba95e0(true);
-    pRenderPassList->count = 0;
+    ((BSShaderProperty__RenderPassArray*)pRenderPassList)->count = 0;
     unsigned int shader;
     bool isSkin = false;
     if (geometry)
-        isSkin = (geometry->GetRTTI() == &g_01202560);
+        isSkin = (static_cast<const NiObject*>(geometry)->GetRTTI() == reinterpret_cast<const NiRTTI*>(&g_01202560));
     if (isSkin)
     {
-        shader = geometry->data->skinMode > 0 ? 87 : 86;
+        shader = reinterpret_cast<GeometryData*>(geometry->m_spModelData.m_pObject)->skinMode > 0 ? 87 : 86;
     }
-    else if (geometry->GetSpecialGeometry())
+    else if (geometry->IsParticlesGeom())
     {
-        if (geometry->data->skinMode > 0)
+        if (reinterpret_cast<GeometryData*>(geometry->m_spModelData.m_pObject)->skinMode > 0)
             shader = GetFlag(51) ? 85 : 83;
         else
             shader = GetFlag(51) ? 84 : 82;
@@ -2055,21 +1885,21 @@ BSShaderProperty__RenderPassArray* RenderProperty::BuildRenderPassList(NiGeometr
             }
         }
     }
-    pRenderPassList->Add(geometry, (unsigned short)shader, true, 0, 0, 0, 0, 0);
-    ShaderPassEntry* pass = pRenderPassList->passes[pRenderPassList->count - 1];
-    bool alphaBlend = (geometry->properties.state->flags & 1) != 0;
+    ((BSShaderProperty__RenderPassArray*)pRenderPassList)->Add(geometry, (unsigned short)shader, true, 0, 0, 0, 0, 0);
+    RenderPassEntry_b6f5c0* pass = ((BSShaderProperty__RenderPassArray*)pRenderPassList)->passes[((BSShaderProperty__RenderPassArray*)pRenderPassList)->count - 1];
+    bool alphaBlend = (reinterpret_cast<GeometryProperties*>(&geometry->m_PropertyState)->state->flags & 1) != 0;
     if (!alphaBlend && (renderer->mode == 2 || (ulFlags[1] & 4) > 0 || GetFlag(33)))
         pass->mode = 10;
     else if ((ulFlags[0] & 0x04000000) > 0)
         pass->mode = 4;
     else if ((ulFlags[0] & 0x08000000) > 0)
         pass->mode = 5;
-    else if (m_iShaderType == 17 && variant == 8)
+    else if (iShaderPropertyType == 17 && variant == 8)
         pass->mode = 3;
-    else if (fAlpha < 1.0f || alphaBlend || geometry->GetSpecialGeometry() || special)
+    else if (fAlpha < 1.0f || alphaBlend || geometry->IsParticlesGeom() || special)
         pass->mode = 1;
     iLastRenderPassState = state;
-    return pRenderPassList;
+    return (BSShaderProperty__RenderPassArray*)pRenderPassList;
 }
 
 void FUN_00ba92c0();
@@ -2089,8 +1919,13 @@ unsigned short FUN_00b704b0_t::get68()
     return *(unsigned short*)((char*)this + 0x68);
 }
 
-struct S00b700d0_RTTI;
-extern S00b700d0_RTTI DAT_01202560;
+
+struct GeometryQueries : NiGeometry
+{
+    bool IsExactKindOf(const NiRTTI* type) const { return GetRTTI() == type; }
+};
+
+extern NiRTTI DAT_01202560;
 
 class S00b700d0_Alpha : public NiProperty
 {
@@ -2145,74 +1980,7 @@ struct S00b700d0_B8
     void* ptr28;
 };
 
-class S00b700d0_Geom : public NiObjectNET
-{
-  public:
-    virtual const S00b700d0_RTTI* GetRTTI() const;
-    virtual void virt0C();
-    virtual void virt10();
-    virtual void virt14();
-    virtual void virt18();
-    virtual void virt1C();
-    virtual void virt20();
-    virtual void virt24();
-    virtual void virt28();
-    virtual void virt2C();
-    virtual int virt30();
 
-    bool IsExactKindOf(const S00b700d0_RTTI* r) const
-    {
-        return GetRTTI() == r;
-    }
-
-    NiProperty* FUN_00a59d30(unsigned int);
-    void FUN_00a5b230(unsigned int);
-    void FUN_00439410(S00b700d0_Alpha*);
-    void FUN_00a5a040();
-
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    S00b700d0_Data* m_pData;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    S00b700d0_B8Ptr m_pkB8;
-    void* m_pkBC;
-};
 
 class S00b700d0_Shader : public BSShaderProperty
 {
@@ -2223,32 +1991,32 @@ class S00b700d0_Shader : public BSShaderProperty
             cache = 0;
         bits |= flag;
     }
-    bool ApplyAlphaProperty(S00b700d0_Geom* pGeom);
+    bool ApplyAlphaProperty(NiGeometry* pGeom);
 };
 
 // Sets shader flags, checks geometry kind and data flags, then creates and applies an S00b700d0_Alpha property from pData fields.
 // @fnv 0x00b700d0
-bool S00b700d0_Shader::ApplyAlphaProperty(S00b700d0_Geom* apGeom)
+bool S00b700d0_Shader::ApplyAlphaProperty(NiGeometry* apGeom)
 {
-    void* ptr28 = apGeom->m_pkB8->ptr28;
+    void* ptr28 = reinterpret_cast<S00b700d0_B8Ptr&>(apGeom->m_spModelData)->ptr28;
     if (ptr28 && !((ulFlags[1] & 0x20) > 0))
     {
         SetBit(ulFlags[1], iLastRenderPassState, 0x20);
     }
-    if (apGeom->m_pkBC)
+    if (apGeom->m_spSkinInstance.m_pObject)
     {
         SetBit(ulFlags[0], iLastRenderPassState, 2);
     }
-    if (!apGeom->virt30())
+    if (!apGeom->IsParticlesGeom())
     {
         return true;
     }
-    bool bExactKind = apGeom->IsExactKindOf(&DAT_01202560);
+    bool bExactKind = ((GeometryQueries*)apGeom)->IsExactKindOf(&DAT_01202560);
     if (bExactKind)
     {
         return true;
     }
-    S00b700d0_Data* pData = apGeom->m_pData;
+    S00b700d0_Data* pData = reinterpret_cast<S00b700d0_Data*>(apGeom->m_PropertyState.m_aspProps[0]);
     if (!pData)
     {
         return true;
@@ -2257,10 +2025,10 @@ bool S00b700d0_Shader::ApplyAlphaProperty(S00b700d0_Geom* apGeom)
     {
         return true;
     }
-    NiProperty* pProp = apGeom->FUN_00a59d30(0);
+    NiProperty* pProp = static_cast<NiAVObject*>(apGeom)->GetProperty(0u);
     if (pProp)
     {
-        apGeom->FUN_00a5b230(0);
+        apGeom->RemoveProperty(0);
     }
     S00b700d0_Alpha* pAlpha = new S00b700d0_Alpha;
     pAlpha->FUN_0049ed90(pData->usFlags & 1);
@@ -2269,33 +2037,23 @@ bool S00b700d0_Shader::ApplyAlphaProperty(S00b700d0_Geom* apGeom)
     pAlpha->m_usFlags &= 0xFFE1;
     pAlpha->FUN_004393e0((pData->usFlags >> 10) & 7);
     pAlpha->m_ucAlphaThreshold = pData->ucThreshold;
-    apGeom->FUN_00439410(pAlpha);
+    apGeom->AttachProperty(reinterpret_cast<NiAlphaProperty*>(pAlpha));
     apGeom->FUN_00a5a040();
     SetBit(ulFlags[1], iLastRenderPassState, 0x80000);
     return true;
 }
 
-class ShadowSceneLight
-{
-  public:
-    float ComputeFade(int aiMemoryContext);
-};
 
-class NiTListItem_ShadowSceneLight___
-{
-  public:
-    NiTListItem_ShadowSceneLight___* m_pkNext;
-    NiTListItem_ShadowSceneLight___* m_pkPrev;
-    ShadowSceneLight* m_element;
-};
+
+
 
 typedef void* NiTListIterator;
 
 class ShadowSceneLightList
 {
   public:
-    NiTListItem_ShadowSceneLight___* m_pkHead;
-    NiTListItem_ShadowSceneLight___* m_pkTail;
+    NiTListItem<ShadowSceneLight*>* m_pkHead;
+    NiTListItem<ShadowSceneLight*>* m_pkTail;
 
     NiTListIterator GetHeadPos() const
     {
@@ -2303,8 +2061,8 @@ class ShadowSceneLightList
     }
     ShadowSceneLight* GetNext(NiTListIterator& kPos) const
     {
-        ShadowSceneLight* const& element = ((NiTListItem_ShadowSceneLight___*)kPos)->m_element;
-        kPos = ((NiTListItem_ShadowSceneLight___*)kPos)->m_pkNext;
+        ShadowSceneLight* const& element = ((NiTListItem<ShadowSceneLight*>*)kPos)->m_element;
+        kPos = ((NiTListItem<ShadowSceneLight*>*)kPos)->m_pkNext;
         return element;
     }
 };
@@ -2348,13 +2106,13 @@ void LightSortOwner::SortShadowSceneLights(int aiMemoryContext)
     bool bChanged = false;
     while (kIter)
     {
-        NiTListItem_ShadowSceneLight___* pkNode = (NiTListItem_ShadowSceneLight___*)kIter;
+        NiTListItem<ShadowSceneLight*>* pkNode = (NiTListItem<ShadowSceneLight*>*)kIter;
         ShadowSceneLight* pkLight = m_kShadowSceneLights.GetNext(kIter);
         NiTListIterator kTestIter = m_kShadowSceneLights.GetHeadPos();
         float fKey = pkLight->ComputeFade(aiMemoryContext);
         while (kTestIter != pkNode && kTestIter)
         {
-            NiTListItem_ShadowSceneLight___* pkTest = (NiTListItem_ShadowSceneLight___*)kTestIter;
+            NiTListItem<ShadowSceneLight*>* pkTest = (NiTListItem<ShadowSceneLight*>*)kTestIter;
             if (fKey < m_kShadowSceneLights.GetNext(kTestIter)->ComputeFade(aiMemoryContext))
             {
                 if (pkNode != pkTest)
@@ -2385,167 +2143,20 @@ void LightSortOwner::SortShadowSceneLights(int aiMemoryContext)
 }
 
 namespace fnv_00b70de0 {
-struct NiPoint3
-{
-    float x, y, z;
-};
-struct NiColor
-{
-    float r, g, b;
-    NiColor operator*(float s) const
-    {
-        NiColor res = {r * s, g * s, b * s};
-        return res;
-    }
-    NiColor& operator*=(float s)
-    {
-        r *= s;
-        g *= s;
-        b *= s;
-        return *this;
-    }
-};
-struct RgbaColor
-{
-    float r, g, b, a;
-    RgbaColor()
-    {}
-    RgbaColor(float _r, float _g, float _b, float _a) : r(_r), g(_g), b(_b), a(_a)
-    {}
-};
+
+
+
 struct Lighting30Packet4
 {
     float r, g, b, a;
 };
 void __cdecl ApplyLighting30Packet(const Lighting30Packet4*, bool);
-void __cdecl FUN_00bb95b0(unsigned int, RgbaColor);
-void __cdecl FUN_00bb95e0(unsigned int, RgbaColor, RgbaColor);
+void __cdecl FUN_00bb95b0(unsigned int, NiColorA);
+void __cdecl FUN_00bb95e0(unsigned int, NiColorA, NiColorA);
 
-struct WaterShaderStub
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual float GetFloat10c();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int iType;
-};
 
-struct GeomStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    WaterShaderStub* pShader;
-};
+
+
 
 struct WaterDataStub
 {
@@ -2675,8 +2286,8 @@ struct WaterStub
     WaterDataStub* pData;
 };
 
-extern GeomStub** DAT_011f91e0;
-extern RgbaColor DAT_011a9bd0;
+extern NiGeometry** DAT_011f91e0;
+extern NiColorA DAT_011a9bd0;
 extern float DAT_011f947c;
 extern unsigned char DAT_011f941e;
 extern unsigned char DAT_011f9427;
@@ -2694,18 +2305,19 @@ void __cdecl ApplyWaterLighting(unsigned int id, WaterStub* water, float scale)
         FUN_00bb95b0(id, DAT_011a9bd0);
         return;
     }
-    WaterShaderStub* p = DAT_011f91e0[0]->pShader;
+    BSShaderPPLightingProperty* p = reinterpret_cast<BSShaderPPLightingProperty*>(DAT_011f91e0[0]->m_PropertyState.m_aspProps[3]);
     WaterDataStub* data = w->pData;
-    WaterShaderStub* shader = (p && p->iType >= 8 && p->iType <= 12) ? p : 0;
-    NiPoint3 direction = data->kWorldPosition;
-    RgbaColor first;
+    BSShaderPPLightingProperty* shader = (p && p->iShaderPropertyType >= 8 && p->iShaderPropertyType <= 12) ? p : 0;
+    NiPoint3 direction;
+    memcpy(&direction, &data->kWorldPosition, sizeof(direction));
+    NiColorA first;
     first.r = direction.x;
     first.g = direction.y;
     first.b = direction.z;
-    first.a = shader ? shader->GetFloat10c() : 1.0f;
+    first.a = shader ? GetSpecularLODFadeVirtual(shader) : 1.0f;
     float brightness = DAT_011f947c;
     bool flag = false;
-    RgbaColor kLightRgba = DAT_011a9bd0;
+    NiColorA kLightRgba = DAT_011a9bd0;
     float multiplier = data->fC4;
     if (!DAT_011f941e && 1.0 < multiplier)
         multiplier = 1.0f;
@@ -2726,7 +2338,9 @@ void __cdecl ApplyWaterLighting(unsigned int id, WaterStub* water, float scale)
             color.b = (color.b + double(0.1f)) * f;
         }
     }
-    color *= scale;
+    color.r *= scale;
+    color.g *= scale;
+    color.b *= scale;
     if (scale < 1.0f)
         flag = true;
     kLightRgba.r = color.r;
@@ -2739,23 +2353,18 @@ void __cdecl ApplyWaterLighting(unsigned int id, WaterStub* water, float scale)
     if (DAT_011f941e && !DAT_011f9427)
         multiplier *= DAT_011f9190;
     color = data->m_kDeepColor;
-    FUN_00bb95e0(id, first, RgbaColor(color.r * multiplier, color.g * multiplier, color.b * multiplier, w->fD4));
+    FUN_00bb95e0(id, first, NiColorA(color.r * multiplier, color.g * multiplier, color.b * multiplier, w->fD4));
 }
 }  // namespace fnv_00b70de0
 
 namespace fnv_00bdf3e0 {
-struct Bdf3e0_v3
-{
-    float x;
-    float y;
-    float z;
-    bool isDef() const;
-};
+
 
 extern float DAT_011f4998;
 extern float DAT_011f499c;
 extern float DAT_011f49a0;
 extern char DAT_011f94ab;
+bool IsDefaultLightVector(const NiPoint3& point);
 
 struct Bdf3e0_info
 {
@@ -2812,75 +2421,10 @@ struct Bdf3e0_info
     int unkc8;
     int unkcc;
     int unkd0;
-    Bdf3e0_v3 vec;
+    NiPoint3 vec;
 };
 
-struct Bdf3e0_node
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    Bdf3e0_info* info;
-};
+
 
 struct Bdf3e0_ent
 {
@@ -2986,8 +2530,8 @@ struct Bdf3e0_cls
     int unk34;
     int unk38;
     Bdf3e0_list* list;
-    Bdf3e0_node* FUN_00b70600(int* it);
-    Bdf3e0_node* FUN_00b70700(int* it);
+    ShadowSceneLight* FUN_00b70600(int* it);
+    ShadowSceneLight* FUN_00b70700(int* it);
     void FUN_00bdf3e0(int a0, int a1, unsigned short* a2, char a3, char* a4, int a5, char a6);
 };
 
@@ -2996,14 +2540,14 @@ struct Bdf3e0_cls
 void Bdf3e0_cls::FUN_00bdf3e0(int a0, int a1, unsigned short* apCount, char acMode, char* apFlag, int a5, char acAdjust)
 {
     int it = 0;
-    Bdf3e0_node* p = FUN_00b70600(&it);
-    while (p && p->info->vec.isDef())
+    ShadowSceneLight* p = FUN_00b70600(&it);
+    while (p && IsDefaultLightVector(reinterpret_cast<Bdf3e0_info*>(p->spLight.m_pObject)->vec))
         p = FUN_00b70700(&it);
-    Bdf3e0_node* q = FUN_00b70700(&it);
-    while (q && q->info->vec.isDef())
+    ShadowSceneLight* q = FUN_00b70700(&it);
+    while (q && IsDefaultLightVector(reinterpret_cast<Bdf3e0_info*>(q->spLight.m_pObject)->vec))
         q = FUN_00b70700(&it);
-    Bdf3e0_node* r = FUN_00b70700(&it);
-    while (r && r->info->vec.isDef())
+    ShadowSceneLight* r = FUN_00b70700(&it);
+    while (r && IsDefaultLightVector(reinterpret_cast<Bdf3e0_info*>(r->spLight.m_pObject)->vec))
         r = FUN_00b70700(&it);
     unsigned short s = vt->vEC(this);
     int n = s < 7 ? s : 7;
@@ -3044,9 +2588,9 @@ void Bdf3e0_cls::FUN_00bdf3e0(int a0, int a1, unsigned short* apCount, char acMo
     }
 }
 
-bool Bdf3e0_v3::isDef() const
+bool IsDefaultLightVector(const NiPoint3& point)
 {
-    return x == DAT_011f4998 && y == DAT_011f499c && z == DAT_011f49a0;
+    return point.x == DAT_011f4998 && point.y == DAT_011f499c && point.z == DAT_011f49a0;
 }
 }  // namespace fnv_00bdf3e0
 
@@ -3333,75 +2877,13 @@ void S::FUN_00b718b0()
 }
 }  // namespace fnv_00b718b0
 
-struct Light_b71560
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    bool byteEC;
-};
+
 
 struct Node_b71560
 {
     Node_b71560* next;
     Node_b71560* prev;
-    Light_b71560* item;
+    ShadowSceneLight* item;
 };
 struct Pool_b71560
 {
@@ -3414,8 +2896,8 @@ struct List_b71560
     Node_b71560* tail;
     Pool_b71560 pool;
     void MoveNodeBefore(Node_b71560* pos, Node_b71560* node);
-    Node_b71560* FUN_00b713c0(Node_b71560* node, Light_b71560* const& item);
-    Node_b71560* FUN_00b58570(Light_b71560* const& item);
+    Node_b71560* FUN_00b713c0(Node_b71560* node, ShadowSceneLight* const& item);
+    Node_b71560* FUN_00b58570(ShadowSceneLight* const& item);
 };
 
 struct Obj_b71560
@@ -3449,13 +2931,13 @@ struct Obj_b71560
     int unk70;
     bool m_b74;
     Node_b71560* m_p78;
-    bool FindNodeByItemValue(Light_b71560* item, void* a2, void** outNode);
-    void InsertOrMoveNode(Light_b71560* item, void* a2);
+    bool FindNodeByItemValue(ShadowSceneLight* item, void* a2, void** outNode);
+    void InsertOrMoveNode(ShadowSceneLight* item, void* a2);
 };
 
-// Moves or inserts list nodes; on the no-p78 path, sets m_b74 and clears m_38 if item->byteEC is set.
+// Moves or inserts list nodes; on the no-p78 path, sets m_b74 and clears m_38 if item->bCastShadow is set.
 // @fnv 0x00b71560
-void Obj_b71560::InsertOrMoveNode(Light_b71560* item, void* a2)
+void Obj_b71560::InsertOrMoveNode(ShadowSceneLight* item, void* a2)
 {
     Node_b71560* p78 = m_p78;
     if (p78)
@@ -3473,19 +2955,19 @@ void Obj_b71560::InsertOrMoveNode(Light_b71560* item, void* a2)
         return;
     }
     void* key = a2;
-    Light_b71560* light = item;
+    ShadowSceneLight* light = item;
     if (!FindNodeByItemValue(light, key, &a2))
     {
         m_list60.FUN_00b58570(item);
     }
     m_b74 = true;
-    if (light->byteEC)
+    if (light->bCastShadow)
     {
         m_38 = 0;
     }
 }
 
-Node_b71560* List_b71560::FUN_00b58570(Light_b71560* const& item)
+Node_b71560* List_b71560::FUN_00b58570(ShadowSceneLight* const& item)
 {
     Node_b71560* node = pool.FUN_0043a010();
     node->item = item;
@@ -3500,7 +2982,7 @@ Node_b71560* List_b71560::FUN_00b58570(Light_b71560* const& item)
     return node;
 }
 
-Node_b71560* List_b71560::FUN_00b713c0(Node_b71560* pos, Light_b71560* const& item)
+Node_b71560* List_b71560::FUN_00b713c0(Node_b71560* pos, ShadowSceneLight* const& item)
 {
     Node_b71560* node = pool.FUN_0043a010();
     node->item = item;
@@ -3514,3 +2996,4 @@ Node_b71560* List_b71560::FUN_00b713c0(Node_b71560* pos, Light_b71560* const& it
     ++pool.count;
     return node;
 }
+

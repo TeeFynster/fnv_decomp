@@ -1,6 +1,30 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 
 // src/havok/physics/collide/agent/deprecated/multispheretriangle/hkpmultispheretriangleagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/deprecated/multispheretriangle/hkpmultispheretriangleagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+// Exe FUN_00d37ed0/FUN_00d38130: CRT byte-array storage adds /GS cookies; preserve the float-only LocalM128 view.
+// VC9 requires the __m128 compatibility typedef for the native intrinsic ABI (a renamed tag causes C2719).
+#define _INCLUDED_MM2
+typedef union __declspec(intrin_type) __declspec(align(16))
+{
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+
+#include "../../../../../../../include/hkpCdBody.h"
+#include "../../../../../../../include/hkpCdBodyPairCollector.h"
+#include "../../../../../../../include/hkpMultiSphereShape.h"
+#include "../../../../../../../include/hkpMultiSphereTriangleAgent.h"
+#include "../../../../../../../include/hkpContactMgr.h"
+#include "../../../../../../../include/hkpTriangleShape.h"
 
 struct S_00d37e60_Allocator
 {
@@ -23,80 +47,32 @@ struct S_00d37e60_Router
 
 S_00d37e60_Router* FUN_00c85750();
 
-struct S_00d37e60_RefObj
-{
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    S_00d37e60_RefObj()
-    {
-        m_sReferenceCount = 1;
-    }
-    virtual ~S_00d37e60_RefObj() throw()
-    {}
-    void* operator new(unsigned int nbytes)
-    {
-        S_00d37e60_RefObj* b = static_cast<S_00d37e60_RefObj*>(FUN_00c85750()->heap().AllocateMemoryBlock(nbytes));
-        b->m_usMemSizeAndFlags = (unsigned short)nbytes;
-        return b;
-    }
-    void operator delete(void*)
-    {}
-};
+void FUN_00cd7160(const void* verts, hkpMultiSphereTriangleAgent::TriangleNormal* out) throw();
 
-struct S_00d37e60_Agent : S_00d37e60_RefObj
-{
-    void* m_pContactManager;
-    S_00d37e60_Agent(void* mgr) : m_pContactManager(mgr)
-    {}
-    virtual void getPenetrations();
-};
+extern const unsigned hkpMultiSphereTriangleAgent_vtable[];
+extern const unsigned hkpSymmetricMultiSphereTriangleAgent_vtable[];
 
-struct S_00d37e60_Shape
-{
-    int unk0[8];
-};
-
-struct S_00d37e60_CdBody
-{
-    char* m_pCollisionShape;
-};
-
-struct S_00d37e60_Plane
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-};
-
-void FUN_00cd7160(const void* verts, S_00d37e60_Plane* out) throw();
-
-struct S_00d37e60_TriAgent : S_00d37e60_Agent
-{
-    S_00d37e60_Plane m_kTriangleNormal;
-    unsigned short m_ids[8];
-    virtual void getPenetrations();
-    __forceinline S_00d37e60_TriAgent(const S_00d37e60_CdBody& bodyA, void* mgr) : S_00d37e60_Agent(mgr)
-    {
-        for (int i = 0; i < 8; i++)
-            m_ids[i] = 0xffff;
-        FUN_00cd7160(bodyA.m_pCollisionShape + 0x20, &m_kTriangleNormal);
-    }
-};
-
-struct S_00d37e60_TriAgent2 : S_00d37e60_TriAgent
-{
-    __forceinline S_00d37e60_TriAgent2(const S_00d37e60_CdBody& bodyA, void* mgr) : S_00d37e60_TriAgent(bodyA, mgr)
-    {}
-    virtual void getPenetrations();
-};
-
-// Allocates and constructs a TriAgent2 from bodyA and mgr, returning it as an Agent pointer.
+// The shared iterative base has no usable constructor. Initialize the checked
+// agent layout directly, including the symmetric wrapper's final vtable.
 // @fnv 0x00d37e60
-S_00d37e60_Agent* CreateTriAgent2(const S_00d37e60_CdBody& bodyA, const S_00d37e60_CdBody& bodyB, const void* input,
+hkpCollisionAgent* CreateTriAgent2(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const void* input,
                                   void* mgr)
 {
-    return new S_00d37e60_TriAgent2(bodyA, mgr);
+    hkpMultiSphereTriangleAgent* agent = static_cast<hkpMultiSphereTriangleAgent*>(
+        FUN_00c85750()->heap().AllocateMemoryBlock(sizeof(hkpMultiSphereTriangleAgent)));
+    agent->m_usMemSizeAndFlags = (unsigned short)sizeof(hkpMultiSphereTriangleAgent);
+    if (agent != 0)
+    {
+        agent->m_sReferenceCount = 1;
+        agent->m_pContactManager = static_cast<hkpContactMgr*>(mgr);
+        *reinterpret_cast<const unsigned**>(agent) = hkpMultiSphereTriangleAgent_vtable;
+        for (int i = 0; i < 8; i++)
+            agent->m_ids[i] = 0xffff;
+        FUN_00cd7160(static_cast<const hkpTriangleShape*>(bodyA.m_pCollisionShape)->m_kVertices,
+                      &agent->m_kTriangleNormal);
+        *reinterpret_cast<const unsigned**>(agent) = hkpSymmetricMultiSphereTriangleAgent_vtable;
+    }
+    return agent;
 }
 
 void __cdecl FUN_00d38130(void*, void*, void*, void*);
@@ -143,43 +119,18 @@ void CpuObject::FUN_00d38e90(void* first, void* second, unsigned int third, unsi
     FUN_00d38390(second, first, third, &data);
 }
 
-struct FUN_00d37e10_sub
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14(unsigned short w, int arg);
-};
-
-class FUN_00d37e10_cls
-{
-  public:
-    virtual void vDtor(int flags);
-    unsigned int unk04;
-    FUN_00d37e10_sub* m_pSub;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned short m_w1C[8];
-
-    void FUN_00d37e10(int arg);
-};
-
-// Calls m_pSub->v14 for each non-0xffff entry in m_w1C, then destroys this with vDtor(1).
+// Removes each stored contact point, then destroys the agent.
 // @fnv 0x00d37e10
-void FUN_00d37e10_cls::FUN_00d37e10(int arg)
+void hkpMultiSphereTriangleAgent::vf07(int arg)
 {
-    unsigned short* p = m_w1C;
+    unsigned short* p = m_ids;
     int n = 8;
     do
     {
         unsigned short w = *p;
         if (w != 0xffff)
         {
-            m_pSub->v14(w, arg);
+            m_pContactManager->removeContactPointImpl(w, *reinterpret_cast<hkpConstraintOwner*>(arg));
         }
         ++p;
         --n;
@@ -187,7 +138,7 @@ void FUN_00d37e10_cls::FUN_00d37e10(int arg)
 
     if (this != 0)
     {
-        this->vDtor(1);
+        delete this;
     }
 }
 
@@ -249,25 +200,20 @@ void __cdecl FUN_00d38ed0(int aiArg1, int aiArg2, int aiArg3, int aiArg4)
     FUN_00d386c0(aiArg2, aiArg1, aiArg3, &local);
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
 }
 
-extern __m128 DAT_010c4c00;
+extern LocalM128 DAT_010c4c00;
 
 struct SimplexVertex
 {
-    __m128 m_kPointA;
-    __m128 m_kPointB;
+    LocalM128 m_kPointA;
+    LocalM128 m_kPointB;
     int unk20;
     int unk24;
     int unk28;
@@ -291,7 +237,7 @@ struct Simplex
     int unk3014;
     int unk3018;
     int unk301C;
-    __m128 m_vHitNormal;
+    LocalM128 m_vHitNormal;
     float m_fClosestPointDistanceSquared;
     int unk3034;
     int unk3038;
@@ -320,14 +266,14 @@ void Agent::FUN_00d38f10(int a, int b, int c, Simplex* s)
     AgentBase::FUN_00d38b00(b, a, c, s);
     for (; v < s->m_kRayEnd; v++)
     {
-        const __m128* pb = &v->m_kPointB;
-        __m128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
+        const LocalM128* pb = &v->m_kPointB;
+        LocalM128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
         v->m_kPointA = _mm_add_ps(_mm_mul_ps(w, v->m_kPointB), v->m_kPointA);
         v->m_kPointB = _mm_xor_ps(v->m_kPointB, DAT_010c4c00);
     }
     if (oldDistance != s->m_fClosestPointDistanceSquared)
     {
-        __m128* n = &s->m_vHitNormal;
+        LocalM128* n = &s->m_vHitNormal;
         *n = _mm_xor_ps(*n, DAT_010c4c00);
         {
             unsigned char t = s->m_dims.m_ucLowNibble;
@@ -359,18 +305,10 @@ struct hkVector4f
     float z;
     float w;
 };
-struct hkVector4
-{
-    __m128 m_vComponents;
-    float getW() const
-    {
-        return m_vComponents.m128_f32[3];
-    }
-};
 union hkQuadVector
 {
     hkVector4f v;
-    __m128 q;
+    LocalM128 q;
 };
 
 struct hkTransformf
@@ -381,65 +319,31 @@ struct hkTransformf
     hkVector4f m_vTranslation;
 };
 
-struct hkpConvexShapeHeader
+__forceinline float hkpTriangleShape::getRadius() const
 {
-    void* m_ppVirtualMethodTable;
-    int m_ulUserData;
-    int m_type;
-    int unk0C;
-};
-struct hkpTriangleShape : hkpConvexShapeHeader
-{
-    float m_fSphereRadius;
-    int unk14;
-    int unk18;
-    int unk1C;
-    hkVector4 m_kVertices[3];
-    float getRadius() const
-    {
-        return m_fSphereRadius;
-    }
-};
-struct hkpMultiSphereShape : hkpConvexShapeHeader
-{
-    int m_iSphereCount;
-    int unk14;
-    int unk18;
-    int unk1C;
-    hkVector4 m_kSpheres[8];
-};
-struct hkpCdBody
-{
-    const void* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const hkTransformf* m_pMotionState;
-    const hkpCdBody* m_parent;
-};
-struct hkpCdBodyPairCollector
-{
-    virtual void dtor();
-    virtual void AddCdBodyPair(const hkpCdBody& bodyA, const hkpCdBody& bodyB);
-};
+    return m_fSphereRadius;
+}
+
 struct CollisionDistanceInfo
 {
-    hkVector4 m_kNearestPoint;
+    LocalM128 m_kNearestPoint;
     float distance;
     int unk14;
     int unk18;
     int unk1C;
 };
-void __cdecl FUN_00cd7850(const hkVector4& position, const hkVector4* triangle, const S_00d37e60_Plane& cache,
+void __cdecl FUN_00cd7850(const hkVector4& position, const hkVector4* triangle, const hkpMultiSphereTriangleAgent::TriangleNormal& cache,
                           CollisionDistanceInfo& result, void* featureOut);
 
-static __forceinline __m128 SetTransformedPoint(const __m128& c0, const __m128& c1, const __m128& c2, const __m128& t,
-                                                const __m128& b)
+static __forceinline LocalM128 SetTransformedPoint(const LocalM128& c0, const LocalM128& c1, const LocalM128& c2, const LocalM128& t,
+                                                const LocalM128& b)
 {
-    const __m128 b0 = _mm_shuffle_ps(b, b, 0x00);
-    const __m128 r0 = _mm_mul_ps(c0, b0);
-    const __m128 b1 = _mm_shuffle_ps(b, b, 0x55);
-    const __m128 r1 = _mm_mul_ps(c1, b1);
-    const __m128 b2 = _mm_shuffle_ps(b, b, 0xaa);
-    const __m128 r2 = _mm_mul_ps(c2, b2);
+    const LocalM128 b0 = _mm_shuffle_ps(b, b, 0x00);
+    const LocalM128 r0 = _mm_mul_ps(c0, b0);
+    const LocalM128 b1 = _mm_shuffle_ps(b, b, 0x55);
+    const LocalM128 r1 = _mm_mul_ps(c1, b1);
+    const LocalM128 b2 = _mm_shuffle_ps(b, b, 0xaa);
+    const LocalM128 r2 = _mm_mul_ps(c2, b2);
     return _mm_add_ps(_mm_add_ps(r0, r1), _mm_add_ps(r2, t));
 }
 
@@ -461,27 +365,23 @@ static __forceinline void TransformPointArray(const hkTransformf& t, const hkVec
     } while (--i >= 0);
 }
 
-struct hkpMultiSphereTriangleAgent : S_00d37e60_TriAgent
-{
-    void FUN_00d37ed0(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const void* input,
-                      hkpCdBodyPairCollector& collector);
-};
-
 // @fnv 0x00d37ed0
 void hkpMultiSphereTriangleAgent::FUN_00d37ed0(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const void* input,
                                                hkpCdBodyPairCollector& collector)
 {
-    const hkpMultiSphereShape* msA = static_cast<const hkpMultiSphereShape*>(bodyA.m_pCollisionShape);
-    const hkpTriangleShape* triB = static_cast<const hkpTriangleShape*>(bodyB.m_pCollisionShape);
+    const hkpMultiSphereShape* msA = reinterpret_cast<const hkpMultiSphereShape*>(bodyA.m_pCollisionShape);
+    const hkpTriangleShape* triB = reinterpret_cast<const hkpTriangleShape*>(bodyB.m_pCollisionShape);
 
     const hkVector4* localVertices = &triB->m_kVertices[0];
-    hkVector4 triVertices[3];
-    TransformPointArray(*bodyB.m_pMotionState, localVertices, 3, &triVertices[0]);
+    LocalM128 triVertexStorage[3];
+    hkVector4* triVertices = reinterpret_cast<hkVector4*>(triVertexStorage);
+    TransformPointArray(*static_cast<const hkTransformf*>(bodyB.m_pMotionState), localVertices, 3, &triVertices[0]);
 
     const hkVector4* localSpheres = &msA->m_kSpheres[0];
-    hkVector4 worldSpheres[8];
+    LocalM128 worldSphereStorage[8];
+    hkVector4* worldSpheres = reinterpret_cast<hkVector4*>(worldSphereStorage);
     const int nsphere = msA->m_iSphereCount;
-    TransformPointArray(*bodyA.m_pMotionState, localSpheres, nsphere, &worldSpheres[0]);
+    TransformPointArray(*static_cast<const hkTransformf*>(bodyA.m_pMotionState), localSpheres, nsphere, &worldSpheres[0]);
 
     for (int i = 0; i < nsphere; ++i)
     {
@@ -496,25 +396,27 @@ void hkpMultiSphereTriangleAgent::FUN_00d37ed0(const hkpCdBody& bodyA, const hkp
     }
 }
 
-void __cdecl FUN_00cd7850(const hkVector4& position, const hkVector4* triangle, const S_00d37e60_Plane& cache,
+void __cdecl FUN_00cd7850(const hkVector4& position, const hkVector4* triangle, const hkpMultiSphereTriangleAgent::TriangleNormal& cache,
                           CollisionDistanceInfo& result, void* featureOut);
 // @fnv 0x00d38130
 void __cdecl FUN_00d38130(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const void* input,
                           hkpCdBodyPairCollector& collector)
 {
-    const hkpMultiSphereShape* msA = static_cast<const hkpMultiSphereShape*>(bodyA.m_pCollisionShape);
-    const hkpTriangleShape* triB = static_cast<const hkpTriangleShape*>(bodyB.m_pCollisionShape);
+    const hkpMultiSphereShape* msA = reinterpret_cast<const hkpMultiSphereShape*>(bodyA.m_pCollisionShape);
+    const hkpTriangleShape* triB = reinterpret_cast<const hkpTriangleShape*>(bodyB.m_pCollisionShape);
 
     const hkVector4* localVertices = &triB->m_kVertices[0];
-    hkVector4 triVertices[3];
-    TransformPointArray(*bodyB.m_pMotionState, localVertices, 3, &triVertices[0]);
+    LocalM128 triVertexStorage[3];
+    hkVector4* triVertices = reinterpret_cast<hkVector4*>(triVertexStorage);
+    TransformPointArray(*static_cast<const hkTransformf*>(bodyB.m_pMotionState), localVertices, 3, &triVertices[0]);
 
     const hkVector4* localSpheres = &msA->m_kSpheres[0];
-    hkVector4 worldSpheres[8];
+    LocalM128 worldSphereStorage[8];
+    hkVector4* worldSpheres = reinterpret_cast<hkVector4*>(worldSphereStorage);
     const int nsphere = msA->m_iSphereCount;
-    TransformPointArray(*bodyA.m_pMotionState, localSpheres, nsphere, &worldSpheres[0]);
+    TransformPointArray(*static_cast<const hkTransformf*>(bodyA.m_pMotionState), localSpheres, nsphere, &worldSpheres[0]);
 
-    S_00d37e60_Plane cache;
+    hkpMultiSphereTriangleAgent::TriangleNormal cache;
     FUN_00cd7160(localVertices, &cache);
 
     for (int i = 0; i < nsphere; ++i)

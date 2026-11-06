@@ -6,89 +6,26 @@
 // state: a side-step vector, the current move mode, the pending turn
 // direction bits and the minimum turn timer.
 //
-// Notes on declarations:
-// - NiPoint3 carries its static ZERO (bsaudio/bsaudiodefines.h precedent);
-//   the canonical task NiPoint3.h omits it, so the identical-layout local
-//   declaration below stands in and the canonical header is blocked by its
-//   own include guard (FNV_NIPOINT3_H).
-//   minimal base below is sized to the PC subobject (0x88 bytes, pActor at
-//   +0x28) as observed in the PC disassembly.
-//   fallout/misc/saveload/bgsloadformbuffer.cpp declaration.
-
-#include "playermover_layout.h"
-
-#define FNV_NIPOINT3_H
-#pragma pack(push, 4)
-class NiPoint3
-{
-  public:
-    static const NiPoint3 ZERO;
-    float Length() const;
-    NiPoint3 operator+(const NiPoint3&) const;
-    float x;  // +0x0
-    float y;  // +0x4
-    float z;  // +0x8
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiPoint3) == 0xC);
-FNV_STATIC_ASSERT(offsetof(NiPoint3, x) == 0x0);
-FNV_STATIC_ASSERT(offsetof(NiPoint3, y) == 0x4);
-FNV_STATIC_ASSERT(offsetof(NiPoint3, z) == 0x8);
-
-#include "playermover_actor.h"
+#include "../../../../include/bhkCharacterController.h"
+#include "../../../../include/Actor.h"
+#include "../../../../include/LowProcess.h"
+#include "../../../../include/MapEntryCount.h"
+#include "../../../../include/MobileObject.h"
+#include "../../../../include/NiControllerSequence.h"
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/TESActorBaseData.h"
+#include "../../../../include/TESAnimGroup.h"
+#include "../../../../include/TESDataHandler.h"
+#include "../../../../include/TESObjectCELL.h"
+#include "../../../../include/TESObjectLAND.h"
+#include "../../../../include/TESTopicInfo.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/BGSLoadGameBuffer.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/ActorMover.h"
+#include "../../../../include/PlayerMover.h"
 #include "playermover_decls.h"
-
-class BGSLoadGameBuffer
-{
-  public:
-    void ReadDataBlock(void* apData, unsigned int auSize);
-};
-
-class BGSLoadFormBuffer : public BGSLoadGameBuffer
-{
-};
-
-#pragma pack(push, 4)
-class ActorMover
-{
-  public:
-    void Revert(BGSLoadFormBuffer* apBuffer);
-    void LoadGame(BGSLoadFormBuffer* apBuffer);
-    void InitLoadGame(BGSLoadFormBuffer* apBuffer);
-
-    unsigned char layoutPadding00[0x28];
-    Actor* pActor;  // +0x28
-    unsigned char layoutPadding2C[0x5C];
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(ActorMover) == 0x88);
-FNV_STATIC_ASSERT(offsetof(ActorMover, pActor) == 0x28);
-
-#pragma pack(push, 4)
-class PlayerMover : public ActorMover
-{
-  public:
-    void Revert(BGSLoadFormBuffer* apBuffer);
-    void LoadGame(BGSLoadFormBuffer* apBuffer);
-    void InitLoadGame(BGSLoadFormBuffer* apBuffer);
-    void SetMovementValue(float fTimeSinceScaleStart);
-    void Update(float fTimeSinceScaleStart);
-    void SetMoverMode(unsigned int auMode);
-    void UpdatePlayerStatus(unsigned int auMode, bool abSet);
-    void SetSideVec(const NiPoint3& arSideVec);
-    void ClearMode(unsigned int auMode);
-
-    NiPoint3 m_kSideVec;    // +0x88
-    unsigned int ByteAndFlagState;  // +0x94
-    unsigned int m_uiMode;  // +0x98
-    float m_fValue;         // +0x9C
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(PlayerMover) == 0xA0);
-FNV_STATIC_ASSERT(offsetof(PlayerMover, m_kSideVec) == 0x88);
-FNV_STATIC_ASSERT(offsetof(PlayerMover, ByteAndFlagState) == 0x94);
-FNV_STATIC_ASSERT(offsetof(PlayerMover, m_uiMode) == 0x98);
-FNV_STATIC_ASSERT(offsetof(PlayerMover, m_fValue) == 0x9C);
 
 // @fnv 0x009ea6a0
 void PlayerMover::Revert(BGSLoadFormBuffer* apBuffer)
@@ -122,7 +59,7 @@ void PlayerMover::SetMovementValue(float afDelta)
     if (m_fValue > 0.0)
     {
         m_fValue -= afDelta;
-        if (!pActor->Unk_85())
+        if (!pActor->GetSitSleepState())
             ByteAndFlagState |= m_uiMode;
     }
 }
@@ -150,7 +87,7 @@ void PlayerMover::Update(float fTimeSinceScaleStart)
         struct ControllerState
         {
             bhkCharacterController* controller;
-            PlayerMoverControllerState* state;
+            bhkCharacterController::ControllerState* state;
         } character;
         character.controller = g_thePlayer->GetPhysicsCharacterController();
         character.state = character.controller ? &character.controller->state : 0;
@@ -168,8 +105,8 @@ void PlayerMover::Update(float fTimeSinceScaleStart)
                 float sideLength;
                 float deltaLength;
             } lengths;
-            lengths.sideLength = m_kSideVec.Length();
-            lengths.deltaLength = delta.Length();
+            lengths.sideLength = static_cast<const NiPoint3&>(m_kSideVec).Length();
+            lengths.deltaLength = static_cast<const NiPoint3&>(delta).Length();
             if (lengths.sideLength > 0.0 && lengths.deltaLength > 0.0 && !(ByteAndFlagState & 0x40))
             {
                 float sideX = m_kSideVec.x / lengths.sideLength;
@@ -180,8 +117,7 @@ void PlayerMover::Update(float fTimeSinceScaleStart)
         }
         if ((ByteAndFlagState & 3) && (ByteAndFlagState & 0xC) && !g_thePlayer->GetIsDying())
         {
-            switch (reinterpret_cast<PlayerMoverProcess*>(reinterpret_cast<PlayerQuestData*>(g_thePlayer)->GetLogDate())
-                        ->GetKnockedState())
+            switch (g_thePlayer->GetLogDate()->GetAnimAction())
             {
             default:
                 if (delta.y != 0.0)
@@ -214,11 +150,11 @@ void PlayerMover::Update(float fTimeSinceScaleStart)
             float height;
             TESObjectCELL* cell;
         } ground;
-        ground.cell = reinterpret_cast<TESObjectCELL*>(reinterpret_cast<LowProcess*>(g_thePlayer)->GetTarget());
+        ground.cell = reinterpret_cast<TESObjectCELL*>(reinterpret_cast<LowProcess*>(g_thePlayer)->LowProcess::GetTarget());
         if (ground.cell && !ground.cell->IsCellInterior())
         {
             ground.height = 0.0f;
-            NiPoint3 position = *g_thePlayer->GetPos();
+            NiPoint3 position = *static_cast<const MobileObject*>(g_thePlayer)->GetPos();
             if (ground.cell->GetLandscape()->GetLandHeightAtPosition(position, ground.height))
             {
                 if (ground.height - position.z > 32.0)
@@ -255,13 +191,13 @@ void PlayerMover::SetMoverMode(unsigned int auMode)
         aimState.sequence = aimState.animation->GetControllerSequence(4);
         aimState.groupID = g_thePlayer->GetAnimGroup(aimState.group, 0, false, aimState.animation);
         if (!aimState.sequence ||
-            aimState.groupID != reinterpret_cast<TESActorBaseData*>(aimState.sequence->GetAnimGroup())->FUN_0047d3b0())
+            aimState.groupID != aimState.sequence->GetAnimGroup()->FUN_0047d3b0())
             aimState.animation->BlendOut(4, false);
         aimState.animation = g_thePlayer->GetAnimation(true);
         aimState.sequence = aimState.animation->GetControllerSequence(4);
         aimState.groupID = g_thePlayer->GetAnimGroup(aimState.group, 0, false, aimState.animation);
         if (!aimState.sequence ||
-            aimState.groupID != reinterpret_cast<TESActorBaseData*>(aimState.sequence->GetAnimGroup())->FUN_0047d3b0())
+            aimState.groupID != aimState.sequence->GetAnimGroup()->FUN_0047d3b0())
             aimState.animation->BlendOut(4, false);
     }
 }
@@ -288,53 +224,29 @@ void PlayerMover::ClearMode(unsigned int auMode)
     ByteAndFlagState &= ~auMode;
 }
 
-struct FUN_009e9de0_shell : PlayerMover
-{
-    void FUN_009e9de0(unsigned int auMode);
-};
-
 // @fnv 0x009e9de0
-void FUN_009e9de0_shell::FUN_009e9de0(unsigned int auMode)
+void PlayerMover::FUN_009e9de0(unsigned int auMode)
 {
     ClearMode(auMode);
 }
 
-struct FUN_009e9dc0_shell : PlayerMover
-{
-    void FUN_009e9dc0(unsigned int auMode);
-};
-
 // @fnv 0x009e9dc0
-void FUN_009e9dc0_shell::FUN_009e9dc0(unsigned int auMode)
+void PlayerMover::FUN_009e9dc0(unsigned int auMode)
 {
     UpdatePlayerStatus(auMode, true);
 }
 
-struct FUN_009daef0
-{
-    virtual ~FUN_009daef0();
-};
-
-struct FUN_009e9e30_shell : FUN_009daef0
-{
-    void FUN_009e9e30();
-};
-
 // @fnv 0x009e9e30
-void FUN_009e9e30_shell::FUN_009e9e30()
+void PlayerMover::FUN_009e9e30()
 {
     *reinterpret_cast<int*>(this) = 0x0109297c;
-    FUN_009daef0::~FUN_009daef0();
+    ActorMover::~ActorMover();
 }
 
 void __cdecl _Deallocate(void*);
-struct FUN_009e9e00_shell : FUN_009e9e30_shell
-{
-    void* FUN_009e9e00(unsigned int);
-};
 // Calls FUN_009e9e30, then deallocates this object if auFlags has bit 0 set, and returns this.
 // @fnv 0x009e9e00
-void* FUN_009e9e00_shell::FUN_009e9e00(unsigned int auFlags)
+void* PlayerMover::FUN_009e9e00(unsigned int auFlags)
 {
     FUN_009e9e30();
     if (auFlags & 1)
@@ -342,22 +254,10 @@ void* FUN_009e9e00_shell::FUN_009e9e00(unsigned int auFlags)
     return this;
 }
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-};
-struct FUN_009df100_shell : PlayerMover
-{
-    void FUN_009df100(BGSSaveFormBuffer* apBuffer);
-};
-struct FUN_009ea5a0_shell : PlayerMover
-{
-    void FUN_009ea5a0(BGSSaveFormBuffer* apBuffer);
-};
 // @fnv 0x009ea5a0
-void FUN_009ea5a0_shell::FUN_009ea5a0(BGSSaveFormBuffer* apBuffer)
+void PlayerMover::FUN_009ea5a0(BGSSaveFormBuffer* apBuffer)
 {
-    ((FUN_009df100_shell*)this)->FUN_009df100(apBuffer);
+    ActorMover::FUN_009df100(apBuffer);
     apBuffer->SaveData(&m_kSideVec, 0xC, 0);
     apBuffer->SaveData(&ByteAndFlagState, 4, 0);
     apBuffer->SaveData(&m_uiMode, 4, 0);

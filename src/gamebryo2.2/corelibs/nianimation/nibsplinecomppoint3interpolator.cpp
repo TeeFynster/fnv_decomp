@@ -1,12 +1,45 @@
-// gamebryo2.2/corelibs/nianimation/nibsplinecomppoint3interpolator.cpp: NiBSplineCompPoint3Interpolator, SplineEvaluationState (8 functions)
+// gamebryo2.2/corelibs/nianimation/nibsplinecomppoint3interpolator.cpp: NiBSplineCompPoint3Interpolator (8 functions)
 
-#include "nibsplinecomppoint3interpolator_decls.h"
+#include "../../../../include/NiBSplineCompPoint3Interpolator.h"
+#include "../../../../include/NiBSplinePoint3Interpolator.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/StrArr.h"
+#include "../../../../include/NiPoint3.h"
+#include <string.h>
+
+// Local call adapters for base routines not declared by the shared interpolator header.
+// These carry no object storage; all fields come from the shared classes.
+struct BSplinePoint3Operations
+{
+    void Construct(int a, unsigned int handle, int c) throw();
+    void CopyUnknownFields(NiBSplineCompPoint3Interpolator* dest, CloningProcess& cloning);
+    bool IsEqual(NiObject* object);
+    void SaveBinary(NiStream& stream);
+};
+
+__forceinline unsigned int NiBinaryStream::Read(void* buffer, unsigned int size)
+{
+    unsigned int componentSize = 4;
+    unsigned int bytes = m_pfnRead(this, buffer, size, &componentSize, 1);
+    m_uiAbsoluteCurrentPos += bytes;
+    return bytes;
+}
+
+inline void NiBinaryStream::Write(void* buffer, unsigned int bytes)
+{
+    unsigned int componentSize = 4;
+    m_uiAbsoluteCurrentPos += m_pfnWrite(this, buffer, bytes, &componentSize, 1);
+}
+
 // Calls the base LoadBinary, then reads 8 bytes from the stream's input into the interpolator's data.
 // @fnv 0x00a51400
 void NiBSplineCompPoint3Interpolator::LoadBinary(NiStream& stream)
 {
     NiBSplinePoint3Interpolator::LoadBinary(stream);
-    NiBinaryStream* input = stream.input;
+    NiBinaryStream* input = stream.m_pkIstr;
     input->Read(&m_fSequenceOffset, 8);
 }
 
@@ -18,46 +51,22 @@ void* __cdecl FUN_00a51270()
     return &g_011f4014;
 }
 
-struct NiObject
-{
-    char _d;
-};
-struct BaseFor51230
-{
-    bool FUN_00a508d0(NiObject* pkObject);
-    char _pad[0x2c];
-};
-struct OwnerFor51230 : BaseFor51230
-{
-    float m_afOffsetAndHalfRange[2];
-    bool FUN_00a51230(NiObject* pkObject);
-};
 // @fnv 0x00a51230
-bool OwnerFor51230::FUN_00a51230(NiObject* pkObject)
+bool __fastcall NiBSplineCompPoint3Interpolator_IsEqual(NiBSplineCompPoint3Interpolator* self, void*, NiObject* pkObject)
 {
-    OwnerFor51230* pkDest;
+    NiBSplineCompPoint3Interpolator* pkDest;
     unsigned int iIndex;
-    if (!FUN_00a508d0(pkObject))
+    if (!reinterpret_cast<BSplinePoint3Operations*>(self)->IsEqual(pkObject))
         return false;
-    pkDest = (OwnerFor51230*)pkObject;
+    pkDest = (NiBSplineCompPoint3Interpolator*)pkObject;
     for (iIndex = 0; iIndex < 2; iIndex++)
     {
-        if (m_afOffsetAndHalfRange[iIndex] != pkDest->m_afOffsetAndHalfRange[iIndex])
+        if ((&self->m_fSequenceOffset)[iIndex] != (&pkDest->m_fSequenceOffset)[iIndex])
             return false;
     }
     return true;
 }
 
-struct StrArr
-{
-    char _pad[8];
-    unsigned short m_usMax;
-    unsigned short m_usSize;
-    unsigned short _pad2;
-    unsigned short m_usGrow;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 void __stdcall FUN_00a50960(StrArr*);
 char* __cdecl _FUN_00a7d330(const char*);
 // Grows the string array if it is full, then appends the string returned by _FUN_00a7d330(g_011f4014) at the current size index.
@@ -67,209 +76,100 @@ void __stdcall FUN_00a51480(StrArr* pkStrings)
     FUN_00a50960(pkStrings);
     char* pszStr = _FUN_00a7d330((const char*)g_011f4014);
     unsigned int uiSize = pkStrings->m_usSize;
-    unsigned int uiMax = pkStrings->m_usMax;
+    unsigned int uiMax = pkStrings->m_usMaxSize;
     if (uiSize >= uiMax)
-        pkStrings->SetSize(uiSize + pkStrings->m_usGrow);
+        pkStrings->SetSize(uiSize + pkStrings->m_usGrowBy);
     pkStrings->SetAt(uiSize, pszStr);
 }
 
-struct Vec3
-{
-    float x, y, z;
-    Vec3()
-    {}
-    Vec3(float inX, float inY, float inZ) : x(inX), y(inY), z(inZ)
-    {}
-};
-struct SplinePath
-{
-    void __thiscall FUN_00a526b0(float time, float* output, unsigned int count, unsigned int offset, unsigned int index,
-                                 float scale, float bias);
-};
-struct SplineEvaluationState
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    float lastTime;
-    float startTime;
-    float endTime;
-    SplinePath* spline;
-    unsigned int componentOffset;
-    Vec3 lastValue;
-    unsigned int controlPointIndex;
-    float scale;
-    float bias;
-
-    bool __thiscall EvaluateSplineAtTime(float time, unsigned int unused, Vec3* out);
-};
+inline NiPoint3::NiPoint3(float inX, float inY, float inZ) : x(inX), y(inY), z(inZ)
+{}
 // @fnv 0x00a51280
-bool SplineEvaluationState::EvaluateSplineAtTime(float time, unsigned int unused, Vec3* out)
+bool __fastcall NiBSplineCompPoint3Interpolator_EvaluateSplineAtTime(NiBSplineCompPoint3Interpolator* self, void*, float time, unsigned int unused, NiPoint3* out)
 {
-    if (lastTime == time)
+    NiPoint3& lastValue = *reinterpret_cast<NiPoint3*>(&self->m_kPoint3Value);
+    if (self->m_fLastTime == time)
     {
-        *out = lastValue;
+        memcpy(out, &lastValue, sizeof(NiPoint3));
         return true;
     }
-    if (controlPointIndex != 0xffff)
+    if (self->m_kPoint3CPHandle != 0xffff)
     {
         float samples[4];
-        float normalized = (time - startTime) / (endTime - startTime);
-        spline->FUN_00a526b0(normalized, samples, 3, componentOffset, controlPointIndex, scale, bias);
-        Vec3 updatedValue(samples[0], samples[1], samples[2]);
-        lastValue = updatedValue;
+        float normalized = (time - self->m_fStartTime) / (self->m_fEndTime - self->m_fStartTime);
+        self->m_spTransformData.m_pObject->CalculateSplineValue(
+            normalized, samples, 3, self->m_spSplineBasisData.m_pObject,
+            self->m_kPoint3CPHandle, self->m_fSequenceOffset, self->m_fDecodeScale);
+        NiPoint3 updatedValue(samples[0], samples[1], samples[2]);
+        memcpy(&lastValue, &updatedValue, sizeof(NiPoint3));
     }
-    *out = lastValue;
-    lastTime = time;
+    memcpy(out, &lastValue, sizeof(NiPoint3));
+    self->m_fLastTime = time;
     return true;
 }
 
-struct CompBinaryStreamView
-{
-    void* vtable;
-    unsigned int absolutePosition;
-    unsigned int unk08;
-    unsigned int(__cdecl* read)(CompBinaryStreamView* stream, void* buffer, unsigned int totalBytes,
-                                unsigned int* componentSizes, unsigned int componentCount);
-
-    void LoadArray(float* values, unsigned int count)
-    {
-        unsigned int size = 4;
-        absolutePosition += read(this, values, 4 * count, &size, 1);
-    }
-};
-
-struct CompStreamView
-{
-    void* vtable;
-    unsigned int version;
-    char unk08[0x248];
-    CompBinaryStreamView* m_pUnderlyingStream;
-};
-
-struct Point3InterpolatorStand
-{
-    void* vtable;
-    char unk04[0x28];
-    void LoadStream(NiStream& stream);
-};
-
-struct FUN_00a51440_cls : public NiBSplineCompPoint3Interpolator
-{
-    void FUN_00a51440(NiStream& stream);
-};
-
-// Loads the base point3 interpolator from the stream, then reads two floats into the array via the binary stream.
+// Saves the base point3 interpolator and the two compression parameters.
 // @fnv 0x00a51440
-void FUN_00a51440_cls::FUN_00a51440(NiStream& stream)
+void __fastcall NiBSplineCompPoint3Interpolator_SaveBinary(NiBSplineCompPoint3Interpolator* self, void*, NiStream& stream)
 {
-    reinterpret_cast<Point3InterpolatorStand*>(this)->LoadStream(stream);
-
-    CompStreamView* pStream = reinterpret_cast<CompStreamView*>(&stream);
-    CompBinaryStreamView* pBinaryStream = pStream->m_pUnderlyingStream;
-
-    pBinaryStream->LoadArray(&m_fSequenceOffset, 2);
+    reinterpret_cast<BSplinePoint3Operations*>(self)->SaveBinary(stream);
+    NiBinaryStream* pBinaryStream = stream.m_pkOstr;
+    pBinaryStream->Write(&self->m_fSequenceOffset, 8);
 }
 
-class CloningProcessA513;
 const float DAT_01099a1c = 3.402823466e+38f;
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
+extern const void* NiBSplineCompPoint3Interpolator_vtable[];
 
-class FUN_00a506c0
-{
-  public:
-    FUN_00a506c0(int a, int b, int c) throw();
-    virtual ~FUN_00a506c0() throw();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-};
-
-class ObjA513 : public FUN_00a506c0
-{
-  public:
-    ObjA513() throw() : FUN_00a506c0(0, 0xffff, 0)
-    {}
-    virtual ~ObjA513() throw();
-
-    static void* operator new(unsigned int n)
-    {
-        return BSFadeNode::operator new(n);
-    }
-
-    float m_2c;
-    float m_30;
-
-    void CopyUnknownFields(ObjA513* dest, CloningProcessA513& cloning);
-    ObjA513* FUN_00a51360(CloningProcessA513& cloning);
-};
-
-// Allocates a new ObjA513, copies unknown fields via cloning, then overwrites m_2c and m_30 with the source values and returns the new object.
+// Allocates a compressed point3 interpolator and copies its base and compression fields.
 // @fnv 0x00a51360
-ObjA513* ObjA513::FUN_00a51360(CloningProcessA513& cloning)
+NiBSplineCompPoint3Interpolator* __fastcall NiBSplineCompPoint3Interpolator_Clone(NiBSplineCompPoint3Interpolator* self, void*, CloningProcess& cloning)
 {
-    ObjA513* pNew = new ObjA513;
+    NiBSplineCompPoint3Interpolator* pNew =
+        (NiBSplineCompPoint3Interpolator*)BSFadeNode::operator new(sizeof(NiBSplineCompPoint3Interpolator));
     if (pNew)
     {
-        pNew->m_30 = pNew->m_2c = DAT_01099a1c;
+        reinterpret_cast<BSplinePoint3Operations*>(pNew)->Construct(0, 0xffff, 0);
+        *reinterpret_cast<const void***>(pNew) = NiBSplineCompPoint3Interpolator_vtable;
     }
     else
     {
         pNew = 0;
     }
-    CopyUnknownFields(pNew, cloning);
-    pNew->m_2c = m_2c;
-    pNew->m_30 = m_30;
+    if (pNew)
+    {
+        pNew->m_fDecodeScale = pNew->m_fSequenceOffset = DAT_01099a1c;
+    }
+    else
+    {
+        pNew = 0;
+    }
+    reinterpret_cast<BSplinePoint3Operations*>(self)->CopyUnknownFields(pNew, cloning);
+    pNew->m_fSequenceOffset = self->m_fSequenceOffset;
+    pNew->m_fDecodeScale = self->m_fDecodeScale;
     return pNew;
 }
 
-extern "C" void* g_011f4014;
-void* __cdecl FUN_00a51270();
-
-void __stdcall FUN_00a50960(StrArr*);
-char* __cdecl _FUN_00a7d330(const char*);
-void __stdcall FUN_00a51480(StrArr* pkStrings);
-
 extern void* FUN_00aa13e0(unsigned int bytes) throw();
 
-struct Base506
-{
-    char pad[0x28];
-    virtual void vf0() throw();
-    Base506(int a, unsigned int b, int c) throw();
-};
-
-struct Pair
-{
-    float hi; /* +0x2c */
-    float lo; /* +0x30 */
-    Pair() throw()
-    {
-        lo = hi = 3.4028234663852886e+038f;
-    }
-};
-struct Comp4 : Base506
-{
-    Pair m_pair;
-    static void* operator new(unsigned int bytes) throw()
-    {
-        return FUN_00aa13e0(bytes);
-    }
-    Comp4() throw() : Base506(0, 0xffff, 0)
-    {}
-};
-// Allocates and returns a new Comp4 instance on the heap.
+// Allocates and initializes a compressed point3 interpolator.
 // @fnv 0x00a513c0
-void* __cdecl CreateComp4()
+void* __cdecl NiBSplineCompPoint3Interpolator_Create()
 {
-    return new Comp4();
+    NiBSplineCompPoint3Interpolator* result =
+        (NiBSplineCompPoint3Interpolator*)FUN_00aa13e0(sizeof(NiBSplineCompPoint3Interpolator));
+    if (result)
+    {
+        reinterpret_cast<BSplinePoint3Operations*>(result)->Construct(0, 0xffff, 0);
+        *reinterpret_cast<const void***>(result) = NiBSplineCompPoint3Interpolator_vtable;
+    }
+    else
+    {
+        result = 0;
+    }
+    if (result)
+    {
+        result->m_fDecodeScale = result->m_fSequenceOffset = 3.4028234663852886e+038f;
+        return result;
+    }
+    return 0;
 }

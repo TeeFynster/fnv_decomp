@@ -1,86 +1,93 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 
 // src/havok/common/internal/collide/gsk/hkgsk_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/collide/gsk/hkgsk.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 // src/havok/common/internal/collide/gsk/hkgsk.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/collide/gsk/hkgsk.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-extern "C" void _ReadWriteBarrier(void);
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Keep the original intrinsic union: the CRT byte arrays change VC9 /GS instrumentation.
+#define _INCLUDED_MM2
+// Exe 0x00e4c730 FUN_00e4c730: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
+#include "../../../../../../include/hkVector4.h"
+#define FNV_VEC4_NO_SSE
+#define FNV_VEC4_SIMD
+#include "../../../../../../include/Vec4.h"
+
+extern "C" void _ReadWriteBarrier(void);
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_setzero_ps(void);
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    int _mm_movemask_ps(__m128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_setzero_ps(void);
+    LocalM128 _mm_cmplt_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
+    int _mm_movemask_ps(LocalM128);
 }
 typedef float hkReal;
-struct hkVector4
+
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
 {
-    __m128 m_vComponents;
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
+__forceinline void hkVector4::setMul4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+}
+__forceinline void hkVector4::setAdd4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
+}
+__forceinline void hkVector4::add4(const hkVector4& a)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
+}
+__forceinline void hkVector4::setCross(const hkVector4& v1, const hkVector4& v2)
+{
+    LocalM128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
+                               _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
+    LocalM128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
+                               _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(cross0, cross1);
+}
+__forceinline int hkVector4::lessZeroXYZ() const
+{
+    return _mm_movemask_ps(_mm_cmplt_ps(m_vComponents, _mm_setzero_ps())) & 7;
+}
 
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setMul4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setAdd4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void add4(const hkVector4& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void setCross(const hkVector4& v1, const hkVector4& v2)
-    {
-        __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
-                                   _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
-                                   _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    __forceinline void setNeg4(const hkVector4& v);
-    __forceinline int lessZeroXYZ() const
-    {
-        return _mm_movemask_ps(_mm_cmplt_ps(m_vComponents, _mm_setzero_ps())) & 7;
-    }
-};
-extern __m128 DAT_010c44d0;
+extern LocalM128 DAT_010c44d0;
 __forceinline void hkVector4::setNeg4(const hkVector4& v)
 {
     m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c44d0);
 }
 static __forceinline int hkDot3LessZero(const hkVector4& a, const hkVector4& b)
 {
-    __m128 p = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    __m128 xyz = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p));
+    LocalM128 p = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+    LocalM128 xyz = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p));
     return _mm_movemask_ps(xyz) & 1;
 }
 static __forceinline void hkTranspose3(hkVector4& c0, hkVector4& c1, hkVector4& c2)
 {
-    __m128 tmp = _mm_unpacklo_ps(c0.m_vComponents, c1.m_vComponents);
-    __m128 ctmp = _mm_unpackhi_ps(c0.m_vComponents, c1.m_vComponents);
+    LocalM128 tmp = _mm_unpacklo_ps(c0.m_vComponents, c1.m_vComponents);
+    LocalM128 ctmp = _mm_unpackhi_ps(c0.m_vComponents, c1.m_vComponents);
     c0.m_vComponents = _mm_movelh_ps(tmp, c2.m_vComponents);
     c1.m_vComponents = _mm_shuffle_ps(_mm_movehl_ps(c0.m_vComponents, tmp), c2.m_vComponents, 0xd4);
     c2.m_vComponents = _mm_shuffle_ps(ctmp, c2.m_vComponents, 0xe4);
@@ -132,22 +139,22 @@ struct TriangleSolver
 };
 extern "C"
 {
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_div_ss(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    __m128 _mm_setzero_ps();
-    int _mm_movemask_ps(__m128);
-    void _mm_store_ss(float*, __m128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_div_ss(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
+    LocalM128 _mm_cmplt_ps(LocalM128, LocalM128);
+    LocalM128 _mm_setzero_ps();
+    int _mm_movemask_ps(LocalM128);
+    void _mm_store_ss(float*, LocalM128);
 }
 struct Out
 {
@@ -155,13 +162,13 @@ struct Out
     Out(int* a) : p(a)
     {}
 };
-static const __m128 one4 = {1, 1, 1, 1};
+static const LocalM128 one4 = {1, 1, 1, 1};
 struct Scalar
 {
-    __m128 q;
+    LocalM128 q;
     Scalar()
     {}
-    Scalar(const __m128& a) : q(a)
+    Scalar(const LocalM128& a) : q(a)
     {}
     operator float() const
     {
@@ -169,7 +176,7 @@ struct Scalar
         _mm_store_ss(&value, q);
         return value;
     }
-    __m128 broadcast() const
+    LocalM128 broadcast() const
     {
         return _mm_shuffle_ps(q, q, 0);
     }
@@ -190,7 +197,7 @@ struct V
 {
     union
     {
-        __m128 q;
+        LocalM128 q;
         struct
         {
             unsigned x, y, z, w;
@@ -211,20 +218,20 @@ struct V
     }
     void cross(const V& a, const V& b)
     {
-        __m128 l = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xc9), _mm_shuffle_ps(b.q, b.q, 0xd2));
-        __m128 r = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xd2), _mm_shuffle_ps(b.q, b.q, 0xc9));
+        LocalM128 l = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xc9), _mm_shuffle_ps(b.q, b.q, 0xd2));
+        LocalM128 r = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xd2), _mm_shuffle_ps(b.q, b.q, 0xc9));
         q = _mm_sub_ps(l, r);
     }
     Scalar dot(const V& b) const
     {
-        __m128 p = _mm_mul_ps(q, b.q);
-        __m128 t = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+        LocalM128 p = _mm_mul_ps(q, b.q);
+        LocalM128 t = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
         return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), t);
     }
     void interpolate(const V& a, const V& b, const Scalar& f)
     {
-        __m128 t = f.broadcast();
-        __m128 s = _mm_sub_ps(one4, t);
+        LocalM128 t = f.broadcast();
+        LocalM128 s = _mm_sub_ps(one4, t);
         q = _mm_add_ps(_mm_mul_ps(s, a.q), _mm_mul_ps(t, b.q));
     }
     Scalar component(int i) const
@@ -276,11 +283,11 @@ extern "C" int FUN_00d22e40(Shape*, const V*, const V*, const V*, Clip*);
 static __forceinline void ThreeDots(const V& first, const V& firstWeight, const V& second, const V& secondWeight,
                                     const V& third, const V& thirdWeight, V& out)
 {
-    register __m128 products0 = _mm_mul_ps(first.q, firstWeight.q);
-    register __m128 products1 = _mm_mul_ps(second.q, secondWeight.q);
-    register __m128 products2 = _mm_mul_ps(third.q, thirdWeight.q);
-    __m128 lower = _mm_unpacklo_ps(products0, products1);
-    __m128 upper = _mm_shuffle_ps(_mm_unpackhi_ps(products0, products1), products2, 0xe4);
+    register LocalM128 products0 = _mm_mul_ps(first.q, firstWeight.q);
+    register LocalM128 products1 = _mm_mul_ps(second.q, secondWeight.q);
+    register LocalM128 products2 = _mm_mul_ps(third.q, thirdWeight.q);
+    LocalM128 lower = _mm_unpacklo_ps(products0, products1);
+    LocalM128 upper = _mm_shuffle_ps(_mm_unpackhi_ps(products0, products1), products2, 0xe4);
     products0 = _mm_movelh_ps(lower, products2);
     products1 = _mm_shuffle_ps(_mm_movehl_ps(products0, lower), products2, 0xd4);
     products2 = upper;
@@ -328,31 +335,31 @@ struct State
 
 extern "C"
 {
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_div_ss(__m128, __m128);
-    __m128 _mm_sqrt_ss(__m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    int _mm_movemask_ps(__m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_setr_ps(float, float, float, float);
-    __m128 _mm_setzero_ps(void);
-    __m128 _mm_load_ss(float const*);
-    void _mm_store_ss(float*, __m128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_div_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sqrt_ss(LocalM128);
+    LocalM128 _mm_rsqrt_ss(LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+    LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+    LocalM128 _mm_cmplt_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+    int _mm_movemask_ps(LocalM128);
+    LocalM128 _mm_set_ss(float);
+    LocalM128 _mm_setr_ps(float, float, float, float);
+    LocalM128 _mm_setzero_ps(void);
+    LocalM128 _mm_load_ss(float const*);
+    void _mm_store_ss(float*, LocalM128);
 }
 
 typedef float Real;
@@ -390,7 +397,7 @@ template <class T> class Pad
 class SReal
 {
   public:
-    SReal(const __m128& x) : m_vValue(x)
+    SReal(const LocalM128& x) : m_vValue(x)
     {}
     SReal(Real x)
     {
@@ -404,17 +411,17 @@ class SReal
         _mm_store_ss(&s, m_vValue);
         return s;
     }
-    __forceinline __m128 broadcast() const
+    __forceinline LocalM128 broadcast() const
     {
         return _mm_shuffle_ps(m_vValue, m_vValue, 0);
     }
-    __forceinline const __m128& getQuad() const
+    __forceinline const LocalM128& getQuad() const
     {
         return m_vValue;
     }
 
   private:
-    __m128 m_vValue;
+    LocalM128 m_vValue;
 };
 
 inline SReal __cdecl operator*(const SReal& r, const SReal& s)
@@ -433,8 +440,6 @@ inline SReal __cdecl operator/(const SReal& r, const SReal& s)
 {
     return _mm_div_ss(r.getQuad(), s.getQuad());
 }
-
-class Vec4;
 
 class VComp
 {
@@ -480,62 +485,18 @@ class VComp
     }
 
   private:
-    __m128 m_uiMask;
+    LocalM128 m_uiMask;
     friend class Vec4;
 };
 
-extern __m128 DAT_010c44d0;
-extern __m128 DAT_010ec7f0;
+extern LocalM128 DAT_010c44d0;
+extern LocalM128 DAT_010ec7f0;
 
-class Rot;
-class Xform;
-
-class Vec4
+// hkMatrix3 (three Vec4 columns; Rot/Xform below mirror hkRotation/hkTransform) over this unit's Vec4 SIMD stand-in.
+class GskMatrix3
 {
   public:
-    __forceinline void operator=(const Vec4& v);
-    __forceinline void operator=(const __m128& v);
-    __forceinline void set(Real x, Real y, Real z, Real w = 0);
-    __forceinline void SetAllComponents(const SReal& x);
-    __forceinline void setZero4();
-    __forceinline int getInt24W() const;
-    __forceinline void setSub4(const Vec4& a, const Vec4& b);
-    __forceinline void setAddMul4(const Vec4& a, const Vec4& b, const SReal& r);
-    __forceinline void setCross(const Vec4& a, const Vec4& b);
-    __forceinline void setInterpolate4(const Vec4& a, const Vec4& b, const SReal& t);
-    __forceinline VComp compareLessThan4(const Vec4& a) const;
-    __forceinline VComp compareLessThanZero4() const;
-    __forceinline VComp compareGreaterThan4(const Vec4& a) const;
-    __forceinline void setNeg4(const Vec4& v);
-    void FUN_00c7f700(const Rot& a, const Vec4& b);
-    void FUN_004b4ab0(const Rot& a, const Vec4& b);
-    __forceinline void rotInvDir(const Rot& a, const Vec4& b);
-    __forceinline void xformPos(const Xform& a, const Vec4& b);
-    __forceinline SReal dot3(const Vec4& a) const;
-    __forceinline SReal length3() const;
-    __forceinline SReal lengthInverse3() const;
-    __forceinline SReal normalizeWithLength3();
-    __forceinline void fastNormalize3NonZero();
-    __forceinline Real& operator()(int i);
-    __forceinline const Real& operator()(int i) const;
-    __forceinline SReal getSimdAt(int i) const;
-    __forceinline __m128& getQuad();
-    __forceinline const __m128& getQuad() const;
-
-  private:
-    __m128 m_vComponents;
-
-  public:
-    operator __m128() const
-    {
-        return m_vComponents;
-    }
-};
-
-class Mat3
-{
-  public:
-    __forceinline Mat3()
+    __forceinline GskMatrix3()
     {}
     __forceinline Vec4& getColumn(int i);
     __forceinline const Vec4& getColumn(int i) const;
@@ -546,7 +507,7 @@ class Mat3
     Vec4 m_kColumn2;
 };
 
-class Rot : public Mat3
+class Rot : public GskMatrix3
 {
 };
 
@@ -565,69 +526,69 @@ class Xform
     Vec4 m_vTranslation;
 };
 
-inline __m128& Vec4::getQuad()
+__forceinline LocalM128& Vec4::getQuad()
 {
     return m_vComponents;
 }
-inline const __m128& Vec4::getQuad() const
+__forceinline const LocalM128& Vec4::getQuad() const
 {
     return m_vComponents;
 }
-inline void Vec4::operator=(const Vec4& v)
+__forceinline void Vec4::operator=(const Vec4& v)
 {
     m_vComponents = v.m_vComponents;
 }
-inline void Vec4::operator=(const __m128& r)
+__forceinline void Vec4::operator=(const LocalM128& r)
 {
     getQuad() = r;
 }
-inline void Vec4::set(Real a, Real b, Real c, Real d)
+__forceinline void Vec4::set(Real a, Real b, Real c, Real d)
 {
     m_vComponents = _mm_setr_ps(a, b, c, d);
 }
-inline void Vec4::SetAllComponents(const SReal& a)
+__forceinline void Vec4::SetAllComponents(const SReal& a)
 {
     m_vComponents = _mm_shuffle_ps(a.getQuad(), a.getQuad(), 0);
 }
-inline void Vec4::setZero4()
+__forceinline void Vec4::setZero4()
 {
     m_vComponents = _mm_setzero_ps();
 }
-int Vec4::getInt24W() const
+__forceinline int Vec4::getInt24W() const
 {
     return (reinterpret_cast<const unsigned int*>(this))[3] & ~0x3f000000;
 }
-inline void Vec4::setSub4(const Vec4& v0, const Vec4& v1)
+__forceinline void Vec4::setSub4(const Vec4& v0, const Vec4& v1)
 {
     m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
 }
-inline void Vec4::setAddMul4(const Vec4& a, const Vec4& b, const SReal& r)
+__forceinline void Vec4::setAddMul4(const Vec4& a, const Vec4& b, const SReal& r)
 {
     m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(r.broadcast(), b.m_vComponents));
 }
-inline void Vec4::setCross(const Vec4& v0, const Vec4& v1)
+__forceinline void Vec4::setCross(const Vec4& v0, const Vec4& v1)
 {
-    __m128 cross0;
+    LocalM128 cross0;
     cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
                         _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
-    __m128 cross1;
+    LocalM128 cross1;
     cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
                         _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
     m_vComponents = _mm_sub_ps(cross0, cross1);
 }
-inline void Vec4::setInterpolate4(const Vec4& v0, const Vec4& v1, const SReal& _t)
+__forceinline void Vec4::setInterpolate4(const Vec4& v0, const Vec4& v1, const SReal& _t)
 {
-    __m128 t = _t.broadcast();
-    __m128 s = _mm_sub_ps(DAT_010ec7f0, t);
+    LocalM128 t = _t.broadcast();
+    LocalM128 s = _mm_sub_ps(DAT_010ec7f0, t);
     m_vComponents = _mm_add_ps(_mm_mul_ps(s, v0.m_vComponents), _mm_mul_ps(t, v1.m_vComponents));
 }
-inline VComp Vec4::compareLessThan4(const Vec4& a) const
+__forceinline VComp Vec4::compareLessThan4(const Vec4& a) const
 {
     VComp m;
     m.m_uiMask = _mm_cmplt_ps(m_vComponents, a.m_vComponents);
     return m;
 }
-inline VComp Vec4::compareLessThanZero4() const
+__forceinline VComp Vec4::compareLessThanZero4() const
 {
     Vec4 zero;
     zero.setZero4();
@@ -635,58 +596,58 @@ inline VComp Vec4::compareLessThanZero4() const
     m.m_uiMask = _mm_cmplt_ps(m_vComponents, zero);
     return m;
 }
-inline VComp Vec4::compareGreaterThan4(const Vec4& a) const
+__forceinline VComp Vec4::compareGreaterThan4(const Vec4& a) const
 {
     return a.compareLessThan4(*this);
 }
-inline void Vec4::setNeg4(const Vec4& v)
+__forceinline void Vec4::setNeg4(const Vec4& v)
 {
     m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c44d0);
 }
-inline SReal Vec4::dot3(const Vec4& a) const
+__forceinline SReal Vec4::dot3(const Vec4& a) const
 {
-    __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-    __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    LocalM128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    LocalM128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
     return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
 }
-inline SReal Vec4::length3() const
+__forceinline SReal Vec4::length3() const
 {
     return _mm_sqrt_ss(this->dot3(*this).getQuad());
 }
-inline SReal Vec4::lengthInverse3() const
+__forceinline SReal Vec4::lengthInverse3() const
 {
-    const __m128 half = _mm_set_ss(0.5f);
-    const __m128 three = _mm_set_ss(3.0f);
-    const __m128 zero = _mm_set_ss(0.0f);
-    const __m128 len2 = this->dot3(*this).getQuad();
-    const __m128 len2EqualsZero = _mm_cmpeq_ss(len2, zero);
-    const __m128 approx = _mm_rsqrt_ss(len2);
-    const __m128 refined =
+    const LocalM128 half = _mm_set_ss(0.5f);
+    const LocalM128 three = _mm_set_ss(3.0f);
+    const LocalM128 zero = _mm_set_ss(0.0f);
+    const LocalM128 len2 = this->dot3(*this).getQuad();
+    const LocalM128 len2EqualsZero = _mm_cmpeq_ss(len2, zero);
+    const LocalM128 approx = _mm_rsqrt_ss(len2);
+    const LocalM128 refined =
         _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
     return _mm_andnot_ps(len2EqualsZero, refined);
 }
-inline SReal Vec4::normalizeWithLength3()
+__forceinline SReal Vec4::normalizeWithLength3()
 {
-    __m128 len2 = this->dot3(*this).getQuad();
-    __m128 lenInv = lengthInverse3().broadcast();
+    LocalM128 len2 = this->dot3(*this).getQuad();
+    LocalM128 lenInv = lengthInverse3().broadcast();
     m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
     return _mm_mul_ss(len2, lenInv);
 }
-inline void Vec4::fastNormalize3NonZero()
+__forceinline void Vec4::fastNormalize3NonZero()
 {
-    __m128 len2 = this->dot3(*this).getQuad();
+    LocalM128 len2 = this->dot3(*this).getQuad();
     SReal approx = _mm_rsqrt_ss(len2);
     m_vComponents = _mm_mul_ps(m_vComponents, approx.broadcast());
 }
-inline Real& Vec4::operator()(int a)
+__forceinline Real& Vec4::operator()(int a)
 {
     return reinterpret_cast<Real*>(&m_vComponents)[a];
 }
-inline const Real& Vec4::operator()(int a) const
+__forceinline const Real& Vec4::operator()(int a) const
 {
     return reinterpret_cast<const Real*>(&m_vComponents)[a];
 }
-inline SReal Vec4::getSimdAt(int i) const
+__forceinline SReal Vec4::getSimdAt(int i) const
 {
     switch (i)
     {
@@ -702,11 +663,11 @@ inline SReal Vec4::getSimdAt(int i) const
     }
 }
 
-inline Vec4& Mat3::getColumn(int x)
+inline Vec4& GskMatrix3::getColumn(int x)
 {
     return (&m_kColumn0)[x];
 }
-inline const Vec4& Mat3::getColumn(int x) const
+inline const Vec4& GskMatrix3::getColumn(int x) const
 {
     return (&m_kColumn0)[x];
 }
@@ -735,37 +696,37 @@ const Rot& Xform::getRotation() const
     return m_rotation;
 }
 
-inline void Vec4::rotInvDir(const Rot& r, const Vec4& b)
+__forceinline void Vec4::rotInvDir(const Rot& r, const Vec4& b)
 {
-    __m128 c0 = r.getColumn(0).m_vComponents;
-    __m128 c1 = r.getColumn(1).m_vComponents;
-    __m128 c2 = r.getColumn(2).m_vComponents;
+    LocalM128 c0 = r.getColumn(0).m_vComponents;
+    LocalM128 c1 = r.getColumn(1).m_vComponents;
+    LocalM128 c2 = r.getColumn(2).m_vComponents;
     {
-        __m128 _tmp, _ctmp;
+        LocalM128 _tmp, _ctmp;
         _tmp = _mm_unpacklo_ps(c0, c1);
         _ctmp = _mm_shuffle_ps(_mm_unpackhi_ps(c0, c1), c2, 0xe4);
         c0 = _mm_movelh_ps(_tmp, c2);
         c1 = _mm_shuffle_ps(_mm_movehl_ps(c0, _tmp), c2, 0xd4);
         c2 = _ctmp;
     }
-    const __m128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
-    const __m128 r0 = _mm_mul_ps(c0, b0);
-    const __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
-    const __m128 r1 = _mm_mul_ps(c1, b1);
-    const __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
-    const __m128 r2 = _mm_mul_ps(c2, b2);
+    const LocalM128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
+    const LocalM128 r0 = _mm_mul_ps(c0, b0);
+    const LocalM128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
+    const LocalM128 r1 = _mm_mul_ps(c1, b1);
+    const LocalM128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
+    const LocalM128 r2 = _mm_mul_ps(c2, b2);
     m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
 
-inline void Vec4::xformPos(const Xform& t, const Vec4& b)
+__forceinline void Vec4::xformPos(const Xform& t, const Vec4& b)
 {
     const Rot& r = t.getRotation();
-    __m128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
-    __m128 r0 = _mm_mul_ps(r.getColumn(0).m_vComponents, b0);
-    __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
-    __m128 r1 = _mm_mul_ps(r.getColumn(1).m_vComponents, b1);
-    __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
-    __m128 r2 = _mm_mul_ps(r.getColumn(2).m_vComponents, b2);
+    LocalM128 b0 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x00);
+    LocalM128 r0 = _mm_mul_ps(r.getColumn(0).m_vComponents, b0);
+    LocalM128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0x55);
+    LocalM128 r1 = _mm_mul_ps(r.getColumn(1).m_vComponents, b1);
+    LocalM128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xaa);
+    LocalM128 r2 = _mm_mul_ps(r.getColumn(2).m_vComponents, b2);
     m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), _mm_add_ps(r2, t.getTranslation().m_vComponents));
 }
 
@@ -812,11 +773,11 @@ inline void __cdecl VUtil::TransformPointArray(const Xform& t, const Vec4* vecto
 inline void __cdecl VUtil::dot3_3vs3(const Vec4& a0, const Vec4& b0, const Vec4& a1, const Vec4& b1, const Vec4& a2,
                                      const Vec4& b2, Vec4& dotsOut)
 {
-    register __m128 c0 = _mm_mul_ps(a0.getQuad(), b0.getQuad());
-    register __m128 c1 = _mm_mul_ps(a1.getQuad(), b1.getQuad());
-    register __m128 c2 = _mm_mul_ps(a2.getQuad(), b2.getQuad());
+    register LocalM128 c0 = _mm_mul_ps(a0.getQuad(), b0.getQuad());
+    register LocalM128 c1 = _mm_mul_ps(a1.getQuad(), b1.getQuad());
+    register LocalM128 c2 = _mm_mul_ps(a2.getQuad(), b2.getQuad());
     {
-        __m128 _tmp, _ctmp;
+        LocalM128 _tmp, _ctmp;
         _tmp = _mm_unpacklo_ps(c0, c1);
         _ctmp = _mm_shuffle_ps(_mm_unpackhi_ps(c0, c1), c2, 0xe4);
         c0 = _mm_movelh_ps(_tmp, c2);

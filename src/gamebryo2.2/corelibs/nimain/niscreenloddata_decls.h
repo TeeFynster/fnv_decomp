@@ -1,66 +1,32 @@
-// gamebryo2.2/corelibs/nimain/niscreenloddata_decls.h: declares NiPoint3, NiTransform, NiBound, ScreenBone, ScreenData and more
+// gamebryo2.2/corelibs/nimain/niscreenloddata_decls.h: local transform and screen-object views
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3 operator+(const NiPoint3& b) const
-    {
-        NiPoint3 r;
-        r.x = x + b.x;
-        r.y = y + b.y;
-        r.z = z + b.z;
-        return r;
-    }
-};
-class NiTransform
+// LocalNiTransform: include/NiTransform.h declares an out-of-line default constructor; 0x00a86530 and 0x00a95fb0
+// construct their NiTransform locals without calling one. Passed to NiBound as the shared NiTransform.
+class NiTransform;
+class LocalNiTransform
 {
   public:
     float rotation[9];
     NiPoint3 translation;
     float scale;
-    void InvertTransform(NiTransform& result) const;
-    NiTransform operator*(const NiTransform& other) const;
-};
-class NiBound
-{
-  public:
-    NiPoint3 center;
-    float radius;
-    NiBound& operator=(const NiBound& b)
-    {
-        center = b.center;
-        radius = b.radius;
-        return *this;
-    }
-    void Update(const NiBound&, const NiTransform&);
-    void Merge(const NiBound*);
-    void TransformPoint(const NiTransform&);
+    void InvertTransform(LocalNiTransform& result) const;
+    LocalNiTransform operator*(const LocalNiTransform& other) const;
 };
 struct ScreenBone
 {
-    NiTransform transform;
+    LocalNiTransform transform;
     NiBound bound;
     char extra[8];
 };
 struct ScreenData
 {
     char pad[12];
-    NiTransform transform;
+    LocalNiTransform transform;
     ScreenBone* bones;
     unsigned int count;
 };
 struct ScreenObject
 {
     char pad[104];
-    NiTransform world;
-};
-class NiScreenLODData
-{
-  public:
-    char pad[8];
-    ScreenData* data;
-    void* unused;
-    ScreenObject* root;
-    ScreenObject** objects;
-    void UpdateScreenBound(NiBound& bound);
+    LocalNiTransform world;
 };

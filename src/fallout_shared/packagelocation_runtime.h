@@ -11,7 +11,7 @@ class AnimData;
 class ValidBip01Names;
 class ScriptLocals;
 
-#include "TESForm.h"
+#include "../../include/TESForm.h"
 #include "packagelocation_reference.h"
 #include "packagelocation_process.h"
 #include "packagelocation_package.h"

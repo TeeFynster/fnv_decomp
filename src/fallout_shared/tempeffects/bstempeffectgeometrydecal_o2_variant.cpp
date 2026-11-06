@@ -4,14 +4,10 @@
 
 // src/fallout_shared/tempeffects/bstempeffectgeometrydecal.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/tempeffects/bstempeffectgeometrydecal.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct NiRTTI
-{
-};
+#include "../../../include/NiRTTI.h"
+#include "../../../include/BSDismemberSkinInstance.h"
+#include "../../../include/BSTempEffectGeometryDecal.h"
 extern const NiRTTI g_011d6b04;
-struct BSTempEffectGeometryDecal
-{
-    const NiRTTI* FUN_006838a0() const;
-};
 extern unsigned char* DAT_011f5b04;
 unsigned char* FUN_00683a60();
 extern "C" void __cdecl PowFloat(float, int);
@@ -19,29 +15,11 @@ void __cdecl ForwardFloatAndInt(float f, int i);
 struct NiFixedString;
 extern NiFixedString* DAT_011c6228;
 NiFixedString* __cdecl FUN_00688460();
-struct GlobalObjectO2_00a7b610
-{
-    int dummy;
-};
-GlobalObjectO2_00a7b610 g_011f5b2c;
-struct FUN_00688590_shell
-{
-    GlobalObjectO2_00a7b610* GetRTTI() const;
-};
-struct BSDismemberSkinInstance
-{
-    void* __thiscall FUN_006885e0(unsigned int);
-    void __thiscall FUN_00688610();
-};
+extern const NiRTTI g_011f5b2c;
 void* __cdecl __Dummy_00b6fef0(void* p, unsigned int size);
 struct FUN_00685e60_shell
 {
     void __thiscall FUN_00685e60(unsigned int, unsigned int);
-};
-struct NiSkinInstance
-{
-    void __thiscall FUN_00a85580();
-    void* __thiscall FUN_006885a0(unsigned int flags);
 };
 extern "C" void __cdecl _delete(void* p, unsigned int size);
 
@@ -61,6 +39,7 @@ void* __thiscall FUN_00a81f90_class::FUN_00a81f90()
 }
 
 #include <windows.h>
+#include "../../../include/NiSkinInstance.h"
 void __cdecl FUN_00aa10f0(void* p) throw();
 struct S_00a85580_RefObject
 {
@@ -78,7 +57,7 @@ template <class T> struct S_00a85580_Pointer
     T* m_pObject;
     ~S_00a85580_Pointer() throw()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
 };

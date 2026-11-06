@@ -1,6 +1,22 @@
 
 // Fallout: New Vegas decompilation: fallout_shared/bgstextureset.cpp.
 #include "bgstextureset_packet.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTexture.h"
+#include "../../include/BSShaderManager.h"
+
+// The shared class does not yet declare these unit-local method bodies.
+// This helper adds no storage and only overrides an existing virtual slot.
+struct BGSTextureSetMethods : public BGSTextureSet
+{
+    void* DeleteTextureSet(unsigned int flags);
+    void SetFullNameByType(int aeType, const char* apFilename);
+    void SaveTextureSet();
+    bool CompareTextureSet(TESForm* apCompare);
+    void CopyFromTextureSet(TESForm* apForm);
+    using BSTextureSet::GetTexture;
+    virtual void GetTexture(BSShaderProperty::TextureTypeEnum aeTextureType, NiPointer<NiTexture>& arspTexture);
+};
 
 // @fnv 0x005922e0
 BGSTextureSet::BGSTextureSet()
@@ -34,7 +50,7 @@ void BGSTextureSet::ClearData()
 }
 
 // @fnv 0x00592e70
-const char* BGSTextureSet::GetTextureFilePath(int aeTextureType)
+const char* BGSTextureSet::GetTexture(BSShaderProperty::TextureTypeEnum aeTextureType)
 {
     const char* pTextureFilePath = 0;
     switch (aeTextureType)
@@ -88,7 +104,7 @@ void BGSTextureSet::InitializeNullTextureSet()
 }
 
 // @fnv 0x005928a0
-bool BGSTextureSet::Load(TESFile* file)
+bool BGSTextureSet::LoadForm(TESFile* file)
 {
     LoadRecordHeader(file);
     SetInitializationState(false);
@@ -150,7 +166,7 @@ bool BGSTextureSet::Load(TESFile* file)
             NiPoint2 fileHash;
             FileNameHash::CreateDirectoryAndFileHashes(path, (FileNameHash&)kDirHash, (FileNameHash&)fileHash);
             m_ppTextureFileEntries[i] =
-                ArchiveManager::FindFileEntry(ARCHIVE_TEXTURES, (FileNameHash&)kDirHash, (FileNameHash&)fileHash, path);
+                ArchiveManager::FindFileEntry(ARCHIVE_TYPE_INDEX_TEXTURES, (FileNameHash&)kDirHash, (FileNameHash&)fileHash, path);
         }
     }
     return true;
@@ -185,16 +201,11 @@ void* S591140::FUN_00591140(unsigned int flags)
 }
 
 void __cdecl _delete(void*, unsigned int);
-struct Holder
-{
-    void FUN_005923c0();
-    void* FUN_00592380(unsigned int flags);
-};
-// Calls FUN_005923c0, frees this with _delete when flags has bit 1 set, and returns this.
+// Destroys the texture set, frees it when flags has bit 1 set, and returns this.
 // @fnv 0x00592380
-void* Holder::FUN_00592380(unsigned int flags)
+void* BGSTextureSetMethods::DeleteTextureSet(unsigned int flags)
 {
-    this->FUN_005923c0();
+    BGSTextureSet::~BGSTextureSet();
     if (flags & 1)
         _delete(this, 0xa0);
     return this;
@@ -207,28 +218,14 @@ struct FullNameEx
     int _m2;
     void SetFullName(char const*);
 };
-struct Holder00592cc0
-{
-    char _pad[56];
-    FullNameEx _arr[6];
-    void SetFullNameByType(int, char const*);
-};
-// If aeType is below 6, calls SetFullName(apFilename) on the _arr entry at index aeType.
+// If aeType is below 6, assigns the filename to that texture entry.
 // @fnv 0x00592cc0
-void Holder00592cc0::SetFullNameByType(int aeType, char const* apFilename)
+void BGSTextureSetMethods::SetFullNameByType(int aeType, char const* apFilename)
 {
     if (aeType < 6)
-        _arr[aeType].SetFullName(apFilename);
+        ((FullNameEx*)&pTextures[aeType])->SetFullName(apFilename);
 }
 
-struct FUN_004855a0
-{
-    void M();
-};
-struct FUN_00485680
-{
-    void M();
-};
 struct FUN_0048e370_obj
 {
     void FUN_0048e370(unsigned int);
@@ -239,21 +236,17 @@ struct FUN_00593320_shell
 };
 void __cdecl FUN_00485950(unsigned int, unsigned int);
 extern unsigned int DAT_0118c574[6];
-struct FUN_00592810_shell
-{
-    void FUN_00592810();
-};
 // @fnv 0x00592810
-void FUN_00592810_shell::FUN_00592810()
+void BGSTextureSetMethods::SaveTextureSet()
 {
     int i;
-    ((FUN_004855a0*)this)->M();
+    TESForm::FUN_004855a0();
     for (i = 0; i < 6; ++i)
-        ((FUN_0048e370_obj*)((char*)this + 0x38 + i * 0xc))->FUN_0048e370(DAT_0118c574[i]);
-    if (*(void**)((char*)this + 0x80))
-        ((FUN_00593320_shell*)*(void**)((char*)this + 0x80))->FUN_00593320((void*)0x54444f44);
-    FUN_00485950(0x4d414e44, *(unsigned short*)((char*)this + 0x84));
-    ((FUN_00485680*)this)->M();
+        ((FUN_0048e370_obj*)&pTextures[i])->FUN_0048e370(DAT_0118c574[i]);
+    if (m_pDecalData)
+        ((FUN_00593320_shell*)m_pDecalData)->FUN_00593320((void*)0x54444f44);
+    FUN_00485950(0x4d414e44, iFlags);
+    TESForm::FUN_00485680();
 }
 
 struct FUN_005e79a0_t : public TESForm
@@ -274,24 +267,8 @@ struct FUN_005926f0_entry
     virtual bool Compare(void*) = 0;
 };
 
-struct FUN_005926f0_texture
-{
-    char _pad[0x80];
-    FUN_005932e0_shell* _compareObject;
-    unsigned short _flags;
-};
-
-struct FUN_005926f0_shell
-{
-    char _pad[0x80];
-    FUN_005932e0_shell* _compareObject;
-    unsigned short _flags;
-
-    bool CompareTextureSet(TESForm* apCompare);
-};
-
 // @fnv 0x005926f0
-bool FUN_005926f0_shell::CompareTextureSet(TESForm* apCompare)
+bool BGSTextureSetMethods::CompareTextureSet(TESForm* apCompare)
 {
     BGSTextureSet* pcompare = dynamic_cast<BGSTextureSet*>(apCompare);
     int i;
@@ -301,25 +278,25 @@ bool FUN_005926f0_shell::CompareTextureSet(TESForm* apCompare)
 
     for (i = 0; i < 6; ++i)
     {
-        if (reinterpret_cast<FUN_005926f0_entry*>(reinterpret_cast<char*>(this) + 0x38 + i * 0xc)
-                ->Compare(reinterpret_cast<void*>(reinterpret_cast<char*>(pcompare) + 0x38 + i * 0xc)))
+        if (reinterpret_cast<FUN_005926f0_entry*>(&pTextures[i])
+                ->Compare(reinterpret_cast<void*>(&pcompare->pTextures[i])))
             return true;
     }
 
-    if (reinterpret_cast<FUN_005926f0_texture*>(pcompare)->_compareObject)
+    if (reinterpret_cast<FUN_005932e0_shell*>(pcompare->m_pDecalData))
     {
-        if (!_compareObject)
+        if (!m_pDecalData)
             return true;
 
-        if (_compareObject->Compare(reinterpret_cast<FUN_005926f0_texture*>(pcompare)->_compareObject))
+        if (reinterpret_cast<FUN_005932e0_shell*>(m_pDecalData)->Compare(reinterpret_cast<FUN_005932e0_shell*>(pcompare->m_pDecalData)))
             return true;
     }
-    else if (_compareObject)
+    else if (m_pDecalData)
     {
         return true;
     }
 
-    if (_flags != reinterpret_cast<FUN_005926f0_texture*>(pcompare)->_flags)
+    if (iFlags != pcompare->iFlags)
         return true;
 
     if (reinterpret_cast<FUN_005e79a0_t*>(this)->FUN_00485270(pcompare))
@@ -333,16 +310,6 @@ struct DecalDataOwned : public DecalData
     ~DecalDataOwned();
 };
 
-struct BoundObjectCopier
-{
-    void CopyBoundObject(TESForm* apForm);
-};
-
-struct BGSTextureSetCopy : public BGSTextureSet
-{
-    void CopyFromTextureSet(TESForm* apForm);
-};
-
 struct DecalDataCopier
 {
     void Copy(DecalData* apSrc);
@@ -350,7 +317,7 @@ struct DecalDataCopier
 
 // Copies the six texture entries, the decal data and the flags from another BGSTextureSet, then copies the bound object.
 // @fnv 0x00592560
-void BGSTextureSetCopy::CopyFromTextureSet(TESForm* apForm)
+void BGSTextureSetMethods::CopyFromTextureSet(TESForm* apForm)
 {
     BGSTextureSet* pSourceTextureSet = dynamic_cast<BGSTextureSet*>(apForm);
     if (!pSourceTextureSet)
@@ -369,99 +336,20 @@ void BGSTextureSetCopy::CopyFromTextureSet(TESForm* apForm)
         m_pDecalData = 0;
     }
     iFlags = pSourceTextureSet->iFlags;
-    ((BoundObjectCopier*)this)->CopyBoundObject(pSourceTextureSet);
+    TESForm::CopyFrom(pSourceTextureSet);
 }
 
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-    NiPointer(T* object = 0);
-    ~NiPointer();
-    NiPointer<T>& operator=(const NiPointer<T>& other);
-};
-class NiTexture
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
-class BSShaderManager
-{
-  public:
-    static void GetTexture(const char* apPath, bool abFlag, NiPointer<NiTexture>& arspTexture, bool abFlag2,
-                           bool abFlag3);
-};
 int FUN_00406d30(char*, unsigned int, const char*);
 
-struct TexSetIface
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual const char* GetTextureFilePath(int aeTextureType);
-    virtual void GetTextureByType(int aeTextureType, NiPointer<NiTexture>& arspTexture);
-};
-struct FormBase9
-{
-    virtual void f00();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-};
-struct TexSetB : FormBase9, TexSetIface
-{
-    virtual void GetTextureByType(int aeTextureType, NiPointer<NiTexture>& arspTexture);
-};
 // Looks up the texture filename for aeTextureType, builds a Data\Textures\ path, loads the texture via BSShaderManager::GetTexture and stores it in arspTexture.
 // @fnv 0x00592f30
-void TexSetB::GetTextureByType(int aeTextureType, NiPointer<NiTexture>& arspTexture)
+void BGSTextureSetMethods::GetTexture(BSShaderProperty::TextureTypeEnum aeTextureType, NiPointer<NiTexture>& arspTexture)
 {
     const char* pFilename;
     {
         NiPointer<NiTexture> spTexture = 0;
         char acPath[0x104];
-        pFilename = GetTextureFilePath(aeTextureType);
+        pFilename = GetTexture(aeTextureType);
         if (pFilename && *pFilename)
         {
             FUN_00406d30(acPath, 0x104, "Data\\Textures\\");

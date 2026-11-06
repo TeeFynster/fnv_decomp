@@ -1,64 +1,57 @@
+#include "../../../include/TESSaveLoadGame.h"
+#include "../../../include/Actor.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/TelekinesisEffect.h"
+#include "../../../include/ActiveEffect.h"
+#include "../../../include/ValueModifierEffect.h"
+#include "../../../include/GO.h"
+#include "../../../include/MagicCaster.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiObject.h"
+#include "../../../include/NiRTTI.h"
+#include "../../../include/Setting.h"
+#include "../../../include/EffectSetting.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/bhkCollisionObject.h"
+#include "../../../include/bhkWorldObject.h"
+#include "../../../include/bhkFilter.h"
 
 // src/fallout/magic/telekinesiseffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/telekinesiseffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct FUN_0082a510_shell
+// A trivial aggregate keeps the deletion flag on the stack while the effect
+// pointer uses ECX, matching the original deleting-destructor ABI.
+struct TelekinesisDeletionFlags
 {
-    void FUN_0082a540();
-    void* DestroyIfFlagged(unsigned int flags);
+    unsigned int value;
 };
-
 void __cdecl _Deallocate(void*);
 
-// Calls FUN_0082a540, then deallocates this when bit 0 of flags is set, and returns this.
 // @fnv 0x0082a510
-void* FUN_0082a510_shell::DestroyIfFlagged(unsigned int flags)
+void* __fastcall DestroyTelekinesisEffect(TelekinesisEffect* effect, TelekinesisDeletionFlags flags)
 {
-    FUN_0082a540();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
+    effect->TelekinesisEffect::~TelekinesisEffect();
+    if (flags.value & 1)
+        _Deallocate(effect);
+    return effect;
 }
 
-struct FUN_0082aab0_shell
-{
-    void SetField644(float value);
-};
-
 // @fnv 0x0082aab0
-void FUN_0082aab0_shell::SetField644(float value)
+void PlayerCharacter::SetField644(float value)
 {
     *(float*)((char*)this + 0x644) = value;
 }
 
-struct FUN_0082af40_shell
-{
-    float fTelekinesisStrength;  // +0x644
-    float GetTelekinesisStrength();
-};
-
+// The shared header has no declaration for this getter. Its sole ECX argument
+// preserves the original parameterless member ABI without a player stand-in.
 // @fnv 0x0082af40
-float FUN_0082af40_shell::GetTelekinesisStrength()
+float __fastcall GetTelekinesisStrength(PlayerCharacter* player)
 {
-    return *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x644);
+    return *reinterpret_cast<float*>(reinterpret_cast<char*>(player) + 0x644);
 }
 
-struct Actor
-{
-};
-struct ValueModifierEffect
-{
-    unsigned short __thiscall FUN_00802d90(Actor* apActor);
-};
-struct TelekinesisEffect : ValueModifierEffect
-{
-    unsigned short __thiscall FUN_0082b190(Actor* apActor);
-};
-struct FUN_008df040_shell
-{
-    unsigned char __thiscall FUN_008df040();
-};
-extern FUN_008df040_shell* g_TESSaveLoadGame;
+extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 // Returns the effect's save size: base size from FUN_00802d90 plus 4, plus 8 more when the save version is at least 0x40.
 // @fnv 0x0082b190
@@ -75,61 +68,33 @@ unsigned short __thiscall TelekinesisEffect::FUN_0082b190(Actor* apActor)
     return uiSaveSize;
 }
 
-namespace fnv_0082b290 {
-struct Actor;
-struct TESSaveLoadGame;
-
-struct ValueModifierEffect
-{
-    void FUN_00802dd0(Actor* apActor);
-};
-
-struct TESSaveLoadGame_shell
-{
-    void FUN_00857aa0(unsigned int* pOut, unsigned int size);
-    void FUN_008579e0(void* pOut, unsigned int size);
-    unsigned char FUN_008df040();
-};
-
-extern TESSaveLoadGame* g_TESSaveLoadGame;
-
-struct TelekinesisEffect : ValueModifierEffect
-{
-    void LoadFromSave(Actor* apActor);
-};
 
 // @fnv 0x0082b290
 void TelekinesisEffect::LoadFromSave(Actor* apActor)
 {
     ValueModifierEffect::FUN_00802dd0(apActor);
     unsigned int irefID;
-    ((TESSaveLoadGame_shell*)g_TESSaveLoadGame)->FUN_00857aa0(&irefID, 4);
-    *(unsigned int*)((char*)this + 0x58) = irefID;
-    if (((TESSaveLoadGame_shell*)g_TESSaveLoadGame)->FUN_008df040() >= 0x40)
+    g_TESSaveLoadGame->FUN_00857aa0(&irefID, 4u);
+    unk58 = irefID;
+    if (g_TESSaveLoadGame->FUN_008df040() >= 0x40)
     {
-        ((TESSaveLoadGame_shell*)g_TESSaveLoadGame)->FUN_008579e0((void*)((char*)this + 0x50), 4);
-        ((TESSaveLoadGame_shell*)g_TESSaveLoadGame)->FUN_008579e0((void*)((char*)this + 0x54), 4);
+        g_TESSaveLoadGame->FUN_008579e0(&m_50, 4);
+        g_TESSaveLoadGame->FUN_008579e0(&m_54, 4);
     }
 }
-}  // namespace fnv_0082b290
-
-struct FUN_0082a670_shell
-{
-    void __thiscall FUN_0082a670();
-    void __thiscall FUN_0082c000();
-    void __thiscall StartTelekinesisEffect();
-};
 
 void* __cdecl FUN_00703390();
+// This base start helper has no shared declaration; its receiver uses ECX.
+void __fastcall StartValueModifierEffect(ValueModifierEffect* effect);
 
 // Calls FUN_0082c000, stores the result of FUN_00703390 at offset 0x58, calls StartTelekinesisEffect, and clears the byte at offset 0x5d.
 // @fnv 0x0082a670
-void __thiscall FUN_0082a670_shell::FUN_0082a670()
+void __thiscall TelekinesisEffect::FUN_0082a670()
 {
-    FUN_0082c000();
-    *(void**)((char*)this + 0x58) = FUN_00703390();
+    StartValueModifierEffect(this);
+    target = static_cast<TESObjectREFR*>(FUN_00703390());
     StartTelekinesisEffect();
-    *(char*)((char*)this + 0x5d) = 0;
+    m_5d = 0;
 }
 
 struct Flt
@@ -137,15 +102,10 @@ struct Flt
     operator unsigned int();
 };
 
-struct FUN_0082aa90_shell
-{
-    unsigned int GetFloatAsUInt();
-};
-
 // @fnv 0x0082aa90
-unsigned int __thiscall FUN_0082aa90_shell::GetFloatAsUInt()
+MagicCaster* __thiscall PlayerCharacter::GetFloatAsUInt()
 {
-    return ((Flt*)((char*)this + 0x634))->operator unsigned int();
+    return reinterpret_cast<MagicCaster*>(((Flt*)((char*)this + 0x634))->operator unsigned int());
 }
 
 void* __cdecl FUN_004b5a80(void const*);
@@ -164,26 +124,13 @@ void* __thiscall FUN_0082aeb0_shell::FUN_0082aeb0()
     return FUN_004b5a80(result);
 }
 
-struct GO
-{
-    ~GO();
-};
-struct FUN_0080d930
-{
-    ~FUN_0080d930();
-};
-struct FUN_0082a540 : FUN_0080d930
-{
-    char _pad[0x4C];
-    GO _go;
-    ~FUN_0082a540();
-};
-// Destructor for FUN_0082a540; destroys its GO member and the FUN_0080d930 base.
+// Destroys the GO and ValueModifierEffect subobjects without changing the vtable.
 // @fnv 0x0082a540
-FUN_0082a540::~FUN_0082a540()
+TelekinesisEffect::~TelekinesisEffect()
 {}
 
-struct ScriptLocalsX
+// This nullable reference-flags accessor binds to 0x004ae750; ScriptLocals::GetLocalData binds to 0x00541c80.
+struct NullableReferenceFlagsAccessor
 {
     void* __thiscall GetLocalData();
 };
@@ -198,208 +145,80 @@ struct FUN_0082aee0_shell
 // @fnv 0x0082aee0
 unsigned int FUN_0082aee0_shell::FUN_0082aee0()
 {
-    Calendar* calendar = reinterpret_cast<Calendar*>((reinterpret_cast<ScriptLocalsX*>(this))->GetLocalData());
+    Calendar* calendar = reinterpret_cast<Calendar*>((reinterpret_cast<NullableReferenceFlagsAccessor*>(this))->GetLocalData());
     return calendar ? calendar->GetDaysPassed() : 0;
 }
 
-struct FUN_0082af20_shell
-{
-    unsigned int __thiscall GetField63C();
-};
+// As above, retain the unsupported getter locally with its original ECX ABI.
 // @fnv 0x0082af20
-unsigned int __thiscall FUN_0082af20_shell::GetField63C()
+unsigned int __fastcall GetField63C(PlayerCharacter* player)
 {
-    return *(unsigned int*)((char*)this + 0x63c);
+    return *(unsigned int*)((char*)player + 0x63c);
 }
 
-struct TESChallenge
-{
-    void* GetFormTwo();
-};
-struct ActiveEffect
-{
-    TESChallenge* __thiscall GetEffectSetting();
-};
-struct FUN_0082afa0_shell
-{
-    void __thiscall FUN_0082afa0();
-};
-struct FUN_0082c810_shell
-{
-    void __thiscall ApplyEffect();
-};
 struct FUN_00974a50_shell
 {
     void __thiscall FUN_00974a50(void* a, void* b);
 };
 extern int DAT_011e0e80;
-struct FUN_0082af60_shell
-{
-    void __thiscall FUN_0082af60();
-};
 // @fnv 0x0082af60
-void __thiscall FUN_0082af60_shell::FUN_0082af60()
+void __thiscall TelekinesisEffect::FUN_0082af60()
 {
-    ((FUN_0082afa0_shell*)this)->FUN_0082afa0();
+    FUN_0082afa0();
     ((FUN_00974a50_shell*)(&DAT_011e0e80))
-        ->FUN_00974a50(*(void**)((char*)this + 0x58), ((ActiveEffect*)this)->GetEffectSetting()->GetFormTwo());
-    ((FUN_0082c810_shell*)this)->ApplyEffect();
+        ->FUN_00974a50(target, GetEffectSetting()->GetEffectShader());
+    ApplyEffect();
 }
 
-struct FUN_0082a460
-{
-    char buf[0x60];
-    FUN_0082a460(int, int, int);
-};
-// Allocates and constructs a FUN_0082a460 object from x, y and z, returning the new instance.
+// Allocates and constructs a TelekinesisEffect from x, y and z.
 // @fnv 0x0082b110
-FUN_0082a460* __cdecl CreateFUN_0082a460(int x, int y, int z)
+TelekinesisEffect* __cdecl CreateTelekinesisEffect(int x, int y, int z)
 {
-    return new FUN_0082a460(x, y, z);
+    return new TelekinesisEffect(x, y, z);
 }
 
-struct FUN_0080dfd0_shell
-{
-    void FUN_00802db0(Actor* apActor);
-};
-struct TESSaveLoadGame
-{
-    void FUN_00857a10(int, int);
-    unsigned char FUN_008df040();
-    void FUN_008579b0(void*, int);
-};
-struct ref_0084e3a0_shell
-{
-    unsigned int ref_0084e3a0();
-};
-struct FUN_0082b200_shell : FUN_0080dfd0_shell
-{
-    void SaveLoad(Actor* apActor);
-};
 // @fnv 0x0082b200
-void FUN_0082b200_shell::SaveLoad(Actor* apActor)
+void TelekinesisEffect::SaveLoad(Actor* apActor)
 {
     unsigned int irefID;
     FUN_00802db0(apActor);
     irefID = 0;
-    if (*(unsigned int*)((char*)this + 0x58))
-        irefID = ((ref_0084e3a0_shell*)*(unsigned int*)((char*)this + 0x58))->ref_0084e3a0();
-    ((TESSaveLoadGame*)g_TESSaveLoadGame)->FUN_00857a10((int)&irefID, 4);
-    if (((TESSaveLoadGame*)g_TESSaveLoadGame)->FUN_008df040() >= 0x40)
+    if (unk58)
+        irefID = target->FUN_0084e3a0();
+    g_TESSaveLoadGame->FUN_00857a10((int)&irefID, 4);
+    if (g_TESSaveLoadGame->FUN_008df040() >= 0x40)
     {
-        ((TESSaveLoadGame*)g_TESSaveLoadGame)->FUN_008579b0((char*)this + 0x50, 4);
-        ((TESSaveLoadGame*)g_TESSaveLoadGame)->FUN_008579b0((char*)this + 0x54, 4);
+        g_TESSaveLoadGame->FUN_008579b0(&m_50, 4);
+        g_TESSaveLoadGame->FUN_008579b0(&m_54, 4);
     }
 }
 
-struct TESObjectREFR
-{
-    virtual ~TESObjectREFR();
-};
-struct TESForm
-{
-    virtual ~TESForm();
-};
 TESForm* __cdecl GetFormByID(unsigned int id);
-struct InvisibilityEffect
-{
-    void FUN_0082cd10(Actor*);
-};
-struct FUN_0082b300_shell : InvisibilityEffect
-{
-    void StartTelekinesisEffect();
-    void FUN_0082b300(Actor* apActor);
-};
+
 // @fnv 0x0082b300
-void FUN_0082b300_shell::FUN_0082b300(Actor* apActor)
+void TelekinesisEffect::FUN_0082b300(Actor* apActor)
 {
-    FUN_0082cd10(apActor);
-    TESObjectREFR* pRef = *reinterpret_cast<TESObjectREFR**>(reinterpret_cast<unsigned char*>(this) + 0x58);
+    ValueModifierEffect::FUN_0082cd10(apActor);
+    TESObjectREFR* pRef = target;
     if (pRef)
-        *reinterpret_cast<TESObjectREFR**>(reinterpret_cast<unsigned char*>(this) + 0x58) =
-            dynamic_cast<TESObjectREFR*>(GetFormByID(reinterpret_cast<unsigned int>(pRef)));
-    if (*reinterpret_cast<TESObjectREFR**>(reinterpret_cast<unsigned char*>(this) + 0x58))
+        target = dynamic_cast<TESObjectREFR*>(GetFormByID(reinterpret_cast<unsigned int>(pRef)));
+    if (target)
         StartTelekinesisEffect();
-    *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(this) + 0x5d) = 1;
+    m_5d = 1;
 }
 
 void* __cdecl operator new(unsigned int);
 
-struct FUN_0082a5a0_shell
-{
-    virtual void v00()
-    {}
-    virtual void v01()
-    {}
-    virtual void v02()
-    {}
-    virtual void v03()
-    {}
-    virtual void v04()
-    {}
-    virtual void v05()
-    {}
-    virtual void v06()
-    {}
-    virtual void v07()
-    {}
-    virtual void v08()
-    {}
-    virtual void v09()
-    {}
-    virtual void v10()
-    {}
-    virtual void v11()
-    {}
-    virtual void v12()
-    {}
-    virtual void v13()
-    {}
-    virtual void v14()
-    {}
-    virtual void v15()
-    {}
-    virtual void v16()
-    {}
-    virtual void CopyFrom(ActiveEffect* copy)
-    {}
-    ActiveEffect* CreateCopy();
-};
-
 // @fnv 0x0082a5a0
-ActiveEffect* FUN_0082a5a0_shell::CreateCopy()
+ActiveEffect* TelekinesisEffect::CreateCopy()
 {
-    ActiveEffect* copy = reinterpret_cast<ActiveEffect*>(
-        new FUN_0082a460(*reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x28),
-                         *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x08),
-                         *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x0C)));
+    ActiveEffect* copy = new TelekinesisEffect(reinterpret_cast<int>(m_pEffectInstance),
+                                              reinterpret_cast<int>(pSpell), reinterpret_cast<int>(pEffect));
 
-    CopyFrom(copy);
+    CopyData(copy);
     return copy;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-    NiPoint3();
-    NiPoint3 operator-(const NiPoint3&) const;
-    float Dot(const NiPoint3&) const;
-    NiPoint3& operator*=(float);
-};
-struct bhkFilter
-{
-    unsigned int value;
-    int FUN_0043b4d0();
-};
-struct bhkWorldObject
-{
-    bhkFilter FUN_0043b4f0();
-    void* FUN_004ae750();
-};
-struct bhkCollisionObject
-{
-    bhkWorldObject* FUN_006fa820();
-};
 struct SceneObject
 {
 };
@@ -530,46 +349,11 @@ struct TelekinesisReference
     virtual SceneObject* GetSceneObject();
     ReferenceForm* GetObjectReference();
 };
-struct MagicCaster
-{
-};
 struct ShaderDefinition
 {
 };
-struct EffectSettingX
-{
-    ShaderDefinition* GetEffectShader();
-};
-struct TelekinesisStartEffect
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    float magnitude;
-    unsigned int unk54;
-    TelekinesisReference* target;
-    MagicCaster* FUN_0045cd60();
-    void Dispel(bool);
-    EffectSettingX* GetEffectSetting();
-    void StartTelekinesisEffect();
-};
+// This caster getter has no shared declaration; its receiver uses ECX.
+MagicCaster* __fastcall GetTelekinesisCaster(ActiveEffect* effect);
 struct TelekinesisConstraint
 {
     unsigned int unk00;
@@ -581,32 +365,13 @@ struct TelekinesisConstraint
     unsigned int unk18;
     TelekinesisConstraint(TelekinesisReference*, bhkWorldObject*, unsigned int);
 };
-struct NiRTTI
-{
-};
-struct NiObject
-{
-    void FUN_00b4dec0(int);
-};
 extern NiRTTI DAT_011f9140;
 NiObject* __cdecl FUN_00653270(const NiRTTI*, SceneObject*);
-struct PlayerCharacter
-{
-    MagicCaster* GetFloatAsUInt();
-    void FUN_00961280();
-    void FUN_0095f930(TelekinesisReference*, int, float);
-    void GetCameraPosAndDir(NiPoint3*, NiPoint3*, bool);
-    void SetField644(float);
-};
 struct CasterPosition
 {
     void ApplyTurnUndeadEffect(NiPoint3*);
 };
 extern PlayerCharacter* g_thePlayer;
-struct LoadingState
-{
-    bool FUN_0047c850();
-};
 extern float DAT_01022958;
 extern const float DAT_01012054;
 struct ShaderEffect
@@ -698,20 +463,20 @@ struct EffectManager
 
 // Validates the target's collision object, creates a TelekinesisConstraint, applies the telekinesis effect to the player, and starts the effect shader.
 // @fnv 0x0082a6a0
-void TelekinesisStartEffect::StartTelekinesisEffect()
+void TelekinesisEffect::StartTelekinesisEffect()
 {
-    if (!target || !FUN_0045cd60())
+    if (!target || !GetTelekinesisCaster(this))
     {
         Dispel(false);
         return;
     }
-    switch (target->GetObjectReference()->FUN_00401170())
+    switch (reinterpret_cast<ReferenceForm*>(target->GetObjectReference())->FUN_00401170())
     {
     case 27:
         Dispel(false);
         return;
     }
-    SceneObject* h = target->GetSceneObject();
+    SceneObject* h = reinterpret_cast<TelekinesisReference*>(target)->GetSceneObject();
     bhkCollisionObject* a = h ? FUN_004b5260(h) : 0;
     bhkWorldObject* i = a ? a->FUN_006fa820() : 0;
     if (i)
@@ -722,19 +487,19 @@ void TelekinesisStartEffect::StartTelekinesisEffect()
         return;
     }
     void* p = i->FUN_004ae750();
-    new TelekinesisConstraint(target, i, i->FUN_0043b4f0().value);
+    new TelekinesisConstraint(reinterpret_cast<TelekinesisReference*>(target), i, i->FUN_0043b4f0().value);
     NiObject* eb = FUN_00653270(&DAT_011f9140, h);
     if (eb)
         eb->FUN_00b4dec0(6);
     if (g_thePlayer->GetFloatAsUInt())
         g_thePlayer->FUN_00961280();
-    if (!((LoadingState*)g_TESSaveLoadGame)->FUN_0047c850())
+    if (!g_TESSaveLoadGame->FUN_0047c850())
         magnitude = DAT_01022958;
-    g_thePlayer->FUN_0095f930(target, 3, magnitude);
+    g_thePlayer->FUN_0095f930(reinterpret_cast<TelekinesisReference*>(target), 3, magnitude);
     NiPoint3 s;
     NiPoint3 f;
     g_thePlayer->GetCameraPosAndDir(&s, &f, true);
-    if (!((LoadingState*)g_TESSaveLoadGame)->FUN_0047c850())
+    if (!g_TESSaveLoadGame->FUN_0047c850())
     {
         NiPoint3 casterPosition;
         ((CasterPosition*)g_thePlayer->GetFloatAsUInt())->ApplyTurnUndeadEffect(&casterPosition);
@@ -745,7 +510,9 @@ void TelekinesisStartEffect::StartTelekinesisEffect()
     }
     if (GetEffectSetting()->GetEffectShader())
     {
-        ShaderEffect* shader = new ShaderEffect(target, GetEffectSetting()->GetEffectShader(), DAT_01012054);
+        ShaderEffect* shader = new ShaderEffect(reinterpret_cast<TelekinesisReference*>(target),
+                                                reinterpret_cast<ShaderDefinition*>(GetEffectSetting()->GetEffectShader()),
+                                                DAT_01012054);
         if (shader->Start())
             ((EffectManager*)&DAT_011e0e80)->FUN_00973fd0(shader);
         else
@@ -780,16 +547,9 @@ struct Target
 {
     void* FUN_0082aeb0();
 };
-struct Player
-{
-    Target* GetFloatAsUInt();
-    Ref* FUN_0089f4e0();
-    unsigned int GetField63C();
-    float GetTelekinesisStrength();
-    void SetField644(float);
-    void FUN_00960520(float);
-};
-extern Player* DAT_011dea3c;
+// This reference lookup is absent from the shared player declaration too.
+Ref* __fastcall FUN_0089f4e0(PlayerCharacter* player);
+extern PlayerCharacter* DAT_011dea3c;
 struct Input
 {
     int FUN_00a24660(int, int);
@@ -799,70 +559,33 @@ struct OS
     Input* FUN_00877720();
 };
 extern OS* DAT_011dea0c;
-struct Setting
-{
-    float* FUN_00403e20();
-};
 extern Setting originalRuntimeFloatSetting1168;
 extern Setting originalRuntimeFloatSetting1169;
 extern Setting originalRuntimeFloatSetting1170;
 extern Setting originalRuntimeFloatSetting1171;
 extern Setting originalRuntimeFloatSetting1112;
 extern Setting g_011d18fc;
-struct Effect
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    float strength;
-    float velocity;
-    Ref* target;
-    bool released;
-    bool skipCost;
-    void FUN_0082c660(float);
-    void FUN_00804210(bool);
-    Ref* FUN_0045cd60();
-    float GetFloatAtOffset1C();
-    void UpdateGrabEffect(float delta);
-};
 // Advances the grab effect: checks the player's grab target and world, updates velocity/strength from input and settings, applies strength and charges cost.
 // @fnv 0x0082aad0
-void Effect::UpdateGrabEffect(float delta)
+void TelekinesisEffect::UpdateGrabEffect(float delta)
 {
-    FUN_0082c660(delta);
-    Target* grab = DAT_011dea3c->GetFloatAsUInt();
+    ValueModifierEffect::Update(delta);
+    Target* grab = reinterpret_cast<Target*>(DAT_011dea3c->GetFloatAsUInt());
     if (!grab->FUN_0082aeb0())
     {
-        FUN_00804210(false);
+        Dispel(false);
         return;
     }
-    World* casterWorld = FUN_0045cd60() && DAT_011dea3c->FUN_0089f4e0()->FUN_008d6f30()
-                             ? FUN_0045cd60()->GetReference()->FUN_008d6f30()->FUN_004543c0()
+    World* casterWorld = GetTelekinesisCaster(this) && FUN_0089f4e0(DAT_011dea3c)->FUN_008d6f30()
+                             ? reinterpret_cast<Ref*>(GetTelekinesisCaster(this))->GetReference()->FUN_008d6f30()->FUN_004543c0()
                              : 0;
-    World* playerWorld = DAT_011dea3c->FUN_0089f4e0() && DAT_011dea3c->FUN_0089f4e0()->FUN_008d6f30()
-                             ? DAT_011dea3c->FUN_0089f4e0()->FUN_008d6f30()->FUN_004543c0()
+    World* playerWorld = FUN_0089f4e0(DAT_011dea3c) && FUN_0089f4e0(DAT_011dea3c)->FUN_008d6f30()
+                             ? FUN_0089f4e0(DAT_011dea3c)->FUN_008d6f30()->FUN_004543c0()
                              : 0;
-    if (!grab || target != DAT_011dea3c->FUN_0089f4e0() || DAT_011dea3c->GetField63C() != 3 ||
+    if (!grab || target != reinterpret_cast<TESObjectREFR*>(FUN_0089f4e0(DAT_011dea3c)) || GetField63C(DAT_011dea3c) != 3 ||
         casterWorld != playerWorld)
     {
-        FUN_00804210(false);
+        Dispel(false);
         return;
     }
     if (DAT_011dea0c->FUN_00877720()->FUN_00a24660(6, 0) && DAT_011dea0c->FUN_00877720()->FUN_00a24660(4, 0))
@@ -870,7 +593,7 @@ void Effect::UpdateGrabEffect(float delta)
         if (velocity >
             *originalRuntimeFloatSetting1168.FUN_00403e20() + *originalRuntimeFloatSetting1169.FUN_00403e20() * 0.1f)
             released = true;
-        FUN_00804210(false);
+        Dispel(false);
     }
     else if (DAT_011dea0c->FUN_00877720()->FUN_00a24660(4, 0))
     {
@@ -890,7 +613,7 @@ void Effect::UpdateGrabEffect(float delta)
     }
     else
         velocity = 0.0f;
-    strength = DAT_011dea3c->GetTelekinesisStrength();
+    strength = GetTelekinesisStrength(DAT_011dea3c);
     strength += velocity * delta;
     if (strength < *originalRuntimeFloatSetting1171.FUN_00403e20())
         strength = *originalRuntimeFloatSetting1171.FUN_00403e20();
@@ -902,64 +625,23 @@ void Effect::UpdateGrabEffect(float delta)
     skipCost = false;
 }
 
-namespace fnv_b4214 {
-class FUN_0082a460_base
+// GO has no shared declaration for this handle operation.
+struct TelekinesisHandleOperations
 {
-  public:
-    virtual ~FUN_0082a460_base();
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-    int m_40;
-    int m_44;
-    int m_48;
-
-    FUN_0082a460_base(int a, int b, int c);
-};
-
-class FUN_0082a460_member
-{
-  public:
-    int m_iWordAt00;
-
-    FUN_0082a460_member(bool flag);
-    ~FUN_0082a460_member();
     void Apply(int value);
 };
 
-class FUN_0082a460 : public FUN_0082a460_base
-{
-  public:
-    FUN_0082a460_member m_4c;
-    float m_50;
-    float m_54;
-    int m_58;
-    unsigned char m_5c;
-    unsigned char m_5d;
+// The novtable class needs its original vtable installed before the handle constructor.
+extern void* TelekinesisEffectVtable[];
 
-    FUN_0082a460(int a, int b, int c);
-    virtual ~FUN_0082a460();
-};
-}
-
-// Initializes the base class, sets m_4c to false and applies 0, then zeroes m_50, m_54, m_58, m_5c, and m_5d.
+// Initializes the base, handle, vtable, and telekinesis state.
 // @fnv 0x0082a460
-fnv_b4214::FUN_0082a460::FUN_0082a460(int aiParam1, int aiParam2, int aiParam3)
-    : fnv_b4214::FUN_0082a460_base(aiParam1, aiParam2, aiParam3), m_4c(false)
+TelekinesisEffect::TelekinesisEffect(int aiParam1, int aiParam2, int aiParam3)
+    : ValueModifierEffect(reinterpret_cast<void*>(aiParam1), reinterpret_cast<void*>(aiParam2),
+                          reinterpret_cast<void*>(aiParam3)),
+      m_4c((*(void***)this = TelekinesisEffectVtable, 0))
 {
-    m_4c.Apply(0);
+    reinterpret_cast<TelekinesisHandleOperations*>(&m_4c)->Apply(0);
     m_50 = 0.0f;
     m_54 = 0.0f;
     m_58 = 0;

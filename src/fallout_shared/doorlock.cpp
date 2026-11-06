@@ -1,32 +1,82 @@
-// fallout_shared/doorlock.cpp: DoorAccessData, Copy9, LockAccess (15 functions)
+// fallout_shared/doorlock.cpp: DoorAccessData, PathingActorData, LockAccess (15 functions)
 
+// Use the shared TESFile with the legacy layout helpers.
+#define FNV_TESFILE_H
 #include "layout_support.h"
-#include "doorlock_decls.h"
+#define FNV64_BSSIMPLELIST_DEFINED
+#include <new>
+#include "../../include/NiFile.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/DoorAccessData.h"
+#include "../../include/PathingActorData.h"
+#include "../../include/InventoryChanges.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESClass.h"
+#include "../../include/TESGlobal.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESFaction.h"
+#include "../../include/TESKey.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/ExtraRadioData.h"
+#include "../../include/LowProcess.h"
+
+// Remaining doorlock support declarations; TESObjectREFR comes from the shared header.
+class ExtraRadioData;
+class LockExtraData;
+class InventoryChanges;
+
+
+
+
+class FUN_00411b00;
+
+class ActorData
+{
+  public:
+    TESActorBase* m_pActorBaseFormItem;
+    InventoryChanges* m_pInventoryChangesValue;
+    bool m_bCanIgnoreLocks;
+    unsigned char layoutPadding9[3];
+
+    ActorData(Actor* actor);
+};
+
+FNV_STATIC_ASSERT(sizeof(PathingActorData) == 12);
+FNV_STATIC_ASSERT(offsetof(PathingActorData, m_pActorBaseFormItem) == 0);
+FNV_STATIC_ASSERT(offsetof(PathingActorData, m_pInventoryChangesValue) == 4);
+FNV_STATIC_ASSERT(offsetof(PathingActorData, m_bCanIgnoreLocks) == 8);
+
 
 class TESObjectCELL;
 class LockExtraData;
 class TESGlobal;
 class TESClass;
-class TESActorBase;
 class InventoryChanges;
 #pragma pack(push, 4)
-class DoorAccessData
-{
-  public:
-    TESObjectCELL* m_pSourceCell;       // +0x0, 4 bytes
-    TESObjectCELL* m_pDestinationCell;  // +0x4, 4 bytes
-    LockExtraData* m_pTeleportData;         // +0x8, 4 bytes
-    TESForm* m_pKeyForm;                // +0xC, 4 bytes
-    int m_iLockLevel;                   // +0x10, 4 bytes
-    TESGlobal* m_pLockLevelGlobal;      // +0x14, 4 bytes
-    DoorAccessData(TESObjectREFR* pRef);
-    ~DoorAccessData();
-    void SetDoorReference(TESObjectREFR* pRef);
-    bool ReadState98();
-    bool CanActorUseDoor(const PathingActorData* pActorData, bool bFlag);
-    bool CanActorOpenDoor(const PathingActorData* pActorData, bool bFlag);
-    bool CanUnlockDoor(const PathingActorData* pActorData, TESObjectREFR* pRef, bool& bNeedsKey);
-};
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(DoorAccessData) == 24);
 FNV_STATIC_ASSERT(offsetof(DoorAccessData, m_pSourceCell) == 0);
@@ -36,12 +86,12 @@ FNV_STATIC_ASSERT(offsetof(DoorAccessData, m_pKeyForm) == 12);
 FNV_STATIC_ASSERT(offsetof(DoorAccessData, m_iLockLevel) == 16);
 FNV_STATIC_ASSERT(offsetof(DoorAccessData, m_pLockLevelGlobal) == 20);
 
-// Copy-assigns another actor's data into this object's actor-data member at offset 0x5c via FUN_00502630 and returns it.
+// Copy-assigns another actor's data into this object's actor-data member at offset 0x5c via CopyFrom and returns it.
 // @fnv 0x006e2b20
 PathingActorData& PathingActorData::operator=(const PathingActorData& other)
 {
     return reinterpret_cast<PathingActorData*>(reinterpret_cast<char*>(this) + 0x5c)
-        ->FUN_00502630(ActorData(reinterpret_cast<Actor*>(const_cast<PathingActorData*>(&other))));
+        ->CopyFrom(ActorData(reinterpret_cast<Actor*>(const_cast<PathingActorData*>(&other))));
 }
 
 // @fnv 0x0073cb80
@@ -51,36 +101,10 @@ bool DoorAccessData::ReadState98()
 }
 
 // Minimal callee declarations (codegen only; layouts remain with owning units).
-class TESForm
-{
-  public:
-    ENUM_FORM_ID GetFormType() const;
-};
-class TESFaction : public TESForm
-{
-};
 class TESGlobalValueReader
 {
   public:
     float GetValue();
-};
-class TESGlobal : public TESGlobalValueReader
-{
-};
-class TESActorBaseData
-{
-  public:
-    int GetFactionRank(TESFaction* pFaction, bool m_bFaceGenDataValid);
-};
-class TESActorBase : public TESForm
-{
-  public:
-    TESClass* GetClass();
-};
-class TESClass
-{
-  public:
-    bool IsGuard();
 };
 class DoorCell
 {
@@ -102,7 +126,6 @@ struct KeySearch
 {
     int iCount;
 };
-class TESKey;
 #pragma pack(push, 4)
 class LockExtraData
 {
@@ -147,7 +170,7 @@ struct DoorLockCtorLocals
 DoorAccessData::DoorAccessData(TESObjectREFR* pRef)
 {
     DoorLockCtorLocals data;
-    m_pSourceCell = reinterpret_cast<TESObjectCELL*>(reinterpret_cast<LowProcess*>(pRef)->GetTarget());
+    m_pSourceCell = reinterpret_cast<TESObjectCELL*>(reinterpret_cast<LowProcess*>(pRef)->LowProcess::GetTarget());
 
     data.pRadioData = pRef->GetExtraRadioData();
     if (data.pRadioData != 0)
@@ -178,22 +201,10 @@ DoorAccessData::~DoorAccessData()
     if (m_pTeleportData != 0)
     {
         void* pMem = m_pTeleportData;
-        MemoryManager::Deallocate(pMem);
+        ::operator delete(pMem);
     }
 }
 
-class TESBoundObject : public TESForm
-{
-};
-class TESKey : public TESBoundObject
-{
-};
-class InventoryChanges
-{
-  public:
-    bool FindItemInInventory(TESBoundObject* pItem, int iArg1, int iArg2, int& iOut, unsigned int uiArg,
-                             TESObjectREFR* pRef);
-};
 extern TESBoundObject* g_pLockpickItem;
 
 // @fnv 0x00502550
@@ -217,8 +228,7 @@ bool DoorAccessData::CanActorUseDoor(const PathingActorData* pActorData, bool bF
             }
             if (own.pFaction != 0 && pActorData->m_pActorBaseFormItem != 0)
             {
-                own.m_iRank = reinterpret_cast<TESActorBaseData*>(reinterpret_cast<char*>(pActorData->m_pActorBaseFormItem) + 0x30)
-                                ->GetFactionRank(own.pFaction, false);
+                own.m_iRank = pActorData->m_pActorBaseFormItem->GetFactionRank(own.pFaction, false);
                 if (own.m_iRank < m_iLockLevel)
                     bIsOwner = false;
             }
@@ -306,21 +316,14 @@ struct XActor
     const XExtraList* GetExtra() const;
     bool IsInDeadState();
 };
-struct FUN_00502670_stand
-{
-    void* pBase;
-    XCont* pChanges;
-    bool bAlarmed;
-    FUN_00502670_stand* InitFromActor(XActor* a);
-};
-// Stores the actor's base, the container from its extra list, and its alarm state into this structure, then returns this.
+// Stores the actor's base, the container from its extra list, and its alarm state.
 // @fnv 0x00502670
-FUN_00502670_stand* FUN_00502670_stand::InitFromActor(XActor* apActor)
+ActorData::ActorData(Actor* apActor)
 {
-    pBase = apActor->GetActorBase();
-    pChanges = ((XExtraList*)apActor->GetExtra())->GetContainerChangeData();
-    bAlarmed = apActor->IsInDeadState();
-    return this;
+    m_pActorBaseFormItem = static_cast<TESActorBase*>(reinterpret_cast<XActor*>(apActor)->GetActorBase());
+    m_pInventoryChangesValue = reinterpret_cast<InventoryChanges*>(
+        ((XExtraList*)reinterpret_cast<XActor*>(apActor)->GetExtra())->GetContainerChangeData());
+    m_bCanIgnoreLocks = reinterpret_cast<XActor*>(apActor)->IsInDeadState();
 }
 
 struct FUN_00996800_shell : public DoorAccessData
@@ -396,7 +399,7 @@ void FUN_00501e80_shell::FUN_00501e80(TESObjectREFR* apDoorRef)
 {
     ExtraRadioData* ptel;
     LockExtraData* pDoorLock;
-    m_pSourceCell = (TESObjectCELL*)((LowProcess*)apDoorRef)->GetTarget();
+    m_pSourceCell = (TESObjectCELL*)((LowProcess*)apDoorRef)->LowProcess::GetTarget();
     ptel = apDoorRef->GetExtraRadioData();
     if (ptel)
         m_pDestinationCell = ptel->FUN_0043a2b0();
@@ -421,21 +424,14 @@ void FUN_00501e80_shell::FUN_00501e80(TESObjectREFR* apDoorRef)
     m_pLockLevelGlobal = apDoorRef->GetLockLevelGlobal();
 }
 
-struct Copy9
-{
-    unsigned int f0;
-    unsigned int f4;
-    unsigned char f8;
-    Copy9* FUN_00502630(const Copy9* other);
-};
-// Copies f0, f4 and f8 from other into this and returns this.
+// Copies the actor's base, inventory changes and lock flag, then returns this.
 // @fnv 0x00502630
-Copy9* Copy9::FUN_00502630(const Copy9* other)
+PathingActorData& PathingActorData::CopyFrom(const ActorData& other)
 {
-    f0 = other->f0;
-    f4 = other->f4;
-    f8 = other->f8;
-    return this;
+    m_pActorBaseFormItem = other.m_pActorBaseFormItem;
+    m_pInventoryChangesValue = other.m_pInventoryChangesValue;
+    m_bCanIgnoreLocks = other.m_bCanIgnoreLocks;
+    return *this;
 }
 
 struct FUN_00502180_shell
@@ -780,10 +776,6 @@ bool LockAccess::CanAccessLock(LockActor* actor, int unused, bool flag)
     return a;
 }
 
-struct Point
-{
-    float x, y, z;
-};
 struct Nav
 {
     void* FUN_00690800();
@@ -791,7 +783,7 @@ struct Nav
 };
 struct Position
 {
-    Point& FUN_00717e50();
+    NiPoint3& FUN_00717e50();
 };
 struct Door
 {
@@ -801,7 +793,7 @@ struct Location
 {
     bool FUN_006dd6f0(int);
     Nav* FUN_0044edb0();
-    Point FUN_005c3420() const;
+    NiPoint3 FUN_005c3420() const;
 };
 struct ParentSpaceNode
 {
@@ -812,7 +804,7 @@ struct ParentSpaceNode
 struct FUN_006d5320
 {
     Door* unk00;
-    Point unk04;
+    NiPoint3 unk04;
     FUN_006d5320();
 };
 struct DoorArray
@@ -826,16 +818,10 @@ struct Result
 {
     int unk00, unk04, unk08, unk0C;
     DoorArray unk10;
-    Point unk20, unk2C;
+    NiPoint3 unk20, unk2C;
     unsigned FUN_006cf4c0(const ParentSpaceNode&);
 };
-struct PathBuilderDetailedPathInfos
-{
-    int unk00, unk04, unk08, unk0C;
-    PathBuilderDetailedPathInfos();
-    ~PathBuilderDetailedPathInfos();
-    Nav*& FUN_00877a30(unsigned);
-};
+#include "../../include/PathBuilderDetailedPathInfos.h"
 struct FUN_005e04c0
 {
     int unk00, unk04, unk08, unk0C;
@@ -1895,7 +1881,7 @@ struct FUN_006b8340 : BuilderBase
     int unk2098, unk209C;
     FUN_006b8340();
     ~FUN_006b8340();
-    bool SetupNavMeshSearch(int, const Point&, Nav*, const Point&, Nav*, PathBuilderDetailedPathInfos&, FUN_005e04c0&,
+    bool SetupNavMeshSearch(int, const NiPoint3&, Nav*, const NiPoint3&, Nav*, PathBuilderDetailedPathInfos&, FUN_005e04c0&,
                             int);
 };
 struct FUN_006f33b0 : BuilderBase

@@ -1,3 +1,36 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+// Preserve the original intrinsic layout: the SDK union's byte arrays change
+// stack protection and alias analysis with this unit's original compiler.
+#define _INCLUDED_MM2
+// Exe 0x00cd72a0 ComputeInverseLengths: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+    int m128_i32[4];
+    __int64 m128_i64[2];
+    unsigned int m128_u32[4];
+} __m128, LocalM128;
+
+#define FNV_VEC4_SCALAR
+#include "../../../../../../../include/Vec4.h"
+
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkpCdBody.h"
+#include "../../../../../../../include/hkpShape.h"
+#include "../../../../../../../include/hkpConvexShape.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkVector4.h"
 
 // src/havok/physics/collide/agent/convexagent/capsuletriangle/hkpcapsuletriangleagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/capsuletriangle/hkpcapsuletriangleagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -144,15 +177,7 @@ struct AllocIface {
     virtual void* Alloc(unsigned int size);
 };
 
-struct AllocHolder {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AllocIface* m_pAllocator;
-};
-
-AllocHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 void __cdecl ComputeInverseLengths(void* value, void* self);
 
@@ -174,8 +199,8 @@ struct FUN_00d39980_cls {
 // @fnv 0x00d39980
 FUN_00d39980_cls* __cdecl CreateAllocatedObject(int a1, int a2, int a3, int a4)
 {
-    AllocHolder* pAllocHolder = FUN_00c85750();
-    FUN_00d39980_cls* pObject = (FUN_00d39980_cls*)pAllocHolder->m_pAllocator->Alloc(0x28);
+    hkMemoryRouter* pAllocHolder = FUN_00c85750();
+    FUN_00d39980_cls* pObject = (FUN_00d39980_cls*)((AllocIface*)pAllocHolder->m_heap)->Alloc(0x28);
     pObject->m_w04 = 0x28;
     pObject->m_w06 = 1;
     pObject->m_i08 = a4;
@@ -188,31 +213,20 @@ FUN_00d39980_cls* __cdecl CreateAllocatedObject(int a1, int a2, int a3, int a4)
     return pObject;
 }
 
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned int m128_u32[4];
-} __m128;
+extern "C" LocalM128 _mm_xor_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
 
-extern "C" __m128 _mm_xor_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
+extern const LocalM128 DAT_010c4c00;
 
-extern const __m128 DAT_010c4c00;
-
-struct hkVector4 {
-    __m128 m_vComponents;
-    void operator=(const hkVector4& o) { m_vComponents = o.m_vComponents; }
-    void setBroadcast3(const hkVector4& v) { m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff); }
-    void mul4(const hkVector4& a) { m_vComponents = _mm_mul_ps(m_vComponents, a.m_vComponents); }
-    void add4(const hkVector4& a) { m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents); }
-    void addMul4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents)); }
-    void setNeg4(const hkVector4& v) { m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c4c00); }
-    void neg() { m_vComponents = _mm_xor_ps(m_vComponents, DAT_010c4c00); }
-};
+inline void hkVector4::operator=(const hkVector4& o) { m_vComponents = o.m_vComponents; }
+inline void hkVector4::setBroadcast3(const hkVector4& v) { m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff); }
+inline void hkVector4::mul4(const hkVector4& a) { m_vComponents = _mm_mul_ps(m_vComponents, a.m_vComponents); }
+inline void hkVector4::add4(const hkVector4& a) { m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents); }
+inline void hkVector4::addMul4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents)); }
+inline void hkVector4::setNeg4(const hkVector4& v) { m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c4c00); }
+inline void hkVector4::neg() { m_vComponents = _mm_xor_ps(m_vComponents, DAT_010c4c00); }
 
 struct Elem_d3b260 {
     hkVector4 m_pos;
@@ -294,7 +308,7 @@ struct __declspec(align(16)) FourWord {
 };
 
 struct __declspec(align(16)) FourFloat {
-    union { __m128 simd; FourWord words; };
+    union { LocalM128 simd; FourWord words; };
 };
 
 struct __declspec(align(16)) MotionPacket {
@@ -330,7 +344,7 @@ struct __declspec(align(16)) MotionCallData {
 };
 
 extern "C" float DAT_0104da48;
-extern "C" const __m128 DAT_010c44d0;
+extern "C" const LocalM128 DAT_010c44d0;
 extern "C" unsigned char UNK_010ce80c;
 
 extern "C" void __cdecl FUN_00daf8e0(unsigned int second, unsigned int first,
@@ -382,36 +396,32 @@ void CallbackHost_d3b160::FUN_00d3b160(void* a1, void* a2, void* a3, unsigned in
     FUN_00d3a620(a2, a1, a3, &t);
 }
 
-struct __declspec(align(16)) Vec4 {
-    float x, y, z, w;
-};
-
 struct Mat4 {
-    Vec4 row0, row1, row2, row3;
+    Vec4::Aligned row0, row1, row2, row3;
 };
 
 void __cdecl FUN_00cd6520(void* a, float b, void* c, float d, void* e, float f, int g, int h, int i);
 
-static __forceinline void transform(Vec4* out, const char* shape, int count, const Mat4* m)
+static __forceinline void transform(Vec4::Aligned* out, const char* shape, int count, const Mat4* m)
 {
-    Vec4 p0 = m->row0;
-    Vec4 p1 = m->row1;
-    Vec4 p2 = m->row2;
-    Vec4 p3 = m->row3;
-    __m128 r0 = *(__m128*)&p0;
-    __m128 r1 = *(__m128*)&p1;
-    __m128 r2 = *(__m128*)&p2;
-    __m128 r3 = *(__m128*)&p3;
+    Vec4::Aligned p0 = m->row0;
+    Vec4::Aligned p1 = m->row1;
+    Vec4::Aligned p2 = m->row2;
+    Vec4::Aligned p3 = m->row3;
+    LocalM128 r0 = *(LocalM128*)&p0;
+    LocalM128 r1 = *(LocalM128*)&p1;
+    LocalM128 r2 = *(LocalM128*)&p2;
+    LocalM128 r3 = *(LocalM128*)&p3;
 
-    __m128* v = (__m128*)(shape + 0x20);
+    LocalM128* v = (LocalM128*)(shape + 0x20);
     for (int i = count - 1; i >= 0; --i) {
-        __m128 vi = v[i];
-        __m128 x = _mm_shuffle_ps(vi, vi, 0x00);
-        __m128 y = _mm_shuffle_ps(vi, vi, 0x55);
-        __m128 z = _mm_shuffle_ps(vi, vi, 0xaa);
-        __m128 a = _mm_add_ps(_mm_mul_ps(y, r1), _mm_mul_ps(x, r0));
-        __m128 b = _mm_add_ps(_mm_mul_ps(z, r2), r3);
-        *(__m128*)&out[i] = _mm_add_ps(a, b);
+        LocalM128 vi = v[i];
+        LocalM128 x = _mm_shuffle_ps(vi, vi, 0x00);
+        LocalM128 y = _mm_shuffle_ps(vi, vi, 0x55);
+        LocalM128 z = _mm_shuffle_ps(vi, vi, 0xaa);
+        LocalM128 a = _mm_add_ps(_mm_mul_ps(y, r1), _mm_mul_ps(x, r0));
+        LocalM128 b = _mm_add_ps(_mm_mul_ps(z, r2), r3);
+        *(LocalM128*)&out[i] = _mm_add_ps(a, b);
     }
 }
 
@@ -422,10 +432,10 @@ void __cdecl TransformAndDispatch(char* a1, char* a2, char* pExtra, void* a4, in
     const char* shapeA = *(const char**)a1;
     const char* shapeB = *(const char**)a2;
 
-    Vec4 aTransformedA[2];
+    Vec4::Aligned aTransformedA[2] = { Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized) };
     transform(aTransformedA, shapeA, 2, *(Mat4**)(a1 + 8));
 
-    Vec4 aTransformedB[3];
+    Vec4::Aligned aTransformedB[3] = { Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized) };
     transform(aTransformedB, shapeB, 3, *(Mat4**)(a2 + 8));
 
     FUN_00cd6520(&aTransformedA[0],
@@ -439,20 +449,20 @@ void __cdecl TransformAndDispatch(char* a1, char* a2, char* pExtra, void* a4, in
                  0);
 }
 
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-extern "C" __m128 _mm_load_ps(const float* p);
-extern "C" void _mm_store_ps(float* p, __m128 a);
-extern "C" __m128 _mm_rsqrt_ps(__m128 a);
-extern __m128 DAT_010c71c0;
-extern __m128 DAT_010c71d0;
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
+extern "C" LocalM128 _mm_load_ps(const float* p);
+extern "C" void _mm_store_ps(float* p, LocalM128 a);
+extern "C" LocalM128 _mm_rsqrt_ps(LocalM128 a);
+extern LocalM128 DAT_010c71c0;
+extern LocalM128 DAT_010c71d0;
 
-static __forceinline float SqLenLane(__m128 x)
+static __forceinline float SqLenLane(LocalM128 x)
 {
-    __m128 sq = _mm_mul_ps(x, x);
-    __m128 yx = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-    __m128 zyx = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), yx);
+    LocalM128 sq = _mm_mul_ps(x, x);
+    LocalM128 yx = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
+    LocalM128 zyx = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), yx);
     float r;
     _mm_store_ss(&r, zyx);
     return r;
@@ -460,19 +470,19 @@ static __forceinline float SqLenLane(__m128 x)
 
 // Computes Newton-refined inverse square roots of four vector lengths from pts and stores them plus a fifth value into out.
 // @fnv 0x00cd72a0
-void __cdecl ComputeInverseLengths(__m128* pts, float* out)
+void __cdecl ComputeInverseLengths(LocalM128* pts, float* out)
 {
-    __m128 c = pts[2];
-    __m128 a = pts[0];
-    __m128 b = pts[1];
+    LocalM128 c = pts[2];
+    LocalM128 a = pts[0];
+    LocalM128 b = pts[1];
 
-    __m128 v = _mm_sub_ps(c, b);
-    __m128 u = _mm_sub_ps(a, c);
-    __m128 w = _mm_sub_ps(b, a);
+    LocalM128 v = _mm_sub_ps(c, b);
+    LocalM128 u = _mm_sub_ps(a, c);
+    LocalM128 w = _mm_sub_ps(b, a);
 
-    __m128 p = _mm_mul_ps(_mm_shuffle_ps(u, u, 0xc9), _mm_shuffle_ps(v, v, 0xd2));
-    __m128 q = _mm_mul_ps(_mm_shuffle_ps(u, u, 0xd2), _mm_shuffle_ps(v, v, 0xc9));
-    __m128 x = _mm_sub_ps(q, p);
+    LocalM128 p = _mm_mul_ps(_mm_shuffle_ps(u, u, 0xc9), _mm_shuffle_ps(v, v, 0xd2));
+    LocalM128 q = _mm_mul_ps(_mm_shuffle_ps(u, u, 0xd2), _mm_shuffle_ps(v, v, 0xc9));
+    LocalM128 x = _mm_sub_ps(q, p);
 
     __declspec(align(16)) float lens[4];
     float fSqLen = SqLenLane(v);
@@ -484,12 +494,12 @@ void __cdecl ComputeInverseLengths(__m128* pts, float* out)
     fSqLen = SqLenLane(x);
     lens[3] = fSqLen;
 
-    __m128 l = _mm_load_ps(lens);
-    __m128 r = _mm_rsqrt_ps(l);
-    __m128 t = _mm_mul_ps(_mm_mul_ps(r, l), r);
-    __m128 k1 = _mm_sub_ps(DAT_010c71c0, t);
-    __m128 k2 = _mm_mul_ps(r, DAT_010c71d0);
-    __m128 inv = _mm_mul_ps(k1, k2);
+    LocalM128 l = _mm_load_ps(lens);
+    LocalM128 r = _mm_rsqrt_ps(l);
+    LocalM128 t = _mm_mul_ps(_mm_mul_ps(r, l), r);
+    LocalM128 k1 = _mm_sub_ps(DAT_010c71c0, t);
+    LocalM128 k2 = _mm_mul_ps(r, DAT_010c71d0);
+    LocalM128 inv = _mm_mul_ps(k1, k2);
 
     _mm_store_ps(lens, inv);
     out[0] = lens[0];
@@ -501,7 +511,7 @@ void __cdecl ComputeInverseLengths(__m128* pts, float* out)
 
 struct __declspec(align(16)) ScalarVector {
     int x, y, z, w;
-    __m128 quad() const { return *(const __m128*)this; }
+    LocalM128 quad() const { return *(const LocalM128*)this; }
 };
 struct Xf {
     ScalarVector r0, r1, r2, t;
@@ -559,34 +569,34 @@ struct Info {
     int index;
 };
 struct Contact {
-    __m128 normal;
-    __m128 position;
+    LocalM128 normal;
+    LocalM128 position;
     Contact& operator=(const Contact& c) { normal = c.normal; position = c.position; return *this; }
     void __thiscall FUN_00caad60(void* arg);
 };
 
 
 
-static __forceinline void xform(const Xf& m, const __m128* src, __m128* dst, int hi)
+static __forceinline void xform(const Xf& m, const LocalM128* src, LocalM128* dst, int hi)
 {
     ScalarVector column0 = m.r0;
-    __m128 c0 = column0.quad();
+    LocalM128 c0 = column0.quad();
     ScalarVector column1 = m.r1;
-    __m128 c1 = column1.quad();
+    LocalM128 c1 = column1.quad();
     ScalarVector column2 = m.r2;
-    __m128 c2 = column2.quad();
+    LocalM128 c2 = column2.quad();
     ScalarVector translation = m.t;
-    __m128 ct = translation.quad();
+    LocalM128 ct = translation.quad();
     for (int i = hi; i >= 0; --i) {
-        __m128 v = src[i];
-        __m128 x = _mm_shuffle_ps(v, v, 0);
-        __m128 y = _mm_shuffle_ps(v, v, 0x55);
-        __m128 z = _mm_shuffle_ps(v, v, 0xaa);
+        LocalM128 v = src[i];
+        LocalM128 x = _mm_shuffle_ps(v, v, 0);
+        LocalM128 y = _mm_shuffle_ps(v, v, 0x55);
+        LocalM128 z = _mm_shuffle_ps(v, v, 0xaa);
         dst[i] = _mm_add_ps(_mm_add_ps(_mm_mul_ps(y, c1), _mm_mul_ps(x, c0)), _mm_add_ps(_mm_mul_ps(z, c2), ct));
     }
 }
 
-struct CollisionWorkspace { __m128 la[2]; __m128 lb[3]; };
+struct CollisionWorkspace { LocalM128 la[2]; LocalM128 lb[3]; };
 // Transforms shape vertices, runs a collision query, optionally refines the contact, and writes the result to out.
 // @fnv 0x00d39bf0
 int __cdecl FUN_00d39bf0(Obj* a, Obj* b, Par* volatile apParams, void* q, Contact* apContactOut)
@@ -596,12 +606,12 @@ int __cdecl FUN_00d39bf0(Obj* a, Obj* b, Par* volatile apParams, void* q, Contac
     shapes[0] = a->base;
     shapes[1] = b->base;
 
-    xform(*a->xf, (const __m128*)shapes[0]->vertices, workspace.la, 1);
+    xform(*a->xf, (const LocalM128*)shapes[0]->vertices, workspace.la, 1);
 
-    xform(*b->xf, (const __m128*)shapes[1]->vertices, workspace.lb, 2);
+    xform(*b->xf, (const LocalM128*)shapes[1]->vertices, workspace.lb, 2);
 
     Info info[3];
-    __m128 res[6];
+    LocalM128 res[6];
     Par* input = apParams;
     FUN_00cd6520(workspace.la, shapes[0]->radius, workspace.lb, shapes[1]->radius, q, input->c, 0, (int)res, (int)info);
 
@@ -643,20 +653,7 @@ extern DWORD DAT_0126835c;
 extern "C" void _ReadWriteBarrier(void);
 unsigned __int64 __cdecl __rdtsc(void);
 
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
 
-struct ProfBuf
-{
-    DWORD unk00;
-    ProfRec* m_pCur;
-    DWORD unk08;
-    ProfRec* m_pRecordEnd;
-};
 
 typedef ScalarVector Vec4f;
 
@@ -673,7 +670,7 @@ struct VirtObj
 
 struct ManifoldPoint
 {
-    __m128 pos;
+    LocalM128 pos;
     int unk10;
     int unk14;
     int unk18;
@@ -690,31 +687,11 @@ struct HitRec
 struct Context
 {
     HitRec hit;
-    __m128 capsule[2];
-    __m128 triangle[3];
+    LocalM128 capsule[2];
+    LocalM128 triangle[3];
 };
 
 extern "C" void __cdecl FUN_00cd6520(void* out1, float fx, void* out2, float fy, void* p, float afDepth, int zero, HitRec* hit, int zero2);
-
-struct hkpShape
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    float m_fSphereRadius;
-    int unk14;
-    int unk18;
-    int unk1c;
-    __m128 m_kVertices[4];
-};
-
-struct hkpCdBody
-{
-    const hkpShape* m_pCollisionShape;
-    int unk04;
-    const ContactMatrix* m_kMotionState;
-};
 
 struct CollisionInput { int unk00; int unk04; float tolerance; };
 
@@ -735,21 +712,22 @@ struct CapsuleTriangleAgent {
 void CapsuleTriangleAgent::FUN_00d3a620(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const CollisionInput* input, VirtObj* collector)
 {
     volatile DWORD tick;
-    ProfBuf* pBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+    hkMonitorStream* pBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
     {
-        ProfRec* pRec = pBuf->m_pCur;
-        pRec->m_pName = "TtCapsTriangle";
+        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+        pRec->m_commandAndMonitor = "TtCapsTriangle";
         _ReadWriteBarrier();
         tick = (DWORD)__rdtsc();
-        pRec->m_iTick = tick;
-        pBuf->m_pCur = pRec + 1;
+        pRec->m_time0 = tick;
+        pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
     }
 
     Context ctx;
-    const hkpShape* capsuleShape = bodyA.m_pCollisionShape;
-    const hkpShape* triangleShape = bodyB.m_pCollisionShape;
-    const ContactMatrix* transformA = bodyA.m_kMotionState;
+    // Capsule and triangle vertices begin at 0x20 in their derived shape layouts.
+    const hkpConvexShape* capsuleShape = static_cast<const hkpConvexShape*>(bodyA.m_pCollisionShape);
+    const hkpConvexShape* triangleShape = static_cast<const hkpConvexShape*>(bodyB.m_pCollisionShape);
+    const ContactMatrix* transformA = (const ContactMatrix*)bodyA.m_pMotionState;
 
     {
         RowPair xyRows;
@@ -759,22 +737,22 @@ void CapsuleTriangleAgent::FUN_00d3a620(const hkpCdBody& bodyA, const hkpCdBody&
         xyRows.second = transformA->row[1];
         c2 = transformA->row[2];
         c3 = transformA->row[3];
-        __m128 r0 = _mm_load_ps((const float*)&xyRows.first);
-        __m128 r1 = _mm_load_ps((const float*)&xyRows.second);
+        LocalM128 r0 = _mm_load_ps((const float*)&xyRows.first);
+        LocalM128 r1 = _mm_load_ps((const float*)&xyRows.second);
         for (int i = 1; i >= 0; i--)
         {
 
-            __m128 r2 = *(__m128*)&c2;
-            __m128 r3 = *(__m128*)&c3;
+            LocalM128 r2 = *(LocalM128*)&c2;
+            LocalM128 r3 = *(LocalM128*)&c3;
 
-            __m128 v = capsuleShape->m_kVertices[i];
-            __m128 t = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(v, v, 0), r0), _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), r1));
+            LocalM128 v = ((const LocalM128*)((const char*)capsuleShape + 0x20))[i];
+            LocalM128 t = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(v, v, 0), r0), _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), r1));
             ctx.capsule[i] = _mm_add_ps(t, _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), r2), r3));
         }
 
     }
 
-    const ContactMatrix* transformB = bodyB.m_kMotionState;
+    const ContactMatrix* transformB = (const ContactMatrix*)bodyB.m_pMotionState;
     {
         __declspec(align(16)) Vec4f d0;
         __declspec(align(16)) Vec4f d1;
@@ -785,12 +763,12 @@ void CapsuleTriangleAgent::FUN_00d3a620(const hkpCdBody& bodyA, const hkpCdBody&
         translationAndZ.first = transformB->row[3];
         for (int i = 2; i >= 0; i--)
         {
-            __m128 s1 = *(__m128*)&d1;
-            __m128 s2 = *(__m128*)&translationAndZ.second;
-            __m128 s3 = *(__m128*)&translationAndZ.first;
-            __m128 s0 = *(__m128*)&d0;
-            __m128 v = triangleShape->m_kVertices[i];
-            __m128 t = _mm_mul_ps(_mm_shuffle_ps(v, v, 0), s0);
+            LocalM128 s1 = *(LocalM128*)&d1;
+            LocalM128 s2 = *(LocalM128*)&translationAndZ.second;
+            LocalM128 s3 = *(LocalM128*)&translationAndZ.first;
+            LocalM128 s0 = *(LocalM128*)&d0;
+            LocalM128 v = ((const LocalM128*)((const char*)triangleShape + 0x20))[i];
+            LocalM128 t = _mm_mul_ps(_mm_shuffle_ps(v, v, 0), s0);
             t = _mm_add_ps(t, _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), s1));
             ctx.triangle[i] = _mm_add_ps(t, _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), s2), s3));
         }
@@ -803,15 +781,15 @@ void CapsuleTriangleAgent::FUN_00d3a620(const hkpCdBody& bodyA, const hkpCdBody&
         collector->Run(&bodyA, &bodyB);
     }
 
-    ProfBuf* pBuf2 = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    if (pBuf2->m_pCur < pBuf2->m_pRecordEnd)
+    hkMonitorStream* pBuf2 = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (pBuf2->m_end.m_storage < pBuf2->m_capacityMinus16.m_storage)
     {
-        ProfRec* pRec = pBuf2->m_pCur;
-        pRec->m_pName = "Et";
+        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf2->m_end.m_storage);
+        pRec->m_commandAndMonitor = "Et";
         _ReadWriteBarrier();
         tick = (DWORD)__rdtsc();
-        pRec->m_iTick = tick;
-        pBuf2->m_pCur = pRec + 1;
+        pRec->m_time0 = tick;
+        pBuf2->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
     }
 }
 
@@ -859,32 +837,31 @@ void CpuObject::FUN_00d3b1e0(void* first, void* second, unsigned int third, unsi
 }
 }  // namespace fnv_00d3b1e0
 
-extern "C" __m128 _mm_unpackhi_ps(__m128 a, __m128 b);
+extern "C" LocalM128 _mm_unpackhi_ps(LocalM128 a, LocalM128 b);
 
 struct ContactNormalSetter : Contact
 {
-    ContactNormalSetter* FUN_00caad60(const __m128* source);
+    ContactNormalSetter* FUN_00caad60(const LocalM128* source);
 };
 
 // Copies the x, y and z components of *source into position, keeping position's existing w, and returns this.
 // @fnv 0x00caad60
-ContactNormalSetter* ContactNormalSetter::FUN_00caad60(const __m128* source)
+ContactNormalSetter* ContactNormalSetter::FUN_00caad60(const LocalM128* source)
 {
-    __m128 incoming = *source;
-    __m128 current = position;
-    __m128 high = _mm_unpackhi_ps(incoming, current);
+    LocalM128 incoming = *source;
+    LocalM128 current = position;
+    LocalM128 high = _mm_unpackhi_ps(incoming, current);
     position = _mm_shuffle_ps(incoming, high, 0xc4);
     return this;
 }
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 struct MonitorRecord { const char* name; unsigned int time; unsigned int unk08; };
-struct MonitorStream { unsigned int unk00; MonitorRecord* cursor; unsigned int unk08; MonitorRecord* end; };
-struct __declspec(align(16)) PlainVector { int x,y,z,w; __m128 quad() const { return *(const __m128*)this; } };
+struct __declspec(align(16)) PlainVector { int x,y,z,w; LocalM128 quad() const { return *(const LocalM128*)this; } };
 struct PlainMatrix { PlainVector r0,r1,r2,t; };
 struct ContactRecord {
-    __m128 position;
-    __m128 normal;
+    LocalM128 position;
+    LocalM128 normal;
     ContactRecord& operator=(const ContactRecord& o) { position=o.position; normal=o.normal; return *this; }
     void FUN_00caad60(const PlainVector*);
 };
@@ -916,9 +893,9 @@ struct CollisionAgent {
 // @fnv 0x00d39ef0
 void CollisionAgent::FUN_00d39ef0(const BodyRecord& a,const BodyRecord& b,const CollisionInput& input,Collector* output) {
     {
-        MonitorStream* stream=(MonitorStream*)TlsGetValue(DAT_0126835c);
-        if(stream->cursor < stream->end) {
-            MonitorRecord* rec=stream->cursor;
+        hkMonitorStream* stream=(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        if(stream->m_end.m_storage < stream->m_capacityMinus16.m_storage) {
+            MonitorRecord* rec=(MonitorRecord*)stream->m_end.m_storage;
             rec->name="TtCapsTriangle";
             unsigned int ticks;
             __asm {
@@ -926,7 +903,7 @@ void CollisionAgent::FUN_00d39ef0(const BodyRecord& a,const BodyRecord& b,const 
                 mov dword ptr[ticks], eax
             }
             rec->time=ticks;
-            stream->cursor=rec+1;
+            stream->m_end.m_storage=(char*)(rec+1);
         }
     }
     {
@@ -967,9 +944,9 @@ void CollisionAgent::FUN_00d39ef0(const BodyRecord& a,const BodyRecord& b,const 
     }
 done:
     {
-        MonitorStream* stream=(MonitorStream*)TlsGetValue(DAT_0126835c);
-        if(stream->cursor < stream->end) {
-            MonitorRecord* rec=stream->cursor;
+        hkMonitorStream* stream=(hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        if(stream->m_end.m_storage < stream->m_capacityMinus16.m_storage) {
+            MonitorRecord* rec=(MonitorRecord*)stream->m_end.m_storage;
             rec->name="Et";
             unsigned int ticks;
             __asm {
@@ -977,7 +954,7 @@ done:
                 mov dword ptr[ticks], eax
             }
             rec->time=ticks;
-            stream->cursor=rec+1;
+            stream->m_end.m_storage=(char*)(rec+1);
         }
     }
 }
@@ -988,42 +965,42 @@ struct TimerPair { int unused; Timer* current; int unused2; Timer* end; };
 struct Body { Shape* shape; int unused; Mat4* matrix; };
 struct Input { int unk00,unk04; float tolerance; };
 struct PenetrationCollector { virtual void unused(); virtual void add(Body*, Body*); };
-struct AlignedPairData { Vec4 position, normal; };
+struct AlignedPairData { Vec4::Aligned position, normal; };
 struct Result { AlignedPairData points[3]; };
 struct Cache { float inverseEdge0,inverseEdge1,inverseEdge2,inverseNormal,normalLength; };
-struct OutputA { Vec4 points[2]; };
-struct OutputB { Vec4 points[3]; };
+struct OutputA { Vec4::Aligned points[2]; };
+struct OutputB { Vec4::Aligned points[3]; };
 struct Locals { Result result; OutputA outA; OutputB outB; };
-static __forceinline void mytransform(Vec4* out, const Shape* shape, int count, const Mat4* m)
+static __forceinline void mytransform(Vec4::Aligned* out, const Shape* shape, int count, const Mat4* m)
 {
-    struct Rows { Vec4 p3,p2,p1,p0; } p;
+    struct Rows { Vec4::Aligned p3,p2,p1,p0; } p = { Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized) };
     p.p0 = m->row0; p.p1 = m->row1; p.p2 = m->row2; p.p3 = m->row3;
-    __m128 r0 = *(__m128*)&p.p0, r1 = *(__m128*)&p.p1, r2 = *(__m128*)&p.p2, r3 = *(__m128*)&p.p3;
-    const __m128* v = (const __m128*)shape->vertices;
+    LocalM128 r0 = *(LocalM128*)&p.p0, r1 = *(LocalM128*)&p.p1, r2 = *(LocalM128*)&p.p2, r3 = *(LocalM128*)&p.p3;
+    const LocalM128* v = (const LocalM128*)shape->vertices;
     for (int i = count - 1; i >= 0; --i) {
-        __m128 vi = v[i];
-        __m128 x = _mm_shuffle_ps(vi, vi, 0);
-        __m128 y = _mm_shuffle_ps(vi, vi, 0x55);
-        __m128 z = _mm_shuffle_ps(vi, vi, 0xaa);
-        __m128 a = _mm_add_ps(_mm_mul_ps(r0, x), _mm_mul_ps(r1, y));
-        __m128 b = _mm_add_ps(_mm_mul_ps(z, r2), r3);
-        *(__m128*)&out[i] = _mm_add_ps(a, b);
+        LocalM128 vi = v[i];
+        LocalM128 x = _mm_shuffle_ps(vi, vi, 0);
+        LocalM128 y = _mm_shuffle_ps(vi, vi, 0x55);
+        LocalM128 z = _mm_shuffle_ps(vi, vi, 0xaa);
+        LocalM128 a = _mm_add_ps(_mm_mul_ps(r0, x), _mm_mul_ps(r1, y));
+        LocalM128 b = _mm_add_ps(_mm_mul_ps(z, r2), r3);
+        *(LocalM128*)&out[i] = _mm_add_ps(a, b);
     }
 }
-static __forceinline void mytransform2(Vec4* out, const Shape* shape, int count, const Mat4* m)
+static __forceinline void mytransform2(Vec4::Aligned* out, const Shape* shape, int count, const Mat4* m)
 {
-    __m128 r0,r1,r2,r3; (void)r1; (void)r2; 
-    struct Rows { Vec4 p0,p1,p2,p3; } p;
+    LocalM128 r0,r1,r2,r3; (void)r1; (void)r2; 
+    struct Rows { Vec4::Aligned p0,p1,p2,p3; } p = { Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized) };
     p.p0 = m->row0; p.p1 = m->row1; p.p2 = m->row2; p.p3 = m->row3;
     r0 = _mm_load_ps((const float*)&p.p0); r1 = _mm_load_ps((const float*)&p.p1); r2 = _mm_load_ps((const float*)&p.p2); r3 = _mm_load_ps((const float*)&p.p3);
-    const __m128* __restrict v = (const __m128*)shape->vertices;
+    const LocalM128* __restrict v = (const LocalM128*)shape->vertices;
     int i = count - 1;
     do {
-        __m128 vi = v[i];
-        __m128 x = _mm_shuffle_ps(vi, vi, 0); __m128 y = _mm_shuffle_ps(vi, vi, 0x55); __m128 z = _mm_shuffle_ps(vi, vi, 0xaa);
-        __m128 a = _mm_add_ps(_mm_mul_ps(y, r1), _mm_mul_ps(x, r0));
-        __m128 b = _mm_add_ps(_mm_mul_ps(z, r2), r3);
-        *(__m128*)&out[i] = _mm_add_ps(b, a);
+        LocalM128 vi = v[i];
+        LocalM128 x = _mm_shuffle_ps(vi, vi, 0); LocalM128 y = _mm_shuffle_ps(vi, vi, 0x55); LocalM128 z = _mm_shuffle_ps(vi, vi, 0xaa);
+        LocalM128 a = _mm_add_ps(_mm_mul_ps(y, r1), _mm_mul_ps(x, r0));
+        LocalM128 b = _mm_add_ps(_mm_mul_ps(z, r2), r3);
+        *(LocalM128*)&out[i] = _mm_add_ps(b, a);
     } while (--i >= 0);
 }
 // Transforms two body shapes, tests for penetration, and adds the pair to the collector if the result normals indicate overlap.
@@ -1039,7 +1016,13 @@ void __cdecl FUN_00d3a8c0(Body* apBodyA, Body* apBodyB, Input* input, Penetratio
         timer->time = t;
         state->current = timer + 1;
     }
-    Locals l;
+    Locals l = {
+        { { { Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized) },
+            { Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized) },
+            { Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized) } } },
+        { { Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized) } },
+        { { Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized), Vec4(Vec4::Uninitialized) } }
+    };
     Cache cache;
     ComputeInverseLengths((void*)apBodyB->shape->vertices, &cache);
     Shape* pShapeA = apBodyA->shape;

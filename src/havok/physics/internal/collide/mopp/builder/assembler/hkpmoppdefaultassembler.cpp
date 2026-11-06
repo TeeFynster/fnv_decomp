@@ -1,3 +1,20 @@
+#include "../../../../../../../../include/hkArray.h"
+
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/Pair.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/NiPoint3.h"
+
+
+inline Pair::Pair() throw()
+{}
+
+inline void* Pair::operator new(unsigned int, void* p) throw()
+{
+    return p;
+}
 
 // src/havok/physics/internal/collide/mopp/builder/assembler/hkpmoppdefaultassembler.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/builder/assembler/hkpmoppdefaultassembler.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -683,15 +700,7 @@ struct Allocator
     virtual void* unk04(void* p);
     virtual void __thiscall ReleaseBlock(void* p, unsigned short size);
 };
-struct Router
-{
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    Allocator* allocator;
-};
-extern "C" Router* __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
 struct FUN_00e09640_class
 {
     virtual void unknownVirtual();
@@ -705,8 +714,8 @@ FUN_00e09640_class* __thiscall FUN_00e09640_class::FUN_00e09640(int flags)
     DestroyAudioBuffer();
     if (flags & 1)
     {
-        Router* router = FUN_00c85750();
-        router->allocator->ReleaseBlock(this, unk04);
+        hkMemoryRouter* router = FUN_00c85750();
+        ((Allocator*)router->m_heap)->ReleaseBlock(this, unk04);
     }
     return this;
 }
@@ -1180,19 +1189,13 @@ int S_00e06e00_Cls::FUN_00e06e00(S_00e06e00_A0* a, S_00e06e00_A1* b, S_00e06e00_
     return unk10->unkC - start;
 }
 
-struct Vec3
-{
-    float x;
-    float y;
-    float z;
-};
 
 extern const double g_thresholdA;
 extern const double g_thresholdB;
 
-// Compares the x, y and z components of a Vec3 against g_thresholdA and g_thresholdB and returns a code from 0 to 12 identifying the region.
+// Compares the x, y and z components of a NiPoint3 against g_thresholdA and g_thresholdB and returns a code from 0 to 12 identifying the region.
 // @fnv 0x00e06f20
-int __stdcall ClassifyVec3Region(const Vec3* pVec)
+int __stdcall ClassifyVec3Region(const NiPoint3* pVec)
 {
     int r;
     if ((double)pVec->x > g_thresholdA)
@@ -1256,17 +1259,12 @@ int __stdcall ClassifyVec3Region(const Vec3* pVec)
     return r;
 }
 
-struct S_00e07070_Pair
-{
-    int unk00;
-    int unk04;
-};
 struct S_00e07070_Object
 {
     int unk00;
     int unk04;
     int unk08;
-    S_00e07070_Pair r[3];
+    Pair r[3];
     int m_24;
     int v[3];
 };
@@ -1296,10 +1294,10 @@ void __stdcall FUN_00e07070(S_00e07070_Object* a, S_00e07070_Object* b, S_00e070
             while (i < 3)
             {
                 int s = a->m_24;
-                int q = (b->r[i].unk00 - a->v[i]) >> s;
+                int q = (b->r[i].a - a->v[i]) >> s;
                 b->v[i] = (q << s) + a->v[i];
                 out->q[i] = q;
-                if (((b->r[i].unk04 - b->v[i]) >> b->m_24) >= 255)
+                if (((b->r[i].b - b->v[i]) >> b->m_24) >= 255)
                     goto retry;
                 i++;
             }
@@ -1685,23 +1683,7 @@ void S_00e07da0_Tree::BuildRegion(S_00e07da0_Node* node, S_00e07da0_Region* pare
     }
 }
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 
 struct BSAudio;
 
@@ -1737,13 +1719,13 @@ struct FUN_00e09450_cls
 void FUN_00e09450_cls::DestroyAudioBuffer()
 {
     m_vptr00 = (int)&DAT_010ea5dc;
-    AudioHolder* pAudioHolder = (AudioHolder*)FUN_00c85750();
-    AudioAllocator* pAudioAllocator = pAudioHolder->m_pAllocator;
+    hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryAllocator* pAudioAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     m_iArrayLength = 0;
     unsigned int uCapacityBits = m_uCapBits;
     if ((uCapacityBits & 0x80000000u) == 0)
     {
-        pAudioAllocator->FreeArray(m_pData, (uCapacityBits & 0x3fffffffu) * 32);
+        pAudioAllocator->bufFree(m_pData, (uCapacityBits & 0x3fffffffu) * 32);
     }
     m_pData = 0;
     m_uCapBits = 0x80000000u;
@@ -1758,11 +1740,6 @@ struct FUN_00e094a0_floatpair
     float hi;
 };
 
-struct FUN_00e094a0_intpair
-{
-    int lo;
-    int hi;
-};
 
 struct FUN_00e094a0_floatset
 {
@@ -1777,7 +1754,7 @@ struct FUN_00e094a0_cls
     unsigned int unk00;
     unsigned int unk04;
     unsigned int unk08;
-    FUN_00e094a0_intpair m_0c[3];
+    Pair m_0c[3];
 
     void BuildScaledRanges(FUN_00e094a0_floatset* a1, float* a2);
 };
@@ -1790,11 +1767,11 @@ void FUN_00e094a0_cls::BuildScaledRanges(FUN_00e094a0_floatset* pFloatSet, float
     {
         volatile float s = pValues[3];
         float v = (pFloatSet->pairs[i].lo - pValues[i]) * s;
-        this->m_0c[i].lo = FUN_00cbfe20(v);
+        this->m_0c[i].a = FUN_00cbfe20(v);
         volatile float fScale2 = pValues[3];
         float w = (pFloatSet->pairs[i].hi - pValues[i]) * fScale2;
-        this->m_0c[i].hi = FUN_00cbfe20(w) + 1;
-        int iSpan = this->m_0c[i].hi - this->m_0c[i].lo;
+        this->m_0c[i].b = FUN_00cbfe20(w) + 1;
+        int iSpan = this->m_0c[i].b - this->m_0c[i].a;
         if (best <= iSpan)
             best = iSpan;
     }
@@ -2052,11 +2029,6 @@ struct Arg1Flags
     unsigned char m_3b[3];
 };
 
-struct Pair
-{
-    int m_ucLowNibble;
-    int m_ucHighNibble;
-};
 
 struct Arg2Layout
 {
@@ -2103,7 +2075,7 @@ struct FUN_00e07550_cls
 void FUN_00e07550_cls::FUN_00e07550(Arg1Flags* apFlags, Arg2Layout* apLayout)
 {
     int i = 0;
-    int* pHighValue = &apLayout->m_0c[0].m_ucHighNibble;
+    int* pHighValue = &apLayout->m_0c[0].b;
     int* volatile pBaseValue = apLayout->m_28;
     for (; i < 3; i++)
     {
@@ -2423,54 +2395,35 @@ void S_00e07d60::FUN_00e07d60(const S_00e07d60_Info& info)
 }
 
 namespace e083 {
-struct Alloc;
-struct Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkc;
-    Alloc* unk10;
-};
-struct Pair
-{
-    int a;
-    int b;
-};
-struct PairArray
-{
-    Pair* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+
 struct SrcW
 {
-    PairArray* p;
+    hkArrayBase<Pair>* p;
 };
 }
 
-void __cdecl ResizeAudioStream(e083::Alloc* a, void* arr, int elemSize);
+void __cdecl ResizeAudioStream(hkMemoryAllocator* a, void* arr, int elemSize);
 
 // Copies all pairs from srcp to dst, adding delta to each pair's a field, growing dst when full.
 // @fnv 0x00e08320
-static __declspec(noinline) void FUN_00e08320(e083::PairArray* srcp, e083::PairArray* dst, int delta)
+static __declspec(noinline) void FUN_00e08320(hkArrayBase<Pair>* srcp, hkArrayBase<Pair>* dst, int delta)
 {
-    e083::PairArray* const* pp = &srcp;
-    e083::PairArray* src = *pp;
+    hkArrayBase<Pair>* const* pp = &srcp;
+    hkArrayBase<Pair>* src = *pp;
     for (int i = 0; i < src->m_iElementCount; i++)
     {
-        e083::Router* h = (e083::Router*)FUN_00c85750();
+        hkMemoryRouter* h = FUN_00c85750();
         if (dst->m_iElementCount == (dst->m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(h->unk10, dst, 8);
+            ResizeAudioStream(h->m_heap, dst, 8);
         int n = dst->m_iElementCount;
-        e083::Pair* out = dst->m_data + n;
+        Pair* out = dst->m_data + n;
         dst->m_iElementCount = n + 1;
         out->b = src->m_data[i].b;
         out->a = src->m_data[i].a + delta;
     }
 }
 
-void e08320_caller(e083::SrcW sw, e083::PairArray* dst, int delta)
+void e08320_caller(e083::SrcW sw, hkArrayBase<Pair>* dst, int delta)
 {
     FUN_00e08320(sw.p, dst, delta);
 }
@@ -2486,54 +2439,49 @@ struct BvAllocator
 void __cdecl ResizeAudioStream(void*, void*, int);
 inline BvAllocator& GetHeap()
 {
-    return *(BvAllocator*)FUN_00c85750()->allocator;
+    return *(BvAllocator*)FUN_00c85750()->m_heap;
 }
-struct BvHeapRouter
+inline hkMemoryRouter* GetBvRouter()
 {
-    void* unk00;
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    BvAllocator* allocator;
-};
-inline BvHeapRouter* GetBvRouter()
-{
-    return (BvHeapRouter*)FUN_00c85750();
+    return FUN_00c85750();
 }
-template <class T> struct BvArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+template <class T>
+static __forceinline void BvArray_clear(hkArrayBase<T>& self);
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
+template <class T>
+static __forceinline void BvArray_ClearAndRelease(hkArrayBase<T>& self, BvAllocator& alloc);
+
+template <class T>
+static __forceinline void BvArray_AddBack(hkArrayBase<T>& self, hkMemoryRouter& router, const T& t);
+
+template <class T>
+static __forceinline void BvArray_clear(hkArrayBase<T>& self)
+{
+        for (int i = 0; i < self.m_iElementCount; ++i)
+            self.m_data[i].~T();
+        self.m_iElementCount = 0;
     }
-    void clear()
-    {
-        for (int i = 0; i < m_iElementCount; ++i)
-            m_data[i].~T();
-        m_iElementCount = 0;
+
+template <class T>
+static __forceinline void BvArray_ClearAndRelease(hkArrayBase<T>& self, BvAllocator& alloc)
+{
+        BvArray_clear(self);
+        if ((self.m_iCapacityState & 0x80000000u) == 0)
+            alloc.ReleaseBlock(self.m_data, self.getCapacity() * sizeof(T));
+        self.m_data = 0;
+        self.m_iCapacityState = 0x80000000;
     }
-    void ClearAndRelease(BvAllocator& alloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000u) == 0)
-            alloc.ReleaseBlock(m_data, getCapacity() * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    void AddBack(Router& router, const T& t)
-    {
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(router.allocator, this, sizeof(T));
-        T* p = m_data + m_iElementCount;
+
+template <class T>
+static __forceinline void BvArray_AddBack(hkArrayBase<T>& self, hkMemoryRouter& router, const T& t)
+{
+        if (self.m_iElementCount == self.getCapacity())
+            ResizeAudioStream(router.m_heap, (&self), sizeof(T));
+        T* p = self.m_data + self.m_iElementCount;
         for (int i = 0; i < 1; i++)
             p[i] = t;
-        m_iElementCount++;
+        self.m_iElementCount++;
     }
-};
 
 struct BvFixup
 {
@@ -2548,7 +2496,7 @@ struct FUN_00e065f0
     int m_pRayCursor;
     int m_offset;
     unsigned char* m_data;
-    BvArray<BvFixup> m_buffer;
+    hkArrayBase<BvFixup> m_buffer;
 
     void FillWithPattern(int);
     void FUN_00e06480();
@@ -2556,7 +2504,7 @@ struct FUN_00e065f0
     void Destroy();
     void* operator new(unsigned int n)
     {
-        FUN_00e065f0* p = static_cast<FUN_00e065f0*>(GetBvRouter()->allocator->AllocateMemoryBlock(n));
+        FUN_00e065f0* p = static_cast<FUN_00e065f0*>(((BvAllocator*)GetBvRouter()->m_heap)->AllocateMemoryBlock(n));
         p->m_usMemSizeAndFlags = (unsigned short)n;
         return p;
     }
@@ -2642,7 +2590,7 @@ struct BvRange
 
 void __stdcall FUN_00e07c50(struct BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack);
 void* __cdecl FUN_00cb1260(void*, const void*, int);
-static void FUN_00e08320(BvArray<BvFixup>* destination, BvArray<BvFixup>* source, int adjustment)
+static void FUN_00e08320(hkArrayBase<BvFixup>* destination, hkArrayBase<BvFixup>* source, int adjustment)
 {
     for (int i = 0; i < source->m_iElementCount; ++i)
     {
@@ -2655,7 +2603,7 @@ static void FUN_00e08320(BvArray<BvFixup>* destination, BvArray<BvFixup>* source
         out->offset = source->m_data[i].offset + adjustment;
     }
 }
-static int FUN_00e08380(BvTree* tree, FUN_00e065f0* source, BvArray<int>* refs, FUN_00e065f0* destination)
+static int FUN_00e08380(BvTree* tree, FUN_00e065f0* source, hkArrayBase<int>* refs, FUN_00e065f0* destination)
 {
     int padding = (-source->m_offset) & 3;
     if (!tree->m_converter)
@@ -2664,12 +2612,12 @@ static int FUN_00e08380(BvTree* tree, FUN_00e065f0* source, BvArray<int>* refs, 
     {
         int bytes = tree->m_converter->ConvertReferences(refs->m_data, refs->m_iElementCount);
         destination->FillWithPattern(bytes);
-        Router* router = FUN_00c85750();
-        unsigned char* temporary = static_cast<unsigned char*>(router->unk00);
-        router->unk00 = temporary + ((bytes + 127) & ~127);
+        hkMemoryRouter* router = FUN_00c85750();
+        unsigned char* temporary = static_cast<unsigned char*>(router->m_stack.m_next.m_storage);
+        router->m_stack.m_next.m_storage = temporary + ((bytes + 127) & ~127);
         tree->m_converter->writeBuffer(refs->m_data, refs->m_iElementCount, temporary);
         FUN_00cb1260(destination->m_data + destination->m_pRayCursor - destination->m_offset, temporary, bytes);
-        FUN_00c85750()->unk00 = temporary;
+        FUN_00c85750()->m_stack.m_next.m_storage = temporary;
     }
     int before = destination->m_offset;
     destination->FillWithPattern(source->m_offset + padding);
@@ -2701,13 +2649,13 @@ struct BvBuilder
     void FUN_00e08470(BvNode* node);
     void FUN_00e07510(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, BvRange* range);
     void FUN_00e07ca0(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, BvRange* range);
-    void FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth, BvArray<int>* refs);
+    void FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth, hkArrayBase<int>* refs);
 };
 
 // Recursively walks a BvNode: deep nodes go to a separate writer, leaves add their edge index to refs, other nodes recurse into both children.
 // @fnv 0x00e08a60
 void BvBuilder::FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d0_cls* stack, int depth,
-                             BvArray<int>* refs)
+                             hkArrayBase<int>* refs)
 {
     if (node->m_depth > 0 && !stack->m_04)
     {
@@ -2718,7 +2666,7 @@ void BvBuilder::FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d
             FUN_00e065f0 writer(entry.m_iOwnerObjectOffset);
             m_pStreamWriter = &writer;
             stack->m_04 = true;
-            BvArray<int> subRefs;
+            hkArrayBase<int> subRefs;
             subRefs.m_data = 0;
             subRefs.m_iElementCount = 0;
             subRefs.m_iCapacityState = 0x80000000;
@@ -2730,8 +2678,8 @@ void BvBuilder::FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d
             }
             entry.m_pStreamWriter = new FUN_00e065f0(entry.m_iOwnerObjectOffset);
             FUN_00e08380(m_iValueAt40, m_pStreamWriter, &subRefs, entry.m_pStreamWriter);
-            m_pStreamWriter->m_buffer.clear();
-            subRefs.ClearAndRelease(GetHeap());
+            BvArray_clear(m_pStreamWriter->m_buffer);
+            BvArray_ClearAndRelease(subRefs, GetHeap());
             writer.Destroy();
         }
         m_pStreamWriter = saved;
@@ -2743,7 +2691,7 @@ void BvBuilder::FUN_00e08a60(BvNode* node, FUN_00e095d0_cls* parent, FUN_00e095d
     {
         FUN_00e07c50(node, parent, stack);
         const int& index = node->m_info->m_uiEdgeIndex;
-        refs->AddBack(*FUN_00c85750(), index);
+        BvArray_AddBack((*(refs)), *FUN_00c85750(), index);
         return;
     }
 
@@ -2772,25 +2720,8 @@ template <class T> __forceinline void constructCopy(T* p, int n, const T& value)
     for (int i = 0; i < n; ++i)
         p[i] = value;
 }
-struct P154Allocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void Free(void*, unsigned);
-};
-struct P154System
-{
-    int unk00, unk04, unk08, unk0c;
-    P154Allocator* allocator;
-};
-struct P154Memory
-{
-    static P154System* FUN_00c85750();
-};
 
-void __cdecl ResizeAudioStream(P154Allocator*, void*, int);
+void __cdecl ResizeAudioStream(hkMemoryAllocator*, void*, int);
 struct P154Array
 {
     int* data;
@@ -2798,48 +2729,44 @@ struct P154Array
     unsigned capacity;
     P154Array() : data(0), count(0), capacity(0x80000000)
     {}
-    void Search(P154Allocator*, int, int*, int);
+    void Search(hkMemoryAllocator*, int, int*, int);
     void append(const int& v)
     {
-        P154System* s = P154Memory::FUN_00c85750();
+        hkMemoryRouter* s = FUN_00c85750();
         if (count == int(capacity & 0x3fffffff))
-            ResizeAudioStream(s->allocator, this, 4);
+            ResizeAudioStream((hkMemoryAllocator*)s->m_heap, this, 4);
         constructCopy(data + count, 1, v);
         ++count;
     }
     void insert(int* src, int pos, int n)
     {
-        P154System* r = P154Memory::FUN_00c85750();
-        P154Allocator* a = r->allocator;
+        hkMemoryRouter* r = FUN_00c85750();
+        hkMemoryAllocator* a = (hkMemoryAllocator*)r->m_heap;
         Search(a, pos, src, n);
     }
     void clear()
     {
-        P154System* r = P154Memory::FUN_00c85750();
-        P154Allocator* a = r->allocator;
+        hkMemoryRouter* r = FUN_00c85750();
+        hkMemoryAllocator* a = (hkMemoryAllocator*)r->m_heap;
         count = 0;
         if (!(capacity & 0x80000000))
-            a->Free(data, (capacity & 0x3fffffff) * 4);
+            a->bufFree(data, (capacity & 0x3fffffff) * 4);
         data = 0;
         capacity = 0x80000000;
     }
 };
-struct P154Pair
-{
-    int first, second;
-};
 struct P154PairArray
 {
-    P154Pair* data;
+    Pair* data;
     int count;
     unsigned capacity;
-    P154Pair& grow()
+    Pair& grow()
     {
-        P154System* s = P154Memory::FUN_00c85750();
+        hkMemoryRouter* s = FUN_00c85750();
         if (count == int(capacity & 0x3fffffff))
-            ResizeAudioStream(s->allocator, this, 8);
+            ResizeAudioStream((hkMemoryAllocator*)s->m_heap, this, 8);
         for (int i = 0; i < 1; ++i)
-            new (data + count + i) P154Pair;
+            new (data + count + i) Pair;
         return data[count++];
     }
 };
@@ -2981,7 +2908,7 @@ int P154Tree::FUN_00e084f0(P154Node* node, P154Region* parent, P154Region* regio
         while (size >= settings->limit - settings->base)
         {
             int index = settings->pairs.count;
-            P154Pair& pair = settings->pairs.grow();
+            Pair& pair = settings->pairs.grow();
             P154Node* selected;
             int oldSize, cost;
             if (highCost > lowCost)
@@ -3002,7 +2929,7 @@ int P154Tree::FUN_00e084f0(P154Node* node, P154Region* parent, P154Region* regio
                 lowRemoved = true;
                 size = highRemoved ? splitSize + 10 : splitSize + highCost + 5;
             }
-            pair.second = settings->base + cost + 5;
+            pair.b = settings->base + cost + 5;
             selected->index = index;
             writer->count += 5 - oldSize;
             P154Node* lowChild = node->low;
@@ -3037,16 +2964,8 @@ struct PairList
     unsigned int m_capBits;
 };
 
-struct AllocHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_pAllocator;
-};
 
-AllocHolder* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 void ResizeAudioStream(void* allocator, PairList* list, unsigned int elemSize);
 
 struct SlotPair
@@ -3146,10 +3065,10 @@ int FUN_00e08240_cls::FUN_00e08240(Node* apNode, int a2, int aiIndex)
             SlotPair* slot = apNode->m_60;
             slot->m_10 = slot->m_00;
             PairList* list = &this->m_14->m_kNode;
-            AllocHolder* holder = FUN_00c85750();
+            hkMemoryRouter* holder = (hkMemoryRouter*)FUN_00c85750();
             if (list->m_uiItemCount == (int)(list->m_capBits & 0x3fffffff))
             {
-                ResizeAudioStream(holder->m_pAllocator, list, 8);
+                fnv_00e08240::ResizeAudioStream(holder->m_heap, list, 8);
             }
             PairEntry* e = &list->m_data[list->m_uiItemCount];
             list->m_uiItemCount++;
@@ -3222,14 +3141,6 @@ struct S_00e08470_Vector
     int unk08;
 };
 
-struct S_00e08470_Holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    void* unk10;
-};
 
 struct S_00e08470_Data
 {
@@ -3237,13 +3148,12 @@ struct S_00e08470_Data
     int unk04;
     int unk08;
     void* unk0c;
-    S_00e08470_Holder* unk10;
+    hkMemoryRouter* unk10;
     S_00e08470_Vector unk14;
 
     void __thiscall FUN_00e06480();
 };
 
-extern "C" S_00e08470_Holder* __cdecl FUN_00c85750();
 extern "C" void __cdecl ResizeAudioStream(void*, S_00e08470_Vector*, int);
 
 struct S_00e08470_Class
@@ -3273,11 +3183,11 @@ int __thiscall S_00e08470_Class::FUN_00e08470(S_00e08470_Context* context)
 
     S_00e08470_Vector* vector = (S_00e08470_Vector*)((char*)this->unk10 + 0x14);
 
-    S_00e08470_Holder* holder = FUN_00c85750();
+    hkMemoryRouter* holder = (hkMemoryRouter*)FUN_00c85750();
 
     if (vector->unk04 == (vector->unk08 & 0x3fffffff))
     {
-        ResizeAudioStream(holder->unk10, vector, 8);
+        ResizeAudioStream((void*)holder->m_heap, vector, 8);
     }
 
     S_00e08470_Entry* entry = vector->unk00 + vector->unk04;
@@ -3298,7 +3208,7 @@ struct CodeCopySource : FUN_00e065f0
 
 // Writes converter-produced reference data and then source's data into destination, adjusts fixups, and returns how far destination's offset grew.
 // @fnv 0x00e08380
-static __declspec(noinline) int FUN_00e08380(BvTree* tree, CodeCopySource* source, BvArray<int>* refs,
+static __declspec(noinline) int FUN_00e08380(BvTree* tree, CodeCopySource* source, hkArrayBase<int>* refs,
                                              FUN_00e065f0* destination)
 {
     int padding = (-source->m_offset) & 3;
@@ -3310,12 +3220,12 @@ static __declspec(noinline) int FUN_00e08380(BvTree* tree, CodeCopySource* sourc
         int count = refs->m_iElementCount;
         int bytes = tree->m_converter->ConvertReferences(data, count);
         destination->FillWithPattern(bytes);
-        Router* router = FUN_00c85750();
-        unsigned char* temporary = static_cast<unsigned char*>(router->unk00);
-        router->unk00 = temporary + ((bytes + 127) & ~127);
+        hkMemoryRouter* router = FUN_00c85750();
+        unsigned char* temporary = static_cast<unsigned char*>(router->m_stack.m_next.m_storage);
+        router->m_stack.m_next.m_storage = temporary + ((bytes + 127) & ~127);
         tree->m_converter->writeBuffer(refs->m_data, refs->m_iElementCount, temporary);
         FUN_00cb1260(destination->m_data + destination->m_pRayCursor - destination->m_offset, temporary, bytes);
-        FUN_00c85750()->unk00 = temporary;
+        FUN_00c85750()->m_stack.m_next.m_storage = temporary;
     }
     int before = destination->m_offset;
     destination->FillWithPattern(source->m_offset + padding);
@@ -3327,7 +3237,7 @@ static __declspec(noinline) int FUN_00e08380(BvTree* tree, CodeCopySource* sourc
     return destination->m_offset - before;
 }
 
-int copy_code_caller(BvTree* tree, CodeCopySource* source, BvArray<int>* refs, FUN_00e065f0* destination)
+int copy_code_caller(BvTree* tree, CodeCopySource* source, hkArrayBase<int>* refs, FUN_00e065f0* destination)
 {
     return FUN_00e08380(tree, source, refs, destination);
 }
@@ -3381,8 +3291,9 @@ struct AssemblerHelper
     int unk1C;
 };
 
-template <typename T> struct MyArray
-{
+template <typename T>
+struct MyArray
+{ // local form of hkArrayBase: 0x00e08cc0 needs its local memset constructor/destructor shape; shared initialization changes extent from 1020 to 1018 bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -3394,21 +3305,21 @@ template <typename T> struct MyArray
     }
     __forceinline ~MyArray() throw()
     {
-        AudioHolder* holder = (AudioHolder*)FUN_00c85750();
-        AudioAllocator* alloc = holder->m_pAllocator;
+        hkMemoryRouter* holder = (hkMemoryRouter*)FUN_00c85750();
+        hkMemoryAllocator* alloc = reinterpret_cast<hkMemoryAllocator*>(holder->m_heap);
         m_iElementCount = 0;
         if (!(m_iCapacityState & 0x80000000))
-            alloc->FreeArray(m_data, (m_iCapacityState & 0x3fffffff) * 4);
+            alloc->bufFree(m_data, (unsigned int)((m_iCapacityState & 0x3fffffff) * 4));
     }
     __forceinline void ClearAndRelease() throw()
     {
-        AudioAllocator* alloc = ((AudioHolder*)FUN_00c85750())->m_pAllocator;
+        hkMemoryAllocator* alloc = reinterpret_cast<hkMemoryAllocator*>(((hkMemoryRouter*)FUN_00c85750())->m_heap);
         int cap = m_iCapacityState;
         m_iElementCount = 0;
         if (!(cap & 0x80000000))
         {
             int bytes = (cap & 0x3fffffff) * 4;
-            alloc->FreeArray(m_data, bytes);
+            alloc->bufFree(m_data, (unsigned int)bytes);
         }
         m_data = 0;
         m_iElementCount = 0;
@@ -3591,9 +3502,9 @@ void Tree::FUN_00e08cc0(S_00e07da0_Node* node, int arg2, int arg3)
     node->info.unk8 = 0;
     {
         EntryArray& entries = this->m_pAssemblerHelper->m_entries;
-        Router* router = FUN_00c85750();
+        hkMemoryRouter* router = FUN_00c85750();
         if (entries.m_iElementCount == (entries.m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(router->allocator, &entries, 8);
+            ResizeAudioStream(router->m_heap, &entries, 8);
         entries.m_iElementCount++;
     }
 

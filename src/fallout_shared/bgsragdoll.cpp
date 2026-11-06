@@ -1,34 +1,122 @@
 // fallout_shared/bgsragdoll.cpp: BGSRagdoll (33 functions)
 
-#include "bgsragdoll_types_BGSRagdoll.h"
+#include "../../include/BSStringT.h"
+
+#include "../../include/BaseFormComponent.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESModel.h"
+#include "../../include/FileEntryList.h"
+#include "../../include/SaveMetadata.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/RagdollFeedbackData__RagdollFeedbackSystemData.h"
+#include "../../include/RagdollAnimationData.h"
+#include "../../include/FootIK_DATA__FootIKSystem_DATA.h"
+#include "../../include/FootIK_DATA.h"
+#include "../../include/LookIK_DATA.h"
+#include "../../include/GrabIK_DATA.h"
+#include "../../include/PoseMatching_DATA__PoseMatching_System_DATA.h"
+#include "../../include/RagdollFeedbackProfile.h"
+#include "../../include/BGSBodyPartData.h"
+#include "../../include/BGSRagdoll.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESFile.h"
 #include <malloc.h>
+
+// No shared definition is available for this array element.
+class FootIK_DATA__FootIK_Leg_DATA
+{
+  public:
+    short m_sFirstLegValue;   // +0x0, 2 bytes
+    short m_sSecondLegValue;  // +0x2, 2 bytes
+    short m_sThirdLegValue;   // +0x4, 2 bytes
+    bool m_bFourthLegValue;   // +0x6, 1 bytes
+    unsigned char layoutPadding7[1];
+    float ShortBooleanFloatComponents;               // +0x8, 4 bytes
+    float BooleanFloatComponentData;                 // +0xC, 4 bytes
+    float SixFloatParameterBlock;                    // +0x10, 4 bytes
+    float SixFloatAndFloatTripletData;               // +0x14, 4 bytes
+    float m_fFourthComponentValue;                   // +0x18, 4 bytes
+    float m_fFifthFloatValue;                          // +0x1C, 4 bytes
+    float ThreeFloatScalarsAndTwoFloatTriples[3];    // +0x20, 12 bytes
+    float TwoFloatAndTwoThreeElementFloatArrays[3];  // +0x2C, 12 bytes
+};
+// No shared definition is available for this array element.
+class LookIK_DATA__LookIK_Head_DATA
+{
+  public:
+    short m_sFirstHeadValue;                      // +0x0, 2 bytes
+    short m_sSecondHeadValue;                     // +0x2, 2 bytes
+    float ShortPairTwoVectorTwoScalarData[3];     // +0x4, 12 bytes
+    float ShortPairTwoVectorThreeScalarData[3];   // +0x10, 12 bytes
+    float ShortAndTwoFloatTriplesAndThreeFloats;  // +0x1C, 4 bytes
+    float VectorPairScalarData;                   // +0x20, 4 bytes
+    float FloatTripleAndThreeFloats;              // +0x24, 4 bytes
+};
+// No shared definition is available for this array element.
+class GrabIK_DATA__GrabIK_Arm_DATA
+{
+  public:
+    short m_sFirstArmValue;   // +0x0, 2 bytes
+    short m_sSecondArmValue;  // +0x2, 2 bytes
+    short m_sThirdArmValue;   // +0x4, 2 bytes
+};
+
+class SandboxProcedureData;
+class TESObjectREFR;
+#include "../../include/NiTNewInterface.h"
+#include "../../include/NiTArray.h"
+
+// The shared data layouts do not yet declare their endian helpers.
+void __fastcall SwapRagdollFeedbackEndian(RagdollFeedbackData__RagdollFeedbackSystemData*);
+void __fastcall SwapPoseMatchingEndian(PoseMatching_DATA__PoseMatching_System_DATA*);
 
 template <int N> struct EndianSizeTag
 {
 };
 void __cdecl BSEndian(unsigned short*, EndianSizeTag<2>);
 
-class TESFileLoadView : public TESFile
-{
-  public:
-    unsigned int GetTESForm();
-};
-
-class TESFormInitFlag
-{
-  public:
-    bool IsFormInitialized() const;
-    static TESForm* GetFormByID(unsigned int formID);
-};
+// This record helper returns the full register value; TESFile::GetTESForm returns a byte.
+unsigned int __fastcall GetRagdollRecordType(TESFile* file);
 
 int __cdecl Warning(const char*, ...);
 void __cdecl operator delete(void*);
 
-class BGSBodyPartData : public TESForm
+// The shared string header lacks the BSStringT comparison overload at 0x00501c90.
+struct RagdollStringOperations : BSStringT<char>
 {
+    int CompareText(const BSStringT<char>* string, bool ignoreCase);
 };
-class TESActorBase : public TESForm
+
+// Shared ragdoll headers lack these copy/compare declarations. These views add no data.
+struct RagdollAnimationOperations : RagdollAnimationData
 {
+    void CopyFrom(const RagdollAnimationOperations&);
+    bool Differs(const RagdollAnimationOperations&);
+};
+struct FootIKOperations : FootIK_DATA
+{
+    void CopyData(const FootIK_DATA&);
+    bool Differs(const FootIK_DATA&);
+};
+struct LookIKOperations : LookIK_DATA
+{
+    void CopyData(const LookIK_DATA&);
+    bool Differs(const LookIK_DATA&);
+};
+struct GrabIKOperations : GrabIK_DATA
+{
+    void CopyData(const GrabIK_DATA&);
+    bool Differs(const GrabIK_DATA&);
+};
+struct RagdollFeedbackOperations : RagdollFeedbackProfile
+{
+    void CopyData(const RagdollFeedbackProfile&);
+    bool Differs(const RagdollFeedbackProfile&);
+};
+struct RagdollOperations : BGSRagdoll
+{
+    void CopyData(TESForm*);
+    bool Differs(TESForm*);
 };
 
 // @fnv 0x005edd00
@@ -158,9 +246,9 @@ void BGSRagdoll::InitItem()
 
 // Reads a BGSRagdoll record from a TESFile, handling EDID, OBND, MODL/MODT, DATA, XNAM, TNAM, RAFD, RAFB, RAPS and ANAM chunks.
 // @fnv 0x005ee640
-bool BGSRagdoll::Load(TESFile* file)
+bool BGSRagdoll::LoadForm(TESFile* file)
 {
-    if (reinterpret_cast<TESFileLoadView*>(file)->GetTESForm() != 0x63)
+    if (GetRagdollRecordType(file) != 0x63)
         return false;
     LoadRecordHeader(file);
     struct LoadLocals
@@ -223,7 +311,7 @@ bool BGSRagdoll::Load(TESFile* file)
             file->GetChunkData(&m_kRagdollAnimationData.m_kRagdollFeedbackData,
                                sizeof(m_kRagdollAnimationData.m_kRagdollFeedbackData));
             if (file->IsEndianConversionRequired())
-                m_kRagdollAnimationData.m_kRagdollFeedbackData.FUN_005ee380();
+                SwapRagdollFeedbackEndian(&m_kRagdollAnimationData.m_kRagdollFeedbackData);
             break;
         case 0x42464152: {
             file->GetChunkData(
@@ -249,7 +337,7 @@ bool BGSRagdoll::Load(TESFile* file)
             file->GetChunkData(&m_kRagdollFeedbackProfile.m_kRagdollFeedbackData,
                                sizeof(m_kRagdollFeedbackProfile.m_kRagdollFeedbackData));
             if (file->IsEndianConversionRequired())
-                m_kRagdollFeedbackProfile.m_kRagdollFeedbackData.FUN_005ee580();
+                SwapPoseMatchingEndian(&m_kRagdollFeedbackProfile.m_kRagdollFeedbackData);
             break;
         case 0x4d414e41: {
             locals.filename = static_cast<char*>(_alloca(file->GetChunkSize()));
@@ -302,37 +390,22 @@ void* __fastcall FUN_005ed790(float* pThis)
     return pThis;
 }
 
-struct FUN_005ed8c0
+// FootIKSystem's constructor must precede both arrays, but the shared class has no constructor declaration.
+struct FootIKFeedbackConstruction : FootIK_DATA__FootIKSystem_DATA
 {
-    int pad[7];
-    FUN_005ed8c0();
+    FootIKFeedbackConstruction();
+};
+struct FootIKConstruction
+{
+    bool bEnabled;
+    FootIKFeedbackConstruction feedback;
+    BSSimpleArray<const char*, 1024> names;
+    BSSimpleArray<FootIK_DATA__FootIK_Leg_DATA, 1024> legs;
+    FootIKConstruction();
 };
 
-struct FUN_005eede0
-{
-    int pad[4];
-    FUN_005eede0();
-    ~FUN_005eede0();
-};
-
-struct FUN_005eefc0
-{
-    int pad;
-    FUN_005eefc0();
-};
-
-struct FUN_005ed850
-{
-    char b0;
-    FUN_005ed8c0 m4;
-    FUN_005eede0 m20;
-    FUN_005eefc0 m30;
-    FUN_005ed850();
-};
-
-// Initializes the object by setting b0 to 0 and default-constructing the m4, m20 and m30 members.
 // @fnv 0x005ed850
-FUN_005ed850::FUN_005ed850() : b0(0)
+FootIKConstruction::FootIKConstruction() : bEnabled(false)
 {}
 
 // Sets the first seven floats of pThis to 0.0f and returns pThis.
@@ -349,78 +422,20 @@ float* __fastcall FUN_005ed8c0(float* pThis)
     return pThis;
 }
 
-namespace fnv_005ed910 {
-struct FUN_005eede0
-{
-    int pad[4];
-    FUN_005eede0();
-    ~FUN_005eede0();
-};
-
-struct FUN_005ef380
-{
-    int pad;
-    FUN_005ef380();
-};
-
-struct FUN_005ed910
-{
-    bool b;
-    FUN_005eede0 m1;
-    FUN_005ef380 m2;
-    FUN_005ed910();
-};
-
-// Initializes b to false and default-constructs the m1 and m2 members.
 // @fnv 0x005ed910
-FUN_005ed910::FUN_005ed910() : b(false)
+LookIK_DATA::LookIK_DATA() : bEnabled(false)
 {}
-}  // namespace fnv_005ed910
 
-namespace fnv_005ed980 {
-struct FUN_005eede0
-{
-    int pad[4];
-    FUN_005eede0();
-    ~FUN_005eede0();
-};
-
-struct FUN_005ef380
-{
-    int pad;
-    FUN_005ef380();
-};
-
-struct FUN_005ed980
-{
-    bool b;
-    FUN_005eede0 m1;
-    FUN_005ef380 m2;
-    FUN_005ed980();
-};
-
-// Constructor that initializes b to false and default-constructs the m1 and m2 members.
 // @fnv 0x005ed980
-FUN_005ed980::FUN_005ed980() : b(false)
+GrabIK_DATA::GrabIK_DATA() : bEnabled(false)
 {}
-}  // namespace fnv_005ed980
 
 void __fastcall InitDefaults(void*);
 
-struct FUN_005ed9f0
-{
-    char m_00;
-    BSStringT<char> m_04;
-    int m_0c;
-
-    FUN_005ed9f0();
-};
-
-// Initializes m_00 to 0 and constructs m_0c by calling InitDefaults.
 // @fnv 0x005ed9f0
-FUN_005ed9f0::FUN_005ed9f0() : m_00(0)
+RagdollFeedbackProfile::RagdollFeedbackProfile() : bEnabled(false)
 {
-    InitDefaults(&m_0c);
+    InitDefaults(&m_kRagdollFeedbackData);
 }
 
 // Initializes the object's fields: three shorts to -1, a byte to 0, and floats to 0, 0, 0.1, 0, then returns pThis.
@@ -440,87 +455,56 @@ void* __fastcall InitDefaults(char* pThis)
 
 // Byte-swaps four consecutive 16-bit values starting at thisPtr via BSEndian.
 // @fnv 0x005ee510
-void __fastcall SwapEndianFourShorts(unsigned short* thisPtr)
+void SaveMetadata::SwapEndianFourShorts()
 {
-    BSEndian(thisPtr, EndianSizeTag<2>());
-    BSEndian(thisPtr + 1, EndianSizeTag<2>());
-    BSEndian(thisPtr + 2, EndianSizeTag<2>());
-    BSEndian(thisPtr + 3, EndianSizeTag<2>());
+    BSEndian(&m_usFootIndexCount, EndianSizeTag<2>());
+    BSEndian(&m_usLegDataCount, EndianSizeTag<2>());
+    BSEndian(&m_usHeadDataCount, EndianSizeTag<2>());
+    BSEndian(&m_usGrabArmDataCount, EndianSizeTag<2>());
 }
 
 unsigned int __cdecl BSStringLength(const char* apString);
-int __cdecl strcpy_s(char* apDest, unsigned int auiSize, const char* apSrc);
+namespace RagdollStrings
+{
+int __cdecl Copy(char* apDest, unsigned int auiSize, const char* apSrc);
+}
 
-struct GlobalObject_00869f00
-{
-    void Clear(bool abFreeMemory);
-};
-struct ArrSI
-{
-    unsigned int GetFlags();
-};
-struct Arr
-{
-    unsigned int* GetAt(int aiIndex);
-};
-struct _Mem_20a4
-{
-    void SetSize(unsigned int auiNewSize, bool abFreeMemory);
-};
-struct FUN_0069ccf0_obj
-{
-    GrabIK_DATA__GrabIK_Arm_DATA& FUN_0069ccf0(unsigned int auiIndex);
-};
-
-struct FUN_005ed360_shell : GrabIK_DATA
-{
-    void FUN_005ed360(const GrabIK_DATA& arData);
-};
 
 // Clears this object's arrays, resizes them to match arData, copies the arm data and duplicated strings, then copies bEnabled.
 // @fnv 0x005ed360
-void FUN_005ed360_shell::FUN_005ed360(const GrabIK_DATA& arSource)
+void GrabIKOperations::CopyData(const GrabIK_DATA& arSource)
 {
-    ((GlobalObject_00869f00*)((char*)this + 0x14))->Clear(true);
-    for (unsigned int ui = 0; ui < ((ArrSI*)((char*)this + 4))->GetFlags(); ui++)
-        delete (void*)*((Arr*)((char*)this + 4))->GetAt(ui);
-    ((GlobalObject_00869f00*)((char*)this + 4))->Clear(true);
+    ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)this + 0x14))->Clear(true);
+    for (unsigned int ui = 0; ui < ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)this + 4))->GetSize(); ui++)
+        delete (void*)((BSSimpleArray<unsigned int, 1024>*)((char*)this + 4))->GetAt(ui);
+    ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)this + 4))->Clear(true);
 
     ((BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>*)((char*)this + 0x14))
-        ->SetSize(((ArrSI*)((char*)&arSource + 0x14))->GetFlags(), true);
-    ((_Mem_20a4*)((char*)this + 4))->SetSize(((ArrSI*)((char*)&arSource + 4))->GetFlags(), true);
+        ->SetSize(((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)&arSource + 0x14))->GetSize(), true);
+    ((BSSimpleArray<const char*, 1024>*)((char*)this + 4))->SetSize(((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)&arSource + 4))->GetSize(), true);
 
-    for (unsigned int ui = 0; ui < ((ArrSI*)((char*)&arSource + 0x14))->GetFlags(); ui++)
-        ((FUN_0069ccf0_obj*)((char*)this + 0x14))->FUN_0069ccf0(ui) =
-            ((FUN_0069ccf0_obj*)((char*)&arSource + 0x14))->FUN_0069ccf0(ui);
+    for (unsigned int ui = 0; ui < ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)&arSource + 0x14))->GetSize(); ui++)
+        ((BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>*)((char*)this + 0x14))->GetAt(ui) =
+            ((BSSimpleArray<GrabIK_DATA__GrabIK_Arm_DATA, 1024>*)((char*)&arSource + 0x14))->GetAt(ui);
 
-    for (unsigned int ui = 0; ui < ((ArrSI*)((char*)&arSource + 4))->GetFlags(); ui++)
+    for (unsigned int ui = 0; ui < ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)&arSource + 4))->GetSize(); ui++)
     {
-        unsigned int uiLength = BSStringLength((const char*)*((Arr*)((char*)&arSource + 4))->GetAt(ui)) + 1;
+        unsigned int uiLength = BSStringLength((const char*)((BSSimpleArray<unsigned int, 1024>*)((char*)&arSource + 4))->GetAt(ui)) + 1;
         char* pString = new char[uiLength];
-        strcpy_s(pString, uiLength, (const char*)*((Arr*)((char*)&arSource + 4))->GetAt(ui));
-        *((Arr*)((char*)this + 4))->GetAt(ui) = (unsigned int)pString;
+        RagdollStrings::Copy(pString, uiLength, (const char*)((BSSimpleArray<unsigned int, 1024>*)((char*)&arSource + 4))->GetAt(ui));
+        ((BSSimpleArray<unsigned int, 1024>*)((char*)this + 4))->GetAt(ui) = (unsigned int)pString;
     }
 
     bEnabled = arSource.bEnabled;
 }
 
-struct FUN_00501c90_shell
-{
-    int CompareString(const BSStringT<char>* apString, bool abIgnoreCase);
-};
-
-struct FUN_005ed4f0_shell : RagdollFeedbackProfile
-{
-    bool FUN_005ed4f0(const RagdollFeedbackProfile& arData);
-};
 
 // @fnv 0x005ed4f0
-bool FUN_005ed4f0_shell::FUN_005ed4f0(const RagdollFeedbackProfile& arOther)
+bool RagdollFeedbackOperations::Differs(const RagdollFeedbackProfile& arOther)
 {
     bool bret = false;
-    if (((FUN_00501c90_shell*)((char*)this + 4))
-            ->CompareString((const BSStringT<char>*)((const char*)&arOther + 4), true))
+    if (((RagdollStringOperations*)((char*)this + 4))
+            ->CompareText((const BSStringT<char>*)((const char*)&arOther + 4), true))
         bret = true;
     if (bret || bEnabled != arOther.bEnabled ||
         *(short*)((char*)this + 0xc) != *(const short*)((const char*)&arOther + 0xc) ||
@@ -535,21 +519,12 @@ bool FUN_005ed4f0_shell::FUN_005ed4f0(const RagdollFeedbackProfile& arOther)
     return bret;
 }
 
-struct BSStringTCharAssign
-{
-    BSStringT<char>& operator=(const BSStringT<char>& arString);
-};
-
-struct FUN_005ed5f0_shell : RagdollFeedbackProfile
-{
-    void AssignFrom(const RagdollFeedbackProfile& arData);
-};
 
 // Copies a string, a flag and several numeric fields from arData into this object.
 // @fnv 0x005ed5f0
-void FUN_005ed5f0_shell::AssignFrom(const RagdollFeedbackProfile& arSource)
+void RagdollFeedbackOperations::CopyData(const RagdollFeedbackProfile& arSource)
 {
-    *(BSStringTCharAssign*)((char*)this + 4) = *(const BSStringT<char>*)((const char*)&arSource + 4);
+    *(BSStringT<char>*)((char*)this + 4) = *(const BSStringT<char>*)((const char*)&arSource + 4);
     bEnabled = arSource.bEnabled;
     *(unsigned short*)((char*)this + 0xc) = *(const unsigned short*)((const char*)&arSource + 0xc);
     *(unsigned short*)((char*)this + 0xe) = *(const unsigned short*)((const char*)&arSource + 0xe);
@@ -562,373 +537,165 @@ void FUN_005ed5f0_shell::AssignFrom(const RagdollFeedbackProfile& arSource)
 }
 
 namespace fnv_005edfb0 {
-struct GlobalObject_00869f00
-{
-    void Clear(bool abFreeMemory);
-};
-struct ArrSI
-{
-    unsigned int GetFlags();
-};
-struct Arr
-{
-    unsigned int* GetAt(int aiIndex);
-};
-
-struct FUN_005edfb0_shell : BGSRagdoll
-{
-    void ClearRagdollData();
-};
 
 // Frees each element of three arrays at offsets 0xb0, 0xd4 and 0xf8, then clears those arrays and the objects at 0x80, 0xc0, 0xe4 and 0x108.
 // @fnv 0x005edfb0
-void FUN_005edfb0_shell::ClearRagdollData()
+void __fastcall ClearRagdollData(BGSRagdoll* ragdoll)
 {
-    ((GlobalObject_00869f00*)((char*)this + 0x80))->Clear(true);
+    ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)ragdoll + 0x80))->Clear(true);
 
-    for (unsigned int ui = 0; ui < ((ArrSI*)((char*)this + 0xb0))->GetFlags(); ui++)
-        delete (void*)*((Arr*)((char*)this + 0xb0))->GetAt(ui);
-    ((GlobalObject_00869f00*)((char*)this + 0xc0))->Clear(true);
-    ((GlobalObject_00869f00*)((char*)this + 0xb0))->Clear(true);
+    for (unsigned int ui = 0; ui < ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)ragdoll + 0xb0))->GetSize(); ui++)
+        delete (void*)((BSSimpleArray<unsigned int, 1024>*)((char*)ragdoll + 0xb0))->GetAt(ui);
+    ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)ragdoll + 0xc0))->Clear(true);
+    ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)ragdoll + 0xb0))->Clear(true);
 
-    for (unsigned int ui = 0; ui < ((ArrSI*)((char*)this + 0xd4))->GetFlags(); ui++)
-        delete (void*)*((Arr*)((char*)this + 0xd4))->GetAt(ui);
-    ((GlobalObject_00869f00*)((char*)this + 0xe4))->Clear(true);
-    ((GlobalObject_00869f00*)((char*)this + 0xd4))->Clear(true);
+    for (unsigned int ui = 0; ui < ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)ragdoll + 0xd4))->GetSize(); ui++)
+        delete (void*)((BSSimpleArray<unsigned int, 1024>*)((char*)ragdoll + 0xd4))->GetAt(ui);
+    ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)ragdoll + 0xe4))->Clear(true);
+    ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)ragdoll + 0xd4))->Clear(true);
 
-    for (unsigned int ui = 0; ui < ((ArrSI*)((char*)this + 0xf8))->GetFlags(); ui++)
-        delete (void*)*((Arr*)((char*)this + 0xf8))->GetAt(ui);
-    ((GlobalObject_00869f00*)((char*)this + 0x108))->Clear(true);
-    ((GlobalObject_00869f00*)((char*)this + 0xf8))->Clear(true);
+    for (unsigned int ui = 0; ui < ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)ragdoll + 0xf8))->GetSize(); ui++)
+        delete (void*)((BSSimpleArray<unsigned int, 1024>*)((char*)ragdoll + 0xf8))->GetAt(ui);
+    ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)ragdoll + 0x108))->Clear(true);
+    ((BSSimpleArray<SandboxProcedureData, 1024>*)((char*)ragdoll + 0xf8))->Clear(true);
 }
 }  // namespace fnv_005edfb0
 
 void __cdecl BSEndian(unsigned int*, EndianSizeTag<4>);
 
-struct FUN_005ee380_Data
-{
-    unsigned int uiValue0;
-    unsigned int uiValue1;
-    unsigned int uiValue2;
-    unsigned int uiValue3;
-    unsigned int uiValue4;
-    unsigned int uiValue5;
-    unsigned int uiValue6;
-    unsigned int uiValue7;
-    unsigned int uiValue8;
-    unsigned int uiValue9;
-    unsigned int uiValue10;
-    unsigned int uiValue11;
-    unsigned int uiValue12;
-    unsigned int uiValue13;
-    unsigned int uiValue14;
-    void FUN_005ee380();
-};
-
 // Byte-swaps each of the 15 unsigned int fields of this struct via BSEndian.
 // @fnv 0x005ee380
-void FUN_005ee380_Data::FUN_005ee380()
+void __fastcall SwapRagdollFeedbackEndian(RagdollFeedbackData__RagdollFeedbackSystemData* data)
 {
-    BSEndian(&uiValue0, EndianSizeTag<4>());
-    BSEndian(&uiValue1, EndianSizeTag<4>());
-    BSEndian(&uiValue2, EndianSizeTag<4>());
-    BSEndian(&uiValue3, EndianSizeTag<4>());
-    BSEndian(&uiValue4, EndianSizeTag<4>());
-    BSEndian(&uiValue5, EndianSizeTag<4>());
-    BSEndian(&uiValue6, EndianSizeTag<4>());
-    BSEndian(&uiValue7, EndianSizeTag<4>());
-    BSEndian(&uiValue8, EndianSizeTag<4>());
-    BSEndian(&uiValue9, EndianSizeTag<4>());
-    BSEndian(&uiValue10, EndianSizeTag<4>());
-    BSEndian(&uiValue11, EndianSizeTag<4>());
-    BSEndian(&uiValue12, EndianSizeTag<4>());
-    BSEndian(&uiValue13, EndianSizeTag<4>());
-    BSEndian(&uiValue14, EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFeedbackParameter1), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->fHeirGain), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFeedbackParameter3), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->fVelGain), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFeedbackParameter5), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->fSnapGain), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFeedbackParameter7), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFeedbackParameter8), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFeedbackParameter9), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFeedbackParameter10), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFeedbackParameter11), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFeedbackParameter12), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFeedbackParameter13), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->ThreeFloatsAndTwoIntegers), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_uiFeedbackParameter14), EndianSizeTag<4>());
 }
 
 void __cdecl BSEndian(unsigned int*, EndianSizeTag<4>);
 
-struct FUN_005ee580_Data
-{
-    unsigned short usValue0;
-    unsigned short usValue1;
-    unsigned short usValue2;
-    unsigned char ucValue3;
-    unsigned int uiValue3;
-    unsigned int uiValue4;
-    unsigned int uiValue5;
-    unsigned int uiValue6;
-    void FUN_005ee580();
-};
-
 // Byte-swaps the three 16-bit and four 32-bit fields of the struct via BSEndian.
 // @fnv 0x005ee580
-void FUN_005ee580_Data::FUN_005ee580()
+void __fastcall SwapPoseMatchingEndian(PoseMatching_DATA__PoseMatching_System_DATA* data)
 {
-    BSEndian(&usValue0, EndianSizeTag<2>());
-    BSEndian(&usValue1, EndianSizeTag<2>());
-    BSEndian(&usValue2, EndianSizeTag<2>());
-    BSEndian(&uiValue3, EndianSizeTag<4>());
-    BSEndian(&uiValue4, EndianSizeTag<4>());
-    BSEndian(&uiValue5, EndianSizeTag<4>());
-    BSEndian(&uiValue6, EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned short*>(&data->m_sFirstRagdollFeedbackIndex), EndianSizeTag<2>());
+    BSEndian(reinterpret_cast<unsigned short*>(&data->m_sSecondRagdollFeedbackIndex), EndianSizeTag<2>());
+    BSEndian(reinterpret_cast<unsigned short*>(&data->m_sThirdRagdollFeedbackIndex), EndianSizeTag<2>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->ShortFlagFloatRecord), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->FourFloatRecord), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->FourFloatParameterBlock), EndianSizeTag<4>());
+    BSEndian(reinterpret_cast<unsigned int*>(&data->m_fFourthParameter), EndianSizeTag<4>());
 }
 
-namespace fnv_005eeb70 {
-struct FUN_005092f0_obj
-{
-    void FUN_004851b0(TESForm* apCopy);
-};
-struct FUN_00c7a790_obj
-{
-    void CopyFrom(const FUN_00c7a790_obj& arData);
-};
-struct FUN_005ecb30_shell : FootIK_DATA
-{
-    void FUN_005ecb30(const FootIK_DATA& arData);
-};
-struct FUN_005ecfd0_shell : LookIK_DATA
-{
-    void FUN_005ecfd0(const LookIK_DATA& arData);
-};
-struct FUN_005ed360_shell : GrabIK_DATA
-{
-    void FUN_005ed360(const GrabIK_DATA& arData);
-};
-struct FUN_005ed5f0_shell : RagdollFeedbackProfile
-{
-    void AssignFrom(const RagdollFeedbackProfile& arData);
-};
-struct FUN_005eeb70_shell : BGSRagdoll
-{
-    void FUN_005eeb70(TESForm* apCopy);
-};
 
 // Casts apCopy to BGSRagdoll, then copies its fields and embedded sub-objects into this ragdoll.
 // @fnv 0x005eeb70
-void FUN_005eeb70_shell::FUN_005eeb70(TESForm* apCopy)
+void RagdollOperations::CopyData(TESForm* apCopy)
 {
     BGSRagdoll* pcopy = dynamic_cast<BGSRagdoll*>(apCopy);
     if (!pcopy)
         return;
-    ((FUN_005092f0_obj*)this)->FUN_004851b0(apCopy);
+    TESForm::CopyFrom(apCopy);
     m_pActorBase = pcopy->m_pActorBase;
     m_pBodyPartDataCur = pcopy->m_pBodyPartDataCur;
     m_iRagdollType = pcopy->m_iRagdollType;
-    ((FUN_00c7a790_obj*)((char*)this + 0x40))->CopyFrom(*(FUN_00c7a790_obj*)((char*)pcopy + 0x40));
-    ((FUN_005ecb30_shell*)((char*)this + 0x90))->FUN_005ecb30(*(FootIK_DATA*)((char*)pcopy + 0x90));
-    ((FUN_005ecfd0_shell*)((char*)this + 0xd0))->FUN_005ecfd0(*(LookIK_DATA*)((char*)pcopy + 0xd0));
-    ((FUN_005ed360_shell*)((char*)this + 0xf4))->FUN_005ed360(*(GrabIK_DATA*)((char*)pcopy + 0xf4));
-    ((FUN_005ed5f0_shell*)((char*)this + 0x118))->AssignFrom(*(RagdollFeedbackProfile*)((char*)pcopy + 0x118));
+    ((RagdollAnimationOperations*)((char*)this + 0x40))->CopyFrom(*(RagdollAnimationOperations*)((char*)pcopy + 0x40));
+    ((FootIKOperations*)((char*)this + 0x90))->CopyData(*(FootIK_DATA*)((char*)pcopy + 0x90));
+    ((LookIKOperations*)((char*)this + 0xd0))->CopyData(*(LookIK_DATA*)((char*)pcopy + 0xd0));
+    ((GrabIKOperations*)((char*)this + 0xf4))->CopyData(*(GrabIK_DATA*)((char*)pcopy + 0xf4));
+    ((RagdollFeedbackOperations*)((char*)this + 0x118))->CopyData(*(RagdollFeedbackProfile*)((char*)pcopy + 0x118));
 }
-}  // namespace fnv_005eeb70
 
-namespace fnv_005eec60 {
-struct FUN_00509540_obj
-{
-    bool FUN_00485270(TESForm* apCompare);
-};
-struct FUN_00c74fb0_obj
-{
-    bool FUN_00c74fb0(const FUN_00c74fb0_obj& arData);
-};
-struct FUN_005ec920_shell : FootIK_DATA
-{
-    bool FUN_005ec920(const FootIK_DATA& arData);
-};
-struct FUN_005ece50_shell : LookIK_DATA
-{
-    bool FUN_005ece50(const LookIK_DATA& arData);
-};
-struct FUN_005ed1e0_shell : GrabIK_DATA
-{
-    bool FUN_005ed1e0(const GrabIK_DATA& arData);
-};
-struct FUN_005ed4f0_shell : RagdollFeedbackProfile
-{
-    bool FUN_005ed4f0(const RagdollFeedbackProfile& arData);
-};
-struct FUN_005eec60_shell : BGSRagdoll
-{
-    bool FUN_005eec60(TESForm* apCompare);
-};
 
 // Compares this BGSRagdoll with apCompare field by field, returning true if any compared member differs or the cast fails.
 // @fnv 0x005eec60
-bool FUN_005eec60_shell::FUN_005eec60(TESForm* apCompare)
+bool RagdollOperations::Differs(TESForm* apCompare)
 {
     BGSRagdoll* pcomp = dynamic_cast<BGSRagdoll*>(apCompare);
     if (!pcomp)
         return true;
-    if (((FUN_00509540_obj*)this)->FUN_00485270(pcomp))
+    if (TESForm::Compare(pcomp))
         return true;
     if (m_iRagdollType != pcomp->m_iRagdollType)
         return true;
-    if (((FUN_00c74fb0_obj*)((char*)this + 0x40))->FUN_00c74fb0(*(FUN_00c74fb0_obj*)((char*)pcomp + 0x40)))
+    if (((RagdollAnimationOperations*)((char*)this + 0x40))->Differs(*(RagdollAnimationOperations*)((char*)pcomp + 0x40)))
         return true;
-    if (((FUN_005ec920_shell*)((char*)this + 0x90))->FUN_005ec920(*(FootIK_DATA*)((char*)pcomp + 0x90)))
+    if (((FootIKOperations*)((char*)this + 0x90))->Differs(*(FootIK_DATA*)((char*)pcomp + 0x90)))
         return true;
-    if (((FUN_005ece50_shell*)((char*)this + 0xd0))->FUN_005ece50(*(LookIK_DATA*)((char*)pcomp + 0xd0)))
+    if (((LookIKOperations*)((char*)this + 0xd0))->Differs(*(LookIK_DATA*)((char*)pcomp + 0xd0)))
         return true;
-    if (((FUN_005ed1e0_shell*)((char*)this + 0xf4))->FUN_005ed1e0(*(GrabIK_DATA*)((char*)pcomp + 0xf4)))
+    if (((GrabIKOperations*)((char*)this + 0xf4))->Differs(*(GrabIK_DATA*)((char*)pcomp + 0xf4)))
         return true;
-    if (((FUN_005ed4f0_shell*)((char*)this + 0x118))->FUN_005ed4f0(*(RagdollFeedbackProfile*)((char*)pcomp + 0x118)))
+    if (((RagdollFeedbackOperations*)((char*)this + 0x118))->Differs(*(RagdollFeedbackProfile*)((char*)pcomp + 0x118)))
         return true;
     if (m_pBodyPartDataCur != pcomp->m_pBodyPartDataCur)
         return true;
     return false;
 }
-}  // namespace fnv_005eec60
 
-struct AX
-{
-    void FUN_006b3eb0(unsigned int, unsigned int);
-    void* FUN_005eede0();
-};
+
 extern int DAT_010472d0;
 
-// Sets the object's vtable pointer to DAT_010472d0, calls FUN_006b3eb0 with 0, 0, and returns this.
+// The constructor and destructor store the BSSimpleArray<char const *,1024> vftable 0x010472d0.
 // @fnv 0x005eede0
-void* AX::FUN_005eede0()
+template <>
+BSSimpleArray<const char*, 1024>::BSSimpleArray()
 {
-    *(int*)this = (int)&DAT_010472d0;
-    FUN_006b3eb0(0, 0);
-    return this;
+    reinterpret_cast<BSSimpleArray<SandboxProcedureData, 1024>*>(this)->FUN_006b3eb0(0, false);
 }
-
-struct FUN_005edac0_shell
-{
-    void FUN_005edc30();
-    void* FUN_005edac0(unsigned int);
-};
-void _Deallocate(void*);
-// Calls FUN_005edc30 on this, then deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x005edac0
-void* FUN_005edac0_shell::FUN_005edac0(unsigned int flags)
-{
-    this->FUN_005edc30();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-struct FUN_005eee10
-{
-    ~FUN_005eee10();
-};
-struct FUN_005ef3b0
-{
-    ~FUN_005ef3b0();
-};
-struct FUN_005edbd0
-{
-    char _0[4];
-    FUN_005eee10 a;
-    char _pad[15];
-    FUN_005ef3b0 b;
-    ~FUN_005edbd0();
-};
-// @fnv 0x005edbd0
-FUN_005edbd0::~FUN_005edbd0()
-{}
-
-namespace fnv_005eee10 {
-extern int DAT_010472d0;
-
-struct GlobalObject_00869f00
-{
-    void Clear(bool);
-};
-
-struct FUN_005eee10_shell
-{
-    int* p;
-    void FUN_005eee10();
-};
 
 // @fnv 0x005eee10
-void FUN_005eee10_shell::FUN_005eee10()
+template <>
+BSSimpleArray<const char*, 1024>::~BSSimpleArray()
 {
-    p = &DAT_010472d0;
-    ((GlobalObject_00869f00*)this)->Clear(true);
+    reinterpret_cast<BSSimpleArray<SandboxProcedureData, 1024>*>(this)->Clear(true);
 }
-}  // namespace fnv_005eee10
 
-namespace fnv_005edb10 {
-struct FUN_005eee10
-{
-    ~FUN_005eee10();
-};
-struct FUN_005eeff0
-{
-    ~FUN_005eeff0();
-};
-struct FUN_005edb10
-{
-    char _pad0[0x20];
-    FUN_005eee10 m20;
-    char _pad1[0x0F];
-    FUN_005eeff0 m30;
-    ~FUN_005edb10();
-};
 // @fnv 0x005edb10
-FUN_005edb10::~FUN_005edb10()
+FootIK_DATA::~FootIK_DATA()
 {}
-}  // namespace fnv_005edb10
 
-namespace fnv_005edb70 {
-struct FUN_005eee10
-{
-    ~FUN_005eee10();
-};
-struct FUN_005ef1d0
-{
-    ~FUN_005ef1d0();
-};
-struct FUN_005edb70
-{
-    int _00;
-    FUN_005eee10 _04;
-    char _pad[15];
-    FUN_005ef1d0 _14;
-    ~FUN_005edb70();
-};
 // @fnv 0x005edb70
-FUN_005edb70::~FUN_005edb70()
+LookIK_DATA::~LookIK_DATA()
 {}
-}  // namespace fnv_005edb70
+
+// @fnv 0x005edbd0
+GrabIK_DATA::~GrabIK_DATA()
+{}
 
 namespace fnv_005ef010 {
-struct FUN_005ef010_Item
-{
-    char b[0x38];
-};
-struct GlobalObject_00869f00
-{
-    void Clear(bool b);
-};
-struct FUN_0072ba80_shell
-{
-    void FUN_0072ba80(void* p, unsigned int n);
-};
-struct FUN_005ef010_Arr
+
+// Shared array specialization lacks the virtual allocator and resize helpers.
+struct FootIKArrayResize
 {
     virtual void v0();
-    virtual FUN_005ef010_Item* Allocate(unsigned int n);
-    FUN_005ef010_Item* pBuffer;
+    virtual FootIK_DATA__FootIK_Leg_DATA* Allocate(unsigned int n);
+    FootIK_DATA__FootIK_Leg_DATA* pBuffer;
     unsigned int uiSize;
     unsigned int uiAllocSize;
-    void ConstructSpawnItems(FUN_005ef010_Item* p, unsigned int n);
+    void ConstructSpawnItems(FootIK_DATA__FootIK_Leg_DATA* p, unsigned int n);
     void FUN_005ef860(unsigned int newAlloc, unsigned int copy);
     void FUN_005ef010(unsigned int aiNewSize, bool abFreeMemory);
 };
 
 // @fnv 0x005ef010
-void FUN_005ef010_Arr::FUN_005ef010(unsigned int aiNewSize, bool abFreeMemory)
+void FootIKArrayResize::FUN_005ef010(unsigned int aiNewSize, bool abFreeMemory)
 {
     if (aiNewSize == 0)
     {
-        ((GlobalObject_00869f00*)this)->Clear(abFreeMemory);
+        ((BSSimpleArray<SandboxProcedureData, 1024>*)this)->Clear(abFreeMemory);
     }
     else if (aiNewSize > uiAllocSize)
     {
@@ -947,7 +714,7 @@ void FUN_005ef010_Arr::FUN_005ef010(unsigned int aiNewSize, bool abFreeMemory)
     }
     else if (aiNewSize < uiSize)
     {
-        ((FUN_0072ba80_shell*)this)->FUN_0072ba80(pBuffer + aiNewSize, uiSize - aiNewSize);
+        ((BSSimpleArray<unsigned char, 1024>*)this)->ReleaseElements(reinterpret_cast<unsigned char*>(pBuffer + aiNewSize), uiSize - aiNewSize);
         uiSize = aiNewSize;
         if (abFreeMemory && aiNewSize <= uiAllocSize >> 2)
         {
@@ -964,36 +731,26 @@ void FUN_005ef010_Arr::FUN_005ef010(unsigned int aiNewSize, bool abFreeMemory)
 }  // namespace fnv_005ef010
 
 namespace fnv_005ef1f0 {
-struct FUN_005ef1f0_Item
-{
-    char b[0x28];
-};
-struct GlobalObject_00869f00
-{
-    void Clear(bool b);
-};
-struct FUN_0072ba80_shell
-{
-    void FUN_0072ba80(void* p, unsigned int n);
-};
-struct FUN_005ef1f0_Arr
+
+// Shared array specialization lacks the virtual allocator and resize helpers.
+struct LookIKArrayResize
 {
     virtual void v0();
-    virtual FUN_005ef1f0_Item* Allocate(unsigned int n);
-    FUN_005ef1f0_Item* pBuffer;
+    virtual LookIK_DATA__LookIK_Head_DATA* Allocate(unsigned int n);
+    LookIK_DATA__LookIK_Head_DATA* pBuffer;
     unsigned int uiSize;
     unsigned int uiAllocSize;
-    void ConstructEntries(FUN_005ef1f0_Item* p, unsigned int n);
+    void ConstructEntries(LookIK_DATA__LookIK_Head_DATA* p, unsigned int n);
     void FUN_005efa80(unsigned int newAlloc, unsigned int copy);
     void FUN_005ef1f0(unsigned int aiNewSize, bool abFreeMemory);
 };
 
 // @fnv 0x005ef1f0
-void FUN_005ef1f0_Arr::FUN_005ef1f0(unsigned int aiNewSize, bool abFreeMemory)
+void LookIKArrayResize::FUN_005ef1f0(unsigned int aiNewSize, bool abFreeMemory)
 {
     if (aiNewSize == 0)
     {
-        ((GlobalObject_00869f00*)this)->Clear(abFreeMemory);
+        ((BSSimpleArray<SandboxProcedureData, 1024>*)this)->Clear(abFreeMemory);
     }
     else if (aiNewSize > uiAllocSize)
     {
@@ -1012,7 +769,7 @@ void FUN_005ef1f0_Arr::FUN_005ef1f0(unsigned int aiNewSize, bool abFreeMemory)
     }
     else if (aiNewSize < uiSize)
     {
-        ((FUN_0072ba80_shell*)this)->FUN_0072ba80(pBuffer + aiNewSize, uiSize - aiNewSize);
+        ((BSSimpleArray<unsigned char, 1024>*)this)->ReleaseElements(reinterpret_cast<unsigned char*>(pBuffer + aiNewSize), uiSize - aiNewSize);
         uiSize = aiNewSize;
         if (abFreeMemory && aiNewSize <= uiAllocSize >> 2)
         {
@@ -1029,36 +786,26 @@ void FUN_005ef1f0_Arr::FUN_005ef1f0(unsigned int aiNewSize, bool abFreeMemory)
 }  // namespace fnv_005ef1f0
 
 namespace fnv_005ef3d0 {
-struct GlobalObject_00869f00
-{
-    void Clear(bool);
-};
-struct FUN_0072ba80_shell
-{
-    void FUN_0072ba80(void*, unsigned int);
-};
-struct GrabIK_Arm_DATA_005ef3d0
-{
-    unsigned short data[3];
-};
-struct BSSimpleArray_005ef3d0
+
+// Shared array specialization lacks the virtual allocator and resize helpers.
+struct GrabIKArrayResize
 {
     virtual void Destroy(bool);
-    virtual GrabIK_Arm_DATA_005ef3d0* Allocate(unsigned int);
-    GrabIK_Arm_DATA_005ef3d0* pBuffer;
+    virtual GrabIK_DATA__GrabIK_Arm_DATA* Allocate(unsigned int);
+    GrabIK_DATA__GrabIK_Arm_DATA* pBuffer;
     unsigned int uiSize;
     unsigned int uiAllocSize;
     void FUN_005efc90(unsigned int, unsigned int);
-    void ConstructItems(GrabIK_Arm_DATA_005ef3d0*, unsigned int);
+    void ConstructItems(GrabIK_DATA__GrabIK_Arm_DATA*, unsigned int);
     void FUN_005ef3d0(unsigned int aiNewSize, bool abFreeMemory);
 };
 
 // @fnv 0x005ef3d0
-void BSSimpleArray_005ef3d0::FUN_005ef3d0(unsigned int aiNewSize, bool abFreeMemory)
+void GrabIKArrayResize::FUN_005ef3d0(unsigned int aiNewSize, bool abFreeMemory)
 {
     if (aiNewSize == 0)
     {
-        ((GlobalObject_00869f00*)this)->Clear(abFreeMemory);
+        ((BSSimpleArray<SandboxProcedureData, 1024>*)this)->Clear(abFreeMemory);
     }
     else if (aiNewSize > uiAllocSize)
     {
@@ -1077,7 +824,7 @@ void BSSimpleArray_005ef3d0::FUN_005ef3d0(unsigned int aiNewSize, bool abFreeMem
     }
     else if (aiNewSize < uiSize)
     {
-        ((FUN_0072ba80_shell*)this)->FUN_0072ba80(pBuffer + aiNewSize, uiSize - aiNewSize);
+        ((BSSimpleArray<unsigned char, 1024>*)this)->ReleaseElements(reinterpret_cast<unsigned char*>(pBuffer + aiNewSize), uiSize - aiNewSize);
         uiSize = aiNewSize;
         if (abFreeMemory && aiNewSize <= uiAllocSize >> 2)
         {
@@ -1094,327 +841,119 @@ void BSSimpleArray_005ef3d0::FUN_005ef3d0(unsigned int aiNewSize, bool abFreeMem
 }  // namespace fnv_005ef3d0
 
 namespace fnv_005ee110 {
-struct FUN_004855a0
-{
-    void M();
-};
 
-struct FUN_00485680
-{
-    void M();
-};
-
-struct FUN_004891d0_obj
-{
-    void WriteToBuffer(unsigned int, unsigned int);
-};
-
-struct ArrSI
-{
-    unsigned int GetFlags();
-};
-
-struct DA00694f80
-{
-    unsigned short& GetAt(int);
-};
-
-struct FUN_005ee110_String
-{
-    unsigned int Length();
-    operator unsigned int() const;
-};
-
-struct FUN_005ee110_shell
-{
-    void FUN_005ee110();
-};
 
 bool __cdecl _FUN_00401500();
 void __cdecl _FUN_00485910(unsigned int, unsigned int);
 void __cdecl _FUN_00485990(unsigned int, void*, unsigned int);
 void __cdecl FUN_00485730(void*, void*, void*);
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
-void __fastcall SwapEndianFourShorts(unsigned short*);
 
 // @fnv 0x005ee110
-void FUN_005ee110_shell::FUN_005ee110()
+void __fastcall SaveRagdoll(BGSRagdoll* ragdoll)
 {
     SaveMetadata saveData;
 
-    reinterpret_cast<FUN_004855a0*>(this)->M();
+    reinterpret_cast<TESForm*>(ragdoll)->FUN_004855a0();
 
-    reinterpret_cast<FUN_004891d0_obj*>(reinterpret_cast<unsigned char*>(this) + 0x18)
+    reinterpret_cast<TESModel*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x18)
         ->WriteToBuffer(0x4c444f4d, 0x54444f4d);
 
     _FUN_00485910(0x5245564e, 1);
 
     *reinterpret_cast<unsigned short*>(reinterpret_cast<unsigned char*>(&saveData) + 0x00) =
-        reinterpret_cast<ArrSI*>(reinterpret_cast<unsigned char*>(this) + 0x80)->GetFlags();
+        reinterpret_cast<BSSimpleArray<SandboxProcedureData, 1024>*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x80)->GetSize();
 
     *reinterpret_cast<unsigned short*>(reinterpret_cast<unsigned char*>(&saveData) + 0x02) =
-        reinterpret_cast<ArrSI*>(reinterpret_cast<unsigned char*>(this) + 0xc0)->GetFlags();
+        reinterpret_cast<BSSimpleArray<SandboxProcedureData, 1024>*>(reinterpret_cast<unsigned char*>(ragdoll) + 0xc0)->GetSize();
 
     *reinterpret_cast<unsigned short*>(reinterpret_cast<unsigned char*>(&saveData) + 0x04) =
-        reinterpret_cast<ArrSI*>(reinterpret_cast<unsigned char*>(this) + 0xe4)->GetFlags();
+        reinterpret_cast<BSSimpleArray<SandboxProcedureData, 1024>*>(reinterpret_cast<unsigned char*>(ragdoll) + 0xe4)->GetSize();
 
     *reinterpret_cast<unsigned short*>(reinterpret_cast<unsigned char*>(&saveData) + 0x06) =
-        reinterpret_cast<ArrSI*>(reinterpret_cast<unsigned char*>(this) + 0x108)->GetFlags();
+        reinterpret_cast<BSSimpleArray<SandboxProcedureData, 1024>*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x108)->GetSize();
 
     *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(&saveData) + 0x08) =
-        *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(this) + 0x40);
+        *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x40);
 
     *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(&saveData) + 0x09) =
-        *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(this) + 0x90);
+        *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x90);
 
     *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(&saveData) + 0x0a) =
-        *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(this) + 0xd0);
+        *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(ragdoll) + 0xd0);
 
     *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(&saveData) + 0x0b) =
-        *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(this) + 0xf4);
+        *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(ragdoll) + 0xf4);
 
     *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(&saveData) + 0x0c) =
-        *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(this) + 0x118);
+        *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x118);
 
     if (_FUN_00401500())
-        SwapEndianFourShorts(reinterpret_cast<unsigned short*>(&saveData));
+        saveData.SwapEndianFourShorts();
 
     _FUN_00485990(0x41544144, &saveData, 0x0e);
 
     if (_FUN_00401500())
-        SwapEndianFourShorts(reinterpret_cast<unsigned short*>(&saveData));
+        saveData.SwapEndianFourShorts();
 
-    if (*reinterpret_cast<TESActorBase**>(reinterpret_cast<unsigned char*>(this) + 0x144))
+    if (*reinterpret_cast<TESActorBase**>(reinterpret_cast<unsigned char*>(ragdoll) + 0x144))
     {
         unsigned int itempint;
-        itempint = (*reinterpret_cast<TESActorBase**>(reinterpret_cast<unsigned char*>(this) + 0x144))->GetFormID();
+        itempint = (*reinterpret_cast<TESActorBase**>(reinterpret_cast<unsigned char*>(ragdoll) + 0x144))->GetFormID();
         _FUN_00485910(0x4d414e58, itempint);
     }
 
-    if (*reinterpret_cast<BGSBodyPartData**>(reinterpret_cast<unsigned char*>(this) + 0x140))
+    if (*reinterpret_cast<BGSBodyPartData**>(reinterpret_cast<unsigned char*>(ragdoll) + 0x140))
     {
         unsigned int itempint;
-        itempint = (*reinterpret_cast<BGSBodyPartData**>(reinterpret_cast<unsigned char*>(this) + 0x140))->GetFormID();
+        itempint = (*reinterpret_cast<BGSBodyPartData**>(reinterpret_cast<unsigned char*>(ragdoll) + 0x140))->GetFormID();
         _FUN_00485910(0x4d414e54, itempint);
     }
 
     if (_FUN_00401500())
-        reinterpret_cast<RagdollFeedbackData__RagdollFeedbackSystemData*>(reinterpret_cast<unsigned char*>(this) + 0x44)
-            ->FUN_005ee380();
+        SwapRagdollFeedbackEndian(reinterpret_cast<RagdollFeedbackData__RagdollFeedbackSystemData*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x44));
 
-    _FUN_00485990(0x44464152, reinterpret_cast<unsigned char*>(this) + 0x44, 0x3c);
+    _FUN_00485990(0x44464152, reinterpret_cast<unsigned char*>(ragdoll) + 0x44, 0x3c);
 
     if (_FUN_00401500())
-        reinterpret_cast<RagdollFeedbackData__RagdollFeedbackSystemData*>(reinterpret_cast<unsigned char*>(this) + 0x44)
-            ->FUN_005ee380();
+        SwapRagdollFeedbackEndian(reinterpret_cast<RagdollFeedbackData__RagdollFeedbackSystemData*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x44));
 
-    if (reinterpret_cast<ArrSI*>(reinterpret_cast<unsigned char*>(this) + 0x80)->GetFlags() > 0)
+    if (reinterpret_cast<BSSimpleArray<SandboxProcedureData, 1024>*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x80)->GetSize() > 0)
     {
         FUN_00485730(reinterpret_cast<void*>(0x42464152),
-                     &reinterpret_cast<DA00694f80*>(reinterpret_cast<unsigned char*>(this) + 0x80)->GetAt(0),
+                     &reinterpret_cast<BSSimpleArray<unsigned short, 1024>*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x80)->GetAt(0),
                      reinterpret_cast<void*>(
-                         reinterpret_cast<ArrSI*>(reinterpret_cast<unsigned char*>(this) + 0x80)->GetFlags()));
+                         reinterpret_cast<BSSimpleArray<SandboxProcedureData, 1024>*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x80)->GetSize()));
     }
 
     if (_FUN_00401500())
-        reinterpret_cast<PoseMatching_DATA__PoseMatching_System_DATA*>(reinterpret_cast<unsigned char*>(this) + 0x124)
-            ->FUN_005ee580();
+        SwapPoseMatchingEndian(reinterpret_cast<PoseMatching_DATA__PoseMatching_System_DATA*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x124));
 
-    _FUN_00485990(0x53504152, reinterpret_cast<unsigned char*>(this) + 0x124, 0x18);
+    _FUN_00485990(0x53504152, reinterpret_cast<unsigned char*>(ragdoll) + 0x124, 0x18);
 
     if (_FUN_00401500())
-        reinterpret_cast<PoseMatching_DATA__PoseMatching_System_DATA*>(reinterpret_cast<unsigned char*>(this) + 0x124)
-            ->FUN_005ee580();
+        SwapPoseMatchingEndian(reinterpret_cast<PoseMatching_DATA__PoseMatching_System_DATA*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x124));
 
-    if (reinterpret_cast<FUN_005ee110_String*>(reinterpret_cast<unsigned char*>(this) + 0x11c)->Length())
+    if (reinterpret_cast<BSStringT<char>*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x11c)->Length())
     {
         FUN_004856f0(0x4d414e41,
-                     reinterpret_cast<void*>(
-                         reinterpret_cast<FUN_005ee110_String*>(reinterpret_cast<unsigned char*>(this) + 0x11c)
-                             ->
-                             operator unsigned int()),
-                     reinterpret_cast<FUN_005ee110_String*>(reinterpret_cast<unsigned char*>(this) + 0x11c)->Length() +
+                     const_cast<char*>(
+                         reinterpret_cast<BSStringT<char>*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x11c)
+                             ->String()),
+                     reinterpret_cast<BSStringT<char>*>(reinterpret_cast<unsigned char*>(ragdoll) + 0x11c)->Length() +
                          1);
     }
 
-    reinterpret_cast<FUN_00485680*>(this)->M();
+    reinterpret_cast<TESForm*>(ragdoll)->FUN_00485680();
 }
 }  // namespace fnv_005ee110
 
-// RunInner: a thin thiscall wrapper that forwards to a method of the
-// sub-object living at offset 0x40 of the owner object.
-struct Inner
-{
-    void Run();
-};
-
-struct FUN_005edaf0_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    Inner m_40;
-    void RunInner();
-};
-
 // @fnv 0x005edaf0
-void FUN_005edaf0_cls::RunInner()
-{
-    m_40.Run();
-}
-
-class ObjPrimary
-{
-  public:
-    virtual void v00();
-    int m_04;
-    int m_08;
-    int m_0C;
-    int m_10;
-    int m_14;
-    ~ObjPrimary();
-};
-
-class ObjSecondary
-{
-  public:
-    virtual void v00();
-    int m_04;
-    int m_08;
-    int m_0C;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1C;
-    int m_20;
-    int m_24;
-    ~ObjSecondary();
-};
-
-class ObjMemberA
-{
-  public:
-    ObjMemberA();
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0C;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1C;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2C;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3C;
-    int m_40;
-    int m_44;
-    int m_48;
-    int m_4C;
-    ~ObjMemberA();
-};
-
-class ObjMemberB
-{
-  public:
-    ObjMemberB();
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0C;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1C;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2C;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3C;
-    ~ObjMemberB();
-};
-
-class ObjMemberC
-{
-  public:
-    ObjMemberC();
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0C;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1C;
-    int m_20;
-    ~ObjMemberC();
-};
-
-class ObjMemberD
-{
-  public:
-    ObjMemberD();
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0C;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1C;
-    int m_20;
-    ~ObjMemberD();
-};
-
-class ObjMemberE
-{
-  public:
-    ObjMemberE();
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0C;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1C;
-    ~ObjMemberE();
-};
-
-class FUN_005edc30 : public ObjPrimary, public ObjSecondary
-{
-  public:
-    void Reset();
-    ObjMemberA m_40;
-    ObjMemberB m_90;
-    ObjMemberC m_d0;
-    ObjMemberD m_f4;
-    ObjMemberE m_118;
-    virtual ~FUN_005edc30();
-};
+RagdollAnimationData::~RagdollAnimationData()
+{}
 
 // @fnv 0x005edc30
-FUN_005edc30::~FUN_005edc30()
+BGSRagdoll::~BGSRagdoll()
 {
-    Reset();
+    fnv_005edfb0::ClearRagdollData(this);
 }

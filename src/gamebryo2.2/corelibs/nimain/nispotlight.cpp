@@ -1,3 +1,10 @@
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPointLight.h"
+#include "../../../../include/NiSpotLight.h"
+#include "../../../../include/NiUpdateData.h"
+#include "../../../../include/StrArr.h"
 
 // src/gamebryo2.2/corelibs/nimain/nispotlight.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nispotlight.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -33,11 +40,6 @@ NiSpotLightShell* __thiscall NiSpotLightShell::FUN_00a94d60(unsigned int flags)
     return this;
 }
 
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-    void* __thiscall FUN_00a94ce0();
-};
 
 // @fnv 0x00a94e20
 void* __cdecl FUN_00a94e20()
@@ -48,26 +50,11 @@ void* __cdecl FUN_00a94e20()
     return 0;
 }
 
-struct NiObject
-{
-};
-struct NiPointLight
-{
-    bool __thiscall FUN_00a7d730(NiObject*);
-};
 
-struct NiSpotLight
-{
-    char m_auiShapeKeys[0x108];
-    float m_f0108;
-    float m_f010c;
-    float m_f0110;
-    bool __thiscall IsEqual(NiObject*);
-};
 
 // Calls the base NiPointLight comparison, then checks that the spot light's three float fields match the other object's.
 // @fnv 0x00a94c80
-bool __thiscall NiSpotLight::IsEqual(NiObject* pObject)
+bool NiSpotLight::IsEqual(NiObject* pObject) const
 {
     NiSpotLight* pOther = (NiSpotLight*)pObject;
     if (((NiPointLight*)this)->FUN_00a7d730(pObject))
@@ -78,9 +65,6 @@ bool __thiscall NiSpotLight::IsEqual(NiObject* pObject)
     return false;
 }
 
-struct NiUpdateData
-{
-};
 struct C_00a7d7a0
 {
     void __thiscall FUN_00a7d7a0(NiUpdateData&);
@@ -100,22 +84,7 @@ void __thiscall S_00a94d90::FUN_00a94d90(NiUpdateData& UpdateData)
     ++*(volatile int*)((char*)this + 0xA8);
 }
 
-struct StrArr
-{
-    char m_auiShapeKeys[8];
-    unsigned short m_uiCapacity;
-    unsigned short m_uiSize;
-    char m_pAuxiliaryObject[2];
-    unsigned short m_uiIncrement;
 
-    void __thiscall SetSize(unsigned int size);
-    void __thiscall SetAt(unsigned int index, char*& value);
-};
-
-struct NiPoint3
-{
-    char* __thiscall FUN_00a59af0(char const* name);
-};
 
 struct NiPointLightViewerStrings
 {
@@ -141,37 +110,37 @@ void FUN_00a94f70_shell::AppendViewerStrings(StrArr* strings)
 
     value = _FUN_00a7d330(*reinterpret_cast<void**>(&g_011f5ec4));
 
-    index = strings->m_uiSize;
-    if (index >= strings->m_uiCapacity)
-        strings->SetSize(index + strings->m_uiIncrement);
+    index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
     value = reinterpret_cast<NiPoint3*>(reinterpret_cast<char*>(this) + 0xfc)->FUN_00a59af0("m_kWorldDir");
 
-    index = strings->m_uiSize;
-    if (index >= strings->m_uiCapacity)
-        strings->SetSize(index + strings->m_uiIncrement);
+    index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
     value = FUN_00a7d550("m_fOuterSpotAngle", *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x108));
 
-    index = strings->m_uiSize;
-    if (index >= strings->m_uiCapacity)
-        strings->SetSize(index + strings->m_uiIncrement);
+    index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
     value = FUN_00a7d550("m_fInnerSpotAngle", *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x10c));
 
-    index = strings->m_uiSize;
-    if (index >= strings->m_uiCapacity)
-        strings->SetSize(index + strings->m_uiIncrement);
+    index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 
     value = FUN_00a7d550("m_fSpotExponent", *reinterpret_cast<float*>(reinterpret_cast<char*>(this) + 0x110));
 
-    index = strings->m_uiSize;
-    if (index >= strings->m_uiCapacity)
-        strings->SetSize(index + strings->m_uiIncrement);
+    index = strings->m_usSize;
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(index + strings->m_usGrowBy);
     strings->SetAt(index, value);
 }
 

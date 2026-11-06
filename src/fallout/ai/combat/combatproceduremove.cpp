@@ -1,12 +1,22 @@
+#include "../../../../include/CombatProcedureMove.h"
+#include "../../../../include/CombatTargetTimestamp.h"
+#include "../../../../include/CombatProcedureEngageTarget.h"
+#include "../../../../include/CombatProcedureAttackRanged.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/Actor.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/CombatProcedure.h"
+#include "../../../../include/GO.h"
+#include "../../../../include/TimeoutTimer.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/PathingAvoidNode.h"
+#include "../../../../include/Setting.h"
 
 // src/fallout/ai/combat/combatproceduremove.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatproceduremove.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct CombatProcedureMove
-{
-    void FUN_009d6ba0();
-    void* DestroyIfFlagged(unsigned int flags);
-};
 
 // @fnv 0x009d6b70
 void* CombatProcedureMove::DestroyIfFlagged(unsigned int flags)
@@ -29,11 +39,6 @@ bool FUN_009d7bd0_shell::IsFlagSet(unsigned int flags)
     return ((1 << flags) & *(unsigned int*)((char*)this + 0x90)) ? true : false;
 }
 
-struct CombatTargetTimestamp
-{
-    int v;
-    CombatTargetTimestamp(float);
-};
 struct Holder
 {
     void SetValue(float);
@@ -42,18 +47,14 @@ struct Holder
 void Holder::SetValue(float afValue)
 {
     CombatTargetTimestamp t(afValue);
-    *(int*)((char*)this + 0xC0) = t.v;
+    *(int*)((char*)this + 0xC0) = *reinterpret_cast<int*>(&t.fTimeStamp);
 }
 
 extern float DAT_010162c0;
-struct S009d8440
-{
-    float FUN_009d8440();
-};
 // @fnv 0x009d8440
-float S009d8440::FUN_009d8440()
+float CombatProcedureMove::FUN_009d8440()
 {
-    switch (*(int*)((char*)this + 0x3C))
+    switch (static_cast<int>(mode))
     {
     case 6:
     case 7:
@@ -65,23 +66,14 @@ float S009d8440::FUN_009d8440()
     }
 }
 
-struct TESObjectREFR;
-struct CombatProcedureAttackRanged
-{
-    void FUN_009caac0(char const*);
-};
-struct MoveHolder
-{
-    void ClearTargetRef(TESObjectREFR*);
-};
 // If the reference stored at offset 0x38 matches apRef, clears it to null and logs that the targeted reference pointer was cleared.
 // @fnv 0x009d8480
-void MoveHolder::ClearTargetRef(TESObjectREFR* apRef)
+void CombatProcedureMove::ClearTargetRef(TESObjectREFR* apRef)
 {
-    if (*(TESObjectREFR**)((char*)this + 0x38) == apRef)
+    if (reinterpret_cast<TESObjectREFR*>(target38) == apRef)
     {
-        *(TESObjectREFR**)((char*)this + 0x38) = 0;
-        ((CombatProcedureAttackRanged*)this)->FUN_009caac0("Targeted reference pointer was cleared");
+        target38 = 0;
+        Fail("Targeted reference pointer was cleared");
     }
 }
 
@@ -93,23 +85,19 @@ struct IMH
 {
     FUN_009d6c80_shell* FUN_00586150();
 };
-struct FUN_009d84b0_shell
-{
-    void FUN_009d84b0();
-};
 // If the bool at offset 0x54 is set, calls FUN_009d6c80 through the object at offset 4 and clears the flag.
 // @fnv 0x009d84b0
-void FUN_009d84b0_shell::FUN_009d84b0()
+void CombatProcedureMove::FUN_009d84b0()
 {
-    if (*(bool*)((char*)this + 0x54))
+    if (active54)
     {
-        ((IMH*)*(IMH**)((char*)this + 4))->FUN_00586150()->FUN_009d6c80();
-        *(bool*)((char*)this + 0x54) = 0;
+        reinterpret_cast<IMH*>(m_pCombatController)->FUN_00586150()->FUN_009d6c80();
+        active54 = 0;
     }
 }
 
+class Tile;
 namespace fnv_009d84e0 {
-struct Tile;
 struct IMH
 {
     Tile* FUN_00586150();
@@ -118,259 +106,127 @@ struct FUN_009d7c20_shell
 {
     void FUN_009d7c20();
 };
-struct FUN_009d84e0_shell
-{
-    void FUN_009d84e0();
-};
-// @fnv 0x009d84e0
-void FUN_009d84e0_shell::FUN_009d84e0()
-{
-    if (reinterpret_cast<int*>(this)[4] == 2 || reinterpret_cast<int*>(this)[4] == 3)
-    {
-        reinterpret_cast<FUN_009d7c20_shell*>(reinterpret_cast<IMH*>(reinterpret_cast<int*>(this)[1])->FUN_00586150())
-            ->FUN_009d7c20();
-        *reinterpret_cast<char*>(this + 0x54) = 1;
-    }
-}
 }  // namespace fnv_009d84e0
 
-struct Actor
+// @fnv 0x009d84e0
+void CombatProcedureMove::FUN_009d84e0()
 {
-    void StopMoving();
-};
+    if (unk10 == 2 || unk10 == 3)
+    {
+        reinterpret_cast<fnv_009d84e0::FUN_009d7c20_shell*>(reinterpret_cast<fnv_009d84e0::IMH*>(m_pCombatController)->FUN_00586150())
+            ->FUN_009d7c20();
+        active54 = true;
+    }
+}
+
+
 struct TESAmmoInitCalls
 {
     Actor* GetFieldBC();
 };
-struct FUN_00666f00_shell
+struct MoveCompletionCheck
 {
-    bool FUN_00666f00();
-};
-struct CombatProcedure
-{
-    void RunProcedure();
-};
-struct CombatProcedureEngageTarget
-{
-    void FUN_00996e40();
-};
-struct FUN_009d6c00_shell : CombatProcedureEngageTarget
-{
-    Actor* GetFieldBC();
-    bool FUN_00666f00();
-    void UpdateCombatMovement();
+    bool IsComplete();
 };
 // @fnv 0x009d6c00
-void FUN_009d6c00_shell::UpdateCombatMovement()
+void CombatProcedureMove::UpdateCombatMovement()
 {
-    Actor* attacker = ((TESAmmoInitCalls*)*(void**)((char*)this + 4))->GetFieldBC();
-    if (*(int*)((char*)this + 0x10) == 1 || *(int*)((char*)this + 0x10) == 2)
+    ::Actor* attacker = reinterpret_cast<TESAmmoInitCalls*>(m_pCombatController)->GetFieldBC();
+    if (unk10 == 1 || unk10 == 2)
     {
-        if (!FUN_00666f00())
+        if (!reinterpret_cast<MoveCompletionCheck*>(this)->IsComplete())
             attacker->StopMoving();
     }
-    else if (*(int*)((char*)this + 0x10) == 3)
+    else if (unk10 == 3)
         ((CombatProcedure*)this)->RunProcedure();
-    FUN_00996e40();
-    if (*(bool*)((char*)this + 0x54))
-        ((IMH*)*(void**)((char*)this + 4))->FUN_00586150()->FUN_009d6c80();
+    reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996e40();
+    if (active54)
+        reinterpret_cast<IMH*>(m_pCombatController)->FUN_00586150()->FUN_009d6c80();
 }
 
-struct BGSSaveFormBuffer;
-struct BGSSaveFormBufferSaveGameHelper;
-
-struct SaveFormIDHelper
-{
-    void SerializeFormData(void* formID, int flag);
-};
-
-struct BGSSaveFormBuffer : SaveFormIDHelper
-{
-    void SaveData(void* data, unsigned short size, unsigned short value);
-};
-
-struct CombatProcedureSaveGameHelper
-{
-    void SaveGame(BGSSaveFormBuffer* buffer);
-};
-
-struct CoordinateTriple
-{
-    void FUN_00527b70(void* buffer);
-};
-
-struct GO
-{
-    operator unsigned int() const;
-};
-
-struct FUN_009a5eb0_shell
-{
-    void FUN_009a5eb0(BGSSaveFormBuffer* buffer);
-};
-
-struct FUN_009d8880_shell
-{
-    void FUN_009d8880(BGSSaveFormBuffer* buffer);
-};
 
 // @fnv 0x009d8880
-void FUN_009d8880_shell::FUN_009d8880(BGSSaveFormBuffer* buffer)
+void CombatProcedureMove::FUN_009d8880(BGSSaveFormBuffer* buffer)
 {
-    reinterpret_cast<CombatProcedureSaveGameHelper*>(this)->SaveGame(buffer);
+    CombatProcedure::SaveGame(buffer);
 
-    buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x10), 4, 0);
+    buffer->SaveData(&unk10, static_cast<unsigned short>(4), static_cast<unsigned short>(0));
 
-    reinterpret_cast<CoordinateTriple*>(reinterpret_cast<char*>(this) + 0x14)->FUN_00527b70(buffer);
-    reinterpret_cast<CoordinateTriple*>(reinterpret_cast<char*>(this) + 0x24)->FUN_00527b70(buffer);
+    startTransform.FUN_00527b70(buffer);
+    currentTransform.FUN_00527b70(buffer);
 
-    buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x34), 4, 0);
+    buffer->SaveData(&rate, static_cast<unsigned short>(4), static_cast<unsigned short>(0));
 
-    buffer->SerializeFormData(*reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x38), 0);
+    buffer->SerializeFormData(reinterpret_cast<void*>(target38), 0);
 
-    buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x3C), 4, 0);
+    buffer->SaveData(&mode, static_cast<unsigned short>(4), static_cast<unsigned short>(0));
 
-    buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x60), 4, 0);
+    buffer->SaveData(&unk60, static_cast<unsigned short>(4), static_cast<unsigned short>(0));
 
-    reinterpret_cast<FUN_009a5eb0_shell*>(reinterpret_cast<char*>(this) + 0x64)->FUN_009a5eb0(buffer);
-    reinterpret_cast<FUN_009a5eb0_shell*>(reinterpret_cast<char*>(this) + 0x40)->FUN_009a5eb0(buffer);
-    reinterpret_cast<FUN_009a5eb0_shell*>(reinterpret_cast<char*>(this) + 0x6C)->FUN_009a5eb0(buffer);
-    reinterpret_cast<FUN_009a5eb0_shell*>(reinterpret_cast<char*>(this) + 0x74)->FUN_009a5eb0(buffer);
+    state64.SaveGame(buffer);
+    pos40.SaveGame(buffer);
+    state6C.SaveGame(buffer);
+    state74.SaveGame(buffer);
 
-    buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x48), 0x0C, 0);
+    buffer->SaveData(&pos48, static_cast<unsigned short>(0x0C), static_cast<unsigned short>(0));
 
-    buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x54), 1, 0);
+    buffer->SaveData(&active54, static_cast<unsigned short>(1), static_cast<unsigned short>(0));
 
-    *reinterpret_cast<bool*>(reinterpret_cast<char*>(this) + 0x5C) =
-        reinterpret_cast<const GO*>(reinterpret_cast<char*>(this) + 0x58)->operator unsigned int();
+    active5C = static_cast<const GO&>(state58).operator unsigned int();
 
-    buffer->SaveData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x5C), 1, 0);
+    buffer->SaveData(&active5C, static_cast<unsigned short>(1), static_cast<unsigned short>(0));
 }
 
-struct BGSLoadFormBuffer
-{
-    bool ReadFormIdentifier(void*);
-    void ReadTypedData(void*, unsigned int);
-    virtual unsigned char GetVersion();
-};
 
-struct FUN_00527ba0_Class
-{
-    void FUN_00527ba0(void*);
-};
-
-struct TimeoutTimer
-{
-    void LoadGame(BGSLoadFormBuffer*);
-};
-
-struct CombatProcedureLoadGameHelper
-{
-    void LoadGame(BGSLoadFormBuffer*);
-};
-
-struct FUN_009d89a0_shell : CombatProcedureMove
-{
-    void FUN_009d89a0(BGSLoadFormBuffer*);
-};
 
 // @fnv 0x009d89a0
-void FUN_009d89a0_shell::FUN_009d89a0(BGSLoadFormBuffer* buffer)
+void CombatProcedureMove::FUN_009d89a0(BGSLoadFormBuffer* buffer)
 {
-    ((CombatProcedureLoadGameHelper*)this)->LoadGame(buffer);
+    CombatProcedure::LoadGame(buffer);
 
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x10), 4);
+    buffer->ReadTypedData(static_cast<void*>(&unk10), 4u);
 
-    reinterpret_cast<FUN_00527ba0_Class*>(reinterpret_cast<char*>(this) + 0x14)->FUN_00527ba0(buffer);
+    startTransform.FUN_00527ba0(buffer);
 
-    reinterpret_cast<FUN_00527ba0_Class*>(reinterpret_cast<char*>(this) + 0x24)->FUN_00527ba0(buffer);
+    currentTransform.FUN_00527ba0(buffer);
 
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x34), 4);
+    buffer->ReadTypedData(static_cast<void*>(&rate), 4u);
 
-    buffer->ReadFormIdentifier(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x38));
+    buffer->ReadFormIdentifier(static_cast<void*>(&target38));
 
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x3c), 4);
+    buffer->ReadTypedData(static_cast<void*>(&mode), 4u);
 
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x60), 4);
+    buffer->ReadTypedData(static_cast<void*>(&unk60), 4u);
 
-    reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x64)->LoadGame(buffer);
+    state64.LoadGame(buffer);
 
-    reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x40)->LoadGame(buffer);
+    pos40.LoadGame(buffer);
 
-    reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x6c)->LoadGame(buffer);
+    state6C.LoadGame(buffer);
 
     if (buffer->GetVersion() >= 8)
     {
-        reinterpret_cast<TimeoutTimer*>(reinterpret_cast<char*>(this) + 0x74)->LoadGame(buffer);
+        state74.LoadGame(buffer);
     }
 
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x48), 0xc);
+    buffer->ReadTypedData(static_cast<void*>(&pos48), 0xcu);
 
-    buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x54), 1);
+    buffer->ReadTypedData(static_cast<void*>(&active54), 1u);
 
     if (buffer->GetVersion() >= 0xc)
     {
-        buffer->ReadTypedData(reinterpret_cast<void*>(reinterpret_cast<char*>(this) + 0x5c), 1);
+        buffer->ReadTypedData(static_cast<void*>(&active5C), 1u);
     }
 }
 
-struct FUN_009ca680
-{
-    virtual ~FUN_009ca680();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    FUN_009ca680();
-};
-struct FUN_0097ede0
-{
-    unsigned int x, y, z, w;
-    FUN_0097ede0();
-};
-struct FUN_00906f60
-{
-    unsigned int x, y;
-    FUN_00906f60();
-};
-struct FUN_006815c0
-{
-    unsigned int x, y, z;
-    FUN_006815c0();
-};
-struct FUN_00633c90
-{
-    unsigned int value;
-    FUN_00633c90(int);
-    ~FUN_00633c90();
-};
 struct MoveInput
 {
-    FUN_0097ede0* FUN_006815c0();
+    CombatProcedureMove::Location* FUN_006815c0();
     unsigned int FUN_0044edb0();
     bool FUN_0097be60(int);
 };
-struct FUN_009d69f0 : FUN_009ca680
-{
-    unsigned int unk10;
-    FUN_0097ede0 startTransform;
-    FUN_0097ede0 currentTransform;
-    float rate;
-    unsigned int target38;
-    unsigned int mode;
-    FUN_00906f60 pos40;
-    FUN_006815c0 pos48;
-    bool active54;
-    FUN_00633c90 state58;
-    bool active5C;
-    int unk60;
-    FUN_00906f60 state64;
-    FUN_00906f60 state6C;
-    FUN_00906f60 state74;
-    FUN_009d69f0(MoveInput* input, float speed, unsigned int flags);
-    virtual ~FUN_009d69f0();
-};
 // @fnv 0x009d69f0
-FUN_009d69f0::FUN_009d69f0(MoveInput* input, float speed, unsigned int flags)
+CombatProcedureMove::CombatProcedureMove(MoveInput* input, float speed, unsigned int flags)
     : unk10(0), startTransform(), currentTransform(), rate(speed), target38(0), mode(flags), pos40(), pos48(),
       active54(false), state58(0), active5C(false), unk60(-1), state64(), state6C(), state74()
 {
@@ -384,52 +240,9 @@ FUN_009d69f0::FUN_009d69f0(MoveInput* input, float speed, unsigned int flags)
     }
 }
 
-class C9D6BA0Ptr
-{
-  public:
-    ~C9D6BA0Ptr();
-
-    void* m_pObject;
-};
-
-class C9D6BA0Base
-{
-  public:
-    virtual ~C9D6BA0Base();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-};
-
-class FUN_009d6ba0 : public C9D6BA0Base
-{
-  public:
-    virtual ~FUN_009d6ba0();
-
-    C9D6BA0Ptr m_spReferencedObject;
-};
 
 // @fnv 0x009d6ba0
-FUN_009d6ba0::~FUN_009d6ba0()
+CombatProcedureMove::~CombatProcedureMove()
 {}
 
 struct TargetActor;
@@ -602,54 +415,34 @@ struct ModeValue
     int unk04;
 };
 extern ModeValue DAT_011a5650[];
-struct ProcedureValue
-{
-    int unk00;
-    IMValue* unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    MemberValue unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    TargetActor* FUN_00996de0();
-    void* FUN_00996e00();
-    void UpdateOutput(OutputValue* output);
-};
 // Calls the vtable getter on the holder, updates the target, and writes values to output depending on unk3c and DAT_011a5650[unk3c].enabled.
 // @fnv 0x009d82e0
-void ProcedureValue::UpdateOutput(OutputValue* output)
+void CombatProcedureMove::UpdateOutput(OutputValue* output)
 {
-    TargetActor* holder = FUN_00996de0();
-    Holder* target = unk04->FUN_00586150();
+    TargetActor* holder = reinterpret_cast<TargetActor*>(reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996de0());
+    Holder* target = reinterpret_cast<IMValue*>(m_pCombatController)->FUN_00586150();
     output->Assign(
         DAT_011f1958->FUN_00825c00(holder->vtable->get(holder, holder, DAT_01012054))->BuildAvoidanceNodes());
     target->SetValue(FUN_00435dd0());
     void* actor = 0;
-    switch (unk3c)
+    switch (static_cast<int>(mode))
     {
     case 4:
-        output->Assign(unk04->FUN_004fb070(holder, unk14.FUN_006815c0(0.0f, output->FUN_00559450()))->FUN_00989490());
+        output->Assign(reinterpret_cast<IMValue*>(m_pCombatController)->FUN_004fb070(holder, reinterpret_cast<MemberValue*>(&startTransform)->FUN_006815c0(0.0f, output->FUN_00559450()))->FUN_00989490());
         break;
     case 0:
     case 1:
-        actor = FUN_00996e00();
+        actor = reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996e00();
         break;
     }
-    if (DAT_011a5650[unk3c].enabled)
+    if (DAT_011a5650[mode].enabled)
     {
         output->Assign(
-            unk04->FUN_004fb070(holder, unk14.FUN_006815c0(0.0f, output->FUN_00559450()))->FUN_009892a0(actor));
+            reinterpret_cast<IMValue*>(m_pCombatController)->FUN_004fb070(holder, reinterpret_cast<MemberValue*>(&startTransform)->FUN_006815c0(0.0f, output->FUN_00559450()))->FUN_009892a0(actor));
     }
 }
+
+typedef CombatProcedureMove::Location MoveLoc;
 
 struct MoveVec
 {
@@ -660,14 +453,6 @@ struct MoveVec
     MoveVec& operator*=(float);
     float Length();
     bool operator==(const MoveVec&);
-};
-struct MoveLoc
-{
-    int x, y, z, w;
-    MoveVec* Point();
-    float Distance(const MoveLoc&);
-    MoveVec Position();
-    void Set(const MoveVec&, int);
 };
 struct MoveTimer
 {
@@ -682,7 +467,6 @@ struct MoveSetting
 };
 extern MoveSetting originalRuntimeFloatSetting461, originalRuntimeFloatSetting390, originalRuntimeFloatSetting389,
     originalRuntimeFloatSetting391, originalRuntimeFloatSetting460, g_011cfad4;
-struct MoveRef;
 struct MoveRef
 {
     virtual void slot000();
@@ -943,59 +727,30 @@ struct ByteAndFlagState
 };
 extern ByteAndFlagState MoveModes[];
 extern bool DAT_011a5bfc;
-struct MoveProcedure
-{
-    int unk00;
-    MoveOwner* owner;
-    int unk08, unk0c;
-    unsigned state;
-    MoveLoc destination, current;
-    float rate;
-    MoveRef* target;
-    unsigned mode;
-    MoveTimer timer;
-    MoveVec position;
-    bool active;
-    MoveSmart pending;
-    bool active5c;
-    int index;
-    MoveTimer retry, check, probe;
-    MoveRef* Actor();
-    MoveRef* Target();
-    bool Begin();
-    void Fail(const char*);
-    void Clear();
-    float Duration();
-    void Look(const MoveVec&, unsigned char);
-    void SetState(int);
-    void Reset();
-    void Avoid(MoveRequest*);
-    void FUN_009d6ca0();
-};
 // @fnv 0x009d6ca0
-void MoveProcedure::FUN_009d6ca0()
+void CombatProcedureMove::FUN_009d6ca0()
 {
     bool changed3;
     bool stop5;
     MoveRef* actorsB = Actor();
     void* actorStatus5 = actorsB->Status();
     MoveRef* other7 = Target();
-    MoveManager* manager2 = owner->Manager();
-    switch (state)
+    MoveManager* manager2 = reinterpret_cast<MoveOwner*>(m_pCombatController)->Manager();
+    switch (unk10)
     {
     case 0:
-        current = destination;
-        state = 1;
+        currentTransform = startTransform;
+        unk10 = 1;
         if (!Begin())
             return;
         if (mode == 15)
-            probe.Set(*originalRuntimeFloatSetting461.Float());
+            reinterpret_cast<MoveTimer*>(&state74)->Set(*originalRuntimeFloatSetting461.Float());
         break;
     case 1:
     case 2:
-        if (pending.Get() && !actorsB->Busy())
+        if (reinterpret_cast<MoveSmart*>(&state58)->Get() && !actorsB->Busy())
         {
-            MoveRef* ref = pending.Get();
+            MoveRef* ref = reinterpret_cast<MoveSmart*>(&state58)->Get();
             if (ref->Type() == 8)
             {
                 MoveTarget* node = (MoveTarget*)ref;
@@ -1007,36 +762,36 @@ void MoveProcedure::FUN_009d6ca0()
                     node->Clear(0);
                     if (point)
                     {
-                        current.Set(*node->LocationPoint(), actorsB->Cell());
+                        currentTransform.Set(*node->LocationPoint(), actorsB->Cell());
                         if (manager2->Start())
                         {
-                            state = 2;
-                            active = true;
+                            unk10 = 2;
+                            active54 = true;
                             MoveVec pos;
-                            UpdateMove(owner, manager2->Path(), &pos, &position);
-                            position.z += MoveAmount(actorsB, 2, 0);
-                            check.Set(0.5f);
+                            UpdateMove(reinterpret_cast<MoveOwner*>(m_pCombatController), manager2->Path(), &pos, &(*reinterpret_cast<MoveVec*>(&pos48)));
+                            reinterpret_cast<MoveVec*>(&pos48)->z += MoveAmount(actorsB, 2, 0);
+                            reinterpret_cast<MoveTimer*>(&state6C)->Set(0.5f);
                         }
                         else
                         {
-                            pending = 0;
-                            current = destination;
-                            state = 1;
+                            (*reinterpret_cast<MoveSmart*>(&state58)) = 0;
+                            currentTransform = startTransform;
+                            unk10 = 1;
                             Begin();
                             return;
                         }
                     }
                     else
-                        current = destination;
+                        currentTransform = startTransform;
                 }
             }
-            pending = 0;
+            (*reinterpret_cast<MoveSmart*>(&state58)) = 0;
         }
         if (actorsB->Failed())
         {
             if (!actorsB->BuildingFailed())
             {
-                if (state == 2)
+                if (unk10 == 2)
                 {
                     MovePath* path = manager2->Path();
                     if (path)
@@ -1066,13 +821,13 @@ void MoveProcedure::FUN_009d6ca0()
                         manager2->ClearOther(0);
                     }
                 }
-                manager2->Destination(current);
+                manager2->Destination(currentTransform);
                 manager2->Update();
                 switch (mode)
                 {
                 case 1:
-                    if (state != 2 && *current.Point() == *destination.Point())
-                        manager2->Destination(destination);
+                    if (unk10 != 2 && *currentTransform.Point() == *startTransform.Point())
+                        manager2->Destination(startTransform);
                     break;
                 }
             }
@@ -1080,36 +835,35 @@ void MoveProcedure::FUN_009d6ca0()
                                            : "Path Building failed to destination");
             return;
         }
-        if (target && (target->Disabled() || target->Deleted()))
+        if (reinterpret_cast<MoveRef*>(target38) && (reinterpret_cast<MoveRef*>(target38)->Disabled() || reinterpret_cast<MoveRef*>(target38)->Deleted()))
         {
-            static const char disabledReason[] = "Target ref is now disabled or deleted";
-            Fail(disabledReason);
+            Fail("Target ref is now disabled or deleted");
             return;
         }
         changed3 = false;
-        if (target)
+        if (reinterpret_cast<MoveRef*>(target38))
         {
             void* targetStatus8 = 0;
-            if (target->IsActor())
+            if (reinterpret_cast<MoveRef*>(target38)->IsActor())
             {
-                MoveRef* ref = target;
+                MoveRef* ref = reinterpret_cast<MoveRef*>(target38);
                 targetStatus8 = ref->Status();
             }
-            MoveLoc locationB = target->Location();
+            MoveLoc locationB = reinterpret_cast<MoveRef*>(target38)->Location();
             float distance8 = 0.0f;
             if (!actorStatus5 && !targetStatus8)
-                distance8 = state == 2
+                distance8 = unk10 == 2
                                 ? *originalRuntimeFloatSetting390.Float() * *originalRuntimeFloatSetting390.Float()
                                 : *originalRuntimeFloatSetting389.Float() * *originalRuntimeFloatSetting389.Float();
             else
                 distance8 = *originalRuntimeFloatSetting391.Float() * *originalRuntimeFloatSetting391.Float();
-            if (distance8 < locationB.Distance(destination))
+            if (distance8 < locationB.Distance(startTransform))
             {
-                destination = locationB;
+                startTransform = locationB;
                 changed3 = true;
             }
         }
-        if (state == 2 && check.Expired())
+        if (unk10 == 2 && reinterpret_cast<MoveTimer*>(&state6C)->Expired())
         {
             if (!changed3 && other7 && manager2->Active())
             {
@@ -1124,38 +878,38 @@ void MoveProcedure::FUN_009d6ca0()
                     {
                         if (!InRange(path->location.Position(), *other7->Position(), path->start, path->end))
                             changed3 = true;
-                        else if (!manager2->Check(&path->location, current.Point(), other7, 0))
+                        else if (!manager2->Check(&path->location, currentTransform.Point(), other7, 0))
                             changed3 = true;
                     }
                 }
             }
-            check.Set(0.5f);
+            reinterpret_cast<MoveTimer*>(&state6C)->Set(0.5f);
         }
         if (changed3)
         {
-            if (state == 2)
+            if (unk10 == 2)
             {
                 manager2->Complete();
                 manager2->ClearPath(0);
-                active = false;
+                active54 = false;
             }
-            current = destination;
-            state = 1;
+            currentTransform = startTransform;
+            unk10 = 1;
             if (!Begin())
                 return;
             return;
         }
-        if (!DAT_011a5bfc && state == 1 && !actorsB->Busy() && !actorStatus5 && MoveModes[mode].enabled &&
+        if (!DAT_011a5bfc && unk10 == 1 && !actorsB->Busy() && !actorStatus5 && MoveModes[mode].enabled &&
             manager2->Allowed(1))
         {
             float radius5 = 256.0f;
             int pathIndex9 = actorsB->PathIndex();
-            if (index == -1)
+            if (unk60 == -1)
                 radius5 = 512.0f;
-            if (pathIndex9 != index || retry.Expired())
+            if (pathIndex9 != unk60 || reinterpret_cast<MoveTimer*>(&state64)->Expired())
             {
-                index = pathIndex9;
-                retry.Set(2.0f);
+                unk60 = pathIndex9;
+                reinterpret_cast<MoveTimer*>(&state64)->Set(2.0f);
                 MoveRequest avoid7(0);
                 bool initialized16 = false;
                 MoveVec previous6_2 = *actorsB->Position();
@@ -1181,49 +935,49 @@ void MoveProcedure::FUN_009d6ca0()
                     MoveQuery query_2;
                     if (manager2->Query(&query_2, &point35, mode, radius5, avoid7.Get()))
                     {
-                        active = true;
+                        active54 = true;
                         manager2->Refresh();
                         MoveVec pos;
-                        UpdateMove(owner, manager2->Path(), &pos, &position);
-                        position.z += MoveAmount(actorsB, 2, 0);
-                        state = 2;
-                        current.Set(pos, actorsB->Cell());
+                        UpdateMove(reinterpret_cast<MoveOwner*>(m_pCombatController), manager2->Path(), &pos, &(*reinterpret_cast<MoveVec*>(&pos48)));
+                        reinterpret_cast<MoveVec*>(&pos48)->z += MoveAmount(actorsB, 2, 0);
+                        unk10 = 2;
+                        currentTransform.Set(pos, actorsB->Cell());
                         if (!Begin())
                             return;
-                        check.Set(0.5f);
+                        reinterpret_cast<MoveTimer*>(&state6C)->Set(0.5f);
                         break;
                     }
                 }
             }
         }
         stop5 = false;
-        if (mode == 15 && probe.Expired())
+        if (mode == 15 && reinterpret_cast<MoveTimer*>(&state74)->Expired())
         {
             MoveLoc loc = actorsB->Location();
-            if (loc.Distance(destination) <
+            if (loc.Distance(startTransform) <
                 *originalRuntimeFloatSetting460.Float() * *originalRuntimeFloatSetting460.Float())
             {
-                MoveProbe request(destination);
+                MoveProbe request(startTransform);
                 if (Probe(&request, loc.Point(), 0, 0))
                     stop5 = true;
             }
-            probe.Set(*g_011cfad4.Float());
+            reinterpret_cast<MoveTimer*>(&state74)->Set(*g_011cfad4.Float());
         }
         if (stop5)
             actorsB->Stop();
         if (stop5 || actorsB->HasStopped())
         {
-            if (state == 2)
+            if (unk10 == 2)
             {
-                state = 3;
-                timer.Set(Duration());
-                check.Set(0.25f);
-                Look(position, 3);
+                unk10 = 3;
+                reinterpret_cast<MoveTimer*>(&pos40)->Set(Duration());
+                reinterpret_cast<MoveTimer*>(&state6C)->Set(0.25f);
+                Look((*reinterpret_cast<MoveVec*>(&pos48)), 3);
                 SetState(2);
             }
             else
             {
-                manager2->Finish(destination, mode);
+                manager2->Finish(startTransform, mode);
                 Clear();
             }
             return;
@@ -1232,11 +986,11 @@ void MoveProcedure::FUN_009d6ca0()
     case 3: {
         bool finished6 = false;
         MovePath* path2 = manager2->Path();
-        if (timer.Expired() || !path2)
+        if (reinterpret_cast<MoveTimer*>(&pos40)->Expired() || !path2)
             finished6 = true;
         else if (other7)
         {
-            float deadline = float(timer.Time() + 1.0);
+            float deadline = float(reinterpret_cast<MoveTimer*>(&pos40)->Time() + 1.0);
             if (deadline < FUN_00435dd0())
             {
                 if (manager2->PathFailed())
@@ -1244,18 +998,18 @@ void MoveProcedure::FUN_009d6ca0()
                 else if (deadline < manager2->Stamp().Time())
                     finished6 = true;
             }
-            if (!finished6 && manager2->Active() && check.Expired())
+            if (!finished6 && manager2->Active() && reinterpret_cast<MoveTimer*>(&state6C)->Expired())
             {
-                if (!manager2->Check(&path2->location, current.Point(), other7, 1))
+                if (!manager2->Check(&path2->location, currentTransform.Point(), other7, 1))
                     finished6 = true;
-                check.Set(0.25f);
+                reinterpret_cast<MoveTimer*>(&state6C)->Set(0.25f);
             }
         }
         if (finished6)
         {
-            state = 0;
+            unk10 = 0;
             manager2->Complete();
-            active = false;
+            active54 = false;
             manager2->ClearPath(0);
             Reset();
         }
@@ -1265,147 +1019,10 @@ void MoveProcedure::FUN_009d6ca0()
     }
 }
 
-struct Point052
-{
-    float x, y, z;
-    Point052();
-    Point052 operator-(const Point052&) const;
-    float FUN_004a7290();
-};
-extern Point052 DAT_011f426c;
+extern NiPoint3 DAT_011f426c;
 extern const float DAT_0103a1c4;
 extern bool DAT_011a5bfc;
 extern const double DAT_01012060;
-struct Actor052;
-struct Table052
-{
-    void* unk000;
-    void* unk004;
-    void* unk008;
-    void* unk00c;
-    void* unk010;
-    void* unk014;
-    void* unk018;
-    void* unk01c;
-    void* unk020;
-    void* unk024;
-    void* unk028;
-    void* unk02c;
-    void* unk030;
-    void* unk034;
-    void* unk038;
-    void* unk03c;
-    void* unk040;
-    void* unk044;
-    void* unk048;
-    void* unk04c;
-    void* unk050;
-    void* unk054;
-    void* unk058;
-    void* unk05c;
-    void* unk060;
-    void* unk064;
-    void* unk068;
-    void* unk06c;
-    void* unk070;
-    void* unk074;
-    void* unk078;
-    void* unk07c;
-    void* unk080;
-    void* unk084;
-    void* unk088;
-    void* unk08c;
-    void* unk090;
-    void* unk094;
-    void* unk098;
-    void* unk09c;
-    void* unk0a0;
-    void* unk0a4;
-    void* unk0a8;
-    void* unk0ac;
-    void* unk0b0;
-    void* unk0b4;
-    void* unk0b8;
-    void* unk0bc;
-    void* unk0c0;
-    void* unk0c4;
-    void* unk0c8;
-    void* unk0cc;
-    void* unk0d0;
-    void* unk0d4;
-    void* unk0d8;
-    void* unk0dc;
-    void* unk0e0;
-    void* unk0e4;
-    void* unk0e8;
-    void* unk0ec;
-    void* unk0f0;
-    void* unk0f4;
-    void* unk0f8;
-    void* unk0fc;
-    void* unk100;
-    void* unk104;
-    void* unk108;
-    void* unk10c;
-    void* unk110;
-    void* unk114;
-    void* unk118;
-    void* unk11c;
-    void* unk120;
-    void* unk124;
-    void* unk128;
-    void* unk12c;
-    void* unk130;
-    void* unk134;
-    void* unk138;
-    void* unk13c;
-    void* unk140;
-    void* unk144;
-    void* unk148;
-    void* unk14c;
-    void* unk150;
-    void* unk154;
-    void* unk158;
-    void* unk15c;
-    void* unk160;
-    void* unk164;
-    void* unk168;
-    void* unk16c;
-    void* unk170;
-    void* unk174;
-    void* unk178;
-    void* unk17c;
-    void* unk180;
-    void* unk184;
-    void* unk188;
-    void* unk18c;
-    void* unk190;
-    void* unk194;
-    void* unk198;
-    void* unk19c;
-    void* unk1a0;
-    void* unk1a4;
-    void* unk1a8;
-    void* unk1ac;
-    void* unk1b0;
-    void* unk1b4;
-    void* unk1b8;
-    void* unk1bc;
-    void* unk1c0;
-    void* unk1c4;
-    void* unk1c8;
-    void* unk1cc;
-    void* unk1d0;
-    void* unk1d4;
-    void* unk1d8;
-    void* unk1dc;
-    void* unk1e0;
-    void* unk1e4;
-    void* unk1e8;
-    void* unk1ec;
-    void* unk1f0;
-    Point052&(__thiscall* position)(Actor052*);
-};
 struct Request052
 {
     int unk00;
@@ -1454,7 +1071,7 @@ struct Request052
     int unkac;
     Request052();
     ~Request052();
-    void FUN_006e2980(Point052&, float);
+    void FUN_006e2980(NiPoint3&, float);
     void SetUseSoft(int);
 };
 struct SpecialRequest052
@@ -1531,146 +1148,18 @@ struct SpecialRequest052
     ~SpecialRequest052();
     void FUN_00705b10(int);
 };
-struct Actor052
+// Actor methods at 0x008b38d0 and 0x008b3820 are absent from the shared API; inherit its layout and virtual slots.
+class CombatMovementRequestAccess : public Actor
 {
-    virtual void unused000();
-    virtual void unused004();
-    virtual void unused008();
-    virtual void unused00c();
-    virtual void unused010();
-    virtual void unused014();
-    virtual void unused018();
-    virtual void unused01c();
-    virtual void unused020();
-    virtual void unused024();
-    virtual void unused028();
-    virtual void unused02c();
-    virtual void unused030();
-    virtual void unused034();
-    virtual void unused038();
-    virtual void unused03c();
-    virtual void unused040();
-    virtual void unused044();
-    virtual void unused048();
-    virtual void unused04c();
-    virtual void unused050();
-    virtual void unused054();
-    virtual void unused058();
-    virtual void unused05c();
-    virtual void unused060();
-    virtual void unused064();
-    virtual void unused068();
-    virtual void unused06c();
-    virtual void unused070();
-    virtual void unused074();
-    virtual void unused078();
-    virtual void unused07c();
-    virtual void unused080();
-    virtual void unused084();
-    virtual void unused088();
-    virtual void unused08c();
-    virtual void unused090();
-    virtual void unused094();
-    virtual void unused098();
-    virtual void unused09c();
-    virtual void unused0a0();
-    virtual void unused0a4();
-    virtual void unused0a8();
-    virtual void unused0ac();
-    virtual void unused0b0();
-    virtual void unused0b4();
-    virtual void unused0b8();
-    virtual void unused0bc();
-    virtual void unused0c0();
-    virtual void unused0c4();
-    virtual void unused0c8();
-    virtual void unused0cc();
-    virtual void unused0d0();
-    virtual void unused0d4();
-    virtual void unused0d8();
-    virtual void unused0dc();
-    virtual void unused0e0();
-    virtual void unused0e4();
-    virtual void unused0e8();
-    virtual void unused0ec();
-    virtual void unused0f0();
-    virtual void unused0f4();
-    virtual void unused0f8();
-    virtual void unused0fc();
-    virtual void unused100();
-    virtual void unused104();
-    virtual void unused108();
-    virtual void unused10c();
-    virtual void unused110();
-    virtual void unused114();
-    virtual void unused118();
-    virtual void unused11c();
-    virtual void unused120();
-    virtual void unused124();
-    virtual void unused128();
-    virtual void unused12c();
-    virtual void unused130();
-    virtual void unused134();
-    virtual void unused138();
-    virtual void unused13c();
-    virtual void unused140();
-    virtual void unused144();
-    virtual void unused148();
-    virtual void unused14c();
-    virtual void unused150();
-    virtual void unused154();
-    virtual void unused158();
-    virtual void unused15c();
-    virtual void unused160();
-    virtual void unused164();
-    virtual void unused168();
-    virtual void unused16c();
-    virtual void unused170();
-    virtual void unused174();
-    virtual void unused178();
-    virtual void unused17c();
-    virtual void unused180();
-    virtual void unused184();
-    virtual void unused188();
-    virtual void unused18c();
-    virtual void unused190();
-    virtual void unused194();
-    virtual void unused198();
-    virtual void unused19c();
-    virtual void unused1a0();
-    virtual void unused1a4();
-    virtual void unused1a8();
-    virtual void unused1ac();
-    virtual void unused1b0();
-    virtual void unused1b4();
-    virtual void unused1b8();
-    virtual void unused1bc();
-    virtual void unused1c0();
-    virtual void unused1c4();
-    virtual void unused1c8();
-    virtual void unused1cc();
-    virtual void unused1d0();
-    virtual void unused1d4();
-    virtual void unused1d8();
-    virtual void unused1dc();
-    virtual void unused1e0();
-    virtual void unused1e4();
-    virtual void unused1e8();
-    virtual void unused1ec();
-    virtual void unused1f0();
-    virtual Point052& position();
-    void* FUN_00575ca0();
-    float FUN_008be1b0();
-    void* FUN_00931850();
-    void BuildPathingRequest(void*, Point052*, void*, float, void*);
-    bool SetPathingRequestAvoidNodes(void*);
+public:
+    void BuildPathingRequest(void*, NiPoint3*, void*, float, void*);
     void* FUN_008b3820();
 };
 struct LocationMember052
 {
-    Point052* FUN_006815c0();
+    NiPoint3* FUN_006815c0();
     void* FUN_0084e3a0();
-    void FUN_0098ddd0(Point052*);
+    void FUN_0098ddd0(NiPoint3*);
     int unk00, unk04, unk08, unk0c;
 };
 struct State052
@@ -1705,118 +1194,87 @@ struct Location052
     int unk1c;
     int unk20;
     int unk24;
-    Location052(const Point052&, Actor052*);
+    Location052(const NiPoint3&, Actor*);
     ~Location052();
     bool FUN_006ded70(float);
 };
-struct Bound052;
 struct Avoid052
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14;
     static void* operator new(unsigned int);
     Avoid052();
-    void AppendNode(const Bound052&);
-};
-struct Bound052
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    Bound052(const Point052&, float, float);
+    void AppendNode(const PathingAvoidNode&);
 };
 struct Output052
 {
     Avoid052* FUN_00559450();
     void Assign(Avoid052*);
 };
-struct Setting052
-{
-    float* FUN_00403e20();
-};
-extern Setting052 DAT_011cf120, DAT_011cf4e0;
+extern Setting DAT_011cf120, DAT_011cf4e0;
 struct Ref052
 {
     int value;
     void FUN_0066b0d0(void*);
 };
-struct Procedure052
-{
-    int unk00;
-    Manager052* manager;
-    int unk08, unk0c;
-    int mode;
-    LocationMember052 source;
-    LocationMember052 destination;
-    float rate;
-    Actor052* target;
-    int state;
-    int unk40, unk44, unk48, unk4c, unk50, unk54;
-    Ref052 request;
-    int unk5c;
-    int unk60;
-    Actor052* FUN_00996de0();
-    void* FUN_00996e00();
-    void FUN_00996e20(int);
-    void FUN_009caac0(const char*);
-    bool UpdateMovementRequest(Output052*);
-};
-Point052 __cdecl FUN_009a68b0(Actor052*, Actor052*, Point052*, float);
-bool __cdecl FUN_009a7940(Actor052*, Actor052*, Point052*, Point052*, int, int);
+NiPoint3 __cdecl FUN_009a68b0(Actor*, Actor*, NiPoint3*, float);
+bool __cdecl FUN_009a7940(Actor*, Actor*, NiPoint3*, NiPoint3*, int, int);
 extern const char DAT_01091c80[];
 // @fnv 0x009d7d00
-bool Procedure052::UpdateMovementRequest(Output052* output)
+bool CombatProcedureMove::UpdateMovementRequest(Output052* output)
 {
     float request;
     bool d;
     float g;
-    Actor052* a = FUN_00996de0();
-    void* c = FUN_00996e00();
-    Holder052* k = manager->FUN_00586150();
+    ::Actor* a = reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996de0();
+    void* c = reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996e00();
+    Holder052* k = reinterpret_cast<Manager052*>(m_pCombatController)->FUN_00586150();
     int b = 3;
-    Point052 h = DAT_011f426c;
+    NiPoint3 h = DAT_011f426c;
     g = 0.0f;
-    switch (state)
+    switch (mode)
     {
     case 3:
-        h = a->position();
+        h = *static_cast<const ::Actor*>(a)->GetPos();
         g = DAT_0103a1c4;
         break;
     case 0:
-        if (manager->FUN_00981940(24))
+        if (reinterpret_cast<Manager052*>(m_pCombatController)->FUN_00981940(24))
             b = 4;
         break;
     }
     State052* i = k->FUN_007058c0();
-    if (i && i->type == 1 && !k->FUN_00461580(256) && state != 8 && i->location.FUN_0084e3a0() == a->FUN_00575ca0())
+    if (i && i->type == 1 && !k->FUN_00461580(256) && mode != 8 && i->location.FUN_0084e3a0() == a->FUN_00575ca0())
     {
         h = *i->location.FUN_006815c0();
         g = k->FUN_009a0b00();
-        Point052 delta = h - a->position();
+        NiPoint3 delta = h - *static_cast<const ::Actor*>(a)->GetPos();
         if (delta.FUN_004a7290() > g * g)
             g = 0.0f;
     }
     request = 0.0f;
-    if (mode == 1)
+    if (unk10 == 1)
         request = rate;
-    if (state == 1 && mode == 1 && target)
+    if (mode == 1 && unk10 == 1 && reinterpret_cast<::Actor*>(target38))
     {
-        Point052 position = FUN_009a68b0(a, target, source.FUN_006815c0(), DAT_01012054);
+        NiPoint3 position = FUN_009a68b0(a, reinterpret_cast<::Actor*>(target38), reinterpret_cast<LocationMember052*>(&startTransform)->FUN_006815c0(), DAT_01012054);
         Location052 location(position, a);
         if (location.FUN_006ded70(a->FUN_008be1b0()) &&
-            FUN_009a7940(a, target, &position, source.FUN_006815c0(), 0, -1))
+            FUN_009a7940(a, reinterpret_cast<::Actor*>(target38), &position, reinterpret_cast<LocationMember052*>(&startTransform)->FUN_006815c0(), 0, -1))
         {
-            destination.FUN_0098ddd0(&position);
+            reinterpret_cast<LocationMember052*>(&currentTransform)->FUN_0098ddd0(&position);
             if (!output->FUN_00559450())
                 output->Assign(new Avoid052);
             output->FUN_00559450()->AppendNode(
-                Bound052(target->position(), *DAT_011cf4e0.FUN_00403e20(), *DAT_011cf120.FUN_00403e20()));
+                PathingAvoidNode(*reinterpret_cast<const ::Actor*>(target38)->GetPos(), *DAT_011cf4e0.FUN_00403e20(), *DAT_011cf120.FUN_00403e20()));
         }
     }
     void* e = 0;
     Request052 j;
     SpecialRequest052 f;
-    if (DAT_011a5bfc && (unsigned char)DAT_011a5650[state].unk02 && k->IsFlagSet(1) && !a->FUN_00931850())
+    if (DAT_011a5bfc && (unsigned char)DAT_011a5650[mode].unk02 && k->IsFlagSet(1) && !a->FUN_00931850())
     {
         k->FUN_0099d310(&f);
-        f.FUN_00705b10(state);
+        f.FUN_00705b10(mode);
         e = &f;
     }
     else
@@ -1827,18 +1285,18 @@ bool Procedure052::UpdateMovementRequest(Output052* output)
         request = -request;
         d = true;
     }
-    a->BuildPathingRequest(e, destination.FUN_006815c0(), destination.FUN_0084e3a0(), request, output->FUN_00559450());
+    static_cast<CombatMovementRequestAccess*>(a)->BuildPathingRequest(e, reinterpret_cast<LocationMember052*>(&currentTransform)->FUN_006815c0(), reinterpret_cast<LocationMember052*>(&currentTransform)->FUN_0084e3a0(), request, output->FUN_00559450());
     ((Request052*)e)->FUN_006e2980(h, g);
     if (d)
         ((Request052*)e)->SetUseSoft(0);
     if (!a->SetPathingRequestAvoidNodes(e))
     {
-        FUN_009caac0(DAT_01091c80);
+        Fail(DAT_01091c80);
         return false;
     }
     unk60 = -1;
-    this->request.FUN_0066b0d0(a->FUN_008b3820());
-    FUN_00996e20(b);
+    reinterpret_cast<Ref052*>(&state58)->FUN_0066b0d0(static_cast<CombatMovementRequestAccess*>(a)->FUN_008b3820());
+    reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996e20(b);
     return true;
 }
 
@@ -2005,26 +1463,11 @@ struct DebugDisplay
     virtual void slot4();
     virtual void __cdecl Print(int, int, const char*, ...);
 };
-struct MoveDebug
-{
-    int unk00;
-    DebugOwner* owner;
-    int unk08, unk0c;
-    unsigned int state;
-    DebugLocation destination;
-    DebugReference* target;
-    int unk3c;
-    DebugTimer hidingTimer;
-    int unk48, unk4c, unk50, unk54, unk58, unk5c, unk60, unk64, unk68;
-    DebugTimer coverTimer;
-    DebugTimer destinationTimer;
-    void PrintDebugInfo(DebugDisplay* display, int x, int y);
-};
 // Prints the move state, destination cell and position, target info and destination timer to the debug display at the given coordinates.
 // @fnv 0x009d8520
-void MoveDebug::PrintDebugInfo(DebugDisplay* display, int x, int y)
+void CombatProcedureMove::PrintDebugInfo(DebugDisplay* display, int x, int y)
 {
-    switch (state)
+    switch (unk10)
     {
     case 0:
         display->Print(x, y, "INITIALIZING");
@@ -2034,41 +1477,33 @@ void MoveDebug::PrintDebugInfo(DebugDisplay* display, int x, int y)
         break;
     case 2:
         display->Print(x, y, "MOVING_USING_COVER");
-        display->Print(x, y, "Check Cover Timer: %.02f/%.02f", coverTimer.FUN_00435e00(), coverTimer.FUN_006b9130());
+        display->Print(x, y, "Check Cover Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&state6C)->FUN_00435e00(), reinterpret_cast<DebugTimer*>(&state6C)->FUN_006b9130());
         break;
     case 3:
         display->Print(x, y, "HIDING_BEHIND_COVER");
-        display->Print(x, y, "Hiding Timer: %.02f/%.02f", hidingTimer.FUN_00435e00(), hidingTimer.FUN_006b9130());
-        display->Print(x, y, "Check Cover Timer: %.02f/%.02f", coverTimer.FUN_00435e00(), coverTimer.FUN_006b9130());
+        display->Print(x, y, "Hiding Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&pos40)->FUN_00435e00(), reinterpret_cast<DebugTimer*>(&pos40)->FUN_006b9130());
+        display->Print(x, y, "Check Cover Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&state6C)->FUN_00435e00(), reinterpret_cast<DebugTimer*>(&state6C)->FUN_006b9130());
         break;
     }
-    DebugPoint position = destination.FUN_006815c0();
-    DebugReference* cell = destination.FUN_0084e3a0();
-    if (cell && cell != owner->GetFieldBC()->FUN_00575ca0())
+    DebugPoint position = reinterpret_cast<DebugLocation*>(&startTransform)->FUN_006815c0();
+    DebugReference* cell = reinterpret_cast<DebugLocation*>(&startTransform)->FUN_0084e3a0();
+    if (cell && cell != reinterpret_cast<DebugOwner*>(m_pCombatController)->GetFieldBC()->FUN_00575ca0())
         display->Print(x, y, "Destination: %s (%.02f,%.02f,%.02f)", cell->GetDebugName(), position.x, position.y,
                        position.z);
     else
         display->Print(x, y, "Destination: (%.02f,%.02f,%.02f)", position.x, position.y, position.z);
-    if (target)
+    if (reinterpret_cast<DebugReference*>(target38))
     {
-        DebugPoint targetPosition = target->GetDebugPosition();
+        DebugPoint targetPosition = reinterpret_cast<DebugReference*>(target38)->GetDebugPosition();
         display->Print(x, y, "Target: '%s' (%08X) - Position: (%.02f,%.02f,%.02f)",
-                       target->FUN_00474cb0() ? target->GetDebugName() : target->FUN_0055d520(), target->FUN_0084e3a0(),
+                       reinterpret_cast<DebugReference*>(target38)->FUN_00474cb0() ? reinterpret_cast<DebugReference*>(target38)->GetDebugName() : reinterpret_cast<DebugReference*>(target38)->FUN_0055d520(), reinterpret_cast<DebugReference*>(target38)->FUN_0084e3a0(),
                        targetPosition.x, targetPosition.y, targetPosition.z);
     }
-    if (destinationTimer.FUN_0097fa50())
-        display->Print(x, y, "Check Destination Timer: %.02f/%.02f", destinationTimer.FUN_00435e00(),
-                       destinationTimer.FUN_006b9130());
+    if (reinterpret_cast<DebugTimer*>(&state74)->FUN_0097fa50())
+        display->Print(x, y, "Check Destination Timer: %.02f/%.02f", reinterpret_cast<DebugTimer*>(&state74)->FUN_00435e00(),
+                       reinterpret_cast<DebugTimer*>(&state74)->FUN_006b9130());
 }
 
-struct TESForm
-{
-    virtual ~TESForm();
-};
-
-struct TESObjectREFR : TESForm
-{
-};
 
 namespace fnv_009d8ad0 {
 using ::TESForm;
@@ -2076,9 +1511,11 @@ using ::TESObjectREFR;
 
 extern "C" TESForm* __cdecl FUN_004839c0(unsigned int formID);
 
-struct MoveContext
+// CombatProcedure vftable 0x01090874 slot 16 is 0x004534f0 (empty, ret 4); CombatProcedureMove overrides it with
+// 0x009d8ad0, which first runs the base version. The shared CombatProcedure declares that slot as vf16().
+struct CombatProcedureSlot16Base
 {
-    void* FUN_008b3820();
+    void FUN_004534f0(unsigned int);
 };
 
 struct CommandTarget
@@ -2087,40 +1524,20 @@ struct CommandTarget
     void FUN_0066b0d0(void* target);
 };
 
-struct ProcedureController
-{
 
-    unsigned int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C, unk30, unk34;
+}  // namespace fnv_009d8ad0
 
-    unsigned int currentForm;
-
-    unsigned int unk3C, unk40, unk44, unk48, unk4C, unk50, unk54;
-
-    CommandTarget command;
-
-    unsigned char refresh;
-
-    MoveContext* FUN_00996de0();
-
-    void FUN_004534f0(unsigned int);
-
-    void FUN_009d8ad0(unsigned int);
-};
-
-// Calls FUN_004534f0, resolves currentForm through FUN_004839c0 and dynamic_cast, then refreshes the command target from context when refresh is set.
+// Resolves the saved target form and restores the movement request when active5C is set.
 // @fnv 0x009d8ad0
-void ProcedureController::FUN_009d8ad0(unsigned int value)
 
+void CombatProcedureMove::FUN_009d8ad0(unsigned int value)
 {
+    ::Actor* context = reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996de0();
 
-    MoveContext* context = FUN_00996de0();
+    reinterpret_cast<fnv_009d8ad0::CombatProcedureSlot16Base*>(this)->FUN_004534f0(value);
 
-    FUN_004534f0(value);
+    target38 = (unsigned int)(target38 ? dynamic_cast<TESObjectREFR*>(fnv_009d8ad0::FUN_004839c0(target38)) : 0);
 
-    currentForm = (unsigned int)(currentForm ? dynamic_cast<TESObjectREFR*>(FUN_004839c0(currentForm)) : 0);
-
-    if (refresh)
-
-        command.FUN_0066b0d0(context->FUN_008b3820());
-}
+    if (active5C)
+        reinterpret_cast<fnv_009d8ad0::CommandTarget*>(&state58)->FUN_0066b0d0(static_cast<CombatMovementRequestAccess*>(context)->FUN_008b3820());
 }

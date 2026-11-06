@@ -1,28 +1,12 @@
-// fallout_shared/tesquesttarget_decls.h: declares ExtraDataList, TESObjectREFR, TESQuestStageLegacyData
+// fallout_shared/tesquesttarget_decls.h: declares quest target and stage data
 #ifndef FNV_TESQUESTTARGET_DECLS_H
 #define FNV_TESQUESTTARGET_DECLS_H
 
-#include "TESForm.h"
+#include "layout_support.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/PerkEntryConditionSet.h"
+#include "../../include/TESObjectREFR.h"
 
-class ExtraDataList
-{
-  public:
-    TESObjectREFR* GetReplacementReference();
-};
-
-class TESObjectREFR : public TESForm
-{
-  public:
-    ExtraDataList* GetExtraData();
-};
-
-class TESConditionItem;
-class PerkEntryConditionSet
-{
-  public:
-    BSSimpleList<TESConditionItem*> m_kConditionItems;
-    void InitItem(TESForm* form);
-};
 FNV_STATIC_ASSERT(sizeof(PerkEntryConditionSet) == 8);
 
 // The target prefix accessed by these methods; the teleport path follows it.

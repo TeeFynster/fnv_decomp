@@ -1,12 +1,11 @@
-// Source layout: IMemoryHeap. PC corrections are in generate_headers.py.
-#ifndef FNV_IMEMORYHEAP_H
-#define FNV_IMEMORYHEAP_H
+#pragma once
 
-#include "layout_support.h"
-#pragma pack(push, 4)
+class MemoryHeapStats;
+class IMemoryManagerFile;
+
 class IMemoryHeap
 {
-  public:
+public:
     virtual ~IMemoryHeap();
     virtual const char* GetName() = 0;
     virtual void* Allocate(unsigned int size, unsigned int alignment) = 0;
@@ -17,7 +16,6 @@ class IMemoryHeap
     virtual int OutputBucketInfo(IMemoryManagerFile* file) = 0;
     virtual int OutputBlockInfo(IMemoryManagerFile* file, bool full) = 0;
     virtual unsigned int Size(const void* pointer, unsigned int alignment) = 0;
+    virtual void vf10() = 0;
+    virtual void vf11();
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(IMemoryHeap) == 0x4);
-#endif

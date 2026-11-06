@@ -2,6 +2,8 @@
 // src/havok/common/base/system/io/socket/hksocket.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/system/io/socket/hksocket.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkReferencedObject.h"
+
 struct S_00d2b790_Target
 {
     virtual void v00();
@@ -206,22 +208,11 @@ typedef void(__cdecl* InitFuncD2B)();
 extern "C" bool DAT_01268a44;
 extern "C" InitFuncD2B DAT_011b3de8;
 
-class hkReferencedObjectD2B
-{
-  public:
-    hkReferencedObjectD2B() throw()
-    {
-        m_sReferenceCount = 1;
-    }
-    virtual ~hkReferencedObjectD2B() throw();
 
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
 
 class FUN_00d2b850;
 
-class PartAD2B : public hkReferencedObjectD2B
+class PartAD2B : public hkReferencedObject
 {
   public:
     PartAD2B() throw() : m_pOwnerObject(0)
@@ -231,7 +222,7 @@ class PartAD2B : public hkReferencedObjectD2B
     FUN_00d2b850* m_pOwnerObject;
 };
 
-class PartBD2B : public hkReferencedObjectD2B
+class PartBD2B : public hkReferencedObject
 {
   public:
     PartBD2B() throw() : m_pOwnerObject(0)
@@ -241,7 +232,7 @@ class PartBD2B : public hkReferencedObjectD2B
     FUN_00d2b850* m_pOwnerObject;
 };
 
-class FUN_00d2b850 : public hkReferencedObjectD2B
+class FUN_00d2b850 : public hkReferencedObject
 {
   public:
     FUN_00d2b850() throw();

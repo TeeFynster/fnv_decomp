@@ -1,55 +1,70 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 
 // src/havok/physics/collide/shape/deprecated/multisphere/hkpmultisphereshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/deprecated/multisphere/hkpmultisphereshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpMultiSphereShape.h"
+// Preserve the float-only SIMD representation used by this unit: MSVC 2008
+// treats the CRT's byte-array SIMD members as /GS buffers.
+#define _INCLUDED_MM2
+// Exe 0x00d2a7c0 FUN_00d2a7c0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkpMultiSphereShape.h"
+#include "../../../../../../../include/hkMotionState.h"
+#include "../../../../../../../include/hkpCdBody.h"
+#include "../../../../../../../include/hkpRayHitCollector.h"
+
+extern "C" LocalM128 _mm_set_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_load_ps1(const float*);
+extern "C" LocalM128 _mm_move_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_set_ps1(float);
+extern "C" LocalM128 _mm_set_ss(float);
+extern "C" LocalM128 _mm_load_ps(const float*);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" LocalM128 _mm_min_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_max_ps(LocalM128, LocalM128);
 
 class FnvShapeGetter : public hkpSphereRepShape
 {
   public:
-    hkInt32 unk10;
-    hkInt32 FUN_00d2a5f0();
+    int unk10;
+    int FUN_00d2a5f0();
 };
 
 // @fnv 0x00d2a5f0
-hkInt32 FnvShapeGetter::FUN_00d2a5f0()
+int FnvShapeGetter::FUN_00d2a5f0()
 {
     return unk10;
 }
 
-class GlobalObjectO2_00d472a0;
-extern GlobalObjectO2_00d472a0 g_01268910;
-
-class hkStatisticsCollectorD2A6;
-
-class hkReferencedObjectD2A6
-{
-  public:
-    virtual ~hkReferencedObjectD2A6() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    void FUN_00c90360(hkStatisticsCollectorD2A6* pkCollector, const GlobalObjectO2_00d472a0* pkClass) const;
-};
-
-class hkObjectD2A6 : public hkReferencedObjectD2A6
-{
-  public:
-    void FUN_00d2a600(hkStatisticsCollectorD2A6* pkCollector, const GlobalObjectO2_00d472a0* pkClass) const;
-};
+extern const hkClass g_01268910;
 
 // @fnv 0x00d2a600
-void hkObjectD2A6::FUN_00d2a600(hkStatisticsCollectorD2A6* pkCollector, const GlobalObjectO2_00d472a0* pkClass) const
+void hkpMultiSphereShape::calcContentStatistics(hkStatisticsCollector* pkCollector, const hkClass* pkClass) const
 {
-    FUN_00c90360(pkCollector, &g_01268910);
+    hkReferencedObject::calcContentStatistics(pkCollector, &g_01268910);
 }
 
 extern int DAT_010ce4bc;
-
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-} __m128;
 
 struct FUN_00d2a760
 {
@@ -62,7 +77,7 @@ struct FUN_00d2a760
     int unk14;
     int unk18;
     int unk1C;
-    hkVector4 m_kSpheres[8];
+    LocalM128 m_kSpheres[8];
 
     FUN_00d2a760(const hkVector4* spheres, int count);
 };
@@ -75,48 +90,24 @@ FUN_00d2a760::FUN_00d2a760(const hkVector4* spheres, int count)
     m_type = 0x15;
     m_ppVirtualMethodTable = &DAT_010ce4bc;
     for (int i = 0; i < count; ++i)
-        *(__m128*)&m_kSpheres[i] = *(const __m128*)&spheres[i];
+        *(LocalM128*)&m_kSpheres[i] = *(const LocalM128*)&spheres[i];
     m_iSphereCount = count;
 }
-
-extern "C" __m128 _mm_set_ps(float, float, float, float);
-
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-
-extern "C" __m128 _mm_load_ps1(const float*);
-
-extern "C" __m128 _mm_move_ss(__m128, __m128);
-
-extern "C" __m128 _mm_load_ss(const float*);
-
-extern "C" __m128 _mm_set_ps1(float);
-
-extern "C" __m128 _mm_set_ss(float);
-
-extern "C" __m128 _mm_load_ps(const float*);
-
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
 
 extern "C" void _ReadWriteBarrier();
 
 struct __declspec(align(16)) Ray
 {
 
-    __m128 from;
+    LocalM128 from;
 
-    __m128 to;
+    LocalM128 to;
 };
 
 struct __declspec(align(16)) Out
 {
 
-    __m128 normal;
+    LocalM128 normal;
 
     float fraction;
 
@@ -137,7 +128,7 @@ struct __declspec(align(16)) Sph
     float x, y, z, w;
 };
 
-extern __m128 DAT_010ec7f0;
+extern LocalM128 DAT_010ec7f0;
 
 // Finds the smallest fraction in fracs, writes the interpolated and scaled normal and sphere id into out, and returns the best index or -1.
 // @fnv 0x00d2a610
@@ -175,14 +166,14 @@ static __declspec(noinline) int FUN_00d2a610(Out* out, const Sph* spheres, const
 
         const Sph* base = spheres;
 
-        __m128 t = _mm_load_ss(&best);
+        LocalM128 t = _mm_load_ss(&best);
         t = _mm_shuffle_ps(t, t, 0);
 
-        __m128 one = DAT_010ec7f0;
+        LocalM128 one = DAT_010ec7f0;
 
-        __m128 center = _mm_load_ps(&base[id].x);
+        LocalM128 center = _mm_load_ps(&base[id].x);
 
-        __m128 n = _mm_add_ps(
+        LocalM128 n = _mm_add_ps(
 
             _mm_mul_ps(_mm_sub_ps(ray->from, center), _mm_sub_ps(one, t)),
 
@@ -192,9 +183,9 @@ static __declspec(noinline) int FUN_00d2a610(Out* out, const Sph* spheres, const
 
         float invR = 1.0f / base[id].w;
 
-        __m128 inv = _mm_load_ss(&invR);
+        LocalM128 inv = _mm_load_ss(&invR);
 
-        __m128 scaled = _mm_mul_ps(n, _mm_shuffle_ps(inv, inv, 0));
+        LocalM128 scaled = _mm_mul_ps(n, _mm_shuffle_ps(inv, inv, 0));
 
         out->normal = scaled;
 
@@ -248,7 +239,7 @@ hkVector4* FUN_00d2a920::CopySpheres(hkVector4* dst)
 
     for (int i = 0; i < m_iSphereCount; ++i)
     {
-        *reinterpret_cast<__m128*>(dst + i) = *reinterpret_cast<__m128*>(m_kSpheres + i);
+        *reinterpret_cast<LocalM128*>(dst + i) = *reinterpret_cast<LocalM128*>(m_kSpheres + i);
     }
     return dst;
 }
@@ -270,47 +261,6 @@ class S00d2ab90_Shape : public hkpSphereRepShape
     char* FUN_00d2ab90(char* ok, RayCtx* in, void* p3);
 };
 
-static void* s00d2ab90_addr[10];
-static void* s00d2ab90_sink;
-void D2abExternCall();
-
-static __declspec(noinline) void* FUN_00d2a960(RayCtx* outB, RayCtx* in, hkVector4* spheres, void* owner, RayCtx* outA)
-{
-    s00d2ab90_sink = outB;
-    s00d2ab90_addr[0] = (void*)&in;
-    s00d2ab90_addr[1] = (void*)&spheres;
-    s00d2ab90_addr[2] = (void*)&owner;
-    s00d2ab90_addr[3] = (void*)&outA;
-    return outB;
-}
-
-static __declspec(noinline) int FUN_00d2a610(hkVector4* spheres, RayCtx* keyB, RayCtx* keyA, void* r, RayCtx* in,
-                                             void* extra)
-{
-    s00d2ab90_addr[4] = (void*)&spheres;
-    s00d2ab90_addr[5] = (void*)&keyB;
-    s00d2ab90_addr[6] = (void*)&keyA;
-    s00d2ab90_addr[7] = (void*)&r;
-    s00d2ab90_sink = in;
-    for (int i = 0; i < 4; i++)
-    {
-        D2abExternCall();
-        ((int*)extra)[i] = i;
-    }
-    return (int)r;
-}
-
-// Performs a raycast against m_kSpheres using in and p3, storing whether a hit was found in *ok and returning ok.
-// @fnv 0x00d2ab90
-char* S00d2ab90_Shape::FUN_00d2ab90(char* ok, RayCtx* in, void* p3)
-{
-    RayCtx keys[2];
-    void* r = FUN_00d2a960(&keys[0], in, m_kSpheres, m_disp, &keys[1]);
-    int v = FUN_00d2a610(m_kSpheres, &keys[1], &keys[0], r, in, p3);
-    *ok = (v != -1);
-    return ok;
-}
-
 #include <math.h>
 
 extern "C" void _ReadWriteBarrier(void);
@@ -320,12 +270,10 @@ extern const char str_010ce4f0[];
 extern const char str_010c41f8[];
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
 struct Sph_Mon
 {
     int unk00;
@@ -345,10 +293,10 @@ struct Sph_Seg
 union Sph_U
 {
     Sph_V v;
-    __m128 q;
+    LocalM128 q;
 };
 
-static inline __m128 Sph_sum3(__m128 t)
+static inline LocalM128 Sph_sum3(LocalM128 t)
 {
     return _mm_add_ss(_mm_shuffle_ps(t, t, 0xaa), _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t));
 }
@@ -386,11 +334,11 @@ static __declspec(noinline) int FUN_00d2a960(const Sph_Seg* seg, const Sph_V* sp
         Sph_U e, s, c;
         e.v = seg->b;
         s.v = seg->a;
-        c.q = *(const __m128*)&spheres[i];
-        __m128 d2 = _mm_sub_ps(e.q, c.q);
+        c.q = *(const LocalM128*)&spheres[i];
+        LocalM128 d2 = _mm_sub_ps(e.q, c.q);
         s.q = _mm_sub_ps(s.q, c.q);
         c.q = _mm_mul_ps(s.q, s.q);
-        __m128 d1 = _mm_sub_ps(d2, s.q);
+        LocalM128 d1 = _mm_sub_ps(d2, s.q);
         float C;
         _mm_store_ss(&C, Sph_sum3(c.q));
         float B;
@@ -430,6 +378,20 @@ static __declspec(noinline) int FUN_00d2a960(const Sph_Seg* seg, const Sph_V* sp
     return hitCounter.count;
 }
 
+// Performs a raycast against m_kSpheres using in and p3, storing whether a hit was found in *ok and returning ok.
+// @fnv 0x00d2ab90
+char* S00d2ab90_Shape::FUN_00d2ab90(char* ok, RayCtx* in, void* p3)
+{
+    int hitKeys[8];
+    float hitFractions[8];
+    int numHits = FUN_00d2a960((const Sph_Seg*)in, (const Sph_V*)m_kSpheres, (int)m_disp,
+                                 hitKeys, hitFractions);
+    int hitIndex = FUN_00d2a610((Out*)p3, (const Sph*)m_kSpheres, hitFractions, hitKeys,
+                                  numHits, (const Ray*)in);
+    *ok = (hitIndex != -1);
+    return ok;
+}
+
 int Sph_caller(const Sph_Seg* seg, const Sph_V* spheres, int n, int* a, float* b)
 {
     return FUN_00d2a960(seg, spheres, n, a, b);
@@ -443,26 +405,9 @@ struct ShapeRayCastQuery
     hkUint32 m_uiFilterInfo;
 };
 
-struct hkMotionState
-{
-    hkTransform m_kMotionTransform;
-};
-
-struct hkpCdBody
-{
-    const hkpShape* m_pCollisionShape;
-    hkUint32 m_uiCollisionShapeKey;
-    const hkMotionState* m_kMotionState;
-    const hkpCdBody* m_parent;
-};
-
 struct ShapeRayCastOutput
 {
-    union
-    {
-        hkVector4 m_vHitNormal;
-        __m128 m_vComponents;
-    };
+    LocalM128 m_vComponents;
     hkReal m_fHitFraction;
     int m_iExtraInfo;
     int unk18[2];
@@ -484,12 +429,6 @@ struct ShapeRayCastOutput
         m_uiShapeKeys[0] = 0xFFFFFFFFu;
         m_uiShapeKeyIndex = 0;
     }
-};
-
-class hkpRayHitCollector
-{
-  public:
-    virtual void CollectRayHit(const hkpCdBody& cdBody, const ShapeRayCastOutput& hitInfo) = 0;
 };
 
 // Pack unit supplies static noinline overloads for both helpers:
@@ -526,16 +465,16 @@ void DummyMultiSphere::FUN_00d2abe0(const ShapeRayCastQuery& input, const hkpCdB
         int hitIndex = FUN_00d2a610((Out*)&output, (const Sph*)spheres, hitFractions, (const int*)hitKeys, numHits,
                                     (const Ray*)&input);
 
-        const hkRotation& rot = cdBody.m_kMotionState->m_kMotionTransform.m_rotation;
+        const hkTransform& transform = static_cast<const hkMotionState*>(cdBody.m_pMotionState)->m_kMotionTransform;
 
-        __m128 v = output.m_vComponents;
-        __m128 v0 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), *(const __m128*)&rot.m_kColumn1);
-        __m128 v1 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x00), *(const __m128*)&rot.m_kColumn0);
-        __m128 v2 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), *(const __m128*)&rot.m_kColumn2);
+        LocalM128 v = output.m_vComponents;
+        LocalM128 v0 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x55), transform.m_row1);
+        LocalM128 v1 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0x00), transform.m_row0);
+        LocalM128 v2 = _mm_mul_ps(_mm_shuffle_ps(v, v, 0xaa), transform.m_row2);
         v0 = _mm_add_ps(v0, v1);
         output.m_vComponents = _mm_add_ps(v0, v2);
 
-        collector.CollectRayHit(cdBody, output);
+        collector.CollectRayHit(cdBody, reinterpret_cast<const RayCastHitResult&>(output));
 
         numHits--;
         hitFractions[hitIndex] = hitFractions[numHits];
@@ -543,21 +482,18 @@ void DummyMultiSphere::FUN_00d2abe0(const ShapeRayCastQuery& input, const hkpCdB
     } while (numHits != 0);
 }
 
-extern "C" __m128 _mm_min_ps(__m128, __m128);
-extern "C" __m128 _mm_max_ps(__m128, __m128);
+extern "C" LocalM128 _mm_min_ps(LocalM128, LocalM128);
+inline Vec4::Vec4(const Vec4& q) : xb(q.xb), yb(q.yb), zb(q.zb), wb(q.wb) {}
 
-struct Vec4
+inline LocalM128 Vec4::get() const
 {
-    __m128 m_vComponents;
-    __m128 get() const
-    {
-        return m_vComponents;
-    }
-    void set(__m128 v)
-    {
-        m_vComponents = v;
-    }
-};
+    return *reinterpret_cast<const LocalM128*>(this);
+}
+
+inline void Vec4::set(LocalM128 v)
+{
+    *reinterpret_cast<LocalM128*>(this) = v;
+}
 
 struct hkTransformSimd
 {
@@ -573,27 +509,27 @@ struct hkAabbSimd
     Vec4 m_kMaximumCorner;
 };
 
-static __forceinline void TransformPointArray(const hkTransformSimd& t, const Vec4* vin, int num, Vec4* vout)
+static __forceinline void TransformPointArray(const hkTransformSimd& t, const Vec4* vin, int num, LocalM128* vout)
 {
-    Vec4 c0 = t.m_kColumn0;
-    Vec4 c1 = t.m_kColumn1;
-    Vec4 c2 = t.m_kColumn2;
-    Vec4 c3 = t.m_vTranslation;
-    __m128 q0 = c0.get();
-    __m128 q1 = c1.get();
-    __m128 q2 = c2.get();
-    __m128 RunFourthVirtual = c3.get();
+    __declspec(align(16)) Vec4 c0 = t.m_kColumn0;
+    __declspec(align(16)) Vec4 c1 = t.m_kColumn1;
+    __declspec(align(16)) Vec4 c2 = t.m_kColumn2;
+    __declspec(align(16)) Vec4 c3 = t.m_vTranslation;
+    LocalM128 q0 = c0.get();
+    LocalM128 q1 = c1.get();
+    LocalM128 q2 = c2.get();
+    LocalM128 RunFourthVirtual = c3.get();
     int i = num - 1;
     do
     {
-        __m128 b = vin[i].get();
-        __m128 xb = _mm_shuffle_ps(b, b, 0);
-        __m128 yb = _mm_shuffle_ps(b, b, 0x55);
-        __m128 zb = _mm_shuffle_ps(b, b, 0xAA);
-        __m128 t0 = _mm_mul_ps(xb, q0);
-        __m128 t1 = _mm_mul_ps(yb, q1);
-        __m128 t2 = _mm_mul_ps(zb, q2);
-        vout[i].set(_mm_add_ps(_mm_add_ps(t0, t1), _mm_add_ps(t2, RunFourthVirtual)));
+        LocalM128 b = vin[i].get();
+        LocalM128 xb = _mm_shuffle_ps(b, b, 0);
+        LocalM128 yb = _mm_shuffle_ps(b, b, 0x55);
+        LocalM128 zb = _mm_shuffle_ps(b, b, 0xAA);
+        LocalM128 t0 = _mm_mul_ps(xb, q0);
+        LocalM128 t1 = _mm_mul_ps(yb, q1);
+        LocalM128 t2 = _mm_mul_ps(zb, q2);
+        vout[i] = _mm_add_ps(_mm_add_ps(t0, t1), _mm_add_ps(t2, RunFourthVirtual));
     } while (--i >= 0);
 }
 
@@ -619,21 +555,21 @@ struct MultiSphereShape
 // @fnv 0x00d2a7c0
 void MultiSphereShape::FUN_00d2a7c0(const hkTransformSimd& localToWorld, float tolerance, hkAabbSimd& out) const
 {
-    Vec4 tmp[8];
+    LocalM128 tmp[8];
     TransformPointArray(localToWorld, m_kSpheres, m_iSphereCount, tmp);
 
-    __m128 absMin = _mm_set_ps1(DAT_0104da48);
-    __m128 absMax = _mm_set_ps1(DAT_0104e148);
+    LocalM128 absMin = _mm_set_ps1(DAT_0104da48);
+    LocalM128 absMax = _mm_set_ps1(DAT_0104e148);
 
     for (int i = 0; i < m_iSphereCount; i++)
     {
-        __m128 r = _mm_shuffle_ps(m_kSpheres[i].get(), m_kSpheres[i].get(), 0xFF);
-        __m128 mn = _mm_sub_ps(tmp[i].get(), r);
-        __m128 mx = _mm_add_ps(tmp[i].get(), r);
+        LocalM128 r = _mm_shuffle_ps(m_kSpheres[i].get(), m_kSpheres[i].get(), 0xFF);
+        LocalM128 mn = _mm_sub_ps(tmp[i], r);
+        LocalM128 mx = _mm_add_ps(tmp[i], r);
         absMin = _mm_min_ps(absMin, mn);
         absMax = _mm_max_ps(absMax, mx);
     }
-    __m128 tol4 = _mm_set_ps1(tolerance);
+    LocalM128 tol4 = _mm_set_ps1(tolerance);
     out.m_kMinimumCorner.set(_mm_sub_ps(absMin, tol4));
     out.m_kMaximumCorner.set(_mm_add_ps(tol4, absMax));
 }

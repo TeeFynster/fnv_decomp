@@ -1,68 +1,39 @@
-// bsshader/imagespaceeffectbloom_decls.h: declares MemoryManager, RgbaColor, ImageSpaceShaderParam, RenderStateMap, ImageSpaceManager
+// bsshader/imagespaceeffectbloom_decls.h: declares ImageSpaceShaderParam, RenderStateMap, ImageSpaceManager
 #ifndef FNV_IMAGESPACEEFFECTBLOOM_DECLS_H
 #define FNV_IMAGESPACEEFFECTBLOOM_DECLS_H
 
 
-// the allocation entry points use the canonical MemoryManager signatures.
-class IMemoryHeap;
-class MemoryManager
-{
-  public:
-    unsigned char layoutPadding0[297];
-    bool m_bPoolAllocationEnabled;
-    unsigned char layoutPadding12A[2];
-    void* Allocate(unsigned int size);
-    void Deallocate(void* pointer);
-};
+#include "../../include/MemoryManager.h"
+#include "../../include/NiColorA.h"
 extern MemoryManager g_memoryManager;
 
-template <class T> class NiTMallocInterface
-{
-};
-template <class T, class Allocator> class NiTArray
-{
-  public:
-    virtual ~NiTArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int size);
-    void SetAt(unsigned int index, const T& item);
-};
-template <class T> class NiTPrimitiveArray : public NiTArray<T, NiTMallocInterface<T> >
-{
-};
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTArray.h"
+#include "../../include/NiTPrimitiveArray.h"
 
 class ImageSpaceTexture;
 class ImageSpaceEffect;
-class ImageSpaceEffectParam;
+class BloomEffectParamLocalForm;
 class ImageSpaceShaderParam;
 class BSRenderedTexture;
 class NiTexture;
 class NiD3DShaderConstantMap;
 
-class ImageSpaceEffectParam
-{
+
+class BloomEffectParamLocalForm
+{ // local form of ImageSpaceEffectParam: 0x00c03410 needs the 0x24-byte vtable/two-array base; the frozen shared size-1 declaration fails the exe-derived size/offset assertions.
   public:
-    virtual ~ImageSpaceEffectParam();
+    virtual ~BloomEffectParamLocalForm();
     NiTPrimitiveArray<int> m_kTextureTypes;
     NiTPrimitiveArray<int> m_kFilterModes;
 };
 
-class RgbaColor
-{
-  public:
-    float r, g, b, a;
-};
-
-class ImageSpaceShaderParam : public ImageSpaceEffectParam
+class ImageSpaceShaderParam : public BloomEffectParamLocalForm
 {
   public:
     int m_eShaderFilterMode;
     int m_eClearFlags;
-    RgbaColor m_eTextureClampMode;
+    NiColorA m_eTextureClampMode;
     float* m_pfVertexShaderConstants;
     int m_iVertexShaderConstantCount;
     float* m_pfPixelShaderConstants;
@@ -102,33 +73,29 @@ class ImageSpaceEffect
     bool bParamsChanged;
     unsigned char layoutPadding6[2];
     NiTPrimitiveArray<ImageSpaceEffect*> pEffectList;
-    NiTPrimitiveArray<ImageSpaceEffectParam*> pEffectParamList;
+    NiTPrimitiveArray<BloomEffectParamLocalForm*> pEffectParamList;
     NiTPrimitiveArray<ImageSpaceTexture*> pTextures;
     struct ImageSpaceEffectInput;
     NiTPrimitiveArray<ImageSpaceEffectInput*> pEffectInputs;
     NiTPrimitiveArray<int> pEffectOutput;
     void SetTextureArrayCount(int count);
-    void SetEffectAt(int index, ImageSpaceEffect* effect, ImageSpaceEffectParam* param, int output);
+    void SetEffectAt(int index, ImageSpaceEffect* effect, BloomEffectParamLocalForm* param, int output);
     // No identity candidate is available for the one-input setup helper.
     void SetEffectParamAt(int effectIndex, int textureIndex, int filterMode);
 };
 
 // Only the PC prefix read by Setup is required here.
-class ImageSpaceManager
+#include "../../include/ImageSpaceManager.h"
+// inlined into the Setup functions (/O2); the shared header only declares it
+inline ImageSpaceEffect* ImageSpaceManager::GetEffect(int index)
 {
-  public:
-    BSRenderedTexture* m_pCurrentRenderedTexture;
-    NiTPrimitiveArray<ImageSpaceEffect*> pEffectList;
-    ImageSpaceEffect* GetEffect(int index)
-    {
-        return pEffectList.m_pBase[index];
-    }
-};
+    return reinterpret_cast<NiTPrimitiveArray<ImageSpaceEffect*>*>(pEffectList)->m_pBase[index];
+}
 
 class BloomImageSpaceEffect : public ImageSpaceEffect
 {
   public:
-    void Setup(ImageSpaceManager* manager, ImageSpaceEffectParam* param);
+    void Setup(ImageSpaceManager* manager, BloomEffectParamLocalForm* param);
 };
 
 extern float DAT_012023f4;

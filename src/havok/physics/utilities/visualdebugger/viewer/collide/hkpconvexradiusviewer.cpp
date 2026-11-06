@@ -2,6 +2,25 @@
 // src/havok/physics/utilities/visualdebugger/viewer/collide/hkpconvexradiusviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/collide/hkpconvexradiusviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkThreadMemory.h"
+#include "../../../../../../../include/hkArray.h"
+
+struct hkMemory
+{
+    virtual void unk0();
+    virtual void* allocateChunk(int size);
+};
+
+inline hkMemoryAllocator& hkThreadMemory::heap()
+{
+    return *(hkMemoryAllocator*)m_pMemoryAllocator;
+}
+
+inline void* hkThreadMemory::allocateChunk(int size) throw()
+{
+    return m_pMemoryAllocator->allocateChunk(size);
+}
+
 void* __cdecl FUN_00d68e00();
 struct FUN_00dd9380_class
 {
@@ -170,14 +189,7 @@ struct Heap
     virtual void b();
     virtual void free(void*, unsigned short);
 };
-struct Holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    Heap* unk10;
-};
+
 struct Destructor
 {
     void FUN_00d690d0();
@@ -195,7 +207,7 @@ struct FUN_00d691d0_Class
     int unk1C;
     FUN_00d691d0_Class* Destroy(unsigned int flags);
 };
-extern Holder* FUN_00c85750();
+extern hkThreadMemory* FUN_00c85750();
 // Runs the destructor, and if flags has bit 0 set, frees this object through the holder's allocator using allocationSize.
 // @fnv 0x00d691d0
 FUN_00d691d0_Class* FUN_00d691d0_Class::Destroy(unsigned int flags)
@@ -203,8 +215,8 @@ FUN_00d691d0_Class* FUN_00d691d0_Class::Destroy(unsigned int flags)
     ((Destructor*)this)->FUN_00d690d0();
     if (flags & 1)
     {
-        Holder* holder = FUN_00c85750();
-        holder->unk10->free(this, allocationSize);
+        hkThreadMemory* holder = FUN_00c85750();
+        ((Heap*)holder->m_pMemoryAllocator)->free(this, allocationSize);
     }
     return this;
 }
@@ -323,22 +335,8 @@ found:
     }
 }
 
-struct S_Heap
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void ReturnMemory(void* p, int n) throw();
-};
-struct S_Holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_Heap* m10;
-};
+
+
 struct S_B0
 {
     virtual void b0v0();
@@ -373,29 +371,18 @@ struct S_D2c
     virtual ~S_D2c() throw()
     {}
 };
-struct S_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_Heap* m10;
-    __forceinline S_Heap& heap()
-    {
-        return *m10;
-    }
-};
+
 struct S_Arr
 {
     void** m_data;
     int m_iElementCount;
     int m_cap;
-    __forceinline void _clearAndDeallocate(S_Heap& h) throw()
+    __forceinline void _clearAndDeallocate(hkMemoryAllocator& h) throw()
     {
         int cap = m_cap;
         m_iElementCount = 0;
         if ((cap & 0x80000000) == 0)
-            h.ReturnMemory(m_data, (cap & 0x3fffffff) * (int)sizeof(void*));
+            h.bufFree(m_data, (cap & 0x3fffffff) * (int)sizeof(void*));
         m_data = 0;
         m_cap = 0x80000000;
     }
@@ -411,7 +398,7 @@ FUN_00d690d0::~FUN_00d690d0() throw()
 {
     for (int i = m30.m_iElementCount - 1; i >= 0; i--)
         FUN_00d69010(i);
-    m30._clearAndDeallocate(((S_Router*)FUN_00c85750())->heap());
+    m30._clearAndDeallocate(FUN_00c85750()->heap());
 }
 
 struct SubObj
@@ -512,9 +499,9 @@ void FUN_00d68e60_cls::FUN_00d68e60(Owner* owner)
     owner->FUN_00c93820(this != 0 ? &m_28 : 0);
     owner->FUN_00c93920(this != 0 ? &m_2C : 0);
 
-    Holder* pAllocHolder = FUN_00c85750();
+    hkThreadMemory* pAllocHolder = FUN_00c85750();
     Record* pRecord = 0;
-    Record* pNewRecord = (Record*)((Allocator*)pAllocHolder->unk10)->Alloc(16);
+    Record* pNewRecord = (Record*)((Allocator*)pAllocHolder->m_pMemoryAllocator)->Alloc(16);
     if (pNewRecord != 0)
     {
         pNewRecord->unk04 = 0;
@@ -525,10 +512,10 @@ void FUN_00d68e60_cls::FUN_00d68e60(Owner* owner)
     pRecord->m_pOwnerObject = owner;
 
     PairList* pList = &m_30;
-    Holder* holder = FUN_00c85750();
+    hkThreadMemory* holder = FUN_00c85750();
     if (pList->m_uiItemCount == (int)(pList->m_capBits & 0x3fffffffu))
     {
-        ResizeAudioStream((Allocator*)holder->unk10, pList, 4);
+        ResizeAudioStream((Allocator*)holder->m_pMemoryAllocator, pList, 4);
     }
     unsigned int idx = *(volatile unsigned int*)&pList->m_uiItemCount;
     void** ppData = pList->m_data;
@@ -632,32 +619,14 @@ struct FUN_00d68b90 : T68Base, T68D28, T68D2c
 FUN_00d68b90::FUN_00d68b90(int arg) : T68Base(arg), m3c(DAT_01269018), m40(DAT_01269014)
 {}
 
-struct Mem_d65f
-{
-    virtual void v00();
-    virtual void* allocateChunk(int nbytes);
-    virtual void deallocateChunk(void* p, int nbytes) throw();
-    virtual void v0C();
-    virtual void deallocate(void* p, int nbytes) throw();
-};
 
-struct Holder_d65f
-{
-    int unk00, unk04, unk08, unk0C;
-    Mem_d65f* m_pMemoryAllocator;
-    Mem_d65f& heap()
-    {
-        return *m_pMemoryAllocator;
-    }
-};
 
-struct Router_d65f
+
+
+
+inline hkMemoryAllocator& getMemory_d65f()
 {
-    static Holder_d65f& __cdecl FUN_00c85750() throw();
-};
-inline Mem_d65f& getMemory_d65f()
-{
-    return *Router_d65f::FUN_00c85750().m_pMemoryAllocator;
+    return FUN_00c85750()->heap();
 }
 
 inline void memCpy4_d65f(void* dst, const void* src, int nbytes)
@@ -666,31 +635,24 @@ inline void memCpy4_d65f(void* dst, const void* src, int nbytes)
         *(unsigned int*)((char*)dst + i) = *(const unsigned int*)((const char*)src + i);
 }
 
-template <class T> struct hkArray_d65f
+template <class T, class Allocator>
+__forceinline hkArray<T, Allocator>::~hkArray()
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    __forceinline ~hkArray_d65f() throw()
-    {
-        Mem_d65f& mem = Router_d65f::FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            mem.deallocate(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            memCpy4_d65f(m_data + index, m_data + m_iElementCount, sizeof(T));
-    }
-};
+    hkMemoryAllocator& mem = FUN_00c85750()->heap();
+    m_iElementCount = 0;
+    if ((m_iCapacityState & 0x80000000) == 0)
+        mem.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
+
+template <class T>
+__forceinline void hkArrayBase<T>::removeAt(int index)
+{
+    m_iElementCount--;
+    if (m_iElementCount != index)
+        memCpy4_d65f(m_data + index, m_data + m_iElementCount, sizeof(T));
+}
 
 struct Listener_d65f;
 struct Watch2_d65f
@@ -707,10 +669,10 @@ struct Agent_d65f
 struct Node_d65f
 {
     Agent_d65f* m_pCollisionAgent;
-    hkArray_d65f<int> m_items;
+    hkArray<int> m_items;
     static void operator delete(void* p) throw()
     {
-        Router_d65f::FUN_00c85750().heap().deallocateChunk(p, sizeof(Node_d65f));
+        (FUN_00c85750()->heap()).blockFree(p, sizeof(Node_d65f));
     }
 };
 
@@ -732,7 +694,7 @@ struct Watch_d65f
 
 struct Phantom_d65f : Base_d65f, Listener_d65f, Watch2_d65f
 {
-    hkArray_d65f<Node_d65f*> m_kNodeCollection;
+    hkArray<Node_d65f*> m_kNodeCollection;
     void FUN_00d68b20(int index);
     void FUN_00d69010(int index);
 };
@@ -1216,30 +1178,12 @@ struct S_00d68c00_Item
     S_00d68c00_List list;
 };
 
-struct S_00d68c00_Heap
-{
-    virtual void v0() throw();
-    virtual void v1() throw();
-    virtual void v2() throw();
-    virtual void v3() throw();
-    virtual void v4(void* p, int bytes) throw();
-};
 
-struct S_00d68c00_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00d68c00_Heap* unk10;
-    S_00d68c00_Heap& heap()
-    {
-        return *unk10;
-    }
-};
 
-S_00d68c00_Router* __cdecl FUN_00c85750() throw();
-void __cdecl ResizeAudioStream(S_00d68c00_Heap* heap, void* arr, int elemSize) throw();
+
+
+hkThreadMemory* __cdecl FUN_00c85750() throw();
+void __cdecl ResizeAudioStream(hkMemoryAllocator* heap, void* arr, int elemSize) throw();
 
 struct S_00d68c00_Obj
 {
@@ -1354,9 +1298,9 @@ void S_00d68c00_Sub::FUN_00d68c00(S_00d68c00_Arg* a2) throw()
     {
         char* name = (char*)a2 + 0x13;
         S_00d68c00_List* list = &item->list;
-        S_00d68c00_Router* r = FUN_00c85750();
+        hkThreadMemory* r = FUN_00c85750();
         if (list->size == (list->cap & 0x3fffffff))
-            ResizeAudioStream(r->unk10, list, 4);
+            ResizeAudioStream(&r->heap(), list, 4);
         char** p = list->data + list->size;
         for (int k = 0; k < 1; k++)
             p[k] = name;
@@ -1373,31 +1317,14 @@ void S_00d68c00_Sub::FUN_00d68c00(S_00d68c00_Arg* a2) throw()
         if (e)
             e->v0(1);
     }
-    S_00d68c00_Heap& heap = FUN_00c85750()->heap();
+    hkMemoryAllocator& heap = (FUN_00c85750()->heap());
     arr.size = 0;
     if ((arr.cap & 0x80000000) == 0)
-        heap.v4(arr.data, (arr.cap & 0x3fffffff) * 4);
+        heap.bufFree(arr.data, (arr.cap & 0x3fffffff) * 4);
 }
 }  // namespace fnv_00d68c00
 
 namespace fnv_00d68e00 {
-struct hkMemory
-{
-    virtual void unk0();
-    virtual void* allocateChunk(int size);
-};
-
-struct hkThreadMemory
-{
-    char pad[0x10];
-    hkMemory* m_pMemoryAllocator;
-
-    void* allocateChunk(int size)
-    {
-        return m_pMemoryAllocator->allocateChunk(size);
-    }
-};
-
 extern "C" hkThreadMemory* __cdecl FUN_00c85750();
 
 struct TargetAgent
@@ -1441,14 +1368,7 @@ struct SpawnItem
     HkArr arr;
 };
 
-struct Holder_d68b20
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    void* volatile m_pAllocator;
-};
+
 
 void __cdecl FUN_00c908c0(void* alloc, void* arr, int n, int elemSize);
 
@@ -1481,8 +1401,8 @@ void FUN_00d68b20_cls::FUN_00d68b20(int idx)
         m_18->v05(item->arr.data[i], DAT_01269010, 0);
     }
     HkArr* a = &item->arr;
-    Holder_d68b20* h = (Holder_d68b20*)FUN_00c85750();
-    void* alloc = h->m_pAllocator;
+    hkThreadMemory* h = FUN_00c85750();
+    void* alloc = *(void* volatile*)&h->m_pMemoryAllocator;
     int cap = (int)(a->m_iCapacity & 0x3fffffff);
     if (cap < 0)
     {

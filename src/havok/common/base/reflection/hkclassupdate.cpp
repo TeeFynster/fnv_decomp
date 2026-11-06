@@ -2,15 +2,8 @@
 // src/havok/common/base/reflection/hkclassupdate.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/reflection/hkclassupdate.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct Allocator;
-struct BSAudio
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    Allocator* allocator;
-};
+#include "../../../../../include/BSAudio.h"
+
 BSAudio* FUN_00c85750();
 struct TypeNode;
 struct VisitMap
@@ -39,7 +32,7 @@ void __cdecl VisitTypeMembers(TypeNode* node, VisitMap* visited, unsigned int ma
         if (mask & flags)
             return;
         BSAudio* audio = FUN_00c85750();
-        visited->FUN_00cb1870(audio->allocator, node, flags | mask);
+        visited->FUN_00cb1870(reinterpret_cast<Allocator*>(audio->pListener), node, flags | mask);
         for (int i = 0; i < node->FUN_00d46f70(); ++i)
         {
             Member* member = node->FUN_00d46f80(i);
@@ -56,11 +49,6 @@ void __cdecl VisitTypeMembers(TypeNode* node, VisitMap* visited, unsigned int ma
 
 namespace fnv_00e04bb0 {
 struct Allocator;
-struct BSAudio
-{
-    int unk00, unk04, unk08, unk0C;
-    Allocator* allocator;
-};
 BSAudio* FUN_00c85750();
 struct TypeNode;
 struct VisitMap
@@ -100,7 +88,7 @@ void VisitTypeNode(TypeNode* node, VisitMap* visited)
     if (!(flags & 1))
     {
         BSAudio* audio = FUN_00c85750();
-        visited->FUN_00cb1870(audio->allocator, node, flags | 1);
+        visited->FUN_00cb1870(reinterpret_cast<Allocator*>(audio->pListener), node, flags | 1);
         unsigned int offset = DAT_0126ed90.FUN_00d46fe0(DAT_010ea4cc)->offset;
         TypeNode* ancestor = node;
         while (ancestor->FUN_00d46d60())
@@ -185,7 +173,7 @@ static __declspec(noinline) void __cdecl FUN_00e04cc0(TraverseNode* node, VisitM
     if ((flags & 4) == 0)
     {
         BSAudio* audio = FUN_00c85750();
-        visited->FUN_00cb1870(audio->allocator, reinterpret_cast<TypeNode*>(node), flags | 4);
+        visited->FUN_00cb1870(reinterpret_cast<Allocator*>(audio->pListener), reinterpret_cast<TypeNode*>(node), flags | 4);
         if (FUN_00cb0fa0(node->FUN_00d46d40(), DAT_010d27bc) == 0)
         {
             char* member = node->FUN_00d46f80(2);

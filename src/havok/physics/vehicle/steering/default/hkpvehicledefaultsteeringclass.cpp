@@ -1,3 +1,4 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/physics/vehicle/steering/default/hkpvehicledefaultsteeringclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/vehicle/steering/default/hkpvehicledefaultsteeringclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -25,24 +26,23 @@ struct S_00dfee20_Router
     }
 };
 
-struct S_00dfee20_Array
+static __forceinline void S_00dfee20_Array__clearAndDeallocate(hkArrayBase<unsigned char>& self, S_00dfee20_Allocator& alloc) throw()
 {
-    unsigned char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+        self.m_iElementCount = 0;
+        if ((self.m_iCapacityState & 0x80000000) == 0)
+            alloc.ReturnMemory(self.m_data, (self.m_iCapacityState & 0x3fffffff) * sizeof(unsigned char));
+        self.m_data = 0;
+        self.m_iCapacityState = 0x80000000;
+    }
 
-    void _clearAndDeallocate(S_00dfee20_Allocator& alloc) throw()
-    {
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(unsigned char));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
+static __forceinline void S_00dfee20_Array_destroy(hkArrayBase<unsigned char>& self) throw()
+{
+        S_00dfee20_Array__clearAndDeallocate(self, S_00dfee20_Router::FUN_00c85750().heap());
     }
-    ~S_00dfee20_Array() throw()
-    {
-        _clearAndDeallocate(S_00dfee20_Router::FUN_00c85750().heap());
-    }
+
+struct S_00dfee20_ArrayPolicy
+{
+    static __forceinline void destroy(hkArrayBase<unsigned char>& self) { S_00dfee20_Array_destroy(self); }
 };
 
 struct S_00dfee20_Base
@@ -64,7 +64,7 @@ struct __declspec(novtable) S_00dfee20 : S_00dfee20_Base
 {
     int unk8;
     int unkC;
-    S_00dfee20_Array unk10;
+    hkArray<unsigned char, S_00dfee20_ArrayPolicy> unk10;
 
     virtual ~S_00dfee20() throw()
     {}
@@ -79,4 +79,10 @@ S_00dfee20* S_00dfee20::DestroyAndMaybeFree(unsigned int flags)
     if (flags & 1)
         operator delete(this);
     return this;
+}
+
+
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
+{
+    A::destroy(*this);
 }

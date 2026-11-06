@@ -1,9 +1,13 @@
+#include "../../../../../../include/hkArray.h"
 // src/havok/common/base/thread/jobqueue/hkjobqueue_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/base/thread/jobqueue/hkjobqueue.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
 // src/havok/common/base/thread/jobqueue/hkjobqueue.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/thread/jobqueue/hkjobqueue.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMonitorStream.h"
+
 struct FUNObj
 {
     struct Entry
@@ -114,18 +118,13 @@ struct Obj {
     int Forward3(int a, int b, int c);
     int ForwardWithZero(int a, int b);
 };
-struct S_00d056a0_Allocator {
-    virtual void v0();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
 struct S_00d056a0_Router {
     int unk0;
     int unk4;
     int unk8;
     int unkC;
-    S_00d056a0_Allocator* m_pStreamAllocator;
-    S_00d056a0_Allocator* heap() { return m_pStreamAllocator; }
+    hkMemoryAllocator* m_pStreamAllocator;
+    hkMemoryAllocator* heap() { return m_pStreamAllocator; }
 };
 S_00d056a0_Router* FUN_00c85750();
 struct S_00d056a0_Elem {
@@ -550,15 +549,14 @@ extern void __cdecl hookD_00d968e0(void*, void*);
 void __cdecl FUN_00da3400(TargetObj* p);
 void __cdecl FUN_00da3480(TargetObj* p);
 void __cdecl InitHookTable(TargetObj* apTarget);
-struct D04A20Allocator;
 struct D04A20MemoryRouter {
     int unk00;
     int unk04;
     int unk08;
     int unk0C;
-    D04A20Allocator* m_pStreamAllocator;
+    hkMemoryAllocator* m_pStreamAllocator;
 
-    D04A20Allocator& heap() { return *m_pStreamAllocator; }
+    hkMemoryAllocator& heap() { return *m_pStreamAllocator; }
 };
 namespace fnvc_adapt { extern "C" D04A20MemoryRouter& __cdecl FUN_00c85750(); }
 void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
@@ -567,21 +565,7 @@ struct D04A20Operation {
     bool m_flag;
     int m_data;
 };
-struct D04A20OperationArray {
-    D04A20Operation* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-
-    D04A20Operation& AllocatePair()
-    {
-        D04A20Allocator& alloc = fnvc_adapt::FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&alloc, this, sizeof(D04A20Operation));
-        return m_data[m_iElementCount++];
-    }
-};
+typedef hkArray<D04A20Operation> D04A20OperationArray;
 struct D04A20World {
     int unk000;
     int unk004;
@@ -739,7 +723,7 @@ struct PoolTable
 {
     static void* operator new(unsigned int nbytes) throw()
     {
-        return FUN_00c85750()->heap()->AllocateMemoryBlock(nbytes);
+        return FUN_00c85750()->heap()->blockAlloc(nbytes);
     }
 
     unsigned short m_counts[12];
@@ -890,12 +874,6 @@ struct TimerEntry {
     const char* m_name;
     unsigned int m_uiCommandId;
     int m_auiShapeKeys;
-};
-struct MonitorStream {
-    int unk00;
-    char* m_cur;
-    int unk08;
-    char* m_kRayEnd;
 };
 struct ArrayOfJobs {
     void** m_data;

@@ -12,11 +12,7 @@ struct RendererPacketEntry
     unsigned int pad[2];
     void* resource;
 };
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-};
+#include "../../../../include/NiMemObject.h"
 class GraphicsRenderer : public NiMemObject
 {
   public:
@@ -180,24 +176,10 @@ struct FUN_00e69b40_shell
     unsigned int GetEntry(unsigned int index);
 };
 unsigned int GetValueForIndex(unsigned int param);
-struct NiPoint3
-{
-    float x, y, z;
-};
+#include "../../../../include/NiTransform.h"
 extern NiPoint3 DAT_011f474c;
 extern float DAT_011f4750;
 extern float DAT_011f4754;
-struct ThreeByThreeMatrix
-{
-    float m[3][3];
-};
-struct NiTransform
-{
-    ThreeByThreeMatrix m_kOrientation;
-    NiPoint3 m_kTranslation;
-    float pad[3];
-    float m_fScale;
-};
 struct NiWorldToSkin
 {
     float r00, r10, r20;

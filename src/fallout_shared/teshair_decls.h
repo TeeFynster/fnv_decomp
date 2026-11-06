@@ -1,30 +1,16 @@
-// fallout_shared/teshair_decls.h: declares TESActorBase, TESHairRaceResult, TESHairCanBeNPCData, TESTextureLoader, TESFileFormInt
+// fallout_shared/teshair_decls.h: declares TESActorBase, TESHairRaceResult, TESHairCanBeNPCData_teshair_decls, TESTextureLoader, TESFileFormInt_teshair_decls
 #ifndef FNV_TESHAIR_DECLS_H
 #define FNV_TESHAIR_DECLS_H
 
 
-#include "TESForm.h"
+#include "layout_support.h"
+#include "../../include/TESForm.h"
 
 class TESActorBase;
-enum SEX
-{
-    eSex_Male = 0,
-    eSex_Female = 1
-};
-class TESActorBase
-{
-  public:
-    SEX GetSex() const;
-};
-
+#include "../../include/SEX.h"
+#include "../../include/TESActorBase.h"
 class BGSQuestObjective;
-template <> class BSSimpleList<BGSQuestObjective*>
-{
-  public:
-    BGSQuestObjective* m_item;
-    BSSimpleList<BGSQuestObjective*>* m_pkNext;
-    bool IsInList(BGSQuestObjective*& item);
-};
+#include "../../include/BSSimpleList.h"
 
 class TESHairRaceResult
 {
@@ -32,22 +18,24 @@ class TESHairRaceResult
     BSSimpleList<BGSQuestObjective*>* FUN_0045bb80();
 };
 
-class TESHairCanBeNPCData
+// TESHairCanBeNPCData_teshair_decls: local type (was include/TESHairCanBeNPCData.h, which had no evidence of one real class); its methods are 0x004ac110 TESNPC::GetRace
+class TESHairRaceResult;
+
+class TESHairCanBeNPCData_teshair_decls
 {
-  public:
+public:
     TESHairRaceResult* FUN_004ac110();
 };
-
 class TESTextureLoader
 {
   public:
     static void ReadTextureData(TESTexture* texture, TESFile* file);
 };
 
-class TESFileFormInt
+// TESFileFormInt_teshair_decls: local type (was include/TESFileFormInt.h, which had no evidence of one real class); its methods are 0x00472660 TESFile::GetTESForm
+class TESFileFormInt_teshair_decls
 {
-  public:
+public:
     int GetTESForm();
 };
-
 #endif

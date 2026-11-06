@@ -1,7 +1,9 @@
+#include "../../../include/BSThreadCriticalSectionPC.h"
 
 // to their real unit once identified.
 
 #include "bsconsolefilecache_decls.h"
+#include "../../../include/MemoryManager.h"
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void*);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void*);
 struct FUN_00b02310_shell
@@ -52,10 +54,6 @@ struct FUN_00b02420_Data
 struct FUN_00b02600_shell
 {
     bool ContainsValue(int);
-};
-struct MemoryManager
-{
-    void _DeallocateAlias(void*);
 };
 extern MemoryManager g_memoryManager;
 struct S00b02640
@@ -122,11 +120,7 @@ struct FUN_00b02220_Class : FUN_00b02130_shell
     bool TryStartTask(void* pOwner, void* pTask, bool bClearPending);
 };
 
-struct NiMemoryManager_b02010
-{
-    void* FUN_00aa3e40(unsigned int size);
-};
-extern NiMemoryManager_b02010 DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 
 struct Spawned_b02010
 {
@@ -176,15 +170,7 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volati
 extern "C" __declspec(dllimport) void __stdcall Sleep(unsigned long dwMilliseconds);
 extern "C" __declspec(dllimport) void __stdcall ReleaseSemaphore(void*, long, long*);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct CritSection
-{
-    void* DebugInfo;
-    long LockCount;
-    long RecursionCount;
-    void* OwningThread;
-    void* LockSemaphore;
-    unsigned long SpinCount;
-};
+
 struct JobSemaphore
 {
     long cnt;
@@ -206,7 +192,7 @@ struct JobOwner
     int unk04;
     JobSemaphore completion;
     int unk10;
-    CritSection kLock;
+    BSThreadCriticalSectionPC kLock;
     bool enabled;
     bool pending;
     bool bBusy;
@@ -263,7 +249,7 @@ struct JobThread
     int unk48;
     int unk4C;
     bool bStop;
-    CritSection kLock;
+    BSThreadCriticalSectionPC kLock;
     Job* m_pQueueHeads[64];
     Job** pQueueTails[64];
     JobSemaphore kSemaphore;

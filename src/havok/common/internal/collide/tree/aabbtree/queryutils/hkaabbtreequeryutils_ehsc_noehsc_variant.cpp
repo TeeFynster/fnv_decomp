@@ -1,3 +1,12 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#include "../../../../../../../../include/hkArray.h"
 
 // src/havok/common/internal/collide/tree/aabbtree/queryutils/hkaabbtreequeryutils_ehsc_noehsc_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHs-c- /Gy (unit src/havok/common/internal/collide/tree/aabbtree/queryutils/hkaabbtreequeryutils.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,6 +14,12 @@
 
 // src/havok/common/internal/collide/tree/aabbtree/queryutils/hkaabbtreequeryutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/collide/tree/aabbtree/queryutils/hkaabbtreequeryutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+// Keep the matched SIMD representation when including the shared vector.
+typedef ::__m128 LocalM128;
+
+#define FNV_VECTOR_USE_LOCAL_SSE
+#include "../../../../../../../../include/hkVector4.h"
+
 struct FUN_00d1bb40_Class
 {
     int* FUN_00d1bb40(unsigned short index);
@@ -36,28 +51,7 @@ struct S_00d1bcb0_Entry
     int m_kPointA;
     int m_kPointB;
 };
-struct S_00d1bcb0_Array
-{
-    S_00d1bcb0_Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void _pushBack(S_00d1bcb0_Allocator& alloc, const S_00d1bcb0_Entry& e)
-    {
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(alloc, this, sizeof(S_00d1bcb0_Entry));
-        new (m_data + m_iElementCount) S_00d1bcb0_Entry(e);
-        m_iElementCount++;
-    }
-    void AddBack(const S_00d1bcb0_Entry& e)
-    {
-        _pushBack(FUN_00c85750()->heap(), e);
-    }
-};
+typedef hkArray<S_00d1bcb0_Entry> S_00d1bcb0_Array;
 struct S_00d1bcb0
 {
     int unk00;
@@ -98,23 +92,12 @@ extern "C" void __cdecl FUN_00d1d530()
 extern int __cdecl FUN_00d1bfa0();
 int __cdecl FUN_00d1d490();
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-
 extern float DAT_0104da48;
-
-struct VectorQ
-{
-    __m128 m_vComponents;
-};
 
 struct AabbQ
 {
-    VectorQ m_kMinimumCorner;
-    VectorQ m_kMaximumCorner;
+    hkVector4 m_kMinimumCorner;
+    hkVector4 m_kMaximumCorner;
 
     __forceinline void operator=(const AabbQ& o)
     {
@@ -175,7 +158,7 @@ template <class T> __forceinline void hkConstructWithCopy(T* p, int n, const T& 
 
 extern "C" void _ReadWriteBarrier(void);
 
-float __cdecl FUN_00d1bad0(const AabbQ* aabb, const VectorQ* point);
+float __cdecl FUN_00d1bad0(const AabbQ* aabb, const hkVector4* point);
 
 struct NodeStack
 {
@@ -214,14 +197,14 @@ struct NodeStack
         hkConstructWithCopy(m_data + m_iElementCount, 1, t);
         m_iElementCount++;
     }
-    __forceinline void AddBack(TreeNode* const& t)
+    __forceinline void pushBack(TreeNode* const& t)
     {
         _pushBack(FUN_00c85750()->heap(), t);
     }
 };
 
 // @fnv 0x00d1dbb0
-void __cdecl FUN_00d1dbb0(AabbTree* tree, const VectorQ& point, ClosestCollector* collector)
+void __cdecl FUN_00d1dbb0(AabbTree* tree, const hkVector4& point, ClosestCollector* collector)
 {
     TreeNode* root = tree->m_pTreeNode;
     if (root)
@@ -230,7 +213,7 @@ void __cdecl FUN_00d1dbb0(AabbTree* tree, const VectorQ& point, ClosestCollector
         NodeStack stack;
         if (!root->isLeaf())
         {
-            stack.AddBack(root);
+            stack.pushBack(root);
             _ReadWriteBarrier();
             do
             {
@@ -250,21 +233,21 @@ void __cdecl FUN_00d1dbb0(AabbTree* tree, const VectorQ& point, ClosestCollector
                     switch (mask & 3)
                     {
                     case 1:
-                        stack.AddBack(c0);
+                        stack.pushBack(c0);
                         break;
                     case 2:
-                        stack.AddBack(c1);
+                        stack.pushBack(c1);
                         break;
                     case 3:
                         if (d0 < d1)
                         {
-                            stack.AddBack(c1);
-                            stack.AddBack(c0);
+                            stack.pushBack(c1);
+                            stack.pushBack(c0);
                         }
                         else
                         {
-                            stack.AddBack(c0);
-                            stack.AddBack(c1);
+                            stack.pushBack(c0);
+                            stack.pushBack(c1);
                         }
                         break;
                     }

@@ -5,6 +5,7 @@
 
 // gamebryo2.2/corelibs/nianimation/nigeommorphercontroller.cpp
 // NiGeomMorpherController: morph-target interpolator management.
+#include "NiRefObject_inline.h"
 #include "nigeommorphercontroller.h"
 
 namespace fnv_00a3b150 {

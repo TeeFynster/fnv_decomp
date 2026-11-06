@@ -2,6 +2,9 @@
 // src/fallout/misc/memorymanagerfile.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/misc/memorymanagerfile.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../include/MemoryManagerFile.h"
+#include "../../../include/SeenData.h"
+
 extern int DAT_01083b00;
 
 struct FUN_00878430_shell
@@ -32,14 +35,9 @@ FUN_008784b0::FUN_008784b0()
 }
 }  // namespace fnv_008784b0
 
-struct SeenData_S
-{
-    bool IsBitSet(unsigned int);
-};
-
 struct FUN_008799c0_shell
 {
-    SeenData_S mSeenData;  // +0x00
+    SeenData mSeenData;  // +0x00
     bool __thiscall IsValueSeen(void* arg1, unsigned int arg2);
 };
 
@@ -86,18 +84,12 @@ struct FileSizeInfo
 {
     void __thiscall SetFromCall(void* apData, unsigned __int64 aSize, unsigned __int64* apRead);
 };
-struct MemoryManagerFile
-{
-    int _pad;
-    FileSizeInfo mFile;
-    int __thiscall Read(void* apData, unsigned int aSize);
-};
-// Reads aSize bytes from mFile into apData and returns the number of bytes read.
+// Reads aSize bytes from the inner file into apData and returns the number of bytes read.
 // @fnv 0x00878530
 int __thiscall MemoryManagerFile::Read(void* apData, unsigned int aSize)
 {
     unsigned __int64 uiBytesRead;
-    mFile.SetFromCall(apData, aSize, &uiBytesRead);
+    reinterpret_cast<FileSizeInfo*>(reinterpret_cast<char*>(this) + 4)->SetFromCall(apData, aSize, &uiBytesRead);
     return (int)uiBytesRead;
 }
 
@@ -107,27 +99,22 @@ struct FileInner
 {
     void __thiscall SetAndReturnPointer(const void*, uint64, uint64*);
 };
-struct MemoryManagerFile
-{
-    int _0;
-    FileInner _4;
-    int __thiscall Write(const void* apData, unsigned int aSize);
-};
+}  // namespace fnv_00878560
 // Writes aSize bytes from apData through the inner file object and returns the number of bytes written.
 // @fnv 0x00878560
 int MemoryManagerFile::Write(const void* apData, unsigned int aSize)
 {
-    uint64 uiwritten;
-    _4.SetAndReturnPointer(apData, aSize, &uiwritten);
+    fnv_00878560::uint64 uiwritten;
+    reinterpret_cast<fnv_00878560::FileInner*>(reinterpret_cast<char*>(this) + 4)->SetAndReturnPointer(apData, aSize, &uiwritten);
     return (int)uiwritten;
 }
-}  // namespace fnv_00878560
 
 namespace fnv_00878590 {
 struct FileSizeInfo
 {
     int __thiscall FUN_0065c290(unsigned __int64&);
 };
+// Retained until MemoryManagerFile declares the size method at 0x00878590.
 struct FUN_00878590_shell : FileSizeInfo
 {
     int __thiscall FUN_00878590();
@@ -147,17 +134,13 @@ struct FUN_008785e0_holder
 {
     void __thiscall SetAndGetField0(__int64, int, uint64*);
 };
-struct MemoryManagerFile
-{
-    void __thiscall FUN_008785b0(int aiPos);
-};
-// @fnv 0x008785b0
-void __thiscall MemoryManagerFile::FUN_008785b0(int aiPos)
-{
-    uint64 uipos;
-    reinterpret_cast<FUN_008785e0_holder*>(reinterpret_cast<char*>(this) + 4)->SetAndGetField0(aiPos, 0, &uipos);
-}
 }  // namespace fnv_008785b0
+// @fnv 0x008785b0
+void __thiscall MemoryManagerFile::vf04(int aiPos)
+{
+    fnv_008785b0::uint64 uipos;
+    reinterpret_cast<fnv_008785b0::FUN_008785e0_holder*>(reinterpret_cast<char*>(this) + 4)->SetAndGetField0(aiPos, 0, &uipos);
+}
 
 class FUN_00b00950
 {
@@ -173,6 +156,7 @@ class FUN_00878430
     virtual ~FUN_00878430();
 };
 
+// Retained until MemoryManagerFile declares its virtual destructor and inner file.
 class FUN_008784d0 : public FUN_00878430
 {
   public:

@@ -1,11 +1,13 @@
-// bsshader/bsshaderutil_decls_decl_bsshaderutil.h: declares FourComponentFloatVector, FadeState, FadeProperties, NiAVObject, NiNode and more
+// bsshader/bsshaderutil_decls_decl_bsshaderutil.h: local shader utility declarations
 #ifndef BSSHADERUTIL_DECLS_H
 #define BSSHADERUTIL_DECLS_H
 
 #include "MemoryManager.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiGlobalStringTable.h"
 
 class NiCamera;
-class NiNode;
 struct FadeProperties;
 
 struct FourComponentFloatVector
@@ -32,31 +34,9 @@ struct FadeProperties
     FadeState* m_pFadeState;
 };
 
-class NiAVObject
-{
-  public:
-    virtual void vfn_00() = 0;
-    virtual void vfn_04() = 0;
-    virtual void vfn_08() = 0;
-    virtual NiNode* vfn_0c() = 0;
-    virtual void vfn_10() = 0;
-    virtual void vfn_14() = 0;
-    virtual FadeProperties* vfn_18() = 0;
-    unsigned char layoutPadding04[0x1c];
-    FourComponentFloatVector* m_kWorldBound;
-    unsigned char layoutPadding24[0x78];
-};
-
-class NiNode : public NiAVObject
-{
-  public:
-    unsigned int m_uiChildrenInterior;
-    NiAVObject** m_ppChildren;
-    unsigned short m_usChildrenCapacity;
-    unsigned short m_usChildrenCount;
-};
-
-class BSShaderAccumulator
+// BSShaderAccumulatorView: unit-local view of BSShaderAccumulator; this unit needs a NiPointer<NiRefObject> at 0xC4 and a three-argument
+// virtual at 0x48 (called by 0x00b6bee0); the shared BSShaderAccumulator does not declare them.
+class BSShaderAccumulatorView
 {
   public:
     virtual void vfn_00() = 0;
@@ -107,47 +87,11 @@ class BSShaderAccumulator
     NiPointer<NiRefObject> texture;
 };
 
-class NiRenderer
-{
-  public:
-    static NiRenderer* ms_pRenderer;
-    void SetCurrentCamera(NiCamera* camera);
-    unsigned char layoutPadding0[8];
-    NiNode* m_pScene;
-    void* m_pCamera;
-    void* m_pActiveRenderTargetGroup;
-    char m_acRendererDataB[4];
-    char _pdbpad_18[104];
-    char m_acRendererDataC[128];
-    char m_acRendererDataD[128];
-    char m_acRendererDataE[128];
-    int m_iRendererState;
-    unsigned int m_uiRendererFlags;
-    bool m_bRendererFlagA;
-    bool m_bRendererFlagB;
-    char _pdbpad_20a[118];
-};
-
-class NiGlobalStringTable
-{
-  public:
-    static char* AddString(const char* value);
-};
-
-class BSShaderRenderUtility
-{
-  public:
-    bool IsRenderTargetId(unsigned int value);
-    static void InitializeMultiBounds();
-    static void SetRenderCamera(NiCamera* camera, BSShaderAccumulator* accumulator, bool unused);
-    static void SetAlphaOnNode(NiNode* node, float alpha);
-};
-
 extern NiCamera* DAT_011f917c;
 extern void* DAT_011fa050;
 extern void* DAT_011fa054;
 extern MemoryManager g_memoryManager;
-void FUN_00b54b10(BSShaderAccumulator* accumulator);
+void FUN_00b54b10(BSShaderAccumulatorView* accumulator);
 
 struct BSShaderUtilTextureName
 {

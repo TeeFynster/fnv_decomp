@@ -1,24 +1,41 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
 
 // src/havok/animation/ragdoll/penetration/hkadetectragdollpenetration.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/ragdoll/penetration/hkadetectragdollpenetration.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkMemoryAllocator;
+// Keep the original intrinsic layout; VC9 uses its array members when arranging stack slots.
+#define _INCLUDED_MM2
+// Exe 0x00d1fb00 FUN_00d1fb00: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_set_ps1(float);
+extern "C" LocalM128 _mm_min_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_max_ps(LocalM128, LocalM128);
 
-struct AudioMgr
-{
-    int unk00, unk04, unk08, unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
+#include <string.h>
 
-struct BSAudio;
-__declspec(nothrow) BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkAabb.h"
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkVector4.h"
+
+__declspec(nothrow) hkMemoryRouter* __cdecl FUN_00c85750();
+inline hkMemoryRouter* audio()
 {
-    return (AudioMgr*)FUN_00c85750();
+    return FUN_00c85750();
 }
 
 __declspec(nothrow) void __cdecl FUN_00c908c0(hkMemoryAllocator& alloc, void* arr, int numElem, int sizeElem);
@@ -28,8 +45,8 @@ inline void* operator new(unsigned int, void* p)
     return p;
 }
 
-struct hkIntArray
-{
+struct hkIntArrayLocalForm
+{ // local form of hkArray: 0x00d1fa50 needs the original constructor stores; shared base construction changes bytes.
     int* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -90,7 +107,7 @@ struct FUN_00d1fa50 : RefObj
 {
     Desc m_kCreateDesc;
     int m_uiItemCount;
-    hkIntArray m_aiIndexedValues;
+    hkIntArrayLocalForm m_aiIndexedValues;
     bool m_flag;
     FUN_00d1fa50(const Desc& d);
 };
@@ -108,66 +125,34 @@ FUN_00d1fa50::FUN_00d1fa50(const Desc& d)
     m_flag = false;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" __m128 _mm_min_ps(__m128, __m128);
-extern "C" __m128 _mm_max_ps(__m128, __m128);
-
 extern float DAT_0104da48;
 extern float DAT_0104e148;
 
-struct hkVector4
-{
-    __m128 m_vComponents;
-    void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void SetAllComponents(float f)
-    {
-        m_vComponents = _mm_set_ps1(f);
-    }
-    void setMin4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void setMax4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents);
-    }
-};
 
-class hkBool
-{
-  public:
-    char m_cBooleanValue;
-    hkBool()
-    {}
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-};
 
-struct hkAabb
+__forceinline void hkVector4::SetAllComponents(float f)
 {
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
-    hkBool ValidateBounds() const throw();
-    void includePoint(const hkVector4& p)
-    {
-        m_kMinimumCorner.setMin4(m_kMinimumCorner, p);
-        m_kMaximumCorner.setMax4(m_kMaximumCorner, p);
-    }
-};
+    m_vComponents = _mm_set_ps1(f);
+}
+
+__forceinline void hkVector4::setMin4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4::setMax4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents);
+}
+
+inline hkAabb::hkAabb()
+{}
+
+inline void hkAabb::includePoint(const hkVector4& p)
+{
+    m_kMinimumCorner.setMin4(m_kMinimumCorner, p);
+    m_kMaximumCorner.setMax4(m_kMaximumCorner, p);
+}
 
 struct hkAllocVt
 {
@@ -180,31 +165,30 @@ struct hkAllocVt
 
 __declspec(nothrow) void __cdecl ResizeAudioStream(void* alloc, void* arr, int sizeElem);
 
-template <typename T> struct hkArr
+// hkArray bodies (allocator = the memory router's heap).
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    hkArr() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    ~hkArr()
-    {
-        hkAllocVt& alloc = (hkAllocVt&)audio()->heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    __forceinline void AddBack(const T& t)
-    {
-        hkMemoryAllocator& alloc = audio()->heap();
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
-            ResizeAudioStream(&alloc, this, sizeof(T));
-        new (m_data + m_iElementCount) T(t);
-        m_iElementCount++;
-    }
-};
+    return audio()->heap();
+}
+template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
+{
+    hkAllocVt& alloc = (hkAllocVt&)audio()->heap();
+    this->m_iElementCount = 0;
+    if ((this->m_iCapacityState & 0x80000000) == 0)
+        alloc.ReturnMemory(this->m_data, (this->m_iCapacityState & 0x3fffffff) * sizeof(T));
+    this->m_data = 0;
+    this->m_iCapacityState = 0x80000000;
+}
+template <typename T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& t)
+{
+    if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
+        ResizeAudioStream(&alloc, this, sizeof(T));
+    // Preserve the array's bitwise copy of these records.
+    T* p = m_data + m_iElementCount;
+    if (p)
+        memcpy(p, &t, sizeof(T));
+    m_iElementCount++;
+}
 
 struct BoxEntry
 {
@@ -255,7 +239,7 @@ struct PairTester
     virtual hkBool test(AabbSink* sink, const hkVector4& a, const hkVector4& b, hkVector4& p0, hkVector4& p1) throw();
 };
 
-void __cdecl CollectReachableNodes(IndexInfo* info, short idx, hkArr<short>* list, int flags) throw();
+void __cdecl CollectReachableNodes(IndexInfo* info, short idx, hkArray<short>* list, int flags) throw();
 
 struct PairFinder : RefObj
 {
@@ -263,14 +247,14 @@ struct PairFinder : RefObj
     PairTester* m_tester;
     AabbSink* m_sink;
     int m_uiItemCount;
-    hkIntArray m_aiIndexedValues;
+    hkIntArrayLocalForm m_aiIndexedValues;
     bool m_flag;
-    hkBool FUN_00d1fb00(BoxSet* boxes, hkArr<PairRecord>* out);
+    hkBool FUN_00d1fb00(BoxSet* boxes, hkArray<PairRecord>* out);
 };
 
 // Tests box pairs against m_tester, collects matching PairRecords into out, and marks reachable nodes in m_aiIndexedValues.
 // @fnv 0x00d1fb00
-hkBool PairFinder::FUN_00d1fb00(BoxSet* boxes, hkArr<PairRecord>* out)
+hkBool PairFinder::FUN_00d1fb00(BoxSet* boxes, hkArray<PairRecord>* out)
 {
     out->m_iElementCount = 0;
     if (!m_flag)
@@ -311,7 +295,7 @@ hkBool PairFinder::FUN_00d1fb00(BoxSet* boxes, hkArr<PairRecord>* out)
                     rec.m_kPointA = idx;
                     rec.m_kPointB = i;
                     rec.m_p1 = p1;
-                    out->AddBack(rec);
+                    out->pushBack(rec);
                 }
             }
         }
@@ -328,7 +312,7 @@ hkBool PairFinder::FUN_00d1fb00(BoxSet* boxes, hkArr<PairRecord>* out)
         short c = out->m_data[j].m_kPointA;
         if (m_aiIndexedValues.m_data[c] != 2)
             m_aiIndexedValues.m_data[c] = 1;
-        hkArr<short> list;
+        hkArray<short> list;
         CollectReachableNodes(m_info, c, &list, 0);
         for (int k = 0; k < list.m_iElementCount; k++)
         {
@@ -340,28 +324,11 @@ hkBool PairFinder::FUN_00d1fb00(BoxSet* boxes, hkArr<PairRecord>* out)
     return true;
 }
 
+
 namespace fnv_00d1fe70 {
 extern int DAT_0102e388;
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-    virtual void v0c();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 struct FUN_00d1fe70_cls
 {
@@ -384,22 +351,22 @@ struct FUN_00d1fe70_cls
 // @fnv 0x00d1fe70
 FUN_00d1fe70_cls* FUN_00d1fe70_cls::FUN_00d1fe70(unsigned char acFlags)
 {
-    AudioHolder* pHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     int count = m_20;
     m_1c = 0;
     if (((unsigned int)count & 0x80000000u) == 0)
     {
-        pAllocator->FreeArray(m_p18, (count & 0x3fffffff) * 4);
+        pAllocator->bufFree(m_p18, (unsigned int)(count & 0x3fffffff) * 4);
     }
     m_p18 = 0;
     m_20 = 0x80000000;
     m_vptr = (int)&DAT_0102e388;
     if (acFlags & 1)
     {
-        AudioHolder* pHolder2 = FUN_00c85750();
-        AudioAllocator* pAllocator2 = pHolder2->m_pAllocator;
-        pAllocator2->Free(this, m_uSize);
+        hkMemoryRouter* pHolder2 = FUN_00c85750();
+        hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
+        pAllocator2->blockFree(this, m_uSize);
     }
     return this;
 }

@@ -1,98 +1,75 @@
+#include "../../include/NiColorA.h"
 
 // src/staging/blk_007c0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/ActorValue.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/BSStringT.h"
+#include "../../include/GO.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiFrustum.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/BSAudio.h"
+#include "../../include/Menu.h"
+#include "../../include/BookMenu.h"
+#include "../../include/Tile.h"
+// OptionListBox isolates MapMenu's legacy array declaration from BSSimpleArray.
+#include "../../include/OptionListBox.h"
+#include "../../include/StartMenu.h"
 
-extern "C" void* DAT_010771d8;
-
-struct GlobalObject_00869f00
+// RTTI identifies this element as StartMenu::VideoRes. StartMenu.h does not yet
+// declare that nested type; keep its element layout here while sharing the array.
+struct StartMenuVideoRes
 {
-    void* p;
-    void Clear(bool b);
-    void ResetToGlobal();
+    BSStringT<char> name;
+    unsigned short width;
+    unsigned short height;
+
+    StartMenuVideoRes();
+    void* Destroy(unsigned int flags);
 };
+
+template <> void BSSimpleArray<StartMenu::Option*>::_InitialSetup(unsigned int, unsigned int);
+template <> void BSSimpleArray<StartMenu::UserOption*>::_InitialSetup(unsigned int, unsigned int);
+template <> void BSSimpleArray<StartMenuVideoRes>::_InitialSetup(unsigned int, unsigned int);
+template <> void BSSimpleArray<StartMenuVideoRes>::InitializeItems(StartMenuVideoRes*, unsigned int);
 
 // @fnv 0x007d9ff0
-void GlobalObject_00869f00::ResetToGlobal()
+template <>
+BSSimpleArray<StartMenu::Option*>::~BSSimpleArray()
 {
-    p = &DAT_010771d8;
     Clear(true);
 }
 
-extern int DAT_010771ec;
-struct AX
-{
-    void FUN_006b3eb0(unsigned int, unsigned int);
-    AX* FUN_007da010();
-};
 // @fnv 0x007da010
-AX* AX::FUN_007da010()
+template <>
+BSSimpleArray<StartMenu::UserOption*>::BSSimpleArray()
 {
-    *reinterpret_cast<int**>(this) = reinterpret_cast<int*>(&DAT_010771ec);
-    FUN_006b3eb0(0, 0);
-    return this;
+    _InitialSetup(0, 0);
 }
-
-namespace fnv_007da070 {
-extern "C" void* DAT_010771ec;
-
-struct GlobalObject_00869f00
-{
-    void* p;
-    void Clear(bool);
-    void InitAndClear();
-};
-
-void GlobalObject_00869f00::Clear(bool)
-{}
 
 // @fnv 0x007da070
-void GlobalObject_00869f00::InitAndClear()
+template <>
+BSSimpleArray<StartMenu::UserOption*>::~BSSimpleArray()
 {
-    p = &DAT_010771ec;
     Clear(true);
 }
-}  // namespace fnv_007da070
 
-extern void* DAT_01077200;
-struct FUN_007da090_Class
-{
-    void* vtable;
-    void FUN_007da110(int a, int b);
-    void* FUN_007da090();
-};
-// Sets the vtable to DAT_01077200, calls FUN_007da110 with 0, 0, and returns this.
 // @fnv 0x007da090
-void* FUN_007da090_Class::FUN_007da090()
+template <>
+BSSimpleArray<StartMenuVideoRes>::BSSimpleArray()
 {
-    vtable = &DAT_01077200;
-    FUN_007da110(0, 0);
-    return this;
+    _InitialSetup(0, 0);
 }
-
-namespace fnv_007da0f0 {
-struct GlobalObject_007da090
-{
-    void FUN_007d8e20(bool);
-};
-
-extern int DAT_01077200;
-
-struct NavMeshSearchLOSArray
-{
-    int m_p;
-    void FUN_007d8e20(bool);
-    void Init();
-};
 
 // @fnv 0x007da0f0
-void NavMeshSearchLOSArray::Init()
+template <>
+BSSimpleArray<StartMenuVideoRes>::~BSSimpleArray()
 {
-    m_p = (int)&DAT_01077200;
-    FUN_007d8e20(true);
+    Clear(true);
 }
-}  // namespace fnv_007da0f0
 
 // @fnv 0x007dc0c0
 int* DecrementInt(int* value)
@@ -110,37 +87,27 @@ void __cdecl FUN_007c5fb0()
 }
 
 extern int* DAT_011daa38;
-struct FUN_007c9dc0_Class
-{
-    void FUN_007c9dc0(int);
-    void InvokeCallbacksForSlot();
-};
 // If DAT_011daa38 is set and its byte at offset 0x54 is nonzero, calls FUN_007c9dc0(1) and InvokeCallbacksForSlot on it.
 // @fnv 0x007cabb0
 void FUN_007cabb0()
 {
     if (DAT_011daa38 && *(unsigned char*)((unsigned char*)DAT_011daa38 + 0x54))
     {
-        ((FUN_007c9dc0_Class*)DAT_011daa38)->FUN_007c9dc0(1);
-        ((FUN_007c9dc0_Class*)DAT_011daa38)->InvokeCallbacksForSlot();
+        ((BookMenu*)DAT_011daa38)->FUN_007c9dc0(1);
+        ((BookMenu*)DAT_011daa38)->InvokeCallbacksForSlot();
     }
 }
 
 namespace fnv_007cabf0 {
 extern int* DAT_011daa38;
-struct FUN_007c9dc0_Class
-{
-    void FUN_007c9dc0(int a);
-    void InvokeCallbacksForSlot();
-};
 // If DAT_011daa38 is set and its byte at offset 0x54 is nonzero, calls FUN_007c9dc0(0) and InvokeCallbacksForSlot on it.
 // @fnv 0x007cabf0
 void FUN_007cabf0()
 {
     if (DAT_011daa38 && *(unsigned char*)((char*)DAT_011daa38 + 0x54))
     {
-        ((FUN_007c9dc0_Class*)DAT_011daa38)->FUN_007c9dc0(0);
-        ((FUN_007c9dc0_Class*)DAT_011daa38)->InvokeCallbacksForSlot();
+        ((BookMenu*)DAT_011daa38)->FUN_007c9dc0(0);
+        ((BookMenu*)DAT_011daa38)->InvokeCallbacksForSlot();
     }
 }
 }  // namespace fnv_007cabf0
@@ -180,95 +147,43 @@ bool FUN_007d6bd0_Class::FUN_007d6bd0(bool abValue)
     return bret;
 }
 
-struct GlobalObject_007da090
-{
-    ~GlobalObject_007da090();
-    void* Destroy(unsigned int flags);
-};
-
-// Destroys the object and, when flags has bit 0 set, frees its memory, then returns the pointer.
-// @fnv 0x007da0c0
-void* GlobalObject_007da090::Destroy(unsigned int flags)
-{
-    GlobalObject_007da090::~GlobalObject_007da090();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
-struct FUN_007da110_StandIn
-{
-    virtual void v0();
-    virtual int Write(unsigned int size);
-    void ConstructRecords(int size, unsigned int savedSize);
-    void FUN_007da110(unsigned int requested, unsigned int savedSize);
-};
-
 // @fnv 0x007da110
-void FUN_007da110_StandIn::FUN_007da110(unsigned int uiRequestedSize, unsigned int savedSize)
+template <>
+void BSSimpleArray<StartMenuVideoRes>::_InitialSetup(unsigned int uiRequestedSize, unsigned int savedSize)
 {
-    ((int*)this)[1] = 0;
-    ((int*)this)[2] = 0;
-    ((int*)this)[3] = 0;
+    pBuffer = 0;
+    iSize = 0;
+    SimpleArrayStorage = 0;
     if (savedSize > uiRequestedSize)
     {
         uiRequestedSize = savedSize;
     }
     if (uiRequestedSize > 0)
     {
-        ((int*)this)[1] = Write(uiRequestedSize);
-        ((int*)this)[3] = uiRequestedSize;
+        pBuffer = _Allocate(uiRequestedSize);
+        SimpleArrayStorage = uiRequestedSize;
     }
     if (savedSize > 0)
     {
-        ConstructRecords(((int*)this)[1], savedSize);
-        ((int*)this)[2] = savedSize;
+        InitializeItems(pBuffer, savedSize);
+        iSize = savedSize;
     }
 }
 
-struct Tile
-{
-    void Set(int x, int y);
-};
-struct StartMenu
-{
-    bool IsFlagSet(int f);
-};
-struct SM7d6 : StartMenu
-{
-    void* GetNext();
-};
-extern SM7d6* DAT_011daac0;
+extern StartMenu* DAT_011daac0;
 bool __cdecl FUN_004b71d0();
 void __cdecl FUN_007d30b0(char);
 void __cdecl HandleBackAction();
-// If DAT_011daac0 exists, sets its next tile to (0x1009, FUN_004b71d0()), calls FUN_007d30b0 with that value, and calls HandleBackAction when flag 0x1000 is set.
-// @fnv 0x007d6c30
-void __cdecl UpdateStartMenuTile()
-{
-    if (DAT_011daac0)
-    {
-        ((Tile*)DAT_011daac0->GetNext())->Set(0x1009, FUN_004b71d0());
-        FUN_007d30b0(FUN_004b71d0());
-        if (DAT_011daac0->IsFlagSet(0x1000))
-            HandleBackAction();
-    }
-}
 
 int __cdecl FUN_00408b20(char const* a, char const* b);
 struct AVH
 {
-    enum Index
-    {
-        kAVHealth,
-        kAVDamageResist
-    };
-    static char const* GetActorValueName(Index index);
+    static char const* GetActorValueName(ActorValue::Index index);
 };
 struct FUN_007da270_T
 {
     int pad;
-    AVH::Index index;
+    ActorValue::Index index;
 };
 // Looks up the actor value names for both structs' index fields and returns the result of comparing those names.
 // @fnv 0x007da270
@@ -280,10 +195,6 @@ int CompareActorValueNames(FUN_007da270_T* apLeft, FUN_007da270_T* apRight)
     return result;
 }
 
-struct GO
-{
-    operator unsigned int() const;
-};
 
 int __fastcall FUN_00794d80(void* value);
 
@@ -452,11 +363,6 @@ void DispatchStateCallback(FUN_007ca530_Params* params)
 }
 
 namespace fnv_007ca5f0 {
-struct GO
-{
-    unsigned int value;
-    operator unsigned int() const;
-};
 
 struct LodObject
 {
@@ -645,18 +551,8 @@ void UpdateLodVisibility(FUN_007ca5f0_Argument* p)
 }
 }  // namespace fnv_007ca5f0
 
-struct SoundPlaybackHandle
-{
-    unsigned int handle;
-    ~SoundPlaybackHandle();
-    void Play(bool play);
-};
-
-struct BSAudio
-{
-    static BSAudio* __cdecl GetSingleton();
-    SoundPlaybackHandle __thiscall GetSoundHandleByEditorID(char const* editorID, unsigned int flags);
-};
+// The shared header lacks this no-argument member. Its only argument is this in ECX.
+void __fastcall FUN_0070bbe0(BSAudio*);
 
 int __fastcall FUN_00794d80(void* object);
 void __cdecl FUN_007c6120();
@@ -665,8 +561,6 @@ void __cdecl FUN_007c6120();
 // @fnv 0x007cac30
 void __cdecl FUN_007cac30()
 {
-    unsigned long long padding;
-
     if (DAT_011daa38 && FUN_00794d80(DAT_011daa38) == DAT_011daa38[22])
     {
         FUN_007c6120();
@@ -677,68 +571,19 @@ void __cdecl FUN_007cac30()
     }
 }
 
-struct FUN_005aa3f0_Class
-{
-    void FUN_005aa3f0(int);
-};
-
-struct FUN_007d9e80_Class
-{
-    void FUN_007d9e80(FUN_005aa3f0_Class* apArray, unsigned int aiCount);
-};
-
-// Calls FUN_005aa3f0(0) on each 12-byte element of apArray for aiCount elements.
 // @fnv 0x007d9e80
-void FUN_007d9e80_Class::FUN_007d9e80(FUN_005aa3f0_Class* apArray, unsigned int aiCount)
+template <>
+void BSSimpleArray<StartMenuVideoRes>::ReleaseElements(StartMenuVideoRes* apArray, unsigned int aiCount)
 {
     for (unsigned int i = 0; i < aiCount; ++i)
-        ((FUN_005aa3f0_Class*)((char*)apArray + i * 12))->FUN_005aa3f0(0);
+        apArray[i].Destroy(0);
 }
 
-struct FUN_007d9f90 : AX
-{
-    void* vtable;
-    FUN_007d9f90();
-};
-
-// Sets the vtable pointer to DAT_010771d8 and calls FUN_006b3eb0 with 0, 0.
 // @fnv 0x007d9f90
-FUN_007d9f90::FUN_007d9f90()
+template <>
+BSSimpleArray<StartMenu::Option*>::BSSimpleArray()
 {
-    vtable = &DAT_010771d8;
-    FUN_006b3eb0(0, 0);
-}
-
-struct GlobalObject_007d9f90
-{
-    void ResetToGlobal();
-    void* FUN_007d9fc0(unsigned int flags);
-};
-// Calls ResetToGlobal, then deletes this when flags has bit 0 set, and returns this.
-// @fnv 0x007d9fc0
-void* GlobalObject_007d9f90::FUN_007d9fc0(unsigned int flags)
-{
-    ResetToGlobal();
-    if (flags & 1)
-        operator delete(this);
-    return this;
-}
-
-struct GlobalObject_007da010
-{
-    void* FUN_007da010();
-    void* FUN_007da040(unsigned int flags);
-    ~GlobalObject_007da010();
-};
-
-// Calls FUN_007da010, then if flags has bit 0 set deletes this, and returns this.
-// @fnv 0x007da040
-void* GlobalObject_007da010::FUN_007da040(unsigned int flags)
-{
-    FUN_007da010();
-    if (flags & 1)
-        operator delete(this);
-    return this;
+    _InitialSetup(0, 0);
 }
 
 // @fnv 0x007c6110
@@ -919,7 +764,7 @@ struct CallbackCollection
     Callback** FUN_006a7ad0(unsigned int index);
 };
 // @fnv 0x007cacd0
-void FUN_007c9dc0_Class::InvokeCallbacksForSlot()
+void BookMenu::InvokeCallbacksForSlot()
 {
     if (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x48) < 9)
     {
@@ -957,139 +802,18 @@ void FUN_007c9dc0_Class::InvokeCallbacksForSlot()
     }
 }
 
-struct Menu
-{
-    Menu();
-    virtual ~Menu();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-};
-struct FUN_007cb540
-{
-    FUN_007cb540();
-    ~FUN_007cb540();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-};
-struct FUN_007642f0
-{
-    FUN_007642f0();
-    ~FUN_007642f0();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-};
-struct FUN_007d7c60
-{
-    FUN_007d7c60();
-    ~FUN_007d7c60();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-};
-struct GlobalObject_00633c90
-{
-    int p;
-    GlobalObject_00633c90(int);
-    ~GlobalObject_00633c90();
-};
 extern int DAT_011daab4;
 extern char DAT_01070244;
 void* __cdecl FUN_00a00940(const char*, int);
 void __cdecl FUN_00403d30(void*, int, unsigned);
-struct AudioView
-{
-    void FUN_0070bbe0();
-};
-struct FUN_007cb330 : Menu
-{
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    FUN_007cb540 unk084;
-    FUN_007cb540 unk0b4;
-    FUN_007cb540 unk0e4;
-    FUN_007cb540 unk114;
-    FUN_007642f0 unk144;
-    FUN_007d7c60 unk174;
-    int unk1a4;
-    int unk1a8;
-    float unk1ac;
-    int unk1b0;
-    int unk1b4;
-    GlobalObject_00633c90 unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    void* unk1d0;
-    FUN_007cb330();
-    virtual ~FUN_007cb330();
-};
 // @fnv 0x007cb330
-FUN_007cb330::FUN_007cb330() : unk1b8(0)
+StartMenu::StartMenu() : unk1b8(0)
 {
     unk1d0 = FUN_00a00940(&DAT_01070244, -1);
-    FUN_00403d30(&unk028, 0, 0x5c);
-    unk1a8 = 0;
-    unk1a4 = 0;
-    unk1ac = 0.0f;
+    FUN_00403d30(m_pTiles, 0, 0x5c);
+    uiFlags = 0;
+    m_pUserOption = 0;
+    m_fMenuTimer = 0.0f;
     unk1b0 = 0;
     unk1c4 = 0;
     unk1c0 = 0;
@@ -1098,7 +822,20 @@ FUN_007cb330::FUN_007cb330() : unk1b8(0)
     unk1cc = 0;
     DAT_011daab4 = 0;
     unk1b4 = 0;
-    ((AudioView*)BSAudio::GetSingleton())->FUN_0070bbe0();
+    FUN_0070bbe0(BSAudio::GetSingleton());
+}
+
+// If DAT_011daac0 exists, sets its next tile to (0x1009, FUN_004b71d0()), calls FUN_007d30b0 with that value, and calls HandleBackAction when flag 0x1000 is set.
+// @fnv 0x007d6c30
+void __cdecl UpdateStartMenuTile()
+{
+    if (DAT_011daac0)
+    {
+        ((Tile*)DAT_011daac0->FUN_00726070())->Set(0x1009, FUN_004b71d0());
+        FUN_007d30b0(FUN_004b71d0());
+        if (DAT_011daac0->IsFlagSet(0x1000))
+            HandleBackAction();
+    }
 }
 
 // @fnv 0x007cc5f0
@@ -1174,24 +911,14 @@ void C7D8EE0List::SelectLast()
 
 void* __cdecl operator new(unsigned int size, void* location);
 void __cdecl operator delete(void* object, void* location);
-struct FUN_007da240
-{
-    int first;
-    int second;
-    int third;
-    FUN_007da240();
-};
-struct CopyCollection
-{
-    void ConstructRecords(FUN_007da240* records, unsigned count);
-};
-// Default-constructs each of the count FUN_007da240 records in place via placement new.
+// Default-constructs each video resolution record in place.
 // @fnv 0x007da1a0
-void CopyCollection::ConstructRecords(FUN_007da240* records, unsigned count)
+template <>
+void BSSimpleArray<StartMenuVideoRes>::InitializeItems(StartMenuVideoRes* records, unsigned count)
 {
     for (unsigned i = 0; i < count; ++i)
     {
-        new (&records[i]) FUN_007da240();
+        new (&records[i]) StartMenuVideoRes();
     }
 }
 
@@ -1217,38 +944,6 @@ void FUN_007df120_Class::FUN_007df120(int aiValue)
     ((FUN_00501c10_Class*)((char*)this + 0x20))->CallAndReturnSelf(aiValue);
 }
 
-struct ImageSpaceEffectParam
-{
-    float left, right, top, bottom;
-    ImageSpaceEffectParam(float, float, float, float);
-};
-struct NiFrustum
-{
-    float left, right, top, bottom, nearPlane, farPlane;
-    bool orthographic;
-    NiFrustum(bool);
-};
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3(float, float, float);
-};
-class NiUpdateData
-{
-  public:
-    float time;
-    bool updateControllers, isMultiThreaded;
-    unsigned int flags;
-    NiUpdateData(float, bool, bool);
-};
-class NiFixedString
-{
-  public:
-    const char* text;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
 struct FUN_00a712f0
 {
     unsigned int unk000;
@@ -1323,7 +1018,7 @@ struct FUN_00a712f0
     static void* operator new(unsigned int);
     static void operator delete(void*, unsigned int);
     FUN_00a712f0();
-    void FUN_00712e60(const ImageSpaceEffectParam&);
+    void FUN_00712e60(const NiColorA&);
     void FUN_00507700(float);
     void FUN_00a6faf0(const NiFrustum&);
     void FUN_004bc1f0(float, float, float);
@@ -1331,10 +1026,6 @@ struct FUN_00a712f0
     void SetLookAt(const NiPoint3&, const NiPoint3&);
     void FUN_00733fd0(float);
     void AssignFixedString(const NiFixedString&);
-};
-struct CameraContext
-{
-    FUN_00a712f0* CreateSurgery3DCamera();
 };
 struct Renderer
 {
@@ -1413,23 +1104,24 @@ extern SettingFloat DAT_01203144;
 extern SettingFloat DAT_01203150;
 extern bool DAT_011f9426;
 extern int DAT_011f9434;
-extern ImageSpaceEffectParam DAT_011ad840;
+extern NiColorA DAT_011ad840;
 int FUN_004dc200();
 int FUN_004dc1f0();
 float FUN_0057dd70(float);
 
 // Allocates a camera object, configures its viewport, frustum, aspect ratio, transform and name, and returns it.
 // @fnv 0x007c99c0
-FUN_00a712f0* CameraContext::CreateSurgery3DCamera()
+void* BookMenu::CreateSurgery3DCamera()
 {
     // Local identifiers and declaration order preserve the MSVC9 /Od stack layout.
     float frustum;                              // Viewport aspect ratio.
     FUN_00a712f0* distance = new FUN_00a712f0;  // Newly allocated camera.
-    ImageSpaceEffectParam viewport(0.0f, 1.0f, 1.0f, 0.0f);
+    NiColorA viewport(0.0f, 1.0f, 1.0f, 0.0f);
     if (DAT_011f9426)
         viewport = DAT_011ad840;
     distance->FUN_00712e60(viewport);
-    NiFrustum angle(false);  // Perspective frustum.
+    NiFrustum angle;
+    angle.Init(false);  // Perspective frustum.
     angle.farPlane = FUN_0045c670()->GetScale();
     angle.nearPlane = *DAT_01203144.Float();
     distance->FUN_00507700(angle.farPlane / angle.nearPlane);
@@ -1440,7 +1132,7 @@ FUN_00a712f0* CameraContext::CreateSurgery3DCamera()
     angle.right = FUN_0057dd70(update) * camera;
     angle.bottom = -FUN_0057dd70(update) * frustum * camera;
     angle.top = FUN_0057dd70(update) * frustum * camera;
-    angle.orthographic = false;
+    angle.ortho = false;
     distance->FUN_00a6faf0(angle);
     distance->FUN_004bc1f0(0.0f, 0.0f, 1.0f);
     NiUpdateData aspect(0.0f, false, false);  // Initial scene update.
@@ -2247,67 +1939,15 @@ void __cdecl FUN_007cc6e0()
                                                DAT_011d258c.FUN_00403df0(), DAT_011d4dec.FUN_00403df0()));
 }
 
-struct BookMenu;
-struct BookTile
-{
-    virtual ~BookTile();
-    BookTile* FUN_00a01b00(const char*);
-    BookMenu* FUN_00a03c90();
-};
 struct BookInterface
 {
-    BookTile* FUN_00586150();
+    Tile* FUN_00586150();
 };
 BookInterface* FUN_004b7210();
 int FUN_007c6110();
 void FUN_005b5e40(const char*, ...);
 void FUN_007037e0();
 void FUN_005cfcb0(bool);
-struct BookMenu
-{
-    virtual ~BookMenu();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual int GetID();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int bookValue;
-    void FUN_00a1dc70(BookTile*, bool);
-    bool HasAllFlagsSet(int*);
-    void InitMenu();
-    void* CreateSurgery3DCamera();
-    void FUN_00a1dc20(bool);
-    void* FUN_00726070();
-};
 struct BookNodePointer
 {
     void FUN_0066b0d0(void*);
@@ -2317,11 +1957,11 @@ extern BookNodePointer DAT_011daa9c;
 // @fnv 0x007c5fc0
 extern "C" void FUN_007c5fc0(int value)
 {
-    BookTile* menu = FUN_004b7210()->FUN_00586150()->FUN_00a01b00("Data\\Menus\\CharGen\\SPECIALBookMenu.xml");
-    BookMenu* tile = menu->FUN_00a03c90();
-    if (tile && tile->GetID() == FUN_007c6110())
+    Tile* menu = FUN_004b7210()->FUN_00586150()->FUN_00a01b00("Data\\Menus\\CharGen\\SPECIALBookMenu.xml");
+    BookMenu* tile = static_cast<BookMenu*>(menu->FUN_00a03c90());
+    if (tile && tile->GetClass() == FUN_007c6110())
     {
-        tile->FUN_00a1dc70(menu, false);
+        tile->SetTileMenu(reinterpret_cast<TileMenu*>(menu), false);
         DAT_011daa38 = reinterpret_cast<int*>(tile);
         int index;
         if (!reinterpret_cast<BookMenu*>(DAT_011daa38)->HasAllFlagsSet(&index))
@@ -2331,7 +1971,8 @@ extern "C" void FUN_007c5fc0(int value)
             FUN_007037e0();
             return;
         }
-        reinterpret_cast<BookMenu*>(DAT_011daa38)->bookValue = value;
+        // The SPECIAL book menu extends BookMenu with its value at 0x58.
+        *reinterpret_cast<int*>(reinterpret_cast<char*>(DAT_011daa38) + 0x58) = value;
         reinterpret_cast<BookMenu*>(DAT_011daa38)->InitMenu();
         DAT_011daa9c.FUN_0066b0d0(reinterpret_cast<BookMenu*>(DAT_011daa38)->CreateSurgery3DCamera());
         FUN_005cfcb0(true);
@@ -2343,25 +1984,6 @@ extern "C" void FUN_007c5fc0(int value)
     }
 }
 
-struct SH_00418890
-{
-    int unk00[3];
-    void FUN_copy(const void* apOther);
-};
-struct BSSoundHandleEx : SH_00418890
-{
-    ~BSSoundHandleEx();
-    bool Play(bool abUnk);
-};
-struct GlobalObject_0041a250 : BSSoundHandleEx
-{
-    GlobalObject_0041a250();
-    ~GlobalObject_0041a250();
-};
-struct FUN_00ad7550_shell
-{
-    BSSoundHandleEx FUN_00ad7550(const char* apEditorID, unsigned int auiFlags);
-};
 int __cdecl FUN_00647b70(int a, int b);
 
 struct FUN_007ca960_Owner
@@ -2382,33 +2004,18 @@ void __cdecl FUN_007ca960(void* apSelf)
         int iCount = ((FUN_007ca960_Owner*)DAT_011dea3c)->kSub.v07(m_uiSoundID);
         if (iCount > 1)
         {
-            GlobalObject_0041a250 kSound;
-            kSound.FUN_copy(
-                &((FUN_00ad7550_shell*)BSAudio::GetSingleton())->FUN_00ad7550("OBJBookSpecialNumber", 0x121));
+            BSSoundHandle kSound;
+            kSound = BSAudio::GetSingleton()->FUN_00ad7550("OBJBookSpecialNumber", 0x121);
             kSound.Play(false);
         }
         ((FUN_007ca960_Owner*)DAT_011dea3c)->FUN_0093a7c0(m_uiSoundID, FUN_00647b70(iCount - 1, 1));
     }
-    ((FUN_007c9dc0_Class*)DAT_011daa38)->InvokeCallbacksForSlot();
+    ((BookMenu*)DAT_011daa38)->InvokeCallbacksForSlot();
 }
 
-struct FUN_007da240_Class
-{
-    void* unk00;
-    unsigned int unk04;
-    unsigned short unk08;
-    unsigned short unk0A;
-
-    void FUN_004037b0();
-    void* FUN_007da240();
-};
-
-// Calls FUN_004037b0, zeroes unk08 and unk0A, and returns this.
 // @fnv 0x007da240
-void* FUN_007da240_Class::FUN_007da240()
+StartMenuVideoRes::StartMenuVideoRes()
 {
-    this->FUN_004037b0();
-    this->unk08 = 0;
-    this->unk0A = 0;
-    return this;
+    width = 0;
+    height = 0;
 }

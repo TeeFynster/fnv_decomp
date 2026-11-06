@@ -1,7 +1,40 @@
-// bsmenu/tilemenu.cpp: TileMenu, TileRect, TileMenuStub (6 functions)
+// bsmenu/tilemenu.cpp: TileMenu, TileRect (6 functions)
 
-#include "tilemenu_decls.h"
-#include "tilemenu_private.h"
+#include "layout_support.h"
+#include "../../include/Menu.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/Tile.h"
+// TileListBoxCalls_tilemenu: local type (was include/TileListBoxCalls.h, which had no evidence of one real class); its methods are 0x00a011b0 Tile::GetFloat
+#include "../../include/Tile.h"
+
+class TileListBoxCalls_tilemenu : public Tile
+{
+  public:
+    float GetFloat(int trait);
+};
+#include "../../include/TileMenu.h"
+#include "../../include/TileRect.h"
+
+extern bool DAT_011f308f[];
+Menu* GetMenuById(int);
+void DebugLog(const char*, ...);
+void __fastcall FUN_00a0b020(TileMenu* tile);
+
+__forceinline void Menu::SetVisible(int id, bool visible)
+{
+    if (id >= 1001 && id <= 1084)
+        DAT_011f308f[id] = visible;
+}
+
+__forceinline bool Tile::IsSpecial()
+{
+    return (uiFlags & 0x2000) != 0;
+}
+
+__forceinline float TileMenu::GetTraitFloat(int id)
+{
+    return ((TileListBoxCalls_tilemenu*)this)->GetFloat(id);
+}
 
 // @fnv 0x00709a40
 int TileMenu::GetType()
@@ -40,8 +73,8 @@ TileMenu::~TileMenu()
 {
     if (pMenu)
     {
-        Menu::SetVisible(pMenu->GetID(), false);
-        Menu::SetMenuRootTile(pMenu->GetID(), 0);
+        Menu::SetVisible(pMenu->GetClass(), false);
+        Menu::SetMenuRootTile(pMenu->GetClass(), 0);
         pMenu->SetTileMenu(0, false);
         delete pMenu;
     }
@@ -56,7 +89,7 @@ Tile* TileMenu::SetTraitValue(int valueID, float floatValue, const char* strValu
     {
         if (!pMenu)
         {
-            Menu* menu = Interface::GetMenuById((int)floatValue);
+            Menu* menu = GetMenuById((int)floatValue);
             pMenu = menu;
         }
         if (!pMenu)
@@ -66,10 +99,10 @@ Tile* TileMenu::SetTraitValue(int valueID, float floatValue, const char* strValu
         else
         {
             pMenu->SetTileMenu(this, false);
-            pMenu->m_iMenuId = pMenu->GetID();
+            pMenu->m_iMenuId = pMenu->GetClass();
             if (GetTraitFloat(0xFA7) == 102.0 || GetTraitFloat(0xFA7) == 103.0)
             {
-                pMenu->SetModal(pMenu->GetID());
+                pMenu->SetModal(pMenu->GetClass());
                 Set(0xFAD, Menu::GetMenuScale(), true);
             }
             Menu::SetMenuRootTile((int)floatValue, this);
@@ -82,24 +115,17 @@ Tile* TileMenu::SetTraitValue(int valueID, float floatValue, const char* strValu
     }
     if (pMenu && valueID == 0xFA3)
     {
-        Menu::SetVisible(pMenu->GetID(), floatValue != 0.0);
+        Menu::SetVisible(pMenu->GetClass(), floatValue != 0.0);
     }
     return 0;
 }
 
-class TileMenuStub : public TileMenu
-{
-  public:
-    void FUN_00a0b020();
-    void FUN_00a1f310();
-};
-
-// Returns early if pMenu's ID is 0x3ec or 0x3ef, otherwise calls FUN_00a0b020.
+// Returns early if the menu's ID is 0x3ec or 0x3ef, otherwise calls FUN_00a0b020.
 // @fnv 0x00a1f310
-void TileMenuStub::FUN_00a1f310()
+void __fastcall FUN_00a1f310(TileMenu* tile)
 {
-    if (pMenu && (pMenu->GetID() == 0x3ec || pMenu->GetID() == 0x3ef))
+    if (tile->pMenu && (tile->pMenu->GetClass() == 0x3ec || tile->pMenu->GetClass() == 0x3ef))
         return;
     else
-        FUN_00a0b020();
+        FUN_00a0b020(tile);
 }

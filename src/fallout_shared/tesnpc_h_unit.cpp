@@ -1,2 +1,7 @@
+#include "../../include/TESNPC.h"
 
-#include "tesnpc.h"
+// @fnv 0x005dd560
+void TESNPC::ResetFaceGen()
+{
+    m_pkSecondaryFaceGenNode = m_pkPrimaryFaceGenNode = 0;
+}

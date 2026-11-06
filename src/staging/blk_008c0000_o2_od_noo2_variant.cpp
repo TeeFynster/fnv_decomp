@@ -6,59 +6,12 @@
 // src/staging/blk_008c0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiTransform.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/hkVector4.h"
 
 #include <xmmintrin.h>
-struct FUN_004a3c90
-{
-    __m128 value;
-    FUN_004a3c90(const FUN_004a3c90*);
-    FUN_004a3c90 FUN_00458700(int) const;
-    float FUN_004586d0() const;
-};
-class NiUpdateData
-{
-  public:
-    float time;
-    bool updateControllers, threaded, unk06, unk07, unk08;
-    unsigned char unk09, unk0a, unk0b;
-    NiUpdateData(float, bool, bool);
-};
-struct hkVector4
-{
-    __m128 value;
-    hkVector4();
-};
-class ThreeByThreeMatrix;
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-    NiPoint3 operator*(float) const;
-    NiPoint3 operator+(const NiPoint3&) const;
-    NiPoint3 operator-(const NiPoint3&) const;
-    NiPoint3 FUN_0053d280(float) const;
-    void FUN_004a0c10();
-};
-class ThreeByThreeMatrix
-{
-  public:
-    float elements[3][3];
-    ThreeByThreeMatrix();
-    void FUN_004a0c90(float);
-    void FUN_00524ac0(float);
-    ThreeByThreeMatrix FUN_0043f8d0(const ThreeByThreeMatrix&) const;
-    void FUN_00439f50(int, NiPoint3*) const;
-};
-class NiTransform
-{
-  public:
-    ThreeByThreeMatrix rotate;
-    NiPoint3 translate;
-    float scale;
-    NiTransform();
-    NiPoint3 FUN_00524c40(const NiPoint3&) const;
-};
 // Aligned sphere: xyz center and radius in one SIMD vector.
 class __declspec(align(16)) FUN_006240d0
 {
@@ -79,7 +32,7 @@ struct Node8
     Node8* FUN_00461130();
     NiPoint3 FUN_004b4500(const NiPoint3&);
     void FUN_004b4880(NiTransform*);
-    void FUN_004b46a0(ThreeByThreeMatrix*);
+    void FUN_004b46a0(NiMatrix3*);
     void FUN_00a59c60(const NiUpdateData&);
     NiPoint3* FUN_0045bb80();
 };
@@ -107,7 +60,7 @@ struct FUN_008cc6f0
     NiPoint3 target, end, direction;
     Ref8* victim;
     Node8* node;
-    ThreeByThreeMatrix rotation;
+    NiMatrix3 rotation;
     FUN_008cc6f0();
 };
 struct Ref8
@@ -431,7 +384,7 @@ struct Ref8
     bool requested;
     unsigned short unk0c2;
     Ref8* FUN_009306d0();
-    FUN_004a3c90* FUN_00807080();
+    hkVector4* FUN_00807080();
     Node8* FUN_0043fcd0();
     Node8* FUN_00950bb0(int);
     void CallProcessAt778();
@@ -461,7 +414,7 @@ struct IntSetting8
 extern FloatSetting8 DAT_011cf624;
 extern IntSetting8 DAT_011cf510;
 extern NiPoint3 DAT_011a9478, DAT_011f426c;
-extern ThreeByThreeMatrix DAT_011a9448;
+extern NiMatrix3 DAT_011a9448;
 extern Ref8* DAT_011dea3c;
 extern float DAT_01085910, DAT_01085c58, DAT_010231a0, DAT_010162c0, DAT_0102226c, DAT_01047224;
 extern double DAT_010356f0, DAT_01011590;
@@ -495,8 +448,8 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
     state->direction = DAT_011f426c;
     if (FUN_009306d0())
     {
-        FUN_004a3c90 direction(FUN_009306d0()->FUN_00807080());
-        if (direction.FUN_00458700(0).FUN_004586d0() == -DAT_01085910)
+        hkVector4 direction(*FUN_009306d0()->FUN_00807080());
+        if (direction.getComponent(0).getReal() == -DAT_01085910)
         {
             if (v1d0())
                 state->direction = v1d0()->FUN_00461130()->FUN_004b4500(DAT_011a9478 * angle);
@@ -547,12 +500,12 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
             victimScene = victim->FUN_0043fcd0();
         float range = DAT_010231a0;
         NiPoint3 direction;
-        ThreeByThreeMatrix pitch;
-        ThreeByThreeMatrix heading;
-        pitch.FUN_004a0c90(v2bc(0));
-        heading.FUN_00524ac0(FUN_00931d70());
-        pitch = pitch.FUN_0043f8d0(heading);
-        pitch.FUN_00439f50(1, &direction);
+        NiMatrix3 pitch;
+        NiMatrix3 heading;
+        pitch.MakeZRotation(v2bc(0));
+        heading.MakeXRotation(FUN_00931d70());
+        pitch = pitch.operator*(heading);
+        pitch.GetCol(1, direction);
         FUN_00525340(&direction);
         NiPoint3 ray = *v1f4() - (direction * range).FUN_0053d280(DAT_010162c0);
         bool found = false;
@@ -563,9 +516,9 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
             NiTransform transform;
             hit->FUN_00461130()->FUN_004b4880(&transform);
             state->target = transform.FUN_00524c40(ray + scaled);
-            ThreeByThreeMatrix inverse;
+            NiMatrix3 inverse;
             hit->FUN_00461130()->FUN_004b46a0(&inverse);
-            state->rotation = inverse.FUN_0043f8d0(*reinterpret_cast<ThreeByThreeMatrix*>(root->FUN_00461130()));
+            state->rotation = inverse.operator*(*reinterpret_cast<NiMatrix3*>(root->FUN_00461130()));
             state->node = hit;
             Form8* form = FUN_004b5260(hit);
             if (form)
@@ -603,9 +556,9 @@ void Ref8::FUN_008cba30(const NiPoint3* start, const NiPoint3* end, Ref8* victim
                     NiTransform transform;
                     hit->FUN_00461130()->FUN_004b4880(&transform);
                     state->target = transform.FUN_00524c40(*hit->FUN_0045bb80() + scaled);
-                    ThreeByThreeMatrix inverse;
+                    NiMatrix3 inverse;
                     hit->FUN_00461130()->FUN_004b46a0(&inverse);
-                    state->rotation = inverse.FUN_0043f8d0(*reinterpret_cast<ThreeByThreeMatrix*>(root->FUN_00461130()));
+                    state->rotation = inverse.operator*(*reinterpret_cast<NiMatrix3*>(root->FUN_00461130()));
                     state->node = hit;
                 }
             }

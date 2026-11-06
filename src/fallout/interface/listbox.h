@@ -1,56 +1,39 @@
-// fallout/interface/listbox.h: declares StartMenu, TileListBoxCalls
+// fallout/interface/listbox.h: declares StartMenu, TileListBoxCalls_listbox
 #ifndef FNV_LISTBOX_MATCH_UNIT_H
 #define FNV_LISTBOX_MATCH_UNIT_H
 
 
-#include "listbox_decls.h"
-#include "layout_support.h"
-#include "ListBoxBase.h"
-#include "listbox_types_Tile.h"
-#include "listbox_types_BGSSaveLoadFileEntry.h"
+#include <stddef.h>
+#include "../../../include/BSSimpleList.h"
+#include "../../../include/BSSimpleArray.h"
+#include "../../../include/BGSSaveLoadFileEntry.h"
+#include "../../../include/NiTListBase_NiTPointerAllocator_unsigned_int__Tile___.h"
+#include "../../../include/NiTListBase_NiTPointerAllocator_unsigned_int__Tile_____AntiBloatAllocator.h"
+#include "../../../include/NiTPointerAllocator_unsigned_int_.h"
+#include "../../../include/NiTPointerListBase_NiTPointerAllocator_unsigned_int__Tile___.h"
+#include "../../../include/NiTPointerList_Tile___.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/StartMenu.h"
+#include "../../../include/Tile.h"
+// TileListBoxCalls_listbox: local type (was include/TileListBoxCalls.h, which had no evidence of one real class); its methods are 0x00a011b0 Tile::GetFloat
+#include "../../../include/Tile.h"
 
-class BGSNote;
-class InventoryStackRecord;
-class StartMenu
-{
-  public:
-    class Option;
-};
-template <class T> class ListBoxItem;
-
-template <class T> class ListBox : public ListBoxBase
-{
-  public:
-    BSSimpleList<ListBoxItem<T>*> items;
-    Tile* m_pListTile;
-    Tile* m_pSelectedTile;
-    Tile* m_pHighlightedTile;
-    const char* pTemplateName;
-    unsigned short m_usSelectedIndex;
-    unsigned char padding1E[2];
-    float m_fFirstListValue;
-    float m_fSecondListValue;
-    float m_fThirdListValue;
-    unsigned short usFlags;
-    unsigned char padding2E[2];
-
-    unsigned int AddItem(unsigned int mask);
-    bool Highlight(Tile* tile);
-    void ResetItems();
-    bool IsEnabled();
-    unsigned int GetVisibleEntryCount();
-    void Initialize(Tile* container, const char* templateName);
-    bool SetSelection(Tile* tile);
-    bool SetSelection(Tile* tile, int mode);
-    T GetSelectedData();
-    T GetSelectedData(Tile* tile);
-};
-
-class TileListBoxCalls : public Tile
+class TileListBoxCalls_listbox : public Tile
 {
   public:
     float GetFloat(int trait);
 };
+#include "listbox_decls.h"
+#include "ListBoxBase.h"
+
+class BGSNote;
+class BGSQuestObjective;
+class PerkForm;
+class InventoryStackRecord;
+template <class T> class ListBoxItem;
+
+#include "../../../include/ListBox.h"
+
 
 int __cdecl GetTileValueID(const char* name, int index);
 Tile* __cdecl FindNamedTile(Tile* tile, const char* name);
@@ -64,7 +47,7 @@ template <>
 unsigned int ListBox<BGSSaveLoadFileEntry*>::GetVisibleEntryCount()
 {
     return m_pListTile != 0
-               ? (unsigned int)((TileListBoxCalls*)m_pListTile)->GetFloat(GetTileValueID(kListBoxNumFiltered, -1))
+               ? (unsigned int)((TileListBoxCalls_listbox*)m_pListTile)->GetFloat(GetTileValueID(kListBoxNumFiltered, -1))
                : 0;
 }
 
@@ -99,11 +82,11 @@ unsigned int ListBox<StartMenu::Option*>::AddItem(unsigned int mask)
 }
 
 // @fnv 0x00418900
-SoundPlaybackHandle& SoundPlaybackHandle::operator=(const SoundPlaybackHandle& other)
+BSSoundHandle& BSSoundHandle::operator=(const BSSoundHandle& other)
 {
-    soundID = other.soundID;
-    success = other.success;
-    state = other.state;
+    iSoundID = other.iSoundID;
+    bAssumeSuccess = other.bAssumeSuccess;
+    eState = other.eState;
     return *this;
 }
 

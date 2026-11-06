@@ -3,7 +3,7 @@
 #define FNV_PACKAGELOCATION_H
 
 #include "layout_support.h"
-#include "TESForm.h"
+#include "../../include/TESForm.h"
 #include "TESObjectREFR.h"
 #include "layout_support.h"
 class LocationDescriptor;

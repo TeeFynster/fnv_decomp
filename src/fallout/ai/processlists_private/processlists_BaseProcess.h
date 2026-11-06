@@ -22,7 +22,7 @@ class BSFaceGenAnimationData;
 class BSFaceGenNiNode;
 class BSShaderPPLightingProperty;
 class PathingAvoidNodeArray;
-class SoundPlaybackHandle;
+class BSSoundHandle;
 class BipedAnim;
 class ActorCombatGroup;
 class Crime;
@@ -448,8 +448,8 @@ class BaseProcess
     virtual void ClearObjectFromAcquireListAlt(unsigned int auiFormID);                            // PC vtable +0x480
     virtual TESObjectREFR* GetPreviousReference() const;                                           // PC vtable +0x484
     virtual void SetActorTargetReference(TESObjectREFR* apRef);                                             // PC vtable +0x488
-    virtual SoundPlaybackHandle GetActorSoundHandle(unsigned int aeType);                                // PC vtable +0x48C
-    virtual void SetActorSoundHandle(unsigned int aeType, SoundPlaybackHandle akHandle);                 // PC vtable +0x490
+    virtual BSSoundHandle GetActorSoundHandle(unsigned int aeType);                                // PC vtable +0x48C
+    virtual void SetActorSoundHandle(unsigned int aeType, BSSoundHandle akHandle);                 // PC vtable +0x490
     virtual void StopActorSound(unsigned int aeType);                                              // PC vtable +0x494
     virtual void UpdateMovementStopped(Actor* apActor);                                            // PC vtable +0x498
     virtual bool GetMovementStopped() const;                                                       // PC vtable +0x49C

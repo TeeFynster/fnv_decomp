@@ -2,16 +2,11 @@
 // src/fallout_shared/tescaravan_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/tescaravan.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "tescaravan_decls.h"
+#include "../../include/BGSImpactData.h"
 class RegionDataEntry
 {
   public:
     void Endian();
-};
-class BGSImpactData
-{
-  public:
-    void ReadTypedData(TESFile* file, void* data, unsigned short size);
 };
 extern "C" void* memset(void* dst, int val, unsigned int size);
 

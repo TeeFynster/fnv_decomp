@@ -2,23 +2,11 @@
 // src/havok/common/internal/kdtree/build/hkkdtreebuildingutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/kdtree/build/hkkdtreebuildingutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiBytes);
-};
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct BufferPair
 {
@@ -34,14 +22,14 @@ void __cdecl FreeBufferPair(BufferPair* apPair, int aiCount)
         return;
 
     void* pSecond = apPair->m_pSecond;
-    AudioHolder* pHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
-    pAllocator->Free(pSecond, aiCount * 16);
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+    pAllocator->blockFree(pSecond, aiCount * 16);
 
     void* pFirst = apPair->m_pFirst;
-    AudioHolder* pHolder2 = FUN_00c85750();
-    AudioAllocator* pAllocator2 = pHolder2->m_pAllocator;
-    pAllocator2->Free(pFirst, aiCount * 16);
+    hkMemoryRouter* pHolder2 = FUN_00c85750();
+    hkMemoryAllocator* pAllocator2 = reinterpret_cast<hkMemoryAllocator*>(pHolder2->m_heap);
+    pAllocator2->blockFree(pFirst, aiCount * 16);
 }
 
 #include <xmmintrin.h>

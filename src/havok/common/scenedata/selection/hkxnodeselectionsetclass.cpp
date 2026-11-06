@@ -1,3 +1,4 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/common/scenedata/selection/hkxnodeselectionsetclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/selection/hkxnodeselectionsetclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -50,22 +51,20 @@ __forceinline void destruct(E01D40RefPtr* ptr, int size)
         ptr[i].release();
 }
 
-struct E01D40RefPtrArray
+typedef hkArrayBase<E01D40RefPtr> E01D40RefPtrArray;
+template<> __forceinline void hkArrayBase<E01D40RefPtr>::_clearAndDeallocate(hkMemoryAllocator& sharedAlloc)
 {
-    E01D40RefPtr* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+E01D40Allocator& alloc = reinterpret_cast<E01D40Allocator&>(sharedAlloc);
 
-    __forceinline void ClearAndRelease(E01D40Allocator& alloc)
-    {
         destruct(m_data, m_iElementCount);
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
             alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(E01D40RefPtr));
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-};
+    
+}
+
 
 struct E01D40StringPtr
 {
@@ -98,7 +97,7 @@ struct E01D40Object : E01D40Base
 void E01D40Object::FUN_00e01d40()
 {
     m_name.release();
-    m_kTrackedObjects.ClearAndRelease(FUN_00c85750().heap());
+    m_kTrackedObjects._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750().heap()));
     E01D40Base::release();
 }
 

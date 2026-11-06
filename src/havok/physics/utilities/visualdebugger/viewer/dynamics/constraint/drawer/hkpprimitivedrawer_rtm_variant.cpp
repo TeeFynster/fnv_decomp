@@ -11,32 +11,33 @@ struct CpuObject
 
 namespace ArrowDraw {
 namespace ArrowDrawMath {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00e10d50 FUN_00e10d50: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     struct
     {
         float x, y, z, w;
     };
-} __m128;
+} __m128, LocalM128;
 extern "C"
 {
-    extern __m128 _mm_add_ss(__m128 _A, __m128 _B);
-    extern __m128 _mm_add_ps(__m128 _A, __m128 _B);
-    extern __m128 _mm_sub_ps(__m128 _A, __m128 _B);
-    extern __m128 _mm_mul_ps(__m128 _A, __m128 _B);
-    extern __m128 _mm_shuffle_ps(__m128 _A, __m128 _B, unsigned int _Imm8);
-    extern __m128 _mm_load_ss(float const* _A);
+    extern LocalM128 _mm_add_ss(LocalM128 _A, LocalM128 _B);
+    extern LocalM128 _mm_add_ps(LocalM128 _A, LocalM128 _B);
+    extern LocalM128 _mm_sub_ps(LocalM128 _A, LocalM128 _B);
+    extern LocalM128 _mm_mul_ps(LocalM128 _A, LocalM128 _B);
+    extern LocalM128 _mm_shuffle_ps(LocalM128 _A, LocalM128 _B, unsigned int _Imm8);
+    extern LocalM128 _mm_load_ss(float const* _A);
 }
 }
 
 extern const float DAT_01064f60;
 extern float DAT_01016b78;
 extern double DAT_010c4ab0;
-extern const ArrowDrawMath::__m128 DAT_010c71e0;
+extern const ArrowDrawMath::LocalM128 DAT_010c71e0;
 
 struct ArrowDrawVector
 {
-    ArrowDrawMath::__m128 m;
+    ArrowDrawMath::LocalM128 m;
     void add(const ArrowDrawVector& a)
     {
         m = ArrowDrawMath::_mm_add_ps(m, a.m);
@@ -74,23 +75,23 @@ struct ArrowDrawObject : ::CpuObject
     void FUN_00e10d50(const ArrowDrawVector* a0, int a1, const ArrowDrawVector* a2, int a3, float a4, int a5, int a6);
 };
 
-static __forceinline ArrowDrawMath::__m128 Hk_e10d50_splat(float f)
+static __forceinline ArrowDrawMath::LocalM128 Hk_e10d50_splat(float f)
 {
-    ArrowDrawMath::__m128 v = ArrowDrawMath::_mm_load_ss(&f);
+    ArrowDrawMath::LocalM128 v = ArrowDrawMath::_mm_load_ss(&f);
     return ArrowDrawMath::_mm_shuffle_ps(v, v, 0);
 }
 
-static __forceinline ArrowDrawMath::__m128 Hk_e10d50_rot(const ArrowDrawMath::__m128& q, ArrowDrawMath::__m128 v)
+static __forceinline ArrowDrawMath::LocalM128 Hk_e10d50_rot(const ArrowDrawMath::LocalM128& q, ArrowDrawMath::LocalM128 v)
 {
-    ArrowDrawMath::__m128 w = ArrowDrawMath::_mm_shuffle_ps(q, q, 0xff);
-    ArrowDrawMath::__m128 ww = ArrowDrawMath::_mm_add_ps(DAT_010c71e0, ArrowDrawMath::_mm_mul_ps(w, w));
-    ArrowDrawMath::__m128 r = ArrowDrawMath::_mm_mul_ps(v, ww);
-    ArrowDrawMath::__m128 p = ArrowDrawMath::_mm_mul_ps(q, v);
-    ArrowDrawMath::__m128 xy = ArrowDrawMath::_mm_add_ss(ArrowDrawMath::_mm_shuffle_ps(p, p, 0x55), p);
-    ArrowDrawMath::__m128 d = ArrowDrawMath::_mm_add_ss(ArrowDrawMath::_mm_shuffle_ps(p, p, 0xaa), xy);
+    ArrowDrawMath::LocalM128 w = ArrowDrawMath::_mm_shuffle_ps(q, q, 0xff);
+    ArrowDrawMath::LocalM128 ww = ArrowDrawMath::_mm_add_ps(DAT_010c71e0, ArrowDrawMath::_mm_mul_ps(w, w));
+    ArrowDrawMath::LocalM128 r = ArrowDrawMath::_mm_mul_ps(v, ww);
+    ArrowDrawMath::LocalM128 p = ArrowDrawMath::_mm_mul_ps(q, v);
+    ArrowDrawMath::LocalM128 xy = ArrowDrawMath::_mm_add_ss(ArrowDrawMath::_mm_shuffle_ps(p, p, 0x55), p);
+    ArrowDrawMath::LocalM128 d = ArrowDrawMath::_mm_add_ss(ArrowDrawMath::_mm_shuffle_ps(p, p, 0xaa), xy);
     d = ArrowDrawMath::_mm_shuffle_ps(d, d, 0);
     r = ArrowDrawMath::_mm_add_ps(r, ArrowDrawMath::_mm_mul_ps(d, q));
-    ArrowDrawMath::__m128 c = ArrowDrawMath::_mm_sub_ps(
+    ArrowDrawMath::LocalM128 c = ArrowDrawMath::_mm_sub_ps(
         ArrowDrawMath::_mm_mul_ps(ArrowDrawMath::_mm_shuffle_ps(q, q, 0xc9), ArrowDrawMath::_mm_shuffle_ps(v, v, 0xd2)),
         ArrowDrawMath::_mm_mul_ps(ArrowDrawMath::_mm_shuffle_ps(q, q, 0xd2),
                                   ArrowDrawMath::_mm_shuffle_ps(v, v, 0xc9)));
@@ -110,12 +111,12 @@ void ArrowDrawObject::FUN_00e10d50(const ArrowDrawVector* a0, int a1, const Arro
     q1.FUN_00cb2450((int)a2, DAT_01064f60);
     q2.FUN_00cb2450((int)a2, DAT_01016b78);
     double na = -a4;
-    ArrowDrawMath::__m128 r1 = Hk_e10d50_rot(*(ArrowDrawMath::__m128*)&q1, ((const ArrowDrawVector*)a1)->m);
+    ArrowDrawMath::LocalM128 r1 = Hk_e10d50_rot(*(ArrowDrawMath::LocalM128*)&q1, ((const ArrowDrawVector*)a1)->m);
     volatile float s = (float)(na * DAT_010c4ab0);
     ArrowDrawTarget* nextSink = (ArrowDrawTarget*)value;
     p2.m = ArrowDrawMath::_mm_add_ps(ArrowDrawMath::_mm_mul_ps(Hk_e10d50_splat(s), r1), p1.m);
     nextSink->edge(&p1, &p2, a3, a5, a6);
-    ArrowDrawMath::__m128 r2 = Hk_e10d50_rot(*(ArrowDrawMath::__m128*)&q2, r1);
+    ArrowDrawMath::LocalM128 r2 = Hk_e10d50_rot(*(ArrowDrawMath::LocalM128*)&q2, r1);
     p2.m = ArrowDrawMath::_mm_add_ps(ArrowDrawMath::_mm_mul_ps(Hk_e10d50_splat(s), r2), p1.m);
     ((ArrowDrawTarget*)value)->edge(&p1, &p2, a3, a5, a6);
 }

@@ -3,7 +3,16 @@
 // polymorphic classes (TESForm, TESObjectCELL, TESWorldSpace). The skeleton of src/fallout_shared/tesworldspace.cpp with those classes made polymorphic; move the functions to
 // their real unit once its classes are.
 
-#include "tesworldspace_packet_rtti_variant.h"
+#include "../../include/BGSEncounterZone.h"
+#include "../../include/BGSMusicType.h"
+#include "../../include/Actor.h"
+#include "../../include/CombatManager.h"
+#include "../../include/CombatThreatMap.h"
+#include "../../include/TESClimate.h"
+#include "../../include/TESImageSpace.h"
+#include "../../include/TESWaterForm.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESWorldSpace.h"
 
 struct GROUP_HEADER
 {
@@ -74,141 +83,47 @@ bool FormGroupOwner::FUN_00584d40(GROUP_HEADER* pkGroup)
     return bResult;
 }
 
-class MobileObject : public TESObjectREFR
-{
-};
-class Actor : public MobileObject
-{
-};
 TESForm* __cdecl FUN_004839c0(unsigned int);
-struct MapPosition532;
-struct FUN_00993820
-{
-    virtual ~FUN_00993820();
-    unsigned int bucketCount;
-    MapPosition532** buckets;
-    unsigned int size;
-    FUN_00993820(int);
-    MapPosition532* FUN_004b9ba0();
-    void GetNextEntry(MapPosition532*&, Actor*&, unsigned __int64&);
-    void SetValue(Actor*, unsigned __int64);
-    void FUN_00438af0();
-};
-struct Child532
-{
-    void UpdateElements(void*);
-};
-struct Tail532
-{
-    void FUN_009a5c40(void*);
-};
-struct ReferenceArray532
-{
-    virtual ~ReferenceArray532();
-    Child532** data;
-    unsigned short capacity, size, effectiveSize, grow;
-    unsigned int GetShortAtOffsetA();
-    Child532*& FUN_00877a30(unsigned int);
-};
-struct CombatGroup532 : ReferenceArray532
-{
-    FUN_00993820* map;
-    Tail532* tail;
-    void FUN_00993600(void* stream);
-};
+// 0x0098e990 fixes up a combat group's saved actors; the shared group header has no declaration yet.
+extern "C" void ActorCombatGroup_UpdateElements();
 // @fnv 0x00993600
-void CombatGroup532::FUN_00993600(void* stream)
+void CombatManager::FUN_00993600(void* stream)
 {
-    FUN_00993820* oldMapX = map;
-    map = new FUN_00993820(0x25);
-    MapPosition532* position = oldMapX->FUN_004b9ba0();
+    NiTMap<Actor*, unsigned __int64>* oldMapX = m_pActorCombatGroupMap;
+    m_pActorCombatGroupMap = new NiTMap<Actor*, unsigned __int64>(0x25);
+    void* position = oldMapX->GetFirstPos();
     Actor* actor_;
     unsigned __int64 valueTmp;
     unsigned int index;
-    Child532* child2;
+    ActorCombatGroup* child2;
     while (position)
     {
-        oldMapX->GetNextEntry(position, actor_, valueTmp);
+        oldMapX->GetNext(position, actor_, valueTmp);
         // Persisted pointer-map keys hold a 32-bit form identifier until fixup.
         actor_ = actor_ ? dynamic_cast<Actor*>(FUN_004839c0((unsigned int)actor_)) : 0;
         if (actor_)
-            map->SetValue(actor_, valueTmp);
+            m_pActorCombatGroupMap->SetAt(actor_, valueTmp);
     }
-    oldMapX->FUN_00438af0();
+    oldMapX->RemoveAll();
     delete oldMapX;
-    for (index = 0; index < GetShortAtOffsetA(); ++index)
+    for (index = 0; index < m_kCombatGroups.GetSize(); ++index)
     {
-        child2 = FUN_00877a30(index);
+        child2 = m_kCombatGroups.GetAt(index);
         if (child2)
-            child2->UpdateElements(stream);
+            reinterpret_cast<void (__thiscall*)(ActorCombatGroup*, void*)>(&ActorCombatGroup_UpdateElements)(child2, stream);
     }
-    tail->FUN_009a5c40(stream);
+    m_pThreatMap->ApplyLoadBuffer(static_cast<BGSLoadGameBuffer*>(stream));
 }
 
-class TESClimate : public TESForm
-{
-};
-class TESImageSpace : public TESForm
-{
-};
-class BGSEncounterZone : public TESForm
-{
-};
-class TESWaterForm : public TESForm
-{
-};
-class BGSMusicType : public TESForm
-{
-};
 
 void __cdecl ResolveFormID5845(unsigned int* puiFormID, TESFile* pkFile);
 int __cdecl MasterLog5845(const char* pcFormat, ...);
-
-class TESObjectCELL5845
-{
-  public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void LinkPersistent();
-};
 
 class CellMap5845
 {
   public:
     void* GetFirstPos();
-    void GetNext(void*& pos, unsigned int& uiKey, TESObjectCELL5845*& pkCell);
+    void GetNext(void*& pos, unsigned int& uiKey, TESObjectCELL*& pkCell);
 };
 
 class WorldSpaceOwner5845;
@@ -334,7 +249,7 @@ class WorldSpaceOwner5845
     void SetMusicType(BGSMusicType* p);
     void SetParentWorld(TESWorldSpace* p);
     void FinishInit(int i);
-    TESObjectCELL5845* GetPersistentCell();
+    TESObjectCELL* GetPersistentCell();
     void FUN_005845e0();
 
     unsigned int unk04;
@@ -513,19 +428,19 @@ void WorldSpaceOwner5845::FUN_005845e0()
             m_pkRegion->Attach(this);
         FinishInit(1);
     }
-    TESObjectCELL5845* pkPersistent4;
+    TESObjectCELL* pkPersistent4;
     void* pos2 = m_pkCellMap->GetFirstPos();
     while (pos2)
     {
         unsigned int uiKey3;
-        TESObjectCELL5845* pkCell = 0;
+        TESObjectCELL* pkCell = 0;
         m_pkCellMap->GetNext(pos2, uiKey3, pkCell);
         if (pkCell)
-            pkCell->LinkPersistent();
+            pkCell->InitItem();
     }
     pkPersistent4 = GetPersistentCell();
     if (pkPersistent4)
-        pkPersistent4->LinkPersistent();
+        pkPersistent4->InitItem();
     m_pkLOD = new WorldSpaceLOD5845(this);
 }
 

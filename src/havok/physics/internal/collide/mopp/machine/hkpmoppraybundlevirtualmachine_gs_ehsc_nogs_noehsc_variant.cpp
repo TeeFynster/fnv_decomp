@@ -1,9 +1,13 @@
+#include "../../../../../../../include/hkArray.h"
 
 // src/havok/physics/internal/collide/mopp/machine/hkpmoppraybundlevirtualmachine_gs_ehsc_nogs_noehsc_variant.cpp - flag-variant unit created 2026-10-31 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/physics/internal/collide/mopp/machine/hkpmoppraybundlevirtualmachine.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
 #include "fnv_asm_helpers.h"
+#define FNV_VEC4_SIMD
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/CodeInfo.h"
 // src/havok/physics/internal/collide/mopp/machine/hkpmoppraybundlevirtualmachine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/machine/hkpmoppraybundlevirtualmachine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 #include <xmmintrin.h>
@@ -24,88 +28,51 @@ __declspec(align(16)) struct FUN_00dd4a50_cls
 extern const double DAT_010d5198;
 extern const __m128 DAT_01268460;
 
-class __declspec(align(16)) Vec4
+__forceinline void Vec4::operator=(const Vec4& v)
 {
-public:
-    __forceinline void operator=(const Vec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
+    m_vComponents = v.m_vComponents;
+}
 
-    __forceinline void operator=(const __m128& v)
-    {
-        m_vComponents = v;
-    }
+__forceinline void Vec4::setZero4()
+{
+    m_vComponents = _mm_setzero_ps();
+}
 
-    __forceinline void SetAllComponents(float a)
-    {
-        m_vComponents = _mm_set_ps1(a);
-    }
+__forceinline void Vec4::setSub4(const Vec4& v0, const Vec4& v1)
+{
+    m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
+}
 
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
+__forceinline void Vec4::mul4(const Vec4& v)
+{
+    m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
+}
 
-    __forceinline void setSub4(const Vec4& v0, const Vec4& v1)
-    {
-        m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
-    }
+// These operations have no matching overload in the shared Vec4 declaration.
+static __forceinline void SetAllComponents(Vec4& value, float a)
+{
+    value.m_vComponents = _mm_set_ps1(a);
+}
 
-    __forceinline void mul4(const Vec4& v)
+static __forceinline void setBroadcast(Vec4& value, const hkVector4& v, int i)
+{
+    if (i == 0)
     {
-        m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
+        value.m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(0, 0, 0, 0));
     }
-
-    __forceinline float& operator()(int a)
+    else if (i == 1)
     {
-        return reinterpret_cast<float*>(&m_vComponents)[a];
+        value.m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(1, 1, 1, 1));
     }
-
-    __forceinline const float& operator()(int a) const
+    else if (i == 2)
     {
-        return reinterpret_cast<const float*>(&m_vComponents)[a];
+        value.m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(2, 2, 2, 2));
     }
-
-    __forceinline void setBroadcast(const Vec4& v, int i)
+    else if (i == 3)
     {
-        if (i == 0)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(0, 0, 0, 0));
-        }
-        else if (i == 1)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(1, 1, 1, 1));
-        }
-        else if (i == 2)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(2, 2, 2, 2));
-        }
-        else if (i == 3)
-        {
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
-        }
+        value.m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, _MM_SHUFFLE(3, 3, 3, 3));
     }
-
-    __forceinline __m128& getQuad()
-    {
-        return m_vComponents;
-    }
-
-    __forceinline const __m128& getQuad() const
-    {
-        return m_vComponents;
-    }
-
-private:
-    __m128 m_vComponents;
-
-public:
-    operator __m128() const
-    {
-        return m_vComponents;
-    }
-};
+}
 
 class __declspec(align(16)) Vec4Comp
 {
@@ -125,29 +92,12 @@ private:
     friend class Vec4;
 };
 
-template <typename T>
-class ArrBase
+
+
+inline float CodeInfo::getScale() const
 {
-public:
-    const T& operator[](int i) const
-    {
-        return m_data[i];
-    }
-
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-
-struct CodeInfo
-{
-    inline float getScale() const
-    {
-        return m_offset(3);
-    }
-
-    Vec4 m_offset;
-};
+    return m_offset.m_f[3];
+}
 
 struct TreeCode
 {
@@ -155,7 +105,7 @@ struct TreeCode
     unsigned short m_usMemSizeAndFlags;
     short m_sReferenceCount;
     CodeInfo m_info;
-    ArrBase<unsigned char> m_data;
+    hkArrayBase<unsigned char> m_data;
     signed char m_eBuildType;
 };
 
@@ -228,25 +178,25 @@ inline void BundleMachine::querySub(const TreeCode* code, const RayBundleInput& 
     MachineVectorIndexRecord query;
     query.m_kVectorBeforeIndex.setZero4();
 
-    m_vRayDirectionVector.SetAllComponents(1.0f / m_pMoppCode->m_info.getScale());
-    query.m_kVectorAfterIndex.SetAllComponents(float(m_pMoppCode->m_info.getScale() * DAT_010d5198));
+    SetAllComponents(m_vRayDirectionVector, 1.0f / m_pMoppCode->m_info.getScale());
+    SetAllComponents(query.m_kVectorAfterIndex, float(m_pMoppCode->m_info.getScale() * DAT_010d5198));
 
     Vec4 offset;
     PointBundlePairAndVector fQuery;
 
-    offset.setBroadcast(code->m_info.m_offset, 0);
+    setBroadcast(offset, code->m_info.m_offset, 0);
     fQuery.m_kPointBundles[0].m_vec[0].setSub4(m_vFrom.m_vec[0], offset);
     fQuery.m_kPointBundles[1].m_vec[0].setSub4(m_vTo.m_vec[0], offset);
     fQuery.m_kPointBundles[0].m_vec[0].mul4(query.m_kVectorAfterIndex);
     fQuery.m_kPointBundles[1].m_vec[0].mul4(query.m_kVectorAfterIndex);
 
-    offset.setBroadcast(code->m_info.m_offset, 1);
+    setBroadcast(offset, code->m_info.m_offset, 1);
     fQuery.m_kPointBundles[0].m_vec[1].setSub4(m_vFrom.m_vec[1], offset);
     fQuery.m_kPointBundles[1].m_vec[1].setSub4(m_vTo.m_vec[1], offset);
     fQuery.m_kPointBundles[0].m_vec[1].mul4(query.m_kVectorAfterIndex);
     fQuery.m_kPointBundles[1].m_vec[1].mul4(query.m_kVectorAfterIndex);
 
-    offset.setBroadcast(code->m_info.m_offset, 2);
+    setBroadcast(offset, code->m_info.m_offset, 2);
     fQuery.m_kPointBundles[0].m_vec[2].setSub4(m_vFrom.m_vec[2], offset);
     fQuery.m_kPointBundles[1].m_vec[2].setSub4(m_vTo.m_vec[2], offset);
     fQuery.m_kPointBundles[0].m_vec[2].mul4(query.m_kVectorAfterIndex);
@@ -273,7 +223,7 @@ Vec4Comp BundleMachine::FUN_00dd4870(const ShapeContainer* collection, const Tre
 {
     m_pShapeCollection = collection;
     m_pRayBundleOutput = &rayResult;
-    m_fEarlyOutHitFraction.SetAllComponents(1.0f);
+    SetAllComponents(m_fEarlyOutHitFraction, 1.0f);
 
     m_vFrom.m_vec[0] = input.m_vFrom[0];
     m_vFrom.m_vec[1] = input.m_vFrom[1];

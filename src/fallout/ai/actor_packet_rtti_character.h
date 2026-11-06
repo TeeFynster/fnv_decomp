@@ -1,41 +1,23 @@
-// fallout/ai/actor_packet_rtti_character.h: declares NiPoint3, MiddleHighProcess, NiCamera, NiControllerSequence, NiAVObject and more
+#include "../../../include/MiddleHighProcess.h"
+#include "../../../include/NiCamera.h"
+#include "../../../include/NiControllerSequence.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/TESBoundObject.h"
+
+// Private actor packet declarations; game classes above use the shared definitions.
 #ifndef ACTOR_PACKET_H
 #define ACTOR_PACKET_H
 
 #include "layout_support.h"
-#define FNV_NIPOINT3_H
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-    NiPoint3(float, float, float);
-    void Set(float, float, float);
-};
+
 class ActiveEffect;
 template <class T> class BSSimpleList;
-class MiddleHighProcess
-{
-  public:
-    char padding[0x1b8];
-    BSSimpleList<ActiveEffect*>* pActiveEffects;
-    BSSimpleList<ActiveEffect*>* GetActiveEffectList();
-};
-class NiCamera
-{
-  public:
-    const NiPoint3& FUN_0045bb80() const;
-};
+
 extern NiCamera* DAT_011e07d0;
 
 class Actor;
 class Animation;
-class NiControllerSequence
-{
-  public:
-    float FUN_00508100();
-    void FUN_0098adb0(float);
-};
+
 class NiNode;
 class NiAVObject
 {
@@ -770,13 +752,7 @@ template <> class NiPointer<NiNode>
     NiNode* operator->() const;
 };
 class ParentSpaceNode;
-class TESBoundObject
-{
-  public:
-    virtual ~TESBoundObject();  // the original class is polymorphic (rtti_variants.py)
-  public:
-    int GetFormType() const;
-};
+
 class VATS
 {
   public:

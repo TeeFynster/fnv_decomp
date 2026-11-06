@@ -1,17 +1,19 @@
-// gamebryo2.2/corelibs/nianimation/nibooldata.cpp: NiBoolData, NiBoolDataSaver (7 functions)
+// gamebryo2.2/corelibs/nianimation/nibooldata.cpp: NiBoolData (7 functions)
+#include "NiRefObject_inline.h"
 
 #include "nibooldata_decls.h"
+#include "../../../../include/StrArr.h"
 
 // @fnv 0x00a53a50
 void NiBoolData::LoadBinary(NiStream& stream)
 {
     NiObject::LoadBinary(stream);
-    AnimationKey::KeyType type = AnimationKey::STEPKEY;
+    NiAnimationKey::KeyType type = NiAnimationKey::STEPKEY;
     unsigned int numKeys;
     ReadBinaryValue(stream, numKeys);
     if (numKeys > 0)
     {
-        if (stream.m_uiNifVersion >= 0x0a010068)
+        if (stream.m_uiNifFileVersion >= 0x0a010068)
             ReadBinaryValue(stream, type);
         m_ucKeyDataSize = BooleanKey::GetKeySize(type);
         BooleanKey* keys = static_cast<BooleanKey*>(BooleanKey::GetLoadFunction(type)(stream, numKeys));
@@ -22,7 +24,7 @@ void NiBoolData::LoadBinary(NiStream& stream)
 
 // Replaces the stored key array: frees the old keys, then stores the new keys, count, key type and key size, or clears them when keys is null or numKeys is zero.
 // @fnv 0x00a538b0
-void NiBoolData::SetColorKeys(BooleanKey* keys, unsigned int numKeys, AnimationKey::KeyType eKeyType)
+void NiBoolData::SetColorKeys(BooleanKey* keys, unsigned int numKeys, NiAnimationKey::KeyType eKeyType)
 {
     if (m_pKeyArray)
         BooleanKey::GetDeleteFunction(m_eRequestType)(m_pKeyArray);
@@ -37,39 +39,21 @@ void NiBoolData::SetColorKeys(BooleanKey* keys, unsigned int numKeys, AnimationK
     {
         m_uiNumKeys = 0;
         m_pKeyArray = 0;
-        m_eRequestType = AnimationKey::NOINTERP;
+        m_eRequestType = NiAnimationKey::NOINTERP;
         m_ucKeyDataSize = 0;
     }
 }
 
 void __cdecl UpdateSlotStates(unsigned int, unsigned int, void*&, unsigned int&, float, float);
-struct StandIn_00a537a0
-{
-    int _pad[2];
-    unsigned int m_uiNumKeys;
-    void* m_pKeyArray;
-    unsigned int m_eRequestType;
-    void FUN_00a537a0(float m_fStartTime, float m_fMaximumDistance);
-};
+// These entry points use ECX for the shared object and retain the original stack arguments.
+// The shared class does not yet declare these NiBoolData operations.
 // @fnv 0x00a537a0
-void StandIn_00a537a0::FUN_00a537a0(float m_fStartTime, float m_fMaximumDistance)
+void __fastcall GuaranteeBoolKeys(NiBoolData* data, void*, float m_fStartTime, float m_fMaximumDistance)
 {
-    void* pkKeys = m_pKeyArray;
-    UpdateSlotStates(5, m_eRequestType, pkKeys, m_uiNumKeys, m_fStartTime, m_fMaximumDistance);
-    m_pKeyArray = pkKeys;
+    void* pkKeys = data->m_pKeyArray;
+    UpdateSlotStates(5, data->m_eRequestType, pkKeys, data->m_uiNumKeys, m_fStartTime, m_fMaximumDistance);
+    data->m_pKeyArray = static_cast<BooleanKey*>(pkKeys);
 }
-
-struct StrArr
-{
-    void* _pad00[2];
-    unsigned short m_uiCapacity;
-    unsigned short m_uiSize;
-    unsigned short _pad01;
-    unsigned short m_uiGrowSize;
-
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
 
 struct GlobalObjectO2_00a7b610
 {
@@ -82,34 +66,26 @@ void __stdcall AppendCameraPathEntries(StrArr*);
 void* __cdecl _FUN_00a7d330(void*);
 char* __cdecl FUN_00a7d510(char const*, unsigned int);
 
-struct FUN_00a53ba0_shell
-{
-    void* _pad00[2];
-    unsigned int m_uiNumKeys;
-
-    void FUN_00a53ba0(StrArr*);
-};
-
 // @fnv 0x00a53ba0
-void FUN_00a53ba0_shell::FUN_00a53ba0(StrArr* apViewerStrings)
+void __fastcall GetBoolViewerStrings(NiBoolData* data, void*, StrArr* apViewerStrings)
 {
     AppendCameraPathEntries(apViewerStrings);
 
     char* pString = static_cast<char*>(_FUN_00a7d330(g_011f4054.pObject));
-    unsigned int uiIndex = apViewerStrings->m_uiSize;
-    unsigned int uiCapacity = apViewerStrings->m_uiCapacity;
+    unsigned int uiIndex = apViewerStrings->m_usSize;
+    unsigned int uiCapacity = apViewerStrings->m_usMaxSize;
 
     if (uiIndex >= uiCapacity)
-        apViewerStrings->SetSize(apViewerStrings->m_uiGrowSize + uiIndex);
+        apViewerStrings->SetSize(apViewerStrings->m_usGrowBy + uiIndex);
 
     apViewerStrings->SetAt(uiIndex, pString);
 
-    pString = FUN_00a7d510("m_uiNumKeys", m_uiNumKeys);
-    uiIndex = apViewerStrings->m_uiSize;
-    uiCapacity = apViewerStrings->m_uiCapacity;
+    pString = FUN_00a7d510("m_uiNumKeys", data->m_uiNumKeys);
+    uiIndex = apViewerStrings->m_usSize;
+    uiCapacity = apViewerStrings->m_usMaxSize;
 
     if (uiIndex >= uiCapacity)
-        apViewerStrings->SetSize(apViewerStrings->m_uiGrowSize + uiIndex);
+        apViewerStrings->SetSize(apViewerStrings->m_usGrowBy + uiIndex);
 
     apViewerStrings->SetAt(uiIndex, pString);
 }
@@ -117,45 +93,32 @@ void FUN_00a53ba0_shell::FUN_00a53ba0(StrArr* apViewerStrings)
 typedef bool(__cdecl* FUN_00a53830_elemcmp)(void* a, void* b);
 extern FUN_00a53830_elemcmp DAT_011f3b58[];
 
-class FUN_00a53830_cls
-{
-  public:
-    int unk00;
-    int unk04;
-    unsigned int m_uiCount;
-    unsigned char* m_pData;
-    unsigned int m_uiType;
-    unsigned char m_ucStride;
-    bool IsSameAs(FUN_00a53830_cls* other);
-    bool Equals(FUN_00a53830_cls* other);
-};
-
-// Compares this object with other via IsSameAs, count, type and stride, then element-wise using DAT_011f3b58[m_uiType]; returns true if all match.
+// Compares the base object, key count, type and stride, then compares each key with the type-specific function.
 // @fnv 0x00a53830
-bool FUN_00a53830_cls::Equals(FUN_00a53830_cls* other)
+bool __fastcall EqualsBoolData(NiBoolData* data, void*, NiBoolData* other)
 {
-    if (!IsSameAs(other))
+    if (!data->IsSameAs(other))
     {
         return false;
     }
-    if (m_uiCount != other->m_uiCount)
+    if (data->m_uiNumKeys != other->m_uiNumKeys)
     {
         return false;
     }
-    if (m_uiType != other->m_uiType)
+    if (data->m_eRequestType != other->m_eRequestType)
     {
         return false;
     }
-    if (m_ucStride != other->m_ucStride)
+    if (data->m_ucKeyDataSize != other->m_ucKeyDataSize)
     {
         return false;
     }
-    FUN_00a53830_elemcmp pElemCmp = DAT_011f3b58[m_uiType];
-    for (unsigned int uiIndex = 0; uiIndex < m_uiCount; ++uiIndex)
+    FUN_00a53830_elemcmp pElemCmp = DAT_011f3b58[data->m_eRequestType];
+    for (unsigned int uiIndex = 0; uiIndex < data->m_uiNumKeys; ++uiIndex)
     {
-        unsigned int off = (unsigned int)m_ucStride * uiIndex;
-        unsigned char* pOtherData = other->m_pData + off;
-        unsigned char* pThisData = m_pData + off;
+        unsigned int off = (unsigned int)data->m_ucKeyDataSize * uiIndex;
+        unsigned char* pOtherData = reinterpret_cast<unsigned char*>(other->m_pKeyArray) + off;
+        unsigned char* pThisData = reinterpret_cast<unsigned char*>(data->m_pKeyArray) + off;
         if (!pElemCmp(pThisData, pOtherData))
         {
             return false;
@@ -165,73 +128,49 @@ bool FUN_00a53830_cls::Equals(FUN_00a53830_cls* other)
 }
 
 typedef void(__cdecl* NiBoolSaveKeysFunction)(NiStream&, BooleanKey*, unsigned int);
-extern "C" NiBoolSaveKeysFunction DAT_011f3ac8[AnimationKey::NUMKEYTYPES];
-struct NiBinaryWriter
+extern "C" NiBoolSaveKeysFunction DAT_011f3ac8[NiAnimationKey::NUMKEYTYPES];
+template <class T> inline void BinaryWriteValue(NiBinaryStream* output, const T& value)
 {
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    void* m_pfnRead;
-    unsigned int(__cdecl* m_pfnWrite)(NiBinaryWriter*, const void*, unsigned int, unsigned int*, unsigned int);
-    template <class T> inline void BinaryWrite(const T& value)
-    {
-        unsigned int size = sizeof(T);
-        m_uiStreamFlags += m_pfnWrite(this, &value, size, &size, 1);
-    }
-};
+    unsigned int size = sizeof(T);
+    output->m_uiAbsoluteCurrentPos += output->m_pfnWrite(output, &value, size, &size, 1);
+}
 template <class T> inline void WriteValue(NiStream& stream, const T& value)
 {
-    reinterpret_cast<NiBinaryWriter*>(stream.m_pBackingStream)->BinaryWrite(value);
+    BinaryWriteValue(stream.m_pkOstr, value);
 }
-struct NiBoolDataSaver
-{
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiRefCount;
-    unsigned int m_uiNumKeys;
-    BooleanKey* m_pKeyArray;
-    AnimationKey::KeyType m_eRequestType;
-    unsigned char m_ucKeyDataSize;
-    void FUN_00a89af0(NiStream&);
-    void SaveBoolData(NiStream&);
-};
 // @fnv 0x00a53b20
-void NiBoolDataSaver::SaveBoolData(NiStream& stream)
+void __fastcall SaveBoolData(NiBoolData* data, void*, NiStream& stream)
 {
-    FUN_00a89af0(stream);
-    WriteValue(stream, m_uiNumKeys);
-    if (m_uiNumKeys > 0)
+    data->NiObject::SaveBinary(stream);
+    WriteValue(stream, data->m_uiNumKeys);
+    if (data->m_uiNumKeys > 0)
     {
-        WriteValue(stream, m_eRequestType);
-        DAT_011f3ac8[m_eRequestType](stream, m_pKeyArray, m_uiNumKeys);
+        WriteValue(stream, data->m_eRequestType);
+        DAT_011f3ac8[data->m_eRequestType](stream, data->m_pKeyArray, data->m_uiNumKeys);
     }
 }
 
-void __cdecl FUN_00a3d630(unsigned int mode, AnimationKey::KeyType type, BooleanKey* sourceKeys,
+void __cdecl FUN_00a3d630(unsigned int mode, NiAnimationKey::KeyType type, BooleanKey* sourceKeys,
                           unsigned int sourceCount, float startTime, float endTime, BooleanKey** outputKeys,
                           unsigned int* outputCount);
 
-struct FUN_00a53910_shell : NiBoolData
-{
-    void __thiscall FUN_00a5d510(NiBoolData*& clone);
-    void __thiscall FUN_00a53910(float startTime, float endTime, NiPointer<NiBoolData>& output);
-};
-
 // Clones this NiBoolData, processes its keys with the requested time range when present, and assigns the result to output.
 // @fnv 0x00a53910
-void FUN_00a53910_shell::FUN_00a53910(float startTime, float endTime, NiPointer<NiBoolData>& output)
+void __fastcall CloneBoolDataForTimeRange(NiBoolData* data, void*, float startTime, float endTime, NiPointer<NiBoolData>& output)
 {
     NiBoolData* original = 0;
-    FUN_00a5d510(original);
+    data->ResolveObjectPointer(reinterpret_cast<NiPointer<NiObject>&>(original));
 
     NiBoolData* copy = original;
     if (copy != 0)
         copy->IncRefCount();
 
-    if (m_uiNumKeys > 0)
+    if (data->m_uiNumKeys > 0)
     {
         BooleanKey* keys = 0;
         unsigned int count = 0;
-        FUN_00a3d630(5, m_eRequestType, m_pKeyArray, m_uiNumKeys, startTime, endTime, &keys, &count);
-        copy->SetColorKeys(keys, count, m_eRequestType);
+        FUN_00a3d630(5, data->m_eRequestType, data->m_pKeyArray, data->m_uiNumKeys, startTime, endTime, &keys, &count);
+        copy->SetColorKeys(keys, count, data->m_eRequestType);
     }
 
     NiBoolData* previous = output.m_pObject;

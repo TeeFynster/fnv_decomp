@@ -4,8 +4,9 @@
 
 #include "tesobjectacti_layout.h"
 #include "BaseFormComponent.h"
-#include "TESForm.h"
-#include "TESFullName.h"
+#include "layout_support.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFullName.h"
 #define FNV_TESSCRIPTABLEFORM_H
 class Script;
 class TESScriptableForm : public BaseFormComponent

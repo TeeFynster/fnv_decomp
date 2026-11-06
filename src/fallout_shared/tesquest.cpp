@@ -1,6 +1,144 @@
-// fallout_shared/tesquest.cpp: TESQuest, PlayerQuestData, FakeQuest, QuestSaveSize and more (39 functions)
+#include "../../include/SettingT.h"
+// fallout_shared/tesquest.cpp: TESQuest and quest stage/save support
 
-#include "tesquest_types.h"
+#include <stddef.h>
+#define FNV_ASSERT(name, expression) typedef char name[(expression) ? 1 : -1]
+class TESForm;
+class TESObjectREFR;
+class TESActorBase;
+#include "../../include/ENUM_FORM_ID.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/BSStringT.h"
+#include "../../include/SETTING_VALUE.h"
+
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESIcon.h"
+#include "../../include/TESScriptableForm.h"
+#include "../../include/BGSQuestObjective.h"
+#include "../../include/PerkEntryConditionSet.h"
+#include "../../include/QuestData.h"
+#include "../../include/Script.h"
+#include "../../include/ScriptLocals.h"
+#include "../../include/TESFile.h"
+#include "../../include/TESRecipe.h"
+#include "../../include/TESQuest.h"
+
+FNV_ASSERT(FormSize, sizeof(TESForm) == 0x18);
+FNV_ASSERT(FormIDOffset, offsetof(TESForm, iFormID) == 0x0c);
+void* __cdecl operator new(unsigned int size);
+void __cdecl operator delete(void* memory);
+void* __cdecl operator new[](unsigned int size);
+void __cdecl operator delete[](void* memory);
+
+class PlayerQuestData;
+class RegionObjectEntry;
+class AnimationClipStatus
+{
+  public:
+    unsigned char m_ucClipIdentifier;
+    bool m_bCompleted;
+};
+class QuestStage
+{
+  public:
+    AnimationClipStatus m_Data;
+    unsigned char layoutPadding2[2];
+    BSSimpleList<PlayerQuestData*> m_kStageItems;
+    QuestStage();
+    ~QuestStage();
+    bool GetDone();
+    unsigned char GetIndex();
+    void SetIndex(unsigned char index);
+    void MarkDone(TESQuest* quest, bool allItems);
+    void MarkDone(bool done);
+    PlayerQuestData* GetStageItemByIndex(unsigned char index);
+    BSSimpleList<PlayerQuestData*>* GetStageItemList();
+    void InitItem(TESForm* owner);
+    void Load(TESFile* file);
+    void AddStageItem(PlayerQuestData* item);
+};
+class RegionObjectEntry
+{
+  public:
+    unsigned char cFlags;
+    unsigned char layoutPadding1[3];
+    PerkEntryConditionSet m_kInfoConditions;
+    TESObjectREFR* m_pReference;
+    unsigned int m_auiData[14];
+    RegionObjectEntry();
+    void Load(TESFile* file);
+    TESObjectREFR* GetReference(bool resolve);
+    PerkEntryConditionSet* GetConditions();
+};
+class Date
+{
+  public:
+    unsigned short usDate, usYear;
+    Date();
+    Date(const Date& date);
+    ~Date();
+};
+class PlayerQuestData
+{
+  public:
+    unsigned char m_ucEntryType;
+    unsigned char layoutPadding1[3];
+    PerkEntryConditionSet m_kInfoConditions;
+    Script ScriptData;
+    unsigned int uiFileOffset;
+    unsigned char m_ucClipIdentifier;
+    bool bHasLogEntry;
+    unsigned char layoutPadding66[2];
+    Date* pLogDate;
+    TESQuest* pOwner;
+    TESQuest* pNextQuest;
+    PlayerQuestData();
+    bool Load(TESFile* file);
+    void SetIndex(unsigned char index);
+    void SetHasLogEntry(bool value);
+    PerkEntryConditionSet* GetConditions();
+    Date* GetLogDate();
+    void SetLogDate(Date* date);
+};
+// These save/load-buffer entry points return a trivial mask in the original ABI.
+// Keep that ABI independent of pending FormChangeMask destructor changes.
+class QuestChangeMask
+{
+  public:
+    unsigned int flags;
+    operator bool() const { return flags != 0; }
+};
+
+class QuestLoadChangeFlags : public BGSLoadFormBuffer
+{
+  public:
+    QuestChangeMask GetChangeFlags(unsigned int mask);
+    QuestChangeMask GetOldChangeFlags(unsigned int mask);
+};
+
+class QuestSaveChangeFlags : public BGSSaveFormBuffer
+{
+  public:
+    QuestChangeMask GetChangeFlags(unsigned int mask);
+};
+
+void __cdecl LogWarning(const char* message, ...);
+extern "C" void* __cdecl _alloca(unsigned int size);
+class INISettingCollection;
+using ::SettingT;
+extern SettingT<INISettingCollection> bActivateAllQuestScripts;
+FNV_ASSERT(QuestSize, sizeof(TESQuest) == 0x6c);
+FNV_ASSERT(QuestStageListOffset, offsetof(TESQuest, m_kStageList) == 0x44);
+FNV_ASSERT(QuestLocalsOffset, offsetof(TESQuest, m_pScriptLocals) == 0x5c);
+FNV_ASSERT(QuestCurrentStageOffset, offsetof(TESQuest, m_ucEnabled) == 0x60);
+FNV_ASSERT(QuestStageSize, sizeof(QuestStage) == 0x0c);
+FNV_ASSERT(QuestObjectiveSize, sizeof(BGSQuestObjective) == 0x24);
+FNV_ASSERT(QuestStageItemSize, sizeof(PlayerQuestData) == 0x74);
+FNV_ASSERT(QuestTargetSize, sizeof(RegionObjectEntry) == 0x48);
+FNV_ASSERT(DateSize, sizeof(Date) == 4);
+FNV_ASSERT(ScriptLocalsSize, sizeof(ScriptLocals) == 0x14);
 
 // @fnv 0x0060d700
 unsigned int TESQuest::GetStageMask()
@@ -162,14 +300,14 @@ void TESQuest::InitItem()
 {
     if (IsFormInitialized())
         return;
-    tESScriptableFormComponent.InitItem(this);
-    if (tESScriptableFormComponent.GetScript())
+    TESScriptableForm::InitItem(this);
+    if (TESScriptableForm::GetScript())
     {
-        m_pScriptLocals = tESScriptableFormComponent.GetScript()->GetOrCreateScriptLocals();
-        tESScriptableFormComponent.GetScript()->SetOwnerQuest(this);
+        m_pScriptLocals = TESScriptableForm::GetScript()->GetOrCreateScriptLocals();
+        TESScriptableForm::GetScript()->SetOwnerQuest(this);
         if (m_pScriptLocals)
             SetFormFlags(0x40000000);
-        if (bActivateAllQuestScripts.Bool()->b)
+        if (bActivateAllQuestScripts.Bool()[0])
             SetEnabled(true);
     }
     if (GetConditions())
@@ -194,7 +332,7 @@ void TESQuest::InitItem()
 void TESQuest::Revert(BGSLoadFormBuffer* buffer)
 {
     TESForm::Revert(buffer);
-    if (buffer->GetOldChangeFlags(0x80000000U))
+    if (static_cast<QuestLoadChangeFlags*>(buffer)->GetOldChangeFlags(0x80000000U).operator bool())
     {
         BSSimpleList<QuestStage*>* stages = &m_kStageList;
         while (stages)
@@ -219,9 +357,9 @@ void TESQuest::Revert(BGSLoadFormBuffer* buffer)
         }
         m_ucEnabled = 0;
     }
-    if (buffer->GetOldChangeFlags(0x40000000U) && m_pScriptLocals)
+    if (static_cast<QuestLoadChangeFlags*>(buffer)->GetOldChangeFlags(0x40000000U).operator bool() && m_pScriptLocals)
         m_pScriptLocals->Revert(buffer);
-    if (buffer->GetOldChangeFlags(0x20000000U))
+    if (static_cast<QuestLoadChangeFlags*>(buffer)->GetOldChangeFlags(0x20000000U).operator bool())
     {
         BSSimpleList<BGSQuestObjective*>* objectives = &m_kObjectives;
         while (objectives)
@@ -280,19 +418,19 @@ BGSQuestObjective* TESQuest::GetObjective(unsigned int index)
 void TESQuest::LoadGame(BGSLoadFormBuffer* buffer)
 {
     TESForm::LoadGame(buffer);
-    if (buffer->GetChangeFlags(2))
-        buffer->ReadTypedData(&data.m_ucEntryType, 1);
-    if (buffer->GetChangeFlags(4))
-        buffer->ReadTypedData(&data.fQuestDelayTime, 4);
-    if (buffer->GetChangeFlags(0x80000000U))
+    if (static_cast<QuestLoadChangeFlags*>(buffer)->GetChangeFlags(2U).operator bool())
+        static_cast<BGSLoadFormBuffer*>(buffer)->ReadTypedData(static_cast<void*>(&data.m_ucEntryType), 1U);
+    if (static_cast<QuestLoadChangeFlags*>(buffer)->GetChangeFlags(4U).operator bool())
+        static_cast<BGSLoadFormBuffer*>(buffer)->ReadTypedData(static_cast<void*>(&data.fQuestDelayTime), 4U);
+    if (static_cast<QuestLoadChangeFlags*>(buffer)->GetChangeFlags(0x80000000U).operator bool())
     {
-        unsigned int stageCount = buffer->ReadElementCount();
+        unsigned int stageCount = static_cast<BGSLoadFormBuffer*>(buffer)->ReadElementCount();
         for (unsigned int i = 0; i < stageCount; ++i)
         {
             unsigned char stageIndex = 0;
             bool done = false;
-            buffer->ReadTypedData(&stageIndex, 1);
-            buffer->ReadTypedData(&done, 1);
+            static_cast<BGSLoadFormBuffer*>(buffer)->ReadTypedData(static_cast<void*>(&stageIndex), 1U);
+            static_cast<BGSLoadFormBuffer*>(buffer)->ReadTypedData(static_cast<void*>(&done), 1U);
             {
                 QuestStage* stage = GetStage(stageIndex);
                 if (stage)
@@ -300,16 +438,16 @@ void TESQuest::LoadGame(BGSLoadFormBuffer* buffer)
                 else
                     LogWarning("SAVELOAD: Could not find stage %i in quest %s during load.", stageIndex,
                                GetEditorName());
-                unsigned int itemCount = buffer->ReadElementCount();
+                unsigned int itemCount = static_cast<BGSLoadFormBuffer*>(buffer)->ReadElementCount();
                 for (unsigned int j = 0; j < itemCount; ++j)
                 {
                     unsigned char itemIndex = 0;
                     bool hasDate = false;
                     Date logDate;
-                    buffer->ReadTypedData(&itemIndex, 1);
-                    buffer->ReadTypedData(&hasDate, 1);
+                    static_cast<BGSLoadFormBuffer*>(buffer)->ReadTypedData(static_cast<void*>(&itemIndex), 1U);
+                    static_cast<BGSLoadFormBuffer*>(buffer)->ReadTypedData(static_cast<void*>(&hasDate), 1U);
                     if (hasDate)
-                        buffer->ReadTypedData(&logDate, 4);
+                        static_cast<BGSLoadFormBuffer*>(buffer)->ReadTypedData(static_cast<void*>(&logDate), 4U);
                     if (hasDate && stage)
                     {
                         PlayerQuestData* item = stage->GetStageItemByIndex(itemIndex);
@@ -322,19 +460,19 @@ void TESQuest::LoadGame(BGSLoadFormBuffer* buffer)
         m_ucEnabled = 0;
         UpdateStageMask();
     }
-    if (buffer->GetChangeFlags(0x40000000U))
+    if (static_cast<QuestLoadChangeFlags*>(buffer)->GetChangeFlags(0x40000000U).operator bool())
     {
         if (m_pScriptLocals)
-            m_pScriptLocals->LoadGame(buffer);
+            m_pScriptLocals->LoadGame(static_cast<BGSLoadFormBuffer*>(buffer));
         else
         {
             ScriptLocals locals;
-            locals.LoadGame(buffer);
+            locals.LoadGame(static_cast<BGSLoadFormBuffer*>(buffer));
         }
     }
-    if (buffer->GetChangeFlags(0x20000000U))
+    if (static_cast<QuestLoadChangeFlags*>(buffer)->GetChangeFlags(0x20000000U).operator bool())
     {
-        unsigned int objectiveCount = buffer->ReadElementCount();
+        unsigned int objectiveCount = static_cast<BGSLoadFormBuffer*>(buffer)->ReadElementCount();
         for (unsigned int k = 0; k < objectiveCount; ++k)
         {
             struct SavedObjectiveState
@@ -344,8 +482,8 @@ void TESQuest::LoadGame(BGSLoadFormBuffer* buffer)
             } savedObjective;
             savedObjective.index = 0;
             savedObjective.state = QOS_DORMANT;
-            buffer->ReadTypedData(&savedObjective.index, 4);
-            buffer->ReadTypedData(&savedObjective.state, 4);
+            static_cast<BGSLoadFormBuffer*>(buffer)->ReadTypedData(static_cast<void*>(&savedObjective.index), 4U);
+            static_cast<BGSLoadFormBuffer*>(buffer)->ReadTypedData(static_cast<void*>(&savedObjective.state), 4U);
             BGSQuestObjective* objective = GetObjective(savedObjective.index);
             if (objective)
                 objective->SetState(savedObjective.state);
@@ -359,7 +497,7 @@ bool TESQuest::Load(TESFile* file)
     QuestStage* stage;
     {
         unsigned char formType = file->GetTESForm();
-        if (formType != FORM_QUEST)
+        if (formType != ENUM_FORM_ID_QUST_ID)
             return false;
         stage = 0;
         PlayerQuestData* item = 0;
@@ -385,15 +523,15 @@ bool TESQuest::Load(TESFile* file)
             case CHUNK_SCRI: {
                 unsigned int script = 0;
                 file->GetChunkData(&script);
-                tESScriptableFormComponent.SetScript(reinterpret_cast<Script*>(script));
-                tESScriptableFormComponent.InitItem(this);
+                TESScriptableForm::SetScript(reinterpret_cast<Script*>(script));
+                TESScriptableForm::InitItem(this);
                 break;
             }
             case CHUNK_FULL:
-                TESFullNameLoader::LoadFullNameChunk(this ? &tESFullNameComponent : 0, file);
+                TESFullName::LoadFullNameChunk(this ? reinterpret_cast<TESFullName*>(reinterpret_cast<char*>(this) + 0x30) : 0, file);
                 break;
             case CHUNK_ICON:
-                TESTexture::ReadTextureData(this ? &tESIconComponent : 0, file);
+                TESTexture::ReadTextureData(this ? reinterpret_cast<TESIcon*>(reinterpret_cast<char*>(this) + 0x24) : 0, file);
                 break;
             case CHUNK_DATA:
                 ReadTypedData(file, &data, sizeof(data));
@@ -487,8 +625,8 @@ void TESQuest::SetStartsEnabled(bool enabled)
 // @fnv 0x0060d4d0
 void TESQuest::RunScript()
 {
-    if (tESScriptableFormComponent.GetScript())
-        tESScriptableFormComponent.GetScript()->Run(0, m_pScriptLocals, 0, false);
+    if (TESScriptableForm::GetScript())
+        TESScriptableForm::GetScript()->Run(static_cast<TESObjectREFR*>(0), m_pScriptLocals, static_cast<TESObjectREFR*>(0), false);
 }
 
 // @fnv 0x0060d490
@@ -518,13 +656,7 @@ short* FUN_004b1000_shell::CopyShortPair(const short* pSource)
     return a;
 }
 
-struct MiscStatManager
-{
-    enum MiscStat
-    {
-    };
-    static void __cdecl AddMiscStat(MiscStat id, int val);
-};
+#include "../../include/MiscStatManager.h"
 
 // @fnv 0x0060cad0
 void FUN_0060cad0(int aeStatId)
@@ -602,174 +734,58 @@ void FUN_0060e680_shell::SetFlags(unsigned int auiFlags)
     *(unsigned int*)((char*)this + 0x54) = *(unsigned int*)((char*)this + 0x54) | auiFlags;
 }
 
-void __cdecl _Deallocate(void*);
-struct FakeQuest
-{
-    void FUN_0060c660();
-    void* FUN_0060c630(unsigned int);
-};
-// @fnv 0x0060c630
-void* FakeQuest::FUN_0060c630(unsigned int flags)
-{
-    FUN_0060c660();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
 extern "C" void* __cdecl _alloca(unsigned int);
 extern "C" void __cdecl _security_check_cookie(unsigned int);
 extern "C" unsigned int DAT_011c16bc;
-extern "C" unsigned int __cdecl BSStringLength(const char*);
 struct TaskQueueInterface
 {
     static void __cdecl CopyStringToBuffer(char*, unsigned int, const char*);
 };
-struct BSStringT_char
+// TESQuest has no declaration for its editor-ID setter override yet.
+// Keep only that missing entry point here, without a duplicate quest layout.
+struct QuestEditorIDSetter
 {
-    char* StrCmp(const char*, bool) const;
-};
-struct BSStr
-{
-    bool Set(const char*, unsigned int);
-};
-struct FUN_0060dab0_shell
-{
-    bool FUN_0060dab0(const char* arg);
+    bool SetEditorID(const char* arg);
 };
 // @fnv 0x0060dab0
-bool FUN_0060dab0_shell::FUN_0060dab0(const char* pcString)
+bool QuestEditorIDSetter::SetEditorID(const char* pcString)
 {
     unsigned int size = BSStringLength(pcString) + 1;
     char* buffer = static_cast<char*>(_alloca(size));
     TaskQueueInterface::CopyStringToBuffer(buffer, size, pcString);
-    if (!reinterpret_cast<BSStringT_char*>(reinterpret_cast<char*>(this) + 0x64)->StrCmp(buffer, true))
+    if (!reinterpret_cast<BSStringT<char>*>(reinterpret_cast<char*>(this) + 0x64)->StrCmp(buffer, true))
         return false;
-    reinterpret_cast<BSStr*>(reinterpret_cast<char*>(this) + 0x64)->Set(buffer, 0);
+    reinterpret_cast<BSStringT<char>*>(reinterpret_cast<char*>(this) + 0x64)->Set(buffer, 0);
     return true;
 }
 
-struct Flt
-{
-    operator unsigned int();
-};
-struct FUN_0060c5f0_Class
-{
-    char _pad[0x64];
-    Flt fld64;
-    const char* GetStringOrEmpty();
-};
-// Returns the string pointer stored in fld64, or an empty string when fld64 is zero.
+// Returns the editor ID string, or an empty string when the ID is unset.
 // @fnv 0x0060c5f0
-const char* FUN_0060c5f0_Class::GetStringOrEmpty()
+const char* TESQuest::GetEditorName() const
 {
-    return (unsigned int)fld64 ? (const char*)(unsigned int)fld64 : "";
+    return strEditorID.String() ? strEditorID.String() : "";
 }
 
-struct BGSSaveFormBuffer : BGSLoadFormBuffer
-{
-    void FUN_005621f0(unsigned int);
-};
-struct FUN_0060e7c0_outer
-{
-    char _pad[0x5c];
-    int _5c;
-    void FUN_0060e7c0(BGSSaveFormBuffer* apSaveGameBuffer);
-};
 // @fnv 0x0060e7c0
-void FUN_0060e7c0_outer::FUN_0060e7c0(BGSSaveFormBuffer* apSaveGameBuffer)
+void TESQuest::FUN_0060e7c0(BGSSaveFormBuffer* apSaveGameBuffer)
 {
-    if (apSaveGameBuffer->GetChangeFlags(0x40000000) && _5c == 0)
-        apSaveGameBuffer->FUN_005621f0(0x40000000);
+    if (static_cast<QuestSaveChangeFlags*>(apSaveGameBuffer)->GetChangeFlags(0x40000000).operator bool() && m_pScriptLocals == 0)
+        apSaveGameBuffer->FUN_005621f0(0x40000000U);
 }
 
-namespace stand {
-struct TESScriptableForm
-{
-    virtual void f0();
-    TESScriptableForm();
-    void* m_pFormScript;
-    bool m_bHasScript;
-};
-struct TESIcon
-{
-    virtual void f0();
-    TESIcon();
-    ~TESIcon();
-    void* p;
-    unsigned int n;
-};
-struct TESFullName
-{
-    virtual void f0();
-    TESFullName();
-    ~TESFullName();
-    void* p;
-    unsigned int n;
-};
-}
-struct FUN_0060c5c0
-{
-    FUN_0060c5c0();
-    unsigned int a;
-    float b;
-};
-struct SL
-{
-    SL();
-    ~SL();
-    void* a;
-    void* b;
-};
-struct CondS
-{
-    CondS();
-    ~CondS();
-    void* a;
-    void* b;
-};
-struct StrMem
-{
-    StrMem();
-    ~StrMem();
-    char* p;
-    unsigned short a;
-    unsigned short b;
-};
-struct FUN_0060c4b0_QI
-{
-    void ResetFormData();
-};
-struct FUN_0060c4b0 : public TESForm, public stand::TESScriptableForm, public stand::TESIcon, public stand::TESFullName
-{
-    FUN_0060c5c0 data;
-    SL m_kStageList;
-    SL m_kObjectives;
-    CondS m_kInfoConditions;
-    ScriptLocals* m_pScriptLocals;
-    unsigned char m_ucEnabled;
-    StrMem strEditorID;
-    FUN_0060c4b0();
-    virtual ~FUN_0060c4b0();
-};
 // @fnv 0x0060c4b0
-FUN_0060c4b0::FUN_0060c4b0()
+TESQuest::TESQuest()
 {
-    SetFormType(FORM_QUEST);
+    SetFormType(ENUM_FORM_ID_QUST_ID);
     m_pScriptLocals = 0;
-    ((FUN_0060c4b0_QI*)this)->ResetFormData();
+    ResetFormData();
 }
 
 void __cdecl FUN_0077a480(void* apQuest);
 
-struct FUN_0060caf0_shell : TESQuest
-{
-    void FUN_0060caf0(bool abCompleted);
-};
-
 // Sets or clears the completed flag bit 0x40 on the quest, calls vtable slot 18 with 2, and notifies via FUN_0077a480 when newly completed.
 // @fnv 0x0060caf0
-void FUN_0060caf0_shell::FUN_0060caf0(bool abCompleted)
+void TESQuest::FUN_0060caf0(bool abCompleted)
 {
     if (abCompleted && GetCompleted())
         return;
@@ -792,131 +808,45 @@ struct TopicMenuController
     static void __cdecl IncrementMiscStat(int id);
 };
 
-struct FUN_0060ca30_shell
-{
-    // Virtual destructor for the shell type; performs no work.
 // @fnv 0x0060ca30
-    virtual ~FUN_0060ca30_shell()
-    {}
-    virtual void f0()
-    {}
-    virtual void f1()
-    {}
-    virtual void f2()
-    {}
-    virtual void f3()
-    {}
-    virtual void f4()
-    {}
-    virtual void f5()
-    {}
-    virtual void f6()
-    {}
-    virtual void f7()
-    {}
-    virtual void f8()
-    {}
-    virtual void f9()
-    {}
-    virtual void f10()
-    {}
-    virtual void f11()
-    {}
-    virtual void f12()
-    {}
-    virtual void f13()
-    {}
-    virtual void f14()
-    {}
-    virtual void f15()
-    {}
-    virtual void f16()
-    {}
-    virtual void RemoveTopic(int id)
-    {}
-
-    unsigned char _pad[0x38];
-    unsigned char data;
-
-    void FUN_0060ca30(bool abCompleted);
-};
-
-void FUN_0060ca30_shell::FUN_0060ca30(bool abCompleted)
+void TESQuest::FUN_0060ca30(bool abCompleted)
 {
-    if (abCompleted && !(data & 2))
+    if (abCompleted && !(data.m_ucEntryType & 2))
     {
-        data |= 2;
-        RemoveTopic(2);
+        data.m_ucEntryType |= 2;
+        MarkAsModified(2);
         TopicMenuController::IncrementMiscStat(0);
         FUN_0077a480(this);
     }
-    else if (!abCompleted && (data & 2))
+    else if (!abCompleted && (data.m_ucEntryType & 2))
     {
-        data &= ~2;
-        RemoveTopic(2);
+        data.m_ucEntryType &= ~2;
+        MarkAsModified(2);
         FUN_0060cad0(0);
     }
 }
 
-class QuestBase
-{
-  public:
-    unsigned char m_ucFormType;
-    unsigned int m_uiFormFlags;
-    unsigned int iFormID;
-    BSSimpleList<TESFile*> m_kSourceFiles;
-    virtual ~QuestBase();
-};
-
-class FUN_0060c660 : public QuestBase, public TESScriptableForm, public TESIcon, public TESFullName
-{
-  public:
-    QuestData data;
-    BSSimpleList<QuestStage*> m_kStageList;
-    BSSimpleList<BGSQuestObjective*> m_kObjectives;
-    PerkEntryConditionSet m_kInfoConditions;
-    ScriptLocals* m_pScriptLocals;
-    unsigned char m_ucEnabled;
-    unsigned char layoutPadding61[3];
-    BSStringT<char> strEditorID;
-
-    void ResetDefaults();
-    virtual ~FUN_0060c660();
-};
-
-// Destructor that calls ResetDefaults to reset the quest's state.
+// Clears quest data before destroying the shared members and base components.
 // @fnv 0x0060c660
-FUN_0060c660::~FUN_0060c660()
+TESQuest::~TESQuest()
 {
-    ResetDefaults();
+    TESQuest::ClearData();
 }
 
-struct FUN_0060c950_item
+// The notifying state transition is distinct from shared SetState's raw setter.
+struct QuestObjectiveTransitions : BGSQuestObjective
 {
-    bool FUN_005a5e70();
-    void FUN_005ec5d0(int a1);
-};
-
-struct FUN_0060c950_node
-{
-    FUN_0060c950_item** FUN_006815c0();
-    FUN_0060c950_node* FUN_00726070();
-};
-
-struct FUN_0060c950_cls
-{
-    FUN_0060c950_node* FUN_005d43e0();
-    void FUN_0060c950(int a1);
+    void ApplyState(QUEST_OBJECTIVE_STATE state);
 };
 
 // @fnv 0x0060c950
-void FUN_0060c950_cls::FUN_0060c950(int a1)
+void TESQuest::FUN_0060c950(int a1)
 {
-    FUN_0060c950_node* node = FUN_005d43e0();
-    while (node && *node->FUN_006815c0())
+    BSSimpleList<QuestObjectiveTransitions*>* node = reinterpret_cast<BSSimpleList<QuestObjectiveTransitions*>*>(GetObjectiveList());
+    while (node && node->GetItem())
     {
-        (*node->FUN_006815c0())->FUN_005ec5d0((*node->FUN_006815c0())->FUN_005a5e70() ? 3 : 2);
-        node = node->FUN_00726070();
+        (node->GetItem())->ApplyState((node->GetItem())->GetDisplayed() ? QOS_COMPLETED_DISPLAYED : QOS_COMPLETED);
+        node = node->GetNext();
     }
 }
 
@@ -938,21 +868,9 @@ struct FNV_InitNode
 };
 struct FNV_InitPart
 {
-    void FUN_0048cca0();
-    void FUN_00487010();
-    void FUN_0048e370(unsigned int);
     void FUN_0060ce80();
 };
-struct FUN_0060cd60_shell : TESQuest
-{
-    void FUN_004855a0();
-    void FUN_00485e20(void*, unsigned int);
-    FNV_SubObject* FUN_005f5760();
-    FNV_InitNode* FUN_005d43c0();
-    FNV_InitNode* FUN_005d43e0();
-    void FUN_00485680();
-    void FUN_0060cd60();
-};
+
 struct FNV_EventObject
 {
     void ProcessItems();
@@ -960,32 +878,32 @@ struct FNV_EventObject
 extern "C" bool __cdecl FUN_00401500();
 
 // @fnv 0x0060cd60
-void FUN_0060cd60_shell::FUN_0060cd60()
+void TESQuest::FUN_0060cd60()
 {
     FUN_004855a0();
-    reinterpret_cast<FNV_InitPart*>(&tESScriptableFormComponent)->FUN_0048cca0();
-    reinterpret_cast<FNV_InitPart*>(&tESIconComponent + 1)->FUN_00487010();
-    reinterpret_cast<FNV_InitPart*>(&tESIconComponent)->FUN_0048e370(0x4e4f4349);
+    TESScriptableForm::FUN_0048cca0();
+    TESFullName::FUN_00487010();
+    TESIcon::Save(0x4e4f4349);
     if (FUN_00401500())
     {
-        reinterpret_cast<FNV_InitPart*>(&tESFullNameComponent + 1)->FUN_0060ce80();
+        reinterpret_cast<FNV_InitPart*>(&data)->FUN_0060ce80();
     }
-    FUN_00485e20(reinterpret_cast<char*>(&tESFullNameComponent) + 12, 8);
+    FUN_00485e20(&data, 8);
     if (FUN_00401500())
     {
-        reinterpret_cast<FNV_InitPart*>(&tESFullNameComponent + 1)->FUN_0060ce80();
+        reinterpret_cast<FNV_InitPart*>(&data)->FUN_0060ce80();
     }
-    if (FUN_005f5760() != 0)
+    if (GetConditions() != 0)
     {
-        reinterpret_cast<FNV_EventObject*>(FUN_005f5760())->ProcessItems();
+        reinterpret_cast<FNV_EventObject*>(GetConditions())->ProcessItems();
     }
-    FNV_InitNode* node = FUN_005d43c0();
+    FNV_InitNode* node = reinterpret_cast<FNV_InitNode*>(GetStageList());
     while (node != 0 && !node->FUN_008256d0())
     {
         node->FUN_006815c0()->object->FUN_00483710();
         node = node->FUN_00726070();
     }
-    FNV_InitNode* pOtherNode = FUN_005d43e0();
+    FNV_InitNode* pOtherNode = reinterpret_cast<FNV_InitNode*>(GetObjectiveList());
     while (pOtherNode != 0 && !pOtherNode->FUN_008256d0())
     {
         pOtherNode->FUN_006815c0()->object->FUN_005ec280();
@@ -1064,11 +982,6 @@ struct FormSaveSizeStub
     unsigned short GetSaveSize(unsigned int changedFlags);
 };
 
-struct ScriptLocalsSaveStub
-{
-    unsigned short GetSaveSize();
-};
-
 struct StageItemListStub
 {
     int GetSize();
@@ -1089,14 +1002,8 @@ extern SettingT<INISettingCollection> bDebugSaveGameSize;
 TESForm* __cdecl LookupFormByID(unsigned int formID);
 void __cdecl SaveGameSizeWarning(const char* message, ...);
 
-struct QuestSaveSize : TESQuest
-{
-    StageNodeStub* GetStageNodes();
-    unsigned short FUN_0060dba0(unsigned int changedFlags);
-};
-
 // @fnv 0x0060dba0
-unsigned short QuestSaveSize::FUN_0060dba0(unsigned int changedFlags)
+unsigned short TESQuest::FUN_0060dba0(unsigned int changedFlags)
 {
     unsigned short size7 = 0;
     size7 += ((FormSaveSizeStub*)this)->GetSaveSize(changedFlags);
@@ -1112,7 +1019,7 @@ unsigned short QuestSaveSize::FUN_0060dba0(unsigned int changedFlags)
     }
     if (changedFlags & 0x80000000)
     {
-        StageNodeStub* node9 = GetStageNodes();
+        StageNodeStub* node9 = reinterpret_cast<StageNodeStub*>(GetStageList());
         size7 += 1;
         while (node9)
         {
@@ -1128,9 +1035,9 @@ unsigned short QuestSaveSize::FUN_0060dba0(unsigned int changedFlags)
     }
     if (changedFlags & 0x40000000)
     {
-        size7 += ((ScriptLocalsSaveStub*)m_pScriptLocals)->GetSaveSize();
+        size7 += m_pScriptLocals->GetSaveSize();
     }
-    if (bDebugSaveGameSize.Bool()->b)
+    if (bDebugSaveGameSize.Bool()[0])
     {
         SaveFormInfo* info = g_TESSaveLoadGame->GetCurrentForm();
         if (info)
@@ -1154,18 +1061,16 @@ struct FUN_004534f0_shell
     void FUN_004534f0(unsigned int auiFlags);
 };
 
-struct QuestScriptLocals
+// Legacy reset entry point is absent from the shared ScriptLocals interface.
+struct QuestScriptLocals : ScriptLocals
 {
     void ResetLocals();
-};
-
-struct FUN_0060e6a0_shell : TESQuest
-{
-    void FUN_0060e6a0(unsigned int auiFlags);
+    void WriteScriptLocals();
+    void ReadScriptLocals();
 };
 
 // @fnv 0x0060e6a0
-void FUN_0060e6a0_shell::FUN_0060e6a0(unsigned int auiFlags)
+void TESQuest::FUN_0060e6a0(unsigned int auiFlags)
 {
     ((FUN_004534f0_shell*)this)->FUN_004534f0(auiFlags);
     if (auiFlags & 0x80000000)
@@ -1200,6 +1105,14 @@ void FUN_0060e6a0_shell::FUN_0060e6a0(unsigned int auiFlags)
     }
 }
 
+// Legacy stream entry points not exposed by the shared form interface.
+struct QuestRecordIO
+{
+    void FUN_00484c20(unsigned int);
+    unsigned char* FUN_005a8080();
+    void FUN_00484ce0(void*, unsigned int);
+};
+
 struct QuestSaveManager
 {
     unsigned char* FUN_00825c00();
@@ -1228,30 +1141,19 @@ struct QuestSaveStageNode
     QuestSaveStage*& FUN_006815c0();
     QuestSaveStageNode* FUN_00726070();
 };
-struct QuestSaveLocals
-{
-    void WriteScriptLocals();
-};
-struct QuestSave : TESQuest
-{
-    void FUN_00484c20(unsigned int);
-    unsigned char* FUN_005a8080();
-    void FUN_00484ce0(void*, unsigned int);
-    QuestSaveStageNode* FUN_005d43c0();
-    void FUN_0060dd50(unsigned int flags);
-};
+
 void __cdecl FUN_0040fbe0(const char*, ...);
 void __cdecl FUN_005b5e40(const char*, ...);
 
 // Writes the quest's save data: flags, stage and item lists, optional locals, debug size logging, and a block-size header when block saving is active.
 // @fnv 0x0060dd50
-void QuestSave::FUN_0060dd50(unsigned int flags)
+void TESQuest::FUN_0060dd50(unsigned int flags)
 {
-    FUN_00484c20(flags);
+    reinterpret_cast<QuestRecordIO*>(this)->FUN_00484c20(flags);
     unsigned short h = 0;  // Reserved block size.
     unsigned char* p = 0;  // Address of the reserved block-size field.
     unsigned char* a = ((QuestSaveManager*)g_TESSaveLoadGame)->FUN_00825c00();
-    if (bDebugSaveGameSize.Bool()->b)
+    if (bDebugSaveGameSize.Bool()[0])
         a = ((QuestSaveManager*)g_TESSaveLoadGame)->FUN_00825c00();
     if (((QuestSaveManager*)g_TESSaveLoadGame)->FUN_00862110())
     {
@@ -1262,15 +1164,15 @@ void QuestSave::FUN_0060dd50(unsigned int flags)
     }
     if (flags & 2)
     {
-        unsigned char questFlags = *FUN_005a8080();
-        FUN_00484ce0(&questFlags, 1);
+        unsigned char questFlags = *reinterpret_cast<QuestRecordIO*>(this)->FUN_005a8080();
+        reinterpret_cast<QuestRecordIO*>(this)->FUN_00484ce0(&questFlags, 1);
     }
     if (flags & 0x80000000)
     {
         unsigned char p = 0;  // Number of saved stages.
         unsigned char* j = ((QuestSaveManager*)g_TESSaveLoadGame)->FUN_00825c00();
-        FUN_00484ce0(&p, 1);
-        QuestSaveStageNode* h = FUN_005d43c0();  // Stage iterator.
+        reinterpret_cast<QuestRecordIO*>(this)->FUN_00484ce0(&p, 1);
+        QuestSaveStageNode* h = reinterpret_cast<QuestSaveStageNode*>(GetStageList());  // Stage iterator.
         while (h)
         {
             QuestSaveStage* stage = h->FUN_006815c0();
@@ -1278,11 +1180,11 @@ void QuestSave::FUN_0060dd50(unsigned int flags)
             {
                 unsigned char eb = stage->FUN_009373f0();  // Stage index.
                 bool f = stage->FUN_005dc960();            // Stage completion flag.
-                FUN_00484ce0(&eb, 1);
-                FUN_00484ce0(&f, 1);
+                reinterpret_cast<QuestRecordIO*>(this)->FUN_00484ce0(&eb, 1);
+                reinterpret_cast<QuestRecordIO*>(this)->FUN_00484ce0(&f, 1);
                 unsigned char q = 0;  // Number of saved stage items.
                 unsigned char* cf = ((QuestSaveManager*)g_TESSaveLoadGame)->FUN_00825c00();
-                FUN_00484ce0(&q, 1);
+                reinterpret_cast<QuestRecordIO*>(this)->FUN_00484ce0(&q, 1);
                 QuestSaveItemNode* s = stage->FUN_00717e50();  // Stage-item iterator.
                 while (s)
                 {
@@ -1291,7 +1193,7 @@ void QuestSave::FUN_0060dd50(unsigned int flags)
                     {
                         unsigned char j = item->FUN_005dc980();  // Stage-item index.
                         Date* p = item->FUN_008d8520();          // Log date, if present.
-                        FUN_00484ce0(&j, 1);
+                        reinterpret_cast<QuestRecordIO*>(this)->FUN_00484ce0(&j, 1);
                         if (p)
                         {
                             ((QuestSaveManager*)g_TESSaveLoadGame)->FUN_008579b0(p, 4);
@@ -1313,8 +1215,8 @@ void QuestSave::FUN_0060dd50(unsigned int flags)
         *j = p;
     }
     if (flags & 0x40000000)
-        ((QuestSaveLocals*)m_pScriptLocals)->WriteScriptLocals();
-    if (bDebugSaveGameSize.Bool()->b)
+        static_cast<QuestScriptLocals*>(m_pScriptLocals)->WriteScriptLocals();
+    if (bDebugSaveGameSize.Bool()[0])
     {
         unsigned char* end = ((QuestSaveManager*)g_TESSaveLoadGame)->FUN_00825c00();
         SaveFormInfo* formInfo = ((QuestSaveManager*)g_TESSaveLoadGame)->FUN_004fd3e0();
@@ -1367,8 +1269,6 @@ struct QuestInput
     void FUN_00484c50(unsigned int, unsigned int);
     void FUN_00484d00(void*, unsigned int);
     unsigned char* FUN_005a8080();
-    void* FUN_0060db40(unsigned char);
-    void FUN_0060d670();
 };
 struct StageSave
 {
@@ -1395,19 +1295,11 @@ struct LogValue
     unsigned short FUN_004b1050();
 };
 void FUN_00483710(LogValue*);
-struct LocalsState
-{
-    void FUN_005a9950();
-    void* FUN_0041af70(unsigned int);
-};
 typedef unsigned int(__thiscall* TagMethod)(void*);
-struct QuestLoader : TESQuest
-{
-    void LoadQuestData(unsigned int flags, unsigned int extra);
-};
+
 // Reads quest data from the stream: enabled flag, stages with dates, script locals, and logs size mismatches.
 // @fnv 0x0060e0d0
-void QuestLoader::LoadQuestData(unsigned int flags, unsigned int extra)
+void TESQuest::LoadQuestData(unsigned int flags, unsigned int extra)
 {
     ((QuestInput*)this)->FUN_00484c50(flags, extra);
     unsigned short sizeRead = 0;
@@ -1449,7 +1341,7 @@ void QuestLoader::LoadQuestData(unsigned int flags, unsigned int extra)
             unsigned char isComplete;
             ((QuestInput*)this)->FUN_00484d00(&stageId, 1);
             ((QuestInput*)this)->FUN_00484d00(&isComplete, 1);
-            StageSave* questStage = (StageSave*)((QuestInput*)this)->FUN_0060db40(stageId);
+            StageSave* questStage = (StageSave*)GetStage(stageId);
             if (questStage)
             {
                 questStage->FUN_0067fdb0(isComplete);
@@ -1504,7 +1396,7 @@ void QuestLoader::LoadQuestData(unsigned int flags, unsigned int extra)
             }
         }
         this->m_ucEnabled = 0;
-        ((QuestInput*)this)->FUN_0060d670();
+        UpdateStageMask();
     }
     if (flags & 0x40000000)
     {
@@ -1512,14 +1404,14 @@ void QuestLoader::LoadQuestData(unsigned int flags, unsigned int extra)
         {
             ScriptLocals* replacement = new ScriptLocals;
             {
-                ((LocalsState*)replacement)->FUN_005a9950();
+                static_cast<QuestScriptLocals*>(replacement)->ReadScriptLocals();
                 delete replacement;
                 ((StreamReader*)DAT_011de45c)->SetFlags(0x40000000);
             }
         }
         else
         {
-            ((LocalsState*)this->m_pScriptLocals)->FUN_005a9950();
+            static_cast<QuestScriptLocals*>(this->m_pScriptLocals)->ReadScriptLocals();
         }
     }
     if (((StreamReader*)DAT_011de45c)->FUN_00862110())
@@ -1561,7 +1453,6 @@ struct F810Flags
 };
 struct F810Item1;
 struct F810Item2;
-struct F810Item3;
 struct F810Node2
 {
     F810Item2* pItem;
@@ -1571,9 +1462,9 @@ struct F810Node2
 };
 struct F810Node3
 {
-    F810Item3* pItem;
+    BGSQuestObjective* pItem;
     F810Node3* pNext;
-    F810Item3** FUN_006815c0();
+    BGSQuestObjective** FUN_006815c0();
     F810Node3* FUN_00726070();
 };
 struct F810Item1
@@ -1587,11 +1478,6 @@ struct F810Item2
     bool FUN_005dc980();
     void* FUN_008d8520();
 };
-struct F810Item3
-{
-    void* FUN_007af430();
-    F810Node3* FUN_00726070();
-};
 struct F810Node1
 {
     F810Item1* pItem;
@@ -1599,51 +1485,14 @@ struct F810Node1
     F810Item1** FUN_006815c0();
     F810Node1* FUN_00726070();
 };
-struct F810Obj
-{
-    void FUN_005a9db0(F810Buf* buf);
-};
 struct F810Buf
 {
     F810Flags* FUN_00428110(void* out, unsigned int tag);
-    void FUN_00865e50(void* data, int size, int flag);
-    unsigned int FUN_00865f20();
-    void FUN_00865ff0(int count, unsigned int total);
-};
-struct FUN_0060e810_shell
-{
-    unsigned int f00;
-    unsigned int f04;
-    unsigned int f08;
-    unsigned int f0c;
-    unsigned int f10;
-    unsigned int f14;
-    unsigned int f18;
-    unsigned int f1c;
-    unsigned int f20;
-    unsigned int f24;
-    unsigned int f28;
-    unsigned int f2c;
-    unsigned int f30;
-    unsigned int f34;
-    unsigned int f38;
-    unsigned char cFlag3c;
-    unsigned char r3d;
-    unsigned char r3e;
-    unsigned char r3f;
-    unsigned int iVal40;
-    F810Node1 list44;
-    F810Node3 list4c;
-    unsigned int f54;
-    unsigned int f58;
-    F810Obj* pObj5c;
-    void SaveIfChanged(F810Buf* buf);
-    void WriteToBuffer(F810Buf* buf);
 };
 
-// Serializes cFlag3c, iVal40, the list44 and list4c lists and pObj5c into buf, each guarded by a tag check, writing counts via FUN_00865ff0.
+// Serializes changed quest flags, delay, stages, objectives, and script locals.
 // @fnv 0x0060e810
-void FUN_0060e810_shell::WriteToBuffer(F810Buf* buf)
+void TESQuest::WriteToBuffer(BGSSaveFormBuffer* buf)
 {
     unsigned int flagsE;
     unsigned int tagD;
@@ -1652,7 +1501,7 @@ void FUN_0060e810_shell::WriteToBuffer(F810Buf* buf)
     unsigned int flag;
     F810Node3* next0;
     void* valY;
-    F810Item3* entry;
+    BGSQuestObjective* entry;
     int iterY;
     F810Node3* head1;
     unsigned int cntY;
@@ -1670,19 +1519,19 @@ void FUN_0060e810_shell::WriteToBuffer(F810Buf* buf)
     unsigned int cnt1;
     int idx0;
     SaveIfChanged(buf);
-    if (buf->FUN_00428110(&flag, 2)->FUN_004280f0())
+    if (reinterpret_cast<F810Buf*>(buf)->FUN_00428110(&flag, 2)->FUN_004280f0())
     {
-        buf->FUN_00865e50(&cFlag3c, 1, 0);
+        buf->FUN_00865e50(&data.m_ucEntryType, 1, 0);
     }
-    if (buf->FUN_00428110(&flag2, 4)->FUN_004280f0())
+    if (reinterpret_cast<F810Buf*>(buf)->FUN_00428110(&flag2, 4)->FUN_004280f0())
     {
-        buf->FUN_00865e50(&iVal40, 4, 0);
+        buf->FUN_00865e50(&data.fQuestDelayTime, 4, 0);
     }
-    if (buf->FUN_00428110(&flags2, 0x80000000)->FUN_004280f0())
+    if (reinterpret_cast<F810Buf*>(buf)->FUN_00428110(&flags2, 0x80000000)->FUN_004280f0())
     {
         idx0 = 0;
         cnt1 = buf->FUN_00865f20();
-        nodeC = &list44;
+        nodeC = reinterpret_cast<F810Node1*>(&m_kStageList);
         while (nodeC != 0)
         {
             itemD = *nodeC->FUN_006815c0();
@@ -1720,24 +1569,24 @@ void FUN_0060e810_shell::WriteToBuffer(F810Buf* buf)
         }
         buf->FUN_00865ff0(idx0, cnt1);
     }
-    if (buf->FUN_00428110(&tagD, 0x40000000)->FUN_004280f0())
+    if (reinterpret_cast<F810Buf*>(buf)->FUN_00428110(&tagD, 0x40000000)->FUN_004280f0())
     {
-        pObj5c->FUN_005a9db0(buf);
+        m_pScriptLocals->SaveGame(buf);
     }
-    if (buf->FUN_00428110(&flagsE, 0x20000000)->FUN_004280f0())
+    if (reinterpret_cast<F810Buf*>(buf)->FUN_00428110(&flagsE, 0x20000000)->FUN_004280f0())
     {
         iterY = 0;
         cntY = buf->FUN_00865f20();
-        head1 = &list4c;
+        head1 = reinterpret_cast<F810Node3*>(&m_kObjectives);
         while (head1 != 0)
         {
             entry = *head1->FUN_006815c0();
             if (entry != 0)
             {
-                valY = entry->FUN_007af430();
+                valY = reinterpret_cast<void*>(entry->GetState());
                 if (valY != 0)
                 {
-                    next0 = entry->FUN_00726070();
+                    next0 = reinterpret_cast<F810Node3*>(entry->GetIndex());
                     buf->FUN_00865e50(&next0, 4, 0);
                     buf->FUN_00865e50(&valY, 4, 0);
                     iterY++;
@@ -1749,30 +1598,6 @@ void FUN_0060e810_shell::WriteToBuffer(F810Buf* buf)
     }
 }
 
-struct ScriptX
-{
-    ScriptLocals* FUN_005abf60();
-};
-struct ScriptableBase
-{
-    virtual void f0();
-    ScriptX* m_pFormScript;
-    bool m_bHasScript;
-    unsigned char layoutPadding[3];
-    ScriptX* FUN_00726070();
-};
-struct IconBase
-{
-    virtual void f0();
-    void* p;
-    unsigned int n;
-};
-struct NameBase
-{
-    virtual void f0();
-    void* p;
-    unsigned int n;
-};
 struct StageItem
 {
     Date* FUN_008d8520();
@@ -1793,37 +1618,16 @@ struct StageNode
     Stage** FUN_006815c0();
     StageNode* FUN_00726070();
 };
-struct ObjItem
-{
-    void FUN_005ec5d0(int);
-};
 struct ObjNode
 {
-    ObjItem** FUN_006815c0();
+    QuestObjectiveTransitions** FUN_006815c0();
     ObjNode* FUN_00726070();
 };
-struct QuestShell : TESForm, ScriptableBase, IconBase, NameBase
-{
-    FUN_0060c5c0 data;
-    SL m_kStageList;
-    SL m_kObjectives;
-    CondS m_kInfoConditions;
-    ScriptLocals* m_pScriptLocals;
-    unsigned char m_ucEnabled;
-    StrMem strEditorID;
-    StageNode* FUN_005d43c0();
-    ObjNode* FUN_005d43e0();
-    bool HasFlag0x10();
-    void FUN_0060c9c0(bool);
-    void FUN_0060ca30(bool);
-    void FUN_0060caf0(bool);
-    void SetFlag20(bool);
-    void FUN_0060d720();
-};
-void __cdecl FUN_00619b60(QuestShell*);
+
+void __cdecl FUN_00619b60(TESQuest*);
 
 // @fnv 0x0060d720
-void QuestShell::FUN_0060d720()
+void TESQuest::FUN_0060d720()
 {
     StageNode* aStageNode;
     ObjNode* objNode;
@@ -1833,7 +1637,7 @@ void QuestShell::FUN_0060d720()
         Date* logDate3;
         StageItem* stageItemA;
 
-        aStageNode = FUN_005d43c0();
+        aStageNode = reinterpret_cast<StageNode*>(GetStageList());
         while (aStageNode)
         {
             stage = *aStageNode->FUN_006815c0();
@@ -1859,17 +1663,17 @@ void QuestShell::FUN_0060d720()
 
     m_ucEnabled = 0;
 
-    objNode = FUN_005d43e0();
+    objNode = reinterpret_cast<ObjNode*>(GetObjectiveList());
     while (objNode && *objNode->FUN_006815c0())
     {
-        (*objNode->FUN_006815c0())->FUN_005ec5d0(0);
+        (*objNode->FUN_006815c0())->ApplyState(QOS_DORMANT);
         objNode = objNode->FUN_00726070();
     }
 
     if (m_pScriptLocals)
     {
         delete m_pScriptLocals;
-        m_pScriptLocals = FUN_00726070()->FUN_005abf60();
+        m_pScriptLocals = TESScriptableForm::GetScript()->GetOrCreateScriptLocals();
     }
 
     FUN_00619b60(this);

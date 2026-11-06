@@ -1,10 +1,14 @@
-// fallout/ai/combat/combatthreatmap.cpp: CombatThreatMap, DelStandIn, ThreatMap (8 functions)
+// fallout/ai/combat/combatthreatmap.cpp: LocalCombatThreatMap, DelStandIn, ThreatMap (8 functions)
 
+#include "../../../../include/NiTPointerMap.h"
 #include "combatthreatmap_ctor_decls.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/MagicProjectile.h"
 
 // Iterates the map's entries, calls LoadGame on each threat, and deletes and removes entries whose TESForm pointer is null.
 // @fnv 0x009a5c40
-void CombatThreatMap::ApplyLoadBuffer(BGSLoadGameBuffer* buffer)
+void LocalCombatThreatMap::ApplyLoadBuffer(BGSLoadGameBuffer* buffer)
 {
     // A traversal cursor keeps its current key and continuation together.
     // Both are real values consumed by GetNext; there is no emulated frame.
@@ -13,26 +17,26 @@ void CombatThreatMap::ApplyLoadBuffer(BGSLoadGameBuffer* buffer)
         unsigned int key;
         void* position;
     } cursor;
-    cursor.position = GetFirstPos();
+    cursor.position = map.GetFirstPos();
     while (cursor.position)
     {
-        CombatThreatRecord* threat = 0;
-        GetNext(cursor.position, cursor.key, threat);
+        CombatThreatRecord_combatthreatmap_ctor_decls* threat = 0;
+        map.GetNext(cursor.position, cursor.key, threat);
         if (threat)
         {
             threat->LoadGame(buffer);
-            if (!static_cast<TESForm*>(*threat))
+            if (!static_cast<TESForm*>(*reinterpret_cast<NiPointer<TESForm>*>(threat)))
             {
                 delete threat;
-                RemoveAt(cursor.key);
+                map.RemoveAt(cursor.key);
             }
         }
     }
 }
 
-// Constructs a CombatThreatMap: initializes the base, stamp, mode and object, then calls InitThreatObjects.
+// Constructs a LocalCombatThreatMap: initializes the base, stamp, mode and object, then calls InitThreatObjects.
 // @fnv 0x00991080
-CombatThreatMap::CombatThreatMap() : FUN_00993960(0, 1), stamp(-DAT_0108d9b0), mode(1), object(0)
+LocalCombatThreatMap::LocalCombatThreatMap() : FUN_00993960(0, 1), stamp(-DAT_0108d9b0), mode(1), object(0)
 {
     InitThreatObjects();
 }
@@ -57,14 +61,6 @@ FUN_009a5050::~FUN_009a5050()
     DeleteAllEntries(this);
 }
 
-struct MagicProjectile
-{
-    void Process(int);
-};
-template <class K, class V> struct NiTPointerMap
-{
-    void GetNext(void*&, K&, V&);
-};
 struct FUN_009a5cd0_cls
 {
     void* GetFirstPos();
@@ -121,11 +117,6 @@ NiBound* FUN_0043d450_Owner::FUN_0043d450()
     return pBound;
 }
 
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-};
-
 struct KFModel;
 
 struct Animation
@@ -154,9 +145,9 @@ struct FUN_00497c10_struct
 // @fnv 0x00497c10
 void FUN_00497c10_struct::LoadAnimationData(BGSLoadFormBuffer* buffer, Animation* anim)
 {
-    buffer->ReadTypedData(&field_08, 4);
-    buffer->ReadTypedData(&field_0C, 4);
-    buffer->ReadTypedData(&field_14, 4);
+    buffer->ReadTypedData(static_cast<void*>(&field_08), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&field_0C), 4u);
+    buffer->ReadTypedData(static_cast<void*>(&field_14), 4u);
     if (field_08 == 0)
     {
         field_08 = 1;
@@ -167,20 +158,10 @@ void FUN_00497c10_struct::LoadAnimationData(BGSLoadFormBuffer* buffer, Animation
     }
 }
 
-struct Pt3
-{
-    float x, y, z;
-};
-struct Stamp
-{
-    float value;
-    Stamp(float);
-    float Elapsed();
-};
 struct Threat
 {
-    Stamp GetStamp();
-    float Evaluate(const Pt3& pos, int arg, float time, float a, float b);
+    CombatTargetTimestamp GetStamp();
+    float Evaluate(const NiPoint3& pos, int arg, float time, float a, float b);
 };
 struct ThreatLock
 {
@@ -199,12 +180,12 @@ struct ThreatMap
     ThreatLock lock;
     void* GetFirstPos();
     void GetNext(void*& pos, unsigned int& key, Threat*& val);
-    float EvaluateThreats(Pt3 pos, int arg, float delay, float a, Stamp since, float b);
+    float EvaluateThreats(NiPoint3 pos, int arg, float delay, float a, CombatTargetTimestamp since, float b);
 };
 
 // Locks the map, sums each threat's Evaluate result for threats newer than since, clamps the total to 1.0, unlocks and returns it.
 // @fnv 0x009a5670
-float ThreatMap::EvaluateThreats(Pt3 pos, int arg, float delay, float a, Stamp since, float b)
+float ThreatMap::EvaluateThreats(NiPoint3 pos, int arg, float delay, float a, CombatTargetTimestamp since, float b)
 {
     lock.Lock();
     float fTotal = 0;
@@ -219,7 +200,7 @@ float ThreatMap::EvaluateThreats(Pt3 pos, int arg, float delay, float a, Stamp s
         unsigned int key = 0;
         Threat* threat3 = 0;
         GetNext(iter, key, threat3);
-        if (threat3->GetStamp().Elapsed() <= since.Elapsed())
+        if (threat3->GetStamp().DisplayElapsedTime() <= since.DisplayElapsedTime())
             continue;
         float fValue = threat3->Evaluate(pos, arg, fTime, a, b);
         fTotal += fValue;

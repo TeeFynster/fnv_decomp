@@ -2,7 +2,51 @@
 // src/fallout_shared/tesnpc_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/tesnpc.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "tesnpc_pc_decls.h"
+// include/TESFile.h needs the Windows types before layout_support.h stubs them.
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "../../include/ActorBaseAttributes.h"
+#include "../../include/ActorSkillData.h"
+#include "../../include/BGSBipedModelList.h"
+#include "../../include/BGSDestructibleObjectForm.h"
+#include "../../include/BGSHeadPart.h"
+#include "../../include/BGSListForm.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/BGSTouchSpellForm.h"
+#include "../../include/BSFaceGenAnimationData.h"
+#include "../../include/BSFaceGenNiNode.h"
+#include "../../include/CombatController.h"
+#include "../../include/ExtraDismemberedLimbs.h"
+#include "../../include/MagicCaster.h"
+#include "../../include/NiControllerManager.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/TESAIForm.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESAnimation.h"
+#include "../../include/TESAttributes.h"
+#include "../../include/TESBipedModelForm.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESClass.h"
+#include "../../include/TESCombatStyle.h"
+#include "../../include/TESContainer.h"
+#include "../../include/TESEyes.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESHair.h"
+#include "../../include/TESHealthForm.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESNPC.h"
+#include "../../include/TESObjectARMO.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESObjectWEAP.h"
+#include "../../include/TESRace.h"
+#include "../../include/TESRaceForm.h"
+#include "../../include/TESScriptableForm.h"
+#include "../../include/TESSpellList.h"
+#include "../../include/TESTopic.h"
 
 // Adjustor thunk for FUN_0060c440: "sub ecx, 0xdc; jmp FUN_00601370".
 //

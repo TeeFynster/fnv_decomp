@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 // src/havok/physics/dynamics/motion/util/hkprigidmotionutil_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/dynamics/motion/util/hkprigidmotionutil_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS- /EHs-c- /Gy (unit lists /MT /O2 /GS- /EHs-c- /Gy). Declarations copied from that unit's skeleton.
 
@@ -9,30 +11,27 @@
 
 #include <math.h>
 namespace StepReleaseFitPrivate {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-} __m128;
+typedef ::__m128 LocalM128;
 extern "C"
 {
     void _ReadWriteBarrier();
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    __m128 _mm_cmpeq_ps(__m128, __m128);
-    int _mm_movemask_ps(__m128);
-    void _mm_store_ss(float*, __m128);
+using ::_mm_store_ps;
+using ::_mm_load_ss;
+using ::_mm_shuffle_ps;
+using ::_mm_mul_ps;
+using ::_mm_add_ps;
+using ::_mm_sub_ps;
+using ::_mm_add_ss;
+using ::_mm_and_ps;
+using ::_mm_cmplt_ps;
+using ::_mm_cmpeq_ps;
+using ::_mm_movemask_ps;
+using ::_mm_store_ss;
 }
 
-static __forceinline __m128 StepReleaseFitbroadcast(float f)
+static __forceinline LocalM128 StepReleaseFitbroadcast(float f)
 {
-    __m128 v = _mm_load_ss(&f);
+    LocalM128 v = _mm_load_ss(&f);
     return _mm_shuffle_ps(v, v, 0);
 }
 static __forceinline float StepReleaseFitscalarCopy(float f)
@@ -40,9 +39,9 @@ static __forceinline float StepReleaseFitscalarCopy(float f)
     return f;
 }
 
-extern const __m128 DAT_01017d10;
-extern const __m128 DAT_010cbf80;
-extern const __m128 DAT_01268370;
+extern const LocalM128 DAT_01017d10;
+extern const LocalM128 DAT_010cbf80;
+extern const LocalM128 DAT_01268370;
 extern const float DAT_010c7948[256];
 extern const double DAT_01011588;
 extern const double DAT_010ce4b0;
@@ -68,14 +67,14 @@ struct __declspec(align(16)) StepReleaseFitQuaternion
 };
 struct StepReleaseFitMotionState
 {
-    __m128 rotationX, rotationY, rotationZ;
-    __m128 translation;
-    __m128 center0;
-    __m128 center1;
+    LocalM128 rotationX, rotationY, rotationZ;
+    LocalM128 translation;
+    LocalM128 center0;
+    LocalM128 center1;
     StepReleaseFitQuaternion rotation0;
     StepReleaseFitQuaternion rotation1;
-    __m128 centerLocal;
-    __m128 deltaAngle;
+    LocalM128 centerLocal;
+    LocalM128 deltaAngle;
     float objectRadius, linearDamping, angularDamping;
     unsigned char maxLinear, maxAngular, unkAE, unkAF;
     unsigned int unkB0, unkB4, unkB8, unkBC;
@@ -88,18 +87,18 @@ struct StepReleaseFitMotion
     unsigned char type, unk09, unk0A, unk0B;
     unsigned int unk0C;
     StepReleaseFitMotionState state;
-    __m128 linearVelocity;
-    __m128 angularVelocity;
+    LocalM128 linearVelocity;
+    LocalM128 angularVelocity;
 };
 struct StepReleaseFitStepInfo
 {
     float startTime, endTime, deltaTime, invDeltaTime;
 };
-static __forceinline float StepReleaseFitlengthSquared3(__m128 v)
+static __forceinline float StepReleaseFitlengthSquared3(LocalM128 v)
 {
-    __m128 squares = _mm_mul_ps(v, v);
-    __m128 xy = _mm_add_ss(_mm_shuffle_ps(squares, squares, 0x55), squares);
-    __m128 xyz = _mm_add_ss(_mm_shuffle_ps(squares, squares, 0xaa), xy);
+    LocalM128 squares = _mm_mul_ps(v, v);
+    LocalM128 xy = _mm_add_ss(_mm_shuffle_ps(squares, squares, 0x55), squares);
+    LocalM128 xyz = _mm_add_ss(_mm_shuffle_ps(squares, squares, 0xaa), xy);
     float result;
     _mm_store_ss(&result, xyz);
     return result;
@@ -131,12 +130,12 @@ struct StepReleaseFitStepArgs
 };
 static __forceinline bool StepReleaseFitcheckVelocities(StepReleaseFitMotion* motion)
 {
-    __m128 limit = DAT_010cbf80;
-    __m128 mask = DAT_01017d10;
-    __m128 linear = motion->linearVelocity;
-    __m128 angular = motion->angularVelocity;
-    __m128 absLinear = _mm_and_ps(linear, mask);
-    __m128 absAngular = _mm_and_ps(angular, mask);
+    LocalM128 limit = DAT_010cbf80;
+    LocalM128 mask = DAT_01017d10;
+    LocalM128 linear = motion->linearVelocity;
+    LocalM128 angular = motion->angularVelocity;
+    LocalM128 absLinear = _mm_and_ps(linear, mask);
+    LocalM128 absAngular = _mm_and_ps(angular, mask);
     int valid = _mm_movemask_ps(_mm_cmplt_ps(absLinear, limit)) & _mm_movemask_ps(_mm_cmplt_ps(absAngular, limit));
     valid &= _mm_movemask_ps(_mm_cmpeq_ps(linear, linear)) & _mm_movemask_ps(_mm_cmpeq_ps(angular, angular));
     return (valid & 7) == 7;
@@ -147,8 +146,8 @@ struct StepReleaseFitStateArgument
 };
 static __forceinline void StepReleaseFitadvanceMotion(StepReleaseFitStateArgument late,
                                                       const StepReleaseFitStepInfo& info,
-                                                      StepReleaseFitMotionState& state, __m128& angularVelocity,
-                                                      __m128& linearVelocity, StepReleaseFitMotion* motion)
+                                                      StepReleaseFitMotionState& state, LocalM128& angularVelocity,
+                                                      LocalM128& linearVelocity, StepReleaseFitMotion* motion)
 {
     state.center1 = _mm_add_ps(
         _mm_mul_ps(StepReleaseFitbroadcast(StepReleaseFitscalarCopy(info.deltaTime)), linearVelocity), state.center1);
@@ -159,12 +158,12 @@ static __forceinline void StepReleaseFitadvanceMotion(StepReleaseFitStateArgumen
     previous.iy = state.rotation1.iy;
     previous.iz = state.rotation1.iz;
     previous.iw = state.rotation1.iw;
-    *(__m128*)&state.rotation0 = *(__m128*)&previous;
-    __m128 oldAngular = angularVelocity;
+    *(LocalM128*)&state.rotation0 = *(LocalM128*)&previous;
+    LocalM128 oldAngular = angularVelocity;
     float halfStep = (float)(info.deltaTime * DAT_01011588);
     StepReleaseFitQuaternion increment;
-    *(__m128*)&increment = _mm_mul_ps(StepReleaseFitbroadcast(halfStep), oldAngular);
-    float angleSquared = (float)(StepReleaseFitlengthSquared3(*(__m128*)&increment) * DAT_010ce4b0);
+    *(LocalM128*)&increment = _mm_mul_ps(StepReleaseFitbroadcast(halfStep), oldAngular);
+    float angleSquared = (float)(StepReleaseFitlengthSquared3(*(LocalM128*)&increment) * DAT_010ce4b0);
     float maxAngleProduct = DAT_010c7948[state.maxAngular] * info.deltaTime;
     float maxAngle = maxAngleProduct > DAT_0106b9e8 ? DAT_010177e8 : maxAngleProduct;
     float maxAngleSquared = maxAngle * maxAngle;
@@ -179,15 +178,15 @@ static __forceinline void StepReleaseFitadvanceMotion(StepReleaseFitStateArgumen
         float factor = inverse * maxAngle;
         angleSquared = maxAngle * maxAngle;
         angularVelocity = _mm_mul_ps(StepReleaseFitbroadcast(factor), oldAngular);
-        *(__m128*)&increment = _mm_mul_ps(StepReleaseFitbroadcast(factor), *(__m128*)&increment);
+        *(LocalM128*)&increment = _mm_mul_ps(StepReleaseFitbroadcast(factor), *(LocalM128*)&increment);
         increment.w = StepReleaseFitcosineApprox(angleSquared);
     }
     previous.FUN_00c66320(&increment, &previous);
     previous.FUN_005611c0();
-    state.deltaAngle = _mm_add_ps(*(__m128*)&increment, *(__m128*)&increment);
+    state.deltaAngle = _mm_add_ps(*(LocalM128*)&increment, *(LocalM128*)&increment);
     float angle = (float)sqrt(angleSquared);
     state.deltaAngle.m128_f32[3] = (float)(angle * DAT_0101ff40);
-    _mm_store_ps((float*)&state.rotation1, *(__m128*)&previous);
+    _mm_store_ps((float*)&state.rotation1, *(LocalM128*)&previous);
     state.FUN_00cb2d90(&late.p->rotation1);
 }
 // @fnv 0x00d28680
@@ -204,20 +203,20 @@ extern "C" void __cdecl FUN_00d28680(StepReleaseFitStepArgs args)
             motion->linearVelocity = DAT_01268370;
             motion->angularVelocity = DAT_01268370;
         }
-        __m128 center = state.center1;
+        LocalM128 center = state.center1;
         const StepReleaseFitStepInfo* info = args.info;
         _ReadWriteBarrier();
         state.center0 = center;
         state.center0.m128_f32[3] = info->startTime;
         _ReadWriteBarrier();
-        __m128 oldLinear = motion->linearVelocity;
+        LocalM128 oldLinear = motion->linearVelocity;
         unsigned int maxLinearIndex = state.maxLinear;
         double maxLinear = DAT_010c7948[maxLinearIndex];
         float speedSquared;
         {
-            __m128 squares = _mm_mul_ps(oldLinear, oldLinear);
-            __m128 xy = _mm_add_ss(_mm_shuffle_ps(squares, squares, 0x55), squares);
-            __m128 xyz = _mm_add_ss(_mm_shuffle_ps(squares, squares, 0xaa), xy);
+            LocalM128 squares = _mm_mul_ps(oldLinear, oldLinear);
+            LocalM128 xy = _mm_add_ss(_mm_shuffle_ps(squares, squares, 0x55), squares);
+            LocalM128 xyz = _mm_add_ss(_mm_shuffle_ps(squares, squares, 0xaa), xy);
             _mm_store_ss(&speedSquared, xyz);
         }
         if (speedSquared > maxLinear * maxLinear)
@@ -230,8 +229,8 @@ extern "C" void __cdecl FUN_00d28680(StepReleaseFitStepArgs args)
         }
         StepReleaseFitStateArgument lateInput = {&motion->state};
         StepReleaseFitadvanceMotion(lateInput, *info, state, motion->angularVelocity, motion->linearVelocity, motion);
-        __m128 local = state.centerLocal;
-        __m128 rotated = _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(local, local, 0x55), state.rotationY),
+        LocalM128 local = state.centerLocal;
+        LocalM128 rotated = _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(local, local, 0x55), state.rotationY),
                                                _mm_mul_ps(_mm_shuffle_ps(local, local, 0), state.rotationX)),
                                     _mm_mul_ps(_mm_shuffle_ps(local, local, 0xaa), state.rotationZ));
         state.translation = _mm_sub_ps(state.center1, rotated);

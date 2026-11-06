@@ -1,74 +1,73 @@
-// gamebryo2.2/corelibs/niconsolerenderer/nid3ddefaultshader.cpp: ShaderStandIn, FakeShader, ShaderCls, ShaderPassBuilder and more (10 functions)
+// gamebryo2.2/corelibs/niconsolerenderer/nid3ddefaultshader.cpp: NiD3DDefaultShader (10 functions)
 
+#include "../../../../include/NiD3DDefaultShader.h"
+#include "../../../../include/NiD3DShader.h"
 #include "nid3ddefaultshader_decls.h"
-// Initializes the default shader: clears state flags and pointers, sets the vtable, assigns the shader name string, and marks the best implementation.
+
+// These entry points are absent from the shared class declarations. The unused
+// EDX parameter keeps their stack arguments compatible with the original methods.
+// Calls through __thiscall pointers leave that unused register unspecified.
+struct GeomX;
+struct GeometryTextureSetBufferView;
+struct StateX;
+struct S_00e7c720_State;
+extern void __fastcall GetDefaultShaderLocalData(NiD3DDefaultShader* shader);
+extern unsigned int __fastcall FinishD3DShaderPass(
+    NiD3DShader*, void*, void*, void*, void*, void*, void*, void*, void*);
+extern unsigned int __fastcall BeginD3DShaderPass(
+    NiD3DShader*, void*, void*, void*, void*, S_00e7c720_State*, void*, void*, void*);
+extern void __fastcall SetDefaultShaderValue(NiD3DDefaultShader*, void*, unsigned int);
+unsigned int __fastcall CreateDefaultShaderPass(
+    NiD3DDefaultShader*, void*, GeomX*, void*, GeometryTextureSetBufferView*, StateX*, void*, void*, void*);
+
+// Initializes the default shader without an exception-unwind path, as in the game.
 // @fnv 0x00e7c6b0
-NiD3DDefaultShader::NiD3DDefaultShader()
+__declspec(nothrow) NiD3DDefaultShader::NiD3DDefaultShader()
 {
-    usesRenderState = false;
-    usesLightState = false;
-    shaderDeclaration = 0;
-    renderStateGroup = 0;
-    pixelConstantMap = 0;
-    vertexConstantMap = 0;
-    currentPass = 0;
-    vtable = DAT_010eecac;
-    field50 = 0;
-    field54 = 0;
-    field58 = 0;
+    m_bUsesNiRenderState = false;
+    m_bUsesNiLightState = false;
+    m_spShaderDecl.m_pObject = 0;
+    m_pkRenderStateGroup = 0;
+    m_spPixelConstantMap.m_pObject = 0;
+    m_spVertexConstantMap.m_pObject = 0;
+    m_uiCurrentPass = 0;
+    *(void**)this = (void*)DAT_010eecac;
+    m_peFogPassArray = 0;
+    m_uiFogPassArraySize = 0;
+    m_pkLastState = 0;
     _ReadWriteBarrier();
     const char* shaderName = "Default Shader From Gamebryo 2.1";
-    char* pOldNameHandle = name.m_handle;
+    char* pOldNameHandle = m_kName.m_kHandle;
     if (pOldNameHandle != shaderName)
     {
-        name.m_handle = NiGlobalStringTable::AddString(shaderName);
-        if (pOldNameHandle != EmptyFS.m_handle)
+        m_kName.m_kHandle = NiGlobalStringTable::AddString(shaderName);
+        if (pOldNameHandle != EmptyFS.m_kHandle)
             InterlockedDecrement((long*)(pOldNameHandle - 8));
     }
-    bestImplementation = true;
+    m_bIsBestImplementation = true;
 }
 
-struct ScriptX
-{
-    void GetLocalData();
-};
-
-struct NiD3DShaderInit
-{
-    bool Initialize();
-};
-
-struct FUN_00e7c560_shell : NiD3DShader
-{
-    bool InitializeIfNeeded();
-};
-
 // @fnv 0x00e7c560
-bool FUN_00e7c560_shell::InitializeIfNeeded()
+bool __fastcall InitializeDefaultShaderIfNeeded(NiD3DDefaultShader* shader)
 {
-    if (!*(reinterpret_cast<bool*>(this) + 0x10))
+    if (!shader->m_bInitialized)
     {
-        if (!reinterpret_cast<NiD3DShaderInit*>(this)->Initialize())
+        if (!shader->NiD3DShader::Initialize())
             return false;
-        reinterpret_cast<ScriptX*>(this)->GetLocalData();
+        GetDefaultShaderLocalData(shader);
     }
     return true;
 }
 
-struct ShaderStandIn
-{
-    unsigned int CreateShaderPass(void* pkGeometry, void* pkSkin, void* pkRendererData, void* pkState, void* pkEffects,
-                                  void* kWorld, void* kWorldBound);
-    unsigned int FUN_00e7cc10(void* pkGeometry, void* pkSkin, void* pkRendererData, void* pkState, void* pkEffects,
-                              void* kWorld, void* kWorldBound);
-};
-// Calls the virtual function at vtable slot 59 on this, then forwards all arguments to CreateShaderPass and returns its result.
+// Resets passes through virtual slot 59, then creates the default shader pass.
 // @fnv 0x00e7cc10
-unsigned int ShaderStandIn::FUN_00e7cc10(void* pkGeometry, void* pkSkin, void* pkRendererData, void* pkState,
-                                         void* pkEffects, void* kWorld, void* kWorldBound)
+unsigned int __fastcall PrepareDefaultShaderPass(
+    NiD3DDefaultShader* shader, void*, void* pkGeometry, void* pkSkin, void* pkRendererData, void* pkState,
+    void* pkEffects, void* kWorld, void* kWorldBound)
 {
-    ((void(__thiscall*)(ShaderStandIn*))(*(void***)this)[59])(this);
-    return CreateShaderPass(pkGeometry, pkSkin, pkRendererData, pkState, pkEffects, kWorld, kWorldBound);
+    ((void(__thiscall*)(NiD3DDefaultShader*))(*(void***)shader)[59])(shader);
+    return reinterpret_cast<unsigned int(__thiscall*)(NiD3DDefaultShader*, void*, void*, void*, void*, void*, void*, void*)>(
+        CreateDefaultShaderPass)(shader, pkGeometry, pkSkin, pkRendererData, pkState, pkEffects, kWorld, kWorldBound);
 }
 
 struct RendererFake
@@ -101,51 +100,31 @@ struct RendererFake
     virtual void f25();
     virtual void Set(int, unsigned int, int, int);
 };
-struct BaseFake
-{
-    unsigned int FUN_00e805f0(void*, void*, void*, void*, void*, void*, void*);
-};
-struct FakeShader
-{
-    char _pad0[0x1c];
-    RendererFake* m_pOwnerShader;
-    char _pad1[0x2c];
-    unsigned int m_uiOld;
-    unsigned int FUN_00e7c580(void*, void*, void*, void*, void*, void*, void*);
-};
-// Calls Set(0x89, m_uiOld, 0, 0) on the renderer, then forwards all arguments to FUN_00e805f0 and returns its result.
+// Restores the saved lighting render state, then finishes the shader pass.
 // @fnv 0x00e7c580
-unsigned int FakeShader::FUN_00e7c580(void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7)
+unsigned int __fastcall RestoreDefaultShaderState(
+    NiD3DDefaultShader* shader, void*, void* a1, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7)
 {
-    m_pOwnerShader->Set(0x89, m_uiOld, 0, 0);
-    return ((BaseFake*)this)->FUN_00e805f0(a1, a2, a3, a4, a5, a6, a7);
+    reinterpret_cast<RendererFake*>(shader->m_pkD3DRenderState)->Set(0x89, shader->m_uiOldLightingValue, 0, 0);
+    return reinterpret_cast<unsigned int(__thiscall*)(NiD3DShader*, void*, void*, void*, void*, void*, void*, void*)>(
+        FinishD3DShaderPass)(shader, a1, a2, a3, a4, a5, a6, a7);
 }
 
 extern void NiFree(void*);
 extern void _delete(void*, unsigned int);
 
-struct NiD3DShaderX : NiD3DShader
-{
-    void FUN_00e806c0();
-};
-
-struct FUN_00e7c5d0_shell2 : NiD3DShaderX
-{
-    void* DestroyShader(unsigned int arg);
-};
-
 // @fnv 0x00e7c5d0
-void* FUN_00e7c5d0_shell2::DestroyShader(unsigned int auiFlags)
+void* __fastcall DestroyDefaultShader(NiD3DDefaultShader* shader, void*, unsigned int auiFlags)
 {
-    void* p = *(void**)((char*)this + 0x50);
-    *(void**)this = (void*)DAT_010eecac;
+    void* p = shader->m_peFogPassArray;
+    *(void**)shader = (void*)DAT_010eecac;
     NiFree(p);
-    ((NiD3DShaderX*)this)->FUN_00e806c0();
+    shader->NiD3DShader::FUN_00e806c0();
     if (auiFlags & 1)
     {
-        _delete(this, 0x5c);
+        _delete(shader, sizeof(NiD3DDefaultShader));
     }
-    return this;
+    return shader;
 }
 
 struct S_00e7c720_Renderer
@@ -758,40 +737,17 @@ struct S_00e7c720_State
     int unk10;
     void* unk14;
 };
-struct S_00e7c720_Shader
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    S_00e7c720_Owner* unk18;
-    S_00e7c720_Renderer* unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    unsigned int unk4c;
-    unsigned int FUN_00e81170(void*, void*, void*, S_00e7c720_State*, void*, void*, void*);
-    unsigned int FUN_00e7c720(void*, void*, void*, S_00e7c720_State*, void*, void*, void*);
-};
-// Calls f02 on unk1c, invokes ApplyRenderModes on unk18->unk8c8 with a5 and a4->unk14, runs FUN_00e81170, stores unk1c->f27(0x89) in unk4c and returns its result.
+// Applies render modes, begins the shader pass, and saves its lighting render state.
 // @fnv 0x00e7c720
-unsigned int S_00e7c720_Shader::FUN_00e7c720(void* apArg1, void* apArg2, void* apArg3, S_00e7c720_State* apState,
-                                             void* apArg5, void* apArg6, void* apArg7)
+unsigned int __fastcall BeginDefaultShaderPass(
+    NiD3DDefaultShader* shader, void*, void* apArg1, void* apArg2, void* apArg3, S_00e7c720_State* apState,
+    void* apArg5, void* apArg6, void* apArg7)
 {
-    unk1c->f02(apState);
-    unk18->unk8c8->ApplyRenderModes(apArg5, apState->unk14, 0);
-    unsigned int r = FUN_00e81170(apArg1, apArg2, apArg3, apState, apArg5, apArg6, apArg7);
-    unk4c = unk1c->f27(0x89);
+    reinterpret_cast<S_00e7c720_Renderer*>(shader->m_pkD3DRenderState)->f02(apState);
+    reinterpret_cast<S_00e7c720_Owner*>(shader->m_pkD3DRenderer)->unk8c8->ApplyRenderModes(apArg5, apState->unk14, 0);
+    unsigned int r = reinterpret_cast<unsigned int(__thiscall*)(NiD3DShader*, void*, void*, void*, S_00e7c720_State*, void*, void*, void*)>(
+        BeginD3DShaderPass)(shader, apArg1, apArg2, apArg3, apState, apArg5, apArg6, apArg7);
+    shader->m_uiOldLightingValue = reinterpret_cast<S_00e7c720_Renderer*>(shader->m_pkD3DRenderState)->f27(0x89);
     return r;
 }
 
@@ -815,22 +771,9 @@ extern unsigned int DAT_011bf55c;
 extern void GetOwner(ShaderOwner** out);
 extern void* MakeSub30();
 
-struct ShaderCls
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34,
-        unk38;
-    unsigned char m_3c;
-    unsigned char m_3d;
-    unsigned char unk3e;
-    unsigned char unk3f;
-    unsigned int unk40;
-    unsigned int m_44;
-    unsigned int m_48;
-    void FUN_00e7c790(int a1, int a2, unsigned char a3, unsigned char a4);
-};
-
 // @fnv 0x00e7c790
-void ShaderCls::FUN_00e7c790(int aiUnused1, int aiUnused2, unsigned char a3, unsigned char a4)
+void __fastcall ConfigureDefaultShader(
+    NiD3DDefaultShader* shader, void*, int aiUnused1, int aiUnused2, unsigned char a3, unsigned char a4)
 {
     ShaderOwner* p = 0;
     int delta = -1;
@@ -843,14 +786,15 @@ void ShaderCls::FUN_00e7c790(int aiUnused1, int aiUnused2, unsigned char a3, uns
         pSub30 = MakeSub30();
     }
     ((Sub30Cls*)pSub30)->Create(0xa8, 7, 1);
-    this->m_3c = a3;
-    this->m_3d = a4;
-    this->m_44 = DAT_011bf558;
-    this->m_48 = DAT_011bf55c;
+    // Preserve the incoming flag bytes without bool normalization.
+    reinterpret_cast<unsigned char&>(shader->m_bBaseTextureAlphaNeeded) = a3;
+    reinterpret_cast<unsigned char&>(shader->m_bVertexColorAlphaNeeded) = a4;
+    shader->m_uiRemainingStages = DAT_011bf558;
+    shader->m_uiRemainingTextures = DAT_011bf55c;
     if (a3)
     {
-        this->m_44 += delta;
-        this->m_48 += delta;
+        shader->m_uiRemainingStages += delta;
+        shader->m_uiRemainingTextures += delta;
     }
     if (p)
     {
@@ -928,25 +872,10 @@ struct ShaderPassManager
 extern ShaderPassManager* DAT_0126f74c;
 void __cdecl AssignStageFromPool(ShaderPass** pass);
 
-struct ShaderPassBuilder
-{
-    int unk00, unk04, unk08, unk0C;
-    int unk10, unk14, unk18, unk1C;
-    int unk20, unk24, unk28, unk2C;
-    int unk30, unk34, unk38;
-    unsigned char unk3C;
-    bool resetState;
-    unsigned short unk3E;
-    int unk40;
-    unsigned int remainingPasses;
-    unsigned int remainingTextures;
-    void SetValue(unsigned int value);
-    ShaderPass* CreatePass(ShaderMaterial* material, unsigned int value);
-};
-
 // Prepares a pass slot, configures render states and texture binding from the material, registers the pass, and returns it.
 // @fnv 0x00e7c830
-ShaderPass* ShaderPassBuilder::CreatePass(ShaderMaterial* material, unsigned int value)
+ShaderPass* __fastcall CreateDefaultShaderTexturePass(
+    NiD3DDefaultShader* shader, void*, ShaderMaterial* material, unsigned int value)
 {
     if (!DAT_0126f74c || !DAT_0126f74c->Prepare(1, material != 0))
         return 0;
@@ -963,10 +892,10 @@ ShaderPass* ShaderPassBuilder::CreatePass(ShaderMaterial* material, unsigned int
         state->Set(3, 1, false);
         state->Set(4, 3, false);
         state->Set(5, 2, false);
-        if (resetState)
+        if (shader->m_bVertexColorAlphaNeeded)
         {
             state->Set(6, 0, false);
-            resetState = false;
+            shader->m_bVertexColorAlphaNeeded = false;
         }
         else
         {
@@ -981,19 +910,20 @@ ShaderPass* ShaderPassBuilder::CreatePass(ShaderMaterial* material, unsigned int
         }
         else
         {
-            SetValue(configuration->GetValue(result));
+            reinterpret_cast<void(__thiscall*)(NiD3DDefaultShader*, unsigned int)>(
+                SetDefaultShaderValue)(shader, configuration->GetValue(result));
         }
-        --remainingTextures;
+        --shader->m_uiRemainingTextures;
     }
     else
     {
         state->Set(1, 2, false);
         state->Set(2, 0, false);
         state->Set(3, 1, false);
-        if (resetState)
+        if (shader->m_bVertexColorAlphaNeeded)
         {
             state->Set(4, 2, false);
-            resetState = false;
+            shader->m_bVertexColorAlphaNeeded = false;
         }
         else
         {
@@ -1001,10 +931,10 @@ ShaderPass* ShaderPassBuilder::CreatePass(ShaderMaterial* material, unsigned int
         }
         state->Set(5, 0, false);
         state->Set(6, 1, false);
-        if (remainingTextures)
-            --remainingTextures;
+        if (shader->m_uiRemainingTextures)
+            --shader->m_uiRemainingTextures;
     }
-    --remainingPasses;
+    --shader->m_uiRemainingStages;
     DAT_0126f74c->Register(DAT_0126f74c->group, result);
     if (pass)
         pass->Release();
@@ -1026,41 +956,27 @@ struct FUN_00e7ca20_holder
     FUN_00e7ca20_setter* m_10;
 };
 
-struct FUN_00e7ca20_cls
-{
-    unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    unsigned int unk20, unk24, unk28, unk2c, unk30, unk34, unk38;
-    unsigned char m_3c;
-    unsigned char unk3d;
-    unsigned short unk3e;
-    unsigned int m_40;
-    unsigned int m_44;
-    unsigned int m_48;
-
-    FUN_00e7ca20_holder* CreatePass(void* p, unsigned int v);
-    void FUN_00e7ca20(void* p);
-};
-
-// If the global is set and m_3c is nonzero with a valid p, configures the holder's setter based on a byte from p and m_40, then clears m_44 and m_48.
+// Configures the alpha texture stage and clears the remaining stage and texture counts.
 // @fnv 0x00e7ca20
-void FUN_00e7ca20_cls::FUN_00e7ca20(void* p)
+void __fastcall ConfigureDefaultShaderTexture(NiD3DDefaultShader* shader, void*, void* p)
 {
     if (DAT_0126f74c != 0)
     {
-        if (m_3c != 0 && p != 0)
+        if (shader->m_bBaseTextureAlphaNeeded != 0 && p != 0)
         {
             unsigned short v = *(unsigned short*)((char*)p + 4);
             v = (unsigned short)(v & 0xff);
             unsigned short c = v;
-            if ((unsigned int)c > m_40)
+            if ((unsigned int)c > shader->m_uiMaxTextureIndex)
             {
-                c = (unsigned short)m_40;
+                c = (unsigned short)shader->m_uiMaxTextureIndex;
             }
-            FUN_00e7ca20_holder* pHolder = CreatePass(p, (unsigned int)c);
+            FUN_00e7ca20_holder* pHolder = reinterpret_cast<FUN_00e7ca20_holder*(__thiscall*)(NiD3DDefaultShader*, void*, unsigned int)>(
+                fnv_00e7c830::CreateDefaultShaderTexturePass)(shader, p, (unsigned int)c);
             if (pHolder != 0)
             {
                 pHolder->m_10->SetStageValue(1, 3, 0);
-                if (m_3c != 0)
+                if (shader->m_bBaseTextureAlphaNeeded != 0)
                 {
                     pHolder->m_10->SetStageValue(4, 4, 0);
                     pHolder->m_10->SetStageValue(6, 0, 0);
@@ -1071,8 +987,8 @@ void FUN_00e7ca20_cls::FUN_00e7ca20(void* p)
                 }
             }
         }
-        m_44 = 0;
-        m_48 = 0;
+        shader->m_uiRemainingStages = 0;
+        shader->m_uiRemainingTextures = 0;
     }
 }
 }  // namespace fnv_00e7ca20
@@ -1133,7 +1049,8 @@ struct StateX
     int unk10;
     TexPropX* m_pkTexProp;
 };
-struct DataX
+// Renderer buffer view: byte 7 counts texture sets and 0x00e8eeb0 validates streams; Data.h instead stores skill requirements.
+struct GeometryTextureSetBufferView
 {
     int unk00;
     char unk04;
@@ -1157,7 +1074,7 @@ struct SkinX
     int unk28;
     int unk2c;
     int unk30;
-    DataX* m_pUserData;
+    GeometryTextureSetBufferView* m_pUserData;
 };
 struct GeomX
 {
@@ -1209,34 +1126,10 @@ struct GeomX
     int unkb4;
     SkinX* m_pkSkin;
 };
-struct ShaderX
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    unsigned int m_uiMaxBones;
-    void FUN_00e7c790(int a1, int a2, unsigned char a3, unsigned char a4);
-    PassX* CreatePass(MapX* p, unsigned int ui);
-    void FUN_00e7ca20(MapX* p);
-    unsigned int CreateShaderPass(GeomX* pkGeometry, void* pkSkin, DataX* pkData, StateX* pkState, void* pkEffects,
-                                  void* kWorld, void* kWorldBound);
-};
 // @fnv 0x00e7cac0
-unsigned int ShaderX::CreateShaderPass(GeomX* pkGeometry, void* pkSkin, DataX* pkData, StateX* pkState, void* pkEffects,
-                                       void* kWorld, void* kWorldBound)
+unsigned int __fastcall CreateDefaultShaderPass(
+    NiD3DDefaultShader* shader, void*, GeomX* pkGeometry, void* pkSkin, GeometryTextureSetBufferView* pkData, StateX* pkState,
+    void* pkEffects, void* kWorld, void* kWorldBound)
 {
     if (!pkGeometry)
     {
@@ -1250,12 +1143,12 @@ unsigned int ShaderX::CreateShaderPass(GeomX* pkGeometry, void* pkSkin, DataX* p
     if (!pkData)
         pkData = pkGeometry->m_pkSkin->m_pUserData;
     unsigned short usBoneCount = pkData->m_ucCount;
-    m_uiMaxBones = 0;
+    shader->m_uiMaxTextureIndex = 0;
     unsigned int uiNumMaps;
     if (usBoneCount)
     {
         pkMap = pkTex->m_ppkMaps[0];
-        m_uiMaxBones = usBoneCount - 1;
+        shader->m_uiMaxTextureIndex = usBoneCount - 1;
         if (pkMap && pkMap->m_pkTexture)
             uiNumMaps = 1;
         else
@@ -1275,14 +1168,16 @@ unsigned int ShaderX::CreateShaderPass(GeomX* pkGeometry, void* pkSkin, DataX* p
     }
     if (bAlpha || uiNumMaps > 0)
     {
-        FUN_00e7c790(1, 3, 0, 0);
+        reinterpret_cast<void(__thiscall*)(NiD3DDefaultShader*, int, int, unsigned char, unsigned char)>(
+            ConfigureDefaultShader)(shader, 1, 3, 0, 0);
         PassX* pkPass;
         if (uiNumMaps > 0)
         {
             unsigned short usIdx = pkMap->m_usFlags & 0xff;
-            if (usIdx > m_uiMaxBones)
-                usIdx = (unsigned short)m_uiMaxBones;
-            pkPass = CreatePass(pkMap, usIdx);
+            if (usIdx > shader->m_uiMaxTextureIndex)
+                usIdx = (unsigned short)shader->m_uiMaxTextureIndex;
+            pkPass = reinterpret_cast<PassX*(__thiscall*)(NiD3DDefaultShader*, MapX*, unsigned int)>(
+                fnv_00e7c830::CreateDefaultShaderTexturePass)(shader, pkMap, usIdx);
             if (bAlpha)
             {
                 pkPass->m_pkStage->SetStageValue(1, 4, 0);
@@ -1298,11 +1193,13 @@ unsigned int ShaderX::CreateShaderPass(GeomX* pkGeometry, void* pkSkin, DataX* p
         }
         else
         {
-            pkPass = CreatePass(0, 0);
+            pkPass = reinterpret_cast<PassX*(__thiscall*)(NiD3DDefaultShader*, MapX*, unsigned int)>(
+                fnv_00e7c830::CreateDefaultShaderTexturePass)(shader, 0, 0);
             pkPass->m_pkStage->SetStageValue(1, 2, 0);
             pkPass->m_pkStage->SetStageValue(4, 2, 0);
         }
-        FUN_00e7ca20(pkMap);
+        reinterpret_cast<void(__thiscall*)(NiD3DDefaultShader*, MapX*)>(
+            fnv_00e7ca20::ConfigureDefaultShaderTexture)(shader, pkMap);
     }
     return 0;
 }

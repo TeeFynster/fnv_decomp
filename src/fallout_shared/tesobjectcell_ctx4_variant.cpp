@@ -2,21 +2,13 @@
 // tesobjectcell_ctx4_variant.cpp: context variant of src/fallout_shared/tesobjectcell.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
 #include "tesobjectcell_packet.h"
+#include "../../include/BGSLightingTemplate.h"
+#include "../../include/NiPoint3.h"
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
 unsigned int FUN_0054f4c0();
 NiAVObject* FUN_0054f4f0();
 
-class TESForm
-{
-  public:
-    virtual ~TESForm();
-};
-class BGSLightingTemplate : public TESForm
-{
-  public:
-    virtual ~BGSLightingTemplate();
-};
 namespace CellLoading {
 
 struct Cell;
@@ -35,10 +27,6 @@ struct Extra
     void FUN_00416be0(Cell*);
 };
 
-struct Vector
-{
-    float x, y, z;
-};
 struct Extras
 {
     void FUN_00421a70(float);
@@ -204,7 +192,7 @@ struct Reference
     bool FUN_004013e0();
     unsigned int FUN_0084e3a0();
     void* FUN_007af430();
-    Vector* FUN_00430830();
+    NiPoint3* FUN_00430830();
     Cell* FUN_008d6f30();
 };
 

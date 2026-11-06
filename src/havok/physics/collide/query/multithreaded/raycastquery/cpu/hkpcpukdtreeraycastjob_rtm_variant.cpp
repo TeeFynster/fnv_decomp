@@ -1,3 +1,7 @@
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+
 
 // src/havok/physics/collide/query/multithreaded/raycastquery/cpu/hkpcpukdtreeraycastjob_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/query/multithreaded/raycastquery/cpu/hkpcpukdtreeraycastjob.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
@@ -48,21 +52,7 @@ struct FUN_00e4dde0
     int unk8C;
     FUN_00e4dde0();
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize);
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-AudioHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 struct FUN_00e4e3c0
 {
     int m_i04;
@@ -109,9 +99,9 @@ struct FUN_00e4e3c0
 
     static void operator delete(void* apMemory)
     {
-        AudioHolder* pHolder = FUN_00c85750();
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(apMemory, sizeof(FUN_00e4e3c0));
+        hkMemoryRouter* pHolder = FUN_00c85750();
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        reinterpret_cast<hkMemoryAllocator*>(pAllocator)->blockFree(apMemory, sizeof(FUN_00e4e3c0));
     }
 };
 FUN_00e4e3c0::FUN_00e4e3c0()
@@ -119,15 +109,16 @@ FUN_00e4e3c0::FUN_00e4e3c0()
     m_i04 = 0;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00e2acf0 FUN_00e2acf0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 
 struct Sub60
 {
-    __m128 v0;
+    LocalM128 v0;
     float f10;
     int unk14;
     int unk18;
@@ -181,8 +172,8 @@ struct Sub60
 
 struct Sub30
 {
-    __m128 v0;
-    __m128 v1;
+    LocalM128 v0;
+    LocalM128 v1;
     char c20;
     int i24;
 
@@ -225,9 +216,9 @@ struct LocalInput
 
 struct FloatMatrix3
 {
-    __m128 col0;
-    __m128 col1;
-    __m128 col2;
+    LocalM128 col0;
+    LocalM128 col1;
+    LocalM128 col2;
 };
 
 void __cdecl FUN_00e2ab00(InputStruct* input, FloatMatrix3* m1, FloatMatrix3* m2);

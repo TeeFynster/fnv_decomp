@@ -2,23 +2,14 @@
 // tesobjectcell_ctx_variant.cpp: context variant of src/fallout_shared/tesobjectcell.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
 #include "tesobjectcell_packet.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/TESForm.h"
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
 unsigned int FUN_0054f4c0();
 NiAVObject* FUN_0054f4f0();
 
-template <> class BSSimpleList<TESObjectREFR*>
-{
-  public:
-    TESObjectREFR* item;
-    BSSimpleList* next;
-    BSSimpleList();
-    ~BSSimpleList();
-    TESObjectREFR*& GetItem();
-    BSSimpleList* GetNext();
-    bool FUN_008256d0();
-    void AddHead(TESObjectREFR* const& item);
-};
+#include "../../include/BSSimpleList.h"
 
 class Cell_Sub;
 
@@ -47,18 +38,8 @@ struct CellC4Holder
     FUN_00544f60* unkC4;
 };
 
-class BGSSaveLoadGame
-{
-  public:
-    bool FUN_0042ce10();
-};
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
-class TESForm
-{
-  public:
-    bool GetDeleted() const;
-};
 
 class FUN_00439f90_shell
 {
@@ -108,75 +89,6 @@ class BSSimpleList_standin
     void FUN_0063f7b0();
 };
 
-class PolymorphicRef
-{
-  public:
-    virtual void Unk_00();
-    virtual void Unk_01();
-    virtual void Unk_02();
-    virtual void Unk_03();
-    virtual void Unk_04();
-    virtual void Unk_05();
-    virtual void Unk_06();
-    virtual void Unk_07();
-    virtual void Unk_08();
-    virtual void Unk_09();
-    virtual void Unk_0a();
-    virtual void Unk_0b();
-    virtual void Unk_0c();
-    virtual void Unk_0d();
-    virtual void Unk_0e();
-    virtual void Unk_0f();
-    virtual void Unk_10();
-    virtual void Unk_11();
-    virtual void Unk_12();
-    virtual void Unk_13();
-    virtual void Unk_14();
-    virtual void Unk_15();
-    virtual void Unk_16();
-    virtual void Unk_17();
-    virtual void Unk_18();
-    virtual void Unk_19();
-    virtual void Unk_1a();
-    virtual void Unk_1b();
-    virtual void Unk_1c();
-    virtual void Unk_1d();
-    virtual void Unk_1e();
-    virtual void Unk_1f();
-    virtual void Unk_20();
-    virtual void Unk_21();
-    virtual void Unk_22();
-    virtual void Unk_23();
-    virtual void Unk_24();
-    virtual void Unk_25();
-    virtual void Unk_26();
-    virtual void Unk_27();
-    virtual void Unk_28();
-    virtual void Unk_29();
-    virtual void Unk_2a();
-    virtual void Unk_2b();
-    virtual void Unk_2c();
-    virtual void Unk_2d();
-    virtual void Unk_2e();
-    virtual void Unk_2f();
-    virtual void Unk_30();
-    virtual void Unk_31();
-    virtual void Unk_32();
-    virtual void Unk_33();
-    virtual void Unk_34();
-    virtual void Unk_35();
-    virtual void Unk_36();
-    virtual void Unk_37();
-    virtual void Unk_38();
-    virtual void Unk_39();
-    virtual void Unk_3a();
-    virtual void Unk_3b();
-    virtual void Unk_3c();
-    virtual void Unk_3d();
-    virtual void Unk_3e();
-    virtual void Unk_3f();
-    virtual bool Unk_40();
-};
 
 class CellSubTarget
 {
@@ -255,7 +167,7 @@ void Cell_Sub::FUN_00544ce0()
     CellRefLockEnter();
     BSSimpleList<TESObjectREFR*> localList9;
     BSSimpleList<TESObjectREFR*>* iter = (BSSimpleList<TESObjectREFR*>*)FUN_009604f0();
-    while (iter != 0 && !iter->FUN_008256d0())
+    while (iter != 0 && !iter->IsEmpty())
     {
         TESObjectREFR* item5 = iter->GetItem();
         iter = iter->GetNext();
@@ -271,7 +183,7 @@ void Cell_Sub::FUN_00544ce0()
             }
             else
             {
-                if (!((PolymorphicRef*)item5)->Unk_40())
+                if (!((TESForm*)item5)->IsActor())
                 {
                     if (((FUN_005656d0_shell*)item5)->FUN_005656d0())
                     {
@@ -286,7 +198,7 @@ void Cell_Sub::FUN_00544ce0()
         }
     }
     CellRefLockLeave();
-    while (!localList9.FUN_008256d0())
+    while (!localList9.IsEmpty())
     {
         TESObjectREFR* item3 = localList9.GetItem();
         ((BSSimpleList_standin*)&localList9)->FUN_0063f7b0();
@@ -302,7 +214,7 @@ void Cell_Sub::FUN_00544ce0()
     if (extra9 != 0)
     {
         iter = ((FUN_00587870_shell*)extra9)->FUN_00587870(this);
-        while (iter != 0 && !iter->FUN_008256d0())
+        while (iter != 0 && !iter->IsEmpty())
         {
             ((FUN_00545740_shell*)this)->GetOrCreateFaceGenNode(iter->GetItem());
             iter = iter->GetNext();

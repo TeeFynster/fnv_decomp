@@ -1,10 +1,69 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#include "../../include/hkArray.h"
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
 // src/staging/blk_00e60000_o2_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00e60000_o2.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
 // src/staging/blk_00e60000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include <stddef.h>
+#include "../../include/hkResult.h"
+#include "../../include/_D3DRESOURCETYPE.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/NiDX9Renderer.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiFile.h"
+#include "../../include/hkMemoryRouter.h"
+
+// COM slots 0-2 (IUnknown), texture slots 17-18, and device slot 40 identify the SDK interfaces.
+struct IDirect3DBaseTexture9;
+struct IDirect3DTexture9;
+struct IDirect3DSurface9;
+struct IDirect3DDevice9;
+#include "../../include/NiPixelFormat.h"
+#include "../../include/NiDX9DepthStencilEntry.h"
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
+// Preserve the original SIMD type: the SDK union's integer lanes change
+// VC9 RTM alias analysis and instruction scheduling in this unit.
+#define _INCLUDED_MM2
+// Exe 0x00e62d30 FUN_00e62d30: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    struct
+    {
+        float x, y, z, w;
+    } lanes;
+} __m128, LocalM128;
+extern "C"
+{
+    __m128 _mm_load_ss(const float*);
+    void _mm_store_ss(float*, __m128);
+    __m128 _mm_add_ss(__m128, __m128);
+    __m128 _mm_shuffle_ps(__m128, __m128, int);
+}
+#include "../../include/NiDX9ImplicitDepthStencilBufferData.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkRotation.h"
+#include "../../include/NiD3DShader.h"
+#include "../../include/hkTransform.h"
+#include "../../include/BSFaceGenMorphData.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiDX9TextureBufferData.h"
+#include "../../include/NiPixelFormat.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiTMapItem.h"
+#include "../../include/NiDX9RenderTargetInfo.h"
+#include "../../include/_D3DFORMAT.h"
+#include "../../include/NiPoint3.h"
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
 struct FUN_00a77980_shell
 {
     unsigned char FUN_00a77980(int);
@@ -40,19 +99,15 @@ struct FUN_00e67fd0_cls
 {
     void __thiscall ClearEntries();
 };
-typedef void*(__stdcall* DepthDevice)(unsigned int);
-typedef int(__stdcall* CreateExFn)(unsigned int, DepthDevice**);
+typedef void*(__stdcall* D3D9CreateFunction)(unsigned int);
+typedef int(__stdcall* CreateExFn)(unsigned int, D3D9CreateFunction**);
 extern void* DAT_0126f0d4;
-extern DepthDevice DAT_0126f0dc;
+extern D3D9CreateFunction DAT_0126f0dc;
 extern CreateExFn DAT_0126f0e0;
 extern void*(__stdcall* DAT_00fdf0ac)(void*, const char*);
 extern void*(__stdcall* DAT_00fdf0b0)(const char*);
 unsigned char __cdecl InitD3D9CreateFunctions();
 extern void __cdecl NiFree(void*);
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern int DAT_010eec74;
 struct FUN_00e7b200_Class
 {
@@ -104,21 +159,10 @@ struct FUN_00e7efc0_List
     FUN_00e7efc0_Node* head;
     FUN_00e7efc0_Node* __thiscall FUN_00e7efc0(FUN_00e7efc0_Node* node);
 };
-enum DX9Format_00e68530
-{
-    DX9FMT_A8P8 = 40,
-    DX9FMT_P8 = 41
-};
-enum DX9ResourceType_00e68530
-{
-    DX9RTYPE_TEXTURE = 3,
-    DX9RTYPE_VOLUMETEXTURE = 4,
-    DX9RTYPE_CUBETEXTURE = 5
-};
 struct DX9SurfaceDesc_00e68530
 {
-    DX9Format_00e68530 Format;
-    DX9ResourceType_00e68530 Type;
+    _D3DFORMAT Format;
+    _D3DRESOURCETYPE Type;
     unsigned long Usage;
     int Pool;
     int MultiSampleType;
@@ -128,8 +172,8 @@ struct DX9SurfaceDesc_00e68530
 };
 struct DX9VolumeDesc_00e68530
 {
-    DX9Format_00e68530 Format;
-    DX9ResourceType_00e68530 Type;
+    _D3DFORMAT Format;
+    _D3DRESOURCETYPE Type;
     unsigned long Usage;
     int Pool;
     unsigned int Width;
@@ -149,7 +193,7 @@ struct DX9BaseTexture_00e68530
     virtual unsigned long __stdcall SetPriority(unsigned long PriorityNew) = 0;
     virtual unsigned long __stdcall GetPriority() = 0;
     virtual void __stdcall PreLoad() = 0;
-    virtual DX9ResourceType_00e68530 __stdcall GetType() = 0;
+    virtual _D3DRESOURCETYPE __stdcall GetType() = 0;
     virtual unsigned long __stdcall SetLOD(unsigned long LODNew) = 0;
     virtual unsigned long __stdcall GetLOD() = 0;
     virtual unsigned long __stdcall GetLevelCount() = 0;
@@ -169,25 +213,7 @@ struct DX9VolumeTexture_00e68530 : DX9BaseTexture_00e68530
 {
     virtual long __stdcall GetLevelDesc(unsigned int Level, DX9VolumeDesc_00e68530* pDesc) = 0;
 };
-struct NiComponentSpec
-{
-    int m_eComponent;
-    int m_eRepresentation;
-    unsigned char m_ucBPC;
-    bool m_bSigned;
-};
-struct NiPixelFormat
-{
-    unsigned char m_ucFlags;
-    unsigned char m_ucBitsPerPixel;
-    int m_eFormat;
-    int m_eTiling;
-    unsigned int m_uiRendererHint;
-    unsigned int m_uiExtraData;
-    NiComponentSpec m_akComponents[4];
-    NiPixelFormat();
-};
-bool __cdecl GetPixelTemplateForFormat(DX9Format_00e68530 eFormat, NiPixelFormat& kFormat);
+bool __cdecl GetPixelTemplateForFormat(_D3DFORMAT eFormat, NiPixelFormat& kFormat);
 struct NiDX9SourceCubeMapData_S
 {
     unsigned int unk00;
@@ -255,19 +281,7 @@ struct FUN_00e63ec0_Class
     int _0c;
     int __thiscall FUN_00e63ec0(int a, int* out);
 };
-struct NiTMapBaseStub
-{
-    void RemoveAll();
-};
 extern MM g_memoryManager;
-extern int DAT_010eec54;
-struct FUN_00e7afc0_Class : NiTMapBaseStub
-{
-    int vtbl;
-    int _04;
-    int _08;
-    FUN_00e7afc0_Class* __thiscall FUN_00e7afc0(int);
-};
 void* __cdecl _NiFree(void*);
 extern int DAT_010eec4c;
 extern MemoryManager _g_memoryManager;
@@ -279,20 +293,8 @@ struct FUN_00e7b230_Class
 };
 extern void* const DAT_010eecac[];
 void NiFree(void*);
-struct NiD3DShader
-{
-    void* const* vtbl;
-    unsigned char _padding[0x4c];
-    void* m_p;
-    void __thiscall FUN_00e806c0();
-    void __thiscall FUN_00e7c540();
-};
 extern int DAT_0126f590;
 unsigned char __cdecl FUN_00e7cca0(int* pObject);
-struct NiRefObject
-{
-    void* vtbl;
-};
 extern NiRefObject vftable_NiRefObject;
 extern int DAT_010eeed4;
 extern int DAT_010eefbc;
@@ -2044,94 +2046,6 @@ struct FUN_00e68ea0_cls
     FUN_00e68ea0_cls* FUN_00e68ea0(unsigned char acFlags);
 };
 void __cdecl NiFree(void* pvMem);
-void __cdecl BE7B040SizedFree(void* pvMem, unsigned int uiSize);
-struct BE7B040Value
-{
-    static void operator delete(void* pvMem, unsigned int uiSize)
-    {
-        BE7B040SizedFree(pvMem, uiSize);
-    }
-
-    int m_aiData00;
-    int m_aiData04;
-    int m_aiData08;
-    int m_aiData0C;
-    int m_aiData10;
-    int m_aiData14;
-    int m_aiData18;
-    int m_aiData1C;
-    int m_aiData20;
-    int m_aiData24;
-    int m_aiData28;
-    int m_aiData2C;
-    int m_aiData30;
-    int m_aiData34;
-    int m_aiData38;
-    int m_aiData3C;
-    int m_aiData40;
-    int m_aiData44;
-};
-template <class TKEY, class TVAL> struct BE7B040MapItem
-{
-    BE7B040MapItem* m_pkNext;
-    TKEY m_key;
-    TVAL m_val;
-};
-template <class TKEY, class TVAL> class BE7B040MapBase
-{
-  public:
-    typedef BE7B040MapItem<TKEY, TVAL> Item;
-
-    __forceinline virtual ~BE7B040MapBase()
-    {
-        RemoveAll();
-        NiFree(m_ppkHashTable);
-    }
-    virtual unsigned int KeyToHashIndex(TKEY key) const;
-
-    void RemoveAll();
-
-    Item* GetFirstPos() const
-    {
-        for (unsigned int i = 0; i < m_uiHashSize; i++)
-        {
-            if (m_ppkHashTable[i])
-                return m_ppkHashTable[i];
-        }
-        return 0;
-    }
-    void GetNext(Item*& pkPos, TKEY& key, TVAL& val) const
-    {
-        Item* pkItem = pkPos;
-        key = pkItem->m_key;
-        val = pkItem->m_val;
-        if (pkItem->m_pkNext)
-        {
-            pkPos = pkItem->m_pkNext;
-            return;
-        }
-        unsigned int i = KeyToHashIndex(pkItem->m_key);
-        for (++i; i < m_uiHashSize; i++)
-        {
-            pkPos = m_ppkHashTable[i];
-            if (pkPos)
-                return;
-        }
-        pkPos = 0;
-    }
-
-    unsigned int m_uiHashSize;
-    Item** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
-template <class TKEY, class TVAL> class BE7B040Map : public BE7B040MapBase<TKEY, TVAL>
-{
-  public:
-    __forceinline virtual ~BE7B040Map()
-    {
-        this->RemoveAll();
-    }
-};
 class FUN_00e7b040_cls
 {
   public:
@@ -2139,7 +2053,7 @@ class FUN_00e7b040_cls
 
     int unk00;
     int unk04;
-    BE7B040Map<unsigned int, BE7B040Value*> m_kValues;
+    NiTPointerMap<_D3DFORMAT, NiDX9RenderTargetInfo*> m_kValues;
 };
 struct Entry
 {
@@ -2913,103 +2827,9 @@ struct D3DSurfaceDesc_e7d250
     unsigned int Width;
     unsigned int Height;
 };
-struct D3DSurface_e7d250
-{
-    virtual long __stdcall QueryInterface(const void* riid, void** ppvObj) = 0;
-    virtual unsigned long __stdcall AddRef() = 0;
-    virtual unsigned long __stdcall Release() = 0;
-    virtual long __stdcall GetDevice(void** ppDevice) = 0;
-    virtual long __stdcall SetPrivateData(const void* refguid, const void* pData, unsigned long SizeOfData,
-                                          unsigned long Flags) = 0;
-    virtual long __stdcall GetPrivateData(const void* refguid, void* pData, unsigned long* pSizeOfData) = 0;
-    virtual long __stdcall FreePrivateData(const void* refguid) = 0;
-    virtual unsigned long __stdcall SetPriority(unsigned long PriorityNew) = 0;
-    virtual unsigned long __stdcall GetPriority() = 0;
-    virtual void __stdcall PreLoad() = 0;
-    virtual int __stdcall GetType() = 0;
-    virtual long __stdcall GetContainer(const void* riid, void** ppContainer) = 0;
-    virtual long __stdcall GetDesc(D3DSurfaceDesc_e7d250* pDesc) = 0;
-};
-struct D3DTexture_e7d250
-{
-    virtual long __stdcall QueryInterface(const void* riid, void** ppvObj) = 0;
-    virtual unsigned long __stdcall AddRef() = 0;
-    virtual unsigned long __stdcall Release() = 0;
-    virtual long __stdcall GetDevice(void** ppDevice) = 0;
-    virtual long __stdcall SetPrivateData(const void* refguid, const void* pData, unsigned long SizeOfData,
-                                          unsigned long Flags) = 0;
-    virtual long __stdcall GetPrivateData(const void* refguid, void* pData, unsigned long* pSizeOfData) = 0;
-    virtual long __stdcall FreePrivateData(const void* refguid) = 0;
-    virtual unsigned long __stdcall SetPriority(unsigned long PriorityNew) = 0;
-    virtual unsigned long __stdcall GetPriority() = 0;
-    virtual void __stdcall PreLoad() = 0;
-    virtual int __stdcall GetType() = 0;
-    virtual unsigned long __stdcall SetLOD(unsigned long LODNew) = 0;
-    virtual unsigned long __stdcall GetLOD() = 0;
-    virtual unsigned long __stdcall GetLevelCount() = 0;
-    virtual long __stdcall SetAutoGenFilterType(int FilterType) = 0;
-    virtual int __stdcall GetAutoGenFilterType() = 0;
-    virtual void __stdcall GenerateMipSubLevels() = 0;
-    virtual long __stdcall GetLevelDesc(unsigned int Level, D3DSurfaceDesc_e7d250* pDesc) = 0;
-    virtual long __stdcall GetSurfaceLevel(unsigned int Level, D3DSurface_e7d250** ppSurfaceLevel) = 0;
-};
-struct NiPixelFormat;
 NiPixelFormat* __cdecl CreatePixelFormat(unsigned int eD3DFormat);
 const char* __cdecl NiDX9ErrorString(long hr);
 void __cdecl NiDX9Warning(const char* pcFormat, ...);
-class Ni2DBufferStub;
-class NiRefObjectStub
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-    NiRefObjectStub() throw()
-    {
-        m_uiRefCount = 0;
-        InterlockedIncrement(&ms_lObjectCount);
-    }
-    virtual ~NiRefObjectStub();
-    unsigned int m_uiRefCount;
-    static volatile long ms_lObjectCount;
-};
-class RendererDataStub : public NiRefObjectStub
-{
-  public:
-    RendererDataStub() throw() : m_pCacheEntry(0), m_pkRenderPixelFormat(0)
-    {}
-    virtual ~RendererDataStub();
-    Ni2DBufferStub* m_pCacheEntry;
-    NiPixelFormat* m_pkRenderPixelFormat;
-};
-class NiDX92DBufferDataStub : public RendererDataStub
-{
-  public:
-    NiDX92DBufferDataStub() throw() : m_pkSurface(0)
-    {}
-    virtual ~NiDX92DBufferDataStub();
-    int m_iDepthFormat;
-    D3DSurface_e7d250* m_pkSurface;
-    int m_iUnk18;
-    int m_iSamples;
-};
-class NiDX9TextureBufferData : public NiDX92DBufferDataStub
-{
-  public:
-    NiDX9TextureBufferData() throw()
-    {
-        m_pkCubeMapTexture = 0;
-    }
-    virtual ~NiDX9TextureBufferData();
-    D3DTexture_e7d250* m_pkCubeMapTexture;
-
-    static NiDX9TextureBufferData* __cdecl FUN_00e7d250(D3DTexture_e7d250* pkD3DTexture, Ni2DBufferStub*& pkBuffer,
-                                                        int eMSAAPref, int iUnk18);
-};
-class Ni2DBufferStub
-{
-  public:
-    static Ni2DBufferStub* __cdecl Create(unsigned int uiWidth, unsigned int uiHeight, RendererDataStub* pkData);
-    void AttachRendererData(RendererDataStub* pkData);
-};
 extern int DAT_0126f5e0;
 int* __cdecl FUN_00e7d550();
 extern int DAT_0126f5b4;
@@ -3187,11 +3007,6 @@ struct E74Geometry
     E74SkinInstance* m_spSkinningInstance;
     E74RefShader* m_pGeometryShader;
 };
-class BSFaceGenMorphData
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-};
 struct E74ShaderPtr
 {
     E74RefShader* m_pObject;
@@ -3211,7 +3026,7 @@ struct E74ShaderPtr
             if (pOld)
                 pOld->DecRefCount();
             m_pObject = pObject;
-            if (pObject)
+            if (pObject != 0)
                 pObject->IncRefCount();
         }
         return *this;
@@ -4235,20 +4050,10 @@ struct AdditionalDepthDevice
     void** vtable;
 };
 typedef unsigned long(__stdcall* DepthAddRef)(void*);
-typedef long(__stdcall* DepthAcquireSurface)(void*, void*, int, D3DSurface_e7d250**);
+typedef long(__stdcall* DepthAcquireSurface)(void*, void*, int, IDirect3DSurface9**);
 typedef long(__stdcall* DepthGetDescription)(void*, DepthSurfaceDescription*);
-class AdditionalDepthData : public NiDX92DBufferDataStub
-{
-  public:
-    AdditionalDepthDevice* device;
-    AdditionalDepthData() throw() : device(0)
-    {}
-    virtual ~AdditionalDepthData()
-    {}
-};
+
 extern char DAT_010ef028;
-AdditionalDepthData* __cdecl CreateDepthBufferData(AdditionalDepthDevice* device, void* surfaceSource, int, int,
-                                                   Ni2DBufferStub** buffer);
 struct IndexAllocator
 {
     int unk00;
@@ -4351,11 +4156,6 @@ void __cdecl FUN_00e60e40(int type, int count, int data, IntArray* out);
 void __cdecl FUN_00e60f50(int type, int data, int count, int base, IntArray* out);
 void __cdecl AppendIndices(int type, int data, int count, int base, U16Array* out);
 void __cdecl BuildIndexArray(IndexSource* src, IntArray* out);
-enum hkResultE63E
-{
-    HK_SUCCESS_E63E = 0,
-    HK_FAILURE_E63E = 1
-};
 struct hkPairE63E
 {
     void* m_key;
@@ -4369,7 +4169,7 @@ class hkMapE63E
     hkPairE63E* m_pairs;
     int m_numPairs;
 
-    hkResultE63E FindValue(void* key, unsigned int* out) const;
+    hkResult FindValue(void* key, unsigned int* out) const;
 };
 struct FnvCpu_FUN_00e687f0_CpuObject
 {
@@ -4453,49 +4253,9 @@ struct FUN_00e76620_cls
 void __cdecl FUN_00c908c0(void*, IndexArray*, int, int);
 void __cdecl AppendIndexSequence(int type, int count, int start, IndexArray* output, void* allocator);
 class AllocatorE60F;
-struct RouterE60F
-{
-    int unk00, unk04, unk08, unk0C;
-    AllocatorE60F* m_pStreamAllocator;
-
-    AllocatorE60F& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-namespace hkRouterE60F {
-extern "C" RouterE60F& __cdecl FUN_00c85750() throw();
-}
 void __cdecl FUN_00c908c0(AllocatorE60F& kAlloc, void* pArray, int iNumElements, int iSizeElem);
 void* __cdecl FUN_00cb1260(void* pDst, const void* pSrc, int iNumBytes);
-template <class T> class hkArrayE60F
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    __forceinline T* expandBy(int n)
-    {
-        AllocatorE60F& kAlloc = hkRouterE60F::FUN_00c85750().heap();
-        int iOldSize = m_iElementCount;
-        int iNewSize = iOldSize + n;
-        if (getCapacity() < iNewSize)
-        {
-            int iCap2 = 2 * getCapacity();
-            int iNewCap = (iNewSize < iCap2) ? iCap2 : iNewSize;
-            FUN_00c908c0(kAlloc, this, iNewCap, sizeof(T));
-        }
-        m_iElementCount += n;
-        return m_data + iOldSize;
-    }
-};
-void __cdecl FUN_00e60f50(int iType, const int* piIndices, int iNumIndices, int iOffset, hkArrayE60F<int>& kOut);
+void __cdecl FUN_00e60f50(int iType, const int* piIndices, int iNumIndices, int iOffset, hkArray<int>& kOut);
 extern "C" double DAT_010229b8;
 static float FUN_00e62ac0(unsigned seed);
 volatile unsigned g_e62ac0_seed = 12345u;
@@ -4514,12 +4274,6 @@ void e62ac0_probe_caller(void);
 //   fstp [esp+4] / fld [esp+4]
 //   fst [edx] / fst [edx+4] / fstp [edx+8]
 //   ret
-struct Vec3
-{
-    float x;
-    float y;
-    float z;
-};
 int g_cn = 5;
 int g_c2 = 7;
 extern float __declspec(noinline) helper()
@@ -4527,7 +4281,7 @@ extern float __declspec(noinline) helper()
     g_cn = (g_cn * 3) << (g_c2 & 31);
     return 1.0f;
 }
-static void SetVec3FromHelper(Vec3* out, float a, float b);
+static void SetVec3FromHelper(NiPoint3* out, float a, float b);
 void FUN_dummycaller();
 static void SwapFloatPair(float* base, int i, float* outB, float a, float b, unsigned __int64 outA);
 float* volatile g_e64_base;
@@ -5177,7 +4931,7 @@ struct FUN_00e69620_cls
     FUN_00e69620_Target* unk884;
     void FUN_00e69620();
 };
-typedef int D3DFORMAT;
+typedef _D3DFORMAT D3DFORMAT;
 typedef int D3DDEVTYPE;
 struct S00e7b590_Mode
 {
@@ -5302,30 +5056,23 @@ __forceinline D3DFORMAT const& GetOuterNext168(OuterNode*& position)
     return *value;
 }
 typedef S00e7b590_Mode Desc;
-struct ModeMap404
-{
-    virtual ~ModeMap404();
-    unsigned int bucketCount;
-    void* buckets;
-    unsigned int count;
-};
 struct ModeItem404
 {
     D3DFORMAT key;
     bool b4;
     bool fullscreenSupported;
-    ModeMap404 modes;
+    NiTPointerMap<_D3DFORMAT, NiDX9RenderTargetInfo*> modes;
 };
-struct ListNode
+struct BlkListNodeView
 {
 
-    ListNode* next;
+    BlkListNodeView* next;
 
-    ListNode* prev;
+    BlkListNodeView* prev;
 
     ModeItem404* item;
 };
-__forceinline ModeItem404* const& GetNext(ListNode*& pos)
+__forceinline ModeItem404* const& GetNext(BlkListNodeView*& pos)
 {
 
     ModeItem404* const* p = &pos->item;
@@ -5350,15 +5097,15 @@ class GlobalObject_0096a2d0
 
     void Lock(const char*);
 };
-extern ListNode* DAT_011c5f58;
+extern BlkListNodeView* DAT_011c5f58;
 extern GlobalObject_0096a2d0 g_011c5f80;
 extern unsigned int DAT_011c5f84;
 void __cdecl FUN_0043a080();
 struct ItemList168
 {
 
-    ListNode* head;
-    ListNode* tail;
+    BlkListNodeView* head;
+    BlkListNodeView* tail;
     unsigned int count;
 
     ItemList168()
@@ -5421,19 +5168,13 @@ class ItemE7CF
     virtual void vf54();
     virtual void vf58(void* pArg);
 };
-template <class T> struct NiTListItemE7CF
-{
-    NiTListItemE7CF* m_pkNext;
-    NiTListItemE7CF* m_pkPrev;
-    T m_element;
-};
 typedef void* NiTListIterator;
 template <class T> class NiTListE7CF
 {
   public:
     void* m_vtbl;
-    NiTListItemE7CF<T>* m_pkHead;
-    NiTListItemE7CF<T>* m_pkTail;
+    NiTListItem<T>* m_pkHead;
+    NiTListItem<T>* m_pkTail;
 
     NiTListIterator GetHeadPos() const
     {
@@ -5441,8 +5182,8 @@ template <class T> class NiTListE7CF
     }
     T GetNext(NiTListIterator& kPos) const
     {
-        const T& element = ((NiTListItemE7CF<T>*)kPos)->m_element;
-        kPos = ((NiTListItemE7CF<T>*)kPos)->m_pkNext;
+        const T& element = ((NiTListItem<T>*)kPos)->m_element;
+        kPos = ((NiTListItem<T>*)kPos)->m_pkNext;
         return element;
     }
 };
@@ -5565,55 +5306,30 @@ class RT
     bool FUN_00e7d0a0(Swap* pkSwap);
 };
 int ApplyOperator(int op, int val);
-struct RouterX
-{
-    char* stackCur;
-    int unk04;
-    int unk08;
-    int unk0c;
-    HeapAlloc* m_pStreamAllocator;
-    __forceinline HeapAlloc& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-struct IntArrayX
-{
-    int* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+static __forceinline void IntArrayX_GrowArrayCapacity(hkArrayBase<int>& self, hkMemoryAllocator& alloc, int n);
 
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void GrowArrayCapacity(HeapAlloc& alloc, int n)
-    {
-        const int cap = getCapacity();
+static __forceinline int* IntArrayX_expandBy(hkArrayBase<int>& self, int n);
+
+static __forceinline void IntArrayX_GrowArrayCapacity(hkArrayBase<int>& self, hkMemoryAllocator& alloc, int n)
+{
+        const int cap = self.getCapacity();
         if (cap < n)
         {
             int cap2 = 2 * cap;
             int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0((IndexAllocator*)&alloc, (IndexArray*)this, newSize, sizeof(int));
+            FUN_00c908c0((IndexAllocator*)&alloc, (IndexArray*)(&self), newSize, sizeof(int));
         }
     }
-    __forceinline int* expandBy(int n)
-    {
-        HeapAlloc& alloc = ((RouterX*)FUN_00c85750())->heap();
-        int oldSize = m_iElementCount;
-        GrowArrayCapacity(alloc, oldSize + n);
-        m_iElementCount += n;
-        return m_data + oldSize;
-    }
-};
-void __cdecl FUN_00e60e40(int type, int count, int data, IntArray* out);
-union __declspec(intrin_type) __declspec(align(16)) __m128
+
+static __forceinline int* IntArrayX_expandBy(hkArrayBase<int>& self, int n)
 {
-    struct
-    {
-        float x, y, z, w;
-    } lanes;
-};
+        hkMemoryAllocator& alloc = ((hkMemoryRouter*)FUN_00c85750())->heap();
+        int oldSize = self.m_iElementCount;
+        IntArrayX_GrowArrayCapacity(self, alloc, oldSize + n);
+        self.m_iElementCount += n;
+        return self.m_data + oldSize;
+    }
+void __cdecl FUN_00e60e40(int type, int count, int data, IntArray* out);
 extern "C" __m128 _mm_sub_ps(__m128, __m128);
 extern "C" __m128 _mm_mul_ps(__m128, __m128);
 extern "C" __m128 _mm_add_ss(__m128, __m128);
@@ -6115,21 +5831,6 @@ int Owner::FUN_00e695c0(int iArg)
 }
 
 }
-struct NiDX9DepthStencilEntry
-{
-    unsigned char m_bStreamFlag;
-    unsigned char m_ucQuality;
-    unsigned short m_usMultiSampleMask;
-};
-struct NiDX9RenderTargetInfo
-{
-    NiDX9DepthStencilEntry m_akWindowed[9];
-    NiDX9DepthStencilEntry m_akFullscreen[9];
-};
-struct SearchIndex
-{
-    __declspec(noalias) bool Lookup(unsigned int key, NiDX9RenderTargetInfo** out);
-};
 extern "C" int __cdecl abs(int v);
 extern unsigned int DAT_011bf140[];
 int __cdecl FUN_00e7a8b0(unsigned int tbl, int* a, unsigned int* b);
@@ -6138,7 +5839,7 @@ class DepthStencilSearch
   public:
     int unk00;
     int unk04;
-    SearchIndex m_08;
+    NiTPointerMap<_D3DFORMAT, NiDX9RenderTargetInfo*> m_08;
     int FindBestFullscreenFormat(unsigned int p1, int p2, int p3);
 };
 struct ClosestList
@@ -6177,27 +5878,6 @@ class FUN_00e7a5e0_Object
 
     FUN_00e7a5e0_Object* FUN_00e7a5e0(unsigned int uiFlags);
 };
-struct NiFilenameQ
-{
-    char m_acFolderPath[256];
-    char m_acDriveLetter[3];
-    char m_acExtension[256];
-    char m_acBaseName[256];
-    char m_acPlatformSubDir[256];
-    void FUN_00aa27d0(const char* pcFullPath);
-};
-struct NiFileQ
-{
-    virtual void Release(int bDelete);
-    virtual bool IsValid();
-    virtual void Unk08();
-    virtual void Unk0C();
-    virtual void Unk10();
-    virtual void Unk14();
-    virtual void Unk18();
-    virtual unsigned int GetFileSize();
-    unsigned int ReadBytes(void* pvBuffer, unsigned int uiBytes);
-};
 struct D3DXImageInfoQ
 {
     unsigned int Width;
@@ -6207,12 +5887,6 @@ struct D3DXImageInfoQ
     int Format;
     int ResourceType;
     int m_iImageFileFormat;
-};
-struct D3DBaseTextureQ
-{
-    virtual long __stdcall QueryInterface(void*, void**);
-    virtual unsigned long __stdcall AddRef();
-    virtual unsigned long __stdcall Release();
 };
 struct DDSFileHeaderQ
 {
@@ -6239,185 +5913,11 @@ struct DDSFileHeaderQ
     unsigned int dwPFFlags;
     unsigned int dwFourCC;
 };
-struct NiDX9RendererQ
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    int unk280;
-    int unk284;
-    void* m_pDirect3DDevice;
-    void* GetD3DDevice() const
-    {
-        return m_pDirect3DDevice;
-    }
-};
 struct FormatPrefsQ
 {
     int m_ePreferredPixelLayout;
     int m_eAlphaFormat;
     int m_eMipFlag;
-};
-struct MemoryManagerQ : MemoryManager
-{
-    void* FUN_00aa3e40(unsigned int uiSize);
 };
 template <class T> __forceinline T NiMaxQ(T a, T b)
 {
@@ -6435,15 +5935,15 @@ __forceinline bool IsBumpFormatQ(int eFormat)
 int __cdecl FUN_00ec65a6(char* pcDest, unsigned int uiDestSize, const char* pcSrc);
 void __cdecl FUN_00aa2a00(char* pcPath);
 int __cdecl FUN_00aa1360(const char* s1, const char* s2);
-NiFileQ* __cdecl FUN_00aa1a20(const char* pcName, int eMode, unsigned int uiBufferSize);
+NiFile* __cdecl FUN_00aa1a20(const char* pcName, int eMode, unsigned int uiBufferSize);
 void* __cdecl FUN_00aa1070(unsigned int uiSize);
 void __cdecl FUN_00aa10f0(void* pvMem);
 void* __cdecl FUN_00ec44d0(void* pvDest, const void* pvSrc, unsigned int uiSize);
 long __stdcall FUN_00ee6e22(const void* pvSrc, unsigned int uiSize, D3DXImageInfoQ* pkInfo);
 __declspec(noalias) long __stdcall FUN_00ee6e1c(void* pkDevice, const void* pvSrc, unsigned int uiSize,
-                                                D3DBaseTextureQ** ppkTexture);
-long __stdcall FUN_00ee6e16(void* pkDevice, const void* pvSrc, unsigned int uiSize, D3DBaseTextureQ** ppkTexture);
-long __stdcall FUN_00ee6e10(void* pkDevice, const void* pvSrc, unsigned int uiSize, D3DBaseTextureQ** ppkTexture);
+                                                IDirect3DBaseTexture9** ppkTexture);
+long __stdcall FUN_00ee6e16(void* pkDevice, const void* pvSrc, unsigned int uiSize, IDirect3DBaseTexture9** ppkTexture);
+long __stdcall FUN_00ee6e10(void* pkDevice, const void* pvSrc, unsigned int uiSize, IDirect3DBaseTexture9** ppkTexture);
 extern unsigned int DAT_0126efc4;
 extern unsigned int DAT_0126efc8;
 struct LocalGroup2
@@ -6454,7 +5954,7 @@ struct LocalGroup2
 struct LocalGroup3
 {
     unsigned char* data;
-    D3DBaseTextureQ* texture;
+    IDirect3DBaseTexture9* texture;
     unsigned int divisor;
 };
 struct NiDX9SourceTextureDataQ
@@ -6503,15 +6003,15 @@ struct NiDX9SourceTextureDataQ
     virtual void VA4();
     virtual void VA8();
     virtual void VAC();
-    virtual bool SetD3DTexture(D3DBaseTextureQ* pkD3DTexture);
+    virtual bool SetD3DTexture(IDirect3DBaseTexture9* pkD3DTexture);
 
     int unk04;
     int unk08;
     unsigned int m_uiImageWidth;
     unsigned int m_uiImageHeight;
 
-    bool LoadFromFilename(const char* pcFilename, NiDX9RendererQ* pkRenderer, const FormatPrefsQ& kPrefs,
-                          NiFileQ* pkFile);
+    bool LoadFromFilename(const char* pcFilename, NiDX9Renderer* pkRenderer, const FormatPrefsQ& kPrefs,
+                          NiFile* pkFile);
 };
 extern int DAT_010eec9c;
 void* __cdecl NiMalloc(unsigned int size);
@@ -6545,7 +6045,7 @@ struct SpinLk
 {
     int owner;
     unsigned int count;
-    void Wait(const char* name = 0) throw();
+    void FUN_0040fbf0(const char* name = 0) throw();
     void Unlock() throw()
     {
         if (--count == 0)
@@ -6568,7 +6068,7 @@ struct PoolAlloc
 {
     static ListItem* Allocate() throw()
     {
-        DAT_011c5f80.Wait();
+        DAT_011c5f80.FUN_0040fbf0();
         if (!NiTAbstractPoolAllocator_unsigned_int_instance.head)
             FUN_0043a080();
         ListItem* p = NiTAbstractPoolAllocator_unsigned_int_instance.head;
@@ -7073,7 +6573,6 @@ struct TextureAccessor
     unsigned int pixelSize;
 };
 void __cdecl FUN_00e683d0(TextureAccessor* source, unsigned int level, CopySurface* surface, unsigned int face);
-extern int DAT_010eec54;
 extern int DAT_010eec7c;
 void* __cdecl FUN_00ec61c0(void* p, int c, unsigned int n);
 int __cdecl MapIndexToValue(unsigned int eFormat);
@@ -7106,76 +6605,13 @@ struct D3DProbe
     virtual int __stdcall CheckDeviceMultiSampleType(unsigned int a, int t, int sf, int w, int mt, unsigned int* q);
     virtual int __stdcall CheckDepthStencilMatch(unsigned int a, int t, int af, int rf, int df);
 };
-struct MapSetAt
-{
-    void InsertOrUpdate(unsigned int key, void* val);
-};
 struct ModeItemInit
 {
     FUN_00e7b260* FUN_00e7b260(S00e7b590_D3D* dev, int ctx, D3DDEVTYPE eDeviceType, D3DFORMAT eAdapterFormat,
                                bool bFullscreen, bool bWindowed);
 };
 void __cdecl FUN_00e7cec0();
-struct RendererE7D6B0
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual int GetA();
-    virtual bool GetB();
-};
-extern RendererE7D6B0* g_rendererE7D6B0;
+extern NiRenderer* g_rendererE7D6B0;
 extern int g_dsAE7D6B0;
 extern bool g_dsBE7D6B0;
 struct PresentParamsE7D6B0
@@ -7235,21 +6671,8 @@ struct DeviceE7D6B0
     virtual void __stdcall v35() = 0;
     virtual void __stdcall v36() = 0;
     virtual void __stdcall v37() = 0;
-    virtual long __stdcall GetRenderTarget(unsigned long RenderTargetIndex, D3DSurface_e7d250** ppRenderTarget) = 0;
+    virtual long __stdcall GetRenderTarget(unsigned long RenderTargetIndex, IDirect3DSurface9** ppRenderTarget) = 0;
 };
-class SwapChainBufferData : public NiDX92DBufferDataStub
-{
-  public:
-    SwapChainBufferData() throw()
-    {
-        m_pkDevice = 0;
-    }
-    virtual ~SwapChainBufferData();
-    PresentParamsE7D6B0 m_kParams;
-    DeviceE7D6B0* m_pkDevice;
-};
-SwapChainBufferData* __cdecl FUN_00e7d6b0(DeviceE7D6B0* pkDevice, PresentParamsE7D6B0* pkParams,
-                                          Ni2DBufferStub** ppkBuffer);
 extern "C" __m128 _mm_xor_ps(__m128, __m128);
 extern "C" __m128 _mm_unpacklo_ps(__m128, __m128);
 extern "C" __m128 _mm_unpackhi_ps(__m128, __m128);
@@ -7292,18 +6715,7 @@ extern "C" __m128 _mm_xor_ps(__m128, __m128);
 extern "C" __m128 _mm_sub_ss(__m128, __m128);
 extern "C" __m128 _mm_max_ps(__m128, __m128);
 extern "C" int _mm_movemask_ps(__m128);
-struct __declspec(align(16)) Vector
-{
-    __m128 value;
-    __forceinline __m128 get() const
-    {
-        return value;
-    }
-    __forceinline void set(__m128 v)
-    {
-        value = v;
-    }
-};
+#include "../../include/hkVector4.h"
 struct Id
 {
     unsigned int v;
@@ -7320,9 +6732,9 @@ struct IdCtor
 };
 struct SupportResult
 {
-    Vector position;
-    Vector field10;
-    Vector field20;
+    hkVector4 position;
+    hkVector4 field10;
+    hkVector4 field20;
     unsigned int field30;
     __forceinline void assign(const SupportResult& b, __m128 p)
     {
@@ -7342,11 +6754,11 @@ template <class T> struct Arg
 };
 struct PodDir
 {
-    const Vector* p;
+    const hkVector4* p;
 };
 union UnionDir
 {
-    const Vector* p;
+    const hkVector4* p;
 };
 struct PodDst
 {
@@ -7354,8 +6766,8 @@ struct PodDst
 };
 struct SupportOwner
 {
-    void FUN_00e62b20(const Vector* direction, SupportResult* result);
-    __m128* FUN_00e62c60(Arg<__m128> out, const Vector* direction, Arg<const __m128> point, Arg<SupportResult> result);
+    void FUN_00e62b20(const hkVector4* direction, SupportResult* result);
+    __m128* FUN_00e62c60(Arg<__m128> out, const hkVector4* direction, Arg<const __m128> point, Arg<SupportResult> result);
 };
 extern "C"
 {
@@ -7481,61 +6893,7 @@ struct S00e67ae0_HullWalker
     void ClearEntries();
     S00e67ae0_HullFace* FUN_00e67ae0(S00e67ae0_HullFace* start);
 };
-extern "C" Ni2DBufferStub* __cdecl FUN_00a9ff60(unsigned int width, unsigned int height, RendererDataStub* data);
 NiPixelFormat* __cdecl CreatePixelFormat(unsigned int eD3DFormat);
-struct D3DDevice_e7d850
-{
-    virtual void vf00() = 0;
-    virtual void vf01() = 0;
-    virtual void vf02() = 0;
-    virtual void vf03() = 0;
-    virtual void vf04() = 0;
-    virtual void vf05() = 0;
-    virtual void vf06() = 0;
-    virtual void vf07() = 0;
-    virtual void vf08() = 0;
-    virtual void vf09() = 0;
-    virtual void vf0A() = 0;
-    virtual void vf0B() = 0;
-    virtual void vf0C() = 0;
-    virtual void vf0D() = 0;
-    virtual void vf0E() = 0;
-    virtual void vf0F() = 0;
-    virtual void vf10() = 0;
-    virtual void vf11() = 0;
-    virtual void vf12() = 0;
-    virtual void vf13() = 0;
-    virtual void vf14() = 0;
-    virtual void vf15() = 0;
-    virtual void vf16() = 0;
-    virtual void vf17() = 0;
-    virtual void vf18() = 0;
-    virtual void vf19() = 0;
-    virtual void vf1A() = 0;
-    virtual void vf1B() = 0;
-    virtual void vf1C() = 0;
-    virtual void vf1D() = 0;
-    virtual void vf1E() = 0;
-    virtual void vf1F() = 0;
-    virtual void vf20() = 0;
-    virtual void vf21() = 0;
-    virtual void vf22() = 0;
-    virtual void vf23() = 0;
-    virtual void vf24() = 0;
-    virtual void vf25() = 0;
-    virtual void vf26() = 0;
-    virtual void vf27() = 0;
-    virtual long __stdcall GetDepthStencilSurface(D3DSurface_e7d250** ppZStencilSurface) = 0;
-};
-class NiDX9AdditionalDepthStencilBufferData : public NiDX92DBufferDataStub
-{
-  public:
-    NiDX9AdditionalDepthStencilBufferData() throw()
-    {}
-    virtual ~NiDX9AdditionalDepthStencilBufferData();
-};
-NiDX9AdditionalDepthStencilBufferData* __cdecl FUN_00e7d850(D3DDevice_e7d850* pkD3DDevice, Ni2DBufferStub*& pkBuffer);
-
 extern "C" __m128 _mm_rsqrt_ss(__m128);
 extern "C" __m128 _mm_sqrt_ss(__m128);
 extern "C" __m128 _mm_sub_ss(__m128, __m128);
@@ -7561,65 +6919,56 @@ extern "C" int _mm_movemask_ps(__m128);
 typedef float hkReal;
 typedef unsigned int hkUint32;
 typedef __m128 hkQuadReal;
-enum hkResult
-{
-    HK_SUCCESS = 0,
-    HK_FAILURE = 1
-};
+#include "../../include/hkResult.h"
 enum hkGskStatus
 {
     HK_GSK_OK = 0,
     HK_GSK_PD_HEURISTIC_SAMPLING_FAILED = 5
 };
 
-class VectorComponentValue
-{
-  public:
-    __forceinline VectorComponentValue(const hkQuadReal& x) : m_vValue(x)
-    {}
-    __forceinline VectorComponentValue(hkReal x)
-    {
-        m_vValue = _mm_load_ss(&x);
-    }
-    __forceinline VectorComponentValue()
-    {}
-    __forceinline operator hkReal() const
-    {
-        hkReal s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-    __forceinline hkQuadReal broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-    __forceinline const hkQuadReal& getQuad() const
-    {
-        return m_vValue;
-    }
 
-  private:
-    hkQuadReal m_vValue;
-};
-typedef const VectorComponentValue& hkSimdRealParameter;
-
-static __forceinline void hkSimdReal_setMax(hkSimdRealParameter a, hkSimdRealParameter b, VectorComponentValue& result)
+__forceinline hkSimdReal::hkSimdReal(const hkQuadReal& x) : m_vValue(x)
+{}
+__forceinline hkSimdReal::hkSimdReal(hkReal x)
 {
-    result = VectorComponentValue(_mm_max_ps(a.getQuad(), b.getQuad()));
+    m_vValue = _mm_load_ss(&x);
 }
-static __forceinline VectorComponentValue operator-(hkSimdRealParameter r, hkSimdRealParameter s)
+__forceinline hkSimdReal::hkSimdReal()
+{}
+__forceinline hkSimdReal::operator hkReal() const
+{
+    hkReal s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
+__forceinline hkQuadReal hkSimdReal::broadcast() const
+{
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
+__forceinline const hkQuadReal& hkSimdReal::getQuad() const
+{
+    return m_vValue;
+}
+
+typedef const hkSimdReal& hkSimdRealParameter;
+
+static __forceinline void hkSimdReal_setMax(hkSimdRealParameter a, hkSimdRealParameter b, hkSimdReal& result)
+{
+    result = hkSimdReal(_mm_max_ps(a.getQuad(), b.getQuad()));
+}
+static __forceinline hkSimdReal operator-(hkSimdRealParameter r, hkSimdRealParameter s)
 {
     return _mm_sub_ss(r.getQuad(), s.getQuad());
 }
-static __forceinline VectorComponentValue operator+(hkSimdRealParameter r, hkSimdRealParameter s)
+static __forceinline hkSimdReal operator+(hkSimdRealParameter r, hkSimdRealParameter s)
 {
     return _mm_add_ss(r.getQuad(), s.getQuad());
 }
-static __forceinline VectorComponentValue operator/(hkSimdRealParameter r, hkSimdRealParameter s)
+static __forceinline hkSimdReal operator/(hkSimdRealParameter r, hkSimdRealParameter s)
 {
     return _mm_div_ss(r.getQuad(), s.getQuad());
 }
-static __forceinline int hkMath_isNegative(const VectorComponentValue& r0)
+static __forceinline int hkMath_isNegative(const hkSimdReal& r0)
 {
     return _mm_movemask_ps(r0.getQuad()) & 1;
 }
@@ -7628,205 +6977,166 @@ static __forceinline float hkMath_fabs(float r)
     return fabsf(r);
 }
 
-template <typename TYPE> class ValueWrapper
+#include "../../include/hkPadSpu.h"   // Havok 7.1 hkPadSpu (was a unit-local ValueWrapper copy)
+
+
+// Inline implementations used by this unit, with shared vector and rotation layouts.
+__forceinline void hkVector4::set(hkReal a, hkReal b, hkReal c, hkReal d)
 {
-  public:
-    __forceinline ValueWrapper()
-    {}
-    __forceinline void operator=(TYPE e)
-    {
-        m_kStorage = e;
-    }
-    __forceinline TYPE val() const
-    {
-        return m_kStorage;
-    }
-    __forceinline TYPE operator->() const
-    {
-        return m_kStorage;
-    }
-    __forceinline operator TYPE() const
-    {
-        return val();
-    }
+    m_vComponents = _mm_setr_ps(a, b, c, d);
+}
 
-  private:
-    TYPE m_kStorage;
-};
-
-class hkBool
+__forceinline void hkVector4::setZero4()
 {
-  public:
-    __forceinline hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    __forceinline operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
+    m_vComponents = _mm_setzero_ps();
+}
 
-  private:
-    char m_cBooleanValue;
-};
-
-class hkRotation;
-class hkTransform;
-class __declspec(align(16)) hkVector4
+__forceinline void hkVector4::setSub4(const hkVector4& v0, const hkVector4& v1)
 {
-  public:
-    __forceinline void operator=(const hkVector4& v)
+    m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
+}
+
+__forceinline void hkVector4::setMul4(hkSimdRealParameter r, const hkVector4& v1)
+{
+    m_vComponents = _mm_mul_ps(r.broadcast(), v1.m_vComponents);
+}
+
+__forceinline void hkVector4::addMul4(hkSimdRealParameter r, const hkVector4& v1)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(r.broadcast(), v1.m_vComponents));
+}
+
+__forceinline void hkVector4::setCross(const hkVector4& v0, const hkVector4& v1)
+{
+    hkQuadReal cross0;
+    cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
+                        _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
+    hkQuadReal cross1;
+    cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
+                        _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(cross0, cross1);
+}
+
+__forceinline void hkVector4::setInterpolate4(const hkVector4& v0, const hkVector4& v1, hkSimdRealParameter _t)
+{
+    static __declspec(align(16)) const float cw[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    hkQuadReal t = _t.broadcast();
+    hkQuadReal s = _mm_sub_ps(*(const hkQuadReal*)&cw, t);
+    m_vComponents = _mm_add_ps(_mm_mul_ps(s, v0.m_vComponents), _mm_mul_ps(t, v1.m_vComponents));
+}
+
+__forceinline void hkVector4::setNeg4(const hkVector4& v)
+{
+    static __declspec(align(16)) const hkUint32 negateMask[4] = {0x80000000, 0x80000000, 0x80000000, 0x80000000};
+    m_vComponents = _mm_xor_ps(v.m_vComponents, *(const hkQuadReal*)&negateMask);
+}
+
+__forceinline void hkVector4::setAbs4(const hkVector4& v)
+{
+    static __declspec(align(16)) const hkUint32 absMask[4] = {0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff};
+    m_vComponents = _mm_and_ps(v.m_vComponents, *(const hkQuadReal*)&absMask);
+}
+
+__forceinline void hkVector4::setXYZ0(const hkVector4& xyz)
+{
+    static __declspec(align(16)) const hkUint32 cw[4] = {0xffffffff, 0xffffffff, 0xffffffff, 0x00000000};
+    m_vComponents = _mm_and_ps(xyz, *(const hkQuadReal*)&cw);
+}
+
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    hkQuadReal x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    hkQuadReal xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
+}
+
+__forceinline hkSimdReal hkVector4::horizontalAdd3() const
+{
+    hkQuadReal xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55), m_vComponents);
+    return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa), xySum);
+}
+
+__forceinline hkSimdReal hkVector4::length3() const
+{
+    return _mm_sqrt_ss(this->dot3(*this).getQuad());
+}
+
+__forceinline hkSimdReal hkVector4::lengthSquared3() const
+{
+    return this->dot3(*this);
+}
+
+// The approved vector header has no lengthInverse3 declaration.
+static __forceinline hkSimdReal lengthInverse3(const hkVector4& vector)
+{
+    const hkQuadReal half = _mm_set_ss(0.5f);
+    const hkQuadReal three = _mm_set_ss(3.0f);
+    const hkQuadReal zero = _mm_set_ss(0.0f);
+    const hkQuadReal len2 = vector.dot3(vector).getQuad();
+    const hkQuadReal len2EqualsZero = _mm_cmpeq_ss(len2, zero);
+    const hkQuadReal approx = _mm_rsqrt_ss(len2);
+    const hkQuadReal refined =
+        _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
+    return _mm_andnot_ps(len2EqualsZero, refined);
+}
+
+__forceinline void hkVector4::normalize3()
+{
+    hkQuadReal lenInv = ::lengthInverse3(*this).broadcast();
+    m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
+}
+
+__forceinline hkSimdReal hkVector4::getSimdAt(int i) const
+{
+    switch (i)
     {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline operator hkQuadReal() const
-    {
+    case 0:
         return m_vComponents;
+    case 1:
+        return _mm_shuffle_ps(m_vComponents, m_vComponents, 0x55);
+    case 2:
+        return _mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa);
+    case 3:
+    default:
+        return _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
     }
-    __forceinline void set(hkReal a, hkReal b, hkReal c, hkReal d)
-    {
-        m_vComponents = _mm_setr_ps(a, b, c, d);
-    }
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline void setSub4(const hkVector4& v0, const hkVector4& v1)
-    {
-        m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    __forceinline void setMul4(hkSimdRealParameter r, const hkVector4& v1)
-    {
-        m_vComponents = _mm_mul_ps(r.broadcast(), v1.m_vComponents);
-    }
-    __forceinline void addMul4(hkSimdRealParameter r, const hkVector4& v1)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(r.broadcast(), v1.m_vComponents));
-    }
-    __forceinline void setCross(const hkVector4& v0, const hkVector4& v1)
-    {
-        hkQuadReal cross0;
-        cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
-                            _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
-        hkQuadReal cross1;
-        cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
-                            _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    __forceinline void setInterpolate4(const hkVector4& v0, const hkVector4& v1, hkSimdRealParameter _t)
-    {
-        static __declspec(align(16)) const float cw[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-        hkQuadReal t = _t.broadcast();
-        hkQuadReal s = _mm_sub_ps(*(const hkQuadReal*)&cw, t);
-        m_vComponents = _mm_add_ps(_mm_mul_ps(s, v0.m_vComponents), _mm_mul_ps(t, v1.m_vComponents));
-    }
-    __forceinline void setNeg4(const hkVector4& v)
-    {
-        static __declspec(align(16)) const hkUint32 negateMask[4] = {0x80000000, 0x80000000, 0x80000000, 0x80000000};
-        m_vComponents = _mm_xor_ps(v.m_vComponents, *(const hkQuadReal*)&negateMask);
-    }
-    __forceinline void setAbs4(const hkVector4& v)
-    {
-        static __declspec(align(16)) const hkUint32 absMask[4] = {0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff};
-        m_vComponents = _mm_and_ps(v.m_vComponents, *(const hkQuadReal*)&absMask);
-    }
-    __forceinline void setXYZ0(const hkVector4& xyz)
-    {
-        static __declspec(align(16)) const hkUint32 cw[4] = {0xffffffff, 0xffffffff, 0xffffffff, 0x00000000};
-        m_vComponents = _mm_and_ps(xyz, *(const hkQuadReal*)&cw);
-    }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        hkQuadReal x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        hkQuadReal xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
-    }
-    __forceinline VectorComponentValue horizontalAdd3() const
-    {
-        hkQuadReal xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55), m_vComponents);
-        return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa), xySum);
-    }
-    __forceinline VectorComponentValue length3() const
-    {
-        return _mm_sqrt_ss(this->dot3(*this).getQuad());
-    }
-    __forceinline VectorComponentValue lengthSquared3() const
-    {
-        return this->dot3(*this);
-    }
-    __forceinline VectorComponentValue lengthInverse3() const
-    {
-        const hkQuadReal half = _mm_set_ss(0.5f);
-        const hkQuadReal three = _mm_set_ss(3.0f);
-        const hkQuadReal zero = _mm_set_ss(0.0f);
-        const hkQuadReal len2 = this->dot3(*this).getQuad();
-        const hkQuadReal len2EqualsZero = _mm_cmpeq_ss(len2, zero);
-        const hkQuadReal approx = _mm_rsqrt_ss(len2);
-        const hkQuadReal refined =
-            _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
-        return _mm_andnot_ps(len2EqualsZero, refined);
-    }
-    __forceinline void normalize3()
-    {
-        hkQuadReal lenInv = lengthInverse3().broadcast();
-        m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
-    }
-    __forceinline VectorComponentValue getSimdAt(int i) const
-    {
-        switch (i)
-        {
-        case 0:
-            return m_vComponents;
-        case 1:
-            return _mm_shuffle_ps(m_vComponents, m_vComponents, 0x55);
-        case 2:
-            return _mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa);
-        case 3:
-        default:
-            return _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
-        }
-    }
-    __forceinline hkReal& operator()(int a)
-    {
-        return reinterpret_cast<hkReal*>(&m_vComponents)[a];
-    }
-    __forceinline const hkReal& operator()(int a) const
-    {
-        return reinterpret_cast<const hkReal*>(&m_vComponents)[a];
-    }
-    void _setRotatedInverseDir(const hkRotation& r, const hkVector4& b);
-    void _setTransformedPos(const hkTransform& t, const hkVector4& b);
-    hkQuadReal m_vComponents;
-};
+}
 
-class hkRotation
+__forceinline hkReal& hkVector4::operator()(int a)
 {
-  public:
-    __forceinline const hkVector4& getColumn(int i) const
-    {
-        return m_col[i];
-    }
-    hkVector4 m_col[3];
-};
-class hkTransform
+    return reinterpret_cast<hkReal*>(&m_vComponents)[a];
+}
+
+__forceinline const hkReal& hkVector4::operator()(int a) const
 {
-  public:
-    __forceinline const hkRotation& getRotation() const
-    {
-        return m_rotation;
-    }
-    __forceinline const hkVector4& getTranslation() const
-    {
-        return m_vTranslation;
-    }
-    __forceinline const hkVector4& getColumn(int i) const
-    {
-        return (&m_rotation.m_col[0])[i];
-    }
-    static const hkTransform& GetIdentityTransform();
-    hkRotation m_rotation;
-    hkVector4 m_vTranslation;
-};
+    return reinterpret_cast<const hkReal*>(&m_vComponents)[a];
+}
+
+
+__forceinline const hkVector4& hkRotation::getColumn(int i) const
+{
+    return (&m_kColumn0)[i];
+}
+__forceinline hkRotation& hkTransform::getRotation()
+{
+    return *reinterpret_cast<hkRotation*>(this);
+}
+__forceinline const hkRotation& hkTransform::getRotation() const
+{
+    return *reinterpret_cast<const hkRotation*>(this);
+}
+__forceinline hkVector4& hkTransform::getTranslation()
+{
+    return reinterpret_cast<hkVector4*>(this)[3];
+}
+__forceinline const hkVector4& hkTransform::getTranslation() const
+{
+    return reinterpret_cast<const hkVector4*>(this)[3];
+}
+__forceinline const hkVector4& hkTransform::getColumn(int i) const
+{
+    return reinterpret_cast<const hkVector4*>(this)[i];
+}
 extern const hkTransform DAT_01268370;
 extern const hkVector4 DAT_01267e30;
 extern const hkQuadReal DAT_010c7200;
@@ -7907,7 +7217,7 @@ struct hkWingedEdge_Vertex
     hkVector4 m_w;
     hkVector4 m_vFirstVector;
     hkVector4 m_vSecondVector;
-    ValueWrapper<void*> m_kEdge;
+    hkPadSpu<void*> m_kEdge;
     __forceinline hkWingedEdge_Vertex()
     {}
     __forceinline hkWingedEdge_Vertex& operator=(const hkWingedEdge_Vertex& o)
@@ -7925,18 +7235,18 @@ class GskCollisionSolver
   public:
     hkTransform m_kTransform;
     hkVector4 m_fScalar;
-    ValueWrapper<hkReal> m_toleranceSquared;
-    ValueWrapper<const hkGskShape*> m_pShapeA;
-    ValueWrapper<const hkGskShape*> m_pShapeB;
+    hkPadSpu<hkReal> m_toleranceSquared;
+    hkPadSpu<const hkGskShape*> m_pShapeA;
+    hkPadSpu<const hkGskShape*> m_pShapeB;
     int m_unk5c;
-    ValueWrapper<hkVector4*> m_kOutgoingTangent;
-    ValueWrapper<hkVector4*> m_kIncomingTangent;
-    ValueWrapper<hkVector4*> m_kVertexPosition;
-    ValueWrapper<int> m_iStridedVertexCount;
+    hkPadSpu<hkVector4*> m_kOutgoingTangent;
+    hkPadSpu<hkVector4*> m_kIncomingTangent;
+    hkPadSpu<hkVector4*> m_kVertexPosition;
+    hkPadSpu<int> m_iStridedVertexCount;
 
     void FUN_00e62b20(const hkVector4& direction, hkWingedEdge_Vertex* result);
     void FUN_00e62c10(const hkWingedEdge_Vertex& p);
-    VectorComponentValue FUN_00e62c60(const hkVector4& direction, const hkVector4& from, hkWingedEdge_Vertex& result);
+    hkSimdReal FUN_00e62c60(const hkVector4& direction, const hkVector4& from, hkWingedEdge_Vertex& result);
     hkBool case0To1(GskPointPair& output);
     void case1To2();
     void case2To3();
@@ -7968,7 +7278,7 @@ __declspec(noinline) void GskCollisionSolver::FUN_00e62c10(const hkWingedEdge_Ve
     m_iStridedVertexCount = ss + 1;
 }
 
-__declspec(noinline) VectorComponentValue GskCollisionSolver::FUN_00e62c60(const hkVector4& direction,
+__declspec(noinline) hkSimdReal GskCollisionSolver::FUN_00e62c60(const hkVector4& direction,
                                                                                 const hkVector4& from,
                                                                                 hkWingedEdge_Vertex& result)
 {
@@ -7980,11 +7290,11 @@ __declspec(noinline) VectorComponentValue GskCollisionSolver::FUN_00e62c60(const
     FUN_00e62b20(directionNeg, pB);
     hkVector4 t0;
     t0.setSub4(pA.m_w, from);
-    VectorComponentValue distancePos = t0.dot3(direction);
+    hkSimdReal distancePos = t0.dot3(direction);
     hkVector4 t1;
     t1.setSub4(pB->m_w, from);
-    VectorComponentValue distanceNeg = t1.dot3(directionNeg);
-    VectorComponentValue bestDist;
+    hkSimdReal distanceNeg = t1.dot3(directionNeg);
+    hkSimdReal bestDist;
     hkSimdReal_setMax(distancePos, distanceNeg, bestDist);
     if (hkMath_isNegative(distanceNeg - distancePos))
     {
@@ -8007,7 +7317,7 @@ __forceinline hkBool GskCollisionSolver::case0To1(GskPointPair& output)
     FUN_00e62c10(p);
     if (m_kVertexPosition.val()[0].lengthSquared3() <= m_toleranceSquared)
     {
-        VectorComponentValue dist = m_kVertexPosition.val()[0].length3();
+        hkSimdReal dist = m_kVertexPosition.val()[0].length3();
         output.m_vPointOnShapeB = p.m_vFirstVector;
         goodInitialDirection.normalize3();
         output.m_vPointOnShapeA.set(goodInitialDirection.getSimdAt(0), goodInitialDirection.getSimdAt(1),
@@ -8053,9 +7363,9 @@ __forceinline void GskCollisionSolver::case2To3()
     segmentNormal.normalize3();
     rightAngleSegmentNormal.normalize3();
     hkWingedEdge_Vertex resultA;
-    VectorComponentValue distA = FUN_00e62c60(segmentNormal, m_kVertexPosition.val()[0], resultA);
+    hkSimdReal distA = FUN_00e62c60(segmentNormal, m_kVertexPosition.val()[0], resultA);
     hkWingedEdge_Vertex resultB;
-    VectorComponentValue distB = FUN_00e62c60(rightAngleSegmentNormal, m_kVertexPosition.val()[0], resultB);
+    hkSimdReal distB = FUN_00e62c60(rightAngleSegmentNormal, m_kVertexPosition.val()[0], resultB);
     if (hkMath_isNegative(distB - distA))
     {
         FUN_00e62c10(resultA);
@@ -8069,7 +7379,7 @@ __forceinline void GskCollisionSolver::case2To3()
 __forceinline hkResult GskCollisionSolver::case3To4(const hkVector4& normal)
 {
     hkWingedEdge_Vertex result;
-    VectorComponentValue dist = FUN_00e62c60(normal, m_kVertexPosition.val()[0], result);
+    hkSimdReal dist = FUN_00e62c60(normal, m_kVertexPosition.val()[0], result);
     if (hkMath_isNegative(dist - m_fScalar.getSimdAt(0)))
     {
         return HK_FAILURE;
@@ -8150,9 +7460,9 @@ int GskCollisionSolver::FUN_00e62d30(GskPointPair& output, hkGskStatus& gjkStatu
                 sA.setAbs4(m_kVertexPosition.val()[0]);
                 hkVector4 sB;
                 sB.setAbs4(m_kVertexPosition.val()[1]);
-                VectorComponentValue la = sA.horizontalAdd3();
-                VectorComponentValue lb = sA.horizontalAdd3();
-                VectorComponentValue f = la / (la + lb + VectorComponentValue(DAT_010c7200));
+                hkSimdReal la = sA.horizontalAdd3();
+                hkSimdReal lb = sA.horizontalAdd3();
+                hkSimdReal f = la / (la + lb + hkSimdReal(DAT_010c7200));
                 hkVector4 p;
                 p.setInterpolate4(m_kOutgoingTangent.val()[0], m_kOutgoingTangent.val()[1], f);
                 output.m_vPointOnShapeB = p;
@@ -8165,14 +7475,14 @@ int GskCollisionSolver::FUN_00e62d30(GskPointPair& output, hkGskStatus& gjkStatu
         if (case3To4(triangleNormal) == HK_FAILURE)
         {
             output.m_vPointOnShapeA.setXYZ0(triangleNormal);
-            ValueWrapper<hkReal> lambda[3];
+            hkPadSpu<hkReal> lambda[3];
             FUN_00e61a10(&DAT_01267e30.m_vComponents, &m_kVertexPosition.val()[0].m_vComponents,
                          &m_kVertexPosition.val()[1].m_vComponents, &m_kVertexPosition.val()[2].m_vComponents,
                          reinterpret_cast<BarycentricResult*>(lambda));
             {
                 hkVector4 sum;
                 hkReal l0 = lambda[0].val();
-                sum.setMul4(l0, m_kOutgoingTangent.val()[0]);
+                sum.setMul4(hkSimdReal(l0), m_kOutgoingTangent.val()[0]);
                 sum.addMul4(lambda[1].val(), m_kOutgoingTangent.val()[1]);
                 sum.addMul4(lambda[2].val(), m_kOutgoingTangent.val()[2]);
                 output.m_vPointOnShapeB = sum;

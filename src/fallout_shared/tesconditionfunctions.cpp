@@ -1,14 +1,422 @@
+#include "../../include/ProcessLists.h"
+// Load the common templates before the Windows declarations from TESFile.
+#include "../../include/MagicTarget.h"
+#include "../../include/TESFullName.h"
+#define PCH WindowsPCH
+#include "../../include/TESFile.h"
+#undef PCH
+#include "../../include/NiNode.h"
+// Older NiNode headers define a separate NiTArray. Newer headers already
+#include "../../include/NiTexturingProperty.h"
+#include "../../include/NiMemObject.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/BGSOpenCloseForm.h"
+#include "../../include/BSSoundHandle.h"
+#include "../../include/BSXFlags.h"
+// ProcessAnimationAction names the process enum separately from the shared global action enum.
+#include "../../include/BaseProcess.h"
+#include "../../include/ANIMATION_ACTION.h"
+#include "../../include/Actor.h"
+#include "../../include/Character.h"
+#include "../../include/EffectSetting.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/InventoryChanges.h"
+#include "../../include/InventoryStackRecord.h"
+#include "../../include/MagicTarget.h"
+#include "../../include/MiddleHighProcess.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/PlayerCharacter.h"
+
+#include "../../include/SettingT_GameSettingCollection_.h"
+#include "../../include/Sky.h"
+#include "../../include/TESActorBaseData.h"
+#include "../../include/TESBipedModelForm.h"
+#include "../../include/TESChallenge.h"
+#include "../../include/TESClass.h"
+#include "../../include/TESFaction.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESObject.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESPackage.h"
+#include "../../include/TESQuest.h"
+#include "../../include/TESRegion.h"
+#include "../../include/TESWaterForm.h"
+
+
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSDestructibleObjectForm.h"
+#include "../../include/GameTimerRecord.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiPoint3.h"
+#define __vecDelDtor DeclaredVectorDeletingDestructor
+#include "../../include/ScriptLocals.h"
+#undef __vecDelDtor
+#include "../../include/TES.h"
+#include "../../include/TESMagicTargetForm.h"
+#include "../../include/TESRace.h"
+#include "../../include/TESRecipe.h"
+#include "../../include/TESReputation.h"
+#include "../../include/TESWeather.h"
+#include "../../include/V4.h"
+
+#include "../../include/BGSTalkingActivator.h"
+#include "../../include/MagicItem.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESCreature.h"
+#include "../../include/TESNPC.h"
+#include "../../include/TESObjectWEAP.h"
+// ActorValueUtility_tesconditionfunctions: local type (was include/ActorValueUtility.h, which had no evidence of one real class); its methods are 0x00648b50 GamePlayFormulas::GetRequiredExperiencePoints
+class ActorValueUtility_tesconditionfunctions
+{
+public:
+    static int __cdecl ConvertActorValue(int);
+};
+#include "../../include/BGSQuestObjective.h"
+#include "../../include/BaseExtraList.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/MapEntryCount.h"
+#include "../../include/MobileObject.h"
+#include "../../include/PerkEntryConditionSet.h"
+#include "../../include/PlacedObjectInfo.h"
+#include "../../include/QuestData.h"
+#include "../../include/Script.h"
+#include "../../include/ScriptHeaderData.h"
+#include "../../include/TESChildCell.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/TESDescription.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESIcon.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESScriptableForm.h"
+#include "../../include/TESTexture.h"
+
+
+
+// Condition-only declarations absent from the shared interfaces; no additional object data.
+struct ConditionActorVATSVisibility : Actor
+{
+    double FUN_008bdbd0(TESObjectREFR* target, float value);
+};
+struct ConditionSky : Sky
+{
+    float GetCurrentWeatherPercent();
+    bool IsSnowing();
+};
+struct ConditionCharacter : Character
+{
+    double GetClothingValue();
+};
+struct ConditionPlayerCharacter : PlayerCharacter
+{
+    bool IsMurderer();
+    int GetField6dc();
+    bool CheckCombatState(bool* searching);
+    bool IsDisabledForConditions();
+    bool TestConditionFlags(unsigned int mask);
+    unsigned char GetConditionFlags();
+    unsigned int GetFieldD68() const;
+    unsigned char GetField();
+    int GetActionObjectItemId();
+};
+struct ConditionQuest : TESQuest
+{
+    QuestData* GetQuestData();
+};
+struct ConditionFaction : TESFaction
+{
+    bool IsFlag20Set() const;
+    bool IsFlag40Set();
+    bool HasFactionFlag8() const;
+};
+struct ConditionBipedModelForm : TESBipedModelForm
+{
+    bool IsLoading();
+};
+
+// Support still needed by the legacy condition-function declarations.
+#ifndef TESCONDITIONFUNCTIONS_CONDITIONFN_DEP_LAYOUT_SUPPORT_H
+#define TESCONDITIONFUNCTIONS_CONDITIONFN_DEP_LAYOUT_SUPPORT_H
+
+#include <stddef.h>
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+#ifdef _MSC_VER
+#define FNV_ALIGN(n) __declspec(align(n))
+#define FNV_FORCEINLINE __forceinline
+typedef __int64 FNVInt64;
+typedef unsigned __int64 FNVUInt64;
+#else
+#define FNV_ALIGN(n) __attribute__((aligned(n)))
+#define FNV_FORCEINLINE inline __attribute__((always_inline))
+typedef long long FNVInt64;
+typedef unsigned long long FNVUInt64;
+#endif
+template <class Collection> class SettingT;
+class FormFlagRecord;
+class ActiveEffect;
+class ActorMover;
+class ActorPackageContext;
+class ActorPackageData;
+class ActorValueInfo;
+class AlchemyItem;
+class AnimData;
+class AutoMemContext;
+class BGSEntryPointFunctionData;
+class BGSEntryPointFunctionDataActivateChoice;
+class BGSEntryPointFunctionDataLeveledList;
+class BGSEntryPointFunctionDataOneValue;
+class BGSEntryPointFunctionDataTwoValue;
+class BGSEntryPointPerkEntry;
+class BGSListForm;
+class BGSPerk;
+class BGSPerkEntry;
+class BSAudioListener;
+class BSAudioSyncTimer;
+class BSCacheDriveSystemUtility;
+class RecursiveLock;
+class BSDiscBootSystemUtility;
+class BSExtraData;
+class BSFaceGenKeyframe;
+class BSFile;
+class BSGameDataSystemUtility;
+class BSSaveDataSystemUtility;
+class BSSaveDataSystemUtility__SaveDataEntry;
+class BSSaveDataOperationEntry;
+class RecursiveSpinLock;
+class BSSysInfoSystemUtility;
+class BSThread;
+class BipedAnim;
+class ExpressionEvaluator;
+class CachedValues;
+class CachedValuesOwner;
+class CombatGroupCollection;
+
+class CombatController;
+class CombatProcedure;
+class TimeoutTimer;
+class ContinuousBeamProjectile;
+class DialogueTopicData;
+class DialogueItem;
+class DialogueResponse;
+class ActorListEntry;
+
+class PerkEntryPointData;
+class ExpressionValue;
+class ExtraContainerChanges;
+
+class TESFileHeader;
+class FormRecordHeader;
+class TESFileGroup;
+class ModifierPointerList;
+class ReactionInfo;
+class GameSettingCollection;
+class GarbageCollector;
+class HUDMainMenu;
+class HUDMainMenu__MessageData;
+class HUDMainMenu__QuestObjective;
+class HUDMainMenu__RadiationUpdate;
+class HUDMainMenu__SubtitleData;
+class HUDMainMenu__XPUpdate;
+class MemoryHeapStats;
+class HotkeyWheelDisplay;
+class IMemoryHeap;
+class IMemoryManagerFile;
+class INFO_LINK_ELEMENT;
+
+class InventoryMenu;
+class InventoryMenu__sPageState;
+
+class ItemModMenu;
+class CellDataNode;
+class ListBox_ItemChange___;
+class ListBox_PerkRankData___;
+class ListBox_StatsMenu__StatusEffect___;
+class ListBox_TESReputation___;
+class ListBox_enum_ActorValue__Index_;
+class ListBox_enum_MiscStatManager__MiscStatID_;
+class ListBox_int_;
+class ListBoxBase;
+class ListBoxItem_ItemChange___;
+class ListBoxItem_PerkRankData___;
+class ListBoxItem_StatsMenu__StatusEffect___;
+class ListBoxItem_TESReputation___;
+class ListBoxItem_enum_ActorValue__Index_;
+class ListBoxItem_enum_MiscStatManager__MiscStatID_;
+class ListBoxItem_int_;
+class LowProcess;
+class MagicCaster;
+class MagicEffectCollection;
+
+class MemoryManager;
+class MemoryPool;
+class MemoryPool__FreePoolBlock;
+class Menu;
+class MessageMenu;
+class MiddleLowProcess;
+class Modifier;
+class ActorValueModifierList;
+class NavMeshInfo;
+class NavMeshInfo_const;
+class NiControllerSequence;
+class NiMemObject;
+class NiObject;
+class NiObjectNET;
+class NiProperty;
+class NiRefObject;
+class NiTimeController;
+class OSGlobals;
+class OSInputGlobals;
+class OSSoundGlobals;
+class TargetDoorController;
+class PathingLocation;
+class PerkData;
+class PerkForm;
+
+class QuestDialogueInfo;
+class RepairMenu;
+class TESResponseList;
+class ScriptDefinition;
+class ScriptFunctionInfo;
+class ScriptLocalVariable;
+class ScriptParameter;
+class ScriptReferencedObject;
+
+class ScriptRunner;
+class ScriptVariableInfo;
+class Setting;
+class MagicEffectContext;
+class SpellItem;
+class StatsMenu;
+class StatsMenu__HealingOption;
+class StatsMenu__NamedEffectsList;
+class StatsMenu__StatusEffect;
+class StatsMenu__StatusEffectList;
+class TESBitArrayFile;
+class TESBoundObject;
+class TESConditionItem;
+class TESTopicInfoData;
+class TESFile;
+class TESGlobal;
+class TESGrass;
+class TESLandTexture;
+class TESLevItem;
+
+
+class QuestStage;
+class RegionObjectEntry;
+class TESReactionForm;
+class TESRegionGrassObject;
+class TESRegionObjectBase;
+class TESResponse;
+class TESSound;
+class TESTopic;
+class TESTopicInfo;
+class TESWorldSpace;
+class TopicInfoData;
+class Tile;
+class Tile__Action;
+class Tile__FloatAction;
+class Tile__TileTemplate;
+class TileMenu;
+class TopicInfoArray;
+class ValidBip01Names;
+class ZeroOverheadHeap;
+class _FILETIME;
+class _RTL_CRITICAL_SECTION;
+class _RTL_CRITICAL_SECTION___unnamed_type_Synchronization_;
+
+class _WIN32_FIND_DATAA;
+class bhkRagdollController;
+class bhkRagdollPenetrationUtil;
+class bool___cdecl__StatsMenu__HealingOption__;
+class bool___cdecl__char__;
+class bool___cdecl__const_char___char___unsigned_int___void___;
+class bool___cdecl__unsigned_int__char___unsigned_int___void___;
+class unsigned_int___cdecl__BSSoundHandle___void___unsigned_int__;
+class void___cdecl___;
+class void___cdecl__BSDiscBootSystemUtility__NOTIFICATION_TYPE_;
+class void___cdecl__BSSaveDataSystemUtility__RESULT_;
+class ScriptParameter;
+class ScriptCallbackContext;
+class CStringArgument;
+#ifdef _MSC_VER
+#define FNV_CDECL __cdecl
+#else
+#define FNV_CDECL
+#endif
+typedef bool(FNV_CDECL* FNVScriptExecuteFunction)(const ScriptParameter*, const char*, TESObjectREFR*, TESObjectREFR*,
+                                                  Script*, ScriptLocals*, double&, unsigned int&);
+typedef bool(FNV_CDECL* FNVScriptCompileFunction)(const unsigned short, const ScriptParameter*, ScriptCallbackContext*,
+                                                  CStringArgument*);
+typedef bool(FNV_CDECL* FNVScriptConditionFunction)(TESObjectREFR*, void*, void*, double&);
+
+  // API only; no allocation or layout claim.
+
+typedef NiTPointerMap<unsigned int, TESFile*> TESFileThreadMap;
+#ifdef _MSC_VER
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
+#else
+FNV_FORCEINLINE long InterlockedDecrement(volatile long* value)
+{
+    return __sync_sub_and_fetch(value, 1);
+}
+FNV_FORCEINLINE long InterlockedIncrement(volatile long* value)
+{
+    return __sync_add_and_fetch(value, 1);
+}
+#endif
+
+typedef NiTListItem<void*> FNVPointerListItem;
+typedef NiTListBase<NiTPointerAllocator<unsigned int>, void*> FNVPointerListBase;
+
+#include "../../include/ActorValue.h"
+typedef ActorValue::Index ActorValue__Index;
+
+#endif
+
 // fallout_shared/tesconditionfunctions.cpp: BGSQuestObjective, Script, IdleAnimationManager, TESQuest and more (272 functions)
 
+#include "tesconditionfunctions_conditionfn_dep_ExtraDataList.h"
 #include "tesconditionfunctions_conditionfn_MobileObject.h"
 #include "tesconditionfunctions_conditionfn_low_Script.h"
-#include "tesconditionfunctions_conditionfn_class_faction.h"
+// fallout_shared/tesconditionfunctions_conditionfn_class_faction.h: declares Node, TESAttributes, TESClass, TESReactionForm, Reaction and more
+#ifndef CONDITIONFN_CLASS_FACTION_DECLARATIONS_H
+#define CONDITIONFN_CLASS_FACTION_DECLARATIONS_H
+// Separate, uncompiled candidates. Do not replace any accepted source body.
+// Concrete component/member layouts use JIP PC facts; genuine method
+// declarations and binding facts are independently established by JohnnyGuitar.
+#include "tesconditionfunctions_conditionfn_dep_TESForm.h"
+#include "tesconditionfunctions_conditionfn_dep_TESFullName.h"
+#include "tesconditionfunctions_conditionfn_dep_TESDescription.h"
+#include "tesconditionfunctions_conditionfn_dep_TESTexture.h"
+
+FNV_STATIC_ASSERT(sizeof(BSSimpleList<TESForm*>) == 8);
+
+
+FNV_STATIC_ASSERT(sizeof(TESAttributes) == 12);
+
+
+FNV_STATIC_ASSERT(sizeof(TESClass) == 96);
+FNV_STATIC_ASSERT(offsetof(TESClass, data) == 68);
+
+
+FNV_STATIC_ASSERT(sizeof(TESReactionForm) == 16);
+
+class TESReputation;
+
+FNV_STATIC_ASSERT(sizeof(TESFaction) == 76);
+FNV_STATIC_ASSERT(offsetof(TESFaction, data) == 52);
+
+#endif
+
 #include "tesconditionfunctions_conditionfn_dep_TESQuest.h"
 #include "tesconditionfunctions_conditionfn_BGSQuestObjective.h"
 #include "tesconditionfunctions_packet.h"
 #include "tesconditionfunctions_conditionfn_dep_TESObjectREFR.h"
 
-class PlayerCharacter;
 extern PlayerCharacter* g_thePlayer;
 
 struct PlayerCharacterMovingStateView
@@ -17,13 +425,6 @@ struct PlayerCharacterMovingStateView
     unsigned char movingIntoNewSpace;
 };
 
-class Actor
-{
-  public:
-    bool IsEssentialActor();
-    unsigned int GetActorStateFlags() const;
-    BooleanFloatQuery* RefreshActorRuntimeData();
-};
 
 // Sets result to 1.0 when the reference is an actor that is essential, otherwise leaves it at 0.0, and returns true.
 // @fnv 0x005a3980
@@ -57,8 +458,8 @@ bool GetLastHitLocationConditionFunction(TESObjectREFR* reference, void* arg1, v
     if (reference && reference->IsActor())
     {
         Actor* actor = (Actor*)reference;
-        if (actor->RefreshActorRuntimeData())
-            result = actor->RefreshActorRuntimeData()->location;
+        if (reinterpret_cast<Actor*>(actor)->RefreshActorRuntimeData())
+            result = reinterpret_cast<Actor*>(actor)->RefreshActorRuntimeData()->location;
     }
     return true;
 }
@@ -90,14 +491,14 @@ bool __cdecl Script::GetPCIsSexConditionFunction(TESObjectREFR* reference, void*
 // @fnv 0x005a2270
 bool TESFaction::GetPCAnEnemy() const
 {
-    return (factionFlags & 16) ? true : false;
+    return (data.iFlags & 16) ? true : false;
 }
 
 // Returns true if aeSkill equals any of the four tagSkills entries.
 // @fnv 0x005a5f40
 bool TESClass::IsTagSkill(ActorValue::Index aeSkill) const
 {
-    return tagSkills[0] == aeSkill || tagSkills[1] == aeSkill || tagSkills[2] == aeSkill || tagSkills[3] == aeSkill;
+    return data.m_aeTaggedSkills[0] == aeSkill || data.m_aeTaggedSkills[1] == aeSkill || data.m_aeTaggedSkills[2] == aeSkill || data.m_aeTaggedSkills[3] == aeSkill;
 }
 
 // @fnv 0x005a40d0
@@ -125,15 +526,11 @@ bool MobileObject::GetShouldUseEmotionAnimation() const
     return m_bTenthFlag;
 }
 
-struct FUN_004fd380_shell : public MobileObject
-{
-    MobileObject* FUN_004fd380();
-};
 
 // @fnv 0x004fd380
-MobileObject* FUN_004fd380_shell::FUN_004fd380()
+TESObjectREFR* Actor::FUN_004fd380()
 {
-    return *(MobileObject**)((char*)this + 0x70);
+    return reinterpret_cast<TESObjectREFR*>(m_pMobileObject);
 }
 
 void __cdecl DebugLog(char const*, ...);
@@ -196,12 +593,7 @@ struct AngleVec3
     float z;
 };
 
-struct RecipeCraftingInfo;
-class TESRecipe
-{
-  public:
-    RecipeCraftingInfo* GetData();
-};
+
 
 __declspec(thread) extern unsigned char tls_pad_0059c170[0x268];
 __declspec(thread) extern bool bConsoleOutput_0059c170;
@@ -237,10 +629,7 @@ struct Twin_0084d030
 {
     float GetStoredFloatValue();
 };
-struct TESObjectREFRScaleView : TESObjectREFR
-{
-    float GetScale();
-};
+
 
 void __cdecl DebugLog(const char*, ...);
 extern Twin_0084d030 g_timeGlobal;
@@ -251,9 +640,9 @@ bool __cdecl FUN_0059c430(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 {
     Script* pscript = static_cast<Script*>(apParam1);
     if (pscript && pscript->GetHeader()->m_bQuest &&
-        reinterpret_cast<TESObjectREFRScaleView*>(pscript)->GetScale() > 0.0)
+        reinterpret_cast<TESObjectREFR*>(pscript)->GetScale() > 0.0)
     {
-        afReturnValue = reinterpret_cast<TESObjectREFRScaleView*>(pscript)->GetScale();
+        afReturnValue = reinterpret_cast<TESObjectREFR*>(pscript)->GetScale();
     }
     else
     {
@@ -277,11 +666,6 @@ struct ActorValueOwner_vtable
     virtual float GetActorValueF(unsigned int);
 };
 
-struct ActorView : public Actor
-{
-    TESActorBase* GetActorBase();
-    bool GetDisabled();
-};
 
 __declspec(thread) extern unsigned char tls_pad[0x269];
 
@@ -290,10 +674,10 @@ __declspec(thread) extern unsigned char tls_pad[0x269];
 bool __cdecl FUN_0059c4f0(TESObjectREFR* reference, void* uiAvCode, void* pUnused, double& result)
 {
     unsigned int avCode = (unsigned int)uiAvCode;
-    ActorView* actor = 0;
+    Actor* actor = 0;
     if (reference && reference->IsActor())
     {
-        actor = (ActorView*)reference;
+        actor = (Actor*)reference;
     }
     if (actor)
     {
@@ -408,7 +792,6 @@ void FUN_0059ce80_shell::FUN_0059ce80(unsigned int aiGroup)
     iFilter |= (aiGroup << 16);
 }
 
-struct NiAVObject;
 struct hkVector4;
 struct hkpAllRayHitCollector;
 struct hkpClosestRayHitCollector;
@@ -842,12 +1225,7 @@ bool __cdecl FUN_0059dd90(TESObjectREFR* reference, void* arg1, void* arg2, doub
 void __cdecl DebugLog(char const*, ...);
 __declspec(thread) extern bool bEcho;
 
-class Sky;
-class TES
-{
-  public:
-    Sky* GetLogDate(void);
-};
+
 
 struct VTable_100
 {
@@ -1246,12 +1624,7 @@ bool __cdecl FUN_0059de90(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 namespace fnv_0059df40 {
 void __cdecl DebugLog(char const*, ...);
 
-class Sky;
-class TES
-{
-  public:
-    Sky* GetLogDate(void);
-};
+
 
 struct VTable0x4c8
 {
@@ -1273,7 +1646,7 @@ bool __cdecl FUN_0059df40(TESObjectREFR* reference, void* pMatchValue, void* pUn
     }
     if (pactor)
     {
-        Sky* p = ((TES*)pactor)->GetLogDate();
+        Sky* p = reinterpret_cast<Sky*>(((TES*)pactor)->GetLogDate());
         if ((*(VTable0x4c8**)p)->fn4c8(p) == pMatchValue)
         {
             result = 1.0;
@@ -1288,24 +1661,12 @@ bool __cdecl FUN_0059df40(TESObjectREFR* reference, void* pMatchValue, void* pUn
 }  // namespace fnv_0059df40
 
 namespace fnv_0059dfe0 {
-class Sky;
-class TES
-{
-  public:
-    Sky* GetLogDate();
-};
 
-class TESObject
-{
-  public:
-    TESObject* GetNext();
-};
 
-template <> class BSSimpleList<Actor*>
-{
-  public:
-    bool IsInList(Actor* const&) const;
-};
+
+
+
+#include "../../include/BSSimpleList.h"
 
 int __fastcall _FNV_GetFormType(TESForm*);
 void __cdecl DebugLog(char const*, ...);
@@ -1313,316 +1674,7 @@ void __cdecl DebugLog(char const*, ...);
 __declspec(thread) extern char g_bConsoleOutput_pad[0x268];
 __declspec(thread) extern bool g_bConsoleOutput_flag;
 
-struct ProcessView_0059dfe0
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual void v213();
-    virtual void v214();
-    virtual void v215();
-    virtual void v216();
-    virtual void v217();
-    virtual void v218();
-    virtual void v219();
-    virtual void v220();
-    virtual void v221();
-    virtual void v222();
-    virtual void v223();
-    virtual void v224();
-    virtual void v225();
-    virtual void v226();
-    virtual void v227();
-    virtual void v228();
-    virtual void v229();
-    virtual void v230();
-    virtual void v231();
-    virtual void v232();
-    virtual void v233();
-    virtual void v234();
-    virtual void v235();
-    virtual void v236();
-    virtual void v237();
-    virtual void v238();
-    virtual void v239();
-    virtual void v240();
-    virtual void v241();
-    virtual void v242();
-    virtual void v243();
-    virtual void v244();
-    virtual void v245();
-    virtual void v246();
-    virtual void v247();
-    virtual void v248();
-    virtual void v249();
-    virtual void v250();
-    virtual void v251();
-    virtual void v252();
-    virtual void v253();
-    virtual void v254();
-    virtual void v255();
-    virtual void v256();
-    virtual void v257();
-    virtual void v258();
-    virtual void v259();
-    virtual void v260();
-    virtual void v261();
-    virtual void v262();
-    virtual void v263();
-    virtual void v264();
-    virtual void v265();
-    virtual void v266();
-    virtual void v267();
-    virtual void v268();
-    virtual void v269();
-    virtual void v270();
-    virtual void v271();
-    virtual void v272();
-    virtual void v273();
-    virtual void v274();
-    virtual void v275();
-    virtual void v276();
-    virtual void v277();
-    virtual void v278();
-    virtual void v279();
-    virtual void v280();
-    virtual void v281();
-    virtual void v282();
-    virtual void v283();
-    virtual void v284();
-    virtual void v285();
-    virtual void v286();
-    virtual void v287();
-    virtual void v288();
-    virtual void v289();
-    virtual void v290();
-    virtual void v291();
-    virtual void v292();
-    virtual void v293();
-    virtual void v294();
-    virtual void v295();
-    virtual void v296();
-    virtual void v297();
-    virtual void v298();
-    virtual void v299();
-    virtual void v300();
-    virtual void v301();
-    virtual void v302();
-    virtual void v303();
-    virtual void v304();
-    virtual void v305();
-    virtual TESObject* GetFurnitureReference();
-};
+
 
 // @fnv 0x0059dfe0
 bool __cdecl FUN_0059dfe0(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double& afReturnValue)
@@ -1639,7 +1691,7 @@ bool __cdecl FUN_0059dfe0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     pform = (TESForm*)apParam1;
     if (pactor && pform)
     {
-        TESObject* pref = ((ProcessView_0059dfe0*)((TES*)pactor)->GetLogDate())->GetFurnitureReference();
+        TESObject* pref = reinterpret_cast<TESObject*>(reinterpret_cast<const BaseProcess*>(((TES*)pactor)->GetLogDate())->GetFurnitureReference());
         if (pref)
         {
             if (_FNV_GetFormType(pform) == 0x27)
@@ -1669,74 +1721,7 @@ bool __cdecl FUN_0059dfe0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 
 void __cdecl DebugLog(char const*, ...);
 
-struct VTableStub_0059e0f0
-{
-    virtual void vfn_00();
-    virtual void vfn_01();
-    virtual void vfn_02();
-    virtual void vfn_03();
-    virtual void vfn_04();
-    virtual void vfn_05();
-    virtual void vfn_06();
-    virtual void vfn_07();
-    virtual void vfn_08();
-    virtual void vfn_09();
-    virtual void vfn_10();
-    virtual void vfn_11();
-    virtual void vfn_12();
-    virtual void vfn_13();
-    virtual void vfn_14();
-    virtual void vfn_15();
-    virtual void vfn_16();
-    virtual void vfn_17();
-    virtual void vfn_18();
-    virtual void vfn_19();
-    virtual void vfn_20();
-    virtual void vfn_21();
-    virtual void vfn_22();
-    virtual void vfn_23();
-    virtual void vfn_24();
-    virtual void vfn_25();
-    virtual void vfn_26();
-    virtual void vfn_27();
-    virtual void vfn_28();
-    virtual void vfn_29();
-    virtual void vfn_30();
-    virtual void vfn_31();
-    virtual void vfn_32();
-    virtual void vfn_33();
-    virtual void vfn_34();
-    virtual void vfn_35();
-    virtual void vfn_36();
-    virtual void vfn_37();
-    virtual bool GetTalkedToPC();  // 38 (0x98)
-    virtual void vfn_39();
-    virtual void vfn_40();
-    virtual void vfn_41();
-    virtual void vfn_42();
-    virtual void vfn_43();
-    virtual void vfn_44();
-    virtual void vfn_45();
-    virtual void vfn_46();
-    virtual void vfn_47();
-    virtual void vfn_48();
-    virtual void vfn_49();
-    virtual void vfn_50();
-    virtual void vfn_51();
-    virtual void vfn_52();
-    virtual void vfn_53();
-    virtual void vfn_54();
-    virtual void vfn_55();
-    virtual void vfn_56();
-    virtual void vfn_57();
-    virtual void vfn_58();
-    virtual void vfn_59();
-    virtual void vfn_60();
-    virtual void vfn_61();
-    virtual void vfn_62();
-    virtual void vfn_63();
-    virtual bool IsActor();  // 64 (0x100)
-};
+
 
 struct TLSData_0059e0f0
 {
@@ -1747,11 +1732,11 @@ struct TLSData_0059e0f0
 __declspec(thread) TLSData_0059e0f0 g_tlsData_0059e0f0;
 
 // @fnv 0x0059e0f0
-bool __cdecl FUN_0059e0f0(VTableStub_0059e0f0* apRefObject, VTableStub_0059e0f0* apParam1, void* apParam2,
+bool __cdecl FUN_0059e0f0(TESObjectREFR* apRefObject, TESObjectREFR* apParam1, void* apParam2,
                           double& afReturnValue)
 {
     afReturnValue = 0.0;
-    VTableStub_0059e0f0* pActor = 0;
+    TESObjectREFR* pActor = 0;
     if (apRefObject)
     {
         if (apRefObject->IsActor())
@@ -1764,7 +1749,7 @@ bool __cdecl FUN_0059e0f0(VTableStub_0059e0f0* apRefObject, VTableStub_0059e0f0*
         pActor = apParam1;
     }
 
-    if (pActor && pActor->GetTalkedToPC())
+    if (pActor && pActor->Unk_26())
     {
         afReturnValue = 1.0;
     }
@@ -1780,10 +1765,7 @@ bool __cdecl FUN_0059e0f0(VTableStub_0059e0f0* apRefObject, VTableStub_0059e0f0*
 namespace fnv_0059e390 {
 void __cdecl DebugLog(const char*, ...);
 
-struct TESQuest_GetCompleted_Helper : public TESQuest
-{
-    bool GetCompleted();
-};
+
 
 __declspec(thread) extern char tls_pad[0x268];
 __declspec(thread) extern bool bConsoleEcho;
@@ -1794,7 +1776,7 @@ bool __cdecl FUN_0059e390(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 {
     afReturnValue = 0.0;
     TESQuest* pQuest = apParam1 ? static_cast<TESQuest*>(apParam1) : 0;
-    if (pQuest && static_cast<TESQuest_GetCompleted_Helper*>(pQuest)->GetCompleted())
+    if (pQuest && pQuest->GetCompleted())
     {
         afReturnValue = 1.0;
     }
@@ -1806,30 +1788,20 @@ bool __cdecl FUN_0059e390(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }
 }  // namespace fnv_0059e390
 
-struct FUN_0059e400_shell : public TESQuest
-{
-    bool FUN_0059e400();
-};
 
-struct TESFaction_RankDataView
-{
-    unsigned char* GetRankDataList();
-};
+
+
 
 // @fnv 0x0059e400
-bool FUN_0059e400_shell::FUN_0059e400()
+bool TESQuest::GetCompleted()
 {
-    return (*reinterpret_cast<TESFaction_RankDataView*>(this)->GetRankDataList() & 2) != 0;
+    return (static_cast<ConditionQuest*>(this)->GetQuestData()->m_ucEntryType & 2) != 0;
 }
 
 void __cdecl DebugLog(const char*, ...);
 
 namespace TESQuestNamespace {
-class TESQuest
-{
-  public:
-    unsigned int GetStageMask();
-};
+
 }
 
 struct TLSData
@@ -1847,7 +1819,7 @@ bool __cdecl GetQuestStage(TESObjectREFR* apRefObject, void* apParam1, void* apP
     afReturnValue = 0.0;
     if (TESQuest* pQuest = apParam1 ? static_cast<TESQuest*>(apParam1) : 0)
     {
-        afReturnValue = reinterpret_cast<TESQuestNamespace::TESQuest*>(pQuest)->GetStageMask();
+        afReturnValue = reinterpret_cast<TESQuest*>(pQuest)->GetStageMask();
     }
     if (g_tlsData.bConsoleEcho)
     {
@@ -1857,11 +1829,7 @@ bool __cdecl GetQuestStage(TESObjectREFR* apRefObject, void* apParam1, void* apP
 }
 
 namespace fnv_0059e8e0 {
-struct Sky
-{
-    static Sky* __cdecl GetInstance();
-    bool IsRaining();
-};
+
 
 void __cdecl DebugLog(char const*, ...);
 __declspec(thread) extern char g_tlspad[0x268];
@@ -1882,10 +1850,7 @@ bool __cdecl FUN_0059e8e0(TESObjectREFR* reference, void* arg1, void* arg2, doub
 int __fastcall _FNV_GetFormType(void*);
 void __cdecl DebugLog(const char*, ...);
 
-struct TESObjectREFR_WorldSpace : TESObjectREFR
-{
-    TESWorldSpace* GetParentWorldSpace();
-};
+
 
 __declspec(thread) extern char tls_pad_0059f0c0[0x268];
 __declspec(thread) extern bool tls_bEchoConsole;
@@ -1925,7 +1890,7 @@ bool __cdecl FUN_0059f0c0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
         pref = apRefObject;
     }
 
-    if (pworld != 0 && static_cast<TESObjectREFR_WorldSpace*>(pref)->GetParentWorldSpace() == pworld)
+    if (pworld != 0 && static_cast<TESObjectREFR*>(pref)->GetParentWorldSpace() == pworld)
     {
         *afReturnValue = 1.0;
     }
@@ -1943,19 +1908,7 @@ int __fastcall _FNV_GetFormType(void* form);
 void __cdecl DebugLog(char const* format, ...);
 __declspec(thread) extern bool bConsoleOutput;
 
-struct TESObject
-{
-    TESObject* GetNext(void);
-};
 
-enum SEX
-{
-};
-
-struct TESActorBase
-{
-    SEX GetSex(void);
-};
 
 // Sets afReturnValue to 1.0 when apRefObject's next form is an actor base whose sex matches apParam1, logs the result, and returns true.
 // @fnv 0x0059f3c0
@@ -1963,7 +1916,7 @@ bool __cdecl FUN_0059f3c0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 {
     afReturnValue = 0.0;
     TESActorBase* pnpc = 0;
-    if (apRefObject && _FNV_GetFormType(reinterpret_cast<TESObject*>(apRefObject)->GetNext()) == 0x2a)
+    if (apRefObject && (_FNV_GetFormType)(reinterpret_cast<TESObject*>(apRefObject)->GetNext()) == 0x2a)
     {
         pnpc = reinterpret_cast<TESActorBase*>(reinterpret_cast<TESObject*>(apRefObject)->GetNext());
     }
@@ -1984,10 +1937,7 @@ extern TESBoundObject* DAT_011cab0c;
 TESBoundObject* __fastcall FUN_004216f0(ExtraDataList*);
 void __cdecl DebugLog(char const*, ...);
 
-struct TESObject
-{
-    TESObject* GetNext();
-};
+
 
 struct TLSData_0059f7b0
 {
@@ -2198,15 +2148,8 @@ bool __cdecl FUN_0059fd30(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 
 void __cdecl DebugLog(char const*, ...);
 
-struct Actor_Shell : public Actor
-{
-    bool FUN_00437bd0();
-};
 
-struct MobileObject_Shell : public MobileObject
-{
-    char const* GetFullName();
-};
+
 
 extern __declspec(thread) char g_tlspad[0x268];
 extern __declspec(thread) bool g_bEchoConsole;
@@ -2224,7 +2167,7 @@ bool __cdecl FUN_0059fee0(TESObjectREFR* reference, void* arg1, void* arg2, doub
 
     if (pactor)
     {
-        if (reinterpret_cast<Actor_Shell*>(pactor)->FUN_00437bd0())
+        if (reinterpret_cast<Actor*>(pactor)->FUN_00437bd0())
         {
             result = 1.0;
         }
@@ -2233,11 +2176,11 @@ bool __cdecl FUN_0059fee0(TESObjectREFR* reference, void* arg1, void* arg2, doub
         {
             if (result != 0.0)
             {
-                DebugLog("%s is unconscious", reinterpret_cast<MobileObject_Shell*>(pactor)->GetFullName());
+                DebugLog("%s is unconscious", reinterpret_cast<MobileObject*>(pactor)->GetFullName());
             }
             else
             {
-                DebugLog("%s is not unconscious", reinterpret_cast<MobileObject_Shell*>(pactor)->GetFullName());
+                DebugLog("%s is not unconscious", reinterpret_cast<MobileObject*>(pactor)->GetFullName());
             }
         }
     }
@@ -2278,20 +2221,16 @@ unsigned int FUN_005a00a0(unsigned int aiMax)
 void __cdecl DebugLog(char const*, ...);
 __declspec(thread) extern bool tls_conditionEcho;
 
-struct ActorLevelHelper : Actor
-{
-    unsigned short GetLevel();
-};
 
 // Sets result to the reference's actor level (0 if not an actor) and logs it when tls_conditionEcho is set; returns true.
 // @fnv 0x005a00c0
 bool __cdecl FUN_005a00c0(TESObjectREFR* reference, void* arg1, void* arg2, double& result)
 {
     result = 0.0;
-    ActorLevelHelper* pactor = 0;
+    Actor* pactor = 0;
     if (reference && reference->IsActor())
     {
-        pactor = (ActorLevelHelper*)reference;
+        pactor = (Actor*)reference;
     }
     if (pactor)
     {
@@ -2333,16 +2272,11 @@ bool __cdecl FUN_005a01f0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     return true;
 }
 
-struct FUN_005a03f0_obj
-{
-    unsigned char pad[0x680];
-    unsigned char f680;
-    bool FUN_005a03f0(unsigned int mask);
-};
+
 // @fnv 0x005a03f0
-bool FUN_005a03f0_obj::FUN_005a03f0(unsigned int mask)
+bool ConditionPlayerCharacter::TestConditionFlags(unsigned int mask)
 {
-    return f680 & mask;
+    return m_ucValueAt680 & mask;
 }
 
 void __cdecl DebugLog(char const*, ...);
@@ -2369,10 +2303,9 @@ struct BGSSaveFormBuffer;
 struct BSAnimGroupSequence;
 struct FindData;
 struct KFModel;
-struct NiAVObject;
+
 struct NiControllerManager;
 struct NiControllerSequence;
-struct NiNode;
 struct TESAnimGroup;
 struct TESIdleForm;
 struct Animation
@@ -2548,131 +2481,7 @@ struct TLSData_005a0f10
 };
 __declspec(thread) TLSData_005a0f10 g_tlsData_005a0f10;
 
-struct TESObjectREFR_View_005a0f10
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual Animation* GetAnimation();
-};
+
 
 // @fnv 0x005a0f10
 bool __cdecl FUN_005a0f10(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double* afReturnValue)
@@ -2680,7 +2489,7 @@ bool __cdecl FUN_005a0f10(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     *afReturnValue = 0.0;
     if (apRefObject)
     {
-        Animation* panim = ((TESObjectREFR_View_005a0f10*)apRefObject)->GetAnimation();
+        Animation* panim = reinterpret_cast<Animation*>(apRefObject->GetAnimData());
         if (panim)
         {
             if (!panim->IsSequenceActive())
@@ -2735,21 +2544,8 @@ namespace fnv_005a1c90 {
 int __fastcall _FNV_GetFormType(void* form);
 void __cdecl DebugLog(const char*, ...);
 
-struct TESPackage
-{
-    bool IsMustComplete();
-};
 
-namespace FNV_Helpers {
-struct ExtraDataList
-{
-    TESPackage* GetPackageOverride();
-};
-struct Actor
-{
-    TESPackage* GetCurrentAIPackage();
-};
-}
+
 
 __declspec(thread) extern char tls_pad[0x268];
 __declspec(thread) extern bool tls_bEcho;
@@ -2773,13 +2569,13 @@ bool __cdecl FUN_005a1c90(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 
     if (pactor && ppackage)
     {
-        TESPackage* pActorPackage = reinterpret_cast<FNV_Helpers::Actor*>(pactor)->GetCurrentAIPackage();
+        TESPackage* pActorPackage = reinterpret_cast<Actor*>(pactor)->GetCurrentAIPackage();
         if (pActorPackage && pActorPackage->IsMustComplete() &&
-            reinterpret_cast<FNV_Helpers::ExtraDataList*>(reinterpret_cast<TESObjectREFR*>(pactor)->GetExtraData())
+            reinterpret_cast<ExtraDataList*>(reinterpret_cast<TESObjectREFR*>(pactor)->GetExtraData())
                 ->GetPackageOverride())
         {
             pActorPackage =
-                reinterpret_cast<FNV_Helpers::ExtraDataList*>(reinterpret_cast<TESObjectREFR*>(pactor)->GetExtraData())
+                reinterpret_cast<ExtraDataList*>(reinterpret_cast<TESObjectREFR*>(pactor)->GetExtraData())
                     ->GetPackageOverride();
         }
         if (pActorPackage == ppackage)
@@ -2866,15 +2662,11 @@ bool __fastcall FUN_005a1e50(const bool* self)
     return self[0x658];
 }
 
-struct FUN_005a2030_shell : public Actor
-{
-    bool FUN_005a2030();
-};
 
 // @fnv 0x005a2030
-bool FUN_005a2030_shell::FUN_005a2030()
+bool Actor::FUN_005a2030()
 {
-    return *((bool*)this + 0x14d);
+    return m_bSecondActorFlag;
 }
 
 void __cdecl DebugLog(char const*, ...);
@@ -2911,10 +2703,7 @@ bool __cdecl GetPCIsEnemyOfFaction(TESObjectREFR* apRefObject, void* apParam1, v
 }
 
 namespace fnv_005a2330 {
-struct TESObjectREFR_standin
-{
-    bool FUN_00477ba0();
-};
+
 void __cdecl DebugLog(char const*, ...);
 extern __declspec(thread) struct
 {
@@ -2923,7 +2712,7 @@ extern __declspec(thread) struct
 } tlsData;
 // Sets result to 1.0 if ref is valid and FUN_00477ba0 returns true, otherwise 0.0, logs it when tlsData.dbg is set, and returns true.
 // @fnv 0x005a2330
-bool __cdecl FUN_005a2330(TESObjectREFR_standin* ref, void* a1, void* a2, double& result)
+bool __cdecl FUN_005a2330(TESObjectREFR* ref, void* a1, void* a2, double& result)
 {
     result = 0.0;
     if (ref && ref->FUN_00477ba0())
@@ -2936,11 +2725,6 @@ bool __cdecl FUN_005a2330(TESObjectREFR_standin* ref, void* a1, void* a2, double
 
 void __cdecl DebugLog(char const*, ...);
 
-class MagicTarget
-{
-  public:
-    bool HasEffect(EffectSetting const*);
-};
 
 struct TLSData_005a2390
 {
@@ -3134,25 +2918,15 @@ bool __cdecl CheckActorEaten(TESObjectREFR* apRefObject, void* apParam1, void* a
 }
 
 namespace fnv_005a2e20 {
-class TESObject : public TESForm
-{
-  public:
-    TESObject* GetNext();
-};
+
 
 extern PlayerCharacter* pPlayer;
 void __cdecl DebugLog(char const*, ...);
 extern __declspec(thread) bool bConditionPrint;
 
-struct ExtraDataListOwnerView : public ExtraDataList
-{
-    TESForm* GetOwner();
-};
 
-struct TESFullNameHelper : public TESFullName
-{
-    static char const* __cdecl GetFullName(TESForm*);
-};
+
+
 
 // @fnv 0x005a2e20
 bool __cdecl FUN_005a2e20(TESObjectREFR* reference, void* pOwner, void* pUnused, double& result)
@@ -3162,7 +2936,7 @@ bool __cdecl FUN_005a2e20(TESObjectREFR* reference, void* pOwner, void* pUnused,
     {
         owner = reinterpret_cast<TESObject*>(pPlayer)->GetNext();
     }
-    if (reference && owner && static_cast<ExtraDataListOwnerView*>(reference->GetExtraData())->GetOwner() == owner)
+    if (reference && owner && static_cast<ExtraDataList*>(reference->GetExtraData())->GetOwner() == owner)
     {
         result = 1.0;
     }
@@ -3170,11 +2944,11 @@ bool __cdecl FUN_005a2e20(TESObjectREFR* reference, void* pOwner, void* pUnused,
     {
         if (result != 0.0)
         {
-            DebugLog("%s is the owner", TESFullNameHelper::GetFullName(owner));
+            DebugLog("%s is the owner", TESFullName::GetFullName(owner));
         }
         else
         {
-            DebugLog("%s is not the owner", TESFullNameHelper::GetFullName(owner));
+            DebugLog("%s is not the owner", TESFullName::GetFullName(owner));
         }
     }
     return true;
@@ -3187,15 +2961,8 @@ __declspec(thread) extern unsigned char g_bConsoleEcho_0268[0x269];
 extern bool (__thiscall Actor::*volatile pfn_Actor_IsSneaking)();
 extern char const*(__cdecl* volatile pfn_TESFullName_GetFullName)(TESForm*);
 
-struct Actor_IsSneaking_Helper : public Actor
-{
-    bool IsSneaking();
-};
 
-struct TESFullName_Helper : public TESFullName
-{
-    static char const* __cdecl GetFullName(TESForm*);
-};
+
 
 // @fnv 0x005a2f60
 bool __cdecl FUN_005a2f60(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double& afReturnValue)
@@ -3209,7 +2976,7 @@ bool __cdecl FUN_005a2f60(TESObjectREFR* apRefObject, void* apParam1, void* apPa
             pact = reinterpret_cast<Actor*>(apRefObject);
         }
     }
-    if (reinterpret_cast<Actor_IsSneaking_Helper*>(pact)->IsSneaking())
+    if (reinterpret_cast<Actor*>(pact)->IsSneaking())
     {
         afReturnValue = 1.0;
     }
@@ -3217,11 +2984,11 @@ bool __cdecl FUN_005a2f60(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     {
         if (afReturnValue != 0.0)
         {
-            DebugLog("%s is sneaking", TESFullName_Helper::GetFullName(reinterpret_cast<TESForm*>(pact)));
+            DebugLog("%s is sneaking", TESFullName::GetFullName(reinterpret_cast<TESForm*>(pact)));
         }
         else
         {
-            DebugLog("%s is not sneaking", TESFullName_Helper::GetFullName(reinterpret_cast<TESForm*>(pact)));
+            DebugLog("%s is not sneaking", TESFullName::GetFullName(reinterpret_cast<TESForm*>(pact)));
         }
     }
     return true;
@@ -3231,11 +2998,7 @@ bool __fastcall FUN_00884730(Actor* actor);
 void __cdecl DebugLog(const char*, ...);
 
 namespace TESFullName_ns {
-class TESFullName
-{
-  public:
-    static const char* __cdecl GetFullName(TESForm*);
-};
+
 }
 
 __declspec(thread) extern bool bConsoleOutput;
@@ -3258,11 +3021,11 @@ bool __cdecl FUN_005a3010(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     {
         if (afReturnValue != 0.0)
         {
-            DebugLog("%s is running", TESFullName_ns::TESFullName::GetFullName(reinterpret_cast<TESForm*>(pact)));
+            DebugLog("%s is running", TESFullName::GetFullName(reinterpret_cast<TESForm*>(pact)));
         }
         else
         {
-            DebugLog("%s is not running", TESFullName_ns::TESFullName::GetFullName(reinterpret_cast<TESForm*>(pact)));
+            DebugLog("%s is not running", TESFullName::GetFullName(reinterpret_cast<TESForm*>(pact)));
         }
     }
     return true;
@@ -3378,11 +3141,7 @@ void __cdecl FUN_005a38e0()
 }  // namespace fnv_005a38e0
 
 class BGSNote;
-class PlayerCharacter
-{
-  public:
-    bool HasNote(BGSNote*);
-};
+
 extern PlayerCharacter* pPlayer;
 
 // Sets result to 1.0 if pPlayer has the BGSNote passed in arg1, otherwise leaves it at 0.0, and returns true.
@@ -3417,26 +3176,16 @@ bool __cdecl FUN_005a3d30(TESObjectREFR* reference, void* arg1, void* arg2, doub
     return true;
 }
 
-struct TESObjectREFR_GetFlags_Helper : public TESObjectREFR
-{
-    unsigned int GetFlags()
-    {
-        return 0;
-    }
-};
+
 // @fnv 0x005a4320
 unsigned int __fastcall FUN_005a4320(char* this_ptr)
 {
-    return ((TESObjectREFR_GetFlags_Helper*)(this_ptr + 8))->GetFlags();
+    return ((TESObjectREFR*)(this_ptr + 8))->GetFlags();
 }
 
 namespace fnv_005a4340 {
-class Sky;
-class TES
-{
-  public:
-    Sky* GetLogDate();
-};
+
+
 
 struct Vtable388
 {
@@ -3686,11 +3435,7 @@ bool __cdecl FUN_005a4340(TESObjectREFR* reference, void* arg1, void* arg2, doub
 }
 }  // namespace fnv_005a4340
 
-class ProcessLists
-{
-  public:
-    bool IsActorTalkingThroughActivator(Actor*);
-};
+
 
 extern ProcessLists DAT_011e0e80;
 
@@ -3927,12 +3672,7 @@ bool __cdecl FUN_005a4480(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 namespace fnv_005a4780 {
 void __cdecl DebugLog(char const*, ...);
 
-class Sky;
-class TES
-{
-  public:
-    Sky* GetLogDate(void);
-};
+
 
 namespace fnv_anon_tesconditionfunctions {}
 using namespace fnv_anon_tesconditionfunctions;
@@ -4196,10 +3936,6 @@ bool __cdecl CheckLastPlayedIdle(TESObjectREFR* reference, void* arg1, void* pUn
 void __cdecl DebugLog(char const*, ...);
 extern PlayerCharacter* pPlayer;
 
-struct Actor_005a49f0
-{
-    int GetReactionToActor(Actor*, bool*);
-};
 
 struct TLSData_005a49f0
 {
@@ -4216,7 +3952,7 @@ bool __cdecl FUN_005a49f0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     afReturnValue = 0.0;
     if (apRefObject && apRefObject->IsActor())
     {
-        Actor_005a49f0* pactor = reinterpret_cast<Actor_005a49f0*>(apRefObject);
+        Actor* pactor = reinterpret_cast<Actor*>(apRefObject);
         Actor* ptarg = reinterpret_cast<Actor*>(apParam1);
         bool bcrime = false;
         pactor->GetReactionToActor(reinterpret_cast<Actor*>(pPlayer), &bcrime);
@@ -4279,219 +4015,11 @@ void __cdecl DebugLog(char const*, ...);
 extern PlayerCharacter* pPlayer;
 __declspec(thread) extern bool tls_0268;
 
-class Sky;
-class TES
-{
-  public:
-    Sky* GetLogDate();
-};
 
-class TESObjectLIGH;
-class EffectSetting
-{
-  public:
-    TESObjectLIGH* GetLight();
-};
 
-struct Process005a5330
-{
-    virtual void vfn_000();
-    virtual void vfn_004();
-    virtual void vfn_008();
-    virtual void vfn_00c();
-    virtual void vfn_010();
-    virtual void vfn_014();
-    virtual void vfn_018();
-    virtual void vfn_01c();
-    virtual void vfn_020();
-    virtual void vfn_024();
-    virtual void vfn_028();
-    virtual void vfn_02c();
-    virtual void vfn_030();
-    virtual void vfn_034();
-    virtual void vfn_038();
-    virtual void vfn_03c();
-    virtual void vfn_040();
-    virtual void vfn_044();
-    virtual void vfn_048();
-    virtual void vfn_04c();
-    virtual void vfn_050();
-    virtual void vfn_054();
-    virtual void vfn_058();
-    virtual void vfn_05c();
-    virtual void vfn_060();
-    virtual void vfn_064();
-    virtual void vfn_068();
-    virtual void vfn_06c();
-    virtual void vfn_070();
-    virtual void vfn_074();
-    virtual void vfn_078();
-    virtual void vfn_07c();
-    virtual void vfn_080();
-    virtual void vfn_084();
-    virtual void vfn_088();
-    virtual void vfn_08c();
-    virtual void vfn_090();
-    virtual void vfn_094();
-    virtual void vfn_098();
-    virtual void vfn_09c();
-    virtual void vfn_0a0();
-    virtual void vfn_0a4();
-    virtual void vfn_0a8();
-    virtual void vfn_0ac();
-    virtual void vfn_0b0();
-    virtual void vfn_0b4();
-    virtual void vfn_0b8();
-    virtual void vfn_0bc();
-    virtual void vfn_0c0();
-    virtual void vfn_0c4();
-    virtual void vfn_0c8();
-    virtual void vfn_0cc();
-    virtual void vfn_0d0();
-    virtual void vfn_0d4();
-    virtual void vfn_0d8();
-    virtual void vfn_0dc();
-    virtual void vfn_0e0();
-    virtual void vfn_0e4();
-    virtual void vfn_0e8();
-    virtual void vfn_0ec();
-    virtual void vfn_0f0();
-    virtual void vfn_0f4();
-    virtual void vfn_0f8();
-    virtual void vfn_0fc();
-    virtual void vfn_100();
-    virtual void vfn_104();
-    virtual void vfn_108();
-    virtual void vfn_10c();
-    virtual void vfn_110();
-    virtual void vfn_114();
-    virtual void vfn_118();
-    virtual void vfn_11c();
-    virtual void vfn_120();
-    virtual void vfn_124();
-    virtual void vfn_128();
-    virtual void vfn_12c();
-    virtual void vfn_130();
-    virtual void vfn_134();
-    virtual void vfn_138();
-    virtual void vfn_13c();
-    virtual void vfn_140();
-    virtual void vfn_144();
-    virtual void vfn_148();
-    virtual void vfn_14c();
-    virtual void vfn_150();
-    virtual void vfn_154();
-    virtual void vfn_158();
-    virtual void vfn_15c();
-    virtual void vfn_160();
-    virtual void vfn_164();
-    virtual void vfn_168();
-    virtual void vfn_16c();
-    virtual void vfn_170();
-    virtual void vfn_174();
-    virtual void vfn_178();
-    virtual void vfn_17c();
-    virtual void vfn_180();
-    virtual void vfn_184();
-    virtual void vfn_188();
-    virtual void vfn_18c();
-    virtual void vfn_190();
-    virtual void vfn_194();
-    virtual void vfn_198();
-    virtual void vfn_19c();
-    virtual void vfn_1a0();
-    virtual void vfn_1a4();
-    virtual void vfn_1a8();
-    virtual void vfn_1ac();
-    virtual void vfn_1b0();
-    virtual void vfn_1b4();
-    virtual void vfn_1b8();
-    virtual void vfn_1bc();
-    virtual void vfn_1c0();
-    virtual void vfn_1c4();
-    virtual void vfn_1c8();
-    virtual void vfn_1cc();
-    virtual void vfn_1d0();
-    virtual void vfn_1d4();
-    virtual void vfn_1d8();
-    virtual void vfn_1dc();
-    virtual void vfn_1e0();
-    virtual void vfn_1e4();
-    virtual void vfn_1e8();
-    virtual void vfn_1ec();
-    virtual void vfn_1f0();
-    virtual void vfn_1f4();
-    virtual void vfn_1f8();
-    virtual void vfn_1fc();
-    virtual void vfn_200();
-    virtual void vfn_204();
-    virtual void vfn_208();
-    virtual void vfn_20c();
-    virtual void vfn_210();
-    virtual void vfn_214();
-    virtual void vfn_218();
-    virtual void vfn_21c();
-    virtual void vfn_220();
-    virtual void vfn_224();
-    virtual void vfn_228();
-    virtual void vfn_22c();
-    virtual void vfn_230();
-    virtual void vfn_234();
-    virtual void vfn_238();
-    virtual void vfn_23c();
-    virtual void vfn_240();
-    virtual void vfn_244();
-    virtual void vfn_248();
-    virtual void vfn_24c();
-    virtual void vfn_250();
-    virtual void vfn_254();
-    virtual void vfn_258();
-    virtual void vfn_25c();
-    virtual void vfn_260();
-    virtual void vfn_264();
-    virtual void vfn_268();
-    virtual void vfn_26c();
-    virtual void vfn_270();
-    virtual void vfn_274();
-    virtual void vfn_278();
-    virtual void vfn_27c();
-    virtual void vfn_280();
-    virtual void vfn_284();
-    virtual void vfn_288();
-    virtual void vfn_28c();
-    virtual void vfn_290();
-    virtual void vfn_294();
-    virtual void vfn_298();
-    virtual void vfn_29c();
-    virtual void vfn_2a0();
-    virtual void vfn_2a4();
-    virtual void vfn_2a8();
-    virtual void vfn_2ac();
-    virtual void vfn_2b0();
-    virtual void vfn_2b4();
-    virtual void vfn_2b8();
-    virtual void vfn_2bc();
-    virtual void vfn_2c0();
-    virtual void vfn_2c4();
-    virtual void vfn_2c8();
-    virtual void vfn_2cc();
-    virtual void vfn_2d0();
-    virtual void vfn_2d4();
-    virtual void vfn_2d8();
-    virtual void vfn_2dc();
-    virtual void vfn_2e0();
-    virtual void vfn_2e4();
-    virtual void vfn_2e8();
-    virtual void vfn_2ec();
-    virtual void vfn_2f0();
-    virtual void vfn_2f4();
-    virtual void vfn_2f8();
-    virtual void vfn_2fc();
-    virtual void vfn_300();
-    virtual void vfn_304();
-    virtual void vfn_308();
-    virtual bool vfn_30c();
-};
+
+
+
 
 // Sets afReturnValue to 1.0 if apRefObject is an actor whose GetLogDate() passes vfn_30c() and whose GetLight() equals pPlayer, then logs the result.
 // @fnv 0x005a5330
@@ -4501,7 +4029,7 @@ bool __cdecl FUN_005a5330(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     if (apRefObject && apRefObject->IsActor())
     {
         Actor* pact = (Actor*)apRefObject;
-        if (((TES*)pact)->GetLogDate() && ((Process005a5330*)((TES*)pact)->GetLogDate())->vfn_30c() &&
+        if (((TES*)pact)->GetLogDate() && reinterpret_cast<const BaseProcess*>(((TES*)pact)->GetLogDate())->IsDetecting() &&
             (PlayerCharacter*)((EffectSetting*)pact)->GetLight() == pPlayer)
         {
             afReturnValue = 1.0;
@@ -4518,15 +4046,12 @@ bool __cdecl FUN_005a5330(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 void __cdecl DebugLog(const char*, ...);
 __declspec(thread) extern bool bEchoConsole;
 
-struct TESQuest_GetObjective_View : public TESQuest
-{
-    BGSQuestObjective* GetObjective(unsigned int index);
-};
+
 
 // @fnv 0x005a5d30
 bool __cdecl FUN_005a5d30(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double& afReturnValue)
 {
-    TESQuest_GetObjective_View* pquest = (TESQuest_GetObjective_View*)apParam1;
+    TESQuest* pquest = (TESQuest*)apParam1;
     int iElementIndex = (int)apParam2;
 
     if (pquest)
@@ -4546,10 +4071,7 @@ bool __cdecl FUN_005a5d30(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 
 void __cdecl DebugLog(const char*, ...);
 
-struct TESQuest_GetObjective : public TESQuest
-{
-    BGSQuestObjective* GetObjective(unsigned int);
-};
+
 
 __declspec(thread) extern unsigned char tls_padding_005a5de0[0x269];
 
@@ -4562,7 +4084,7 @@ bool __cdecl GetQuestObjectiveDisplayed(TESObjectREFR* apRefObject, void* apPara
     int iElementIndex = (int)apParam2;
     if (pquest)
     {
-        BGSQuestObjective* pobjective = ((TESQuest_GetObjective*)pquest)->GetObjective(iElementIndex);
+        BGSQuestObjective* pobjective = pquest->GetObjective(iElementIndex);
         if (pobjective)
         {
             afReturnValue = pobjective->GetDisplayed() ? 1.0 : 0.0;
@@ -4619,8 +4141,6 @@ unsigned int __fastcall FUN_005a6260(char* thisPtr)
     return *reinterpret_cast<unsigned int*>(thisPtr + 0x610);
 }
 
-struct TESObjectCELL;
-class TESObjectREFR;
 int __fastcall _FNV_GetFormType(void*);
 void DebugLog(const char*, ...);
 extern __declspec(thread) unsigned char g_tlsFlag;
@@ -4657,8 +4177,6 @@ bool FUN_0059ee80(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     return true;
 }
 
-struct TESObjectREFR;
-struct TESFaction;
 struct XActor
 {
     void* GetActorBase();
@@ -4668,7 +4186,7 @@ struct FUN_008b8290_shell
     int FUN_008b8290(TESFaction*, bool);
 };
 int __fastcall _FNV_GetFormType(void*);
-class PlayerCharacter;
+
 extern PlayerCharacter* g_thePlayer;
 void DebugLog(const char*, ...);
 extern __declspec(thread) unsigned char g_tlsFlag;
@@ -4692,7 +4210,6 @@ bool FUN_0059fc50(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     return true;
 }
 
-struct TESObjectREFR;
 void DebugLog(const char*, ...);
 extern __declspec(thread) unsigned char g_tlsFlag;
 // Sets the return value to 0, then if the reference is valid and passes a check, queries its perk rank and sets the return value to 1 when the rank is nonzero.
@@ -4714,7 +4231,6 @@ bool FUN_005a4630(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     return true;
 }
 
-struct TESObjectREFR;
 struct ActorH
 {
     int GetReactionToActor(void*, bool*);
@@ -4740,12 +4256,8 @@ bool GetFactionRelation(TESObjectREFR* apRefObject, void* apParam1, void* apPara
     return true;
 }
 
-struct TESObjectREFR;
-struct TESH
-{
-    void* GetLogDate();
-};
-struct ArrSI
+// Exe 0x005a5270: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct TesconditionfunctionsOffset08View
 {
     unsigned int GetFlags();
 };
@@ -4764,11 +4276,11 @@ bool FUN_005a5270(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     {
         TESObjectREFR* pactor = apRefObject;
         IC* pweapon;
-        if (((TESH*)pactor)->GetLogDate())
+        if (((TES*)pactor)->GetLogDate())
         {
-            void* pprocess = ((TESH*)pactor)->GetLogDate();
+            void* pprocess = ((TES*)pactor)->GetLogDate();
             pweapon = ((IC * (__thiscall*)(void*))(*(void***)pprocess)[0x52])(pprocess);
-            if (pweapon && ((ArrSI*)pweapon)->GetFlags() != DAT_011ca278)
+            if (pweapon && ((TesconditionfunctionsOffset08View*)pweapon)->GetFlags() != DAT_011ca278)
                 *afReturnValue = pweapon->GetConditionPercent(true);
             else
                 *afReturnValue = g_d100;
@@ -4779,44 +4291,12 @@ bool FUN_005a5270(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     return true;
 }
 
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
 namespace fnv_0059cf50 {
 struct FormFlagRecord;
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
 struct ScriptDefinition;
-struct ScriptLocals
-{
-    void ClearActionFlags();
-    bool GetLocalData(TESForm*, unsigned int);
-    void ClearActionFlagsForForm(TESForm*);
-    bool CheckActionFlag(TESForm*, unsigned int);
-    FormFlagRecord* GetActionEntry(TESForm*, bool);
-    void Save(ScriptHeaderData*);
-    void ClearActionList();
-    void InitializeActionList();
-    void CopyActionListFrom(ScriptLocals*);
-    void* GetActionList();
-    void ResetFormData(Script*);
-    void SetVariable(unsigned int, double);
-    double GetVariable(unsigned int, Script*);
-    void* GetLocalList();
-    bool IsReferenceVariable(unsigned int);
-    unsigned short GetSaveSize();
-    void SaveGame(BGSSaveFormBuffer*);
-    void SaveGame();
-    void LoadGame(BGSLoadFormBuffer*);
-    void LoadGame();
-    void Revert(BGSLoadFormBuffer*);
-    void Revert();
-    static void ProcessPendingTasks();
-    void* __vecDelDtor(unsigned int);
-    Script* m_pOwnerScript;
-    char m_cActionFlags;
-    char _pad_5[3];
-    void* m_pLocalVariableList;
-    void* m_pVariableList;
-    ScriptDefinition* m_pExtendedLocals;
-};
+
 typedef char _sizecheck_ScriptLocals[sizeof(ScriptLocals) == 20 ? 1 : -1];
 
 void __cdecl DebugLog(char const*, ...);
@@ -4860,19 +4340,18 @@ struct BipedAnim;
 struct CollisionComponent;
 struct DestructionStageData;
 struct IDebugText;
-struct NiAVObject;
+
 struct NiControllerSequence;
-struct NiNode;
 struct QueuedFile;
 struct TESBoundObject;
 struct TESFile;
 struct TESKey;
 struct TESModel;
 struct TESModelTextureSwap;
-struct TESObject;
+
 struct TESFormList;
 struct FileEntryList;
-struct TESWaterForm;
+
 struct DistantTreeTextureInfo;
 struct blob12
 {
@@ -4898,88 +4377,11 @@ struct LockExtraData
     unsigned int m_uiLockValue;
 };
 typedef char _sizecheck_REFR_LOCK[sizeof(LockExtraData) == 20 ? 1 : -1];
-struct TESMagicTargetForm
-{
-    static bool CanBeMagicTarget(TESForm*);
-    char _pad_0[1];
-};
+
 typedef char _sizecheck_TESMagicTargetForm[sizeof(TESMagicTargetForm) == 1 ? 1 : -1];
-struct BGSDestructibleObjectForm : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    static void LoadDestructibleData(BGSDestructibleObjectForm*, TESFile*);
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    void InitItem(TESForm*);
-    CollisionComponent* GetData();
-    DestructionStageData* GetStage(unsigned int);
-    unsigned char GetStageCount();
-    DestructionStageData** AllocateStageArray(unsigned char);
-    void SortStages();
-    void SetDestructibleData(DestructionStageData*);
-    void ClearStageData(unsigned int);
-    static bool HasDestructibleData(TESForm*);
-    static unsigned int GetDestructionStageCount(TESForm*);
-    static BGSDestructibleObjectForm* GetDestructibleObjectForm(TESForm*);
-    static int GetModelSwapIndex(TESForm*, TESModel*);
-    static TESModel* GetModelSwap(TESForm*, int);
-    bool HasValidStages();
-    bool GetTargetableInVATS();
-    void SetTargetableInVATS(bool);
-    unsigned int GetMaxHealth(TESObjectREFR*);
-    void DamageObject(TESObjectREFR*, float, bool);
-    unsigned int SpawnExplosionsAtBlastNodes(NiAVObject*, BGSExplosion*, unsigned int, TESObjectREFR*);
-    void SpawnExplosionAtBlastNode(NiAVObject*, unsigned int, void*);
-    unsigned int SpawnDebrisAtDebrisNodes(NiAVObject*, BGSDebris*, unsigned int, TESObjectREFR*, unsigned int);
-    void FindDebrisNodes(NiAVObject*, unsigned int, void*);
-    static void UpdateDamageStageNodes(NiAVObject*, unsigned int);
-    void FindDamageStageNodes(NiAVObject*, unsigned int, void*);
-    bool UpdateCurrentDamageStage(TESObjectREFR*, bool);
-    void ApplyTerminalDamage(TESObjectREFR*);
-    void FindModelSwapNodes(NiAVObject*, void*);
-    static void UpdateDestructionMap();
-    static void UpdateTargetHealthBar(TESObjectREFR*);
-    static int GetDestructionStageIndex(TESObjectREFR*);
-    static bool IsDestructionStageNode(NiAVObject*);
-    void QueueResourceLoad(TESBoundObject*, int, QueuedFile*);
-    void PreloadReplacementModels(TESBoundObject*);
-    void UnloadReplacementModels();
-    static bool IsDangerousObject(TESForm*);
-    float CalculateDangerousExplosionHealth(unsigned char, float, float, BGSExplosion**);
-    static float CalculateDangerousExplosionHealth(TESObjectREFR*, float, float, BGSExplosion**);
-    float CalculateDangerousExplosionTerminalTime(unsigned char, float, float, BGSExplosion**);
-    void DrawDebugText(IDebugText*, TESObjectREFR*);
-    void DisplayNodeDebugText(IDebugText*, TESObjectREFR*);
-    static unsigned int GetSelfDamage(TESObjectREFR*, float);
-    static void SetDestructionStage(TESObjectREFR*, unsigned int);
-    static void ClearDestruction(TESObjectREFR*);
-    static void* GetDestructibleObjectMap();
-    static float GetLastUpdateTime();
-    static void SetLastUpdateTime(float);
-    void ClearStages();
-    void CreateData();
-    void RemoveData();
-    void* __vecDelDtor(unsigned int);
-    CollisionComponent* pData;
-};
+
 typedef char _sizecheck_BGSDestructibleObjectForm[sizeof(BGSDestructibleObjectForm) == 8 ? 1 : -1];
-struct BGSOpenCloseForm
-{
-    virtual void HandleOpenAnimationFinish(TESObjectREFR*, TESObjectREFR*);
-    virtual void HandleCloseFinish(TESObjectREFR*, TESObjectREFR*);
-    virtual bool GetBlockActivatesWhileOpening();
-    static BGSOpenCloseForm* GetOpenCloseComponent(TESForm*);
-    static bool HasOpenCloseComponent(TESForm*);
-    static bool HasOpenCloseAnims(NiNode*);
-    static void HandleOpenCloseActivation(TESObjectREFR*, TESObjectREFR*, BGSOpenCloseForm*);
-    static void HandleAnimStartHavok(TESObjectREFR*, NiControllerSequence*);
-    static bool HandleAnimEndHavok(TESObjectREFR*, NiControllerSequence*);
-    static bool SetOpenState(TESObjectREFR*, bool, bool);
-    static int GetOpenState(TESObjectREFR*);
-    static void SnapHavokTo3D(TESObjectREFR*);
-};
+
 typedef char _sizecheck_BGSOpenCloseForm[sizeof(BGSOpenCloseForm) == 4 ? 1 : -1];
 
 void __cdecl DebugLog(char const*, ...);
@@ -4993,10 +4395,7 @@ struct P01ObjA
 {
     TESForm* GetNext();
 };
-struct P01PlayerA
-{
-    int GetTerminalAccessResult(TESObjectREFR*);
-};
+
 struct P01TermA
 {
     bool FUN_00501ae0(TESObjectREFR*);
@@ -5017,7 +4416,7 @@ bool FUN_0059d010(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
         }
         else if (_FNV_GetFormType(((P01ObjA*)apRefObject)->GetNext()) == 0x17)
         {
-            if (((P01PlayerA*)g_thePlayer)->GetTerminalAccessResult(apRefObject) == 2)
+            if (((PlayerCharacter*)g_thePlayer)->GetTerminalAccessResult(apRefObject) == 2)
             {
                 *afReturnValue = 2.0;
             }
@@ -5050,13 +4449,8 @@ bool FUN_0059e320(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
 }
 
 void __cdecl DebugLog(char const*, ...);
-enum ReputationType
-{
-};
-struct TESReputation
-{
-    float GetUnsignedIntegerPointer(ReputationType type);
-};
+
+
 struct FNStub
 {
     const char* GetFullName();
@@ -5112,7 +4506,8 @@ bool __cdecl FUN_005a5cb0(TESObjectREFR* reference, void* arg1, void* arg2, doub
 }
 }  // namespace fnv_005a5cb0
 
-struct Interface
+// Exe 0x0059c380: unit-local Interface view; declarations and layout are preserved.
+struct TesconditionfunctionsInterfaceView
 {
     enum enumMenus
     {
@@ -5130,19 +4525,19 @@ __declspec(thread) extern unsigned char g_tlsDebugFlags[0x300];
 bool __cdecl GetMenuModeValue(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double* afReturnValue)
 {
     *afReturnValue = 0.0;
-    Interface::enumMenus eMenuId = (Interface::enumMenus)(int)apParam1;
+    TesconditionfunctionsInterfaceView::enumMenus eMenuId = (TesconditionfunctionsInterfaceView::enumMenus)(int)apParam1;
     if (eMenuId == 0)
     {
-        *afReturnValue = (double)Interface::IsSaveLoadActive();
+        *afReturnValue = (double)TesconditionfunctionsInterfaceView::IsSaveLoadActive();
     }
     else if (DAT_011cab24)
     {
-        if (Interface::GetSelectedTargetIndex(eMenuId))
+        if (TesconditionfunctionsInterfaceView::GetSelectedTargetIndex(eMenuId))
             *afReturnValue = 1.0;
     }
     else
     {
-        if (Interface::IsMenuActive(eMenuId, 0))
+        if (TesconditionfunctionsInterfaceView::IsMenuActive(eMenuId, 0))
             *afReturnValue = 1.0;
     }
     if (g_tlsDebugFlags[0x268])
@@ -5151,20 +4546,14 @@ bool __cdecl GetMenuModeValue(TESObjectREFR* apRefObject, void* apParam1, void* 
 }
 
 namespace fnv_005a3180 {
-struct TESFullName_Helper
-{
-    static const char* __cdecl GetFullName(TESForm*);
-};
+
 void __cdecl DebugLog(char const*, ...);
 __declspec(thread) extern unsigned char g_tlsDebugFlags[0x300];
 struct PCH
 {
     bool HasCombatState();
 };
-struct PlayerCharacterHelper_00953c50
-{
-    bool FUN_00953c50(bool*);
-};
+
 extern PlayerCharacter* g_thePlayer;
 
 // Sets the return value to 1.0 if the reference is an actor in combat, or to the player's combat check result, and logs the state when debug flags are set.
@@ -5179,13 +4568,13 @@ bool __cdecl GetActorInCombat(TESObjectREFR* apRefObject, void* apParam1, void* 
         *afReturnValue = 1.0;
     bool bsearch = false;
     if ((PlayerCharacter*)pact == g_thePlayer)
-        *afReturnValue = (double)((PlayerCharacterHelper_00953c50*)g_thePlayer)->FUN_00953c50(&bsearch);
+        *afReturnValue = (double)((ConditionPlayerCharacter*)g_thePlayer)->CheckCombatState(&bsearch);
     if (g_tlsDebugFlags[0x268])
     {
         if (*afReturnValue != 0.0)
-            DebugLog("%s is in combat", TESFullName_Helper::GetFullName((TESForm*)pact));
+            DebugLog("%s is in combat", TESFullName::GetFullName((TESForm*)pact));
         else
-            DebugLog("%s is not in combat", TESFullName_Helper::GetFullName((TESForm*)pact));
+            DebugLog("%s is not in combat", TESFullName::GetFullName((TESForm*)pact));
     }
     return true;
 }
@@ -5199,15 +4588,15 @@ bool __cdecl FUN_0059d3a0(void* apReference, void* apUnused, void* apUnused2, do
     return FUN_0059d400((TESObjectREFR*)apReference, g_thePlayer, 0, *result);
 }
 
-struct FUN_0059eb40
+struct ConditionWeather : TESWeather
 {
     bool GetFlag();
 };
 
 // @fnv 0x0059eb40
-bool __thiscall FUN_0059eb40::GetFlag()
+bool __thiscall ConditionWeather::GetFlag()
 {
-    return (reinterpret_cast<unsigned char*>(this)[0xeb] & 8) != 0;
+    return (m_aucWeatherFlags[11] & 8) != 0;
 }
 
 extern bool __cdecl FUN_0059f180(PlayerCharacter* reference, void* arg1, void* arg2, double& result);
@@ -5233,20 +4622,14 @@ NiFixedString* FUN_005a07f0()
     return DAT_011c61b4;
 }
 
-struct FUN_005a2310_This
-{
-    int mFlags;
-};
 
-struct FUN_005a2310_Class
-{
-    bool IsFlag20Set() const;
-};
+
+
 
 // @fnv 0x005a2310
-bool FUN_005a2310_Class::IsFlag20Set() const
+bool ConditionFaction::IsFlag20Set() const
 {
-    return ((int*)this)[0x34 / 4] & 0x20 ? true : false;
+    return data.iFlags & 0x20 ? true : false;
 }
 
 // @fnv 0x005a2a50
@@ -5256,10 +4639,7 @@ bool __cdecl FUN_005a2a50(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     return true;
 }
 
-struct PlayerS
-{
-    bool IsSleepingOrResting();
-};
+
 
 __declspec(thread) unsigned char g_DebugTimePassingFlag;
 
@@ -5269,7 +4649,7 @@ void __cdecl DebugLog(char const*, ...);
 // @fnv 0x005a2c70
 bool __cdecl FUN_005a2c70(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double& afReturnValue)
 {
-    if (((PlayerS*)g_thePlayer)->IsSleepingOrResting())
+    if (((PlayerCharacter*)g_thePlayer)->IsSleepingOrResting())
     {
         afReturnValue = 1.0;
     }
@@ -5299,30 +4679,24 @@ bool __cdecl FUN_005a3650(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     return true;
 }
 
-struct PC_00605d70
-{
-    bool __thiscall FUN_004eaf60();
-};
+
 
 // Sets afReturnValue to 1.0 when the player fails the check FUN_004eaf60, otherwise leaves it at 0.0, and returns true.
 // @fnv 0x005a3d00
 bool __cdecl FUN_005a3d00(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double& afReturnValue)
 {
     afReturnValue = 0.0;
-    if (!((PC_00605d70*)g_thePlayer)->FUN_004eaf60())
+    if (!((ConditionPlayerCharacter*)g_thePlayer)->IsDisabledForConditions())
         afReturnValue = 1.0;
     return 1;
 }
 
-struct FUN_005a4910_Class
-{
-    unsigned int GetFieldD68() const;
-};
+
 
 // @fnv 0x005a4910
-unsigned int FUN_005a4910_Class::GetFieldD68() const
+unsigned int ConditionPlayerCharacter::GetFieldD68() const
 {
-    return *(unsigned int*)((const unsigned char*)this + 0xd68);
+    return *reinterpret_cast<const unsigned int*>(unkD68);
 }
 
 extern bool DAT_011dbe50;
@@ -5344,15 +4718,12 @@ unsigned int* FUN_005a5b10_Class::GetFieldPointer()
     return *(unsigned int**)((char*)this + 0x103b0);
 }
 
-struct FUN_005a6050
-{
-    unsigned char __thiscall GetField();
-};
+
 
 // @fnv 0x005a6050
-unsigned char __thiscall FUN_005a6050::GetField()
+unsigned char __thiscall ConditionPlayerCharacter::GetField()
 {
-    return *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(this) + 0xe38);
+    return unkE1C[0x1c];
 }
 
 extern bool __cdecl FUN_0059d540(void* ref, void* arg1, void* arg2, void* arg3);
@@ -5374,16 +4745,7 @@ bool __cdecl FUN_005a39d0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }
 
 namespace fnv_005a3b90 {
-struct BGSTalkingActivator
-{
-    TESObjectREFR* GetTempRef() const;
-};
-class TESObject
-{
-  public:
-    TESObject* GetNext();
-    unsigned int GetFormType();
-};
+
 // Sets *result to 1.0 if object's next form is a talking activator whose temp ref equals reference, otherwise 0.0; always returns true.
 // @fnv 0x005a3b90
 bool __cdecl FUN_005a3b90(TESObject* object, TESObjectREFR* reference, TESObjectREFR* pUnused, double* pfResult)
@@ -5393,7 +4755,7 @@ bool __cdecl FUN_005a3b90(TESObject* object, TESObjectREFR* reference, TESObject
     if (object && object->GetNext()->GetFormType() == 0x16)
     {
         TESObjectREFR* next = reinterpret_cast<TESObjectREFR*>(object->GetNext());
-        if (reinterpret_cast<BGSTalkingActivator*>(next)->GetTempRef() == pRef)
+        if (reinterpret_cast<const BGSTalkingActivator*>(next)->GetTempRef() == pRef)
             *pfResult = 1.0;
     }
     return true;
@@ -5453,56 +4815,38 @@ bool FUN_0059f610Class::FUN_0059f610()
     return (m_flag & 1) ? true : false;
 }
 
-struct FUN_005a03d0Class
-{
-    unsigned char padding[0x680];
-    unsigned char flag;
-    unsigned char __thiscall FUN_005a03d0();
-};
+
 
 // @fnv 0x005a03d0
-unsigned char __thiscall FUN_005a03d0Class::FUN_005a03d0()
+unsigned char __thiscall ConditionPlayerCharacter::GetConditionFlags()
 {
-    return flag;
+    return m_ucValueAt680;
 }
 
-struct FUN_005a20b0_Standin
-{
-    unsigned char padding[0x6dc];
-    unsigned int field6dc;
-    unsigned int GetField6dc();
-};
+
 
 // @fnv 0x005a20b0
-unsigned int FUN_005a20b0_Standin::GetField6dc()
+int ConditionPlayerCharacter::GetField6dc()
 {
-    return field6dc;
+    return layoutPadding6C4[6];
 }
 
-struct FUN_005a21d0_Class
-{
-    unsigned char padding[0x34];
-    unsigned int flags;
-    bool IsFlag40Set();
-};
+
 
 // @fnv 0x005a21d0
-bool FUN_005a21d0_Class::IsFlag40Set()
+bool ConditionFaction::IsFlag40Set()
 {
-    return (flags & 0x40) ? true : false;
+    return (data.iFlags & 0x40) ? true : false;
 }
 
-struct PlayerCharacterStub
-{
-    int __thiscall GetActionObjectItemId();
-};
+
 
 // Sets result to zero, then stores the player's value from GetActionObjectItemId into result and returns true.
 // @fnv 0x005a3af0
 bool __cdecl FUN_005a3af0(TESObjectREFR* reference, void* arg1, void* arg2, double& result)
 {
     result = 0.0;
-    result = ((PlayerCharacterStub*)g_thePlayer)->GetActionObjectItemId();
+    result = ((ConditionPlayerCharacter*)g_thePlayer)->GetActionObjectItemId();
     return true;
 }
 
@@ -5519,17 +4863,17 @@ unsigned int FUN_005a4b40Class::FUN_005a4b40()
     return m_val;
 }
 
-struct ActorState
+
+// The crime counter uses the Actor flags storage but has its own entry point.
+struct ConditionActorCrime : Actor
 {
-    unsigned char padding[0x140];
-    unsigned int state;
-    unsigned int GetMaskedState() const;
+    unsigned int GetMaskedCrimeCount() const;
 };
 
 // @fnv 0x005a4c00
-unsigned int ActorState::GetMaskedState() const
+unsigned int ConditionActorCrime::GetMaskedCrimeCount() const
 {
-    return state & 0x3fffffff;
+    return m_uiActorFlags & 0x3fffffff;
 }
 
 struct FUN_005a5bb0Class
@@ -5545,140 +4889,28 @@ unsigned char __thiscall FUN_005a5bb0Class::FUN_005a5bb0()
     return flag;
 }
 
+class BGSListForm;
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
+class TESAmmo;
+class TESBoundObject;
+class TESContainer;
+class TESFile;
+class TESLevItem;
 namespace fnv_0059d8e0 {
-struct BGSListForm;
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
 struct BipedAnim;
 struct InventoryIterator;
-struct InventoryStackRecord;
-struct NiAVObject;
+
+
 struct IndexedPointerCollection;
-struct TESActorBase;
-struct TESAmmo;
-struct TESBoundObject;
-struct TESContainer;
-struct TESFile;
-struct TESLevItem;
-struct TESObject;
+
 struct TESFormList;
-struct TESObjectWEAP;
-struct TESWaterForm;
+
 struct blob12
 {
     char b[12];
 };
-struct InventoryChanges
-{
-    void ForceWeightRecalculation();
-    static void KillTempRef();
-    void AddItemToEntry(TESBoundObject*, int, Actor*, ExtraDataList*, InventoryStackRecord*);
-    bool IsEmpty();
-    void AddItem(TESBoundObject*, ExtraDataList*, int);
-    void AddItem(TESObjectREFR*, int, bool, bool);
-    void AddChangeEntry(InventoryStackRecord*, bool);
-    void RemoveChangeItem(TESBoundObject*);
-    TESObjectREFR* RemoveItem(TESObjectREFR*, TESBoundObject*, bool, int, ExtraDataList*, bool, TESObjectREFR*, void*,
-                              void*, bool, bool, InventoryStackRecord*);
-    void UpdateItemCount(int, bool, int);
-    TESObjectREFR* DropItem(TESObjectREFR*, TESBoundObject*, int, TESObjectREFR*, void*, void*);
-    void PutItemIntoContainer(TESBoundObject*, int, TESObjectREFR*, ExtraDataList*);
-    void DamageItem(TESBoundObject*, float);
-    void RepairBatch(TESBoundObject*, float);
-    void AddOwnership(TESBoundObject*, TESForm*);
-    void RemoveOwnership(TESBoundObject*);
-    TESContainer* GetOriginalContainer();
-    void RemoveBoundItem(TESBoundObject*, int, Actor*, ExtraDataList*, bool, bool);
-    bool RemoveInventoryItem(bool*, TESBoundObject*, int, Actor*, ExtraDataList*, bool, bool, InventoryStackRecord*, bool*);
-    void ResetInventoryChanges();
-    bool RunScripts(TESObjectREFR*);
-    void ResetInventoryState();
-    void CleanUpBoundItems(Actor*);
-    TESBoundObject* GetLeveledCalculatedBaseObject(TESLevItem*);
-    void ModifyCharge(float);
-    InventoryStackRecord* GetOrCreateInventoryEntry(TESBoundObject*, bool, unsigned int);
-    static InventoryChanges* CreateForReference(TESObjectREFR*);
-    ExtraDataList* GetExtraDataListForObject(TESBoundObject*, bool);
-    bool WearingWeapon(TESBoundObject**);
-    bool WearingAmmo(TESBoundObject**);
-    bool WearingTorch(TESBoundObject**);
-    InventoryStackRecord* WearingRing(bool);
-    bool WearingVoiceModulateItem();
-    bool HasItemOfType(unsigned int);
-    bool FindItemInInventory(TESBoundObject*, int, int, int*, unsigned int, TESObjectREFR*);
-    bool HasQuestObject();
-    bool HasScript();
-    TESBoundObject* GetObjectAtIndex(int, int*);
-    TESBoundObject* GetBoundObjectByIndex(int, int*);
-    InventoryStackRecord* GetPotion(void*);
-    InventoryStackRecord* GetBestAmmoForActor(TESActorBase*, bool);
-    TESAmmo* GetBestAmmoForWeapon(TESObjectWEAP*, bool*);
-    InventoryStackRecord* GetBestWeapon(TESActorBase*, float*, int, bool);
-    InventoryStackRecord* FindBestArmor(TESActorBase*, int, bool);
-    void* GetListBestArmor(TESActorBase*);
-    InventoryStackRecord* GetBestClothing(TESActorBase*, int, bool);
-    InventoryStackRecord* GetBestLight(TESActorBase*, bool);
-    InventoryStackRecord* GetInventoryEntryData(int, bool);
-    InventoryStackRecord* GetEquippedItemForSlot(int);
-    InventoryStackRecord** GetEntryPointerByIndices(int, int);
-    void SetHotKeyItem(InventoryStackRecord*, ExtraDataList*, int);
-    void SetInventoryEntryCount(InventoryStackRecord*, int);
-    void RemoveAllObjectsWorn(bool, TESObjectREFR*);
-    bool RechargeAll();
-    void RemoveAllHealth();
-    int GetCount(bool);
-    InventoryStackRecord* GetInventoryEntryAtIndex(int);
-    IndexedPointerCollection* GetFirstItem();
-    InventoryStackRecord* GetEntryForListNode(IndexedPointerCollection*);
-    void RemoveItemChangeEntry(TESBoundObject*, void*);
-    void RefreshItemChange(TESBoundObject*, void*);
-    void UpdateItemChangeEntry(TESBoundObject*, void*);
-    int GetObjectCount(int);
-    int GetObjectCount(TESBoundObject*);
-    InventoryStackRecord* GetFirstInventoryEntry();
-    int GetInventoryEntryCount();
-    void TransferItemToReference(TESObjectREFR*, int, TESObjectREFR*);
-    float RemoveAllTypedItems(TESObjectREFR*, TESObjectREFR*, bool, bool, bool, bool, int, BGSListForm*);
-    float RemoveAllItems(TESObjectREFR*, TESObjectREFR*, bool, bool, bool, bool, int, BGSListForm*);
-    void DuplicateAllItems(TESObjectREFR*, TESObjectREFR*);
-    void MoveItemsOfType(TESObjectREFR*, TESObjectREFR*, TESForm*);
-    void RemoveNonStolenItems(TESObjectREFR*, TESObjectREFR*);
-    float GetInventoryWeight(bool);
-    unsigned int GetTotalItemCount(bool, bool);
-    void AddAmountToItemChange(TESBoundObject*, int);
-    float GetArmorValueForActor(Actor*);
-    void UpdateArmorWeight();
-    void UpdateWeight();
-    void RemoveDefaultLeveledItems();
-    bool IsLevelItemInited(int);
-    InventoryStackRecord* FindEntryForObject(TESBoundObject*, unsigned int);
-    void SetItemsBacktoDefaultState();
-    void CopyInventoryChanges(InventoryChanges*, TESObjectREFR*, bool);
-    void ResetEntryList();
-    void ResetCachedWeights();
-    unsigned short GetSaveSize();
-    void SaveGame(BGSSaveFormBuffer*);
-    void SaveGame();
-    void LoadGame(BGSLoadFormBuffer*);
-    void LoadGame();
-    void InitLoadGame(BGSLoadFormBuffer*);
-    void InitLoadGame();
-    int GetExtraDataListIndexForItem(TESBoundObject*, ExtraDataList*);
-    ExtraDataList* GetExtraDataListFromIndexForItem(TESBoundObject*, int);
-    unsigned int FindItemEntryData(int*, void*, unsigned int);
-    bool GetNextItem(InventoryIterator*, InventoryStackRecord**, unsigned int);
-    TESObjectREFR* GetRef();
-    static TESObjectREFR* GetTempRef();
-    void RemoveExtraFromObject(TESObject*, ExtraDataList*);
-    void DeleteExtraData(TESBoundObject*, ExtraDataList*);
-    void* __vecDelDtor(unsigned int);
-    void* m_pEntryList;
-    TESObjectREFR* pRef;
-    float m_fTotalWeight;
-    float m_fArmorWeight;
-    bool m_bChanged;
-    char _pad_11[3];
-};
+
 typedef char _sizecheck_InventoryChanges[sizeof(InventoryChanges) == 20 ? 1 : -1];
 
 struct TLSConsoleData
@@ -5746,142 +4978,24 @@ struct BGSListForm;
 struct BGSLoadFormBuffer;
 struct BGSSaveFormBuffer;
 struct InventoryIterator;
-struct InventoryStackRecord;
+
 struct IndexedPointerCollection;
-struct TESActorBase;
 struct TESAmmo;
 struct TESBoundObject;
 struct TESContainer;
 struct TESFile;
 struct TESLevItem;
-struct TESObject;
-struct TESObjectWEAP;
-struct InventoryChanges
-{
-    void ForceWeightRecalculation();
-    static void KillTempRef();
-    void AddItemToEntry(TESBoundObject*, int, Actor*, ExtraDataList*, InventoryStackRecord*);
-    bool IsEmpty();
-    void AddItem(TESBoundObject*, ExtraDataList*, int);
-    void AddItem(TESObjectREFR*, int, bool, bool);
-    void AddChangeEntry(InventoryStackRecord*, bool);
-    void RemoveChangeItem(TESBoundObject*);
-    TESObjectREFR* RemoveItem(TESObjectREFR*, TESBoundObject*, bool, int, ExtraDataList*, bool, TESObjectREFR*, void*,
-                              void*, bool, bool, InventoryStackRecord*);
-    void UpdateItemCount(int, bool, int);
-    TESObjectREFR* DropItem(TESObjectREFR*, TESBoundObject*, int, TESObjectREFR*, void*, void*);
-    void PutItemIntoContainer(TESBoundObject*, int, TESObjectREFR*, ExtraDataList*);
-    void DamageItem(TESBoundObject*, float);
-    void RepairBatch(TESBoundObject*, float);
-    void AddOwnership(TESBoundObject*, TESForm*);
-    void RemoveOwnership(TESBoundObject*);
-    TESContainer* GetOriginalContainer();
-    void RemoveBoundItem(TESBoundObject*, int, Actor*, ExtraDataList*, bool, bool);
-    bool RemoveInventoryItem(bool*, TESBoundObject*, int, Actor*, ExtraDataList*, bool, bool, InventoryStackRecord*, bool*);
-    void ResetInventoryChanges();
-    bool RunScripts(TESObjectREFR*);
-    void ResetInventoryState();
-    void CleanUpBoundItems(Actor*);
-    TESBoundObject* GetLeveledCalculatedBaseObject(TESLevItem*);
-    void ModifyCharge(float);
-    InventoryStackRecord* GetOrCreateInventoryEntry(TESBoundObject*, bool, unsigned int);
-    static InventoryChanges* CreateForReference(TESObjectREFR*);
-    ExtraDataList* GetExtraDataListForObject(TESBoundObject*, bool);
-    bool WearingWeapon(TESBoundObject**);
-    bool WearingAmmo(TESBoundObject**);
-    bool WearingTorch(TESBoundObject**);
-    InventoryStackRecord* WearingRing(bool);
-    bool WearingVoiceModulateItem();
-    bool HasItemOfType(unsigned int);
-    bool FindItemInInventory(TESBoundObject*, int, int, int*, unsigned int, TESObjectREFR*);
-    bool HasQuestObject();
-    bool HasScript();
-    TESBoundObject* GetObjectAtIndex(int, int*);
-    TESBoundObject* GetBoundObjectByIndex(int, int*);
-    InventoryStackRecord* GetPotion(void*);
-    InventoryStackRecord* GetBestAmmoForActor(TESActorBase*, bool);
-    TESAmmo* GetBestAmmoForWeapon(TESObjectWEAP*, bool*);
-    InventoryStackRecord* GetBestWeapon(TESActorBase*, float*, int, bool);
-    InventoryStackRecord* FindBestArmor(TESActorBase*, int, bool);
-    void* GetListBestArmor(TESActorBase*);
-    InventoryStackRecord* GetBestClothing(TESActorBase*, int, bool);
-    InventoryStackRecord* GetBestLight(TESActorBase*, bool);
-    InventoryStackRecord* GetInventoryEntryData(int, bool);
-    InventoryStackRecord* GetEquippedItemForSlot(int);
-    InventoryStackRecord** GetEntryPointerByIndices(int, int);
-    void SetHotKeyItem(InventoryStackRecord*, ExtraDataList*, int);
-    void SetInventoryEntryCount(InventoryStackRecord*, int);
-    void RemoveAllObjectsWorn(bool, TESObjectREFR*);
-    bool RechargeAll();
-    void RemoveAllHealth();
-    int GetCount(bool);
-    InventoryStackRecord* GetInventoryEntryAtIndex(int);
-    IndexedPointerCollection* GetFirstItem();
-    InventoryStackRecord* GetEntryForListNode(IndexedPointerCollection*);
-    void RemoveItemChangeEntry(TESBoundObject*, void*);
-    void RefreshItemChange(TESBoundObject*, void*);
-    void UpdateItemChangeEntry(TESBoundObject*, void*);
-    int GetObjectCount(int);
-    int GetObjectCount(TESBoundObject*);
-    InventoryStackRecord* GetFirstInventoryEntry();
-    int GetInventoryEntryCount();
-    void TransferItemToReference(TESObjectREFR*, int, TESObjectREFR*);
-    float RemoveAllTypedItems(TESObjectREFR*, TESObjectREFR*, bool, bool, bool, bool, int, BGSListForm*);
-    float RemoveAllItems(TESObjectREFR*, TESObjectREFR*, bool, bool, bool, bool, int, BGSListForm*);
-    void DuplicateAllItems(TESObjectREFR*, TESObjectREFR*);
-    void MoveItemsOfType(TESObjectREFR*, TESObjectREFR*, TESForm*);
-    void RemoveNonStolenItems(TESObjectREFR*, TESObjectREFR*);
-    float GetInventoryWeight(bool);
-    unsigned int GetTotalItemCount(bool, bool);
-    void AddAmountToItemChange(TESBoundObject*, int);
-    float GetArmorValueForActor(Actor*);
-    void UpdateArmorWeight();
-    void UpdateWeight();
-    void RemoveDefaultLeveledItems();
-    bool IsLevelItemInited(int);
-    InventoryStackRecord* FindEntryForObject(TESBoundObject*, unsigned int);
-    void SetItemsBacktoDefaultState();
-    void CopyInventoryChanges(InventoryChanges*, TESObjectREFR*, bool);
-    void ResetEntryList();
-    void ResetCachedWeights();
-    unsigned short GetSaveSize();
-    void SaveGame(BGSSaveFormBuffer*);
-    void SaveGame();
-    void LoadGame(BGSLoadFormBuffer*);
-    void LoadGame();
-    void InitLoadGame(BGSLoadFormBuffer*);
-    void InitLoadGame();
-    int GetExtraDataListIndexForItem(TESBoundObject*, ExtraDataList*);
-    ExtraDataList* GetExtraDataListFromIndexForItem(TESBoundObject*, int);
-    unsigned int FindItemEntryData(int*, void*, unsigned int);
-    bool GetNextItem(InventoryIterator*, InventoryStackRecord**, unsigned int);
-    TESObjectREFR* GetRef();
-    static TESObjectREFR* GetTempRef();
-    void RemoveExtraFromObject(TESObject*, ExtraDataList*);
-    void DeleteExtraData(TESBoundObject*, ExtraDataList*);
-    void* __vecDelDtor(unsigned int);
-    void* m_pEntryList;
-    TESObjectREFR* pRef;
-    float m_fTotalWeight;
-    float m_fArmorWeight;
-    bool m_bChanged;
-    char _pad_11[3];
-};
+
+
 typedef char _sizecheck_InventoryChanges[sizeof(InventoryChanges) == 20 ? 1 : -1];
 
-struct FUN_0059da90_FT
-{
-    int _FNV_GetFormType();
-};
+
 struct FUN_0059da90_List
 {
     FUN_0059da90_List* GetNext();
     TESForm** _ref_006815c0();
 };
-struct FUN_0059da90_IC
-{
-    void* GetExtraDataListForObject(TESBoundObject*, bool);
-};
+
 void DebugLog(const char*, ...);
 extern __declspec(thread) unsigned char FUN_0059da90_tls[0x269];
 // @fnv 0x0059da90
@@ -5898,7 +5012,7 @@ bool __cdecl FUN_0059da90(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     if (ptarget && pform)
     {
         pCurrentElementNext = 0;
-        if (((FUN_0059da90_FT*)pform)->_FNV_GetFormType() == 0x55)
+        if (((TESForm*)pform)->_FNV_GetFormType() == 0x55)
         {
             BGSListForm* plistform = (BGSListForm*)pform;
             pCurrentElementNext = (FUN_0059da90_List*)((Script*)plistform)->GetHeader();
@@ -5912,7 +5026,7 @@ bool __cdecl FUN_0059da90(TESObjectREFR* apRefObject, void* apParam1, void* apPa
                 if (pchange)
                 {
                     TESBoundObject* pobject = (TESBoundObject*)pform;
-                    if (((FUN_0059da90_IC*)pchange)->GetExtraDataListForObject(pobject, false))
+                    if (pchange->GetExtraDataListForObject(reinterpret_cast<::TESBoundObject*>(pobject), false))
                     {
                         afReturnValue = 1;
                         break;
@@ -5932,17 +5046,10 @@ bool __cdecl FUN_0059da90(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     return true;
 }
 
-struct FUN_00401170_s
-{
-    int FUN_00401170();
-};
+
 struct PCH
 {
     bool HasCombatState();
-};
-struct ActorShell
-{
-    bool IsHostileToActor(Actor*, int, int*, bool);
 };
 struct FUN_00992640_s
 {
@@ -5951,10 +5058,7 @@ struct FUN_00992640_s
 extern void* BGSSaveLoadGlobalDataWorldspacePtr;
 void DebugLog(const char*, ...);
 extern __declspec(thread) bool g_bShowConditionDebug;
-enum FIGHT_REACTION
-{
-    FIGHT_REACTION_NEUTRAL = 0
-};
+#include "../../include/FIGHT_REACTION.h"
 struct ActorVStand
 {
     virtual void v0();
@@ -6232,7 +5336,7 @@ bool FUN_0059ed30(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     Actor* pactor = 0;
     if (apParam1)
     {
-        switch (((FUN_00401170_s*)apParam1)->FUN_00401170())
+        switch (static_cast<int>(((TESForm*)apParam1)->FUN_00401170()))
         {
         case 0x3b:
         case 0x3c:
@@ -6255,7 +5359,7 @@ bool FUN_0059ed30(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
             return true;
         int idispcombat = 0;
         kIreaction = 0;
-        if (((ActorShell*)pact9)->IsHostileToActor(pactor, 0, &kIreaction, false))
+        if (((Actor*)pact9)->IsHostileToActor(pactor, 0, &kIreaction, false))
             ainumber = 100;
         *afReturnValue = ainumber;
     }
@@ -6264,14 +5368,8 @@ bool FUN_0059ed30(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     return true;
 }
 
-struct FUN_0059ef60_FormTypeShell
-{
-    int _FNV_GetFormType();
-};
-struct BGSCameraPath
-{
-    int HasNameForWarning();
-};
+
+
 int _strnicmp(const char*, const char*, unsigned int);
 void DebugLog(const char*, ...);
 extern TESObjectREFR* DAT_011caaf4;
@@ -6289,12 +5387,12 @@ bool FUN_0059ef60(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
 {
     *afReturnValue = 0.0;
     TESObjectCELL* pcell = 0;
-    if (apParam1 && ((FUN_0059ef60_FormTypeShell*)apParam1)->_FNV_GetFormType() == 0x39)
+    if (apParam1 && ((TESForm*)apParam1)->_FNV_GetFormType() == 0x39)
         pcell = (TESObjectCELL*)apParam1;
     TESObjectREFR* pref = 0;
     if (apParam2)
     {
-        switch (((FUN_0059ef60_FormTypeShell*)apParam2)->_FNV_GetFormType())
+        switch (static_cast<int>(((TESForm*)apParam2)->_FNV_GetFormType()))
         {
         case 0x3a:
         case 0x3b:
@@ -6335,11 +5433,6 @@ bool FUN_0059ef60(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     return true;
 }
 
-struct NiPoint3Ex
-{
-    float x, y, z;
-    NiPoint3Ex operator-(const NiPoint3&) const;
-};
 float GetDirectionAngle(const NiPoint3&);
 void DebugLog(const char*, ...);
 extern double DAT_0101ff58;
@@ -6362,9 +5455,9 @@ bool FUN_005a0410(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     TESObjectREFR* ptarget = (TESObjectREFR*)apParam1;
     if (pmobile && ptarget)
     {
-        NiPoint3Ex headingToTarget = *(NiPoint3Ex*)ptarget->GetPos() - *pmobile->GetPos();
-        float ftargetAngle = GetDirectionAngle(*(NiPoint3*)&headingToTarget);
-        *afReturnValue = ftargetAngle - pmobile->AdjustRot(0);
+        NiPoint3 headingToTarget = *static_cast<const TESObjectREFR*>(ptarget)->GetPos() - *static_cast<const MobileObject*>(pmobile)->GetPos();
+        float ftargetAngle = GetDirectionAngle(headingToTarget);
+        *afReturnValue = ftargetAngle - pmobile->GetCurrentTargetDistance(false);
         while (*afReturnValue < DAT_0101ff58)
             *afReturnValue += (double)6.2831855f;
         while (*afReturnValue > (double)3.1415927f)
@@ -6376,10 +5469,10 @@ bool FUN_005a0410(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     return true;
 }
 
-namespace fnv_0059d400 {
 class NiColor;
-class TESFaction;
-class PlayerCharacter;
+namespace fnv_0059d400 {
+
+
 struct FactionReaction
 {
     TESFaction* pFaction;
@@ -6393,14 +5486,8 @@ struct ContNode
 };
 bool __fastcall FUN_008256d0(ContNode*);
 ContNode* __fastcall FUN_00726070(ContNode*);
-struct TESRegion
-{
-    NiColor* GetDiffuseColor();
-};
-struct TESActorBaseData
-{
-    int GetFactionRank(TESFaction*, bool);
-};
+
+
 struct XActor
 {
     void* GetActorBase();
@@ -6508,21 +5595,8 @@ bool FUN_0059d400(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
 }  // namespace fnv_0059d400
 
 namespace fnv_0059d610 {
-struct TESObject
-{
-    unsigned int GetNext();
-};
-struct TESActorBase
-{
-    int GetSex();
-};
-struct TESNPC : TESActorBase
-{
-};
-struct FNV_GetFormTypeHelper
-{
-    int _FNV_GetFormType();
-};
+
+
 void __cdecl _DebugLog(const char*, ...);
 __declspec(thread) bool g_bDebugLogEnabled;
 // Sets result to 1.0 if reference and actor1 are both NPCs of form type 0x2a with equal sex, logs the value, and returns true.
@@ -6535,7 +5609,7 @@ bool __cdecl FUN_0059d610(TESObject* reference, TESObject* actor1, TESObject* ac
     pnpc1 = 0;
     if (reference)
     {
-        if (((FNV_GetFormTypeHelper*)reference->GetNext())->_FNV_GetFormType() == 0x2a)
+        if (((TESForm*)reference->GetNext())->_FNV_GetFormType() == 0x2a)
         {
             pnpc1 = (TESNPC*)reference->GetNext();
         }
@@ -6543,12 +5617,12 @@ bool __cdecl FUN_0059d610(TESObject* reference, TESObject* actor1, TESObject* ac
     pnpc2 = 0;
     if (actor1)
     {
-        if (((FNV_GetFormTypeHelper*)actor1->GetNext())->_FNV_GetFormType() == 0x2a)
+        if (((TESForm*)actor1->GetNext())->_FNV_GetFormType() == 0x2a)
         {
             pnpc2 = (TESNPC*)actor1->GetNext();
         }
     }
-    if (pnpc1 && pnpc2 && pnpc1->GetSex() == pnpc2->GetSex())
+    if (pnpc1 && pnpc2 && pnpc1->TESActorBase::GetSex() == pnpc2->TESActorBase::GetSex())
     {
         result = 1.0;
     }
@@ -7094,24 +6168,13 @@ struct DetProcV
     virtual void v730();
     virtual float GetLight();
 };
-class TES
-{
-  public:
-    void* GetLogDate();
-};
+
 class PCH
 {
   public:
     bool HasCombatState();
 };
-struct PlayerOps_59d6e0
-{
-    bool FUN_00953c50(bool*);
-};
-struct DetActorHelper
-{
-    int CalculateDetectionLevel(int, Actor*, bool*, bool, int, bool, bool*);
-};
+
 void DebugLog(const char*, ...);
 extern __declspec(thread) bool g_bDebugLogDetect;
 
@@ -7140,11 +6203,11 @@ bool FUN_0059d6e0(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
         bincombat = false;
         bsearch = false;
         if (pdetector == (Actor*)g_thePlayer)
-            bincombat = ((PlayerOps_59d6e0*)g_thePlayer)->FUN_00953c50(&bsearch);
+            bincombat = ((ConditionPlayerCharacter*)g_thePlayer)->CheckCombatState(&bsearch);
         else
             bincombat = ((PCH*)pdetector)->HasCombatState();
         iCount =
-            ((DetActorHelper*)pactor)->CalculateDetectionLevel(0, pdetector, &blinesight, false, bincombat, false, 0);
+            ((Actor*)pactor)->CalculateDetectionLevel(0, pdetector, &blinesight, false, bincombat, false, 0);
         if (iCount > 0)
             afReturnValue = 1;
         ilight = (int)((DetProcV*)((TES*)pdetector)->GetLogDate())->GetLight();
@@ -7155,133 +6218,22 @@ bool FUN_0059d6e0(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
 }
 }  // namespace fnv_0059d6e0
 
+class ActorValueOwner;
+class AlchemyItem;
+class BGSLoadFormBuffer;
+class BGSSaveFormBuffer;
+struct ExtraLeveledItem;
+class TESBoundObject;
 namespace fnv_0059e1a0 {
 struct FormFlagRecord;
-struct ActorValueOwner;
-struct AlchemyItem;
-struct BGSLoadFormBuffer;
-struct BGSSaveFormBuffer;
-struct ExtraLeveledItem;
-struct InventoryChanges;
+
 struct ScriptDefinition;
-struct TESBoundObject;
-struct TESObjectWEAP;
-struct ScriptLocals
-{
-    void ClearActionFlags();
-    bool GetLocalData(TESForm*, unsigned int);
-    void ClearActionFlagsForForm(TESForm*);
-    bool CheckActionFlag(TESForm*, unsigned int);
-    FormFlagRecord* GetActionEntry(TESForm*, bool);
-    void Save(ScriptHeaderData*);
-    void ClearActionList();
-    void InitializeActionList();
-    void CopyActionListFrom(ScriptLocals*);
-    void* GetActionList();
-    void ResetFormData(Script*);
-    void SetVariable(unsigned int, double);
-    double GetVariable(unsigned int, Script*);
-    void* GetLocalList();
-    bool IsReferenceVariable(unsigned int);
-    unsigned short GetSaveSize();
-    void SaveGame(BGSSaveFormBuffer*);
-    void SaveGame();
-    void LoadGame(BGSLoadFormBuffer*);
-    void LoadGame();
-    void Revert(BGSLoadFormBuffer*);
-    void Revert();
-    static void ProcessPendingTasks();
-    void* __vecDelDtor(unsigned int);
-    Script* m_pOwnerScript;
-    char m_cActionFlags;
-    char _pad_5[3];
-    void* m_pLocalVariableList;
-    void* m_pVariableList;
-    ScriptDefinition* m_pExtendedLocals;
-};
+
 typedef char _sizecheck_ScriptLocals[sizeof(ScriptLocals) == 20 ? 1 : -1];
-struct InventoryStackRecord
-{
-    void Copy(InventoryStackRecord*);
-    void MergeEntryData(InventoryStackRecord*);
-    void ClearEntryData();
-    TESBoundObject* GetContainerObject();
-    void* GetExtraDataList();
-    float GetConditionPercent(bool);
-    int GetItemUses();
-    float GetItemCharge();
-    TESForm* GetInventoryObject();
-    float GetItemValue();
-    int GetHotKey();
-    void SetHotKey(int);
-    AlchemyItem* GetPoison();
-    void RemovePoison();
-    bool IsWorn(bool);
-    bool IsWornDefault(bool);
-    int GetCount();
-    Script* GetScript();
-    ScriptLocals* GetScriptLocalData();
-    ExtraLeveledItem* RemoveLeveledItemExtra();
-    bool HasPerkEntry();
-    int NumberLeveledExtra();
-    bool HasApplicablePerkEntry();
-    int NumberStolenData();
-    void RemoveOriginalChanges();
-    bool IsWornStolen();
-    unsigned char GetWeaponCategory();
-    void SetModSlot(unsigned char);
-    unsigned char GetModEffect(unsigned char);
-    bool SetEquipmentState(unsigned char);
-    bool SetEquipmentState(unsigned char, float*);
-    void RoundToNearestStep();
-    void GetPayloadAddress();
-    static float GetModifiedAttackDamage(TESObjectWEAP*, ActorValueOwner*, float);
-    float GetModifiedAttackDamage(ActorValueOwner*, float, bool);
-    float GetDamageResistance(ActorValueOwner*);
-    float GetArmorDamageThreshold(ActorValueOwner*);
-    int GetTypeforMenu();
-    char* GetDisplayNameForReference(TESObjectREFR*);
-    char* GetFullName();
-    float GetValueforMenuCol1(bool, Actor*, bool);
-    float GetValueforMenuCol2(bool, Actor*, bool);
-    float GetValueforMenuCol3(bool, Actor*, bool);
-    float GetValueforMenuCol4(bool, bool, Actor*, bool);
-    char* GetValueforMenu(int, bool, bool, Actor*, bool);
-    void SetItemHealth(float, InventoryChanges*, ExtraDataList*, bool);
-    void SetItemUses(int);
-    void SetItemCharge(float, InventoryChanges*, ExtraDataList*);
-    void SetItemOwner(TESForm*);
-    void SetPoison(AlchemyItem*);
-    void SetEquippedState(bool, bool, bool);
-    void SetCount(int);
-    bool ShouldDisplayItem(Actor*, bool, int, bool, bool);
-    unsigned short GetSaveSize();
-    void SaveGame(BGSSaveFormBuffer*);
-    void SaveGame();
-    void LoadGame(BGSLoadFormBuffer*);
-    void LoadGame();
-    void InitLoadGame(BGSLoadFormBuffer*);
-    void InitLoadGame();
-    int GetStatusFlags();
-    char* GetStatusIcon(int);
-    TESBoundObject* GetItemChangeObject();
-    void SetItemChangeObject(TESBoundObject*);
-    int GetCountWithExtras(bool);
-    int GetTotalCount();
-    int GetAmountDefaultExtra();
-    int GetExtraDataCount();
-    void* __vecDelDtor(unsigned int);
-    void* m_pExtraDataLists;
-    int m_iCountChange;
-    TESBoundObject* m_pItemObject;
-};
+
 typedef char _sizecheck_ItemChange[sizeof(InventoryStackRecord) == 12 ? 1 : -1];
 
-class TESObject
-{
-  public:
-    TESObject* GetNext();
-};
+
 
 unsigned int __fastcall _FNV_GetFormType(TESForm* form);
 ::ScriptLocals* __fastcall FUN_004bdea0(InventoryStackRecord* item);
@@ -7300,12 +6252,9 @@ struct ScriptLocals_Helper
 static double (__thiscall ScriptLocals_Helper::*volatile _force_5a9140)(void*,
                                                                         Script*) = &ScriptLocals_Helper::call_5a9140;
 
-struct ExtraDataList_Access : public ExtraDataList
-{
-    TESObjectREFR* GetReplacementReference();
-};
-static TESObjectREFR* (__thiscall ExtraDataList_Access::*volatile _force_GetReferencePointer)() =
-    &ExtraDataList_Access::GetReplacementReference;
+
+static TESObjectREFR* (__thiscall ExtraDataList::*volatile _force_GetReferencePointer)() =
+    &ExtraDataList::GetReplacementReference;
 
 struct ItemChange_WithDtor : public InventoryStackRecord
 {
@@ -7331,10 +6280,10 @@ bool __cdecl FUN_0059e1a0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
         case 0x40:
         case 0x69: {
             TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pForm);
-            if (static_cast<ExtraDataList_Access*>(pRef->GetExtraData())->GetReplacementReference())
+            if (static_cast<ExtraDataList*>(pRef->GetExtraData())->GetReplacementReference())
             {
                 TESObjectREFR* m_pContainer =
-                    static_cast<ExtraDataList_Access*>(pRef->GetExtraData())->GetReplacementReference();
+                    static_cast<ExtraDataList*>(pRef->GetExtraData())->GetReplacementReference();
                 InventoryStackRecord* pItemChange =
                     reinterpret_cast<TESObjectREFR_Helper*>(m_pContainer)
                         ->call_576260(reinterpret_cast<TESObject*>(pRef)->GetNext(), pRef->GetFormID());
@@ -7369,24 +6318,13 @@ bool __cdecl FUN_0059e1a0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }  // namespace fnv_0059e1a0
 
 namespace fnv_0059e700 {
-struct BSAudio
-{
-    void* GetAudioBackendData();
-};
-struct GameTimerRecord
-{
-    unsigned int GetTime() const;
-};
+
+
 struct FUN_0059e7d0_Class
 {
     bool FUN_0059e7d0();
 };
-struct Sky : BSAudio
-{
-    static Sky* GetInstance();
-    float FUN_006447d0();
-    unsigned int GetTime() const;
-};
+
 void _DebugLog(const char* fmt, ...);
 __declspec(thread) bool _DebugLogEnabled;
 // @fnv 0x0059e700
@@ -7395,10 +6333,10 @@ bool FUN_0059e700(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     Sky* pWeatherSky = Sky::GetInstance();
     afReturnValue =
         pWeatherSky->GetAudioBackendData() && ((FUN_0059e7d0_Class*)pWeatherSky->GetAudioBackendData())->FUN_0059e7d0()
-            ? pWeatherSky->FUN_006447d0()
+            ? reinterpret_cast<ConditionSky*>(pWeatherSky)->GetCurrentWeatherPercent()
             : 0.0;
     afReturnValue += pWeatherSky->GetTime() && ((FUN_0059e7d0_Class*)pWeatherSky->GetTime())->FUN_0059e7d0()
-                         ? 1.0 - pWeatherSky->FUN_006447d0()
+                         ? 1.0 - reinterpret_cast<ConditionSky*>(pWeatherSky)->GetCurrentWeatherPercent()
                          : 0.0;
     if (_DebugLogEnabled)
         _DebugLog("GetIsPleasant >> %0.2f", afReturnValue);
@@ -7407,13 +6345,7 @@ bool FUN_0059e700(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
 }  // namespace fnv_0059e700
 
 namespace fnv_0059e7f0 {
-struct Sky
-{
-    static Sky* GetInstance();
-    void* GetAudioBackendData();
-    unsigned int GetTime() const;
-    float FUN_006447d0();
-};
+
 struct FUN_0059e8c0_Class
 {
     bool IsFlag2Set();
@@ -7426,10 +6358,10 @@ bool __cdecl FUN_0059e7f0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     Sky* pWeatherSky = Sky::GetInstance();
     afReturnValue =
         pWeatherSky->GetAudioBackendData() && ((FUN_0059e8c0_Class*)pWeatherSky->GetAudioBackendData())->IsFlag2Set()
-            ? pWeatherSky->FUN_006447d0()
+            ? reinterpret_cast<ConditionSky*>(pWeatherSky)->GetCurrentWeatherPercent()
             : 0.0;
     afReturnValue += pWeatherSky->GetTime() && ((FUN_0059e8c0_Class*)pWeatherSky->GetTime())->IsFlag2Set()
-                         ? 1.0 - pWeatherSky->FUN_006447d0()
+                         ? 1.0 - reinterpret_cast<ConditionSky*>(pWeatherSky)->GetCurrentWeatherPercent()
                          : 0.0;
     if (g_pLogDebug)
         _DebugLog("GetIsCloudy >> %0.2f", afReturnValue);
@@ -7437,14 +6369,8 @@ bool __cdecl FUN_0059e7f0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }
 }  // namespace fnv_0059e7f0
 
-struct ActorX
-{
-    bool FUN_00437bf0();
-};
-struct MobileObjectShell
-{
-    const char* GetFullName();
-};
+
+
 void __cdecl _DebugLog(const char* fmt, ...);
 __declspec(thread) unsigned char g_theDebugLevel;
 
@@ -7453,9 +6379,9 @@ __declspec(thread) unsigned char g_theDebugLevel;
 bool __cdecl FUN_0059ff90(TESObjectREFR* reference, void* apUnused1, void* apUnused2, double& result)
 {
     result = 0.0;
-    ActorX* actor = 0;
+    Actor* actor = 0;
     if (reference && reference->IsActor())
-        actor = (ActorX*)reference;
+        actor = (Actor*)reference;
     if (actor)
     {
         if (actor->FUN_00437bf0())
@@ -7463,23 +6389,17 @@ bool __cdecl FUN_0059ff90(TESObjectREFR* reference, void* apUnused1, void* apUnu
         if (g_theDebugLevel)
         {
             if (result != 0.0)
-                _DebugLog("%s is restrained", ((MobileObjectShell*)actor)->GetFullName());
+                _DebugLog("%s is restrained", ((MobileObject*)actor)->GetFullName());
             else
-                _DebugLog("%s is not restrained", ((MobileObjectShell*)actor)->GetFullName());
+                _DebugLog("%s is not restrained", ((MobileObject*)actor)->GetFullName());
         }
     }
     return true;
 }
 
 namespace fnv_005a02f0 {
-struct FUN_005a03d0Class
-{
-    unsigned char FUN_005a03d0();
-};
-struct FUN_005a03f0_obj
-{
-    bool FUN_005a03f0(unsigned int);
-};
+
+
 void __cdecl _DebugLog(const char* fmt, ...);
 extern PlayerCharacter* _g_thePlayer;
 extern int DAT_0118c608[7];
@@ -7491,12 +6411,12 @@ bool __cdecl FUN_005a02f0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 {
     afReturnValue = 0.0;
     unsigned int ibit = (unsigned int)apParam1;
-    if (((FUN_005a03f0_obj*)_g_thePlayer)->FUN_005a03f0(ibit))
+    if (((ConditionPlayerCharacter*)_g_thePlayer)->TestConditionFlags(ibit))
         afReturnValue = 1.0;
     if (pDebugLog)
     {
         _DebugLog("GetPlayerControlsDisabled: %0.2f", afReturnValue);
-        signed char cDisabledFlags = ((FUN_005a03d0Class*)_g_thePlayer)->FUN_005a03d0();
+        signed char cDisabledFlags = ((ConditionPlayerCharacter*)_g_thePlayer)->GetConditionFlags();
         for (int iIndex = 0; iIndex < 7; ++iIndex)
         {
             if (cDisabledFlags & 1)
@@ -7510,15 +6430,12 @@ bool __cdecl FUN_005a02f0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }
 }  // namespace fnv_005a02f0
 
+class BGSListForm;
 namespace fnv_005a05e0 {
-struct TESObjectWEAP;
-struct BGSListForm;
-struct InventoryStackRecord;
-struct TES
-{
-    void* GetLogDate();
-};
-struct ArrSI
+
+
+// Exe 0x005a05e0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct TesconditionfunctionsOffset08View
 {
     unsigned int GetFlags();
 };
@@ -7526,93 +6443,7 @@ struct LH
 {
     bool IsInList(int&);
 };
-class BaseProcess
-{
-  public:
-    virtual ~BaseProcess();
-    virtual void Copy();
-    virtual void SetReferenceTarget();
-    virtual void Update(MobileObject*);
-    virtual void Update(MobileObject*, float);
-    virtual void SetMobileObjectState();
-    virtual void GetActorWorldPosition();
-    virtual void GetActorNodePosition();
-    virtual void GetActorValueAtIndex();
-    virtual void CanProcessActor();
-    virtual void ResetPackageState();
-    virtual void IsLowProcessStateValid();
-    virtual void GetPackedStateBits0To8();
-    virtual void GetPackedStateBits9To12();
-    virtual void GetPackedStateBits13To26();
-    virtual void SetProcessInteger();
-    virtual void GetProcessInteger();
-    virtual void StartIdleAnimation();
-    virtual void ClearIdleAnimation();
-    virtual void GetCurrentMagicItem();
-    virtual void SetCurrentMagicItem();
-    virtual void SetActorMagicItem();
-    virtual void InitializeProcessState();
-    virtual void UpdateHealthBar();
-    virtual void GetIdleDoneOnce();
-    virtual void MarkIdleDoneOnce();
-    virtual void ShouldProcessActor();
-    virtual void ProcessActorGroupState();
-    virtual void CanUsePlayerAction();
-    virtual void CanPerformActorAction();
-    virtual void IsAsleep();
-    virtual void ProcessSandman();
-    virtual void ProcessCannibal();
-    virtual void ProcessFurniture();
-    virtual void SetCombatEnabled();
-    virtual void FindPackageTarget();
-    virtual void GetPackageLocationReference();
-    virtual void GetActorTargetReference();
-    virtual void GetActorTargetPosition();
-    virtual void GetTargetCell();
-    virtual void GetTargetWorldSpace();
-    virtual void GetTargetDistance();
-    virtual void GetMobileObject();
-    virtual void AdvanceProcess();
-    virtual void EvaluateActorPackage();
-    virtual void FindPackageToEvaluate();
-    virtual void GetFirstProcessFloat();
-    virtual void SetCurrentSpeed();
-    virtual void EvaluateCurrentPackage();
-    virtual void SelectPackage();
-    virtual void SetPackageForActor();
-    virtual void HasInterruptPackage();
-    virtual void SetEssentialFlag();
-    virtual void PlayRandomIdle();
-    virtual void ProcessActorIdle();
-    virtual void PlayIdleAnimation();
-    virtual void ClearAnimationState();
-    virtual void GetEssentialDownTimer();
-    virtual void SetEssentialDownTimer();
-    virtual void ResetEssentialDownTimer();
-    virtual void FindDetectionRecord();
-    virtual void GetDetectionRecords();
-    virtual void FindDetectionEventForActor();
-    virtual void AddDetectionEvent();
-    virtual void RemoveDetectionEvent();
-    virtual void ClearDetectionEvents();
-    virtual void GetWeaponScore();
-    virtual void SetWeaponScore();
-    virtual void HasCaughtPlayerPickpocketing();
-    virtual void SetIsWeaponReady();
-    virtual void SetAnimationComplete();
-    virtual void IsMovementComplete();
-    virtual void SetCurrentMovementComplete();
-    virtual void GetCurrentMovementComplete();
-    virtual void GetTarget();
-    virtual void SetTarget();
-    virtual void GetDoor();
-    virtual void SetDoor();
-    virtual void AddDeferredHideLimb();
-    virtual void GetObjectToAcquire();
-    virtual void SetFaceAnimationData();
-    virtual void GetActorFaceGenData();
-    virtual InventoryStackRecord* GetActiveWeapon();
-};
+
 int __fastcall _FNV_GetFormType(unsigned int);
 extern unsigned int g_uiConditionFunctionState;
 void _DebugLog(const char*, ...);
@@ -7630,8 +6461,8 @@ bool __cdecl FUN_005a05e0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     {
         InventoryStackRecord* pweapdata = ((BaseProcess*)((TES*)pactor)->GetLogDate())->GetActiveWeapon();
         TESObjectWEAP* pweap = 0;
-        if (pweapdata && ((ArrSI*)pweapdata)->GetFlags() && _FNV_GetFormType(((ArrSI*)pweapdata)->GetFlags()) == 0x28)
-            pweap = (TESObjectWEAP*)((ArrSI*)pweapdata)->GetFlags();
+        if (pweapdata && ((TesconditionfunctionsOffset08View*)pweapdata)->GetFlags() && _FNV_GetFormType(((TesconditionfunctionsOffset08View*)pweapdata)->GetFlags()) == 0x28)
+            pweap = (TESObjectWEAP*)((TesconditionfunctionsOffset08View*)pweapdata)->GetFlags();
         if (!pweap)
             pweap = (TESObjectWEAP*)g_uiConditionFunctionState;
         if (pweap)
@@ -7757,10 +6588,7 @@ bool __cdecl FUN_005a2a60(TESObjectREFR* reference, void* arg1, void* arg2, doub
     return true;
 }
 
-struct TESWaterForm
-{
-    bool FUN_00580060();
-};
+
 struct FUN_005a3740_cls
 {
     unsigned char GetByteAt14C();
@@ -7769,10 +6597,7 @@ struct FUN_005a3740_shell
 {
     unsigned char GetByteAt14C();
 };
-struct FUN_00547770_shell
-{
-    TESWaterForm* FUN_00547770();
-};
+
 // Sets result to 1.0 when reference is an actor in a parent cell whose water form reports true, otherwise leaves result at 0.0, and returns true.
 // @fnv 0x005a36b0
 bool __cdecl FUN_005a36b0(TESObjectREFR* reference, void* arg1, void* arg2, double& result)
@@ -7782,18 +6607,15 @@ bool __cdecl FUN_005a36b0(TESObjectREFR* reference, void* arg1, void* arg2, doub
     {
         TESObjectREFR* actor = reference;
         if (actor && ((FUN_005a3740_cls*)actor)->GetByteAt14C() && actor->GetParentCell() &&
-            ((FUN_00547770_shell*)actor->GetParentCell())->FUN_00547770() &&
-            ((FUN_00547770_shell*)actor->GetParentCell())->FUN_00547770()->FUN_00580060())
+            ((TESObjectCELL*)actor->GetParentCell())->FUN_00547770() &&
+            ((TESObjectCELL*)actor->GetParentCell())->FUN_00547770()->HasFlag1())
             result = 1.0;
     }
     return true;
 }
 
 namespace fnv_0059c930 {
-struct TESObjectREFRScaleView
-{
-    float GetScale();
-};
+
 struct ActorV_S
 {
     float GetScale();
@@ -7810,7 +6632,7 @@ bool __cdecl GetObjectScale(TESObjectREFR* apRefObject, void* apParam1, void* ap
 {
     if (apRefObject)
     {
-        afReturnValue = ((TESObjectREFRScaleView*)apRefObject)->GetScale();
+        afReturnValue = ((TESObjectREFR*)apRefObject)->GetScale();
         if (g_threadLocalFlags.bDebugLogging)
             _DebugLog("GetScale >> %0.2f (with base %0.2f)", afReturnValue, ((ActorV_S*)apRefObject)->GetScale());
     }
@@ -7865,16 +6687,8 @@ bool __cdecl FUN_0059fb00(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }  // namespace fnv_0059fb00
 
 namespace fnv_005a1880 {
-class TES
-{
-  public:
-    void* GetLogDate();
-};
-class Sky
-{
-  public:
-    float GetFieldCC();
-};
+
+
 extern int g_TES;
 extern "C" int __cdecl _DebugLog(const char*, ...);
 extern __declspec(thread) unsigned char g_DebugLogFlag;
@@ -7893,10 +6707,7 @@ bool __cdecl FUN_005a1880(TESObjectREFR* reference, void* apUnused1, void* apUnu
 }  // namespace fnv_005a1880
 
 namespace fnv_005a1c30 {
-struct BGSOpenCloseForm
-{
-    static int __cdecl GetOpenState(TESObjectREFR*);
-};
+
 extern "C" void __cdecl _DebugLog(const char*, ...);
 __declspec(thread) bool g_bDebugLogging;
 // Zeroes result, stores GetOpenState(reference) when reference is non-null, logs it if debug logging is on, and returns true.
@@ -7913,10 +6724,7 @@ bool __cdecl FUN_005a1c30(TESObjectREFR* reference, void* apUnused1, void* apUnu
 }  // namespace fnv_005a1c30
 
 namespace fnv_005a20d0 {
-struct FUN_0047d720Class
-{
-    bool HasFactionFlag8() const;
-};
+
 void _DebugLog(const char*);
 __declspec(thread) unsigned char g_tlsDebugFlag;
 
@@ -7925,7 +6733,7 @@ __declspec(thread) unsigned char g_tlsDebugFlag;
 bool __cdecl FUN_005a20d0(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double& afReturnValue)
 {
     afReturnValue = 0.0;
-    FUN_0047d720Class* pFaction = reinterpret_cast<FUN_0047d720Class*>(apParam1);
+    ConditionFaction* pFaction = reinterpret_cast<ConditionFaction*>(apParam1);
     if (pFaction && pFaction->HasFactionFlag8())
         afReturnValue = 1.0;
     if (g_tlsDebugFlag)
@@ -7940,10 +6748,7 @@ bool __cdecl FUN_005a20d0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }  // namespace fnv_005a20d0
 
 namespace fnv_005a2150 {
-struct FUN_005a21d0_Class
-{
-    bool IsFlag40Set();
-};
+
 void _DebugLog(const char*);
 __declspec(thread) unsigned char g_tlsFlag;
 // Sets result to 1.0 if the faction object reports a murder, otherwise 0.0, and logs the outcome when the TLS flag is set; always returns true.
@@ -7951,7 +6756,7 @@ __declspec(thread) unsigned char g_tlsFlag;
 bool FUN_005a2150(TESObjectREFR* ref, void* apFaction, void* apUnused, double& result)
 {
     result = 0.0;
-    FUN_005a21d0_Class* faction = (FUN_005a21d0_Class*)apFaction;
+    ConditionFaction* faction = (ConditionFaction*)apFaction;
     if (faction && faction->IsFlag40Set())
         result = 1.0;
     if (g_tlsFlag)
@@ -7966,15 +6771,9 @@ bool FUN_005a2150(TESObjectREFR* ref, void* apFaction, void* apUnused, double& r
 }  // namespace fnv_005a2150
 
 namespace fnv_005a2290 {
-struct FUN_005a2310_Class
-{
-    bool IsFlag20Set() const;
-};
+
 void __cdecl _DebugLog(const char*);
-struct PlayerCharacter
-{
-    bool bDebugLogging;
-};
+
 __declspec(thread) bool g_tlsDebugLogging;
 // Sets afReturnValue to 1.0 if apParam1 is a faction that passes IsFlag20Set, logs the result when debug logging is on, and returns true.
 // @fnv 0x005a2290
@@ -7982,7 +6781,7 @@ bool __cdecl FUN_005a2290(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 {
     afReturnValue = 0.0;
     TESFaction* pFaction = static_cast<TESFaction*>(apParam1);
-    if (pFaction && reinterpret_cast<FUN_005a2310_Class*>(pFaction)->IsFlag20Set())
+    if (pFaction && reinterpret_cast<ConditionFaction*>(pFaction)->IsFlag20Set())
         afReturnValue = 1.0;
     if (g_tlsDebugLogging)
     {
@@ -7996,11 +6795,12 @@ bool __cdecl FUN_005a2290(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }  // namespace fnv_005a2290
 
 namespace fnv_005a2590 {
-struct ArrSI
+// Exe 0x005a2590: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct TesconditionfunctionsOffset08View
 {
     unsigned int GetFlags();
 };
-extern ArrSI DAT_011f2250;
+extern TesconditionfunctionsOffset08View DAT_011f2250;
 extern "C" void __cdecl _DebugLog(const char*, ...);
 __declspec(thread) unsigned char g_tlsFlag;
 // Sets result to the flags of DAT_011f2250 as a double, logs it when g_tlsFlag is set, and returns true.
@@ -8016,163 +6816,7 @@ bool __cdecl FUN_005a2590(TESObjectREFR* reference, void* apUnused1, void* apUnu
 }  // namespace fnv_005a2590
 
 namespace fnv_005a3570 {
-struct TES
-{
-    void* GetLogDate(void);
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual void v100();
-    virtual bool v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual void v214();
-    virtual void v218();
-    virtual void v21c();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual void v22c();
-    virtual void v230();
-    virtual void v234();
-    virtual void v238();
-    virtual void v23c();
-    virtual void v240();
-    virtual void v244();
-    virtual void v248();
-    virtual void v24c();
-    virtual void v250();
-    virtual void v254();
-    virtual void v258();
-    virtual void v25c();
-    virtual void v260();
-};
+
 
 struct LogDate
 {
@@ -8260,10 +6904,7 @@ bool __cdecl FUN_005a3820(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }
 }  // namespace fnv_005a3820
 
-struct TESObjectREFR_Dismembered : TESObjectREFR
-{
-    bool IsLimbMissing(int limb);
-};
+
 
 // Sets result to 1.0 if reference is an actor whose limb is dismembered, otherwise 0.0, and returns true.
 // @fnv 0x005a3db0
@@ -8273,90 +6914,21 @@ bool __cdecl FUN_005a3db0(TESObjectREFR* reference, void* aiLimb, void* apUnused
     int limb = reinterpret_cast<int>(aiLimb);
     if (reference && reference->IsActor())
     {
-        TESObjectREFR_Dismembered* actor = static_cast<TESObjectREFR_Dismembered*>(reference);
+        TESObjectREFR* actor = static_cast<TESObjectREFR*>(reference);
         if (actor->IsLimbMissing(limb))
             result = 1.0;
     }
     return true;
 }
 
-struct FUN_005a4160_shell
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c();
-    virtual void v90();
-    virtual void v94();
-    virtual void v98();
-    virtual void v9c();
-    virtual void va0();
-    virtual void va4();
-    virtual void va8();
-    virtual void vac();
-    virtual void vb0();
-    virtual void vb4();
-    virtual void vb8();
-    virtual void vbc();
-    virtual void vc0();
-    virtual void vc4();
-    virtual void vc8();
-    virtual void vcc();
-    virtual void vd0();
-    virtual void vd4();
-    virtual void vd8();
-    virtual void vdc();
-    virtual void ve0();
-    virtual void ve4();
-    virtual void ve8();
-    virtual void vec();
-    virtual void vf0();
-    virtual void vf4();
-    virtual void vf8();
-    virtual void vfc();
-    virtual bool v100();
-    unsigned int GetActorStateFlags() const;
-};
 
 // @fnv 0x005a4160
 bool FUN_005a4160(TESObjectREFR* reference, void* arg1, void* arg2, double& result)
 {
     result = 0.0;
-    if (reference && ((FUN_005a4160_shell*)reference)->v100())
+    if (reference && reference->IsActor())
     {
-        unsigned int mode = ((FUN_005a4160_shell*)reference)->GetActorStateFlags() & 0x30;
+        unsigned int mode = ((const Actor*)reference)->GetActorStateFlags() & 0x30;
         if (mode & 0x10)
             result = 1.0;
         else if (mode & 0x20)
@@ -8518,11 +7090,8 @@ bool __cdecl FUN_005a41c0(TESObjectREFR* reference, void* apUnused1, void* apUnu
 
 namespace fnv_005a48a0 {
 extern "C" void _DebugLog(const char*, ...);
-struct PlayerCharacterStandIn
-{
-    unsigned int GetFieldD68() const;
-};
-extern PlayerCharacterStandIn* _g_thePlayer;
+
+extern ConditionPlayerCharacter* _g_thePlayer;
 
 __declspec(thread) bool g_bDebugLoggingEnabled = false;
 
@@ -8558,155 +7127,20 @@ bool __cdecl FUN_005a4c60(TESObjectREFR* ref, void* apUnused1, void* apUnused2, 
 namespace fnv_005a57b0 {
 extern "C" void __cdecl _DebugLog(const char* apFormat, ...);
 
-struct FUN_008bdbd0
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c();
-    virtual void v90();
-    virtual void v94();
-    virtual void v98();
-    virtual void v9c();
-    virtual void va0();
-    virtual void va4();
-    virtual void va8();
-    virtual void vac();
-    virtual void vb0();
-    virtual void vb4();
-    virtual void vb8();
-    virtual void vbc();
-    virtual void vc0();
-    virtual void vc4();
-    virtual void vc8();
-    virtual void vcc();
-    virtual void vd0();
-    virtual void vd4();
-    virtual void vd8();
-    virtual void vdc();
-    virtual void ve0();
-    virtual void ve4();
-    virtual void ve8();
-    virtual void vec();
-    virtual void vf0();
-    virtual void vf4();
-    virtual void vf8();
-    virtual void vfc();
-    virtual void v100();
-    double GetAngleToReference(TESObjectREFR* apRef, float afAngle);
-};
+
 
 __declspec(thread) unsigned char g_tlsFlag;
 
-struct ActorStandIn
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80();
-    virtual void v84();
-    virtual void v88();
-    virtual void v8c();
-    virtual void v90();
-    virtual void v94();
-    virtual void v98();
-    virtual void v9c();
-    virtual void va0();
-    virtual void va4();
-    virtual void va8();
-    virtual void vac();
-    virtual void vb0();
-    virtual void vb4();
-    virtual void vb8();
-    virtual void vbc();
-    virtual void vc0();
-    virtual void vc4();
-    virtual void vc8();
-    virtual void vcc();
-    virtual void vd0();
-    virtual void vd4();
-    virtual void vd8();
-    virtual void vdc();
-    virtual void ve0();
-    virtual void ve4();
-    virtual void ve8();
-    virtual void vec();
-    virtual void vf0();
-    virtual void vf4();
-    virtual void vf8();
-    virtual void vfc();
-    virtual bool IsEssentialActor();
-};
+
 
 // @fnv 0x005a57b0
 bool __cdecl FUN_005a57b0(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double& afReturnValue)
 {
     afReturnValue = 0.0;
     TESObjectREFR* ptargetRef = (TESObjectREFR*)apParam1;
-    if (apRefObject && ((ActorStandIn*)apRefObject)->IsEssentialActor())
+    if (apRefObject && apRefObject->IsActor())
     {
-        afReturnValue = ((FUN_008bdbd0*)apRefObject)->GetAngleToReference(ptargetRef, 3.1415927410125732f);
+        afReturnValue = static_cast<ConditionActorVATSVisibility*>(apRefObject)->FUN_008bdbd0(ptargetRef, 3.1415927410125732f);
     }
     if (g_tlsFlag)
         _DebugLog("VATSBackTargetVisible >> %.2f", afReturnValue);
@@ -8824,10 +7258,7 @@ struct FUN_005a5bb0Class
 {
     unsigned char FUN_005a5bb0();
 };
-struct MobileObjectShell
-{
-    const char* GetFullName();
-};
+
 void _DebugLog(const char* fmt, ...);
 __declspec(thread) unsigned char g_tlsDebugLogEnabled;
 // If apRefObject is an actor, stores its force-hit-reaction value in afReturnValue and optionally logs the actor's full name and value; returns true.
@@ -8840,18 +7271,15 @@ bool __cdecl GetForceHitReactionCondition(TESObjectREFR* apRefObject, void* apPa
         afReturnValue = (double)((FUN_005a5bb0Class*)apRefObject)->FUN_005a5bb0();
         if (g_tlsDebugLogEnabled)
             _DebugLog("GetForceHitReactionConditionFunction: %s >> %0.2f",
-                      ((MobileObjectShell*)apRefObject)->GetFullName(), afReturnValue);
+                      ((MobileObject*)apRefObject)->GetFullName(), afReturnValue);
     }
     return true;
 }
 }  // namespace fnv_005a5b30
 
 namespace fnv_005a5ff0 {
-struct FUN_005a6050
-{
-    unsigned char GetField();
-};
-extern FUN_005a6050* _g_thePlayer;
+
+extern ConditionPlayerCharacter* _g_thePlayer;
 void _DebugLog(const char*, ...);
 __declspec(thread) unsigned char g_tlsFlag;
 
@@ -8867,10 +7295,7 @@ bool __cdecl FUN_005a5ff0(TESObjectREFR* reference, void* arg1, void* arg2, doub
 }
 }  // namespace fnv_005a5ff0
 
-struct TESChallenge
-{
-    int GetUnlocked();
-};
+
 void __cdecl DebugLog(const char*, ...);
 __declspec(thread) bool g_bDebugLoggingEnabled;
 // Reads the unlocked value from the TESChallenge in arg1 into result, logs it when debug logging is enabled, and returns true.
@@ -8889,10 +7314,7 @@ bool __cdecl GetChallengeUnlockedValue(TESObjectREFR* reference, void* pChalleng
 }
 
 namespace fnv_005a60f0 {
-struct TESChallenge
-{
-    unsigned int GetCompleted();
-};
+
 
 __declspec(thread) unsigned char g_tlsFlag[0x269];
 
@@ -8916,15 +7338,11 @@ bool __cdecl FUN_005a60f0(TESObjectREFR* reference, void* pChallenge, void* pUnu
 }
 }  // namespace fnv_005a60f0
 
+class TESContainer;
 namespace fnv_0059dbe0 {
 extern "C" void __cdecl _DebugLog(const char*, ...);
 extern "C" void* __cdecl _ref_004839c0(int);
-struct InventoryChanges
-{
-    static InventoryChanges* __cdecl CreateForReference(TESObjectREFR*);
-    int GetObjectCount(TESForm*);
-};
-struct TESContainer;
+
 TESContainer* __fastcall GetContainer(TESObjectREFR*);
 __declspec(thread) unsigned char g_sDebugLogState[0x268 + 1];
 // Sets result to the reference's inventory count of form 15 (gold), logs it when debug logging is on, and returns true.
@@ -8959,10 +7377,7 @@ struct ActorServiceStandIn
     bool FUN_008ac680();
 };
 
-struct MobileObjectShell : public TESObjectREFR
-{
-    const char* GetFullName();
-};
+
 
 void __cdecl _DebugLog(const char*, ...);
 extern __declspec(thread) bool g_bDebugLogEnabled;
@@ -8980,19 +7395,17 @@ bool __cdecl FUN_005a2af0(TESObjectREFR* reference, void* arg1, void* arg2, doub
     if (g_bDebugLogEnabled)
     {
         if (result != 0.0)
-            _DebugLog("%s  is offering services", reinterpret_cast<MobileObjectShell*>(actor)->GetFullName());
+            _DebugLog("%s  is offering services", reinterpret_cast<MobileObject*>(actor)->GetFullName());
         else
-            _DebugLog("%s is not offering services", reinterpret_cast<MobileObjectShell*>(actor)->GetFullName());
+            _DebugLog("%s is not offering services", reinterpret_cast<MobileObject*>(actor)->GetFullName());
     }
     return true;
 }
 }  // namespace fnv_005a2af0
 
 namespace fnv_005a30c0 {
-struct FUN_00422640Class
-{
-    int FUN_00422640();
-};
+// This extra-data accessor is not declared by the shared interface.
+int __fastcall FUN_00422640(ExtraDataList* extraData);
 
 struct FUN_005a30c0_tls
 {
@@ -9014,7 +7427,7 @@ bool __cdecl FUN_005a30c0(TESObjectREFR* reference, void* apUnused1, void* apUnu
         actor = (Actor*)reference;
     if (!actor)
         return true;
-    adHitCount = (double)((FUN_00422640Class*)((TESObjectREFR*)actor)->GetExtraData())->FUN_00422640();
+    adHitCount = (double)FUN_00422640(((TESObjectREFR*)actor)->GetExtraData());
     if (FUN_005a30c0_tlsVar.bDebug)
         _DebugLog("%s has hit %s %0.2f times", GetFullName(g_thePlayer), GetFullName(actor), adHitCount);
     return true;
@@ -9397,10 +7810,6 @@ struct FUN_0059c760_proxy
     }
 };
 
-struct FUN_00893530_shell
-{
-    float GetFatigueRatio();
-};
 
 struct FUN_0059c760_tls
 {
@@ -9424,7 +7833,7 @@ bool __cdecl FUN_0059c760(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 
     if (pActor)
     {
-        afReturnValue = ((FUN_00893530_shell*)pActor)->GetFatigueRatio();
+        afReturnValue = ((Actor*)pActor)->GetFatigueRatio();
         if (DAT_0059c760_tls.enabled)
             _DebugLog("GetFatiguePercentage >> %0.2f", afReturnValue);
     }
@@ -9701,10 +8110,6 @@ struct FUN_0059c860_VirtualHelper
     }
 };
 
-struct FUN_0059c860_ActorHelper
-{
-    float FUN_00884dc0();
-};
 
 struct FUN_0059c860_TLSData
 {
@@ -9730,7 +8135,7 @@ bool __cdecl FUN_0059c860(TESObjectREFR* reference, void* apUnused1, void* apUnu
 
     if (pActor)
     {
-        result = reinterpret_cast<FUN_0059c860_ActorHelper*>(pActor)->FUN_00884dc0();
+        result = reinterpret_cast<Actor*>(pActor)->FUN_00884dc0();
 
         if (DAT_0059c864.enabled)
         {
@@ -9743,11 +8148,7 @@ bool __cdecl FUN_0059c860(TESObjectREFR* reference, void* apUnused1, void* apUnu
 }  // namespace fnv_0059c860
 
 namespace fnv_0059d100 {
-struct TESObject
-{
-    unsigned int GetNext();
-    unsigned int _FNV_GetFormType();
-};
+
 
 struct LockExtraData
 {
@@ -9835,30 +8236,17 @@ bool __cdecl FUN_0059d3e0(TESObjectREFR* reference, void* arg1, void* arg2, doub
     return FUN_0059d610(reference, _g_thePlayer, 0, result);
 }
 
+class TESRace;
 namespace fnv_0059d540 {
 extern unsigned int __tls_index;
 
-class TESObject;
-class TESNPC;
-class TESRace;
 
 unsigned int __fastcall _FNV_GetFormType(TESObject* object);
 void _DebugLog(const char* format, double value);
 
-class TESObject
-{
-  public:
-    TESObject* GetNext();
-};
 
-struct FUN_004ac110_shell
-{
-    TESRace* FUN_004ac110();
-};
 
-struct TESNPC : public FUN_004ac110_shell
-{
-};
+
 
 __declspec(thread) bool bDebug;
 
@@ -9869,13 +8257,13 @@ bool __cdecl FUN_0059d540(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     afReturnValue = 0.0;
 
     TESNPC* pnpc1 = 0;
-    if (apRefObject && _FNV_GetFormType(reinterpret_cast<TESObject*>(apRefObject)->GetNext()) == 0x2a)
+    if (apRefObject && (_FNV_GetFormType)(reinterpret_cast<TESObject*>(apRefObject)->GetNext()) == 0x2a)
     {
         pnpc1 = reinterpret_cast<TESNPC*>(reinterpret_cast<TESObject*>(apRefObject)->GetNext());
     }
 
     TESNPC* pnpc2 = 0;
-    if (apParam1 && _FNV_GetFormType(reinterpret_cast<TESObject*>(apParam1)->GetNext()) == 0x2a)
+    if (apParam1 && (_FNV_GetFormType)(reinterpret_cast<TESObject*>(apParam1)->GetNext()) == 0x2a)
     {
         pnpc2 = reinterpret_cast<TESNPC*>(reinterpret_cast<TESObject*>(apParam1)->GetNext());
     }
@@ -9895,23 +8283,11 @@ bool __cdecl FUN_0059d540(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }  // namespace fnv_0059d540
 
 namespace fnv_0059e510 {
-class TESFaction;
 
-class TESActorBaseData
-{
-  public:
-    int GetFactionRank(TESFaction* faction, bool isPlayer);
-};
 
-class TESActorBasePrefix
-{
-  public:
-    unsigned char padding[0x30];
-};
 
-class TESActorBase : public TESActorBasePrefix, public TESActorBaseData
-{
-};
+
+
 
 class XActor
 {
@@ -9985,10 +8361,7 @@ class XActor
     void* GetActorBase();
 };
 
-struct FNV_GetFormType
-{
-    int _FNV_GetFormType();
-};
+
 
 void __cdecl _DebugLog(const char* format, ...);
 extern unsigned int __tls_index;
@@ -10023,13 +8396,13 @@ bool __cdecl FUN_0059e510(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     irank2 = (TESActorBase*)((XActor*)pacttar)->GetActorBase();
 
     pfac = 0;
-    if (apParam1 && ((FNV_GetFormType*)apParam1)->_FNV_GetFormType() == 8)
+    if (apParam1 && ((TESForm*)apParam1)->_FNV_GetFormType() == 8)
         pfac = (TESFaction*)apParam1;
 
     if (pact && irank2 && pfac)
     {
-        irank1 = ((TESActorBase*)pact)->GetFactionRank(pfac, pactorbase2 == (Actor*)g_thePlayer);
-        pactorbase1 = ((TESActorBase*)irank2)->GetFactionRank(pfac, pacttar == (Actor*)g_thePlayer);
+        irank1 = reinterpret_cast<TESActorBaseData*>(reinterpret_cast<char*>(pact) + 0x30)->GetFactionRank(pfac, pactorbase2 == (Actor*)g_thePlayer);
+        pactorbase1 = reinterpret_cast<TESActorBaseData*>(reinterpret_cast<char*>(irank2) + 0x30)->GetFactionRank(pfac, pacttar == (Actor*)g_thePlayer);
 
         if (irank1 != -1 && pactorbase1 != -1)
             afReturnValue = (double)(irank1 - pactorbase1);
@@ -10158,9 +8531,6 @@ bool __cdecl FUN_0059e650(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }  // namespace fnv_0059e650
 
 namespace fnv_0059ebb0 {
-struct TESWeather
-{
-};
 
 struct FUN_0059ebb0_TLS
 {
@@ -10175,17 +8545,9 @@ extern unsigned int __tls_index;
 int __fastcall _FNV_GetFormType(TESObjectREFR* reference);
 void __cdecl _DebugLog(const char* format, ...);
 
-class BSAudio
-{
-  public:
-    int GetAudioBackendData();
-};
 
-class Sky : public BSAudio
-{
-  public:
-    static Sky* __cdecl GetInstance();
-};
+
+
 
 // Returns 1.0 in afReturnValue if apRefObject is a TESWeather matching the Sky instance's current weather, otherwise 0.0; logs the result when enabled.
 // @fnv 0x0059ebb0
@@ -10480,6 +8842,8 @@ struct FUN_0059ec30Base
     }
 };
 
+// Actor.h declares slot 0x470 as void Unk_11C(); this condition needs its bool result.
+// Retain this virtual interface until the shared declaration supports that signature.
 struct FUN_0059ec30Actor : public FUN_0059ec30Base
 {
     virtual bool d0()
@@ -11397,21 +9761,9 @@ extern unsigned int __tls_index;
 
 __declspec(thread) unsigned char FUN_0059f180_tls[0x269];
 
-class TESObject
-{
-  public:
-    unsigned int __thiscall GetNext();
-};
 
-class TESActorBase
-{
-  public:
-    TESClass* GetClass();
-};
 
-class TESNPC : public TESActorBase
-{
-};
+
 
 unsigned int __fastcall _FNV_GetFormType(void* object);
 void __cdecl _DebugLog(const char* format, double value);
@@ -11436,7 +9788,7 @@ bool __cdecl FUN_0059f180(TESObjectREFR* apRefObject, void* apParam1, void* apPa
             pclass = reinterpret_cast<TESClass*>(apParam1);
     }
 
-    if (pnpc && pclass && pnpc->GetClass() == pclass)
+    if (pnpc && pclass && pnpc->TESActorBase::GetClass() == pclass)
         afReturnValue = 1.0;
 
     if (FUN_0059f180_tls[0x268])
@@ -11447,24 +9799,10 @@ bool __cdecl FUN_0059f180(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }  // namespace fnv_0059f180
 
 namespace fnv_0059f240 {
-class TESRace
-{
-};
 
-struct FUN_004ac110_shell
-{
-    TESRace* FUN_004ac110();
-};
 
-struct TESNPC : public FUN_004ac110_shell
-{
-};
 
-class TESObject
-{
-  public:
-    unsigned int GetNext();
-};
+
 
 unsigned int __fastcall _FNV_GetFormType(unsigned int formID);
 void __cdecl _DebugLog(const char* format, ...);
@@ -11518,15 +9856,8 @@ extern unsigned int __tls_index;
 extern int __fastcall _FNV_GetFormType(unsigned int form);
 extern void __cdecl _DebugLog(const char* format, double value);
 
-struct TESObject
-{
-    unsigned int GetNext();
-};
 
-struct TESCreature
-{
-    signed char GetCreatureType() const;
-};
+
 
 extern __declspec(thread) unsigned char g_bDebugLog;
 
@@ -11550,7 +9881,7 @@ bool __cdecl FUN_0059f300(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 
     iCreatureType = (int)apParam1;
 
-    if (pcreature && pcreature->GetCreatureType() == iCreatureType)
+    if (pcreature && static_cast<const TESCreature*>(pcreature)->GetCreatureType() == iCreatureType)
     {
         afReturnValue = 1.0;
     }
@@ -11567,10 +9898,6 @@ bool __cdecl FUN_0059f300(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 extern int __tls_index;
 extern __declspec(thread) unsigned char FUN_tls_debug[0x269];
 
-struct ActorGetAlertHelper
-{
-    bool IsCurrentlyAlerted();
-};
 
 struct TESObjectREFRVirtualHelper
 {
@@ -11657,7 +9984,7 @@ bool __cdecl FUN_005a0260(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 
     if (pactor)
     {
-        afReturnValue = ((ActorGetAlertHelper*)pactor)->IsCurrentlyAlerted();
+        afReturnValue = ((Actor*)pactor)->IsCurrentlyAlerted();
 
         if (FUN_tls_debug[0x268])
         {
@@ -11668,22 +9995,11 @@ bool __cdecl FUN_005a0260(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     return true;
 }
 
+class NiFixedString;
 namespace fnv_005a0710 {
-class NiNode
-{
-  public:
-    virtual ~NiNode();
-};
 
-class NiAVObject : public NiNode
-{
-  public:
-    virtual ~NiAVObject();
-};
 
-class NiFixedString
-{
-};
+
 
 class Model : public NiAVObject
 {
@@ -11741,7 +10057,7 @@ bool FUN_005a0710(TESObjectREFR* reference, void* arg1, void* arg2, double& resu
         p3d4 = reinterpret_cast<FUN_00571550_shell*>(pactor)->FUN_00571530(proot, FUN_005a07f0());
 
         if (!p3d4)
-            p3d4 = reinterpret_cast<TESObjectREFR_AnimationExt*>(pactor)->FUN_00490310(proot, "Bip01 Spine01");
+            p3d4 = reinterpret_cast<TESObjectREFR_AnimationExt*>(pactor)->FUN_00490310(reinterpret_cast<NiNode*>(proot), "Bip01 Spine01");
 
         if (!p3d4 || FUN_00c6b7b0(p3d4, 0))
             result = 1.0;
@@ -11754,18 +10070,14 @@ bool FUN_005a0710(TESObjectREFR* reference, void* arg1, void* arg2, double& resu
 }
 }  // namespace fnv_005a0710
 
+class NiFixedString;
 namespace fnv_005a0800 {
-struct NiAVObject
-{
-};
+
 
 struct Model : NiAVObject
 {
 };
 
-struct NiFixedString
-{
-};
 
 struct ActorVirtual
 {
@@ -11887,288 +10199,16 @@ bool __cdecl FUN_005a0800(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }  // namespace fnv_005a0800
 
 namespace fnv_005a09b0 {
-class TESObjectWEAP
-{
-  public:
-    int GetWeaponType(void);
-};
 
-class ArrSI
+// Exe 0x005a09b0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+class TesconditionfunctionsOffset08View
 {
   public:
     TESObjectWEAP* GetFlags(void);
 };
 
-class InventoryStackRecord : public ArrSI
-{
-};
 
-class TES
-{
-  public:
-    virtual bool f00()
-    {
-        return false;
-    }
-    virtual bool f01()
-    {
-        return false;
-    }
-    virtual bool f02()
-    {
-        return false;
-    }
-    virtual bool f03()
-    {
-        return false;
-    }
-    virtual bool f04()
-    {
-        return false;
-    }
-    virtual bool f05()
-    {
-        return false;
-    }
-    virtual bool f06()
-    {
-        return false;
-    }
-    virtual bool f07()
-    {
-        return false;
-    }
-    virtual bool f08()
-    {
-        return false;
-    }
-    virtual bool f09()
-    {
-        return false;
-    }
-    virtual bool f10()
-    {
-        return false;
-    }
-    virtual bool f11()
-    {
-        return false;
-    }
-    virtual bool f12()
-    {
-        return false;
-    }
-    virtual bool f13()
-    {
-        return false;
-    }
-    virtual bool f14()
-    {
-        return false;
-    }
-    virtual bool f15()
-    {
-        return false;
-    }
-    virtual bool f16()
-    {
-        return false;
-    }
-    virtual bool f17()
-    {
-        return false;
-    }
-    virtual bool f18()
-    {
-        return false;
-    }
-    virtual bool f19()
-    {
-        return false;
-    }
-    virtual bool f20()
-    {
-        return false;
-    }
-    virtual bool f21()
-    {
-        return false;
-    }
-    virtual bool f22()
-    {
-        return false;
-    }
-    virtual bool f23()
-    {
-        return false;
-    }
-    virtual bool f24()
-    {
-        return false;
-    }
-    virtual bool f25()
-    {
-        return false;
-    }
-    virtual bool f26()
-    {
-        return false;
-    }
-    virtual bool f27()
-    {
-        return false;
-    }
-    virtual bool f28()
-    {
-        return false;
-    }
-    virtual bool f29()
-    {
-        return false;
-    }
-    virtual bool f30()
-    {
-        return false;
-    }
-    virtual bool f31()
-    {
-        return false;
-    }
-    virtual bool f32()
-    {
-        return false;
-    }
-    virtual bool f33()
-    {
-        return false;
-    }
-    virtual bool f34()
-    {
-        return false;
-    }
-    virtual bool f35()
-    {
-        return false;
-    }
-    virtual bool f36()
-    {
-        return false;
-    }
-    virtual bool f37()
-    {
-        return false;
-    }
-    virtual bool f38()
-    {
-        return false;
-    }
-    virtual bool f39()
-    {
-        return false;
-    }
-    virtual bool f40()
-    {
-        return false;
-    }
-    virtual bool f41()
-    {
-        return false;
-    }
-    virtual bool f42()
-    {
-        return false;
-    }
-    virtual bool f43()
-    {
-        return false;
-    }
-    virtual bool f44()
-    {
-        return false;
-    }
-    virtual bool f45()
-    {
-        return false;
-    }
-    virtual bool f46()
-    {
-        return false;
-    }
-    virtual bool f47()
-    {
-        return false;
-    }
-    virtual bool f48()
-    {
-        return false;
-    }
-    virtual bool f49()
-    {
-        return false;
-    }
-    virtual bool f50()
-    {
-        return false;
-    }
-    virtual bool f51()
-    {
-        return false;
-    }
-    virtual bool f52()
-    {
-        return false;
-    }
-    virtual bool f53()
-    {
-        return false;
-    }
-    virtual bool f54()
-    {
-        return false;
-    }
-    virtual bool f55()
-    {
-        return false;
-    }
-    virtual bool f56()
-    {
-        return false;
-    }
-    virtual bool f57()
-    {
-        return false;
-    }
-    virtual bool f58()
-    {
-        return false;
-    }
-    virtual bool f59()
-    {
-        return false;
-    }
-    virtual bool f60()
-    {
-        return false;
-    }
-    virtual bool f61()
-    {
-        return false;
-    }
-    virtual bool f62()
-    {
-        return false;
-    }
-    virtual bool f63()
-    {
-        return false;
-    }
-    virtual bool m_bFlagBeforeTwoBooleans()
-    {
-        return false;
-    }
 
-    void* GetLogDate(void);
-};
 
 class LogDate
 {
@@ -12501,7 +10541,7 @@ class LogDate
     {
         return 0;
     }
-    virtual ArrSI* GetItemChange()
+    virtual TesconditionfunctionsOffset08View* GetItemChange()
     {
         return 0;
     }
@@ -12524,7 +10564,7 @@ bool __cdecl FUN_005a09b0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     afReturnValue = 0.0;
     pactor = 0;
 
-    if (apRefObject && reinterpret_cast<TES*>(apRefObject)->m_bFlagBeforeTwoBooleans())
+    if (apRefObject && apRefObject->IsActor())
     {
         pactor = reinterpret_cast<Actor*>(apRefObject);
     }
@@ -12537,7 +10577,7 @@ bool __cdecl FUN_005a09b0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
         pweap = 0;
         if (pweapdata && pweapdata->GetFlags() && _FNV_GetFormType(pweapdata->GetFlags()) == 0x28)
         {
-            pweap = pweapdata->GetFlags();
+            pweap = reinterpret_cast<TESObjectWEAP*>(pweapdata->GetFlags());
         }
 
         if (pweap)
@@ -12889,12 +10929,10 @@ struct V3 : V2
 {
     virtual bool v03();
 };
-struct V4 : V3
+// Preserve this unrelated vtable ladder without shadowing the shared SIMD V4.
+struct V5 : V3
 {
     virtual bool v04();
-};
-struct V5 : V4
-{
     virtual bool v05();
 };
 struct V6 : V5
@@ -13161,144 +11199,12 @@ bool __cdecl FUN_005a1a40(TESObjectREFR* apRefObject, void*, void*, double& afRe
 }
 
 namespace fnv_005a1ad0 {
-struct NiFixedString
-{
-};
 
-struct NiExtraData
-{
-};
 
-struct NiAVObjectX
-{
-    NiExtraData* GetExtraData(NiFixedString const& name);
-};
 
-struct BSXFlags
-{
-    bool GetAddon() const;
-};
 
-struct FUN_005a1ad0_Dispatch
-{
-    virtual void f000() = 0;
-    virtual void f001() = 0;
-    virtual void f002() = 0;
-    virtual void f003() = 0;
-    virtual void f004() = 0;
-    virtual void f005() = 0;
-    virtual void f006() = 0;
-    virtual void f007() = 0;
-    virtual void f008() = 0;
-    virtual void f009() = 0;
-    virtual void f010() = 0;
-    virtual void f011() = 0;
-    virtual void f012() = 0;
-    virtual void f013() = 0;
-    virtual void f014() = 0;
-    virtual void f015() = 0;
-    virtual void f016() = 0;
-    virtual void f017() = 0;
-    virtual void f018() = 0;
-    virtual void f019() = 0;
-    virtual void f020() = 0;
-    virtual void f021() = 0;
-    virtual void f022() = 0;
-    virtual void f023() = 0;
-    virtual void f024() = 0;
-    virtual void f025() = 0;
-    virtual void f026() = 0;
-    virtual void f027() = 0;
-    virtual void f028() = 0;
-    virtual void f029() = 0;
-    virtual void f030() = 0;
-    virtual void f031() = 0;
-    virtual void f032() = 0;
-    virtual void f033() = 0;
-    virtual void f034() = 0;
-    virtual void f035() = 0;
-    virtual void f036() = 0;
-    virtual void f037() = 0;
-    virtual void f038() = 0;
-    virtual void f039() = 0;
-    virtual void f040() = 0;
-    virtual void f041() = 0;
-    virtual void f042() = 0;
-    virtual void f043() = 0;
-    virtual void f044() = 0;
-    virtual void f045() = 0;
-    virtual void f046() = 0;
-    virtual void f047() = 0;
-    virtual void f048() = 0;
-    virtual void f049() = 0;
-    virtual void f050() = 0;
-    virtual void f051() = 0;
-    virtual void f052() = 0;
-    virtual void f053() = 0;
-    virtual void f054() = 0;
-    virtual void f055() = 0;
-    virtual void f056() = 0;
-    virtual void f057() = 0;
-    virtual void f058() = 0;
-    virtual void f059() = 0;
-    virtual void f060() = 0;
-    virtual void f061() = 0;
-    virtual void f062() = 0;
-    virtual void f063() = 0;
-    virtual void f064() = 0;
-    virtual void f065() = 0;
-    virtual void f066() = 0;
-    virtual void f067() = 0;
-    virtual void f068() = 0;
-    virtual void f069() = 0;
-    virtual void f070() = 0;
-    virtual void f071() = 0;
-    virtual void f072() = 0;
-    virtual void f073() = 0;
-    virtual void f074() = 0;
-    virtual void f075() = 0;
-    virtual void f076() = 0;
-    virtual void f077() = 0;
-    virtual void f078() = 0;
-    virtual void f079() = 0;
-    virtual void f080() = 0;
-    virtual void f081() = 0;
-    virtual void f082() = 0;
-    virtual void f083() = 0;
-    virtual void f084() = 0;
-    virtual void f085() = 0;
-    virtual void f086() = 0;
-    virtual void f087() = 0;
-    virtual void f088() = 0;
-    virtual void f089() = 0;
-    virtual void f090() = 0;
-    virtual void f091() = 0;
-    virtual void f092() = 0;
-    virtual void f093() = 0;
-    virtual void f094() = 0;
-    virtual void f095() = 0;
-    virtual void f096() = 0;
-    virtual void f097() = 0;
-    virtual void f098() = 0;
-    virtual void f099() = 0;
-    virtual void f100() = 0;
-    virtual void f101() = 0;
-    virtual void f102() = 0;
-    virtual void f103() = 0;
-    virtual void f104() = 0;
-    virtual void f105() = 0;
-    virtual void f106() = 0;
-    virtual void f107() = 0;
-    virtual void f108() = 0;
-    virtual void f109() = 0;
-    virtual void f110() = 0;
-    virtual void f111() = 0;
-    virtual void f112() = 0;
-    virtual void f113() = 0;
-    virtual void f114() = 0;
-    virtual void f115() = 0;
-    virtual NiAVObjectX* f116() = 0;
-};
+
+
 
 NiFixedString const& __cdecl FUN_00448a80(void);
 BSXFlags* __cdecl _UseSaveGameBlocks(BSXFlags* blocks, NiExtraData* extra);
@@ -13323,7 +11229,7 @@ bool __cdecl FUN_005a1ad0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 
     if (apRefObject)
     {
-        pExtraData = reinterpret_cast<FUN_005a1ad0_Dispatch*>(apRefObject)->f116()->GetExtraData(FUN_00448a80());
+        pExtraData = apRefObject->GetNiNode()->GetExtraData(FUN_00448a80());
 
         if (pExtraData)
         {
@@ -13339,12 +11245,12 @@ bool __cdecl FUN_005a1ad0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }
 }  // namespace fnv_005a1ad0
 
-struct FUN_008a81e0_shell
+struct ConditionActorDetection : Actor
 {
     int FUN_008a81e0(Actor* target);
 };
 
-int FUN_008a81e0_shell::FUN_008a81e0(Actor* target)
+int ConditionActorDetection::FUN_008a81e0(Actor* target)
 {
     return 0;
 }
@@ -13383,7 +11289,7 @@ bool __cdecl FUN_005a1ee0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
         Actor* pTarget = reinterpret_cast<Actor*>(apParam1);
         if (pActor && pTarget)
         {
-            afReturnValue = reinterpret_cast<FUN_008a81e0_shell*>(pActor)->FUN_008a81e0(pTarget);
+            afReturnValue = reinterpret_cast<ConditionActorDetection*>(pActor)->FUN_008a81e0(pTarget);
 
             if (g_tlsDebugEnabled[0x268])
             {
@@ -13401,10 +11307,6 @@ extern unsigned int __tls_index;
 extern __declspec(thread) unsigned char FUN_tls_context[0x269];
 extern void __cdecl _DebugLog(char const*, ...);
 
-struct FUN_005a2030_shell
-{
-    bool FUN_005a2030() const;
-};
 
 // Sets afReturnValue to 1.0 when apRefObject is an actor whose FUN_005a2030 returns true, logs the result if the TLS flag is set, and returns true.
 // @fnv 0x005a1fa0
@@ -13416,7 +11318,7 @@ bool __cdecl FUN_005a1fa0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     if (apRefObject && apRefObject->IsActor())
         pact = reinterpret_cast<Actor*>(apRefObject);
 
-    if (pact && reinterpret_cast<FUN_005a2030_shell*>(pact)->FUN_005a2030())
+    if (pact && reinterpret_cast<Actor*>(pact)->FUN_005a2030())
         afReturnValue = 1.0;
 
     if (FUN_tls_context[0x268])
@@ -13429,127 +11331,6 @@ bool __cdecl FUN_005a1fa0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 namespace fnv_005a2440 {
 extern int __tls_index;
 
-class MagicItem;
-
-class MagicTarget
-{
-  public:
-    bool HasSpell(MagicItem*, bool);
-};
-
-struct MagicItemBase
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual void f6();
-    virtual void f7();
-    virtual void f8();
-    virtual void f9();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-    virtual void f38();
-    virtual void f39();
-    virtual void f40();
-    virtual void f41();
-    virtual void f42();
-    virtual void f43();
-    virtual void f44();
-    virtual void f45();
-    virtual void f46();
-    virtual void f47();
-    virtual void f48();
-    virtual void f49();
-    virtual void f50();
-    virtual void f51();
-    virtual void f52();
-    virtual void f53();
-    virtual void f54();
-    virtual void f55();
-    virtual void f56();
-    virtual void f57();
-    virtual void f58();
-    virtual void f59();
-    virtual void f60();
-    virtual void f61();
-    virtual void f62();
-    virtual void f63();
-};
-
-class MagicItem : public MagicItemBase
-{
-  public:
-    virtual bool CanBeSpellTarget();
-    virtual void f65();
-    virtual void f66();
-    virtual void f67();
-    virtual void f68();
-    virtual void f69();
-    virtual void f70();
-    virtual void f71();
-    virtual void f72();
-    virtual void f73();
-    virtual void f74();
-    virtual void f75();
-    virtual void f76();
-    virtual void f77();
-    virtual void f78();
-    virtual void f79();
-    virtual void f80();
-    virtual void f81();
-    virtual void f82();
-    virtual void f83();
-    virtual void f84();
-    virtual void f85();
-    virtual void f86();
-    virtual void f87();
-    virtual void f88();
-    virtual void f89();
-    virtual void f90();
-    virtual void f91();
-    virtual void f92();
-    virtual void f93();
-    virtual void f94();
-    virtual void f95();
-    virtual void f96();
-    virtual void f97();
-    virtual void f98();
-    virtual void f99();
-    virtual void f100();
-    virtual void f101();
-    virtual void f102();
-    virtual MagicTarget* GetMagicTarget();
-};
-
 struct TLSData
 {
     unsigned char padding[0x268];
@@ -13561,22 +11342,27 @@ extern __declspec(thread) TLSData tlsData;
 void __cdecl _DebugLog(const char*, ...);
 
 // @fnv 0x005a2440
-bool __cdecl FUN_005a2440(TESObjectREFR* reference, void* apActor, void* apUnused, double& result)
+bool __cdecl FUN_005a2440(TESObjectREFR* reference, void* apMagicItem, void* apUnused, double& result)
 {
-    MagicItem* pmagicItem;
+    Actor* pactorTarget;
 
     result = 0.0;
-    pmagicItem = 0;
+    pactorTarget = 0;
 
-    if (reference && reinterpret_cast<MagicItem*>(reference)->CanBeSpellTarget())
+    if (reference && reference->IsActor())
     {
-        pmagicItem = reinterpret_cast<MagicItem*>(reference);
+        pactorTarget = reinterpret_cast<Actor*>(reference);
     }
 
     {
-        Actor* pactor = reinterpret_cast<Actor*>(apActor);
+        MagicItem* pmagicItem = reinterpret_cast<MagicItem*>(apMagicItem);
+        // TESObjectREFR::Unk_67 is the virtual magic-target getter, but the
+        // shared declaration currently returns void. Keep its original slot.
+        typedef MagicTarget* (__thiscall* GetMagicTargetFunction)(Actor*);
 
-        if (pmagicItem && pactor && pmagicItem->GetMagicTarget()->HasSpell(reinterpret_cast<MagicItem*>(pactor), true))
+        if (pactorTarget && pmagicItem &&
+            reinterpret_cast<GetMagicTargetFunction>((*reinterpret_cast<void***>(pactorTarget))[103])(pactorTarget)
+                ->HasSpell(pmagicItem, true))
         {
             result = 1.0;
         }
@@ -13734,10 +11520,7 @@ bool __cdecl FUN_005a2c30(TESObjectREFR* reference, void* arg1, void* arg2, doub
     return true;
 }
 
-struct DoorCell
-{
-    TESForm* GetOwner();
-};
+
 
 char const* __cdecl FUN_00482720(TESForm* form);
 void __cdecl _DebugLog(char const* format, ...);
@@ -13753,7 +11536,7 @@ extern __declspec(thread) FUN_005a2ed0_TLSData FUN_005a2ed0_TLSData;
 // @fnv 0x005a2ed0
 bool __cdecl FUN_005a2ed0(TESObjectREFR* reference, void* arg1, void* arg2, double& result)
 {
-    DoorCell* m_pSourceCell = static_cast<DoorCell*>(arg1);
+    TESObjectCELL* m_pSourceCell = static_cast<TESObjectCELL*>(arg1);
     TESForm* pOwner = static_cast<TESForm*>(arg2);
 
     if (m_pSourceCell->GetOwner() == pOwner)
@@ -13878,11 +11661,6 @@ class Time : public Calendar
 extern Time DAT_011de7b8;
 extern double _DAT_01012060;
 
-class TES
-{
-  public:
-    void* GetLogDate(void);
-};
 
 class FUN_005a3a30_ObjectBase
 {
@@ -14036,465 +11814,19 @@ class FUN_005a3a30_Object : public FUN_005a3a30_ObjectBase
     virtual bool v139(int) = 0;
 };
 
-class FUN_005a3a30_LogBase
-{
-  public:
-    virtual void v000() = 0;
-    virtual void v001() = 0;
-    virtual void v002() = 0;
-    virtual void v003() = 0;
-    virtual void v004() = 0;
-    virtual void v005() = 0;
-    virtual void v006() = 0;
-    virtual void v007() = 0;
-    virtual void v008() = 0;
-    virtual void v009() = 0;
-    virtual void v010() = 0;
-    virtual void v011() = 0;
-    virtual void v012() = 0;
-    virtual void v013() = 0;
-    virtual void v014() = 0;
-    virtual void v015() = 0;
-    virtual void v016() = 0;
-    virtual void v017() = 0;
-    virtual void v018() = 0;
-    virtual void v019() = 0;
-    virtual void v020() = 0;
-    virtual void v021() = 0;
-    virtual void v022() = 0;
-    virtual void v023() = 0;
-    virtual void v024() = 0;
-    virtual void v025() = 0;
-    virtual void v026() = 0;
-    virtual void v027() = 0;
-    virtual void v028() = 0;
-    virtual void v029() = 0;
-    virtual void v030() = 0;
-    virtual void v031() = 0;
-    virtual void v032() = 0;
-    virtual void v033() = 0;
-    virtual void v034() = 0;
-    virtual void v035() = 0;
-    virtual void v036() = 0;
-    virtual void v037() = 0;
-    virtual void v038() = 0;
-    virtual void v039() = 0;
-    virtual void v040() = 0;
-    virtual void v041() = 0;
-    virtual void v042() = 0;
-    virtual void v043() = 0;
-    virtual void v044() = 0;
-    virtual void v045() = 0;
-    virtual void v046() = 0;
-    virtual void v047() = 0;
-    virtual void v048() = 0;
-    virtual void v049() = 0;
-    virtual void v050() = 0;
-    virtual void v051() = 0;
-    virtual void v052() = 0;
-    virtual void v053() = 0;
-    virtual void v054() = 0;
-    virtual void v055() = 0;
-    virtual void v056() = 0;
-    virtual void v057() = 0;
-    virtual void v058() = 0;
-    virtual void v059() = 0;
-    virtual void v060() = 0;
-    virtual void v061() = 0;
-    virtual void v062() = 0;
-    virtual void v063() = 0;
-};
 
-class FUN_005a3a30_Log1 : public FUN_005a3a30_LogBase
-{
-  public:
-    virtual void v064() = 0;
-    virtual void v065() = 0;
-    virtual void v066() = 0;
-    virtual void v067() = 0;
-    virtual void v068() = 0;
-    virtual void v069() = 0;
-    virtual void v070() = 0;
-    virtual void v071() = 0;
-    virtual void v072() = 0;
-    virtual void v073() = 0;
-    virtual void v074() = 0;
-    virtual void v075() = 0;
-    virtual void v076() = 0;
-    virtual void v077() = 0;
-    virtual void v078() = 0;
-    virtual void v079() = 0;
-    virtual void v080() = 0;
-    virtual void v081() = 0;
-    virtual void v082() = 0;
-    virtual void v083() = 0;
-    virtual void v084() = 0;
-    virtual void v085() = 0;
-    virtual void v086() = 0;
-    virtual void v087() = 0;
-    virtual void v088() = 0;
-    virtual void v089() = 0;
-    virtual void v090() = 0;
-    virtual void v091() = 0;
-    virtual void v092() = 0;
-    virtual void v093() = 0;
-    virtual void v094() = 0;
-    virtual void v095() = 0;
-    virtual void v096() = 0;
-    virtual void v097() = 0;
-    virtual void v098() = 0;
-    virtual void v099() = 0;
-    virtual void v100() = 0;
-    virtual void v101() = 0;
-    virtual void v102() = 0;
-    virtual void v103() = 0;
-    virtual void v104() = 0;
-    virtual void v105() = 0;
-    virtual void v106() = 0;
-    virtual void v107() = 0;
-    virtual void v108() = 0;
-    virtual void v109() = 0;
-    virtual void v110() = 0;
-    virtual void v111() = 0;
-    virtual void v112() = 0;
-    virtual void v113() = 0;
-    virtual void v114() = 0;
-    virtual void v115() = 0;
-    virtual void v116() = 0;
-    virtual void v117() = 0;
-    virtual void v118() = 0;
-    virtual void v119() = 0;
-    virtual void v120() = 0;
-    virtual void v121() = 0;
-    virtual void v122() = 0;
-    virtual void v123() = 0;
-    virtual void v124() = 0;
-    virtual void v125() = 0;
-    virtual void v126() = 0;
-    virtual void v127() = 0;
-};
 
-class FUN_005a3a30_Log2 : public FUN_005a3a30_Log1
-{
-  public:
-    virtual void v128() = 0;
-    virtual void v129() = 0;
-    virtual void v130() = 0;
-    virtual void v131() = 0;
-    virtual void v132() = 0;
-    virtual void v133() = 0;
-    virtual void v134() = 0;
-    virtual void v135() = 0;
-    virtual void v136() = 0;
-    virtual void v137() = 0;
-    virtual void v138() = 0;
-    virtual void v139() = 0;
-    virtual void v140() = 0;
-    virtual void v141() = 0;
-    virtual void v142() = 0;
-    virtual void v143() = 0;
-    virtual void v144() = 0;
-    virtual void v145() = 0;
-    virtual void v146() = 0;
-    virtual void v147() = 0;
-    virtual void v148() = 0;
-    virtual void v149() = 0;
-    virtual void v150() = 0;
-    virtual void v151() = 0;
-    virtual void v152() = 0;
-    virtual void v153() = 0;
-    virtual void v154() = 0;
-    virtual void v155() = 0;
-    virtual void v156() = 0;
-    virtual void v157() = 0;
-    virtual void v158() = 0;
-    virtual void v159() = 0;
-    virtual void v160() = 0;
-    virtual void v161() = 0;
-    virtual void v162() = 0;
-    virtual void v163() = 0;
-    virtual void v164() = 0;
-    virtual void v165() = 0;
-    virtual void v166() = 0;
-    virtual void v167() = 0;
-    virtual void v168() = 0;
-    virtual void v169() = 0;
-    virtual void v170() = 0;
-    virtual void v171() = 0;
-    virtual void v172() = 0;
-    virtual void v173() = 0;
-    virtual void v174() = 0;
-    virtual void v175() = 0;
-    virtual void v176() = 0;
-    virtual void v177() = 0;
-    virtual void v178() = 0;
-    virtual void v179() = 0;
-    virtual void v180() = 0;
-    virtual void v181() = 0;
-    virtual void v182() = 0;
-    virtual void v183() = 0;
-    virtual void v184() = 0;
-    virtual void v185() = 0;
-    virtual void v186() = 0;
-    virtual void v187() = 0;
-    virtual void v188() = 0;
-    virtual void v189() = 0;
-    virtual void v190() = 0;
-    virtual void v191() = 0;
-};
 
-class FUN_005a3a30_Log3 : public FUN_005a3a30_Log2
-{
-  public:
-    virtual void v192() = 0;
-    virtual void v193() = 0;
-    virtual void v194() = 0;
-    virtual void v195() = 0;
-    virtual void v196() = 0;
-    virtual void v197() = 0;
-    virtual void v198() = 0;
-    virtual void v199() = 0;
-    virtual void v200() = 0;
-    virtual void v201() = 0;
-    virtual void v202() = 0;
-    virtual void v203() = 0;
-    virtual void v204() = 0;
-    virtual void v205() = 0;
-    virtual void v206() = 0;
-    virtual void v207() = 0;
-    virtual void v208() = 0;
-    virtual void v209() = 0;
-    virtual void v210() = 0;
-    virtual void v211() = 0;
-    virtual void v212() = 0;
-    virtual void v213() = 0;
-    virtual void v214() = 0;
-    virtual void v215() = 0;
-    virtual void v216() = 0;
-    virtual void v217() = 0;
-    virtual void v218() = 0;
-    virtual void v219() = 0;
-    virtual void v220() = 0;
-    virtual void v221() = 0;
-    virtual void v222() = 0;
-    virtual void v223() = 0;
-    virtual void v224() = 0;
-    virtual void v225() = 0;
-    virtual void v226() = 0;
-    virtual void v227() = 0;
-    virtual void v228() = 0;
-    virtual void v229() = 0;
-    virtual void v230() = 0;
-    virtual void v231() = 0;
-    virtual void v232() = 0;
-    virtual void v233() = 0;
-    virtual void v234() = 0;
-    virtual void v235() = 0;
-    virtual void v236() = 0;
-    virtual void v237() = 0;
-    virtual void v238() = 0;
-    virtual void v239() = 0;
-    virtual void v240() = 0;
-    virtual void v241() = 0;
-    virtual void v242() = 0;
-    virtual void v243() = 0;
-    virtual void v244() = 0;
-    virtual void v245() = 0;
-    virtual void v246() = 0;
-    virtual void v247() = 0;
-    virtual void v248() = 0;
-    virtual void v249() = 0;
-    virtual void v250() = 0;
-    virtual void v251() = 0;
-    virtual void v252() = 0;
-    virtual void v253() = 0;
-    virtual void v254() = 0;
-    virtual void v255() = 0;
-};
 
-class FUN_005a3a30_Log4 : public FUN_005a3a30_Log3
-{
-  public:
-    virtual void v256() = 0;
-    virtual void v257() = 0;
-    virtual void v258() = 0;
-    virtual void v259() = 0;
-    virtual void v260() = 0;
-    virtual void v261() = 0;
-    virtual void v262() = 0;
-    virtual void v263() = 0;
-    virtual void v264() = 0;
-    virtual void v265() = 0;
-    virtual void v266() = 0;
-    virtual void v267() = 0;
-    virtual void v268() = 0;
-    virtual void v269() = 0;
-    virtual void v270() = 0;
-    virtual void v271() = 0;
-    virtual void v272() = 0;
-    virtual void v273() = 0;
-    virtual void v274() = 0;
-    virtual void v275() = 0;
-    virtual void v276() = 0;
-    virtual void v277() = 0;
-    virtual void v278() = 0;
-    virtual void v279() = 0;
-    virtual void v280() = 0;
-    virtual void v281() = 0;
-    virtual void v282() = 0;
-    virtual void v283() = 0;
-    virtual void v284() = 0;
-    virtual void v285() = 0;
-    virtual void v286() = 0;
-    virtual void v287() = 0;
-    virtual void v288() = 0;
-    virtual void v289() = 0;
-    virtual void v290() = 0;
-    virtual void v291() = 0;
-    virtual void v292() = 0;
-    virtual void v293() = 0;
-    virtual void v294() = 0;
-    virtual void v295() = 0;
-    virtual void v296() = 0;
-    virtual void v297() = 0;
-    virtual void v298() = 0;
-    virtual void v299() = 0;
-    virtual void v300() = 0;
-    virtual void v301() = 0;
-    virtual void v302() = 0;
-    virtual void v303() = 0;
-    virtual void v304() = 0;
-    virtual void v305() = 0;
-    virtual void v306() = 0;
-    virtual void v307() = 0;
-    virtual void v308() = 0;
-    virtual void v309() = 0;
-    virtual void v310() = 0;
-    virtual void v311() = 0;
-    virtual void v312() = 0;
-    virtual void v313() = 0;
-    virtual void v314() = 0;
-    virtual void v315() = 0;
-    virtual void v316() = 0;
-    virtual void v317() = 0;
-    virtual void v318() = 0;
-    virtual void v319() = 0;
-};
 
-class FUN_005a3a30_Log5 : public FUN_005a3a30_Log4
-{
-  public:
-    virtual void v320() = 0;
-    virtual void v321() = 0;
-    virtual void v322() = 0;
-    virtual void v323() = 0;
-    virtual void v324() = 0;
-    virtual void v325() = 0;
-    virtual void v326() = 0;
-    virtual void v327() = 0;
-    virtual void v328() = 0;
-    virtual void v329() = 0;
-    virtual void v330() = 0;
-    virtual void v331() = 0;
-    virtual void v332() = 0;
-    virtual void v333() = 0;
-    virtual void v334() = 0;
-    virtual void v335() = 0;
-    virtual void v336() = 0;
-    virtual void v337() = 0;
-    virtual void v338() = 0;
-    virtual void v339() = 0;
-    virtual void v340() = 0;
-    virtual void v341() = 0;
-    virtual void v342() = 0;
-    virtual void v343() = 0;
-    virtual void v344() = 0;
-    virtual void v345() = 0;
-    virtual void v346() = 0;
-    virtual void v347() = 0;
-    virtual void v348() = 0;
-    virtual void v349() = 0;
-    virtual void v350() = 0;
-    virtual void v351() = 0;
-    virtual void v352() = 0;
-    virtual void v353() = 0;
-    virtual void v354() = 0;
-    virtual void v355() = 0;
-    virtual void v356() = 0;
-    virtual void v357() = 0;
-    virtual void v358() = 0;
-    virtual void v359() = 0;
-    virtual void v360() = 0;
-    virtual void v361() = 0;
-    virtual void v362() = 0;
-    virtual void v363() = 0;
-    virtual void v364() = 0;
-    virtual void v365() = 0;
-    virtual void v366() = 0;
-    virtual void v367() = 0;
-    virtual void v368() = 0;
-    virtual void v369() = 0;
-    virtual void v370() = 0;
-    virtual void v371() = 0;
-};
 
-class FUN_005a3a30_Log6 : public FUN_005a3a30_Log5
-{
-  public:
-    virtual void v380() = 0;
-    virtual void v381() = 0;
-    virtual void v382() = 0;
-    virtual void v383() = 0;
-    virtual void v384() = 0;
-    virtual void v385() = 0;
-    virtual void v386() = 0;
-    virtual void v387() = 0;
-    virtual void v388() = 0;
-    virtual void v389() = 0;
-    virtual void v390() = 0;
-    virtual void v391() = 0;
-    virtual void v392() = 0;
-    virtual void v393() = 0;
-    virtual void v394() = 0;
-    virtual void v395() = 0;
-    virtual void v396() = 0;
-    virtual void v397() = 0;
-    virtual void v398() = 0;
-    virtual void v399() = 0;
-    virtual void v400() = 0;
-    virtual void v401() = 0;
-    virtual void v402() = 0;
-    virtual void v403() = 0;
-    virtual void v404() = 0;
-    virtual void v405() = 0;
-    virtual void v406() = 0;
-    virtual void v407() = 0;
-    virtual void v408() = 0;
-    virtual void v409() = 0;
-    virtual void v410() = 0;
-    virtual void v411() = 0;
-    virtual void v412() = 0;
-    virtual void v413() = 0;
-    virtual void v414() = 0;
-    virtual void v415() = 0;
-    virtual void v416() = 0;
-    virtual void v417() = 0;
-    virtual void v418() = 0;
-    virtual void v419() = 0;
-    virtual void v420() = 0;
-    virtual void v421() = 0;
-    virtual void v422() = 0;
-    virtual void v423() = 0;
-    virtual void v424() = 0;
-    virtual void v425() = 0;
-    virtual void v426() = 0;
-    virtual void v427() = 0;
-    virtual void v428() = 0;
-    virtual void v429() = 0;
-    virtual void v430() = 0;
 
-    virtual float v431() = 0;
-};
+
+
+
+
+
+
 
 // @fnv 0x005a3a30
 bool FUN_005a3a30(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double* afReturnValue)
@@ -14510,7 +11842,7 @@ bool FUN_005a3a30(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
         pactor = (Actor*)apRefObject;
 
         if (((TES*)pactor)->GetLogDate() &&
-            (fdeadtime = ((FUN_005a3a30_Log6*)((TES*)pactor)->GetLogDate())->v431()) > 0.0)
+            (fdeadtime = reinterpret_cast<const BaseProcess*>(((TES*)pactor)->GetLogDate())->GetCurrentDetectionAmount()) > 0.0)
         {
             fcurrtime = DAT_011de7b8.GetGameHoursPassed();
             *afReturnValue = fcurrtime - fdeadtime;
@@ -14534,81 +11866,13 @@ extern int __tls_index;
 void __cdecl _DebugLog(const char* format, double value);
 int __fastcall FUN_00573110(int thisPointer);
 
-struct FUN_005a3e10_VirtualActor
-{
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-    virtual void f38();
-    virtual void f39();
-    virtual void f40();
-    virtual void f41();
-    virtual void f42();
-    virtual void f43();
-    virtual void f44();
-    virtual void f45();
-    virtual void f46();
-    virtual void f47();
-    virtual void f48();
-    virtual void f49();
-    virtual void f50();
-    virtual void f51();
-    virtual void f52();
-    virtual void f53();
-    virtual void f54();
-    virtual void f55();
-    virtual void f56();
-    virtual void f57();
-    virtual void f58();
-    virtual void f59();
-    virtual void f60();
-    virtual void f61();
-    virtual void f62();
-    virtual void f63();
-    virtual bool IsEssentialActor();
-};
 
 // @fnv 0x005a3e10
 bool __cdecl FUN_005a3e10(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double& afReturnValue)
 {
     afReturnValue = -1.0;
 
-    if (reinterpret_cast<FUN_005a3e10_VirtualActor*>(apRefObject)->IsEssentialActor())
+    if (apRefObject->IsActor())
     {
         Actor* pactor = reinterpret_cast<Actor*>(apRefObject);
         afReturnValue = static_cast<double>(FUN_00573110(reinterpret_cast<int>(pactor)));
@@ -14832,10 +12096,6 @@ bool __cdecl FUN_005a4090(TESObjectREFR* reference, void* pScript, void* pFactio
 }
 
 namespace fnv_005a4b60 {
-struct ActorState
-{
-    unsigned int GetMaskedState(void) const;
-};
 
 struct VirtualActor
 {
@@ -15000,7 +12260,7 @@ bool __cdecl FUN_005a4b60(TESObjectREFR* apRefObject, void* apParam1, void* apPa
         if (pactor == (Actor*)g_thePlayer)
         {
             {
-                int majorCrimeCount = (int)((ActorState*)pactor)->GetMaskedState();
+                int majorCrimeCount = (int)((const ConditionActorCrime*)pactor)->GetMaskedCrimeCount();
                 afReturnValue = majorCrimeCount;
             }
         }
@@ -15186,7 +12446,7 @@ struct FUN_005a53e0_virtual_helper
     }
 };
 
-struct FUN_008bc700_shell
+struct ConditionActorCombatTarget : Actor
 {
     bool FUN_008bc700(Actor* actor);
 };
@@ -15208,7 +12468,7 @@ bool FUN_005a53e0(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     if (apRefObject && reinterpret_cast<FUN_005a53e0_virtual_helper*>(apRefObject)->GetBlockPostAnim())
     {
         Actor* pact = reinterpret_cast<Actor*>(apRefObject);
-        if (reinterpret_cast<FUN_008bc700_shell*>(pact)->FUN_008bc700(reinterpret_cast<Actor*>(apParam1)))
+        if (reinterpret_cast<ConditionActorCombatTarget*>(pact)->FUN_008bc700(reinterpret_cast<Actor*>(apParam1)))
         {
             afReturnValue = 1.0;
         }
@@ -15228,141 +12488,8 @@ extern int __tls_index;
 
 __declspec(thread) unsigned char FUN_005a5460_tlsData[0x269];
 
-struct FUN_005a5460_StandIn
+struct ConditionActorVATSArea : Actor
 {
-    virtual void v00()
-    {}
-    virtual void v01()
-    {}
-    virtual void v02()
-    {}
-    virtual void v03()
-    {}
-    virtual void v04()
-    {}
-    virtual void v05()
-    {}
-    virtual void v06()
-    {}
-    virtual void v07()
-    {}
-    virtual void v08()
-    {}
-    virtual void v09()
-    {}
-    virtual void v10()
-    {}
-    virtual void v11()
-    {}
-    virtual void v12()
-    {}
-    virtual void v13()
-    {}
-    virtual void v14()
-    {}
-    virtual void v15()
-    {}
-    virtual void v16()
-    {}
-    virtual void v17()
-    {}
-    virtual void v18()
-    {}
-    virtual void v19()
-    {}
-    virtual void v20()
-    {}
-    virtual void v21()
-    {}
-    virtual void v22()
-    {}
-    virtual void v23()
-    {}
-    virtual void v24()
-    {}
-    virtual void v25()
-    {}
-    virtual void v26()
-    {}
-    virtual void v27()
-    {}
-    virtual void v28()
-    {}
-    virtual void v29()
-    {}
-    virtual void v30()
-    {}
-    virtual void v31()
-    {}
-    virtual void v32()
-    {}
-    virtual void v33()
-    {}
-    virtual void v34()
-    {}
-    virtual void v35()
-    {}
-    virtual void v36()
-    {}
-    virtual void v37()
-    {}
-    virtual void v38()
-    {}
-    virtual void v39()
-    {}
-    virtual void v40()
-    {}
-    virtual void v41()
-    {}
-    virtual void v42()
-    {}
-    virtual void v43()
-    {}
-    virtual void v44()
-    {}
-    virtual void v45()
-    {}
-    virtual void v46()
-    {}
-    virtual void v47()
-    {}
-    virtual void v48()
-    {}
-    virtual void v49()
-    {}
-    virtual void v50()
-    {}
-    virtual void v51()
-    {}
-    virtual void v52()
-    {}
-    virtual void v53()
-    {}
-    virtual void v54()
-    {}
-    virtual void v55()
-    {}
-    virtual void v56()
-    {}
-    virtual void v57()
-    {}
-    virtual void v58()
-    {}
-    virtual void v59()
-    {}
-    virtual void v60()
-    {}
-    virtual void v61()
-    {}
-    virtual void v62()
-    {}
-    virtual void v63()
-    {}
-    virtual bool IsEssentialActor()
-    {
-        return false;
-    }
-
     float FUN_008bd830(TESObjectREFR* target, float value);
 };
 
@@ -15375,9 +12502,9 @@ bool __cdecl FUN_005a5460(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     afReturnValue = 0.0;
     ptargetRef = (TESObjectREFR*)apParam1;
 
-    if (apRefObject && ((FUN_005a5460_StandIn*)apRefObject)->IsEssentialActor())
+    if (apRefObject && apRefObject->IsActor())
     {
-        afReturnValue = ((FUN_005a5460_StandIn*)apRefObject)->FUN_008bd830(ptargetRef, 1.5707963705062866f);
+        afReturnValue = ((ConditionActorVATSArea*)apRefObject)->FUN_008bd830(ptargetRef, 1.5707963705062866f);
     }
 
     if (FUN_005a5460_tlsData[0x268])
@@ -15596,76 +12723,7 @@ struct FUN_005a5720_TLS
 
 static __declspec(thread) FUN_005a5720_TLS FUN_005a5720_tls;
 
-struct FUN_005a5720_StandIn
-{
-    virtual void v00() = 0;
-    virtual void v01() = 0;
-    virtual void v02() = 0;
-    virtual void v03() = 0;
-    virtual void v04() = 0;
-    virtual void v05() = 0;
-    virtual void v06() = 0;
-    virtual void v07() = 0;
-    virtual void v08() = 0;
-    virtual void v09() = 0;
-    virtual void v10() = 0;
-    virtual void v11() = 0;
-    virtual void v12() = 0;
-    virtual void v13() = 0;
-    virtual void v14() = 0;
-    virtual void v15() = 0;
-    virtual void v16() = 0;
-    virtual void v17() = 0;
-    virtual void v18() = 0;
-    virtual void v19() = 0;
-    virtual void v20() = 0;
-    virtual void v21() = 0;
-    virtual void v22() = 0;
-    virtual void v23() = 0;
-    virtual void v24() = 0;
-    virtual void v25() = 0;
-    virtual void v26() = 0;
-    virtual void v27() = 0;
-    virtual void v28() = 0;
-    virtual void v29() = 0;
-    virtual void v30() = 0;
-    virtual void v31() = 0;
-    virtual void v32() = 0;
-    virtual void v33() = 0;
-    virtual void v34() = 0;
-    virtual void v35() = 0;
-    virtual void v36() = 0;
-    virtual void v37() = 0;
-    virtual void v38() = 0;
-    virtual void v39() = 0;
-    virtual void v40() = 0;
-    virtual void v41() = 0;
-    virtual void v42() = 0;
-    virtual void v43() = 0;
-    virtual void v44() = 0;
-    virtual void v45() = 0;
-    virtual void v46() = 0;
-    virtual void v47() = 0;
-    virtual void v48() = 0;
-    virtual void v49() = 0;
-    virtual void v50() = 0;
-    virtual void v51() = 0;
-    virtual void v52() = 0;
-    virtual void v53() = 0;
-    virtual void v54() = 0;
-    virtual void v55() = 0;
-    virtual void v56() = 0;
-    virtual void v57() = 0;
-    virtual void v58() = 0;
-    virtual void v59() = 0;
-    virtual void v60() = 0;
-    virtual void v61() = 0;
-    virtual void v62() = 0;
-    virtual void v63() = 0;
-    virtual bool v64() = 0;
 
-    double FUN_008bdbd0(TESObjectREFR* target, float value);
-};
 
 // Computes a value for apRefObject against apParam1 at 4.712389 radians, stores it in afReturnValue, logs it when TLS enabled, and returns true.
 // @fnv 0x005a5720
@@ -15674,10 +12732,10 @@ bool __cdecl FUN_005a5720(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     afReturnValue = 0.0;
     TESObjectREFR* ptargetRef = static_cast<TESObjectREFR*>(apParam1);
 
-    if (apRefObject && reinterpret_cast<FUN_005a5720_StandIn*>(apRefObject)->v64())
+    if (apRefObject && apRefObject->IsActor())
     {
         afReturnValue =
-            reinterpret_cast<FUN_005a5720_StandIn*>(apRefObject)->FUN_008bdbd0(ptargetRef, 4.71238899230957f);
+            reinterpret_cast<ConditionActorVATSVisibility*>(apRefObject)->FUN_008bdbd0(ptargetRef, 4.71238899230957f);
     }
 
     if (FUN_005a5720_tls.enabled)
@@ -15692,10 +12750,7 @@ struct GlobalObject_0045cfe0
     int* Int();
 };
 
-struct ActorValueUtility
-{
-    static int __cdecl ConvertActorValue(int level);
-};
+
 
 struct ActorLevelAccess
 {
@@ -15743,7 +12798,7 @@ bool __cdecl FUN_005a58c0(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 
     icurrentXP =
         reinterpret_cast<PlayerStatAccess*>(reinterpret_cast<unsigned char*>(_g_thePlayer) + 0xa4)->GetStat(0x18);
-    inextThreshold = ActorValueUtility::ConvertActorValue(iplayerLevel + 1);
+    inextThreshold = ActorValueUtility_tesconditionfunctions::ConvertActorValue(iplayerLevel + 1);
     afReturnValue = inextThreshold - icurrentXP;
 
     if (g_005a58c0_tlsFlag)
@@ -16084,16 +13139,13 @@ bool __cdecl FUN_0059d250(TESObjectREFR* reference, void* arg1, void* arg2, doub
 
 extern __declspec(thread) bool g_bShowConditionDebug;
 void __cdecl DebugLog(char const*, ...);
-struct TESBipedModelForm
-{
-    bool FUN_0047c850(void);
-};
+
 
 // @fnv 0x0059d2a0
 bool __cdecl FUN_0059d2a0(TESObjectREFR* reference, void* apUnused1, void* apUnused2, double& result)
 {
     result = 0.0;
-    if (reference && reference->IsActor() && reinterpret_cast<TESBipedModelForm*>(reference)->FUN_0047c850())
+    if (reference && reference->IsActor() && reinterpret_cast<ConditionBipedModelForm*>(reference)->IsLoading())
     {
         result = 1.0;
     }
@@ -16104,11 +13156,8 @@ bool __cdecl FUN_0059d2a0(TESObjectREFR* reference, void* apUnused1, void* apUnu
     return true;
 }
 
-struct SkyState
-{
-    bool FUN_0059ea80();
-};
-SkyState* __cdecl FUN_0046dd00();
+
+
 extern __declspec(thread) unsigned char tlsBytes[];
 extern const char str_010351ec[];
 void __cdecl FUN_00703c00(const char*, double);
@@ -16116,27 +13165,21 @@ void __cdecl FUN_00703c00(const char*, double);
 // @fnv 0x0059ea10
 bool __cdecl FUN_0059ea10(int first, int second, int third, double* output)
 {
-    SkyState* sky = FUN_0046dd00();
-    *output = sky->FUN_0059ea80() ? 1.0f : 0.0f;
+    ConditionSky* sky = reinterpret_cast<ConditionSky*>(Sky::GetInstance());
+    *output = sky->IsSnowing() ? 1.0f : 0.0f;
     if (tlsBytes[0x268])
         FUN_00703c00(str_010351ec, *output);
     return true;
 }
 
-struct FUN_00401170_Mode
-{
-    unsigned int __thiscall FUN_00401170();
-};
-struct FUN_0059ecc0_Ref
-{
-    FUN_00401170_Mode* __thiscall FUN_007af430();
-};
+
+
 extern __declspec(thread) unsigned char traceState[];
 extern const char DAT_01035260[];
 void __cdecl FUN_00703c00(const char* text, double result);
 // Sets result to 1.0 when reference's mode equals 0x2b, logs the result if traceState[0x268] is set, and returns true.
 // @fnv 0x0059ecc0
-bool __cdecl FUN_0059ecc0(FUN_0059ecc0_Ref* reference, void* arg1, void* arg2, double& result)
+bool __cdecl FUN_0059ecc0(TESObjectREFR* reference, void* arg1, void* arg2, double& result)
 {
     result = 0.0;
     if (reference != 0)
@@ -16260,14 +13303,8 @@ bool __cdecl IsWeaponSkillType(TESObjectREFR* reference, void* aiSkillType, void
 }
 }  // namespace fnv_005a0ab0
 
-struct RefOps
-{
-    TESForm* __thiscall FUN_007af430();
-};
-struct FormOps
-{
-    unsigned int __thiscall FUN_00401170();
-};
+
+
 struct ActorOps
 {
     TESClass* __thiscall FUN_00502430();
@@ -16286,8 +13323,8 @@ bool __cdecl FUN_005a10b0(TESObjectREFR* reference, void* arg1, void* arg2, doub
     if (reference)
     {
         TESForm* actorBase = 0;
-        if (((FormOps*)((RefOps*)reference)->FUN_007af430())->FUN_00401170() == 42)
-            actorBase = ((RefOps*)reference)->FUN_007af430();
+        if (((TESForm*)((TESObjectREFR*)reference)->FUN_007af430())->FUN_00401170() == 42)
+            actorBase = ((TESObjectREFR*)reference)->FUN_007af430();
         if (actorBase)
         {
             if (((ActorOps*)actorBase)->FUN_00502430() &&
@@ -16600,10 +13637,7 @@ bool __cdecl FUN_005a1b80(SourceLocal* source, unsigned int arg1, unsigned int a
 }
 
 namespace fnv_005a1e70 {
-struct PlayerCharacter
-{
-    bool FUN_00953f60();
-};
+
 void __cdecl _DebugLog(const char* format, ...);
 __declspec(thread) bool g_DebugLogFlag;
 // Sets result to 1.0 if the player is a murderer, otherwise 0.0, logs it when debug logging is enabled, and returns true.
@@ -16611,7 +13645,7 @@ __declspec(thread) bool g_DebugLogFlag;
 bool FUN_005a1e70(TESObjectREFR* reference, void* arg1, void* arg2, double& result)
 {
     result = 0.0;
-    result = ((PlayerCharacter*)g_thePlayer)->FUN_00953f60() ? 1.0f : 0.0f;
+    result = ((ConditionPlayerCharacter*)g_thePlayer)->IsMurderer() ? 1.0f : 0.0f;
     if (g_DebugLogFlag)
         _DebugLog("IsPlayerAMurderer >> %0.2f", result);
     return true;
@@ -16619,10 +13653,7 @@ bool FUN_005a1e70(TESObjectREFR* reference, void* arg1, void* arg2, double& resu
 }  // namespace fnv_005a1e70
 
 namespace fnv_005a2050 {
-struct FUN_005a20b0_Standin
-{
-    int GetField6dc();
-};
+
 extern "C" void __cdecl FUN_00703c00(const char*, ...);
 extern const char str_010359b4[];
 __declspec(thread) unsigned char g_tlsFlag;
@@ -16632,7 +13663,7 @@ __declspec(thread) unsigned char g_tlsFlag;
 bool __cdecl FUN_005a2050(TESObjectREFR* reference, void* apUnused1, void* apUnused2, double& result)
 {
     result = 0.0;
-    result = (double)((FUN_005a20b0_Standin*)g_thePlayer)->GetField6dc();
+    result = (double)((ConditionPlayerCharacter*)g_thePlayer)->GetField6dc();
     if (g_tlsFlag)
         FUN_00703c00(str_010359b4, result);
     return true;
@@ -16656,11 +13687,7 @@ bool __cdecl FUN_005a37b0(TESObjectREFR* reference, void* arg1, void* arg2, doub
 namespace fnv_005a3b20 {
 class BGSAction;
 
-class PlayerCharacter
-{
-  public:
-    bool HasAction(void* action);
-};
+
 
 extern PlayerCharacter* g_thePlayer;
 extern __declspec(thread) bool tls_conditionEcho;
@@ -16765,9 +13792,9 @@ bool __cdecl FUN_005a3c90(TESObjectREFR* reference, void* arg1, void* arg2, doub
         if (reinterpret_cast<EssentialVirtualActor*>(reference)->IsEssentialActor())
         {
             Actor* actor = reinterpret_cast<Actor*>(reference);
-            if (actor->RefreshActorRuntimeData())
+            if (reinterpret_cast<Actor*>(actor)->RefreshActorRuntimeData())
             {
-                result = reinterpret_cast<HitDataBoolFlag*>(actor->RefreshActorRuntimeData())->Flag(4) ? 1.0f : 0.0f;
+                result = reinterpret_cast<HitDataBoolFlag*>(reinterpret_cast<Actor*>(actor)->RefreshActorRuntimeData())->Flag(4) ? 1.0f : 0.0f;
             }
         }
     }
@@ -16839,84 +13866,16 @@ struct RuntimeState
     unsigned char flag;
 };
 extern __declspec(thread) RuntimeState gRuntimeState;
-struct Actor005a4820
-{
-    virtual void vf00();
-    virtual void vf01();
-    virtual void vf02();
-    virtual void vf03();
-    virtual void vf04();
-    virtual void vf05();
-    virtual void vf06();
-    virtual void vf07();
-    virtual void vf08();
-    virtual void vf09();
-    virtual void vf10();
-    virtual void vf11();
-    virtual void vf12();
-    virtual void vf13();
-    virtual void vf14();
-    virtual void vf15();
-    virtual void vf16();
-    virtual void vf17();
-    virtual void vf18();
-    virtual void vf19();
-    virtual void vf20();
-    virtual void vf21();
-    virtual void vf22();
-    virtual void vf23();
-    virtual void vf24();
-    virtual void vf25();
-    virtual void vf26();
-    virtual void vf27();
-    virtual void vf28();
-    virtual void vf29();
-    virtual void vf30();
-    virtual void vf31();
-    virtual void vf32();
-    virtual void vf33();
-    virtual void vf34();
-    virtual void vf35();
-    virtual void vf36();
-    virtual void vf37();
-    virtual void vf38();
-    virtual void vf39();
-    virtual void vf40();
-    virtual void vf41();
-    virtual void vf42();
-    virtual void vf43();
-    virtual void vf44();
-    virtual void vf45();
-    virtual void vf46();
-    virtual void vf47();
-    virtual void vf48();
-    virtual void vf49();
-    virtual void vf50();
-    virtual void vf51();
-    virtual void vf52();
-    virtual void vf53();
-    virtual void vf54();
-    virtual void vf55();
-    virtual void vf56();
-    virtual void vf57();
-    virtual void vf58();
-    virtual void vf59();
-    virtual void vf60();
-    virtual void vf61();
-    virtual void vf62();
-    virtual void vf63();
-    virtual unsigned char CheckActivity();
-    unsigned char FUN_00566950();
-};
+
 // Sets *out to 0.0, then to 1.0 if the actor is active and FUN_00566950 returns true; logs *out when gRuntimeState flag is set; returns 1.
 // @fnv 0x005a4820
-unsigned char __cdecl FUN_005a4820(Actor005a4820* actor, unsigned int action, unsigned int flags, double* out)
+unsigned char __cdecl FUN_005a4820(Actor* actor, unsigned int action, unsigned int flags, double* out)
 {
     *out = 0.0;
-    if (actor && actor->CheckActivity())
+    if (actor && actor->IsActor())
     {
-        Actor005a4820* p = actor;
-        if (p->FUN_00566950())
+        Actor* p = actor;
+        if (p->IsPlayerTeammate())
             *out = 1.0;
         if (*((unsigned char*)&gRuntimeState + 0x268))
             FUN_00703c00(DAT_01035f64, (int)*out);
@@ -17125,498 +14084,11 @@ struct TlsData
 };
 extern __declspec(thread) TlsData g_tls;
 
-class BaseProcess
-{
-  public:
-    virtual void Unk_000();
-    virtual void Unk_001();
-    virtual void Unk_002();
-    virtual void Unk_003();
-    virtual void Unk_004();
-    virtual void Unk_005();
-    virtual void Unk_006();
-    virtual void Unk_007();
-    virtual void Unk_008();
-    virtual void Unk_009();
-    virtual void Unk_00A();
-    virtual void Unk_00B();
-    virtual void Unk_00C();
-    virtual void Unk_00D();
-    virtual void Unk_00E();
-    virtual void Unk_00F();
-    virtual void Unk_010();
-    virtual void Unk_011();
-    virtual void Unk_012();
-    virtual void Unk_013();
-    virtual void Unk_014();
-    virtual void Unk_015();
-    virtual void Unk_016();
-    virtual void Unk_017();
-    virtual void Unk_018();
-    virtual void Unk_019();
-    virtual void Unk_01A();
-    virtual void Unk_01B();
-    virtual void Unk_01C();
-    virtual void Unk_01D();
-    virtual void Unk_01E();
-    virtual void Unk_01F();
-    virtual void Unk_020();
-    virtual void Unk_021();
-    virtual void Unk_022();
-    virtual void Unk_023();
-    virtual void Unk_024();
-    virtual void Unk_025();
-    virtual void Unk_026();
-    virtual void Unk_027();
-    virtual void Unk_028();
-    virtual void Unk_029();
-    virtual void Unk_02A();
-    virtual void Unk_02B();
-    virtual void Unk_02C();
-    virtual void Unk_02D();
-    virtual void Unk_02E();
-    virtual void Unk_02F();
-    virtual void Unk_030();
-    virtual void Unk_031();
-    virtual void Unk_032();
-    virtual void Unk_033();
-    virtual void Unk_034();
-    virtual void Unk_035();
-    virtual void Unk_036();
-    virtual void Unk_037();
-    virtual void Unk_038();
-    virtual void Unk_039();
-    virtual void Unk_03A();
-    virtual void Unk_03B();
-    virtual void Unk_03C();
-    virtual void Unk_03D();
-    virtual void Unk_03E();
-    virtual void Unk_03F();
-    virtual void Unk_040();
-    virtual void Unk_041();
-    virtual void Unk_042();
-    virtual void Unk_043();
-    virtual void Unk_044();
-    virtual void Unk_045();
-    virtual void Unk_046();
-    virtual void Unk_047();
-    virtual void Unk_048();
-    virtual void Unk_049();
-    virtual void Unk_04A();
-    virtual void Unk_04B();
-    virtual void Unk_04C();
-    virtual void Unk_04D();
-    virtual void Unk_04E();
-    virtual void Unk_04F();
-    virtual void Unk_050();
-    virtual void Unk_051();
-    virtual void Unk_052();
-    virtual void Unk_053();
-    virtual void Unk_054();
-    virtual void Unk_055();
-    virtual void Unk_056();
-    virtual void Unk_057();
-    virtual void Unk_058();
-    virtual void Unk_059();
-    virtual void Unk_05A();
-    virtual void Unk_05B();
-    virtual void Unk_05C();
-    virtual void Unk_05D();
-    virtual void Unk_05E();
-    virtual void Unk_05F();
-    virtual void Unk_060();
-    virtual void Unk_061();
-    virtual void Unk_062();
-    virtual void Unk_063();
-    virtual void Unk_064();
-    virtual void Unk_065();
-    virtual void Unk_066();
-    virtual void Unk_067();
-    virtual void Unk_068();
-    virtual void Unk_069();
-    virtual void Unk_06A();
-    virtual void Unk_06B();
-    virtual void Unk_06C();
-    virtual void Unk_06D();
-    virtual void Unk_06E();
-    virtual void Unk_06F();
-    virtual void Unk_070();
-    virtual void Unk_071();
-    virtual void Unk_072();
-    virtual void Unk_073();
-    virtual void Unk_074();
-    virtual void Unk_075();
-    virtual void Unk_076();
-    virtual void Unk_077();
-    virtual void Unk_078();
-    virtual void Unk_079();
-    virtual void Unk_07A();
-    virtual void Unk_07B();
-    virtual void Unk_07C();
-    virtual void Unk_07D();
-    virtual void Unk_07E();
-    virtual void Unk_07F();
-    virtual void Unk_080();
-    virtual void Unk_081();
-    virtual void Unk_082();
-    virtual void Unk_083();
-    virtual void Unk_084();
-    virtual void Unk_085();
-    virtual void Unk_086();
-    virtual void Unk_087();
-    virtual void Unk_088();
-    virtual void Unk_089();
-    virtual void Unk_08A();
-    virtual void Unk_08B();
-    virtual void Unk_08C();
-    virtual void Unk_08D();
-    virtual void Unk_08E();
-    virtual void Unk_08F();
-    virtual void Unk_090();
-    virtual void Unk_091();
-    virtual void Unk_092();
-    virtual void Unk_093();
-    virtual void Unk_094();
-    virtual void Unk_095();
-    virtual void Unk_096();
-    virtual void Unk_097();
-    virtual void Unk_098();
-    virtual void Unk_099();
-    virtual void Unk_09A();
-    virtual void Unk_09B();
-    virtual void Unk_09C();
-    virtual void Unk_09D();
-    virtual void Unk_09E();
-    virtual void Unk_09F();
-    virtual void Unk_0A0();
-    virtual void Unk_0A1();
-    virtual void Unk_0A2();
-    virtual void Unk_0A3();
-    virtual void Unk_0A4();
-    virtual void Unk_0A5();
-    virtual void Unk_0A6();
-    virtual void Unk_0A7();
-    virtual void Unk_0A8();
-    virtual void Unk_0A9();
-    virtual void Unk_0AA();
-    virtual void Unk_0AB();
-    virtual void Unk_0AC();
-    virtual void Unk_0AD();
-    virtual void Unk_0AE();
-    virtual void Unk_0AF();
-    virtual void Unk_0B0();
-    virtual void Unk_0B1();
-    virtual void Unk_0B2();
-    virtual void Unk_0B3();
-    virtual void Unk_0B4();
-    virtual void Unk_0B5();
-    virtual void Unk_0B6();
-    virtual void Unk_0B7();
-    virtual void Unk_0B8();
-    virtual void Unk_0B9();
-    virtual void Unk_0BA();
-    virtual void Unk_0BB();
-    virtual void Unk_0BC();
-    virtual void Unk_0BD();
-    virtual void Unk_0BE();
-    virtual void Unk_0BF();
-    virtual void Unk_0C0();
-    virtual void Unk_0C1();
-    virtual void Unk_0C2();
-    virtual void Unk_0C3();
-    virtual void Unk_0C4();
-    virtual void Unk_0C5();
-    virtual void Unk_0C6();
-    virtual void Unk_0C7();
-    virtual void Unk_0C8();
-    virtual void Unk_0C9();
-    virtual void Unk_0CA();
-    virtual void Unk_0CB();
-    virtual void Unk_0CC();
-    virtual void Unk_0CD();
-    virtual void Unk_0CE();
-    virtual void Unk_0CF();
-    virtual void Unk_0D0();
-    virtual void Unk_0D1();
-    virtual void Unk_0D2();
-    virtual void Unk_0D3();
-    virtual void Unk_0D4();
-    virtual void Unk_0D5();
-    virtual void Unk_0D6();
-    virtual void Unk_0D7();
-    virtual void Unk_0D8();
-    virtual void Unk_0D9();
-    virtual void Unk_0DA();
-    virtual void Unk_0DB();
-    virtual void Unk_0DC();
-    virtual void Unk_0DD();
-    virtual void Unk_0DE();
-    virtual void Unk_0DF();
-    virtual void Unk_0E0();
-    virtual void Unk_0E1();
-    virtual void Unk_0E2();
-    virtual void Unk_0E3();
-    virtual void Unk_0E4();
-    virtual void Unk_0E5();
-    virtual void Unk_0E6();
-    virtual void Unk_0E7();
-    virtual void Unk_0E8();
-    virtual void Unk_0E9();
-    virtual void Unk_0EA();
-    virtual void Unk_0EB();
-    virtual void Unk_0EC();
-    virtual void Unk_0ED();
-    virtual void Unk_0EE();
-    virtual void Unk_0EF();
-    virtual void Unk_0F0();
-    virtual void Unk_0F1();
-    virtual void Unk_0F2();
-    virtual void Unk_0F3();
-    virtual void Unk_0F4();
-    virtual void Unk_0F5();
-    virtual void Unk_0F6();
-    virtual void Unk_0F7();
-    virtual void Unk_0F8();
-    virtual void Unk_0F9();
-    virtual void Unk_0FA();
-    virtual void Unk_0FB();
-    virtual void Unk_0FC();
-    virtual void Unk_0FD();
-    virtual void Unk_0FE();
-    virtual void Unk_0FF();
-    virtual void Unk_100();
-    virtual void Unk_101();
-    virtual void Unk_102();
-    virtual void Unk_103();
-    virtual void Unk_104();
-    virtual void Unk_105();
-    virtual void Unk_106();
-    virtual void Unk_107();
-    virtual void Unk_108();
-    virtual void Unk_109();
-    virtual void Unk_10A();
-    virtual void Unk_10B();
-    virtual void Unk_10C();
-    virtual void Unk_10D();
-    virtual void Unk_10E();
-    virtual void Unk_10F();
-    virtual void Unk_110();
-    virtual void Unk_111();
-    virtual void Unk_112();
-    virtual void Unk_113();
-    virtual void Unk_114();
-    virtual void Unk_115();
-    virtual void Unk_116();
-    virtual void Unk_117();
-    virtual void Unk_118();
-    virtual void Unk_119();
-    virtual void Unk_11A();
-    virtual void Unk_11B();
-    virtual void Unk_11C();
-    virtual void Unk_11D();
-    virtual void Unk_11E();
-    virtual void Unk_11F();
-    virtual void Unk_120();
-    virtual void Unk_121();
-    virtual void Unk_122();
-    virtual void Unk_123();
-    virtual void Unk_124();
-    virtual void Unk_125();
-    virtual void Unk_126();
-    virtual void Unk_127();
-    virtual void Unk_128();
-    virtual void Unk_129();
-    virtual void Unk_12A();
-    virtual void Unk_12B();
-    virtual void Unk_12C();
-    virtual void Unk_12D();
-    virtual void Unk_12E();
-    virtual void Unk_12F();
-    virtual void Unk_130();
-    virtual void Unk_131();
-    virtual void Unk_132();
-    virtual void Unk_133();
-    virtual void Unk_134();
-    virtual void Unk_135();
-    virtual void Unk_136();
-    virtual void Unk_137();
-    virtual void Unk_138();
-    virtual void Unk_139();
-    virtual void Unk_13A();
-    virtual void Unk_13B();
-    virtual void Unk_13C();
-    virtual void Unk_13D();
-    virtual void Unk_13E();
-    virtual void Unk_13F();
-    virtual void Unk_140();
-    virtual void Unk_141();
-    virtual void Unk_142();
-    virtual void Unk_143();
-    virtual void Unk_144();
-    virtual void Unk_145();
-    virtual void Unk_146();
-    virtual void Unk_147();
-    virtual void Unk_148();
-    virtual void Unk_149();
-    virtual void Unk_14A();
-    virtual void Unk_14B();
-    virtual void Unk_14C();
-    virtual void Unk_14D();
-    virtual void Unk_14E();
-    virtual void Unk_14F();
-    virtual void Unk_150();
-    virtual void Unk_151();
-    virtual void Unk_152();
-    virtual void Unk_153();
-    virtual void Unk_154();
-    virtual void Unk_155();
-    virtual void Unk_156();
-    virtual void Unk_157();
-    virtual void Unk_158();
-    virtual void Unk_159();
-    virtual void Unk_15A();
-    virtual void Unk_15B();
-    virtual void Unk_15C();
-    virtual void Unk_15D();
-    virtual void Unk_15E();
-    virtual void Unk_15F();
-    virtual void Unk_160();
-    virtual void Unk_161();
-    virtual void Unk_162();
-    virtual void Unk_163();
-    virtual void Unk_164();
-    virtual void Unk_165();
-    virtual void Unk_166();
-    virtual void Unk_167();
-    virtual void Unk_168();
-    virtual void Unk_169();
-    virtual void Unk_16A();
-    virtual void Unk_16B();
-    virtual void Unk_16C();
-    virtual void Unk_16D();
-    virtual void Unk_16E();
-    virtual void Unk_16F();
-    virtual void Unk_170();
-    virtual void Unk_171();
-    virtual void Unk_172();
-    virtual void Unk_173();
-    virtual void Unk_174();
-    virtual void Unk_175();
-    virtual void Unk_176();
-    virtual void Unk_177();
-    virtual void Unk_178();
-    virtual void Unk_179();
-    virtual void Unk_17A();
-    virtual void Unk_17B();
-    virtual void Unk_17C();
-    virtual void Unk_17D();
-    virtual void Unk_17E();
-    virtual void Unk_17F();
-    virtual void Unk_180();
-    virtual void Unk_181();
-    virtual void Unk_182();
-    virtual void Unk_183();
-    virtual void Unk_184();
-    virtual void Unk_185();
-    virtual void Unk_186();
-    virtual void Unk_187();
-    virtual void Unk_188();
-    virtual void Unk_189();
-    virtual void Unk_18A();
-    virtual void Unk_18B();
-    virtual void Unk_18C();
-    virtual void Unk_18D();
-    virtual void Unk_18E();
-    virtual void Unk_18F();
-    virtual void Unk_190();
-    virtual void Unk_191();
-    virtual void Unk_192();
-    virtual void Unk_193();
-    virtual void Unk_194();
-    virtual void Unk_195();
-    virtual void Unk_196();
-    virtual void Unk_197();
-    virtual void Unk_198();
-    virtual void Unk_199();
-    virtual void Unk_19A();
-    virtual void Unk_19B();
-    virtual void Unk_19C();
-    virtual void Unk_19D();
-    virtual void Unk_19E();
-    virtual void Unk_19F();
-    virtual void Unk_1A0();
-    virtual void Unk_1A1();
-    virtual void Unk_1A2();
-    virtual void Unk_1A3();
-    virtual void Unk_1A4();
-    virtual void Unk_1A5();
-    virtual void Unk_1A6();
-    virtual void Unk_1A7();
-    virtual void Unk_1A8();
-    virtual void Unk_1A9();
-    virtual void Unk_1AA();
-    virtual void Unk_1AB();
-    virtual void Unk_1AC();
-    virtual void Unk_1AD();
-    virtual void Unk_1AE();
-    virtual void Unk_1AF();
-    virtual void Unk_1B0();
-    virtual void Unk_1B1();
-    virtual void Unk_1B2();
-    virtual void Unk_1B3();
-    virtual void Unk_1B4();
-    virtual void Unk_1B5();
-    virtual void Unk_1B6();
-    virtual void Unk_1B7();
-    virtual void Unk_1B8();
-    virtual void Unk_1B9();
-    virtual void Unk_1BA();
-    virtual void Unk_1BB();
-    virtual void Unk_1BC();
-    virtual void Unk_1BD();
-    virtual void Unk_1BE();
-    virtual void Unk_1BF();
-    virtual void Unk_1C0();
-    virtual void Unk_1C1();
-    virtual void Unk_1C2();
-    virtual void Unk_1C3();
-    virtual void Unk_1C4();
-    virtual void Unk_1C5();
-    virtual void Unk_1C6();
-    virtual void Unk_1C7();
-    virtual void Unk_1C8();
-    virtual void Unk_1C9();
-    virtual void Unk_1CA();
-    virtual void Unk_1CB();
-    virtual void Unk_1CC();
-    virtual void Unk_1CD();
-    virtual void Unk_1CE();
-    virtual void Unk_1CF();
-    virtual void Unk_1D0();
-    virtual void Unk_1D1();
-    virtual void Unk_1D2();
-    virtual void Unk_1D3();
-    virtual void Unk_1D4();
-    virtual void Unk_1D5();
-    virtual void Unk_1D6();
-    virtual double Unk_75C();
-    virtual void Unk_760();
-    virtual double Unk_764();
-    virtual void Unk_768();
-    virtual double Unk_76C();
-};
 
-class ActorS : public MobileObject
-{
-  public:
-    BaseProcess* GetCurrentProcess() const;
-};
 
-class MobileObject_Shell
-{
-  public:
-    const char* GetFullName();
-};
+
+
+
 
 void __cdecl DebugLog(const char* fmt, ...);
 
@@ -17626,16 +14098,16 @@ bool __cdecl FUN_005a50f0(TESObjectREFR* reference, void* arg1, void* arg2, doub
     result = 0.0;
     if (reference && reference->IsActor())
     {
-        ActorS* actor = (ActorS*)reference;
+        Actor* actor = (Actor*)reference;
         result = 0.0;
         if (actor->GetCurrentProcess())
         {
-            result = actor->GetCurrentProcess()->Unk_76C() + actor->GetCurrentProcess()->Unk_75C() +
-                     actor->GetCurrentProcess()->Unk_764();
+            result = actor->GetCurrentProcess()->GetControllerPhase() + actor->GetCurrentProcess()->GetAnimationElapsedTime() +
+                     actor->GetCurrentProcess()->GetAnimationRemainingTime();
         }
         if (g_tls.debugLogging)
         {
-            DebugLog("%s radiation level is %.2f", ((MobileObject_Shell*)reference)->GetFullName(), result);
+            DebugLog("%s radiation level is %.2f", ((MobileObject*)reference)->GetFullName(), result);
         }
     }
     return true;
@@ -17743,10 +14215,7 @@ struct TlsData
 };
 extern __declspec(thread) TlsData DAT_0126fd98;
 void FUN_00703c00(const char*, ...);
-struct Pt3
-{
-    float x, y, z;
-};
+
 class RefA
 {
   public:
@@ -17841,7 +14310,7 @@ class RefA
     virtual void v88();
     virtual void v89();
     virtual void v90();
-    virtual void GetStartingAngle(Pt3*);
+    virtual void GetStartingAngle(NiPoint3*);
 };
 // Converts the starting angle of a reference on the given axis from radians to degrees and stores it in result.
 // @fnv 0x0059c2d0
@@ -17850,18 +14319,19 @@ bool FUN_0059c2d0(RefA* reference, void* acAxis, void* apUnused, double& afAngle
     int iAxis = (int)acAxis;
     if (reference)
     {
-        Pt3 kAngle;
-        reference->GetStartingAngle(&kAngle);
+        // The original local point was an uninitialized aggregate.
+        float kAngle[3];
+        reference->GetStartingAngle(reinterpret_cast<NiPoint3*>(kAngle));
         switch (iAxis)
         {
         case 'X':
-            afAngle = kAngle.x * 57.2957763671875;
+            afAngle = kAngle[0] * 57.2957763671875;
             break;
         case 'Y':
-            afAngle = kAngle.y * 57.2957763671875;
+            afAngle = kAngle[1] * 57.2957763671875;
             break;
         case 'Z':
-            afAngle = kAngle.z * 57.2957763671875;
+            afAngle = kAngle[2] * 57.2957763671875;
             break;
         }
         if (DAT_0126fd98.bDebug)
@@ -18100,15 +14570,8 @@ bool FUN_0059c680(ActorV* apActor, void* aiActorValue, void* apUnused, double& a
 }  // namespace fnv_0059c680
 
 namespace fnv_0059d320 {
-struct TESObject
-{
-    TESObject* GetNext();
-    int FNV_GetFormType();
-};
-struct Character
-{
-    double FUN_008d3110();
-};
+
+
 __declspec(thread) bool g_DebugLogEnabled;
 void __cdecl _DebugLog(const char* fmt, ...);
 
@@ -18124,7 +14587,7 @@ bool __cdecl FUN_0059d320(TESObjectREFR* apRefObject, void* apParam1, void* apPa
             pactor = reinterpret_cast<Character*>(apRefObject);
     }
     if (pactor)
-        afReturnValue = pactor->FUN_008d3110();
+        afReturnValue = reinterpret_cast<ConditionCharacter*>(pactor)->GetClothingValue();
     if (g_DebugLogEnabled)
         _DebugLog("GetClothingValue >> %0.2f", afReturnValue);
     return true;
@@ -18132,90 +14595,19 @@ bool __cdecl FUN_0059d320(TESObjectREFR* apRefObject, void* apParam1, void* apPa
 }  // namespace fnv_0059d320
 
 namespace fnv_0059ea80 {
-struct FUN_0059eb40
-{
-    bool GetFlag();
-};
-struct TESWeatherEx
-{
-    float GetWeatherData(int a1, float a2, float a3);
-};
 extern float DAT_01017d00;
-struct FUN_0059ea80_class
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    FUN_0059eb40* m_kPointA;
-    FUN_0059eb40* m_kPointB;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    int unkF0;
-    float unkF4;
-    bool FUN_0059ea80();
-};
+
 // @fnv 0x0059ea80
-bool FUN_0059ea80_class::FUN_0059ea80()
-{
-    return (m_kPointA != 0 && m_kPointA->GetFlag() &&
-            unkF4 > reinterpret_cast<TESWeatherEx*>(m_kPointA)->GetWeatherData(6, 0.999000013f, 0.0f)) ||
-           (m_kPointB != 0 && m_kPointB->GetFlag() &&
-            unkF4 < reinterpret_cast<TESWeatherEx*>(m_kPointB)->GetWeatherData(7, 1.0f, DAT_01017d00));
-}
 }  // namespace fnv_0059ea80
+
+bool ConditionSky::IsSnowing()
+{
+    return (m_pRegionWeather != 0 && static_cast<ConditionWeather*>(m_pRegionWeather)->GetFlag() &&
+            m_fWeatherBlend > m_pRegionWeather->GetWeatherData(6, 0.999000013f, 0.0f)) ||
+           (m_pPreviousWeather != 0 && static_cast<ConditionWeather*>(m_pPreviousWeather)->GetFlag() &&
+            m_fWeatherBlend < m_pPreviousWeather->GetWeatherData(7, 1.0f, fnv_0059ea80::DAT_01017d00));
+}
+
 
 namespace fnv_0059eb60 {
 struct TlsData
@@ -18227,17 +14619,13 @@ struct TlsData
 };
 extern __declspec(thread) TlsData DAT_0126fd98;
 void FUN_00703c00(const char*, ...);
-class Sky
-{
-  public:
-    float FUN_006447d0();
-};
-Sky* FUN_0046dd00();
+
+
 // Reads the current weather percent from the Sky object, logs it when bDebug is set, and returns true.
 // @fnv 0x0059eb60
 bool FUN_0059eb60(void* reference, void* arg1, void* arg2, double& afPercent)
 {
-    afPercent = FUN_0046dd00()->FUN_006447d0();
+    afPercent = reinterpret_cast<ConditionSky*>(Sky::GetInstance())->GetCurrentWeatherPercent();
     if (DAT_0126fd98.bDebug)
         FUN_00703c00("GetCurrentWeatherPercent >> %0.2f", afPercent);
     return true;
@@ -18259,34 +14647,24 @@ class RaceP
   public:
     bool FUN_0059f610();
 };
-class FormP
-{
-  public:
-    int FUN_00401170();
-    RaceP* FUN_004ac110();
-};
-class RefP
-{
-  public:
-    FormP* FUN_007af430();
-};
-extern RefP* DAT_011cab1c;
+
+extern TESObjectREFR* DAT_011cab1c;
 extern float DAT_011cab20;
 // Caches the playable-race result by reference pointer, logs it when bDebug is set, and always returns true.
 // @fnv 0x0059f540
-bool FUN_0059f540(RefP* reference, void* apUnused1, void* apUnused2, double& result)
+bool FUN_0059f540(TESObjectREFR* reference, void* apUnused1, void* apUnused2, double& result)
 {
     if (DAT_011cab1c == reference)
         result = DAT_011cab20;
     else
     {
         result = 0;
-        FormP* pForm = 0;
+        TESNPC* pForm = 0;
         if (reference && reference->FUN_007af430()->FUN_00401170() == 0x2a)
-            pForm = reference->FUN_007af430();
+            pForm = static_cast<TESNPC*>(reference->FUN_007af430());
         if (pForm)
         {
-            RaceP* pRace = pForm->FUN_004ac110();
+            RaceP* pRace = reinterpret_cast<RaceP*>(pForm->FUN_004ac110());
             if (pRace && pRace->FUN_0059f610())
                 result = 1;
         }
@@ -18674,11 +15052,7 @@ struct TlsData
 };
 extern __declspec(thread) TlsData DAT_0126fd98;
 void FUN_00703c00(const char*, ...);
-class FormC
-{
-  public:
-    int FUN_00401170();
-};
+
 class ActorC
 {
   public:
@@ -18751,19 +15125,19 @@ class ActorC
 class CrimeC
 {
   public:
-    bool HasMatchingCrime(ActorC*, FormC*, ActorC*, int, int, int);
+    bool HasMatchingCrime(ActorC*, TESForm*, ActorC*, int, int, int);
 };
 extern CrimeC DAT_011e0e80;
 // Checks if a crime exists between the actor and victim using the crime type index, storing the result in the output parameter.
 // @fnv 0x005a0f90
-bool FUN_005a0f90(ActorC* apActor, FormC* apVictim, void* aiCrimeType, double& result)
+bool FUN_005a0f90(ActorC* apActor, TESForm* apVictim, void* aiCrimeType, double& result)
 {
     result = 0;
     int e = (int)aiCrimeType;
-    FormC* pVictim = 0;
+    TESForm* pVictim = 0;
     if (apVictim)
     {
-        switch (apVictim->FUN_00401170())
+        switch (static_cast<int>(apVictim->FUN_00401170()))
         {
         case 0x3a:
         case 0x3b:
@@ -18808,11 +15182,7 @@ struct TlsData
 };
 extern __declspec(thread) TlsData DAT_0126fd98;
 void FUN_00703c00(const char*, ...);
-class FormY
-{
-  public:
-    int FUN_0084e3a0();
-};
+
 class ProcY
 {
   public:
@@ -18973,7 +15343,7 @@ class ProcY
     virtual void v154();
     virtual void v155();
     virtual void v156();
-    virtual FormY* GetY();
+    virtual TESForm* GetY();
 };
 class ItemZ
 {
@@ -18981,88 +15351,18 @@ class ItemZ
     int FUN_0041ca90();
     int FUN_004fd3c0();
 };
-class ActorX
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-    ItemZ* FUN_009344a0();
-    ProcY* FUN_008d8520();
-};
+
 // Reads a numeric value from the actor's item or procedure-related form into result and logs it when debug is enabled.
 // @fnv 0x005a1770
-bool FUN_005a1770(ActorX* apActor, void* apUnused1, void* apUnused2, double& result)
+bool FUN_005a1770(Actor* apActor, void* apUnused1, void* apUnused2, double& result)
 {
     result = -1.0;
-    ActorX* pActor = 0;
+    Actor* pActor = 0;
     if (apActor && apActor->IsActor())
         pActor = apActor;
     if (pActor)
     {
-        ItemZ* pItem = pActor->FUN_009344a0();
+        ItemZ* pItem = reinterpret_cast<ItemZ*>(pActor->FUN_009344a0());
         if (pItem)
         {
             switch (pItem->FUN_0041ca90())
@@ -19073,14 +15373,14 @@ bool FUN_005a1770(ActorX* apActor, void* apUnused1, void* apUnused2, double& res
                 break;
             }
             case 0xe: {
-                ProcY* pProc = pActor->FUN_008d8520();
+                ProcY* pProc = reinterpret_cast<ProcY*>(pActor->FUN_008d8520());
                 if (pProc)
                 {
-                    FormY* pForm = pProc->GetY();
+                    TESForm* pForm = pProc->GetY();
                     if (pForm)
                     {
-                        FormY* pF = pForm;
-                        result = pF->FUN_0084e3a0();
+                        TESForm* pF = pForm;
+                        result = static_cast<int>(pF->FUN_0084e3a0());
                     }
                 }
                 break;
@@ -19434,15 +15734,6 @@ bool FUN_005a25f0(void* reference, void* arg1, void* arg2, double& afHeight)
 }  // namespace fnv_005a25f0
 
 namespace fnv_005a2810 {
-struct TlsData
-{
-    char pad[0x268];
-    bool bDebug;
-    char p2[3];
-    void* pTarget;
-};
-extern __declspec(thread) TlsData DAT_0126fd98;
-void FUN_00703c00(const char*, ...);
 class PlayerS
 {
   public:
@@ -19667,6 +15958,16 @@ class PlayerS
     virtual void v218();
     virtual bool IsInSandman();
 };
+struct TlsData
+{
+    char pad[0x268];
+    bool bDebug;
+    char p2[3];
+    void* pTarget;
+};
+extern __declspec(thread) TlsData DAT_0126fd98;
+void FUN_00703c00(const char*, ...);
+
 extern PlayerS* DAT_011dea3c;
 // Checks if the given PlayerS is the global player and in Sandman, logs the result in debug mode, and always returns true.
 // @fnv 0x005a2810
@@ -19691,87 +15992,23 @@ struct TlsData
 };
 extern __declspec(thread) TlsData DAT_0126fd98;
 void FUN_00703c00(const char*, ...);
-class ActorS
+
+// 0x005a29b0 reads Actor's critical stage; the shared interface lacks this getter.
+struct CriticalStageCondition : Actor
 {
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-    int FUN_005a29b0();
+    int GetCriticalStage();
 };
 extern const char* DAT_0119bbb0[];
 // Checks if the actor is in the given stage and logs the result when debug is enabled.
 // @fnv 0x005a2910
-bool FUN_005a2910(ActorS* apActor, void* aiStage, void* apUnused, double& result)
+bool FUN_005a2910(Actor* apActor, void* aiStage, void* apUnused, double& result)
 {
     result = 0;
     int iStage = (int)aiStage;
     if (apActor->IsActor())
     {
-        ActorS* pActor = apActor;
-        if (pActor->FUN_005a29b0() == iStage)
+        Actor* pActor = apActor;
+        if (static_cast<CriticalStageCondition*>(pActor)->GetCriticalStage() == iStage)
             result = 1;
     }
     if (DAT_0126fd98.bDebug)
@@ -19790,11 +16027,7 @@ struct TlsData
 };
 extern __declspec(thread) TlsData DAT_0126fd98;
 void FUN_00703c00(const char*, ...);
-class FormB
-{
-  public:
-    int FUN_00401170();
-};
+
 class ArmorB
 {
   public:
@@ -19803,7 +16036,7 @@ class ArmorB
 struct FUN_004459e0
 {
     int a, b;
-    FormB* FUN_0044ddc0();
+    TESForm* FUN_0044ddc0();
     ~FUN_004459e0();
 };
 class InvB
@@ -19811,81 +16044,13 @@ class InvB
   public:
     FUN_004459e0* FUN_004c8c10(int, int);
 };
-class ActorX
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-};
-InvB* FUN_004bf220(ActorX*);
+
+InvB* FUN_004bf220(Actor*);
 // Sets result to 1.0 for non-heavy armor or 2.0 for heavy armor when a type 0x18 entry is found; otherwise it remains 0.
 // @fnv 0x005a2ce0
-bool FUN_005a2ce0(ActorX* apActor, void* apUnused1, void* apUnused2, double& afRating)
+bool FUN_005a2ce0(Actor* apActor, void* apUnused1, void* apUnused2, double& afRating)
 {
-    ActorX* pActor = 0;
+    Actor* pActor = 0;
     if (apActor && apActor->IsActor())
         pActor = apActor;
     afRating = 0;
@@ -20031,156 +16196,16 @@ struct TlsData
 extern __declspec(thread) TlsData DAT_0126fd98;
 
 void FUN_00703c00(const char*, ...);
-class ActorX
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-    virtual void w0();
-    virtual void w1();
-    virtual void w2();
-    virtual void w3();
-    virtual void w4();
-    virtual void w5();
-    virtual void w6();
-    virtual void w7();
-    virtual void w8();
-    virtual void w9();
-    virtual void w10();
-    virtual void w11();
-    virtual void w12();
-    virtual void w13();
-    virtual void w14();
-    virtual void w15();
-    virtual void w16();
-    virtual void w17();
-    virtual void w18();
-    virtual void w19();
-    virtual void w20();
-    virtual void w21();
-    virtual void w22();
-    virtual void w23();
-    virtual void w24();
-    virtual void w25();
-    virtual void w26();
-    virtual void w27();
-    virtual void w28();
-    virtual void w29();
-    virtual void w30();
-    virtual void w31();
-    virtual void w32();
-    virtual void w33();
-    virtual void w34();
-    virtual void w35();
-    virtual void w36();
-    virtual void w37();
-    virtual void w38();
-    virtual void w39();
-    virtual void w40();
-    virtual void w41();
-    virtual void w42();
-    virtual void w43();
-    virtual void w44();
-    virtual void w45();
-    virtual void w46();
-    virtual void w47();
-    virtual void w48();
-    virtual void w49();
-    virtual void w50();
-    virtual void w51();
-    virtual void w52();
-    virtual void w53();
-    virtual void w54();
-    virtual void w55();
-    virtual void w56();
-    virtual void w57();
-    virtual void w58();
-    virtual void w59();
-    virtual void w60();
-    virtual void w61();
-    virtual void w62();
-    virtual void w63();
-    virtual void w64();
-    virtual void w65();
-    virtual void w66();
-    virtual void w67();
-    virtual void w68();
-    virtual bool IsX();
-    void* FUN_007af430();
-    const char* FUN_0055d520();
-};
+
 // Checks if the reference actor is the current crime victim target and sets result to 1 or 0, logging the outcome in debug mode.
 // @fnv 0x005a3460
-bool FUN_005a3460(ActorX* apActor, void* apUnused1, void* apUnused2, double& result)
+bool FUN_005a3460(Actor* apActor, void* apUnused1, void* apUnused2, double& result)
 {
-    ActorX* pActor = 0;
+    Actor* pActor = 0;
     if (apActor && apActor->IsActor())
         pActor = apActor;
     result = 0;
-    if (pActor && pActor->IsX())
+    if (pActor && pActor->IsCharacter())
     {
         void* pTarget = pActor->FUN_007af430();
         if (pTarget && pTarget == DAT_0126fd98.pTarget)
@@ -20217,243 +16242,26 @@ bool FUN_005a3870(void* reference, void* arg1, void* arg2, double& result)
 }
 }  // namespace fnv_005a3870
 
-union SETTING_VALUE
-{
-    int i;
-    float f;
-};
 
-struct SettingT_GameSettingCollection_
-{
-    SETTING_VALUE* Int();
-};
+
+
+
 extern SettingT_GameSettingCollection_ DAT_011d0844;
 
-class TESObjectREFR5A3E
-{
-  public:
-    virtual void vfn_000();
-    virtual void vfn_004();
-    virtual void vfn_008();
-    virtual void vfn_00C();
-    virtual void vfn_010();
-    virtual void vfn_014();
-    virtual void vfn_018();
-    virtual void vfn_01C();
-    virtual void vfn_020();
-    virtual void vfn_024();
-    virtual void vfn_028();
-    virtual void vfn_02C();
-    virtual void vfn_030();
-    virtual void vfn_034();
-    virtual void vfn_038();
-    virtual void vfn_03C();
-    virtual void vfn_040();
-    virtual void vfn_044();
-    virtual void vfn_048();
-    virtual void vfn_04C();
-    virtual void vfn_050();
-    virtual void vfn_054();
-    virtual void vfn_058();
-    virtual void vfn_05C();
-    virtual void vfn_060();
-    virtual void vfn_064();
-    virtual void vfn_068();
-    virtual void vfn_06C();
-    virtual void vfn_070();
-    virtual void vfn_074();
-    virtual void vfn_078();
-    virtual void vfn_07C();
-    virtual void vfn_080();
-    virtual void vfn_084();
-    virtual void vfn_088();
-    virtual void vfn_08C();
-    virtual void vfn_090();
-    virtual void vfn_094();
-    virtual void vfn_098();
-    virtual void vfn_09C();
-    virtual void vfn_0A0();
-    virtual void vfn_0A4();
-    virtual void vfn_0A8();
-    virtual void vfn_0AC();
-    virtual void vfn_0B0();
-    virtual void vfn_0B4();
-    virtual void vfn_0B8();
-    virtual void vfn_0BC();
-    virtual void vfn_0C0();
-    virtual void vfn_0C4();
-    virtual void vfn_0C8();
-    virtual void vfn_0CC();
-    virtual void vfn_0D0();
-    virtual void vfn_0D4();
-    virtual void vfn_0D8();
-    virtual void vfn_0DC();
-    virtual void vfn_0E0();
-    virtual void vfn_0E4();
-    virtual void vfn_0E8();
-    virtual void vfn_0EC();
-    virtual void vfn_0F0();
-    virtual void vfn_0F4();
-    virtual void vfn_0F8();
-    virtual void vfn_0FC();
-    virtual bool IsActor();
-    virtual void vfn_104();
-    virtual void vfn_108();
-    virtual void vfn_10C();
-    virtual void vfn_110();
-    virtual void vfn_114();
-    virtual void vfn_118();
-    virtual void vfn_11C();
-    virtual void vfn_120();
-    virtual void vfn_124();
-    virtual void vfn_128();
-    virtual void vfn_12C();
-    virtual void vfn_130();
-    virtual void vfn_134();
-    virtual void vfn_138();
-    virtual void vfn_13C();
-    virtual void vfn_140();
-    virtual void vfn_144();
-    virtual void vfn_148();
-    virtual void vfn_14C();
-    virtual void vfn_150();
-    virtual void vfn_154();
-    virtual void vfn_158();
-    virtual void vfn_15C();
-    virtual void vfn_160();
-    virtual void vfn_164();
-    virtual void vfn_168();
-    virtual void vfn_16C();
-    virtual void vfn_170();
-    virtual void vfn_174();
-    virtual void vfn_178();
-    virtual void vfn_17C();
-    virtual void vfn_180();
-    virtual void vfn_184();
-    virtual void vfn_188();
-    virtual void vfn_18C();
-    virtual void vfn_190();
-    virtual void vfn_194();
-    virtual void vfn_198();
-    virtual void vfn_19C();
-    virtual void vfn_1A0();
-    virtual void vfn_1A4();
-    virtual void vfn_1A8();
-    virtual void vfn_1AC();
-    virtual void vfn_1B0();
-    virtual void vfn_1B4();
-    virtual void vfn_1B8();
-    virtual void vfn_1BC();
-    virtual void vfn_1C0();
-    virtual void vfn_1C4();
-    virtual void vfn_1C8();
-    virtual void vfn_1CC();
-    virtual void vfn_1D0();
-    virtual void vfn_1D4();
-    virtual void vfn_1D8();
-    virtual void vfn_1DC();
-    virtual void vfn_1E0();
-    virtual void vfn_1E4();
-    virtual void vfn_1E8();
-    virtual void vfn_1EC();
-    virtual void vfn_1F0();
-    virtual void vfn_1F4();
-    virtual void vfn_1F8();
-    virtual void vfn_1FC();
-    virtual void vfn_200();
-    virtual void vfn_204();
-    virtual void vfn_208();
-    virtual void vfn_20C();
-    virtual void vfn_210();
-    virtual void vfn_214();
-    virtual void vfn_218();
-    virtual void vfn_21C();
-    virtual void vfn_220();
-    virtual void vfn_224();
-    virtual void vfn_228();
-    virtual void vfn_22C();
-    virtual void vfn_230();
-    virtual void vfn_234();
-    virtual void vfn_238();
-    virtual void vfn_23C();
-    virtual void vfn_240();
-    virtual void vfn_244();
-    virtual void vfn_248();
-    virtual void vfn_24C();
-    virtual void vfn_250();
-    virtual void vfn_254();
-    virtual void vfn_258();
-    virtual void vfn_25C();
-    virtual void vfn_260();
-    virtual void vfn_264();
-    virtual void vfn_268();
-    virtual void vfn_26C();
-    virtual void vfn_270();
-    virtual void vfn_274();
-    virtual void vfn_278();
-    virtual void vfn_27C();
-    virtual void vfn_280();
-    virtual void vfn_284();
-    virtual void vfn_288();
-    virtual void vfn_28C();
-    virtual void vfn_290();
-    virtual void vfn_294();
-    virtual void vfn_298();
-    virtual void vfn_29C();
-    virtual void vfn_2A0();
-    virtual void vfn_2A4();
-    virtual void vfn_2A8();
-    virtual void vfn_2AC();
-    virtual void vfn_2B0();
-    virtual void vfn_2B4();
-    virtual void vfn_2B8();
-    virtual void vfn_2BC();
-    virtual void vfn_2C0();
-    virtual void vfn_2C4();
-    virtual void vfn_2C8();
-    virtual void vfn_2CC();
-    virtual void vfn_2D0();
-    virtual void vfn_2D4();
-    virtual void vfn_2D8();
-    virtual void vfn_2DC();
-    virtual void vfn_2E0();
-    virtual void vfn_2E4();
-    virtual void vfn_2E8();
-    virtual void vfn_2EC();
-    virtual void vfn_2F0();
-    virtual void vfn_2F4();
-    virtual void vfn_2F8();
-    virtual void vfn_2FC();
-    virtual void vfn_300();
-    virtual void vfn_304();
-    virtual void vfn_308();
-    virtual void vfn_30C();
-    virtual void vfn_310();
-    virtual void vfn_314();
-    virtual void vfn_318();
-    virtual void vfn_31C();
-    virtual void vfn_320();
-    virtual void vfn_324();
-    virtual void vfn_328();
-    virtual void vfn_32C();
-    virtual void vfn_330();
-    virtual void vfn_334();
-    virtual void vfn_338();
-    virtual void vfn_33C();
-    virtual void vfn_340();
-    virtual int vfn_344(PlayerCharacter* target, int flag);
-};
+
 
 // Sets result to 1 when the actor's vfn_344 value against g_thePlayer is at least the DAT_011d0844 setting; otherwise it remains 0.
 // @fnv 0x005a3e90
-bool __cdecl FUN_005a3e90(TESObjectREFR5A3E* apActor, void* paramInfo, void* scriptData, double& result)
+bool __cdecl FUN_005a3e90(TESObjectREFR* apActor, void* paramInfo, void* scriptData, double& result)
 {
     result = 0;
     if (apActor && apActor->IsActor())
     {
-        TESObjectREFR5A3E* actor = apActor;
-        int value = actor->vfn_344(g_thePlayer, 0);
-        if (value >= DAT_011d0844.Int()->i)
+        TESObjectREFR* actor = apActor;
+        // The shared Actor slot 0x344 is still declared void with no arguments.
+        typedef int (__thiscall* GetDispositionFunction)(TESObjectREFR*, PlayerCharacter*, int);
+        int value = reinterpret_cast<GetDispositionFunction>((*reinterpret_cast<void***>(actor))[0x344 / 4])(actor, g_thePlayer, 0);
+        if (value >= *reinterpret_cast<int*>(DAT_011d0844.Int()))
             result = 1;
     }
     return true;
@@ -20756,19 +16564,11 @@ struct TlsData
 };
 extern __declspec(thread) TlsData DAT_0126fd98;
 void FUN_00703c00(const char*, ...);
-class FormT
-{
-  public:
-    int FUN_00401170();
-};
-class RefT
-{
-  public:
-    FormT* FUN_007af430();
-};
+
+
 // Compares the reference's form type against arg1, stores 1 or 0 in result, and logs the value when bDebug is set.
 // @fnv 0x005a4410
-bool FUN_005a4410(RefT* reference, void* aiType, void* apUnused, double& result)
+bool FUN_005a4410(TESObjectREFR* reference, void* aiType, void* apUnused, double& result)
 {
     result = 0;
     int iType = (int)aiType;
@@ -21092,98 +16892,17 @@ struct TlsData
 };
 extern __declspec(thread) TlsData DAT_0126fd98;
 void FUN_00703c00(const char*, ...);
-class ActorX
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-    virtual void w0();
-    virtual void w1();
-    virtual void w2();
-    virtual void w3();
-    virtual void w4();
-    virtual void w5();
-    virtual void w6();
-    virtual void w7();
-    virtual void w8();
-    virtual void w9();
-    virtual void w10();
-    virtual const char* GetName();
-    float GetModifiedDamagePerSecond(float);
-};
+
 // Computes the ratio of reference's modified damage per second to arg1's, storing it in result and logging the outcome in debug mode.
 // @fnv 0x005a4cd0
-bool FUN_005a4cd0(ActorX* reference, void* apTarget, void* apUnused, double& afRatio)
+bool FUN_005a4cd0(Actor* reference, void* apTarget, void* apUnused, double& afRatio)
 {
     afRatio = 0;
-    ActorX* pTarget = (ActorX*)apTarget;
+    Actor* pTarget = (Actor*)apTarget;
     if (reference && reference->IsActor() && pTarget)
     {
-        ActorX* pActor = reference;
-        afRatio = pActor->GetModifiedDamagePerSecond(-1.0f) / pTarget->GetModifiedDamagePerSecond(-1.0f);
+        Actor* pActor = reference;
+        afRatio = pActor->GetCombatRating(-1.0f) / pTarget->GetCombatRating(-1.0f);
         if (DAT_0126fd98.bDebug)
             FUN_00703c00("GetThreatRatio: '%s' to '%s' >> %.2f", pActor->GetName(), pTarget->GetName(), afRatio);
     }
@@ -21519,87 +17238,17 @@ class Proc
     virtual void v130();
     virtual Pkg* GetPkg();
 };
-class ActorX
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-    Proc* FUN_008d8520();
-    const char* FUN_0055d520();
-};
+
 // Sets result when the actor's package chain exists and the package method returns 0xe; logs a message when bDebug is set.
 // @fnv 0x005a4f30
-bool FUN_005a4f30(ActorX* apActor, void* apUnused1, void* apUnused2, double& result)
+bool FUN_005a4f30(Actor* apActor, void* apUnused1, void* apUnused2, double& result)
 {
     result = 0;
     if (apActor && apActor->IsActor())
     {
-        ActorX* pActor = apActor;
-        if (pActor->FUN_008d8520() && pActor->FUN_008d8520()->GetPkg() &&
-            pActor->FUN_008d8520()->GetPkg()->FUN_0041ca90() == 0xe)
+        Actor* pActor = apActor;
+        if (reinterpret_cast<Proc*>(pActor->FUN_008d8520()) && reinterpret_cast<Proc*>(pActor->FUN_008d8520())->GetPkg() &&
+            reinterpret_cast<Proc*>(pActor->FUN_008d8520())->GetPkg()->FUN_0041ca90() == 0xe)
             result = 1;
         if (DAT_0126fd98.bDebug)
         {
@@ -21859,6 +17508,11 @@ bool __cdecl FUN_005a5580(TESObjectREFR* reference, void* arg1, void* arg2, doub
 }
 
 namespace fnv_005a5690 {
+// 0x008bdbd0 is the actor VATS visibility query; retain this call site's float result.
+struct RightTargetVisibilityCondition : Actor
+{
+    float GetTargetVisibility(Actor* target, float angle);
+};
 struct TlsData
 {
     char pad[0x268];
@@ -21868,84 +17522,15 @@ struct TlsData
 };
 extern __declspec(thread) TlsData DAT_0126fd98;
 void FUN_00703c00(const char*, ...);
-class ActorQ
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();
-    float FUN_008bdbd0(ActorQ*, float);
-};
+
 // Calls FUN_008bdbd0 on reference with arg1 and 1.5707964f, stores its return value, and logs it.
 // @fnv 0x005a5690
-bool FUN_005a5690(ActorQ* reference, void* apTarget, void* apUnused, double& afVisibility)
+bool FUN_005a5690(Actor* reference, void* apTarget, void* apUnused, double& afVisibility)
 {
     afVisibility = 0;
-    ActorQ* pTarget = (ActorQ*)apTarget;
+    Actor* pTarget = (Actor*)apTarget;
     if (reference && reference->IsActor())
-        afVisibility = reference->FUN_008bdbd0(pTarget, 1.5707964f);
+        afVisibility = static_cast<RightTargetVisibilityCondition*>(reference)->GetTargetVisibility(pTarget, 1.5707964f);
     if (DAT_0126fd98.bDebug)
         FUN_00703c00("VATSRightTargetVisible >> %.2f", afVisibility);
     return true;
@@ -22172,7 +17757,8 @@ struct VisibilityRef
 };
 struct SphereBound
 {
-    NiPoint3 center;
+    // Raw coordinate storage retains the original trivial construction.
+    float center[3];
     float radius;
     void FUN_006240d0();
     void FUN_0098ddd0(NiPoint3*);
@@ -22316,7 +17902,7 @@ bool __cdecl FUN_0059c990(TESObjectREFR* reference, void* target, void*, double&
                 }
                 if (inView)
                 {
-                    NiPoint3 origin = cameraNode->FUN_0043c490();
+                    Pos3 origin = *reinterpret_cast<Pos3*>(&cameraNode->FUN_0043c490());
                     RayQuery rayQuery;
                     rayQuery.FUN_004a3c20();
                     VisibilityRef* targetActor = 0;
@@ -22324,8 +17910,8 @@ bool __cdecl FUN_0059c990(TESObjectREFR* reference, void* target, void*, double&
                         targetActor = other;
                     FUN_0062a190 rayCollector(0x25, targetActor);
                     rayQuery.FUN_0059ceb0(&rayCollector);
-                    NiPoint3 destination = *other->GetPos();
-                    rayQuery.FUN_004a3da0(&origin);
+                    Pos3 destination = *reinterpret_cast<Pos3*>(other->GetPos());
+                    rayQuery.FUN_004a3da0(reinterpret_cast<NiPoint3*>(&origin));
                     unsigned int playerFilter;
                     reinterpret_cast<VisibilityRef*>(g_thePlayer)->FUN_00931ed0(&playerFilter);
                     Filter rayFilter;
@@ -22333,15 +17919,15 @@ bool __cdecl FUN_0059c990(TESObjectREFR* reference, void* target, void*, double&
                     rayFilter.FUN_004a39f0(0x25);
                     rayFilter.FUN_0059ce80(reinterpret_cast<Filter*>(&playerFilter)->FUN_004a3a20());
                     rayQuery.FUN_004a3f70(rayFilter.bits);
-                    NiPoint3 maxBounds;
-                    NiPoint3 minBounds;
-                    float height = other->GetBoundsMaximum(&maxBounds)->z - other->GetBoundsMinimum(&minBounds)->z;
+                    float maxBounds[3];
+                    float minBounds[3];
+                    float height = other->GetBoundsMaximum(reinterpret_cast<NiPoint3*>(maxBounds))->z - other->GetBoundsMinimum(reinterpret_cast<NiPoint3*>(minBounds))->z;
                     float heights[3] = {height * 0.75 + destination.z, height * 0.5 + destination.z,
                                         height * 0.25 + destination.z};
                     for (int i = 0; i < 3; i++)
                     {
                         destination.z = heights[i];
-                        rayQuery.FUN_004a3eb0(&destination);
+                        rayQuery.FUN_004a3eb0(reinterpret_cast<NiPoint3*>(&destination));
                         void* hit = g_TES->FUN_00458420(&rayQuery);
                         VisibilityRef* hitRef = hit ? FUN_0056f930(hit) : 0;
                         if (!hit || hitRef == other)
@@ -22403,11 +17989,6 @@ struct Process
     BoundObject* FUN_004216f0();
 };
 
-struct Actor
-{
-    Process* FUN_005d43c0();
-    BoundObject* FUN_007af430();
-};
 
 static const char s_szIsInListFormat[] = "IsInList >> %0.2f";
 
@@ -22419,9 +18000,9 @@ bool FUN_0059f890(Actor* pkActor, ListForm* pkListArg, void* pvUnused, double* p
     ListForm* pkList = pkListArg;
     if (pkActor && pkList)
     {
-        BoundObject* pkObject = pkActor->FUN_005d43c0()->FUN_004216f0();
+        BoundObject* pkObject = reinterpret_cast<Process*>(pkActor->FUN_005d43c0())->FUN_004216f0();
         if (!pkObject)
-            pkObject = pkActor->FUN_007af430();
+            pkObject = reinterpret_cast<BoundObject*>(pkActor->FUN_007af430());
         if (pkObject && pkList->FUN_00500940()->FUN_005f65d0(pkObject))
             *pdResult = 1.0;
     }
@@ -22432,12 +18013,7 @@ bool FUN_0059f890(Actor* pkActor, ListForm* pkListArg, void* pvUnused, double* p
 
 }
 
-class TESPackage
-{
-  public:
-    int GetProcedureType();
-    int GetPackType();
-};
+
 struct S981990
 {
     bool FUN_00981990();
@@ -22448,177 +18024,8 @@ struct ProcedureTarget
     int type;
     unsigned int GetFlags();
 };
-class BaseProcess
-{
-  public:
-    virtual void Unk_00();
-    virtual void Unk_01();
-    virtual void Unk_02();
-    virtual void Unk_03();
-    virtual void Unk_04();
-    virtual void Unk_05();
-    virtual void Unk_06();
-    virtual void Unk_07();
-    virtual void Unk_08();
-    virtual void Unk_09();
-    virtual void Unk_0A();
-    virtual void Unk_0B();
-    virtual void Unk_0C();
-    virtual void Unk_0D();
-    virtual void Unk_0E();
-    virtual void Unk_0F();
-    virtual void Unk_10();
-    virtual void Unk_11();
-    virtual void Unk_12();
-    virtual void Unk_13();
-    virtual void Unk_14();
-    virtual void Unk_15();
-    virtual void Unk_16();
-    virtual void Unk_17();
-    virtual void Unk_18();
-    virtual void Unk_19();
-    virtual void Unk_1A();
-    virtual void Unk_1B();
-    virtual void Unk_1C();
-    virtual void Unk_1D();
-    virtual void Unk_1E();
-    virtual void Unk_1F();
-    virtual void Unk_20();
-    virtual void Unk_21();
-    virtual void Unk_22();
-    virtual void Unk_23();
-    virtual void Unk_24();
-    virtual void Unk_25();
-    virtual void Unk_26();
-    virtual void Unk_27();
-    virtual void Unk_28();
-    virtual void Unk_29();
-    virtual void Unk_2A();
-    virtual void Unk_2B();
-    virtual void Unk_2C();
-    virtual void Unk_2D();
-    virtual void Unk_2E();
-    virtual void Unk_2F();
-    virtual void Unk_30();
-    virtual void Unk_31();
-    virtual void Unk_32();
-    virtual void Unk_33();
-    virtual void Unk_34();
-    virtual void Unk_35();
-    virtual void Unk_36();
-    virtual void Unk_37();
-    virtual void Unk_38();
-    virtual void Unk_39();
-    virtual void Unk_3A();
-    virtual void Unk_3B();
-    virtual void Unk_3C();
-    virtual void Unk_3D();
-    virtual void Unk_3E();
-    virtual void Unk_3F();
-    virtual void Unk_40();
-    virtual void Unk_41();
-    virtual void Unk_42();
-    virtual void Unk_43();
-    virtual void Unk_44();
-    virtual void Unk_45();
-    virtual void Unk_46();
-    virtual void Unk_47();
-    virtual void Unk_48();
-    virtual void Unk_49();
-    virtual void Unk_4A();
-    virtual void Unk_4B();
-    virtual void Unk_4C();
-    virtual void Unk_4D();
-    virtual void Unk_4E();
-    virtual void Unk_4F();
-    virtual void Unk_50();
-    virtual void Unk_51();
-    virtual void Unk_52();
-    virtual void Unk_53();
-    virtual void Unk_54();
-    virtual void Unk_55();
-    virtual void Unk_56();
-    virtual void Unk_57();
-    virtual void Unk_58();
-    virtual void Unk_59();
-    virtual void Unk_5A();
-    virtual void Unk_5B();
-    virtual void Unk_5C();
-    virtual void Unk_5D();
-    virtual void Unk_5E();
-    virtual void Unk_5F();
-    virtual void Unk_60();
-    virtual void Unk_61();
-    virtual void Unk_62();
-    virtual void Unk_63();
-    virtual void Unk_64();
-    virtual void Unk_65();
-    virtual void Unk_66();
-    virtual void Unk_67();
-    virtual void Unk_68();
-    virtual void Unk_69();
-    virtual void Unk_6A();
-    virtual void Unk_6B();
-    virtual void Unk_6C();
-    virtual void Unk_6D();
-    virtual void Unk_6E();
-    virtual void Unk_6F();
-    virtual void Unk_70();
-    virtual void Unk_71();
-    virtual void Unk_72();
-    virtual void Unk_73();
-    virtual void Unk_74();
-    virtual void Unk_75();
-    virtual void Unk_76();
-    virtual void Unk_77();
-    virtual void Unk_78();
-    virtual void Unk_79();
-    virtual void Unk_7A();
-    virtual void Unk_7B();
-    virtual void Unk_7C();
-    virtual void Unk_7D();
-    virtual void Unk_7E();
-    virtual void Unk_7F();
-    virtual void Unk_80();
-    virtual void Unk_81();
-    virtual void Unk_82();
-    virtual void Unk_83();
-    virtual void Unk_84();
-    virtual void Unk_85();
-    virtual void Unk_86();
-    virtual void Unk_87();
-    virtual void Unk_88();
-    virtual void Unk_89();
-    virtual void Unk_8A();
-    virtual void Unk_8B();
-    virtual void Unk_8C();
-    virtual void Unk_8D();
-    virtual void Unk_8E();
-    virtual void Unk_8F();
-    virtual void Unk_90();
-    virtual void Unk_91();
-    virtual void Unk_92();
-    virtual void Unk_93();
-    virtual void Unk_94();
-    virtual void Unk_95();
-    virtual void Unk_96();
-    virtual void Unk_97();
-    virtual void Unk_98();
-    virtual void Unk_99();
-    virtual void Unk_9A();
-    virtual void Unk_9B();
-    virtual void Unk_9C();
-    virtual ProcedureTarget* GetProcedureTarget();
-    virtual void Unk_9E();
-    virtual void Unk_9F();
-    virtual int GetProcedureIndex();
-};
-class ActorS : public TESObjectREFR
-{
-  public:
-    BaseProcess* GetCurrentProcess() const;
-    TESPackage* GetCurrentPackage();
-};
+
+
 extern int* DAT_011a3ff0[];
 extern __declspec(thread) bool bPrintConditionDebug;
 void DebugLog(const char*, ...);
@@ -22630,9 +18037,9 @@ static const float flagResults[7] = {45.0f, 48.0f, 8.0f, 10.0f, 7.0f, 46.0f, 4.0
 bool __cdecl FUN_005a1210(TESObjectREFR* reference, void* apUnused1, void* apUnused2, double& result)
 {
     result = 0.0;
-    ActorS* actor = 0;
+    Actor* actor = 0;
     if (reference && reference->IsActor())
-        actor = (ActorS*)reference;
+        actor = (Actor*)reference;
     {
         TESPackage* package;
         {
@@ -22643,12 +18050,12 @@ bool __cdecl FUN_005a1210(TESObjectREFR* reference, void* apUnused1, void* apUnu
                     BaseProcess* process;
                     {
                         int procedureIndex;
-                        if (actor && actor->GetCurrentProcess() && actor->GetCurrentPackage())
+                        if (actor && actor->GetCurrentProcess() && actor->MobileObject::GetCurrentPackage())
                         {
-                            package = actor->GetCurrentPackage();
+                            package = actor->MobileObject::GetCurrentPackage();
                             process = actor->GetCurrentProcess();
                             procedureType = package->GetProcedureType();
-                            procedureIndex = process->GetProcedureIndex();
+                            procedureIndex = static_cast<const BaseProcess*>(process)->GetPackageInfoValue();
                             procedure = DAT_011a3ff0[procedureType][procedureIndex];
                             if (package->GetPackType() == 18)
                             {
@@ -22788,7 +18195,7 @@ bool __cdecl FUN_005a1210(TESObjectREFR* reference, void* apUnused1, void* apUnu
                                 result = 44.0;
                                 break;
                             case 42: {
-                                ProcedureTarget* target = process->GetProcedureTarget();
+                                ProcedureTarget* target = reinterpret_cast<ProcedureTarget*>(process->GetCurrentPackageData());
                                 result = 45.0;
                                 if (target)
                                 {
@@ -22991,10 +18398,6 @@ struct GetInFactionCache_0059f630
     static int DAT_011cab04;
     static float DAT_011cab08;
 };
-struct GetInFactionActor_0059f630
-{
-    bool HasFaction(TESForm*);
-};
 // Checks if apRefObject is in the faction apParam1, using a static cache to avoid repeated HasFaction calls, and writes the result to afReturnValue.
 // @fnv 0x0059f630
 bool FUN_0059f630(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, double* afReturnValue)
@@ -23010,9 +18413,9 @@ bool FUN_0059f630(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     }
     else
     {
-        GetInFactionActor_0059f630* pact = 0;
+        Actor* pact = 0;
         if (apRefObject && apRefObject->IsActor())
-            pact = (GetInFactionActor_0059f630*)apRefObject;
+            pact = (Actor*)apRefObject;
         if (!pact)
             return true;
         if (pact->HasFaction(pfac))
@@ -23076,49 +18479,11 @@ bool FUN_005a2ba0(TESObjectREFR* apRefObject, void* apParam1, void* apParam2, do
     return true;
 }
 
-struct BGSVoiceType;
 struct TESFormList;
-struct VoiceCondition59f450Data : BaseFormComponent
-{
-    virtual void CopyFromTemplateForm(TESActorBase*);
-    virtual bool GetVATSmeleeDisabled();
-    virtual bool GetNoVATSranged();
-    virtual bool GetCanBePickpocketed();
-    virtual bool GetIsGhost();
-    virtual bool GetIsInvulnerable();
-    virtual bool GetNoKnockdowns();
-    virtual bool GetCanBeAllRaces();
-    virtual bool GetNoHeadTracking();
-    virtual bool GetNoPersuasion();
-    virtual bool GetNoLeftArm();
-    virtual bool GetNoRightArm();
-    virtual bool GetNoHead();
-    virtual bool GetNoShadow();
-    virtual bool GetNoBloodSpray();
-    virtual void SetNoBloodSpray(bool);
-    virtual bool GetNoBloodDecal();
-    virtual void SetNoBloodDecal(bool);
-    virtual int GetBloodImpactMaterial();
-    virtual void SetBloodImpactMaterial(int);
-    virtual unsigned short GetFatigue();
-    virtual float GetHealthRegeneration();
-    virtual BGSVoiceType* GetVoiceType();
-};
 
-struct VoiceCondition59f450Actor : TESForm
-{
-    TESFormList* m_pBoundObjectList;
-    TESBoundObject* m_pPreviousBlock;
-    TESBoundObject* pNext;
-    short minX;
-    short minY;
-    short minZ;
-    short maxX;
-    short maxY;
-    short maxZ;
-    VoiceCondition59f450Data data;
-};
-struct VoiceCondition59f450Activator
+
+// Voice lookup is not yet declared by BGSTalkingActivator.
+struct ConditionTalkingActivator : BGSTalkingActivator
 {
     BGSVoiceType* FUN_009185e0();
 };
@@ -23300,14 +18665,17 @@ bool __cdecl FUN_0059f450(TESObjectREFR* apRefObject, void* apParam1, void* apPa
             {
             case 0x2a:
             case 0x2b: {
-                VoiceCondition59f450Actor* pab =
-                    reinterpret_cast<VoiceCondition59f450Actor*>(apRefObject->GetObjectReference());
-                pcompvoice = pab->data.GetVoiceType();
+                TESActorBase* pab =
+                    reinterpret_cast<TESActorBase*>(apRefObject->GetObjectReference());
+                // The original actor-base component starts at 0x30; TESBoundObject
+                // currently carries extra trailing padding in the shared hierarchy.
+                pcompvoice = reinterpret_cast<const TESActorBaseData*>(
+                    reinterpret_cast<const char*>(pab) + 0x30)->GetVoiceType();
             }
             break;
             case 0x16: {
-                VoiceCondition59f450Activator* pta =
-                    reinterpret_cast<VoiceCondition59f450Activator*>(apRefObject->GetObjectReference());
+                ConditionTalkingActivator* pta =
+                    reinterpret_cast<ConditionTalkingActivator*>(apRefObject->GetObjectReference());
                 pcompvoice = pta->FUN_009185e0();
             }
             break;
@@ -23323,9 +18691,7 @@ bool __cdecl FUN_0059f450(TESObjectREFR* apRefObject, void* apParam1, void* apPa
     return true;
 }
 
-class MiddleHighProcess : public BaseProcess
-{
-};
+
 extern __declspec(thread) bool bPrintConditionDebug;
 
 struct P01Proc

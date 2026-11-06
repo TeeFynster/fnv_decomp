@@ -2,6 +2,174 @@
 // src/speedtree/branch.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/speedtree/branch.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/NiPoint3.h"
+// LocalVec: unit-local copy of the former shared stand-in Vec. This unit uses the stand-in's matrix/SpeedTree members (FUN_00c7f640/FUN_00c7f700 transforms, FUN_00b12790/FUN_00b13040), which NiPoint3 does not have.
+#include <xmmintrin.h>
+class Matrix;
+class Scalar;
+class Simd;
+class Tok;
+class Mask;
+class Elem;
+class Iter;
+class CIter;
+class CMutIter;
+class Mat3;
+class Mat4;
+class hkVector4;
+class hkQuaternion;
+
+class LocalVec
+{
+public:
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+        };
+        struct
+        {
+            void* m_pData;
+            int m_iArrayLength;
+            int m_iCapacity;
+        };
+    };
+
+    LocalVec();
+    LocalVec(float a, float b, float c);
+    // Keep the implicit copy constructor, copy assignment and destructor trivial.
+
+    void negative(const LocalVec& n);
+    void inv(const Matrix& m, const LocalVec& n);
+    void point(const Matrix& m, const LocalVec& b);
+    void difference(const LocalVec& a, const LocalVec& b);
+    Scalar dot(const LocalVec& n) const;
+    Scalar at(int i) const;
+    void set(float a, float b, float c, float d);
+
+    Simd lengthSquared() const;
+    void mul(const Simd& factor);
+    void SetProduct(const Simd& factor, const LocalVec& v);
+
+    void resize(unsigned n);
+    Tok& operator[](unsigned i);
+    void release(int elemSize);
+
+    LocalVec& operator-=(const LocalVec& v);
+    LocalVec& operator+=(const LocalVec& v);
+    LocalVec operator*(float scale) const;
+    LocalVec operator+(const LocalVec& v) const;
+    LocalVec operator-(const LocalVec& v) const;
+    float Squared() const;
+    float Length() const;
+    float Normalize();
+    float Dot(const LocalVec& v) const;
+    LocalVec Cross(const LocalVec& v) const;
+    LocalVec ApplyScaled(float scale);
+    LocalVec ApplyScaled(float scale) const;
+    void FUN_00acf580(unsigned n, Tok value);
+    LocalVec FUN_004a0bd0();
+    LocalVec FUN_004a0bd0() const;
+    LocalVec FUN_0053d1a0(const LocalVec& v);
+    LocalVec FUN_004b3800(const LocalVec& v);
+    LocalVec FUN_004b3800(const LocalVec& v) const;
+    LocalVec FUN_00439e90(const LocalVec& v);
+    LocalVec FUN_00439e90(const LocalVec& v) const;
+    LocalVec FUN_00439ef0(const LocalVec& v);
+    LocalVec FUN_00439ef0(const LocalVec& v) const;
+    float FUN_00457990();
+    float FUN_00457990() const;
+    void FUN_004a0c10();
+    void FUN_006815c0();
+    void FUN_00439180(float scale);
+    LocalVec& FUN_0063c8a0(const LocalVec& v);
+    float FUN_004a7290();
+    float FUN_004a7290() const;
+    void FUN_004b4db0(const float* values);
+    void FUN_00a38560();
+    void FUN_004f0180(void* value);
+
+    LocalVec& ScaleByInverse(float divisor);
+    float FUN_00457910();
+    LocalVec* FUN_006a6eb0();
+    bool FUN_004390c0(const LocalVec& v);
+
+    __m128 get() const;
+    void set(__m128 value);
+    void operator=(const __m128& value);
+    operator __m128() const;
+    __m128& getQuad();
+    const __m128& getQuad() const;
+    __m128& quad();
+    const __m128& quad() const;
+    float& operator()(int component);
+    const float& operator()(int component) const;
+    void setZero4();
+    void setSub4(const LocalVec& a, const LocalVec& b);
+    void setAdd4(const LocalVec& a, const LocalVec& b);
+    void setMul4(const LocalVec& a, const LocalVec& b);
+    void setMul4(const Scalar& a, const LocalVec& b);
+    void add4(const LocalVec& v);
+    void mul4(const LocalVec& v);
+    void mul4(const Scalar& value);
+    void add3clobberW(const LocalVec& v);
+    void sub3clobberW(const LocalVec& v);
+    void setBroadcast3clobberW(const LocalVec& v, int component);
+    Scalar horizontalAdd3() const;
+    void setCross(const LocalVec& a, const LocalVec& b);
+    Scalar dot3(const LocalVec& v) const;
+    Scalar lengthSquared3() const;
+    Scalar lengthInverse3() const;
+    void normalize3();
+    Scalar getSimdAt(int component) const;
+    void setInterpolate4(const LocalVec& a, const LocalVec& b, const Scalar& fraction);
+    void setAddMul4(const LocalVec& a, const LocalVec& b, const Scalar& scale);
+    void setNeg4(const LocalVec& v);
+    Mask compareLessThanZero4() const;
+    void SetRotatedDirection(const hkQuaternion& rotation, const LocalVec& direction);
+    void setRotatedTranslation(const hkQuaternion& rotation, const LocalVec& direction);
+    void cross(const LocalVec& a, const LocalVec& b);
+    Scalar squared() const;
+    Scalar inverseLength() const;
+    void normalize();
+    void negate(const LocalVec& v);
+
+    void FUN_00c7f640(const void* matrix, const hkVector4& point);
+    void FUN_00c7f640(Mat4* matrix, void* point);
+    void FUN_00c7f640(const void* matrix, const LocalVec* point);
+    void FUN_00c7f640(const void* matrix, const void* point);
+    void FUN_00c7f700(Mat3* matrix, void* point);
+    void FUN_00c7f700(const void* matrix, const LocalVec* point);
+    void FUN_00b12790();
+    void FUN_00b13040(LocalVec* out, const LocalVec* v);
+    LocalVec* ScaleSwizzled(LocalVec* out, float factor);
+    void AddVector(LocalVec* out, const LocalVec* v);
+    float Dot(const LocalVec& v);
+    LocalVec* FUN_004a3c90(const LocalVec* v);
+    LocalVec* FUN_0062b0a0(LocalVec* out, LocalVec* v);
+    LocalVec* FUN_0062af00(LocalVec* target);
+
+    void FUN_00cf7690(Elem* value);
+    void FUN_00b1e970();
+    Iter begin();
+    Iter end();
+    CIter FUN_00b33030(CIter first, CIter last);
+    void FUN_00b32120();
+    unsigned int size() const;
+    unsigned int capacity() const;
+    void FUN_00b2df90();
+    void FUN_00b2e140(Elem* first, Elem* last);
+    bool InitBuffer(unsigned int count);
+    Elem* _Ucopy(Elem* first, Elem* last, Elem* out);
+    LocalVec& FUN_00b2db10(const LocalVec& v);
+    CMutIter FUN_00aceb80(CMutIter first, CMutIter last);
+    void FUN_00acac40();
+    LocalVec& FUN_00ad61e0(const LocalVec& v);
+};
+
 extern int DAT_011ad14c;
 
 struct FUN_00b14ae0_class
@@ -38,11 +206,6 @@ char* FUN_00b15170::GetElement(unsigned int uiIndex)
     return m_0c + uiIndex;
 }
 
-struct NiPoint3
-{
-    float x, y, z;
-};
-
 struct FUN_00b2a180
 {
     float a;
@@ -58,14 +221,9 @@ float FUN_00b2a180::Dot(const NiPoint3& point)
 }
 
 double __cdecl FUN_00ec6054(double);
-struct FUN_00b12790_class
-{
-    float x, y, z;
-    void FUN_00b12790();
-};
 // Normalizes the vector by dividing x, y and z by the square root of the sum of their squares.
 // @fnv 0x00b12790
-void FUN_00b12790_class::FUN_00b12790()
+void LocalVec::FUN_00b12790()
 {
     float fSumOfSquares;
     float fInvSquareRoot;
@@ -335,24 +493,12 @@ float __cdecl FUN_00b15110(Link* link)
     }
 }
 
-// Stand-in for the game's vector type: three floats plus the vector helpers
-// the original calls (difference, normalisation, scaling, sum and dot product).
-struct Vec
-{
-    float x, y, z;
-    void FUN_00b12790();                         // normalise in place
-    void FUN_00b13040(Vec* out, const Vec* p);   // *out = *this - *p
-    Vec* ScaleSwizzled(Vec* out, float factor);  // *out = *this * factor
-    void AddVector(Vec* out, const Vec* other);  // *out = *this + *other
-    float Dot(const Vec& p);
-};
-
 // The class that owns ProjectOntoLine (in the game it derives from the vector
 // class, so `this` points at the three floats a, b and c).
 struct MyThis
 {
     float a, b, c;
-    Vec* ProjectOntoLine(Vec* out, Vec* a, Vec* b, Vec* c);
+    LocalVec* ProjectOntoLine(LocalVec* out, LocalVec* a, LocalVec* b, LocalVec* c);
 };
 
 // The function projects the point c onto the line through a and b.
@@ -368,37 +514,33 @@ struct MyThis
 //   ebp-0x18  ejne (the normalised direction)
 //   ebp-0x0c  z   (c - a)
 // @fnv 0x00b3ec40
-Vec* MyThis::ProjectOntoLine(Vec* out, Vec* a, Vec* pLineStart, Vec* c)
+LocalVec* MyThis::ProjectOntoLine(LocalVec* out, LocalVec* a, LocalVec* pLineStart, LocalVec* c)
 {
-    Vec m;
-    Vec o;
-    Vec L;
-    Vec U;
+    // Raw, float-aligned storage preserves the original uninitialized locals.
+    float m[sizeof(LocalVec) / sizeof(float)];
+    float o[sizeof(LocalVec) / sizeof(float)];
+    float L[sizeof(LocalVec) / sizeof(float)];
+    float U[sizeof(LocalVec) / sizeof(float)];
     float i2;
     float l2;
-    Vec e;
+    float e[sizeof(LocalVec) / sizeof(float)];
     float dir;
-    Vec ejne;
-    Vec z;
+    float ejne[sizeof(LocalVec) / sizeof(float)];
+    float z[sizeof(LocalVec) / sizeof(float)];
     if ((unsigned char)((a->x == pLineStart->x && a->y == pLineStart->y && a->z == pLineStart->z) ? 1 : 0))
     {
         *out = *a;
         return out;
     }
-    pLineStart->FUN_00b13040(&ejne, a);
-    ejne.FUN_00b12790();
-    c->FUN_00b13040(&z, a);
-    dir = z.Dot(ejne);
-    a->AddVector(out, ejne.ScaleSwizzled(&e, dir));
+    pLineStart->FUN_00b13040((LocalVec*)ejne, a);
+    ((LocalVec*)ejne)->FUN_00b12790();
+    c->FUN_00b13040((LocalVec*)z, a);
+    dir = ((LocalVec*)z)->Dot(*(LocalVec*)ejne);
+    a->AddVector(out, ((LocalVec*)ejne)->ScaleSwizzled((LocalVec*)e, dir));
     return out;
 }
 
 extern unsigned int __cdecl FUN_00ec7c56(void);
-
-struct NiPoint3x
-{
-    float x, y, z;
-};
 
 struct S_00b14280_Entry
 {
@@ -437,7 +579,7 @@ struct S_00b14280_Entries
 struct S_00b14280_Obj
 {
     int unk00;
-    NiPoint3x m_pos;
+    NiPoint3 m_pos;
 };
 
 struct S_00b14280_List
@@ -462,11 +604,11 @@ struct S_00b14280_State
 
 struct S_00b14280_This
 {
-    bool IsPointClearOfEntries(const NiPoint3x& pt, unsigned int index, S_00b14280_List* list);
+    bool IsPointClearOfEntries(const NiPoint3& pt, unsigned int index, S_00b14280_List* list);
 };
 
 // @fnv 0x00b14280
-bool S_00b14280_This::IsPointClearOfEntries(const NiPoint3x& aPoint, unsigned int index, S_00b14280_List* list)
+bool S_00b14280_This::IsPointClearOfEntries(const NiPoint3& aPoint, unsigned int index, S_00b14280_List* list)
 {
     bool ok5 = true;
     float r7;
@@ -475,7 +617,7 @@ bool S_00b14280_This::IsPointClearOfEntries(const NiPoint3x& aPoint, unsigned in
     S_00b14280_Entries* b;
     S_00b14280_Entry* en7;
     S_00b14280_Obj** p5;
-    const NiPoint3x* RunSeventhVirtualOperation;
+    const NiPoint3* RunSeventhVirtualOperation;
     a8 = &((S_00b14280_State*)DAT_011f8bf4)->m_entries;
     if ((unsigned char)(((a8->m_kRayEnd - a8->m_pRayStart) == 0) ? 1 : 0) == 0)
     {
@@ -506,7 +648,7 @@ bool S_00b14280_This::IsPointClearOfEntries(const NiPoint3x& aPoint, unsigned in
 
 struct AngleState
 {
-    Vec heading;
+    LocalVec heading;
     float radians;
     float unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38;
 };
@@ -514,32 +656,33 @@ struct AngleState
 struct FacingTint
 {
     int unk00;
-    Vec* FUN_00b40430(Vec* out);
-    void FUN_00b404c0(Vec* point, int flag);
-    void FUN_00b40210(Vec* point, Vec* other, float t);
+    LocalVec* FUN_00b40430(LocalVec* out);
+    void FUN_00b404c0(LocalVec* point, int flag);
+    void FUN_00b40210(LocalVec* point, LocalVec* other, float t);
 };
 
 extern double __cdecl FUN_00ec9f30(double value);
 extern double DAT_01011588;
 
 // @fnv 0x00b40210
-void FacingTint::FUN_00b40210(Vec* point, Vec* other, float t)
+void FacingTint::FUN_00b40210(LocalVec* point, LocalVec* other, float t)
 {
-    Vec goal;
-    Vec sample;
+    // Avoid invoking LocalVec constructors for the original uninitialized scratch storage.
+    float goal[sizeof(LocalVec) / sizeof(float)];
+    float sample[sizeof(LocalVec) / sizeof(float)];
     float length;
     float scale;
-    Vec scaled;
-    Vec dest;
-    AngleState basis;
-    ((Vec*)((char*)this + 4))->FUN_00b13040(&sample, point);
-    sample.FUN_00b12790();
-    other->FUN_00b13040(&goal, point);
-    goal.FUN_00b12790();
-    basis.radians = ((This*)&sample)->FUN_00b12720(*(NiPoint3*)&goal);
-    length = (float)(double)(float)FUN_00ec9f30(basis.radians);
+    float scaled[sizeof(LocalVec) / sizeof(float)];
+    float dest[sizeof(LocalVec) / sizeof(float)];
+    float basis[sizeof(AngleState) / sizeof(float)];
+    ((LocalVec*)((char*)this + 4))->FUN_00b13040((LocalVec*)sample, point);
+    ((LocalVec*)sample)->FUN_00b12790();
+    other->FUN_00b13040((LocalVec*)goal, point);
+    ((LocalVec*)goal)->FUN_00b12790();
+    ((AngleState*)basis)->radians = ((This*)sample)->FUN_00b12720(*(NiPoint3*)goal);
+    length = (float)(double)(float)FUN_00ec9f30(((AngleState*)basis)->radians);
     scale = (float)((length + 1.0) * DAT_01011588) * (1.0f - t) + t;
-    this->FUN_00b404c0(this->FUN_00b40430(&scaled)->ScaleSwizzled(&dest, scale), 1);
+    this->FUN_00b404c0(this->FUN_00b40430((LocalVec*)scaled)->ScaleSwizzled((LocalVec*)dest, scale), 1);
 }
 
 #include <stdlib.h>

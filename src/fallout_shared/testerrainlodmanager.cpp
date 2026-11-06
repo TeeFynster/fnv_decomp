@@ -1,6 +1,25 @@
 // fallout_shared/testerrainlodmanager.cpp: free functions (11 functions)
 
-#include "testerrainlodmanager_unit.h"
+#include "../../include/MEM_CONTEXT.h"
+#include "layout_support.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/AutoMemHelper.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiAdditionalGeometryData.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/Setting.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiPlane.h"
+#include "../../include/BSFogProperty.h"
+#include "../../include/NiFrustum.h"
+
+extern "C" void* __cdecl memcpy(void*, const void*, size_t);
+#pragma intrinsic(memcpy)
+
+extern NiFixedString* DAT_011c6224;
 
 // @fnv 0x0057d090
 NiFixedString* FUN_0057d090()
@@ -76,30 +95,17 @@ int __cdecl PackFloatPairToInt(float* afValues)
     return (x << 16) | (y & 0xffff);
 }
 
-struct Setting_S
-{
-    float* Float();
-};
-struct GlobalObject_0045cfe0
-{
-    int* Int();
-};
 struct TallGrassShaderProperty
 {
     static int __cdecl GetCacheIdentifier();
-};
-struct B006815c0
-{
-    char d[12];
-    B006815c0();
 };
 void __cdecl SetWindMagnitudeRange(float, float);
 extern void* DAT_011ca43c;
 extern void* DAT_011ca440;
 extern int DAT_011ca444;
-extern Setting_S g_011ca48c;
-extern Setting_S g_011ca510;
-extern GlobalObject_0045cfe0 g_011ca524;
+extern Setting g_011ca48c;
+extern Setting g_011ca510;
+extern Setting g_011ca524;
 
 struct FUN_0057cd10
 {
@@ -114,7 +120,7 @@ FUN_0057cd10::FUN_0057cd10()
     {
         int isizecap = (TallGrassShaderProperty::GetCacheIdentifier() << 8) / *g_011ca524.Int();
         if (!DAT_011ca43c)
-            DAT_011ca43c = new B006815c0[isizecap * isizecap];
+            DAT_011ca43c = new NiPoint3[isizecap * isizecap];
         if (!DAT_011ca440)
             DAT_011ca440 = new int[isizecap * isizecap];
     }
@@ -123,107 +129,11 @@ FUN_0057cd10::FUN_0057cd10()
 }
 
 namespace fnv_0057cf00 {
-struct AutoMemHelper
-{
-    AutoMemHelper(int a, bool b, const char* file, int line);
-    ~AutoMemHelper();
-    int iOld;
-};
-struct Setting_S
-{
-    float& Float();
-};
-struct GlobalObject_0045cfe0
-{
-    int& Int();
-};
-struct NiAVObject
-{
-    void SetName(const NiFixedString& name);
-    void UpdateSceneObject();
-};
-struct NiNode : public NiAVObject
-{
-    static void* operator new(unsigned int size);
-    static void operator delete(void*, unsigned int);
-    NiNode(unsigned short count);
-    char pad[0xac];
-};
-struct BaseNodeV
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void SetAt(unsigned int index, NiAVObject* child);
-};
-struct NiAdditionalGeometryData
-{
-    static BaseNodeV* __cdecl GetShadowSceneNodeForIndex(int index);
-};
 extern double DAT_01011588;
-extern Setting_S DAT_011ca450;
-extern Setting_S g_011ca4ac;
-extern Setting_S g_011ca498;
-extern GlobalObject_0045cfe0 g_011c63cc;
+extern Setting DAT_011ca450;
+extern Setting g_011ca4ac;
+extern Setting g_011ca498;
+extern Setting g_011c63cc;
 extern float DAT_011ca434;
 extern NiNode* DAT_011ca438;
 extern bool DAT_011ca430;
@@ -235,32 +145,22 @@ void UpdateTerrainLODMaxRange()
     AutoMemHelper tempMemContext(
         0x1c, true, "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESTerrainLODManager.cpp", 0x90);
     float fmaxrange = 0.0f;
-    if (DAT_011ca450.Float() >= g_011ca4ac.Float() + 0.5f)
-        fmaxrange = DAT_011ca450.Float() + g_011ca498.Float();
-    if (fmaxrange > (float)(unsigned int)(g_011c63cc.Int() << 12))
-        fmaxrange = (float)(unsigned int)(g_011c63cc.Int() << 12);
+    if (*DAT_011ca450.Float() >= *g_011ca4ac.Float() + 0.5f)
+        fmaxrange = *DAT_011ca450.Float() + *g_011ca498.Float();
+    if (fmaxrange > (float)(unsigned int)(*g_011c63cc.Int() << 12))
+        fmaxrange = (float)(unsigned int)(*g_011c63cc.Int() << 12);
     DAT_011ca434 = fmaxrange;
-    BaseNodeV* pbasenode = NiAdditionalGeometryData::GetShadowSceneNodeForIndex(0);
+    ShadowSceneNode* pbasenode = NiAdditionalGeometryData::GetShadowSceneNodeForIndex(0);
     DAT_011ca438 = new NiNode(0);
     DAT_011ca438->SetName(*FUN_0057d090());
-    pbasenode->SetAt(6, DAT_011ca438);
+    pbasenode->ReplaceNthObject(6, DAT_011ca438);
     DAT_011ca438->UpdateSceneObject();
     DAT_011ca430 = true;
 }
 }  // namespace fnv_0057cf00
 
 namespace TerrainLOD {
-struct AutoMemContext
-{
-    int context;
-    AutoMemContext(int, bool, const char*, int);
-    ~AutoMemContext();
-};
 extern const char DAT_010310d8[];
-struct Point3
-{
-    float x, y, z;
-};
 struct TwoComponentVector
 {
     float x, y;
@@ -384,7 +284,7 @@ struct TerrainNode
 };
 struct Cell
 {
-    float FUN_0054fb70(Point3*);
+    float FUN_0054fb70(NiPoint3*);
     int FUN_00544c60();
     int FUN_00544c30();
 };
@@ -392,12 +292,6 @@ struct World
 {
     void* FUN_005f36f0();
     Cell* FUN_00451900(int, int);
-};
-struct Setting
-{
-    bool* FUN_00408d60();
-    float* FUN_00403e20();
-    bool GetBoolValue();
 };
 extern World* DAT_011dea10;
 extern Setting DAT_011ca4f0, DAT_011ca480, DAT_011ca450, DAT_011ca498, DAT_011ca4ac;
@@ -407,10 +301,10 @@ TerrainNode* FUN_00450b80(int);
 void FUN_00b62970();
 void UpdateTerrainLODMaxRange();
 void FUN_00b60120(float, float, float, float);
-void FUN_0057d4f0(Cell*, TerrainNode*, Point3, Point3, float, float, float);
+void FUN_0057d4f0(Cell*, TerrainNode*, NiPoint3, NiPoint3, float, float, float);
 void FUN_00b61570(int, int);
 // @fnv 0x0057d0a0
-void FUN_0057d0a0(Point3 position, Point3 direction, float scale)
+void FUN_0057d0a0(NiPoint3 position, NiPoint3 direction, float scale)
 {
     AutoMemContext contextSlot1(28, true, DAT_010310d8, 177);
     if (DAT_011dea10->FUN_005f36f0() || !*DAT_011ca4f0.FUN_00408d60() || !DAT_0118c000)
@@ -510,28 +404,9 @@ struct CellForm
     virtual void v1a4();
     virtual int Get1a8();
 };
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-    NiPoint3 operator-(const NiPoint3&) const;
-    float Length() const;
-    void FUN_004a0c10();
-};
-struct NiBound
-{
-    float x, y, z, radius;
-    const NiPoint3& FUN_006815c0();
-    float FUN_0084d030() const;
-};
-struct NiPlaneX
-{
-    float x, y, z, d;
-};
 struct FUN_0045c620
 {
-    NiPlaneX m_akPlanes[6];
+    NiPlane m_akPlanes[6];
     unsigned int m_uiActive;
     unsigned int m_uiPad;
     FUN_0045c620();
@@ -543,17 +418,6 @@ struct Tmp53a510
     int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     int unk40, unk44, unk48, unk4c;
     void FUN_0053a510();
-};
-struct NiFrustum
-{
-    float m_fLeftBound, m_fRightBound, m_fTopBound, m_fBottomBound, m_fNearPlane, m_fFarPlane;
-    bool m_bOrthographic;
-    NiFrustum(bool abOrtho);
-};
-struct NiRenderer
-{
-    unsigned int FUN_004dee70();
-    unsigned int FUN_004dee10();
 };
 NiRenderer* FUN_0043c4b0();
 struct CamNode
@@ -599,7 +463,6 @@ struct Mgr
     NiNodeHelper* FUN_00456fc0(int, unsigned int);
 };
 extern unsigned char DAT_011ca534;
-extern NiPoint3 __NiPoint3_ZERO;
 int FUN_0057ce60();
 bool FUN_00b617b0(const char*, const char*);
 CellForm* _ref_004839c0(int);
@@ -642,7 +505,8 @@ void __cdecl FUN_0057d4f0(Mgr* apMgr, int aiParam, NiPoint3 akPos, NiPoint3 akDi
     akDir.z = 0.0f;
     akDir.FUN_004a0c10();
     afFov = afFov * 2.0f;
-    NiFrustum kFrust(false);
+    NiFrustum kFrust;
+    kFrust.Init(false);
     float fW = (float)FUN_0043c4b0()->FUN_004dee70();
     float fScreenH4 = (float)FUN_0043c4b0()->FUN_004dee10();
     float kFAspectRatio = fW / fScreenH4;
@@ -664,9 +528,12 @@ void __cdecl FUN_0057d4f0(Mgr* apMgr, int aiParam, NiPoint3 akPos, NiPoint3 akDi
         {
             NiPoint3 kStartPt = pData30->FUN_0053b450(0, 0, 0, 0);
             int iV1b8 = 0;
-            NiBound kBounds = pCell->FUN_0043d450();
-            NiPoint3 kNone = __NiPoint3_ZERO;
-            float fDist = (akPos - kBounds.FUN_006815c0()).Length() - kBounds.FUN_0084d030();
+            // Copy the bound's representation without invoking its shared copy constructor.
+            unsigned int kBounds[sizeof(NiBound) / sizeof(unsigned int)];
+            memcpy(kBounds, &pCell->FUN_0043d450(), sizeof(NiBound));
+            NiPoint3 kNone = NiPoint3::ZERO;
+            float fDist = (akPos - *reinterpret_cast<NiBound*>(kBounds)->FUN_006815c0()).Length() -
+                          reinterpret_cast<const NiBound*>(kBounds)->FUN_0084d030();
             Node45* pAt = apMgr->FUN_00456fc0(2, iQuad)->FUN_0043b4a0();
             int eState = ((FormKind*)pAt->FUN_006629f0()->FUN_0043b230())->FUN_0044ddc0();
             unsigned char bProjectedOnScreen = pAt->FUN_006629f0()->FUN_0043b230()->IsInFrustum(&kTester);
@@ -729,44 +596,16 @@ void __cdecl FUN_0057d4f0(Mgr* apMgr, int aiParam, NiPoint3 akPos, NiPoint3 akDi
 }
 
 namespace fnv_0057de00 {
-enum MEM_CONTEXT
-{
-    MEM_CONTEXT_MEM_CONTEXT_GRASS = 28,
-};
 
-template <class T> class NiPointer
+// Unit-local view of NiPointer for 0x0057de00 (namespace fnv_0057de00): built on the shared NiPointer, that code does not compile or does not match.
+template <class T> class NiPointer_0057de00
 {
   public:
     T* m_pObject;
-    NiPointer(T* pObject = 0);
-    ~NiPointer();
+    NiPointer_0057de00(T* pObject = 0);
+    ~NiPointer_0057de00();
 };
 
-class AutoMemContext
-{
-  public:
-    int iPrevious;
-    AutoMemContext(MEM_CONTEXT aeMemoryContext, bool bOverride, const char* pcFile, int iLine);
-    ~AutoMemContext();
-};
-
-class BSFogProperty
-{
-  public:
-    void IncRefCount();
-    void DecRefCount();
-};
-
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-    NiPoint3(float fX, float fY, float fZ);
-    NiPoint3 operator+(const NiPoint3& kPoint) const;
-    NiPoint3 operator-(const NiPoint3& kPoint) const;
-    void FUN_004a0c10();  // Unitize
-};
 
 class FUN_00414430_Color
 {
@@ -833,11 +672,7 @@ struct LODSettings
     bool bUseSlope;
 };
 
-struct LODIntSetting
-{
-    int* FUN_0043d4d0();
-};
-extern LODIntSetting DAT_011ca524;
+extern Setting DAT_011ca524;
 extern NiPoint3* DAT_011ca43c;
 extern float* DAT_011ca440;
 
@@ -861,7 +696,7 @@ void GenerateGrassPositions(int iA, int iB, int iUnused08, LODLand* pkLand, void
     AutoMemContext kMemContextRef(MEM_CONTEXT_MEM_CONTEXT_GRASS, true,
                                   "D:\\_Fallout3\\Platforms\\Common\\Code\\Fallout Shared\\TESTerrainLODManager.cpp",
                                   522);
-    NiPointer<BSFogProperty> spProperty;
+    NiPointer_0057de00<BSFogProperty> spProperty;
     NiPoint3 kUnusedRef;
     float fMinSlopeRes = FUN_0057e960(ucMinAngle * 0.017453292f);
     float fMaxSlopeValue = FUN_0057e960(ucMaxAngle * 0.017453292f);

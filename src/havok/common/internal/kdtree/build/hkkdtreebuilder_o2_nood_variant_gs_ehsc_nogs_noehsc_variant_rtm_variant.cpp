@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 
 // src/havok/common/internal/kdtree/build/hkkdtreebuilder_o2_nood_variant_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/kdtree/build/hkkdtreebuilder_o2_nood_variant_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
@@ -6,6 +8,25 @@
 // byte only under /MT /O2 /GS- /EHs-c- /Gy (unit src/havok/common/internal/kdtree/build/hkkdtreebuilder_o2_nood_variant.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 #include "fnv_asm_helpers.h"
+#include "../../../../../../include/hkArray.h"
+#include "../../../../../../include/hkBaseObject.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkStackMemory.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkErrStream.h"
+#include "../../../../../../include/hkError.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkOstream.h"
+#include "../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../include/hkSingleton.h"
+
+
+template<typename T>
+__forceinline T& __cdecl hkSingleton<T>::GetMonitorStream()
+{
+    return *s_instance;
+}
+
 // src/havok/common/internal/kdtree/build/hkkdtreebuilder_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_moves.py: the bytes and the matched neighbours of these functions
 // say /MT /O2 /GS /EHsc /Gy (unit src/havok/common/internal/kdtree/build/hkkdtreebuilder.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions to their real
 // unit once identified.
@@ -20,196 +41,12 @@ typedef signed int hkInt32;
 typedef unsigned short hkUint16;
 typedef unsigned int hkUint32;
 typedef unsigned long __w64 hkUlong;
-typedef unsigned __w64 hk_size_t;class FinishingFlag
-{
-public:
-FinishingFlag():m_bFinishing(0){}
-int m_bFinishing;
-};
-class hkClass;
-class hkBool
-{
-public:
-typedef char CompileTimeTrueType;inline hkBool(bool b)
-{
-m_cBooleanValue=static_cast<char>(b);
-}
-inline operator bool()const
-{
-return m_cBooleanValue !=0;
-}
-private:
-char m_cBooleanValue;};
-template<typename TYPE>
-class ValueWrapper
-{
-public:
-__forceinline ValueWrapper(){}
-private:
-TYPE m_kStorage;};
-namespace vc_attributes
-{
-enum YesNoMaybe
-{
-No=0x0fff0001,
-Maybe=0x0fff0010,
-Yes=0x0fff0100
-};
-enum AccessType
-{
-NoAccess=0,
-Read=1,
-Write=2,
-ReadWrite=3
-};
-[repeatable]
-[source_annotation_attribute(Parameter)]
-struct PreAttribute
-{
-PreAttribute();
-unsigned int Deref;
-YesNoMaybe Valid;
-YesNoMaybe Null;
-YesNoMaybe Tainted;
-AccessType Access;
-size_t ValidElementsConst;
-size_t ValidBytesConst;
-const wchar_t*ValidElements;
-const wchar_t*ValidBytes;
-const wchar_t*ValidElementsLength;
-const wchar_t*ValidBytesLength;
-size_t WritableElementsConst;
-size_t WritableBytesConst;
-const wchar_t*WritableElements;
-const wchar_t*WritableBytes;
-const wchar_t*WritableElementsLength;
-const wchar_t*WritableBytesLength;
-size_t ElementSizeConst;
-const wchar_t*ElementSize;
-YesNoMaybe NullTerminated;
-const wchar_t*Condition;
-};};
-const vc_attributes::YesNoMaybe SA_Yes=vc_attributes::Yes;
-const vc_attributes::YesNoMaybe SA_No=vc_attributes::No;
-const vc_attributes::AccessType SA_Read=vc_attributes::Read;
-typedef vc_attributes::PreAttribute SA_Pre;class hkMemoryAllocator
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}
-virtual void*AllocateMemoryBlock(int numBytes)=0;public:
-enum MemoryState
-{
-MEMORY_STATE_OK,
-MEMORY_STATE_OUT_OF_MEMORY
-};};struct StringPointerTriple
-{
-public:
-__forceinline StringPointerTriple();protected:
-ValueWrapper<void*>m_next;};
-class NineIntegerRecord
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t,void*p){return p;}
-typedef hkMemoryAllocator Allocator;
-static NineIntegerRecord&__cdecl GetMonitorStream();inline Allocator&heap(){return*m_pStreamAllocator;}
-protected:
-StringPointerTriple m_aiEntries;
-Allocator*m_pTemp;
-Allocator*m_pStreamAllocator;};
-class hkBaseObject
-{
-public:
-static const struct ClassMemberDescriptor Members[];public:
-__forceinline hkBaseObject(){}
-};
-class hkStatisticsCollector;
-class hkReferencedObject:public hkBaseObject
-{
-public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;hkReferencedObject*b=static_cast<hkReferencedObject*>(NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes)));b->m_usMemSizeAndFlags=static_cast<hkUint16>(nbytes);;return b;}
-virtual ~hkReferencedObject(){}
-virtual const hkClass*GetClassType()const;
-virtual void CalcContentStatistics(hkStatisticsCollector*collector,const hkClass*cls)const;
-public:
-enum
-{
-MASK_MEMSIZE=0x7fff
-};
-hkUint16 m_usMemSizeAndFlags;
-public:
-hkReferencedObject(class FinishingFlag flag){}
-};template<typename T>
-class hkSingleton
-{
-public:
-static T*s_instance;
-static __forceinline T&__cdecl GetMonitorStream()
-{
-return*s_instance;
-}
-protected:
-hkSingleton(){}
-};
-class hkStreamWriter;
-struct RouterHeapAllocatorProvider;
-class hkOstream:public hkReferencedObject
-{
-public:
-static const struct ClassMemberDescriptor Members[];~hkOstream();
-hkOstream&operator<<(const char*s);
-protected:
-hkStreamWriter*m_pStreamWriter;};class hkError:public hkReferencedObject,public hkSingleton<hkError>
-{
-public:
-enum Message
-{
-MESSAGE_REPORT,
-MESSAGE_WARNING,
-MESSAGE_ASSERT,
-MESSAGE_ERROR
-};
-virtual int message(Message m,int id,const char*description,const char*file,int line)=0;};
-class hkErrStream:public hkOstream
-{
-public:
-hkErrStream(void*buf,int bufSize);
-};template<bool N>struct BooleanTypeConstant{typedef BooleanTypeConstant<N>type;enum{result=N};};
-typedef BooleanTypeConstant<true>hkTypeIsPod;
-template<typename T>
-class HavokElementArray
-{
-public:
-typedef HavokElementArray<T>ThisType;
-protected:
-__forceinline HavokElementArray(const HavokElementArray&a){;}
-public:
-__forceinline void _useExternalArray(T*,int cap);
-protected:
-__forceinline HavokElementArray<T>&copyFromArray(hkMemoryAllocator&,const HavokElementArray<T>&src,hkTypeIsPod);
-public:
-enum
-{
-CAPACITY_MASK=int(0x3FFFFFFF),
-FLAG_MASK=int(0xC0000000),
-DONT_DEALLOCATE_FLAG=int(0x80000000),
-FORCE_SIGNED=-1
-};
-protected:
-friend class hkStatisticsCollector;
-public:
-HavokElementArray(FinishingFlag f){}
-};
-template<typename T,typename Allocator=RouterHeapAllocatorProvider>
-class hkArray:public HavokElementArray<T>
-{
-public:
-typedef Allocator AllocatorType;protected:
-__forceinline hkArray(const hkArray&a);
-public:
-__forceinline hkArray&operator=(const HavokElementArray<T>&a);};
-typedef union __declspec(intrin_type)__declspec(align(16))__m128{
-unsigned __int16 m128_u16[8];}__m128;
-typedef __m128 hkQuadReal;
+typedef unsigned __w64 hk_size_t;
+
+
+
+typedef ::__m128 LocalM128;
+typedef LocalM128 hkQuadReal;
 class Vector4Comparison;
 typedef const Vector4Comparison&hkVector4ComparisonParameter;
 class Vector4Comparison
@@ -294,7 +131,7 @@ typedef __m128i hkQuadUint;
 class UnsignedIntegerVector4
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 __forceinline void setZero();
 private:
 hkQuadUint m_vComponents;
@@ -313,7 +150,7 @@ typedef hkUint16 hkHalfPointer;
 class KdTreeNode
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 __forceinline KdTreeNode();
 __forceinline void setSplit(int axis,hkSplitType splitMin,hkSplitType splitMax);
 __forceinline void setLeftAndRightByteOffset(hkUlong offset);
@@ -346,7 +183,7 @@ void operator=(const FieldlessRecord&other)
 class KdTree
 {
 public:
-__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=NineIntegerRecord::GetMonitorStream().heap().AllocateMemoryBlock(static_cast<int>(nbytes));;return obj;}
+__forceinline void*__cdecl operator new(hk_size_t nbytes){;void*obj=hkMemoryRouter::getInstance().heap().blockAlloc(static_cast<int>(nbytes));;return obj;}
 static __forceinline int __cdecl getSizeForFastBuild(int numPrimitives){return 2*numPrimitives;}
 protected:
 void AllocateNodes(int numNodes);};KdTreeNode::KdTreeNode()
@@ -602,7 +439,7 @@ int evenJobSize=numPrimitives / 4;
 if(treeSize<KdTree::getSizeForFastBuild(evenJobSize)*4+8)
 {
 
-if(1){char assertBuf[512];hkErrStream ostr(assertBuf,sizeof(assertBuf));ostr<<DAT_010da240;if(hkError::GetMonitorStream().message(hkError::MESSAGE_ERROR,0x5010d60c,assertBuf,DAT_010da21c,408)){fnv_Breakpoint();}}else;
+if(1){char assertBuf[512];hkErrStream ostr(assertBuf,sizeof(assertBuf));static_cast<hkOstream&>(ostr)<<DAT_010da240;if(hkError::GetMonitorStream().message(hkError::MESSAGE_ERROR,0x5010d60c,assertBuf,DAT_010da21c,408)){fnv_Breakpoint();}}else;
 }
 FieldlessRecord*endEntries[4];
 endEntries[0]=buffersIn.m_pProjectedEntryBegin+evenJobSize;
@@ -656,7 +493,7 @@ entry++;
 }
 if(jobSize[0]==0 || jobSize[1]==0 || jobSize[2]==0 || jobSize[3]==0)
 {
-fullyBalancedFallback=true;
+fullyBalancedFallback.m_cBooleanValue=1;
 min[0]=bounds.m_kMaximumCorner[splitAxis];
 min[1]=bounds.m_kMaximumCorner[splitAxis];
 min[2]=bounds.m_kMaximumCorner[splitAxis];

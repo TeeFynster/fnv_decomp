@@ -3,11 +3,49 @@
 // polymorphic classes (BSExtraData, TESPackage). The skeleton of src/fallout_shared/extradatalist.cpp with those classes made polymorphic; move the functions to
 // their real unit once its classes are.
 
+// Select shared class layouts alongside the packet's remaining generated dependencies.
+// include/TESFile.h needs the Windows types before layout_support.h stubs them.
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "../../include/layout_support.h"
+#define FNV64_BSSIMPLELIST_DEFINED
+#define FNV_BASEFORMCOMPONENT_H
+#define FNV_BSEXTRADATA_H
+#define FNV_MAGICTARGET_H
+#pragma include_alias("TESForm.h", "../../include/TESForm.h")
+#pragma include_alias("NiPoint3.h", "../../include/NiPoint3.h")
+#pragma include_alias("TESObjectREFR.h", "../../include/TESObjectREFR.h")
+#pragma include_alias("TESFile.h", "../../include/TESFile.h")
+#pragma include_alias("TESChildCell.h", "../../include/TESChildCell.h")
+#pragma include_alias("ActorValueOwner.h", "../../include/ActorValueOwner.h")
+#include "../../include/BaseFormComponent.h"
+#include "../../include/BSExtraData.h"
+#include "../../include/MagicTarget.h"
+
 #include "extradatalist_packet_rtti_extradatalist.h"
 #include "ExtraDataList.h"
 #include "ExtraContainerChanges_rtti_extradatalist.h"
 #include "InventoryChanges.h"
 #include "game_constants.h"
+// Keep the scene graph's helper templates distinct from the packet templates.
+#include "../../include/NiAVObject.h"
+// Avoid a collision with MSVC 2008's synthesized constructor helper.
+#define __local_vftable_ctor_closure BoundObjectVftableCtorClosure
+#include "../../include/AlchemyItem.h"
+#include "../../include/BGSEncounterZone.h"
+#include "../../include/ExtraSpecialRenderFlags.h"
+#include "../../include/MagicItem.h"
+#include "../../include/NonActorMagicTarget.h"
+#include "../../include/Script.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESAmmo.h"
+#include "../../include/TESFaction.h"
+#include "../../include/TESGlobal.h"
+#include "../../include/TESKey.h"
+#include "../../include/TESPackage.h"
+#include "../../include/TESTopic.h"
+#include "../../include/TESTopicInfo.h"
+#undef __local_vftable_ctor_closure
 
 struct P3Q
 {
@@ -77,17 +115,6 @@ struct P3Q
     virtual void v63();
     virtual bool IsX();
 };
-struct MTQ
-{
-    virtual void m0();
-    virtual void m1();
-    virtual int GetCaster();
-};
-class NonActorMagicTarget : public BSExtraData
-{
-  public:
-    MTQ kMT;
-};
 struct ResQ
 {
     void FUN_00483710();
@@ -116,7 +143,7 @@ void OwnQ::FUN_00426720(unsigned int uiFlags, int a2, P3Q* p3)
         {
             NonActorMagicTarget* pTarget = dynamic_cast<NonActorMagicTarget*>(FUN_00410220(0x33));
             if (pTarget)
-                FUN_00806130(pTarget->kMT.GetCaster(), 0);
+                FUN_00806130((int)pTarget->GetActiveEffectList(), 0);
         }
     }
 }
@@ -124,67 +151,6 @@ void OwnQ::FUN_00426720(unsigned int uiFlags, int a2, P3Q* p3)
 void* __cdecl memset(void* dst, int value, unsigned int size);
 class type_info;
 // ExtraDataList::LoadGame (FUN_00428150)
-class TESGlobal : public TESForm
-{
-};
-class ScriptEventList;
-class Script : public TESForm
-{
-  public:
-    ScriptEventList* CreateEventList();
-};
-class TESAmmo : public TESForm
-{
-};
-class BGSEncounterZone : public TESForm
-{
-};
-class TESKey : public TESForm
-{
-};
-class TESFaction : public TESForm
-{
-};
-class TESTopic : public TESForm
-{
-};
-class TESTopicInfo : public TESForm
-{
-};
-class TESBoundObject : public TESForm
-{
-};
-class ActorBaseData
-{
-  public:
-    bool IsValid();  // 0x47cdb0
-};
-class TESActorBase : public TESForm
-{
-  public:
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    ActorBaseData kBaseData;
-};
-class MagicItem
-{
-  public:
-    virtual ~MagicItem();
-};
-class AlchemyItem : public MagicItem
-{
-};
-struct ExtraSpecialRenderFlags
-{
-  public:
-    virtual ~ExtraSpecialRenderFlags();
-    unsigned int GetFlags();            // 0x84e3a0
-    void SetFlags(unsigned int flags);  // 0x41fd00
-};
 extern "C" void* __cdecl __RTDynamicCast(void* inptr, long vfdelta, void* srcType, void* targetType, int isReference);
 struct LoadFlags
 {
@@ -1181,13 +1147,12 @@ class X8F : public ExtraData110
     void SetName(const char* s);  // 0x438260
     void SetText(const char* s);  // 0x438280
 };
-class X92 : public ExtraData110
+// The shared header has no constructor declaration. Retain only that entry
+// point here; all fields and methods come from ExtraSpecialRenderFlags.
+class LoadableSpecialRenderFlags : public ExtraSpecialRenderFlags
 {
   public:
-    X92();
-    unsigned int u0C;
-    unsigned int u10;
-    void SetFlags(unsigned int v);
+    LoadableSpecialRenderFlags();  // 0x411e40
 };
 class ExtraDataLoader : public ExtraDataList
 {
@@ -1784,7 +1749,7 @@ void ExtraDataLoader::FUN_00428150(LoadBuffer* buf)
                     actor->GetSub()->Reset();
                     actor->Fn8adc50();
                 }
-                if (actor != 0 && _extra->pBase != 0 && _extra->pBase2 != 0 && _extra->pBase->kBaseData.IsValid())
+                if (actor != 0 && _extra->pBase != 0 && _extra->pBase2 != 0 && _extra->pBase->TESActorBaseData::GetUsesLeveledTemplate())
                 {
                     kObj = CreateBaseObj(_extra->pBase, _extra->pBase2);
                     DelObj* pCur = actor->GetObj();
@@ -1909,10 +1874,10 @@ void ExtraDataLoader::FUN_00428150(LoadBuffer* buf)
                 break;
             }
             case 0x92: {
-                X92* p92 = (X92*)(abHas[cType] ? GetByType(cType) : AddData(new X92));
+                ExtraSpecialRenderFlags* p92 = (ExtraSpecialRenderFlags*)(abHas[cType] ? GetByType(cType) : AddData((ExtraData110*)new LoadableSpecialRenderFlags));
                 unsigned int uiRender;
                 buf->Read(&uiRender, 4);
-                buf->Read(&p92->u10, 4);
+                buf->Read(&p92->m_fRenderValue, 4);
                 p92->SetFlags(uiRender);
                 break;
             }

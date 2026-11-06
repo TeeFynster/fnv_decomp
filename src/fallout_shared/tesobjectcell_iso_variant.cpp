@@ -2,6 +2,9 @@
 // with VC9 SP1 and /MT /Od /Oy- /GS /EHsc /Gy /GF (unit lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton.
 
 #include "tesobjectcell_packet.h"
+#include "../../include/BGSSaveLoadGame.h"
+#include "../../include/IngredientItem.h"
+#include <stddef.h>
 void __cdecl operator delete(void* pointer);
 const char kTESObjectCELLCellRefLockEnter[] = "TESObjectCELL::CellRefLockEnter()";
 unsigned int FUN_0054f4c0();
@@ -11,25 +14,14 @@ struct ExpiredRefPosition3
 {
     float x, y, z;
 };
-class TESBoundObject
-{
-  public:
-    virtual ~TESBoundObject();
-    int FUN_00401170();
-};
 struct FUN_00546af0_shell : public TESObjectCELL
 {
     unsigned int FUN_00546af0();
-};
-struct BGSSaveLoadGame
-{
-    unsigned char FUN_0042ce10();
 };
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 extern TESDataHandler* g_dataHandler;
 struct RefNode;
 struct RefrShell;
-struct ExtraShell;
 struct ZoneShell
 {
     bool FUN_00526120(FUN_00546af0_shell* cell);
@@ -45,45 +37,46 @@ struct RefNode
     RefNode* FUN_00726070();
     void FUN_0063f7b0();
 };
-struct Inner3c
+// The shared EffectItemList::vf01 returns void; this call consumes its Boolean result.
+struct EffectItemListBoolQuery
 {
-    virtual void v0();
-    virtual bool v1();
-};
-class IngredientItem : public TESBoundObject
-{
-  public:
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-
-    Inner3c m3c;
+    virtual void Destroy();
+    virtual bool Query();
 };
 struct Obj34
 {
     void UpdateSoundLevel(RefrShell* refr);
 };
-struct ExtraShell : public ExtraDataList
+// ExtraShell_tesobjectcell_iso_variant: local type (was include/ExtraShell.h, which had no evidence of one real class); its methods are 0x00411ec0 ExtraDataList::CopyList, 0x004127e0 ExtraDataList::CompareList, 0x00418520 ExtraDataList::GetContainerChanges, 0x00418750 ExtraDataList::HasLeveledItem
+#include "../../include/ExtraDataList.h"
+
+class OpacityFadeState;
+class RefNode;
+class RefrShell;
+
+class ExtraShell_tesobjectcell_iso_variant : public ExtraDataList
 {
+public:
+    ExtraShell_tesobjectcell_iso_variant();
+
+    int FUN_00418520();
+    bool FUN_00418750();
+    short FUN_00418770();
+    bool FUN_004127e0(ExtraShell_tesobjectcell_iso_variant*);
+    void FUN_00419ad0(int);
+    void FUN_00411ec0(ExtraShell_tesobjectcell_iso_variant*);
+    signed char GetExtraByteValue();
+    void FUN_0042dec0();
+    OpacityFadeState* GetOffsetC();
+    void FUN_0041aeb0();
+    void FUN_0041af50();
     void* FUN_0042e250();
-    Modelish* FUN_00418520();
     RefNode* FUN_0041df90();
     void FUN_0041dfd0();
     void FUN_0041de40(int a);
     RefrShell* FUN_0041e310();
 };
-struct RefrShell : public TESObjectREFR
+struct RefrShell
 {
 
     virtual void v00();
@@ -318,9 +311,9 @@ extern Calendar g_calendar;
 unsigned int __cdecl FUN_00526100();
 bool __fastcall FUN_005262a0(void* zone);
 Obj34* __cdecl FUN_00475400(void* p);
-void __cdecl DoCheckScriptRunnerAndRun(RefrShell* refr, ExtraShell* extra);
-bool __cdecl MarkBaseExtraListScriptEvent(RefrShell* refr, ExtraShell* extra, unsigned int a);
-ExtraShell* __fastcall FUN_005d43c0(RefrShell* refr);
+void __cdecl DoCheckScriptRunnerAndRun(RefrShell* refr, ExtraShell_tesobjectcell_iso_variant* extra);
+bool __cdecl MarkBaseExtraListScriptEvent(RefrShell* refr, ExtraShell_tesobjectcell_iso_variant* extra, unsigned int a);
+ExtraShell_tesobjectcell_iso_variant* __fastcall FUN_005d43c0(RefrShell* refr);
 struct CellShell : public FUN_00546af0_shell
 {
     ZoneShell* FUN_00546c20();
@@ -356,7 +349,7 @@ bool CellShell::FUN_0054df30()
             RefrShell* flag6;
             flag6 = *a->FUN_006815c0();
             a = a->FUN_00726070();
-            switch (flag6->FUN_007af430()->FUN_00401170())
+            switch (static_cast<int>(flag6->FUN_007af430()->FUN_00401170()))
             {
             case 0x1b:
                 if (flag6->FUN_005653d0())
@@ -531,15 +524,15 @@ bool CellShell::FUN_0054df30()
             }
             else
             {
-                switch (refr2->FUN_007af430()->FUN_00401170())
+                switch (static_cast<int>(refr2->FUN_007af430()->FUN_00401170()))
                 {
                 case 0x1b:
                     if (refr2->FUN_0056ae60())
                     {
                         refr2->V130(0);
-                        if (!!FUN_005d43c0(refr2)->FUN_00418520())
+                        if (!!reinterpret_cast<Modelish*>(FUN_005d43c0(refr2)->FUN_00418520()))
                         {
-                            if (!FUN_005d43c0(refr2)->FUN_00418520()->FUN_0042cde0())
+                            if (!reinterpret_cast<Modelish*>(FUN_005d43c0(refr2)->FUN_00418520())->FUN_0042cde0())
                                 refr2->FUN_00569250();
                         }
                     }
@@ -554,7 +547,9 @@ bool CellShell::FUN_0054df30()
                         j = dynamic_cast<IngredientItem*>(refr2->FUN_007af430());
                         if (0 != j)
                         {
-                            if (j->m3c.v1())
+                            if (reinterpret_cast<EffectItemListBoolQuery&>(reinterpret_cast<char*>(j)[
+                                    offsetof(IngredientItem, m_iEffectCount) -
+                                    offsetof(EffectItemList, m_iEffectCount)]).Query())
                                 refr2->V49(0);
                         }
                     }

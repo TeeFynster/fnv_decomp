@@ -1,15 +1,25 @@
-// fallout_shared/tesscriptcompiler.cpp: ScriptCompiler, BGSCameraPath, S7f, S5a and more (36 functions)
+#include "../../include/BSStringT.h"
+// fallout_shared/tesscriptcompiler.cpp: ScriptCompiler, TESForm, S7f, S5a and more (36 functions)
 
 #include "tesscriptcompiler_packet_decls.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/SL.h"
+#include "../../include/Script.h"
+#include "../../include/StrMem.h"
+#include "../../include/TESDataHandler.h"
+#include "../../include/ScriptCompiler.h"
+#include "../../include/BGSMessage.h"
+#include <stddef.h>
 
-// If DAT_011c40c8 is clear, sets it true, reads GetEditorID(), resets it, and returns the name's length or 0 when there is no name.
+// If DAT_011c40c8 is clear, sets it true, reads GetName(), resets it, and returns the name's length or 0 when there is no name.
 // @fnv 0x00474cb0
-int BGSCameraPath::HasNameForWarning()
+int TESForm::FUN_00474cb0()
 {
     if (DAT_011c40c8)
         return 0;
     DAT_011c40c8 = true;
-    const char* name = GetEditorID();
+    const char* name = GetName();
     DAT_011c40c8 = false;
     return name ? BSStringLength(name) : 0;
 }
@@ -25,9 +35,7 @@ ScriptFunctionInfo* GetFunctionByOpcode(SCRIPT_OUTPUT output)
     return result;
 }
 
-struct ScriptReferencedObject;
 struct ScriptVariableData;
-struct Script;
 struct CStringArgument
 {
     bool GetVariable(ScriptVariableData*);
@@ -58,13 +66,8 @@ struct CStringArgument
     char m_kLineList[8];
 };
 typedef char _sizecheck_ScriptCompileData[sizeof(CStringArgument) == 88 ? 1 : -1];
-struct FUN_00613790_shell : public CStringArgument
-{
-    void* FUN_00613790();
-};
-
 // @fnv 0x00613790
-void* FUN_00613790_shell::FUN_00613790()
+void* CStringArgument::GetScriptLineList()
 {
     return &m_kLineList;
 }
@@ -105,7 +108,8 @@ int IsIntegerString(const char* pcString)
     return 0;
 }
 
-struct Interface
+// Exe 0x005aea50: unit-local Interface view; declarations and layout are preserved.
+struct TesscriptcompilerInterfaceView
 {
     static void __cdecl PrintDebugMessage(const char*);
 };
@@ -119,9 +123,9 @@ struct S5a
 S5a* S5a::ValidateScriptNameTables()
 {
     if (DAT_01196d18 != 0x1280)
-        Interface::PrintDebugMessage("The script function list doesn't have all the names filled in.\r\n");
+        TesscriptcompilerInterfaceView::PrintDebugMessage("The script function list doesn't have all the names filled in.\r\n");
     if (DAT_011908f0 != 0x1cd)
-        Interface::PrintDebugMessage("The script console-command list doesn't have all the names filled in.\r\n");
+        TesscriptcompilerInterfaceView::PrintDebugMessage("The script console-command list doesn't have all the names filled in.\r\n");
     return this;
 }
 
@@ -211,15 +215,10 @@ struct List
     void*& _ref_006815c0();
     void _ref_0063f7b0();
 };
-struct TESDataHandler
-{
-    List* GetTESHairList();
-    void ClearHairList();
-};
 // @fnv 0x005ae670
 void TESDataHandler::ClearHairList()
 {
-    List* pList = GetTESHairList();
+    List* pList = (List*)GetTESHairList();
     while (pList && !pList->_ref_008256d0())
     {
         void* item = pList->_ref_006815c0();
@@ -260,10 +259,6 @@ struct TaskQueueInterface
 {
     static void __cdecl CopyStringToBuffer(char*, unsigned int, const char*);
 };
-struct TESForm
-{
-    static TESForm* __cdecl LookupFormByEditorID(const char*);
-};
 struct ScriptVariableData
 {
     char pText[512];
@@ -288,37 +283,10 @@ bool __cdecl FUN_005afeb0(const char* apVarName)
 }
 }  // namespace fnv_005afeb0
 
+#include "../../include/COMPILER_NAME.h"
+
 namespace fnv_005aedb0 {
-template <class T> class BSSimpleList;
-struct ScriptReferencedObject;
-class ShellH;
-class Script
-{
-  public:
-    char* GetText();
-    static void __cdecl CopyScriptReferences(BSSimpleList<ScriptReferencedObject*>*,
-                                             BSSimpleList<ScriptReferencedObject*>*, Script*);
-};
-class ScriptS
-{
-  public:
-    void* GetHeader();
-};
-class XActor
-{
-  public:
-    ShellH* GetExtra() const;
-};
-class TESObjectREFR
-{
-  public:
-    Script* FUN_005673c0();
-};
-class BSStr
-{
-  public:
-    bool Set(const char*, unsigned int);
-};
+
 class Str6a70
 {
   public:
@@ -328,11 +296,6 @@ class Str6a70
 };
 void* __memcpy(void*, const void*, unsigned int);
 extern const char* DAT_0118ca7c[];
-enum COMPILER_NAME
-{
-    COMPILER_NAME_0,
-    COMPILER_NAME_1
-};
 
 struct FUN_005ae490;
 struct FUN_005ae5c0;
@@ -356,12 +319,7 @@ template <class A, class B> class ScriptCompileDataT
 };
 typedef ScriptCompileDataT<FUN_005ae490, FUN_005ae5c0> CStringArgument;
 
-class ScriptCompiler
-{
-  public:
-    bool FUN_005aeb90(Script*, CStringArgument*);
-    bool FUN_005aedb0(Script* apScript, TESObjectREFR* apOwnerObject, COMPILER_NAME index, bool abOnLoad);
-};
+}  // namespace fnv_005aedb0
 
 // Builds compile data from the script and optional owner object, sets the compiler name, then calls FUN_005aeb90 to compile the script.
 // @fnv 0x005aedb0
@@ -369,56 +327,29 @@ bool ScriptCompiler::FUN_005aedb0(Script* apScript, TESObjectREFR* apOwnerObject
                                   bool abOnLoad)
 {
     bool bResult;
-    CStringArgument compileData;
+    fnv_005aedb0::CStringArgument compileData;
     compileData.m_eCompilerIndex = eCompilerName;
     compileData.bPartial = true;
     if (apOwnerObject && apOwnerObject->FUN_005673c0())
     {
         compileData.pScript = apOwnerObject->FUN_005673c0();
-        __memcpy(compileData.kHeader, ((ScriptS*)compileData.pScript)->GetHeader(), 0x14);
+        fnv_005aedb0::__memcpy(compileData.kHeader, compileData.pScript->GetHeader(), 0x14);
         Script::CopyScriptReferences(
-            (BSSimpleList<ScriptReferencedObject*>*)((XActor*)compileData.pScript)->GetExtra(),
+            compileData.pScript->GetReferencedObjectList(),
             (BSSimpleList<ScriptReferencedObject*>*)compileData.kRefObjects, 0);
     }
     else
     {
         compileData.pScript = apScript;
     }
-    if (eCompilerName == 1 || !((BGSCameraPath*)compileData.pScript)->HasNameForWarning())
-        compileData.m_pName = DAT_0118ca7c[compileData.m_eCompilerIndex];
+    if (eCompilerName == 1 || !((TESForm*)compileData.pScript)->FUN_00474cb0())
+        compileData.m_pName = fnv_005aedb0::DAT_0118ca7c[compileData.m_eCompilerIndex];
     else
-        ((BSStr*)&compileData.m_pName)->Set(((BGSCameraPath*)compileData.pScript)->GetEditorID(), 0);
+        ((::BSStringT<char>*)&compileData.m_pName)->Set(((TESForm*)compileData.pScript)->GetName(), 0);
     compileData.pText = apScript->GetText();
-    bResult = FUN_005aeb90(apScript, &compileData);
+    bResult = FUN_005aeb90(apScript, (CStringArgument*)&compileData);
     return bResult;
 }
-}  // namespace fnv_005aedb0
-
-struct BSStr
-{
-    bool Set(char const*, unsigned int);
-    unsigned char _padding[8];
-};
-
-struct StrMem : BSStr
-{
-    StrMem();
-    ~StrMem();
-
-    int _field08;
-    unsigned char _field0c;
-    int _field10;
-    char* _field14;
-    int _field18;
-    unsigned char _field1c[0x14];
-};
-
-struct SL
-{
-    SL();
-    ~SL();
-    unsigned char _padding[8];
-};
 
 void* __cdecl memset(void*, int, unsigned int);
 char* __cdecl AllocateZeroed(int, int);
@@ -432,6 +363,12 @@ struct FUN_005ae490
     int _field04;
     int _field08;
     StrMem _field0c;
+    int _field14;
+    unsigned char _field18;
+    int _field1c;
+    char* _field20;
+    int _field24;
+    unsigned char _field28[0x14];
     SL _field3c;
     SL _field44;
     int _field4c;
@@ -443,36 +380,26 @@ struct FUN_005ae490
 // @fnv 0x005ae490
 FUN_005ae490::FUN_005ae490()
 {
-    _field0c._field10 = 0;
+    _field1c = 0;
     _field04 = 0;
-    _field0c._field18 = 0;
+    _field24 = 0;
 
-    _field0c._field14 = AllocateZeroed(1, 0x4000);
-    memset(_field0c._field14, 0, 4);
-    memset(_field0c._field1c, 0, 0x14);
-    memset(_field0c._field14, 0, 4);
+    _field20 = AllocateZeroed(1, 0x4000);
+    memset(_field20, 0, 4);
+    memset(_field28, 0, 0x14);
+    memset(_field20, 0, 4);
 
     _field08 = 0;
-    _field0c._field0c = 0;
+    _field18 = 0;
     _field4c = 0;
 
     _field0c.Set($SG3295, 0);
 
-    _field0c._field08 = 0;
+    _field14 = 0;
 }
 
 namespace fnv_005ae5c0 {
-struct TESDataHandler
-{
-    void ClearHairList();
-    unsigned char padding[0x0C];
-};
 
-struct BSS
-{
-    unsigned char padding[0x14];
-    ~BSS();
-};
 
 struct ListX
 {
@@ -484,8 +411,11 @@ void __cdecl _Deallocate(void* ptr);
 void __fastcall ClearList(void* ptr);
 void __fastcall FUN_005ae730(void* ptr);
 
-struct FUN_005ae5c0 : public TESDataHandler, public BSS
+struct FUN_005ae5c0
 {
+    unsigned char padding00[0x0c];
+    ::BSStringT<char> _field0c;
+    unsigned char stringTailPadding[0x0c];
     char* pOutput;
     unsigned char padding[0x18];
     ListX list1;
@@ -500,7 +430,7 @@ struct FUN_005ae5c0 : public TESDataHandler, public BSS
 // @fnv 0x005ae5c0
 FUN_005ae5c0::~FUN_005ae5c0()
 {
-    TESDataHandler::ClearHairList();
+    ((TESDataHandler*)this)->ClearHairList();
     ClearList(this);
     FUN_005ae730(this);
     _Deallocate(pOutput);
@@ -774,10 +704,8 @@ void FUN_005ae730_shell::FUN_005ae730()
 }
 
 struct ScriptRefHolder;
-struct TESForm;
-struct TESObjectREFR;
 struct Target;
-struct ListNode;
+struct TesscriptcompilerListNodeView;
 struct Item;
 
 extern char DAT_01183028[];
@@ -795,26 +723,18 @@ int __cdecl FUN_00ec7ec0(char* s, ScriptRefHolder* p, int idx);
 int __cdecl FUN_00ec89e9(int c);
 Target* __cdecl FUN_004826d0(TESForm* f);
 
-struct TESForm
-{
-    int FUN_00401170();
-};
 
-struct TESObjectREFR
-{
-    void FUN_00565730();
-    Target* FUN_005673c0();
-};
 
 struct Target
 {
     bool FUN_005ac6a0(ScriptRefHolder* p, int* out);
 };
 
-struct ListNode
+// Exe 0x005ae7a0: unit-local ListNode view; declarations and layout are preserved.
+struct TesscriptcompilerListNodeView
 {
     void*& Slot();
-    ListNode* Next();
+    TesscriptcompilerListNodeView* Next();
 };
 
 struct Buf
@@ -846,7 +766,7 @@ struct CompilerCtx
     char unk00[0x4c];
     Target* m_4c;
 
-    ListNode* FUN_005a8080();
+    TesscriptcompilerListNodeView* FUN_005a8080();
     bool FUN_005afad0(ScriptRefHolder* p, int a, int b);
     bool ResolveReference(ScriptRefHolder* p);
 };
@@ -855,7 +775,7 @@ struct CompilerCtx
 // @fnv 0x005ae7a0
 bool CompilerCtx::ResolveReference(ScriptRefHolder* apRef)
 {
-    ListNode* cur;
+    TesscriptcompilerListNodeView* cur;
     int idx;
     TESObjectREFR* r2;
     Target* t5;
@@ -870,7 +790,7 @@ bool CompilerCtx::ResolveReference(ScriptRefHolder* apRef)
         if (r2 != 0)
         {
             r2->FUN_00565730();
-            t5 = r2->FUN_005673c0();
+            t5 = (Target*)r2->FUN_005673c0();
         }
         else
         {
@@ -1004,20 +924,8 @@ struct ScriptHeaderView
     unsigned char scriptType;
     unsigned char flags;
 };
-struct Script
-{
-    ScriptHeaderView* FUN_00500940();
-    void InitFromCompileData(CStringArgument*);
-};
-struct ScriptCompiler
-{
-    bool FUN_005aeb90(Script* script, FUN_00613790_shell* data);
-    unsigned int ParseLine(CStringArgument*);
-    bool FUN_005b1180(CStringArgument*);
-    bool FUN_005aff40(Script*, CStringArgument*, ScriptLineBuffer*);
-};
 // @fnv 0x005aeb90
-bool ScriptCompiler::FUN_005aeb90(Script* script, FUN_00613790_shell* pSource)
+bool ScriptCompiler::FUN_005aeb90(Script* script, CStringArgument* pSource)
 {
     if (!script || !pSource)
         return false;
@@ -1039,7 +947,7 @@ bool ScriptCompiler::FUN_005aeb90(Script* script, FUN_00613790_shell* pSource)
         pSource->m_uiLastLineNumber = 0;
         if (!pSource->m_bIsPartialScript)
         {
-            buffer = (Node_5afe30*)pSource->FUN_00613790();
+            buffer = (Node_5afe30*)pSource->GetScriptLineList();
             if (!buffer || (buffer && buffer->_ref_008256d0()))
             {
                 ScriptCompileError((ScriptSource*)pSource, scriptNameError);
@@ -1060,7 +968,7 @@ bool ScriptCompiler::FUN_005aeb90(Script* script, FUN_00613790_shell* pSource)
                 return false;
         }
     }
-    buffer = (Node_5afe30*)pSource->FUN_00613790();
+    buffer = (Node_5afe30*)pSource->GetScriptLineList();
     ScriptLineBuffer* currentLine = 0;
     while (buffer && !buffer->_ref_008256d0())
     {
@@ -1113,41 +1021,26 @@ struct Name95
     int length;
     void FUN_004037f0(const char*, int);
 };
-struct Compile95
-{
-    const char* input;
-    unsigned int offset;
-    int compiler;
-    Name95 name;
-    int error;
-    int unk18;
-    unsigned int line;
-    Queue95* FUN_00613790();
-};
 unsigned int __cdecl FUN_00ec6130(const char*);
-int __cdecl ReadScriptLine(Compile95*, Line95*);
-int __cdecl FUN_005af5f0(Compile95*, Word95*, const char*, unsigned int*, int, int);
-void __cdecl ReportScriptError(Compile95*, const char*, ...);
+int __cdecl ReadScriptLine(CStringArgument*, Line95*);
+int __cdecl FUN_005af5f0(CStringArgument*, Word95*, const char*, unsigned int*, int, int);
+void __cdecl ReportScriptError(CStringArgument*, const char*, ...);
 void __cdecl FUN_00406d30(char*, unsigned int, const char*);
-struct Parser95
-{
-    int ParseLine(Compile95*);
-};
 // @fnv 0x005aeed0
-int Parser95::ParseLine(Compile95* pCompile)
+unsigned int ScriptCompiler::ParseLine(CStringArgument* pCompile)
 {
-    if (pCompile->offset >= FUN_00ec6130(pCompile->input))
+    if (pCompile->m_uiInputOffset >= FUN_00ec6130(pCompile->input))
         return 65535;
     Line95* line8 = new Line95;
-    line8->number = pCompile->line + 1;
+    line8->number = pCompile->m_uiLastLineNumber + 1;
     int consumed38 = ReadScriptLine(pCompile, line8);
     if (!consumed38)
     {
-        pCompile->error = line8->error;
+        pCompile->m_eErrorCode = line8->error;
         delete line8;
         return 65535;
     }
-    pCompile->offset += consumed38;
+    pCompile->m_uiInputOffset += consumed38;
     Word95 word26;
     int parsed2 = FUN_005af5f0(pCompile, &word26, line8->input, &line8->cursor, 1, 1);
     if (!parsed2)
@@ -1160,7 +1053,7 @@ int Parser95::ParseLine(Compile95* pCompile)
     bool valid46 = word26.kind == 'X';
     if (valid46)
     {
-        if (word26.code >= 256 && word26.code < 461 && pCompile->compiler != 1)
+        if (word26.code >= 256 && word26.code < 461 && pCompile->m_eCompilerIndex != 1)
         {
             valid46 = false;
             ReportScriptError(pCompile, "Script command \"%s\" is a console-only command.", word26.text);
@@ -1168,26 +1061,26 @@ int Parser95::ParseLine(Compile95* pCompile)
     }
     else
     {
-        ++pCompile->line;
+        ++pCompile->m_uiLastLineNumber;
         ReportScriptError(pCompile, "Script command \"%s\" not found.", word26.text);
-        pCompile->error = 13;
+        pCompile->m_eErrorCode = 13;
     }
     if (valid46)
     {
         line8->code = word26.code;
         FUN_00406d30(line8->input, 512, line8->input + line8->cursor);
         line8->size -= line8->cursor;
-        pCompile->line = line8->number;
+        pCompile->m_uiLastLineNumber = line8->number;
         if (line8->code == 29)
         {
             unsigned int cursor33 = 0;
             Word95 name21;
             if (FUN_005af5f0(pCompile, &name21, line8->input, &cursor33, 0, 0))
-                pCompile->name.FUN_004037f0(name21.text, 0);
+                ((Name95*)&pCompile->m_kScriptName)->FUN_004037f0(name21.text, 0);
             else
             {
                 ReportScriptError(pCompile, "Syntax Error.  Missing script name.");
-                pCompile->error = 1;
+                pCompile->m_eErrorCode = 1;
                 delete line8;
                 return 65535;
             }
@@ -1195,11 +1088,11 @@ int Parser95::ParseLine(Compile95* pCompile)
         if ((line8->code == 22 || line8->code == 24) && !line8->input[0])
         {
             ReportScriptError(pCompile, "Syntax Error.  No condition specified for 'if' or 'elseif'.");
-            pCompile->error = 6;
+            pCompile->m_eErrorCode = 6;
             delete line8;
             return 65535;
         }
-        pCompile->FUN_00613790()->FUN_00905820(&line8);
+        ((Queue95*)pCompile->GetScriptLineList())->FUN_00905820(&line8);
         return line8->code;
     }
     else
@@ -1448,23 +1341,12 @@ struct ScriptLineNode
     ScriptLineNode* FUN_00726070();
 };
 bool __fastcall FUN_008256d0(ScriptLineNode* pkNode);
-struct ScriptBufferS
-{
-    char pad[0x1c];
-    unsigned int m_uiCurrentLine;
-    ScriptLineNode* FUN_00613790();
-};
-void ReportScriptError(ScriptBufferS* pkBuffer, const char* pcError);
-struct FUN_005b1180_shell
-{
-    bool FUN_005b1180(ScriptBufferS* pkBuffer);
-};
 // @fnv 0x005b1180
-bool FUN_005b1180_shell::FUN_005b1180(ScriptBufferS* pkBuffer)
+bool ScriptCompiler::FUN_005b1180(CStringArgument* pkBuffer)
 {
     unsigned int uiType5;
     bool bInBlock = false;
-    ScriptLineNode* pIterCur = pkBuffer->FUN_00613790();
+    ScriptLineNode* pIterCur = (ScriptLineNode*)pkBuffer->GetScriptLineList();
     while (pIterCur && !FUN_008256d0(pIterCur))
     {
         ScriptLineS* pkLine = pIterCur->FUN_006815c0();
@@ -1480,7 +1362,7 @@ bool FUN_005b1180_shell::FUN_005b1180(ScriptBufferS* pkBuffer)
         case 0x10:
             if (bInBlock)
             {
-                pkBuffer->m_uiCurrentLine = pkLine->m_uiLineNumber;
+                pkBuffer->m_uiLastLineNumber = pkLine->m_uiLineNumber;
                 ReportScriptError(pkBuffer, "Nested begin/end blocks are not allowed.");
                 return false;
             }
@@ -1492,7 +1374,7 @@ bool FUN_005b1180_shell::FUN_005b1180(ScriptBufferS* pkBuffer)
         case 0x11:
             if (!bInBlock)
             {
-                pkBuffer->m_uiCurrentLine = pkLine->m_uiLineNumber;
+                pkBuffer->m_uiLastLineNumber = pkLine->m_uiLineNumber;
                 ReportScriptError(pkBuffer, "End without matching Begin.");
                 return false;
             }
@@ -1504,7 +1386,7 @@ bool FUN_005b1180_shell::FUN_005b1180(ScriptBufferS* pkBuffer)
         default:
             if (!bInBlock)
             {
-                pkBuffer->m_uiCurrentLine = pkLine->m_uiLineNumber;
+                pkBuffer->m_uiLastLineNumber = pkLine->m_uiLineNumber;
                 ReportScriptError(pkBuffer, "All script commands must be inside a begin/end block.");
                 return false;
             }
@@ -1891,7 +1773,7 @@ struct ScriptFuncDef
 {
     int field00;
     int field04;
-    BGSCameraPath* pForm;
+    TESForm* pForm;
 };
 struct CompilerShell : public CStringArgument
 {
@@ -2004,7 +1886,7 @@ int __cdecl FUN_005af5f0(CompilerShell* aCompiler, ScriptVariableData* apWord, c
                 ReportScriptError(
                     (CStringArgument*)aCompiler,
                     "Syntax error.  Invalid reference '%s' (only quests and object references are allowed in this context).",
-                    pScriptFunction->pForm->GetEditorID());
+                    pScriptFunction->pForm->GetName());
                 return 0;
             }
             if (castA != 0)
@@ -2096,21 +1978,6 @@ unsigned int __cdecl FUN_0044a670(const char*);
 namespace MsgCompileData {
 extern "C" char DAT_01186130[];
 }
-struct MessageDescription_5b3c
-{
-    virtual void v0();
-    virtual void v4();
-    virtual void v8();
-    virtual void vc();
-    virtual char* GetText(void*, unsigned int);
-};
-class BGSMessage_5b3c : public TESForm
-{
-  public:
-    unsigned int virtualTable00;
-    int flags04, flags08, flags0c, flags10, flags14, flags18, flags1c, flags20;
-    MessageDescription_5b3c description;
-};
 struct MessageParseWord_5b3c
 {
     char text[0x200];
@@ -2145,13 +2012,13 @@ bool __cdecl FUN_005b3cd0(unsigned short opcode, MessageParameter_5b3c* apParame
     {
         MessageParseWord_5b3c message;
         {
-            BGSMessage_5b3c* form;
+            BGSMessage* form;
             {
                 unsigned short version;
                 {
                     int count;
                     {
-                        char* text;
+                        const char* text;
                         {
                             char* output;
                             line->uiElapsedMilliseconds = 0;
@@ -2202,7 +2069,7 @@ bool __cdecl FUN_005b3cd0(unsigned short opcode, MessageParameter_5b3c* apParame
                                                  &word, apParameter->name);
                                     return false;
                                 }
-                                form = static_cast<BGSMessage_5b3c*>(
+                                form = static_cast<BGSMessage*>(
                                     _FNV_DynamicCast(word.form, 0, DAT_01183028, MsgCompileData::DAT_01186130, 0));
                                 if (word.variable == 0 && form == 0)
                                 {
@@ -2222,7 +2089,14 @@ bool __cdecl FUN_005b3cd0(unsigned short opcode, MessageParameter_5b3c* apParame
                             if (literal)
                                 text = message.text;
                             else
-                                text = form ? form->description.GetText(0, 0x43534544) : 0;
+                            {
+                                // Address the description subobject directly: /Od adds a null check to base casts.
+                                text = form ? reinterpret_cast<TESDescription*>(
+                                                  (char*)form + offsetof(BGSMessage, TESDescription::m_uiDescriptionFileOffset) -
+                                                  offsetof(TESDescription, m_uiDescriptionFileOffset))
+                                                  ->GetDescription(0, static_cast<CHUNK_ID>(0x43534544))
+                                            : 0;
+                            }
                             count = 0;
                             while (text && *text)
                             {

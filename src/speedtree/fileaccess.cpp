@@ -1,3 +1,4 @@
+#include "../../include/CVec3.h"
 
 // src/speedtree/fileaccess.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/speedtree/fileaccess.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -28,31 +29,27 @@ void* FUN_00b3ede0_shell::FUN_00b3ede0()
     return *(void**)result;
 }
 
-struct Vector3D
-{
-    float m_fComponents[3];
-};
-
 struct FUN_00b3ef80_shell
 {
     int m_iValueAt00;
     void* m_pObjectAt04;
     float FUN_00b3ed20();
-    Vector3D GetVector3();
+    CVec3 GetVector3();
 };
 
 // Builds a 3-component vector by calling FUN_00b3ed20 once per component and returns it.
 // @fnv 0x00b3ef80
-Vector3D FUN_00b3ef80_shell::GetVector3()
+CVec3 FUN_00b3ef80_shell::GetVector3()
 {
-    Vector3D vecResult;
+    // Preserve explicit initialization without calling the shared default constructor.
+    float vecResult[sizeof(CVec3) / sizeof(float)];
     int iComponent;
-    vecResult.m_fComponents[2] = 0.0f;
-    vecResult.m_fComponents[1] = 0.0f;
-    vecResult.m_fComponents[0] = 0.0f;
+    vecResult[2] = 0.0f;
+    vecResult[1] = 0.0f;
+    vecResult[0] = 0.0f;
     for (iComponent = 0; iComponent < 3; iComponent++)
-        vecResult.m_fComponents[iComponent] = FUN_00b3ed20();
-    return vecResult;
+        vecResult[iComponent] = FUN_00b3ed20();
+    return *reinterpret_cast<CVec3*>(vecResult);
 }
 
 struct FUN_00b3ed20_range
@@ -133,9 +130,10 @@ struct FUN_00b40150_cls : public FUN_00b40150_base
     unsigned char m_unk10;
     int m_i14;
     unsigned char m_unk18;
-    Vector3D m_vec1;
-    Vector3D m_vec2;
-    Vector3D m_vec3;
+    // These vectors are initialized explicitly in the constructor body.
+    float m_vec1[sizeof(CVec3) / sizeof(float)];
+    float m_vec2[sizeof(CVec3) / sizeof(float)];
+    float m_vec3[sizeof(CVec3) / sizeof(float)];
     unsigned char m_unk40;
     float m_f44;
     int m_i48;
@@ -150,20 +148,20 @@ FUN_00b40150_cls::FUN_00b40150_cls()
     m_i14 = -1;
     m_unk18 = 0;
 
-    Vector3D* v1 = &m_vec1;
-    v1->m_fComponents[2] = 0.0f;
-    v1->m_fComponents[1] = 0.0f;
-    v1->m_fComponents[0] = 0.0f;
+    CVec3* v1 = reinterpret_cast<CVec3*>(m_vec1);
+    v1->z = 0.0f;
+    v1->y = 0.0f;
+    v1->x = 0.0f;
 
-    Vector3D* v2 = &m_vec2;
-    v2->m_fComponents[2] = 0.0f;
-    v2->m_fComponents[1] = 0.0f;
-    v2->m_fComponents[0] = 0.0f;
+    CVec3* v2 = reinterpret_cast<CVec3*>(m_vec2);
+    v2->z = 0.0f;
+    v2->y = 0.0f;
+    v2->x = 0.0f;
 
-    Vector3D* v5 = &m_vec3;
-    v5->m_fComponents[2] = 0.0f;
-    v5->m_fComponents[1] = 0.0f;
-    v5->m_fComponents[0] = 0.0f;
+    CVec3* v5 = reinterpret_cast<CVec3*>(m_vec3);
+    v5->z = 0.0f;
+    v5->y = 0.0f;
+    v5->x = 0.0f;
 
     m_unk40 = 0;
     m_f44 = 0.0f;

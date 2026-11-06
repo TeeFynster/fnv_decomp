@@ -913,12 +913,13 @@ struct MapOpsD5F5
 
 struct MapD5F5
 {
-    struct Pair
+    // hkMapBase<KEY,VAL>::Pair (Havok hkMap.h: key, val); renamed so it does not take include/Pair.h's name
+    struct KeyValue
     {
         unsigned int key;
         ValD5F5 val;
     };
-    Pair* m_kPrimitiveElement;
+    KeyValue* m_kPrimitiveElement;
     int m_iCapacityFlags;
     int m_iPairCount;
     void FUN_00d5f570(void* it);

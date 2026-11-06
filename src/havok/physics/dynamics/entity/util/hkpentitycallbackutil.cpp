@@ -1,6 +1,10 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/physics/dynamics/entity/util/hkpentitycallbackutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/entity/util/hkpentitycallbackutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../include/hkMonitorStream.h"
 
 struct CFF9B0SmallArray
 {
@@ -188,13 +192,6 @@ struct Timer833
     const char* command;
     unsigned int time0, time1;
 };
-struct Stream833
-{
-    int unk00;
-    Timer833* end;
-    int unk08;
-    Timer833* capacityEnd;
-};
 static __declspec(noinline) void FUN_00cff9b0(Array833& listeners)
 {
     for (int index = listeners.size - 1; index >= 0; --index)
@@ -213,15 +210,15 @@ __forceinline void CaptureTicks833(volatile unsigned int& ticks)
 }
 __forceinline void TimerEvent833(const char* name, volatile unsigned int& ticks)
 {
-    Stream833* stream = static_cast<Stream833*>(TlsGetValue(DAT_0126835c));
-    Timer833* command = stream->end;
-    if (command < stream->capacityEnd)
+    hkMonitorStream* stream = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+    Timer833* command = (Timer833*)stream->m_end.val();
+    if ((char*)command < stream->m_capacityMinus16.val())
     {
         command->command = name;
         _ReadWriteBarrier();
         CaptureTicks833(ticks);
         command->time0 = ticks;
-        stream->end = command + 1;
+        stream->m_end.m_storage = (char*)(command + 1);
     }
 }
 // Invokes HandleContactPointEvent on each non-null contact point listener in world->contactPointListeners, then removes null entries via FUN_00cff9b0.
@@ -401,13 +398,6 @@ struct Timer833
     const char* command;
     unsigned int time0, time1;
 };
-struct Stream833
-{
-    int unk00;
-    Timer833* end;
-    int unk08;
-    Timer833* capacityEnd;
-};
 static __declspec(noinline) void FUN_00cff9b0(Array833& listeners)
 {
     for (int index = listeners.size - 1; index >= 0; --index)
@@ -426,15 +416,15 @@ __forceinline void CaptureTicks833(volatile unsigned int& ticks)
 }
 __forceinline void TimerEvent833(const char* name, volatile unsigned int& ticks)
 {
-    Stream833* stream = static_cast<Stream833*>(TlsGetValue(DAT_0126835c));
-    Timer833* command = stream->end;
-    if (command < stream->capacityEnd)
+    hkMonitorStream* stream = static_cast<hkMonitorStream*>(TlsGetValue(DAT_0126835c));
+    Timer833* command = (Timer833*)stream->m_end.val();
+    if ((char*)command < stream->m_capacityMinus16.val())
     {
         command->command = name;
         _ReadWriteBarrier();
         CaptureTicks833(ticks);
         command->time0 = ticks;
-        stream->end = command + 1;
+        stream->m_end.m_storage = (char*)(command + 1);
     }
 }
 // Iterates world->contactPointListeners, calls finishedCollisionCallback on each non-null listener, then removes null entries via FUN_00cff9b0.
@@ -460,40 +450,33 @@ void __cdecl FUN_00d00060(World833* world, ContactPointEvent* event)
 
 extern unsigned long DAT_0126835c;
 
-struct StringCursor
-{
-    int unk00;
-    char* m_cur;
-    int unk08;
-    char* m_kRayEnd;
-};
 
 static __forceinline void timerBegin(const char* name, volatile unsigned int& tb)
 {
-    StringCursor* stream = (StringCursor*)TlsGetValue(DAT_0126835c);
-    char* cur = stream->m_cur;
-    if (cur < stream->m_kRayEnd)
+    hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* cur = stream->m_end.m_storage;
+    if (cur < stream->m_capacityMinus16.m_storage)
     {
         *(const char**)cur = name;
         _ReadWriteBarrier();
         volatile unsigned int& t_begin = tb;
         t_begin = (unsigned int)__rdtsc();
         *(unsigned int*)(cur + 4) = t_begin;
-        stream->m_cur = cur + 12;
+        stream->m_end.m_storage = cur + 12;
     }
 }
 
 static __forceinline void timerEnd(const char* name)
 {
-    StringCursor* stream = (StringCursor*)TlsGetValue(DAT_0126835c);
-    char* cur = stream->m_cur;
-    if (cur < stream->m_kRayEnd)
+    hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    char* cur = stream->m_end.m_storage;
+    if (cur < stream->m_capacityMinus16.m_storage)
     {
         *(const char**)cur = name;
         _ReadWriteBarrier();
         volatile unsigned int t_end = (unsigned int)__rdtsc();
         *(unsigned int*)(cur + 4) = (unsigned int)t_end;
-        stream->m_cur = cur + 12;
+        stream->m_end.m_storage = cur + 12;
     }
 }
 
@@ -533,12 +516,7 @@ struct Container_00cffab0
     CFF9B0SmallArray listeners;
 };
 
-struct ListenerArrayB4
-{
-    Listener2** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+
 
 struct Class_00cffab0
 {
@@ -586,7 +564,7 @@ struct Class_00cffab0
     int unka4;
     int unka8;
     CFF9B0SmallArray m_smallArrayAC;
-    ListenerArrayB4 m_arrayB4;
+    hkArrayBase<Listener2*> m_arrayB4;
     int unkc0;
     int unkc4;
     int unkc8;
@@ -720,6 +698,7 @@ void __cdecl FUN_00cffab0(Class_00cffab0* obj)
 }
 
 #include <windows.h>
+#include "../../../../../../include/hkMonitorStream.h"
 struct CFFCF0TimerCommand
 {
     const char* m_pCommandName;
@@ -734,35 +713,23 @@ struct CFFCF0TimerCommand
     }
 };
 
-struct CFFCF0MonitorStream
-{
-    int unk00;
-    char* m_kRayEnd;
-    int unk08;
-    char* m_pCurrentCommand;
-
-    bool memoryAvailable() const
-    {
-        return m_kRayEnd < m_pCurrentCommand;
-    }
-};
 
 extern DWORD g_CFFCF0TlsIndex;
 
-__forceinline CFFCF0MonitorStream& CFFCF0GetMonitorStream()
+__forceinline hkMonitorStream& CFFCF0GetMonitorStream()
 {
-    return *(CFFCF0MonitorStream*)TlsGetValue(g_CFFCF0TlsIndex);
+    return *(hkMonitorStream*)TlsGetValue(g_CFFCF0TlsIndex);
 }
 
 __forceinline void CFFCF0TimerBegin(const char* name, volatile unsigned int& ticks)
 {
-    CFFCF0MonitorStream& mStream = CFFCF0GetMonitorStream();
-    if (mStream.memoryAvailable())
+    hkMonitorStream& mStream = CFFCF0GetMonitorStream();
+    if (mStream.m_end.val() < mStream.m_capacityMinus16.val())
     {
-        CFFCF0TimerCommand* h = (CFFCF0TimerCommand*)mStream.m_kRayEnd;
+        CFFCF0TimerCommand* h = (CFFCF0TimerCommand*)mStream.m_end.val();
         h->m_pCommandName = name;
         h->setTime(ticks);
-        mStream.m_kRayEnd = (char*)(h + 1);
+        mStream.m_end.m_storage = (char*)(h + 1);
     }
 }
 
@@ -825,20 +792,7 @@ extern DWORD DAT_0126835c;
 
 unsigned __int64 __cdecl __rdtsc(void);
 
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
 
-struct ProfBuf
-{
-    DWORD unk00;
-    ProfRec* m_pCur;
-    DWORD unk08;
-    ProfRec* m_pRecordEnd;
-};
 
 class TaskObj
 {
@@ -898,28 +852,28 @@ void __cdecl InvokeMotionTypeCallbacks(TaskOwner* pOwner)
             {
                 if (pList->m_ppItems[i] != 0)
                 {
-                    ProfBuf* pBuf = (ProfBuf*)pfnTls(DAT_0126835c);
-                    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+                    hkMonitorStream* pBuf = (hkMonitorStream*)pfnTls(DAT_0126835c);
+                    if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
                     {
-                        ProfRec* pRec = pBuf->m_pCur;
-                        pRec->m_pName = "TtsetMotionTypeCb";
+                        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+                        pRec->m_commandAndMonitor = "TtsetMotionTypeCb";
                         _ReadWriteBarrier();
                         ticks[0] = (DWORD)__rdtsc();
-                        pRec->m_iTick = ticks[0];
-                        pBuf->m_pCur = pRec + 1;
+                        pRec->m_time0 = ticks[0];
+                        pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
                     }
 
                     pList->m_ppItems[i]->vtbl10(pOwner);
 
-                    pBuf = (ProfBuf*)pfnTls(DAT_0126835c);
-                    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+                    pBuf = (hkMonitorStream*)pfnTls(DAT_0126835c);
+                    if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
                     {
-                        ProfRec* pRec = pBuf->m_pCur;
-                        pRec->m_pName = "Et";
+                        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+                        pRec->m_commandAndMonitor = "Et";
                         _ReadWriteBarrier();
                         ticks[1] = (DWORD)__rdtsc();
-                        pRec->m_iTick = ticks[1];
-                        pBuf->m_pCur = pRec + 1;
+                        pRec->m_time0 = ticks[1];
+                        pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
                     }
                 }
                 i--;
@@ -992,26 +946,26 @@ void __cdecl DeleteCallbacks(ProfOwner* pOwner)
             {
                 if (pList->m_ppItems[i] != 0)
                 {
-                    ProfBuf* pBuf = (ProfBuf*)pfnTlsGetValue(DAT_0126835c);
-                    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+                    hkMonitorStream* pBuf = (hkMonitorStream*)pfnTlsGetValue(DAT_0126835c);
+                    if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
                     {
-                        ProfRec* pRec = pBuf->m_pCur;
-                        pRec->m_pName = "TtentDelCb";
+                        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+                        pRec->m_commandAndMonitor = "TtentDelCb";
                         _ReadWriteBarrier();
                         ticks[0] = (DWORD)__rdtsc();
-                        pRec->m_iTick = ticks[0];
-                        pBuf->m_pCur = pRec + 1;
+                        pRec->m_time0 = ticks[0];
+                        pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
                     }
                     pList->m_ppItems[i]->vtbl14(pOwner);
-                    ProfBuf* pBuf2 = (ProfBuf*)pfnTlsGetValue(DAT_0126835c);
-                    if (pBuf2->m_pCur < pBuf2->m_pRecordEnd)
+                    hkMonitorStream* pBuf2 = (hkMonitorStream*)pfnTlsGetValue(DAT_0126835c);
+                    if (pBuf2->m_end.m_storage < pBuf2->m_capacityMinus16.m_storage)
                     {
-                        ProfRec* pRec = pBuf2->m_pCur;
-                        pRec->m_pName = "Et";
+                        hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf2->m_end.m_storage);
+                        pRec->m_commandAndMonitor = "Et";
                         _ReadWriteBarrier();
                         ticks[1] = (DWORD)__rdtsc();
-                        pRec->m_iTick = ticks[1];
-                        pBuf2->m_pCur = pRec + 1;
+                        pRec->m_time0 = ticks[1];
+                        pBuf2->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
                     }
                 }
             }
@@ -1031,24 +985,17 @@ struct TimerEntry
     unsigned int m_uiCommandId;
     unsigned int m_08;
 };
-struct MonitorStream
-{
-    int m_00;
-    char* m_cur;
-    int m_08;
-    char* m_kRayEnd;
-};
 static inline void TimerWriteV(const char* name, volatile unsigned int& t)
 {
-    MonitorStream* s = (MonitorStream*)TlsGetValue(DAT_0126835c);
-    if (s->m_cur < s->m_kRayEnd)
+    hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (s->m_end.val() < s->m_capacityMinus16.val())
     {
-        TimerEntry* h = (TimerEntry*)s->m_cur;
+        TimerEntry* h = (TimerEntry*)s->m_end.val();
         h->m_name = name;
         _ReadWriteBarrier();
         t = (unsigned int)__rdtsc();
         h->m_uiCommandId = t;
-        s->m_cur = (char*)(h + 1);
+        s->m_end.m_storage = (char*)(h + 1);
     }
 }
 struct ContactListener
@@ -1122,13 +1069,6 @@ struct CProfileMarker
     const char* m_name;
     unsigned int m_tsc;
     unsigned int m_unk08;
-};
-struct CProfileTls
-{
-    int m_unk00;
-    CProfileMarker* m_cur;
-    int m_unk08;
-    CProfileMarker* m_kRayEnd;
 };
 struct CEvent
 {
@@ -1285,31 +1225,31 @@ void FUN_00d001c0(CManager* mgr, CEvent* ev)
             continue;
 
         {
-            CProfileTls* tls = (CProfileTls*)TlsGetValue(g_tcpTlsIndex);
-            if (tls->m_cur < tls->m_kRayEnd)
+            hkMonitorStream* tls = (hkMonitorStream*)TlsGetValue(g_tcpTlsIndex);
+            if (tls->m_end.val() < tls->m_capacityMinus16.val())
             {
-                CProfileMarker* marker = tls->m_cur;
+                CProfileMarker* marker = (CProfileMarker*)tls->m_end.val();
                 marker->m_name = "TtcpRemCb";
                 _ReadWriteBarrier();
                 volatile unsigned int timestamp = (unsigned int)__rdtsc();
                 marker->m_tsc = timestamp;
-                tls->m_cur = marker + 1;
+                tls->m_end.m_storage = (char*)(marker + 1);
             }
         }
 
         ((CListener*)list->m_data[i])->m05(ev);
 
         {
-            CProfileTls* tls = (CProfileTls*)TlsGetValue(g_tcpTlsIndex);
-            if (tls->m_cur < tls->m_kRayEnd)
+            hkMonitorStream* tls = (hkMonitorStream*)TlsGetValue(g_tcpTlsIndex);
+            if (tls->m_end.val() < tls->m_capacityMinus16.val())
             {
-                CProfileMarker* marker = tls->m_cur;
+                CProfileMarker* marker = (CProfileMarker*)tls->m_end.val();
                 marker->m_name = "Et";
                 _ReadWriteBarrier();
                 volatile unsigned int timestamp = (unsigned int)__rdtsc();
                 void* p = (void*)&timestamp;
                 marker->m_tsc = timestamp;
-                tls->m_cur = marker + 1;
+                tls->m_end.m_storage = (char*)(marker + 1);
             }
         }
     }
@@ -1323,20 +1263,7 @@ extern DWORD DAT_0126835c;
 
 unsigned __int64 __cdecl __rdtsc(void);
 
-struct ProfRec_cffa00
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
 
-struct ProfBuf_cffa00
-{
-    DWORD unk00;
-    ProfRec_cffa00* m_pCur;
-    DWORD unk08;
-    ProfRec_cffa00* m_pRecordEnd;
-};
 
 class ListItem_cffa00
 {
@@ -1375,7 +1302,7 @@ struct ProfOwner_cffa00
     ItemList_cffa00* m_pItems;
 };
 
-// Iterates pOwner->m_pItems in reverse, writing TtentAddCb/Et rdtsc ticks to the TLS ProfBuf and calling vtbl04 on each item.
+// Iterates pOwner->m_pItems in reverse, writing TtentAddCb/Et rdtsc ticks to the TLS hkMonitorStream and calling vtbl04 on each item.
 // @fnv 0x00cffa00
 void __cdecl FUN_00cffa00(ProfOwner_cffa00* pOwner)
 {
@@ -1393,26 +1320,26 @@ void __cdecl FUN_00cffa00(ProfOwner_cffa00* pOwner)
             {
                 if (pList->m_ppItems[i] != 0)
                 {
-                    ProfBuf_cffa00* pBuf = (ProfBuf_cffa00*)pfnTlsGetValue(DAT_0126835c);
-                    if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+                    hkMonitorStream* pBuf = (hkMonitorStream*)pfnTlsGetValue(DAT_0126835c);
+                    if (pBuf->m_end.val() < pBuf->m_capacityMinus16.val())
                     {
-                        ProfRec_cffa00* pRec = pBuf->m_pCur;
-                        pRec->m_pName = "TtentAddCb";
+                        hkMonitorStream::TimerCommand* pRec = (hkMonitorStream::TimerCommand*)pBuf->m_end.val();
+                        pRec->m_commandAndMonitor = "TtentAddCb";
                         _ReadWriteBarrier();
                         ticks[0] = (DWORD)__rdtsc();
-                        pRec->m_iTick = ticks[0];
-                        pBuf->m_pCur = pRec + 1;
+                        pRec->m_time0 = ticks[0];
+                        pBuf->m_end.m_storage = (char*)(pRec + 1);
                     }
                     pList->m_ppItems[i]->vtbl04(pOwner);
-                    ProfBuf_cffa00* pBuf2 = (ProfBuf_cffa00*)pfnTlsGetValue(DAT_0126835c);
-                    if (pBuf2->m_pCur < pBuf2->m_pRecordEnd)
+                    hkMonitorStream* pBuf2 = (hkMonitorStream*)pfnTlsGetValue(DAT_0126835c);
+                    if (pBuf2->m_end.val() < pBuf2->m_capacityMinus16.val())
                     {
-                        ProfRec_cffa00* pRec = pBuf2->m_pCur;
-                        pRec->m_pName = "Et";
+                        hkMonitorStream::TimerCommand* pRec = (hkMonitorStream::TimerCommand*)pBuf2->m_end.val();
+                        pRec->m_commandAndMonitor = "Et";
                         _ReadWriteBarrier();
                         ticks[1] = (DWORD)__rdtsc();
-                        pRec->m_iTick = ticks[1];
-                        pBuf2->m_pCur = pRec + 1;
+                        pRec->m_time0 = ticks[1];
+                        pBuf2->m_end.m_storage = (char*)(pRec + 1);
                     }
                 }
             }
@@ -1460,28 +1387,28 @@ void __cdecl FUN_00cfffb0(void* apOwner, void* apParam)
         {
             if (pItemTable->m_ppItems[i] != 0)
             {
-                ProfBuf* pBuf = (ProfBuf*)pfnTlsGetValue(DAT_0126835c);
-                if (pBuf->m_pCur < pBuf->m_pRecordEnd)
+                hkMonitorStream* pBuf = (hkMonitorStream*)pfnTlsGetValue(DAT_0126835c);
+                if (pBuf->m_end.m_storage < pBuf->m_capacityMinus16.m_storage)
                 {
-                    ProfRec* pRec = pBuf->m_pCur;
-                    pRec->m_pName = "TtNewCollCb";
+                    hkMonitorStream::TimerCommand* pRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+                    pRec->m_commandAndMonitor = "TtNewCollCb";
                     _ReadWriteBarrier();
                     tEnter.Record();
-                    pRec->m_iTick = tEnter.Read();
-                    pBuf->m_pCur = pRec + 1;
+                    pRec->m_time0 = tEnter.Read();
+                    pBuf->m_end.m_storage = reinterpret_cast<char*>(pRec + 1);
                 }
 
                 pItemTable->m_ppItems[i]->v04(apParam);
 
-                ProfBuf* pBuf2 = (ProfBuf*)pfnTlsGetValue(DAT_0126835c);
-                if (pBuf2->m_pCur < pBuf2->m_pRecordEnd)
+                hkMonitorStream* pBuf2 = (hkMonitorStream*)pfnTlsGetValue(DAT_0126835c);
+                if (pBuf2->m_end.m_storage < pBuf2->m_capacityMinus16.m_storage)
                 {
-                    ProfRec* pRec2 = pBuf2->m_pCur;
-                    pRec2->m_pName = "Et";
+                    hkMonitorStream::TimerCommand* pRec2 = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf2->m_end.m_storage);
+                    pRec2->m_commandAndMonitor = "Et";
                     _ReadWriteBarrier();
                     tExit.Record();
-                    pRec2->m_iTick = tExit.Read();
-                    pBuf2->m_pCur = pRec2 + 1;
+                    pRec2->m_time0 = tExit.Read();
+                    pBuf2->m_end.m_storage = reinterpret_cast<char*>(pRec2 + 1);
                 }
             }
         } while (--i >= 0);
@@ -1530,28 +1457,28 @@ void __cdecl FUN_00d00270(void* pOwner, TaskContext* pContext)
         {
             if (pArr->m_data[i] != 0)
             {
-                ProfBuf* pBuf = (ProfBuf*)pfnTls(DAT_0126835c);
-                ProfRec* cur = pBuf->m_pCur;
-                if (cur < pBuf->m_pRecordEnd)
+                hkMonitorStream* pBuf = (hkMonitorStream*)pfnTls(DAT_0126835c);
+                hkMonitorStream::TimerCommand* cur = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+                if (reinterpret_cast<char*>(cur) < pBuf->m_capacityMinus16.m_storage)
                 {
-                    cur->m_pName = str_010cca5c;
+                    cur->m_commandAndMonitor = str_010cca5c;
                     _ReadWriteBarrier();
                     volatile DWORD dwStartTick = (DWORD)__rdtsc();
-                    cur->m_iTick = dwStartTick;
+                    cur->m_time0 = dwStartTick;
                     cur++;
-                    pBuf->m_pCur = cur;
+                    pBuf->m_end.m_storage = reinterpret_cast<char*>(cur);
                 }
                 ((TaskObjV7*)pArr->m_data[i])->v06(pContext);
-                pBuf = (ProfBuf*)pfnTls(DAT_0126835c);
-                cur = pBuf->m_pCur;
-                if (cur < pBuf->m_pRecordEnd)
+                pBuf = (hkMonitorStream*)pfnTls(DAT_0126835c);
+                cur = reinterpret_cast<hkMonitorStream::TimerCommand*>(pBuf->m_end.m_storage);
+                if (reinterpret_cast<char*>(cur) < pBuf->m_capacityMinus16.m_storage)
                 {
-                    cur->m_pName = str_010c41f8;
+                    cur->m_commandAndMonitor = str_010c41f8;
                     _ReadWriteBarrier();
                     *pEndTick = (DWORD)__rdtsc();
-                    cur->m_iTick = *pEndTick;
+                    cur->m_time0 = *pEndTick;
                     cur++;
-                    pBuf->m_pCur = cur;
+                    pBuf->m_end.m_storage = reinterpret_cast<char*>(cur);
                 }
             }
             i--;

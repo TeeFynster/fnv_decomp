@@ -1,33 +1,9 @@
-// gamebryo2.2/corelibs/nianimation/nicolordata_decls.h: declares AnimationKey, NiColorData
+// gamebryo2.2/corelibs/nianimation/nicolordata_decls.h: the shared NiColorData and the key tables it calls
 #ifndef NICOLORDATA_DECLS_H
 #define NICOLORDATA_DECLS_H
 
-#include "NiObject.h"
-class AnimationKey
-{
-  public:
-    enum KeyType
-    {
-        NOINTERP,
-        LINKEY,
-        BEZKEY,
-        TCBKEY,
-        EULERKEY,
-        STEPKEY,
-        NUMKEYTYPES
-    };
-};
-class ColorAnimationKey;
+#include "../../../../include/NiColorData.h"
 typedef void(__cdecl* NiColorDeleteFunction)(ColorAnimationKey*);
 extern NiColorDeleteFunction DAT_011f38e8[];
 extern unsigned char DAT_011f376a[];
-class NiColorData : public NiObject
-{
-  public:
-    unsigned int m_uiNumKeys;
-    ColorAnimationKey* m_pKeyArray;
-    AnimationKey::KeyType m_eRequestType;
-    unsigned char m_ucKeyDataSize;
-    void SetColorKeys(ColorAnimationKey*, unsigned int, AnimationKey::KeyType);
-};
 #endif

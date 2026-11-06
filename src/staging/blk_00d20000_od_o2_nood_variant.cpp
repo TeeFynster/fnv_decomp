@@ -1,3 +1,11 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
 // src/staging/blk_00d20000_od_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHsc /Gy (unit src/staging/blk_00d20000_od.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -6,35 +14,66 @@
 // src/staging/blk_00d20000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/FinishingFlag.h"
+#include "../../include/hkpCdPointCollector.h"
+#include "../../include/hkpCollisionDispatcher.h"
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
+__forceinline hkpCdPointCollector::hkpCdPointCollector()
 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    float _mm_cvtss_f32(__m128);
-    void _mm_store_ss(float*, __m128);
+    m_fEarlyOutDistance = 3.40282e+38f;
 }
 
-struct hkVector4
-{
-    __m128 m_vComponents;
+__forceinline hkpCdPointCollector::~hkpCdPointCollector() throw()
+{}
 
-    __forceinline float lengthSquared3() const
-    {
-        __m128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 y = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-        __m128 z = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), y);
-        float r;
-        _mm_store_ss(&r, z);
-        return r;
-    }
-};
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C"
+{
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    float _mm_cvtss_f32(LocalM128);
+    void _mm_store_ss(float*, LocalM128);
+}
+
+// This unit supplies its SSE intrinsic type and declarations above.
+#define _INCLUDED_MM2
+#include "../../include/hkVector4.h"
+#include "../../include/hkVector4.h"
+#include <string.h>
+
+
+__forceinline hkVector4::hkVector4(const hkVector4& vector)
+{
+    memcpy(this, &vector, sizeof(*this));
+}
+
+
+__forceinline void hkVector4::setBroadcast3(const hkVector4& vector)
+{
+    m_vComponents = _mm_shuffle_ps(vector.m_vComponents, vector.m_vComponents, 0xff);
+}
+
+__forceinline void hkVector4::addMul4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents));
+}
+
+__forceinline float hkVector4::dot3scalar(const hkVector4& vector) const
+{
+    LocalM128 sq = _mm_mul_ps(m_vComponents, vector.m_vComponents);
+    LocalM128 y = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
+    LocalM128 z = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), y);
+    float r;
+    _mm_store_ss(&r, z);
+    return r;
+}
+
 
 struct ContactBody
 {
@@ -61,8 +100,8 @@ bool FUN_00d28560(void* unused, char** items, int count, int offset)
         ContactBody* body = (ContactBody*)(*items + offset);
         float t0 = body->m_uiCommandId;
         float t = (1.0f < t0) ? 1.0f : t0;
-        float lin = body->m_kTranslationalVelocity.lengthSquared3();
-        float ang = body->m_kAngularVelocity.lengthSquared3();
+        float lin = body->m_kTranslationalVelocity.dot3scalar(body->m_kTranslationalVelocity);
+        float ang = body->m_kAngularVelocity.dot3scalar(body->m_kAngularVelocity);
         float r = t * t * ang + lin;
         r = r * 0.25 - 0.010000000298023226;
         if ((body->m_qualityA & 0x7f) > (body->m_qualityC & 0x7f))
@@ -82,52 +121,15 @@ bool FUN_00d28560(void* unused, char** items, int count, int offset)
 }
 
 namespace fnv_00d31610 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-}
 
-extern __m128 DAT_010c4c00;
+extern LocalM128 DAT_010c4c00;
 
-struct hkVector4q
-{
-    __m128 m_vComponents;
-
-    __forceinline void operator=(const hkVector4q& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setBroadcast3(const hkVector4q& v)
-    {
-        m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
-    }
-    __forceinline void addMul4(const hkVector4q& a, const hkVector4q& b)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents));
-    }
-    __forceinline void setNeg4(const hkVector4q& v)
-    {
-        m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c4c00);
-    }
-    __forceinline void setNeg4b(const hkVector4q& v)
-    {
-        m_vComponents = _mm_xor_ps(DAT_010c4c00, v.m_vComponents);
-    }
-};
 
 struct LinearCastVertex
 {
-    hkVector4q m_vContactPosition;
-    hkVector4q m_direction;
-    hkVector4q m_unk20;
+    hkVector4 m_vContactPosition;
+    hkVector4 m_direction;
+    hkVector4 m_unk20;
 };
 
 struct GskVertexIds
@@ -434,7 +436,7 @@ struct LinearCastState
     int m_unk3014;
     int m_unk3018;
     int m_unk301c;
-    hkVector4q m_vHitNormal;
+    hkVector4 m_vHitNormal;
     float m_fClosestPointDistanceSquared;
     int m_unk3034;
     int m_unk3038;
@@ -457,14 +459,14 @@ void __thiscall CastObj::FUN_00d31610(int a1, int a2, int a3, LinearCastState& s
     FUN_00d302d0(a2, a1, a3, st);
     for (; v < s->m_kRayEnd; v++)
     {
-        hkVector4q w;
+        hkVector4 w;
         w.setBroadcast3(v->m_direction);
         v->m_vContactPosition.addMul4(w, v->m_direction);
-        v->m_direction.setNeg4(v->m_direction);
+        v->m_direction.m_vComponents = _mm_xor_ps(v->m_direction.m_vComponents, DAT_010c4c00);
     }
     if (oldDistance != s->m_fClosestPointDistanceSquared)
     {
-        s->m_vHitNormal.setNeg4b(s->m_vHitNormal);
+        s->m_vHitNormal.m_vComponents = _mm_xor_ps(DAT_010c4c00, s->m_vHitNormal.m_vComponents);
 
         s->m_pAccessManager.flip();
     }
@@ -472,25 +474,24 @@ void __thiscall CastObj::FUN_00d31610(int a1, int a2, int a3, LinearCastState& s
 }  // namespace fnv_00d31610
 
 namespace fnv_00d36d60 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
 }
 
-extern __m128 DAT_010c4c00;
+extern LocalM128 DAT_010c4c00;
 
 struct SimplexVertex
 {
-    __m128 m_kPointA;
-    __m128 m_kPointB;
+    LocalM128 m_kPointA;
+    LocalM128 m_kPointB;
     int unk20;
     int unk24;
     int unk28;
@@ -514,7 +515,7 @@ struct Simplex
     int unk3014;
     int unk3018;
     int unk301C;
-    __m128 m_vHitNormal;
+    LocalM128 m_vHitNormal;
     float m_fClosestPointDistanceSquared;
     int unk3034;
     int unk3038;
@@ -540,14 +541,14 @@ void SimplexProcessor::FUN_00d36d60(int a, int b, int c, Simplex* s)
     FUN_00d369a0(b, a, c, s);
     for (; v < s->m_kRayEnd; v++)
     {
-        const __m128* pb = &v->m_kPointB;
-        __m128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
+        const LocalM128* pb = &v->m_kPointB;
+        LocalM128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
         v->m_kPointA = _mm_add_ps(_mm_mul_ps(w, v->m_kPointB), v->m_kPointA);
         v->m_kPointB = _mm_xor_ps(v->m_kPointB, DAT_010c4c00);
     }
     if (oldDistance != s->m_fClosestPointDistanceSquared)
     {
-        __m128* n = &s->m_vHitNormal;
+        LocalM128* n = &s->m_vHitNormal;
         *n = _mm_xor_ps(*n, DAT_010c4c00);
         {
             unsigned char t = s->m_dims.m_ucLowNibble;
@@ -574,29 +575,7 @@ void SimplexProcessor::FUN_00d36d60(int a, int b, int c, Simplex* s)
 }  // namespace fnv_00d36d60
 
 namespace fnv_00d23380 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" void _mm_store_ss(float* p, __m128 a);
 
-struct hkVector4
-{
-    __m128 m_vComponents;
-    __forceinline float lengthSquared3() const
-    {
-        __m128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-        s = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), s);
-        float r;
-        _mm_store_ss(&r, s);
-        return r;
-    }
-};
 
 struct SortObject
 {
@@ -637,7 +616,7 @@ void FUN_00d23380(SortList* list)
             if (a.m_object->m_priority < b.m_object->m_priority)
                 continue;
             if (a.m_object->m_priority == b.m_object->m_priority &&
-                a.m_object->m_vContactPosition.lengthSquared3() < b.m_object->m_vContactPosition.lengthSquared3())
+                a.m_object->m_vContactPosition.dot3scalar(a.m_object->m_vContactPosition) < b.m_object->m_vContactPosition.dot3scalar(b.m_object->m_vContactPosition))
                 continue;
             SortEntry t = a;
             a = b;
@@ -653,11 +632,6 @@ inline void* operator new(unsigned int, void* p) throw()
 }
 inline void operator delete(void*, void*) throw()
 {}
-
-struct FinishingFlag
-{
-    int m_bFinishing;
-};
 
 static inline FinishingFlag NotFinishing()
 {
@@ -686,7 +660,7 @@ class S00d2c8a0_Derived : public S00d2c8a0_Base
     S00d2c8a0_Derived(FinishingFlag flag) : S00d2c8a0_Base(flag)
     {}
     virtual void vf04();
-    __m128 m_kScaleFactors;
+    LocalM128 m_kScaleFactors;
 };
 
 // Havok getVtable helper: placement-construct into a local buffer with the finish-loading flag.
@@ -699,25 +673,24 @@ const void* __cdecl FUN_00d2c8a0()
 }
 
 namespace fnv_00d32850 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
 }
 
-extern __m128 DAT_010c4c00;
+extern LocalM128 DAT_010c4c00;
 
 struct SimplexVertex
 {
-    __m128 m_kPointA;
-    __m128 m_kPointB;
+    LocalM128 m_kPointA;
+    LocalM128 m_kPointB;
     int unk20;
     int unk24;
     int unk28;
@@ -741,7 +714,7 @@ struct Simplex
     int unk3014;
     int unk3018;
     int unk301C;
-    __m128 m_vHitNormal;
+    LocalM128 m_vHitNormal;
     float m_fClosestPointDistanceSquared;
     int unk3034;
     int unk3038;
@@ -770,14 +743,14 @@ void Agent::FUN_00d32850(int a, int b, int c, Simplex* s)
     AgentBase::FUN_00d324e0(b, a, c, s);
     for (; v < s->m_kRayEnd; v++)
     {
-        const __m128* pb = &v->m_kPointB;
-        __m128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
+        const LocalM128* pb = &v->m_kPointB;
+        LocalM128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
         v->m_kPointA = _mm_add_ps(_mm_mul_ps(w, v->m_kPointB), v->m_kPointA);
         v->m_kPointB = _mm_xor_ps(v->m_kPointB, DAT_010c4c00);
     }
     if (oldDistance != s->m_fClosestPointDistanceSquared)
     {
-        __m128* n = &s->m_vHitNormal;
+        LocalM128* n = &s->m_vHitNormal;
         *n = _mm_xor_ps(*n, DAT_010c4c00);
         {
             unsigned char t = s->m_dims.m_ucLowNibble;
@@ -857,72 +830,35 @@ extern "C" void FUN_00d36520(SortPair* arr, int lo, int hi, unsigned int extra)
     }
 }
 
-struct hkpAgent3FuncsD367
+// The original registration helpers inline the shared table's default initialization.
+inline hkpCollisionDispatcher::Agent3FunctionTable::Agent3FunctionTable()
 {
-    hkpAgent3FuncsD367()
-    {
-        m_bIsPredictive = false;
-        m_bAgentFlag1 = false;
-        m_bAgentFlag2 = false;
-        m_pAgentFunction7 = 0;
-        m_pAgentFunction8 = 0;
-        m_pUpdateFilterFunc = 0;
-        m_pAgentFunction10 = 0;
-        m_pAgentFunction11 = 0;
-    }
+    m_bIsPredictive = false;
+    m_bAgentFlag1 = false;
+    m_bAgentFlag2 = false;
+    m_pUpdateFilterFunc = 0;
+    m_pCalcStats = 0;
+    m_pAgentFunction10 = 0;
+    m_pAgentFunction11 = 0;
+    m_pAgentFunction7 = 0;
+}
 
-    void* m_pCreateFunc;
-    void* m_pAgent3DestroyFuncs;
-    void* m_pAgentFunction3;
-    void* m_pAgentFunction4;
-    void* m_pAgentFunction5;
-    void* m_createZeroContactFunc;
-    void* m_pAgentFunction7;
-    void* m_pAgentFunction8;
-    void* m_pUpdateFilterFunc;
-    void* m_pAgentFunction10;
-    void* m_pAgentFunction11;
-    void* m_setCollisionQualityFunc;
-    bool m_bIsPredictive;
-    bool m_bAgentFlag1;
-    bool m_bAgentFlag2;
-};
-
-void __cdecl FUN_00d367b0(hkpAgent3FuncsD367& kFuncs);
-
-class hkpCollisionDispatcherD367
-{
-  public:
-    void AddEntry(const hkpAgent3FuncsD367& kFuncs, int iTypeA, int iTypeB);
-};
+void __cdecl FUN_00d367b0(hkpCollisionDispatcher::Agent3FunctionTable& kFuncs);
 
 // @fnv 0x00d367d0
-void __cdecl FUN_00d367d0(hkpCollisionDispatcherD367* pkDispatcher)
+void __cdecl FUN_00d367d0(hkpCollisionDispatcher* pkDispatcher)
 {
-    __declspec(align(16)) hkpAgent3FuncsD367 kFuncs;
+    __declspec(align(16)) hkpCollisionDispatcher::Agent3FunctionTable kFuncs;
     FUN_00d367b0(kFuncs);
-    pkDispatcher->AddEntry(kFuncs, 0x12, 7);
+    pkDispatcher->AddEntry(&kFuncs, 0x12, 7);
 }
 
+class hkpCdBody;
 namespace fnv_00d36e80 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_xor_ps(__m128, __m128);
-}
 
-extern __m128 DAT_010c44d0;
+extern LocalM128 DAT_010c44d0;
 
-struct hkpCdBody;
 
-struct hkVector4
-{
-    __m128 m_vComponents;
-};
 
 struct ShapeSweepParameters
 {
@@ -953,24 +889,13 @@ struct ShapeSweepParameters
     int unk6c;
 };
 
-class hkpCdPointCollector
-{
-  public:
-    hkpCdPointCollector()
-    {
-        m_fEarlyOutDistance = 3.40282e+38f;
-    }
-    virtual void AddCdPoint(const void* point);
-    float m_fEarlyOutDistance;
-};
-
 class hkpSymmetricAgentFlipCastCollector : public hkpCdPointCollector
 {
   public:
     hkpSymmetricAgentFlipCastCollector(const hkVector4& path, hkpCdPointCollector& collector)
         : m_path(path), m_kCollector(collector)
     {}
-    virtual void AddCdPoint(const void* point);
+    virtual void AddCdPoint(const ContactPointPair& point);
     hkVector4 m_path;
     hkpCdPointCollector& m_kCollector;
 };
@@ -978,7 +903,7 @@ class hkpSymmetricAgentFlipCastCollector : public hkpCdPointCollector
 struct AgentBase
 {
     void FUN_00d36960(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const ShapeSweepParameters& input,
-                      hkpCdPointCollector& collector, hkpCdPointCollector* startCollector);
+                      hkpCdPointCollector& collector, hkpCdPointCollector* startCollector) throw();
 };
 
 struct Agent : AgentBase
@@ -991,7 +916,8 @@ struct Agent : AgentBase
 void Agent::FUN_00d36e80(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const ShapeSweepParameters& input,
                          hkpCdPointCollector& collector, hkpCdPointCollector* startCollector)
 {
-    ShapeSweepParameters flippedInput = input;
+    ShapeSweepParameters flippedInput;
+    memcpy(&flippedInput, &input, sizeof(flippedInput));
     flippedInput.m_path.m_vComponents = _mm_xor_ps(input.m_path.m_vComponents, DAT_010c44d0);
     hkpSymmetricAgentFlipCastCollector flippedCollector(input.m_path, collector);
     if (startCollector)
@@ -1007,25 +933,24 @@ void Agent::FUN_00d36e80(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const S
 }  // namespace fnv_00d36e80
 
 namespace fnv_00d37c10 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
 }
 
-extern __m128 DAT_010c4c00;
+extern LocalM128 DAT_010c4c00;
 
 struct SimplexVertex
 {
-    __m128 m_kPointA;
-    __m128 m_kPointB;
+    LocalM128 m_kPointA;
+    LocalM128 m_kPointB;
     int unk20;
     int unk24;
     int unk28;
@@ -1049,7 +974,7 @@ struct Simplex
     int unk3014;
     int unk3018;
     int unk301C;
-    __m128 m_vHitNormal;
+    LocalM128 m_vHitNormal;
     float m_fClosestPointDistanceSquared;
     int unk3034;
     int unk3038;
@@ -1078,14 +1003,14 @@ void Agent::FUN_00d37c10(int a, int b, int c, Simplex* s)
     AgentBase::FUN_00d378e0(b, a, c, s);
     for (; v < s->m_kRayEnd; v++)
     {
-        const __m128* pb = &v->m_kPointB;
-        __m128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
+        const LocalM128* pb = &v->m_kPointB;
+        LocalM128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
         v->m_kPointA = _mm_add_ps(_mm_mul_ps(w, v->m_kPointB), v->m_kPointA);
         v->m_kPointB = _mm_xor_ps(v->m_kPointB, DAT_010c4c00);
     }
     if (oldDistance != s->m_fClosestPointDistanceSquared)
     {
-        __m128* n = &s->m_vHitNormal;
+        LocalM128* n = &s->m_vHitNormal;
         *n = _mm_xor_ps(*n, DAT_010c4c00);
         {
             unsigned char t = s->m_dims.m_ucLowNibble;
@@ -1111,87 +1036,60 @@ void Agent::FUN_00d37c10(int a, int b, int c, Simplex* s)
 }
 }  // namespace fnv_00d37c10
 
-struct hkpAgent3FuncsD398
-{
-    hkpAgent3FuncsD398()
-    {
-        m_bAgentFlag1 = false;
-        m_bAgentFlag2 = false;
-        m_pAgentFunction8 = 0;
-        m_pUpdateFilterFunc = 0;
-        m_pAgentFunction10 = 0;
-        m_pAgentFunction11 = 0;
-        m_pAgentFunction7 = 0;
-        m_bIsPredictive = false;
-    }
-
-    void* m_pCreateFunc;
-    void* m_pAgent3DestroyFuncs;
-    void* m_pAgentFunction3;
-    void* m_pAgentFunction4;
-    void* m_pAgentFunction5;
-    void* m_createZeroContactFunc;
-    void* m_pAgentFunction7;
-    void* m_pAgentFunction8;
-    void* m_pUpdateFilterFunc;
-    void* m_pAgentFunction10;
-    void* m_pAgentFunction11;
-    void* m_setCollisionQualityFunc;
-    bool m_bIsPredictive;
-    bool m_bAgentFlag1;
-    bool m_bAgentFlag2;
-};
-
-class hkpCollisionDispatcherD398
-{
-  public:
-    void AddEntry(const hkpAgent3FuncsD398& kFuncs, int iTypeA, int iTypeB);
-};
-
-void InitOutputDefaults();
-void FUN_00d39130();
-void ReleaseHandles();
-void RemoveKeyFromTable();
-void InsertIntoSlotArray();
-void FUN_00d39090();
-void FUN_00d39150();
-void FUN_00d39390();
+hkpAgentData* __cdecl InitOutputDefaults(const AgentProcessingInput&, FourByteState*, hkpAgentData*);
+void __cdecl FUN_00d39130(FourByteState*, hkpAgentData*, hkpContactMgr*, hkpConstraintOwner&,
+                         hkpCollisionDispatcher*);
+hkpAgentData* __cdecl ReleaseHandles(FourByteState*, hkpAgentData*, hkpContactMgr*, hkpConstraintOwner&);
+void __cdecl RemoveKeyFromTable(FourByteState*, hkpAgentData*, hkContactPointId);
+void __cdecl InsertIntoSlotArray(FourByteState*, hkpAgentData*, hkContactPointId);
+void __cdecl FUN_00d39090(FourByteState*, hkpAgentData*, hkContactPointId);
+void __cdecl FUN_00d39150(const AgentProcessingInput&, FourByteState*, hkpAgentData*, hkVector4&);
+hkpAgentData* __cdecl FUN_00d39390(const AgentSubtypeMarker&, FourByteState*, hkpAgentData*, hkVector4*,
+                                 WorldOperationEntry&);
 
 // @fnv 0x00d39840
-void __cdecl FUN_00d39840(hkpCollisionDispatcherD398* pkDispatcher)
+void __cdecl FUN_00d39840(hkpCollisionDispatcher* pkDispatcher)
 {
-    __declspec(align(16)) hkpAgent3FuncsD398 kFuncs;
+    __declspec(align(16)) hkpCollisionDispatcher::Agent3FunctionTable kFuncs;
+    // This registration helper applies the defaults in its original store order.
+    kFuncs.m_bAgentFlag1 = false;
+    kFuncs.m_bAgentFlag2 = false;
+    kFuncs.m_pCalcStats = 0;
+    kFuncs.m_pAgentFunction10 = 0;
+    kFuncs.m_pAgentFunction11 = 0;
+    kFuncs.m_pAgentFunction7 = 0;
+    kFuncs.m_pUpdateFilterFunc = 0;
+    kFuncs.m_bIsPredictive = false;
     kFuncs.m_pCreateFunc = InitOutputDefaults;
-    kFuncs.m_setCollisionQualityFunc = FUN_00d39390;
-    kFuncs.m_pAgentFunction11 = FUN_00d39150;
+    kFuncs.m_pAgentFunction8 = FUN_00d39390;
+    kFuncs.m_pAgentFunction7 = FUN_00d39150;
     kFuncs.m_pAgentFunction3 = ReleaseHandles;
     kFuncs.m_pAgentFunction4 = RemoveKeyFromTable;
     kFuncs.m_pAgentFunction5 = InsertIntoSlotArray;
-    kFuncs.m_createZeroContactFunc = FUN_00d39090;
+    kFuncs.m_pCreateZombieFunc = FUN_00d39090;
     kFuncs.m_pAgent3DestroyFuncs = FUN_00d39130;
-    pkDispatcher->AddEntry(kFuncs, 5, 3);
+    pkDispatcher->AddEntry(&kFuncs, 5, 3);
 }
 
 namespace fnv_00d3f500 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
 }
 
-extern __m128 DAT_010c4c00;
+extern LocalM128 DAT_010c4c00;
 
 struct SimplexVertex
 {
-    __m128 m_kPointA;
-    __m128 m_kPointB;
+    LocalM128 m_kPointA;
+    LocalM128 m_kPointB;
     int unk20;
     int unk24;
     int unk28;
@@ -1215,7 +1113,7 @@ struct Simplex
     int unk3014;
     int unk3018;
     int unk301C;
-    __m128 m_vHitNormal;
+    LocalM128 m_vHitNormal;
     float m_fClosestPointDistanceSquared;
     int unk3034;
     int unk3038;
@@ -1244,14 +1142,14 @@ void Agent::FUN_00d3f500(int a, int b, int c, Simplex* s)
     AgentBase::FUN_00d3f080(b, a, c, s);
     for (; v < s->m_kRayEnd; v++)
     {
-        const __m128* pb = &v->m_kPointB;
-        __m128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
+        const LocalM128* pb = &v->m_kPointB;
+        LocalM128 w = _mm_shuffle_ps(*pb, *pb, 0xff);
         v->m_kPointA = _mm_add_ps(_mm_mul_ps(w, v->m_kPointB), v->m_kPointA);
         v->m_kPointB = _mm_xor_ps(v->m_kPointB, DAT_010c4c00);
     }
     if (oldDistance != s->m_fClosestPointDistanceSquared)
     {
-        __m128* n = &s->m_vHitNormal;
+        LocalM128* n = &s->m_vHitNormal;
         *n = _mm_xor_ps(*n, DAT_010c4c00);
         {
             unsigned char t = s->m_dims.m_ucLowNibble;
@@ -1278,18 +1176,11 @@ void Agent::FUN_00d3f500(int a, int b, int c, Simplex* s)
 }  // namespace fnv_00d3f500
 
 namespace fnv_00d3fe90 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_load_ss(const float*);
+    LocalM128 _mm_set_ps1(float);
+    LocalM128 _mm_set_ss(float);
+    LocalM128 _mm_load_ss(const float*);
     __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
     unsigned __int64 __rdtsc();
     void _ReadWriteBarrier();
@@ -1307,20 +1198,9 @@ struct ProfileBuffer
     unsigned int unk08;
     ProfileSample* end;
 };
-struct Vector
-{
-    union
-    {
-        __m128 quad;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-};
 struct Matrix
 {
-    Vector c0, c1, c2, c3;
+    hkVector4 c0, c1, c2, c3;
 };
 struct ShapeBase
 {
@@ -1330,7 +1210,7 @@ struct ShapeBase
 struct Shape : ShapeBase
 {
     unsigned int unk14, unk18, unk1c;
-    __m128 halfExtents;
+    LocalM128 halfExtents;
 };
 struct Body
 {
@@ -1363,13 +1243,13 @@ struct Processor
     const Matrix* worldB;
     unsigned int unk1c;
     Matrix relative;
-    Vector halfA, halfB, tolerance, expandedA, expandedB;
+    hkVector4 halfA, halfB, tolerance, expandedA, expandedB;
     float scalarTolerance, constant;
     unsigned int unkB8, unkBC, unkC0, unkC4, unkC8, unkCC, unkD0, unkD4, unkD8, unkDC;
     unsigned int unkE0, unkE4, unkE8, unkEC, unkF0, unkF4, unkF8, unkFC;
     unsigned int unk100, unk104, unk108, unk10c, unk110, unk114, unk118, unk11c, unk120, unk124, unk128, unk12c;
     __forceinline Processor(const Body& aa, const Body& bb, CollisionInput* ii, unsigned int mm, int oo,
-                            const Matrix& rr, const Matrix& wa, const Vector& ha, const Matrix& wb, const Vector& hb,
+                            const Matrix& rr, const Matrix& wa, const hkVector4& ha, const Matrix& wb, const hkVector4& hb,
                             float tol)
     {
         a = &aa;
@@ -1379,20 +1259,24 @@ struct Processor
         output = oo;
         worldA = &wa;
         worldB = &wb;
-        Vector c0 = rr.c0;
-        Vector c1 = rr.c1;
-        Vector c2 = rr.c2;
-        Vector c3 = rr.c3;
-        relative.c0.quad = c0.quad;
-        relative.c1.quad = c1.quad;
-        relative.c2.quad = c2.quad;
-        relative.c3.quad = c3.quad;
-        halfA = ha;
-        halfB = hb;
-        __m128 t = _mm_set_ps1(tol);
-        tolerance.quad = t;
-        expandedA.quad = _mm_add_ps(tolerance.quad, ha.quad);
-        expandedB.quad = _mm_add_ps(tolerance.quad, hb.quad);
+        hkVector4 c0;
+        memcpy(&c0, &rr.c0, sizeof(c0));
+        hkVector4 c1;
+        memcpy(&c1, &rr.c1, sizeof(c1));
+        hkVector4 c2;
+        memcpy(&c2, &rr.c2, sizeof(c2));
+        hkVector4 c3;
+        memcpy(&c3, &rr.c3, sizeof(c3));
+        relative.c0.m_vComponents = c0.m_vComponents;
+        relative.c1.m_vComponents = c1.m_vComponents;
+        relative.c2.m_vComponents = c2.m_vComponents;
+        relative.c3.m_vComponents = c3.m_vComponents;
+        memcpy(&halfA, &ha, sizeof(halfA));
+        memcpy(&halfB, &hb, sizeof(halfB));
+        LocalM128 t = _mm_set_ps1(tol);
+        tolerance.m_vComponents = t;
+        expandedA.m_vComponents = _mm_add_ps(tolerance.m_vComponents, ha.m_vComponents);
+        expandedB.m_vComponents = _mm_add_ps(tolerance.m_vComponents, hb.m_vComponents);
         scalarTolerance = tol;
         constant = 0.01f;
     }
@@ -1415,13 +1299,13 @@ void* __cdecl FUN_00d3fe90(Params* p, unsigned char* out, unsigned char* obj, in
     Shape* shapeA = static_cast<Shape*>(a->shape);
     float radiusA = *(volatile float*)&shapeA->radius;
     Shape* shapeB = static_cast<Shape*>(p->b->shape);
-    __m128 ba = _mm_set_ps1(radiusA);
-    Vector halfA;
-    halfA.quad = _mm_add_ps(ba, shapeA->halfExtents);
+    LocalM128 ba = _mm_set_ps1(radiusA);
+    hkVector4 halfA;
+    halfA.m_vComponents = _mm_add_ps(ba, shapeA->halfExtents);
     float radiusB = shapeB->radius;
-    __m128 bb = _mm_set_ps1(radiusB);
-    Vector halfB;
-    halfB.quad = _mm_add_ps(bb, shapeB->halfExtents);
+    LocalM128 bb = _mm_set_ps1(radiusB);
+    hkVector4 halfB;
+    halfB.m_vComponents = _mm_add_ps(bb, shapeB->halfExtents);
     CollisionInput* input = p->input;
     float tol = input->tolerance;
     Processor state(*a, *p->b, input, p->unk10, z, p->relative, *a->transform, halfA, *p->b->transform, halfB, tol);
@@ -1443,10 +1327,10 @@ void* __cdecl FUN_00d3fe90(Params* p, unsigned char* out, unsigned char* obj, in
 
 extern "C"
 {
-    __m128 _mm_set_ps1(float a);
-    __m128 _mm_add_ps(__m128 a, __m128 b);
-    __m128 _mm_sub_ps(__m128 a, __m128 b);
-    void _mm_store_ps(float* p, __m128 a);
+    LocalM128 _mm_set_ps1(float a);
+    LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+    LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+    void _mm_store_ps(float* p, LocalM128 a);
 }
 
 extern "C" double fabs(double);
@@ -1457,27 +1341,27 @@ struct ClosestPointResult
     float s;
     float t;
     float unk0C;
-    __m128 p1;
-    __m128 p2;
+    LocalM128 p1;
+    LocalM128 p2;
 };
 
-static __forceinline void Dot3(float& result, __m128 u, __m128 v)
+static __forceinline void Dot3(float& result, LocalM128 u, LocalM128 v)
 {
-    __m128 m = _mm_mul_ps(u, v);
-    __m128 y = _mm_shuffle_ps(m, m, 0x55);
-    __m128 z = _mm_shuffle_ps(m, m, 0xaa);
+    LocalM128 m = _mm_mul_ps(u, v);
+    LocalM128 y = _mm_shuffle_ps(m, m, 0x55);
+    LocalM128 z = _mm_shuffle_ps(m, m, 0xaa);
     _mm_store_ss(&result, _mm_add_ss(z, _mm_add_ss(y, m)));
 }
 
 // @fnv 0x00d231b0
-int FUN_00d231b0(const __m128* pa, const __m128* pb, const __m128* pc, const __m128* pd, ClosestPointResult* out)
+int FUN_00d231b0(const LocalM128* pa, const LocalM128* pb, const LocalM128* pc, const LocalM128* pd, ClosestPointResult* out)
 {
-    const __m128& d = *pd;
-    const __m128& b = *pb;
-    __m128 a = *pa;
-    __m128 c = *pc;
+    const LocalM128& d = *pd;
+    const LocalM128& b = *pb;
+    LocalM128 a = *pa;
+    LocalM128 c = *pc;
 
-    __m128 ca = _mm_sub_ps(c, a);
+    LocalM128 ca = _mm_sub_ps(c, a);
     float p;
     Dot3(p, d, b);
     float q;
@@ -1504,9 +1388,9 @@ int FUN_00d231b0(const __m128* pa, const __m128* pb, const __m128* pc, const __m
     }
     float t = (p * s - r) / dd;
 
-    __m128 p1 = _mm_add_ps(_mm_mul_ps(_mm_set_ps1(s), b), a);
-    __m128 p2 = _mm_add_ps(_mm_mul_ps(_mm_set_ps1(t), d), c);
-    __m128 diff = _mm_sub_ps(p1, p2);
+    LocalM128 p1 = _mm_add_ps(_mm_mul_ps(_mm_set_ps1(s), b), a);
+    LocalM128 p2 = _mm_add_ps(_mm_mul_ps(_mm_set_ps1(t), d), c);
+    LocalM128 diff = _mm_sub_ps(p1, p2);
     float distSq;
     Dot3(distSq, diff, diff);
 
@@ -1518,21 +1402,13 @@ int FUN_00d231b0(const __m128* pa, const __m128* pb, const __m128* pc, const __m
     return result;
 }
 
-extern "C" void _mm_store_ps(float*, __m128);
-extern "C" __m128 _mm_xor_ps(__m128, __m128);
+extern "C" void _mm_store_ps(float*, LocalM128);
+extern "C" LocalM128 _mm_xor_ps(LocalM128, LocalM128);
 
 extern float DAT_0104da48;
-extern __m128 DAT_010c44d0;
+extern LocalM128 DAT_010c44d0;
 extern char DAT_010ce80c;
 
-struct D2fVector4
-{
-    __declspec(align(16)) float m_vComponents[4];
-    void setNeg4(const D2fVector4& v)
-    {
-        _mm_store_ps(m_vComponents, _mm_xor_ps(*(const __m128*)v.m_vComponents, DAT_010c44d0));
-    }
-};
 
 struct __declspec(align(16)) D2fInput
 {
@@ -1556,7 +1432,7 @@ struct __declspec(align(16)) D2fInput
     int unk44;
     int unk48;
     int unk4C;
-    D2fVector4 m_vec;
+    hkVector4 m_vec;
     int unk60;
     int unk64;
     int unk68;
@@ -1573,10 +1449,10 @@ struct D2fRayHitCollector
 
 struct __declspec(align(16)) D2fCollector : D2fRayHitCollector
 {
-    D2fVector4 m_vec;
+    hkVector4 m_vec;
     void* m_user;
 
-    D2fCollector(const D2fVector4& v, void* user) throw() : m_vec(v), m_user(user)
+    D2fCollector(const hkVector4& v, void* user) throw() : m_vec(v), m_user(user)
     {}
     virtual void CollectRayHit(const void* a, const void* b);
 };
@@ -1590,8 +1466,9 @@ struct D2fWorld
 // @fnv 0x00d2f460
 void D2fWorld::FUN_00d2f460(int a1, int a2, const D2fInput* a3, int a4, void* a5)
 {
-    D2fInput tmp = *a3;
-    tmp.m_vec.setNeg4(a3->m_vec);
+    D2fInput tmp;
+    memcpy(&tmp, a3, sizeof(tmp));
+    _mm_store_ps(tmp.m_vec.m_f, _mm_xor_ps(a3->m_vec.m_vComponents, DAT_010c44d0));
     D2fCollector c1(a3->m_vec, (void*)a4);
     if (a5)
     {
@@ -1605,8 +1482,7 @@ void D2fWorld::FUN_00d2f460(int a1, int a2, const D2fInput* a3, int a4, void* a5
 }
 
 namespace N {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
     __int8 m128_i8[16];
@@ -1616,10 +1492,10 @@ union __declspec(intrin_type) __declspec(align(16)) __m128
     unsigned __int8 m128_u8[16];
     unsigned __int16 m128_u16[8];
     unsigned __int32 m128_u32[4];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_setr_ps(float, float, float, float);
+    LocalM128 _mm_setr_ps(float, float, float, float);
 }
 }
 
@@ -1642,7 +1518,7 @@ class FUN_00d2c910 : public S00d2c910_Base
   public:
     FUN_00d2c910(void* a, int b);
     virtual void vf00();
-    N::__m128 m_kScaleFactors;
+    N::LocalM128 m_kScaleFactors;
 };
 
 // @fnv 0x00d2c910

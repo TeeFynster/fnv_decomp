@@ -752,24 +752,13 @@ class Setting
   public:
     const char* GetString();
 };
-class SoundPlaybackHandle
-{
-  public:
-    unsigned int m_uiSoundResourceID;
-    bool m_bLooping;
-    int state;
-    SoundPlaybackHandle();
-    ~SoundPlaybackHandle();
-    SoundPlaybackHandle& operator=(const SoundPlaybackHandle&);
-    bool Play(bool);
-    bool SetPosition(float, float, float);
-};
+#include "../../include/BSSoundHandle.h"
 class BSAudio
 {
   public:
     static BSAudio* GetSingleton();
-    SoundPlaybackHandle GetSoundHandleByFormID(unsigned int, unsigned int);
-    SoundPlaybackHandle GetSoundHandleByEditorID(const char*, unsigned int);
+    BSSoundHandle GetSoundHandleByFormID(unsigned int, unsigned int);
+    BSSoundHandle GetSoundHandleByEditorID(const char*, unsigned int);
     bool FUN_005bb4d0();
     void Update(bool);
 };

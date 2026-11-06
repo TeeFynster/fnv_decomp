@@ -1,6 +1,6 @@
 // fallout_shared/actorcause.cpp: ActorCause (5 functions)
 
-#include "actorcause.h"
+#include "../../include/ActorCause.h"
 
 // @fnv 0x0066e910
 void ActorCause::ClearActorCauseList(BGSLoadGameBuffer* buffer)
@@ -8,29 +8,20 @@ void ActorCause::ClearActorCauseList(BGSLoadGameBuffer* buffer)
     ms_kActorCauseList.RemoveAll();
 }
 
-struct FUN_0047d3d0_shell : public ActorCause
-{
-    unsigned short FUN_0047d3d0();
-};
-
 // @fnv 0x0047d3d0
-unsigned short FUN_0047d3d0_shell::FUN_0047d3d0()
+unsigned short ActorCause::FUN_0047d3d0()
 {
     return *(unsigned short*)((char*)this + 0x18);
 }
 
-struct AC_0042f730
-{
-    void FUN_0044bbc0();
-};
-void __fastcall FUN_0066e2b0(AC_0042f730*);
+void __fastcall FUN_0066e2b0(ActorCause*);
 struct Holder0042f780
 {
-    AC_0042f730* m_pObject;
-    Holder0042f780* FUN_0042f780(AC_0042f730* pObject);
+    ActorCause* m_pObject;
+    Holder0042f780* FUN_0042f780(ActorCause* pObject);
 };
 // @fnv 0x0042f780
-Holder0042f780* Holder0042f780::FUN_0042f780(AC_0042f730* pObject)
+Holder0042f780* Holder0042f780::FUN_0042f780(ActorCause* pObject)
 {
     if (m_pObject != pObject)
     {
@@ -38,12 +29,11 @@ Holder0042f780* Holder0042f780::FUN_0042f780(AC_0042f730* pObject)
             FUN_0066e2b0(m_pObject);
         m_pObject = pObject;
         if (m_pObject)
-            m_pObject->FUN_0044bbc0();
+            m_pObject->IncRefCount();
     }
     return this;
 }
 
-struct FUN_0066e010_cls;
 struct VirtObjPlaceholder;
 
 struct Pair12
@@ -129,63 +119,36 @@ struct VirtObjPlaceholder
 
 extern Pair12 DAT_011f426c;
 extern unsigned int DAT_011d60cc;
-extern BSSimpleList<FUN_0066e010_cls*> DAT_011d6124;
-
-struct FUN_0066e010_cls
-{
-    CauseRef* m_00;
-    int m_04;
-    Pair12 m_08;
-    unsigned int m_14;
-    int m_18;
-
-    FUN_0066e010_cls* FUN_0066e010(CauseRef* arg);
-};
+extern BSSimpleList<ActorCause*> DAT_011d6124;
 
 // @fnv 0x0066e010
-FUN_0066e010_cls* FUN_0066e010_cls::FUN_0066e010(CauseRef* apCauseRef)
+ActorCause* ActorCause::FUN_0066e010(Actor* apCauseRef)
 {
-    m_08.Reset();
+    ((Pair12*)&m_08)->Reset();
     m_00 = apCauseRef;
-    Pair12* src2 = (m_00 != 0) ? m_00->GetBase() : &DAT_011f426c;
-    m_08 = *src2;
+    Pair12* src2 = (m_00 != 0) ? ((CauseRef*)m_00)->GetBase() : &DAT_011f426c;
+    m_08 = *(NiPoint3*)src2;
     m_04 = 0;
-    VirtObjPlaceholder* v = (m_00 != 0) ? apCauseRef->GetVirt() : 0;
+    VirtObjPlaceholder* v = (m_00 != 0) ? ((CauseRef*)apCauseRef)->GetVirt() : 0;
     if (v != 0)
     {
-        m_04 = v->v61(m_00);
+        m_04 = (BSSimpleList<DetectionViewData*>*)v->v61((CauseRef*)m_00);
     }
     m_18 = 0;
     m_14 = DAT_011d60cc;
     DAT_011d60cc = DAT_011d60cc + 1;
-    FUN_0066e010_cls* self = this;
+    ActorCause* self = this;
     DAT_011d6124.AddHead(self);
     return this;
 }
-
-class B66E810Item
-{
-  public:
-    ~B66E810Item();
-
-    unsigned short GetCount();
-    void Update(int iArg);
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int m_iFadeIndex;
-};
 
 class B66E810Node
 {
   public:
     bool IsEmpty();
-    B66E810Item** GetItem();
+    ActorCause** GetItem();
     B66E810Node* GetNext();
-    void RemoveNext(B66E810Item** ppkItem);
+    void RemoveNext(ActorCause** ppkItem);
     void RemoveHead();
 };
 
@@ -199,7 +162,7 @@ void __cdecl UpdateOrRemoveItems(int iArg)
     B66E810Node* pkPrev = 0;
     while (pkNode && !pkNode->IsEmpty())
     {
-        B66E810Item* pkItem = *pkNode->GetItem();
+        ActorCause* pkItem = *pkNode->GetItem();
         bool bRemove = false;
         if (pkItem)
         {

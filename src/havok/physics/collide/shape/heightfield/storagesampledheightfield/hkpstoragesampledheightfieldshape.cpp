@@ -1,3 +1,8 @@
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
 
 // src/havok/physics/collide/shape/heightfield/storagesampledheightfield/hkpstoragesampledheightfieldshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/heightfield/storagesampledheightfield/hkpstoragesampledheightfieldshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -33,6 +38,7 @@ FUN_00d496d0::~FUN_00d496d0()
     FUN_00d24660();
 }
 
+#pragma pack(push, 4)
 struct FUN_00d248a0
 {
     FUN_00d248a0(int resolution, int mode);
@@ -48,11 +54,20 @@ struct FUN_00d248a0
     unsigned char m_ucHeightFieldType;
     unsigned char m_reserved1e;
     unsigned char m_reserved1f;
-    hkVector4 m_kHeightScaleVector;
-    hkVector4 m_kInverseScale;
-    hkVector4 m_kOffset;
-    hkVector4 SetCenterPosition;
+    float m_kHeightScaleVectorStorage[4];
+    hkVector4& get_m_kHeightScaleVector() { return *reinterpret_cast<hkVector4*>(m_kHeightScaleVectorStorage); }
+    __declspec(property(get=get_m_kHeightScaleVector)) hkVector4 m_kHeightScaleVector;
+    float m_kInverseScaleStorage[4];
+    hkVector4& get_m_kInverseScale() { return *reinterpret_cast<hkVector4*>(m_kInverseScaleStorage); }
+    __declspec(property(get=get_m_kInverseScale)) hkVector4 m_kInverseScale;
+    float m_kOffsetStorage[4];
+    hkVector4& get_m_kOffset() { return *reinterpret_cast<hkVector4*>(m_kOffsetStorage); }
+    __declspec(property(get=get_m_kOffset)) hkVector4 m_kOffset;
+    float SetCenterPositionStorage[4];
+    hkVector4& get_SetCenterPosition() { return *reinterpret_cast<hkVector4*>(SetCenterPositionStorage); }
+    __declspec(property(get=get_SetCenterPosition)) hkVector4 SetCenterPosition;
 };
+#pragma pack(pop)
 struct FUN_00d49700 : public FUN_00d248a0
 {
     int* values;
@@ -80,29 +95,27 @@ FUN_00d49700::FUN_00d49700(int resolution, int* source, float value) : FUN_00d24
     scale = value;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
-extern "C" __m128 _mm_andnot_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ss(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_sub_ss(__m128, __m128);
-extern "C" __m128 _mm_rsqrt_ss(__m128);
-extern "C" __m128 _mm_cmpeq_ss(__m128, __m128);
-extern "C" __m128 _mm_set_ss(float);
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C" void _mm_store_ss(float*, __m128);
-extern "C" void _mm_store_ps(float*, __m128);
+// Exe 0x00d49850 Collide: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_rsqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_set_ss(float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" void _mm_store_ss(float*, LocalM128);
+extern "C" void _mm_store_ps(float*, LocalM128);
 
 struct HfVec_d49850
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     __forceinline void set(float a, float b, float c, float d)
     {
         m_vComponents = _mm_setr_ps(a, b, c, d);
@@ -129,19 +142,19 @@ struct HfVec_d49850
     }
     __forceinline float dot3(const HfVec_d49850& a) const
     {
-        __m128 t = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(t, t, 0xaa), _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t));
+        LocalM128 t = _mm_mul_ps(m_vComponents, a.m_vComponents);
+        LocalM128 s = _mm_add_ss(_mm_shuffle_ps(t, t, 0xaa), _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t));
         float r;
         _mm_store_ss(&r, s);
         return r;
     }
     __forceinline void normalize3()
     {
-        __m128 t = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 len2 = _mm_add_ss(_mm_shuffle_ps(t, t, 0xaa), _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t));
-        __m128 r = _mm_rsqrt_ss(len2);
-        __m128 eq = _mm_cmpeq_ss(len2, _mm_set_ss(0.0f));
-        __m128 f = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), r),
+        LocalM128 t = _mm_mul_ps(m_vComponents, m_vComponents);
+        LocalM128 len2 = _mm_add_ss(_mm_shuffle_ps(t, t, 0xaa), _mm_add_ss(_mm_shuffle_ps(t, t, 0x55), t));
+        LocalM128 r = _mm_rsqrt_ss(len2);
+        LocalM128 eq = _mm_cmpeq_ss(len2, _mm_set_ss(0.0f));
+        LocalM128 f = _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), r),
                               _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(len2, r), r)));
         f = _mm_andnot_ps(eq, f);
         m_vComponents = _mm_mul_ps(_mm_shuffle_ps(f, f, 0), m_vComponents);
@@ -163,10 +176,7 @@ struct HfInput_d49850
     HfVec_d49850* m_kSpheres;
     int m_iSphereCount;
 };
-struct HfBool_d49850
-{
-    char m_cBooleanValue;
-};
+typedef hkBool HfBool_d49850;
 
 static inline const HfVec_d49850& HfQ_d49850(const hkVector4& v)
 {
@@ -356,10 +366,10 @@ struct HeightFieldSource
     unsigned char m_bUseProjectionBasedHeight;
     volatile unsigned char m_ucHeightFieldType;
     unsigned short m_stitchingMode;
-    __m128 m_kHeightScaleVector;
-    __m128 m_kInverseScale;
-    __m128 m_kOffset;
-    __m128 SetCenterPosition;
+    LocalM128 m_kHeightScaleVector;
+    LocalM128 m_kInverseScale;
+    LocalM128 m_kOffset;
+    LocalM128 SetCenterPosition;
 };
 struct FUN_00d49750
 {
@@ -374,10 +384,10 @@ struct FUN_00d49750
     unsigned char m_bUseProjectionBasedHeight;
     volatile unsigned char m_ucHeightFieldType;
     unsigned short m_stitchingMode;
-    __m128 m_kHeightScaleVector;
-    __m128 m_kInverseScale;
-    __m128 m_kOffset;
-    __m128 SetCenterPosition;
+    LocalM128 m_kHeightScaleVector;
+    LocalM128 m_kInverseScale;
+    LocalM128 m_kOffset;
+    LocalM128 SetCenterPosition;
     float* m_storageData;
     unsigned char m_bFlipTriangleOrder;
     unsigned int m_storageCapacity;

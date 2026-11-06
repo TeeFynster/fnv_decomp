@@ -1,19 +1,9 @@
+#include "../../../include/Sky.h"
+#include "../../../include/TESObjectCELL.h"
 
 // src/fallout_shared/region system/tesregionobject.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/region system/tesregionobject.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct TESObjectCELL
-{
-    bool IsInterior();
-};
-struct MobileObjectCellAccess
-{
-    bool FUN_004518e0() const;
-};
-struct Sky
-{
-    float GetFieldCC();
-};
 struct DoorH
 {
     void* GetParentWorldSpace();
@@ -29,7 +19,7 @@ struct FUN_005471e0_shell
 // @fnv 0x005471e0
 float FUN_005471e0_shell::FUN_005471e0()
 {
-    if (!((MobileObjectCellAccess*)this)->FUN_004518e0() || ((TESObjectCELL*)this)->IsInterior())
+    if (!((TESObjectCELL*)this)->HasWater() || ((TESObjectCELL*)this)->IsInterior())
     {
         return DAT_01015f5c;
     }

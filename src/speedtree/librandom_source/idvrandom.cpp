@@ -1,5 +1,6 @@
 // speedtree/librandom_source/idvrandom.cpp: RandomNumberGenerator, Uniform (8 functions)
 
+#include "../../../include/Random.h"
 #include "idvrandom_decls.h"
 
 // @fnv 0x00b3f100
@@ -32,31 +33,18 @@ void RandomNumberGenerator::SeedRandomGenerator(long seed)
     DAT_011f8eb8 = true;
 }
 
-struct FUN_00b3f270_shell
-{
-    int GetOne();
-};
-
 // @fnv 0x00b3f270
-int FUN_00b3f270_shell::GetOne()
+int Random::vf06()
 {
     return 1;
 }
 
-struct DAT_011f8ebc_type
-{
-    double GetRandomSample();
-};
-extern DAT_011f8ebc_type DAT_011f8ebc;
-struct FUN_00b3f130_shell
-{
-    float FUN_00b3f130(float fMin, float fScaledValue);
-};
-// Linearly interpolates between fMin and the second argument using a factor returned by DAT_011f8ebc.GetRandomSample().
+extern Random DAT_011f8ebc;
+// Linearly interpolates between fMin and afMax using a random sample.
 // @fnv 0x00b3f130
-float FUN_00b3f130_shell::FUN_00b3f130(float fMin, float afMax)
+float RandomNumberGenerator::GenerateRandomFloat(float fMin, float afMax)
 {
-    return (float)((afMax - fMin) * DAT_011f8ebc.GetRandomSample() + fMin);
+    return (float)((afMax - fMin) * (double)DAT_011f8ebc.Random::Next() + fMin);
 }
 
 struct FloatIntPair
@@ -64,61 +52,37 @@ struct FloatIntPair
     float f;
     int i;
 };
-struct StandIn210
-{
-    FloatIntPair* InitHalf(FloatIntPair* p);
-};
 // Sets p->i to 0 and p->f to 0.5, then returns p.
 // @fnv 0x00b3f210
-FloatIntPair* StandIn210::InitHalf(FloatIntPair* pValue)
+FloatIntPair* Random::vf04(FloatIntPair* pValue)
 {
     pValue->i = 0;
     pValue->f = 0.5f;
     return pValue;
 }
 
-namespace fnv_00b3f240 {
 extern float DAT_010a58ec;
-struct FloatIntPair
-{
-    float f;
-    int i;
-};
-struct S00B3F240
-{
-    FloatIntPair* FUN_00b3f240(FloatIntPair* p);
-};
 // Sets p->i to 0 and p->f to DAT_010a58ec, then returns p.
 // @fnv 0x00b3f240
-FloatIntPair* S00B3F240::FUN_00b3f240(FloatIntPair* pValue)
+FloatIntPair* Random::vf05(FloatIntPair* pValue)
 {
     pValue->i = 0;
     pValue->f = DAT_010a58ec;
     return pValue;
 }
-}  // namespace fnv_00b3f240
-
-struct FUN_00b3f280_shell
-{
-    int FUN_00b3f280();
-};
-
-struct FUN_00b433a0_shell
-{
-    int __thiscall GetRandomSample();
-};
-
-// @fnv 0x00b3f280
-int FUN_00b3f280_shell::FUN_00b3f280()
-{
-    return ((FUN_00b433a0_shell*)this)->GetRandomSample();
-}
-
 extern double _gModifierZero;
 struct Uniform
 {
+    float Next();
     float FUN_00b3f2a0(float x) const;
 };
+
+// @fnv 0x00b3f280
+float Uniform::Next()
+{
+    return ((Random*)this)->Random::Next();
+}
+
 // Returns 1.0f when x is within [_gModifierZero, 1.0], otherwise 0.0f.
 // @fnv 0x00b3f2a0
 float Uniform::FUN_00b3f2a0(float afValue) const

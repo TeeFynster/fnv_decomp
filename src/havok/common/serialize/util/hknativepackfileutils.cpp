@@ -1,3 +1,8 @@
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+
+
 
 // src/havok/common/serialize/util/hknativepackfileutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/util/hknativepackfileutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -83,29 +88,17 @@ extern "C" void __cdecl ProcessElements(int header, int first, int second)
     }
 }
 
-struct S_00dc0de0_Allocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void ReturnMemory(void* p, int nbytes);
-};
+hkMemoryRouter* FUN_00c85750();
 
-struct S_00dc0de0_Router
+inline hkMemoryAllocator& GetHeap(hkMemoryRouter* holder)
 {
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00dc0de0_Allocator* m_pStreamAllocator;
-    S_00dc0de0_Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
+    return *reinterpret_cast<hkMemoryAllocator*>(holder->m_heap);
+}
 
-S_00dc0de0_Router* FUN_00c85750();
+inline hkMemoryRouter& GetMonitorStream() throw()
+{
+    return *FUN_00c85750();
+}
 
 struct S_00dc0de0_Value
 {
@@ -154,7 +147,7 @@ struct S_00dc0de0_Map
     {
         return m_kPrimitiveElement[it].val;
     }
-    void ClearAndRelease(S_00dc0de0_Allocator& alloc);
+    void ClearAndRelease(hkMemoryAllocator& alloc);
     void FUN_00a29680();
 };
 
@@ -174,21 +167,19 @@ struct S_00dc0de0_Elem
     int unk2c;
 };
 
-struct S_00dc0de0_Array
+typedef hkArrayBase<S_00dc0de0_Elem> S_00dc0de0_Array;
+template<> __forceinline void hkArrayBase<S_00dc0de0_Elem>::_clearAndDeallocate(hkMemoryAllocator& sharedAlloc)
 {
-    S_00dc0de0_Elem* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+hkMemoryAllocator& alloc = reinterpret_cast<hkMemoryAllocator&>(sharedAlloc);
 
-    void _clearAndDeallocate(S_00dc0de0_Allocator& alloc)
-    {
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(S_00dc0de0_Elem));
+            alloc.bufFree(m_data, (int)((m_iCapacityState & 0x3fffffff) * sizeof(S_00dc0de0_Elem)));
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-};
+    
+}
+
 
 struct S_00dc0de0
 {
@@ -209,8 +200,8 @@ void FUN_00dc0de0(S_00dc0de0* s)
         if (pValue->m_callback)
             pValue->m_callback(map.GetIteratorKey(it));
     }
-    s->m_ppData._clearAndDeallocate(FUN_00c85750()->heap());
-    map.ClearAndRelease(FUN_00c85750()->heap());
+    s->m_ppData._clearAndDeallocate(GetHeap(FUN_00c85750()));
+    map.ClearAndRelease(GetHeap(FUN_00c85750()));
     map.FUN_00a29680();
 }
 
@@ -243,33 +234,6 @@ extern "C" void __cdecl FUN_00c908c0(void*, void*, int, int) throw();
 extern "C" void* __cdecl UnpackPackfile(void*, void*, void*, int, void*) throw();
 extern "C" void* DAT_010d6a94;
 
-struct S_00dc0cd0_Alloc
-{
-    virtual void* unk00() throw();
-    virtual void* AllocateMemoryBlock(int size) throw();
-    virtual void ReleaseBlock(void* p, int size) throw();
-    virtual void* AllocateBufferWithSize(int& req, int size) throw();
-    virtual void ReturnMemory(void* p, int size) throw();
-};
-
-struct S_00dc0cd0_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    S_00dc0cd0_Alloc* m_pStreamAllocator;
-
-    S_00dc0cd0_Alloc& heap() throw()
-    {
-        return *m_pStreamAllocator;
-    }
-    static S_00dc0cd0_Router& GetMonitorStream() throw()
-    {
-        return *(S_00dc0cd0_Router*)FUN_00c85750();
-    }
-};
-
 struct S_00dc0cd0_Map
 {
     void* LookupHashEntry(void* key, int defVal) throw();
@@ -301,20 +265,20 @@ struct S_00dc0cd0_MemberArray
     void SwapThreeInts(void* other) throw();
 };
 
-struct S_00dc0cd0_Array
-{
+struct S_00dc0cd0_ArrayLocalForm
+{ // local form of hkArray: 0x00dc0cd0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     S_00dc0cd0_Data* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    S_00dc0cd0_Array() throw()
+    S_00dc0cd0_ArrayLocalForm() throw()
     {
         m_data = 0;
         m_iElementCount = 0;
         m_iCapacityState = 0x80000000;
     }
 
-    void GrowArrayCapacity(S_00dc0cd0_Alloc& alloc, int n) throw()
+    void GrowArrayCapacity(hkMemoryAllocator& alloc, int n) throw()
     {
         int cap = m_iCapacityState & 0x3fffffff;
         if (cap < n)
@@ -326,7 +290,7 @@ struct S_00dc0cd0_Array
         }
     }
 
-    void _setSize(S_00dc0cd0_Alloc& alloc, int n) throw()
+    void _setSize(hkMemoryAllocator& alloc, int n) throw()
     {
         if ((m_iCapacityState & 0x3fffffff) < n)
         {
@@ -337,17 +301,17 @@ struct S_00dc0cd0_Array
 
     void SetSizeAndGrow(int n) throw()
     {
-        _setSize(S_00dc0cd0_Router::GetMonitorStream().heap(), n);
+        _setSize(GetHeap(&GetMonitorStream()), n);
     }
 
-    ~S_00dc0cd0_Array() throw()
+    ~S_00dc0cd0_ArrayLocalForm() throw()
     {
-        S_00dc0cd0_Alloc& alloc = S_00dc0cd0_Router::GetMonitorStream().heap();
+        hkMemoryAllocator& alloc = GetHeap(&GetMonitorStream());
         m_iElementCount = 0;
         int cap = m_iCapacityState;
         if ((cap & 0x80000000) == 0)
         {
-            alloc.ReturnMemory(m_data, cap & 0x3fffffff);
+            alloc.bufFree(m_data, (unsigned int)(cap & 0x3fffffff));
         }
     }
 };
@@ -365,7 +329,7 @@ struct S_00dc0cd0_Resource
 // @fnv 0x00dc0cd0
 void* __cdecl CreateResourceFromArray(void* arg0, void* arg1, void* arg2) throw()
 {
-    S_00dc0cd0_Array tempArray;
+    S_00dc0cd0_ArrayLocalForm tempArray;
     int needed = FUN_00dc07d0(arg0, arg1);
     tempArray.SetSizeAndGrow(needed);
     void* pKey = UnpackPackfile(arg0, arg1, tempArray.m_data, needed, arg2);
@@ -377,7 +341,7 @@ void* __cdecl CreateResourceFromArray(void* arg0, void* arg1, void* arg2) throw(
         pFound = *ppValue;
     }
     S_00dc0cd0_Resource* pResource =
-        (S_00dc0cd0_Resource*)S_00dc0cd0_Router::GetMonitorStream().heap().AllocateMemoryBlock(0x1c);
+        (S_00dc0cd0_Resource*)GetHeap(&GetMonitorStream()).blockAlloc(0x1c);
     pResource->m_04 = 0x1c;
     pResource->m_06 = 1;
     pResource->m_00 = &DAT_010d6a94;
@@ -388,31 +352,13 @@ void* __cdecl CreateResourceFromArray(void* arg0, void* arg1, void* arg2) throw(
     return pResource;
 }
 
+class BSAudio;
 namespace fnv_00dc0f20 {
 extern int DAT_010d6a94;
 extern int DAT_0102e388;
 
 void __cdecl FUN_00dc0de0(void*, void*);
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-struct BSAudio;
 
 struct FUN_00dc0f20_cls
 {
@@ -437,13 +383,13 @@ void FUN_00dc0f20_cls::FUN_00dc0f20()
         m_14 = 0;
         m_18 = 0;
     }
-    AudioHolder* pAudioHolder = (AudioHolder*)FUN_00c85750();
-    AudioAllocator* pAllocator = pAudioHolder->m_pAllocator;
+    hkMemoryRouter* pAudioHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     m_0c = 0;
     unsigned int uCapBits = m_10;
     if ((uCapBits & 0x80000000u) == 0)
     {
-        pAllocator->FreeArray(m_08, uCapBits & 0x3fffffffu);
+        pAllocator->bufFree(m_08, uCapBits & 0x3fffffffu);
     }
     m_08 = 0;
     m_10 = 0x80000000u;
@@ -588,20 +534,7 @@ inline void* operator new(unsigned int, void* p) throw()
     return p;
 }
 
-struct hkSectionArrayN
-{
-    hkPackfileSectionHeaderN* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkSectionArrayN(hkPackfileSectionHeaderN* p, int size, int capacity) throw()
-        : m_data(p), m_iElementCount(size), m_iCapacityState(capacity | 0x80000000)
-    {}
-    hkPackfileSectionHeaderN& operator[](int i)
-    {
-        return m_data[i];
-    }
-};
+typedef hkArrayBase<hkPackfileSectionHeaderN> hkSectionArrayN;
 
 struct hkTypeInfoRegistryN
 {
@@ -740,7 +673,7 @@ extern "C" void* __cdecl UnpackPackfile(void* packfileData, void* dataSize, void
                 const void* typeInfo = registry->RegisterLoadedObject(obj, className);
                 if (typeInfo)
                 {
-                    S_00dc0de0_Allocator& heap = FUN_00c85750()->heap();
+                    hkMemoryAllocator& heap = GetHeap(FUN_00c85750());
                     out->m_pTracker.add(&heap, obj, typeInfo);
                 }
             }
@@ -841,18 +774,7 @@ extern "C" int __cdecl FUN_00dc07d0(void* packfileData, void* packfileSize) thro
 }
 
 namespace fnv_00dc0f80 {
-struct Allocator
-{
-    virtual void slot0();
-    virtual void slot1();
-    virtual void Free(void*, unsigned);
-};
-struct Manager
-{
-    unsigned flags, state, count, capacity;
-    Allocator* allocator;
-};
-Manager* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 struct FUN_00dc0f80
 {
     unsigned short allocationSize;
@@ -860,8 +782,8 @@ struct FUN_00dc0f80
     virtual ~FUN_00dc0f80();
     void operator delete(void* ptr)
     {
-        Manager* manager = FUN_00c85750();
-        manager->allocator->Free(ptr, static_cast<FUN_00dc0f80*>(ptr)->allocationSize);
+        hkMemoryRouter* manager = FUN_00c85750();
+        reinterpret_cast<hkMemoryAllocator*>(manager->m_heap)->blockFree(ptr, static_cast<FUN_00dc0f80*>(ptr)->allocationSize);
     }
 };
 // @fnv 0x00dc0f80

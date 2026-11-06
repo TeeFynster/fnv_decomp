@@ -6,6 +6,11 @@
 // src/staging/blk_00ac0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/FutBinaryFileC.h"
+#include "../../include/BSAudioManager.h"
+#include "../../include/NiRefObject.h"
 struct FUN_00ac5340_class
 {
     void FUN_00ac5220(int a, int b, int c);
@@ -58,18 +63,6 @@ extern int DAT_010a31fc;
 struct FUN_00ad41a0_cls
 {
     void FUN_00ad41a0();
-};
-struct BSAudioManager
-{
-    static BSAudioManager& GetRandomGenerator();
-    void FUN_00adcd00(void* a, void* b);
-    void FUN_00ad84e0(void* a, void* b);
-};
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
 };
 struct FUN_00ac10c0_Class
 {
@@ -1734,7 +1727,7 @@ struct S_ad8700
 };
 
 // The CRT's std::exception / std::bad_alloc (VC9 <exception>, <new>).
-namespace std {
+namespace staging_std {
 class exception
 {
   public:
@@ -1782,7 +1775,7 @@ AllocElem48* FUN_00ad5370(unsigned int _Count, AllocElem48*)
     if (_Count <= 0)
         _Count = 0;
     else if (((unsigned int)(-1) / _Count) < sizeof(AllocElem48))
-        throw std::bad_alloc(0);
+        throw staging_std::bad_alloc(0);
     return (AllocElem48*)::operator new(_Count * sizeof(AllocElem48));
 }
 
@@ -1818,12 +1811,6 @@ struct PoolX
     void FUN_00aa4060(void* p);
 };
 extern "C" PoolX g_pool_011f6238;
-inline void* operator new(unsigned int, void* p)
-{
-    return p;
-}
-inline void operator delete(void*, void*)
-{}
 struct FUN_00ac05b0
 {
     char b[0x38];
@@ -8630,7 +8617,7 @@ extern "C" int __cdecl memcpy_s(void*, unsigned int, const void*, unsigned int);
 extern "C" int __cdecl memmove_s(void*, unsigned int, const void*, unsigned int);
 void* __cdecl operator new(unsigned int);
 void __cdecl operator delete(void*);
-namespace std {
+namespace staging_std {
 struct input_iterator_tag
 {
 };
@@ -8927,7 +8914,7 @@ struct Elem
 {
     unsigned int u;
     CopyRecord r;
-    std::basic_string<char, std::char_traits<char>, std::allocator<char> > s;
+    staging_std::basic_string<char, staging_std::char_traits<char>, staging_std::allocator<char> > s;
     Elem& operator=(const Elem& o)
     {
         u = o.u;
@@ -8938,12 +8925,12 @@ struct Elem
 };
 
 // @fnv 0x00ac1810
-Elem* __cdecl FUN_00ac1810(Elem* _First, Elem* _Last, Elem* _Dest, std::random_access_iterator_tag,
-                           std::_Nonscalar_ptr_iterator_tag, std::_Range_checked_iterator_tag)
+Elem* __cdecl FUN_00ac1810(Elem* _First, Elem* _Last, Elem* _Dest, staging_std::random_access_iterator_tag,
+                           staging_std::_Nonscalar_ptr_iterator_tag, staging_std::_Range_checked_iterator_tag)
 {
     Elem* _Result = _Dest + (_Last - _First);
-    std::_Copy_opt(_First, _Last, std::_Checked_base(_Dest), std::forward_iterator_tag(),
-                   std::_Nonscalar_ptr_iterator_tag(), std::_Range_checked_iterator_tag());
+    staging_std::_Copy_opt(_First, _Last, staging_std::_Checked_base(_Dest), staging_std::forward_iterator_tag(),
+                   staging_std::_Nonscalar_ptr_iterator_tag(), staging_std::_Range_checked_iterator_tag());
     return _Result;
 }
 
@@ -12851,7 +12838,7 @@ void __cdecl FUN_00ac2290(FloatPair2290* first, unsigned int count, const FloatP
 namespace fnv_00ac2440 {
 void* __cdecl operator new(unsigned int);
 void __cdecl operator delete(void*);
-namespace std {
+namespace staging_std {
 template <class E> struct char_traits
 {
     typedef E char_type;
@@ -13101,7 +13088,7 @@ struct Elem
 {
     int id;
     Tri tri;
-    std::string name;
+    staging_std::string name;
     Elem(const Elem& r) : id(r.id), tri(r.tri), name(r.name)
     {
         unsigned a, b, c;
@@ -14201,7 +14188,8 @@ struct Str3170
     }
 };
 
-struct Vec3170
+// 0x00ac27c0 also binds AC27Vector::Assign: 24-byte allocator/buffer storage, unlike Vec3's three floats.
+struct RecordSequenceStorage
 {
     int aux;
     int alaux;
@@ -14209,7 +14197,7 @@ struct Vec3170
     void* first;
     void* last;
     void* end;
-    Vec3170& operator=(const Vec3170& rhs)
+    RecordSequenceStorage& operator=(const RecordSequenceStorage& rhs)
     {
         int a0;
         int a1;
@@ -14374,7 +14362,7 @@ struct Vec3170
 struct Elem3170
 {
     Str3170 name;
-    Vec3170 items;
+    RecordSequenceStorage items;
     Elem3170& operator=(const Elem3170& rhs)
     {
         name.assign(rhs.name, 0, DAT_010173f0);
@@ -15965,10 +15953,6 @@ PtC* __cdecl FUN_00ac3900(PtC* first, PtC* last, PtC* dest)
     return dest;
 }
 
-struct MemoryManager
-{
-    void Deallocate(void* p);
-};
 extern MemoryManager g_memoryManager;
 struct Elem38
 {
@@ -20368,7 +20352,8 @@ struct VecVal : BaseAux
 {
     Alloc alval;
 };
-struct Vec : VecVal
+// std::vector of 4-byte elements with checked iterators: 0x00acac40 = clear() via erase(begin(), end()) (0x00aceb80).
+struct IntStdVector : VecVal
 {
     int* first;
     int* last;
@@ -20382,7 +20367,7 @@ struct Vec : VecVal
 inline CMutIter::CMutIter(int* p, const ContainerBase* v)
 {
     {
-        if (!(v != 0 && ((Vec*)v)->first <= p && p <= ((Vec*)v)->last))
+        if (!(v != 0 && ((IntStdVector*)v)->first <= p && p <= ((IntStdVector*)v)->last))
         {
             _invalid_parameter_noinfo();
         }
@@ -20391,15 +20376,15 @@ inline CMutIter::CMutIter(int* p, const ContainerBase* v)
     ptr = p;
 }
 
-inline MutIter Vec::begin()
+inline MutIter IntStdVector::begin()
 {
     return MutIter(first, this);
 }
-inline MutIter Vec::end()
+inline MutIter IntStdVector::end()
 {
     return MutIter(last, this);
 }
-inline CMutIter Vec::FUN_00aceb80(CMutIter a, CMutIter b)
+inline CMutIter IntStdVector::FUN_00aceb80(CMutIter a, CMutIter b)
 {
     int k0, k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12, k13, k14, k15, k16, k17, k18, k19, k20, k21, k22, k23,
         k24, k25, k26, k27, k28;
@@ -20476,12 +20461,12 @@ inline CMutIter Vec::FUN_00aceb80(CMutIter a, CMutIter b)
     return a;
 }
 // @fnv 0x00acac40
-inline void Vec::FUN_00acac40()
+inline void IntStdVector::FUN_00acac40()
 {
     FUN_00aceb80(begin(), end());
 }
 
-void fnv_keep(Vec* v)
+void fnv_keep(IntStdVector* v)
 {
     v->FUN_00acac40();
 }
@@ -20942,11 +20927,12 @@ struct FUN_00ad1a50
         return _Ptr == r._Ptr;
     }
 };
-struct PairQ
+// Tree insertion at 0x00acaf50 returns an 8-byte checked iterator plus bool; shared Pair holds two ints.
+struct TreeInsertResult
 {
     FUN_00ad1a50 first;
     bool second;
-    PairQ(const FUN_00ad1a50& a, const bool& b) : first(a), second(b)
+    TreeInsertResult(const FUN_00ad1a50& a, const bool& b) : first(a), second(b)
     {}
 };
 struct TreeQ
@@ -20994,10 +20980,10 @@ struct TreeQ
         return FUN_00ad1a50(_Lmost(), this);
     }
     FUN_00ad1a50 FUN_00acf120(bool _Addleft, NodeQ* _Wherenode, const ValQ& _Val);
-    PairQ FUN_00acaf50(const ValQ& _Val);
+    TreeInsertResult FUN_00acaf50(const ValQ& _Val);
 };
 // @fnv 0x00acaf50
-PairQ TreeQ::FUN_00acaf50(const ValQ& _Val)
+TreeInsertResult TreeQ::FUN_00acaf50(const ValQ& _Val)
 {
     NodeQ* _Trynode = _Root();
     NodeQ* _Wherenode = _Myhead;
@@ -21011,7 +20997,7 @@ PairQ TreeQ::FUN_00acaf50(const ValQ& _Val)
     if (_Multi)
     {
         Dead20();
-        return PairQ(FUN_00acf120(_Addleft, _Wherenode, _Val), true);
+        return TreeInsertResult(FUN_00acf120(_Addleft, _Wherenode, _Val), true);
     }
     else
     {
@@ -21019,16 +21005,16 @@ PairQ TreeQ::FUN_00acaf50(const ValQ& _Val)
         if (!_Addleft)
             ;
         else if (_Where == begin())
-            return PairQ(FUN_00acf120(true, _Wherenode, _Val), true);
+            return TreeInsertResult(FUN_00acf120(true, _Wherenode, _Val), true);
         else
             _Where.FUN_00ad3450();
         if (_Key(_Where._Mynode()) < _Kfn(_Val))
         {
             Dead1();
-            return PairQ(FUN_00acf120(_Addleft, _Wherenode, _Val), true);
+            return TreeInsertResult(FUN_00acf120(_Addleft, _Wherenode, _Val), true);
         }
         else
-            return PairQ(_Where, false);
+            return TreeInsertResult(_Where, false);
     }
 }
 }  // namespace fnv_00acaf50
@@ -22146,17 +22132,6 @@ void VcVector::FUN_00acdba0()
     erase(begin(), end());
 }
 
-struct _iobuf
-{
-    char* _ptr;
-    int _cnt;
-    char* _base;
-    int _flag;
-    int _file;
-    int _charbuf;
-    int _bufsiz;
-    char* _tmpfname;
-};
 extern "C" int __cdecl fclose(struct _iobuf* _File);
 void __cdecl operator delete(void* pv);
 
@@ -23091,7 +23066,7 @@ FUN_00acefd0_Vector::iterator FUN_00acefd0_Vector::FUN_00acefd0(const_iterator _
 }  // namespace fnv_00acefd0
 
 namespace fnv_00acf500 {
-namespace std {
+namespace staging_std {
 template <class T> struct char_traits
 {
 };
@@ -23165,8 +23140,8 @@ template <class _Elem, class _Traits, class _Ax> class basic_string : public _St
 
 struct FUN_00acf500
 {
-    std::basic_string<char, std::char_traits<char>, std::allocator<char> > a;
-    std::basic_string<char, std::char_traits<char>, std::allocator<char> > b;
+    staging_std::basic_string<char, staging_std::char_traits<char>, staging_std::allocator<char> > a;
+    staging_std::basic_string<char, staging_std::char_traits<char>, staging_std::allocator<char> > b;
     FUN_00acf500();
 };
 
@@ -26608,7 +26583,7 @@ FUN_00ad3810_It& FUN_00ad3810_It::FUN_00ad3810(int _Off)
 
 namespace fnv_00ad3ca0 {
 extern "C" int __cdecl memcpy_s(void* _Dst, unsigned int _DstSize, const void* _Src, unsigned int _MaxCount);
-namespace std {
+namespace staging_std {
 struct _Secure_char_traits_tag
 {
 };
@@ -26726,10 +26701,10 @@ class FUN_00ad3ca0
   public:
     FUN_00ad3ca0(const char* pszLocName);
     FUN_00ec32e3 _Lock;
-    std::string _Days;
-    std::string _Months;
-    std::string _Oldlocname;
-    std::string _Newlocname;
+    staging_std::string _Days;
+    staging_std::string _Months;
+    staging_std::string _Oldlocname;
+    staging_std::string _Newlocname;
 };
 void __cdecl FUN_00ec3740(FUN_00ad3ca0*, const char*);
 // @fnv 0x00ad3ca0
@@ -26852,7 +26827,7 @@ Ctype4110* Ctype4110::FUN_00ad4110(unsigned int flags)
 
 namespace fnv_00ad47f0 {
 extern "C" unsigned int __cdecl strlen(const char*);
-namespace std {
+namespace staging_std {
 bool __cdecl uncaught_exception();
 template <class C> struct char_traits
 {
@@ -27070,8 +27045,8 @@ template <class C, class T> class basic_ostream : public virtual basic_ios<C, T>
     _Myt& flush();
 };
 }
-typedef std::char_traits<char> Traits;
-typedef std::basic_ostream<char, Traits> Ostream;
+typedef staging_std::char_traits<char> Traits;
+typedef staging_std::basic_ostream<char, Traits> Ostream;
 // @fnv 0x00ad47f0
 Ostream& __cdecl FUN_00ad47f0(Ostream& _Ostr, const char* _Val)
 {
@@ -27555,7 +27530,7 @@ unsigned char* __cdecl FUN_00ad5110(unsigned char* _First, unsigned char* _Last,
 }  // namespace fnv_00ad5110
 
 namespace fnv_00ad5250 {
-namespace std {
+namespace staging_std {
 
 struct input_iterator_tag
 {
@@ -27672,11 +27647,11 @@ inline _BidIt2 _Mb_ra(_BidIt1 _First, _BidIt1 _Last, _BidIt2 _Dest, random_acces
 }
 
 // @fnv 0x00ad5250
-std::String* __cdecl FUN_00ad5250(std::String* _First, std::String* _Last, std::String* _Dest)
+staging_std::String* __cdecl FUN_00ad5250(staging_std::String* _First, staging_std::String* _Last, staging_std::String* _Dest)
 {
-    return std::_Mb_ra(std::_Checked_base_local(_First), std::_Checked_base_local(_Last), _Dest,
-                       std::_Iter_random_local(_First, _Dest), std::_Move_cat_local(_Dest),
-                       std::_Range_checked_iterator_tag());
+    return staging_std::_Mb_ra(staging_std::_Checked_base_local(_First), staging_std::_Checked_base_local(_Last), _Dest,
+                       staging_std::_Iter_random_local(_First, _Dest), staging_std::_Move_cat_local(_Dest),
+                       staging_std::_Range_checked_iterator_tag());
 }
 }  // namespace fnv_00ad5250
 
@@ -28360,7 +28335,7 @@ extern "C" int __cdecl memmove_s(void*, unsigned int, const void*, unsigned int)
 void* __cdecl operator new(unsigned int);
 void __cdecl operator delete(void*);
 
-namespace std {
+namespace staging_std {
 struct forward_iterator_tag
 {
 };
@@ -28655,12 +28630,12 @@ inline _OutIt _Copy_opt(_InIt _First, _InIt _Last, _OutIt _Dest, _InOutItCat, _N
 
 struct TwoStr
 {
-    std::basic_string<char, std::char_traits<char>, std::allocator<char> > a;
-    std::basic_string<char, std::char_traits<char>, std::allocator<char> > b;
+    staging_std::basic_string<char, staging_std::char_traits<char>, staging_std::allocator<char> > a;
+    staging_std::basic_string<char, staging_std::char_traits<char>, staging_std::allocator<char> > b;
 };
 
-void assign_string(std::basic_string<char, std::char_traits<char>, std::allocator<char> >& dst,
-                   const std::basic_string<char, std::char_traits<char>, std::allocator<char> >& src)
+void assign_string(staging_std::basic_string<char, staging_std::char_traits<char>, staging_std::allocator<char> >& dst,
+                   const staging_std::basic_string<char, staging_std::char_traits<char>, staging_std::allocator<char> >& src)
 {
     dst = src;
 }
@@ -28669,8 +28644,8 @@ void assign_string(std::basic_string<char, std::char_traits<char>, std::allocato
 TwoStr* __cdecl FUN_00ad5ec0(TwoStr* _First, TwoStr* _Last, TwoStr* _Dest)
 {
     TwoStr* _Result = _Dest + (_Last - _First);
-    std::_Copy_opt(_First, _Last, std::_Checked_base(_Dest), std::forward_iterator_tag(),
-                   std::_Nonscalar_ptr_iterator_tag());
+    staging_std::_Copy_opt(_First, _Last, staging_std::_Checked_base(_Dest), staging_std::forward_iterator_tag(),
+                   staging_std::_Nonscalar_ptr_iterator_tag());
     return _Result;
 }
 }  // namespace fnv_00ad5ec0
@@ -29453,7 +29428,7 @@ namespace fnv_00ad6800 {
 extern "C" int __cdecl memcpy_s(void*, unsigned int, const void*, unsigned int);
 extern "C" int __cdecl memmove_s(void*, unsigned int, const void*, unsigned int);
 
-namespace std {
+namespace staging_std {
 
 struct input_iterator_tag
 {
@@ -29763,19 +29738,19 @@ inline _BidIt2 _Copy_backward_opt(_BidIt1 _First, _BidIt1 _Last, _BidIt2 _Dest, 
 
 }
 
-typedef std::pair<std::string, std::string> PairSS;
+typedef staging_std::pair<staging_std::string, staging_std::string> PairSS;
 
 // @fnv 0x00ad6800
-PairSS* __cdecl FUN_00ad6800(PairSS* _First, PairSS* _Last, PairSS* _Dest, std::random_access_iterator_tag,
-                             std::_Nonscalar_ptr_iterator_tag, std::_Range_checked_iterator_tag)
+PairSS* __cdecl FUN_00ad6800(PairSS* _First, PairSS* _Last, PairSS* _Dest, staging_std::random_access_iterator_tag,
+                             staging_std::_Nonscalar_ptr_iterator_tag, staging_std::_Range_checked_iterator_tag)
 {
     PairSS* _Result = _Dest - (_Last - _First);
-    std::_Copy_backward_opt(_First, _Last, std::_Checked_base(_Dest), std::forward_iterator_tag(),
-                            std::_Nonscalar_ptr_iterator_tag(), std::_Range_checked_iterator_tag());
+    staging_std::_Copy_backward_opt(_First, _Last, staging_std::_Checked_base(_Dest), staging_std::forward_iterator_tag(),
+                            staging_std::_Nonscalar_ptr_iterator_tag(), staging_std::_Range_checked_iterator_tag());
     return _Result;
 }
 
-namespace std {
+namespace staging_std {
 template <class _Elem, class _Traits, class _Ax>
 const typename basic_string<_Elem, _Traits, _Ax>::size_type basic_string<_Elem, _Traits, _Ax>::npos =
     (typename basic_string<_Elem, _Traits, _Ax>::size_type)(-1);
@@ -29986,41 +29961,22 @@ Pair56* __cdecl FUN_00ad6d30(Pair56* first, Pair56* last, Pair56* dest)
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);
-struct NiPoint3_audio
+inline void NiRefObject::IncRefCount()
 {
-    float x, y, z;
-};
-struct NiRefObject_audio
+    InterlockedIncrement((long*)&m_uiRefCount);
+}
+template <> inline NiPointer<NiAVObject>::NiPointer(NiAVObject* pObject) : m_pObject(pObject)
 {
-    virtual ~NiRefObject_audio();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((long*)&m_uiRefCount);
-    }
-    void DecRefCount();
-};
-template <class T> struct NiPointer_audio
+    if (m_pObject)
+        reinterpret_cast<NiRefObject*>(m_pObject)->IncRefCount();
+}
+template <> inline NiPointer<NiAVObject>::~NiPointer()
 {
-    NiPointer_audio(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointer_audio()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    T* m_pObject;
-};
-typedef NiPointer_audio<NiRefObject_audio> NiRefObjectPtr_audio;
-extern NiPoint3_audio DAT_011f426c;
-struct AudioMgr_ad8650
-{
-    bool FUN_00adb1a0(int m_uiSoundID, int a, int b, int c, NiRefObjectPtr_audio pSceneObject, NiPoint3_audio kPos);
-};
-AudioMgr_ad8650* __cdecl FUN_00ad9060();
+    if (m_pObject)
+        reinterpret_cast<NiRefObject*>(m_pObject)->DecRefCount();
+}
+extern NiPoint3 DAT_011f426c;
+BSAudioManager* __cdecl FUN_00ad9060();
 struct FUN_00ad8650_cls
 {
     void FUN_00ad8650();
@@ -31364,7 +31320,8 @@ FUN_00ad0210_Q::FUN_00ad0210_Q(OstrQ& _Ostr) : FUN_00ad2fa0(_Ostr)
 }  // namespace fnv_00ad0210
 
 namespace fnv_00ad5180 {
-struct Vec
+// A 24-byte std::vector element: 0x00ad61e0 = its operator=; FUN_00ad5180 = std::copy over a range of them.
+struct StdVector24
 {
     int unk00;
     int unk04;
@@ -31373,7 +31330,7 @@ struct Vec
     int unk10;
     int unk14;
     // /Ob1 size-refuses this body after reserving one slot per local. Those slots are the dead gap in FUN_00ad5180.
-    inline Vec& FUN_00ad61e0(const Vec& _Right)
+    inline StdVector24& FUN_00ad61e0(const StdVector24& _Right)
     {
         int l0, l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22,
             l23, l24, l25, l26, l27, l28, l29, l30, l31, l32, l33, l34, l35, l36, l37, l38, l39, l40, l41, l42, l43,
@@ -31518,7 +31475,7 @@ inline _OutIt _Copy_opt(_InIt _First, _InIt _Last, _OutIt _Dest, random_access_i
     return _Result;
 }
 // @fnv 0x00ad5180
-Vec* __cdecl FUN_00ad5180(Vec* _First, Vec* _Last, Vec* _Dest)
+StdVector24* __cdecl FUN_00ad5180(StdVector24* _First, StdVector24* _Last, StdVector24* _Dest)
 {
     return _Copy_opt(_Checked_base(_First), _Checked_base(_Last), _Dest, _Iter_random(_First, _Dest),
                      _Ptr_cat(_First, _Dest), _Range_checked_iterator_tag());
@@ -32573,7 +32530,7 @@ template <class _Ty> class vectorS : public _Vector_valS<_Ty>
 extern "C" unsigned int __cdecl strlen(const char* pcString);
 extern "C" int __cdecl memcpy_s(void* pvDst, unsigned int uiDstSize, const void* pvSrc, unsigned int ItemUpdateArray);
 void* __cdecl operator new(unsigned int uiSize);
-namespace std {
+namespace staging_std {
 class bad_alloc
 {
   public:
@@ -32640,7 +32597,7 @@ inline char* AllocateChars(unsigned int ItemUpdateArray, char*)
     if (ItemUpdateArray <= 0)
         ItemUpdateArray = 0;
     else if (((unsigned int)(-1) / ItemUpdateArray) < sizeof(char))
-        throw std::bad_alloc(0);
+        throw staging_std::bad_alloc(0);
     return (char*)::operator new(ItemUpdateArray * sizeof(char));
 }
 struct CharAllocator
@@ -33261,7 +33218,7 @@ struct Str43B0
 
     static u32 length(const char* p)
     {
-        return strlen(p);
+        return ::strlen(p);
     }
     int compare(char* p)
     {
@@ -33409,7 +33366,7 @@ extern "C" int __cdecl memcpy_s(void* pvDst, unsigned int uiDstSize, const void*
 extern "C" int __cdecl memmove_s(void* pvDst, unsigned int uiDstSize, const void* pvSrc, unsigned int ItemUpdateArray);
 void* __cdecl operator new(unsigned int uiSize);
 unsigned int __cdecl FUN_00ec7c56();
-namespace std {
+namespace staging_std {
 class bad_alloc
 {
   public:
@@ -33476,7 +33433,7 @@ inline char* AllocateChars(unsigned int ItemUpdateArray, char*)
     if (ItemUpdateArray <= 0)
         ItemUpdateArray = 0;
     else if (((unsigned int)(-1) / ItemUpdateArray) < sizeof(char))
-        throw std::bad_alloc(0);
+        throw staging_std::bad_alloc(0);
     return (char*)::operator new(ItemUpdateArray * sizeof(char));
 }
 struct CharAllocator
@@ -34169,7 +34126,7 @@ extern "C" int __cdecl memcpy_s(void* pvDst, unsigned int uiDstSize, const void*
 extern "C" int __cdecl memmove_s(void* pvDst, unsigned int uiDstSize, const void* pvSrc, unsigned int ItemUpdateArray);
 void* __cdecl operator new(unsigned int uiSize);
 unsigned int __cdecl FUN_00ec7c56();
-namespace std {
+namespace staging_std {
 class bad_alloc
 {
   public:
@@ -34236,7 +34193,7 @@ inline char* AllocateChars(unsigned int ItemUpdateArray, char*)
     if (ItemUpdateArray <= 0)
         ItemUpdateArray = 0;
     else if (((unsigned int)(-1) / ItemUpdateArray) < sizeof(char))
-        throw std::bad_alloc(0);
+        throw staging_std::bad_alloc(0);
     return (char*)::operator new(ItemUpdateArray * sizeof(char));
 }
 struct CharAllocator
@@ -34903,7 +34860,7 @@ template <class _Ty> class vectorS : public _Vector_valS<_Ty>
 extern "C" unsigned int __cdecl strlen(const char* pcString);
 extern "C" int __cdecl memcpy_s(void* pvDst, unsigned int uiDstSize, const void* pvSrc, unsigned int ItemUpdateArray);
 void* __cdecl operator new(unsigned int uiSize);
-namespace std {
+namespace staging_std {
 class bad_alloc
 {
   public:
@@ -34970,7 +34927,7 @@ inline char* AllocateChars(unsigned int ItemUpdateArray, char*)
     if (ItemUpdateArray <= 0)
         ItemUpdateArray = 0;
     else if (((unsigned int)(-1) / ItemUpdateArray) < sizeof(char))
-        throw std::bad_alloc(0);
+        throw staging_std::bad_alloc(0);
     return (char*)::operator new(ItemUpdateArray * sizeof(char));
 }
 struct CharAllocator
@@ -35341,7 +35298,7 @@ inline void* __cdecl operator new(unsigned int, void* p)
 }
 inline void __cdecl operator delete(void*, void*)
 {}
-namespace std {
+namespace staging_std {
 class exception
 {
   public:
@@ -35662,16 +35619,16 @@ inline O _Uninit_copy(I first, I last, O out, Al& al, _Nonscalar_ptr_iterator_ta
 namespace stdext {
 template <class I, class O> inline O unchecked_copy(I first, I last, O out)
 {
-    return std::_Copy_opt(std::_Checked_base(first), std::_Checked_base(last), out, std::_Iter_random(first, out),
-                          std::_Ptr_cat(first, out), std::_Range_checked_iterator_tag());
+    return staging_std::_Copy_opt(staging_std::_Checked_base(first), staging_std::_Checked_base(last), out, staging_std::_Iter_random(first, out),
+                          staging_std::_Ptr_cat(first, out), staging_std::_Range_checked_iterator_tag());
 }
 template <class I, class O, class Al> inline O unchecked_uninitialized_copy(I first, I last, O out, Al& al)
 {
-    return std::_Uninit_copy(std::_Checked_base(first), std::_Checked_base(last), out, al, std::_Ptr_cat(first, out),
-                             std::_Range_checked_iterator_tag());
+    return staging_std::_Uninit_copy(staging_std::_Checked_base(first), staging_std::_Checked_base(last), out, al, staging_std::_Ptr_cat(first, out),
+                             staging_std::_Range_checked_iterator_tag());
 }
 }
-namespace std {
+namespace staging_std {
 class _Container_base_aux;
 class _Aux_cont
 {
@@ -35905,12 +35862,12 @@ inline O backwardCopy(I first, I last, O out, random_access_iterator_tag, _Nonsc
     return _Result;
 }
 }
-typedef std::vector<std::string> StringVector;
+typedef staging_std::vector<staging_std::string> StringVector;
 // @fnv 0x00ad60c0
 StringVector* __cdecl FUN_00ad60c0(StringVector* first, StringVector* last, StringVector* out,
-                                   std::random_access_iterator_tag category)
+                                   staging_std::random_access_iterator_tag category)
 {
-    return std::backwardCopy(first, last, out, category, std::_Ptr_cat(first, out), std::_Range_checked_iterator_tag());
+    return staging_std::backwardCopy(first, last, out, category, staging_std::_Ptr_cat(first, out), staging_std::_Range_checked_iterator_tag());
 }
 }  // namespace fnv_00ad60c0
 
@@ -35926,7 +35883,7 @@ inline void* __cdecl operator new(unsigned int, void* _Where)
 }
 inline void __cdecl operator delete(void*, void*)
 {}
-namespace std {
+namespace staging_std {
 class exception
 {
   public:
@@ -36147,7 +36104,7 @@ template <class C, class Tr, class Al> class basic_string : public _String_val<C
     }
 };
 typedef basic_string<char, char_traits<char>, allocator<char> > string;
-class logic_error : public std::exception
+class logic_error : public staging_std::exception
 {
   public:
     explicit logic_error(const string& _Message) : _Str(_Message)
@@ -36176,7 +36133,7 @@ template <class _Ty> inline _Ty* _Allocate(unsigned int _Count, _Ty*)
     if (_Count <= 0)
         _Count = 0;
     else if (((unsigned int)(-1) / _Count) < sizeof(_Ty))
-        throw std::bad_alloc(0);
+        throw staging_std::bad_alloc(0);
     return ((_Ty*)::operator new(_Count * sizeof(_Ty)));
 }
 template <class _T1, class _T2> inline void _Construct(_T1* _Ptr, const _T2& _Val)
@@ -36259,20 +36216,20 @@ inline _FwdIt _Uninit_copy(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al,
 namespace stdext {
 template <class _InIt, class _OutIt> inline _OutIt unchecked_copy(_InIt _First, _InIt _Last, _OutIt _Dest)
 {
-    return (std::_Copy_opt(std::_Checked_base(_First), std::_Checked_base(_Last), _Dest,
-                           std::_Iter_random(_First, _Dest), std::_Ptr_cat(_First, _Dest),
-                           std::_Range_checked_iterator_tag()));
+    return (staging_std::_Copy_opt(staging_std::_Checked_base(_First), staging_std::_Checked_base(_Last), _Dest,
+                           staging_std::_Iter_random(_First, _Dest), staging_std::_Ptr_cat(_First, _Dest),
+                           staging_std::_Range_checked_iterator_tag()));
 }
 template <class _InIt, class _FwdIt, class _Alloc>
 inline _FwdIt unchecked_uninitialized_copy(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al)
 {
-    return (std::_Uninit_copy(std::_Checked_base(_First), std::_Checked_base(_Last), _Dest, _Al,
-                              std::_Ptr_cat(_First, _Dest), std::_Range_checked_iterator_tag()));
+    return (staging_std::_Uninit_copy(staging_std::_Checked_base(_First), staging_std::_Checked_base(_Last), _Dest, _Al,
+                              staging_std::_Ptr_cat(_First, _Dest), staging_std::_Range_checked_iterator_tag()));
 }
 }
 
 extern "C" void __cdecl _invalid_parameter_noinfo();
-namespace std {
+namespace staging_std {
 class _Container_base_aux;
 class _Aux_cont
 {
@@ -36669,7 +36626,7 @@ template <class _Ty, class _Alloc> class _Vector_iterator : public _Vector_const
     }
 };
 }
-namespace std {
+namespace staging_std {
 template <class _Alloc> class _Container_base_aux_alloc_real : public _Container_base_aux
 {
   public:
@@ -36793,7 +36750,7 @@ template <class _Ty, class _Ax = allocator<_Ty> > class vector : public _Vector_
     }
 };
 }
-void force_vector_assignment(std::vector<std::string>& a, const std::vector<std::string>& b)
+void force_vector_assignment(staging_std::vector<staging_std::string>& a, const staging_std::vector<staging_std::string>& b)
 {
     a.FUN_00ad61e0(b);
 }
@@ -37235,7 +37192,7 @@ template <class _Ty> class vectorS : public _Vector_valS<_Ty>
 extern "C" unsigned int __cdecl strlen(const char* pcString);
 extern "C" int __cdecl memcpy_s(void* pvDst, unsigned int uiDstSize, const void* pvSrc, unsigned int ItemUpdateArray);
 void* __cdecl operator new(unsigned int uiSize);
-namespace std {
+namespace staging_std {
 class bad_alloc
 {
   public:
@@ -37302,7 +37259,7 @@ inline char* AllocateChars(unsigned int ItemUpdateArray, char*)
     if (ItemUpdateArray <= 0)
         ItemUpdateArray = 0;
     else if (((unsigned int)(-1) / ItemUpdateArray) < sizeof(char))
-        throw std::bad_alloc(0);
+        throw staging_std::bad_alloc(0);
     return (char*)::operator new(ItemUpdateArray * sizeof(char));
 }
 struct CharAllocator
@@ -38458,37 +38415,37 @@ struct FileGuard
     }
 };
 
-struct FutBinaryFileC
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    BxString signature;
-    bool FUN_00ac3fe0(const BxString& path);
-};
+}  // namespace ac3_signature
 
 // @fnv 0x00ac3fe0
-bool FutBinaryFileC::FUN_00ac3fe0(const BxString& path)
+bool FutBinaryFileC::FUN_00ac3fe0(const ::BxString& path)
 {
-    FileGuard file(fopen(path._Myptr(), "rb"));
+    using ac3_signature::FileGuard;
+    using ac3_signature::FUN_00ac6430;
+    using ac3_signature::fopen;
+    using ac3_signature::fread;
+    using ucpyac15::GvVector;
+    FileGuard file(fopen(reinterpret_cast<const ucpyac15::BxString&>(path)._Myptr(), "rb"));
     if (!file.fp)
     {
-        FUN_00ac6430(4, path);
+        FUN_00ac6430(4, reinterpret_cast<const ucpyac15::BxString&>(path));
         return false;
     }
-    GvVector<unsigned char> buffer2(signature.size() + 1);
-    if (fread(&buffer2[0], signature.size(), 1, file.get()) != 1)
+    // The original checker reads the second string, at 0x20 (the shared path member).
+    GvVector<unsigned char> buffer2(reinterpret_cast<ucpyac15::BxString&>(this->path).size() + 1);
+    if (ac3_signature::fread(&buffer2[0], reinterpret_cast<ucpyac15::BxString&>(this->path).size(), 1, file.get()) != 1)
     {
         file.Close();
-        FUN_00ac6430(1, path);
+        FUN_00ac6430(1, reinterpret_cast<const ucpyac15::BxString&>(path));
         return false;
     }
-    buffer2[signature.size()] = 0;
+    buffer2[reinterpret_cast<ucpyac15::BxString&>(this->path).size()] = 0;
     file.Close();
-    buffer2[5] = signature[5];
-    if (signature == (const char*)&buffer2[0])
+    buffer2[5] = reinterpret_cast<ucpyac15::BxString&>(this->path)[5];
+    if (reinterpret_cast<ucpyac15::BxString&>(this->path) == (const char*)&buffer2[0])
         return true;
     else
         return false;
-}
 }
 
 template <class T> struct HexVectorView;
@@ -38836,9 +38793,9 @@ void VecQ_acab30::FUN_00acab30(const ElQ_acab30& _Val)
     }
 }
 
-struct AllocationFailureB80 : std::exception
+struct AllocationFailureB80 : staging_std::exception
 {
-    AllocationFailureB80(const char* message) throw() : std::exception(message)
+    AllocationFailureB80(const char* message) throw() : staging_std::exception(message)
     {}
     virtual ~AllocationFailureB80() throw()
     {}
@@ -38942,7 +38899,7 @@ int SBQ_acbb80::FUN_00acbb80(int _Meta)
             _Inc = _Al.FUN_0065f7a0(_Newsize);
         }
         if (0 < _Oldptr)
-            std::_Traits_helper::copy_s<CopyTraitsB80>(_Inc, _Newsize, _Ptr, _Oldptr);
+            staging_std::_Traits_helper::copy_s<CopyTraitsB80>(_Inc, _Newsize, _Ptr, _Oldptr);
         if (_Oldptr == 0)
         {
             _Seekhigh = _Inc;
@@ -39455,7 +39412,7 @@ void StringbufCleanup::FUN_00acf9e0()
     _Mystate &= ~1;
 }
 
-template <class T> struct EraseAlloc : std::allocator<T>
+template <class T> struct EraseAlloc : staging_std::allocator<T>
 {
     typedef T* pointer;
     void destroy(pointer ptr)
@@ -40707,7 +40664,7 @@ struct S5540_String : S5540_StringVal
     unsigned int _Myres;
     void _Eos(unsigned int newsize)
     {
-        std::char_traits<char>::assign(_Myptr()[_Mysize = newsize], char());
+        staging_std::char_traits<char>::assign(_Myptr()[_Mysize = newsize], char());
     }
     __declspec(noinline) void FUN_0044a730(bool built, unsigned int newsize)
     {
@@ -40717,7 +40674,7 @@ struct S5540_String : S5540_StringVal
         {
             char* ptr = _Bx._Ptr;
             if (0 < newsize)
-                std::_Traits_helper::copy_s<std::char_traits<char> >(_Bx._Buf, 16, ptr, newsize);
+                staging_std::_Traits_helper::copy_s<staging_std::char_traits<char> >(_Bx._Buf, 16, ptr, newsize);
             _Alval.deallocate(ptr, _Myres + 1);
         }
         _Myres = 15;
@@ -40727,12 +40684,12 @@ struct S5540_String : S5540_StringVal
     S5540_String& erase(unsigned int off = 0, unsigned int count = (unsigned int)-1)
     {
         if (_Mysize < off)
-            std::_String_base::_Xran();
+            staging_std::_String_base::_Xran();
         if (_Mysize - off < count)
             count = _Mysize - off;
         if (0 < count)
         {
-            std::_Traits_helper::move_s<std::char_traits<char> >(_Myptr() + off, _Myres - off, _Myptr() + off + count,
+            staging_std::_Traits_helper::move_s<staging_std::char_traits<char> >(_Myptr() + off, _Myres - off, _Myptr() + off + count,
                                                                  _Mysize - off - count);
             unsigned int newsize = _Mysize - count;
             _Eos(newsize);
@@ -40742,7 +40699,7 @@ struct S5540_String : S5540_StringVal
     S5540_String& AssignSubstring(const S5540_String& right, unsigned int off, unsigned int count)
     {
         if (right.size() < off)
-            std::_String_base::_Xran();
+            staging_std::_String_base::_Xran();
         unsigned int num = right.size() - off;
         if (count < num)
             num = count;
@@ -40750,7 +40707,7 @@ struct S5540_String : S5540_StringVal
             erase((unsigned int)(off + num)), erase(0, off);
         else if (_Grow(num))
         {
-            std::_Traits_helper::copy_s<std::char_traits<char> >(_Myptr(), _Myres, right._Myptr() + off, num);
+            staging_std::_Traits_helper::copy_s<staging_std::char_traits<char> >(_Myptr(), _Myres, right._Myptr() + off, num);
             _Eos(num);
         }
         return *this;
@@ -41208,7 +41165,7 @@ template <class C> struct Traits
         return ::FUN_00ec6130(const_cast<C*>(text));
     }
 };
-template <class C> class Alloc : public std::allocator<C>
+template <class C> class Alloc : public staging_std::allocator<C>
 {
   public:
     Alloc() throw()
@@ -41429,14 +41386,15 @@ template <class K> struct Tree : TreeValues<K>
         return where == end() || this->comparator(value, key(where.getNode())) ? end() : where;
     }
 };
-struct Map : Tree<String>
+// Exe 0x00ac8390: unit-local Map view; declarations and layout are preserved.
+struct BlkMapView : Tree<String>
 {
 };
 }
 void FUN_00ac6430(int, parser839::String);
-bool FUN_00ac7aa0(parser839::Input<char, parser839::Traits<char> >&, parser839::Map&, const parser839::String&, bool);
+bool FUN_00ac7aa0(parser839::Input<char, parser839::Traits<char> >&, parser839::BlkMapView&, const parser839::String&, bool);
 // @fnv 0x00ac8390
-bool FUN_00ac8390(const char* buffer, const parser839::String& name, parser839::Map& output)
+bool FUN_00ac8390(const char* buffer, const parser839::String& name, parser839::BlkMapView& output)
 {
     if (!buffer)
     {
@@ -41475,8 +41433,8 @@ bool FUN_00ac8390(const char* buffer, const parser839::String& name, parser839::
     }
 }
 
-typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > PackString87;
-struct Alloc87 : std::allocator<char>
+typedef staging_std::basic_string<char, staging_std::char_traits<char>, staging_std::allocator<char> > PackString87;
+struct Alloc87 : staging_std::allocator<char>
 {
     __forceinline Alloc87() throw()
     {}
@@ -41501,7 +41459,7 @@ struct FUN_0044a4c0 : PackString87
         }
         if (_Grow(n))
         {
-            std::_Traits_helper::copy_s<std::char_traits<char> >(_Myptr(), _Myres, p, n);
+            staging_std::_Traits_helper::copy_s<staging_std::char_traits<char> >(_Myptr(), _Myres, p, n);
             _Eos(n);
         }
         return *this;
@@ -42350,7 +42308,7 @@ template <class _Ty> inline _Ty* _Allocate(unsigned int _Count, _Ty*)
     if (_Count <= 0)
         _Count = 0;
     else if (((unsigned int)(-1) / _Count) < sizeof(_Ty))
-        throw std::bad_alloc(0);
+        throw staging_std::bad_alloc(0);
     return ((_Ty*)::operator new(_Count * sizeof(_Ty)));
 }
 
@@ -42398,9 +42356,9 @@ template <class _Ty> class allocator
     }
 };
 
-template <class _T1, class _T2> inline std::_Nonscalar_ptr_iterator_tag _Ptr_cat(_T1&, _T2&)
+template <class _T1, class _T2> inline staging_std::_Nonscalar_ptr_iterator_tag _Ptr_cat(_T1&, _T2&)
 {
-    std::_Nonscalar_ptr_iterator_tag _Cat;
+    staging_std::_Nonscalar_ptr_iterator_tag _Cat;
     return (_Cat);
 }
 
@@ -42410,15 +42368,15 @@ template <class _Iter> inline _Undefined_move_tag _Move_cat(const _Iter&)
     return (_Cat);
 }
 
-template <class _Iter1, class _Iter2> inline std::random_access_iterator_tag _Iter_random(const _Iter1&, const _Iter2&)
+template <class _Iter1, class _Iter2> inline staging_std::random_access_iterator_tag _Iter_random(const _Iter1&, const _Iter2&)
 {
-    std::random_access_iterator_tag _Cat;
+    staging_std::random_access_iterator_tag _Cat;
     return (_Cat);
 }
 
 template <class _Alloc>
 inline void _Destroy_range(typename _Alloc::pointer _First, typename _Alloc::pointer _Last, _Alloc& _Al,
-                           std::_Nonscalar_ptr_iterator_tag)
+                           staging_std::_Nonscalar_ptr_iterator_tag)
 {
     for (; _First != _Last; ++_First)
         _Al.destroy(_First);
@@ -42431,8 +42389,8 @@ inline void _Destroy_range(typename _Alloc::pointer _First, typename _Alloc::poi
 }
 
 template <class _InIt, class _FwdIt, class _Alloc>
-inline _FwdIt _Uninit_copy(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al, std::_Nonscalar_ptr_iterator_tag,
-                           std::_Range_checked_iterator_tag)
+inline _FwdIt _Uninit_copy(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al, staging_std::_Nonscalar_ptr_iterator_tag,
+                           staging_std::_Range_checked_iterator_tag)
 {
     _FwdIt _Next = _Dest;
     try
@@ -42452,13 +42410,13 @@ inline _FwdIt _Uninit_copy(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al,
 template <class _InIt, class _FwdIt, class _Alloc>
 inline _FwdIt unchecked_uninitialized_copy(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al)
 {
-    return (_Uninit_copy(std::_Checked_base(_First), std::_Checked_base(_Last), _Dest, _Al, _Ptr_cat(_First, _Dest),
-                         std::_Range_checked_iterator_tag()));
+    return (_Uninit_copy(staging_std::_Checked_base(_First), staging_std::_Checked_base(_Last), _Dest, _Al, _Ptr_cat(_First, _Dest),
+                         staging_std::_Range_checked_iterator_tag()));
 }
 
 template <class _InIt, class _FwdIt, class _Alloc, class _MoveCatTy>
 inline _FwdIt _Uninit_move(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al, _MoveCatTy,
-                           std::_Range_checked_iterator_tag)
+                           staging_std::_Range_checked_iterator_tag)
 {
     return unchecked_uninitialized_copy(_First, _Last, _Dest, _Al);
 }
@@ -42466,13 +42424,13 @@ inline _FwdIt _Uninit_move(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al,
 template <class _InIt, class _FwdIt, class _Alloc>
 inline _FwdIt _Unchecked_uninitialized_move(_InIt _First, _InIt _Last, _FwdIt _Dest, _Alloc& _Al)
 {
-    return (_Uninit_move(std::_Checked_base(_First), std::_Checked_base(_Last), _Dest, _Al, _Move_cat(_Dest),
-                         std::_Range_checked_iterator_tag()));
+    return (_Uninit_move(staging_std::_Checked_base(_First), staging_std::_Checked_base(_Last), _Dest, _Al, _Move_cat(_Dest),
+                         staging_std::_Range_checked_iterator_tag()));
 }
 
 template <class _FwdIt, class _Diff, class _Tval, class _Alloc>
 inline void _Uninit_fill_n(_FwdIt _First, _Diff _Count, const _Tval& _Val, _Alloc& _Al,
-                           std::_Nonscalar_ptr_iterator_tag, std::_Range_checked_iterator_tag)
+                           staging_std::_Nonscalar_ptr_iterator_tag, staging_std::_Range_checked_iterator_tag)
 {
     _FwdIt _Next = _First;
     try
@@ -42491,12 +42449,12 @@ inline void _Uninit_fill_n(_FwdIt _First, _Diff _Count, const _Tval& _Val, _Allo
 template <class _FwdIt, class _Diff, class _Tval, class _Alloc>
 inline void unchecked_uninitialized_fill_n(_FwdIt _First, _Diff _Count, const _Tval& _Val, _Alloc& _Al)
 {
-    _Uninit_fill_n(_First, _Count, _Val, _Al, _Ptr_cat(_First, _First), std::_Range_checked_iterator_tag());
+    _Uninit_fill_n(_First, _Count, _Val, _Al, _Ptr_cat(_First, _First), staging_std::_Range_checked_iterator_tag());
 }
 
 template <class _BidIt1, class _BidIt2, class _IterCat>
 inline _BidIt2 _Copy_backward_opt(_BidIt1 _First, _BidIt1 _Last, _BidIt2 _Dest, _IterCat,
-                                  std::_Nonscalar_ptr_iterator_tag, std::_Range_checked_iterator_tag)
+                                  staging_std::_Nonscalar_ptr_iterator_tag, staging_std::_Range_checked_iterator_tag)
 {
     while (_First != _Last)
         *--_Dest = *--_Last;
@@ -42504,28 +42462,28 @@ inline _BidIt2 _Copy_backward_opt(_BidIt1 _First, _BidIt1 _Last, _BidIt2 _Dest, 
 }
 
 template <class I, class O>
-inline O _Copy_backward_opt(I first, I last, O dest, std::random_access_iterator_tag, std::_Nonscalar_ptr_iterator_tag,
-                            std::_Range_checked_iterator_tag)
+inline O _Copy_backward_opt(I first, I last, O dest, staging_std::random_access_iterator_tag, staging_std::_Nonscalar_ptr_iterator_tag,
+                            staging_std::_Range_checked_iterator_tag)
 {
     O result = dest - (last - first);
-    _Copy_backward_opt(first, last, std::_Checked_base(dest), std::forward_iterator_tag(),
-                       std::_Nonscalar_ptr_iterator_tag(), std::_Range_checked_iterator_tag());
+    _Copy_backward_opt(first, last, staging_std::_Checked_base(dest), staging_std::forward_iterator_tag(),
+                       staging_std::_Nonscalar_ptr_iterator_tag(), staging_std::_Range_checked_iterator_tag());
     return result;
 }
 
 template <class _BidIt1, class _BidIt2, class _IterCat, class _MoveCatTy>
 inline _BidIt2 _Move_backward_opt(_BidIt1 _First, _BidIt1 _Last, _BidIt2 _Dest, _IterCat _First_dest_cat, _MoveCatTy,
-                                  std::_Range_checked_iterator_tag)
+                                  staging_std::_Range_checked_iterator_tag)
 {
     return _Copy_backward_opt(_First, _Last, _Dest, _First_dest_cat, _Ptr_cat(_First, _Dest),
-                              std::_Range_checked_iterator_tag());
+                              staging_std::_Range_checked_iterator_tag());
 }
 
 template <class _BidIt1, class _BidIt2>
 inline _BidIt2 _Unchecked_move_backward(_BidIt1 _First, _BidIt1 _Last, _BidIt2 _Dest)
 {
-    return (_Move_backward_opt(std::_Checked_base(_First), std::_Checked_base(_Last), _Dest,
-                               _Iter_random(_First, _Dest), _Move_cat(_Dest), std::_Range_checked_iterator_tag()));
+    return (_Move_backward_opt(staging_std::_Checked_base(_First), staging_std::_Checked_base(_Last), _Dest,
+                               _Iter_random(_First, _Dest), _Move_cat(_Dest), staging_std::_Range_checked_iterator_tag()));
 }
 
 template <class _FwdIt, class _Ty> inline void _Fill(_FwdIt _First, _FwdIt _Last, const _Ty& _Val)
@@ -42536,13 +42494,13 @@ template <class _FwdIt, class _Ty> inline void _Fill(_FwdIt _First, _FwdIt _Last
 
 template <class _FwdIt, class _Ty> inline void fill(_FwdIt _First, _FwdIt _Last, const _Ty& _Val)
 {
-    _Fill(std::_Checked_base(_First), std::_Checked_base(_Last), _Val);
+    _Fill(staging_std::_Checked_base(_First), staging_std::_Checked_base(_Last), _Val);
 }
 
-class logic_error : public std::exception
+class logic_error : public staging_std::exception
 {
   public:
-    explicit logic_error(const FnvString& _Message) : std::exception(_Message.data()), _Str(_Message)
+    explicit logic_error(const FnvString& _Message) : staging_std::exception(_Message.data()), _Str(_Message)
     {}
     virtual ~logic_error();
 
@@ -42558,7 +42516,7 @@ class length_error : public logic_error
     virtual ~length_error();
 };
 
-template <class A> struct InsertStringBase : std::_String_base
+template <class A> struct InsertStringBase : staging_std::_String_base
 {
     A _Alval;
     InsertStringBase(A a = A()) : _Alval(a)
@@ -42608,7 +42566,7 @@ template <class _Elem, class _Traits, class _Ax> class InsertStringStorage : pub
     InsertStringStorage& assign(const InsertStringStorage& _Right, size_type _Roff, size_type _Count)
     {
         if (_Right.size() < _Roff)
-            std::_String_base::_Xran();
+            staging_std::_String_base::_Xran();
         size_type _Num = _Right.size() - _Roff;
         if (_Count < _Num)
             _Num = _Count;
@@ -42616,7 +42574,7 @@ template <class _Elem, class _Traits, class _Ax> class InsertStringStorage : pub
             erase((size_type)(_Roff + _Num)), erase(0, _Roff);
         else if (_Grow(_Num))
         {
-            std::_Traits_helper::copy_s<_Traits>(_Myptr(), this->_Myres, _Right._Myptr() + _Roff, _Num);
+            staging_std::_Traits_helper::copy_s<_Traits>(_Myptr(), this->_Myres, _Right._Myptr() + _Roff, _Num);
             _Eos(_Num);
         }
         return *this;
@@ -42624,12 +42582,12 @@ template <class _Elem, class _Traits, class _Ax> class InsertStringStorage : pub
     InsertStringStorage& erase(size_type _Off = 0, size_type _Count = (size_type)-1)
     {
         if (this->_Mysize < _Off)
-            std::_String_base::_Xran();
+            staging_std::_String_base::_Xran();
         if (this->_Mysize - _Off < _Count)
             _Count = this->_Mysize - _Off;
         if (0 < _Count)
         {
-            std::_Traits_helper::move_s<_Traits>(_Myptr() + _Off, this->_Myres - _Off, _Myptr() + _Off + _Count,
+            staging_std::_Traits_helper::move_s<_Traits>(_Myptr() + _Off, this->_Myres - _Off, _Myptr() + _Off + _Count,
                                                  this->_Mysize - _Off - _Count);
             size_type _Newsize = this->_Mysize - _Count;
             _Eos(_Newsize);
@@ -42671,7 +42629,7 @@ template <class _Elem, class _Traits, class _Ax> class InsertStringStorage : pub
         {
             _Elem* _Ptr = _Bx._Ptr;
             if (0 < _Newsize)
-                std::_Traits_helper::copy_s<_Traits>(_Bx._Buf, _BUF_SIZE, _Ptr, _Newsize);
+                staging_std::_Traits_helper::copy_s<_Traits>(_Bx._Buf, _BUF_SIZE, _Ptr, _Newsize);
             this->_Alval.deallocate(_Ptr, this->_Myres + 1);
         }
         this->_Myres = _BUF_SIZE - 1;
@@ -42703,7 +42661,7 @@ template <class _Elem, class _Traits, class _Ax> class InsertStringStorage : pub
             }
         }
         if (0 < _Oldlen)
-            std::_Traits_helper::copy_s<_Traits>(_Ptr, _Newres + 1, _Myptr(), _Oldlen);
+            staging_std::_Traits_helper::copy_s<_Traits>(_Ptr, _Newres + 1, _Myptr(), _Oldlen);
         _Tidy(true);
         _Bx._Ptr = _Ptr;
         this->_Myres = _Newres;
@@ -42712,7 +42670,7 @@ template <class _Elem, class _Traits, class _Ax> class InsertStringStorage : pub
     bool _Grow(size_type _Newsize, bool _Trim = false)
     {
         if (max_size() < _Newsize)
-            std::_String_base::_Xlen();
+            staging_std::_String_base::_Xlen();
         if (this->_Myres < _Newsize)
             _Copy(_Newsize, this->_Mysize);
         else if (_Trim && _Newsize < _BUF_SIZE)
@@ -42730,7 +42688,7 @@ template <class _Elem, class _Traits, class _Ax> class InsertStringStorage : pub
     size_type _Myres;
 };
 
-typedef InsertStringStorage<char, std::char_traits<char>, allocator<char> > InsertString;
+typedef InsertStringStorage<char, staging_std::char_traits<char>, allocator<char> > InsertString;
 template <class A, class B> struct InsertPair
 {
     A first;
@@ -42761,7 +42719,8 @@ template <class _Ty, class _Alloc> struct VectorVal : AuxAlloc<_Alloc>
     _Alloc _Alval;
 };
 
-template <class _Ty, class _Alloc> class Vector : public VectorVal<_Ty, _Alloc>
+// Unit-local view of Vector for the code in namespace s1c10: built on the shared Vector, that code does not compile or does not match.
+template <class _Ty, class _Alloc> class Vector_s1c10 : public VectorVal<_Ty, _Alloc>
 {
   public:
     typedef _Alloc _Alty;
@@ -42807,7 +42766,7 @@ template <class _Ty, class _Alloc> class Vector : public VectorVal<_Ty, _Alloc>
 
 // @fnv 0x00ad1c10
 template <class _Ty, class _Alloc>
-void Vector<_Ty, _Alloc>::FUN_00ad1c10(const_iterator _Where, size_type _Count, const _Ty& _Val)
+void Vector_s1c10<_Ty, _Alloc>::FUN_00ad1c10(const_iterator _Where, size_type _Count, const _Ty& _Val)
 {
     size_type _Capacity = capacity();
 
@@ -42876,18 +42835,12 @@ void Vector<_Ty, _Alloc>::FUN_00ad1c10(const_iterator _Where, size_type _Count, 
     }
 }
 
-typedef Vector<StringPair, allocator<StringPair> > StringPairVector;
+typedef Vector_s1c10<StringPair, allocator<StringPair> > StringPairVector;
 template void StringPairVector::FUN_00ad1c10(StringPairVector::const_iterator, StringPairVector::size_type,
                                              const StringPair&);
 }
 
 extern const char* _bad_alloc_Message;
-struct _Mbstatet
-{
-    unsigned long _Wchar;
-    unsigned short _Byte;
-    unsigned short _State;
-};
 typedef int ptrdiff_t;
 typedef __int64 fpos_t;
 namespace rstd {
@@ -45352,7 +45305,7 @@ struct StringList
 template void rstd::vector<StringList>::FUN_00ad26f0(rstd::vector<StringList>::const_iterator, unsigned int,
                                                      const StringList&);
 
-struct StringPairMemberQ : std::basic_string<char, std::char_traits<char>, std::allocator<char> >
+struct StringPairMemberQ : staging_std::basic_string<char, staging_std::char_traits<char>, staging_std::allocator<char> >
 {
     ~StringPairMemberQ()
     {
@@ -45677,10 +45630,10 @@ class FUN_00ad0630 : public basic_streambufDEB0
 };
 class StreamError : public rstd::exception
 {
-    fnv_00ad47f0::std::StreamMessage message;
+    fnv_00ad47f0::staging_std::StreamMessage message;
 
   public:
-    explicit StreamError(const fnv_00ad47f0::std::StreamMessage& text) : message(text)
+    explicit StreamError(const fnv_00ad47f0::staging_std::StreamMessage& text) : message(text)
     {}
     virtual ~StreamError()
     {}
@@ -45688,7 +45641,7 @@ class StreamError : public rstd::exception
 class StreamFailure : public StreamError
 {
   public:
-    explicit StreamFailure(const fnv_00ad47f0::std::StreamMessage& text) : StreamError(text)
+    explicit StreamFailure(const fnv_00ad47f0::staging_std::StreamMessage& text) : StreamError(text)
     {}
     virtual ~StreamFailure()
     {}
@@ -45935,7 +45888,7 @@ const CharFacet38& FUN_00ad38d0(const Locale38& _Loc)
     }
 }
 
-namespace std {
+namespace staging_std {
 class _Lockit
 {
   public:
@@ -46097,27 +46050,27 @@ template <class F> const locale::facet* _Facetptr<F>::_Psave = 0;
 }
 
 // @fnv 0x00ad4fd0
-const std::codecvt<char, char, int>& __cdecl FUN_00ad4fd0(const std::locale& _Loc)
+const staging_std::codecvt<char, char, int>& __cdecl FUN_00ad4fd0(const staging_std::locale& _Loc)
 {
     {
-        std::_Lockit _Lock(0);
-        const std::locale::facet* _Psave = std::_Facetptr<std::codecvt<char, char, int> >::_Psave;
-        unsigned _Id = std::codecvt<char, char, int>::id;
-        const std::locale::facet* _Pf = _Loc._Getfacet(_Id);
+        staging_std::_Lockit _Lock(0);
+        const staging_std::locale::facet* _Psave = staging_std::_Facetptr<staging_std::codecvt<char, char, int> >::_Psave;
+        unsigned _Id = staging_std::codecvt<char, char, int>::id;
+        const staging_std::locale::facet* _Pf = _Loc._Getfacet(_Id);
         if (_Pf != 0)
             ;
         else if (_Psave != 0)
             _Pf = _Psave;
-        else if (std::codecvt<char, char, int>::_Getcat(&_Psave, &_Loc) == unsigned(-1))
-            throw std::bad_cast();
+        else if (staging_std::codecvt<char, char, int>::_Getcat(&_Psave, &_Loc) == unsigned(-1))
+            throw staging_std::bad_cast();
         else
         {
             _Pf = _Psave;
-            std::_Facetptr<std::codecvt<char, char, int> >::_Psave = _Psave;
-            std::locale::facet* _Pfmod = (std::codecvt<char, char, int>*)_Psave;
+            staging_std::_Facetptr<staging_std::codecvt<char, char, int> >::_Psave = _Psave;
+            staging_std::locale::facet* _Pfmod = (staging_std::codecvt<char, char, int>*)_Psave;
             _Pfmod->_Incref();
             _Pfmod->_Register();
         }
-        return (const std::codecvt<char, char, int>&)*_Pf;
+        return (const staging_std::codecvt<char, char, int>&)*_Pf;
     }
 }

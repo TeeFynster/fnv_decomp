@@ -1,3 +1,4 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/common/scenedata/attributes/hkxsparselyanimatedstringclass.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/attributes/hkxsparselyanimatedstringclass.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -35,14 +36,9 @@ struct S_00e01900_Ref
     }
 };
 
-template <typename T> struct S_00e01900_Array
+template <class T, class A> __forceinline hkArray<T, A>::~hkArray()
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline void _clearAndDeallocate(S_00e01900_Allocator& alloc) throw()
-    {
+        { S_00e01900_Allocator& alloc = S_00e01900_Router::FUN_00c85750().heap();
         T* p = m_data;
         int n = m_iElementCount;
         for (int i = 0; i < n; i++)
@@ -56,12 +52,9 @@ template <typename T> struct S_00e01900_Array
         }
         m_data = 0;
         m_iCapacityState = 0x80000000;
-    }
-    __forceinline ~S_00e01900_Array() throw()
-    {
-        _clearAndDeallocate(S_00e01900_Router::FUN_00c85750().heap());
-    }
-};
+     }
+    
+}
 
 struct S_00e01900_Base
 {
@@ -73,8 +66,8 @@ struct S_00e01900_Base
 
 struct __declspec(novtable) FUN_00e01900 : S_00e01900_Base
 {
-    S_00e01900_Array<S_00e01900_Ref> m_refs;
-    S_00e01900_Array<int> m_auiHeaderValues;
+    hkArray<S_00e01900_Ref> m_refs;
+    hkArray<int> m_auiHeaderValues;
     ~FUN_00e01900() throw();
 };
 

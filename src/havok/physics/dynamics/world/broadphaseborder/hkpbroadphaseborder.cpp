@@ -1,6 +1,11 @@
+#include "../../../../../../include/hkArray.h"
 
 // src/havok/physics/dynamics/world/broadphaseborder/hkpbroadphaseborder.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/broadphaseborder/hkpbroadphaseborder.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkReferencedObject.h"
 
 // @fnv 0x00d0b5d0
 int __cdecl CompareByOffsetD4(const void* apFirst, const void* apSecond)
@@ -8,10 +13,6 @@ int __cdecl CompareByOffsetD4(const void* apFirst, const void* apSecond)
     return *(const char**)((const char*)apFirst + 0xd4) < *(const char**)((const char*)apSecond + 0xd4);
 }
 
-struct hkReferencedObject
-{
-    void removeReference();
-};
 struct Item : hkReferencedObject
 {
     int unk04;
@@ -174,11 +175,6 @@ struct OwnerDest
     void ClearValue(void* p);
 };
 
-struct NodeHdr
-{
-    void FUN_00c905b0();
-};
-
 struct FUN_00d0b530_cls
 {
     int unk00;
@@ -194,7 +190,7 @@ void FUN_00d0b530_cls::FUN_00d0b530(int unused)
 {
     m_0C->FUN_00c91a70(((char*)this - 8) ? (void*)this : 0);
     m_0C->ClearValue(((char*)this - 8) ? (void*)((char*)this + 8) : 0);
-    ((NodeHdr*)((char*)this - 8))->FUN_00c905b0();
+    ((hkReferencedObject*)((char*)this - 8))->removeReference();
 }
 
 struct D0B630Entity;
@@ -254,29 +250,8 @@ void D0B630Collector::FlushDeferredEntities(const void* event)
     }
 }
 
-struct D0B6A0Allocator;
-
-struct D0B6A0MemoryRouter
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    D0B6A0Allocator* m_pStreamAllocator;
-
-    D0B6A0Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-extern "C" D0B6A0MemoryRouter& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 void __cdecl ResizeAudioStream(void* alloc, void* array, int sizeElem);
-
-struct D0B6A0Entity
-{
-    void RetainReference() const;
-};
 
 struct D0B6A0Collidable
 {
@@ -303,32 +278,20 @@ struct D0B6A0Event
     const D0B6A0Collidable* m_kCollidable;
 };
 
-struct D0B6A0EntityArray
+static __forceinline void D0B6A0EntityArray_construct(hkReferencedObject** p, int n, hkReferencedObject* const& e)
 {
-    D0B6A0Entity** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    static void construct(D0B6A0Entity** p, int n, D0B6A0Entity* const& e)
-    {
         for (int i = 0; i < n; i++)
             p[i] = e;
     }
 
-    __forceinline void AddBack(D0B6A0Entity* const& e)
-    {
-        D0B6A0Allocator& alloc = FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&alloc, this, sizeof(D0B6A0Entity*));
-        construct(m_data + m_iElementCount, 1, e);
-        m_iElementCount++;
+static __forceinline void D0B6A0EntityArray_AddBack(hkArrayBase<hkReferencedObject*>& self, hkReferencedObject* const& e)
+{
+        hkMemoryRouter& holder = FUN_00c85750();
+        if (self.m_iElementCount == self.getCapacity())
+            ResizeAudioStream(holder.m_heap, (&self), sizeof(hkReferencedObject*));
+        D0B6A0EntityArray_construct(self.m_data + self.m_iElementCount, 1, e);
+        self.m_iElementCount++;
     }
-};
 
 class D0B6A0Primary
 {
@@ -336,7 +299,7 @@ class D0B6A0Primary
     virtual void vfunc00();
     virtual void vfunc04();
     virtual void vfunc08();
-    virtual void entityAdded(D0B6A0Entity* entity);
+    virtual void entityAdded(hkReferencedObject* entity);
 
     int unk04;
     int unk08;
@@ -363,7 +326,7 @@ class D0B6A0Collector : public D0B6A0Primary, public D0B6A0Secondary
     int unk2C;
     int unk30;
     bool m_deferAdds;
-    D0B6A0EntityArray m_deferredEntities;
+    hkArrayBase<hkReferencedObject*> m_deferredEntities;
 };
 
 // Handles an event: if the collidable's m_type is 1, gets its owner entity and either defers it into m_deferredEntities or calls entityAdded.
@@ -373,13 +336,13 @@ void D0B6A0Collector::HandleEvent(const D0B6A0Event& event)
     const D0B6A0Collidable* collidable = event.m_kCollidable;
     if (collidable->m_type == 1)
     {
-        D0B6A0Entity* entity = static_cast<D0B6A0Entity*>(collidable->getOwner());
+        hkReferencedObject* entity = static_cast<hkReferencedObject*>(collidable->getOwner());
         if (entity)
         {
             if (m_deferAdds)
             {
-                m_deferredEntities.AddBack(entity);
-                entity->RetainReference();
+                D0B6A0EntityArray_AddBack(m_deferredEntities, entity);
+                entity->addReference();
             }
             else
             {
@@ -389,26 +352,9 @@ void D0B6A0Collector::HandleEvent(const D0B6A0Event& event)
     }
 }
 
+class BSAudio;
 namespace fnv_00d0bb20 {
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
 
 extern int DAT_010cd3c4;
@@ -465,13 +411,16 @@ void FUN_00d0bb20_cls::Destroy()
         pEntry++;
         i--;
     } while (i != 0);
-    AudioHolder* pAudioHolder = (AudioHolder*)FUN_00c85750();
-    AudioAllocator* pAudioAllocator = pAudioHolder->m_pAllocator;
+    hkMemoryRouter* pAudioHolder = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryAllocator* pAudioAllocator = reinterpret_cast<hkMemoryAllocator*>(pAudioHolder->m_heap);
     m_iArrayLength = i;
     unsigned int uiCapBits = m_uCapBits;
     if ((uiCapBits & 0x80000000u) == 0)
     {
-        pAudioAllocator->FreeArray(m_pData, (uiCapBits & 0x3fffffffu) * 4);
+        // This allocator uses virtual slot 0x10; the shared declaration is nonvirtual.
+        typedef void (__thiscall* FreeArrayFunction)(hkMemoryAllocator*, void*, unsigned int);
+        FreeArrayFunction* vtable = *reinterpret_cast<FreeArrayFunction**>(pAudioAllocator);
+        vtable[4](pAudioAllocator, m_pData, (uiCapBits & 0x3fffffffu) * 4);
     }
     unsigned int* puiCap = &m_uCapBits;
     m_pData = 0;

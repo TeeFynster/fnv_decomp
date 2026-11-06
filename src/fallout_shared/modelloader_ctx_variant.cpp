@@ -1,29 +1,16 @@
 
 // modelloader_ctx_variant.cpp: context variant of src/fallout_shared/modelloader.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
-#include "modelloader_verified_packet.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiRenderer.h"
 NiRenderer* FUN_0043c4b0();
 const NiFixedString& FUN_00448a80();
 
 NiRenderer* FUN_0043c4b0();
 const NiFixedString& FUN_00448a80();
-
-class AutoMemContext
-{
-    int unk00;
-
-  public:
-    AutoMemContext(int, bool, const char*, int);
-    ~AutoMemContext();
-};
-
-class NiFixedString
-{
-  public:
-    const char* m_str;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
 
 class H_A100
 {

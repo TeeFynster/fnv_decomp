@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 // src/staging/blk_00c60000_od_o2_nood_variant_iso_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00c60000_od_o2_nood_variant.cpp that match byte for byte only
 // with VC9 SP1 and /MT /O2 /GS /EHsc /Gy (unit lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
@@ -8,19 +10,62 @@
 // src/staging/blk_00c60000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#define FNV_VEC4_SIMD
+#include "../../include/Vec4.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/hkpRigidBody.h"
+#include "../../include/hkpCollidable.h"
+#include "../../include/SETTING_VALUE.h"
+#include "../../include/Setting.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/Bound.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/NiColorA.h"
+#include "../../include/hkpCdBody.h"
+#include "../../include/hkpShape.h"
+#include "../../include/hkpShapeInfo.h"
+#include "../../include/BSDecalPlacementVectorExtraData.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/NiObject.h"
+#include "../../include/hkMatrix4.h"
+#include "../../include/hkVector4.h"
+// 0x00c62890 is the NiTArray<NiPointer<NiAVObject>, NiTMallocInterface<NiPointer<NiAVObject> > > destructor (RTTI at 0x010c377c).
+#include "../../include/NiTArray.h"
+#include "../../include/BSPSysSimpleColorModifier.h"
+#include "../../include/NiPSysModifier.h"
+#include "../../include/NiBinaryExtraData.h"
+#include "../../include/NiPSysCylinderEmitter.h"
+#include "../../include/NiPSysVolumeEmitter.h"
+#include "../../include/NiPSysPositionModifier.h"
+#include "../../include/NiPSysData.h"
 extern "C" void* g_01204388;
 struct FUN_00c600f0_Class
 {
     void* __thiscall FUN_00c600f0();
-};
-struct NiStream;
-struct NiPSysModifier
-{
-    virtual void LinkObject(NiStream&);
-};
-struct BSPSysSimpleColorModifier : public NiPSysModifier
-{
-    void FUN_00c60910(NiStream& stream);
 };
 struct FUN_00c60930_class
 {
@@ -74,12 +119,6 @@ struct FUN_00c614e0_Class
     char FUN_00a998e0(int arg);
     char FUN_00c614e0(int arg);
 };
-struct NiFixedString;
-struct NiAVObject
-{
-    void SetName(NiFixedString const&);
-    void FUN_00c61610();
-};
 extern NiFixedString* DAT_012043a0;
 extern "C" void* g_012043a4;
 struct FUN_00c61810_class
@@ -90,19 +129,6 @@ struct FUN_00c61820_class
 {
     void* FUN_00c61820(int);
 };
-struct NiStream;
-struct NiPSysVolumeEmitter
-{
-    void LoadBinary(NiStream&);
-    void LoadBinaryFromStream(NiStream* stream);
-};
-struct NiStream;
-struct NiObject
-{
-    void FUN_00c62140();
-    void LinkObject(NiStream&);
-    void FUN_00c61f30(NiStream& stream);
-};
 struct FUN_00c61f60_class
 {
     void __thiscall FUN_00c2f4f0(int);
@@ -112,12 +138,6 @@ struct FUN_00c61f80_cls
 {
     void FUN_00c31b60(void* apParam);
     void FUN_00c61f80(void* apParam);
-};
-struct NiAVObject;
-struct NiPSysCylinderEmitter
-{
-    bool FUN_00c31b80(NiAVObject*);
-    bool FUN_00c61fa0(NiAVObject*);
 };
 struct FUN_00c627e0_Class
 {
@@ -145,14 +165,6 @@ struct FUN_00c63aa0_class
 };
 void __cdecl FUN_00c63c30(int, int);
 void __cdecl CallWithSameArgumentTwice(int a);
-struct NiBinaryExtraData
-{
-    void LinkObject(void*);
-};
-struct BSDecalPlacementVectorExtraData : NiBinaryExtraData
-{
-    void LinkToObject(void*);
-};
 struct FUN_00c644d0_Class
 {
     unsigned char Equals(const char*);
@@ -163,24 +175,13 @@ struct FUN_00c64600_Class
 {
     void* __thiscall GetGlobalPointer();
 };
-struct NiStream;
-struct NiObjectBase
-{
-    bool RegisterStreamables(NiStream&);
-};
-struct FUN_00c64b70 : NiObjectBase
+struct FUN_00c64b70 : NiObject
 {
     bool RegisterStreamables(NiStream& stream);
 };
 struct FUN_00c64fc0_class
 {
     int __thiscall GetThisAddress(int);
-};
-struct NiStream;
-struct NiExtraData
-{
-    void LinkObject(NiStream& stream);
-    void FUN_00c65160(NiStream& stream);
 };
 struct C00c541e0
 {
@@ -194,12 +195,6 @@ struct FUN_00c657e0_class
 };
 extern "C" void NiFreeAlias(void*);
 extern int DAT_010c377c;
-struct NiTPointerList_00c62890
-{
-    void* m_pObjectItem;
-    void* m_pNext;
-    void FUN_00c62890();
-};
 extern "C" void NiFreeAlias(void*);
 extern int DAT_010c3a08;
 struct FUN_00c65680_Class
@@ -221,10 +216,6 @@ struct FUN_00c613a0_Class
     void operator delete(void* p, unsigned int size);
 };
 extern "C" void NiFree(void*);
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00c63210_Class
 {
@@ -232,20 +223,12 @@ struct FUN_00c63210_Class
     void* m_iWordAt04;
     void* __thiscall FUN_00c63210(int flag);
 };
-struct FUN_00a7b300_shell
-{
-    void __thiscall FUN_00a7b300();
-};
 struct FUN_00c632f0_class
 {
     void* __thiscall FUN_00c632f0(unsigned int flags);
 };
 void __cdecl operator delete(void*, int);
 struct CloningProcess;
-struct NiPSysModifierCopy : NiPSysModifier
-{
-    void CopyMemberData(NiPSysModifier* dst, CloningProcess& proc);
-};
 struct FUN_00c63840_Class : NiPSysModifier
 {
     void __thiscall CopyModifierWithValue(NiPSysModifier* dst, CloningProcess* proc);
@@ -253,11 +236,7 @@ struct FUN_00c63840_Class : NiPSysModifier
 struct SStream;
 struct SObj;
 void __cdecl CallAnimCallback(SStream*, SObj*);
-struct NiPSysModifier_00c31950
-{
-    void __thiscall FUN_00c31950(void*);
-};
-struct FUN_00c63970_class : NiPSysModifier_00c31950
+struct FUN_00c63970_class : NiPSysModifier
 {
     void __thiscall FUN_00c63970(void* stream);
 };
@@ -281,11 +260,6 @@ struct FUN_00c64c30_Class
     bool __thiscall FUN_00c64c30(int a);
 };
 extern int DAT_010c3384;
-struct NiPSysPositionModifier
-{
-    NiPSysPositionModifier();
-    ~NiPSysPositionModifier();
-};
 struct FUN_00c60240 : NiPSysPositionModifier
 {
     int m_vt;
@@ -294,21 +268,12 @@ struct FUN_00c60240 : NiPSysPositionModifier
     float m_w[4];
     FUN_00c60240();
 };
-struct NiStream;
-struct RgbaColor
-{
-    void SaveBinary(NiStream&);
-};
-struct FUN_00c60950_class : NiPSysModifier_00c31950
+struct FUN_00c60950_class : NiPSysModifier
 {
     void FUN_00c60950(NiStream* stream);
 };
 int _sprintf_s(char*, unsigned int, const char*, ...);
 size_t _strlen(const char*);
-struct P03MM
-{
-    void* __thiscall Allocate(unsigned int);
-};
 struct FUN_00c62090_Class
 {
     char* __thiscall BuildAttachTypeString(const char* name, int type);
@@ -317,14 +282,6 @@ extern GlobalObject_00a7b610 g_012043b0;
 struct FUN_00c63320_Class
 {
     GlobalObject_00a7b610* __thiscall FUN_00c63320();
-};
-struct NiStream
-{
-    void SerializeString(const char* s);
-};
-struct NiExtraDataSaveHelper
-{
-    void SaveBinary(NiStream& s);
 };
 struct FUN_00c65210_class
 {
@@ -368,13 +325,6 @@ struct FUN_00c63260_class
     unsigned short m_uiY;
     FUN_00c63260_class(unsigned short x, unsigned short y);
 };
-struct NiPoint3_ZERO
-{
-    int x;
-    int y;
-    int z;
-};
-extern NiPoint3_ZERO _NiPoint3_ZERO;
 extern int _DAT_011f4270;
 extern int _DAT_011f4274;
 extern int DAT_010c37fc;
@@ -384,10 +334,6 @@ struct FUN_00c63330 : NiPSysPositionModifier
 };
 int strcpy_s(char* dst, unsigned int size, const char* src);
 size_t strlen(const char*);
-struct MemoryManagerAllocHelper
-{
-    void* Allocate(unsigned int);
-};
 struct FUN_00c64780_Class
 {
     void* m_iWordAt00;
@@ -400,10 +346,6 @@ struct FUN_00c65710_Class
     void* m_iWordAt00;
     void* m_iWordAt04;
     void* __thiscall FUN_00c65710(unsigned int flags);
-};
-struct IsEqualHelper
-{
-    bool __thiscall IsEqual(NiObject* arg);
 };
 struct FUN_00c60000_Class
 {
@@ -429,19 +371,11 @@ struct FUN_00c60700_Data
     float value40;
     float value44;
 };
-struct FUN_00c60700_Class : NiPSysModifierCopy
+struct FUN_00c60700_Class : NiPSysModifier
 {
     void FUN_00c60700(NiPSysModifier* dst, CloningProcess& proc);
 };
 template <class T> void __cdecl ReadBinaryValue(NiStream& stream, T& value);
-struct NiPSysModifierLoadBinary_StandIn
-{
-    void LoadBinary(NiStream& stream);
-};
-struct NiColorALoadBinary_StandIn
-{
-    void LoadBinary(NiStream& stream);
-};
 struct FUN_00c60850_Class : public NiPSysModifier
 {
     void FUN_00c60850(NiStream& stream);
@@ -485,10 +419,6 @@ struct FUN_00c612b0_Class : NiAVObject, A51BF0Base
 };
 extern NiFixedString DAT_011f49e0;
 NiAVObject* __cdecl FUN_00c61510();
-struct FUN_00a7b330_shell
-{
-    void FUN_00a7b330(void* a, void* b);
-};
 struct FUN_00c61830_class
 {
     void FUN_00c61830(void* a, void* b);
@@ -502,11 +432,7 @@ struct FUN_00c61ba0_class : FUN_00c62390_class
     void ForwardToBase(void* a, void* b, void* c);
 };
 template <class T> void ReadBinaryValue(NiStream&, T&);
-struct NiPSysModifierStub
-{
-    virtual void LoadBinary(NiStream&);
-};
-struct FUN_00c63900_class : NiPSysModifierStub
+struct FUN_00c63900_class : NiPSysModifier
 {
     void LoadModifierData(NiStream& stream);
 };
@@ -746,18 +672,11 @@ struct S_00c62cc0_Locals
     unsigned int unk44;
 };
 // FUN_00c634b0: thiscall (this in ecx), 2 stack params (a1 pointer, unsigned short index).
-class XVec12
-{
-  public:
-    float m_00;
-    float m_04;
-    float m_08;
-};
 class XSub30
 {
   public:
     unsigned int unk00;
-    unsigned int Call0045bb20(XVec12* out);
+    unsigned int Call0045bb20(NiPoint3* out);
 };
 class XItem12
 {
@@ -792,17 +711,10 @@ class FUN_00c634b0_cls
     XSub30 m_30;
     void FUN_00c634b0(XObj70* a1, unsigned short idx);
 };
-struct NiPoint3_c
-{
-    unsigned int x;
-    unsigned int y;
-    unsigned int z;
-};
-extern NiPoint3_c NiPoint3_ZERO;
 struct FUN_00c63780_c
 {
     int pad[9];
-    NiPoint3_c v;
+    NiPoint3 v;
     void ResetVector();
 };
 void* __cdecl FUN_00aa13e0(unsigned int size);
@@ -934,13 +846,6 @@ struct FUN_00c65180_Class
 
     unsigned char __thiscall VisitEntries(FUN_00c65180_VTable* p);
 };
-struct MyColorA
-{
-    float r;
-    float g;
-    float b;
-    float a;
-};
 struct Point3ParameterData
 {
     float unk00;
@@ -951,39 +856,6 @@ struct Point3ParameterData
     float unk14;
     float unk18;
 };
-struct NiPSysData
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    MyColorA* m_pkParticleColors;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    unsigned short m_usNumParticles;
-    short pad52;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    Point3ParameterData* m_pkParticleInfo;
-};
 struct BSPSysSimpleColorModifierCand
 {
     int unk00;
@@ -992,9 +864,9 @@ struct BSPSysSimpleColorModifierCand
     int unk0c;
     int unk10;
     int unk14;
-    MyColorA m_kColor1;
-    MyColorA m_kColor2;
-    MyColorA m_kColor3;
+    NiColorA m_kColor1;
+    NiColorA m_kColor2;
+    NiColorA m_kColor3;
     float m_fFadeInPercent;
     float m_fFadeOutPercent;
     float m_fColor1End;
@@ -1004,58 +876,15 @@ struct BSPSysSimpleColorModifierCand
 
     void UpdateParticleColors(float fTime, NiPSysData* pkData);
 };
-class NiObjectC60
-{
-  public:
-    NiObjectC60();
-    virtual ~NiObjectC60();
-
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem);
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-};
-class NiCloningProcessC60;
-class NiOwnerC60
-{
-  public:
-    void CopyMemberData(NiObjectC60* pkDest, NiCloningProcessC60& kCloning);
-    NiObjectC60* CloneObject(NiCloningProcessC60& kCloning);
-};
-struct NiTPrimitiveArray_unsigned_int_
-{
-    unsigned int AddFirstEmpty(const unsigned int& value);
-};
+// The unused clone declarations targeted BSPSysSimpleColorModifier (constructor 0x00c60240), not NiObject.
 struct FUN_00c615a0_class
 {
     int unk00;
     int unk04;
     int unk08;
     unsigned int unk0c;
-    void FUN_00a99b20(NiTPrimitiveArray_unsigned_int_* values);
-    void AppendGlobalAndFormatValues(NiTPrimitiveArray_unsigned_int_* values);
+    void FUN_00a99b20(NiTPrimitiveArray<unsigned int>* values);
+    void AppendGlobalAndFormatValues(NiTPrimitiveArray<unsigned int>* values);
 };
 extern "C" void* g_012043a4;
 extern const char str_0109df4c[];
@@ -1388,183 +1217,10 @@ struct PointLoader
     void ReadPointsFromFile(unsigned int formID, int* value, AlignedOwnerNode* tmp, AlignedOwnerNode* owner);
 };
 extern "C" void _ReadWriteBarrier();
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-struct hkVector4
-{
-    __m128 m_vComponents;
-};
 extern float DAT_01267e30;
-struct hkpShapeInfo
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    unsigned int m_flags;
-};
-struct hkpShape
-{
-    int unk00;
-    int unk04;
-    hkpShapeInfo* m_info;
-};
-struct hkpCdBody
-{
-    const hkpShape* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const hkpCdBody* m_parent;
-
-    const hkpCdBody* getRootCollidable() const
-    {
-        const hkpCdBody* body = this;
-        while (body->m_parent)
-        {
-            body = body->m_parent;
-        }
-        return body;
-    }
-};
-struct hkpCollidable : hkpCdBody
-{
-    signed char m_iOwnerOffset;
-    char unk11;
-    short unk12;
-    int m_broadPhaseId;
-    char m_type;
-    char unk19;
-    short unk1a;
-    unsigned int m_uiCollisionFilterData;
-
-    void* getOwner() const
-    {
-        return (void*)((char*)this + m_iOwnerOffset);
-    }
-};
-struct hkpRigidBody
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    hkVector4 m_kTranslationalVelocity;
-
-    const hkVector4& getLinearVelocity() const
-    {
-        return m_kTranslationalVelocity;
-    }
-};
 __forceinline hkpRigidBody* hkGetRigidBody(const hkpCollidable* collidable)
 {
-    if (collidable->m_type == 1)
+    if (collidable->m_kBroadPhaseHandle.m_type == 1)
     {
         return (hkpRigidBody*)collidable->getOwner();
     }
@@ -2240,27 +1896,10 @@ struct RayCaster
     virtual World* GetWorld();
     bool FUN_00c696d0(Query* query);
 };
-// hkMatrix4-style copy: assign four 16-byte columns and return *this.
-struct hkVector4CD60
-{
-    __m128 m_vComponents;
-    void operator=(const hkVector4CD60& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-struct hkMatrix4CD60
-{
-    hkVector4CD60 m_kColumn0;
-    hkVector4CD60 m_kColumn1;
-    hkVector4CD60 m_kColumn2;
-    hkVector4CD60 m_kColumn3;
-    hkMatrix4CD60& FUN_00c6cd60(const hkMatrix4CD60& other);
-};
 struct SseBlock
 {
-    __m128 m_00;
-    __m128 m_10;
+    LocalM128 m_00;
+    LocalM128 m_10;
     float m_20;
     float m_24;
     float m_28;
@@ -2272,20 +1911,20 @@ struct SseBlock
 // Reconstruction adapted from an unverified 2026-10-26 contribution by another contributor.
 extern "C"
 {
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_setr_ps(float, float, float, float);
-    __m128 _mm_setzero_ps(void);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_sqrt_ss(__m128);
-    void _mm_store_ss(float*, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
+using ::_mm_add_ss;
+using ::_mm_andnot_ps;
+using ::_mm_cmpeq_ss;
+using ::_mm_mul_ps;
+using ::_mm_mul_ss;
+using ::_mm_rsqrt_ss;
+using ::_mm_set_ss;
+using ::_mm_setr_ps;
+using ::_mm_setzero_ps;
+using ::_mm_shuffle_ps;
+using ::_mm_sqrt_ss;
+using ::_mm_store_ss;
+using ::_mm_sub_ps;
+using ::_mm_sub_ss;
 }
 extern "C" double __cdecl cos(_In_ double _X);
 extern "C" inline float cosf(_In_ float _X)
@@ -2306,52 +1945,6 @@ extern const float DAT_01011d78, DAT_01017718, DAT_01016248;
 extern const double DAT_0102f248, DAT_01066808, DAT_01020758, DAT_0102fc70, DAT_01023128;
 extern const char* DAT_0109b220;
 extern "C" long(__stdcall* DAT_00fdf1c4)(long*);
-union Vec4
-{
-    __m128 m_vComponents;
-    signed char m_ai8[16];
-    __forceinline Vec4()
-    {}
-    __forceinline Vec4(const Vec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline float& operator()(int i)
-    {
-        return reinterpret_cast<float*>(&m_vComponents)[i];
-    }
-    __forceinline void operator=(const Vec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setSub4(const Vec4& a, const Vec4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline float length3() const
-    {
-        float result;
-        __m128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-        sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), sum);
-        _mm_store_ss(&result, _mm_sqrt_ss(sum));
-        return result;
-    }
-    __forceinline void normalize3()
-    {
-        __m128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-        sum = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), sum);
-        __m128 inv = _mm_rsqrt_ss(sum);
-        __m128 zero = _mm_set_ss(DAT_01011d78);
-        __m128 three = _mm_set_ss(DAT_01017718);
-        __m128 half = _mm_set_ss(DAT_01016248);
-        __m128 isZero = _mm_cmpeq_ss(sum, zero);
-        __m128 r = _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(sum, inv), inv));
-        r = _mm_andnot_ps(isZero, _mm_mul_ss(_mm_mul_ss(half, inv), r));
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(r, r, 0), m_vComponents);
-    }
-};
 struct FxString
 {
     const char* m_kHandle;
@@ -2433,24 +2026,23 @@ __forceinline FxObject** Properties(FxNode* pkNode)
 struct SceneObject
 {
     unsigned unk00, unk04, unk08, unk0c;
-    struct Point
-    {
-        float x, y, z, w;
-    };
-    Point origin, end;
+    NiPoint3 origin;
+    float originW;
+    NiPoint3 end;
+    float endW;
 };
 __forceinline Vec4 DifferenceOf(const SceneObject* o)
 {
     Vec4 v;
-    v.m_vComponents = _mm_sub_ps(_mm_setr_ps(o->origin.x, o->origin.y, o->origin.z, o->origin.w),
-                                 _mm_setr_ps(o->end.x, o->end.y, o->end.z, o->end.w));
+    v.m_vComponents = _mm_sub_ps(_mm_setr_ps(o->origin.x, o->origin.y, o->origin.z, o->originW),
+                                 _mm_setr_ps(o->end.x, o->end.y, o->end.z, o->endW));
     return v;
 }
 __forceinline Vec4 DifferenceOfMid(const SceneObject* o)
 {
     Vec4 v;
-    __m128 a = _mm_setr_ps(o->origin.x, o->origin.y, o->origin.z, o->origin.w);
-    __m128 b = _mm_setr_ps(o->end.x, o->end.y, o->end.z, o->end.w);
+    LocalM128 a = _mm_setr_ps(o->origin.x, o->origin.y, o->origin.z, o->originW);
+    LocalM128 b = _mm_setr_ps(o->end.x, o->end.y, o->end.z, o->endW);
     _ReadWriteBarrier();
     v.m_vComponents = _mm_sub_ps(a, b);
     return v;
@@ -2530,10 +2122,6 @@ __forceinline VfxSource* FindSource(FxObject** ppkProperties)
     }
     return pkSource;
 }
-struct Setting
-{
-    float* FUN_00403e20();
-};
 extern Setting DAT_01267d98, DAT_01267de0;
 struct EffectOutput
 {
@@ -2565,7 +2153,7 @@ struct SRC
 {
     int m_00, m_04, m_08, m_0c;
     float m_10, m_14, m_18, m_1c;
-    __m128 m_20;
+    LocalM128 m_20;
 };
 struct DST
 {
@@ -2601,38 +2189,10 @@ DST* __cdecl FUN_00c74d50(DST* dst, const SRC* src)
     return dst;
 }
 extern "C" void _ReadWriteBarrier();
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float xx, float yy, float zz)
-    {
-        x = xx;
-        y = yy;
-        z = zz;
-    }
-    NiPoint3 operator*(float scale) const
-    {
-        return NiPoint3(x * scale, y * scale, z * scale);
-    }
-};
 inline const NiPoint3& ZeroPoint()
 {
-    return reinterpret_cast<const NiPoint3&>(NiPoint3_ZERO);
+    return NiPoint3::ZERO;
 }
-struct Bound
-{
-    union
-    {
-        struct
-        {
-            float x, y, z, radius;
-        };
-        float coordinates[4];
-    };
-};
 extern Bound DAT_011f4288;
 extern float DAT_010c72bc, DAT_011b0194;
 static float DAT_01267bcc;
@@ -2798,11 +2358,7 @@ struct __declspec(align(16)) AuxInfo
 };
 struct ShapeInput;
 struct ShapeOwner;
-struct MemoryManagerLocal
-{
-    void* FUN_00aa3e40(unsigned int);
-};
-extern MemoryManagerLocal DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 struct FUN_00c6d1e0 : ShapeRef
 {
     int unk14, unk18, unk1c;
@@ -3292,41 +2848,36 @@ struct ShapeOwner
     void FUN_00c72410(ShapeInput* input);
 };
 namespace P064Intrinsics {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    signed char m128_i8[16];
-};
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_div_ss(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_cmple_ps(__m128, __m128);
-    __m128 _mm_sqrt_ss(__m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_rcp_ps(__m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_setzero_ps();
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    void _mm_store_ss(float*, __m128);
-    float _mm_cvtss_f32(__m128);
-    int _mm_movemask_ps(__m128);
+using ::_mm_mul_ps;
+using ::_mm_load_ps;
+using ::_mm_add_ps;
+using ::_mm_sub_ps;
+using ::_mm_add_ss;
+using ::_mm_sub_ss;
+using ::_mm_mul_ss;
+using ::_mm_div_ss;
+using ::_mm_shuffle_ps;
+using ::_mm_xor_ps;
+using ::_mm_and_ps;
+using ::_mm_andnot_ps;
+using ::_mm_cmpeq_ss;
+using ::_mm_cmple_ps;
+using ::_mm_sqrt_ss;
+using ::_mm_rsqrt_ss;
+using ::_mm_rcp_ps;
+using ::_mm_set_ss;
+using ::_mm_set_ps1;
+using ::_mm_setzero_ps;
+using ::_mm_unpackhi_ps;
+using ::_mm_store_ss;
+using ::_mm_cvtss_f32;
+using ::_mm_movemask_ps;
 }
 }
-typedef P064Intrinsics::__m128 P064Quad;
+typedef P064Intrinsics::LocalM128 P064Quad;
 struct P064Bool
 {
     char value;
@@ -3696,7 +3247,7 @@ __declspec(noinline) float P064Controller::FUN_00c755e0(int index, P064Quaternio
 }
 union CharacterVector
 {
-    hkVector4 vector;
+    LocalM128 vector;
     signed char bytes[16];
     float& component(int index)
     {
@@ -3704,7 +3255,7 @@ union CharacterVector
     }
     void set(float a, float b, float c, float d)
     {
-        vector.m_vComponents = _mm_setr_ps(a, b, c, d);
+        vector = _mm_setr_ps(a, b, c, d);
     }
 };
 struct ParticleArgument
@@ -4557,7 +4108,7 @@ struct AimController_c70060
 union S00c70550_Vector
 {
     __int8 m_i8[16];
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     struct
     {
         float x, y, z, w;
@@ -4914,7 +4465,7 @@ class FUN_00c70550_cls
 };
 union C74570_Vec
 {
-    __m128 q;
+    LocalM128 q;
     char bytes[16];  // the real xmmintrin __m128 also overlays __int8 m128_i8[16]
 };
 struct C74570_Ctrl
@@ -5254,8 +4805,8 @@ struct SupportListener
 extern int DAT_01034ec4;
 struct S00c6e680_C6RayInput
 {
-    __m128 from;
-    __m128 to;
+    LocalM128 from;
+    LocalM128 to;
     bool enableShapeCollectionFilter;
     unsigned int filterInfo;
     unsigned int unk28;
@@ -5266,7 +4817,7 @@ struct S00c6e680_C6RayInput
 };
 struct S00c6e680_C6RayOutput
 {
-    __m128 normal;
+    LocalM128 normal;
     float hitFraction;
     int m_uiExtraInfo;
     int unk18;
@@ -5281,7 +4832,7 @@ struct S00c6e680_C6RayOutput
 };
 struct S00c6e680_C6RayOutputPlain
 {
-    __m128 normal;
+    LocalM128 normal;
     float hitFraction;
     int m_uiExtraInfo;
     int unk18;
@@ -5322,7 +4873,7 @@ struct S00c6e680_C6PickData
     S00c6e680_C6RayOutput output;
     void* unk80;
     char unk84[12];
-    __m128 unk90;
+    LocalM128 unk90;
     unsigned int unkA0;
     S00c6e680_C6Collector* collectorPointer;
     unsigned int unkA8;
@@ -5420,7 +4971,7 @@ struct S00c6e680_Ctrl
 };
 struct S00c6e680_Class : S00c6e680_Ctrl
 {
-    void FUN_00c6e680(int index, __m128* position);
+    void FUN_00c6e680(int index, LocalM128* position);
 };
 struct VectorData
 {
@@ -5434,25 +4985,10 @@ struct VectorData
     float unk1c;
     P064Quad m_20;
 };
-struct Vec4Sink
-{
-    void __thiscall FUN_00c7f640(int arg, P064Quad* value);
-};
-void __cdecl FUN_00c6d620(VectorData* data, int arg, Vec4Sink* callee);
+void __cdecl FUN_00c6d620(VectorData* data, int arg, Vec4* callee);
 
 namespace N {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int8 m128_i8[16];
-    __int16 m128_i16[8];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int8 m128_u8[16];
-    unsigned __int16 m128_u16[8];
-    unsigned __int32 m128_u32[4];
-};
+typedef ::__m128 LocalM128;
 extern "C"
 {
 }
@@ -5460,9 +4996,12 @@ extern "C"
 
 extern float DAT_012677d8;
 
+// Keep this aggregate for the by-value temporary in FUN_00c68750: VC9 /GS
+// emits its original 88-byte body with the cookie. Using hkVector4 (which has
+// user-declared constructors) drops the cookie and produces 66 bytes instead.
 struct __declspec(align(16)) ScaledVector
 {
-    N::__m128 m_vComponents;
+    N::LocalM128 m_vComponents;
 
     void set(float x, float y, float z, float w = 0.0f)
     {
@@ -5473,17 +5012,10 @@ struct __declspec(align(16)) ScaledVector
     }
 };
 
-struct SourcePoint
-{
-    float x;
-    float y;
-    float z;
-};
-
 void __stdcall FUN_00c66c00(ScaledVector* v);
 
 // @fnv 0x00c68750
-void __stdcall FUN_00c68750(const SourcePoint* p)
+void __stdcall FUN_00c68750(const NiPoint3* p)
 {
     ScaledVector v;
     v.set(p->x * DAT_012677d8, p->y * DAT_012677d8, p->z * DAT_012677d8);

@@ -1,80 +1,59 @@
+// src/havok/physics/collide/agent/convexagent/gjk/hkpgskfagent.cpp
+// Functions are listed by their @fnv annotations.
 
-// src/havok/physics/collide/agent/convexagent/gjk/hkpgskfagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/convexagent/gjk/hkpgskfagent.cpp).
-// Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../../../../../include/hkpGskfAgent.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+// This placement form has no deallocation callback: the original factory
+// constructs directly in storage owned by the Havok allocator.
+struct GskAgentStorage
+{
+    void* p;
+    explicit GskAgentStorage(void* storage) : p(storage) {}
+};
+inline void* __cdecl operator new(std::size_t, GskAgentStorage storage) { return storage.p; }
 
-void __cdecl FUN_00dacc00();
+inline hkpCollisionDispatcher::CollisionAgentFunctionTable::CollisionAgentFunctionTable() {}
+
 void __cdecl TestGsk();
 void __cdecl FUN_00dac450();
 void __cdecl FUN_00daf8e0();
 
-struct FUN_00dacc70_vt
-{
-    void (*m_pVirtualFunction0)();
-    void (*m_pVirtualFunction1)();
-    void (*m_pVirtualFunction2)();
-    void (*m_pVirtualFunction3)();
-    unsigned char b0;
-    unsigned char b1;
-};
-
-// Assigns four function pointers to the object's vtable slots and clears its two byte fields.
 // @fnv 0x00dacc70
-void __cdecl InitVtable(FUN_00dacc70_vt* p)
+__declspec(noinline) void __cdecl hkpGskfAgent::InitAgentFunc(hkpCollisionDispatcher::CollisionAgentFunctionTable& f)
 {
-    p->m_pVirtualFunction0 = (void (*)())FUN_00dacc00;
-    p->m_pVirtualFunction1 = (void (*)())TestGsk;
-    p->m_pVirtualFunction2 = (void (*)())FUN_00dac450;
-    p->m_pVirtualFunction3 = (void (*)())FUN_00daf8e0;
-    p->b0 = 0;
-    p->b1 = 0;
+    f.m_pCreateFunc = m_pVirtualFunction0;
+    f.m_pQueryPenetrationsFunc = (hkpCollisionDispatcher::GetPenetrationsFunc)TestGsk;
+    f.m_pGetPenetrationsFunc = (hkpCollisionDispatcher::GetClosestPointsFunc)FUN_00dac450;
+    f.m_pLinearCastFunc = (hkpCollisionDispatcher::LinearCastFunc)FUN_00daf8e0;
+    f.m_bIsFlipped = false;
+    f.m_bIsPredictive = false;
 }
 
 void __cdecl ReleaseAllEntries(void*, void*, void*);
 
-struct FUN_00dacaf0_vt
-{
-    void(__thiscall* dtor)(void*, int);
-};
-
-struct FUN_00dacaf0
-{
-    FUN_00dacaf0_vt* vt;  // +0x00
-    void* field4;         // +0x04
-    void* field8;         // +0x08
-    char pad[0x24];       // +0x0c..0x2f
-    char field30[0x10];   // +0x30
-    void cleanup(void* arg);
-};
-
-// Calls ReleaseAllEntries with field30, field8 and arg, then invokes the virtual destructor on this with flag 1.
 // @fnv 0x00dacaf0
-void FUN_00dacaf0::cleanup(void* arg)
+void hkpGskfAgent::cleanup(hkpConstraintOwner& arg)
 {
-    ReleaseAllEntries(&field30[0], field8, arg);
-    vt->dtor(this, 1);
+    ReleaseAllEntries(&m_kContactManifold, m_pContactManager, &arg);
+    delete this;
 }
 
 void __cdecl FUN_00dae340(void*, int);
 
-struct hkpGskfAgent
-{
-    void FUN_00dacb20(unsigned short id);
-};
-
-// Scans up to count entries at this+0x36 for a matching id and, if found, calls FUN_00dae340 with this+0x30 and the entry index.
 // @fnv 0x00dacb20
-void hkpGskfAgent::FUN_00dacb20(unsigned short id)
+void hkpGskfAgent::removePoint(hkContactPointId id)
 {
-    int count = *(unsigned char*)((char*)this + 0x32);
+    int count = m_kContactManifold.m_usNumContactPoints;
     int i = 0;
     if (count > 0)
     {
-        char* p = (char*)this + 0x36;
+        char* p = (char*)&m_kContactManifold.m_akContactPoints[0].m_iOwnerObjectOffset;
         do
         {
             if (*(unsigned short*)p == id)
             {
-                FUN_00dae340((char*)this + 0x30, i);
+                FUN_00dae340(&m_kContactManifold, i);
                 return;
             }
             ++i;
@@ -83,95 +62,38 @@ void hkpGskfAgent::FUN_00dacb20(unsigned short id)
     }
 }
 
-struct FUN_00dacb60_class
-{
-    unsigned char m_pad00[0x32];
-    unsigned char m_uiItemCount;
-    unsigned char m_pad01[3];
-
-    struct Potential
-    {
-        unsigned short m_uiFilterValue;
-        unsigned char m_auiShapeKeys[6];
-    };
-
-    Potential m_potentials[256];
-
-    void __thiscall AddPotential(unsigned short value);
-};
-
 // @fnv 0x00dacb60
-void __thiscall FUN_00dacb60_class::AddPotential(unsigned short value)
+void hkpGskfAgent::CommitPotentialContactPoint(hkContactPointId value)
 {
-    int count = m_uiItemCount;
+    int count = m_kContactManifold.m_usNumContactPoints;
     int i;
 
     for (i = 0; i < count; ++i)
     {
-        if (m_potentials[i].m_uiFilterValue == 0xffff)
+        if (m_kContactManifold.m_akContactPoints[i].m_iOwnerObjectOffset == 0xffff)
         {
-            m_potentials[i].m_uiFilterValue = value;
+            m_kContactManifold.m_akContactPoints[i].m_iOwnerObjectOffset = value;
             return;
         }
     }
 }
 
-extern int DAT_010d5224;
-
-struct FUN_00dabf10
-{
-    void* m_pVtbl;
-    char m_b0[44];
-    int m_i0;
-    FUN_00dabf10(int, int, int);
-    ~FUN_00dabf10();
-};
-
-struct FUN_00dacbd0 : FUN_00dabf10
-{
-    FUN_00dacbd0(int a, int b, int c);
-    ~FUN_00dacbd0();
-};
-
-// Initializes the derived object: sets its vtable pointer to DAT_010d5224 and clears m_i0 after the base constructor runs.
 // @fnv 0x00dacbd0
-FUN_00dacbd0::FUN_00dacbd0(int a, int b, int c) : FUN_00dabf10(a, b, c)
+__declspec(noinline) hkpGskfAgent::hkpGskfAgent(const hkpCdBody& a, const hkpCdBody& b, hkpContactMgr* c) : hkpGskBaseAgent(a, b, c)
 {
-    m_pVtbl = &DAT_010d5224;
-    m_i0 = 0;
+    *(int*)&m_kContactManifold = 0;
 }
 
-struct hkSlotDACB
-{
-    unsigned char m_00;
-    unsigned char m_01;
-    short m_iOwnerObjectOffset;
-    int m_04;
-};
-
-class hkObjDACB
-{
-  public:
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
-    int unk20, unk24, unk28, unk2C;
-    short unk30;
-    unsigned char m_numSlots;
-    unsigned char unk33;
-    hkSlotDACB m_slots[8];
-
-    void ClearSlotById(short id);
-};
-
 // @fnv 0x00dacba0
-void hkObjDACB::ClearSlotById(short id)
+void hkpGskfAgent::MarkContactPointAsZombie(hkContactPointId id)
 {
-    for (int i = 0; i < m_numSlots; i++)
+    for (int i = 0; i < m_kContactManifold.m_usNumContactPoints; i++)
     {
-        hkSlotDACB& kSlot = m_slots[i];
+        ConvexContactManifold::AlignedPairData& kSlot = m_kContactManifold.m_akContactPoints[i];
         if (kSlot.m_iOwnerObjectOffset == id)
         {
-            kSlot.m_00 = 0;
-            kSlot.m_01 = 0;
+            kSlot.m_ucDimensionA = 0;
+            kSlot.m_ucDimensionB = 0;
             return;
         }
     }
@@ -217,65 +139,24 @@ struct Dsrc
     Dvec4* f08;
 };
 
-struct Drecv
-{
-    int unk00;
-    int unk04;
-    int f08;
-    int f0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int f20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int f30;
-
-    void FUN_00daccd0(Dsrc* a1, Dsrc* a2, Dsrc* a3, int a4);
-};
-
 void ProcessCollision(Dtask* task, int* ctx1, int* ctx2, int* node, int* a5, int* a6, int a7);
 
-// Fills a Dtask from a1, a2, a3 and f08, calls FUN_00cb22f0 on its sub with a1->f08 and a2->f08, then ProcessCollision with the task, tmp, f0c, f30, f20 and a4.
 // @fnv 0x00daccd0
-void Drecv::FUN_00daccd0(Dsrc* a1, Dsrc* a2, Dsrc* a3, int a4)
+void hkpGskfAgent::ProcessAgent(const hkpCdBody& bodyA, const hkpCdBody& bodyB, const GskAgentInput& input, WorldOperationEntry& result)
 {
+    Dsrc* a1 = (Dsrc*)&bodyA;
+    Dsrc* a2 = (Dsrc*)&bodyB;
+    Dsrc* a3 = (Dsrc*)&input;
+    int a4 = (int)&result;
     Dctx ctx;
     Dtask res;
     res.f08 = 0;
     res.f00 = a1;
     res.f04 = a2;
-    res.f10 = f08;
+    res.f10 = (int)m_pContactManager;
     res.f0c = a3;
     res.sub.FUN_00cb22f0(a1->f08, a2->f08);
-    ProcessCollision(&res, &ctx.f0, &ctx.f1, &f0c, &f30, &f20, a4);
-}
-
-class hkMemoryAllocatorDACC
-{
-  public:
-    virtual ~hkMemoryAllocatorDACC() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterDACC
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorDACC* m_pStreamAllocator;
-    hkMemoryAllocatorDACC& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-namespace hkRouterDACC {
-extern "C" hkMemoryRouterDACC& __cdecl FUN_00c85750() throw();
+    ProcessCollision(&res, &ctx.f0, &ctx.f1, (int*)m_pAccess, (int*)&m_kContactManifold, (int*)&m_vSeparatingNormal, a4);
 }
 
 struct hkAllocHeaderDACC
@@ -284,44 +165,39 @@ struct hkAllocHeaderDACC
     unsigned short allocationSize;
 };
 
+// Read the router heap slot as its allocator type, preserving the original aliasing.
+inline hkMemoryAllocator& getAgentHeap(hkMemoryRouter& router)
+{
+    return **reinterpret_cast<hkMemoryAllocator**>(&router.m_heap);
+}
+
 inline void* allocateAgentDACC(int nbytes)
 {
-    void* b = hkRouterDACC::FUN_00c85750().heap().AllocateMemoryBlock(nbytes);
+    void* b = getAgentHeap(*(&hkMemoryRouter::getInstance())).blockAlloc(nbytes);
     static_cast<hkAllocHeaderDACC*>(b)->allocationSize = (unsigned short)nbytes;
     return b;
 }
 
-struct GskInitDACC : FUN_00dacbd0
-{
-    FUN_00dabf10* __thiscall FUN_00dacbd0(int, int, int);
-    FUN_00dabf10* __thiscall FUN_00dabf10(int, int, int);
-};
-
-// If c is nonzero, allocates 0x80 bytes and calls FUN_00dacbd0; otherwise allocates 0x30 bytes and calls FUN_00dabf10; returns the constructed object.
 // @fnv 0x00dacc00
-FUN_00dabf10* __cdecl FUN_00dacc00(int a, int b, int unused, int c)
+hkpCollisionAgent* __cdecl hkpGskfAgent::m_pVirtualFunction0(const hkpCdBody& a, const hkpCdBody& b, const CollisionAgentContext& unused, hkpContactMgr* c)
 {
     if (c)
-        return static_cast<GskInitDACC*>(allocateAgentDACC(0x80))->FUN_00dacbd0(a, b, c);
-    return static_cast<GskInitDACC*>(allocateAgentDACC(0x30))->FUN_00dabf10(a, b, 0);
+        return ::new (GskAgentStorage(allocateAgentDACC(0x80))) hkpGskfAgent(a, b, c);
+    return ::new (GskAgentStorage(allocateAgentDACC(0x30))) hkpGskBaseAgent(a, b, 0);
 }
 
-__declspec(noinline) void __cdecl InitVtable(FUN_00dacc70_vt* p);
-
-typedef FUN_00dacc70_vt D41FD0AgentFuncs;
-
-struct D41FD0CollisionDispatcher
+// The approved dispatcher header does not yet declare this registration entry.
+struct GskAgentRegistration
 {
-    void registerCollisionAgent(D41FD0AgentFuncs& funcs, int a, int b);
+    void registerCollisionAgent(hkpCollisionDispatcher::CollisionAgentFunctionTable& funcs, int a, int b);
 };
 
-// Builds an agent function table with b0 and b1 zeroed and InitVtable, and registers it with the dispatcher for the pair 0x12, 0x12.
 // @fnv 0x00dacca0
-void __cdecl FUN_00dacca0(D41FD0CollisionDispatcher* dispatcher)
+void __cdecl hkpGskfAgent::RegisterCapsuleCapsuleAgent(hkpCollisionDispatcher* dispatcher)
 {
-    D41FD0AgentFuncs funcs;
-    funcs.b0 = 0;
-    funcs.b1 = 0;
-    InitVtable(&funcs);
-    dispatcher->registerCollisionAgent(funcs, 0x12, 0x12);
+    hkpCollisionDispatcher::CollisionAgentFunctionTable funcs;
+    funcs.m_bIsFlipped = false;
+    funcs.m_bIsPredictive = false;
+    InitAgentFunc(funcs);
+    ((GskAgentRegistration*)dispatcher)->registerCollisionAgent(funcs, 0x12, 0x12);
 }

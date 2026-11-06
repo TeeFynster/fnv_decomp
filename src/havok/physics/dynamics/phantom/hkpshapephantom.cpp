@@ -2,7 +2,16 @@
 // src/havok/physics/dynamics/phantom/hkpshapephantom.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/phantom/hkpshapephantom.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpShapePhantom.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkTransform.h"
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkpCollidable.h"
+
+typedef unsigned short hkUint16;
+typedef short hkInt16;
+typedef unsigned int hkUint32;
+typedef unsigned long hkUlong;
 
 struct FUN_00c9ea00__VirtualObject
 {
@@ -70,58 +79,6 @@ void FUN_00c9e820()
     FreeListenerArrays();
 }
 
-template <class T> class hkArrayD4CE
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    hkArrayD4CE() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
-
-struct hkVector4D4CE
-{
-    hkReal x, y, z, w;
-};
-
-struct hkTransformD4CE
-{
-    hkVector4D4CE m_kColumn0;
-    hkVector4D4CE m_kColumn1;
-    hkVector4D4CE m_kColumn2;
-    hkVector4D4CE m_vTranslation;
-};
-
-class hkpShapeD4CE;
-
-struct hkpCollidableD4CE
-{
-    const hkpShapeD4CE* m_pCollisionShape;
-    hkUint32 m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const void* m_parent;
-    char m_pad10[0xc];
-    hkUint32 m_uiCollisionFilterData;
-    char m_pad20[0x50];
-
-    void SetUserInfo(hkUint32 uiInfo)
-    {
-        m_uiCollisionFilterData = uiInfo;
-    }
-};
-
-struct hkBoolD4CE
-{
-    char m_cBooleanValue;
-    hkBoolD4CE& operator=(bool b)
-    {
-        m_cBooleanValue = (char)b;
-        return *this;
-    }
-};
-
 class FUN_00c9ea40
 {
   public:
@@ -130,10 +87,11 @@ class FUN_00c9ea40
     hkInt16 m_sReferenceCount;
     void* m_pOwningWorld;
     hkUlong m_ulUserData;
-    hkpCollidableD4CE m_kCollidable;
-    char m_pad80[0xe0];
+    hkpCollidable m_kCollidable;
+    // The remaining world-object, phantom, and motion-state fields start at +0x60.
+    char m_pad60[0x100];
 
-    FUN_00c9ea40(const hkpShapeD4CE* pkShape, const hkTransformD4CE& kTransform) throw();
+    FUN_00c9ea40(const hkpShape* pkShape, const hkTransform& kTransform) throw();
 };
 
 struct hkpCollisionDetailD4CE
@@ -145,10 +103,10 @@ struct hkpCollisionDetailD4CE
 class FUN_00d4ce10 : public FUN_00c9ea40
 {
   public:
-    hkArrayD4CE<hkpCollisionDetailD4CE> m_kCollisionDetails;
-    hkBoolD4CE m_bOrderDirty;
+    hkArray<hkpCollisionDetailD4CE> m_kCollisionDetails;
+    hkBool m_bOrderDirty;
 
-    FUN_00d4ce10(const hkpShapeD4CE* pkShape, const hkTransformD4CE& kTransform,
+    FUN_00d4ce10(const hkpShape* pkShape, const hkTransform& kTransform,
                  hkUint32 uiCollisionFilterInfo) throw();
     virtual ~FUN_00d4ce10() throw();
 };
@@ -157,12 +115,12 @@ typedef char fnv_check_d4ce10[(sizeof(FUN_00d4ce10) == 0x170) ? 1 : -1];
 
 // Constructs the object from a shape and transform, clears the bool flag, and stores the collision filter info in the collidable.
 // @fnv 0x00d4ce10
-FUN_00d4ce10::FUN_00d4ce10(const hkpShapeD4CE* pkShape, const hkTransformD4CE& kTransform,
+FUN_00d4ce10::FUN_00d4ce10(const hkpShape* pkShape, const hkTransform& kTransform,
                            hkUint32 uiCollisionFilterInfo) throw()
     : FUN_00c9ea40(pkShape, kTransform)
 {
     m_bOrderDirty = false;
-    m_kCollidable.SetUserInfo(uiCollisionFilterInfo);
+    m_kCollidable.m_kBroadPhaseHandle.m_uiCollisionFilterData = uiCollisionFilterInfo;
 }
 
 struct S00c9e830_Operation

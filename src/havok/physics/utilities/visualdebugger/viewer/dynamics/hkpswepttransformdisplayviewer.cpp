@@ -1,13 +1,11 @@
+#include "../../../../../../../include/hkArray.h"
 
 // src/havok/physics/utilities/visualdebugger/viewer/dynamics/hkpswepttransformdisplayviewer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/visualdebugger/viewer/dynamics/hkpswepttransformdisplayviewer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkpSweptTransformDisplayViewer
-{
-    int FindEntryIndex(int);
-    void RemoveWorldData(int);
-    void FUN_00d64950(int a);
-};
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkpSweptTransformDisplayViewer.h"
 
 // Calls FindEntryIndex on the viewer at this-0x20 with a; if the returned index is non-negative, calls RemoveWorldData with it.
 // @fnv 0x00d64950
@@ -39,33 +37,13 @@ struct D63FF0Entry
     void* m_key;
 };
 
-struct D63FF0Container
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    D63FF0Entry** m_entries;
-    int m_iNumberOfEntries;
-
-    int FindEntryIndex(void* key) const;
-};
-
 // Scans m_entries for an entry whose m_key equals key and returns its index, or -1 if none matches.
 // @fnv 0x00d63ff0
-int D63FF0Container::FindEntryIndex(void* key) const
+int hkpSweptTransformDisplayViewer::FindEntryIndex(void* key) const
 {
     for (int i = 0; i < m_iNumberOfEntries; i++)
     {
-        if (m_entries[i]->m_key == key)
+        if (((D63FF0Entry*)m_entries[i])->m_key == key)
             return i;
     }
     return -1;
@@ -100,34 +78,25 @@ struct SweptVObj
     virtual int v5(void* p, int g, int z);
 };
 
-class SweptTransformItem
-{
-  public:
-    int unk00;
-    int unk04;
-    SweptList** m_08;
-
-    void FUN_00d64120(SweptArg* a1);
-};
-
 extern "C" int g_ptr_0x1268fd0;
 
 // @fnv 0x00d64120
-void SweptTransformItem::FUN_00d64120(SweptArg* a1)
+// This callback receives the entity-listener subobject.
+void __fastcall FUN_00d64120(hkpEntityListener* self, void*, SweptArg* a1)
 {
     if (*(int*)&a1->m_10 == 0)
     {
         return;
     }
-    hkpSweptTransformDisplayViewer* viewer = (hkpSweptTransformDisplayViewer*)((char*)this - 0x28);
+    hkpSweptTransformDisplayViewer* viewer = (hkpSweptTransformDisplayViewer*)((char*)self - 0x28);
     int iIndex = viewer->FindEntryIndex(a1->m_08);
     if (iIndex < 0)
     {
         return;
     }
-    SweptList* list = this->m_08[iIndex];
+    SweptList* list = (SweptList*)((hkpSweptTransformDisplayViewer::WorldDataList*)((char*)self + 8))->m_data[iIndex];
     void* key = (void*)&a1->m_11;
-    SweptVObj* pVObj = *(SweptVObj**)((char*)this - 0x10);
+    SweptVObj* pVObj = *(SweptVObj**)((char*)self - 0x10);
     pVObj->v5(key, g_ptr_0x1268fd0, 0);
 
     int i = 0;
@@ -157,7 +126,7 @@ void SweptTransformItem::FUN_00d64120(SweptArg* a1)
 
     key = (void*)&a1->m_12;
     int g2 = g_ptr_0x1268fd0;
-    pVObj = *(SweptVObj**)((char*)this - 0x10);
+    pVObj = *(SweptVObj**)((char*)self - 0x10);
     pVObj->v5(key, g2, 0);
 
     i = 0;
@@ -219,41 +188,23 @@ struct FUN_00d647b0_Pool
     int m_uiItemCount;
 };
 
-struct FUN_00d647b0_Listener
-{
-    int unk00;
-};
-
-typedef void(__thiscall* FUN_00d647b0_Handler)(FUN_00d647b0_Listener* self, int item);
-
-struct FUN_00d647b0_cls
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    FUN_00d647b0_Pool* m_kNodePool;
-
-    void NotifyItems();
-};
+typedef void(__thiscall* FUN_00d647b0_Handler)(hkpSweptTransformDisplayViewer* self, int item);
 
 // @fnv 0x00d647b0
-void FUN_00d647b0_cls::NotifyItems()
+void hkpSweptTransformDisplayViewer::NotifyItems()
 {
-    if (m_kNodePool != 0)
+    // init receives the hkProcess subobject, eight bytes into the viewer.
+    if ((*(FUN_00d647b0_Pool**)((char*)this + 0x1c)) != 0)
     {
         int i = 0;
-        if (m_kNodePool->m_uiItemCount > i)
+        if ((*(FUN_00d647b0_Pool**)((char*)this + 0x1c))->m_uiItemCount > i)
         {
-            FUN_00d647b0_Listener* listener = (FUN_00d647b0_Listener*)((char*)this - 8);
+            hkpSweptTransformDisplayViewer* listener = (hkpSweptTransformDisplayViewer*)((char*)this - 8);
             do
             {
-                ((FUN_00d647b0_Handler)FUN_00d64650)(listener, m_kNodePool->m_items[i]);
+                ((FUN_00d647b0_Handler)FUN_00d64650)(listener, (*(FUN_00d647b0_Pool**)((char*)this + 0x1c))->m_items[i]);
                 i++;
-            } while (i < m_kNodePool->m_uiItemCount);
+            } while (i < (*(FUN_00d647b0_Pool**)((char*)this + 0x1c))->m_uiItemCount);
         }
     }
 }
@@ -288,40 +239,7 @@ template <int SIZE> __forceinline void SweptMemCpyOne(void* dst, const void* src
         ((unsigned int*)dst)[i] = ((const unsigned int*)src)[i];
 }
 
-template <typename T> struct SweptArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    __forceinline ~SweptArray() throw()
-    {
-        _clearAndDeallocate(FUN_00c85750().heap());
-    }
-
-    __forceinline void clear() throw()
-    {
-        m_iElementCount = 0;
-    }
-    __forceinline void _clearAndDeallocate(SweptHeap& alloc) throw()
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    __forceinline void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            SweptMemCpyOne<sizeof(T)>(m_data + index, m_data + m_iElementCount);
-    }
-};
 
 struct SweptEntityListener
 {
@@ -338,10 +256,15 @@ struct SweptWorld
     void AddPostSimulationListener(SweptPostSimListener* listener);
 };
 
+template<> __forceinline hkArray<unsigned long>::~hkArray() {
+ SweptHeap& alloc=FUN_00c85750().heap();m_iElementCount=0;
+ if((m_iCapacityState&0x80000000)==0)alloc.ReturnMemory(m_data,(m_iCapacityState&0x3fffffff)*sizeof(unsigned long));
+ m_data=0;m_iCapacityState=0x80000000;
+}
 struct SweptWorldData
 {
     SweptWorld* m_pOwningWorld;
-    SweptArray<unsigned long> m_kEntityIDs;
+    hkArray<unsigned long> m_kEntityIDs;
 
     static void operator delete(void* p, unsigned int nbytes)
     {
@@ -349,94 +272,64 @@ struct SweptWorldData
     }
 };
 
-struct SweptViewerBase
+__forceinline void hkpSweptTransformDisplayViewer::WorldDataList::removeAt(int index)
 {
-    virtual ~SweptViewerBase();
-    int m_04, m_08, m_0c, m_10, m_14, m_18, m_1c, m_20, m_24;
-};
-
-struct SweptViewer : SweptViewerBase, SweptEntityListener, SweptPostSimListener
-{
-    SweptArray<SweptWorldData*> m_kWorldDataList;
-
-    void ClearSweptEntry(int index);
-    void RemoveWorldData(int index);
-};
+    m_iElementCount--;
+    if (m_iElementCount != index)
+        SweptMemCpyOne<sizeof(SweptWorldData*)>(m_data + index, m_data + m_iElementCount);
+}
 
 // Unregisters this viewer from the world at index, calls ClearSweptEntry, deletes the world data and removes it from the array.
 // @fnv 0x00d64800
-void SweptViewer::RemoveWorldData(int index)
+void hkpSweptTransformDisplayViewer::RemoveWorldData(int index)
 {
-    m_kWorldDataList[index]->m_pOwningWorld->AddEntityListener(this);
-    m_kWorldDataList[index]->m_pOwningWorld->AddPostSimulationListener(this);
+    m_kWorldDataList[index]->m_pOwningWorld->AddEntityListener((SweptEntityListener*)(hkpEntityListener*)this);
+    m_kWorldDataList[index]->m_pOwningWorld->AddPostSimulationListener((SweptPostSimListener*)(hkpWorldPostSimulationListener*)this);
     ClearSweptEntry(index);
     delete m_kWorldDataList[index];
     m_kWorldDataList.removeAt(index);
 }
 
+class BSAudio;
 namespace fnv_00d648c0 {
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void*, unsigned int) throw();
-};
-struct AudioHolder
-{
-    int unk00, unk04, unk08, unk0c;
-    AudioAllocator* m_pAllocator;
-};
-struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
 extern int DAT_010d1918, DAT_010d18f8, DAT_010d18e8, DAT_010d18cc, DAT_010d18bc, DAT_010ccf7c;
-struct AudioArray
+__forceinline void ResetWorldData(hkpSweptTransformDisplayViewer::WorldDataList& data)
 {
-    void* m_pData;
-    int m_iArrayLength;
-    unsigned int m_uCapBits;
-    void Reset()
-    {
-        m_pData = 0;
-        m_uCapBits = 0x80000000u;
-    }
-};
-struct SweptViewer
-{
-    int m_vptr00, unk04, m_vptr08, unk0c, unk10, unk14, unk18, unk1c, m_vptr20, m_vptr24, m_vptr28, m_vptr2c;
-    AudioArray m_ppData;
-    void RemoveWorldData(int);
-    void FUN_00ddcc60_tail();
-    void Destroy();
-};
+    data.m_data = 0;
+    data.m_iCapacityState = 0x80000000u;
+}
+
+// The shared class has no declaration for this explicit destruction body.
 // @fnv 0x00d648c0
-void SweptViewer::Destroy()
+void __fastcall Destroy(hkpSweptTransformDisplayViewer* self)
 {
-    m_vptr00 = (int)&DAT_010d1918;
-    m_vptr08 = (int)&DAT_010d18f8;
-    m_vptr20 = (int)&DAT_010d18e8;
-    m_vptr28 = (int)&DAT_010d18cc;
-    m_vptr2c = (int)&DAT_010d18bc;
-    int i = m_ppData.m_iArrayLength - 1;
+    int i = self->m_kWorldDataList.m_iElementCount - 1;
+    *(int*)(self) = (int)&DAT_010d1918;
+    *(int*)((char*)self + 0x08) = (int)&DAT_010d18f8;
+    *(int*)((char*)self + 0x20) = (int)&DAT_010d18e8;
+    *(int*)((char*)self + 0x28) = (int)&DAT_010d18cc;
+    *(int*)((char*)self + 0x2c) = (int)&DAT_010d18bc;
     if (i >= 0)
     {
         do
         {
-            RemoveWorldData(i);
+            self->RemoveWorldData(i);
             --i;
         } while (i >= 0);
     }
-    AudioHolder* h = (AudioHolder*)FUN_00c85750();
-    AudioAllocator* a = h->m_pAllocator;
-    m_ppData.m_iArrayLength = 0;
-    unsigned int uiCapBits = m_ppData.m_uCapBits;
+    hkMemoryRouter* h = (hkMemoryRouter*)FUN_00c85750();
+    hkMemoryAllocator* a = reinterpret_cast<hkMemoryAllocator*>(h->m_heap);
+    self->m_kWorldDataList.m_iElementCount = 0;
+    unsigned int uiCapBits = self->m_kWorldDataList.m_iCapacityState;
+    // FreeArray is nonvirtual in the shared header; the game dispatches through slot 4.
     if ((uiCapBits & 0x80000000u) == 0)
-        a->FreeArray(m_ppData.m_pData, (uiCapBits & 0x3fffffffu) * 4);
-    m_ppData.Reset();
-    m_vptr2c = (int)&DAT_010ccf7c;
-    m_vptr28 = (int)"pFU";
-    return FUN_00ddcc60_tail();
+        ((void(__thiscall*)(hkMemoryAllocator*, void*, unsigned int))(*(void***)a)[4])(
+            a, self->m_kWorldDataList.m_data, (uiCapBits & 0x3fffffffu) * 4);
+    ResetWorldData(self->m_kWorldDataList);
+    *(int*)((char*)self + 0x2c) = (int)&DAT_010ccf7c;
+    *(int*)((char*)self + 0x28) = (int)"pFU";
+    return self->FUN_00ddcc60();
 }
 }  // namespace fnv_00d648c0
 
@@ -446,6 +339,7 @@ struct __declspec(align(16)) D64020Vector4
     float m_f[4];
 };
 
+// local form of hkRotation: 0x00d64020 needs implicit rotation construction; shared form gives 261 bytes vs exe 252.
 struct __declspec(align(16)) D64020Rotation
 {
     D64020Vector4 m_kColumn0;
@@ -569,216 +463,60 @@ struct D64020Constraint
     D64020Vector4 m_localPivot;
 };
 
-class D64020Primary
-{
-  public:
-    virtual void unk00();
-
-    D64020DisplayHandler* m_pDisplayHandler;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class D64020Secondary
-{
-  public:
-    virtual void DisplayConstraintPivots(D64020Constraint* constraint);
-};
-
-class D64020Viewer : public D64020Primary, public D64020Secondary
-{
-  public:
-    virtual void DisplayConstraintPivots(D64020Constraint* constraint);
-};
-
 // Builds two D64020Transforms from the constraint's rotation and pivot pairs and submits them to the display handler for rendering.
 // @fnv 0x00d64020
-void D64020Viewer::DisplayConstraintPivots(D64020Constraint* constraint)
+// This callback receives the post-simulation-listener subobject.
+void __fastcall DisplayConstraintPivots(hkpWorldPostSimulationListener* self, void*, D64020Constraint* constraint)
 {
+    hkpSweptTransformDisplayViewer* viewer = (hkpSweptTransformDisplayViewer*)((char*)self - 0x2c);
     D64020Transform frame;
 
     frame.m_rotation.set(constraint->m_kRotationA);
     *(__m128*)frame.m_vTranslation.m_f = _mm_sub_ps(*(const __m128*)constraint->m_kPivotA.m_f,
                                                     D64020RotateDir(frame.m_rotation, constraint->m_localPivot));
-    m_pDisplayHandler->displayFrame(frame, (unsigned long)constraint + 0x11, g_D64020Color);
+    ((D64020DisplayHandler*)viewer->unk10)->displayFrame(frame, (unsigned long)constraint + 0x11, g_D64020Color);
 
     frame.m_rotation.set(constraint->m_kRotationB);
     *(__m128*)frame.m_vTranslation.m_f = _mm_sub_ps(*(const __m128*)constraint->m_kPivotB.m_f,
                                                     D64020RotateDir(frame.m_rotation, constraint->m_localPivot));
-    m_pDisplayHandler->displayFrame(frame, (unsigned long)constraint + 0x12, g_D64020Color);
+    ((D64020DisplayHandler*)viewer->unk10)->displayFrame(frame, (unsigned long)constraint + 0x12, g_D64020Color);
 }
 
-// sub ecx,8; jmp FUN_00d649c0 == MSVC adjustor thunk for the secondary base's override.
-struct PrimaryBase
+// The shared header does not declare the deleting-destructor entry points.
+// Keep their ABI bridges as functions rather than duplicate viewer classes.
+// @fnv 0x00d649c0
+void* __fastcall DeleteSweptTransformViewer(hkpSweptTransformDisplayViewer* self, void*, unsigned int flags)
 {
-    virtual void FUN_00d64980();
-    int unk04;
-};
+    fnv_00d648c0::Destroy(self);
+    if (flags & 1)
+        FUN_00c85750().heap().ReleaseBlock(self, self->m_usMemSizeAndFlags);
+    return self;
+}
 
-struct SecondaryBase
-{
-    virtual void FUN_00d64980();
-};
-
-struct Derived : PrimaryBase, SecondaryBase
-{
-    Derived();
 // @fnv 0x00d64980
-    virtual void FUN_00d64980();
-};
-
-Derived::Derived()
-{}
-
-// FUN_00d64990 : MSVC this-adjusting thunk  (sub ecx, 0x28 ; jmp <impl>)
-//
-// Two bases declare the same virtual, so the derived class overrides one
-// function for both of them and the compiler emits one adjustor thunk per
-// secondary base.  The first base is padded to 40 bytes so the second
-// base lands at +0x28.  The override is DECLARED ONLY, so this thunk
-// is the single defined function symbol carrying the name FUN_00d64990; a defined
-// key function makes the vftable that references the thunk be emitted here.
-struct A1_00d64990
+__declspec(naked) void FUN_00d64980()
 {
-    A1_00d64990();
-    virtual void FUN_00d64990();
-    char pad[0x24];
-};
-
-struct A2_00d64990
-{
-    A2_00d64990();
-// @fnv 0x00d64990
-    virtual void FUN_00d64990();
-};
-
-struct Own_00d64990 : A1_00d64990, A2_00d64990
-{
-    Own_00d64990();
-    virtual void key_fn();  // key function - defined, so the vftable is emitted
-    void FUN_00d64990();    // the shared override - declared only
-};
-
-Own_00d64990::Own_00d64990()
-{}
-void Own_00d64990::key_fn()
-{}
-
-Own_00d64990* make_00d64990()
-{
-    static Own_00d64990 o;
-    return &o;
+    __asm { sub ecx, 8 }
+    __asm { jmp DeleteSweptTransformViewer }
 }
 
-struct D649A0Primary
+// @fnv 0x00d64990
+__declspec(naked) void FUN_00d64990()
 {
-    virtual void vfunc00();
-    virtual void FUN_00d649a0();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-};
-
-struct D649A0Secondary
-{
-    virtual void FUN_00d649a0();
-};
-
-struct D649A0Object : D649A0Primary, D649A0Secondary
-{
-    D649A0Object();
+    __asm { sub ecx, 28h }
+    __asm { jmp DeleteSweptTransformViewer }
+}
 
 // @fnv 0x00d649a0
-    virtual void FUN_00d649a0();
-};
-
-D649A0Object::D649A0Object()
-{}
-
-// FUN_00d649b0 : MSVC this-adjusting thunk  (sub ecx, 0x20 ; jmp <impl>)
-//
-// Two bases declare the same virtual, so the derived class overrides one
-// function for both of them and the compiler emits one adjustor thunk per
-// secondary base.  The first base is padded to 32 bytes so the second
-// base lands at +0x20.  The override is DECLARED ONLY, so this thunk
-// is the single defined function symbol carrying the name FUN_00d649b0; a defined
-// key function makes the vftable that references the thunk be emitted here.
-struct A1_00d649b0
+__declspec(naked) void FUN_00d649a0()
 {
-    A1_00d649b0();
-    virtual void FUN_00d649b0();
-    char pad[0x1c];
-};
-
-struct A2_00d649b0
-{
-    A2_00d649b0();
-// @fnv 0x00d649b0
-    virtual void FUN_00d649b0();
-};
-
-struct Own_00d649b0 : A1_00d649b0, A2_00d649b0
-{
-    Own_00d649b0();
-    virtual void key_fn();  // key function - defined, so the vftable is emitted
-    void FUN_00d649b0();    // the shared override - declared only
-};
-
-Own_00d649b0::Own_00d649b0()
-{}
-void Own_00d649b0::key_fn()
-{}
-
-Own_00d649b0* make_00d649b0()
-{
-    static Own_00d649b0 o;
-    return &o;
+    __asm { sub ecx, 2ch }
+    __asm { jmp DeleteSweptTransformViewer }
 }
 
-struct S_00d649c0_Heap
+// @fnv 0x00d649b0
+__declspec(naked) void FUN_00d649b0()
 {
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-
-struct S_00d649c0_Router
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    S_00d649c0_Heap* m_pStreamAllocator;
-    __forceinline S_00d649c0_Heap& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-struct FUN_00d649c0
-{
-    virtual ~FUN_00d649c0() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    FUN_00d649c0();
-    static void operator delete(void* p, unsigned int)
-    {
-        FUN_00d649c0* b = static_cast<FUN_00d649c0*>(p);
-        FUN_00c85750().heap().ReleaseBlock(p, b->m_usMemSizeAndFlags);
-    }
-};
-
-// @fnv 0x00d649c0
-FUN_00d649c0::FUN_00d649c0()
-{}
+    __asm { sub ecx, 20h }
+    __asm { jmp DeleteSweptTransformViewer }
+}

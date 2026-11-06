@@ -2,6 +2,11 @@
 
 #include "creature_decls.h"
 
+#include "../../../include/NiControllerManager.h"
+#include "../../../include/TES.h"
+#include "../../../include/TESActorBase.h"
+#include "../../../include/TESCreature.h"
+
 // @fnv 0x008d4ff0
 void Creature::LoadGame(BGSLoadFormBuffer* buffer)
 {
@@ -16,18 +21,22 @@ float Creature::CalculateRunSpeed()
     float fRunSpeed = 0.0f;
     typedef bool(__thiscall * IsOverencumberedFn)(Creature*);
     if (!((IsOverencumberedFn)(*(void***)(this))[214])(this))
-        fRunSpeed = actorValues.GetCurrentActorValue(21) * 1.1 * Creature::GetAnimationSpeedMultiplier(kAnimGroupRun);
+        fRunSpeed = GetCurrentActorValue((ActorValue::Index)21) * 1.1 * Creature::GetAnimationSpeedMultiplier(ANIM_GROUP_ENUM_ANIM_GROUP_MOVE_FORWARD);
     return fRunSpeed;
 }
 
+// 0x00897910 is Actor::GetAnimGroup (4 parameters, ret 0x10); this call site pushes only two.
+struct CreatureAnimGroupCall
+{
+    unsigned short GetAnimGroup(ANIM_GROUP_ENUM, InventoryStackRecord*);
+};
 // @fnv 0x008d4f70
 float Creature::GetAnimationSpeedMultiplier(ANIM_GROUP_ENUM group)
 {
     if (!((CreatureAnimationAccess*)this)->GetAnimData())
         return 32.0f;
-    typedef unsigned short (__thiscall Actor::*GroupFn)(ANIM_GROUP_ENUM, InventoryStackRecord*);
     unsigned short animGroup =
-        (this->*reinterpret_cast<GroupFn>(&Actor::GetAnimGroup))(group, pAnimData->GetWeaponInfo(1, 0));
+        ((CreatureAnimGroupCall*)this)->GetAnimGroup(group, ((CreatureProcessAccess*)m_pBaseProcess)->GetWeaponInfo(1, 0));
     return ((CreatureAnimationAccess*)this)->GetAnimData()->GetGroupSection(animGroup);
 }
 
@@ -36,10 +45,8 @@ struct FUN_008d4a80_shell : public Creature
     int FUN_008d4a80(int);
 };
 
+#include "../../../include/ActorValue.h"
 namespace ActorValue {
-enum Index
-{
-};
 bool __cdecl GetFlag(Index, unsigned int);
 }
 
@@ -94,7 +101,6 @@ unsigned char __fastcall GetByteAtOffset1B4(void* thisPtr)
     return *(unsigned char*)((char*)thisPtr + 0x1b4);
 }
 
-struct NiFixedString;
 extern NiFixedString* DAT_011c6250;
 
 // @fnv 0x008d4ca0
@@ -103,7 +109,6 @@ NiFixedString* FUN_008d4ca0()
     return DAT_011c6250;
 }
 
-struct NiFixedString;
 
 extern NiFixedString* DAT_011c6258;
 
@@ -204,13 +209,6 @@ void* S::FUN_008d44d0(unsigned int flags)
     return this;
 }
 
-struct TESActorBase
-{
-    virtual ~TESActorBase();
-};
-struct TESCreature : TESActorBase
-{
-};
 struct XActor
 {
     TESActorBase* GetActorBase();
@@ -308,19 +306,6 @@ void Holder::FUN_008d49f0(int aiArg, float afValue, void* a3)
 
 extern int DAT_011dffe4;
 
-struct NiAVObject
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual NiAVObject* GetParent();
-};
-
-struct NiNode
-{
-    NiAVObject* FUN_0045bc00(unsigned int);
-};
-
 struct bhkCollisionObject;
 
 bhkCollisionObject* __cdecl FUN_004a8b00(NiNode*);
@@ -346,7 +331,7 @@ bool FUN_008d4ab0_shell::FUN_008d4ab0(NiAVObject* apObject)
     }
     else if (!collision && DAT_011dffe4 < 4)
     {
-        NiAVObject* parent = apObject ? apObject->GetParent() : 0;
+        NiAVObject* parent = apObject ? apObject->IsSceneNode() : 0;
         if (parent)
         {
             bHasCollision = FUN_008d4ab0(reinterpret_cast<NiNode*>(parent)->FUN_0045bc00(0));
@@ -739,11 +724,6 @@ struct VProc
     virtual float vfunc_5b4();
 };
 
-struct TES
-{
-    VProc* GetLogDate();
-};
-
 void __cdecl FUN_00b68770(void*, bool, float, int, float, int);
 
 struct FUN_008c50f0_shell
@@ -762,7 +742,7 @@ void FUN_008c50f0_shell::ApplyModifier(bool abEnabled, float afModifier)
     {
         if (((TES*)this)->GetLogDate())
         {
-            f = ((TES*)this)->GetLogDate()->vfunc_5b4();
+            f = ((VProc*)((TES*)this)->GetLogDate())->vfunc_5b4();
         }
     }
 
@@ -881,74 +861,9 @@ float FUN_008d4db0_shell::FUN_008d4db0()
 }
 }  // namespace fnv_008d4db0
 
-struct NiControllerManager
-{
-    virtual void vm000();
-    virtual void vm001();
-    virtual void vm002();
-    virtual void vm003();
-    virtual void vm004();
-    virtual void vm005();
-    virtual void vm006();
-    virtual void vm007();
-    virtual void vm008();
-    virtual void vm009();
-    virtual void vm010();
-    virtual void vm011();
-    virtual void vm012();
-    virtual void vm013();
-    virtual void vm014();
-    virtual void vm015();
-    virtual void vm016();
-    virtual void vm017();
-    virtual void vm018();
-    virtual void vm019();
-    virtual void vm020();
-    virtual void vm021();
-    virtual void vm022();
-    virtual void vm023();
-    virtual void vm024();
-    virtual void vm025();
-    virtual void vm026();
-    virtual void vm027();
-    virtual void vm028();
-    virtual void vm029();
-    virtual void vm030();
-    virtual void vm031();
-    virtual void vm032();
-    virtual void vm033();
-    virtual void vm034();
-    virtual NiAVObject* GetObjectByName(NiFixedString* name);
-    NiControllerManager* GetStringAtOffset();
-};
 struct ActorAnimData
 {
     NiControllerManager* FUN_00496940();
-};
-struct CreatureFlags30
-{
-    virtual void vs000();
-    virtual void vs001();
-    virtual void vs002();
-    virtual void vs003();
-    virtual void vs004();
-    virtual void vs005();
-    virtual void vs006();
-    virtual void vs007();
-    virtual void vs008();
-    virtual void vs009();
-    virtual void vs010();
-    virtual void vs011();
-    virtual void vs012();
-    virtual void vs013();
-    virtual bool vf38();
-    virtual bool vf3c();
-    virtual bool vf40();
-};
-struct CreatureViewQ
-{
-    char pad[0x30];
-    CreatureFlags30 m30;
 };
 NiFixedString* FUN_008a30f0();
 NiFixedString* FUN_008d4ca0();
@@ -1092,20 +1007,20 @@ void XActorQ::FUN_008d4b60()
     {
         if (!pAnimData->FUN_00496940())
             return;
-        NiControllerManager* pManager = pAnimData->FUN_00496940()->GetStringAtOffset();
-        if (((CreatureViewQ*)pCreature)->m30.vf38())
+        NiAVObjectPalette* pManager = pAnimData->FUN_00496940()->GetStringAtOffset();
+        if (static_cast<const TESCreature*>(pCreature)->GetNoLeftArm())
         {
-            NiAVObject* pObject = pManager->GetObjectByName(FUN_008d4ca0());
+            NiAVObject* pObject = pManager->FindAVObject(static_cast<const NiFixedString&>(*FUN_008d4ca0()));
             FUN_0062bc10(pObject);
         }
-        if (((CreatureViewQ*)pCreature)->m30.vf3c())
+        if (static_cast<const TESCreature*>(pCreature)->GetNoRightArm())
         {
-            NiAVObject* pObject = pManager->GetObjectByName(FUN_008d4cb0());
+            NiAVObject* pObject = pManager->FindAVObject(static_cast<const NiFixedString&>(*FUN_008d4cb0()));
             FUN_0062bc10(pObject);
         }
-        if (((CreatureViewQ*)pCreature)->m30.vf40())
+        if (static_cast<const TESCreature*>(pCreature)->GetNoHead())
         {
-            NiAVObject* pObject = pManager->GetObjectByName(FUN_008a30f0());
+            NiAVObject* pObject = pManager->FindAVObject(static_cast<const NiFixedString&>(*FUN_008a30f0()));
             FUN_0062bc10(pObject);
         }
     }

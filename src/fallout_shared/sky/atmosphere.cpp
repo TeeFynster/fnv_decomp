@@ -1,149 +1,49 @@
+#include "../../../include/Atmosphere.h"
+#include "../../../include/BSFaceGenAnimationData.h"
+#include "../../../include/BSFaceGenNiNode.h"
+#include "../../../include/BSMultiBoundRoom.h"
+#include "../../../include/NiCamera.h"
+#include "../../../include/NiPoint3.h"
+
 
 // src/fallout_shared/sky/atmosphere.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/sky/atmosphere.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct Atmosphere
-{
-    void FUN_00633190();
-};
-
 void __cdecl _Deallocate(void* p);
 
-struct FUN_00633160_shell : Atmosphere
-{
-    void* FUN_00633160(unsigned int flags);
-};
-
 // @fnv 0x00633160
-void* FUN_00633160_shell::FUN_00633160(unsigned int flags)
+void* __fastcall FUN_00633160(Atmosphere* pAtmosphere, void*, unsigned int flags)
 {
-    FUN_00633190();
+    pAtmosphere->FUN_00633190();
     if (flags & 1)
-        _Deallocate(this);
-    return this;
+        _Deallocate(pAtmosphere);
+    return pAtmosphere;
 }
 
-struct PathingRefStandIn
-{
-    void* m_pObject;
-
-    ~PathingRefStandIn();
-    void Reset(void* pObject);
-};
-
-struct PathingStandInBase
-{
-    virtual ~PathingStandInBase();
-
-    int unk04;
-};
-
-struct FUN_00633190 : PathingStandInBase
-{
-    PathingRefStandIn m_kRefA;
-    PathingRefStandIn m_kRefB;
-    PathingRefStandIn m_kRefC;
-    PathingRefStandIn m_kRefD;
-
-    virtual ~FUN_00633190();
-};
-
-// Destructor that resets the four PathingRefStandIn members (m_kRefB, m_kRefA, m_kRefD, m_kRefC) to null.
 // @fnv 0x00633190
-FUN_00633190::~FUN_00633190()
+Atmosphere::~Atmosphere()
 {
-    m_kRefB.Reset(0);
-    m_kRefA.Reset(0);
-    m_kRefD.Reset(0);
-    m_kRefC.Reset(0);
+    m_spFog = (NiFogProperty*)0;
+    m_spAtmosphere = (NiNode*)0;
+    m_spSkyShape = (NiNode*)0;
+    m_spSkyNode = (NiNode*)0;
 }
 
-void* __cdecl FUN_00aa13e0(unsigned int uiSize);
 void __cdecl AtmoFree(void* pvMem);
 
-struct AtmoObject;
-
-struct AtmoNode
+// Hide the inherited unsized delete so constructor unwinding uses the game's
+// sized node deallocation call. The shared NiNode supplies the complete layout.
+struct AtmosphereModelNode : NiNode
 {
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void AttachChildInAvailableSlot(AtmoNode* pkChild, int abFirstAvailableSlot);
-
-    int unk04[0xac / 4 - 1];
-    AtmoNode(int iChildren);
-    static void* operator new(unsigned int uiSize)
-    {
-        return FUN_00aa13e0(uiSize);
-    }
+    AtmosphereModelNode(unsigned short iChildren);
     static void operator delete(void* pvMem, unsigned int)
     {
         AtmoFree(pvMem);
     }
-    void FUN_004902f0(bool bAppCulled);
-    void FUN_00440460(void* pkProperty);
 };
 
-template <class T> struct AtmoPtr
-{
-    T* m_pObject;
-    AtmoPtr& FUN_0066b0d0(T* pObject);
-    T* FUN_00559450() const;
-};
+struct AtmoObject;
 
-struct AtmoProperty;
 struct AtmoPropertyList
 {
     void* FUN_0043c490();
@@ -153,8 +53,8 @@ struct AtmoShaderMgr
     AtmoPropertyList* FUN_00558310();
 };
 AtmoShaderMgr* __cdecl FUN_0045c670();
-void __cdecl FUN_00b899a0(AtmoPtr<AtmoNode>* pspNode);
-void __cdecl FUN_00b55540(int iUnk, AtmoProperty* pkFog);
+void __cdecl FUN_00b899a0(NiPointer<NiNode>* pspNode);
+void __cdecl FUN_00b55540(int iUnk, NiFogProperty* pkFog);
 void __cdecl FUN_005b5e40(const char* pFormat, ...);
 extern unsigned char g_bNoSky_011f941e;
 extern char g_kNiNodeRTTI_011f4a40[];
@@ -166,7 +66,7 @@ struct AtmoObject
     virtual void v01();
     virtual void v02();
     virtual int IsGeometry();
-    AtmoNode* FUN_0045bc00(int iIndex);
+    NiNode* FUN_0045bc00(int iIndex);
 };
 
 struct AtmoStream
@@ -185,32 +85,19 @@ struct AtmoLoadedModel
     AtmoObject* FUN_0043b230();
 };
 
-struct AtmosphereImpl
-{
-    int unk00;
-    AtmoPtr<AtmoNode> m_spRootNode;
-    AtmoPtr<AtmoNode> m_spAtmosphere;
-    AtmoPtr<AtmoProperty> m_spFog;
-    AtmoPtr<AtmoNode> m_spSkyNode;
-    AtmoPtr<AtmoNode> m_spSkyShape;
-
-    void CreateSortAdjustNode(AtmoNode* pkRoot);
-    void SetAtmosphere(AtmoNode* pkRoot, AtmoProperty* pkFog);
-};
-
 // @fnv 0x00633260
-void AtmosphereImpl::SetAtmosphere(AtmoNode* pkRoot, AtmoProperty* pkFog)
+void Atmosphere::SetAtmosphere(NiNode* pkRoot, NiFogProperty* pkFog)
 {
     CreateSortAdjustNode(pkRoot);
     if (!g_bNoSky_011f941e)
     {
         FUN_00b899a0(&m_spSkyShape);
-        m_spSkyShape.FUN_00559450()->FUN_004902f0(true);
-        m_spSkyShape.FUN_00559450()->FUN_00440460(FUN_0045c670()->FUN_00558310()->FUN_0043c490());
-        m_spSkyNode.FUN_0066b0d0(new AtmoNode(0));
-        m_spSkyNode.FUN_00559450()->FUN_004902f0(true);
-        m_spSkyNode.FUN_00559450()->AttachChildInAvailableSlot(m_spSkyShape.FUN_00559450(), 1);
-        m_spRootNode.FUN_00559450()->AttachChildInAvailableSlot(m_spSkyNode.FUN_00559450(), 1);
+        m_spSkyShape->FUN_004902f0(true);
+        m_spSkyShape->FUN_00440460((const NiPoint3*)FUN_0045c670()->FUN_00558310()->FUN_0043c490());
+        m_spSkyNode = new AtmosphereModelNode(0);
+        m_spSkyNode->FUN_004902f0(true);
+        m_spSkyNode->AttachChildInAvailableSlot((NiAVObject*)m_spSkyShape.operator->(), true);
+        m_pRootNode->AttachChildInAvailableSlot((NiAVObject*)m_spSkyNode.operator->(), true);
     }
 
     AtmoStream kStream;
@@ -218,36 +105,29 @@ void AtmosphereImpl::SetAtmosphere(AtmoNode* pkRoot, AtmoProperty* pkFog)
     {
         AtmoLoadedModel kModel_("Meshes\\Sky\\Atmosphere.nif", &kStream, 0, 0);
         AtmoObject* pkFirstVal2 = kModel_.FUN_0043b230();
-        AtmoNode* pkMeshRes = 0;
+        NiNode* pkMeshRes = 0;
         AtmoObject* pkObjectOut = kModel_.FUN_0043b230();
         if (pkObjectOut)
         {
             if (pkObjectOut->IsGeometry())
                 pkMeshRes = pkObjectOut->FUN_0045bc00(0);
             else if (FUN_0043b300(g_kNiNodeRTTI_011f4a40, pkObjectOut))
-                pkMeshRes = (AtmoNode*)pkObjectOut;
+                pkMeshRes = (NiNode*)pkObjectOut;
         }
         if (!pkMeshRes)
         {
             FUN_005b5e40("Cannot load the atmosphere model.");
             return;
         }
-        m_spAtmosphere.FUN_0066b0d0(pkMeshRes);
-        m_spAtmosphere.FUN_00559450()->FUN_004902f0(true);
-        m_spRootNode.FUN_00559450()->AttachChildInAvailableSlot(m_spAtmosphere.FUN_00559450(), 1);
+        m_spAtmosphere = pkMeshRes;
+        m_spAtmosphere->FUN_004902f0(true);
+        m_pRootNode->AttachChildInAvailableSlot((NiAVObject*)m_spAtmosphere.operator->(), true);
     }
-    m_spFog.FUN_0066b0d0(pkFog);
+    m_spFog = pkFog;
     FUN_00b55540(0, pkFog);
 }
 
 namespace fnv_006335d0 {
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    NiPoint3* ScaleTo(NiPoint3* out, float s);
-};
 struct Param
 {
     float a;
@@ -255,31 +135,6 @@ struct Param
     float c;
     float d;
     Param* FUN_00414430(float a0, float a1, float a2, float a3);
-};
-struct NiFrustum
-{
-    float unk00;
-    float unk04;
-    float unk08;
-    float unk0c;
-    float unk10;
-    float unk14;
-    float unk18;
-};
-struct NiCamera
-{
-    const NiFrustum& GetViewFrustum() const;
-};
-struct FUN_00507700_cls : NiCamera
-{
-    void FUN_00507700(float f);
-};
-struct Stub_00a6faf0 : FUN_00507700_cls
-{
-    void FUN_00a6faf0(NiFrustum* fr);
-};
-struct BSFaceGenAnimationData : Stub_00a6faf0
-{
 };
 struct Light
 {
@@ -310,21 +165,9 @@ struct Fog : FUN_00633c60_Class
     void FUN_005bf9a0(float a, float b);
     void FUN_005bfbd0(float a);
 };
-struct Ref
-{
-    int unk00;
-    Fog* FUN_00559450();
-};
-struct FUN_009a5480_class
-{
-    float GetFieldE4Float();
-};
-struct BSMultiBoundRoom : FUN_009a5480_class
-{
-    void* FUN_006ab360();
-};
 struct Node : BSMultiBoundRoom
 {
+    float GetFieldE4Float();
     int FUN_00476c90();
     NiPoint3* FUN_00624700();
     NiPoint3* FUN_0050d100();
@@ -344,9 +187,10 @@ struct Info
     float unk04;
     float unk08;
 };
-struct BSFaceGenNiNode
+// This object supplies a camera, not face-generation animation data.
+struct AtmosphereSceneGraph
 {
-    BSFaceGenAnimationData* GetAnimationData();
+    NiCamera* GetCamera();
     virtual void v00();
     virtual void v01();
     virtual void v02();
@@ -421,31 +265,22 @@ extern unsigned char DAT_011f941e;
 extern float DAT_011f9190;
 Fog* __cdecl FUN_00b55520(int a0);
 void __cdecl FUN_00b55540(int a0, Fog* a1);
-BSFaceGenNiNode* __cdecl FUN_0045c670();
-void* __fastcall FUN_00558310(BSFaceGenNiNode* w);
+AtmosphereSceneGraph* __cdecl FUN_0045c670();
+void* __fastcall FUN_00558310(AtmosphereSceneGraph* w);
 Info* __fastcall FUN_0045bb80(void* p);
-struct Atm
-{
-    int unk00;
-    int unk04;
-    Ref unk08;
-    Ref unk0c;
-    int unk10;
-    int unk14;
-    unsigned char unk18;
-    void FUN_008d0600(Node* n, float f);
-    void UpdateAtmosphere(Node* node, float f);
-};
-// Updates the atmosphere for a node: refreshes the fog reference, computes fog positions, and syncs the face-gen animation frustum far plane.
+}  // namespace fnv_006335d0
+
+// Refreshes the fog reference and positions, and syncs the camera frustum far plane.
 // @fnv 0x006335d0
-void Atm::UpdateAtmosphere(Node* node, float f)
+void Atmosphere::UpdateAtmosphere(Sky* node, float f)
 {
+    using namespace fnv_006335d0;
     float len;
     {
         float p3;
         Light* p1;
         {
-            BSFaceGenAnimationData* u;
+            NiCamera* u;
             {
                 float farv;
                 {
@@ -461,67 +296,68 @@ void Atm::UpdateAtmosphere(Node* node, float f)
                                     Param p4;
                                     Param t;
                                     {
-                                        NiPoint3 pNode;
+                                        // ScaleTo writes all components; avoid a default-constructor call.
+                                        float pNode[3];
 
                                         if (!node)
                                             return;
-                                        if (FUN_00b55520(0) != unk0c.FUN_00559450())
-                                            FUN_00b55540(0, unk0c.FUN_00559450());
+                                        if (FUN_00b55520(0) != reinterpret_cast<Fog*>(m_spFog.operator->()))
+                                            FUN_00b55540(0, reinterpret_cast<Fog*>(m_spFog.operator->()));
                                         FUN_008d0600(node, f);
-                                        if (node->FUN_00476c90() == 3 || 2 == node->FUN_00476c90())
+                                        if (reinterpret_cast<Node*>(node)->FUN_00476c90() == 3 || 2 == reinterpret_cast<Node*>(node)->FUN_00476c90())
                                         {
-                                            if (!(unk08.FUN_00559450()))
+                                            if (!(m_spAtmosphere.operator->()))
                                                 return;
                                             if (DAT_011dea3c != 0 && DAT_011dea3c->FUN_008d6f30() &&
-                                                FUN_0045bb80(FUN_00558310(FUN_0045c670()))->unk08 <
+                                                FUN_0045bb80(FUN_00558310(fnv_006335d0::FUN_0045c670()))->unk08 <
                                                     DAT_011dea3c->FUN_0057b0a0())
                                             {
-                                                DAT_011ff8e0 = *pData.FUN_00414430(node->FUN_00624700()->x,
-                                                                                   node->FUN_00624700()->y,
-                                                                                   node->FUN_00624700()->z, 1.0f);
+                                                DAT_011ff8e0 = *pData.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_00624700()->x,
+                                                                                   reinterpret_cast<Node*>(node)->FUN_00624700()->y,
+                                                                                   reinterpret_cast<Node*>(node)->FUN_00624700()->z, 1.0f);
                                                 DAT_011ff8f0 =
-                                                    *p0.FUN_00414430(node->FUN_00624700()->x, node->FUN_00624700()->y,
-                                                                     node->FUN_00624700()->z, 1.0f);
-                                                DAT_011ff900 = *light.FUN_00414430(node->FUN_00624700()->x,
-                                                                                   node->FUN_00624700()->y,
-                                                                                   node->FUN_00624700()->z, 1.0);
+                                                    *p0.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_00624700()->x, reinterpret_cast<Node*>(node)->FUN_00624700()->y,
+                                                                     reinterpret_cast<Node*>(node)->FUN_00624700()->z, 1.0f);
+                                                DAT_011ff900 = *light.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_00624700()->x,
+                                                                                   reinterpret_cast<Node*>(node)->FUN_00624700()->y,
+                                                                                   reinterpret_cast<Node*>(node)->FUN_00624700()->z, 1.0);
                                             }
                                             else
                                             {
                                                 DAT_011ff8e0 =
-                                                    *k.FUN_00414430(node->FUN_0050d100()->x, node->FUN_0050d100()->y,
-                                                                    node->FUN_0050d100()->z, 1.0);
+                                                    *k.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_0050d100()->x, reinterpret_cast<Node*>(node)->FUN_0050d100()->y,
+                                                                    reinterpret_cast<Node*>(node)->FUN_0050d100()->z, 1.0);
                                                 DAT_011ff8f0 =
-                                                    *p4.FUN_00414430(node->FUN_009c1a50()->x, node->FUN_009c1a50()->y,
-                                                                     node->FUN_009c1a50()->z, 1.0);
+                                                    *p4.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_009c1a50()->x, reinterpret_cast<Node*>(node)->FUN_009c1a50()->y,
+                                                                     reinterpret_cast<Node*>(node)->FUN_009c1a50()->z, 1.0);
                                                 DAT_011ff900 =
-                                                    *t.FUN_00414430(node->FUN_005a8080()->x, node->FUN_005a8080()->y,
-                                                                    node->FUN_005a8080()->z, 1.0f);
+                                                    *t.FUN_00414430(reinterpret_cast<Node*>(node)->FUN_005a8080()->x, reinterpret_cast<Node*>(node)->FUN_005a8080()->y,
+                                                                    reinterpret_cast<Node*>(node)->FUN_005a8080()->z, 1.0f);
                                             }
                                         }
-                                        if (0 != unk0c.FUN_00559450())
+                                        if (0 != reinterpret_cast<Fog*>(m_spFog.operator->()))
                                         {
-                                            p1 = node->FUN_00923000();
-                                            unk0c.FUN_00559450()->FUN_0049ed90(p1->unk04 > p1->unk00);
+                                            p1 = reinterpret_cast<Node*>(node)->FUN_00923000();
+                                            reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_0049ed90(p1->unk04 > p1->unk00);
                                             if (unk18)
                                             {
-                                                unk0c.FUN_00559450()->FUN_005bf9a0(p1->unk00, p1->unk04);
-                                                unk0c.FUN_00559450()->FUN_005bfbd0(node->GetFieldE8Float());
+                                                reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_005bf9a0(p1->unk00, p1->unk04);
+                                                reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_005bfbd0(reinterpret_cast<Node*>(node)->GetFieldE8Float());
                                             }
                                             if (!(DAT_011f941e))
                                             {
                                                 p3 = DAT_011f9190 / 3.75f;
-                                                unk0c.FUN_00559450()->FUN_00633bf0(
-                                                    node->FUN_00624700()->ScaleTo(&pNode, p3));
+                                                reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_00633bf0(
+                                                    reinterpret_cast<Node*>(node)->FUN_00624700()->ScaleTo(reinterpret_cast<NiPoint3*>(pNode), p3));
                                             }
                                             else
                                             {
-                                                unk0c.FUN_00559450()->FUN_00633bf0(node->FUN_00624700());
+                                                reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_00633bf0(reinterpret_cast<Node*>(node)->FUN_00624700());
                                             }
-                                            len = node->GetFieldE4Float();
-                                            unk0c.FUN_00559450()->FUN_00633c40(node->GetFieldE4Float());
-                                            unk0c.FUN_00559450()->FUN_00633c20(p1->unk08, p1->unk0c);
-                                            unk0c.FUN_00559450()->FUN_00633c60(*(NiPoint3*)node->FUN_006ab360());
+                                            len = reinterpret_cast<Node*>(node)->GetFieldE4Float();
+                                            reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_00633c40(reinterpret_cast<Node*>(node)->GetFieldE4Float());
+                                            reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_00633c20(p1->unk08, p1->unk0c);
+                                            reinterpret_cast<Fog*>(m_spFog.operator->())->FUN_00633c60(*(NiPoint3*)reinterpret_cast<Node*>(node)->FUN_006ab360());
                                         }
                                     }
                                 }
@@ -531,16 +367,16 @@ void Atm::UpdateAtmosphere(Node* node, float f)
                     if (unk18)
                     {
                         u = 0;
-                        farv = FUN_0045c670()->v40();
-                        u = FUN_0045c670()->GetAnimationData();
+                        farv = fnv_006335d0::FUN_0045c670()->v40();
+                        u = fnv_006335d0::FUN_0045c670()->GetCamera();
                         if (0 != u)
                         {
                             tmp = u->GetViewFrustum();
-                            if (farv != tmp.unk14)
+                            if (farv != tmp.m_fFarPlane)
                             {
-                                tmp.unk14 = farv;
-                                u->FUN_00507700(farv / tmp.unk10);
-                                u->FUN_00a6faf0(&tmp);
+                                tmp.m_fFarPlane = farv;
+                                u->FUN_00507700(farv / tmp.m_fNearPlane);
+                                u->FUN_00a6faf0(tmp);
                             }
                         }
                     }
@@ -549,7 +385,6 @@ void Atm::UpdateAtmosphere(Node* node, float f)
         }
     }
 }
-}  // namespace fnv_006335d0
 
 struct FUN_00633cc0_SkyObject
 {

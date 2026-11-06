@@ -2,6 +2,12 @@
 // tesscript_ctx_variant.cpp: context variant of src/fallout_shared/tesscript.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
 #include "tesscript_decls.h"
+// TESFileFormInt_tesscript: local type (was include/TESFileFormInt.h, which had no evidence of one real class); its methods are 0x00472660 TESFile::GetTESForm
+class TESFileFormInt_tesscript
+{
+public:
+    int GetTESForm();
+};
 
 class ScriptLoader : public Script
 {
@@ -20,7 +26,7 @@ bool ScriptLoader::FUN_005ab9f0(TESFile* file)
     unsigned int unusedID;
     ScriptReferencedObject* referenceID;
     unsigned int editorID;
-    if (file->GetTESForm() != ENUM_FORM_ID_SCPT_ID)
+    if (reinterpret_cast<TESFileFormInt_tesscript*>(file)->GetTESForm() != ENUM_FORM_ID_SCPT_ID)
         return false;
     LoadRecordHeader(file);
     while (size = file->GetChunkID())
@@ -50,7 +56,7 @@ bool ScriptLoader::FUN_005ab9f0(TESFile* file)
             {
                 variableName = (char*)_alloca(file->GetChunkSize());
                 file->GetChunkData(variableName, 0x200);
-                chunk->m_kName.Set(variableName, 0);
+                chunk->name.Set(variableName, 0);
             }
             break;
         case 0x41444353:

@@ -1,8 +1,30 @@
+#include "../../include/NiFrustum.h"
 
 // src/staging/blk_00700000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+// The legacy layout support header also defines NiFile and scene containers.
+// Keep only the list API needed here, before its shared users.
+#include "../../include/BSStringT.h"
+
+#include "../../include/BSSimpleList.h"
+#include "../../include/GO.h"
+#include "../../include/SL.h"
+#include "../../include/StrMem.h"
+#include "../../include/BSFile.h"
+#include "../../include/DialogMenu.h"
+#include "../../include/HUDMainMenu.h"
+#include "../../include/Menu.h"
+#include "../../include/NiCamera.h"
+#include "../../include/NiFrustum.h"
+#include "../../include/NiPick.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/OSGlobals.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESHealthForm.h"
+#include "../../include/TESModelTextureSwap.h"
+#include "../../include/Tile.h"
+#include "../../include/TileMenu.h"
 
 struct FUN_00700270_class
 {
@@ -17,20 +39,13 @@ bool FUN_00700270_class::operator==(int other)
     return !Equals(other);
 }
 
-struct BSStr
-{
-    int StrCmp(const char* s, bool caseSensitive) const;
-    int Equals(const char* s);
-};
 
-int BSStr::StrCmp(const char* s, bool caseSensitive) const
-{
-    return 0;
-}
+
+
 
 // Returns true when this string compares equal to s using a case-sensitive comparison.
 // @fnv 0x007002a0
-int BSStr::Equals(const char* s)
+template <> int BSStringT<char>::Equals(const char* s)
 {
     return !StrCmp(s, true);
 }
@@ -50,15 +65,10 @@ FUN_007002d0_Class* __thiscall FUN_007002d0_Class::FUN_007002d0()
     return this;
 }
 
-struct Flt
-{
-    operator unsigned int();
-    void FUN_00700300();
-};
 // @fnv 0x00700300
-void Flt::FUN_00700300()
+const char* Tile::FUN_00700300()
 {
-    ((Flt*)((char*)this + 0x20))->operator unsigned int();
+    return StringProvider.String();
 }
 
 extern "C" void* __cdecl DAT_0106e8d4;
@@ -127,32 +137,16 @@ void __thiscall FUN_00703960_Class::SetByteAtOffsetEC(char value)
     ((char*)this)[0xec] = value;
 }
 
-struct GO
-{
-    void operator=(void*);
-};
-struct NiPick
-{
-    NiPick();
-    void* m_kPointA[5];
-    GO m_kPointB;
-    void FUN_00705fc0(void* p);
-};
 // @fnv 0x00705fc0
 void NiPick::FUN_00705fc0(void* p)
 {
-    m_kPointB = p;
+    reinterpret_cast<GO&>(root) = p;
 }
 
-struct FUN_00709a20_Class
-{
-    int __thiscall FUN_00709a20();
-};
-
 // @fnv 0x00709a20
-int FUN_00709a20_Class::FUN_00709a20()
+bool Tile::IsSpecial()
 {
-    return (*reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0x30) & 0x2000) != 0;
+    return (uiFlags & 0x2000) != 0;
 }
 
 extern float g_011d86e0_arg1;
@@ -285,15 +279,11 @@ void FUN_00719be0::Initialize()
     ((GlobalObject_00869f00*)this)->Clear(true);
 }
 
-struct FUN_0071aa60_class
-{
-    void FUN_0071aa60(bool value);
-};
 
 // @fnv 0x0071aa60
-void FUN_0071aa60_class::FUN_0071aa60(bool value)
+void Tile::FUN_0071aa60(bool value)
 {
-    *reinterpret_cast<unsigned char*>(reinterpret_cast<char*>(this) + 0x35) = value;
+    m_bSpeechChallengeFailure = value;
 }
 
 extern "C" void __cdecl FUN_00ecb849(int, int, int);
@@ -355,11 +345,6 @@ void FUN_0071e0f0_cls::FUN_0071e0f0(const char* arg)
     ((FUN_0071e1a0_cls*)((char*)this + 8))->FUN_0071e1a0(arg);
 }
 
-struct StrMem
-{
-    char data[8];
-    StrMem();
-};
 
 struct FUN_0071e230
 {
@@ -394,10 +379,6 @@ char __cdecl HasThirdFieldNonZero(void* a)
 }
 
 extern int DAT_01070028;
-struct SL
-{
-    SL();
-};
 struct FUN_0071f5d0
 {
     int m;
@@ -522,10 +503,6 @@ struct Modifier
 {
     unsigned char GetKey();
 };
-struct Tile
-{
-    static void UpdateAll(bool);
-};
 void* __cdecl FUN_004b7210();
 // If FUN_004b7210 returns a non-null object whose GetKey is nonzero, calls SetByteAtOffsetEC(1) on it and Tile::UpdateAll(false).
 // @fnv 0x00703920
@@ -556,11 +533,6 @@ struct Modifier
     unsigned char GetKey();
 };
 Modifier* __cdecl FUN_004b7210();
-struct TESObjectREFR;
-struct HUDMainMenu
-{
-    static bool __cdecl UpdateTargetReference(TESObjectREFR*, bool, bool);
-};
 // @fnv 0x007062e0
 bool __cdecl FUN_007062e0(TESObjectREFR* apRefr, bool abFlag1, bool abFlag2)
 {
@@ -574,8 +546,8 @@ done:;
 }
 }  // namespace fnv_007062e0
 
+class InterfaceManager;
 namespace fnv_00707b30 {
-struct InterfaceManager;
 InterfaceManager* FUN_004b7210();
 void FUN_00717990();
 // @fnv 0x00707b30
@@ -586,22 +558,14 @@ void FUN_00707b30()
 }
 }  // namespace fnv_00707b30
 
-struct FUN_00709840
-{
-    FUN_00709840();
-};
-struct TileMenu
-{
-    TileMenu* __thiscall TileMenuConstructor(int, int);
-};
 extern char vftable_TileMenu;
 // Initializes a TileMenu: runs the base constructor, installs the TileMenu vtable, and zeroes the field at offset 0x3c.
 // @fnv 0x00709810
 TileMenu* __thiscall TileMenu::TileMenuConstructor(int aiUnused1, int aiUnused2)
 {
-    ((FUN_00709840*)this)->FUN_00709840::FUN_00709840();
+    this->TileRect::TileRect();
     *(void**)this = (void*)&vftable_TileMenu;
-    *(int*)((char*)this + 0x3c) = 0;
+    pMenu = 0;
     return this;
 }
 
@@ -824,14 +788,15 @@ void* __thiscall GlobalObject_00719b80::InitializeAndMaybeDeallocate(unsigned in
     return this;
 }
 
-struct ArrSI
+// Exe 0x00719da0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int __thiscall GetFlags();
 };
 int __fastcall _FNV_GetFormType(unsigned int);
 // Returns 1 if p is non-null and its form type from GetFlags equals 0x28, otherwise 0.
 // @fnv 0x00719da0
-unsigned char __cdecl FUN_00719da0(ArrSI* p)
+unsigned char __cdecl FUN_00719da0(BlkOffset08View* p)
 {
     int result;
     if (p != 0 && _FNV_GetFormType(p->GetFlags()) == 0x28)
@@ -843,7 +808,8 @@ unsigned char __cdecl FUN_00719da0(ArrSI* p)
 
 namespace fnv_00719de0 {
 int __fastcall FNV_GetFormType(unsigned int form);
-struct ArrSI
+// Exe 0x00719de0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int GetFlags();
 };
@@ -853,7 +819,7 @@ char FUN_00719de0(void* arg)
 {
     int result;
     if (arg &&
-        (FNV_GetFormType(((ArrSI*)arg)->GetFlags()) == 0x1a || FNV_GetFormType(((ArrSI*)arg)->GetFlags()) == 0x18))
+        (FNV_GetFormType(((BlkOffset08View*)arg)->GetFlags()) == 0x1a || FNV_GetFormType(((BlkOffset08View*)arg)->GetFlags()) == 0x18))
         result = 1;
     else
         result = 0;
@@ -878,10 +844,6 @@ void __thiscall Holder::FUN_0071dd50(char const* a)
         *((char*)this + 0x810) = 0;
 }
 
-struct BSStringTCharAssign
-{
-    BSStringTCharAssign& __thiscall operator=(const BSStringTCharAssign&);
-};
 struct A71e0d0
 {
     void* __thiscall FUN_0071e0d0();
@@ -892,14 +854,14 @@ struct B49fa20
 };
 struct S71df20
 {
-    void __thiscall AssignString(const BSStringTCharAssign&);
+    void __thiscall AssignString(const BSStringT<char>&);
 };
 // Gets a pointer via FUN_0071e0d0, assigns a to the object at offset 8, then passes the pointer to FUN_0049fa20.
 // @fnv 0x0071df20
-void __thiscall S71df20::AssignString(const BSStringTCharAssign& aString)
+void __thiscall S71df20::AssignString(const BSStringT<char>& aString)
 {
     void* tmp = ((A71e0d0*)this)->FUN_0071e0d0();
-    ((BSStringTCharAssign*)((char*)tmp + 8))->operator=(aString);
+    ((BSStringT<char>*)((char*)tmp + 8))->operator=(aString);
     ((B49fa20*)this)->FUN_0049fa20(tmp);
 }
 
@@ -934,23 +896,19 @@ void* __thiscall S_0071e200::FUN_0071e200(unsigned int flags)
     return this;
 }
 
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-};
 extern int DAT_0106ff84;
 extern int DAT_011db088;
 struct S
 {
     void __thiscall DestroyMenu();
 };
-// Resets the vtable pointer to DAT_0106ff84, clears DAT_011db088, then calls the Menu_007a8b10 destructor on this.
+// Resets the vtable pointer to DAT_0106ff84, clears DAT_011db088, then calls the Menu destructor on this.
 // @fnv 0x0071f310
 void __thiscall S::DestroyMenu()
 {
     *(int*)this = (int)&DAT_0106ff84;
     DAT_011db088 = 0;
-    ((Menu_007a8b10*)this)->Menu_007a8b10::~Menu_007a8b10();
+    ((Menu*)this)->Menu::~Menu();
 }
 
 char __cdecl HasThirdFieldNonZero(void*);
@@ -1025,11 +983,7 @@ struct FUN_00716a10_Class
 {
     void FUN_00716a10();
 };
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-};
-struct FUN_0071fb60_Class : Menu_007a8b10
+struct FUN_0071fb60_Class : Menu
 {
     ~FUN_0071fb60_Class();
 };
@@ -1092,10 +1046,7 @@ void PerfMgr::FUN_00700650()
     }
 }
 
-struct NiTMallocInterface_0096afc0
-{
-    static void* __cdecl Allocate(unsigned short);
-};
+class ActorCombatGroup;
 
 extern int DAT_0106e8dc;
 
@@ -1109,7 +1060,7 @@ FUN_00700560::FUN_00700560(void* ausSize, void* b)
     *(unsigned short*)((char*)this + 0x0c) = 0;
     if (*(unsigned short*)((char*)this + 0x08) > 0)
     {
-        *(void**)((char*)this + 0x04) = NiTMallocInterface_0096afc0::Allocate(*(unsigned short*)((char*)this + 0x08));
+        *(void**)((char*)this + 0x04) = NiTMallocInterface<ActorCombatGroup*>::Allocate(*(unsigned short*)((char*)this + 0x08));
     }
     else
     {
@@ -1151,7 +1102,7 @@ void FUN_007192c0_class::FUN_007192c0()
 
 // Returns 1 if p is non-null and its form type is one of 0x1f, 0x29, 0x67, 0x32, 0x6c, 0x74 or 0x73; otherwise 0.
 // @fnv 0x00719e30
-unsigned char __cdecl FUN_00719e30(ArrSI* apForm)
+unsigned char __cdecl FUN_00719e30(BlkOffset08View* apForm)
 {
     int result;
 
@@ -1166,21 +1117,17 @@ unsigned char __cdecl FUN_00719e30(ArrSI* apForm)
     return result;
 }
 
-struct BSS
-{
-    char c[8];
-    ~BSS();
-};
+
 struct FUN_0071e250
 {
     char pad[8];
-    BSS s;
+    ::BSStringT<char> s;
     void DestroyBSS();
 };
 // @fnv 0x0071e270
 void FUN_0071e250::DestroyBSS()
 {
-    s.BSS::~BSS();
+    s.BSStringT<char>::~BSStringT();
 }
 
 struct FUN_00701500_Sub
@@ -1346,23 +1293,10 @@ bool __cdecl FUN_00709d10()
 }
 }  // namespace fnv_00709d10
 
-struct NiFrustum
-{
-    float m_fLeftBound;
-    float m_fRightBound;
-    float m_fTopBound;
-    float m_fBottomBound;
-    float m_fNearPlane;
-    float m_fFarPlane;
-    bool m_bOrthographic;
-    NiFrustum(bool bOrtho);
-};
 
-struct NiCamera
-{
-    void SetMinNearPlaneDist(float fDist, bool bUpdate);
-    void UpdateViewFrustum(const NiFrustum& kFrustum);
-};
+
+
+
 
 struct SettingF
 {
@@ -1389,7 +1323,8 @@ void __cdecl UpdateCameraFrustum(NiCamera* pCamera, float fFOV)
         float fHalfFOV = (fFOV * *g_01203150.Float() * (double)0.017453292f * (double)1.1f < (double)1.5393804f)
                              ? fFOV * *g_01203150.Float() * (double)0.017453292f * (double)1.1f
                              : (double)1.5393804f;
-        NiFrustum kFrustum(false);
+        NiFrustum kFrustum;
+        kFrustum.Init(false);
         kFrustum.m_fLeftBound = -FUN_0057dd70(fHalfFOV) * fNear * fAspect;
         kFrustum.m_fRightBound = FUN_0057dd70(fHalfFOV) * fNear * fAspect;
         kFrustum.m_fBottomBound = -FUN_0057dd70(fHalfFOV) * fNear;
@@ -1472,20 +1407,6 @@ int __cdecl FUN_00719ca0(FUN_00719ca0_cls* apLeft, FUN_00719ca0_cls* apRight)
     }
 }
 
-struct TESBoundObject
-{
-    virtual void s0();
-};
-
-struct TESHealthForm
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual unsigned int v4();
-};
-
 struct SrcObj
 {
     TESBoundObject* FUN_0044ddc0();
@@ -1498,13 +1419,13 @@ int __cdecl FUN_00719cf0(SrcObj* apSrcObjA, SrcObj* apSrcObjB)
     TESHealthForm* x;
     x = dynamic_cast<TESHealthForm*>(apSrcObjA->FUN_0044ddc0());
     y = dynamic_cast<TESHealthForm*>(apSrcObjB->FUN_0044ddc0());
-    if (x->v4() < y->v4())
+    if (x->GetHealth() < y->GetHealth())
     {
         return -1;
     }
     else
     {
-        if (x->v4() > y->v4())
+        if (x->GetHealth() > y->GetHealth())
         {
             return 1;
         }
@@ -1801,22 +1722,8 @@ void FUN_007031e0(DbgRef* ref)
 extern "C" void* __cdecl FUN_004b7210();
 extern "C" void* __cdecl FUN_00a09030(int);
 
-class Menu
-{
-  public:
-    virtual void Unk00();
-};
 
-class DialogMenu : public Menu
-{
-  public:
-    TESSound* GetCastSound();
-};
 
-struct TileStandIn
-{
-    Menu* GetMenu();
-};
 
 // If a modifier key is held, looks up tile 0x3f1's menu as a DialogMenu and returns its cast sound, otherwise null.
 // @fnv 0x00705190
@@ -1824,7 +1731,7 @@ TESSound* GetDialogCastSound()
 {
     if (FUN_004b7210() && ((Modifier*)FUN_004b7210())->GetKey())
     {
-        TileStandIn* pTile = (TileStandIn*)FUN_00a09030(0x3f1);
+        Tile* pTile = (Tile*)FUN_00a09030(0x3f1);
         DialogMenu* pDialogMenu = pTile != 0 ? dynamic_cast<DialogMenu*>(pTile->GetMenu()) : 0;
         if (pDialogMenu != 0)
             return pDialogMenu->GetCastSound();
@@ -1832,11 +1739,6 @@ TESSound* GetDialogCastSound()
     return 0;
 }
 
-struct StringFormatView
-{
-    int FUN_00406f90(const char* format, char* arguments);
-};
-unsigned int __fastcall FUN_004048e0(const BSStringT<char>* text);
 bool __cdecl FUN_00705ea0();
 bool __cdecl FUN_0070edf0();
 struct ConsoleSetting
@@ -1884,7 +1786,7 @@ void ConsoleText::Print(const char* format, char* arguments)
     if (FUN_00705ea0() && !FUN_0070edf0())
         return;
     BSStringT<char> a;
-    reinterpret_cast<StringFormatView*>(&a)->FUN_00406f90(format, arguments);
+    a.FUN_00406f90(format, arguments);
     WriteLine(a.String());
     int s = 1200;
     int p = 0;
@@ -1893,7 +1795,7 @@ void ConsoleText::Print(const char* format, char* arguments)
         return;
     char i[2048];
     unsigned int eb;
-    for (eb = 0; eb <= FUN_004048e0(&a); ++eb)
+    for (eb = 0; eb <= a.Length(); ++eb)
         i[eb] = a.String()[eb];
     char* f = i;
     for (int q = 0; q < h; ++q)
@@ -1923,21 +1825,6 @@ void ConsoleText::Print(const char* format, char* arguments)
 }
 
 namespace fnv_0071f340 {
-class Menu
-{
-  public:
-    Menu();
-    virtual ~Menu();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-};
 struct ListElem
 {
     ListElem();
@@ -2192,13 +2079,6 @@ FUN_0071f600::~FUN_0071f600()
 }
 
 namespace fnv_0071fbf0 {
-class Menu
-{
-  public:
-    virtual ~Menu();
-    Menu();
-    unsigned int m04, m08, m0c, m10, m14, m18, m1c, m20, m24;
-};
 class GlobalObject_0041a250
 {
   public:
@@ -2357,7 +2237,8 @@ struct MenuSource
 {
     MenuActor* FUN_00a03c90();
 };
-struct MenuList
+// distinct from MenuList: 0x00711ea0 walks this nonvirtual pointer-list access view via GetNext 0x0057cbe0; the shared MenuList is a virtual UI list box.
+struct BlkMenuListView
 {
     int FUN_00559450();
     MenuSource** FUN_0057cbe0(int* frame);
@@ -2365,7 +2246,7 @@ struct MenuList
 struct MenuCollection
 {
     int bookkeeping;
-    MenuList list;
+    BlkMenuListView list;
 };
 struct MenuState
 {
@@ -2628,11 +2509,6 @@ struct InventoryMenuSetting
     const char* name;
     const char* FUN_00403df0();
 };
-class OSGlobals
-{
-  public:
-    FUN_00703be0_Class* FUN_00877720();
-};
 extern OSGlobals* g_osGlobals;
 extern InventoryMenuSetting* DAT_011d5268[];
 extern InventoryMenuSetting* DAT_011d5240[];
@@ -2654,25 +2530,25 @@ void __cdecl GetControlLabel(int control, char* output, bool prefix)
     *output = 0;
     if (FUN_004b71d0())
     {
-        setting = DAT_011d5268[g_osGlobals->FUN_00877720()->GetByteAt(control, 3)];
+        setting = DAT_011d5268[reinterpret_cast<FUN_00703be0_Class*>(g_osGlobals->FUN_00877720())->GetByteAt(control, 3)];
     }
     else
     {
-        unsigned char key = g_osGlobals->FUN_00877720()->GetByteAt(control, 1);
+        unsigned char key = reinterpret_cast<FUN_00703be0_Class*>(g_osGlobals->FUN_00877720())->GetByteAt(control, 1);
         if (key >= 0 && key < 9)
         {
             setting = DAT_011d5240[key];
         }
         else
         {
-            key = g_osGlobals->FUN_00877720()->GetByteAt(control, 0);
+            key = reinterpret_cast<FUN_00703be0_Class*>(g_osGlobals->FUN_00877720())->GetByteAt(control, 0);
             if (key >= 0 && key < 238)
             {
                 setting = DAT_011d52f0[key];
             }
             else
             {
-                key = g_osGlobals->FUN_00877720()->GetByteAt(control, 2);
+                key = reinterpret_cast<FUN_00703be0_Class*>(g_osGlobals->FUN_00877720())->GetByteAt(control, 2);
                 if (key >= 0 && key < 8)
                     setting = DAT_011d51b0[key];
             }
@@ -2695,37 +2571,6 @@ void __cdecl GetControlLabel(int control, char* output, bool prefix)
 }
 
 #include <string.h>
-class BSFile
-{
-  public:
-    BSFile(const char*, int, unsigned int, bool);
-    virtual ~BSFile();
-    virtual bool Open(bool, bool);
-    void Close();
-    void Seek(int, int);
-    unsigned int FUN_00aff950(const void*, unsigned int);
-    unsigned int m_uiStreamFlags;
-    void* m_pfnRead;
-    void* m_pfnWrite;
-    unsigned int m_uiBufferAllocSize;
-    unsigned int m_uiBufferReadSize;
-    unsigned int m_uiPos;
-    int m_eMode;
-    char* m_pBuffer;
-    void* m_pFile;
-    bool m_bGood;
-    unsigned int unk2C;
-    bool m_bUseAuxBuffer;
-    void* m_pFileBuffer;
-    int m_iAuxTrueFilePos;
-    unsigned int unk3C;
-    unsigned int unk40;
-    char m_acInputFilePath[0x104];
-    unsigned int unk148;
-    unsigned int unk14C;
-    int m_iTrueFilePos;
-    unsigned int m_uiFileSize;
-};
 extern int DAT_010a2488;
 
 struct FUN_0071dd90_shell
@@ -2745,9 +2590,9 @@ void FUN_0071dd90_shell::WriteLine(const char* apText)
     BSFile file((char*)this + 0x810, 1, 0x2800, true);
     if (file.Open(false, true))
     {
-        file.Seek(0, DAT_010a2488);
-        file.FUN_00aff950(apText, uiLen);
-        file.FUN_00aff950("\r\n", 2);
+        file.BSFile::Seek(0, DAT_010a2488);
+        file.FUN_00aff950(static_cast<const void*>(apText), uiLen);
+        file.FUN_00aff950(static_cast<const void*>("\r\n"), 2);
     }
     file.Close();
 }
@@ -2788,15 +2633,6 @@ struct GameObjStub2
     void* FUN_004459e0(int arg);
 };
 
-class TESModelTextureSwap : public TESBoundObject
-{
-  public:
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void* v04();
-};
 
 class FUN_00701520_cls
 {
@@ -2804,7 +2640,7 @@ class FUN_00701520_cls
     void FUN_00701520();
 };
 
-// For each of 8 slots, resolves an object via FUN_00481090 or a TESModelTextureSwap cast and passes its v04() result to DAT_011c3b3c->FUN_0045a5e0.
+// For each of 8 slots, resolves an object via FUN_00481090 or a TESModelTextureSwap cast and passes its model path to DAT_011c3b3c->FUN_0045a5e0.
 // @fnv 0x00701520
 void FUN_00701520_cls::FUN_00701520()
 {
@@ -2826,7 +2662,7 @@ void FUN_00701520_cls::FUN_00701520()
 
             if (c != 0)
             {
-                ((GameObjStub2*)DAT_011c3b3c)->FUN_0045a5e0(((TESModelTextureSwap*)c)->v04());
+                ((GameObjStub2*)DAT_011c3b3c)->FUN_0045a5e0((void*)((TESModelTextureSwap*)c)->GetModelFilePath());
             }
         }
 

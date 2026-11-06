@@ -1,4 +1,4 @@
-// fallout_shared/bgsprimitive_decls.h: declares NiPoint3, RgbaColor, NiBound, NiUpdateData, NiFixedString and more
+// fallout_shared/bgsprimitive_decls.h: declares NiPoint3, NiColorA, NiBound, NiUpdateData, NiFixedString and more
 #ifndef BGSPRIMITIVE_DECLS_H
 #define BGSPRIMITIVE_DECLS_H
 namespace std {
@@ -12,11 +12,7 @@ class NiPoint3
     float& operator[](unsigned int);
     static const NiPoint3 ZERO;
 };
-class RgbaColor
-{
-  public:
-    float r, g, b, a;
-};
+#include "../../include/NiColorA.h"
 class NiBound
 {
   public:
@@ -52,16 +48,11 @@ class NiGeometryData
 {
   public:
     NiPoint3* GetVertices();
-    RgbaColor* GetColors();
+    NiColorA* GetColors();
     unsigned short GetVertexCount();
     void SetDirtyFlags(unsigned int);
 };
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
+#include "../../include/NiMemObject.h"
 class NiAVObject : public NiMemObject
 {
   public:
@@ -139,7 +130,7 @@ class BGSPrimitive
     BGSPrimitive();
     virtual ~BGSPrimitive();
     int eType;
-    RgbaColor Color;
+    NiColorA Color;
     NiPoint3 m_kRadii;
     NiPointer<NiGeometry> m_kGeometry;
     NiPointer<NiLines> m_kLines;
@@ -153,13 +144,13 @@ class BGSPrimitiveBox : public BGSPrimitive
     virtual ~BGSPrimitiveBox();
     void* m_apBoxData[6];
     void NormalizeRadii(NiPoint3&);
-    void SetColor(RgbaColor&);
+    void SetColor(NiColorA&);
     void Build();
 };
 class BGSPrimitivePlane : public BGSPrimitive
 {
   public:
-    void SetColor(RgbaColor&);
+    void SetColor(NiColorA&);
 };
 typedef char BGSPrimitive_size_check[sizeof(BGSPrimitive) == 0x34 ? 1 : -1];
 typedef char BGSPrimitiveBox_size_check[sizeof(BGSPrimitiveBox) == 0x4c ? 1 : -1];

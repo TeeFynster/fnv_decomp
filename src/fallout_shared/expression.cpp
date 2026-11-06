@@ -63,7 +63,8 @@ void FUN_00594c40_shell::ResetIndex()
     *(int*)((char*)this + 0x100) = 0xffffffff;
 }
 
-struct Interface
+// Exe 0x005934d0: unit-local Interface view; declarations and layout are preserved.
+struct ExpressionInterfaceView
 {
     static void __cdecl PrintDebugMessage(char const*, ...);
 };
@@ -77,7 +78,7 @@ struct Holder5934d0
 void Holder5934d0::SetError(int aiErrorCode)
 {
     err = aiErrorCode;
-    Interface::PrintDebugMessage("%s", g_expressionErrorStrings[aiErrorCode]);
+    ExpressionInterfaceView::PrintDebugMessage("%s", g_expressionErrorStrings[aiErrorCode]);
 }
 
 struct FUN_00594c00_shell

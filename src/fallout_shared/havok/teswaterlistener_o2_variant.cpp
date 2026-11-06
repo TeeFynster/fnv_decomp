@@ -4,6 +4,11 @@
 
 // src/fallout_shared/havok/teswaterlistener.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/teswaterlistener.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../../include/BSOcclusionPlane.h"
+#include "../../../include/BSThread.h"
+#include "../../../include/ExtraDataList.h"
+#include "../../../include/TESDataHandler.h"
+
 struct FUN_0062e750_shell
 {
     void* __thiscall FUN_0062e750(unsigned int flags);
@@ -16,18 +21,6 @@ extern unsigned char DAT_011c7a5a;
 void FUN_0062f8e0(unsigned char value);
 extern float _DAT_011c7a5c;
 void FUN_0062f8f0(float value);
-struct BSOcclusionPlane
-{
-    unsigned int GetCullResult() const;
-};
-struct ExtraDataList
-{
-    unsigned int GetRoomId();
-};
-struct BSThread
-{
-    unsigned int GetThreadID();
-};
 unsigned int __cdecl GetOcclusionPlaneThreadID(BSOcclusionPlane* pPlane);
 extern "C" float __cdecl ExpFloat(float);
 float FUN_00630aa0(float value);
@@ -48,10 +41,6 @@ struct FUN_0062e710_shell
 struct BSSimpleList_Ragdoll
 {
     void* __thiscall FUN_006310e0();
-};
-struct TESDataHandler
-{
-    BSSimpleList_Ragdoll* __thiscall GetBGSRagdollList();
 };
 struct FUN_006310c0_shell
 {

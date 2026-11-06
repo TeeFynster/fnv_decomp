@@ -32,52 +32,14 @@ FNV_STATIC_ASSERT(offsetof(MobileObjectTaskletContext, eType) == 0);
 FNV_STATIC_ASSERT(offsetof(MobileObjectTaskletContext, uiObjectCount) == 4);
 FNV_STATIC_ASSERT(offsetof(MobileObjectTaskletContext, pObject) == 8);
 
-template <class T> class BSTFreeListElement
-{
-  public:
-    BSTFreeListElement();
-    ~BSTFreeListElement();
+#include "../../../../include/BSTStaticFreeList.h"
 
-    unsigned char kRawElem[sizeof(T)];
-    BSTFreeListElement<T>* pNext;
+#include "../../../../include/BSTStaticFreeList.h"
 
-    void ConstructElem(const T& arItem);
-    void DestructElem();
-    T& Elem();
-};
-
-template <class T> class BSTFreeList
-{
-  public:
-    BSTFreeList();
-    virtual ~BSTFreeList();
-
-    unsigned int m_uiLockState;
-    BSTFreeListElement<T>* pFree;
-
-    bool Allocate(BSTFreeListElement<T>*& apElement, const T& arItem);
-    void Deallocate(BSTFreeListElement<T>*& apElement);
-    void Lock();
-    void Unlock();
-
-  protected:
-    void Init(unsigned int auiCount, BSTFreeListElement<T>* apElements);
-
-  private:
-    bool DoAllocate(BSTFreeListElement<T>*& apElement);
-    void DoDeallocate(BSTFreeListElement<T>*& apElement);
-};
-
-template <class T, unsigned int ItemUpdateArray> class BSTStaticFreeList : public BSTFreeList<T>
-{
-  public:
-    BSTStaticFreeList();
-    virtual ~BSTStaticFreeList();
-    BSTFreeListElement<T> kElems[ItemUpdateArray];
-};
-FNV_STATIC_ASSERT(sizeof(BSTFreeListElement<MobileObjectTaskletContext>) == 0x10);
-FNV_STATIC_ASSERT(offsetof(BSTFreeListElement<MobileObjectTaskletContext>, kRawElem) == 0);
-FNV_STATIC_ASSERT(offsetof(BSTFreeListElement<MobileObjectTaskletContext>, pNext) == 0xC);
+#include "../../../../include/BSTStaticFreeList.h"
+FNV_STATIC_ASSERT(sizeof(BSTFreeListElem<MobileObjectTaskletContext>) == 0x10);
+FNV_STATIC_ASSERT(offsetof(BSTFreeListElem<MobileObjectTaskletContext>, kRawElem) == 0);
+FNV_STATIC_ASSERT(offsetof(BSTFreeListElem<MobileObjectTaskletContext>, pNext) == 0xC);
 FNV_STATIC_ASSERT(sizeof(BSTFreeList<MobileObjectTaskletContext>) == 0xC);
 FNV_STATIC_ASSERT(offsetof(BSTFreeList<MobileObjectTaskletContext>, m_uiLockState) == 4);
 FNV_STATIC_ASSERT(offsetof(BSTFreeList<MobileObjectTaskletContext>, pFree) == 8);
@@ -121,8 +83,8 @@ template <class T> class BSTCommonLLMessageQueue : public BSTCommonMessageQueue<
     virtual ~BSTCommonLLMessageQueue();
 
     BSTFreeList<T>* pSizeClassFreeList;
-    BSTFreeListElement<T>* pHead;
-    BSTFreeListElement<T>** m_ppTailLink;
+    BSTFreeListElem<T>* pHead;
+    BSTFreeListElem<T>** m_ppTailLink;
 
     virtual bool EnqueueMessage(const T& arMessage);
     virtual bool RemoveMessage(T& arMessage);

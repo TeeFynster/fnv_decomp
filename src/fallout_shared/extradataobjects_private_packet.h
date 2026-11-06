@@ -287,13 +287,7 @@ class ExtraLock
     void Lock();
 };
 template <class T> class NiTNewInterface;
-template <class T, class A> class NiTArray
-{
-  public:
-    void* vptr;
-    T* data;
-    T& GetAt(unsigned int);
-};
+#include "../../include/NiTArray.h"
 enum MagicSystem__CastingType
 {
     CastingTypeNone

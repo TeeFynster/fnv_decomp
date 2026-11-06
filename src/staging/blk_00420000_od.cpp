@@ -2,11 +2,45 @@
 // src/staging/blk_00420000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
+#include <windows.h>
+#include "../../include/BSStringT.h"
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "../../include/NiPointer.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiTMap.h"
+// The legacy layout helpers overlap the shared scene-object templates.
 #include "../../include/layout_support.h"
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/GO.h"
+#include "../../include/NavMeshPtr.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESSound.h"
+#include "../../include/BSExtraData.h"
+#include "../../include/BaseExtraList.h"
+#include "../../include/Bound.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/ExtraLock.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiInterpController.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/TESLeveledList.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESObjectTREE.h"
+#include "../../include/BSMultiBoundAABB.h"
+#include "../../include/BSMultiBoundOBB.h"
+#include "../../include/BSMultiBound.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/CombatTargetTimestamp.h"
+#include "../../include/TESSaveLoadGame.h"
 
-struct BaseExtraList
+// The shared timestamp declares only its float constructor. This adapter
+// names the game's default constructor without copying the timestamp layout.
+struct DefaultTimestamp : CombatTargetTimestamp
 {
-    bool HasExtraData(unsigned char);
+    DefaultTimestamp();
 };
 
 struct FUN_004216d0_shell
@@ -32,14 +66,6 @@ bool FUN_0042ce90_class::FUN_0042ce90() const
 }
 
 namespace fnv_0042e040 {
-struct BaseExtraList
-{
-    void RemoveExtra(unsigned char);
-};
-
-void BaseExtraList::RemoveExtra(unsigned char)
-{}
-
 struct FUN_0042e040_shell
 {
     void FUN_0042e040();
@@ -48,16 +74,11 @@ struct FUN_0042e040_shell
 // @fnv 0x0042e040
 void FUN_0042e040_shell::FUN_0042e040()
 {
-    ((BaseExtraList*)this)->RemoveExtra(0x4d);
+    ((BaseExtraList*)this)->RemoveExtra((unsigned char)0x4d);
 }
 }  // namespace fnv_0042e040
 
 namespace fnv_0042e110 {
-struct BSExtraData;
-struct BaseExtraList
-{
-    BSExtraData* GetExtraData(unsigned char type);
-};
 struct FUN_0042e110 : BaseExtraList
 {
     BSExtraData* GetExtraData();
@@ -114,18 +135,8 @@ void GlobalObject_00869f00::FUN_0042ff80()
 
 extern void* DAT_01015968;
 
-struct BSExtraData
-{
-    virtual ~BSExtraData();
-};
-
 struct FUN_00435ef0 : public BSExtraData
 {
-    void* vtbl;
-    int a;
-    int b;
-    int c;
-    int d;
     void FUN_00435ef0_init();
 };
 
@@ -138,11 +149,6 @@ void FUN_00435ef0::FUN_00435ef0_init()
     this->BSExtraData::~BSExtraData();
 }
 
-struct FUN_006815c0
-{
-    void* __thiscall _ref_006815c0();
-};
-
 struct FUN_00437dd0_Class
 {
     void* FUN_00437dd0();
@@ -151,7 +157,7 @@ struct FUN_00437dd0_Class
 // @fnv 0x00437dd0
 void* FUN_00437dd0_Class::FUN_00437dd0()
 {
-    return *(void**)(((FUN_006815c0*)((char*)this + 0x20))->_ref_006815c0());
+    return *(void**)&((Bound*)((char*)this + 0x20))->FUN_006815c0();
 }
 
 extern int DAT_01015fbc;
@@ -222,18 +228,11 @@ void FUN_004385a0Class::FUN_004385a0()
 }
 }  // namespace fnv_004385a0
 
-extern int DAT_01016010;
-struct BSSimpleArrayShell
-{
-    void FUN_00438a60(unsigned int, unsigned int);
-    BSSimpleArrayShell* FUN_004385c0();
-};
 // @fnv 0x004385c0
-BSSimpleArrayShell* BSSimpleArrayShell::FUN_004385c0()
+template <>
+BSSimpleArray<CombatTargetTimestamp, 1024>::BSSimpleArray()
 {
-    *reinterpret_cast<int**>(this) = &DAT_01016010;
-    FUN_00438a60(0, 0);
-    return this;
+    _InitialSetup(0, 0);
 }
 
 namespace fnv_00438690 {
@@ -336,24 +335,11 @@ void FUN_004392c0_shell::FUN_00439320()
     FUN_004392c0();
 }
 
-struct NiObjectNET
-{
-    void FUN_00439360(unsigned short a, unsigned int b, unsigned int c);
-    void FUN_00439340(unsigned short a);
-};
-
 // @fnv 0x00439340
 void NiObjectNET::FUN_00439340(unsigned short a)
 {
     FUN_00439360(a, 0x1e, 1);
 }
-
-namespace fnv_00439390 {
-struct NiObjectNET
-{
-    void FUN_00439360(unsigned short a, unsigned int b, unsigned int c);
-    void FUN_00439390(unsigned short a);
-};
 
 // Calls FUN_00439360 with the given unsigned short and the constants 0x1e0 and 5.
 // @fnv 0x00439390
@@ -361,23 +347,13 @@ void NiObjectNET::FUN_00439390(unsigned short ausValue)
 {
     FUN_00439360(ausValue, 0x1e0, 5);
 }
-}  // namespace fnv_00439390
-
-struct NiPoint3
-{
-    float x, y, z;
-};
-
-struct FUN_00439680_class
-{
-    void FUN_00439680(const NiPoint3& p);
-};
 
 // Stores the given NiPoint3 into the object at offset 0x18.
 // @fnv 0x00439680
-void FUN_00439680_class::FUN_00439680(const NiPoint3& aPoint)
+void Bound::FUN_00439680(const NiPoint3& aPoint)
 {
-    *(NiPoint3*)((char*)this + 0x18) = aPoint;
+    struct PointWords { unsigned int x, y, z; };
+    *(PointWords*)((char*)this + 0x18) = *(const PointWords*)&aPoint;
 }
 
 struct FUN_0043b260_Class
@@ -405,15 +381,6 @@ void TaskQueueInterface::FUN_0043b350(bool enabled)
     SetTaskFlagDWord(enabled, 0x80);
 }
 
-struct TESForm
-{
-    void Revert(unsigned int);
-};
-
-struct TESObjectTREE
-{
-    TESForm* GetData();
-};
 
 struct FUN_0043b5b0_shell
 {
@@ -423,7 +390,7 @@ struct FUN_0043b5b0_shell
 // @fnv 0x0043b5b0
 void FUN_0043b5b0_shell::FUN_0043b5b0()
 {
-    ((TESObjectTREE*)this)->GetData()->Revert(1);
+    ((TESForm*)((TESObjectTREE*)this)->GetData())->Revert(1);
 }
 
 struct FUN_0043ba10_shell
@@ -442,10 +409,6 @@ void FUN_0043b9f0_shell::FUN_0043b9f0(FUN_0043ba10_shell* p)
     ((FUN_0043ba10_shell*)((char*)this + 8))->FUN_0043ba10(p);
 }
 
-struct GO
-{
-    void* operator=(void*);
-};
 
 struct FUN_0043baa0_class
 {
@@ -474,68 +437,39 @@ bool __thiscall FUN_0043fab0_class::FUN_0043fab0()
 extern "C" void* __cdecl _NiFreeAlias(void*);
 extern int DAT_01015a1c;
 
-struct FUN_0042fee0_cls : NiTPointerMap<int, int>
-{
-    void FUN_0042fee0();
-};
-
-// Resets the vtable pointer, removes all entries from the map, and frees the pointer stored at offset 8.
 // @fnv 0x0042fee0
-void __thiscall FUN_0042fee0_cls::FUN_0042fee0()
+template <>
+NiTMapBase<DFALL<NiTMapItem<TESObjectREFR*, bool> >, TESObjectREFR*, bool>::~NiTMapBase()
 {
-    *(void**)this = &DAT_01015a1c;
     RemoveAll();
-    _NiFreeAlias(*(void**)((char*)this + 8));
+    _NiFreeAlias(m_ppkHashTable);
 }
 
 extern int DAT_01015f24;
 
-struct BE
-{
-    BE(unsigned char);
-};
-
-struct FUN_00436ac0 : BE
+struct FUN_00436ac0 : BSExtraData
 {
     FUN_00436ac0();
 };
 
 // Initialises the base with tag 0x55, installs the vtable pointer from DAT_01015f24, and zeroes the field at offset 0xc.
 // @fnv 0x00436ac0
-FUN_00436ac0::FUN_00436ac0() : BE(0x55)
+FUN_00436ac0::FUN_00436ac0() : BSExtraData(0x55)
 {
-    *reinterpret_cast<int**>(this) = &DAT_01015f24;
     *reinterpret_cast<int*>(reinterpret_cast<char*>(this) + 0xc) = 0;
 }
 
-namespace fnv_00438780 {
-extern "C" void __cdecl _NiFreeAlias(void*);
-extern void* DAT_01016038;
-
-struct NiTPointerMap_00438780
-{
-    void* m_pVTable;
-    int m_nSize;
-    void* m_pData;
-    void RemoveAll();
-    void FUN_00438780();
-};
-
-// Sets the vtable pointer, removes all entries, and frees the data buffer via _NiFreeAlias.
+class WaterZone;
+// RTTI at vtable 0x01016038 identifies NiTMapBase<DFALL<NiTMapItem<WaterZone*, int> >, WaterZone*, int>.
 // @fnv 0x00438780
-void NiTPointerMap_00438780::FUN_00438780()
+template <>
+NiTMapBase<DFALL<NiTMapItem<WaterZone*, int> >, WaterZone*, int>::~NiTMapBase()
 {
-    m_pVTable = &DAT_01016038;
     RemoveAll();
-    _NiFreeAlias(m_pData);
+    _NiFreeAlias(m_ppkHashTable);
 }
-}  // namespace fnv_00438780
 
-struct NavMeshPtr
-{
-    void __thiscall FUN_0042fa40();
-    void* __thiscall FUN_0042ffa0(unsigned int flags);
-};
+
 void __cdecl Deallocate(void*);
 // Calls FUN_0042fa40, then deallocates this if the flags bit 0 is set, and returns this.
 // @fnv 0x0042ffa0
@@ -547,7 +481,7 @@ void* __thiscall NavMeshPtr::FUN_0042ffa0(unsigned int flags)
     return this;
 }
 
-struct FUN_0042ffd0_cls : public FUN_0042fee0_cls
+struct FUN_0042ffd0_cls
 {
     void* __thiscall FUN_0042ffd0(unsigned int flags);
 };
@@ -556,40 +490,32 @@ struct FUN_0042ffd0_cls : public FUN_0042fee0_cls
 // @fnv 0x0042ffd0
 void* __thiscall FUN_0042ffd0_cls::FUN_0042ffd0(unsigned int flags)
 {
-    FUN_0042fee0();
+    ((NiTMapBase<DFALL<NiTMapItem<TESObjectREFR*, bool> >, TESObjectREFR*, bool>*)this)->NiTMapBase::~NiTMapBase();
     if (flags & 1)
         Deallocate(this);
     return this;
 }
 
-struct FUN_00435ec0 : public BE
+struct FUN_00435ec0 : public BSExtraData
 {
-    void* vtbl;
-    int a;
-    int b;
     void* p;
     FUN_00435ec0(void* a);
 };
 // Initialises the object with base value 0x46, sets its vtable to DAT_01015968 and stores the passed pointer in p.
 // @fnv 0x00435ec0
-FUN_00435ec0::FUN_00435ec0(void* a) : BE(0x46)
+FUN_00435ec0::FUN_00435ec0(void* a) : BSExtraData(0x46)
 {
-    vtbl = &DAT_01015968;
     p = a;
 }
 
-struct FUN_00435f20_class : public BE
+struct FUN_00435f20_class : public BSExtraData
 {
-    const char* m_pName;
-    int m_auiShapeKeys;
-    int m_pAuxiliaryObject;
     float m_fValue;
     FUN_00435f20_class(float f);
 };
 // @fnv 0x00435f20
-FUN_00435f20_class::FUN_00435f20_class(float f) : BE(0x48)
+FUN_00435f20_class::FUN_00435f20_class(float f) : BSExtraData(0x48)
 {
-    m_pName = "P_C";
     m_fValue = f;
 }
 
@@ -613,18 +539,14 @@ void* __thiscall FUN_00435f50_class::FUN_00435f50(unsigned int flags)
 }
 
 extern "C" void* DAT_01015974;
-struct FUN_00436090 : public BE
+struct FUN_00436090 : public BSExtraData
 {
-    void* vtbl;
-    int a;
-    int b;
     unsigned char c;
     FUN_00436090(unsigned char);
 };
 // @fnv 0x00436090
-FUN_00436090::FUN_00436090(unsigned char x) : BE(0x4e)
+FUN_00436090::FUN_00436090(unsigned char x) : BSExtraData(0x4e)
 {
-    vtbl = &DAT_01015974;
     c = x;
 }
 
@@ -726,23 +648,37 @@ void* FUN_00436af0_Class::FUN_00436af0(unsigned int flags)
 void __cdecl FUN_00438720(FUN_004383b0_Class*);
 struct FUN_00438410_Class
 {
-    void* __thiscall FUN_00438720();
     void* __thiscall FUN_00438410(unsigned int flags);
 };
 // Calls FUN_00438720, then deallocates this if flags has bit 0 set, and returns this.
 // @fnv 0x00438410
 void* __thiscall FUN_00438410_Class::FUN_00438410(unsigned int flags)
 {
-    FUN_00438720();
+    ((NiTMap<WaterZone*, int>*)this)->NiTMap::~NiTMap();
     if (flags & 1)
         Deallocate(this);
     return this;
 }
 
-struct FUN_004388a0_Class
+// RTTI at vtable 0x01016058 identifies BSMapBase<TESFaction*, bool>.
+class FactionMembershipMapBase
 {
-    void* __thiscall FUN_004388a0();
+  public:
+    virtual ~FactionMembershipMapBase();
+
+    void RemoveAll();
+
+    unsigned int m_uiHashSize;
+    void** m_ppkHashTable;
+    unsigned int m_uiCount;
 };
+
+class FactionMembershipMap : public FactionMembershipMapBase
+{
+  public:
+    virtual ~FactionMembershipMap();
+};
+
 struct FUN_00438440_Class
 {
     void* __thiscall FUN_00438440(unsigned int flags);
@@ -750,7 +686,7 @@ struct FUN_00438440_Class
 // @fnv 0x00438440
 void* __thiscall FUN_00438440_Class::FUN_00438440(unsigned int flags)
 {
-    ((FUN_004388a0_Class*)this)->FUN_004388a0();
+    ((FactionMembershipMap*)this)->FactionMembershipMap::~FactionMembershipMap();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -772,30 +708,15 @@ void* __thiscall FUN_00438970_class::FUN_00438970(unsigned int flags)
     return this;
 }
 
-struct FUN_004389a0_Class
+// Entry-point adapter for the scalar deleting destructor; it carries no map layout.
+struct WaterZoneMapBaseDeletion
 {
-    void* __thiscall FUN_004385f0();
-    void* __thiscall FUN_004389a0(unsigned int flags);
-};
-// Calls FUN_004385f0, then deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x004389a0
-void* FUN_004389a0_Class::FUN_004389a0(unsigned int flags)
-{
-    FUN_004385f0();
-    if (flags & 1)
-        Deallocate(this);
-    return this;
-}
-
-struct FUN_00438780_Class
-{
-    void FUN_00438780();
     void* FUN_00438a00(unsigned int flags);
 };
 // @fnv 0x00438a00
-void* FUN_00438780_Class::FUN_00438a00(unsigned int flags)
+void* WaterZoneMapBaseDeletion::FUN_00438a00(unsigned int flags)
 {
-    FUN_00438780();
+    ((NiTMapBase<DFALL<NiTMapItem<WaterZone*, int> >, WaterZone*, int>*)this)->NiTMapBase::~NiTMapBase();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -842,9 +763,8 @@ struct Flt
 {
     operator unsigned int();
 };
-struct Holder00420dd0
+struct Holder00420dd0 : BaseExtraList
 {
-    BSExtraData* __thiscall GetExtraData(unsigned char);
     unsigned int __thiscall FUN_00420dd0();
 };
 // @fnv 0x00420dd0
@@ -858,11 +778,8 @@ unsigned int __thiscall Holder00420dd0::FUN_00420dd0()
 
 extern int DAT_01015998;
 
-struct FUN_0042cba0_class : public BE
+struct FUN_0042cba0_class : public BSExtraData
 {
-    void* vtbl;
-    int a;
-    int b;
     int c;
     int d;
     FUN_0042cba0_class();
@@ -870,23 +787,22 @@ struct FUN_0042cba0_class : public BE
 
 // Initialises the object with base value 0x6e, sets its vtbl to DAT_01015998, and zeroes fields c and d.
 // @fnv 0x0042cba0
-FUN_0042cba0_class::FUN_0042cba0_class() : BE(0x6e)
+FUN_0042cba0_class::FUN_0042cba0_class() : BSExtraData(0x6e)
 {
-    vtbl = (void*)&DAT_01015998;
     c = 0;
     d = 0;
 }
 
-struct FHolder_42cbe0 : BE
+struct FHolder_42cbe0 : BSExtraData
 {
     void* __thiscall FUN_0042cbe0();
 };
 extern int DAT_010151fc;
-// Initialises the object with BE(0x70), installs the vtable pointer DAT_010151fc, zeroes the field at offset 0xc, and returns this.
+// Initialises the object with BSExtraData(0x70), installs the vtable pointer DAT_010151fc, zeroes the field at offset 0xc, and returns this.
 // @fnv 0x0042cbe0
 void* __thiscall FHolder_42cbe0::FUN_0042cbe0()
 {
-    this->BE::BE(0x70);
+    this->BSExtraData::BSExtraData(0x70);
     *(void**)this = (void*)&DAT_010151fc;
     *(int*)((char*)this + 0xc) = 0;
     return this;
@@ -912,15 +828,8 @@ FUN_0042cc10_class* __thiscall FUN_0042cc10_class::FUN_0042cc10()
 struct FUN_00432470 : public BSExtraData
 {
     int x;
-    int y;
-    int z;
     FUN_00432470(int v);
     ~FUN_00432470();
-};
-struct ExtraListHelper
-{
-    BSExtraData* GetExtraData(unsigned char);
-    BSExtraData* AddExtra(BSExtraData*);
 };
 struct FUN_0042dee0_shell
 {
@@ -930,11 +839,11 @@ struct FUN_0042dee0_shell
 // @fnv 0x0042dee0
 void __thiscall FUN_0042dee0_shell::FUN_0042dee0(int aiValue)
 {
-    BSExtraData* extra = ((ExtraListHelper*)this)->GetExtraData(0x4d);
+    BSExtraData* extra = ((BaseExtraList*)this)->GetExtraData(0x4d);
     if (!extra)
     {
         extra = new FUN_00432470(aiValue);
-        ((ExtraListHelper*)this)->AddExtra(extra);
+        ((BaseExtraList*)this)->AddExtra(extra);
     }
     else
     {
@@ -942,16 +851,6 @@ void __thiscall FUN_0042dee0_shell::FUN_0042dee0(int aiValue)
     }
 }
 
-struct ExtraDataList
-{
-    BSExtraData* GetExtraData(unsigned char);
-};
-struct ExtraLock
-{
-    bool FUN_0042dff0();
-    void FUN_0042e010(int);
-    ~ExtraLock();
-};
 struct FUN_0042df90_shell
 {
     ExtraLock* FUN_0042df90(int a);
@@ -967,45 +866,33 @@ ExtraLock* FUN_0042df90_shell::FUN_0042df90(int a)
 }
 
 extern int DAT_01015980;
-struct FUN_0042e210_Class : public BE
+struct FUN_0042e210_Class : public BSExtraData
 {
-    void* vtbl;
-    int a;
-    int b;
     int c;
     int d;
     FUN_0042e210_Class(int x, int y);
 };
-// Initializes the object with base BE(0x5b), sets vtbl to DAT_01015980, and stores x into c and y into d.
+// Initializes the object with base BSExtraData(0x5b), sets vtbl to DAT_01015980, and stores x into c and y into d.
 // @fnv 0x0042e210
-FUN_0042e210_Class::FUN_0042e210_Class(int x, int y) : BE(0x5b)
+FUN_0042e210_Class::FUN_0042e210_Class(int x, int y) : BSExtraData(0x5b)
 {
-    vtbl = &DAT_01015980;
     c = x;
     d = y;
 }
 
 extern void* DAT_010159bc;
-struct FUN_0042e650_class : BE
+struct FUN_0042e650_class : BSExtraData
 {
-    void* vtbl;
-    int a;
-    int b;
     unsigned char c;
     FUN_0042e650_class(unsigned char c);
 };
 // Initialises the object with base value 0x8e, sets its vtbl to DAT_010159bc and stores c in field c.
 // @fnv 0x0042e650
-FUN_0042e650_class::FUN_0042e650_class(unsigned char aucValue) : BE(0x8e)
+FUN_0042e650_class::FUN_0042e650_class(unsigned char aucValue) : BSExtraData(0x8e)
 {
-    vtbl = &DAT_010159bc;
     this->c = aucValue;
 }
 
-struct NiAVObject
-{
-    void FUN_00401970();
-};
 struct G00559a40
 {
     void FUN_0040f6e0();
@@ -1125,14 +1012,6 @@ struct FNStub
 {
     const char* GetFullName();
 };
-struct TESModel
-{
-    unsigned int GetModelLength();
-};
-struct TESSound
-{
-    unsigned int Deallocate();
-};
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
 void __cdecl FUN_004858f0(unsigned int, unsigned char);
 void __cdecl FUN_00485910(unsigned int, unsigned int);
@@ -1220,17 +1099,11 @@ struct Mat9
 {
     int v[9];
 };
-struct FUN_004396b0_class
-{
-    char _pad[0x24];
-    Mat9 m;
-    void __thiscall FUN_004396b0(const Mat9& src);
-};
 // Copies the 9-element matrix src into the object's m field.
 // @fnv 0x004396b0
-void __thiscall FUN_004396b0_class::FUN_004396b0(const Mat9& aMatrix)
+void __thiscall Bound::FUN_004396b0(const Matrix& aMatrix)
 {
-    m = aMatrix;
+    *(Mat9*)((char*)this + 0x24) = *(const Mat9*)&aMatrix;
 }
 
 struct FUN_00439f50_class
@@ -1269,11 +1142,6 @@ void __thiscall ScriptPool::FUN_00439fd0(const void* arg)
     FUN_0049fa20(p);
 }
 
-struct TESSaveLoadGame
-{
-    void ReadTypedData(void* p, unsigned int size);
-    void FUN_00857aa0(unsigned int* pOut, int size);
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 
 struct FUN_0043a9a0_class
@@ -1382,13 +1250,10 @@ struct FUN_00435820 : public BSExtraData
 {
     FUN_00435820();
     ~FUN_00435820();
-    char m_data[0xc];
+    char m_data[4];
 };
 struct FUN_00420e00_cls : public BaseExtraList
 {
-    BSExtraData* GetExtraData(unsigned char);
-    BSExtraData* AddExtra(BSExtraData*);
-    void RemoveExtra(unsigned char);
     void FUN_00420e00(void* p);
 };
 // Stores p in the extra data of type 0x78, creating and adding it if absent, or removes that extra data when p is null.
@@ -1411,14 +1276,12 @@ void FUN_00420e00_cls::FUN_00420e00(void* apData)
     }
     else
     {
-        RemoveExtra(0x78);
+        RemoveExtra((unsigned char)0x78);
     }
 }
 
-struct FUN_00421600_Class
+struct FUN_00421600_Class : BaseExtraList
 {
-    BSExtraData* GetExtraData(unsigned char);
-    BSExtraData* AddExtra(BSExtraData*);
     void FUN_00421600(unsigned char val);
 };
 // Stores val in the byte at offset 0xc of extra data 0x4e, creating a new FUN_00436090 extra if none exists.
@@ -1445,8 +1308,6 @@ struct ListX
 };
 struct FUN_00433830 : public BSExtraData
 {
-    void* m_pData;
-    int m_iFlags;
     ListX m_kEntryList;
     ~FUN_00433830();
 };
@@ -1482,15 +1343,6 @@ FUN_00438820_Class::FUN_00438820_Class(int aiCount)
     }
 }
 
-struct BaseExtraList2
-{
-    BSExtraData* GetExtraData(unsigned char type);
-    BSExtraData* AddExtra(BSExtraData* extra);
-};
-struct TESLeveledList
-{
-    void FUN_0042e680(unsigned char type);
-};
 struct FUN_0042e5a0_class
 {
     void FUN_0042e5a0(unsigned char type);
@@ -1498,11 +1350,11 @@ struct FUN_0042e5a0_class
 // @fnv 0x0042e5a0
 void FUN_0042e5a0_class::FUN_0042e5a0(unsigned char type)
 {
-    BSExtraData* extra = ((BaseExtraList2*)this)->GetExtraData(0x8e);
+    BSExtraData* extra = ((BaseExtraList*)this)->GetExtraData(0x8e);
     if (!extra)
     {
         extra = (BSExtraData*)new FUN_0042e650_class(type);
-        ((BaseExtraList2*)this)->AddExtra(extra);
+        ((BaseExtraList*)this)->AddExtra(extra);
     }
     else
     {
@@ -1547,10 +1399,6 @@ NiPoint3* FUN_00439ef0_class::FUN_00439ef0(NiPoint3* apResult, const NiPoint3& a
     return apResult;
 }
 
-struct NiInterpController
-{
-    static const unsigned short INVALID_INDEX;
-};
 struct FUN_0043b3b0_class
 {
     unsigned short FUN_0043b3b0(unsigned int value);
@@ -1619,11 +1467,6 @@ void FUN_00420c10_Class::FUN_00420c10(int value)
 
 struct FUN_0042cca0 : public BSExtraData
 {
-    void* vtbl;
-    int a;
-    int b;
-    int c;
-    int d;
     virtual ~FUN_0042cca0();
 };
 // @fnv 0x0042cca0
@@ -1644,12 +1487,7 @@ int FUN_0042dff0_shell::FUN_0042dff0()
     return ((BSSimpleListTESRaceSize*)((char*)this + 0xc))->GetSize() == 0 ? 1 : 0;
 }
 
-struct FUN_0042e130_Base
-{
-    void RemoveExtra(unsigned char);
-};
-
-struct FUN_0042e130_shell : FUN_0042e130_Base
+struct FUN_0042e130_shell : BaseExtraList
 {
     void FUN_0042e130();
 };
@@ -1657,7 +1495,7 @@ struct FUN_0042e130_shell : FUN_0042e130_Base
 // @fnv 0x0042e130
 void FUN_0042e130_shell::FUN_0042e130()
 {
-    FUN_0042e130_Base::RemoveExtra(0x55);
+    BaseExtraList::RemoveExtra((unsigned char)0x55);
 }
 
 struct FUN_0042e6d0 : public BSExtraData
@@ -1687,72 +1525,45 @@ void* NavMeshArr::FUN_0042f510(unsigned int flags)
     return this;
 }
 
-struct BSSimpleArrayActor
-{
-    void* m_vtbl;
-    int* m_data;
-    unsigned int m_iElementCount;
-    unsigned int m_pRayCursor;
-
-    void Clear(bool);
-    void FUN_0042f5f0(unsigned int count, bool clear);
-};
-
-struct FUN_0042fc00_shell
-{
-    void __thiscall FUN_0042fc00(void* count, unsigned int size);
-};
-
-struct BSSimpleArrayShell_FUN_00430000
-{
-    void __thiscall FUN_00430000(void* data, unsigned int count);
-};
-
-struct FUN_0072ba80_shell
-{
-    void __thiscall FUN_0072ba80(char* data, unsigned int count);
-};
-
 // @fnv 0x0042f5f0
-void BSSimpleArrayActor::FUN_0042f5f0(unsigned int count, bool clear)
+template <>
+void BSSimpleArray<CombatTargetTimestamp, 1024>::SetSize(unsigned int count, bool clear)
 {
     if (count == 0)
     {
         Clear(clear);
     }
-    else if (count > m_pRayCursor)
+    else if (count > SimpleArrayStorage)
     {
-        if (m_pRayCursor == 0)
+        if (SimpleArrayStorage == 0)
         {
-            typedef int*(__thiscall * GrowProc)(BSSimpleArrayActor*, unsigned int);
-            m_data = reinterpret_cast<GrowProc*>(m_vtbl)[1](this, count);
-            m_pRayCursor = count;
+            pBuffer = _Allocate(count);
+            SimpleArrayStorage = count;
         }
         else
         {
-            reinterpret_cast<FUN_0042fc00_shell*>(this)->FUN_0042fc00(reinterpret_cast<void*>(count), m_iElementCount);
-            m_pRayCursor = count;
+            ReallocateStorage(count, iSize);
+            SimpleArrayStorage = count;
         }
 
-        reinterpret_cast<BSSimpleArrayShell_FUN_00430000*>(this)->FUN_00430000(m_data + m_iElementCount, count - m_iElementCount);
-        m_iElementCount = count;
+        InitializeItems(pBuffer + iSize, count - iSize);
+        iSize = count;
     }
-    else if (count < m_iElementCount)
+    else if (count < iSize)
     {
-        reinterpret_cast<FUN_0072ba80_shell*>(this)->FUN_0072ba80(reinterpret_cast<char*>(m_data + count),
-                                                                  m_iElementCount - count);
-        m_iElementCount = count;
+        ReleaseElements(pBuffer + count, iSize - count);
+        iSize = count;
 
-        if (clear && count <= m_pRayCursor / 4)
+        if (clear && count <= SimpleArrayStorage / 4)
         {
-            reinterpret_cast<FUN_0042fc00_shell*>(this)->FUN_0042fc00(reinterpret_cast<void*>(count), count);
-            m_pRayCursor = count;
+            ReallocateStorage(count, count);
+            SimpleArrayStorage = count;
         }
     }
     else
     {
-        reinterpret_cast<BSSimpleArrayShell_FUN_00430000*>(this)->FUN_00430000(m_data + m_iElementCount, count - m_iElementCount);
-        m_iElementCount = count;
+        InitializeItems(pBuffer + iSize, count - iSize);
+        iSize = count;
     }
 }
 
@@ -1770,21 +1581,13 @@ void __fastcall AC_0042f730::FUN_0042f760()
         ((AC_0042f730*)vtbl)->FUN_0066e2b0();
 }
 
-struct NiPointerStandIn
-{
-    bool operator==(int) const;
-};
 // @fnv 0x0042ff30
 void FUN_0042ff10_cls::FUN_0042ff30(int aiValue)
 {
-    ((NiPointerStandIn*)this)->operator==(aiValue);
+    ((NiPointer<NiAVObject>*)this)->operator==(*reinterpret_cast<const NiPointer<NiAVObject>*>(aiValue));
 }
 
-struct BSExtraDataHelper
-{
-    virtual ~BSExtraDataHelper();
-};
-struct FUN_00435f80 : public BSExtraDataHelper
+struct FUN_00435f80 : public BSExtraData
 {
     virtual ~FUN_00435f80();
 };
@@ -1818,23 +1621,12 @@ struct FUN_00436bb0 : public BSExtraData
 FUN_00436bb0::~FUN_00436bb0()
 {}
 
-namespace fnv_004385f0 {
-struct BSSimpleArrayActor
-{
-    void* m_vtbl;
-    void Clear(bool);
-};
-struct FUN_004385f0_Class
-{
-    void __thiscall FUN_004385f0();
-};
 // @fnv 0x004385f0
-void __thiscall FUN_004385f0_Class::FUN_004385f0()
+template <>
+BSSimpleArray<CombatTargetTimestamp, 1024>::~BSSimpleArray()
 {
-    *(void**)this = &DAT_01016010;
-    ((BSSimpleArrayActor*)this)->Clear(true);
+    Clear(true);
 }
-}  // namespace fnv_004385f0
 
 struct FUN_0043a080_Node
 {
@@ -1903,13 +1695,6 @@ void ExtraListShell::FUN_004216b0()
 
 extern "C" void* DAT_0101598c;
 
-struct FUN_0040ecb0
-{
-    virtual ~FUN_0040ecb0();
-    int unk04;
-    int unk08;
-};
-
 struct FUN_0042f780
 {
     int unk00;
@@ -1920,7 +1705,7 @@ struct FUN_0042f780
     ~FUN_0042f780();
 };
 
-struct FUN_0042cb30 : public FUN_0040ecb0
+struct FUN_0042cb30 : public BSExtraData
 {
     FUN_0042f780 unk0c;
 
@@ -1934,40 +1719,20 @@ FUN_0042cb30::~FUN_0042cb30()
     unk0c.Init(0);
 }
 
-class BSString42C
-{
-  public:
-    BSString42C();
-    ~BSString42C();
-
-    char* m_pString;
-    unsigned short m_usLen;
-    unsigned short m_usMaxLen;
-};
-
-class BSExtraData42C
-{
-  public:
-    BSExtraData42C(unsigned char ucType);
-    virtual ~BSExtraData42C();
-
-    unsigned char m_ucType;
-    BSExtraData42C* m_pkNext;
-};
-
-class FUN_0042ccc0 : public BSExtraData42C
+// The two strings call BSStringT<char>::BSStringT at 0x004037b0.
+class FUN_0042ccc0 : public BSExtraData
 {
   public:
     FUN_0042ccc0();
     virtual ~FUN_0042ccc0();
 
-    BSString42C m_kFirst;
-    BSString42C m_kSecond;
+    BSStringT<char> m_kFirst;
+    BSStringT<char> m_kSecond;
 };
 
-// Constructs a BSExtraData42C-derived extra-data object of type 0x8f holding two BSString42C members.
+// Constructs a BSExtraData-derived extra-data object of type 0x8f holding two BSStringT<char> members.
 // @fnv 0x0042ccc0
-FUN_0042ccc0::FUN_0042ccc0() : BSExtraData42C(0x8f)
+FUN_0042ccc0::FUN_0042ccc0() : BSExtraData(0x8f)
 {}
 
 struct FUN_00436b20
@@ -2020,42 +1785,23 @@ void B42FA60Allocator::FUN_0042fa60(B42FA60Entry* pkArray, unsigned int ItemUpda
         new (&pkArray[i]) B42FA60Entry;
 }
 
-class B42FE80MapBase
-{
-  public:
-    virtual ~B42FE80MapBase();
-    int m_uiHashSize;
-    void** m_ppkHashTable;
-    int m_uiCount;
-};
-
-class FUN_0042fe80_Map : public B42FE80MapBase
-{
-  public:
-    virtual ~FUN_0042fe80_Map();
-    void RemoveAll();
-};
-
 // @fnv 0x0042fe80
-FUN_0042fe80_Map::~FUN_0042fe80_Map()
+template <>
+NiTMap<TESObjectREFR*, bool>::~NiTMap()
 {
     RemoveAll();
 }
 
 void* __cdecl operator new(unsigned int, void*);
 void __cdecl operator delete(void*, void*);
-struct FUN_004300a0
-{
-    void* m_uiFilterValue;
-    FUN_004300a0();
-};
-// Default-constructs count FUN_004300a0 objects in place at data.
+// Default-constructs count timestamps in place at data.
 // @fnv 0x00430000
-void BSSimpleArrayShell_FUN_00430000::FUN_00430000(void* data, unsigned int count)
+template <>
+void BSSimpleArray<CombatTargetTimestamp, 1024>::InitializeItems(CombatTargetTimestamp* data, unsigned int count)
 {
     for (unsigned int index = 0; index < count; ++index)
     {
-        new (&static_cast<FUN_004300a0*>(data)[index]) FUN_004300a0;
+        new (&data[index]) DefaultTimestamp;
     }
 }
 
@@ -2064,21 +1810,13 @@ struct SpawnedSub
     ~SpawnedSub();
 };
 
-struct SpawnedBase
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    ~SpawnedBase();
-};
-
-struct FUN_00435ce0_cls : public SpawnedBase
+struct FUN_00435ce0_cls : public BSExtraData
 {
     SpawnedSub m_0c;
     ~FUN_00435ce0_cls();
 };
 
-// Destructor for FUN_00435ce0_cls that destroys its SpawnedSub member and base SpawnedBase.
+// Destructor for FUN_00435ce0_cls that destroys its SpawnedSub member and base BSExtraData.
 // @fnv 0x00435ce0
 FUN_00435ce0_cls::~FUN_00435ce0_cls()
 {}
@@ -2318,17 +2056,8 @@ struct SlottedSource
     virtual Vec3Sub* GetVariedData();
     Vec3Sub* GetFixedData();
 };
-struct RootCtorCls
+struct FUN_00435fa0_cls : BSExtraData
 {
-    virtual void v0();
-    RootCtorCls(unsigned int sizeInit);
-    ~RootCtorCls();
-};
-struct FUN_00435fa0_cls : RootCtorCls
-{
-    virtual void v0();
-    int unk04;
-    int unk08;
     Vec3Sub m_kPointA;
     Vec3Sub m_kPointB;
     Vec3Sub m_iThirdValue;
@@ -2336,7 +2065,7 @@ struct FUN_00435fa0_cls : RootCtorCls
 };
 
 // @fnv 0x00435fa0
-FUN_00435fa0_cls::FUN_00435fa0_cls(SlottedSource* apSource) : RootCtorCls(0x4c)
+FUN_00435fa0_cls::FUN_00435fa0_cls(SlottedSource* apSource) : BSExtraData(0x4c)
 {
     if (apSource != 0)
     {
@@ -2361,47 +2090,27 @@ struct EhGuard
     {}
 };
 
-struct Base4f
+struct ExtraValue004360c0
 {
-    virtual void Tick();
-    int unk04;
-    int unk08;
-
-    Base4f(int flags);
-    ~Base4f();
-};
-
-struct Member12
-{
-    Member12();
-    ~Member12();
+    ExtraValue004360c0();
+    ~ExtraValue004360c0();
     void Assign(const Arg12& value);
 };
 
-struct FUN_004360c0_cls : public Base4f
+struct FUN_004360c0_cls : public BSExtraData
 {
     virtual void Update();
-    Member12 m_0c;
+    ExtraValue004360c0 m_0c;
 
     FUN_004360c0_cls(Arg12 value);
 };
 
 // Initializes the base with flags 0x4f and assigns the given Arg12 value to m_0c.
 // @fnv 0x004360c0
-FUN_004360c0_cls::FUN_004360c0_cls(Arg12 value) : Base4f(0x4f), m_0c()
+FUN_004360c0_cls::FUN_004360c0_cls(Arg12 value) : BSExtraData(0x4f), m_0c()
 {
     m_0c.Assign(value);
 }
-
-struct Base_004361e0
-{
-    virtual void v00();
-    int unk04;
-    int unk08;
-
-    Base_004361e0(int aValue);
-    ~Base_004361e0();
-};
 
 struct Arg12_004361e0
 {
@@ -2424,7 +2133,7 @@ struct Member_004361e0
     void Add(Arg12_004361e0* pArg);
 };
 
-struct FUN_004361e0 : Base_004361e0
+struct FUN_004361e0 : BSExtraData
 {
     Member_004361e0 m_0C;
 
@@ -2434,7 +2143,7 @@ struct FUN_004361e0 : Base_004361e0
 
 // Initializes the base with 0x7d and adds the passed argument to the member at offset 0x0C.
 // @fnv 0x004361e0
-FUN_004361e0::FUN_004361e0(Arg12_004361e0 aArg) : Base_004361e0(0x7d)
+FUN_004361e0::FUN_004361e0(Arg12_004361e0 aArg) : BSExtraData(0x7d)
 {
     m_0C.Add(&aArg);
 }
@@ -2456,17 +2165,7 @@ class ChildMember
     void Attach(ParamBlock* p);
 };
 
-class NodeBase
-{
-  public:
-    NodeBase(int kind);
-    virtual void v00();
-    ~NodeBase();
-    unsigned int unk04;
-    unsigned int unk08;
-};
-
-class FUN_00436660 : public NodeBase
+class FUN_00436660 : public BSExtraData
 {
   public:
     FUN_00436660(ParamBlock p);
@@ -2474,9 +2173,9 @@ class FUN_00436660 : public NodeBase
     ChildMember m_pChildAtom;
 };
 
-// Constructs a NodeBase of kind 0x87 and attaches the given ParamBlock to its ChildMember.
+// Constructs a BSExtraData of kind 0x87 and attaches the given ParamBlock to its ChildMember.
 // @fnv 0x00436660
-FUN_00436660::FUN_00436660(ParamBlock aParamBlock) : NodeBase(0x87)
+FUN_00436660::FUN_00436660(ParamBlock aParamBlock) : BSExtraData(0x87)
 {
     m_pChildAtom.Attach(&aParamBlock);
 }
@@ -2695,7 +2394,8 @@ struct CloneRef
     void FUN_00575690(void* pBase);
     void FUN_00565480(bool b);
     void FUN_00575830(const NiPoint3& kPos);
-    void FUN_00575700(NiPoint3 kAngle);
+    struct AngleWords { unsigned int x, y, z; };
+    void FUN_00575700(AngleWords kAngle);
     void FUN_004fbf00(CloneSource* pSource);
     void FUN_00898280(bool b);
     void FUN_00935ae0();
@@ -3027,7 +2727,7 @@ CloneRef* CloneFactory::FUN_00436780(void* pBase, CloneSource* pSource)
         pRef->FUN_00575690(pBase);
         pRef->FUN_00565480(pSource->FUN_005653d0());
         pRef->FUN_00575830(*pSource->FUN_00436aa0());
-        pRef->FUN_00575700(pSource->FUN_00430830());
+        pRef->FUN_00575700(*(const CloneRef::AngleWords*)&pSource->FUN_00430830());
         pRef->FUN_004fbf00(pSource);
         pRef->FUN_00898280(true);
         pRef->FUN_00935ae0();
@@ -3132,24 +2832,11 @@ int FUN_00438610_cls::FUN_00438610(unsigned int* value)
     return index;
 }
 
-class Base_438720
-{
-  public:
-    virtual ~Base_438720();
-    int unk04;
-};
-
-class FUN_00438720_cls : public Base_438720
-{
-  public:
-    virtual ~FUN_00438720_cls();
-    void FUN_00438af0();
-};
-
 // @fnv 0x00438720
-FUN_00438720_cls::~FUN_00438720_cls()
+template <>
+NiTMap<WaterZone*, int>::~NiTMap()
 {
-    this->FUN_00438af0();
+    RemoveAll();
 }
 
 struct NiSpawnBase
@@ -3219,237 +2906,34 @@ struct Matrix
 {
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
 };
-class TESObjectREFR
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual int v125();
-    const NiPoint3& GetAngleOnReference() const;
-    const NiPoint3& FUN_00569880();
-    Matrix FUN_0056fa00();
-};
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-};
-struct Bound : NiMemObject
-{
-    virtual void b0();
-    virtual void b1();
-    virtual void b2();
-    virtual void b3();
-    virtual void b4();
-    virtual void b5();
-    virtual void b6();
-    virtual void b7();
-    virtual void b8();
-    virtual void b9();
-    virtual void b10();
-    virtual void b11();
-    virtual void b12();
-    virtual void b13();
-    virtual void b14();
-    virtual void b15();
-    virtual void b16();
-    virtual void b17();
-    virtual void b18();
-    virtual void b19();
-    virtual void b20();
-    virtual void b21();
-    virtual void b22();
-    virtual void b23();
-    virtual void b24();
-    virtual void b25();
-    virtual void b26();
-    virtual void b27();
-    virtual void b28();
-    virtual void b29();
-    virtual void b30();
-    virtual void b31();
-    virtual void b32();
-    virtual void b33();
-    virtual void b34();
-    virtual void b35();
-    virtual void b36();
-    virtual void b37();
-    virtual void b38();
-    virtual void b39();
-    virtual void b40();
-    virtual void b41();
-    virtual void b42();
-    virtual void b43();
-    virtual void b44();
-    virtual void b45();
-    virtual void SetScale(int);
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    void FUN_00439680(const NiPoint3&);
-    void FUN_004396b0(const Matrix&);
-};
-struct FUN_00c37ec0 : Bound
-{
-    FUN_00c37ec0();
-};
-struct FUN_00c36310 : Bound
-{
-    int unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40, unk44;
-    FUN_00c36310();
-};
-class BSMultiBound : public NiMemObject
-{
-  public:
-    int unk00, unk04, unk08, unk0c;
-    BSMultiBound();
-    void FUN_004addc0(Bound*);
-};
+// The shared BSMultiBound declares unsized delete as well as sized delete.
+// MSVC selects unsized delete for constructor failure in FUN_00439490,
+// changing its EH cleanup at 0x00eebbe0. Keep this definition until the
+// shared allocation API supports the original sized-delete cleanup.
+#include "../../include/NiMemObject.h"
 // @fnv 0x00439490
 BSMultiBound* __cdecl FUN_00439490(TESObjectREFR* reference)
 {
     BSMultiBound* result = 0;
     if (reference)
     {
-        Bound* pBound = 0;
+        BSMultiBoundShape* pBound = 0;
         if (std::abs(reference->GetAngleOnReference().x) < 0.01f &&
             std::abs(reference->GetAngleOnReference().y) < 0.01f &&
             std::abs(reference->GetAngleOnReference().z) < 0.01f)
         {
-            pBound = new FUN_00c37ec0;
-            pBound->FUN_00439680(reference->FUN_00569880());
+            pBound = new BSMultiBoundAABB;
+            ((Bound*)pBound)->FUN_00439680(reference->FUN_00569880());
         }
         else
         {
-            pBound = new FUN_00c36310;
-            pBound->FUN_004396b0(reference->FUN_0056fa00());
-            pBound->FUN_00439680(reference->FUN_00569880());
+            pBound = new BSMultiBoundOBB;
+            ((Bound*)pBound)->FUN_004396b0(reference->FUN_0056fa00());
+            ((Bound*)pBound)->FUN_00439680(reference->FUN_00569880());
         }
-        pBound->SetScale(reference->v125());
+        pBound->SetGridPosition(*static_cast<const TESObjectREFR*>(reference)->GetPos());
         result = new BSMultiBound;
-        result->FUN_004addc0(pBound);
+        result->FUN_004addc0((Bound*)pBound);
     }
     return result;
 }
@@ -3505,26 +2989,8 @@ void Host00437df0::FUN_00437df0()
     m_sub.FUN_0063f7b0();
 }
 
-class NiTMapBase438
-{
-  public:
-    virtual ~NiTMapBase438();
-
-    void RemoveAll();
-
-    unsigned int m_uiHashSize;
-    void** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
-
-class FUN_004388a0 : public NiTMapBase438
-{
-  public:
-    virtual ~FUN_004388a0();
-};
-
 // @fnv 0x004388a0
-FUN_004388a0::~FUN_004388a0()
+FactionMembershipMap::~FactionMembershipMap()
 {
     RemoveAll();
 }
@@ -3822,14 +3288,6 @@ FUN_0043b750::~FUN_0043b750()
     m_iSecondInteger = 0;
 }
 
-class NiFixedString
-{
-  public:
-    NiFixedString(const char* pcString);
-    ~NiFixedString();
-    const char* m_kHandle;
-};
-
 class NameSource
 {
   public:
@@ -3895,7 +3353,7 @@ void NamedObjectLoader::FUN_0043b7e0(const char* pcName)
             char acBuffer[260];
             FUN_00401460(acBuffer, pcPath, pcSep - pcPath);
             acBuffer[pcSep - pcPath] = 0;
-            m_pReferencedObject.FUN_00559450()->FUN_0043b9f0(NiFixedString(acBuffer));
+            m_pReferencedObject.FUN_00559450()->FUN_0043b9f0(NiFixedString((const char*)acBuffer));
         }
     }
     m_spNode.FUN_0066b0d0(FUN_005f3a20(m_pReferencedObject.FUN_00559450(), pcName));
@@ -3906,16 +3364,7 @@ void NamedObjectLoader::FUN_0043b7e0(const char* pcName)
 
 class MenuTopic;
 
-class ExtraBase437510
-{
-  public:
-    virtual ~ExtraBase437510();
-    unsigned char m_ucType;
-    void* m_pkNext;
-    ExtraBase437510(unsigned char type);
-};
-
-class FUN_00437510 : public ExtraBase437510
+class FUN_00437510 : public BSExtraData
 {
   public:
     BSSimpleList<BSSimpleList<MenuTopic*>*>* m_pTopics;
@@ -3925,7 +3374,7 @@ class FUN_00437510 : public ExtraBase437510
 
 // Constructs an extra of type 0x73 holding a new list and adds the given topics list to it.
 // @fnv 0x00437510
-FUN_00437510::FUN_00437510(BSSimpleList<MenuTopic*>* topics) : ExtraBase437510(0x73)
+FUN_00437510::FUN_00437510(BSSimpleList<MenuTopic*>* topics) : BSExtraData(0x73)
 {
     m_pTopics = new BSSimpleList<BSSimpleList<MenuTopic*>*>;
     m_pTopics->AddHead(topics);
@@ -3956,15 +3405,6 @@ struct ListArg436
     ~ListArg436();
 };
 
-class ExtraBase436
-{
-  public:
-    ExtraBase436(unsigned char ucType);
-    virtual ~ExtraBase436();
-    unsigned char m_ucType;
-    ExtraBase436* m_pkNext;
-};
-
 struct ExtraList436
 {
     ExtraList436();
@@ -3973,7 +3413,7 @@ struct ExtraList436
     int m_data;
 };
 
-class FUN_00436300 : public ExtraBase436
+class FUN_00436300 : public BSExtraData
 {
   public:
     FUN_00436300(ListArg436 kList);
@@ -3981,21 +3421,12 @@ class FUN_00436300 : public ExtraBase436
     ExtraList436 m_kList;
 };
 
-// Constructs an ExtraBase436 with type 0x8a and copies the supplied ListArg436 into m_kList.
+// Constructs an BSExtraData with type 0x8a and copies the supplied ListArg436 into m_kList.
 // @fnv 0x00436300
-FUN_00436300::FUN_00436300(ListArg436 kList) : ExtraBase436(0x8a)
+FUN_00436300::FUN_00436300(ListArg436 kList) : BSExtraData(0x8a)
 {
     m_kList.Copy(&kList);
 }
-
-struct ExtraDataBase436540
-{
-    virtual void Slot00();
-    unsigned int unk04;
-    void* unk08;
-    ExtraDataBase436540(unsigned char type);
-    ~ExtraDataBase436540();
-};
 
 struct Value436540
 {
@@ -4007,14 +3438,14 @@ struct Value436540
     Value436540& operator=(const Value436540& other);
 };
 
-struct FUN_00436540 : ExtraDataBase436540
+struct FUN_00436540 : BSExtraData
 {
     Value436540 m_uiFilterValue;
     FUN_00436540(Value436540 value);
 };
 
 // @fnv 0x00436540
-FUN_00436540::FUN_00436540(Value436540 value) : ExtraDataBase436540(0x86)
+FUN_00436540::FUN_00436540(Value436540 value) : BSExtraData(0x86)
 {
     m_uiFilterValue = value;
 }
@@ -4049,157 +3480,18 @@ Val42CE30 C42CE30::FUN_0042ce30()
     return m_kValue;
 }
 
-struct Guard430
-{
-    ~Guard430();
-};
-Guard430::~Guard430()
-{}
-struct FUN_00436b20_Ref
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual void v064();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual NiPoint3* v125();
-};
 namespace FNV {
-struct FUN_00436b20 : BE
+struct FUN_00436b20 : BSExtraData
 {
-    Guard430 m_guard;
-    unsigned int unk04;
-    unsigned int unk08;
     CloneRef* unk0c;
     FUN_00436b20(unsigned int first, unsigned int second);
 };
 // Sets the vtable pointer, stores the result of FUN_00436780(first, second) in unk0c, then calls FUN_00575830 on it with second's v125() point.
 // @fnv 0x00436b20
-FUN_00436b20::FUN_00436b20(unsigned int first, unsigned int second) : BE(0x55)
+FUN_00436b20::FUN_00436b20(unsigned int first, unsigned int second) : BSExtraData(0x55)
 {
-    *(void**)this = (void*)&DAT_01015f24;
     unk0c = ((CloneFactory*)this)->FUN_00436780((void*)first, (CloneSource*)second);
-    unk0c->FUN_00575830(*((FUN_00436b20_Ref*)second)->v125());
+    unk0c->FUN_00575830(*((const TESObjectREFR*)second)->GetPos());
 }
 }
 
@@ -4229,14 +3521,7 @@ struct Member
     ~Member();
     void Assign(const Arg& a);
 };
-struct Base
-{
-    Base(int n);
-    ~Base();
-    virtual void v0();
-    int p, q;
-};
-struct FUN_00436420 : Base
+struct FUN_00436420 : BSExtraData
 {
     Member m;
     FUN_00436420(Arg a, int b, int c);
@@ -4244,7 +3529,7 @@ struct FUN_00436420 : Base
 };
 // Constructs the object by calling the Base constructor with 0x83 and assigning the Arg parameter to the Member field m.
 // @fnv 0x00436420
-FUN_00436420::FUN_00436420(Arg a, int aiUnused1, int aiUnused2) : Base(0x83)
+FUN_00436420::FUN_00436420(Arg a, int aiUnused1, int aiUnused2) : BSExtraData(0x83)
 {
     m.Assign(a);
 }

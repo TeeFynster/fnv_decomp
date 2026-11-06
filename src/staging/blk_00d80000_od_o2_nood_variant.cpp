@@ -7,10 +7,29 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
+#include "../../include/hkVector4.h"
+#include "../../include/hkTransform.h"
+#include "../../include/hkContactPoint.h"
+#include "../../include/hkpSimpleContactConstraintAtom.h"
+
+
+inline float& hkVector4::operator()(int i)
 {
-    float m128_f32[4];
-};
+    return m_f[i];
+}
+
+inline void hkVector4::setZero4()
+{
+    m_vComponents = _mm_setzero_ps();
+}
+
+__forceinline hkContactPoint& hkContactPoint::operator=(const hkContactPoint& other)
+{
+    m_vContactPosition = other.m_vContactPosition;
+    m_vSeparatingNormal = other.m_vSeparatingNormal;
+    return *this;
+}
+
 struct BaseD85
 {
     int unk00;
@@ -153,36 +172,28 @@ StandinClass& StandinClass::FUN_00d85300(const StandinClass* source)
     return *this;
 }
 
+__forceinline hkContactPoint* hkpSimpleContactConstraintAtom::getContactPoints()
+{
+    return (hkContactPoint*)(this + 1);
+}
+
+__forceinline hkContactPoint* hkpSimpleContactConstraintAtom::getContactPoints() const
+{
+    return (hkContactPoint*)(this + 1);
+}
+
+__forceinline UInt32Value* hkpSimpleContactConstraintAtom::getContactPointPropertiesStream() const
+{
+    return (UInt32Value*)((char*)getContactPoints() + sizeof(hkContactPoint) * m_usMaxNumContactPoints);
+}
+
+__forceinline int hkpSimpleContactConstraintAtom::getContactPointPropertiesStriding() const
+{
+    return m_ucContactPointPropertiesStriding;
+}
+
 namespace fnv_00d925b0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-
-typedef unsigned char hkUint8;
-typedef unsigned short hkUint16;
 typedef unsigned int hkUint32;
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-
-struct hkContactPoint
-{
-    hkVector4 m_vContactPosition;
-    hkVector4 m_vSeparatingNormal;
-};
-
-struct UInt32Value
-{
-    hkUint32 m_data;
-};
 
 struct __declspec(align(16)) hkpSimpleContactConstraintDataInfo
 {
@@ -196,33 +207,6 @@ struct __declspec(align(16)) hkpSimpleContactConstraintDataInfo
     hkUint32 m_data7;
 };
 
-struct hkpSimpleContactConstraintAtom
-{
-    hkUint16 m_type;
-    hkUint16 m_usSizeOfAllAtoms;
-    hkUint16 m_usNumContactPoints;
-    hkUint16 m_usMaxNumContactPoints;
-    hkUint8 m_ucNumReservedContactPoints;
-    hkUint8 m_ucNumContactPointProperties;
-    hkUint8 m_ucContactPointPropertiesStriding;
-    hkUint8 unk0B;
-    hkUint16 m_usMaxNumContactPointProperties;
-    hkUint16 unk0E;
-    hkpSimpleContactConstraintDataInfo m_info;
-
-    __forceinline hkContactPoint* getContactPoints() const
-    {
-        return (hkContactPoint*)(this + 1);
-    }
-    __forceinline UInt32Value* getContactPointPropertiesStream() const
-    {
-        return (UInt32Value*)((char*)getContactPoints() + sizeof(hkContactPoint) * m_usMaxNumContactPoints);
-    }
-    __forceinline int getContactPointPropertiesStriding() const
-    {
-        return m_ucContactPointPropertiesStriding;
-    }
-};
 
 __forceinline void memCpy4(void* dst, const void* src, int numWords)
 {
@@ -237,7 +221,8 @@ __forceinline void memCpy4(void* dst, const void* src, int numWords)
 // @fnv 0x00d925b0
 void FUN_00d925b0(hkpSimpleContactConstraintAtom* dst, const hkpSimpleContactConstraintAtom* src)
 {
-    dst->m_info = src->m_info;
+    *(hkpSimpleContactConstraintDataInfo*)&dst->m_infoFlags =
+        *(const hkpSimpleContactConstraintDataInfo*)&src->m_infoFlags;
     dst->m_usNumContactPoints = src->m_usNumContactPoints;
 
     hkContactPoint* dstCp = dst->getContactPoints();
@@ -255,45 +240,18 @@ void FUN_00d925b0(hkpSimpleContactConstraintAtom* dst, const hkpSimpleContactCon
 }
 }  // namespace fnv_00d925b0
 
-extern "C" __m128 _mm_setzero_ps(void);
-
-struct hkVector4Stub
+inline void hkTransform::setIdentity()
 {
-    __m128 m_vComponents;
-    float& operator()(int i)
-    {
-        return ((float*)this)[i];
-    }
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    void operator=(const hkVector4Stub& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
-
-struct hkTransformStub
-{
-    hkVector4Stub m_kColumn0;
-    hkVector4Stub m_kColumn1;
-    hkVector4Stub m_kColumn2;
-    hkVector4Stub m_vTranslation;
-    void setIdentity()
-    {
-        hkVector4Stub zero;
-        zero.setZero4();
-        m_kColumn0 = zero;
-        m_kColumn1 = zero;
-        m_kColumn2 = zero;
-        m_kColumn0(0) = 1.0f;
-        m_kColumn1(1) = 1.0f;
-        m_kColumn2(2) = 1.0f;
-        m_vTranslation.setZero4();
-    }
-    void FUN_00c6cd60(const hkTransformStub* t);
-};
+    hkVector4 zero;
+    zero.setZero4();
+    m_kColumn0 = zero.m_vComponents;
+    m_kColumn1 = zero.m_vComponents;
+    m_kColumn2 = zero.m_vComponents;
+    reinterpret_cast<hkVector4&>(m_kColumn0)(0) = 1.0f;
+    reinterpret_cast<hkVector4&>(m_kColumn1)(1) = 1.0f;
+    reinterpret_cast<hkVector4&>(m_kColumn2)(2) = 1.0f;
+    reinterpret_cast<hkVector4&>(m_vTranslation).setZero4();
+}
 
 struct ShapeStub
 {
@@ -318,17 +276,17 @@ struct ShapeStub
 struct ShapeWithVectors : ShapeStub
 {
     int unk1c;
-    hkVector4Stub m_kShapeVectorData[1];
+    hkVector4 m_kShapeVectorData[1];
 };
 
 struct ShapeWithTransforms : ShapeStub
 {
     int unk1c;
-    hkTransformStub m_kTransforms[1];
+    hkTransform m_kTransforms[1];
 };
 
 // @fnv 0x00d84ee0
-void FUN_00d84ee0(ShapeStub* shape, int key, hkTransformStub* out)
+void FUN_00d84ee0(ShapeStub* shape, int key, hkTransform* out)
 {
     for (;;)
     {
@@ -342,31 +300,31 @@ void FUN_00d84ee0(ShapeStub* shape, int key, hkTransformStub* out)
             shape = shape->FUN_00cdf6d0();
             break;
         case 1:
-            out->FUN_00c6cd60(&((ShapeWithTransforms*)shape)->m_kTransforms[key]);
+            *out = ((ShapeWithTransforms*)shape)->m_kTransforms[key];
             return;
         case 2:
-            out->FUN_00c6cd60(&((ShapeWithTransforms*)shape)->m_kTransforms[key]);
+            *out = ((ShapeWithTransforms*)shape)->m_kTransforms[key];
             return;
         case 6:
-            out->FUN_00c6cd60(&((ShapeWithTransforms*)shape)->m_kTransforms[key]);
+            *out = ((ShapeWithTransforms*)shape)->m_kTransforms[key];
             return;
         case 7:
-            out->FUN_00c6cd60(&((ShapeWithTransforms*)shape)->m_kTransforms[key]);
+            *out = ((ShapeWithTransforms*)shape)->m_kTransforms[key];
             return;
         case 14:
-            out->FUN_00c6cd60(&((ShapeWithTransforms*)shape)->m_kTransforms[key]);
+            *out = ((ShapeWithTransforms*)shape)->m_kTransforms[key];
             return;
         case 9:
-            out->FUN_00c6cd60(&((ShapeWithTransforms*)shape)->m_kTransforms[key]);
+            *out = ((ShapeWithTransforms*)shape)->m_kTransforms[key];
             return;
         case 0:
-            out->m_vTranslation = ((ShapeWithVectors*)shape)->m_kShapeVectorData[key];
+            out->m_vTranslation = ((ShapeWithVectors*)shape)->m_kShapeVectorData[key].m_vComponents;
             return;
         case 8:
-            out->m_vTranslation = ((ShapeWithVectors*)shape)->m_kShapeVectorData[key];
+            out->m_vTranslation = ((ShapeWithVectors*)shape)->m_kShapeVectorData[key].m_vComponents;
             return;
         case 15:
-            out->m_vTranslation = ((ShapeWithVectors*)shape)->m_kShapeVectorData[key];
+            out->m_vTranslation = ((ShapeWithVectors*)shape)->m_kShapeVectorData[key].m_vComponents;
             return;
         default:
             return;

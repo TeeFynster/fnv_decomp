@@ -3,9 +3,9 @@
 // polymorphic classes (TESPackage). The skeleton of src/fallout_shared/package.cpp with those classes made polymorphic; move the functions to
 // their real unit once its classes are.
 
-#include "package_decls_rtti_variant.h"
+#include "../../include/FleePackage.h"
+#include "../../include/Setting.h"
 
-struct A;
 struct P;
 struct Proc;
 struct Target;
@@ -31,26 +31,8 @@ struct P : TESPackage
     bool IsSpellInList(A*);
     void AddHeadAtOffset(A*);
 };
-class FleePackage : public P
-{
-  public:
-    void FUN_009f1310(A*);
-};
 struct Created : P
 {
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
     int unk80;
     int unk84;
     Created(A*);
@@ -83,11 +65,7 @@ struct Lists
     List* CollectActorsByPackage(A*, int, int);
 };
 extern Lists gLists;
-struct SettingLocal
-{
-    int* Int();
-};
-extern SettingLocal g_011cd808;
+extern Setting g_011cd808;
 extern A* player;
 struct Proc
 {

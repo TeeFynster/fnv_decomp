@@ -1,74 +1,103 @@
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 
 // src/havok/common/internal/collide/gsk/hkgsk.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/collide/gsk/hkgsk.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 extern "C" void _ReadWriteBarrier(void);
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Keep the original intrinsic union: the CRT byte arrays change VC9 /GS instrumentation.
+#define _INCLUDED_MM2
+// Exe 0x00e4bbe0 FUN_00e4bbe0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
+#include "../../../../../../include/hkVector4.h"
+
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_setzero_ps(void);
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    int _mm_movemask_ps(__m128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_div_ss(LocalM128, LocalM128);
+    LocalM128 _mm_setzero_ps(void);
+    LocalM128 _mm_cmplt_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+    LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
+    int _mm_movemask_ps(LocalM128);
+    void _mm_store_ss(float*, LocalM128);
 }
 
 typedef float hkReal;
 
-struct hkVector4
+
+__forceinline hkVector4::hkVector4(const hkVector4& v)
 {
-    __m128 m_vComponents;
+    unsigned* out = reinterpret_cast<unsigned*>(&m_vComponents);
+    const unsigned* in = reinterpret_cast<const unsigned*>(&v.m_vComponents);
+    out[0] = in[0];
+    out[1] = in[1];
+    out[2] = in[2];
+    out[3] = in[3];
+}
 
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
 
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setMul4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setAdd4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void add4(const hkVector4& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void setCross(const hkVector4& v1, const hkVector4& v2)
-    {
-        __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
-                                   _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
-                                   _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    __forceinline void setNeg4(const hkVector4& v);
-    __forceinline int lessZeroXYZ() const
-    {
-        return _mm_movemask_ps(_mm_cmplt_ps(m_vComponents, _mm_setzero_ps())) & 7;
-    }
-};
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
+}
 
-extern __m128 DAT_010c44d0;
+__forceinline void hkVector4::setMul4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4::setAdd4(const hkVector4& a, const hkVector4& b)
+{
+    m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
+}
+
+__forceinline void hkVector4::add4(const hkVector4& a)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
+}
+
+__forceinline void hkVector4::setCross(const hkVector4& v1, const hkVector4& v2)
+{
+    LocalM128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
+                               _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
+    LocalM128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
+                               _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(cross0, cross1);
+}
+
+__forceinline int hkVector4::lessZeroXYZ() const
+{
+    return _mm_movemask_ps(_mm_cmplt_ps(m_vComponents, _mm_setzero_ps())) & 7;
+}
+
+__forceinline int hkVector4::lessZero3() const
+{
+    return _mm_movemask_ps(_mm_cmplt_ps(m_vComponents, _mm_setzero_ps())) & 7;
+}
+
+extern LocalM128 DAT_010c44d0;
 
 __forceinline void hkVector4::setNeg4(const hkVector4& v)
 {
@@ -77,15 +106,15 @@ __forceinline void hkVector4::setNeg4(const hkVector4& v)
 
 static __forceinline int hkDot3LessZero(const hkVector4& a, const hkVector4& b)
 {
-    __m128 p = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    __m128 xyz = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p));
+    LocalM128 p = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+    LocalM128 xyz = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p));
     return _mm_movemask_ps(xyz) & 1;
 }
 
 static __forceinline void hkTranspose3(hkVector4& c0, hkVector4& c1, hkVector4& c2)
 {
-    __m128 tmp = _mm_unpacklo_ps(c0.m_vComponents, c1.m_vComponents);
-    __m128 ctmp = _mm_unpackhi_ps(c0.m_vComponents, c1.m_vComponents);
+    LocalM128 tmp = _mm_unpacklo_ps(c0.m_vComponents, c1.m_vComponents);
+    LocalM128 ctmp = _mm_unpackhi_ps(c0.m_vComponents, c1.m_vComponents);
     c0.m_vComponents = _mm_movelh_ps(tmp, c2.m_vComponents);
     c1.m_vComponents = _mm_shuffle_ps(_mm_movehl_ps(c0.m_vComponents, tmp), c2.m_vComponents, 0xd4);
     c2.m_vComponents = _mm_shuffle_ps(ctmp, c2.m_vComponents, 0xe4);
@@ -191,69 +220,14 @@ int TriangleSolver::FUN_00e4da90(const hkVector4& p, TriangleVerts& tri, hkVecto
     return mask;
 }
 
-namespace fnv_00e4dc70 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    __m128 _mm_setzero_ps(void);
-    int _mm_movemask_ps(__m128);
-}
-struct hkVector4
-{
-    __m128 m_vComponents;
-    void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void setCross(const hkVector4& a, const hkVector4& b)
-    {
-        const __m128 a1 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9);
-        const __m128 a2 = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2);
-        const __m128 b1 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9);
-        const __m128 b2 = _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2);
-        const __m128 c0 = _mm_mul_ps(a1, b2);
-        const __m128 c1 = _mm_mul_ps(a2, b1);
-        m_vComponents = _mm_sub_ps(c0, c1);
-    }
-    void setMul4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void setAdd4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    void add4(const hkVector4& a)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, a.m_vComponents);
-    }
-    int lessZero3() const
-    {
-        return _mm_movemask_ps(_mm_cmplt_ps(m_vComponents, _mm_setzero_ps())) & 7;
-    }
-    int FUN_00e4dc70(const hkVector4&, const hkVector4*, void*);
-};
-static inline void dot3_3vs3(const hkVector4& a0, const hkVector4& b0, const hkVector4& a1, const hkVector4& b1,
+static inline void dot3_3vs3Direct(const hkVector4& a0, const hkVector4& b0, const hkVector4& a1, const hkVector4& b1,
                              const hkVector4& a2, const hkVector4& b2, hkVector4& out)
 {
-    __m128 d0 = _mm_mul_ps(a0.m_vComponents, b0.m_vComponents);
-    __m128 d1 = _mm_mul_ps(a1.m_vComponents, b1.m_vComponents);
-    __m128 d2 = _mm_mul_ps(a2.m_vComponents, b2.m_vComponents);
+    LocalM128 d0 = _mm_mul_ps(a0.m_vComponents, b0.m_vComponents);
+    LocalM128 d1 = _mm_mul_ps(a1.m_vComponents, b1.m_vComponents);
+    LocalM128 d2 = _mm_mul_ps(a2.m_vComponents, b2.m_vComponents);
     {
-        __m128 low, high;
+        LocalM128 low, high;
         low = _mm_unpacklo_ps(d0, d1);
         high = _mm_shuffle_ps(_mm_unpackhi_ps(d0, d1), d2, 0xe4);
         d0 = _mm_movelh_ps(low, d2);
@@ -290,30 +264,10 @@ int hkVector4::FUN_00e4dc70(const hkVector4& point, const hkVector4* apTriangle,
     c1.setCross(p2, e1);
     hkVector4 c2;
     c2.setCross(p0, e2);
-    dot3_3vs3(c0, n, c1, n, c2, n, *this);
+    dot3_3vs3Direct(c0, n, c1, n, c2, n, *this);
     return lessZero3();
 }
-}  // namespace fnv_00e4dc70
 
-extern "C"
-{
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_div_ss(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_unpacklo_ps(__m128, __m128);
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_movelh_ps(__m128, __m128);
-    __m128 _mm_movehl_ps(__m128, __m128);
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    __m128 _mm_setzero_ps();
-    int _mm_movemask_ps(__m128);
-    void _mm_store_ss(float*, __m128);
-}
 
 struct Out
 {
@@ -321,14 +275,14 @@ struct Out
     Out(int* a) : p(a)
     {}
 };
-static const __m128 one4 = {1, 1, 1, 1};
+static const LocalM128 one4 = {1, 1, 1, 1};
 
 struct Scalar
 {
-    __m128 q;
+    LocalM128 q;
     Scalar()
     {}
-    Scalar(const __m128& a) : q(a)
+    Scalar(const LocalM128& a) : q(a)
     {}
     operator float() const
     {
@@ -336,7 +290,7 @@ struct Scalar
         _mm_store_ss(&value, q);
         return value;
     }
-    __m128 broadcast() const
+    LocalM128 broadcast() const
     {
         return _mm_shuffle_ps(q, q, 0);
     }
@@ -353,86 +307,59 @@ inline Scalar operator/(const Scalar& a, const Scalar& b)
 {
     return _mm_div_ss(a.q, b.q);
 }
-struct V
+static __forceinline Scalar vectorDot3(const hkVector4& a, const hkVector4& b)
 {
-    union
-    {
-        __m128 q;
-        struct
-        {
-            unsigned x, y, z, w;
-        };
-    };
-    V()
-    {}
-    V(const V& a) : x(a.x), y(a.y), z(a.z), w(a.w)
-    {}
-    V& operator=(const V& a)
-    {
-        q = a.q;
-        return *this;
-    }
-    void sub(const V& a, const V& b)
-    {
-        q = _mm_sub_ps(a.q, b.q);
-    }
-    void cross(const V& a, const V& b)
-    {
-        __m128 l = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xc9), _mm_shuffle_ps(b.q, b.q, 0xd2));
-        __m128 r = _mm_mul_ps(_mm_shuffle_ps(a.q, a.q, 0xd2), _mm_shuffle_ps(b.q, b.q, 0xc9));
-        q = _mm_sub_ps(l, r);
-    }
-    Scalar dot(const V& b) const
-    {
-        __m128 p = _mm_mul_ps(q, b.q);
-        __m128 t = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
-        return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), t);
-    }
-    void interpolate(const V& a, const V& b, const Scalar& f)
-    {
-        __m128 t = f.broadcast();
-        __m128 s = _mm_sub_ps(one4, t);
-        q = _mm_add_ps(_mm_mul_ps(s, a.q), _mm_mul_ps(t, b.q));
-    }
-    Scalar component(int i) const
-    {
-        switch (i)
-        {
-        case 0:
-            return q;
-        case 1:
-            return _mm_shuffle_ps(q, q, 0x55);
-        case 2:
-            return _mm_shuffle_ps(q, q, 0xaa);
-        default:
-            return _mm_shuffle_ps(q, q, 0xff);
-        }
-    }
-};
-static __forceinline void Swap(V& a, V& b)
+    LocalM128 p = _mm_mul_ps(a.m_vComponents, b.m_vComponents);
+    LocalM128 t = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), t);
+}
+
+static __forceinline void vectorInterpolate(hkVector4& out, const hkVector4& a, const hkVector4& b, const Scalar& f)
 {
-    V saved = a;
+    LocalM128 t = f.broadcast();
+    LocalM128 s = _mm_sub_ps(one4, t);
+    out.m_vComponents = _mm_add_ps(_mm_mul_ps(s, a.m_vComponents), _mm_mul_ps(t, b.m_vComponents));
+}
+
+static __forceinline Scalar vectorComponent(const hkVector4& vector, int i)
+{
+    switch (i)
+    {
+    case 0:
+        return vector.m_vComponents;
+    case 1:
+        return _mm_shuffle_ps(vector.m_vComponents, vector.m_vComponents, 0x55);
+    case 2:
+        return _mm_shuffle_ps(vector.m_vComponents, vector.m_vComponents, 0xaa);
+    default:
+        return _mm_shuffle_ps(vector.m_vComponents, vector.m_vComponents, 0xff);
+    }
+}
+
+static __forceinline void Swap(hkVector4& a, hkVector4& b)
+{
+    hkVector4 saved = a;
     a = b;
     b = saved;
 }
-static __forceinline bool ComparePlane(const V& oldValue, const V& newValue, int i, int j)
+static __forceinline bool ComparePlane(const hkVector4& oldValue, const hkVector4& newValue, int i, int j)
 {
-    Scalar oldI = oldValue.component(i);
-    Scalar oldJ = oldValue.component(j);
-    Scalar deltaI = newValue.component(i) - oldI;
-    Scalar deltaJ = newValue.component(j) - oldJ;
+    Scalar oldI = vectorComponent(oldValue, i);
+    Scalar oldJ = vectorComponent(oldValue, j);
+    Scalar deltaI = vectorComponent(newValue, i) - oldI;
+    Scalar deltaJ = vectorComponent(newValue, j) - oldJ;
     return float(oldJ * deltaI) > float(oldI * deltaJ);
 }
 
 struct Shape
 {
-    V points[4];
-    V anchors[3];
+    hkVector4 points[4];
+    hkVector4 anchors[3];
 };
 struct Clip
 {
-    V point;
-    V separation;
+    hkVector4 point;
+    hkVector4 separation;
     float distance;
 };
 struct Both
@@ -440,47 +367,47 @@ struct Both
     Clip first;
     Clip second;
 };
-extern "C" int FUN_00d22e40(Shape*, const V*, const V*, const V*, Clip*);
+extern "C" int FUN_00d22e40(Shape*, const hkVector4*, const hkVector4*, const hkVector4*, Clip*);
 
-static __forceinline void ThreeDots(const V& first, const V& firstWeight, const V& second, const V& secondWeight,
-                                    const V& third, const V& thirdWeight, V& out)
+static __forceinline void ThreeDots(const hkVector4& first, const hkVector4& firstWeight, const hkVector4& second, const hkVector4& secondWeight,
+                                    const hkVector4& third, const hkVector4& thirdWeight, hkVector4& out)
 {
-    register __m128 products0 = _mm_mul_ps(first.q, firstWeight.q);
-    register __m128 products1 = _mm_mul_ps(second.q, secondWeight.q);
-    register __m128 products2 = _mm_mul_ps(third.q, thirdWeight.q);
-    __m128 lower = _mm_unpacklo_ps(products0, products1);
-    __m128 upper = _mm_shuffle_ps(_mm_unpackhi_ps(products0, products1), products2, 0xe4);
+    register LocalM128 products0 = _mm_mul_ps(first.m_vComponents, firstWeight.m_vComponents);
+    register LocalM128 products1 = _mm_mul_ps(second.m_vComponents, secondWeight.m_vComponents);
+    register LocalM128 products2 = _mm_mul_ps(third.m_vComponents, thirdWeight.m_vComponents);
+    LocalM128 lower = _mm_unpacklo_ps(products0, products1);
+    LocalM128 upper = _mm_shuffle_ps(_mm_unpackhi_ps(products0, products1), products2, 0xe4);
     products0 = _mm_movelh_ps(lower, products2);
     products1 = _mm_shuffle_ps(_mm_movehl_ps(products0, lower), products2, 0xd4);
     products2 = upper;
-    out.q = _mm_add_ps(_mm_add_ps(products0, products1), products2);
+    out.m_vComponents = _mm_add_ps(_mm_add_ps(products0, products1), products2);
 }
 
-static __forceinline int mask(const V& p, const Shape* b)
+static __forceinline int mask(const hkVector4& p, const Shape* b)
 {
-    V e0, e1, e2, n, d0, d1, d2, c0, c1, c2;
-    e0.sub(b->points[2], b->points[1]);
-    e1.sub(b->points[0], b->points[2]);
-    e2.sub(b->points[1], b->points[0]);
-    n.cross(e0, e1);
-    d0.sub(p, b->points[1]);
-    d1.sub(p, b->points[2]);
-    d2.sub(p, b->points[0]);
-    c0.cross(d0, e0);
-    c1.cross(d1, e1);
-    c2.cross(d2, e2);
-    V sum;
+    hkVector4 e0, e1, e2, n, d0, d1, d2, c0, c1, c2;
+    e0.setSub4(b->points[2], b->points[1]);
+    e1.setSub4(b->points[0], b->points[2]);
+    e2.setSub4(b->points[1], b->points[0]);
+    n.setCross(e0, e1);
+    d0.setSub4(p, b->points[1]);
+    d1.setSub4(p, b->points[2]);
+    d2.setSub4(p, b->points[0]);
+    c0.setCross(d0, e0);
+    c1.setCross(d1, e1);
+    c2.setCross(d2, e2);
+    hkVector4 sum;
     ThreeDots(c0, n, c1, n, c2, n, sum);
-    return _mm_movemask_ps(_mm_cmplt_ps(sum.q, _mm_setzero_ps())) & 7;
+    return _mm_movemask_ps(_mm_cmplt_ps(sum.m_vComponents, _mm_setzero_ps())) & 7;
 }
-static __forceinline void ReplaceSelected(V& point, V& anchor, const V& newPoint, const V& newAnchor, int* count)
+static __forceinline void ReplaceSelected(hkVector4& point, hkVector4& anchor, const hkVector4& newPoint, const hkVector4& newAnchor, int* count)
 {
     point = newPoint;
     anchor = newAnchor;
     *count = 2;
 }
 
-static __forceinline void CollapseFirst(Shape* shape, const V& point, int* count)
+static __forceinline void CollapseFirst(Shape* shape, const hkVector4& point, int* count)
 {
     *count = 1;
     shape->points[0] = point;
@@ -489,12 +416,12 @@ static __forceinline void CollapseFirst(Shape* shape, const V& point, int* count
 
 struct State
 {
-    V origin;
+    hkVector4 origin;
     int m10, m14, m18, m1c;
-    V m20, m30, m40, m50, m60, m70, m80, m90, ma0, mb0, mc0, md0, me0, mf0, m100, m110;
-    V direction;
-    int FUN_00e4da90(Shape*, Shape*, V*);
-    int FUN_00e4dc70(V*, Shape*, V*);
+    hkVector4 m20, m30, m40, m50, m60, m70, m80, m90, ma0, mb0, mc0, md0, me0, mf0, m100, m110;
+    hkVector4 direction;
+    int FUN_00e4da90(Shape*, Shape*, hkVector4*);
+    int FUN_00e4dc70(hkVector4*, Shape*, hkVector4*);
     int FUN_00e4bbe0(Shape*, Shape*, int*, int*, unsigned char, int);
 };
 // Branches on flag, updates shape points and anchors, writes through out1 or out2 on selected paths, and returns status values.
@@ -504,20 +431,20 @@ int State::FUN_00e4bbe0(Shape* apShapeA, Shape* apShapeB, int* __restrict apOutC
 {
     if (flag)
     {
-        V edge0, edge1, normal;
-        edge0.sub(apShapeB->points[1], apShapeB->points[2]);
-        edge1.sub(apShapeB->points[0], apShapeB->points[2]);
-        normal.cross(edge0, edge1);
-        V d0;
-        d0.sub(apShapeA->points[0], apShapeB->points[0]);
-        Scalar s0 = d0.dot(normal);
-        d0.sub(apShapeA->points[1], apShapeB->points[0]);
-        Scalar s1 = d0.dot(normal);
+        hkVector4 edge0, edge1, normal;
+        edge0.setSub4(apShapeB->points[1], apShapeB->points[2]);
+        edge1.setSub4(apShapeB->points[0], apShapeB->points[2]);
+        normal.setCross(edge0, edge1);
+        hkVector4 d0;
+        d0.setSub4(apShapeA->points[0], apShapeB->points[0]);
+        Scalar s0 = vectorDot3(d0, normal);
+        d0.setSub4(apShapeA->points[1], apShapeB->points[0]);
+        Scalar s1 = vectorDot3(d0, normal);
         if (_mm_movemask_ps((s0 * s1).q) & 1)
         {
             Scalar t = s0 / (s0 - s1);
-            V p;
-            p.interpolate(apShapeA->points[0], apShapeA->points[1], t);
+            hkVector4 p;
+            vectorInterpolate(p, apShapeA->points[0], apShapeA->points[1], t);
             if (mask(p, apShapeB) == 7)
                 return 1;
         }
@@ -534,8 +461,8 @@ int State::FUN_00e4bbe0(Shape* apShapeA, Shape* apShapeB, int* __restrict apOutC
                 return 0;
             }
         }
-        V diff;
-        diff.sub(apShapeA->points[1], apShapeA->points[0]);
+        hkVector4 diff;
+        diff.setSub4(apShapeA->points[1], apShapeA->points[0]);
         Clip clip0, clip1;
         Clip* later = &clip1;
         FUN_00d22e40(apShapeA, &diff, &apShapeB->points[2], &edge0, &clip0);
@@ -547,18 +474,18 @@ int State::FUN_00e4bbe0(Shape* apShapeA, Shape* apShapeB, int* __restrict apOutC
     }
     else
     {
-        V saved = origin;
-        V* end = &apShapeA->points[0];
-        V d0;
-        d0.sub(*end, apShapeB->points[0]);
-        Scalar s0 = d0.dot(direction);
+        hkVector4 saved = origin;
+        hkVector4* end = &apShapeA->points[0];
+        hkVector4 d0;
+        d0.setSub4(*end, apShapeB->points[0]);
+        Scalar s0 = vectorDot3(d0, direction);
         ++end;
-        d0.sub(*end, apShapeB->points[0]);
-        Scalar s1 = d0.dot(direction);
+        d0.setSub4(*end, apShapeB->points[0]);
+        Scalar s1 = vectorDot3(d0, direction);
         if (_mm_movemask_ps((s0 * s1).q) & 1)
         {
-            V p;
-            p.interpolate(apShapeA->points[0], *end, s0 / (s0 - s1));
+            hkVector4 p;
+            vectorInterpolate(p, apShapeA->points[0], *end, s0 / (s0 - s1));
             if (mask(p, apShapeB) == 7)
                 return 1;
         }

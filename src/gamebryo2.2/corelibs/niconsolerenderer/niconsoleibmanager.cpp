@@ -1,5 +1,6 @@
 // gamebryo2.2/corelibs/niconsolerenderer/niconsoleibmanager.cpp: IndexBufferManager (1 function)
 
+#include "../../../../include/NiD3DDefaultShader.h"
 #include "niconsoleibmanager_decls.h"
 
 // Reuses or creates a D3D index buffer matching the requested format/usage/pool/size, copies the indices into it, and returns the buffer.

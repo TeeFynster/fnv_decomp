@@ -11,20 +11,20 @@ FNV_STATIC_ASSERT(offsetof(FaceGenMatrix<float>, m_uiRowCount) == 24);
 FNV_STATIC_ASSERT(offsetof(FaceGenMatrix<float>, m_uiColumnCount) == 28);
 
 // @fnv 0x006581e0
-FaceGenMatrix<float>& FaceGenMatrix<float>::operator=(const FaceGenMatrix<float>& rhs)
+template <> FaceGenMatrix<float>& FaceGenMatrix<float>::operator=(const FaceGenMatrix<float>& rhs)
 {
     if (this == &rhs)
         return *this;
 
     m_uiRowCount = rhs.m_uiRowCount;
     m_uiColumnCount = rhs.m_uiColumnCount;
-    data.SetElementCount(m_uiRowCount * m_uiColumnCount);
+    reinterpret_cast<FR2MatrixVTCData*>(this)->SetElementCount(m_uiRowCount * m_uiColumnCount);
     memcpy(FUN_006578b0(0), rhs.FUN_006578b0(0), m_uiRowCount * m_uiColumnCount * sizeof(float));
     return *this;
 }
 
 // @fnv 0x006588a0
-float FaceGenMatrix<float>::GetTrace()
+template <> float FaceGenMatrix<float>::GetTrace()
 {
     float result = 0.0f;
     unsigned int row = 0;
@@ -40,7 +40,7 @@ float FaceGenMatrix<float>::GetTrace()
 }
 
 // @fnv 0x00658360
-FaceGenMatrix<float> FaceGenMatrix<float>::operator*(const FaceGenMatrix<float>& rhs)
+template <> FaceGenMatrix<float> FaceGenMatrix<float>::operator*(const FaceGenMatrix<float>& rhs)
 {
     unsigned int k;
     {

@@ -5,24 +5,44 @@
 
 // src/staging/blk_00a60000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiTexture.h"
+#include "../../include/NiPointer.h"
+#include "../../include/NiTFixedStringMap.h"
+#include "../../include/NiTFixedStringMapBase.h"
+#include "../../include/NiPixelFormat.h"
+#include <stddef.h>
+#include "../../include/BSFadeNode.h"
+#include "../../include/NiFile.h"
+#include "../../include/NiDirectionalLight.h"
+#include "../../include/NiShader.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiTriStrips.h"
+#include "../../include/BSFaceGenModel.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiBinaryStream.h"
+#include "../../include/NiCullingProperty.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiTFixedStringMap_NiAVObject___.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/NiTMap.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiTStringTemplateMap.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/RecursiveSpinLock.h"
+#include "../../include/NiPixelData.h"
+#include <string.h>
 void* __cdecl _fnv_zlib_memset(void* p, int c, unsigned int n);
 struct FUN_00a61590_class
 {
     void* __thiscall ClearAndReset();
 };
-struct NiShader;
-template <class K, class V> class NiTPointerMap;
-template <class K, class V> class NiTStringTemplateMap
-{
-  public:
-    virtual void Test(int);
-};
-struct NiUnionBV
-{
-    virtual void Test(int);
-};
 extern NiTStringTemplateMap<NiTPointerMap<char const*, NiShader*>, NiShader*>* DAT_011f4784;
+class NiUnionBV;
 extern NiUnionBV* DAT_011f4788;
 void FUN_00a632b0();
 extern "C" void NiFreeAlias(void*);
@@ -35,49 +55,23 @@ struct FUN_00a7f820_Class
     void __thiscall FUN_00a7f820();
 };
 void __fastcall FUN_00a69690(float* p);
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00a615c0_Class
 {
     void __thiscall ClearAllBuckets();
 };
-struct RecursiveSpinLock
-{
-    void __thiscall Lock(const char*);
-};
 extern RecursiveSpinLock g_011c5f80;
 extern unsigned int DAT_011c5f84;
 extern void* DAT_011c5f58;
 void __stdcall FUN_00a638c0(void* p);
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 struct NiTriBasedGeomData;
 NiTriBasedGeomData* __fastcall InitializeTriBasedGeomData(NiTriBasedGeomData*);
 extern int DAT_0109dac4;
 void* __cdecl FUN_00a7b790();
 void __fastcall FUN_00a71f60(void*);
 extern int DAT_0109dd0c;
-struct FUN_00a7d670_Class
-{
-    void* __thiscall FUN_00a7d670();
-};
-struct CloningProcess;
-struct NiDirectionalLight
-{
-    void CopyMemberData(NiDirectionalLight* dst, CloningProcess& proc);
-    void FUN_00a7d6a0(NiDirectionalLight* dst, CloningProcess& proc);
-};
 extern "C" int __cdecl tolower(int);
 unsigned int FUN_00a61530(const char* str);
-struct NiCullingProperty
-{
-    void FUN_00a5d7a0(void*, CloningProcess&);
-};
 struct FUN_00a755f0_Class : NiCullingProperty
 {
     void __thiscall CopyCullingData(void* dst, CloningProcess& proc);
@@ -90,43 +84,17 @@ struct A51BF0Base
 {
     static void* __cdecl operator new(unsigned int);
 };
-struct FUN_00a7d6e0_Class
-{
-    void __thiscall FUN_00a71f60();
-};
 void* FUN_00a7d6e0();
-struct NiTMapBaseStub
-{
-    void RemoveAll();
-};
 extern void _NiFree(void*);
 extern int DAT_0109bc84;
 extern int DAT_0109bca4;
 extern int DAT_0109bcc4;
-struct FUN_00a63850_Class
-{
-    void DestroyMap();
-};
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-
-    NiPoint3 __thiscall CrossProduct(NiPoint3 const& other) const;
-};
 struct FUN_00a699d0_Class
 {
     NiPoint3 normal;
     float distance;
 
     FUN_00a699d0_Class* __thiscall FUN_00a699d0(NiPoint3 const* point0, NiPoint3 const* point1, NiPoint3 const* point2);
-};
-struct NiTFixedStringMap_NiAVObject___
-{
-    void* m_baseData0;
-    void* m_baseData1;
-    void __thiscall RemoveAll();
 };
 struct FUN_00a6ea00_Class : NiTFixedStringMap_NiAVObject___
 {
@@ -136,16 +104,8 @@ struct FUN_00a6ea00_Class : NiTFixedStringMap_NiAVObject___
 extern int DAT_0109ca08;
 extern MemoryManager _g_memoryManager;
 void _NiFree(void* p);
-struct NiTriStrips
-{
-    NiTriStrips();
-};
 extern int DAT_0109cd44;
 void* CreateNiTriStrips();
-struct NiTPrimitiveArray_ImageSpaceTexture___
-{
-    void SetSize(unsigned int);
-};
 struct FUN_00a72ca0_Class
 {
     void FUN_00a72ca0(unsigned int size);
@@ -261,95 +221,6 @@ class A61750Texture
 };
 unsigned int GetTextureSizeLevel(A61750Texture* pkTexture);
 extern bool __cdecl FUN_00a614d0(int, int);
-struct NiShaderBase
-{
-    virtual void M00()
-    {}
-    virtual void Release() = 0;
-    virtual void M01()
-    {}
-    virtual void M02()
-    {}
-    virtual void M03()
-    {}
-    virtual void M04()
-    {}
-    virtual void M05()
-    {}
-    virtual void M06()
-    {}
-    virtual void M07()
-    {}
-    virtual void M08()
-    {}
-    virtual void M09()
-    {}
-    virtual void M10()
-    {}
-    virtual void M11()
-    {}
-    virtual void M12()
-    {}
-    virtual void M13()
-    {}
-    virtual void M14()
-    {}
-    virtual void M15()
-    {}
-    virtual void M16()
-    {}
-    virtual void M17()
-    {}
-    virtual void M18()
-    {}
-    virtual void M19()
-    {}
-    virtual void M20()
-    {}
-    virtual void M21()
-    {}
-    virtual void M22()
-    {}
-    virtual void M23()
-    {}
-    virtual void M24()
-    {}
-    virtual void M25()
-    {}
-    virtual void M26()
-    {}
-    virtual void M27()
-    {}
-    virtual void M28()
-    {}
-    virtual void M29()
-    {}
-    virtual void M30()
-    {}
-    virtual void M31()
-    {}
-    virtual void M32()
-    {}
-    virtual void M33()
-    {}
-    virtual void M34()
-    {}
-    virtual void M35()
-    {}
-    virtual void M36()
-    {}
-    virtual void M37()
-    {}
-};
-class NiShader : public NiShaderBase
-{
-  public:
-    long m_iObjectReferenceCount;
-    int m_iShaderValue;
-
-    virtual void Release();
-    virtual int* GetHash();
-};
 struct FUN_00a61920_Node
 {
     NiShader* m_pObject;
@@ -365,12 +236,6 @@ class FUN_00a61920_Class
 
     bool __thiscall FindShaderByHash(int, int, NiShader**);
 };
-void NiShader::Release()
-{}
-int* NiShader::GetHash()
-{
-    return &m_iShaderValue;
-}
 class FUN_00a61ec0_cls;
 class RefCountedNodeObject
 {
@@ -399,14 +264,15 @@ class FUN_00a61ec0_cls
 
     void ClearAllSlots();
 };
-struct Vector4f
+// Exe 0x00a63ae0: unit-local Vector4f view; declarations and layout are preserved.
+struct BlkVector4fView
 {
     unsigned char b0;
     unsigned char b1;
     unsigned char b2;
     unsigned char b3;
 };
-void __cdecl SwapByteQuadWords(Vector4f* q, unsigned int count);
+void __cdecl SwapByteQuadWords(BlkVector4fView* q, unsigned int count);
 struct A62190Component
 {
     int m_eComponent;
@@ -474,10 +340,10 @@ template <class T> struct NiPtr_a62
     {
         if (m_pObject != pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -493,13 +359,6 @@ void __cdecl ApplySettings(const Settings_a62& kSettings);
 extern MemoryManager _g_memoryManager;
 extern int DAT_0109bc84;
 extern "C" void NiFreeAlias(void*);
-struct FUN_00a639e0_Class
-{
-    void* m_baseData0;
-    void* m_baseData1;
-    void* m_baseData2;
-    FUN_00a639e0_Class* __thiscall FUN_00a639e0(char param_2);
-};
 struct FUN_00a66960_cls
 {
     int m_00;
@@ -626,48 +485,17 @@ struct FUN_00a69b40_Class
     void __thiscall FUN_00a69b40(int param_2);
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
-class NiGlobalStringTable
-{
-  public:
-    static char* __cdecl AddString(const char* str);
-};
-extern char* DAT_0109b220;
-struct NiRefObjectStub
-{
-    virtual ~NiRefObjectStub();
-    virtual void DeleteThis();
-    volatile long m_uiRefCount;
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-struct FixedStringStub
-{
-    char* m_kHandle;
-};
-static inline void ReleaseString(FixedStringStub& s)
-{
-    char* old = s.m_kHandle;
-    if (old)
-    {
-        s.m_kHandle = NiGlobalStringTable::AddString(0);
-        if (old != DAT_0109b220)
-            InterlockedDecrement((volatile long*)(old - 8));
-    }
-}
-extern NiRefObjectStub* DAT_011f49ac;
-extern FixedStringStub DAT_011f49b0;
-extern FixedStringStub DAT_011f49b4;
-extern FixedStringStub DAT_011f49b8;
-extern FixedStringStub DAT_011f49bc;
-extern FixedStringStub DAT_011f49c0;
-extern FixedStringStub DAT_011f49c4;
-extern FixedStringStub DAT_011f49c8;
-extern FixedStringStub DAT_011f49cc;
-extern FixedStringStub DAT_011f49d0;
-extern FixedStringStub DAT_011f49d4;
+extern NiRefObject* DAT_011f49ac;
+extern NiFixedString DAT_011f49b0;
+extern NiFixedString DAT_011f49b4;
+extern NiFixedString DAT_011f49b8;
+extern NiFixedString DAT_011f49bc;
+extern NiFixedString DAT_011f49c0;
+extern NiFixedString DAT_011f49c4;
+extern NiFixedString DAT_011f49c8;
+extern NiFixedString DAT_011f49cc;
+extern NiFixedString DAT_011f49d0;
+extern NiFixedString DAT_011f49d4;
 void ReleaseGlobalStrings();
 struct FUN_00a6db50_V
 {
@@ -721,23 +549,7 @@ struct FUN_00a75dc0_cls
                        unsigned int a11);
 };
 void* __cdecl FUN_00aa13e0(unsigned int size);
-struct FUN_00a71c40_cls
-{
-    int* m_vt;
-    void FUN_00a89720(void* p);
-    FUN_00a71c40_cls* ConstructWithAlloc(unsigned int a1, unsigned int a2, unsigned int a3, unsigned int a4,
-                                         unsigned int a5, unsigned int a6, unsigned int a7, unsigned int a8,
-                                         unsigned int a9, unsigned int a10, unsigned int a11);
-};
-// FUN_00a71cc0 : constructor-like helper that calls a base routine with the
-// argument and then installs the class vtable pointer, returning itself.
 extern int DAT_0109cd44;
-struct FUN_00a71cc0_cls
-{
-    void* m_pVTable;
-    void FUN_00a89720(int arg);
-    FUN_00a71cc0_cls* FUN_00a71cc0(int arg);
-};
 struct FUN_00a72550_Class
 {
     struct Item
@@ -768,16 +580,6 @@ struct SceneEntry
     virtual void Unknown0C();
     virtual void Prepare(unsigned int reason);
 };
-struct IndexedObjects
-{
-    void* vtable;
-    SceneEntry** entries;
-    unsigned short capacity;
-    unsigned short count;
-    unsigned short elementSize;
-    unsigned short growth;
-    void __thiscall FUN_00ba3aa0(unsigned int index, unsigned int* removed);
-};
 struct LinkedRecord
 {
     void* owner;
@@ -797,7 +599,7 @@ struct ObjectRegistry
     unsigned int recordCount;
     LinkedRecord* records;
     void* unk18;
-    IndexedObjects indexedObjects;
+    NiTPrimitiveArray<SceneEntry*> indexedObjects;
 
     bool __thiscall RemoveObject(unsigned int index, bool clearReferences);
 };
@@ -835,13 +637,6 @@ struct ObjectWriter
     unsigned int bytesWritten;
     unsigned int(__cdecl* write)(ObjectWriter*, const void*, unsigned int, const unsigned int*, int);
 };
-struct BinaryStream
-{
-    ObjectWriter* Writer()
-    {
-        return *reinterpret_cast<ObjectWriter**>(reinterpret_cast<char*>(this) + 0x24c);
-    }
-};
 struct ColorState
 {
     unsigned char format;
@@ -854,199 +649,12 @@ struct ColorState
     unsigned int threshold;
     unsigned int blendMode;
 
-    void FUN_00a72cb0(BinaryStream* stream);
+    void FUN_00a72cb0(NiStream* stream);
 };
-class BA72DB0BinaryStream
-{
-  public:
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(BA72DB0BinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int(__cdecl* m_pfnWrite)(BA72DB0BinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-
-    unsigned int BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                             unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesWritten = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesWritten;
-        return uiBytesWritten;
-    }
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
-class BA72DB0Stream
-{
-  public:
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    unsigned int m_uiFileVersion;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    BA72DB0BinaryStream* m_pUnderlyingStream;
-    BA72DB0BinaryStream* m_pBackingStream;
-};
-template <class T>
-inline void BA72DB0BinaryStreamSave(BA72DB0BinaryStream& kOstr, const T* pValue, unsigned int uiNumEls = 1)
-{
-    unsigned int uiSize = sizeof(T);
-    kOstr.BinaryWrite(pValue, uiNumEls * uiSize, &uiSize, 1);
-}
-template <class T> inline void BA72DB0SaveBinary(BA72DB0Stream& kStream, const T& value)
-{
-    BA72DB0BinaryStreamSave(*kStream.m_pBackingStream, &value);
-}
 class BA72DB0Data
 {
   public:
-    void FUN_00a72db0(BA72DB0Stream& kStream);
+    void FUN_00a72db0(NiStream& kStream);
 
     bool m_bFlag;
     int m_iValue0;
@@ -1165,173 +773,6 @@ bool FUN_00a77920(int a);
 struct NiBinaryStream;
 typedef unsigned int (*NiBinaryStreamWriteFn)(NiBinaryStream* pThis, const void* pvBuffer, unsigned int uiBytes,
                                               unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-struct NiBinaryStream
-{
-    void* vtbl;
-    unsigned int m_uiStreamFlags;
-    void* m_pfnRead;
-    NiBinaryStreamWriteFn m_pfnWrite;
-
-    unsigned int BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                             unsigned int uiNumComponents)
-    {
-        unsigned int uiBytes = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytes;
-        return uiBytes;
-    }
-};
-struct NiStream
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    NiBinaryStream* m_pBackingStream;
-};
 template <class T> inline void SerializeValue(NiBinaryStream& binstream, const T& value)
 {
     unsigned int uiSize = sizeof(T);
@@ -1339,7 +780,7 @@ template <class T> inline void SerializeValue(NiBinaryStream& binstream, const T
 }
 template <class T> inline void SerializeValue(NiStream& stream, const T& value)
 {
-    SerializeValue(*stream.m_pBackingStream, value);
+    SerializeValue(stream.Istr(), value);
 }
 struct Entry
 {
@@ -1406,88 +847,14 @@ struct S_00a7fea0_Class
     void TransformPoint(const S_00a7fea0_Xf& a);
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
-class MemoryManagerA61
-{
-  public:
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerA61 g_kMemoryManagerA61;
-class NiObjectA61
-{
-  public:
-    virtual ~NiObjectA61();
-    virtual void DeleteThis();
-    virtual void vfn08();
-    virtual void vfn0C();
-    virtual void vfn10();
-    virtual void vfn14();
-    virtual void vfn18();
-    virtual void vfn1C();
-    virtual void vfn20();
-    virtual void vfn24();
-    virtual void vfn28();
-    virtual void vfn2C();
-    virtual void vfn30();
-    virtual void vfn34();
-    virtual void vfn38();
-    virtual void vfn3C();
-    virtual void vfn40();
-    virtual void vfn44();
-    virtual void vfn48();
-    virtual void vfn4C();
-    virtual void vfn50();
-    virtual void vfn54();
-    virtual void vfn58();
-    virtual void vfn5C();
-    virtual void vfn60();
-    virtual void vfn64();
-    virtual void vfn68();
-    virtual void vfn6C();
-    virtual void vfn70();
-    virtual void vfn74();
-    virtual void vfn78();
-    virtual void vfn7C();
-    virtual void vfn80();
-    virtual void vfn84();
-    virtual void vfn88();
-    virtual void vfn8C();
-    virtual void vfn90();
-    virtual void vfn94();
-    virtual void vfn98();
-    virtual const char** GetName();
-
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-
-    unsigned int m_uiRefCount;
-};
-template <class T> class NiPointerA61
-{
-  public:
-    ~NiPointerA61()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-
-    T* operator->() const
-    {
-        return m_pObject;
-    }
-
-    T* m_pObject;
-};
 struct NodeA61
 {
     static void operator delete(void* pvMem)
     {
-        g_kMemoryManagerA61.Deallocate(pvMem);
+        g_memoryManager.Deallocate(pvMem);
     }
 
-    NiPointerA61<NiObjectA61> m_pReferencedObject;
+    NiPointer<NiTexture> m_pReferencedObject;
     int m_iData;
     NodeA61* m_pkNext;
 };
@@ -1530,10 +897,10 @@ template <class T> class A619B0Pointer
     {
         if (m_pObject != kOther.m_pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = kOther.m_pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -1563,7 +930,7 @@ struct MyPool
 };
 struct FUN_0040fbf0_Class
 {
-    void Wait(int);
+    void FUN_0040fbf0(int);
 };
 extern FUN_00a615c0_Class* DAT_011f4468;
 extern FUN_0040fbf0_Class DAT_011f4480;
@@ -1755,61 +1122,21 @@ struct Q67530Data
     int e;
     int f;
 };
-struct BSFaceGenModel
-{
-    void FUN_00a72720(int flag, void* a, void* f, void* c, void* e, void* d, void* b);
-};
 struct Q67530Cls : FUN_00a674b0_cls
 {
     void FillOutRec674(OutRec674* out);
 };
-void* __cdecl NiMallocA6F(unsigned int uiSize) throw();
-extern "C" void* __cdecl MemSetA6F(void* pvDest, int iValue, unsigned int uiSize);
-struct NiTMapItemA6F;
-class NiTMapBaseA6F
-{
-  public:
-    __forceinline NiTMapBaseA6F(unsigned int uiHashSize = 37) throw()
-    {
-        m_uiHashSize = uiHashSize;
-        m_uiCount = 0;
-        unsigned int uiSize = sizeof(NiTMapItemA6F*) * m_uiHashSize;
-        m_ppkHashTable = (NiTMapItemA6F**)NiMallocA6F(uiSize);
-        MemSetA6F(m_ppkHashTable, 0, m_uiHashSize * sizeof(NiTMapItemA6F*));
-    }
-    virtual ~NiTMapBaseA6F() throw();
-
-    unsigned int m_uiHashSize;
-    NiTMapItemA6F** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
-class NiTPointerMapA6F : public NiTMapBaseA6F
-{
-  public:
-    __forceinline NiTPointerMapA6F(unsigned int uiHashSize = 37) throw() : NiTMapBaseA6F(uiHashSize)
-    {}
-    virtual ~NiTPointerMapA6F() throw();
-};
-class NiObjectA6F
-{
-  public:
-    static void* operator new(unsigned int uiSize) throw();
-
-    NiObjectA6F() throw();
-    virtual ~NiObjectA6F() throw();
-
-    unsigned int m_uiRefCount;
-};
-class NiExtraDataMapA6F : public NiObjectA6F
+class NiExtraDataMapA6F : public NiObject
 {
   public:
     __forceinline NiExtraDataMapA6F() throw() : m_pkLast(0)
     {}
     virtual ~NiExtraDataMapA6F() throw();
 
-    static NiObjectA6F* FUN_00a6f000();
+    static NiObject* FUN_00a6f000();
 
-    NiTPointerMapA6F m_kFormatEntries;
+    // Vtables 0x01096114/0x0109618c identify the fixed-string map base/derived pair.
+    NiTFixedStringMap<NiAVObject*> m_kFormatEntries;
     void* m_pkLast;
 };
 struct NiPixelChannelsA773
@@ -1932,23 +1259,6 @@ struct FUN_00a60160_cls : FUN_00a5fca0_cls
     void* DestroyIfFlagged(unsigned int flags);
 };
 extern "C" void __cdecl _delete(void* p, unsigned int size);
-struct NiStreamA606
-{
-    virtual void V00();
-    virtual void V01();
-    virtual void V02();
-    virtual void V03();
-    virtual void V04();
-    virtual void V05();
-    virtual void V06();
-    virtual void V07();
-    virtual void V08();
-    virtual void V09();
-    virtual void V10();
-    virtual void V11();
-    virtual void SaveLinkID(void* pkObject);
-    void WriteObjectLink(void* pkString);
-};
 struct ControllerA606
 {
     char m_acUnk00[0x18];
@@ -2213,88 +1523,6 @@ class ObjA609
 
     void LoadFile();
 };
-struct NiFixedString
-{
-    char* m_handle;
-    NiFixedString& operator=(const char* value);
-    void Assign(const char* value)
-    {
-        char* old = m_handle;
-        if (old != value)
-        {
-            m_handle = NiGlobalStringTable::AddString(value);
-            if (old != DAT_0109b220)
-                InterlockedDecrement((volatile long*)(old - 8));
-        }
-    }
-    void Clear()
-    {
-        char* old = m_handle;
-        if (old)
-        {
-            m_handle = NiGlobalStringTable::AddString(0);
-            if (old != DAT_0109b220)
-                InterlockedDecrement((volatile long*)(old - 8));
-        }
-    }
-};
-struct TextureBinaryInput
-{
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(TextureBinaryInput*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int BinaryRead(void* buffer, unsigned int totalBytes, unsigned int* componentSizes,
-                            unsigned int numComponents)
-    {
-        unsigned int bytes = m_pfnRead(this, buffer, totalBytes, componentSizes, numComponents);
-        m_uiStreamFlags += bytes;
-        return bytes;
-    }
-};
-template <class T> inline void TextureBinaryStreamLoad(TextureBinaryInput& input, T* value, unsigned int count = 1)
-{
-    unsigned int size = sizeof(T);
-    input.BinaryRead(value, count * size, &size, 1);
-}
-struct TextureLoadStream : NiStream
-{
-    void FUN_00a64ea0(NiFixedString*);
-    void FUN_00a64df0(NiFixedString*);
-    void FUN_00a64700(unsigned int);
-    void FUN_00a645b0();
-    void FUN_00a636f0(const char*);
-    bool FUN_00a636b0(char*, unsigned int);
-    void FUN_00a633d0(const char*, NiObjectA61**);
-    void FUN_00a633b0(void*);
-    template <class T> void Read(T& value)
-    {
-        TextureBinaryStreamLoad(*reinterpret_cast<TextureBinaryInput*>(unk24c), &value);
-    }
-    void Read(bool& value)
-    {
-        unsigned char byte;
-        Read(byte);
-        value = byte != 0;
-    }
-    unsigned int Version() const
-    {
-        return static_cast<unsigned int>(unk0d8);
-    }
-};
-struct TextureStreamVirtual
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void Register(NiObjectA61*);
-};
 enum SourcePixelLayout
 {
     PixelLayout4 = 4,
@@ -2314,24 +1542,6 @@ enum SourceAlphaFormat
     AlphaBinary = 2,
     AlphaSmooth = 3
 };
-struct SourceTextureBase : NiObjectA61
-{
-    unsigned int unk08, unk0c, unk10, unk14;
-    unsigned int pixelLayout, alphaFormat, mipmapFormat;
-    unsigned int unk24, unk28, unk2c;
-    void FUN_00a47350(TextureLoadStream&);
-};
-struct NiSourceTexture : SourceTextureBase
-{
-    NiFixedString fileName;
-    NiFixedString resolvedName;
-    NiObjectA61* pixelData;
-    NiObjectA61* rendererData;
-    bool isStatic;
-    bool loadDirect;
-    bool persistent;
-    void FUN_00a60180(TextureLoadStream& stream);
-};
 extern bool DAT_011f4780;
 void __cdecl FUN_00a76960(void*, void*);
 bool __cdecl FUN_00aa1a30(const char*, int);
@@ -2339,27 +1549,9 @@ class GlobalObjectO2_00a7b610;
 extern GlobalObjectO2_00a7b610 g_011f444c;
 char* __cdecl FUN_00a7d330(char* pcText);
 char* __cdecl FUN_00a7d5e0(const char* pcPrefix, const char* pcText);
-struct StrArr
-{
-    void* vtable;
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char*& element);
-    void Add(char*& element)
-    {
-        unsigned int uiIndex = m_usSize;
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-    }
-};
 struct FUN_00a62a40_this
 {
-    void FUN_00a62a40(StrArr* pkStrings);
+    void FUN_00a62a40(NiTPrimitiveArray<char*>* pkStrings);
 };
 struct FUN_00a60770_shell : FUN_00a62a40_this
 {
@@ -2377,32 +1569,12 @@ struct FUN_00a60770_shell : FUN_00a62a40_this
     int unk2C;
     int unk30;
     const char* m_pcFileName;
-    void GetFileStrings(StrArr* pkStrings);
+    void GetFileStrings(NiTPrimitiveArray<char*>* pkStrings);
 };
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* p);
 namespace A61F {
 
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis() throw();
-    long m_uiRefCount;
 
-    void DecRefCount() throw()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
-class NiPointer
-{
-  public:
-    NiRefObject* m_pObject;
-    NiPointer() throw() : m_pObject(0)
-    {}
-};
 
 struct LockState
 {
@@ -2421,16 +1593,11 @@ class GlobalObject_0096a2d0
   public:
     void Lock(const char* pcName) throw();
 };
-extern "C" bool __cdecl fnv_NiStreamGetTexture(const char* pcName, A61F::NiPointer* apTextureOutput) throw();
+extern "C" bool __cdecl fnv_NiStreamGetTexture(const char* pcName, NiPointer<NiRefObject>* apTextureOutput) throw();
 bool __cdecl FUN_00a61f30(const void* pvTexture) throw();
 bool __cdecl FUN_00a61fb0(const char* pcName);
-struct FUN_00a63840_Class
-{
-    unsigned int m0;
-    unsigned int m4;
-    unsigned int FUN_00a63840(unsigned int a);
-};
-struct NiPixelFormatA775
+// Conversion descriptor: 24 bytes of masks, shifts and losses; NiPixelFormat is 68 bytes.
+struct PixelChannelPacking
 {
     unsigned int m_auiMask[4];
     unsigned char m_aucShift[4];
@@ -2438,30 +1605,9 @@ struct NiPixelFormatA775
 };
 void __cdecl ConvertPixelFormat(unsigned int uiWidth, unsigned int uiHeight, unsigned int uiDestStride,
                                 unsigned char* pucDest, unsigned int uiSrcStride, unsigned int uiSrcSize,
-                                const unsigned char* pucSrc, const NiPixelFormatA775* pkSrcFmt);
+                                const unsigned char* pucSrc, const PixelChannelPacking* pkSrcFmt);
 void __cdecl FUN_00a8a9a0();
 void __cdecl FUN_00a7b7d0();
-struct Vec3
-{
-    float x;
-    float y;
-    float z;
-    Vec3 operator*(float scale) const
-    {
-        Vec3 r;
-        r.x = x * scale;
-        r.y = y * scale;
-        r.z = z * scale;
-        return r;
-    }
-    Vec3& operator+=(const Vec3& o)
-    {
-        x += o.x;
-        y += o.y;
-        z += o.z;
-        return *this;
-    }
-};
 void __cdecl AddScaledPoints(NiPoint3* dest, float scale, const NiPoint3* src, unsigned int count);
 extern int DAT_0109b944;
 extern int DAT_0109df8c;
@@ -2505,4 +1651,42 @@ class FUN_007613f0
 void* FUN_00a63ae0(unsigned int ItemUpdateArray)
 {
     return new FUN_007613f0[ItemUpdateArray];
+}
+
+// Gamebryo NiMain code is built without C++ exception handling: no cleanup state for the new-expression.
+struct CheckerColor
+{
+    float r, g, b, a;
+};
+// Creates a 32x32 NiPixelData and fills each face with a two-color checkerboard pattern using the given colors and pixel format.
+// @fnv 0x00a62330
+NiPixelData* __cdecl CreateCheckerboardTexture(const CheckerColor& color0, const CheckerColor& color1,
+                                               const NiPixelFormat& format, unsigned int faces)
+{
+    NiPixelData* data = new NiPixelData(32, 32, format, 1, faces);
+    unsigned int colors[2];
+    colors[0] = ((unsigned int)(color0.r * 255.0) << format.GetPixelBitData((NiPixelFormat::Component)0)) & format.GetMask(0);
+    colors[0] |= ((unsigned int)(color0.g * 255.0) << format.GetPixelBitData((NiPixelFormat::Component)1)) & format.GetMask(1);
+    colors[0] |= ((unsigned int)(color0.b * 255.0) << format.GetPixelBitData((NiPixelFormat::Component)2)) & format.GetMask(2);
+    colors[0] |= ((unsigned int)(color0.a * 255.0) << format.GetPixelBitData((NiPixelFormat::Component)3)) & format.GetMask(3);
+    colors[1] = ((unsigned int)(color1.r * 255.0) << format.GetPixelBitData((NiPixelFormat::Component)0)) & format.GetMask(0);
+    colors[1] |= ((unsigned int)(color1.g * 255.0) << format.GetPixelBitData((NiPixelFormat::Component)1)) & format.GetMask(1);
+    colors[1] |= ((unsigned int)(color1.b * 255.0) << format.GetPixelBitData((NiPixelFormat::Component)2)) & format.GetMask(2);
+    colors[1] |= ((unsigned int)(color1.a * 255.0) << format.GetPixelBitData((NiPixelFormat::Component)3)) & format.GetMask(3);
+    for (unsigned int face = 0; face < faces; ++face)
+    {
+        unsigned char* dst =
+            data->m_pucPixels + data->m_puiOffsetInBytes[0] + data->m_puiOffsetInBytes[data->m_uiMipmapLevels] * face;
+        unsigned char bytes = format.m_ucBitsPerPixel >> 3;
+        for (unsigned int y = 0; y < 32; ++y)
+        {
+            unsigned int rowHalf = y >> 4;
+            for (unsigned int x = 0; x < 32; ++x)
+            {
+                memcpy(dst, &colors[rowHalf != (x >> 4)], bytes);
+                dst += bytes;
+            }
+        }
+    }
+    return data;
 }

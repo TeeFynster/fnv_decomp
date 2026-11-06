@@ -1,6 +1,21 @@
-// tesobjecttree.cpp: TESObjectTREE, BSShaderTextureSet, BGSImpactData, BSFadeNode and more (45 functions)
+#include "../include/BSStringT.h"
+#include "../include/Setting.h"
+// 0x00408d60 returns the setting value at +4 (or a fallback byte for null this).
 
-#include "TESObjectTREE.h"
+// tesobjecttree.cpp: TESObjectTREE, BSShaderTextureSet, BGSImpactData, BSFadeNode and more (45 functions)
+#include "../include/NiColorA.h"
+
+// include/TESFile.h needs the Windows types before layout_support.h stubs them.
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include "../include/TESObjectTREE.h"
+#include "../include/NiTPrimitiveArray.h"
+// IsFormInitialized through a const view (the original calls the const member)
+class TESFormInitFlag
+{
+  public:
+    bool IsFormInitialized() const;
+};
 
 // @fnv 0x0043b5d0
 TreeRecordData* TESObjectTREE::GetData()
@@ -27,6 +42,11 @@ void TESObjectTREE::InitItem()
 #include "TESFile.h"
 #include <malloc.h>
 #include <string.h>
+#include "../include/AutoMemContext.h"
+#include "../include/BSShaderTextureSet.h"
+#include "../include/NiObject.h"
+#include "../include/NiPoint3.h"
+#include "../include/BSSoundHandle.h"
 
 template <int size> struct EndianSizeTag
 {
@@ -34,9 +54,12 @@ template <int size> struct EndianSizeTag
 void BSEndian(unsigned int* value, EndianSizeTag<4>);
 void BSEndian(float* value, EndianSizeTag<4>);
 
+// the record chunk tags TESObjectTREE::LoadForm reads
+#include "../include/CHUNK_ID.h"
+
 // Reads a TESObjectTREE record from the file, dispatching EDID, OBND, MODL/MODT, ICON, DEST/DSTD, SNAM, CNAM and BNAM chunks until the chunk list ends.
 // @fnv 0x0051bbc0
-bool TESObjectTREE::Load(TESFile* file)
+bool TESObjectTREE::LoadForm(TESFile* file)
 {
     unsigned char form = file->GetTESForm();
     if (form != 37)
@@ -123,11 +146,6 @@ bool TESObjectTREE::Load(TESFile* file)
     return true;
 }
 
-class NiObject
-{
-  public:
-    void FUN_00a5d3d0(void);
-};
 struct _Fake_FUN_004a7090
 {
     void f();
@@ -139,13 +157,7 @@ void _Fake_FUN_004a7090::f()
     reinterpret_cast<NiObject*>(this)->FUN_00a5d3d0();
 }
 
-struct BSS
-{
-    char* p;
-    unsigned short a;
-    unsigned short b;
-    ~BSS();
-};
+
 struct FUN_004a7090
 {
     int a;
@@ -154,10 +166,10 @@ struct FUN_004a7090
 };
 struct FUN_0051d1c0 : public FUN_004a7090
 {
-    BSS textures[6];
+    ::BSStringT<char> textures[6];
     ~FUN_0051d1c0();
 };
-// Destructor for the texture set: destroys the six BSS texture entries and the base object.
+// Destructor for the texture set: destroys the six ::BSStringT<char> texture entries and the base object.
 // @fnv 0x0051d1c0
 FUN_0051d1c0::~FUN_0051d1c0()
 {}
@@ -200,10 +212,6 @@ struct NiRTTI;
 
 extern const NiRTTI g_0120044c;
 
-struct BSShaderTextureSet
-{
-    const NiRTTI* GetNiRTTI() const;
-};
 
 // @fnv 0x0051d150
 const NiRTTI* BSShaderTextureSet::GetNiRTTI() const
@@ -241,12 +249,9 @@ void __thiscall FUN_0051d400_shell::FUN_0051d400()
     Deallocate(p1);
 }
 
-struct ProcessLists
-{
-    unsigned char* GetLifeStateControlFlag(void);
-};
 
-struct GlobalObject_0045cf30 : ProcessLists
+
+struct GlobalObject_0045cf30 : Setting
 {
 };
 
@@ -255,7 +260,7 @@ extern GlobalObject_0045cf30 g_011d5ce8;
 // @fnv 0x0051d740
 unsigned char GetFirstProcessListByte()
 {
-    return g_011d5ce8.GetLifeStateControlFlag()[0];
+    return g_011d5ce8.FUN_00408d60()[0];
 }
 
 struct FUN_006447b0_shell
@@ -269,13 +274,14 @@ float FUN_006447b0_shell::GetField84Float()
     return *reinterpret_cast<float*>(this + 0x84);
 }
 
-struct BGSImpactData
+// float field getter at +0x38 (no RTTI evidence for its class)
+struct FUN_009a9350_shell
 {
     float FUN_009a9350() const;
 };
 
 // @fnv 0x009a9350
-float BGSImpactData::FUN_009a9350() const
+float FUN_009a9350_shell::FUN_009a9350() const
 {
     return *(const float*)((const char*)this + 0x38);
 }
@@ -293,17 +299,12 @@ unsigned int FUN_009acce0_shell::GetFieldC8()
     return _m_c8;
 }
 
-struct BSFadeNode
-{
-    char _pad_0[0xCC];
-    unsigned int userDataAt0xCC;
-    unsigned int FUN_009ad610();
-};
+#include "../include/BSFadeNode.h"
 
 // @fnv 0x009ad610
 unsigned int BSFadeNode::FUN_009ad610()
 {
-    return userDataAt0xCC;
+    return *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0xCC);
 }
 
 struct FUN_0051b8c0_shell : TESObjectTREE
@@ -328,12 +329,6 @@ struct FUN_0051b970_shell : TESTexture1024
 FUN_0051b970_shell::FUN_0051b970_shell()
 {}
 
-struct Arr
-{
-    unsigned int GetSize(void);
-    unsigned int* GetAt(int);
-};
-
 extern unsigned int __cdecl DialogueRandom(void);
 
 struct FUN_0051c360_shell
@@ -341,15 +336,15 @@ struct FUN_0051c360_shell
     unsigned int FUN_0051c360();
 };
 
-// Returns a random element from the Arr at offset 0x5c, or 0 when that Arr is empty.
+// Returns a random element from the seed array at offset 0x5c, or 0 when the array is empty.
 // @fnv 0x0051c360
 unsigned int FUN_0051c360_shell::FUN_0051c360()
 {
-    unsigned int index = reinterpret_cast<Arr*>(reinterpret_cast<char*>(this) + 0x5c)->GetSize();
+    unsigned int index = reinterpret_cast<NiTPrimitiveArray<unsigned int>*>(reinterpret_cast<char*>(this) + 0x5c)->GetSize();
     if (!index)
         return 0;
     unsigned int size = DialogueRandom() % index;
-    return *reinterpret_cast<Arr*>(reinterpret_cast<char*>(this) + 0x5c)->GetAt(size);
+    return reinterpret_cast<NiTPrimitiveArray<unsigned int>*>(reinterpret_cast<char*>(this) + 0x5c)->GetAt(size);
 }
 
 namespace fnv_0051d220 {
@@ -424,10 +419,7 @@ void* S_0051b900::FUN_0051b900(unsigned int flags)
     return this;
 }
 
-struct TESIcon
-{
-    ~TESIcon();
-};
+#include "../include/TESIcon.h"
 
 struct FUN_0051b990_shell : public TESIcon
 {
@@ -440,11 +432,7 @@ void FUN_0051b990_shell::FUN_0051b990()
     TESIcon::~TESIcon();
 }
 
-struct NiBillboardNode
-{
-    void FUN_0051cfe0();
-    void* Destroy(unsigned int);
-};
+#include "../include/NiBillboardNode.h"
 void __cdecl _delete(void*, unsigned int);
 // @fnv 0x0051cfa0
 void* NiBillboardNode::Destroy(unsigned int flags)
@@ -456,15 +444,10 @@ void* NiBillboardNode::Destroy(unsigned int flags)
 }
 
 namespace fnv_0051ba90 {
-struct Arr
-{
-    unsigned int GetSize();
-    unsigned int* GetAt(int);
-};
 struct Holder
 {
     char _pad[0x5c];
-    Arr arr;
+    NiTPrimitiveArray<unsigned int> arr;
     unsigned char FindIndex(unsigned int aiIndex);
 };
 // Searches arr for the first element equal to aiIndex and returns its index, or 0xff if not found.
@@ -474,7 +457,7 @@ unsigned char Holder::FindIndex(unsigned int aiIndex)
     unsigned char idx = 0xff;
     for (unsigned int uiIndex = 0; uiIndex < arr.GetSize(); ++uiIndex)
     {
-        if (*arr.GetAt(uiIndex) == aiIndex)
+        if (arr.GetAt(uiIndex) == aiIndex)
         {
             idx = uiIndex;
             break;
@@ -503,23 +486,9 @@ struct FUN_0051b970_shell
     virtual ~FUN_0051b970_shell();
     char pad[0x8];
 };
-struct FUN_00474790
-{
-    FUN_00474790(int, int);
-    ~FUN_00474790();
-    char pad[0x10];
-};
 struct B006815c0 : public NiPoint2
 {
     B006815c0();
-};
-struct DestructibleTail
-{
-    ~DestructibleTail();
-};
-struct SoundPlaybackHandle
-{
-    void SetFormType(int);
 };
 extern const float g_011c3ec0_arg1;
 extern const float runtimeFloatSettingDefault696;
@@ -529,10 +498,9 @@ extern NiPoint2 DAT_011f4980;
 struct FUN_0051b6e0 : public FUN_0050f7a0,
                       public FUN_0051b930,
                       public FUN_0051b970_shell,
-                      public BGSDestructibleObjectForm,
-                      public DestructibleTail
+                      public BGSDestructibleObjectForm
 {
-    FUN_00474790 m5c;
+    NiTPrimitiveArray<unsigned int> m5c;
     float f6c;
     float f70;
     float f74;
@@ -549,7 +517,7 @@ struct FUN_0051b6e0 : public FUN_0050f7a0,
 // @fnv 0x0051b6e0
 FUN_0051b6e0::FUN_0051b6e0() : m5c(0, 1)
 {
-    ((SoundPlaybackHandle*)this)->SetFormType(0x25);
+    reinterpret_cast<TESForm*>(this)->SetFormType(static_cast<ENUM_FORM_ID>(0x25));
     f6c = g_011c3ec0_arg1;
     f70 = 5.0f;
     f74 = runtimeFloatSettingDefault696;
@@ -563,11 +531,6 @@ FUN_0051b6e0::FUN_0051b6e0() : m5c(0, 1)
 }  // namespace fnv_0051b6e0
 
 namespace fnv_0051baf0 {
-struct Arr
-{
-    unsigned int GetSize();
-    unsigned int* GetAt(int);
-};
 struct FUN_0051baf0_shell
 {
     virtual void v00();
@@ -928,15 +891,15 @@ struct FUN_0051baf0_shell
 unsigned int FUN_0051baf0_shell::GetEntryByIndex(unsigned char index)
 {
     unsigned int result;
-    if (index == 0xFF || !((Arr*)((char*)this + 0x5c))->GetSize())
+    if (index == 0xFF || !((NiTPrimitiveArray<unsigned int>*)((char*)this + 0x5c))->GetSize())
     {
         result = ((unsigned int(__thiscall*)(void*))(*(void***)(this))[0x190 / 4])(this);
     }
     else
     {
-        if (index >= ((Arr*)((char*)this + 0x5c))->GetSize())
-            index = index % ((Arr*)((char*)this + 0x5c))->GetSize();
-        result = *((Arr*)((char*)this + 0x5c))->GetAt(index);
+        if (index >= ((NiTPrimitiveArray<unsigned int>*)((char*)this + 0x5c))->GetSize())
+            index = index % ((NiTPrimitiveArray<unsigned int>*)((char*)this + 0x5c))->GetSize();
+        result = ((NiTPrimitiveArray<unsigned int>*)((char*)this + 0x5c))->GetAt(index);
     }
     return result;
 }
@@ -970,12 +933,6 @@ struct FUN_005e79a0_t
 struct NiPoint2_shell
 {
     bool FUN_0051c330(NiPoint2 const&) const;
-};
-
-struct Arr
-{
-    unsigned int GetSize();
-    unsigned int* GetAt(int);
 };
 
 struct FUN_0051c220_vtable
@@ -1102,15 +1059,15 @@ bool FUN_0051c220_shell::IsNotEqual(TESForm* apCompare)
             ->FUN_0051c330(*reinterpret_cast<NiPoint2 const*>(reinterpret_cast<const char*>(i) + 0x8c)))
         return true;
 
-    unsigned int isize = reinterpret_cast<Arr*>(reinterpret_cast<char*>(this) + 0x5c)->GetSize();
-    if (isize != reinterpret_cast<Arr*>(reinterpret_cast<char*>(i) + 0x5c)->GetSize())
+    unsigned int isize = reinterpret_cast<NiTPrimitiveArray<unsigned int>*>(reinterpret_cast<char*>(this) + 0x5c)->GetSize();
+    if (isize != reinterpret_cast<NiTPrimitiveArray<unsigned int>*>(reinterpret_cast<char*>(i) + 0x5c)->GetSize())
         return true;
 
     unsigned int pcomp = 0;
     for (; pcomp < isize; ++pcomp)
     {
-        if (*reinterpret_cast<Arr*>(reinterpret_cast<char*>(this) + 0x5c)->GetAt(pcomp) !=
-            *reinterpret_cast<Arr*>(reinterpret_cast<char*>(i) + 0x5c)->GetAt(pcomp))
+        if (reinterpret_cast<NiTPrimitiveArray<unsigned int>*>(reinterpret_cast<char*>(this) + 0x5c)->GetAt(pcomp) !=
+            reinterpret_cast<NiTPrimitiveArray<unsigned int>*>(reinterpret_cast<char*>(i) + 0x5c)->GetAt(pcomp))
             return true;
     }
 
@@ -1314,10 +1271,6 @@ struct S_00477f20
     int unk00, unk04;
     void FUN_00477f20();
 };
-struct ArrBlock : Arr
-{
-    int unk00, unk04, unk08, unk0c;
-};
 struct TreeData
 {
     float unk00, unk04, unk08, unk0c, unk10;
@@ -1335,7 +1288,7 @@ struct SaveTree
     FUN_004891d0_shell model;
     FUN_0048e370_obj icon;
     S_00477f20 destruct;
-    ArrBlock seeds;
+    NiTPrimitiveArray<unsigned int> seeds;
     TreeData data;
     float billboardX, billboardY;
     void FUN_004855a0();
@@ -1359,7 +1312,7 @@ void SaveTree::FUN_0051bfb0()
         unsigned int uiSeedValue;
         for (unsigned int value = 0; value < values; value++)
         {
-            uiSeedValue = *seeds.GetAt(value);
+            uiSeedValue = seeds.GetAt(value);
             if (uiSeedValue > 0)
                 count[value] = uiSeedValue;
         }
@@ -1422,23 +1375,6 @@ void FUN_0051c3b0_cls::BuildBillboardTexturePath(char* dst)
     *out4 = 0;
 }
 
-class AutoMemContext
-{
-    int m_pSecondNode;
-
-  public:
-    AutoMemContext(MEM_CONTEXT, bool, const char*, int);
-    ~AutoMemContext();
-};
-class NiPoint3
-{
-  public:
-    float x;
-    float y;
-    float z;
-    NiPoint3();
-    NiPoint3(float, float, float);
-};
 class P2
 {
   public:
@@ -1447,23 +1383,14 @@ class P2
     P2();
     P2(float, float);
 };
-class ImageSpaceEffectParam
-{
-  public:
-    float a;
-    float b;
-    float c;
-    float d;
-    ImageSpaceEffectParam();
-    ImageSpaceEffectParam(float, float, float, float);
-};
-class NiMemObject
+// Gamebryo NiMemObject with its sized operator delete (the shared NiMemObject declares the unsized one)
+class SizedNiMemObject
 {
   public:
     static void* operator new(unsigned int);
     static void operator delete(void*, unsigned int);
 };
-class CreatedObj : public NiMemObject
+class CreatedObj : public SizedNiMemObject
 {
   public:
     int cf00;
@@ -1488,7 +1415,7 @@ class CreatedObj : public NiMemObject
     int cf4c;
     int cf50;
     int cf54;
-    CreatedObj(int, NiPoint3*, NiPoint3*, ImageSpaceEffectParam*, P2*, int, int, int, unsigned short*);
+    CreatedObj(int, NiPoint3*, NiPoint3*, NiColorA*, P2*, int, int, int, unsigned short*);
 };
 template <class T> class SpPtr
 {
@@ -1610,11 +1537,11 @@ void TreeObj::CreateTreeGeometry(bool abVertical, SpPtr<CreatedObj>* out)
     pCA[1] = P2(1.0f, 0.0f);
     pCA[2] = P2(0.0f, 0.0f);
     pCA[3] = P2(0.0f, 1.0f);
-    ImageSpaceEffectParam* pDB = new ImageSpaceEffectParam[4];
-    pDB[0] = ImageSpaceEffectParam(1.0f, 1.0f, 1.0f, 0.0f);
-    pDB[1] = ImageSpaceEffectParam(1.0f, 1.0f, 1.0f, 0.0f);
-    pDB[2] = ImageSpaceEffectParam(1.0f, 1.0f, 1.0f, 0.0f);
-    pDB[3] = ImageSpaceEffectParam(1.0f, 1.0f, 1.0f, 0.0f);
+    NiColorA* pDB = new NiColorA[4];
+    pDB[0] = NiColorA(1.0f, 1.0f, 1.0f, 0.0f);
+    pDB[1] = NiColorA(1.0f, 1.0f, 1.0f, 0.0f);
+    pDB[2] = NiColorA(1.0f, 1.0f, 1.0f, 0.0f);
+    pDB[3] = NiColorA(1.0f, 1.0f, 1.0f, 0.0f);
     unsigned short* pE = (unsigned short*)NiMalloc(12);
     pE[0] = 0;
     pE[1] = 2;
@@ -1627,26 +1554,21 @@ void TreeObj::CreateTreeGeometry(bool abVertical, SpPtr<CreatedObj>* out)
 }
 
 namespace fnv_0051cba0 {
-class NiMemObject
+// Gamebryo NiMemObject with its sized operator delete (the shared NiMemObject declares the unsized one)
+class SizedNiMemObject
 {
   public:
     static void* operator new(unsigned int size);
     static void operator delete(void* pointer, unsigned int);
 };
-class NiSourceTexture
+// the reference-count view of the billboard NiSourceTexture
+class BillboardTexture
 {
   public:
     void IncRefCount();
     void DecRefCount();
 };
-class AutoMemContext
-{
-  public:
-    int previousContext;
-    AutoMemContext(int context, bool active, const char* file, int line);
-    ~AutoMemContext();
-};
-class TreeSceneObject : public NiMemObject
+class TreeSceneObject : public SizedNiMemObject
 {
   public:
     virtual void v00();
@@ -1685,7 +1607,7 @@ class TreeSceneObject : public NiMemObject
     virtual void v33();
     virtual void v34();
     virtual void v35();
-    virtual void GetTexture(unsigned int index, NiPointer<NiSourceTexture>* texture);
+    virtual void GetTexture(unsigned int index, NiPointer<BillboardTexture>* texture);
     virtual void SetTexture(unsigned int index, const char* path);
     virtual void v38();
     virtual void v39();
@@ -1890,11 +1812,17 @@ class FUN_0051cf00 : public TreeSceneObject
     void FUN_0051d000(int mode);
 };
 extern const char treeSourceFile[];
+// NiPointer<NiSourceTexture>::operator==(NiSourceTexture*) (0x00822510); the shared NiPointer declares no operator==
+struct BillboardTexturePointerCompare
+{
+    BillboardTexture* m_pObject;
+    bool operator==(BillboardTexture* object) const;
+};
 TreeSceneObject* GetFloatAsUInt();
 class TreeBillboardBuilder : public FUN_0051d250_Class
 {
   public:
-    void CreateTreeGeometry(bool variant, NiPointer<NiSourceTexture>* texture);
+    void CreateTreeGeometry(bool variant, NiPointer<BillboardTexture>* texture);
     void BuildBillboardTexturePath(char* path);
     TreeSceneObject* CreateBillboardSceneObject(bool variant);
 };
@@ -1904,9 +1832,9 @@ TreeSceneObject* TreeBillboardBuilder::CreateBillboardSceneObject(bool variant)
     if (!FUN_0051d250())
         return 0;
     AutoMemContext eb(0x23, true, treeSourceFile, 470);
-    NiPointer<NiSourceTexture> a(0);
+    NiPointer<BillboardTexture> a(0);
     CreateTreeGeometry(variant, &a);
-    FUN_00a74480* h = new FUN_00a74480((unsigned int)(NiSourceTexture*)a);
+    FUN_00a74480* h = new FUN_00a74480((unsigned int)(BillboardTexture*)a);
     TreeSceneObject* f = GetFloatAsUInt();
     if (f)
         h->AttachProperty((NiObject*)f);
@@ -1918,9 +1846,9 @@ TreeSceneObject* TreeBillboardBuilder::CreateBillboardSceneObject(bool variant)
     cf->SetTexture(0, q);
     i->FUN_00b66ad0("STBB", cf);
     i->UpdateShader(0);
-    NiPointer<NiSourceTexture> p(0);
+    NiPointer<BillboardTexture> p(0);
     cf->GetTexture(0, &p);
-    if (p == 0)
+    if (reinterpret_cast<BillboardTexturePointerCompare&>(p) == 0)
         return 0;
     FUN_0051cf00* s = new FUN_0051cf00;
     s->FUN_0051d000(5);
@@ -1930,12 +1858,6 @@ TreeSceneObject* TreeBillboardBuilder::CreateBillboardSceneObject(bool variant)
 }  // namespace fnv_0051cba0
 
 namespace fnv_0051d440 {
-struct AutoMemContext
-{
-    int context;
-    AutoMemContext(int, bool, const char*, int);
-    ~AutoMemContext();
-};
 struct Texture;
 struct TexturePtr
 {
@@ -2058,17 +1980,13 @@ struct TreeDestructible
     virtual ~TreeDestructible();
     unsigned int unk04;
 };
-struct TreeSeeds
-{
-    ~TreeSeeds();
-};
 struct FUN_0051b9d0 : TreeBase, TreeModel, TreeIcon, TreeDestructible
 {
-    TreeSeeds seeds;
+    NiTPrimitiveArray<unsigned int> seeds;
     virtual ~FUN_0051b9d0();
     void ClearData();
 };
-// Destructor: calls ClearData, then the TreeSeeds member and base sub-objects are destroyed.
+// Destructor: calls ClearData, then the NiTPrimitiveArray<unsigned int> member and base sub-objects are destroyed.
 // @fnv 0x0051b9d0
 FUN_0051b9d0::~FUN_0051b9d0()
 {
@@ -2134,12 +2052,6 @@ class TreeCopy : public TESObjectTREE
 
 typedef TreeRecordData*(__thiscall* TreeDataGetter)(TESObjectTREE*);
 
-class TreeSeedAppender : public NiTPrimitiveArray_unsigned_int_
-{
-  public:
-    unsigned int AddAtFirstFreeSlot(unsigned int&);
-};
-
 // Copies seed array, tree record data, and billboard dimensions from a source TESObjectTREE into this TreeCopy.
 // @fnv 0x0051c140
 void TreeCopy::FUN_0051c140(TESForm* source)
@@ -2157,7 +2069,7 @@ void TreeCopy::FUN_0051c140(TESForm* source)
         {
             unsigned int index;
             for (index = 0; index < count; ++index)
-                reinterpret_cast<TreeSeedAppender&>(m_kSeedArray).AddAtFirstFreeSlot(tree->m_kSeedArray.GetAt(index));
+                m_kSeedArray.Add(tree->m_kSeedArray.GetAt(index));
         }
     }
     Data = *reinterpret_cast<TreeDataGetter>((*reinterpret_cast<void***>(tree))[0x63])(tree);

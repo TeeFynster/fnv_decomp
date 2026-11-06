@@ -1,13 +1,28 @@
+#include <string.h>
+#pragma intrinsic(memcpy)
+#include "../../../include/BSAudio.h"
+#include "../../../include/MagicProjectile.h"
+#include "../../../include/NiQuaternion.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESSaveLoadGame.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/NiFixedString.h"
+
+// BSAudio's shared factory still returns the legacy handle type. This declaration
+// supplies its real return type without duplicating either shared class's layout.
+class MagicBoltAudio : public BSAudio
+{
+public:
+    BSSoundHandle GetSoundHandleByFormID(unsigned int formID, unsigned int flags);
+};
 
 // src/fallout/magic/magicboltprojectile.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/magicboltprojectile.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct RefH
-{
-    bool IsDeleted() const;
-};
 
-struct FUN_00811930_shell : RefH
+struct FUN_00811930_shell
 {
     bool IsNotDeleted() const;
 };
@@ -15,7 +30,7 @@ struct FUN_00811930_shell : RefH
 // @fnv 0x00811930
 bool FUN_00811930_shell::IsNotDeleted() const
 {
-    return !IsDeleted();
+    return !reinterpret_cast<const TESForm*>(this)->IsDeleted();
 }
 
 extern int DAT_011ae61c;
@@ -57,10 +72,6 @@ struct FUN_0081e830_shell
 {
     unsigned short GetSaveRecordSize(unsigned int flags);
 };
-struct TESSaveLoadGame
-{
-    unsigned char FUN_008df040();
-};
 extern TESSaveLoadGame* g_TESSaveLoadGame;
 struct SinglyLinkedListNode
 {
@@ -97,25 +108,18 @@ unsigned short FUN_00814590_shell::GetSaveSize(unsigned int flags)
     return size;
 }
 
-struct H006815c0
-{
-    void _ref_006815c0();
-};
 struct FUN_00814aa0
 {
-    H006815c0 m0;
-    char pad0[11];
-    H006815c0 m1;
-    char pad1[19];
+    NiPoint3 m0;
+    NiQuaternion m1;
+    float smoothing;
     int f20;
     FUN_00814aa0();
 };
-// Calls _ref_006815c0 on m0 and m1 and sets f20 to 0.
+// Constructs the saved position and rotation, then clears the form ID array.
 // @fnv 0x00814aa0
 FUN_00814aa0::FUN_00814aa0()
 {
-    m0._ref_006815c0();
-    m1._ref_006815c0();
     f20 = 0;
 }
 
@@ -150,19 +154,10 @@ class FUN_008121a0_cls
 FUN_008121a0_cls::~FUN_008121a0_cls()
 {}
 
-struct NiPoint3
-{
-    float x, y, z;
-};
-struct Quat16
-{
-    float a, b, c, d;
-    Quat16();
-};
 struct Node3D
 {
     NiPoint3& GetPos();
-    void GetRot(Quat16* out);
+    void GetRot(NiQuaternion* out);
 };
 struct PathReq
 {
@@ -172,15 +167,11 @@ struct PathPtr
 {
     operator PathReq*() const;
 };
-struct Form
-{
-    unsigned int GetRefID();
-};
 struct NameStr
 {
     operator const char*() const;
 };
-Form* LookupByName(const char* name);
+TESForm* LookupByName(const char* name);
 struct AreaBoltNode
 {
     int unk00;
@@ -191,11 +182,6 @@ struct AreaBoltNode
     int unk14;
     NameStr name;
     AreaBoltNode* next;
-};
-struct SaveGame
-{
-    void WriteRaw(void* p, int size);
-    unsigned short* ReserveCount();
 };
 struct SaveBaseObj
 {
@@ -363,7 +349,7 @@ struct SaveBaseObj
     int unkB8;
     int unkBC;
     int unkC0;
-    Form* pForm;
+    TESForm* pForm;
     int unkC8;
     int unkCC;
     int unkD0;
@@ -383,15 +369,15 @@ struct ThisObj : SaveBaseObj
 void ThisObj::SaveAreaBoltData(int arg)
 {
     SaveBase(arg);
-    ((SaveGame*)g_TESSaveLoadGame)->WriteRaw(&unkAC, 4);
+    g_TESSaveLoadGame->FUN_008579b0(&unkAC, 4);
     WriteData(&unk88, 4);
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x30)
     {
-        NiPoint3 pos4 = GetNode3D()->GetPos();
+        NiPoint3 pos4 = reinterpret_cast<const NiPoint3&>(GetNode3D()->GetPos());
         WriteData(&pos4, 12);
-        Quat16 rot;
+        NiQuaternion rot;
         GetNode3D()->GetRot(&rot);
-        ((SaveGame*)g_TESSaveLoadGame)->WriteRaw(&rot, 16);
+        g_TESSaveLoadGame->FUN_008579b0(&rot, 16);
         float smooth5 = 0.0f;
         if (pathing)
             smooth5 = ((PathReq*)pathing)->GetSmoothingRandomness();
@@ -399,10 +385,10 @@ void ThisObj::SaveAreaBoltData(int arg)
     }
     unsigned int formIDA = 0;
     if (pForm)
-        formIDA = pForm->GetRefID();
+        formIDA = pForm->GetFormID();
     WriteRefID(&formIDA, 4);
     unsigned short count = 0;
-    unsigned short* aPCount = ((SaveGame*)g_TESSaveLoadGame)->ReserveCount();
+    unsigned short* aPCount = g_TESSaveLoadGame->ReserveCount();
     WriteData(&count, 2);
     AreaBoltNode* node7 = m_pListNode;
     while (node7)
@@ -410,9 +396,9 @@ void ThisObj::SaveAreaBoltData(int arg)
         unsigned int boltID = 0;
         if ((const char*)node7->name)
         {
-            Form* f5 = LookupByName(node7->name);
+            TESForm* f5 = LookupByName(node7->name);
             if (f5)
-                boltID = f5->GetRefID();
+                boltID = f5->GetFormID();
         }
         WriteRefID(&boltID, 4);
         count++;
@@ -502,17 +488,6 @@ template <class T> struct HUDPointer
     operator T*() const;
 };
 
-struct HUDSoundHandle
-{
-    unsigned int uiID;
-    unsigned int uiState;
-    unsigned int uiFlags;
-
-    ~HUDSoundHandle();
-    bool IsValid();
-    void Stop();
-    void FUN_00ad8d10();
-};
 
 struct HUDEntry
 {
@@ -536,52 +511,8 @@ struct HUDSetting
     float* Float();
 };
 
-struct HUDMagicTarget
-{
-    virtual void v00();
-};
 
-struct HUDPlayerBase
-{
-    virtual void v00();
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-};
 
-struct HUDPlayer : HUDPlayerBase, HUDMagicTarget
-{
-};
 
 struct HUDBaseA
 {
@@ -650,7 +581,7 @@ struct HUDProcessLists
     HUDList* GetOffset70Ptr();
 };
 
-extern HUDPlayer* g_pHUDPlayer;
+extern PlayerCharacter* g_pHUDPlayer;
 extern HUDSetting g_kHUDSetting;
 extern HUDProcessLists g_kHUDProcessLists;
 
@@ -664,9 +595,9 @@ struct FUN_00811e10 : HUDBase
     HUDPointer<HUDNode> spBC;
     HUDPointer<HUDNode> spC0;
     int unkC4;
-    HUDSoundHandle kSound;
+    BSSoundHandle kSound;
 
-    HUDMagicTarget* GetTarget();
+    MagicCaster* GetTarget();
     virtual ~FUN_00811e10();
 };
 
@@ -714,7 +645,7 @@ FUN_00811e10::~FUN_00811e10()
     if (kSound.IsValid())
     {
         kSound.Stop();
-        kSound.FUN_00ad8d10();
+        kSound.Release();
     }
 }
 
@@ -1254,10 +1185,6 @@ struct AimFullActor : AimActor, AimSecondBase
 {
 };
 
-struct AimPlayer : AimFullActor
-{
-    bool FUN_004eaf60();
-};
 
 struct AimOwner
 {
@@ -1277,7 +1204,7 @@ struct AimOwner
 
 float __cdecl AimAtan2(float afY, float afX);
 
-extern AimPlayer* g_pAimPlayer;
+extern PlayerCharacter* g_pAimPlayer;
 extern double g_dAimZero;
 
 struct AimProjectile
@@ -1347,7 +1274,7 @@ bool AimProjectile::UpdateProjectileAimNode()
 
     if (pSource && aPTarget && (AimNode*)m_pController)
     {
-        if (GetField90Float() < 0.5 && pActor2 == g_pAimPlayer && !g_pAimPlayer->FUN_004eaf60())
+        if (GetField90Float() < 0.5 && pActor2 == reinterpret_cast<AimFullActor*>(g_pAimPlayer) && !g_pAimPlayer->FUN_004eaf60())
         {
             AimPoint3 kPos = *pSource->GetWorldTranslate();
             ((AimNode*)m_pController)->SetLocalTranslate(kPos);
@@ -1381,27 +1308,6 @@ struct FUN_00484d40_Host
 {
     void FUN_00484d40(unsigned int*, int);
 };
-struct FUN_008579e0_shell
-{
-    void FUN_008579e0(void*, unsigned int);
-};
-struct NiQuaternion
-{
-    static const Quat16 IDENTITY;
-};
-struct PlayerCharacter : SaveBaseObj
-{
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v7a();
-    virtual void v7b();
-    virtual void v7c();
-    virtual NiPoint3* GetPosition();
-};
 extern PlayerCharacter* pPlayer;
 struct LoadObject : ThisObj
 {
@@ -1413,23 +1319,23 @@ void LoadObject::LoadObjectData(int arg1, int arg2)
 {
     v71();
     FUN_0081e980(arg1, arg2);
-    reinterpret_cast<FUN_008579e0_shell*>(g_TESSaveLoadGame)->FUN_008579e0(&unkAC, 4);
+    g_TESSaveLoadGame->FUN_008579e0(&unkAC, 4);
     reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(&unk88, 4);
     FUN_00814aa0* formID = new FUN_00814aa0;
     if (g_TESSaveLoadGame->FUN_008df040() >= 0x30)
     {
         reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(&formID->m0, 12);
-        reinterpret_cast<FUN_008579e0_shell*>(g_TESSaveLoadGame)->FUN_008579e0(&formID->m1, 16);
-        reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(reinterpret_cast<Quat16*>(&formID->m1) + 1, 4);
+        g_TESSaveLoadGame->FUN_008579e0(&formID->m1, 16);
+        reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(reinterpret_cast<NiQuaternion*>(&formID->m1) + 1, 4);
     }
     if (g_TESSaveLoadGame->FUN_008df040() < 0x30)
     {
-        reinterpret_cast<NiPoint3&>(formID->m0) = *pPlayer->GetPosition();
-        reinterpret_cast<Quat16&>(formID->m1) = NiQuaternion::IDENTITY;
+        memcpy(&formID->m0, static_cast<const TESObjectREFR*>(pPlayer)->GetPos(), sizeof(NiPoint3));
+        memcpy(&formID->m1, &NiQuaternion::IDENTITY, sizeof(NiQuaternion));
     }
     unsigned int count;
     reinterpret_cast<FUN_00484d40_Host*>(this)->FUN_00484d40(&count, 4);
-    pForm = reinterpret_cast<Form*>(count);
+    pForm = reinterpret_cast<TESForm*>(count);
     unsigned short state;
     reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(&state, 2);
     if (state)
@@ -1444,18 +1350,6 @@ void LoadObject::LoadObjectData(int arg1, int arg2)
         reinterpret_cast<Helper009f8770*>(this)->FUN_00484d00(&unkD4, 4);
 }
 
-class TESForm
-{
-  public:
-    virtual void v00();
-};
-class NiFixedString
-{
-  public:
-    const char* text;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
 struct SceneNode
 {
     virtual void v00();
@@ -1499,154 +1393,6 @@ struct SceneNode
     virtual void v26();
     virtual SceneNode* FindNode(const NiFixedString& name);
 };
-class TESObjectREFR : public TESForm
-{
-  public:
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v3a();
-    virtual void v3b();
-    virtual void v3c();
-    virtual void v3d();
-    virtual void v3e();
-    virtual void v3f();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v4a();
-    virtual void v4b();
-    virtual void v4c();
-    virtual void v4d();
-    virtual void v4e();
-    virtual void v4f();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v5a();
-    virtual void v5b();
-    virtual void v5c();
-    virtual void v5d();
-    virtual void v5e();
-    virtual void v5f();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v6a();
-    virtual void v6b();
-    virtual void v6c();
-    virtual void v6d();
-    virtual void v6e();
-    virtual void v6f();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual SceneNode* GetNode3D();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v7a();
-    virtual void v7b();
-    virtual void v7c();
-    virtual const NiPoint3& GetPosition();
-};
-struct NodePointer
-{
-    SceneNode* value;
-    operator SceneNode*() const;
-    NodePointer& operator=(SceneNode*);
-};
-struct AudioPlaybackHandle
-{
-    unsigned int soundID;
-    unsigned int state;
-    unsigned int flags;
-    ~AudioPlaybackHandle();
-    AudioPlaybackHandle& operator=(const AudioPlaybackHandle&);
-    bool FUN_00ad8ce0();
-    void FUN_00ad8d10();
-    bool FUN_00ad8b60(float x, float y, float z);
-    void FUN_00ad8f20(SceneNode*);
-    bool FUN_00ad8830(bool);
-};
 struct SoundForm
 {
     unsigned int GetFormID();
@@ -1659,72 +1405,7 @@ struct ProjectileCell
 {
     void AddReference(TESObjectREFR*, bool);
 };
-struct AudioManager
-{
-    static AudioManager* GetSingleton();
-    AudioPlaybackHandle FUN_00ad73b0(unsigned int id, unsigned int flags);
-};
 TESForm* FUN_004839c0(unsigned int id);
-class MagicProjectile : public TESObjectREFR
-{
-  public:
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    NodePointer nodeB4;
-    int unkB8;
-    NodePointer spineNode;
-    NodePointer soundNode;
-    TESObjectREFR* sourceReference;
-    AudioPlaybackHandle sound;
-    void ResolveMagicReferences(int arg1, int arg2);
-    void InitEffect();
-    void FUN_00570f70(SceneNode*);
-    ProjectileCell* GetParentCell();
-    ProjectileEffect* FUN_004fd400();
-    void InitializeProjectile(int arg1, int arg2);
-};
 // @fnv 0x00814ad0
 void MagicProjectile::InitializeProjectile(int arg1, int arg2)
 {
@@ -1735,7 +1416,7 @@ void MagicProjectile::InitializeProjectile(int arg1, int arg2)
         sourceReference = dynamic_cast<TESObjectREFR*>(FUN_004839c0(referenceID));
         if (sourceReference)
         {
-            SceneNode* node = sourceReference->GetNode3D();
+            SceneNode* node = reinterpret_cast<SceneNode*>(sourceReference->GetNiNode());
             if (node)
             {
                 spineNode = node->FindNode(NiFixedString("Bip01 Spine2"));
@@ -1745,27 +1426,22 @@ void MagicProjectile::InitializeProjectile(int arg1, int arg2)
     InitEffect();
     FUN_00570f70(nodeB4);
     GetParentCell()->AddReference(this, false);
-    if (FUN_004fd400()->GetBoltSound())
+    if (reinterpret_cast<ProjectileEffect*>(FUN_004fd400())->GetBoltSound())
     {
-        unsigned int soundID = FUN_004fd400()->GetBoltSound()->GetFormID();
-        if (sound.FUN_00ad8ce0())
-            sound.FUN_00ad8d10();
-        if (GetNode3D())
+        unsigned int soundID = reinterpret_cast<ProjectileEffect*>(FUN_004fd400())->GetBoltSound()->GetFormID();
+        if (reinterpret_cast<BSSoundHandle&>(sound).IsValid())
+            reinterpret_cast<BSSoundHandle&>(sound).Release();
+        if (GetNiNode())
         {
-            sound = AudioManager::GetSingleton()->FUN_00ad73b0(soundID, 0x102);
-            NiPoint3 position = GetPosition();
-            sound.FUN_00ad8b60(position.x, position.y, position.z);
-            sound.FUN_00ad8f20(soundNode);
-            sound.FUN_00ad8830(true);
+            reinterpret_cast<BSSoundHandle&>(sound) = static_cast<MagicBoltAudio*>(BSAudio::GetSingleton())->GetSoundHandleByFormID(soundID, 0x102u);
+            NiPoint3 position = *reinterpret_cast<const NiPoint3*>(static_cast<const TESObjectREFR*>(this)->GetPos());
+            reinterpret_cast<BSSoundHandle&>(sound).SetPosition(position.x, position.y, position.z);
+            reinterpret_cast<BSSoundHandle&>(sound).SetObjectToFollow(reinterpret_cast<NiAVObject*>(static_cast<SceneNode*>(soundNode)));
+            reinterpret_cast<BSSoundHandle&>(sound).Play(true);
         }
     }
 }
 
-struct Vec3
-{
-    float x, y, z;
-    float FUN_00457990();
-};
 
 struct OutHandle
 {
@@ -2027,7 +1703,7 @@ struct GameObject
 
     virtual void slot124();
 
-    virtual Vec3* position();
+    virtual NiPoint3* position();
 
     virtual void slot126();
 
@@ -2177,7 +1853,7 @@ struct GameObject
 
     float FUN_00457990();
 
-    GameObject* FUN_0045bb80(Vec3*, void*);
+    GameObject* FUN_0045bb80(NiPoint3*, void*);
 
     GameObject* FUN_00439ef0();
 
@@ -2200,7 +1876,7 @@ struct Holder
 struct Pending
 {
 
-    Vec3 FUN_00439ef0(Vec3*);
+    NiPoint3 FUN_00439ef0(NiPoint3*);
 
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18;
 
@@ -2457,30 +2133,30 @@ void Root::UpdatePending(int arg1, int arg2)
             if (m0bc.FUN_00559450())
             {
 
-                Vec3 position3d;
+                union { float components[3]; } position3d;
 
-                m0bc.FUN_00559450()->FUN_0045bb80(&position3d, pending)->FUN_00439ef0();
+                m0bc.FUN_00559450()->FUN_0045bb80(reinterpret_cast<NiPoint3*>(&position3d), pending)->FUN_00439ef0();
 
-                m0a8.FUN_00559450()->DispatchFloatPair(pending->value1c, position3d.FUN_00457990(), f088, force);
+                m0a8.FUN_00559450()->DispatchFloatPair(pending->value1c, reinterpret_cast<NiPoint3*>(&position3d)->FUN_00457990(), f088, force);
 
                 Matrix rot;
 
                 rot.FUN_006815c0();
 
-                float angle = position3d.z;
+                float angle = reinterpret_cast<NiPoint3*>(&position3d)->z;
 
-                position3d.z = 0.0f;
+                reinterpret_cast<NiPoint3*>(&position3d)->z = 0.0f;
 
-                float azimuth = position3d.FUN_00457990();
+                float azimuth = reinterpret_cast<NiPoint3*>(&position3d)->FUN_00457990();
 
-                rot.FUN_00a59780(FUN_004b5550(position3d.x, position3d.y), 0.0f, -FUN_004b5550(angle, azimuth));
+                rot.FUN_00a59780(FUN_004b5550(reinterpret_cast<NiPoint3*>(&position3d)->x, reinterpret_cast<NiPoint3*>(&position3d)->y), 0.0f, -FUN_004b5550(angle, azimuth));
 
                 m0b4.FUN_00559450()->FUN_0043fa80(&rot);
             }
             else
             {
 
-                Vec3 position3d = *this->position();
+                NiPoint3 position3d = *this->position();
 
                 float direction = pending->FUN_00439ef0(&position3d).FUN_00457990();
 
@@ -2815,13 +2491,8 @@ class AEActor : public AERefr
     bool FUN_008ace90();
 };
 
-class AEPlayer : public AEActor
-{
-  public:
-    bool FUN_004eaf60();
-};
 
-extern AEPlayer* g_thePlayer;
+extern PlayerCharacter* g_thePlayer;
 
 struct AEFlags
 {
@@ -2896,23 +2567,7 @@ class AEIdle
 AEIdle* FUN_006890b0(void* pvCell, float fRadius, int iAreaType, AEPoint3 akStart, AEPoint3 kTo, float fScale,
                      int iType, int iFlags);
 
-class BSSoundHandleEx
-{
-  public:
-    unsigned int m_uiID;
-    unsigned int m_uiState;
-    unsigned int m_uiValue1;
-    ~BSSoundHandleEx();
-    bool FUN_00ad8b60(float fX, float fY, float fZ);
-    bool Play(bool bLoop);
-};
 
-class BSAudio
-{
-  public:
-    static BSAudio* GetSingleton();
-    BSSoundHandleEx FUN_00ad73b0(unsigned int auiFormId, unsigned int uiFlags);
-};
 
 class AEProjectile : public AERefr
 {
@@ -2967,7 +2622,7 @@ void AEProjectile::Impact(AEPoint3 kPos, int iIndex, AERefr* pkTarget, bool bSil
 
     if (pkTarget)
     {
-        if (pkTarget != g_thePlayer || g_thePlayer->FUN_004eaf60())
+        if (pkTarget != reinterpret_cast<AERefr*>(g_thePlayer) || g_thePlayer->FUN_004eaf60())
         {
             m_pkSource = pkTarget;
             AENode* pkTargetNode = m_pkSource->GetNode3D();
@@ -3002,9 +2657,9 @@ void AEProjectile::Impact(AEPoint3 kPos, int iIndex, AERefr* pkTarget, bool bSil
     if (FUN_004fd400()->FUN_008ce390() && !bSilent)
     {
         unsigned int auiFormId = FUN_004fd400()->FUN_008ce390()->FUN_0084e3a0();
-        BSSoundHandleEx kSound = BSAudio::GetSingleton()->FUN_00ad73b0(auiFormId, 0x102);
+        BSSoundHandle kSound = static_cast<MagicBoltAudio*>(BSAudio::GetSingleton())->GetSoundHandleByFormID(auiFormId, 0x102u);
         AEPoint3 kSoundLoc = GetPosition();
-        kSound.FUN_00ad8b60(kSoundLoc.x, kSoundLoc.y, kSoundLoc.z);
+        kSound.SetPosition(kSoundLoc.x, kSoundLoc.y, kSoundLoc.z);
         kSound.Play(false);
     }
 }

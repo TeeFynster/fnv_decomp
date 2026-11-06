@@ -1,29 +1,58 @@
 // fallout_shared/facegen/bsfacegenmorph.cpp: BSFaceGenMorphStatistical, BSFaceGenMorphDifferential, GeometryVertexBuffer (14 functions)
 
+#include "../../../include/BSFaceGenMorphDifferential.h"
+#include "../../../include/BSFaceGenMorphStatistical.h"
 #include "bsfacegenmorph_decls.h"
+
+extern "C" void _Deallocate(void*);
+
+// @fnv 0x00660690
+BSFaceGenMorph::BSFaceGenMorph()
+{}
+
+// @fnv 0x006606e0
+BSFaceGenMorph::~BSFaceGenMorph()
+{}
+
+// @fnv 0x00660700
+BSFaceGenMorphDifferential::BSFaceGenMorphDifferential(unsigned int count)
+{
+    data[1] = count;
+    if (data[1])
+        data[0] = (unsigned int)new NiPoint3[data[1]];
+    else
+        data[0] = 0;
+}
+
+// @fnv 0x00660820
+BSFaceGenMorphDifferential::~BSFaceGenMorphDifferential()
+{
+    if (data[0] != 0)
+    {
+        void* tmp = (void*)data[0];
+        _Deallocate(tmp);
+    }
+}
 
 // @fnv 0x00660970
 BSFaceGenMorphStatistical::BSFaceGenMorphStatistical(unsigned int count, unsigned int firstIndex)
 {
-    m_ppVirtualMethodTable = (void**)DAT_01065cd0;
-    m_uiVertexCount = count;
-    m_uiFirstIndex = firstIndex;
-    if (m_uiVertexCount)
-        m_puiVertexIndices = new unsigned long[m_uiVertexCount];
+    data[1] = count;
+    this->extra = firstIndex;
+    if (data[1])
+        data[0] = (unsigned int)new unsigned long[data[1]];
     else
-        m_puiVertexIndices = 0;
+        data[0] = 0;
 }
 
-// Constructor: stores the global pointer and count, and allocates an array of NiPoint3 of size count (or null when count is zero).
-// @fnv 0x00660700
-BSFaceGenMorphDifferential::BSFaceGenMorphDifferential(unsigned int count)
+// @fnv 0x00660a50
+BSFaceGenMorphStatistical::~BSFaceGenMorphStatistical()
 {
-    m_ppVirtualMethodTable = (void**)DAT_01065cc4;
-    m_uiVertexCount = count;
-    if (m_uiVertexCount)
-        m_pkDeltas = new NiPoint3[m_uiVertexCount];
-    else
-        m_pkDeltas = 0;
+    if (data[0] != 0)
+    {
+        void* tmp = (void*)data[0];
+        _Deallocate(tmp);
+    }
 }
 
 // @fnv 0x0065b390
@@ -46,11 +75,11 @@ void BSFaceGenMorphDifferential::ApplyDifferentialMorph(NiTriBasedGeom* geom, BS
     GeometryVertexBuffer localC;
     pData->FUN_00a67410(localC);
     NiPoint3 localD;
-    unsigned int ItemUpdateArray = MinUnsigned(pData->GetVertexCount(), m_uiVertexCount);
+    unsigned int ItemUpdateArray = MinUnsigned(pData->NiGeometryData::GetVertexCount(), data[1]);
     for (unsigned int i = 0; i < ItemUpdateArray; ++i, localC.AddToA())
     {
         localC.CopyV3(localD);
-        localD += m_pkDeltas[i] * weight;
+        localD.FUN_0063c8a0(((NiPoint3*)data[0])[i] * weight);
         localC.SetPoint(localD);
     }
 }
@@ -59,30 +88,21 @@ void BSFaceGenMorphDifferential::ApplyDifferentialMorph(NiTriBasedGeom* geom, BS
 void BSFaceGenMorphStatistical::ApplyDifferentialMorph(NiTriBasedGeom* geom, BSFaceGenBaseMorphExtraData* extra,
                                                        float weight)
 {
-    if (!geom || weight <= 0.0 || weight > 1.0 || !extra->FUN_0084e3a0())
+    if (!geom || weight <= 0.0 || weight > 1.0 || !extra->GetVertices())
         return;
-    NiPoint3* pData = extra->FUN_0084e3a0();
+    NiPoint3* pData = extra->GetVertices();
     NiGeometryData* pGeomData = geom->FUN_005495f0();
     GeometryVertexBuffer localC;
     pGeomData->FUN_00a67410(localC);
     NiPoint3 localD;
     unsigned int ItemUpdateArray;
-    for (unsigned int i = 0; i < m_uiVertexCount; ++i)
+    for (unsigned int i = 0; i < data[1]; ++i)
     {
-        ItemUpdateArray = m_puiVertexIndices[i];
+        ItemUpdateArray = ((unsigned long*)data[0])[i];
         localC.FUN_00534570(ItemUpdateArray, localD);
-        localD += (pData[m_uiFirstIndex + i] - pData[ItemUpdateArray]) * weight;
+        localD.FUN_0063c8a0((pData[this->extra + i] - pData[ItemUpdateArray]) * weight);
         localC.SetVertex(ItemUpdateArray, localD);
     }
-}
-
-extern int DAT_01065cb8;
-
-// @fnv 0x00660690
-void** __fastcall FUN_00660690(void** p)
-{
-    *p = &DAT_01065cb8;
-    return p;
 }
 
 // Returns the smaller of a 16-bit value and a 32-bit value, comparing them as unsigned integers.
@@ -92,121 +112,6 @@ unsigned int __cdecl MinUnsigned(unsigned short ausValue, unsigned int auValue)
     return ausValue < auValue ? ausValue : auValue;
 }
 
-extern "C" void _Deallocate(void*);
-
-struct FUN_006606b0_shell
-{
-    void __thiscall SetVTable();
-    void* __thiscall Destroy(unsigned int flags);
-};
-
-// @fnv 0x006606b0
-void* __thiscall FUN_006606b0_shell::Destroy(unsigned int flags)
-{
-    SetVTable();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-void _Deallocate(void*);
-struct S006607F0
-{
-    void FUN_00660820();
-    void* DeallocateIfFlagged(unsigned int);
-};
-// Calls FUN_00660820, then deallocates this if bit 0 of flags is set, and returns this.
-// @fnv 0x006607f0
-void* S006607F0::DeallocateIfFlagged(unsigned int flags)
-{
-    FUN_00660820();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-namespace fnv_00660820 {
-extern int _DAT_01065cc4;
-void __cdecl _Deallocate(void*);
-struct FUN_006606b0_shell
-{
-    void SetVTable();
-};
-struct FUN_00660820_shell
-{
-    void* vtable;
-    void* ptr;
-    void FUN_00660820();
-};
-// Sets the vtable to _DAT_01065cc4, deallocates ptr if non-null, then calls SetVTable on this.
-// @fnv 0x00660820
-void FUN_00660820_shell::FUN_00660820()
-{
-    vtable = (void*)&_DAT_01065cc4;
-    if (ptr != 0)
-    {
-        void* tmp = ptr;
-        _Deallocate(tmp);
-    }
-    ((FUN_006606b0_shell*)this)->SetVTable();
-}
-}  // namespace fnv_00660820
-
-void __cdecl _Deallocate(void*);
-struct FUN_00660a20_holder
-{
-    void FUN_00660a50();
-    void* DestroyIfFlagged(unsigned int);
-};
-// Calls FUN_00660a50, then deallocates this if bit 0 of flags is set, and returns this.
-// @fnv 0x00660a20
-void* FUN_00660a20_holder::DestroyIfFlagged(unsigned int flags)
-{
-    FUN_00660a50();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
-
-namespace fnv_00660a50 {
-struct FUN_006606b0_shell
-{
-    void SetVTable();
-};
-extern int _DAT_01065cd0;
-void __cdecl _Deallocate(void*);
-struct FUN_00660a50_shell
-{
-    int field0;
-    void* field4;
-    void FUN_00660a50();
-};
-// Sets field0 to the address of _DAT_01065cd0, frees field4 if non-null, then calls SetVTable on this.
-// @fnv 0x00660a50
-void FUN_00660a50_shell::FUN_00660a50()
-{
-    field0 = (int)&_DAT_01065cd0;
-    if (field4 != 0)
-    {
-        void* tmp = field4;
-        _Deallocate(tmp);
-    }
-    ((FUN_006606b0_shell*)this)->SetVTable();
-}
-}  // namespace fnv_00660a50
-
-extern int DAT_01065cb8;
-
-struct FUN_006606e0_shell
-{
-    void SetVTable();
-};
-
-// @fnv 0x006606e0
-void FUN_006606e0_shell::SetVTable()
-{
-    *reinterpret_cast<int*>(this) = (int)&DAT_01065cb8;
-}
 
 struct B65EB90Entry
 {

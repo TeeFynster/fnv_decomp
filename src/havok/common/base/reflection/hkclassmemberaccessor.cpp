@@ -1,6 +1,9 @@
+#include "../../../../../include/hkArray.h"
 
 // src/havok/common/base/reflection/hkclassmemberaccessor.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/reflection/hkclassmemberaccessor.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#include "../../../../../include/Pair.h"
 
 struct FUN_00d87210_class
 {
@@ -148,18 +151,11 @@ char* FUN_00d87360_class::FUN_00d87360(int index)
     return m_p + index * 8;
 }
 
-struct Pair
-{
-    int first;
-    int second;
-    Pair& FUN_00d873d0(const Pair& other);
-};
-
 // @fnv 0x00d873d0
 Pair& Pair::FUN_00d873d0(const Pair& other)
 {
-    first = other.first;
-    second = other.second;
+    a = other.a;
+    b = other.b;
     return *this;
 }
 
@@ -197,32 +193,18 @@ bool* __thiscall TargetClass::FUN_00d871e0(bool* out)
     return out;
 }
 
-struct D87240Array
-{
-    char* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    char& FUN_00d87240(int i);
-};
+typedef hkArrayBase<char> D87240Array;
 
 // @fnv 0x00d87240
-char& D87240Array::FUN_00d87240(int i)
+template<> char& hkArrayBase<char>::FUN_00d87240(int i)
 {
     return m_data[i];
 }
 
-struct D87250Array
-{
-    int* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int& FUN_00d87250(int i);
-};
+typedef hkArrayBase<int> D87250Array;
 
 // @fnv 0x00d87250
-int& D87250Array::FUN_00d87250(int i)
+template<> int& hkArrayBase<int>::FUN_00d87250(int i)
 {
     return m_data[i];
 }

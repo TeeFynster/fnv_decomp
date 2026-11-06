@@ -2,16 +2,9 @@
 // src/havok/common/base/system/io/writer/offsetonly/hkoffsetonlystreamwriter.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/system/io/writer/offsetonly/hkoffsetonlystreamwriter.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkReferencedObject
-{
-    virtual void vf0();
-    short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    hkReferencedObject()
-    {
-        m_sReferenceCount = 1;
-    }
-};
+#include "../../../../../../../../include/hkReferencedObject.h"
+
+
 
 struct FUN_00e02ef0 : hkReferencedObject
 {

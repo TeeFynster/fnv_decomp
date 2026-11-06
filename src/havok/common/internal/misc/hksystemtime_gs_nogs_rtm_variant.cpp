@@ -1,3 +1,5 @@
+#include <xmmintrin.h>
+typedef ::__m128 LocalM128;
 // src/havok/common/internal/misc/hksystemtime_gs_nogs_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/common/internal/misc/hksystemtime.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS- /EHsc /Gy (unit lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
@@ -7,27 +9,24 @@ extern "C" __int64 __cdecl __time64(__int64*);
 int FUN_00e29910(void);
 
 #include <math.h>
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-} __m128;
+typedef ::__m128 LocalM128;
 extern "C"
 {
-    __m128 _mm_setzero_ps();
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    int _mm_movemask_ps(__m128);
-    float _mm_cvtss_f32(__m128);
-    void _mm_store_ss(float*, __m128);
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_load_ss(const float*);
+    LocalM128 _mm_setzero_ps();
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_rsqrt_ss(LocalM128);
+    LocalM128 _mm_set_ss(float);
+    LocalM128 _mm_cmplt_ps(LocalM128, LocalM128);
+    int _mm_movemask_ps(LocalM128);
+    float _mm_cvtss_f32(LocalM128);
+    void _mm_store_ss(float*, LocalM128);
+    void _mm_store_ps(float*, LocalM128);
+    LocalM128 _mm_load_ps(const float*);
+    LocalM128 _mm_load_ss(const float*);
 }
 
 // ---- stand-ins for the analysed image's types
@@ -70,8 +69,8 @@ struct E29SrcList
 
 struct E29Item
 {
-    __m128 a;
-    __m128 b;
+    LocalM128 a;
+    LocalM128 b;
     char flag20;
     int val24;
 };
@@ -119,22 +118,22 @@ extern "C" FNV_Ctx* FUN_00c85750() throw();
 // ---- shell helpers
 struct FUN_00e29920_shell;
 extern "C" bool FUN_00e29920(FNV_Vec4*, FNV_Vec4*, FNV_Vec4*, FNV_Vec4*, FNV_Vec4*, FNV_Vec4*, float, float) throw();
-extern "C" void FUN_00e29a10(E29SrcList*, const __m128*, const __m128*, char*, E29Out1*, int*, E29Out2*, int*) throw();
+extern "C" void FUN_00e29a10(E29SrcList*, const LocalM128*, const LocalM128*, char*, E29Out1*, int*, E29Out2*, int*) throw();
 
-static __forceinline __m128 dot3(__m128 a, __m128 b)
+static __forceinline LocalM128 dot3(LocalM128 a, LocalM128 b)
 {
-    __m128 q = _mm_mul_ps(a, b);
+    LocalM128 q = _mm_mul_ps(a, b);
     return _mm_add_ss(_mm_shuffle_ps(q, q, 0xaa), _mm_add_ss(_mm_shuffle_ps(q, q, 0x55), q));
 }
 extern "C" __declspec(noinline) bool FUN_00e29920(FNV_Vec4* a, FNV_Vec4* b, FNV_Vec4* n, FNV_Vec4* a2, FNV_Vec4* b2,
                                                   FNV_Vec4* n2, float thresh, float limit) throw()
 {
     float dot;
-    _mm_store_ss(&dot, dot3(*(__m128*)n, *(__m128*)n2));
+    _mm_store_ss(&dot, dot3(*(LocalM128*)n, *(LocalM128*)n2));
     if (dot < thresh)
         return false;
-    __m128 d1 = _mm_sub_ps(*(__m128*)a2, *(__m128*)a);
-    __m128 d2 = _mm_sub_ps(*(__m128*)b2, *(__m128*)b);
+    LocalM128 d1 = _mm_sub_ps(*(LocalM128*)a2, *(LocalM128*)a);
+    LocalM128 d2 = _mm_sub_ps(*(LocalM128*)b2, *(LocalM128*)b);
     float distance1;
     _mm_store_ss(&distance1, dot3(d1, d1));
     if (distance1 > limit)
@@ -144,14 +143,14 @@ extern "C" __declspec(noinline) bool FUN_00e29920(FNV_Vec4* a, FNV_Vec4* b, FNV_
     return !(distance2 > limit);
 }
 
-static __forceinline __m128 normalizeVector(FNV_Vec4& result, __m128 value)
+static __forceinline LocalM128 normalizeVector(FNV_Vec4& result, LocalM128 value)
 {
-    __m128 q = _mm_mul_ps(value, value);
-    __m128 y = _mm_add_ss(_mm_shuffle_ps(q, q, 0x55), q);
-    __m128 len = _mm_add_ss(_mm_shuffle_ps(q, q, 0xaa), y);
-    __m128 inv = _mm_rsqrt_ss(len);
-    __m128 scale = _mm_shuffle_ps(inv, inv, 0);
-    __m128 distance = _mm_mul_ss(len, scale);
+    LocalM128 q = _mm_mul_ps(value, value);
+    LocalM128 y = _mm_add_ss(_mm_shuffle_ps(q, q, 0x55), q);
+    LocalM128 len = _mm_add_ss(_mm_shuffle_ps(q, q, 0xaa), y);
+    LocalM128 inv = _mm_rsqrt_ss(len);
+    LocalM128 scale = _mm_shuffle_ps(inv, inv, 0);
+    LocalM128 distance = _mm_mul_ss(len, scale);
     _mm_store_ps(&result.x, _mm_mul_ps(scale, value));
     return distance;
 }
@@ -174,14 +173,14 @@ void FUN_00e2a010(int corner, FNV_Vec4* A, FNV_Vec4* B, int n, float angle, floa
     int i = 0;
     if (n > 0)
     {
-        __m128 zero = _mm_setzero_ps();
+        LocalM128 zero = _mm_setzero_ps();
         E29Src* cursor = recs;
         int off = (char*)B - (char*)A;
         do
         {
             FNV_Vec4 va = *pa;
             FNV_Vec4 vb = *(FNV_Vec4*)((char*)pa + off);
-            __m128 delta = _mm_sub_ps(*(__m128*)&vb, *(__m128*)&va);
+            LocalM128 delta = _mm_sub_ps(*(LocalM128*)&vb, *(LocalM128*)&va);
             int bits = _mm_movemask_ps(_mm_cmplt_ps(delta, zero));
             if ((bits & 4) + (bits & 2) + (bits & 1) != corner)
                 goto next;
@@ -189,7 +188,7 @@ void FUN_00e2a010(int corner, FNV_Vec4* A, FNV_Vec4* B, int n, float angle, floa
             float dist;
             _mm_store_ss(&dist, normalizeVector(nrm1, delta));
             float power = pow(dist, 2.0f);
-            __m128 ang = _mm_load_ss(&power);
+            LocalM128 ang = _mm_load_ss(&power);
 
             {
                 for (int k = 0; k < list.count; k++)
@@ -202,7 +201,7 @@ void FUN_00e2a010(int corner, FNV_Vec4* A, FNV_Vec4* B, int n, float angle, floa
                         int idx = rec->idx[j];
                         FNV_Vec4 va2 = A[idx];
                         FNV_Vec4 vb2 = B[idx];
-                        __m128 d2 = _mm_sub_ps(*(__m128*)&vb2, *(__m128*)&va2);
+                        LocalM128 d2 = _mm_sub_ps(*(LocalM128*)&vb2, *(LocalM128*)&va2);
                         FNV_Vec4 nrm2;
                         normalizeVector(nrm2, d2);
                         float sc;
@@ -228,7 +227,7 @@ void FUN_00e2a010(int corner, FNV_Vec4* A, FNV_Vec4* B, int n, float angle, floa
             pa++;
         } while (i < n);
     }
-    FUN_00e29a10(&list, (const __m128*)A, (const __m128*)B, a7, a8, a9, a10, a11);
+    FUN_00e29a10(&list, (const LocalM128*)A, (const LocalM128*)B, a7, a8, a9, a10, a11);
     FUN_00c85750()->cur = recs;
     FNV_Ctx* holder = FUN_00c85750();
     FNV_MemObj* allocator = holder->obj;

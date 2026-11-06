@@ -1,3 +1,121 @@
+#ifndef _INCLUDED_MM2
+#define _INCLUDED_MM2
+typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4]; unsigned __int64 m128_u64[2]; } __m128, LocalM128;
+#endif
+
+// local form of hkVector4: 0x00d3dd90 needs its original packet form (compiled function extent differs: 670 vs 827).
+
+
+#if !defined(FNV_FOURFLOATVECTOR_NO_SSE)
+#include <xmmintrin.h>
+#else
+union LocalM128;
+#endif
+
+class SimdReal;
+class SimdScalar;
+class ScalarValue;
+class Transform;
+class NiPoint3;
+
+#pragma pack(push, 4)
+
+class PacketCallLocal_00d3dd90
+{
+public:
+#if defined(FNV_FOURFLOATVECTOR_NO_SSE)
+    union Components
+    {
+        float m128_f32[4];
+        unsigned __int64 m128_u64[2];
+        signed char m128_i8[16];
+        short m128_i16[8];
+        int m128_i32[4];
+        __int64 m128_i64[2];
+        unsigned char m128_u8[16];
+        unsigned short m128_u16[8];
+        unsigned int m128_u32[4];
+    };
+#else
+    typedef __declspec(align(4)) LocalM128 Components;
+#endif
+
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+            float z;
+            float w;
+        };
+        Components m_vComponents;
+        Components m;
+        float f[4];
+        Components values;
+        Components q;
+        Components value;
+        Components quad;
+        float elements[4];
+        float m_fComponents[4];
+    };
+
+    PacketCallLocal_00d3dd90();
+    PacketCallLocal_00d3dd90(float x, float y, float z, float w);
+    PacketCallLocal_00d3dd90(const LocalM128& vector);
+
+    PacketCallLocal_00d3dd90* FUN_005532a0(float x, float y, float z, float w);
+    void FUN_004a3f10(PacketCallLocal_00d3dd90* vector);
+    void __thiscall FUN_004b4db0(const PacketCallLocal_00d3dd90* vector);
+    PacketCallLocal_00d3dd90& FUN_00e531a0(int parameter);
+    PacketCallLocal_00d3dd90 FUN_00e53260(int parameter);
+    void FUN_005611c0();
+
+    void operator=(const PacketCallLocal_00d3dd90& vector);
+    float& operator()(int index);
+    const float& operator()(int index) const;
+    float& component(int index);
+    float& At(int index);
+    const float& At(int index) const;
+
+    LocalM128 length3() const;
+    float getW() const;
+    ScalarValue Dot(const PacketCallLocal_00d3dd90& vector) const;
+    ScalarValue LengthSq() const;
+    ScalarValue Length() const;
+    ScalarValue InverseLength() const;
+    void Normalize();
+    bool NormalizeNonzero();
+    void Mul(const ScalarValue& scalar);
+    void Add(const PacketCallLocal_00d3dd90& vector);
+    void Sub(const PacketCallLocal_00d3dd90& vector);
+    void Cross(const PacketCallLocal_00d3dd90& a, const PacketCallLocal_00d3dd90& b);
+
+    void setAbs4(const PacketCallLocal_00d3dd90& vector);
+    void setMul4(const SimdReal& scalar, const PacketCallLocal_00d3dd90& vector);
+    void addMul4(const SimdReal& scalar, const PacketCallLocal_00d3dd90& vector);
+    void setAddMul4(const PacketCallLocal_00d3dd90& a, const PacketCallLocal_00d3dd90& b, const SimdReal& scalar);
+    SimdReal getSimdAt3() const;
+    SimdReal lengthSquared3() const;
+    void setXYZ_W(LocalM128 xyz, LocalM128 w);
+    void setSqrtInverse4(const PacketCallLocal_00d3dd90& vector);
+    void setAddMul(const PacketCallLocal_00d3dd90& a, const PacketCallLocal_00d3dd90& b, const SimdScalar& scalar);
+    void addMul(const float& scalar, const PacketCallLocal_00d3dd90& vector);
+    void transformed(const Transform& transform, const PacketCallLocal_00d3dd90& vector);
+    void addScaled(const PacketCallLocal_00d3dd90& base, const PacketCallLocal_00d3dd90& direction, float amount);
+    void* AddVector(void*, NiPoint3*, void*, float);
+    void* AddVector(void*, void*);
+    void* ScaleSwizzled();
+};
+
+#pragma pack(pop)
+
+#include "../../../../../../../include/Transform.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkThreadMemory.h"
 // src/havok/physics/collide/agent/convexagent/spheretriangle/hkpspheretriangleagent_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/agent/convexagent/spheretriangle/hkpspheretriangleagent.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -54,14 +172,6 @@ struct hkMemory {
     virtual void unk0();
     virtual void* allocateChunk(int size);
 };
-struct hkThreadMemory {
-    char pad[0x10];
-    hkMemory* m_pMemoryAllocator;
-
-    void* allocateChunk(int size) {
-        return m_pMemoryAllocator->allocateChunk(size);
-    }
-};
 extern "C" hkThreadMemory* __cdecl FUN_00c85750();
 extern "C" void __cdecl FUN_00cd7160(void* src, void* dst);
 extern "C" const void* DAT_010cf060;
@@ -103,22 +213,12 @@ struct D3DD10Object
     void __thiscall FUN_00d3dd10(unsigned int p0, unsigned int p1,
                                  unsigned int p2, unsigned int p3);
 };
-union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; unsigned __int64 m128_u64[2]; };
 extern "C" {
-__m128 _mm_add_ps(__m128, __m128);
-__m128 _mm_mul_ps(__m128, __m128);
-__m128 _mm_xor_ps(__m128, __m128);
-__m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
+LocalM128 _mm_add_ps(LocalM128, LocalM128);
+LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
 }
-struct hkVector4q
-{
-    __m128 m_vComponents;
-
-    __forceinline void setBroadcast3(const hkVector4q& v) { m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff); }
-    __forceinline void addMul4(const hkVector4q& a, const hkVector4q& b) { m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(a.m_vComponents, b.m_vComponents)); }
-    __forceinline void xor4(const hkVector4q& b) { m_vComponents = _mm_xor_ps(m_vComponents, b.m_vComponents); }
-    __forceinline void setXor4(const hkVector4q& a, const hkVector4q& b) { m_vComponents = _mm_xor_ps(a.m_vComponents, b.m_vComponents); }
-};
 template <typename T>
 __forceinline void hkSwap(T& a, T& b)
 {
@@ -133,9 +233,9 @@ struct NibblePair
 };
 struct SpawnedParticle
 {
-    hkVector4q m_vContactPosition;
-    hkVector4q m_fVelocity;
-    hkVector4q m_extra;
+    PacketCallLocal_00d3dd90 m_vContactPosition;
+    PacketCallLocal_00d3dd90 m_fVelocity;
+    PacketCallLocal_00d3dd90 m_extra;
 };
 struct ParticleSystemState
 {
@@ -148,7 +248,7 @@ struct ParticleSystemState
     int unk3014;
     int unk3018;
     int unk301C;
-    hkVector4q m_3020;
+    PacketCallLocal_00d3dd90 m_3020;
     float m_3030;
     int unk3034;
     int unk3038;
@@ -165,7 +265,7 @@ struct ParticleSystemState
         unsigned char unk304b;
     } m_info;
 };
-extern hkVector4q DAT_010c4c00;
+extern PacketCallLocal_00d3dd90 DAT_010c4c00;
 class ParticleSystemOps
 {
 public:
@@ -177,19 +277,16 @@ extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(DWORD);
 extern "C" {
 unsigned __int64 __rdtsc();
 void _ReadWriteBarrier();
-__m128 _mm_sub_ps(__m128, __m128);
-__m128 _mm_unpacklo_ps(__m128, __m128);
-__m128 _mm_unpackhi_ps(__m128, __m128);
-__m128 _mm_movelh_ps(__m128, __m128);
-__m128 _mm_movehl_ps(__m128, __m128);
-void _mm_store_ps(float*, __m128);
+LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+LocalM128 _mm_unpacklo_ps(LocalM128, LocalM128);
+LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+LocalM128 _mm_movelh_ps(LocalM128, LocalM128);
+LocalM128 _mm_movehl_ps(LocalM128, LocalM128);
+void _mm_store_ps(float*, LocalM128);
 }
 extern "C" DWORD DAT_0126835c;
-struct __declspec(align(16)) Vec4 {
-    float x, y, z, w;
-};
-struct Res {
-    Vec4 pt;
+struct __declspec(align(16)) Res {
+    PacketCallLocal_00d3dd90 pt;
     float d;
 };
 struct Arg3S {
@@ -198,23 +295,6 @@ struct Arg3S {
     int unk08;
     int unk0C;
     float f10;
-};
-struct ProfRec {
-    const char* name;
-    unsigned int tsc;
-    unsigned int unk08;
-};
-struct ProfBuf {
-    unsigned int unk00;
-    ProfRec* cur;
-    unsigned int unk08;
-    ProfRec* end;
-};
-struct XForm {
-    __m128 r0;
-    __m128 r1;
-    __m128 r2;
-    __m128 t;
 };
 struct BodyB {
     int unk00;
@@ -230,13 +310,13 @@ struct BodyB {
 struct BodyHolderB {
     BodyB* obj;
     int unk04;
-    XForm* xf;
+    Transform* xf;
 };
 struct Sink {
     virtual void unk00();
     virtual void unk04(BodyHolderB& a, BodyHolderB& b);
 };
-extern void __cdecl FUN_00cd7850(Vec4* v, void* tri, float* f, Res* out, void* flag);
+extern void __cdecl FUN_00cd7850(PacketCallLocal_00d3dd90* v, void* tri, float* f, Res* out, void* flag);
 // non-POD 1-dword wrapper params: block the entry-enregister pass so the
 // params are read lazily from their incoming arg slots (see e2fbc0)
 struct BHWrap {
@@ -265,18 +345,6 @@ struct S_00d3d3e0_Entry {
     unsigned time;
     int unk08;
 };
-struct S_00d3d3e0_Hdr {
-    int unk00;
-    S_00d3d3e0_Entry* cur;
-    int unk08;
-    S_00d3d3e0_Entry* end;
-};
-struct __declspec(align(16)) S_00d3d3e0_V4 {
-    float x, y, z, w;
-};
-struct S_00d3d3e0_Mat {
-    S_00d3d3e0_V4 r0, r1, r2, t;
-};
 struct S_00d3d3e0_Shape {
     int unk00, unk04, unk08, unk0c;
     float f10;
@@ -290,12 +358,12 @@ struct S_00d3d3e0_Obj {
 struct S_00d3d3e0_P1 {
     S_00d3d3e0_Shape* shape;
     int unk04;
-    S_00d3d3e0_Mat* mat;
+    Transform* mat;
 };
 struct S_00d3d3e0_P2 {
     S_00d3d3e0_Obj* obj;
     int unk04;
-    S_00d3d3e0_Mat* mat;
+    Transform* mat;
 };
 struct S_00d3d3e0_P3 {
     virtual void v0();
@@ -305,55 +373,59 @@ struct __declspec(align(16)) S_00d3d3e0_Out {
     int unk00, unk04, unk08, unk0c;
     float f10;
 };
-void __cdecl FUN_00cd7160(void* a, S_00d3d3e0_V4* out);
-void __cdecl FUN_00cd7850(S_00d3d3e0_V4* a, void* b, S_00d3d3e0_V4* c, S_00d3d3e0_Out* d, bool* e);
+void __cdecl FUN_00cd7160(void* a, PacketCallLocal_00d3dd90* out);
+void __cdecl FUN_00cd7850(PacketCallLocal_00d3dd90* a, void* b, PacketCallLocal_00d3dd90* c, S_00d3d3e0_Out* d, bool* e);
 struct S_00d3d3e0_P1P { S_00d3d3e0_P1* p; S_00d3d3e0_P1* val() const { return p; } };
 struct S_00d3d3e0_P2P { S_00d3d3e0_P2* p; S_00d3d3e0_P2* val() const { return p; } };
 struct S_00d3d3e0_P3P { S_00d3d3e0_P3* p; S_00d3d3e0_P3* val() const { return p; } };
 void FUN_00d3d3e0(S_00d3d3e0_P1P a1, S_00d3d3e0_P2P a2, int unused, S_00d3d3e0_P3P a3);
 
-extern "C" __m128 _mm_load_ss(float const*_A);
+extern "C" LocalM128 _mm_load_ss(float const*_A);
 typedef unsigned long DWORD;
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(DWORD);
 extern "C" {
 unsigned __int64 __rdtsc();
 void _ReadWriteBarrier();
-__m128 _mm_load_ss(const float*);
+LocalM128 _mm_load_ss(const float*);
 }
-struct __declspec(align(16)) S00d3d6b0_Vec4 { float x,y,z,w; };
-struct S00d3d6b0_Res { S00d3d6b0_Vec4 pt; float d; };
+struct __declspec(align(16)) S00d3d6b0_Res { PacketCallLocal_00d3dd90 pt; float d; };
 struct S00d3d6b0_ProfRec { const char* name; unsigned int tsc; unsigned int unk08; };
-struct S00d3d6b0_ProfBuf { unsigned int unk00; S00d3d6b0_ProfRec* cur; unsigned int unk08; S00d3d6b0_ProfRec* end; };
-struct S00d3d6b0_XForm { S00d3d6b0_Vec4 r0,r1,r2,t; };
 struct S00d3d6b0_BodyB {
     int unk00,unk04,unk08,unk0C;
     float radius;
     int unk14,unk18,unk1C;
-    S00d3d6b0_Vec4 vertices[3];
+    PacketCallLocal_00d3dd90 vertices[3];
 };
-struct S00d3d6b0_BodyHolderB { S00d3d6b0_BodyB* obj; int unk04; S00d3d6b0_XForm* xf; };
-struct S00d3d6b0_HitInfo { S00d3d6b0_Vec4 pt,nrm; S00d3d6b0_BodyHolderB* a; S00d3d6b0_BodyHolderB* b; };
+struct S00d3d6b0_BodyHolderB { S00d3d6b0_BodyB* obj; int unk04; Transform* xf; };
+struct __declspec(align(16)) S00d3d6b0_HitInfo { PacketCallLocal_00d3dd90 pt,nrm; S00d3d6b0_BodyHolderB* a; S00d3d6b0_BodyHolderB* b; };
 struct S00d3d6b0_Sink { virtual void unk00(); virtual void unk04(S00d3d6b0_HitInfo*); };
 struct S00d3d6b0_Input { int unk00,unk04; float tolerance; };
-extern void __cdecl FUN_00cd7850(S00d3d6b0_Vec4* v, void* tri, float* f, S00d3d6b0_Res* out, void* flag);
+extern void __cdecl FUN_00cd7850(PacketCallLocal_00d3dd90* v, void* tri, float* f, S00d3d6b0_Res* out, void* flag);
 class S00d3d6b0_SphereTriAgent {
 public:
     int unk00,unk04,unk08,unk0C;
     float unk10;
     void FUN_00d3d6b0(S00d3d6b0_BodyHolderB* a, S00d3d6b0_BodyHolderB* b, S00d3d6b0_Input* input, S00d3d6b0_Sink* sink);
 };
+extern "C" void* __cdecl memcpy(void* dst, const void* src, unsigned int size);
+#pragma intrinsic(memcpy)
+
+static __forceinline void copyVector(PacketCallLocal_00d3dd90& out, const PacketCallLocal_00d3dd90& in) {
+    memcpy(&out, &in, sizeof(out));
+}
+
 // @fnv 0x00d3d6b0
 void S00d3d6b0_SphereTriAgent::FUN_00d3d6b0(S00d3d6b0_BodyHolderB* a, S00d3d6b0_BodyHolderB* b, S00d3d6b0_Input* input, S00d3d6b0_Sink* sink) {
     volatile unsigned int lo;
     {
-        S00d3d6b0_ProfBuf* buf = (S00d3d6b0_ProfBuf*)TlsGetValue(DAT_0126835c);
-        S00d3d6b0_ProfRec* r = buf->cur;
-        if (r < buf->end) {
+        hkMonitorStream* buf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        S00d3d6b0_ProfRec* r = (S00d3d6b0_ProfRec*)buf->m_end.m_storage;
+        if (r < (S00d3d6b0_ProfRec*)buf->m_capacityMinus16.m_storage) {
             r->name = "TtSphereTri";
             _ReadWriteBarrier();
             lo = (unsigned int)__rdtsc();
             r->tsc = lo;
-            buf->cur = r + 1;
+            buf->m_end.m_storage = (char*)(r + 1);
         }
     }
     S00d3d6b0_HitInfo hit;
@@ -361,25 +433,25 @@ void S00d3d6b0_SphereTriAgent::FUN_00d3d6b0(S00d3d6b0_BodyHolderB* a, S00d3d6b0_
     hit.b=b;
     S00d3d6b0_BodyB* shapeA = a->obj;
     S00d3d6b0_BodyB* shapeB = b->obj;
-    S00d3d6b0_XForm* axf = a->xf;
-    S00d3d6b0_Vec4* center = &axf->t;
-    S00d3d6b0_Vec4 tri[3];
+    Transform* axf = a->xf;
+    PacketCallLocal_00d3dd90* center = (PacketCallLocal_00d3dd90*)&axf->r[3];
+    __declspec(align(16)) PacketCallLocal_00d3dd90 tri[3];
+    __declspec(align(16)) PacketCallLocal_00d3dd90 r0,r1,r2;
     S00d3d6b0_Res out;
     {
-        S00d3d6b0_Vec4 r0,r1,r2;
-        r0=b->xf->r0;
-        r1=b->xf->r1;
-        r2=b->xf->r2;
-        out.pt=b->xf->t;
+        copyVector(r0, *(PacketCallLocal_00d3dd90*)&b->xf->r[0]);
+        copyVector(r1, *(PacketCallLocal_00d3dd90*)&b->xf->r[1]);
+        copyVector(r2, *(PacketCallLocal_00d3dd90*)&b->xf->r[2]);
+        copyVector(out.pt, *(PacketCallLocal_00d3dd90*)&b->xf->r[3]);
         for (int i=2; i>=0; --i) {
-            __m128 v = *(__m128*)&shapeB->vertices[i];
-            __m128 y = _mm_shuffle_ps(v,v,0x55);
-            __m128 x = _mm_shuffle_ps(v,v,0);
-            __m128 z = _mm_shuffle_ps(v,v,0xaa);
-            __m128 px = _mm_mul_ps(x,*(__m128*)&r0);
-            __m128 py = _mm_mul_ps(y,*(__m128*)&r1);
-            __m128 pz = _mm_mul_ps(z,*(__m128*)&r2);
-            *(__m128*)&tri[i] = _mm_add_ps(_mm_add_ps(py,px),_mm_add_ps(pz,*(__m128*)&out.pt));
+            LocalM128 v = *(LocalM128*)&shapeB->vertices[i];
+            LocalM128 y = _mm_shuffle_ps(v,v,0x55);
+            LocalM128 x = _mm_shuffle_ps(v,v,0);
+            LocalM128 z = _mm_shuffle_ps(v,v,0xaa);
+            LocalM128 px = _mm_mul_ps(x,*(LocalM128*)&r0);
+            LocalM128 py = _mm_mul_ps(y,*(LocalM128*)&r1);
+            LocalM128 pz = _mm_mul_ps(z,*(LocalM128*)&r2);
+            *(LocalM128*)&tri[i] = _mm_add_ps(_mm_add_ps(py,px),_mm_add_ps(pz,*(LocalM128*)&out.pt));
         }
     }
     FUN_00cd7850(center,tri,&unk10,&out,0);
@@ -388,25 +460,25 @@ void S00d3d6b0_SphereTriAgent::FUN_00d3d6b0(S00d3d6b0_BodyHolderB* a, S00d3d6b0_
     float threshold = input->tolerance+sum;
     if (distance < threshold) {
         float delta = shapeB->radius-distance;
-        __m128 centerValue = *(__m128*)center;
-        __m128 scalar = _mm_load_ss(&delta);
-        __m128 splat = _mm_shuffle_ps(scalar,scalar,0);
-        __m128 normal = *(__m128*)&out.pt;
-        __m128 pos = _mm_add_ps(_mm_mul_ps(splat,normal),centerValue);
-        *(__m128*)&hit.pt = pos;
-        *(__m128*)&hit.nrm = normal;
+        LocalM128 centerValue = *(LocalM128*)center;
+        LocalM128 scalar = _mm_load_ss(&delta);
+        LocalM128 splat = _mm_shuffle_ps(scalar,scalar,0);
+        LocalM128 normal = *(LocalM128*)&out.pt;
+        LocalM128 pos = _mm_add_ps(_mm_mul_ps(splat,normal),centerValue);
+        *(LocalM128*)&hit.pt = pos;
+        *(LocalM128*)&hit.nrm = normal;
         hit.nrm.w = distance-sum;
         sink->unk04(&hit);
     }
     {
-        S00d3d6b0_ProfBuf* buf = (S00d3d6b0_ProfBuf*)TlsGetValue(DAT_0126835c);
-        S00d3d6b0_ProfRec* r = buf->cur;
-        if (r < buf->end) {
+        hkMonitorStream* buf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+        S00d3d6b0_ProfRec* r = (S00d3d6b0_ProfRec*)buf->m_end.m_storage;
+        if (r < (S00d3d6b0_ProfRec*)buf->m_capacityMinus16.m_storage) {
             r->name = "Et";
             _ReadWriteBarrier();
             lo = (unsigned int)__rdtsc();
             r->tsc = lo;
-            buf->cur = r + 1;
+            buf->m_end.m_storage = (char*)(r + 1);
         }
     }
 }
@@ -414,49 +486,40 @@ void S00d3d6b0_SphereTriAgent::FUN_00d3d6b0(S00d3d6b0_BodyHolderB* a, S00d3d6b0_
 extern "C" {
 unsigned __int64 __rdtsc(void);
 void _ReadWriteBarrier(void);
-__m128 _mm_unpackhi_ps(__m128, __m128);
-__m128 _mm_load_ss(const float*);
+LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+LocalM128 _mm_load_ss(const float*);
 }
 
-struct Transform;
+__forceinline PacketCallLocal_00d3dd90::PacketCallLocal_00d3dd90() {}
 
-struct FourFloatVector {
-    union { __m128 m; float f[4]; };
-    __forceinline void operator=(const FourFloatVector& rhs) { m = rhs.m; }
-    __forceinline void transformed(const Transform& t, const FourFloatVector& v);
-    __forceinline void addScaled(const FourFloatVector& base, const FourFloatVector& direction, float amount) {
-        __m128 scalar = _mm_load_ss(&amount);
-        scalar = _mm_shuffle_ps(scalar, scalar, 0);
-        m = _mm_add_ps(base.m, _mm_mul_ps(scalar, direction.m));
-    }
-    __forceinline float& component(int n) { return f[n]; }
+__forceinline void PacketCallLocal_00d3dd90::operator=(const PacketCallLocal_00d3dd90& rhs) { m = rhs.m; }
 
-};
-
-struct Transform {
-    FourFloatVector col0;
-    FourFloatVector col1;
-    FourFloatVector col2;
-    FourFloatVector translation;
-    __forceinline Transform(const Transform& rhs) {
-        const FourFloatVector c0 = rhs.col0, c1 = rhs.col1, c2 = rhs.col2, c3 = rhs.translation;
-        col0 = c0; col1 = c1; col2 = c2; translation = c3;
-    }
-};
-
-__forceinline void FourFloatVector::transformed(const Transform& t, const FourFloatVector& v) {
-    __m128 splatX = _mm_shuffle_ps(v.m, v.m, 0);
-    __m128 prodX = _mm_mul_ps(t.col0.m, splatX);
-    __m128 splatY = _mm_shuffle_ps(v.m, v.m, 0x55);
-    __m128 prodY = _mm_mul_ps(t.col1.m, splatY);
-    __m128 splatZ = _mm_shuffle_ps(v.m, v.m, 0xaa);
-    __m128 prodZ = _mm_mul_ps(t.col2.m, splatZ);
-    m = _mm_add_ps(_mm_add_ps(prodX, prodY), _mm_add_ps(prodZ, t.translation.m));
+__forceinline void PacketCallLocal_00d3dd90::addScaled(const PacketCallLocal_00d3dd90& base, const PacketCallLocal_00d3dd90& direction, float amount) {
+    LocalM128 scalar = _mm_load_ss(&amount);
+    scalar = _mm_shuffle_ps(scalar, scalar, 0);
+    m = _mm_add_ps(base.m, _mm_mul_ps(scalar, direction.m));
 }
 
-struct AlignedPairData {
-    FourFloatVector m_vContactPosition;
-    FourFloatVector m_vSeparatingNormal;
+__forceinline float& PacketCallLocal_00d3dd90::component(int n) { return f[n]; }
+
+__forceinline Transform::Transform(const Transform& rhs) {
+    const PacketCallLocal_00d3dd90 c0 = *(const PacketCallLocal_00d3dd90*)&rhs.r[0], c1 = *(const PacketCallLocal_00d3dd90*)&rhs.r[1], c2 = *(const PacketCallLocal_00d3dd90*)&rhs.r[2], c3 = *(const PacketCallLocal_00d3dd90*)&rhs.r[3];
+    *(PacketCallLocal_00d3dd90*)&r[0] = c0; *(PacketCallLocal_00d3dd90*)&r[1] = c1; *(PacketCallLocal_00d3dd90*)&r[2] = c2; *(PacketCallLocal_00d3dd90*)&r[3] = c3;
+}
+
+__forceinline void PacketCallLocal_00d3dd90::transformed(const Transform& t, const PacketCallLocal_00d3dd90& v) {
+    LocalM128 splatX = _mm_shuffle_ps(v.m, v.m, 0);
+    LocalM128 prodX = _mm_mul_ps(t.r[0], splatX);
+    LocalM128 splatY = _mm_shuffle_ps(v.m, v.m, 0x55);
+    LocalM128 prodY = _mm_mul_ps(t.r[1], splatY);
+    LocalM128 splatZ = _mm_shuffle_ps(v.m, v.m, 0xaa);
+    LocalM128 prodZ = _mm_mul_ps(t.r[2], splatZ);
+    m = _mm_add_ps(_mm_add_ps(prodX, prodY), _mm_add_ps(prodZ, t.r[3]));
+}
+
+struct __declspec(align(16)) AlignedPairData {
+    PacketCallLocal_00d3dd90 m_vContactPosition;
+    PacketCallLocal_00d3dd90 m_vSeparatingNormal;
     unsigned int m_iOwnerObjectOffset;
     int pad24;
     int pad28;
@@ -495,7 +558,7 @@ struct Shape {
     int pad14;
     int pad18;
     int pad1C;
-    FourFloatVector m_kVertices[3];
+    __declspec(align(16)) PacketCallLocal_00d3dd90 m_kVertices[3];
 };
 
 struct CollisionConstraintOwner {};
@@ -525,12 +588,6 @@ struct MonitorRecord {
     unsigned int timestamp;
     unsigned int auxiliary;
 };
-struct MonitorStream {
-    void* unk0;
-    MonitorRecord* m_pTileTemplate;
-    void* unk8;
-    MonitorRecord* m_pRayCursor;
-};
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 extern "C" unsigned long DAT_0126835c;
@@ -548,19 +605,19 @@ union FeatureInfo {
     unsigned __int64 encoded;
 };
 
-struct ClosestPointOutput {
-    FourFloatVector m_vHitNormal;
+struct __declspec(align(16)) ClosestPointOutput {
+    PacketCallLocal_00d3dd90 m_vHitNormal;
     float m_fClosestPointDistanceSquared;
 };
 
 static __forceinline int queryContact(const CdBody* bodyA, const CdBody* bodyB, const ProcessCollisionInput* input, void* cache, AlignedPairData* cp, FeatureInfo* feature) {
     Shape* shapeA = bodyA->shape();
     Shape* shapeB = bodyB->shape();
-    const FourFloatVector* spherePos = &(&bodyA->transform())->translation;
+    const PacketCallLocal_00d3dd90* spherePos = (const PacketCallLocal_00d3dd90*)&bodyA->transform().r[3];
 
-    __declspec(align(16)) FourFloatVector vTransformed[3];
+    __declspec(align(16)) PacketCallLocal_00d3dd90 vTransformed[3];
         const Transform* motionB = (&bodyB->transform());
-        Transform copy(*motionB);
+        __declspec(align(16)) Transform copy(*motionB);
         for (int i=2; i>=0; --i) {
             vTransformed[i].transformed(copy, shapeB->m_kVertices[i]);
         }
@@ -587,9 +644,9 @@ struct TargetAgent_Cand : TargetAgent {
 
 // @fnv 0x00d3dd90
 void TargetAgent_Cand::FUN_00d3dd90(const CdBody* bodyA, const CdBody* bodyB, const ProcessCollisionInput* input, ProcessCollisionOutput* result) {
-    MonitorStream* stream = (MonitorStream*)TlsGetValue(DAT_0126835c);
-    MonitorRecord* cur = stream->m_pTileTemplate;
-    if (cur < stream->m_pRayCursor) {
+    hkMonitorStream* stream = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    MonitorRecord* cur = (MonitorRecord*)stream->m_end.m_storage;
+    if (cur < (MonitorRecord*)stream->m_capacityMinus16.m_storage) {
         cur->name = DAT_010cf0d4;
         unsigned int ticks;
         _ReadWriteBarrier();
@@ -598,7 +655,7 @@ void TargetAgent_Cand::FUN_00d3dd90(const CdBody* bodyA, const CdBody* bodyB, co
             mov dword ptr[ticks], eax
         }
         cur->timestamp = ticks;
-        stream->m_pTileTemplate = cur + 1;
+        stream->m_end.m_storage = (char*)(cur + 1);
     }
 
     AlignedPairData* cp = result->m_pAlignedPairData;
@@ -607,8 +664,8 @@ void TargetAgent_Cand::FUN_00d3dd90(const CdBody* bodyA, const CdBody* bodyB, co
         unsigned char m_uiMaterialIndex = weldFlag.count;
         if (m_uiMaterialIndex > 0) {
             Shape* weldShape = bodyB->shape();
-            FourFloatVector normalOut = cp->m_vSeparatingNormal;
-            FourFloatVector posOut = cp->m_vContactPosition;
+            __declspec(align(16)) PacketCallLocal_00d3dd90 normalOut = cp->m_vSeparatingNormal;
+            __declspec(align(16)) PacketCallLocal_00d3dd90 posOut = cp->m_vContactPosition;
             int weldRes = weldShape->weldContactPoint(weldFlag.indices, &m_uiMaterialIndex, &posOut, (&bodyB->transform()), bodyA->shape(), (&bodyA->transform()), &normalOut);
             if (weldRes == 0) {
                 if (this->m_padC != 0xffff) {
@@ -618,9 +675,9 @@ void TargetAgent_Cand::FUN_00d3dd90(const CdBody* bodyA, const CdBody* bodyB, co
                 return;
             }
             if (weldRes == 1) {
-                __m128 oldNormal = cp->m_vSeparatingNormal.m;
-                __m128 newNormal = normalOut.m;
-                __m128 unpck = _mm_unpackhi_ps(newNormal, oldNormal);
+                LocalM128 oldNormal = cp->m_vSeparatingNormal.m;
+                LocalM128 newNormal = normalOut.m;
+                LocalM128 unpck = _mm_unpackhi_ps(newNormal, oldNormal);
                 cp->m_vSeparatingNormal.m = _mm_shuffle_ps(newNormal, unpck, 0xc4);
             }
         }
@@ -639,9 +696,9 @@ void TargetAgent_Cand::FUN_00d3dd90(const CdBody* bodyA, const CdBody* bodyB, co
         }
     }
 
-    MonitorStream* streamEnd = (MonitorStream*)TlsGetValue(DAT_0126835c);
-    MonitorRecord* curEnd = streamEnd->m_pTileTemplate;
-    if (curEnd < streamEnd->m_pRayCursor) {
+    hkMonitorStream* streamEnd = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    MonitorRecord* curEnd = (MonitorRecord*)streamEnd->m_end.m_storage;
+    if (curEnd < (MonitorRecord*)streamEnd->m_capacityMinus16.m_storage) {
         curEnd->name = DAT_010c41f8;
         unsigned int ticks;
         _ReadWriteBarrier();
@@ -650,50 +707,36 @@ void TargetAgent_Cand::FUN_00d3dd90(const CdBody* bodyA, const CdBody* bodyB, co
             mov dword ptr[ticks], eax
         }
         curEnd->timestamp = ticks;
-        streamEnd->m_pTileTemplate = curEnd + 1;
+        streamEnd->m_end.m_storage = (char*)(curEnd + 1);
     }
 }
 
-extern "C" __m128 _mm_load_ss(const float*);
-static __forceinline __m128 PlainBroadcast(const float& f) {
- __m128 t=_mm_load_ss(&f); return _mm_shuffle_ps(t,t,0);
+extern "C" LocalM128 _mm_load_ss(const float*);
+static __forceinline LocalM128 PlainBroadcast(const float& f) {
+ LocalM128 t=_mm_load_ss(&f); return _mm_shuffle_ps(t,t,0);
 }
 
 
-struct __declspec(align(16)) S_00d3d520_V4 {
-    float x, y, z, w;
-    __m128& q() { return reinterpret_cast<__m128&>(*this); }
-    const __m128& q() const { return reinterpret_cast<const __m128&>(*this); }
-};
 
-struct S_00d3d520_Col {
-    float x, y, z, w;
-};
 
-struct S_00d3d520_T {
-    S_00d3d520_Col c0;
-    S_00d3d520_Col c1;
-    S_00d3d520_Col c2;
-    S_00d3d520_Col c3;
-};
 
-static __forceinline void S_00d3d520_Xform(S_00d3d520_V4& out, const S_00d3d520_Col& c0, const S_00d3d520_Col& c1, const S_00d3d520_Col& c2, const S_00d3d520_Col& c3, const S_00d3d520_V4& b)
+static __forceinline void S_00d3d520_Xform(PacketCallLocal_00d3dd90& out, const PacketCallLocal_00d3dd90& c0, const PacketCallLocal_00d3dd90& c1, const PacketCallLocal_00d3dd90& c2, const PacketCallLocal_00d3dd90& c3, const PacketCallLocal_00d3dd90& b)
 {
-    const __m128 xb = _mm_shuffle_ps(b.q(), b.q(), 0x00);
-    const __m128 yb = _mm_shuffle_ps(b.q(), b.q(), 0x55);
-    const __m128 zb = _mm_shuffle_ps(b.q(), b.q(), 0xaa);
-    const __m128 t0 = _mm_mul_ps(xb, *(const __m128*)&c0);
-    const __m128 t1 = _mm_mul_ps(yb, *(const __m128*)&c1);
-    const __m128 t2 = _mm_mul_ps(zb, *(const __m128*)&c2);
-    out.q() = _mm_add_ps(_mm_add_ps(t1, t0), _mm_add_ps(t2, *(const __m128*)&c3));
+    const LocalM128 xb = _mm_shuffle_ps(b.m, b.m, 0x00);
+    const LocalM128 yb = _mm_shuffle_ps(b.m, b.m, 0x55);
+    const LocalM128 zb = _mm_shuffle_ps(b.m, b.m, 0xaa);
+    const LocalM128 t0 = _mm_mul_ps(xb, *(const LocalM128*)&c0);
+    const LocalM128 t1 = _mm_mul_ps(yb, *(const LocalM128*)&c1);
+    const LocalM128 t2 = _mm_mul_ps(zb, *(const LocalM128*)&c2);
+    out.m = _mm_add_ps(_mm_add_ps(t1, t0), _mm_add_ps(t2, *(const LocalM128*)&c3));
 }
 
-static __forceinline void S_00d3d520_TransformPoints(const S_00d3d520_T& t, const S_00d3d520_V4* in, S_00d3d520_V4* out)
+static __forceinline void S_00d3d520_TransformPoints(const Transform& t, const PacketCallLocal_00d3dd90* in, PacketCallLocal_00d3dd90* out)
 {
-    S_00d3d520_Col c0 = t.c0;
-    S_00d3d520_Col c1 = t.c1;
-    S_00d3d520_Col c2 = t.c2;
-    S_00d3d520_Col c3 = t.c3;
+    PacketCallLocal_00d3dd90 c0; copyVector(c0, *(const PacketCallLocal_00d3dd90*)&t.r[0]);
+    PacketCallLocal_00d3dd90 c1; copyVector(c1, *(const PacketCallLocal_00d3dd90*)&t.r[1]);
+    PacketCallLocal_00d3dd90 c2; copyVector(c2, *(const PacketCallLocal_00d3dd90*)&t.r[2]);
+    PacketCallLocal_00d3dd90 c3; copyVector(c3, *(const PacketCallLocal_00d3dd90*)&t.r[3]);
     int i = 2;
     do {
         S_00d3d520_Xform(out[i], c0, c1, c2, c3, in[i]);
@@ -704,19 +747,19 @@ struct S_00d3d520_Shape {
     int unk00, unk04, unk08, unk0c;
     float radius;
     int unk14, unk18, unk1c;
-    S_00d3d520_V4 verts[3];
+    PacketCallLocal_00d3dd90 verts[3];
 };
 
 struct S_00d3d520_Body {
     S_00d3d520_Shape* shape;
     int unk04;
-    S_00d3d520_T* motion;
+    Transform* motion;
 };
 
 struct S_00d3d520_A {
     S_00d3d520_Shape* shape;
     int unk04;
-    S_00d3d520_V4* pos;
+    PacketCallLocal_00d3dd90* pos;
 };
 
 struct S_00d3d520_Info {
@@ -726,20 +769,20 @@ struct S_00d3d520_Info {
 };
 
 struct __declspec(align(16)) S_00d3d520_Res {
-    S_00d3d520_V4 normal;
+    PacketCallLocal_00d3dd90 normal;
     float dist;
 };
 
-struct S_00d3d520_Out { S_00d3d520_V4 point; union { S_00d3d520_V4 normal; struct {float nx,ny,nz; volatile float distance;}; }; };
+struct __declspec(align(16)) S_00d3d520_Out { PacketCallLocal_00d3dd90 point; PacketCallLocal_00d3dd90 normal; };
 
-int __cdecl FUN_00cd7850(const S_00d3d520_V4* pos, const S_00d3d520_V4* tri, int a4, S_00d3d520_Res* out, char* flag);
+int __cdecl FUN_00cd7850(const PacketCallLocal_00d3dd90* pos, const PacketCallLocal_00d3dd90* tri, int a4, S_00d3d520_Res* out, char* flag);
 
 // @fnv 0x00d3d520
 int __cdecl FUN_00d3d520(S_00d3d520_A* a, S_00d3d520_Body* b, S_00d3d520_Info* info, int a4, S_00d3d520_Out* outp)
 {
-    S_00d3d520_V4 v[3]; S_00d3d520_Shape* sphere = a->shape;
+    __declspec(align(16)) PacketCallLocal_00d3dd90 v[3]; S_00d3d520_Shape* sphere = a->shape;
     { S_00d3d520_Shape* tri = b->shape;
-    const S_00d3d520_V4* count = a->pos + 3;
+    const PacketCallLocal_00d3dd90* count = a->pos + 3;
     
     S_00d3d520_TransformPoints(*b->motion, tri->verts, v);
     S_00d3d520_Res pen;
@@ -751,9 +794,9 @@ int __cdecl FUN_00d3d520(S_00d3d520_A* a, S_00d3d520_Body* b, S_00d3d520_Info* i
 S_00d3d520_Out* o=outp;
 float res=tri->radius-pen.dist;
 double separation=pen.dist-k;
-volatile float* distance=&o->distance;
-o->point.q()=_mm_add_ps(count->q(),_mm_mul_ps(PlainBroadcast(res),pen.normal.q()));
-o->normal.q()=pen.normal.q();
+volatile float* distance=&o->normal.w;
+o->point.m=_mm_add_ps(count->m,_mm_mul_ps(PlainBroadcast(res),pen.normal.m));
+o->normal.m=pen.normal.m;
 *distance=(float)separation;
         int f = 1 + (r != 0); return f;
     } }

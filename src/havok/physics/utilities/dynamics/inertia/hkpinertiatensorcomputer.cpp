@@ -1,6 +1,100 @@
+#include "../../../../../../include/hkArrayBase.h"
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#define FNV64_HKMATRIX3_TRIVIAL_DEFAULT
 
 // src/havok/physics/utilities/dynamics/inertia/hkpinertiatensorcomputer.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/dynamics/inertia/hkpinertiatensorcomputer.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+// Retain this unit's float-only intrinsic type: the CRT's byte-array view
+// changes the old compiler's /GS classification of stack temporaries.
+#define _INCLUDED_MM2
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+extern "C"
+{
+    LocalM128 _mm_setr_ps(float, float, float, float);
+    LocalM128 _mm_setzero_ps();
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_load_ss(const float*);
+    void _mm_store_ps(float*, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+    LocalM128 _mm_sqrt_ss(LocalM128);
+    void _mm_store_ss(float*, LocalM128);
+    LocalM128 _mm_div_ss(LocalM128, LocalM128);
+    LocalM128 _mm_set_ps1(float);
+    LocalM128 _mm_load_ps(const float*);
+    LocalM128 _mm_set_ss(float);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_rsqrt_ss(LocalM128);
+    LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+    LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
+    LocalM128 _mm_min_ps(LocalM128, LocalM128);
+    LocalM128 _mm_max_ps(LocalM128, LocalM128);
+}
+// Preserve aligned SIMD storage and uninitialized vector construction.
+#define FNV_VEC4_NO_SSE
+#define FNV_VEC4_SIMD
+#include "../../../../../../include/Vec4.h"
+#include "../../../../../../include/Transform.h"
+#include "../../../../../../include/hkAabb.h"
+#include "../../../../../../include/V4.h"
+#include "../../../../../../include/hkVector4.h"
+
+// These operations were inline in this unit's original vector definitions.
+inline hkAabb::hkAabb() {}
+inline V4::V4() {}
+inline void V4::setZero4()
+{
+    q = _mm_setzero_ps();
+}
+inline float& V4::operator()(int i)
+{
+    return q.m128_f32[i];
+}
+inline const float& V4::operator()(int i) const
+{
+    return q.m128_f32[i];
+}
+
+inline void hkVector4::set(float x, float y, float z, float w)
+{
+    m_vComponents = _mm_setr_ps(x, y, z, w);
+}
+inline float& hkVector4::operator()(int i)
+{
+    return m_vComponents.m128_f32[i];
+}
+inline int hkVector4::maxAxisSecond() const
+{
+    if (x < y)
+        return y < z ? 2 : 1;
+    return x < z ? 2 : 0;
+}
+inline int hkVector4::maxAxis() const
+{
+    if (x < y)
+    {
+        if (z > y)
+            return 2;
+        return 1;
+    }
+    if (z > x)
+        return 2;
+    return 0;
+}
+
 
 struct Object
 {
@@ -41,37 +135,31 @@ int __cdecl ApplyLimitToReceiver(int owner, int context, int count, float limit,
     return 0;
 }
 
-struct FUN_00cebe80_Struct
-{
-    float unk00;
-    float unk04;
-    float unk08;
-};
 
 // Subtracts fParam2 times products of pThis's components from the diagonal of pOut and adds the off-diagonal products to its symmetric entries.
 // @fnv 0x00cebe80
-void __cdecl FUN_00cebe80(FUN_00cebe80_Struct* pThis, float fScale, float* pMatrix)
+void __cdecl FUN_00cebe80(hkVector4* pThis, float fScale, float* pMatrix)
 {
     float fValue;
 
-    fValue = pMatrix[0] - fScale * (pThis->unk08 * pThis->unk08 + pThis->unk04 * pThis->unk04);
+    fValue = pMatrix[0] - fScale * (pThis->z * pThis->z + pThis->y * pThis->y);
     pMatrix[0] = fValue;
 
-    fValue = pMatrix[5] - fScale * (pThis->unk00 * pThis->unk00 + pThis->unk08 * pThis->unk08);
+    fValue = pMatrix[5] - fScale * (pThis->x * pThis->x + pThis->z * pThis->z);
     pMatrix[5] = fValue;
 
-    fValue = pMatrix[10] - fScale * (pThis->unk00 * pThis->unk00 + pThis->unk04 * pThis->unk04);
+    fValue = pMatrix[10] - fScale * (pThis->x * pThis->x + pThis->y * pThis->y);
     pMatrix[10] = fValue;
 
-    fValue = pThis->unk00 * fScale * pThis->unk04 + pMatrix[1];
+    fValue = pThis->x * fScale * pThis->y + pMatrix[1];
     pMatrix[1] = fValue;
     pMatrix[4] = fValue;
 
-    fValue = fScale * pThis->unk04 * pThis->unk08 + pMatrix[6];
+    fValue = fScale * pThis->y * pThis->z + pMatrix[6];
     pMatrix[6] = fValue;
     pMatrix[9] = fValue;
 
-    fValue = fScale * pThis->unk08 * pThis->unk00 + pMatrix[8];
+    fValue = fScale * pThis->z * pThis->x + pMatrix[8];
     pMatrix[8] = fValue;
     pMatrix[2] = fValue;
 }
@@ -410,76 +498,12 @@ void S00cec3d0_Face::FUN_00cec3d0(const float* verts, const float* apNormal)
                         w * (2.0 * (apNormal[A] * m_fComponent0 + apNormal[B] * m_fComponent1) + w * Pa));
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-extern "C"
-{
-    __m128 _mm_setr_ps(float, float, float, float);
-    __m128 _mm_setzero_ps();
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-}
-struct Vector
-{
-    union
-    {
-        __m128 q;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-    Vector()
-    {}
-    Vector(const Vector& other) : q(other.q)
-    {}
-    void operator=(const Vector& other)
-    {
-        q = other.q;
-    }
-    void set(float x, float y, float z, float w)
-    {
-        q = _mm_setr_ps(x, y, z, w);
-    }
-    float& operator()(int i)
-    {
-        return q.m128_f32[i];
-    }
-    int maxAxisSecond() const
-    {
-        if (x < y)
-            return y < z ? 2 : 1;
-        return x < z ? 2 : 0;
-    }
-    int maxAxis() const
-    {
-        if (x < y)
-        {
-            if (z > y)
-                return 2;
-            return 1;
-        }
-        if (z > x)
-            return 2;
-        return 0;
-    }
-};
 struct Matrix
 {
-    Vector c0, c1, c2;
+    hkVector4 c0, c1, c2;
 };
-struct Transform
-{
-    Vector columns[4];
-};
-struct Bounds
-{
-    Vector lo, hi;
-};
-extern const Vector DAT_01017d10;
-void FUN_00d5ac50(char*, Matrix*, Vector*, Vector*, Vector*);
+extern const hkVector4 DAT_01017d10;
+void FUN_00d5ac50(char*, Matrix*, hkVector4*, hkVector4*, hkVector4*);
 struct Shape
 {
     virtual void v0();
@@ -489,32 +513,32 @@ struct Shape
     virtual void v4();
     virtual void v5();
     virtual void v6();
-    virtual void getAabb(const Transform*, float, Bounds*);
+    virtual void getAabb(const Transform*, float, hkAabb*);
 };
 // Builds a transform from input's basis, gets the shape's AABB, and writes the transform columns of the largest and second-largest extent axes to outA and outB.
 // @fnv 0x00cedae0
-void FUN_00cedae0(Shape* shape, const Matrix* input, Vector* outA, Vector* outB)
+void FUN_00cedae0(Shape* shape, const Matrix* input, hkVector4* outA, hkVector4* outB)
 {
     Matrix matrix = *input;
     char ok;
-    Vector e0, e1, e2;
+    hkVector4 e0, e1, e2;
     FUN_00d5ac50(&ok, &matrix, &e0, &e1, &e2);
-    Transform transform;
-    transform.columns[0].set(e0.x, e1.x, e2.x, 0.0f);
-    transform.columns[1].set(e0.y, e1.y, e2.y, 0.0f);
-    transform.columns[2].set(e0.z, e1.z, e2.z, 0.0f);
-    transform.columns[3].q = _mm_setzero_ps();
-    Bounds bounds;
+    __declspec(align(16)) Transform transform;
+    transform.r[0] = _mm_setr_ps(e0.x, e1.x, e2.x, 0.0f);
+    transform.r[1] = _mm_setr_ps(e0.y, e1.y, e2.y, 0.0f);
+    transform.r[2] = _mm_setr_ps(e0.z, e1.z, e2.z, 0.0f);
+    transform.r[3] = _mm_setzero_ps();
+    hkAabb bounds;
     shape->getAabb(&transform, 0.0f, &bounds);
-    Vector extent, absolute;
-    extent.q = _mm_sub_ps(bounds.hi.q, bounds.lo.q);
-    absolute.q = _mm_and_ps(extent.q, DAT_01017d10.q);
+    hkVector4 extent, absolute;
+    extent.m_vComponents = _mm_sub_ps(*reinterpret_cast<const LocalM128*>(&bounds.m_kMaximumCorner.x), *reinterpret_cast<const LocalM128*>(&bounds.m_kMinimumCorner.x));
+    absolute.m_vComponents = _mm_and_ps(extent.m_vComponents, DAT_01017d10.m_vComponents);
     int first = absolute.maxAxis();
     extent(first) = 0.0f;
-    absolute.q = _mm_and_ps(extent.q, DAT_01017d10.q);
+    absolute.m_vComponents = _mm_and_ps(extent.m_vComponents, DAT_01017d10.m_vComponents);
     int second = absolute.maxAxisSecond();
-    *outA = transform.columns[first];
-    *outB = transform.columns[second];
+    outA->m_vComponents = transform.r[first];
+    outB->m_vComponents = transform.r[second];
 }
 
 struct MotionLike
@@ -523,14 +547,14 @@ struct MotionLike
     float field04;
     int unk08;
     int unk0c;
-    __m128 field10;
-    __m128 field20;
-    __m128 field30;
-    __m128 field40;
-    __m128 field50;
-    __m128 field60;
-    __m128 field70;
-    __m128 field80;
+    LocalM128 field10;
+    LocalM128 field20;
+    LocalM128 field30;
+    LocalM128 field40;
+    LocalM128 field50;
+    LocalM128 field60;
+    LocalM128 field70;
+    LocalM128 field80;
     float field90;
 };
 // Copies source field04 to destination field90, and source field10, field20, field30, field40 to destination field80, field50, field60, field70.
@@ -544,10 +568,9 @@ void FUN_00cebdb0(const MotionLike* source, MotionLike* destination)
     destination->field70 = source->field40;
 }
 
-extern "C" __m128 _mm_load_ss(const float*);
 struct Sub
 {
-    void Multiply(const Vector* p);
+    void Multiply(const hkVector4* p);
 };
 struct Owner
 {
@@ -556,13 +579,13 @@ struct Owner
     int unk08, unk0c, unk10, unk14, unk18, unk1c;
     Sub m20;
 };
-// Multiplies m04 by value, then calls Multiply on m20 with a Vector broadcast from value.
+// Multiplies m04 by value, then calls Multiply on m20 with a hkVector4 broadcast from value.
 // @fnv 0x00cebfd0
 static __declspec(noinline) void FUN_00cebfd0(Owner* self, float afScale)
 {
     self->m04 *= afScale;
-    Vector tmp;
-    tmp.q = _mm_load_ss(&afScale);
+    hkVector4 tmp;
+    tmp.m_vComponents = _mm_load_ss(&afScale);
     self->m20.Multiply(&tmp);
 }
 Owner* volatile g_owner;
@@ -574,34 +597,18 @@ void caller()
     g_sink = g_owner;
 }
 
-struct __declspec(align(16)) S00ceccf0_Vec
-{
-    __m128 q;
-    void set(__m128 v)
-    {
-        q = v;
-    }
-    __m128 get() const
-    {
-        return q;
-    }
-    void operator=(const S00ceccf0_Vec& o)
-    {
-        q = o.q;
-    }
-};
 
 struct __declspec(align(16)) S00ceccf0_Mat
 {
-    S00ceccf0_Vec c0;
-    S00ceccf0_Vec c1;
-    S00ceccf0_Vec c2;
+    hkVector4 c0;
+    hkVector4 c1;
+    hkVector4 c2;
     void Subtract(const S00ceccf0_Mat& o);
     S00ceccf0_Mat& operator=(const S00ceccf0_Mat& o)
     {
-        c0 = o.c0;
-        c1 = o.c1;
-        c2 = o.c2;
+        c0.m_vComponents = o.c0.m_vComponents;
+        c1.m_vComponents = o.c1.m_vComponents;
+        c2.m_vComponents = o.c2.m_vComponents;
         return *this;
     }
 };
@@ -612,7 +619,7 @@ struct S00ceccf0_Out
     float m_04;
     int unk08;
     int unk0c;
-    S00ceccf0_Vec m_10;
+    hkVector4 m_10;
     S00ceccf0_Mat m_20;
 };
 
@@ -620,7 +627,7 @@ extern const double DAT_010cbf40;
 
 static __declspec(noinline) void __cdecl FUN_00ceba60(float a, float b, S00ceccf0_Out* out)
 {
-    out->m_10.set(_mm_setzero_ps());
+    out->m_10.m_vComponents = _mm_setzero_ps();
     out->m_00 = a * b;
     out->m_04 = a + b;
 }
@@ -656,14 +663,14 @@ int __cdecl FUN_00ceccf0(float start, float span, float t, S00ceccf0_Out* out)
 
     S00ceccf0_Out x;
     S00ceccf0_Out y;
-    __m128 zero = _mm_setzero_ps();
-    x.m_20.c0.set(zero);
-    x.m_20.c1.set(zero);
-    x.m_20.c2.set(zero);
-    y.m_10.set(zero);
-    y.m_20.c0.set(zero);
-    y.m_20.c1.set(zero);
-    y.m_20.c2.set(zero);
+    LocalM128 zero = _mm_setzero_ps();
+    x.m_20.c0.m_vComponents = zero;
+    x.m_20.c1.m_vComponents = zero;
+    x.m_20.c2.m_vComponents = zero;
+    y.m_10.m_vComponents = zero;
+    y.m_20.c0.m_vComponents = zero;
+    y.m_20.c1.m_vComponents = zero;
+    y.m_20.c2.m_vComponents = zero;
     x.m_00 = 0.0f;
     x.m_04 = 0.0f;
     y.m_00 = 0.0f;
@@ -673,7 +680,7 @@ int __cdecl FUN_00ceccf0(float start, float span, float t, S00ceccf0_Out* out)
     FUN_00ceba60(d, b, &y);
 
     S00ceccf0_Mat& r = out->m_20;
-    out->m_10.set(zero);
+    out->m_10.m_vComponents = zero;
     r = x.m_20;
     r.Subtract(y.m_20);
 
@@ -698,12 +705,7 @@ struct Edge
     int n18;
 };
 
-struct __declspec(align(16)) Mat3
-{
-    float m00, m01, m02, m03;
-    float m10, m11, m12, m13;
-    float m20, m21, m22, m23;
-};
+#include "../../../../../../include/hkMatrix3.h"
 
 struct ShapeIface
 {
@@ -712,7 +714,7 @@ struct ShapeIface
     virtual void v08();
     virtual void v0c();
     virtual void v10();
-    virtual void getInertia(Mat3* out);
+    virtual void getInertia(hkMatrix3* out);
 };
 
 struct Node
@@ -735,7 +737,7 @@ struct Node
     {
         return &shape;
     }
-    void FUN_00ca8920(Mat3* m);
+    void FUN_00ca8920(hkMatrix3* m);
 };
 
 struct LocalArr
@@ -819,7 +821,7 @@ float __cdecl FUN_00cedec0(S_00cee1c0_Arr* arr, int aiNode, float value)
         return 0.0f;
     }
 
-    Mat3 m;
+    hkMatrix3 m;
     ShapeIface* motion = body->getMotion();
     motion->getInertia(&m);
 
@@ -856,13 +858,8 @@ typedef union __declspec(intrin_type) __declspec(align(16)) __m128i
     int m128i_i32[4];
 } __m128i;
 extern "C" __m128i _mm_cvtsi32_si128(int);
-__m128 _mm_castsi128_ps(__m128i);
-extern "C" void _mm_store_ps(float*, __m128);
+LocalM128 _mm_castsi128_ps(__m128i);
 
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
-};
 struct Probe
 {
     unsigned char flag;
@@ -886,14 +883,14 @@ struct Track
     void FUN_00d762f0();
     float GetMass();
     double FUN_00d752e0();
-    __m128* FUN_00d75600();
-    __m128* FUN_00d75560();
+    LocalM128* FUN_00d75600();
+    LocalM128* FUN_00d75560();
     void FUN_00d77be0(float scale);
     void FUN_00d76940();
 };
 struct RowMatrix
 {
-    __m128 row0, row1, row2;
+    LocalM128 row0, row1, row2;
     void Multiply(const Vec4* weight);
 };
 struct Receiver2
@@ -902,7 +899,7 @@ struct Receiver2
     float enabled;
     float pad08;
     float pad0c;
-    __m128 translation;
+    LocalM128 translation;
     RowMatrix matrix;
 };
 struct Status
@@ -913,12 +910,11 @@ extern float DAT_011b153c;
 extern double DAT_01020998;
 extern double DAT_010cbf50;
 extern double DAT_010cbf48;
-inline __m128 scalarVector(float x)
+inline LocalM128 scalarVector(float x)
 {
-    __m128 result = {x};
+    LocalM128 result = {x};
     return result;
 }
-extern "C" __m128 _mm_load_ss(const float*);
 extern "C" void _ReadWriteBarrier();
 // Steps a Track until it reaches stage 3 past a threshold, stores its translation, matrix and time in receiver, and returns 0, or 1 if the stage is -1.
 // @fnv 0x00cebbb0
@@ -954,7 +950,7 @@ int __cdecl FUN_00cebbb0(void* state, float value, Receiver2* receiver)
             step += step;
         }
         receiver->translation = *track.FUN_00d75600();
-        __m128* rows = track.FUN_00d75560();
+        LocalM128* rows = track.FUN_00d75560();
         RowMatrix* m = &receiver->matrix;
         m->row0 = rows[0];
         m->row1 = rows[1];
@@ -966,8 +962,8 @@ int __cdecl FUN_00cebbb0(void* state, float value, Receiver2* receiver)
         {
             float fRatio = (float)(current / total + 1.0);
             Vec4 ratio;
-            __m128 scalar = _mm_load_ss(&fRatio);
-            *(__m128*)&ratio = scalar;
+            LocalM128 scalar = _mm_load_ss(&fRatio);
+            *(LocalM128*)&ratio = scalar;
             m->Multiply(&ratio);
         }
         track.FUN_00d76940();
@@ -977,13 +973,9 @@ int __cdecl FUN_00cebbb0(void* state, float value, Receiver2* receiver)
     return 1;
 }
 
-struct S_00ced310_V
-{
-    float x, y, z, w;
-};
 struct S_00ced310_M
 {
-    S_00ced310_V c0, c1, c2;
+    hkVector4 c0, c1, c2;
 };
 
 static __forceinline float S_Max(float a, float b)
@@ -993,7 +985,7 @@ static __forceinline float S_Max(float a, float b)
 
 static __forceinline void S_SetZero(S_00ced310_M* m)
 {
-    __m128 z = _mm_setzero_ps();
+    LocalM128 z = _mm_setzero_ps();
     _ReadWriteBarrier();
     _mm_store_ps(&m->c0.x, z);
     _mm_store_ps(&m->c1.x, z);
@@ -1012,39 +1004,18 @@ void __cdecl SetDiagonal(S_00ced310_M* m)
 }
 
 namespace fnv_00cefb90 {
-extern "C"
-{
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    __m128 _mm_sqrt_ss(__m128);
-    __m128 _mm_load_ss(const float*);
-    void _mm_store_ss(float*, __m128);
-}
 
-// Same-file stand-ins as FUN_00cece50 (hkpMassProperties / hkVector4 / hkMatrix3).
-struct __declspec(align(16)) CE50Vector
-{
-    union
-    {
-        __m128 quad;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-};
+// Mass properties and inertia helpers for surface geometry.
 struct CE50Matrix
 {
-    CE50Vector row0, row1, row2;
+    hkVector4 row0, row1, row2;
     void FUN_00cd5140(const CE50Matrix* source);
 };
 struct CE50Body
 {
     float volume;
     float mass;
-    CE50Vector center;
+    hkVector4 center;
     CE50Matrix inertia;
 };
 
@@ -1054,7 +1025,7 @@ struct CEFBTri
 };
 struct CEFBGeom
 {
-    CE50Vector* verts;
+    hkVector4* verts;
     int vertCount;
     unsigned vertCap;
     CEFBTri* tris;
@@ -1070,7 +1041,7 @@ struct CEFBAreas
 };
 
 void __cdecl FUN_00c908c0(S_00cee1c0_Heap* heap, CEFBAreas* arr, int count, int elemSize);
-int __cdecl FUN_00cee290(const CE50Vector* v0, const CE50Vector* v1, const CE50Vector* v2, float triMass,
+int __cdecl FUN_00cee290(const hkVector4* v0, const hkVector4* v1, const hkVector4* v2, float triMass,
                          float thickness, CE50Body* out);
 extern "C" void _ReadWriteBarrier(void);
 
@@ -1086,26 +1057,25 @@ __declspec(noinline) void __cdecl AddInertiaTensor(float* c, float m, float* I)
     float zx = I[8] - m * c[2] * c[0];
     I[8] = I[2] = zx;
 }
-extern "C" __m128 _mm_div_ss(__m128, __m128);
 void __cdecl FUN_00ced6b0(const CEFBGeom* geometry, float mass, CE50Body* out);
-__declspec(noinline) int __cdecl FUN_00cee290(const CE50Vector* a, const CE50Vector* b, const CE50Vector* c, float mass,
+__declspec(noinline) int __cdecl FUN_00cee290(const hkVector4* a, const hkVector4* b, const hkVector4* c, float mass,
                                               float thickness, CE50Body* out)
 {
     if (mass <= 0.0f || thickness < 0.0f)
         return 1;
-    __m128 ab = _mm_sub_ps(a->quad, b->quad);
-    __m128 cb = _mm_sub_ps(c->quad, b->quad);
-    __m128 cross = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(ab, ab, 0xd2), _mm_shuffle_ps(cb, cb, 0xc9)),
+    LocalM128 ab = _mm_sub_ps(a->m_vComponents, b->m_vComponents);
+    LocalM128 cb = _mm_sub_ps(c->m_vComponents, b->m_vComponents);
+    LocalM128 cross = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(ab, ab, 0xd2), _mm_shuffle_ps(cb, cb, 0xc9)),
                               _mm_mul_ps(_mm_shuffle_ps(ab, ab, 0xc9), _mm_shuffle_ps(cb, cb, 0xd2)));
-    __m128 sq = _mm_mul_ps(cross, cross);
-    __m128 len = _mm_sqrt_ss(_mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq)));
+    LocalM128 sq = _mm_mul_ps(cross, cross);
+    LocalM128 len = _mm_sqrt_ss(_mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq)));
     float length;
     _mm_store_ss(&length, len);
-    CE50Vector center;
+    hkVector4 center;
     float thirdF = 1.0f / 3.0f;
-    __m128 thirdV = _mm_load_ss(&thirdF);
-    __m128 third = _mm_shuffle_ps(thirdV, thirdV, 0);
-    center.quad = _mm_mul_ps(_mm_add_ps(_mm_add_ps(a->quad, b->quad), c->quad), third);
+    LocalM128 thirdV = _mm_load_ss(&thirdF);
+    LocalM128 third = _mm_shuffle_ps(thirdV, thirdV, 0);
+    center.m_vComponents = _mm_mul_ps(_mm_add_ps(_mm_add_ps(a->m_vComponents, b->m_vComponents), c->m_vComponents), third);
     CE50Matrix inertia;
     if (thickness < 1e-5f)
     {
@@ -1121,7 +1091,7 @@ __declspec(noinline) int __cdecl FUN_00cee290(const CE50Vector* a, const CE50Vec
             -(float)((a->x * a->z + b->x * b->z + c->x * c->z + 9.0 * center.x * center.z) * mass / 12.0);
         inertia.row1.z = inertia.row2.y =
             -(float)((a->y * a->z + b->y * b->z + c->y * c->z + 9.0 * center.y * center.z) * mass / 12.0);
-        FUN_00cebe80((FUN_00cebe80_Struct*)&center, mass, &inertia.row0.x);
+        FUN_00cebe80(&center, mass, &inertia.row0.x);
     }
     else if (length <= 0.0f)
     {
@@ -1135,16 +1105,16 @@ __declspec(noinline) int __cdecl FUN_00cee290(const CE50Vector* a, const CE50Vec
     else
     {
         float halfThickness = thickness * 0.5f;
-        __m128 inv = _mm_load_ss(&length);
+        LocalM128 inv = _mm_load_ss(&length);
         inv = _mm_div_ss(_mm_load_ss(&halfThickness), inv);
-        __m128 delta = _mm_mul_ps(cross, _mm_shuffle_ps(inv, inv, 0));
-        CE50Vector points[6];
-        points[0].quad = _mm_add_ps(a->quad, delta);
-        points[1].quad = _mm_sub_ps(a->quad, delta);
-        points[2].quad = _mm_add_ps(b->quad, delta);
-        points[3].quad = _mm_sub_ps(b->quad, delta);
-        points[4].quad = _mm_add_ps(c->quad, delta);
-        points[5].quad = _mm_sub_ps(c->quad, delta);
+        LocalM128 delta = _mm_mul_ps(cross, _mm_shuffle_ps(inv, inv, 0));
+        hkVector4 points[6];
+        points[0].m_vComponents = _mm_add_ps(a->m_vComponents, delta);
+        points[1].m_vComponents = _mm_sub_ps(a->m_vComponents, delta);
+        points[2].m_vComponents = _mm_add_ps(b->m_vComponents, delta);
+        points[3].m_vComponents = _mm_sub_ps(b->m_vComponents, delta);
+        points[4].m_vComponents = _mm_add_ps(c->m_vComponents, delta);
+        points[5].m_vComponents = _mm_sub_ps(c->m_vComponents, delta);
         CEFBTri faces[8] = {{0, 2, 4, -1}, {1, 5, 3, -1}, {0, 3, 2, -1}, {0, 1, 3, -1},
                             {1, 0, 4, -1}, {1, 4, 5, -1}, {2, 5, 4, -1}, {2, 3, 5, -1}};
         CEFBGeom prism = {points, 6, 0x80000006u, faces, 8, 0x80000008u};
@@ -1175,13 +1145,13 @@ int __cdecl FUN_00cefb90(const CEFBGeom* geom, float surfaceThickness, BoolFlag 
 
     _ReadWriteBarrier();
 
-    __m128 zero = _mm_setzero_ps();
+    LocalM128 zero = _mm_setzero_ps();
     CE50Matrix* inertia = &result->inertia;
-    inertia->row0.quad = zero;
-    inertia->row1.quad = zero;
-    inertia->row2.quad = zero;
-    CE50Vector* center = &result->center;
-    center->quad = zero;
+    inertia->row0.m_vComponents = zero;
+    inertia->row1.m_vComponents = zero;
+    inertia->row2.m_vComponents = zero;
+    hkVector4* center = &result->center;
+    center->m_vComponents = zero;
 
     int count = geom->triCount;
     CEFBAreas triAreas;
@@ -1206,20 +1176,20 @@ int __cdecl FUN_00cefb90(const CEFBGeom* geom, float surfaceThickness, BoolFlag 
     for (; i < geom->triCount; ++i)
     {
         const CEFBTri* tri = &geom->tris[i];
-        __m128 vb = geom->verts[tri->b].quad;
-        __m128 e2 = _mm_sub_ps(geom->verts[tri->c].quad, vb);
-        __m128 e0 = _mm_sub_ps(geom->verts[tri->a].quad, vb);
-        __m128 yzxE0 = _mm_shuffle_ps(e0, e0, 0xC9);
-        __m128 zxyE2 = _mm_shuffle_ps(e2, e2, 0xD2);
-        __m128 yzxE2 = _mm_shuffle_ps(e2, e2, 0xC9);
-        __m128 prodA = _mm_mul_ps(yzxE0, zxyE2);
-        __m128 zxyE0 = _mm_shuffle_ps(e0, e0, 0xD2);
-        __m128 prodB = _mm_mul_ps(zxyE0, yzxE2);
-        __m128 vCross = _mm_sub_ps(prodB, prodA);
-        __m128 sq = _mm_mul_ps(vCross, vCross);
-        __m128 yy = _mm_shuffle_ps(sq, sq, 0x55);
-        __m128 sum = _mm_add_ss(yy, sq);
-        __m128 zz = _mm_shuffle_ps(sq, sq, 0xAA);
+        LocalM128 vb = geom->verts[tri->b].m_vComponents;
+        LocalM128 e2 = _mm_sub_ps(geom->verts[tri->c].m_vComponents, vb);
+        LocalM128 e0 = _mm_sub_ps(geom->verts[tri->a].m_vComponents, vb);
+        LocalM128 yzxE0 = _mm_shuffle_ps(e0, e0, 0xC9);
+        LocalM128 zxyE2 = _mm_shuffle_ps(e2, e2, 0xD2);
+        LocalM128 yzxE2 = _mm_shuffle_ps(e2, e2, 0xC9);
+        LocalM128 prodA = _mm_mul_ps(yzxE0, zxyE2);
+        LocalM128 zxyE0 = _mm_shuffle_ps(e0, e0, 0xD2);
+        LocalM128 prodB = _mm_mul_ps(zxyE0, yzxE2);
+        LocalM128 vCross = _mm_sub_ps(prodB, prodA);
+        LocalM128 sq = _mm_mul_ps(vCross, vCross);
+        LocalM128 yy = _mm_shuffle_ps(sq, sq, 0x55);
+        LocalM128 sum = _mm_add_ss(yy, sq);
+        LocalM128 zz = _mm_shuffle_ps(sq, sq, 0xAA);
         sum = _mm_add_ss(zz, sum);
         sum = _mm_sqrt_ss(sum);
         float len;
@@ -1241,45 +1211,45 @@ int __cdecl FUN_00cefb90(const CEFBGeom* geom, float surfaceThickness, BoolFlag 
     for (int j = 0; j < geom->triCount; ++j)
     {
         const CEFBTri* __restrict tri = &geom->tris[j];
-        CE50Vector v0;
-        CE50Vector v1;
-        CE50Vector v2;
-        v0.quad = geom->verts[tri->a].quad;
-        v1.quad = geom->verts[tri->b].quad;
-        v2.quad = geom->verts[tri->c].quad;
+        hkVector4 v0;
+        hkVector4 v1;
+        hkVector4 v2;
+        v0.m_vComponents = geom->verts[tri->a].m_vComponents;
+        v1.m_vComponents = geom->verts[tri->b].m_vComponents;
+        v2.m_vComponents = geom->verts[tri->c].m_vComponents;
         float triMass = triAreas.data[j] * mass / total;
 
         CE50Body triBody;
         triBody.volume = 0.0f;
         triBody.mass = 0.0f;
-        triBody.center.quad = zero;
-        triBody.inertia.row0.quad = zero;
-        triBody.inertia.row1.quad = zero;
-        triBody.inertia.row2.quad = zero;
+        triBody.center.m_vComponents = zero;
+        triBody.inertia.row0.m_vComponents = zero;
+        triBody.inertia.row1.m_vComponents = zero;
+        triBody.inertia.row2.m_vComponents = zero;
         FUN_00cee290(&v0, &v1, &v2, triMass, surfaceThickness, &triBody);
 
         CE50Matrix shiftedInertia;
-        shiftedInertia.row0.quad = triBody.inertia.row0.quad;
-        shiftedInertia.row1.quad = triBody.inertia.row1.quad;
-        shiftedInertia.row2.quad = triBody.inertia.row2.quad;
+        shiftedInertia.row0.m_vComponents = triBody.inertia.row0.m_vComponents;
+        shiftedInertia.row1.m_vComponents = triBody.inertia.row1.m_vComponents;
+        shiftedInertia.row2.m_vComponents = triBody.inertia.row2.m_vComponents;
 
-        __m128 com = triBody.center.quad;
-        __m128 vTriMass = _mm_load_ss(&triMass);
-        __m128 scale = _mm_shuffle_ps(vTriMass, vTriMass, 0);
-        center->quad = _mm_add_ps(center->quad, _mm_mul_ps(scale, com));
+        LocalM128 com = triBody.center.m_vComponents;
+        LocalM128 vTriMass = _mm_load_ss(&triMass);
+        LocalM128 scale = _mm_shuffle_ps(vTriMass, vTriMass, 0);
+        center->m_vComponents = _mm_add_ps(center->m_vComponents, _mm_mul_ps(scale, com));
 
-        CE50Vector comCopy;
-        comCopy.quad = com;
+        hkVector4 comCopy;
+        comCopy.m_vComponents = com;
         AddInertiaTensor(&comCopy.x, triMass, &shiftedInertia.row0.x);
         inertia->FUN_00cd5140(&shiftedInertia);
     }
 
     result->mass = mass;
     float invMass = 1.0f / mass;
-    __m128 vInvMass = _mm_load_ss(&invMass);
-    __m128 inv = _mm_shuffle_ps(vInvMass, vInvMass, 0);
-    center->quad = _mm_mul_ps(inv, center->quad);
-    FUN_00cebe80((FUN_00cebe80_Struct*)center, mass, &inertia->row0.x);
+    LocalM128 vInvMass = _mm_load_ss(&invMass);
+    LocalM128 inv = _mm_shuffle_ps(vInvMass, vInvMass, 0);
+    center->m_vComponents = _mm_mul_ps(inv, center->m_vComponents);
+    FUN_00cebe80(center, mass, &inertia->row0.x);
 
     S_00cee1c0_Router* freeRouter = FUN_00c85750();
     S_00cee1c0_Heap* freeHeap = freeRouter->heap;
@@ -1296,13 +1266,6 @@ int __cdecl FUN_00cefb90(const CEFBGeom* geom, float surfaceThickness, BoolFlag 
 }
 }  // namespace fnv_00cefb90
 
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-extern "C"
-{
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_set_ps1(float);
-}
 
 struct S_00ced090_Elem
 {
@@ -1371,26 +1334,17 @@ struct S_00ced090_State
     S_00ced090_Elem* first;
     int count;
 };
-struct __declspec(align(16)) S_00ced090_V4
-{
-    float x, y, z, w;
-};
 struct S_00ced090_Mat
 {
-    S_00ced090_V4 r0, r1, r2;
+    hkVector4 r0, r1, r2;
     void FUN_00cd5880(void* xf);
-};
-struct S_00ced090_Vec
-{
-    S_00ced090_V4 v;
-    void FUN_00c7f640(void* a, void* b);
 };
 struct S_00ced090_Inertia
 {
-    S_00ced090_V4 r0, r1, r2;
+    hkVector4 r0, r1, r2;
     void FUN_00cd5140(S_00ced090_Mat* m);
 };
-void __cdecl AddInertiaTensor(S_00ced090_Vec* d, float m, S_00ced090_Mat* mat);
+void __cdecl AddInertiaTensor(hkVector4* d, float m, S_00ced090_Mat* mat);
 
 // Sums mass and mass-weighted center and accumulates an inertia tensor over the elements into out; returns 1 if the total mass is not positive.
 // @fnv 0x00ced090
@@ -1398,15 +1352,15 @@ int __cdecl FUN_00ced090(S_00ced090_State* apState, S_00ced090_Out* out)
 {
     float mass = 0.0f;
     float sum0 = 0.0f;
-    __m128 vAccum = _mm_setzero_ps();
+    LocalM128 vAccum = _mm_setzero_ps();
     for (int i = 0; i < apState->count; i++)
     {
-        S_00ced090_Vec v;
-        v.FUN_00c7f640(&apState->first[i].unk50, &apState->first[i].unk10);
-        __m128 t = _mm_load_ss(&apState->first[i].unk04);
+        hkVector4 v;
+        v.FUN_00c7f640(*reinterpret_cast<const Transform*>(&apState->first[i].unk50), *reinterpret_cast<const hkVector4*>(&apState->first[i].unk10));
+        LocalM128 t = _mm_load_ss(&apState->first[i].unk04);
         mass = mass + apState->first[i].unk04;
         sum0 += apState->first[i].unk00;
-        vAccum = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(t, t, 0), *(__m128*)&v.v), vAccum);
+        vAccum = _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(t, t, 0), v.m_vComponents), vAccum);
     }
     if (mass <= 0.0f)
         return 1;
@@ -1414,22 +1368,22 @@ int __cdecl FUN_00ced090(S_00ced090_State* apState, S_00ced090_Out* out)
     S_00ced090_Inertia* pInertia = (S_00ced090_Inertia*)&out->unk20;
     out->unk04 = mass;
     vAccum = _mm_mul_ps(_mm_set_ps1(inv), vAccum);
-    *(__m128*)&out->unk10 = vAccum;
+    *(LocalM128*)&out->unk10 = vAccum;
     out->unk00 = sum0;
     S_00ced090_Inertia* I = pInertia;
-    *(__m128*)&I->r0 = _mm_setzero_ps();
-    *(__m128*)&I->r1 = _mm_setzero_ps();
-    *(__m128*)&I->r2 = _mm_setzero_ps();
+    *(LocalM128*)&I->r0 = _mm_setzero_ps();
+    *(LocalM128*)&I->r1 = _mm_setzero_ps();
+    *(LocalM128*)&I->r2 = _mm_setzero_ps();
     for (int i = 0; i < apState->count; i++)
     {
         S_00ced090_Mat m;
-        *(__m128*)&m.r0 = *(__m128*)&apState->first[i].unk20;
-        *(__m128*)&m.r1 = *(__m128*)&apState->first[i].unk30;
-        *(__m128*)&m.r2 = *(__m128*)&apState->first[i].unk40;
+        *(LocalM128*)&m.r0 = *(LocalM128*)&apState->first[i].unk20;
+        *(LocalM128*)&m.r1 = *(LocalM128*)&apState->first[i].unk30;
+        *(LocalM128*)&m.r2 = *(LocalM128*)&apState->first[i].unk40;
         m.FUN_00cd5880(&apState->first[i].unk50);
-        S_00ced090_Vec v;
-        v.FUN_00c7f640(&apState->first[i].unk50, &apState->first[i].unk10);
-        *(__m128*)&v.v = _mm_sub_ps(*(__m128*)&v.v, vAccum);
+        hkVector4 v;
+        v.FUN_00c7f640(*reinterpret_cast<const Transform*>(&apState->first[i].unk50), *reinterpret_cast<const hkVector4*>(&apState->first[i].unk10));
+        v.m_vComponents = _mm_sub_ps(v.m_vComponents, vAccum);
         AddInertiaTensor(&v, apState->first[i].unk04, &m);
         I->FUN_00cd5140(&m);
     }
@@ -1628,10 +1582,6 @@ struct S00cf0f40_Owner
     S00cf0f40_Stream* m_stream;
 };
 
-struct S00cf0f40_Vec
-{
-    unsigned int x, y, z, w;
-};
 
 struct S00cf0f40_Arr;
 inline S_00cee1c0_Heap& S00cf0f40_heap(S_00cee1c0_Router* r)
@@ -1642,7 +1592,7 @@ void __cdecl FUN_00c908c0(S_00cee1c0_Heap* heap, void* arr, int cap, int elemSiz
 
 struct S00cf0f40_Arr
 {
-    S00cf0f40_Vec* m_data;
+    hkVector4* m_data;
     int m_iElementCount;
     int m_capFlags;
 
@@ -1655,7 +1605,7 @@ struct S00cf0f40_Arr
         S_00cee1c0_Heap& heap = S00cf0f40_heap(FUN_00c85750());
         m_iElementCount = 0;
         if ((m_capFlags & 0x80000000) == 0)
-            heap.Free(m_data, getCapacity() * sizeof(S00cf0f40_Vec));
+            heap.Free(m_data, getCapacity() * sizeof(hkVector4));
         m_data = 0;
         m_capFlags = 0x80000000;
     }
@@ -1666,7 +1616,7 @@ struct S00cf0f40_Arr
         if (cap < n)
         {
             int nc = cap * 2;
-            FUN_00c908c0(&heap, this, n < nc ? nc : n, sizeof(S00cf0f40_Vec));
+            FUN_00c908c0(&heap, this, n < nc ? nc : n, sizeof(hkVector4));
         }
     }
     void SetSizeAndGrow(int n)
@@ -1693,13 +1643,13 @@ unsigned int __cdecl FUN_00cf0f40(S00cf0f40_Owner* owner, S00cf0f40_Arr* arr)
     S00cf0f40_Load(*owner->m_stream, &n, 1);
     arr->ClearAndRelease();
     arr->SetSizeAndGrow(n);
-    unsigned int bytes = n * sizeof(S00cf0f40_Vec);
+    unsigned int bytes = n * sizeof(hkVector4);
     for (unsigned int i = 0; i < n; ++i)
     {
-        owner->m_stream->BinaryRead(&arr->m_data[i], sizeof(S00cf0f40_Vec), 0, 0);
+        owner->m_stream->BinaryRead(&arr->m_data[i], sizeof(hkVector4), 0, 0);
         if (owner->m_1e5 != 1)
         {
-            S00cf0f40_Vec* v = &arr->m_data[i];
+            hkVector4* v = &arr->m_data[i];
             S00cf0f40_Swap4(&v->x);
             S00cf0f40_Swap4(&v->y);
             S00cf0f40_Swap4(&v->z);
@@ -1720,10 +1670,10 @@ struct Target
     float m_f04;
     unsigned int unk08;
     unsigned int unk0C;
-    __m128 m_v10;
+    LocalM128 m_v10;
     union
     {
-        __m128 m_v20;
+        LocalM128 m_v20;
         struct
         {
             float m_f20;
@@ -1734,7 +1684,7 @@ struct Target
     };
     union
     {
-        __m128 m_v30;
+        LocalM128 m_v30;
         struct
         {
             float unk30;
@@ -1745,7 +1695,7 @@ struct Target
     };
     union
     {
-        __m128 m_v40;
+        LocalM128 m_v40;
         struct
         {
             float unk40;
@@ -1876,53 +1826,18 @@ void VertexComponentData::FUN_00cec000(const float* verts)
     m_fComponent5 /= -60.0f;
 }
 
-extern "C"
-{
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_load_ps(const float*);
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_set_ss(float);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-}
-inline void* operator new(unsigned int, void* p)
-{
-    return p;
-}
 extern const float DAT_01011d78;
 extern const float DAT_01017718;
 extern const float DAT_01016248;
-struct Mat4CE;
-struct __declspec(align(16)) Vec4CE
-{
-    float x, y, z, w;
-    void FUN_00c7f640(const Mat4CE*, const Vec4CE*);
-    __forceinline void Assign(const Vec4CE& source)
-    {
-        (__m128&)* this = (const __m128&)source;
-    }
-};
-struct Mat4CE
-{
-    Vec4CE row0, row1, row2, translation;
-    void FUN_00cb2240(const Mat4CE*, const Mat4CE*);
-};
 struct Inertia
 {
-    Vec4CE row0, row1, row2;
-    void Multiply(const __m128*);
+    hkVector4 row0, row1, row2;
+    void Multiply(const LocalM128*);
 };
 struct MassBody
 {
     float volume, mass;
-    Vec4CE center;
+    hkVector4 center;
     Inertia inertia;
     MassBody() : volume(0.0f), mass(0.0f)
     {
@@ -1936,7 +1851,7 @@ typedef S_00cee1c0_Heap Heap;
 typedef S_00cee1c0_Router Router;
 struct Handle
 {
-    Vec4CE* data;
+    hkVector4* data;
     int count, capacity;
     __forceinline void release(Heap* heap)
     {
@@ -1947,7 +1862,7 @@ struct Handle
 };
 struct View
 {
-    Vec4CE* data;
+    hkVector4* data;
     int count, stride;
 };
 struct __declspec(align(16)) Query
@@ -1958,19 +1873,16 @@ struct ShapeVector
 {
     float x, y, z, w;
 };
-struct TranslatedMatrix : Mat4CE
+__forceinline void InitializeTranslatedTransform(Transform* matrix, const ShapeVector& offset)
 {
-    __forceinline TranslatedMatrix(const ShapeVector& offset)
-    {
-        _mm_store_ps(&row0.x, _mm_setzero_ps());
-        row0.x = 1.0f;
-        _mm_store_ps(&row1.x, _mm_setzero_ps());
-        row1.y = 1.0f;
-        _mm_store_ps(&row2.x, _mm_setzero_ps());
-        row2.z = 1.0f;
-        _mm_store_ps(&translation.x, (const __m128&)offset);
-    }
-};
+    _mm_store_ps(&matrix->m_f00, _mm_setzero_ps());
+    matrix->m_f00 = 1.0f;
+    _mm_store_ps(&matrix->m_f10, _mm_setzero_ps());
+    matrix->m_f14 = 1.0f;
+    _mm_store_ps(&matrix->m_f20, _mm_setzero_ps());
+    matrix->m_f28 = 1.0f;
+    _mm_store_ps(&matrix->m_f30, (const LocalM128&)offset);
+}
 struct HkShape
 {
     virtual void v00();
@@ -2003,26 +1915,26 @@ struct TreeShape : HkShape
 struct ScaledShape
 {
     int m00, m04, m08, m0c, m10, m14, m18, m1c;
-    Vec4CE m20, m30;
+    hkVector4 m20, m30;
     void FUN_00cd8160(float);
 };
 void __cdecl ResizeAudioStream(void*, void*, int);
-void __cdecl FUN_00cebaf0(Vec4CE*, float, MassBody*);
-void __cdecl FUN_00ceeca0(Vec4CE*, Vec4CE*, float, float, MassBody*);
-void __cdecl FUN_00cef6d0(Vec4CE*, Vec4CE*, float, float, MassBody*);
+void __cdecl FUN_00cebaf0(hkVector4*, float, MassBody*);
+void __cdecl FUN_00ceeca0(hkVector4*, hkVector4*, float, float, MassBody*);
+void __cdecl FUN_00cef6d0(hkVector4*, hkVector4*, float, float, MassBody*);
 float __cdecl FUN_00c98210(float, float);
-void __cdecl FUN_00cee290(Vec4CE*, Vec4CE*, Vec4CE*, float, float, MassBody*);
+void __cdecl FUN_00cee290(hkVector4*, hkVector4*, hkVector4*, float, float, MassBody*);
 void __cdecl FUN_00ced090(void*, MassBody*);
 struct RawBody
 {
     float volume, mass;
-    Vec4CE center;
+    hkVector4 center;
     Inertia inertia;
 };
 struct Element
 {
     RawBody body;
-    Mat4CE transform;
+    Transform transform;
     __forceinline void Initialize()
     {
         body.volume = 0.0f;
@@ -2031,30 +1943,32 @@ struct Element
         _mm_store_ps(&body.inertia.row0.x, _mm_setzero_ps());
         _mm_store_ps(&body.inertia.row1.x, _mm_setzero_ps());
         _mm_store_ps(&body.inertia.row2.x, _mm_setzero_ps());
-        _mm_store_ps(&transform.row0.x, _mm_setzero_ps());
-        _mm_store_ps(&transform.row1.x, _mm_setzero_ps());
-        _mm_store_ps(&transform.row2.x, _mm_setzero_ps());
-        transform.row0.x = 1.0f;
-        transform.row1.y = 1.0f;
-        transform.row2.z = 1.0f;
-        _mm_store_ps(&transform.translation.x, _mm_setzero_ps());
+        _mm_store_ps(&transform.m_f00, _mm_setzero_ps());
+        _mm_store_ps(&transform.m_f10, _mm_setzero_ps());
+        _mm_store_ps(&transform.m_f20, _mm_setzero_ps());
+        transform.m_f00 = 1.0f;
+        transform.m_f14 = 1.0f;
+        transform.m_f28 = 1.0f;
+        _mm_store_ps(&transform.m_f30, _mm_setzero_ps());
     }
     void FUN_00cf0820(const MassBody*);
 };
 union PrimitiveTemporary
 {
     Handle vertices;
-    Vec4CE vector;
+    LocalM128 vector;
 };
+// VC9 unions cannot contain the shared Transform or hkVector4 copy constructors.
+// Keep aligned storage and access it through the shared types.
 union ShapeTemporary
 {
-    Mat4CE local;
-    ScaledShape scaled;
+    LocalM128 local[sizeof(Transform) / sizeof(LocalM128)];
+    LocalM128 scaled[sizeof(ScaledShape) / sizeof(LocalM128)];
 };
 struct Working
 {
     ShapeTemporary temp;
-    Mat4CE combined;
+    Transform combined;
     MassBody body;
 };
 struct Array
@@ -2070,25 +1984,26 @@ struct Array
     }
 };
 
+// Array contains Transform instances, so its union arm also needs raw storage.
 union ResultStorage
 {
     Query query;
-    Array array;
+    LocalM128 array[sizeof(Array) / sizeof(LocalM128)];
 };
 
 // Recursively computes the mass, volume, center of mass, and inertia of an HkShape into output, handling primitives, composites, and containers.
 // @fnv 0x00ceff00
-void __cdecl FUN_00ceff00(HkShape* apShape, const Mat4CE& transform, float limit, MassBody& output)
+void __cdecl FUN_00ceff00(HkShape* apShape, const Transform& transform, float limit, MassBody& output)
 {
     Working workspace;
     ResultStorage storage;
     PrimitiveTemporary primitive;
-    Vec4CE& vectorA = primitive.vector;
-    Vec4CE vectorB;
+    hkVector4& vectorA = reinterpret_cast<hkVector4&>(primitive.vector);
+    hkVector4 vectorB;
     MassBody& body = workspace.body;
-    Mat4CE& combined = workspace.combined;
-    Mat4CE& local = workspace.temp.local;
-    __m128 zero = _mm_setzero_ps();
+    Transform& combined = workspace.combined;
+    Transform& local = reinterpret_cast<Transform&>(workspace.temp.local);
+    LocalM128 zero = _mm_setzero_ps();
     int shapeType = apShape->GetType();
     switch (shapeType)
     {
@@ -2097,9 +2012,9 @@ void __cdecl FUN_00ceff00(HkShape* apShape, const Mat4CE& transform, float limit
         break;
     case 4: {
         float r = apShape->radius;
-        Vec4CE& radii = vectorA;
-        __m128 radius = _mm_set_ps1(r);
-        __m128 halfExtents = (const __m128&)apShape->v20;
+        hkVector4& radii = vectorA;
+        LocalM128 radius = _mm_set_ps1(r);
+        LocalM128 halfExtents = (const LocalM128&)apShape->v20;
         radius = _mm_add_ps(radius, halfExtents);
         _mm_store_ps(&radii.x, radius);
         FUN_00cebaf0(&radii, 1.0f, &body);
@@ -2121,9 +2036,9 @@ void __cdecl FUN_00ceff00(HkShape* apShape, const Mat4CE& transform, float limit
         break;
     }
     case 3: {
-        Vec4CE& a = workspace.temp.local.row0;
-        Vec4CE& b = vectorB;
-        Vec4CE& c = vectorA;
+        hkVector4& a = *reinterpret_cast<hkVector4*>(workspace.temp.local);
+        hkVector4& b = vectorB;
+        hkVector4& c = vectorA;
         _mm_store_ps(&a.x, _mm_load_ps(&apShape->v20.x));
         _mm_store_ps(&b.x, _mm_load_ps(&apShape->v30.x));
         _mm_store_ps(&c.x, _mm_load_ps(&apShape->v40.x));
@@ -2134,18 +2049,18 @@ void __cdecl FUN_00ceff00(HkShape* apShape, const Mat4CE& transform, float limit
         FUN_00ceff00(apShape->child18, transform, limit, output);
         return;
     case 11: {
-        TranslatedMatrix* translated = new (&local) TranslatedMatrix(apShape->v20);
-        combined.FUN_00cb2240(&transform, translated);
+        InitializeTranslatedTransform(&local, apShape->v20);
+        combined.FUN_00cb2240(&transform, &local);
         FUN_00ceff00(apShape->child18, combined, limit, output);
         return;
     }
     case 12: {
-        combined.FUN_00cb2240(&transform, (const Mat4CE*)&apShape->v20);
+        combined.FUN_00cb2240(&transform, (const Transform*)&apShape->v20);
         FUN_00ceff00(apShape->child18, combined, limit, output);
         return;
     }
     case 15: {
-        combined.FUN_00cb2240(&transform, (const Mat4CE*)&apShape->v30);
+        combined.FUN_00cb2240(&transform, (const Transform*)&apShape->v30);
         FUN_00ceff00(apShape->child14, combined, limit, output);
         return;
     }
@@ -2153,15 +2068,15 @@ void __cdecl FUN_00ceff00(HkShape* apShape, const Mat4CE& transform, float limit
         int i = 0;
         if (apShape->count > 0)
         {
-            Vec4CE* walk = (Vec4CE*)&apShape->v20;
+            hkVector4* walk = (hkVector4*)&apShape->v20;
             do
             {
-                _mm_store_ps(&combined.row0.x, _mm_load_ps(&transform.row0.x));
-                _mm_store_ps(&combined.row1.x, _mm_load_ps(&transform.row1.x));
-                _mm_store_ps(&combined.row2.x, _mm_load_ps(&transform.row2.x));
-                _mm_store_ps(&combined.translation.x, _mm_load_ps(&transform.translation.x));
-                combined.translation.FUN_00c7f640(&combined, walk);
-                ScaledShape& scaled = workspace.temp.scaled;
+                _mm_store_ps(&combined.m_f00, _mm_load_ps(&transform.m_f00));
+                _mm_store_ps(&combined.m_f10, _mm_load_ps(&transform.m_f10));
+                _mm_store_ps(&combined.m_f20, _mm_load_ps(&transform.m_f20));
+                _mm_store_ps(&combined.m_f30, _mm_load_ps(&transform.m_f30));
+                reinterpret_cast<hkVector4&>(combined.r[3]).FUN_00c7f640(combined, *walk);
+                ScaledShape& scaled = reinterpret_cast<ScaledShape&>(workspace.temp.scaled);
                 scaled.FUN_00cd8160(walk->w);
                 FUN_00ceff00((HkShape*)&scaled, combined, limit, output);
                 ++i;
@@ -2203,28 +2118,28 @@ void __cdecl FUN_00ceff00(HkShape* apShape, const Mat4CE& transform, float limit
         return;
     }
     case 5:
-        FUN_00ceeca0((Vec4CE*)&apShape->v20, (Vec4CE*)&apShape->v30, apShape->radius, 1.0f, &body);
+        FUN_00ceeca0((hkVector4*)&apShape->v20, (hkVector4*)&apShape->v30, apShape->radius, 1.0f, &body);
         break;
     case 2: {
-        __m128 v5 = _mm_load_ps(&apShape->v30.x), v3 = _mm_load_ps(&apShape->v20.x);
+        LocalM128 v5 = _mm_load_ps(&apShape->v30.x), v3 = _mm_load_ps(&apShape->v20.x);
         float t = apShape->radius;
-        __m128 v1 = _mm_sub_ps(v5, v3);
-        __m128 v0 = _mm_mul_ps(v1, v1);
-        __m128 v2 = _mm_shuffle_ps(v0, v0, 0x55);
+        LocalM128 v1 = _mm_sub_ps(v5, v3);
+        LocalM128 v0 = _mm_mul_ps(v1, v1);
+        LocalM128 v2 = _mm_shuffle_ps(v0, v0, 0x55);
         v2 = _mm_add_ss(v2, v0);
         v0 = _mm_shuffle_ps(v0, v0, 0xaa);
         v0 = _mm_add_ss(v0, v2);
-        __m128 r = _mm_rsqrt_ss(v0);
-        __m128 mask = _mm_cmpeq_ss(v0, _mm_set_ss(DAT_01011d78));
-        __m128 rr = _mm_mul_ss(_mm_mul_ss(v0, r), r);
-        __m128 fac = _mm_mul_ss(_mm_set_ss(DAT_01016248), r);
+        LocalM128 r = _mm_rsqrt_ss(v0);
+        LocalM128 mask = _mm_cmpeq_ss(v0, _mm_set_ss(DAT_01011d78));
+        LocalM128 rr = _mm_mul_ss(_mm_mul_ss(v0, r), r);
+        LocalM128 fac = _mm_mul_ss(_mm_set_ss(DAT_01016248), r);
         fac = _mm_mul_ss(fac, _mm_sub_ss(_mm_set_ss(DAT_01017718), rr));
         fac = _mm_andnot_ps(mask, fac);
-        __m128 n = _mm_mul_ps(_mm_shuffle_ps(fac, fac, 0), v1);
-        Vec4CE& start = vectorB;
-        Vec4CE& end = workspace.temp.local.row0;
-        __m128 ts = _mm_load_ss(&t);
-        __m128 ts2 = _mm_load_ss(&t);
+        LocalM128 n = _mm_mul_ps(_mm_shuffle_ps(fac, fac, 0), v1);
+        hkVector4& start = vectorB;
+        hkVector4& end = *reinterpret_cast<hkVector4*>(workspace.temp.local);
+        LocalM128 ts = _mm_load_ss(&t);
+        LocalM128 ts2 = _mm_load_ss(&t);
         _mm_store_ps(&start.x, _mm_sub_ps(v3, _mm_mul_ps(_mm_shuffle_ps(ts, ts2, 0), n)));
         _mm_store_ps(&end.x, _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(ts2, ts, 0), n), v5));
         float radius = apShape->FUN_00d571a0() + t;
@@ -2239,7 +2154,7 @@ void __cdecl FUN_00ceff00(HkShape* apShape, const Mat4CE& transform, float limit
     if (body.volume != 0.0f)
     {
         FUN_00cebfd0((Owner*)&body, body.volume);
-        Array& arr = storage.array;
+        Array& arr = reinterpret_cast<Array&>(storage.array);
         arr.data = arr.local;
         arr.count = 0;
         arr.capacity = 0x80000002;
@@ -2251,13 +2166,13 @@ void __cdecl FUN_00ceff00(HkShape* apShape, const Mat4CE& transform, float limit
             slot->Initialize();
         Element* e0 = arr.data + arr.count++;
         e0->FUN_00cf0820(&output);
-        _mm_store_ps(&e0->transform.row0.x, zero);
-        _mm_store_ps(&e0->transform.row1.x, zero);
-        _mm_store_ps(&e0->transform.row2.x, zero);
-        e0->transform.row0.x = 1.0f;
-        e0->transform.row1.y = 1.0f;
-        e0->transform.row2.z = 1.0f;
-        _mm_store_ps(&e0->transform.translation.x, zero);
+        _mm_store_ps(&e0->transform.m_f00, zero);
+        _mm_store_ps(&e0->transform.m_f10, zero);
+        _mm_store_ps(&e0->transform.m_f20, zero);
+        e0->transform.m_f00 = 1.0f;
+        e0->transform.m_f14 = 1.0f;
+        e0->transform.m_f28 = 1.0f;
+        _mm_store_ps(&e0->transform.m_f30, zero);
         router = (Router*)FUN_00c85750();
         if (arr.count == (arr.capacity & 0x3fffffff))
             ResizeAudioStream(router->heap, &arr, 0x90);
@@ -2266,10 +2181,10 @@ void __cdecl FUN_00ceff00(HkShape* apShape, const Mat4CE& transform, float limit
             slot->Initialize();
         Element* e1 = arr.data + arr.count++;
         e1->FUN_00cf0820(&body);
-        e1->transform.row0.Assign(transform.row0);
-        e1->transform.row1.Assign(transform.row1);
-        e1->transform.row2.Assign(transform.row2);
-        e1->transform.translation.Assign(transform.translation);
+        e1->transform.r[0] = transform.r[0];
+        e1->transform.r[1] = transform.r[1];
+        e1->transform.r[2] = transform.r[2];
+        e1->transform.r[3] = transform.r[3];
         FUN_00ced090(&arr, &output);
         Router* cleanupRouter = (Router*)FUN_00c85750();
         arr.release(cleanupRouter->heap);
@@ -2280,7 +2195,7 @@ function_end:
 
 struct S_00cecc90_Sub
 {
-    void Multiply(Vector* v);
+    void Multiply(hkVector4* v);
 };
 
 // Stores value at offset 4, computes value divided by the previous value, and passes the quotient to Multiply.
@@ -2290,47 +2205,40 @@ __declspec(noinline) void Receiver::FUN_00cecc90(float value)
     float* p = (float*)((char*)this + 4);
     float quotient = value / *p;
     *p = value;
-    Vector v;
-    v.q = _mm_load_ss(&quotient);
+    hkVector4 v;
+    v.m_vComponents = _mm_load_ss(&quotient);
     ((S_00cecc90_Sub*)((char*)this + 0x20))->Multiply(&v);
 }
 
-extern "C"
-{
-    __m128 _mm_set_ps1(float);
-    __m128 _mm_xor_ps(__m128, __m128);
-    __m128 _mm_min_ps(__m128, __m128);
-    __m128 _mm_max_ps(__m128, __m128);
-}
 
 extern const float DAT_0104da48;
 extern const float DAT_01016248;
-extern const __m128 DAT_010c44d0;
-extern const __m128 DAT_010ec7f0;
+extern const LocalM128 DAT_010c44d0;
+extern const LocalM128 DAT_010ec7f0;
 
 // Computes the center and extent of the axis-aligned bounding box enclosing apPoints[0..aiCount-1] using SIMD min/max and a 0.5 blend.
 // @fnv 0x00cec7f0
-void __cdecl FUN_00cec7f0(const __m128* apPoints, int volatile aiCount, __m128* apCenter, __m128* apExtent)
+void __cdecl FUN_00cec7f0(const LocalM128* apPoints, int volatile aiCount, LocalM128* apCenter, LocalM128* apExtent)
 {
     int iCount = aiCount;
-    __m128 kMinPoint = _mm_set_ps1(DAT_0104da48);
+    LocalM128 kMinPoint = _mm_set_ps1(DAT_0104da48);
 
     *apCenter = _mm_setzero_ps();
     *apExtent = _mm_setzero_ps();
 
-    __m128 kMaxPoint = _mm_xor_ps(DAT_010c44d0, kMinPoint);
+    LocalM128 kMaxPoint = _mm_xor_ps(DAT_010c44d0, kMinPoint);
 
     for (int i = 0; i < iCount; i++)
     {
-        __m128 kPoint = apPoints[i];
+        LocalM128 kPoint = apPoints[i];
         kMinPoint = _mm_min_ps(kPoint, kMinPoint);
         kMaxPoint = _mm_max_ps(kPoint, kMaxPoint);
     }
 
     if (iCount != 0)
     {
-        __m128 kT = _mm_set_ps1(DAT_01016248);
-        __m128 kOneMinusT = _mm_sub_ps(DAT_010ec7f0, kT);
+        LocalM128 kT = _mm_set_ps1(DAT_01016248);
+        LocalM128 kOneMinusT = _mm_sub_ps(DAT_010ec7f0, kT);
         *apCenter = _mm_add_ps(_mm_mul_ps(kOneMinusT, kMinPoint), _mm_mul_ps(kT, kMaxPoint));
         *apExtent = _mm_sub_ps(kMaxPoint, kMinPoint);
     }
@@ -2339,35 +2247,19 @@ void __cdecl FUN_00cec7f0(const __m128* apPoints, int volatile aiCount, __m128* 
 extern "C" const double DAT_01099ee0;
 extern "C" const double DAT_010240b0;
 
-struct V4
-{
-    __m128 q;
-    void setZero4()
-    {
-        q = _mm_setzero_ps();
-    }
-    float& operator()(int i)
-    {
-        return q.m128_f32[i];
-    }
-    const float& operator()(int i) const
-    {
-        return q.m128_f32[i];
-    }
-};
-struct BoxInertia : Mat3
+struct BoxInertia : hkMatrix3
 {
     float& operator()(int r, int c)
     {
-        return (&m00)[c * 4 + r];
+        return (&m_kColumn0.m_f[0])[c * 4 + r];
     }
     void setZero()
     {
         V4 z;
         z.setZero4();
-        _mm_store_ps(&m00, z.q);
-        _mm_store_ps(&m10, z.q);
-        _mm_store_ps(&m20, z.q);
+        _mm_store_ps(&m_kColumn0.m_f[0], z.q);
+        _mm_store_ps(&m_kColumn1.m_f[0], z.q);
+        _mm_store_ps(&m_kColumn2.m_f[0], z.q);
     }
     void setIdentity()
     {
@@ -2425,23 +2317,23 @@ struct SourceBlock
     float f04;
     int unk08;
     int unk0c;
-    __m128 a10;
-    __m128 b20;
-    __m128 c30;
-    __m128 d40;
+    LocalM128 a10;
+    LocalM128 b20;
+    LocalM128 c30;
+    LocalM128 d40;
 };
 
 struct DestBlock
 {
-    __m128 m00;
-    __m128 m10;
-    __m128 m20;
-    __m128 m30;
+    LocalM128 m00;
+    LocalM128 m10;
+    LocalM128 m20;
+    LocalM128 m30;
     float f40;
     void Multiply(Vec4Q* v);
 };
 
-// Copies four __m128 blocks from source into destination at offset 0x50, stores value in f40, and calls Multiply with value divided by src->f04.
+// Copies four LocalM128 blocks from source into destination at offset 0x50, stores value in f40, and calls Multiply with value divided by src->f04.
 // @fnv 0x00cebdf0
 void __cdecl FUN_00cebdf0(float* source, float value, Object* destination)
 {
@@ -2459,18 +2351,6 @@ void __cdecl FUN_00cebdf0(float* source, float value, Object* destination)
     dst->Multiply(&tmp);
 }
 
-extern "C"
-{
-    __m128 _mm_set_ss(float);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-}
 
 extern "C" double __cdecl sqrt(double);
 extern "C" double __cdecl fabs(double);
@@ -2490,40 +2370,40 @@ static __forceinline float Abs(float x)
 
 struct EigenMatrix
 {
-    __m128 row0, row1, row2;
+    LocalM128 row0, row1, row2;
     void FUN_00cd55b0(const EigenMatrix& a, const EigenMatrix& b);
 };
 
 struct EigenVector
 {
-    __m128 q;
+    union { LocalM128 q; LocalM128 m_vComponents; };
     __forceinline float& operator()(int i)
     {
         return ((float*)&q)[i];
     }
     __forceinline void normalize3()
     {
-        __m128 m = _mm_mul_ps(q, q);
-        __m128 lenSq = _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m));
-        __m128 r = _mm_rsqrt_ss(lenSq);
-        __m128 zero = _mm_set_ss(0.0f);
-        __m128 c3 = _mm_set_ss(3.0f);
-        __m128 c05 = _mm_set_ss(0.5f);
-        __m128 invLen = _mm_mul_ss(_mm_mul_ss(c05, r), _mm_sub_ss(c3, _mm_mul_ss(_mm_mul_ss(lenSq, r), r)));
+        LocalM128 m = _mm_mul_ps(q, q);
+        LocalM128 lenSq = _mm_add_ss(_mm_shuffle_ps(m, m, 0xaa), _mm_add_ss(_mm_shuffle_ps(m, m, 0x55), m));
+        LocalM128 r = _mm_rsqrt_ss(lenSq);
+        LocalM128 zero = _mm_set_ss(0.0f);
+        LocalM128 c3 = _mm_set_ss(3.0f);
+        LocalM128 c05 = _mm_set_ss(0.5f);
+        LocalM128 invLen = _mm_mul_ss(_mm_mul_ss(c05, r), _mm_sub_ss(c3, _mm_mul_ss(_mm_mul_ss(lenSq, r), r)));
         invLen = _mm_andnot_ps(_mm_cmpeq_ss(lenSq, zero), invLen);
         q = _mm_mul_ps(_mm_shuffle_ps(invLen, invLen, 0), q);
     }
     __forceinline void setCross(const EigenVector& a, const EigenVector& b)
     {
-        __m128 aq = a.q;
-        __m128 bq = b.q;
+        LocalM128 aq = a.m_vComponents;
+        LocalM128 bq = b.m_vComponents;
         q = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(aq, aq, 0xd2), _mm_shuffle_ps(bq, bq, 0xc9)),
                        _mm_mul_ps(_mm_shuffle_ps(aq, aq, 0xc9), _mm_shuffle_ps(bq, bq, 0xd2)));
     }
     __forceinline void setCrossS(const EigenVector& a, const EigenVector& b)
     {
-        __m128 aq = a.q;
-        __m128 bq = b.q;
+        LocalM128 aq = a.m_vComponents;
+        LocalM128 bq = b.m_vComponents;
         q = _mm_sub_ps(_mm_mul_ps(_mm_shuffle_ps(aq, aq, 0xc9), _mm_shuffle_ps(bq, bq, 0xd2)),
                        _mm_mul_ps(_mm_shuffle_ps(aq, aq, 0xd2), _mm_shuffle_ps(bq, bq, 0xc9)));
     }
@@ -2536,7 +2416,7 @@ struct Basis
     {
         return (&c0)[i];
     }
-    __forceinline void setIdentityZ(__m128 z)
+    __forceinline void setIdentityZ(LocalM128 z)
     {
         getColumn(0).q = z;
         getColumn(1).q = z;
@@ -2545,11 +2425,11 @@ struct Basis
         getColumn(1)(1) = 1.0f;
         getColumn(2)(2) = 1.0f;
     }
-    __forceinline void setIdentityZ2(__m128 z)
+    __forceinline void setIdentityZ2(LocalM128 z)
     {
-        c0.q = z;
-        c1.q = z;
-        c2.q = z;
+        c0.m_vComponents = z;
+        c1.m_vComponents = z;
+        c2.m_vComponents = z;
         c0(0) = 1.0f;
         c1(1) = 1.0f;
         c2(2) = 1.0f;
@@ -2558,11 +2438,11 @@ struct Basis
     {
         return ((float*)this)[r * 4 + c];
     }
-    __forceinline void setIdentityZ3(__m128 z)
+    __forceinline void setIdentityZ3(LocalM128 z)
     {
-        c0.q = z;
-        c1.q = z;
-        c2.q = z;
+        c0.m_vComponents = z;
+        c1.m_vComponents = z;
+        c2.m_vComponents = z;
         at(0, 0) = 1.0f;
         at(1, 1) = 1.0f;
         at(2, 2) = 1.0f;
@@ -2589,7 +2469,7 @@ struct Basis
 // @fnv 0x00cec880
 void __cdecl FUN_00cec880(EigenMatrix* src, EigenMatrix* dst)
 {
-    __m128 zero = _mm_setzero_ps();
+    LocalM128 zero = _mm_setzero_ps();
     ((Basis*)dst)->setIdentityZ2(zero);
 
     int iter = 5;
@@ -2658,21 +2538,16 @@ struct OutObj
     float m_04;
     float unk08;
     float unk0c;
-    __m128 com;
-    __m128 r0;
-    __m128 r1;
-    __m128 r2;
+    LocalM128 com;
+    LocalM128 r0;
+    LocalM128 r1;
+    LocalM128 r2;
 };
 struct __declspec(align(16)) Vec
 {
     float x, y, z, w;
 };
-struct Arr
-{
-    Vec* data;
-    int size;
-    unsigned cap;
-};
+
 static __forceinline void computePoints(Vec* data, int count, float mass, OutObj* out)
 {
     out->m_04 = mass;
@@ -2685,8 +2560,8 @@ static __forceinline void computePoints(Vec* data, int count, float mass, OutObj
     for (int i = 0; i < count; i++)
         out->com = _mm_add_ps(_mm_load_ps(&data[i].x), out->com);
     fc = 1.0f / fc;
-    __m128 scalar = _mm_load_ss(&fc);
-    __m128 broadcast = _mm_shuffle_ps(scalar, scalar, 0);
+    LocalM128 scalar = _mm_load_ss(&fc);
+    LocalM128 broadcast = _mm_shuffle_ps(scalar, scalar, 0);
     out->com = _mm_mul_ps(broadcast, out->com);
     for (int i = 0; i < count; i++)
     {
@@ -2709,37 +2584,37 @@ int __cdecl FUN_00cedcb0(char* apVertices, int stride, int count, float mass, Ou
 {
     if (count <= 0)
         return 1;
-    Arr a;
-    a.data = 0;
-    a.size = 0;
-    a.cap = 0x80000000u;
+    hkArrayBase<Vec> a;
+    a.m_data = 0;
+    a.m_iElementCount = 0;
+    a.m_iCapacityState = 0x80000000u;
     S_00cee1c0_Router* router = FUN_00c85750();
     S_00cee1c0_Heap* heap = router->heap;
-    if ((int)(a.cap & 0x3fffffff) < count)
+    if ((int)(a.m_iCapacityState & 0x3fffffff) < count)
     {
-        int n = (a.cap & 0x3fffffff) * 2;
+        int n = (a.m_iCapacityState & 0x3fffffff) * 2;
         if (count >= n)
             n = count;
         FUN_00c908c0(heap, &a, n, 16);
     }
-    a.size = count;
+    a.m_iElementCount = count;
     char* p = apVertices;
     float zero = 0.0f;
     for (int i = 0; i < count; i++)
     {
-        a.data[i].x = ((float*)p)[0];
-        a.data[i].y = ((float*)p)[1];
-        a.data[i].z = ((float*)p)[2];
-        a.data[i].w = zero;
+        a.m_data[i].x = ((float*)p)[0];
+        a.m_data[i].y = ((float*)p)[1];
+        a.m_data[i].z = ((float*)p)[2];
+        a.m_data[i].w = zero;
         p += stride;
     }
-    computePoints(a.data, count, mass, out);
+    computePoints(a.m_data, count, mass, out);
     router = FUN_00c85750();
     heap = router->heap;
-    a.size = 0;
-    unsigned capacity = a.cap;
+    a.m_iElementCount = 0;
+    unsigned capacity = a.m_iCapacityState;
     if ((capacity & 0x80000000u) == 0)
-        heap->Free(a.data, (capacity & 0x3fffffff) * 16);
+        heap->Free(a.m_data, (capacity & 0x3fffffff) * 16);
     return 0;
 }
 
@@ -2755,19 +2630,27 @@ struct MassPropertiesSV
 {
     float volume;
     float mass;
-    Vector center;
+    hkVector4 center;
     Matrix inertia;
+    MassPropertiesSV& operator=(const MassPropertiesSV& source)
+    {
+        volume = source.volume;
+        mass = source.mass;
+        center.m_vComponents = source.center.m_vComponents;
+        inertia = source.inertia;
+        return *this;
+    }
 };
 __declspec(noinline) void __cdecl FUN_00cec7f0(Vec4* v, int n, Vec4* center, Vec4* dims)
 {
-    __m128 lo = _mm_load_ps(&v->x);
-    __m128 hi = lo;
-    __m128 s0 = lo;
+    LocalM128 lo = _mm_load_ps(&v->x);
+    LocalM128 hi = lo;
+    LocalM128 s0 = lo;
     Vec4* p = v + 1;
     Vec4* e = v + n;
     while (p < e)
     {
-        __m128 q = _mm_load_ps(&p->x);
+        LocalM128 q = _mm_load_ps(&p->x);
         lo = _mm_min_ps(lo, q);
         hi = _mm_max_ps(hi, q);
         s0 = _mm_add_ps(s0, q);
@@ -2775,8 +2658,8 @@ __declspec(noinline) void __cdecl FUN_00cec7f0(Vec4* v, int n, Vec4* center, Vec
         _mm_store_ps(&center[(int)(e - p) & 1].x, s0);
         ++p;
     }
-    __m128 a = _mm_add_ps(lo, hi);
-    __m128 b = _mm_xor_ps(lo, s0);
+    LocalM128 a = _mm_add_ps(lo, hi);
+    LocalM128 b = _mm_xor_ps(lo, s0);
     _mm_store_ps(&center->x, _mm_mul_ps(a, b));
     _mm_store_ps(&dims->x, _mm_add_ps(b, hi));
 }
@@ -2806,14 +2689,14 @@ struct Integrator
 };
 __declspec(noinline) void Integrator::FUN_00ced390(Geometry* g, Vec4* off)
 {
-    __m128 o = _mm_load_ps(&off->x);
-    __m128 acc = _mm_load_ps(&basisY.x);
+    LocalM128 o = _mm_load_ps(&off->x);
+    LocalM128 acc = _mm_load_ps(&basisY.x);
     for (int i = 0; i < g->triangleCount; ++i)
     {
         int* t = g->triangles + i * 3;
-        __m128 a = _mm_add_ps(_mm_load_ps(&g->vertices[t[0]].x), o);
-        __m128 b = _mm_add_ps(_mm_load_ps(&g->vertices[t[1]].x), o);
-        __m128 c = _mm_load_ps(&g->vertices[t[2]].x);
+        LocalM128 a = _mm_add_ps(_mm_load_ps(&g->vertices[t[0]].x), o);
+        LocalM128 b = _mm_add_ps(_mm_load_ps(&g->vertices[t[1]].x), o);
+        LocalM128 c = _mm_load_ps(&g->vertices[t[2]].x);
         acc = _mm_add_ps(acc, _mm_mul_ps(a, b));
         _mm_store_ps(&basisX.x, _mm_add_ps(_mm_load_ps(&basisX.x), _mm_mul_ps(a, c)));
         m_64 += g->vertices[t[2]].x * m_60 + m_68;
@@ -2856,12 +2739,12 @@ void __cdecl FUN_00ced6b0(Geometry* geometry, float mass, MassPropertiesSV* resu
         _mm_store_ps(&boxProperties.inertia.c2.x, _mm_setzero_ps());
         FUN_00cebaf0(&dimensions, mass, &boxProperties);
     }
-    __m128 centerValue = *(__m128*)&center;
-    *(__m128*)&boxProperties.center = centerValue;
+    LocalM128 centerValue = *(LocalM128*)&center;
+    *(LocalM128*)&boxProperties.center = centerValue;
     Integrator integrator;
     {
         Vec4 shift;
-        *(__m128*)&shift = _mm_xor_ps(DAT_010c44d0, centerValue);
+        *(LocalM128*)&shift = _mm_xor_ps(DAT_010c44d0, centerValue);
         integrator.FUN_00ced390(geometry, &shift);
     }
     if (integrator.m_64 <= 0.0f)
@@ -2873,7 +2756,7 @@ void __cdecl FUN_00ced6b0(Geometry* geometry, float mass, MassPropertiesSV* resu
     result->mass = mass;
     float density = mass / integrator.m_64;
     integrator.FUN_00cec6b0(mass, density, (float*)&result->center, (float*)&result->inertia.c0);
-    *(__m128*)&result->center = _mm_add_ps(*(__m128*)&result->center, *(__m128*)&boxProperties.center);
+    *(LocalM128*)&result->center = _mm_add_ps(*(LocalM128*)&result->center, *(LocalM128*)&boxProperties.center);
     float* inertia = (float*)&result->inertia.c0;
     float* boxInertia = (float*)&boxProperties.inertia.c0;
     for (int i = 0; i < 3; ++i)

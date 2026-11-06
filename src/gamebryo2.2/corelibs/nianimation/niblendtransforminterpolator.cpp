@@ -1,8 +1,10 @@
+#include "../../../../include/NiTArray.h"
 // gamebryo2.2/corelibs/nianimation/niblendtransforminterpolator.cpp: NiBlendTransformInterpolator, BlendTransformInterpolator (9 functions)
 
-#include "niblendtransforminterpolator_types_NiBlendTransformInterpolator.h"
-#include "niblendtransforminterpolator_types_NiQuatTransform.h"
-#include "niblendtransforminterpolator_NiObjectNET.h"
+#include "../../../../include/NiBlendTransformInterpolator.h"
+#include "../../../../include/NiQuatTransform.h"
+#include "../../../../include/NiObjectNET.h"
+class NiRTTI;
 
 // @fnv 0x00a41110
 bool NiBlendTransformInterpolator::Update(float fTime, NiObjectNET* pkObject, NiQuatTransform& kTransform)
@@ -208,31 +210,18 @@ void __stdcall FUN_00a40ab0(FUN_00a40ab0_obj* a1)
     }
 }
 
-template <class T> class AGPrimArray
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-  public:
-    virtual ~AGPrimArray();
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, const T& element);
-    unsigned int SetAtGrow(unsigned int uiIndex, const T& element)
-    {
         if (uiIndex >= m_usMaxSize)
             SetSize(uiIndex + m_usGrowBy);
         SetAt(uiIndex, element);
         return uiIndex;
     }
-    unsigned int Add(const T& element)
-    {
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
         return SetAtGrow(m_usSize, element);
     }
-};
-typedef AGPrimArray<const char*> AGViewerStrings;
+typedef NiTArray<const char*, NiTMallocInterface<const char*> > AGViewerStrings;
 extern "C" const char* DAT_011f3e64;
 void __stdcall FUN_00a38080(AGViewerStrings* pkStrings);
 const char* __cdecl FUN_00a7d330(const char* pcText);
@@ -289,6 +278,7 @@ inline BlendPoint operator*(float f, const BlendPoint& p)
     r.z = f * p.z;
     return r;
 }
+// local form of NiQuaternion: 0x00a40c10 needs POD construction and inline component assignment; the shared ctor/operator= split changes bytes.
 struct BlendQuaternion
 {
     float m_fVectorX, m_fVectorY, m_fVectorZ, m_fScalarPart;
@@ -393,7 +383,7 @@ bool BlendTransformInterpolator::FUN_00a40c10(float time, NiObjectNET* object, B
                 continue;
             }
             BlendTransform value;
-            if (item.interpolator->Update(updateTime, object, *reinterpret_cast<NiQuatTransform*>(&value)))
+            if (item.interpolator->UpdateTransform(updateTime, object, *reinterpret_cast<NiQuatTransform*>(&value)))
             {
                 if (value.m_kTranslate.x != -3.4028234663852886e+38)
                 {

@@ -49,7 +49,7 @@ void BGSPlaceableWater::InitItem()
 
 // Loads a BGSPlaceableWater record from a TESFile: validates form type 0x23, clears data, reads EDID/OBND/MODL/MODT/DATA/DNAM chunks, and returns true on success.
 // @fnv 0x004fc540
-bool BGSPlaceableWater::Load(TESFile* file)
+bool BGSPlaceableWater::LoadForm(TESFile* file)
 {
     unsigned char formType = file->GetTESForm();
     if (formType != 0x23)
@@ -85,7 +85,7 @@ bool BGSPlaceableWater::Load(TESFile* file)
             if (reinterpret_cast<TESFileGetChunkData*>(file)->GetChunkData())
                 data.FUN_00535aa0();
             Data.m_pOwningWater = data.m_pOwningWater;
-            Data.ulFlags = 0;
+            Data.flags = 0;
             FUN_004fc360(true);
             FUN_004fc380(true);
             FUN_004fc3a0(true);
@@ -192,14 +192,14 @@ void FUN_004fc860_shell::FUN_004fc860(TESForm* apCopy)
     __memcpy(FUN_00624700(), pcopy->FUN_00624700(), 8);
 }
 
-// Sets or clears aiFlag in the ulFlags of the object returned by FUN_00624700, depending on abSet.
+// Sets or clears aiFlag in the flags of the object returned by FUN_00624700, depending on abSet.
 // @fnv 0x004fc990
 void FUN_004fc990_t::FUN_004fc990(int aiFlag, bool abSet)
 {
     if (abSet)
-        ((BGSPlaceableWater*)this)->FUN_00624700()->ulFlags |= aiFlag;
+        ((BGSPlaceableWater*)this)->FUN_00624700()->flags |= aiFlag;
     else
-        ((BGSPlaceableWater*)this)->FUN_00624700()->ulFlags &= ~aiFlag;
+        ((BGSPlaceableWater*)this)->FUN_00624700()->flags &= ~aiFlag;
 }
 
 struct FUN_004fc360_shell : public BGSPlaceableWater

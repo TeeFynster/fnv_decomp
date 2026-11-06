@@ -2,7 +2,8 @@
 #ifndef TESGLOBAL_IMAGESPACE_H
 #define TESGLOBAL_IMAGESPACE_H
 
-#include "TESForm.h"
+#include "layout_support.h"
+#include "../../include/TESForm.h"
 class TESImageSpace : public TESForm
 {
   public:

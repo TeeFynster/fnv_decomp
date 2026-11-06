@@ -1,3 +1,7 @@
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
 // src/havok/physics/collide/shape/convex/capsule/hkpcapsuleshape_ehsc_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/collide/shape/convex/capsule/hkpcapsuleshape_ehsc_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -13,19 +17,18 @@ void __cdecl FUN_00c90360(char const* const* arg1, char const* const* arg2);
 void __cdecl FUN_00d22360(char const* const* arg1, char const* const* arg2);
 int __cdecl FUN_00d22350();
 int __stdcall FUN_00d22d60(int a, int b);
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
-extern "C" __m128 _mm_load_ps(float const* p);
-extern "C" void _mm_store_ps(float* p, __m128 v);
+// Exe 0x00d22760 FUN_00d22760: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+
+extern "C" LocalM128 _mm_load_ps(float const* p);
+extern "C" void _mm_store_ps(float* p, LocalM128 v);
 class FUN_00d223f0_cls
 {
 public:
     void GatherIndexedVectors(unsigned short const* indices, int count, hkVector4* out);
 };
 struct __declspec(align(16)) hkVector4D224 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 
     hkVector4D224() {}
     hkVector4D224(const hkVector4D224& v) { m_vComponents = v.m_vComponents; }
@@ -57,13 +60,13 @@ struct FUN_00d224a0_Data {
     int unk14;
     int unk18;
     int unk1C;
-    __m128 unk20;
-    __m128 unk30;
+    LocalM128 unk20;
+    LocalM128 unk30;
 
-    void __thiscall FUN_00d224a0(__m128* result);
+    void __thiscall FUN_00d224a0(LocalM128* result);
 };
 extern int DAT_010ce25c;
-union __declspec(align(16)) AlignedHKVector4 { __m128 simd; struct {float x,y,z,w;}; };
+union __declspec(align(16)) AlignedHKVector4 { LocalM128 simd; struct {float x,y,z,w;}; };
 struct FUN_00d22590_Class : hkpCapsuleShape {
     FUN_00d22590_Class* __thiscall FUN_00d22590(
         const AlignedHKVector4& first, const AlignedHKVector4& second, float radius);
@@ -83,11 +86,11 @@ void __cdecl FUN_00d231b0(const Point4& a, const Point4& b,
                             const Point4& c, const Point4& d,
                             ClosestLineResult* out);
 void __cdecl GetClosestLinePoints(const Point4& aLineAStart, const Point4& aLineAEnd, const Point4& aLineBStart, const Point4& aLineBEnd, float* pfDistance, float* pfFractionA, float* pfFractionB, Point4* pointA, Point4* pointB);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ps(float*, __m128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" void _mm_store_ps(float*, LocalM128);
 extern float DAT_01016248;
 class Aabb_d22440 {
 public:
@@ -99,48 +102,48 @@ public:
     int unk14;
     int unk18;
     int unk1C;
-    __m128 m_kMin;
-    __m128 m_kMax;
+    LocalM128 m_kMin;
+    LocalM128 m_kMax;
 
-    void __thiscall FUN_00d22440(__m128* pkCenter) const;
+    void __thiscall FUN_00d22440(LocalM128* pkCenter) const;
 };
-extern "C" __m128 _mm_sub_ps(__m128,__m128);
-extern "C" __m128 _mm_mul_ps(__m128,__m128);
-extern "C" __m128 _mm_add_ps(__m128,__m128);
-extern "C" __m128 _mm_add_ss(__m128,__m128);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" void _mm_store_ss(float*,__m128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" void _mm_store_ss(float*,LocalM128);
 void __cdecl FUN_00d224c0(float* arg1, float* arg2, float* arg3, float* out);
 
-extern "C" __m128 _mm_mul_ps(__m128,__m128);
-extern "C" __m128 _mm_add_ps(__m128,__m128);
-extern "C" __m128 _mm_sub_ps(__m128,__m128);
-extern "C" __m128 _mm_mul_ss(__m128,__m128);
-extern "C" __m128 _mm_add_ss(__m128,__m128);
-extern "C" __m128 _mm_sub_ss(__m128,__m128);
-extern "C" __m128 _mm_shuffle_ps(__m128,__m128,int);
-extern "C" __m128 _mm_rsqrt_ss(__m128);
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_andnot_ps(__m128,__m128);
-extern "C" __m128 _mm_cmpeq_ss(__m128,__m128);
-extern "C" __m128 _mm_setzero_ps();
-extern "C" __m128 _mm_set_ss(float);
-extern "C" void _mm_store_ss(float*,__m128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_mul_ss(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_sub_ss(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128,LocalM128,int);
+extern "C" LocalM128 _mm_rsqrt_ss(LocalM128);
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_cmpeq_ss(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_setzero_ps();
+extern "C" LocalM128 _mm_set_ss(float);
+extern "C" void _mm_store_ss(float*,LocalM128);
 extern "C" double __cdecl sqrt(double);
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern unsigned long DAT_0126835c;
-extern const __m128 DAT_010c7160, DAT_010ec7f0;
+extern const LocalM128 DAT_010c7160, DAT_010ec7f0;
 
 class S00d22760_SimdReal {
 public:
-    __forceinline S00d22760_SimdReal(const __m128& x) : m_vValue(x) {}
+    __forceinline S00d22760_SimdReal(const LocalM128& x) : m_vValue(x) {}
     __forceinline S00d22760_SimdReal(float x) { m_vValue = _mm_load_ss(&x); }
     __forceinline S00d22760_SimdReal() {}
     __forceinline operator float() const { float s; _mm_store_ss(&s, m_vValue); return s; }
-    __forceinline __m128 broadcast() const { return _mm_shuffle_ps(m_vValue, m_vValue, 0); }
-    __forceinline const __m128& getQuad() const { return m_vValue; }
+    __forceinline LocalM128 broadcast() const { return _mm_shuffle_ps(m_vValue, m_vValue, 0); }
+    __forceinline const LocalM128& getQuad() const { return m_vValue; }
 private:
-    __m128 m_vValue;
+    LocalM128 m_vValue;
 };
 typedef const S00d22760_SimdReal& S00d22760_SimdParam;
 static __forceinline S00d22760_SimdReal operator-(S00d22760_SimdParam r) {
@@ -157,37 +160,37 @@ public:
         m_vComponents = _mm_add_ps(a.m_vComponents, _mm_mul_ps(r.broadcast(), b.m_vComponents));
     }
     __forceinline void setInterpolate4(const S00d22760_Vec& v0, const S00d22760_Vec& v1, S00d22760_SimdParam _t) {
-        __m128 t = _t.broadcast();
-        __m128 s = _mm_sub_ps(DAT_010ec7f0, t);
+        LocalM128 t = _t.broadcast();
+        LocalM128 s = _mm_sub_ps(DAT_010ec7f0, t);
         m_vComponents = _mm_add_ps(_mm_mul_ps(s, v0.m_vComponents), _mm_mul_ps(t, v1.m_vComponents));
     }
     __forceinline S00d22760_SimdReal dot3(const S00d22760_Vec& a) const {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+        LocalM128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+        LocalM128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
         return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
     }
     __forceinline S00d22760_SimdReal lengthSquared3() const { return this->dot3(*this); }
     __forceinline S00d22760_SimdReal lengthInverse3() const {
-        const __m128 half = _mm_set_ss(0.5f);
-        const __m128 three = _mm_set_ss(3.0f);
-        const __m128 zero = _mm_set_ss(0.0f);
-        const __m128 len2 = this->dot3(*this).getQuad();
-        const __m128 len2EqualsZero = _mm_cmpeq_ss(len2, zero);
-        const __m128 approx = _mm_rsqrt_ss(len2);
-        const __m128 refined = _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
+        const LocalM128 half = _mm_set_ss(0.5f);
+        const LocalM128 three = _mm_set_ss(3.0f);
+        const LocalM128 zero = _mm_set_ss(0.0f);
+        const LocalM128 len2 = this->dot3(*this).getQuad();
+        const LocalM128 len2EqualsZero = _mm_cmpeq_ss(len2, zero);
+        const LocalM128 approx = _mm_rsqrt_ss(len2);
+        const LocalM128 refined = _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
         return _mm_andnot_ps(len2EqualsZero, refined);
     }
     __forceinline void normalize3() {
-        __m128 lenInv = lengthInverse3().broadcast();
+        LocalM128 lenInv = lengthInverse3().broadcast();
         m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
     }
     __forceinline S00d22760_SimdReal normalizeWithLength3() {
-        __m128 len2 = this->dot3(*this).getQuad();
-        __m128 lenInv = lengthInverse3().broadcast();
+        LocalM128 len2 = this->dot3(*this).getQuad();
+        LocalM128 lenInv = lengthInverse3().broadcast();
         m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
         return _mm_mul_ss(len2, lenInv);
     }
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 class S00d22760_Bool {
 public:

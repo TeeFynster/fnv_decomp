@@ -1,11 +1,9 @@
 
 #include <stddef.h>
 
-class NiMemObject
-{
-public:
-    static void operator delete(void*, unsigned int);
-};
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiTPrimitiveSet.h"
+#include "../../../../include/NiTSet.h"
 
 class D3DRenderStateGroup : public NiMemObject
 {
@@ -26,22 +24,6 @@ public:
 
     ~D3DRenderStateGroup();
     static void ReleaseRenderStateGroup(D3DRenderStateGroup* group);
-};
-
-template<class T> class NiTMallocInterface;
-template<class T> class NiTNewInterface;
-
-template<class T, class Allocator> class NiTSet
-{
-public:
-    T* m_pBase;
-    unsigned int m_uiElementCount;
-    unsigned int m_uiAllocatedCapacity;
-    void Add(T& object);
-};
-
-template<class T> class NiTPrimitiveSet : public NiTSet<T, NiTMallocInterface<T> >
-{
 };
 
 template<class T, class Allocator> class ObjectPool

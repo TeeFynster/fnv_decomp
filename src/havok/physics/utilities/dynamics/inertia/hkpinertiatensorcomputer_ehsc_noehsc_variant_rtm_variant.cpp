@@ -1,3 +1,22 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#include "../../../../../../include/Vec4.h"
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit defines its own form
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
+#include "../../../../../../include/hkGeometry.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/Transform.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkSimdReal.h"
+#include "../../../../../../include/hkMatrix3.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkpMassProperties.h"
+#include "../../../../../../include/hkAabb.h"
 // src/havok/physics/utilities/dynamics/inertia/hkpinertiatensorcomputer_ehsc_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/utilities/dynamics/inertia/hkpinertiatensorcomputer_ehsc_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -24,13 +43,8 @@ struct State
 };
 void FUN_00cebbb0(void* state, float zero, void* receiver);
 int __cdecl ApplyLimitToReceiver(int owner, int context, int count, float limit, Receiver* receiver, float value);
-struct FUN_00cebe80_Struct
-{
-    float unk00;
-    float unk04;
-    float unk08;
-};
-void __cdecl FUN_00cebe80(FUN_00cebe80_Struct* pThis, float fScale, float* pMatrix);
+
+void __cdecl FUN_00cebe80(const hkVector4& shift, float mass, hkMatrix3& inertia);
 void __cdecl AddInertiaTensor(float* param_1, float fScale, float* pMatrix);
 struct FUN_00cec6b0_cls
 {
@@ -122,22 +136,8 @@ static inline float S_MaxLT(float x, float y)
     return (x < y) ? y : x;
 }
 void __cdecl FUN_00ced230(float afDivisor, S_00ced230_T* pData);
-struct S_00cee1c0_Heap
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void Free(void* p, unsigned int size);
-};
-struct S_00cee1c0_Router
-{
-    unsigned int cursor;
-    int unk04;
-    int unk08;
-    int unk0C;
-    S_00cee1c0_Heap* heap;
-};
+
+
 struct S_00cee1c0_Arr
 {
     unsigned int* m_data;
@@ -145,7 +145,7 @@ struct S_00cee1c0_Arr
     unsigned int m_cap;
     unsigned int* m_pTrailingData;
 };
-S_00cee1c0_Router* FUN_00c85750();
+hkMemoryRouter* FUN_00c85750();
 float __cdecl FUN_00cedec0(S_00cee1c0_Arr* arr, int unk, float value);
 void __cdecl ProcessArrayWithValue(unsigned int* source, int count, int unk, float value);
 namespace fnv_anon_00cec3d0 {}
@@ -200,10 +200,7 @@ void S00cec3d0_Base::FUN_00cec000(const float* v)
     P1 = v[A] * v[B];
     Pa = v[A];
 }
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-};
+
 extern "C"
 {
     __m128 _mm_setr_ps(float, float, float, float);
@@ -211,65 +208,14 @@ extern "C"
     __m128 _mm_sub_ps(__m128, __m128);
     __m128 _mm_and_ps(__m128, __m128);
 }
-struct Vector
-{
-    union
-    {
-        __m128 q;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-    Vector()
-    {}
-    Vector(const Vector& other) : q(other.q)
-    {}
-    void operator=(const Vector& other)
-    {
-        q = other.q;
-    }
-    void set(float x, float y, float z, float w)
-    {
-        q = _mm_setr_ps(x, y, z, w);
-    }
-    float& operator()(int i)
-    {
-        return q.m128_f32[i];
-    }
-    int maxAxisSecond() const
-    {
-        if (x < y)
-            return y < z ? 2 : 1;
-        return x < z ? 2 : 0;
-    }
-    int maxAxis() const
-    {
-        if (x < y)
-        {
-            if (z > y)
-                return 2;
-            return 1;
-        }
-        if (z > x)
-            return 2;
-        return 0;
-    }
-};
+
 struct Matrix
 {
-    Vector c0, c1, c2;
+    hkVector4 c0, c1, c2;
 };
-struct Transform
-{
-    Vector columns[4];
-};
-struct Bounds
-{
-    Vector lo, hi;
-};
-extern const Vector DAT_01017d10;
-void FUN_00d5ac50(char*, Matrix*, Vector*, Vector*, Vector*);
+
+extern const hkVector4 DAT_01017d10;
+void FUN_00d5ac50(char*, Matrix*, hkVector4*, hkVector4*, hkVector4*);
 struct Shape
 {
     virtual void v0();
@@ -279,9 +225,9 @@ struct Shape
     virtual void v4();
     virtual void v5();
     virtual void v6();
-    virtual void getAabb(const Transform*, float, Bounds*);
+    virtual void getAabb(const Transform*, float, hkAabb*);
 };
-void FUN_00cedae0(Shape* shape, const Matrix* input, Vector* outA, Vector* outB);
+void FUN_00cedae0(Shape* shape, const Matrix* input, hkVector4* outA, hkVector4* outB);
 struct MotionLike
 {
     int unk00;
@@ -302,7 +248,7 @@ void FUN_00cebdb0(const MotionLike* source, MotionLike* destination);
 extern "C" __m128 _mm_load_ss(const float*);
 struct Sub
 {
-    void Multiply(const Vector* p);
+    void Multiply(const hkVector4* p);
 };
 struct Owner
 {
@@ -316,59 +262,21 @@ Owner* volatile g_owner;
 volatile float g_value;
 Owner* volatile g_sink;
 void caller();
-struct __declspec(align(16)) S00ceccf0_Vec
-{
-    __m128 q;
-    void set(__m128 v)
-    {
-        q = v;
-    }
-    __m128 get() const
-    {
-        return q;
-    }
-    void operator=(const S00ceccf0_Vec& o)
-    {
-        q = o.q;
-    }
-};
-struct __declspec(align(16)) S00ceccf0_Mat
-{
-    S00ceccf0_Vec c0;
-    S00ceccf0_Vec c1;
-    S00ceccf0_Vec c2;
-    void Subtract(const S00ceccf0_Mat& o);
-    S00ceccf0_Mat& operator=(const S00ceccf0_Mat& o)
-    {
-        c0 = o.c0;
-        c1 = o.c1;
-        c2 = o.c2;
-        return *this;
-    }
-};
-struct S00ceccf0_Out
-{
-    float m_00;
-    float m_04;
-    int unk08;
-    int unk0c;
-    S00ceccf0_Vec m_10;
-    S00ceccf0_Mat m_20;
-};
+
 extern const double DAT_010cbf40;
-static __declspec(noinline) void __cdecl FUN_00ceba60(float a, float b, S00ceccf0_Out* out)
+static __declspec(noinline) void __cdecl FUN_00ceba60(float a, float b, hkpMassProperties* out)
 {
-    out->m_10.set(_mm_setzero_ps());
-    out->m_00 = a * b;
-    out->m_04 = a + b;
+    out->m_kCenterOfMass1.m_vComponents = _mm_setzero_ps();
+    out->m_iBufferSize = a * b;
+    out->m_fViscosityFriction = a + b;
 }
-void(__cdecl* g_S00ceccf0_fp)(float, float, S00ceccf0_Out*) = &FUN_00ceba60;
-static __declspec(noinline) void FUN_00cebfd0(S00ceccf0_Out* out, float value)
+void(__cdecl* g_S00ceccf0_fp)(float, float, hkpMassProperties*) = &FUN_00ceba60;
+static __declspec(noinline) void FUN_00cebfd0(hkpMassProperties* out, float value)
 {
-    out->m_00 *= value;
-    out->m_04 *= value;
+    out->m_iBufferSize *= value;
+    out->m_fViscosityFriction *= value;
 }
-int __cdecl FUN_00ceccf0(float start, float span, float t, S00ceccf0_Out* out);
+int __cdecl FUN_00ceccf0(float start, float span, float t, hkpMassProperties* out);
 // Incident-edge walk: detach edges touching `unk`, recurse to the other end,
 // then fold the node's inertia diagonal with the children's sum and max.
 // Local array is an inplace hkArray (cap 16, dont-free flag 0x80000000).
@@ -382,7 +290,8 @@ struct Edge
     int n14;
     int n18;
 };
-struct __declspec(align(16)) Mat3
+// local form of hkMatrix3: 0x00cee290 needs a trivial 0x30-byte scalar matrix beside the separately constructed hkMatrix3; sharing the latter adds constructor/assignment calls.
+struct __declspec(align(16)) InertiaMatrixPodLocal_00ce
 {
     float m00, m01, m02, m03;
     float m10, m11, m12, m13;
@@ -395,7 +304,7 @@ struct ShapeIface
     virtual void v08();
     virtual void v0c();
     virtual void v10();
-    virtual void getInertia(Mat3* out);
+    virtual void getInertia(InertiaMatrixPodLocal_00ce* out);
 };
 struct Node
 {
@@ -417,7 +326,7 @@ struct Node
     {
         return &shape;
     }
-    void FUN_00ca8920(Mat3* m);
+    void FUN_00ca8920(InertiaMatrixPodLocal_00ce* m);
 };
 struct LocalArr
 {
@@ -429,12 +338,12 @@ struct LocalArr
 void __cdecl ResizeAudioStream(void* heap, void* array, int elemSize);
 __forceinline void releaseArr(LocalArr* a)
 {
-    S_00cee1c0_Router* router = FUN_00c85750();
-    S_00cee1c0_Heap* heap = router->heap;
+    hkMemoryRouter* router = FUN_00c85750();
+    hkMemoryAllocator* heap = router->m_heap;
     int cap = a->m_cap;
     a->m_iElementCount = 0;
     if ((cap & 0x80000000) == 0)
-        heap->Free(a->m_data, (cap & 0x3fffffff) * 4);
+        heap->bufFree(a->m_data, (cap & 0x3fffffff) * 4);
 }
 __forceinline float fMinimumInputValue(float a, float b)
 {
@@ -445,17 +354,8 @@ __forceinline float fTargetUpperBound(float a, float b)
     return a < b ? a : b;
 }
 float __cdecl FUN_00cedec0(S_00cee1c0_Arr* arr, int unk, float value);
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128i
-{
-    int m128i_i32[4];
-} __m128i;
-extern "C" __m128i _mm_cvtsi32_si128(int);
-__m128 _mm_castsi128_ps(__m128i);
+
 extern "C" void _mm_store_ps(float*, __m128);
-struct __declspec(align(16)) Vec4
-{
-    float x, y, z, w;
-};
 struct Probe
 {
     unsigned char flag;
@@ -514,27 +414,21 @@ inline __m128 scalarVector(float x)
 extern "C" __m128 _mm_load_ss(const float*);
 extern "C" void _ReadWriteBarrier();
 int __cdecl FUN_00cebbb0(void* state, float value, Receiver2* receiver);
-struct S_00ced310_V
-{
-    float x, y, z, w;
-};
-struct S_00ced310_M
-{
-    S_00ced310_V c0, c1, c2;
-};
+
+
 static __forceinline float S_Max(float a, float b)
 {
     return a > b ? a : b;
 }
-static __forceinline void S_SetZero(S_00ced310_M* m)
+static __forceinline void S_SetZero(hkMatrix3* m)
 {
     __m128 z = _mm_setzero_ps();
     _ReadWriteBarrier();
-    _mm_store_ps(&m->c0.x, z);
-    _mm_store_ps(&m->c1.x, z);
-    _mm_store_ps(&m->c2.x, z);
+    _mm_store_ps(&m->m_kColumn0.x, z);
+    _mm_store_ps(&m->m_kColumn1.x, z);
+    _mm_store_ps(&m->m_kColumn2.x, z);
 }
-void __cdecl SetDiagonal(S_00ced310_M* m);
+void __cdecl SetDiagonal(hkMatrix3* m);
 extern "C" __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
 extern "C"
 {
@@ -581,55 +475,15 @@ struct S_00ced090_Elem
     int unk88;
     int unk8c;
 };
-struct S_00ced090_Out
-{
-    float unk00;
-    float unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-};
+
 struct S_00ced090_State
 {
     S_00ced090_Elem* first;
     int count;
 };
-struct __declspec(align(16)) S_00ced090_V4
-{
-    float x, y, z, w;
-};
-struct S_00ced090_Mat
-{
-    S_00ced090_V4 r0, r1, r2;
-    void FUN_00cd5880(void* xf);
-};
-struct S_00ced090_Vec
-{
-    S_00ced090_V4 v;
-    void FUN_00c7f640(void* a, void* b);
-};
-struct S_00ced090_Inertia
-{
-    S_00ced090_V4 r0, r1, r2;
-    void FUN_00cd5140(S_00ced090_Mat* m);
-};
-void __cdecl AddInertiaTensor(S_00ced090_Vec* d, float m, S_00ced090_Mat* mat);
-int __cdecl FUN_00ced090(S_00ced090_State* s, S_00ced090_Out* out);
+
+void __cdecl AddInertiaTensor(hkVector4* d, float m, hkMatrix3* mat);
+int __cdecl FUN_00ced090(S_00ced090_State* s, hkpMassProperties* out);
 extern "C" unsigned long __cdecl _byteswap_ulong(unsigned long);
 extern __declspec(thread) int DAT_012722b4;
 struct S00cf0f40_Guard
@@ -822,11 +676,11 @@ struct S00cf0f40_Vec
     unsigned int x, y, z, w;
 };
 struct S00cf0f40_Arr;
-inline S_00cee1c0_Heap& S00cf0f40_heap(S_00cee1c0_Router* r)
+inline hkMemoryAllocator& S00cf0f40_heap(hkMemoryRouter* r)
 {
-    return *r->heap;
+    return *r->m_heap;
 }
-void __cdecl FUN_00c908c0(S_00cee1c0_Heap* heap, void* arr, int cap, int elemSize);
+void __cdecl FUN_00c908c0(hkMemoryAllocator* heap, void* arr, int cap, int elemSize);
 struct S00cf0f40_Arr
 {
     S00cf0f40_Vec* m_data;
@@ -839,16 +693,16 @@ struct S00cf0f40_Arr
     }
     void ClearAndRelease()
     {
-        S_00cee1c0_Heap& heap = S00cf0f40_heap(FUN_00c85750());
+        hkMemoryAllocator& heap = S00cf0f40_heap(FUN_00c85750());
         m_iElementCount = 0;
         if ((m_capFlags & 0x80000000) == 0)
-            heap.Free(m_data, getCapacity() * sizeof(S00cf0f40_Vec));
+            heap.bufFree(m_data, getCapacity() * sizeof(S00cf0f40_Vec));
         m_data = 0;
         m_capFlags = 0x80000000;
     }
     void reserve(int n)
     {
-        S_00cee1c0_Heap& heap = S00cf0f40_heap(FUN_00c85750());
+        hkMemoryAllocator& heap = S00cf0f40_heap(FUN_00c85750());
         int cap = getCapacity();
         if (cap < n)
         {
@@ -892,348 +746,221 @@ extern "C"
     __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
 }
 
-typedef __m128 hkQuadReal;
+// VC9 changes scheduling when the register union exposes integer lanes.
+// Keep float-only intrinsic registers while using the shared object layouts.
+namespace InertiaSimd {
+// Exe 0x00cee290 FUN_00cee290: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4]; } __m128, LocalM128;
+typedef LocalM128 Quad;
+extern "C" {
+Quad _mm_setzero_ps(); Quad _mm_load_ss(const float*); void _mm_store_ss(float*, Quad);
+Quad _mm_set_ss(float); Quad _mm_add_ss(Quad,Quad); Quad _mm_mul_ss(Quad,Quad);
+Quad _mm_sqrt_ss(Quad); Quad _mm_rsqrt_ss(Quad); Quad _mm_cmpeq_ss(Quad,Quad);
+Quad _mm_add_ps(Quad,Quad); Quad _mm_sub_ps(Quad,Quad); Quad _mm_mul_ps(Quad,Quad);
+Quad _mm_sub_ss(Quad,Quad); Quad _mm_andnot_ps(Quad,Quad);
+Quad _mm_shuffle_ps(Quad,Quad,unsigned int);
+}
+static __forceinline Quad& packet(hkVector4& v) { return *reinterpret_cast<Quad*>(&v); }
+static __forceinline const Quad& packet(const hkVector4& v) { return *reinterpret_cast<const Quad*>(&v); }
+static __forceinline Quad dot3ScalarCall(const hkVector4& v, const hkVector4& a)
+{
+    Quad x2 = _mm_mul_ps(packet(v), packet(a));
+    Quad xySum = _mm_add_ss(_mm_shuffle_ps(x2,x2,0x55),x2);
+    return _mm_add_ss(_mm_shuffle_ps(x2,x2,0xaa),xySum);
+}
+static __forceinline float length3ScalarCall(const hkVector4& v)
+{
+    float f; _mm_store_ss(&f,_mm_sqrt_ss(dot3ScalarCall(v,v))); return f;
+}
+static __forceinline void addMul4(hkVector4& dst, float scalar, const hkVector4& v)
+{
+    Quad r = _mm_load_ss(&scalar);
+    packet(dst) = _mm_add_ps(packet(dst),_mm_mul_ps(_mm_shuffle_ps(r,r,0),packet(v)));
+}
+}
 typedef float hkReal;
-
-class VectorComponentValue
+__forceinline hkVector4::hkVector4(const hkVector4& v) { InertiaSimd::packet(*this) = InertiaSimd::packet(v); }
+__forceinline void hkVector4::operator=(const hkVector4& v) { InertiaSimd::packet(*this) = InertiaSimd::packet(v); }
+__forceinline void hkVector4::setZero4() { InertiaSimd::packet(*this) = InertiaSimd::_mm_setzero_ps(); }
+__forceinline void hkVector4::add4(const hkVector4& v)
+{ InertiaSimd::packet(*this) = InertiaSimd::_mm_add_ps(InertiaSimd::packet(*this),InertiaSimd::packet(v)); }
+__forceinline void hkVector4::setSub4(const hkVector4& a,const hkVector4& b)
+{ InertiaSimd::packet(*this) = InertiaSimd::_mm_sub_ps(InertiaSimd::packet(a),InertiaSimd::packet(b)); }
+__forceinline void hkVector4::setMul4(float scalar,const hkVector4& v)
 {
-  public:
-    __forceinline VectorComponentValue(const hkQuadReal& x) : m_vValue(x)
-    {}
-    __forceinline VectorComponentValue(hkReal x)
-    {
-        m_vValue = _mm_load_ss(&x);
-    }
-    __forceinline operator hkReal() const
-    {
-        hkReal s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-    __forceinline hkQuadReal broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
-    __forceinline const hkQuadReal& getQuad() const
-    {
-        return m_vValue;
-    }
-
-  private:
-    hkQuadReal m_vValue;
-};
-typedef const VectorComponentValue& hkSimdRealParameter;
-
-class hkVector4
+    InertiaSimd::Quad r = InertiaSimd::_mm_load_ss(&scalar);
+    InertiaSimd::packet(*this) = InertiaSimd::_mm_mul_ps(InertiaSimd::_mm_shuffle_ps(r,r,0),InertiaSimd::packet(v));
+}
+__forceinline void hkVector4::setCross(const hkVector4& a,const hkVector4& b)
 {
-  public:
-    __forceinline hkVector4()
-    {}
-    __forceinline hkVector4(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    __forceinline void add4(const hkVector4& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void setSub4(const hkVector4& v0, const hkVector4& v1)
-    {
-        m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    __forceinline void setMul4(hkSimdRealParameter r, const hkVector4& v1)
-    {
-        m_vComponents = _mm_mul_ps(r.broadcast(), v1.m_vComponents);
-    }
-    __forceinline void addMul4(hkSimdRealParameter r, const hkVector4& v1)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(r.broadcast(), v1.m_vComponents));
-    }
-    __forceinline void setCross(const hkVector4& v0, const hkVector4& v1)
-    {
-        hkQuadReal cross0;
-        cross0 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xc9),
-                            _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2));
-        hkQuadReal cross1;
-        cross1 = _mm_mul_ps(_mm_shuffle_ps(v0.m_vComponents, v0.m_vComponents, 0xd2),
-                            _mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        hkQuadReal x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        hkQuadReal xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
-    }
-    __forceinline VectorComponentValue length3() const
-    {
-        return _mm_sqrt_ss(this->dot3(*this).getQuad());
-    }
-    __forceinline VectorComponentValue lengthInverse3() const
-    {
-        const hkQuadReal half = _mm_set_ss(0.5f);
-        const hkQuadReal three = _mm_set_ss(3.0f);
-        const hkQuadReal zero = _mm_set_ss(0.0f);
-        const hkQuadReal len2 = this->dot3(*this).getQuad();
-        const hkQuadReal len2EqualsZero = _mm_cmpeq_ss(len2, zero);
-        const hkQuadReal approx = _mm_rsqrt_ss(len2);
-        const hkQuadReal refined =
-            _mm_mul_ss(_mm_mul_ss(half, approx), _mm_sub_ss(three, _mm_mul_ss(_mm_mul_ss(len2, approx), approx)));
-        return _mm_andnot_ps(len2EqualsZero, refined);
-    }
-    __forceinline void normalize3()
-    {
-        hkQuadReal lenInv = lengthInverse3().broadcast();
-        m_vComponents = _mm_mul_ps(lenInv, m_vComponents);
-    }
-    __forceinline hkReal& operator()(int a)
-    {
-        return reinterpret_cast<hkReal*>(&m_vComponents)[a];
-    }
-    __forceinline const hkReal& operator()(int a) const
-    {
-        return reinterpret_cast<const hkReal*>(&m_vComponents)[a];
-    }
-    hkQuadReal m_vComponents;
-};
-
-class hkMatrix3
+    using namespace InertiaSimd;
+    Quad c0 = InertiaSimd::_mm_mul_ps(InertiaSimd::_mm_shuffle_ps(InertiaSimd::packet(a),InertiaSimd::packet(a),0xc9),InertiaSimd::_mm_shuffle_ps(InertiaSimd::packet(b),InertiaSimd::packet(b),0xd2));
+    Quad c1 = InertiaSimd::_mm_mul_ps(InertiaSimd::_mm_shuffle_ps(InertiaSimd::packet(a),InertiaSimd::packet(a),0xd2),InertiaSimd::_mm_shuffle_ps(InertiaSimd::packet(b),InertiaSimd::packet(b),0xc9));
+    InertiaSimd::packet(*this) = InertiaSimd::_mm_sub_ps(c0,c1);
+}
+__forceinline void hkVector4::normalize3()
 {
-  public:
-    __forceinline hkMatrix3()
-    {}
-    __forceinline hkVector4& getColumn(int x)
-    {
+    using namespace InertiaSimd;
+    const Quad half = InertiaSimd::_mm_set_ss(0.5f);
+    const Quad three = InertiaSimd::_mm_set_ss(3.0f);
+    const Quad zero = InertiaSimd::_mm_set_ss(0.0f);
+    const Quad len2 = InertiaSimd::dot3ScalarCall(*this,*this);
+    const Quad isZero = InertiaSimd::_mm_cmpeq_ss(len2,zero);
+    const Quad approx = InertiaSimd::_mm_rsqrt_ss(len2);
+    const Quad refined = InertiaSimd::_mm_mul_ss(InertiaSimd::_mm_mul_ss(half,approx),InertiaSimd::_mm_sub_ss(three,InertiaSimd::_mm_mul_ss(InertiaSimd::_mm_mul_ss(len2,approx),approx)));
+    Quad inv = InertiaSimd::_mm_andnot_ps(isZero,refined);
+    Quad lenInv = InertiaSimd::_mm_shuffle_ps(inv,inv,0);
+    InertiaSimd::packet(*this) = InertiaSimd::_mm_mul_ps(lenInv,InertiaSimd::packet(*this));
+}
+
+__forceinline hkReal& hkVector4::operator()(int a)
+{
+        return reinterpret_cast<hkReal*>(&InertiaSimd::packet(*this))[a];
+    }
+
+__forceinline const hkReal& hkVector4::operator()(int a) const
+{
+        return reinterpret_cast<const hkReal*>(&InertiaSimd::packet(*this))[a];
+    }
+
+__forceinline hkMatrix3::hkMatrix3()
+{}
+
+__forceinline hkVector4& hkMatrix3::getColumn(int x)
+{
         return (&m_kColumn0)[x];
     }
-    __forceinline const hkVector4& getColumn(int x) const
-    {
+
+__forceinline const hkVector4& hkMatrix3::getColumn(int x) const
+{
         return (&m_kColumn0)[x];
     }
-    __forceinline hkReal& operator()(int r, int c)
-    {
+
+__forceinline hkReal& hkMatrix3::operator()(int r, int c)
+{
         return getColumn(c)(r);
     }
-    __forceinline void operator=(const hkMatrix3& a)
-    {
+
+__forceinline void hkMatrix3::operator=(const hkMatrix3& a)
+{
         m_kColumn0 = a.getColumn(0);
         m_kColumn1 = a.getColumn(1);
         m_kColumn2 = a.getColumn(2);
     }
-    __forceinline void setZero()
-    {
+
+__forceinline void hkMatrix3::setZero()
+{
         hkVector4 zero;
         zero.setZero4();
         getColumn(0) = zero;
         getColumn(1) = zero;
         getColumn(2) = zero;
     }
-    hkVector4 m_kColumn0, m_kColumn1, m_kColumn2;
-};
 
-struct hkpMassProperties
+__forceinline hkpMassProperties::hkpMassProperties() : m_iBufferSize(0.0f), m_fViscosityFriction(0.0f)
 {
-    __forceinline hkpMassProperties() : m_iBufferSize(0.0f), m_fViscosityFriction(0.0f)
-    {
         m_kCenterOfMass1.setZero4();
         m_kInertiaTensor.setZero();
     }
-    hkReal m_iBufferSize;
-    hkReal m_fViscosityFriction;
-    hkVector4 m_kCenterOfMass1;
-    hkMatrix3 m_kInertiaTensor;
-};
 
-struct hkMemoryAllocator
+template <typename TYPE> __forceinline TYPE* hkMemoryAllocator::_bufAlloc(int& reqNumInOut)
 {
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-    template <typename TYPE> __forceinline TYPE* _bufAlloc(int& reqNumInOut)
-    {
         const int SIZE_ELEM = sizeof(TYPE);
         int n = reqNumInOut * SIZE_ELEM;
-        void* p = AllocateBufferWithSize(n);
+        void* p = bufAlloc(n);
         reqNumInOut = n / SIZE_ELEM;
         return static_cast<TYPE*>(p);
     }
-    template <typename TYPE> __forceinline void _bufFree(void* p, int numElem)
-    {
+
+template <typename TYPE> __forceinline void hkMemoryAllocator::_bufFree(void* p, int numElem)
+{
         const int SIZE_ELEM = sizeof(TYPE);
-        ReturnMemory(p, numElem * SIZE_ELEM);
+        bufFree(p, numElem * SIZE_ELEM);
     }
-};
-struct NineIntegerRecord
-{
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocator* m_pStreamAllocator;
-    __forceinline hkMemoryAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    static __forceinline NineIntegerRecord& GetMonitorStream()
-    {
-        return *reinterpret_cast<NineIntegerRecord*>(FUN_00c85750());
-    }
-};
-struct RouterHeapAllocatorProvider
-{
-    __forceinline hkMemoryAllocator& get(const void*)
-    {
-        return NineIntegerRecord::GetMonitorStream().heap();
-    }
-};
 
-template <typename T> class HavokElementArray
-{
-  public:
-    __forceinline HavokElementArray() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-    __forceinline HavokElementArray(T* ptr, int size, int capacity)
-        : m_data(ptr), m_iElementCount(size), m_iCapacityState(capacity | 0x80000000)
-    {}
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    __forceinline T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    __forceinline void clear()
-    {
-        m_iElementCount = 0;
-    }
-    __forceinline void GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
-    {
-        const int capacity = getCapacity();
-        if (capacity < n)
-        {
-            int cap2 = 2 * capacity;
-            int newSize = (n < cap2) ? cap2 : n;
-            FUN_00c908c0(reinterpret_cast<S_00cee1c0_Heap*>(&alloc), this, newSize, sizeof(T));
-        }
-    }
-    __forceinline void _setSize(hkMemoryAllocator& alloc, int n)
-    {
-        GrowArrayCapacity(alloc, n);
-        m_iElementCount = n;
-    }
-    __forceinline T* _expandBy(hkMemoryAllocator& alloc, int n)
-    {
-        int oldsize = m_iElementCount;
-        GrowArrayCapacity(alloc, m_iElementCount + n);
-        m_iElementCount += n;
-        return m_data + oldsize;
-    }
-    __forceinline void copyFromArray(hkMemoryAllocator& alloc, const HavokElementArray<T>& a)
-    {
-        if (getCapacity() < a.GetLogicalSize())
-        {
-            if ((m_iCapacityState & 0x80000000) == 0)
-            {
-                alloc._bufFree<T>(m_data, getCapacity());
-            }
-            int n = a.GetLogicalSize();
-            m_data = alloc._bufAlloc<T>(n);
-            m_iCapacityState = n;
-        }
-        m_iElementCount = a.GetLogicalSize();
-        copy(m_data, a.m_data, m_iElementCount);
-    }
-    static __forceinline void copy(T* dst, const T* src, int n)
-    {
-        for (int i = 0; i < n; ++i)
-        {
-            dst[i] = src[i];
-        }
-    }
-    __forceinline void _clearAndDeallocate(hkMemoryAllocator& alloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc._bufFree<T>(m_data, getCapacity());
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-template <typename T> class hkArray : public HavokElementArray<T>
-{
-  public:
-    __forceinline hkArray()
-    {}
-    __forceinline hkArray(T* ptr, int size, int capacity) : HavokElementArray<T>(ptr, size, capacity)
-    {}
-    __forceinline void ClearAndRelease()
-    {
-        this->_clearAndDeallocate(RouterHeapAllocatorProvider().get(this));
-    }
-    __forceinline void SetSizeAndGrow(int n)
-    {
-        this->_setSize(RouterHeapAllocatorProvider().get(this), n);
-    }
-    __forceinline T* expandBy(int n)
-    {
-        return this->_expandBy(RouterHeapAllocatorProvider().get(this), n);
-    }
-    __forceinline hkArray<T>& operator=(const hkArray<T>& a)
-    {
-        this->copyFromArray(RouterHeapAllocatorProvider().get(this), a);
-        return *this;
-    }
-};
-template <typename T, unsigned N> class hkInplaceArray : public hkArray<T>
-{
-  public:
-    __forceinline explicit hkInplaceArray(int size = 0) : hkArray<T>(m_kStorage, size, N)
-    {}
-    __forceinline ~hkInplaceArray()
-    {
-        this->ClearAndRelease();
-    }
-    T m_kStorage[N];
-};
 
-struct hkGeometry
+__forceinline hkMemoryRouter& hkMemoryRouter::getInstance()
 {
-    struct Triangle
-    {
-        int m_kPointA, m_kPointB, m_iThirdValue, m_iMaterialIndex;
-        __forceinline void set(int a, int b, int c, int material = -1)
-        {
-            m_kPointA = a;
-            m_kPointB = b;
-            m_iThirdValue = c;
-            m_iMaterialIndex = material;
-        }
-    };
-    hkArray<hkVector4> m_kVertices;
-    hkArray<Triangle> m_uiTriangleCount;
-    __forceinline hkGeometry()
-    {}
-    __forceinline ~hkGeometry()
-    {
-        FUN_00cce530();
+        return *FUN_00c85750();
     }
-    void FUN_00cce530();
-};
+
+// hkArrayBase / hkArray / hkInplaceArray / hkContainerHeapAllocator: include/hkArray.h (via hkGeometry.h);
+// the bodies this unit uses are defined here.
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+    return hkMemoryRouter::getInstance().heap();
+}
+template <typename T> __forceinline void hkArrayBase<T>::clear()
+{
+    m_iElementCount = 0;
+}
+template <typename T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
+{
+    const int capacity = getCapacity();
+    if (capacity < n)
+    {
+        int cap2 = 2 * capacity;
+        int newSize = (n < cap2) ? cap2 : n;
+        FUN_00c908c0(&alloc, this, newSize, sizeof(T));
+    }
+}
+template <typename T> __forceinline void hkArrayBase<T>::_setSize(hkMemoryAllocator& alloc, int n)
+{
+    GrowArrayCapacity(alloc, n);
+    m_iElementCount = n;
+}
+template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
+{
+    clear();
+    if ((m_iCapacityState & 0x80000000) == 0)
+        alloc._bufFree<T>(m_data, getCapacity());
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
+template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
+{
+    clearAndDeallocate();
+}
+
+__forceinline hkGeometry::hkGeometry()
+{
+}
+__forceinline void hkGeometry::Triangle::set(int a, int b, int c, int material)
+{
+    m_kPointA = a;
+    m_kPointB = b;
+    m_iThirdValue = c;
+    m_iMaterialIndex = material;
+}
+template <typename T> static __forceinline T* inertiaExpand(hkArray<T>& a, int n)
+{
+    hkMemoryAllocator& alloc = hkContainerHeapAllocator().get(&a);
+    int oldsize = a.m_iElementCount;
+    int count = a.m_iElementCount + n;
+    int capacity = a.m_iCapacityState & 0x3fffffff;
+    if (capacity < count)
+    {
+        int cap2 = 2 * capacity;
+        FUN_00c908c0(&alloc, &a, count < cap2 ? cap2 : count, sizeof(T));
+    }
+    a.m_iElementCount += n;
+    return a.m_data + oldsize;
+}
+template <typename T> static __forceinline void inertiaCopy(hkArray<T>& dst, const hkArrayBase<T>& src)
+{
+    hkMemoryAllocator& alloc = hkContainerHeapAllocator().get(&dst);
+    if ((dst.m_iCapacityState & 0x3fffffff) < src.GetLogicalSize())
+    {
+        if ((dst.m_iCapacityState & 0x80000000) == 0)
+            alloc._bufFree<T>(dst.m_data, dst.m_iCapacityState & 0x3fffffff);
+        int n = src.GetLogicalSize();
+        dst.m_data = alloc._bufAlloc<T>(n);
+        dst.m_iCapacityState = n;
+    }
+    dst.m_iElementCount = src.GetLogicalSize();
+    hkArrayBase<T>::copy(dst.m_data, src.m_data, dst.m_iElementCount);
+}
 
 __declspec(noinline) void __cdecl FUN_00cebe80(const hkVector4& shift, hkReal mass, hkMatrix3& inertia)
 {
@@ -1250,7 +977,7 @@ __declspec(noinline) void __cdecl FUN_00cebe80(const hkVector4& shift, hkReal ma
 __declspec(noinline) void __cdecl FUN_00ced6b0(const hkGeometry* geom, hkReal mass, hkpMassProperties& result)
 {
     result.m_fViscosityFriction += mass;
-    result.m_iBufferSize += (hkReal)geom->m_kVertices.GetLogicalSize();
+    result.m_iBufferSize += (hkReal)geom->m_kVertices.m_iElementCount;
 }
 
 // @fnv 0x00cee290
@@ -1273,7 +1000,7 @@ int __cdecl FUN_00cee290(const hkVector4& v0, const hkVector4& v1, const hkVecto
         ab.setSub4(v0, v1);
         normal.setCross(cb, ab);
     }
-    const hkReal area = normal.length3();
+    const hkReal area = InertiaSimd::length3ScalarCall(normal);
 
     if (surfaceThickness < tolerance)
     {
@@ -1324,31 +1051,31 @@ int __cdecl FUN_00cee290(const hkVector4& v0, const hkVector4& v1, const hkVecto
     {
         normal.normalize3();
         hkInplaceArray<hkVector4, 6> vertices(0);
-        vertices.SetSizeAndGrow(6);
+        vertices.setSize(6);
         vertices[0] = v0;
         vertices[1] = v0;
-        vertices[0].addMul4((hkReal)(surfaceThickness * 0.5), normal);
-        vertices[1].addMul4((hkReal)(-surfaceThickness * 0.5), normal);
+        InertiaSimd::addMul4(vertices[0], (hkReal)(surfaceThickness * 0.5), normal);
+        InertiaSimd::addMul4(vertices[1], (hkReal)(-surfaceThickness * 0.5), normal);
         vertices[2] = v1;
         vertices[3] = v1;
-        vertices[2].addMul4((hkReal)(surfaceThickness * 0.5), normal);
-        vertices[3].addMul4((hkReal)(-surfaceThickness * 0.5), normal);
+        InertiaSimd::addMul4(vertices[2], (hkReal)(surfaceThickness * 0.5), normal);
+        InertiaSimd::addMul4(vertices[3], (hkReal)(-surfaceThickness * 0.5), normal);
         vertices[4] = v2;
         vertices[5] = v2;
-        vertices[4].addMul4((hkReal)(surfaceThickness * 0.5), normal);
-        vertices[5].addMul4((hkReal)(-surfaceThickness * 0.5), normal);
+        InertiaSimd::addMul4(vertices[4], (hkReal)(surfaceThickness * 0.5), normal);
+        InertiaSimd::addMul4(vertices[5], (hkReal)(-surfaceThickness * 0.5), normal);
         hkpMassProperties massProperties;
         {
             hkGeometry geom;
-            geom.m_kVertices = vertices;
-            geom.m_uiTriangleCount.expandBy(1)->set(0, 2, 4);
-            geom.m_uiTriangleCount.expandBy(1)->set(1, 5, 3);
-            geom.m_uiTriangleCount.expandBy(1)->set(0, 3, 2);
-            geom.m_uiTriangleCount.expandBy(1)->set(0, 1, 3);
-            geom.m_uiTriangleCount.expandBy(1)->set(1, 0, 4);
-            geom.m_uiTriangleCount.expandBy(1)->set(1, 4, 5);
-            geom.m_uiTriangleCount.expandBy(1)->set(2, 5, 4);
-            geom.m_uiTriangleCount.expandBy(1)->set(2, 3, 5);
+            inertiaCopy(geom.m_kVertices, vertices);
+            inertiaExpand(geom.m_uiTriangleCount, 1)->set(0, 2, 4);
+            inertiaExpand(geom.m_uiTriangleCount, 1)->set(1, 5, 3);
+            inertiaExpand(geom.m_uiTriangleCount, 1)->set(0, 3, 2);
+            inertiaExpand(geom.m_uiTriangleCount, 1)->set(0, 1, 3);
+            inertiaExpand(geom.m_uiTriangleCount, 1)->set(1, 0, 4);
+            inertiaExpand(geom.m_uiTriangleCount, 1)->set(1, 4, 5);
+            inertiaExpand(geom.m_uiTriangleCount, 1)->set(2, 5, 4);
+            inertiaExpand(geom.m_uiTriangleCount, 1)->set(2, 3, 5);
             FUN_00ced6b0(&geom, mass, massProperties);
         }
         com = massProperties.m_kCenterOfMass1;
@@ -1363,12 +1090,13 @@ int __cdecl FUN_00cee290(const hkVector4& v0, const hkVector4& v1, const hkVecto
 
 namespace CapsuleMassSimd {
 namespace NativeRegisters {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00cee290 FUN_00cee290: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-};
+} __m128, LocalM128;
 }
-typedef NativeRegisters::__m128 CapsuleMassQuad;
+typedef NativeRegisters::LocalM128 CapsuleMassQuad;
 extern "C"
 {
     CapsuleMassQuad _mm_add_ss(CapsuleMassQuad, CapsuleMassQuad);
@@ -1446,8 +1174,8 @@ struct __declspec(align(16)) CapsuleMassVector
     {
         m = CapsuleMassSimd::_mm_setzero_ps();
     }
-    __forceinline CapsuleMassScalar length3() const;
-    __forceinline CapsuleMassScalar dot3(const CapsuleMassVector& b) const;
+    __forceinline CapsuleMassScalar length3ScalarCall() const;
+    __forceinline CapsuleMassScalar dot3ScalarCall(const CapsuleMassVector& b) const;
     __forceinline void normalize3();
     __forceinline CapsuleMassScalar inverseLength3() const;
     void FUN_00c7f700(const struct CapsuleMassMatrix*, const CapsuleMassVector*);
@@ -1579,20 +1307,20 @@ struct CapsuleMassArray
     {}
     __forceinline void append(const CapsuleMassElement& e)
     {
-        S_00cee1c0_Router* r = FUN_00c85750();
+        hkMemoryRouter* r = FUN_00c85750();
         if (size == (capacity & 0x3fffffff))
-            CapsuleMassSimd::ResizeAudioStream(r->heap, this, sizeof(CapsuleMassElement));
+            CapsuleMassSimd::ResizeAudioStream(r->m_heap, this, sizeof(CapsuleMassElement));
         new (data + size) CapsuleMassElement(e);
         ++size;
     }
     __forceinline ~CapsuleMassArray()
     {
-        S_00cee1c0_Router* router = FUN_00c85750();
-        S_00cee1c0_Heap* h = router->heap;
+        hkMemoryRouter* router = FUN_00c85750();
+        hkMemoryAllocator* h = router->m_heap;
         unsigned cap = capacity;
         size = 0;
         if ((cap & 0x80000000u) == 0)
-            h->Free(data, (cap & 0x3fffffff) * sizeof(CapsuleMassElement));
+            h->bufFree(data, (cap & 0x3fffffff) * sizeof(CapsuleMassElement));
     }
 };
 extern int __cdecl FUN_00ced090(CapsuleMassArray*, Receiver*);
@@ -1610,11 +1338,11 @@ static __forceinline float capsuleMassReal(CapsuleMassQuad v)
     CapsuleMassSimd::_mm_store_ss(&f, v);
     return f;
 }
-__forceinline CapsuleMassScalar CapsuleMassVector::length3() const
+__forceinline CapsuleMassScalar CapsuleMassVector::length3ScalarCall() const
 {
-    return CapsuleMassSimd::_mm_sqrt_ss(dot3(*this).quad());
+    return CapsuleMassSimd::_mm_sqrt_ss(dot3ScalarCall(*this).quad());
 }
-__forceinline CapsuleMassScalar CapsuleMassVector::dot3(const CapsuleMassVector& b) const
+__forceinline CapsuleMassScalar CapsuleMassVector::dot3ScalarCall(const CapsuleMassVector& b) const
 {
     return CapsuleMassScalar(capsuleMassSum3(CapsuleMassSimd::_mm_mul_ps(m, b.m)));
 }
@@ -1623,7 +1351,7 @@ __forceinline CapsuleMassScalar CapsuleMassVector::inverseLength3() const
     const CapsuleMassQuad half = CapsuleMassSimd::_mm_set_ss(0.5f);
     const CapsuleMassQuad three = CapsuleMassSimd::_mm_set_ss(3.0f);
     const CapsuleMassQuad zero = CapsuleMassSimd::_mm_set_ss(0.0f);
-    const CapsuleMassQuad squared = dot3(*this).quad();
+    const CapsuleMassQuad squared = dot3ScalarCall(*this).quad();
     const CapsuleMassQuad isZero = CapsuleMassSimd::_mm_cmpeq_ss(squared, zero);
     const CapsuleMassQuad approx = CapsuleMassSimd::_mm_rsqrt_ss(squared);
     const CapsuleMassQuad refined = CapsuleMassSimd::_mm_mul_ss(
@@ -1655,7 +1383,7 @@ __declspec(noinline) int __cdecl FUN_00ceeca0(const CapsuleMassVector* source, c
         return 1;
     CapsuleMassVector between;
     between.m = CapsuleMassSimd::_mm_sub_ps(destination->m, source->m);
-    float length = float(between.length3());
+    float length = float(between.length3ScalarCall());
     CapsuleMassTransform transform;
     if (length > 0.0f)
     {
@@ -1663,13 +1391,13 @@ __declspec(noinline) int __cdecl FUN_00ceeca0(const CapsuleMassVector* source, c
         CapsuleMassVector up;
         up.set(0.0f, 0.0f, 1.0f);
 
-        if (capsuleMassAbs(float(up.dot3(between))) < DAT_010cbf70)
+        if (capsuleMassAbs(float(up.dot3ScalarCall(between))) < DAT_010cbf70)
         {
             CapsuleMassVector axis;
             axis.m = capsuleMassCross(up.m, between.m);
             axis.normalize3();
             CapsuleMassQuaternion q;
-            q.FUN_00cb2450(&axis, ClampedAcos(float(up.dot3(between))));
+            q.FUN_00cb2450(&axis, ClampedAcos(float(up.dot3ScalarCall(between))));
             transform.rotation.FUN_00cb2d90(&q);
         }
         else
@@ -1719,8 +1447,8 @@ __declspec(noinline) int __cdecl FUN_00ceeca0(const CapsuleMassVector* source, c
         CapsuleMassVector half;
         half.m = CapsuleMassSimd::_mm_load_ss(&DAT_01016248);
         cap.properties.inertia.Multiply(&half);
-        FUN_00cebe80((FUN_00cebe80_Struct*)&cap.properties.center, (float)(sphereMass * 0.5),
-                     &cap.properties.inertia.row0.x);
+        FUN_00cebe80(*reinterpret_cast<const hkVector4*>(&cap.properties.center), (float)(sphereMass * 0.5),
+                     *reinterpret_cast<hkMatrix3*>(&cap.properties.inertia));
         cap.properties.volume = (float)(sphereVolume * 0.5);
         cap.properties.mass = (float)(sphereMass * 0.5);
         elements.append(cap);
@@ -1740,8 +1468,8 @@ __declspec(noinline) int __cdecl FUN_00ceeca0(const CapsuleMassVector* source, c
         CapsuleMassVector half;
         half.m = CapsuleMassSimd::_mm_load_ss(&DAT_01016248);
         cap.properties.inertia.Multiply(&half);
-        FUN_00cebe80((FUN_00cebe80_Struct*)&cap.properties.center, (float)(sphereMass * 0.5),
-                     &cap.properties.inertia.row0.x);
+        FUN_00cebe80(*reinterpret_cast<const hkVector4*>(&cap.properties.center), (float)(sphereMass * 0.5),
+                     *reinterpret_cast<hkMatrix3*>(&cap.properties.inertia));
         cap.properties.volume = (float)(sphereVolume * 0.5);
         cap.properties.mass = (float)(sphereMass * 0.5);
         elements.append(cap);

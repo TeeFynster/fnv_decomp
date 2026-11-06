@@ -1,6 +1,8 @@
 // fallout_shared/sky/clouds.cpp: Clouds (10 functions)
 
 #include "clouds_decls.h"
+#include "../../../include/Sky.h"
+#include "../../../include/NiPoint3.h"
 
 // @fnv 0x00634110
 void Clouds::Update(Sky* sky, float time)
@@ -28,7 +30,7 @@ void Clouds::Update(Sky* sky, float time)
             if (controller)
             {
                 NiColor color = GetPointAt(i);
-                controller->color = RgbaColor(color.r, color.g, color.b, 1.0f);
+                controller->color = NiColorA(color.r, color.g, color.b, 1.0f);
             }
             speed = m_pWeatherObject->GetCloudLayerSpeed(i, DAT_011cca6c.Float()->f, 0.0f);
             if (m_pPreviousWeather)
@@ -53,7 +55,7 @@ void Clouds::Update(Sky* sky, float time)
                 TESTexture1024* pkTexture = m_pWeatherObject->GetCloudTexture(i);
                 if (pkTexture && pkTexture->GetModelLength())
                 {
-                    path = pkTexture->vfn_18();
+                    path = pkTexture->GetTextureResourcePath();
                     path += pkTexture->GetTextureResourceName();
                     sky->GetTextureManager();
                     SkyTextureManager::LoadTextureFromPath(&m_pCloudLayerTexture[i], path);
@@ -71,7 +73,7 @@ void Clouds::Update(Sky* sky, float time)
                 TESTexture1024* pkTexture = m_pWeatherObject->GetCloudTexture(i);
                 if (pkTexture && pkTexture->GetModelLength())
                 {
-                    path = pkTexture->vfn_18();
+                    path = pkTexture->GetTextureResourcePath();
                     path += pkTexture->GetTextureResourceName();
                     NiPointer<NiTexture> loaded = 0;
                     BSShaderManager::GetTexture(path, true, loaded, true, false);
@@ -126,15 +128,15 @@ void Clouds::Initialize(NiNode* parent)
             int children;
         } build;
         build.root = kModel.GetObject3D();
-        parent->AddObject(m_pRootNode, true);
+        parent->AttachChildInAvailableSlot((NiAVObject*)(NiNode*)m_pRootNode, true);
         build.layers = 0;
         build.children = build.root->FUN_00453470();
         for (int i = 0; i < build.children; ++i)
         {
-            if (build.root->FUN_0043b4a0(i)->vfn_18())
+            if (build.root->FUN_0043b4a0(i)->IsGeometry())
             {
                 m_pCloudLayerGeometry[i] = (NiGeometry*)build.root->FUN_0043b4a0(i);
-                m_pRootNode->AddObject(m_pCloudLayerGeometry[i], true);
+                m_pRootNode->AttachChildInAvailableSlot((NiAVObject*)(NiGeometry*)m_pCloudLayerGeometry[i], true);
                 ++build.layers;
             }
         }
@@ -150,111 +152,43 @@ void Clouds::SetCloudCount(int count)
     m_usCloudCount = (unsigned short)count;
 }
 
-struct FUN_00634870_shell : public Sky
-{
-    bool FUN_00634870();
-};
-
 // @fnv 0x00634870
-bool FUN_00634870_shell::FUN_00634870()
+bool Sky::FUN_00634870()
 {
-    return (0 < (*(unsigned int*)((char*)this + 0x118) & 3));
+    return (0 < (uiFlags & 3));
 }
-
-struct FUN_00634890_shell : public Sky
-{
-    SkyTextureManager* GetTextureManager();
-};
 
 // @fnv 0x00634890
-SkyTextureManager* FUN_00634890_shell::GetTextureManager()
+SkyTextureManager* Sky::GetTextureManager()
 {
-    return reinterpret_cast<SkyTextureManager*>(reinterpret_cast<char*>(this) + 0x114);
+    return &SkyController;
 }
 
-struct FUN_00634900_shell : public SkyShaderProperty
-{
-    void FUN_00634900(void*);
-};
-
-struct NiFixedString_access : public NiFixedString
-{
-    operator char const*() const;
-};
-
-// Assigns the NiFixedString at aFilename to the BSStringT<char> at offset 0x74 of this shader property.
+// Assigns the fixed string to the cloud texture path at offset 0x74.
 // @fnv 0x00634900
-void FUN_00634900_shell::FUN_00634900(void* aFilename)
+void SkyShaderProperty::FUN_00634900(const NiFixedString& aFilename)
 {
-    *(BSStringT<char>*)((char*)this + 0x74) = *(const NiFixedString_access*)aFilename;
+    *(BSStringT<char>*)((char*)this + 0x74) = aFilename;
 }
-
-struct NiTexture;
-struct FUN_009c8680_shell : public SkyShaderProperty
-{
-    NiTexture* FUN_009c8680();
-};
 
 // @fnv 0x009c8680
-NiTexture* FUN_009c8680_shell::FUN_009c8680()
+NiTexture* SkyShaderProperty::FUN_009c8680()
 {
     return (NiTexture*)((BSStringT<char>*)((char*)this + 0x70))->operator const char*();
 }
 
-struct P3
-{
-    void Set(float, float, float);
-};
-
-struct FUN_00633e00
-{
-    P3 m;
-    void Init();
-};
-
-// Initializes the object's m member by setting it to (0, 0, 0).
 // @fnv 0x00633e00
-void FUN_00633e00::Init()
+void __fastcall InitializeCloudColor(NiColor* color)
 {
-    m.Set(0.0f, 0.0f, 0.0f);
+    reinterpret_cast<NiPoint3*>(color)->Set(0.0f, 0.0f, 0.0f);
 }
 
-void _Deallocate(void*);
-struct S_00633dd0
-{
-    void FUN_00633e30();
-    void* DestroyIfFlagged(unsigned int);
-};
-// Calls FUN_00633e30, then deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x00633dd0
-void* S_00633dd0::DestroyIfFlagged(unsigned int flags)
-{
-    FUN_00633e30();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
-}
+// The shared Clouds interface does not yet declare the geometry reset method.
+void __fastcall ClearCloudGeometry(Clouds*);
 
-struct SkyObjectBase633e30
-{
-    virtual void Slot00();
-    NiNode* m_pTreeNode;
-    ~SkyObjectBase633e30();
-};
-
-struct FUN_00633e30 : SkyObjectBase633e30
-{
-    NiPointer<NiGeometry> m_clouds[4];
-    NiPointer<NiTexture> m_transitionTextures[4];
-    void FUN_00633d90();
-    void FUN_00634930();
-    ~FUN_00633e30();
-};
-
-// Destructor that calls FUN_00633d90 and FUN_00634930 before returning.
 // @fnv 0x00633e30
-FUN_00633e30::~FUN_00633e30()
+Clouds::~Clouds()
 {
-    FUN_00633d90();
-    FUN_00634930();
+    ClearCloudGeometry(this);
+    ClearCloudLayers();
 }

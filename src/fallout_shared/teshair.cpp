@@ -1,5 +1,9 @@
 // fallout_shared/teshair.cpp: TESHair, HairComparisonEntry (10 functions)
 
+#include "../../include/TESRaceForm.h"
+// Use the shared base instead of the generated unit-local definition.
+#define FNV_BASEFORMCOMPONENT_H
+
 #include "teshair_types_TESHair.h"
 #include "teshair_decls.h"
 #include <malloc.h>
@@ -13,9 +17,9 @@ TESHair::TESHair() : TESForm(), TESFullName(), TESModel(), TESTexture()
 
 // Loads a hair record: verifies form type 10, reads the record header, then dispatches EDID, OBND, FULL, MODL/MODD, ICON and DATA chunks until no chunks remain.
 // @fnv 0x005fdcb0
-bool TESHair::Load(TESFile* file)
+bool TESHair::LoadForm(TESFile* file)
 {
-    if (((TESFileFormInt*)file)->GetTESForm() != 10)
+    if (((TESFileFormInt_teshair_decls*)file)->GetTESForm() != 10)
         return false;
     TESForm::LoadRecordHeader(file);
     unsigned int chunkID;
@@ -65,23 +69,6 @@ bool FUN_005fdf60_shell::FUN_005fdf60()
     return true;
 }
 
-struct TESNPC;
-struct TESRace;
-struct TESRaceForm : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    void InitItem(TESForm*);
-    static TESRace* GetFormRace(TESForm*);
-    TESRace* GetFormRace();
-    static char* GetFormRaceEditorID(TESForm*);
-    char* GetFormRaceEditorID();
-    void SetFormRace(TESRace*);
-    TESRace* m_pRace;
-};
 typedef char _sizecheck_TESRaceForm[sizeof(TESRaceForm) == 8 ? 1 : -1];
 struct FUN_005fdfa0_shell : public TESHair
 {
@@ -93,20 +80,20 @@ bool FUN_005fdfa0_shell::IsHairValidForNPC(TESNPC* apNPC)
 {
     bool bretval = false;
     BGSQuestObjective* hair;
-    if (apNPC && ((TESHairCanBeNPCData*)apNPC)->FUN_004ac110() != 0)
+    if (apNPC && ((TESHairCanBeNPCData_teshair_decls*)apNPC)->FUN_004ac110() != 0)
     {
         hair = (BGSQuestObjective*)this;
-        if (((TESHairCanBeNPCData*)apNPC)->FUN_004ac110()->FUN_0045bb80()->IsInList(hair))
+        if (((TESHairCanBeNPCData_teshair_decls*)apNPC)->FUN_004ac110()->FUN_0045bb80()->IsInList(hair))
         {
             switch (((TESActorBase*)apNPC)->GetSex())
             {
-            case eSex_Male:
+            case SEX_SEX_MALE:
                 if (FUN_005fdf60())
                 {
                     bretval = true;
                 }
                 break;
-            case eSex_Female:
+            case SEX_SEX_FEMALE:
                 if (IsFlag4Clear())
                 {
                     bretval = true;

@@ -1,6 +1,125 @@
-// fallout/ai/movement/detailedactorpathhandler.cpp: std, DetailedActorPathHandler, DetailedActorPathHandlerEx, DelStandIn and more (73 functions)
+#include "../../../../include/SettingT.h"
+#include "../../../../include/Actor.h"
+// fallout/ai/movement/detailedactorpathhandler.cpp (73 byte-matched functions)
 
-#include "detailedactorpathhandler_decls.h"
+// Approved-header blockers retained below:
+// Actor: ::Actor needs virtual SetTarget(target) at slot 0x2C0;
+// MobileObject.h declares this slot as Unk_B0() without arguments.
+#include "../../../../include/NiTMallocInterface.h"
+#include "../../../../include/NiTNewInterface.h"
+#include "../../../../include/NiTArray.h"
+#include "../../../../include/NiMemObject.h"
+#include "../../../../include/NiMatrix3.h"
+#include "../../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+// In-class bodies of the former NiPoint3_ext stand-in.
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ) : x(fX), y(fY), z(fZ)
+{}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x - kRhs.x, y - kRhs.y, z - kRhs.z);
+}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x + kRhs.x, y + kRhs.y, z + kRhs.z);
+}
+inline float NiPoint3::operator*(const NiPoint3& point) const
+{
+    return x * point.x + y * point.y + z * point.z;
+}
+inline NiPoint3 operator*(float scalar, const NiPoint3& point)
+{
+    return NiPoint3(scalar * point.x, scalar * point.y, scalar * point.z);
+}
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/PathingLocation.h"
+#include "../../../../include/NiPoint3.h"
+
+#include "../../../../include/PathingGraphNode.h"
+#include "../../../../include/NavMeshTriangle.h"
+#include "../../../../include/ProcessLists.h"
+#include "../../../../include/BGSTerrainManager.h"
+// The shared handler does not declare its ActorAvoidanceData value type yet.
+// RTTI 0x01092640 identifies the array below as BSSimpleArray of this 8-byte payload.
+struct ActorAvoidanceData
+{
+    Actor* pActor;
+    float fValue;
+    ActorAvoidanceData(Actor*, float);
+};
+#include "../../../../include/ActorMover.h"
+#include "../../../../include/ActorPathHandler.h"
+
+#include "../../../../include/CombatState.h"
+// The former float CombatState query called Actor::FUN_008be1b0 (0x008be1b0).
+#include "../../../../include/Setting.h"
+#include "../../../../include/TESPackage.h"
+
+// Animation.h is absent; checked calls 0x00494710 and 0x00495BE0 belong to Animation.
+class Animation
+{
+public:
+    bool IsGroupQueued(unsigned short);
+    bool IsHighestPriority();
+};
+#include "../../../../include/BGSLoadFormBuffer.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/BSSimpleList.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/ActorValueOwner.h"
+#include "../../../../include/AnimIdle.h"
+#include "../../../../include/BGSCameraPath.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/BSSoundHandle.h"
+#include "../../../../include/BaseFormComponent.h"
+#include "../../../../include/CachedValuesOwner.h"
+#include "../../../../include/GO.h"
+#include "../../../../include/MobileObject.h"
+#include "../../../../include/NavMesh.h"
+#include "../../../../include/NavMeshStaticAvoidNode.h"
+#include "../../../../include/NavMeshClosedDoorInfo.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiTPrimitiveArray.h"
+#include "../../../../include/NiPointer.h"
+#include "../../../../include/BSSimpleArray.h"
+#include "../../../../include/BSStringT.h"
+#include "../../../../include/PathingRequest.h"
+// The approved request header lacks the byte-preserving 0x9F accessor.
+// Keep only that declaration on a layout-free extension of the shared class.
+struct PathingRequestQueries : PathingRequest
+{
+    unsigned char GetByteAtOffset9F();
+};
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/TES.h"
+#include "../../../../include/TESChildCell.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/bhkCharacterController.h"
+
+
+#pragma pack(push, 4)
+#include "../../../../include/DetailedActorPathHandler.h"
+#include "../../../../include/PathingSolution.h"
+#pragma pack(pop)
 
 // @fnv 0x009e0930
 bool DetailedActorPathHandler::TurnToAngle(float angle, bool keepActorHeading)
@@ -12,8 +131,8 @@ bool DetailedActorPathHandler::TurnToAngle(float angle, bool keepActorHeading)
     m_fPathValue5 = 0.0f;
     m_fPathValue16 = 0.0f;
     m_fPathValue2 = 0.0f;
-    pCurrentPathingSolution = (PathingSolution*)0;
-    m_pPathingRequest = (PathingRequest*)0;
+    (NiPointer<PathingSolution>&)pCurrentPathingSolution = (PathingSolution*)0;
+    (NiPointer<PathingRequest>&)m_pPathingRequest = (PathingRequest*)0;
     m_bHasPathingSolution = false;
     m_bPathingRequestPending = false;
     m_fElapsedTime = 0.0f;
@@ -34,8 +153,8 @@ void DetailedActorPathHandler::SetInitialPathState()
     m_kPathVector1 = NiPoint3::ZERO;
     ByteAndFlagState = m_pActorMover->GetPreferredMoveModeType();
     m_fPathValue16 = 0.0f;
-    pCurrentPathingSolution = (PathingSolution*)0;
-    m_pPathingRequest = (PathingRequest*)0;
+    (NiPointer<PathingSolution>&)pCurrentPathingSolution = (PathingSolution*)0;
+    (NiPointer<PathingRequest>&)m_pPathingRequest = (PathingRequest*)0;
     m_bPathFlag5 = false;
     m_iPathValue2 = 0;
     m_pPathTargetReference = 0;
@@ -48,7 +167,7 @@ void DetailedActorPathHandler::SetInitialPathState()
 // @fnv 0x009e3380
 void DetailedActorPathHandler::TransitionFrom(ActorPathHandler* previous)
 {
-    if (!previous || !previous->CanTransition())
+    if (!previous || !previous->vfn_34())
         return;
 
     DetailedActorPathHandler* oldPath = (DetailedActorPathHandler*)previous;
@@ -86,62 +205,46 @@ void DetailedActorPathHandler::TransitionFrom(ActorPathHandler* previous)
     }
 }
 
-struct NP_009e03e0
-{
-    void* p;
-    NP_009e03e0& operator=(void*);
-};
-struct Base_009e03e0
-{
-    char pad[8];
-    virtual ~Base_009e03e0();
-};
-struct List_009e03e0
-{
-    char pad[8];
-    ~List_009e03e0();
-    void RemoveAll();
-};
-struct FUN_009e03e0 : Base_009e03e0
-{
-    NP_009e03e0 spA;
-    NP_009e03e0 spB;
-    char pad2[0x44];
-    List_009e03e0 list;
-    ~FUN_009e03e0();
-};
 // @fnv 0x009e03e0
-FUN_009e03e0::~FUN_009e03e0()
+DetailedActorPathHandler::~DetailedActorPathHandler()
 {
-    spA = 0;
-    spB = 0;
-    list.RemoveAll();
+    (NiPointer<PathingSolution>&)pCurrentPathingSolution = (PathingSolution*)0;
+    (NiPointer<PathingRequest>&)m_pPathingRequest = (PathingRequest*)0;
+    ActorAvoidEntryList.RemoveAll();
 }
-
-struct FUN_009e1640_shell : public DetailedActorPathHandler
-{
-    void SetRotationMatrix(float);
-};
 
 void __cdecl FUN_00639730(float, float*, float*);
 
+// 0x009e1640 builds a Z rotation like NiMatrix3::MakeZRotation (0x004a0c90) but through the game's own sin/cos
+// (0x00639730): a game helper, not the Gamebryo inline.
+struct FUN_009e1640_ZRotation : public NiMatrix3
+{
+    void SetRotationMatrix(float afAngle);
+};
+
+// NiMatrix3::operator*(const NiPoint3&) const (0x004b4500) seen through this unit's NiPoint3.
+struct FUN_004b4500_ExtView : public NiMatrix3
+{
+    NiPoint3 operator*(const NiPoint3& point) const;
+};
+
 // Computes sin/cos of the angle and writes a 3x3 rotation matrix into the object's first nine floats.
 // @fnv 0x009e1640
-void FUN_009e1640_shell::SetRotationMatrix(float afAngle)
+void FUN_009e1640_ZRotation::SetRotationMatrix(float afAngle)
 {
     float fSin;
     float fCos;
     FUN_00639730(afAngle, &fSin, &fCos);
 
-    ((float*)this)[0] = fCos;
-    ((float*)this)[1] = fSin;
-    ((float*)this)[2] = 0.0f;
-    ((float*)this)[3] = -fSin;
-    ((float*)this)[4] = fCos;
-    ((float*)this)[5] = 0.0f;
-    ((float*)this)[6] = 0.0f;
-    ((float*)this)[7] = 0.0f;
-    ((float*)this)[8] = 1.0f;
+    m_pEntry[0][0] = fCos;
+    m_pEntry[0][1] = fSin;
+    m_pEntry[0][2] = 0.0f;
+    m_pEntry[1][0] = -fSin;
+    m_pEntry[1][1] = fCos;
+    m_pEntry[1][2] = 0.0f;
+    m_pEntry[2][0] = 0.0f;
+    m_pEntry[2][1] = 0.0f;
+    m_pEntry[2][2] = 1.0f;
 }
 
 namespace fnv_009e27e0 {
@@ -150,15 +253,6 @@ struct FUN_009e27e0_shell : public DetailedActorPathHandler
     bool FUN_009e27e0();
 };
 
-template <typename T> struct BSStringT
-{
-    operator const T*() const;
-};
-
-struct PathingRequest
-{
-    float GetFloatAtOffset68();
-};
 
 extern double DAT_01011588;
 
@@ -180,14 +274,9 @@ int __fastcall GetField38(char* this_ptr)
     return *(int*)(this_ptr + 0x38);
 }
 
-struct FUN_009e32f0_shell : public DetailedActorPathHandler
-{
-    bool ConsumePendingDelta(NiPoint3*);
-};
-
 // If the flag at offset 0xe2 is set, clears it, writes the vector at offset 0x1c to aDelta and returns true; otherwise writes NiPoint3::ZERO and returns false.
 // @fnv 0x009e32f0
-bool FUN_009e32f0_shell::ConsumePendingDelta(NiPoint3* aDelta)
+bool DetailedActorPathHandler::GetPathingDelta(NiPoint3* aDelta)
 {
     if (*((bool*)this + 0xe2))
     {
@@ -202,15 +291,15 @@ bool FUN_009e32f0_shell::ConsumePendingDelta(NiPoint3* aDelta)
     }
 }
 
-struct Act_009e3520
+// Actor.h has no declaration for this query yet.
+struct ActorLookAtQuery : public Actor
 {
     bool GetLookAtPosition(void*);
-    float GetCurrentMovementSpeed();
 };
 struct S_009e3520
 {
     int pad0;
-    Act_009e3520* pActor;
+    ActorLookAtQuery* pActor;
     char pad1[0x14];
     float a;
     float speed;
@@ -237,20 +326,16 @@ void FUN_009e5480_shell::ResetPathState()
 }
 
 struct ActiveEffect;
-struct Actor;
 struct ActorCause;
 struct AlchemyItem;
-struct Animation;
 struct TwoIntegerValues;
 struct MediaLocation;
 struct BGSEncounterZone;
 struct ExplosionForm;
 struct BGSImpactDataSet;
-struct BGSLoadFormBuffer;
 struct BGSLoadGameBuffer;
 struct BGSPerk;
 struct BGSPerkEntry;
-struct BGSSaveFormBuffer;
 struct BGSSaveGameBuffer;
 struct BGSTextureSet;
 struct BSAnimGroupSequence;
@@ -261,7 +346,7 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
+class BSSoundHandle;
 struct BaseProcess;
 struct BipedAnim;
 struct CHUNK;
@@ -294,7 +379,7 @@ struct MagicEffectCollection;
 struct MagicProjectile;
 struct MagicTarget;
 struct MapMarkerData;
-struct MobileObject;
+
 struct Point3Offset;
 struct NiAVObject;
 struct AnimationInterpolator;
@@ -304,15 +389,13 @@ struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
 struct NiNode;
 struct NiPointLight;
 struct PlacedObjectInfo;
 struct IndexedPointerCollection;
 struct LocationDescriptor;
 struct PathingAvoidNodeArray;
-struct PathingLocation;
-struct PathingRequest;
+
 struct Projectile;
 struct QueuedFile;
 struct ReferenceLightData;
@@ -340,7 +423,6 @@ struct TESObjectBOOK;
 struct TESObjectCELL;
 struct TESObjectCLOT;
 struct TESObjectLIGH;
-struct TESObjectREFR;
 struct TESObjectWEAP;
 struct TESPackage;
 struct TESRace;
@@ -354,7 +436,7 @@ struct TrapEntry;
 struct TrespassPackage;
 struct WaterZone;
 struct WeaponObject;
-struct bhkCharacterController;
+
 struct bhkNiCollisionObject;
 struct bhkRagdollController;
 struct bhkRagdollPenetrationUtil;
@@ -364,14 +446,7 @@ struct hkpRigidBody;
 extern int* DAT_011a3ff0[];
 
 struct Sky;
-struct TES
-{
-    Sky* GetLogDate(void);
-};
-struct Calendar
-{
-    unsigned int GetDaysPassed(void);
-};
+
 
 struct FakeProcess
 {
@@ -534,78 +609,10 @@ struct FakeProcess
     virtual void v156();
     virtual void v157();
     virtual void v158();
-    virtual Calendar* GetCurrentPackage();  // 159 * 4 = 0x27c
+    virtual TESPackage* GetCurrentPackage();  // 159 * 4 = 0x27c
     virtual int GetPackageState();          // 160 * 4 = 0x280
 };
 
-struct FakeREFR
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual bool IsActor();  // 64 * 4 = 0x100
-};
 
 // Resolves the current process's package; if its type is 6 and the target reference is an actor, returns that actor as the follow leader, otherwise null.
 // @fnv 0x009e55e0
@@ -616,13 +623,13 @@ Actor* __cdecl FUN_009e55e0(TES* apActor)
     pprocess = (FakeProcess*)apActor->GetLogDate();
     if (pprocess)
     {
-        Calendar* ppack = pprocess->GetCurrentPackage();
+        TESPackage* ppack = pprocess->GetCurrentPackage();
         if (ppack)
         {
-            int iPackageType = DAT_011a3ff0[ppack->GetDaysPassed()][pprocess->GetPackageState()];
+            int iPackageType = DAT_011a3ff0[ppack->GetProcedureType()][pprocess->GetPackageState()];
             if (iPackageType == 6)
             {
-                FakeREFR* ptarget = (FakeREFR*)pprocess->GetActorTargetReference();
+                TESObjectREFR* ptarget = pprocess->GetActorTargetReference();
                 if (ptarget && ptarget->IsActor())
                 {
                     pfollowLeader = (Actor*)ptarget;
@@ -655,11 +662,7 @@ class Date
 
 union SETTING_VALUE;
 class GameSettingCollection;
-template <class T> class SettingT
-{
-  public:
-    SETTING_VALUE* Float();
-};
+using ::SettingT;
 
 extern double _gModifierZero;
 extern float DAT_010923dc;
@@ -916,103 +919,97 @@ void FUN_009e8790_shell::ResetMoveState()
     *(NiPoint3*)((char*)this + 0xa0) = NiPoint3::ZERO;
 }
 
+class ActiveEffect;
+class AlchemyItem;
+struct BGSEncounterZone;
+class BGSLoadGameBuffer;
+class BGSSaveGameBuffer;
+class BSAnimNoteReceiver;
+class BSExtraData;
+class BSFaceGenAnimationData;
+class BSFaceGenNiNode;
+class BSMultiBound;
+class BSMultiBoundRoom;
+class BSSoundHandle;
+class BaseProcess;
+class CellMopp;
+class EffectItem;
+class ExtraDataList;
+class ExtraLock;
+class FormRecordHeader;
+class FurnitureMark;
+class HWND__;
+struct InventoryChanges;
+class InventoryStackRecord;
+class MagicCaster;
+class MagicItem;
+class MagicProjectile;
+class MagicTarget;
+class NiAVObject;
+class NiColor;
+class NiControllerManager;
+class NiControllerSequence;
+class NiFixedString;
+class NiGeometry;
+class NiLight;
+class NiNode;
+class NiPointLight;
+class NiQuaternion;
+class PlacedObjectInfo;
+class Script;
+class ScriptLocals;
+class SpellItem;
+class TESActorBase;
+class TESAmmo;
+class TESBoundObject;
+class TESContainer;
+class TESFile;
+class TESForm;
+class TESGlobal;
+class TESIdleForm;
+class TESModel;
+class TESObjectARMO;
+class TESObjectCELL;
+class TESObjectCLOT;
+class TESObjectLIGH;
+class TESObjectWEAP;
+class TESPackage;
+class TESSound;
+class TESTopic;
+class TESTopicInfo;
+class TESWorldSpace;
+class TargetEntry;
+class bhkNiCollisionObject;
+class hkVector4;
+class hkpRigidBody;
 namespace fnv_009e9390 {
-struct ActiveEffect;
-struct Actor;
 struct ActorCause;
-struct AlchemyItem;
-struct Animation;
 struct TwoIntegerValues;
 struct MediaLocation;
-struct BGSEncounterZone;
 struct ExplosionForm;
-struct BGSLoadFormBuffer;
-struct BGSLoadGameBuffer;
-struct BGSSaveFormBuffer;
-struct BGSSaveGameBuffer;
 struct SaveLoadFile;
-struct BSAnimNoteReceiver;
-struct BSExtraData;
-struct BSFaceGenAnimationData;
-struct BSFaceGenNiNode;
-struct BSMultiBound;
-struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
-struct BaseProcess;
 struct BipedAnim;
 struct CHUNK;
-struct CellMopp;
 struct GameFormRecord;
 struct DialogueResponse;
 struct TeleportableReference;
-struct EffectItem;
-struct ExtraDataList;
-struct ExtraLock;
-struct FormRecordHeader;
 struct TESFileGroup;
-struct FurnitureMark;
-struct HWND__;
 struct BooleanIntegerAccessor;
-struct InventoryChanges;
-struct InventoryStackRecord;
 struct CellDataNode;
-struct MagicCaster;
-struct MagicItem;
 struct MagicEffectCollection;
-struct MagicProjectile;
-struct MagicTarget;
 struct MapMarkerData;
-struct MobileObject;
+
 struct Point3Offset;
-struct NiAVObject;
 struct AnimationInterpolator;
-struct NiColor;
-struct NiControllerManager;
-struct NiControllerSequence;
-struct NiFixedString;
-struct NiGeometry;
-struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
-struct NiPointLight;
-struct NiQuaternion;
-struct PlacedObjectInfo;
 struct IndexedPointerCollection;
 struct LocationDescriptor;
 struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
-struct ScriptLocals;
-struct SpellItem;
-struct TESActorBase;
-struct TESAmmo;
-struct TESBoundObject;
-struct TESContainer;
-struct TESFile;
-struct TESForm;
-struct TESGlobal;
-struct TESIdleForm;
-struct TESModel;
-struct TESObjectARMO;
-struct TESObjectCELL;
-struct TESObjectCLOT;
-struct TESObjectLIGH;
-struct TESObjectREFR;
-struct TESObjectWEAP;
-struct TESPackage;
-struct TESSound;
-struct TESTopic;
-struct TESTopicInfo;
-struct TESWorldSpace;
-struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
-struct bhkNiCollisionObject;
-struct hkVector4;
-struct hkpRigidBody;
+
 struct blob4
 {
     char b[4];
@@ -1033,48 +1030,17 @@ struct blob48
 {
     char b[48];
 };
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
+
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
-struct TESChildCell
-{
-    virtual TESObjectCELL* GetSaveParentCell();
-};
+
 typedef char _sizecheck_TESChildCell[sizeof(TESChildCell) == 4 ? 1 : -1];
-struct ActorValueOwner
-{
-    virtual int GetBaseActorValue(int);
-    virtual float GetBaseActorValueFloat(int);
-    virtual int GetActorValue(int);
-    virtual float GetCurrentActorValue(int);
-    virtual float GetPermanentActorValueFloat(int);
-    virtual float GetTemporaryActorValue(int);
-    virtual float GetDamageActorValue(int);
-    virtual int GetPermanentActorValue(int);
-    virtual float GetPermanentActorValueAdjustment(int);
-    virtual TESForm* GetActorValueOwnerForm();
-    virtual unsigned short GetActorValueOwnerType();
-    int GetActorValueAsInteger(int);
-    float GetActorValueFloatByIndex(int);
-};
+
 typedef char _sizecheck_ActorValueOwner[sizeof(ActorValueOwner) == 4 ? 1 : -1];
 struct FUN_009e9390_shell : public DetailedActorPathHandler
 {
     void FUN_009e9390(BGSLoadFormBuffer*);
 };
 
-struct BGSLoadFormBuffer
-{
-    virtual unsigned char GetVersion();
-    bool ReadFormIdentifier(void*);
-    void ReadTypedData(void*, unsigned int);
-    int ReadElementCount();
-};
 
 // @fnv 0x009e9390
 void FUN_009e9390_shell::FUN_009e9390(BGSLoadFormBuffer* apLoadGameBuffer)
@@ -1175,244 +1141,9 @@ namespace std {
 float __cdecl abs(float);
 }
 
-class PathingGraphNode
-{
-  public:
-    bool IsTransitionNode();
-    bool FUN_006e2330();
-};
 
-class PathingSolution
-{
-  public:
-    PathingGraphNode* FUN_006b05a0();
-    bool FUN_006b05d0();
-    float GetTotalPathLength();
-    unsigned int GetObjectFlags();
-};
-
-class PathingRequest
-{
-  public:
-    float GetCenterRadius();
-};
-
-template <class T> class NiPointerAccess
-{
-  public:
-    T* operator->() const;
-};
-
-class ActorMoverEx
-{
-  public:
-    bool HasLookAtTarget();
-    bool GetLookAtTargetPosition(NiPoint3& arPoint);
-};
-
-class NiPoint3Ex : public NiPoint3
-{
-  public:
-    NiPoint3Ex();
-    NiPoint3& Subtract(const NiPoint3& arPt);
-    float Length() const;
-};
-
-class Actor
-{
-  public:
-    virtual void Vfn000();
-    virtual void Vfn001();
-    virtual void Vfn002();
-    virtual void Vfn003();
-    virtual void Vfn004();
-    virtual void Vfn005();
-    virtual void Vfn006();
-    virtual void Vfn007();
-    virtual void Vfn008();
-    virtual void Vfn009();
-    virtual void Vfn010();
-    virtual void Vfn011();
-    virtual void Vfn012();
-    virtual void Vfn013();
-    virtual void Vfn014();
-    virtual void Vfn015();
-    virtual void Vfn016();
-    virtual void Vfn017();
-    virtual void Vfn018();
-    virtual void Vfn019();
-    virtual void Vfn020();
-    virtual void Vfn021();
-    virtual void Vfn022();
-    virtual void Vfn023();
-    virtual void Vfn024();
-    virtual void Vfn025();
-    virtual void Vfn026();
-    virtual void Vfn027();
-    virtual void Vfn028();
-    virtual void Vfn029();
-    virtual void Vfn030();
-    virtual void Vfn031();
-    virtual void Vfn032();
-    virtual void Vfn033();
-    virtual void Vfn034();
-    virtual void Vfn035();
-    virtual void Vfn036();
-    virtual void Vfn037();
-    virtual void Vfn038();
-    virtual void Vfn039();
-    virtual void Vfn040();
-    virtual void Vfn041();
-    virtual void Vfn042();
-    virtual void Vfn043();
-    virtual void Vfn044();
-    virtual void Vfn045();
-    virtual void Vfn046();
-    virtual void Vfn047();
-    virtual void Vfn048();
-    virtual void Vfn049();
-    virtual void Vfn050();
-    virtual void Vfn051();
-    virtual void Vfn052();
-    virtual void Vfn053();
-    virtual void Vfn054();
-    virtual void Vfn055();
-    virtual void Vfn056();
-    virtual void Vfn057();
-    virtual void Vfn058();
-    virtual void Vfn059();
-    virtual void Vfn060();
-    virtual void Vfn061();
-    virtual void Vfn062();
-    virtual void Vfn063();
-    virtual void Vfn064();
-    virtual void Vfn065();
-    virtual void Vfn066();
-    virtual void Vfn067();
-    virtual void Vfn068();
-    virtual void Vfn069();
-    virtual void Vfn070();
-    virtual void Vfn071();
-    virtual void Vfn072();
-    virtual void Vfn073();
-    virtual void Vfn074();
-    virtual void Vfn075();
-    virtual void Vfn076();
-    virtual void Vfn077();
-    virtual void Vfn078();
-    virtual void Vfn079();
-    virtual void Vfn080();
-    virtual void Vfn081();
-    virtual void Vfn082();
-    virtual void Vfn083();
-    virtual void Vfn084();
-    virtual void Vfn085();
-    virtual void Vfn086();
-    virtual void Vfn087();
-    virtual void Vfn088();
-    virtual void Vfn089();
-    virtual void Vfn090();
-    virtual void Vfn091();
-    virtual void Vfn092();
-    virtual void Vfn093();
-    virtual void Vfn094();
-    virtual void Vfn095();
-    virtual void Vfn096();
-    virtual void Vfn097();
-    virtual void Vfn098();
-    virtual void Vfn099();
-    virtual void Vfn100();
-    virtual void Vfn101();
-    virtual void Vfn102();
-    virtual void Vfn103();
-    virtual void Vfn104();
-    virtual void Vfn105();
-    virtual void Vfn106();
-    virtual void Vfn107();
-    virtual void Vfn108();
-    virtual void Vfn109();
-    virtual void Vfn110();
-    virtual void Vfn111();
-    virtual void Vfn112();
-    virtual void Vfn113();
-    virtual void Vfn114();
-    virtual void Vfn115();
-    virtual void Vfn116();
-    virtual void Vfn117();
-    virtual void Vfn118();
-    virtual void Vfn119();
-    virtual void Vfn120();
-    virtual void Vfn121();
-    virtual void Vfn122();
-    virtual void Vfn123();
-    virtual void Vfn124();
-    virtual const NiPoint3* GetPos();
-    virtual void Vfn126();
-    virtual void Vfn127();
-    virtual void Vfn128();
-    virtual void Vfn129();
-    virtual void Vfn130();
-    virtual void Vfn131();
-    virtual void Vfn132();
-    virtual void Vfn133();
-    virtual void Vfn134();
-    virtual void Vfn135();
-    virtual void Vfn136();
-    virtual void Vfn137();
-    virtual void Vfn138();
-    virtual void Vfn139();
-    virtual void Vfn140();
-    virtual void Vfn141();
-    virtual void Vfn142();
-    virtual void Vfn143();
-    virtual void Vfn144();
-    virtual void Vfn145();
-    virtual void Vfn146();
-    virtual void Vfn147();
-    virtual void Vfn148();
-    virtual void Vfn149();
-    virtual void Vfn150();
-    virtual void Vfn151();
-    virtual void Vfn152();
-    virtual void Vfn153();
-    virtual void Vfn154();
-    virtual void Vfn155();
-    virtual void Vfn156();
-    virtual void Vfn157();
-    virtual void Vfn158();
-    virtual void Vfn159();
-    virtual void Vfn160();
-    virtual void Vfn161();
-    virtual void Vfn162();
-    virtual void Vfn163();
-    virtual void Vfn164();
-    virtual void Vfn165();
-    virtual void Vfn166();
-    virtual void Vfn167();
-    virtual void Vfn168();
-    virtual void Vfn169();
-    virtual void Vfn170();
-    virtual void Vfn171();
-    virtual void Vfn172();
-    virtual void Vfn173();
-    virtual void Vfn174();
-    virtual float GetCurrentTargetDistance(bool abInterp);
-    virtual void Vfn176();
-    virtual void SetFurnitureHeading(float afHeading);
-    bool HasCombatState();
-};
-
-class PathHandlerEx
-{
-  public:
-    virtual void V00();
-    virtual void V01();
-    virtual void V02();
-    virtual int Update(float afDeltaT);
-    Actor* pActor;
-};
-
-struct DetailedActorPathHandlerEx : public DetailedActorPathHandler
+// 0x009E0470 uses the shared handler layout; only these missing method declarations remain local.
+struct PathTravelUpdate : public DetailedActorPathHandler
 {
     void ResetMoveState();
     void FUN_009e27e0();
@@ -1423,7 +1154,7 @@ struct DetailedActorPathHandlerEx : public DetailedActorPathHandler
 
 // Resets path-travel state, computes the goal angle from the actor's position and pathing solution, and updates the handler when afDeltaT is positive.
 // @fnv 0x009e0470
-int DetailedActorPathHandlerEx::UpdatePathTravel(float afPercentTraveled, float afDeltaT)
+int PathTravelUpdate::UpdatePathTravel(float afPercentTraveled, float afDeltaT)
 {
     eState = 1;
     if (m_iPathParameter1 == 0)
@@ -1448,33 +1179,33 @@ int DetailedActorPathHandlerEx::UpdatePathTravel(float afPercentTraveled, float 
     m_fPathValue7 = 0.0f;
     m_fPathValue13 = 0.0f;
     m_kPathVector5 = NiPoint3::ZERO;
-    m_kActorPosition = *((PathHandlerEx*)this)->pActor->GetPos();
+    m_kActorPosition = *((const Actor*)pActor)->GetPos();
     m_fPathValue15 = 0.0f;
     m_fPathValue11 = -1.0f;
 
-    if (((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() < 2)
+    if (((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() < 2)
     {
         ResetMoveState();
         m_bPathFlag5 = false;
-        m_kPathVector3 = *((PathHandlerEx*)this)->pActor->GetPos();
+        m_kPathVector3 = *((const Actor*)pActor)->GetPos();
         m_kPathVector4 = m_kPathVector3;
         eState = 5;
         return 5;
     }
 
-    if (((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05d0())
+    if (((NiPointer<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05d0())
     {
         m_fPathValue14 = g_011e0994_arg1;
     }
     else
     {
-        m_fPathValue14 = FUN_00404010(((NiPointerAccess<PathingRequest>&)m_pPathingRequest)->GetCenterRadius() *
-                                          ((NiPointerAccess<PathingRequest>&)m_pPathingRequest)->GetCenterRadius(),
+        m_fPathValue14 = FUN_00404010(((NiPointer<PathingRequest>&)m_pPathingRequest)->GetCenterRadius() *
+                                          ((NiPointer<PathingRequest>&)m_pPathingRequest)->GetCenterRadius(),
                                       0.1f);
-        if (((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0()->FUN_006e2330())
+        if (((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0())->FUN_006e2330())
             m_fPathValue14 = DAT_01092470;
     }
-    if (((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0()->IsTransitionNode())
+    if (((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0())->IsTransitionNode())
         m_bPathFlag4 = true;
 
     FUN_009e27e0();
@@ -1483,25 +1214,25 @@ int DetailedActorPathHandlerEx::UpdatePathTravel(float afPercentTraveled, float 
     m_bHasPathingSolution = false;
     m_bPathingRequestPending = false;
     m_fElapsedTime = 0.0f;
-    if (!((PathHandlerEx*)this)->pActor->HasCombatState() &&
-        ((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->GetTotalPathLength() <
+    if (!((Actor*)pActor)->HasCombatState() &&
+        ((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetTotalPathLength() <
             *(float*)((char*)this + 0x18) &&
-        !((ActorMoverEx*)m_pActorMover)->HasLookAtTarget())
+        !((ActorMover*)m_pActorMover)->HasLookAtTarget())
     {
         m_bHasPathingSolution = true;
         m_bPathingRequestPending = true;
-        m_fElapsedTime = (float)((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags();
+        m_fElapsedTime = (float)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags();
     }
 
     if (!UpdatePathingGoal())
     {
         float fgoalAngle;
-        NiPoint3Ex dirVec;
-        if (m_bPathFlag6 || !((ActorMoverEx*)m_pActorMover)->GetLookAtTargetPosition(dirVec))
+        NiPoint3 dirVec;
+        if (m_bPathFlag6 || !((ActorMover*)m_pActorMover)->GetLookAtTargetPosition((NiPoint3&)dirVec))
             (NiPoint3&)dirVec = m_kPathVector3;
-        dirVec.Subtract(*((PathHandlerEx*)this)->pActor->GetPos());
+        dirVec.Subtract(*((const Actor*)pActor)->GetPos());
         if (dirVec.Length() * DAT_0107d1b8 <= std::abs(dirVec.z))
-            fgoalAngle = ((PathHandlerEx*)this)->pActor->GetCurrentTargetDistance(false);
+            fgoalAngle = ((Actor*)pActor)->GetCurrentTargetDistance(false);
         else
             fgoalAngle = GetDirectionAngle(dirVec);
         if (!bpathTransition)
@@ -1509,13 +1240,13 @@ int DetailedActorPathHandlerEx::UpdatePathTravel(float afPercentTraveled, float 
             if (afPercentTraveled == _gModifierZero)
                 StartTurningToAngle(fgoalAngle, false, bpathTransition);
             else
-                ((PathHandlerEx*)this)->pActor->SetFurnitureHeading(fgoalAngle);
+                ((Actor*)pActor)->SetFurnitureHeading(fgoalAngle);
         }
     }
 
     eState = 2;
     if (afDeltaT > _gModifierZero)
-        return ((PathHandlerEx*)this)->Update(afDeltaT);
+        return ((ActorPathHandler*)this)->vfn_0c(afDeltaT);
     return 0;
 }
 }  // namespace fnv_009e0470
@@ -1526,26 +1257,7 @@ struct FUN_009e16e0_shell : public DetailedActorPathHandler
     int FUN_009e16e0(float);
 };
 
-struct Setting_S
-{
-    float* Float();
-};
-struct XActor
-{
-    void* GetActorBase();
-};
-struct PCH
-{
-    bool HasCombatState();
-};
-struct CombatState
-{
-    float ProcessCoverLOSResult();
-};
-struct MobileObject
-{
-    bool IsInDialogueWithPlayer() const;
-};
+
 struct NP_0081c630
 {
     NP_0081c630& operator=(void*);
@@ -1555,29 +1267,11 @@ struct GlobalObject_0041a250
     ~GlobalObject_0041a250();
 };
 namespace p07 {
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    NiPoint3();
-    NiPoint3 operator-(const NiPoint3&) const;
-};
+
 float __cdecl GetDirectionAngle(const NiPoint3&);
 }
-struct FUN_00595c80_shell
-{
-    float GetSquaredXYLength() const;
-};
-struct B006815c0 : public p07::NiPoint3
-{
-    B006815c0();
-};
-struct ActorMoverLook
-{
-    bool HasLookAtTarget();
-    bool GetLookAtTargetPosition(p07::NiPoint3&);
-};
+
+
 struct FUN_009e8790_shell
 {
     void ResetMoveState();
@@ -1590,230 +1284,7 @@ struct FUN_009e7d70_shell
 {
     float FUN_009e7d70(float);
 };
-struct PathHandlerStub
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual int Update(float);
-};
-struct ActorStub
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual const p07::NiPoint3* GetPos();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual bool IsPlayerRef();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual float GetCurrentTargetDistance(int);
-    virtual void v176();
-    virtual void SetFurnitureHeading(float);
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual float GetTurnSpeed();
-};
+
 namespace std {
 float __cdecl abs(float);
 }
@@ -1824,34 +1295,34 @@ struct FUN_005f0c80_shell
 };
 bool __fastcall GetByteAtOffset70(void*);
 bool __fastcall FUN_0097fb20(CombatState*);
-p07::NiPoint3 __cdecl FUN_009a8050(ActorStub*);
-p07::NiPoint3 __cdecl FUN_009a88e0(ActorStub*, B006815c0);
+NiPoint3 __cdecl FUN_009a8050(Actor*);
+NiPoint3 __cdecl FUN_009a88e0(Actor*, NiPoint3);
 extern double g_d100;
 bool __fastcall FUN_0087eeb0(void*);
 float __cdecl FUN_004b15e0(float, float, float*);
 extern double _gModifierZero;
 extern float DAT_010923dc;
-extern Setting_S originalRuntimeFloatSetting220;
+extern Setting originalRuntimeFloatSetting220;
 extern const double DAT_01023128;
 extern double DAT_01092478;
-extern Setting_S g_011f2ac4;
-extern Setting_S g_011f2ad8;
-extern Setting_S g_011f2b10;
-extern Setting_S g_011f2c10;
+extern Setting g_011f2ac4;
+extern Setting g_011f2ad8;
+extern Setting g_011f2b10;
+extern Setting g_011f2c10;
 
 // Runs the actor path handler's state machine, turning the actor toward its look-at target and updating move mode and timers.
 // @fnv 0x009e16e0
 int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
 {
     int eresult = -1;
-    bool bimmobile = ((FUN_005f0c80_shell*)((XActor*)*(ActorStub**)((char*)this + 4))->GetActorBase())->FUN_005f0c80();
-    if (!FUN_0087eeb0(*(ActorStub**)((char*)this + 4)) && !GetByteAtOffset70(*(void**)((char*)this + 8)) &&
+    bool bimmobile = ((FUN_005f0c80_shell*)((Actor*)*(Actor**)((char*)this + 4))->GetActorBase())->FUN_005f0c80();
+    if (!fnv_009e16e0::FUN_0087eeb0(*(Actor**)((char*)this + 4)) && !GetByteAtOffset70(*(void**)((char*)this + 8)) &&
         !FUN_0097fb20(*(CombatState**)((char*)this + 8)))
     {
         switch (*(unsigned int*)((char*)this + 0xc8))
         {
         case 3:
-            ((PathHandlerStub*)this)->Update(afDeltaT);
+            ((ActorPathHandler*)this)->vfn_0c(afDeltaT);
             eresult = 0;
             break;
         case 7:
@@ -1860,7 +1331,7 @@ int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
             eresult = 5;
             break;
         case 6:
-            (*(ActorStub**)((char*)this + 4))->SetFurnitureHeading(((FUN_009e7d70_shell*)this)->FUN_009e7d70(afDeltaT));
+            (*(Actor**)((char*)this + 4))->SetFurnitureHeading(((FUN_009e7d70_shell*)this)->FUN_009e7d70(afDeltaT));
             *(NiPoint3*)((char*)this + 0x1c) = NiPoint3::ZERO;
             *(float*)((char*)this + 0x9c) = 0.0f;
             *(NiPoint3*)((char*)this + 0xa0) = NiPoint3::ZERO;
@@ -1875,7 +1346,7 @@ int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
             *(NP_0081c630*)((char*)this + 0x10) = 0;
         case 0:
         case 4:
-            if (!(*(ActorMoverLook**)((char*)this + 8))->HasLookAtTarget())
+            if (!(*(ActorMover**)((char*)this + 8))->HasLookAtTarget())
             {
                 *(unsigned int*)((char*)this + 0x60) = (*(ActorMover**)((char*)this + 8))->GetPreferredMoveModeType();
                 eresult = 5;
@@ -1897,39 +1368,39 @@ int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
         }
         if (eresult == -1)
         {
-            B006815c0 lookatPoint;
-            if ((*(ActorMoverLook**)((char*)this + 8))->GetLookAtTargetPosition(lookatPoint) &&
-                !((MobileObject*)*(ActorStub**)((char*)this + 4))->IsInDialogueWithPlayer())
+            NiPoint3 lookatPoint;
+            if ((*(ActorMover**)((char*)this + 8))->GetLookAtTargetPosition((NiPoint3&)lookatPoint) &&
+                !((MobileObject*)*(Actor**)((char*)this + 4))->IsInDialogueWithPlayer())
             {
-                float fCurrentAngle = WrapAngle((*(ActorStub**)((char*)this + 4))->GetCurrentTargetDistance(0));
-                p07::NiPoint3 firingLocation = FUN_009a8050(*(ActorStub**)((char*)this + 4));
-                if (((FUN_00595c80_shell*)&(firingLocation - lookatPoint))->GetSquaredXYLength() <
-                    ((CombatState*)*(ActorStub**)((char*)this + 4))->ProcessCoverLOSResult() *
-                        ((CombatState*)*(ActorStub**)((char*)this + 4))->ProcessCoverLOSResult() * 0.25)
+                float fCurrentAngle = WrapAngle((*(Actor**)((char*)this + 4))->GetCurrentTargetDistance(0));
+                NiPoint3 firingLocation = FUN_009a8050(*(Actor**)((char*)this + 4));
+                if (((NiPoint3*)&(firingLocation - lookatPoint))->GetSquaredXYLength() <
+                    (*(Actor**)((char*)this + 4))->FUN_008be1b0() *
+                        (*(Actor**)((char*)this + 4))->FUN_008be1b0() * 0.25)
                     eresult = 0;
                 if (eresult == -1)
                 {
                     float fdir;
-                    p07::NiPoint3 rot = FUN_009a88e0(*(ActorStub**)((char*)this + 4), lookatPoint);
+                    NiPoint3 rot = FUN_009a88e0(*(Actor**)((char*)this + 4), lookatPoint);
                     float fgoalAngle = WrapAngle(rot.z);
                     float fgoalLookAngle = rot.x;
                     float fangleDelta;
-                    if (((CombatState*)*(ActorStub**)((char*)this + 4))->ProcessCoverLOSResult() >= g_d100)
+                    if ((*(Actor**)((char*)this + 4))->FUN_008be1b0() >= g_d100)
                     {
-                        p07::NiPoint3 delta = lookatPoint - *(*(ActorStub**)((char*)this + 4))->GetPos();
+                        NiPoint3 delta = lookatPoint - *((const Actor*)*(Actor**)((char*)this + 4))->GetPos();
                         delta.z = 0.0f;
-                        fangleDelta = std::abs(FUN_004b15e0(fCurrentAngle, p07::GetDirectionAngle(delta), &fdir));
+                        fangleDelta = std::abs(FUN_004b15e0(fCurrentAngle, p07::GetDirectionAngle((const NiPoint3&)delta), &fdir));
                     }
                     else
                     {
                         fangleDelta = std::abs(FUN_004b15e0(fCurrentAngle, fgoalAngle, &fdir));
                     }
-                    float frotateMax = (*(ActorStub**)((char*)this + 4))->GetTurnSpeed() * DAT_01023128 * afDeltaT;
-                    if (!(*(ActorStub**)((char*)this + 4))->IsPlayerRef())
-                        frotateMax *= ((PCH*)*(ActorStub**)((char*)this + 4))->HasCombatState() ? *g_011f2ac4.Float()
+                    float frotateMax = (*(Actor**)((char*)this + 4))->GetMaxRotationSpeed() * DAT_01023128 * afDeltaT;
+                    if (!(*(Actor**)((char*)this + 4))->IsCreature())
+                        frotateMax *= ((Actor*)*(Actor**)((char*)this + 4))->HasCombatState() ? *g_011f2ac4.Float()
                                                                                                 : *g_011f2ad8.Float();
                     else
-                        frotateMax *= ((PCH*)*(ActorStub**)((char*)this + 4))->HasCombatState() ? *g_011f2b10.Float()
+                        frotateMax *= ((Actor*)*(Actor**)((char*)this + 4))->HasCombatState() ? *g_011f2b10.Float()
                                                                                                 : *g_011f2c10.Float();
                     float fclampedAngleDelta = fangleDelta;
                     if (fclampedAngleDelta > frotateMax)
@@ -1963,7 +1434,7 @@ int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
                     if (!FUN_0097fb20(*(CombatState**)((char*)this + 8)))
                         *(unsigned int*)((char*)this + 0x60) = inewMoveMode;
                     if (!bimmobile || std::abs(fgoalLookAngle) <= DAT_01092478)
-                        (*(ActorStub**)((char*)this + 4))->SetFurnitureHeading(fCurrentAngle);
+                        (*(Actor**)((char*)this + 4))->SetFurnitureHeading(fCurrentAngle);
                     flookingAngle = fgoalLookAngle;
                     if (bimmobile)
                         ((FUN_009e4c60_shell*)this)->UpdateLookingAngle(afDeltaT, flookingAngle);
@@ -1980,201 +1451,7 @@ int FUN_009e16e0_shell::FUN_009e16e0(float afDeltaT)
 }  // namespace fnv_009e16e0
 
 namespace fnv_009e2aa0 {
-class Animation
-{
-  public:
-    bool IsGroupQueued(unsigned short usGroup);
-};
 
-class MobileObject
-{
-  public:
-    virtual void Vfn000();
-    virtual void Vfn001();
-    virtual void Vfn002();
-    virtual void Vfn003();
-    virtual void Vfn004();
-    virtual void Vfn005();
-    virtual void Vfn006();
-    virtual void Vfn007();
-    virtual void Vfn008();
-    virtual void Vfn009();
-    virtual void Vfn010();
-    virtual void Vfn011();
-    virtual void Vfn012();
-    virtual void Vfn013();
-    virtual void Vfn014();
-    virtual void Vfn015();
-    virtual void Vfn016();
-    virtual void Vfn017();
-    virtual void Vfn018();
-    virtual void Vfn019();
-    virtual void Vfn020();
-    virtual void Vfn021();
-    virtual void Vfn022();
-    virtual void Vfn023();
-    virtual void Vfn024();
-    virtual void Vfn025();
-    virtual void Vfn026();
-    virtual void Vfn027();
-    virtual void Vfn028();
-    virtual void Vfn029();
-    virtual void Vfn030();
-    virtual void Vfn031();
-    virtual void Vfn032();
-    virtual void Vfn033();
-    virtual void Vfn034();
-    virtual void Vfn035();
-    virtual void Vfn036();
-    virtual void Vfn037();
-    virtual void Vfn038();
-    virtual void Vfn039();
-    virtual void Vfn040();
-    virtual void Vfn041();
-    virtual void Vfn042();
-    virtual void Vfn043();
-    virtual void Vfn044();
-    virtual void Vfn045();
-    virtual void Vfn046();
-    virtual void Vfn047();
-    virtual void Vfn048();
-    virtual void Vfn049();
-    virtual void Vfn050();
-    virtual void Vfn051();
-    virtual void Vfn052();
-    virtual void Vfn053();
-    virtual void Vfn054();
-    virtual void Vfn055();
-    virtual void Vfn056();
-    virtual void Vfn057();
-    virtual void Vfn058();
-    virtual void Vfn059();
-    virtual void Vfn060();
-    virtual void Vfn061();
-    virtual void Vfn062();
-    virtual void Vfn063();
-    virtual void Vfn064();
-    virtual void Vfn065();
-    virtual void Vfn066();
-    virtual void Vfn067();
-    virtual void Vfn068();
-    virtual void Vfn069();
-    virtual void Vfn070();
-    virtual void Vfn071();
-    virtual void Vfn072();
-    virtual void Vfn073();
-    virtual void Vfn074();
-    virtual void Vfn075();
-    virtual void Vfn076();
-    virtual void Vfn077();
-    virtual void Vfn078();
-    virtual void Vfn079();
-    virtual void Vfn080();
-    virtual void Vfn081();
-    virtual void Vfn082();
-    virtual void Vfn083();
-    virtual void Vfn084();
-    virtual void Vfn085();
-    virtual void Vfn086();
-    virtual void Vfn087();
-    virtual void Vfn088();
-    virtual void Vfn089();
-    virtual void Vfn090();
-    virtual void Vfn091();
-    virtual void Vfn092();
-    virtual void Vfn093();
-    virtual void Vfn094();
-    virtual void Vfn095();
-    virtual void Vfn096();
-    virtual void Vfn097();
-    virtual void Vfn098();
-    virtual void Vfn099();
-    virtual void Vfn100();
-    virtual void Vfn101();
-    virtual void Vfn102();
-    virtual void Vfn103();
-    virtual void Vfn104();
-    virtual void Vfn105();
-    virtual void Vfn106();
-    virtual void Vfn107();
-    virtual void Vfn108();
-    virtual void Vfn109();
-    virtual void Vfn110();
-    virtual void Vfn111();
-    virtual void Vfn112();
-    virtual void Vfn113();
-    virtual void Vfn114();
-    virtual void Vfn115();
-    virtual void Vfn116();
-    virtual void Vfn117();
-    virtual void Vfn118();
-    virtual void Vfn119();
-    virtual void Vfn120();
-    virtual Animation* GetAnimation();
-    virtual void Vfn122();
-    virtual void Vfn123();
-    virtual void Vfn124();
-    virtual NiPoint3* GetPos();
-    virtual void Vfn126();
-    virtual void Vfn127();
-    virtual void Vfn128();
-    virtual void Vfn129();
-    virtual void Vfn130();
-    virtual void Vfn131();
-    virtual void Vfn132();
-    virtual void Vfn133();
-    virtual void Vfn134();
-    virtual bool IsAnimationDriven();
-    virtual void Vfn136();
-    virtual void Vfn137();
-    virtual void Vfn138();
-    virtual void Vfn139();
-    virtual void Vfn140();
-    virtual void Vfn141();
-    virtual void Vfn142();
-    virtual void Vfn143();
-    virtual void Vfn144();
-    virtual void Vfn145();
-    virtual void Vfn146();
-    virtual void Vfn147();
-    virtual void Vfn148();
-    virtual void Vfn149();
-    virtual void Vfn150();
-    virtual void Vfn151();
-    virtual void Vfn152();
-    virtual void Vfn153();
-    virtual void Vfn154();
-    virtual void Vfn155();
-    virtual void Vfn156();
-    virtual void Vfn157();
-    virtual void Vfn158();
-    virtual void Vfn159();
-    virtual void Vfn160();
-    virtual void Vfn161();
-    virtual void Vfn162();
-    virtual void Vfn163();
-    virtual void Vfn164();
-    virtual void Vfn165();
-    virtual void Vfn166();
-    virtual void Vfn167();
-    virtual void Vfn168();
-    virtual void Vfn169();
-    virtual void Vfn170();
-    virtual void Vfn171();
-    virtual void Vfn172();
-    virtual void Vfn173();
-    virtual void Vfn174();
-    virtual float GetCurrentTargetDistance(bool bForce);
-    bool FUN_005a2030() const;
-};
-
-class Actor : public MobileObject
-{
-  public:
-    bool FUN_00437bd0();
-    bool FUN_00437bf0();
-    float FUN_00897b50(int iType);
-};
 
 class DetailedActorMover
 {
@@ -2203,12 +1480,6 @@ class PathingRequestPtr
     operator PathingRequestPath*() const;
 };
 
-class NiPoint3Ex : public NiPoint3
-{
-  public:
-    NiPoint3Ex();
-    NiPoint3& Subtract(const NiPoint3& kPt);
-};
 
 namespace std {
 float abs(float f);
@@ -2217,7 +1488,7 @@ double _fabs(double d);
 float __cdecl WrapAngle(float fAngleDifference);
 float __cdecl FUN_004b15e0(float, float, float*);
 float __cdecl GetDirectionAngle(const NiPoint3& kPt);
-NiPoint3Ex __cdecl GetPitchYaw(NiPoint3 kFrom, NiPoint3 kTo);
+NiPoint3 __cdecl GetPitchYaw(NiPoint3 kFrom, NiPoint3 kTo);
 
 struct FUN_009e2aa0_shell
 {
@@ -2249,7 +1520,7 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
     }
     uiMoveMode3 = (*(ActorMover**)((char*)this + 8))->GetPreferredMoveModeType();
     uiMoveFlags3 = *(unsigned int*)((char*)this + 0x60) & 0x3f;
-    if ((*(Actor**)((char*)this + 4))->FUN_005a2030() && (*(Actor**)((char*)this + 4))->IsAnimationDriven())
+    if ((*(Actor**)((char*)this + 4))->FUN_005a2030() && (*(Actor**)((char*)this + 4))->IsCreature())
     {
         *(unsigned int*)((char*)this + 0x60) = uiMoveMode3 | 1;
         return true;
@@ -2257,7 +1528,7 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
     if (!*(bool*)((char*)this + 0xe1) &&
         ((*(DetailedActorMover**)((char*)this + 8))->HasLookAtTarget() || *(bool*)((char*)this + 0xc0)))
     {
-        NiPoint3Ex kPoint;
+        NiPoint3 kPoint;
         float fDesiredHeading;
         float fDesiredHeading_2;
         float fDesiredHeadingAngle;
@@ -2265,7 +1536,7 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
         if ((*(DetailedActorMover**)((char*)this + 8))->HasLookAtTarget())
         {
             (*(DetailedActorMover**)((char*)this + 8))->GetLookAtTargetPosition(kPoint);
-            kPoint.Subtract(*(*(Actor**)((char*)this + 4))->GetPos());
+            kPoint.Subtract(*(const NiPoint3*)((const MobileObject*)*(Actor**)((char*)this + 4))->GetPos());
             fDesiredHeading_2 = GetDirectionAngle(kPoint);
         }
         else if (*(bool*)((char*)this + 0xc1))
@@ -2277,7 +1548,7 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
         {
             ((PathingRequestPath*)*(PathingRequestPtr*)((char*)this + 0xc))
                 ->GetLocationAtSplineParameter(*(float*)((char*)this + 0xc4), kPoint);
-            kPoint.Subtract(*(*(Actor**)((char*)this + 4))->GetPos());
+            kPoint.Subtract(*(const NiPoint3*)((const MobileObject*)*(Actor**)((char*)this + 4))->GetPos());
             fDesiredHeading_2 = GetDirectionAngle(kPoint);
         }
         else
@@ -2285,7 +1556,7 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
             static_cast<NiPoint3&>(kPoint) = NiPoint3::ZERO;
             fDesiredHeading_2 = (*(Actor**)((char*)this + 4))->GetCurrentTargetDistance(false);
         }
-        NiPoint3Ex kAngles = GetPitchYaw(*(*(Actor**)((char*)this + 4))->GetPos(), *(NiPoint3*)((char*)this + 0x34));
+        NiPoint3 kAngles = GetPitchYaw(*(const NiPoint3*)((const MobileObject*)*(Actor**)((char*)this + 4))->GetPos(), *(NiPoint3*)((char*)this + 0x34));
         if ((*(Actor**)((char*)this + 4))->FUN_005a2030() &&
             _fabs(std::abs(kAngles.x) - 1.5707963267948966) < 0.2617993950843811)
             fDesiredHeadingAngle = fDesiredHeading_2;
@@ -2299,7 +1570,7 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
             if (std::abs(fDesiredHeading) > 0.01745329238474369)
             {
                 float fDegrees2 = fDesiredHeading * 57.2957763671875;
-                if (std::abs(fDegrees2) > 135.0 && (*(Actor**)((char*)this + 4))->GetAnimation()->IsGroupQueued(4) &&
+                if (std::abs(fDegrees2) > 135.0 && ((Animation*)(*(Actor**)((char*)this + 4))->GetAnimData())->IsGroupQueued(4) &&
                     (_fabs(std::abs(kAngles.x) - 1.5707963267948966) >= 0.2617993950843811 ||
                      !(*(Actor**)((char*)this + 4))->FUN_005a2030()))
                 {
@@ -2309,8 +1580,8 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
                 {
                     if (fDirection > 0.0)
                     {
-                        if ((*(Actor**)((char*)this + 4))->IsAnimationDriven() &&
-                            !(*(Actor**)((char*)this + 4))->GetAnimation()->IsGroupQueued(5))
+                        if ((*(Actor**)((char*)this + 4))->IsCreature() &&
+                            !((Animation*)(*(Actor**)((char*)this + 4))->GetAnimData())->IsGroupQueued(5))
                         {
                             uiMoveFlags3 = 1;
                             *(bool*)((char*)this + 0xe1) = true;
@@ -2321,8 +1592,8 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
                     }
                     else
                     {
-                        if ((*(Actor**)((char*)this + 4))->IsAnimationDriven() &&
-                            !(*(Actor**)((char*)this + 4))->GetAnimation()->IsGroupQueued(6))
+                        if ((*(Actor**)((char*)this + 4))->IsCreature() &&
+                            !((Animation*)(*(Actor**)((char*)this + 4))->GetAnimData())->IsGroupQueued(6))
                         {
                             uiMoveFlags3 = 1;
                             *(bool*)((char*)this + 0xe1) = true;
@@ -2373,11 +1644,11 @@ bool FUN_009e2aa0_shell::FUN_009e2aa0(float fTimeDelta)
 }
 }  // namespace fnv_009e2aa0
 
-namespace fnv_009e3560 {
 struct NiStream;
+class hkStatisticsCollector;
+class hkVector4;
+namespace fnv_009e3560 {
 struct PhysicsSimulationContext;
-struct hkStatisticsCollector;
-struct hkVector4;
 struct CharacterProxyConfiguration;
 struct Vector4Data;
 struct hkpCharacterProxy;
@@ -2394,80 +1665,11 @@ struct blob64
 {
     char b[64];
 };
-struct ThreeByThreeMatrix
-{
-    void GetRow(unsigned int, float*);
-    void GetRow(unsigned int, float*, float*, float*);
-    void GetRow(unsigned int, NiPoint3*);
-    void SetRow(unsigned int, float*);
-    void SetRow(unsigned int, float, float, float);
-    void SetRow(unsigned int, void*);
-    void GetCol(unsigned int, float*);
-    void GetCol(unsigned int, float*, float*, float*);
-    void GetCol(unsigned int, NiPoint3*);
-    void SetCol(unsigned int, float*);
-    void SetCol(unsigned int, float, float, float);
-    void SetCol(unsigned int, void*);
-    float GetEntry(unsigned int, unsigned int);
-    void SetEntry(unsigned int, unsigned int, float);
-    void MakeZero();
-    void ResetToIdentity();
-    void MakeDiagonal(float, float, float);
-    void SetXRotation(float);
-    void SetYRotation(float);
-    void SetZRotation(float);
-    void MakeZRotationQ(float);
-    void MakeAxisAngleRotation(float, void*);
-    void MakeAxisAngleRotation(float, float, float, float);
-    bool Inverse(ThreeByThreeMatrix*);
-    struct blob48 Inverse();
-    struct blob48 Transpose();
-    void ToQuaternion(float*, float*, float*, float*);
-    bool ExtractEulerAnglesXYZ(float*, float*, float*);
-    bool ToEulerAnglesXZY(float*, float*, float*);
-    bool ToEulerAnglesYXZ(float*, float*, float*);
-    bool ToEulerAnglesYZX(float*, float*, float*);
-    bool ToEulerAnglesZXY(float*, float*, float*);
-    bool ToEulerAnglesZYX(float*, float*, float*);
-    void SetRotationFromEulerXYZ(float, float, float);
-    void FromEulerAnglesXZY(float, float, float);
-    void FromEulerAnglesYXZ(float, float, float);
-    void FromEulerAnglesYZX(float, float, float);
-    void SetRotationFromEulerZXY(float, float, float);
-    void SetRotationFromEulerZYX(float, float, float);
-    bool Reorthogonalize();
-    struct blob48 ComposeMatrices(void*);
-    struct blob48 Congruence(void*);
-    static void TransformPositions(void*, void*, unsigned int, void*, NiPoint3*);
-    static void TransformNormals(void*, unsigned int, void*, NiPoint3*);
-    static void TransformVerticesAndNormals(void*, void*, unsigned int, void*, NiPoint3*, void*, NiPoint3*);
-    void ApplyToVector(float*, NiPoint3*);
-    void LoadBinary(NiStream*);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    void Scale(float, float, float);
-    static struct blob64 XMLoadFloat3x4(float*);
-    static void XMStoreFloat3x4(float*, struct blob64);
-    bool Tridiagonal(float*, float*);
-    bool QLAlgorithm(float*, float*);
-    float Determinant();
-    char m_afEntries[48];
-};
-typedef char _sizecheck_NiMatrix3[sizeof(ThreeByThreeMatrix) == 48 ? 1 : -1];
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+using ::NiMemObject;
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
 struct FUN_009e3560_shell : public DetailedActorPathHandler
 {
     void UpdatePathRotation(float);
-};
-
-class bhkCharacterController
-{
-  public:
-    float GetValue();
 };
 
 struct TopicH
@@ -2475,243 +1677,11 @@ struct TopicH
     NiPoint3* GetAddTopicList();
 };
 
-struct MobileObject
-{
-    virtual void vfn_000();
-    virtual void vfn_001();
-    virtual void vfn_002();
-    virtual void vfn_003();
-    virtual void vfn_004();
-    virtual void vfn_005();
-    virtual void vfn_006();
-    virtual void vfn_007();
-    virtual void vfn_008();
-    virtual void vfn_009();
-    virtual void vfn_010();
-    virtual void vfn_011();
-    virtual void vfn_012();
-    virtual void vfn_013();
-    virtual void vfn_014();
-    virtual void vfn_015();
-    virtual void vfn_016();
-    virtual void vfn_017();
-    virtual void vfn_018();
-    virtual void vfn_019();
-    virtual void vfn_020();
-    virtual void vfn_021();
-    virtual void vfn_022();
-    virtual void vfn_023();
-    virtual void vfn_024();
-    virtual void vfn_025();
-    virtual void vfn_026();
-    virtual void vfn_027();
-    virtual void vfn_028();
-    virtual void vfn_029();
-    virtual void vfn_030();
-    virtual void vfn_031();
-    virtual void vfn_032();
-    virtual void vfn_033();
-    virtual void vfn_034();
-    virtual void vfn_035();
-    virtual void vfn_036();
-    virtual void vfn_037();
-    virtual void vfn_038();
-    virtual void vfn_039();
-    virtual void vfn_040();
-    virtual void vfn_041();
-    virtual void vfn_042();
-    virtual void vfn_043();
-    virtual void vfn_044();
-    virtual void vfn_045();
-    virtual void vfn_046();
-    virtual void vfn_047();
-    virtual void vfn_048();
-    virtual void vfn_049();
-    virtual void vfn_050();
-    virtual void vfn_051();
-    virtual void vfn_052();
-    virtual void vfn_053();
-    virtual void vfn_054();
-    virtual void vfn_055();
-    virtual void vfn_056();
-    virtual void vfn_057();
-    virtual void vfn_058();
-    virtual void vfn_059();
-    virtual void vfn_060();
-    virtual void vfn_061();
-    virtual void vfn_062();
-    virtual void vfn_063();
-    virtual void vfn_064();
-    virtual void vfn_065();
-    virtual void vfn_066();
-    virtual void vfn_067();
-    virtual void vfn_068();
-    virtual void vfn_069();
-    virtual void vfn_070();
-    virtual void vfn_071();
-    virtual void vfn_072();
-    virtual void vfn_073();
-    virtual void vfn_074();
-    virtual void vfn_075();
-    virtual void vfn_076();
-    virtual void vfn_077();
-    virtual void vfn_078();
-    virtual void vfn_079();
-    virtual void vfn_080();
-    virtual void vfn_081();
-    virtual void vfn_082();
-    virtual void vfn_083();
-    virtual void vfn_084();
-    virtual void vfn_085();
-    virtual void vfn_086();
-    virtual void vfn_087();
-    virtual void vfn_088();
-    virtual void vfn_089();
-    virtual void vfn_090();
-    virtual void vfn_091();
-    virtual void vfn_092();
-    virtual void vfn_093();
-    virtual void vfn_094();
-    virtual void vfn_095();
-    virtual void vfn_096();
-    virtual void vfn_097();
-    virtual void vfn_098();
-    virtual void vfn_099();
-    virtual void vfn_100();
-    virtual void vfn_101();
-    virtual void vfn_102();
-    virtual void vfn_103();
-    virtual void vfn_104();
-    virtual void vfn_105();
-    virtual void vfn_106();
-    virtual void vfn_107();
-    virtual void vfn_108();
-    virtual void vfn_109();
-    virtual void vfn_110();
-    virtual void vfn_111();
-    virtual void vfn_112();
-    virtual void vfn_113();
-    virtual void vfn_114();
-    virtual void vfn_115();
-    virtual void vfn_116();
-    virtual void vfn_117();
-    virtual void vfn_118();
-    virtual void vfn_119();
-    virtual void vfn_120();
-    virtual void vfn_121();
-    virtual void vfn_122();
-    virtual void vfn_123();
-    virtual void vfn_124();
-    virtual NiPoint3* vfn_125();
-    virtual void vfn_126();
-    virtual void vfn_127();
-    virtual void vfn_128();
-    virtual void vfn_129();
-    virtual void vfn_130();
-    virtual void vfn_131();
-    virtual void vfn_132();
-    virtual void vfn_133();
-    virtual void vfn_134();
-    virtual void vfn_135();
-    virtual void vfn_136();
-    virtual void vfn_137();
-    virtual void vfn_138();
-    virtual void vfn_139();
-    virtual void vfn_140();
-    virtual void vfn_141();
-    virtual void vfn_142();
-    virtual void vfn_143();
-    virtual void vfn_144();
-    virtual void vfn_145();
-    virtual void vfn_146();
-    virtual void vfn_147();
-    virtual void vfn_148();
-    virtual void vfn_149();
-    virtual void vfn_150();
-    virtual void vfn_151();
-    virtual void vfn_152();
-    virtual void vfn_153();
-    virtual void vfn_154();
-    virtual void vfn_155();
-    virtual void vfn_156();
-    virtual void vfn_157();
-    virtual void vfn_158();
-    virtual void vfn_159();
-    virtual void vfn_160();
-    virtual void vfn_161();
-    virtual void vfn_162();
-    virtual void vfn_163();
-    virtual void vfn_164();
-    virtual void vfn_165();
-    virtual void vfn_166();
-    virtual void vfn_167();
-    virtual void vfn_168();
-    virtual void vfn_169();
-    virtual void vfn_170();
-    virtual void vfn_171();
-    virtual void vfn_172();
-    virtual void vfn_173();
-    virtual void vfn_174();
-    virtual float vfn_175(bool);
-
-    bool FUN_005a2030() const;
-    float GetRelevantWaterHeight() const;
-    bhkCharacterController* GetPhysicsCharacterController();
-    float GetActorHeight() const;
-};
-
-struct DetailedActorPathHandler_Layout
-{
-    virtual void vfn_00();
-    virtual void vfn_01();
-    virtual void vfn_02();
-    virtual void vfn_03();
-    virtual void vfn_04();
-    virtual void vfn_05();
-    virtual void vfn_06();
-    virtual void vfn_07();
-    virtual void vfn_08();
-    virtual void vfn_09();
-    virtual void vfn_10();
-    virtual void vfn_11();
-    virtual void vfn_12();
-    virtual void vfn_13();
-    virtual void vfn_14();
-    virtual void vfn_15();
-    virtual void vfn_16();
-    virtual void vfn_17();
-    virtual unsigned int vfn_18();
-    MobileObject* pActor;
-    char pad_08[0x14];
-    NiPoint3 m_kPathVector1;
-    NiPoint3 m_kPathVector2;
-    NiPoint3 m_kPathVector3;
-    char pad_40[0x20];
-    unsigned int ByteAndFlagState;
-    char pad_64[0x7a];
-    bool bAtDE;
-};
-
-struct B006815c0
-{
-    float pad[9];
-    B006815c0();
-};
 
 struct HighProcessVector
 {
     void Subtract(NiPoint3*);
     void FUN_004a0c10();
-};
-
-struct FUN_00524ac0_shell
-{
-    void FUN_00524ac0(float);
-};
-
-struct FUN_009e1640_shell
-{
-    void SetRotationMatrix(float);
 };
 
 struct NiPoint3b
@@ -2720,10 +1690,6 @@ struct NiPoint3b
     NiPoint3b();
 };
 
-struct M_004b4500
-{
-    NiPoint3b FUN_004b4500(const NiPoint3*);
-};
 
 float __cdecl GetDirectionAngle(NiPoint3 const&);
 NiPoint3b __cdecl FUN_004b3ae0(NiPoint3 const&, float const*);
@@ -2740,36 +1706,36 @@ extern double const DAT_01064f50;
 // @fnv 0x009e3560
 void FUN_009e3560_shell::UpdatePathRotation(float afDeltaT)
 {
-    if (((DetailedActorPathHandler_Layout*)this)->pActor->FUN_005a2030())
+    if (((MobileObject*)pActor)->FUN_005a2030())
     {
-        NiPoint3 deltaToTargetPoint = ((DetailedActorPathHandler_Layout*)this)->m_kPathVector3;
-        float fwaterHeight = ((DetailedActorPathHandler_Layout*)this)->pActor->GetRelevantWaterHeight();
-        if (fwaterHeight != _DAT_010241b0 && ((DetailedActorPathHandler_Layout*)this)->m_kPathVector3.z > fwaterHeight)
+        NiPoint3 deltaToTargetPoint = ((DetailedActorPathHandler*)this)->m_kPathVector3;
+        float fwaterHeight = ((MobileObject*)pActor)->GetRelevantWaterHeight();
+        if (fwaterHeight != _DAT_010241b0 && ((DetailedActorPathHandler*)this)->m_kPathVector3.z > fwaterHeight)
         {
-            ((DetailedActorPathHandler_Layout*)this)->m_kPathVector3.z =
-                ((DetailedActorPathHandler_Layout*)this)->pActor->GetRelevantWaterHeight() - DAT_01020998;
+            ((DetailedActorPathHandler*)this)->m_kPathVector3.z =
+                ((MobileObject*)pActor)->GetRelevantWaterHeight() - DAT_01020998;
         }
         bhkCharacterController* pcon =
-            ((DetailedActorPathHandler_Layout*)this)->pActor->GetPhysicsCharacterController();
-        NiPoint3 actorLoc = *(((TopicH*)((DetailedActorPathHandler_Layout*)this)->pActor)->GetAddTopicList());
+            ((MobileObject*)pActor)->GetPhysicsCharacterController();
+        NiPoint3 actorLoc = *(((TopicH*)((MobileObject*)pActor))->GetAddTopicList());
         if (pcon)
         {
             actorLoc.z +=
-                ((DetailedActorPathHandler_Layout*)this)->pActor->GetActorHeight() * DAT_01011588 * pcon->GetValue();
+                ((MobileObject*)pActor)->GetActorHeight() * DAT_01011588 * pcon->GetValue();
             ((HighProcessVector*)&deltaToTargetPoint)->Subtract(&actorLoc);
         }
         else
         {
             ((HighProcessVector*)&deltaToTargetPoint)
-                ->Subtract(((DetailedActorPathHandler_Layout*)this)->pActor->vfn_125());
+                ->Subtract((NiPoint3*)((const MobileObject*)((MobileObject*)pActor))->GetPos());
         }
-        if (((DetailedActorPathHandler_Layout*)this)->m_kPathVector3.z >=
-                actorLoc.z - ((DetailedActorPathHandler_Layout*)this)->pActor->GetActorHeight() &&
-            ((DetailedActorPathHandler_Layout*)this)->m_kPathVector3.z < actorLoc.z)
+        if (((DetailedActorPathHandler*)this)->m_kPathVector3.z >=
+                actorLoc.z - ((MobileObject*)pActor)->GetActorHeight() &&
+            ((DetailedActorPathHandler*)this)->m_kPathVector3.z < actorLoc.z)
         {
             deltaToTargetPoint.z = 0.0f;
         }
-        B006815c0 rot;
+        NiMatrix3 rot;
         ((HighProcessVector*)&deltaToTargetPoint)->FUN_004a0c10();
         FUN_005330e0(deltaToTargetPoint.z, -1.0f, 1.0f);
         float fangle;
@@ -2783,27 +1749,27 @@ void FUN_009e3560_shell::UpdatePathRotation(float afDeltaT)
             fangle = FUN_004f6e40(-deltaToTargetPoint.z);
             fangle = fangle - DAT_01064f50;
         }
-        if (((DetailedActorPathHandler_Layout*)this)->m_kPathVector1.y < _gModifierZero &&
-            (((DetailedActorPathHandler_Layout*)this)->ByteAndFlagState & 2))
+        if (((DetailedActorPathHandler*)this)->m_kPathVector1.y < _gModifierZero &&
+            (((DetailedActorPathHandler*)this)->ByteAndFlagState & 2))
         {
-            ((FUN_00524ac0_shell*)&rot)->FUN_00524ac0(-fangle);
+            rot.MakeXRotation(-fangle);
         }
         else
         {
-            ((FUN_00524ac0_shell*)&rot)->FUN_00524ac0(fangle);
+            rot.MakeXRotation(fangle);
         }
-        *(NiPoint3b*)&((DetailedActorPathHandler_Layout*)this)->m_kPathVector1 =
-            FUN_004b3ae0(((DetailedActorPathHandler_Layout*)this)->m_kPathVector1, (const float*)&rot);
+        *(NiPoint3b*)&((DetailedActorPathHandler*)this)->m_kPathVector1 =
+            FUN_004b3ae0(((DetailedActorPathHandler*)this)->m_kPathVector1, (const float*)&rot);
         return;
     }
-    NiPoint3 deltaToTargetPoint = ((DetailedActorPathHandler_Layout*)this)->bAtDE
-                                      ? ((DetailedActorPathHandler_Layout*)this)->m_kPathVector2
-                                      : ((DetailedActorPathHandler_Layout*)this)->m_kPathVector3;
-    ((HighProcessVector*)&deltaToTargetPoint)->Subtract(((DetailedActorPathHandler_Layout*)this)->pActor->vfn_125());
+    NiPoint3 deltaToTargetPoint = ((DetailedActorPathHandler*)this)->m_bPathFlag3
+                                      ? ((DetailedActorPathHandler*)this)->m_kPathVector2
+                                      : ((DetailedActorPathHandler*)this)->m_kPathVector3;
+    ((HighProcessVector*)&deltaToTargetPoint)->Subtract((NiPoint3*)((const MobileObject*)((MobileObject*)pActor))->GetPos());
     deltaToTargetPoint.z = 0.0f;
     float fangleToTarget = GetDirectionAngle(deltaToTargetPoint);
     float fmoveModeAngle;
-    switch (((DetailedActorPathHandler_Layout*)this)->vfn_18() & 0xf)
+    switch (((DetailedActorPathHandler*)this)->GetActorStateFlags() & 0xf)
     {
     case 0:
     case 1:
@@ -2822,12 +1788,12 @@ void FUN_009e3560_shell::UpdatePathRotation(float afDeltaT)
         fmoveModeAngle = 0.0f;
         break;
     }
-    float fworldSpaceMoveModeAngle = ((DetailedActorPathHandler_Layout*)this)->pActor->vfn_175(false) + fmoveModeAngle;
+    float fworldSpaceMoveModeAngle = ((MobileObject*)pActor)->GetCurrentTargetDistance(false) + fmoveModeAngle;
     float fdeltaAngle = fangleToTarget - fworldSpaceMoveModeAngle;
-    B006815c0 MoveModeRot;
-    ((FUN_009e1640_shell*)&MoveModeRot)->SetRotationMatrix(fdeltaAngle);
-    *(NiPoint3b*)&((DetailedActorPathHandler_Layout*)this)->m_kPathVector1 =
-        ((M_004b4500*)&MoveModeRot)->FUN_004b4500(&((DetailedActorPathHandler_Layout*)this)->m_kPathVector1);
+    NiMatrix3 MoveModeRot;
+    ((FUN_009e1640_ZRotation&)MoveModeRot).SetRotationMatrix(fdeltaAngle);
+    ((DetailedActorPathHandler*)this)->m_kPathVector1 =
+        ((const NiMatrix3&)MoveModeRot).operator*(((DetailedActorPathHandler*)this)->m_kPathVector1);
 }
 }  // namespace fnv_009e3560
 
@@ -2835,263 +1801,24 @@ namespace fnv_009e3d50 {
 float __cdecl FUN_00404010(float, float);
 extern double _gModifierZero;
 
-class NiPoint3Ex : public NiPoint3
-{
-  public:
-    NiPoint3Ex();
-    NiPoint3Ex operator-(const NiPoint3& arPt) const;
-    NiPoint3& Subtract(const NiPoint3& arPt);
-    float Dot(const NiPoint3& arPt) const;
-    float SqrLength() const;
-    float Length() const;
-};
 
-class ThreeByThreeMatrix
-{
-  public:
-    float m_afEntries[3][3];
-    ThreeByThreeMatrix();
-    void SetRotationMatrix(float afAngle);
-    NiPoint3Ex operator*(const NiPoint3& arPt) const;
-};
-
-class PathingLocation
-{
-  public:
-    NiPoint3 GetPoint() const;
-};
-
-class PathingGraphNode
-{
-  public:
-    PathingLocation& GetLocation();
-};
-
-class PathingSolution
-{
-  public:
-    PathingGraphNode* FUN_006b05a0();
-    void GetLocationAtSplineParameter(float afT, NiPoint3& arOut);
-    float GetSplineLengthAtParameter(float afT);
-    unsigned int GetObjectFlags();
-};
-
-template <class T> class NiPointerAccess
-{
-  public:
-    T* operator->() const;
-};
-
-class ActorMoverEx
-{
-  public:
-    void PathUpdated();
-};
-
-class Actor
-{
-  public:
-    virtual void Vfn000();
-    virtual void Vfn001();
-    virtual void Vfn002();
-    virtual void Vfn003();
-    virtual void Vfn004();
-    virtual void Vfn005();
-    virtual void Vfn006();
-    virtual void Vfn007();
-    virtual void Vfn008();
-    virtual void Vfn009();
-    virtual void Vfn010();
-    virtual void Vfn011();
-    virtual void Vfn012();
-    virtual void Vfn013();
-    virtual void Vfn014();
-    virtual void Vfn015();
-    virtual void Vfn016();
-    virtual void Vfn017();
-    virtual void Vfn018();
-    virtual void Vfn019();
-    virtual void Vfn020();
-    virtual void Vfn021();
-    virtual void Vfn022();
-    virtual void Vfn023();
-    virtual void Vfn024();
-    virtual void Vfn025();
-    virtual void Vfn026();
-    virtual void Vfn027();
-    virtual void Vfn028();
-    virtual void Vfn029();
-    virtual void Vfn030();
-    virtual void Vfn031();
-    virtual void Vfn032();
-    virtual void Vfn033();
-    virtual void Vfn034();
-    virtual void Vfn035();
-    virtual void Vfn036();
-    virtual void Vfn037();
-    virtual void Vfn038();
-    virtual void Vfn039();
-    virtual void Vfn040();
-    virtual void Vfn041();
-    virtual void Vfn042();
-    virtual void Vfn043();
-    virtual void Vfn044();
-    virtual void Vfn045();
-    virtual void Vfn046();
-    virtual void Vfn047();
-    virtual void Vfn048();
-    virtual void Vfn049();
-    virtual void Vfn050();
-    virtual void Vfn051();
-    virtual void Vfn052();
-    virtual void Vfn053();
-    virtual void Vfn054();
-    virtual void Vfn055();
-    virtual void Vfn056();
-    virtual void Vfn057();
-    virtual void Vfn058();
-    virtual void Vfn059();
-    virtual void Vfn060();
-    virtual void Vfn061();
-    virtual void Vfn062();
-    virtual void Vfn063();
-    virtual void Vfn064();
-    virtual void Vfn065();
-    virtual void Vfn066();
-    virtual void Vfn067();
-    virtual void Vfn068();
-    virtual void Vfn069();
-    virtual void Vfn070();
-    virtual void Vfn071();
-    virtual void Vfn072();
-    virtual void Vfn073();
-    virtual void Vfn074();
-    virtual void Vfn075();
-    virtual void Vfn076();
-    virtual void Vfn077();
-    virtual void Vfn078();
-    virtual void Vfn079();
-    virtual void Vfn080();
-    virtual void Vfn081();
-    virtual void Vfn082();
-    virtual void Vfn083();
-    virtual void Vfn084();
-    virtual void Vfn085();
-    virtual void Vfn086();
-    virtual void Vfn087();
-    virtual void Vfn088();
-    virtual void Vfn089();
-    virtual void Vfn090();
-    virtual void Vfn091();
-    virtual void Vfn092();
-    virtual void Vfn093();
-    virtual void Vfn094();
-    virtual void Vfn095();
-    virtual void Vfn096();
-    virtual void Vfn097();
-    virtual void Vfn098();
-    virtual void Vfn099();
-    virtual void Vfn100();
-    virtual void Vfn101();
-    virtual void Vfn102();
-    virtual void Vfn103();
-    virtual void Vfn104();
-    virtual void Vfn105();
-    virtual void Vfn106();
-    virtual void Vfn107();
-    virtual void Vfn108();
-    virtual void Vfn109();
-    virtual void Vfn110();
-    virtual void Vfn111();
-    virtual void Vfn112();
-    virtual void Vfn113();
-    virtual void Vfn114();
-    virtual void Vfn115();
-    virtual void Vfn116();
-    virtual void Vfn117();
-    virtual void Vfn118();
-    virtual void Vfn119();
-    virtual void Vfn120();
-    virtual void Vfn121();
-    virtual void Vfn122();
-    virtual void Vfn123();
-    virtual void Vfn124();
-    virtual const NiPoint3* GetPos();
-    virtual void Vfn126();
-    virtual void Vfn127();
-    virtual void Vfn128();
-    virtual void Vfn129();
-    virtual void Vfn130();
-    virtual void Vfn131();
-    virtual void Vfn132();
-    virtual void Vfn133();
-    virtual void Vfn134();
-    virtual void Vfn135();
-    virtual void Vfn136();
-    virtual void Vfn137();
-    virtual void Vfn138();
-    virtual void Vfn139();
-    virtual void Vfn140();
-    virtual void Vfn141();
-    virtual void Vfn142();
-    virtual void Vfn143();
-    virtual void Vfn144();
-    virtual void Vfn145();
-    virtual void Vfn146();
-    virtual void Vfn147();
-    virtual void Vfn148();
-    virtual void Vfn149();
-    virtual void Vfn150();
-    virtual void Vfn151();
-    virtual void Vfn152();
-    virtual void Vfn153();
-    virtual void Vfn154();
-    virtual void Vfn155();
-    virtual void Vfn156();
-    virtual void Vfn157();
-    virtual void Vfn158();
-    virtual void Vfn159();
-    virtual void Vfn160();
-    virtual void Vfn161();
-    virtual void Vfn162();
-    virtual void Vfn163();
-    virtual void Vfn164();
-    virtual void Vfn165();
-    virtual void Vfn166();
-    virtual void Vfn167();
-    virtual void Vfn168();
-    virtual void Vfn169();
-    virtual void Vfn170();
-    virtual void Vfn171();
-    virtual void Vfn172();
-    virtual void Vfn173();
-    virtual void Vfn174();
-    virtual float GetCurrentTargetDistance(bool abInterp);
-};
-
-class PathHandlerEx
-{
-  public:
-    virtual void V00();
-    Actor* pActor;
-};
-
-struct DetailedActorPathHandlerEx : public DetailedActorPathHandler
+// 0x009E3D50 uses the shared handler layout; UpdatePathing is absent from its header.
+struct PathSplineUpdate : public DetailedActorPathHandler
 {
     void UpdatePathing(float afDeltaT);
 };
 
 // Advances the pathing solution parameter along the path, checking direction and distance against the actor's position, and updates the cached point and index.
 // @fnv 0x009e3d50
-void DetailedActorPathHandlerEx::UpdatePathing(float afDeltaT)
+void PathSplineUpdate::UpdatePathing(float afDeltaT)
 {
-    if (((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() == 0)
+    if (((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() == 0)
         return;
-    if (((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() > 0 &&
-        m_uiPathPointIndex + 1 >= ((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags())
+    if (((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() > 0 &&
+        m_uiPathPointIndex + 1 >= ((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags())
     {
         m_kPathVector3 =
-            ((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0()->GetLocation().GetPoint();
+            ((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0())->GetLocation().GetPoint<NiPoint3>();
         return;
     }
     if ((ByteAndFlagState & 1) && m_kPathVector1.y < _gModifierZero)
@@ -3103,55 +1830,55 @@ void DetailedActorPathHandlerEx::UpdatePathing(float afDeltaT)
     if ((ByteAndFlagState & 8) && m_kPathVector1.x < _gModifierZero)
         return;
 
-    ThreeByThreeMatrix kRotationBasis;
-    kRotationBasis.SetRotationMatrix(((PathHandlerEx*)this)->pActor->GetCurrentTargetDistance(false));
-    NiPoint3Ex kForward = kRotationBasis * m_kPathVector1;
+    NiMatrix3 kRotationBasis;
+    ((FUN_009e1640_ZRotation&)kRotationBasis).SetRotationMatrix(((Actor*)pActor)->GetCurrentTargetDistance(false));
+    NiPoint3 kForward = ((const NiMatrix3&)kRotationBasis).operator*(m_kPathVector1);
     float fDot;
-    NiPoint3Ex kToTarget = ((const NiPoint3Ex&)m_kPathVector3) - *((PathHandlerEx*)this)->pActor->GetPos();
-    NiPoint3Ex kAhead;
-    ((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)
+    NiPoint3 kToTarget = ((const NiPoint3&)m_kPathVector3) - *((const Actor*)pActor)->GetPos();
+    NiPoint3 kAhead;
+    ((NiPointer<PathingSolution>&)pCurrentPathingSolution)
         ->GetLocationAtSplineParameter(m_fSplineParameter + 0.10000000149011612, kAhead);
     kAhead.Subtract(m_kPathVector3);
     kToTarget.z = 0.0f;
-    fDot = kForward.Dot(kToTarget);
-    float fAheadDot = kAhead.Dot(kToTarget);
-    float fSqDist = kToTarget.SqrLength();
-    float fTargetDistSqr = ((NiPoint3Ex&)m_kPathVector1).Length() * 4.0;
+    fDot = ((const NiPoint3&)kForward).Dot(kToTarget);
+    float fAheadDot = ((const NiPoint3&)kAhead).Dot(kToTarget);
+    float fSqDist = kToTarget.SqrXYLength();
+    float fTargetDistSqr = ((const NiPoint3&)m_kPathVector1).FUN_004a7290() * 4.0;
     fTargetDistSqr = FUN_00404010(fTargetDistSqr, *(float*)((char*)this + 0x14) * *(float*)((char*)this + 0x14));
 
     if (fDot < _gModifierZero || fAheadDot < _gModifierZero || fSqDist < fTargetDistSqr)
     {
-        m_fPathValue16 = ((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)
+        m_fPathValue16 = ((NiPointer<PathingSolution>&)pCurrentPathingSolution)
                              ->GetSplineLengthAtParameter(m_fSplineParameter);
         m_kPathVector4 = m_kPathVector3;
-        if (((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() - 1 <= m_fSplineParameter)
+        if (((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() - 1 <= m_fSplineParameter)
         {
             m_fSplineParameter =
-                (float)(((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() - 1);
+                (float)(((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() - 1);
             m_uiPathPointIndex = (int)m_fSplineParameter;
             m_kPathVector3 =
-                ((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0()->GetLocation().GetPoint();
+                ((PathingGraphNode*)((NiPointer<PathingSolution>&)pCurrentPathingSolution)->FUN_006b05a0())->GetLocation().GetPoint<NiPoint3>();
             return;
         }
         float fLastDot = fDot;
         m_fSplineParameter += 0.10000000149011612;
-        ((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)
+        ((NiPointer<PathingSolution>&)pCurrentPathingSolution)
             ->GetLocationAtSplineParameter(m_fSplineParameter, m_kPathVector3);
-        ((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)
+        ((NiPointer<PathingSolution>&)pCurrentPathingSolution)
             ->GetLocationAtSplineParameter(m_fSplineParameter + 0.10000000149011612, kAhead);
         kAhead.Subtract(m_kPathVector3);
-        kToTarget = ((const NiPoint3Ex&)m_kPathVector3) - *((PathHandlerEx*)this)->pActor->GetPos();
+        kToTarget = ((const NiPoint3&)m_kPathVector3) - *((const Actor*)pActor)->GetPos();
         kToTarget.z = 0.0f;
-        fDot = kForward.Dot(kToTarget);
-        fAheadDot = kAhead.Dot(kToTarget);
-        fSqDist = kToTarget.SqrLength();
+        fDot = ((const NiPoint3&)kForward).Dot(kToTarget);
+        fAheadDot = ((const NiPoint3&)kAhead).Dot(kToTarget);
+        fSqDist = kToTarget.SqrXYLength();
         while (1)
         {
-            if (((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() - 1 <=
+            if (((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() - 1 <=
                 m_fSplineParameter)
             {
                 m_fSplineParameter =
-                    (float)(((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() - 1);
+                    (float)(((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetObjectFlags() - 1);
                 break;
             }
             if (fDot < _gModifierZero || fAheadDot < _gModifierZero)
@@ -3166,19 +1893,19 @@ void DetailedActorPathHandlerEx::UpdatePathing(float afDeltaT)
             }
             fLastDot = fDot;
             m_fSplineParameter += 0.10000000149011612;
-            ((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)
+            ((NiPointer<PathingSolution>&)pCurrentPathingSolution)
                 ->GetLocationAtSplineParameter(m_fSplineParameter, m_kPathVector3);
-            ((NiPointerAccess<PathingSolution>&)pCurrentPathingSolution)
+            ((NiPointer<PathingSolution>&)pCurrentPathingSolution)
                 ->GetLocationAtSplineParameter(m_fSplineParameter + 0.10000000149011612, kAhead);
             kAhead.Subtract(m_kPathVector3);
-            kToTarget = ((const NiPoint3Ex&)m_kPathVector3) - *((PathHandlerEx*)this)->pActor->GetPos();
+            kToTarget = ((const NiPoint3&)m_kPathVector3) - *((const Actor*)pActor)->GetPos();
             kToTarget.z = 0.0f;
-            fDot = kForward.Dot(kToTarget);
-            fAheadDot = kAhead.Dot(kToTarget);
-            fSqDist = kToTarget.SqrLength();
+            fDot = ((const NiPoint3&)kForward).Dot(kToTarget);
+            fAheadDot = ((const NiPoint3&)kAhead).Dot(kToTarget);
+            fSqDist = kToTarget.SqrXYLength();
         }
         m_uiPathPointIndex = (int)m_fSplineParameter;
-        ((ActorMoverEx*)m_pActorMover)->PathUpdated();
+        ((ActorMover*)m_pActorMover)->FUN_00483710();
     }
 }
 }  // namespace fnv_009e3d50
@@ -3206,244 +1933,6 @@ struct NiPoint3_sub : public NiPoint3
     float GetSquaredXYLength() const;
 };
 
-struct Actor
-{
-    virtual void V000();
-    virtual void V001();
-    virtual void V002();
-    virtual void V003();
-    virtual void V004();
-    virtual void V005();
-    virtual void V006();
-    virtual void V007();
-    virtual void V008();
-    virtual void V009();
-    virtual void V010();
-    virtual void V011();
-    virtual void V012();
-    virtual void V013();
-    virtual void V014();
-    virtual void V015();
-    virtual void V016();
-    virtual void V017();
-    virtual void V018();
-    virtual void V019();
-    virtual void V020();
-    virtual void V021();
-    virtual void V022();
-    virtual void V023();
-    virtual void V024();
-    virtual void V025();
-    virtual void V026();
-    virtual void V027();
-    virtual void V028();
-    virtual void V029();
-    virtual void V030();
-    virtual void V031();
-    virtual void V032();
-    virtual void V033();
-    virtual void V034();
-    virtual void V035();
-    virtual void V036();
-    virtual void V037();
-    virtual void V038();
-    virtual void V039();
-    virtual void V040();
-    virtual void V041();
-    virtual void V042();
-    virtual void V043();
-    virtual void V044();
-    virtual void V045();
-    virtual void V046();
-    virtual void V047();
-    virtual void V048();
-    virtual void V049();
-    virtual void V050();
-    virtual void V051();
-    virtual void V052();
-    virtual void V053();
-    virtual void V054();
-    virtual void V055();
-    virtual void V056();
-    virtual void V057();
-    virtual void V058();
-    virtual void V059();
-    virtual void V060();
-    virtual void V061();
-    virtual void V062();
-    virtual void V063();
-    virtual void V064();
-    virtual void V065();
-    virtual void V066();
-    virtual void V067();
-    virtual void V068();
-    virtual void V069();
-    virtual void V070();
-    virtual void V071();
-    virtual void V072();
-    virtual void V073();
-    virtual void V074();
-    virtual void V075();
-    virtual void V076();
-    virtual void V077();
-    virtual void V078();
-    virtual void V079();
-    virtual void V080();
-    virtual void V081();
-    virtual void V082();
-    virtual void V083();
-    virtual void V084();
-    virtual void V085();
-    virtual void V086();
-    virtual void V087();
-    virtual void V088();
-    virtual void V089();
-    virtual void V090();
-    virtual void V091();
-    virtual void V092();
-    virtual void V093();
-    virtual void V094();
-    virtual void V095();
-    virtual void V096();
-    virtual void V097();
-    virtual void V098();
-    virtual void V099();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual NiPoint3_sub* GetPos();
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
-    virtual void V144();
-    virtual void V145();
-    virtual void V146();
-    virtual void V147();
-    virtual void V148();
-    virtual void V149();
-    virtual void V150();
-    virtual void V151();
-    virtual void V152();
-    virtual void V153();
-    virtual void V154();
-    virtual void V155();
-    virtual void V156();
-    virtual void V157();
-    virtual void V158();
-    virtual void V159();
-    virtual void V160();
-    virtual void V161();
-    virtual void V162();
-    virtual void V163();
-    virtual void V164();
-    virtual void V165();
-    virtual void V166();
-    virtual void V167();
-    virtual void V168();
-    virtual void V169();
-    virtual void V170();
-    virtual void V171();
-    virtual void V172();
-    virtual void V173();
-    virtual void V174();
-    virtual float GetCurrentTargetDistance(int);
-    virtual void V176();
-    virtual void V177();
-    virtual void V178();
-    virtual void V179();
-    virtual void V180();
-    virtual void V181();
-    virtual void V182();
-    virtual void V183();
-    virtual void V184();
-    virtual void V185();
-    virtual void V186();
-    virtual void V187();
-    virtual void V188();
-    virtual void V189();
-    virtual void V190();
-    virtual void V191();
-    virtual void V192();
-    virtual void V193();
-    virtual void V194();
-    virtual void V195();
-    virtual void V196();
-    virtual void V197();
-    virtual void V198();
-    virtual void V199();
-    virtual void V200();
-    virtual void V201();
-    virtual void V202();
-    virtual void V203();
-    virtual void V204();
-    virtual void V205();
-    virtual void V206();
-    virtual void V207();
-    virtual void V208();
-    virtual void V209();
-    virtual void V210();
-    virtual void V211();
-    virtual void V212();
-    virtual float GetMaxRotationSpeed();
-    float FUN_00884dc0();
-    float FUN_00884eb0();
-    float FUN_008be1b0();
-};
-
-struct PathingLocation
-{
-    NiPoint3 FUN_005c3420() const;
-};
-
-class PathingGraphNode
-{
-  public:
-    PathingLocation& FUN_00717e50();
-};
-
-class PathingSolution
-{
-  public:
-    PathingGraphNode& FUN_006b05a0();
-    void FUN_006e7e70(float, float, int, int*, NiPoint3*);
-};
 
 struct Flt
 {
@@ -3480,12 +1969,11 @@ float DetailedActorPathHandlerRot::FUN_009e4800(float afDeltaT, float* pfRotateM
             float fAngleToTarget;
             float fTargetAngle;
             float fFacingAngle;
-            NiPoint3 kGoal;
-            fDist = (((const NiPoint3_sub&)m_kPathVector3) - *(*(Actor**)((char*)this + 4))->GetPos()).Length();
+            fDist = (((const NiPoint3_sub&)m_kPathVector3) - *(*(const Actor**)((char*)this + 4))->GetPos()).Length();
             fMinRadius = (ByteAndFlagState & 0x200) ? (*(Actor**)((char*)this + 4))->FUN_00884eb0()
                                             : (*(Actor**)((char*)this + 4))->FUN_00884dc0();
             fLookAheadDist = fMinRadius;
-            kGoal = m_kPathVector3;
+            NiPoint3 kGoal = m_kPathVector3;
             if (fDist < fLookAheadDist)
             {
                 int iNode;
@@ -3493,7 +1981,7 @@ float DetailedActorPathHandlerRot::FUN_009e4800(float afDeltaT, float* pfRotateM
                     ->FUN_006e7e70(m_fSplineParameter, fLookAheadDist - fDist, 1, &iNode, &kGoal);
             }
             fFacingAngle = (*(Actor**)((char*)this + 4))->GetCurrentTargetDistance(0);
-            NiPoint3_sub toTarget = ((const NiPoint3_sub&)kGoal) - *(*(Actor**)((char*)this + 4))->GetPos();
+            NiPoint3_sub toTarget = ((const NiPoint3_sub&)kGoal) - *(*(const Actor**)((char*)this + 4))->GetPos();
             fTargetAngle = GetDirectionAngle(toTarget);
             fAngleToTarget = fTargetAngle - fFacingAngle;
             WrapValueToRange(fAngleToTarget, -3.1415927f, 3.1415927f);
@@ -3511,11 +1999,11 @@ float DetailedActorPathHandlerRot::FUN_009e4800(float afDeltaT, float* pfRotateM
                 *pfRotateMult = 0.2f;
             else if ((unsigned int)*(Flt*)&pCurrentPathingSolution && (unsigned int)*(Flt*)&m_pPathingRequest)
             {
-                if ((*(*(Actor**)((char*)this + 4))->GetPos() -
-                     ((PathingSolution*)(unsigned int)*(Flt*)&pCurrentPathingSolution)
-                         ->FUN_006b05a0()
-                         .FUN_00717e50()
-                         .FUN_005c3420())
+                if ((*(*(const Actor**)((char*)this + 4))->GetPos() -
+                     ((PathingGraphNode*)((PathingSolution*)(unsigned int)*(Flt*)&pCurrentPathingSolution)
+                         ->FUN_006b05a0())
+                         ->FUN_00717e50()
+                         .FUN_005c3420<NiPoint3>())
                         .GetSquaredXYLength() <
                     (*(Actor**)((char*)this + 4))->FUN_008be1b0() * (*(Actor**)((char*)this + 4))->FUN_008be1b0())
                     *pfRotateMult = 0.5f;
@@ -3531,223 +2019,14 @@ float DetailedActorPathHandlerRot::FUN_009e4800(float afDeltaT, float* pfRotateM
 }  // namespace fnv_009e4800
 
 namespace fnv_009e5690 {
-struct NiPoint3_ext : public NiPoint3
-{
-    NiPoint3_ext& Subtract(const NiPoint3_ext& arPt);
-    float GetLengthSquared();
-    void ComputeMagnitude();
-    float Dot(const NiPoint3_ext& arPt) const;
-    float GetSquaredXYLength() const;
-};
 
-class ThreeByThreeMatrix
-{
-  public:
-    float m_afEntries[3][3];
-    ThreeByThreeMatrix();
-    void SetRotationMatrix(float afAngle);
-    NiPoint3_ext operator*(const NiPoint3_ext& arPt) const;
-};
-
-class Actor
-{
-  public:
-    virtual void Vfn000();
-    virtual void Vfn001();
-    virtual void Vfn002();
-    virtual void Vfn003();
-    virtual void Vfn004();
-    virtual void Vfn005();
-    virtual void Vfn006();
-    virtual void Vfn007();
-    virtual void Vfn008();
-    virtual void Vfn009();
-    virtual void Vfn010();
-    virtual void Vfn011();
-    virtual void Vfn012();
-    virtual void Vfn013();
-    virtual void Vfn014();
-    virtual void Vfn015();
-    virtual void Vfn016();
-    virtual void Vfn017();
-    virtual void Vfn018();
-    virtual void Vfn019();
-    virtual void Vfn020();
-    virtual void Vfn021();
-    virtual void Vfn022();
-    virtual void Vfn023();
-    virtual void Vfn024();
-    virtual void Vfn025();
-    virtual void Vfn026();
-    virtual void Vfn027();
-    virtual void Vfn028();
-    virtual void Vfn029();
-    virtual void Vfn030();
-    virtual void Vfn031();
-    virtual void Vfn032();
-    virtual void Vfn033();
-    virtual void Vfn034();
-    virtual void Vfn035();
-    virtual void Vfn036();
-    virtual void Vfn037();
-    virtual void Vfn038();
-    virtual void Vfn039();
-    virtual void Vfn040();
-    virtual void Vfn041();
-    virtual void Vfn042();
-    virtual void Vfn043();
-    virtual void Vfn044();
-    virtual void Vfn045();
-    virtual void Vfn046();
-    virtual void Vfn047();
-    virtual void Vfn048();
-    virtual void Vfn049();
-    virtual void Vfn050();
-    virtual void Vfn051();
-    virtual void Vfn052();
-    virtual void Vfn053();
-    virtual void Vfn054();
-    virtual void Vfn055();
-    virtual void Vfn056();
-    virtual void Vfn057();
-    virtual void Vfn058();
-    virtual void Vfn059();
-    virtual void Vfn060();
-    virtual void Vfn061();
-    virtual void Vfn062();
-    virtual void Vfn063();
-    virtual void Vfn064();
-    virtual void Vfn065();
-    virtual void Vfn066();
-    virtual void Vfn067();
-    virtual void Vfn068();
-    virtual void Vfn069();
-    virtual void Vfn070();
-    virtual void Vfn071();
-    virtual void Vfn072();
-    virtual void Vfn073();
-    virtual void Vfn074();
-    virtual void Vfn075();
-    virtual void Vfn076();
-    virtual void Vfn077();
-    virtual void Vfn078();
-    virtual void Vfn079();
-    virtual void Vfn080();
-    virtual void Vfn081();
-    virtual void Vfn082();
-    virtual void Vfn083();
-    virtual void Vfn084();
-    virtual void Vfn085();
-    virtual void Vfn086();
-    virtual void Vfn087();
-    virtual void Vfn088();
-    virtual void Vfn089();
-    virtual void Vfn090();
-    virtual void Vfn091();
-    virtual void Vfn092();
-    virtual void Vfn093();
-    virtual void Vfn094();
-    virtual void Vfn095();
-    virtual void Vfn096();
-    virtual void Vfn097();
-    virtual void Vfn098();
-    virtual void Vfn099();
-    virtual void Vfn100();
-    virtual void Vfn101();
-    virtual void Vfn102();
-    virtual void Vfn103();
-    virtual void Vfn104();
-    virtual void Vfn105();
-    virtual void Vfn106();
-    virtual void Vfn107();
-    virtual void Vfn108();
-    virtual void Vfn109();
-    virtual void Vfn110();
-    virtual void Vfn111();
-    virtual void Vfn112();
-    virtual void Vfn113();
-    virtual void Vfn114();
-    virtual void Vfn115();
-    virtual void Vfn116();
-    virtual void Vfn117();
-    virtual void Vfn118();
-    virtual void Vfn119();
-    virtual void Vfn120();
-    virtual void Vfn121();
-    virtual void Vfn122();
-    virtual void Vfn123();
-    virtual void Vfn124();
-    virtual const NiPoint3_ext* GetPos();
-    virtual void Vfn126();
-    virtual void Vfn127();
-    virtual void Vfn128();
-    virtual void Vfn129();
-    virtual void Vfn130();
-    virtual void Vfn131();
-    virtual void Vfn132();
-    virtual void Vfn133();
-    virtual void Vfn134();
-    virtual void Vfn135();
-    virtual void Vfn136();
-    virtual void Vfn137();
-    virtual void Vfn138();
-    virtual void Vfn139();
-    virtual void Vfn140();
-    virtual void Vfn141();
-    virtual void Vfn142();
-    virtual void Vfn143();
-    virtual void Vfn144();
-    virtual void Vfn145();
-    virtual void Vfn146();
-    virtual void Vfn147();
-    virtual void Vfn148();
-    virtual void Vfn149();
-    virtual void Vfn150();
-    virtual void Vfn151();
-    virtual void Vfn152();
-    virtual void Vfn153();
-    virtual void Vfn154();
-    virtual void Vfn155();
-    virtual void Vfn156();
-    virtual void Vfn157();
-    virtual void Vfn158();
-    virtual void Vfn159();
-    virtual void Vfn160();
-    virtual void Vfn161();
-    virtual void Vfn162();
-    virtual void Vfn163();
-    virtual void Vfn164();
-    virtual void Vfn165();
-    virtual void Vfn166();
-    virtual void Vfn167();
-    virtual void Vfn168();
-    virtual void Vfn169();
-    virtual void Vfn170();
-    virtual void Vfn171();
-    virtual void Vfn172();
-    virtual void Vfn173();
-    virtual void Vfn174();
-    virtual float GetCurrentTargetDistance(bool abFlag);
-    const NiPoint3_ext& FUN_008b3d50();
-    bool FUN_004938e0();
-    float ProcessCoverLOSResult();
-};
 
 struct PC7d : public Actor
 {
 };
 
-class PathingRequest
-{
-  public:
-    float GetFloatAtOffset68();
-};
 
-struct Setting_S
-{
-    float* Float();
-};
-struct GlobalObject_0044f440 : public Setting_S
+struct GlobalObject_0044f440 : public Setting
 {
 };
 
@@ -3755,33 +2034,11 @@ struct Twin_0084d030
 {
     float GetStoredFloatValue();
 };
-struct AnimIdle : public Twin_0084d030
-{
-};
 
-struct Arr
-{
-    Actor** GetAt(int aiIndex);
-};
-struct GlobalObject_009e9bb0 : public Arr
-{
-};
-
-struct ActorAvoidEntry
-{
-    Actor* pActor;
-    float fValue;
-    ActorAvoidEntry(Actor* apActor, float afValue);
-};
-
-struct ActorAvoidEntryList
-{
-    void FUN_009e99a0(const ActorAvoidEntry& arEntry);
-};
 
 Actor* __cdecl FUN_009e55e0(Actor* apActor);
 void __cdecl UpdateAliveActorList();
-bool __cdecl FUN_009e6900(Actor* apActor, void* apData, Actor* apOther, NiPoint3_ext* apPos, NiPoint3_ext* apDir,
+bool __cdecl FUN_009e6900(Actor* apActor, void* apData, Actor* apOther, NiPoint3* apPos, NiPoint3* apDir,
                           float afDist, float afCosAngle, float* apResult, bool abFlag);
 
 extern double _gModifierZero;
@@ -3793,12 +2050,12 @@ extern PC7d* g_thePlayer;
 extern unsigned int DAT_011f2aa0;
 extern GlobalObject_0044f440 g_011f2b8c;
 extern GlobalObject_0044f440 g_011f2b98;
-extern GlobalObject_009e9bb0 g_011f2bf8;
-extern AnimIdle g_timeGlobal;
+extern NiTPrimitiveArray<Actor*> g_011f2bf8;
+extern Twin_0084d030 g_timeGlobal;
 
 // @fnv 0x009e5690
-void EvaluateAvoidance(Actor* apActor, PathingRequest* apRequest, unsigned int auiFlags, const NiPoint3_ext* apDir,
-                       void* apData, ActorAvoidEntryList* apList)
+void EvaluateAvoidance(Actor* apActor, PathingRequest* apRequest, unsigned int auiFlags, const NiPoint3* apDir,
+                       void* apData, BSSimpleArray<ActorAvoidanceData, 1024>* apList)
 {
     float fTime;
     float fSpeed;
@@ -3807,12 +2064,13 @@ void EvaluateAvoidance(Actor* apActor, PathingRequest* apRequest, unsigned int a
     float afValueAfterThirdFloat;
     float fDistance;
     Actor* pTargetActor;
-    ThreeByThreeMatrix kRot;
-    kRot.SetRotationMatrix(apActor->GetCurrentTargetDistance(false));
-    NiPoint3_ext kIntersectionOffset = kRot * *apDir;
+    NiMatrix3 kRot;
+    ((FUN_009e1640_ZRotation&)kRot).SetRotationMatrix(apActor->GetCurrentTargetDistance(false));
+    NiPoint3 kIntersectionOffset = (const FUN_004b4500_ExtView&)kRot * *apDir;
     float fTravelTime;
-    NiPoint3_ext kNormDir = kIntersectionOffset;
-    NiPoint3_ext akStart;
+    NiPoint3 kNormDir = kIntersectionOffset;
+    // Raw scratch storage avoids default-constructor calls in this unoptimized function.
+    float akStart[3];
     float fRadius;
     float fAheadDist;
 
@@ -3821,7 +2079,7 @@ void EvaluateAvoidance(Actor* apActor, PathingRequest* apRequest, unsigned int a
     fScaleMultiplier = kNormDir.GetLengthSquared();
     fTravelTime = fScaleMultiplier / fTime;
     fAheadDist = fSpeed * fTravelTime;
-    akStart = *apActor->GetPos();
+    ((NiPoint3&)akStart) = (const NiPoint3&)*((const Actor*)apActor)->GetPos();
     fRadius = apRequest->GetFloatAtOffset68();
     fDistance = 0.0f;
     fCosThreshold = DAT_011a5cf4;
@@ -3834,39 +2092,39 @@ void EvaluateAvoidance(Actor* apActor, PathingRequest* apRequest, unsigned int a
     for (unsigned int i = 0; i < DAT_011f2aa0; i++)
     {
         float fDistSq;
-        NiPoint3_ext kDelta;
+        float kDelta[3];
         float fLOS;
         Actor* pAvoidActor;
-        pAvoidActor = *g_011f2bf8.GetAt(i);
+        pAvoidActor = g_011f2bf8.GetAt(i);
         if (pAvoidActor != apActor)
         {
-            kDelta = *pAvoidActor->GetPos();
-            kDelta.Subtract(akStart);
-            fDistSq = kDelta.GetSquaredXYLength();
+            ((NiPoint3&)kDelta) = (const NiPoint3&)*((const Actor*)pAvoidActor)->GetPos();
+            ((NiPoint3&)kDelta).Subtract(((NiPoint3&)akStart));
+            fDistSq = ((NiPoint3&)kDelta).GetSquaredXYLength();
             if (fDistSq > DAT_0106b798)
                 continue;
             fLOS = pAvoidActor->ProcessCoverLOSResult();
             if (fRadius * DAT_01026998 <= fLOS)
             {
-                NiPoint3_ext kRelOffset;
+                float kRelOffset[3];
                 float fOffsetLength;
                 float fAvoidDist;
                 float fTimeToTarget;
                 float fOtherDist;
-                kRelOffset = kIntersectionOffset;
+                ((NiPoint3&)kRelOffset) = kIntersectionOffset;
                 if (pAvoidActor->FUN_004938e0())
                 {
-                    ThreeByThreeMatrix kOtherRot;
-                    kOtherRot.SetRotationMatrix(pAvoidActor->GetCurrentTargetDistance(false));
-                    NiPoint3_ext kOtherOffset = kOtherRot * pAvoidActor->FUN_008b3d50();
-                    kRelOffset.Subtract(kOtherOffset);
+                    NiMatrix3 kOtherRot;
+                    ((FUN_009e1640_ZRotation&)kOtherRot).SetRotationMatrix(pAvoidActor->GetCurrentTargetDistance(false));
+                    NiPoint3 kOtherOffset = (const FUN_004b4500_ExtView&)kOtherRot * (const NiPoint3&)pAvoidActor->FUN_008b3d50();
+                    ((NiPoint3&)kRelOffset).Subtract(kOtherOffset);
                 }
-                fOffsetLength = kRelOffset.GetLengthSquared();
+                fOffsetLength = ((NiPoint3&)kRelOffset).GetLengthSquared();
                 if (fDistSq > *g_011f2b8c.Float() * *g_011f2b8c.Float())
                 {
-                    NiPoint3_ext kToOther = *pAvoidActor->GetPos();
-                    kToOther.Subtract(akStart);
-                    NiPoint3_ext kToOtherDir = kToOther;
+                    NiPoint3 kToOther = (const NiPoint3&)*((const Actor*)pAvoidActor)->GetPos();
+                    kToOther.Subtract(((NiPoint3&)akStart));
+                    NiPoint3 kToOtherDir = kToOther;
                     kToOtherDir.ComputeMagnitude();
                     if (kToOtherDir.Dot(kNormDir) < _gModifierZero)
                         continue;
@@ -3876,242 +2134,21 @@ void EvaluateAvoidance(Actor* apActor, PathingRequest* apRequest, unsigned int a
                 fAvoidDist = fRadius + fOtherDist;
                 if (fAvoidDist < *g_011f2b8c.Float())
                     fAvoidDist = *g_011f2b8c.Float();
-                if (FUN_009e6900(apActor, apData, pAvoidActor, &akStart, &kRelOffset, fAvoidDist, fCosThreshold,
+                if (FUN_009e6900(apActor, apData, pAvoidActor, &((NiPoint3&)akStart), &((NiPoint3&)kRelOffset), fAvoidDist, fCosThreshold,
                                  &fDistance, false))
-                    apList->FUN_009e99a0(ActorAvoidEntry(pAvoidActor, fDistance));
+                    apList->AppendElement(ActorAvoidanceData(pAvoidActor, fDistance));
             }
         }
     }
 
-    if (FUN_009e6900(apActor, apData, g_thePlayer, &akStart, &kIntersectionOffset, fAheadDist, fCosThreshold,
+    if (FUN_009e6900(apActor, apData, g_thePlayer, &((NiPoint3&)akStart), &kIntersectionOffset, fAheadDist, fCosThreshold,
                      &fDistance, false))
-        apList->FUN_009e99a0(ActorAvoidEntry(g_thePlayer, fDistance));
+        apList->AppendElement(ActorAvoidanceData(g_thePlayer, fDistance));
 }
 }  // namespace fnv_009e5690
 
 namespace fnv_009e77d0 {
-class PathingGraphNode;
-class NiPoint3_ext : public NiPoint3
-{
-  public:
-    NiPoint3_ext();
-    NiPoint3_ext operator-(const NiPoint3&) const;
-    float Dot(const NiPoint3&) const;
-    float GetSquaredXYLength() const;
-};
-struct TESObjectREFR
-{
-    virtual void V000();
-    virtual void V001();
-    virtual void V002();
-    virtual void V003();
-    virtual void V004();
-    virtual void V005();
-    virtual void V006();
-    virtual void V007();
-    virtual void V008();
-    virtual void V009();
-    virtual void V010();
-    virtual void V011();
-    virtual void V012();
-    virtual void V013();
-    virtual void V014();
-    virtual void V015();
-    virtual void V016();
-    virtual void V017();
-    virtual void V018();
-    virtual void V019();
-    virtual void V020();
-    virtual void V021();
-    virtual void V022();
-    virtual void V023();
-    virtual void V024();
-    virtual void V025();
-    virtual void V026();
-    virtual void V027();
-    virtual void V028();
-    virtual void V029();
-    virtual void V030();
-    virtual void V031();
-    virtual void V032();
-    virtual void V033();
-    virtual void V034();
-    virtual void V035();
-    virtual void V036();
-    virtual void V037();
-    virtual void V038();
-    virtual void V039();
-    virtual void V040();
-    virtual void V041();
-    virtual void V042();
-    virtual void V043();
-    virtual void V044();
-    virtual void V045();
-    virtual void V046();
-    virtual void V047();
-    virtual void V048();
-    virtual void V049();
-    virtual void V050();
-    virtual void V051();
-    virtual void V052();
-    virtual void V053();
-    virtual void V054();
-    virtual void V055();
-    virtual void V056();
-    virtual void V057();
-    virtual void V058();
-    virtual void V059();
-    virtual void V060();
-    virtual void V061();
-    virtual void V062();
-    virtual void V063();
-    virtual void V064();
-    virtual void V065();
-    virtual void V066();
-    virtual void V067();
-    virtual void V068();
-    virtual void V069();
-    virtual void V070();
-    virtual void V071();
-    virtual void V072();
-    virtual void V073();
-    virtual void V074();
-    virtual void V075();
-    virtual void V076();
-    virtual void V077();
-    virtual void V078();
-    virtual void V079();
-    virtual void V080();
-    virtual void V081();
-    virtual void V082();
-    virtual void V083();
-    virtual void V084();
-    virtual void V085();
-    virtual void V086();
-    virtual void V087();
-    virtual void V088();
-    virtual void V089();
-    virtual void V090();
-    virtual void V091();
-    virtual void V092();
-    virtual void V093();
-    virtual void V094();
-    virtual void V095();
-    virtual void V096();
-    virtual void V097();
-    virtual void V098();
-    virtual void V099();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual const NiPoint3& GetPos() const;
-    virtual void V126();
-    virtual void V127();
-    virtual void V128();
-    virtual void V129();
-    virtual void V130();
-    virtual void V131();
-    virtual void V132();
-    virtual void V133();
-    virtual void V134();
-    virtual void V135();
-    virtual void V136();
-    virtual void V137();
-    virtual void V138();
-    virtual void V139();
-    virtual void V140();
-    virtual void V141();
-    virtual void V142();
-    virtual void V143();
-    virtual void V144();
-    virtual void V145();
-    virtual void V146();
-    virtual void V147();
-    virtual void V148();
-    virtual void V149();
-    virtual void V150();
-    virtual void V151();
-    virtual void V152();
-    virtual void V153();
-    virtual void V154();
-    virtual void V155();
-    virtual void V156();
-    virtual void V157();
-    virtual void V158();
-    virtual void V159();
-    virtual void V160();
-    virtual void V161();
-    virtual void V162();
-    virtual void V163();
-    virtual void V164();
-    virtual void V165();
-    virtual void V166();
-    virtual void V167();
-    virtual void V168();
-    virtual void V169();
-    virtual void V170();
-    virtual void V171();
-    virtual void V172();
-    virtual void V173();
-    virtual void V174();
-    virtual float GetCurrentTargetDistance(int);
-    TESWorldSpace* GetParentWorldSpace();
-    TESObjectCELL* GetParentCell();
-    void FUN_008ad1c0(NiPoint3&, float, TESObjectCELL*, TESWorldSpace*, unsigned char, unsigned char);
-};
-class PathingLocationEx
-{
-  public:
-    PathingLocationEx(const NiPoint3&, TESObjectREFR*);
-    ~PathingLocationEx();
-    NiPoint3 FUN_005c3420() const;
-    virtual void SaveGame(BGSSaveGameBuffer*);
-    NiPoint3 Location;
-    void* m_pLocationNavMesh;
-    void* pNavMeshInfoArray;
-    TESObjectCELL* pCell;
-    TESWorldSpace* m_pContainingWorldspace;
-    unsigned int m_uiPathingFlags;
-    unsigned short m_usTriangleID;
-    unsigned char uiFlags;
-    unsigned char ucPad;
-};
-class PathingGraphNode
-{
-  public:
-    PathingLocationEx& FUN_00717e50();
-};
-class PathingSolution
-{
-  public:
-    PathingGraphNode& FUN_006b05a0();
-    float GetTotalPathLength();
-    void GetLocationAtSplineParameter(float, NiPoint3*);
-    float FindSegmentAtFraction(float, float, unsigned int*);
-    unsigned int GetObjectFlags();
-};
+
 struct Flt
 {
     operator PathingSolution*() const;
@@ -4120,7 +2157,7 @@ struct FUN_009e3c00_cls
 {
     void AdvanceAlongPath(float);
 };
-bool __cdecl GetNavMeshHeight(PathingLocationEx*, float*);
+bool __cdecl GetNavMeshHeight(PathingLocation*, float*);
 extern const double DAT_01020998;
 extern double _gModifierZero;
 struct FUN_009e77d0_cls : public DetailedActorPathHandler
@@ -4142,16 +2179,16 @@ void FUN_009e77d0_cls::UpdatePathTether(float afPercentTraveled)
             m_uiPathPointIndex = ((PathingSolution*)*(const Flt*)&pCurrentPathingSolution)->GetObjectFlags() - 1;
             m_fSplineParameter = (float)m_uiPathPointIndex;
             m_kPathVector3 =
-                ((PathingSolution*)*(const Flt*)&pCurrentPathingSolution)->FUN_006b05a0().FUN_00717e50().FUN_005c3420();
-            m_kPathVector4 = (*(TESObjectREFR**)((char*)this + 4))->GetPos();
+                ((PathingGraphNode*)((PathingSolution*)*(const Flt*)&pCurrentPathingSolution)->FUN_006b05a0())->FUN_00717e50().FUN_005c3420<NiPoint3>();
+            m_kPathVector4 = *((const TESObjectREFR*)*(TESObjectREFR**)((char*)this + 4))->GetPos();
             m_bPathFlag5 = false;
             return;
         }
-        NiPoint3_ext oldDirVec = static_cast<const NiPoint3_ext&>(m_kPathVector3) - m_kPathVector4;
+        NiPoint3 oldDirVec = ((const NiPoint3&)m_kPathVector3).FUN_00439ef0(m_kPathVector4);
         oldDirVec.z = 0;
-        NiPoint3 actorLoc = (*(TESObjectREFR**)((char*)this + 4))->GetPos();
-        NiPoint3_ext actorDirVec = static_cast<const NiPoint3_ext&>(m_kPathVector3) - actorLoc;
-        float factDotCheck = actorDirVec.Dot(oldDirVec);
+        NiPoint3 actorLoc = *((const TESObjectREFR*)*(TESObjectREFR**)((char*)this + 4))->GetPos();
+        NiPoint3 actorDirVec = ((const NiPoint3&)m_kPathVector3).FUN_00439ef0(actorLoc);
+        float factDotCheck = actorDirVec.Dot((const NiPoint3&)oldDirVec);
         bool bpastGoal = factDotCheck < _gModifierZero;
         float fcheck5 = DAT_01020998 / m_fPathValue2;
         float fcheck20 = fcheck5 * 4.0;
@@ -4159,8 +2196,8 @@ void FUN_009e77d0_cls::UpdatePathTether(float afPercentTraveled)
         float fbestSqrTetherDist = 3.402823466e+38f;
         float fbestSplineT = 0;
         unsigned int ibestNode = 0;
-        NiPoint3_ext actorToTetherDir;
-        NiPoint3_ext newTetherLoc;
+        NiPoint3 actorToTetherDir;
+        NiPoint3 newTetherLoc;
         bool botherSide = false;
         unsigned int itempNode;
         float ftempSplineT;
@@ -4171,10 +2208,10 @@ void FUN_009e77d0_cls::UpdatePathTether(float afPercentTraveled)
                 ((PathingSolution*)*(const Flt*)&pCurrentPathingSolution)
                     ->FindSegmentAtFraction(afPercentTraveled + fcheck5 + i * fcheck20, m_fPathValue2, &itempNode);
             ((PathingSolution*)*(const Flt*)&pCurrentPathingSolution)
-                ->GetLocationAtSplineParameter(ftempSplineT, &newTetherLoc);
-            actorToTetherDir = newTetherLoc - actorLoc;
+                ->GetLocationAtSplineParameter(ftempSplineT, (NiPoint3*)&newTetherLoc);
+            actorToTetherDir = newTetherLoc.FUN_00439ef0(actorLoc);
             actorToTetherDir.z = 0;
-            fdot = actorToTetherDir.Dot(oldDirVec);
+            fdot = actorToTetherDir.Dot((const NiPoint3&)oldDirVec);
             fsqrDist = actorToTetherDir.GetSquaredXYLength();
             if ((!bpastGoal && fdot < _gModifierZero) || (bpastGoal && fdot > _gModifierZero))
             {
@@ -4216,10 +2253,10 @@ void FUN_009e77d0_cls::UpdatePathTether(float afPercentTraveled)
         m_kPathVector4 = m_kPathVector3;
         if (afPercentTraveled > _gModifierZero)
         {
-            PathingLocationEx tetherNavMeshLoc(m_kPathVector3, *(TESObjectREFR**)((char*)this + 4));
+            PathingLocation tetherNavMeshLoc((const NiPoint3&)m_kPathVector3, *(::TESObjectREFR**)((char*)this + 4));
             NiPoint3 snapLocation = m_kPathVector3;
             GetNavMeshHeight(&tetherNavMeshLoc, &snapLocation.z);
-            float fheading = (*(TESObjectREFR**)((char*)this + 4))->GetCurrentTargetDistance(0);
+            float fheading = (*(MobileObject**)((char*)this + 4))->GetCurrentTargetDistance(false);
             (*(TESObjectREFR**)((char*)this + 4))
                 ->FUN_008ad1c0(snapLocation, fheading, (*(TESObjectREFR**)((char*)this + 4))->GetParentCell(),
                                (*(TESObjectREFR**)((char*)this + 4))->GetParentWorldSpace(), 1, 1);
@@ -4251,197 +2288,17 @@ extern double DAT_01092508;
 extern float DAT_011a5d00;
 extern double _gModifierZero;
 
-struct FUN_00595c80_shell : public NiPoint3
-{
-    float GetSquaredXYLength();
-};
-struct NiPoint3_sub : public FUN_00595c80_shell
-{
-    NiPoint3 operator-(const NiPoint3&) const;
-};
-struct NiPoint3_ext : public NiPoint3_sub
-{
-    float Dot(const NiPoint3&) const;
-};
-struct NP3S : public NiPoint3_ext
-{
-};
-struct BaseS : public NiPoint3_ext
-{
-    BaseS();
-};
+
 struct LocS
 {
-    NP3S GetLocation();
+    NiPoint3 GetLocation();
 };
 struct TeleportableReference
 {
     const NiPoint3& GetPosition();
 };
-class PathingGraphNode
-{
-  public:
-    bool IsTransitionNode();
-};
 class PacketNodeRecord;
-struct PathingSolution
-{
-    unsigned int GetVirtualNodeCount();
-    PathingGraphNode& FUN_006b05a0();
-    bool FUN_006b05d0();
-    PacketNodeRecord* GetVirtualNode(unsigned int);
-};
-struct FUN_006e7970_shell
-{
-    void* FUN_006e7970(unsigned int);
-};
-struct BGSTerrainManager
-{
-    unsigned int GetMinLevel();
-};
-struct BGSCameraPath
-{
-    int HasNameForWarning();
-};
-struct ActorV_S
-{
-    float GetActorHeight() const;
-};
-struct PathingRequest_S
-{
-    float GetSmoothingRandomness();
-};
-struct MobileObject
-{
-    virtual void Vfunc000();
-    virtual void Vfunc001();
-    virtual void Vfunc002();
-    virtual void Vfunc003();
-    virtual void Vfunc004();
-    virtual void Vfunc005();
-    virtual void Vfunc006();
-    virtual void Vfunc007();
-    virtual void Vfunc008();
-    virtual void Vfunc009();
-    virtual void Vfunc010();
-    virtual void Vfunc011();
-    virtual void Vfunc012();
-    virtual void Vfunc013();
-    virtual void Vfunc014();
-    virtual void Vfunc015();
-    virtual void Vfunc016();
-    virtual void Vfunc017();
-    virtual void Vfunc018();
-    virtual void Vfunc019();
-    virtual void Vfunc020();
-    virtual void Vfunc021();
-    virtual void Vfunc022();
-    virtual void Vfunc023();
-    virtual void Vfunc024();
-    virtual void Vfunc025();
-    virtual void Vfunc026();
-    virtual void Vfunc027();
-    virtual void Vfunc028();
-    virtual void Vfunc029();
-    virtual void Vfunc030();
-    virtual void Vfunc031();
-    virtual void Vfunc032();
-    virtual void Vfunc033();
-    virtual void Vfunc034();
-    virtual void Vfunc035();
-    virtual void Vfunc036();
-    virtual void Vfunc037();
-    virtual void Vfunc038();
-    virtual void Vfunc039();
-    virtual void Vfunc040();
-    virtual void Vfunc041();
-    virtual void Vfunc042();
-    virtual void Vfunc043();
-    virtual void Vfunc044();
-    virtual void Vfunc045();
-    virtual void Vfunc046();
-    virtual void Vfunc047();
-    virtual void Vfunc048();
-    virtual void Vfunc049();
-    virtual void Vfunc050();
-    virtual void Vfunc051();
-    virtual void Vfunc052();
-    virtual void Vfunc053();
-    virtual void Vfunc054();
-    virtual void Vfunc055();
-    virtual void Vfunc056();
-    virtual void Vfunc057();
-    virtual void Vfunc058();
-    virtual void Vfunc059();
-    virtual void Vfunc060();
-    virtual void Vfunc061();
-    virtual void Vfunc062();
-    virtual void Vfunc063();
-    virtual void Vfunc064();
-    virtual void Vfunc065();
-    virtual void Vfunc066();
-    virtual void Vfunc067();
-    virtual void Vfunc068();
-    virtual void Vfunc069();
-    virtual void Vfunc070();
-    virtual void Vfunc071();
-    virtual void Vfunc072();
-    virtual void Vfunc073();
-    virtual void Vfunc074();
-    virtual void Vfunc075();
-    virtual const char* GetEditorID();
-    virtual void Vfunc077();
-    virtual void Vfunc078();
-    virtual void Vfunc079();
-    virtual void Vfunc080();
-    virtual void Vfunc081();
-    virtual void Vfunc082();
-    virtual void Vfunc083();
-    virtual void Vfunc084();
-    virtual void Vfunc085();
-    virtual void Vfunc086();
-    virtual void Vfunc087();
-    virtual void Vfunc088();
-    virtual void Vfunc089();
-    virtual void Vfunc090();
-    virtual void Vfunc091();
-    virtual void Vfunc092();
-    virtual void Vfunc093();
-    virtual void Vfunc094();
-    virtual void Vfunc095();
-    virtual void Vfunc096();
-    virtual void Vfunc097();
-    virtual void Vfunc098();
-    virtual void Vfunc099();
-    virtual void Vfunc100();
-    virtual void Vfunc101();
-    virtual void Vfunc102();
-    virtual void Vfunc103();
-    virtual void Vfunc104();
-    virtual void Vfunc105();
-    virtual void Vfunc106();
-    virtual void Vfunc107();
-    virtual void Vfunc108();
-    virtual void Vfunc109();
-    virtual void Vfunc110();
-    virtual void Vfunc111();
-    virtual void Vfunc112();
-    virtual void Vfunc113();
-    virtual void Vfunc114();
-    virtual void Vfunc115();
-    virtual void Vfunc116();
-    virtual void Vfunc117();
-    virtual void Vfunc118();
-    virtual void Vfunc119();
-    virtual void Vfunc120();
-    virtual void Vfunc121();
-    virtual void Vfunc122();
-    virtual void Vfunc123();
-    virtual void Vfunc124();
-    virtual const NiPoint3& GetPos();
-    const char* GetFullName();
-    bool FUN_005a2030() const;
-};
+
 
 // Checks the actor's distance to its pathing goal or transition node and returns a pathing status code (0, 2 or 5).
 // @fnv 0x009e8000
@@ -4451,16 +2308,16 @@ int FUN_009e8000_shell::UpdatePathingGoal()
     {
         if (*(unsigned int*)((char*)this + 0x64) + 2 >= GetObjectFlags((char*)(unsigned int)*(Flt*)((char*)this + 0xc)))
         {
-            BaseS diff;
+            NiPoint3 diff;
             bool bPast = false;
             if (*(unsigned int*)((char*)this + 0x64) + 2 ==
                 GetObjectFlags((char*)(unsigned int)*(Flt*)((char*)this + 0xc)))
                 (NiPoint3&)diff =
-                    ((LocS*)&((TeleportableReference*)((FUN_006e7970_shell*)(unsigned int)*(Flt*)((char*)this + 0xc))
+                    ((LocS*)&((TeleportableReference*)((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))
                                   ->FUN_006e7970(*(unsigned int*)((char*)this + 0x64)))
                          ->GetPosition())
                         ->GetLocation() -
-                    (*(MobileObject**)((char*)this + 4))->GetPos();
+                    *(const NiPoint3*)((const MobileObject*)*(MobileObject**)((char*)this + 4))->GetPos();
             else
                 bPast = true;
             if (bPast || diff.GetSquaredXYLength() <= DAT_01092508)
@@ -4471,12 +2328,12 @@ int FUN_009e8000_shell::UpdatePathingGoal()
                                                : *(unsigned short*)(*(char**)((char*)this + 8) + 0x42);
                 switch (ConstructAndCallMethod((unsigned int)*(Flt*)((char*)this + 0x10),
                                                (unsigned int)*(Flt*)((char*)this + 0xc), iupdateNode,
-                                               (*(MobileObject**)((char*)this + 4))->GetPos()))
+                                               *(const NiPoint3*)((const MobileObject*)*(MobileObject**)((char*)this + 4))->GetPos()))
                 {
                 case 2:
                 case 3:
                     *(bool*)((char*)this + 0xdf) =
-                        ((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->FUN_006b05a0().IsTransitionNode();
+                        ((PathingGraphNode*)((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->FUN_006b05a0())->IsTransitionNode();
                     *(unsigned short*)(*(char**)((char*)this + 8) + 0x42) =
                         ((BGSTerrainManager*)(unsigned int)*(Flt*)((char*)this + 0xc))->GetMinLevel();
                     return 0;
@@ -4495,26 +2352,26 @@ int FUN_009e8000_shell::UpdatePathingGoal()
     else
     {
         bool bgoalReached = false;
-        BaseS goal;
-        BaseS diff;
+        NiPoint3 goal;
+        NiPoint3 diff;
         float fdistanceSqr = 3.402823466e+38f;
         float fgoalRadiusTestSqr;
         if (!((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->FUN_006b05d0() &&
             ((BGSTerrainManager*)(unsigned int)*(Flt*)((char*)this + 0xc))->GetMinLevel() ==
                 ((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->GetVirtualNodeCount() - 1)
-            (NiPoint3&)goal =
+            goal =
                 ((LocS*)&((TeleportableReference*)((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))
                               ->GetVirtualNode(
                                   ((BGSTerrainManager*)(unsigned int)*(Flt*)((char*)this + 0xc))->GetMinLevel()))
                      ->GetPosition())
                     ->GetLocation();
         else
-            (NiPoint3&)goal =
+            goal =
                 ((LocS*)&(
-                     (TeleportableReference*)&((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->FUN_006b05a0())
+                     (TeleportableReference*)((PathingSolution*)(unsigned int)*(Flt*)((char*)this + 0xc))->FUN_006b05a0())
                      ->GetPosition())
                     ->GetLocation();
-        (NiPoint3&)diff = goal - (*(MobileObject**)((char*)this + 4))->GetPos();
+        (NiPoint3&)diff = goal - *(const NiPoint3*)((const MobileObject*)*(MobileObject**)((char*)this + 4))->GetPos();
         fdistanceSqr = diff.GetSquaredXYLength();
         fgoalRadiusTestSqr = *(float*)((char*)this + 0xac);
         bgoalReached = fdistanceSqr <= *(float*)((char*)this + 0xac);
@@ -4524,12 +2381,12 @@ int FUN_009e8000_shell::UpdatePathingGoal()
             if (FUN_009e8670((unsigned int)*(Flt*)((char*)this + 0x10)) &&
                 *(float*)((char*)this + 0xac) > DAT_011a5d00 && fdistanceSqr > DAT_011a5d00)
             {
-                NiPoint3 tetherDir = *(NiPoint3_sub*)((char*)this + 0x34) - *(NiPoint3*)((char*)this + 0x4c);
+                NiPoint3 tetherDir = *(NiPoint3*)((char*)this + 0x34) - *(NiPoint3*)((char*)this + 0x4c);
                 tetherDir.z = 0.0f;
                 NiPoint3 actorToTetherDir =
-                    *(NiPoint3_sub*)((char*)this + 0x34) - (*(MobileObject**)((char*)this + 4))->GetPos();
+                    *(NiPoint3*)((char*)this + 0x34) - *(const NiPoint3*)((const MobileObject*)*(MobileObject**)((char*)this + 4))->GetPos();
                 actorToTetherDir.z = 0.0f;
-                float fdot = ((NiPoint3_ext&)tetherDir).Dot(actorToTetherDir);
+                float fdot = ((NiPoint3&)tetherDir).Dot(actorToTetherDir);
                 if (fdot >= _gModifierZero && *(float*)((char*)this + 0x78) == _gModifierZero &&
                     *(float*)((char*)this + 0x88) == _gModifierZero)
                     bvalidCheck = false;
@@ -4539,7 +2396,7 @@ int FUN_009e8000_shell::UpdatePathingGoal()
                 if (!(*(MobileObject**)((char*)this + 4))->FUN_005a2030())
                 {
                     if (std::abs(diff.z) <=
-                        ((PathingRequest_S*)(unsigned int)*(Flt*)((char*)this + 0x10))->GetSmoothingRandomness())
+                        ((PathingRequest*)(unsigned int)*(Flt*)((char*)this + 0x10))->GetSmoothingRandomness())
                     {
                         return 5;
                     }
@@ -4549,7 +2406,7 @@ int FUN_009e8000_shell::UpdatePathingGoal()
                     {
                         Warning("PATHFINDING: Actor %s failed pathing due to goal Z difference %f, being too large",
                                 ((BGSCameraPath*)*(MobileObject**)((char*)this + 4))->HasNameForWarning()
-                                    ? (*(MobileObject**)((char*)this + 4))->GetEditorID()
+                                    ? (*(MobileObject**)((char*)this + 4))->GetName()
                                     : (*(MobileObject**)((char*)this + 4))->GetFullName(),
                                 std::abs(diff.z));
                         return 2;
@@ -4558,8 +2415,8 @@ int FUN_009e8000_shell::UpdatePathingGoal()
                 else
                 {
                     float fzdeltaThresold = FUN_0040ebd0(
-                        ((PathingRequest_S*)(unsigned int)*(Flt*)((char*)this + 0x10))->GetSmoothingRandomness(),
-                        ((ActorV_S*)*(MobileObject**)((char*)this + 4))->GetActorHeight());
+                        ((PathingRequest*)(unsigned int)*(Flt*)((char*)this + 0x10))->GetSmoothingRandomness(),
+                        ((Actor*)*(MobileObject**)((char*)this + 4))->GetActorHeight());
                     if (std::abs(diff.z) <= fzdeltaThresold)
                         return 5;
                 }
@@ -4578,63 +2435,36 @@ bool __cdecl FUN_00709d40()
     return FUN_004b71d0();
 }
 
-struct Actor;
 unsigned int __cdecl FUN_0042f5a0(unsigned int, unsigned int);
 
-struct ActorAvoidanceEntry
-{
-    Actor* pActor;
-    float m_fPackageValue;
-};
-
-struct ActorAvoidanceDataArray
-{
-    ActorAvoidanceEntry* pBuffer;
-    unsigned int uiSize;
-    unsigned int uiAllocSize;
-
-    virtual ~ActorAvoidanceDataArray();
-    void FUN_0072ba80(ActorAvoidanceEntry* apItems, unsigned int auiCount);
-    void FUN_00692480(ActorAvoidanceEntry* apDestAddr, ActorAvoidanceEntry* apSrcAddr, unsigned int auiCount);
-    void FUN_00983720(unsigned int auiIndex, unsigned int auiCount);
-};
 
 // @fnv 0x00983720
-void ActorAvoidanceDataArray::FUN_00983720(unsigned int auiIndex, unsigned int auiCount)
+template <>
+void BSSimpleArray<ActorAvoidanceData, 1024>::RemoveAt(unsigned int auiIndex, unsigned int auiCount)
 {
     unsigned int uiMoveCount;
 
-    uiMoveCount = FUN_0042f5a0(uiSize - auiIndex - auiCount, auiCount);
-    FUN_0072ba80(pBuffer + auiIndex, auiCount);
-    FUN_00692480(pBuffer + auiIndex, pBuffer + uiSize - uiMoveCount, uiMoveCount);
-    uiSize -= auiCount;
+    uiMoveCount = FUN_0042f5a0(iSize - auiIndex - auiCount, auiCount);
+    ReleaseElements(pBuffer + auiIndex, auiCount);
+    UpdateEntryValue(pBuffer + auiIndex, pBuffer + iSize - uiMoveCount, uiMoveCount);
+    iSize -= auiCount;
 }
 
 namespace fnv_009a86e0 {
-class TESObjectREFR
-{
-  public:
-    const NiPoint3& GetAngleOnReference() const;
-};
 
-struct NiPoint3Ex : public NiPoint3
-{
-    NiPoint3Ex(float afX, float afY, float afZ);
-    NiPoint3Ex operator-(const NiPoint3&) const;
-};
 
 extern double DAT_0101ff58;
 
-NiPoint3Ex FUN_009a8050(TESObjectREFR* apAttacker);
-NiPoint3Ex FUN_009a87f0(NiPoint3Ex aFiringLocation, TESObjectREFR* apTarget, float afParam1, float afParam2,
+NiPoint3 FUN_009a8050(TESObjectREFR* apAttacker);
+NiPoint3 FUN_009a87f0(NiPoint3 aFiringLocation, TESObjectREFR* apTarget, float afParam1, float afParam2,
                         int aiParam3);
 
 // @fnv 0x009a86e0
-NiPoint3Ex ComputeRelativeFiringAngle(TESObjectREFR* apAttacker, TESObjectREFR* apTarget, float afParam1,
+NiPoint3 ComputeRelativeFiringAngle(TESObjectREFR* apAttacker, TESObjectREFR* apTarget, float afParam1,
                                       float afParam2, int aiParam3)
 {
-    NiPoint3Ex firingPos = FUN_009a8050(apAttacker);
-    NiPoint3Ex kResult = FUN_009a87f0(firingPos, apTarget, afParam1, afParam2, aiParam3);
+    NiPoint3 firingPos = FUN_009a8050(apAttacker);
+    NiPoint3 kResult = FUN_009a87f0(firingPos, apTarget, afParam1, afParam2, aiParam3);
     kResult = kResult - apAttacker->GetAngleOnReference();
     kResult.y = 0;
     if (kResult.x <= DAT_0101ff58)
@@ -4649,23 +2479,6 @@ NiPoint3Ex ComputeRelativeFiringAngle(TESObjectREFR* apAttacker, TESObjectREFR* 
 }
 }  // namespace fnv_009a86e0
 
-struct TESObjectREFR;
-
-struct NavMeshClosedDoorInfo
-{
-    TESObjectREFR* m_pDoorRef;
-};
-class NavMeshTriangle
-{
-  public:
-    bool GetFlag(int);
-};
-class NavMesh
-{
-  public:
-    NavMeshTriangle* GetTriangle(unsigned short);
-    NavMeshClosedDoorInfo* GetClosedDoorInfo(unsigned short);
-};
 
 struct ClosedDoorPathFilter
 {
@@ -4687,14 +2500,14 @@ bool ClosedDoorPathFilter::CheckDoorTransition(NavMesh* apNavMesh1, unsigned sho
     if (apNavMesh1->GetTriangle(aTriangle1)->GetFlag(0x1000))
     {
         NavMeshClosedDoorInfo* pDoorInfo1 = apNavMesh1->GetClosedDoorInfo(aTriangle1);
-        if (pDoorInfo1 && (pDoorInfo1->m_pDoorRef == pPathNodeDoor || pPathNodeDoor == 0))
+        if (pDoorInfo1 && ((TESObjectREFR*)pDoorInfo1->m_uiDoorFormID == pPathNodeDoor || pPathNodeDoor == 0))
             bInDoor1 = true;
     }
     bool bInDoor2 = false;
     if (apNavMesh2->GetTriangle(aTriangle2)->GetFlag(0x1000))
     {
         NavMeshClosedDoorInfo* pDoorInfo2 = apNavMesh2->GetClosedDoorInfo(aTriangle2);
-        if (pDoorInfo2 && (pDoorInfo2->m_pDoorRef == pPathNodeDoor || pPathNodeDoor == 0))
+        if (pDoorInfo2 && ((TESObjectREFR*)pDoorInfo2->m_uiDoorFormID == pPathNodeDoor || pPathNodeDoor == 0))
             bInDoor2 = true;
     }
     if (!bInDoor1)
@@ -4708,9 +2521,9 @@ bool ClosedDoorPathFilter::CheckDoorTransition(NavMesh* apNavMesh1, unsigned sho
     return true;
 }
 
+class TESWorldSpace;
+class TESObjectCELL;
 namespace fnv_009e3110 {
-struct TESWorldSpace;
-struct TESObjectCELL;
 struct TeleportableReference;
 
 struct Flt
@@ -4718,36 +2531,11 @@ struct Flt
     operator unsigned int() const;
 };
 
-class TESObjectREFR
-{
-  public:
-    TESObjectCELL* GetParentCell();
-    TESWorldSpace* GetParentWorldSpace();
-    TeleportableReference* Set3DObject();
-};
+
 struct TeleportableReference
 {
     TESObjectREFR* m_pLinkedDoorReference;
     TESObjectREFR* GetLinkedDoor() const;
-};
-struct PathingLocation
-{
-    TESObjectCELL* FUN_006dd4f0() const;
-    TESWorldSpace* FUN_00441110() const;
-};
-class PathingGraphNode
-{
-  public:
-    const PathingLocation& FUN_00717e50() const;
-    bool FUN_006e2330() const;
-    TESObjectREFR* GetField38() const;
-};
-class PathingSolution
-{
-  public:
-    bool FUN_009dc530();
-    unsigned int GetObjectFlags();
-    const PathingGraphNode* FUN_006e7970(unsigned int);
 };
 struct TESHelper
 {
@@ -4755,9 +2543,7 @@ struct TESHelper
     TESWorldSpace* GetParentWorldSpace();
 };
 extern TESHelper* g_TES;
-class PlayerCharacter : public TESObjectREFR
-{
-};
+
 extern PlayerCharacter* g_thePlayer;
 
 struct FUN_009e3110_t : public DetailedActorPathHandler
@@ -4782,8 +2568,8 @@ bool FUN_009e3110_t::IsPathReachableToPlayer() const
     inumNodes = ((PathingSolution*)(unsigned int)*(const Flt*)&pCurrentPathingSolution)->GetObjectFlags();
     iscanNodes = m_uiPathPointIndex + 1;
     bcompareCells = true;
-    pplayerCell = g_thePlayer->GetParentCell();
-    pplayerWorld = g_thePlayer->GetParentWorldSpace();
+    pplayerCell = (TESObjectCELL*)g_thePlayer->GetParentCell();
+    pplayerWorld = (TESWorldSpace*)g_thePlayer->GetParentWorldSpace();
     if (!pplayerCell)
     {
         pplayerCell = g_TES->IsCellInterior();
@@ -4802,16 +2588,16 @@ bool FUN_009e3110_t::IsPathReachableToPlayer() const
         const PathingGraphNode* pnode;
         const PathingLocation* ploc;
 
-        pnode = ((PathingSolution*)(unsigned int)*(const Flt*)&pCurrentPathingSolution)->FUN_006e7970(iscanNodes);
+        pnode = (const PathingGraphNode*)((PathingSolution*)(unsigned int)*(const Flt*)&pCurrentPathingSolution)->FUN_006e7970(iscanNodes);
         if (!pnode)
             continue;
         ploc = &pnode->FUN_00717e50();
         if (bcompareCells)
         {
-            if (pplayerCell == ploc->FUN_006dd4f0())
+            if (pplayerCell == (TESObjectCELL*)ploc->FUN_006dd4f0())
                 return true;
         }
-        else if (pplayerWorld == ploc->FUN_00441110())
+        else if (pplayerWorld == (TESWorldSpace*)ploc->FUN_00441110())
         {
             return true;
         }
@@ -4824,7 +2610,7 @@ bool FUN_009e3110_t::IsPathReachableToPlayer() const
             pdoor = pnode->GetField38();
             if (!pdoor)
                 continue;
-            ptel = pdoor->Set3DObject();
+            ptel = (TeleportableReference*)pdoor->Set3DObject();
             if (!ptel)
                 continue;
             plinkedDoor = ptel->GetLinkedDoor();
@@ -4832,10 +2618,10 @@ bool FUN_009e3110_t::IsPathReachableToPlayer() const
                 continue;
             if (bcompareCells)
             {
-                if (pplayerCell == plinkedDoor->GetParentCell())
+                if (pplayerCell == (TESObjectCELL*)plinkedDoor->GetParentCell())
                     return true;
             }
-            else if (pplayerWorld == plinkedDoor->GetParentWorldSpace())
+            else if (pplayerWorld == (TESWorldSpace*)plinkedDoor->GetParentWorldSpace())
             {
                 return true;
             }
@@ -4845,34 +2631,12 @@ bool FUN_009e3110_t::IsPathReachableToPlayer() const
 }
 }  // namespace fnv_009e3110
 
-struct FUN_009e3970Class
-{
-    float GetValue();
-};
-
 // @fnv 0x009e3970
-float FUN_009e3970Class::GetValue()
+float bhkCharacterController::GetValue()
 {
     return *(float*)((char*)this + 0x560);
 }
 
-class PathingLocation
-{
-  public:
-    NiPoint3 GetPoint() const;
-};
-class PathingGraphNode
-{
-  public:
-    PathingLocation& GetLocation();
-};
-class PathingSolution
-{
-  public:
-    unsigned int GetNodeCount();
-    PathingGraphNode* GetNode(unsigned int index);
-    PathingGraphNode& GetLastNode();
-};
 struct FUN_009e3a70_shell : public DetailedActorPathHandler
 {
     NiPoint3 GetNextPathPoint();
@@ -4881,16 +2645,16 @@ struct FUN_009e3a70_shell : public DetailedActorPathHandler
 // @fnv 0x009e3a70
 NiPoint3 FUN_009e3a70_shell::GetNextPathPoint()
 {
-    if (pCurrentPathingSolution && pCurrentPathingSolution->GetNodeCount() > 0)
+    if (pCurrentPathingSolution && ((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetNodeCount() > 0)
     {
-        if (m_uiPathPointIndex + 1 < pCurrentPathingSolution->GetNodeCount())
-            return pCurrentPathingSolution->GetNode(m_uiPathPointIndex + 1)->GetLocation().GetPoint();
+        if (m_uiPathPointIndex + 1 < ((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetNodeCount())
+            return ((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetNode(m_uiPathPointIndex + 1)->GetLocation().GetPoint<NiPoint3>();
         else
-            return pCurrentPathingSolution->GetLastNode().GetLocation().GetPoint();
+            return ((NiPointer<PathingSolution>&)pCurrentPathingSolution)->GetLastNode().GetLocation().GetPoint<NiPoint3>();
     }
     else
     {
-        return *pActor->GetPos();
+        return *(const NiPoint3*)((const Actor*)pActor)->GetPos();
     }
 }
 
@@ -4950,14 +2714,6 @@ FUN_009e5ab0_Class* FUN_009e5ab0_Class::Init(int aiValue, float afValue)
     return this;
 }
 
-class BGSCameraPath;
-template <class T> class NiTMallocInterface;
-
-template <> class NiTArray<BGSCameraPath*, NiTMallocInterface<BGSCameraPath*> >
-{
-  public:
-    void Compact();
-};
 
 struct LH
 {
@@ -4966,22 +2722,9 @@ struct LH
     bool _ref_008256d0();
 };
 
-struct Arr
-{
-    TESObjectREFR** GetAt(int);
-};
-
-struct GlobalObject_00869b10
-{
-    void RemoveAt(unsigned int);
-};
-
-struct GlobalObject_009e9bb0
-{
-};
 
 extern unsigned int DAT_011f2aa0;
-extern GlobalObject_009e9bb0 g_011f2bf8;
+extern NiTPrimitiveArray<Actor*> g_011f2bf8;
 
 struct FUN_009e8690_shell : DetailedActorPathHandler
 {
@@ -5002,10 +2745,10 @@ void FUN_009e8690_shell::RemoveRefFromPathHandler(TESObjectREFR* apRef)
     {
         for (unsigned int i = 0; i < DAT_011f2aa0; ++i)
         {
-            if (*((Arr*)&g_011f2bf8)->GetAt(i) == apRef)
+            if (g_011f2bf8.GetAt(i) == apRef)
             {
-                ((GlobalObject_00869b10*)&g_011f2bf8)->RemoveAt(i);
-                ((NiTArray<BGSCameraPath*, NiTMallocInterface<BGSCameraPath*> >*)&g_011f2bf8)->Compact();
+                g_011f2bf8.RemoveAt(i);
+                g_011f2bf8.Compact();
                 DAT_011f2aa0--;
             }
         }
@@ -5019,14 +2762,9 @@ void FUN_009e8690_shell::RemoveRefFromPathHandler(TESObjectREFR* apRef)
     }
 }
 
-struct FUN_009e20a0_Class
-{
-    unsigned char* m_data;
-    unsigned char __thiscall GetByteAtOffset9F();
-};
 
 // @fnv 0x009e20a0
-unsigned char __thiscall FUN_009e20a0_Class::GetByteAtOffset9F()
+unsigned char __thiscall PathingRequestQueries::GetByteAtOffset9F()
 {
     return *(reinterpret_cast<unsigned char*>(this) + 0x9f);
 }
@@ -5056,119 +2794,64 @@ struct Flt
     operator unsigned int() const;
 };
 
-struct FUN_009e2830_This
+struct DetailedPathDistanceQueries : DetailedActorPathHandler
 {
-    unsigned int m_iWordAt00;
-    unsigned int m_iWordAt04;
-    unsigned int m_8;
-    Flt m_flt;
-    unsigned int m_10;
-    unsigned int m_14;
-    unsigned int m_18;
-    unsigned int m_1c;
-    unsigned int m_20;
-    unsigned int m_24;
-    unsigned int m_28;
-    unsigned int m_2c;
-    unsigned int m_30;
-    unsigned int m_34;
-    unsigned int m_38;
-    unsigned int m_3c;
-    unsigned int m_40;
-    unsigned int m_44;
-    unsigned int m_48;
-    unsigned int m_4c;
-    unsigned int m_50;
-    unsigned int m_54;
-    unsigned int m_58;
-    unsigned int m_5c;
-    unsigned int m_60;
-    unsigned int m_64;
-    unsigned int m_68;
-    unsigned int m_6c;
-    unsigned int m_70;
-    unsigned int m_74;
-    unsigned int m_78;
-    unsigned int m_7c;
-    unsigned int m_80;
-    unsigned int m_84;
-    unsigned int m_88;
-    unsigned int m_8c;
-    unsigned int m_90;
-    unsigned int m_94;
-    unsigned int m_98;
-    unsigned int m_9c;
-    unsigned int m_a0;
-    unsigned int m_a4;
-    unsigned int m_a8;
-    unsigned int m_ac;
-    unsigned int m_b0;
-    float m_fPathValue16;
     float GetFloatValue();
 };
 
 // @fnv 0x009e2830
-float FUN_009e2830_This::GetFloatValue()
+float DetailedPathDistanceQueries::GetFloatValue()
 {
-    if (!m_flt)
+    if (!(NiPointer<PathingSolution>&)pCurrentPathingSolution)
         return 0.0f;
     return m_fPathValue16;
 }
 
-struct FUN_009e3990;
 
-struct FUN_009e3990
+struct DetailedPathPointQueries : DetailedActorPathHandler
 {
     bool IsPointValid(NiPoint3& arPoint);
 };
 
 // Copies the NiPoint3 stored at offset 0x34 of this object into arPoint and returns true.
 // @fnv 0x009e3990
-bool FUN_009e3990::IsPointValid(NiPoint3& arPoint)
+bool DetailedPathPointQueries::IsPointValid(NiPoint3& arPoint)
 {
-    arPoint = *reinterpret_cast<const NiPoint3*>(reinterpret_cast<char*>(this) + 0x34);
+    arPoint = m_kPathVector3;
     return true;
 }
 
 namespace fnv_009e68c0 {
-struct List_009e03e0
-{
-    void RemoveAll();
-};
 
-struct FUN_009e68c0
+struct DetailedPathResetQueries : DetailedActorPathHandler
 {
     void Reset();
 };
 
 // Sets the flag at offset 0xd0 to 1, clears the list at 0x58, and zeroes the floats at 0x78 and 0x74.
 // @fnv 0x009e68c0
-void FUN_009e68c0::Reset()
+void DetailedPathResetQueries::Reset()
 {
-    *(int*)((char*)this + 0xd0) = 1;
-    ((List_009e03e0*)((char*)this + 0x58))->RemoveAll();
-    *(float*)((char*)this + 0x78) = 0.0f;
-    *(float*)((char*)this + 0x74) = 0.0f;
+    m_iPathParameter2 = 1;
+    ActorAvoidEntryList.RemoveAll();
+    m_fPathValue5 = 0.0f;
+    m_fPathValue4 = 0.0f;
 }
 }  // namespace fnv_009e68c0
 
-struct FUN_009e8670
+struct DetailedPathFlagQueries : DetailedActorPathHandler
 {
     char GetMethod();
 };
 
 // @fnv 0x009e8670
-char FUN_009e8670::GetMethod()
+char DetailedPathFlagQueries::GetMethod()
 {
-    return ((char*)this)[0x9c];
+    return *(char*)&m_fPathValue13;
 }
 
 struct NiRTTI;
-struct NiObject
-{
-    virtual NiRTTI const* GetStreamableRTTI();
-    void* FUN_00621a40();
-};
+
 void* __cdecl FUN_00458b20();
 int __fastcall GetReferenceFlags(void*);
 struct FUN_00cac910_shell
@@ -5192,17 +2875,10 @@ void* NiObject::FUN_00621a40()
     return result;
 }
 
-struct FUN_008b3d50_This
-{
-    char pad[0x190];
-    TESForm* form;
-    BSSimpleList<TESFile*>* FUN_008b3d50();
-};
-
 // @fnv 0x008b3d50
-BSSimpleList<TESFile*>* FUN_008b3d50_This::FUN_008b3d50()
+const NiPoint3& Actor::FUN_008b3d50()
 {
-    return form->GetSourceFiles();
+    return *(const NiPoint3*)((TESForm*)m_pActorMover)->GetSourceFiles();
 }
 
 void __fastcall SetVtable(void*);
@@ -5229,105 +2905,70 @@ FUN_009e2690::FUN_009e2690(int aiValue)
 }
 
 float __cdecl FUN_00404010(float, float);
-struct S009e2860
+struct DetailedPathRemainingDistanceQueries : DetailedActorPathHandler
 {
-    virtual void vf0();
-    virtual void vf1();
-    virtual void vf2();
-    virtual void vf3();
-    virtual void vf4();
-    virtual void vf5();
-    virtual float vf6();
-    char _pad[0x68];
-    float m_fPathValue2;
     float FUN_009e2860();
 };
 // @fnv 0x009e2860
-float S009e2860::FUN_009e2860()
+float DetailedPathRemainingDistanceQueries::FUN_009e2860()
 {
     float flength;
-    flength = m_fPathValue2 - vf6();
+    flength = m_fPathValue2 - vfn_18();
     flength = FUN_00404010(flength, 0.0f);
     return flength;
 }
 
 extern double _gModifierZero;
 void __cdecl FUN_005330e0(float&, float, float);
-struct FakePathHandler
+struct DetailedPathProgressQueries : DetailedActorPathHandler
 {
-    virtual void vm0()
-    {}
-    virtual void vm1()
-    {}
-    virtual void vm2()
-    {}
-    virtual void vm3()
-    {}
-    virtual void vm4()
-    {}
-    virtual void vm5()
-    {}
-    virtual float vm6()
-    {
-        return 0.0f;
-    }
-    char _pad[0x68];
-    float m_fPathValue2;
     float FUN_009e28a0();
 };
 // @fnv 0x009e28a0
-float FakePathHandler::FUN_009e28a0()
+float DetailedPathProgressQueries::FUN_009e28a0()
 {
     float fRatio;
     if (m_fPathValue2 <= _gModifierZero)
         return 1.0f;
-    fRatio = vm6() / m_fPathValue2;
+    fRatio = vfn_18() / m_fPathValue2;
     FUN_005330e0(fRatio, 0.0f, 1.0f);
     return fRatio;
 }
 
-struct FUN_009e2a80_Class
+struct DetailedPathModeQueries : DetailedActorPathHandler
 {
-    int _pad[0x34];
-    int m_iPathParameter2;
     bool FUN_009e2a80();
 };
 
 // @fnv 0x009e2a80
-bool FUN_009e2a80_Class::FUN_009e2a80()
+bool DetailedPathModeQueries::FUN_009e2a80()
 {
     return m_iPathParameter2 == 2;
 }
 
-struct FUN_009e3360_Class
+struct DetailedPathMoveModeQueries : DetailedActorPathHandler
 {
     void SetMode(unsigned int mode);
 };
 
 // @fnv 0x009e3360
-void FUN_009e3360_Class::SetMode(unsigned int mode)
+void DetailedPathMoveModeQueries::SetMode(unsigned int mode)
 {
-    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 0x60) = mode;
+    ByteAndFlagState = mode;
 }
 
-struct FUN_009e3be0_class
+struct DetailedPathMovementQueries : DetailedActorPathHandler
 {
     bool FUN_009e3be0();
 };
 
 // @fnv 0x009e3be0
-bool FUN_009e3be0_class::FUN_009e3be0()
+bool DetailedPathMovementQueries::FUN_009e3be0()
 {
-    return *(bool*)((char*)this + 0xde);
+    return m_bPathFlag3;
 }
 
-struct B006815c0
-{
-    int a;
-    int b;
-    int c;
-    B006815c0();
-};
+
 struct POD12
 {
     int a;
@@ -5337,7 +2978,7 @@ struct POD12
 struct FUN_009e6870
 {
     POD12 f0;
-    B006815c0 fC;
+    NiPoint3 fC;
     float f18;
     float f1C;
     int f20;
@@ -5353,52 +2994,23 @@ FUN_009e6870::FUN_009e6870(const POD12& aPOD12, float afValue1, float afValue2, 
 }
 
 extern int DAT_01092640;
-struct Holder_9e9950
-{
-    void* vtable;
-    void InitBuffer(int, int);
-    Holder_9e9950* Initialize();
-};
 // Sets the vtable to DAT_01092640, calls InitBuffer with 0 and 0, and returns this.
 // @fnv 0x009e9950
-Holder_9e9950* Holder_9e9950::Initialize()
+template <>
+BSSimpleArray<ActorAvoidanceData, 1024>::BSSimpleArray()
 {
-    vtable = (void*)&DAT_01092640;
-    InitBuffer(0, 0);
-    return this;
+    _InitialSetup(0, 0);
 }
 
-namespace fnv_009e9980 {
-extern "C" void* DAT_01092640;
-struct GlobalObject_00869f00
-{
-    void* m_p;
-    void Clear(bool b);
-};
-struct FUN_009e9980_Class
-{
-    void* m_p;
-    void FUN_009e9980();
-};
 // @fnv 0x009e9980
-void FUN_009e9980_Class::FUN_009e9980()
+template <>
+BSSimpleArray<ActorAvoidanceData, 1024>::~BSSimpleArray()
 {
-    m_p = &DAT_01092640;
-    ((GlobalObject_00869f00*)this)->Clear(true);
+    Clear(true);
 }
-}  // namespace fnv_009e9980
 
 namespace fnv_009e2900 {
-struct PathingSolution
-{
-    unsigned int GetNodeCount();
-    NiPoint3 GetPointAtDistance(float, float);
-};
-struct GO
-{
-    ~GO();
-    void* m_pObject;
-};
+
 struct Flt : GO
 {
     operator unsigned int();
@@ -5408,11 +3020,7 @@ struct SpObst : Flt
     SpObst(unsigned int*);
 };
 char __fastcall GetByteAtOffset70(char*);
-struct Actor_009e2900
-{
-    float FUN_00884dc0();
-    float FUN_00884eb0();
-};
+
 struct Ref_009e2900
 {
     virtual void v0();
@@ -5447,21 +3055,21 @@ NiPoint3 FUN_009e2900_t::GetPathingPosition(float afDeltaT) const
             float fdistance;
             float fspeed;
             if (((Ref_009e2900*)pRef)->GetFlags() & 0x200)
-                fspeed = ((Actor_009e2900*)pActor)->FUN_00884eb0();
+                fspeed = ((Actor*)pActor)->FUN_00884eb0();
             else
-                fspeed = ((Actor_009e2900*)pActor)->FUN_00884dc0();
+                fspeed = ((Actor*)pActor)->FUN_00884dc0();
             fdistance = fspeed * afDeltaT;
             return ((PathingSolution*)(unsigned int)pPathingSolution)
                 ->GetPointAtDistance(m_fSplineParameter, fdistance);
         }
         else
         {
-            return *pActor->GetPos();
+            return *(const NiPoint3*)((const Actor*)pActor)->GetPos();
         }
     }
     else
     {
-        return *pActor->GetPos();
+        return *(const NiPoint3*)((const Actor*)pActor)->GetPos();
     }
 }
 }  // namespace fnv_009e2900
@@ -5472,24 +3080,7 @@ struct FUN_009e3c00_shell : public DetailedActorPathHandler
     void AdvanceAlongPath(float);
 };
 
-struct B006815c0
-{
-    float x, y, z;
-    B006815c0();
-};
-struct PathingSolution
-{
-    unsigned int GetNodeCount();
-    void FUN_006e7e70(float, float, int, int*, NiPoint3*);
-};
-struct FUN_006e84b0_shell
-{
-    float GetSplineLengthAtParameter(float);
-};
-struct BSSoundHandleEx
-{
-    ~BSSoundHandleEx();
-};
+
 struct Flt
 {
     operator unsigned int();
@@ -5499,107 +3090,68 @@ struct FUN_009e5480_shell
     void ResetPathState();
 };
 extern double gModifierZero;
-struct DAPHView_009e3c00
-{
-    char pad0[8];
-    BSSoundHandleEx* pForm;
-    Flt m_pPathingSolution;
-    char pad10[0x34 - 0x10];
-    B006815c0 m_kPathVector3;
-    char pad40[0x4c - 0x40];
-    B006815c0 m_kPathVector4;
-    char pad58[0x64 - 0x58];
-    unsigned int m_uiPathPointIndex;
-    char pad68[0x70 - 0x68];
-    float m_fSplineParameter;
-    char pad74[0xb4 - 0x74];
-    float m_fPathValue16;
-};
 
 // @fnv 0x009e3c00
 void FUN_009e3c00_shell::AdvanceAlongPath(float afDist)
 {
-    if (!((PathingSolution*)(unsigned int)((DAPHView_009e3c00*)this)->m_pPathingSolution)->GetNodeCount())
+    if (!((PathingSolution*)pCurrentPathingSolution)->GetNodeCount())
         return;
-    if (((DAPHView_009e3c00*)this)->m_uiPathPointIndex + 1 >=
-        ((PathingSolution*)(unsigned int)((DAPHView_009e3c00*)this)->m_pPathingSolution)->GetNodeCount())
+    if (this->m_uiPathPointIndex + 1 >=
+        ((PathingSolution*)pCurrentPathingSolution)->GetNodeCount())
         return;
-    ((DAPHView_009e3c00*)this)->m_fPathValue16 =
-        ((FUN_006e84b0_shell*)(unsigned int)((DAPHView_009e3c00*)this)->m_pPathingSolution)
-            ->GetSplineLengthAtParameter(((DAPHView_009e3c00*)this)->m_fSplineParameter);
-    ((DAPHView_009e3c00*)this)->m_kPathVector4 = ((DAPHView_009e3c00*)this)->m_kPathVector3;
+    this->m_fPathValue16 =
+        ((PathingSolution*)pCurrentPathingSolution)
+            ->GetSplineLengthAtParameter(this->m_fSplineParameter);
+    this->m_kPathVector4 = this->m_kPathVector3;
     ((FUN_009e5480_shell*)this)->ResetPathState();
-    B006815c0 newPoint;
+    NiPoint3 newPoint;
     float fnewSplineT;
     if (afDist >= gModifierZero)
-        ((PathingSolution*)(unsigned int)((DAPHView_009e3c00*)this)->m_pPathingSolution)
-            ->FUN_006e7e70(((DAPHView_009e3c00*)this)->m_fSplineParameter, afDist, 1, (int*)&fnewSplineT,
+        ((PathingSolution*)pCurrentPathingSolution)
+            ->FUN_006e7e70(this->m_fSplineParameter, afDist, 1, (int*)&fnewSplineT,
                            (NiPoint3*)&newPoint);
     else
-        ((PathingSolution*)(unsigned int)((DAPHView_009e3c00*)this)->m_pPathingSolution)
-            ->FUN_006e7e70(((DAPHView_009e3c00*)this)->m_fSplineParameter, -afDist, 0, (int*)&fnewSplineT,
+        ((PathingSolution*)pCurrentPathingSolution)
+            ->FUN_006e7e70(this->m_fSplineParameter, -afDist, 0, (int*)&fnewSplineT,
                            (NiPoint3*)&newPoint);
-    ((DAPHView_009e3c00*)this)->m_fSplineParameter = fnewSplineT;
-    ((DAPHView_009e3c00*)this)->m_kPathVector3 = newPoint;
-    ((DAPHView_009e3c00*)this)->m_uiPathPointIndex = (int)((DAPHView_009e3c00*)this)->m_fSplineParameter;
-    ((DAPHView_009e3c00*)this)->pForm->BSSoundHandleEx::~BSSoundHandleEx();
+    this->m_fSplineParameter = fnewSplineT;
+    this->m_kPathVector3 = (const NiPoint3&)newPoint;
+    this->m_uiPathPointIndex = (int)this->m_fSplineParameter;
+    m_pActorMover->FUN_00483710();
 }
 }  // namespace fnv_009e3c00
 
+class GameTimerRecord;
 namespace fnv_009e54a0 {
-struct Setting_S
-{
-    float* Float();
-};
-struct BSFadeNode
-{
-    bool FUN_00552470() const;
-};
+
+
 struct BSSimpleListTESRaceSize
 {
     int GetSize();
-};
-struct GlobalObject_00869b10
-{
-    void RemoveAll();
 };
 struct FUN_007ff8e0_shell
 {
     bool FUN_007ff8e0();
 };
-struct AnimIdle
-{
-    int GetSection();
-};
-struct bhkCharacterController_shell
+
+// The approved controller lacks this query. Extend its declaration locally
+// without repeating its layout or virtual table.
+struct CharacterControllerQueries : public bhkCharacterController
 {
     float FUN_008a3b50() const;
 };
-struct NiTPrimitiveArray_unsigned_int_
-{
-    unsigned int AddFirstEmpty(const unsigned int&);
-};
-struct StrArr
-{
-    void SetSize(unsigned int);
-};
-struct ProcessLists
-{
-    BSSimpleList<Actor*>* GetAliveActorList();
-};
+
 struct FUN_009e54a0_ref
 {
     Actor** _ref_006815c0();
 };
 struct GlobalObject_0044f440;
-struct GlobalObject_009e9bb0;
-struct GameTimerRecord;
 extern int DAT_011e0e80;
 extern int DAT_011f2a9c;
 extern unsigned int DAT_011f2aa0;
 extern int DAT_011f2aa4;
 extern GlobalObject_0044f440 g_011f2bd0;
-extern GlobalObject_009e9bb0 g_011f2bf8;
+extern NiTPrimitiveArray<Actor*> g_011f2bf8;
 extern GameTimerRecord g_timeGlobal;
 
 // Rebuilds the actor list when the idle section changes: clears it, sizes it to the alive actor count, and adds qualifying actors.
@@ -5611,9 +3163,9 @@ bool UpdateAliveActorList()
     {
         BSSimpleList<Actor*>* pActorList = ((ProcessLists*)&DAT_011e0e80)->GetAliveActorList();
         DAT_011f2aa4 = section;
-        ((GlobalObject_00869b10*)&g_011f2bf8)->RemoveAll();
+        g_011f2bf8.RemoveAll();
         DAT_011f2a9c = ((BSSimpleListTESRaceSize*)pActorList)->GetSize();
-        ((StrArr*)&g_011f2bf8)->SetSize(DAT_011f2a9c);
+        g_011f2bf8.SetSize(DAT_011f2a9c);
         DAT_011f2aa0 = 0;
         for (; pActorList; pActorList = pActorList->GetNext())
         {
@@ -5626,11 +3178,11 @@ bool UpdateAliveActorList()
             if (!((FUN_007ff8e0_shell*)node)->FUN_007ff8e0())
                 continue;
             if (actor->GetPhysicsCharacterController() && ((BSFadeNode*)node)->FUN_00552470() &&
-                ((bhkCharacterController_shell*)actor->GetPhysicsCharacterController())->FUN_008a3b50() >
-                    *((Setting_S*)&g_011f2bd0)->Float())
+                ((CharacterControllerQueries*)actor->GetPhysicsCharacterController())->FUN_008a3b50() >
+                    *((Setting*)&g_011f2bd0)->Float())
                 continue;
             DAT_011f2aa0++;
-            ((NiTPrimitiveArray_unsigned_int_*)&g_011f2bf8)->AddFirstEmpty(*(unsigned int*)&actor);
+            g_011f2bf8.AddFirstEmpty(actor);
         }
         return true;
     }
@@ -5641,131 +3193,124 @@ bool UpdateAliveActorList()
 }
 }  // namespace fnv_009e54a0
 
+class ActiveEffect;
+class AlchemyItem;
+struct BGSEncounterZone;
+struct BGSImpactDataSet;
+class BGSLoadGameBuffer;
+class BGSPerk;
+class BGSPerkEntry;
+class BGSSaveGameBuffer;
+class BGSTextureSet;
+class BSAnimGroupSequence;
+class BSAnimNote;
+class BSAnimNoteReceiver;
+class BSExtraData;
+class BSFaceGenAnimationData;
+class BSFaceGenNiNode;
+class BSMultiBound;
+class BSMultiBoundRoom;
+class BSSoundHandle;
+class BaseProcess;
+class CellMopp;
+class CombatController;
+class ActorCombatGroup;
+class ContinuousBeamProjectile;
+class EffectItem;
+class ExtraDataList;
+class ExtraLock;
+class FormRecordHeader;
+class FurnitureMark;
+class HWND__;
+class IDebugText;
+struct InventoryChanges;
+class InventoryStackRecord;
+class MagicCaster;
+class MagicItem;
+class MagicProjectile;
+class MagicTarget;
+class NiAVObject;
+class NiColor;
+class NiControllerManager;
+class NiControllerSequence;
+class NiFixedString;
+class NiGeometry;
+class NiLight;
+class NiNode;
+class NiPointLight;
+class PlacedObjectInfo;
+class PathingAvoidNodeArray;
+class Projectile;
+class QueuedFile;
+class Script;
+class ScriptLocals;
+class SpellItem;
+class TESActorBase;
+class TESAmmo;
+class TESBoundObject;
+class TESClass;
+class TESCombatStyle;
+class TESContainer;
+class TESFaction;
+class TESFile;
+class TESForm;
+class TESGlobal;
+class TESIdleForm;
+class TESModel;
+class TESObject;
+class TESObjectARMO;
+class TESObjectBOOK;
+class TESObjectCELL;
+class TESObjectCLOT;
+class TESObjectLIGH;
+class TESObjectWEAP;
+class TESPackage;
+class TESRace;
+class TESSkill;
+class TESSound;
+class TESTopic;
+class TESTopicInfo;
+class TESWorldSpace;
+class TargetEntry;
+class TrespassPackage;
+class WeaponObject;
+class bhkNiCollisionObject;
+class bhkRagdollController;
+class bhkRigidBody;
+class hkpRigidBody;
 namespace fnv_009e6ba0 {
-struct ActiveEffect;
-struct Actor;
 struct ActorCause;
-struct AlchemyItem;
-struct Animation;
 struct TwoIntegerValues;
 struct MediaLocation;
-struct BGSEncounterZone;
 struct ExplosionForm;
-struct BGSImpactDataSet;
-struct BGSLoadFormBuffer;
-struct BGSLoadGameBuffer;
-struct BGSPerk;
-struct BGSPerkEntry;
-struct BGSSaveFormBuffer;
-struct BGSSaveGameBuffer;
-struct BGSTextureSet;
-struct BSAnimGroupSequence;
-struct BSAnimNote;
-struct BSAnimNoteReceiver;
-struct BSExtraData;
-struct BSFaceGenAnimationData;
-struct BSFaceGenNiNode;
-struct BSMultiBound;
-struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
-struct BaseProcess;
 struct BipedAnim;
 struct CHUNK;
 struct CombatGroupCollection;
-struct CellMopp;
-struct CombatController;
-struct ActorCombatGroup;
-struct ContinuousBeamProjectile;
 struct Crime;
 struct GameFormRecord;
 struct DialogueResponse;
 struct DetectionParameters;
 struct TeleportableReference;
-struct EffectItem;
-struct ExtraDataList;
-struct ExtraLock;
-struct FormRecordHeader;
 struct TESFileGroup;
-struct FurnitureMark;
-struct HWND__;
 struct BooleanIntegerAccessor;
 struct BooleanFloatQuery;
-struct IDebugText;
-struct InventoryChanges;
-struct InventoryStackRecord;
 struct CellDataNode;
-struct MagicCaster;
-struct MagicItem;
 struct MagicEffectCollection;
-struct MagicProjectile;
-struct MagicTarget;
 struct MapMarkerData;
-struct MobileObject;
+
 struct Point3Offset;
-struct NiAVObject;
 struct AnimationInterpolator;
-struct NiColor;
-struct NiControllerManager;
-struct NiControllerSequence;
-struct NiFixedString;
-struct NiGeometry;
-struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
-struct NiPointLight;
-struct PlacedObjectInfo;
 struct IndexedPointerCollection;
 struct LocationDescriptor;
-struct PathingAvoidNodeArray;
-struct PathingLocation;
-struct PathingRequest;
-struct Projectile;
-struct QueuedFile;
+
 struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
-struct ScriptLocals;
-struct SpellItem;
-struct TESActorBase;
-struct TESAmmo;
-struct TESBoundObject;
-struct TESClass;
-struct TESCombatStyle;
-struct TESContainer;
-struct TESFaction;
-struct TESFile;
-struct TESForm;
-struct TESGlobal;
-struct TESIdleForm;
-struct TESModel;
-struct TESObject;
-struct TESObjectARMO;
-struct TESObjectBOOK;
-struct TESObjectCELL;
-struct TESObjectCLOT;
-struct TESObjectLIGH;
-struct TESObjectREFR;
-struct TESObjectWEAP;
-struct TESPackage;
-struct TESRace;
-struct TESSkill;
-struct TESSound;
-struct TESTopic;
-struct TESTopicInfo;
-struct TESWorldSpace;
-struct TargetEntry;
 struct TrapEntry;
-struct TrespassPackage;
 struct WaterZone;
-struct WeaponObject;
-struct bhkCharacterController;
-struct bhkNiCollisionObject;
-struct bhkRagdollController;
+
 struct bhkRagdollPenetrationUtil;
-struct bhkRigidBody;
-struct hkpRigidBody;
 struct blob4
 {
     char b[4];
@@ -5786,62 +3331,15 @@ struct blob48
 {
     char b[48];
 };
-struct NiMemObject
-{
-    char _pad_0[1];
-};
+using ::NiMemObject;
 typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
+
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
-struct TESChildCell
-{
-    virtual TESObjectCELL* GetSaveParentCell();
-};
+
 typedef char _sizecheck_TESChildCell[sizeof(TESChildCell) == 4 ? 1 : -1];
-struct ActorValueOwner
-{
-    virtual int GetBaseActorValue(int);
-    virtual float GetBaseActorValueFloat(int);
-    virtual int GetActorValue(int);
-    virtual float GetCurrentActorValue(int);
-    virtual float GetPermanentActorValueFloat(int);
-    virtual float GetTemporaryActorValue(int);
-    virtual float GetDamageActorValue(int);
-    virtual int GetPermanentActorValue(int);
-    virtual float GetPermanentActorValueAdjustment(int);
-    virtual TESForm* GetActorValueOwnerForm();
-    virtual unsigned short GetActorValueOwnerType();
-    int GetActorValueAsInteger(int);
-    float GetActorValueFloatByIndex(int);
-};
+
 typedef char _sizecheck_ActorValueOwner[sizeof(ActorValueOwner) == 4 ? 1 : -1];
-struct CachedValuesOwner
-{
-    virtual float GetFloatValue0();
-    virtual float GetFloatValue1();
-    virtual float GetFloatValue2();
-    virtual float GetFloatValue3();
-    virtual float GetFloatValue4();
-    virtual float GetFloatValue5();
-    virtual float GetFloatValue6();
-    virtual float GetFloatValue7();
-    virtual float GetFloatValue8();
-    virtual float GetFloatValue9();
-    virtual float GetFloatValue10();
-    virtual float GetFloatValue11();
-    virtual int GetIntegerValue12();
-    virtual int GetIntegerValue13();
-    virtual float GetFloatValue14();
-    virtual float GetFloatValue15();
-    virtual bool GetBooleanValue16();
-    void PrecalculateCachedValues();
-};
+
 typedef char _sizecheck_CachedValuesOwner[sizeof(CachedValuesOwner) == 4 ? 1 : -1];
 struct FUN_009e6ba0_shell : public DetailedActorPathHandler
 {
@@ -5866,161 +3364,12 @@ struct WorldOps_9e6ba0
     CellOps_9e6ba0* GetCellByWorldPosition(const NiPoint3& pt);
 };
 
-struct RefrOps_9e6ba0
-{
-    virtual void V000();
-    virtual void V001();
-    virtual void V002();
-    virtual void V003();
-    virtual void V004();
-    virtual void V005();
-    virtual void V006();
-    virtual void V007();
-    virtual void V008();
-    virtual void V009();
-    virtual void V010();
-    virtual void V011();
-    virtual void V012();
-    virtual void V013();
-    virtual void V014();
-    virtual void V015();
-    virtual void V016();
-    virtual void V017();
-    virtual void V018();
-    virtual void V019();
-    virtual void V020();
-    virtual void V021();
-    virtual void V022();
-    virtual void V023();
-    virtual void V024();
-    virtual void V025();
-    virtual void V026();
-    virtual void V027();
-    virtual void V028();
-    virtual void V029();
-    virtual void V030();
-    virtual void V031();
-    virtual void V032();
-    virtual void V033();
-    virtual void V034();
-    virtual void V035();
-    virtual void V036();
-    virtual void V037();
-    virtual void V038();
-    virtual void V039();
-    virtual void V040();
-    virtual void V041();
-    virtual void V042();
-    virtual void V043();
-    virtual void V044();
-    virtual void V045();
-    virtual void V046();
-    virtual void V047();
-    virtual void V048();
-    virtual void V049();
-    virtual void V050();
-    virtual void V051();
-    virtual void V052();
-    virtual void V053();
-    virtual void V054();
-    virtual void V055();
-    virtual void V056();
-    virtual void V057();
-    virtual void V058();
-    virtual void V059();
-    virtual void V060();
-    virtual void V061();
-    virtual void V062();
-    virtual void V063();
-    virtual void V064();
-    virtual void V065();
-    virtual void V066();
-    virtual void V067();
-    virtual void V068();
-    virtual void V069();
-    virtual void V070();
-    virtual void V071();
-    virtual void V072();
-    virtual void V073();
-    virtual void V074();
-    virtual void V075();
-    virtual void V076();
-    virtual void V077();
-    virtual void V078();
-    virtual void V079();
-    virtual void V080();
-    virtual void V081();
-    virtual void V082();
-    virtual void V083();
-    virtual void V084();
-    virtual void V085();
-    virtual void V086();
-    virtual void V087();
-    virtual void V088();
-    virtual void V089();
-    virtual void V090();
-    virtual void V091();
-    virtual void V092();
-    virtual void V093();
-    virtual void V094();
-    virtual void V095();
-    virtual void V096();
-    virtual void V097();
-    virtual void V098();
-    virtual void V099();
-    virtual void V100();
-    virtual void V101();
-    virtual void V102();
-    virtual void V103();
-    virtual void V104();
-    virtual void V105();
-    virtual void V106();
-    virtual void V107();
-    virtual void V108();
-    virtual void V109();
-    virtual void V110();
-    virtual void V111();
-    virtual void V112();
-    virtual void V113();
-    virtual void V114();
-    virtual void V115();
-    virtual void V116();
-    virtual void V117();
-    virtual void V118();
-    virtual void V119();
-    virtual void V120();
-    virtual void V121();
-    virtual void V122();
-    virtual void V123();
-    virtual void V124();
-    virtual NiPoint3* GetPos();
-    CellOps_9e6ba0* GetParentCell();
-    WorldOps_9e6ba0* GetParentWorldSpace();
-};
-
-struct ActorOps_9e6ba0 : public RefrOps_9e6ba0
-{
-    float GetRadius();
-};
 
 struct PlayerOps_9e6ba0
 {
     bool IsSleepingOrResting();
 };
 
-struct Setting_S
-{
-    float* Float();
-};
-
-struct PathingLocation
-{
-    PathingLocation(RefrOps_9e6ba0* ref);
-    PathingLocation(const NiPoint3& pt, RefrOps_9e6ba0* ref);
-    ~PathingLocation();
-    NiPoint3Ops GetLocation() const;
-    unsigned char data[0x28];
-};
 
 struct PathingRequestOps
 {
@@ -6031,12 +3380,6 @@ struct PathingRequestOps
     void ClearInitialTangent();
 };
 
-class PathingSolution
-{
-  public:
-    unsigned int IsValid();
-    void GetPoint(float t, NiPoint3& out);
-};
 
 template <class T> struct NiPointerOps
 {
@@ -6055,8 +3398,6 @@ template <class T> struct BSSimpleListOps
 
 struct PathHandlerOps : public ActorPathHandler
 {
-    virtual void V14();
-    virtual bool IsFollowingDoorPath();
     void AdjustTether(float delta);
 };
 
@@ -6064,7 +3405,7 @@ float __cdecl GetDirectionAngle(const NiPoint3& dir);
 bool __cdecl FUN_006ba9e0(const NiPoint3* start, const NiPoint3* end, const NiPoint3* avoidPos, float avoidRadius);
 
 extern PlayerOps_9e6ba0* g_thePlayer;
-extern Setting_S g_011f2b68;
+extern Setting g_011f2b68;
 extern double DAT_01011588;
 
 // Validates the pathing solution and player state, then updates the tether and sets the request origin based on actor position, cell interior, and avoided actors.
@@ -6084,8 +3425,8 @@ void FUN_009e6ba0_shell::UpdatePathingOrigin(PathingRequest* apRequest)
     if (((DetailedActorPathHandler*)this)->m_bPathFlag5)
     {
         ((PathingRequestOps*)apRequest)
-            ->SetOrigin(PathingLocation(((DetailedActorPathHandler*)this)->m_kPathVector3,
-                                        *(RefrOps_9e6ba0**)((char*)this + 4)));
+            ->SetOrigin(PathingLocation((const NiPoint3&)((DetailedActorPathHandler*)this)->m_kPathVector3,
+                                        *(::TESObjectREFR**)((char*)this + 4)));
         return;
     }
 
@@ -6093,20 +3434,21 @@ void FUN_009e6ba0_shell::UpdatePathingOrigin(PathingRequest* apRequest)
         return;
 
     ((DetailedActorPathHandler*)this)->m_bPathFlag5 = true;
-    NiPoint3 actorCurrent = *(*(RefrOps_9e6ba0**)((char*)this + 4))->GetPos();
-    if (((DetailedActorPathHandler*)this)->m_bPathFlag3 || ((PathHandlerOps*)this)->IsFollowingDoorPath() ||
+    NiPoint3 actorCurrent = *(*(const TESObjectREFR**)((char*)this + 4))->GetPos();
+    // The shared vfn_3c declaration returns void; this call consumes its bool result.
+    if (((DetailedActorPathHandler*)this)->m_bPathFlag3 || ((bool (__thiscall**)(void*))*(void**)this)[15](this) ||
         ((DetailedActorPathHandler*)this)->m_bPathFlag1)
     {
         ((DetailedActorPathHandler*)this)->m_kPathVector3 = actorCurrent;
         ((DetailedActorPathHandler*)this)->m_kPathVector4 = actorCurrent;
         ((DetailedActorPathHandler*)this)->eState = 4;
-        ((PathingRequestOps*)apRequest)->SetOrigin(PathingLocation(*(RefrOps_9e6ba0**)((char*)this + 4)));
+        ((PathingRequestOps*)apRequest)->SetOrigin(PathingLocation(*(::TESObjectREFR**)((char*)this + 4)));
         return;
     }
     else
     {
-        float fnewLen = (((PathingRequestOps*)apRequest)->GetOrigin()->GetLocation() -
-                         ((PathingRequestOps*)apRequest)->GetDestination()->GetLocation())
+        float fnewLen = (((PathingRequestOps*)apRequest)->GetOrigin()->GetLocation<NiPoint3Ops>() -
+                         ((PathingRequestOps*)apRequest)->GetDestination()->GetLocation<NiPoint3Ops>())
                             .Length();
         float fwaitDist = *g_011f2b68.Float();
         if (((DetailedActorPathHandler*)this)->ByteAndFlagState & 0x200)
@@ -6129,12 +3471,11 @@ void FUN_009e6ba0_shell::UpdatePathingOrigin(PathingRequest* apRequest)
     }
 
     bool bfixupTether = true;
-    if ((*(RefrOps_9e6ba0**)((char*)this + 4))->GetParentCell() &&
-        (*(RefrOps_9e6ba0**)((char*)this + 4))->GetParentCell()->IsInterior())
+    if ((*(TESObjectREFR**)((char*)this + 4))->GetParentCell() &&
+        ((CellOps_9e6ba0*)(*(TESObjectREFR**)((char*)this + 4))->GetParentCell())->IsInterior())
         bfixupTether = false;
-    else if ((*(RefrOps_9e6ba0**)((char*)this + 4))->GetParentWorldSpace() &&
-             (*(RefrOps_9e6ba0**)((char*)this + 4))
-                 ->GetParentWorldSpace()
+    else if ((*(TESObjectREFR**)((char*)this + 4))->GetParentWorldSpace() &&
+             ((WorldOps_9e6ba0*)(*(TESObjectREFR**)((char*)this + 4))->GetParentWorldSpace())
                  ->GetCellByWorldPosition(((DetailedActorPathHandler*)this)->m_kPathVector3))
         bfixupTether = false;
 
@@ -6157,19 +3498,19 @@ void FUN_009e6ba0_shell::UpdatePathingOrigin(PathingRequest* apRequest)
         tetherTangent -= ((DetailedActorPathHandler*)this)->m_kPathVector3;
         finitialAngle = (GetDirectionAngle)(tetherTangent);
 
-        if (!((BSSimpleListOps<ActorOps_9e6ba0*>*)&((DetailedActorPathHandler*)this)->ActorAvoidEntryList)->IsEmpty())
+        if (!((BSSimpleListOps<Actor*>*)&((DetailedActorPathHandler*)this)->ActorAvoidEntryList)->IsEmpty())
         {
-            BSSimpleListOps<ActorOps_9e6ba0*>* pCurrentElementNext =
-                (BSSimpleListOps<ActorOps_9e6ba0*>*)&((DetailedActorPathHandler*)this)->ActorAvoidEntryList;
+            BSSimpleListOps<Actor*>* pCurrentElementNext =
+                (BSSimpleListOps<Actor*>*)&((DetailedActorPathHandler*)this)->ActorAvoidEntryList;
             while (pCurrentElementNext)
             {
-                ActorOps_9e6ba0* pavoidActor = pCurrentElementNext->GetItem();
+                Actor* pavoidActor = pCurrentElementNext->GetItem();
                 pCurrentElementNext = pCurrentElementNext->GetNext();
-                if (FUN_006ba9e0((*(RefrOps_9e6ba0**)((char*)this + 4))->GetPos(),
-                                 &((DetailedActorPathHandler*)this)->m_kPathVector3, pavoidActor->GetPos(),
-                                 pavoidActor->GetRadius()))
+                if (FUN_006ba9e0((*(const TESObjectREFR**)((char*)this + 4))->GetPos(),
+                                 &((DetailedActorPathHandler*)this)->m_kPathVector3, ((const Actor*)pavoidActor)->GetPos(),
+                                 pavoidActor->FUN_008be1b0()))
                 {
-                    newPathOrigin = *(*(RefrOps_9e6ba0**)((char*)this + 4))->GetPos();
+                    newPathOrigin = *(*(const TESObjectREFR**)((char*)this + 4))->GetPos();
                     bSetInitialTangent = false;
                     break;
                 }
@@ -6177,7 +3518,7 @@ void FUN_009e6ba0_shell::UpdatePathingOrigin(PathingRequest* apRequest)
         }
 
         ((PathingRequestOps*)apRequest)
-            ->SetOrigin(PathingLocation(newPathOrigin, *(RefrOps_9e6ba0**)((char*)this + 4)));
+            ->SetOrigin(PathingLocation((const NiPoint3&)newPathOrigin, *(::TESObjectREFR**)((char*)this + 4)));
         if (bSetInitialTangent)
             ((PathingRequestOps*)(NiPointerOps<PathingRequestOps>&)((DetailedActorPathHandler*)this)->m_pPathingRequest)
                 ->SetInitialTangent(finitialAngle);
@@ -6188,103 +3529,97 @@ void FUN_009e6ba0_shell::UpdatePathingOrigin(PathingRequest* apRequest)
 }
 }  // namespace fnv_009e6ba0
 
+class ActiveEffect;
+class AlchemyItem;
+struct BGSEncounterZone;
+class BGSLoadGameBuffer;
+class BGSSaveGameBuffer;
+class BSAnimNoteReceiver;
+class BSExtraData;
+class BSFaceGenAnimationData;
+class BSFaceGenNiNode;
+class BSMultiBound;
+class BSMultiBoundRoom;
+class BSSoundHandle;
+class BaseProcess;
+class CellMopp;
+class EffectItem;
+class ExtraDataList;
+class ExtraLock;
+class FormRecordHeader;
+class FurnitureMark;
+class HWND__;
+struct InventoryChanges;
+class InventoryStackRecord;
+class MagicCaster;
+class MagicItem;
+class MagicProjectile;
+class MagicTarget;
+class NiAVObject;
+class NiColor;
+class NiControllerManager;
+class NiControllerSequence;
+class NiFixedString;
+class NiGeometry;
+class NiLight;
+class NiNode;
+class NiPointLight;
+class NiQuaternion;
+class PlacedObjectInfo;
+class Script;
+class ScriptLocals;
+class SpellItem;
+class TESActorBase;
+class TESAmmo;
+class TESBoundObject;
+class TESContainer;
+class TESFile;
+class TESForm;
+class TESGlobal;
+class TESIdleForm;
+class TESModel;
+class TESObjectARMO;
+class TESObjectCELL;
+class TESObjectCLOT;
+class TESObjectLIGH;
+class TESObjectWEAP;
+class TESPackage;
+class TESSound;
+class TESTopic;
+class TESTopicInfo;
+class TESWorldSpace;
+class TargetEntry;
+class bhkNiCollisionObject;
+class hkVector4;
+class hkpRigidBody;
 namespace fnv_009e9760 {
-struct ActiveEffect;
-struct Actor;
 struct ActorCause;
-struct AlchemyItem;
-struct Animation;
 struct TwoIntegerValues;
 struct MediaLocation;
-struct BGSEncounterZone;
 struct ExplosionForm;
-struct BGSLoadFormBuffer;
-struct BGSLoadGameBuffer;
-struct BGSSaveFormBuffer;
-struct BGSSaveGameBuffer;
 struct SaveLoadFile;
-struct BSAnimNoteReceiver;
-struct BSExtraData;
-struct BSFaceGenAnimationData;
-struct BSFaceGenNiNode;
-struct BSMultiBound;
-struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
-struct BaseProcess;
 struct BipedAnim;
 struct CHUNK;
-struct CellMopp;
 struct GameFormRecord;
 struct DialogueResponse;
 struct TeleportableReference;
-struct EffectItem;
-struct ExtraDataList;
-struct ExtraLock;
-struct FormRecordHeader;
 struct TESFileGroup;
-struct FurnitureMark;
-struct HWND__;
 struct BooleanIntegerAccessor;
-struct InventoryChanges;
-struct InventoryStackRecord;
 struct CellDataNode;
-struct MagicCaster;
-struct MagicItem;
 struct MagicEffectCollection;
-struct MagicProjectile;
-struct MagicTarget;
 struct MapMarkerData;
-struct MobileObject;
+
 struct Point3Offset;
-struct NiAVObject;
 struct AnimationInterpolator;
-struct NiColor;
-struct NiControllerManager;
-struct NiControllerSequence;
-struct NiFixedString;
-struct NiGeometry;
-struct NiLight;
-struct ThreeByThreeMatrix;
-struct NiNode;
-struct NiPointLight;
-struct NiQuaternion;
-struct PlacedObjectInfo;
 struct IndexedPointerCollection;
 struct LocationDescriptor;
 struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
-struct ScriptLocals;
-struct SpellItem;
-struct TESActorBase;
-struct TESAmmo;
-struct TESBoundObject;
-struct TESContainer;
-struct TESFile;
-struct TESForm;
-struct TESGlobal;
-struct TESIdleForm;
-struct TESModel;
-struct TESObjectARMO;
-struct TESObjectCELL;
-struct TESObjectCLOT;
-struct TESObjectLIGH;
-struct TESObjectREFR;
-struct TESObjectWEAP;
-struct TESPackage;
-struct TESSound;
-struct TESTopic;
-struct TESTopicInfo;
-struct TESWorldSpace;
-struct TargetEntry;
 struct TrapEntry;
 struct WaterZone;
-struct bhkCharacterController;
-struct bhkNiCollisionObject;
-struct hkVector4;
-struct hkpRigidBody;
+
 struct blob4
 {
     char b[4];
@@ -6305,45 +3640,17 @@ struct blob48
 {
     char b[48];
 };
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
+
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
-struct TESChildCell
-{
-    virtual TESObjectCELL* GetSaveParentCell();
-};
+
 typedef char _sizecheck_TESChildCell[sizeof(TESChildCell) == 4 ? 1 : -1];
-struct ActorValueOwner
-{
-    virtual int GetBaseActorValue(int);
-    virtual float GetBaseActorValueFloat(int);
-    virtual int GetActorValue(int);
-    virtual float GetCurrentActorValue(int);
-    virtual float GetPermanentActorValueFloat(int);
-    virtual float GetTemporaryActorValue(int);
-    virtual float GetDamageActorValue(int);
-    virtual int GetPermanentActorValue(int);
-    virtual float GetPermanentActorValueAdjustment(int);
-    virtual TESForm* GetActorValueOwnerForm();
-    virtual unsigned short GetActorValueOwnerType();
-    int GetActorValueAsInteger(int);
-    float GetActorValueFloatByIndex(int);
-};
+
 typedef char _sizecheck_ActorValueOwner[sizeof(ActorValueOwner) == 4 ? 1 : -1];
 struct FUN_009e9760_shell : public DetailedActorPathHandler
 {
     void FUN_009e9760(BGSLoadFormBuffer*);
 };
 
-struct TESObjectREFRHelper
-{
-    void SetTargetingState(bool);
-};
 
 struct AvoidActorListNode
 {
@@ -6408,7 +3715,7 @@ void FUN_009e9760_shell::FUN_009e9760(BGSLoadFormBuffer* apLoadGameBuffer)
         }
     }
     if (m_pPathTargetReference)
-        ((TESObjectREFRHelper*)m_pPathTargetReference)->SetTargetingState(true);
+        ((TESObjectREFR*)m_pPathTargetReference)->FUN_00564db0(true);
 }
 }  // namespace fnv_009e9760
 
@@ -6465,80 +3772,12 @@ bool FUN_009e3b60_cls::GetPairByIndex(int aiIndex, Pair3* apPair)
     return false;
 }
 
-struct Point3
+struct PathSerializationData : DetailedActorPathHandler
 {
-    float x, y, z;
-};
-struct ActorAvoidNode
-{
-    void* item;
-    ActorAvoidNode* next;
-    void** FUN_006815c0();
-    ActorAvoidNode* FUN_00726070();
-};
-struct PathArchive
-{
-    void FUN_00865e50(void* data, unsigned int size, unsigned int flags);
-    void FUN_00865df0(void* data, unsigned int flags);
-    unsigned int FUN_00865f20();
-    void FUN_00865ff0(unsigned int count, unsigned int token);
-};
-struct PathSerializationData
-{
-    unsigned int unk00;
-    void* pActor;
-    void* m_pActorMover;
-    void* pCurrentPathingSolution;
-    void* m_pPathingRequest;
-    unsigned int unk14;
-    unsigned int unk18;
-    Point3 m_kPathVector1;
-    Point3 m_kPathVector2;
-    Point3 m_kPathVector3;
-    Point3 m_kActorPosition;
-    Point3 m_kPathVector4;
-    ActorAvoidNode ActorAvoidEntryList;
-    unsigned int ByteAndFlagState;
-    unsigned int m_uiPathPointIndex;
-    float m_fPathValue1;
-    float m_fPathValue2;
-    float m_fSplineParameter;
-    float m_fPathValue4;
-    float m_fPathValue5;
-    int m_iPathValue1;
-    float m_fPathValue6;
-    float m_fPathValue7;
-    float m_fPathValue8;
-    float m_fPathValue9;
-    float m_fPathValue10;
-    float m_fPathValue11;
-    float m_fPathValue12;
-    float m_fPathValue13;
-    Point3 m_kPathVector5;
-    float m_fPathValue14;
-    float m_fPathValue15;
-    float m_fPathValue16;
-    float m_fPathValue17;
-    float m_fPathValue18;
-    bool m_bHasPathingSolution;
-    bool m_bPathingRequestPending;
-    float m_fElapsedTime;
-    int eState;
-    int m_iPathParameter1;
-    int m_iPathParameter2;
-    int m_iPathValue2;
-    void* m_pPathTargetReference;
-    bool m_bPathFlag1;
-    bool m_bPathFlag2;
-    bool m_bPathFlag3;
-    bool m_bPathFlag4;
-    bool m_bPathFlag5;
-    bool m_bPathFlag6;
-    bool m_bPathFlag7;
-    void Serialize(PathArchive* archive);
+    void Serialize(BGSSaveFormBuffer* archive);
 };
 // @fnv 0x009e8f80
-void PathSerializationData::Serialize(PathArchive* archive)
+void PathSerializationData::Serialize(BGSSaveFormBuffer* archive)
 {
     archive->FUN_00865e50(&m_kPathVector1, 12, 0);
     archive->FUN_00865e50(&m_kPathVector2, 12, 0);
@@ -6565,8 +3804,8 @@ void PathSerializationData::Serialize(PathArchive* archive)
     archive->FUN_00865e50(&m_fPathValue15, 4, 0);
     archive->FUN_00865e50(&m_fPathValue16, 4, 0);
     archive->FUN_00865e50(&m_fPathValue17, 4, 0);
-    archive->FUN_00865e50(&unk14, 4, 0);
-    archive->FUN_00865e50(&unk18, 4, 0);
+    archive->FUN_00865e50(pad14, 4, 0);
+    archive->FUN_00865e50(pad14 + 4, 4, 0);
     archive->FUN_00865e50(&eState, 4, 0);
     archive->FUN_00865e50(&m_iPathParameter1, 4, 0);
     archive->FUN_00865e50(&m_iPathParameter2, 4, 0);
@@ -6586,43 +3825,34 @@ void PathSerializationData::Serialize(PathArchive* archive)
     archive->FUN_00865df0(m_pPathTargetReference, 0);
     unsigned int count = 0;
     unsigned int token = archive->FUN_00865f20();
-    ActorAvoidNode* node = &ActorAvoidEntryList;
+    BSSimpleList<TESTopicInfo*>* node = &ActorAvoidEntryList;
     while (node != 0)
     {
-        void* item = *node->FUN_006815c0();
+        void* item = node->GetItem();
         if (item != 0)
         {
             archive->FUN_00865df0(item, 0);
             count = count + 1;
         }
-        node = node->FUN_00726070();
+        node = node->GetNext();
     }
     archive->FUN_00865ff0(count, token);
 }
 
-struct PtrArrayView
-{
-    unsigned int m_unk00;
-    void** m_pData;
-    unsigned short m_unk08;
-    unsigned short m_usSize;
-    unsigned short m_usElementCount;
-
-    void* FUN_009e98d0(unsigned int index);
-};
 
 // @fnv 0x009e98d0
-void* PtrArrayView::FUN_009e98d0(unsigned int index)
+template <>
+Actor* NiTArray<Actor*, NiTMallocInterface<Actor*> >::RemoveAt(unsigned int index)
 {
     if (index >= m_usSize)
     {
         return 0;
     }
-    void* item = m_pData[index];
-    m_pData[index] = 0;
+    Actor* item = m_pBase[index];
+    m_pBase[index] = 0;
     if (item != 0)
     {
-        m_usElementCount--;
+        m_usESize--;
     }
     if (index == (unsigned short)(m_usSize - 1))
     {
@@ -6631,111 +3861,46 @@ void* PtrArrayView::FUN_009e98d0(unsigned int index)
     return item;
 }
 
-struct PathBase
-{
-    virtual ~PathBase();
-    int actor, mover, path, request;
-    float initialAngle, initialRadius;
-    PathBase(void*, void*, void*, void*);
-};
-struct PathPoint
-{
-    float x, y, z;
-    PathPoint();
-    PathPoint(float, float, float);
-};
-struct PathList
-{
-    void* item;
-    void* next;
-    PathList();
-    ~PathList();
-};
-struct PathPtr
+// The approved smart pointer has no equality overload for the original 0x009e0190 call.
+struct PathSolutionComparisonQueries : NiPointer<PathingSolution>
 {
     bool operator==(void*) const;
 };
-extern const PathPoint pathZero;
-struct FUN_009e0190 : PathBase
-{
-    PathPoint moveDelta, blockedTarget, tetherTarget, lastLocation, lastTether;
-    PathList avoidList;
-    int f60;
-    int f64;
-    float f68;
-    float f6c;
-    float f70;
-    float f74;
-    float f78;
-    float f7c;
-    float f80;
-    float f84;
-    float f88;
-    float f8c;
-    float f90;
-    float f94;
-    float f98;
-    float f9c;
-    PathPoint lastFrameDelta;
-    float fac;
-    float fb0;
-    float fb4;
-    float fb8;
-    float fbc;
-    unsigned char fc0;
-    unsigned char fc1;
-    unsigned char fc2;
-    unsigned char fc3;
-    float fc4;
-    int fc8;
-    int fcc;
-    int fd0;
-    int fd4;
-    int fd8;
-    unsigned char fdc;
-    unsigned char fdd;
-    unsigned char fde;
-    unsigned char fdf;
-    unsigned char fe0;
-    unsigned char fe1;
-    unsigned char fe2;
-    unsigned char fe3;
-    FUN_009e0190(void*, void*, PathPtr*, void*);
-    virtual ~FUN_009e0190();
-};
+extern const NiPoint3 pathZero;
+
 // @fnv 0x009e0190
-FUN_009e0190::FUN_009e0190(void* apActor, void* apMover, PathPtr* apPathPtr, void* apRequest)
-    : PathBase(apActor, apMover, apPathPtr, apRequest), moveDelta(pathZero), tetherTarget(pathZero),
-      lastLocation(3.402823466e+38F, 3.402823466e+38F, 3.402823466e+38F), lastTether(pathZero)
+DetailedActorPathHandler::DetailedActorPathHandler(void* apActor, void* apMover, NiPointer<PathingSolution>* apPathPtr, void* apRequest)
+    : ActorPathHandler(apActor, apMover, apPathPtr, apRequest), m_kPathVector1(pathZero), m_kPathVector3(pathZero),
+      m_kActorPosition(3.402823466e+38F, 3.402823466e+38F, 3.402823466e+38F), m_kPathVector4(pathZero)
 {
-    f60 = 0;
-    f8c = 1.0f;
-    f94 = -1.0f;
-    f78 = 0.0f;
-    fb8 = 0.0f;
-    fdf = 0;
-    fe0 = 0;
-    fe2 = 0;
-    fe1 = 0;
-    if (*apPathPtr == 0 && apRequest == 0)
-        fc8 = 5;
+    ByteAndFlagState = 0;
+    m_fPathValue9 = 1.0f;
+    m_fPathValue11 = -1.0f;
+    m_fPathValue5 = 0.0f;
+    m_fPathValue17 = 0.0f;
+    m_bPathFlag4 = 0;
+    m_bPathFlag5 = 0;
+    m_bPathFlag7 = 0;
+    m_bPathFlag6 = 0;
+    if (*(PathSolutionComparisonQueries*)apPathPtr == 0 && apRequest == 0)
+        eState = 5;
     else
-        fc8 = 0;
-    fcc = 0;
-    f90 = 0.0f;
-    fd0 = 0;
-    f64 = 0;
-    fac = 0.0f;
-    fb4 = 0.0f;
-    f6c = 0.0f;
-    f70 = 0.0f;
-    initialAngle = 10.0f;
-    initialRadius = 20.0f;
-    fd8 = 0;
-    fc0 = 0;
-    fc1 = 0;
-    fc4 = 0.0f;
-    fbc = 0.0f;
+        eState = 0;
+    m_iPathParameter1 = 0;
+    m_fPathValue10 = 0.0f;
+    m_iPathParameter2 = 0;
+    m_uiPathPointIndex = 0;
+    m_fPathValue14 = 0.0f;
+    m_fPathValue16 = 0.0f;
+    m_fPathValue2 = 0.0f;
+    m_fSplineParameter = 0.0f;
+    *(float*)pad14 = 10.0f;
+    *(float*)(pad14 + 4) = 20.0f;
+    m_pPathTargetReference = 0;
+    m_bHasPathingSolution = 0;
+    m_bPathingRequestPending = 0;
+    m_fElapsedTime = 0.0f;
+    m_fPathValue18 = 0.0f;
 }
 
 struct P3Update
@@ -7023,39 +4188,6 @@ struct UpdateActor
     bool Active();
     UpdateController* Controller();
 };
-struct UpdateMover
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    void Clear();
-    bool Request(const UpdateRequest*);
-};
 struct UpdatePlayer
 {
     bool IsSleepingOrResting();
@@ -7095,7 +4227,7 @@ struct UpdateHandler
     virtual void slot4();
     virtual int SleepingUpdate(float);
     UpdateActor* actor;
-    UpdateMover* mover;
+    ActorMover* mover;
     SolutionPtr path;
     RequestPtr request;
     int unk14;
@@ -7217,7 +4349,7 @@ int UpdateHandler::UpdateMovementState(float afDeltaTime)
         lastMinDelta = 0.0f;
         lastDelta = P3Update::ZERO;
 
-        mover->Clear();
+        mover->FUN_00483710();
         return 0;
     }
     if (state == 4)
@@ -7336,9 +4468,9 @@ int UpdateHandler::UpdateMovementState(float afDeltaTime)
                     ((UpdateRequest*)newRequest)->Prepare();
                     avoidState = 3;
 
-                    mover->Request(newRequest);
+                    mover->FUN_009db090((const PathingRequest*)(UpdateRequest*)newRequest);
 
-                    if (mover->unk6c == 6)
+                    if (mover->eState == 6)
                     {
                         Clear();
                         waiting = false;
@@ -7377,7 +4509,7 @@ int UpdateHandler::UpdateMovementState(float afDeltaTime)
     float c = Speed(afDeltaTime, &j);
     actor->SetFurnitureHeading(c);
 
-    mover->Clear();
+    mover->FUN_00483710();
 
     if (j > 0.0)
         delta *= j;
@@ -7430,126 +4562,46 @@ int UpdateHandler::UpdateMovementState(float afDeltaTime)
 }
 
 namespace fnv_009e20c0 {
-struct DoorRef : TESForm
-{
-    unsigned int DoorId();
-    bool Activate(Actor*, bool, void*, int);
-    void Mark(bool);
-};
+
 struct RequestView
 {
     bool Ready() const;
 };
-struct RequestPtr
+TESObjectREFR* LookupDoor(unsigned int);
+int OpenState(TESObjectREFR*);
+struct DoorHandler : DetailedActorPathHandler
 {
-    RequestView* ptr;
-    operator RequestView*() const;
-};
-struct MoverView
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int doorID;
-};
-DoorRef* LookupDoor(unsigned int);
-int OpenState(DoorRef*);
-struct DoorHandler
-{
-    int unk00;
-    Actor* actor;
-    MoverView* mover;
-    int unk0c;
-    RequestPtr request;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int state;
-    DoorRef* current;
     bool CanOpen(unsigned int);
     int UpdateDoorState();
 };
 // @fnv 0x009e20c0
 int DoorHandler::UpdateDoorState()
 {
-    switch (state)
+    switch (m_iPathValue2)
     {
     case 0:
-        if (mover->doorID)
+        if (m_pActorMover->unk2C)
         {
-            TESForm* form = LookupDoor(mover->doorID);
+            TESForm* form = LookupDoor(m_pActorMover->unk2C);
             if (form && form->GetIsReference())
             {
-                DoorRef* door = (DoorRef*)form;
+                TESObjectREFR* door = (TESObjectREFR*)form;
                 int status = OpenState(door);
                 switch (status)
                 {
                 case 3:
-                    if (!((RequestView*)request)->Ready() && CanOpen(door->DoorId()))
+                    if (!((RequestView*)((NiPointer<RequestView>&)m_pPathingRequest))->Ready() && CanOpen(door->FUN_0084e3a0()))
                     {
-                        if (!door->Activate(actor, false, 0, 1))
-                            state = 2;
+                        if (!door->Activate(pActor, false, (TESBoundObject*)0, 1))
+                            m_iPathValue2 = 2;
                         else
                         {
-                            current = door;
-                            current->Mark(true);
-                            state = 1;
+                            ((TESObjectREFR*&)m_pPathTargetReference) = door;
+                            ((TESObjectREFR*&)m_pPathTargetReference)->FUN_00564db0(true);
+                            m_iPathValue2 = 1;
                         }
                     }
-                    return state;
+                    return m_iPathValue2;
                     break;
                 default:
                     return 0;
@@ -7558,22 +4610,22 @@ int DoorHandler::UpdateDoorState()
         }
         break;
     case 1:
-        if (!current)
+        if (!((TESObjectREFR*&)m_pPathTargetReference))
         {
-            state = 2;
-            return state;
+            m_iPathValue2 = 2;
+            return m_iPathValue2;
         }
         {
-            int nextStatus = OpenState(current);
+            int nextStatus = OpenState(((TESObjectREFR*&)m_pPathTargetReference));
             switch (nextStatus)
             {
             case 2:
                 return 1;
                 break;
             case 1:
-                current = 0;
-                state = 0;
-                return state;
+                ((TESObjectREFR*&)m_pPathTargetReference) = 0;
+                m_iPathValue2 = 0;
+                return m_iPathValue2;
             default:
                 return 0;
             }
@@ -7583,28 +4635,20 @@ int DoorHandler::UpdateDoorState()
         return 2;
         break;
     default:
-        state = 0;
-        return state;
+        m_iPathValue2 = 0;
+        return m_iPathValue2;
     }
-    state = 0;
-    return state;
+    m_iPathValue2 = 0;
+    return m_iPathValue2;
 }
 }  // namespace fnv_009e20c0
 
-template <> class NiPointer<NavMesh>
-{
-  public:
-    NavMesh* m_pObject;
-    NiPointer();
-    ~NiPointer();
-    operator NavMesh*() const;
-};
 
 struct FUN_006dcd70
 {
     int aiData[10];
     FUN_006dcd70(TESObjectREFR* apRef);
-    FUN_006dcd70(const B006815c0& arPoint, TESObjectREFR* apRef);
+    FUN_006dcd70(const NiPoint3& arPoint, TESObjectREFR* apRef);
     ~FUN_006dcd70();
     void FUN_006dd6f0(int a1);
     bool FUN_006dd640(NiPointer<NavMesh>& aspNavMesh, unsigned short& ausTriangle);
@@ -7615,7 +4659,7 @@ unsigned int __fastcall GetObjectFlags(char* apPath);
 
 struct FUN_006e7a10_Class
 {
-    void GetLocationAtSplineParameter(float afT, B006815c0& arPoint);
+    void GetLocationAtSplineParameter(float afT, NiPoint3& arPoint);
 };
 
 struct FUN_009e22d0_shell : public DetailedActorPathHandler
@@ -7658,8 +4702,8 @@ bool FUN_009e22d0_shell::FUN_009e22d0(unsigned int auiFlags)
                  aFT += 0.5)
             {
                 float fNextTCur = aFT + 0.5;
-                B006815c0 kStart4;
-                B006815c0 kEnd2;
+                NiPoint3 kStart4;
+                NiPoint3 kEnd2;
                 ((FUN_006e7a10_Class*)(PathingSolution*)pCurrentPathingSolution)
                     ->GetLocationAtSplineParameter(aFT, kStart4);
                 ((FUN_006e7a10_Class*)(PathingSolution*)pCurrentPathingSolution)
@@ -7691,30 +4735,13 @@ bool FUN_009e22d0_shell::FUN_009e22d0(unsigned int auiFlags)
     }
 }
 
-class NiPoint3_ext : public NiPoint3
-{
-  public:
-    NiPoint3_ext();
-    NiPoint3_ext FUN_00439ef0(const NiPoint3&) const;
-    float GetSquaredXYLength() const;
-    float FUN_00457990() const;
-};
-struct PathAngleSolution : PathingSolution
-{
-    void GetLocationAtSplineParameter(float, NiPoint3&);
-};
-struct PathAngleMover : ActorMover
-{
-    bool FUN_008b3d10();
-    void FUN_009de270(NiPoint3&);
-};
 struct PathAngleActor : Actor
 {
     float FUN_008be1b0();
     bool FUN_005a2030() const;
 };
-NiPoint3_ext __cdecl FUN_009a8050(Actor*);
-NiPoint3_ext __cdecl FUN_009a88e0(Actor*, NiPoint3_ext);
+NiPoint3 __cdecl FUN_009a8050(Actor*);
+NiPoint3 __cdecl FUN_009a88e0(Actor*, NiPoint3);
 float __cdecl GetDirectionAngle(const NiPoint3&);
 struct PathAngles : DetailedActorPathHandler
 {
@@ -7738,23 +4765,23 @@ void PathAngles::GetPathAngles(float& headingOut, float& lookingOut)
         }
         else if (pCurrentPathingSolution)
         {
-            NiPoint3_ext target;
-            ((PathAngleSolution*)(PathingSolution*)pCurrentPathingSolution)
-                ->GetLocationAtSplineParameter(m_fElapsedTime, target);
-            NiPoint3_ext delta = target.FUN_00439ef0(*pActor->GetPos());
+            NiPoint3 target;
+            ((PathingSolution*)(PathingSolution*)pCurrentPathingSolution)
+                ->GetLocationAtSplineParameter(m_fElapsedTime, (NiPoint3&)target);
+            NiPoint3 delta = target.FUN_00439ef0(*(const NiPoint3*)((const Actor*)pActor)->GetPos());
             delta.z = 0.0f;
-            angle = GetDirectionAngle(delta);
+            angle = GetDirectionAngle((const NiPoint3&)delta);
         }
         else
         {
             angle = pActor->GetCurrentTargetDistance(false);
         }
     }
-    else if (!m_bPathFlag6 && ((PathAngleMover*)m_pActorMover)->FUN_008b3d10())
+    else if (!m_bPathFlag6 && ((ActorMover*)m_pActorMover)->HasLookAtTarget())
     {
-        NiPoint3_ext target;
-        ((PathAngleMover*)m_pActorMover)->FUN_009de270(target);
-        NiPoint3_ext position = FUN_009a8050(pActor);
+        NiPoint3 target;
+        ((ActorMover*)m_pActorMover)->GetLookAtTargetPosition((NiPoint3&)target);
+        NiPoint3 position = FUN_009a8050(pActor);
         if (position.FUN_00439ef0(target).GetSquaredXYLength() <
             ((PathAngleActor*)pActor)->FUN_008be1b0() * ((PathAngleActor*)pActor)->FUN_008be1b0() * 0.25)
         {
@@ -7762,14 +4789,14 @@ void PathAngles::GetPathAngles(float& headingOut, float& lookingOut)
         }
         else
         {
-            NiPoint3_ext angles = FUN_009a88e0(pActor, target);
+            NiPoint3 angles = FUN_009a88e0(pActor, target);
             if (!((PathAngleActor*)pActor)->FUN_005a2030())
                 looking = angles.x;
             if (((PathAngleActor*)pActor)->FUN_008be1b0() >= 100.0)
             {
-                NiPoint3_ext delta = target.FUN_00439ef0(*pActor->GetPos());
+                NiPoint3 delta = target.FUN_00439ef0(*(const NiPoint3*)((const Actor*)pActor)->GetPos());
                 delta.z = 0.0f;
-                angle = GetDirectionAngle(delta);
+                angle = GetDirectionAngle((const NiPoint3&)delta);
             }
             else
             {
@@ -7779,17 +4806,17 @@ void PathAngles::GetPathAngles(float& headingOut, float& lookingOut)
     }
     else
     {
-        NiPoint3_ext destination;
+        NiPoint3 destination;
         if (pCurrentPathingSolution && ((PathingSolution*)pCurrentPathingSolution)->GetNodeCount() > 0)
         {
-            ((PathAngleSolution*)(PathingSolution*)pCurrentPathingSolution)
-                ->GetLocationAtSplineParameter(float(m_fSplineParameter + 0.10000000149011612), destination);
+            ((PathingSolution*)(PathingSolution*)pCurrentPathingSolution)
+                ->GetLocationAtSplineParameter(float(m_fSplineParameter + 0.10000000149011612), (NiPoint3&)destination);
         }
         else
         {
             (NiPoint3&)destination = m_kPathVector3;
         }
-        NiPoint3_ext direction = destination.FUN_00439ef0(*pActor->GetPos());
+        NiPoint3 direction = destination.FUN_00439ef0(*(const NiPoint3*)((const Actor*)pActor)->GetPos());
         if (((PathAngleActor*)pActor)->FUN_005a2030() &&
             direction.FUN_00457990() * 0.949999988079071 <= std::abs(direction.z))
         {
@@ -7797,7 +4824,7 @@ void PathAngles::GetPathAngles(float& headingOut, float& lookingOut)
         }
         else
         {
-            angle = GetDirectionAngle(direction);
+            angle = GetDirectionAngle((const NiPoint3&)direction);
         }
         if (((PathAngleActor*)pActor)->FUN_005a2030())
             looking = 0.0f;
@@ -7816,10 +4843,7 @@ struct MotionVec
     float FullLength();
     double Dot(const MotionVec&);
 };
-struct AnimationView
-{
-    bool IsHighestPriority();
-};
+
 struct CollisionObjectView
 {
     virtual void v000();
@@ -8020,7 +5044,7 @@ struct MotionActor
     virtual void v1d8();
     virtual void v1dc();
     virtual void v1e0();
-    virtual AnimationView* GetAnimation();
+    virtual Animation* GetAnimation();
     virtual void v1e8();
     virtual void v1ec();
     virtual void v1f0();
@@ -8029,10 +5053,6 @@ struct MotionActor
     ControllerView* FUN_009306d0();
     TESWorldSpace* FUN_00575d70();
     TESObjectCELL* FUN_008d6f30();
-};
-struct MoverView
-{
-    void FUN_00483710();
 };
 struct RequestView
 {
@@ -8050,18 +5070,9 @@ struct AvoidSphereView
     void FUN_00819a50(float);
     void FUN_00804cb0(float);
 };
-struct AvoidArrayView
-{
-    unsigned unk00, unk04, unk08, unk0c;
-    AvoidArrayView();
-    ~AvoidArrayView();
-    bool FUN_0076b610();
-    unsigned FUN_0044ddc0();
-    AvoidSphereView*& FUN_00877a30(unsigned);
-};
 struct MeshView
 {
-    void FUN_00691660(unsigned short, AvoidArrayView&);
+    void FUN_00691660(unsigned short, BSSimpleArray<NavMeshStaticAvoidNode*, 1024>&);
     void AddAvoidNode(const MotionVec&, unsigned short, float);
 };
 struct MeshPtrView
@@ -8071,10 +5082,8 @@ struct MeshPtrView
     ~MeshPtrView();
     MeshView* operator->();
 };
-struct LocationView
+struct LocationView : PathingLocation
 {
-    MotionVec point;
-    unsigned unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
     LocationView(const MotionVec&, TESObjectCELL*, TESWorldSpace*);
     ~LocationView();
     bool FUN_006dd6f0(int);
@@ -8084,7 +5093,7 @@ struct MotionTarget
 {
     unsigned unk00;
     MotionActor* actor;
-    MoverView* mover;
+    ActorMover* mover;
     unsigned unk0c;
     RequestPtrView request;
     unsigned unk14;
@@ -8230,14 +5239,14 @@ bool MotionTarget::UpdateMotion(float afDeltaTime)
                 unsigned short p;
                 if (location.FUN_006dd640(h, p))
                 {
-                    AvoidArrayView f;
+                    BSSimpleArray<NavMeshStaticAvoidNode*, 1024> f;
                     h->FUN_00691660(p, f);
                     bool eb = true;
                     if (!f.FUN_0076b610())
                     {
-                        for (unsigned a = 0; a < f.FUN_0044ddc0(); ++a)
+                        for (unsigned a = 0; a < f.GetSize(); ++a)
                         {
-                            AvoidSphereView* i = f.FUN_00877a30(a);
+                            AvoidSphereView* i = (AvoidSphereView*)f.GetAt(a);
                             if ((i->FUN_006815c0() - target).Squared() < i->FUN_004a7bd0() * i->FUN_004a7bd0())
                             {
                                 if (i->FUN_004a7bd0() < 128.0)
@@ -8272,16 +5281,8 @@ struct AvoidPoint
     float FUN_004a7290() const;
     float GetSquaredXYLength() const;
 };
-struct AvoidLocation
+struct AvoidLocation : PathingLocation
 {
-    AvoidPoint point;
-    void* cell;
-    void* world;
-    unsigned int triangle;
-    void* mesh;
-    float radius;
-    unsigned int flags;
-    unsigned int state;
     AvoidLocation();
     AvoidLocation(void*);
     AvoidLocation(void*, float);
@@ -8776,33 +5777,6 @@ struct AvoidRefRequest
     AvoidRequest* p;
     operator AvoidRequest*() const;
 };
-struct AvoidEntry
-{
-    AvoidActor* actor;
-    float weight;
-};
-struct AvoidContacts
-{
-    void* data;
-    unsigned int size, capacity;
-    unsigned int flags;
-    AvoidContacts();
-    ~AvoidContacts();
-    unsigned int FUN_0044ddc0();
-    AvoidEntry* GetElement(unsigned int);
-};
-struct AvoidActors
-{
-    void* vtable;
-    void* data;
-    unsigned int size, capacity;
-    AvoidActors();
-    ~AvoidActors();
-    unsigned int FUN_0044ddc0();
-    void FUN_007cb2e0(AvoidActor* const&);
-    AvoidActor*& FUN_00877a30(unsigned int);
-    bool FUN_0076b610();
-};
 struct AvoidList
 {
     AvoidActor* actor;
@@ -8815,7 +5789,7 @@ struct AvoidList
 struct AvoidElement
 {
     AvoidPoint point;
-    B006815c0 velocity;
+    NiPoint3 velocity;
     float distance;
     float timer;
     int mode;
@@ -8857,15 +5831,11 @@ struct AvoidRotation
     void SetRotationMatrix(float);
     AvoidPoint FUN_004b4500(const AvoidPoint*);
 };
-struct AvoidMover
-{
-    void FUN_00483710();
-};
 struct AvoidHandler
 {
     void* vtable;
     AvoidActor* actor;
-    AvoidMover* mover;
+    ActorMover* mover;
     AvoidRefPath path;
     AvoidRefRequest request;
     unsigned int unk14, unk18;
@@ -8884,7 +5854,7 @@ struct AvoidHandler
     int UpdateAvoidance(float deltaTime);
 };
 void __cdecl EvaluateAvoidance(AvoidActor*, AvoidRequest*, unsigned int, const AvoidPoint*, AvoidHandler*,
-                               AvoidContacts*);
+                               BSSimpleArray<ActorAvoidanceData, 1024>*);
 // Evaluates nearby actors and obstacles to update detectionValue and avoidTimer, builds avoid nodes, and returns an avoidance state code (0-3).
 // @fnv 0x009e5ae0
 int AvoidHandler::UpdateAvoidance(float deltaTime)
@@ -8898,18 +5868,18 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
     if (avoidState != 4 && avoidState != 3)
         actors.FUN_00470470();
     AvoidActor* destination = (AvoidActor*)FUN_009e55e0((TES*)actor);
-    AvoidContacts contacts;
+    BSSimpleArray<ActorAvoidanceData, 1024> contacts;
     AvoidPoint direction = moveDelta;
     if (avoidState == 2)
         direction = AvoidPoint(0.0f, 1.0f, 0.0f);
     EvaluateAvoidance(actor, request, moveMode, &direction, this, &contacts);
-    AvoidActors nearbyActors;
+    BSSimpleArray<Actor*, 1024> nearbyActors;
     bool blocked = false;
     bool includesPlayer = false;
-    for (unsigned int i = 0; i < contacts.FUN_0044ddc0(); ++i)
+    for (unsigned int i = 0; i < contacts.GetSize(); ++i)
     {
-        AvoidActor* obstacle = contacts.GetElement(i)->actor;
-        float weight = contacts.GetElement(i)->weight;
+        AvoidActor* obstacle = (AvoidActor*)contacts.GetElement(i).pActor;
+        float weight = contacts.GetElement(i).fValue;
         if (obstacle == g_thePlayer)
         {
             if (g_thePlayer != destination)
@@ -8926,7 +5896,7 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
                     }
                 }
                 detectionValue += weight * deltaTime;
-                nearbyActors.FUN_007cb2e0(g_thePlayer);
+                nearbyActors.Add((Actor*)g_thePlayer);
                 includesPlayer = true;
             }
         }
@@ -8952,7 +5922,7 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
                     if (obstacle->GetVtbl20Result() & 0x200)
                         blocked = true;
                     else
-                        nearbyActors.FUN_007cb2e0(obstacle);
+                        nearbyActors.Add((Actor* const&)obstacle);
                 }
                 else if (!actor->FUN_008bc7d0(obstacle))
                 {
@@ -8979,7 +5949,7 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
                             ((AvoidRequest*)request)->SetUseSoft(false);
                     }
                 }
-                nearbyActors.FUN_007cb2e0(obstacle);
+                nearbyActors.Add((Actor* const&)obstacle);
             }
         }
     }
@@ -9003,9 +5973,9 @@ int AvoidHandler::UpdateAvoidance(float deltaTime)
             else
                 avoidTimer = FUN_00404010(avoidTimer, *g_011f2bc4.FUN_00403e20());
             AvoidArray* avoidNodes = new AvoidArray;
-            unsigned int count = nearbyActors.FUN_0044ddc0();
+            unsigned int count = nearbyActors.GetSize();
             for (unsigned int j = 0; j < count; ++j)
-                actors.FUN_005ae3d0(nearbyActors.FUN_00877a30(j));
+                actors.FUN_005ae3d0((AvoidActor* const&)nearbyActors.GetAt(j));
             float factor = (moveMode & 0x200) ? 1.75f : 1.5f;
             AvoidActor* current = 0;
             AvoidList* list = &actors;
@@ -9087,10 +6057,6 @@ struct FUN_00493bb0_shell
     bool FUN_00493bb0();
 };
 
-struct ActorMover_Helper : public ActorMover
-{
-    void DebugOnStopMoving();
-};
 
 struct VCallHelper_354 : public VCallHelper_2bc
 {
@@ -9155,7 +6121,7 @@ float FUN_009e7d70_shell::FUN_009e7d70(float afDeltaTime)
     if (std::abs(var4) > DAT_01023128)
     {
         float var_10 = ((VCallHelper_354*)this->pActor)->v213() * DAT_01023128 * afDeltaTime;
-        if (!this->pActor->Unk_87())
+        if (!this->pActor->IsCreature())
         {
             var_10 *= ((FUN_00493bb0_shell*)this->pActor)->FUN_00493bb0() ? *g_011f2ac4.Float() : *g_011f2ad8.Float();
         }
@@ -9169,7 +6135,7 @@ float FUN_009e7d70_shell::FUN_009e7d70(float afDeltaTime)
             if (this->m_fPathValue11 <= _gModifierZero)
             {
                 this->m_bPathFlag1 = false;
-                ((ActorMover_Helper*)this->m_pActorMover)->DebugOnStopMoving();
+                ((ActorMover*)this->m_pActorMover)->FUN_00483710();
             }
         }
         else
@@ -9192,7 +6158,7 @@ float FUN_009e7d70_shell::FUN_009e7d70(float afDeltaTime)
         if (this->m_fPathValue11 <= _gModifierZero)
         {
             this->m_bPathFlag1 = false;
-            ((ActorMover_Helper*)this->m_pActorMover)->DebugOnStopMoving();
+            ((ActorMover*)this->m_pActorMover)->FUN_00483710();
         }
     }
     this->m_fPathValue11 -= afDeltaTime;
@@ -9205,20 +6171,13 @@ struct PosX
     PosX FUN_00439ef0(const PosX& r) const;
     float FUN_00589850() const;
 };
-struct ActorX
+
+// The original calls 0x008BE350 with an x87 double result; Actor.h lacks that declaration.
+struct PathClearanceQuery : Actor
 {
-    virtual void v000(), v004(), v008(), v00c(), v010(), v014(), v018(), v01c(), v020(), v024(), v028(), v02c(), v030(),
-        v034(), v038(), v03c(), v040(), v044(), v048(), v04c(), v050(), v054(), v058(), v05c(), v060(), v064(), v068(),
-        v06c(), v070(), v074(), v078(), v07c(), v080(), v084(), v088(), v08c(), v090(), v094(), v098(), v09c(), v0a0(),
-        v0a4(), v0a8(), v0ac(), v0b0(), v0b4(), v0b8(), v0bc(), v0c0(), v0c4(), v0c8(), v0cc(), v0d0(), v0d4(), v0d8(),
-        v0dc(), v0e0(), v0e4(), v0e8(), v0ec(), v0f0(), v0f4(), v0f8(), v0fc(), v100(), v104(), v108(), v10c(), v110(),
-        v114(), v118(), v11c(), v120(), v124(), v128(), v12c(), v130(), v134(), v138(), v13c(), v140(), v144(), v148(),
-        v14c(), v150(), v154(), v158(), v15c(), v160(), v164(), v168(), v16c(), v170(), v174(), v178(), v17c(), v180(),
-        v184(), v188(), v18c(), v190(), v194(), v198(), v19c(), v1a0(), v1a4(), v1a8(), v1ac(), v1b0(), v1b4(), v1b8(),
-        v1bc(), v1c0(), v1c4(), v1c8(), v1cc(), v1d0(), v1d4(), v1d8(), v1dc(), v1e0(), v1e4(), v1e8(), v1ec(), v1f0();
-    virtual PosX* v1f4();
     double FUN_008be350();
 };
+
 struct LocX
 {
     PosX FUN_005c3420();
@@ -9272,7 +6231,7 @@ struct ResultX
 struct WalkX
 {
     int pad[10];
-    WalkX(ActorX* p);
+    WalkX(Actor* p);
     ~WalkX();
     void FUN_006dd6f0(int i);
     bool FUN_006dd640(NodePtr* p, unsigned short* pus);
@@ -9285,7 +6244,7 @@ struct PlanX
 struct PkgX
 {
     int m0;
-    ActorX* m4;
+    Actor* m4;
     PlanX* m8;
     ProcPtr mc;
     TgtPtr m10;
@@ -9304,15 +6263,15 @@ bool PkgX::IsPathClear()
     float fNearSq_chdcf = fNear_u * fNear_u;
     float fFar_nezo = 128.0f;
     float fFarSq_abpnoy = fFar_nezo * fFar_nezo;
-    float fDistTmp = m34.FUN_00439ef0(*m4->v1f4()).FUN_00589850();
+    float fDistTmp = m34.FUN_00439ef0(*(PosX*)((const Actor*)m4)->GetPos()).FUN_00589850();
     float fMin_knckj = 0.0f;
     if (mc.FUN_00559450()->FUN_006b05d0())
-        fMin_knckj = m4->FUN_008be350() * 0.6f;
+        fMin_knckj = ((PathClearanceQuery*)m4)->FUN_008be350() * 0.6f;
     if (mc.FUN_00559450()->GetObjectFlags() > 0)
     {
         if (fDistTmp < fFar_nezo)
             AdvanceAlongPath(fFar_nezo - fDistTmp);
-        fDistTmp = m34.FUN_00439ef0(*m4->v1f4()).FUN_00589850();
+        fDistTmp = m34.FUN_00439ef0(*(PosX*)((const Actor*)m4)->GetPos()).FUN_00589850();
         float fCell_kdfu =
             mc.FUN_00559450()->FUN_006b05a0()->FUN_00717e50()->FUN_005c3420().FUN_00439ef0(m34).FUN_00589850();
         if (fDistTmp < fNear_u || fCell_kdfu < fMin_knckj)
@@ -9356,12 +6315,7 @@ bool PkgX::IsPathClear()
 }
 
 namespace fnv_009e8b50 {
-struct Vec3
-{
-    float x;
-    float y;
-    float z;
-};
+
 struct Obj4
 {
     virtual void v0();
@@ -9489,7 +6443,7 @@ struct Obj4
     virtual void v122();
     virtual void v123();
     virtual void v124();
-    virtual Vec3* v125();
+    virtual NiPoint3* v125();
 };
 struct Ctx
 {
@@ -9530,7 +6484,7 @@ void PFThis::FUN_009e8b50(Ctx* pOutput, int a2, int a3)
     char acDetailText[0x104];
     char acStateText[0x104];
     {
-        Vec3 vPos = *f04->v125();
+        NiPoint3 vPos = *(const NiPoint3*)f04->v125();
         pOutput->v5(a2, a3, "DetailedPathHandler: Actor's Position %1.f %1.f %1.f", (double)vPos.x, (double)vPos.y,
                     (double)vPos.z);
     }
@@ -9608,157 +6562,47 @@ void PFThis::FUN_009e8b50(Ctx* pOutput, int a2, int a3)
 }
 }  // namespace fnv_009e8b50
 
-class Vec3f
-{
-  public:
-    float x;
-    float y;
-    float z;
-};
 
-extern Vec3f DAT_011f426c;
+extern NiPoint3 DAT_011f426c;
 extern float DAT_01016970;
 extern float DAT_01012054;
 extern float DAT_01017b78;
 extern float DAT_01017868;
 
-class FUN_009dfd70
-{
-  public:
-    int b04;
-    int b08;
-    int b0c;
-    int b10;
-    float f14;
-    float f18;
-    FUN_009dfd70(int a1, int a2);
-    virtual ~FUN_009dfd70();
-};
-
-class FUN_006815c0
-{
-  public:
-    float m00;
-    float m04;
-    float m08;
-    FUN_006815c0();
-};
-
-class FUN_00416870
-{
-  public:
-    float m00;
-    float m04;
-    float m08;
-    FUN_00416870(float a1, float a2, float a3);
-};
-
-class FUN_0096a2d0
-{
-  public:
-    int m00;
-    int m04;
-    FUN_0096a2d0();
-    ~FUN_0096a2d0();
-};
-
-class FUN_009dff40 : public FUN_009dfd70
-{
-  public:
-    Vec3f v1c;
-    FUN_006815c0 m28;
-    Vec3f v34;
-    FUN_00416870 m40;
-    Vec3f v4c;
-    FUN_0096a2d0 m58;
-    int i60;
-    int i64;
-    int i68;
-    float f6c;
-    float f70;
-    int i74;
-    float f78;
-    int i7c;
-    int i80;
-    int i84;
-    int i88;
-    float f8c;
-    float f90;
-    float f94;
-    int i98;
-    int i9c;
-    FUN_006815c0 mA0;
-    float fac;
-    int ib0;
-    float fb4;
-    float fb8;
-    float fbc;
-    char cc0;
-    char cc1;
-    char cc2;
-    char cc3;
-    float fc4;
-    int ic8;
-    int icc;
-    int id0;
-    int id4;
-    int id8;
-    char cdc;
-    char cdd;
-    char cde;
-    char cdf;
-    char ce0;
-    char ce1;
-    char ce2;
-    char ce3;
-    FUN_009dff40(int a1, int a2);
-    virtual ~FUN_009dff40();
-};
 
 // @fnv 0x009dff40
-FUN_009dff40::FUN_009dff40(int a1, int a2)
-    : FUN_009dfd70(a1, a2), v1c(DAT_011f426c), v34(DAT_011f426c), m40(DAT_01016970, DAT_01016970, DAT_01016970),
-      v4c(DAT_011f426c)
+DetailedActorPathHandler::DetailedActorPathHandler(int a1, int a2)
+    : ActorPathHandler(a1, a2), m_kPathVector1(DAT_011f426c), m_kPathVector3(DAT_011f426c), m_kActorPosition(DAT_01016970, DAT_01016970, DAT_01016970),
+      m_kPathVector4(DAT_011f426c)
 {
-    i60 = 0;
-    f8c = 1.0f;
-    f94 = DAT_01012054;
-    f78 = 0.0f;
-    fb8 = 0.0f;
-    cdf = 0;
-    ce0 = 0;
-    ce2 = 0;
-    ce1 = 0;
-    ic8 = 5;
-    icc = 0;
-    f90 = 0.0f;
-    id0 = 0;
-    i64 = 0;
-    fac = 0.0f;
-    fb4 = 0.0f;
-    f6c = 0.0f;
-    f70 = 0.0f;
-    f14 = DAT_01017b78;
-    f18 = DAT_01017868;
-    id8 = 0;
-    cc0 = 0;
-    cc1 = 0;
-    fc4 = 0.0f;
-    fbc = 0.0f;
+    ByteAndFlagState = 0;
+    m_fPathValue9 = 1.0f;
+    m_fPathValue11 = DAT_01012054;
+    m_fPathValue5 = 0.0f;
+    m_fPathValue17 = 0.0f;
+    m_bPathFlag4 = 0;
+    m_bPathFlag5 = 0;
+    m_bPathFlag7 = 0;
+    m_bPathFlag6 = 0;
+    eState = 5;
+    m_iPathParameter1 = 0;
+    m_fPathValue10 = 0.0f;
+    m_iPathParameter2 = 0;
+    m_uiPathPointIndex = 0;
+    m_fPathValue14 = 0.0f;
+    m_fPathValue16 = 0.0f;
+    m_fPathValue2 = 0.0f;
+    m_fSplineParameter = 0.0f;
+    *(float*)pad14 = DAT_01017b78;
+    *(float*)(pad14 + 4) = DAT_01017868;
+    m_pPathTargetReference = 0;
+    m_bHasPathingSolution = 0;
+    m_bPathingRequestPending = 0;
+    m_fElapsedTime = 0.0f;
+    m_fPathValue18 = 0.0f;
 }
 
 namespace fnv_009e6900 {
-struct Pt3
-{
-    float x;
-    float y;
-    float z;
-    Pt3();
-    Pt3 operator-(const Pt3& point) const;
-    float SqrLength() const;
-    float Length2() const;
-    float Dot(const Pt3& point) const;
-};
 
 namespace std {
 float __cdecl abs(float);
@@ -10082,7 +6926,7 @@ struct Ref
     virtual void v122();
     virtual void v123();
     virtual void v124();
-    virtual Pt3* GetPos();
+    virtual NiPoint3* GetPos();
     virtual void v126();
     virtual void v127();
     virtual void v128();
@@ -10295,10 +7139,10 @@ struct Group
 
 // Checks target range, vertical separation, package and direction conditions, and may write a computed value to apResult.
 // @fnv 0x009e6900
-bool __cdecl FUN_009e6900(Ref* apActor, Group* apGroup, Ref* apTarget, const Pt3& arPos, const Pt3& arDir,
+bool __cdecl FUN_009e6900(Ref* apActor, Group* apGroup, Ref* apTarget, const NiPoint3& arPos, const NiPoint3& arDir,
                           float afExtra, float afMinDot, float* apResult, bool abCheckOnly)
 {
-    Pt3 kDelta;
+    NiPoint3 kDelta;
     *apResult = 0.0f;
     if (apGroup && (apGroup->state == 4 || apGroup->state == 3) && apGroup->list.IsInList(apTarget))
         return false;
@@ -10307,7 +7151,7 @@ bool __cdecl FUN_009e6900(Ref* apActor, Group* apGroup, Ref* apTarget, const Pt3
     float fRadius3 = apActor->FUN_008be420();
     float fRange5 = apTarget->FUN_008be1b0() + afExtra + fRadius3;
     float fRangeSqr6 = fRange5 * fRange5;
-    if (kDelta.SqrLength() < fRangeSqr6)
+    if (((const NiPoint3&)kDelta).GetSquaredXYLength() < fRangeSqr6)
     {
         if (std::abs(kDelta.z) < 180.0)
         {
@@ -10361,449 +7205,241 @@ bool __cdecl FUN_009e6900(Ref* apActor, Group* apGroup, Ref* apTarget, const Pt3
 }
 }  // namespace fnv_009e6900
 
-struct FUN_004f2770_Class;
 __if_not_exists(_g_thePlayer)
 {
-    extern FUN_004f2770_Class* _g_thePlayer;
+    extern TESObjectREFR* _g_thePlayer;
 }
 extern const double _DAT_01012640;
 
-class Calendar_1d50
+// 0x00867950 is Calendar::GetGameTimeScale; include/Calendar.h is not available.
+class Calendar
 {
   public:
-    float FUN_00867950();
+    float GetGameTimeScale();
 };
-extern Calendar_1d50 g_calendar;
+extern Calendar g_calendar;
 
 float GetDirectionAngle(const NiPoint3& kVector);
 float WrapAngle(float fAngleDifference);
 
-class PathingRequest_1d50
+
+
+
+// Actor virtual signature retained: approved MobileObject::Unk_B0 has no target argument.
+namespace fnv_009e1d50 {
+
+}  // namespace fnv_009e1d50
+
+
+
+
+// Missing handler methods live on this extension; all fields and virtual slots are shared.
+struct DetailedPathGoalUpdate : DetailedActorPathHandler
 {
-  public:
-    unsigned char GetByteAtOffset9F();
-    bool FUN_00505c00();
-    float FUN_00507e10();
-};
-
-class PathingLocation_1d50
-{
-  public:
-    NiPoint3 FUN_005c3420() const;
-    TESObjectCELL* FUN_006dd4f0() const;
-    TESWorldSpace* FUN_00441110() const;
-};
-
-class ContNode_1d50
-{
-  public:
-    PathingLocation_1d50* FUN_00717e50();
-    NiPoint3* FUN_005d8a70();
-};
-
-class PathingSolution_1d50
-{
-  public:
-    ContNode_1d50* FUN_006b05a0();
-    unsigned int FUN_005a4320();
-    unsigned int GetObjectFlags();
-    ContNode_1d50* FUN_006e7970(unsigned int uiIndex);
-};
-
-class B006815c0_1d50
-{
-  public:
-    B006815c0_1d50();
-    float x, y, z;
-};
-
-class PointW_1d50 : public NiPoint3
-{
-  public:
-    NiPoint3 FUN_00439ef0(const NiPoint3& kOther) const;
-};
-
-class ActorS_1d50
-{
-  public:
-    virtual void Vf000();
-    virtual void Vf004();
-    virtual void Vf008();
-    virtual void Vf00c();
-    virtual void Vf010();
-    virtual void Vf014();
-    virtual void Vf018();
-    virtual void Vf01c();
-    virtual void Vf020();
-    virtual void Vf024();
-    virtual void Vf028();
-    virtual void Vf02c();
-    virtual void Vf030();
-    virtual void Vf034();
-    virtual void Vf038();
-    virtual void Vf03c();
-    virtual void Vf040();
-    virtual void Vf044();
-    virtual void Vf048();
-    virtual void Vf04c();
-    virtual void Vf050();
-    virtual void Vf054();
-    virtual void Vf058();
-    virtual void Vf05c();
-    virtual void Vf060();
-    virtual void Vf064();
-    virtual void Vf068();
-    virtual void Vf06c();
-    virtual void Vf070();
-    virtual void Vf074();
-    virtual void Vf078();
-    virtual void Vf07c();
-    virtual void Vf080();
-    virtual void Vf084();
-    virtual void Vf088();
-    virtual void Vf08c();
-    virtual void Vf090();
-    virtual void Vf094();
-    virtual void Vf098();
-    virtual void Vf09c();
-    virtual void Vf0a0();
-    virtual void Vf0a4();
-    virtual void Vf0a8();
-    virtual void Vf0ac();
-    virtual void Vf0b0();
-    virtual void Vf0b4();
-    virtual void Vf0b8();
-    virtual void Vf0bc();
-    virtual void Vf0c0();
-    virtual void Vf0c4();
-    virtual void Vf0c8();
-    virtual void Vf0cc();
-    virtual void Vf0d0();
-    virtual void Vf0d4();
-    virtual void Vf0d8();
-    virtual void Vf0dc();
-    virtual void Vf0e0();
-    virtual void Vf0e4();
-    virtual void Vf0e8();
-    virtual void Vf0ec();
-    virtual void Vf0f0();
-    virtual void Vf0f4();
-    virtual void Vf0f8();
-    virtual void Vf0fc();
-    virtual void Vf100();
-    virtual void Vf104();
-    virtual void Vf108();
-    virtual void Vf10c();
-    virtual void Vf110();
-    virtual void Vf114();
-    virtual void Vf118();
-    virtual void Vf11c();
-    virtual void Vf120();
-    virtual void Vf124();
-    virtual void Vf128();
-    virtual void Vf12c();
-    virtual void Vf130();
-    virtual void Vf134();
-    virtual void Vf138();
-    virtual void Vf13c();
-    virtual void Vf140();
-    virtual void Vf144();
-    virtual void Vf148();
-    virtual void Vf14c();
-    virtual void Vf150();
-    virtual void Vf154();
-    virtual void Vf158();
-    virtual void Vf15c();
-    virtual void Vf160();
-    virtual void Vf164();
-    virtual void Vf168();
-    virtual void Vf16c();
-    virtual void Vf170();
-    virtual void Vf174();
-    virtual void Vf178();
-    virtual void Vf17c();
-    virtual void Vf180();
-    virtual void Vf184();
-    virtual void Vf188();
-    virtual void Vf18c();
-    virtual void Vf190();
-    virtual void Vf194();
-    virtual void Vf198();
-    virtual void Vf19c();
-    virtual void Vf1a0();
-    virtual void Vf1a4();
-    virtual void Vf1a8();
-    virtual void Vf1ac();
-    virtual void Vf1b0();
-    virtual void Vf1b4();
-    virtual void Vf1b8();
-    virtual void Vf1bc();
-    virtual void Vf1c0();
-    virtual void Vf1c4();
-    virtual void Vf1c8();
-    virtual void Vf1cc();
-    virtual void Vf1d0();
-    virtual void Vf1d4();
-    virtual void Vf1d8();
-    virtual void Vf1dc();
-    virtual void Vf1e0();
-    virtual void Vf1e4();
-    virtual void Vf1e8();
-    virtual void Vf1ec();
-    virtual void Vf1f0();
-    virtual void Vf1f4();
-    virtual void Vf1f8();
-    virtual void Vf1fc();
-    virtual void Vf200();
-    virtual void Vf204();
-    virtual void Vf208();
-    virtual void Vf20c();
-    virtual void Vf210();
-    virtual int GetSitSleepState();
-    virtual void Vf218();
-    virtual void Vf21c();
-    virtual void Vf220();
-    virtual void Vf224();
-    virtual void Vf228();
-    virtual void Vf22c();
-    virtual void Vf230();
-    virtual void Vf234();
-    virtual void Vf238();
-    virtual void Vf23c();
-    virtual void Vf240();
-    virtual void Vf244();
-    virtual void Vf248();
-    virtual void Vf24c();
-    virtual void Vf250();
-    virtual void Vf254();
-    virtual void Vf258();
-    virtual void Vf25c();
-    virtual void Vf260();
-    virtual void Vf264();
-    virtual void Vf268();
-    virtual void Vf26c();
-    virtual void Vf270();
-    virtual void Vf274();
-    virtual void Vf278();
-    virtual void Vf27c();
-    virtual void Vf280();
-    virtual void Vf284();
-    virtual void Vf288();
-    virtual void Vf28c();
-    virtual void Vf290();
-    virtual void Vf294();
-    virtual void Vf298();
-    virtual void Vf29c();
-    virtual void Vf2a0();
-    virtual void Vf2a4();
-    virtual void Vf2a8();
-    virtual void Vf2ac();
-    virtual void Vf2b0();
-    virtual void Vf2b4();
-    virtual void Vf2b8();
-    virtual float GetCurrentTargetDistance(int iUnused);
-    virtual void SetTarget(FUN_004f2770_Class* pkTarget);
-    float FUN_008a0b10();
-    void FUN_008ad1c0(NiPoint3& kPos2, float fHeading9, TESObjectCELL* pkCell, TESWorldSpace* pkWorld,
-                      unsigned char ucA, unsigned char ucB);
-};
-
-class MoverW_1d50
-{
-  public:
-    bool FUN_008b3d10();
-    void FUN_009de270(B006815c0_1d50* pkTarget);
-    int m_unk00;
-    int m_unk04;
-    int m_unk08;
-    int m_unk0c;
-    int m_unk10;
-    int m_unk14;
-    int m_unk18;
-    int m_unk1c;
-    int m_unk20;
-    int m_unk24;
-    int m_unk28;
-    int m_unk2c;
-    int m_unk30;
-    int m_unk34;
-    int m_unk38;
-    int m_unk3c;
-    unsigned short m_unk40;
-    unsigned short m_usPathCount;
-};
-
-B006815c0_1d50 FUN_009a88e0(ActorS_1d50* pkActor, B006815c0_1d50 kTarget);
-
-class PackageProcW_1d50
-{
-  public:
-    virtual void Vf00();
-    virtual void Vf04();
-    virtual void Vf08();
-    virtual void Vf0c();
-    virtual void Vf10();
-    virtual void Vf14();
-    virtual float GetElapsed();
-
     void ResetPathState();
     void FUN_009e68c0();
     void ResetMoveState();
-    int FUN_009e1d50(int iUnused);
-
-    ActorS_1d50* m_pkActor;
-    MoverW_1d50* m_pkMover;
-    NiPointer<PathingSolution_1d50> pCurrentPathingSolution;
-    NiPointer<PathingRequest_1d50> m_pPathingRequest;
-    int m_unk14;
-    int m_unk18;
-    NiPoint3 m_kMoveDelta;
-    NiPoint3 m_kBlockedTarget;
-    NiPoint3 m_kTetherTarget;
-    NiPoint3 m_kLastLoc;
-    NiPoint3 m_kLastTether;
-    int m_unkAvoid0;
-    int m_unkAvoid1;
-    int m_iMoveMode;
-    int m_iNodeIndex;
-    float m_fRotateGoal;
-    float m_fPathLength;
-    float m_fCurrentSplineT;
-    float m_fActorAvoidTimer;
-    float m_fAvoidDetectionVal;
-    int m_iUnblockDir;
-    float m_fAltFacingAngle;
-    float m_fBlockedStartAngle;
-    float m_fBlockTime;
-    float m_fTimeInAnim;
-    float m_fRunWalkTime;
-    float m_fMinRotateTime;
-    float m_fWaitTime;
-    float m_fLastFrameMinMoveDelta;
-    NiPoint3 m_kLastFrameMinMoveDelta;
-    float m_fGoalRadiusSqr;
-    float m_fFallTime;
-    float m_fDistanceTraveled;
-    float m_fIgnoreLookAtTimer;
-    float m_fLastRotApplied;
-    bool m_bIgnoreInitialRotation;
-    bool m_bIgnoreInitialRotationKeepHeading;
-    unsigned short m_usUnkC2;
-    float m_fIgnoreInitialRotationTetherParam;
-    int m_iFadeIndex;
-    int m_iNextState;
-    int m_iAvoidState;
-    int m_iDoorState;
-    void* m_pCurrentDoor;
-    bool m_bRotateMode;
-    bool m_bRotateCCW;
-    bool m_bMovementBlocked;
-    bool m_bEndUpdatePath;
-    bool m_bWaitingForUpdate;
-    bool m_bIgnoreLookAtPoint;
-    bool m_bDeltaComputedThisFrame;
-    char m_cUnkE3;
+    int FUN_009e1d50(int);
 };
+
 
 // Computes the actor's next move position and heading from the pathing solution, applies it, and returns the next state index.
+
 // @fnv 0x009e1d50
-int PackageProcW_1d50::FUN_009e1d50(int iUnused)
+
+int DetailedPathGoalUpdate::FUN_009e1d50(int iUnused)
+
 {
+
     bool bAtEnd;
+
     unsigned int uiCell6;
-    ContNode_1d50* pvRef4;
+
+    PathingGraphNode* pvRef4;
+
     int iResultY2;
+
     float fHeading9;
+
     float fRateVal;
-    PathingLocation_1d50* pkLocation8;
+
+    PathingLocation* pkLocation8;
+
     float fSpeedB;
+
     unsigned int uiWorld3;
+
     float fElapsed9;
 
+
     ResetPathState();
+
     FUN_009e68c0();
-    m_bRotateMode = false;
-    m_iFadeIndex = 2;
-    m_iNextState = 3;
-    m_fFallTime = 0.0f;
-    if (m_pPathingRequest && ((PathingRequest_1d50*)m_pPathingRequest)->GetByteAtOffset9F())
+
+    m_bPathFlag1 = false;
+
+    eState = 2;
+
+    m_iPathParameter1 = 3;
+
+    m_fPathValue15 = 0.0f;
+
+    if (((NiPointer<PathingRequestQueries>&)m_pPathingRequest) && ((PathingRequestQueries*)((NiPointer<PathingRequestQueries>&)m_pPathingRequest))->GetByteAtOffset9F())
+
     {
-        m_pkActor->SetTarget((FUN_004f2770_Class*)_g_thePlayer);
+
+        ((::Actor*)pActor)->SetTarget((TESObjectREFR*)_g_thePlayer);
+
         return 0;
+
     }
-    fElapsed9 = m_fPathLength - GetElapsed();
-    pvRef4 = ((PathingSolution_1d50*)pCurrentPathingSolution)->FUN_006b05a0();
-    pkLocation8 = pvRef4->FUN_00717e50();
-    NiPoint3 kPos2 = pkLocation8->FUN_005c3420();
-    fHeading9 = (GetDirectionAngle)(*pvRef4->FUN_005d8a70());
+
+    fElapsed9 = m_fPathValue2 - vfn_18();
+
+    pvRef4 = (PathingGraphNode*)((PathingSolution*)pCurrentPathingSolution)->FUN_006b05a0();
+
+    pkLocation8 = &pvRef4->FUN_00717e50();
+
+    NiPoint3 kPos2 = pkLocation8->FUN_005c3420<NiPoint3>();
+
+    fHeading9 = (GetDirectionAngle)(pvRef4->FUN_005d8a70());
+
     uiCell6 = (unsigned int)pkLocation8->FUN_006dd4f0();
+
     uiWorld3 = (unsigned int)pkLocation8->FUN_00441110();
-    fRateVal = _DAT_01012640 / g_calendar.FUN_00867950();
-    fSpeedB = m_pkActor->FUN_008a0b10() * fRateVal;
-    bAtEnd = (m_pkMover->m_usPathCount + 1) == ((PathingSolution_1d50*)pCurrentPathingSolution)->FUN_005a4320();
-    if (m_pkActor->GetSitSleepState() == 4 && m_pkActor->GetSitSleepState() == 9)
+
+    fRateVal = _DAT_01012640 / g_calendar.GetGameTimeScale();
+
+    fSpeedB = pActor->GetCurrentMovementSpeed() * fRateVal;
+
+    bAtEnd = (m_pActorMover->lastNode + 1) == ((PathingSolution*)pCurrentPathingSolution)->FUN_005a4320();
+
+    if (((Actor*)pActor)->GetSitSleepState() == 4 && ((Actor*)pActor)->GetSitSleepState() == 9)
+
     {
+
     }
+
     else
+
     {
-        if (m_pPathingRequest && ((PathingRequest_1d50*)m_pPathingRequest)->FUN_00505c00() && bAtEnd)
+
+        if (((NiPointer<PathingRequestQueries>&)m_pPathingRequest) && ((PathingRequestQueries*)((NiPointer<PathingRequestQueries>&)m_pPathingRequest))->FUN_00505c00() && bAtEnd)
+
         {
-            fHeading9 = ((PathingRequest_1d50*)m_pPathingRequest)->FUN_00507e10();
+
+            fHeading9 = ((PathingRequestQueries*)((NiPointer<PathingRequestQueries>&)m_pPathingRequest))->FUN_00507e10();
+
         }
-        else if (m_pkMover->FUN_008b3d10())
+
+        else if (m_pActorMover->HasLookAtTarget())
+
         {
-            B006815c0_1d50 kTarget;
-            m_pkMover->FUN_009de270(&kTarget);
-            B006815c0_1d50 kTargetPt = FUN_009a88e0(m_pkActor, kTarget);
+
+            NiPoint3 kTarget;
+
+            m_pActorMover->GetLookAtTargetPosition((NiPoint3&)kTarget);
+
+            NiPoint3 kTargetPt = FUN_009a88e0(((Actor*)pActor), kTarget);
+
             fHeading9 = WrapAngle(kTargetPt.z);
+
         }
+
         else
+
         {
-            unsigned int ItemUpdateArray = ((PathingSolution_1d50*)pCurrentPathingSolution)->GetObjectFlags();
+
+            unsigned int ItemUpdateArray = ((PathingSolution*)pCurrentPathingSolution)->GetObjectFlags();
+
             if (ItemUpdateArray > 1)
+
             {
-                NiPoint3 kPrevTmp = ((PathingSolution_1d50*)pCurrentPathingSolution)
-                                        ->FUN_006e7970(ItemUpdateArray - 2)
+
+                NiPoint3 kPrevTmp = ((PathingGraphNode*)((PathingSolution*)pCurrentPathingSolution)
+
+                                        ->FUN_006e7970(ItemUpdateArray - 2))
+
                                         ->FUN_00717e50()
-                                        ->FUN_005c3420();
-                NiPoint3 kLastX = ((PathingSolution_1d50*)pCurrentPathingSolution)
-                                      ->FUN_006e7970(ItemUpdateArray - 1)
+
+                                        .FUN_005c3420<NiPoint3>();
+
+                NiPoint3 kLastX = ((PathingGraphNode*)((PathingSolution*)pCurrentPathingSolution)
+
+                                      ->FUN_006e7970(ItemUpdateArray - 1))
+
                                       ->FUN_00717e50()
-                                      ->FUN_005c3420();
-                NiPoint3 kDiff = ((PointW_1d50&)kLastX).FUN_00439ef0(kPrevTmp);
+
+                                      .FUN_005c3420<NiPoint3>();
+
+                NiPoint3 kDiff = ((NiPoint3&)kLastX).FUN_00439ef0(kPrevTmp);
+
                 fHeading9 = (GetDirectionAngle)(kDiff);
+
             }
+
             else
+
             {
-                fHeading9 = m_pkActor->GetCurrentTargetDistance(0);
+
+                fHeading9 = ((Actor*)pActor)->GetCurrentTargetDistance(0);
+
             }
+
         }
+
     }
-    m_pkActor->FUN_008ad1c0(kPos2, fHeading9, (TESObjectCELL*)uiCell6, (TESWorldSpace*)uiWorld3, 1, 0);
+
+    pActor->FUN_008ad1c0(kPos2, fHeading9, (int)uiCell6, (int)uiWorld3, 1, 0);
+
     iResultY2 = 5;
+
     ResetMoveState();
-    m_iFadeIndex = 5;
+
+    eState = 5;
+
     if (!bAtEnd)
+
         iResultY2 = 6;
+
     return iResultY2;
+
 }
+
 
 struct EndRotateHandler : DetailedActorPathHandler
+
 {
+
     bool FUN_009e7550();
+
 };
 
+
 // @fnv 0x009e7550
+
 bool EndRotateHandler::FUN_009e7550()
+
 {
-    if (((PathingRequest_1d50*)m_pPathingRequest.operator->())->FUN_00505c00() &&
-        ((MoverW_1d50*)m_pActorMover)->m_usPathCount + 1 ==
-            ((PathingSolution_1d50*)pCurrentPathingSolution.operator->())->FUN_005a4320() &&
-        pActor->Unk_85() != 4 && pActor->Unk_85() != 9)
+
+    if (((PathingRequestQueries*)((NiPointer<PathingRequest>&)m_pPathingRequest).operator->())->FUN_00505c00() &&
+
+        ((ActorMover*)m_pActorMover)->lastNode + 1 ==
+
+            ((PathingSolution*)((NiPointer<PathingSolution>&)pCurrentPathingSolution).operator->())->FUN_005a4320() &&
+
+        pActor->GetSitSleepState() != 4 && pActor->GetSitSleepState() != 9)
+
     {
-        StartTurningToAngle(((PathingRequest_1d50*)m_pPathingRequest.operator->())->FUN_00507e10(), false, false);
+
+        StartTurningToAngle(((PathingRequestQueries*)((NiPointer<PathingRequest>&)m_pPathingRequest).operator->())->FUN_00507e10(), false, false);
+
         return m_bPathFlag1;
+
     }
 
+
     return false;
+
 }
+

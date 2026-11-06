@@ -2,7 +2,22 @@
 // src/staging/blk_00780000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include "../../include/Actor.h"
+#include "../../include/Menu.h"
+#include "../../include/Tile.h"
+#include "../../include/TileShaderProperty.h"
+// ActorValueUtility_blk_00780000_od: local type (was include/ActorValueUtility.h, which had no evidence of one real class); its methods are 0x00648b50 GamePlayFormulas::GetRequiredExperiencePoints
+class ActorValueUtility_blk_00780000_od
+{
+public:
+    static int __cdecl ConvertActorValue(int);
+};
+#include "../../include/InventoryMenu.h"
+#include "../../include/LoveTesterMenu.h"
+#include "../../include/NiAdditionalGeometryData.h"
+#include "../../include/ShadowSceneNode.h"
+#include "../../include/BSSystemUtility.h"
+#include "../../include/GO.h"
 
 struct FUN_007832e0_class
 {
@@ -32,11 +47,6 @@ void* __thiscall FUN_00788330::Alloc(int a)
     return result;
 }
 
-struct BSSystemUtility
-{
-    void Update();
-    static BSSystemUtility* ms_pSystemUtility;
-};
 
 // If the BSSystemUtility singleton exists, sets its byte at offset 0x4a to 1 and calls Update().
 // @fnv 0x0078d050
@@ -119,18 +129,9 @@ void __cdecl FUN_007915e0()
 }
 
 struct NiAVObject;
-struct NiNode
-{
-    unsigned int GetNumChildren();
-    NiAVObject* GetAt(unsigned int index);
-};
 struct PropHelper
 {
     void* GetProperty(unsigned int id);
-};
-struct TileShaderProperty
-{
-    void SetAlpha(float alpha);
 };
 int __cdecl FUN_00438220(void);
 struct FUN_0078cf10_Class
@@ -226,14 +227,6 @@ struct GlobalObject_0045cfe0
 {
     int* Int();
 };
-struct Actor
-{
-    unsigned short GetLevel();
-};
-struct ActorValueUtility
-{
-    static int ConvertActorValue(int);
-};
 struct Player
 {
     virtual void v0();
@@ -255,8 +248,8 @@ float GetLevelProgress()
     int lowXP;
     int highXP;
     int level = g_thePlayer->GetLevel();
-    lowXP = ActorValueUtility::ConvertActorValue(level);
-    highXP = ActorValueUtility::ConvertActorValue(level + 1);
+    lowXP = ActorValueUtility_blk_00780000_od::ConvertActorValue(level);
+    highXP = ActorValueUtility_blk_00780000_od::ConvertActorValue(level + 1);
     float currentXP = ((Player*)(char*)g_thePlayer + 0xa4 / 4)->v3(0x18);
     if (currentXP < lowXP)
         FNV_Warning(0x12, "Loading Menu:  Invalid Level Progress Values\n  LowXP=%d, HighXP=%d, CurrXP=%.2f", lowXP,
@@ -264,24 +257,15 @@ float GetLevelProgress()
     return (currentXP - lowXP) / (highXP - lowXP);
 }
 
-struct ArrSI
+// Exe 0x007832a0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int GetFlags();
 };
 
-struct FUN_004bddd0_t : public ArrSI
+struct FUN_004bddd0_t : public BlkOffset08View
 {
     bool FUN_004bddd0(bool a);
-};
-
-struct G2
-{
-    void AddHead(int* a);
-};
-
-struct InventoryMenu
-{
-    static InventoryMenu* ms_pInventoryMenu;
 };
 
 struct FUN_007832a0_class
@@ -294,105 +278,21 @@ void __cdecl FUN_007832a0_class::FUN_007832a0(FUN_004bddd0_t* a)
 {
     if (a != 0 && a->FUN_004bddd0(false))
     {
-        int flags = static_cast<int>(a->GetFlags());
-        reinterpret_cast<G2*>(reinterpret_cast<char*>(InventoryMenu::ms_pInventoryMenu) + 0x11c)->AddHead(&flags);
+        TESBoundObject* flags = reinterpret_cast<TESBoundObject*>(a->GetFlags());
+        InventoryMenu::ms_pInventoryMenu->m_kHotkeyObjects.AddHead(flags);
     }
 }
 
-struct NiAdditionalGeometryData
-{
-    static void* __cdecl GetShadowSceneNodeForIndex(int a);
-};
 
-struct ShadowSceneNode
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58(unsigned int a);
-};
 
-struct GO
-{
-    operator unsigned int() const;
-    void operator=(void* a);
-};
 
-struct FUN_00b5ddb0_self
-{
-    void FUN_00b5d180();
-};
 
-struct NiNodeDetachHelper
-{
-    void __thiscall DetachAllChildren();
-};
-
-struct Menu_007a8b10
-{
-    virtual ~Menu_007a8b10();
-};
 
 extern GO DAT_011da24c;
 extern GO g_011da224;
 extern int DAT_011da204;
 
-struct FUN_0078e0f0 : Menu_007a8b10
+struct FUN_0078e0f0 : Menu
 {
     ~FUN_0078e0f0();
 };
@@ -400,16 +300,16 @@ struct FUN_0078e0f0 : Menu_007a8b10
 // @fnv 0x0078e0f0
 FUN_0078e0f0::~FUN_0078e0f0()
 {
-    ((ShadowSceneNode*)NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1))
-        ->v58(DAT_011da24c.operator unsigned int());
+    NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1)
+        ->RemoveObject((NiAVObject*)DAT_011da24c.operator unsigned int());
 
-    ((NiNodeDetachHelper*)(NiNode*)(unsigned int)DAT_011da24c.operator unsigned int())->DetachAllChildren();
+    ((NiNode*)DAT_011da24c.operator unsigned int())->DetachAllChildren();
 
     DAT_011da24c.operator=(0);
     g_011da224.operator=(0);
     DAT_011da204 = 0;
 
-    ((FUN_00b5ddb0_self*)NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1))->FUN_00b5d180();
+    NiAdditionalGeometryData::GetShadowSceneNodeForIndex(1)->FUN_00b5d180();
 }
 
 void* operator new(unsigned int size, void* place);
@@ -435,68 +335,9 @@ void Owner_788::ConstructElems(Elem_788* pData, unsigned int auiCount)
     }
 }
 
-struct TileStub;
-
-struct MenuStub
-{
-    virtual ~MenuStub();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual int GetID();
-    void SetTile(TileStub* tile, bool flag);
-    void SetVisible(bool flag);
-    void* GetTileRef();
-};
-
-struct LoveTesterMenu : MenuStub
-{
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    bool InitializeCollection(int* missingIndex);
-    void Setup();
-    void* GetNode();
-};
-
-struct TileStub
-{
-    virtual ~TileStub();
-    TileStub* ReadXML(const char* path);
-    MenuStub* GetParentMenu();
-};
-
 struct IMStub
 {
-    TileStub* GetMenuRoot();
+    Tile* GetMenuRoot();
 };
 
 struct NodePtr
@@ -516,11 +357,11 @@ extern NodePtr g_011da2f4;
 // @fnv 0x007915f0
 void __cdecl CreateLoveTesterMenu(int aiValue)
 {
-    TileStub* pTile = GetInterfaceManager()->GetMenuRoot()->ReadXML("Data\\Menus\\CharGen\\love_tester_menu.xml");
-    MenuStub* menu = pTile->GetParentMenu();
-    if (menu && menu->GetID() == GetLoveTesterMenuID())
+    Tile* pTile = GetInterfaceManager()->GetMenuRoot()->ReadFile("Data\\Menus\\CharGen\\love_tester_menu.xml");
+    Menu* menu = pTile->GetMenu();
+    if (menu && menu->GetClass() == GetLoveTesterMenuID())
     {
-        menu->SetTile(pTile, false);
+        menu->SetTileMenu(reinterpret_cast<TileMenu*>(pTile), false);
         DAT_011da2c8 = (LoveTesterMenu*)menu;
         int missing;
         if (!DAT_011da2c8->InitializeCollection(&missing))
@@ -534,9 +375,9 @@ void __cdecl CreateLoveTesterMenu(int aiValue)
         DAT_011da2c8->Setup();
         g_011da2f4 = DAT_011da2c8->GetNode();
         SetLoveTesterEnabled(true);
-        menu->SetVisible(false);
+        menu->SetMenuVisibility(false);
     }
-    else if (menu && menu->GetTileRef())
+    else if (menu && menu->GetTile())
     {
         delete menu;
     }
@@ -548,31 +389,15 @@ int FUN_00791740()
     return 0x432;
 }
 
-class FUN_00791750_cls
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int m_flags[8];
-    bool HasAllFlagsSet(int* index);
-};
 
-// Sets *index to 0, scans the 8 m_flags entries and returns false on the first zero, otherwise true.
+// Sets *index to 0, scans the eight menu tiles and returns false on the first missing tile.
 // @fnv 0x00791750
-bool FUN_00791750_cls::HasAllFlagsSet(int* index)
+bool LoveTesterMenu::InitializeCollection(int* index)
 {
     *index = 0;
     for (; *index < 8; (*index)++)
     {
-        if (m_flags[*index] == 0)
+        if ((&unk28)[*index] == 0)
         {
             return false;
         }
@@ -580,20 +405,6 @@ bool FUN_00791750_cls::HasAllFlagsSet(int* index)
     return true;
 }
 
-struct Menu
-{
-    Menu();
-    virtual ~Menu();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-};
 struct MemberList
 {
     int a, b, c;
@@ -1015,7 +826,7 @@ FUN_00788440::FUN_00788440() : view(0.0f, 0.0f, 0.0f, 0.0f)
     {
         void* data = selected->Get();
         if (data)
-            Apply(&static_cast<Menu*>(data)->unk18);
+            Apply(&static_cast<Menu*>(data)->m_iSecondaryValue);
     }
 }
 

@@ -2,7 +2,20 @@
 // src/staging/blk_00740000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
+#include <windows.h>
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "../../include/NiPointer.h"
 #include "../../include/layout_support.h"
+#include "../../include/BSSimpleArray.h"
+#include "../../include/ListBox_ItemChange___.h"
+#include "../../include/SL.h"
+#define FNV64_BSSIMPLELIST_DEFINED  // layout_support.h supplies BSSimpleList.
+#include "../../include/BGSNote.h"
+#include "../../include/StrMem.h"
+#include "../../include/Menu.h"
+#include "../../include/ShadowSceneLight.h"
+#include "../../include/Tile.h"
+#include "../../include/NiColorA.h"
 
 struct FUN_00740960_Class
 {
@@ -235,40 +248,17 @@ void* __thiscall FUN_007531e0_Class::FUN_007531e0(unsigned int flags)
     return this;
 }
 
-struct StrMem
+struct AnimatingText : public StrMem
 {
-    StrMem();
-    ~StrMem();
-    void FUN_006ffe10();
-};
-struct FUN_00759f20_holder
-{
-    char* AssignString(const char*);
-};
-struct FUN_00759eb0 : public StrMem
-{
-    FUN_00759eb0(const char* s);
+    AnimatingText(const char* s);
+    AnimatingText* AssignString(const char*);
 };
 // @fnv 0x00759eb0
-FUN_00759eb0::FUN_00759eb0(const char* s)
+AnimatingText::AnimatingText(const char* s)
 {
     FUN_006ffe10();
-    ((FUN_00759f20_holder*)this)->AssignString(s);
+    AssignString(s);
 }
-
-struct FNStub
-{
-    char* GetFullName();
-};
-struct BGSNote
-{
-    FNStub* GetNoteTexture();
-};
-struct Tile
-{
-    void Set(int, int);
-    void Set(int, const char*, bool);
-};
 struct TileProcessor
 {
     void ProcessAllTiles();
@@ -290,24 +280,13 @@ void FUN_00759470_Class::UpdateNoteDisplay(BGSNote* pNote)
         ((Tile*)*((int*)this + 0x11))->Set(0xfa3, 0);
         ((Tile*)*((int*)this + 0x19))->Set(0xfa3, 0);
     }
-    ((Tile*)*((int*)this + 0xc))->Set(0xfcc, pNote->GetNoteTexture()->GetFullName(), true);
+    ((Tile*)*((int*)this + 0xc))->Set(0xfcc, reinterpret_cast<TESFullName*>(pNote->GetNoteTexture())->GetFullName(), true);
 }
 
-struct SL
-{
-    SL();
-    ~SL();
-};
-
-struct Str6a70 : public StrMem
-{
-    char m_ucUnknownByte[7];
-    Str6a70& operator=(const char*);
-};
 
 extern const char $SG3295[];
 
-struct FUN_00759330 : public Str6a70
+struct FUN_00759330 : public BSStringT<char>
 {
     int m_w;
     int m_h;
@@ -324,7 +303,7 @@ struct FUN_00759330 : public Str6a70
 // @fnv 0x00759330
 FUN_00759330::FUN_00759330(int aiWidth, int aiHeight, int s, int aiExtra, char c)
 {
-    this->Str6a70::operator=($SG3295);
+    this->BSStringT<char>::operator=($SG3295);
     m_w = aiWidth;
     m_h = aiHeight;
     m_s = s;
@@ -333,32 +312,14 @@ FUN_00759330::FUN_00759330(int aiWidth, int aiHeight, int s, int aiExtra, char c
     m_iThirdValue = c;
 }
 
-struct FUN_00752cb0_Slot
+struct FUN_00752cb0_Inner
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    unsigned int __thiscall FUN_0044ddc0();
+    int __thiscall FUN_008d80e0();
 };
 
 struct FUN_00752cb0_Group
 {
-    FUN_00752cb0_Slot items[7];
-};
-
-struct FUN_00752cb0_Holder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* __thiscall FUN_006a7ad0(int flags);
-};
-
-struct FUN_00752cb0_Inner
-{
-    int __thiscall FUN_008d80e0();
+    BSSimpleArray<FUN_00752cb0_Inner*> items[7];
 };
 
 struct FUN_00752cb0_cls
@@ -372,11 +333,9 @@ int __thiscall FUN_00752cb0_cls::FUN_00752cb0(int aiGroupIndex, int aiMatchValue
 {
     int i = 0;
     int count = 0;
-    while (i < 7 && ((FUN_00752cb0_Group*)((char*)this + 0xb44))[aiGroupIndex].items[i].FUN_0044ddc0() > 0)
+    while (i < 7 && ((FUN_00752cb0_Group*)((char*)this + 0xb44))[aiGroupIndex].items[i].GetSize() > 0)
     {
-        if (((FUN_00752cb0_Inner*)*(
-                 void**)((FUN_00752cb0_Holder*)&((FUN_00752cb0_Group*)((char*)this + 0xb44))[aiGroupIndex].items[i])
-                 ->FUN_006a7ad0(0))
+        if (((FUN_00752cb0_Group*)((char*)this + 0xb44))[aiGroupIndex].items[i].GetAt(0)
                 ->FUN_008d80e0() == aiMatchValue)
         {
             count++;
@@ -386,59 +345,7 @@ int __thiscall FUN_00752cb0_cls::FUN_00752cb0(int aiGroupIndex, int aiMatchValue
     return count * aiMatchValue;
 }
 
-class Menu
-{
-  public:
-    Menu();
-    virtual ~Menu();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-};
 
-struct ListBox_ItemChange___
-{
-    ListBox_ItemChange___();
-    ~ListBox_ItemChange___();
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-};
 
 struct FUN_0057bd10_S
 {
@@ -466,6 +373,7 @@ class FUN_0075b0d0 : public Menu
   public:
     FUN_0075b0d0();
     virtual ~FUN_0075b0d0();
+    unsigned char layoutPadding28[0x50];
     BSSimpleList<int*> list78;
     int unk80;
     int unk84;
@@ -499,35 +407,11 @@ FUN_0075b0d0::FUN_0075b0d0()
 }
 
 namespace fnv_0075f070 {
-class Menu
-{
-  public:
-    Menu();
-    virtual ~Menu();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-};
 
 struct MenuRefObj
 {
     void IncRefCount();
     void DecRefCount();
-};
-
-struct ImageSpaceEffectParamStub
-{
-    float a;
-    float b;
-    float c;
-    float d;
-    ImageSpaceEffectParamStub(float a1, float b1, float c1, float d1);
 };
 
 struct MenuListStub
@@ -540,7 +424,7 @@ struct MenuListStub
     int unk0C;
 };
 
-extern ImageSpaceEffectParamStub g_defaultImageSpaceParam;
+extern NiColorA g_defaultImageSpaceParam;
 extern int g_menuGlobalState;
 
 class FUN_0075f070 : public Menu
@@ -558,7 +442,7 @@ class FUN_0075f070 : public Menu
     int unk44;
     int unk48;
     int unk4C;
-    ImageSpaceEffectParamStub unk50;
+    NiColorA unk50;
     MenuListStub unk60;
     int unk70;
     int unk74;
@@ -598,15 +482,6 @@ struct FUN_00752d40_Obj
 {
     int __thiscall FUN_004036b0();
     int __thiscall FUN_008d80e0();
-};
-struct FUN_00752d40_Item
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    unsigned int __thiscall FUN_0044ddc0();
-    FUN_00752d40_Obj*& __thiscall FUN_006a7ad0(int index);
 };
 struct FUN_00752d40_cls
 {
@@ -671,7 +546,7 @@ struct FUN_00752d40_cls
     int unkAE0, unkAE4, unkAE8, unkAEC, unkAF0, unkAF4, unkAF8, unkAFC, unkB00, unkB04, unkB08, unkB0C;
     int unkB10, unkB14, unkB18, unkB1C, unkB20, unkB24, unkB28, unkB2C, unkB30, unkB34, unkB38, unkB3C;
     int unkB40;
-    FUN_00752d40_Item slots[8][7];
+    BSSimpleArray<FUN_00752d40_Obj*> slots[8][7];
     int __thiscall FUN_00752d40(int group, int type);
 };
 // Counts, over the filled slots of a group, the sum returned by FUN_008d80e0 for slots whose first entry's FUN_004036b0 equals type.
@@ -680,16 +555,14 @@ int __thiscall FUN_00752d40_cls::FUN_00752d40(int group, int type)
 {
     int i = 0;
     int count = 0;
-    while (i < 7 && slots[group][i].FUN_0044ddc0() > 0)
+    while (i < 7 && slots[group][i].GetSize() > 0)
     {
-        if (slots[group][i].FUN_006a7ad0(0)->FUN_004036b0() == type)
-            count += slots[group][i].FUN_006a7ad0(0)->FUN_008d80e0();
+        if (slots[group][i].GetAt(0)->FUN_004036b0() == type)
+            count += slots[group][i].GetAt(0)->FUN_008d80e0();
         i++;
     }
     return count;
 }
-
-struct Tile759f90;
 
 struct Base759f90
 {
@@ -720,7 +593,7 @@ struct FUN_00759f90 : public Base759f90, public BSSimpleList<int*>
 
     FUN_00759f90();
     virtual ~FUN_00759f90();
-    void SetSelectedTile(Tile759f90* tile, bool selected);
+    void SetSelectedTile(Tile* tile, bool selected);
 };
 
 void __cdecl RegisterMenu759f90(FUN_00759f90* menu);
@@ -791,6 +664,7 @@ struct CaravanTotal
 };
 struct CaravanOwner : Menu
 {
+    unsigned char layoutPadding28[0x50];
     int unknown078;
     int unknown07c;
     int unknown080;

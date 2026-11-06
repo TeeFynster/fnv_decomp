@@ -1,8 +1,11 @@
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiExtraData.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/StrArr.h"
 
 // src/gamebryo2.2/corelibs/nimain/niswitchstringextradata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/niswitchstringextradata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-
-struct NiRTTI;
 
 extern NiRTTI g_011f5eac;
 
@@ -11,16 +14,6 @@ NiRTTI* __cdecl FUN_00a93740()
 {
     return &g_011f5eac;
 }
-
-struct NiExtraData
-{
-    void FUN_00a7b2e0();
-};
-
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 
 extern int DAT_0109ff64;
 
@@ -42,9 +35,6 @@ void* __cdecl FUN_00a93870()
 }
 
 void __cdecl NiFreeAlias(void*);
-void __cdecl FUN_00a7b300();
-struct NiRTTI;
-extern NiRTTI g_011f5eac;
 struct NiFile;
 struct FUN_00a93750_shell
 {
@@ -63,7 +53,7 @@ void FUN_00a93750_shell::FUN_00a93750()
         NiFreeAlias(m_pEntryData[i]);
     NiFreeAlias(m_pEntryData);
     m_pEntryData = 0;
-    ((void(__thiscall*)(void*))FUN_00a7b300)(this);
+    reinterpret_cast<NiExtraData*>(this)->FUN_00a7b300();
 }
 
 void __cdecl _delete(void* p, unsigned int);
@@ -109,25 +99,8 @@ void* __thiscall S_00a918e0::FUN_00a918e0(unsigned int auiFlags)
     return this;
 }
 
-struct StrArr
-{
-    void* m_pUnknown;
-    char** m_pEntryData;
-    unsigned short m_uiCapacity;
-    unsigned short m_uiSize;
-    unsigned short m_uiNonNullCount;
-    unsigned short m_uiGrowSize;
-
-    void __thiscall SetSize(unsigned int size);
-    void __thiscall SetAt(unsigned int index, char*& value);
-};
-
-typedef StrArr A89C70StringArray;
-
-struct A89C70Base
-{
-    void __thiscall GetViewerStrings(A89C70StringArray* strings);
-};
+// NiExtraData viewer strings are not yet declared by the shared header.
+void __cdecl FUN_00a7b580();
 
 char* __cdecl _FUN_00a7d330(void* object);
 char* __cdecl FUN_00a7d510(char const* name, char const* value);
@@ -150,97 +123,98 @@ struct FUN_00a93a60_shell
 // @fnv 0x00a93a60
 void FUN_00a93a60_shell::FUN_00a93a60(StrArr* apViewerStrings)
 {
-    reinterpret_cast<A89C70Base*>(this)->GetViewerStrings(apViewerStrings);
+    reinterpret_cast<void (__thiscall*)(NiExtraData*, StrArr*)>(FUN_00a7b580)(
+        reinterpret_cast<NiExtraData*>(this), apViewerStrings);
 
     {
         char* value = _FUN_00a7d330(*(void**)&g_011f5eac);
-        unsigned int index = apViewerStrings->m_uiSize;
-        if (index >= apViewerStrings->m_uiCapacity)
+        unsigned int index = apViewerStrings->m_usSize;
+        if (index >= apViewerStrings->m_usMaxSize)
         {
-            apViewerStrings->SetSize(index + apViewerStrings->m_uiGrowSize);
+            apViewerStrings->SetSize(index + apViewerStrings->m_usGrowBy);
         }
         apViewerStrings->SetAt(index, value);
 
         value = FUN_00a7d510("m_uiSize", reinterpret_cast<char const*>(m_uiSize));
-        index = apViewerStrings->m_uiSize;
-        if (index >= apViewerStrings->m_uiCapacity)
+        index = apViewerStrings->m_usSize;
+        if (index >= apViewerStrings->m_usMaxSize)
         {
-            apViewerStrings->SetSize(index + apViewerStrings->m_uiGrowSize);
+            apViewerStrings->SetSize(index + apViewerStrings->m_usGrowBy);
         }
         apViewerStrings->SetAt(index, value);
 
         for (unsigned int i = 0; i < m_uiSize; ++i)
         {
             value = FUN_00a7d5e0("m_ppcValue[i]", m_ppcValue[i]);
-            index = apViewerStrings->m_uiSize;
-            if (index >= apViewerStrings->m_uiCapacity)
+            index = apViewerStrings->m_usSize;
+            if (index >= apViewerStrings->m_usMaxSize)
             {
-                apViewerStrings->SetSize(index + apViewerStrings->m_uiGrowSize);
+                apViewerStrings->SetSize(index + apViewerStrings->m_usGrowBy);
             }
 
-            if (index >= apViewerStrings->m_uiSize)
+            if (index >= apViewerStrings->m_usSize)
             {
-                apViewerStrings->m_uiSize = static_cast<unsigned short>(index + 1);
+                apViewerStrings->m_usSize = static_cast<unsigned short>(index + 1);
                 if (value)
                 {
-                    ++apViewerStrings->m_uiNonNullCount;
+                    ++apViewerStrings->m_usESize;
                 }
             }
             else
             {
                 if (value)
                 {
-                    if (!apViewerStrings->m_pEntryData[index])
+                    if (!apViewerStrings->m_pBase[index])
                     {
-                        ++apViewerStrings->m_uiNonNullCount;
+                        ++apViewerStrings->m_usESize;
                     }
                 }
                 else
                 {
-                    if (apViewerStrings->m_pEntryData[index])
+                    if (apViewerStrings->m_pBase[index])
                     {
-                        apViewerStrings->m_uiNonNullCount += static_cast<unsigned short>(0xffff);
+                        apViewerStrings->m_usESize += static_cast<unsigned short>(0xffff);
                     }
                 }
             }
-            apViewerStrings->m_pEntryData[index] = value;
+            apViewerStrings->m_pBase[index] = value;
         }
     }
 
     {
         char* value = FUN_00a7d4d0("m_iIndex", m_iIndex);
-        unsigned int index = apViewerStrings->m_uiSize;
-        if (index >= apViewerStrings->m_uiCapacity)
+        unsigned int index = apViewerStrings->m_usSize;
+        if (index >= apViewerStrings->m_usMaxSize)
         {
-            apViewerStrings->SetSize(index + apViewerStrings->m_uiGrowSize);
+            apViewerStrings->SetSize(index + apViewerStrings->m_usGrowBy);
         }
 
-        if (index >= apViewerStrings->m_uiSize)
+        if (index >= apViewerStrings->m_usSize)
         {
-            apViewerStrings->m_uiSize = static_cast<unsigned short>(index + 1);
+            apViewerStrings->m_usSize = static_cast<unsigned short>(index + 1);
             if (value)
             {
-                ++apViewerStrings->m_uiNonNullCount;
+                ++apViewerStrings->m_usESize;
             }
         }
         else
         {
             if (value)
             {
-                if (!apViewerStrings->m_pEntryData[index])
+                if (!apViewerStrings->m_pBase[index])
                 {
-                    ++apViewerStrings->m_uiNonNullCount;
+                    ++apViewerStrings->m_usESize;
                 }
             }
             else
             {
-                if (apViewerStrings->m_pEntryData[index])
+                if (apViewerStrings->m_pBase[index])
                 {
-                    apViewerStrings->m_uiNonNullCount += static_cast<unsigned short>(0xffff);
+                    apViewerStrings->m_usESize += static_cast<unsigned short>(0xffff);
                 }
             }
         }
-        apViewerStrings->m_pEntryData[index] = value;
+        apViewerStrings->m_pBase[index] = value;
     }
 }
 
@@ -292,7 +266,6 @@ struct StrListObj
     char** m_ppStrings;
     int m_iIndex;
 
-    void FUN_00a7b330(StrListObj* dst, void* arg2);
     void CopyStringList(StrListObj* dst, void* arg2);
 };
 
@@ -302,7 +275,7 @@ void __cdecl FUN_00ec65a6(void* dst, unsigned int size, void* src);
 // @fnv 0x00a937a0
 void StrListObj::CopyStringList(StrListObj* dst, void* arg2)
 {
-    FUN_00a7b330(dst, arg2);
+    reinterpret_cast<NiExtraData*>(this)->FUN_00a7b330(dst, arg2);
     if (m_ppStrings == 0 || m_uiCount <= 0)
     {
         dst->m_ppStrings = 0;
@@ -342,69 +315,59 @@ void StrListObj::CopyStringList(StrListObj* dst, void* arg2)
     }
 }
 
-struct NiBinaryStreamView
+__forceinline unsigned int NiBinaryStream::BinaryRead(void* pvBuffer, unsigned int uiTotalBytes,
+                                                       unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-    typedef unsigned int(__cdecl* READFN)(NiBinaryStreamView*, void*, unsigned int, unsigned int*, unsigned int);
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int m_uiBufferSize;
-    READFN m_pfnRead;
-    __forceinline unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                                          unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
+    unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    m_uiAbsoluteCurrentPos += uiBytesRead;
+    return uiBytesRead;
+}
+
+__forceinline unsigned int NiBinaryStream::BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes,
+                                                        unsigned int* puiComponentSizes, unsigned int uiNumComponents)
+{
+    unsigned int uiBytesWritten = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    m_uiAbsoluteCurrentPos += uiBytesWritten;
+    return uiBytesWritten;
+}
+
+// 0x00a939d0 saves the count at +0x0C, strings at +0x10 and index at +0x14.
+struct SwitchStringSaveState : NiExtraData
+{
+    unsigned int m_uiSize;
+    char** m_ppcValue;
+    unsigned int m_uiIndex;
+    void SaveToStream(NiStream& kStream);
 };
 
-struct NiStreamView
-{
-    __forceinline NiBinaryStreamView* Input()
-    {
-        return *reinterpret_cast<NiBinaryStreamView**>(reinterpret_cast<char*>(this) + 0x250);
-    }
-    void FUN_00a64160(unsigned int linkId);
-};
-
-struct NiExtraDataView
-{
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiRefCount;
-    char* m_pcName;
-    unsigned int m_uiNumEntries;
-    unsigned int* m_pLinkIds;
-    unsigned int m_uiNumLinkIds;
-    void FUN_00a7b2c0(NiStreamView& kStream);
-    void LoadFromStream(NiStreamView& kStream);
-};
-
-template <class T> __forceinline void NiBinaryStreamLoad(NiBinaryStreamView& is, T* pValue, unsigned int uiNumEls = 1)
+template <class T> __forceinline void NiBinaryStreamSave(NiBinaryStream& os, T* pValue, unsigned int uiNumEls = 1)
 {
     unsigned int uiSize = sizeof(T);
-    is.BinaryRead(pValue, sizeof(T) * uiNumEls, &uiSize, 1);
+    os.BinaryWrite(pValue, sizeof(T) * uiNumEls, &uiSize, 1);
 }
-template <class T> __forceinline void ReadBinaryValue(NiStreamView& kStream, T& value)
+
+template <class T> __forceinline void WriteBinaryValue(NiStream& kStream, T& value)
 {
-    NiBinaryStreamLoad(*kStream.Input(), &value, 1);
+    NiBinaryStreamSave(*kStream.m_pkOstr, &value, 1);
 }
 
 // @fnv 0x00a939d0
-void NiExtraDataView::LoadFromStream(NiStreamView& kStream)
+void SwitchStringSaveState::SaveToStream(NiStream& kStream)
 {
-    FUN_00a7b2c0(kStream);
-    ReadBinaryValue(kStream, m_uiNumEntries);
-    for (unsigned int i = 0; i < m_uiNumEntries; ++i)
-        kStream.FUN_00a64160(m_pLinkIds[i]);
-    ReadBinaryValue(kStream, m_uiNumLinkIds);
+    NiExtraData::SaveBinary(kStream);
+    WriteBinaryValue(kStream, m_uiSize);
+    for (unsigned int i = 0; i < m_uiSize; ++i)
+        kStream.WriteStreamString(m_ppcValue[i]);
+    WriteBinaryValue(kStream, m_uiIndex);
 }
 
 // Uses insights from unverified 2026-10-23 contributor attempt.
 extern int DAT_0109ff64;
-struct SSE_Node : NiExtraData
+struct SSE_Node
 {
-    void* m_vtbl;
-    unsigned int unk04, unk08, unk0C, unk10;
+    // Initialize the shared base through its original helper, without calling its default constructor.
+    unsigned char m_extraData[sizeof(NiExtraData)];
+    unsigned int unk0C, unk10;
     int unk14;
     static void* operator new(unsigned int size)
     {
@@ -412,8 +375,8 @@ struct SSE_Node : NiExtraData
     }
     SSE_Node() throw()
     {
-        FUN_00a7b2e0();
-        m_vtbl = &DAT_0109ff64;
+        reinterpret_cast<NiExtraData*>(this)->FUN_00a7b2e0();
+        *reinterpret_cast<void**>(this) = &DAT_0109ff64;
         unk10 = 0;
         unk0C = 0;
         unk14 = -1;
@@ -434,76 +397,38 @@ SSE_Node* SSE_Owner::CreateNode(unsigned int arg)
 
 void* __cdecl NiMalloc(unsigned int stSizeInBytes);
 
-class NiBinaryStreamA939
-{
-  public:
-    typedef unsigned int(__cdecl* READFN)(NiBinaryStreamA939* pkThis, void* pvBuffer, unsigned int uiBytes,
-                                          unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    READFN m_pfnRead;
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
-
-template <class T> inline void NiBinaryStreamLoad(NiBinaryStreamA939* pkStream, T* pValue, unsigned int uiNumEls)
+template <class T> inline void NiBinaryStreamLoad(NiBinaryStream* pkStream, T* pValue, unsigned int uiNumEls)
 {
     unsigned int uiSize = sizeof(T);
     pkStream->BinaryRead(pValue, uiNumEls * uiSize, &uiSize, 1);
 }
 
-class NiObjectA939;
-
-class NiStreamA939
-{
-  public:
-    int unk000[0x24c / 4];
-    NiBinaryStreamA939* m_pUnderlyingStream;
-
-    void FUN_00a64ce0(NiObjectA939** ppkObject);
-};
-
-class NiExtraDataA939
-{
-  public:
-    virtual void vfn_00();
-    void FUN_00a7b4a0(NiStreamA939& kStream);
-    unsigned int m_uiRefCount;
-    char* m_pcName;
-};
-
-class LinkArrayExtraA939 : public NiExtraDataA939
+// 0x00a93930 loads strings with NiStream::ReadStreamString (0x00a64ce0), not object links.
+class SwitchStringLoadState : public NiExtraData
 {
   public:
     unsigned int m_uiCount;
-    NiObjectA939** m_ppkObjects;
-    unsigned int m_uiValue1;
+    char** m_ppcStrings;
+    unsigned int m_uiIndex;
 
-    void FUN_00a93930(NiStreamA939& kStream);
+    void FUN_00a93930(NiStream& kStream);
 };
 
-// Reads m_uiCount, allocates m_ppkObjects and loads each object via kStream, then reads m_uiValue1 from the underlying stream.
+// Reads the count, allocates the string array and loads each string, then reads the index.
 // @fnv 0x00a93930
-void LinkArrayExtraA939::FUN_00a93930(NiStreamA939& kStream)
+void SwitchStringLoadState::FUN_00a93930(NiStream& kStream)
 {
-    FUN_00a7b4a0(kStream);
-    NiBinaryStreamLoad(kStream.m_pUnderlyingStream, &m_uiCount, 1);
+    NiExtraData::LoadBinary(kStream);
+    NiBinaryStreamLoad(kStream.m_pkIstr, &m_uiCount, 1);
     if (m_uiCount > 0)
     {
-        m_ppkObjects = (NiObjectA939**)NiMalloc(m_uiCount * sizeof(NiObjectA939*));
+        m_ppcStrings = (char**)NiMalloc(m_uiCount * sizeof(char*));
         for (unsigned int i = 0; i < m_uiCount; i++)
-            kStream.FUN_00a64ce0(&m_ppkObjects[i]);
+            kStream.ReadStreamString(m_ppcStrings[i]);
     }
     else
     {
-        m_ppkObjects = 0;
+        m_ppcStrings = 0;
     }
-    NiBinaryStreamLoad(kStream.m_pUnderlyingStream, &m_uiValue1, 1);
+    NiBinaryStreamLoad(kStream.m_pkIstr, &m_uiIndex, 1);
 }

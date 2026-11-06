@@ -1,3 +1,4 @@
+#include "../../include/NiTArray.h"
 
 // src/staging/blk_00a80000_o2_noehsc_variant.cpp - flag-variant unit created 2026-10-24 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /Gy (unit src/staging/blk_00a80000_o2.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,21 +6,23 @@
 
 // src/staging/blk_00a80000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include <stddef.h>
+#include "../../include/MemoryManager.h"
+#include "../../include/NiParticleMeshes.h"
+#include "../../include/NiDirectionalLight.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/NiAlphaAccumulator.h"
+#include "../../include/NiCollisionObject.h"
+#include "../../include/NiCullingProperty.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/NiLODData.h"
+#include "../../include/NiPixelData.h"
+#include "../../include/NiProperty.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiPixelFormat.h"
+#include "../../include/NiTFixedStringMap_NiAVObject___.h"
 extern "C" void __cdecl _Call_a5d3a0();
 extern const void* NiCollisionObject_vftable;
-struct NiCollisionObject
-{
-    void* vft;
-    int m_kPointA;
-    int m_kPointB;
-    NiCollisionObject();
-    NiCollisionObject* Construct();
-};
-NiCollisionObject::NiCollisionObject()
-{
-    _Call_a5d3a0();
-}
 extern unsigned char* DAT_011f5b04;
 void __cdecl FUN_00714960(int);
 void __cdecl FUN_00a81a20();
@@ -28,17 +31,8 @@ struct FUN_00a744a0
 {
     void Init();
 };
-struct BSFadeNode
-{
-    void* vtbl;
-    static void* operator new(unsigned int size);
-};
 extern const void* DAT_0109e984;
 BSFadeNode* FUN_00a877a0();
-struct NiBound
-{
-    void ComputeFromPoints(int count, const NiPoint3* points);
-};
 struct FUN_00a87900_class
 {
     void FUN_00a87900();
@@ -74,10 +68,6 @@ extern char DAT_011f5d30;
 int __cdecl GetGlobalDataPtr();
 extern int DAT_011f5e44;
 extern int DAT_011f5e4c;
-struct NiStreamLinkIDSet
-{
-    void Realloc(unsigned int);
-};
 void ResetStreamLinkIDSet();
 extern int DAT_0109f814;
 struct FUN_00a8ff50
@@ -116,60 +106,19 @@ struct FUN_00a964a0_Class
     void* m_p;
     void FUN_00a964a0(void* p);
 };
-struct CloningProcess;
 struct NiBinaryExtraData;
 struct NiFloatsExtraData;
-struct NiExtraData
-{
-    void* p;
-    void FUN_00a7b330(void* dst, CloningProcess* cp);
-};
 struct FUN_00a99c40_shell : public NiExtraData
 {
     void FUN_00a99c40(NiBinaryExtraData* dst, CloningProcess* cp);
 };
 extern const void* DAT_0109e47c;
-struct NiLODData
-{
-    NiLODData();
-    void* operator new(size_t, void* p)
-    {
-        return p;
-    }
-};
 BSFadeNode* FUN_00a81fb0();
 unsigned int __cdecl FUN_00a88ac0(unsigned int a);
-struct NiExtraDataHelper
-{
-    void FUN_00a7b2e0();
-};
 extern int DAT_0109fb94;
 void* __cdecl FUN_00a91fe0();
 extern int DAT_010a02e4;
-struct NiProperty
-{
-    void* vtbl;
-    int m_iWordAt04;
-    int m_8;
-    int m_iThirdValue;
-    int m_10;
-    int m_14;
-    short m_18;
-    short m_1a;
-    int m_1c;
-    NiProperty();
-};
 NiProperty* __cdecl FUN_00a95160();
-struct NiParticleMeshes
-{
-    void* vft;
-    int m_kPointA;
-    int m_kPointB;
-    char m_auiShapeKeys[0xbc];
-    char m_flag;
-    NiParticleMeshes();
-    void Init();
-};
 extern const void* DAT_010a0a6c;
 NiParticleMeshes* __cdecl FUN_00a98e70();
 void __cdecl NiFree(void*);
@@ -187,10 +136,6 @@ extern const void* DAT_010a12cc;
 void __fastcall FUN_00a71f60(void*);
 void* __cdecl FUN_00a9b330();
 extern unsigned int kVtbl_NiAlphaAccumulator;
-struct NiAlphaAccumulator
-{
-    NiAlphaAccumulator();
-};
 NiAlphaAccumulator* CreateNiAlphaAccumulator();
 struct FUN_00a9be80
 {
@@ -301,10 +246,6 @@ struct FUN_00a87140_class
     void FUN_00a87140_ctor();
 };
 FUN_00a87140_class* FUN_00a87140();
-struct NiDirectionalLight
-{
-    void FUN_00a7d6a0(NiDirectionalLight* dst, CloningProcess& cp);
-};
 struct FUN_00a94c00_shell
 {
     char m_iWordAt00[0xfc];
@@ -315,10 +256,6 @@ struct FUN_00a94c00_shell
     float m_10c;
     float m_110;
     void FUN_00a94c00(NiDirectionalLight* dst, CloningProcess& cp);
-};
-struct MemoryManager
-{
-    void Deallocate(void*);
 };
 extern MemoryManager g_memoryManager;
 extern char* DAT_010a05e4;
@@ -363,22 +300,12 @@ struct FUN_00a8f810_class
 {
     void FUN_00a8f810();
 };
-struct CloningProcess;
-struct NiCullingProperty
-{
-    void FUN_00a5d7a0(void* dst, CloningProcess& proc);
-    void FUN_00a81430(void* dst, CloningProcess& proc);
-};
 void __cdecl NiFree(void*);
 struct FUN_00a8a670_shell
 {
     void* m_iWordAt00;
     void* m_iWordAt04;
     void FUN_00a8a670();
-};
-struct NiTFixedStringMap_NiAVObject___
-{
-    void RemoveAll();
 };
 extern const void* vftable_SdmDerived;
 extern const void* vftable_SdmBase;
@@ -410,12 +337,6 @@ void __cdecl operator delete(void* p, unsigned int);
 void __cdecl FUN_00a9b8b0();
 void __cdecl FUN_00a9b9b0();
 void __cdecl FUN_00a9ba80();
-struct SpawnedRef
-{
-    virtual void Vslot00();
-    virtual void DeleteThis();
-    long m_iObjectReferenceCount;
-};
 extern int DAT_0109e04c;
 struct FUN_00a80580_sub
 {
@@ -437,8 +358,8 @@ struct FUN_00a80580_cls
     int unk60, unk64, unk68, unk6C, unk70, unk74, unk78, unk7C, unk80, unk84, unk88, unk8C;
     int unk90, unk94, unk98;
     FUN_00a80580_sub m_sub9c;
-    SpawnedRef* m_b8;
-    SpawnedRef* m_bc;
+    NiRefObject* m_b8;
+    NiRefObject* m_bc;
 
     void BaseTeardown();
     void FUN_00a80580();
@@ -803,22 +724,6 @@ struct FUN_00a8bdf0_cls
     int m_08;
     int m_0c;
     void FUN_00a8bdf0(unsigned char* dst, unsigned int a2, unsigned int count);
-};
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
 };
 class FUN_00a8f140_cls
 {
@@ -1204,50 +1109,18 @@ class S911d0_EntryPool
 };
 extern S911d0_EntryPool* DAT_011f5e50;
 
-template <class T> class S911d0_ArrayBase
-{
-  public:
-    virtual ~S911d0_ArrayBase()
-    {
-        FUN_00aa10f0(m_pBase);
-    }
 
-    unsigned int GetSize() const
-    {
-        return m_usSize;
-    }
-    T GetAt(unsigned int uiIndex) const
-    {
-        return m_pBase[uiIndex];
-    }
-    void SetAt(unsigned int uiIndex, const T& element)
-    {
-        if (uiIndex >= m_usSize)
-        {
-            m_usSize = (unsigned short)(uiIndex + 1);
-            if (element != 0)
-                m_usESize++;
-        }
-        else if (element != 0)
-        {
-            if (m_pBase[uiIndex] == 0)
-                m_usESize++;
-        }
-        else if (m_pBase[uiIndex] != 0)
-        {
-            m_usESize--;
-        }
-        m_pBase[uiIndex] = element;
-    }
-    void FUN_00a90180(int iFlags);
 
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
-
+template <class T, class A> inline NiTArray<T,A>::~NiTArray() { FUN_00aa10f0(m_pBase); }
+template <class T, class A> inline unsigned int NiTArray<T,A>::GetSize() const { return m_usSize; }
+template <class T, class A> inline const T& NiTArray<T,A>::GetAt(unsigned int i) const { return m_pBase[i]; }
+template <class T, class A> inline T& NiTArray<T,A>::GetAt(unsigned int i) { return m_pBase[i]; }
+template <class T, class A> inline void NiTArray<T,A>::SetAt(unsigned int uiIndex,const T& element) {
+ if(uiIndex>=m_usSize) { m_usSize=(unsigned short)(uiIndex+1);if(element!=0)m_usESize++; }
+ else if(element!=0) { if(m_pBase[uiIndex]==0)m_usESize++; }
+ else if(m_pBase[uiIndex]!=0)m_usESize--;
+ m_pBase[uiIndex]=element;
+}
 class S911d0_Base
 {
   public:
@@ -1281,7 +1154,7 @@ class FUN_00a911d0 : public S911d0_Base
 {
   public:
     virtual ~FUN_00a911d0();
-    S911d0_ArrayBase<S911d0_Entry*> m_kEntries;
+    NiTArray<S911d0_Entry*, NiTMallocInterface<S911d0_Entry*> > m_kEntries;
 };
 
 // @fnv 0x00a911d0
@@ -1306,81 +1179,33 @@ FUN_00a911d0::~FUN_00a911d0()
 extern void(__stdcall* DAT_00fdf05c)(void*);
 extern void(__stdcall* DAT_00fdf100)(void*);
 extern int DAT_010a2484;
-class NiPixelFormat
-{
-  public:
-    NiPixelFormat();
-    bool operator==(const NiPixelFormat&) const;
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-};
 extern const NiPixelFormat DAT_011aa210;
 extern const NiPixelFormat DAT_011aa2e8;
 extern const NiPixelFormat DAT_011aa2a0;
-struct BmpColor
+typedef NiPalette::PaletteColorEntry BmpColor;
+// These operations are inline in this unit in the original binary.
+inline void NiRefObject::IncRefCount()
 {
-    unsigned char r, g, b, a;
-};
-class FUN_00a8b110 : public NiRefObject
+    InterlockedIncrement((volatile long*)&m_uiRefCount);
+}
+inline void NiRefObject::DecRefCount()
 {
-  public:
-    unsigned int unk08, unk0c, unk10, unk14, unk18, unk1c, unk20;
-    static void* operator new(unsigned int n)
-    {
-        return BSFadeNode::operator new(n);
-    }
-    FUN_00a8b110(bool, unsigned int, const BmpColor*);
-};
-class NiPixelData
+    if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+inline void NiPixelData::SetPalette(NiPalette* p)
 {
-  public:
-    void* vtable;
-    unsigned int refs;
-    NiPixelFormat format;
-    FUN_00a8b110* palette;
-    unsigned char* pixels;
-    unsigned int* width;
-    unsigned int* height;
-    unsigned int* offsets;
-    unsigned int levels;
-    unsigned int stride;
-    unsigned int unk68, unk6c, unk70;
-    static void* operator new(unsigned int n)
+    NiPalette* palette = static_cast<NiPalette*>(m_spPalette.value);
+    if (palette != p)
     {
-        return BSFadeNode::operator new(n);
+        if (palette)
+            static_cast<NiRefObject*>(palette)->DecRefCount();
+        m_spPalette.value = p;
+        if (m_spPalette.value)
+            static_cast<NiRefObject*>(static_cast<NiPalette*>(m_spPalette.value))->IncRefCount();
     }
-    NiPixelData(unsigned int, unsigned int, const NiPixelFormat&, unsigned int = 1, unsigned int = 1);
-    unsigned char* Pixels()
-    {
-        return pixels + offsets[0];
-    }
-    void SetPalette(FUN_00a8b110* p)
-    {
-        if (palette != p)
-        {
-            if (palette)
-                palette->DecRefCount();
-            palette = p;
-            if (palette)
-                palette->IncRefCount();
-        }
-    }
-};
+}
+
 struct BmpStream
 {
     virtual void v0();
@@ -1486,7 +1311,7 @@ NiPixelData* BmpReader::FUN_00a8e810(BmpStream& stream, NiPixelData* optional)
         return 0;
     }
     NiPixelData* dest;
-    if (optional && optional->width[0] == width && optional->height[0] == height && optional->format == format)
+    if (optional && optional->m_puiWidth[0] == width && optional->m_puiHeight[0] == height && optional->m_kPixelFormat == format)
         dest = optional;
     else
         dest = new NiPixelData(width, height, format);
@@ -1502,7 +1327,7 @@ NiPixelData* BmpReader::FUN_00a8e810(BmpStream& stream, NiPixelData* optional)
             color->b = temp;
             color->a = 255;
         }
-        dest->SetPalette(new FUN_00a8b110(false, 256, colors));
+        dest->SetPalette(new NiPalette(false, 256, colors));
     }
     else
     {
@@ -1512,7 +1337,7 @@ NiPixelData* BmpReader::FUN_00a8e810(BmpStream& stream, NiPixelData* optional)
     if (extra > 0)
         stream.Seek(extra, DAT_010a2484);
     unsigned int imageSize = (((width * bpp + 31) & ~31) >> 3) * height;
-    unsigned int rowSize = dest->width[0] * dest->stride;
+    unsigned int rowSize = dest->m_puiWidth[0] * dest->m_uiPixelStride;
     if (bpp == 4)
     {
         unsigned int packedSize = (width >> 1) + (width & 1);
@@ -1522,7 +1347,7 @@ NiPixelData* BmpReader::FUN_00a8e810(BmpStream& stream, NiPixelData* optional)
         int step;
         if (flip)
         {
-            row = dest->Pixels() + rowSize * (dest->height[0] - 1);
+            row = dest->Pixels() + rowSize * (dest->m_puiHeight[0] - 1);
             step = -(int)rowSize;
         }
         else
@@ -1591,7 +1416,7 @@ NiPixelData* BmpReader::FUN_00a8e810(BmpStream& stream, NiPixelData* optional)
     }
     if (format == DAT_011aa2e8 || format == DAT_011aa2a0)
     {
-        unsigned int pixelStride = dest->stride;
+        unsigned int pixelStride = dest->m_uiPixelStride;
         unsigned int count = width * height;
         unsigned char* pixel = dest->Pixels();
         for (unsigned int i = 0; i < count; ++i, pixel += pixelStride)

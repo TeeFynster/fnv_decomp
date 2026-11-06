@@ -2,7 +2,41 @@
 // src/havok/physics/collide/shape/heightfield/plane/hkpplaneshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/heightfield/plane/hkpplaneshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpPlaneShape.h"
+// Keep the non-byte intrinsic lanes used by this unit's original /GS code.
+#define _INCLUDED_MM2
+// Exe 0x00d552f0 FUN_00d552f0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+    __int32 m128_i32[4];
+    __int64 m128_i64[2];
+    unsigned __int32 m128_u32[4];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" float _mm_cvtss_f32(LocalM128);
+
+extern "C" LocalM128 _mm_and_ps(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_cmple_ps(LocalM128 _A, LocalM128 _B);
+extern "C" LocalM128 _mm_set_ps1(float _A);
+extern "C" void _mm_store_ss(float* _V, LocalM128 _A);
+extern "C" int _mm_movemask_ps(LocalM128 _A);
+#define FNV_VEC4_NO_SSE
+#define FNV_VEC4_SIMD
+#include "../../../../../../../include/Vec4.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/hkpPlaneShape.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+
+__forceinline void Vec4::operator=(const Vec4& v)
+{
+    m_vComponents = v.m_vComponents;
+}
 
 void __cdecl FUN_00d26230(void*, void*, void*, float, int);
 
@@ -18,31 +52,18 @@ void FUN_00d552c0_StandIn::FUN_00d552c0(void* param1, float param2, int param3)
     FUN_00d26230(param1, (void*)((char*)this + 0x30), (void*)((char*)this + 0x20), param2, param3);
 }
 
-class GlobalObjectO2_00d472a0;
-extern GlobalObjectO2_00d472a0 g_01269b84;
+extern const hkClass g_01269b84;
 
-class hkStatisticsCollectorD54F;
-
-class hkReferencedObjectD54F
+class hkObjectD54F : public hkReferencedObject
 {
   public:
-    virtual ~hkReferencedObjectD54F() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    void FUN_00c90360(hkStatisticsCollectorD54F* pkCollector, const GlobalObjectO2_00d472a0* pkClass) const;
-};
-
-class hkObjectD54F : public hkReferencedObjectD54F
-{
-  public:
-    void FUN_00d54f80(hkStatisticsCollectorD54F* pkCollector, const GlobalObjectO2_00d472a0* pkClass) const;
+    void FUN_00d54f80(hkStatisticsCollector* pkCollector, const hkClass* pkClass) const;
 };
 
 // @fnv 0x00d54f80
-void hkObjectD54F::FUN_00d54f80(hkStatisticsCollectorD54F* pkCollector, const GlobalObjectO2_00d472a0* pkClass) const
+void hkObjectD54F::FUN_00d54f80(hkStatisticsCollector* pkCollector, const hkClass* pkClass) const
 {
-    FUN_00c90360(pkCollector, &g_01269b84);
+    hkReferencedObject::calcContentStatistics(pkCollector, &g_01269b84);
 }
 
 struct __declspec(align(16)) Vector4D54F90
@@ -112,9 +133,8 @@ void ShapeD54F90::FUN_00d54f90(const RayCastInputD54F90& kInput, const CdBodyD54
     }
 }
 
-#include <xmmintrin.h>
 extern char DAT_010d0e18;
-extern __m128 DAT_010c71d0;
+extern LocalM128 DAT_010c71d0;
 
 struct PlaneShape_00d551d0 : hkpPlaneShape
 {
@@ -126,26 +146,26 @@ struct PlaneShape_00d551d0 : hkpPlaneShape
 PlaneShape_00d551d0* PlaneShape_00d551d0::FUN_00d551d0(const hkVector4& p, const hkVector4* box)
 {
     m_ulUserData = 0;
-    m_type = 0x1c;
+    *(unsigned int*)&m_type = 0x1c;
     *(void**)this = &DAT_010d0e18;
     m_sReferenceCount = 1;
-    *(__m128*)&m_kTriangleNormal = *(const __m128*)&p;
-    *(__m128*)&m_kAabbCenter = _mm_mul_ps(_mm_add_ps(*(const __m128*)&box[1], *(const __m128*)&box[0]), DAT_010c71d0);
-    *(__m128*)&m_kAabbHalfExtents =
-        _mm_mul_ps(_mm_sub_ps(*(const __m128*)&box[1], *(const __m128*)&box[0]), DAT_010c71d0);
+    *(LocalM128*)&m_kTriangleNormal = *(const LocalM128*)&p;
+    *(LocalM128*)&m_kAabbCenter = _mm_mul_ps(_mm_add_ps(*(const LocalM128*)&box[1], *(const LocalM128*)&box[0]), DAT_010c71d0);
+    *(LocalM128*)&m_kAabbHalfExtents =
+        _mm_mul_ps(_mm_sub_ps(*(const LocalM128*)&box[1], *(const LocalM128*)&box[0]), DAT_010c71d0);
     return this;
 }
 
 struct __declspec(align(16)) PlaneVector
 {
-    __m128 value;
+    LocalM128 value;
     __forceinline float Dot3(const PlaneVector& other) const
     {
-        __m128 product = _mm_mul_ps(value, other.value);
-        __m128 y = _mm_shuffle_ps(product, product, 0x55);
-        __m128 z = _mm_shuffle_ps(product, product, 0xaa);
-        __m128 sum = _mm_add_ss(y, product);
-        __m128 total = _mm_add_ss(z, sum);
+        LocalM128 product = _mm_mul_ps(value, other.value);
+        LocalM128 y = _mm_shuffle_ps(product, product, 0x55);
+        LocalM128 z = _mm_shuffle_ps(product, product, 0xaa);
+        LocalM128 sum = _mm_add_ss(y, product);
+        LocalM128 total = _mm_add_ss(z, sum);
         return _mm_cvtss_f32(total);
     }
 };
@@ -182,26 +202,8 @@ FUN_00d55240::FUN_00d55240(const PlaneVector& normal, const PlaneVector& center,
 }
 
 namespace fnv_00d552f0 {
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    __int32 m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned __int32 m128_u32[4];
-} __m128;
-extern "C" __m128 _mm_sub_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_add_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_mul_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_add_ss(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_and_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_cmple_ps(__m128 _A, __m128 _B);
-extern "C" __m128 _mm_shuffle_ps(__m128 _A, __m128 _B, unsigned int _Imm8);
-extern "C" __m128 _mm_set_ps1(float _A);
-extern "C" void _mm_store_ss(float* _V, __m128 _A);
-extern "C" int _mm_movemask_ps(__m128 _A);
-extern "C" const __m128 DAT_010ec7f0;
-extern "C" const __m128 DAT_01017d10;
+extern "C" const LocalM128 DAT_010ec7f0;
+extern "C" const LocalM128 DAT_01017d10;
 
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long dwTlsIndex);
 extern "C" unsigned long DAT_0126835c;
@@ -210,38 +212,19 @@ extern "C" const char DAT_010c41f8[];
 extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 
-struct CommandTimingEntry
-{
-    const char* m_pCommandName;
-    unsigned int m_uiStartTicks;
-    unsigned int m_uiEndTicks;
-};
-
-struct MonitorStream
-{
-    char* m_kRayStart;
-    char* m_kRayEnd;
-    char* m_pRayCursor;
-    char* m_pCurrentCommand;
-    static MonitorStream* GetMonitorStream()
-    {
-        return (MonitorStream*)TlsGetValue(DAT_0126835c);
-    }
-};
-
 static const char s_kEndTimer[] = "Et";
 static __forceinline void TimerMark(const char* name, volatile unsigned int& t)
 {
-    MonitorStream* s = MonitorStream::GetMonitorStream();
-    if (s->m_kRayEnd < s->m_pCurrentCommand)
+    hkMonitorStream* s = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (s->m_end.m_storage < s->m_capacityMinus16.m_storage)
     {
-        CommandTimingEntry* h = (CommandTimingEntry*)s->m_kRayEnd;
-        h->m_pCommandName = name;
+        hkMonitorStream::TimerCommand* h = (hkMonitorStream::TimerCommand*)s->m_end.m_storage;
+        h->m_commandAndMonitor = name;
         _ReadWriteBarrier();
         t = (unsigned int)__rdtsc();
         _ReadWriteBarrier();
-        h->m_uiStartTicks = t;
-        s->m_kRayEnd = (char*)(h + 1);
+        h->m_time0 = t;
+        s->m_end.m_storage = (char*)(h + 1);
     }
 }
 
@@ -268,36 +251,15 @@ class HkBoolD55
     }
 };
 
-class Vec4D55
-{
-  public:
-    __m128 m_vComponents;
-    Vec4D55& operator=(const Vec4D55& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
-    float dot4xyz1(const Vec4D55& p) const
-    {
-        __m128 x2 = _mm_mul_ps(m_vComponents, p.m_vComponents);
-        __m128 w = _mm_shuffle_ps(p.m_vComponents, p.m_vComponents, 0xff);
-        __m128 z = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), w);
-        __m128 y = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        float r;
-        _mm_store_ss(&r, _mm_add_ps(z, y));
-        return r;
-    }
-};
-
 struct RayInputD55
 {
-    Vec4D55 m_vFrom;
-    Vec4D55 m_vTo;
+    Vec4 m_vFrom;
+    Vec4 m_vTo;
 };
 
 struct RayOutputD55
 {
-    Vec4D55 m_vHitNormal;
+    Vec4 m_vHitNormal;
     float m_fromDist;
     int m_iExtraInfo;
     int pad[2];
@@ -309,12 +271,12 @@ struct RayOutputD55
     }
 };
 
-static inline void Dot4xyz1(float* out, const Vec4D55& p, const Vec4D55& a)
+static inline void Dot4xyz1(float* out, const Vec4& p, const Vec4& a)
 {
-    __m128 x2 = _mm_mul_ps(a.m_vComponents, p.m_vComponents);
-    __m128 w = _mm_shuffle_ps(p.m_vComponents, p.m_vComponents, 0xff);
-    __m128 z = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), w);
-    __m128 y = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    LocalM128 x2 = _mm_mul_ps(a.m_vComponents, p.m_vComponents);
+    LocalM128 w = _mm_shuffle_ps(p.m_vComponents, p.m_vComponents, 0xff);
+    LocalM128 z = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), w);
+    LocalM128 y = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
     _mm_store_ss(out, _mm_add_ps(z, y));
 }
 
@@ -322,9 +284,9 @@ class PlaneShapeD55
 {
   public:
     int pad[4];
-    Vec4D55 m_kTriangleNormal;
-    Vec4D55 m_kAabbCenter;
-    Vec4D55 m_kAabbHalfExtents;
+    Vec4 m_kTriangleNormal;
+    Vec4 m_kAabbCenter;
+    Vec4 m_kAabbHalfExtents;
     HkBoolD55 FUN_00d552f0(const RayInputD55& input, RayOutputD55& results) const;
 };
 
@@ -344,10 +306,10 @@ HkBoolD55 PlaneShapeD55::FUN_00d552f0(const RayInputD55& input, RayOutputD55& re
     if (fromDist >= 0.0f && toDist < 0.0f)
     {
         fromDist = fromDist / (fromDist - toDist);
-        __m128 t = _mm_set_ps1(fromDist);
-        __m128 s = _mm_sub_ps(DAT_010ec7f0, t);
-        __m128 hit = _mm_add_ps(_mm_mul_ps(s, input.m_vFrom.m_vComponents), _mm_mul_ps(input.m_vTo.m_vComponents, t));
-        __m128 diff = _mm_and_ps(_mm_sub_ps(hit, m_kAabbCenter.m_vComponents), DAT_01017d10);
+        LocalM128 t = _mm_set_ps1(fromDist);
+        LocalM128 s = _mm_sub_ps(DAT_010ec7f0, t);
+        LocalM128 hit = _mm_add_ps(_mm_mul_ps(s, input.m_vFrom.m_vComponents), _mm_mul_ps(input.m_vTo.m_vComponents, t));
+        LocalM128 diff = _mm_and_ps(_mm_sub_ps(hit, m_kAabbCenter.m_vComponents), DAT_01017d10);
         if ((_mm_movemask_ps(_mm_cmple_ps(diff, m_kAabbHalfExtents.m_vComponents)) & 7) == 7)
         {
             results.m_fromDist = fromDist;

@@ -105,7 +105,7 @@ Vector4Comparison hkpShapeBase::FUN_00c9e400(const ShapeRayBundleCastInput& inpu
         {
             singleInput.m_vFrom.m_vComponents = from[i];
             singleInput.m_vTo.m_vComponents = to[i];
-            hkBoolRet hit = RayCast(singleInput, results.m_akRayOutputs[i]);
+            hkBool hit = IntersectRayWithShape(singleInput, results.m_akRayOutputs[i]);
             if (hit.m_cBooleanValue)
             {
                 resultMask |= Vector4Comparison::s_masks[i];

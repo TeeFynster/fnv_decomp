@@ -8,6 +8,27 @@
 // src/staging/blk_00e20000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+// hkRefPtrE_blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant_rtm_variant: local type (was include/hkRefPtrE.h, which had no evidence of one real class); no method of it is bound to a named game function
+#include "../../include/hkReferencedObject.h"
+
+class hkRefPtrE_blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant_rtm_variant
+{
+public:
+    hkReferencedObject* m_pRetainedObject;
+
+    ~hkRefPtrE_blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant_rtm_variant();
+};
+#include "../../include/hkTypeIsClass.h"
+#include "../../include/hkArray.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkMonitorStream.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/Vec4.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkStringPtr.h"
+#include "../../include/hkpBroadPhaseCastCollector.h"
+#include "../../include/hkCpuWorldRayCastCollector.h"
+#include "../../include/hkKdTreeCastCollector.h"
 int __cdecl PackBitFields(int a, int b, int c);
 extern void* DAT_011be488[];
 void __cdecl CallHandlerByIndex(int a, int b, int c);
@@ -1092,24 +1113,6 @@ inline void* operator new(unsigned int, void* p)
 {
     return p;
 }
-struct hkMemoryAllocator;
-struct hkMemoryRouterStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-    hkMemoryAllocator* m_pStreamAllocator;
-};
-hkMemoryRouterStub* GetMemoryRouterStub();
-struct hkArrayUtilStub
-{
-    static void __cdecl reserve(hkMemoryAllocator& alloc, void* array, int numElem, int sizeElem);
-};
 struct RefHolderE2
 {
     void* m_ptr;
@@ -1122,73 +1125,10 @@ struct KeyedEntryE2
     float m_key;
     RefHolderE2 m_uiFilterValue;
 };
-template <typename T> struct hkArrayStub
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    __forceinline void destruct(T* p, int n)
-    {
-        for (int i = 0; i < n; i++)
-        {
-            p[i].~T();
-        }
-    }
-
-    __forceinline void copy(T* dst, const T* src, int n)
-    {
-        for (int i = 0; i < n; i++)
-        {
-            dst[i] = src[i];
-        }
-    }
-
-    __forceinline void constructWithCopy(T* dst, int n, const T* src)
-    {
-        for (int i = 0; i < n; i++)
-        {
-            new (dst + i) T(src[i]);
-        }
-    }
-
-    __forceinline void reserve(hkMemoryAllocator& alloc, int n)
-    {
-        if (getCapacity() < n)
-        {
-            int cap2 = 2 * getCapacity();
-            int newCap = n < cap2 ? cap2 : n;
-            hkArrayUtilStub::reserve(alloc, this, newCap, sizeof(T));
-        }
-    }
-
-    __forceinline hkArrayStub& operator=(const hkArrayStub& a)
-    {
-        copyFromArray(GetMemoryRouterStub()->heap(), a);
-        return *this;
-    }
-
-    __forceinline void copyFromArray(hkMemoryAllocator& alloc, const hkArrayStub& a)
-    {
-        const int oldSize = m_iElementCount;
-        const int newSize = a.m_iElementCount;
-        const int copiedSize = newSize > oldSize ? oldSize : newSize;
-        reserve(alloc, newSize);
-        destruct(m_data + newSize, oldSize - newSize);
-        copy(m_data, a.m_data, copiedSize);
-        constructWithCopy(m_data + copiedSize, newSize - copiedSize, a.m_data + copiedSize);
-        m_iElementCount = newSize;
-    }
-};
 struct FUN_00e2f680_Class
 {
     RefHolderE2 m_ref;
-    hkArrayStub<KeyedEntryE2> m_entries;
+    hkArray<KeyedEntryE2> m_entries;
 
     FUN_00e2f680_Class& CopyFrom(const FUN_00e2f680_Class& other);
 };
@@ -1400,20 +1340,6 @@ struct FUN_00e3c5b0 : S_00e3c5b0_Base
     unsigned char unk40;
     FUN_00e3c5b0(float f);
 };
-struct ScriptRecord
-{
-    unsigned int identifier;
-    unsigned short flags;
-    short type;
-    unsigned int value;
-};
-struct ScriptRecordList
-{
-    ScriptRecord* records;
-    int count;
-
-    ScriptRecord* FindByTypeAndOccurrence(int type, int occurrence);
-};
 struct FUN_00e3dfb0_arg
 {
     int value;
@@ -1492,49 +1418,10 @@ struct S_00e3ed00_Foo
     int __thiscall AppendToTraversalList(S_00e3ed00_Foo* param1, S_00e3ed00_List* param2);
 };
 void __cdecl ResizeAudioStream(int param1, S_00e3ed00_List* param2, int param3);
-struct hkMemoryAllocator
-{
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-    virtual void* AllocateBufferWithSize(int& reqNumBytesInOut);
-    virtual void ReturnMemory(void* p, int numBytes);
-    template <class T> __forceinline void _bufFree(void* p, int numElem)
-    {
-        ReturnMemory(p, numElem * sizeof(T));
-    }
-};
-struct NineIntegerRecord
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* m_pStreamAllocator;
-    hkMemoryAllocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-NineIntegerRecord& GetMemoryRouter();
+hkMemoryRouter& GetMemoryRouter();
 struct hkReferencedObj
 {
     void removeReference();
-};
-struct hkStringPtr
-{
-    const char* m_pcText;
-    void release();
-};
-struct hkRefPtrE
-{
-    hkReferencedObj* m_pRetainedObject;
-    ~hkRefPtrE()
-    {
-        if (m_pRetainedObject)
-            m_pRetainedObject->removeReference();
-        m_pRetainedObject = 0;
-    }
 };
 struct ReferenceCountedPointer
 {
@@ -1577,9 +1464,6 @@ struct Elem40
     int unk38;
     int unk3C;
 };
-struct hkTypeIsClass
-{
-};
 template <class T> __forceinline void destructAll2(T* t, int n, hkTypeIsClass)
 {
     for (int i = 0; i < n; ++i)
@@ -1591,33 +1475,6 @@ template <class T> __forceinline void destructAll(T* t, int n)
 {
     destructAll2(t, n, hkTypeIsClass());
 }
-template <class T> struct hkArr
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void clear()
-    {
-        destructAll(m_data, m_iElementCount);
-        m_iElementCount = 0;
-    }
-    __forceinline void _clearAndDeallocate(hkMemoryAllocator& alloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc._bufFree<T>(m_data, getCapacity());
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    __forceinline void ClearAndRelease()
-    {
-        _clearAndDeallocate(GetMemoryRouter().heap());
-    }
-};
 struct BaseE3EAA0
 {
     int unk04;
@@ -1631,9 +1488,9 @@ struct FUN_00e3ed80 : BaseE3EAA0
 {
     hkStringPtr m_14;
     ReferenceCountedPointer m_18;
-    hkArr<Elem40> m_1c;
-    hkArr<hkRefPtrE> m_28;
-    hkArr<Pair8> m_34;
+    hkArray<Elem40> m_1c;
+    hkArray<hkRefPtrE_blk_00e20000_o2_gs_ehsc_nogs_noehsc_variant_rtm_variant> m_28;
+    hkArray<Pair8> m_34;
     hkStringPtr m_40;
     virtual ~FUN_00e3ed80();
 };
@@ -1790,20 +1647,12 @@ struct FUN_00e3f370_cls
     void ReleaseItems();
 };
 #include <xmmintrin.h>
-struct hkVector4Stub
-{
-    __m128 m_vComponents;
-    void set(float x, float y, float z, float w = 0.0f)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
 struct Mat34
 {
     float m[3][4];
 };
-void FUN_00e310c0(const Mat34* src, int stride, int n, int row, int col, hkVector4Stub** outA, hkVector4Stub** outB,
-                  hkVector4Stub** outC);
+void FUN_00e310c0(const Mat34* src, int stride, int n, int row, int col, hkVector4** outA, hkVector4** outB,
+                  hkVector4** outC);
 class RayVector
 {
     __m128 v;
@@ -1853,19 +1702,6 @@ struct Ray
     Ray() : filtering(false), filterInfo(0)
     {}
 };
-struct Command
-{
-    Ray input;
-    void* results;
-    int capacity;
-    int count;
-    Flag useCollector, stop;
-    Command()
-    {
-        useCollector = false;
-        stop = false;
-    }
-};
 struct BundleCommand
 {
     Ray input[4];
@@ -1896,81 +1732,6 @@ struct WorkInput
         filter = 0;
     }
 };
-class hkpBroadPhaseHandle;
-class hkpBroadPhaseCastCollector
-{
-  public:
-    virtual ~hkpBroadPhaseCastCollector()
-    {}
-    virtual float ReleaseCollector(const hkpBroadPhaseHandle*, int) = 0;
-};
-class hkKdTreeCastCollector
-{
-  public:
-    virtual ~hkKdTreeCastCollector()
-    {}
-    virtual Flag ReportHit(unsigned long) = 0;
-    virtual Flag DidHit() = 0;
-    virtual float GetHitFraction() = 0;
-};
-struct hkAabbTreeData
-{
-    struct RayQueryAabb
-    {
-    };
-    struct QuantizedAabb
-    {
-    };
-};
-template <class B, class I = unsigned short> class hkAabbTree
-{
-  public:
-    struct Node;
-};
-template <class B, class I = unsigned short> class hkAabbTreeQueryUtils
-{
-  public:
-    struct Collector
-    {
-        virtual ~Collector()
-        {}
-        virtual float GetHitDistance(const typename hkAabbTree<B, I>::Node*) = 0;
-    };
-};
-class hkCpuWorldRayCastCollector : public hkpBroadPhaseCastCollector,
-                                   public hkKdTreeCastCollector,
-                                   public hkAabbTreeQueryUtils<hkAabbTreeData::RayQueryAabb>::Collector,
-                                   public hkAabbTreeQueryUtils<hkAabbTreeData::QuantizedAabb>::Collector
-{
-  public:
-    void* filter;
-    float fraction;
-    Flag hit;
-    Command* command;
-    const Ray* original;
-    void* result;
-    void* next;
-    WorkInput work;
-    void* fixed;
-    RayVector fractions;
-    hkCpuWorldRayCastCollector() : fixed(0)
-    {
-        fraction = 1.0f;
-        hit = false;
-    }
-    virtual float ReleaseCollector(const hkpBroadPhaseHandle*, int);
-    virtual Flag ReportHit(unsigned long);
-    virtual Flag DidHit()
-    {
-        return hit;
-    }
-    virtual float GetHitFraction()
-    {
-        return fraction;
-    }
-    virtual float GetHitDistance(const hkAabbTree<hkAabbTreeData::RayQueryAabb>::Node*);
-    virtual float GetHitDistance(const hkAabbTree<hkAabbTreeData::QuantizedAabb>::Node*);
-};
 extern int DAT_011b3830[];
 Task __cdecl FUN_00d1bb50(const RayVector&, const RayVector&, const RayVector&, const RayVector&, const RayVector&,
                           const RayVector&, const RayVector&, const RayVector&, int);
@@ -1978,25 +1739,6 @@ void __cdecl FUN_00d1d530(const Input*, void*, int, const Task&,
                           hkAabbTreeQueryUtils<hkAabbTreeData::RayQueryAabb>::Collector**, float*);
 void FUN_00e2b070(const Input* input, BundleCommand* src, void* filter, RayVector& fractions, void*, void*, void*,
                   void*, int*);
-class Vec4
-{
-  public:
-    void operator=(const Vec4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void operator=(const __m128& q)
-    {
-        m_vComponents = q;
-    }
-    operator __m128() const
-    {
-        return m_vComponents;
-    }
-
-  private:
-    __m128 m_vComponents;
-};
 struct Bundle
 {
     Vec4 m_data[3];

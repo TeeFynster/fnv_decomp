@@ -1,6 +1,104 @@
 // bsmenu/tileimage.cpp: TileImage, FileFinder, BGSTextureSet, NiNode and more (7 functions)
 
-#include "tileimage_private.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/GO.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiTexture.h"
+#include "../../include/NiSourceTexture.h"
+#include "../../include/Setting.h"
+#include "../../include/NiGeometry.h"
+#include "../../include/BGSTextureSet.h"
+#include "../../include/BSShaderTextureSet.h"
+#include "../../include/BSTextureSet.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint2.h"
+#include "../../include/NiGeometryData.h"
+#include "../../include/NiTriShape.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/Tile.h"
+#include "../../include/TileImage.h"
+#include "../../include/TileShaderProperty.h"
+
+
+inline void NiTexture::IncRefCount()
+{
+    InterlockedIncrement((long*)&m_uiRefCount);
+}
+inline void NiTexture::DecRefCount()
+{
+    if (InterlockedDecrement((long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement((long*)&m_uiRefCount);
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement((long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+inline void NiNode::IncRefCount()
+{
+    InterlockedIncrement((long*)&m_uiRefCount);
+}
+inline void NiNode::DecRefCount()
+{
+    if (InterlockedDecrement((long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0)
+{
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::NiPointer(T* pkNew) : m_pObject(pkNew)
+{
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+
+template <class T> inline NiPointer<T>::operator T*() const
+{
+    return m_pObject;
+}
+template <class T> inline T* NiPointer<T>::operator->() const
+{
+    return m_pObject;
+}
+template <class T> __forceinline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+
+extern Setting g_011d33f0;
+typedef char tileimage_size_check[sizeof(TileImage) == 0x48 ? 1 : -1];
+typedef char tileimage_flags_check[offsetof(Tile, uiFlags) == 0x30 ? 1 : -1];
+typedef char tileimage_texture_check[offsetof(TileImage, spTexture) == 0x3c ? 1 : -1];
+class TextureReceiver
+{
+  public:
+    void FUN_004bc320();
+};
+class GlobalObject_00633c90
+{
+  public:
+    char data[4];
+};
+extern GlobalObject_00633c90 g_011ded3c;
+class TaskQueueInterface
+{
+  public:
+    static void CopyStringToBuffer(char*, unsigned int, const char*);
+    static int AppendStringToBuffer(char*, unsigned int, const char*);
+};
+
 
 // @fnv 0x00a20580
 Tile* TileImage::SetTraitValue(int trait, float value, const char* text)
@@ -45,29 +143,22 @@ BSShaderTextureSet* BGSTextureSet::BuildShaderTextureSet()
     BSShaderTextureSet* result = new BSShaderTextureSet;
     for (int i = 0; i < 6; ++i)
     {
-        const char* path = textures.GetTexturePath(i);
+        const char* path = GetTexture((BSShaderProperty::TextureTypeEnum)i);
         if (path && *path)
         {
             char szFullPath[260];
             TaskQueueInterface::CopyStringToBuffer(szFullPath, 260, "Data\\Textures\\");
-            strcat_s(szFullPath, 260, path);
-            result->SetTexturePath(i, szFullPath);
+            TaskQueueInterface::AppendStringToBuffer(szFullPath, 260, path);
+            result->SetTexture((BSShaderProperty::TextureTypeEnum)i, szFullPath);
         }
     }
     return result;
 }
 
-struct Interface
+// Exe 0x00a1f7d0: unit-local TileimageInterfaceView view used by this matched implementation.
+struct TileimageInterfaceView
 {
     static float __cdecl GetInterfaceFloat();
-};
-struct NiGlobalStringTable
-{
-    static char* __cdecl AddString(const char*);
-    static void DecRef(long* p)
-    {
-        InterlockedDecrement(p);
-    }
 };
 struct FileFinder;
 extern FileFinder* g_fileFinder;
@@ -82,65 +173,51 @@ struct FileFinder
 extern char* EmptyFS;
 int _strcpy_s(char*, unsigned int, const char*);
 int _strcat_s(char*, unsigned int, const char*);
+inline NiFixedString& NiFixedString::operator=(const char* pc)
+{
+    if (m_kHandle != pc)
+    {
+        char* kHandle = m_kHandle;
+        m_kHandle = NiGlobalStringTable::AddString(pc);
+        NiGlobalStringTable::DecRefCount(kHandle);
+    }
+    return *this;
+}
+inline const char* Setting::GetString()
+{
+    const char* r;
+    if (this)
+        r = *(const char**)&uValue;
+    else
+        r = 0;
+    return r;
+}
+inline GO& GO::operator=(void* pObject)
+{
+    if (m_pObject != pObject)
+    {
+        if (m_pObject)
+            ((NiTexture*)m_pObject)->DecRefCount();
+        m_pObject = pObject;
+        if (m_pObject)
+            ((NiTexture*)m_pObject)->IncRefCount();
+    }
+    return *this;
+}
+
 namespace L {
-struct Setting
-{
-    void* vtbl;
-    char* m_pString;
-    char* GetString()
-    {
-        char* r;
-        if (this)
-            r = m_pString;
-        else
-            r = 0;
-        return r;
-    }
-};
-struct NiFixedString
-{
-    char* m_kHandle;
-    NiFixedString(const char* s)
-    {
-        if (s == 0)
-            m_kHandle = EmptyFS;
-        else
-            m_kHandle = NiGlobalStringTable::AddString(s);
-    }
-    ~NiFixedString()
-    {
-        if (m_kHandle == EmptyFS)
-            return;
-        NiGlobalStringTable::DecRef((long*)(m_kHandle - 8));
-    }
-};
-struct NiTexture
-{
-    virtual void S0();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 struct NiTexturePtr
 {
     NiTexture* m_pObject;
     NiTexturePtr(NiTexture* p = 0)
     {
         m_pObject = p;
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
     ~NiTexturePtr()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     bool operator==(const NiTexture* p) const
@@ -157,12 +234,12 @@ void ResolveTexturePath(const char* apFilename, float* afScale, float afZoom, ch
 {
     if (!apFilename || !*apFilename || *apFilename == ' ')
         return;
-    float aspect = Interface::GetInterfaceFloat();
+    float aspect = TileimageInterfaceView::GetInterfaceFloat();
     *afScale = 1.0f;
     _strcpy_s(axOut, 260, "Data\\Textures\\");
     _strcat_s(axOut, 260, apFilename);
     L::NiTexturePtr sptex;
-    L::NiFixedString path(axOut);
+    NiFixedString path((const char*)axOut);
     fnv_NiStreamGetTexture(path.m_kHandle, &sptex);
     if (sptex == 0)
     {
@@ -175,153 +252,30 @@ void ResolveTexturePath(const char* apFilename, float* afScale, float afZoom, ch
                 if (FileFinder::GetSingleton()->GetFileLocation(axOut, 0, 6, 0xffffffff))
                     *afScale = 1.0f;
                 else
-                    _strcpy_s(axOut, 260, ((L::Setting*)&g_011d33f0)->GetString());
+                    _strcpy_s(axOut, 260, g_011d33f0.GetString());
             }
             else
             {
-                _strcpy_s(axOut, 260, ((L::Setting*)&g_011d33f0)->GetString());
+                _strcpy_s(axOut, 260, g_011d33f0.GetString());
             }
         }
     }
 }
 
 namespace fnv_00a1fa20 {
-struct NiFixedString
-{
-    bool Exists();
-    unsigned int GetLength();
-    unsigned int GetRefCount();
-    bool Equals(char*);
-    bool EqualsNoCase(char*);
-    bool Contains(char*);
-    bool HasSuffix(char*);
-    unsigned int QHandle();
-    void Init();
-    void* __vecDelDtor(unsigned int);
-    char* m_kHandle;
-};
 typedef char _sizecheck_NiFixedString[sizeof(NiFixedString) == 4 ? 1 : -1];
-struct BooleanFlagObject
-{
-    void* __vecDelDtor(unsigned int);
-    bool m_bFlag;
-};
-typedef char _sizecheck_AutoPauseFileCaching[sizeof(BooleanFlagObject) == 1 ? 1 : -1];
-struct AutoMemContext
-{
-    void Enter(int, bool, char*, int);
-    void Leave();
-    void* __vecDelDtor(unsigned int);
-    int m_eMemoryContext;
-    unsigned int m_pFileName;
-    int m_iLineNumber;
-};
-typedef char _sizecheck_AutoMemContext[sizeof(AutoMemContext) == 12 ? 1 : -1];
+typedef char _sizecheck_AutoMemContext[sizeof(AutoMemContext) == 4 ? 1 : -1];
 
-extern char* EmptyFS;
 extern __declspec(thread) int OM06_tlsMemContext;
-struct NiGlobalStringTable
-{
-    static char* __cdecl AddString(const char*);
-    static long* GetRealBufferStart(char* const& h)
-    {
-        return ((long*)h) - 2;
-    }
-    static long NiAtomicSubtract(long& v)
-    {
-        return InterlockedDecrement(&v);
-    }
-    static void DecRefCount(char*& h)
-    {
-        if (h == EmptyFS)
-            return;
-        NiAtomicSubtract(GetRealBufferStart(h)[0]);
-    }
-};
-struct OMFixedString : public NiFixedString
-{
-    OMFixedString(const char* pc)
-    {
-        if (pc == 0)
-            m_kHandle = EmptyFS;
-        else
-            m_kHandle = NiGlobalStringTable::AddString(pc);
-    }
-    ~OMFixedString()
-    {
-        NiGlobalStringTable::DecRefCount(m_kHandle);
-    }
-    OMFixedString& operator=(const char* pc)
-    {
-        if (m_kHandle != pc)
-        {
-            char* kHandle = m_kHandle;
-            m_kHandle = NiGlobalStringTable::AddString(pc);
-            NiGlobalStringTable::DecRefCount(kHandle);
-        }
-        return *this;
-    }
-};
-class OMTex
-{
-  public:
-    virtual void V0();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-class NiSourceTexture
-{
-  public:
-    static NiSourceTexture* __cdecl Create(const NiFixedString&, NiTexture::TextureFormatPreferences&, bool, bool);
-};
 class BSFileEntry;
 struct TextureFileEntrySetter
 {
     static void __cdecl SetTexture(NiTexture*, const BSFileEntry*);
 };
-struct Interface
+// Exe 0x00a1fa20: unit-local TileimageInterfaceView view used by this matched implementation.
+struct TileimageInterfaceView
 {
     static void __cdecl PrintDebugMessage(const char*, ...);
-};
-struct GO
-{
-    OMTex* m_pObject;
-    void operator=(void* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = (OMTex*)pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-    }
-};
-struct Helper62d0
-{
-    OMTex* m_pObject;
-    void* operator=(const void* ptr)
-    {
-        if (m_pObject != ((const Helper62d0*)ptr)->m_pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = ((const Helper62d0*)ptr)->m_pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return this;
-    }
 };
 class FileFinder;
 extern FileFinder* g_fileFinder;
@@ -342,45 +296,29 @@ extern NiTexture::TextureFormatPreferences DAT_011a9598;
 void* __cdecl _fnv_zlib_memset(void*, int, unsigned int);
 void __cdecl ResolveTexturePath(const char*, float&, float, char*);
 char* __cdecl FUN_00ec7750(const char*, const char*);
-class OMTexPtr
+void __cdecl fnv_NiStreamGetTexture(const char*, NiPointer<NiTexture>&);
+static inline int GetCurrentMemoryContext()
 {
-  public:
-    OMTex* m_pObject;
-    ~OMTexPtr()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    operator OMTex*() const
-    {
-        return m_pObject;
-    }
-};
-void __cdecl fnv_NiStreamGetTexture(const char*, OMTexPtr&);
-struct OMMemContext
+    return OM06_tlsMemContext;
+}
+static inline void SetCurrentMemoryContext(int context)
 {
-    int m_eMemoryContext;
-    static int GetCurrent()
-    {
-        return OM06_tlsMemContext;
-    }
-    static void SetCurrent(int i)
-    {
-        OM06_tlsMemContext = i;
-    }
-    OMMemContext(int iNew)
-    {
-        m_eMemoryContext = GetCurrent();
-        SetCurrent(iNew);
-    }
-    ~OMMemContext()
-    {
-        SetCurrent(m_eMemoryContext);
-    }
-};
+    OM06_tlsMemContext = context;
+}
+}  // namespace fnv_00a1fa20
+inline AutoMemContext::AutoMemContext(int context)
+{
+    m_eMemoryContext = (MEM_CONTEXT)fnv_00a1fa20::GetCurrentMemoryContext();
+    fnv_00a1fa20::SetCurrentMemoryContext(context);
+}
+inline AutoMemContext::~AutoMemContext()
+{
+    fnv_00a1fa20::SetCurrentMemoryContext(m_eMemoryContext);
+}
+namespace fnv_00a1fa20 {
 // @fnv 0x00a1fa20
-void __cdecl LoadTextureForFile(const char* apFilename, float& afScale, OMTexPtr& aspTexture, float afZoom,
-                                OMTexPtr apDataImage)
+void __cdecl LoadTextureForFile(const char* apFilename, float& afScale, NiPointer<NiTexture>& aspTexture, float afZoom,
+                                NiPointer<NiTexture> apDataImage)
 {
     if (!apDataImage)
     {
@@ -390,94 +328,56 @@ void __cdecl LoadTextureForFile(const char* apFilename, float& afScale, OMTexPtr
         ResolveTexturePath(apFilename, afScale, afZoom, acTexturePath);
         if (acTexturePath[0])
         {
-            OMFixedString path(acTexturePath);
+            NiFixedString path((const char*)acTexturePath);
             fnv_NiStreamGetTexture(path.m_kHandle, aspTexture);
             if (!aspTexture && FileFinder::GetSingleton()->GetFileLocation(acTexturePath, 0, 0, 0xffffffff))
             {
-                path = acTexturePath;
-                OMMemContext tempMemContext(0xd);
+                path = (const char*)acTexturePath;
+                AutoMemContext tempMemContext(0xd);
                 ((GO*)&aspTexture)->operator=(NiSourceTexture::Create(path, DAT_011a9598, true, false));
                 if (aspTexture)
                 {
                     if (!FUN_00ec7750(acTexturePath, "oading\\load_"))
-                        TextureFileEntrySetter::SetTexture((NiTexture*)(OMTex*)aspTexture, 0);
+                        TextureFileEntrySetter::SetTexture((NiTexture*)aspTexture, 0);
                 }
                 else
                 {
-                    Interface::PrintDebugMessage("*** ERROR: Could not create ptexture '%s'!", acTexturePath);
+                    TileimageInterfaceView::PrintDebugMessage("*** ERROR: Could not create ptexture '%s'!", acTexturePath);
                 }
             }
         }
     }
     else
     {
-        ((Helper62d0*)&aspTexture)->operator=(&apDataImage);
+        aspTexture = apDataImage;
     }
     return;
 }
 }  // namespace fnv_00a1fa20
 
-namespace ImageNodeBuild {
-template <class T> class NiPointer
+inline void NiNode::SetExtraBuffer(void* buffer)
 {
-  public:
-    T* m_pObject;
-    inline NiPointer(T* object = 0)
+    ((NiGeometry*)this)->m_spShader = (NiShader*)buffer;
+}
+
+namespace ImageNodeBuild {
+extern void* __cdecl FUN_00aa13e0(unsigned int);
+}
+
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer<T>& kSrc)
+{
+    if (m_pObject != kSrc.m_pObject)
     {
-        m_pObject = object;
-        if (m_pObject)
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = kSrc.m_pObject;
+        if (m_pObject != 0)
             m_pObject->IncRefCount();
     }
-    __forceinline ~NiPointer()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    inline void Release()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    inline bool operator!() const
-    {
-        return m_pObject == 0;
-    }
-    NiPointer<T>& operator=(T*);
-    NiPointer<T>& operator=(const NiPointer<T>&);
-    inline operator T*() const
-    {
-        return m_pObject;
-    }
-    inline T* operator->() const
-    {
-        return m_pObject;
-    }
-};
+    return *this;
+}
 
-extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long*);
-extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long*);
-
-struct NiObject
-{
-    virtual void OnObject();
-    virtual void DeleteThis();
-    long referenceCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&referenceCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&referenceCount) == 0)
-            DeleteThis();
-    }
-};
-
-struct GeometryData
-{
-    void FUN_00a67050(int);
-};
-struct NiNode;
+namespace ImageNodeBuild {
 struct PropertyList
 {
     void* head;
@@ -485,185 +385,37 @@ struct PropertyList
     unsigned int count;
     void FUN_00439fd0(const NiPointer<NiNode>&);
 };
-struct NiNode : NiObject
-{
-    virtual void vfn_08();
-    virtual void vfn_0c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual int GetPropertyType();
-    virtual void vfn_90();
-    virtual void vfn_94();
-    virtual void vfn_98();
-    virtual void vfn_9c();
-    virtual void vfn_a0();
-    virtual void vfn_a4();
-    virtual void vfn_a8();
-    virtual void vfn_ac();
-    virtual void vfn_b0();
-    virtual void vfn_b4();
-    virtual void vfn_b8();
-    virtual void vfn_bc();
-    virtual void vfn_c0();
-    virtual void vfn_c4();
-    virtual void vfn_c8();
-    virtual void vfn_cc();
-    virtual void vfn_d0();
-    virtual void vfn_d4();
-    virtual void vfn_d8();
-    virtual void AttachChildInAvailableSlot(NiNode*, bool);
-    void AssignFixedString(const L::NiFixedString&);
-    void SetExtraDataName(void*);
-    void FUN_00a5a040();
-    void FUN_00439410(NiNode*);
-    GeometryData* GetGeometryData()
-    {
-        return geometryData;
-    }
-    void SetExtraBuffer(void* buffer)
-    {
-        m_pExtraBuffer = buffer;
-    }
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    PropertyList properties;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    GeometryData* geometryData;
-    unsigned int unk0bc;
-    void* m_pExtraBuffer;
-};
+}  // namespace ImageNodeBuild
 inline void NiNode::FUN_00439410(NiNode* property)
 {
-    if (property->GetPropertyType() < 7)
+    NiProperty* typedProperty = (NiProperty*)property;
+    if (typedProperty->GetType() < 7)
     {
         NiPointer<NiNode> heldProperty(property);
-        properties.FUN_00439fd0(heldProperty);
+        ((ImageNodeBuild::PropertyList*)&m_kPropertyList)->FUN_00439fd0(heldProperty);
     }
 }
-class TileShaderProperty : public NiObject
+namespace ImageNodeBuild {
+extern MemoryManager g_GameAllocator;
+}  // namespace ImageNodeBuild
+
+inline NiPoint3::NiPoint3(float vx, float vy, float vz) : x(vx), y(vy), z(vz)
+{}
+
+__forceinline void* __cdecl operator new[](size_t n)
 {
-};
-template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* object)
-{
-    if (m_pObject != object)
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-        m_pObject = object;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    return *this;
+    return ImageNodeBuild::g_GameAllocator.FUN_00aa3e40((unsigned)n);
 }
-struct TraitArray
+
+inline NiPoint2::NiPoint2(float vx, float vy) : x(vx), y(vy)
+{}
+
+__forceinline void* NiPoint2::operator new[](size_t n)
 {
-    void* vtable;
-    void* buffer;
-    unsigned int size;
-    unsigned int reserved;
-};
-struct StringValue
-{
-    char* pString;
-    unsigned short length;
-    unsigned short maxLength;
-};
-struct GameAllocator
-{
-    void* FUN_00aa3e40(unsigned int);
-};
-extern GameAllocator g_GameAllocator;
-struct NiPoint3
-{
-    static __forceinline void* operator new[](size_t n)
-    {
-        return g_GameAllocator.FUN_00aa3e40((unsigned)n);
-    }
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float vx, float vy, float vz) : x(vx), y(vy), z(vz)
-    {}
-};
-struct NiUV
-{
-    static __forceinline void* operator new[](size_t n)
-    {
-        return g_GameAllocator.FUN_00aa3e40((unsigned)n);
-    }
-    float u, v_r;
-    NiUV()
-    {}
-    NiUV(float x, float y) : u(x), v_r(y)
-    {}
-};
+    return ImageNodeBuild::g_GameAllocator.FUN_00aa3e40((unsigned)n);
+}
+
+namespace ImageNodeBuild {
 extern void* __cdecl FUN_00aa1070(unsigned int);
 extern void* __cdecl FUN_00aa13e0(unsigned int);
 extern void* __cdecl FUN_00b55560(unsigned int);
@@ -680,15 +432,7 @@ struct FUN_00c5cf30
     {
         return FUN_00aa13e0(0xd4);
     }
-    FUN_00c5cf30(int, NiPoint3*, NiPoint3*, int, NiUV*, int, int, int, unsigned short*, int, int, unsigned int);
-};
-struct FUN_00a74410
-{
-    static __forceinline void* operator new(size_t)
-    {
-        return FUN_00aa13e0(0xc4);
-    }
-    FUN_00a74410(int, NiPoint3*, NiPoint3*, int, NiUV*, int, int, int, unsigned short*);
+    FUN_00c5cf30(int, NiPoint3*, NiPoint3*, int, NiPoint2*, int, int, int, unsigned short*, int, int, unsigned int);
 };
 static __forceinline unsigned int GeometryTime()
 {
@@ -696,31 +440,8 @@ static __forceinline unsigned int GeometryTime()
     FUN_00706e00(FUN_00ec62c0());
     return FUN_00ec62c0();
 }
-struct FUN_00bb7c30
-{
-    static __forceinline void* operator new(size_t)
-    {
-        return FUN_00aa13e0(0xb0);
-    }
-    FUN_00bb7c30(int);
-};
-struct FUN_00a5ecb0
-{
-    static __forceinline void* operator new(size_t)
-    {
-        return FUN_00aa13e0(0xac);
-    }
-    FUN_00a5ecb0(int);
-};
 extern char DAT_010954cc[];
-struct FUN_00a7b2e0 : NiObject
-{
-    char* name;
-    FUN_00a7b2e0();
-    ~FUN_00a7b2e0();
-    void AssignFixedString(const L::NiFixedString&);
-};
-struct FUN_00a1f610 : FUN_00a7b2e0
+struct FUN_00a1f610 : NiExtraData
 {
     void* tile;
     NiNode* node;
@@ -730,46 +451,27 @@ struct FUN_00a1f610 : FUN_00a7b2e0
     }
     FUN_00a1f610(void* owner, NiNode* model) : tile(owner), node(model)
     {
-        AssignFixedString(L::NiFixedString(DAT_010954cc));
+        SetName(NiFixedString((const char*)DAT_010954cc));
     }
 };
 extern void* __cdecl FUN_00a5b690(const char*);
 extern char kGeometryName[];
 static __forceinline void GD(NiNode* n)
 {
-    n->GetGeometryData()->FUN_00a67050(0);
+    ((NiGeometry*)n)->m_spModelData->FUN_00a67050(0);
 }
 static __forceinline NiNode* AsN(NiNode* p)
 {
     return p;
 }
 
-struct TileImageShim
-{
-    void* vtable;
-    NiTPointerList<Tile*> m_kChildTileList;
-    BSSimpleArray<Tile::Value*, 8> m_kValues;
-    BSStringT<char> StringProvider;
-    Tile* pParent;
-    NiPointer<NiNode> m_pRenderedNodeEntry;
-    unsigned int uiFlags;
-    bool m_bFlagAfterUiFlags;
-    bool m_bSpeechChallengeFailure;
-    float fScale;
-    NiPointer<NiTexture> spTexture;
-    NiPointer<TileShaderProperty> m_spShaderProperty;
-    bool m_bTextureLoaded;
-    NiNode* GetNiNode();
-    bool IsTraitNonZero(unsigned int);
-    float FUN_00a011b0(unsigned int, int);
-    void FUN_00a037e0(unsigned int, float);
-    void SetChangeFlag(unsigned int);
-    NiNode* FUN_00a1fd50();
-};
+}  // namespace ImageNodeBuild
+
 // Builds a quad geometry object, attaches it beneath a node returned by FUN_00a089c0() or a fallback, and returns the containing node.
 // @fnv 0x00a1fd50
-NiNode* TileImageShim::FUN_00a1fd50()
+NiNode* TileImage::CalculateNode()
 {
+    using namespace ImageNodeBuild;
     NiNode* cnt_lgft;
     cnt_lgft = GetNiNode();
     NiPointer<NiNode> ptr_k;
@@ -778,8 +480,8 @@ NiNode* TileImageShim::FUN_00a1fd50()
     vertices_nriq = new NiPoint3[4];
     void* s_xx;
     s_xx = 0;
-    NiUV* extraBuffer_tjnslw;
-    extraBuffer_tjnslw = new NiUV[4];
+    NiPoint2* extraBuffer_tjnslw;
+    extraBuffer_tjnslw = new NiPoint2[4];
     unsigned short* indices_tyg;
     indices_tyg = static_cast<unsigned short*>(FUN_00aa1070(6 * sizeof(unsigned short)));
     NiPoint3* previous_zphzqj;
@@ -796,29 +498,30 @@ NiNode* TileImageShim::FUN_00a1fd50()
     indices_tyg[4] = 1;
     indices_tyg[5] = 3;
 
-    extraBuffer_tjnslw[0] = NiUV(0.0f, 0.0f);
-    extraBuffer_tjnslw[1] = NiUV(0.0f, 1.0f);
-    extraBuffer_tjnslw[2] = NiUV(1.0f, 0.0f);
-    extraBuffer_tjnslw[3] = NiUV(1.0f, 1.0f);
+    extraBuffer_tjnslw[0] = NiPoint2(0.0f, 0.0f);
+    extraBuffer_tjnslw[1] = NiPoint2(0.0f, 1.0f);
+    extraBuffer_tjnslw[2] = NiPoint2(1.0f, 0.0f);
+    extraBuffer_tjnslw[3] = NiPoint2(1.0f, 1.0f);
 
     if (IsTraitNonZero(0xfae))
     {
-        ptr_k =
+        ((GO*)&ptr_k)->operator=(
             (NiNode*)new FUN_00c5cf30(4, vertices_nriq, previous_zphzqj, 0, extraBuffer_tjnslw, 1, 0, 2, indices_tyg, 0,
-                                      0, (FUN_00706df0(), FUN_00706e00(FUN_00ec62c0()), FUN_00ec62c0()));
+                                      0, (FUN_00706df0(), FUN_00706e00(FUN_00ec62c0()), FUN_00ec62c0())));
         m_bTextureLoaded = true;
     }
     else
     {
-        ptr_k =
-            (NiNode*)new FUN_00a74410(4, vertices_nriq, previous_zphzqj, 0, extraBuffer_tjnslw, 1, 0, 2, indices_tyg);
+        ((GO*)&ptr_k)->operator=(
+            (NiNode*)new NiTriShape(4, vertices_nriq, previous_zphzqj, 0, extraBuffer_tjnslw, 1, 0, 2, indices_tyg));
         m_bTextureLoaded = false;
     }
 
-    ptr_k->AssignFixedString(L::NiFixedString(kGeometryName));
+    ptr_k->SetName(NiFixedString((const char*)kGeometryName));
     GD(ptr_k);
 
-    m_spShaderProperty = (TileShaderProperty*)(new FUN_00bb7c30(0));
+    ((GO*)&m_spShaderProperty)->operator=(
+        new TileShaderProperty(false));
     ptr_k->FUN_00439410((NiNode*)(TileShaderProperty*)m_spShaderProperty);
 
     void* v_r;
@@ -827,13 +530,13 @@ NiNode* TileImageShim::FUN_00a1fd50()
     v_r = kIter_bw;
     ptr_k->SetExtraBuffer(v_r);
 
-    m_pRenderedNodeEntry = (NiNode*)(new FUN_00a5ecb0(0));
-    m_pRenderedNodeEntry->AttachChildInAvailableSlot(ptr_k, true);
+    ((GO*)&m_pRenderedNodeEntry)->operator=(new NiNode(0));
+    m_pRenderedNodeEntry->AttachChildInAvailableSlot((NiAVObject*)(NiNode*)ptr_k, true);
     if (0 == cnt_lgft)
         cnt_lgft = (NiNode*)FUN_00706d30();
-    cnt_lgft->AttachChildInAvailableSlot(m_pRenderedNodeEntry, true);
+    cnt_lgft->AttachChildInAvailableSlot((NiAVObject*)(NiNode*)m_pRenderedNodeEntry, true);
 
-    m_pRenderedNodeEntry->AssignFixedString(L::NiFixedString(StringProvider.pString));
+    m_pRenderedNodeEntry->SetName(NiFixedString((const char*)StringProvider.pString));
     AttachFaceGenAnimationData(ptr_k);
     m_pRenderedNodeEntry->FUN_00a5a040();
     FUN_00707930(1);
@@ -845,6 +548,4 @@ NiNode* TileImageShim::FUN_00a1fd50()
         SetChangeFlag(0x100);
     SetChangeFlag(0x3d);
     return (NiNode*)m_pRenderedNodeEntry;
-}
-
 }

@@ -2,6 +2,7 @@
 #ifndef FNV_HIGHACTORCULLER_DECLS_H
 #define FNV_HIGHACTORCULLER_DECLS_H
 
+#include "layout_support.h"
 #include "NiPoint3.h"
 
 class NiAVObject;

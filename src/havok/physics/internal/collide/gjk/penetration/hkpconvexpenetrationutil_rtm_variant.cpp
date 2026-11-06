@@ -1,27 +1,14 @@
+
 // src/havok/physics/internal/collide/gjk/penetration/hkpconvexpenetrationutil_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/internal/collide/gjk/penetration/hkpconvexpenetrationutil.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 
 // src/havok/physics/internal/collide/gjk/penetration/hkpconvexpenetrationutil.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/gjk/penetration/hkpconvexpenetrationutil.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-struct __declspec(align(16)) hkVector4
-{
-    float x, y, z, w;
-    void operator=(const hkVector4& o)
-    {
-        *(__m128*)&x = *(const __m128*)&o.x;
-    }
-};
+#include "../../../../../../../include/hkTransform.h"
+
+#include "../../../../../../../include/hkVector4.h"
+
 struct Entry
 {
     hkVector4 m_iThirdValue;
@@ -77,7 +64,6 @@ extern "C"
 {
     __m128 _mm_sub_ps(__m128, __m128);
     __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
     __m128 _mm_add_ss(__m128, __m128);
     void _mm_store_ss(float*, __m128);
 }
@@ -233,14 +219,10 @@ struct S_00dfaac0_MonitorStream
         }
     }
 };
-struct S_00dfaac0_Transform
-{
-    float m[16];
-};
 struct __declspec(align(16)) S_00dfaac0_Penetration
 {
     int unk00;
-    S_00dfaac0_Penetration(int a, int b, const S_00dfaac0_Transform& t, float f, int c, int d, int e, int g);
+    S_00dfaac0_Penetration(int a, int b, const hkTransform& t, float f, int c, int d, int e, int g);
     int FUN_00dfa940(int out);
     int unk04;
     int unk08;
@@ -270,8 +252,8 @@ struct __declspec(align(16)) S_00dfaac0_Penetration
     int unk68;
     int unk6C;
 };
-int __cdecl FUN_00e2db70(int a, int b, const S_00dfaac0_Transform& t, int c, int d, int out);
-int __cdecl TestPenetration(int a, int b, const S_00dfaac0_Transform& t, float f, int c, int d, int e, int g, int out);
+int __cdecl FUN_00e2db70(int a, int b, const hkTransform& t, int c, int d, int out);
+int __cdecl TestPenetration(int a, int b, const hkTransform& t, float f, int c, int d, int e, int g, int out);
 extern "C" void _mm_store_ps(float*, __m128);
 extern "C" __m128 _mm_load_ps(const float*);
 extern "C"
@@ -281,7 +263,6 @@ extern "C"
 
     __m128 _mm_mul_ps(__m128, __m128);
     __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
     __m128 _mm_xor_ps(__m128, __m128);
     __m128 _mm_set_ps1(float);
 }
@@ -315,18 +296,6 @@ struct LocalStruct70
     hkVector4 m_v0;
     hkVector4 m_v1;
     float m_f;
-};
-struct hkTransform
-{
-    hkVector4 m_rotation[3];
-    hkVector4 m_vTranslation;
-    void operator=(const hkTransform& o)
-    {
-        *(__m128*)this = *(const __m128*)&o.m_rotation[0];
-        m_rotation[1] = o.m_rotation[1];
-        m_rotation[2] = o.m_rotation[2];
-        m_vTranslation = o.m_vTranslation;
-    }
 };
 struct WorkObject
 {

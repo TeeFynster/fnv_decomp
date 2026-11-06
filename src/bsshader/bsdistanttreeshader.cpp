@@ -1,6 +1,48 @@
 // bsshader/bsdistanttreeshader.cpp: ZTree, This, BSDistantTreeShaderPasses, GeomShader (14 functions)
 
+#include <new>
+
+#define FNV64_NIPOINTER_INLINE_BODIES
+#include "../../include/BSShader.h"
+#include "../../include/NiD3DDefaultShader.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiD3DShader.h"
+#include "../../include/NiD3DShaderConstantMap.h"
+#include "../../include/NiD3DShaderDeclaration.h"
+#include "../../include/NiD3DShaderInterface.h"
+#include "../../include/NiShader.h"
+#include "../../include/NiShaderConstantMap.h"
+#include "../../include/NiShaderDeclaration.h"
+#include "../../include/NiColorA.h"
+#include "../../include/NiD3DVertexShader.h"
+#include "../../include/NiD3DPixelShader.h"
+
+// Use the shared reference object throughout this translation unit.
+#define FNV_NIREFOBJECT_H
 #include "bsdistanttreeshader_decls.h"
+
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+inline void NiD3DVertexShader::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DVertexShader::DecRefCount() { NiRefObject::DecRefCount(); }
+inline void NiD3DPixelShader::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiD3DPixelShader::DecRefCount() { NiRefObject::DecRefCount(); }
+
+inline void NiD3DPass::IncRefCount() { ++m_uiRefCount; }
+inline void NiD3DPass::DecRefCount()
+{
+    if (--m_uiRefCount == 0)
+        FUN_00e80190();
+}
+inline NiColorA::NiColorA(float red, float green, float blue, float alpha)
+    : r(red), g(green), b(blue), a(alpha) {}
 
 extern int g_012007bc;
 
@@ -110,10 +152,10 @@ struct ShPtr
     {
         if (m_pObject != p)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = p;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
@@ -167,56 +209,13 @@ inline void FreeTreeMemory(void* ptr)
 {
     g_memoryManager.Deallocate(ptr);
 }
-struct TreePass
+struct FUN_00bb6300 : BSShader
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int refCount;
-    void FUN_00e80190();
-    void IncRefCount()
-    {
-        ++refCount;
-    }
-    void DecRefCount()
-    {
-        if (--refCount == 0)
-            FUN_00e80190();
-    }
-};
-struct TreeShaderBase : BSShader
-{
-    virtual ~TreeShaderBase();
-};
-struct FUN_00bb6300 : TreeShaderBase
-{
-    NiPointer<TreePass> passes[2];
+    NiPointer<NiD3DPass> passes[2];
     NiPointer<ShRefObj> vertex[1];
     NiPointer<ShRefObj> pixels[2];
     NiPointer<ShRefObj> decl;
-    RgbaColor fog[2];
+    NiColorA fog[2];
     unsigned int count;
     void* instances;
     virtual ~FUN_00bb6300();
@@ -369,15 +368,6 @@ void BB6B90ParticleShader::CopyParticlesFromSource(BB6B90ParticleSource* source)
 
 extern MemoryManager g_memoryManager;
 
-class DTPass : public NiRefObject
-{
-};
-class DTVertexShader : public NiRefObject
-{
-};
-class DTPixelShader : public NiRefObject
-{
-};
 
 struct DistantTreeInstance
 {
@@ -401,59 +391,40 @@ struct DistantTreeInstance
     }
 };
 
+
+
 struct DistantTreeFogColors
 {
-    RgbaColor colors[2];
-    DistantTreeFogColors()
+    // Construct the shared colors in a loop, as the original array initialization does.
+    __declspec(align(4)) unsigned char storage[2 * sizeof(NiColorA)];
+    __forceinline DistantTreeFogColors()
     {
-        RgbaColor* p = colors;
+        NiColorA* p = reinterpret_cast<NiColorA*>(storage);
         int count = 1;
         do
         {
-            p->r = 0.0f;
-            p->g = 0.0f;
-            p->b = 0.0f;
-            p->a = 0.0f;
+            __assume(p != 0);
+            new (p) NiColorA();
             ++p;
         } while (--count >= 0);
     }
 };
 
-struct DistantTreeColor
-{
-    float r;
-    float g;
-    float b;
-    float a;
-    __forceinline DistantTreeColor()
-    {
-        r = 0.0f;
-        g = 0.0f;
-        b = 0.0f;
-        a = 0.0f;
-    }
-};
 
-struct DTShaderBase : public BSShader
+struct FUN_00bb6c30 : public BSShader
 {
-    DTShaderBase();
-    virtual ~DTShaderBase();
-};
-
-struct FUN_00bb6c30 : public DTShaderBase
-{
-    NiPointer<DTPass> spRenderPass[2];
-    NiPointer<DTVertexShader> m_spTreeVertexShader[1];
-    NiPointer<DTPixelShader> m_spPixelShaderVariants[2];
+    NiPointer<NiD3DPass> spRenderPass[2];
+    NiPointer<NiD3DVertexShader> m_spTreeVertexShader[1];
+    NiPointer<NiD3DPixelShader> m_spPixelShaderVariants[2];
     NiPointer<NiD3DVertexDeclaration> m_spVertexDeclaration;
     DistantTreeFogColors m_kFogColors;
     unsigned int m_uiInstanceCount;
     DistantTreeInstance* m_pInstances;
-    DistantTreeColor m_kColor1;
-    DistantTreeColor m_kColor2;
-    DistantTreeColor m_kColor3;
-    DistantTreeColor m_kColor4;
-    DistantTreeColor m_kColor5;
+    NiColorA m_kColor1;
+    NiColorA m_kColor2;
+    NiColorA m_kColor3;
+    NiColorA m_kColor4;
+    NiColorA m_kColor5;
 
     FUN_00bb6c30(NiD3DVertexDeclaration* pDecl);
     virtual ~FUN_00bb6c30();
@@ -464,7 +435,7 @@ struct FUN_00bb6c30 : public DTShaderBase
 // @fnv 0x00bb6c30
 FUN_00bb6c30::FUN_00bb6c30(NiD3DVertexDeclaration* pDecl)
 {
-    m_iPassId = 25;
+    iShaderType = 25;
     m_spVertexDeclaration = pDecl;
     m_pInstances = new DistantTreeInstance[DistantTreeInstance::GetMaxCount()];
 }
@@ -685,14 +656,6 @@ FUN_00bb6c30* CreateTreeShader()
 }
 }  // namespace fnv_00bb6e30
 
-struct ZColor
-{
-    float r, g, b, a;
-    ZColor()
-    {}
-    ZColor(float x, float y, float z, float w) : r(x), g(y), b(z), a(w)
-    {}
-};
 struct ZVec
 {
     float x, y, z;
@@ -1097,14 +1060,14 @@ struct ZSky
     int unk148;
     int unk14C;
     int unk150;
-    ZColor unk154;
+    NiColorA unk154;
 };
 ZFog* __cdecl FUN_00b55520(int);
 ZRenderer* __cdecl FUN_00b4f5c0();
 ZSky* __cdecl FUN_00b4f5d0();
 extern unsigned char DAT_011f91c4;
 extern unsigned int DAT_011f91b8;
-extern ZColor DAT_011a9bd0;
+extern NiColorA DAT_011a9bd0;
 struct ZTree
 {
     int unk00;
@@ -1140,9 +1103,9 @@ struct ZTree
     int unk78;
     int unk7C;
     int unk80;
-    ZColor unk84, unk94;
+    NiColorA unk84, unk94;
     int unkA4, unkA8;
-    ZColor unkAC, unkBC, unkCC;
+    NiColorA unkAC, unkBC, unkCC;
     void UpdateLighting(int);
 };
 // Sets the tree's fog and ambient/directional light colors from the current fog, sky, or scene light, depending on DAT_011f91b8.
@@ -1158,13 +1121,13 @@ void ZTree::UpdateLighting(int arg)
         float power = fog->unk60;
         if (fFogEnd == 0.0f && fFogStart == 0.0f)
         {
-            unk84 = ZColor(500000.0f, 0.0f, power, 0.0f);
+            unk84 = NiColorA(500000.0f, 0.0f, power, 0.0f);
             unk94 = DAT_011a9bd0;
         }
         else
         {
-            unk84 = ZColor(fFogEnd, fFogEnd - fFogStart, power, 0.0f);
-            unk94 = ZColor(fogColor.x, fogColor.y, fogColor.z, 1.0f);
+            unk84 = NiColorA(fFogEnd, fFogEnd - fFogStart, power, 0.0f);
+            unk94 = NiColorA(fogColor.x, fogColor.y, fogColor.z, 1.0f);
         }
     }
     if (DAT_011f91b8 == 15)
@@ -1180,31 +1143,20 @@ void ZTree::UpdateLighting(int arg)
         ZVec lightDir = light->unkF0;
         lightDir.FUN_004a0c10();
         ZVec ambient = light->unkC8;
-        unkAC = ZColor(ambient.x, ambient.y, ambient.z, 1.0f);
+        unkAC = NiColorA(ambient.x, ambient.y, ambient.z, 1.0f);
         ambient = light->unkD4;
-        unkCC = ZColor(ambient.x, ambient.y, ambient.z, 1.0f);
-        unkBC = ZColor(-lightDir.x, -lightDir.y, -lightDir.z, 1.0f);
+        unkCC = NiColorA(ambient.x, ambient.y, ambient.z, 1.0f);
+        unkBC = NiColorA(-lightDir.x, -lightDir.y, -lightDir.z, 1.0f);
     }
 }
 
 extern unsigned int DAT_012007b8;
 extern char DAT_01011584;
 
-struct Obj
-{
-    static void* operator new(unsigned int size);
-    Obj(int a, int b);
-    virtual void Slot0();
-    virtual void DeleteThis();
-    virtual int SetParam(const char* name, int a2, int a3, int a4, int a5, const void* a6, int a7, int a8, void* a9,
-                         int a10);
-    unsigned int m_uiRefCount;
-    char pad08[0x44 - 8];
-};
 
-static void AssignRef(Obj*& slot, Obj* nobj)
+static void AssignRef(NiD3DShaderConstantMap*& slot, NiD3DShaderConstantMap* nobj)
 {
-    Obj* old = slot;
+    NiD3DShaderConstantMap* old = slot;
     if (old != nobj)
     {
         if (old && InterlockedDecrement((long*)((char*)old + 4)) == 0)
@@ -1218,10 +1170,10 @@ static void AssignRef(Obj*& slot, Obj* nobj)
 struct This
 {
     char pad00[0x18];
-    int m_18;
+    unsigned int m_18;
     char pad1c[0x30 - 0x1c];
-    Obj* m_30;
-    Obj* m_34;
+    NiD3DShaderConstantMap* m_30;
+    NiD3DShaderConstantMap* m_34;
     char pad38[0x84 - 0x38];
     char m_84[0xa8 - 0x84];
     void* m_a8;
@@ -1232,35 +1184,29 @@ struct This
     void InitShaderParams();
 };
 
-// Creates the two Obj instances if missing and, for the second, registers the WorldViewProjTranspose, fog, instances and light shader parameters.
+// Creates the two NiD3DShaderConstantMap instances if missing and, for the second, registers the WorldViewProjTranspose, fog, instances and light shader parameters.
 // @fnv 0x00bb6f40
 void This::InitShaderParams()
 {
     if (this->m_30 == 0)
     {
-        Obj* nobj = new Obj(this->m_18, 2);
+        NiD3DShaderConstantMap* nobj = new NiD3DShaderConstantMap(this->m_18, 2u);
         AssignRef(this->m_30, nobj);
     }
     if (this->m_34 == 0)
     {
-        Obj* nobj = new Obj(this->m_18, 0);
+        NiD3DShaderConstantMap* nobj = new NiD3DShaderConstantMap(this->m_18, 0u);
         AssignRef(this->m_34, nobj);
-        this->m_34->SetParam("WorldViewProjTranspose", 0x20000009, 0, 0, 4, 0, 0, 0, 0, 0);
-        this->m_34->SetParam("fog", 0x10000009, 0, 4, 2, &DAT_01011584, 0x20, 4, &this->m_84, 0);
-        this->m_34->SetParam("instances", 0x10000009, 0, 9, DAT_012007b8 + DAT_012007b8, &DAT_01011584,
+        this->m_34->SetConstant("WorldViewProjTranspose", 0x20000009, 0, 0, 4, 0, 0, 0, 0, 0);
+        this->m_34->SetConstant("fog", 0x10000009, 0, 4, 2, &DAT_01011584, 0x20, 4, &this->m_84, 0);
+        this->m_34->SetConstant("instances", 0x10000009, 0, 9, DAT_012007b8 + DAT_012007b8, &DAT_01011584,
                              DAT_012007b8 << 5, 4, this->m_a8, 0);
-        this->m_34->SetParam("Diffuse Light direction", 0x10000007, 0, 6, 1, &DAT_01011584, 0x10, 4, &this->m_bc, 0);
-        this->m_34->SetParam("Diffuse Light color", 0x10000007, 0, 7, 1, &DAT_01011584, 0x10, 4, &this->m_cc, 0);
-        this->m_34->SetParam("ambient color", 0x10000007, 0, 8, 1, &DAT_01011584, 0x10, 4, &this->m_ac, 0);
+        this->m_34->SetConstant("Diffuse Light direction", 0x10000007, 0, 6, 1, &DAT_01011584, 0x10, 4, &this->m_bc, 0);
+        this->m_34->SetConstant("Diffuse Light color", 0x10000007, 0, 7, 1, &DAT_01011584, 0x10, 4, &this->m_cc, 0);
+        this->m_34->SetConstant("ambient color", 0x10000007, 0, 8, 1, &DAT_01011584, 0x10, 4, &this->m_ac, 0);
     }
 }
 
-class NiD3DVertexShader : public NiRefObject
-{
-};
-class NiD3DPixelShader : public NiRefObject
-{
-};
 
 // Texture stage: pooled object, plain (non-atomic) refcount at +0x60.
 struct TreeTextureStage : public BeamStage
@@ -1301,40 +1247,13 @@ struct TreeTextureStage : public BeamStage
     }
 };
 
-struct TreePassData : public NiD3DPass
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int m_uiField14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    NiPointer<NiD3DPixelShader> m_spPixelShaderObject;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    NiPointer<NiD3DVertexShader> m_spVertexShaderObject;
-};
 
 struct BSDistantTreeShaderPasses : public BSDistantTreeShader
 {
     bool FUN_00bb64a0();
-    TreePassData* GetPassData(int i)
+    NiD3DPass* GetPassData(int i)
     {
-        return (TreePassData*)(NiD3DPass*)spRenderPass[i];
+        return (NiD3DPass*)spRenderPass[i];
     }
 };
 
@@ -1347,18 +1266,18 @@ bool BSDistantTreeShaderPasses::FUN_00bb64a0()
     BeamStage::CreateNewStage((NiPointer<BeamStage>&)spStage);
     ConfigureBeamStage(spStage, 0, 3, 2, true);
     spStage->FUN_00e7def0(1);
-    spRenderPass[0]->FUN_00e802b0(GetPassData(0)->m_uiField14, spStage);
-    GetPassData(0)->m_spVertexShaderObject = (NiD3DVertexShader*)m_spTreeVertexShader;
-    GetPassData(0)->m_spPixelShaderObject = (NiD3DPixelShader*)m_spPixelShaderVariants[0];
+    spRenderPass[0]->FUN_00e802b0(GetPassData(0)->m_uiCurrentStage, spStage);
+    GetPassData(0)->m_spVertexShader = (NiD3DVertexShader*)m_spTreeVertexShader;
+    GetPassData(0)->m_spPixelShader = (NiD3DPixelShader*)m_spPixelShaderVariants[0];
 
     NiD3DPass::CreateD3DPass(spRenderPass[1]);
     spStage = 0;
     BeamStage::CreateNewStage((NiPointer<BeamStage>&)spStage);
     ConfigureBeamStage(spStage, 0, 3, 2, true);
     spStage->FUN_00e7def0(1);
-    spRenderPass[1]->FUN_00e802b0(GetPassData(1)->m_uiField14, spStage);
-    GetPassData(1)->m_spVertexShaderObject = (NiD3DVertexShader*)m_spTreeVertexShader;
-    GetPassData(1)->m_spPixelShaderObject = (NiD3DPixelShader*)m_spPixelShaderVariants[1];
+    spRenderPass[1]->FUN_00e802b0(GetPassData(1)->m_uiCurrentStage, spStage);
+    GetPassData(1)->m_spVertexShader = (NiD3DVertexShader*)m_spTreeVertexShader;
+    GetPassData(1)->m_spPixelShader = (NiD3DPixelShader*)m_spPixelShaderVariants[1];
 
     return true;
 }

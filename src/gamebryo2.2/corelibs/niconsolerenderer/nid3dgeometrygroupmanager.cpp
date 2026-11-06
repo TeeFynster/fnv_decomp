@@ -1,6 +1,42 @@
-// gamebryo2.2/corelibs/niconsolerenderer/nid3dgeometrygroupmanager.cpp: NiD3DGeometryGroupManager, Holder (12 functions)
+// gamebryo2.2/corelibs/niconsolerenderer/nid3dgeometrygroupmanager.cpp: NiD3DGeometryGroupManager (12 functions)
 
-#include "nid3dgeometrygroupmanager_decls.h"
+#include "../../../../include/NiD3DGeometryGroupManager.h"
+#include "../../../../include/NiGeometryGroup.h"
+#include "../../../../include/NiGeometryGroupManager.h"
+// NiStreamLinkIDSet_nid3dgeometrygroupmanager: local type (was include/NiStreamLinkIDSet.h, which had no evidence of one real class); its methods are 0x00a311e0 NiTSet<NiScreenGeometryData::ScreenElement *,NiTMallocInterface<NiScreenGeometryData::ScreenElement *> >::Add, 0x00a543b0 NiTSet::Ptr::Add
+class Item;
+class NiGeomMorpherUpdateTask;
+class D3DRenderStateGroup;
+
+class NiStreamLinkIDSet_nid3dgeometrygroupmanager
+{
+public:
+    void* m_kPointA;
+    unsigned int m_uiItemCount;
+    unsigned int m_pRayCursor;
+
+    void Realloc(unsigned int);
+    void FUN_00a56e60(unsigned int ItemUpdateArray);
+    unsigned int Find(Item* item);
+    int Find(unsigned int value);
+    void Add(Item* item);
+    void Add(NiGeomMorpherUpdateTask* pkTask);
+    void Add(D3DRenderStateGroup* p);
+    void AddUnique(Item* item);
+};
+#include "../../../../include/NiUnsharedGeometryGroup.h"
+#include "../../../../include/NiGeometryBufferData.h"
+
+class Direct3DDeviceInterface
+{
+  public:
+    virtual void slot0() = 0;
+    virtual unsigned long __stdcall AddRef() = 0;
+    virtual unsigned long __stdcall Release() = 0;
+};
+
+extern void* DAT_010ef718[];
+
 // Allocates and initialises a NiD3DGeometryGroupManager, stores the device and buffers, and AddRefs the device.
 // @fnv 0x00e88eb0
 NiD3DGeometryGroupManager* NiD3DGeometryGroupManager::Create(Direct3DDeviceInterface* device,
@@ -9,60 +45,41 @@ NiD3DGeometryGroupManager* NiD3DGeometryGroupManager::Create(Direct3DDeviceInter
     NiD3DGeometryGroupManager* p = (NiD3DGeometryGroupManager*)NiMemObject::operator new(28);
     if (p)
     {
-        p->FUN_00a7f810();
-        p->vtable = DAT_010ef718;
-        p->groups.data = 0;
-        p->groups.capacity = 0;
-        p->groups.count = 0;
-        p->device = 0;
-        p->buffers = 0;
-        p->flag = false;
+        p->Initialize();
+        *(void***)p = DAT_010ef718;
+        p->m_04 = 0;
+        p->m_08 = 0;
+        p->m_0c = 0;
+        p->m_10 = 0;
+        p->m_14 = 0;
+        p->m_18 = false;
     }
     else
         p = 0;
-    p->device = device;
+    p->m_10 = device;
     device->AddRef();
-    p->buffers = buffers;
+    p->m_14 = buffers;
     return p;
 }
 
-struct NiGeometryData;
 struct NiSkinInstance;
-struct FUN_00e88fa0_shell : public NiD3DGeometryGroupManager
-{
-    bool FUN_00e88fa0(NiGeometryGroup*, NiGeometryData*, NiSkinInstance*, bool, unsigned int, unsigned int);
-};
-
 bool __fastcall ProcessCollector(void*, int, NiGeometryGroup*, NiGeometryData*, NiSkinInstance*, bool, unsigned int,
                                  unsigned int);
 
-struct FUN_00e88dc0_caller
-{
-    bool call(NiGeometryGroup* a, NiGeometryData* b, NiSkinInstance* c, bool d, unsigned int e, unsigned int f)
-    {
-        return false;
-    }
-};
-
 // Forwards the geometry group, data and skin instance to ProcessCollector along with the bool at pThis+0x18 and two zero arguments.
 // @fnv 0x00e88fa0
-bool __fastcall FUN_00e88fa0(void* pThis, int, NiGeometryGroup* pkGroup, NiGeometryData* pkData,
+bool __fastcall FUN_00e88fa0(NiD3DGeometryGroupManager* pThis, int, NiGeometryGroup* pkGroup, NiGeometryData* pkData,
                              NiSkinInstance* pkSkinInstance)
 {
     typedef bool(__thiscall * Fn)(void*, NiGeometryGroup*, NiGeometryData*, NiSkinInstance*, bool, unsigned int,
                                   unsigned int);
-    return ((Fn)&ProcessCollector)(pThis, pkGroup, pkData, pkSkinInstance, *((bool*)pThis + 0x18), 0, 0);
+    return ((Fn)&ProcessCollector)(pThis, pkGroup, pkData, pkSkinInstance, pThis->m_18, 0, 0);
 }
 
-struct FUN_00e88c90_shell : public NiD3DGeometryGroupManager
-{
-    bool FUN_00e88c90(NiGeometryGroup*);
-};
-
 // @fnv 0x00e88c90
-bool FUN_00e88c90_shell::FUN_00e88c90(NiGeometryGroup* pkGroup)
+bool __fastcall IsGroupEmpty(NiD3DGeometryGroupManager*, int, NiGeometryGroup* pkGroup)
 {
-    return *(unsigned int*)((char*)pkGroup + 4) == 0;
+    return pkGroup->m_uiRefCount == 0;
 }
 
 struct FUN_00e88ca0_Data
@@ -70,145 +87,70 @@ struct FUN_00e88ca0_Data
     int _pad[7];
     int m1c;
 };
-struct FUN_00e88ca0_Group
-{
-    virtual void f0();
-    virtual void f1(FUN_00e88ca0_Data*);
-};
-struct FUN_00e88ca0_t
-{
-    bool CheckAndDispatch(FUN_00e88ca0_Group* pkGroup, FUN_00e88ca0_Data* pkData);
-};
-// Returns false if pkData->m1c is nonzero; otherwise calls pkGroup->f1(pkData) and returns true.
+// Returns false if pkData->m1c is nonzero; otherwise dispatches to the group and returns true.
 // @fnv 0x00e88ca0
-bool FUN_00e88ca0_t::CheckAndDispatch(FUN_00e88ca0_Group* pkGroup, FUN_00e88ca0_Data* pkData)
+bool __fastcall CheckAndDispatch(NiD3DGeometryGroupManager*, int, NiGeometryGroup* pkGroup, FUN_00e88ca0_Data* pkData)
 {
     if (pkData->m1c != 0)
         return false;
-    pkGroup->f1(pkData);
+    pkGroup->vf01(reinterpret_cast<NiScreenTexture*>(pkData));
     return true;
 }
 
-struct NiScreenTexture;
-struct FUN_00e88cc0_shell : public NiD3DGeometryGroupManager
-{
-    bool FUN_00e88cc0(NiScreenTexture*);
-};
-
-struct NiGeometryBufferData
-{
-    void* _f0;
-    void* _f1;
-    void* m_pkActorGroup;
-};
-struct GroupVCall
-{
-    virtual void Unk0();
-    virtual void Unk1();
-    virtual void Unk2();
-    virtual void Unk3(NiScreenTexture*);
-};
 // @fnv 0x00e88cc0
-bool FUN_00e88cc0_shell::FUN_00e88cc0(NiScreenTexture* pkScreenTexture)
+bool __fastcall RemoveScreenTexture(NiD3DGeometryGroupManager*, int, NiScreenTexture* pkScreenTexture)
 {
     NiGeometryGroup* pkGroup;
     NiGeometryBufferData* pkBuffData;
     pkBuffData = *(NiGeometryBufferData**)((char*)pkScreenTexture + 0x1c);
     if (!pkBuffData)
         return false;
-    pkGroup = (NiGeometryGroup*)pkBuffData->m_pkActorGroup;
-    ((GroupVCall*)pkGroup)->Unk3(pkScreenTexture);
-    if (*(unsigned int*)((char*)pkGroup + 4) == 0)
-        ((GroupVCall*)pkGroup)->Unk0();
+    pkGroup = pkBuffData->m_pkOwnerGroup;
+    pkGroup->vf03(reinterpret_cast<NiGeometryData*>(pkScreenTexture));
+    if (pkGroup->m_uiRefCount == 0)
+        pkGroup->Purge();
     return true;
 }
 
-struct Elem9
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual void f6();
-    virtual void f7();
-    virtual void f8();
-    virtual void f9(int);
-};
-struct Rel3
-{
-    virtual void __stdcall g0();
-    virtual void __stdcall g1();
-    virtual void __stdcall g2();
-};
-struct Holder
-{
-    void* vf;
-    Elem9** arr;
-    int _08;
-    unsigned int cnt;
-    Rel3* p;
-    void FUN_00a7f820();
-    void FUN_00e88d60();
-};
+void __fastcall DestroyGeometryGroupManagerBase(NiD3DGeometryGroupManager*, int);
 void __cdecl FUN_00e94290();
 void __cdecl _NiFreeAlias(void*);
 // @fnv 0x00e88d60
-void Holder::FUN_00e88d60()
+void __fastcall DestroyGeometryGroupManager(NiD3DGeometryGroupManager* manager, int)
 {
-    unsigned int n = cnt;
+    unsigned int n = manager->m_0c;
     unsigned int i = 0;
-    vf = DAT_010ef718;
+    *(void***)manager = DAT_010ef718;
     for (; i < n; ++i)
     {
-        Elem9* e = arr[i];
+        NiGeometryGroup* e = reinterpret_cast<NiGeometryGroup**>(manager->m_04)[i];
         if (e)
-            e->f9(1);
+            delete e;
     }
     FUN_00e94290();
-    if (p)
-        p->g2();
-    _NiFreeAlias(arr);
-    FUN_00a7f820();
+    if (manager->m_10)
+        manager->m_10->Release();
+    _NiFreeAlias(manager->m_04);
+    typedef void (__thiscall* DestroyBase)(NiD3DGeometryGroupManager*);
+    ((DestroyBase)&DestroyGeometryGroupManagerBase)(manager);
 }
 
 void __cdecl _delete(void*, unsigned int);
-struct FUN_00e88e90_shell
-{
-    void FUN_00e88d60();
-    void* DestroyIfOwned(unsigned int);
-};
-// Calls FUN_00e88d60, then deletes this with _delete(this, 0x1c) if flags has bit 1 set, and returns this.
+// Destroys the manager, frees it when flags has bit 1 set, and returns its address.
 // @fnv 0x00e88e90
-void* FUN_00e88e90_shell::DestroyIfOwned(unsigned int flags)
+void* __fastcall DestroyIfOwned(NiD3DGeometryGroupManager* manager, int, unsigned int flags)
 {
-    FUN_00e88d60();
+    typedef void (__thiscall* DestroyManager)(NiD3DGeometryGroupManager*);
+    ((DestroyManager)&DestroyGeometryGroupManager)(manager);
     if (flags & 1)
-        _delete(this, 0x1c);
-    return this;
+        _delete(manager, 0x1c);
+    return manager;
 }
 
-struct FUN_Elem;
-struct FUN_B
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4(FUN_Elem* e);
-    int m_04;
-};
-struct FUN_A
-{
-    int m_00;
-    int m_04;
-    FUN_B* m_08;
-};
 struct FUN_Elem
 {
     unsigned char pad[0x28];
-    FUN_A* m_28;
+    NiGeometryBufferData* m_28;
 };
 struct FUN_P
 {
@@ -222,64 +164,39 @@ bool __stdcall FUN_00e88d00(FUN_P* p)
 {
     unsigned int cnt = p->m_08;
     FUN_Elem* e = p->m_0C;
-    FUN_B* b = e->m_28->m_08;
+    NiGeometryGroup* b = e->m_28->m_pkOwnerGroup;
     bool flag = false;
     if (cnt > 0)
     {
         unsigned int n = cnt;
         do
         {
-            FUN_A* a = e->m_28;
+            NiGeometryBufferData* a = e->m_28;
             if (a)
             {
-                a->m_08->f4(e);
+                a->m_pkOwnerGroup->vf04(e);
                 flag = true;
             }
             ++e;
             --n;
         } while (n != 0);
-        if (flag && b->m_04 == 0)
-            b->f0();
+        if (flag && b->m_uiRefCount == 0)
+            b->Purge();
     }
     return flag;
 }
 
-struct FUN_00e88c30_elem
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual void f6();
-    virtual void f7();
-    virtual void f8();
-    virtual void f9(int);
-};
-
-struct FUN_00e88c30_cls
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual bool v3(FUN_00e88c30_elem* p);
-    FUN_00e88c30_elem** m_04;
-    unsigned int m_08;
-    unsigned int m_0c;
-    bool RemoveElement(FUN_00e88c30_elem* p);
-};
-
 // @fnv 0x00e88c30
-bool FUN_00e88c30_cls::RemoveElement(FUN_00e88c30_elem* pElement)
+bool __fastcall RemoveElement(NiD3DGeometryGroupManager* manager, int, NiGeometryGroup* pElement)
 {
-    if (pElement != 0 && this->v3(pElement))
+    typedef bool (__thiscall* CheckGroup)(NiD3DGeometryGroupManager*, NiGeometryGroup*);
+    if (pElement != 0 && ((CheckGroup)(*(void***)manager)[3])(manager, pElement))
     {
         unsigned int uiIndex = 0;
-        unsigned int n = m_0c;
+        unsigned int n = manager->m_0c;
         if (n > 0)
         {
-            FUN_00e88c30_elem** cur = m_04;
+            NiGeometryGroup** cur = reinterpret_cast<NiGeometryGroup**>(manager->m_04);
             do
             {
                 if (*cur == pElement)
@@ -293,39 +210,20 @@ bool FUN_00e88c30_cls::RemoveElement(FUN_00e88c30_elem* pElement)
         uiIndex = 0xffffffff;
     found:
 
-        unsigned int& cnt = m_0c;
+        unsigned int& cnt = manager->m_0c;
         --cnt;
-        FUN_00e88c30_elem** arr = m_04;
+        NiGeometryGroup** arr = reinterpret_cast<NiGeometryGroup**>(manager->m_04);
         arr[uiIndex] = arr[cnt];
-        pElement->f9(1);
+        delete pElement;
         return true;
     }
     return false;
 }
 
-struct GeomSlotB
-{
-    virtual void Slot0();
-    virtual void Slot1();
-    virtual void Slot2();
-    virtual void Slot3();
-    virtual void Slot4();
-    virtual void Slot5(void* pOwner);
-    virtual void Slot6();
-    int m_04;
-};
-
-struct GeomSlotA
-{
-    int m_00;
-    int m_04;
-    GeomSlotB* m_08;
-};
-
 struct GeomOwner
 {
     unsigned char pad[0x34];
-    GeomSlotA* m_34;
+    NiGeometryBufferData* m_34;
 };
 
 struct GeomRef
@@ -334,7 +232,7 @@ struct GeomRef
     void* m_0C;
 };
 
-// Checks pRef's m_0C via FUN_00e88d00, otherwise calls Slot5 on pOwner's m_34->m_08 and Slot0 if m_04 is zero, returning true or false.
+// Removes the referenced geometry buffers, then purges the owner group if it is empty.
 // @fnv 0x00e88e40
 bool __stdcall FUN_00e88e40(GeomOwner* pGeomOwner, GeomRef* pGeomRef)
 {
@@ -352,111 +250,77 @@ owner:
     {
         return false;
     }
-    GeomSlotB* pSlotB = pGeomOwner->m_34->m_08;
-    pSlotB->Slot5(pGeomOwner);
-    if (pSlotB->m_04 == 0)
+    NiGeometryGroup* pSlotB = pGeomOwner->m_34->m_pkOwnerGroup;
+    pSlotB->vf05(reinterpret_cast<NiGeometryData*>(pGeomOwner));
+    if (pSlotB->m_uiRefCount == 0)
     {
-        pSlotB->Slot0();
+        pSlotB->Purge();
     }
     return true;
 }
 
-struct IDeviceE88
-{
-    virtual long __stdcall QueryInterface(const void* riid, void** ppvObj) = 0;
-    virtual unsigned long __stdcall AddRef() = 0;
-    virtual unsigned long __stdcall Release() = 0;
-};
+NiGeometryGroup* CreateStaticGroup();
+NiGeometryGroup* CreateDynamicGroup();
 
-class NiGeometryGroupE88
+inline int NiStreamLinkIDSet_nid3dgeometrygroupmanager::Find(unsigned int value)
 {
-  public:
-    void* m_ppVirtualMethodTable;
-    int unk04;
-    IDeviceE88* m_pD3DDevice;
-
-    void SetDevice(IDeviceE88* pkDevice)
+    unsigned int index = 0;
+    unsigned int count = m_pRayCursor;
+    if (count > 0)
     {
-        m_pD3DDevice = pkDevice;
-        pkDevice->AddRef();
-    }
-};
-
-NiGeometryGroupE88* CreateStaticGroupE88();
-NiGeometryGroupE88* CreateUnsharedGroupE88();
-NiGeometryGroupE88* CreateDynamicGroupE88();
-
-template <class T> class NiTPrimitiveSetE88
-{
-  public:
-    T* m_pBase;
-    unsigned int m_uiElementCount;
-    unsigned int m_uiAllocatedCapacity;
-
-    void Realloc(unsigned int uiNewSize);
-
-    int Find(const T& element) const
-    {
-        for (unsigned int i = 0; i < m_uiAllocatedCapacity; i++)
+        unsigned int* current = static_cast<unsigned int*>(m_kPointA);
+        do
         {
-            if (m_pBase[i] == element)
-                return i;
-        }
-        return -1;
+            if (*current == value)
+                return index;
+            ++current;
+            ++index;
+        } while (index < count);
     }
+    return -1;
+}
 
-    void Add(const T& element)
-    {
-        if (m_uiAllocatedCapacity == m_uiElementCount)
-            Realloc(m_uiElementCount > 0 ? 2 * m_uiElementCount : 1);
-        m_pBase[m_uiAllocatedCapacity++] = element;
-    }
-};
-
-class NiGeometryGroupManagerE88
+static inline void AppendGroup(NiStreamLinkIDSet_nid3dgeometrygroupmanager* groups, NiGeometryGroup* const& group)
 {
-  public:
-    enum RepackingBehavior
-    {
-        STATIC,
-        UNSHARED,
-        DYNAMIC
-    };
+    if (groups->m_pRayCursor == groups->m_uiItemCount)
+        groups->Realloc(groups->m_uiItemCount > 0 ? 2 * groups->m_uiItemCount : 1);
+    static_cast<NiGeometryGroup**>(groups->m_kPointA)[groups->m_pRayCursor++] = group;
+}
 
-    void* m_ppVirtualMethodTable;
-    NiTPrimitiveSetE88<NiGeometryGroupE88*> m_kObjectGroups;
-    IDeviceE88* m_pD3DDevice;
+static inline void SetDevice(NiGeometryGroup* group, Direct3DDeviceInterface* device)
+{
+    group->m_pD3DDevice = device;
+    device->AddRef();
+}
 
-    __forceinline void AddGroup(NiGeometryGroupE88* pkGroup)
-    {
-        if (m_kObjectGroups.Find(pkGroup) >= 0)
-            return;
-        m_kObjectGroups.Add(pkGroup);
-        pkGroup->SetDevice(m_pD3DDevice);
-    }
-
-    NiGeometryGroupE88* CreateGroup(RepackingBehavior eBehavior);
-};
+static __forceinline void AddGroup(NiD3DGeometryGroupManager* manager, NiGeometryGroup* group)
+{
+    NiStreamLinkIDSet_nid3dgeometrygroupmanager* groups = reinterpret_cast<NiStreamLinkIDSet_nid3dgeometrygroupmanager*>(&manager->m_04);
+    if (groups->Find(reinterpret_cast<unsigned int>(group)) >= 0)
+        return;
+    AppendGroup(groups, group);
+    SetDevice(group, manager->m_10);
+}
 
 // Creates a geometry group for the given repacking behavior, adds it to the manager's set, and returns it (or null for an unknown behavior).
 // @fnv 0x00e88f10
-NiGeometryGroupE88* NiGeometryGroupManagerE88::CreateGroup(RepackingBehavior eBehavior)
+NiGeometryGroup* NiD3DGeometryGroupManager::CreateGroup(NiGeometryGroupManager::RepackingBehavior eBehavior)
 {
-    NiGeometryGroupE88* pkGroup = 0;
+    NiGeometryGroup* pkGroup = 0;
     switch (eBehavior)
     {
     case STATIC:
-        pkGroup = CreateStaticGroupE88();
+        pkGroup = CreateStaticGroup();
         break;
     case UNSHARED:
-        pkGroup = CreateUnsharedGroupE88();
+        pkGroup = NiUnsharedGeometryGroup::Create();
         break;
     case DYNAMIC:
-        pkGroup = CreateDynamicGroupE88();
+        pkGroup = CreateDynamicGroup();
         break;
     }
     if (pkGroup)
-        AddGroup(pkGroup);
+        AddGroup(this, pkGroup);
     return pkGroup;
 }
 
@@ -505,18 +369,13 @@ struct HkBody
     int unk30;
     int unk34;
 };
-struct HkCollector
-{
-    virtual void vf0();
-    virtual void vf1();
-    virtual void Process(HkBody* body, HkInput* input, HkElem2c* elem);
-};
-
 // Processes each element of the info array when enabled; otherwise calls Process once with null if body->unk34 is zero.
 // @fnv 0x00e88dc0
-bool __stdcall ProcessCollector(HkCollector* collector, HkBody* body, HkInput* input, bool flag, int unused1,
+bool __stdcall ProcessCollector(NiGeometryGroup* collector, HkBody* body, HkInput* input, bool flag, int unused1,
                                 int unused2)
 {
+    // The shared vf02 declaration has no parameters; retain this unit's call signature.
+    typedef void (__thiscall* Collect)(NiGeometryGroup*, HkBody*, HkInput*, HkElem2c*);
     if (input && flag && input->unk0c)
     {
         HkInfo* info = input->unk0c;
@@ -526,12 +385,12 @@ bool __stdcall ProcessCollector(HkCollector* collector, HkBody* body, HkInput* i
         unsigned int count = info->unk08;
         for (unsigned int i = 0; i < count; ++i)
         {
-            collector->Process(body, input, &elem[i]);
+            ((Collect)(*(void***)collector)[2])(collector, body, input, &elem[i]);
         }
         return true;
     }
     if (body->unk34 != 0)
         return false;
-    collector->Process(body, input, 0);
+    ((Collect)(*(void***)collector)[2])(collector, body, input, 0);
     return true;
 }

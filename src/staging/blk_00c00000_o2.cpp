@@ -2,12 +2,136 @@
 // src/staging/blk_00c00000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include <stddef.h>
+#include "../../include/BSRenderedTexture.h"
+#include "../../include/ImageSpaceEffectParam.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
 
-struct MemoryManager
+inline NiPoint3 NiPoint3::operator-() const
 {
-    void Deallocate(void*);
-};
+    return NiPoint3(-x, -y, -z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/ImageSpaceTexture.h"
+#include "../../include/NiTArray.h"
+#include "../../include/NiTPrimitiveArray.h"
+#include "../../include/NiTObjectArray.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiPointer.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/BSShaderPPLightingProperty.h"
+#include "../../include/NiBound.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiD3DShader.h"
+#include "../../include/NiD3DShaderConstantMap.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/NiScreenElements.h"
+#include "../../include/NiShaderConstantMapEntry.h"
+#include "../../include/StrArr.h"
+
+
+template <class T, class A> inline unsigned int NiTArray<T, A>::GetSize() const { return m_usSize; }
+template <class T, class A> inline T& NiTArray<T, A>::GetAt(unsigned int uiIndex) { return m_pBase[uiIndex]; }
+template <class T, class A> inline unsigned int NiTArray<T, A>::SetAtGrow(unsigned int uiIndex, const T& element)
+{
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+
+extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long*);
+extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long*);
+
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0) {}
+template <class T> inline NiPointer<T>::NiPointer(T* pkNew) : m_pObject(pkNew)
+{
+    if (m_pObject != 0) m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::NiPointer(const NiPointer& kSrc) : m_pObject(kSrc.m_pObject)
+{
+    if (m_pObject != 0) m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0) m_pObject->DecRefCount();
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pkNew)
+{
+    if (m_pObject != pkNew)
+    {
+        if (m_pObject != 0) m_pObject->DecRefCount();
+        m_pObject = pkNew;
+        if (m_pObject != 0) m_pObject->IncRefCount();
+    }
+    return *this;
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer& kSrc)
+{
+    if (m_pObject != kSrc.m_pObject)
+    {
+        if (m_pObject != 0) m_pObject->DecRefCount();
+        m_pObject = kSrc.m_pObject;
+        if (m_pObject != 0) m_pObject->IncRefCount();
+    }
+    return *this;
+}
+template <class T> inline NiPointer<T>::operator T*() const { return m_pObject; }
+template <class T> inline T* NiPointer<T>::operator->() const { return m_pObject; }
+
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement((volatile long*)&m_uiRefCount);
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+// The shared texture header exposes the reference-counted base as eight bytes.
+inline void BSRenderedTexture::IncRefCount()
+{
+    volatile long* p = reinterpret_cast<volatile long*>(base + 4);
+    InterlockedIncrement(p);
+}
+
+template <> inline NiPointer<BSRenderedTexture>::~NiPointer()
+{
+    if (m_pObject != 0)
+        reinterpret_cast<NiRefObject*>(m_pObject)->DecRefCount();
+}
+
+inline void NiAVObject::IncRefCount() { NiRefObject::IncRefCount(); }
+inline void NiAVObject::DecRefCount() { NiRefObject::DecRefCount(); }
+template <class T> inline bool operator==(const NiPointer<T>& left, const NiPointer<T>& right)
+{
+    return left.m_pObject == right.m_pObject;
+}
+template <class T> inline bool operator!=(const NiPointer<T>& left, const NiPointer<T>& right)
+{
+    return left.m_pObject != right.m_pObject;
+}
+
 extern MemoryManager g_memoryManager;
 void __cdecl FUN_00c03270();
 struct FUN_00c033f0_class
@@ -87,10 +211,6 @@ void Target_00c04090::AssignRefObjects(Arg_00c04090* apSource)
 }
 
 namespace fnv_00c04710 {
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 
 struct FUN_00c04710Class
@@ -112,10 +232,7 @@ FUN_00c04710Class* __thiscall FUN_00c04710Class::FUN_00c04710(bool abFree)
 
 extern "C" void __cdecl FUN_00b4f510();
 
-struct NiTPrimitiveArray_int___
-{
-    void SetAt(unsigned int, int&);
-};
+
 
 struct FUN_00c04960_class
 {
@@ -128,14 +245,10 @@ void FUN_00c04960_class::ResetArrayElement()
 {
     FUN_00b4f510();
     int value = 0;
-    ((NiTPrimitiveArray_int___*)((char*)this + 0x28))->SetAt(2, value);
+    ((NiTPrimitiveArray<int>*)((char*)this + 0x28))->SetAt(2, value);
 }
 
 namespace fnv_00c04a80 {
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 void __cdecl FUN_00c048b0();
 struct FUN_00c04a80_class
@@ -199,10 +312,6 @@ void __thiscall FUN_00c04d80_cls::SetByteValue(char acValue)
 
 namespace fnv_00c05160 {
 extern "C" void __cdecl FUN_00c04da0();
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 
 struct FUN_00c05160_class
@@ -265,17 +374,12 @@ void __fastcall FUN_00a89760(void*);
 
 extern "C" void __cdecl _delete(void*, unsigned int);
 
-struct NiScreenElements
-{
-    void FUN_00a89760();
-    void* DestroyIfRequested(bool);
-};
 
 // Calls FUN_00a89760, then if b has bit 0 set frees this with _delete, and returns this.
 // @fnv 0x00c1a450
 void* NiScreenElements::DestroyIfRequested(bool abFree)
 {
-    FUN_00a89760();
+    ::FUN_00a89760(this);
     if (abFree & 1)
         _delete(this, 0xd8);
     return this;
@@ -310,12 +414,7 @@ void __thiscall FUN_00c0bb20_class::FUN_00c0bb20(int apTarget, int apSource)
     *(int*)(*(int*)(*(int*)(apTarget + 0x24) + 0x14) + 8) = *(int*)(*(int*)(apSource + 0xb4));
 }
 
-struct NiShaderConstantMapEntry
-{
-    int m_iWordAt00;
-    int m_iWordAt04;
-    unsigned char m_8;
-};
+
 extern NiShaderConstantMapEntry* DAT_011fec44;
 extern NiShaderConstantMapEntry* DAT_011fec6c;
 void __cdecl UpdateFlagHolders(int);
@@ -325,11 +424,11 @@ void SetShaderConstantMapEntryFlags(int a)
     UpdateFlagHolders(a);
     unsigned char v = 0;
     if (a == 193 || a == 194)
-        DAT_011fec6c->m_8 = 1;
+        reinterpret_cast<unsigned char&>(DAT_011fec6c->unk08) = 1;
     else
-        DAT_011fec6c->m_8 = v;
+        reinterpret_cast<unsigned char&>(DAT_011fec6c->unk08) = v;
     if (DAT_011fec44 != 0 && (unsigned int)a < 728 && (unsigned int)a > 751)
-        DAT_011fec44->m_8 = v;
+        reinterpret_cast<unsigned char&>(DAT_011fec44->unk08) = v;
 }
 
 struct FUN_00c036e0_class
@@ -547,10 +646,7 @@ bool __thiscall FUN_00c053c0_class::UpdateShaderParam(int)
     return true;
 }
 
-struct ImageSpaceTexture
-{
-    void AddRenderedTexture();
-};
+
 struct FUN_00c03260_class
 {
     char pad[0x58];
@@ -586,10 +682,7 @@ bool FUN_00c03350_class::FUN_00c03350(int)
     return false;
 }
 
-struct ISTex
-{
-    void __thiscall CreateRenderTargetTexture(unsigned int);
-};
+
 
 struct FUN_00c03390_class
 {
@@ -600,12 +693,12 @@ struct FUN_00c03390_class
 void FUN_00c03390_class::FUN_00c03390(int)
 {
     int texture;
-    ISTex* pTexture = reinterpret_cast<ISTex*>(reinterpret_cast<char*>(this) + 0x58);
+    ImageSpaceTexture* pTexture = reinterpret_cast<ImageSpaceTexture*>(reinterpret_cast<char*>(this) + 0x58);
 
-    pTexture->CreateRenderTargetTexture(3);
+    pTexture->FUN_00ba3840(3);
 
     texture = reinterpret_cast<int>(pTexture);
-    reinterpret_cast<NiTPrimitiveArray_int___*>(reinterpret_cast<char*>(this) + 0x28)->SetAt(2, texture);
+    reinterpret_cast<NiTPrimitiveArray<int>*>(reinterpret_cast<char*>(this) + 0x28)->SetAt(2, texture);
 }
 
 struct BeamStage
@@ -616,14 +709,17 @@ struct BeamStage
     int m_iObjectReferenceCount;
 };
 
+// Texture stages use the stage pool and the reference count at 0x60;
+// they are distinct from the NiD3DPass objects created by CreateD3DPass.
 struct StageReturn : BeamStage
 {
     void __thiscall ReturnToPool();
-};
-
-struct NiD3DPass : StageReturn
-{
     bool __thiscall ApplyRenderStateChanges(bool);
+    void DecRefCount()
+    {
+        if (--m_iObjectReferenceCount == 0)
+            ReturnToPool();
+    }
 };
 
 struct UnkBA38F0
@@ -631,22 +727,17 @@ struct UnkBA38F0
     void __thiscall FUN_00ba38f0(BeamStage*);
 };
 
-struct NiD3DShader
-{
-    char pad00[0x24];
-    NiD3DPass** m_ppPasses;
-};
 
 extern int DAT_0126f74c;
 
 struct StageReturnPtr
 {
-    NiD3DPass* m_pObject;
+    StageReturn* m_pObject;
 
     StageReturnPtr() : m_pObject(0)
     {}
 
-    void operator=(NiD3DPass* pObject)
+    void operator=(StageReturn* pObject)
     {
         if (m_pObject != pObject)
         {
@@ -690,8 +781,8 @@ void __thiscall FUN_00c04310_class::ReleaseStagePasses(int)
 
     for (unsigned int i = 1; i < m_usStageCount; ++i)
     {
-        NiD3DShader* pShader = reinterpret_cast<NiD3DShader*>(DAT_0126f74c);
-        stageReturn = pShader->m_ppPasses[i - 1];
+        NiD3DPass* pPass = reinterpret_cast<NiD3DPass*>(DAT_0126f74c);
+        stageReturn = static_cast<StageReturn*>(pPass->m_kStages.m_pBase[i - 1].m_pObject);
 
         if (stageReturn.m_pObject)
         {
@@ -850,41 +941,31 @@ void __thiscall FUN_00c04490_class::ResetStages(int)
 }  // namespace fnv_00c04490
 
 extern int DAT_010bca64;
-struct ImageSpaceEffect
+// Local until include/ImageSpaceEffect.h is available; constructor binds to 0x00ba4080.
+class ImageSpaceEffect__EffectInput;
+class ImageSpaceEffect
 {
-    int m_iWordAt00;
-    int m_iWordAt04;
-    int m_8;
-    int m_iThirdValue;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-    int m_40;
-    int m_44;
-    int m_48;
-    int m_4c;
-    int m_50;
-    int m_54;
-    int m_58;
+public:
     ImageSpaceEffect();
+    virtual ~ImageSpaceEffect();
+    bool bIsActive;
+    bool bParamsChanged;
+    unsigned char layoutPadding6[2];
+    NiTPrimitiveArray<ImageSpaceEffect*> pEffectList;
+    NiTPrimitiveArray<ImageSpaceEffectParam*> pEffectParamList;
+    NiTPrimitiveArray<ImageSpaceTexture*> pTextures;
+    NiTPrimitiveArray<ImageSpaceEffect__EffectInput*> pEffectInputs;
+    NiTPrimitiveArray<int> pEffectOutput;
 };
 struct FUN_00c04600 : ImageSpaceEffect
 {
+    int m_58;
     FUN_00c04600();
 };
 // @fnv 0x00c04600
 FUN_00c04600::FUN_00c04600()
 {
-    m_iWordAt00 = (int)&DAT_010bca64;
+    *(int*)this = (int)&DAT_010bca64;
     m_58 = 0;
 }
 
@@ -941,11 +1022,6 @@ FUN_00c056a0_class* FUN_00c056a0_class::FUN_00c05760(char flag)
 }
 
 namespace fnv_00c12480 {
-struct NiD3DPass
-{
-    static void CreateD3DPass(NiD3DPass*& pass);
-};
-
 extern int DAT_012022c0;
 
 // @fnv 0x00c12480
@@ -965,11 +1041,6 @@ bool __fastcall FUN_00c12480(int* pObject)
 }  // namespace fnv_00c12480
 
 namespace fnv_00c16350 {
-struct NiD3DPass
-{
-    static void __cdecl CreateD3DPass(NiD3DPass*&);
-};
-
 extern int DAT_011f91c0;
 extern int DAT_01202350;
 
@@ -1008,29 +1079,13 @@ int FUN_00c1a480_class::FUN_00c1a480(int aiArg)
     return (int)this;
 }
 
-struct StrArr
-{
-    unsigned char pad00[8];
-    unsigned short m_08;
-    unsigned short m_0A;
-    unsigned char pad0C[2];
-    unsigned short m_0E;
-
-    void __thiscall SetSize(unsigned int size);
-    void __thiscall SetAt(unsigned int index, char*& value);
-};
-
-struct FUN_00a7fb20_class
-{
-    char* __thiscall FUN_00a7fb20(char const* name);
-};
 
 struct Holder
 {
     unsigned char pad00[0xC4];
     unsigned short m_instanceCount;
     unsigned char padC6[2];
-    FUN_00a7fb20_class m_bound;
+    NiBound m_bound;
 
     void __thiscall AppendString(StrArr* strings);
     void __thiscall AppendBoundInfo(StrArr* strings);
@@ -1044,31 +1099,24 @@ void Holder::AppendBoundInfo(StrArr* strings)
 {
     AppendString(strings);
 
-    char* value = m_bound.FUN_00a7fb20("pLocalBound");
-    unsigned int index = strings->m_0A;
+    char* value = m_bound.FormatToBuffer("pLocalBound");
+    unsigned int index = strings->m_usSize;
 
-    if (index >= strings->m_08)
-        strings->SetSize(strings->m_0E + index);
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(strings->m_usGrowBy + index);
 
     strings->SetAt(index, value);
 
     value = FUN_00a7d490("instance count", m_instanceCount);
-    index = strings->m_0A;
+    index = strings->m_usSize;
 
-    if (index >= strings->m_08)
-        strings->SetSize(strings->m_0E + index);
+    if (index >= strings->m_usMaxSize)
+        strings->SetSize(strings->m_usGrowBy + index);
 
     strings->SetAt(index, value);
 }
 
-struct NiTransformDummy
-{
-    int pad[4];
-};
-struct NiBound
-{
-    void Update(const NiBound&, const NiTransformDummy&);
-};
+
 struct FUN_00c1a680_class
 {
     void __thiscall FUN_00c1a680();
@@ -1077,21 +1125,11 @@ struct FUN_00c1a680_class
 void __thiscall FUN_00c1a680_class::FUN_00c1a680()
 {
     ((NiBound*)(*(void**)((char*)this + 0x20)))
-        ->Update(*((const NiBound*)((char*)this + 0xc8)), *(const NiTransformDummy*)((char*)this + 0x68));
+        ->Update((char*)this + 0xc8, (char*)this + 0x68);
 }
 
 namespace fnv_00c1a740 {
-struct StrArr
-{
-    char pad00[0x8];
-    unsigned short m_8;
-    unsigned short m_kPointA;
-    unsigned short m_iThirdValue;
-    unsigned short m_usTrailingValue;
 
-    void __thiscall SetSize(unsigned int size);
-    void __thiscall SetAt(unsigned int index, char*& value);
-};
 
 struct Caller74690
 {
@@ -1100,17 +1138,13 @@ struct Caller74690
 
 char* __cdecl FUN_00a7d490(char const* text, unsigned short value);
 
-struct FUN_00a7fb20_class
-{
-    char* __thiscall FUN_00a7fb20(char const* text);
-};
 
 struct FUN_00c1a740_class
 {
     unsigned char pad00[0xc4];
     unsigned short m_c4;
     unsigned char padc6[2];
-    FUN_00a7fb20_class m_c8;
+    NiBound m_c8;
 
     void __thiscall SetLocalBoundAndInstanceCount(StrArr* value);
 };
@@ -1121,19 +1155,19 @@ void __thiscall FUN_00c1a740_class::SetLocalBoundAndInstanceCount(StrArr* pStrAr
 {
     reinterpret_cast<Caller74690*>(this)->FUN_00a74690(pStrArr);
 
-    char* text = m_c8.FUN_00a7fb20("pLocalBound");
+    char* text = m_c8.FormatToBuffer("pLocalBound");
 
-    unsigned int index = pStrArr->m_kPointA;
-    if (index >= pStrArr->m_8)
-        pStrArr->SetSize(pStrArr->m_usTrailingValue + index);
+    unsigned int index = pStrArr->m_usSize;
+    if (index >= pStrArr->m_usMaxSize)
+        pStrArr->SetSize(pStrArr->m_usGrowBy + index);
 
     pStrArr->SetAt(index, text);
 
     text = FUN_00a7d490("instance count", m_c4);
 
-    index = pStrArr->m_kPointA;
-    if (index >= pStrArr->m_8)
-        pStrArr->SetSize(pStrArr->m_usTrailingValue + index);
+    index = pStrArr->m_usSize;
+    if (index >= pStrArr->m_usMaxSize)
+        pStrArr->SetSize(pStrArr->m_usGrowBy + index);
 
     pStrArr->SetAt(index, text);
 }
@@ -1647,22 +1681,6 @@ void FUN_00c036f0_cls::InitSubObjects(int aUnused)
     ((FUN_00c036f0_sub28*)((char*)this + 0x28))->FUN_00ba3aa0(3, &pSub);
 }
 
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement((volatile long*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((volatile long*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 
 class SpawnedPrimary_c03a20
 {
@@ -2159,23 +2177,10 @@ void __thiscall FUN_00c043f0_cls::FUN_00c043f0(int a1)
     }
 }
 
-class MemoryManagerC046
-{
-  public:
-    void Deallocate(void* pvMem);
-};
-extern MemoryManagerC046 g_kMemoryManagerC046;
 
-class ImageSpaceTextureC046
-{
-  public:
-    ~ImageSpaceTextureC046();
 
-    static void operator delete(void* pvMem)
-    {
-        g_kMemoryManagerC046.Deallocate(pvMem);
-    }
-};
+
+
 
 class C04620Object
 {
@@ -2183,27 +2188,7 @@ class C04620Object
     virtual ~C04620Object();
 };
 
-template <class T> class C04620PrimitiveArray
-{
-  public:
-    virtual ~C04620PrimitiveArray();
 
-    unsigned int GetSize() const
-    {
-        return m_usSize;
-    }
-    T& GetAt(unsigned int uiIndex) const
-    {
-        return m_pBase[uiIndex];
-    }
-    void SetAt(unsigned int uiIndex, const T& element);
-
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
 
 class C04620Base
 {
@@ -2215,8 +2200,8 @@ class C04620Base
     int unk0C;
     int unk10;
     int unk14;
-    C04620PrimitiveArray<C04620Object*> m_kThirdFollowingStreamField;
-    C04620PrimitiveArray<C04620Object*> m_kTextureSwapList;
+    NiTPrimitiveArray<C04620Object*> m_kThirdFollowingStreamField;
+    NiTPrimitiveArray<C04620Object*> m_kTextureSwapList;
     int unk38;
     int unk3C;
     int unk40;
@@ -2232,7 +2217,7 @@ class FUN_00c04620 : public C04620Base
   public:
     virtual ~FUN_00c04620();
 
-    ImageSpaceTextureC046* m_pkTexture;
+    ImageSpaceTexture* m_pkTexture;
 };
 
 // @fnv 0x00c04620
@@ -2489,25 +2474,9 @@ struct S_00c05250_Obj
     virtual ~S_00c05250_Obj();
 };
 
-struct S_00c05250_Arr
-{
-    void* m_vfptr;
-    S_00c05250_Obj** m_pBase;
-    unsigned short m_usMax;
-    unsigned short m_usSize;
-    unsigned short m_usElementCount;
-    unsigned short m_usGrow;
-    void __thiscall SetAt(unsigned int index, S_00c05250_Obj*& value);
-};
 
-struct S_00c05250_Elem
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    ~S_00c05250_Elem();
-};
+
+
 
 struct _Base_00ba3d30
 {
@@ -2517,7 +2486,7 @@ struct _Base_00ba3d30
     int unk0c;
     int unk10;
     int unk14;
-    S_00c05250_Arr m_18;
+    NiTPrimitiveArray<S_00c05250_Obj*> m_18;
     int unk28;
     int unk2c;
     int unk30;
@@ -2535,7 +2504,7 @@ struct _Base_00ba3d30
 
 struct FUN_00c05250 : _Base_00ba3d30
 {
-    S_00c05250_Elem m_5c[2];
+    ImageSpaceTexture m_5c[2];
     ~FUN_00c05250();
 };
 
@@ -3919,23 +3888,7 @@ void FUN_00c0e630_cls::FUN_00c0e630()
 }
 
 namespace fnv_00c11790 {
-class NiRefObject
-{
-  public:
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    long m_uiRefCount;
 
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
 typedef NiPointer<NiRefObject> RefObjectPtr;
 
 void AssignStageFromPool(StageReturn*& rpStage);
@@ -5121,6 +5074,7 @@ accumulated:
     DAT_011fa0c0 = accumColor;
 }
 
+class NiRenderTargetGroup;
 namespace fnv_00c03d80 {
 struct RenderColor
 {
@@ -5144,16 +5098,6 @@ struct RenderSettings
 extern RenderSettings DAT_01202410;
 extern RenderColor DAT_011ad840;
 extern bool DAT_011f9426;
-struct NiRenderTargetGroup;
-struct BSRenderedTexture : NiRefObject
-{
-    NiRenderTargetGroup* GetGroup();
-    void IncRefCount()
-    {
-        volatile long* p = (volatile long*)&m_uiRefCount;
-        InterlockedIncrement(p);
-    }
-};
 struct TextureInput
 {
     BSRenderedTexture* GetRenderedTexture() const;
@@ -5847,72 +5791,25 @@ void RenderSecondary::RenderSecondaryGeometry(RenderGeometry* geometry, int unus
 }
 }  // namespace fnv_00c03d80
 
-class TextureC054
-{
-  public:
-    TextureC054();
-    ~TextureC054();
 
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-};
 
-class PrimitiveArrayC054
-{
-  public:
-    void SetSize(unsigned int uiMaxSize);
 
-    void* m_ppVirtualMethodTable;
-    void* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
 
-class ImageSpaceEffectC054
-{
-  public:
-    ImageSpaceEffectC054();
-    virtual ~ImageSpaceEffectC054();
-
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    PrimitiveArrayC054 m_kTextureSwapList;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-};
-
-class FUN_00c05420 : public ImageSpaceEffectC054
+class FUN_00c05420 : public ImageSpaceEffect
 {
   public:
     FUN_00c05420();
     virtual ~FUN_00c05420();
 
     int m_iMode;
-    TextureC054 m_akTextures[2];
+    ImageSpaceTexture m_akTextures[2];
 };
 
 // Initializes m_iMode to 0 and sets the primitive array size to 4.
 // @fnv 0x00c05420
 FUN_00c05420::FUN_00c05420() : m_iMode(0)
 {
-    m_kTextureSwapList.SetSize(4);
+    pTextures.SetSize(4);
 }
 
 struct FUN_00c05730_class
@@ -8327,19 +8224,10 @@ extern int _DAT_012024f8;
 extern char UNK_00fdd3b0;
 void __cdecl FUN_00ec658f(void*);
 
-struct FUN_00c1d8b0_class
-{
-    void** m_ppVirtualMethodTable;
-    RefObject** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void FUN_00c1d8b0(unsigned int index, RefObject** value);
-};
-
+// The game's function-local null NiPointer and its initialization guard are
+// referenced explicitly here; their original storage is 0x012024f8/0x012024fc.
 // @fnv 0x00c1d8b0
-void FUN_00c1d8b0_class::FUN_00c1d8b0(unsigned int index, RefObject** value)
+template <> void NiTArray<NiPointer<NiObject>, NiTNewInterface<NiPointer<NiObject> > >::SetAt(unsigned int index, const NiPointer<NiObject>& value)
 {
     int one = 1;
     if ((*(unsigned char*)&_DAT_012024fc & one) == 0)
@@ -8352,140 +8240,47 @@ void FUN_00c1d8b0_class::FUN_00c1d8b0(unsigned int index, RefObject** value)
     if (index >= m_usSize)
     {
         m_usSize = (unsigned short)(index + 1);
-        if (*value != (RefObject*)_DAT_012024f8)
+        if (value.m_pObject != (NiObject*)_DAT_012024f8)
             m_usESize += one;
     }
     else
     {
-        if (*value != (RefObject*)_DAT_012024f8)
+        if (value.m_pObject != (NiObject*)_DAT_012024f8)
         {
-            if (m_pBase[index] == (RefObject*)_DAT_012024f8)
+            if (m_pBase[index].m_pObject == (NiObject*)_DAT_012024f8)
                 m_usESize += one;
         }
-        else if (m_pBase[index] != (RefObject*)_DAT_012024f8)
+        else if (m_pBase[index].m_pObject != (NiObject*)_DAT_012024f8)
         {
             m_usESize += 0xffff;
         }
     }
 
-    RefObject** slot = &m_pBase[index];
-    RefObject* oldValue = *slot;
-    if (oldValue != *value)
-    {
-        if (oldValue != 0)
-        {
-            if (DAT_00fdf1c4(&oldValue->m_iObjectReferenceCount) == 0)
-                oldValue->DeleteThis();
-        }
-        RefObject* newValue = *value;
-        *slot = newValue;
-        if (newValue != 0)
-            DAT_00fdf1c0(&newValue->m_iObjectReferenceCount);
-    }
+    m_pBase[index] = value;
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 
-class NiRefObjectF42
-{
-  public:
-    virtual ~NiRefObjectF42();
-    virtual void DeleteThis();
 
-    void IncRefCount()
-    {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
 
-    unsigned int m_uiRefCount;
-};
 
-template <class T> class NiPointerF42
-{
-  public:
-    NiPointerF42(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointerF42()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
 
-    NiPointerF42& operator=(const NiPointerF42& ptr)
-    {
-        if (m_pObject != ptr.m_pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = ptr.m_pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
 
-    bool operator==(const NiPointerF42& ptr) const
-    {
-        return m_pObject == ptr.m_pObject;
-    }
 
-    T* m_pObject;
-};
 
-template <class T> class NiTArrayF42
-{
-  public:
-    virtual ~NiTArrayF42();
 
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, const T& element);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, const T& element)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, element);
-        return uiIndex;
-    }
-
-    unsigned int AddFirstEmpty(const T& element);
-};
-
-class NiObjectF42 : public NiRefObjectF42
-{
-};
-
-class FUN_00c1f420_Array : public NiTArrayF42<NiPointerF42<NiObjectF42> >
-{
-  public:
-    unsigned int FUN_00c1f420(const NiPointerF42<NiObjectF42>& element);
-};
 
 // Finds the first empty slot in the array and stores element there, incrementing m_usESize; returns the index, or appends via SetAtGrow if none is free.
 // @fnv 0x00c1f420
-unsigned int FUN_00c1f420_Array::FUN_00c1f420(const NiPointerF42<NiObjectF42>& element)
+template <> unsigned int NiTArray<NiPointer<NiObject>, NiTNewInterface<NiPointer<NiObject> > >::AddFirstEmpty(const NiPointer<NiObject>& element)
 {
-    if (element == NiPointerF42<NiObjectF42>(0))
+    if (element == NiPointer<NiObject>(0))
         return (unsigned int)~0;
 
     for (unsigned short i = 0; i < m_usSize; i++)
     {
-        if (m_pBase[i] == NiPointerF42<NiObjectF42>(0))
+        if (m_pBase[i] == NiPointer<NiObject>(0))
         {
             m_pBase[i] = element;
             m_usESize++;
@@ -9212,17 +9007,6 @@ void __thiscall FNVRenderManager::SetupCubeSurfaces()
     DAT_011fc670 = DAT_011fc668;
 }
 
-struct Point374
-{
-    float x, y, z;
-    Point374& operator*=(float factor)
-    {
-        x = factor * x;
-        y = factor * y;
-        z = factor * z;
-        return *this;
-    }
-};
 struct Color374
 {
     float r, g, b, a;
@@ -9256,15 +9040,15 @@ extern Manager374* _DAT_011f91ac;
 struct Source374
 {
     unsigned int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
-    Point374 fallback;
-    const Point374* color;
+    NiPoint3 fallback;
+    const NiPoint3* color;
     unsigned int unk38, unk3c;
     float multiplier;
 };
 // @fnv 0x00c03180
 void __stdcall ApplySourceColor(Source374* source)
 {
-    Point374 color = source->color ? *source->color : source->fallback;
+    NiPoint3 color = source->color ? *source->color : source->fallback;
     if (DAT_011F941E)
         color *= (_DAT_011f91ac->group->material->settings->scale * source->multiplier);
     _DAT_011fa270 = Color374(color.x, color.y, color.z, 1.0f);
@@ -9278,16 +9062,9 @@ void __cdecl FUN_00c04950()
     FUN_00b4f510();
 }
 
-struct ObjPtrArray
-{
-    void* m_vfptr;
-    S_00c05250_Obj** m_pBase;
-    unsigned short m_usMax;
-    unsigned short m_usSize;
-    unsigned short m_usElementCount;
-    unsigned short m_usGrow;
-    void SetAt(unsigned int index, S_00c05250_Obj* const& value) throw();
-};
+
+template <> void NiTArray<S_00c05250_Obj*, NiTMallocInterface<S_00c05250_Obj*> >::SetAt(unsigned int, S_00c05250_Obj* const&) throw();
+
 struct FUN_00c04da0 : _Base_00ba3d30
 {
     ~FUN_00c04da0();
@@ -9299,7 +9076,7 @@ FUN_00c04da0::~FUN_00c04da0()
     if (m_18.m_pBase[0])
     {
         delete m_18.m_pBase[0];
-        ((ObjPtrArray&)m_18).SetAt(0, 0);
+        m_18.SetAt(0, 0);
     }
 }
 
@@ -9312,102 +9089,27 @@ float __cdecl FUN_00c05870()
 extern "C" unsigned int __cdecl _rotl(unsigned int, int);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
-struct ConstantEntryStandin
+inline void NiD3DShaderConstantMap::IncRefCount()
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    unsigned flags;
-};
-class RefObjectStandin
+    NiRefObject::IncRefCount();
+}
+inline void NiD3DShaderConstantMap::DecRefCount()
 {
-  public:
-    virtual ~RefObjectStandin();
-    virtual void DeleteThis();
-    long m_uiRefCount;
-    void IncRefCount()
-    {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-class NiD3DShaderConstantMap : public RefObjectStandin
+    NiRefObject::DecRefCount();
+}
+
+// The shared declarations for these virtual slots do not yet accept an entry.
+// Keep the entry-taking calls here until their signatures are available there.
+typedef void (__thiscall* ShaderConstantEntryCall)(NiD3DShaderConstantMap*, NiShaderConstantMapEntry*);
+inline void AddShaderConstantEntry(NiD3DShaderConstantMap* map, NiShaderConstantMapEntry* entry)
 {
-  public:
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2c();
-    virtual void v30();
-    virtual void v34();
-    virtual void v38();
-    virtual void v3c();
-    virtual void v40();
-    virtual void v44();
-    virtual void v48();
-    virtual void v4c();
-    virtual void v50();
-    virtual void v54();
-    virtual void v58();
-    virtual void v5c();
-    virtual void v60();
-    virtual void v64();
-    virtual void v68();
-    virtual void v6c();
-    virtual void v70();
-    virtual void v74();
-    virtual void v78();
-    virtual void v7c();
-    virtual void v80(ConstantEntryStandin*);
-    virtual void v84(ConstantEntryStandin*);
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    static void* operator new(unsigned);
-    static void operator delete(void*);
-    NiD3DShaderConstantMap(void*, int);
-};
-template <class T> class PointerStandin
+    reinterpret_cast<ShaderConstantEntryCall>((*reinterpret_cast<void***>(map))[32])(map, entry);
+}
+inline void AddDefinedShaderConstantEntry(NiD3DShaderConstantMap* map, NiShaderConstantMapEntry* entry)
 {
-  public:
-    T* m_pObject;
-    PointerStandin<T>& operator=(T* object)
-    {
-        if (m_pObject != object)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = object;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-};
+    reinterpret_cast<ShaderConstantEntryCall>((*reinterpret_cast<void***>(map))[33])(map, entry);
+}
+
 struct State
 {
     int unk00;
@@ -9423,12 +9125,12 @@ struct State
     int unk28;
     int unk2c;
     int unk30;
-    PointerStandin<NiD3DShaderConstantMap> pixel;
+    NiPointer<NiD3DShaderConstantMap> pixel;
     int unk38;
     int unk3c;
     int unk40;
     int unk44;
-    PointerStandin<NiD3DShaderConstantMap> vertex;
+    NiPointer<NiD3DShaderConstantMap> vertex;
     int unk4c;
     int unk50;
     int unk54;
@@ -9464,8 +9166,8 @@ struct StatePtr
 extern StatePtr DAT_01200ec0[112];
 extern unsigned DAT_01200a28[112];
 extern unsigned DAT_01200868[112];
-extern ConstantEntryStandin* DAT_01201080[17];
-extern ConstantEntryStandin* DAT_012010c4[10];
+extern NiShaderConstantMapEntry* DAT_01201080[17];
+extern NiShaderConstantMapEntry* DAT_012010c4[10];
 struct Owner
 {
     int unk00;
@@ -9518,13 +9220,13 @@ void Owner::InitShaderConstantMaps()
                 currentMask = _rotl(currentMask, 1);
                 if (currentMask & DAT_01200a28[index])
                 {
-                    ConstantEntryStandin* e = DAT_01201080[entry];
+                    NiShaderConstantMapEntry* e = DAT_01201080[entry];
                     if (e)
                     {
-                        if ((e->flags & 0xf0000000) == 0x20000000)
-                            vertex->v84(e);
+                        if ((e->m_uiValue1 & 0xf0000000) == 0x20000000)
+                            AddDefinedShaderConstantEntry(vertex, e);
                         else
-                            vertex->v80(e);
+                            AddShaderConstantEntry(vertex, e);
                     }
                 }
                 mask = currentMask;
@@ -9538,13 +9240,13 @@ void Owner::InitShaderConstantMaps()
                 currentMask = _rotl(currentMask, 1);
                 if (currentMask & DAT_01200868[index])
                 {
-                    ConstantEntryStandin* e = DAT_012010c4[entry];
+                    NiShaderConstantMapEntry* e = DAT_012010c4[entry];
                     if (e)
                     {
-                        if ((e->flags & 0xf0000000) == 0x20000000)
-                            pixel->v84(e);
+                        if ((e->m_uiValue1 & 0xf0000000) == 0x20000000)
+                            AddDefinedShaderConstantEntry(pixel, e);
                         else
-                            pixel->v80(e);
+                            AddShaderConstantEntry(pixel, e);
                     }
                 }
                 mask = currentMask;
@@ -12044,10 +11746,7 @@ finished:
 }
 }
 
-struct BSShaderPPLightingProperty
-{
-    bool FUN_004a2020(int flag);
-};
+
 struct TextureReceiver
 {
     TextureReceiver* FUN_004bc320(int code);
@@ -12807,122 +12506,41 @@ ISEffect::ISEffect()
     SetupRenderer();
 }
 
-struct ImageSpaceEffectParamC056
-{
-    virtual ~ImageSpaceEffectParamC056();
-};
-struct ParamArrayC056
-{
-    void* m_vfptr;
-    ImageSpaceEffectParamC056** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    __declspec(noalias) void SetAt(unsigned int uiIndex, ImageSpaceEffectParamC056* const& element) throw();
-};
-struct ImageSpaceEffectBaseC056
-{
-    virtual ~ImageSpaceEffectBaseC056();
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    ParamArrayC056 m_18;
-};
-struct FUN_00c056a0 : ImageSpaceEffectBaseC056
+template <> __declspec(noalias) void NiTArray<ImageSpaceEffectParam*, NiTMallocInterface<ImageSpaceEffectParam*> >::SetAt(unsigned int, ImageSpaceEffectParam* const&) throw();
+
+struct FUN_00c056a0 : ImageSpaceEffect
 {
     virtual ~FUN_00c056a0();
 };
-// Destroys the first element of the m_18 parameter array if it is non-null, then clears the slot.
+// Destroys the first element of pEffectParamList if it is non-null, then clears the slot.
 // @fnv 0x00c056a0
 FUN_00c056a0::~FUN_00c056a0()
 {
-    if (m_18.m_pBase[0])
+    if (pEffectParamList.m_pBase[0])
     {
-        delete m_18.m_pBase[0];
-        m_18.SetAt(0, 0);
+        // The game's slot zero is the scalar deleting destructor; the shared
+        // header currently declares only a nonvirtual destructor.
+        typedef void* (__thiscall *DeletingDestructor)(ImageSpaceEffectParam*, unsigned int);
+        ImageSpaceEffectParam* param = pEffectParamList.m_pBase[0];
+        if (param)
+            (*reinterpret_cast<DeletingDestructor**>(param))[0](param, 1);
+        pEffectParamList.SetAt(0, 0);
     }
 }
 
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile* plAddend);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile* plAddend);
 
-class NiRefObjectC1D
-{
-  public:
-    virtual ~NiRefObjectC1D();
-    virtual void DeleteThis();
 
-    void IncRefCount()
-    {
-        InterlockedIncrement((long volatile*)&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
 
-    unsigned int m_uiRefCount;
-};
 
-template <class T> class NiPointerC1D
-{
-  public:
-    NiPointerC1D(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointerC1D()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-    NiPointerC1D& operator=(const NiPointerC1D& ptr)
-    {
-        if (m_pObject != ptr.m_pObject)
-        {
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = ptr.m_pObject;
-            if (m_pObject)
-                m_pObject->IncRefCount();
-        }
-        return *this;
-    }
-    bool operator==(const NiPointerC1D& ptr) const
-    {
-        return m_pObject == ptr.m_pObject;
-    }
-    bool operator!=(const NiPointerC1D& ptr) const
-    {
-        return m_pObject != ptr.m_pObject;
-    }
 
-    T* m_pObject;
-};
-
-template <class T> class NiTObjectArrayC1D
-{
-  public:
-    virtual ~NiTObjectArrayC1D();
-    void Set(unsigned int uiIndex, const T& element);
-
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
 
 // Stores element at uiIndex in m_pBase, growing m_usSize if needed and adjusting m_usESize when the slot's null state changes.
 // @fnv 0x00c1d7e0
-template <class T> void NiTObjectArrayC1D<T>::Set(unsigned int uiIndex, const T& element)
+template <> void NiTArray<NiPointer<NiAVObject>, NiTNewInterface<NiPointer<NiAVObject> > >::SetAt(unsigned int uiIndex, const NiPointer<NiAVObject>& element)
 {
-    static const T kNull(0);
+    static const NiPointer<NiAVObject> kNull(0);
 
     if (uiIndex >= m_usSize)
     {
@@ -12947,75 +12565,50 @@ template <class T> void NiTObjectArrayC1D<T>::Set(unsigned int uiIndex, const T&
     m_pBase[uiIndex] = element;
 }
 
-class NiAVObjectC1D : public NiRefObjectC1D
-{
-};
 
-template class NiTObjectArrayC1D<NiPointerC1D<NiAVObjectC1D> >;
 
-struct RefPass04120 : NiD3DPass
-{
-    void DecRefCount()
-    {
-        if (--m_iObjectReferenceCount == 0)
-            ReturnToPool();
-    }
-};
+
+
 struct Pass04120
 {
-    RefPass04120* m_pObject;
+    StageReturn* m_pObject;
     Pass04120() : m_pObject(0)
     {}
     ~Pass04120()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
 };
-struct Shader04120
+// The shared pass header has no indexed SetStage declaration. This binding
+// supplies only that call; all pass data and other methods use NiD3DPass.
+struct D3DPassStageBinding
 {
-    int unk00, unk04, unk08, unk0c, unk10;
-    void* m_kTextureStages;
-    int unk18, unk1c, unk20, unk24, unk28, unk2c;
-    ElemObj* m_uiContentCount;
-    int unk34, unk38, unk3c, unk40;
-    NiRefObject* m_property;
-    int unk48, unk4c, unk50, unk54, unk58;
-    NiRefObject* m_texture;
-
-    void FUN_00e802b0(void*, NiD3DPass*);
-    void SetRenderState(int a, int b, int c)
-    {
-        if (!m_uiContentCount)
-            m_uiContentCount = FUN_00e7f5d0();
-        m_uiContentCount->SetNodeValue(a, b, c);
-    }
-    void SetTexture(NiRefObject* p)
-    {
-        if (m_texture != p)
-        {
-            if (m_texture)
-                m_texture->DecRefCount();
-            m_texture = p;
-            if (m_texture)
-                m_texture->IncRefCount();
-        }
-    }
-    void SetProperty(NiRefObject* p)
-    {
-        if (m_property != p)
-        {
-            if (m_property)
-                m_property->DecRefCount();
-            m_property = p;
-            if (m_property)
-                m_property->IncRefCount();
-        }
-    }
+    void SetStage(unsigned int index, BeamStage* stage);
 };
-void __cdecl FUN_00e804d0(void*);
+
+inline void NiD3DPass::SetRenderState(unsigned int state, unsigned int value, bool save)
+{
+    if (!m_pkRenderStateGroup)
+        m_pkRenderStateGroup = reinterpret_cast<D3DRenderStateGroup*>(FUN_00e7f5d0());
+    reinterpret_cast<ElemObj*>(m_pkRenderStateGroup)->SetNodeValue(state, value, save);
+}
+
+inline void NiD3DPass::SetPixelShader(NiD3DPixelShader* shader)
+{
+    NiRefObject* incoming = reinterpret_cast<NiRefObject*>(shader);
+    NiRefObject* old = reinterpret_cast<NiRefObject*>(m_spPixelShader.m_pObject);
+    if (old != incoming)
+    {
+        if (old)
+            old->DecRefCount();
+        m_spPixelShader.m_pObject = shader;
+        if (incoming)
+            incoming->IncRefCount();
+    }
+}
 void __cdecl AssignStageFromPool(Pass04120*);
-void __cdecl ConfigureBeamStage(NiD3DPass*, unsigned int, int, int, int);
+void __cdecl ConfigureBeamStage(BeamStage*, unsigned int, int, int, int);
 struct Target04120
 {
     virtual void v000();
@@ -13107,7 +12700,7 @@ struct Target04120
     int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
     int unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     int unk40, unk44, unk48, unk4c, unk50, unk54, unk58;
-    Shader04120* m_shader;
+    NiD3DPass* m_shader;
     int unk60, unk64, unk68, unk6c, unk70, unk74, unk78, unk7c;
     int unk80, unk84, unk88, unk8c, unk90, unk94, unk98;
     unsigned short m_stageCount;
@@ -13123,12 +12716,12 @@ struct Target04120
 bool Target04120::ConfigureBeam()
 {
     Pass04120 pass;
-    FUN_00e804d0(&m_shader);
+    NiD3DPass::CreateD3DPass(m_shader);
     for (unsigned int i = 0; i < m_stageCount; ++i)
     {
         AssignStageFromPool(&pass);
         ConfigureBeamStage(pass.m_pObject, i, 3, 2, 1);
-        m_shader->FUN_00e802b0(m_shader->m_kTextureStages, pass.m_pObject);
+        reinterpret_cast<D3DPassStageBinding*>(m_shader)->SetStage(m_shader->m_uiCurrentStage, pass.m_pObject);
     }
     m_shader->SetRenderState(7, 0, 1);
     m_shader->SetRenderState(14, 0, 1);
@@ -13137,19 +12730,19 @@ bool Target04120::ConfigureBeam()
     m_shader->SetRenderState(168, 15, 1);
     Configure();
     {
-        Shader04120* shader = m_shader;
+        NiD3DPass* shader = m_shader;
         NiRefObject* incoming = m_texture;
-        NiRefObject* old = shader->m_texture;
+        NiRefObject* old = reinterpret_cast<NiRefObject*>(shader->m_spVertexShader.m_pObject);
         if (old != incoming)
         {
             if (old)
                 old->DecRefCount();
-            shader->m_texture = incoming;
+            shader->m_spVertexShader.m_pObject = reinterpret_cast<NiD3DVertexShader*>(incoming);
             if (incoming)
                 incoming->IncRefCount();
         }
     }
-    m_shader->SetProperty(m_property);
+    m_shader->SetPixelShader(reinterpret_cast<NiD3DPixelShader*>(m_property));
     DAT_0126f74c = reinterpret_cast<int>(m_shader);
     return true;
 }

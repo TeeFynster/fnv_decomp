@@ -4,20 +4,10 @@
 
 // src/gamebryo2.2/corelibs/nianimation/niflipcontroller.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/niflipcontroller.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct FUN_00a4f300_shell
-{
-    void* GetEntryAt(int idx);
-};
+#include "../../../../include/BSFadeNode.h"
+
 extern "C" const void* g_011f3fd4;
 const void* __cdecl FUN_00a4f5d0();
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
-struct NiFlipController
-{
-    void* __thiscall FUN_00a4f820();
-};
 void* __cdecl CreateNiFlipController();
 
 struct StaticKey

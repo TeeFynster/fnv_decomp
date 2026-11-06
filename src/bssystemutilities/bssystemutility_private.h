@@ -2,28 +2,6 @@
 #define BSSYSTEMUTILITY_PRIVATE_H
 
 
-class CountingSemaphore
-{
-  public:
-    volatile int iCount;
-    void* hSemaphore;
-    int m_iMaximumCount;
-    void Signal();
-};
-
-class BSSystemUtility
-{
-  public:
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    unsigned char storage[0x94];
-    void Update();
-    void Initialize(const char*, const char*, unsigned int);
-    void Destroy();
-    void FUN_00af3340();
-};
-
 class IdleSystem
 {
   public:

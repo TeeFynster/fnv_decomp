@@ -1,17 +1,9 @@
-// fallout_shared/packagetarget_decls.h: declares BGSCameraPath
+// fallout_shared/packagetarget_decls.h: package target helpers
 #ifndef FNV_PACKAGETARGET_DECLS_H
 #define FNV_PACKAGETARGET_DECLS_H
 
-enum PACK_LOC_TYPE
-{
-    PACK_LOC_TYPE_INVALID = -1
-};
+#include "../../include/PACK_LOC_TYPE.h"
 class TESForm;
-class BGSCameraPath
-{
-  public:
-    int HasNameForWarning();
-};
 TESForm* GetFormByID(unsigned int);
 int Warning(const char*, ...);
 #endif

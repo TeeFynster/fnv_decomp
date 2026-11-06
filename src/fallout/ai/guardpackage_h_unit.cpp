@@ -9,6 +9,7 @@
 //
 // Compiler: MSVC9 SP1 15.00.30729.01, flags /Od /Oy- /GS /EHsc /Gy
 #include "guardpackage.h"
+#include "../../../include/GuardActorPackageData.h"
 
 // @fnv 0x009f27f0
 PTYPE GuardActorPackageData::GetPackageType()

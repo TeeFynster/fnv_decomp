@@ -1,3 +1,62 @@
+// ProcessInput_hkpconvexlistagent3: local type (was include/ProcessInput.h, which had no evidence of one real class); no method of it is bound to a named game function
+#include "../../../../../../include/Transform.h"
+#include "../../../../../../include/hkpCdBody.h"
+
+class CollisionInput;
+class Manager;
+class Context;
+
+class ProcessInput_hkpconvexlistagent3
+{
+public:
+    hkpCdBody* bodyA;
+    hkpCdBody* bodyB;
+    int unk08;
+    CollisionInput* input;
+    Manager* manager;
+    int unk14;
+    int unk18;
+    int unk1c;
+    __declspec(align(16)) Transform transform;
+    int extra60;
+    int extra64;
+    int extra68;
+    int extra6c;
+    int extra70;
+    int extra74;
+    int extra78;
+    int extra7c;
+
+    void FUN_00d33260(Context*);
+    float getTolerance() const;
+};
+#include "../../../../../../include/hkTransform.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkpShape.h"
+#include "../../../../../../include/hkpShapeContainer.h"
+#include "../../../../../../include/hkpConvexListShape.h"
+#include "../../../../../../include/hkpCdBody.h"
+#include "../../../../../../include/hkpCollidable.h"
+#include "../../../../../../include/hkContactPoint.h"
+#include "../../../../../../include/hkpCollisionDispatcher.h"
+
+inline hkpCdBody::hkpCdBody() {}
+inline hkpShapeType hkpShape::getType() const
+{
+    return reinterpret_cast<const hkpShapeType&>(m_type);
+}
+
+inline hkpCollisionDispatcher::Agent3FunctionTable::Agent3FunctionTable()
+{
+    m_bIsPredictive = false;
+    m_bAgentFlag1 = false;
+    m_bAgentFlag2 = false;
+    m_pUpdateFilterFunc = 0;
+    m_pCalcStats = 0;
+    m_pAgentFunction10 = 0;
+    m_pAgentFunction11 = 0;
+    m_pAgentFunction7 = 0;
+}
 
 // src/havok/physics/collide/agent3/convexlist3/hkpconvexlistagent3.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent3/convexlist3/hkpconvexlistagent3.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -22,40 +81,24 @@ void __cdecl FUN_00d32c40(int, int, int);
 void __cdecl FUN_00d32ae0(int, int, int);
 void __cdecl FUN_00d32b40(int, int, int);
 void __cdecl FUN_00d32ba0(int, int, int);
-struct FUN_00d33140_t
-{
-    void* m_ppVirtualMethodTable;
-    int m_04;
-    void* m_08;
-    void* m_0c;
-    void* m_10;
-    void* m_14;
-    void* m_18;
-    void* m_1c;
-    void* m_20;
-    void* m_24;
-    void* m_28;
-    void* m_2c;
-    char m_30;
-};
-// Fills the struct at a with function pointers for its slots, stores a pointer in m_04 and sets m_30 to 1.
+// Installs the convex-list callbacks and marks the agent as predictive.
 // @fnv 0x00d33140
-void __cdecl FUN_00d33140(int apStruct)
+void __cdecl FUN_00d33140(hkpCollisionDispatcher::Agent3FunctionTable& kFuncs)
 {
-    FUN_00d33140_t* p = (FUN_00d33140_t*)apStruct;
-    p->m_ppVirtualMethodTable = (void*)&SetFlagAndCall;
-    p->m_2c = (void*)&FUN_00d32cd0;
-    p->m_28 = (void*)&FUN_00d32ca0;
-    p->m_08 = (void*)&FUN_00d32bd0;
-    p->m_0c = (void*)&FUN_00d32be0;
-    p->m_10 = (void*)&FUN_00d32c00;
-    p->m_14 = (void*)&FUN_00d32c20;
-    p->m_18 = (void*)&FUN_00d32c40;
-    p->m_1c = (void*)&FUN_00d32ae0;
-    p->m_20 = (void*)&CallIfNotFlagged;
-    p->m_24 = (void*)&FUN_00d32b40;
-    p->m_04 = (int)&FUN_00d32ba0;
-    p->m_30 = 1;
+    hkpCollisionDispatcher::Agent3FunctionTable* p = &kFuncs;
+    p->m_pCreateFunc = reinterpret_cast<hkAgent3::CreateFunc>(&SetFlagAndCall);
+    p->m_pAgentFunction8 = reinterpret_cast<hkAgent3::ProcessFunc>(&FUN_00d32cd0);
+    p->m_pAgentFunction7 = reinterpret_cast<hkAgent3::SepNormalFunc>(&FUN_00d32ca0);
+    p->m_pAgentFunction3 = reinterpret_cast<hkAgent3::CleanupFunc>(&FUN_00d32bd0);
+    p->m_pAgentFunction4 = reinterpret_cast<hkAgent3::RemovePointFunc>(&FUN_00d32be0);
+    p->m_pAgentFunction5 = reinterpret_cast<hkAgent3::CommitPotentialFunc>(&FUN_00d32c00);
+    p->m_pCreateZombieFunc = reinterpret_cast<hkAgent3::CreateZombieFunc>(&FUN_00d32c20);
+    p->m_pUpdateFilterFunc = reinterpret_cast<hkAgent3::UpdateFilterFunc>(&FUN_00d32c40);
+    p->m_pCalcStats = reinterpret_cast<hkAgent3::CalcStatisticsFunc>(&FUN_00d32ae0);
+    p->m_pAgentFunction10 = reinterpret_cast<hkAgent3::InvalidateTimFunc>(&CallIfNotFlagged);
+    p->m_pAgentFunction11 = reinterpret_cast<hkAgent3::WarpTimeFunc>(&FUN_00d32b40);
+    p->m_pAgent3DestroyFuncs = reinterpret_cast<hkAgent3::DestroyFunc>(&FUN_00d32ba0);
+    p->m_bIsPredictive = true;
 }
 
 struct FUN_00d32ae0_agent
@@ -350,47 +393,15 @@ void __cdecl FUN_00d32c40(int aiUnused, Arg1* a1, int a2, Arg3* a3, int aiArg4, 
     FUN_00da48e0(&a1->field_10, &j);
 }
 
-struct hkpShapeD333
-{
-    void* m_ppVirtualMethodTable;
-    int m_usMemSizeAndFlags;
-    int m_ulUserData;
-    int m_type;
-};
-
-class hkpShapeContainerD333
-{
-  public:
-    virtual ~hkpShapeContainerD333() throw();
-    virtual void V1() throw();
-    virtual void V2() throw();
-    virtual void V3() throw();
-    virtual void V4() throw();
-    virtual const hkpShapeD333* GetShapeForKey(unsigned int uiKey, void* pvBuffer) const throw();
-};
-
-struct hkpShapeCollectionD333 : public hkpShapeD333
-{
-    int m_10;
-    hkpShapeContainerD333 m_container;
-};
-
-struct hkpCdBodyD333
-{
-    const hkpShapeD333* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const hkpCdBodyD333* m_parent;
-};
-
-struct hkpGskCacheD333
+// The shared hkpGskCache header is not available yet; retain the accessed cache fields here.
+struct hkpGskCache
 {
     unsigned short m_kVertices[4];
     unsigned char m_ucDimensionA;
     unsigned char m_ucDimensionB;
 };
 
-struct __declspec(align(16)) hkpShapeBufferD333
+struct __declspec(align(16)) hkpShapeBuffer
 {
     unsigned int m_buffer[128];
 };
@@ -401,8 +412,8 @@ class hkpChildProcessorD333
     virtual void V0() throw();
     virtual void V1() throw();
     virtual void V2() throw();
-    virtual int process(const hkpCdBodyD333& kBodyA, const hkpCdBodyD333& kBodyB, const void* pvInput,
-                        const void* pvTransform, hkpGskCacheD333* pkCache, void* pvOutput) throw();
+    virtual int process(const hkpCdBody& kBodyA, const hkpCdBody& kBodyB, const void* pvInput,
+                        const void* pvTransform, hkpGskCache* pkCache, void* pvOutput) throw();
 };
 
 class hkpConvexListProcessorD333
@@ -414,23 +425,23 @@ class hkpConvexListProcessorD333
     hkpChildProcessorD333* m_processor;
     bool m_invalidCache;
 
-    int ProcessConvexListChildren(const hkpCdBodyD333& kBodyA, const hkpCdBodyD333& kBodyB, const void* pvInput,
-                                  const void* pvTransform, hkpGskCacheD333* pkCache, void* pvOutput) throw();
+    int ProcessConvexListChildren(const hkpCdBody& kBodyA, const hkpCdBody& kBodyB, const void* pvInput,
+                                  const void* pvTransform, hkpGskCache* pkCache, void* pvOutput) throw();
 };
 
 // Resolves convex-list child shapes for both bodies from the cache keys, flags an invalid cache on mismatch, and delegates to m_processor->process.
 // @fnv 0x00d33390
-int hkpConvexListProcessorD333::ProcessConvexListChildren(const hkpCdBodyD333& kBodyA, const hkpCdBodyD333& kBodyB,
+int hkpConvexListProcessorD333::ProcessConvexListChildren(const hkpCdBody& kBodyA, const hkpCdBody& kBodyB,
                                                           const void* pvInput, const void* pvTransform,
-                                                          hkpGskCacheD333* pkCache, void* pvOutput) throw()
+                                                          hkpGskCache* pkCache, void* pvOutput) throw()
 {
-    hkpShapeBufferD333 kBuffer;
-    const hkpCdBodyD333* pkBodyA = &kBodyA;
-    const hkpCdBodyD333* pkBodyB = &kBodyB;
-    hkpCdBodyD333 kChildA;
-    hkpCdBodyD333 kChildB;
+    hkpShapeBuffer kBuffer;
+    const hkpCdBody* pkBodyA = &kBodyA;
+    const hkpCdBody* pkBodyB = &kBodyB;
+    hkpCdBody kChildA;
+    hkpCdBody kChildB;
 
-    if (kBodyA.m_pCollisionShape->m_type == 0x16)
+    if (kBodyA.m_pCollisionShape->getType() == 0x16)
     {
         int iKey = pkCache->m_kVertices[0] >> 8;
         for (int i = 1; i < pkCache->m_ucDimensionA; i++)
@@ -441,15 +452,15 @@ int hkpConvexListProcessorD333::ProcessConvexListChildren(const hkpCdBodyD333& k
                 return 0xffff;
             }
         }
-        const hkpShapeD333* pkChild = static_cast<const hkpShapeCollectionD333*>(kBodyA.m_pCollisionShape)
-                                          ->m_container.GetShapeForKey(iKey, &kBuffer);
+        const hkpShape* pkChild = static_cast<const hkpConvexListShape*>(kBodyA.m_pCollisionShape)
+                                          ->GetShapeForKey(iKey, kBuffer);
         kChildA.m_uiCollisionShapeKey = iKey;
         kChildA.m_parent = &kBodyA;
         kChildA.m_pMotionState = kBodyA.m_pMotionState;
         kChildA.m_pCollisionShape = pkChild;
         pkBodyA = &kChildA;
     }
-    if (kBodyB.m_pCollisionShape->m_type == 0x16)
+    if (kBodyB.m_pCollisionShape->getType() == 0x16)
     {
         int iKey = pkCache->m_kVertices[pkCache->m_ucDimensionA] >> 8;
         for (int i = pkCache->m_ucDimensionA + 1; i < pkCache->m_ucDimensionA + pkCache->m_ucDimensionB; i++)
@@ -460,8 +471,8 @@ int hkpConvexListProcessorD333::ProcessConvexListChildren(const hkpCdBodyD333& k
                 return 0xffff;
             }
         }
-        const hkpShapeD333* pkChild = static_cast<const hkpShapeCollectionD333*>(kBodyB.m_pCollisionShape)
-                                          ->m_container.GetShapeForKey(iKey, &kBuffer);
+        const hkpShape* pkChild = static_cast<const hkpConvexListShape*>(kBodyB.m_pCollisionShape)
+                                          ->GetShapeForKey(iKey, kBuffer);
         kChildB.m_parent = &kBodyB;
         kChildB.m_pMotionState = kBodyB.m_pMotionState;
         kChildB.m_pCollisionShape = pkChild;
@@ -519,7 +530,8 @@ void Container::FUN_00d33600(void* unusedA, void* unusedB, char* source, Callbac
     }
 }
 
-struct hkpShapeD32
+// Agent flags at +0x0b and cache data at +0x10 identify an agent record, not a polymorphic hkpShape.
+struct ConvexListAgentRecord
 {
     int unk00;
     int unk04;
@@ -531,12 +543,12 @@ struct hkpShapeD32
     int m_data;
 };
 
-void __cdecl ForwardToTarget(void* agent, hkpShapeD32* shape, void* input, void* output, void* collector);
+void __cdecl ForwardToTarget(void* agent, ConvexListAgentRecord* shape, void* input, void* output, void* collector);
 void __cdecl FUN_00da42b0(int* data, void* collector, void* input, void* output);
 
-// If the hkpShapeD32 flag 0x20 is set, forward the call to ForwardToTarget; otherwise call FUN_00da42b0 with the shape data.
+// If the ConvexListAgentRecord flag 0x20 is set, forward the call to ForwardToTarget; otherwise call FUN_00da42b0 with the shape data.
 // @fnv 0x00d32ba0
-void __cdecl FUN_00d32ba0(void* agent, hkpShapeD32* shape, void* input, void* output, void* collector)
+void __cdecl FUN_00d32ba0(void* agent, ConvexListAgentRecord* shape, void* input, void* output, void* collector)
 {
     if (shape->m_flags & 0x20)
     {
@@ -553,53 +565,14 @@ void __cdecl FUN_00d32bd0(int a, int b, int c)
     FUN_00d41860();
 }
 
-struct hkpAgent3FuncsD331
-{
-    hkpAgent3FuncsD331()
-    {
-        m_bIsPredictive = false;
-        m_bAgentFlag1 = false;
-        m_bAgentFlag2 = false;
-        m_pAgentFunction7 = 0;
-        m_pAgentFunction8 = 0;
-        m_pUpdateFilterFunc = 0;
-        m_pAgentFunction10 = 0;
-        m_pAgentFunction11 = 0;
-    }
-
-    void* m_pCreateFunc;
-    void* m_pAgent3DestroyFuncs;
-    void* m_pAgentFunction3;
-    void* m_pAgentFunction4;
-    void* m_pAgentFunction5;
-    void* m_createZeroContactFunc;
-    void* m_pAgentFunction7;
-    void* m_pAgentFunction8;
-    void* m_pUpdateFilterFunc;
-    void* m_pAgentFunction10;
-    void* m_pAgentFunction11;
-    void* m_setCollisionQualityFunc;
-    bool m_bIsPredictive;
-    bool m_bAgentFlag1;
-    bool m_bAgentFlag2;
-};
-
-void __cdecl FUN_00d33140(hkpAgent3FuncsD331& kFuncs);
-
-class hkpCollisionDispatcherD331
-{
-  public:
-    void AddEntry(const hkpAgent3FuncsD331& kFuncs, int iTypeA, int iTypeB);
-};
-
-// Initializes a hkpAgent3FuncsD331 via FUN_00d33140 and adds two entries to pkDispatcher for type pairs 0x12/0x16 and 0x16/0x16.
+// Initializes the function table and registers the convex/convex-list and convex-list/convex-list pairs.
 // @fnv 0x00d331a0
-void __cdecl RegisterAgent3Entries(hkpCollisionDispatcherD331* pkDispatcher)
+void __cdecl RegisterAgent3Entries(hkpCollisionDispatcher* pkDispatcher)
 {
-    __declspec(align(16)) hkpAgent3FuncsD331 kFuncs;
+    __declspec(align(16)) hkpCollisionDispatcher::Agent3FunctionTable kFuncs;
     FUN_00d33140(kFuncs);
-    pkDispatcher->AddEntry(kFuncs, 0x12, 0x16);
-    pkDispatcher->AddEntry(kFuncs, 0x16, 0x16);
+    pkDispatcher->AddEntry(&kFuncs, 0x12, 0x16);
+    pkDispatcher->AddEntry(&kFuncs, 0x16, 0x16);
 }
 
 #include <xmmintrin.h>
@@ -622,35 +595,6 @@ void __cdecl FUN_00d32ca0(int a, int b, int c, int output)
     reinterpret_cast<float*>(p)[3] = finalComponent;
 }
 
-struct HK_ASSERT_OBJECT_SIZE_OK_FUNC_t
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    int m_2c;
-    int m_30;
-    int m_34;
-    int m_38;
-    int m_3c;
-    int m_40;
-    int m_44;
-    int m_48;
-    int m_4c;
-    int m_50;
-    int m_54;
-    int m_58;
-    int m_5c;
-    HK_ASSERT_OBJECT_SIZE_OK_FUNC_t& FUN_00d33260(const HK_ASSERT_OBJECT_SIZE_OK_FUNC_t& a);
-};
-
 struct __declspec(align(16)) HK_Stage_t
 {
     int d00;
@@ -671,39 +615,39 @@ struct __declspec(align(16)) HK_Stage_t
     int d3c;
 };
 
-// Copies the first 20 bytes and the remaining 64 bytes of the source object into this object, returning a reference to this.
+// Copies the body, collision input, manager, and transform from the source context.
 // @fnv 0x00d33260
-HK_ASSERT_OBJECT_SIZE_OK_FUNC_t& HK_ASSERT_OBJECT_SIZE_OK_FUNC_t::FUN_00d33260(const HK_ASSERT_OBJECT_SIZE_OK_FUNC_t& a)
+ProcessInput_hkpconvexlistagent3& __fastcall CopyProcessInput(ProcessInput_hkpconvexlistagent3* destination, int, const ProcessInput_hkpconvexlistagent3& a)
 {
-    m_00 = a.m_00;
-    m_04 = a.m_04;
-    m_08 = a.m_08;
-    m_0c = a.m_0c;
-    m_10 = a.m_10;
+    destination->bodyA = a.bodyA;
+    destination->bodyB = a.bodyB;
+    destination->unk08 = a.unk08;
+    destination->input = a.input;
+    destination->manager = a.manager;
     HK_Stage_t stagedTail;
-    stagedTail.d00 = a.m_20;
-    stagedTail.d04 = a.m_24;
-    stagedTail.d08 = a.m_28;
-    stagedTail.d0c = a.m_2c;
-    stagedTail.d10 = a.m_30;
-    stagedTail.d14 = a.m_34;
-    stagedTail.d18 = a.m_38;
-    stagedTail.d1c = a.m_3c;
-    stagedTail.d20 = a.m_40;
-    stagedTail.d24 = a.m_44;
-    stagedTail.d28 = a.m_48;
-    stagedTail.d2c = a.m_4c;
-    stagedTail.d30 = a.m_50;
-    stagedTail.d34 = a.m_54;
-    stagedTail.d38 = a.m_58;
-    stagedTail.d3c = a.m_5c;
-    __m128* d = (__m128*)&m_20;
+    stagedTail.d00 = reinterpret_cast<const int*>(&a.transform)[0];
+    stagedTail.d04 = reinterpret_cast<const int*>(&a.transform)[1];
+    stagedTail.d08 = reinterpret_cast<const int*>(&a.transform)[2];
+    stagedTail.d0c = reinterpret_cast<const int*>(&a.transform)[3];
+    stagedTail.d10 = reinterpret_cast<const int*>(&a.transform)[4];
+    stagedTail.d14 = reinterpret_cast<const int*>(&a.transform)[5];
+    stagedTail.d18 = reinterpret_cast<const int*>(&a.transform)[6];
+    stagedTail.d1c = reinterpret_cast<const int*>(&a.transform)[7];
+    stagedTail.d20 = reinterpret_cast<const int*>(&a.transform)[8];
+    stagedTail.d24 = reinterpret_cast<const int*>(&a.transform)[9];
+    stagedTail.d28 = reinterpret_cast<const int*>(&a.transform)[10];
+    stagedTail.d2c = reinterpret_cast<const int*>(&a.transform)[11];
+    stagedTail.d30 = reinterpret_cast<const int*>(&a.transform)[12];
+    stagedTail.d34 = reinterpret_cast<const int*>(&a.transform)[13];
+    stagedTail.d38 = reinterpret_cast<const int*>(&a.transform)[14];
+    stagedTail.d3c = reinterpret_cast<const int*>(&a.transform)[15];
+    __m128* d = (__m128*)&destination->transform;
     const __m128* s = (const __m128*)&stagedTail.d00;
     d[0] = s[0];
     d[1] = s[1];
     d[2] = s[2];
     d[3] = s[3];
-    return *this;
+    return *destination;
 }
 
 #include <string.h>
@@ -817,45 +761,13 @@ FUN_00d33670::FUN_00d33670(const LargeOutput& src)
 
 #include <xmmintrin.h>
 namespace fnv_00d32cd0 {
+
 #include <windows.h>
 #include <string.h>
 
 extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 
-struct __declspec(align(16)) FourFloatVector
-{
-    union
-    {
-        __m128 v;
-        struct
-        {
-            float x, y, z, w;
-        };
-    };
-};
-struct Transform
-{
-    FourFloatVector rotation0, rotation1, rotation2, translation;
-    void FUN_00cb22f0(Transform*, Transform*);
-};
-struct Shape
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c,
-        unk40, unk44;
-    int childCount;
-    int unk4c;
-    int children;
-};
-struct Body
-{
-    Shape* shape;
-    int key;
-    Transform* transform;
-    Body* parent;
-    int unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c, unk40, unk44, unk48;
-    float radius;
-};
 struct CollisionInput
 {
     int unk00, unk04;
@@ -866,13 +778,9 @@ struct Cache
     int first, second;
     unsigned int state;
 };
-struct Contact
-{
-    FourFloatVector position, normal;
-};
 struct Basis
 {
-    FourFloatVector x, y, z;
+    hkVector4 x, y, z;
 };
 struct ContactIDs
 {
@@ -880,7 +788,7 @@ struct ContactIDs
 };
 struct CacheState
 {
-    FourFloatVector first, second;
+    hkVector4 first, second;
     union
     {
         float time;
@@ -897,7 +805,7 @@ struct CacheState
         timeBits = source.timeBits;
         key = source.key;
         ids = source.ids;
-        transform = source.transform;
+        memcpy(&transform, &source.transform, sizeof(transform));
     }
 };
 struct Output
@@ -905,7 +813,7 @@ struct Output
     int count;
     int owner;
     int unk08, unk0c;
-    Contact contacts[384];
+    hkContactPoint contacts[384];
     CacheState cache;
     void* savedContacts;
 };
@@ -923,13 +831,13 @@ struct Manager
 };
 struct Context
 {
-    Body* bodyA;
-    Body* bodyB;
+    hkpCdBody* bodyA;
+    hkpCdBody* bodyB;
     int unk08;
     CollisionInput* input;
     Manager* manager;
     int unk14, unk18, unk1c;
-    Transform transform;
+    hkTransform transform;
     int extra60, extra64, extra68, extra6c, extra70, extra74, extra78, extra7c;
 };
 struct StateRecord
@@ -959,33 +867,22 @@ struct FUN_00d33670
     int count;
     int owner;
     int unk08, unk0c;
-    Contact contacts[128];
+    hkContactPoint contacts[128];
     CacheState cache;
     FUN_00d33670(Output*);
-    void FUN_00d33600(Body*, Body*, Output*, Manager*);
+    void FUN_00d33600(hkpCdBody*, hkpCdBody*, Output*, Manager*);
 };
-struct ProcessInput
-{
-    Body* bodyA;
-    Body* bodyB;
-    int unk08;
-    CollisionInput* input;
-    Manager* manager;
-    int unk14, unk18, unk1c;
-    Transform transform;
-    int extra60, extra64, extra68, extra6c, extra70, extra74, extra78, extra7c;
-    void FUN_00d33260(Context*);
-};
+
 struct CollisionResult
 {
     float unk00, unk04, unk08, distance;
 };
 struct ProbeInput
 {
-    Transform* relative;
-    Transform* world;
-    Shape* a;
-    Shape* b;
+    hkTransform* relative;
+    const void* world;
+    const hkpShape* a;
+    const hkpShape* b;
     float tolerance;
 };
 struct Collector
@@ -1014,9 +911,9 @@ struct Monitor
 extern DWORD DAT_0126835c;
 extern void* DAT_010ceb44;
 extern float DAT_010ceb6c;
-int __cdecl FUN_00dabca0(ProbeInput*, Agent*, void*, FourFloatVector*);
+int __cdecl FUN_00dabca0(ProbeInput*, Agent*, void*, hkVector4*);
 void __cdecl FUN_00da42b0(Cache*, int, Manager*, int);
-void* __cdecl FUN_00d41a30(ProcessInput*, int, Agent*, void*, Output*);
+void* __cdecl FUN_00d41a30(ProcessInput_hkpconvexlistagent3*, int, Agent*, void*, Output*);
 void __cdecl FUN_00d41860(int, Agent*, Manager*, int);
 void __cdecl InitBlockPool(Cache*);
 void __cdecl FUN_00da4aa0(Cache*, Context*, int*, int*, Output*);
@@ -1035,7 +932,7 @@ void* __cdecl FUN_00d32cd0(Context* context, int stream, Agent* agent, Collision
         volatile unsigned int stamp;
         union
         {
-            Shape* shape;
+            hkpConvexListShape* shape;
             volatile unsigned int stamp;
         } shapeEnd;
 
@@ -1060,15 +957,11 @@ void* __cdecl FUN_00d32cd0(Context* context, int stream, Agent* agent, Collision
             monitor->current = (MonitorEntry*)((char*)entry + 16);
         }
     }
-    scratch.shapeEnd.shape = context->bodyB->shape;
+    scratch.shapeEnd.shape = static_cast<hkpConvexListShape*>(const_cast<hkpShape*>(context->bodyB->m_pCollisionShape));
     FUN_00d33670 temporary(output);
 
-    FourFloatVector separating;
-    union
-    {
-        Transform relative;
-        ProcessInput process;
-    } phase;
+    hkVector4 separating;
+    ProcessInput_hkpconvexlistagent3 phase;
     union
     {
         ProbeInput probe;
@@ -1095,12 +988,12 @@ void* __cdecl FUN_00d32cd0(Context* context, int stream, Agent* agent, Collision
             agent->state.countdown = 25;
             {
 
-                phase.relative.FUN_00cb22f0(context->bodyA->transform, context->bodyB->transform);
+                reinterpret_cast<hkTransform&>(phase).FUN_00cb22f0(context->bodyA->m_pMotionState, context->bodyB->m_pMotionState);
 
-                arguments.probe.a = context->bodyA->shape;
-                arguments.probe.b = context->bodyB->shape;
-                arguments.probe.relative = &phase.relative;
-                arguments.probe.world = context->bodyA->transform;
+                arguments.probe.a = context->bodyA->m_pCollisionShape;
+                arguments.probe.b = context->bodyB->m_pCollisionShape;
+                arguments.probe.relative = reinterpret_cast<hkTransform*>(&phase);
+                arguments.probe.world = context->bodyA->m_pMotionState;
                 arguments.probe.tolerance = context->input->tolerance;
 
                 if (!FUN_00dabca0(&arguments.probe, agent, collisionOutput, &separating))
@@ -1119,27 +1012,27 @@ void* __cdecl FUN_00d32cd0(Context* context, int stream, Agent* agent, Collision
         arguments.collector.manager = context->manager;
         arguments.collector.hit = false;
 
-        phase.process.FUN_00d33260(context);
-        phase.process.extra60 = context->extra60;
-        phase.process.extra70 = context->extra70;
-        phase.process.extra74 = context->extra74;
-        phase.process.extra78 = context->extra78;
-        phase.process.extra7c = context->extra7c;
-        phase.process.manager = (Manager*)&arguments.collector;
-        scratch.outcome.result = FUN_00d41a30(&phase.process, stream, agent, collisionOutput, output);
-        phase.process.manager = arguments.collector.manager;
+        phase.FUN_00d33260(reinterpret_cast<::Context*>(context));
+        phase.extra60 = context->extra60;
+        phase.extra70 = context->extra70;
+        phase.extra74 = context->extra74;
+        phase.extra78 = context->extra78;
+        phase.extra7c = context->extra7c;
+        phase.manager = reinterpret_cast<::Manager*>(&arguments.collector);
+        scratch.outcome.result = FUN_00d41a30(&phase, stream, agent, collisionOutput, output);
+        phase.manager = reinterpret_cast<::Manager*>(arguments.collector.manager);
         if (!arguments.collector.hit)
         {
             if (!agent->state.count || (agent->flags & 0x40))
                 goto finished;
-            Body* body = context->bodyB;
-            while (body->parent)
-                body = body->parent;
-            float radiusB = body->radius;
+            const hkpCdBody* body = context->bodyB;
+            while (body->m_parent)
+                body = body->m_parent;
+            float radiusB = reinterpret_cast<const hkpCollidable*>(body)->m_fAllowedPenetrationDepth;
             body = context->bodyA;
-            while (body->parent)
-                body = body->parent;
-            float radiusA = body->radius;
+            while (body->m_parent)
+                body = body->m_parent;
+            float radiusA = reinterpret_cast<const hkpCollidable*>(body)->m_fAllowedPenetrationDepth;
             float radius = radiusA < radiusB ? radiusA : radiusB;
             float twice = radius * 2.0f;
             if (!(collisionOutput->distance < -twice))
@@ -1170,13 +1063,14 @@ void* __cdecl FUN_00d32cd0(Context* context, int stream, Agent* agent, Collision
 fallback:
     collisionOutput->distance = -1.701410009187828e+38f;
     {
-        int count = scratch.shapeEnd.shape->childCount;
+        int count = scratch.shapeEnd.shape->m_kChildShapes.m_iElementCount;
         int** arena = (int**)FUN_00c85750();
         int* keys = *arena;
         *arena = (int*)((char*)keys + ((count * 4 + 0x83) & ~0x7f));
         for (int i = 0; i < count; ++i)
             keys[i] = i;
-        int* sub = &(*(Shape* volatile*)&scratch.shapeEnd.shape)->unk14;
+        int* sub = reinterpret_cast<int*>(
+            reinterpret_cast<char*>(*(hkpConvexListShape* volatile*)&scratch.shapeEnd.shape) + sizeof(hkpConvexShape));
         Cache* cache = &agent->state.cache;
         FUN_00da4aa0((keys[count] = -1, cache), context, sub, keys, output);
         *(int**)FUN_00c85750() = keys;
@@ -1210,30 +1104,30 @@ class hkpLinearCastProcessorD334
     virtual void V4() throw();
     virtual void V5() throw();
     virtual void V6() throw();
-    virtual int process(const hkpCdBodyD333* pkBodyA, const hkpCdBodyD333* pkBodyB, int iArg3, int iArg4, float fArg5,
-                        int iArg6, hkpGskCacheD333* pkCache, int iArg8, int iArg9) throw();
+    virtual int process(const hkpCdBody* pkBodyA, const hkpCdBody* pkBodyB, int iArg3, int iArg4, float fArg5,
+                        int iArg6, hkpGskCache* pkCache, int iArg8, int iArg9) throw();
 };
 
 class hkpConvexListLinearCastD334 : public hkpConvexListProcessorD333
 {
   public:
-    int FUN_00d334c0(const hkpCdBodyD333* a1, const hkpCdBodyD333* a2, int a3, int a4, float a5, int a6,
-                     hkpGskCacheD333* a7, int a8, int a9);
+    int FUN_00d334c0(const hkpCdBody* a1, const hkpCdBody* a2, int a3, int a4, float a5, int a6,
+                     hkpGskCache* a7, int a8, int a9);
 };
 
 // Resolves shape collection sub-shapes for both bodies if needed, then delegates to the linear cast processor's process method.
 // @fnv 0x00d334c0
-int hkpConvexListLinearCastD334::FUN_00d334c0(const hkpCdBodyD333* apBodyA, const hkpCdBodyD333* apBodyB, int a3,
-                                              int a4, float a5, int a6, hkpGskCacheD333* apCache, int a8, int a9)
+int hkpConvexListLinearCastD334::FUN_00d334c0(const hkpCdBody* apBodyA, const hkpCdBody* apBodyB, int a3,
+                                              int a4, float a5, int a6, hkpGskCache* apCache, int a8, int a9)
 {
-    hkpCdBodyD333 wrapper2;
-    hkpShapeBufferD333 buffer;
-    hkpCdBodyD333 wrapper1;
+    hkpCdBody wrapper2;
+    hkpShapeBuffer buffer;
+    hkpCdBody wrapper1;
 
-    const hkpCdBodyD333* bodyA = apBodyA;
-    const hkpCdBodyD333* bodyB = apBodyB;
+    const hkpCdBody* bodyA = apBodyA;
+    const hkpCdBody* bodyB = apBodyB;
 
-    if (apBodyA->m_pCollisionShape->m_type == 0x16)
+    if (apBodyA->m_pCollisionShape->getType() == 0x16)
     {
         int keyA = apCache->m_kVertices[0] >> 8;
         for (int i = 1; i < apCache->m_ucDimensionA; ++i)
@@ -1244,8 +1138,8 @@ int hkpConvexListLinearCastD334::FUN_00d334c0(const hkpCdBodyD333* apBodyA, cons
                 return 1;
             }
         }
-        const hkpShapeD333* shape = static_cast<const hkpShapeCollectionD333*>(apBodyA->m_pCollisionShape)
-                                        ->m_container.GetShapeForKey(keyA, &buffer);
+        const hkpShape* shape = static_cast<const hkpConvexListShape*>(apBodyA->m_pCollisionShape)
+                                        ->GetShapeForKey(keyA, buffer);
         wrapper1.m_uiCollisionShapeKey = keyA;
         wrapper1.m_parent = apBodyA;
         wrapper1.m_pMotionState = apBodyA->m_pMotionState;
@@ -1253,7 +1147,7 @@ int hkpConvexListLinearCastD334::FUN_00d334c0(const hkpCdBodyD333* apBodyA, cons
         bodyA = &wrapper1;
     }
 
-    if (apBodyB->m_pCollisionShape->m_type == 0x16)
+    if (apBodyB->m_pCollisionShape->getType() == 0x16)
     {
         int keyB = apCache->m_kVertices[apCache->m_ucDimensionA] >> 8;
         for (int i = apCache->m_ucDimensionA + 1; i < apCache->m_ucDimensionB + apCache->m_ucDimensionA; ++i)
@@ -1264,8 +1158,8 @@ int hkpConvexListLinearCastD334::FUN_00d334c0(const hkpCdBodyD333* apBodyA, cons
                 return 1;
             }
         }
-        const hkpShapeD333* shape = static_cast<const hkpShapeCollectionD333*>(apBodyB->m_pCollisionShape)
-                                        ->m_container.GetShapeForKey(keyB, &buffer);
+        const hkpShape* shape = static_cast<const hkpConvexListShape*>(apBodyB->m_pCollisionShape)
+                                        ->GetShapeForKey(keyB, buffer);
         wrapper2.m_parent = apBodyB;
         wrapper2.m_pMotionState = apBodyB->m_pMotionState;
         wrapper2.m_pCollisionShape = shape;

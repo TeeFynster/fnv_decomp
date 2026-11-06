@@ -15,7 +15,7 @@ void PlayerCharacter::SetActionGroupFlags(unsigned short group, ACTION_FLAGS fla
         Animation* animation;
     } selection;
     selection.type = TESAnimGroup::GetType(group);
-    if (selection.type == ANIM_GROUP_ENUM_ANIM_GROUP_NONE)
+    if (selection.type == static_cast<ANIM_GROUP_ENUM>(255))  // ANIM_GROUP_NONE
         return;
     selection.animation = GetAnimation(true);
     bool copied = false;
@@ -28,16 +28,16 @@ void PlayerCharacter::SetActionGroupFlags(unsigned short group, ACTION_FLAGS fla
     if (!copied)
     {
         if (selection.animation->IsGroupQueued(group))
-            selection.animation->PlayGroup(group, flags, -1, ANIM_GROUP_SECTION_NONE);
+            selection.animation->PlayGroup(group, flags, -1, ANIM_GROUP_SECTION_AGS_NONE);
         else if (TESAnimGroup::IsIronSightsAction(group) && selection.animation->IsGroupQueued(group - 3))
-            selection.animation->PlayGroup(group - 3, flags, -1, ANIM_GROUP_SECTION_NONE);
+            selection.animation->PlayGroup(group - 3, flags, -1, ANIM_GROUP_SECTION_AGS_NONE);
         else
         {
             unsigned short fallback = GetAnimGroup(selection.type, 0, !GetActiveWeapon(), selection.animation);
             if (TESAnimGroup::GetType(fallback) == selection.type ||
                 (TESAnimGroup::IsIronSightsAction(selection.type) &&
                  TESAnimGroup::GetType(fallback) == selection.type - 3))
-                selection.animation->PlayGroup(fallback, flags, -1, ANIM_GROUP_SECTION_NONE);
+                selection.animation->PlayGroup(fallback, flags, -1, ANIM_GROUP_SECTION_AGS_NONE);
         }
     }
 }

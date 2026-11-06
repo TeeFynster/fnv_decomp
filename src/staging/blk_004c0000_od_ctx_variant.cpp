@@ -5,7 +5,29 @@
 // against, for verified matches whose own declarations clash with the unit's current types.
 // src/staging/blk_004c0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
-#include "../../include/layout_support.h"
+#include "../../include/INISettingCollection.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiControllerSequence.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiObject.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiTimeController.h"
+#include "../../include/NiTriBasedGeom.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiSkinInstance.h"
+#include "../../include/SkyTextureManager.h"
+
+#include "../../include/BGSLoadGameBuffer.h"
+#include "../../include/BGSMoviePlayer.h"
+#include "../../include/BSAudio.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/GO.h"
+#include "../../include/NiStream.h"
+#include "../../include/NiUpdateData.h"
+
 struct FUN_004dfdd0_StandIn
 {
     float m_f0;
@@ -34,7 +56,8 @@ struct FUN_004d7490_Class
 {
     void FUN_004d7490();
 };
-struct ArrSI
+// Exe 0x004dcdf0: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BlkOffset08View
 {
     unsigned int GetFlags();
 };
@@ -149,10 +172,6 @@ struct FUN_004def90_Class
 {
     void FUN_004def90();
 };
-struct GO
-{
-    GO& operator=(void*);
-};
 struct FUN_004dfe80_Class
 {
     GO m_p[12];
@@ -256,63 +275,6 @@ struct FUN_004d7440_Class
 extern int(__cdecl* DAT_011c6f18)(int, int, int, int);
 int __cdecl FUN_004d7890(int a, int b, int c, int d);
 void* __cdecl FUN_004b5a80(void const*);
-struct FUN_004d8530_Class
-{
-    virtual void const* f00();
-    virtual void const* f01();
-    virtual void const* f02();
-    virtual void const* f03();
-    virtual void const* f04();
-    virtual void const* f05();
-    virtual void const* f06();
-    virtual void const* f07();
-    virtual void const* f08();
-    virtual void const* f09();
-    virtual void const* f10();
-    virtual void const* f11();
-    virtual void const* f12();
-    virtual void const* f13();
-    virtual void const* f14();
-    virtual void const* f15();
-    virtual void const* f16();
-    virtual void const* f17();
-    virtual void const* f18();
-    virtual void const* f19();
-    virtual void const* f20();
-    virtual void const* f21();
-    virtual void const* f22();
-    virtual void const* f23();
-    virtual void const* f24();
-    virtual void const* f25();
-    virtual void const* f26();
-    virtual void const* f27();
-    virtual void const* f28();
-    virtual void const* f29();
-    virtual void const* f30();
-    virtual void const* f31();
-    virtual void const* f32();
-    virtual void const* f33();
-    virtual void const* f34();
-    virtual void const* f35();
-    virtual void const* f36();
-    virtual void const* f37();
-    virtual void const* f38();
-    virtual void const* f39();
-    virtual void const* f40();
-    virtual void const* f41();
-    virtual void const* f42();
-    virtual void const* f43();
-    virtual void const* f44();
-    virtual void const* f45();
-    virtual void const* f46();
-    virtual void const* f47();
-    virtual void const* f48();
-    virtual void const* f49();
-    virtual void const* f50();
-    virtual void const* f51();
-    virtual void const* f52();
-    void* __thiscall FUN_004d8530();
-};
 struct FUN_004d8560_Inner
 {
     virtual void f0();
@@ -323,7 +285,8 @@ struct FUN_004d8560_Outer
     char _0[0x10];
     FUN_004d8560_Inner _10;
 };
-struct ScriptLocalsX
+// 0x004ae750 also binds bhkWorldObject::FUN_004ae750; 0x004d8560 queries its physics-object interface.
+struct NullablePhysicsObjectAccess
 {
     FUN_004d8560_Outer* GetLocalData();
 };
@@ -413,7 +376,6 @@ struct Date
 {
     ~Date();
 };
-struct NiNode;
 extern NiPointer<NiNode> g_011dee84;
 void FUN_004dc560();
 extern "C" unsigned char __cdecl FUN_00446e10(void);
@@ -463,11 +425,6 @@ struct FUN_004de550_StandIn
 {
     void __thiscall FUN_0045d240();
     void* __thiscall FUN_004de550(unsigned int);
-};
-struct NiTexture;
-struct SkyTextureManager
-{
-    static void __cdecl LoadTextureFromPath(NiPointer<NiTexture>*, char const*);
 };
 extern NiPointer<NiTexture> DAT_011c7804[];
 bool __cdecl FUN_004deed0(char const* a, unsigned char b);
@@ -656,17 +613,6 @@ struct FUN_004d7470_StandIn
 extern char DAT_011c6e10;
 void __cdecl FUN_00403d30(void* destination, int pNodeValue, unsigned int size);
 typedef int(__stdcall* SendTreeMessage)(void*, int, int, int);
-struct FUN_004d74c0_Value
-{
-    int FUN_00453470();
-};
-struct FUN_004d74c0_Node
-{
-    virtual void f00();
-    virtual void f04();
-    virtual void f08();
-    virtual FUN_004d74c0_Value* getValue();
-};
 struct FUN_004d74c0_Item
 {
     unsigned int mask;
@@ -678,7 +624,7 @@ struct FUN_004d74c0_Item
     int image;
     int selectedImage;
     int children;
-    FUN_004d74c0_Node* itemData;
+    NiObject* itemData;
     int integral;
     int stateEx;
     void* hwnd;
@@ -687,51 +633,8 @@ struct FUN_004d74c0_Item
 void __cdecl ExpandTreeItemsRecursively(void* tree, int startingItem, int expandFlags);
 int FUN_00406d30(char* pcDest, unsigned int uiSize, const char* pcSrc);
 int FUN_00406d50(char* pcDest, unsigned int uiSize, const char* pcSrc);
-class NiObject
-{
-  public:
-    int m_aiObject[2];
-};
-class NiFixedString
-{
-  public:
-    operator const char*() const;
-    const char* m_kHandle;
-};
-struct NiUpdateData
-{
-    float m_fTime;
-    bool m_bUpdate;
-    bool m_bIsMultiThreaded;
-    int m_pkUpdateProcess;
-    NiUpdateData(float fTime, bool m_bUpdateEnabled, bool bIsMultiThreaded);
-};
-class NiAVObject : public NiObject
-{
-  public:
-    void FUN_00450f90(bool bCulled);
-    void FUN_00a5a040();
-    void Update(NiUpdateData& kUpdateData);
-    NiFixedString& GetName();
-};
-class NiStream
-{
-  public:
-    NiStream();
-    ~NiStream();
-    void InsertObject(NiObject* pkObject);
-    bool FUN_00a640b0(const char* pcFileName);
-    int m_kNextStreamField[0x172];
-};
 int FUN_004d78c0(NiObject* pkObject, int iType, int iCommand);
-struct NiObject;
-struct NiRTTI
-{
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
 extern const NiRTTI DAT_012024e0;
-NiObject* __cdecl FUN_00653270(const NiRTTI*, NiObject*);
 const char* __cdecl PrepareScriptMessage(const char* msg, bool flag);
 class BGSAddonNode;
 struct Holder_004d9100 : public NiTArray<BGSAddonNode*, NiTMallocInterface<BGSAddonNode*> >
@@ -907,16 +810,13 @@ struct TreeInsert4d86
 };
 typedef void*(__stdcall* SendMessage4d86)(void*, int, int, int);
 const char* PrepareScriptMessage(const char* pcText, bool bFlag);
-struct MediaSet4d86
-{
-    int FUN_008041a0();
-};
 struct Palette4d86;
 struct Object4d86
 {
     Palette4d86* GetStringAtOffset();
     unsigned int FUN_00495d00();
-    MediaSet4d86* FUN_00495d20(unsigned int uiIndex);
+    // 0x00495d20 binds NiControllerManager::GetSequenceAt; the sequence state getter is 0x008041a0.
+    NiControllerSequence* FUN_00495d20(unsigned int uiIndex);
 };
 struct TreeCtrl4d86
 {
@@ -925,7 +825,7 @@ struct TreeCtrl4d86
     void* m_hWnd;
     void* m_hTreeWnd;
     void AddNameItems(void* hParent, Palette4d86* pkPalette);
-    void FUN_004d8b90(void* hParent, MediaSet4d86* pkSet);
+    void FUN_004d8b90(void* hParent, NiControllerSequence* pkSet);
     void PopulateObjectTree(void* hParent, Object4d86* pkObject);
 };
 struct TreeItem4d88
@@ -1078,15 +978,6 @@ struct FUN_004de3f0_Class
 {
     void __thiscall FUN_004de420();
     void* __thiscall FUN_004de3f0(int flags);
-};
-struct INISettingCollection
-{
-    INISettingCollection();
-    virtual void v0();
-};
-struct FUN_004de530 : public INISettingCollection
-{
-    FUN_004de530();
 };
 extern char DAT_011c77e8;
 extern void* DAT_011c7810;
@@ -1393,11 +1284,6 @@ class FUN_004d4eb0 : public FUN_004d4f10
   public:
     virtual ~FUN_004d4eb0();
 };
-struct BGSLoadGameBuffer
-{
-    virtual unsigned char GetVersion();
-    void FUN_00864980(void*, unsigned int);
-};
 struct SavedSettingValue
 {
     unsigned int unk00;
@@ -1467,10 +1353,6 @@ class Owner
     ListT kList;
     void* GetByIndex(unsigned int idx);
 };
-struct NiTMallocInterface_004d91b0
-{
-    static void __cdecl Deallocate(void*);
-};
 struct FUN_004d91b0_Class
 {
     virtual void v00();
@@ -1509,22 +1391,11 @@ extern int(__stdcall* DAT_00fdf2e8)(unsigned int, int);
 extern int(__stdcall* DAT_00fdf310)(OutT*, int, int);
 extern int(__stdcall* DAT_00fdf2a4)(unsigned int, int, int);
 unsigned int FUN_004bc3f0();
-class NiAVObject;
 struct FUN_004dc540_shell
 {
     void FUN_004dc540(NiAVObject*);
 };
-class BGSMoviePlayer
-{
-  public:
-    void FUN_00ec25e0();
-};
 extern BGSMoviePlayer* DAT_0126fac4;
-class BSAudio
-{
-  public:
-    unsigned int FUN_0044ddc0();
-};
 extern BSAudio* g_osGlobals;
 struct FUN_00b7b930_Ctx
 {
@@ -1562,7 +1433,8 @@ class E73shell
   public:
     int FUN_00e73eb0(int, int);
 };
-class Interface
+// Exe 0x004d66d0: unit-local Interface view; declarations and layout are preserved.
+class BlkInterfaceView
 {
   public:
     static void Init(bool);
@@ -1597,72 +1469,6 @@ struct FUN_004d8610_StandIn
     void* GetSubValue(int);
 };
 
-namespace fnv_004d66d0 {
-struct NiPoint3
-{
-  public:
-    float x, y, z;
-};
-class NiFixedString
-{
-  public:
-    const char* text;
-};
-class NiRTTI : public BSStringT<char>
-{
-};
-class ViewerStrings
-{
-  public:
-    virtual ~ViewerStrings();
-    const char** strings;
-    unsigned short capacity, size, used, growBy;
-    ViewerStrings(int initialSize, int growSize);
-    unsigned int GetSize();
-    const char*& GetAt(unsigned int index);
-    void RemoveAll();
-};
-class NiTimeController;
-class NiTriBasedGeom;
-class NiObject
-{
-  public:
-    virtual ~NiObject();
-    virtual void Unk01();
-    virtual NiRTTI* GetRTTI();
-    virtual NiNode* IsSceneNode();
-    virtual void Unk04();
-    virtual void Unk05();
-    virtual NiTriBasedGeom* IsTriBasedGeom();
-    virtual void Unk07();
-    virtual void Unk08();
-    virtual void Unk09();
-    virtual void Unk10();
-    virtual void Unk11();
-    virtual void Unk12();
-    virtual void Unk13();
-    virtual void Unk14();
-    virtual void Unk15();
-    virtual void Unk16();
-    virtual void Unk17();
-    virtual void Unk18();
-    virtual void Unk19();
-    virtual void Unk20();
-    virtual void Unk21();
-    virtual void Unk22();
-    virtual void Unk23();
-    virtual void GetViewerStrings(ViewerStrings* strings);
-};
-class NiObjectNET : public NiObject
-{
-  public:
-    NiTimeController* GetControllers() const;
-};
-class NiTimeController : public NiObject
-{
-  public:
-    NiTimeController* GetNext() const;
-};
 class PropertyValue
 {
   public:
@@ -1675,26 +1481,18 @@ class PropertyList
     bool FUN_0076b610() const;
     PropertyValue& GetNext(void*& position);
 };
-class NiAVObject : public NiObjectNET
+
+namespace fnv_004d66d0 {
+class ViewerStrings
 {
   public:
-    NiPoint3& FUN_0043c490();
-    NiFixedString& GetName();
-    float GetFloatAt64();
-    bool FUN_00456610();
-    PropertyList& FUN_00430830();
-    NiObject* FUN_006838b0();
-};
-class NiNode : public NiAVObject
-{
-  public:
-    unsigned int FUN_0043b480();
-    NiAVObject* FUN_0043b4a0(unsigned int index);
-};
-class NiTriBasedGeom
-{
-  public:
-    NiObject* FUN_0043fad0();
+    virtual ~ViewerStrings();
+    const char** strings;
+    unsigned short capacity, size, used, growBy;
+    ViewerStrings(int initialSize, int growSize);
+    unsigned int GetSize();
+    const char*& GetAt(unsigned int index);
+    void RemoveAll();
 };
 extern NiRTTI DAT_011f4a18;
 extern NiRTTI DAT_011f4a28;
@@ -1773,8 +1571,8 @@ void ObjectTree::FUN_004d66d0(void* parent, NiAVObject* object)
                         treeItem.item.mask = 0x27;
                         treeItem.parent = parent;
                         treeItem.item.data = object;
-                        sprintf_s(label, 260, "%s \"%s\" (%.0f,%.0f,%.0f)", object->GetRTTI()->String(),
-                                  object->GetName().text, object->FUN_0043c490().x, object->FUN_0043c490().y,
+                        sprintf_s(label, 260, "%s \"%s\" (%.0f,%.0f,%.0f)", object->GetRTTI()->GetName(),
+                                  object->GetName().m_kHandle, object->FUN_0043c490().x, object->FUN_0043c490().y,
                                   object->FUN_0043c490().z);
                         if (object->GetFloatAt64() != 1.0)
                         {
@@ -1802,7 +1600,7 @@ void ObjectTree::FUN_004d66d0(void* parent, NiAVObject* object)
                         parent = treeItem.parent;
                         treeItem.parent = (void*)SendMessageA(tree, 0x1100, 0, (LPARAM)&treeItem);
                         strings = new ViewerStrings(128, 128);
-                        object->GetViewerStrings(strings);
+                        object->GetViewerStrings(reinterpret_cast<NiViewerStringsArray*>(strings));
                         for (i = 0; i < strings->GetSize(); i++)
                         {
                             treeItem.item.text = PrepareScriptMessage(strings->GetAt(i), false);
@@ -1841,14 +1639,14 @@ void ObjectTree::FUN_004d66d0(void* parent, NiAVObject* object)
                                     NiObject* typedController;
                                     {
                                         char controllerName[64];
-                                        FUN_004add50(controllerName, extra->GetRTTI()->String(), 63);
+                                        FUN_004add50(controllerName, extra->GetRTTI()->GetName(), 63);
                                         controllerName[63] = 0;
                                         treeItem.item.text = PrepareScriptMessage(controllerName, false);
                                         treeItem.item.image = 6;
                                         treeItem.item.selectedImage = treeItem.item.image;
                                         treeItem.parent = controllersItem;
                                         treeItem.parent = (void*)SendMessageA(tree, 0x1100, 0, (LPARAM)&treeItem);
-                                        extra->GetViewerStrings(strings);
+                                        extra->GetViewerStrings(reinterpret_cast<NiViewerStringsArray*>(strings));
                                         for (j = 0; j < strings->GetSize(); j++)
                                         {
                                             treeItem.item.text = PrepareScriptMessage(strings->GetAt(j), false);
@@ -1888,7 +1686,7 @@ void ObjectTree::FUN_004d66d0(void* parent, NiAVObject* object)
                                             NiObject* typedController;
                                             {
                                                 char controllerName[64];
-                                                FUN_004add50(controllerName, propertyController->GetRTTI()->String(),
+                                                FUN_004add50(controllerName, propertyController->GetRTTI()->GetName(),
                                                              63);
                                                 controllerName[63] = 0;
                                                 treeItem.item.text = PrepareScriptMessage(controllerName, false);
@@ -1897,7 +1695,7 @@ void ObjectTree::FUN_004d66d0(void* parent, NiAVObject* object)
                                                 treeItem.parent = controllersItem;
                                                 treeItem.parent =
                                                     (void*)SendMessageA(tree, 0x1100, 0, (LPARAM)&treeItem);
-                                                propertyController->GetViewerStrings(strings);
+                                                propertyController->GetViewerStrings(reinterpret_cast<NiViewerStringsArray*>(strings));
                                                 for (j = 0; j < strings->GetSize(); j++)
                                                 {
                                                     treeItem.item.text = PrepareScriptMessage(strings->GetAt(j), false);
@@ -1943,14 +1741,14 @@ void ObjectTree::FUN_004d66d0(void* parent, NiAVObject* object)
                                     unsigned int j;
                                     {
                                         char propertyName[64];
-                                        FUN_004add50(propertyName, property->GetRTTI()->String(), 63);
+                                        FUN_004add50(propertyName, property->GetRTTI()->GetName(), 63);
                                         propertyName[63] = 0;
                                         treeItem.item.text = PrepareScriptMessage(propertyName, false);
                                         treeItem.item.image = 6;
                                         treeItem.item.selectedImage = treeItem.item.image;
                                         treeItem.parent = propertiesItem;
                                         treeItem.parent = (void*)SendMessageA(tree, 0x1100, 0, (LPARAM)&treeItem);
-                                        property->GetViewerStrings(strings);
+                                        property->GetViewerStrings(reinterpret_cast<NiViewerStringsArray*>(strings));
                                         for (j = 0; j < strings->GetSize(); j++)
                                         {
                                             treeItem.item.text = PrepareScriptMessage(strings->GetAt(j), false);
@@ -1963,7 +1761,7 @@ void ObjectTree::FUN_004d66d0(void* parent, NiAVObject* object)
                                 }
                             }
                         }
-                        if (object->IsTriBasedGeom() && object->IsTriBasedGeom()->FUN_0043fad0())
+                        if (object->IsGeometry() && object->IsGeometry()->GetSkinInstance())
                         {
                             treeItem.item.text = PrepareScriptMessage("SkinInstance", false);
                             treeItem.item.image = 5;
@@ -1971,7 +1769,7 @@ void ObjectTree::FUN_004d66d0(void* parent, NiAVObject* object)
                             treeItem.parent = parent;
                             treeItem.parent = (void*)SendMessageA(tree, 0x1100, 0, (LPARAM)&treeItem);
                             ViewerStrings* skinStrings = new ViewerStrings(128, 128);
-                            object->IsTriBasedGeom()->FUN_0043fad0()->GetViewerStrings(skinStrings);
+                            object->IsGeometry()->GetSkinInstance()->GetViewerStrings(reinterpret_cast<NiViewerStringsArray*>(skinStrings));
                             for (unsigned int j = 0; j < skinStrings->GetSize(); j++)
                             {
                                 treeItem.item.text = PrepareScriptMessage(skinStrings->GetAt(j), false);

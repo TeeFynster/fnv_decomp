@@ -1,21 +1,48 @@
 // fallout/interface/menus/companionwheelmenu.cpp: CompanionWheelMenu, Foo, WheelHost, InteractionMenu and more (30 functions)
 
 #include "companionwheelmenu_decls.h"
-// Constructor: sets the menu state of FUN_004b7210() to 255 and initializes state to 0.
-// @fnv 0x007a8a10
-CompanionWheelMenu::CompanionWheelMenu()
+#include "../../../../include/DialogueItem.h"
+#include "../../../../include/Menu.h"
+// InterfaceH_companionwheelmenu: local type (was include/InterfaceH.h, which had no evidence of one real class); its methods are 0x00702360 Interface::IsInMenuMode, 0x00702450 Interface::IsTopMenuID, 0x00703860 HUDMainMenu::HandleHealthbarForCrosshairActor_, 0x00705e00 Interface::CreateLoadingMenu
+class TESForm;
+class TESObjectREFR;
+
+class InterfaceH_companionwheelmenu
 {
-    FUN_004b7210()->menuState = 255;
-    state = 0;
+public:
+    static bool __cdecl GetSelectedTargetIndex(int);
+    static void SetQuestTarget(TESForm*, bool);
+    static void SetLookAtReference(TESObjectREFR*);
+    static double GetFourthInterfaceFloat();
+    static double GetThirdInterfaceFloat();
+    static bool IsSaveLoadActive();
+};
+#include "../../../../include/Actor.h"
+#include "../../../../include/ActorValueOwner.h"
+#include "../../../../include/AlchemyItem.h"
+#include "../../../../include/DialoguePackage.h"
+#include "../../../../include/ExtraDataList.h"
+#include "../../../../include/Script.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/TESPackage.h"
+#include "../../../../include/TESTopic.h"
+#include "../../../../include/TESTopicInfo.h"
+#include "../../../../include/Tile.h"
+
+#include "../../../../include/BSAudio.h"
+#include "../../../../include/BSSoundHandle.h"
+#include "../../../../include/MagicCaster.h"
+#include "../../../../include/Setting.h"
+// Constructor: sets the menu state of FUN_004b7210() to 255 and initializes the message count to 0.
+// @fnv 0x007a8a10
+MessageMenu_007a8a10::MessageMenu_007a8a10()
+{
+    FUN_004b7210()->ucMsgBoxButton = 255;
+    messageCount = 0;
 }
 
-struct FUN_00754bf0_shell
-{
-    int __thiscall GetClass();
-};
-
 // @fnv 0x00754bf0
-int __thiscall FUN_00754bf0_shell::GetClass()
+int CompanionWheelMenu::GetClass()
 {
     return 0x433;
 }
@@ -23,10 +50,6 @@ int __thiscall FUN_00754bf0_shell::GetClass()
 struct FUN_00884480_shell
 {
     bool __thiscall FUN_00884480(void);
-};
-struct Actor
-{
-    bool __thiscall IsHostileToActor(Actor*, int, int*, bool);
 };
 extern Actor* g_thePlayer;
 
@@ -60,9 +83,9 @@ float FUN_00755660(float value)
 extern "C" void __cdecl CloseMenuAndRefresh(int);
 
 // @fnv 0x00756960
-void __fastcall FUN_00756960(int thisPtr)
+void __fastcall FUN_00756960(CompanionWheelMenu* apMenu)
 {
-    *(char*)(thisPtr + 0x74) = 1;
+    apMenu->unk74 = 1;
     CloseMenuAndRefresh(1);
 }
 
@@ -98,68 +121,33 @@ void* __thiscall MyStandin754c30::FUN_00754c30(unsigned int flags)
     return this;
 }
 
-struct Tile
-{
-    void __thiscall Set(int, char const*, bool);
-};
-struct Unk00755d90
-{
-    char _pad[0x4C];
-    Tile* _tile;
-    void __thiscall SetTileText(char const*);
-};
-// If _tile is set, calls _tile->Set with id 0xFC4, the given string and true.
+// If tile 9 is set, calls its Set with id 0xFC4, the given string and true.
 // @fnv 0x00755d90
-void __thiscall Unk00755d90::SetTileText(char const* acText)
+void CompanionWheelMenu::SetTileText(const char* acText)
 {
-    if (_tile != 0)
-        _tile->Set(0xFC4, acText, true);
+    if (tiles[9] != 0)
+        tiles[9]->Set(0xFC4, acText, true);
 }
 
 struct FUN_008a7760_holder
 {
     void __thiscall OpenDialogMenu();
 };
-struct FUN_00756930_shell
-{
-    char _pad[0x68];
-    Actor* m_pDialogueActor;
-    void __thiscall FUN_00756930();
-};
 // @fnv 0x00756930
-void __thiscall FUN_00756930_shell::FUN_00756930()
+void CompanionWheelMenu::FUN_00756930()
 {
-    if (m_pDialogueActor)
-        ((FUN_008a7760_holder*)m_pDialogueActor)->OpenDialogMenu();
+    if (companion)
+        ((FUN_008a7760_holder*)companion)->OpenDialogMenu();
     CloseMenuAndRefresh(1);
 }
 
-struct TESForm
-{
-    virtual void v0();
-    static TESForm* __cdecl LookupFormByEditorID(const char*);
-};
-struct TESTopic
-{
-    virtual void v0();
-};
-struct Tile2
-{
-    void __thiscall Set(int, int);
-};
-struct FUN_007560c0_shell
-{
-    void __thiscall PlayTopicResponse(TESTopic*);
-    void __thiscall RunTopicResultScripts(TESTopic*);
-    void __thiscall ToggleFollowersTacticsDistance();
-};
 // @fnv 0x007560c0
-void __thiscall FUN_007560c0_shell::ToggleFollowersTacticsDistance()
+void CompanionWheelMenu::ToggleFollowersTacticsDistance()
 {
     bool bSuccess;
-    *((bool*)((char*)this + 0x6c)) = !*((bool*)((char*)this + 0x6c));
+    followersTacticsDistance = !followersTacticsDistance;
     bSuccess = false;
-    if (*((bool*)((char*)this + 0x6c)))
+    if (followersTacticsDistance)
     {
         TESTopic* pRelatedTopic =
             dynamic_cast<TESTopic*>(TESForm::LookupFormByEditorID("FollowersTacticsDistanceLong"));
@@ -175,106 +163,44 @@ void __thiscall FUN_007560c0_shell::ToggleFollowersTacticsDistance()
         RunTopicResultScripts(pRelatedTopic);
         bSuccess = true;
     }
-    if (bSuccess && *((Tile2**)((char*)this + 0x3c)))
+    if (bSuccess && tiles[5])
     {
-        ((Tile2**)((char*)this + 0x3c))[0]->Set(0x100f, *((bool*)((char*)this + 0x6c)));
+        tiles[5]->Set(0x100f, followersTacticsDistance);
     }
 }
 
-namespace fnv_007575b0 {
-struct Actor;
-struct ScriptLocals;
-struct Script
-{
-    bool __thiscall Run(Actor*, ScriptLocals*, bool, bool);
-};
-struct ScriptS
-{
-    void* __thiscall GetHeader();
-};
-struct ExtraDataList
-{
-    ScriptLocals* __thiscall GetScriptLocalData();
-};
-struct XActor
-{
-    ExtraDataList* __thiscall GetExtra() const;
-};
-struct MobileObject;
-struct PlayerCharacter;
-struct TESTopicInfo
-{
-    Script* __thiscall GetResultScript(unsigned int);
-};
-struct TESTopic
-{
-    TESTopicInfo* __thiscall FindMatchingTopicInfo(MobileObject*, PlayerCharacter*);
-};
-struct FUN_007575b0_shell
-{
-    char _pad[0x68];
-    Actor* m_pDialogueActor;
-    void __thiscall RunTopicResultScripts(TESTopic* aRelatedTopic);
-};
 // @fnv 0x007575b0
-void FUN_007575b0_shell::RunTopicResultScripts(TESTopic* aRelatedTopic)
+void CompanionWheelMenu::RunTopicResultScripts(TESTopic* aRelatedTopic)
 {
     TESTopicInfo* pInfo = 0;
     Actor* pactor;
     PlayerCharacter* pActionActor;
     Script* pInfoScript;
     pActionActor = (PlayerCharacter*)g_thePlayer;
-    pactor = m_pDialogueActor;
+    pactor = companion;
     if (aRelatedTopic)
         pInfo = aRelatedTopic->FindMatchingTopicInfo((MobileObject*)pactor, pActionActor);
     if (pInfo)
     {
-        pInfoScript = pInfo->GetResultScript(0);
-        if (pInfoScript && *(int*)((char*)((ScriptS*)pInfoScript)->GetHeader() + 8))
-            pInfoScript->Run(m_pDialogueActor, ((XActor*)m_pDialogueActor)->GetExtra()->GetScriptLocalData(), false,
+        pInfoScript = pInfo->GetResultScript(0u);
+        if (pInfoScript && *(int*)((char*)pInfoScript->GetHeader() + 8))
+            pInfoScript->Run(companion, const_cast<ExtraDataList*>(companion->GetExtra())->GetScriptLocalData(), false,
                              true);
-        pInfoScript = pInfo->GetResultScript(1);
-        if (pInfoScript && *(int*)((char*)((ScriptS*)pInfoScript)->GetHeader() + 8))
-            pInfoScript->Run(m_pDialogueActor, ((XActor*)m_pDialogueActor)->GetExtra()->GetScriptLocalData(), false,
+        pInfoScript = pInfo->GetResultScript(1u);
+        if (pInfoScript && *(int*)((char*)pInfoScript->GetHeader() + 8))
+            pInfoScript->Run(companion, const_cast<ExtraDataList*>(companion->GetExtra())->GetScriptLocalData(), false,
                              true);
     }
 }
-}  // namespace fnv_007575b0
 
-struct MagicCaster
-{
-    void __thiscall SetSelectedMagicItem(int);
-};
-
-struct Date
-{
-    virtual ~Date();
-};
-
-struct Menu_007a8b10
-{
-    char _pad[0x70];
-    virtual ~Menu_007a8b10();
-};
 
 MagicCaster* __cdecl _FUN_004b7210();
-extern int DAT_011d92b8;
-
-struct FUN_00754c60 : Menu_007a8b10
-{
-    bool _flag;
-    char _pad[7];
-    Date _date;
-
-    void __thiscall UpdateCompanionInteraction();
-
-    ~FUN_00754c60();
-};
+extern CompanionWheelMenu* DAT_011d92b8;
 
 // @fnv 0x00754c60
-FUN_00754c60::~FUN_00754c60()
+CompanionWheelMenu::~CompanionWheelMenu()
 {
-    if (_flag)
+    if (unk74)
     {
         _FUN_004b7210()->SetSelectedMagicItem(1);
         UpdateCompanionInteraction();
@@ -283,34 +209,15 @@ FUN_00754c60::~FUN_00754c60()
     DAT_011d92b8 = 0;
 }
 
-struct InterfaceH
-{
-    static bool __cdecl GetSelectedTargetIndex(int);
-};
-
 void __cdecl FUN_00717280(int);
 
-struct FUN_007552e0_shell
-{
-    void __thiscall FUN_007552e0(int, Tile*);
-    void __thiscall SelectTile(int, bool);
-    void __thiscall ToggleAggressive();
-    void __thiscall ToggleRelatedTopic();
-    void __thiscall ToggleFollowerWait();
-    void __thiscall HealCompanion();
-    void __thiscall FUN_007568d0();
-
-    unsigned char _pad[0x28];
-    Tile* m_pTiles[64];
-};
-
 // @fnv 0x007552e0
-void FUN_007552e0_shell::FUN_007552e0(int aiID, Tile* apTarget)
+void CompanionWheelMenu::HandleSelection(int aiID, Tile* apTarget)
 {
     if (!apTarget && aiID >= 0 && aiID < 16)
-        apTarget = m_pTiles[aiID];
+        apTarget = tiles[aiID];
 
-    if (!InterfaceH::GetSelectedTargetIndex(0x433))
+    if (!InterfaceH_companionwheelmenu::GetSelectedTargetIndex(0x433))
         return;
 
     switch (aiID)
@@ -321,18 +228,18 @@ void FUN_007552e0_shell::FUN_007552e0(int aiID, Tile* apTarget)
         break;
 
     case 3:
-        FUN_00756960(reinterpret_cast<int>(this));
+        FUN_00756960(this);
         FUN_00717280(1);
         break;
 
     case 2:
-        this->ToggleFollowerWait();
+        ToggleFollowerWait();
         this->SelectTile(aiID, true);
         FUN_00717280(1);
         break;
 
     case 4:
-        reinterpret_cast<FUN_00756930_shell*>(this)->FUN_00756930();
+        FUN_00756930();
         FUN_00717280(1);
         break;
 
@@ -349,7 +256,7 @@ void FUN_007552e0_shell::FUN_007552e0(int aiID, Tile* apTarget)
         break;
 
     case 7:
-        this->ToggleRelatedTopic();
+        ToggleRelatedTopic();
         this->SelectTile(aiID, true);
         FUN_00717280(1);
         break;
@@ -360,64 +267,49 @@ void FUN_007552e0_shell::FUN_007552e0(int aiID, Tile* apTarget)
         break;
 
     case 5:
-        reinterpret_cast<FUN_007560c0_shell*>(this)->ToggleFollowersTacticsDistance();
+        ToggleFollowersTacticsDistance();
         this->SelectTile(aiID, true);
         FUN_00717280(1);
         break;
     }
 }
 
-namespace fnv_007562b0 {
-struct FUN_007562b0_shell
-{
-    char _pad00[0x44];
-    Tile2* m_pPromptTile;
-    char _pad48[0x20];
-    Actor* m_pDialogueActor;
-    char _pad6C[2];
-    bool m_bRelatedTopicVisible;
-
-    void __thiscall ToggleRelatedTopic();
-};
-
-extern FUN_007562b0_shell* DAT_011d92b8;
 extern char str_01071f24[];
 extern char str_01071f40[];
 
 // @fnv 0x007562b0
-void __thiscall FUN_007562b0_shell::ToggleRelatedTopic()
+void CompanionWheelMenu::ToggleRelatedTopic()
 {
     bool bSuccess = false;
 
-    if (m_pDialogueActor)
+    if (companion)
     {
-        m_bRelatedTopicVisible = !m_bRelatedTopicVisible;
+        relatedTopicVisible = !relatedTopicVisible;
 
-        if (m_bRelatedTopicVisible)
+        if (relatedTopicVisible)
         {
             TESTopic* pRelatedTopic = dynamic_cast<TESTopic*>(TESForm::LookupFormByEditorID(str_01071f40));
 
-            ((FUN_007560c0_shell*)this)->PlayTopicResponse(pRelatedTopic);
-            ((FUN_007560c0_shell*)this)->RunTopicResultScripts(pRelatedTopic);
+            PlayTopicResponse(pRelatedTopic);
+            RunTopicResultScripts(pRelatedTopic);
             bSuccess = true;
         }
         else
         {
             TESTopic* pRelatedTopic = dynamic_cast<TESTopic*>(TESForm::LookupFormByEditorID(str_01071f24));
 
-            ((FUN_007560c0_shell*)this)->PlayTopicResponse(pRelatedTopic);
-            ((FUN_007560c0_shell*)this)->RunTopicResultScripts(pRelatedTopic);
+            PlayTopicResponse(pRelatedTopic);
+            RunTopicResultScripts(pRelatedTopic);
             bSuccess = true;
         }
 
         if (bSuccess)
         {
-            if (m_pPromptTile)
-                m_pPromptTile->Set(0x100f, DAT_011d92b8->m_bRelatedTopicVisible);
+            if (tiles[7])
+                tiles[7]->Set(0x100f, DAT_011d92b8->relatedTopicVisible);
         }
     }
 }
-}  // namespace fnv_007562b0
 
 unsigned int __cdecl gm_GetTickCount(void);
 float __cdecl FUN_00755660(float value);
@@ -433,19 +325,8 @@ extern short DAT_011d8a5c;
 extern short DAT_011d8a5e;
 extern short DAT_011d8a74;
 
-struct FUN_00755480_shell
-{
-    char _pad[0x58];
-    Tile* pTile;
-    char _pad2[0x1C];
-    unsigned int m_uiCurrentItemIndex;
-
-    void __thiscall FUN_00755c50(float value);
-    void __thiscall UpdateTileTimerAndInputAngle();
-};
-
 // @fnv 0x00755480
-void FUN_00755480_shell::UpdateTileTimerAndInputAngle()
+void CompanionWheelMenu::UpdateDialog()
 {
     float fInputVectorY;
     float fInputAngle;
@@ -457,14 +338,14 @@ void FUN_00755480_shell::UpdateTileTimerAndInputAngle()
     fInputVectorY = 0.0f;
     fInputAngle = 0.0f;
 
-    if (m_uiCurrentItemIndex != 0 && gm_GetTickCount() > m_uiCurrentItemIndex)
+    if (textClearTime != 0 && gm_GetTickCount() > textClearTime)
     {
-        m_uiCurrentItemIndex = 0;
-        if (pTile != 0)
-            pTile->Set(0xFC4, $SG3295, true);
+        textClearTime = 0;
+        if (tiles[12] != 0)
+            tiles[12]->Set(0xFC4, $SG3295, true);
     }
 
-    if (!InterfaceH::GetSelectedTargetIndex(0x433))
+    if (!InterfaceH_companionwheelmenu::GetSelectedTargetIndex(0x433))
         return;
 
     _FUN_004b7210();
@@ -541,86 +422,15 @@ extern const char DAT_01071de0[];
 extern const char DAT_01071dd0[];
 extern const char DAT_01071dbc[];
 extern const char DAT_01011584[];
-struct TileOps;
-struct ActorOps
-{
-    float ComputeFromNode(const char*);
-};
-struct MenuView
-{
-    virtual ~MenuView();
-    virtual void slot1();
-    virtual void slot2();
-    virtual void slot3();
-    virtual void slot4();
-    virtual void slot5();
-    virtual void slot6();
-    virtual void slot7();
-    virtual void slot8();
-    virtual void slot9();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual int GetMenuID();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    TileOps* tile28;
-    unsigned int unk2c;
-    TileOps* tile30;
-    unsigned int unk34, unk38;
-    TileOps* tile3c;
-    unsigned int unk40;
-    TileOps* tile44;
-    TileOps* tile48;
-    unsigned int unk4c, unk50, unk54;
-    TileOps* tile58;
-    TileOps* tile5c;
-    TileOps* tile60;
-    TileOps* tile64;
-    ActorOps* companion;
-    bool following, aggressive, ranged, waiting;
-    void FUN_00a1dc70(TileOps*, bool);
-    bool FUN_007b78a0();
-    void FUN_00a1dc20(bool);
-    int FUN_00726070();
-};
-struct TileOps
-{
-    TileOps* ReadFile(const char*);
-    MenuView* GetMenu();
-    void Set(int, int);
-    void Set(int, const char*, bool);
-    void Set(int, float);
-    float FUN_00a011b0(int);
-};
 struct ResourceProvider
 {
-    TileOps* FUN_00586150();
+    Tile* FUN_00586150();
 };
-struct SettingLite
-{
-    const char* FUN_00403df0();
-};
-extern SettingLite DAT_011d3534, DAT_011d33fc, DAT_011d3ec8, DAT_011d27d8;
-extern MenuView* companionMenu;
-MenuView* FUN_00a09030(int);
-struct BSSoundHandleEx
-{
-    unsigned int id, status, flags;
-    ~BSSoundHandleEx();
-    bool Play(bool);
-};
-struct BSAudio
-{
-    BSSoundHandleEx GetSoundHandleByEditorID(const char*, unsigned int);
-};
+extern Setting DAT_011d3534, DAT_011d33fc, DAT_011d3ec8, DAT_011d27d8;
+extern CompanionWheelMenu* companionMenu;
+// 0x007b78a0 validates the loaded menu; shared CompanionWheelMenu has no declaration.
+bool __fastcall ValidateLoadedMenu(CompanionWheelMenu*);
+CompanionWheelMenu* FUN_00a09030(int);
 BSAudio* FUN_00453a70();
 float __stdcall FUN_00a01530(bool);
 void FUN_005b5e40(const char*, ...);
@@ -628,51 +438,51 @@ extern const char DAT_01071d58[];
 extern const char DAT_01025cc4[];
 extern const char DAT_01071db4[];
 // @fnv 0x00754de0
-TileOps* OpenCompanionMenu(ActorOps* actor)
+Tile* OpenCompanionMenu(Actor* actor)
 {
     ResourceProvider* a = (ResourceProvider*)FUN_004b7210();
-    MenuView* p = FUN_00a09030(FUN_00755260());
+    CompanionWheelMenu* p = FUN_00a09030(FUN_00755260());
     if (p)
         delete p;
-    TileOps* h = a->FUN_00586150()->ReadFile(DAT_01071dfc);
-    companionMenu = h->GetMenu();
-    if (companionMenu && companionMenu->GetMenuID() == FUN_00755260())
+    Tile* h = a->FUN_00586150()->ReadFile(DAT_01071dfc);
+    companionMenu = (CompanionWheelMenu*)h->GetMenu();
+    if (companionMenu && companionMenu->GetClass() == FUN_00755260())
     {
         companionMenu->companion = actor;
         if (companionMenu->companion)
         {
             companionMenu->aggressive = companionMenu->companion->ComputeFromNode(DAT_01071de0) == 1.0;
-            companionMenu->following = companionMenu->companion->ComputeFromNode(DAT_01071dd0) == 1.0;
-            companionMenu->ranged = companionMenu->companion->ComputeFromNode(DAT_01071dbc) == 1.0;
-            companionMenu->waiting = companionMenu->companion->ComputeFromNode(DAT_01071db4) == 0.0;
+            companionMenu->followersTacticsDistance = companionMenu->companion->ComputeFromNode(DAT_01071dd0) == 1.0;
+            companionMenu->relatedTopicVisible = companionMenu->companion->ComputeFromNode(DAT_01071dbc) == 1.0;
+            companionMenu->followerWait = companionMenu->companion->ComputeFromNode(DAT_01071db4) == 0.0;
         }
-        if (companionMenu->tile28)
-            companionMenu->tile28->Set(0x100f, (int)companionMenu->aggressive);
-        if (companionMenu->tile30)
-            companionMenu->tile30->Set(0x100f, (int)!companionMenu->waiting);
-        if (companionMenu->tile3c)
-            companionMenu->tile3c->Set(0x100f, (int)companionMenu->following);
-        if (companionMenu->tile44)
-            companionMenu->tile44->Set(0x100f, (int)companionMenu->ranged);
-        if (companionMenu->tile58)
-            companionMenu->tile58->Set(0xfc4, DAT_01011584, true);
-        if (companionMenu->tile48)
-            companionMenu->tile48->Set(0xfc4, DAT_011d3534.FUN_00403df0(), true);
-        if (companionMenu->tile5c)
-            companionMenu->tile5c->Set(0xfc4, DAT_011d33fc.FUN_00403df0(), true);
-        if (companionMenu->tile60)
-            companionMenu->tile60->Set(0xfc4, DAT_011d3ec8.FUN_00403df0(), true);
-        if (companionMenu->tile64)
-            companionMenu->tile64->Set(0xfc4, DAT_011d27d8.FUN_00403df0(), true);
-        companionMenu->FUN_00a1dc70(h, false);
-        if (!companionMenu->FUN_007b78a0())
+        if (companionMenu->tiles[0])
+            companionMenu->tiles[0]->Set(0x100f, (int)companionMenu->aggressive);
+        if (companionMenu->tiles[2])
+            companionMenu->tiles[2]->Set(0x100f, (int)!companionMenu->followerWait);
+        if (companionMenu->tiles[5])
+            companionMenu->tiles[5]->Set(0x100f, (int)companionMenu->followersTacticsDistance);
+        if (companionMenu->tiles[7])
+            companionMenu->tiles[7]->Set(0x100f, (int)companionMenu->relatedTopicVisible);
+        if (companionMenu->tiles[12])
+            companionMenu->tiles[12]->Set(0xfc4, DAT_01011584, true);
+        if (companionMenu->tiles[8])
+            companionMenu->tiles[8]->Set(0xfc4, DAT_011d3534.FUN_00403df0(), true);
+        if (companionMenu->tiles[13])
+            companionMenu->tiles[13]->Set(0xfc4, DAT_011d33fc.FUN_00403df0(), true);
+        if (companionMenu->tiles[14])
+            companionMenu->tiles[14]->Set(0xfc4, DAT_011d3ec8.FUN_00403df0(), true);
+        if (companionMenu->tiles[15])
+            companionMenu->tiles[15]->Set(0xfc4, DAT_011d27d8.FUN_00403df0(), true);
+        companionMenu->FUN_00a1dc70((TileMenu*)h, false);
+        if (!ValidateLoadedMenu(companionMenu))
         {
             FUN_005b5e40(DAT_01071d58);
             return 0;
         }
         FUN_00453a70()->GetSoundHandleByEditorID(DAT_01025cc4, 0x121).Play(false);
         if (h->FUN_00a011b0(0xfa7) == 6006.0 || h->FUN_00a011b0(0xfa7) == 102.0)
-            h->Set(0xfad, FUN_00a01530(true));
+            h->FUN_00a012d0(0xfad, FUN_00a01530(true));
         companionMenu->FUN_00a1dc20(false);
         return h;
     }
@@ -684,21 +494,10 @@ TileOps* OpenCompanionMenu(ActorOps* actor)
 
 extern "C" bool __cdecl FUN_00702450(int);
 
-struct Foo
-{
-    virtual void vf0();
-    virtual void vf1();
-    virtual void vf2();
-    virtual void vf(int, Tile*);
-    char _pad[0x24];
-    Tile* m_pTiles[18];
-    int idx;
-    bool HandleTileAction(int arg, int unused);
-};
-
-// If setting 0x433 is enabled, dispatches a virtual call for arg 9 (using idx or slot 11) or arg 10 (slot 11) and returns whether it dispatched.
+// If menu 0x433 is active, dispatches HandleSelection for input 9 (the selected tile, else tile 11) or 10 (tile 11)
+// and returns whether it dispatched.
 // @fnv 0x007556b0
-bool Foo::HandleTileAction(int aiAction, int unused)
+bool CompanionWheelMenu::HandleMenuInput(int aiAction, float unused)
 {
     bool result = false;
     if (!FUN_00702450(0x433))
@@ -707,20 +506,20 @@ bool Foo::HandleTileAction(int aiAction, int unused)
     }
     if (aiAction == 9)
     {
-        if (this->idx != -1)
+        if (this->selected != -1)
         {
-            this->vf(this->idx, this->m_pTiles[this->idx]);
+            this->HandleSelection(this->selected, this->tiles[this->selected]);
             result = true;
         }
         else
         {
-            this->vf(0xb, this->m_pTiles[11]);
+            this->HandleSelection(0xb, this->tiles[11]);
             result = true;
         }
     }
     else if (aiAction == 10)
     {
-        this->vf(0xb, this->m_pTiles[11]);
+        this->HandleSelection(0xb, this->tiles[11]);
         result = true;
     }
     return result;
@@ -772,51 +571,6 @@ struct PackageNode
 {
     PackageNode* FUN_00726070();
 };
-struct TESPackage
-{
-    virtual ~TESPackage();
-    int FUN_0041ca90();
-    bool FUN_00678610();
-    PackageNode* FUN_0041d8a0();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4c;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5c;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6c;
-    unsigned int unk70;
-    unsigned int unk74;
-    unsigned int unk78;
-    unsigned int unk7c;
-    unsigned int unk80;
-    unsigned int unk84;
-    unsigned int unk88;
-};
-struct DialoguePackage : TESPackage
-{
-    unsigned int topic;
-};
 struct ActorLevelInfo
 {
     unsigned int unk00, unk04, unk08;
@@ -826,14 +580,6 @@ struct ActorLevelInfo
 struct DialoguePolicy
 {
     bool FUN_00619df0();
-};
-struct DialogueItem
-{
-    DialoguePolicy* FUN_0084e3a0();
-    bool FUN_0083c7b0();
-    bool FUN_0083c7e0();
-    ~DialogueItem();
-    static void operator delete(void*);
 };
 struct DialogueManager
 {
@@ -1447,7 +1193,7 @@ void InteractionMenu::UpdateCompanionInteraction()
                                     !targetPackageB->FUN_0041ca90())
                                 {
                                     if (targetPackageB->FUN_0041d8a0() &&
-                                        !targetPackageB->FUN_0041d8a0()->FUN_00726070())
+                                        !((PackageNode*)targetPackageB->FUN_0041d8a0())->FUN_00726070())
                                         actor2->SetPackage(player2, 2);
                                     else
                                         actor2->SetPackage(aTarget, 1);
@@ -1482,7 +1228,7 @@ void InteractionMenu::UpdateCompanionInteraction()
                                     if (package)
                                         topic = package->topic;
                                 }
-                                if (playerPackage8->FUN_0041d8a0() && !playerPackage8->FUN_0041d8a0()->FUN_00726070())
+                                if (playerPackage8->FUN_0041d8a0() && !((PackageNode*)playerPackage8->FUN_0041d8a0())->FUN_00726070())
                                     player2->FUN_008d8520()->SetPackage(player2, 2);
                                 else
                                     player2->FUN_008d8520()->SetPackage(player2, 1);
@@ -1516,31 +1262,21 @@ void InteractionMenu::UpdateCompanionInteraction()
     }
 }
 
-struct BSStringT
+
+
+struct TESQuest;
+struct TESObjectREFR;
+
+struct WheelResponseString
 {
     char* m_data;
     unsigned short m_dataLen;
     unsigned short m_bufLen;
-    BSStringT(const BSStringT& src);
-    ~BSStringT();
+    WheelResponseString(const WheelResponseString& src);
+    ~WheelResponseString();
     unsigned int GetLength();
     const char* CStr();
 };
-
-struct SoundPlaybackHandle
-{
-    unsigned int soundID;
-    bool assumeSuccess;
-    unsigned int state;
-    SoundPlaybackHandle(const SoundPlaybackHandle& src);
-    SoundPlaybackHandle& operator=(const SoundPlaybackHandle& src);
-    ~SoundPlaybackHandle();
-};
-
-struct TESQuest;
-struct TESTopicInfo;
-struct TESObjectREFR;
-struct TESTopic;
 
 struct SoundFile
 {
@@ -1556,11 +1292,11 @@ struct DialogueResponse
 {
     SoundFile* GetSoundByEditorID();
     unsigned int GetSoundID();
-    BSStringT& GetText();
+    WheelResponseString& GetText();
     int GetEmotionValue();
     int GetEmotionType();
     unsigned int GetFlags();
-    SoundPath* GetVoicePath(SoundPlaybackHandle* snd);
+    SoundPath* GetVoicePath(BSSoundHandle* snd);
 };
 
 struct CompActor
@@ -1730,33 +1466,11 @@ struct CompActor
                         int emotionType, int emotionValue, CompActor* target, bool a8, bool a9, bool a10, bool a11,
                         bool a12);
 
-    SoundPlaybackHandle PlaySound(unsigned int soundID, int a2, int flags, int a4);
+    BSSoundHandle PlaySound(unsigned int soundID, int a2, int flags, int a4);
 };
 
-struct TopicInfoStandin
-{
-    TESTopicInfo* GetTopicInfo(CompActor* speaker, CompActor* target);
-};
 
-struct TopicInfoQ
-{
-    TESQuest* GetQuest();
-};
 
-struct DialogueItemStandin
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    DialogueItemStandin(TESQuest* quest, TopicInfoStandin* topic, TopicInfoQ* info, CompActor* speaker);
-    ~DialogueItemStandin();
-    void Init();
-    DialogueResponse* GetCurrentItem();
-};
 
 struct CompanionWheelStandin
 {
@@ -1791,24 +1505,24 @@ struct CompanionWheelStandin
     int unk70;
     int unk74;
     int unk78;
-    SoundPlaybackHandle sound;
+    BSSoundHandle sound;
 
-    void PlayTopicResponse(TopicInfoStandin* topic);
-    void PlayResponse(BSStringT text, SoundPlaybackHandle snd);
+    void PlayTopicResponse(TESTopic* topic);
+    void PlayResponse(WheelResponseString text, BSSoundHandle snd);
 };
 
 // @fnv 0x007573d0
-void CompanionWheelStandin::PlayTopicResponse(TopicInfoStandin* topic)
+void CompanionWheelStandin::PlayTopicResponse(TESTopic* topic)
 {
-    TopicInfoQ* info6 = 0;
+    TESTopicInfo* info6 = 0;
     CompActor* playerB = (CompActor*)g_thePlayer;
     CompActor* speaker = companion;
     if (topic)
-        info6 = (TopicInfoQ*)topic->GetTopicInfo(speaker, playerB);
+        info6 = topic->FindMatchingTopicInfo((MobileObject*)speaker, (PlayerCharacter*)playerB);
     if (info6)
     {
-        DialogueItemStandin itemB(info6->GetQuest(), topic, info6, speaker);
-        itemB.Init();
+        DialogueItem itemB(info6->GetParentQuest(), topic, info6, (TESObjectREFR*)speaker);
+        itemB.SelectDefaultResponseList();
         DialogueResponse* response2 = itemB.GetCurrentItem();
         if (response2)
         {
@@ -1838,22 +1552,6 @@ struct CStringArg_757690
     int __thiscall FUN_00559450();
     int __thiscall FUN_00559450(int);
 };
-struct CValueArg_757690
-{
-    unsigned value;
-    unsigned kind;
-    unsigned other;
-    ~CValueArg_757690();
-    int __thiscall FUN_00ad8b30();
-};
-struct CWheelItem_757690
-{
-    void __thiscall FUN_00a01350(int id, int value);
-};
-struct CRelatedActor_757690
-{
-    bool __thiscall FUN_008c1bc0();
-};
 struct CInterface_757690
 {
     unsigned char* __thiscall FUN_00408d60();
@@ -1868,37 +1566,37 @@ extern double DAT_01012060;
 extern double DAT_01017b70;
 unsigned __cdecl FUN_00ec6130(int);
 unsigned __cdecl FUN_00457fe0();
+// The CompanionWheelMenu's text-and-timeout setter.
 struct CWheelMenu_757690
 {
-    void __thiscall SetItemTextAndValue(CStringArg_757690 text, CValueArg_757690 value);
+    void __thiscall SetItemTextAndValue(CStringArg_757690 text, BSSoundHandle value);
 };
 // @fnv 0x00757690
-void __thiscall CWheelMenu_757690::SetItemTextAndValue(CStringArg_757690 text, CValueArg_757690 value)
+void __thiscall CWheelMenu_757690::SetItemTextAndValue(CStringArg_757690 text, BSSoundHandle value)
 {
     float shift = 0.0f;
     if (text.FUN_004048e0() > 0)
     {
-        if (*DAT_011d8928.FUN_00408d60() || (*(CRelatedActor_757690**)((char*)this + 0x68) != 0 &&
-                                             (*(CRelatedActor_757690**)((char*)this + 0x68))->FUN_008c1bc0()))
+        if (*DAT_011d8928.FUN_00408d60() || (reinterpret_cast<CompanionWheelMenu*>(this)->companion != 0 &&
+                                             reinterpret_cast<CompanionWheelMenu*>(this)->companion->FUN_008c1bc0()))
         {
-            if (*(CWheelItem_757690**)((char*)this + 0x58))
+            if (reinterpret_cast<CompanionWheelMenu*>(this)->tiles[12])
             {
-                (*(CWheelItem_757690**)((char*)this + 0x58))->FUN_00a01350(0xfc4, text.FUN_00559450(1));
+                reinterpret_cast<CompanionWheelMenu*>(this)->tiles[12]->Set(0xfc4, (const char*)text.FUN_00559450(1));
             }
-            shift = (float)value.FUN_00ad8b30();
+            shift = (float)value.GetDuration();
             if (shift == DAT_01012060)
             {
                 shift =
                     (float)((double)FUN_00ec6130(text.FUN_00559450()) * (*DAT_011d2178.FUN_00403e20()) * DAT_01017b70);
             }
-            *(unsigned*)((char*)this + 0x78) = (unsigned)((double)FUN_00457fe0() + shift);
+            reinterpret_cast<CompanionWheelMenu*>(this)->textClearTime = (unsigned)((double)FUN_00457fe0() + shift);
         }
     }
 }
 
 namespace ScriptAnimation {
 struct Reference;
-struct Actor;
 struct Idle;
 struct Process;
 struct Sequence;
@@ -2608,56 +2306,13 @@ struct Process
     virtual int GetState(int);
     int FUN_0045cd60();
 };
-struct Actor : Reference
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    float animationTime;
-    Process* FUN_008d8520();
-    int FUN_00931850();
-    bool FUN_0094df60();
-    bool FUN_0087f3d0();
-    int FUN_004f8960();
-    unsigned int FUN_005d43c0();
-};
 extern Actor* DAT_011dea3c;
-struct Setting
-{
-    const int* FUN_0043d4d0();
-    void FUN_0045ce80(int);
-};
 extern Setting DAT_011cd378;
 extern const float DAT_01012054;
 extern const char DAT_011846d4, DAT_011841cc;
 Actor* FUN_00ec43fb(Reference*, int, const void*, const void*, int);
-void MarkBaseExtraListScriptEvent(Idle*, unsigned int, int);
+void MarkBaseExtraListScriptEvent(Idle*, void*, int);
+int __fastcall GetActorKnockState(::Actor*);
 Reference* FUN_00564480(int, int);
 bool FUN_005accb0(void*, void*, void*, Reference*, void*, void*, void*, Idle**, int*, void**, int*, int*);
 // Plays an idle animation on the source actor or reference, choosing the sequence and dispatching play events, then restores the previous setting value.
@@ -2690,32 +2345,32 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
     {
         if (actor)
         {
-            if (actor->FUN_008d8520() && !actor->IsDead(1))
+            if (actor->FUN_008d8520() && !((Reference*)actor)->IsDead(1))
             {
-                actor->animationTime = DAT_01012054;
-                actor->FUN_008d8520()->SetAlert(0);
-                actor->FUN_008d8520()->Reset();
+                actor->ReferenceMobileState = DAT_01012054;
+                ((Process*)actor->FUN_008d8520())->SetAlert(0);
+                ((Process*)actor->FUN_008d8520())->Reset();
                 if (!actor->FUN_00931850())
                 {
-                    int state = actor->FUN_008d8520()->GetState(2);
-                    actor->FUN_008d8520()->SetState(0);
-                    actor->FUN_008d8520()->RestoreState(state);
-                    actor->FUN_008d8520()->Update();
+                    int state = ((Process*)actor->FUN_008d8520())->GetState(2);
+                    ((Process*)actor->FUN_008d8520())->SetState(0);
+                    ((Process*)actor->FUN_008d8520())->RestoreState(state);
+                    ((Process*)actor->FUN_008d8520())->Update();
                 }
                 else if (immediateA)
                 {
                     actor->FUN_0057ad20(idleVal);
-                    Sequence* chosen = idleVal->FUN_0061b320(actor, 0, 0, 0, 0);
+                    Sequence* chosen = idleVal->FUN_0061b320((Reference*)actor, 0, 0, 0, 0);
                     if (chosen)
                         source->FUN_0057ace0(chosen->FUN_0084e3a0());
                     ResultList events = actor->PlayActor(idleVal, actor, immediateFlag4, priorityFlag, 0, 0);
                     events.FUN_00ad8e60(FUN_005790f0, source->FUN_0084e3a0());
                     return true;
                 }
-                if (DAT_011dea3c->FUN_0094df60() || actor->FUN_008d8520()->FUN_0045cd60() != 0 ||
-                    (actor->FUN_0087f3d0() && actor->FUN_004f8960() == 6))
+                if (DAT_011dea3c->FUN_0094df60() || ((Process*)actor->FUN_008d8520())->FUN_0045cd60() != 0 ||
+                    (actor->FUN_0087f3d0() && GetActorKnockState(actor) == 6))
                 {
-                    Sequence* selected = idleVal->FUN_0061b320(actor, 0, 0, 0, 1);
+                    Sequence* selected = idleVal->FUN_0061b320((Reference*)actor, 0, 0, 0, 1);
                     if (selected)
                     {
                         selected->FUN_0083c7b0();
@@ -2727,12 +2382,12 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
                     }
                 }
                 else
-                    actor->FUN_008d8520()->Play(actor, idleVal, forceFlag4, 0, 1, 1);
+                    ((Process*)actor->FUN_008d8520())->Play(actor, idleVal, forceFlag4, 0, 1, 1);
             }
             else if (actor->FUN_008d8520())
             {
                 MarkBaseExtraListScriptEvent(idleVal, actor->FUN_005d43c0(), 0x40000);
-                actor->FUN_008d8520()->Clear(0);
+                ((Process*)actor->FUN_008d8520())->Clear(0);
             }
         }
         else if (source && object4)
@@ -2764,57 +2419,8 @@ bool FUN_005c8a50(void* paramInfo, void* scriptData, Reference* source, void* co
 }
 }
 
-class Tile755
-{
-  public:
-    void SetInt(int m_iValueId, int iValue);
-};
 
-class Fader755
-{
-  public:
-    void Start(int m_iPayloadInteger);
-};
 
-class Menu755
-{
-  public:
-    Tile755* GetTile();
-    void Close();
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    Fader755 m_kFader;
-};
 
 class SaveLoad755
 {
@@ -2828,7 +2434,7 @@ class Manager755
     void Refresh();
 };
 
-extern Menu755* g_pkMenu755;
+extern CompanionWheelMenu* g_pkMenu755;
 extern SaveLoad755* g_pkSaveLoad755;
 extern Manager755 g_kManager755;
 
@@ -2839,18 +2445,14 @@ void __cdecl CloseMenuAndRefresh(bool bFade)
     if (g_pkMenu755)
     {
         if (bFade)
-            g_pkMenu755->m_kFader.Start(0x64);
+            g_pkMenu755->sound.FadeOutAndRelease(0x64);
         if (!g_pkSaveLoad755->IsLoading())
             g_kManager755.Refresh();
         g_pkMenu755->GetTile()->SetInt(0x1772, 1);
-        g_pkMenu755->Close();
+        g_pkMenu755->LoadMenuData();
     }
 }
 
-struct Tile_Set_Helper
-{
-    void Set(int, int);
-};
 struct ScriptTile256
 {
     void Set(const char*, double);
@@ -2897,7 +2499,7 @@ struct Wheel256
     int unk1c;
     int unk20;
     int unk24;
-    Tile_Set_Helper* tile;
+    Tile* tile;
     int unk2c;
     int unk30;
     int unk34;
@@ -2944,12 +2546,6 @@ void Wheel256::ToggleAggressive()
         tile->Set(0x100f, aggressive);
 }
 
-class TESBoundObject : public TESForm
-{
-};
-class AlchemyItem : public TESBoundObject
-{
-};
 struct HealingExtra
 {
     int unk00;
@@ -3220,33 +2816,18 @@ extern const char str_01019f08[];
 // 0x00755dc0  unit_929b7ab49562.cpp  /MT /Od /Oy- /GS /EHsc /Gy
 extern "C" int sprintf_s(char* buf, unsigned int size, const char* fmt, ...);
 
-struct Setting755d
-{
-    const char* String();
-};
-extern Setting755d DAT_011d300c;
-extern Setting755d DAT_011d2568;
-extern Setting755d DAT_011d1e60;
+extern Setting DAT_011d300c;
+extern Setting DAT_011d2568;
+extern Setting DAT_011d1e60;
 
-struct TileStr755d
-{
-    void SetString(int id, const char* text, bool flag);
-};
 
 struct Cast755d
 {
     const char* GetTargetFullName();
 };
 
-struct AVO755d
-{
-    virtual int v0(int);
-    virtual float v1(int);
-    virtual float v2(int);
-    virtual float v3(int);
-};
-
-struct ActorBase755d
+// Primary Actor ABI through +0xa4; shared Actor cannot supply the slot-239 pointer-return/int-argument query.
+struct CompanionStatsPrimaryObject
 {
     virtual void* v0(int);
     virtual void* v1(int);
@@ -3530,12 +3111,13 @@ struct ActorBase755d
     int unkA0;
 };
 
-struct Actor755d : ActorBase755d, AVO755d
+// Retained Actor query view: 0x008a0c20 reads ActorValueOwner at +0xa4; shared Actor lacks this method and the slot-239 pointer-return/int-argument signature.
+struct CompanionStatsActorQueries : CompanionStatsPrimaryObject, ActorValueOwner
 {
     float FUN_008a0c20();
 };
 
-float __cdecl FUN_008a0cd0(AVO755d* owner, int value);
+float __cdecl FUN_008a0cd0(ActorValueOwner* owner, int value);
 
 struct InvEntry755d
 {
@@ -3565,13 +3147,13 @@ struct Wheel755d
     int unk44;
     int unk48;
     int unk4C;
-    TileStr755d* tile;
+    Tile* tile;
     int unk54;
     int unk58;
     int unk5C;
     int unk60;
     int unk64;
-    Actor755d* actor;
+    CompanionStatsActorQueries* actor;
     void FUN_00755dc0(int mode);
 };
 
@@ -3597,8 +3179,8 @@ void Wheel755d::FUN_00755dc0(int mode)
         case 1:
             if (actor)
             {
-                b = (int)(*(AVO755d*)((char*)actor + sizeof(ActorBase755d))).v3(0x10);
-                rlBTmp = (*(AVO755d*)((char*)actor + sizeof(ActorBase755d))).v0(0x10);
+                b = (int)(*(ActorValueOwner*)((char*)actor + sizeof(CompanionStatsPrimaryObject))).GetCurrentActorValue((ActorValue::Index)0x10);
+                rlBTmp = (*(ActorValueOwner*)((char*)actor + sizeof(CompanionStatsPrimaryObject))).GetBaseActorValue((ActorValue::Index)0x10);
                 rlV = 0;
                 rlObj = dynamic_cast<TESBoundObject*>(FUN_0058db10(0));
                 if (rlObj)
@@ -3642,18 +3224,6 @@ void Wheel755d::FUN_00755dc0(int mode)
     }
 }
 
-struct BSSoundHandleEx
-{
-    unsigned int soundID;
-    bool assumeSuccess;
-    unsigned int state;
-    ~BSSoundHandleEx();
-    bool Play(bool immediate);
-};
-struct BSAudio
-{
-    BSSoundHandleEx GetSoundHandleByEditorID(const char*, unsigned int);
-};
 extern "C" BSAudio* __cdecl FUN_00453a70();
 extern MessageSetting DAT_011d33fc;
 extern MessageSetting DAT_011d4288;
@@ -3680,7 +3250,7 @@ struct WheelSelection
     int unk1C;
     int unk20;
     int unk24;
-    Tile_Set_Helper* tiles[16];
+    Tile* tiles[16];
     CompActor* companion;
     unsigned char flag6c;
     unsigned char flag6d;
@@ -3779,21 +3349,13 @@ void WheelSelection::SelectTile(int next, bool force)
     FUN_00755dc0(selected);
 }
 
-struct FUN_007563a0_shell
-{
-    char _pad[0x6f];
-    bool m_bTopicResponsePlayed;
-    void __thiscall ToggleFollowerWait();
-    void __thiscall PlayTopicResponse(TESTopic*);
-    void __thiscall RunTopicResultScripts(TESTopic*);
-};
-// Toggles m_bTopicResponsePlayed, plays the matching follower topic, and updates the tile set helper state.
+// Toggles followerWait, plays the matching follower topic, and updates the tile set helper state.
 // @fnv 0x007563a0
-void __thiscall FUN_007563a0_shell::ToggleFollowerWait()
+void CompanionWheelMenu::ToggleFollowerWait()
 {
     bool bSuccess = false;
-    m_bTopicResponsePlayed = !m_bTopicResponsePlayed;
-    if (!m_bTopicResponsePlayed)
+    followerWait = !followerWait;
+    if (!followerWait)
     {
         TESTopic* pRelatedTopic = dynamic_cast<TESTopic*>(TESForm::LookupFormByEditorID("FollowersWait"));
         PlayTopicResponse(pRelatedTopic);
@@ -3807,6 +3369,6 @@ void __thiscall FUN_007563a0_shell::ToggleFollowerWait()
         RunTopicResultScripts(pRelatedTopic);
         bSuccess = true;
     }
-    if (bSuccess && *(Tile_Set_Helper**)((char*)this + 0x30))
-        (*(Tile_Set_Helper**)((char*)this + 0x30))->Set(0x100f, !m_bTopicResponsePlayed);
+    if (bSuccess && tiles[2])
+        tiles[2]->Set(0x100f, !followerWait);
 }

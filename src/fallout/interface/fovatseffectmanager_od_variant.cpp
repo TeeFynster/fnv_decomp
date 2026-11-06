@@ -3,11 +3,15 @@
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 extern unsigned __int64 selected_target_masks[43];
-#include "fovatseffectmanager_targets.h"
+#include "../../../include/ImageSpaceManager.h"
+#include "../../../include/NiPoint3.h"
+// The shared manager supplies NiPoint3; skip the legacy dependency copy.
+#define FNV_NIPOINT3_H
 #pragma optimize("", off)
 #include "fovatseffectmanager_perks.h"
 void ApplyPerkModifiers(int entryPoint, Actor* actor, ...);
 #include "fovatseffectmanager_effects.h"
+#include "../../../include/FOVATSEffectManager.h"
 
 struct Struct801420
 {
@@ -27,15 +31,11 @@ void Struct801420::FUN_00801420(unsigned char a, int b)
 
 extern "C" unsigned char __cdecl FUN_00709d00();
 
-struct FOVATSEffectManager_00801a60
-{
-    void FUN_00801ad0(int, int, int, unsigned char);
-    void FUN_00801bb0(int, int, int, unsigned char);
-    void FUN_00801a60(int, int, int, unsigned char);
-};
+// Retained with this unit's FOVATSEffectManager stand-ins: the shared header lacks
+// FUN_00801420, FUN_00801450, FUN_00801880, FUN_00800f30 and OnIdle's helper methods.
 
 // @fnv 0x00801a60
-void FOVATSEffectManager_00801a60::FUN_00801a60(int a, int b, int c, unsigned char d)
+void FOVATSEffectManager::FUN_00801a60(int a, int b, int c, unsigned char d)
 {
     if (FUN_00709d00())
         return;
@@ -52,8 +52,9 @@ void FOVATSEffectManager_00801a60::FUN_00801a60(int a, int b, int c, unsigned ch
     }
 }
 
-struct SoundPlaybackHandle
+class ImageSpaceEffect
 {
+public:
     virtual void FUN_00000000();
     virtual void FUN_00000004();
     virtual void FUN_00000008();
@@ -63,34 +64,15 @@ struct SoundPlaybackHandle
     void SetFormType(int);
 };
 
-struct S5 : SoundPlaybackHandle
-{
-};
-
-struct S4
-{
-    S5* FUN_004ebbc0(int);
-};
-
-struct ImageSpaceManager : S4
-{
-};
-
-struct FOVATSEffectManager_008019d0
-{
-    void FUN_008019d0();
-};
-
-ImageSpaceManager* __cdecl FUN_004e3270(void);
 extern int DAT_012007fc;
 
 // @fnv 0x008019d0
-void FOVATSEffectManager_008019d0::FUN_008019d0()
+void FOVATSEffectManager::FUN_008019d0()
 {
-    FUN_004e3270()->FUN_004ebbc0(0x0A)->SetFormType(0);
-    FUN_004e3270()->FUN_004ebbc0(0x0B)->SetFormType(0);
-    FUN_004e3270()->FUN_004ebbc0(0x0A)->Play();
-    FUN_004e3270()->FUN_004ebbc0(0x0B)->Play();
+    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(0x0A)->SetFormType(0);
+    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(0x0B)->SetFormType(0);
+    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(0x0A)->Play();
+    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(0x0B)->Play();
     DAT_012007fc = 0;
 }
 
@@ -123,14 +105,6 @@ struct FilterHolder
     int FUN_004a3a20();
 };
 
-struct Vec3Like
-{
-    float x;
-    float y;
-    float z;
-    Vec3Like();
-};
-
 struct CellLike
 {
     unsigned int FUN_009611e0();
@@ -138,7 +112,7 @@ struct CellLike
 
 struct TESLike
 {
-    CellLike* FUN_00457620(Vec3Like* pos);
+    CellLike* FUN_00457620(NiPoint3* pos);
 };
 
 struct ExtraLike
@@ -151,7 +125,7 @@ extern TESLike* g_TES;
 void* FUN_004b59f0(const void* p);
 void* FUN_004b5950(const void* p);
 RefLike* FUN_004b5a20(void* p);
-void FUN_00458620(Vec3Like* out, int v);
+void FUN_00458620(NiPoint3* out, int v);
 void* FUN_004b5ad0(NiAVObject* p);
 void* FUN_004b5a80(const void* p);
 
@@ -172,7 +146,7 @@ unsigned int FUN_004b5820(FormLike* form)
             }
             else if (FilterHolder(form->FUN_0043b540()).FUN_004a3a20() == 1)
             {
-                Vec3Like pos4;
+                NiPoint3 pos4;
                 FUN_00458620(&pos4, ((NodeLike*)node_)->FUN_004b4ec0());
                 CellLike* cellA = g_TES->FUN_00457620(&pos4);
                 if (cellA && cellA->FUN_009611e0())
@@ -691,19 +665,10 @@ struct Obj0664_00801ad0
     void FUN_0066b0d0(void* p);
 };
 
-struct Actor_00801ad0
+// 0x004bc320 selects a rendered texture (also bound by imagespacetexture and watershader), not an Actor method.
+struct RenderedTextureSource
 {
     void* FUN_004bc320(int a);
-};
-
-struct S5_00801ad0
-{
-    void FUN_004f15a0();
-};
-
-struct Mgr_00801ad0
-{
-    S5_00801ad0* FUN_004ebbc0();
 };
 
 extern Holder_00801ad0 DAT_011db7b4;
@@ -719,10 +684,9 @@ extern float DAT_011ae614;
 extern float DAT_011ae618;
 
 Obj719_00801ad0* __stdcall FUN_00718b60(int, Vec4Tmp_00801ad0*);
-Mgr_00801ad0* __stdcall FUN_004e3270(int, int);
 
 // @fnv 0x00801ad0
-void FOVATSEffectManager_00801a60::FUN_00801ad0(int a0, int a1, int a2, unsigned char a3)
+void FOVATSEffectManager::FUN_00801ad0(int a0, int a1, int a2, unsigned char a3)
 {
     Vec4Tmp_00801ad0 tmp;
     tmp.FUN_00414430(0.0f, 0.0f, 0.0f, 0.0f);
@@ -735,8 +699,8 @@ void FOVATSEffectManager_00801a60::FUN_00801ad0(int a0, int a1, int a2, unsigned
     DAT_01201f38 = tmp.d2;
     DAT_01201f3c = tmp.d3;
     ((Obj6e5_00801ad0*)&DAT_01201f40)->FUN_006e5cc0((char*)this + 0x2c4);
-    ((Obj0664_00801ad0*)&DAT_01201f44)->FUN_0066b0d0(((Actor_00801ad0*)a1)->FUN_004bc320(0));
-    FUN_004e3270(0xb, 1)->FUN_004ebbc0()->FUN_004f15a0();
+    ((Obj0664_00801ad0*)&DAT_01201f44)->FUN_0066b0d0(((RenderedTextureSource*)a1)->FUN_004bc320(0));
+    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(0xb)->SetFormType(1);
 }
 
 struct FUN_00414430
@@ -1395,16 +1359,16 @@ struct EffectModeSetup
     int unk2bc;
     float value2c0;
     int unk2c4;
-    void FUN_00801bb0(int, Actor_00801ad0*, int, unsigned char);
+    void FUN_00801bb0(int, RenderedTextureSource*, int, unsigned char);
 };
 // @fnv 0x00801bb0
-void EffectModeSetup::FUN_00801bb0(int unused, Actor_00801ad0* actor, int unused2, unsigned char flag)
+void EffectModeSetup::FUN_00801bb0(int unused, RenderedTextureSource* actor, int unused2, unsigned char flag)
 {
     Vec4Tmp_00801ad0 vector;
     vector.FUN_00414430(0.0f, 0.0f, 0.0f, 0.0f);
     FUN_00718b60(1, &vector)->FUN_00719060();
     DAT_012007fc = 1;
-    FUN_004e3270(10, 1)->FUN_004ebbc0()->FUN_004f15a0();
+    ImageSpaceManager::FUN_004e3270()->FUN_004ebbc0(10)->SetFormType(1);
     DAT_01200818.FUN_0066b0d0(actor->FUN_004bc320(0));
     if (enabled)
     {

@@ -1,6 +1,44 @@
-// fallout_shared/bgsnote.cpp: BGSNote, Proxy, BGSNoteStandin, NoteRecord and more (25 functions)
+// fallout_shared/bgsnote.cpp: BGSNote and note serialization operations (25 functions)
 
-#include "bgsnote_decls.h"
+void* __cdecl operator new(unsigned int);
+void __cdecl operator delete(void*);
+
+#include "../../include/BGSNote.h"
+#include "../../include/BSSimpleList.h"
+#include "../../include/TESBoundObject.h"
+#include "../../include/TESModel.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESIcon.h"
+#include "../../include/MagicTarget.h"
+#include "../../include/TESDescription.h"
+#include "../../include/TESTexture.h"
+#include "../../include/TESQuest.h"
+#include "../../include/TESSound.h"
+#include "../../include/TESTopic.h"
+#include "../../include/TESActorBase.h"
+#include "../../include/TESFile.h"
+#include "../../include/ENUM_FORM_ID.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/FormChangeMask.h"
+#include "../../include/BGSPickupPutdownSounds.h"
+
+// 0x00472660 is compared as a full ENUM_FORM_ID here; TESFile's shared declaration returns a byte.
+class RecordFormTypeReader
+{
+  public:
+    ENUM_FORM_ID GetTESForm();
+};
+
+int Warning(const char*, ...);
+template <class T> struct BGSNoteReference
+{
+    unsigned int id;
+    T* form;
+};
+bool __cdecl IsChunkTypeIcon(int);
+extern "C" void* __cdecl _alloca(unsigned int);
+#pragma intrinsic(_alloca)
+
 // @fnv 0x005e8240
 void BGSNote::ResetFormData()
 {
@@ -22,7 +60,7 @@ TESDescription* BGSNote::GetNoteDescription()
 // @fnv 0x005e8060
 BGSNote::BGSNote()
 {
-    SetFormType(kNote);
+    SetFormType(ENUM_FORM_ID_NOTE_ID);
     ResetFormData();
 }
 
@@ -77,7 +115,7 @@ void BGSNote::InitItem()
         }
         else
         {
-            Warning("MASTERFILE: Unable to find owner quest (%08X) for Note '%s' (%08X).", noteRef.id, GetEditorID(),
+            Warning("MASTERFILE: Unable to find owner quest (%08X) for Note '%s' (%08X).", noteRef.id, GetName(),
                     GetFormID());
             if (previous)
             {
@@ -96,7 +134,7 @@ void BGSNote::InitItem()
         noteRef.form = dynamic_cast<TESSound*>(GetFormByID(noteRef.id));
         SetNoteSound(noteRef.form);
         if (!noteRef.form)
-            Warning("MASTERFILE: Unable to find sound (%08X) for Note '%s' (%08X).", noteRef.id, GetEditorID(),
+            Warning("MASTERFILE: Unable to find sound (%08X) for Note '%s' (%08X).", noteRef.id, GetName(),
                     GetFormID());
     }
     if (FUN_005e9240())
@@ -107,7 +145,7 @@ void BGSNote::InitItem()
         noteRef.form = dynamic_cast<TESTopic*>(GetFormByID(noteRef.id));
         SetNoteTopic(noteRef.form);
         if (!noteRef.form)
-            Warning("MASTERFILE: Unable to find topic (%08X) for Note '%s' (%08X).", noteRef.id, GetEditorID(),
+            Warning("MASTERFILE: Unable to find topic (%08X) for Note '%s' (%08X).", noteRef.id, GetName(),
                     GetFormID());
     }
     if (FUN_005e92a0())
@@ -118,7 +156,7 @@ void BGSNote::InitItem()
         noteRef.form = dynamic_cast<TESActorBase*>(GetFormByID(noteRef.id));
         SetNoteSpeaker(noteRef.form);
         if (!noteRef.form)
-            Warning("MASTERFILE: Unable to find actor base (%08X) for Note '%s' (%08X).", noteRef.id, GetEditorID(),
+            Warning("MASTERFILE: Unable to find actor base (%08X) for Note '%s' (%08X).", noteRef.id, GetName(),
                     GetFormID());
     }
     BGSPickupPutdownSounds::InitItem(this);
@@ -129,7 +167,7 @@ void BGSNote::InitItem()
 // @fnv 0x005e84e0
 bool BGSNote::Load(TESFile* file)
 {
-    if (file->GetTESForm() != kNote)
+    if (reinterpret_cast<RecordFormTypeReader*>(file)->GetTESForm() != ENUM_FORM_ID_NOTE_ID)
         return false;
     LoadRecordHeader(file);
     int chunk;
@@ -140,14 +178,14 @@ bool BGSNote::Load(TESFile* file)
         case 0x44494445: {
             char* editorID = (char*)_alloca(file->GetChunkSize());
             file->GetChunkData(editorID, 0x200);
-            SetEditorID(editorID);
+            SetEditorID_AtRuntime(editorID);
             break;
         }
         case 0x444e424f:
-            LoadBounds(file);
+            readOBNDSubRecord(file);
             break;
         case 0x4c4c5546:
-            TESFullNameLoader::LoadFullNameChunk(this, file);
+            TESFullName::LoadFullNameChunk(this, file);
             break;
         case 0x4c444f4d:
         case 0x54444f4d:
@@ -241,31 +279,27 @@ bool BGSNote::Load(TESFile* file)
     return true;
 }
 
-struct FUN_005e8d40_shell : public BGSNote
-{
-    int GetNoteType();
-};
 
 // @fnv 0x005e8d40
-int FUN_005e8d40_shell::GetNoteType()
+int BGSNote::GetNoteType()
 {
     return cType;
 }
 
-// Returns the note's sound if its type is NoteSound, otherwise returns null.
+// Returns the note's sound if its type is NT_SOUND, otherwise returns null.
 // @fnv 0x005e9100
 TESSound* BGSNote::FUN_005e9100()
 {
-    if (GetNoteType() == NoteSound)
+    if (GetNoteType() == NT_SOUND)
         return (TESSound*)m_pText;
     return 0;
 }
 
-// Returns the note texture if the note type is NoteTexture, otherwise returns null.
+// Returns the note texture if the note type is NT_IMAGE, otherwise returns null.
 // @fnv 0x005e9160
 TESTexture* BGSNote::GetNoteTexture()
 {
-    if (GetNoteType() == NoteTexture)
+    if (GetNoteType() == NT_IMAGE)
         return (TESTexture*)m_pText;
     return 0;
 }
@@ -279,13 +313,9 @@ TESTopic* BGSNote::FUN_005e9240()
     return 0;
 }
 
-struct FUN_005e9270_shell : public BGSNote
-{
-    void FUN_005e9270(TESTopic*);
-};
 
 // @fnv 0x005e9270
-void FUN_005e9270_shell::FUN_005e9270(TESTopic* apTopic)
+void BGSNote::SetNoteTopic(TESTopic* apTopic)
 {
     if (GetNoteType() == 3)
         m_pText = apTopic;
@@ -300,328 +330,121 @@ TESActorBase* BGSNote::FUN_005e92a0()
     return 0;
 }
 
-struct FUN_005e92d0_shell : public BGSNote
-{
-    void FUN_005e92d0(TESActorBase*);
-};
 
 // If GetNoteType() returns 3, stores apSpeaker into a field.
 // @fnv 0x005e92d0
-void FUN_005e92d0_shell::FUN_005e92d0(TESActorBase* apSpeaker)
+void BGSNote::SetNoteSpeaker(TESActorBase* apSpeaker)
 {
     if (GetNoteType() == 3)
         m_pDialogueSpeaker = apSpeaker;
 }
 
-struct FUN_005e9130_shell : BGSNote
-{
-    void FUN_005e9130(int a1);
-};
 
-// If GetNoteType returns 0, stores a1 at offset 0x6c of this object.
+// Stores the sound when the note type is NT_SOUND.
 // @fnv 0x005e9130
-void FUN_005e9130_shell::FUN_005e9130(int a1)
+void BGSNote::SetNoteSound(TESSound* sound)
 {
     if (GetNoteType() == 0)
-        *(int*)((char*)this + 0x6c) = a1;
+        m_pText = sound;
 }
 
 void _Deallocate(void*);
-struct Proxy
-{
-    void FUN_005e8170();
-    void* Release(unsigned int);
-};
-// Calls FUN_005e8170, frees this via _Deallocate when flags has bit 1 set, and returns this.
+// Runs the note destructor, frees this when flags has bit 1 set, and returns this.
 // @fnv 0x005e8140
-void* Proxy::Release(unsigned int flags)
+void* BGSNote::Release(unsigned int flags)
 {
-    this->FUN_005e8170();
+    this->BGSNote::~BGSNote();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-struct Fake9190
-{
-    virtual void f0()
-    {}
-    virtual void f1()
-    {}
-    virtual void f2(int)
-    {}
-};
-struct FUN_005e9190_shell : BGSNote
-{
-    void FUN_005e9190(int);
-};
 // @fnv 0x005e9190
-void FUN_005e9190_shell::FUN_005e9190(int a)
+void BGSNote::SetNoteTexture(TESTexture* texture)
 {
     if (GetNoteType() == 2)
-        ((Fake9190*)m_pText)->f2(a);
+        ((TESTexture*)m_pText)->CopyFromBase((BaseFormComponent*)texture);
 }
 
-struct Helper005e9200
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2(void*);
-};
-struct FUN_005e9200_shell : BGSNote
-{
-    void FUN_005e9200(void*);
-};
 // @fnv 0x005e9200
-void FUN_005e9200_shell::FUN_005e9200(void* apArg)
+void BGSNote::SetNoteText(TESDescription* text)
 {
     if (GetNoteType() == 1)
-        ((Helper005e9200*)m_pText)->f2(apArg);
+        ((TESDescription*)m_pText)->CopyFromBase((BaseFormComponent*)text);
 }
 
-struct FormChangeMask
-{
-    unsigned int m_flags;
-    operator bool() const;
-};
-struct BGSLoadFormBuffer
-{
-    FormChangeMask GetChangeFlags(unsigned int);
-};
-struct TESFormBufferAccess
-{
-    void LoadGame(BGSLoadFormBuffer*);
-};
-struct BGSNoteStandin : TESForm
-{
-    void FUN_005e9480(BGSLoadFormBuffer*);
-};
 // @fnv 0x005e9480
-void BGSNoteStandin::FUN_005e9480(BGSLoadFormBuffer* apLoadGameBuffer)
+void BGSNote::LoadGame(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    ((TESFormBufferAccess*)this)->LoadGame(apLoadGameBuffer);
-    if (apLoadGameBuffer->GetChangeFlags(0x80000000))
-        *(unsigned char*)((char*)this + 0x7d) = 1;
+    TESForm::LoadGame(apLoadGameBuffer);
+    if (apLoadGameBuffer->GetChangeFlags(0x80000000).operator bool())
+        m_bIsRead = true;
 }
 
-namespace fnv_005e94d0 {
-struct FormChangeMask
-{
-    int data;
-    operator bool() const;
-};
-struct BGSLoadFormBuffer
-{
-    FormChangeMask GetOldChangeFlags(unsigned int);
-};
-struct FUN_004534f0_shell
-{
-    void FUN_004534f0(unsigned int);
-};
-struct FUN_005e94d0_shell : TESForm
-{
-    void FUN_005e94d0(BGSLoadFormBuffer*);
-};
 // @fnv 0x005e94d0
-void FUN_005e94d0_shell::FUN_005e94d0(BGSLoadFormBuffer* apLoadGameBuffer)
+void BGSNote::Revert(BGSLoadFormBuffer* apLoadGameBuffer)
 {
-    ((FUN_004534f0_shell*)this)->FUN_004534f0(reinterpret_cast<unsigned int>(apLoadGameBuffer));
-    if (apLoadGameBuffer->GetOldChangeFlags(0x80000000))
-        *(char*)((char*)this + 0x7d) = 0;
+    TESForm::Revert(apLoadGameBuffer);
+    if (apLoadGameBuffer->GetOldChangeFlags(0x80000000).operator bool())
+        m_bIsRead = false;
 }
-}  // namespace fnv_005e94d0
 
-struct FUN_005e9300_Host
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18(unsigned int);
-    virtual void v19(unsigned int);
-    char _pad[0x79];
-    bool mRead;
-    void SetRead(bool abRead);
-};
 // @fnv 0x005e9300
-void FUN_005e9300_Host::SetRead(bool abRead)
+void BGSNote::SetSoundNotePlayed(bool abRead)
 {
-    if (mRead == abRead)
+    if (m_bIsRead == abRead)
         return;
-    mRead = abRead;
-    if (mRead)
-        v18(0x80000000);
+    m_bIsRead = abRead;
+    if (m_bIsRead)
+        MarkAsModified(0x80000000);
     else
-        v19(0x80000000);
+        MarkAsUnmodified(0x80000000);
 }
 
-struct FUN_005e8170 : public TESBoundObject,
-                      public TESModel,
-                      public TESFullName,
-                      public TESIcon,
-                      public BGSPickupPutdownSounds
-{
-    void* m_pText;
-    void* m_pDialogueSpeaker;
-    BSSimpleList<TESQuest*> ownerQuests;
-    signed char cType;
-    bool m_bIsRead;
-    char padding7e[2];
-    void ClearNoteData();
-    virtual ~FUN_005e8170();
-};
-
-// Destructor that calls ClearNoteData to release the note's data.
 // @fnv 0x005e8170
-FUN_005e8170::~FUN_005e8170()
+BGSNote::~BGSNote()
 {
     ClearNoteData();
 }
 
-struct NoteQuestList
-{
-    unsigned int head;
-    unsigned int tail;
-    void __thiscall FUN_00470470();
-};
-struct NoteRecord
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    TESDescription* noteData;
-    void* speaker;
-    NoteQuestList ownerQuests;
-    unsigned char noteType;
-    unsigned char wasRead;
-    void __thiscall Destroy();
-};
 // @fnv 0x005e8270
-void NoteRecord::Destroy()
+void BGSNote::ClearNoteData()
 {
-    ownerQuests.FUN_00470470();
-    switch (noteType)
+    ownerQuests.RemoveAll();
+    switch ((unsigned char)cType)
     {
     case 1:
-        delete noteData;
-        noteData = 0;
+        delete (TESDescription*)m_pText;
+        m_pText = 0;
         break;
     case 2:
-        delete reinterpret_cast<TESTexture*>(noteData);
-        noteData = 0;
+        delete (TESTexture*)m_pText;
+        m_pText = 0;
         break;
     }
 }
-
-struct SaveForm
-{
-    unsigned int SerializeFormData();
-};
-struct SaveTexture : TESTexture
-{
-    unsigned int GetNameLength();
-    const char* GetName();
-};
-struct SaveFullName : TESFullName
-{
-    void SaveFullNameChunk();
-};
-struct SaveModel : TESModel
-{
-    void SaveModelChunk(unsigned int, unsigned int);
-};
-struct SaveIcon : TESIcon
-{
-    void SaveIconChunk(unsigned int);
-};
-struct SavePickup : BGSPickupPutdownSounds
-{
-    void SavePickupChunk();
-};
-struct SaveQuestList
-{
-    bool IsListEmpty();
-    TESQuest*& GetListItem();
-    SaveQuestList* GetListNext();
-};
 
 void SaveByteChunk(unsigned int, unsigned char);
 void SaveIntChunk(unsigned int, unsigned int);
 void SaveDataChunk(unsigned int, const void*, unsigned int);
 void SaveDescriptionChunk(void*, unsigned int);
 
-struct BGSNoteSave : TESBoundObject, SaveModel, SaveFullName, SaveIcon, SavePickup
-{
-    void* m_pText;
-    void* m_pDialogueSpeaker;
-    BSSimpleList<TESQuest*> ownerQuests;
-    signed char cType;
-    bool m_bIsRead;
-    TESTexture* GetNoteTexture();
-    TESSound* FUN_005e9100();
-    TESTopic* FUN_005e9240();
-    TESActorBase* FUN_005e92a0();
-    void StartSave();
-    void EndSave();
-    SaveQuestList* GetOwnerQuests();
-    void* GetNoteTextData();
-    void SaveNote();
-};
-
 // @fnv 0x005e8300
-void BGSNoteSave::SaveNote()
+void BGSNote::SaveNote()
 {
-    StartSave();
-    SaveFullNameChunk();
-    SaveModelChunk(0x4c444f4d, 0x54444f4d);
-    SaveIconChunk(0x4e4f4349);
-    SavePickupChunk();
+    TESForm::FUN_004855a0();
+    TESFullName::FUN_00487010();
+    TESModel::WriteToBuffer(0x4c444f4d, 0x54444f4d);
+    TESTexture::Save(0x4e4f4349);
+    BGSPickupPutdownSounds::SavePickupChunk();
     SaveByteChunk(0x41544144, cType);
-    SaveQuestList* pNode = GetOwnerQuests();
-    while (pNode && !pNode->IsListEmpty())
+    BSSimpleList<TESQuest*>* pNode = GetOwnerQuests();
+    while (pNode && !pNode->IsEmpty())
     {
-        TESQuest* pOwner = pNode->GetListItem();
-        unsigned int uiOwnerQuestID = ((SaveForm*)pOwner)->SerializeFormData();
+        TESQuest* pOwner = pNode->GetItem();
+        unsigned int uiOwnerQuestID = pOwner->GetFormID();
         SaveIntChunk(0x4d414e4f, uiOwnerQuestID);
-        pNode = pNode->GetListNext();
+        pNode = pNode->GetNext();
     }
     switch (cType)
     {
@@ -629,75 +452,53 @@ void BGSNoteSave::SaveNote()
         TESSound* SoundAssetTmp = FUN_005e9100();
         if (SoundAssetTmp)
         {
-            unsigned int uiSoundID = ((SaveForm*)SoundAssetTmp)->SerializeFormData();
+            unsigned int uiSoundID = SoundAssetTmp->GetFormID();
             SaveIntChunk(0x4d414e53, uiSoundID);
         }
         break;
     }
     case 1: {
-        void* pText = GetNoteTextData();
+        void* pText = GetNoteDescription();
         if (pText)
             SaveDescriptionChunk(pText, 0x4d414e54);
         break;
     }
     case 2: {
-        SaveTexture* pNoteTexture = (SaveTexture*)GetNoteTexture();
+        TESTexture* pNoteTexture = GetNoteTexture();
         if (pNoteTexture)
-            SaveDataChunk(0x4d414e58, pNoteTexture->GetName(), pNoteTexture->GetNameLength() + 1);
+            SaveDataChunk(0x4d414e58, pNoteTexture->GetTextureResourceName(), pNoteTexture->GetTextureNameLength() + 1);
         break;
     }
     case 3: {
         TESTopic* pTopic = FUN_005e9240();
         if (pTopic)
         {
-            unsigned int uiTopicFormID = ((SaveForm*)pTopic)->SerializeFormData();
+            unsigned int uiTopicFormID = pTopic->GetFormID();
             SaveIntChunk(0x4d414e54, uiTopicFormID);
         }
         TESActorBase* m_pDialogueSpeaker = FUN_005e92a0();
         if (m_pDialogueSpeaker)
         {
-            unsigned int uiSpeakerFormID = ((SaveForm*)m_pDialogueSpeaker)->SerializeFormData();
+            unsigned int uiSpeakerFormID = m_pDialogueSpeaker->GetFormID();
             SaveIntChunk(0x4d414e53, uiSpeakerFormID);
         }
         break;
     }
     }
-    EndSave();
+    TESForm::FUN_00485680();
 }
-
-namespace fnv_005e8c00 {
-struct NoteQuestList
-{
-    void RemoveAll();
-};
-
-class BGSNoteCopy : public BGSNote
-{
-  public:
-    void CopyGenericComponents(TESForm* apForm);
-    void SetNoteFlags(int aiFlags);
-    void SetNoteSpeaker(TESActorBase* apSpeaker);
-    void SetNoteSound(TESSound* apSound);
-    TESDescription* FUN_005e91d0();
-    void SetNoteText(TESDescription* apText);
-    void SetNoteTexture(TESTexture* apTexture);
-    void SetNoteTopic(TESTopic* apTopic);
-    BSSimpleList<TESQuest*>* GetOwnerQuests();
-
-    void CopyFromNote(TESForm* apForm);
-};
 
 // Copies generic components, flags, speaker, type-specific data and owner quests from another BGSNote into this one.
 // @fnv 0x005e8c00
-void BGSNoteCopy::CopyFromNote(TESForm* apForm)
+void BGSNote::CopyFrom(const TESForm* apForm)
 {
-    BGSNoteCopy* pSource = (BGSNoteCopy*)dynamic_cast<BGSNote*>(apForm);
+    BGSNote* pSource = dynamic_cast<BGSNote*>(const_cast<TESForm*>(apForm));
     if (!pSource)
         return;
 
-    CopyGenericComponents(apForm);
+    TESForm::CopyFrom(apForm);
     BSSimpleList<TESQuest*>* pIter = 0;
-    SetNoteFlags(pSource->GetNoteType());
+    ChangeNoteType((NOTE_TYPE)pSource->GetNoteType());
     SetNoteSpeaker(pSource->FUN_005e92a0());
     switch (cType)
     {
@@ -705,7 +506,7 @@ void BGSNoteCopy::CopyFromNote(TESForm* apForm)
         SetNoteSound(pSource->FUN_005e9100());
         break;
     case 1:
-        SetNoteText(pSource->FUN_005e91d0());
+        SetNoteText(pSource->GetNoteDescription());
         break;
     case 2:
         SetNoteTexture(pSource->GetNoteTexture());
@@ -715,7 +516,7 @@ void BGSNoteCopy::CopyFromNote(TESForm* apForm)
         break;
     }
 
-    ((NoteQuestList*)&ownerQuests)->RemoveAll();
+    ownerQuests.RemoveAll();
     pIter = pSource->GetOwnerQuests();
     while (pIter && !pIter->IsEmpty())
     {
@@ -724,46 +525,15 @@ void BGSNoteCopy::CopyFromNote(TESForm* apForm)
     }
     m_bIsRead = pSource->m_bIsRead;
 }
-}  // namespace fnv_005e8c00
-
-namespace fnv_005e8d60 {
-struct NoteCompareData
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual bool IsDifferent(NoteCompareData* apOther);
-};
-
-struct NoteQuestList
-{
-    TESQuest* pItem;
-    NoteQuestList* pNext;
-
-    int GetSize();
-    bool IsEmpty();
-    TESQuest*& GetItem();
-    bool IsInList(TESQuest*& arItem);
-    NoteQuestList* GetNext();
-};
-
-struct NoteCompare : BGSNote
-{
-    bool CompareBase(BGSNote* apOther);
-    NoteQuestList* GetOwnerQuests();
-    NoteCompareData* FUN_005e91d0();
-    NoteCompareData* GetNoteTexture();
-    bool FUN_005e8d60(TESForm* apForm);
-};
 
 // Compares this note against apForm by base data, type-specific data and owner quest lists, returning true when they differ.
 // @fnv 0x005e8d60
-bool NoteCompare::FUN_005e8d60(TESForm* apForm)
+bool BGSNote::Compare(TESForm* apForm)
 {
     BGSNote* pNote = dynamic_cast<BGSNote*>(apForm);
     if (!pNote)
         return true;
-    if (CompareBase(pNote))
+    if (TESForm::Compare(pNote))
         return true;
     if (pNote->cType != cType)
         return true;
@@ -775,11 +545,11 @@ bool NoteCompare::FUN_005e8d60(TESForm* apForm)
             return true;
         break;
     case 1: {
-        NoteCompareData* pMine = FUN_005e91d0();
-        NoteCompareData* pTheirs = ((NoteCompare*)pNote)->FUN_005e91d0();
+        TESDescription* pMine = GetNoteDescription();
+        TESDescription* pTheirs = pNote->GetNoteDescription();
         if (pMine && pTheirs)
         {
-            if (pMine->IsDifferent(pTheirs))
+            if (pMine->CompareWithBase((BaseFormComponent*)pTheirs))
                 return true;
         }
         else if (pMine || pTheirs)
@@ -787,11 +557,11 @@ bool NoteCompare::FUN_005e8d60(TESForm* apForm)
         break;
     }
     case 2: {
-        NoteCompareData* pMine = GetNoteTexture();
-        NoteCompareData* pTheirs = ((NoteCompare*)pNote)->GetNoteTexture();
+        TESTexture* pMine = GetNoteTexture();
+        TESTexture* pTheirs = pNote->GetNoteTexture();
         if (pMine && pTheirs)
         {
-            if (pMine->IsDifferent(pTheirs))
+            if (pMine->CompareWithBase((BaseFormComponent*)pTheirs))
                 return true;
         }
         else if (pMine || pTheirs)
@@ -806,17 +576,16 @@ bool NoteCompare::FUN_005e8d60(TESForm* apForm)
         break;
     }
 
-    if (GetOwnerQuests()->GetSize() != ((NoteCompare*)pNote)->GetOwnerQuests()->GetSize())
+    if (GetOwnerQuests()->ItemsInList() != pNote->GetOwnerQuests()->ItemsInList())
         return true;
 
-    NoteQuestList* pNode = GetOwnerQuests();
+    BSSimpleList<TESQuest*>* pNode = GetOwnerQuests();
     while (pNode && !pNode->IsEmpty())
     {
         TESQuest* pQuest = pNode->GetItem();
-        if (!((NoteCompare*)pNote)->GetOwnerQuests()->IsInList(pQuest))
+        if (!pNote->GetOwnerQuests()->IsInList(pQuest))
             return true;
         pNode = pNode->GetNext();
     }
     return false;
 }
-}  // namespace fnv_005e8d60

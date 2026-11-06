@@ -1,39 +1,60 @@
-// Source layout: BSSaveDataSystemUtility. PC corrections are in generate_headers.py.
-#ifndef FNV_BSSAVEDATASYSTEMUTILITY_H
-#define FNV_BSSAVEDATASYSTEMUTILITY_H
+﻿#pragma once
 
-#include "layout_support.h"
 #include "BSSaveDataSystemUtility__SaveDataEntry.h"
-#pragma pack(push, 4)
+
+class BSSaveDataOperationEntry;
+
 class BSSaveDataSystemUtility
 {
-  public:
-    void** m_ppVirtualMethodTable;  // +0x0
-    bool bIsActive;   // +0x4
+public:
+    enum OPERATION
+    {
+        OPERATION_NONE = 0,
+        OPERATION_SAVE = 1,
+        OPERATION_LOAD = 2,
+        OPERATION_DELETE = 3,
+        OPERATION_AUTOSAVE = 4,
+        OPERATION_AUTOLOAD = 5,
+    };
+
+    enum RESULT
+    {
+        RESULT_SUCCESS = 0,
+        RESULT_CANCEL = 1,
+        RESULT_FAILED = 2,
+    };
+
+    enum RESULT_FAILED_REASON
+    {
+        RESULT_FAILED_REASON_NO_DATA = 0,
+        RESULT_FAILED_REASON_INSUFFICIENT_SPACE = 1,
+        RESULT_FAILED_REASON_DATA_CORRUPT = 2,
+        RESULT_FAILED_REASON_UNKNOWN = 3,
+    };
+
+    virtual void* vf00(unsigned int flags);
+    virtual void vf04();
+    virtual void Destroy();
+    virtual unsigned int vf0C(const char*, int, int);  // 0x00aaa650: returns 0
+    virtual bool vf10(const char*, void*);
+    virtual void vf14();
+    virtual void vf18();
+    virtual void vf1C(int);
+    virtual void vf20();
+    virtual void vf24();
+
+    bool bIsActive;
     unsigned char layoutPadding5;
     unsigned short layoutPadding6;
-    BSSaveDataOperationEntry* m_pOperationContext;                   // +0x8
-    BSSaveDataSystemUtility__SaveDataEntry m_kSaveDataEntry;            // +0xC
-    BSSaveDataSystemUtility__OPERATION m_eOperation;                    // +0x2C
-    BSSaveDataSystemUtility__RESULT m_eResult;                          // +0x30
-    BSSaveDataSystemUtility__RESULT m_eSecondResult;                    // +0x34
-    BSSaveDataSystemUtility__RESULT m_eThirdResult;                     // +0x38
-    BSSaveDataSystemUtility__RESULT_FAILED_REASON m_eFailedReason;      // +0x3C
-    unsigned int m_uiResultCount;                                       // +0x40
-    void___cdecl__BSSaveDataSystemUtility__RESULT_* m_pResultCallback;  // +0x44
-    void Destroy();
+    BSSaveDataOperationEntry* m_pOperationContext;
+    BSSaveDataSystemUtility__SaveDataEntry m_kSaveDataEntry;
+    OPERATION m_eOperation;
+    RESULT m_eResult;
+    RESULT m_eSecondResult;
+    RESULT m_eThirdResult;
+    RESULT_FAILED_REASON m_eFailedReason;
+    unsigned int m_uiResultCount;
+    void (__cdecl* m_pResultCallback)(RESULT);
+
+    void SetResultCallback(void (__cdecl* apCallback)(RESULT));  // 0x008d8040 (folded +0x44 setter)
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BSSaveDataSystemUtility) == 0x48);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, m_ppVirtualMethodTable) == 0x0);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, bIsActive) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, m_pOperationContext) == 0x8);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, m_kSaveDataEntry) == 0xC);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, m_eOperation) == 0x2C);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, m_eResult) == 0x30);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, m_eSecondResult) == 0x34);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, m_eThirdResult) == 0x38);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, m_eFailedReason) == 0x3C);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, m_uiResultCount) == 0x40);
-FNV_STATIC_ASSERT(offsetof(BSSaveDataSystemUtility, m_pResultCallback) == 0x44);
-#endif

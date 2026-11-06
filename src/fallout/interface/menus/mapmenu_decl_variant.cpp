@@ -16,8 +16,8 @@ void MapMenu::FUN_0079af30()
 {
     int selected = -1;
     Tile* index = 0;
-    m_kQuestListBox.FUN_007a2350(false);
-    m_kObjectiveListBox.SetEnabledTrait(false);
+    m_kQuestListBox.SetEnabled(false);
+    m_kObjectiveListBox.SetEnabled(false);
     m_kNoteListBox.FUN_007a30e0(false);
     m_kNoteListBox.FUN_007a5a30(false);
     m_kChallengeListBox.FUN_007a59a0(false);
@@ -61,10 +61,10 @@ void MapMenu::FUN_0079af30()
     case 36:
         DAT_011da368->m_pTiles[12]->Set(0xfa3, 0);
         selected =
-            (int)(m_kMapMarkerListBox.GetSelectedTile() ? m_kMapMarkerListBox.GetSelectedTile()->FUN_00a011b0(0xfac)
+            (int)(m_kMapMarkerListBox.GetHighlightedItem() ? m_kMapMarkerListBox.GetHighlightedItem()->FUN_00a011b0(0xfac)
                                                         : -1.0f);
         DAT_011da368->RefreshRadioList();
-        index = m_kMapMarkerListBox.GetTileAt(selected, false);
+        index = m_kMapMarkerListBox.GetTileAt(static_cast<unsigned int>(selected), false);
         if (index)
             FUN_004b7210()->FUN_00715860(index, 0xfc3, 1);
         m_kMapMarkerListBox.ScrollToHighlight();

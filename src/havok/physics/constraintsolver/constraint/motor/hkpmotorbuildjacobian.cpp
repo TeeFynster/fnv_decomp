@@ -114,6 +114,7 @@ struct __declspec(align(16)) S_00dd0260_Vector4
     }
 };
 
+// local form of hkMatrix3: 0x00dd0260 needs inline column q accessors; shared form gives 305 bytes vs exe 338.
 struct S_00dd0260_Matrix3
 {
     S_00dd0260_Vector4 m_kColumn0;

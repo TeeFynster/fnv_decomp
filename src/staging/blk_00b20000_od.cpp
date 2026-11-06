@@ -3,6 +3,8 @@
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/Random.h"
 
 extern "C" void __cdecl FUN_00b02c90();
 
@@ -66,14 +68,6 @@ void __thiscall FUN_00b3f0a0_Class::FUN_00b3f0a0()
 {
     *(int*)this = (int)&DAT_010a5890;
 }
-
-struct NiPoint3
-{
-    float x;
-    float y;
-    float z;
-    NiPoint3& __thiscall FUN_00b2a1c0(const NiPoint3& other);
-};
 
 // Adds other's x, y and z to this point's components and returns this point.
 // @fnv 0x00b2a1c0
@@ -415,12 +409,6 @@ FUN_00b3f030_Class::FUN_00b3f030_Class()
     p[2] = 0.0f;
 }
 
-struct Random
-{
-    void* vtbl;
-    void* __thiscall DestroyRandom(unsigned int flags);
-};
-
 extern const int vftable_Random[];
 void _Deallocate(void*);
 
@@ -428,7 +416,7 @@ void _Deallocate(void*);
 // @fnv 0x00b3f2e0
 void* __thiscall Random::DestroyRandom(unsigned int flags)
 {
-    this->vtbl = (void*)vftable_Random;
+    *reinterpret_cast<const int**>(this) = vftable_Random;
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -1508,27 +1496,28 @@ void S_00b3db50::FUN_00b3db50()
     m14 = 0;
 }
 
-struct Item32780
+struct SequenceRecord
 {
     int m_00, m_04, m_08, m_0c, m_10, m_14;
 };
-struct Tag32780
+struct SequenceCopyTag
 {
     unsigned char v;
 };
-struct Vec32780
+// First/last pointers at +0x0c/+0x10 hold 24-byte records; 0x00b1f590 also binds std::vector::_Buy, while Vec3 has three floats.
+struct RecordSequence
 {
     int m_00, m_04, m_08;
-    Item32780* m_0c;
-    Item32780* m_10;
+    SequenceRecord* m_0c;
+    SequenceRecord* m_10;
     bool FUN_00b1f590(int n);
     void FUN_00b32c60();
-    void FUN_00b32780(int n, const Item32780* value);
+    void FUN_00b32780(int n, const SequenceRecord* value);
 };
-extern void __cdecl FUN_00b360a0(Item32780*, int, const Item32780*, void*, unsigned char, unsigned char);
+extern void __cdecl FUN_00b360a0(SequenceRecord*, int, const SequenceRecord*, void*, unsigned char, unsigned char);
 // If FUN_00b1f590(n) succeeds, calls FUN_00b360a0 on m_0c with n and value and sets m_10 to m_0c + n; on exception calls FUN_00b32c60 and rethrows.
 // @fnv 0x00b32780
-void Vec32780::FUN_00b32780(int n, const Item32780* value)
+void RecordSequence::FUN_00b32780(int n, const SequenceRecord* value)
 {
     int filler[25];
     if (FUN_00b1f590(n))
@@ -1536,12 +1525,12 @@ void Vec32780::FUN_00b32780(int n, const Item32780* value)
         try
         {
             unsigned char a;
-            Item32780* c;
-            Item32780* b;
+            SequenceRecord* c;
+            SequenceRecord* b;
             unsigned char h;
             c = m_0c;
             b = c;
-            Tag32780 p = {};
+            SequenceCopyTag p = {};
             h = a;
             FUN_00b360a0(b, n, value, &m_08, h, p.v);
             m_10 = c + n;

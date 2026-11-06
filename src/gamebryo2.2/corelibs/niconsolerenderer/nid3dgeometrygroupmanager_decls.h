@@ -1,9 +1,5 @@
 
-class NiMemObject
-{
-  public:
-    static void* operator new(unsigned int);
-};
+#include "../../../../include/NiMemObject.h"
 class Direct3DDeviceInterface
 {
   public:
@@ -45,8 +41,8 @@ class NiGeometryGroupManager
     enum RepackingBehavior
     {
         STATIC,
-        DYNAMIC,
-        UNSHARED
+        UNSHARED,
+        DYNAMIC
     };
 };
 class NiD3DGeometryGroupManager : public NiMemObject

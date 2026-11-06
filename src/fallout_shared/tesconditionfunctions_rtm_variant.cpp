@@ -2,26 +2,12 @@
 // src/fallout_shared/tesconditionfunctions_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/fallout_shared/tesconditionfunctions.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /Od /Oy- /GS /EHsc /Gy /GF (unit lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton.
 
-#include "tesconditionfunctions_conditionfn_MobileObject.h"
-#include "tesconditionfunctions_conditionfn_low_Script.h"
-#include "tesconditionfunctions_conditionfn_class_faction.h"
-#include "tesconditionfunctions_conditionfn_dep_TESQuest.h"
-#include "tesconditionfunctions_conditionfn_BGSQuestObjective.h"
-#include "tesconditionfunctions_packet.h"
-#include "tesconditionfunctions_conditionfn_dep_TESObjectREFR.h"
-class PlayerCharacter;
+#include "../../include/Actor.h"
 extern PlayerCharacter* g_thePlayer;
 struct PlayerCharacterMovingStateView
 {
     unsigned char padding[0x20c];
     unsigned char movingIntoNewSpace;
-};
-class Actor
-{
-  public:
-    bool IsEssentialActor();
-    unsigned int GetActorStateFlags() const;
-    BooleanFloatQuery* RefreshActorRuntimeData();
 };
 bool __cdecl GetEssentialConditionFunction(TESObjectREFR* reference, void* arg1, void* arg2, double& result);
 bool __cdecl IsPlayerEnteringSpaceConditionFunction(TESObjectREFR* reference, void* arg1, void* arg2, double& result);

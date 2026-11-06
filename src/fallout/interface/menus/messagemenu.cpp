@@ -1,6 +1,15 @@
+#include "../../../../include/ListBox.h"
+#include "../../../../include/BSSimpleArray.h"
+#include "../../../../include/InterfaceManager.h"
 // fallout/interface/menus/messagemenu.cpp: DelStandIn, MessageMenu, MessageMenuHandler, KeyMenu and more (28 functions)
 
-#include "MessageMenu.h"
+#include "../../../../include/Setting.h"
+#include "../../../../include/StrMem.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/MessageMenu.h"
+#include "../../../../include/Menu.h"
+#include "../../../../include/PlayerCharacter.h"
+#include "../../../../include/Tile.h"
 
 static const int kGetClassValue = 1001;
 
@@ -18,18 +27,14 @@ void __cdecl FUN_00703fe0(bool abDisable)
     FUN_007aa6b0(abDisable);
 }
 
-struct Menu_007a8b10
-{
-    char pad[0x3c];
-    virtual ~Menu_007a8b10();
-};
 struct Member_007a8b10
 {
     char pad[4];
     ~Member_007a8b10();
 };
-struct FUN_007a8b10 : public Menu_007a8b10
+struct FUN_007a8b10 : public Menu
 {
+    Tile* m_pTiles[6];
     Member_007a8b10 m40;
     virtual ~FUN_007a8b10();
 };
@@ -48,22 +53,11 @@ FUN_007a8b10::~FUN_007a8b10()
 }
 
 namespace fnv_007a8df0 {
-class Tile
-{
-  public:
-    void Set(int, int);
-};
-
-class Interface
+// Exe 0x007a8df0: unit-local Interface view; declarations and layout are preserved.
+class MessagemenuInterfaceView
 {
   public:
     static bool __cdecl IsInDialog(void);
-};
-
-class PlayerCharacter
-{
-  public:
-    static bool __cdecl UpdatePlayerStatus(void);
 };
 
 extern void* DAT_011da4f0;
@@ -84,7 +78,7 @@ void __cdecl FUN_007a8df0()
         else
             FUN_00a1d910(DAT_011da4f0);
 
-        if (Interface::IsInDialog() && !PlayerCharacter::UpdatePlayerStatus())
+        if (MessagemenuInterfaceView::IsInDialog() && !PlayerCharacter::UpdatePlayerStatus())
             SetDialogMenuActive(0);
     }
 }
@@ -96,17 +90,8 @@ char __fastcall GetByteAtOffset56(char* pThis)
     return pThis[0x38];
 }
 
-class TESObjectREFR
-{
-  public:
-    unsigned int GetFlags();
-};
+template <class T, unsigned int N> class BSSimpleArray;
 
-template <> class BSSimpleArray<unsigned int, 1024>
-{
-  public:
-    unsigned int& GetAt(unsigned int);
-};
 
 extern unsigned int DAT_011da4f4;
 extern BSSimpleArray<unsigned int, 1024> g_011da53c;
@@ -123,12 +108,11 @@ unsigned int __cdecl GetCurrentArrayElement()
     return uiResult;
 }
 
+class RecursiveLock;
+class NiAVObject;
+class NiNode;
+class TileShaderProperty;
 namespace fnv_007aa070 {
-struct RecursiveLock;
-struct NiAVObject;
-struct NiNode;
-struct Tile;
-struct TileShaderProperty;
 struct MenuValueDescriptor;
 struct FUN_007aa070_shell : public MessageMenu
 {
@@ -142,11 +126,7 @@ extern bool DAT_011da4ed;
 extern bool DAT_011da4ee;
 
 class PerkForm;
-template <class T> class ListBox
-{
-  public:
-    T GetSelectedData(Tile*);
-};
+using ::ListBox;
 
 // Resolves a tile by ID when none is given, and for ID 7 stores the list-box result into a global and runs the selection callbacks.
 // @fnv 0x007aa070
@@ -247,11 +227,7 @@ void CleanupGlobalObject()
 }  // namespace fnv_007aa530
 
 namespace fnv_007aa6b0 {
-struct GlobalObject2_0040c150
-{
-    int* Int();
-};
-extern GlobalObject2_0040c150 g_011c3ea4;
+extern Setting g_011c3ea4;
 extern bool DAT_011da4ec;
 extern int DAT_011da4f0;
 void __cdecl FUN_007a8df0();
@@ -355,23 +331,7 @@ void* DelStandIn::Destroy(unsigned int flags)
 }
 }  // namespace fnv_007aa500
 
-struct StrMem
-{
-    char* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    StrMem();
-    ~StrMem();
-};
-class Tile
-{
-  public:
-    float GetFloat(int aiTrait);
-};
-struct InterfaceManager
-{
-    Tile* FUN_004fd400();
-};
+
 InterfaceManager* __cdecl FUN_004b7210();
 int __cdecl FUN_00a01860(const char* apTraitName);
 struct FUN_007a8850
@@ -423,7 +383,8 @@ void FUN_007aa6a0(unsigned char value)
 }
 
 namespace fnv_007aaf20 {
-struct ArrSI
+// Exe 0x007aaf20: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct MessagemenuOffset08View
 {
     unsigned int __thiscall GetFlags(void);
 };
@@ -433,7 +394,7 @@ extern unsigned char DAT_011da4ec;
 extern unsigned char DAT_011da594;
 extern void __cdecl FUN_007a8df0(void);
 extern void __cdecl FUN_007aa6b0(unsigned char);
-extern ArrSI g_011da53c;
+extern MessagemenuOffset08View g_011da53c;
 
 // @fnv 0x007aaf20
 void __cdecl FUN_007aaf20(bool abFlag)
@@ -529,18 +490,10 @@ int __thiscall FUN_007aafb0_Class::FUN_007aafb0(unsigned int arg)
     return this->FUN_0044a970() + arg;
 }
 
+// Assignment is not yet declared by the shared StrMem header.
+void __cdecl FUN_00438390();
+
 namespace MessageCreation {
-struct String
-{
-    char* data;
-    unsigned short length, capacity;
-    String(const char*);
-    ~String();
-    void FUN_00438390(const char*);
-    void FUN_00404820(const char*);
-    unsigned int FUN_004048e0();
-    const char* FUN_00559450();
-};
 struct Text
 {
     unsigned int allocator;
@@ -555,14 +508,14 @@ struct Text
 };
 struct Message
 {
-    String message;
+    StrMem message;
     char* icon;
-    String title;
-    String buttons;
+    StrMem title;
+    StrMem buttons;
     bool hasButtons;
-    String hotkeys;
+    StrMem hotkeys;
     int buttonCount, type;
-    String sound;
+    StrMem sound;
     bool pause;
     int tileID, callback;
     float displayTime, alpha;
@@ -590,10 +543,6 @@ struct Messages
 extern Messages DAT_011da53c;
 extern int DAT_011da4f0;
 extern bool DAT_011da4ec, DAT_011da4ef;
-struct Setting
-{
-    int* FUN_0043d4d0();
-};
 extern Setting DAT_011c3ea4;
 bool FUN_007050d0();
 void FUN_00709470(int, int, int, int, int, bool);
@@ -605,14 +554,14 @@ bool QueueMessage(const char* title, const char* message, const char* icon, cons
                   int callback, float time, float alpha, float flags)
 {
     Message* info = new Message;
-    String buttonSlot11(firstButton);
+    StrMem buttonSlot11(firstButton);
     info->buttonCount = buttonCount;
     info->hasButtons = hasButtons;
     info->type = type;
-    info->message.FUN_00438390(message);
-    info->hotkeys.FUN_00438390(DAT_01011584);
-    info->title.FUN_00438390(title);
-    info->sound.FUN_00438390(sound);
+    reinterpret_cast<void (__thiscall*)(StrMem*, const char*)>(FUN_00438390)(&info->message, message);
+    reinterpret_cast<void (__thiscall*)(StrMem*, const char*)>(FUN_00438390)(&info->hotkeys, DAT_01011584);
+    reinterpret_cast<void (__thiscall*)(StrMem*, const char*)>(FUN_00438390)(&info->title, title);
+    reinterpret_cast<void (__thiscall*)(StrMem*, const char*)>(FUN_00438390)(&info->sound, sound);
     info->pause = pause;
     info->tileID = tileID;
     info->callback = callback;
@@ -640,7 +589,7 @@ bool QueueMessage(const char* title, const char* message, const char* icon, cons
         if (FUN_00408b20(text.FUN_0044a560(), DAT_01020770))
             info->buttons.FUN_00404820(text.FUN_0044a560());
         info->buttons.FUN_00404820(DAT_01063d7c);
-        buttonSlot11.FUN_00438390((*arguments += 1)[-1]);
+        reinterpret_cast<void (__thiscall*)(StrMem*, const char*)>(FUN_00438390)(&buttonSlot11, (*arguments += 1)[-1]);
     }
     if (DAT_011da53c.FUN_0044ddc0())
     {
@@ -673,16 +622,11 @@ bool QueueMessage(const char* title, const char* message, const char* icon, cons
 }
 }
 
-struct KeyText
-{
-    unsigned int FUN_004048e0();
-    const char* FUN_00559450();
-    int unk00, unk04, unk08;
-};
 struct KeyBinding
 {
     int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    KeyText text;
+    StrMem text;
+    int unk28;
     int type;
 };
 struct KeyString
@@ -760,20 +704,12 @@ struct FUN_007aa2a0_shell : MessageMenu
     int FUN_0059bb30();
     void FUN_00a1db20();
     void FUN_00a1d910();
-    void* FUN_00726070(int, int);
+    Tile* FUN_00726070();
 };
 struct TimerCalls
 {
     void FUN_00771520();
     unsigned int FUN_00825c00();
-};
-struct TileCalls
-{
-    bool IsTraitNonZero(int);
-};
-struct MenuActionCalls
-{
-    void FUN_00700320();
 };
 void __cdecl CleanupGlobalObject();
 extern double DAT_01012060;
@@ -790,7 +726,7 @@ void FUN_007aa2a0_shell::UpdateMenuAction()
         {
             if (static_cast<unsigned char>(GetByteAtOffset56(reinterpret_cast<char*>(GetCurrentArrayElement()))) == 0)
             {
-                if (reinterpret_cast<TileCalls*>(m_pTiles[0])->IsTraitNonZero(0xfa3))
+                if (m_pTiles[0]->IsTraitNonZero(0xfa3))
                 {
                     if (FUN_0059bb30() == 4)
                     {
@@ -819,7 +755,7 @@ void FUN_007aa2a0_shell::UpdateMenuAction()
                                 {
                                     if (message == *reinterpret_cast<FUN_006f2270*>(&g_011da53c)->GetLast())
                                     {
-                                        reinterpret_cast<MenuActionCalls*>(FUN_00726070(0x1772, 1))->FUN_00700320();
+                                        FUN_00726070()->FUN_00700320(0x1772, 1);
                                         CleanupGlobalObject();
                                     }
                                     else
@@ -836,14 +772,6 @@ void FUN_007aa2a0_shell::UpdateMenuAction()
     }
 }
 
-struct ActionMenuReference;
-struct ActionMenuStoredString
-{
-    char* data;
-    unsigned short size, capacity;
-    void FUN_00438390(const char*);
-    void FUN_00404820(const char*);
-};
 struct ActionMenuText
 {
     char* data;
@@ -857,26 +785,18 @@ struct ActionMenuText
 };
 struct ActionMenuInfo
 {
-    ActionMenuStoredString message;
+    StrMem message;
     int icon;
-    ActionMenuStoredString title, buttons;
+    StrMem title, buttons;
     bool hasButtons;
-    ActionMenuStoredString hotkeys;
+    StrMem hotkeys;
     void (*callback)();
     int type;
-    ActionMenuStoredString sound;
+    StrMem sound;
     int pause, tile, callbackId;
     float displayTime, backgroundAlpha;
     int flags;
     ActionMenuInfo();
-};
-struct ActionMenuSetting
-{
-    const char* FUN_00403df0();
-};
-struct ActionMenuCountSetting
-{
-    int* FUN_0043d4d0();
 };
 struct ActionMenuBase
 {
@@ -886,14 +806,12 @@ struct ActionMenuOwner
 {
     bool FUN_005021a0();
 };
-struct ActionMenuReference
-{
-    int FUN_00579280();
-    ActionMenuBase* FUN_007af430();
-    ActionMenuOwner* FUN_00569160();
-    bool FUN_00579690();
-    bool FUN_005785e0(ActionMenuReference*, bool);
-};
+// These reference methods are not yet declared by the shared header.
+void __cdecl FUN_00579280();
+void __cdecl FUN_00569160();
+void __cdecl FUN_00579690();
+void __cdecl FUN_005785e0();
+
 struct ActionMenuAction
 {
     virtual void Slot0();
@@ -911,7 +829,7 @@ struct ActionMenuEntry
 {
     const char* label;
     int action;
-    ActionMenuReference* reference;
+    TESObjectREFR* reference;
 };
 template <class T> struct ActionMenuQueue
 {
@@ -921,11 +839,11 @@ extern ActionMenuQueue<ActionMenuEntry*> DAT_011da524;
 extern ActionMenuQueue<ActionMenuInfo*> DAT_011da53c;
 extern int DAT_011da4f0;
 extern bool DAT_011da4ec;
-extern ActionMenuCountSetting DAT_011c3ea4;
-extern ActionMenuSetting DAT_011d2280, DAT_011d3708, DAT_011d4f48, DAT_011d38dc, DAT_011d45a0, DAT_011d22b0,
+extern Setting DAT_011c3ea4;
+extern Setting DAT_011d2280, DAT_011d3708, DAT_011d4f48, DAT_011d38dc, DAT_011d45a0, DAT_011d22b0,
     DAT_011d29f4;
-extern ActionMenuSetting* DAT_011d5160[];
-extern ActionMenuReference* DAT_011dea3c;
+extern Setting* DAT_011d5160[];
+extern TESObjectREFR* DAT_011dea3c;
 extern const char DAT_01011584[], DAT_01020770[], DAT_01063d7c[];
 extern const unsigned DAT_010173f0;
 void FUN_007aae70();
@@ -934,19 +852,19 @@ void FUN_00709470(int, int, int, int, int, int);
 void FUN_00406d30(char*, unsigned, const char*);
 unsigned FUN_0044a670(const char*);
 int FUN_00408b20(const char*, const char*);
-int FUN_0047b250(ActionMenuReference*);
-bool FUN_00518f00(ActionMenuReference*, ActionMenuReference*, int, int);
+int FUN_0047b250(TESObjectREFR*);
+bool FUN_00518f00(TESObjectREFR*, TESObjectREFR*, int, int);
 // Builds an ActionMenuInfo with title, hotkeys and buttons from the list's actions and the reference's action type, queues entries and the menu, and opens it.
 // @fnv 0x007aa720
-bool BuildActionMenu(ActionMenuList* list, ActionMenuReference* reference)
+bool BuildActionMenu(ActionMenuList* list, TESObjectREFR* reference)
 {
     ActionMenuInfo* menu4 = new ActionMenuInfo;
     menu4->callback = FUN_007aae70;
     menu4->hasButtons = false;
     menu4->type = 0;
-    menu4->message.FUN_00438390(0);
-    menu4->hotkeys.FUN_00438390(DAT_01011584);
-    menu4->title.FUN_00438390(DAT_011d2280.FUN_00403df0());
+    reinterpret_cast<void (__thiscall*)(StrMem*, const char*)>(FUN_00438390)(&menu4->message, 0);
+    reinterpret_cast<void (__thiscall*)(StrMem*, const char*)>(FUN_00438390)(&menu4->hotkeys, DAT_01011584);
+    reinterpret_cast<void (__thiscall*)(StrMem*, const char*)>(FUN_00438390)(&menu4->title, DAT_011d2280.FUN_00403df0());
     char label58[260];
     while (list && !list->FUN_008256d0())
     {
@@ -981,11 +899,11 @@ bool BuildActionMenu(ActionMenuList* list, ActionMenuReference* reference)
         }
         list = list->FUN_00726070();
     }
-    int action3 = reference->FUN_00579280();
-    unsigned type22 = reference->FUN_007af430()->FUN_00401170();
-    ActionMenuOwner* owner15 = reference->FUN_00569160();
-    ActionMenuBase* base7 = reference->FUN_007af430();
-    if (action3 == 1 && reference->FUN_00579690())
+    int action3 = reinterpret_cast<int (__thiscall*)(TESObjectREFR*)>(FUN_00579280)(reference);
+    unsigned type22 = reinterpret_cast<ActionMenuBase*>(reference->FUN_007af430())->FUN_00401170();
+    ActionMenuOwner* owner15 = reinterpret_cast<ActionMenuOwner* (__thiscall*)(TESObjectREFR*)>(FUN_00569160)(reference);
+    ActionMenuBase* base7 = reinterpret_cast<ActionMenuBase*>(reference->FUN_007af430());
+    if (action3 == 1 && reinterpret_cast<bool (__thiscall*)(TESObjectREFR*)>(FUN_00579690)(reference))
     {
         FUN_00406d30(label58, 260, type22 == 42 ? DAT_011d3708.FUN_00403df0() : DAT_011d4f48.FUN_00403df0());
     }
@@ -996,7 +914,7 @@ bool BuildActionMenu(ActionMenuList* list, ActionMenuReference* reference)
     else if (action3 == 8 && type22 == 28)
     {
         bool isChair = FUN_0047b250(reference) == 1 || FUN_0047b250(reference) == 2;
-        if (owner15 && owner15->FUN_005021a0() && !reference->FUN_005785e0(DAT_011dea3c, true) &&
+        if (owner15 && owner15->FUN_005021a0() && !reinterpret_cast<bool (__thiscall*)(TESObjectREFR*, TESObjectREFR*, bool)>(FUN_005785e0)(reference, DAT_011dea3c, true) &&
             (!base7 || !FUN_00518f00(reference, DAT_011dea3c, 0, 1)))
         {
             FUN_00406d30(label58, 260, DAT_011d45a0.FUN_00403df0());
@@ -1047,17 +965,6 @@ bool BuildActionMenu(ActionMenuList* list, ActionMenuReference* reference)
 
 namespace MessageMenuSetup {
 
-struct MsgTile
-{
-    void FUN_00a01350(int aiID, const char* apText, bool abPropagate);
-    void FUN_00700320(int aiID, int aiValue);
-    float FUN_00a011b0(int aiID);
-    const char* FUN_00a011f0(int aiID);
-    void SetFloat(int aiID, float afValue, bool abPropagate);
-    MsgTile* FUN_00a03da0(const char* apName);
-    bool IsTraitNonZero(int aiID);
-};
-
 struct MsgSize
 {
     float x, y, z;
@@ -1081,14 +988,6 @@ struct MsgAudio
     MsgSound FUN_00ad7550(const char* apEditorID, int aiFlags);
 };
 
-struct MsgText
-{
-    char* pString;
-    unsigned short usLength;
-    unsigned short usCapacity;
-    unsigned int FUN_004048e0();
-    const char* FUN_00559450();
-};
 
 struct MsgString
 {
@@ -1103,14 +1002,14 @@ struct MsgString
 
 struct MsgData
 {
-    MsgText kTitle;
+    StrMem kTitle;
     const char* pIcon;
-    MsgText kText;
-    MsgText kButtons;
+    StrMem kText;
+    StrMem kButtons;
     char cButtonBase;
     char pad1d[0xf];
     int iType;
-    MsgText kSound;
+    StrMem kSound;
     char pad38[4];
     int iX;
     int iY;
@@ -1130,7 +1029,7 @@ struct MsgList
     virtual void l005();
     virtual void l006();
     virtual void Clear();
-    MsgTile* FUN_00764430(int aiIndex, const char* apText, int a3, int a4);
+    Tile* FUN_00764430(int aiIndex, const char* apText, int a3, int a4);
     void RebuildVisibleTiles();
 };
 
@@ -1156,9 +1055,9 @@ struct MsgMenu
     virtual void m00c();
     virtual int GetID();
     char pad04[0x24];
-    MsgTile* m_pTiles[6];
+    Tile* m_pTiles[6];
     MsgList kButtons;
-    MsgTile* FUN_00726070();
+    Tile* FUN_00726070();
     void PopulateFromMessageData();
 };
 
@@ -1221,7 +1120,7 @@ void MsgMenu::PopulateFromMessageData()
     {
         DAT_011da4f0->m_pTiles[1]->FUN_00700320(0xfa3, 0);
     }
-    MsgTile* pItemNew = 0;
+    Tile* pItemNew = 0;
     unsigned int uiPosNum = 0;
     int iMaxWidthCur = 0;
     float fListHeightTmp = 0.0f;
@@ -1235,13 +1134,13 @@ void MsgMenu::PopulateFromMessageData()
             MsgString kPart = kButtonText.Substr(uiPosNum, kButtonText.FUN_005103a0(DAT_01063d7c, uiPosNum) - uiPosNum);
             if (kPart.FUN_00825c00() > 0)
             {
-                MsgTile* pText = 0;
+                Tile* pText = 0;
                 pItemNew = DAT_011da4f0->kButtons.FUN_00764430(
                     pMessagePtr->cButtonBase + iIndex,
                     kButtonText.Substr(uiPosNum, kButtonText.FUN_005103a0(DAT_01063d7c, uiPosNum) - uiPosNum)
                         .FUN_0044a560(),
                     0, 0);
-                pText = pItemNew->FUN_00a03da0(s_szListItemText);
+                pText = pItemNew->GetNamedChild(s_szListItemText);
                 pItemNew->FUN_00700320(0xfaa, 7);
                 if (pText)
                 {
@@ -1276,8 +1175,8 @@ void MsgMenu::PopulateFromMessageData()
         fButtonsWidth = FUN_0040ebd0(iMaxWidthCur + 80.0, (float)pMessagePtr->uiWidth);
     else
         fButtonsWidth = iMaxWidthCur + 80.0;
-    DAT_011da4f0->m_pTiles[4]->SetFloat(0xfb0, fListHeightTmp, false);
-    DAT_011da4f0->m_pTiles[4]->SetFloat(0xfb1, fButtonsWidth, false);
+    DAT_011da4f0->m_pTiles[4]->FUN_00a012d0(0xfb0, fListHeightTmp, false);
+    DAT_011da4f0->m_pTiles[4]->FUN_00a012d0(0xfb1, fButtonsWidth, false);
     DAT_011da4f0->kButtons.RebuildVisibleTiles();
     if (pMessagePtr->uiWidth > 0)
         fButtonsWidth = FUN_0040ebd0(fHorBuf * 2 + fButtonsWidth, (float)pMessagePtr->uiWidth);
@@ -1291,7 +1190,7 @@ void MsgMenu::PopulateFromMessageData()
     fMaxWidthCur = fMaxWidthCur - fHorBuf * 2;
     if (DAT_011da4f0->m_pTiles[2]->IsTraitNonZero(0xfa3))
         fMaxWidthCur = fMaxWidthCur - 120.0;
-    DAT_011da4f0->m_pTiles[3]->SetFloat(0xfba, fMaxWidthCur, true);
+    DAT_011da4f0->m_pTiles[3]->FUN_00a012d0(0xfba, fMaxWidthCur, true);
     MsgSize kSizeFinal = FUN_005bd5b0()->FUN_00a1b020(pMessagePtr->kText.FUN_00559450(), 2,
                                                       DAT_011da4f0->m_pTiles[3]->FUN_00a011b0(0xfba), 0);
     fTheTextHeight = fHorBuf * 2 + kSizeFinal.x + fTheTextHeight;
@@ -1317,13 +1216,13 @@ void MsgMenu::PopulateFromMessageData()
         fWidths = FUN_00715d40() * (pMessagePtr->uiWidth / FUN_00706e50());
         fWidths = FUN_0040ebd0(fWidths, FUN_00715d40() - FUN_007177c0() * 2);
     }
-    DAT_011da4f0->m_pTiles[0]->SetFloat(0xfb1, fWidths, true);
+    DAT_011da4f0->m_pTiles[0]->FUN_00a012d0(0xfb1, fWidths, true);
     DAT_0119f348 = pMessagePtr->iType == 0x17;
     FUN_00726070()->FUN_00700320(0x1772, 0);
     FUN_00726070()->FUN_00700320(0xfa3, 1);
     if (!pMessagePtr->GetByteAtOffset56())
     {
-        DAT_011da4f0->m_pTiles[0]->SetFloat(0xfa9, 0.0f, true);
+        DAT_011da4f0->m_pTiles[0]->FUN_00a012d0(0xfa9, 0.0f, true);
         if (FUN_004b7210()->FUN_00714f90(GetID()))
             FUN_00706fd0(GetID(), 1);
         float fScreenWidth = FUN_00715d40();
@@ -1344,16 +1243,16 @@ void MsgMenu::PopulateFromMessageData()
             fY = FUN_00404010(fTop, FUN_00717820());
             fY = FUN_0040ebd0(fY, fScreenHeight - fMenuHeightNew - FUN_00717820());
         }
-        DAT_011da4f0->m_pTiles[0]->SetFloat(0xfa1, fXNew, true);
-        DAT_011da4f0->m_pTiles[0]->SetFloat(0xfa2, fY, true);
+        DAT_011da4f0->m_pTiles[0]->FUN_00a012d0(0xfa1, fXNew, true);
+        DAT_011da4f0->m_pTiles[0]->FUN_00a012d0(0xfa2, fY, true);
     }
     else
     {
-        DAT_011da4f0->m_pTiles[0]->SetFloat(0xfa9, 1.0f, true);
+        DAT_011da4f0->m_pTiles[0]->FUN_00a012d0(0xfa9, 1.0f, true);
         if (!FUN_004b7210()->FUN_00714f90(GetID()))
             FUN_00706fb0(GetID(), 0);
     }
-    DAT_011da4f0->m_pTiles[5]->SetFloat(0xfa9, pMessagePtr->fAlpha, true);
+    DAT_011da4f0->m_pTiles[5]->FUN_00a012d0(0xfa9, pMessagePtr->fAlpha, true);
 }
 
 }
@@ -1376,21 +1275,15 @@ struct VDel
 struct Helper
 {
     void* FUN_00586150(const char* s);
-    Tile* FUN_00a01b00();
-    int FUN_00a03c90();
     void FUN_00a1dc70(Tile* tile, int zero);
-    double FUN_00a011b0(int);
-    void SetFloat(int, float, unsigned char);
     void FUN_0075a0d0(void* arg1, const char* arg2);
     void PopulateFromMessageData();
     void FUN_00a1dc20(int);
-    void* FUN_00403e20();
     void* FUN_00726070();
-    Tile* FUN_00a03da0(const char* name);
 };
 
 extern int DAT_011da4f0;
-extern char DAT_011d3bc8;
+extern Setting DAT_011d3bc8;
 extern double DAT_010704f0;
 extern double DAT_010704e8;
 extern double DAT_0101e568;
@@ -1408,8 +1301,8 @@ bool __cdecl FUN_007a8ba0()
     }
     if (FUN_007023c0())
         flag = 1;
-    Tile* pTile = ((Helper*)((Helper*)B)->FUN_00586150("Data\\Menus\\message_menu.xml"))->FUN_00a01b00();
-    DAT_011da4f0 = ((Helper*)pTile)->FUN_00a03c90();
+    Tile* pTile = ((Tile*)((Helper*)B)->FUN_00586150("Data\\Menus\\message_menu.xml"))->FUN_00a01b00();
+    DAT_011da4f0 = (int)pTile->FUN_00a03c90();
     if (DAT_011da4f0 != 0 &&
         ((int(__thiscall*)(void*))((*(void***)DAT_011da4f0)[13]))((void*)DAT_011da4f0) == FUN_007a8de0())
     {
@@ -1419,10 +1312,10 @@ bool __cdecl FUN_007a8ba0()
             FUN_0040fbe0("Message Menu Creation Failed... Are your menu and art resources up to date?");
             return false;
         }
-        if (((Helper*)pTile)->FUN_00a011b0(0xfa7) == DAT_010704f0 ||
-            ((Helper*)pTile)->FUN_00a011b0(0xfa7) == DAT_010704e8)
+        if (pTile->FUN_00a011b0(0xfa7) == DAT_010704f0 ||
+            pTile->FUN_00a011b0(0xfa7) == DAT_010704e8)
         {
-            ((Helper*)pTile)->SetFloat(0xfad, FUN_00a01530(), 1);
+            pTile->FUN_00a012d0(0xfad, FUN_00a01530(), 1);
         }
         ((Helper*)((char*)DAT_011da4f0 + 0x40))
             ->FUN_0075a0d0(*(void**)((char*)DAT_011da4f0 + 0x38), "MM_ButtonTemplate");
@@ -1432,8 +1325,8 @@ bool __cdecl FUN_007a8ba0()
         }
         if (flag)
         {
-            ((Helper*)(((Helper*)(((Helper*)DAT_011da4f0)->FUN_00726070()))->FUN_00a03da0((char*)"MM_Background")))
-                ->SetFloat(0xfa9, *(float*)(((Helper*)&DAT_011d3bc8)->FUN_00403e20()) * DAT_0101e568, 1);
+            ((Tile*)((Helper*)DAT_011da4f0)->FUN_00726070())->GetNamedChild("MM_Background")
+                ->FUN_00a012d0(0xfa9, *DAT_011d3bc8.FUN_00403e20() * DAT_0101e568, 1);
         }
         if (FUN_007050d0())
         {

@@ -2,6 +2,12 @@
 // tesobjectrefr_ctx_variant.cpp: context variant of src/fallout_shared/tesobjectrefr.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
 #include "tesobjectrefr_decls.h"
+#include "../../include/AutoMemHelper.h"
+#include "../../include/BaseExtraList.h"
+#include "../../include/BaseFormComponent.h"
+#include "../../include/ExtraScript.h"
+#include "../../include/InventoryChanges.h"
+#include "../../include/Script.h"
 GarbageCollectorUpdateState* FUN_00446ef0();
 void* FUN_0056a8c0();
 void FUN_005743f0();
@@ -22,13 +28,11 @@ struct ExtraDataList;
 struct FormRecordHeader;
 struct TESFileGroup;
 struct HWND__;
-struct InventoryChanges;
 struct NiAVObject;
 struct NiColor;
 struct NiPoint3;
 struct ScriptHeaderData;
 struct ScriptReferencedObject;
-struct Script;
 struct CStringArgument;
 struct ScriptCompiler;
 struct ScriptLocals;
@@ -53,30 +57,13 @@ struct blob12
 {
     char b[12];
 };
-struct BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-};
 typedef char _sizecheck_BaseFormComponent[sizeof(BaseFormComponent) == 4 ? 1 : -1];
 struct FUN_00565730_shell : public TESObjectREFR
 {
     void FUN_00565730();
 };
 
-struct AutoMemHelper
-{
-    AutoMemHelper(int, bool, char const*, int);
-    ~AutoMemHelper();
-    int m_iValueAtOffset0C;
-};
 struct ShellH;
-struct BaseExtraList
-{
-    BSExtraData* GetExtraData(unsigned char);
-};
 struct XActor
 {
     ShellH* GetExtra() const;
@@ -93,26 +80,9 @@ struct FUN_00419f80_shell
 {
     void FUN_00419f80(ScriptLocals*);
 };
-struct Script
-{
-    ScriptLocals* GetOrCreateScriptLocals();
-};
-struct InventoryChanges
-{
-    static InventoryChanges* __cdecl CreateForReference(TESObjectREFR*);
-    void FUN_004d1960();
-};
 TESContainer* __fastcall GetContainer(TESObjectREFR*);
 TESBoundObject* __fastcall _FNV_GetObjectReference(TESObjectREFR*);
 Script* FUN_004826d0(TESBoundObject*);
-struct ExtraScript
-{
-    virtual ~ExtraScript();
-    unsigned char m_ucExtraDataType;      // +0x04
-    BSExtraData* pNext;        // +0x08
-    Script* pScript;           // +0x0c
-    ScriptLocals* pEventList;  // +0x10
-};
 struct VRefStandin
 {
     virtual void v0();

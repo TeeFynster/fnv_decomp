@@ -2,6 +2,40 @@
 // src/havok/common/base/memory/allocator/solver/hksolverallocator.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/memory/allocator/solver/hksolverallocator.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/hkCriticalSection.h"
+#include "../../../../../../../include/hkCriticalSectionLock.h"
+
+inline hkCriticalSectionLock::hkCriticalSectionLock(hkCriticalSection* pkSection) : m_kCriticalSection(pkSection)
+{
+    m_kCriticalSection->enter();
+}
+
+inline hkCriticalSectionLock::~hkCriticalSectionLock()
+{
+    m_kCriticalSection->leave();
+}
+
+
+inline void copyArrayWords(void* dst, const void* src, int numBytes)
+{
+    for (int i = 0; i < numBytes; i += 4)
+        *(int*)((char*)dst + i) = *(const int*)((const char*)src + i);
+}
+
+template <typename T>
+__forceinline void hkArrayBase<T>::removeAtAndCopy(int index)
+{
+    m_iElementCount--;
+    copyArrayWords(m_data + index, m_data + index + 1, (m_iElementCount - index) * sizeof(T));
+}
+
+template <typename T>
+__forceinline void hkArrayBase<T>::popBack(int numElemsToRemove)
+{
+    m_iElementCount -= numElemsToRemove;
+}
+
 struct hkMemoryStatistics
 {
     int m_iAllocated;
@@ -111,15 +145,6 @@ void __stdcall FUN_00d5e890(void* context, unsigned int flags)
 extern "C" __declspec(dllimport) void __stdcall EnterCriticalSection(void* cs);
 extern "C" __declspec(dllimport) void __stdcall LeaveCriticalSection(void* cs);
 
-struct hkCriticalSectionD5E9
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
 
 struct hkStreamD5E9
 {
@@ -209,7 +234,7 @@ struct hkObjD5E9
     int unk118;
     int unk11C;
     int unk120;
-    hkCriticalSectionD5E9 m_kCriticalSection;
+    hkCriticalSection m_kCriticalSection;
 
     void InitStream(char* p, int size);
 };
@@ -225,72 +250,10 @@ void hkObjD5E9::InitStream(char* pBuffer, int size)
 }
 
 namespace fnv_00d5e9b0 {
-extern void(__stdcall* DAT_00fdf05c)(void* pvSection);
-extern void(__stdcall* DAT_00fdf100)(void* pvSection);
-
-class hkCriticalSectionD5E9
-{
-  public:
-    int m_kCriticalSection[6];
-    void enter()
-    {
-        DAT_00fdf05c(&m_kCriticalSection);
-    }
-    void leave()
-    {
-        DAT_00fdf100(&m_kCriticalSection);
-    }
-};
-
-class hkCriticalSectionLockD5E9
-{
-  public:
-    hkCriticalSectionD5E9* m_kCriticalSection;
-    hkCriticalSectionLockD5E9(hkCriticalSectionD5E9* pkSection) : m_kCriticalSection(pkSection)
-    {
-        m_kCriticalSection->enter();
-    }
-    ~hkCriticalSectionLockD5E9()
-    {
-        m_kCriticalSection->leave();
-    }
-};
-
 struct hkFreeBlockD5E9
 {
     char* m_kRayStart;
     int m_iElementCount;
-};
-
-inline void memMoveD5E9(void* pvDst, const void* pvSrc, int iNumBytes)
-{
-    for (int i = 0; i < iNumBytes; i += 4)
-        *(int*)((char*)pvDst + i) = *(const int*)((const char*)pvSrc + i);
-}
-
-template <typename T> struct hkArrayD5E9
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int GetLogicalSize() const
-    {
-        return m_iElementCount;
-    }
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    void removeAtAndCopy(int iIndex)
-    {
-        m_iElementCount--;
-        memMoveD5E9(m_data + iIndex, m_data + iIndex + 1, (m_iElementCount - iIndex) * sizeof(T));
-    }
 };
 
 class hkBlockAllocatorD5E9
@@ -302,7 +265,7 @@ class hkBlockAllocatorD5E9
     char* m_cur;
     int m_iCurrentUsage;
     unsigned int m_peakUsage;
-    hkArrayD5E9<hkFreeBlockD5E9> m_pFreeBlocks;
+    hkArray<hkFreeBlockD5E9> m_pFreeBlocks;
     int m_24;
     int m_28;
     int m_2c;
@@ -367,7 +330,7 @@ class hkBlockAllocatorD5E9
     int m_118;
     int m_11c;
     int m_120;
-    hkCriticalSectionD5E9 m_pWorldLock;
+    hkCriticalSection m_pWorldLock;
 
     void updateStats()
     {
@@ -383,7 +346,7 @@ class hkBlockAllocatorD5E9
 // @fnv 0x00d5e9b0
 char* hkBlockAllocatorD5E9::Allocate(int* piSizeInOut) throw()
 {
-    hkCriticalSectionLockD5E9 kLock(&m_pWorldLock);
+    hkCriticalSectionLock kLock(&m_pWorldLock);
     int iSize = *piSizeInOut;
     int iBestIndex = -1;
     int iBestSize = 0x7ffffff;
@@ -435,7 +398,6 @@ inline void* operator new(unsigned int, void* ptr)
     return ptr;
 }
 
-void __cdecl FUN_00c908c0(void* allocator, void* array, int capacity, int elemSize);
 void __cdecl FUN_00d2cc70(void* dst, const void* src, unsigned int numBytes);
 
 struct Element
@@ -444,18 +406,10 @@ struct Element
     int b;
 };
 
-struct ArrayClass
-{
-    Element* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    void Splice(void* allocator, int index, int numToRemove, const Element* elements, int numToInsert);
-};
-
 // Grows the array if needed, shifts elements to make room, copy-constructs numToInsert elements at index, and updates the size.
 // @fnv 0x00d5ecc0
-void ArrayClass::Splice(void* allocator, int index, int numToRemove, const Element* elements, int numToInsert)
+template <>
+void hkArrayBase<Element>::_spliceInto(hkMemoryAllocator& allocator, int index, int numToRemove, const Element* elements, int numToInsert)
 {
     int newSize = m_iElementCount - numToRemove + numToInsert;
     int numToMove = m_iElementCount - index - numToRemove;
@@ -466,7 +420,7 @@ void ArrayClass::Splice(void* allocator, int index, int numToRemove, const Eleme
         iCapacity += iCapacity;
         if (newSize >= iCapacity)
             iCapacity = newSize;
-        FUN_00c908c0(allocator, this, iCapacity, 8);
+        hkArrayUtil::_reserve(allocator, this, iCapacity, 8);
     }
 
     FUN_00d2cc70(&m_data[index + numToInsert], &m_data[index + numToRemove], numToMove * 8);
@@ -480,29 +434,16 @@ void ArrayClass::Splice(void* allocator, int index, int numToRemove, const Eleme
     m_iElementCount = newSize;
 }
 
-template <typename T> struct hkArrayD5E9
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-
-template <typename T, int N> struct hkInplaceArrayD5E9 : public hkArrayD5E9<T>
-{
-    T m_kStorage[N];
-    hkInplaceArrayD5E9()
-    {
-        this->m_data = m_kStorage;
-        this->m_iElementCount = 0;
-        this->m_iCapacityState = N | 0x80000000;
-    }
-};
-
 struct hkPairD5E9
 {
     int m_key;
     int m_uiFilterValue;
 };
+
+// Used only for construction cleanup here: 0x00d5e900 never acquires storage beyond the embedded buffer.
+template <>
+__forceinline hkArray<hkPairD5E9>::~hkArray()
+{}
 
 class FUN_00cf6da0
 {
@@ -520,7 +461,7 @@ class FUN_00d5e900
     int m_0C;
     int m_10;
     int m_14;
-    hkInplaceArrayD5E9<hkPairD5E9, 32> m_pairs;
+    hkInplaceArray<hkPairD5E9, 32> m_pairs;
     FUN_00cf6da0 m_pChildAtom;
 
     FUN_00d5e900();
@@ -543,42 +484,6 @@ struct S00d5eb10_Block
     {}
 };
 
-struct S00d5eb10_BlockArray
-{
-    S00d5eb10_Block* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    S00d5eb10_Block m_kStorage[32];
-
-    S00d5eb10_Block& back()
-    {
-        return m_data[m_iElementCount - 1];
-    }
-    void popBack()
-    {
-        m_iElementCount--;
-    }
-
-    __forceinline void removeAtAndCopy(int index)
-    {
-        m_iElementCount--;
-        int count = m_iElementCount - index;
-        int numBytes = count * sizeof(S00d5eb10_Block);
-        S00d5eb10_Block* d = &m_data[index];
-        S00d5eb10_Block* s = d + 1;
-        for (int j = 0; j < numBytes; j += 4)
-        {
-            *(int*)((char*)d + j) = *(const int*)((const char*)s + j);
-        }
-    }
-
-    void FUN_00d5eda0(int unk0, int index, const S00d5eb10_Block* item);
-    void aiRecipeIndex(int index, const S00d5eb10_Block& b)
-    {
-        FUN_00d5eda0(0, index, &b);
-    }
-};
-
 struct S00d5eb10_CS
 {
     int unk00;
@@ -596,7 +501,7 @@ struct S00d5eb10_Alloc : public FUN_00c66560_class
     void* m_pTileTemplate;
     int m_numAllocations;
     int unk14;
-    S00d5eb10_BlockArray m_kBlocks;
+    hkInplaceArray<S00d5eb10_Block, 32> m_kBlocks;
     S00d5eb10_CS m_pWorldLock;
 
     void FUN_00d5eb10(void* p, int size);
@@ -673,7 +578,7 @@ void S00d5eb10_Alloc::FUN_00d5eb10(void* apBlock, int size)
         }
     }
 
-    m_kBlocks.aiRecipeIndex(i + 1, S00d5eb10_Block(apBlock, size));
+    m_kBlocks._insertAt(*(hkMemoryAllocator*)0, i + 1, S00d5eb10_Block(apBlock, size));
 exit:
     LeaveCriticalSection(cs);
 }

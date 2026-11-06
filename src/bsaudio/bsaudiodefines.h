@@ -14,21 +14,12 @@
 #define FNV_BSAUDIODEFINES_H
 
 
+#include "../../include/NiPoint3.h"
 #include "bsaudiodefines_decls.h"
 #include <string.h>
 
 class SoundMessageRecord;
 
-#pragma pack(push, 4)
-class NiPoint3
-{
-  public:
-    static const NiPoint3 ZERO;
-    float x;  // +0x0
-    float y;  // +0x4
-    float z;  // +0x8
-};
-#pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiPoint3) == 0xC);
 FNV_STATIC_ASSERT(offsetof(NiPoint3, x) == 0x0);
 FNV_STATIC_ASSERT(offsetof(NiPoint3, y) == 0x4);

@@ -2,28 +2,27 @@
 // src/gamebryo2.2/corelibs/nimain/nistencilproperty_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/gamebryo2.2/corelibs/nimain/nistencilproperty.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-class NiRTTI;
-class NiStencilProperty
-{
-  public:
-    static const NiRTTI ms_kRTTI;
-    virtual const NiRTTI* GetRTTI() const;
-};
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiCullingProperty.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiProperty.h"
+#include "../../../../include/NiStencilProperty.h"
+#include "../../../../include/StrArr.h"
 
-class NiObject;
+inline void* operator new(unsigned int, void* p) { return p; }
+
 struct EqBase
 {
     bool FUN_00a62140(NiObject*);
-    bool FUN_00a6f070(NiObject*);
 };
 // @fnv 0x00a6f070
-bool EqBase::FUN_00a6f070(NiObject* pkObject)
+bool NiStencilProperty::FUN_00a6f070(NiObject* pkObject)
 {
     NiStencilProperty* pkStencil = (NiStencilProperty*)pkObject;
-    if (FUN_00a62140(pkObject) &&
-        *(unsigned short*)((char*)pkStencil + 0x18) == *(unsigned short*)((char*)this + 0x18) &&
-        *(unsigned int*)((char*)pkStencil + 0x1c) == *(unsigned int*)((char*)this + 0x1c) &&
-        *(unsigned int*)((char*)pkStencil + 0x20) == *(unsigned int*)((char*)this + 0x20))
+    if (((EqBase*)this)->FUN_00a62140(pkObject) &&
+        pkStencil->mode == this->mode &&
+        pkStencil->flags == this->flags &&
+        pkStencil->mask == this->mask)
         return true;
     return false;
 }
@@ -60,48 +59,33 @@ char* FUN_00a6f2d0(const char* name, int stencil)
 
 extern void* DAT_0101e07c;
 
-struct NiProperty
-{
-    void NiPropertyCtor();
-};
-
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
 
 // @fnv 0x00a6f410
 void* __cdecl FUN_00a6f410()
 {
-    void* p = BSFadeNode::operator new(0x24);
+    NiStencilProperty* p = (NiStencilProperty*)BSFadeNode::operator new(0x24);
     if (p)
     {
-        ((NiProperty*)p)->NiPropertyCtor();
-        *(unsigned short*)((char*)p + 0x18) = 0x4180;
+        ::new (p) NiProperty;
+        p->mode = 0x4180;
         *(void**)p = &DAT_0101e07c;
-        *(int*)((char*)p + 0x1c) = 0;
-        *(int*)((char*)p + 0x20) = 0xffffffff;
+        p->flags = 0;
+        p->mask = 0xffffffff;
         return p;
     }
     return 0;
 }
 
-struct S00a6f4d0
-{
-    virtual void f0();
-    virtual void f1();
-    long m_ref;
-};
-extern S00a6f4d0* DAT_011f4a14;
+extern NiObject* DAT_011f4a14;
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
 // @fnv 0x00a6f4d0
 void FUN_00a6f4d0()
 {
     if (DAT_011f4a14)
     {
-        S00a6f4d0* p = DAT_011f4a14;
-        if (InterlockedDecrement(&DAT_011f4a14->m_ref) == 0)
-            p->f1();
+        NiObject* p = DAT_011f4a14;
+        if (InterlockedDecrement(reinterpret_cast<volatile long*>(&DAT_011f4a14->m_uiRefCount)) == 0)
+            p->DeleteThis();
         DAT_011f4a14 = 0;
     }
 }
@@ -140,55 +124,36 @@ char* FUN_00a6f1e0(const char* name, int stencil)
     return result;
 }
 
-namespace fnv_00a6f390 {
-struct NiObject
-{
-    void CopyMembersStream(NiObject*, void*);
-};
-struct CloningProcess;
-struct NiCullingProperty
-{
-    void FUN_00a5d7a0(void*, CloningProcess&);
-};
-struct NiPropertyCtorStub
-{
-    void NiPropertyCtor();
-};
-struct FUN_00a6f390 : NiProperty
-{
-    void* MakeClone(CloningProcess&);
-};
 // @fnv 0x00a6f390
-void* FUN_00a6f390::MakeClone(CloningProcess& kCloning)
+NiObject* NiStencilProperty::MakeClone(CloningProcess& kCloning)
 {
     if (*(unsigned int*)((char*)this + 0xc))
     {
-        FUN_00a6f390* pkObject = (FUN_00a6f390*)BSFadeNode::operator new(0x24);
+        NiStencilProperty* pkObject = (NiStencilProperty*)BSFadeNode::operator new(0x24);
         if (pkObject)
         {
-            ((NiPropertyCtorStub*)pkObject)->NiPropertyCtor();
+            ::new (pkObject) NiProperty;
             *(void**)((char*)pkObject + 0x00) = &DAT_0101e07c;
-            *(unsigned int*)((char*)pkObject + 0x1c) = 0;
-            *(unsigned int*)((char*)pkObject + 0x20) = 0xffffffff;
-            *(unsigned short*)((char*)pkObject + 0x18) = 0x4180;
+            pkObject->flags = 0;
+            pkObject->mask = 0xffffffff;
+            pkObject->mode = 0x4180;
         }
         else
         {
             pkObject = 0;
         }
         ((NiCullingProperty*)this)->FUN_00a5d7a0(pkObject, kCloning);
-        *(unsigned short*)((char*)pkObject + 0x18) = *(unsigned short*)((char*)this + 0x18);
-        *(unsigned int*)((char*)pkObject + 0x1c) = *(unsigned int*)((char*)this + 0x1c);
-        *(unsigned int*)((char*)pkObject + 0x20) = *(unsigned int*)((char*)this + 0x20);
+        pkObject->mode = this->mode;
+        pkObject->flags = this->flags;
+        pkObject->mask = this->mask;
         return pkObject;
     }
     else
     {
-        ((NiObject*)this)->CopyMembersStream((NiObject*)this, &kCloning);
+        ((NiObject*)this)->CopyMembersStream((NiObject*)this, (void*)&kCloning);
         return this;
     }
 }
-}  // namespace fnv_00a6f390
 
 // @fnv 0x00a6f0b0
 char* FUN_00a6f0b0(const char* name, int test)
@@ -247,18 +212,11 @@ struct Base
 {
     void FUN_00a5d7b0(Stream*);
 };
-struct Property : Base
-{
-    void* unk00;
-    unsigned int unk04, unk08, unk0c, unk10, unk14;
-    unsigned short mode;
-    unsigned int flags, mask;
-    void FUN_00a6f740(Stream*);
-};
 // @fnv 0x00a6f740
-void Property::FUN_00a6f740(Stream* stream)
+void NiStencilProperty::FUN_00a6f740(NiStream* niStream)
 {
-    FUN_00a5d7b0(stream);
+    Stream* stream = reinterpret_cast<Stream*>(niStream);
+    ((Base*)this)->FUN_00a5d7b0(stream);
     unsigned int size = 2;
     Writer* __restrict w = stream->writer();
     w->bytesWritten += w->write(w, &mode, 2, &size, 1);
@@ -270,21 +228,13 @@ void Property::FUN_00a6f740(Stream* stream)
     w->bytesWritten += w->write(w, &mask, 4, &size, 1);
 }
 
-struct StrArr
+inline void StrArr::Append(char* text)
 {
-    void* vtable;
-    char** data;
-    unsigned short capacity, size, effectiveSize, growBy;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-    void Append(char* text)
-    {
-        unsigned int index = size;
-        if (index >= capacity)
-            SetSize(index + growBy);
-        SetAt(index, text);
-    }
-};
+    unsigned int index = m_usSize;
+    if (index >= m_usMaxSize)
+        SetSize(index + m_usGrowBy);
+    SetAt(index, text);
+}
 struct FUN_00a62a40_this
 {
     void AppendString(StrArr*);
@@ -296,18 +246,10 @@ char* __cdecl FUN_00a7d510(const char*, unsigned int);
 char* __cdecl FUN_00a6f0b0(const char*, int);
 char* __cdecl FUN_00a6f1e0(const char*, int);
 char* __cdecl FUN_00a6f2d0(const char*, int);
-struct StencilDebugProperty : FUN_00a62a40_this
-{
-    void* vtable;
-    unsigned int refCount, unk08, unk0c, unk10, unk14;
-    unsigned short mode;
-    unsigned int reference, mask;
-    void FUN_00a6f7d0(StrArr*);
-};
 // @fnv 0x00a6f7d0
-void StencilDebugProperty::FUN_00a6f7d0(StrArr* strings)
+void NiStencilProperty::FUN_00a6f7d0(StrArr* strings)
 {
-    AppendString(strings);
+    ((FUN_00a62a40_this*)this)->AppendString(strings);
     strings->Append(FUN_00a7d330(DAT_011f4a0c));
     bool enabled = (mode & 1) != 0;
     strings->Append(FUN_00a7d370("Enabled", enabled));
@@ -511,23 +453,15 @@ enum Draw
 {
     D0
 };
-struct Stencil
+struct StencilLoadBase
 {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned short mode;
-    unsigned int flags, mask;
     void FUN_00a5d7f0(Input&);
-    void FUN_00a6f500(Input& stream);
 };
 // @fnv 0x00a6f500
-void Stencil::FUN_00a6f500(Input& stream)
+void NiStencilProperty::FUN_00a6f500(NiStream& niStream)
 {
-    FUN_00a5d7f0(stream);
+    Input& stream = reinterpret_cast<Input&>(niStream);
+    ((StencilLoadBase*)this)->FUN_00a5d7f0(stream);
     if (stream.version < 0x14010002)
     {
         bool enabled;
@@ -573,53 +507,37 @@ void Stencil::FUN_00a6f500(Input& stream)
 }
 
 #include <windows.h>
-class StencilRefObj
-{
-  public:
-    virtual void f0();
-    virtual void f1();
-    long m_04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    unsigned short m_18;
-    unsigned short unk1a;
-    long m_1c;
-    long m_20;
-};
-
 // @fnv 0x00a6f450
 void FUN_00a6f450()
 {
-    StencilRefObj* obj = (StencilRefObj*)BSFadeNode::operator new(0x24);
+    NiStencilProperty* obj = (NiStencilProperty*)BSFadeNode::operator new(0x24);
     if (obj != 0)
     {
-        reinterpret_cast<NiProperty*>(obj)->NiPropertyCtor();
+        ::new (obj) NiProperty;
         *(void**)obj = &DAT_0101e07c;
         obj->m_1c = 0;
         obj->m_20 = -1;
-        obj->m_18 = 0x4180;
+        obj->mode = 0x4180;
     }
     else
     {
         obj = 0;
     }
 
-    if ((StencilRefObj*)DAT_011f4a14 != obj)
+    if ((NiStencilProperty*)DAT_011f4a14 != obj)
     {
         if (DAT_011f4a14 != 0)
         {
-            StencilRefObj* p = (StencilRefObj*)DAT_011f4a14;
-            if (InterlockedDecrement(&((StencilRefObj*)DAT_011f4a14)->m_04) == 0)
+            NiStencilProperty* p = (NiStencilProperty*)DAT_011f4a14;
+            if (InterlockedDecrement(reinterpret_cast<volatile long*>(&DAT_011f4a14->m_uiRefCount)) == 0)
             {
-                p->f1();
+                p->DeleteThis();
             }
         }
-        DAT_011f4a14 = reinterpret_cast<S00a6f4d0*>(obj);
+        DAT_011f4a14 = reinterpret_cast<NiObject*>(obj);
         if (obj != 0)
         {
-            InterlockedIncrement(&obj->m_04);
+            InterlockedIncrement(reinterpret_cast<volatile long*>(&obj->m_uiRefCount));
         }
     }
 }

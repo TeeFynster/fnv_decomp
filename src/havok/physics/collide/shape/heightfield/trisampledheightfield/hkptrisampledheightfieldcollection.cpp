@@ -2,7 +2,26 @@
 // src/havok/physics/collide/shape/heightfield/trisampledheightfield/hkptrisampledheightfieldcollection.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/heightfield/trisampledheightfield/hkptrisampledheightfieldcollection.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpTriSampledHeightFieldCollection.h"
+// Keep the unit's minimal SIMD type: the CRT's additional byte arrays change /GS code generation.
+#define _INCLUDED_MM2
+// Exe 0x00d26510 FUN_00d26510: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ss(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+extern "C" LocalM128 _mm_setr_ps(float a, float b, float c, float d);
+extern "C" void _mm_store_ss(float* p, LocalM128 a);
+
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkpSampledHeightFieldShape.h"
+#include "../../../../../../../include/hkpTriSampledHeightFieldCollection.h"
 
 struct FUN_00d263f0_t
 {
@@ -82,21 +101,11 @@ int FUN_00d26390()
     return 0;
 }
 
-struct FUN_00d263a0_data
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
 struct FUN_00d263a0_cls
 {
     int unk00;
     int unk04;
-    FUN_00d263a0_data* unk08;
+    hkpSampledHeightFieldShape* unk08;
     int GetNextKey(unsigned int key);
 };
 
@@ -108,10 +117,10 @@ int __thiscall FUN_00d263a0_cls::GetNextKey(unsigned int key)
         return key | 1;
     unsigned int hi = key >> 16;
     unsigned int idx = ((key >> 1) & 0x7fff) + 1;
-    unsigned int uiLimit = unk08->unk10 - 1;
+    unsigned int uiLimit = unk08->m_iXResolution - 1;
     if (idx == uiLimit)
     {
-        unsigned int uiLimit2 = unk08->unk14 - 1;
+        unsigned int uiLimit2 = unk08->m_iZResolution - 1;
         hi++;
         idx = 0;
         if (hi == uiLimit2)
@@ -143,12 +152,6 @@ void* FUN_00d26450_Obj::FUN_00d26450()
     return unk18;
 }
 
-class hkpSampledHeightFieldShape : public hkpShape
-{
-  public:
-    int m_unk10;
-};
-
 struct S_d264d0_Coll : public hkpTriSampledHeightFieldCollection
 {
     hkpSampledHeightFieldShape* FUN_00d26450();
@@ -164,17 +167,10 @@ __declspec(noinline) hkpSampledHeightFieldShape* S_d264d0_Coll::FUN_00d26450()
 // @fnv 0x00d264d0
 void S_d264d0_Coll::FUN_00d264d0(unsigned int key, unsigned short value)
 {
-    unsigned int count = FUN_00d26450()->m_unk10;
+    unsigned int count = FUN_00d26450()->m_iXResolution;
     unsigned int idx = ((count - 1) * (key >> 16) + ((key >> 1) & 0x7fff)) * 2 | (key & 1);
     m_kWeldingInfo.m_data[idx] = value;
 }
-
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setzero_ps(void);
 
 extern int DAT_010ce390;
 extern int DAT_010ce370;
@@ -200,7 +196,7 @@ struct FUN_00d26700
     volatile int m_uiX;  // +0x24
     volatile int m_uiY;  // +0x28
     volatile int m_uiZ;  // +0x2c
-    __m128 m_v;          // +0x30
+    LocalM128 m_v;          // +0x30
 
     FUN_00d26700(void* p, float f);
 };
@@ -221,49 +217,27 @@ FUN_00d26700::FUN_00d26700(void* p, float f)
     ((Target26700*)p)->FUN_00c90510();
 }
 
-class hkMemoryAllocatorD267
-{
-  public:
-    virtual ~hkMemoryAllocatorD267() throw();
-    virtual void* AllocateMemoryBlock(int n) throw();
-    virtual void ReleaseBlock(void* p, int n) throw();
-    virtual void* AllocateBufferWithSize(int& n) throw();
-    virtual void ReturnMemory(void* p, int n) throw();
-};
-
-struct hkMemoryRouterD267
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorD267* m_pStreamAllocator;
-    hkMemoryAllocatorD267& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-namespace hkRouterD267 {
-extern "C" hkMemoryRouterD267& __cdecl FUN_00c85750() throw();
+// hkMemoryRouter is the shared Havok memory router: 0x00c85750 returns it, heap at +0x10.
+namespace HavokHeap {
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
 
-template <class T> struct hkArrayD267
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
 
-    ~hkArrayD267() throw()
-    {
-        hkMemoryAllocatorD267& alloc = hkRouterD267::FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+    return HavokHeap::FUN_00c85750().heap();
+}
+
+template <class T, class Allocator>
+__forceinline hkArray<T, Allocator>::~hkArray() throw()
+{
+    hkMemoryAllocator& alloc = Allocator().get(this);
+    m_iElementCount = 0;
+    if ((m_iCapacityState & 0x80000000) == 0)
+        alloc.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
 
 struct RefD267 : public hkReferencedObject
 {
@@ -293,7 +267,7 @@ class FUN_00d26760 : public hkBase0D267, public hkBase1D267
   public:
     RefD267* m_pkRef;
     int unk1C[2];
-    hkArrayD267<short> m_ppData;
+    hkArray<short> m_ppData;
 
     virtual ~FUN_00d26760() throw();
 };
@@ -306,7 +280,7 @@ FUN_00d26760::~FUN_00d26760() throw()
 
 struct FUN_00d26450_S
 {
-    void* FUN_00d26450();
+    hkpSampledHeightFieldShape* FUN_00d26450();
 };
 
 struct FUN_00d267c0_Alloc
@@ -332,8 +306,8 @@ void FUN_00d267c0_t::FUN_00d267c0(int mode)
 {
     if (mode != 6)
     {
-        char* o = (char*)FUN_00d26450();
-        int idx = (2 * *(int*)(o + 0x14) - 2) * (*(int*)(o + 0x10) - 1);
+        const hkpSampledHeightFieldShape* o = FUN_00d26450();
+        int idx = (2 * o->m_iZResolution - 2) * (o->m_iXResolution - 1);
         char* arr = (char*)this + 0x24;
         char* cur = (char*)FUN_00c85750();
         if ((*(int*)(arr + 8) & 0x3fffffff) < idx)
@@ -365,25 +339,14 @@ void FUN_00d267c0_t::FUN_00d267c0(int mode)
     }
 }
 
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ss(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
-extern "C" __m128 _mm_setr_ps(float a, float b, float c, float d);
-extern "C" void _mm_store_ss(float* p, __m128 a);
-
-struct S00d26510_Bool
-{
-    char m_cBooleanValue;
-};
-
 struct S00d26510_Vec
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     void set(float a, float b, float c, float d)
     {
         m_vComponents = _mm_setr_ps(a, b, c, d);
     }
-    void mul4(const S00d26510_Vec& v)
+    void mul4(const hkVector4& v)
     {
         m_vComponents = _mm_mul_ps(v.m_vComponents, m_vComponents);
     }
@@ -396,38 +359,6 @@ struct S00d26510_Shape
     unsigned short m_sReferenceCount;
     int m_ulUserData;
     int m_type;
-};
-
-struct S00d26510_HFBase
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1C();
-    virtual void v20();
-    virtual void v24();
-    virtual void v28();
-    virtual void v2C();
-    virtual void v30();
-    virtual float getHeightAt(int x, int z) const;
-    virtual void getTriangleFlip(S00d26510_Bool& out) const;
-    unsigned short m_usMemSizeAndFlags;
-    unsigned short m_sReferenceCount;
-    int m_ulUserData;
-    int m_type;
-};
-
-struct S00d26510_HF : public S00d26510_HFBase
-{
-    int m_iXResolution;
-    int m_iZResolution;
-    int unk18;
-    int unk1C;
-    S00d26510_Vec m_kHeightScaleVector;
 };
 
 struct S00d26510_ShapeB
@@ -461,10 +392,10 @@ struct S00d26510_Tri : public S00d26510_Convex
     unsigned char m_ucWeldingPadding;
     int unk18;
     int unk1C;
-    __m128 m_kVertexA;
-    __m128 m_kVertexB;
-    __m128 m_kVertexC;
-    __m128 m_kVertexTransform;
+    LocalM128 m_kVertexA;
+    LocalM128 m_kVertexB;
+    LocalM128 m_kVertexC;
+    LocalM128 m_kVertexTransform;
 
     void* operator new(unsigned int, void* p) throw()
     {
@@ -489,19 +420,19 @@ struct S00d26510_Container
 struct S00d26510_Coll : public S00d26510_Shape, public S00d26510_Container
 {
     int unk14;
-    S00d26510_HF* m_pHeightFieldShape;
+    hkpSampledHeightFieldShape* m_pHeightFieldShape;
     int m_iChildSize;
     float m_fSphereRadius;
     unsigned short* m_weldingData;
     int m_weldingSize;
     int m_weldingCap;
-    __m128 m_kTriangleExtrusion;
+    LocalM128 m_kTriangleExtrusion;
 
-    S00d26510_HF* getHF() const;
+    hkpSampledHeightFieldShape* getHF() const;
     virtual const S00d26510_ShapeB* FUN_00d26510(unsigned int key, void* buffer) const;
 };
 
-__declspec(noinline) S00d26510_HF* S00d26510_Coll::getHF() const
+__declspec(noinline) hkpSampledHeightFieldShape* S00d26510_Coll::getHF() const
 {
     return m_pHeightFieldShape;
 }
@@ -511,7 +442,7 @@ __declspec(noinline) S00d26510_HF* S00d26510_Coll::getHF() const
 const S00d26510_ShapeB* S00d26510_Coll::FUN_00d26510(unsigned int key, void* buffer) const
 {
     const S00d26510_Coll* coll = this;
-    const S00d26510_HF* hf = coll->getHF();
+    const hkpSampledHeightFieldShape* hf = coll->getHF();
     int x = (key & 0xffff) >> 1;
     int z = key >> 16;
     S00d26510_Tri* tri = new (buffer) S00d26510_Tri(m_fSphereRadius);
@@ -520,11 +451,13 @@ const S00d26510_ShapeB* S00d26510_Coll::FUN_00d26510(unsigned int key, void* buf
     {
         int xx = ((key & 0xffff) >> 1) + (i >> 1);
         int zz = (key >> 16) + (i & 1);
-        vertices[i].set((float)xx, hf->getHeightAt(xx, zz), (float)zz, 0.0f);
+        vertices[i].set((float)xx, hf->GetHeightAtGridPoint(xx, zz), (float)zz, 0.0f);
         vertices[i].mul4(hf->m_kHeightScaleVector);
     }
-    S00d26510_Bool flipB;
-    hf->getTriangleFlip(flipB);
+    hkBool flipB;
+    // The shared vf14 declaration has no output parameter yet.
+    typedef void (__thiscall* GetTriangleFlip)(const hkpSampledHeightFieldShape*, hkBool&);
+    (*reinterpret_cast<GetTriangleFlip const* const*>(hf))[14](hf, flipB);
     int flip = flipB.m_cBooleanValue != 0;
     int iParity = key & 1;
     tri->m_kVertexA = vertices[(~flip & iParity) * 3].m_vComponents;
@@ -537,8 +470,8 @@ const S00d26510_ShapeB* S00d26510_Coll::FUN_00d26510(unsigned int key, void* buf
         iWeldingInfo = coll->m_weldingData[((coll->getHF()->m_iXResolution - 1) * z + x) * 2 | iParity];
     tri->m_kWeldingInfo = (unsigned short)iWeldingInfo;
     tri->m_eWeldingType = type;
-    __m128 sq = _mm_mul_ps(coll->m_kTriangleExtrusion, coll->m_kTriangleExtrusion);
-    __m128 len = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
+    LocalM128 sq = _mm_mul_ps(coll->m_kTriangleExtrusion, coll->m_kTriangleExtrusion);
+    LocalM128 len = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq));
     float l;
     _mm_store_ss(&l, len);
 

@@ -1,559 +1,1139 @@
-// Source layout: BaseProcess. PC corrections are in generate_headers.py.
-#ifndef FNV_BASEPROCESS_H
-#define FNV_BASEPROCESS_H
-#include "layout_support.h"
+#pragma once
+
+#include <stddef.h>
 #include "ActorPackageContext.h"
+#include "NiPoint3.h"
+
+class ActiveEffect;
 class AnimIdle;
-class Animation;
 class ArrowProjectile;
+class Actor;
+enum RESET_3D_FLAGS;
+class BooleanFloatQuery;
+class Animation;
 class BGSBodyPartData;
-class BGSSaveFormBuffer;
+class BGSLoadFormBuffer;
+class BGSSaveGameBuffer;
 class BSAnimGroupSequence;
 class BSBound;
 class BSFaceGenAnimationData;
 class BSFaceGenNiNode;
 class BSShaderPPLightingProperty;
+class PathingAvoidNodeArray;
+class BipedAnim;
+class ActorCombatGroup;
 class Crime;
-class DetectionEvent;
 class DetectionViewData;
-class FurnitureMark;
-class BooleanFloatQuery;
+class ExtraDataList;
+class InventoryStackRecord;
 class KFModel;
-class LipSyncAnimation;
+class MagicCaster;
+class MagicItem;
+class MagicTarget;
+class MobileObject;
 class MuzzleFlash;
 class NiAVObject;
-class NiControllerManager;
-class PathingAvoidNodeArray;
+class NiNode;
+class NiObjectNET;
+class NiRefObject;
+class NiTriShape;
 class Projectile;
+class BSSoundHandle;
+class SpellItem;
+class TESActorBase;
+class TESAmmo;
 class TESEffectShader;
 class TESIdleForm;
-class TESObjectSTAT;
+class TESObject;
+class TESObjectCELL;
 class TESObjectWEAP;
-class WadingWaterData;
+class TESTopic;
+class TESWorldSpace;
 class bhkCharacterController;
-enum KNOCK_STATE_ENUM
+class NiControllerManager;
+class TESPackageData;
+class DialogueItem;
+class DetectionEvent;
+class ObjectToAcquire;
+class LipSyncAnimation;
+class TESBoundObject;
+class TESObjectSTAT;
+class WadingWaterData;
+struct FurnitureMark;
+class CachedValues;
+class PlayerCharacter;
+
+template <class T> class BSSimpleList;
+template <class T> class NiPointer;
+
+namespace ActorValue
 {
-    KNOCK_STATE_ENUM_KNOCK_STATE_NORMAL = 0,
-    KNOCK_STATE_ENUM_KNOCK_STATE_EXPLODE = 1,
-    KNOCK_STATE_ENUM_KNOCK_STATE_EXPLODE_LEAD_IN = 2,
-    KNOCK_STATE_ENUM_KNOCK_STATE_OUT = 3,
-    KNOCK_STATE_ENUM_KNOCK_STATE_OUT_LEAD_IN = 4,
-    KNOCK_STATE_ENUM_KNOCK_STATE_QUEUED = 5,
-    KNOCK_STATE_ENUM_KNOCK_STATE_GET_UP = 6
+    enum Index;
+}
+
+struct _AnimationAction
+{
+    enum Action
+    {
+        NONE = -1,
+        EQUIP_WEAPON,
+        UNEQUIP_WEAPON,
+        ATTACK,
+        ATTACK_EJECT,
+        ATTACK_FOLLOW_THROUGH,
+        ATTACK_THROW,
+        ATTACK_THROW_ATTACH,
+        BLOCK,
+        RECOIL,
+        RELOAD,
+        STAGGER,
+        DODGE,
+        LOWER_BODY_ANIM,
+        SPECIAL_IDLE,
+        SCRIPT_ANIMATION,
+        RELOAD_LOOP_START,
+        RELOAD_LOOP_END,
+        RELOAD_LOOP,
+        COUNT,
+    };
 };
-#pragma pack(push, 4)
+// Distinct nested enum: HighProcess::SetAnimAction at 0x008da270 uses _AnimationAction::Action.
+typedef _AnimationAction::Action ProcessAnimationAction;
+
+struct _AnimGroup
+{
+    enum Group
+    {
+        NONE = -1,
+
+        IDLE = 0,
+        DYNAMIC_IDLE,
+        SPECIAL_IDLE,
+
+        MOVE_FORWARD,
+        MOVE_BACK,
+        MOVE_LEFT,
+        MOVE_RIGHT,
+        FAST_FORWARD,
+        FAST_BACK,
+        FAST_LEFT,
+        FAST_RIGHT,
+        DODGE_FORWARD,
+        DODGE_BACK,
+        DODGE_LEFT,
+        DODGE_RIGHT,
+        TURN_LEFT,
+        TURN_RIGHT,
+
+        _MOVEMENT_START = MOVE_FORWARD,
+        _MOVEMENT_END = TURN_RIGHT,
+
+        AIM,
+        AIM_UP,
+        AIM_DOWN,
+        AIM_IS,
+        AIM_IS_UP,
+        AIM_IS_DOWN,
+
+        _AIM_START = AIM,
+        _AIM_END = AIM_IS_DOWN,
+
+        HOLSTER,
+        EQUIP,
+        UNEQUIP,
+        ATTACK_LEFT,
+        ATTACK_LEFT_UP,
+        ATTACK_LEFT_DOWN,
+        ATTACK_LEFT_IS,
+        ATTACK_LEFT_IS_UP,
+        ATTACK_LEFT_IS_DOWN,
+        ATTACK_RIGHT,
+        ATTACK_RIGHT_UP,
+        ATTACK_RIGHT_DOWN,
+        ATTACK_RIGHT_IS,
+        ATTACK_RIGHT_IS_UP,
+        ATTACK_RIGHT_IS_DOWN,
+        ATTACK_3,
+        ATTACK_3_UP,
+        ATTACK_3_DOWN,
+        ATTACK_3_IS,
+        ATTACK_3_IS_UP,
+        ATTACK_3_IS_DOWN,
+        ATTACK_4,
+        ATTACK_4_UP,
+        ATTACK_4_DOWN,
+        ATTACK_4_IS,
+        ATTACK_4_IS_UP,
+        ATTACK_4_IS_DOWN,
+        ATTACK_5,
+        ATTACK_5_UP,
+        ATTACK_5_DOWN,
+        ATTACK_5_IS,
+        ATTACK_5_IS_UP,
+        ATTACK_5_IS_DOWN,
+        ATTACK_6,
+        ATTACK_6_UP,
+        ATTACK_6_DOWN,
+        ATTACK_6_IS,
+        ATTACK_6_IS_UP,
+        ATTACK_6_IS_DOWN,
+        ATTACK_7,
+        ATTACK_7_UP,
+        ATTACK_7_DOWN,
+        ATTACK_7_IS,
+        ATTACK_7_IS_UP,
+        ATTACK_7_IS_DOWN,
+        ATTACK_8,
+        ATTACK_8_UP,
+        ATTACK_8_DOWN,
+        ATTACK_8_IS,
+        ATTACK_8_IS_UP,
+        ATTACK_8_IS_DOWN,
+        ATTACK_LOOP,
+        ATTACK_LOOP_UP,
+        ATTACK_LOOP_DOWN,
+        ATTACK_LOOP_IS,
+        ATTACK_LOOP_IS_UP,
+        ATTACK_LOOP_IS_DOWN,
+        ATTACK_SPIN,
+        ATTACK_SPIN_UP,
+        ATTACK_SPIN_DOWN,
+        ATTACK_SPIN_IS,
+        ATTACK_SPIN_IS_UP,
+        ATTACK_SPIN_IS_DOWN,
+        ATTACK_SPIN_2,
+        ATTACK_SPIN_2_UP,
+        ATTACK_SPIN_2_DOWN,
+        ATTACK_SPIN_2_IS,
+        ATTACK_SPIN_2_IS_UP,
+        ATTACK_SPIN_2_IS_DOWN,
+        ATTACK_POWER,
+        ATTACK_FORWARD_POWER,
+        ATTACK_BACK_POWER,
+        ATTACK_LEFT_POWER,
+        ATTACK_RIGHT_POWER,
+        ATTACK_CUSTOM_1_POWER,
+        ATTACK_CUSTOM_2_POWER,
+        ATTACK_CUSTOM_3_POWER,
+        ATTACK_CUSTOM_4_POWER,
+        ATTACK_CUSTOM_5_POWER,
+        PLACE_MINE,
+        PLACE_MINE_UP,
+        PLACE_MINE_DOWN,
+        PLACE_MINE_IS,
+        PLACE_MINE_IS_UP,
+        PLACE_MINE_IS_DOWN,
+        PLACE_MINE_2,
+        PLACE_MINE_2_UP,
+        PLACE_MINE_2_DOWN,
+        PLACE_MINE_2_IS,
+        PLACE_MINE_2_IS_UP,
+        PLACE_MINE_2_IS_DOWN,
+        ATTACK_THROW,
+        ATTACK_THROW_UP,
+        ATTACK_THROW_DOWN,
+        ATTACK_THROW_IS,
+        ATTACK_THROW_IS_UP,
+        ATTACK_THROW_IS_DOWN,
+        ATTACK_THROW_2,
+        ATTACK_THROW_2_UP,
+        ATTACK_THROW_2_DOWN,
+        ATTACK_THROW_2_IS,
+        ATTACK_THROW_2_IS_UP,
+        ATTACK_THROW_2_IS_DOWN,
+        ATTACK_THROW_3,
+        ATTACK_THROW_3_UP,
+        ATTACK_THROW_3_DOWN,
+        ATTACK_THROW_3_IS,
+        ATTACK_THROW_3_IS_UP,
+        ATTACK_THROW_3_IS_DOWN,
+        ATTACK_THROW_4,
+        ATTACK_THROW_4_UP,
+        ATTACK_THROW_4_DOWN,
+        ATTACK_THROW_4_IS,
+        ATTACK_THROW_4_IS_UP,
+        ATTACK_THROW_4_IS_DOWN,
+        ATTACK_THROW_5,
+        ATTACK_THROW_5_UP,
+        ATTACK_THROW_5_DOWN,
+        ATTACK_THROW_5_IS,
+        ATTACK_THROW_5_IS_UP,
+        ATTACK_THROW_5_IS_DOWN,
+        ATTACK_9,
+        ATTACK_9_UP,
+        ATTACK_9_DOWN,
+        ATTACK_9_IS,
+        ATTACK_9_IS_UP,
+        ATTACK_9_IS_DOWN,
+        ATTACK_THROW_6,
+        ATTACK_THROW_6_UP,
+        ATTACK_THROW_6_DOWN,
+        ATTACK_THROW_6_IS,
+        ATTACK_THROW_6_IS_UP,
+        ATTACK_THROW_6_IS_DOWN,
+        ATTACK_THROW_7,
+        ATTACK_THROW_7_UP,
+        ATTACK_THROW_7_DOWN,
+        ATTACK_THROW_7_IS,
+        ATTACK_THROW_7_IS_UP,
+        ATTACK_THROW_7_IS_DOWN,
+        ATTACK_THROW_8,
+        ATTACK_THROW_8_UP,
+        ATTACK_THROW_8_DOWN,
+        ATTACK_THROW_8_IS,
+        ATTACK_THROW_8_IS_UP,
+        ATTACK_THROW_8_IS_DOWN,
+        COUNTER_ATTACK,
+
+        _WEAPONS_START = EQUIP,
+        _WEAPONS_END = COUNTER_ATTACK,
+
+        STOMP,
+        BLOCK_IDLE,
+        BLOCK_HIT,
+        RECOIL,
+
+        RELOAD_W_START,
+        RELOAD_X_START,
+        RELOAD_Y_START,
+        RELOAD_Z_START,
+        RELOAD_A,
+        RELOAD_B,
+        RELOAD_C,
+        RELOAD_D,
+        RELOAD_E,
+        RELOAD_F,
+        RELOAD_G,
+        RELOAD_H,
+        RELOAD_I,
+        RELOAD_J,
+        RELOAD_K,
+        RELOAD_L,
+        RELOAD_M,
+        RELOAD_N,
+        RELOAD_O,
+        RELOAD_P,
+        RELOAD_Q,
+        RELOAD_R,
+        RELOAD_S,
+        RELOAD_W,
+        RELOAD_X,
+        RELOAD_Y,
+        RELOAD_Z,
+
+        _RELOAD_START = RELOAD_A,
+        _LOOPING_RELOAD_START = RELOAD_W,
+        _RELOAD_END = RELOAD_Z,
+
+        JAM_A,
+        JAM_B,
+        JAM_C,
+        JAM_D,
+        JAM_E,
+        JAM_F,
+        JAM_G,
+        JAM_H,
+        JAM_I,
+        JAM_J,
+        JAM_K,
+        JAM_L,
+        JAM_M,
+        JAM_N,
+        JAM_O,
+        JAM_P,
+        JAM_Q,
+        JAM_R,
+        JAM_S,
+        JAM_W,
+        JAM_X,
+        JAM_Y,
+        JAM_Z,
+
+        _WEAPON_JAM_START = JAM_A,
+        _WEAPON_JAM_END = JAM_Z,
+
+        STAGGER,
+        DEATH,
+        TALKING,
+        PIPBOY,
+
+        JUMP_START,
+        JUMP_LOOP,
+        JUMP_LAND,
+
+        HAND_GRIP_1,
+        HAND_GRIP_2,
+        HAND_GRIP_3,
+        HAND_GRIP_4,
+        HAND_GRIP_5,
+        HAND_GRIP_6,
+
+        JUMP_LOOP_FORWARD,
+        JUMP_LOOP_BACKWARD,
+        JUMP_LOOP_LEFT,
+        JUMP_LOOP_RIGHT,
+
+        PIPBOY_CHILD,
+
+        JUMP_LAND_FORWARD,
+        JUMP_LAND_BACKWARD,
+        JUMP_LAND_LEFT,
+        JUMP_LAND_RIGHT,
+
+        COUNT,
+    };
+};
+typedef _AnimGroup::Group ANIM_GROUP_TYPE;
+
+struct _AnimationIdlePlayType
+{
+    enum Type
+    {
+        REPLACE = 0,
+        QUEUE = 1,
+        AUTO = 2,
+        AUTO_EXCLUSIVE = 3,
+    };
+};
+typedef _AnimationIdlePlayType::Type ANIM_IDLE_PLAY_TYPE;
+
+struct _BodyPartType
+{
+    enum Type
+    {
+        NONE = -1,
+        TORSO,
+        HEAD_1,
+        HEAD_2,
+        LEFT_ARM_1,
+        LEFT_ARM_2,
+        RIGHT_ARM_1,
+        RIGHT_ARM_2,
+        LEFT_LEG_1,
+        LEFT_LEG_2,
+        LEFT_LEG_3,
+        RIGHT_LEG_1,
+        RIGHT_LEG_2,
+        RIGHT_LEG_3,
+        BRAIN,
+        WEAPON,
+        COUNT,
+    };
+};
+typedef _BodyPartType::Type LIMB_TYPE;
+
+struct _DetectionLevel
+{
+    enum Level
+    {
+        LOST = 0,
+        UNSEEN = 1,
+        NOTICED = 2,
+        SEEN = 3,
+        COUNT = 4,
+    };
+};
+typedef _DetectionLevel::Level DETECTION_LEVEL;
+
+struct _SoundLevel
+{
+    enum Level
+    {
+        LOUD,
+        NORMAL,
+        SILENT,
+        COUNT,
+    };
+};
+typedef _SoundLevel::Level SOUND_LEVEL;
+
+#include "DIALOGUE_EMOTION.h"
+#include "PACKAGE_OBJECT_TYPE.h"
+#include "SIT_SLEEP_STATE.h"
+#include "PROCESS_TYPE.h"
+
+typedef PROCESS_TYPE PROCESS_LEVEL;
+
 class BaseProcess
 {
   public:
-    ActorPackageContext m_kProcessData;                                                              // +0x4
-    float m_fValue2;                                                                          // +0x1C
-    float m_fValue1;                                                                          // +0x20
-    unsigned int m_uiStateFlags;                                                              // +0x24
-    PROCESS_TYPE m_eProcessType;                                                              // +0x28
-    CachedValues* m_pCachedValues;                                                            // +0x2C
-    virtual ~BaseProcess();                                                                   // slot 0x0
-    virtual void Copy(BaseProcess*);                                                          // slot 0x1
-    virtual void SetReferenceTarget(TESObjectREFR*);                                          // slot 0x2
-    virtual void Update(MobileObject*);                                                       // slot 0x4
-    virtual void Update(MobileObject*, float);                                                // slot 0x3
-    virtual void SetMobileObjectState(MobileObject*, bool);                                   // slot 0x5
-    virtual const NiPoint3 GetActorWorldPosition(Actor*);                                     // slot 0x6
-    virtual NiPoint3 GetActorNodePosition(Actor*, int);                                       // slot 0x7
-    virtual float GetActorValueAtIndex(Actor*, int);                                          // slot 0x8
-    virtual bool CanProcessActor(Actor*, bool);                                               // slot 0x9
-    virtual void ResetPackageState();                                                         // slot 0xA
-    virtual bool IsLowProcessStateValid();                                                    // slot 0xB
-    virtual int GetPackedStateBits0To8();                                                     // slot 0xC
-    virtual int GetPackedStateBits9To12();                                                    // slot 0xD
-    virtual int GetPackedStateBits13To26();                                                   // slot 0xE
-    virtual void SetProcessInteger(int);                                                      // slot 0xF
-    virtual int GetProcessInteger();                                                          // slot 0x10
-    virtual bool StartIdleAnimation(MobileObject*, TESIdleForm*, int, bool, bool, bool);      // slot 0x11
-    virtual void ClearIdleAnimation();                                                        // slot 0x12
-    virtual MagicItem* GetCurrentMagicItem();                                                 // slot 0x13
-    virtual void SetCurrentMagicItem(MagicItem*);                                             // slot 0x14
-    virtual void SetActorMagicItem(Actor*, int);                                              // slot 0x15
-    virtual void InitializeProcessState();                                                    // slot 0x16
-    virtual void UpdateHealthBar(Actor*);                                                     // slot 0x17
-    virtual bool GetIdleDoneOnce();                                                           // slot 0x18
-    virtual void MarkIdleDoneOnce(bool);                                                      // slot 0x19
-    virtual bool ShouldProcessActor(Actor*);                                                  // slot 0x1A
-    virtual void ProcessActorGroupState(Actor*);                                        // slot 0x1B
-    virtual bool CanUsePlayerAction(Actor*);                                                  // slot 0x1C
-    virtual bool CanPerformActorAction(Actor*, float);                                        // slot 0x1D
-    virtual bool IsAsleep();                                                                  // slot 0x1E
-    virtual void ProcessSandman(Actor*);                                                      // slot 0x1F
-    virtual void ProcessCannibal(Actor*);                                                     // slot 0x20
-    virtual void ProcessFurniture(Actor*);                                                    // slot 0x21
-    virtual void SetCombatEnabled(bool);                                                      // slot 0x22
-    virtual bool FindPackageTarget(Actor*);                                                   // slot 0x23
-    virtual TESObjectREFR* GetPackageLocationReference(Actor*, bool);                         // slot 0x24
-    virtual TESObjectREFR* GetActorTargetReference(Actor*, bool);                             // slot 0x25
-    virtual NiPoint3 GetActorTargetPosition(Actor*, bool);                                    // slot 0x26
-    virtual TESObjectCELL* GetTargetCell(Actor*);                                             // slot 0x27
-    virtual TESWorldSpace* GetTargetWorldSpace(Actor*);                                       // slot 0x28
-    virtual float GetTargetDistance(Actor*);                                                  // slot 0x29
-    virtual MobileObject* GetMobileObject();                                                  // slot 0x2A
-    virtual void AdvanceProcess();                                                            // slot 0x2B
-    virtual bool EvaluateActorPackage(Actor*, TESPackage*, bool);                             // slot 0x2C
-    virtual bool FindPackageToEvaluate(Actor*, TESPackage*&);                                 // slot 0x2D
-    virtual float GetFirstProcessFloat();                                                     // slot 0x2E
-    virtual void SetCurrentSpeed(float);                                                      // slot 0x2F
-    virtual void EvaluateCurrentPackage(Actor*);                                              // slot 0x30
-    virtual void SelectPackage(Actor*, bool);                                                 // slot 0x31
-    virtual void SetPackageForActor(Actor*, TESPackage*, bool);                               // slot 0x32
-    virtual bool HasInterruptPackage();                                                       // slot 0x33
-    virtual void SetEssentialFlag(bool);                                                      // slot 0x34
-    virtual void PlayRandomIdle(Actor*);                                                      // slot 0x35
-    virtual void ProcessActorIdle(Actor*);                                                    // slot 0x36
-    virtual void PlayIdleAnimation();                                                         // slot 0x37
-    virtual void ClearAnimationState();                                                       // slot 0x38
-    virtual float GetEssentialDownTimer();                                                    // slot 0x39
-    virtual void SetEssentialDownTimer(float);                                                // slot 0x3A
-    virtual void ResetEssentialDownTimer();                                                   // slot 0x3B
-    virtual DetectionViewData* FindDetectionRecord(Actor*, int, bool, int, int, bool, bool);  // slot 0x3C
-    virtual BSSimpleList<DetectionViewData*>* GetDetectionRecords(Actor*);                    // slot 0x3D
-    virtual DetectionEvent* FindDetectionEventForActor(Actor*);                               // slot 0x3E
-    virtual void AddDetectionEvent(Actor*, NiPoint3, int, int, TESObjectREFR*);               // slot 0x3F
-    virtual void RemoveDetectionEvent();                                                      // slot 0x40
-    virtual void ClearDetectionEvents();                                                      // slot 0x41
-    virtual float GetWeaponScore();                                                           // slot 0x42
-    virtual void SetWeaponScore(float);                                                       // slot 0x43
-    virtual bool HasCaughtPlayerPickpocketing();                                              // slot 0x44
-    virtual void SetIsWeaponReady(bool);                                                      // slot 0x45
-    virtual void SetAnimationComplete(bool);                                                  // slot 0x46
-    virtual bool IsMovementComplete();                                                        // slot 0x47
-    virtual void SetCurrentMovementComplete(bool);                                            // slot 0x48
-    virtual bool GetCurrentMovementComplete();                                                // slot 0x49
-    virtual TESObjectREFR* GetTarget();                                                       // slot 0x4A
-    virtual void SetTarget(TESObjectREFR*);                                                   // slot 0x4B
-    virtual TESObjectREFR* GetDoor();                                                         // slot 0x4C
-    virtual void SetDoor(TESObjectREFR*);                                                     // slot 0x4D
-    virtual void AddDeferredHideLimb(TargetDoorController*);                                      // slot 0x4E
-    virtual TargetDoorController* GetObjectToAcquire();                                           // slot 0x4F
-    virtual void SetFaceAnimationData(TargetDoorController*);                                     // slot 0x50
-    virtual BSFaceGenAnimationData* GetActorFaceGenData(Actor*);                              // slot 0x51
-    virtual InventoryStackRecord* GetActiveWeapon();                                                    // slot 0x52
-    virtual InventoryStackRecord* GetCurrentAmmo();                                                     // slot 0x53
-    virtual bool CanFireWeapon();                                                             // slot 0x54
-    virtual void SetAiming(bool);                                                             // slot 0x55
-    virtual int GetPackageObjectType();                                                       // slot 0x56
-    virtual void SetPackageObjectType(int);                                                   // slot 0x57
-    virtual bool SetCurrentArmor(InventoryStackRecord*, NiNode*, bool);                                 // slot 0x58
-    virtual bool SetCurrentTorch(InventoryStackRecord*);                                                // slot 0x59
-    virtual bool SetCurrentAmmunition(InventoryStackRecord*);                                           // slot 0x5A
-    virtual bool SetCurrentShield(InventoryStackRecord*);                                               // slot 0x5B
-    virtual void UpdateEquippedItems(Actor*);                                                 // slot 0x5C
-    virtual bool IsItemQueued(TESBoundObject*, ExtraDataList*, bool);                         // slot 0x5D
-    virtual void ProcessEquipmentRequest(Actor*, bool, TESBoundObject*, int, ExtraDataList*, bool, bool, bool, bool,
-                                         bool, bool);                                             // slot 0x5E
-    virtual void SetEquippedItem(TESBoundObject*, ExtraDataList*);                                // slot 0x5F
-    virtual void ClearQueuedEquipItems();                                                         // slot 0x60
-    virtual NiAVObject* GetSceneRoot();                                                           // slot 0x61
-    virtual void Assign3DObject(NiAVObject*);                                                     // slot 0x62
-    virtual void SetAnimationControllerManager(NiControllerManager*, NiNode*);                                // slot 0x63
-    virtual NiNode* GetActorRootNode(BipedAnim*);                                                 // slot 0x64
-    virtual NiNode* GetWeaponAttachNode(BipedAnim*);                                              // slot 0x65
-    virtual NiNode* GetShieldBone(BipedAnim*);                                                    // slot 0x66
-    virtual NiNode* GetQuiverBone(BipedAnim*);                                                    // slot 0x67
-    virtual NiNode* GetTorchAttachNode(BipedAnim*);                                               // slot 0x68
-    virtual NiNode* GetLeftWeaponBone(BipedAnim*);                                                // slot 0x69
-    virtual bool ResetAlertState();                                                               // slot 0x6A
-    virtual bool IsAnimationPlaying();                                                            // slot 0x6B
-    virtual bool IsAnimationActive();                                                             // slot 0x6C
-    virtual bool IsAnimationSequenceActive();                                                     // slot 0x6D
-    virtual Animation* GetAnimation();                                                            // slot 0x6E
-    virtual bool IsAnimationStateActive();                                                        // slot 0x6F
-    virtual void SetAnimationStateActive(bool);                                                   // slot 0x70
-    virtual bool IsProcessTaskComplete();                                                                // slot 0x71
-    virtual void SetProcessTaskComplete(bool);                                                    // slot 0x72
-    virtual void PlayAnimation(bool, BipedAnim*, Animation*, Actor*);                             // slot 0x73
-    virtual void SetCurrentBoundObject(TESBoundObject*);                                          // slot 0x74
-    virtual TESBoundObject* GetCurrentBoundObject();                                              // slot 0x75
-    virtual void RunActorProcessing(Actor*);                                                      // slot 0x76
-    virtual void RefreshActorMovement(Actor*, bool);                                              // slot 0x77
-    virtual float GetProcessBlendAmount();                                                        // slot 0x78
-    virtual void SetAnimationTimer(float);                                                        // slot 0x79
-    virtual void SetLocomotionSpeed(float);                                                       // slot 0x7A
-    virtual bool IsProcessConditionMet();                                                         // slot 0x7B
-    virtual void SelectActorCombatTarget(Actor*);                                                 // slot 0x7C
-    virtual bool IsCombatTargetForActor(Actor*, Actor*);                                          // slot 0x7D
-    virtual bool CanAttackTarget(Actor*, Actor*);                                                 // slot 0x7E
-    virtual bool IsActorTargetValid(Actor*, Actor*);                                              // slot 0x7F
-    virtual bool IsCurrentPackageTarget(Actor*);                                                  // slot 0x80
-    virtual bool IsValidCombatTarget(Actor*, Actor*);                                             // slot 0x81
-    virtual float GetDistanceBetweenActors(Actor*, Actor*);                                       // slot 0x82
-    virtual TESPackage* GetRunOncePackage();                                                      // slot 0x83
-    virtual void AssignRunOncePackage(TESPackage*, MobileObject*);                                // slot 0x84
-    virtual void StopRunOncePackage();                                                            // slot 0x85
-    virtual void SetRunOncePackageIndex(int);                                                     // slot 0x86
-    virtual int GetCurrentProcedure();                                                            // slot 0x87
-    virtual void SetCurrentProcedure(int);                                                        // slot 0x88
-    virtual void ClearDialogueItems();                                                            // slot 0x89
-    virtual bool IsPackageRunningForActor(Actor*);                                                // slot 0x8A
-    virtual TESPackage* GetCurrentPackage();                                                      // slot 0x8B
-    virtual void SetCurrentPackageAndTarget(TESPackage*, MobileObject*);                          // slot 0x8C
-    virtual void StopPackage();                                                                   // slot 0x8D
-    virtual void SetPackageInfoState(int);                                                   // slot 0x8E
-    virtual int GetPackageState();                                                                // slot 0x8F
-    virtual void SetPackageExecutionState(int);                                                   // slot 0x90
-    virtual void ResetCurrentPackage();                                                           // slot 0x91
-    virtual DialogueItem* GetCurrentDialogueItem();                                               // slot 0x92
-    virtual void SetCurrentDialogueItem(DialogueItem*);                                           // slot 0x93
-    virtual void MoveToPosition(Actor*, NiPoint3, float, float, TESObjectREFR*, TESObjectSTAT*);  // slot 0x94
-    virtual PathingAvoidNodeArray* GetPathingAvoidNodeArray(Actor*);                              // slot 0x95
-    virtual bool IsReferenceAvoided(TESObjectREFR*);                                              // slot 0x96
-    virtual void SetAnimationTime(float);                                                         // slot 0x97
-    virtual void SetDetectionTarget(TESObjectREFR*);                                          // slot 0x98
-    virtual float GetDetectionProgress();                                                         // slot 0x99
-    virtual void SetDetectionLevel(float);                                                        // slot 0x9A
-    virtual void ClearCurrentTarget();                                                            // slot 0x9B
-    virtual ActorPackageData* GetRunOncePackageData();                                            // slot 0x9C
-    virtual ActorPackageData* GetCurrentPackageData();                                            // slot 0x9D
-    virtual ActorPackageContext* GetCurrentProcessData();                                                // slot 0x9E
-    virtual TESPackage* GetOneTimePackage();                                                      // slot 0x9F
-    virtual int GetPackageInfoValue();                                                            // slot 0xA0
-    virtual void SetAnimationState(int);                                                          // slot 0xA1
-    virtual void SetProcessTarget(MobileObject*, int);                                            // slot 0xA2
-    virtual bhkCharacterController* GetPhysicsCharacterController();                              // slot 0xA3
-    virtual void AssignCharacterController(NiPointer<bhkCharacterController>);                    // slot 0xA4
-    virtual void StopActorMovement(Actor*);                                                       // slot 0xA5
-    virtual void UpdateActorPackage(Actor*, bool, int, bool);                                     // slot 0xA6
-    virtual void EvaluatePackage(Actor*, bool, bool, int);                                        // slot 0xA7
-    virtual void ProcessFlee(Actor*);                                                             // slot 0xA8
-    virtual void ProcessDialogueTopic(Actor*, TESTopic*, bool, bool, bool, bool);                 // slot 0xA9
-    virtual void StartActorInteraction(Actor*);                                                   // slot 0xAA
-    virtual void UpdateActorInteraction(Actor*);                                                  // slot 0xAB
-    virtual bool IsActorProcessable(Actor*);                                                      // slot 0xAC
-    virtual bool IsFurnitureType(TESObjectREFR*, unsigned int);                                   // slot 0xAD
-    virtual bool CanDetectActor(Actor*);                                                          // slot 0xAE
-    virtual void UpdateActorStateWithOptions(Actor*, bool, bool, int, bool);                                    // slot 0xAF
-    virtual WadingWaterData* GetWadingWaterData();                                                // slot 0xB0
-    virtual void SetActorDetectionLevel(Actor*, int);                                             // slot 0xB1
-    virtual void SetDetectionTimer(float);                                                        // slot 0xB2
-    virtual bool IsActorVisibleToActor(Actor*, Actor*, int, bool);                                // slot 0xB3
-    virtual bool IsActorDetected(Actor*, Actor*, int);                                            // slot 0xB4
-    virtual int GetDetectionCount(Actor*, int);                                                   // slot 0xB5
-    virtual bool IsDetectionEnabled();                                                            // slot 0xB6
-    virtual void SetActorProcessEnabled(bool);                                                    // slot 0xB7
-    virtual void SetActorProcessTime(Actor*, float);                                              // slot 0xB8
-    virtual int GetActorReferenceState(Actor*, TESObjectREFR*);                                   // slot 0xB9
-    virtual DIALOGUE_EMOTION GetCurrentDialogueEmotion();                                         // slot 0xBA
-    virtual void SetDialogueEmotion(DIALOGUE_EMOTION);                                            // slot 0xBB
-    virtual void RunDetection(Actor*, float);                                                     // slot 0xBC
-    virtual float GetDetectionStrength();                                                         // slot 0xBD
-    virtual void ResetDetectionState();                                                           // slot 0xBE
-    virtual void UpdateActorLighting(float);                                                      // slot 0xBF
-    virtual float UpdateProcessTiming();                                                          // slot 0xC0
-    virtual void SetSurfacing(bool);                                                              // slot 0xC1
-    virtual bool GetSurfacing();                                                                  // slot 0xC2
-    virtual bool IsDetecting();                                                                   // slot 0xC3
-    virtual void SetCombatAlerted(bool);                                                          // slot 0xC4
-    virtual float GetSecondProcessFloat();                                                        // slot 0xC5
-    virtual void SetLipSyncValue(float);                                                          // slot 0xC6
-    virtual bool IsCurrentlyAlerted();                                                            // slot 0xC7
-    virtual void SetAlert(bool);                                                                  // slot 0xC8
-    virtual bool HasCombatStarted();                                                     // slot 0xC9
-    virtual void SetIsWeaponDrawn(bool);                                                          // slot 0xCA
-    virtual InventoryStackRecord* GetPackageObject(Actor*, PACKAGE_OBJECT_TYPE);                            // slot 0xCB
-    virtual void ClearPackageObjectList();                                                        // slot 0xCC
-    virtual float GetRadiationRate();                                                             // slot 0xCD
-    virtual void SetRadiationRate(float);                                                         // slot 0xCE
-    virtual bool ShouldAttackTarget(Actor*, Actor*, bool, bool, ActorCombatGroup*, bool, bool, bool, char, bool, bool, bool,
-                                    TESPackage*);                                            // slot 0xCF
-    virtual void SetCombatTargetForActor(Actor*, Actor*);                                    // slot 0xD0
-    virtual void ReportCrime(Actor*, Actor*, Crime*);                                        // slot 0xD1
-    virtual void SetCrimeCategory(int);                                                      // slot 0xD2
-    virtual int GetAttackChance(Actor*, float, float, float, bool, bool);                    // slot 0xD3
-    virtual void SetActorDetectionState(Actor*, int, bool);                                  // slot 0xD4
-    virtual void FinishDying(Actor*);                                                        // slot 0xD5
-    virtual bool MoveToTarget(Actor*, float, int);                                           // slot 0xD6
-    virtual bool ClearProcessStateFlags();                                                   // slot 0xD7
-    virtual bool IsCurrentProcessComplete();                                                 // slot 0xD8
-    virtual void SetCurrentProcessComplete(bool);                                                          // slot 0xD9
-    virtual int GetActorStateCode(Actor*);                                                   // slot 0xDA
-    virtual bool HasActorAlertState();                                                     // slot 0xDB
-    virtual void SetDialogueState(bool);                                                     // slot 0xDC
-    virtual void SetTalkingState(bool);                                                      // slot 0xDD
-    virtual bool IsActorTalking();                                                         // slot 0xDE
-    virtual LipSyncAnimation* GetLipSync();                                                  // slot 0xDF
-    virtual void AssignLipSyncAnimation(LipSyncAnimation*);                                  // slot 0xE0
-    virtual void SetLipSyncEnabled(bool);                                                    // slot 0xE1
-    virtual bool GetPlantedExplosive();                                                      // slot 0xE2
-    virtual TESIdleForm* GetActiveIdleForm();                                                // slot 0xE3
-    virtual void SetCurrentIdle(TESIdleForm*);                                               // slot 0xE4
-    virtual void RefreshActorValues(Actor*);                                                 // slot 0xE5
-    virtual int GetActorValue(TESActorBase*, ActorValue__Index, Actor*);                     // slot 0xE6
-    virtual float GetCurrentActorValue(TESActorBase*, ActorValue__Index, Actor*);            // slot 0xE7
-    virtual void AlterActorValue(Actor*, ActorValue__Index, int);                          // slot 0xE9
-    virtual void AlterActorValue(Actor*, ActorValue__Index, float);                        // slot 0xE8
-    virtual void ApplyActorValue(Actor*, ActorValue__Index, int);                            // slot 0xEB
-    virtual void ApplyActorValue(Actor*, ActorValue__Index, float);                          // slot 0xEA
-    virtual void InvalidateValue(ActorValue__Index);                                         // slot 0xEC
-    virtual void InitializeActiveEffectList();                                               // slot 0xED
-    virtual BSSimpleList<ActiveEffect*>* GetActiveEffectList();                              // slot 0xEE
-    virtual void DestroyActiveEffectList();                                                  // slot 0xEF
-    virtual void CastSpellOnCaster(MagicCaster*, SpellItem*, bool);                          // slot 0xF0
-    virtual void CastSpellAtTarget(MagicCaster*, SpellItem*, MagicTarget*, bool);            // slot 0xF1
-    virtual MagicItem* GetSelectedMagicItem();                                               // slot 0xF2
-    virtual void SetSelectedMagicItem(MagicItem*);                                           // slot 0xF3
-    virtual MagicTarget* GetCurrentMagicTarget();                                            // slot 0xF4
-    virtual void SetMagicTarget(MagicTarget*);                                               // slot 0xF5
-    virtual bool UpdateIdleAnimation();                                                      // slot 0xF6
-    virtual void SetBooleanState(bool);                                                      // slot 0xF7
-    virtual void Move(MobileObject*, NiPoint3);                                              // slot 0xF8
-    virtual int GetAnimAction();                                                             // slot 0xF9
-    virtual BSAnimGroupSequence* GetActorProcessTime();                                      // slot 0xFA
-    virtual void SetAnimAction(int, BSAnimGroupSequence*);                                   // slot 0xFB
-    virtual bool IsAnimationSequencePlaying();                                               // slot 0xFC
-    virtual void SetIsAlerted(bool);                                                         // slot 0xFD
-    virtual bool IsAimingWeapon();                                                           // slot 0xFE
-    virtual bool IsAimingAtActor(Actor*);                                                    // slot 0xFF
-    virtual void SetAimingWeapon(bool);                                                        // slot 0x100
-    virtual bool IsAlert();                                                                  // slot 0x101
-    virtual bool HasAnimationGroup(ANIM_GROUP_ENUM);                                         // slot 0x102
-    virtual KNOCK_STATE_ENUM StopIdleAnimation();                                            // slot 0x103
-    virtual void SetKnockdownState(KNOCK_STATE_ENUM);                                        // slot 0x104
-    virtual void KnockDown(Actor*);                                                          // slot 0x105
-    virtual void ApplyKnockback(Actor*, NiPoint3, float);                                    // slot 0x106
-    virtual void UpdateActorData(Actor*);                                                    // slot 0x107
-    virtual void ProcessActorEvent(Actor*);                                                  // slot 0x108
-    virtual void SetAnimationSequence(int, BSAnimGroupSequence*);                            // slot 0x109
-    virtual void RefreshActorAnimation(Actor*);                                              // slot 0x10A
-    virtual float GetAimAngle();                                                             // slot 0x10B
-    virtual void SetAimAngle(float);                                                         // slot 0x10C
-    virtual void SetStartShooting(bool);                                                     // slot 0x10D
-    virtual unsigned char GetAttackState(Actor*);                                            // slot 0x10E
-    virtual void SetBodyPartState(unsigned char);                                            // slot 0x10F
-    virtual unsigned char GetProcessStateByte();                                             // slot 0x110
-    virtual float GetVisibilityAlpha();                                                      // slot 0x111
-    virtual void SetAttackCount(int);                                                        // slot 0x112
-    virtual bool IsFirstActorFlagSet();                                                       // slot 0x113
-    virtual void SetIsSwimming(bool);                                                        // slot 0x114
-    virtual bool IsAdditionalActorFlagSet();                                                           // slot 0x115
-    virtual void SetActorMovementState(Actor*, bool);                                        // slot 0x116
-    virtual void SetLastKnownPosition(NiPoint3);                                             // slot 0x117
-    virtual const NiPoint3* GetLastKnownPosition();                                          // slot 0x118
-    virtual void RefreshActorState(Actor*);                                                      // slot 0x119
-    virtual void ResetActorModel(int);                                                       // slot 0x11A
-    virtual void SetDetectionFlag(int);                                                      // slot 0x11B
-    virtual void ClearDetectionFlag();                                                       // slot 0x11C
-    virtual bool IsProcessFlagSet(int);                                                      // slot 0x11D
-    virtual unsigned char GetCurrentTargetType();                                            // slot 0x11E
-    virtual void ClearReferenceRecords(unsigned int);                                        // slot 0x120
-    virtual void ClearReferenceRecords(TESObjectREFR*);                                      // slot 0x11F
-    virtual TESObjectREFR* GetPreviousReference();                                           // slot 0x121
-    virtual void SetActorTargetReference(TESObjectREFR*);                                             // slot 0x122
-    virtual SoundPlaybackHandle GetActorSoundHandle(int);                                          // slot 0x123
-    virtual void SetActorSoundHandle(int, SoundPlaybackHandle);                                    // slot 0x124
-    virtual void StopActorSound(int);                                                        // slot 0x125
-    virtual void UpdateMovementStopped(Actor*);                                              // slot 0x126
-    virtual bool IsMovementStopped();                                                        // slot 0x127
-    virtual void ResetMovementState();                                                       // slot 0x128
-    virtual void SetDiveBreathLevel(float);                                                  // slot 0x129
-    virtual void StopAllActorSounds();                                                       // slot 0x12A
-    virtual float GetDiveBreathLevel();                                                      // slot 0x12B
-    virtual float GetMovementTimer();                                                        // slot 0x12C
-    virtual void UpdateActorProcess(float);                                                  // slot 0x12D
-    virtual bool IsTalking(MobileObject*);                                                   // slot 0x12E
-    virtual SIT_SLEEP_STATE GetSitSleepState();                                              // slot 0x12F
-    virtual void SetFurnitureState(Actor*, SIT_SLEEP_STATE, TESObjectREFR*, unsigned char);  // slot 0x130
-    virtual unsigned int GetFurnitureMarkerID();                                             // slot 0x131
-    virtual TESObjectREFR* GetFurnitureReference();                                          // slot 0x132
-    virtual void SetFurnitureReference(TESObjectREFR*);                                      // slot 0x133
-    virtual unsigned int GetFurnitureMarkerIndex();                                          // slot 0x134
-    virtual FurnitureMark* GetFurnitureMarkerData();                                         // slot 0x135
-    virtual bool IsFurnitureMarkerValid(Actor*);                                             // slot 0x136
-    virtual void AssignAnimation(Actor*, Animation*);                                        // slot 0x137
-    virtual bool HasAssignedAnimation();                                                     // slot 0x138
-    virtual void SetAnimationEnabled(bool);                                                  // slot 0x139
-    virtual bool IsPlayingAnimation();                                                       // slot 0x13A
-    virtual void SetProcessConditionMet(bool);                                               // slot 0x13B
-    virtual bool IsProcessStateEnabled();                                                    // slot 0x13C
-    virtual void SetWeaponOutState(bool);                                                    // slot 0x13D
-    virtual BSShaderPPLightingProperty* GetPixelLightingProperty();                          // slot 0x13E
-    virtual void SetPixelLightingProperty(BSShaderPPLightingProperty*);                      // slot 0x13F
-    virtual void SetDetectionState(Actor*, bool);                                            // slot 0x140
-    virtual DetectionViewData* GetDetectionState(Actor*, int);                               // slot 0x141
-    virtual DetectionViewData* InsertIntoDetectionArray(Actor*, int);                        // slot 0x142
-    virtual float GetLightLevel();                                                           // slot 0x143
-    virtual void SetFloatProperty(float);                                                    // slot 0x144
-    virtual TESObjectREFR* GetActiveCombatTarget();                                          // slot 0x145
-    virtual void SetCurrentCombatTarget(TESObjectREFR*);                                     // slot 0x146
-    virtual TESObjectREFR* GetProcessReference();                                            // slot 0x147
-    virtual void SetCurrentLocationReference(TESObjectREFR*);                                // slot 0x148
-    virtual void UpdateCurrentPackage(Actor*);                                               // slot 0x149
-    virtual void SetTalkTarget(Actor*);                                                      // slot 0x14A
-    virtual Actor* GetCurrentTalkTarget();                                                     // slot 0x14B
-    virtual void SetEquippedWeapon(TESObjectWEAP*);                                          // slot 0x14C
-    virtual TESObjectWEAP* GetWeaponForm();                                                  // slot 0x14D
-    virtual void SetActorAlpha(float);                                                       // slot 0x14E
-    virtual float GetActorAlpha();                                                           // slot 0x14F
-    virtual void SetFurnitureMarkerData(TESObjectREFR*, unsigned char, FurnitureMark*);      // slot 0x150
-    virtual void ApplyProcessLevelChange(MobileObject*);                                     // slot 0x151
-    virtual unsigned short GetSaveSize(unsigned int, MobileObject*);                         // slot 0x152
-    virtual void SaveGame(unsigned int, MobileObject*);                                      // slot 0x154
-    virtual void SaveGame(BGSSaveFormBuffer*);                                               // slot 0x153
-    virtual void LoadGame(unsigned int, unsigned int, MobileObject*);                        // slot 0x156
-    virtual void LoadGame(BGSLoadFormBuffer*);                                               // slot 0x155
-    virtual void InitLoadGame(unsigned int, unsigned int, MobileObject*);                    // slot 0x158
-    virtual void InitLoadGame(BGSLoadFormBuffer*);                                           // slot 0x157
-    virtual void FinishLoadGameTES(unsigned int, unsigned int, MobileObject*);               // slot 0x159
-    virtual void Revert(unsigned int, MobileObject*);                                        // slot 0x15B
-    virtual void Revert(BGSLoadFormBuffer*);                                                 // slot 0x15A
-    virtual void ApplyLoadBuffer(BGSLoadFormBuffer*);                                        // slot 0x15C
-    virtual TESEffectShader* GetCurrentEffectShader();                                       // slot 0x15D
-    virtual void AssignEffectShader(TESEffectShader*);                                       // slot 0x15E
-    virtual bool IsProcessStateInitialized();                                                // slot 0x15F
-    virtual void UpdateActorAppearance(bool, bool, bool);                                    // slot 0x160
-    virtual void RefreshActorProcessState(Actor*);                                           // slot 0x161
-    virtual void SetIdleAnimationPlayed(bool);                                               // slot 0x162
-    virtual bool IsPlayedState();                                                      // slot 0x163
-    virtual void SetPlayedState(bool);                                                       // slot 0x164
-    virtual bool WasIdleAnimationPlayed();                                                   // slot 0x165
-    virtual void OnPackageChanged(Actor*, TESPackage*);                                      // slot 0x166
-    virtual void OnPackageStart(Actor*, TESPackage*);                                        // slot 0x167
-    virtual void OnPackageEnd(Actor*, TESPackage*);                                          // slot 0x168
-    virtual bool IsProcessActivityActive();                                                  // slot 0x169
-    virtual void SetProcessModeEnabled(bool);                                                // slot 0x16A
-    virtual float GetLightIntensity();                                                       // slot 0x16B
-    virtual void SetUnderwaterBreathTime(float);                                             // slot 0x16C
-    virtual float GetThirdProcessFloat();                                                    // slot 0x16D
-    virtual void SetWadingWaterLevel(float);                                                 // slot 0x16E
-    virtual void UpdateWadingWater(Actor*);                                                  // slot 0x16F
-    virtual int GetProcessIndex();                                                           // slot 0x170
-    virtual void SetProcessIndex(int);                                                       // slot 0x171
-    virtual bool HasActiveEffectOfType(BSSimpleList<ActiveEffect*>*, int);                   // slot 0x172
-    virtual void RefreshMagicEffects();                                                      // slot 0x173
-    virtual BSSimpleList<SpellItem*>* GetActorSpellList(Actor*, bool);                       // slot 0x174
-    virtual void SetCastingState(int);                                                       // slot 0x175
-    virtual int GetCurrentAnimAction();                                                      // slot 0x176
-    virtual void SetCurrentMoveMode(int);                                                    // slot 0x177
-    virtual int GetPendingIdleFlags();                                                       // slot 0x178
-    virtual float GetPermanentActorValueFloat(ActorValue__Index);                            // slot 0x179
-    virtual float GetDamageActorValue(ActorValue__Index);                                    // slot 0x17A
-    virtual float GetTemporaryActorValue(ActorValue__Index);                                 // slot 0x17B
-    virtual BSBound* GetObjectBounds();                                                      // slot 0x17C
-    virtual void SetBoundingBox(BSBound*);                                                   // slot 0x17D
-    virtual void SetIsSitting(bool);                                                         // slot 0x17E
-    virtual bool IsActorInCombat();                                                       // slot 0x17F
-    virtual void SetCombatState(bool);                                                       // slot 0x180
-    virtual bool IsCurrentlyDetected();                                                        // slot 0x181
-    virtual BSSimpleList<Actor*>* GetCombatTargetList();                                     // slot 0x182
-    virtual void ProcessActorReferences(Actor*, TESObjectREFR*, TESObjectREFR*);             // slot 0x183
-    virtual int GetCurrentFadeState();                                                       // slot 0x184
-    virtual void AddPostAnimAction(int);                                                     // slot 0x185
-    virtual int GetPostAnimationAction();                                                    // slot 0x186
-    virtual void ClearPostAnimActions();                                                     // slot 0x187
-    virtual void SetProcessState(int);                                                       // slot 0x188
-    virtual void SetPreviousReference(TESObjectREFR*);                                       // slot 0x189
-    virtual void SetActorProcessState(TESObjectREFR*);                                       // slot 0x18A
-    virtual void SetPackageTargetReference(TESObjectREFR*);                                  // slot 0x18B
-    virtual void SetCombatTargetReference(TESObjectREFR*);                                   // slot 0x18C
-    virtual void ClearHighProcessState(TESObjectREFR*);                                      // slot 0x18D
-    virtual void SetLastKnownReference(TESObjectREFR*);                                      // slot 0x18E
-    virtual void SetTargetReferenceByIndex(int, TESObjectREFR*);                             // slot 0x18F
-    virtual void ClearPackageData();                                                         // slot 0x190
-    virtual void ClearCachedTargetReferences(bool);                                          // slot 0x191
-    virtual void SetCombatActive(bool);                                                      // slot 0x192
-    virtual void ResetCombatState();                                                         // slot 0x193
-    virtual void RestorePreviousReference(bool);                                             // slot 0x194
-    virtual void SetProcessActive(bool);                                                     // slot 0x195
-    virtual void UpdatePlayerAwarenessTimer();                                               // slot 0x196
-    virtual float GetCurrentAlpha();                                                         // slot 0x197
-    virtual void ResetTargetReferences();                                                    // slot 0x198
-    virtual void SetCurrentTargetReference(TESObjectREFR*);                                      // slot 0x199
-    virtual bool HasNoPendingEntriesAndExpired();                                            // slot 0x19A
-    virtual bool HasNoPendingEntries();                                                      // slot 0x19B
-    virtual bool CanUseEquippedWeapon();                                              // slot 0x19C
-    virtual TESObjectREFR* GetPrimaryTargetReference();                                      // slot 0x19E
-    virtual TESObjectREFR* GetPrimaryTargetReference(int);                                   // slot 0x19D
-    virtual int GetCombatTargetCount();                                                      // slot 0x19F
-    virtual const char* GetCurrentPackageName();                                             // slot 0x1A0
-    virtual void SetIsTalking(bool);                                                         // slot 0x1A1
-    virtual bool IsCombatTargetValid();                                                      // slot 0x1A2
-    virtual TESObjectREFR* GetRelatedReference();                                            // slot 0x1A3
-    virtual bool IsInLastDefaultTargetArray(TESObjectREFR*);                                 // slot 0x1A4
-    virtual void SetHasLastDefaultTargetArray(bool);                                         // slot 0x1A5
-    virtual bool BeginIdleAnimation();                                                       // slot 0x1A6
-    virtual float GetCurrentDetectionAmount();                                               // slot 0x1A7
-    virtual void SetLightingAmount(float);                                                   // slot 0x1A8
-    virtual void AddArrowProjectile(ArrowProjectile*);                                       // slot 0x1A9
-    virtual void UnregisterArrowProjectile(ArrowProjectile*);                                // slot 0x1AA
-    virtual void SetArrowTargetReference(TESObjectREFR*);                                    // slot 0x1AB
-    virtual BSSimpleList<ArrowProjectile*>* GetArrowProjectiles();                           // slot 0x1AC
-    virtual void SetProjectileTarget(Projectile*, TESObjectREFR*);                           // slot 0x1AD
-    virtual MuzzleFlash* GetMuzzleFlash();                                                   // slot 0x1AE
-    virtual bool GetEnableMuzzleFlash();                                                     // slot 0x1AF
-    virtual void EnableMuzzleFlash();                                                        // slot 0x1B0
-    virtual void ClearMuzzleFlash();                                                         // slot 0x1B1
-    virtual void ApplyBodyPartData(NiNode*, BGSBodyPartData*);                               // slot 0x1B2
-    virtual void SetNodeForType(int, NiNode*);                                               // slot 0x1B3
-    virtual NiNode* GetNodeByType(int);                                                      // slot 0x1B4
-    virtual NiAVObject* GetFirstSceneObject();                                               // slot 0x1B5
-    virtual NiAVObject* GetActorSceneObject();                                               // slot 0x1B6
-    virtual bool IsHoldingWeapon();                                                          // slot 0x1B7
-    virtual void SetSustainedState(bool);                                                    // slot 0x1B8
-    virtual void RunActorProcess(Actor*);                                                    // slot 0x1B9
-    virtual bool GetProcessState();                                                          // slot 0x1BA
-    virtual bool SetProcessStateFlag();                                                      // slot 0x1BB
-    virtual bool IsProcessModeEnabled();                                                     // slot 0x1BC
-    virtual bool SetActorAlertState();                                                          // slot 0x1BD
-    virtual void SetIdleStateFlag(bool);                                                     // slot 0x1BE
-    virtual bool IsProcessStateActive();                                                  // slot 0x1BF
-    virtual void UpdateReferenceTime(Actor*, float);                                         // slot 0x1C0
-    virtual void UpdateActorProcessState(Actor*);                                         // slot 0x1C1
-    virtual void SelectAnimationAction(int);                                                 // slot 0x1C2
-    virtual void UpdateActorReferences(Actor*);                                              // slot 0x1C3
-    virtual void SetProcessReference(MobileObject*);                                         // slot 0x1C4
-    virtual void SetMobileObjectTarget(MobileObject*);                                       // slot 0x1C5
-    virtual TESIdleForm* GetSelectedIdleForm();                                              // slot 0x1C6
-    virtual void SetIdleForm(TESIdleForm*);                                                  // slot 0x1C7
-    virtual void SetIdleAnimation(AnimIdle*, KFModel*);                                      // slot 0x1C8
-    virtual AnimIdle* GetIdleAnimation();                                                    // slot 0x1C9
-    virtual KFModel* GetIdleAnimationModel();                                                // slot 0x1CA
-    virtual void ApplyDamageToActor(Actor*, float);                                          // slot 0x1CB
-    virtual float GetLastDamage();                                                           // slot 0x1CC
-    virtual float GetProcessBlendWeight();                                                   // slot 0x1CD
-    virtual void SetLightLevel(float);                                                       // slot 0x1CE
-    virtual void AttachWeaponNode(int, NiNode*, NiAVObject*, bool);                          // slot 0x1CF
-    virtual void UpdateActorWithTime(Actor*, float);                                         // slot 0x1D0
-    virtual void SetLipSyncAnimation(LipSyncAnimation*);                                     // slot 0x1D1
-    virtual LipSyncAnimation* GetLipSyncAnimationData();                                     // slot 0x1D2
-    virtual void UpdateEffectShader(unsigned int);                                           // slot 0x1D3
-    virtual unsigned int GetAnimationState();                                                // slot 0x1D4
-    virtual void SetActorMovementRate(float);                                                // slot 0x1D5
-    virtual void SetMovementTimer(float);                                                    // slot 0x1D6
-    virtual float GetAnimationElapsedTime();                                                 // slot 0x1D7
-    virtual void AdvanceMovementTimer(float);                                                // slot 0x1D8
-    virtual float GetAnimationRemainingTime();                                               // slot 0x1D9
-    virtual void SetWaterLevel(float);                                                       // slot 0x1DA
-    virtual float GetControllerPhase();                                                      // slot 0x1DB
-    virtual BooleanFloatQuery* RefreshActorRuntimeData();                                    // slot 0x1DC
-    virtual void SetProcessObject(BooleanFloatQuery*);                                       // slot 0x1DD
-    virtual void ResetHitData();                                                             // slot 0x1DE
-    virtual BooleanFloatQuery* GetCurrentObjectData();                                       // slot 0x1DF
-    virtual void SetHitData(BooleanFloatQuery*);                                             // slot 0x1E0
-    virtual void ResetTargetHitData();                                                       // slot 0x1E1
-    virtual int GetSleepSitState();                                                          // slot 0x1E2
-    virtual void SetKnockdownStage(int);                                                     // slot 0x1E3
-    virtual BSFaceGenNiNode* GetFacialAnimationNode();                                       // slot 0x1E4
-    virtual void AttachFaceGenerationNode(BSFaceGenNiNode*);                                 // slot 0x1E5
-    virtual BSFaceGenNiNode* GetFaceGenHeadNode();                                           // slot 0x1E6
-    virtual void SetFaceGenHeadNode(BSFaceGenNiNode*);                                       // slot 0x1E7
-    virtual NiAVObject* GetAnimationObject();                                                // slot 0x1E8
-    virtual void SetAnimationNode(NiAVObject*);                                              // slot 0x1E9
-    virtual void SetActorTarget(Actor*);                                                     // slot 0x1EA
-    virtual void SetLastTargetReference(TESObjectREFR*);                                     // slot 0x1EB
-    virtual void ClearTargetReference(TESObjectREFR*);                                       // slot 0x1EC
+    enum POSTANIM_ACTION  // values: Xbox PDB BaseProcess::POSTANIM_ACTION
+    {
+        POSTANIM_ACTION_NONE = 0,
+        POSTANIM_ACTION_FIRE_WEAPON = 1,
+        POSTANIM_ACTION_RELOAD_WEAPON = 2,
+        POSTANIM_ACTION_SIT_SLEEP = 4,
+        POSTANIM_ACTION_GET_UP = 8,
+        POSTANIM_ACTION_PLAY_IDLE = 16,
+        POSTANIM_ACTION_DIE = 32,
+        POSTANIM_ACTION_EQUIP_UNEQUIP_WEAPON = 64,
+        POSTANIM_ACTION_PICK_IDLE_CALL = 128,
+        POSTANIM_ACTION_HAND_GRIP_WEAPON = 256,
+        POSTANIM_ACTION_GETOUT_OF_FURNITURE = 512,
+        POSTANIM_FORCEIDLE_ANIMATION = 1024,
+        POSTANIM_FREEUP_SPECIAL_IDLE = 2048,
+        POSTANIM_RELOAD_TARGETS = 4096,
+        POSTANIM_ACTION_IDLE_LOADED = 8192,
+        POSTANIM_ACTION_HAVOKWEAPON = 16384,
+        POSTANIM_ACTION_BLOCK = 32768,
+        POSTANIM_ACTION_SET_IRON_SIGHTS = 65536,
+        POSTANIM_ACTION_EXPEL_SHELLCASING = 131072,
+        POSTANIM_ACTION_RELOAD_SINGLE = 262144,
+        POSTANIM_ACTION_START_LOOPING_RELOAD = 524288
+    };
+    enum HEAD_TRACK_TYPE  // values: Xbox PDB BaseProcess::HEAD_TRACK_TYPE
+    {
+        HEAD_TRACK_TYPE_DEFAULT = 0,
+        HEAD_TRACK_TYPE_ACTION = 1,
+        HEAD_TRACK_TYPE_SCRIPT = 2,
+        HEAD_TRACK_TYPE_COMBAT = 3,
+        HEAD_TRACK_TYPE_DIALOG = 4,
+        HEAD_TRACK_TYPE_USE_WEAPON = 5,
+        HEAD_TRACK_TYPE_COUNT = 6
+    };
+    enum FADE_STATE  // values: Xbox PDB BaseProcess::FADE_STATE
+    {
+        FADE_NORMAL = 0,
+        FADE_IN = 1,
+        FADE_OUT = 2,
+        FADE_TELEPORT_IN = 3,
+        FADE_TELEPORT_OUT = 4,
+        FADE_OUT_DISABLE = 5,
+        FADE_OUT_DELETE = 6,
+        FADE_OUT_MOVE = 7
+    };
+
+    struct _DetectionListType
+    {
+        enum Type
+        {
+            BY_ME = 0,
+            BY_OTHERS = 1,
+        };
+    };
+    typedef _DetectionListType::Type DetectionListType;
+
+    struct _PostAnimAction
+    {
+        enum Action
+        {
+            NONE = 0,
+            FIRE_WEAPON = 1u << 0,
+            RELOAD_WEAPON = 1u << 1,
+            SIT_SLEEP = 1u << 2,
+            GET_UP = 1u << 3,
+            PLAY_IDLE = 1u << 4,
+            DIE = 1u << 5,
+            EQUIP_UNEQUIP_WEAPON = 1u << 6,
+            PICK_IDLE_CALL = 1u << 7,
+            HAND_GRIP_WEAPON = 1u << 8,
+            GET_OUT_OF_FURNITURE = 1u << 9,
+            FORCE_IDLE_ANIMATION = 1u << 10,
+            FREE_SPECIAL_IDLE = 1u << 11,
+            RELOAD_TARGETS = 1u << 12,
+            IDLE_LOADED = 1u << 13,
+            HAVOK_WEAPON = 1u << 14,
+            BLOCK = 1u << 15,
+            SET_IRON_SIGHTS = 1u << 16,
+            EXPEL_SHELLCASING = 1u << 17,
+            RELOAD_SINGLE = 1u << 18,
+            START_LOOPING_RELOAD = 1u << 19,
+        };
+    };
+    typedef _PostAnimAction::Action PostAnimAction;
+
+    struct _FadeState
+    {
+        enum State
+        {
+            FADE_NORMAL = 0,
+            FADE_IN = 1,
+            FADE_OUT = 2,
+            FADE_TELEPORT_IN = 3,
+            FADE_TELEPORT_OUT = 4,
+            FADE_OUT_DISABLE = 5,
+            FADE_OUT_DELETE = 6,
+            FADE_MOVE_TO_MARKER = 7,
+            COUNT = 8,
+        };
+    };
+    typedef _FadeState::State FadeState;
+
+    struct _HeadTrackType
+    {
+        enum Type
+        {
+            DEFAULT = 0,
+            ACTION = 1,
+            COMBAT = 2,
+            DIALOG = 3,
+            SCRIPT = 4,
+            PROCEDURE = 5,
+            COUNT = 6,
+        };
+    };
+    typedef _HeadTrackType::Type HeadTrackType;
+
+    virtual ~BaseProcess();
+    virtual void Copy(BaseProcess* apSource);
+    virtual void SetReferenceTarget(Actor* apActor);
+    virtual void UpdateAlt(MobileObject* apObject, float afDelta);
+    virtual void Update(MobileObject* apObject);
+    virtual void SetMobileObjectState(MobileObject* apObject, bool abActionflag);
+    virtual NiPoint3 GetActorWorldPosition(Actor* apActor);
+    virtual NiPoint3 GetActorNodePosition(Actor* apActor, DetectionListType aeType);
+    virtual double GetActorValueAtIndex(Actor* apActor, DetectionListType aeType);
+    virtual bool CheckForNewPackage(Actor* apActor, bool abFlag);
+    virtual void ResetPackageState();
+    virtual bool IsLowProcessStateValid() const;
+    virtual unsigned int GetPackedStateBits0To8() const;
+    virtual unsigned int GetPackedStateBits9To12() const;
+    virtual unsigned int GetPackedStateBits13To26() const;
+    virtual void SetProcessInteger(int aiVal);
+    virtual int GetProcessInteger() const;
+    virtual bool StartIdleAnimation(Actor* apActor, TESIdleForm* apIdle, ANIM_IDLE_PLAY_TYPE aeDefaultAction,
+                                    bool abCrippled, bool abForce, bool abTestConditions);
+    virtual void ClearIdleAnimation();
+    virtual MagicItem* GetCurrentMagicItem() const;
+    virtual void SetCurrentMagicItem(MagicItem* apSpell);
+    virtual void SetActorMagicItem(Actor* apActor, int aiRounds);
+    virtual void InitializeProcessState();
+    virtual void UpdateHealthBar(Actor* apActor);
+    virtual bool GetIdleDoneOnce() const;
+    virtual void MarkIdleDoneOnce(bool abVal);
+    virtual bool ShouldProcessActor(Actor* apActor);
+    virtual void ProcessActorGroupState(Actor* apActor);
+    virtual bool CanUsePlayerAction(Actor* apActor) const;
+    virtual bool CanPerformActorAction(Actor* apActor, float afTimeDelta);
+    virtual bool IsAsleep() const;
+    virtual void ProcessSandman(Actor* apActor);
+    virtual void ProcessCannibal(Actor* apActor);
+    virtual void ProcessFurniture(Actor* apActor);
+    virtual void SetCombatEnabled(bool abVal);
+    virtual bool FindPackageTarget(Actor* apActor);
+    virtual TESObjectREFR* GetPackageLocationReference(Actor* apActor, bool abSecond);  // LowProcess 0x00908c50: ret 8, returns the reference
+    virtual TESObjectREFR* GetActorTargetReference(Actor* apActor, bool abInterrupt);
+    virtual NiPoint3 GetActorTargetPosition(Actor* apActor, bool abInterrupt);  // returned through the hidden pointer
+    virtual TESObjectCELL* GetTargetCell(Actor* apActor);
+    virtual TESWorldSpace* GetTargetWorldSpace(Actor* apActor);
+    virtual float GetTargetDistance(Actor* apActor);
+    virtual MobileObject* GetMobileObject() const;
+    virtual void AdvanceProcess();
+    virtual bool EvaluateActorPackage(Actor* apActor, TESPackage* apPackage, bool abInCombat);
+    virtual bool FindPackageToEvaluate(Actor* apActor, TESPackage*& apPackage);
+    virtual float GetFirstProcessFloat() const;
+    virtual void SetCurrentSpeed(float afValue);
+    virtual void EvaluateCurrentPackage(Actor* apActor);
+    virtual void SelectPackage(Actor* apActor, bool abInterateIndex);
+    virtual void SetPackageForActor(Actor* apActor, TESPackage* apPackage, bool abCheck);
+    virtual bool HasInterruptPackage() const;
+    virtual void SetEssentialFlag(bool abVal);
+    virtual void PlayRandomIdle(Actor* apActor);
+    virtual void ProcessActorIdle(Actor* apActor);
+    virtual void PlayIdleAnimation();
+    virtual void ClearAnimationState();
+    virtual float GetEssentialDownTimer() const;
+    virtual void SetEssentialDownTimer(float afValue);
+    virtual void ResetEssentialDownTimer();
+    virtual DetectionViewData* FindDetectionRecord(Actor* apActor, DETECTION_LEVEL aeDetectionLevel, bool abLineSight,
+                                                   int aiLevel, DetectionListType aeType, bool ab360View,
+                                                   bool abInCombat);
+    virtual BSSimpleList<DetectionViewData*>* GetDetectingActors();
+    virtual DetectionEvent* FindDetectionEventForActor(Actor* apActor);
+    virtual void AddDetectionEvent(Actor* apActor, NiPoint3 akPosition, SOUND_LEVEL aeSoundLevel,
+                                   int aiDetectionEventType, TESObjectREFR* apRef);
+    virtual void RemoveDetectionEvent();
+    virtual void ClearDetectionEvents();
+    virtual void GetWeaponScore();
+    virtual void SetWeaponScore(float afVal);
+    virtual bool HasCaughtPlayerPickpocketing() const;
+    virtual void SetIsWeaponReady(bool abVal);
+    virtual void SetAnimationComplete(bool abVal);
+    virtual bool IsMovementComplete() const;
+    virtual void SetCurrentMovementComplete(bool abVal);
+    virtual bool GetCurrentMovementComplete() const;
+    virtual TESObjectREFR* GetTarget() const;
+    virtual void SetTarget(TESObjectREFR* apTarget);
+    virtual TESObjectREFR* GetDoor() const;
+    virtual void SetDoor(TESObjectREFR* apDoor);
+    virtual void AddDeferredHideLimb(ObjectToAcquire* apObject);
+    virtual ObjectToAcquire* GetObjectToAcquire() const;
+    virtual void SetFaceAnimationData(ObjectToAcquire* apObject);
+    virtual BSFaceGenAnimationData* GetActorFaceGenData(Actor* apActor);
+    virtual InventoryStackRecord* GetActiveWeapon() const;
+    virtual InventoryStackRecord* GetCurrentAmmo() const;
+    virtual bool GetLipQueued() const;
+    virtual void SetLipQueued(bool abVal);
+    virtual unsigned int GetPackageObjectType() const;
+    virtual void SetPackageObjectType(unsigned int auiCount);
+    virtual bool SetCurrentArmor(InventoryStackRecord* apWeapon, NiNode* apScene, bool abForce);
+    virtual void SetCurrentTorch(InventoryStackRecord* apTorch);
+    virtual bool SetCurrentAmmunition(InventoryStackRecord* apAmmo);
+    virtual void SetCurrentShield(InventoryStackRecord* apShield);
+    virtual void UpdateEquippedItems(Actor* apActor);
+    virtual bool IsItemQueued(TESBoundObject* apItem, ExtraDataList* apExtraList, bool abEquip);
+    virtual void ProcessEquipmentRequest(Actor* apActor, bool abEquip, TESBoundObject* apItem, int aiNumber,
+                                         ExtraDataList* apExtraList, bool abNow, bool abForceEquip, bool abFromMenus,
+                                         bool abForceUnequip, bool abEquipCalling,
+                                         bool abPlaySound);
+    virtual void SetEquippedItem(TESBoundObject* apObject, ExtraDataList* apExtraList);
+    virtual void ClearQueuedEquipItems();
+    virtual NiNode* GetSceneRoot() const;
+    virtual void Assign3DObject(NiAVObject* apNode);
+    virtual bool SetAnimationControllerManager(NiControllerManager* apControllerManager, NiNode* apNode);
+    virtual NiNode* GetActorRootNode(BipedAnim* apAnim) const;
+    virtual NiNode* GetWeaponAttachNode(BipedAnim* apAnim) const;
+    virtual NiNode* GetShieldBone(BipedAnim* apAnim) const;
+    virtual NiNode* GetQuiverBone(BipedAnim* apAnim) const;
+    virtual NiNode* GetTorchAttachNode(BipedAnim* apAnim) const;
+    virtual NiNode* GetLeftWeaponBone(BipedAnim* apAnim) const;
+    virtual bool ResetAlertState() const;
+    virtual bool IsAnimationPlaying() const;
+    virtual bool IsAnimationActive() const;
+    virtual bool IsAnimationSequenceActive() const;
+    virtual Animation* GetAnimation() const;
+    virtual bool IsAnimationStateActive() const;
+    virtual void SetAnimationStateActive(bool abVal);
+    virtual bool IsProcessTaskComplete() const;
+    virtual void SetProcessTaskComplete(bool abVal);
+    virtual void PlayAnimation(bool abDrawn, BipedAnim* apBipedAnim, Animation* apAnim,
+                               Actor* apActor);
+    virtual void SetCurrentBoundObject(TESObject* apItem);
+    virtual TESObject* GetCurrentBoundObject() const;
+    virtual void RunActorProcessing(Actor* apActor);
+    virtual void RefreshActorMovement(Actor* apActor, bool abFlag);
+    virtual float GetProcessBlendAmount() const;
+    virtual void SetAnimationTimer(float afVal);
+    virtual void SetCombatDelayFadeTimer(float afVal);
+    virtual bool IsProcessConditionMet() const;
+    virtual void SelectActorCombatTarget(Actor* apActor);
+    virtual bool IsCombatTargetForActor(Actor* apActor, Actor* apTarget) const;
+    virtual bool CanAttackTarget(Actor* apActor, Actor* apTarget) const;
+    virtual bool IsActorTargetValid(Actor* apActor, Actor* apTarget) const;
+    virtual bool IsCurrentPackageTarget(Actor* apActor);
+    virtual bool IsValidCombatTarget(Actor* apActor, Actor* apTarget);
+    virtual float GetDistanceBetweenActors(Actor* apActor, Actor* apTarget);
+    virtual TESPackage* GetRunOncePackage() const;
+    virtual void AssignRunOncePackage(TESPackage* apPackage, Actor* apActor);
+    virtual void StopRunOncePackage();
+    virtual void SetRunOncePackageIndex(int aiIndex);
+    virtual int GetCurrentProcedure() const;
+    virtual void SetCurrentProcedure(int aiOffset);
+    virtual void ClearDialogueItems();
+    virtual bool IsPackageRunningForActor(Actor* apActor) const;
+    virtual TESPackage* GetCurrentPackage() const;
+    virtual void SetCurrentPackageAndTarget(TESPackage* apPackage, Actor* apActor);
+    virtual void StopPackage();
+    virtual void SetPackageInfoState(int aiIndex);
+    virtual int GetPackageState() const;
+    virtual void SetPackageExecutionState(int aiOffset);
+    virtual void ResetCurrentPackage();
+    virtual DialogueItem* GetCurrentDialogueItem() const;
+    virtual void SetCurrentDialogueItem(DialogueItem* apSubtitle);
+    virtual void MoveToPosition(Actor* apActor, NiPoint3 akPoint, float afRadius, float afTimeToExpire,
+                                float afAvoidanceStrength, TESObjectREFR* apRef,
+                                TESObjectSTAT* apMarker);
+    virtual PathingAvoidNodeArray* GetPathingAvoidNodeArray(Actor* apActor); // slot 149: HighProcess 0x00904450 (ret 4)
+    virtual bool IsReferenceAvoided(TESObjectREFR* apRef) const;
+    virtual void SetAnimationTime(float afVal);
+    virtual void SetDetectionTarget(TESObjectREFR* apRef);
+    virtual float GetDetectionProgress() const;
+    virtual void SetDetectionLevel(float afVal);
+    virtual void ClearCurrentTarget();
+    virtual ActorPackageData* GetRunOncePackageData() const;
+    virtual ActorPackageData* GetCurrentPackageData() const;
+    virtual ActorPackageContext* GetCurrentProcessData() const;
+    virtual TESPackage* GetOneTimePackage() const;
+    virtual int GetPackageInfoValue() const;
+    virtual void SetAnimationState(unsigned int aiIndex);
+    virtual void SetProcessTarget(MobileObject* apTarget, int aiOffset);
+    virtual bhkCharacterController* GetPhysicsCharacterController() const;
+    virtual void AssignCharacterController(NiPointer<bhkCharacterController> arController); // slot 164: 0x008d84a0 destroys its by-value argument
+    virtual void StopActorMovement(Actor* apActor);
+    virtual void UpdateActorPackage(Actor* apActor, bool abFlag, unsigned int aeMoveMode,
+                                    bool abPursuit);
+    virtual void EvaluatePackage(Actor* apActor, bool abNewPackage, bool abInterateIndex,
+                                 unsigned int aeMoveMode);
+    virtual void ProcessFlee(Actor* apActor);
+    virtual void ProcessDialogueTopic(Actor* apActor, TESTopic* apTopic, bool abForceSub, bool abStop, bool abQueue,
+                                      bool abSayCallBack);
+    virtual void StartActorInteraction(Actor* apActor);
+    virtual void UpdateActorInteraction(Actor* apActor);
+    virtual bool IsActorProcessable(Actor* apActor);
+    virtual bool IsFurnitureType(TESObjectREFR* apFurnitureRef, unsigned int auiFurnitureType);
+    virtual bool CanDetectActor(Actor* apActor);
+    virtual void UpdateActorStateWithOptions(Actor* apActor, bool abNewPackage, bool abIterateIndex, unsigned int aeMoveMode,
+                               bool abSecondLoc);
+    virtual WadingWaterData* GetWadingWaterData() const;
+    virtual void SetActorDetectionLevel(Actor* apActor, DetectionListType aeType);
+    virtual void SetDetectionTimer();
+    virtual bool IsActorVisibleToActor(Actor* apActor, Actor* apTarget, DetectionListType aeType,
+                                       bool abFullTest);
+    virtual bool IsActorDetected(Actor* apActor, Actor* apTarget, DetectionListType aeType);
+    virtual int GetDetectionCount(Actor* apTarget, DetectionListType aeType) const;
+    virtual bool IsDetectionEnabled() const;
+    virtual void SetActorProcessEnabled(bool abVal);
+    virtual void SetActorProcessTime(Actor* apActor, float afTimeDelta);
+    virtual int GetActorReferenceState(Actor* apActor, TESObjectREFR* apTarget);
+    virtual DIALOGUE_EMOTION GetCurrentDialogueEmotion() const;
+    virtual void SetDialogueEmotion(DIALOGUE_EMOTION aeEmotion);
+    virtual void RunDetection(Actor* apActor, float afTimeDelta); // slot 188: HighProcess 0x008e40d0 (ret 8)
+    virtual double GetDetectionStrength();
+    virtual void ResetDetectionState();
+    virtual void UpdateActorLighting(float afVal);
+    virtual float UpdateProcessTiming() const;
+    virtual void SetSurfacing(bool abVal);
+    virtual bool GetSurfacing();
+    virtual bool IsDetecting() const;
+    virtual void SetCombatAlerted(bool abVal);
+    virtual float GetSecondProcessFloat() const;
+    virtual void SetLipSyncValue(float afVal);
+    virtual bool IsCurrentlyAlerted() const;
+    virtual void SetAlert(bool abVal);
+    virtual bool HasCombatStarted();
+    virtual void SetIsWeaponDrawn(bool abVal);
+    virtual InventoryStackRecord* GetPackageObject(Actor* apActor, PACKAGE_OBJECT_TYPE aePackageObjectType);
+    virtual void ClearPackageObjectList();
+    virtual float GetRadiationRate() const;
+    virtual void SetRadiationRate(float afValue);
+    virtual bool ShouldAttackTarget(Actor* apActor, Actor* apTarget, bool, bool abIsEvil, ActorCombatGroup* apCombatGroup,
+                                    bool, bool, bool abIsAggressor, bool, bool abIgnoreActorLimit, bool, bool,
+                                    TESPackage* apPackage);
+    virtual void SetCombatTargetForActor(Actor* apActor, Actor* apCriminal);
+    virtual void CallForHelp(Actor* apActor, Actor* apCriminal, Crime* apCrime);
+    virtual void SetCrimeCategory(int aiVal);
+    virtual unsigned int GetAttackChance(Actor* apActor, float afDistanceSq, float afShortDistSq, float afLongDistSq,
+                                         bool abAlarmOrCombat, bool abPureTravel) const;
+    virtual void SetActorDetectionState(Actor* apActor, unsigned int aeMoveMode,
+                                        bool abCheckAlwaysRun);
+    virtual void FinishDying(Actor* apActor);
+    virtual bool MoveToTarget(Actor* apActor, float afRadius, unsigned int aeMoveMode);
+    virtual bool ClearProcessStateFlags() const;
+    virtual bool IsCurrentProcessComplete() const;
+    virtual void SetCurrentProcessComplete(bool abVal);
+    virtual int GetActorStateCode(Actor* apActor);
+    virtual bool HasActorAlertState() const;
+    virtual void SetDialogueState(bool abVal);
+    virtual void SetTalkingState(bool abVal);
+    virtual bool IsActorTalking() const;
+    virtual LipSyncAnimation* GetLipSync() const;
+    virtual void AssignLipSyncAnimation(LipSyncAnimation* apAnim);
+    virtual void Virtual384(int);
+    virtual bool GetPlantedExplosive() const;
+    virtual TESIdleForm* GetActiveIdleForm() const;
+    virtual void SetLastPlayedIdle(TESIdleForm* idleForm);
+    virtual void RefreshActorValues(Actor* apActor);
+    virtual int GetActorValueI(TESActorBase* apBase, ActorValue::Index aeIndex, Actor* apActor);
+    virtual float GetActorValueF(TESActorBase* apBase, ActorValue::Index aeIndex, Actor* apActor);
+    virtual void TempModActorValueF(Actor* apActor, ActorValue::Index aeIndex, float afVal);
+    virtual void TempModActorValueI(Actor* apActor, ActorValue::Index aeIndex, int aiVal);
+    virtual void DamageModActorValueF(Actor* apActor, ActorValue::Index aeIndex, float afVal);
+    virtual void DamageModActorValueI(Actor* apActor, ActorValue::Index aeIndex, int aiVal);
+    virtual void InvalidateValue(ActorValue::Index aeIndex);
+    virtual void InitializeActiveEffectList();
+    virtual BSSimpleList<ActiveEffect*>* GetActiveEffectList() const;
+    virtual void DestroyActiveEffectList();
+    virtual void CastSpellOnCaster(MagicCaster* apCaster, SpellItem* apAbility, bool abLoadCast);
+    virtual void CastSpellAtTarget(MagicCaster* apCaster, SpellItem* apDisease, MagicTarget* apTarget,
+                                   bool abLoadCast);
+    virtual MagicItem* GetSelectedMagicItem() const;
+    virtual void SetSelectedMagicItem(MagicItem* apSpell);
+    virtual MagicTarget* GetCurrentMagicTarget() const;
+    virtual void SetMagicTarget(MagicTarget* apTarget);
+    virtual bool UpdateIdleAnimation() const;
+    virtual void SetBooleanState(bool abVal);
+    virtual void Move(MobileObject* apObject, NiPoint3 akSideVector);
+    virtual ProcessAnimationAction GetAnimAction() const;
+    virtual BSAnimGroupSequence* GetActorProcessTime() const;
+    virtual void SetAnimAction(ProcessAnimationAction aeAnimationAction,
+                               BSAnimGroupSequence* apSequence);
+    virtual bool IsAnimationSequencePlaying() const;
+    virtual void SetIsAlerted(bool abVal);
+    virtual bool IsAimingWeapon() const;
+    virtual bool IsAimingAtActor(Actor* apActor);
+    virtual void SetAimingWeapon(bool isAiming);
+    virtual bool IsAlert() const;
+    virtual bool HasAnimationGroup(ANIM_GROUP_TYPE aeAnim);
+    virtual int GetKnockedState();
+    virtual void SetKnockedState(char state);
+    virtual void KnockDown(Actor* apActor);
+    virtual void PushActorAway(Actor* apActor, NiPoint3 akSource, float afForce);
+    virtual void UpdateActorData(Actor* apActor);
+    virtual void ProcessActorEvent(Actor* apActor);
+    virtual void SetAnimationSequence(int aeDirection, BSAnimGroupSequence* apSequence);
+    virtual void RefreshActorAnimation(Actor* apActor);
+    virtual float GetAimAngle() const;
+    virtual void SetAimAngle(float afValue);
+    virtual void SetStartShooting(bool abStartShooting);
+    virtual unsigned char GetAttackState(Actor* apTarget);
+    virtual void SetBodyPartState(unsigned char aucCount);
+    virtual unsigned char GetProcessStateByte() const;
+    virtual float GetVisibilityAlpha() const;
+    virtual void SetAttackCount(int aiNumAttacks);
+    virtual bool IsFirstActorFlagSet() const;
+    virtual void SetIsSwimming(bool abVal);
+    virtual bool IsAdditionalActorFlagSet() const;
+    virtual void SetActorMovementState(Actor* apActor, bool abVal);
+    virtual void SetWeaponLastPos(NiPoint3 akPos);
+    virtual NiPoint3* GetLastKnownPosition() const;
+    virtual void Update3DModel(Actor* apActor);
+    virtual void ResetActorModel(RESET_3D_FLAGS aucFlag); // slot 282: 0x008d8740 reads a 32-bit enum
+    virtual void SetDetectionFlag(unsigned char aucFlag);
+    virtual void ClearDetectionFlag();
+    virtual bool IsProcessFlagSet(unsigned char aucFlag) const;
+    virtual unsigned char GetCurrentTargetType() const;
+    virtual void ClearReferenceRecords(TESObjectREFR* apObject);
+    virtual void ClearObjectFromAcquireListAlt(unsigned int auiFormID);
+    virtual TESObjectREFR* GetPreviousReference() const;
+    virtual void SetActorTargetReference(TESObjectREFR* apRef);
+    virtual BSSoundHandle GetActorSoundHandle(unsigned int aeType);
+    virtual void SetActorSoundHandle(unsigned int aeType, BSSoundHandle akHandle);
+    virtual void StopActorSound(unsigned int aeType);
+    virtual void UpdateMovementStopped(Actor* apActor);
+    virtual bool GetMovementStopped() const;
+    virtual void ClearMovementStopped();
+    virtual void SetDiveBreathLevel(float afVal);
+    virtual void StopAllActorSounds();
+    virtual float GetDiveBreathLevel() const;
+    virtual float GetMovementTimer() const;
+    virtual void UpdateActorProcess(float afVal);
+    // Slot 302 (+0x4b8): BaseProcess 0x008d0370 and HighProcess 0x008f6fc0 both ret 4 (one argument, a MobileObject*).
+    virtual bool IsTalking(MobileObject* apTarget) const;  // const: HighProcess.h's non-virtual IsTalking stays as it is until highprocess.cpp moves
+    virtual SIT_SLEEP_STATE GetSitSleepState() const;
+    virtual void SetFurnitureState(Actor* apActor, SIT_SLEEP_STATE aeState, TESObjectREFR* apFurniture,
+                                   unsigned char aucFurnitureIndex);
+    virtual unsigned int GetFurnitureMarkerID() const;
+    virtual TESObjectREFR* GetFurnitureReference() const;
+    virtual void RemoveFurniture(TESObjectREFR* apFurnitureRef);
+    virtual unsigned int GetFurnitureMarkerIndex() const;
+    virtual FurnitureMark* GetFurnitureMarkerData() const;
+    virtual bool IsFurnitureMarkerValid(Actor* apActor);
+    virtual void AssignAnimation(Actor* apActor, Animation* apAnimation);
+    virtual bool HasAssignedAnimation() const;
+    virtual void SetAnimationEnabled(bool abVal);
+    virtual bool IsPlayingAnimation() const;
+    virtual void SetProcessConditionMet(bool abVal);  // LowProcess override 0x008d7fe0 reads its bool argument (ret 4)
+    virtual bool IsProcessStateEnabled() const;
+    virtual void SetWeaponOutState(bool abVal);
+    virtual BSShaderPPLightingProperty* GetPixelLightingProperty() const;
+    virtual void SetPixelLightingProperty(BSShaderPPLightingProperty* apProp);
+    virtual void SetDetectionState(Actor* apActor, bool abIgnoreTorch);
+    virtual DetectionViewData* GetDetectionState(Actor* apTarget, DetectionListType aeType) const;
+    virtual DetectionViewData* InsertIntoDetectionArray(Actor* apTarget,
+                                                        DETECTION_LEVEL aeDetectionLevel);
+    virtual double GetLightUpdateTimer() const;
+    virtual void SetLightUpdateTimer(float afVal);
+    virtual TESObjectREFR* GetActiveCombatTarget() const;
+    virtual void SetCurrentCombatTarget(TESObjectREFR* apLocation);
+    virtual TESObjectREFR* GetProcessReference() const;
+    virtual void SetCurrentLocationReference(TESObjectREFR* apLocation);
+    virtual void UpdateCurrentPackage(Actor* apActor);  // LowProcess 0x00910b30: ret 4
+    virtual void SetTalkTarget(Actor* apActor);
+    virtual Actor* GetCurrentTalkTarget() const;
+    virtual void SetEquippedWeapon(TESObjectWEAP* apWeapon);
+    virtual ActorValue::Index GetWeaponForm() const; // slot 333: 0x008d85e0, actor-value index in combat callers
+    virtual void SetActorAlpha(float afVal);
+    virtual float GetActorAlpha() const;
+    virtual void SetFurnitureMarkerData(TESObjectREFR* apFurnitureRef, unsigned char aucMarkerIndex,
+                                        FurnitureMark* apMark);
+    virtual void ApplyProcessLevelChange(MobileObject* apObject);
+    virtual unsigned short GetSaveSize(unsigned int auiFlags, MobileObject* apObject);
+    virtual void SaveGameBGS(BGSSaveGameBuffer* apBuffer);
+    virtual void SaveGameTES(unsigned int auiFlags, MobileObject* apObject);
+    virtual void LoadGameBGS(BGSLoadFormBuffer* apBuffer);
+    virtual void LoadGameTES(unsigned int auiFlags, unsigned int auiCurrentFlags,
+                             MobileObject* apObject);
+    virtual void InitLoadGameBGS(BGSLoadFormBuffer* apBuffer);
+    virtual void InitLoadGameTES(unsigned int auiFlags, unsigned int auiOldFlags,
+                                 MobileObject* apObject);
+    virtual void FinishLoadGameTES(unsigned int auiFlags, unsigned int auiOldFlags,
+                                   MobileObject* apObject);
+    virtual void RevertBGS(BGSLoadFormBuffer* apBuffer);
+    virtual void RevertTES(unsigned int auiFlags, MobileObject* apObject);
+    virtual void ApplyLoadBuffer(BGSLoadFormBuffer*); // slot 348: BaseProcess 0x008d1050 consumes the load buffer
+    virtual TESEffectShader* GetCurrentEffectShader() const;
+    virtual void AssignEffectShader(TESEffectShader* apShader);
+    virtual bool IsProcessStateInitialized() const;
+    virtual void UpdateActorAppearance(bool abUpdateWeaponEffectShader, bool abInitializeActiveHitEffect,
+                                       bool);
+    virtual void RefreshActorProcessState(Actor* apActor);
+    virtual void SetIdleAnimationPlayed(bool abVal);
+    virtual bool IsPlayedState() const;
+    virtual void SetPlayedState(bool abVal);
+    virtual bool WasIdleAnimationPlayed() const;
+    virtual void OnPackageChanged(Actor* apActor, TESPackage* apPackage);
+    virtual void OnPackageStart(Actor* apActor, TESPackage* apPackage);  // 0x009135a0 (LowProcess), 0x00903bf0 (HighProcess): no return value
+    virtual void OnPackageEnd(Actor* apActor, TESPackage* apPackage);
+    virtual bool IsProcessActivityActive() const;
+    virtual void SetProcessModeEnabled(bool abVal);
+    virtual float GetLightIntensity() const;
+    virtual void SetUnderwaterBreathTime(float afVal);
+    virtual float GetThirdProcessFloat() const;
+    virtual void SetWadingWaterLevel(float afVal);
+    virtual void UpdateWadingWater(Actor* apActor);
+    virtual int GetProcessIndex() const;
+    virtual void SetProcessIndex(int aiVal);
+    virtual bool HasActiveEffectOfType(BSSimpleList<ActiveEffect*>* apEffects,
+                                       unsigned int aeFlareType);
+    virtual void RefreshMagicEffects();
+    virtual BSSimpleList<SpellItem*>* GetActorSpellList(Actor* apActor, bool abIncludeDiseases);
+    virtual void SetCastingState(int aiHasSpells);
+    virtual int GetCurrentAnimAction() const;
+    virtual void SetCurrentMoveMode(int aiHasHealingPotion);
+    virtual int GetPendingIdleFlags() const;
+    virtual float GetPermanentActorValueFloat(ActorValue::Index aeActorValue);
+    virtual float GetDamageActorValue(ActorValue::Index aeActorValue);
+    virtual float GetTemporaryActorValue(ActorValue::Index aeActorValue);
+    virtual BSBound* GetBound() const;
+    virtual void SetObjectBound(BSBound* apBound);
+    virtual void SetIsSitting(bool abVal);
+    virtual bool IsActorInCombat() const;
+    virtual void SetCombatState(bool abVal);
+    virtual bool IsCurrentlyDetected() const;
+    virtual BSSimpleList<Actor*>* GetActorsInAggroRadius() const;
+    virtual void ProcessActorReferences(Actor* apActor, Actor* apTarget, Actor* apAlly);
+    virtual FadeState GetCurrentFadeState() const;
+    virtual void AddPostAnimAction(PostAnimAction aeFlag);
+    virtual unsigned int GetPostAnimationAction() const;
+    virtual void ClearPostAnimActions();
+    virtual void SetProcessState(PostAnimAction aeFlag);
+    virtual void SetPreviousReference(TESObjectREFR* apTarget);
+    virtual void SetActorProcessState(TESObjectREFR* apTarget);
+    virtual void SetPackageTargetReference(TESObjectREFR* apTarget);
+    virtual void SetCombatTargetReference(TESObjectREFR* apTarget);
+    virtual void ClearHighProcessState(TESObjectREFR* apTarget);
+    virtual void SetLastKnownReference(TESObjectREFR* apTarget);
+    virtual void SetTargetReferenceByIndex(HeadTrackType aeType, TESObjectREFR* apTarget);
+    virtual void ClearPackageData();
+    virtual void ClearCachedTargetReferences(bool abHoldDefault);
+    virtual void SetCombatActive(bool abHoldDefault);
+    virtual void ResetCombatState();
+    virtual void RestorePreviousReference(bool abHoldDefault);
+    virtual void SetProcessActive(bool abHoldDefault);
+    virtual void UpdatePlayerAwarenessTimer();
+    virtual float GetCurrentAlpha() const;
+    virtual void ResetHeadTrackingTarget();
+    virtual void SetCurrentTargetReference(TESObjectREFR* apTarget);
+    virtual bool HasNoPendingEntriesAndExpired();
+    virtual bool HasNoPendingEntries();
+    virtual bool CanSetDialogHeadTrackTarget();
+    virtual TESObjectREFR* GetCurrentHeadTrackTargetByType(HeadTrackType aeType);
+    virtual TESObjectREFR* GetPrimaryTargetReference();
+    virtual unsigned int GetCombatTargetCount() const;
+    virtual const char* GetCurrentPackageName() const;
+    virtual void SetIsTalking(bool abVal);
+    virtual bool IsCombatTargetValid() const;
+    virtual TESObjectREFR* GetRelatedReference() const;
+    virtual bool IsInLastDefaultTargetArray(TESObjectREFR* apRef);
+    virtual void SetHasLastDefaultTargetArray(bool abVal);
+    virtual bool BeginIdleAnimation() const;
+    virtual float GetCurrentDetectionAmount() const;
+    virtual void SetLightingAmount(float afVal);
+    virtual void AddArrowProjectile(ArrowProjectile* apArrow);
+    virtual void UnregisterArrowProjectile(ArrowProjectile* apArrow);
+    virtual void SetArrowTargetReference(TESObjectREFR* apRef);
+    virtual BSSimpleList<ArrowProjectile*>* GetArrowProjectiles() const;
+    virtual void SetProjectileTarget(Projectile* apProjectile, TESObjectREFR* apShooter);
+    virtual NiObjectNET* GetMuzzleFlash() const;
+    virtual bool GetEnableMuzzleFlash();
+    virtual void EnableMuzzleFlash();
+    virtual void ClearMuzzleFlash();
+    virtual void ApplyBodyPartData(NiNode* apNode, BGSBodyPartData* apBodyPartData);
+    virtual void SetNodeForType(LIMB_TYPE aeBodyPart, NiNode* apNode);
+    virtual NiNode* GetNodeByType(LIMB_TYPE aeBodyPart) const;
+    virtual NiNode* GetFirstSceneObject() const;
+    virtual NiNode* GetActorSceneObject() const;
+    virtual bool GetSustainedFire() const;
+    virtual void SetSustainedState(bool abVal);
+    virtual void RunActorProcess();
+    virtual void IsWearingHeavyArmor();
+    virtual bool IsWearingPowerArmorTorso();
+    virtual bool IsWearingPowerArmorHelmet();
+    virtual bool IsWearingBackpack();
+    virtual void SetIdleStateFlag(bool abVal);
+    virtual bool IsProcessStateActive() const;
+    virtual void UpdateReferenceTime(Actor* apActor, float afTimeDelta);
+    virtual void UpdateActorProcessState(Actor* apActor);
+    virtual void SelectAnimationAction(int aiValue);
+    virtual void UpdateActorReferences(Actor* apActor);
+    virtual void SetProcessReference(TESObjectREFR* apRef);
+    virtual void SetMobileObjectTarget(TESObjectREFR* apRef);
+    virtual TESIdleForm* GetSelectedIdleForm() const;
+    virtual void SetIdleForm(TESIdleForm* apIdleForm);
+    virtual void SetIdleAnimation(AnimIdle* apAnimIdle, KFModel* apAnimIdleKF);
+    virtual AnimIdle* GetIdleAnimation() const;
+    virtual KFModel* GetIdleAnimationModel() const;
+    virtual void ApplyDamageToActor(Actor* apSource, float afDamage);
+    virtual float GetLastDamage() const;
+    virtual float GetProcessBlendWeight() const;
+    virtual void SetLightLevel(float afLightAmount);
+    virtual void AttachWeaponNode(LIMB_TYPE aeLimbIndex, NiNode* apDismemberedLimbRoot, NiAVObject* apReplacementLimb,
+                                  bool abExplosion);
+    virtual void UpdateActorWithTime(Actor* apActor, float afTimeDelta);
+    virtual void SetLipSyncAnimation(LipSyncAnimation* apAnim);
+    virtual LipSyncAnimation* GetLipSyncAnimationData() const;
+    virtual void UpdateEffectShader(unsigned int auiTime);
+    virtual unsigned int GetAnimationState() const;
+    virtual void SetActorMovementRate(float afVal);
+    virtual void SetMovementTimer(float afVal);
+    virtual float GetAnimationElapsedTime() const;
+    virtual void AdvanceMovementTimer(float afVal);
+    virtual float GetAnimationRemainingTime() const;
+    virtual void SetWaterLevel(float afVal);
+    virtual float GetControllerPhase() const;
+    virtual BooleanFloatQuery* RefreshActorRuntimeData() const;
+    virtual void SetProcessObject(BooleanFloatQuery* apHitData);
+    virtual void ResetHitData();
+    virtual BooleanFloatQuery* GetCurrentObjectData();
+    virtual void SetHitData(BooleanFloatQuery* apHitData);
+    virtual void ResetTargetHitData();
+    virtual int GetSleepSitState();
+    virtual void SetKnockdownStage(int aiStage);
+    virtual BSFaceGenNiNode* GetFacialAnimationNode() const;
+    virtual void AttachFaceGenerationNode(BSFaceGenNiNode* apNode);
+    virtual BSFaceGenNiNode* GetFaceGenHeadNode() const;
+    virtual void SetFaceGenHeadNode(BSFaceGenNiNode* apNode);
+    virtual NiAVObject* GetAnimationObject() const;
+    virtual void SetAnimationNode(NiAVObject* apObject);
+    virtual void SetActorTarget(Actor* apActor);
+    virtual void SetLastTargetReference(TESObjectREFR* apTarget);
+    virtual void ClearTargetReference(TESObjectREFR* apTarget);
+
+    ActorPackageContext m_kProcessData;
+    float m_fValue2;
+    float m_fValue1;
+    unsigned int m_uiStateFlags;
+    PROCESS_TYPE m_eProcessType;
+    CachedValues* m_pCachedValues;
+
+    void ApplyKnockback(Actor* apActor, NiPoint3 akSource, float afForce);
+
+    PROCESS_TYPE GetProcessLevel() const;
     PROCESS_TYPE GetProcessLevel();
+    int FUN_0045cd60();
+    void LoadGame(BGSLoadFormBuffer*);
+    void InitLoadGame(BGSLoadFormBuffer*);
+    void Revert(BGSLoadFormBuffer*);
+    void ProcessNode(PlayerCharacter*);
+    void SetPlaybackTime(Actor*, unsigned int, unsigned int);
+    void SetPlaybackTime(Actor*, TESObjectREFR*, bool);
+    void FUN_007037c0(unsigned int);
+    float FUN_007df1f0();
+    void FUN_00693d50(float);
+    unsigned int FUN_0059bb30();
+    double GetField43C();
+    float GetField440();
+    void FUN_00977c90(float);
+    void AddAvoidArea(Actor*, NiPoint3, float, float, float, TESObjectREFR*, bool);
+    void FUN_008c8fd0(bool active);
+
+    void SetLipSyncEnabled(bool abVal);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BaseProcess) == 0x30);
-FNV_STATIC_ASSERT(offsetof(BaseProcess, m_kProcessData) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BaseProcess, m_fValue2) == 0x1C);
-FNV_STATIC_ASSERT(offsetof(BaseProcess, m_fValue1) == 0x20);
-FNV_STATIC_ASSERT(offsetof(BaseProcess, m_uiStateFlags) == 0x24);
-FNV_STATIC_ASSERT(offsetof(BaseProcess, m_eProcessType) == 0x28);
-FNV_STATIC_ASSERT(offsetof(BaseProcess, m_pCachedValues) == 0x2C);
-#endif
+
+typedef char BaseProcess_size_check[(sizeof(BaseProcess) == 0x30) ? 1 : -1];
+typedef char BaseProcess_process_data_offset_check[(offsetof(BaseProcess, m_kProcessData) == 0x04) ? 1 : -1];
+typedef char BaseProcess_value2_offset_check[(offsetof(BaseProcess, m_fValue2) == 0x1C) ? 1 : -1];
+typedef char BaseProcess_value1_offset_check[(offsetof(BaseProcess, m_fValue1) == 0x20) ? 1 : -1];
+typedef char BaseProcess_state_flags_offset_check[(offsetof(BaseProcess, m_uiStateFlags) == 0x24) ? 1 : -1];
+typedef char BaseProcess_process_type_offset_check[(offsetof(BaseProcess, m_eProcessType) == 0x28) ? 1 : -1];
+typedef char BaseProcess_cached_values_offset_check[(offsetof(BaseProcess, m_pCachedValues) == 0x2C) ? 1 : -1];

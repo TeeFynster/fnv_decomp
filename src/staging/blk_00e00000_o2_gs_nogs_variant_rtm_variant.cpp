@@ -8,6 +8,10 @@
 // src/staging/blk_00e00000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/FinishingFlag.h"
+#include "../../include/hkSmallArray.h"
 extern int DAT_010305a8;
 extern int DAT_010c749c;
 void __cdecl FUN_00e00570(int* a, int b);
@@ -412,22 +416,6 @@ struct FUN_00e11d60_class
     int m_30;
     void __thiscall FUN_00e11d60(int val);
 };
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
 extern int DAT_0102e388;
@@ -485,14 +473,10 @@ extern int DAT_010e83b4;
 int* __cdecl FUN_00e00360();
 extern unsigned char DAT_0126db98;
 void* __cdecl FUN_00e00380();
-struct E00390FinishFlag
-{
-    int m_bFinishing;
-};
 class E00390Object
 {
   public:
-    E00390Object(E00390FinishFlag flag);
+    E00390Object(FinishingFlag flag);
 
     static void* operator new(unsigned int, void* p)
     {
@@ -926,14 +910,10 @@ inline void* operator new(unsigned int, void* pvWhere) throw()
 {
     return pvWhere;
 }
-struct E00B60FinishFlag
-{
-    int m_bFinishing;
-};
 class E00B60Object
 {
   public:
-    E00B60Object(E00B60FinishFlag flag);
+    E00B60Object(FinishingFlag flag);
 
     int unk00;
 };
@@ -1588,24 +1568,10 @@ struct FUN_00e11520_class
     char flag100;
     void FUN_00e11520(int a, int b);
 };
-struct hkFinishLoadedObjectFlagE00
-{
-    int m_bFinishing;
-};
-template <class T> class hkSmallArrayE00
-{
-  public:
-    hkSmallArrayE00() : m_data(0), m_iElementCount(0), m_iCapacityState(0x8000)
-    {}
-
-    T* m_data;
-    unsigned short m_iElementCount;
-    unsigned short m_iCapacityState;
-};
 class hkMemberE00
 {
   public:
-    hkMemberE00(hkFinishLoadedObjectFlagE00 flag) throw();
+    hkMemberE00(FinishingFlag flag) throw();
 
     int unk00;
     int unk04;
@@ -1614,18 +1580,18 @@ class hkMemberE00
 class hkBaseE00
 {
   public:
-    __forceinline hkBaseE00(hkFinishLoadedObjectFlagE00 flag) : m_kMemberDescriptor(flag)
+    __forceinline hkBaseE00(FinishingFlag flag) : m_kMemberDescriptor(flag)
     {}
     virtual ~hkBaseE00();
 
     int unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
-    hkSmallArrayE00<int> m_ppData;
+    hkSmallArray<int> m_ppData;
     hkMemberE00 m_kMemberDescriptor;
 };
 class hkMidE00 : public hkBaseE00
 {
   public:
-    __forceinline hkMidE00(hkFinishLoadedObjectFlagE00 flag) : hkBaseE00(flag)
+    __forceinline hkMidE00(FinishingFlag flag) : hkBaseE00(flag)
     {
         m_iType = -16;
     }
@@ -1636,7 +1602,7 @@ class hkMidE00 : public hkBaseE00
 class hkDerivedE00 : public hkMidE00
 {
   public:
-    __forceinline hkDerivedE00(hkFinishLoadedObjectFlagE00 flag) : hkMidE00(flag)
+    __forceinline hkDerivedE00(FinishingFlag flag) : hkMidE00(flag)
     {}
     virtual ~hkDerivedE00();
 };
@@ -3273,7 +3239,8 @@ inline void swap32E05E(void* pv)
     swapE05E(c[0], c[3]);
     swapE05E(c[1], c[2]);
 }
-struct hkEntryE05E
+// Two 16-bit fields occupy 4 bytes; the Xbox hkEntry type is 12 bytes.
+struct PackedFilterShapeKeyPair
 {
     unsigned short m_uiFilterValue;
     unsigned short m_auiShapeKeys;
@@ -3282,7 +3249,7 @@ struct hkHeaderE05E
 {
     unsigned char unk00;
     unsigned char unk01;
-    hkEntryE05E m_entries[7];
+    PackedFilterShapeKeyPair m_entries[7];
     unsigned char unk1E;
     unsigned char unk1F;
     unsigned char unk20;

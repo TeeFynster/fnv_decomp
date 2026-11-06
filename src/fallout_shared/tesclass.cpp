@@ -1,40 +1,76 @@
-// fallout_shared/tesclass.cpp: TESClass, ActorValue, ClassComparison (15 functions)
+// fallout_shared/tesclass.cpp: TESClass and class-data operations (15 functions)
 
-#include "tesclass_decls.h"
-// Stores skill into data.skills[index] and marks the class modified when skill is a skill or None.
+#define FNV_TESFILE_H  // the shared TESFile below replaces layout_support.h's stub
+#include "../../include/NiFile.h"
+#include "layout_support.h"
+#include "../../include/BGSLoadFormBuffer.h"
+#include "../../include/BGSSaveFormBuffer.h"
+#include "../../include/BGSImpactData.h"
+#include "../../include/TESAttributes.h"
+#include "../../include/TESClass.h"
+#include "../../include/TESClassData.h"
+#include "../../include/TESDescription.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESTexture.h"
+#include "TESFile.h"
+#include "../../include/TESFile.h"
+#include "../../include/ActorValue.h"
+namespace ActorValue {
+bool IsSkill(Index);
+}
+class LegacyActorBaseData
+{
+  public:
+    ActorValue::Index skills[3];
+    char flags;
+    int services;
+    unsigned char trainingSkill, trainingLevel;
+    void SwapEndianData();
+};
+extern "C" void* __cdecl memset(void*, int, unsigned int);
+
+extern "C" void* __cdecl _alloca(unsigned int);
+int __cdecl Warning(const char*, ...);
+// TESFileFormInt_tesclass: local type (was include/TESFileFormInt.h, which had no evidence of one real class); its methods are 0x00472660 TESFile::GetTESForm
+class TESFileFormInt_tesclass
+{
+public:
+    int GetTESForm();
+};
+// Stores skill into data.m_aeTaggedSkills[index] and marks the class modified when skill is a skill or ActorValue__Index_VALUE_NONE.
 // @fnv 0x005f6e80
 void TESClass::SetClassSkillAtIndex(int index, ActorValue::Index skill)
 {
-    if (ActorValue::IsSkill(skill) || skill == ActorValue::None)
+    if (ActorValue::IsSkill(skill) || skill == ActorValue::ActorValue__Index_VALUE_NONE)
     {
-        data.skills[index] = skill;
+        data.m_aeTaggedSkills[index] = skill;
         MarkAsModified(2);
     }
 }
-// Clears the 28-byte data block and sets all four actor value slots to ActorValue::None.
+// Clears the 28-byte data block and sets all four actor value slots to ActorValue::ActorValue__Index_VALUE_NONE.
 // @fnv 0x005f67c0
 void TESClass::ResetFormData()
 {
     memset(&data, 0, 28);
     for (int i = 0; i < 4; ++i)
-        SetClassSkillAtIndex(i, ActorValue::None);
+        SetClassSkillAtIndex(i, ActorValue::ActorValue__Index_VALUE_NONE);
 }
 // Loads the base form data, then reads four skill values from the buffer when change flag 2 is set.
 // @fnv 0x005f71c0
 void TESClass::LoadGame(BGSLoadFormBuffer* buffer)
 {
     TESForm::LoadGame(buffer);
-    if (buffer->GetChangeFlags(2))
+    if (buffer->GetChangeFlags(2u).operator bool())
     {
         for (unsigned int i = 0; i < 4; ++i)
-            buffer->ReadTypedData(&data.skills[i], 4);
+            buffer->ReadTypedData(static_cast<void*>(&data.m_aeTaggedSkills[i]), 4u);
     }
 }
 // Reads a TESClass record from the file, handling EDID, OBND, FULL, DESC, ICON, DATA and ATTR chunks, then warns if the class data is invalid.
 // @fnv 0x005f6930
 bool TESClass::Load(TESFile* file)
 {
-    if (((TESFileFormInt*)file)->GetTESForm() != 7)
+    if (((TESFileFormInt_tesclass*)file)->GetTESForm() != 7)
         return false;
     LoadRecordHeader(file);
     int chunk;
@@ -52,7 +88,7 @@ bool TESClass::Load(TESFile* file)
             readOBNDSubRecord(file);
             break;
         case 0x4c4c5546:
-            TESFullNameLoader::LoadFullNameChunk(this, file);
+            TESFullName::LoadFullNameChunk(this, file);
             break;
         case 0x43534544:
             TESDescription::ReadDescriptionFromFile(this, file);
@@ -76,12 +112,12 @@ bool TESClass::Load(TESFile* file)
                     file->GetChunkData(&oldData, 24);
                 if (file->IsEndianConversionRequired())
                     oldData.SwapEndianData();
-                data.flags = oldData.flags;
-                data.services = oldData.services;
-                data.trainingLevel = oldData.trainingLevel;
-                data.trainingSkill = oldData.trainingSkill;
+                data.m_ucClassFlags = oldData.flags;
+                data.m_uiField08 = oldData.services;
+                data.m_ucField0D = oldData.trainingLevel;
+                data.m_ucField0C = oldData.trainingSkill;
                 for (int i = 0; i < 3; ++i)
-                    data.skills[i] = oldData.skills[i];
+                    data.m_aeTaggedSkills[i] = oldData.skills[i];
             }
             else
             {
@@ -93,7 +129,7 @@ bool TESClass::Load(TESFile* file)
         case 0x52545441: {
             unsigned char attributes[7];
             file->GetChunkData(attributes, 7);
-            TESAttributes::FUN_00480130(attributes);
+            TESAttributes::Load(attributes);
             break;
         }
         }
@@ -106,24 +142,13 @@ bool TESClass::Load(TESFile* file)
     return true;
 }
 
-struct FUN_005f6e20_shell : public TESClass
-{
-    bool ValidateSkillActorValue();
-};
-
-struct TESClass_Helper
-{
-    ActorValue::Index FUN_005f6dd0();
-    void SetSkillIndex(int);
-};
-
 // @fnv 0x005f6e20
-bool FUN_005f6e20_shell::ValidateSkillActorValue()
+bool TESClass::ValidateSkillActorValue()
 {
     bool bIsSkill = true;
-    if (!ActorValue::IsSkill(((TESClass_Helper*)this)->FUN_005f6dd0()))
+    if (!ActorValue::IsSkill(static_cast<ActorValue::Index>(GetTrainingSkill())))
     {
-        ((TESClass_Helper*)this)->SetSkillIndex(0x20);
+        SetTrainingSkill(static_cast<ActorValue::Index>(0x20));
         bIsSkill = false;
     }
     return bIsSkill;
@@ -137,18 +162,13 @@ void __cdecl BSEndian(int*, EndianSizeTag<4>);
 void __cdecl BSEndian(int*, EndianSizeTag<3>);
 void __cdecl BSEndian(float*, EndianSizeTag<3>);
 
-struct FUN_005f68d0_shell
-{
-    void SwapEndian();
-};
-
 // Byte-swaps the four 3-byte values at the start of this object and the 4-byte value at offset 0x14.
 // @fnv 0x005f68d0
-void FUN_005f68d0_shell::SwapEndian()
+void TESClassData::SwapEndian()
 {
-    BSEndian((int*)(this + 0x14), EndianSizeTag<4>());
+    BSEndian(&m_uiField08, EndianSizeTag<4>());
     for (int i = 0; i < 4; ++i)
-        BSEndian((int*)this + i, EndianSizeTag<3>());
+        BSEndian(reinterpret_cast<int*>(&m_aeTaggedSkills[i]), EndianSizeTag<3>());
 }
 
 namespace fnv_005f6c90 {
@@ -175,58 +195,33 @@ void FUN_005f6c90_shell::SwapEndianData()
 }
 }  // namespace fnv_005f6c90
 
-struct FUN_005f6dd0_shell
-{
-    int FUN_005f6dd0();
-};
-
 // @fnv 0x005f6dd0
-int FUN_005f6dd0_shell::FUN_005f6dd0()
+int TESClass::GetTrainingSkill()
 {
-    int result = *(unsigned char*)((char*)this + 0x5c) + 0x20;
+    int result = data.m_ucField0C + 0x20;
     return result;
 }
 
-struct FUN_005f6df0_shell
-{
-    void SetSkillIndex(ActorValue::Index index);
-};
-
 // If index is a skill, stores index minus 0x20 into the byte at offset 0x5c of this object.
 // @fnv 0x005f6df0
-void FUN_005f6df0_shell::SetSkillIndex(ActorValue::Index aeSkillIndex)
+void TESClass::SetTrainingSkill(ActorValue::Index aeSkillIndex)
 {
     if (ActorValue::IsSkill(aeSkillIndex))
     {
-        ((unsigned char*)this)[0x5c] = (unsigned char)(aeSkillIndex - 0x20);
+        data.m_ucField0C = (unsigned char)(aeSkillIndex - 0x20);
     }
 }
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-};
-
-struct FUN_00484d60_holder
-{
-    void SaveIfChanged(unsigned int);
-};
-
-struct FUN_005f7150_shell
-{
-    void SaveForm(BGSSaveFormBuffer* apSaveGameBuffer);
-};
-
 // @fnv 0x005f7150
-void __thiscall FUN_005f7150_shell::SaveForm(BGSSaveFormBuffer* apSaveGameBuffer)
+void __thiscall TESClass::SaveGame(BGSSaveFormBuffer* apSaveGameBuffer)
 {
     unsigned int i;
-    ((FUN_00484d60_holder*)this)->SaveIfChanged((unsigned int)apSaveGameBuffer);
-    if (((BGSLoadFormBuffer*)apSaveGameBuffer)->GetChangeFlags(2))
+    TESForm::SaveGame(apSaveGameBuffer);
+    if (((BGSLoadFormBuffer*)apSaveGameBuffer)->GetChangeFlags(2u).operator bool())
     {
         for (i = 0; i < 4; ++i)
         {
-            apSaveGameBuffer->SaveData((void*)((char*)this + 0x44 + i * 4), 4, 0);
+            apSaveGameBuffer->SaveData(&data.m_aeTaggedSkills[i], 4, 0);
         }
     }
 }
@@ -236,173 +231,70 @@ extern "C"
     unsigned char __cdecl _FUN_00401500();
 }
 
-struct FUN_004855a0
-{
-    void __thiscall M(void);
-};
-struct S_00487010
-{
-    void __thiscall FUN_00487010(void);
-};
-struct FUN_00482cb0_shell
-{
-    void __thiscall FUN_00482cb0(void);
-};
-struct FUN_00480100_shell
-{
-    unsigned int __thiscall FUN_00480100(void*);
-};
-struct FUN_00485680
-{
-    void __thiscall M(void);
-};
-
-struct FUN_0048e370_obj
-{
-    void __thiscall FUN_0048e370(unsigned int);
-};
 void __cdecl FUN_004856f0(unsigned int, void*, unsigned int);
 void __cdecl _FUN_00485990(unsigned int, void*, unsigned int);
 
-struct FUN_005f6810_shell
-{
-    void __thiscall FUN_005f6810(void);
-};
-
 // @fnv 0x005f6810
-void __thiscall FUN_005f6810_shell::FUN_005f6810(void)
+void __thiscall TESClass::SaveForm(void)
 {
     char cAttribData[7];
-    reinterpret_cast<FUN_004855a0*>(this)->M();
-    reinterpret_cast<S_00487010*>(reinterpret_cast<char*>(this) + 0x18)->FUN_00487010();
-    reinterpret_cast<FUN_00482cb0_shell*>(reinterpret_cast<char*>(this) + 0x24)->FUN_00482cb0();
-    reinterpret_cast<FUN_0048e370_obj*>(reinterpret_cast<char*>(this) + 0x2c)->FUN_0048e370(0x4e4f4349);
+    TESForm::FUN_004855a0();
+    TESFullName::FUN_00487010();
+    TESDescription::FUN_00482cb0();
+    TESTexture::Save(0x4e4f4349);
     if (_FUN_00401500())
     {
-        reinterpret_cast<TESClassData*>(reinterpret_cast<char*>(this) + 0x44)->SwapEndian();
+        data.SwapEndian();
     }
-    _FUN_00485990(0x41544144, reinterpret_cast<char*>(this) + 0x44, 0x1c);
+    _FUN_00485990(0x41544144, &data, 0x1c);
     if (_FUN_00401500())
     {
-        reinterpret_cast<TESClassData*>(reinterpret_cast<char*>(this) + 0x44)->SwapEndian();
+        data.SwapEndian();
     }
-    reinterpret_cast<FUN_00480100_shell*>(reinterpret_cast<char*>(this) + 0x38)->FUN_00480100(cAttribData);
+    TESAttributes::Save(cAttribData);
     FUN_004856f0(0x52545441, cAttribData, 7);
-    reinterpret_cast<FUN_00485680*>(this)->M();
+    TESForm::FUN_00485680();
 }
 
-struct S_005f66e0
-{
-    void FUN_005f6710();
-    void* DestroyIfFlagged(unsigned int);
-};
 void __cdecl _Deallocate(void*);
-// Calls FUN_005f6710, then frees this via _Deallocate when flags has bit 1 set, and returns this.
+// Destroys the class, frees it when flags has bit 1 set, and returns its address.
 // @fnv 0x005f66e0
-void* S_005f66e0::DestroyIfFlagged(unsigned int flags)
+void* TESClass::DestroyIfFlagged(unsigned int flags)
 {
-    FUN_005f6710();
+    this->TESClass::~TESClass();
     if (flags & 1)
         _Deallocate(this);
     return this;
 }
 
-struct ShellH;
-struct XActor
-{
-    ShellH* GetExtra() const;
-};
 void* __memcpy(void*, const void*, unsigned int);
-struct FUN_005e78f0_t
-{
-    void FUN_004851b0(TESForm*);
-    void CopyFromTESClass(TESForm* apCopy);
-};
 // @fnv 0x005f6d70
-void FUN_005e78f0_t::CopyFromTESClass(TESForm* apCopy)
+void TESClass::CopyFromTESClass(TESForm* apCopy)
 {
     TESClass* cl = dynamic_cast<TESClass*>(apCopy);
     if (!cl)
         return;
     FUN_004851b0(apCopy);
-    __memcpy((void*)((char*)this + 0x44), ((XActor*)cl)->GetExtra(), 0x1c);
+    __memcpy(&data, cl->GetClassData(), 0x1c);
 }
 
-struct FUN_005f6710_Primary
-{
-    virtual ~FUN_005f6710_Primary();
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-};
-
-struct FUN_005f6710_Base18
-{
-    virtual ~FUN_005f6710_Base18();
-    unsigned int unk04;
-    unsigned int unk08;
-};
-
-struct FUN_005f6710_Base24
-{
-    virtual void unk00();
-    unsigned int unk04;
-};
-
-struct FUN_005f6710_Base2c
-{
-    virtual ~FUN_005f6710_Base2c();
-    unsigned int unk04;
-    unsigned int unk08;
-};
-
-struct FUN_005f6710_Base38
-{
-    virtual ~FUN_005f6710_Base38();
-    unsigned int unk04;
-};
-
-struct FUN_005f6710 : FUN_005f6710_Primary,
-                      FUN_005f6710_Base18,
-                      FUN_005f6710_Base24,
-                      FUN_005f6710_Base2c,
-                      FUN_005f6710_Base38
-{
-    virtual ~FUN_005f6710();
-};
-
-// Destructor for FUN_005f6710; it has an empty body and only tears down the base subobjects.
+// Tears down the class component bases.
 // @fnv 0x005f6710
-FUN_005f6710::~FUN_005f6710()
+TESClass::~TESClass()
 {}
 
 extern "C" int __cdecl _memcmp(const void*, const void*, unsigned int);
 
-class ClassDataAccess : public TESClass
-{
-  public:
-    TESClassData* FUN_005d43c0();
-};
-
-class ClassComparison : public TESClass
-{
-  public:
-    bool FUN_00485270(TESForm*);
-    bool FUN_005f6cf0(TESForm* other);
-};
-
 // Returns true if the cast fails, FUN_00485270 returns true, or the two TESClassData byte ranges differ.
 // @fnv 0x005f6cf0
-bool ClassComparison::FUN_005f6cf0(TESForm* other)
+bool TESClass::CompareClass(TESForm* other)
 {
     TESClass* pClass = dynamic_cast<TESClass*>(other);
     if (!pClass)
         return true;
     if (FUN_00485270(pClass))
         return true;
-    if (_memcmp(&data, static_cast<ClassDataAccess*>(pClass)->FUN_005d43c0(), sizeof(TESClassData)))
+    if (_memcmp(&data, pClass->GetClassData(), sizeof(TESClassData)))
         return true;
     return false;
 }

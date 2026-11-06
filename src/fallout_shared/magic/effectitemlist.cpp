@@ -1,6 +1,18 @@
-// fallout_shared/magic/effectitemlist.cpp: EffectItemList, EILStandIn, EffectListCmp, EffectItemListFind and more (28 functions)
+// fallout_shared/magic/effectitemlist.cpp: EffectItemList and related magic helpers (28 functions)
 
 #include "effectitemlist.h"
+#include "../../../include/EffectItemList.h"
+#include "../../../include/EffectItem.h"
+// The folded getter at 0x0084e3a0 as this unit calls it on EffectItem (the shared header does not name it).
+struct EffectItemFoldedGetter
+{
+    int _ref_0084e3a0();
+};
+#include "../../../include/EffectSetting.h"
+#include "../../../include/PerkEntryConditionSet.h"
+#include "../../../include/RecursiveSpinLock.h"
+#include "../../../include/Setting.h"
+#include "../../../include/TESFullName.h"
 
 // Out-of-line reference for the inline ActorPathHandler::CompleteNoPathUpdate so the
 // translation unit emits the method body attributed to the header.
@@ -10,9 +22,9 @@ ActorPathHandler::PATH_HANDLER_RESULT CallNoPathUpdate(ActorPathHandler* pHandle
 }
 
 // @fnv 0x00405d80
-bool __fastcall FUN_00405d80(int* pThis)
+bool EffectItemList::FUN_00405d80()
 {
-    return pThis[3] > 0;
+    return m_iEffectCount > 0;
 }
 
 namespace MagicEffectSystem {
@@ -25,82 +37,24 @@ struct _Type
 bool __cdecl IsFlagSet(_Type::Type, unsigned int);
 }
 
-struct EffectSetting
-{
-    int GetArchetype();
-};
-
 // @fnv 0x004064b0
 bool __fastcall IsArchetypeFlagSet(EffectSetting* pThis)
 {
     return MagicEffectSystem::IsFlagSet((MagicEffectSystem::_Type::Type)pThis->GetArchetype(), 0x7c);
 }
 
-struct Actor;
-struct EffectSetting;
 struct MagicItem;
 struct Script;
-struct PerkEntryConditionSet;
-struct TESFile;
 struct TESForm;
 struct blob8
 {
     char b[8];
 };
-struct EffectItem
-{
-    void Save();
-    bool Load(TESFile*, char*);
-    void Copy(EffectItem*);
-    bool Compare(EffectItem*);
-    bool MatchesEffect(EffectItem*);
-    void InitItem(TESForm*);
-    struct blob8 GetEffectString(MagicItem*, float);
-    struct blob8 GetEffectString(int, float, bool, bool, bool);
-    EffectSetting* GetEffectSetting();
-    char* GetIcon();
-    int GetMagnitude();
-    bool SetMagnitude(int);
-    int GetArea();
-    bool SetArea(int);
-    int GetDuration();
-    bool SetDuration(int);
-    int GetRange();
-    bool SetRange(int);
-    int IsAssociatedItemUsed();
-    bool IsActorValueUsed();
-    bool IsScriptEffect();
-    bool IsDisabled();
-    bool IsHostile();
-    void SetHostile(bool);
-    bool IsScriptBasedEffect();
-    void GetEffectName(char*);
-    struct blob8 GetEffectName();
-    int GetEffectID();
-    int GetAffectedActorValue();
-    void SetActorValueIndex(int);
-    Script* GetScript();
-    float GetCost(Actor*);
-    float GetRawCost();
-    PerkEntryConditionSet* GetConditions();
-    void PausePlayback(PerkEntryConditionSet*);
-    void SetEffectAt(EffectSetting*);
-    void Initialize(EffectSetting*);
-    void* __vecDelDtor(unsigned int);
-    char data[20];
-    EffectSetting* m_pEffectSetting;
-    float m_fCost;
-    char Conditions[8];
-};
+
 typedef char _sizecheck_EffectItem[sizeof(EffectItem) == 36 ? 1 : -1];
 
-struct EffectItemList_shell
-{
-    EffectItem* FindCostliestEffectItem(int, int);
-};
-
 // @fnv 0x004065e0
-int __fastcall FUN_004065e0(EffectItemList_shell* pthis)
+int __fastcall FUN_004065e0(EffectItemList* pthis)
 {
     int eresult = -1;
     EffectItem* peffect = pthis->FindCostliestEffectItem(3, 0);
@@ -137,28 +91,18 @@ bool __cdecl FUN_00406d70(int aiIndex, int aiFlag)
     return (g_011d61c8[aiIndex][0x11] & aiFlag) != 0;
 }
 
-struct EI;
-struct LN
-{
-    EI** _ref_006815c0();
-    LN* _ref_00726070();
-};
 void _FNV_Warning(const char*);
-struct HX
-{
-    EI* FUN_00406ee0(unsigned char);
-};
 // @fnv 0x00406ee0
-EI* HX::FUN_00406ee0(unsigned char aiIndex)
+EffectItem* EffectItemList::GetEffectItemAtIndex(unsigned char aiIndex)
 {
     unsigned char uiCurrentIndex = 0;
-    LN* pCurrentElementNext = this ? (LN*)((char*)this + 4) : 0;
+    BSSimpleList<EffectItem*>* pCurrentElementNext = this ? reinterpret_cast<BSSimpleList<EffectItem*>*>(&m_item) : 0;
     while (pCurrentElementNext)
     {
         if (uiCurrentIndex == aiIndex)
-            return *pCurrentElementNext->_ref_006815c0();
+            return pCurrentElementNext->GetItem();
         uiCurrentIndex++;
-        pCurrentElementNext = pCurrentElementNext->_ref_00726070();
+        pCurrentElementNext = pCurrentElementNext->GetNext();
     }
     _FNV_Warning(
         "GAME EFFECTS: When trying to get an effect item by its index, the index was larger than the size of the list.");
@@ -173,12 +117,6 @@ int __cdecl FUN_00407000(char* apString1, const char* apFormat, char* aList)
     return FUN_00ec6cc4(apString1, apFormat, aList);
 }
 
-class RecursiveSpinLock
-{
-  public:
-    RecursiveSpinLock();
-};
-
 extern int DAT_01070020;
 
 // @fnv 0x0071f540
@@ -191,130 +129,62 @@ void* __fastcall ConstructWithVTable(void* apObject)
 
 extern int DAT_01011cf4;
 extern int DAT_01011d0c;
-namespace stand {
-struct TESFullName
-{
-    TESFullName();
-    ~TESFullName();
-    void* vt0;
-    char pad0[8];
-};
-}
 struct FUN_004056a0
 {
     FUN_004056a0();
     ~FUN_004056a0();
     void* vt1;
 };
-struct FUN_00402c90 : public stand::TESFullName, public FUN_004056a0
+struct FUN_00402c90
 {
+    TESFullName fullName;
+    FUN_004056a0 component;
     FUN_00402c90();
 };
 // Sets the two vtable pointers of the object to DAT_01011d0c and DAT_01011cf4.
 // @fnv 0x00402c90
 FUN_00402c90::FUN_00402c90()
 {
-    vt0 = &DAT_01011d0c;
-    vt1 = &DAT_01011cf4;
+    *reinterpret_cast<void**>(&fullName) = &DAT_01011d0c;
+    component.vt1 = &DAT_01011cf4;
 }
 
-namespace fnv_00405f30 {
-struct LN
-{
-    bool _ref_008256d0();
-    EffectItem** _ref_006815c0();
-    LN* _ref_00726070();
-};
-struct EIHelper
-{
-    int _ref_0084e3a0();
-    bool IsDetrimental();
-};
-struct EILPad
-{
-    int vtbl;
-};
-struct EILStandIn : EILPad, LN
-{
-    bool HasNonDetrimentalEffect();
-};
 // @fnv 0x00405f30
-bool EILStandIn::HasNonDetrimentalEffect()
+bool EffectItemList::HasNonDetrimentalEffect()
 {
-    EILStandIn* pCurrentElementNext = this;
-    if (pCurrentElementNext->_ref_008256d0())
+    EffectItemList* pCurrentElementNext = this;
+    if (pCurrentElementNext->IsEmpty())
         return false;
     bool bfound = false;
     while (pCurrentElementNext && !bfound)
     {
-        EffectItem* pitem = *pCurrentElementNext->_ref_006815c0();
-        if (pitem && ((EIHelper*)pitem)->_ref_0084e3a0() == 2 && !((EIHelper*)pitem)->IsDetrimental())
+        EffectItem* pitem = pCurrentElementNext->GetItem();
+        if (pitem && reinterpret_cast<EffectItemFoldedGetter*>(pitem)->_ref_0084e3a0() == 2 && !pitem->IsDetrimental())
             bfound = true;
-        pCurrentElementNext = (EILStandIn*)pCurrentElementNext->_ref_00726070();
+        pCurrentElementNext = (EffectItemList*)pCurrentElementNext->GetNext();
     }
     return bfound;
 }
-}  // namespace fnv_00405f30
-
-struct EffectItemHeader
-{
-    int header;
-};
-struct EffectItemDetrimental
-{
-    bool IsDetrimental();
-};
-struct EffectItemNode
-{
-    EffectItem* item;
-    EffectItemNode* next;
-    EffectItem** _ref_006815c0();
-    EffectItemNode* _ref_00726070();
-    bool _ref_008256d0();
-};
-
-struct EffectItemList : public EffectItemHeader, public EffectItemNode
-{
-    bool FUN_00405da0();
-};
 
 // @fnv 0x00405da0
 bool EffectItemList::FUN_00405da0()
 {
     EffectItemList* pCurrentElementNext = this;
-    if (pCurrentElementNext->_ref_008256d0())
+    if (pCurrentElementNext->IsEmpty())
         return false;
     while (pCurrentElementNext)
     {
-        EffectItem* pitem = *pCurrentElementNext->_ref_006815c0();
-        if (pitem && !((EffectItemDetrimental*)pitem)->IsDetrimental() && !pitem->IsHostile())
+        EffectItem* pitem = pCurrentElementNext->GetItem();
+        if (pitem && !pitem->IsDetrimental() && !pitem->IsHostile())
             return false;
-        pCurrentElementNext = static_cast<EffectItemList*>(pCurrentElementNext->_ref_00726070());
+        pCurrentElementNext = static_cast<EffectItemList*>(pCurrentElementNext->GetNext());
     }
     return true;
 }
 
-namespace fnv_00406340 {
-struct EffectItemHeader
-{
-    int header;
-};
-struct EffectItemNode
-{
-    EffectItem* item;
-    EffectItemNode* next;
-    EffectItem** _ref_006815c0();
-    void _ref_0063f7b0();
-    EffectItemNode* _ref_00726070();
-};
 struct EffectItemDeleter
 {
     ~EffectItemDeleter();
-};
-
-struct EffectItemList : public EffectItemHeader, public EffectItemNode
-{
-    void FUN_00406340();
 };
 
 // @fnv 0x00406340
@@ -323,26 +193,22 @@ void EffectItemList::FUN_00406340()
     EffectItemList* pCurrentElementNext = this;
     while (pCurrentElementNext)
     {
-        EffectItem* pitem = *pCurrentElementNext->_ref_006815c0();
+        EffectItem* pitem = pCurrentElementNext->GetItem();
         if (pitem)
         {
             delete (EffectItemDeleter*)pitem;
-            pCurrentElementNext->_ref_0063f7b0();
+            pCurrentElementNext->RemoveHead();
         }
         else
         {
-            pCurrentElementNext = static_cast<EffectItemList*>(pCurrentElementNext->_ref_00726070());
+            pCurrentElementNext = static_cast<EffectItemList*>(pCurrentElementNext->GetNext());
         }
     }
 }
-}  // namespace fnv_00406340
 
 namespace fnv_00403ca0 {
-class EffectSetting;
-struct EffectItem
-{
-    EffectSetting* GetEffectSetting();
-};
+
+// local form of MagicEffectEntry: 0x00403ca0 needs the out-of-line 0x00403ba0 ctor; shared POD replacement changes bytes.
 struct FUN_00403ba0
 {
     FUN_00403ba0();
@@ -352,14 +218,7 @@ struct FUN_00403ba0
     int m_eRange;
     int m_eAssociatedActorValue;
 };
-struct PerkEntryConditionSet
-{
-    PerkEntryConditionSet();
-    ~PerkEntryConditionSet();
-    void* pHead;
-    void* pNext;
-};
-
+// local form of EffectItem: 0x00403ca0 needs automatic data construction at 0x00403ba0; the shared union/POD form changes bytes.
 struct FUN_00403ca0
 {
     FUN_00403ba0 data;
@@ -380,70 +239,23 @@ FUN_00403ca0::FUN_00403ca0(EffectItem* pEffectItem)
 }
 }  // namespace fnv_00403ca0
 
-namespace fnv_004062a0 {
-struct EffectItem;
-struct EffectItemDetrimental
-{
-    bool IsDetrimental();
-};
-struct EffectItemNode
-{
-    bool FUN_008256d0();
-    EffectItem** FUN_006815c0();
-    EffectItemNode* FUN_00726070();
-    EffectItem* item;
-    EffectItemNode* next;
-};
-
-struct EffectItemList : public EffectItemNode
-{
-    virtual ~EffectItemList();
-    bool HasDetrimentalEffect();
-};
-
 // @fnv 0x004062a0
 bool EffectItemList::HasDetrimentalEffect()
 {
     bool bDetrimental = false;
     EffectItemList* pCurrentElementNext = this;
-    if (pCurrentElementNext->FUN_008256d0())
+    if (pCurrentElementNext->IsEmpty())
         return false;
     while (pCurrentElementNext && !bDetrimental)
     {
-        EffectItem* pitem = *pCurrentElementNext->FUN_006815c0();
-        if (pitem && reinterpret_cast<EffectItemDetrimental*>(pitem)->IsDetrimental())
+        EffectItem* pitem = pCurrentElementNext->GetItem();
+        if (pitem && pitem->IsDetrimental())
             bDetrimental = true;
-        pCurrentElementNext = static_cast<EffectItemList*>(pCurrentElementNext->FUN_00726070());
+        pCurrentElementNext = static_cast<EffectItemList*>(pCurrentElementNext->GetNext());
     }
     return bDetrimental;
 }
-}  // namespace fnv_004062a0
 
-namespace fnv_004064d0 {
-struct MagicEffectEntry
-{
-    unsigned int FUN_0084e3a0();
-};
-struct EffectItemDetrimental
-{
-    bool IsDetrimental();
-};
-struct EffectItemNode
-{
-    bool FUN_008256d0();
-    EffectItem** FUN_006815c0();
-    EffectItemNode* FUN_00726070();
-    EffectItem* item;
-    EffectItemNode* next;
-};
-
-struct EffectItemList : public EffectItemNode
-{
-    virtual ~EffectItemList();
-    EffectItem* FindCostliestEffectItem(int aeRange, bool abAreaOnly);
-};
-
-// Scans the effect list for the non-detrimental item with the highest cost matching the range (and area if requested), returning it or null.
 // @fnv 0x004064d0
 EffectItem* EffectItemList::FindCostliestEffectItem(int aeRange, bool abAreaOnly)
 {
@@ -452,32 +264,31 @@ EffectItem* EffectItemList::FindCostliestEffectItem(int aeRange, bool abAreaOnly
     int imaxCost;
     pBestItem = 0;
     pCurrentElementNext = this;
-    if (pCurrentElementNext->FUN_008256d0())
+    if (pCurrentElementNext->IsEmpty())
         return 0;
     imaxCost = -1;
     while (pCurrentElementNext)
     {
         EffectItem* pitem;
         int iItemCost;
-        pitem = *pCurrentElementNext->FUN_006815c0();
+        pitem = pCurrentElementNext->GetItem();
         iItemCost = (int)pitem->GetCost(0);
-        if (!reinterpret_cast<EffectItemDetrimental*>(pitem)->IsDetrimental() && iItemCost > imaxCost)
+        if (!pitem->IsDetrimental() && iItemCost > imaxCost)
         {
             if (abAreaOnly ? pitem->GetArea() > 0 : 1)
             {
                 if (aeRange == 3 ||
-                    (aeRange != 3 && reinterpret_cast<MagicEffectEntry*>(pitem)->FUN_0084e3a0() == aeRange))
+                    (aeRange != 3 && reinterpret_cast<EffectItemFoldedGetter*>(pitem)->_ref_0084e3a0() == aeRange))
                 {
                     pBestItem = pitem;
                     imaxCost = iItemCost;
                 }
             }
         }
-        pCurrentElementNext = static_cast<EffectItemList*>(pCurrentElementNext->FUN_00726070());
+        pCurrentElementNext = static_cast<EffectItemList*>(pCurrentElementNext->GetNext());
     }
     return pBestItem;
 }
-}  // namespace fnv_004064d0
 
 void _Deallocate(void*);
 struct Fake406e40
@@ -516,75 +327,24 @@ void __thiscall Obj93::GetTwoValues(float* pfValue, float* pfResult)
     *pfValue = (float)m.f2(46);
 }
 
-namespace fnv_00405fe0 {
-struct EffectItem_acc : EffectItem
-{
-    int _ref_0084e3a0();
-    bool IsDetrimental();
-};
-
-struct BSSimpleList_Standin
-{
-    bool _ref_008256d0();
-    EffectItem** _ref_006815c0();
-    BSSimpleList_Standin* _ref_00726070();
-};
-
-struct EffectItemList : public BSSimpleList_Standin
-{
-    virtual ~EffectItemList();
-    int m_iEffectCount;
-
-    bool FUN_00405fe0();
-};
-
 // @fnv 0x00405fe0
 bool EffectItemList::FUN_00405fe0()
 {
     EffectItemList* pCurrentElementNext = this;
-    if (pCurrentElementNext->_ref_008256d0())
+    if (pCurrentElementNext->IsEmpty())
         return false;
 
     bool bfound = false;
     while (pCurrentElementNext && !bfound)
     {
-        EffectItem* pitem = *pCurrentElementNext->_ref_006815c0();
-        if (pitem && ((EffectItem_acc*)pitem)->_ref_0084e3a0() == 1 && !((EffectItem_acc*)pitem)->IsDetrimental())
+        EffectItem* pitem = pCurrentElementNext->GetItem();
+        if (pitem && reinterpret_cast<EffectItemFoldedGetter*>(pitem)->_ref_0084e3a0() == 1 && !pitem->IsDetrimental())
             bfound = true;
 
-        pCurrentElementNext = (EffectItemList*)pCurrentElementNext->_ref_00726070();
+        pCurrentElementNext = (EffectItemList*)pCurrentElementNext->GetNext();
     }
     return bfound;
 }
-}  // namespace fnv_00405fe0
-
-namespace fnv_00406090 {
-class EffectItem
-{
-  public:
-    int _ref_0084e3a0();
-    bool IsDetrimental();
-};
-
-class BSSimpleList
-{
-  public:
-    bool _ref_008256d0();
-    EffectItem** _ref_006815c0();
-    BSSimpleList* _ref_00726070();
-};
-
-class EffectItemListPrefix
-{
-  public:
-    int m_prefix;
-};
-
-class EffectItemList : public EffectItemListPrefix, public BSSimpleList
-{
-  public:
-    bool FUN_00406090();
-};
 
 // @fnv 0x00406090
 bool EffectItemList::FUN_00406090()
@@ -594,7 +354,7 @@ bool EffectItemList::FUN_00406090()
 
     pCurrentElementNext = this;
 
-    if (pCurrentElementNext->_ref_008256d0())
+    if (pCurrentElementNext->IsEmpty())
         return false;
 
     bfound = false;
@@ -603,59 +363,50 @@ bool EffectItemList::FUN_00406090()
     {
         EffectItem* pitem;
 
-        pitem = *pCurrentElementNext->_ref_006815c0();
+        pitem = pCurrentElementNext->GetItem();
 
-        if (pitem && !pitem->_ref_0084e3a0() && !pitem->IsDetrimental())
+        if (pitem && !reinterpret_cast<EffectItemFoldedGetter*>(pitem)->_ref_0084e3a0() && !pitem->IsDetrimental())
             bfound = true;
 
-        pCurrentElementNext = (EffectItemList*)pCurrentElementNext->_ref_00726070();
+        pCurrentElementNext = (EffectItemList*)pCurrentElementNext->GetNext();
     }
 
     return bfound;
 }
-}  // namespace fnv_00406090
 
-struct EffectItemCmp
+// The shared headers do not yet declare these operations. These extensions add
+// only the missing method declarations; all list storage comes from the headers.
+struct EffectItemListNodeOperations : BSSimpleList<EffectItem*>
 {
-    bool Compare(EffectItemCmp*);
-};
-
-struct EffectListHdr
-{
-    int header;
-};
-struct EffectListNode
-{
-    EffectItemCmp* item;
-    EffectListNode* next;
     int GetSize();
-    bool IsEmpty();
-    EffectItemCmp** GetItem();
-    EffectListNode* GetNext();
 };
-struct EffectListCmp : public EffectListHdr, public EffectListNode
+
+struct EffectItemListOperations : EffectItemList
 {
-    bool FUN_00405a00(EffectListCmp* apOther);
+    bool Compare(EffectItemList* other);
+    void CopyItemsFromList(EffectItemList* list);
+    unsigned char FindEffectItemIndex(int formID);
 };
 
 // Returns true if the two effect lists differ.
 // @fnv 0x00405a00
-bool EffectListCmp::FUN_00405a00(EffectListCmp* apOther)
+bool EffectItemListOperations::Compare(EffectItemList* apOther)
 {
-    if (apOther->GetSize() != GetSize())
+    if (reinterpret_cast<EffectItemListNodeOperations*>(&apOther->m_item)->GetSize() !=
+        reinterpret_cast<EffectItemListNodeOperations*>(&m_item)->GetSize())
         return true;
     if (!IsEmpty())
     {
-        EffectListCmp* pNodeA = this;
-        EffectListCmp* pNodeB = apOther;
+        EffectItemList* pNodeA = this;
+        EffectItemList* pNodeB = apOther;
         while (pNodeA)
         {
-            EffectItemCmp* pItemB = *pNodeA->GetItem();
-            EffectItemCmp* pElement = *pNodeB->GetItem();
+            EffectItem* pItemB = pNodeA->GetItem();
+            EffectItem* pElement = pNodeB->GetItem();
             if (pItemB && pElement && pItemB->Compare(pElement))
                 return true;
-            pNodeA = static_cast<EffectListCmp*>(pNodeA->GetNext());
-            pNodeB = static_cast<EffectListCmp*>(pNodeB->GetNext());
+            pNodeA = static_cast<EffectItemList*>(pNodeA->GetNext());
+            pNodeB = static_cast<EffectItemList*>(pNodeB->GetNext());
         }
     }
     return false;
@@ -685,165 +436,95 @@ class B5B10ItemCopy
     int unk20;
 };
 
-class B5B10Owner
-{
-  public:
-    void Clear();
-    void AddItem(B5B10ItemCopy* pkItem);
-    void CopyItemsFromList(EffectItemList* pkList);
-};
-
 // Clears the owner, then walks the linked EffectItemList and adds a B5B10ItemCopy for each non-null EffectItem.
 // @fnv 0x00405b10
-void B5B10Owner::CopyItemsFromList(EffectItemList* pkList)
+void EffectItemListOperations::CopyItemsFromList(EffectItemList* pkList)
 {
-    Clear();
+    FUN_00406340();
     EffectItemList* pkNode = pkList;
     while (pkNode)
     {
-        EffectItem* pkItem = *pkNode->_ref_006815c0();
+        EffectItem* pkItem = pkNode->GetItem();
         if (pkItem)
         {
             B5B10ItemCopy* pkCopy = new B5B10ItemCopy(pkItem);
-            AddItem(pkCopy);
+            AddItem(reinterpret_cast<EffectItem*>(pkCopy));
         }
-        pkNode = static_cast<EffectItemList*>(pkNode->_ref_00726070());
+        pkNode = static_cast<EffectItemList*>(pkNode->GetNext());
     }
 }
 
-struct EffectSetting_6140
-{
-    bool IsFlagSet(unsigned int auiFlag);
-};
-
-struct EffectItem_6140
-{
-    EffectSetting_6140* GetEffectSetting();
-    bool IsDetrimental();
-};
-
-struct EffectItemNode_6140
-{
-    EffectItem_6140* item;
-    EffectItemNode_6140* next;
-    EffectItem_6140** _ref_006815c0();
-    EffectItemNode_6140* _ref_00726070();
-    bool _ref_008256d0();
-};
-
-struct EffectItemList_6140 : public EffectItemHeader, public EffectItemNode_6140
-{
-    bool HasNonDetrimentalEffectWithFlag(unsigned int auiFlag);
-};
-
 // @fnv 0x00406140
-bool EffectItemList_6140::HasNonDetrimentalEffectWithFlag(unsigned int auiFlag)
+bool EffectItemList::HasNonDetrimentalEffectWithFlag(unsigned int auiFlag)
 {
-    EffectItemList_6140* pNode2 = this;
-    if (pNode2->_ref_008256d0())
+    EffectItemList* pNode2 = this;
+    if (pNode2->IsEmpty())
         return false;
     bool bResultTmp = false;
     while (pNode2 && !bResultTmp)
     {
-        EffectItem_6140* pItem = *pNode2->_ref_006815c0();
+        EffectItem* pItem = pNode2->GetItem();
         if (pItem && pItem->GetEffectSetting()->IsFlagSet(auiFlag) && !pItem->IsDetrimental())
         {
             bResultTmp = true;
         }
-        pNode2 = static_cast<EffectItemList_6140*>(pNode2->_ref_00726070());
+        pNode2 = static_cast<EffectItemList*>(pNode2->GetNext());
     }
     return bResultTmp;
 }
 
-class Entry406
-{
-  public:
-    unsigned int GetTimeStamp();
-};
+EffectSetting* GetUsageMonitorEntry406();
 
-unsigned int GetUsageMonitorEntry406();
-
-class List406
-{
-  public:
-    bool IsEmpty();
-    Entry406** GetItem();
-    List406* GetNext();
-};
-
-class Head406
-{
-  public:
-    int unk00;
-};
-
-class Node406 : public Head406, public List406
-{
-  public:
-    Entry406* FindEntryByTimeStamp();
-};
-
-// Walks the node list and returns the first entry whose GetTimeStamp equals GetUsageMonitorEntry406(), or null.
+// Returns the first effect item using the script effect setting, or null.
 // @fnv 0x00406200
-Entry406* Node406::FindEntryByTimeStamp()
+EffectItem* EffectItemList::GetScriptEffect()
 {
-    Entry406* pkResult = 0;
-    Node406* pkNode = this;
+    EffectItem* pkResult = 0;
+    EffectItemList* pkNode = this;
     while (pkNode && !pkNode->IsEmpty() && !pkResult)
     {
-        Entry406* pkEntry = *pkNode->GetItem();
-        if (pkEntry->GetTimeStamp() == GetUsageMonitorEntry406())
+        EffectItem* pkEntry = pkNode->GetItem();
+        if (pkEntry->GetEffectSetting() == GetUsageMonitorEntry406())
             pkResult = pkEntry;
         else
-            pkNode = static_cast<Node406*>(pkNode->GetNext());
+            pkNode = static_cast<EffectItemList*>(pkNode->GetNext());
     }
     return pkResult;
 }
 
 extern double DAT_01012060;
 float __cdecl FUN_00404040(float);
-struct S_004063e0 : EffectItemList
-{
-    float GetTotalCost(Actor* actor);
-};
 // @fnv 0x004063e0
-float S_004063e0::GetTotalCost(Actor* actor)
+float EffectItemList::GetTotalCost(Actor* actor)
 {
     float total;
     EffectItemList* p5 = this;
-    if (p5->_ref_008256d0())
+    if (p5->IsEmpty())
         return 0.0f;
     total = 0.0f;
     while (p5)
     {
-        EffectItem* item = *p5->_ref_006815c0();
-        if (!reinterpret_cast<EffectItemDetrimental*>(item)->IsDetrimental())
+        EffectItem* item = p5->GetItem();
+        if (!item->IsDetrimental())
             total += item->GetCost(actor);
-        p5 = static_cast<EffectItemList*>(p5->_ref_00726070());
+        p5 = static_cast<EffectItemList*>(p5->GetNext());
     }
     return total < DAT_01012060 ? 0.0f : FUN_00404040(total);
 }
 
-struct EffectItemListFind
-{
-    int header;
-    EffectItemNode node;
-    unsigned char FindEffectItemIndex(int aiFormID);
-};
-
 // @fnv 0x00406e70
-unsigned char EffectItemListFind::FindEffectItemIndex(int aiFormID)
+unsigned char EffectItemListOperations::FindEffectItemIndex(int aiFormID)
 {
     unsigned char idx3 = 0;
-    EffectItemNode* cur = this ? &node : 0;
+    BSSimpleList<EffectItem*>* cur = this ? reinterpret_cast<BSSimpleList<EffectItem*>*>(&m_item) : 0;
     while (cur != 0)
     {
-        if (aiFormID == (int)*cur->_ref_006815c0())
+        if (aiFormID == (int)cur->GetItem())
         {
             return idx3;
         }
         idx3++;
-        cur = cur->_ref_00726070();
+        cur = cur->GetNext();
     }
     _FNV_Warning(
         "GAME EFFECTS: When trying to get an effect item index, the effect item was not found in the effect item list.");
@@ -952,10 +633,6 @@ struct Condition
 {
     bool _ref_00680c60(void*, int, bool*, int);
 };
-struct Setting
-{
-    bool _ref_00403e60(unsigned int);
-};
 struct EI
 {
     int magnitude;
@@ -1027,7 +704,7 @@ void Description::BuildDescription(char* acBuffer, unsigned int size)
             if (!(*nodeB->_ref_006815c0())->_ref_00409140() ||
                 (*nodeB->_ref_006815c0())->_ref_00409140()->_ref_00680c60(_g_thePlayer, 0, &s, 0))
             {
-                if ((*nodeB->_ref_006815c0())->_ref_00825c00()->_ref_00403e60(0x2000))
+                if ((*nodeB->_ref_006815c0())->_ref_00825c00()->FUN_00403e60(0x2000))
                 {
                     CopyText(bufferA, 128, (*nodeB->_ref_006815c0())->EffectName());
                     if (aA)

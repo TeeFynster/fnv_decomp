@@ -1,3 +1,16 @@
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit defines its own form
+#include "../../../../../../include/hkSimdReal.h"
+#include "../../../../../../include/hkMatrix3.h"
+#include "../../../../../../include/hkRotation.h"
+#include "../../../../../../include/hkTransform.h"
+#include "../../../../../../include/hkVector4.h"
+#include "../../../../../../include/hkpMotion.h"
+#include "../../../../../../include/hkpRigidBody.h"
+#include "../../../../../../include/hkpSetLocalTransformsConstraintAtom.h"
+#include "../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkReferencedObject.h"
 // src/havok/physics/utilities/constraint/bilateral/hkpconstraintutils_gs_ehsc_nogs_noehsc_variant_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/utilities/constraint/bilateral/hkpconstraintutils_gs_ehsc_nogs_noehsc_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
@@ -7,48 +20,12 @@
 // to their real unit once identified.
 // src/havok/physics/utilities/constraint/bilateral/hkpconstraintutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/constraint/bilateral/hkpconstraintutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-typedef union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-    char m128_i8[16];
-    short m128_i16[8];
-    int m128_i32[4];
-    __int64 m128_i64[2];
-    unsigned char m128_u8[16];
-    unsigned short m128_u16[8];
-    unsigned int m128_u32[4];
-} __m128;
-struct hkMemoryAllocator
-{
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-struct AudioMgr
-{
-    int unk00, unk04, unk08;
-    hkMemoryAllocator* unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
 struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
+inline hkMemoryRouter* audio()
 {
-    return (AudioMgr*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
-struct hkBool
-{
-    char m_cBooleanValue;
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-};
 struct Block5
 {
     int unk00, unk04, unk08, unk0c, unk10;
@@ -61,15 +38,7 @@ struct Block5b
     unsigned char unk07;
     int unk08, unk0c, unk10;
 };
-struct hkRefObj
-{
-    void* m_vtbl;
-    unsigned short m_usMemSizeAndFlags;
-    unsigned short m_sReferenceCount;
-    void FUN_00c90510();
-    void FUN_00c905b0();
-};
-struct CloneDataBase : hkRefObj
+struct CloneDataBase : hkReferencedObject
 {
     int unk08, unk0c;
     int unk10, unk14, unk18, unk1c;
@@ -122,7 +91,7 @@ struct SourceDataA : SourceData
     Block5 unk124;
 };
 struct Instance;
-struct Instance : hkRefObj
+struct Instance : hkReferencedObject
 {
     int unk08;
     SourceData* unk0c;
@@ -134,7 +103,7 @@ struct Instance : hkRefObj
 };
 inline void* hkAlloc(int size)
 {
-    hkRefObj* p = (hkRefObj*)audio()->heap().AllocateMemoryBlock(size);
+    hkReferencedObject* p = (hkReferencedObject*)audio()->heap().blockAlloc(size);
     p->m_usMemSizeAndFlags = (unsigned short)size;
     return p;
 }
@@ -230,276 +199,103 @@ struct WorkVectors
 };
 extern "C"
 {
-    __m128 _mm_load_ps(const float* p);
-    __m128 _mm_mul_ps(__m128 a, __m128 b);
-    __m128 _mm_add_ps(__m128 a, __m128 b);
-    __m128 _mm_sub_ps(__m128 a, __m128 b);
-    __m128 _mm_shuffle_ps(__m128 a, __m128 b, int sel);
-    __m128 _mm_add_ss(__m128 a, __m128 b);
-    __m128 _mm_set_ps1(float x);
-    void _mm_store_ss(float* p, __m128 v);
-}
-extern "C"
-{
     const __m128 DAT_010ec7f0 = {{1.0f, 1.0f, 1.0f, 1.0f}};
     const float DAT_010959f4 = 1e-6f;
 }
 bool* FUN_00e5af80(bool* out, FnvHolder2* h, float t, float t2);
 
-extern "C" __m128 _mm_load_ss(const float*);
+// Keep the original inline operations with the shared class declarations.
+__forceinline hkSimdReal::hkSimdReal(const __m128& x) : m_vValue(x)
+{}
+__forceinline hkSimdReal::hkSimdReal(float x)
+{
+    m_vValue = _mm_load_ss(&x);
+}
+__forceinline hkSimdReal::operator float() const
+{
+    float s;
+    _mm_store_ss(&s, m_vValue);
+    return s;
+}
+__forceinline __m128 hkSimdReal::broadcast() const
+{
+    return _mm_shuffle_ps(m_vValue, m_vValue, 0);
+}
 
-class VectorComponentValue
+__forceinline void hkVector4::setAdd4(const hkVector4& v0, const hkVector4& v1)
 {
-  public:
-    __forceinline VectorComponentValue(const __m128& x) : m_vValue(x)
-    {}
-    __forceinline VectorComponentValue(float x)
-    {
-        m_vValue = _mm_load_ss(&x);
-    }
-    __forceinline operator float() const
-    {
-        float s;
-        _mm_store_ss(&s, m_vValue);
-        return s;
-    }
-    __forceinline __m128 broadcast() const
-    {
-        return _mm_shuffle_ps(m_vValue, m_vValue, 0);
-    }
+    m_vComponents = _mm_add_ps(v0.m_vComponents, v1.m_vComponents);
+}
+__forceinline void hkVector4::addMul4(const hkSimdReal& r, const hkVector4& v1)
+{
+    m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(r.broadcast(), v1.m_vComponents));
+}
+__forceinline hkSimdReal hkVector4::dot3(const hkVector4& a) const
+{
+    __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
+    __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
+    return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
+}
+__forceinline hkSimdReal hkVector4::getSimdAt3() const
+{
+    return _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
+}
+__forceinline float& hkVector4::operator()(int a)
+{
+    return reinterpret_cast<float*>(&m_vComponents)[a];
+}
 
-  private:
-    __m128 m_vValue;
-};
-
-class hkVector4
+__forceinline hkMatrix3::hkMatrix3()
+{}
+__forceinline hkVector4& hkMatrix3::getColumn(int x)
 {
-  public:
-    __forceinline hkVector4()
-    {}
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setAdd4(const hkVector4& v0, const hkVector4& v1)
-    {
-        m_vComponents = _mm_add_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    __forceinline void setSub4(const hkVector4& v0, const hkVector4& v1)
-    {
-        m_vComponents = _mm_sub_ps(v0.m_vComponents, v1.m_vComponents);
-    }
-    __forceinline void addMul4(const VectorComponentValue& r, const hkVector4& v1)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, _mm_mul_ps(r.broadcast(), v1.m_vComponents));
-    }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const
-    {
-        __m128 x2 = _mm_mul_ps(m_vComponents, a.m_vComponents);
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), xySum);
-    }
-    __forceinline VectorComponentValue getSimdAt3() const
-    {
-        return _mm_shuffle_ps(m_vComponents, m_vComponents, 0xff);
-    }
-    __forceinline float& operator()(int a)
-    {
-        return reinterpret_cast<float*>(&m_vComponents)[a];
-    }
-    __m128 m_vComponents;
-};
-
-class hkRotation;
-class hkMatrix3
+    return (&m_kColumn0)[x];
+}
+__forceinline float& hkMatrix3::operator()(int r, int c)
 {
-  public:
-    __forceinline hkMatrix3()
-    {}
-    void transpose();
-    void SetFromRotation(const hkRotation& r);
-    __forceinline hkVector4& getColumn(int x)
-    {
-        return (&m_kColumn0)[x];
-    }
-    __forceinline float& operator()(int r, int c)
-    {
-        return getColumn(c)(r);
-    }
-    hkVector4 m_kColumn0;
-    hkVector4 m_kColumn1;
-    hkVector4 m_kColumn2;
-};
-class hkRotation : public hkMatrix3
+    return getColumn(c)(r);
+}
+__forceinline hkRotation::hkRotation(const hkRotation& o)
 {
-  public:
-    __forceinline hkRotation(const hkRotation& o)
-    {
-        m_kColumn0 = o.m_kColumn0;
-        m_kColumn1 = o.m_kColumn1;
-        m_kColumn2 = o.m_kColumn2;
-    }
-};
-struct hkTransform
+    m_kColumn0 = o.m_kColumn0;
+    m_kColumn1 = o.m_kColumn1;
+    m_kColumn2 = o.m_kColumn2;
+}
+__forceinline const hkVector4& hkRotation::getColumn(int x) const
 {
-    hkRotation m_rotation;
-    hkVector4 m_vTranslation;
-    __forceinline hkRotation& getRotation()
-    {
-        return m_rotation;
-    }
-    __forceinline hkVector4& getTranslation()
-    {
-        return m_vTranslation;
-    }
-};
-struct hkpSetLocalTransformsConstraintAtom
+    return (&m_kColumn0)[x];
+}
+__forceinline hkRotation& hkTransform::getRotation()
 {
-    int unk00, unk04, unk08, unk0c;
-    hkTransform m_kBodyALocalFrame;
-    hkTransform m_kBodyBLocalFrame;
-};
-struct hkpMotionBase
+    return reinterpret_cast<hkRotation&>(m_row0);
+}
+__forceinline hkVector4& hkTransform::getTranslation()
 {
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void v10();
-    virtual void v14();
-    virtual void v18();
-    virtual void v1c();
-    virtual void v20();
-    virtual void GetInertiaInvLocal(hkMatrix3& inertiaInv);
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-};
-struct hkpMotion : hkpMotionBase
+    return reinterpret_cast<hkVector4&>(m_row3);
+}
+__forceinline hkSimdReal hkpMotion::getMassInv() const
 {
-    hkVector4 m_vCenterOfMassLocal;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    hkVector4 m_kInertiaAndMassInv;
-    __forceinline VectorComponentValue getMassInv() const
-    {
-        return m_kInertiaAndMassInv.getSimdAt3();
-    }
-};
-struct hkpRigidBody
+    return m_kInertiaAndMassInv.getSimdAt3();
+}
+__forceinline hkpMotion* hkpRigidBody::getRigidMotion()
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    hkpMotion m_pMotionState;
-    __forceinline hkpMotion* getRigidMotion()
-    {
-        return &m_pMotionState;
-    }
-    __forceinline void GetInertiaInvLocal(hkMatrix3& m)
-    {
-        getRigidMotion()->GetInertiaInvLocal(m);
-    }
-    __forceinline float getMassInv()
-    {
-        return getRigidMotion()->getMassInv();
-    }
-    __forceinline const hkVector4& getCenterOfMassLocal()
-    {
-        return m_pMotionState.m_vCenterOfMassLocal;
-    }
-};
+    return &m_pMotionState;
+}
+__forceinline void hkpRigidBody::GetInertiaInvLocal(hkMatrix3& m)
+{
+    hkpMotion* motion = getRigidMotion();
+    // The shared declaration calls the inertia getter slot vf24.
+    typedef void (__thiscall *InertiaGetter)(hkpMotion*, hkMatrix3&);
+    reinterpret_cast<InertiaGetter>((*reinterpret_cast<void***>(motion))[9])(motion, m);
+}
+__forceinline float hkpRigidBody::getMassInv()
+{
+    return getRigidMotion()->getMassInv();
+}
+__forceinline const hkVector4& hkpRigidBody::getCenterOfMassLocal()
+{
+    return m_pMotionState.m_kMotionState.m_kSweptTransform.m_vCenterOfMassLocal;
+}
 
 // @fnv 0x00e5a800
 void __cdecl FUN_00e5a800(Instance* constraint)
@@ -528,7 +324,7 @@ void __cdecl FUN_00e5a800(Instance* constraint)
         hkMatrix3 inertiaLocA;
         bodyA->GetInertiaInvLocal(inertiaLocA);
         hkRotation invRot = transformsAtom->m_kBodyALocalFrame.getRotation();
-        invRot.transpose();
+        reinterpret_cast<hkMatrix3&>(invRot).transpose();
         inertiaLocA.SetFromRotation(invRot);
         invInertiaA = float(inertiaLocA(1, 1) + inertiaLocA(2, 1)) + float(inertiaLocA(1, 2) + inertiaLocA(2, 2));
         if (useRelativeInertia && bodyA->getMassInv() > 1.192092896e-07f)
@@ -542,7 +338,7 @@ void __cdecl FUN_00e5a800(Instance* constraint)
         hkMatrix3 inertiaLocB;
         bodyB->GetInertiaInvLocal(inertiaLocB);
         hkRotation invRot = transformsAtom->m_kBodyBLocalFrame.getRotation();
-        invRot.transpose();
+        reinterpret_cast<hkMatrix3&>(invRot).transpose();
         inertiaLocB.SetFromRotation(invRot);
         invInertiaB = float(inertiaLocB(1, 1) + inertiaLocB(2, 1)) + float(inertiaLocB(1, 2) + inertiaLocB(2, 2));
         if (useRelativeInertia && bodyB->getMassInv() > 1.192092896e-07f)
@@ -551,12 +347,12 @@ void __cdecl FUN_00e5a800(Instance* constraint)
         }
     }
 
-    hkVector4& axisA = transformsAtom->m_kBodyALocalFrame.getRotation().getColumn(0);
+    const hkVector4& axisA = transformsAtom->m_kBodyALocalFrame.getRotation().getColumn(0);
     hkVector4 pivotA;
     pivotA.setSub4(transformsAtom->m_kBodyALocalFrame.getTranslation(), bodyA->getCenterOfMassLocal());
     float pivotLengthAlongAxisA = pivotA.dot3(axisA);
 
-    hkVector4& axisB = transformsAtom->m_kBodyBLocalFrame.getRotation().getColumn(0);
+    const hkVector4& axisB = transformsAtom->m_kBodyBLocalFrame.getRotation().getColumn(0);
     hkVector4 pivotB;
     pivotB.setSub4(transformsAtom->m_kBodyBLocalFrame.getTranslation(), bodyB->getCenterOfMassLocal());
     float pivotLengthAlongAxisB = pivotB.dot3(axisB);

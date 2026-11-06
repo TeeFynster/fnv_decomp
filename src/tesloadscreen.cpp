@@ -1,15 +1,24 @@
-// tesloadscreen.cpp: TESLoadScreen, LoadScreenA6C, FormT (13 functions)
+// tesloadscreen.cpp: TESLoadScreen (13 functions)
 
+#include "../include/BSStringT.h"
 #include "tesloadscreen.h"
 #include "tesloadscreen_decls.h"
+#include "../include/TESLoadScreen.h"
+#include "../include/BaseFormComponent.h"
+#include "../include/NiPoint3.h"
+#include "../include/TESDataHandler.h"
+#include "../include/TESDescription.h"
+#include "../include/TESFile.h"
+#include "../include/TESForm.h"
+#include "../include/TESObjectCELL.h"
+#include "../include/TESObjectREFR.h"
+#include "../include/TESTexture.h"
+#include "../include/TESWorldSpace.h"
+
+extern TESDataHandler* g_dataHandler;
 
 extern "C" const char kTESLoadScreenWarning[];
 const char kTESLoadScreenWarning[] = "MASTERFILE: File %s contains old data for loadscreen %s (%08X).";
-
-// Empty destructor for TESLoadScreen; performs no work.
-// @fnv 0x005a67b0
-TESLoadScreen::~TESLoadScreen()
-{}
 
 // Reads the load screen record header and chunks (EDID, OBND, ICON, DESC, LNAM, FNAM, WMI1), storing editor ID, text, form list entries and load screen type.
 // @fnv 0x005a68d0
@@ -71,7 +80,7 @@ bool TESLoadScreen::Load(TESFile* file)
 // @fnv 0x005a66e0
 TESLoadScreen::TESLoadScreen()
 {
-    SetFormType(FORM_ID_LSCR);
+    SetFormType(ENUM_FORM_ID_LSCR_ID);
     SetInitializationState(true);
     m_pLoadScreenType = 0;
 }
@@ -132,9 +141,9 @@ bool TESLoadScreen::MatchesFormLocation(TESForm* form)
     bool validLocation = false;
     WorldCellRecord location = {0, 0, 0};
     bool display = false;
-    switch (form->GetFormType())
+    switch (static_cast<const TESForm*>(form)->GetFormType())
     {
-    case FORM_ID_CELL: {
+    case ENUM_FORM_ID_CELL_ID: {
         TESObjectCELL* cell = static_cast<TESObjectCELL*>(form);
         if (cell->IsCellInterior())
         {
@@ -156,7 +165,7 @@ bool TESLoadScreen::MatchesFormLocation(TESForm* form)
         }
         break;
     }
-    case FORM_ID_WRLD: {
+    case ENUM_FORM_ID_WRLD_ID: {
         TESWorldSpace* world = static_cast<TESWorldSpace*>(form);
         location.auiFormId = world->GetFormID();
         location.uiWorldID = 0;
@@ -164,16 +173,16 @@ bool TESLoadScreen::MatchesFormLocation(TESForm* form)
         display = true;
         break;
     }
-    case FORM_ID_REFR:
-    case FORM_ID_ACHR:
-    case FORM_ID_ACRE:
-    case FORM_ID_PMIS:
-    case FORM_ID_PGRE:
-    case FORM_ID_PBEA:
-    case FORM_ID_PFLA:
-    case FORM_ID_PBAR: {
+    case ENUM_FORM_ID_REFR_ID:
+    case ENUM_FORM_ID_ACHR_ID:
+    case ENUM_FORM_ID_ACRE_ID:
+    case ENUM_FORM_ID_PMIS_ID:
+    case ENUM_FORM_ID_PGRE_ID:
+    case ENUM_FORM_ID_PBEA_ID:
+    case ENUM_FORM_ID_PFLA_ID:
+    case ENUM_FORM_ID_PCBE_ID: {
         TESObjectREFR* ref = static_cast<TESObjectREFR*>(form);
-        TESObjectCELL* cell = ref->GetParentCell();
+        TESObjectCELL* cell = static_cast<const TESObjectREFR*>(ref)->GetParentCell();
         if (cell && cell->IsCellInterior())
         {
             location.auiFormId = cell->GetFormID();
@@ -188,7 +197,7 @@ bool TESLoadScreen::MatchesFormLocation(TESForm* form)
             {
                 location.auiFormId = 0;
                 location.uiWorldID = world->GetFormID();
-                location.uiCellKey = TESWorldSpace::GetKeyForWorldCoord(*ref->GetPos());
+                location.uiCellKey = TESWorldSpace::GetKeyForWorldCoord(*static_cast<const TESObjectREFR*>(ref)->GetPos());
                 display = true;
             }
         }
@@ -223,141 +232,44 @@ bool TESLoadScreen::MatchesFormLocation(TESForm* form)
     return validLocation;
 }
 
-struct FUN_005a7110_shell : public TESLoadScreen
-{
-    bool FUN_005a7110();
-};
-
 bool __fastcall _ref_008256d0(void*);
 
 // @fnv 0x005a7110
-bool FUN_005a7110_shell::FUN_005a7110()
+bool TESLoadScreen::IsDefaultLoadScreen()
 {
-    return _ref_008256d0((char*)this + 0x2c);
+    return _ref_008256d0(&m_kWorldCellRecordList);
 }
 
-struct FUN_005a7130_shell : public TESLoadScreen
-{
-    int FUN_005a7130();
-};
-
-// Returns the int at offset 0x18 of the object stored at this+0x34, or 0 if that pointer is null.
 // @fnv 0x005a7130
-int FUN_005a7130_shell::FUN_005a7130()
+int TESLoadScreen::GetLoadScreenTypeDataType()
 {
     int eRetVal = 0;
-    if (*(int**)((char*)this + 0x34))
+    if (m_pLoadScreenType)
     {
-        eRetVal = *(int*)((char*)*(int**)((char*)this + 0x34) + 0x18);
+        eRetVal = *(int*)((char*)m_pLoadScreenType + 0x18);
     }
     return eRetVal;
 }
 
-struct FUN_005a68b0_shell
-{
-    void FUN_005a68b0();
-};
-
-struct FUN_004855a0_standin
-{
-    void FUN_004855a0();
-};
-struct FUN_00485680_standin
-{
-    void FUN_00485680();
-};
-
 // @fnv 0x005a68b0
-void FUN_005a68b0_shell::FUN_005a68b0()
+void TESLoadScreen::InitializeComponent()
 {
-    ((FUN_004855a0_standin*)this)->FUN_004855a0();
-    ((FUN_00485680_standin*)this)->FUN_00485680();
+    TESForm::FUN_004855a0();
+    TESForm::FUN_00485680();
 }
 
-// TESLoadScreen destructor: clear the form data; members and base components are destroyed afterwards.
-
-class A67E0Form
-{
-  public:
-    virtual ~A67E0Form();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-};
-
-class A67E0Texture
-{
-  public:
-    virtual ~A67E0Texture();
-    char* m_pcPath;
-    unsigned short m_usLen;
-    unsigned short m_usMax;
-};
-
-class A67E0Description
-{
-  public:
-    virtual void Unk_00();
-    int unk04;
-};
-
-class A67E0LocationList
-{
-  public:
-    ~A67E0LocationList();
-    void* m_pkHead;
-    void* m_pkTail;
-    unsigned int m_uiCount;
-};
-
-class A67E0String
-{
-  public:
-    ~A67E0String();
-    char* m_pString;
-    unsigned short m_usLen;
-    unsigned short m_usMax;
-};
-
-class FUN_005a67e0 : public A67E0Form, public A67E0Texture, public A67E0Description
-{
-  public:
-    virtual ~FUN_005a67e0();
-    virtual void ClearData();
-
-    A67E0LocationList m_kLocations;
-    A67E0String m_kLoadingText;
-};
-
 // @fnv 0x005a67e0
-FUN_005a67e0::~FUN_005a67e0()
+TESLoadScreen::~TESLoadScreen()
 {
     ClearData();
 }
 
-class LoadFormListA6C : public BSSimpleList<WorldCellRecord*>
-{
-  public:
-    void AddTail(WorldCellRecord* const& pkItem);
-};
-
-class LoadScreenA6C : public TESLoadScreen
-{
-  public:
-    TESLoadScreenType* GetLoadScreenType();
-    void SetLoadScreenType(TESLoadScreenType* pkType);
-    void CopyFormData(TESForm* pkForm);
-    void CopyLoadScreenData(TESForm* pkForm);
-};
-
 // Copies the load-screen type, form data and list items from another TESLoadScreen into this one.
 // @fnv 0x005a6c70
-void LoadScreenA6C::CopyLoadScreenData(TESForm* pkForm)
+void TESLoadScreen::CopyLoadScreenData(TESForm* pkForm)
 {
     BSSimpleList<WorldCellRecord*>* pkDstNode = 0;
-    LoadScreenA6C* pkSource = static_cast<LoadScreenA6C*>(dynamic_cast<TESLoadScreen*>(pkForm));
+    TESLoadScreen* pkSource = dynamic_cast<TESLoadScreen*>(pkForm);
     if (!pkSource)
         return;
 
@@ -367,7 +279,7 @@ void LoadScreenA6C::CopyLoadScreenData(TESForm* pkForm)
     pkDstNode = &m_kWorldCellRecordList;
     while (pkSrcIter && !pkSrcIter->IsEmpty())
     {
-        static_cast<LoadFormListA6C*>(pkDstNode)->AddTail(pkSrcIter->GetItem());
+        pkDstNode->AddTail(static_cast<WorldCellRecord* const&>(pkSrcIter->GetItem()));
         if (pkDstNode->GetNext())
             pkDstNode = pkDstNode->GetNext();
         pkSrcIter = pkSrcIter->GetNext();
@@ -390,43 +302,24 @@ class ListX
     void* head;
     void* next;
 };
-class FormT
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    ListX kList;
-    bool FUN_00485270(FormT*);
-    int FUN_005f36f0();
-    bool FUN_005a6d30(void* pOther);
-};
 // @fnv 0x005a6d30
-bool FormT::FUN_005a6d30(void* pOther)
+bool TESLoadScreen::CompareLoadScreenData(void* pOther)
 {
-    FormT* pOtherForm = (FormT*)FUN_00ec43fb(pOther, 0, &DAT_01183028, &DAT_01186260, 0);
+    TESLoadScreen* pOtherForm = (TESLoadScreen*)FUN_00ec43fb(pOther, 0, &DAT_01183028, &DAT_01186260, 0);
     if (!pOtherForm)
         return true;
-    ListX* it = &pOtherForm->kList;
-    if (kList.FUN_005ae380() != it->FUN_005ae380())
+    ListX* it = reinterpret_cast<ListX*>(&pOtherForm->m_kWorldCellRecordList);
+    if (reinterpret_cast<ListX*>(&m_kWorldCellRecordList)->FUN_005ae380() != it->FUN_005ae380())
         return true;
     while (it && !it->FUN_008256d0())
     {
-        if (!kList.FUN_005f65d0(it->FUN_006815c0()))
+        if (!reinterpret_cast<ListX*>(&m_kWorldCellRecordList)->FUN_005f65d0(it->FUN_006815c0()))
             return true;
         it = it->FUN_00726070();
     }
-    if (FUN_00485270(pOtherForm))
+    if (CompareFormData(pOtherForm))
         return true;
-    if (FUN_005f36f0() != pOtherForm->FUN_005f36f0())
+    if (GetLoadScreenType() != pOtherForm->GetLoadScreenType())
         return true;
     return false;
 }

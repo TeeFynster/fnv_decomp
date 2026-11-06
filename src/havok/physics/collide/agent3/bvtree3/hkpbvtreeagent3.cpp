@@ -32,7 +32,8 @@ void __cdecl FUN_00d2d480(void*, void* target, float first, float second, int fl
     FUN_00da35f0(target, first, second, flags);
 }
 
-struct Interface
+// Exe 0x00d2d4b0: unit-local Interface view; declarations and layout are preserved.
+struct Hkpbvtreeagent3InterfaceView
 {
     virtual void f0();
     virtual void f1();
@@ -41,7 +42,7 @@ struct Interface
     virtual void f4();
 };
 // @fnv 0x00d2d4b0
-void FUN_00d2d4b0(Interface** a)
+void FUN_00d2d4b0(Hkpbvtreeagent3InterfaceView** a)
 {
     (*a)->f4();
 }

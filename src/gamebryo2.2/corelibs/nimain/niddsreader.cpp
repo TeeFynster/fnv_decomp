@@ -1,6 +1,61 @@
 // gamebryo2.2/corelibs/nimain/niddsreader.cpp: NiDDSReader, DDSReader, NiBMPReader, ClsReader and more (23 functions)
 
-#include "niddsreader_decls.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiDDSReader.h"
+#include "../../../../include/NiBMPReader.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiPixelData.h"
+inline void* operator new(size_t, void* memory) throw()
+{
+    return memory;
+}
+
+
+// The shared stream declares these operations; this unit needs their inline bodies.
+// Its approved declaration has no named storage for position or the transfer callbacks.
+inline unsigned int NiBinaryStream::BinaryRead(void* buffer, unsigned int bytes,
+                                               unsigned int* componentSizes, unsigned int componentCount)
+{
+    unsigned int bytesRead = (*reinterpret_cast<ReadFunction*>(reinterpret_cast<char*>(this) + 8))(
+        this, buffer, bytes, componentSizes, componentCount);
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(this) + 4) += bytesRead;
+    return bytesRead;
+}
+
+inline unsigned int NiBinaryStream::Read(void* buffer, unsigned int bytes)
+{
+    unsigned int size = 1;
+    return BinaryRead(buffer, bytes, &size, 1);
+}
+
+inline void NiBinaryStream::Seek(int offset, int whence)
+{
+    // The image readers use the file-stream extension at virtual slot five.
+    typedef void (__thiscall* SeekFile)(NiBinaryStream*, int, int);
+    reinterpret_cast<SeekFile>((*reinterpret_cast<void***>(this))[5])(this, offset, whence);
+}
+
+static inline void ReadPixelBytes(NiBinaryStream* stream, void* data, unsigned int count)
+{
+    unsigned int size = 1;
+    *reinterpret_cast<unsigned int*>(reinterpret_cast<char*>(stream) + 4) +=
+        (*reinterpret_cast<NiBinaryStream::ReadFunction*>(reinterpret_cast<char*>(stream) + 8))(
+            stream, data, count, &size, 1);
+}
+
+static __forceinline void ReadStreamBytes(NiBinaryStream& stream, void* buffer, int size)
+{
+    stream.BinaryRead(buffer, size, reinterpret_cast<unsigned int*>(&size), 1);
+}
+
+extern const NiPixelFormat DAT_011aa2e8;
+extern void(__stdcall* DAT_00fdf054)(void*);
+
+inline NiImageReader::NiImageReader()
+{
+    DAT_00fdf054(lock);
+}
+
 // Initializes the NiBMPReader fields: zeroes height, width, unknown, x, y, sets format to DAT_011aa2e8 and clears b1 and b2.
 // @fnv 0x00a8e410
 NiBMPReader::NiBMPReader()
@@ -250,12 +305,7 @@ extern void(__stdcall* DAT_00fdf058)(void*);
 
 void __cdecl FUN_00aa10f0(void* apMemory);
 
-class FUN_00a8d850_pool
-{
-  public:
-    void FUN_00aa4060(void* apMemory);
-};
-extern FUN_00a8d850_pool DAT_011f6238;
+extern MemoryManager DAT_011f6238;
 
 struct FUN_00a8d850_cls : NiImageReader
 {
@@ -280,40 +330,19 @@ FUN_00a8d850_cls* FUN_00a8d850_cls::DestroyImageReader(unsigned char acFlags)
     *(int*)this = (int)&DAT_0109f4b0;
     FUN_00aa10f0(pFirst);
     void* pSecond = m_p16c;
-    DAT_011f6238.FUN_00aa4060(pSecond);
+    DAT_011f6238.Deallocate(pSecond);
     *(int*)this = (int)&DAT_0109f3d0;
     DAT_00fdf058(lock);
     if (acFlags & 1)
     {
-        DAT_011f6238.FUN_00aa4060(this);
+        DAT_011f6238.Deallocate(this);
     }
     return this;
 }
 
-struct ClsStream
-{
-    int s00;
-    int m_pos;
-    int(__cdecl* m_read)(ClsStream*, unsigned char*, int, int*, int);
-};
 struct ClsSub
 {
     ClsSub* FUN_00a8b110(int b, int w, int d);
-};
-struct ClsImage
-{
-    int i00;
-    int i04;
-    NiPixelFormat m_fmt;
-    int i4c;
-    int m_50;
-    unsigned int* m_p54;
-    unsigned int* m_p58;
-    unsigned int* m_p5c;
-    int i60;
-    int m_64;
-    ClsImage* FUN_00a7c190(int w, int h, NiPixelFormat* fmt, int a, int b);
-    void FUN_00a76a60(ClsSub* sub);
 };
 extern void* __cdecl FUN_00aa13e0(unsigned int size);
 extern void __cdecl FUN_00aa10f0(void* p);
@@ -352,17 +381,21 @@ struct ClsReader : NiImageReader
     int d16c;
     void (ClsReader::*m_fn170)(unsigned char*, int);
     int d174;
-    virtual void Slot1();
-    virtual void Slot2();
-    virtual bool Slot3(ClsStream* stream, int* o3, int* o2, NiPixelFormat* fmt, unsigned char* byteOut, int* o1);
-    void ReadPixels(ClsStream* stream);
-    void Decode(ClsStream* stream, unsigned char* buf, int cap);
-    ClsImage* ReadImage(ClsStream* stream, ClsImage* image);
+    bool Slot3(NiBinaryStream* stream, int* o3, int* o2, NiPixelFormat* fmt, unsigned char* byteOut, int* o1)
+    {
+        // The shared base declares vf03 without this reader's parameters.
+        typedef bool (__thiscall* ReadHeader)(ClsReader*, NiBinaryStream*, int*, int*, NiPixelFormat*, unsigned char*, int*);
+        return reinterpret_cast<ReadHeader>((*reinterpret_cast<void***>(this))[3])(this, stream, o3, o2, fmt,
+                                                                                  byteOut, o1);
+    }
+    void ReadPixels(NiBinaryStream* stream);
+    void Decode(NiBinaryStream* stream, unsigned char* buf, int cap);
+    NiPixelData* ReadImage(NiBinaryStream* stream, NiPixelData* image);
 };
 
 // Reads pixel data from the stream into an image, allocating or reusing the image and buffer, then writes each row via m_fn170.
 // @fnv 0x00a8e120
-ClsImage* ClsReader::ReadImage(ClsStream* stream, ClsImage* image)
+NiPixelData* ClsReader::ReadImage(NiBinaryStream* stream, NiPixelData* image)
 {
     NiPixelFormat fmt;
     void* lockPtr = lock;
@@ -400,9 +433,9 @@ ClsImage* ClsReader::ReadImage(ClsStream* stream, ClsImage* image)
         DAT_00fdf100(lockPtr);
         return 0;
     }
-    ClsImage* result;
-    if (image != 0 && *image->m_p54 == (unsigned int)(unsigned short)w10e &&
-        *image->m_p58 == (unsigned int)(unsigned short)w110 && image->m_fmt == m_eFormat)
+    NiPixelData* result;
+    if (image != 0 && *image->m_puiWidth == (unsigned int)(unsigned short)w10e &&
+        *image->m_puiHeight == (unsigned int)(unsigned short)w110 && image->m_kPixelFormat == m_eFormat)
     {
         result = image;
     }
@@ -411,8 +444,7 @@ ClsImage* ClsReader::ReadImage(ClsStream* stream, ClsImage* image)
         void* pImageMem = FUN_00aa13e0(0x74);
         if (pImageMem != 0)
         {
-            result = ((ClsImage*)pImageMem)
-                         ->FUN_00a7c190((int)(unsigned short)w10e, (int)(unsigned short)w110, &m_eFormat, 1, 1);
+            result = ::new (pImageMem) NiPixelData((int)(unsigned short)w10e, (int)(unsigned short)w110, &m_eFormat, 1, 1);
         }
         else
         {
@@ -432,7 +464,7 @@ ClsImage* ClsReader::ReadImage(ClsStream* stream, ClsImage* image)
         {
             sub = 0;
         }
-        image->FUN_00a76a60(sub);
+        image->FUN_00a76a60(reinterpret_cast<NiPalette*>(sub));
     }
     if (m_pRayCursor < (unsigned int)count)
     {
@@ -440,11 +472,11 @@ ClsImage* ClsReader::ReadImage(ClsStream* stream, ClsImage* image)
         FUN_00aa10f0(m_buffer);
         m_buffer = (unsigned char*)FUN_00aa1070(m_pRayCursor);
     }
-    int iOffset = (int)*image->m_p5c + image->m_50;
-    int step = image->m_64 * (int)*image->m_p54;
+    int iOffset = (int)*image->m_puiOffsetInBytes + (int)image->m_pucPixels;
+    int step = image->m_uiPixelStride * (int)*image->m_puiWidth;
     if (step == 0)
     {
-        step = (int)(*image->m_p54 >> 1);
+        step = (int)(*image->m_puiWidth >> 1);
     }
     if (b117 != 0)
     {
@@ -467,7 +499,7 @@ ClsImage* ClsReader::ReadImage(ClsStream* stream, ClsImage* image)
         {
             unsigned char* rowBuffer = m_buffer;
             flag = 1;
-            stream->m_pos += stream->m_read(stream, rowBuffer, count, &flag, 1);
+            stream->BinaryRead(rowBuffer, count, reinterpret_cast<unsigned int*>(&flag), 1);
             (this->*m_fn170)(m_buffer, iOffset);
             iOffset += step;
         }
@@ -479,31 +511,6 @@ ClsImage* ClsReader::ReadImage(ClsStream* stream, ClsImage* image)
 extern void(__stdcall* DAT_00fdf05c)(void*);
 extern void(__stdcall* DAT_00fdf100)(void*);
 extern int DAT_010a2484;
-
-class NiBinaryStream
-{
-  public:
-    virtual ~NiBinaryStream();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void SetEndianSwap(bool bDoSwap);
-    virtual void Seek(int iNumBytes, int iWhence);
-
-    unsigned int m_uiStreamFlags;
-    unsigned int (*m_pfnRead)(NiBinaryStream* pkThis, void* pvBuffer, unsigned int uiBytes,
-                              unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-    unsigned int (*m_pfnWrite)(NiBinaryStream* pkThis, const void* pvBuffer, unsigned int uiBytes,
-                               unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
 
 template <class T> inline unsigned int NiBinaryStreamLoad(NiBinaryStream& kStream, T* pkValue, unsigned int uiNumEls)
 {
@@ -540,30 +547,15 @@ extern NiPixelFormat DAT_011aa648;
 extern NiPixelFormat DAT_011aa690;
 extern NiPixelFormat DAT_011aa6d8;
 
-class NiDDSReader : public NiImageReader
+inline void NiDDSReader::Lock()
 {
-  public:
-    unsigned int m_uiImageHeight;
-    unsigned int m_uiImageWidth;
-    unsigned int m_uiMipMapLevels;
-    bool m_bCubeMap;
-    NiPixelFormat m_eFormat;
+    DAT_00fdf05c(lock);
+}
 
-    void Lock()
-    {
-        DAT_00fdf05c(lock);
-    }
-    void Unlock()
-    {
-        DAT_00fdf100(lock);
-    }
-
-    __declspec(noinline) bool IsValidBitDepth(unsigned int uiRedMask, unsigned int uiGreenMask, unsigned int uiBlueMask,
-                                              unsigned int uiAlphaMask, unsigned int uiBitsPerPixel);
-    NiPixelFormat NormalizePixelFormat(NiPixelFormat kFormat);
-    bool FUN_00a8c1e0(NiBinaryStream& kIst, unsigned int& uiWidth, unsigned int& uiHeight, NiPixelFormat& kFormat,
-                      bool& bMipmap, unsigned int& uiFaces);
-};
+inline void NiDDSReader::Unlock()
+{
+    DAT_00fdf100(lock);
+}
 
 __declspec(noinline) bool NiDDSReader::IsValidBitDepth(unsigned int uiRedMask, unsigned int uiGreenMask,
                                                        unsigned int uiBlueMask, unsigned int uiAlphaMask,
@@ -748,27 +740,6 @@ bool NiDDSReader::FUN_00a8c1e0(NiBinaryStream& kIst, unsigned int& uiWidth, unsi
     return true;
 }
 
-struct PixelDataView
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
-    int unk28, unk2c, unk30, unk34, unk38, unk3c, unk40, unk44, unk48, unk4c;
-    unsigned char* pixels;
-    unsigned int* widths;
-    unsigned int* heights;
-    unsigned int* offsets;
-    unsigned int levels;
-};
-struct BinaryStreamView
-{
-    unsigned int unk00;
-    unsigned int position;
-    unsigned int(__cdecl* reader)(BinaryStreamView*, void*, unsigned int, unsigned int*, unsigned int);
-    void Read(void* data, unsigned int count)
-    {
-        unsigned int size = 1;
-        position += reader(this, data, count, &size, 1);
-    }
-};
 struct MaskData
 {
     unsigned int mask[4];
@@ -832,15 +803,15 @@ struct FormatView
 };
 // Reads one mip level from a stream and expands its packed pixels into RGBA bytes, forcing alpha to 255 when the source format has no alpha channel.
 // @fnv 0x00a8c7a0
-void __cdecl FUN_00a8c7a0(BinaryStreamView* stream, PixelDataView* data, NiPixelFormat source, NiPixelFormat dest,
+void __cdecl FUN_00a8c7a0(NiBinaryStream* stream, NiPixelData* data, NiPixelFormat source, NiPixelFormat dest,
                           unsigned int level, unsigned int face)
 {
-    unsigned char* __restrict pixels = data->pixels + data->offsets[level] + data->offsets[data->levels] * face;
-    stream->Read(pixels, data->offsets[level + 1] - data->offsets[level]);
+    unsigned char* __restrict pixels = data->m_pucPixels + data->m_puiOffsetInBytes[level] + data->m_puiOffsetInBytes[data->m_uiMipmapLevels] * face;
+    ReadPixelBytes(stream, pixels, data->m_puiOffsetInBytes[level + 1] - data->m_puiOffsetInBytes[level]);
     MaskData masks;
     masks.FUN_00a779b0(source);
-    unsigned int width = data->widths[level];
-    unsigned int height = data->heights[level];
+    unsigned int width = data->m_puiWidth[level];
+    unsigned int height = data->m_puiHeight[level];
     if (((FormatCompare&)source).FUN_00a765c0(dest))
     {
         unsigned int* input = (unsigned int*)pixels;
@@ -884,122 +855,44 @@ void __cdecl FUN_00a8c7a0(BinaryStreamView* stream, PixelDataView* data, NiPixel
 
 extern void(__stdcall* DAT_00fdf05c)(void*);
 extern void(__stdcall* DAT_00fdf100)(void*);
-struct ImageStream
-{
-    unsigned int unk00, position;
-    unsigned int(__cdecl* read)(ImageStream*, void*, unsigned int, unsigned int*, unsigned int);
-};
-struct PixelData
-{
-    unsigned int unk00, unk04;
-    NiPixelFormat format;
-    unsigned int unk4c;
-    unsigned char* pixels;
-    unsigned int* widths;
-    unsigned int* heights;
-    unsigned int* offsets;
-    unsigned int levels, unk64, unk68, faces, unk70;
-    static void* operator new(unsigned int) throw();
-    PixelData(unsigned int, unsigned int, const NiPixelFormat&, unsigned int, unsigned int) throw();
-};
-void __cdecl Convert32(ImageStream*, PixelData*, NiPixelFormat, NiPixelFormat, unsigned int, unsigned int,
+void __cdecl Convert32(NiBinaryStream*, NiPixelData*, NiPixelFormat, NiPixelFormat, unsigned int, unsigned int,
                        unsigned char);
-void __cdecl Convert24(ImageStream*, PixelData*, NiPixelFormat, NiPixelFormat, unsigned int, unsigned int,
+void __cdecl Convert24(NiBinaryStream*, NiPixelData*, NiPixelFormat, NiPixelFormat, unsigned int, unsigned int,
                        unsigned char);
-void __cdecl Convert16(ImageStream*, PixelData*, NiPixelFormat, NiPixelFormat, unsigned int, unsigned int,
+void __cdecl Convert16(NiBinaryStream*, NiPixelData*, NiPixelFormat, NiPixelFormat, unsigned int, unsigned int,
                        unsigned char);
-struct DDSReader
+inline bool ReadDDSHeader(NiDDSReader* reader, NiBinaryStream* stream, unsigned int* width, unsigned int* height,
+                          NiPixelFormat* format, bool* mipmap, unsigned int* faces)
 {
-    virtual void slot0();
-    virtual void slot1();
-    virtual void slot2();
-    virtual bool ReadHeader(ImageStream*, unsigned int*, unsigned int*, NiPixelFormat*, bool*, unsigned int*);
-    unsigned int unk004;
-    unsigned int unk008;
-    unsigned int unk00c;
-    unsigned int unk010;
-    unsigned int unk014;
-    unsigned int unk018;
-    unsigned int unk01c;
-    unsigned int unk020;
-    unsigned int unk024;
-    unsigned int unk028;
-    unsigned int unk02c;
-    unsigned int unk030;
-    unsigned int unk034;
-    unsigned int unk038;
-    unsigned int unk03c;
-    unsigned int unk040;
-    unsigned int unk044;
-    unsigned int unk048;
-    unsigned int unk04c;
-    unsigned int unk050;
-    unsigned int unk054;
-    unsigned int unk058;
-    unsigned int unk05c;
-    unsigned int unk060;
-    unsigned int unk064;
-    unsigned int unk068;
-    unsigned int unk06c;
-    unsigned int unk070;
-    unsigned int unk074;
-    unsigned int unk078;
-    unsigned int unk07c;
-    unsigned int unk080;
-    unsigned int unk084;
-    unsigned int unk088;
-    unsigned int unk08c;
-    unsigned int unk090;
-    unsigned int unk094;
-    unsigned int unk098;
-    unsigned int unk09c;
-    unsigned int unk0a0;
-    unsigned int unk0a4;
-    unsigned int unk0a8;
-    unsigned int unk0ac;
-    unsigned int unk0b0;
-    unsigned int unk0b4;
-    unsigned int unk0b8;
-    unsigned int unk0bc;
-    unsigned int unk0c0;
-    unsigned int unk0c4;
-    unsigned int unk0c8;
-    unsigned int unk0cc;
-    unsigned int unk0d0;
-    unsigned int unk0d4;
-    unsigned int unk0d8;
-    unsigned int unk0dc;
-    unsigned int unk0e0;
-    unsigned int unk0e4;
-    unsigned int unk0e8;
-    unsigned int unk0ec;
-    unsigned int unk0f0;
-    unsigned int unk0f4;
-    unsigned int unk0f8;
-    unsigned int unk0fc;
-    unsigned int height, width, levels;
-    unsigned char swap, unk10d, unk10e, unk10f;
-    NiPixelFormat format;
-    PixelData* ReadPixelData(ImageStream*, PixelData*);
-};
+    // The shared base declares vf03 without this reader's parameters.
+    typedef bool (__thiscall* ReadHeader)(NiDDSReader*, NiBinaryStream*, unsigned int*, unsigned int*, NiPixelFormat*,
+                                         bool*, unsigned int*);
+    return reinterpret_cast<ReadHeader>((*reinterpret_cast<void***>(reader))[3])(reader, stream, width, height,
+                                                                                format, mipmap, faces);
+}
+
 // Reads DDS pixel data for all faces and mip levels from stream into result, converting pixel format if it differs from the requested format.
 // @fnv 0x00a8d0d0
-PixelData* DDSReader::ReadPixelData(ImageStream* stream, PixelData* apPixelData)
+NiPixelData* __fastcall ReadDDSPixelData(NiDDSReader* reader, int, NiBinaryStream* stream, NiPixelData* apPixelData)
 {
     unsigned int uiWidth, uiHeight, faceCount;
     bool headerFlag;
     NiPixelFormat requested;
-    DAT_00fdf05c(&unk080);
-    if (!ReadHeader(stream, &uiWidth, &uiHeight, &requested, &headerFlag, &faceCount))
+    DAT_00fdf05c(reader->lock);
+    if (!ReadDDSHeader(reader, stream, &uiWidth, &uiHeight, &requested, &headerFlag, &faceCount))
     {
-        DAT_00fdf100(&unk080);
+        DAT_00fdf100(reader->lock);
         return 0;
     }
-    if (!apPixelData || apPixelData->widths[0] != width || apPixelData->heights[0] != height ||
-        !(apPixelData->format == requested) || apPixelData->levels != levels || apPixelData->faces != faceCount)
-        apPixelData = new PixelData(width, height, requested, levels, faceCount);
-    unsigned int mipCount = apPixelData->levels;
-    if (requested == format)
+    if (!apPixelData || apPixelData->m_puiWidth[0] != reader->m_uiImageWidth || apPixelData->m_puiHeight[0] != reader->m_uiImageHeight ||
+        !(apPixelData->m_kPixelFormat == requested) || apPixelData->m_uiMipmapLevels != reader->m_uiMipMapLevels || apPixelData->m_uiFaces != faceCount)
+    {
+        void* memory = NiPixelData::operator new(sizeof(NiPixelData));
+        apPixelData = memory ? ::new (memory) NiPixelData(reader->m_uiImageWidth, reader->m_uiImageHeight, requested,
+                                                       reader->m_uiMipMapLevels, faceCount) : 0;
+    }
+    unsigned int mipCount = apPixelData->m_uiMipmapLevels;
+    if (requested == reader->m_eFormat)
     {
         for (unsigned int face = 0; face < faceCount; ++face)
         {
@@ -1027,11 +920,11 @@ PixelData* DDSReader::ReadPixelData(ImageStream* stream, PixelData* apPixelData)
             }
             for (unsigned int mip = 0; mip < mipCount; ++mip)
             {
-                unsigned char* destination = apPixelData->pixels + apPixelData->offsets[mip] +
-                                             apPixelData->offsets[apPixelData->levels] * faceIndex;
-                unsigned int size = apPixelData->offsets[mip + 1] - apPixelData->offsets[mip];
+                unsigned char* destination = apPixelData->m_pucPixels + apPixelData->m_puiOffsetInBytes[mip] +
+                                             apPixelData->m_puiOffsetInBytes[apPixelData->m_uiMipmapLevels] * faceIndex;
+                unsigned int size = apPixelData->m_puiOffsetInBytes[mip + 1] - apPixelData->m_puiOffsetInBytes[mip];
                 unsigned int count = 1;
-                stream->position += stream->read(stream, destination, size, &count, 1);
+                stream->BinaryRead(destination, size, &count, 1);
             }
         }
     }
@@ -1063,22 +956,22 @@ PixelData* DDSReader::ReadPixelData(ImageStream* stream, PixelData* apPixelData)
             }
             for (unsigned int mip = 0; mip < mipCount; ++mip)
             {
-                switch (format.bits)
+                switch (reader->m_eFormat.bits)
                 {
                 case 32:
-                    Convert32(stream, apPixelData, format, requested, mip, faceIndex, swap);
+                    Convert32(stream, apPixelData, reader->m_eFormat, requested, mip, faceIndex, reader->m_bCubeMap);
                     break;
                 case 24:
-                    Convert24(stream, apPixelData, format, requested, mip, faceIndex, swap);
+                    Convert24(stream, apPixelData, reader->m_eFormat, requested, mip, faceIndex, reader->m_bCubeMap);
                     break;
                 case 16:
-                    Convert16(stream, apPixelData, format, requested, mip, faceIndex, swap);
+                    Convert16(stream, apPixelData, reader->m_eFormat, requested, mip, faceIndex, reader->m_bCubeMap);
                     break;
                 }
             }
         }
     }
-    DAT_00fdf100(&unk080);
+    DAT_00fdf100(reader->lock);
     return apPixelData;
 }
 
@@ -1099,21 +992,6 @@ void __fastcall FUN_00a8d590(char* this_ptr, int, unsigned char* pSrc, unsigned 
 void __fastcall FUN_00a8d600(char* self, int edx, const unsigned char* src, unsigned char* dst);
 void __fastcall FUN_00a8d670(char*, int, unsigned char*, unsigned char*);
 void __fastcall FUN_00a8d6c0(char*, int, unsigned char*, unsigned char*);
-struct ReadStream
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual int Seek(int pos);
-    virtual int SetByte(int b, int val);
-    int pos;
-    int(__cdecl* ReadFn)(ReadStream* self, void* dest, int size, int* pSize, int flag);
-    __forceinline void ReadBytes(void* dest, int size)
-    {
-        pos += ReadFn(this, dest, size, &size, 1);
-    }
-};
 struct DDSReader : NiImageReader
 {
     unsigned char b100, b101, b102, unk103;
@@ -1127,32 +1005,32 @@ struct DDSReader : NiImageReader
     void(__fastcall* m_pfnPixelConverter)(char*, int, unsigned char*, unsigned char*);
     unsigned int d174;
     unsigned char b178, b179, b17a, b17b;
-    bool FUN_00a8dce0(ReadStream* stream, int* pA, int* pB, NiPixelFormat* pFmt, unsigned char* pByte, int* pFlag);
+    bool FUN_00a8dce0(NiBinaryStream* stream, int* pA, int* pB, NiPixelFormat* pFmt, unsigned char* pByte, int* pFlag);
 };
 // Seeks to the start, reads fields, selects m_eFormat and a converter, and writes values to pFlag, pA, pB, pFmt, and pByte.
 // @fnv 0x00a8dce0
-bool DDSReader::FUN_00a8dce0(ReadStream* stream, int* apWidth, int* apHeight, NiPixelFormat* apFormat,
+bool DDSReader::FUN_00a8dce0(NiBinaryStream* stream, int* apWidth, int* apHeight, NiPixelFormat* apFormat,
                              unsigned char* pByte, int* pFlag)
 {
-    ReadStream& kReadStream = *stream;
-    kReadStream.Seek(0);
+    NiBinaryStream& kReadStream = *stream;
+    kReadStream.SetEndianSwap(false);
     DAT_00fdf05c(lock);
     *pFlag = 1;
-    kReadStream.ReadBytes(&b100, 1);
-    kReadStream.ReadBytes(&b101, 1);
-    kReadStream.ReadBytes(&b102, 1);
-    kReadStream.ReadBytes(&w104, 2);
-    kReadStream.ReadBytes(&w106, 2);
-    kReadStream.ReadBytes(&b108, 1);
-    kReadStream.ReadBytes(&w10a, 2);
-    kReadStream.ReadBytes(&w10c, 2);
-    kReadStream.ReadBytes(&w10e, 2);
-    kReadStream.ReadBytes(&w110, 2);
-    kReadStream.ReadBytes(&b112, 1);
-    kReadStream.ReadBytes(&b113, 1);
+    ReadStreamBytes(kReadStream, &b100, 1);
+    ReadStreamBytes(kReadStream, &b101, 1);
+    ReadStreamBytes(kReadStream, &b102, 1);
+    ReadStreamBytes(kReadStream, &w104, 2);
+    ReadStreamBytes(kReadStream, &w106, 2);
+    ReadStreamBytes(kReadStream, &b108, 1);
+    ReadStreamBytes(kReadStream, &w10a, 2);
+    ReadStreamBytes(kReadStream, &w10c, 2);
+    ReadStreamBytes(kReadStream, &w10e, 2);
+    ReadStreamBytes(kReadStream, &w110, 2);
+    ReadStreamBytes(kReadStream, &b112, 1);
+    ReadStreamBytes(kReadStream, &b113, 1);
     if (b100)
     {
-        kReadStream.SetByte(b100, DAT_010a2484);
+        kReadStream.Seek(b100, DAT_010a2484);
     }
     b117 = ~(b113 >> 5) & 1;
     switch (b102)
@@ -1252,10 +1130,6 @@ bool DDSReader::FUN_00a8dce0(ReadStream* stream, int* apWidth, int* apHeight, Ni
 }
 }  // namespace fnv_00a8dce0
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 __declspec(dllimport) void __stdcall DeleteCriticalSection(void*);
 struct FUN_00a8e480 : NiImageReader
@@ -1338,35 +1212,6 @@ ChannelInfo::ChannelInfo(const NiPixelFormat& f)
     }
     bits3 = 8 - b;
 }
-struct NiBinaryStream
-{
-    void* vtbl;
-    unsigned int pos;
-    unsigned int (*pfnRead)(NiBinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        pos += uiBytesRead;
-        return uiBytesRead;
-    }
-    unsigned int Read(void* pvBuffer, unsigned int uiBytes)
-    {
-        unsigned int uiSize = 1;
-        return BinaryRead(pvBuffer, uiBytes, &uiSize, 1);
-    }
-};
-struct NiPixelData
-{
-    unsigned int unk00, unk04;
-    NiPixelFormat format;
-    unsigned int unk4c;
-    unsigned char* pixels;
-    unsigned int* widths;
-    unsigned int* heights;
-    unsigned int* offsets;
-    unsigned int levels;
-};
 
 template <int C> static inline unsigned char Expand(unsigned int raw, const ChannelInfo& ci)
 {
@@ -1388,14 +1233,14 @@ template <int C> static inline unsigned char Expand(unsigned int raw, const Chan
     return (unsigned char)(v | acc);
 }
 
-// Reads packed pixel data from stream into buf, expands each channel via ChannelInfo, and writes RGBA or RGB bytes into data->pixels for the given mip and face.
+// Reads packed pixel data from stream into buf, expands each channel via ChannelInfo, and writes RGBA or RGB bytes into data->m_pucPixels for the given mip and face.
 // @fnv 0x00a8cc40
 void __cdecl FUN_00a8cc40(NiBinaryStream* stream, NiPixelData* apPixelData, NiPixelFormat srcFmt, NiPixelFormat dstFmt,
                           unsigned int mip, unsigned int face)
 {
     unsigned char* dst =
-        apPixelData->pixels + apPixelData->offsets[mip] + apPixelData->offsets[apPixelData->levels] * face;
-    unsigned int total = apPixelData->heights[mip] * apPixelData->widths[mip] * 2;
+        apPixelData->m_pucPixels + apPixelData->m_puiOffsetInBytes[mip] + apPixelData->m_puiOffsetInBytes[apPixelData->m_uiMipmapLevels] * face;
+    unsigned int total = apPixelData->m_puiHeight[mip] * apPixelData->m_puiWidth[mip] * 2;
     ChannelInfo ci(srcFmt);
     unsigned short buf[256];
     for (unsigned int done = 0; done < total;)

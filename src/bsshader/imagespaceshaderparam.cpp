@@ -1,4 +1,5 @@
 // bsshader/imagespaceshaderparam.cpp: ImageSpaceShaderParam (9 functions)
+#include "NiRefObject_inline.h"
 
 #include "imagespaceshaderparam_decls.h"
 #include "imagespaceshaderparam_types_NiD3DShaderConstantMap.h"
@@ -9,8 +10,8 @@
 void ImageSpaceShaderParam::AllocateShaderConstants(int vertexCount, int pixelCount)
 {
     FUN_00b8a7e0();
-    m_pVertexShaderConstantMap = new NiD3DShaderConstantMap(g_pkRenderer, 0);
-    m_pPixelShaderConstantMap = new NiD3DShaderConstantMap(g_pkRenderer, 2);
+    m_pVertexShaderConstantMap = new NiD3DShaderConstantMap(g_pkRenderer, 0u);
+    m_pPixelShaderConstantMap = new NiD3DShaderConstantMap(g_pkRenderer, 2u);
     m_iVertexShaderConstantCount = vertexCount + 3;
     if (m_iVertexShaderConstantCount > 0)
     {
@@ -18,7 +19,7 @@ void ImageSpaceShaderParam::AllocateShaderConstants(int vertexCount, int pixelCo
             g_memoryManager.Deallocate(m_pfVertexShaderConstants);
         m_pfVertexShaderConstants =
             reinterpret_cast<float*>(new ImageSpaceShaderParamFloat[m_iVertexShaderConstantCount * 4]);
-        m_pVertexShaderConstantMap.m_pObject->AddConstant(
+        m_pVertexShaderConstantMap.m_pObject->SetConstant(
             "Constant Group", 0x10000000, 0, 0, m_iVertexShaderConstantCount, "", m_iVertexShaderConstantCount * 16, 4,
             m_pfVertexShaderConstants, false);
     }
@@ -29,7 +30,7 @@ void ImageSpaceShaderParam::AllocateShaderConstants(int vertexCount, int pixelCo
             g_memoryManager.Deallocate(m_pfPixelShaderConstants);
         m_pfPixelShaderConstants =
             reinterpret_cast<float*>(new ImageSpaceShaderParamFloat[m_iPixelShaderConstantCount * 4]);
-        m_pPixelShaderConstantMap.m_pObject->AddConstant(
+        m_pPixelShaderConstantMap.m_pObject->SetConstant(
             "Constant Group", 0x10000000, 0, 0, m_iPixelShaderConstantCount, "", m_iPixelShaderConstantCount * 16, 4,
             m_pfPixelShaderConstants, false);
     }
@@ -88,10 +89,11 @@ void ImageSpaceShaderParam::CopyParamData(int index, const float* data, unsigned
 // @fnv 0x00b8a7c0
 void ImageSpaceShaderParam::FUN_00b8a7c0()
 {
-    m_eClearFlags = DAT_011f9440 ? NiRenderer__ClearFlags_CLEAR_ALL : NiRenderer__ClearFlags_CLEAR_NONE;
+    m_eClearFlags = DAT_011f9440 ? NiRenderer::CLEAR_ALL : NiRenderer::CLEAR_NONE;
 }
 
-struct H
+// View of ImageSpaceShaderParam: +0x3C is m_pfVertexShaderConstants (the first three vectors are reserved).
+struct ImageSpaceVertexConstantsView
 {
     char _0[0x3C];
     float* _pf;
@@ -99,7 +101,7 @@ struct H
 };
 // Writes four floats f0..f3 into the float array at offset aiIndex*4+12.
 // @fnv 0x00b8a760
-void H::SetFloat4At(int aiIndex, float f0, float f1, float f2, float f3)
+void ImageSpaceVertexConstantsView::SetFloat4At(int aiIndex, float f0, float f1, float f2, float f3)
 {
     int idx = aiIndex * 4 + 12;
     _pf[idx] = f0;

@@ -18,7 +18,7 @@ void TESObjectANIO::InitItem()
 }
 
 // @fnv 0x00511b20
-bool TESObjectANIO::Load(TESFile* file)
+bool TESObjectANIO::LoadForm(TESFile* file)  // TESForm vslot 8
 {
     unsigned char formType = file->GetTESForm();
     if (formType != 0x4d)

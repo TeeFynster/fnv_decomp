@@ -592,12 +592,13 @@ struct ObjectResolver
 {
     int unk00;
 };
-struct ListNode
+// Exe 0x00c59200: unit-local ListNode view; declarations and layout are preserved.
+struct PathingdebuggeometryListNodeView
 {
     bool Probe();
     ObjectResolver* GetData();
     void Unlink(ObjectResolver* data);
-    ListNode* Next();
+    PathingdebuggeometryListNodeView* Next();
 };
 struct EventTarget
 {
@@ -606,7 +607,7 @@ struct EventTarget
     virtual void v08();
     virtual void v0c(int a, int b);
 };
-extern ListNode DAT_011db150;
+extern PathingdebuggeometryListNodeView DAT_011db150;
 extern int DAT_011f21cc;
 extern int DAT_011db0d4;
 void Callee_007ebd50();

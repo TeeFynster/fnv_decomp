@@ -5,6 +5,9 @@
 // src/staging/blk_00ae0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/BSAudio.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/NiPoint3.h"
 extern int DAT_010a42b4;
 void* __cdecl _fnv_zlib_memset(void* p, int c, unsigned int n);
 struct FUN_00af30a0_Class
@@ -122,7 +125,6 @@ struct FUN_00afd960_Class
     int iField;
     void FUN_00afd960();
 };
-struct NiFile;
 struct FileFinder
 {
     static NiFile* __cdecl GetFile(const char*, int, unsigned int, unsigned int);
@@ -148,10 +150,6 @@ struct FUN_00aea730_Class
     int m_kPointB;
     FUN_00aea730_Class* FUN_00aea730(int v);
 };
-struct MemoryManager
-{
-    void __thiscall Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00aeaa80_Class
 {
@@ -166,11 +164,6 @@ struct FUN_00aefcf0_Class
 struct FUN_00af1d20_Class
 {
     void* FUN_00af1d20();
-};
-struct BSFile
-{
-    void __thiscall Close();
-    virtual ~BSFile();
 };
 int __cdecl CloseAndDeleteFile(BSFile* apFile);
 struct DownloadableContentManager
@@ -247,11 +240,6 @@ struct FUN_00afd8b0_Class
     unsigned short m_usPassCountLocal;
     void* __thiscall FUN_00afd8b0();
 };
-struct BSAudio
-{
-    char pad[0x38];
-    void* pAudio;
-};
 extern BSAudio* DAT_011f6d98;
 struct FUN_00af1ba0_Class
 {
@@ -316,13 +304,6 @@ struct FUN_00af3a40_Class
     int i4c;
     void* __thiscall ResetState();
 };
-struct BSFileDelete : public BSFile
-{
-    virtual ~BSFileDelete();
-    void* FUN_00afff20(unsigned int flags);
-};
-BSFileDelete::~BSFileDelete()
-{}
 extern "C" __declspec(dllimport) int __stdcall CloseHandle(void* hObject);
 extern int DAT_010a33d0;
 struct FUN_00ae78a0_cls
@@ -813,13 +794,6 @@ struct MMStub
     void* __thiscall Allocate(unsigned int size);
 };
 extern MMStub g_mmStub;
-class NiPoint3
-{
-  public:
-    float x;
-    float y;
-    float z;
-};
 extern const NiPoint3 NiPoint3_ZERO;
 struct Stub1A4
 {
@@ -2413,111 +2387,6 @@ extern int(__stdcall* DAT_00fdf138)(void*);
 extern "C" __declspec(dllimport) int __stdcall CopyFileA(const char* lpExistingFileName, const char* lpNewFileName,
                                                          unsigned char bFailIfExists);
 int __cdecl CopyFileChecked(const char* lpExistingFileName, const char* lpNewFileName, unsigned char bFailIfExists);
-class FUN_00aff180_base
-{
-  public:
-    virtual ~FUN_00aff180_base();
-    FUN_00aff180_base();
-};
-class FUN_00aff180 : public FUN_00aff180_base
-{
-  public:
-    unsigned int m_unk04;
-    unsigned int m_unk08;
-    unsigned int m_unk0c;
-    unsigned int m_unk10;
-    unsigned int m_unk14;
-    unsigned int m_unk18;
-    unsigned int m_unk1c;
-    unsigned int m_unk20;
-    unsigned int m_unk24;
-    unsigned int m_unk28;
-    unsigned char m_unk2c;
-    unsigned char m_unk2d;
-    unsigned char m_unk2e;
-    unsigned char m_unk2f;
-    unsigned char m_unk30;
-    unsigned char m_unk31;
-    unsigned char m_unk32;
-    unsigned char m_unk33;
-    unsigned int m_unk34;
-    unsigned int m_unk38;
-    unsigned int m_unk3c;
-    unsigned int m_unk40;
-    unsigned char m_unk44;
-    unsigned char m_unk45;
-    unsigned char m_unk46;
-    unsigned char m_unk47;
-    unsigned int m_unk48;
-    unsigned int m_unk4c;
-    unsigned int m_unk50;
-    unsigned int m_unk54;
-    unsigned int m_unk58;
-    unsigned int m_unk5c;
-    unsigned int m_unk60;
-    unsigned int m_unk64;
-    unsigned int m_unk68;
-    unsigned int m_unk6c;
-    unsigned int m_unk70;
-    unsigned int m_unk74;
-    unsigned int m_unk78;
-    unsigned int m_unk7c;
-    unsigned int m_unk80;
-    unsigned int m_unk84;
-    unsigned int m_unk88;
-    unsigned int m_unk8c;
-    unsigned int m_unk90;
-    unsigned int m_unk94;
-    unsigned int m_unk98;
-    unsigned int m_unk9c;
-    unsigned int m_unka0;
-    unsigned int m_unka4;
-    unsigned int m_unka8;
-    unsigned int m_unkac;
-    unsigned int m_unkb0;
-    unsigned int m_unkb4;
-    unsigned int m_unkb8;
-    unsigned int m_unkbc;
-    unsigned int m_unkc0;
-    unsigned int m_unkc4;
-    unsigned int m_unkc8;
-    unsigned int m_unkcc;
-    unsigned int m_unkd0;
-    unsigned int m_unkd4;
-    unsigned int m_unkd8;
-    unsigned int m_unkdc;
-    unsigned int m_unke0;
-    unsigned int m_unke4;
-    unsigned int m_unke8;
-    unsigned int m_unkec;
-    unsigned int m_unkf0;
-    unsigned int m_unkf4;
-    unsigned int m_unkf8;
-    unsigned int m_unkfc;
-    unsigned int m_unk100;
-    unsigned int m_unk104;
-    unsigned int m_unk108;
-    unsigned int m_unk10c;
-    unsigned int m_unk110;
-    unsigned int m_unk114;
-    unsigned int m_unk118;
-    unsigned int m_unk11c;
-    unsigned int m_unk120;
-    unsigned int m_unk124;
-    unsigned int m_unk128;
-    unsigned int m_unk12c;
-    unsigned int m_unk130;
-    unsigned int m_unk134;
-    unsigned int m_unk138;
-    unsigned int m_unk13c;
-    unsigned int m_unk140;
-    unsigned int m_unk144;
-    unsigned int m_unk148;
-    unsigned int m_unk14c;
-    unsigned int m_unk150;
-    FUN_00aff180();
-    virtual ~FUN_00aff180();
-};
 struct BucketTableStorage
 {
     struct Node

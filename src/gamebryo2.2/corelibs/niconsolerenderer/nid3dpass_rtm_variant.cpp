@@ -1,8 +1,6 @@
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
-#include "nid3dpass_types_NiD3DPass.h"
-#include "nid3dpass_types_NiTArray_NiPointer_NiD3DTextureStage__NiTNewInterface_NiPointer_NiD3DTextureStage_____.h"
-#include "nid3dpass_decls.h"
+#include "../../../../include/NiD3DPass.h"
 
 struct Matrix4_b7dde0
 {

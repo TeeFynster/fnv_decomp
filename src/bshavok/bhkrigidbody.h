@@ -1,15 +1,15 @@
 #ifndef FNV_BHKRIGIDBODY_WORKER_H
 #define FNV_BHKRIGIDBODY_WORKER_H
 
-#include "bhkrigidbody_types_NiRTTI.h"
-#include "bhkrigidbody_types_bhkRigidBody.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/bhkRigidBody.h"
 
 #include "bhkrigidbody_worker_decls.h"
 extern NiRTTI DAT_012681c0;
 
 #pragma optimize("", off)
 // @fnv 0x0056d530
-const NiRTTI* bhkRigidBody::GetRTTI()
+const NiRTTI* bhkRigidBody::GetRTTI() const
 {
     return &DAT_012681c0;
 }
@@ -61,7 +61,7 @@ float bhkRigidBody::GetBodyMass()
 __forceinline const __m128& bhkRigidBody::PositionVector()
 {
     if (this && m_pHavokObject)
-        return ((hkpRigidBody*)m_pHavokObject)->m_vContactPosition;
+        return ((hkpRigidBodyMotionView*)m_pHavokObject)->m_vContactPosition;
     return *(__m128*)&DAT_01267e30;
 }
 #pragma optimize("t", on)
@@ -74,7 +74,7 @@ NiPoint3& bhkRigidBody::GetPosition(NiPoint3& p)
 __forceinline const __m128& bhkRigidBody::RotationVector()
 {
     if (this && m_pHavokObject)
-        return ((hkpRigidBody*)m_pHavokObject)->m_rotation;
+        return ((hkpRigidBodyMotionView*)m_pHavokObject)->m_rotation;
     return *(__m128*)&DAT_012683b0;
 }
 #pragma optimize("t", on)
@@ -105,30 +105,30 @@ void bhkRigidBody::FUN_00c8d1d0(const NiPoint3& p, const NiQuaternion& q)
         }
     }
 }
-__forceinline const __m128& bhkRigidBody::FUN_00c8d240Vector()
+__forceinline const __m128& bhkRigidBody::FUN_00c8d240()
 {
     if (this && m_pHavokObject)
-        return ((hkpRigidBody*)m_pHavokObject)->m_vCenterOfMass1;
+        return ((hkpRigidBodyMotionView*)m_pHavokObject)->m_vCenterOfMass1;
     return *(__m128*)&DAT_01267e30;
 }
 #pragma optimize("t", on)
 // @fnv 0x00c8d240
 NiPoint3& bhkRigidBody::GetVec(NiPoint3& p)
 {
-    *(bhkrigidbody_vector*)&p = (const bhkrigidbody_vector&)FUN_00c8d240Vector();
+    *(bhkrigidbody_vector*)&p = (const bhkrigidbody_vector&)FUN_00c8d240();
     return p;
 }
-__forceinline const __m128& bhkRigidBody::FUN_00c8d200Vector()
+__forceinline const __m128& bhkRigidBody::FUN_00c8d200()
 {
     if (this && m_pHavokObject)
-        return ((hkpRigidBody*)m_pHavokObject)->m_vCenterOfMassLocal;
+        return ((hkpRigidBodyMotionView*)m_pHavokObject)->m_vCenterOfMassLocal;
     return *(__m128*)&DAT_01267e30;
 }
 #pragma optimize("t", on)
 // @fnv 0x00c8d200
 NiPoint3& bhkRigidBody::FUN_00c8d200(NiPoint3& p)
 {
-    *(bhkrigidbody_vector*)&p = (const bhkrigidbody_vector&)FUN_00c8d200Vector();
+    *(bhkrigidbody_vector*)&p = (const bhkrigidbody_vector&)FUN_00c8d200();
     return p;
 }
 #endif

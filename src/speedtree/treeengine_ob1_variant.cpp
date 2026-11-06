@@ -1,3 +1,9 @@
+#include "../../include/CTreeEngine.h"
+#include "../../include/IdvFileError.h"
+#include "../../include/NiPoint3.h"
+#include <errno.h>
+#include <string.h>
+#include <vector>
 
 // src/speedtree/treeengine_ob1_variant.cpp - flag-variant unit created 2026-10-27 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/speedtree/treeengine.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -5,20 +11,7 @@
 
 // src/speedtree/treeengine.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/speedtree/treeengine.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct FUN_00b2bcf0_shell
-{
-    void FUN_00b2bcf0(float* a, float* b);
-};
-struct CTreeEngine
-{
-    float* m_pfTreeSize;
-    float* m_pfTreeSizeVariance;
-    void FUN_00b2bd20(float fSize, float fVariance);
-};
-struct FUN_00b2bdc0_shell
-{
-    void FUN_00b2bdc0(float a, float b);
-};
+
 void __cdecl operator delete(void*);
 struct FUN_00b2ae60_shell
 {
@@ -32,40 +25,14 @@ struct RandomNumberGenerator
 };
 extern float DAT_0108cb00;
 extern float _DAT_010162c0;
-struct FUN_00b2c0c0_shell
-{
-    void InitSeed(unsigned int seed);
-};
+
 struct ElementIterator
 {
     int __thiscall GetNextElement();
 };
-struct FUN_00b2daf0_shell : CTreeEngine
-{
-    void __thiscall FUN_00b2daf0(ElementIterator* a);
-};
-namespace std {
-template <class C> struct char_traits
-{
-};
 
-template <class C> struct allocator
-{
-};
-
-template <class C, class T, class A> class basic_string
-{
-  public:
-    void _Tidy(bool, unsigned int) throw();
-    basic_string& assign(const basic_string&, unsigned int, unsigned int);
-};
-}
 
 extern unsigned int DAT_010173f0;
-struct NarrowString : std::basic_string<char, std::char_traits<char>, std::allocator<char> >
-{
-    NarrowString& AssignFromString(const NarrowString& rhs);
-};
 struct FUN_00b04d40_Obj
 {
     float FUN_00b04d40(int a);
@@ -73,29 +40,7 @@ struct FUN_00b04d40_Obj
 extern FUN_00b04d40_Obj DAT_011f8e9c;
 extern double DAT_01012060;
 extern double DAT_01012070;
-struct FUN_00b2bd40_Obj
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    float unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    float unk40;
-    float unk44;
 
-    float __thiscall GetNormalizedValue();
-};
 struct FUN_00b3d720_String
 {
     void __thiscall FUN_0044a730(bool a, unsigned int b);
@@ -353,29 +298,14 @@ struct SptError : SptRuntimeError
     ~SptError();
 };
 
-struct SptFilename
+inline CTreeEngine::SptFilename::~SptFilename()
 {
-    int allocator;
-    union Buffer
-    {
-        char buffer[16];
-        char* data;
-    } storage;
-    unsigned int length;
-    unsigned int capacity;
-    SptFilename(const SptFilename& rhs);
-    ~SptFilename()
-    {
-        FUN_0044a730(true, 0);
-    }
-    void FUN_0044a730(bool, unsigned int);
-    SptFilename& AssignFromString(const SptFilename&);
-    SptFilename& FUN_00b2b910(const SptFilename&);
-    __forceinline void operator=(const SptFilename& rhs)
-    {
-        FUN_00b2b910(SptFilename(rhs));
-    }
-};
+    FUN_0044a730(true, 0);
+}
+__forceinline void CTreeEngine::SptFilename::operator=(const SptFilename& rhs)
+{
+    FUN_00b2b910(SptFilename(rhs));
+}
 
 struct CTreeFileAccessBuffer
 {
@@ -421,91 +351,8 @@ struct CTreeFileAccessImpl : ElementIterator
     }
 };
 
-struct Sub94
-{
-    void FUN_00b3d1b0(ElementIterator* a);
-};
-
-struct Sub10c
-{
-    void FUN_00b408b0(ElementIterator* a);
-};
-
-struct SubA4
-{
-    void FUN_00b2db10(SubA4* a);
-};
-
-struct CTreeEngineImpl : CTreeEngine
-{
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    float m_actualSize;
-    float m_actualVariance;
-    int unk20;
-    SptFilename m_pcFileName;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    Sub94 m_sub94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    SubA4 m_suba4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    int unkf4;
-    int unkf8;
-    int unkfc;
-    int unk100;
-    int unk104;
-    int unk108;
-    Sub10c m_sub10c;
-
-    void FUN_00b2bde0(ElementIterator* a);
-    void FUN_00b2cbc0(ElementIterator* a);
-    bool FUN_00b2b550(CTreeFileAccessImpl* file);
-};
-
 // @fnv 0x00b2b550
-bool CTreeEngineImpl::FUN_00b2b550(CTreeFileAccessImpl* file)
+bool CTreeEngine::FUN_00b2b550(CTreeFileAccessImpl* file)
 {
     bool bSuccess = false;
 
@@ -560,68 +407,15 @@ bool CTreeEngineImpl::FUN_00b2b550(CTreeFileAccessImpl* file)
     return bSuccess;
 }
 
-struct FUN_00b2b910_shell : NarrowString
-{
-    NarrowString& FUN_00b2b910(const NarrowString& rhs);
-};
-
-namespace std {
-// VC9's real <xstring> defines assign inside the class body, so the /Ob1 front
-// end expands it here (and rolls the expansion back to the call) reserving the
-// frame slots seen in the original. The pack's stand-in only declares it; this
-// out-of-line-style body restores the expansion attempt. The trimming logic
-// mirrors the header's assign(_Right, _Roff, _Count).
-template <class C, class T, class A>
-inline basic_string<C, T, A>& basic_string<C, T, A>::assign(const basic_string<C, T, A>& _Right, unsigned int _Roff,
-                                                            unsigned int _Count)
-{
-    unsigned int v01 = 0, v02 = 0, v03 = 0, v04 = 0, v05 = 0, v06 = 0, v07 = 0;
-    unsigned int v08 = 0, v09 = 0, v10 = 0, v11 = 0, v12 = 0, v13 = 0, v14 = 0;
-    unsigned int v15 = 0, v16 = 0, v17 = 0, v18 = 0, v19 = 0, v20 = 0, v21 = 0;
-    if (_Roff == 0x7f3f3f3f)
-    {
-        v01 = _Roff;
-        v02 = _Count;
-        v03 = v01 + v02;
-        v04 = (unsigned int)&_Right;
-        v05 = v03 + v04;
-        v06 = v05 + v01;
-        v07 = v06 + v02;
-        v08 = v07 + v03;
-        v09 = v08 + v04;
-        v10 = v09 + v05;
-        v11 = v10 + v06;
-        v12 = v11 + v07;
-        v13 = v12 + v08;
-        v14 = v13 + v09;
-        v15 = v14 + v10;
-        v16 = v15 + v11;
-        v17 = v16 + v12;
-        v18 = v17 + v13;
-        v19 = v18 + v14;
-        v20 = v19 + v15;
-        v21 = v20 + v16;
-        _Tidy(v21 != 0, v21);
-        return *this;
-    }
-    return assign(_Right, _Roff + 1, _Count);
-}
-}
 
 // @fnv 0x00b2b910
-NarrowString& FUN_00b2b910_shell::FUN_00b2b910(const NarrowString& rhs)
+CTreeEngine::SptFilename& CTreeEngine::SptFilename::FUN_00b2b910(const SptFilename& rhs)
 {
-    assign(rhs, 0, DAT_010173f0);
+    typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > FilenameString;
+    reinterpret_cast<FilenameString*>(this)->assign(reinterpret_cast<const FilenameString&>(rhs), 0, DAT_010173f0);
     return *this;
 }
 
-void __cdecl operator delete(void* _Ptr) throw();
-inline void* operator new(unsigned int, void* _Where) throw()
-{
-    return _Where;
-}
-inline void operator delete(void*, void*) throw()
-{}
 namespace shutb2b9 {
 void FUN_00ec7c56();
 template <class T> inline void GvDestroyOne(T* _Ptr)
@@ -1517,204 +1311,65 @@ struct GvLink
 }
 using namespace shutb2b9;
 
-struct GvManager
+inline bool TreeGeometryInitialized(CTreeEngine* tree)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    char unk20;
-    bool bInitialized;
-    char unk22;
-    char unk23;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    GvPart* m_pModel;
-    int unk5c;
-    GvVector<GvLink*> kLinks;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int iListCount;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    GvVector<GvNode*>* bItemFound;
-    bool IsFormInitialized() const
-    {
-        return bInitialized;
-    }
-    void FUN_00b2b940();
-};
+    return *(bool*)((char*)tree + 0x21);
+}
 
+// The shared class does not declare this cleanup routine. Keep its ECX receiver
+// as a local free function rather than recreating an engine class.
 // @fnv 0x00b2b940
-void GvManager::FUN_00b2b940()
+void __fastcall ClearTreeGeometry(CTreeEngine* tree)
 {
-    if (IsFormInitialized())
+    if (TreeGeometryInitialized(tree))
     {
-        delete m_pModel;
-        m_pModel = 0;
-        for (int i = 0; i < iListCount; ++i)
+        delete (*(GvPart**)&tree->unk58);
+        (*(GvPart**)&tree->unk58) = 0;
+        for (int i = 0; i < tree->unkd8; ++i)
         {
-            if (bItemFound)
+            if ((*(GvVector<GvNode*>**)&tree->unkec))
             {
-                for (unsigned int j = 0; j < bItemFound[i].size(); ++j)
+                for (unsigned int j = 0; j < (*(GvVector<GvNode*>**)&tree->unkec)[i].size(); ++j)
                 {
-                    delete bItemFound[i][j];
-                    bItemFound[i][j] = 0;
+                    delete (*(GvVector<GvNode*>**)&tree->unkec)[i][j];
+                    (*(GvVector<GvNode*>**)&tree->unkec)[i][j] = 0;
                 }
-                bItemFound[i].clear();
+                (*(GvVector<GvNode*>**)&tree->unkec)[i].clear();
             }
         }
-        delete[] bItemFound;
-        bItemFound = 0;
-        for (unsigned int k = 0; k < kLinks.size(); ++k)
+        delete[] (*(GvVector<GvNode*>**)&tree->unkec);
+        (*(GvVector<GvNode*>**)&tree->unkec) = 0;
+        for (unsigned int k = 0; k < (*(GvVector<GvLink*>*)&tree->unk60).size(); ++k)
         {
-            delete kLinks[k];
-            kLinks[k] = 0;
+            delete (*(GvVector<GvLink*>*)&tree->unk60)[k];
+            (*(GvVector<GvLink*>*)&tree->unk60)[k] = 0;
         }
-        kLinks.clear();
-        bInitialized = false;
+        (*(GvVector<GvLink*>*)&tree->unk60).clear();
+        (*(bool*)((char*)tree + 0x21)) = false;
     }
 }
 
 extern float DAT_010a5664;
 extern float DAT_010a5668;
-struct Point3B2BC70
+inline float& TreeVectorComponent(NiPoint3* point, int i)
 {
-    float x;
-    float y;
-    float z;
-    float& operator[](int i)
-    {
-        return (&x)[i];
-    }
-    void Set(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-};
-struct OwnerB2BC70
+    return (&point->x)[i];
+}
+
+inline void SetTreeVector(NiPoint3* point, float fX, float fY, float fZ)
 {
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    Point3B2BC70 m_kExtent;
-    Point3B2BC70 m_kOffset;
-    float m_fScale;
-    void FUN_00b2bc70(float fScale);
-};
+    point->x = fX;
+    point->y = fY;
+    point->z = fZ;
+}
 
 // @fnv 0x00b2bc70
-void OwnerB2BC70::FUN_00b2bc70(float fScale)
+void CTreeEngine::FUN_00b2bc70(float fScale)
 {
-    m_fScale = fScale;
-    float fY = DAT_010a5664 * fScale * m_kExtent[1];
-    float fX = DAT_010a5668 * fScale * m_kExtent[0];
-    m_kOffset.Set(-fX, fX, fY);
+    *(float*)((char*)this + 0x124) = fScale;
+    float fY = DAT_010a5664 * fScale * TreeVectorComponent((NiPoint3*)&m_sub10c, 1);
+    float fX = DAT_010a5668 * fScale * TreeVectorComponent((NiPoint3*)&m_sub10c, 0);
+    SetTreeVector((NiPoint3*)((char*)this + 0x118), -fX, fX, fY);
 }
 
 struct S2bde0_Str
@@ -1867,25 +1522,9 @@ inline void S2bde0_Reset()
 {
     S2bde0_ResetIn();
 }
-struct S2bde0_Tree
-{
-    int iUnk00;
-    int iUnk04;
-    int iUnk08;
-    int iUnk0C;
-    int iUnk10;
-    int iUnk14;
-    int iUnk18;
-    int iUnk1C;
-    int iUnk20;
-    S2bde0_Name strName;
-    float f40, f44, f48, f4c, f50;
-    void InitSeed(int);
-    void FUN_00b2c790(S2bde0_Parser*);
-    void FUN_00b2bde0(S2bde0_Parser* p);
-};
+
 // @fnv 0x00b2bde0
-void S2bde0_Tree::FUN_00b2bde0(S2bde0_Parser* p)
+void CTreeEngine::FUN_00b2bde0(ElementIterator* p)
 {
     int iCount;
     int iToken = ((ElementIterator*)p)->GetNextElement();
@@ -1895,11 +1534,11 @@ void S2bde0_Tree::FUN_00b2bde0(S2bde0_Parser* p)
         {
         case 0x7d0: {
             Gap1();
-            S2bde0_Str kTmp(p->FUN_00b3ee40());
-            strName = kTmp;
+            S2bde0_Str kTmp(((S2bde0_Parser*)p)->FUN_00b3ee40());
+            (*(S2bde0_Name*)&m_pcFileName) = kTmp;
         }
             {
-                strName = strName.FUN_00b09f90();
+                (*(S2bde0_Name*)&m_pcFileName) = (*(S2bde0_Name*)&m_pcFileName).FUN_00b09f90();
                 break;
             }
         case 0x7d5: {
@@ -1908,22 +1547,22 @@ void S2bde0_Tree::FUN_00b2bde0(S2bde0_Parser* p)
             break;
         }
         case 0x7d3:
-            f44 = p->FUN_00b3ed20();
+            (*(float*)&unk44) = ((S2bde0_Parser*)p)->FUN_00b3ed20();
             break;
         case 0x7d1:
-            f40 = p->FUN_00b3ed20();
+            (*(float*)&unk40) = ((S2bde0_Parser*)p)->FUN_00b3ed20();
             break;
         case 0x7d4:
             ((ElementIterator*)p)->GetNextElement();
             break;
         case 0x7d2:
-            p->FUN_00b06180();
+            ((S2bde0_Parser*)p)->FUN_00b06180();
             break;
         case 0x7d6:
-            f4c = p->FUN_00b3ed20();
+            (*(float*)&unk4c) = ((S2bde0_Parser*)p)->FUN_00b3ed20();
             break;
         case 0x7d7:
-            f50 = p->FUN_00b3ed20();
+            (*(float*)&unk50) = ((S2bde0_Parser*)p)->FUN_00b3ed20();
             break;
         case 0x3f6:
             FUN_00b2c790(p);
@@ -2074,41 +1713,28 @@ inline const float& Max(const float& a, const float& b)
     return a < b ? b : a;
 }
 
-struct MainC
+inline unsigned int Count(CTreeEngine* tree)
 {
-    int m_00[22];
-    Obj58* m_58;
-    Obj5c* m_5c;
-    int m_60[6];
-    unsigned int m_78;
-    int m_7c[30];
-    float m_f4;
-    float m_f8;
-    int m_fc;
-    float m_100;
-    float m_104;
-    unsigned int Count()
-    {
-        unsigned int r = m_78;
-        return r;
-    }
-    float Lerp(float t, float a)
-    {
-        return a + (m_f4 - a) * t;
-    }
-    void FUN_00b2c130();
-};
+    unsigned int r = tree->unk78;
+    return r;
+}
+inline float Lerp(CTreeEngine* tree, float t, float a)
+{
+    return a + (tree->unkF4 - a) * t;
+}
+} // namespace fnv_00b2c130
 
 // @fnv 0x00b2c130
-void MainC::FUN_00b2c130()
+void CTreeEngine::FUN_00b2c130()
 {
+    using namespace fnv_00b2c130;
     int v_j;
     Dead2();
     FUN_00b17db0 k;
-    if (m_58)
+    if (((Obj58*)unk58))
     {
-        if ((unsigned short)(m_5c->m_88.size() / 3) > 0)
-            m_58->FUN_00b13820(&k);
+        if ((unsigned short)(((Obj5c*)unk5c)->m_88.size() / 3) > 0)
+            ((Obj58*)unk58)->FUN_00b13820(&k);
     }
     float v_sum = 0.0f;
     float v_maxA = 0.0f;
@@ -2124,7 +1750,7 @@ void MainC::FUN_00b2c130()
             v_maxA = eq;
     }
     FUN_00b3f100 q;
-    float fDist = 1.0f - m_104;
+    float fDist = 1.0f - unk104;
     FUN_00b17db0 v_cntIn;
     for (dir = 0; dir < k.size(); dir++)
     {
@@ -2141,7 +1767,7 @@ void MainC::FUN_00b2c130()
         else
         {
             Dead5();
-            float v_g = q.FUN_00b3f130(0.0f, m_100);
+            float v_g = q.FUN_00b3f130(0.0f, unk100);
             float v_r = 1.0f - v_g;
             v_z = v_r * v_z + v_g * v_maxA;
             v_z = Max(v_z, 0.0f);
@@ -2157,14 +1783,14 @@ void MainC::FUN_00b2c130()
     }
     Dead9();
     unsigned int v_k;
-    v_k = Count();
+    v_k = Count(this);
     {
         unsigned int v_p;
         for (v_p = 0; v_p < v_k; v_p++)
         {
             if (!v_p)
-                m_5c->FUN_00b30c80(0);
-            float v_acc = (int)v_k < 2 ? 1.0f : Lerp((float)((double)v_p / (double)(int)(v_k - 1)), m_f8);
+                ((Obj5c*)unk5c)->FUN_00b30c80(0);
+            float v_acc = (int)v_k < 2 ? 1.0f : Lerp(this, (float)((double)v_p / (double)(int)(v_k - 1)), unkF8);
             float v_target = v_acc * v_sum;
             int lhs = 0;
             float w = 0.0f;
@@ -2174,21 +1800,20 @@ void MainC::FUN_00b2c130()
                 w = w + W(k[e]);
                 lhs = 1 + lhs;
             }
-            m_5c->FUN_00b306d0((unsigned short)v_p);
+            ((Obj5c*)unk5c)->FUN_00b306d0((unsigned short)v_p);
             if (v_p == 0 && lhs == 0)
             {
-                m_5c->FUN_00b2fdc0(0, 0, 0);
+                ((Obj5c*)unk5c)->FUN_00b2fdc0(0, 0, 0);
             }
             else
             {
                 int v_s;
                 for (v_s = 0; v_s < lhs; v_s++)
-                    k[v_s]->BuildStripIndices(v_p, m_5c);
+                    k[v_s]->BuildStripIndices(v_p, ((Obj5c*)unk5c));
             }
         }
     }
 }
-}  // namespace fnv_00b2c130
 
 struct ElemB2CB50
 {
@@ -2321,28 +1946,24 @@ inline void DeadTop()
     int aiD[130];
     aiD[88] = 0;
 }
-struct Tree
-{
-    int ai[54];
-    int iLodCount;
-    int aj[4];
-    LodQ* pLods;
-    bool bLodsLoaded;
-    void FUN_00b2cbc0(Parser* p);
-};
+
+} // namespace fnv_00b2cbc0
+
 // @fnv 0x00b2cbc0
-void Tree::FUN_00b2cbc0(Parser* p)
+void CTreeEngine::FUN_00b2cbc0(ElementIterator* p)
 {
+    using namespace fnv_00b2cbc0;
+    using fnv_00b2cbc0::FUN_00b09480;
     DeadTop();
     int iCount = 0;
     int iLevel = p->GetNextElement();
-    iLodCount = iLevel;
-    delete[] pLods;
-    pLods = new LodQ[iLodCount];
+    unkd8 = iLevel;
+    delete[] (*(LodQ**)&unkec);
+    (*(LodQ**)&unkec) = new LodQ[unkd8];
     int iTok = p->GetNextElement();
     while (iTok != 0x1b59)
     {
-        if (iCount >= iLodCount)
+        if (iCount >= unkd8)
             throw FUN_00b09480("too many leaf lod levels", false);
         if (iTok != 0x1b5a)
             throw FUN_00b09480("malformed leaf lod data", false);
@@ -2351,367 +1972,16 @@ void Tree::FUN_00b2cbc0(Parser* p)
         {
             if (iTok != 0x1b5c)
                 throw FUN_00b09480("malformed leaf lod data", false);
-            pLods[iCount].FUN_00b15390(FUN_00b405c0(p));
+            (*(LodQ**)&unkec)[iCount].FUN_00b15390(FUN_00b405c0((Parser*)p));
             iTok = p->GetNextElement();
         }
         iCount++;
         iTok = p->GetNextElement();
     }
-    bLodsLoaded = true;
+    (*(bool*)&unkf0) = true;
 }
-}  // namespace fnv_00b2cbc0
 
 namespace fnv_00b2d090 {
-extern "C" unsigned int __cdecl strlen(const char* pcString);
-extern "C" int __cdecl memcpy_s(void* pvDst, unsigned int uiDstSize, const void* pvSrc, unsigned int ItemUpdateArray);
-extern "C" int __cdecl memmove_s(void* pvDst, unsigned int uiDstSize, const void* pvSrc, unsigned int ItemUpdateArray);
-void* __cdecl operator new(unsigned int uiSize);
-void __cdecl FUN_00ec7c56();
-namespace std {
-class bad_alloc
-{
-  public:
-    bad_alloc(const char* pcMessage = "bad allocation") throw();
-    virtual ~bad_alloc() throw();
-
-  private:
-    const char* m_pcWhat;
-    int m_iDoFree;
-};
-}
-struct CharTraits
-{
-    static unsigned int length(const char* pcFirst)
-    {
-        return strlen(pcFirst);
-    }
-    static char* _Copy_s(char* pcFirst1, unsigned int uiSizeInBytes, const char* pcFirst2, unsigned int ItemUpdateArray)
-    {
-        memcpy_s(pcFirst1, uiSizeInBytes, pcFirst2, ItemUpdateArray);
-        return pcFirst1;
-    }
-    static char* _Move_s(char* pcFirst1, unsigned int uiSizeInBytes, const char* pcFirst2, unsigned int ItemUpdateArray)
-    {
-        memmove_s(pcFirst1, uiSizeInBytes, pcFirst2, ItemUpdateArray);
-        return pcFirst1;
-    }
-    static void assign(char& cLeft, const char& cRight)
-    {
-        cLeft = cRight;
-    }
-};
-struct TraitsHelper
-{
-    static char* CopyS(char* pcDst, unsigned int uiDstSize, const char* pcSrc, unsigned int ItemUpdateArray);
-    static char* MoveS(char* pcDst, unsigned int uiDstSize, const char* pcSrc, unsigned int ItemUpdateArray);
-};
-char* TraitsHelper::CopyS(char* pcDst, unsigned int uiDstSize, const char* pcSrc, unsigned int ItemUpdateArray)
-{
-    return CharTraits::_Copy_s(pcDst, uiDstSize, pcSrc, ItemUpdateArray);
-}
-char* TraitsHelper::MoveS(char* pcDst, unsigned int uiDstSize, const char* pcSrc, unsigned int ItemUpdateArray)
-{
-    return CharTraits::_Move_s(pcDst, uiDstSize, pcSrc, ItemUpdateArray);
-}
-inline char* AllocateChars(unsigned int ItemUpdateArray, char*)
-{
-    if (ItemUpdateArray <= 0)
-        ItemUpdateArray = 0;
-    else if (((unsigned int)(-1) / ItemUpdateArray) < sizeof(char))
-        throw std::bad_alloc(0);
-    return (char*)::operator new(ItemUpdateArray * sizeof(char));
-}
-struct CharAllocator
-{
-    CharAllocator()
-    {}
-    CharAllocator(const CharAllocator&)
-    {}
-    void deallocate(char* pcPtr, unsigned int)
-    {
-        ::operator delete(pcPtr);
-    }
-    char* allocate(unsigned int ItemUpdateArray)
-    {
-        return AllocateChars(ItemUpdateArray, (char*)0);
-    }
-    unsigned int max_size() const
-    {
-        unsigned int ItemUpdateArray = (unsigned int)(-1) / sizeof(char);
-        return 0 < ItemUpdateArray ? ItemUpdateArray : 1;
-    }
-};
-struct StringBase
-{
-    static void _Xlen();
-    static void _Xran();
-};
-struct StringVal : public StringBase
-{
-    StringVal(CharAllocator kAl = CharAllocator()) : m_kAlval(kAl)
-    {}
-    CharAllocator m_kAlval;
-};
-struct String : public StringVal
-{
-    static const unsigned int npos;
-    String(const char* pcPtr) : StringVal()
-    {
-        _Tidy();
-        unsigned int uiLength = CharTraits::length(pcPtr);
-        assign(pcPtr, uiLength);
-    }
-    String(const String& kRight) : StringVal()
-    {
-        _Tidy();
-        assign(kRight, 0, npos);
-    }
-    ~String()
-    {
-        _Tidy(true);
-    }
-    String& assign(const String& kRight, unsigned int uiRoff, unsigned int ItemUpdateArray)
-    {
-        if (kRight.size() < uiRoff)
-            _Xran();
-        unsigned int uiElementCount = kRight.size() - uiRoff;
-        if (ItemUpdateArray < uiElementCount)
-            uiElementCount = ItemUpdateArray;
-        if (this == &kRight)
-            erase((unsigned int)(uiRoff + uiElementCount)), erase(0, uiRoff);
-        else if (_Grow(uiElementCount))
-        {
-            TraitsHelper::CopyS(_Myptr(), m_uiRes, kRight._Myptr() + uiRoff, uiElementCount);
-            _Eos(uiElementCount);
-        }
-        return *this;
-    }
-    String& assign(const char* pcPtr, unsigned int ItemUpdateArray)
-    {
-        int pad;
-        if (_Inside(pcPtr))
-            return assign(*this, pcPtr - _Myptr(), ItemUpdateArray);
-        if (_Grow(ItemUpdateArray))
-        {
-            TraitsHelper::CopyS(_Myptr(), m_uiRes, pcPtr, ItemUpdateArray);
-            _Eos(ItemUpdateArray);
-        }
-        return *this;
-    }
-    String& assign(const char* pcPtr)
-    {
-        return assign(pcPtr, CharTraits::length(pcPtr));
-    }
-    String& operator+=(const String& kRight)
-    {
-        return append(kRight);
-    }
-    String& operator+=(const char* pcPtr)
-    {
-        return append(pcPtr);
-    }
-    String& append(const String& kRight)
-    {
-        return append(kRight, 0, npos);
-    }
-    String& append(const String& kRight, unsigned int uiRoff, unsigned int ItemUpdateArray)
-    {
-        if (kRight.size() < uiRoff)
-            _Xran();
-        unsigned int uiElementCount = kRight.size() - uiRoff;
-        if (uiElementCount < ItemUpdateArray)
-            ItemUpdateArray = uiElementCount;
-        if (npos - m_uiSize <= ItemUpdateArray || m_uiSize + ItemUpdateArray < m_uiSize)
-            _Xlen();
-        if (0 < ItemUpdateArray && _Grow(uiElementCount = m_uiSize + ItemUpdateArray))
-        {
-            TraitsHelper::CopyS(_Myptr() + m_uiSize, m_uiRes - m_uiSize, kRight._Myptr() + uiRoff, ItemUpdateArray);
-            _Eos(uiElementCount);
-        }
-        return *this;
-    }
-    String& append(const char* pcPtr, unsigned int ItemUpdateArray)
-    {
-        if (_Inside(pcPtr))
-            return append(*this, pcPtr - _Myptr(), ItemUpdateArray);
-        if (npos - m_uiSize <= ItemUpdateArray)
-            _Xlen();
-        unsigned int uiElementCount;
-        if (0 < ItemUpdateArray && _Grow(uiElementCount = m_uiSize + ItemUpdateArray))
-        {
-            TraitsHelper::CopyS(_Myptr() + m_uiSize, m_uiRes - m_uiSize, pcPtr, ItemUpdateArray);
-            _Eos(uiElementCount);
-        }
-        return *this;
-    }
-    String& append(const char* pcPtr)
-    {
-        return append(pcPtr, CharTraits::length(pcPtr));
-    }
-    String& erase(unsigned int uiOff = 0, unsigned int ItemUpdateArray = npos)
-    {
-        if (m_uiSize < uiOff)
-            _Xran();
-        if (m_uiSize - uiOff < ItemUpdateArray)
-            ItemUpdateArray = m_uiSize - uiOff;
-        if (0 < ItemUpdateArray)
-        {
-            TraitsHelper::MoveS(_Myptr() + uiOff, m_uiRes - uiOff, _Myptr() + uiOff + ItemUpdateArray,
-                                m_uiSize - uiOff - ItemUpdateArray);
-            unsigned int uiNewsize = m_uiSize - ItemUpdateArray;
-            _Eos(uiNewsize);
-        }
-        return *this;
-    }
-    const char* c_str() const
-    {
-        if (16 <= m_uiRes)
-            return m_kBx.m_pcPtr;
-        return m_kBx.m_acBuf;
-    }
-    unsigned int size() const
-    {
-        return m_uiSize;
-    }
-    unsigned int length() const
-    {
-        return m_uiSize;
-    }
-    unsigned int max_size() const
-    {
-        unsigned int uiElementCount = m_kAlval.max_size();
-        return uiElementCount <= 1 ? 1 : uiElementCount - 1;
-    }
-    const char& operator[](unsigned int uiOff) const
-    {
-        if (!(uiOff <= m_uiSize))
-            FUN_00ec7c56();
-        do
-        {
-        } while (0);
-        return _Myptr()[uiOff];
-    }
-    void _Copy(unsigned int uiNewsize, unsigned int uiOldlen)
-    {
-        unsigned int uiNewres = uiNewsize | 15;
-        if (max_size() < uiNewres)
-            uiNewres = uiNewsize;
-        else if (uiNewres / 3 < m_uiRes / 2 && m_uiRes <= max_size() - m_uiRes / 2)
-            uiNewres = m_uiRes + m_uiRes / 2;
-        char* pcPtr = 0;
-        try
-        {
-            pcPtr = m_kAlval.allocate(uiNewres + 1);
-        }
-        catch (...)
-        {
-            uiNewres = uiNewsize;
-            try
-            {
-                pcPtr = m_kAlval.allocate(uiNewres + 1);
-            }
-            catch (...)
-            {
-                _Tidy(true);
-                throw;
-            }
-        }
-        if (0 < uiOldlen)
-            TraitsHelper::CopyS(pcPtr, uiNewres + 1, _Myptr(), uiOldlen);
-        _Tidy(true);
-        m_kBx.m_pcPtr = pcPtr;
-        m_uiRes = uiNewres;
-        _Eos(uiOldlen);
-    }
-    void _Eos(unsigned int uiNewsize)
-    {
-        CharTraits::assign((16 <= m_uiRes ? m_kBx.m_pcPtr : m_kBx.m_acBuf)[m_uiSize = uiNewsize], char());
-    }
-    bool _Grow(unsigned int uiNewsize, bool bTrim = false)
-    {
-        if (max_size() < uiNewsize)
-            _Xlen();
-        if (m_uiRes < uiNewsize)
-            _Copy(uiNewsize, m_uiSize);
-        else if (bTrim && uiNewsize < 16)
-            _Tidy(true, uiNewsize < m_uiSize ? uiNewsize : m_uiSize);
-        else if (uiNewsize == 0)
-            _Eos(0);
-        return 0 < uiNewsize;
-    }
-    bool _Inside(const char* pcPtr)
-    {
-        if (pcPtr == 0 || pcPtr < _Myptr() || _Myptr() + m_uiSize <= pcPtr)
-            return false;
-        else
-            return true;
-    }
-    char* _Myptr()
-    {
-        return 16 <= m_uiRes ? m_kBx.m_pcPtr : m_kBx.m_acBuf;
-    }
-    const char* _Myptr() const
-    {
-        return 16 <= m_uiRes ? m_kBx.m_pcPtr : m_kBx.m_acBuf;
-    }
-    void _Tidy(bool bBuilt = false, unsigned int uiNewsize = 0)
-    {
-        if (!bBuilt)
-            ;
-        else if (16 <= m_uiRes)
-        {
-            if (0 < uiNewsize)
-                TraitsHelper::CopyS(m_kBx.m_acBuf, 16, m_kBx.m_pcPtr, uiNewsize);
-            m_kAlval.deallocate(m_kBx.m_pcPtr, m_uiRes + 1);
-        }
-        m_uiRes = 15;
-        _Eos(uiNewsize);
-    }
-    union
-    {
-        char m_acBuf[16];
-        char* m_pcPtr;
-    } m_kBx;
-    unsigned int m_uiSize;
-    unsigned int m_uiRes;
-};
-inline String operator+(const String& kLeft, const char* pcRight)
-{
-    return String(kLeft) += pcRight;
-}
-inline String operator+(const String& kLeft, const String& kRight)
-{
-    return String(kLeft) += kRight;
-}
-namespace std {
-class exception
-{
-  public:
-    exception();
-    virtual ~exception();
-
-  private:
-    const char* m_pcWhat;
-    int m_iDoFree;
-};
-class runtime_error : public exception
-{
-  public:
-    explicit runtime_error(const String& strMessage);
-    virtual ~runtime_error();
-
-  private:
-    String m_strMessage;
-};
-}
-extern "C" int* __cdecl _errno();
-extern "C" char* __cdecl strerror(int iError);
-struct IdvFileError : public std::runtime_error
-{
-    IdvFileError(const String& strMessage, bool bUseErrno = true)
-        : std::runtime_error(strMessage + " [" + (bUseErrno ? String(strerror(*_errno())) : String("")) + "]")
-    {}
-};
 struct TextureControlB2D090
 {
     int unk00;
@@ -2726,175 +1996,54 @@ struct TextureControlB2D090
     char unk1F;
     float m_fValue;
 };
-struct TextureControlVector
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    TextureControlB2D090** m_ppFirst;
-    TextureControlB2D090** m_ppLast;
-    TextureControlB2D090** m_ppEnd;
-    unsigned int size() const
-    {
-        return m_ppLast - m_ppFirst;
-    }
-    TextureControlB2D090*& operator[](unsigned int uiPos)
-    {
-        if (!(uiPos < size()))
-            FUN_00ec7c56();
-        return *(m_ppFirst + uiPos);
-    }
-    __forceinline TextureControlB2D090*& atA(unsigned int uiPos)
-    {
-        int hq0;
-        int hq1;
-        if (!(uiPos < size()))
-            FUN_00ec7c56();
+} // namespace fnv_00b2d090
 
-        return *(m_ppFirst + uiPos);
-    }
-};
+// ParseBool is defined in the class: VC9 declines to inline it here but keeps its two slots (0x00b2d090's frame gap
+// above the first operator[]); its out-of-line copy is 0x00b06180.
 struct TreeFileAccess
 {
     int ParseToken();
-    bool ParseBool();
+    bool ParseBool()
+    {
+        return m_vBuffer[m_uiPosition++] != 0;
+    }
     float ParseReal();
-};
-struct TreeEngineB2D090
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    TextureControlVector m_vTextureControls;
-    void FUN_00b2d090(TreeFileAccess* pFile);
+    unsigned int m_uiPosition;
+    std::vector<unsigned char> m_vBuffer;
 };
 
+// IdvFileError's constructor is attempted and declined by /Ob1 here (its slots stay reserved at each throw):
+// 0x00b2d090 and 0x00b2d2e0 call it at 0x00b09480.
+inline IdvFileError::IdvFileError(const std::string& strMessage, bool bUseErrno)
+    : std::runtime_error(strMessage + " [" + (bUseErrno ? std::string(strerror(errno)) : std::string("")) + "]")
+{}
+
 // @fnv 0x00b2d090
-void TreeEngineB2D090::FUN_00b2d090(TreeFileAccess* pFile)
+void CTreeEngine::FUN_00b2d090(TreeFileAccess* pFile)
 {
-    for (unsigned int i = 0; i < m_vTextureControls.size(); ++i)
+    using namespace fnv_00b2d090;
+    for (unsigned int i = 0; i < (*(std::vector<TextureControlB2D090*>*)&unk60).size(); ++i)
     {
         if (pFile->ParseToken() != 15002)
             throw IdvFileError("malformed texture controls", false);
-        m_vTextureControls.atA(i)->m_bFlag = pFile->ParseBool();
+        (*(std::vector<TextureControlB2D090*>*)&unk60)[i]->m_bFlag = pFile->ParseBool();
         if (pFile->ParseToken() != 15003)
             throw IdvFileError("malformed texture controls", false);
-        m_vTextureControls[i]->m_fValue = pFile->ParseReal();
+        (*(std::vector<TextureControlB2D090*>*)&unk60)[i]->m_fValue = pFile->ParseReal();
     }
     if (pFile->ParseToken() != 15001)
         throw IdvFileError("malformed texture controls", false);
 }
-}  // namespace fnv_00b2d090
+
+// The same SpeedTree file reader as TreeFileAccess, seen through CTreeEngine.h's Reader declaration. Its own
+// members, not ElementIterator's: the base-class call form shifts the /Ob1 inline budget of 0x00b2d2e0.
+struct Reader
+{
+    int ParseToken();
+    float ParseReal();
+};
 
 namespace fnv_00b2d2e0 {
-struct FUN_0044a4c0 : std::basic_string<char, std::char_traits<char>, std::allocator<char> >
-{
-    unsigned int proxy;
-    union
-    {
-        struct
-        {
-            int buffer00, buffer04, buffer08, buffer0c;
-        } buffer;
-        char* pointer;
-    } storage;
-    unsigned int length, capacity;
-    FUN_0044a4c0(const char*);
-    FUN_0044a4c0& append(const char*);
-    __forceinline ~FUN_0044a4c0()
-    {
-        _Tidy(true, 0);
-    }
-};
-extern int* errno_ptr();
-extern char* error_text(int);
-FUN_0044a4c0 operator+(const FUN_0044a4c0&, const char*);
-extern void TagTidy();
-struct TagText
-{
-    int word00, word04, word08, word0c, word10;
-    TagText(const char*);
-    __forceinline ~TagText()
-    {
-        TagTidy();
-    }
-};
-extern const TagText TagEmpty;
-FUN_0044a4c0 operator+(const FUN_0044a4c0&, const TagText&);
-FUN_0044a4c0 operator+(const FUN_0044a4c0&, const FUN_0044a4c0&);
-struct RuntimeError
-{
-    int unk00, unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24;
-    RuntimeError(const FUN_0044a4c0&);
-};
-struct FUN_00b09480 : RuntimeError
-{
-    FUN_00b09480(const FUN_0044a4c0& message, bool sys)
-        : RuntimeError((message + " [" + (sys ? TagText(error_text(*errno_ptr())) : TagEmpty)).append("]"))
-    {
-        int dq[20];
-        dq[0] = 0;
-        dq[1] = 1;
-        dq[2] = 2;
-        dq[3] = 3;
-        dq[4] = 4;
-        dq[5] = 5;
-        dq[6] = 6;
-        dq[7] = 7;
-        dq[8] = 8;
-        dq[9] = 9;
-        dq[10] = 10;
-        dq[11] = 11;
-        dq[12] = 12;
-        dq[13] = 13;
-        dq[14] = 14;
-        dq[15] = 15;
-        dq[16] = 16;
-        dq[17] = 17;
-        dq[18] = 18;
-        dq[19] = 19;
-        dq[0] = 20;
-        dq[1] = 21;
-        dq[2] = 22;
-        dq[3] = 23;
-        dq[4] = 24;
-        dq[5] = 25;
-        dq[6] = 26;
-        dq[7] = 27;
-        dq[8] = 28;
-        dq[9] = 29;
-        dq[10] = 30;
-        dq[11] = 31;
-        dq[12] = 32;
-    }
-};
-extern int DAT_01170384;
-extern void FUN_00ec7c56();
-struct Reader : ElementIterator
-{
-    float FUN_00b3ed20();
-};
 struct Flare
 {
     int unk00;
@@ -2918,144 +2067,51 @@ struct Flare
     float value48;
     float value4c;
 };
-struct FlareVector
-{
-    int unk00, unk04, unk08;
-    Flare** first;
-    Flare** last;
-    Flare** limit;
-    __forceinline unsigned int size() const
-    {
-        return last - first;
-    }
-    __forceinline Flare*& operator[](unsigned int index)
-    {
-        if (index >= size())
-            FUN_00ec7c56();
-        return first[index];
-    }
-    Flare*& FUN_00b31230(unsigned int);
-};
-struct FlareEngine
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    FlareVector flares;
-    void FUN_00b2d2e0(Reader* reader);
-};
+} // namespace fnv_00b2d2e0
+
 // @fnv 0x00b2d2e0
-void FlareEngine::FUN_00b2d2e0(Reader* reader)
+void CTreeEngine::FUN_00b2d2e0(Reader* reader)
 {
-    for (unsigned int index = 0; index < flares.size(); ++index)
+    using namespace fnv_00b2d2e0;
+    for (unsigned int index = 0; index < (*(std::vector<Flare*>*)&unk60).size(); ++index)
     {
-        if (reader->GetNextElement() != 0x3e82)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares[index]->value24 = reader->FUN_00b3ed20();
-        if (reader->GetNextElement() != 0x3e83)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares[index]->value28 = reader->GetNextElement();
-        if (reader->GetNextElement() != 0x3e84)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares[index]->value2c = reader->FUN_00b3ed20();
-        if (reader->GetNextElement() != 0x3e85)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares[index]->value30 = reader->FUN_00b3ed20();
-        if (reader->GetNextElement() != 0x3e86)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares[index]->value34 = reader->FUN_00b3ed20();
-        if (reader->GetNextElement() != 0x3e87)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares[index]->value38 = reader->FUN_00b3ed20();
-        if (reader->GetNextElement() != 0x3e88)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares[index]->value3c = reader->FUN_00b3ed20();
-        if (reader->GetNextElement() != 0x3e89)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares.FUN_00b31230(index)->value40 = reader->FUN_00b3ed20();
-        if (reader->GetNextElement() != 0x3e8a)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares.FUN_00b31230(index)->value44 = reader->FUN_00b3ed20();
-        if (reader->GetNextElement() != 0x3e8b)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares.FUN_00b31230(index)->value48 = reader->FUN_00b3ed20();
-        if (reader->GetNextElement() != 0x3e8c)
-        {
-            FUN_0044a4c0 message("malformed flare info");
-            FUN_00b09480 error(message, 0);
-            _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-        }
-        flares.FUN_00b31230(index)->value4c = reader->FUN_00b3ed20();
+        if (reader->ParseToken() != 0x3e82)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value24 = reader->ParseReal();
+        if (reader->ParseToken() != 0x3e83)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value28 = reader->ParseToken();
+        if (reader->ParseToken() != 0x3e84)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value2c = reader->ParseReal();
+        if (reader->ParseToken() != 0x3e85)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value30 = reader->ParseReal();
+        if (reader->ParseToken() != 0x3e86)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value34 = reader->ParseReal();
+        if (reader->ParseToken() != 0x3e87)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value38 = reader->ParseReal();
+        if (reader->ParseToken() != 0x3e88)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value3c = reader->ParseReal();
+        if (reader->ParseToken() != 0x3e89)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value40 = reader->ParseReal();
+        if (reader->ParseToken() != 0x3e8a)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value44 = reader->ParseReal();
+        if (reader->ParseToken() != 0x3e8b)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value48 = reader->ParseReal();
+        if (reader->ParseToken() != 0x3e8c)
+            throw IdvFileError("malformed flare info", false);
+        (*(std::vector<Flare*>*)&unk60)[index]->value4c = reader->ParseReal();
     }
-    if (reader->GetNextElement() != 0x3e81)
-    {
-        FUN_0044a4c0 message("malformed flare info");
-        FUN_00b09480 error(message, 0);
-        _CxxThrowException(&error, (_ThrowInfo*)&DAT_01170384);
-    }
+    if (reader->ParseToken() != 0x3e81)
+        throw IdvFileError("malformed flare info", false);
 }
-}  // namespace fnv_00b2d2e0
 
 struct Elem
 {
@@ -3219,7 +2275,8 @@ inline void S00b2db10_padE()
     int e24;
     int e25;
 }
-struct Vec : VecVal
+// std::vector of 0x54-byte Elem (_Myfirst/_Mylast/_Myend): 0x00b2db10 = its operator=, 0x00b2e080 = _Buy (GvVectorStore::_Buy in blk_00b20000).
+struct Elem54Vector : VecVal
 {
     Elem* _Myfirst;
     Elem* _Mylast;
@@ -3239,10 +2296,10 @@ struct Vec : VecVal
     {
         return unchecked_uninitialized_copy(_First, _Last, _Ptr, this->_Alval);
     }
-    Vec& FUN_00b2db10(const Vec& _Right);
+    Elem54Vector& FUN_00b2db10(const Elem54Vector& _Right);
 };
 // @fnv 0x00b2db10
-Vec& Vec::FUN_00b2db10(const Vec& _Right)
+Elem54Vector& Elem54Vector::FUN_00b2db10(const Elem54Vector& _Right)
 {
     if (this != &_Right)
     {
@@ -3324,76 +2381,9 @@ inline void DeadTop()
     int aiD[63];
     aiD[14] = 0;
 }
-struct LodInfoReader : CTreeEngine
-{
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkD8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    int unkf0;
-    float unkF4;
-    float unkF8;
-    float unkFC;
-    float unk100;
-    float unk104;
-    void __thiscall FUN_00b2ceb0(ElementIterator* a);
-};
+
 // @fnv 0x00b2ceb0
-void __thiscall LodInfoReader::FUN_00b2ceb0(ElementIterator* a)
+void __thiscall CTreeEngine::FUN_00b2ceb0(ElementIterator* a)
 {
     DeadTop();
     int token = a->GetNextElement();
@@ -3413,7 +2403,7 @@ void __thiscall LodInfoReader::FUN_00b2ceb0(ElementIterator* a)
                 this->unkFC = DAT_0101e2bc;
             break;
         case 0x2333:
-            this->unkD8 = a->GetNextElement();
+            this->unkd8 = a->GetNextElement();
             break;
         case 0x2334:
             this->unkF8 = static_cast<S2bde0_Parser*>(static_cast<void*>(a))->FUN_00b3ed20();
@@ -3457,119 +2447,21 @@ struct S00b2c790_Sub
     void FUN_00b15390(int* value);
 };
 
-struct S00b2c790_Local
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    int unkF0;
-    int unkF4;
-    int unkF8;
-    int unkFC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-};
-
-__forceinline S00b2c790_Sub* TreeSub(S2bde0_Tree* tree)
+__forceinline S00b2c790_Sub* TreeSub(CTreeEngine* tree)
 {
     return reinterpret_cast<S00b2c790_Sub*>(reinterpret_cast<char*>(tree) + 0x60);
 }
 
 __forceinline void TreeClear()
 {
-    S00b2c790_Local local;
-    local.unk38 = 0;
+    int local[0x178 / sizeof(int)];
+    local[0x38 / sizeof(int)] = 0;
 }
 
 int __cdecl FUN_00b3f8e0(ElementIterator* value);
 
 // @fnv 0x00b2c790
-void S2bde0_Tree::FUN_00b2c790(S2bde0_Parser* parser)
+void CTreeEngine::FUN_00b2c790(ElementIterator* parser)
 {
     S00b2c790_Error error2;
     int count_2;

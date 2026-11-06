@@ -1,3 +1,6 @@
+#include "../../../../../include/Vec4.h"
+#include "../../../../../include/hkErrStream.h"
+#include "../../../../../include/hkError.h"
 
 // src/havok/animation/ragdoll/utils/hkaragdollutils_fpfast_variant.cpp - flag-variant unit created 2026-10-30 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /O2 /GS /EHsc /Gy /fp:fast (unit src/havok/animation/ragdoll/utils/hkaragdollutils.cpp lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -49,22 +52,6 @@ struct Obj
 {
     char pad0[0xc];
     Inner* inner;
-};
-struct hkErrStream
-{
-    void* p1;
-    void* p2;
-    void* p3;
-    hkErrStream(void* buf, int size) throw();
-    ~hkErrStream() throw();
-    hkErrStream& operator<<(const char* str) throw();
-};
-struct hkError
-{
-    virtual ~hkError() throw();
-    virtual void unk0();
-    virtual void unk1();
-    virtual int message(int type, int id, const char* desc, const char* file, int line) throw();
 };
 extern hkError* DAT_01268360;
 static bool IsSupportedRagdollConstraint(Obj* obj, bool reportError) throw();
@@ -145,22 +132,13 @@ struct ScratchArray
         return data[index];
     }
 };
-struct LogText
+// The shared stream header does not yet declare the signed-integer overload.
+extern "C" void FUN_00cc0280();
+static __forceinline hkOstream& writeInt(hkOstream& stream, int value) throw()
 {
-    int unk00, unk04, unk08;
-    void FUN_00cb1600(void* storage, int length) throw();
-    LogText(void* storage, int length) throw()
-    {
-        FUN_00cb1600(storage, length);
-    }
-    ~LogText() throw()
-    {
-        FUN_00cc00e0();
-    }
-    LogText* FUN_00cc01c0(const char* value) throw();
-    LogText* WriteInt(int value) throw();
-    void FUN_00cc00e0() throw();
-};
+    typedef hkOstream& (__thiscall *WriteInt)(hkOstream*, int);
+    return reinterpret_cast<WriteInt>(&FUN_00cc0280)(&stream, value);
+}
 extern "C" void __cdecl FUN_00c908c0(HeapAllocator* allocator, ScratchArray* array, int capacity, int itemSize);
 extern "C" const char DAT_010cbde0[];
 extern "C" const char DAT_010cbdec[];
@@ -312,12 +290,9 @@ extern "C" int __cdecl FUN_00cea030(void* first, void* second)
     {
         int messageStorage[128];
         hkErrStream message(messageStorage, 512);
-        reinterpret_cast<LogText*>(&message)
-            ->FUN_00cc01c0(DAT_010cbde0)
-            ->WriteInt(nodeCount - 1)
-            ->FUN_00cc01c0(DAT_010cbdec)
-            ->WriteInt(linkCount)
-            ->FUN_00cc01c0(DAT_010cbe00);
+        writeInt(writeInt(message.FUN_00cc01c0(DAT_010cbde0), nodeCount - 1)
+            .FUN_00cc01c0(DAT_010cbdec), linkCount)
+            .FUN_00cc01c0(DAT_010cbe00);
         DAT_01268360->message(1, 0xabba54bb, reinterpret_cast<const char*>(messageStorage), DAT_010cbd34, 0x144);
         return 1;
     }
@@ -391,10 +366,6 @@ extern const float DAT_010959f4;
 extern const float DAT_01012068;
 extern const __m128 DAT_010c71b0;
 
-struct Vec4
-{
-    float x, y, z, w;
-};
 struct PivotVec;
 struct Bits
 {
@@ -485,6 +456,7 @@ struct __declspec(align(16)) PivotVec
     }
 };
 
+// local form of hkQsTransform: 0x00ce9db0 needs implicit construction and inline scale setup; shared form gives 235 bytes vs exe 224.
 struct __declspec(align(16)) PivotXform
 {
     PivotVec m_vTranslation;

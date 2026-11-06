@@ -2,10 +2,9 @@
 // src/bssystem/bssearchpath.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bssystem/bssearchpath.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct BSSearchPath
-{
-    bool FUN_00b013e0(char* apFile);
-};
+#include "../../include/BSSearchPath.h"
+#include "../../include/BSWin32FileCache.h"
+#include "../../include/MemoryManager.h"
 
 // @fnv 0x00b013e0
 bool BSSearchPath::FUN_00b013e0(char* apFile)
@@ -13,19 +12,7 @@ bool BSSearchPath::FUN_00b013e0(char* apFile)
     return true;
 }
 
-namespace fnv_00b01480 {
-struct MemoryManager
-{
-    void _DeallocateAlias(void* p);
-};
-
 extern MemoryManager g_memoryManager;
-
-struct BSSearchPath
-{
-    void FUN_00aa24f0();
-    void* FUN_00b01480(unsigned int flags);
-};
 
 // Calls FUN_00aa24f0, then deallocates this via g_memoryManager._DeallocateAlias when flags has bit 1 set, and returns this.
 // @fnv 0x00b01480
@@ -36,7 +23,6 @@ void* BSSearchPath::FUN_00b01480(unsigned int flags)
         g_memoryManager._DeallocateAlias(this);
     return this;
 }
-}  // namespace fnv_00b01480
 
 struct FUN_00b01c40_shell
 {
@@ -69,13 +55,8 @@ struct FUN_00b01c80_shell
 void FUN_00b01c80_shell::FUN_00b01c80(int a1)
 {}
 
-struct BSWin32FileCache
-{
-    int FUN_00b01c90(int arg);
-};
-
 // @fnv 0x00b01c90
-int BSWin32FileCache::FUN_00b01c90(int arg)
+int BSWin32FileCache::vf05(int arg)
 {
     return 0;
 }
@@ -164,11 +145,7 @@ struct FUN_00b01d00_shell
 void __thiscall FUN_00b01d00_shell::FUN_00b01d00()
 {}
 
-struct S_00b01d20_MemoryManager
-{
-    void Deallocate(void* p);
-};
-extern S_00b01d20_MemoryManager g_00b01d20_MemoryManager;
+extern MemoryManager g_00b01d20_MemoryManager;
 struct S_00b01d20_FileCache
 {
     virtual ~S_00b01d20_FileCache();
@@ -184,25 +161,16 @@ S_00b01d20_FileCache* S_00b01d20_FileCache::DestroyFileCache(unsigned int uiFlag
     return this;
 }
 
-struct FUN_00b01390_cls
-{
-    int unk00;
-    int m_uiItemCount;
-    char m_path[0x104];
-
-    bool CopyPathOnce(char* out, int unused);
-};
-
 int __cdecl FUN_00ec65a6(char* dst, unsigned int size, const char* src);
 
 // @fnv 0x00b01390
-bool FUN_00b01390_cls::CopyPathOnce(char* out, int unused)
+bool BSSearchPath::ResolveSearchPath(char* out, unsigned int unused)
 {
-    switch (m_uiItemCount)
+    switch (m_uiSearchPathValue)
     {
     case 0:
-        FUN_00ec65a6(out, 0x104, m_path);
-        m_uiItemCount = m_uiItemCount + 1;
+        FUN_00ec65a6(out, 0x104, m_acFilePathBuffer);
+        m_uiSearchPathValue = m_uiSearchPathValue + 1;
         return true;
     }
     return false;

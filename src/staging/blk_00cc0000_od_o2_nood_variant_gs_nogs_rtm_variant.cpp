@@ -1,3 +1,5 @@
+#define FNV64_HKVECTOR4_OWN_ASSIGN   // this unit defines its own hkVector4 assign form
+#define FNV64_HKVECTOR4_OWN_COPY   // this unit defines its own hkVector4 copy form
 // src/staging/blk_00cc0000_od_o2_nood_variant_gs_nogs_rtm_variant.cpp - variant unit created 2026-11-01 by rtm_route.py: community reworks of src/staging/blk_00cc0000_od_o2_nood_variant.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with) and /MT /O2 /GS- /EHsc /Gy (unit lists /MT /O2 /GS /EHsc /Gy). Declarations copied from that unit's skeleton.
 
@@ -9,11 +11,18 @@
 // src/staging/blk_00cc0000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
+#include "../../include/AutoMemContext.h"
+#include "../../include/hkAabb.h"
+#include "../../include/Transform.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkReferencedObject.h"
+#include "../../include/hkVector4.h"
+#include "../../include/hkpConvexShape.h"
+#include "../../include/hkpShape.h"
 extern "C" __declspec(thread) int tls_memContext;
 struct MemContextGuard
 {
@@ -28,32 +37,7 @@ struct MemContextGuard
         tls_memContext = m_iSaved;
     }
 };
-struct hkMemoryAllocator
-{
-    virtual void v00();
-    virtual void* allocateChunk(int nbytes);
-};
-struct hkMemoryRouterStub
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* m_pThreadAllocator;
-    hkMemoryAllocator& heap()
-    {
-        return *m_pThreadAllocator;
-    }
-};
-hkMemoryRouterStub* FUN_00c85750();
-struct hkVector4
-{
-    __m128 m_vComponents;
-    void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-};
+// The router at 0x00c85750 uses the shared prefix's heap allocator at +0x10.
 struct TransformObj
 {
     int unk00;
@@ -82,7 +66,7 @@ struct TransformObj
 
     static void* operator new(unsigned int nbytes)
     {
-        TransformObj* p = (TransformObj*)FUN_00c85750()->heap().allocateChunk(nbytes);
+        TransformObj* p = (TransformObj*)hkMemoryRouter::getInstance().heap().blockAlloc(nbytes);
         p->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return p;
     }
@@ -412,19 +396,6 @@ struct PoseState
     }
     PoseTransform& FUN_00cda8e0(int index);
 };
-struct SpawnAllocator
-{
-    virtual void v00();
-    virtual void* Alloc(unsigned int size);
-};
-struct SpawnHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    SpawnAllocator* m_pAllocator;
-};
 struct FUN_00d4f2a0
 {
     int unk00;
@@ -464,8 +435,8 @@ struct FUN_00d4f2a0
     {}
     static __forceinline void* operator new(unsigned int size) throw()
     {
-        SpawnHolder* h = (SpawnHolder*)FUN_00c85750();
-        void* p = h->m_pAllocator->Alloc(size);
+        hkMemoryRouter& h = hkMemoryRouter::getInstance();
+        void* p = h.heap().blockAlloc(size);
         ((FUN_00d4f2a0*)p)->m_iElementCount = (unsigned short)size;
         return p;
     }
@@ -564,11 +535,6 @@ struct S_00ccbce0_Owner
     void __thiscall FUN_00ccbce0(S_00ccbce0_Output* value);
 };
 extern "C" __m128 _mm_setr_ps(float, float, float, float);
-union hkVec4
-{
-    __m128 m_vComponents;
-    char m_bytes[16];
-};
 struct BytePair
 {
     char a;
@@ -594,7 +560,7 @@ struct EntityObj
     char unk5C, unk5D;
     static void* operator new(unsigned int nbytes)
     {
-        EntityObj* p = (EntityObj*)FUN_00c85750()->heap().allocateChunk(nbytes);
+        EntityObj* p = (EntityObj*)hkMemoryRouter::getInstance().heap().blockAlloc(nbytes);
         p->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return p;
     }
@@ -987,14 +953,6 @@ class S_00cd3c20_Obj
     int unk520;
 };
 void __stdcall FUN_00cd3c20(S_00cd3c20_Obj* obj);
-struct ShapeVector
-{
-    hkVec4 m_v;
-    ShapeVector(float x, float y, float z, float w)
-    {
-        m_v.m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
 struct IntegerBlock18
 {
     int unk00;
@@ -1030,13 +988,13 @@ struct ShapeObj
 
     static void* operator new(unsigned int nbytes)
     {
-        ShapeObj* p = (ShapeObj*)FUN_00c85750()->heap().allocateChunk(nbytes);
+        ShapeObj* p = (ShapeObj*)hkMemoryRouter::getInstance().heap().blockAlloc(nbytes);
         p->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return p;
     }
     static void operator delete(void* p, unsigned int nbytes);
 
-    ShapeObj(int iType, const ShapeVector& kVec, float fA, float fB);
+    ShapeObj(int iType, const hkVector4& kVec, float fA, float fB);
     void FUN_00c905b0();
 };
 struct ShapeOwner
@@ -1114,8 +1072,8 @@ struct S00cc4610_Out
     S00cc4610_Out(int a, int b, int c);
     void* operator new(unsigned int n)
     {
-        hkMemoryAllocator& a = FUN_00c85750()->heap();
-        void* p = a.allocateChunk(n);
+        hkMemoryAllocator& a = hkMemoryRouter::getInstance().heap();
+        void* p = a.blockAlloc(n);
         ((S00cc4610_Out*)p)->m_iElementCount = (unsigned short)n;
         return p;
     }
@@ -1520,21 +1478,8 @@ struct TlsState
     int unk2b4;
 };
 extern __declspec(thread) TlsState g_tlsState;
-class MemoryManager
-{
-  public:
-    void* Allocate(unsigned int size);
-};
 extern MemoryManager _g_memoryManager;
 struct Holder;
-struct CinfoVector
-{
-    hkVec4 value;
-    __forceinline CinfoVector(__m128 vector)
-    {
-        value.m_vComponents = vector;
-    }
-};
 extern "C" __m128 _mm_set_ps1(float);
 struct CachedObj
 {
@@ -1547,19 +1492,6 @@ struct CachedObj
     int unk24;
     int unk28;
     int unk2c;
-};
-struct AutoMemContext
-{
-    int m_saved;
-    AutoMemContext(int ctx)
-    {
-        m_saved = g_tlsState.unk2b4;
-        g_tlsState.unk2b4 = ctx;
-    }
-    ~AutoMemContext()
-    {
-        g_tlsState.unk2b4 = m_saved;
-    }
 };
 struct Holder
 {
@@ -1580,10 +1512,6 @@ inline void* AllocAligned(unsigned int size)
     p[-1] = pad;
     return p;
 }
-struct Vec
-{
-    float x, y, z;
-};
 struct Mat
 {
     float xx, xy, xz, yx, yy, yz, zx, zy, zz;
@@ -1591,16 +1519,8 @@ struct Mat
 struct NodeTransform
 {
     Mat rotation;
-    Vec translation;
+    NiPoint3 translation;
     float scale;
-};
-union __declspec(align(16)) Transform
-{
-    struct
-    {
-        __m128 a, b, c, d;
-    };
-    char bytes[64];
 };
 struct TLSData
 {
@@ -1864,7 +1784,7 @@ struct ConvexShapeNode
     int unk2c;
     int unk30;
     Mat rotation;
-    Vec position;
+    NiPoint3 position;
     int unk64;
     int unk68;
     int unk6c;
@@ -1972,7 +1892,7 @@ struct Body
 extern Transform identity;
 extern const char nodeName[];
 void FUN_00624b10(Mat*, Transform*);
-void FUN_00458620(Vec*, __m128*);
+void FUN_00458620(NiPoint3*, __m128*);
 struct Subject
 {
     int unk00, unk04;
@@ -1987,39 +1907,20 @@ extern "C"
 }
 extern float DAT_0104da48;
 extern float DAT_0104e148;
-struct BoundsVector : hkVector4
-{
-    __forceinline const __m128& Get() const
-    {
-        return m_vComponents;
-    }
-    __forceinline void SetAll(float value)
-    {
-        m_vComponents = _mm_set_ps1(value);
-    }
-    __forceinline void Min(const BoundsVector& a, const BoundsVector& b)
-    {
-        m_vComponents = _mm_min_ps(a.Get(), b.Get());
-    }
-    __forceinline void Max(const BoundsVector& a, const BoundsVector& b)
-    {
-        m_vComponents = _mm_max_ps(a.Get(), b.Get());
-    }
-};
 struct BoundsEntry
 {
-    BoundsVector translation;
-    BoundsVector rotation;
-    BoundsVector scale;
+    hkVector4 translation;
+    hkVector4 rotation;
+    hkVector4 scale;
 };
 struct BoundsBox
 {
-    BoundsVector m_kMinimumCorner;
-    BoundsVector m_kMaximumCorner;
-    __forceinline void Include(const BoundsVector& point)
+    hkVector4 m_kMinimumCorner;
+    hkVector4 m_kMaximumCorner;
+    __forceinline void Include(const hkVector4& point)
     {
-        m_kMinimumCorner.Min(m_kMinimumCorner, point);
-        m_kMaximumCorner.Max(m_kMaximumCorner, point);
+        m_kMinimumCorner.m_vComponents = _mm_min_ps(m_kMinimumCorner.m_vComponents, point.m_vComponents);
+        m_kMaximumCorner.m_vComponents = _mm_max_ps(m_kMaximumCorner.m_vComponents, point.m_vComponents);
     }
 };
 class BoundsOwner
@@ -2047,31 +1948,9 @@ struct S00cc2530_ScopedHeap306
         DAT_tls_field = old;
     }
 };
-struct S00cc2530_Alloc306
-{
-    virtual void f0();
-    virtual void* Allocate(int);
-    virtual void Free(void*, int);
-};
-struct S00cc2530_Router306
-{
-    int unk00, unk04, unk08, unk0c;
-    S00cc2530_Alloc306* heap;
-    S00cc2530_Alloc306* GetAllocator()
-    {
-        return heap;
-    }
-};
-namespace Memory306 {
-extern "C" S00cc2530_Router306* FUN_00c85750();
-}
 struct S00cc2530_Source306
 {
     int a, b, unk08, unk0c, unk10, unk14, unk18, unk1c;
-    float m[16];
-};
-struct __declspec(align(16)) Transform306
-{
     float m[16];
 };
 struct S00cc2530_FUN_00d4ce10
@@ -2174,13 +2053,13 @@ struct S00cc2530_FUN_00d4ce10
     void removeReference();
     static void* operator new(unsigned int n)
     {
-        void* p = Memory306::FUN_00c85750()->GetAllocator()->Allocate(n);
+        void* p = hkMemoryRouter::getInstance().heap().blockAlloc(n);
         static_cast<S00cc2530_FUN_00d4ce10*>(p)->memorySize = (unsigned short)n;
         return p;
     }
     static void operator delete(void* p)
     {
-        Memory306::FUN_00c85750()->GetAllocator()->Free(p, 0x170);
+        hkMemoryRouter::getInstance().heap().blockFree(p, 0x170);
     }
 };
 __forceinline __m128* BuildTransform306(S00cc2530_Source306* src, __m128* t)
@@ -2282,8 +2161,8 @@ struct Shape : RefCountedObject
     unsigned char kind;
     static void* operator new(unsigned int bytes)
     {
-        hkMemoryRouterStub* router = FUN_00c85750();
-        Shape* result = static_cast<Shape*>(router->heap().allocateChunk(bytes));
+        hkMemoryRouter& router = hkMemoryRouter::getInstance();
+        Shape* result = static_cast<Shape*>(router.heap().blockAlloc(bytes));
         result->size = (unsigned short)bytes;
         return result;
     }
@@ -2309,8 +2188,8 @@ struct FUN_00cc9d00 : RefCountedObject
     FUN_00cc9d00(ObjectType* type, Shape* shape, SourceGeometry* geometry);
     static void* operator new(unsigned int bytes)
     {
-        hkMemoryRouterStub* router = FUN_00c85750();
-        FUN_00cc9d00* result = static_cast<FUN_00cc9d00*>(router->heap().allocateChunk(bytes));
+        hkMemoryRouter& router = hkMemoryRouter::getInstance();
+        FUN_00cc9d00* result = static_cast<FUN_00cc9d00*>(router.heap().blockAlloc(bytes));
         result->size = (unsigned short)bytes;
         return result;
     }
@@ -2571,32 +2450,18 @@ static void AddName(NameArr* arr, const unsigned int& v)
     arr->FUN_0096ae90(n, v);
 }
 extern "C" void _mm_store_ss(float*, __m128);
-struct hkVec4Q
-{
-    hkVec4 storage;
-    __forceinline void setSub4(const hkVec4Q& a, const hkVec4Q& b)
-    {
-        storage.m_vComponents = _mm_sub_ps(a.storage.m_vComponents, b.storage.m_vComponents);
-    }
-    __forceinline __m128 dot3(const hkVec4Q& a) const
-    {
-        __m128 x2 = _mm_mul_ps(storage.m_vComponents, a.storage.m_vComponents);
-        __m128 result = _mm_add_ss(_mm_shuffle_ps(x2, x2, 0x55), x2);
-        return _mm_add_ss(_mm_shuffle_ps(x2, x2, 0xaa), result);
-    }
-};
 struct AlignedPairData
 {
-    hkVec4Q m_vContactPosition;
-    hkVec4Q m_vHitNormal;
+    hkVector4 m_vContactPosition;
+    hkVector4 m_vHitNormal;
     float m_fClosestPointDistanceSquared;
     int m_type;
     int unk28;
     int unk2C;
-    hkVec4Q unk30;
-    hkVec4Q unk40;
-    hkVec4Q unk50;
-    hkVec4Q unk60;
+    hkVector4 unk30;
+    hkVector4 unk40;
+    hkVector4 unk50;
+    hkVector4 unk60;
 };
 template <int ELEMENTSIZE> __forceinline void memCpyOneAligned(void* dst, const void* src)
 {
@@ -2642,17 +2507,6 @@ struct ContactManifold
 };
 extern "C" __m128 _mm_setzero_ps();
 extern float DAT_011b153c;
-union hkVecQ3E
-{
-    __m128 m_vComponents;
-    char m_bytes[16];
-    __forceinline hkVecQ3E()
-    {}
-    __forceinline hkVecQ3E(float x, float y, float z, float w)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
 struct ShapeInfo_SI
 {
     int unk00;
@@ -2672,58 +2526,17 @@ struct ShapeInfo_SI
     float m_f38;
     float m_f3C;
 };
-struct hkReferencedObject
-{
-    virtual ~hkReferencedObject();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    __forceinline hkReferencedObject()
-    {
-        m_sReferenceCount = 1;
-    }
-
-    __forceinline static void* operator new(unsigned int nbytes)
-    {
-        hkReferencedObject* p = (hkReferencedObject*)FUN_00c85750()->heap().allocateChunk(nbytes);
-        p->m_usMemSizeAndFlags = (unsigned short)nbytes;
-        return p;
-    }
-    static void operator delete(void* p, unsigned int nbytes);
-
-    void FUN_00c905b0();
-};
-struct hkpShape : hkReferencedObject
-{
-    int m_ulUserData;
-    int m_type;
-
-    __forceinline hkpShape(int iType)
-    {
-        m_ulUserData = 0;
-        m_type = iType;
-    }
-};
-struct hkpConvexShape : hkpShape
-{
-    float m_fSphereRadius;
-
-    __forceinline hkpConvexShape(int iType, float fRadius) : hkpShape(iType)
-    {
-        m_fSphereRadius = fRadius;
-    }
-};
 struct ShapeObj_SI : hkpConvexShape
 {
     unsigned short unk14;
     unsigned char unk16;
     unsigned char unk17;
-    hkVecQ3E m_v20;
-    hkVecQ3E m_v30;
-    hkVecQ3E m_v40;
-    hkVecQ3E m_v50;
+    hkVector4 m_v20;
+    hkVector4 m_v30;
+    hkVector4 m_v40;
+    hkVector4 m_v50;
 
-    __forceinline ShapeObj_SI(const hkVecQ3E& a, const hkVecQ3E& b, const hkVecQ3E& c, float fRadius = DAT_011b153c)
+    __forceinline ShapeObj_SI(const hkVector4& a, const hkVector4& b, const hkVector4& c, float fRadius = DAT_011b153c)
         : hkpConvexShape(3, fRadius)
     {
         m_v20.m_vComponents = a.m_vComponents;
@@ -2870,10 +2683,6 @@ struct ExtendedMeshIndex
         return _g_memoryManager.Allocate(size);
     }
 };
-struct Vec3
-{
-    float x, y, z;
-};
 struct Triangle
 {
     unsigned short a, b, c, unk06;
@@ -2893,7 +2702,7 @@ struct Geometry
 
     Triangle* triangles;
 
-    Vec3* vertices;
+    NiPoint3* vertices;
 
     unsigned unk1C, unk20;
 
@@ -2929,26 +2738,17 @@ struct MeshPart
 
     unsigned vertexCount;
 
-    Vec3* vertices;
+    NiPoint3* vertices;
 
     unsigned triangleCount;
 
     unsigned short* indices;
 
-    struct Bounds* bounds;
+    struct hkAabb* bounds;
 
     MeshPart();
 
     ~MeshPart();
-};
-struct Bounds
-{
-    unsigned first, second;
-    __forceinline void Init(unsigned a, unsigned b)
-    {
-        first = a;
-        second = b;
-    }
 };
 struct FUN_00a5d3a0
 {
@@ -3054,15 +2854,15 @@ struct IndexArray
 };
 struct __declspec(align(16)) ExtendedMeshStoredVector
 {
-    hkVec4 lanes;
+    hkVector4 lanes;
     __forceinline ExtendedMeshStoredVector& operator=(__m128 v)
     {
-        _mm_store_ps(reinterpret_cast<float*>(&lanes.m_bytes[0]), v);
+        _mm_store_ps(lanes.m_f, v);
         return *this;
     }
     __forceinline operator const __m128&() const
     {
-        return *reinterpret_cast<const __m128*>(&lanes.m_bytes[0]);
+        return lanes.m_vComponents;
     }
 };
 struct Result
@@ -3280,76 +3080,70 @@ inline float sqrt_cdb910(float x)
     return sqrt(x);
 }
 
-struct Vec_cdb910
+inline hkVector4::hkVector4(const hkVector4& o)
 {
-    __m128 m_vComponents;
-    Vec_cdb910()
-    {}
-    Vec_cdb910(const Vec_cdb910& o)
-    {
-        m_vComponents = o.m_vComponents;
-    }
-    void operator=(const Vec_cdb910& o)
-    {
-        m_vComponents = o.m_vComponents;
-    }
-    __forceinline float dot3(const Vec_cdb910& o) const
-    {
-        __m128 p = _mm_mul_ps(m_vComponents, o.m_vComponents);
-        __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
-        s = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
-        float r;
-        _mm_store_ss(&r, s);
-        return r;
-    }
-    __forceinline void setCross(const Vec_cdb910& a, const Vec_cdb910& b)
-    {
-        __m128 c0 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9),
-                               _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2));
-        __m128 c1 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2),
-                               _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(c0, c1);
-    }
-    __forceinline void mul4(const float& s)
-    {
-        __m128 q = _mm_load_ss(&s);
-        q = _mm_shuffle_ps(q, q, 0);
-        m_vComponents = _mm_mul_ps(m_vComponents, q);
-    }
-    float& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-    __forceinline void normalize4()
-    {
-        __m128 l = _mm_mul_ps(m_vComponents, m_vComponents);
-        l = _mm_add_ps(_mm_shuffle_ps(l, l, 0x4e), l);
-        l = _mm_add_ps(_mm_shuffle_ps(l, l, 0xb1), l);
-        __m128 e = _mm_rsqrt_ss(l);
-        __m128 zero = _mm_set_ss(DAT_01011d78);
-        __m128 three = _mm_set_ss(DAT_01017718);
-        __m128 half = _mm_set_ss(DAT_01016248);
-        __m128 ree = _mm_mul_ss(_mm_mul_ss(l, e), e);
-        __m128 mask = _mm_cmpeq_ss(l, zero);
-        __m128 res = _mm_mul_ss(_mm_mul_ss(half, e), _mm_sub_ss(three, ree));
-        res = _mm_andnot_ps(mask, res);
-        m_vComponents = _mm_mul_ps(_mm_shuffle_ps(res, res, 0), m_vComponents);
-    }
-};
+    m_vComponents = o.m_vComponents;
+}
+inline void hkVector4::operator=(const hkVector4& o)
+{
+    m_vComponents = o.m_vComponents;
+}
+__forceinline float hkVector4::dot3scalar(const hkVector4& o) const
+{
+    __m128 p = _mm_mul_ps(m_vComponents, o.m_vComponents);
+    __m128 s = _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p);
+    s = _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), s);
+    float r;
+    _mm_store_ss(&r, s);
+    return r;
+}
+__forceinline void hkVector4::setCross(const hkVector4& a, const hkVector4& b)
+{
+    __m128 c0 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xc9),
+                           _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xd2));
+    __m128 c1 = _mm_mul_ps(_mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xd2),
+                           _mm_shuffle_ps(b.m_vComponents, b.m_vComponents, 0xc9));
+    m_vComponents = _mm_sub_ps(c0, c1);
+}
+__forceinline void hkVector4::mul4(const float& s)
+{
+    __m128 q = _mm_load_ss(&s);
+    q = _mm_shuffle_ps(q, q, 0);
+    m_vComponents = _mm_mul_ps(m_vComponents, q);
+}
+inline float& hkVector4::operator()(int i)
+{
+    return m_f[i];
+}
+__forceinline void hkVector4::normalize4()
+{
+    __m128 l = _mm_mul_ps(m_vComponents, m_vComponents);
+    l = _mm_add_ps(_mm_shuffle_ps(l, l, 0x4e), l);
+    l = _mm_add_ps(_mm_shuffle_ps(l, l, 0xb1), l);
+    __m128 e = _mm_rsqrt_ss(l);
+    __m128 zero = _mm_set_ss(DAT_01011d78);
+    __m128 three = _mm_set_ss(DAT_01017718);
+    __m128 half = _mm_set_ss(DAT_01016248);
+    __m128 ree = _mm_mul_ss(_mm_mul_ss(l, e), e);
+    __m128 mask = _mm_cmpeq_ss(l, zero);
+    __m128 res = _mm_mul_ss(_mm_mul_ss(half, e), _mm_sub_ss(three, ree));
+    res = _mm_andnot_ps(mask, res);
+    m_vComponents = _mm_mul_ps(_mm_shuffle_ps(res, res, 0), m_vComponents);
+}
 
-extern const Vec_cdb910 DAT_010c71b0;
+extern const hkVector4 DAT_010c71b0;
 
 struct Quat_cdb910
 {
-    Vec_cdb910 m_vec;
-    void FUN_00cb2700(const Vec_cdb910& from);
-    void FUN_00cdb910(float t, const Vec_cdb910& from, const Vec_cdb910& to);
+    hkVector4 m_vec;
+    void FUN_00cb2700(const hkVector4& from);
+    void FUN_00cdb910(float t, const hkVector4& from, const hkVector4& to);
 };
 
 // @fnv 0x00cdb910
-void Quat_cdb910::FUN_00cdb910(float t, const Vec_cdb910& from, const Vec_cdb910& to)
+void Quat_cdb910::FUN_00cdb910(float t, const hkVector4& from, const hkVector4& to)
 {
-    float d = from.dot3(to);
+    float d = from.dot3scalar(to);
     float c = t * d + (1.0f - t);
     float v = (1.0f + c) * DAT_01011588;
     if (v <= 0.0f || d < DAT_010cb650)
@@ -3365,7 +3159,7 @@ void Quat_cdb910::FUN_00cdb910(float t, const Vec_cdb910& from, const Vec_cdb910
         }
         float s = sqrt_cdb910(v);
         float scale = (t * DAT_01011588) / s;
-        Vec_cdb910 axis;
+        hkVector4 axis;
         axis.setCross(from, to);
         axis.mul4(scale);
         axis(3) = s;

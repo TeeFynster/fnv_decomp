@@ -1,8 +1,46 @@
+#define FNV64_HKVECTOR4_PACKET_BODIES
+#define FNV64_HKVECTOR4_OWN_CONVERSION
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4
+#include "../../include/ImageSpaceTexture.h"
+#include "../../include/NiTArray.h"
 
 // src/staging/blk_00860000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
-#include "../../include/layout_support.h"
+#include <string.h>
+#pragma intrinsic(memcpy)
+
+// Avoid collision between header declarations and the compiler-generated closure.
+#define __local_vftable_ctor_closure DeclaredVftableCtorClosure
+#include "../../include/Actor.h"
+#include "../../include/ActorCombatGroup.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BGSMessage.h"
+#include "../../include/BSAudio.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSShaderAccumulator.h"
+#include "../../include/FalloutRadio.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/NiTMallocInterface.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/bhkWorldObject.h"
+#include "../../include/Setting.h"
+#include "../../include/TESRecipe.h"
+#include "../../include/hkVector4.h"
+#include "../../include/BGSSaveLoadManager.h"
+#include "../../include/CountingSemaphore.h"
+#include "../../include/GO.h"
+#include "../../include/MessageHandler.h"
+#include "../../include/StrArr.h"
+#include "../../include/TES.h"
+#include "../../include/TESGlobal.h"
+#include "../../include/TESSound.h"
+#undef __local_vftable_ctor_closure
 
 extern int DAT_01081fa0;
 struct FUN_00863e00_cls
@@ -102,14 +140,14 @@ bool __cdecl HasFlags(int flags)
 struct FUN_008693f0_Class
 {
     void __thiscall FUN_008693f0(int aiParam);
-    void __thiscall FUN_00869680(unsigned short auParam, int aiParam);
+    void __thiscall SetAtGrow(unsigned short auParam, int aiParam);
 };
 
-// Calls FUN_00869680 with the unsigned short at offset 0xa of this object and the given int.
+// Calls SetAtGrow with the unsigned short at offset 0xa of this object and the given int.
 // @fnv 0x008693f0
 void __thiscall FUN_008693f0_Class::FUN_008693f0(int aiParam)
 {
-    FUN_00869680(*(unsigned short*)((char*)this + 0xa), aiParam);
+    SetAtGrow(*(unsigned short*)((char*)this + 0xa), aiParam);
 }
 
 extern "C" void __cdecl Deallocate(void*);
@@ -217,10 +255,6 @@ void FUN_00869e30_class::FUN_00869e30()
     FUN_004b0220(f);
 }
 
-struct CountingSemaphore
-{
-    void Signal();
-};
 struct FUN_0086c600_shell
 {
     void SignalAtOffset();
@@ -232,10 +266,6 @@ void FUN_0086c600_shell::SignalAtOffset()
 }
 
 namespace fnv_0086cdd0 {
-struct CountingSemaphore
-{
-    void Wait();
-};
 struct FUN_0086cdd0
 {
     void Wait();
@@ -248,10 +278,7 @@ void FUN_0086cdd0::Wait()
 }
 }  // namespace fnv_0086cdd0
 
-struct ImageSpaceTexture
-{
-    void AddRenderedTexture();
-};
+
 
 struct FUN_00876a00_Class
 {
@@ -584,45 +611,7 @@ void FUN_00863f00::Init()
     _NiFreeAlias(*(void**)((char*)this + 8));
 }
 
-struct NiRenderer
-{
-    virtual void vfn_00();
-    virtual void vfn_04();
-    virtual void vfn_08();
-    virtual void vfn_0c();
-    virtual void vfn_10();
-    virtual void vfn_14();
-    virtual void vfn_18();
-    virtual void vfn_1c();
-    virtual void vfn_20();
-    virtual void vfn_24();
-    virtual void vfn_28();
-    virtual void vfn_2c();
-    virtual void vfn_30();
-    virtual void vfn_34();
-    virtual void vfn_38();
-    virtual void vfn_3c();
-    virtual void vfn_40();
-    virtual void vfn_44();
-    virtual void vfn_48();
-    virtual void vfn_4c();
-    virtual void vfn_50();
-    virtual void vfn_54();
-    virtual void vfn_58();
-    virtual void vfn_5c();
-    virtual void vfn_60();
-    virtual void vfn_64();
-    virtual void vfn_68();
-    virtual void vfn_6c();
-    virtual void vfn_70();
-    virtual void vfn_74();
-    virtual void vfn_78();
-    virtual void vfn_7c();
-    virtual void vfn_80();
-    virtual void vfn_84();
-    virtual void vfn_88();
-    virtual void vfn_8c();
-};
+
 
 NiRenderer* __cdecl FUN_0043c4b0();
 
@@ -633,7 +622,7 @@ int __cdecl FUN_0086a020()
     if (FUN_0043c4b0())
     {
         NiRenderer* renderer = FUN_0043c4b0();
-        renderer->vfn_8c();
+        renderer->Unk_23();
     }
     return 0;
 }
@@ -748,10 +737,7 @@ void* __thiscall FUN_00863ff0_class::FUN_00863ff0(unsigned int flags)
     return this;
 }
 
-struct NiTPointerMap_Standin
-{
-    void __thiscall ClearAndFree();
-};
+class LoadFormHeader;
 struct FUN_00864020_Class
 {
     void* __thiscall FUN_00864020(unsigned int flags);
@@ -759,7 +745,9 @@ struct FUN_00864020_Class
 // @fnv 0x00864020
 void* __thiscall FUN_00864020_Class::FUN_00864020(unsigned int flags)
 {
-    reinterpret_cast<NiTPointerMap_Standin*>(this)->ClearAndFree();
+    // 0x00863d30 destroys the NiTMapBase specialization (vftable 0x01081f78), not NiTPointerMap.
+    typedef NiTMapBase<NiTPointerAllocator<unsigned int>, unsigned char, BSSimpleList<LoadFormHeader*>*> LoadHeaderMap;
+    reinterpret_cast<LoadHeaderMap*>(this)->LoadHeaderMap::~NiTMapBase();
     if (flags & 1)
         Deallocate(this);
     return this;
@@ -1105,11 +1093,6 @@ void __cdecl FUN_0086c150(float value)
     DAT_011ff8b0 = value;
 }
 
-struct MessageHandler
-{
-    static MessageHandler* pHandler;
-    virtual ~MessageHandler();
-};
 MessageHandler* MessageHandler::pHandler;
 
 // Deletes the global MessageHandler instance if it exists and its byte at offset 4 is zero.
@@ -1152,10 +1135,6 @@ void* __thiscall FUN_00877d50_Class::FUN_00877d50(unsigned int flags)
     return this;
 }
 
-struct StrArr
-{
-    void SetSize(unsigned int);
-};
 struct FUN_00877e10_Class
 {
     void SetEntry(unsigned int, unsigned int);
@@ -1194,10 +1173,6 @@ void FUN_008781e0(int value)
     DAT_011a95fc = value;
 }
 
-struct TESSound
-{
-    unsigned int Deallocate();
-};
 struct FUN_00878f20_shell
 {
     int pad[4];
@@ -1276,10 +1251,6 @@ GlobalObject_0087d420* __thiscall GlobalObject_0087d420::FUN_0087d450(unsigned i
 
 void* __cdecl operator new(unsigned int size);
 void __cdecl operator delete(void* p);
-struct BGSSaveLoadManager
-{
-    unsigned char FUN_00424940();
-};
 extern BGSSaveLoadManager* DAT_011de134;
 void* __cdecl __memcpy(void* dest, const void* src, unsigned int count);
 struct FUN_008660b0_shell
@@ -1389,14 +1360,6 @@ FUN_00869d40::FUN_00869d40(unsigned int aiA, unsigned int aiB)
 }
 }  // namespace fnv_00869d40
 
-struct ActorCombatGroup
-{
-    int pad;
-};
-struct NiTMallocInterface_0096afc0
-{
-    static ActorCombatGroup** __cdecl Allocate(unsigned int);
-};
 extern int DAT_01081fc8;
 struct FUN_00864160
 {
@@ -1418,16 +1381,11 @@ FUN_00864160::FUN_00864160(unsigned int ItemUpdateArray, int iExtra)
     m_uiPad = 0;
     m_uiAlloc = 0;
     if (m_uiCount > 0)
-        m_pData = NiTMallocInterface_0096afc0::Allocate(m_uiCount);
+        m_pData = NiTMallocInterface<ActorCombatGroup*>::Allocate(m_uiCount);
     else
         m_pData = 0;
 }
 
-struct TESGlobal
-{
-    float GetValue();
-    void SetValue(float);
-};
 struct TESForm;
 TESForm* __cdecl _ref_004839c0(int id);
 struct FUN_00867890_shell
@@ -1460,13 +1418,6 @@ void FUN_00867890_shell::FUN_00867890()
     FUN_00867a20();
 }
 
-struct GO
-{
-    unsigned int m_uiData;
-    GO(unsigned int* p);
-    ~GO();
-    operator unsigned int() const;
-};
 struct Arr
 {
     unsigned int GetSize();
@@ -1637,10 +1588,7 @@ void FUN_0087d340_Class::FUN_0087d340(unsigned int requested, unsigned int saved
     }
 }
 
-struct BSFadeNode
-{
-    unsigned int FUN_009ad610();
-};
+
 
 struct BSFadeNodeResult
 {
@@ -2209,17 +2157,15 @@ void* FUN_0086c850_shell::FUN_0086c850(unsigned int flags)
     return this;
 }
 
-struct BSAudio;
+
 struct RegionPointList;
 struct SoundPlaybackManager;
-struct TESRecipe;
-struct BGSMessage;
+
+
 struct BGSMenuIcon;
-struct BGSCameraPath;
+
 struct TES;
 struct TESSound;
-
-typedef void(__cdecl* AudioCallback)();
 
 void __cdecl FUN_00aea020();
 void __cdecl GetSoundPathAndFlags();
@@ -2229,15 +2175,7 @@ void __cdecl FUN_00832c40();
 void __cdecl FUN_0082f830();
 bool __cdecl FUN_0082d740(TESSound*, int*, int*);
 
-struct BSAudio
-{
-    virtual void vfn_00();
-    virtual void vfn_04(unsigned int value);
-    virtual void vfn_08();
-    virtual void vfn_0c(AudioCallback callback);
 
-    static BSAudio* __cdecl GetSingleton();
-};
 
 struct RegionPointList
 {
@@ -2249,31 +2187,14 @@ struct SoundPlaybackManager
     static bool __cdecl ResolveSoundFile(char const*, char*, unsigned int*, void**);
 };
 
-struct TESRecipe
-{
-    void __thiscall SetSkill(int value);
-    void __thiscall SetSkillLevel(int value);
-};
 
-struct BGSMessage
-{
-    void __thiscall SetIcon(BGSMenuIcon* value);
-};
 
-struct BGSCameraPath
-{
-    void __thiscall AssignParentPath(BGSCameraPath* value);
-};
 
-struct TES
-{
-    void __thiscall SetDawnSound(TESSound* value);
-};
 
-struct FalloutRadio
-{
-    static void __cdecl RadioSynchUnPaused();
-};
+
+
+
+
 
 struct FUN_0086ce40_class
 {
@@ -2474,10 +2395,6 @@ void FUN_0087d3d0_Class::FUN_0087d3d0(int aiBase, unsigned int count)
     }
 }
 
-struct ScriptLocalsX
-{
-    unsigned int __thiscall GetLocalData();
-};
 struct FUN_0087ea80_shell
 {
     void FUN_0087ea80(unsigned int a);
@@ -2485,22 +2402,19 @@ struct FUN_0087ea80_shell
 // @fnv 0x0087ea80
 void FUN_0087ea80_shell::FUN_0087ea80(unsigned int a)
 {
-    *(unsigned int*)((char*)this + 0x90) = ((ScriptLocalsX*)a)->GetLocalData();
+    // The callee is bhkWorldObject::FUN_004ae750 (0x004ae750), not ScriptLocals::GetLocalData (0x00541c80).
+    *(unsigned int*)((char*)this + 0x90) = (unsigned int)((bhkWorldObject*)a)->FUN_004ae750();
 }
 
-struct Actor_0087f4a0
-{
-    void* GetActorBase();
-    bool FUN_0087f4a0();
-};
+
 struct FlagHelper
 {
     bool GetFlag8();
 };
 // @fnv 0x0087f4a0
-bool Actor_0087f4a0::FUN_0087f4a0()
+bool __fastcall FUN_0087f4a0(Actor* actor)
 {
-    return reinterpret_cast<FlagHelper*>(reinterpret_cast<char*>(GetActorBase()) + 0x30)->GetFlag8();
+    return reinterpret_cast<FlagHelper*>(reinterpret_cast<char*>(actor->GetActorBase()) + 0x30)->GetFlag8();
 }
 
 class MapDtorWrap_b9629 : public NiTPointerMap<int, int>
@@ -2792,25 +2706,12 @@ TESObjectREFR* FUN_008691d0_cls::RemoveAt(unsigned int index)
 
 struct C869680Item;
 
-class C869680Array
-{
-  public:
-    virtual ~C869680Array();
+typedef NiTArray<C869680Item*, NiTMallocInterface<C869680Item*> > C869680Array;
 
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, C869680Item* const& pkElement);
-    unsigned int FUN_00869680(unsigned int uiIndex, C869680Item* const& pkElement);
-
-    C869680Item** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
 
 // SetAtGrow
 // @fnv 0x00869680
-unsigned int C869680Array::FUN_00869680(unsigned int uiIndex, C869680Item* const& pkElement)
+template <> unsigned int NiTArray<C869680Item*, NiTMallocInterface<C869680Item*> >::SetAtGrow(unsigned int uiIndex, C869680Item* const& pkElement)
 {
     if (uiIndex >= m_usMaxSize)
         SetSize(uiIndex + m_usGrowBy);
@@ -2818,10 +2719,9 @@ unsigned int C869680Array::FUN_00869680(unsigned int uiIndex, C869680Item* const
     return uiIndex;
 }
 
-struct FNV_869F30_Renderer : NiRenderer
-{
-    void __thiscall FUN_00483710();
-};
+
+
+void __fastcall RendererNoOp(NiRenderer* renderer);
 
 struct FNV_869F30_Manager
 {
@@ -2867,7 +2767,7 @@ void __cdecl RunModeSwitch(int mode)
     case 2:
         if (FUN_0043c4b0())
         {
-            static_cast<FNV_869F30_Renderer*>(FUN_0043c4b0())->FUN_00483710();
+            RendererNoOp(FUN_0043c4b0());
         }
         FUN_00867090();
         if (DAT_01202d98)
@@ -2967,11 +2867,8 @@ extern unsigned char g_011f941e;
 extern float g_011adbcc;
 extern float g_011adbd0;
 
-struct SettingsRef_011cf8a4
-{
-    float* GetValuePtr();
-};
-extern SettingsRef_011cf8a4 g_011cf8a4;
+
+extern Setting g_011cf8a4;
 
 struct ChainLeaf_005b9f80
 {
@@ -3012,7 +2909,7 @@ void FUN_0086c010()
         g_011adbcc = Sample_0086c0e0();
         g_011adbd0 = Sample_0086c0f0();
     }
-    value = *g_011cf8a4.GetValuePtr();
+    value = *g_011cf8a4.FUN_00403e20();
     Factory_004e3270(12, value)->Next()->Run();
 }
 
@@ -3807,12 +3704,7 @@ FUN_008641d0::FUN_008641d0(unsigned int uiCapacity, void* pvUserData)
         pvContextData = 0;
 }
 
-class BSAudio867
-{
-  public:
-    static BSAudio867* GetSingleton();
-    bool IsEnabled();
-};
+
 
 class Base867
 {
@@ -3830,11 +3722,11 @@ class FUN_008670e0 : public Base867
     virtual ~FUN_008670e0();
 };
 
-// Constructs the object and sets its enabled state from BSAudio867::GetSingleton()->IsEnabled().
+// Constructs the object and sets its enabled state from BSAudio::GetSingleton()->IsEnabled().
 // @fnv 0x008670e0
 FUN_008670e0::FUN_008670e0()
 {
-    SetEnabled(BSAudio867::GetSingleton()->IsEnabled());
+    SetEnabled(BSAudio::GetSingleton()->IsEnabled());
 }
 
 struct Array08
@@ -3904,174 +3796,7 @@ struct FUN_0086c620
     ~FUN_0086c620();
     void SignalAtOffset();
 };
-class BSShaderAccumulator
-{
-  public:
-    static void* operator new(unsigned int);
-    BSShaderAccumulator(int, unsigned int, unsigned int);
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06c;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07c;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    int unk0b0;
-    int unk0b4;
-    int unk0b8;
-    int unk0bc;
-    int unk0c0;
-    int unk0c4;
-    int unk0c8;
-    int unk0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    int unk0e0;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    int unk0f0;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11c;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14c;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15c;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16c;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18c;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    int unk1b0;
-    int unk1b4;
-    int unk1b8;
-    int unk1bc;
-    int unk1c0;
-    int unk1c4;
-    int unk1c8;
-    int unk1cc;
-    int unk1d0;
-    int unk1d4;
-    int unk1d8;
-    int unk1dc;
-    int unk1e0;
-    int unk1e4;
-    int unk1e8;
-    int unk1ec;
-    int unk1f0;
-    int unk1f4;
-    int unk1f8;
-    int unk1fc;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20c;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21c;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22c;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23c;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24c;
-    int unk250;
-    int unk254;
-    int unk258;
-    int unk25c;
-    int unk260;
-    int unk264;
-    int unk268;
-    int unk26c;
-    int unk270;
-    int unk274;
-    int unk278;
-    int unk27c;
-    void FUN_004a1040(unsigned int);
-    void FUN_00936aa0(bool);
-};
+
 struct FUN_00633c90
 {
     void* ptr;
@@ -4156,25 +3881,14 @@ class FUN_00a712f0
     int unk10c;
     int unk110;
 };
-struct Global_p161
-{
-    int* FUN_0043d4d0();
-};
-extern Global_p161 DAT_011c3ea4;
+
+extern Setting DAT_011c3ea4;
 int FUN_0040fc90();
 void FUN_0087b8d0(FUN_0086c620*, FUN_0086c620*);
 extern const char DAT_0105c2b0[];
 extern const char DAT_010829c4[];
 void FUN_00aa2740(int, const char*);
-class AutoMemContext
-{
-  public:
-    int context;
-    AutoMemContext(int, bool, const char*, int);
-    ~AutoMemContext();
-    void FUN_00404f00(int, bool, const char*, int);
-    void Leave();
-};
+
 void CreateC790Manager(int);
 struct Controls_p161
 {
@@ -4237,7 +3951,7 @@ FUN_0086c160::FUN_0086c160(int aiArg1, int aiArg2)
     CreateC790Manager(aiArg2);
     FUN_007fdf30()->LoadControlsFromIni();
     context.Leave();
-    context.FUN_00404f00(11, true, DAT_010829c4, 3541);
+    context.Enter(11, true, const_cast<char*>(DAT_010829c4), 3541);
     InitAudioCallbacks();
     context.Leave();
 }
@@ -6091,10 +5805,7 @@ struct Manager86
 {
     void FUN_00a22e10();
 };
-struct Setting86
-{
-    int* FUN_0043d4d0();
-};
+
 void ClearArchiveTables();
 Manager86* FUN_007fdf30();
 void ClearTaskQueue();
@@ -6110,7 +5821,7 @@ extern Delete86* DAT_011d5128[14];
 extern Delete86* DAT_011d5160[20];
 extern Delete86* DAT_011d5268[34];
 extern Delete86* DAT_011d56a8[34];
-extern Setting86 DAT_011c3ea4;
+extern Setting DAT_011c3ea4;
 struct FUN_0086c880
 {
     int field00, field04, field08, field0c, field10, field14;
@@ -6258,14 +5969,14 @@ union Command
     } fields;
     unsigned char payload[32];
 };
-struct H
+struct ActorCommandSender
 {
     void __thiscall FUN_0087d160(Command*);
     void __thiscall SendCommand22(unsigned int, unsigned int);
 };
 // Builds a Command with operation 22 and the two arguments, then passes it to FUN_0087d160.
 // @fnv 0x0087b3b0
-void __thiscall H::SendCommand22(unsigned int uiFirst, unsigned int uiSecond)
+void __thiscall ActorCommandSender::SendCommand22(unsigned int uiFirst, unsigned int uiSecond)
 {
     Command cmdRequest;
     cmdRequest.fields.operation = 22;
@@ -6346,490 +6057,30 @@ struct Package
 {
     void FUN_00937090(int);
 };
-struct Vector
-{
-    float x, y, z;
-};
-extern Vector DAT_011f426c;
-struct Setting
-{
-    const float* FUN_00403e20();
-};
+
+extern hkVector4 DAT_011f426c;
+
 extern Setting DAT_011df810, DAT_011df828;
 extern const float DAT_01012054, DAT_01017718;
 float FUN_00476b70(float, float);
 bool FUN_008c7aa0();
-struct Actor;
+
 struct Manager
 {
     void FUN_0096e870(Actor*);
     void FUN_0096d450(Actor*, int, int, int, int);
 };
 extern Manager DAT_011e0e80;
-struct Actor
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void v116();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual void v125();
-    virtual void v126();
-    virtual void v127();
-    virtual void v128();
-    virtual void v129();
-    virtual void v130();
-    virtual void v131();
-    virtual void v132();
-    virtual void v133();
-    virtual void v134();
-    virtual void v135();
-    virtual void v136();
-    virtual void v137();
-    virtual void v138();
-    virtual void v139();
-    virtual void v140();
-    virtual void v141();
-    virtual void v142();
-    virtual void v143();
-    virtual void v144();
-    virtual void v145();
-    virtual void v146();
-    virtual void v147();
-    virtual void v148();
-    virtual void v149();
-    virtual void v150();
-    virtual void v151();
-    virtual void v152();
-    virtual void v153();
-    virtual void v154();
-    virtual void v155();
-    virtual void v156();
-    virtual void v157();
-    virtual void v158();
-    virtual void v159();
-    virtual void v160();
-    virtual void v161();
-    virtual void v162();
-    virtual void v163();
-    virtual void v164();
-    virtual void v165();
-    virtual void v166();
-    virtual void v167();
-    virtual void v168();
-    virtual void v169();
-    virtual void v170();
-    virtual void v171();
-    virtual void v172();
-    virtual void v173();
-    virtual void v174();
-    virtual void v175();
-    virtual void v176();
-    virtual void v177();
-    virtual void v178();
-    virtual void v179();
-    virtual void v180();
-    virtual void v181();
-    virtual void v182();
-    virtual void v183();
-    virtual void v184();
-    virtual void v185();
-    virtual void v186();
-    virtual void v187();
-    virtual void v188();
-    virtual void v189();
-    virtual void v190();
-    virtual void v191();
-    virtual void v192();
-    virtual void v193();
-    virtual void v194();
-    virtual void v195();
-    virtual void v196();
-    virtual void v197();
-    virtual void v198();
-    virtual void v199();
-    virtual void v200();
-    virtual void v201();
-    virtual void v202();
-    virtual void v203();
-    virtual void v204();
-    virtual void v205();
-    virtual void v206();
-    virtual void v207();
-    virtual void v208();
-    virtual void v209();
-    virtual void v210();
-    virtual void v211();
-    virtual void v212();
-    virtual void v213();
-    virtual void v214();
-    virtual void v215();
-    virtual void v216();
-    virtual void v217();
-    virtual void v218();
-    virtual void v219();
-    virtual void v220();
-    virtual void v221();
-    virtual void v222();
-    virtual void v223();
-    virtual void v224();
-    virtual void v225();
-    virtual void v226();
-    virtual void v227();
-    virtual void v228();
-    virtual void v229();
-    virtual void v230();
-    virtual void v231();
-    virtual void v232();
-    virtual void v233();
-    virtual void v234();
-    virtual void v235();
-    virtual void v236();
-    virtual void v237();
-    virtual void v238();
-    virtual void v239();
-    virtual void v240();
-    virtual void Update();
-    virtual void v242();
-    virtual void v243();
-    virtual void v244();
-    virtual void v245();
-    virtual void v246();
-    virtual void v247();
-    virtual void v248();
-    virtual void v249();
-    virtual void v250();
-    virtual void v251();
-    virtual void v252();
-    virtual void v253();
-    virtual void v254();
-    virtual void v255();
-    virtual void v256();
-    virtual void v257();
-    virtual void v258();
-    virtual void v259();
-    virtual void v260();
-    virtual void v261();
-    virtual void v262();
-    virtual void v263();
-    virtual void v264();
-    virtual void v265();
-    virtual void v266();
-    virtual void v267();
-    virtual void v268();
-    virtual void v269();
-    virtual void v270();
-    virtual void v271();
-    virtual void v272();
-    virtual void v273();
-    virtual void v274();
-    virtual void v275();
-    virtual void v276();
-    virtual void v277();
-    virtual void v278();
-    virtual void v279();
-    virtual void v280();
-    virtual void v281();
-    virtual void v282();
-    virtual void v283();
-    virtual void v284();
-    virtual void v285();
-    virtual void v286();
-    virtual void v287();
-    virtual void v288();
-    virtual void v289();
-    virtual void v290();
-    virtual void v291();
-    virtual void v292();
-    virtual void v293();
-    virtual void v294();
-    virtual void v295();
-    virtual void v296();
-    virtual void v297();
-    virtual void v298();
-    virtual void v299();
-    virtual void v300();
-    virtual void v301();
-    virtual void v302();
-    virtual void v303();
-    virtual void v304();
-    virtual void v305();
-    virtual void v306();
-    virtual void v307();
-    virtual void ResetState();
-    int unk004;
-    int unk008;
-    int unk00c;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01c;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02c;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03c;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04c;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05c;
-    int unk060;
-    int unk064;
-    Process* process;
-    int unk06c;
-    int unk070;
-    float value074;
-    int unk078;
-    unsigned char unk07c;
-    unsigned char unk07d;
-    unsigned char flag07e;
-    unsigned char unk07f;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08c;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09c;
-    int unk0a0;
-    int unk0a4;
-    int unk0a8;
-    int unk0ac;
-    Controller* controller;
-    int unk0b4;
-    float value0b8;
-    unsigned char flag0bc;
-    unsigned char unk0bd;
-    unsigned char unk0be;
-    unsigned char unk0bf;
-    int unk0c0;
-    unsigned char flag0c4;
-    unsigned char unk0c5;
-    unsigned char unk0c6;
-    unsigned char unk0c7;
-    float value0c8;
-    float value0cc;
-    int unk0d0;
-    int unk0d4;
-    int unk0d8;
-    int unk0dc;
-    Package package;
-    int unk0e4;
-    int unk0e8;
-    int unk0ec;
-    unsigned char flag0f0;
-    unsigned char flag0f1;
-    unsigned char unk0f2;
-    unsigned char unk0f3;
-    int unk0f4;
-    int unk0f8;
-    int unk0fc;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10c;
-    int unk110;
-    float value114;
-    unsigned char flag118;
-    unsigned char unk119;
-    unsigned char unk11a;
-    unsigned char unk11b;
-    int unk11c;
-    int unk120;
-    unsigned char flag124;
-    unsigned char flag125;
-    unsigned char flag126;
-    unsigned char flag127;
-    int unk128;
-    int unk12c;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13c;
-    int unk140;
-    unsigned char flag144;
-    unsigned char flag145;
-    unsigned char flag146;
-    unsigned char unk147;
-    int unk148;
-    unsigned char flag14c;
-    unsigned char flag14d;
-    unsigned char unk14e;
-    unsigned char unk14f;
-    int unk150;
-    float value154;
-    float value158;
-    unsigned char flag15c;
-    unsigned char flag15d;
-    unsigned char unk15e;
-    unsigned char unk15f;
-    Vector velocity;
-    float value16c;
-    int unk170;
-    unsigned char flag174;
-    unsigned char flag175;
-    unsigned char unk176;
-    unsigned char unk177;
-    int unk178;
-    int unk17c;
-    int unk180;
-    int unk184;
-    int unk188;
-    unsigned char flag18c;
-    unsigned char flag18d;
-    unsigned char flag18e;
-    unsigned char unk18f;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19c;
-    int unk1a0;
-    int unk1a4;
-    int unk1a8;
-    int unk1ac;
-    unsigned char flag1b0;
-    unsigned char flag1b1;
-    void FUN_0046a010(int);
-    void FUN_008a08e0(int);
-    void FUN_008bbdb0();
-    void FUN_008bbe00();
-    void FUN_008c4400();
-    void FUN_0087d890(bool);
-};
+
+}  // namespace ActorInitialization
+
 // Initializes the actor: allocates process and controller, optionally registers it, sets default field values, resets state and runs update/init calls.
 // @fnv 0x0087d890
 void Actor::FUN_0087d890(bool registerActor)
 {
+    using namespace ActorInitialization;
     FUN_0046a010(1);
-    process = new Process;
+    m_pBaseProcess = reinterpret_cast<BaseProcess*>(new ActorInitialization::Process);
     if (registerActor)
     {
         if (FUN_008c7aa0())
@@ -6837,71 +6088,70 @@ void Actor::FUN_0087d890(bool registerActor)
         else
             DAT_011e0e80.FUN_0096d450(this, 3, 0, 0, 0);
     }
-    value114 = DAT_01012054;
-    unk120 = 0;
-    unk108 = 0;
-    unk10c = 0;
-    flag118 = 0;
-    unk0b4 = 8;
-    flag0bc = 1;
-    flag0c4 = 0;
-    value0b8 = 0.0f;
-    flag125 = 0;
-    flag124 = 0;
-    unk0c0 = 0;
-    unk070 = 0;
-    unk148 = 0;
-    flag126 = 1;
-    flag14c = 0;
-    value158 = 0.0f;
-    flag15c = 1;
-    value074 = FUN_00476b70(*DAT_011df810.FUN_00403e20(), *DAT_011df828.FUN_00403e20());
-    unk11c = 0;
-    unk170 = 0;
-    value16c = 0.0f;
-    velocity = DAT_011f426c;
-    value0c8 = 0.0f;
-    value0cc = DAT_01017718;
-    flag174 = 0;
-    flag175 = 1;
-    unk110 = 255;
+    ActorConditionAndAnimationState = ActorInitialization::DAT_01012054;
+    m_uiValueBeforeBooleanFields = 0;
+    m_eLifeState = static_cast<ACTOR_LIFE_STATE>(0);
+    m_eCriticalStage = static_cast<ACTOR_CRITICAL_STAGE>(0);
+    m_bHasUpdated = 0;
+    m_eDialogueEmotion = static_cast<DIALOGUE_EMOTION>(8);
+    m_bFirstActorFlag = 1;
+    m_bActorFlag = 0;
+    ActorRagdollData = 0.0f;
+    ActorReferenceData = 0;
+    ActorStateFlags = 0;
+    m_pActorReference = 0;
+    m_pMobileObject = 0;
+    m_pActorBase = 0;
+    ActorReferenceListData = 1;
+    ActorBaseReference = 0;
+    IntegerFloatFlagSettings = 0.0f;
+    m_bFirstBehaviorFlag = 1;
+    ProcessReferenceState = FUN_00476b70(*DAT_011df810.FUN_00403e20(), *DAT_011df828.FUN_00403e20());
+    m_iActorStateValue = 0;
+    FormReferenceState = 0;
+    FormPositionData = 0.0f;
+    memcpy(&m_kFormPosition, &DAT_011f426c, sizeof(m_kFormPosition));
+    m_fFirstValueAfterFlag = 0.0f;
+    m_fSecondScalar = DAT_01017718;
+    m_bFirstFlagAfterForm = 0;
+    m_bFormFlag = 1;
+    m_eAnimationGroup = static_cast<ANIM_GROUP_ENUM>(255);
     ResetState();
     FUN_008a08e0(0);
-    flag14d = 0;
-    unk0ac = 0;
-    controller = new Controller;
-    flag18c = 0;
+    m_bSecondActorFlag = 0;
+    m_pRagdollController = 0;
+    m_pRagdollPenetrationUtil = reinterpret_cast<bhkRagdollPenetrationUtil*>(new ActorInitialization::Controller);
+    FloatTripleBooleanFlagRecord = 0;
     FUN_008bbdb0();
     FUN_008bbe00();
     Update();
     FUN_008c4400();
-    unk150 = 0;
-    value154 = 0.0f;
-    flag0f1 = 0;
-    package.FUN_00937090(1);
-    flag145 = 0;
-    flag146 = 0;
-    flag07e = 0;
-    flag0f0 = 0;
-    unk1a4 = 0;
-    unk1a8 = 0;
-    flag18d = 0;
-    flag127 = 0;
-    unk128 = 0;
-    unk12c = 0;
-    unk130 = 0;
-    unk1ac = 0;
-    flag18e = 0;
-    unk194 = 0;
-    flag15d = 1;
-    unk198 = 0;
-    flag144 = 0;
-    flag1b0 = 0;
-    unk1a0 = 0;
-    flag1b1 = 0;
-    unk140 = 0;
-    unk13c = 0;
-}
+    m_iIntegerBeforeTwoFloatValues = 0;
+    BooleanIntegerTwoFloatData = 0.0f;
+    m_bMiddleFlag = 0;
+    reinterpret_cast<ActorInitialization::Package*>(&m_kSecondActorData)->FUN_00937090(1);
+    ActorBaseConfiguration = 0;
+    m_bFlagBeforeActorBase = 0;
+    MobileObject::m_bThirdFlag = 0;
+    m_bFlagBeforeTwoBooleans = 0;
+    m_iPackageState = 0;
+    ActorProjectileState = 0;
+    m_bMiddleFlagBeforeActorMover = 0;
+    m_bFlagBeforeCurrentActor = 0;
+    m_pCurrentActor = 0;
+    m_pFirstActorArray = 0;
+    m_pSecondActorArray = 0;
+    m_eSitSleepState = static_cast<SIT_SLEEP_STATE>(0);
+    m_bMovementFlag = 0;
+    m_pData = 0;
+    m_bSecondOfTwoFlags = 1;
+    m_pPackage = 0;
+    ActorStatusData = 0;
+    m_bFlagAfterSitSleepState = 0;
+    m_pContinuousBeamProjectile = 0;
+    ActorSleepState = 0;
+    m_uiActorFlags = 0;
+    m_uiFirstValueAfterInteger = 0;
 }
 
 // Allocates a new array of unsigned int with a elements and returns it as an int.
@@ -7092,21 +6342,15 @@ struct SSBitmapHeader
     unsigned short ausClrImportant[2];
 };
 
-struct SSCounter
-{
-    int* FUN_0043d4d0();
-};
-struct SSStringSetting
-{
-    const char* FUN_00403df0();
-};
+
+
 struct SSMenuState
 {
     void OpenAtPosition();
 };
 
-extern SSCounter DAT_011df124;
-extern SSStringSetting DAT_011df0f8;
+extern Setting DAT_011df124;
+extern Setting DAT_011df0f8;
 
 SSRenderer* FUN_004bc3f0();
 int FUN_00e7bd20(SSFormat* pkFormat);

@@ -1,6 +1,9 @@
 // fallout_shared/bipedanim.cpp: BipedAnim, BipedAnimWeap, FaceLoader, BipedAnimHelper (75 functions)
 
 #include "bipedanim_decls.h"
+#include "../../include/GO.h"
+// local form of BSPackedTask: 0x0087b360 needs a direct char[20] member for the original /GS cookie (union form extent 46 vs 66).
+struct PackedTaskGsLocal_0087b360 { int f0, f1, f2; char buf[20]; };
 
 // @fnv 0x004ad4a0
 NiAVObject* BipedAnim::AttachBipedModel(NiNode* model, NiNode* parent, BIPED_OBJECT slot, bool firstPerson, bool hair,
@@ -21,7 +24,7 @@ NiAVObject* BipedAnim::AttachBipedModel(NiNode* model, NiNode* parent, BIPED_OBJ
         if (parent && model->FUN_0043b480() >= 2 && model->FUN_0043b4a0(1) && model->FUN_0043b4a0(1)->IsGeometry())
         {
             attachment.attachNode = new NiNode(0);
-            parent->AddObject(attachment.attachNode, true);
+            parent->AttachChildInAvailableSlot(static_cast<NiAVObject*>(attachment.attachNode), true);
             pResult = attachment.attachNode;
         }
         BipedSkinBoneMetadata metadata;
@@ -29,16 +32,16 @@ NiAVObject* BipedAnim::AttachBipedModel(NiNode* model, NiNode* parent, BIPED_OBJ
         metadata.bones = metadata.extra;
         if (metadata.bones)
         {
-            NiNode* boneNode = GetBoneNode(BIPED_BONE_WEAPON);
+            NiNode* boneNode = GetBoneNode(BIPED_BONE_BIPED_BONE_WEAPON);
             if (boneNode)
                 boneNode->RemoveExtraDataByName(FUN_004ab220());
             boneNode->AddExtraData(FUN_004ab220(), metadata.bones);
             for (unsigned int j = 0; j < model->FUN_0043b480(); ++j)
             {
                 NiAVObject* child = model->FUN_0043b4a0(j);
-                if (child->IsGeometry() && child->IsGeometry()->FUN_0043fad0())
+                if (child->IsGeometry() && child->IsGeometry()->GetSkinInstance())
                 {
-                    metadata.bones->children.FUN_004700d0(model->FUN_0043b4a0(j));
+                    reinterpret_cast<BoneListExtraView*>(metadata.bones)->children.FUN_004700d0(model->FUN_0043b4a0(j));
                 }
             }
         }
@@ -89,8 +92,8 @@ NiAVObject* BipedAnim::AttachBipedModel(NiNode* model, NiNode* parent, BIPED_OBJ
                 }
             }
             skinned.geom = (NiTriBasedGeom*)skinned.child;
-            if (skinned.geom && skinned.geom->FUN_005495f0() && skinned.geom->FUN_0043fad0() && attachment.face &&
-                m_pActor && m_pActor->GetObjectReference() && m_pActor->GetObjectReference()->GetFormType() == FORM_NPC)
+            if (skinned.geom && skinned.geom->FUN_005495f0() && skinned.geom->GetSkinInstance() && attachment.face &&
+                m_pActor && m_pActor->GetObjectReference() && m_pActor->GetObjectReference()->GetFormType() == ENUM_FORM_ID_NPC__ID)
             {
                 TESNPC* m_pActorBaseFormItem;
                 m_pActorBaseFormItem = (TESNPC*)m_pActor->GetObjectReference();
@@ -99,27 +102,27 @@ NiAVObject* BipedAnim::AttachBipedModel(NiNode* model, NiNode* parent, BIPED_OBJ
                 skinned.geom->FUN_005495f0()->ResolveObjectPointer(*(NiPointer<NiObject>*)&spDataCopy);
                 copiedData = (NiAVObject*)spDataCopy;
                 skinned.geom->ReplaceModelData((NiGeometryData*)(NiAVObject*)copiedData);
-                if (skinned.geom->FUN_0043fad0() &&
-                    ((NiSkinPartition*)((NiObjectNET*)skinned.geom->FUN_0043fad0())->GetControllers()))
+                if (skinned.geom->GetSkinInstance() &&
+                    ((NiSkinPartition*)((NiObjectNET*)skinned.geom->GetSkinInstance())->GetControllers()))
                 {
-                    ((NiSkinPartition*)((NiObjectNET*)skinned.geom->FUN_0043fad0())->GetControllers())
+                    ((NiSkinPartition*)((NiObjectNET*)skinned.geom->GetSkinInstance())->GetControllers())
                         ->ResolveObjectPointer(*(NiPointer<NiObject>*)&spDataCopy);
                     NiPointer<NiAVObject> partition((NiAVObject*)spDataCopy);
-                    skinned.geom->FUN_004adde0((NiSkinInstance*)skinned.geom->FUN_0043fad0()->Clone());
-                    skinned.geom->FUN_0043fad0()->FUN_004addc0((NiSkinPartition*)(NiAVObject*)partition);
+                    skinned.geom->SetSkinInstance((NiSkinInstance*)skinned.geom->GetSkinInstance()->Clone());
+                    skinned.geom->GetSkinInstance()->FUN_004addc0((NiSkinPartition*)(NiAVObject*)partition);
                 }
                 m_pActorBaseFormItem->GetFaceGenCoords(coords);
                 if (FUN_0043faf0())
                     attachment.face->ApplyFaceGenMorphs(&coords, skinned.geom, false);
             }
             UpdateSkinInstance(skinned.geom, false);
-            skinned.skin = skinned.geom->FUN_0043fad0();
+            skinned.skin = skinned.geom->GetSkinInstance();
             if (skinned.skin)
             {
                 if (!pResult)
                     pResult = skinned.child;
                 BipedSkinBoneBinding binding;
-                binding.count = (unsigned int)((LowProcess*)skinned.skin->GetSkinData())->GetActiveCombatTarget();
+                binding.count = (unsigned int)((LowProcess*)skinned.skin->GetSkinData())->LowProcess::GetActiveCombatTarget();
                 binding.boneArray = (NiAVObject**)((TimeGlobal*)skinned.skin)->GetTimeStamp();
                 for (unsigned int j = 0; j < binding.count; ++j)
                 {
@@ -138,7 +141,7 @@ NiAVObject* BipedAnim::AttachBipedModel(NiNode* model, NiNode* parent, BIPED_OBJ
                 if (attachment.attachNode)
                 {
                     ((BGSQuestObjective*)skinned.skin)->SetOwnerQuest((TESQuest*)parent);
-                    attachment.attachNode->AddObject(skinned.child, true);
+                    attachment.attachNode->AttachChildInAvailableSlot(static_cast<NiAVObject*>(skinned.child), true);
                 }
             }
         }
@@ -161,7 +164,7 @@ void BipedAnim::AttachFaceGenNode()
         weaponInfo.changes = ((TESObjectREFR*)this)->GetExtraData()->GetContainerChangeData();
         if (weaponInfo.changes)
         {
-            InventoryStackRecord* item = weaponInfo.changes->GetInventoryEntryData(BIPED_WEAPON, false);
+            InventoryStackRecord* item = weaponInfo.changes->GetInventoryEntryData(BIPED_OBJECT_BO_WEAPON, false);
             if (item)
             {
                 weaponInfo.weapon = (TESObjectWEAP*)item->FUN_0044ddc0();
@@ -177,7 +180,7 @@ void BipedAnim::AttachFaceGenNode()
         }
         else
         {
-            pOwnerContext.biped = ((TESObjectREFR*)this)->GetBipedAnim();
+            pOwnerContext.biped = (BipedAnim*)((TESObjectREFR*)this)->GetValidBip01Names();  // vtable slot 122 (+0x1e8)
         }
         pOwnerContext.actor = 0;
         if (((TESObjectREFR*)this)->IsActor())
@@ -185,7 +188,7 @@ void BipedAnim::AttachFaceGenNode()
         if (((TESObjectREFR*)this) == g_thePlayer)
         {
             pOwnerContext.biped = g_thePlayer->GetBipedAnimation(true);
-            ((InventoryStackRecord*)&DAT_011f2250)->SetEquipmentState(false, true);
+            DAT_011f2250.FUN_009c8950(false, true);
             if (pOwnerContext.biped)
                 pOwnerContext.biped->RemoveBipedWeapon();
             pOwnerContext.biped = g_thePlayer->GetBipedAnimation(false);
@@ -207,7 +210,7 @@ void BipedAnim::AttachFaceGenNode()
                 NiNode* pWeaponNode;
                 {
                     NiAVObject* pBackpack =
-                        SceneObjectLookup::GetObjectByName(((TESObjectREFR*)this)->GetNiNode_v(), "Backpack");
+                        SceneObjectLookup::GetObjectByName(((TESObjectREFR*)this)->GetNiNode(), "Backpack");
                     if (pBackpack)
                         pBackpack->GetParent()->RemoveObject(pBackpack);
                     pWeaponNode = 0;
@@ -215,11 +218,11 @@ void BipedAnim::AttachFaceGenNode()
                         NiNode* pNode = 0;
                         if (pOwnerContext.process)
                         {
-                            pWeaponNode = pOwnerContext.process->GetWeaponNode(false);
+                            pWeaponNode = pOwnerContext.process->GetTorchAttachNode(0);
                             m_bHeaderParsed = pWeaponNode && pWeaponNode->FUN_00453470();
                             if (!m_bHeaderParsed)
                             {
-                                pWeaponNode = pOwnerContext.process->GetQuiverNode(false);
+                                pWeaponNode = pOwnerContext.process->GetLeftWeaponBone(0);
                                 bool bow = false;
                                 if (pWeaponNode)
                                 {
@@ -241,7 +244,7 @@ void BipedAnim::AttachFaceGenNode()
                             {
                                 BipedWeaponSearch nodes;
                                 {
-                                    nodes.root = ((TESObjectREFR*)this)->GetNiNode_v();
+                                    nodes.root = ((TESObjectREFR*)this)->GetNiNode();
                                     nodes.search = nodes.root;
                                     nodes.found = 0;
                                     if (nodes.root)
@@ -269,17 +272,17 @@ void BipedAnim::AttachFaceGenNode()
         }
         if (pOwnerContext.process)
         {
-            NiNode* pWeaponNode = pOwnerContext.process->GetWeaponNode(false);
+            NiNode* pWeaponNode = pOwnerContext.process->GetTorchAttachNode(0);
             if (pWeaponNode)
             {
-                FUN_00450b80(0)->RemoveObject(pWeaponNode);
+                reinterpret_cast<SceneObjectRemover*>(FUN_00450b80(0))->RemoveObject(pWeaponNode);
                 pWeaponNode->DetachAllChildren();
             }
             if (((TESObjectREFR*)this)->IsCreature())
             {
                 BipedWeaponSearch nodes;
                 {
-                    nodes.root = ((TESObjectREFR*)this)->GetNiNode_v();
+                    nodes.root = ((TESObjectREFR*)this)->GetNiNode();
                     nodes.search = nodes.root;
                     nodes.found = 0;
                     if (nodes.root)
@@ -288,13 +291,13 @@ void BipedAnim::AttachFaceGenNode()
                         nodes.found = (NiNode*)object;
                         if (nodes.found)
                         {
-                            FUN_00450b80(0)->RemoveObject(nodes.found);
+                            reinterpret_cast<SceneObjectRemover*>(FUN_00450b80(0))->RemoveObject(nodes.found);
                             nodes.found->DetachAllChildren();
                         }
                     }
                 }
             }
-            pWeaponNode = pOwnerContext.process->GetQuiverNode(false);
+            pWeaponNode = pOwnerContext.process->GetLeftWeaponBone(0);
             if (pWeaponNode)
             {
                 bool bow = false;
@@ -309,7 +312,7 @@ void BipedAnim::AttachFaceGenNode()
                 }
                 if (bow)
                 {
-                    FUN_00450b80(0)->RemoveObject(pWeaponNode);
+                    reinterpret_cast<SceneObjectRemover*>(FUN_00450b80(0))->RemoveObject(pWeaponNode);
                     pWeaponNode->DetachAllChildren();
                 }
             }
@@ -324,7 +327,7 @@ void BipedAnim::AttachFaceGenNode()
             {
                 BGSBipedModelList* models = BGSBipedModelList::GetBipedModelList(weaponInfo.weapon);
                 if (models && ((BSSimpleList<BGSPerkEntry*>*)models)->GetNext())
-                    pOwnerContext.actor->GetProcess()->SetWeaponModelChanged(true);
+                    pOwnerContext.actor->GetProcess()->ResetActorModel((RESET_3D_FLAGS)1);
             }
         }
     }
@@ -371,7 +374,7 @@ void BipedAnim::AttachFaceGenNode(NiNode* rootNode, NiNode* objectNode, NiNode* 
             if (attachment.parent)
             {
                 fScale = attachment.parent->GetFloatAt64();
-                attachment.parent->AddObject(objectNode, true);
+                attachment.parent->AttachChildInAvailableSlot(static_cast<NiAVObject*>(objectNode), true);
                 NiUpdateData UpdateData((float)g_timeGlobal.GetTimeStamp(), false, false);
                 objectNode->UpdateDownwardPass(UpdateData, 0);
                 ShadowSceneNode* shadowScene = FUN_00450b80(0);
@@ -379,7 +382,7 @@ void BipedAnim::AttachFaceGenNode(NiNode* rootNode, NiNode* objectNode, NiNode* 
                 NiAVObject* scabbard = SceneObjectLookup::GetObjectByName(objectNode, "Scb");
                 if (scabbard)
                 {
-                    attachment.parent->AddObject(scabbard, true);
+                    attachment.parent->AttachChildInAvailableSlot(static_cast<NiAVObject*>(scabbard), true);
                     SetCollisionRefFlag(attachment.parent, true);
                     scabbard->UpdateSceneObject();
                     objectNode->FUN_004add70();
@@ -402,7 +405,7 @@ void BipedAnim::AttachFaceGenNode(NiNode* rootNode, NiNode* objectNode, NiNode* 
                             NiAVObject* found = FUN_004ade00(rootNode, BIPED_EXTRA_STRING(pName));
                             attachment.parent = (NiNode*)found;
                             if (attachment.parent)
-                                attachment.parent->AddObject(pBackpackNode, true);
+                                attachment.parent->AttachChildInAvailableSlot(static_cast<NiAVObject*>(pBackpackNode), true);
                         }
                     }
                 }
@@ -413,7 +416,7 @@ void BipedAnim::AttachFaceGenNode(NiNode* rootNode, NiNode* objectNode, NiNode* 
             {
                 switch (slot)
                 {
-                case BIPED_WEAPON: {
+                case BIPED_OBJECT_BO_WEAPON: {
                     bhkCollisionObject* pCollision = bhkCollisionObject::GetFromNiAVObject(objectNode);
                     if (pCollision)
                     {
@@ -528,7 +531,7 @@ void BipedAnim::UpdateRaceSex(TESRace* race, SEX sex)
     for (i = 0; i < 20; ++i)
         if (m_kPreviousObjects[i].pParent)
             empty = false;
-    if (m_pActor && m_pActor->GetNiNode_v())
+    if (m_pActor && m_pActor->GetNiNode())
     {
         for (i = 0; i < 20; ++i)
         {
@@ -710,8 +713,8 @@ void BipedAnim::ApplyReferenceExtraData(NiNode* model, NiNode* clone, BIPED_OBJE
 // @fnv 0x004abfa0
 bool BipedAnim::CanLoadHiddenBipedObjects()
 {
-    return ((SettingT<INISettingCollection>*)&g_011d5a10)->Bool()->b &&
-           ((SettingT<INISettingCollection>*)&g_011d5a44)->Bool()->b;
+    return *((SettingT<INISettingCollection>*)&g_011d5a10)->Bool() &&
+           *((SettingT<INISettingCollection>*)&g_011d5a44)->Bool();
 }
 
 struct NiNode;
@@ -1254,22 +1257,15 @@ bool FUN_004ad010_shell::IsFlag4Set()
     return *(unsigned char*)(this + 0x100) & 4;
 }
 
-struct BSPackedTask
-{
-    int f0;
-    int f1;
-    int f2;
-    char buf[20];
-};
 struct Host0087b360
 {
-    void ProcessPackedTask(BSPackedTask const&);
+    void ProcessPackedTask(PackedTaskGsLocal_0087b360 const&);
     void FUN_0087b360(int a, int b);
 };
 // @fnv 0x0087b360
 void Host0087b360::FUN_0087b360(int aiFirst, int aiSecond)
 {
-    BSPackedTask task;
+    PackedTaskGsLocal_0087b360 task;
     task.f0 = 0x15;
     task.f1 = aiFirst;
     task.f2 = aiSecond;
@@ -1371,7 +1367,7 @@ void FUN_004aeb20_holder::AttachFaceGenModel(BSFaceGenModel* apFaceGenModel, NiN
         if (ppartClone)
         {
             BSStringT<char> newName;
-            newName.PrintfString("%s %s (%08X)", DAT_01188b98[aeBipedObject], object[aeBipedObject].pParent->GetEditorID(),
+            newName.PrintfString("%s %s (%08X)", DAT_01188b98[aeBipedObject], object[aeBipedObject].pParent->GetName(),
                             object[aeBipedObject].pParent->GetFormID());
             ppartClone->SetName(NiFixedString(newName));
             ApplyReferenceExtraData(apNode, pcloneNode, aeBipedObject, m_pActor);
@@ -1379,9 +1375,9 @@ void FUN_004aeb20_holder::AttachFaceGenModel(BSFaceGenModel* apFaceGenModel, NiN
             {
                 NiNode* pparent = ppartClone->GetParent();
                 if (bone[boneIndex].pParent)
-                    bone[boneIndex].pParent->AddObject(ppartClone, true);
+                    bone[boneIndex].pParent->AttachChildInAvailableSlot(static_cast<NiAVObject*>(ppartClone), true);
                 else if (ppartClone->GetParent())
-                    root->AddObject(ppartClone, true);
+                    root->AttachChildInAvailableSlot(static_cast<NiAVObject*>(ppartClone), true);
             }
             object[aeBipedObject].m_pSceneObject = ppartClone;
         }
@@ -1466,15 +1462,6 @@ struct FUN_004aad00_shell
     void InitBoneSlots(NiAVObject*);
 };
 
-struct GO
-{
-    unsigned int value;
-
-    GO(int);
-    operator unsigned int() const;
-    ~GO();
-};
-
 extern const char* DAT_01188b74[5];
 
 // Looks up the root "Bip01" and five named bones under pBone, storing each found bone and setting its flag, or warning when a bone is missing.
@@ -1533,15 +1520,15 @@ struct BipedAnimWeap : public BipedAnim
     void SetWeaponModel(TESObjectWEAP* apWeapon, unsigned char iModSlots);
 };
 
-// Removes the weapon biped part, resolves the weapon's mod/static TESModel, and stores the weapon and model into the BIPED_WEAPON slot.
+// Removes the weapon biped part, resolves the weapon's mod/static TESModel, and stores the weapon and model into the BIPED_OBJECT_BO_WEAPON slot.
 // @fnv 0x004ab400
 void BipedAnimWeap::SetWeaponModel(TESObjectWEAP* apWeapon, unsigned char iModSlots)
 {
     if (!apWeapon || apWeapon->GetFormType() != 0x28 ||
-        (apWeapon == object[BIPED_WEAPON].pParent && object[BIPED_WEAPON].m_pSceneObject))
+        (apWeapon == object[BIPED_OBJECT_BO_WEAPON].pParent && object[BIPED_OBJECT_BO_WEAPON].m_pSceneObject))
         return;
 
-    RemovePart(BIPED_WEAPON, true, 0);
+    RemovePart(BIPED_OBJECT_BO_WEAPON, true, 0);
     TESModel* m_kModelObjectsItem = ((WeapAccess*)apWeapon)->GetModTESModel(iModSlots, true);
     if (this == g_thePlayer->GetBipedAnimation(true) || this == g_thePlayer->GetBipedAnimation(false))
     {
@@ -1556,8 +1543,8 @@ void BipedAnimWeap::SetWeaponModel(TESObjectWEAP* apWeapon, unsigned char iModSl
         if (pStaticModel)
             m_kModelObjectsItem = pStaticModel;
     }
-    object[BIPED_WEAPON].pParent = apWeapon;
-    object[BIPED_WEAPON].m_pModel = m_kModelObjectsItem;
+    object[BIPED_OBJECT_BO_WEAPON].pParent = apWeapon;
+    object[BIPED_OBJECT_BO_WEAPON].m_pModel = m_kModelObjectsItem;
 }
 
 struct NotificationProbe : NiAVObject
@@ -1600,7 +1587,7 @@ void __cdecl FUN_004ade40(NiNode* source, NiAVObject* object, NiAVObject* notify
     {
         NiSkinInstance* geometry;
         NiTriBasedGeom* skin = static_cast<NiTriBasedGeom*>(object);
-        geometry = skin->FUN_0043fad0();
+        geometry = skin->GetSkinInstance();
         if (geometry)
         {
             NiAVObject* boneCount;
@@ -1849,7 +1836,7 @@ void FUN_004ab750_shell::FUN_004ab750(TESObjectWEAP* apWeapon, unsigned char iMo
             return;
         {
             BSStringT<char> str;
-            FUN_00406f60(&str, "%s %s (%08X)", DAT_01188b98[5], object[5].pParent->GetEditorID(),
+            FUN_00406f60(&str, "%s %s (%08X)", DAT_01188b98[5], object[5].pParent->GetName(),
                          object[5].pParent->GetFormID());
             object[5].m_pSceneObject->SetName(NiFixedString((const char*)str));
             if (((FUN_004ab730_shell*)apWeapon)->IsFlagSet() && object[7].m_pSceneObject)
@@ -1873,13 +1860,13 @@ void FUN_004ab750_shell::FUN_004ab750(TESObjectWEAP* apWeapon, unsigned char iMo
                     if (m_pActor == _g_thePlayer && this == ((PlayerCalls*)_g_thePlayer)->FUN_00950b00(true))
                         ((ActorCalls*)pActor)
                             ->FUN_008d8520()
-                            ->UpdateWeaponDrawn(((ActorCalls*)pActor)->FUN_008a16d0(), this,
-                                                _g_thePlayer->GetAnimation(true), pActor);
+                            ->PlayAnimation(((ActorCalls*)pActor)->FUN_008a16d0(), this,
+                                                _g_thePlayer->GetAnimation(true), (Actor*)pActor);
                     else
                         ((ActorCalls*)pActor)
                             ->FUN_008d8520()
-                            ->UpdateWeaponDrawn(((ActorCalls*)pActor)->FUN_008a16d0(), this,
-                                                ((ActorCalls*)pActor)->FUN_008b70d0(), pActor);
+                            ->PlayAnimation(((ActorCalls*)pActor)->FUN_008a16d0(), this,
+                                                ((ActorCalls*)pActor)->FUN_008b70d0(), (Actor*)pActor);
                 }
             }
         }
@@ -2098,7 +2085,7 @@ NiAVObject* __cdecl FUN_004aeed0(TESForm* form, TESModel* model, int slot, TESOb
         selected3 = ((ObjectOps*)loaded6)->CloneWith(context4);
     NiAVObject* result5 = selected3;
     bool skinned2 = false;
-    TESModelTextureSwap* swapTmp = model->GetAsModelTextureSwap();
+    TESModelTextureSwap* swapTmp = model->GetAsModelMaterialSwap();
     if (swapTmp)
         swapTmp->ApplyTextureSwaps(result5);
     if (form && form->Unk_2B())
@@ -2140,9 +2127,9 @@ NiAVObject* __cdecl FUN_004aeed0(TESForm* form, TESModel* model, int slot, TESOb
                     attach7 = found5;
                 }
                 if (attach7)
-                    ((NiNode*)attach7)->AddObject(result5, true);
+                    ((NiNode*)attach7)->AttachChildInAvailableSlot(static_cast<NiAVObject*>(result5), true);
                 else
-                    ((NiNode*)parent5)->AddObject(result5, true);
+                    ((NiNode*)parent5)->AttachChildInAvailableSlot(static_cast<NiAVObject*>(result5), true);
             }
         }
         ((ObjectOps*)result5)->Finish();
@@ -2188,11 +2175,11 @@ void BipedAnimHelper::ApplySkinTextures(NiAVObject* apObject, bool abArg2)
     {
         Warning("TEXTURES: Missing '%s' race texture for '%s' in race '%s'.",
                 FUN_00464f30(DAT_01199e8c[((TESActorBase*)pNPC)->GetSex()], false),
-                FUN_00464f30(DAT_01188b98[bipedObject], true), pNPC->FUN_004ac110()->fullName.GetFullName());
+                FUN_00464f30(DAT_01188b98[bipedObject], true), pNPC->FUN_004ac110()->TESFullName::GetFullName());
     }
     else
     {
-        pLightingProp5->SetTexture(0, _ptrA);
+        reinterpret_cast<PPLightingTextureSlots*>(pLightingProp5)->SetTexture(0, _ptrA);
 
         NiSourceTexture* pSourceTex = (NiSourceTexture*)FUN_00653270(&DAT_011f444c, (NiProperty*)(NiTexture*)_ptrA);
         const char* pFilename = 0;
@@ -2211,11 +2198,11 @@ void BipedAnimHelper::ApplySkinTextures(NiAVObject* apObject, bool abArg2)
             NiPointer<NiTexture> normalTexX(0);
             FUN_00b55840(buffer, bUnknown9, normalTexX, true, false);
             if (normalTexX)
-                pLightingProp5->SetNormalTexture(0, normalTexX);
+                reinterpret_cast<PPLightingTextureSlots*>(pLightingProp5)->SetNormalTexture(0, normalTexX);
         }
 
-        pLightingProp5->SetTexture(1, ptrB3);
-        pLightingProp5->SetNormalTexture(1, FUN_004af8a0());
+        reinterpret_cast<PPLightingTextureSlots*>(pLightingProp5)->SetTexture(1, ptrB3);
+        reinterpret_cast<PPLightingTextureSlots*>(pLightingProp5)->SetNormalTexture(1, FUN_004af8a0());
         pLightingProp5->SetFlag(10, true);
     }
 }
@@ -2282,13 +2269,6 @@ struct CloneLoadAccess : NiNode
 {
     NiObject* FUN_00a5d2c0(CloningProcess&);
     void FUN_00a5a040();
-};
-struct MatrixLoadAccess
-{
-    float entry[3][3];
-    MatrixLoadAccess();
-    void FUN_0043f850(float);
-    MatrixLoadAccess operator*(const ThreeByThreeMatrix&) const;
 };
 struct TESLoadAccess : TES
 {
@@ -2361,7 +2341,7 @@ void BipedLoadAccess::UpdateBipedObjects(bool force)
             if (m_pActor == g_thePlayer)
             {
                 TESObjectWEAP* weapon = (TESObjectWEAP*)object[slot].pParent;
-                ItemLoadAccess* pWeaponInfo = (ItemLoadAccess*)g_thePlayer->GetProcess()->GetWeaponInfo();
+                ItemLoadAccess* pWeaponInfo = (ItemLoadAccess*)g_thePlayer->GetProcess()->GetActiveWeapon();
                 modScope = pWeaponInfo->FUN_004bd820();
                 float info = 0.0f;
                 mods = pWeaponInfo->FUN_004bd8d0(14, info);
@@ -2392,10 +2372,10 @@ void BipedLoadAccess::UpdateBipedObjects(bool force)
                     continue;
                 }
             }
-            if (!force && IsSlotHidden((BIPED_OBJECT)slot) && m_pActor != g_thePlayer && DAT_011c5ef0.Bool()->b &&
+            if (!force && IsSlotHidden((BIPED_OBJECT)slot) && m_pActor != g_thePlayer && *DAT_011c5ef0.Bool() &&
                 FUN_0043faf0() && FUN_004abfa0())
             {
-                QueueItem(TASK_DEFAULT, 0, (BIPED_OBJECT)slot);
+                QueueItem(IO_TASK_PRIORITY_IO_TASK_PRIORITY_CRITICAL, 0, (BIPED_OBJECT)slot);
                 continue;
             }
             if (!object[slot].m_pModel->GetModelLength())
@@ -2418,7 +2398,7 @@ void BipedLoadAccess::UpdateBipedObjects(bool force)
             result = 0;
             if (boneIndexd)
             {
-                TESModelTextureSwap* fade = object[slot].m_pModel ? object[slot].m_pModel->GetAsModelTextureSwap() : 0;
+                TESModelTextureSwap* fade = object[slot].m_pModel ? object[slot].m_pModel->GetAsModelMaterialSwap() : 0;
                 if (fade)
                     fade->ApplyTextureSwaps(boneIndexd);
                 if (object[slot].pParent && object[slot].pParent->Unk_2B())
@@ -2440,13 +2420,13 @@ void BipedLoadAccess::UpdateBipedObjects(bool force)
                             for (unsigned int index = 0; index < boneIndexd->FUN_0043b480(); index++)
                             {
                                 NiAVObject* childNode = boneIndexd->FUN_0043b4a0(index);
-                                NiTriBasedGeom* geometry = childNode->IsTriBasedGeom();
+                                NiTriBasedGeom* geometry = childNode->IsTriBasedGeometry();
                                 if (childNode && !geometry)
                                     FUN_005b5e40("FaceGen NIF contains non-geometry at root: '%s'",
                                                  object[slot].m_pModel->GetModelFilePath());
                                 if (geometry && geometry->FUN_005495f0() && m_pActor &&
                                     m_pActor->GetObjectReference() &&
-                                    m_pActor->GetObjectReference()->GetFormType() == FORM_NPC)
+                                    m_pActor->GetObjectReference()->GetFormType() == ENUM_FORM_ID_NPC__ID)
                                 {
                                     TESNPC* newData = (TESNPC*)m_pActor->GetObjectReference();
                                     FaceGenCoord coords[4];
@@ -2458,8 +2438,8 @@ void BipedLoadAccess::UpdateBipedObjects(bool force)
                                     newData->GetFaceGenCoords(coords);
                                     if (!FUN_0043faf0() || face->ApplyFaceGenMorphs(&coords, geometry, false))
                                     {
-                                        ThreeByThreeMatrix rotation;
-                                        rotation.SetYRotation(-1.57079637f);
+                                        NiMatrix3 rotation;
+                                        rotation.MakeYRotation(-1.57079637f);
                                         geometry->FUN_0043fa80(geometry->FUN_006a9540() * rotation);
                                     }
                                 }
@@ -2473,10 +2453,10 @@ void BipedLoadAccess::UpdateBipedObjects(bool force)
                         if (actor->GetProcess())
                         {
                             if (m_pActor == g_thePlayer && this == ((PlayerLoadAccess*)g_thePlayer)->FUN_00950b00(true))
-                                actor->GetProcess()->UpdateWeaponDrawn(actor->FUN_008a16d0(), this,
+                                actor->GetProcess()->PlayAnimation(actor->FUN_008a16d0(), this,
                                                                        g_thePlayer->GetAnimation(true), actor);
                             else
-                                actor->GetProcess()->UpdateWeaponDrawn(actor->FUN_008a16d0(), this,
+                                actor->GetProcess()->PlayAnimation(actor->FUN_008a16d0(), this,
                                                                        actor->FUN_008b70d0(), actor);
                         }
                     }
@@ -2485,7 +2465,7 @@ void BipedLoadAccess::UpdateBipedObjects(bool force)
             if (result)
             {
                 BSStringT<char> name;
-                FUN_00406f60(&name, "%s %s (%08X)", DAT_01188b98[slot], object[slot].pParent->GetEditorID(),
+                FUN_00406f60(&name, "%s %s (%08X)", DAT_01188b98[slot], object[slot].pParent->GetName(),
                              object[slot].pParent->GetFormID());
                 result->SetName(NiFixedString(name));
                 FUN_004af240(_clone, boneIndexd, (BIPED_OBJECT)slot, m_pActor);
@@ -2507,9 +2487,9 @@ void BipedLoadAccess::UpdateBipedObjects(bool force)
                     else
                     {
                         if (bone[node].pParent)
-                            bone[node].pParent->AddObject(result, true);
+                            bone[node].pParent->AttachChildInAvailableSlot(static_cast<NiAVObject*>(result), true);
                         else if (result->GetParent())
-                            root->AddObject(result, true);
+                            root->AttachChildInAvailableSlot(static_cast<NiAVObject*>(result), true);
                     }
                 }
                 ExtraDismemberedLimbs* limbs = ((RefrLoadAccess*)m_pActor)->FUN_005d43c0()->FUN_0042e8c0();

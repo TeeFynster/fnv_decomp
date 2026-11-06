@@ -4,9 +4,10 @@
 
 #pragma optimize("", off)
 // @fnv 0x004f31b0
-void NiGlobalStringTable::AddString()
+// Exe 0x004f31b0 increments NiPixelData revision at +0x68, not a string-table lock.
+void NiPixelData::AddString()
 {
-    ++m_uiLockCount;
+    ++m_uiRevID;
 }
 
 #pragma intrinsic(strlen)

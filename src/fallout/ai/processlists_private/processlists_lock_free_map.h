@@ -7,18 +7,8 @@
 #include "processlists_layout_support.h"
 #include "processlists_sync.h"
 
-class MobileObject;
 class LipTask;
 template <class T> class ThreadInterfaceManager;
-
-class InterfacedClass
-{
-  public:
-    InterfacedClass();
-    virtual ~InterfacedClass();
-    virtual void* AllocateInterface(unsigned int auiThread) = 0;
-};
-FNV_STATIC_ASSERT(sizeof(InterfacedClass) == 4);
 
 template <class K, class T> class LockFreeMap : public InterfacedClass
 {

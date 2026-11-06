@@ -1,3 +1,40 @@
+#include "../../../../../../../../include/hkArray.h"
+#define FNV64_HKVECTOR4_OWN_ADD4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_ADDMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkSimdReal   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_MUL4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETADD4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETMUL4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SETSUB4_consthkVector4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+#define FNV64_HKVECTOR4_OWN_SUB4_consthkVector4   // this unit keeps the out-of-line hkVector4 form
+// Preserve the unit's SIMD representation: the SDK's byte-array aliases
+// cause this compiler to insert additional /GS instrumentation.
+// Exe 0x00d1bd00 FUN_00d1bd00: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
+
+#include "../../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../../include/hkpFixedBufferRayHitCollector.h"
+#include "../../../../../../../../include/hkCpuWorldRayCastCollector.h"
+#include "../../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../../include/hkVector4.h"
+#include "../../../../../../../../include/hkAabb.h"
+
+__forceinline hkpRayHitCollector::hkpRayHitCollector() : m_fEarlyOutHitFraction(1.0f) {}
+__forceinline hkpFixedBufferRayHitCollector::hkpFixedBufferRayHitCollector(int buffer, int capacity)
+{
+    m_pRayHitBuffer = reinterpret_cast<WorldRayCastOutput*>(buffer);
+    m_pHitBufferEnd = reinterpret_cast<WorldRayCastOutput*>(buffer);
+    m_pRayCursor = capacity;
+    m_iHitCount = 0;
+    m_pCollidable = 0;
+}
 
 // src/havok/common/internal/collide/tree/aabbtree/queryutils/hkaabbtreequeryutils.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/common/internal/collide/tree/aabbtree/queryutils/hkaabbtreequeryutils.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -18,26 +55,9 @@ inline void* __cdecl operator new(unsigned int, void* where) throw()
     return where;
 }
 
-struct S_00d1bcb0_Allocator
-{
-    int unk00;
-};
 
-struct S_00d1bcb0_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00d1bcb0_Allocator* m_pStreamAllocator;
-    S_00d1bcb0_Allocator& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
-S_00d1bcb0_Router* FUN_00c85750();
-void ResizeAudioStream(S_00d1bcb0_Allocator& alloc, void* array, int sizeElem);
+hkMemoryRouter* FUN_00c85750();
+void ResizeAudioStream(hkMemoryAllocator& alloc, void* array, int sizeElem);
 
 struct S_00d1bcb0_Entry
 {
@@ -45,28 +65,22 @@ struct S_00d1bcb0_Entry
     int m_kPointB;
 };
 
-struct S_00d1bcb0_Array
+typedef hkArray<S_00d1bcb0_Entry> S_00d1bcb0_Array;
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
 {
-    S_00d1bcb0_Entry* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+return reinterpret_cast<hkMemoryAllocator&>(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750()->heap()));
+}
+template<> __forceinline void hkArrayBase<S_00d1bcb0_Entry>::_pushBack(hkMemoryAllocator& sharedAlloc, S_00d1bcb0_Entry const& e)
+{
+hkMemoryAllocator& alloc = reinterpret_cast<hkMemoryAllocator&>(sharedAlloc);
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void _pushBack(S_00d1bcb0_Allocator& alloc, const S_00d1bcb0_Entry& e)
-    {
         if (m_iElementCount == getCapacity())
             ResizeAudioStream(alloc, this, sizeof(S_00d1bcb0_Entry));
         new (m_data + m_iElementCount) S_00d1bcb0_Entry(e);
         m_iElementCount++;
-    }
-    void AddBack(const S_00d1bcb0_Entry& e)
-    {
-        _pushBack(FUN_00c85750()->heap(), e);
-    }
-};
+    
+}
+
 
 struct S_00d1bcb0
 {
@@ -81,7 +95,7 @@ bool S_00d1bcb0::FUN_00d1bcb0(int iFirst, int iSecond)
     S_00d1bcb0_Entry e;
     e.m_kPointA = iFirst;
     e.m_kPointB = iSecond;
-    m_ppData->AddBack(e);
+    m_ppData->pushBack(e);
     return false;
 }
 
@@ -154,22 +168,18 @@ int __cdecl FUN_00d1d490()
     return FUN_00d1bfa0();
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
 extern "C"
 {
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_cmple_ps(__m128, __m128);
-    int _mm_movemask_ps(__m128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_cmple_ps(LocalM128, LocalM128);
+    LocalM128 _mm_cmpge_ps(LocalM128, LocalM128);
+    int _mm_movemask_ps(LocalM128);
 }
 
 struct DNode
 {
-    __m128 m_ucLowNibble;
-    __m128 m_ucHighNibble;
+    LocalM128 m_ucLowNibble;
+    LocalM128 m_ucHighNibble;
     int m_pChildAtom;
     int unk24;
     int m_flags;
@@ -190,11 +200,7 @@ struct DOwner
     int unk18;
     DIndex m_uiEdgeIndex;
 };
-struct DBox
-{
-    __m128 m_ucLowNibble;
-    __m128 m_ucHighNibble;
-};
+
 struct DVisitor
 {
     virtual void v0();
@@ -205,8 +211,8 @@ template <class T> __forceinline void hkConstructWithCopy(T* p, int n, const T& 
     for (int i = 0; i < n; i++)
         p[i] = t;
 }
-struct DIntArray
-{
+struct DIntArrayLocalForm
+{ // local form of hkArray: 0x00d1d240 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     int* m_data;
     int m_iElementCount;
     int m_iCapacityState;
@@ -214,16 +220,16 @@ struct DIntArray
     {
         return m_iCapacityState & 0x3fffffff;
     }
-    __forceinline void _pushBack(S_00d1bcb0_Allocator& alloc, int e)
+    __forceinline void _pushBack(hkMemoryAllocator& alloc, int e)
     {
         if (m_iElementCount == getCapacity())
             ResizeAudioStream(alloc, this, sizeof(int));
         hkConstructWithCopy(m_data + m_iElementCount, 1, e);
         m_iElementCount++;
     }
-    __forceinline void AddBack(int e)
+    __forceinline void pushBack(int e)
     {
-        _pushBack(FUN_00c85750()->heap(), e);
+        _pushBack(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750()->heap()), e);
     }
 };
 extern float DAT_01011d78;
@@ -238,8 +244,8 @@ extern "C" void* __cdecl FUN_00d1d240(void* apOwner, int apQueryBox, int apVisit
     if (!node)
         return 0;
     int count = 0;
-    __m128 lo;
-    __m128 hi;
+    LocalM128 lo;
+    LocalM128 hi;
     if (apVisitor)
     {
         for (;;)
@@ -247,8 +253,8 @@ extern "C" void* __cdecl FUN_00d1d240(void* apOwner, int apQueryBox, int apVisit
             lo = node->m_ucLowNibble;
             hi = node->m_ucHighNibble;
             DNode* next = node->m_nextId != 0x7fffffff ? owner->m_uiEdgeIndex.FUN_00d9a4c0(node->m_nextId) : 0;
-            int mask = _mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(((DBox*)apQueryBox)->m_ucLowNibble, hi),
-                                                  _mm_cmple_ps(lo, ((DBox*)apQueryBox)->m_ucHighNibble)));
+            int mask = _mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(((hkAabb*)apQueryBox)->m_kMinimumCorner.m_vComponents, hi),
+                                                  _mm_cmple_ps(lo, ((hkAabb*)apQueryBox)->m_kMaximumCorner.m_vComponents)));
             if ((mask & 7) == 7)
             {
                 if (!(node->m_flags & 0x80000000))
@@ -276,8 +282,8 @@ extern "C" void* __cdecl FUN_00d1d240(void* apOwner, int apQueryBox, int apVisit
             lo = node->m_ucLowNibble;
             hi = node->m_ucHighNibble;
             DNode* next = node->m_nextId != 0x7fffffff ? owner->m_uiEdgeIndex.FUN_00d9a4c0(node->m_nextId) : 0;
-            int mask = _mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(((DBox*)apQueryBox)->m_ucLowNibble, hi),
-                                                  _mm_cmple_ps(lo, ((DBox*)apQueryBox)->m_ucHighNibble)));
+            int mask = _mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(((hkAabb*)apQueryBox)->m_kMinimumCorner.m_vComponents, hi),
+                                                  _mm_cmple_ps(lo, ((hkAabb*)apQueryBox)->m_kMaximumCorner.m_vComponents)));
             if ((mask & 7) == 7)
             {
                 if (!(node->m_flags & 0x80000000))
@@ -298,14 +304,14 @@ extern "C" void* __cdecl FUN_00d1d240(void* apOwner, int apQueryBox, int apVisit
     }
     else if (apIntArray)
     {
-        DIntArray* array = (DIntArray*)apIntArray;
+        DIntArrayLocalForm* array = (DIntArrayLocalForm*)apIntArray;
         for (;;)
         {
             lo = node->m_ucLowNibble;
             hi = node->m_ucHighNibble;
             DNode* next = node->m_nextId != 0x7fffffff ? owner->m_uiEdgeIndex.FUN_00d9a4c0(node->m_nextId) : 0;
-            int mask = _mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(((DBox*)apQueryBox)->m_ucLowNibble, hi),
-                                                  _mm_cmple_ps(lo, ((DBox*)apQueryBox)->m_ucHighNibble)));
+            int mask = _mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(((hkAabb*)apQueryBox)->m_kMinimumCorner.m_vComponents, hi),
+                                                  _mm_cmple_ps(lo, ((hkAabb*)apQueryBox)->m_kMaximumCorner.m_vComponents)));
             if ((mask & 7) == 7)
             {
                 if (!(node->m_flags & 0x80000000))
@@ -313,7 +319,7 @@ extern "C" void* __cdecl FUN_00d1d240(void* apOwner, int apQueryBox, int apVisit
                     node = owner->m_uiEdgeIndex.FUN_00d9a4c0(node->m_pChildAtom);
                     continue;
                 }
-                array->AddBack(node->m_pChildAtom);
+                array->pushBack(node->m_pChildAtom);
                 count++;
             }
             node = next;
@@ -325,48 +331,19 @@ extern "C" void* __cdecl FUN_00d1d240(void* apOwner, int apQueryBox, int apVisit
 }
 
 namespace fnv_00d1d5a0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
+void __cdecl FUN_00c908c0(hkMemoryAllocator* alloc, void* array, int reqCapacity, int elemSize);
+
+static __forceinline bool treeBoundsOverlap(const hkAabb& bounds, const hkAabb& other)
 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_cmple_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_cmpge_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_and_ps(__m128 a, __m128 b);
-extern "C" int _mm_movemask_ps(__m128 a);
+    LocalM128 mincomp = _mm_cmple_ps(bounds.m_kMinimumCorner.m_vComponents, other.m_kMaximumCorner.m_vComponents);
+    LocalM128 maxcomp = _mm_cmpge_ps(bounds.m_kMaximumCorner.m_vComponents, other.m_kMinimumCorner.m_vComponents);
+    return (_mm_movemask_ps(_mm_and_ps(mincomp, maxcomp)) & 7) == 7;
+}
 
-void __cdecl FUN_00c908c0(S_00d1bcb0_Allocator* alloc, void* array, int reqCapacity, int elemSize);
-
-struct hkMemoryAllocatorV
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void ReturnMemory(void* p, int numBytes);
-};
-
-struct TreeVector4
-{
-    __m128 m_vComponents;
-};
-
-struct TreeAabb
-{
-    TreeVector4 m_kMinimumCorner;
-    TreeVector4 m_kMaximumCorner;
-
-    bool overlaps(const TreeAabb& other) const
-    {
-        __m128 mincomp = _mm_cmple_ps(m_kMinimumCorner.m_vComponents, other.m_kMaximumCorner.m_vComponents);
-        __m128 maxcomp = _mm_cmpge_ps(m_kMaximumCorner.m_vComponents, other.m_kMinimumCorner.m_vComponents);
-        return (_mm_movemask_ps(_mm_and_ps(mincomp, maxcomp)) & 7) == 7;
-    }
-};
 
 struct TreeNode
 {
-    TreeAabb m_kBounds;
+    hkAabb m_kBounds;
     int m_children[2];
     unsigned int m_parent;
     int m_next;
@@ -413,7 +390,7 @@ struct TreePairStack
     {
         return m_iCapacityState & 0x3fffffff;
     }
-    __forceinline void GrowArrayCapacity(S_00d1bcb0_Allocator& alloc, int n)
+    __forceinline void GrowArrayCapacity(hkMemoryAllocator& alloc, int n)
     {
         const int cap = getCapacity();
         if (cap < n)
@@ -425,39 +402,21 @@ struct TreePairStack
     }
     __forceinline void SetSizeAndGrow(int n)
     {
-        GrowArrayCapacity(FUN_00c85750()->heap(), n);
+        GrowArrayCapacity(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750()->heap()), n);
         m_iElementCount = n;
     }
-    __forceinline void _clearAndDeallocate(S_00d1bcb0_Allocator& alloc)
+    __forceinline void _clearAndDeallocate(hkMemoryAllocator& alloc)
     {
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
-            reinterpret_cast<hkMemoryAllocatorV&>(alloc).ReturnMemory(m_data, getCapacity() * sizeof(TreePair));
+            alloc.bufFree(m_data, getCapacity() * sizeof(TreePair));
     }
 };
 
-struct TreePairArray
-{
-    TreePair* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+typedef hkArray<TreePair> TreePairArray;
+}
+namespace fnv_00d1d5a0 {
 
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void _pushBack(S_00d1bcb0_Allocator& alloc, const TreePair& e)
-    {
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(alloc, this, sizeof(TreePair));
-        new (m_data + m_iElementCount) TreePair(e);
-        m_iElementCount++;
-    }
-    __forceinline void AddBack(const TreePair& e)
-    {
-        _pushBack(FUN_00c85750()->heap(), e);
-    }
-};
 
 // Performs a simultaneous traversal of two AABB trees, collecting overlapping leaf pairs into pairsOut and returning the count.
 // @fnv 0x00d1d5a0
@@ -507,13 +466,13 @@ int FUN_00d1d5a0(AabbTree* treeA, AabbTree* treeB, TreePairArray* pairsOut)
                 top++;
             }
         }
-        else if (nodeB->m_kBounds.overlaps(nodeA->m_kBounds))
+        else if (treeBoundsOverlap(nodeB->m_kBounds, nodeA->m_kBounds))
         {
             if (leafA)
             {
                 if (leafB)
                 {
-                    pairsOut->AddBack(pair);
+                    pairsOut->pushBack(pair);
                     numPairs++;
                 }
                 else
@@ -563,7 +522,7 @@ int FUN_00d1d5a0(AabbTree* treeA, AabbTree* treeB, TreePairArray* pairsOut)
         }
     } while (top);
 
-    pairStack._clearAndDeallocate(FUN_00c85750()->heap());
+    pairStack._clearAndDeallocate(reinterpret_cast<hkMemoryAllocator&>(FUN_00c85750()->heap()));
     return numPairs;
 }
 }  // namespace fnv_00d1d5a0
@@ -573,19 +532,7 @@ extern "C" void _ReadWriteBarrier(void);
 
 extern DWORD DAT_0126835c;
 unsigned __int64 __cdecl __rdtsc(void);
-struct ProfRec
-{
-    const char* m_pName;
-    DWORD m_iTick;
-    DWORD unk08;
-};
-struct ProfBuf
-{
-    DWORD unk00;
-    ProfRec* m_pCur;
-    DWORD unk08;
-    ProfRec* m_pRecordEnd;
-};
+
 struct Inner
 {
     DWORD unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
@@ -614,15 +561,15 @@ int FUN_00d1b930(int a, Inner* b, int* c, int d);
 // @fnv 0x00df6850
 void __cdecl ProcessAabbTree(Target* apTarget, Frame* apFrame)
 {
-    ProfBuf* pProfBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    if (pProfBuf->m_pCur < pProfBuf->m_pRecordEnd)
+    hkMonitorStream* pProfBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (pProfBuf->m_end.m_storage < pProfBuf->m_capacityMinus16.m_storage)
     {
-        ProfRec* pProfRec = pProfBuf->m_pCur;
-        pProfRec->m_pName = "TtCpuAabbTreeAabb";
+        hkMonitorStream::TimerCommand* pProfRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pProfBuf->m_end.m_storage);
+        pProfRec->m_commandAndMonitor = "TtCpuAabbTreeAabb";
         _ReadWriteBarrier();
         volatile DWORD tick = (DWORD)__rdtsc();
-        pProfRec->m_iTick = tick;
-        pProfBuf->m_pCur = pProfRec + 1;
+        pProfRec->m_time0 = tick;
+        pProfBuf->m_end.m_storage = reinterpret_cast<char*>(pProfRec + 1);
     }
     Frame* pFrame = apFrame;
     int* rem = (int*)(&apTarget + 1);
@@ -657,160 +604,146 @@ void __cdecl ProcessAabbTree(Target* apTarget, Frame* apFrame)
             in = (Inner*)((char*)in + 0x30);
         } while (--k);
     }
-    pProfBuf = (ProfBuf*)TlsGetValue(DAT_0126835c);
-    if (pProfBuf->m_pCur < pProfBuf->m_pRecordEnd)
+    pProfBuf = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    if (pProfBuf->m_end.m_storage < pProfBuf->m_capacityMinus16.m_storage)
     {
-        ProfRec* pProfRec = pProfBuf->m_pCur;
-        pProfRec->m_pName = "Et";
+        hkMonitorStream::TimerCommand* pProfRec = reinterpret_cast<hkMonitorStream::TimerCommand*>(pProfBuf->m_end.m_storage);
+        pProfRec->m_commandAndMonitor = "Et";
         _ReadWriteBarrier();
         volatile DWORD dwTick2 = (DWORD)__rdtsc();
-        pProfRec->m_iTick = dwTick2;
-        pProfBuf->m_pCur = pProfRec + 1;
+        pProfRec->m_time0 = dwTick2;
+        pProfBuf->m_end.m_storage = reinterpret_cast<char*>(pProfRec + 1);
     }
     apTarget->ProcessCallback(pFrame, pFrame, 0);
 }
 
-extern "C" __m128 _mm_set_ps1(float a);
-extern "C" __m128 _mm_sub_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_add_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_min_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_max_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_andnot_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_or_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_cmpeq_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_cmplt_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_rcp_ps(__m128 a);
-extern "C" __m128 _mm_unpackhi_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
+extern "C" LocalM128 _mm_set_ps1(float a);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_sub_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_add_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_mul_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_min_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_max_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_andnot_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_or_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_cmpeq_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_cmplt_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_rcp_ps(LocalM128 a);
+extern "C" LocalM128 _mm_unpackhi_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
 
-extern __m128 DAT_010c7170;  // (1,1,1,1)
+extern LocalM128 DAT_010c7170;  // (1,1,1,1)
 extern float DAT_01267e30;   // zero vector (bss)
-extern __m128 DAT_010cd670;  // HK_REAL_MAX x4
+extern LocalM128 DAT_010cd670;  // HK_REAL_MAX x4
 
-struct VectorMask
+extern LocalM128 DAT_01268460[];
+struct Vector4Comparison
 {
-    __m128 bits;
-    __forceinline int testX() const
+    LocalM128 m_uiMask;
+    __forceinline void set(int m)
     {
-        return _mm_movemask_ps(bits) & 1;
+        m_uiMask = DAT_01268460[m];
+    }
+    __forceinline void setAnd(const Vector4Comparison& a, const Vector4Comparison& b)
+    {
+        m_uiMask = _mm_and_ps(a.m_uiMask, b.m_uiMask);
+    }
+    __forceinline int anyIsSet(int m) const
+    {
+        return _mm_movemask_ps(m_uiMask) & m;
     }
 };
-struct TreeVector4
+
+__forceinline Vector4Comparison hkVector4::compareEqual4(const hkVector4& b) const
+{ Vector4Comparison r; r.m_uiMask = _mm_cmpeq_ps(m_vComponents, b.m_vComponents); return r; }
+__forceinline Vector4Comparison hkVector4::compareLessThan4(const hkVector4& b) const
+{ Vector4Comparison r; r.m_uiMask = _mm_cmplt_ps(m_vComponents, b.m_vComponents); return r; }
+
+__forceinline hkAabb::hkAabb() {}
+__forceinline const LocalM128& hkVector4::getQuad() const { return m_vComponents; }
+__forceinline void hkVector4::set(float a, float b, float c, float d) { m_vComponents = _mm_setr_ps(a, b, c, d); }
+__forceinline void hkVector4::SetAllComponents(float a) { m_vComponents = _mm_set_ps1(a); }
+__forceinline void hkVector4::setAdd4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents); }
+__forceinline void hkVector4::add4(const hkVector4& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
+__forceinline void hkVector4::sub4(const hkVector4& v) { m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents); }
+__forceinline void hkVector4::mul4(const hkVector4& v) { m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents); }
+__forceinline void hkVector4::setSub4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents); }
+__forceinline void hkVector4::setMin4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents); }
+__forceinline void hkVector4::setMax4(const hkVector4& a, const hkVector4& b) { m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents); }
+__forceinline void hkVector4::setBroadcast(const hkVector4& v, int i)
 {
-    __forceinline void operator=(const TreeVector4& other)
-    {
-        m_vComponents = other.m_vComponents;
-    }
-    __m128 m_vComponents;
-    __forceinline void subtract(const TreeVector4& a, const TreeVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void multiply(const TreeVector4& a)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, a.m_vComponents);
-    }
-    __forceinline void minimum(const TreeVector4& a, const TreeVector4& b)
-    {
-        m_vComponents = _mm_min_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void maximum(const TreeVector4& a, const TreeVector4& b)
-    {
-        m_vComponents = _mm_max_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void broadcastY(const TreeVector4& a)
-    {
-        m_vComponents = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0x55);
-    }
-    __forceinline void broadcastZ(const TreeVector4& a)
-    {
-        m_vComponents = _mm_shuffle_ps(a.m_vComponents, a.m_vComponents, 0xaa);
-    }
-    __forceinline VectorMask equal(const TreeVector4& b) const
-    {
-        VectorMask r;
-        r.bits = _mm_cmpeq_ps(m_vComponents, b.m_vComponents);
-        return r;
-    }
-    __forceinline VectorMask less(const TreeVector4& b) const
-    {
-        VectorMask r;
-        r.bits = _mm_cmplt_ps(m_vComponents, b.m_vComponents);
-        return r;
-    }
-    __forceinline void choose(const TreeVector4& a, const TreeVector4& b, const VectorMask& m)
-    {
-        m_vComponents = _mm_or_ps(_mm_and_ps(m.bits, b.m_vComponents), _mm_andnot_ps(m.bits, a.m_vComponents));
-    }
-    __forceinline void reciprocal(const TreeVector4& a)
-    {
-        __m128 input = _mm_shuffle_ps(a.m_vComponents, _mm_unpackhi_ps(a.m_vComponents, DAT_010c7170), 0xc4);
-        __m128 estimate = _mm_rcp_ps(input);
-        m_vComponents = _mm_sub_ps(_mm_add_ps(estimate, estimate), _mm_mul_ps(_mm_mul_ps(estimate, input), estimate));
-    }
-};
+    if (i == 0) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x00);
+    else if (i == 1) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55);
+    else if (i == 2) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xaa);
+    else if (i == 3) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
+}
+__forceinline float& hkVector4::operator()(int i) { return reinterpret_cast<float*>(&m_vComponents)[i]; }
+__forceinline void hkVector4::setReciprocal3(const hkVector4& a)
+{
+    LocalM128 input = _mm_shuffle_ps(a.m_vComponents, _mm_unpackhi_ps(a.m_vComponents, DAT_010c7170), 0xc4);
+    LocalM128 estimate = _mm_rcp_ps(input);
+    m_vComponents = _mm_sub_ps(_mm_add_ps(estimate, estimate), _mm_mul_ps(_mm_mul_ps(estimate, input), estimate));
+}
+
+static __forceinline void vectorSelect(hkVector4& out, const hkVector4& a, const hkVector4& b, const Vector4Comparison& m)
+{ out.m_vComponents = _mm_or_ps(_mm_and_ps(m.m_uiMask, b.m_vComponents), _mm_andnot_ps(m.m_uiMask, a.m_vComponents)); }
 
 struct RayQ
 {
-    TreeVector4 m_kRayStart;
-    TreeVector4 m_vInverseDirection;
-    __forceinline void init(const TreeVector4& from, const TreeVector4& to)
+    hkVector4 m_kRayStart;
+    hkVector4 m_vInverseDirection;
+    __forceinline void init(const hkVector4& from, const hkVector4& to)
     {
         m_kRayStart = from;
-        TreeVector4 delta;
-        delta.subtract(to, from);
-        VectorMask zeros = delta.equal(*reinterpret_cast<const TreeVector4*>(&DAT_01267e30));
-        TreeVector4 safe;
-        safe.choose(delta, *reinterpret_cast<const TreeVector4*>(&DAT_010c7170), zeros);
-        TreeVector4 inverse;
-        inverse.reciprocal(safe);
-        m_vInverseDirection.choose(inverse, *reinterpret_cast<const TreeVector4*>(&DAT_010cd670), zeros);
+        hkVector4 delta;
+        delta.setSub4(to, from);
+        Vector4Comparison zeros = delta.compareEqual4(*reinterpret_cast<const hkVector4*>(&DAT_01267e30));
+        hkVector4 safe;
+        vectorSelect(safe, delta, *reinterpret_cast<const hkVector4*>(&DAT_010c7170), zeros);
+        hkVector4 inverse;
+        inverse.setReciprocal3(safe);
+        vectorSelect(m_vInverseDirection, inverse, *reinterpret_cast<const hkVector4*>(&DAT_010cd670), zeros);
     }
 };
 
-struct TreeAabb
+static __forceinline int rayHitsBounds(const hkAabb& bounds, const hkVector4& start, const hkVector4& invDir, const hkVector4& limit)
 {
-    TreeVector4 m_kMinimumCorner;
-    TreeVector4 m_kMaximumCorner;
-    __forceinline int hit(const TreeVector4& start, const TreeVector4& invDir, const TreeVector4& limit) const
-    {
-        TreeVector4 lo;
-        lo.subtract(m_kMinimumCorner, start);
-        lo.multiply(invDir);
-        TreeVector4 hi;
-        hi.subtract(m_kMaximumCorner, start);
-        hi.multiply(invDir);
-        TreeVector4 nearT;
-        nearT.minimum(lo, hi);
-        TreeVector4 nz;
-        nz.broadcastZ(nearT);
-        TreeVector4 nX;
-        nX.maximum(nearT, *reinterpret_cast<const TreeVector4*>(&DAT_01267e30));
-        TreeVector4 ny;
-        ny.broadcastY(nearT);
-        TreeVector4 farT;
-        farT.maximum(lo, hi);
-        TreeVector4 afDepth;
-        afDepth.broadcastZ(farT);
-        TreeVector4 fX;
-        fX.minimum(farT, limit);
-        TreeVector4 nYZ;
-        nYZ.maximum(ny, nz);
-        nX.maximum(nX, nYZ);
-        TreeVector4 fy;
-        fy.broadcastY(farT);
-        TreeVector4 fYZ;
-        fYZ.minimum(fy, afDepth);
-        fX.minimum(fX, fYZ);
-        return nX.less(fX).testX();
-    }
-};
+    hkVector4 lo;
+    lo.setSub4(bounds.m_kMinimumCorner, start);
+    lo.mul4(invDir);
+    hkVector4 hi;
+    hi.setSub4(bounds.m_kMaximumCorner, start);
+    hi.mul4(invDir);
+    hkVector4 nearT;
+    nearT.setMin4(lo, hi);
+    hkVector4 nz;
+    nz.setBroadcast(nearT, 2);
+    hkVector4 nX;
+    nX.setMax4(nearT, *reinterpret_cast<const hkVector4*>(&DAT_01267e30));
+    hkVector4 ny;
+    ny.setBroadcast(nearT, 1);
+    hkVector4 farT;
+    farT.setMax4(lo, hi);
+    hkVector4 afDepth;
+    afDepth.setBroadcast(farT, 2);
+    hkVector4 fX;
+    fX.setMin4(farT, limit);
+    hkVector4 nYZ;
+    nYZ.setMax4(ny, nz);
+    nX.setMax4(nX, nYZ);
+    hkVector4 fy;
+    fy.setBroadcast(farT, 1);
+    hkVector4 fYZ;
+    fYZ.setMin4(fy, afDepth);
+    fX.setMin4(fX, fYZ);
+    return nX.compareLessThan4(fX).anyIsSet(1);
+}
+
 
 struct TreeNode
 {
-    TreeVector4 m_kMinimumCorner;
-    TreeVector4 m_kMaximumCorner;
+    hkVector4 m_kMinimumCorner;
+    hkVector4 m_kMaximumCorner;
     int m_child0;
     int m_child1;
     unsigned int m_parent;
@@ -842,7 +775,7 @@ struct NodeTree
 
 // Traverses the node tree, testing each node's AABB against a ray and calling visitor->processLeaf on hits to update the max fraction.
 // @fnv 0x00d1d0b0
-void FUN_00d1d0b0(NodeTree* tree, const TreeVector4* from, const TreeVector4* to, RayVisitor* visitor,
+void FUN_00d1d0b0(NodeTree* tree, const hkVector4* from, const hkVector4* to, RayVisitor* visitor,
                   float maxFraction)
 {
     if (!tree)
@@ -851,22 +784,22 @@ void FUN_00d1d0b0(NodeTree* tree, const TreeVector4* from, const TreeVector4* to
     if (!node)
         return;
 
-    TreeVector4 fraction;
+    hkVector4 fraction;
     fraction.m_vComponents = _mm_set_ps1(maxFraction);
     RayQ ray;
     ray.init(*from, *to);
 
     for (;;)
     {
-        TreeAabb bounds;
-        bounds = *reinterpret_cast<const TreeAabb*>(&node->m_kMinimumCorner);
+        hkAabb bounds;
+        bounds = *reinterpret_cast<const hkAabb*>(&node->m_kMinimumCorner);
         TreeNode* next;
         if (node->m_next != 0x7fffffff)
             next = tree->m_kNodeCollection.FUN_00d9a4c0(node->m_next);
         else
             next = 0;
 
-        if (bounds.hit(ray.m_kRayStart, ray.m_vInverseDirection, fraction))
+        if (rayHitsBounds(bounds, ray.m_kRayStart, ray.m_vInverseDirection, fraction))
         {
             if (!(node->m_parent & 0x80000000))
             {
@@ -882,79 +815,10 @@ void FUN_00d1d0b0(NodeTree* tree, const TreeVector4* from, const TreeVector4* to
     }
 }
 
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 
-extern __m128 DAT_01268460[];
+extern LocalM128 DAT_01268460[];
 extern const int DAT_010c92e0[4];
-
-struct hkVector4
-{
-    __m128 m_vComponents;
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline const __m128& getQuad() const
-    {
-        return m_vComponents;
-    }
-    __forceinline void set(float a, float b, float c, float d = 0.0f)
-    {
-        m_vComponents = _mm_setr_ps(a, b, c, d);
-    }
-    __forceinline void sub4(const hkVector4& v)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void mul4(const hkVector4& v)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void setSub4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void setMin4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_min_ps(a.getQuad(), b.getQuad());
-    }
-    __forceinline void setMax4(const hkVector4& a, const hkVector4& b)
-    {
-        m_vComponents = _mm_max_ps(a.getQuad(), b.getQuad());
-    }
-    __forceinline void setBroadcast(const hkVector4& v, int i)
-    {
-        if (i == 0)
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x00);
-        else if (i == 1)
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55);
-        else if (i == 2)
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xaa);
-        else if (i == 3)
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
-    }
-    __forceinline float& operator()(int a)
-    {
-        return reinterpret_cast<float*>(&m_vComponents)[a];
-    }
-};
-
-struct Vector4Comparison
-{
-    __m128 m_uiMask;
-    __forceinline void set(int m)
-    {
-        m_uiMask = DAT_01268460[m];
-    }
-    __forceinline void setAnd(const Vector4Comparison& a, const Vector4Comparison& b)
-    {
-        m_uiMask = _mm_and_ps(a.m_uiMask, b.m_uiMask);
-    }
-    __forceinline int anyIsSet(int m) const
-    {
-        return _mm_movemask_ps(m_uiMask) & m;
-    }
-};
 
 struct Bundle
 {
@@ -1036,18 +900,10 @@ struct Collector
     virtual float GetHitDistance(const Node16* leaf);
 };
 
-struct hkAabb
-{
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
-    __forceinline hkAabb()
-    {}
-};
 
 struct RayQueryAabb : hkAabb
 {
-    __forceinline RayQueryAabb()
-    {}
+    __forceinline RayQueryAabb() {}
     __forceinline int overlaps(const RayQuerySet& ray, const hkVector4& ealyOutFractions,
                                Vector4Comparison& hitOut) const
     {
@@ -1055,15 +911,12 @@ struct RayQueryAabb : hkAabb
         max[0].setBroadcast(m_kMaximumCorner, 0);
         max[1].setBroadcast(m_kMaximumCorner, 1);
         max[2].setBroadcast(m_kMaximumCorner, 2);
-
         hkVector4 min[3];
         min[0].setBroadcast(m_kMinimumCorner, 0);
         min[1].setBroadcast(m_kMinimumCorner, 1);
         min[2].setBroadcast(m_kMinimumCorner, 2);
-
         Bundle dNear;
         Bundle dFar;
-
         for (int i = 0; i < 3; i++)
         {
             hkVector4 dNearTmp;
@@ -1072,22 +925,17 @@ struct RayQueryAabb : hkAabb
             dFarTmp.setSub4(max[i], ray.m_vFrom.m_data[i]);
             dNearTmp.mul4(ray.m_vInverseDirection.m_data[i]);
             dFarTmp.mul4(ray.m_vInverseDirection.m_data[i]);
-
             dNear.m_data[i].setMin4(dNearTmp, dFarTmp);
             dFar.m_data[i].setMax4(dNearTmp, dFarTmp);
         }
-
         hkVector4 maxNear;
         hkVector4 minFar;
-
         maxNear.setMax4(dNear.m_data[0], dNear.m_data[1]);
         maxNear.setMax4(maxNear, dNear.m_data[2]);
         maxNear.setMax4(maxNear, *reinterpret_cast<const hkVector4*>(&DAT_01267e30));
-
         minFar.setMin4(dFar.m_data[0], dFar.m_data[1]);
         minFar.setMin4(minFar, dFar.m_data[2]);
         minFar.setMin4(minFar, ealyOutFractions);
-
         hitOut.set(ray.m_uiMask);
         Vector4Comparison lt;
         lt.m_uiMask = _mm_cmplt_ps(maxNear.m_vComponents, minFar.m_vComponents);
@@ -1096,6 +944,7 @@ struct RayQueryAabb : hkAabb
         return hitOut.anyIsSet(ray.m_uiMask);
     }
 };
+
 
 static __forceinline void restoreAabb(const QuantizedAabb& in, const hkVector4& bitScaleInv,
                                       const hkVector4& bitOffsetLow, hkAabb& out)
@@ -1152,102 +1001,60 @@ void FUN_00d1bfa0(const hkAabbTree16* tree, const Node16* apStartNode, const Nod
     }
 }
 
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 
 struct S1c2b0_Cmp
 {
-    __m128 m_uiMask;
+    LocalM128 m_uiMask;
     __forceinline int anyIsSet(int m) const
     {
         return _mm_movemask_ps(m_uiMask) & m;
     }
 };
 
+// This existing helper returns vectors from setSub4/setMin4/setMax4. The shared
+// API returns void; merging it changes the code at 0x00d1bd00.
 struct hkVector4Real
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     __forceinline hkVector4Real& operator=(const hkVector4Real& v)
-    {
-        m_vComponents = v.m_vComponents;
-        return *this;
-    }
-    __forceinline const __m128& getQuad() const
-    {
-        return m_vComponents;
-    }
+    { m_vComponents = v.m_vComponents; return *this; }
+    __forceinline const LocalM128& getQuad() const { return m_vComponents; }
     __forceinline void set(float a, float b, float c, float d = 0.0f)
-    {
-        m_vComponents = _mm_setr_ps(a, b, c, d);
-    }
-    __forceinline void SetAllComponents(float a)
-    {
-        m_vComponents = _mm_set_ps1(a);
-    }
+    { m_vComponents = _mm_setr_ps(a, b, c, d); }
+    __forceinline void SetAllComponents(float a) { m_vComponents = _mm_set_ps1(a); }
     __forceinline void setAdd4(const hkVector4Real& a, const hkVector4Real& b)
-    {
-        m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents);
-    }
-    __forceinline void add4(const hkVector4Real& v)
-    {
-        m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void sub4(const hkVector4Real& v)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents);
-    }
-    __forceinline void mul4(const hkVector4Real& v)
-    {
-        m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents);
-    }
+    { m_vComponents = _mm_add_ps(a.m_vComponents, b.m_vComponents); }
+    __forceinline void add4(const hkVector4Real& v) { m_vComponents = _mm_add_ps(m_vComponents, v.m_vComponents); }
+    __forceinline void sub4(const hkVector4Real& v) { m_vComponents = _mm_sub_ps(m_vComponents, v.m_vComponents); }
+    __forceinline void mul4(const hkVector4Real& v) { m_vComponents = _mm_mul_ps(m_vComponents, v.m_vComponents); }
     __forceinline hkVector4Real setSub4(const hkVector4Real& a, const hkVector4Real& b)
-    {
-        m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents);
-        return *this;
-    }
+    { m_vComponents = _mm_sub_ps(a.m_vComponents, b.m_vComponents); return *this; }
     __forceinline hkVector4Real setMin4(const hkVector4Real& a, const hkVector4Real& b)
-    {
-        m_vComponents = _mm_min_ps(a.getQuad(), b.getQuad());
-        return *this;
-    }
+    { m_vComponents = _mm_min_ps(a.getQuad(), b.getQuad()); return *this; }
     __forceinline hkVector4Real setMax4(const hkVector4Real& a, const hkVector4Real& b)
-    {
-        m_vComponents = _mm_max_ps(a.getQuad(), b.getQuad());
-        return *this;
-    }
+    { m_vComponents = _mm_max_ps(a.getQuad(), b.getQuad()); return *this; }
     __forceinline hkVector4Real& setBroadcast(const hkVector4Real& v, int i)
     {
-        if (i == 0)
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x00);
-        else if (i == 1)
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55);
-        else if (i == 2)
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xaa);
-        else
-            m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
+        if (i == 0) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x00);
+        else if (i == 1) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0x55);
+        else if (i == 2) m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xaa);
+        else m_vComponents = _mm_shuffle_ps(v.m_vComponents, v.m_vComponents, 0xff);
         return *this;
     }
     __forceinline S1c2b0_Cmp compareEqual4(const hkVector4Real& a) const
-    {
-        S1c2b0_Cmp m;
-        m.m_uiMask = _mm_cmpeq_ps(m_vComponents, a.m_vComponents);
-        return m;
-    }
+    { S1c2b0_Cmp m; m.m_uiMask = _mm_cmpeq_ps(m_vComponents, a.m_vComponents); return m; }
     __forceinline S1c2b0_Cmp compareLessThan4(const hkVector4Real& a) const
-    {
-        S1c2b0_Cmp m;
-        m.m_uiMask = _mm_cmplt_ps(m_vComponents, a.m_vComponents);
-        return m;
-    }
+    { S1c2b0_Cmp m; m.m_uiMask = _mm_cmplt_ps(m_vComponents, a.m_vComponents); return m; }
     __forceinline hkVector4Real& select32(const hkVector4Real& a, const hkVector4Real& b, const S1c2b0_Cmp& comp)
     {
-        m_vComponents =
-            _mm_or_ps(_mm_and_ps(comp.m_uiMask, b.m_vComponents), _mm_andnot_ps(comp.m_uiMask, a.m_vComponents));
+        m_vComponents = _mm_or_ps(_mm_and_ps(comp.m_uiMask, b.m_vComponents), _mm_andnot_ps(comp.m_uiMask, a.m_vComponents));
         return *this;
     }
     __forceinline hkVector4Real& setReciprocal3(const hkVector4Real& a)
     {
-        __m128 input = _mm_shuffle_ps(a.m_vComponents, _mm_unpackhi_ps(a.m_vComponents, DAT_010c7170), 0xc4);
-        __m128 estimate = _mm_rcp_ps(input);
+        LocalM128 input = _mm_shuffle_ps(a.m_vComponents, _mm_unpackhi_ps(a.m_vComponents, DAT_010c7170), 0xc4);
+        LocalM128 estimate = _mm_rcp_ps(input);
         m_vComponents = _mm_sub_ps(_mm_add_ps(estimate, estimate), _mm_mul_ps(_mm_mul_ps(estimate, input), estimate));
         return *this;
     }
@@ -1330,62 +1137,52 @@ struct S1c2b0_Ray
     }
 };
 
-struct S1c2b0_Aabb
+static __forceinline int compressedRayOverlapsBounds(const hkAabb& bounds, const S1c2b0_Ray& r, const hkVector4Real& earlyOutHitFraction)
 {
-    hkVector4Real m_kMinimumCorner;
-    hkVector4Real m_kMaximumCorner;
-    __forceinline int overlaps(const S1c2b0_Ray& r, const hkVector4Real& earlyOutHitFraction) const
-    {
-        hkVector4Real dNearTemp;
-        hkVector4Real dFarTemp;
-        dNearTemp.setSub4(m_kMinimumCorner, r.m_kRayStart);
-        dFarTemp.setSub4(m_kMaximumCorner, r.m_kRayStart);
-        dNearTemp.mul4(r.m_vInverseDirection);
-        dFarTemp.mul4(r.m_vInverseDirection);
-        hkVector4Real dNear;
-        dNear.setMin4(dNearTemp, dFarTemp);
-        hkVector4Real dFar;
-        dFar.setMax4(dNearTemp, dFarTemp);
-        hkVector4Real dNearY;
-        dNearY.setBroadcast(dNear, 1);
-        hkVector4Real dNearZ;
-        dNearZ.setBroadcast(dNear, 2);
-        hkVector4Real dFarY;
-        dFarY.setBroadcast(dFar, 1);
-        hkVector4Real dFarZ;
-        dFarZ.setBroadcast(dFar, 2);
-        hkVector4Real nearYZ;
-        nearYZ.setMax4(dNearY, dNearZ);
-        hkVector4Real farYZ;
-        farYZ.setMin4(dFarY, dFarZ);
-        hkVector4Real nearX;
-        nearX.setMax4(dNear, *reinterpret_cast<const hkVector4Real*>(&DAT_01267e30));
-        hkVector4Real farX;
-        farX.setMin4(dFar, earlyOutHitFraction);
-        nearX.setMax4(nearX, nearYZ);
-        farX.setMin4(farX, farYZ);
-        S1c2b0_Cmp nearLtFar = nearX.compareLessThan4(farX);
-        return nearLtFar.anyIsSet(1);
-    }
-};
+    hkVector4Real dNearTemp;
+    hkVector4Real dFarTemp;
+    dNearTemp.setSub4(reinterpret_cast<const hkVector4Real&>(bounds.m_kMinimumCorner), r.m_kRayStart);
+    dFarTemp.setSub4(reinterpret_cast<const hkVector4Real&>(bounds.m_kMaximumCorner), r.m_kRayStart);
+    dNearTemp.mul4(r.m_vInverseDirection);
+    dFarTemp.mul4(r.m_vInverseDirection);
+    hkVector4Real dNear;
+    dNear.setMin4(dNearTemp, dFarTemp);
+    hkVector4Real dFar;
+    dFar.setMax4(dNearTemp, dFarTemp);
+    hkVector4Real dNearY;
+    dNearY.setBroadcast(dNear, 1);
+    hkVector4Real dNearZ;
+    dNearZ.setBroadcast(dNear, 2);
+    hkVector4Real dFarY;
+    dFarY.setBroadcast(dFar, 1);
+    hkVector4Real dFarZ;
+    dFarZ.setBroadcast(dFar, 2);
+    hkVector4Real nearYZ;
+    nearYZ.setMax4(dNearY, dNearZ);
+    hkVector4Real farYZ;
+    farYZ.setMin4(dFarY, dFarZ);
+    hkVector4Real nearX;
+    nearX.setMax4(dNear, *reinterpret_cast<const hkVector4Real*>(&DAT_01267e30));
+    hkVector4Real farX;
+    farX.setMin4(dFar, earlyOutHitFraction);
+    nearX.setMax4(nearX, nearYZ);
+    farX.setMin4(farX, farYZ);
+    S1c2b0_Cmp nearLtFar = nearX.compareLessThan4(farX);
+    return nearLtFar.anyIsSet(1);
+}
 
-struct S1c2b0_TreeAabb : S1c2b0_Aabb
-{
-    __forceinline S1c2b0_TreeAabb()
-    {}
-};
 
 static __forceinline void restoreAabb(const hkpCompressedNode& in, const hkVector4Real& bitScaleInv,
-                                      const hkVector4Real& bitOffsetLow, S1c2b0_Aabb& out)
+                                      const hkVector4Real& bitOffsetLow, hkAabb& out)
 {
-    out.m_kMaximumCorner.set((float)(in.m_kMaximumCorner[0] << 15), (float)(in.m_kMaximumCorner[1] << 15),
+    reinterpret_cast<hkVector4Real&>(out.m_kMaximumCorner).set((float)(in.m_kMaximumCorner[0] << 15), (float)(in.m_kMaximumCorner[1] << 15),
                              (float)(in.m_kMaximumCorner[2] << 15));
-    out.m_kMinimumCorner.set((float)(in.m_kMinimumCorner[0] << 15), (float)(in.m_kMinimumCorner[1] << 15),
+    reinterpret_cast<hkVector4Real&>(out.m_kMinimumCorner).set((float)(in.m_kMinimumCorner[0] << 15), (float)(in.m_kMinimumCorner[1] << 15),
                              (float)(in.m_kMinimumCorner[2] << 15));
-    out.m_kMinimumCorner.mul4(bitScaleInv);
-    out.m_kMaximumCorner.mul4(bitScaleInv);
-    out.m_kMinimumCorner.sub4(bitOffsetLow);
-    out.m_kMaximumCorner.sub4(bitOffsetLow);
+    reinterpret_cast<hkVector4Real&>(out.m_kMinimumCorner).mul4(bitScaleInv);
+    reinterpret_cast<hkVector4Real&>(out.m_kMaximumCorner).mul4(bitScaleInv);
+    reinterpret_cast<hkVector4Real&>(out.m_kMinimumCorner).sub4(bitOffsetLow);
+    reinterpret_cast<hkVector4Real&>(out.m_kMaximumCorner).sub4(bitOffsetLow);
 }
 
 static __forceinline hkVector4Real expandedValue(const hkVector4Real& a, const hkVector4Real& b)
@@ -1394,7 +1191,7 @@ static __forceinline hkVector4Real expandedValue(const hkVector4Real& a, const h
     out.setAdd4(a, b);
     return out;
 }
-static __forceinline __m128 expandedQuad(__m128 a, __m128 b)
+static __forceinline LocalM128 expandedQuad(LocalM128 a, LocalM128 b)
 {
     return _mm_add_ps(a, b);
 }
@@ -1402,7 +1199,7 @@ static __forceinline void expandedRef(hkVector4Real& out, const hkVector4Real& a
 {
     out.setAdd4(a, b);
 }
-static __forceinline void expandedVal(hkVector4Real& out, __m128 a, __m128 b)
+static __forceinline void expandedVal(hkVector4Real& out, LocalM128 a, LocalM128 b)
 {
     out.m_vComponents = _mm_add_ps(a, b);
 }
@@ -1418,8 +1215,8 @@ int FUN_00d1c2b0(CompressedTree* tree, int aabb, const SweptBoxQuery* apQuery, L
     if (!node)
         return 0;
 
-    S1c2b0_Aabb box;
-    box.m_kMaximumCorner = *reinterpret_cast<const hkVector4Real*>(&DAT_01267e30);
+    hkAabb box;
+    reinterpret_cast<hkVector4Real&>(box.m_kMaximumCorner) = *reinterpret_cast<const hkVector4Real*>(&DAT_01267e30);
     S1c2b0_Ray ray;
     ray.setRay(apQuery->m_vFrom, apQuery->m_vTo);
 
@@ -1436,10 +1233,11 @@ int FUN_00d1c2b0(CompressedTree* tree, int aabb, const SweptBoxQuery* apQuery, L
 
     for (;;)
     {
-        S1c2b0_Aabb decoded;
+        hkAabb decoded;
         restoreAabb(*node, bitScaleInv, bitOffsetLow, decoded);
         box.m_kMaximumCorner.m_vComponents = _mm_add_ps(decoded.m_kMaximumCorner.m_vComponents, extents.m_vComponents);
-        box.m_kMinimumCorner.setSub4(decoded.m_kMinimumCorner, extents);
+        reinterpret_cast<hkVector4Real&>(box.m_kMinimumCorner).setSub4(
+            reinterpret_cast<const hkVector4Real&>(decoded.m_kMinimumCorner), extents);
 
         const hkpCompressedNode* next;
         if (node->m_skip != 0x7fff)
@@ -1447,7 +1245,7 @@ int FUN_00d1c2b0(CompressedTree* tree, int aabb, const SweptBoxQuery* apQuery, L
         else
             next = 0;
 
-        if (box.overlaps(ray, earlyOut))
+        if (compressedRayOverlapsBounds(box, ray, earlyOut))
         {
             if ((node->m_flags & 0x8000) == 0)
             {
@@ -1481,28 +1279,15 @@ static __forceinline Vector4Comparison queryLessEqual(const hkVector4& a, const 
     return r;
 }
 
-class QueryAabb
+static __forceinline int queryBoundsOverlap(const hkAabb& bounds, const hkAabb& other)
 {
-  public:
-    __forceinline QueryAabb()
-    {}
-    __forceinline int overlaps(const QueryAabb& other) const
-    {
-        Vector4Comparison mincomp = queryLessEqual(m_kMinimumCorner, other.m_kMaximumCorner);
-        Vector4Comparison maxcomp = queryLessEqual(other.m_kMinimumCorner, m_kMaximumCorner);
-        Vector4Comparison both;
-        both.setAnd(mincomp, maxcomp);
-        return ((_mm_movemask_ps(both.m_uiMask) & 7) == 7);
-    }
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
-};
+    Vector4Comparison mincomp = queryLessEqual(bounds.m_kMinimumCorner, other.m_kMaximumCorner);
+    Vector4Comparison maxcomp = queryLessEqual(other.m_kMinimumCorner, bounds.m_kMaximumCorner);
+    Vector4Comparison both;
+    both.setAnd(mincomp, maxcomp);
+    return ((_mm_movemask_ps(both.m_uiMask) & 7) == 7);
+}
 
-struct QueryAabbTreeAabbD : public QueryAabb
-{
-    __forceinline QueryAabbTreeAabbD()
-    {}
-};
 
 struct QueryBounds16
 {
@@ -1510,7 +1295,7 @@ struct QueryBounds16
     unsigned short m_kMinimumCorner[3];
 
     __forceinline static void restoreAabb(const QueryBounds16& in, const hkVector4& bitScaleInv,
-                                          const hkVector4& bitOffsetLow, QueryAabb& out)
+                                          const hkVector4& bitOffsetLow, hkAabb& out)
     {
         out.m_kMaximumCorner.set((float)(in.m_kMaximumCorner[0] << 15), (float)(in.m_kMaximumCorner[1] << 15),
                                  (float)(in.m_kMaximumCorner[2] << 15));
@@ -1614,32 +1399,22 @@ struct AabbCollector
     virtual float GetHitDistance(const QueryNode* node);
 };
 
-struct VoidArray
+typedef hkArray<void*> VoidArray;
+template<> __forceinline void hkArrayBase<void*>::_pushBack(hkMemoryAllocator& sharedAlloc, void* const& e)
 {
-    void** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+hkMemoryAllocator& alloc = reinterpret_cast<hkMemoryAllocator&>(sharedAlloc);
 
-    __forceinline int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void _pushBack(S_00d1bcb0_Allocator& alloc, void* const& e)
-    {
         if (m_iElementCount == getCapacity())
             ResizeAudioStream(alloc, this, sizeof(void*));
         hkConstructWithCopy(m_data + m_iElementCount, 1, e);
         m_iElementCount++;
-    }
-    __forceinline void AddBack(void* const& e)
-    {
-        _pushBack(FUN_00c85750()->heap(), e);
-    }
-};
+    
+}
+
 
 // Traverses a QueryTree16, tests node bounds against the query AABB, and reports overlapping leaf hits through a collector, iterator, or array.
 // @fnv 0x00d1c560
-int __cdecl FUN_00d1c560(const QueryTree16* tree, const QueryAabb& apQueryAabb, AabbCollector* collector,
+int __cdecl FUN_00d1c560(const QueryTree16* tree, const hkAabb& apQueryAabb, AabbCollector* collector,
                          VoidArray* hitArray, void*** appHitIter, int hitCapacity)
 {
     const QueryNode* rootNode = tree->getRootNode();
@@ -1657,11 +1432,11 @@ int __cdecl FUN_00d1c560(const QueryTree16* tree, const QueryAabb& apQueryAabb, 
     {
         while (1)
         {
-            QueryAabbTreeAabbD nodeAabb;
+            hkAabb nodeAabb;
             QueryBounds16::restoreAabb(node->m_iBufferSize, bitScaleInv, bitOffsetLow, nodeAabb);
             const QueryNode* skipNode = tree->getSkipNode(node);
             iVisited++;
-            if (nodeAabb.overlaps(apQueryAabb))
+            if (queryBoundsOverlap(nodeAabb, apQueryAabb))
             {
                 if (!node->isLeaf())
                 {
@@ -1682,11 +1457,11 @@ int __cdecl FUN_00d1c560(const QueryTree16* tree, const QueryAabb& apQueryAabb, 
     {
         while (1)
         {
-            QueryAabbTreeAabbD nodeAabb;
+            hkAabb nodeAabb;
             QueryBounds16::restoreAabb(node->m_iBufferSize, bitScaleInv, bitOffsetLow, nodeAabb);
             const QueryNode* skipNode = tree->getSkipNode(node);
             iVisited++;
-            if (nodeAabb.overlaps(apQueryAabb))
+            if (queryBoundsOverlap(nodeAabb, apQueryAabb))
             {
                 if (!node->isLeaf())
                 {
@@ -1709,18 +1484,18 @@ int __cdecl FUN_00d1c560(const QueryTree16* tree, const QueryAabb& apQueryAabb, 
     {
         while (1)
         {
-            QueryAabbTreeAabbD nodeAabb;
+            hkAabb nodeAabb;
             QueryBounds16::restoreAabb(node->m_iBufferSize, bitScaleInv, bitOffsetLow, nodeAabb);
             const QueryNode* skipNode = tree->getSkipNode(node);
             iVisited++;
-            if (nodeAabb.overlaps(apQueryAabb))
+            if (queryBoundsOverlap(nodeAabb, apQueryAabb))
             {
                 if (!node->isLeaf())
                 {
                     node = treeGetNode(tree->getChild(node, 0));
                     continue;
                 }
-                hitArray->AddBack(node->getLeafData<void*>());
+                hitArray->pushBack(node->getLeafData<void*>());
                 iHits++;
             }
             node = treeGetNode(skipNode);
@@ -1732,25 +1507,21 @@ int __cdecl FUN_00d1c560(const QueryTree16* tree, const QueryAabb& apQueryAabb, 
     return iHits;
 }
 
-extern "C" __m128 _mm_load_ps(const float*);
+extern "C" LocalM128 _mm_load_ps(const float*);
 
-struct hkVector4f
+struct ScalarQuad
 {
-    float x;
-    float y;
-    float z;
-    float w;
+    float x, y, z, w;
 };
-
-union hkQuadVector
+union QuadStorage
 {
-    hkVector4f v;
-    __m128 q;
+    ScalarQuad scalar;
+    LocalM128 simd;
 };
 
 // Traverses the compressed tree, restores each node's AABB, and calls GetHitDistance for leaves overlapping the ray within maxDistance.
 // @fnv 0x00d1bd00
-void FUN_00d1bd00(CompressedTree* tree, const __m128* from, const __m128* to, LeafCollector* collector,
+void FUN_00d1bd00(CompressedTree* tree, const LocalM128* from, const LocalM128* to, LeafCollector* collector,
                   float maxDistance)
 {
     if (!tree)
@@ -1764,14 +1535,15 @@ void FUN_00d1bd00(CompressedTree* tree, const __m128* from, const __m128* to, Le
     S1c2b0_Ray ray;
     ray.setRay(*reinterpret_cast<const hkVector4Real*>(from), *reinterpret_cast<const hkVector4Real*>(to));
 
-    hkQuadVector scale;
-    scale.v = reinterpret_cast<const hkVector4f&>(tree->m_kAabbInverseScale);
-    hkQuadVector offset;
-    offset.v = reinterpret_cast<const hkVector4f&>(tree->m_kAabbMin);
+    QuadStorage scale;
+    scale.scalar = reinterpret_cast<const ScalarQuad&>(tree->m_kAabbInverseScale);
+
+    QuadStorage offset;
+    offset.scalar = reinterpret_cast<const ScalarQuad&>(tree->m_kAabbMin);
 
     for (;;)
     {
-        S1c2b0_Aabb bounds;
+        hkAabb bounds;
         restoreAabb(*node, *reinterpret_cast<const hkVector4Real*>(&scale),
                     *reinterpret_cast<const hkVector4Real*>(&offset), bounds);
 
@@ -1781,7 +1553,7 @@ void FUN_00d1bd00(CompressedTree* tree, const __m128* from, const __m128* to, Le
         else
             next = 0;
 
-        if (bounds.overlaps(ray, maxT))
+        if (compressedRayOverlapsBounds(bounds, ray, maxT))
         {
             if ((node->m_flags & 0x8000) == 0)
             {
@@ -1801,15 +1573,10 @@ struct NodesSV_1cc50
     int* FUN_00d1bb40(unsigned short index);
 };
 
-struct TV4Q
-{
-    __m128 m_vComponents;
-};
-
 struct TNodeQ
 {
-    TV4Q m_kMinimumCorner;
-    TV4Q m_kMaximumCorner;
+    hkVector4 m_kMinimumCorner;
+    hkVector4 m_kMaximumCorner;
     unsigned int m_data;
     unsigned short m_flags;
     unsigned short m_next;
@@ -1833,32 +1600,27 @@ struct RayCollector
     virtual float GetHitDistance(const TNodeQ* node);
 };
 
-__forceinline __m128 inverseDir(__m128 dir)
+__forceinline LocalM128 inverseDir(LocalM128 dir)
 {
-    __m128 isZero = _mm_cmpeq_ps(*reinterpret_cast<const __m128*>(&DAT_01267e30), dir);
-    __m128 safe = _mm_or_ps(_mm_and_ps(isZero, DAT_010c7170), _mm_andnot_ps(isZero, dir));
+    LocalM128 isZero = _mm_cmpeq_ps(*reinterpret_cast<const LocalM128*>(&DAT_01267e30), dir);
+    LocalM128 safe = _mm_or_ps(_mm_and_ps(isZero, DAT_010c7170), _mm_andnot_ps(isZero, dir));
     safe = _mm_shuffle_ps(safe, _mm_unpackhi_ps(safe, DAT_010c7170), 0xc4);
-    __m128 r = _mm_rcp_ps(safe);
-    __m128 inv = _mm_sub_ps(_mm_add_ps(r, r), _mm_mul_ps(_mm_mul_ps(r, safe), r));
+    LocalM128 r = _mm_rcp_ps(safe);
+    LocalM128 inv = _mm_sub_ps(_mm_add_ps(r, r), _mm_mul_ps(_mm_mul_ps(r, safe), r));
     return _mm_or_ps(_mm_andnot_ps(isZero, inv), _mm_and_ps(isZero, DAT_010cd670));
 }
 struct RayDir
 {
-    TV4Q m_dir;
-    TV4Q m_vInverseDirection;
+    hkVector4 m_dir;
+    hkVector4 m_vInverseDirection;
 };
 
-struct NodeAabb
-{
-    TV4Q m_kMinimumCorner;
-    TV4Q m_kMaximumCorner;
-};
 
 struct RayInput
 {
-    TV4Q m_vFrom;
-    TV4Q m_vTo;
-    TV4Q m_fExtents;
+    hkVector4 m_vFrom;
+    hkVector4 m_vTo;
+    hkVector4 m_fExtents;
 };
 
 // Traverses tree nodes, tests each AABB against the ray, and reports leaf hits through the collector or output buffer.
@@ -1872,15 +1634,15 @@ int FUN_00d1cc50(NTreeQ* tree, void* unused, const RayInput* ray, RayCollector* 
     if (!node)
         return 0;
 
-    __m128 from = ray->m_vFrom.m_vComponents;
-    NodeAabb aabb;
+    LocalM128 from = ray->m_vFrom.m_vComponents;
+    hkAabb aabb;
     aabb.m_kMaximumCorner.m_vComponents = from;
     RayDir kRayDir;
     kRayDir.m_dir.m_vComponents = _mm_sub_ps(ray->m_vTo.m_vComponents, from);
-    __m128 dir = kRayDir.m_dir.m_vComponents;
+    LocalM128 dir = kRayDir.m_dir.m_vComponents;
     kRayDir.m_vInverseDirection.m_vComponents = inverseDir(dir);
-    __m128 vExtent = _mm_add_ps(_mm_set_ps1(radius), ray->m_fExtents.m_vComponents);
-    __m128 fraction = _mm_set_ps1(1.0f);
+    LocalM128 vExtent = _mm_add_ps(_mm_set_ps1(radius), ray->m_fExtents.m_vComponents);
+    LocalM128 fraction = _mm_set_ps1(1.0f);
 
     int count = 0;
     for (;;)
@@ -1901,12 +1663,12 @@ int FUN_00d1cc50(NTreeQ* tree, void* unused, const RayInput* ray, RayCollector* 
             _mm_mul_ps(aabb.m_kMaximumCorner.m_vComponents, kRayDir.m_vInverseDirection.m_vComponents);
         aabb.m_kMinimumCorner.m_vComponents =
             _mm_mul_ps(aabb.m_kMinimumCorner.m_vComponents, kRayDir.m_vInverseDirection.m_vComponents);
-        __m128 vNearT = _mm_min_ps(aabb.m_kMinimumCorner.m_vComponents, aabb.m_kMaximumCorner.m_vComponents);
-        __m128 vFarT = _mm_max_ps(aabb.m_kMinimumCorner.m_vComponents, aabb.m_kMaximumCorner.m_vComponents);
-        __m128 vExitT = _mm_min_ps(_mm_min_ps(vFarT, fraction),
+        LocalM128 vNearT = _mm_min_ps(aabb.m_kMinimumCorner.m_vComponents, aabb.m_kMaximumCorner.m_vComponents);
+        LocalM128 vFarT = _mm_max_ps(aabb.m_kMinimumCorner.m_vComponents, aabb.m_kMaximumCorner.m_vComponents);
+        LocalM128 vExitT = _mm_min_ps(_mm_min_ps(vFarT, fraction),
                                    _mm_min_ps(_mm_shuffle_ps(vFarT, vFarT, 0x55), _mm_shuffle_ps(vFarT, vFarT, 0xaa)));
-        __m128 vEnterT =
-            _mm_max_ps(_mm_max_ps(vNearT, *reinterpret_cast<const __m128*>(&DAT_01267e30)),
+        LocalM128 vEnterT =
+            _mm_max_ps(_mm_max_ps(vNearT, *reinterpret_cast<const LocalM128*>(&DAT_01267e30)),
                        _mm_max_ps(_mm_shuffle_ps(vNearT, vNearT, 0x55), _mm_shuffle_ps(vNearT, vNearT, 0xaa)));
         if (_mm_movemask_ps(_mm_cmplt_ps(vEnterT, vExitT)) & 1)
         {
@@ -1950,58 +1712,63 @@ struct FilterRays_Ray
     hkVector4 m_vInverseDirection;
 };
 
-class FilterRays_FilterAabb
+class FilterRays_FilterAabb : public hkAabb
 {
-  public:
-    __forceinline FilterRays_FilterAabb()
-    {}
-    hkVector4 m_kMinimumCorner;
-    hkVector4 m_kMaximumCorner;
-
-    __forceinline int overlaps(const FilterRays_Ray& r, const hkVector4& earlyOutHitFraction) const
+public:
+    __forceinline FilterRays_FilterAabb() {}
+    __forceinline int overlapsLeaf(const FilterRays_Ray& r, const hkVector4& earlyOutHitFraction) const
     {
-        hkVector4 dNearTemp;
-        hkVector4 dFarTemp;
-        dNearTemp.setSub4(m_kMinimumCorner, r.m_kRayStart);
-        dFarTemp.setSub4(m_kMaximumCorner, r.m_kRayStart);
-        dNearTemp.mul4(r.m_vInverseDirection);
-        dFarTemp.mul4(r.m_vInverseDirection);
-        hkVector4 dNear;
-        dNear.setMin4(dNearTemp, dFarTemp);
-        hkVector4 dFar;
-        dFar.setMax4(dNearTemp, dFarTemp);
-        hkVector4 dNearY;
-        dNearY.setBroadcast(dNear, 1);
-        hkVector4 dNearZ;
-        dNearZ.setBroadcast(dNear, 2);
-        hkVector4 dFarY;
-        dFarY.setBroadcast(dFar, 1);
-        hkVector4 dFarZ;
-        dFarZ.setBroadcast(dFar, 2);
-        hkVector4 nearYZ;
-        nearYZ.setMax4(dNearY, dNearZ);
-        hkVector4 farYZ;
-        farYZ.setMin4(dFarY, dFarZ);
-        hkVector4 nearX;
-        nearX.setMax4(dNear, *reinterpret_cast<const hkVector4*>(&DAT_01267e30));
-        hkVector4 farX;
-        farX.setMin4(dFar, earlyOutHitFraction);
-        nearX.setMax4(nearX, nearYZ);
-        farX.setMin4(farX, farYZ);
-        Vector4Comparison nearLtFar;
-        nearLtFar.m_uiMask = _mm_cmplt_ps(nearX.m_vComponents, farX.m_vComponents);
-        return nearLtFar.anyIsSet(1);
+        LocalM128 dNearTemp = _mm_sub_ps(m_kMinimumCorner.m_vComponents, r.m_kRayStart.m_vComponents);
+        LocalM128 dFarTemp = _mm_sub_ps(m_kMaximumCorner.m_vComponents, r.m_kRayStart.m_vComponents);
+        dNearTemp = _mm_mul_ps(dNearTemp, r.m_vInverseDirection.m_vComponents);
+        dFarTemp = _mm_mul_ps(dFarTemp, r.m_vInverseDirection.m_vComponents);
+        LocalM128 dNear = _mm_min_ps(dNearTemp, dFarTemp);
+        LocalM128 dFar = _mm_max_ps(dNearTemp, dFarTemp);
+        LocalM128 dNearY = _mm_shuffle_ps(dNear, dNear, 0x55);
+        LocalM128 dNearZ = _mm_shuffle_ps(dNear, dNear, 0xaa);
+        LocalM128 dFarY = _mm_shuffle_ps(dFar, dFar, 0x55);
+        LocalM128 dFarZ = _mm_shuffle_ps(dFar, dFar, 0xaa);
+        LocalM128 nearYZ = _mm_max_ps(dNearY, dNearZ);
+        LocalM128 farYZ = _mm_min_ps(dFarY, dFarZ);
+        LocalM128 nearX = _mm_max_ps(dNear, *reinterpret_cast<const LocalM128*>(&DAT_01267e30));
+        LocalM128 farX = _mm_min_ps(dFar, earlyOutHitFraction.m_vComponents);
+        nearX = _mm_max_ps(nearX, nearYZ);
+        farX = _mm_min_ps(farX, farYZ);
+        return _mm_movemask_ps(_mm_cmplt_ps(nearX, farX)) & 1;
     }
-    __forceinline static void restoreAabb(const FilterRays_FilterAabb& in, const hkVector4& bitScaleInv,
-                                          const hkVector4& bitOffsetLow, FilterRays_FilterAabb& out)
+    __forceinline static void restoreAabb(const hkAabb& in, const hkVector4& bitScaleInv,
+                                         const hkVector4& bitOffsetLow, FilterRays_FilterAabb& out)
     {
-        out = in;
+        static_cast<hkAabb&>(out) = in;
     }
 };
 
+
+static __forceinline bool filterRayOverlapsBounds(const hkAabb& bounds, const FilterRays_Ray& r,
+                                                const hkVector4& earlyOutHitFraction)
+{
+    LocalM128 dNearTemp = _mm_sub_ps(bounds.m_kMinimumCorner.m_vComponents, r.m_kRayStart.m_vComponents);
+    LocalM128 dFarTemp = _mm_sub_ps(bounds.m_kMaximumCorner.m_vComponents, r.m_kRayStart.m_vComponents);
+    dNearTemp = _mm_mul_ps(dNearTemp, r.m_vInverseDirection.m_vComponents);
+    dFarTemp = _mm_mul_ps(dFarTemp, r.m_vInverseDirection.m_vComponents);
+    LocalM128 dNear = _mm_min_ps(dNearTemp, dFarTemp);
+    LocalM128 dFar = _mm_max_ps(dNearTemp, dFarTemp);
+    LocalM128 dNearY = _mm_shuffle_ps(dNear, dNear, 0x55);
+    LocalM128 dNearZ = _mm_shuffle_ps(dNear, dNear, 0xaa);
+    LocalM128 dFarY = _mm_shuffle_ps(dFar, dFar, 0x55);
+    LocalM128 dFarZ = _mm_shuffle_ps(dFar, dFar, 0xaa);
+    LocalM128 nearYZ = _mm_max_ps(dNearY, dNearZ);
+    LocalM128 farYZ = _mm_min_ps(dFarY, dFarZ);
+    LocalM128 nearX = _mm_max_ps(dNear, *reinterpret_cast<const LocalM128*>(&DAT_01267e30));
+    LocalM128 farX = _mm_min_ps(dFar, earlyOutHitFraction.m_vComponents);
+    nearX = _mm_max_ps(nearX, nearYZ);
+    farX = _mm_min_ps(farX, farYZ);
+    return _mm_movemask_ps(_mm_cmplt_ps(nearX, farX)) & 1;
+}
+
 struct FilterRays_Node
 {
-    FilterRays_FilterAabb m_iBufferSize;
+    hkAabb m_iBufferSize;
     unsigned short m_ausChildIndices[2];
     unsigned short m_usNodeValue;
     unsigned short m_iSkipNodeIndex;
@@ -2038,68 +1805,6 @@ struct RayCastRequest
     unsigned char m_useFilterCollector;
 };
 
-struct FilterRays_FilterCollector
-{
-    virtual ~FilterRays_FilterCollector();
-    virtual float GetHitDistance(const FilterRays_Node* leaf);
-};
-
-class hkpFixedBufferRayHitCollector
-{
-  public:
-    __forceinline hkpFixedBufferRayHitCollector(int buffer, int capacity) : m_fEarlyOutHitFraction(1.0f)
-    {
-        m_pRayHitBuffer = buffer;
-        m_pHitBufferEnd = buffer;
-        m_pRayCursor = capacity;
-        m_iHitCount = 0;
-        m_pCollidable = 0;
-    }
-    virtual void CollectRayHit();
-    float m_fEarlyOutHitFraction;
-    int m_pRayHitBuffer;
-    int m_pHitBufferEnd;
-    int m_pRayCursor;
-    int m_iHitCount;
-    int m_pCollidable;
-};
-
-struct FilterRays_CastBase0
-{
-    virtual void v0();
-};
-struct FilterRays_CastBase1
-{
-    virtual void v1();
-};
-struct FilterRays_CastBase3
-{
-    virtual void v3();
-};
-
-class hkCpuWorldRayCastCollector : public FilterRays_CastBase0,
-                                   public FilterRays_CastBase1,
-                                   public FilterRays_FilterCollector,
-                                   public FilterRays_CastBase3
-{
-  public:
-    int m_iFilter;
-    float m_fHitFraction;
-    int m_bHasHit;
-    int m_iFieldAfterHasHit;
-    int m_iFieldBeforeResult;
-    int m_result;
-    int m_iFieldAfterResult;
-    hkVector4 m_workFrom;
-    hkVector4 m_workTo;
-    int m_workFilter;
-    int m_workCollection;
-    int unk58, unk5c;
-    hkpFixedBufferRayHitCollector* m_fixedBufferRayHitFilterCollector;
-    int unk64, unk68, unk6c;
-    hkVector4 m_fEarlyOutHitFraction;
-};
-
 extern int DAT_011b3830[5];
 extern void* DAT_0126ec04;
 void FUN_00e2b9b0();
@@ -2109,7 +1814,7 @@ RayQuerySet __cdecl FUN_00e2baf0(const hkVector4& s0, const hkVector4& e0, const
                                  const hkVector4& s2, const hkVector4& e2, const hkVector4& s3, const hkVector4& e3,
                                  int mask);
 void __cdecl FUN_00d1ca00(const FilterRays_Tree* tree, const FilterRays_Node* node, const void* skipNode,
-                          const RayQuerySet* bundle, FilterRays_FilterCollector** collectors, float* fractions);
+                          const RayQuerySet* bundle, hkAabbTreeQueryUtils<hkAabbTreeData::hkAabbTreeAabb, unsigned short>::Collector** collectors, float* fractions);
 
 template <class T> __forceinline T FilterRays_min2(T x, T y)
 {
@@ -2143,10 +1848,10 @@ void __cdecl FUN_00e2bbd0(const FilterRays_Tree* tree, const FilterRays_Node* no
             hkCpuWorldRayCastCollector* collector = collectors;
             hkVector4 earlyOut;
             FilterRays_filterSetAll(earlyOut, 1.0f);
-            if (aabb.overlaps(rays[idx], earlyOut))
+            if (aabb.overlapsLeaf(rays[idx], earlyOut))
             {
                 FUN_00e2baa0(collector, commandArray + idx, filter);
-                collector->GetHitDistance(node);
+                collector->GetHitDistance(reinterpret_cast<const hkAabbTree<hkAabbTreeData::hkAabbTreeAabb, unsigned short>::Node*>(node));
             }
         }
     }
@@ -2155,22 +1860,22 @@ void __cdecl FUN_00e2bbd0(const FilterRays_Tree* tree, const FilterRays_Node* no
         int* child1 = tree->getChild(node, 1);
         child0Out.CopyFrom(tree->getChild(node, 0));
         child1Out.CopyFrom(child1);
-        FilterRays_FilterAabb aabb0;
-        FilterRays_FilterAabb aabb1;
-        FilterRays_FilterAabb::restoreAabb(child0Out.m_iBufferSize, tree->m_kAabbInverseScale, tree->m_kAabbMin, aabb0);
-        FilterRays_FilterAabb::restoreAabb(child1Out.m_iBufferSize, tree->m_kAabbInverseScale, tree->m_kAabbMin, aabb1);
+        hkAabb aabb0;
+        hkAabb aabb1;
+        aabb0 = child0Out.m_iBufferSize;
+        aabb1 = child1Out.m_iBufferSize;
         hkVector4 earlyOut;
         FilterRays_filterSetAll(earlyOut, 1.0f);
         for (int i = 0; i < numRays; i++)
         {
             int idx = raysIdx[i];
-            if (aabb0.overlaps(rays[idx], earlyOut))
+            if (filterRayOverlapsBounds(aabb0, rays[idx], earlyOut))
             {
                 *raysIdxOut0 = idx;
                 raysIdxOut0++;
                 numRaysOut0++;
             }
-            if (aabb1.overlaps(rays[idx], earlyOut))
+            if (filterRayOverlapsBounds(aabb1, rays[idx], earlyOut))
             {
                 *raysIdxOut1 = idx;
                 raysIdxOut1++;
@@ -2199,7 +1904,7 @@ void __cdecl FUN_00e2bbd0(const FilterRays_Tree* tree, const FilterRays_Node* no
                 fractions[j] = earlyHitFractionArray[rayIdx[j]];
                 if (command->m_useFilterCollector)
                 {
-                    collectors[j].m_fixedBufferRayHitFilterCollector = new (&fixedBufferFilterCollectors[j])
+                    collectors[j].m_fixedBufferRayHitFilterCollector = ::new (&fixedBufferFilterCollectors[j])
                         hkpFixedBufferRayHitCollector(command->m_pResultBuffer, command->m_iResultCount);
                     FilterRays_registerAddRayHit(FUN_00e2b9b0);
                 }
@@ -2212,7 +1917,7 @@ void __cdecl FUN_00e2bbd0(const FilterRays_Tree* tree, const FilterRays_Node* no
                 rays[rayIdx[0]].m_kRayStart, rays[rayIdx[0]].m_vInverseDirection, rays[rayIdx[1]].m_kRayStart,
                 rays[rayIdx[1]].m_vInverseDirection, rays[rayIdx[2]].m_kRayStart, rays[rayIdx[2]].m_vInverseDirection,
                 rays[rayIdx[3]].m_kRayStart, rays[rayIdx[3]].m_vInverseDirection, DAT_011b3830[n]);
-            FilterRays_FilterCollector* collectorPtrs[4] = {&collectors[0], &collectors[1], &collectors[2],
+            hkAabbTreeQueryUtils<hkAabbTreeData::hkAabbTreeAabb, unsigned short>::Collector* collectorPtrs[4] = {&collectors[0], &collectors[1], &collectors[2],
                                                             &collectors[3]};
             FUN_00d1ca00(tree, node, skipNode, &bundle, collectorPtrs, fractions);
             for (int j = 0; j < n; j++)

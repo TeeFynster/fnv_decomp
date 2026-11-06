@@ -1,22 +1,29 @@
+#include "../../../../include/NiTListBase.h"
 // Names of nested/template specializations use the canonical generator identifier mapping.
 #ifndef FNV_TASK_TYPES_NICONSOLERENDERER_H
 #define FNV_TASK_TYPES_NICONSOLERENDERER_H
 
-#include "layout_support.h"
+#include <stddef.h>
+#include "../../../../include/NiRenderer.h"
+#include "../../../../include/MapEntryCount.h"
+#include "../../../../include/NiTPointerMap.h"
+
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+
+#include "../../../../include/NiBound.h"
+#include "../../../../include/NiTPointerAllocator_unsigned_int_.h"
 #include "NiObject.h"
 #include "NiPoint3.h"
-#include "_RTL_CRITICAL_SECTION.h"
-#include "layout_support.h"
 class Direct3DDeviceInterface;
 class GeometryRelatedType;
 class Direct3DRenderState;
 class COMUnknownInterface;
 class RenderableGeometry;
-class D3DXMATRIX;
+
 class NiAccumulator;
-class NiBound;
-class RgbaColor;
-class NiCriticalSection;
+class NiColorA;
 class NiD3DGeometryGroupManager;
 class NiD3DShaderInterface;
 class ShaderConstantLayout;
@@ -28,16 +35,13 @@ class NiPixelData;
 class NiPixelFormat;
 class NiPoint2;
 class NiPropertyState;
-class NiRenderTargetGroup;
 class NiRenderedCubeMap;
 class NiRenderedTexture;
-class NiRenderer;
 class NiShader;
 class NiTAbstractPoolAllocator_unsigned_int_;
-class NiTListBase_NiTPointerAllocator_unsigned_int__NiD3DShaderInterface___;
+typedef NiTListBase<NiTPointerAllocator_unsigned_int_, NiD3DShaderInterface* > NiTListBase_NiTPointerAllocator_unsigned_int__NiD3DShaderInterface___;
 class NiTListBase_NiTPointerAllocator_unsigned_int__NiD3DShaderInterface_____AntiBloatAllocator;
 class NiTListItem_NiD3DShaderInterface___;
-class NiTPointerAllocator_unsigned_int_;
 class NiTPointerList_NiD3DShaderInterface___;
 class NiTPointerListBase_NiTPointerAllocator_unsigned_int__NiD3DShaderInterface___;
 class NiUnsharedGeometryGroup;
@@ -60,19 +64,7 @@ class _D3DPSHADERCAPS2_0;
 class Direct3DResourceRecord;
 class _D3DVIEWPORT9;
 class _D3DVSHADERCAPS2_0;
-enum NiRenderer__EFrameState
-{
-    NiRenderer__EFrameState_FRAMESTATE_OUTSIDE_FRAME = 0,
-    NiRenderer__EFrameState_FRAMESTATE_INSIDE_FRAME = 1,
-    NiRenderer__EFrameState_FRAMESTATE_INSIDE_OFFSCREEN_FRAME = 2,
-    NiRenderer__EFrameState_FRAMESTATE_WAITING_FOR_DISPLAY = 3
-};
-enum _D3DDEVTYPE
-{
-    _D3DDEVTYPE_D3DDEVTYPE_HAL = 1,
-    _D3DDEVTYPE_D3DDEVTYPE_COMMAND_BUFFER = 2,
-    _D3DDEVTYPE_D3DDEVTYPE_FORCE_DWORD = 2147483647
-};
+#include "../../../../include/_D3DDEVTYPE.h"
 enum NiConsoleRenderer__TexFormat
 {
     NiConsoleRenderer__TexFormat_TEX_RGB565 = 0,
@@ -100,103 +92,10 @@ enum NiConsoleRenderer__TexFormat
     NiConsoleRenderer__TexFormat_TEX_DEFAULT = 22,
     NiConsoleRenderer__TexFormat_TEX_NUM = 22
 };
-#pragma pack(push, 4)
-class NiCriticalSection
-{
-  public:
-    _RTL_CRITICAL_SECTION m_kCriticalSection;  // +0x0, 28 bytes
-    unsigned long m_ulThreadOwner;             // +0x1C, 4 bytes
-    unsigned int m_uiLockCount;                // +0x20, 4 bytes
-    unsigned char layoutPadding24[92];
-    // void __cdecl NiCriticalSection::*()
-    // void __cdecl NiCriticalSection::*()
-    // void __cdecl NiCriticalSection::*()
-    // void __cdecl NiCriticalSection::*()
-    // unsigned int __cdecl NiCriticalSection::*()
-    // unsigned int __cdecl NiCriticalSection::*()
-    // void* __cdecl NiCriticalSection::*(unsigned int)
-};
-#pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiCriticalSection) == 128);
 FNV_STATIC_ASSERT(offsetof(NiCriticalSection, m_kCriticalSection) == 0);
 FNV_STATIC_ASSERT(offsetof(NiCriticalSection, m_ulThreadOwner) == 28);
 FNV_STATIC_ASSERT(offsetof(NiCriticalSection, m_uiLockCount) == 32);
-#pragma pack(push, 4)
-class NiRenderer : public NiObject
-{
-  public:
-    // base NiObject at +0x0, size 8
-    NiPointer<NiAccumulator> m_acRendererDataA;        // +0x8, 4 bytes
-    NiPropertyState* m_pCamera;                        // +0xC, 4 bytes
-    NiDynamicEffectState* m_pActiveRenderTargetGroup;  // +0x10, 4 bytes
-    NiPointer<NiShader> m_acRendererDataB;             // +0x14, 4 bytes
-    unsigned char layoutPadding18[104];
-    NiCriticalSection m_acRendererDataC;       // +0x80, 128 bytes
-    NiCriticalSection m_acRendererDataD;       // +0x100, 128 bytes
-    NiCriticalSection m_acRendererDataE;       // +0x180, 128 bytes
-    NiRenderer__EFrameState m_iRendererState;  // +0x200, 4 bytes
-    unsigned int m_uiRendererFlags;            // +0x204, 4 bytes
-    bool m_bRendererFlagA;                     // +0x208, 1 bytes
-    bool m_bRendererFlagB;                     // +0x209, 1 bytes
-    unsigned char layoutPadding20A[118];
-    // const NiRTTI* __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*(NiTPrimitiveArray<char *>*)
-    // NiPoint3& __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*(const NiPoint3&)
-    // bool __cdecl NiRenderer::*(unsigned int)
-    // NiRenderer
-    // void __cdecl NiRenderer::*()
-    // unsigned int __cdecl NiRenderer::*()
-    // unsigned int __cdecl NiRenderer::*()
-    // NiRenderer::EFrameState __cdecl NiRenderer::*()
-    // bool __cdecl NiRenderer::*()
-    // bool __cdecl NiRenderer::*()
-    // bool __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*(NiAccumulator*)
-    // NiAccumulator* __cdecl NiRenderer::*()
-    // bool __cdecl NiRenderer::*()
-    // bool __cdecl NiRenderer::*(NiGeometry*, unsigned int, unsigned int, NiD3DShaderDeclaration*)
-    // NiShader* __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*(NiShader*)
-    // const char* __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*()
-    // NiPropertyState* __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*(NiPropertyState*)
-    // NiDynamicEffectState* __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*(NiDynamicEffectState*)
-    // void __cdecl NiRenderer::*(const char*)
-    // void __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*(const char*, ...)
-    // void __cdecl NiRenderer::*(const char*, ...)
-    // void __cdecl NiRenderer::*(const char*, ...)
-    // void __cdecl NiRenderer::*()
-    // NiRenderer* __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*(NiPropertyState*, NiDynamicEffectState*)
-    // void __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*(NiTriShape*)
-    // void __cdecl NiRenderer::*(NiTriStrips*)
-    // void __cdecl NiRenderer::*()
-    // void __cdecl NiRenderer::*()
-    // bool __cdecl NiRenderer::*(const char*, NiRenderer::EFrameState)
-    // bool __cdecl NiRenderer::*(const char*, bool)
-    // bool __cdecl NiRenderer::*(const char*, bool)
-    // NiRenderer& __cdecl NiRenderer::*(const NiRenderer&)
-    // void __cdecl NiRenderer::*()
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiRenderer) == 640);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_acRendererDataA) == 8);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_pCamera) == 12);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_pActiveRenderTargetGroup) == 16);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_acRendererDataB) == 20);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_acRendererDataC) == 128);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_acRendererDataD) == 256);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_acRendererDataE) == 384);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_iRendererState) == 512);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_uiRendererFlags) == 516);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_bRendererFlagA) == 520);
-FNV_STATIC_ASSERT(offsetof(NiRenderer, m_bRendererFlagB) == 521);
 #pragma pack(push, 4)
 class _D3DVSHADERCAPS2_0
 {
@@ -394,40 +293,6 @@ FNV_STATIC_ASSERT(offsetof(Direct3DResourceRecord, m_uiFieldAtOffset0C) == 12);
 FNV_STATIC_ASSERT(offsetof(Direct3DResourceRecord, m_pPointerAtOffset10) == 16);
 FNV_STATIC_ASSERT(offsetof(Direct3DResourceRecord, m_uiFieldAtOffset14) == 20);
 #pragma pack(push, 4)
-class NiBound
-{
-  public:
-    NiPoint3 m_kCenter;  // +0x0, 12 bytes
-    union
-    {                          // overlapping CodeView storage
-        float m_fBoundRadius;  // +0xC, 4 bytes
-        int m_iRadius;         // +0xC, 4 bytes
-    };
-    // void __cdecl NiBound::*()
-    // const NiPoint3& __cdecl NiBound::*()
-    // void __cdecl NiBound::*(float)
-    // float __cdecl NiBound::*()
-    // void __cdecl NiBound::*(const NiPoint3&, float)
-    // bool __cdecl NiBound::*(const NiBound&)
-    // bool __cdecl NiBound::*(const NiBound&)
-    // void __cdecl NiBound::*(int, const NiPoint3*)
-    // Update
-    // void __cdecl NiBound::*(NiTPrimitiveArray<NiBound const *>&)
-    // void __cdecl NiBound::*(const NiBound*)
-    // int __cdecl NiBound::*(const NiPlane&)
-    // bool __cdecl NiBound::*(float, const NiBound&, const NiPoint3&, const NiBound&, const NiPoint3&)
-    // bool __cdecl NiBound::*(float, const NiBound&, const NiPoint3&, const NiBound&, const NiPoint3&, float&, NiPoint3&, bool, NiPoint3&, NiPoint3&)
-    // void __cdecl NiBound::*(NiStream&)
-    // void __cdecl NiBound::*(NiStream&)
-    // char* __cdecl NiBound::*(const char*)
-    // const NiBound& __cdecl NiBound::*(const NiBound&)
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiBound) == 16);
-FNV_STATIC_ASSERT(offsetof(NiBound, m_kCenter) == 0);
-FNV_STATIC_ASSERT(offsetof(NiBound, m_fBoundRadius) == 12);
-FNV_STATIC_ASSERT(offsetof(NiBound, m_iRadius) == 12);
-#pragma pack(push, 4)
 class _D3DMATRIX
 {
   public:
@@ -501,15 +366,6 @@ class NiTAbstractPoolAllocator_unsigned_int_
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTAbstractPoolAllocator_unsigned_int_) == 1);
 #pragma pack(push, 4)
-class NiTPointerAllocator_unsigned_int_ : public NiTAbstractPoolAllocator_unsigned_int_
-{
-  public:
-    // void* __cdecl NiTPointerAllocator<unsigned int>::*()
-    // void __cdecl NiTPointerAllocator<unsigned int>::*(void*)
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiTPointerAllocator_unsigned_int_) == 1);
-#pragma pack(push, 4)
 class NiTListBase_NiTPointerAllocator_unsigned_int__NiD3DShaderInterface_____AntiBloatAllocator
     : public NiTPointerAllocator_unsigned_int_
 {
@@ -523,30 +379,7 @@ FNV_STATIC_ASSERT(sizeof(NiTListBase_NiTPointerAllocator_unsigned_int__NiD3DShad
 FNV_STATIC_ASSERT(offsetof(NiTListBase_NiTPointerAllocator_unsigned_int__NiD3DShaderInterface_____AntiBloatAllocator,
                            m_uiCount) == 0);
 #pragma pack(push, 4)
-class NiTListBase_NiTPointerAllocator_unsigned_int__NiD3DShaderInterface___
-{
-  public:
-    NiTListItem_NiD3DShaderInterface___* m_pkHead;  // +0x0, 4 bytes
-    NiTListItem_NiD3DShaderInterface___* m_pkTail;  // +0x4, 4 bytes
-    NiTListBase_NiTPointerAllocator_unsigned_int__NiD3DShaderInterface_____AntiBloatAllocator
-        m_kItemCount;  // +0x8, 4 bytes
-    // unsigned int __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*()
-    // bool __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*()
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*()
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*()
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*(void*)
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*(void*)
-    // void __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*(void*, void*)
-    // void __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*(void*, void*)
-    // NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>
-    // void __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*()
-    // void __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*(NiTListItem<NiD3DShaderInterface *>*)
-    // void __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*(NiTListItem<NiD3DShaderInterface *>*)
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*(void*, NiTListItem<NiD3DShaderInterface *>*)
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*(void*, NiTListItem<NiD3DShaderInterface *>*)
-    // NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>& __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*(const NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>&)
-    // void* __cdecl NiTListBase<NiTPointerAllocator<unsigned int>,NiD3DShaderInterface *>::*(unsigned int)
-};
+
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NiTListBase_NiTPointerAllocator_unsigned_int__NiD3DShaderInterface___) == 12);
 FNV_STATIC_ASSERT(offsetof(NiTListBase_NiTPointerAllocator_unsigned_int__NiD3DShaderInterface___, m_pkHead) == 0);
@@ -645,26 +478,7 @@ FNV_STATIC_ASSERT(offsetof(ShaderConstantLayout, FourthUnsignedIntegerField) == 
 FNV_STATIC_ASSERT(offsetof(ShaderConstantLayout, FiveUnsignedIntegerRecord) == 32);
 FNV_STATIC_ASSERT(offsetof(ShaderConstantLayout, m_uiBufferSize) == 36);
 #pragma pack(push, 4)
-class D3DXMATRIX : public _D3DMATRIX
-{
-  public:
-    // base _D3DMATRIX at +0x0, size 64
-    // D3DXMATRIX
-    // operator()
-    // float* __cdecl D3DXMATRIX::*()
-    // const float* __cdecl D3DXMATRIX::*()
-    // D3DXMATRIX& __cdecl D3DXMATRIX::*(const D3DXMATRIX&)
-    // operator*=
-    // D3DXMATRIX& __cdecl D3DXMATRIX::*(const D3DXMATRIX&)
-    // D3DXMATRIX& __cdecl D3DXMATRIX::*(const D3DXMATRIX&)
-    // D3DXMATRIX& __cdecl D3DXMATRIX::*(float)
-    // operator+
-    // operator-
-    // operator*
-    // D3DXMATRIX __cdecl D3DXMATRIX::*(float)
-    // int __cdecl D3DXMATRIX::*(const D3DXMATRIX&)
-    // int __cdecl D3DXMATRIX::*(const D3DXMATRIX&)
-};
+#include "../../../../include/D3DXMATRIX.h"
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(D3DXMATRIX) == 64);
 #pragma pack(push, 4)
@@ -749,7 +563,7 @@ class GraphicsRenderer : public NiRenderer
     D3DXMATRIX m_kShadowMatrixAfterThird;                                                // +0x850, 64 bytes
     D3DXMATRIX ShadowGeometryData;                                                       // +0x890, 64 bytes
     NiPoint2* m_pSourcePoint2Array;                                                      // +0x8D0, 4 bytes
-    RgbaColor* m_pIntermediateGeometryObject;                                            // +0x8D4, 4 bytes
+    NiColorA* m_pIntermediateGeometryObject;                                            // +0x8D4, 4 bytes
     NiPoint2* m_pSecondPoint2Array;                                                      // +0x8D8, 4 bytes
     unsigned short* m_pIndexArray;                                                       // +0x8DC, 4 bytes
     unsigned short m_usIndexCount;                                                       // +0x8E0, 2 bytes

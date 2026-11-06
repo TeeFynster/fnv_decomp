@@ -4,16 +4,7 @@
 
 // src/fallout_shared/bgsconstructibleobject.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/bgsconstructibleobject.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct FUN_004f9bf0_shell
-{
-    unsigned int FUN_004f9bf0();
-};
-void* __cdecl _Deallocate(void*);
-struct BGSConstructibleObject
-{
-    void* __thiscall FUN_004f94b0();
-    void* __thiscall Destroy(unsigned int flags);
-};
+#include "../../include/BGSConstructibleObject.h"
 
 // sub ecx,0x3c; jmp target: MSVC adjustor thunk from multiple inheritance (Derived overrides a virtual both bases declare).
 struct PrimaryBase

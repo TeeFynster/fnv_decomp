@@ -1,19 +1,70 @@
-// fallout/misc/memorylevelmanager.cpp: ActorReferenceArray (5 functions)
+#include "../../../include/SettingT.h"
+// fallout/misc/memorylevelmanager.cpp: MemoryLevelManager (5 functions)
 
-#include "memorylevelmanager_decls.h"
+#include "../../../include/BaseProcess.h"
+#include "../../../include/BGSReconstructFormsInAllFilesMap.h"
+#include "../../../include/ExtraDataList.h"
+#include "../../../include/Tile.h"
+#include "../../../include/BSFaceGenManager.h"
+#include "../../../include/BSFaceGenModelMap.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/SettingT_GameSettingCollection_.h"
+#include "../../../include/NiAdditionalGeometryData.h"
+#include "../../../include/NiRenderer.h"
+#include "../../../include/TES.h"
+#include "../../../include/TESObjectCELL.h"
+#include "../../../include/TESDataHandler.h"
+#include "../../../include/TopicInfoArray.h"
+
+// Private declarations inferred from the two packet call sites.
+struct ActorReferenceArray::ActorReferenceSetupData
+{
+    unsigned int a;
+    unsigned char b;
+    bool c;
+    unsigned short d;
+    unsigned int e;
+};
+
+class MemoryLevelManager
+{
+  public:
+    typedef ActorReferenceArray::ActorReferenceSetupData ActorReferenceSetupData;
+    static void SetupActorReferences();
+    unsigned int reserved;
+    unsigned char actorArray[0x158];
+    bool active;
+    void ResetActorReferences();
+};
+void FUN_00878250(bool);
+void FUN_00878200(ActorReferenceArray::ActorReferenceSetupData&);
+extern PlayerCharacter* g_thePlayer;
+
+class TESReputation;
+template <class T> class BSSimpleList;
+class BGSLoadedReferenceCollection;
+extern BGSLoadedReferenceCollection* DAT_011c95c8;
+extern bool DAT_011f12d8;
+
+class GameSettingCollection;
+using ::SettingT;
+extern SettingT<GameSettingCollection> originalRuntimeFloatSetting1045;
+extern SettingT<GameSettingCollection> originalRuntimeFloatSetting292;
+float ScaleByInverseRatio(float, float, float);
+
 // @fnv 0x008782b0
-void ActorReferenceArray::SetupActorReferences()
+void MemoryLevelManager::SetupActorReferences()
 {
     ActorReferenceSetupData data;
     TESObjectCELL::InitializeTESResources(data, true, true, true);
     FUN_00878250(data.c);
     if (g_thePlayer->FUN_00878340() && BSFaceGenManager::GetModelMap() &&
-        BSFaceGenManager::GetModelMap()->FUN_00529ea0() && !Tile::FindMenuById(0x40c))
+        BSFaceGenManager::GetModelMap()->HasModels() && !Tile::FindMenuById(0x40c))
         BSFaceGenManager::GetModelMap()->PurgeUnusedModels(false);
     FUN_00878200(data);
 }
 // @fnv 0x009777a0
-void ActorReferenceArray::ResetActorReferences()
+void MemoryLevelManager::ResetActorReferences()
 {
     struct Locals
     {
@@ -79,7 +130,7 @@ void ActorReferenceArray::ResetActorReferences()
                 {
                     local.ref = reinterpret_cast<TopicInfoArray*>(actorArray)->FUN_00968670(local.i);
                     local.actor = 0;
-                    if (local.ref && local.ref->vfn_100())
+                    if (local.ref && local.ref->IsActor())
                         local.actor = local.ref;
                     if (local.actor)
                     {
@@ -102,8 +153,8 @@ void ActorReferenceArray::ResetActorReferences()
                             {
                                 if (local.actor->UpdateActorInventory())
                                 {
-                                    if (!local.process->vfn_258(local.source))
-                                        local.process->AddAvoidArea(local.actor, local.source->GetPos(), local.radius,
+                                    if (!local.process->IsReferenceAvoided(local.source))
+                                        local.process->AddAvoidArea(local.actor, *static_cast<const TESObjectREFR*>(local.source)->GetPos(), local.radius,
                                                                     3.402823466e+38f, local.value, local.source, false);
                                     else if (!local.actor->HasEssentialStatus())
                                         local.actor->UpdatePlayerStatus(0x200);
@@ -112,7 +163,7 @@ void ActorReferenceArray::ResetActorReferences()
                                 }
                                 local.process->FUN_00977c90(local.value);
                             }
-                            local.process->vfn_768(local.process->GetField440());
+                            local.process->SetWaterLevel(local.process->GetField440());
                         }
                     }
                 }
@@ -128,7 +179,7 @@ void ActorReferenceArray::ResetActorReferences()
                     local.process->FUN_00977c90(local.playerValue);
                 if (local.maximum < local.playerValue)
                     local.maximum = local.playerValue;
-                local.process->vfn_768(local.process->GetField440());
+                local.process->SetWaterLevel(local.process->GetField440());
             }
         }
     }
@@ -139,25 +190,20 @@ void ActorReferenceArray::ResetActorReferences()
              local.resetIndex++)
         {
             local.resetRef = reinterpret_cast<TopicInfoArray*>(actorArray)->FUN_00968670(local.resetIndex);
-            local.resetActor = local.resetRef && local.resetRef->vfn_100() ? local.resetRef : 0;
+            local.resetActor = local.resetRef && local.resetRef->IsActor() ? local.resetRef : 0;
             if (local.resetActor)
             {
                 maximum = local.resetActor->GetProcess();
                 if (maximum)
-                    maximum->vfn_768(0.0f);
+                    maximum->SetWaterLevel(0.0f);
             }
         }
         local.playerProcess = g_thePlayer->GetProcess();
         if (local.playerProcess)
-            local.playerProcess->vfn_768(0.0f);
+            local.playerProcess->SetWaterLevel(0.0f);
     }
 }
 
-class NiRenderer
-{
-  public:
-    void FinishScene(void);
-};
 class IOManager;
 
 NiRenderer* __cdecl FUN_0043c4b0(void);
@@ -185,24 +231,10 @@ void __cdecl FUN_00878200(unsigned char* aFreeData)
     FUN_00c3e340(DAT_01202d98);
 }
 
-class ShadowSceneNode;
-
 class ModelLoader
 {
   public:
     void FUN_00448620(bool);
-};
-
-class NiAdditionalGeometryData
-{
-  public:
-    static ShadowSceneNode* __cdecl GetShadowSceneNodeForIndex(int);
-};
-
-class TES
-{
-  public:
-    void SetTESActive(bool);
 };
 
 extern ModelLoader* g_modelLoader;
@@ -229,13 +261,8 @@ void __cdecl FUN_00878250(bool abRunExtraSteps)
     g_TES->SetTESActive(false);
 }
 
-struct FUN_00878340_shell : public PlayerCharacter
-{
-    bool FUN_00878340();
-};
-
 // @fnv 0x00878340
-bool FUN_00878340_shell::FUN_00878340()
+bool PlayerCharacter::FUN_00878340()
 {
     return *((bool*)((char*)this + 0x75d));
 }

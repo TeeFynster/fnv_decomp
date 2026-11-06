@@ -2,6 +2,36 @@
 // src/bsshader/particleshaderproperty.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/particleshaderproperty.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../include/MemoryManager.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiColorA.h"
+
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ)
+{
+    x = fX;
+    y = fY;
+    z = fZ;
+}
+inline void NiPoint3::Set(float X, float Y, float Z)
+{
+    x = X;
+    y = Y;
+    z = Z;
+}
+inline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(x * scalar, y * scalar, z * scalar);
+}
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x - kRhs.x, y - kRhs.y, z - kRhs.z);
+}
+inline NiPoint3 NiPoint3::operator+(const NiPoint3& kRhs) const
+{
+    return NiPoint3(x + kRhs.x, y + kRhs.y, z + kRhs.z);
+}
+
 extern int g_01200434;
 
 // @fnv 0x00ba7f10
@@ -10,26 +40,18 @@ int& __cdecl FUN_00ba7f10()
     return g_01200434;
 }
 
-template <class T> class NiTMallocInterface
-{
-};
-template <class T, class A> class NiTPrimitiveArray
-{
-  public:
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
+#include "../../include/NiTPrimitiveArray.h"
 struct BaseStr
 {
-    void WriteToSettingArray(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >*);
+    void WriteToSettingArray(NiTPrimitiveArray<char*>*);
 };
 struct ParticleShaderProperty : BaseStr
 {
-    void FUN_00ba7f20(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >*);
+    void FUN_00ba7f20(NiTPrimitiveArray<char*>*);
 };
 char* __cdecl _FUN_00a7d330(const char*);
 // @fnv 0x00ba7f20
-void ParticleShaderProperty::FUN_00ba7f20(NiTPrimitiveArray<char*, NiTMallocInterface<char*> >* apStrings)
+void ParticleShaderProperty::FUN_00ba7f20(NiTPrimitiveArray<char*>* apStrings)
 {
     WriteToSettingArray(apStrings);
     char* str = _FUN_00a7d330((const char*)g_01200434);
@@ -46,73 +68,50 @@ extern int DAT_01200424;
 char** __cdecl FUN_005e0ba0(unsigned int);
 int __cdecl GetFloatQuadTable();
 void* _fnv_zlib_memset(void*, int, unsigned int);
-struct MemoryManager
-{
-    void* Allocate(unsigned int);
-};
 extern MemoryManager g_memoryManager;
 struct ParticleShader
 {
     static unsigned int __cdecl GetShaderParticleCount();
 };
-struct NiPoint3
+inline NiColorA::NiColorA(float fR, float fG, float fB, float fA)
 {
-    float x, y, z;
-    NiPoint3()
-    {}
-    NiPoint3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-};
-struct RgbaColor
+    r = fR;
+    g = fG;
+    b = fB;
+    a = fA;
+}
+inline void NiRefObject::DecRefCount()
 {
-    float r, g, b, a;
-    RgbaColor(float fR = 0.0f, float fG = 0.0f, float fB = 0.0f, float fA = 0.0f)
-    {
-        r = fR;
-        g = fG;
-        b = fB;
-        a = fA;
-    }
-};
-struct NiRefObject
+    if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+inline void NiNode::DecRefCount()
 {
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    unsigned int m_uiRefCount;
-    void IncRefCount();
-    void DecRefCount()
-    {
-        if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-template <class T> struct NiPointer
+    if (InterlockedDecrement((long volatile*)&m_uiRefCount) == 0)
+        DeleteThis();
+}
+template <class T> inline NiPointer<T>::NiPointer()
 {
-    T* m_pObject;
-    NiPointer(T* pObject = 0)
+    m_pObject = 0;
+}
+template <class T> inline NiPointer<T>::NiPointer(T* pObject)
+{
+    m_pObject = pObject;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* pObject)
+{
+    if (m_pObject != pObject)
     {
+        if (pObject != 0)
+            pObject->IncRefCount();
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
         m_pObject = pObject;
-        if (m_pObject)
-            m_pObject->IncRefCount();
     }
-    ~NiPointer();
-    NiPointer& operator=(T* pObject)
-    {
-        if (m_pObject != pObject)
-        {
-            if (pObject)
-                pObject->IncRefCount();
-            if (m_pObject)
-                m_pObject->DecRefCount();
-            m_pObject = pObject;
-        }
-        return *this;
-    }
-};
+    return *this;
+}
 struct GlobalObject_004aff00
 {
     const void* vt;
@@ -176,9 +175,9 @@ struct FUN_00ba7f70 : FUN_00ba8e50
     float m_fParticleParameter10;              // 0xb0
     float m_fParticleParameter11;              // 0xb4
     float fUnkB8, fUnkBC, fUnkC0;              // 0xb8
-    RgbaColor Color1;                          // 0xc4
-    RgbaColor Color2;                          // 0xd4
-    RgbaColor Color3;                          // 0xe4
+    NiColorA Color1;                          // 0xc4
+    NiColorA Color2;                          // 0xd4
+    NiColorA Color3;                          // 0xe4
     float fUnkF4, fUnkF8, fUnkFC, fUnk100;     // 0xf4
     float fScaleTime;                          // 0x104
     float fUnk108, fUnk10C, fUnk110, fUnk114;  // 0x108
@@ -194,7 +193,7 @@ struct FUN_00ba7f70 : FUN_00ba8e50
 };
 // Initialises particle system fields to defaults, clears kArray, allocates pParticles for the shader's particle count and zeroes it.
 // @fnv 0x00ba7f70
-FUN_00ba7f70::FUN_00ba7f70() : kArray(10, 10)
+FUN_00ba7f70::FUN_00ba7f70() : spRetainedObject(0), kArray(10, 10)
 {
     spRetainedObject = 0;
     iParticleCount = 0;
@@ -214,9 +213,9 @@ FUN_00ba7f70::FUN_00ba7f70() : kArray(10, 10)
     m_fParticleParameter9 = 0.0f;
     m_fParticleParameter10 = 0.0f;
     m_fParticleParameter11 = 0.0f;
-    Color1 = RgbaColor(0.0f, 0.0f, 0.0f, 0.0f);
-    Color2 = RgbaColor(0.0f, 0.0f, 0.0f, 0.0f);
-    Color3 = RgbaColor(0.0f, 0.0f, 0.0f, 0.0f);
+    Color1 = NiColorA(0.0f, 0.0f, 0.0f, 0.0f);
+    Color2 = NiColorA(0.0f, 0.0f, 0.0f, 0.0f);
+    Color3 = NiColorA(0.0f, 0.0f, 0.0f, 0.0f);
     fAlpha = 1.0f;
     m_fParticleParameter12 = 1.0f;
     m_fParticleParameter13 = 1.0f;
@@ -339,10 +338,6 @@ void ParticleEmitter::AdvanceParticleTimes(float fTime)
     fScaleTime = fTime;
 }
 
-struct TableAllocator
-{
-    void* FUN_00aa3e40(unsigned int uiSize);
-};
 extern int DAT_011f6238;
 extern int DAT_01200420;
 unsigned int __cdecl FUN_00ba52d0();
@@ -353,7 +348,7 @@ struct FloatQuad
 
     static void* operator new[](unsigned int uiSize)
     {
-        return reinterpret_cast<TableAllocator*>(&DAT_011f6238)->FUN_00aa3e40(uiSize);
+        return reinterpret_cast<MemoryManager*>(&DAT_011f6238)->FUN_00aa3e40(uiSize);
     }
 };
 
@@ -502,55 +497,37 @@ void ParticleInitializer::InitParticles(float time)
 }
 
 #include <string.h>
-struct PickVector
+inline const NiPoint3* NormalizePoint(NiPoint3& point)
 {
-    float x, y, z;
-    PickVector& operator=(const PickVector& __restrict rhs)
-    {
-        memcpy(this, &rhs, sizeof(*this));
-        return *this;
-    }
-    void FUN_004a0c10();
-    const PickVector* Normalized()
-    {
-        FUN_004a0c10();
-        return this;
-    }
-};
-inline PickVector MakePoint(float x, float y, float z)
+    point.FUN_004a0c10();
+    return &point;
+}
+inline NiPoint3 MakePoint(float x, float y, float z)
 {
-    PickVector p = {x, y, z};
+    NiPoint3 p(x, y, z);
     return p;
 }
-inline PickVector operator*(const PickVector& v, float t)
+inline NiPoint3& MulPoint(NiPoint3& out, const NiPoint3& v, float t)
 {
-    return MakePoint(v.x * t, v.y * t, v.z * t);
-}
-inline PickVector& MulPoint(PickVector& out, const PickVector& v, float t)
-{
-    const PickVector& a = v;
+    const NiPoint3& a = v;
     out.x = a.x * t;
     out.y = a.y * t;
     out.z = a.z * t;
     return out;
 }
-inline PickVector& AddPoint(PickVector& out, const PickVector& l, const PickVector& r)
+inline NiPoint3& AddPoint(NiPoint3& out, const NiPoint3& l, const NiPoint3& r)
 {
     out.x = l.x + r.x;
     out.y = l.y + r.y;
     out.z = l.z + r.z;
     return out;
 }
-inline PickVector operator+(const PickVector& l, const PickVector& r)
-{
-    return MakePoint(l.x + r.x, l.y + r.y, l.z + r.z);
-}
 
-inline void CopyPoint(PickVector& dst, const PickVector& src)
+inline void CopyPoint(NiPoint3& dst, const NiPoint3& src)
 {
     dst = src;
 }
-extern PickVector DAT_011f426c;
+extern NiPoint3 DAT_011f426c;
 extern double DAT_01029790;
 extern double DAT_01012070;
 unsigned int __cdecl FUN_00ecadb8();
@@ -598,7 +575,7 @@ struct PickObj
     int unk80;
     int unk84;
     int unk88;
-    PickVector m_pos8c;
+    NiPoint3 m_pos8c;
 };
 
 struct PickCtx
@@ -652,22 +629,18 @@ struct ArrView2
     unsigned int unk08;
     unsigned char flag;
 };
-struct ThreeComponentPoint
-{
-    float x, y, z;
-};
 union PickWork
 {
-    ThreeComponentPoint vector;
+    float vector[3];
     ArrView view;
-    PickVector& point()
+    NiPoint3& point()
     {
-        return reinterpret_cast<PickVector&>(vector);
+        return reinterpret_cast<NiPoint3&>(vector);
     }
 };
 struct PickWorkspace
 {
-    PickVector left;
+    NiPoint3 left;
     PickWork other;
     PickWork work;
 };
@@ -722,8 +695,8 @@ struct PickShape
     int unk14;
     int unk18;
     int unk1C;
-    PickVector* m_pVecA;
-    PickVector* m_pVecB;
+    NiPoint3* m_pVecA;
+    NiPoint3* m_pVecB;
     int unk28;
     int unk2C;
     PickMesh* m_pMesh;
@@ -735,8 +708,8 @@ struct PickShape
 
 struct PickMover
 {
-    PickVector* FUN_004b4500(PickVector*, const PickVector*);
-    __declspec(noalias) PickVector* FUN_00524c40(PickVector*, const PickVector*);
+    NiPoint3* FUN_004b4500(NiPoint3*, const NiPoint3*);
+    __declspec(noalias) NiPoint3* FUN_00524c40(NiPoint3*, const NiPoint3*);
 };
 
 struct PickElem
@@ -808,8 +781,8 @@ struct EmitterPick : ParticleEmitter
 // @fnv 0x00ba74a0
 void EmitterPick::PickParticle(int aiIndex)
 {
-    PickVector a = DAT_011f426c;
-    PickVector b = DAT_011f426c;
+    NiPoint3 a = DAT_011f426c;
+    NiPoint3 b = DAT_011f426c;
     PickElem* e = 0;
     PickWorkspace scratch;
     if (m_usElementCount > 0)
@@ -836,11 +809,11 @@ void EmitterPick::PickParticle(int aiIndex)
                          MulPoint(scratch.other.point(), pAltObj->m_pos8c, fLerpS));
             float dz = RandSigned();
             float dx = RandSigned();
-            scratch.work.vector.x = dx;
-            scratch.work.vector.y = 0.0f;
-            scratch.work.vector.z = dz;
-            PickVector* __restrict r = reinterpret_cast<PickMover*>(&e->unk68_mover)
-                                           ->FUN_004b4500(&scratch.other.point(), scratch.work.point().Normalized());
+            scratch.work.vector[0] = dx;
+            scratch.work.vector[1] = 0.0f;
+            scratch.work.vector[2] = dz;
+            NiPoint3* __restrict r = reinterpret_cast<PickMover*>(&e->unk68_mover)
+                                           ->FUN_004b4500(&scratch.other.point(), NormalizePoint(scratch.work.point()));
             b = *r;
             goto L_0353;
         }
@@ -866,32 +839,32 @@ void EmitterPick::PickParticle(int aiIndex)
                 {
                     pShape->FUN_00a67410(&scratch.work.view);
                     pShape->GetBounds(&scratch.other.view);
-                    PickVector* __restrict pVecA =
-                        (PickVector*)((char*)scratch.work.view.base + scratch.work.view.stride * uiRemainder);
+                    NiPoint3* __restrict pVecA =
+                        (NiPoint3*)((char*)scratch.work.view.base + scratch.work.view.stride * uiRemainder);
                     a = *pVecA;
-                    PickVector* __restrict pVecB =
-                        (PickVector*)((char*)scratch.other.view.base + scratch.other.view.stride * uiRemainder);
+                    NiPoint3* __restrict pVecB =
+                        (NiPoint3*)((char*)scratch.other.view.base + scratch.other.view.stride * uiRemainder);
                     b = *pVecB;
                     pShape->FUN_00a673d0();
                 }
             }
             else
             {
-                PickVector* pVecA = pShape->m_pVecA != 0 ? pShape->m_pVecA + uiRemainder : (PickVector*)&DAT_011f426c;
-                PickVector* pVecBBase = pShape->m_pVecB;
+                NiPoint3* pVecA = pShape->m_pVecA != 0 ? pShape->m_pVecA + uiRemainder : (NiPoint3*)&DAT_011f426c;
+                NiPoint3* pVecBBase = pShape->m_pVecB;
                 a = *pVecA;
-                PickVector* __restrict pVecB = pVecBBase != 0 ? pVecBBase + uiRemainder : (PickVector*)&DAT_011f426c;
+                NiPoint3* __restrict pVecB = pVecBBase != 0 ? pVecBBase + uiRemainder : (NiPoint3*)&DAT_011f426c;
                 b = *pVecB;
             }
             if (reinterpret_cast<unsigned char&>(unk6C) != 0)
             {
                 PickMover* pMover = reinterpret_cast<PickMover*>(&e->unk68_mover);
                 {
-                    PickVector* __restrict r = pMover->FUN_00524c40(&scratch.work.point(), &a);
+                    NiPoint3* __restrict r = pMover->FUN_00524c40(&scratch.work.point(), &a);
                     a = *r;
                 }
                 {
-                    PickVector* __restrict r = pMover->FUN_004b4500(&scratch.work.point(), &b);
+                    NiPoint3* __restrict r = pMover->FUN_004b4500(&scratch.work.point(), &b);
                     b = *r;
                 }
             }
@@ -951,10 +924,6 @@ struct ParticleSceneNode
     int unk88;
     NiPoint3 worldPosition;
 };
-inline NiPoint3 operator-(const NiPoint3& a, const NiPoint3& b)
-{
-    return NiPoint3(a.x - b.x, a.y - b.y, a.z - b.z);
-}
 struct ParticleUpdater : FUN_00ba7f70
 {
     void PickParticle(int);
@@ -1037,15 +1006,6 @@ void ParticleUpdater::FUN_00ba7b60(float time, bool compensate, bool emit)
 
 #include <stdlib.h>
 extern "C" void _ReadWriteBarrier();
-struct SpawnVector
-{
-    float x, y, z;
-    SpawnVector()
-    {}
-    SpawnVector(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    __declspec(noalias) void FUN_004a0c10();
-};
 
 inline float RandomSigned()
 {
@@ -1061,19 +1021,11 @@ inline float RandomUnit()
 {
     return (float)(rand() / 32767.0);
 }
-inline SpawnVector operator*(const SpawnVector& v, float s)
-{
-    return SpawnVector(v.x * s, v.y * s, v.z * s);
-}
-inline SpawnVector operator+(const SpawnVector& a, const SpawnVector& b)
-{
-    return SpawnVector(a.x + b.x, a.y + b.y, a.z + b.z);
-}
 
 struct M_004b4500
 {
     float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-    SpawnVector __declspec(noalias) FUN_004b4500(const SpawnVector*);
+    NiPoint3 __declspec(noalias) FUN_004b4500(const NiPoint3*);
 };
 struct EmitterNode
 {
@@ -1082,7 +1034,7 @@ struct EmitterNode
     int unk1c, unk20, unk24, unk28, unk2c, unk30, unk34, unk38, unk3c;
     int unk40, unk44, unk48, unk4c, unk50, unk54, unk58, unk5c, unk60, unk64;
     M_004b4500 rotation;
-    SpawnVector position;
+    NiPoint3 position;
     int unk98, unk9c, unka0, unka4;
     unsigned short count;
 };
@@ -1097,8 +1049,8 @@ struct ParticleSpawner : ParticleEmitter
 // @fnv 0x00ba7860
 void ParticleSpawner::FUN_00ba7860(unsigned int index)
 {
-    SpawnVector position;
-    SpawnVector direction;
+    NiPoint3 position;
+    NiPoint3 direction;
     if (count > 0)
     {
         EmitterNode* node;
@@ -1112,7 +1064,7 @@ void ParticleSpawner::FUN_00ba7860(unsigned int index)
             float t = RandomUnit();
             position = node->position * t + parent->position * (1.0f - t);
             float z = RandomSigned();
-            direction = SpawnVector(RandomLast(), 0.0f, z);
+            direction = NiPoint3(RandomLast(), 0.0f, z);
             direction.FUN_004a0c10();
             direction = node->rotation.FUN_004b4500(&direction);
         }
@@ -1121,13 +1073,13 @@ void ParticleSpawner::FUN_00ba7860(unsigned int index)
             position = node->position;
             float z = RandomSigned();
             float y = RandomSigned();
-            direction = SpawnVector(RandomLast(), y, z);
+            direction = NiPoint3(RandomLast(), y, z);
             direction.FUN_004a0c10();
         }
     }
     else
     {
-        direction = position = *(const SpawnVector*)&DAT_011f426c;
+        direction = position = *(const NiPoint3*)&DAT_011f426c;
     }
     Particle* const& particles = pParticles;
     particles[index].m_fFirstFloatValue = position.x;
@@ -1139,24 +1091,10 @@ void ParticleSpawner::FUN_00ba7860(unsigned int index)
     particles[index].unk18 = direction.z;
 }
 
-struct Point71 : NiPoint3
-{
-    Point71()
-    {}
-    Point71(float fX, float fY, float fZ) : NiPoint3(fX, fY, fZ)
-    {}
-    void Set(float X, float Y, float Z)
-    {
-        x = X;
-        y = Y;
-        z = Z;
-    }
-    void FUN_004a0c10();
-};
 struct Transform71
 {
-    Point71* FUN_00524c40(Point71*, const Point71*);
-    Point71* FUN_004b4500(Point71*, const Point71*);
+    NiPoint3* FUN_00524c40(NiPoint3*, const NiPoint3*);
+    NiPoint3* FUN_004b4500(NiPoint3*, const NiPoint3*);
 };
 struct Object71
 {
@@ -1290,8 +1228,8 @@ inline float RandomSigned71()
 // @fnv 0x00ba71d0
 void Target71::FUN_00ba71d0(unsigned int index)
 {
-    Point71 position;
-    Point71 direction;
+    NiPoint3 position;
+    NiPoint3 direction;
     if (kArray.m_usSize > 0)
     {
         Object71* object = kArray.m_pBase[0];
@@ -1299,14 +1237,14 @@ void Target71::FUN_00ba71d0(unsigned int index)
         {
             direction.Set(0.0f, m_fParticleParameter1 * RandomUnit71(), 0.0f);
             position = direction;
-            direction = Point71(RandomSigned71(), 0.0f, RandomSigned71());
+            direction = NiPoint3(RandomSigned71(), 0.0f, RandomSigned71());
             direction.FUN_004a0c10();
             if (m_bParticleEnabled)
             {
-                Point71 result;
-                const Point71* __restrict p = object->transform.FUN_00524c40(&result, &position);
+                NiPoint3 result;
+                const NiPoint3* __restrict p = object->transform.FUN_00524c40(&result, &position);
                 position = *p;
-                const Point71* __restrict q = object->transform.FUN_004b4500(&result, &direction);
+                const NiPoint3* __restrict q = object->transform.FUN_004b4500(&result, &direction);
                 direction = *q;
             }
         }
@@ -1327,21 +1265,14 @@ void Target71::FUN_00ba71d0(unsigned int index)
 
 extern int DAT_010b8250;
 void __fastcall FUN_00baa0e0(void*);
-struct MemoryManagerDealloc
-{
-    void* Deallocate(void*);
-};
-extern MemoryManagerDealloc g_dealloc;
+extern MemoryManager g_dealloc;
 void operator delete[](void* p)
 {
     g_dealloc.Deallocate(p);
 }
-struct NiNode : NiRefObject
-{
-};
 template <class T> NiPointer<T>::~NiPointer()
 {
-    if (m_pObject)
+    if (m_pObject != 0)
         m_pObject->DecRefCount();
 }
 GlobalObject_004aff00::~GlobalObject_004aff00()
@@ -1380,9 +1311,9 @@ struct FUN_00ba7df0 : FUN_00ba8e50
     float m_fParticleParameter10;
     float m_fParticleParameter11;
     float fUnkB8, fUnkBC, fUnkC0;
-    RgbaColor Color1;
-    RgbaColor Color2;
-    RgbaColor Color3;
+    NiColorA Color1;
+    NiColorA Color2;
+    NiColorA Color3;
     float fUnkF4, fUnkF8, fUnkFC, fUnk100;
     float fScaleTime;
     float fUnk108, fUnk10C, fUnk110, fUnk114;

@@ -1,6 +1,8 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../include/MemoryManager.h"
+
 void* __cdecl operator new(unsigned);
 void* __cdecl operator new[](unsigned);
 void* __cdecl FUN_00403d30(void*, int, unsigned);
@@ -63,27 +65,20 @@ struct FUN_00aa7400 : Heap
     FUN_00aa7400(unsigned, const char*);
 };
 extern char DAT_010824fc, DAT_010824f0, DAT_010824e4;
-struct MemoryManager
-{
-    unsigned short unk00, count, current, unk06;
-    Heap** heaps;
-    Heap* classes[66];
-    void InitializeHeaps();
-};
-// Clears the classes array, allocates three heaps, assigns them to class slots, and resets current to 0.
+// Clears the context heap array, allocates three heaps, assigns them to context slots, and resets the physical heap count.
 // @fnv 0x00866e00
 void MemoryManager::InitializeHeaps()
 {
-    FUN_00403d30(classes, 0, 0x108);
-    count = 3;
-    heaps = new Heap*[count];
-    heaps[0] = new FUN_00aa78a0(0xc800000, 0x5500000, &DAT_010824fc, false);
-    classes[65] = heaps[0];
-    heaps[1] = new FUN_00aa7400(0x183800, &DAT_010824f0);
-    classes[0] = heaps[1];
-    classes[9] = heaps[1];
-    classes[3] = heaps[1];
-    heaps[2] = new FUN_00aa78a0(0x4000000, 0x200000, &DAT_010824e4, false);
-    classes[23] = heaps[2];
-    current = 0;
+    FUN_00403d30(pHeapsByContextA, 0, 0x108);
+    iNumHeaps = 3;
+    ppHeaps = new IMemoryHeap*[iNumHeaps];
+    ppHeaps[0] = reinterpret_cast<IMemoryHeap*>(new FUN_00aa78a0(0xc800000, 0x5500000, &DAT_010824fc, false));
+    pHeapsByContextA[65] = ppHeaps[0];
+    ppHeaps[1] = reinterpret_cast<IMemoryHeap*>(new FUN_00aa7400(0x183800, &DAT_010824f0));
+    pHeapsByContextA[0] = ppHeaps[1];
+    pHeapsByContextA[9] = ppHeaps[1];
+    pHeapsByContextA[3] = ppHeaps[1];
+    ppHeaps[2] = reinterpret_cast<IMemoryHeap*>(new FUN_00aa78a0(0x4000000, 0x200000, &DAT_010824e4, false));
+    pHeapsByContextA[23] = ppHeaps[2];
+    iNumPhysicalHeaps = 0;
 }

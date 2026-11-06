@@ -1,3 +1,8 @@
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
 
 // src/havok/physics/utilities/actions/mousespring/hkpmousespringaction_rtm_variant.cpp - RTM variant unit created 2026-11-01 by rtm_route.py: community reworks of src/havok/physics/utilities/actions/mousespring/hkpmousespringaction.cpp that match byte for byte only
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
@@ -5,6 +10,11 @@
 // src/havok/physics/utilities/actions/mousespring/hkpmousespringaction.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/actions/mousespring/hkpmousespringaction.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 #include "havok/hkpMouseSpringAction.h"
+#include "../../../../../../include/hkBool.h"   // the shared class; include/hkMonitorStream.h skips it once havok/hkBase.h is in
+#include "../../../../../../include/hkStepInfo.h"
+#include "../../../../../../include/hkpCdBody.h"
+#include "../../../../../../include/hkpBroadPhaseHandle.h"
+#include "../../../../../../include/hkpTypedBroadPhaseHandle.h"
 struct FUN_00d2b1f0
 {
     void __thiscall EntityRemovedCallback(int);
@@ -21,11 +31,9 @@ struct FUN_00cbb1b0_Class
 };
 extern "C" int DAT_01268a14;
 int __cdecl FUN_00cbb8a0();
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
+// Exe 0x00cbb1e0 FUN_00cbb1e0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+
 extern int DAT_010c8e94;
 extern int DAT_010c476c;
 extern float DAT_0101b2d0;
@@ -80,10 +88,10 @@ struct Ms_Sphere
 };
 struct Ms_Xf
 {
-    __m128 c0;
-    __m128 c1;
-    __m128 c2;
-    __m128 t;
+    LocalM128 c0;
+    LocalM128 c1;
+    LocalM128 c2;
+    LocalM128 t;
 };
 struct Ms_Body
 {
@@ -120,9 +128,9 @@ struct Ms_Input
     int i5;
     int i6;
     int i7;
-    __m128 q0;
-    __m128 q1;
-    __m128 q2;
+    LocalM128 q0;
+    LocalM128 q1;
+    LocalM128 q2;
 };
 struct Ms_Coll
 {
@@ -225,8 +233,8 @@ struct Ms_N
 };
 extern "C"
 {
-    void _mm_store_ps(float*, __m128);
-    __m128 _mm_load_ps(const float*);
+    void _mm_store_ps(float*, LocalM128);
+    LocalM128 _mm_load_ps(const float*);
 }
 struct Fv
 {
@@ -253,7 +261,7 @@ struct Ms_cls
     float objDamping;
     int shapeKey;
     Ms_ArrInit cb;
-    Ms_cls* FUN_00cbb560(__m128* a0, __m128* a1, float a2, float a3, float a4, Ms_Ent* a5, Ms_Arr* a6);
+    Ms_cls* FUN_00cbb560(LocalM128* a0, LocalM128* a1, float a2, float a3, float a4, Ms_Ent* a5, Ms_Arr* a6);
 };
 class FUN_00d01a60
 {
@@ -262,51 +270,7 @@ class FUN_00d01a60
     int unk00[11];
 };
 extern const float DAT_01012054;
-class hkpCdBodyCD2D
-{
-  public:
-    hkpCdBodyCD2D(const void* shape, const void* motionState)
-    {
-        m_pCollisionShape = shape;
-        m_pMotionState = motionState;
-        m_parent = 0;
-        m_uiCollisionShapeKey = 0xffffffff;
-    }
-    const void* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const hkpCdBodyCD2D* m_parent;
-};
-class hkpBroadPhaseHandleCD2D
-{
-  public:
-    hkpBroadPhaseHandleCD2D()
-    {
-        m_iOwnerObjectOffset = 0;
-    }
-    unsigned int m_iOwnerObjectOffset;
-};
-class hkpTypedBroadPhaseHandleCD2D : public hkpBroadPhaseHandleCD2D
-{
-  public:
-    hkpTypedBroadPhaseHandleCD2D(int type)
-    {
-        m_type = (signed char)type;
-        m_ucObjectQualityType = -1;
-        m_uiCollisionFilterData = 0;
-        m_iOwnerOffset = 0x7f;
-    }
-    void SetOwnerPointer(void* owner)
-    {
-        int offset = (int)((char*)owner - (char*)this);
-        m_iOwnerOffset = (signed char)offset;
-    }
-    signed char m_type;
-    signed char m_iOwnerOffset;
-    signed char m_ucObjectQualityType;
-    unsigned int m_uiCollisionFilterData;
-};
-class FUN_00cd2d80 : public hkpCdBodyCD2D
+class FUN_00cd2d80 : public hkpCdBody
 {
   public:
     FUN_00cd2d80(const void* shape, const void* motionState, int type);
@@ -314,7 +278,7 @@ class FUN_00cd2d80 : public hkpCdBodyCD2D
     signed char m_iOwnerOffset;
     signed char m_uiForceCollideOntoPpu;
     unsigned short m_uiShapeSizeOnSpu;
-    hkpTypedBroadPhaseHandleCD2D m_kBroadPhaseHandle;
+    hkpTypedBroadPhaseHandle m_kBroadPhaseHandle;
     FUN_00d01a60 m_kBoundingVolumeData;
     float m_fAllowedPenetrationDepth;
 };
@@ -341,20 +305,20 @@ struct Cls
 };
 extern "C"
 {
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_load_ps1(const float*);
-    __m128 _mm_cmple_ps(__m128, __m128);
-    int _mm_movemask_ps(__m128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_load_ps1(const float*);
+    LocalM128 _mm_cmple_ps(LocalM128, LocalM128);
+    int _mm_movemask_ps(LocalM128);
 }
 extern "C"
 {
 }
-extern const __m128 DAT_01017d10;
+extern const LocalM128 DAT_01017d10;
 extern const float DAT_01017d00;
 struct __declspec(align(16)) hkVector4CBB1
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
     void operator=(const hkVector4CBB1& v)
     {
         m_vComponents = v.m_vComponents;
@@ -388,7 +352,7 @@ class hkpPositionTrackerCBB1
 
     void FUN_00cbb150(const hkVector4CBB1& kPosition);
 };
-extern "C" __m128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_setzero_ps(void);
 struct FUN_00cbb4e0
 {
     void* unk00;
@@ -414,34 +378,28 @@ extern float DAT_01016248, DAT_01017870, DAT_0101ffc0;
 
 extern "C"
 {
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    void _mm_store_ss(float*, __m128);
-    __m128 _mm_setzero_ps();
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_load1_ps(const float*);
-    __m128 _mm_set1_ps(float);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_xor_ps(__m128, __m128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+    void _mm_store_ss(float*, LocalM128);
+    LocalM128 _mm_setzero_ps();
+    LocalM128 _mm_load_ss(const float*);
+    LocalM128 _mm_load1_ps(const float*);
+    LocalM128 _mm_set1_ps(float);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_xor_ps(LocalM128, LocalM128);
 }
 
 extern "C" float DAT_0106c288;
 extern "C" hkVector4 DAT_010c44d0;
 
-struct hkStepInfo
-{
-    hkReal m_uiStartTime;
-    hkReal m_fEndTime;
-    hkReal m_fTimeStep;
-    hkReal m_fInverseDeltaTime;
-};
-
 struct FUN_00ca86c0_class
 {
     unsigned int __thiscall FUN_00ca86c0();
 };
+
+__forceinline hkMatrix3::hkMatrix3() {}
 
 struct FUN_00cdf250_class
 {
@@ -488,20 +446,40 @@ struct MotionExt
     int unk04;
     int unk08;
     int unk0c;
-    hkTransform m_kMotionTransform;
+    float m_kMotionTransformStorage[16];
+    __declspec(property(get=Get_m_kMotionTransform)) hkTransform m_kMotionTransform;
+    __forceinline hkTransform& Get_m_kMotionTransform() { return *reinterpret_cast<hkTransform*>(m_kMotionTransformStorage); }
     int unk50;
     int unk54;
     int unk58;
     int unk5c;
-    hkVector4 m_centerOfMassInWorld;
-    hkVector4 unk70;
-    hkVector4 unk80;
-    hkVector4 unk90;
-    hkVector4 unka0;
-    hkVector4 unkb0;
-    hkVector4 m_kInertiaAndMassInv;
-    hkVector4 m_kTranslationalVelocity;
-    hkVector4 m_kAngularVelocity;
+    float m_centerOfMassInWorldStorage[4];
+    __declspec(property(get=Get_m_centerOfMassInWorld)) hkVector4 m_centerOfMassInWorld;
+    __forceinline hkVector4& Get_m_centerOfMassInWorld() { return *reinterpret_cast<hkVector4*>(m_centerOfMassInWorldStorage); }
+    float unk70Storage[4];
+    __declspec(property(get=Get_unk70)) hkVector4 unk70;
+    __forceinline hkVector4& Get_unk70() { return *reinterpret_cast<hkVector4*>(unk70Storage); }
+    float unk80Storage[4];
+    __declspec(property(get=Get_unk80)) hkVector4 unk80;
+    __forceinline hkVector4& Get_unk80() { return *reinterpret_cast<hkVector4*>(unk80Storage); }
+    float unk90Storage[4];
+    __declspec(property(get=Get_unk90)) hkVector4 unk90;
+    __forceinline hkVector4& Get_unk90() { return *reinterpret_cast<hkVector4*>(unk90Storage); }
+    float unka0Storage[4];
+    __declspec(property(get=Get_unka0)) hkVector4 unka0;
+    __forceinline hkVector4& Get_unka0() { return *reinterpret_cast<hkVector4*>(unka0Storage); }
+    float unkb0Storage[4];
+    __declspec(property(get=Get_unkb0)) hkVector4 unkb0;
+    __forceinline hkVector4& Get_unkb0() { return *reinterpret_cast<hkVector4*>(unkb0Storage); }
+    float m_kInertiaAndMassInvStorage[4];
+    __declspec(property(get=Get_m_kInertiaAndMassInv)) hkVector4 m_kInertiaAndMassInv;
+    __forceinline hkVector4& Get_m_kInertiaAndMassInv() { return *reinterpret_cast<hkVector4*>(m_kInertiaAndMassInvStorage); }
+    float m_kTranslationalVelocityStorage[4];
+    __declspec(property(get=Get_m_kTranslationalVelocity)) hkVector4 m_kTranslationalVelocity;
+    __forceinline hkVector4& Get_m_kTranslationalVelocity() { return *reinterpret_cast<hkVector4*>(m_kTranslationalVelocityStorage); }
+    float m_kAngularVelocityStorage[4];
+    __declspec(property(get=Get_m_kAngularVelocity)) hkVector4 m_kAngularVelocity;
+    __forceinline hkVector4& Get_m_kAngularVelocity() { return *reinterpret_cast<hkVector4*>(m_kAngularVelocityStorage); }
 
     float __thiscall FUN_00c86430();
 };
@@ -512,19 +490,45 @@ struct RigidBodyExt : FUN_00ca86c0_class
     int unk04;
     int unk08;
     int unk0c;
-    hkVector4 unk10;
-    hkVector4 unk20;
-    hkVector4 unk30;
-    hkVector4 unk40;
-    hkVector4 unk50;
-    hkVector4 unk60;
-    hkVector4 unk70;
-    hkVector4 unk80;
-    hkVector4 unk90;
-    hkVector4 unka0;
-    hkVector4 unkb0;
-    hkVector4 unkc0;
-    hkVector4 unkd0;
+    float unk10Storage[4];
+    __declspec(property(get=Get_unk10)) hkVector4 unk10;
+    __forceinline hkVector4& Get_unk10() { return *reinterpret_cast<hkVector4*>(unk10Storage); }
+    float unk20Storage[4];
+    __declspec(property(get=Get_unk20)) hkVector4 unk20;
+    __forceinline hkVector4& Get_unk20() { return *reinterpret_cast<hkVector4*>(unk20Storage); }
+    float unk30Storage[4];
+    __declspec(property(get=Get_unk30)) hkVector4 unk30;
+    __forceinline hkVector4& Get_unk30() { return *reinterpret_cast<hkVector4*>(unk30Storage); }
+    float unk40Storage[4];
+    __declspec(property(get=Get_unk40)) hkVector4 unk40;
+    __forceinline hkVector4& Get_unk40() { return *reinterpret_cast<hkVector4*>(unk40Storage); }
+    float unk50Storage[4];
+    __declspec(property(get=Get_unk50)) hkVector4 unk50;
+    __forceinline hkVector4& Get_unk50() { return *reinterpret_cast<hkVector4*>(unk50Storage); }
+    float unk60Storage[4];
+    __declspec(property(get=Get_unk60)) hkVector4 unk60;
+    __forceinline hkVector4& Get_unk60() { return *reinterpret_cast<hkVector4*>(unk60Storage); }
+    float unk70Storage[4];
+    __declspec(property(get=Get_unk70)) hkVector4 unk70;
+    __forceinline hkVector4& Get_unk70() { return *reinterpret_cast<hkVector4*>(unk70Storage); }
+    float unk80Storage[4];
+    __declspec(property(get=Get_unk80)) hkVector4 unk80;
+    __forceinline hkVector4& Get_unk80() { return *reinterpret_cast<hkVector4*>(unk80Storage); }
+    float unk90Storage[4];
+    __declspec(property(get=Get_unk90)) hkVector4 unk90;
+    __forceinline hkVector4& Get_unk90() { return *reinterpret_cast<hkVector4*>(unk90Storage); }
+    float unka0Storage[4];
+    __declspec(property(get=Get_unka0)) hkVector4 unka0;
+    __forceinline hkVector4& Get_unka0() { return *reinterpret_cast<hkVector4*>(unka0Storage); }
+    float unkb0Storage[4];
+    __declspec(property(get=Get_unkb0)) hkVector4 unkb0;
+    __forceinline hkVector4& Get_unkb0() { return *reinterpret_cast<hkVector4*>(unkb0Storage); }
+    float unkc0Storage[4];
+    __declspec(property(get=Get_unkc0)) hkVector4 unkc0;
+    __forceinline hkVector4& Get_unkc0() { return *reinterpret_cast<hkVector4*>(unkc0Storage); }
+    float unkd0Storage[4];
+    __declspec(property(get=Get_unkd0)) hkVector4 unkd0;
+    __forceinline hkVector4& Get_unkd0() { return *reinterpret_cast<hkVector4*>(unkd0Storage); }
     MotionExt m_pMotionState;
 
     void __thiscall OnTrigger(const hkVector4* linVel);
@@ -570,25 +574,25 @@ void __thiscall MouseSpringActionExt::FUN_00cbb1e0(const hkStepInfo& stepInfo)
 
     worldPos.FUN_00c7f640(&rb->m_pMotionState.m_kMotionTransform, &m_kMousePositionInWorld);
 
-    *(__m128*)&deltaPos = _mm_sub_ps(*(__m128*)&worldPos, *(__m128*)&m_kGrabPointInBodySpace);
+    *(LocalM128*)&deltaPos = _mm_sub_ps(*(LocalM128*)&worldPos, *(LocalM128*)&m_kGrabPointInBodySpace);
 
     MotionExt* motion = rb->FUN_00ca86c0() ? (MotionExt*)rb->FUN_00ca86c0() : &rb->m_pMotionState;
 
-    __m128 invMassVec =
-        _mm_shuffle_ps(*(__m128*)&motion->m_kInertiaAndMassInv, *(__m128*)&motion->m_kInertiaAndMassInv, 0xff);
+    LocalM128 invMassVec =
+        _mm_shuffle_ps(*(LocalM128*)&motion->m_kInertiaAndMassInv, *(LocalM128*)&motion->m_kInertiaAndMassInv, 0xff);
     _mm_store_ss(&maxImpulse, invMassVec);
 
-    *(__m128*)&r = _mm_sub_ps(*(__m128*)&worldPos, *(__m128*)&rb->m_pMotionState.m_centerOfMassInWorld);
+    *(LocalM128*)&r = _mm_sub_ps(*(LocalM128*)&worldPos, *(LocalM128*)&rb->m_pMotionState.m_centerOfMassInWorld);
 
     crossR.FUN_00cd4cc0(&r);
 
     motion->GetLocalInverseInertia(&matrices.inertiaInvWorld);
 
-    *(__m128*)&work.K.m_kColumn0 = _mm_setzero_ps();
+    *(LocalM128*)&work.K.m_kColumn0 = _mm_setzero_ps();
     work.K.m_kColumn0.x = maxImpulse;
-    *(__m128*)&work.K.m_kColumn1 = _mm_setzero_ps();
+    *(LocalM128*)&work.K.m_kColumn1 = _mm_setzero_ps();
     work.K.m_kColumn1.y = maxImpulse;
-    *(__m128*)&work.K.m_kColumn2 = _mm_setzero_ps();
+    *(LocalM128*)&work.K.m_kColumn2 = _mm_setzero_ps();
     work.K.m_kColumn2.z = maxImpulse;
 
     matrices.tempMat1.FUN_00cd55b0((int*)&crossR, (int)&matrices.inertiaInvWorld);
@@ -598,38 +602,38 @@ void __thiscall MouseSpringActionExt::FUN_00cbb1e0(const hkStepInfo& stepInfo)
 
     if (work.K.FUN_00cd4f10(DAT_0106c288) == 0)
     {
-        *(__m128*)&work.lin = *(__m128*)&rb->m_pMotionState.m_kTranslationalVelocity;
-        __m128 dampLoad1 = _mm_load_ss(&m_fTau);
-        __m128 dampSplat1 = _mm_shuffle_ps(dampLoad1, dampLoad1, 0);
-        *(__m128*)&work.lin = _mm_mul_ps(*(__m128*)&work.lin, dampSplat1);
+        *(LocalM128*)&work.lin = *(LocalM128*)&rb->m_pMotionState.m_kTranslationalVelocity;
+        LocalM128 dampLoad1 = _mm_load_ss(&m_fTau);
+        LocalM128 dampSplat1 = _mm_shuffle_ps(dampLoad1, dampLoad1, 0);
+        *(LocalM128*)&work.lin = _mm_mul_ps(*(LocalM128*)&work.lin, dampSplat1);
         rb->OnTrigger(&work.lin);
 
-        *(__m128*)&work.ang = *(__m128*)&rb->m_pMotionState.m_kAngularVelocity;
-        __m128 dampLoad2 = _mm_load_ss(&m_fTau);
-        __m128 dampSplat2 = _mm_shuffle_ps(dampLoad2, dampLoad2, 0);
-        *(__m128*)&work.ang = _mm_mul_ps(*(__m128*)&work.ang, dampSplat2);
+        *(LocalM128*)&work.ang = *(LocalM128*)&rb->m_pMotionState.m_kAngularVelocity;
+        LocalM128 dampLoad2 = _mm_load_ss(&m_fTau);
+        LocalM128 dampSplat2 = _mm_shuffle_ps(dampLoad2, dampLoad2, 0);
+        *(LocalM128*)&work.ang = _mm_mul_ps(*(LocalM128*)&work.ang, dampSplat2);
         rb->FUN_00561800(&work.ang);
 
         rb->FUN_00ca0c40(&worldPos, &r);
 
         float springFactor = m_fSpringElasticity * stepInfo.m_fInverseDeltaTime;
-        __m128 term1 =
-            _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&springFactor), _mm_load_ss(&springFactor), 0), *(__m128*)&deltaPos);
-        *(__m128*)&angVel = term1;
-        __m128 sdLoad = _mm_load_ss(&m_fSpringDamping);
-        __m128 sdSplat = _mm_shuffle_ps(sdLoad, sdLoad, 0);
-        __m128 term2 = _mm_mul_ps(sdSplat, *(__m128*)&r);
-        *(__m128*)&angVel = _mm_add_ps(term2, term1);
+        LocalM128 term1 =
+            _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&springFactor), _mm_load_ss(&springFactor), 0), *(LocalM128*)&deltaPos);
+        *(LocalM128*)&angVel = term1;
+        LocalM128 sdLoad = _mm_load_ss(&m_fSpringDamping);
+        LocalM128 sdSplat = _mm_shuffle_ps(sdLoad, sdLoad, 0);
+        LocalM128 term2 = _mm_mul_ps(sdSplat, *(LocalM128*)&r);
+        *(LocalM128*)&angVel = _mm_add_ps(term2, term1);
 
         impulse.FUN_00c7f750(&work.K, &angVel);
 
-        *(__m128*)&impulse = _mm_xor_ps(*(__m128*)&impulse, *(__m128*)&DAT_010c44d0);
+        *(LocalM128*)&impulse = _mm_xor_ps(*(LocalM128*)&impulse, *(LocalM128*)&DAT_010c44d0);
 
-        __m128 sq = _mm_mul_ps(*(__m128*)&impulse, *(__m128*)&impulse);
-        __m128 y = _mm_shuffle_ps(sq, sq, 0x55);
-        __m128 xy = _mm_add_ss(y, sq);
-        __m128 z = _mm_shuffle_ps(sq, sq, 0xaa);
-        __m128 xyz = _mm_add_ss(z, xy);
+        LocalM128 sq = _mm_mul_ps(*(LocalM128*)&impulse, *(LocalM128*)&impulse);
+        LocalM128 y = _mm_shuffle_ps(sq, sq, 0x55);
+        LocalM128 xy = _mm_add_ss(y, sq);
+        LocalM128 z = _mm_shuffle_ps(sq, sq, 0xaa);
+        LocalM128 xyz = _mm_add_ss(z, xy);
         _mm_store_ss(&lenSq, xyz);
 
         maxImpulse = motion->FUN_00c86430();
@@ -640,8 +644,8 @@ void __thiscall MouseSpringActionExt::FUN_00cbb1e0(const hkStepInfo& stepInfo)
             float sqrtLen = (float)sqrt(lenSq);
             float invLen = 1.0f / sqrtLen;
             float scale = invLen * maxImpulse;
-            *(__m128*)&impulse =
-                _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&scale), _mm_load_ss(&scale), 0), *(__m128*)&impulse);
+            *(LocalM128*)&impulse =
+                _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&scale), _mm_load_ss(&scale), 0), *(LocalM128*)&impulse);
         }
 
         rb->FUN_00c9c1d0();

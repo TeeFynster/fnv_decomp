@@ -2,62 +2,41 @@
 // src/havok/common/scenedata/attributes/hkxattributegroup.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/scenedata/attributes/hkxattributegroup.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkxAttributeGroup.h"
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkRefVariant.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkxAttribute.h"
 
 __forceinline void* __cdecl operator new(unsigned int, void* pvWhere) throw()
 {
     return pvWhere;
 }
 
-struct FUN_00cb0c00_class
-{
-    void FUN_00cb0c00() throw();
-};
-
-class hkReferencedObject
-{
-  public:
-    void FUN_00c90510() throw();
-    void removeReference() throw();
-};
-
-struct hkMemoryAllocatorE5CD;
-
-void __cdecl FUN_00c908c0(hkMemoryAllocatorE5CD& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
 void FUN_00d2cc70(void* pvDst, void* pvSrc, unsigned int uiNumBytes) throw();
 
-struct FUN_00cb0bd0
+inline hkStringPtr::~hkStringPtr() throw()
 {
-    char* m_pcString;
-    FUN_00cb0bd0(const FUN_00cb0bd0& kOther) throw();
-    ~FUN_00cb0bd0() throw()
-    {
-        ((FUN_00cb0c00_class*)this)->FUN_00cb0c00();
-    }
-};
+    FUN_00cb0c00();
+}
 
-struct hkRefVariantE5CD
-{
-    hkReferencedObject* m_pRetainedObject;
-    hkRefVariantE5CD(const hkRefVariantE5CD& kOther) throw()
-    {
-        if (kOther.m_pRetainedObject)
-            kOther.m_pRetainedObject->FUN_00c90510();
-        m_pRetainedObject = kOther.m_pRetainedObject;
-    }
-    ~hkRefVariantE5CD() throw()
-    {
-        if (m_pRetainedObject)
-            m_pRetainedObject->removeReference();
-        m_pRetainedObject = 0;
-    }
-};
+// The shared hkStringPtr omits the copy constructor at 0x00cb0bd0.
+// Call its existing entry point with the original thiscall ABI.
+void CopyConstructAttributeName() throw();
+typedef void (__thiscall* AttributeNameCopyConstructor)(hkStringPtr*, const hkStringPtr&);
 
-struct hkxAttributeE5CD
+inline hkRefVariant::hkRefVariant(const hkRefVariant& kOther) throw()
 {
-    FUN_00cb0bd0 m_name;
-    hkRefVariantE5CD m_uiFilterValue;
-};
+    if (kOther.m_pRetainedObject)
+        kOther.m_pRetainedObject->addReference();
+    m_pRetainedObject = kOther.m_pRetainedObject;
+}
+
+inline hkRefVariant::~hkRefVariant() throw()
+{
+    if (m_pRetainedObject)
+        m_pRetainedObject->removeReference();
+    m_pRetainedObject = 0;
+}
 
 template <typename T> __forceinline void hkDestructE5CD(T* t, int n)
 {
@@ -65,39 +44,41 @@ template <typename T> __forceinline void hkDestructE5CD(T* t, int n)
         t[i].~T();
 }
 
-template <typename T> __forceinline void hkConstructWithArrayE5CD(T* t, int n, const T* s)
+__forceinline hkxAttribute* CopyConstructAttribute(hkxAttribute* destination, const hkxAttribute& source)
 {
-    for (int i = 0; i < n; ++i)
-        new (t + i) T(s[i]);
+    reinterpret_cast<AttributeNameCopyConstructor>(&CopyConstructAttributeName)(&destination->m_name, source.m_name);
+    if (source.m_uiFilterValue.m_pRetainedObject)
+        source.m_uiFilterValue.m_pRetainedObject->addReference();
+    destination->m_uiFilterValue.m_pRetainedObject = source.m_uiFilterValue.m_pRetainedObject;
+    return destination;
 }
 
-struct hkArrayE5CD
+__forceinline void hkConstructWithArrayE5CD(hkxAttribute* t, int n, const hkxAttribute* s)
 {
-    hkxAttributeE5CD* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+    for (int i = 0; i < n; ++i)
+    {
+        hkxAttribute* destination = t + i;
+        if (destination)
+            CopyConstructAttribute(destination, s[i]);
+    }
+}
 
-    int getCapacity() const
+template <typename T>
+__forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& kAlloc, int n)
+{
+    const int iCapacity = getCapacity();
+    if (iCapacity < n)
     {
-        return m_iCapacityState & 0x3fffffff;
+        int iCap2 = 2 * iCapacity;
+        int iNewSize = (n < iCap2) ? iCap2 : n;
+        hkArrayUtil::_reserve(kAlloc, this, iNewSize, sizeof(T));
     }
-    void GrowArrayCapacity(hkMemoryAllocatorE5CD& kAlloc, int n)
-    {
-        const int iCapacity = getCapacity();
-        if (iCapacity < n)
-        {
-            int iCap2 = 2 * iCapacity;
-            int iNewSize = (n < iCap2) ? iCap2 : n;
-            FUN_00c908c0(kAlloc, this, iNewSize, sizeof(hkxAttributeE5CD));
-        }
-    }
-    void SpliceArray(hkMemoryAllocatorE5CD& kAlloc, int iIndex, int iNumDel, const hkxAttributeE5CD* pkInsert,
-                     int iNumToInsert);
-};
+}
 
 // Replaces iNumDel elements at iIndex with iNumToInsert copies of pkInsert, growing the array if needed and shifting the tail.
 // @fnv 0x00e5cdb0
-void hkArrayE5CD::SpliceArray(hkMemoryAllocatorE5CD& kAlloc, int iIndex, int iNumDel, const hkxAttributeE5CD* pkInsert,
+template <>
+void hkArrayBase<hkxAttribute>::_spliceInto(hkMemoryAllocator& kAlloc, int iIndex, int iNumDel, const hkxAttribute* pkInsert,
                               int iNumToInsert)
 {
     int iNewSize = m_iElementCount + iNumToInsert - iNumDel;
@@ -105,7 +86,7 @@ void hkArrayE5CD::SpliceArray(hkMemoryAllocatorE5CD& kAlloc, int iIndex, int iNu
     if (iNewSize > getCapacity())
         GrowArrayCapacity(kAlloc, iNewSize);
     hkDestructE5CD(m_data + iIndex, iNumDel);
-    FUN_00d2cc70(m_data + iIndex + iNumToInsert, m_data + iIndex + iNumDel, iNumToMove * sizeof(hkxAttributeE5CD));
+    FUN_00d2cc70(m_data + iIndex + iNumToInsert, m_data + iIndex + iNumDel, iNumToMove * sizeof(hkxAttribute));
     hkConstructWithArrayE5CD(m_data + iIndex, iNumToInsert, pkInsert);
     m_iElementCount = iNewSize;
 }
@@ -217,28 +198,8 @@ int AttrLookup::GetAttributeMatrix(const char* apAttributeName, bool verbose, HM
     return 1;
 }
 
-struct RefObj
-{
-    void __thiscall FUN_00c905b0(void);
-};
-
-struct Inner
-{
-    void __thiscall FUN_00cb0c00(void);
-};
-
-struct Elem
-{
-    Inner inner;
-    RefObj* ref;
-};
-
-struct NewElem
-{
-    void __thiscall FUN_00e3f8e0(void);
-    int a;
-    int b;
-};
+// Default construction entry point at 0x00e3f8e0; this is passed in ECX.
+void __fastcall ConstructAttribute(hkxAttribute* destination);
 
 struct Allocator
 {
@@ -251,11 +212,11 @@ struct Allocator
 
 struct ElemArray
 {
-    Elem* data;
+    hkxAttribute* data;
     int size;
     int capacityAndFlags;
 
-    void __thiscall FUN_00e5cec0(int alloc, int zero, Elem* src, int n);
+    void __thiscall FUN_00e5cec0(int alloc, int zero, hkxAttribute* src, int n);
 };
 
 struct S00e5cce0_Class
@@ -270,27 +231,27 @@ struct S00e5cce0_Class
 void __cdecl FUN_00c908c0(int alloc, ElemArray* a, int bytes, int elemSize);
 Allocator* __cdecl FUN_00c85750(void);
 
-static __forceinline void destructElems(Elem* data, int n)
+static __forceinline void destructElems(hkxAttribute* data, int n)
 {
     for (int i = 0; i < n; i++)
     {
-        Elem& e = data[i];
-        if (e.ref != 0)
+        hkxAttribute& e = data[i];
+        if (e.m_uiFilterValue.m_pRetainedObject != 0)
         {
-            e.ref->FUN_00c905b0();
+            e.m_uiFilterValue.m_pRetainedObject->removeReference();
         }
-        e.ref = 0;
-        e.inner.FUN_00cb0c00();
+        e.m_uiFilterValue.m_pRetainedObject = 0;
+        e.m_name.FUN_00cb0c00();
     }
 }
 
-static __forceinline void constructElems(NewElem* p, int n)
+static __forceinline void constructElems(hkxAttribute* p, int n)
 {
     for (int i = 0; i < n; i++)
     {
         if (&p[i] != 0)
         {
-            p[i].FUN_00e3f8e0();
+            ConstructAttribute(&p[i]);
         }
     }
 }
@@ -312,13 +273,13 @@ S00e5cce0_Class& __thiscall S00e5cce0_Class::FUN_00e5cce0(const S00e5cce0_Class&
     }
 
     destructElems(s.data, s.size);
-    constructElems((NewElem*)(s.data + s.size), 0 - s.size);
+    constructElems(s.data + s.size, 0 - s.size);
     s.size = 0;
 
     int iCount = aOther.arr.size;
     if (iCount != 0)
     {
-        Elem* src = aOther.arr.data;
+        hkxAttribute* src = aOther.arr.data;
         int a = FUN_00c85750()->unk10;
         s.FUN_00e5cec0(a, 0, src, iCount);
     }

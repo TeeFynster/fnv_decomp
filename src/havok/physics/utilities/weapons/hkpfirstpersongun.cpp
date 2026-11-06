@@ -1,8 +1,56 @@
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+#define _INCLUDED_MM2
 
 // src/havok/physics/utilities/weapons/hkpfirstpersongun.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/utilities/weapons/hkpfirstpersongun.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../include/hkResult.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#define FNV64_HKVECTOR4Q_OWN_BODIES
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkVector4q.h"
+
+// Keep the generated reflection types separate from the shared SIMD types.
 #include "havok/hkpFirstPersonGun.h"
+
+template <typename T> void hkMemoryAllocator::_bufFree(void* p, int numElem)
+{
+    bufFree(p, numElem * sizeof(T));
+}
+
+// The router at 0x00c85750 has its heap allocator at +0x10 (hkMemoryRouter).
+
+
+template <class T> __forceinline void destroyGunArrayElements(T* t, int n)
+{
+    for (int i = 0; i < n; i++)
+        t[i].~T();
+}
+
+template <typename T> __forceinline void hkArrayBase<T>::clear()
+{
+    destroyGunArrayElements(m_data, m_iElementCount);
+    m_iElementCount = 0;
+}
+
+template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
+{
+    clear();
+    if ((m_iCapacityState & 0x80000000) == 0)
+        alloc._bufFree<T>(m_data, getCapacity());
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
+
+template <typename T, typename A> __forceinline hkArray<T, A>::~hkArray()
+{
+    this->_clearAndDeallocate(hkMemoryRouter::getInstance().heap());
+}
 
 struct FUN_00e463b0_cls
 {
@@ -45,27 +93,7 @@ struct FUN_00cb0b80
     char* m_kStringBuffer;
     FUN_00cb0b80(const char* s) throw();
 };
-template <typename T> struct hkArrayE466
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    hkArrayE466() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
-
-class hkRefObjE466
-{
-  public:
-    virtual ~hkRefObjE466();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    hkRefObjE466()
-    {
-        m_sReferenceCount = 1;
-    }
-};
-class FUN_00e46660 : public hkRefObjE466
+class FUN_00e46660 : public hkReferencedObject
 {
   public:
     volatile unsigned char m_type;
@@ -73,7 +101,7 @@ class FUN_00e46660 : public hkRefObjE466
     FUN_00cb0b80 m_name;
     unsigned char m_uiKeyboardKey;
     char unk11, unk12, unk13;
-    hkArrayE466<void*> m_kListeners;
+    hkArray<void*> m_kListeners;
     FUN_00e46660();
     virtual ~FUN_00e46660();
 };
@@ -82,37 +110,13 @@ FUN_00e46660::FUN_00e46660() : m_type(0), m_name(""), m_uiKeyboardKey(0x71)
 {}
 
 namespace fnv_00e466a0 {
-struct hkFinishFlagE466
-{
-    int m_bFinishing;
-};
-
 struct FUN_00cb0a70
 {
     char* m_kStringBuffer;
-    FUN_00cb0a70(hkFinishFlagE466 flag) throw();
+    FUN_00cb0a70(FinishingFlag flag) throw();
 };
 
-template <class T> struct hkArrayE466
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    hkArrayE466() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
-    {}
-};
-
-class hkRefObjE466
-{
-  public:
-    virtual ~hkRefObjE466();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    hkRefObjE466(hkFinishFlagE466 flag)
-    {}
-};
-
-class FUN_00e466a0 : public hkRefObjE466
+class FUN_00e466a0 : public hkReferencedObject
 {
   public:
     unsigned char m_type;
@@ -124,14 +128,14 @@ class FUN_00e466a0 : public hkRefObjE466
     char unk11;
     char unk12;
     char unk13;
-    hkArrayE466<void*> m_kListeners;
+    hkArray<void*> m_kListeners;
 
-    FUN_00e466a0(hkFinishFlagE466 flag);
+    FUN_00e466a0(FinishingFlag flag);
     virtual ~FUN_00e466a0();
 };
 
 // @fnv 0x00e466a0
-FUN_00e466a0::FUN_00e466a0(hkFinishFlagE466 flag) : hkRefObjE466(flag), m_name(flag)
+FUN_00e466a0::FUN_00e466a0(FinishingFlag flag) : hkReferencedObject(flag), m_name(flag)
 {
     if (flag.m_bFinishing)
         m_type = 0;
@@ -139,72 +143,6 @@ FUN_00e466a0::FUN_00e466a0(hkFinishFlagE466 flag) : hkRefObjE466(flag), m_name(f
 }  // namespace fnv_00e466a0
 
 namespace fnv_00e466e0 {
-class hkMemoryAllocatorE466
-{
-  public:
-    virtual ~hkMemoryAllocatorE466() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-    virtual void* AllocateBufferWithSize(int& iReqNumBytesInOut) throw();
-    virtual void ReturnMemory(void* p, int iNumBytes) throw();
-
-    template <typename T> void _bufFree(void* p, int aiNumElements)
-    {
-        ReturnMemory(p, aiNumElements * sizeof(T));
-    }
-};
-
-struct hkMemoryRouterE466
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorE466* m_pStreamAllocator;
-    hkMemoryAllocatorE466& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterE466& __cdecl FUN_00c85750();
-
-template <class T> __forceinline void destructE466(T* t, int n)
-{
-    for (int i = 0; i < n; i++)
-        t[i].~T();
-}
-
-template <class T> class hkArrayE466
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-
-    __forceinline ~hkArrayE466()
-    {
-        ClearAndRelease(FUN_00c85750().heap());
-    }
-    __forceinline void clear()
-    {
-        destructE466(m_data, m_iElementCount);
-        m_iElementCount = 0;
-    }
-    __forceinline void ClearAndRelease(hkMemoryAllocatorE466& kAlloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc._bufFree<T>(m_data, getCapacity());
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
-
 class FUN_00cb0c00_class
 {
   public:
@@ -217,28 +155,13 @@ class FUN_00cb0c00_class
     }
 };
 
-struct FUN_00d1df70
-{
-    void FUN_00c90510() throw();
-    void removeReference() throw();
-};
-
-class hkReferencedObjectE466
-{
-  public:
-    virtual ~hkReferencedObjectE466() throw()
-    {}
-    hkUint16 m_usMemSizeAndFlags;
-    hkInt16 m_sReferenceCount;
-};
-
-class FUN_00e466e0_class : public hkReferencedObjectE466
+class FUN_00e466e0_class : public hkReferencedObject
 {
   public:
     int m_08;
     FUN_00cb0c00_class m_name;
     int m_10;
-    hkArrayE466<FUN_00d1df70*> m_children;
+    hkArray<hkReferencedObject*> m_children;
 
     virtual ~FUN_00e466e0_class() throw();
 };
@@ -259,24 +182,6 @@ struct FUN_00e466e0_Obj
 
 class FUN_00e46750_Obj;
 
-struct VirtualObj
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08(FUN_00e46750_Obj* a, int b);
-};
-
-struct FUN_00c85750_Obj
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    VirtualObj* unk10;
-};
-
-FUN_00c85750_Obj* __cdecl FUN_00c85750();
-
 class FUN_00e46750_Obj : public hkpFirstPersonGun
 {
   public:
@@ -291,66 +196,48 @@ int FUN_00e46750_Obj::FUN_00e46750(unsigned char flag)
 
     if (flag & 1)
     {
-        FUN_00c85750_Obj* audio = FUN_00c85750();
-        audio->unk10->vf08(this, m_usMemSizeAndFlags);
+        hkMemoryRouter* router = &hkMemoryRouter::getInstance();
+        router->m_heap->blockFree(this, m_usMemSizeAndFlags);
     }
 
     return (int)this;
 }
 
-#include <xmmintrin.h>
+
 namespace fnv_00e464e0 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
+using ::__m128;
+using ::LocalM128;
+// Exe 0x00e464e0 FUN_00e464e0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+
+extern "C" LocalM128 _mm_setzero_ps(void);
+extern "C" LocalM128 _mm_unpackhi_ps(LocalM128 a, LocalM128 b);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128 a, LocalM128 b, unsigned int imm);
+
+}  // namespace fnv_00e464e0
+
+// Use the original intrinsic view so SIMD stores retain their original aliasing.
+__forceinline void hkVector4q::operator=(const hkVector4q& v)
 {
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setzero_ps(void);
-extern "C" __m128 _mm_unpackhi_ps(__m128 a, __m128 b);
-extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
+    typedef fnv_00e464e0::LocalM128 Quad;
+    *reinterpret_cast<Quad*>(this) = *reinterpret_cast<const Quad*>(&v);
+}
 
-struct hkMemoryAllocator
+__forceinline void hkVector4q::setZero4()
 {
-    virtual void v00();
-    virtual void* allocateChunk(int nbytes);
-};
+    typedef fnv_00e464e0::LocalM128 Quad;
+    *reinterpret_cast<Quad*>(this) = fnv_00e464e0::_mm_setzero_ps();
+}
 
-struct hkMemoryRouterStub
+__forceinline void hkVector4q::setXYZ(const hkVector4q& v)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocator* m_pThreadAllocator;
-    hkMemoryAllocator& heap()
-    {
-        return *m_pThreadAllocator;
-    }
-};
-hkMemoryRouterStub* FUN_00c85750();
+    typedef fnv_00e464e0::LocalM128 Quad;
+    Quad& dest = *reinterpret_cast<Quad*>(this);
+    const Quad& src = *reinterpret_cast<const Quad*>(&v);
+    dest = fnv_00e464e0::_mm_shuffle_ps(src, fnv_00e464e0::_mm_unpackhi_ps(src, dest), 0xc4);
+}
 
-struct hkVector4q
-{
-    __m128 m_vComponents;
-
-    void operator=(const hkVector4q& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    void setZero4()
-    {
-        m_vComponents = _mm_setzero_ps();
-    }
-    float& operator()(int i)
-    {
-        return m_vComponents.m128_f32[i];
-    }
-    void setXYZ(const hkVector4q& v)
-    {
-        m_vComponents = _mm_shuffle_ps(v.m_vComponents, _mm_unpackhi_ps(v.m_vComponents, m_vComponents), 0xc4);
-    }
-};
-
+namespace fnv_00e464e0 {
 extern hkVector4q DAT_01267e30;
 extern float DAT_0104da48;
 extern float DAT_0104da4c;
@@ -387,7 +274,7 @@ struct hkpSphereShapeq
 
     static void* operator new(unsigned int nbytes)
     {
-        hkpSphereShapeq* p = (hkpSphereShapeq*)FUN_00c85750()->heap().allocateChunk(nbytes);
+        hkpSphereShapeq* p = (hkpSphereShapeq*)hkMemoryRouter::getInstance().heap().blockAlloc(nbytes);
         p->m_usMemSizeAndFlags = (unsigned short)nbytes;
         return p;
     }
@@ -513,11 +400,6 @@ struct LinearCastResult
     void* m_pRigidBody;
 };
 
-enum hkResult
-{
-    HK_SUCCESS = 0,
-    HK_FAILURE = 1
-};
 
 // Performs a sphere linear cast in the physics world and stores the hit point, normal, rigid body, and shape key in the result.
 // @fnv 0x00e464e0

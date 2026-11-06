@@ -2,50 +2,17 @@
 // src/havok/common/base/math/swepttransform/hkswepttransform.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/math/swepttransform/hkswepttransform.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkSweptTransform.h"
+#include "../../../../../../include/hkVector4q.h"
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_add_ps(__m128 a, __m128 b);
-    __m128 _mm_sub_ps(__m128 a, __m128 b);
-    __m128 _mm_mul_ps(__m128 a, __m128 b);
-    __m128 _mm_sub_ss(__m128 a, __m128 b);
-    __m128 _mm_mul_ss(__m128 a, __m128 b);
-    __m128 _mm_rsqrt_ss(__m128 a);
-    __m128 _mm_cmpeq_ss(__m128 a, __m128 b);
-    __m128 _mm_andnot_ps(__m128 a, __m128 b);
-    __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm8);
-    __m128 _mm_set_ss(float a);
-    __m128 _mm_set_ps1(float a);
-}
 
 static const __declspec(align(16)) float g_quadOne[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
-struct hkRotationq;
-
-struct hkVector4q
+__forceinline void hkVector4q::setInterpolate4(const hkVector4q& a, const hkVector4q& b, const hkVector4q& t)
 {
-    __m128 m_vComponents;
-
-    __forceinline void setInterpolate4(const hkVector4q& a, const hkVector4q& b, const hkVector4q& t)
-    {
-        const __m128 one = *(const __m128*)g_quadOne;
-        m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(one, t.m_vComponents), a.m_vComponents),
-                                   _mm_mul_ps(b.m_vComponents, t.m_vComponents));
-    }
-
-    __forceinline void SetRotatedDirection(const hkRotationq& r, const hkVector4q& b);
-
-    __forceinline void sub4(const hkVector4q& a)
-    {
-        m_vComponents = _mm_sub_ps(m_vComponents, a.m_vComponents);
-    }
-};
+    const __m128 one = *(const __m128*)g_quadOne;
+    m_vComponents = _mm_add_ps(_mm_mul_ps(_mm_sub_ps(one, t.m_vComponents), a.m_vComponents),
+                               _mm_mul_ps(b.m_vComponents, t.m_vComponents));
+}
 
 struct hkQuaternionq
 {
@@ -69,6 +36,7 @@ struct hkQuaternionq
     }
 };
 
+// local form of hkRotation: 0x00cf22d0 needs inline column access and original SIMD aliases; shared rotation changes 26 exe bytes.
 struct hkRotationq
 {
     hkVector4q m_kColumn0;
@@ -99,6 +67,7 @@ __forceinline void hkVector4q::SetRotatedDirection(const hkRotationq& r, const h
     m_vComponents = _mm_add_ps(_mm_add_ps(r0, r1), r2);
 }
 
+// local form of hkSweptTransform: 0x00cf22d0 needs the original inline q-vector interpolation form; canonical swept member does not reproduce exe bytes.
 class hkSweptTransformq
 {
   public:
@@ -131,15 +100,16 @@ void hkSweptTransformq::Evaluate(float time, hkTransformq& transformOut) const
 }
 
 namespace fnv_00cf2410 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00cf2410 FUN_00cf2410: retain this LocalM128 view; the CRT type does not reproduce this function.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
-extern "C" __m128 _mm_setzero_ps(void);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setzero_ps(void);
 struct Swept_00cf2410_Sub
 {
-    void FUN_00cf2280(__m128 const* a, __m128 const* b);
+    void FUN_00cf2280(LocalM128 const* a, LocalM128 const* b);
 };
 struct Swept_00cf2410_Cb
 {
@@ -159,7 +129,7 @@ struct Swept_00cf2410
     int unk24;
     int unk28;
     int unk2C;
-    __m128 m_vContactPosition;
+    LocalM128 m_vContactPosition;
     int unk40;
     int unk44;
     int unk48;
@@ -180,16 +150,16 @@ struct Swept_00cf2410
     int unk84;
     int unk88;
     int unk8C;
-    __m128 m_vVector;
+    LocalM128 m_vVector;
     float m_inverseTime;
-    void FUN_00cf2410(__m128 const& position, __m128 const& rotation);
+    void FUN_00cf2410(LocalM128 const& position, LocalM128 const& rotation);
 };
 // Passes position and rotation to one method, passes rotation to another, stores position, sets m_inverseTime to 1.0f, and zeroes m_vVector.
 // @fnv 0x00cf2410
-void Swept_00cf2410::FUN_00cf2410(__m128 const& position, __m128 const& rotation)
+void Swept_00cf2410::FUN_00cf2410(LocalM128 const& position, LocalM128 const& rotation)
 {
     ((Swept_00cf2410_Sub*)((char*)this + 0x40))->FUN_00cf2280(&position, &rotation);
-    ((Swept_00cf2410_Cb*)this)->FUN_00cb2d90(const_cast<__m128*>(&rotation));
+    ((Swept_00cf2410_Cb*)this)->FUN_00cb2d90(const_cast<LocalM128*>(&rotation));
     m_vContactPosition = position;
     m_inverseTime = 1.0f;
     m_vVector = _mm_setzero_ps();

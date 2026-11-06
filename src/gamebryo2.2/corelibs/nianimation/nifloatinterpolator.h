@@ -1,13 +1,4 @@
-// Authored unit-local declarations for
-// gamebryo2.2/corelibs/nianimation/nifloatinterpolator.cpp.
-//
-// NiInterpolator/NiKeyBasedInterpolator/NiFloatInterpolator/NiFloatData member
-// CodeView layouts, member order and layout asserts unchanged); only the
-// virtuals actually used by this unit's bytes are declared, so the
-// NiFloatInterpolator vtable is the symbol bound in manifest.json.
-// NiStream exposes only m_pUnderlyingStream (+0x24C) and DeserializeObject, and the
-// NiBinaryStream read idiom plus the NiRefObject IncRefCount/DecRefCount
-// bodies follow the accepted corelibs/nimain/nitimecontroller.cpp unit.
+// Unit-local NiFloatInterpolator declarations and inline bodies for shared classes.
 #ifndef FNV_NIFLOATINTERPOLATOR_UNIT_H
 #define FNV_NIFLOATINTERPOLATOR_UNIT_H
 
@@ -21,164 +12,61 @@
 
 #define FNV_FORCEINLINE __forceinline
 
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiFloatData.h"
+#include "../../../../include/NiInterpolator.h"
+#include "../../../../include/NiKeyBasedInterpolator.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiRefObject.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/NiPointer.h"
+
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(volatile long* value);
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile long* value);
 
-class NiStream;
-
-// ---------------------------------------------------------------------------
-// NiMemObject / NiRefObject.
-// ---------------------------------------------------------------------------
-class NiMemObject
+inline void NiRefObject::IncRefCount()
 {
-  public:
-    virtual ~NiMemObject();
-};
-
-class NiRefObject : public NiMemObject
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
 {
-  public:
-    unsigned int m_uiRefCount;  // +0x4
-    virtual ~NiRefObject();
-    virtual void DeleteThis();
-    FNV_FORCEINLINE void IncRefCount()
-    {
-        InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
-    }
-    FNV_FORCEINLINE void DecRefCount()
-    {
-        if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
-            DeleteThis();
-    }
-};
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
 
-// ---------------------------------------------------------------------------
-// NiObject.
-// ---------------------------------------------------------------------------
-class NiObject : public NiRefObject
+template <class T> FNV_FORCEINLINE NiPointer<T>::NiPointer(T* pObject) : m_pObject(pObject)
 {
-  public:
-    virtual ~NiObject();
-    virtual void LoadBinary(NiStream& kStream);
-};
-
-// ---------------------------------------------------------------------------
-// NiPointer (single reference counted pointer). The destructor is instantiated
-// by the owning units; this unit only needs the retaining constructor, and a
-// non-trivial destructor here would add an unwind funclet to the covered
-// NiFloatInterpolator constructor, which the original bytes do not have.
-// ---------------------------------------------------------------------------
-template <class T> class NiPointer
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> FNV_FORCEINLINE NiPointer<T>::NiPointer() : m_pObject(0)
+{}
+template <class T> inline NiPointer<T>::~NiPointer()
 {
-  public:
-    T* m_pObject;
-
-    FNV_FORCEINLINE NiPointer(T* pObject = 0) : m_pObject(pObject)
-    {
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-};
-
-// ---------------------------------------------------------------------------
-// NiStream (only what this unit uses).
-// ---------------------------------------------------------------------------
-class NiBinaryStream : public NiMemObject
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+template <class T> inline NiPointer<T>::operator T*() const
 {
-  public:
-    typedef unsigned int (*NIBINARYSTREAM_READFN)(NiBinaryStream* pkThis, void* pvBuffer, unsigned int uiBytes,
-                                                  unsigned int* puiComponentSizes, unsigned int uiNumComponents);
+    return m_pObject;
+}
 
-    unsigned int m_uiStreamFlags;     // +0x4
-    NIBINARYSTREAM_READFN m_pfnRead;  // +0x8
-
-    FNV_FORCEINLINE unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-};
-
-class NiStream
+FNV_FORCEINLINE unsigned int NiBinaryStream::BinaryRead(void* pvBuffer, unsigned int uiTotalBytes,
+    unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-  public:
-    NiObject* DeserializeObject();
-
-    unsigned char m_auPadStreamHeader[0x24C];
-    NiBinaryStream* m_pUnderlyingStream;  // +0x24C
-};
-FNV_NIFI_OFFSET_ASSERT(NiStream, m_pUnderlyingStream, 0x24C);
-
-// ---------------------------------------------------------------------------
-// NiFloatData.
-// ---------------------------------------------------------------------------
-class TimedAnimationKey;
-
-enum NiAnimationKey__KeyType
+    unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    m_uiAbsoluteCurrentPos += uiBytesRead;
+    return uiBytesRead;
+}
+FNV_FORCEINLINE unsigned int NiBinaryStream::BinaryWrite(const void* pvBuffer, unsigned int uiTotalBytes,
+    unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-    NiAnimationKey__KeyType_NOINTERP = 0,
-    NiAnimationKey__KeyType_LINKEY = 1,
-    NiAnimationKey__KeyType_BEZKEY = 2,
-    NiAnimationKey__KeyType_TCBKEY = 3,
-    NiAnimationKey__KeyType_EULERKEY = 4,
-    NiAnimationKey__KeyType_STEPKEY = 5,
-    NiAnimationKey__KeyType_NUMKEYTYPES = 6
-};
+    unsigned int uiBytesWritten = m_pfnWrite(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    m_uiAbsoluteCurrentPos += uiBytesWritten;
+    return uiBytesWritten;
+}
 
-class NiFloatData : public NiObject
-{
-  public:
-    unsigned int m_uiNumKeys;                // +0x8, 4 bytes
-    TimedAnimationKey* m_pKeyArray;          // +0xC, 4 bytes
-    NiAnimationKey__KeyType m_eRequestType;  // +0x10, 4 bytes
-    unsigned char m_ucKeyDataSize;           // +0x14, 1 bytes
-    unsigned char m_auPadKeySize[3];
-};
-FNV_NIFI_SIZE_ASSERT(NiFloatData, 24);
-FNV_NIFI_OFFSET_ASSERT(NiFloatData, m_uiNumKeys, 8);
-FNV_NIFI_OFFSET_ASSERT(NiFloatData, m_pKeyArray, 12);
-FNV_NIFI_OFFSET_ASSERT(NiFloatData, m_eRequestType, 16);
-FNV_NIFI_OFFSET_ASSERT(NiFloatData, m_ucKeyDataSize, 20);
-
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-class NiInterpolator : public NiObject
-{
-  public:
-    virtual ~NiInterpolator();
-    virtual void LoadBinary(NiStream& kStream);
-
-    float m_fLastTime;  // +0x8, 4 bytes
-};
-FNV_NIFI_SIZE_ASSERT(NiInterpolator, 12);
-FNV_NIFI_OFFSET_ASSERT(NiInterpolator, m_fLastTime, 8);
-
-class NiKeyBasedInterpolator : public NiInterpolator
-{
-  public:
-    NiKeyBasedInterpolator();
-    virtual ~NiKeyBasedInterpolator();
-    virtual void LoadBinary(NiStream& kStream);
-};
-FNV_NIFI_SIZE_ASSERT(NiKeyBasedInterpolator, 12);
-
-class NiFloatInterpolator : public NiKeyBasedInterpolator
-{
-  public:
-    NiFloatInterpolator(NiFloatData* pkFloatData);
-    virtual ~NiFloatInterpolator();
-    virtual void LoadBinary(NiStream& kStream);
-
-    float m_fFloatValue;                   // +0xC, 4 bytes
-    NiPointer<NiFloatData> m_spFloatData;  // +0x10, 4 bytes
-    unsigned int m_uiLastKeyIndex;         // +0x14, 4 bytes
-};
-FNV_NIFI_SIZE_ASSERT(NiFloatInterpolator, 24);
-FNV_NIFI_OFFSET_ASSERT(NiFloatInterpolator, m_fFloatValue, 12);
-FNV_NIFI_OFFSET_ASSERT(NiFloatInterpolator, m_spFloatData, 16);
-FNV_NIFI_OFFSET_ASSERT(NiFloatInterpolator, m_uiLastKeyIndex, 20);
+#include "../../../../include/NiFloatInterpolator.h"
 
 // Release-mode diagnostics: asserts vanish, the verified read still runs.
 #define NIASSERT(x) ((void)0)
@@ -193,7 +81,7 @@ template <class T> FNV_FORCEINLINE void NiBinaryStreamLoad(NiBinaryStream& is, T
 
 template <class T> FNV_FORCEINLINE void ReadBinaryValue(NiStream& kStream, T& value)
 {
-    NiBinaryStreamLoad(*kStream.m_pUnderlyingStream, &value, 1);
+    NiBinaryStreamLoad(*kStream.m_pkIstr, &value, 1);
 }
 
 #endif

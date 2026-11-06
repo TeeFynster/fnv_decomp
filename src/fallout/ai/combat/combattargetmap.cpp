@@ -1,6 +1,28 @@
 // fallout/ai/combat/combattargetmap.cpp: CombatTargetMap, DelStandIn (7 functions)
 
 #include "combattargetmap_decls.h"
+#include "../../../../include/BGSSaveLoadChangesMap.h"
+#include "../../../../include/BGSReconstructFormsInAllFilesMap.h"
+#include "../../../../include/CombatTargetMap.h"
+#include "../../../../include/Actor.h"
+#include "../../../../include/AutoMemHelper.h"
+// CombatThreatRecord_combattargetmap: local type (was include/CombatThreatRecord.h, which had no evidence of one real class); its methods are 0x009a4f40 SandBoxChoiceListItem::InitLoadGame, 0x009a5170 CombatThreat::IsExpired, 0x009a5e50 NiTMapBase<DFALL<NiTMapItem<unsigned int,CombatThreat *> >,unsigned int,CombatThreat *>::~NiTMapBase<DFALL<NiTMapItem<unsigned int,CombatThreat *> >,unsigned int,CombatThreat *>
+class BGSLoadGameBuffer;
+
+class CombatThreatRecord_combattargetmap
+{
+public:
+    void* vfn_00;
+    int pad_04;
+    void* p_08;
+
+    ~CombatThreatRecord_combattargetmap();
+    bool IsXLessThan(float);
+    void LoadGame(BGSLoadGameBuffer*);
+    void __thiscall FUN_009a5e50();
+};
+#include "../../../../include/DummyPointerMap.h"
+#include "../../../../include/GO.h"
 // Locks the map, iterates every entry, and deletes threats whose IsXLessThan(time) check passes, removing them by key.
 // @fnv 0x009a50b0
 void CombatTargetMap::ResetTargetMap()
@@ -8,12 +30,12 @@ void CombatTargetMap::ResetTargetMap()
     void* pIterPos = ((BGSReconstructFormsInAllFilesMap*)this)->GetFirstPos();
     if (pIterPos)
     {
-        lock.AcquireLock();
+        ((CombatTargetMapLock*)((char*)this + 0x10))->AcquireLock();
         float time = Actor::GetActorScale();
         while (pIterPos)
         {
             unsigned int key = 0;
-            CombatThreatRecord* threat = 0;
+            CombatThreatRecord_combattargetmap* threat = 0;
             ((BGSReconstructFormsInAllFilesMap*)this)
                 ->GetNext(pIterPos, (TESFile*&)key, (BGSReconstructFormsInFileMap*&)threat);
             if (threat && threat->IsXLessThan(time))
@@ -22,7 +44,7 @@ void CombatTargetMap::ResetTargetMap()
                 ((BGSSaveLoadChangesMap*)this)->RemoveAt(key);
             }
         }
-        lock.FUN_00aa62e0();
+        ((CombatTargetMapLock*)((char*)this + 0x10))->FUN_00aa62e0();
     }
 }
 
@@ -80,12 +102,6 @@ struct FUN_009a42f0
     FUN_009a42f0(int, int);
     ~FUN_009a42f0();
 };
-struct GO
-{
-    int _v;
-    GO(int);
-    ~GO();
-};
 struct FUN_009a40c0 : FUN_009a42f0
 {
     GO m;
@@ -99,35 +115,19 @@ FUN_009a40c0::FUN_009a40c0() : FUN_009a42f0(5, 0), m(0)
 namespace fnv_009a3fe0 {
 void* __cdecl operator new(unsigned int);
 
-struct AutoMemHelper
-{
-    int pad;
-    AutoMemHelper(int, bool, const char*, int);
-    ~AutoMemHelper();
-};
-
-template <typename T, int N> struct BSSimpleArray
+// Unit-local view of BSSimpleArray for 0x009a3fe0 (namespace fnv_009a3fe0): built on the shared BSSimpleArray, that code does not compile or does not match.
+template <typename T, int N> struct BSSimpleArray_009a3fe0
 {
     unsigned int Add(T&);
 };
 
-struct FUN_009a40c0 : BSSimpleArray<void*, 1024>
+struct FUN_009a40c0 : BSSimpleArray_009a3fe0<void*, 1024>
 {
     char pad[0x14];
     FUN_009a40c0();
 };
 
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&);
-};
-
-struct SetAtHelper : DummyPointerMap
-{
-    void SetAt(unsigned int, unsigned int);
-};
-
-struct FUN_009a3fe0_struct : SetAtHelper
+struct FUN_009a3fe0_struct : DummyPointerMap
 {
     void AddAttackerToTarget(void* apTarget, void* apAttacker);
 };
@@ -152,10 +152,7 @@ void FUN_009a3fe0_struct::AddAttackerToTarget(void* apTarget, void* apAttacker)
 
 extern void* DAT_0108e1e8;
 
-struct Actor;
 struct ActorCombatTargetData;
-struct TESFile;
-struct BGSReconstructFormsInFileMap;
 
 struct MyMap
 {

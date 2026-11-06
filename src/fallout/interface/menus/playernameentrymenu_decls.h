@@ -4,10 +4,3 @@
 
 const char* __cdecl FUN_007ab810();
 void __cdecl FUN_007ab7c0();
-
-class PlayerNameEntryMenu
-{
-  public:
-    void UpdateDialog();
-    void Finish(const char* name);
-};

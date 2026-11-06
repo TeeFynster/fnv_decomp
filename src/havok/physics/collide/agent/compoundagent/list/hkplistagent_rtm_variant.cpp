@@ -3,97 +3,18 @@
 
 // src/havok/physics/collide/agent/compoundagent/list/hkplistagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/compoundagent/list/hkplistagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-extern "C" void __cdecl FUN_00da3510(void*, void*);
-struct hkAgent1nMachine
-{
-    void __thiscall InvalidateTim(void*);
-};
-struct hkpListAgent
-{
-    char m0[0x10];
-    void __thiscall FUN_00d36850(void* arg);
-};
-extern "C" void __cdecl FUN_00d36990(int, int, int, int);
-void __stdcall FUN_00d36b00(int aiArg1, int aiArg2, int aiArg3, int aiArg4);
-extern "C" void __cdecl FUN_00da35f0(void*, float, float, int);
-struct Owner
-{
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    void FUN_00d36870(float a1, float a2, int a3);
-};
-void __cdecl FUN_00d36920(void* a, void* b, void* c, void* d);
-void __stdcall FUN_00d36940(void* apArg1, void* apArg2, void* apArg3, void* apArg4);
-void __cdecl FUN_00d36930(int a1, int a2, int a3, int a4, int a5);
-void __stdcall FUN_00d36960(int aiArg1, int aiArg2, int aiArg3, int aiArg4, int aiArg5);
-extern "C" void __cdecl FUN_00da42b0(void* a, int b, int c, int d);
-struct FUN_00d36820_cls
-{
-    virtual void v00(int a);
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    void FUN_00d36820(int a1);
-};
-struct S_00d368a0_Arg
-{
-    int unk00;
-    int unk04;
-    int m_field08;
-};
-void __cdecl FUN_00d97250(void* sub, int field08, S_00d368a0_Arg* arg);
-struct S_00d368a0
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int m_sub10;
+#include "../../../../../../../include/hkpListAgent.h"
 
-    void FUN_00d368a0(S_00d368a0_Arg* a, int unused);
-};
-extern "C" void __cdecl FUN_00da48e0(void*, void*);
-struct VirtTarget
-{
-    virtual int v00();
-    virtual int v04();
-    virtual int v08();
-    virtual int v0c();
-    virtual int v10();
-};
-struct CallArgs
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-};
-struct FUN_00d368c0_cls
-{
-    int unk00;
-    int unk04;
-    int m_08;
-    int unk0C;
-    int unk10;
-    void FUN_00d368c0(void* a1, void* a2, void* a3, void* a4);
-};
-
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00d369a0 vf03: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-};
-extern "C" __m128 _mm_load_ss(const float*);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_load_ss(const float*);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
 
 extern "C" void _ReadWriteBarrier();
 struct S00d369a0_ShapeBase
@@ -135,20 +56,20 @@ struct S00d369a0_Bits : S00d369a0_ShapeBase, S00d369a0_Container
 
 struct S00d369a0_Motion
 {
-    __m128 c0, c1, c2, translation;
-    __m128 v40;
+    LocalM128 c0, c1, c2, translation;
+    LocalM128 v40;
     union
     {
-        __m128 v50;
+        LocalM128 v50;
         struct
         {
             float x50, y54, z58, f5c;
         };
     };
-    __m128 v60, v70, v80;
+    LocalM128 v60, v70, v80;
     union
     {
-        __m128 v90;
+        LocalM128 v90;
         struct
         {
             float x90, y94, z98, f9c;
@@ -173,7 +94,7 @@ struct S00d369a0_Config
 
 struct S00d369a0_Transform
 {
-    __m128 c0, c1, c2, translation;
+    LocalM128 c0, c1, c2, translation;
     void __thiscall FUN_00cb22f0(S00d369a0_Motion* a, S00d369a0_Motion* b);
 };
 struct S00d369a0_ProcessInput
@@ -185,23 +106,21 @@ struct S00d369a0_ProcessInput
     void* cache;
     int unk14, unk18, unk1C;
     S00d369a0_Transform transform;
-    __m128 unk60;
-    __m128 tim;
+    LocalM128 unk60;
+    LocalM128 tim;
 };
 extern "C" void* __cdecl FUN_00c85750();
 extern "C" void __cdecl FUN_00da4aa0(void* a, S00d369a0_ProcessInput* b, S00d369a0_Container* c, void* d, int e);
 extern "C" unsigned int _rotl(unsigned int, int);
 extern "C" void _ReadWriteBarrier();
-struct S00d369a0_ListAgent
-{
-    int unk00, unk04;
-    void* m08;
-    int unk0C, track10;
-    void FUN_00d369a0(S00d369a0_Body* a1, S00d369a0_Body* a2, S00d369a0_Config* a3, int a4);
-};
 // @fnv 0x00d369a0
-void S00d369a0_ListAgent::FUN_00d369a0(S00d369a0_Body* a1, S00d369a0_Body* a2, S00d369a0_Config* a3, int a4)
+void hkpListAgent::vf03(const hkpCdBody& bodyA, const hkpCdBody& bodyB,
+                        const CollisionAgentContext& context, hkpCdBodyPairCollector& collector)
 {
+    S00d369a0_Body* a1 = (S00d369a0_Body*)&bodyA;
+    S00d369a0_Body* a2 = (S00d369a0_Body*)&bodyB;
+    S00d369a0_Config* a3 = (S00d369a0_Config*)&context;
+    int a4 = (int)&collector;
     S00d369a0_ProcessInput input;
     S00d369a0_Bits* bits = a2->m00;
     input.b = a2;
@@ -209,11 +128,11 @@ void S00d369a0_ListAgent::FUN_00d369a0(S00d369a0_Body* a1, S00d369a0_Body* a2, S
     input.a = a1;
     float dt = a3->f58;
     input.config = a3;
-    input.cache = this->m08;
+    input.cache = this->m_pContactManager;
     S00d369a0_Motion* o = a1->m08;
     S00d369a0_Motion* p = a2->m08;
-    __m128 d0 = _mm_sub_ps(o->v40, o->v50);
-    __m128 d1 = _mm_sub_ps(p->v50, p->v40);
+    LocalM128 d0 = _mm_sub_ps(o->v40, o->v50);
+    LocalM128 d1 = _mm_sub_ps(p->v50, p->v40);
     float f0 = dt * o->f5c;
     float f1 = dt * p->f5c;
     input.tim = _mm_mul_ps(_mm_shuffle_ps(_mm_load_ss(&f0), _mm_load_ss(&f0), 0), d0);
@@ -232,6 +151,6 @@ void S00d369a0_ListAgent::FUN_00d369a0(S00d369a0_Body* a1, S00d369a0_Body* a2, S
             dst[n++] = i;
     }
     dst[n] = 0xffffffff;
-    FUN_00da4aa0(&this->track10, &input, bits, dst, a4);
+    FUN_00da4aa0(this->m0 + 4, &input, bits, dst, a4);
     *(unsigned int*)FUN_00c85750() = (unsigned int)dst;
 }

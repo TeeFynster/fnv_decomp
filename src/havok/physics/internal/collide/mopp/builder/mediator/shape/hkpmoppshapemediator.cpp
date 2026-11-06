@@ -1,4 +1,7 @@
 
+#include "../../../../../../../../../include/hkpShapeContainer.h"
+
+
 // src/havok/physics/internal/collide/mopp/builder/mediator/shape/hkpmoppshapemediator.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/build/20091222_000100_aianbecldeph/source/physics/internal/collide/mopp/builder/mediator/shape/hkpmoppshapemediator.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
@@ -25,14 +28,6 @@ void __stdcall FUN_00dd5260(FUN_00dd5260_T* pSrc, int a1, int a2, int a3, FUN_00
     *pDst = *pSrc;
 }
 
-struct FUN_00dd5210_Interface
-{
-    virtual void First();
-    virtual void Second();
-    virtual int GetValue();
-    virtual int UseValue(int value);
-};
-
 struct FUN_00dd5210_Record
 {
     int value;
@@ -46,17 +41,17 @@ struct FUN_00dd5210_Object
 {
     int unk00;
     int unk04;
-    FUN_00dd5210_Interface* unk08;
+    hkpShapeContainer* unk08;
     int unk0c;
     void FillRecords(FUN_00dd5210_Record* records);
 };
 
-// Fills count records with successive values from unk08, starting at GetValue() and advancing via UseValue().
+// Fills count records with successive shape keys from unk08.
 // @fnv 0x00dd5210
 void FUN_00dd5210_Object::FillRecords(FUN_00dd5210_Record* records)
 {
     int count = unk0c;
-    int value = unk08->GetValue();
+    hkpShapeKey value = unk08->GetFirstKey();
     if (count > 0)
     {
         do
@@ -64,17 +59,11 @@ void FUN_00dd5210_Object::FillRecords(FUN_00dd5210_Record* records)
             records->value = value;
             records->reserved = 0;
             ++records;
-            value = unk08->UseValue(value);
+            value = unk08->GetNextShapeKey(value);
             --count;
         } while (count != 0);
     }
 }
-
-struct SpawnedSource
-{
-    virtual void First();
-    virtual int Second();
-};
 
 struct SpawnedBase
 {
@@ -87,20 +76,20 @@ class FUN_00dd52a0_cls : public SpawnedBase
   public:
     short unk04;
     unsigned short m_flag06;
-    SpawnedSource* m_src08;
+    hkpShapeContainer* m_src08;
     int m_result0c;
 
-    FUN_00dd52a0_cls* InitFromSource(SpawnedSource* src);
+    FUN_00dd52a0_cls* InitFromSource(hkpShapeContainer* src);
 };
 
-// Sets m_flag06 to 1, destroys the base, stores src in m_src08, stores src->Second() in m_result0c and returns this.
+// Sets m_flag06 to 1, destroys the base, stores src and its child shape count, and returns this.
 // @fnv 0x00dd52a0
-FUN_00dd52a0_cls* FUN_00dd52a0_cls::InitFromSource(SpawnedSource* pSource)
+FUN_00dd52a0_cls* FUN_00dd52a0_cls::InitFromSource(hkpShapeContainer* pSource)
 {
     m_flag06 = 1;
     this->SpawnedBase::~SpawnedBase();
     m_src08 = pSource;
-    m_result0c = pSource->Second();
+    m_result0c = pSource->GetNumChildShapes();
     return this;
 }
 
@@ -156,11 +145,11 @@ int FnvCpu_FUN_00dd5290_CpuObject::FUN_00dd5290()
     return value;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe-matched intrinsic packet; __m128 remains an ABI compatibility alias.
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 extern "C"
 {
     __m128 _mm_xor_ps(__m128, __m128);
@@ -168,43 +157,13 @@ extern "C"
 
 extern __m128 DAT_010c44d0;
 
-typedef float hkReal;
-typedef unsigned int hkpShapeKey;
+#include "../../../../../../../../../include/hkVector4.h"
+__forceinline void hkVector4::setNeg4(const hkVector4& v) { m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c44d0); }
 
-struct __declspec(align(16)) hkVector4
-{
-    __m128 m_vComponents;
-    __forceinline void operator=(const hkVector4& v)
-    {
-        m_vComponents = v.m_vComponents;
-    }
-    __forceinline void setNeg4(const hkVector4& v)
-    {
-        m_vComponents = _mm_xor_ps(v.m_vComponents, DAT_010c44d0);
-    }
-};
 
 struct __declspec(align(16)) hkpShapeBuffer
 {
     int m_data[128];
-};
-
-struct hkpShape
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual hkReal getMaximumProjection(const hkVector4& direction) const;
-};
-
-struct hkpShapeContainer
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual const hkpShape* GetShapeForKey(hkpShapeKey key, hkpShapeBuffer& buffer) const;
 };
 
 struct ProjectionSample

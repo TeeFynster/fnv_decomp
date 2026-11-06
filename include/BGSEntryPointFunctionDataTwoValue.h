@@ -1,18 +1,22 @@
-// Source layout: BGSEntryPointFunctionDataTwoValue. PC corrections are in generate_headers.py.
-#ifndef FNV_BGSENTRYPOINTFUNCTIONDATATWOVALUE_H
-#define FNV_BGSENTRYPOINTFUNCTIONDATATWOVALUE_H
+#pragma once
 
-#include "layout_support.h"
 #include "BGSEntryPointFunctionData.h"
-#pragma pack(push, 4)
+
 class BGSEntryPointFunctionDataTwoValue : public BGSEntryPointFunctionData
 {
-  public:
-    float EntryPointTwoValueFunctionData;  // +0x4
-    float fSecondFunctionValue;            // +0x8
+public:
+    BGSEntryPointFunctionDataTwoValue();
+
+    float EntryPointTwoValueFunctionData;
+    float fSecondFunctionValue;
+
+    float ReadValueA();
+    float ReadValueB();
+
+    BGSEntryPointFunctionDataTwoValue* FUN_005e67f0();
+    bool FUN_005e6890(BGSEntryPointFunctionData* apCompare);
+    void FUN_005e6900();
+    bool FUN_005e6970(TESFile* apFile);
+    void FUN_005e6490();
+    void* FUN_005e64e0(unsigned int flags);
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(BGSEntryPointFunctionDataTwoValue) == 0xC);
-FNV_STATIC_ASSERT(offsetof(BGSEntryPointFunctionDataTwoValue, EntryPointTwoValueFunctionData) == 0x4);
-FNV_STATIC_ASSERT(offsetof(BGSEntryPointFunctionDataTwoValue, fSecondFunctionValue) == 0x8);
-#endif

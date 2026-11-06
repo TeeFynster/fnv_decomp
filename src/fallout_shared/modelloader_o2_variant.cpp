@@ -2,9 +2,6 @@
 // src/fallout_shared/modelloader_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/modelloader.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "modelloader_verified_packet.h"
-NiRenderer* FUN_0043c4b0();
-const NiFixedString& FUN_00448a80();
 
 extern char* _EmptyFS;
 extern "C" __declspec(dllimport) long __stdcall InterlockedIncrement(long volatile*);

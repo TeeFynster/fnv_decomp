@@ -3,17 +3,12 @@
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/fallout_shared/tesobject.cpp lists /MT /Od /Oy- /GS /EHsc /Gy /GF). Declarations copied from that unit's skeleton; move the functions
 // to their real unit once identified.
 
-#include "tesobject_decls.h"
+#include "../../include/MemoryManager.h"
 
 #include <string>
 #include <vector>
 #include <memory>
 #include <stdexcept>
-class MemoryManager
-{
-  public:
-    void Deallocate(void*);
-};
 extern MemoryManager DAT_011f6238;
 
 struct El

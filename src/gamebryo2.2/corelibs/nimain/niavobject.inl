@@ -6,9 +6,9 @@ void NiAVObject::UpdateTimeControllers(NiUpdateData& data, bool updateProperties
 {
     NiTimeController* controller;
     if (updateProperties && GetHasPropertyController()) {
-        NiTListIterator position = SceneGraphObject.GetHeadPos();
+        void* position = m_kPropertyList.GetHeadPos();
         while (position) {
-            NiProperty* property = SceneGraphObject.GetNext(position);
+            NiProperty* property = m_kPropertyList.GetNext(position);
             if (property && property->GetControllers())
                 property->Update(data);
         }

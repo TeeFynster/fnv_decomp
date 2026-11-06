@@ -1,23 +1,10 @@
+#include "../../../include/TESRegionData.h"
 // fallout_shared/region system/tesregiondatalist.cpp: RegionDataList (4 functions)
 
 class TESRegionData;
 
-template <class T> class BSSimpleList
-{
-  public:
-    T m_item;
-    BSSimpleList<T>* m_pkNext;
-    unsigned int ItemsInList();
-    T& GetItem();
-    BSSimpleList<T>* GetNext();
-    void RemoveHead();
-};
+#include "../../../include/BSSimpleList.h"
 
-class TESRegionData
-{
-  public:
-    virtual ~TESRegionData();
-};
 
 class RegionDataList : public BSSimpleList<TESRegionData*>
 {

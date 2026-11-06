@@ -2,25 +2,13 @@
 // with VC9 RTM (cl 15.00.21022.08, the compiler the game was built with). Declarations copied from that unit's skeleton.
 
 #include "combatstate_decls.h"
+// CombatCoverPointData_combatstate_rtm_variant: local type (was include/CombatCoverPointData.h, which had no evidence of one real class); its methods are 0x005dc960 Main::GameOver, 0x0067fdb0 PackageSchedule::SetStartDayOfWeek, 0x009a2ea0 CombatCoverLocation::LoadGameBGS
+class BGSSaveFormBuffer;
+class BGSLoadFormBuffer;
 
-class TESForm
+class CombatCoverPointData_combatstate_rtm_variant
 {
-  public:
-    virtual void FormSlot();
-};
-struct CombatAvoidanceSphere
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-};
-struct CombatCoverPointData
-{
+public:
     int unk00;
     int unk04;
     int unk08;
@@ -51,19 +39,38 @@ struct CombatCoverPointData
     int unk6c;
     int unk70;
     int unk74;
-};
-class TESObjectWEAP : public TESForm
-{
-};
 
-class BGSExplosion : public TESForm
-{
+    void Copy(void*);
+    void SaveGame(BGSSaveFormBuffer*);
+    void LoadGame(BGSLoadFormBuffer*);
+    bool IsHideCover();
+    bool IsCrouchCover();
+    bool IsStandCover();
+    bool IsLedgeCover();
+    bool IsValidCover();
+    unsigned char GetCoverHeight();
+    bool IsReserved();
+    void SetReserved(bool);
+    bool IsDirty();
+    void SetDirty(bool);
+    void* __vecDelDtor(unsigned int);
 };
+#include "../../../../include/BGSExplosion.h"
+#include "../../../../include/TESBoundObject.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/TESObjectWEAP.h"
 
-class TESBoundObject : public TESForm
+struct CombatAvoidanceSphere
 {
+    int unk00;
+    int unk04;
+    int unk08;
+    int unk0c;
+    int unk10;
+    int unk14;
+    int unk18;
+    int unk1c;
 };
-
 TESForm* __cdecl FUN_004839c0(unsigned int);
 
 struct CombatLoadBuffer
@@ -92,13 +99,10 @@ struct LoadStamp8
     void FUN_009a5f20(CombatLoadBuffer*);
 };
 
-struct LoadCover : CombatCoverPointData
+// The shared class has no constructor declaration; retain only this construction adapter.
+struct LoadCover : CombatCoverPointData_combatstate_rtm_variant
 {
-
     LoadCover();
-    void FUN_009a2ea0(CombatLoadBuffer*);
-    bool FUN_005dc960();
-    void FUN_0067fdb0(int);
 };
 
 struct LoadLocation : CombatAvoidanceSphere
@@ -277,9 +281,9 @@ struct CombatLoadState
 
     LoadStamp4 stamp0e0;
 
-    LoadCover* cover;
+    CombatCoverPointData_combatstate_rtm_variant* cover;
 
-    LoadCover* alternateCover;
+    CombatCoverPointData_combatstate_rtm_variant* alternateCover;
 
     LoadArea area1;
 
@@ -347,7 +351,7 @@ struct CombatLoadState
 
     unsigned int unk228;
 
-    void FUN_009a0510(LoadCover*);
+    void FUN_009a0510(CombatCoverPointData_combatstate_rtm_variant*);
 
     void FUN_009a2040(CombatLoadBuffer*);
 };
@@ -475,11 +479,11 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
 
             cover = new LoadCover;
 
-            cover->FUN_009a2ea0(buffer);
+            cover->LoadGame(reinterpret_cast<BGSLoadFormBuffer*>(buffer));
 
-            if (cover->FUN_005dc960())
+            if (cover->IsReserved())
             {
-                cover->FUN_0067fdb0(0);
+                cover->SetReserved(false);
                 FUN_009a0510(cover);
             }
         }
@@ -489,11 +493,11 @@ void CombatLoadState::FUN_009a2040(CombatLoadBuffer* buffer)
 
             alternateCover = new LoadCover;
 
-            alternateCover->FUN_009a2ea0(buffer);
+            alternateCover->LoadGame(reinterpret_cast<BGSLoadFormBuffer*>(buffer));
 
-            if (alternateCover->FUN_005dc960())
+            if (alternateCover->IsReserved())
             {
-                alternateCover->FUN_0067fdb0(0);
+                alternateCover->SetReserved(false);
                 FUN_009a0510(alternateCover);
             }
         }

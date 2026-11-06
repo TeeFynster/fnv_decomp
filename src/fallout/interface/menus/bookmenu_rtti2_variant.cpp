@@ -1,3 +1,12 @@
+#include "../../../../include/BSStringT.h"
+#include "../../../../include/InterfaceManager.h"
+#include "../../../../include/BookMenu.h"
+#include "../../../../include/TESObjectBOOK.h"
+#include "../../../../include/Menu.h"
+#include "../../../../include/NiFile.h"
+#include "../../../../include/BSFile.h"
+#include "../../../../include/Tile.h"
+#include "../../../../include/TileMenu.h"
 // src/fallout/interface/menus/bookmenu_rtti2_variant.cpp - RTTI variant unit created 2026-11-01 by rtti_variants.py for paused functions whose original code needs
 // polymorphic classes (BookMenu, Menu, Tile). The skeleton of src/fallout/interface/menus/bookmenu.cpp with those classes made polymorphic; move the functions to
 // their real unit once its classes are.
@@ -5,31 +14,12 @@
 
 // src/fallout/interface/menus/bookmenu.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/interface/menus/bookmenu.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-struct Menu
-{
-    virtual ~Menu();  // the original class is polymorphic (rtti_variants.py)
-    Menu();
-    unsigned int m_kPointA;
-    unsigned int m_kPointB;
-    unsigned int m_iThirdValue;
-    unsigned int m_iFourthElementInteger;
-    unsigned int m_usTrailingValue;
-    unsigned int m_f;
-    unsigned int m_g;
-    unsigned int m_h;
-    unsigned int m_i;
-};
 extern unsigned int DAT_01070ecc;
 struct FUN_0073acb0 : Menu
 {
     void* m_pHighlightedTile;
     void* m_pObject;
     FUN_0073acb0();
-};
-struct BookMenu
-{
-    virtual ~BookMenu();  // the original class is polymorphic (rtti_variants.py)
-    int FUN_0073acf0();
 };
 struct FUN_0073af60_shell
 {
@@ -72,338 +62,14 @@ struct SceneGraph;
 struct ShadowSceneNode;
 struct TESImageSpaceModifier;
 struct TESObjectREFR;
-struct Tile;
 struct TileImage;
 struct ViewCaster;
 struct blob12
 {
     char b[12];
 };
-struct InterfaceManager
-{
-    static InterfaceManager* Instance();
-    static void Free();
-    static void Initialize(unsigned int, bool);
-    void Init(bool);
-    void RefreshInterfaceState();
-    SceneGraph* GetOrCreateSceneGraph(SceneGraph*, char*, bool);
-    bool IsDoneFirstInit();
-    bool IsDoneSecondInit();
-    static void PlayUISound(int);
-    SceneGraph* GetSceneGraph();
-    SceneGraph* Get3DSceneGraph();
-    char GetStatsPageNumber();
-    char GetInventoryPageNumber();
-    char GetMagicPageNumber();
-    char GetMapPageNumber();
-    void UpdateStatsPageNumber(char);
-    void UpdateInventoryPageNumber(char);
-    void UpdateMagicPageNumber(char);
-    void UpdateMapPageNumber(char);
-    void SetStatsPageNumber(char);
-    void SetInventoryPageNumber(char);
-    void SetMapPageNumber(char);
-    static bool IsPipboyMenuActive();
-    static bool IsInterfaceMenuActive();
-    static bool IsCurrentRenderedMenuTopmost();
-    int GetCurrentMainMenu();
-    void SetCurrentMainMenu(int);
-    void PreIdleStuff();
-    void Idle();
-    void ProcessGamepadInput(int);
-    int GetGamepadInput(bool, bool, bool*);
-    void RefreshGamepadState();
-    void RefreshInputState();
-    void RecursiveFade(NiAVObject*, float, float);
-    Tile* GetPickTarget(bool);
-    void SetPickDistance(int);
-    int GetPickDistance();
-    void SetTelekinesisDistance(int);
-    char GetMenuMode();
-    bool IsSaveLoadActive();
-    void InternalSetMenuMode(int);
-    void CalculateConsolePickRefs();
-    void ClearMenuInput();
-    int GetPickCursorX();
-    int GetCursorY();
-    int GetMouseWheel();
-    int GetRealCursorX();
-    int GetRealCursorY();
-    float GetRawCursorX();
-    float GetRawCursorY();
-    void SetRawCursorX(float);
-    void SetRawCursorY(float);
-    void SetCursorPos(float, float);
-    static void SetCursorAlpha(int);
-    int GetCursorOffsetX();
-    int GetCursorOffsetY();
-    int GetTargetID();
-    Tile* GetTarget();
-    void SetCursorOffsetX(int);
-    void SetCursorOffsetY(int);
-    void SetTargetID(int);
-    void SetTarget(Tile*);
-    float GetMouseHeldTime();
-    void SetMouseHeldTime(float);
-    void Accumulate();
-    void Click(BSRenderedTexture*, BSRenderedTexture*);
-    TileImage* GetMouseCursorImage();
-    void SwitchControllerModes(bool);
-    static bool Get360ControllerDisabled();
-    void Disable360Controller(bool);
-    bool GetMouseVisible();
-    void ToggleMouseVisible();
-    void SetDebugTextVisible(bool);
-    bool GetDebugTextVisible();
-    NiNode* GetInterfaceNode();
-    Tile* GetCursor();
-    NiNode* GetCursorRoot();
-    NiNode* GetPlayerRoot();
-    Tile* GetPrimaryInterfaceTile();
-    Tile* GetSecondaryInterfaceTile();
-    void SetStringRoot(Tile*);
-    NiNode* GetDebugTextRoot();
-    float GetOneToOneDistance();
-    ShadowSceneNode* GetShadowNode();
-    BSShaderAccumulator* GetAccumulator();
-    BSShaderAccumulator* Get3dAccumulator();
-    TESImageSpaceModifier* GetImageSpaceModifier();
-    void SetMenuFocusEnabled(bool);
-    Tile* GetCurrentFocusTarget();
-    void ClearInterfaceState(Tile*, int, bool);
-    void ClearCurrentFocusTarget();
-    void GetDefaultFocus();
-    static float GetFourthInterfaceFloat();
-    static float GetThirdInterfaceFloat();
-    static float GetRealScreenLeft();
-    static float GetRealScreenRight();
-    static float GetRealScreenTop();
-    static float GetRealScreenBottom();
-    static float UpdateInterfaceState();
-    static float GetFirstInterfaceFloat();
-    static float GetScreenLeft();
-    static float GetScreenRight();
-    static float GetScreenTop();
-    static float GetScreenBottom();
-    static float GetScreenAspect();
-    static float GetScreenSafeX();
-    static float GetScreenSafeY();
-    static float GetMenuHeight();
-    static unsigned int GetLastXDefault(int);
-    static int GetInputButtonCode(int, bool);
-    static void SendGamepadButton(int);
-    int GetDragDroppingState();
-    void SetDragDroppingState(int);
-    void UpdateScreenShape(int, int);
-    void ToggleReticle(int);
-    void ToggleSafeZone(int);
-    void SetNamedMenuOption(char*, bool);
-    void SetFirstChanceTextureRelease(bool);
-    void ReleaseMenuTextures();
-    bool IsAnyMenuOpen();
-    Tile* ScanForMaxFocus(int*, Tile*);
-    void SetClickMultithreaded(bool);
-    bool GetClickMultithreaded();
-    void SetRepeatingKey(int);
-    int GetRepeatingKey(float);
-    void RefreshTargetReference();
-    TESObjectREFR* GetTargetREFR();
-    void ClearTargetREFR();
-    void SetTargetREFR(TESObjectREFR*);
-    TESObjectREFR* GetPickedREFR();
-    void ClearPickedREFR();
-    void SetPickedREFR(TESObjectREFR*);
-    TESObjectREFR* GetActivateREFR();
-    TESObjectREFR* GetCurrentPickedREFR();
-    struct blob12 GetActivatePickLocation();
-    bool IsActivatePickFuzzy();
-    void ClearActivatePickResults();
-    void SetActivatePickReference(TESObjectREFR*);
-    int GetActivatePickResult(int);
-    int GetTopEnterStackEntry();
-    int GetMenuStackEntry(int);
-    int AddMenuStackEntry(int, bool);
-    bool IsMenuInStack(unsigned int);
-    void Test();
-    NiAlphaProperty* GetAlphaProp();
-    void NeedToUpdate(bool);
-    unsigned short GetKeyModifiers();
-    int GetChar(int, int);
-    bool IsAltDown();
-    bool IsControlDown();
-    bool IsShiftDown();
-    bool TileIsAcceptingEvents(Tile*);
-    static void LocalMessgeResults();
-    void FreeTimerList();
-    void UpdateAllTimers();
-    static void NewTimer(void*, float);
-    static void ClearTimer(void*);
-    static float GetTimerPercent(void*);
-    void CullInterfaceMenus();
-    void RestoreMenuVisibility();
-    void ProcessMenuCulling(BSCullingProcess*, bool);
-    void CullPipboyMenus();
-    void UncullPipboyMenus();
-    void UpdateMenuCulling();
-    void RenderBlur(BSRenderedTexture*);
-    FOPipboyManager* GetPipboyManagerInstance();
-    ShaderRenderProperty* GetHUDEffects();
-    ShadowLightData* GetVATSEffect();
-    void SetPipboyPickResults(bool, float, float, int);
-    void ClearPipboyPickResults();
-    void ShowPipboy(int*, int);
-    void ClosePipboy(int*);
-    void UpdatePipboyState();
-    void SetCurrentRenderedMenu(FORenderedMenu*);
-    bool IsPipboyMenuOpen();
-    FORenderedMenu* GetActiveRenderedMenu();
-    void DumpMenuPackingInfo();
-    float GetPipboyMouseX();
-    float GetPipboyMouseY();
-    void GetPipboyMouseCoords(float*, float*);
-    static void RegisterListBox(ListBoxBase*);
-    static void UnregisterListBox(ListBoxBase*);
-    void HandleMenuTileEvent(Menu*, int, Tile*);
-    void HandleMenuMouseEvent(Menu*, int, Tile*);
-    void HandleMenuSelection(Menu*, int, Tile*);
-    bool HandleMenuInput(Menu*, int, float);
-    void AddTileIfAbsent(Tile*);
-    void RemoveTileFromUpdateList(Tile*);
-    void RefreshInterface();
-    void QueueCloseSupportMenus();
-    void UpdateQueuedMenuClosings();
-    static bool Has360Controller();
-    static int ConvertGamepadButton(int);
-    static void SetDiskError(bool);
-    static bool GetMainDiskError();
-    bool QLockpickControlsDisable();
-    void SetLockpickControlsDisable(bool);
-    static void SetContainerMenuQueued(bool);
-    static bool GetContainerMenuQueued();
-    static void UpdateContainerMenu(Tile*, Tile*, Tile*, InventoryStackRecord*, bool);
-    void* __vecDelDtor(unsigned int);
-    bool m_bFirstStateEnabled;
-    bool m_bSecondStateEnabled;
-    char _pad_2[2];
-    char m_kFirstStateData[4];
-    char m_kSecondStateData[4];
-    int m_iStateEntryCount;
-    bool m_bFirstStateActive;
-    bool m_bSecondStateActive;
-    char m_cFirstStateCode;
-    char m_cSecondStateCode;
-    char m_cCurrentStateCode;
-    char m_kInterfaceAdditionalData;
-    char _pad_16[2];
-    int m_kDisplayManagerData;
-    int m_iSecondaryState;
-    unsigned char m_ucFirstFlag;
-    unsigned char m_ucSecondFlag;
-    char _pad_22[2];
-    NiDirectionalLight* m_pDirectionalLight;
-    TileImage* kArgumentPosition;
-    char m_kFirstVectorData[12];
-    char m_kSecondVectorData[12];
-    float m_fImageTileLeadingValue;
-    float m_fImageTileScale;
-    Tile* m_pImageTile;
-    int m_iImageTileIndex;
-    float m_fImageTileOpacity;
-    float m_fImageTileBlendAmount;
-    int m_iImageTileFirstState;
-    int m_iImageTileFirstIndex;
-    int m_iImageTileSecondIndex;
-    int m_iTargetIndex;
-    Tile* pTarget;
-    char m_cTargetTextBuffer[8];
-    int m_iTargetTextLength;
-    bool m_bTargetTextFlag;
-    bool m_kInterfaceExtensionData;
-    char _pad_7e[2];
-    NiNode* m_pFirstSceneNode;
-    NiNode* m_pSecondSceneNode;
-    ShadowSceneNode* m_pFirstShadowSceneNode;
-    char m_kFirstShadowData[4];
-    char m_kSecondShadowData[4];
-    ShadowSceneNode* m_pSecondShadowSceneNode;
-    ShadowSceneNode* m_pThirdShadowSceneNode;
-    Tile* m_pFirstSceneTile;
-    Tile* m_pSecondSceneTile;
-    NiNode* m_pThirdSceneNode;
-    float m_fSceneNodeBlendAmount;
-    char m_kSceneMetadata[4];
-    bool m_bCursorVisible;
-    char _pad_b1[1];
-    unsigned short m_usPickDistance;
-    Tile* m_pFirstAuxiliaryTile;
-    Tile* m_pSecondAuxiliaryTile;
-    Tile* m_pThirdAuxiliaryTile;
-    unsigned int m_uiAuxiliaryTileFlags;
-    int m_iAuxiliaryTileIndex;
-    bool m_bFirstMenuFirstFlag;
-    bool m_bFirstMenuSecondFlag;
-    char _pad_ca[2];
-    Tile* m_pFirstMenuTile;
-    Menu* m_pFirstMenu;
-    Tile* m_pSecondMenuTile;
-    Menu* m_pSecondMenu;
-    bool m_bSecondMenuFirstFlag;
-    bool m_bSecondMenuSecondFlag;
-    char _pad_de[2];
-    Menu* m_pThirdMenu;
-    char m_cThirdMenuState;
-    char _pad_e5[3];
-    int* m_pMenuIndexArray;
-    bool m_bFirstReferenceActive;
-    bool m_bSecondReferenceActive;
-    char _pad_ee[2];
-    TESObjectREFR* m_pFirstReference;
-    TESObjectREFR* m_pSecondReference;
-    TESObjectREFR* m_pThirdReference;
-    TESObjectREFR* m_pFourthReference;
-    TESObjectREFR* m_pFifthReference;
-    char m_kReferenceData[12];
-    bool m_bActivatePickFuzzy;
-    char _pad_111[3];
-    char m_cPickedObjectName[40];
-    ViewCaster* m_pViewCaster;
-    MobileObject* m_pFirstMobileObject;
-    MobileObject* m_pSecondMobileObject;
-    bool m_bMouseVisible;
-    bool m_bControllerModeActive;
-    char _pad_14a[2];
-    int m_kMenuManagerData;
-    int m_kInputManagerData;
-    unsigned int m_kCursorManagerData;
-    unsigned int m_kReferenceManagerData;
-    int m_iValueBetweenReferenceAndOverlay;
-    unsigned int m_kOverlayManagerData;
-    void* m_ppMeasurements;
-    bool m_bRenderedMenuActive;
-    char _pad_169[3];
-    FORenderedMenu* m_pRenderedMenu;
-    bool m_bPipboyMenuActive;
-    char _pad_171[3];
-    FOPipboyManager* m_pPipboyManager;
-    char HUDEffects[100];
-    char VATSEffect[452];
-    float m_fHUDEffectTime;
-    float m_fVATSEffectTime;
-    bool m_bVATEffectActive;
-    char _pad_3a9[3];
-    int m_iHUDEffectState;
-    int m_iVATEffectState;
-    int* m_pInterfaceIntegerData;
-    char m_cDebugTextBuffer[8];
-    bool m_bDebugInfoVisible;
-    bool m_bDebugTextVisible;
-    char _pad_3c2[2];
-    float m_fDebugTextScale;
-    bool m_bDebugOverlayVisible;
-    char _pad_3c9[3];
-    char m_kInterfaceStateData[172];
-};
-typedef char _sizecheck_InterfaceManager[sizeof(InterfaceManager) == 1144 ? 1 : -1];
+
+// Exe 0x00709fd0 allocates the full 0x580-byte shared InterfaceManager.
 struct FUN_0073b020_shell : public InterfaceManager
 {
     int FUN_0073b020();
@@ -439,16 +105,6 @@ struct FUN_007e7a80 : Menu
     int m_78;
     int m_7c;
     FUN_007e7a80();
-};
-struct TGF
-{
-    virtual ~TGF();  // the original class is polymorphic (rtti_variants.py)
-    float GetFloat(int);
-};
-struct Tile : TGF
-{
-    float GetScreenY();
-    void Set(int, int);
 };
 FUN_0073b020_shell* __cdecl _FUN_004b7210();
 int __cdecl __ftol2_sse(double);
@@ -736,34 +392,16 @@ struct BookInput
     const char* CallInnerFoo();
     bool FUN_0073b460();
 };
-struct BookTile
-{
-    void FUN_00700320(int, int);
-    void FUN_00a01350(int, const char*, bool);
-};
-struct BSStringTChar
-{
-    char* data;
-    unsigned short length;
-    unsigned short capacity;
-    BSStringTChar(const char*);
-    ~BSStringTChar();
-};
+
 struct BookTarget : Menu
 {
     void* unk28;
     void* unk2c;
     int unk30;
-    BookTile* FUN_00726070();
+    Tile* FUN_00726070();
     void UpdateBookMenu(BookInput*, int);
 };
 void __cdecl FUN_00717280(int);
-struct MyTile
-{
-    bool IsTraitNonZero(int);
-    float FUN_00a011b0(int);
-    void Set(int, int);
-};
 struct BookMenu_Shell
 {
     virtual void v0();
@@ -782,82 +420,24 @@ struct BookMenu_Shell
     int unk1c;
     int unk20;
     int unk24;
-    MyTile* m_pHighlightedTile;
-    MyTile* m_pObject;
+    Tile* m_pHighlightedTile;
+    Tile* m_pObject;
 
-    MyTile* FUN_00726070();
+    Tile* FUN_00726070();
     void HandleScrollInput(int a1, int a2);
 };
 extern const char DAT_01070fa8[];
 extern const char DAT_01070f84[];
-template <class T> struct BSStringT
-{
-    T* data;
-    unsigned short length, capacity;
-    BSStringT();
-    BSStringT(const T*);
-    ~BSStringT();
-    const T* FUN_00559450();
-    unsigned int FUN_004048e0();
-};
-struct NiFile
-{
-    enum OpenMode
-    {
-        read = 0
-    };
-};
-struct BSFile
-{
-    unsigned int vtable;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3c;
-    unsigned int unk40;
-    char filename[260];
-    unsigned int unk148, unk14c, unk150, unk154;
-    BSFile(const char*, NiFile::OpenMode, unsigned int, bool);
-    ~BSFile();
-    bool FUN_00aff300(bool, bool);
-    bool FUN_008905f0();
-    void FUN_00aff7c0(BSStringT<char>*, int);
-};
 extern void __cdecl FUN_00703c00(const char*, ...);
 struct LoadBook
 {
-    BookTile* FUN_00726070();
+    Tile* FUN_00726070();
     void LoadBookFile();
 };
 
-struct TESObjectBOOK
-{
-    bool FUN_00409700();
-};
-struct Tile_00a01b00 : Tile
-{
-    static float __cdecl FUN_00a01530();
-    Tile* FUN_00a01b00(const char*);
-    Menu* FUN_00a03c90();
-    void SetFloat(int, float, bool);
-};
-struct TileMenu : Tile
-{
-};
 struct IMH
 {
-    Tile_00a01b00* FUN_00586150();
+    Tile* FUN_00586150();
 };
 struct BookMenuData : Menu
 {
@@ -900,7 +480,7 @@ Tile* __cdecl FUN_0073ad50(TESObjectBOOK* apBook, TESObjectREFR* apRef)
     Menu* pmenu;
     TESObjectBOOK* pbook;
     float ftop_depth;
-    Tile_00a01b00* ptile;
+    Tile* ptile;
     Tile* pold_menu_tile;
     pold_menu_tile = (Tile*)FindMenuById(0x402);
     if (pold_menu_tile)
@@ -909,9 +489,9 @@ Tile* __cdecl FUN_0073ad50(TESObjectBOOK* apBook, TESObjectREFR* apRef)
     if (!pbook)
         return 0;
     pin = FUN_004b7210();
-    ftop_depth = Tile_00a01b00::FUN_00a01530();
+    ftop_depth = Tile::GetInterfaceScale();
     ptile = 0;
-    ptile = (Tile_00a01b00*)((IMH*)pin)->FUN_00586150()->FUN_00a01b00("Data\\Menus\\book_menu.xml");
+    ptile = ((IMH*)pin)->FUN_00586150()->FUN_00a01b00("Data\\Menus\\book_menu.xml");
     pmenu = ptile->FUN_00a03c90();
     g_pHudMainMenuInstance = (BookMenu*)pmenu;
     ((BookMenuData*)g_pHudMainMenuInstance)->m_pObjectToUpdateMenuTile = apBook;
@@ -924,8 +504,8 @@ Tile* __cdecl FUN_0073ad50(TESObjectBOOK* apBook, TESObjectREFR* apRef)
             FNV_Warning("MENUS: Book Menu Creation Failed... Are your menu and art resources up to date?");
             return 0;
         }
-        if (((TGF*)ptile)->GetFloat(0xfa7) == 6006.0 || ((TGF*)ptile)->GetFloat(0xfa7) == 102.0)
-            ptile->SetFloat(0xfad, ftop_depth, true);
+        if (ptile->GetFloat(0xfa7) == 6006.0 || ptile->GetFloat(0xfa7) == 102.0)
+            ptile->FUN_00a012d0(0xfad, ftop_depth, true);
         ((BookMenuData*)g_pHudMainMenuInstance)->UpdateBookMenu(apBook, apRef);
         if (((BookMenuData*)g_pHudMainMenuInstance)->m_pObjectToUpdateMenuTile->FUN_00409700())
             FUN_00717280(0x18);

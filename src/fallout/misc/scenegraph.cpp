@@ -1,19 +1,17 @@
+#include "../../../include/BGSCameraPath.h"
+#include "../../../include/BGSTerrainManager.h"
+#include "../../../include/BSSceneGraph.h"
+#include "../../../include/SceneGraph.h"
+#include "../../../include/SettingT_GameSettingCollection_.h"
+#include "../../../include/Sky.h"
+#include "../../../include/TES.h"
+#include "../../../include/TESObjectCELL.h"
+#include "../../../include/TESWorldSpace.h"
 // fallout/misc/scenegraph.cpp: SceneGraph, StandIn (5 functions)
 
 class NiRTTI;
 
-class BSSceneGraph
-{
-  public:
-    virtual const NiRTTI* GetRTTI() const;
-};
 
-class SceneGraph : public BSSceneGraph
-{
-  public:
-    static const NiRTTI ms_kRTTI;
-    virtual const NiRTTI* GetRTTI() const;
-};
 
 // @fnv 0x00878640
 const NiRTTI* SceneGraph::GetRTTI() const
@@ -44,47 +42,6 @@ void* Wrapper_00878610::FUN_00878610(char* apSceneGraphName, bool abMenuSceneGra
 struct FUN_008786b0_shell : public SceneGraph
 {
     float FUN_008786b0();
-};
-
-union SETTING_VALUE
-{
-    float f;
-};
-class SettingT_GameSettingCollection_
-{
-  public:
-    SETTING_VALUE* Float();
-};
-class BGSTerrainManager
-{
-  public:
-    bool FUN_00454b70();
-};
-class TESWorldSpace
-{
-  public:
-    BGSTerrainManager* GetWorldTerrainManager();
-};
-class Sky
-{
-  public:
-    int FUN_00476c90();
-};
-class TESObjectCELL
-{
-  public:
-    float GetInteriorLightValue();
-};
-class BGSCameraPath
-{
-  public:
-    BGSCameraPath* GetPrevPath();
-};
-class TES
-{
-  public:
-    TESWorldSpace* GetHitSound();
-    Sky* GetLogDate();
 };
 
 extern TES* g_TES;

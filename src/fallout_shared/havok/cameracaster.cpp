@@ -2,6 +2,10 @@
 // src/fallout_shared/havok/cameracaster.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/havok/cameracaster.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../include/BSAudio.h"
+#include "../../../include/bhkCharacterListener.h"
+#include "../../../include/hkpAllCdPointCollector.h"
+
 extern int DAT_0104da3c;
 
 struct FUN_00621100_shell
@@ -15,15 +19,10 @@ void __thiscall FUN_00621100_shell::SetVtable()
     *(int*)this = (int)&DAT_0104da3c;
 }
 
-struct bhkCharacterListener
-{
-    unsigned int FUN_00621270(unsigned int aiFlags);
-};
-
 // @fnv 0x00621270
-unsigned int bhkCharacterListener::FUN_00621270(unsigned int aiFlags)
+unsigned int bhkCharacterListener::GetFlags(unsigned int aiFlags)
 {
-    return *(unsigned int*)((char*)this + 4) & aiFlags;
+    return *(unsigned int*)unk04 & aiFlags;
 }
 
 extern float DAT_0104da4c;
@@ -59,10 +58,6 @@ FUN_00621060_shell* __thiscall FUN_00621060_shell::FUN_00621060()
     return this;
 }
 
-struct BSAudio
-{
-    void* GetAudioBackendData();
-};
 struct TopicObj
 {
     virtual void f0()
@@ -85,10 +80,6 @@ void FUN_006210d0(void* a1)
 }
 
 namespace fnv_00621170 {
-struct BSAudio
-{
-    void* GetAudioBackendData();
-};
 BSAudio* __cdecl _FUN_00c85750();
 struct Caller
 {
@@ -107,21 +98,8 @@ void FUN_00621170(void* apArg)
 }
 }  // namespace fnv_00621170
 
-struct RootContactPoint
-{
-    char m_kPoint[32];
-    void* m_pRootCollidableA;
-    unsigned int m_uiShapeKeyA;
-    char m_kContactPointB[32];
-    void* m_pRootCollidableB;
-    unsigned int m_uiShapeKeyB;
-    char m_kContactPointC[32];
-};
-typedef char _sizecheck_hkpRootCdPoint[sizeof(RootContactPoint) == 112 ? 1 : -1];
-struct FUN_006212c0_shell : public RootContactPoint
-{
-    RootContactPoint* FUN_006212c0(void*);
-};
+#include "../../../include/RootContactPoint.h"
+typedef char _sizecheck_RootContactPoint[sizeof(RootContactPoint) == 112 ? 1 : -1];
 
 struct FUN_006281a0_shell
 {
@@ -129,18 +107,17 @@ struct FUN_006281a0_shell
 };
 
 // @fnv 0x006212c0
-RootContactPoint* FUN_006212c0_shell::FUN_006212c0(void* apSource)
+RootContactPoint* RootContactPoint::FUN_006212c0(void* apSource)
 {
     ((FUN_006281a0_shell*)this)->FUN_006281a0(apSource);
     m_pRootCollidableA = ((RootContactPoint*)apSource)->m_pRootCollidableA;
     m_uiShapeKeyA = ((RootContactPoint*)apSource)->m_uiShapeKeyA;
     for (unsigned int uiIndex = 0; uiIndex < 8; ++uiIndex)
-        ((unsigned int*)m_kContactPointB)[uiIndex] =
-            ((unsigned int*)((RootContactPoint*)apSource)->m_kContactPointB)[uiIndex];
+        m_auiUnk28[uiIndex] = ((RootContactPoint*)apSource)->m_auiUnk28[uiIndex];
     m_pRootCollidableB = ((RootContactPoint*)apSource)->m_pRootCollidableB;
     m_uiShapeKeyB = ((RootContactPoint*)apSource)->m_uiShapeKeyB;
     for (unsigned int S2 = 0; S2 < 8; ++S2)
-        ((unsigned int*)m_kContactPointC)[S2] = ((unsigned int*)((RootContactPoint*)apSource)->m_kContactPointC)[S2];
+        m_auiUnk50[S2] = ((RootContactPoint*)apSource)->m_auiUnk50[S2];
     return this;
 }
 
@@ -187,22 +164,17 @@ Rcv621210* Hld621210::FUN_00621210(Rcv621210* apReceiver)
     return apReceiver;
 }
 
-struct DummyFlags
-{
-    int __thiscall FUN_00621270(int);
-};
-
 struct DummyFlagsShell
 {
     char _pad[0x410];
-    DummyFlags _flags;
+    bhkCharacterListener _flags;
     bool FUN_00621240();
 };
 
 // @fnv 0x00621240
 bool DummyFlagsShell::FUN_00621240()
 {
-    return _flags.FUN_00621270(0x800) != 0;
+    return _flags.GetFlags(0x800) != 0;
 }
 
 struct FUN_006210a0_shell : FUN_00621100_shell
@@ -221,11 +193,6 @@ void* __thiscall FUN_006210a0_shell::FUN_006210a0(unsigned int flags)
 
 void __cdecl FUN_00621170(void*);
 void FUN_006211b0(void*);
-struct hkpAllCdPointCollector
-{
-    void FUN_006211b0();
-    void* FUN_00621140(unsigned int aiFlags);
-};
 // @fnv 0x00621140
 void* hkpAllCdPointCollector::FUN_00621140(unsigned int aiFlags)
 {
@@ -238,6 +205,7 @@ void* hkpAllCdPointCollector::FUN_00621140(unsigned int aiFlags)
 struct Base_620ff0
 {
     virtual void v00();
+
     int unk04;
     int unk08;
     int unk0C;

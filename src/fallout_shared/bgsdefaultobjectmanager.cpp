@@ -1,6 +1,12 @@
 // fallout_shared/bgsdefaultobjectmanager.cpp: BGSDefaultObjectManager, NavMesh (11 functions)
 
-#include "bgsdefaultobjectmanager_form.h"
+#include "layout_support.h"
+#include "../../include/ActorValueInfo.h"
+#include "../../include/BGSDefaultObjectManager.h"
+#include "../../include/NavMesh.h"
+#include "../../include/NavMeshGrid.h"
+#include "../../include/TESChildCell.h"
+
 #include "bgsdefaultobjectmanager.h"
 #include <string.h>
 
@@ -82,14 +88,13 @@ void BGSDefaultObjectManager::InitItem()
     SetInitializationState(true);
 }
 
-#include "bgsdefaultobjectmanager_nav.h"
 // @fnv 0x0068eb80
 NavMesh::NavMesh() : POVPointerArray(37)
 {
     SetFormType(ENUM_FORM_ID_NAVM_ID);
     m_pOwningCell = 0;
     m_pNavigationMesh = 0;
-    pTriangleToObstacleMap = new NiTMap_unsigned_short_NiPointer_ObstacleData___(37);
+    pTriangleToObstacleMap = new NiTMap<unsigned short, NiPointer<ObstacleData> >(37);
 }
 
 // Deletes the BGSDefaultObjectManager singleton instance and clears its pointer if it is set.
@@ -103,86 +108,34 @@ void DestroyDefaultObjectManager()
     }
 }
 
-struct ActorValueInfo
-{
-    void SetScriptName(char const*);
-};
-
-struct FUN_0058d760 : public TESForm
-{
-    FUN_0058d760();
-    virtual ~FUN_0058d760();
-};
-
 // @fnv 0x0058d760
-FUN_0058d760::FUN_0058d760() : TESForm()
+BGSDefaultObjectManager::BGSDefaultObjectManager() : TESForm()
 {
     SetFormType((ENUM_FORM_ID)100);
     SetRefID(0x31, 1);
     ((ActorValueInfo*)this)->SetScriptName("DefaultObjectManager");
-    ((BGSDefaultObjectManager*)this)->ResetFormData();
+    ResetFormData();
 }
 
-void _Deallocate(void*);
-struct S_0058d7f0
+// @fnv 0x0058d820
+BGSDefaultObjectManager::~BGSDefaultObjectManager()
 {
-    void InitializeVTable();
-    void* FUN_0058d7f0(unsigned int);
-};
-// Calls InitializeVTable, then deallocates this when flags has bit 0 set, and returns this.
-// @fnv 0x0058d7f0
-void* S_0058d7f0::FUN_0058d7f0(unsigned int flags)
-{
-    InitializeVTable();
-    if (flags & 1)
-        _Deallocate(this);
-    return this;
 }
 
-struct FUN_004855a0
-{
-    void M();
-};
-struct FUN_00485680
-{
-    void M();
-};
 void __cdecl FUN_00485710(unsigned int, unsigned int*, unsigned int);
-struct FUN_0058d870_shell
-{
-    void FUN_0058d870();
-};
 // @fnv 0x0058d870
-void FUN_0058d870_shell::FUN_0058d870()
+void BGSDefaultObjectManager::Save()
 {
     unsigned int pidarray4[34];
     int i;
-    ((FUN_004855a0*)this)->M();
+    FUN_004855a0();
     for (i = 0; i < 34; ++i)
     {
-        if (*(void**)((char*)this + 0x18 + i * 4))
-            pidarray4[i] = ((TESForm*)*(void**)((char*)this + 0x18 + i * 4))->GetFormID();
+        if (m_apDefaultObjects[i])
+            pidarray4[i] = m_apDefaultObjects[i]->GetFormID();
         else
             pidarray4[i] = 0;
     }
     FUN_00485710(0x41544144, pidarray4, 34);
-    ((FUN_00485680*)this)->M();
-}
-
-// InitializeVTable: constructor-like member that installs the class vtable
-// pointer into *this and then calls a base routine with this as `this`.
-extern int DAT_01032dc4;
-
-struct FUN_0058d820_cls
-{
-    void* m_pVTable;
-    void FUN_00483630();
-    void InitializeVTable();
-};
-
-// @fnv 0x0058d820
-void FUN_0058d820_cls::InitializeVTable()
-{
-    m_pVTable = (void*)&DAT_01032dc4;
-    FUN_00483630();
+    FUN_00485680();
 }

@@ -2,28 +2,22 @@
 // src/fallout/magic/disintegrateweaponeffect.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/magic/disintegrateweaponeffect.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct ActiveEffect
+#include "../../../include/ActiveEffect.h"
+
+struct DisintegrateWeaponEffect : ActiveEffect
 {
-    virtual ~ActiveEffect();
-    void CopyData(ActiveEffect*);
+    DisintegrateWeaponEffect(MagicCaster*, MagicItem*, EffectItem*);
+    ~DisintegrateWeaponEffect();
+    virtual ActiveEffect* Copy();
+    void ApplyDisintegrateWeaponDamage();
 };
-struct FUN_0080d6b0 : ActiveEffect
-{
-    int m[17];
-    FUN_0080d6b0(int, int, int);
-    ~FUN_0080d6b0();
-};
-struct FUN_0080d710_shell : ActiveEffect
-{
-    FUN_0080d6b0* CreateEffectCopy();
-};
-// Allocates a new FUN_0080d6b0 from three fields of this object, copies this object's data into it, and returns the new object.
+// Allocates a new effect, copies this object's data into it, and returns the new object.
 // @fnv 0x0080d710
-FUN_0080d6b0* FUN_0080d710_shell::CreateEffectCopy()
+ActiveEffect* DisintegrateWeaponEffect::Copy()
 {
-    FUN_0080d6b0* pNewEffect =
-        new FUN_0080d6b0(*(int*)((char*)this + 0x28), *(int*)((char*)this + 8), *(int*)((char*)this + 0xc));
-    this->CopyData(pNewEffect);
+    DisintegrateWeaponEffect* pNewEffect =
+        new DisintegrateWeaponEffect(m_pEffectInstance, pSpell, pEffect);
+    ActiveEffect::CopyData(pNewEffect);
     return pNewEffect;
 }
 
@@ -459,18 +453,11 @@ struct EffectOwner
 bool __cdecl FUN_005b6f70();
 void __cdecl FUN_00703c00(const char* apFormat, ...);
 
-struct FUN_0080d7b0_cls
-{
-    EffectOwner* FUN_0059bb30();
-    float GetFloatAtOffset1C();
-    void ApplyDisintegrateWeaponDamage();
-};
-
 // Gets the effect's target and applies disintegrate weapon damage to it, then logs the damage if FUN_005b6f70 is true.
 // @fnv 0x0080d7b0
-void FUN_0080d7b0_cls::ApplyDisintegrateWeaponDamage()
+void DisintegrateWeaponEffect::ApplyDisintegrateWeaponDamage()
 {
-    Effect* pEffect = FUN_0059bb30() ? FUN_0059bb30()->FUN_00822b40() : 0;
+    Effect* pEffect = FUN_0059bb30() ? reinterpret_cast<EffectOwner*>(FUN_0059bb30())->FUN_00822b40() : 0;
     if (pEffect == 0)
         return;
 

@@ -2,89 +2,63 @@
 // src/gamebryo2.2/corelibs/nianimation/bstreadtransfinterpolator.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nianimation/bstreadtransfinterpolator.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct FUN_00a43560_shell
-{
-    unsigned char m_auiShapeKeys[0x20];
-    void* m_ptr_20;
-    int __thiscall FUN_00a43560(short arg);
-};
+#include "../../../../include/BSTreadTransfInterpolator.h"
+#include "../../../../include/NiFloatData.h"
+#include <windows.h>
 
 // @fnv 0x00a43560
-int __thiscall FUN_00a43560_shell::FUN_00a43560(short arg)
+unsigned int BSTreadTransfInterpolator::GetColorKeyCount(unsigned short arg) const
 {
     if (arg == 0)
     {
-        if (this->m_ptr_20)
+        if (reference.m_pObject)
         {
-            return *reinterpret_cast<int*>(reinterpret_cast<char*>(this->m_ptr_20) + 8);
+            return *reinterpret_cast<int*>(reinterpret_cast<char*>(reference.m_pObject) + 8);
         }
     }
     return 0;
 }
 
-struct FUN_00a43580_shell
-{
-    void* __thiscall FUN_00a43580(unsigned short flag);
-};
-
 // @fnv 0x00a43580
-void* FUN_00a43580_shell::FUN_00a43580(unsigned short flag)
+void* BSTreadTransfInterpolator::FUN_00a43580(unsigned short flag)
 {
     if (!flag)
     {
-        void* p = *reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(this) + 0x20);
+        void* p = reference.m_pObject;
         if (p)
             return *reinterpret_cast<void**>(reinterpret_cast<unsigned char*>(p) + 0x10);
     }
     return 0;
 }
 
-struct FUN_00a435a0_shell
-{
-    void* FUN_00a435a0(short arg1);
-};
-
 // @fnv 0x00a435a0
-void* FUN_00a435a0_shell::FUN_00a435a0(short arg1)
+NiAnimationKey* BSTreadTransfInterpolator::GetChannelKeys(unsigned short arg1) const
 {
     if (arg1 != 0)
         return 0;
-    void* obj = *reinterpret_cast<void**>(reinterpret_cast<char*>(this) + 0x20);
+    void* obj = reference.m_pObject;
     if (obj)
-        return *reinterpret_cast<void**>(reinterpret_cast<char*>(obj) + 0xc);
+        return *reinterpret_cast<NiAnimationKey**>(reinterpret_cast<char*>(obj) + 0xc);
     return 0;
 }
-
-struct BSTreadTransfInterpolator
-{
-    ~BSTreadTransfInterpolator();
-    void* FUN_00a43a50(unsigned int flags);
-};
 
 extern "C" void __cdecl __Dummy_00b6fef0(void* ptr, unsigned int flags);
 
 // @fnv 0x00a43a50
 void* BSTreadTransfInterpolator::FUN_00a43a50(unsigned int flags)
 {
-    this->~BSTreadTransfInterpolator();
+    this->BSTreadTransfInterpolator::~BSTreadTransfInterpolator();
     if (flags & 1)
         __Dummy_00b6fef0(this, 0x24);
     return this;
 }
 
-struct FUN_00a435c0_shell
-{
-    unsigned char m_auiShapeKeys[0x20];
-    void* m_ptr_20;
-    char __thiscall FUN_00a435c0(short arg);
-};
-
 // @fnv 0x00a435c0
-char __thiscall FUN_00a435c0_shell::FUN_00a435c0(short arg)
+unsigned char BSTreadTransfInterpolator::GetColorKeySize(unsigned short arg) const
 {
     if (arg != 0)
         return 0;
-    void* p = m_ptr_20;
+    void* p = reference.m_pObject;
     if (p)
         return *reinterpret_cast<unsigned char*>(reinterpret_cast<unsigned char*>(p) + 0x14);
     return 0;
@@ -94,250 +68,42 @@ struct TrackFlags
 {
     unsigned char value;
 };
-struct SampleTrack
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int count;
-    float* times;
-    float* values;
-    TrackFlags flags;
-};
 float __cdecl InterpolateKey(float, float*, float*, unsigned int, unsigned int*, TrackFlags);
-struct FUN_00a434b0_shell
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    float previousTime;
-    unsigned int unk0c;
-    unsigned int unk10;
-    float previousValue;
-    float valueDelta;
-    unsigned int sampleIndex;
-    SampleTrack* track;
-    bool __thiscall UpdateSampleValue(float time, int, int);
-};
-// Samples the track at time, updates sampleIndex, computes valueDelta from the previous value, stores previousValue and previousTime, and returns true.
+// Samples the track, updates the sample index and value delta, and stores the current value and time.
 // @fnv 0x00a434b0
-bool __thiscall FUN_00a434b0_shell::UpdateSampleValue(float time, int, int)
+bool BSTreadTransfInterpolator::UpdateSampleValue(float time, int, int)
 {
-    SampleTrack* pTrack = track;
-    unsigned int count = pTrack->count;
-    float* values = pTrack->values;
-    TrackFlags flags = pTrack->flags;
-    float* times = pTrack->times;
+    NiFloatData* pTrack = reinterpret_cast<NiFloatData*>(reference.m_pObject);
+    unsigned int count = pTrack->m_uiNumKeys;
+    float* values = reinterpret_cast<float*>(pTrack->m_eRequestType);
+    TrackFlags flags;
+    flags.value = pTrack->m_ucKeyDataSize;
+    float* times = reinterpret_cast<float*>(pTrack->m_pKeyArray);
     if (count > 0)
     {
-        unsigned int index = sampleIndex;
+        unsigned int index = unk1c;
         float value = InterpolateKey(time, times, values, count, &index, flags);
-        sampleIndex = index;
-        if (previousTime > time && previousValue > value)
+        unk1c = index;
+        if (m_fLastTime > time && firstValue > value)
         {
-            valueDelta = (1.0f - previousValue) + value;
+            secondValue = (1.0f - firstValue) + value;
         }
         else
         {
-            valueDelta = value - previousValue;
+            secondValue = value - firstValue;
         }
-        previousValue = value;
+        firstValue = value;
     }
-    previousTime = time;
+    m_fLastTime = time;
     return true;
 }
 
-struct FUN_00a435e0_shell
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v0a();
-    virtual void v0b();
-    virtual void v0c();
-    virtual void v0d();
-    virtual void v0e();
-    virtual void v0f();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v1a();
-    virtual void v1b();
-    virtual void v1c();
-    virtual void v1d();
-    virtual void v1e();
-    virtual void v1f();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v2a();
-    virtual void v2b();
-    virtual void v2c();
-    virtual void v2d();
-    virtual void v2e();
-    virtual void v2f();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38(int arg);
-
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-
-    bool __thiscall FUN_00a435e0(int arg);
-};
-
 // @fnv 0x00a435e0
-inline void FUN_00a435e0_shell::v00()
-{}
-inline void FUN_00a435e0_shell::v01()
-{}
-inline void FUN_00a435e0_shell::v02()
-{}
-inline void FUN_00a435e0_shell::v03()
-{}
-inline void FUN_00a435e0_shell::v04()
-{}
-inline void FUN_00a435e0_shell::v05()
-{}
-inline void FUN_00a435e0_shell::v06()
-{}
-inline void FUN_00a435e0_shell::v07()
-{}
-inline void FUN_00a435e0_shell::v08()
-{}
-inline void FUN_00a435e0_shell::v09()
-{}
-inline void FUN_00a435e0_shell::v0a()
-{}
-inline void FUN_00a435e0_shell::v0b()
-{}
-inline void FUN_00a435e0_shell::v0c()
-{}
-inline void FUN_00a435e0_shell::v0d()
-{}
-inline void FUN_00a435e0_shell::v0e()
-{}
-inline void FUN_00a435e0_shell::v0f()
-{}
-inline void FUN_00a435e0_shell::v10()
-{}
-inline void FUN_00a435e0_shell::v11()
-{}
-inline void FUN_00a435e0_shell::v12()
-{}
-inline void FUN_00a435e0_shell::v13()
-{}
-inline void FUN_00a435e0_shell::v14()
-{}
-inline void FUN_00a435e0_shell::v15()
-{}
-inline void FUN_00a435e0_shell::v16()
-{}
-inline void FUN_00a435e0_shell::v17()
-{}
-inline void FUN_00a435e0_shell::v18()
-{}
-inline void FUN_00a435e0_shell::v19()
-{}
-inline void FUN_00a435e0_shell::v1a()
-{}
-inline void FUN_00a435e0_shell::v1b()
-{}
-inline void FUN_00a435e0_shell::v1c()
-{}
-inline void FUN_00a435e0_shell::v1d()
-{}
-inline void FUN_00a435e0_shell::v1e()
-{}
-inline void FUN_00a435e0_shell::v1f()
-{}
-inline void FUN_00a435e0_shell::v20()
-{}
-inline void FUN_00a435e0_shell::v21()
-{}
-inline void FUN_00a435e0_shell::v22()
-{}
-inline void FUN_00a435e0_shell::v23()
-{}
-inline void FUN_00a435e0_shell::v24()
-{}
-inline void FUN_00a435e0_shell::v25()
-{}
-inline void FUN_00a435e0_shell::v26()
-{}
-inline void FUN_00a435e0_shell::v27()
-{}
-inline void FUN_00a435e0_shell::v28()
-{}
-inline void FUN_00a435e0_shell::v29()
-{}
-inline void FUN_00a435e0_shell::v2a()
-{}
-inline void FUN_00a435e0_shell::v2b()
-{}
-inline void FUN_00a435e0_shell::v2c()
-{}
-inline void FUN_00a435e0_shell::v2d()
-{}
-inline void FUN_00a435e0_shell::v2e()
-{}
-inline void FUN_00a435e0_shell::v2f()
-{}
-inline void FUN_00a435e0_shell::v30()
-{}
-inline void FUN_00a435e0_shell::v31()
-{}
-inline void FUN_00a435e0_shell::v32()
-{}
-inline void FUN_00a435e0_shell::v33()
-{}
-inline void FUN_00a435e0_shell::v34()
-{}
-inline void FUN_00a435e0_shell::v35()
-{}
-inline void FUN_00a435e0_shell::v36()
-{}
-inline void FUN_00a435e0_shell::v37()
-{}
-inline void FUN_00a435e0_shell::v38(int)
-{}
-
-bool FUN_00a435e0_shell::FUN_00a435e0(int arg)
+bool BSTreadTransfInterpolator::FUN_00a435e0(int arg)
 {
-    if (unk20 != 0)
+    if (reference.m_pObject != 0)
     {
-        v38(arg);
+        GetColorKeyCount(static_cast<unsigned short>(arg));
     }
     return false;
 }
@@ -550,7 +316,7 @@ class A43600Color
     void SaveBinary(A43600Stream& kStream);
 };
 
-struct A43600Entry
+struct TreadTransformEntry
 {
     A43600Color m_kColor0;
     int unk10;
@@ -565,181 +331,78 @@ struct A43600Entry
     void* m_kName;
 };
 
+// The approved base header does not declare this stream helper.
 class A43600Base
 {
   public:
     void SaveBinaryBase(A43600Stream& kStream);
 };
 
-class A43600Controller : public A43600Base
-{
-  public:
-    void FUN_00a43600(A43600Stream& kStream);
-
-    int unk00;
-    int unk04;
-    int unk08;
-    A43600Entry* m_pkEntryArray;
-    unsigned int m_uiNumEntries;
-    int unk14;
-    int unk18;
-    int unk1C;
-    A43600Object* m_pkTarget;
-};
-
 // Saves the base data, entry count, each entry's name and two colors, then the target link ID to the stream.
 // @fnv 0x00a43600
-void A43600Controller::FUN_00a43600(A43600Stream& kStream)
+void BSTreadTransfInterpolator::SaveBinary(NiStream& arStream)
 {
-    SaveBinaryBase(kStream);
-    A43600SaveBinary(kStream, m_uiNumEntries);
-    for (unsigned int i = 0; i < m_uiNumEntries; i++)
+    A43600Stream& kStream = reinterpret_cast<A43600Stream&>(arStream);
+    reinterpret_cast<A43600Base*>(this)->SaveBinaryBase(kStream);
+    A43600SaveBinary(kStream, count);
+    for (unsigned int i = 0; i < count; i++)
     {
-        kStream.SerializeString(&m_pkEntryArray[i].m_kName);
-        m_pkEntryArray[i].m_kColor0.SaveBinary(kStream);
-        m_pkEntryArray[i].m_kColor1.SaveBinary(kStream);
+        kStream.SerializeString(&entries[i].m_kName);
+        entries[i].m_kColor0.SaveBinary(kStream);
+        entries[i].m_kColor1.SaveBinary(kStream);
     }
-    kStream.SaveLinkID(m_pkTarget);
+    kStream.SaveLinkID(reinterpret_cast<A43600Object*>(reference.m_pObject));
 }
 
-class NiMemObject
+template <class T> inline NiPointer<T>::NiPointer()
+    : m_pObject(0)
+{}
+
+template <class T> __declspec(nothrow) inline NiPointer<T>::~NiPointer()
 {
-  public:
-    static void* operator new(unsigned int stSize);
-    static void operator delete(void* pvMem, unsigned int stElementSize);
-};
+    T* pkNew = m_pObject;
+    if (pkNew && InterlockedDecrement((long volatile*)&pkNew->m_uiRefCount) == 0)
+        pkNew->DeleteThis();
+}
 
-class NiKeyBasedInterpolator : public NiMemObject
-{
-  public:
-    NiKeyBasedInterpolator() throw();
-    virtual ~NiKeyBasedInterpolator();
+inline BSTreadTransfInterpolator::BSTreadTransfInterpolator() throw()
+    : entries(0), count(0), firstValue(0.0f), secondValue(0.0f), unk1c(0)
+{}
 
-    unsigned int m_uiRefCount;
-    float m_fLastTime;
-};
-
-class NiRefObject
-{
-  public:
-    void IncRefCount()
-    {
-        ++m_uiRefCount;
-    }
-    void DecRefCount();
-    void* m_vtbl;
-    unsigned int m_uiRefCount;
-};
-
-template <class T> class NiPointer
-{
-  public:
-    NiPointer(T* pObject = 0)
-    {
-        m_pObject = pObject;
-        if (m_pObject)
-            m_pObject->IncRefCount();
-    }
-    ~NiPointer()
-    {
-        if (m_pObject)
-            m_pObject->DecRefCount();
-    }
-
-    T* m_pObject;
-};
-
-class NiFloatData : public NiRefObject
-{
-};
-
-class TreadTransfInterpolator : public NiKeyBasedInterpolator
-{
-  public:
-    TreadTransfInterpolator() throw()
-        : m_uiUnk0C(0), m_uiUnk10(0), m_fPreviousValue(0.0f), m_fValueDelta(0.0f), m_uiSampleIndex(0)
-    {}
-    virtual ~TreadTransfInterpolator();
-
-    TreadTransfInterpolator* FUN_00a439e0(void* kCloning);
-    void FUN_00a43690(TreadTransfInterpolator* pkDest, void* kCloning);
-
-    unsigned int m_uiUnk0C;
-    unsigned int m_uiUnk10;
-    float m_fPreviousValue;
-    float m_fValueDelta;
-    unsigned int m_uiSampleIndex;
-    NiPointer<NiFloatData> m_spFloatData;
-};
-
-// Allocates a new TreadTransfInterpolator, passes it and kCloning to FUN_00a43690, then returns it.
+// Allocates a clone and copies the interpolator data.
 // @fnv 0x00a439e0
-TreadTransfInterpolator* TreadTransfInterpolator::FUN_00a439e0(void* kCloning)
+BSTreadTransfInterpolator* BSTreadTransfInterpolator::FUN_00a439e0(void* kCloning)
 {
-    TreadTransfInterpolator* pkClone = new TreadTransfInterpolator;
+    BSTreadTransfInterpolator* pkClone = new BSTreadTransfInterpolator;
     FUN_00a43690(pkClone, kCloning);
     return pkClone;
 }
 
-#include <windows.h>
 extern void* DAT_0109b220;
-
-struct a43840_Ref
-{
-    virtual void v00();
-    virtual void Release();
-    int refCount;
-};
 
 struct a43840_Mem
 {
-    void __thiscall _DeallocateAlias(void*);
+    __declspec(nothrow) void __thiscall _DeallocateAlias(void*);
 };
 
 extern a43840_Mem DAT_011f6238;
 
-struct a43840_Elem
-{
-    int unk00, unk04, unk08, unk0c;
-    int unk10, unk14, unk18, unk1c;
-    int unk20, unk24, unk28, unk2c;
-    int unk30, unk34, unk38, unk3c;
-    void* m_40;
-};
-
-class FUN_00a43840
-{
-  public:
-    virtual void v00();
-    int unk04;
-    int unk08;
-    a43840_Elem* m_0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    a43840_Ref* m_20;
-
-    virtual ~FUN_00a43840();
-    void FUN_00a3ca30();
-};
-
-// Frees the element array, decrements the reference count of m_20 and calls Release when it reaches zero, then calls FUN_00a3ca30.
+// Frees the entry array; member and base destructors release the reference and interpolator data.
 // @fnv 0x00a43840
-FUN_00a43840::~FUN_00a43840()
+BSTreadTransfInterpolator::~BSTreadTransfInterpolator()
 {
-    a43840_Elem* pElements = m_0c;
+    TreadTransformEntry* pElements = entries;
     if (pElements != 0)
     {
         int i = ((int*)pElements)[-1];
-        a43840_Elem* p = pElements + i;
+        TreadTransformEntry* p = pElements + i;
         i = i - 1;
         if (i >= 0)
         {
             do
             {
                 p = p - 1;
-                void* e = p->m_40;
+                void* e = p->m_kName;
                 if (e != DAT_0109b220)
                 {
                     InterlockedDecrement((long volatile*)((char*)e - 8));
@@ -748,10 +411,4 @@ FUN_00a43840::~FUN_00a43840()
         }
         DAT_011f6238._DeallocateAlias((char*)pElements - 4);
     }
-    a43840_Ref* r = m_20;
-    if (r != 0 && InterlockedDecrement((long volatile*)&r->refCount) == 0)
-    {
-        r->Release();
-    }
-    FUN_00a3ca30();
 }

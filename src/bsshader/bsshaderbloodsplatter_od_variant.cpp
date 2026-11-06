@@ -2,8 +2,27 @@
 // src/bsshader/bsshaderbloodsplatter_od_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/bsshader/bsshaderbloodsplatter.cpp functions whose prologue its flags cannot
 // produce (ebp frame in an /O2 unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "bsshaderbloodsplatter_types_BSShaderBloodSplatter.h"
-#include "bsshaderbloodsplatter_types_BSShaderManager.h"
+#include <stddef.h>
+#ifndef FNV_STATIC_ASSERT
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+#endif
+
+#include "../../include/BSShaderBloodSplatter.h"
+#include "../../include/NiPointer.h"
+#include "../../include/BSShader.h"
+#include "../../include/BSShaderManager.h"
+#include "../../include/NiD3DDefaultShader.h"
+#include "../../include/NiD3DPass.h"
+#include "../../include/NiD3DPixelShader.h"
+#include "../../include/NiD3DShader.h"
+#include "../../include/NiD3DShaderDeclaration.h"
+#include "../../include/NiD3DShaderInterface.h"
+#include "../../include/NiD3DVertexShader.h"
+#include "../../include/NiShader.h"
+#include "../../include/NiShaderDeclaration.h"
+
 #include "bsshaderbloodsplatter_types_NiConsoleShaderDeclaration.h"
 extern GraphicsRenderer* g_pkRenderer;
 extern float g_splatterDefaultFirst;
@@ -23,10 +42,6 @@ struct SplatterShaderInfo
 {
     const char* file;
     _D3DXMACRO macros[9];
-};
-struct FUN_00b807c0_shell
-{
-    int __thiscall FUN_00b807c0(void* a, void* b);
 };
 extern int g_011fedc8;
 int* __cdecl FUN_00b807b0();

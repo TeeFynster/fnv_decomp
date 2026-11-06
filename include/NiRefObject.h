@@ -1,43 +1,27 @@
-// Source layout: NiRefObject. PC corrections are in generate_headers.py.
-#ifndef FNV_NIREFOBJECT_H
-#define FNV_NIREFOBJECT_H
-#include "layout_support.h"
+#pragma once
+
 #include "NiMemObject.h"
-#ifndef FNV_NI_ATOMIC_DEFINED
-#define FNV_NI_ATOMIC_DEFINED
-inline unsigned int NiAtomicIncrement(unsigned int& value)
-{
-    return InterlockedIncrement(reinterpret_cast<volatile long*>(&value));
-}
-inline unsigned int NiAtomicSubtract(unsigned int& value)
-{
-    return InterlockedDecrement(reinterpret_cast<volatile long*>(&value));
-}
-#endif
-#pragma pack(push, 4)
+
+// RTTI (.?AVNiRefObject@@): base NiMemObject, which supplies operator new (0x00aa13e0) and the sized delete (0x00aa1460).
 class NiRefObject : public NiMemObject
 {
   public:
-    unsigned int m_uiRefCount;  // +0x4
-    NiRefObject()
-    {
-        m_uiRefCount = 0;
-        NiAtomicIncrement(ms_lObjectCount);
-    }
+    unsigned int m_uiRefCount;
+
+    NiRefObject();
     virtual ~NiRefObject();
     virtual void DeleteThis();
-    void IncRefCount()
+
+    void IncRefCount();
+    void DecRefCount();
+    void AcquireReference();
+    void DecRef();
+    unsigned int GetRefCount() const
     {
-        NiAtomicIncrement(m_uiRefCount);
+        return m_uiRefCount;
     }
-    void DecRefCount()
-    {
-        if (NiAtomicSubtract(m_uiRefCount) == 0)
-            DeleteThis();
-    }
+    void IncrementReferenceCount();
+    void DecrementReferenceCount();
+
     static unsigned int ms_lObjectCount;
 };
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(NiRefObject) == 0x8);
-FNV_STATIC_ASSERT(offsetof(NiRefObject, m_uiRefCount) == 0x4);
-#endif

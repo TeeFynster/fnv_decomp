@@ -2,25 +2,10 @@
 // src/havok/physics/collide/agent/compoundagent/bvtree/hkpmoppagent.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/agent/compoundagent/bvtree/hkpmoppagent.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 
 extern int DAT_010ce8f4;
 extern int DAT_0102e388;
@@ -42,13 +27,15 @@ struct FUN_00d2f380_cls
 void FUN_00d2f380_cls::DestroyArray()
 {
     m_vptr00 = (int)&DAT_010ce8f4;
-    AudioHolder* pHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uCapBits = m_uCapBits;
     m_iArrayLength = 0;
     if ((uCapBits & 0x80000000u) == 0)
     {
-        pAllocator->FreeArray(m_pData, (uCapBits & 0x3fffffffu) * 12);
+        // The shared declaration is nonvirtual; this call uses the allocator's fifth vtable slot.
+        typedef void (__thiscall* FreeArrayFn)(hkMemoryAllocator*, void*, unsigned int);
+        (*reinterpret_cast<FreeArrayFn**>(pAllocator))[4](pAllocator, m_pData, (uCapBits & 0x3fffffffu) * 12);
     }
     m_pData = 0;
     m_uCapBits = 0x80000000u;

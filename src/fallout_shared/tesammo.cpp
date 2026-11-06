@@ -1,3 +1,5 @@
+#include "../../include/TESAmmo.h"
+#include "../../include/BSStringT.h"
 // fallout_shared/tesammo.cpp: TESAmmo, AmmoMethods, AmmoSave (18 functions)
 
 #include "tesammo_load.h"
@@ -39,13 +41,13 @@ void TESAmmo::InitItem()
     ((TESModelTextureSwap*)((char*)this + 0x3C))->InitItem((TESForm*)this);
     ((BGSPickupPutdownSounds*)((char*)this + 0x90))->InitItem((TESForm*)this);
 
-    locals.formID = ((MiddleLowProcess*)this)->GetProcessInteger();
+    locals.formID = ((TESAmmoProjectileField*)this)->GetProcessInteger();
     if (locals.formID)
     {
         TESForm::RemapFormIDForFile(locals.formID, GetFile(-1));
-        ((MiddleLowProcess*)this)
+        ((TESAmmoProjectileField*)this)
             ->SetProcessInteger((int)dynamic_cast<BGSProjectile*>(TESForm::GetFormByID(locals.formID)));
-        if (!((MiddleLowProcess*)this)->GetProcessInteger())
+        if (!((TESAmmoProjectileField*)this)->GetProcessInteger())
         {
             Warning(DAT_01026288, locals.formID, GetName(), GetFormID());
         }
@@ -84,7 +86,7 @@ void TESAmmo::InitItem()
 }
 
 // @fnv 0x00502cd0
-bool TESAmmo::Load(TESFile* file)
+bool TESAmmo::LoadForm(TESFile* file)
 {
     unsigned char type = file->GetTESForm();
     if (type != 41)
@@ -261,11 +263,14 @@ void FUN_00504450_shell::FUN_00504450(unsigned int aiFlags)
 }
 
 struct BGSLoadFormBuffer;
-struct TESValueFormLoadGame
+// TESValueFormLoadGame_tesammo: local type (was include/TESValueFormLoadGame.h, which had no evidence of one real class); its methods are 0x0048ea80 TESValueForm::LoadGame
+#include "../../include/BGSLoadFormBuffer.h"
+
+class TESValueFormLoadGame_tesammo
 {
+public:
     void LoadGame(BGSLoadFormBuffer* buffer);
 };
-
 struct FUN_00503a40_shell : TESForm
 {
     void LoadGame(BGSLoadFormBuffer* buffer);
@@ -275,7 +280,7 @@ struct FUN_00503a40_shell : TESForm
 void FUN_00503a40_shell::LoadGame(BGSLoadFormBuffer* buffer)
 {
     TESForm::LoadGame(buffer);
-    ((TESValueFormLoadGame*)(this) + 0x78)->LoadGame(buffer);
+    ((TESValueFormLoadGame_tesammo*)(this) + 0x78)->LoadGame(buffer);
 }
 
 namespace fnv_00503210 {
@@ -421,13 +426,7 @@ struct AmmoScriptablePart
     bool m_bHasScript;
     virtual void Unk00();
 };
-struct AmmoString
-{
-    char* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    ~AmmoString();
-};
+
 struct AmmoEffectList
 {
     void* m_item;
@@ -449,28 +448,11 @@ struct AmmoDataNV
     float m_fDamageMultiplier;
 };
 
-struct FUN_00502880 : AmmoBoundObjectPart,
-                      AmmoFullNamePart,
-                      AmmoModelTextureSwapPart,
-                      AmmoIconPart,
-                      AmmoMessageIconPart,
-                      AmmoValueFormPart,
-                      AmmoClipRoundsPart,
-                      AmmoDestructiblePart,
-                      AmmoPickupPutdownPart,
-                      AmmoScriptablePart
-{
-    AmmoData data;
-    AmmoDataNV m_kProjectileData;
-    AmmoString m_kPrimaryString;
-    AmmoString m_kSecondaryString;
-    AmmoEffectList m_kEffects;
-    ~FUN_00502880();
-};
+
 
 // Destructor for the ammo object; the body is empty and member destructors run implicitly.
 // @fnv 0x00502880
-FUN_00502880::~FUN_00502880()
+TESAmmo::~TESAmmo()
 {}
 
 namespace fnv_00503670 {
@@ -486,10 +468,7 @@ struct AmmoMethods : TESAmmo
     AmmoEffectList* FUN_00923000();
     bool FUN_00503670(TESForm* form);
 };
-struct AmmoString
-{
-    int CompareString(BSStringT<char>*, bool);
-};
+
 // @fnv 0x00503670
 bool AmmoMethods::FUN_00503670(TESForm* form)
 {
@@ -507,9 +486,9 @@ bool AmmoMethods::FUN_00503670(TESForm* form)
         return true;
     if (memcmp(&m_kProjectileData, static_cast<AmmoMethods*>(i)->FUN_00984230(), 20))
         return true;
-    if (reinterpret_cast<AmmoString*>(&m_kSecondaryString)->CompareString(&i->m_kSecondaryString, true))
+    if (reinterpret_cast<::BSStringT<char>*>(&m_kSecondaryString)->FUN_00501c90(&i->m_kSecondaryString, true))
         return true;
-    if (reinterpret_cast<AmmoString*>(&m_kPrimaryString)->CompareString(&i->m_kPrimaryString, true))
+    if (reinterpret_cast<::BSStringT<char>*>(&m_kPrimaryString)->FUN_00501c90(&i->m_kPrimaryString, true))
         return true;
     if (FUN_00923000()->FUN_005ae380() != static_cast<AmmoMethods*>(i)->FUN_00923000()->FUN_005ae380())
         return true;
@@ -658,7 +637,7 @@ void FUN_00503510_shell::CopyFromAmmo(TESForm* pkForm)
     FUN_004851b0(pkForm);
     __memcpy(&data, pSourceAmmo->FUN_00503650(), 8);
     __memcpy(&m_kProjectileData, FUN_00984230((char*)pSourceAmmo), 0x14);
-    FUN_004f15a0(FNV_GetFormType(pSourceAmmo));
+    FUN_004f15a0(::FNV_GetFormType(pSourceAmmo));
     m_kPrimaryString.Set(((AmmoString503*)&pSourceAmmo->m_kPrimaryString)->FUN_00559450(), 0);
     m_kSecondaryString.Set(((AmmoString503*)&pSourceAmmo->m_kSecondaryString)->FUN_00559450(), 0);
     while (!FUN_008256d0(FUN_00923000()))
@@ -668,7 +647,7 @@ void FUN_00503510_shell::CopyFromAmmo(TESForm* pkForm)
     {
         TESAmmoEffect* pkEffect = pkNodeCur->FUN_006815c0();
         FUN_00923000()->FUN_00905820(pkEffect);
-        pkNodeCur = FUN_00726070(pkNodeCur);
+        pkNodeCur = ::FUN_00726070(pkNodeCur);
     }
 }
 

@@ -1,35 +1,28 @@
+
+#include "../../include/BSSimpleArray.h"
 // bscore/bsscraparray_decls.h: declares MemoryManager
 #ifndef BSSCRAPARRAY_DECLS_H
 #define BSSCRAPARRAY_DECLS_H
 
+#include "../../include/MemoryManager.h"
+
 class NiAVObject;
 class Animation;
 class NavMeshInfo;
+
 template <class T> class NiPointer;
-class ScrapHeapBuffer;
-class MemoryManager
-{
-  public:
-    ScrapHeapBuffer* GetGeneralAllocator();
-};
 MemoryManager* FUN_00401020();
-template <class T, unsigned int N> class BSSimpleArray
-{
-  public:
-    BSSimpleArray();
-    ~BSSimpleArray();
-    void* vtable;
-    T* pBuffer;
-    unsigned int iSize, SimpleArrayStorage;
-    void FUN_00822860(unsigned int, bool);
-    void FUN_006b3eb0(unsigned int, bool);
-};
+
+
 extern unsigned int DAT_01084074;
 extern unsigned int DAT_0108c228;
-template <class T, unsigned int N> class BSScrapArray : public BSSimpleArray<T, N>
+
+
+// local form of BSScrapArray: 0x0087d1b0/0x009789e0 needs the BSSimpleArray base ctor and EH cleanup.
+template <class T, unsigned int N> class ScrapArrayWithBase : public BSSimpleArray<T, N>
 {
-  public:
-    BSScrapArray();
+public:
+    ScrapArrayWithBase();
     ScrapHeapBuffer* m_pAllocator;
 };
 #endif

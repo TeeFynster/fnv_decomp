@@ -1,13 +1,15 @@
 
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/NiD3DShaderProgram.h"
+#include "../../../../include/NiTMapBase.h"
+#include "../../../../include/NiTPointerAllocator.h"
+
+class NiShader;
+typedef NiTMapBase<NiTPointerAllocator<unsigned int>, const char*, NiShader*> ShaderMapBase;
+
 extern "C" void __cdecl _delete(void*, unsigned int);
 
-struct NiD3DShaderProgram
-{
-    void FUN_00e89840();
-    void* DestroyIfFlagged(unsigned int flags);
-};
 
 // Calls FUN_00e89840, then deletes this with size 0x2c when flags has bit 1 set, and returns this.
 // @fnv 0x00e898a0
@@ -19,10 +21,6 @@ void* NiD3DShaderProgram::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-struct NiTMapBase
-{
-    bool RemoveAt(char const*);
-};
 struct Direct3DDeviceInterface
 {
     virtual void f0();
@@ -50,7 +48,7 @@ struct Direct3DDeviceInterface
 struct Program
 {
     char _pad[0x14];
-    NiTMapBase* pkMap;
+    ShaderMapBase* pkMap;
 };
 extern Program* DAT_0126fa10;
 // If the global Program and its map exist, gets the device's name and removes that entry from the map.
@@ -64,7 +62,7 @@ void RemoveDeviceFromMap(Direct3DDeviceInterface* pkD3DDevice)
     char const* psz = pkD3DDevice->GetName();
     if (!psz)
         return;
-    NiTMapBase* pkM = DAT_0126fa10->pkMap;
+    ShaderMapBase* pkM = DAT_0126fa10->pkMap;
     if (!pkM)
         return;
     pkM->RemoveAt(psz);

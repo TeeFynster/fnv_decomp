@@ -2,11 +2,9 @@
 #ifndef FNV_MENUTOPICMANAGER_H
 #define FNV_MENUTOPICMANAGER_H
 
-#include "layout_support.h"
-#include "TESObjectREFR.h"
-#include "layout_support.h"
+#include "menutopic_layout.h"
+#include "../../../include/TESObjectREFR.h"
 class MenuTopic;
-class TopicMenuController;
 #pragma pack(push, 4)
 class TopicMenuController
 {

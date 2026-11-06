@@ -14,7 +14,6 @@ class ListBox_TESRecipeComponent___;
 class ListBoxItem_TESConditionItem___;
 class ListBoxItem_TESRecipe___;
 class ListBoxItem_TESRecipeComponent___;
-class RecipeMenu;
 enum MENU_SOUNDS
 {
     MENU_SOUNDS_MENU_SOUND_NONE = -1,
@@ -257,56 +256,4 @@ FNV_STATIC_ASSERT(offsetof(ListBox_TESConditionItem___, m_fFirstListValue) == 32
 FNV_STATIC_ASSERT(offsetof(ListBox_TESConditionItem___, m_fSecondListValue) == 36);
 FNV_STATIC_ASSERT(offsetof(ListBox_TESConditionItem___, m_fThirdListValue) == 40);
 FNV_STATIC_ASSERT(offsetof(ListBox_TESConditionItem___, usFlags) == 44);
-#pragma pack(push, 4)
-class RecipeMenu : public Menu
-{
-  public:
-    void AssignTileByID(int tileID, Tile* tile);
-    // base Menu at +0x0, size 40
-    Tile* m_pTiles[14];                                    // +0x28, 56 bytes
-    TESObjectREFR* m_pCraftingReference;                   // +0x60, 4 bytes
-    TESForm* pCategory;                                    // +0x64, 4 bytes
-    MENU_SOUNDS m_eMenuSounds;                             // +0x68, 4 bytes
-    ListBox_TESRecipe___ m_kAvailableRecipeList;           // +0x6C, 48 bytes
-    ListBox_TESRecipe___* m_pCurrentList;                  // +0x9C, 4 bytes
-    ListBox_TESRecipeComponent___ m_kRecipeComponentList;  // +0xA0, 48 bytes
-    ListBox_TESConditionItem___ m_kConditionItemList;      // +0xD0, 48 bytes
-    bool m_bFlagAfterConditionList;                        // +0x100, 1 bytes
-    unsigned char layoutPadding101[3];
-    // void __cdecl RecipeMenu::*(TESBoundObject*, TESForm*)
-    // int __cdecl RecipeMenu::*(const void*, const void*)
-    // void __cdecl RecipeMenu::*(int)
-    // bool __cdecl RecipeMenu::*(TESRecipe*)
-    // RecipeMenu
-    // void __cdecl RecipeMenu::*()
-    // Tile* __cdecl RecipeMenu::*(TESObjectREFR*, TESForm*)
-    // int __cdecl RecipeMenu::*()
-    // int __cdecl RecipeMenu::*()
-    // bool __cdecl RecipeMenu::*()
-    // void __cdecl RecipeMenu::*(int, Tile*)
-    // void __cdecl RecipeMenu::*()
-    // void __cdecl RecipeMenu::*(int, Tile*)
-    // void __cdecl RecipeMenu::*(int, Tile*)
-    // void __cdecl RecipeMenu::*(int, Tile*)
-    // bool __cdecl RecipeMenu::*(int, float)
-    // void __cdecl RecipeMenu::*(int, Tile*)
-    // void __cdecl RecipeMenu::*()
-    // void __cdecl RecipeMenu::*(bool)
-    // int __cdecl RecipeMenu::*(TESRecipe*)
-    // void __cdecl RecipeMenu::*(TESForm*, Tile*)
-    // BSSimpleArray<TESRecipeCategory *,1024>* __cdecl RecipeMenu::*()
-    // RecipeMenu& __cdecl RecipeMenu::*(const RecipeMenu&)
-    // void __cdecl RecipeMenu::*()
-};
-#pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(RecipeMenu) == 260);
-FNV_STATIC_ASSERT(offsetof(RecipeMenu, m_pTiles) == 40);
-FNV_STATIC_ASSERT(offsetof(RecipeMenu, m_pCraftingReference) == 96);
-FNV_STATIC_ASSERT(offsetof(RecipeMenu, pCategory) == 100);
-FNV_STATIC_ASSERT(offsetof(RecipeMenu, m_eMenuSounds) == 104);
-FNV_STATIC_ASSERT(offsetof(RecipeMenu, m_kAvailableRecipeList) == 108);
-FNV_STATIC_ASSERT(offsetof(RecipeMenu, m_pCurrentList) == 156);
-FNV_STATIC_ASSERT(offsetof(RecipeMenu, m_kRecipeComponentList) == 160);
-FNV_STATIC_ASSERT(offsetof(RecipeMenu, m_kConditionItemList) == 208);
-FNV_STATIC_ASSERT(offsetof(RecipeMenu, m_bFlagAfterConditionList) == 256);
 #endif

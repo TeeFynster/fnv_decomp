@@ -1,8 +1,21 @@
+#include "../../include/NiTArray.h"
 
 // src/fallout_shared/tesobjectrefr_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/tesobjectrefr.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 #include "tesobjectrefr_decls.h"
+#include "../../include/NiRTTI.h"
+#include "../../include/NiObject.h"
+#include "../../include/ProjectileListener.h"
+#include "../../include/bhkAabbPhantom.h"
+#include "../../include/bhkRefObject.h"
+#include "../../include/bhkSphereShape.h"
+#include "../../include/bhkWorldObject.h"
+#include "../../include/hkReferencedObject.h"
+#include "../../include/hkArray.h"
+#include "../../include/hkpCollidable.h"
+#include "../../include/hkpShape.h"
+#include "../../include/hkpWorldObject.h"
 GarbageCollectorUpdateState* FUN_00446ef0();
 void* FUN_0056a8c0();
 void FUN_005743f0();
@@ -34,63 +47,45 @@ extern int DAT_01268238;
 extern const void* DAT_01030394;
 extern const void* DAT_0103078c;
 extern const void* DAT_010306b4;
-struct bhkRefObject
-{
-    void* vtbl;
-    int f4;
-    int f8;
-    int fc;
-    int f10;
-    unsigned char f14;
-    bhkRefObject* Initialize();
-};
 struct FUN_0056e2d0
 {
     virtual ~FUN_0056e2d0();
 };
 extern const void* vftable_FUN_0056e2d0;
-struct FUN_00c6d190 : bhkRefObject
+struct FUN_00c6d190
 {
+    bhkRefObject base;
+    int fc;
+    int f10;
+    unsigned char f14;
     FUN_00c6d190();
 };
 // @fnv 0x00c6d190
 FUN_00c6d190::FUN_00c6d190()
 {
-    Initialize();
-    vtbl = &DAT_01030394;
+    *(const void**)this = &DAT_01030394;
     fc = 0;
     f10 = 0;
     ++DAT_0126810c;
-    vtbl = &DAT_0103078c;
+    *(const void**)this = &DAT_0103078c;
     ++DAT_01268238;
-    vtbl = &DAT_010306b4;
+    *(const void**)this = &DAT_010306b4;
     ++DAT_01268208;
     f14 = 0;
-    vtbl = &vftable_FUN_0056e2d0;
+    *(const void**)this = &vftable_FUN_0056e2d0;
     ++DAT_0126822c;
     f14 = 0;
 }
 
-struct ProjectileListener
-{
-    void* vfptr;
-    int m4;
-    int m8;
-    void FUN_00c876a0();
-};
 // @fnv 0x00c876a0
-void ProjectileListener::FUN_00c876a0()
+__declspec(noinline) void ProjectileListener::FUN_00c876a0()
 {
     typedef void(__thiscall * Fn)(void*, int);
-    if (m8 != 0)
+    if (m_pHavokObject != 0)
         ((Fn)(*(void***)this)[0x8c / 4])(this, 0);
     ((Fn)(*(void***)this)[0xa4 / 4])(this, 1);
 }
 
-struct hkReferencedObject
-{
-    void removeReference();
-};
 void FUN_00c876a0();
 struct FUN_00c9d4c0_holder
 {
@@ -172,23 +167,14 @@ void Holder00c9d5d0::FUN_00c9d5d0()
 }
 
 extern int DAT_01268238;
-struct FUN_00c876a0_holder
-{
-    virtual ~FUN_00c876a0_holder();
-    void FUN_00c876a0();
-};
-struct bhkWorldObject
-{
-    void FUN_00c85790();
-};
-struct FUN_00c9f3b0 : FUN_00c876a0_holder
+struct FUN_00c9f3b0 : bhkWorldObject
 {
     virtual ~FUN_00c9f3b0();
 };
 // @fnv 0x00c9f3b0
 FUN_00c9f3b0::~FUN_00c9f3b0()
 {
-    FUN_00c876a0();
+    reinterpret_cast<ProjectileListener*>(this)->FUN_00c876a0();
     --DAT_01268238;
 }
 
@@ -196,60 +182,12 @@ struct WorldHolder
 {
     void UpdatePhantom(void* a, int b);
 };
-struct PhantomBase
-{
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-};
-struct bhkAabbPhantom : PhantomBase
-{
-    virtual WorldHolder* GetWorld();
-    int m4;
-    void* m8;
-    void FUN_00c9f460();
-};
 // @fnv 0x00c9f460
 void bhkAabbPhantom::FUN_00c9f460()
 {
     WorldHolder* w = GetWorld();
     if (w)
-        w->UpdatePhantom(m8, 1);
+        w->UpdatePhantom(m_pHavokObject, 1);
 }
 
 extern float DAT_010c72bc;
@@ -293,64 +231,13 @@ struct RetV
     char _0[4];
     float f4;
 };
-struct bhkSphereShape
-{
-    virtual void f00();
-    virtual void f01();
-    virtual void f02();
-    virtual void f03();
-    virtual void f04();
-    virtual void f05();
-    virtual void f06();
-    virtual void f07();
-    virtual void f08();
-    virtual void f09();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-    virtual void f38();
-    virtual void f39();
-    virtual void f40();
-    virtual void f41();
-    virtual void f42();
-    virtual void f43();
-    virtual void f44();
-    virtual RetV* Target(char* p);
-    void __thiscall FUN_00c84df0(void* a, ArgB* b);
-    void __thiscall FUN_00ca0740(void* a, ArgB* b);
-};
 // @fnv 0x00ca0740
 void __thiscall bhkSphereShape::FUN_00ca0740(void* a, ArgB* b)
 {
     unsigned int tmp;
-    RetV* r = Target((char*)&tmp + 3);
+    RetV* r = reinterpret_cast<RetV*>(slotB4((char*)&tmp + 3));
     r->f4 *= b->f10;
-    FUN_00c84df0(a, b);
+    bhkSphereShape::FUN_00c84df0(a, b);
 }
 
 struct S_00cb3070
@@ -441,55 +328,45 @@ extern int DAT_0126810c;
 extern unsigned int DAT_012681bc;
 extern int DAT_012681fc;
 extern int DAT_012683c0;
-struct bhkRefObject
+extern const void* vftable_bhkLiquidAction;
+struct FUN_00cb3860
 {
-    void* m0;
-    void* m4;
-    void* m8;
+    bhkRefObject base;
     void* mC;
     void* m10;
     void* m14;
     void* m18;
-    bhkRefObject* Initialize();
-};
-extern const void* vftable_bhkLiquidAction;
-struct FUN_00cb3860 : public bhkRefObject
-{
     FUN_00cb3860();
 };
 // @fnv 0x00cb3860
 FUN_00cb3860::FUN_00cb3860()
 {
-    Initialize();
-    m0 = &DAT_01030394;
+    *(const void**)this = &DAT_01030394;
     m10 = 0;
     mC = 0;
     ++DAT_0126810c;
-    m0 = &DAT_010302bc;
+    *(const void**)this = &DAT_010302bc;
     ++DAT_012681fc;
-    m0 = &vftable_bhkLiquidAction;
+    *(const void**)this = &vftable_bhkLiquidAction;
     m14 = 0;
     m18 = 0;
     ++DAT_012681bc;
     m10 = 0;
-    m0 = &DAT_010c879c;
+    *(const void**)this = &DAT_010c879c;
     ++DAT_012683c0;
 }
 }  // namespace fnv_00cb3860
 
 extern int DAT_012681fc;
-struct FUN_00c9d620_holder : FUN_00c876a0_holder
+struct FUN_00c9d620_holder : bhkWorldObject
 {
-    void* m0;
-    void* m4;
-    void* m8;
     FUN_00c9d620_holder();
     ~FUN_00c9d620_holder();
 };
 // @fnv 0x00c9d620
 FUN_00c9d620_holder::~FUN_00c9d620_holder()
 {
-    void* p = m4;
+    void* p = m_pHavokObject;
     if (p)
     {
         void* q = *(void**)((char*)p + 0x210);
@@ -497,7 +374,7 @@ FUN_00c9d620_holder::~FUN_00c9d620_holder()
             ((hkReferencedObject*)q)->removeReference();
         *(void**)((char*)p + 0x210) = 0;
     }
-    FUN_00c876a0();
+    reinterpret_cast<ProjectileListener*>(this)->FUN_00c876a0();
     --DAT_012681fc;
 }
 
@@ -526,23 +403,25 @@ extern void* DAT_0103093c;
 extern void* DAT_01030a24;
 extern void* DAT_01030b0c;
 extern void* DAT_01030bf4;
-struct FUN_00c9fde0 : bhkRefObject
+struct FUN_00c9fde0
 {
+    bhkRefObject base;
+    int fc;
+    int f10;
     FUN_00c9fde0();
 };
 // @fnv 0x00c9fde0
 FUN_00c9fde0::FUN_00c9fde0()
 {
-    Initialize();
     fc = 0;
     f10 = 0;
-    vtbl = &DAT_01030bf4;
+    *(const void**)this = &DAT_01030bf4;
     DAT_012680f8 += 1;
-    vtbl = &DAT_01030b0c;
+    *(const void**)this = &DAT_01030b0c;
     DAT_01268274 += 1;
-    vtbl = &DAT_01030a24;
+    *(const void**)this = &DAT_01030a24;
     DAT_01268250 += 1;
-    vtbl = &DAT_0103093c;
+    *(const void**)this = &DAT_0103093c;
     DAT_0126825c += 1;
 }
 
@@ -609,25 +488,10 @@ FUN_00c84c50::~FUN_00c84c50()
 
 extern int DAT_0126810c;
 
-class FUN_00c85790_base
-{
-  public:
-    virtual void unk00();
-    ~FUN_00c85790_base();
-    int unk04;
-};
-
-class FUN_00c85790 : public FUN_00c85790_base
-{
-  public:
-    virtual ~FUN_00c85790();
-    void unk08();
-};
-
 // @fnv 0x00c85790
-FUN_00c85790::~FUN_00c85790()
+bhkWorldObject::~bhkWorldObject()
 {
-    this->unk08();
+    reinterpret_cast<ProjectileListener*>(this)->FUN_00c876a0();
     DAT_0126810c--;
 }
 
@@ -797,23 +661,11 @@ void WorldObjectView::FUN_00c85900(int a, int b)
     FUN_00c87600(a, b);
 }
 
-struct NiRTTI
-{
-    const char* m_pcName;
-};
 
-struct NiObject
-{
-    virtual void v00();
-    virtual void v01();
-    virtual const NiRTTI* GetRTTI();
-};
 
-template <class T> struct NiTMallocInterface
-{
-};
+#include "../../include/NiTMallocInterface.h"
 
-template <class T, class A> struct NiTPrimitiveArray
+template <class T, class A> struct DebugPrimitiveArray
 {
     void* vtbl;
     T* m_pBase;
@@ -836,7 +688,7 @@ template <class T, class A> struct NiTPrimitiveArray
     }
 };
 
-typedef NiTPrimitiveArray<char*, NiTMallocInterface<char*> > DebugStrArray;
+typedef DebugPrimitiveArray<char*, NiTMallocInterface<char*> > DebugStrArray;
 
 struct hkShapeStub
 {
@@ -898,35 +750,26 @@ char* MakeDebugLine(const char* label, const char* value);
 int SprintfS(char* buf, int size, const char* fmt, ...);
 extern const char* g_debugHeaderName;
 
-struct bhkBase_c878c0
-{
-    void* vtbl;
-    int unk04;
-    hkWorldObjStub* m_pObject;
-    hkCdBodyStub* GetBody()
-    {
-        return m_pObject;
-    }
-    void BaseDebugInfo(DebugStrArray* arr);
-};
+void __fastcall AppendHavokViewerStrings(bhkRefObject*, void*, DebugStrArray*);
 
-struct bhkWorldObject_c86190 : bhkBase_c878c0
+static __forceinline hkCdBodyStub* GetWorldObjectBody(bhkWorldObject* object)
 {
-    void FUN_00c86190(DebugStrArray* arr);
-};
+    return (hkWorldObjStub*)object->m_pHavokObject;
+}
 
 // @fnv 0x00c86190
-void bhkWorldObject_c86190::FUN_00c86190(DebugStrArray* arr)
+void __fastcall FUN_00c86190(bhkWorldObject* object, void*, DebugStrArray* arr)
 {
     HeapContextGuard guard(0x10);
-    BaseDebugInfo(arr);
+    typedef void (__thiscall* AppendStrings)(bhkRefObject*, DebugStrArray*);
+    ((AppendStrings)AppendHavokViewerStrings)(object, arr);
     arr->Add(MakeDebugHeader(g_debugHeaderName));
-    hkCdBodyStub* b = GetBody();
+    hkCdBodyStub* b = GetWorldObjectBody(object);
     DebugHelper_c849b0 helper(b ? b->unk1C : 0);
     helper.Fill(arr);
-    if (m_pObject)
+    if (object->m_pHavokObject)
     {
-        hkCdBodyStub* body = GetBody();
+        hkCdBodyStub* body = GetWorldObjectBody(object);
         if (body)
         {
             hkShapeStub* shape = body->m_pCollisionShape;
@@ -976,12 +819,12 @@ struct FUN_00c9eb30 : FUN_00c9f3b0
 // @fnv 0x00c9eb30
 FUN_00c9eb30::~FUN_00c9eb30()
 {
-    FUN_00c876a0();
+    reinterpret_cast<ProjectileListener*>(this)->FUN_00c876a0();
     --DAT_01268208;
 }
 
 namespace fnv_00c9eec0 {
-struct FUN_00c9eb30 : FUN_00c876a0_holder
+struct FUN_00c9eb30 : bhkWorldObject
 {
     virtual ~FUN_00c9eb30();
 };
@@ -994,7 +837,7 @@ struct FUN_00c9eec0 : FUN_00c9eb30
 // @fnv 0x00c9eec0
 FUN_00c9eec0::~FUN_00c9eec0()
 {
-    FUN_00c876a0();
+    reinterpret_cast<ProjectileListener*>(this)->FUN_00c876a0();
     --DAT_0126822c;
 }
 }  // namespace fnv_00c9eec0
@@ -1218,7 +1061,7 @@ bhkRefObject* FUN_00c9efa0_cls::FUN_00c9efa0(unsigned int flag)
     FUN_00c6d190* p = new FUN_00c6d190;
     this->FUN_00c85900(p, flag);
     FUN_00c87700();
-    return p;
+    return &p->base;
 }
 
 struct S_00c9f1e0_Shape
@@ -1943,31 +1786,19 @@ struct BC9F970AllocTagScope
     }
 };
 
-class BC9F970StringArray
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::SetAtGrow(unsigned int uiIndex, const T& element)
 {
-  public:
-    virtual ~BC9F970StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, element);
+    return uiIndex;
+}
+template <class T, class TAlloc> inline unsigned int NiTArray<T, TAlloc>::Add(const T& element)
+{
+    return SetAtGrow(m_usSize, element);
+}
 
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > BC9F970StringArray;
 
 extern const char* g_pcC9F970Name;
 
@@ -2105,14 +1936,14 @@ struct SphereScalingMethod : bhkSphereShape
 void SphereScalingMethod::FUN_00c9fea0(void* first, ArgB* second)
 {
     char flag;
-    SphereScaleFields* result = reinterpret_cast<SphereScaleFields*>(Target(&flag));
+    SphereScaleFields* result = reinterpret_cast<SphereScaleFields*>(slotB4(&flag));
     float scale = second->f10;
     volatile float& initial = result->m_10;
     result->m_10 = initial * scale;
     result->m_14 *= scale;
     result->m_18 *= scale;
     result->m_1c *= scale;
-    FUN_00c84df0(first, second);
+    bhkSphereShape::FUN_00c84df0(first, second);
 }
 
 struct Tls_ca0090
@@ -2499,31 +2330,7 @@ struct BCA05B0AllocTagScope
     }
 };
 
-class BCA05B0StringArray
-{
-  public:
-    virtual ~BCA05B0StringArray();
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char* const& pcElement);
-
-    unsigned int SetAtGrow(unsigned int uiIndex, char* const& pcElement)
-    {
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-    unsigned int Add(char* const& pcElement)
-    {
-        return SetAtGrow(m_usSize, pcElement);
-    }
-
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-};
+typedef NiTArray<char*, NiTMallocInterface<char*> > BCA05B0StringArray;
 
 extern const char* g_pcCA05B0Name;
 
@@ -2839,7 +2646,7 @@ struct FUN_00ccd080 : FUN_00c9fb00
 // @fnv 0x00ccd080
 FUN_00ccd080::~FUN_00ccd080()
 {
-    ((FUN_00c876a0_holder*)this)->FUN_00c876a0();
+    reinterpret_cast<ProjectileListener*>(this)->FUN_00c876a0();
     DAT_0126868c--;
 }
 
@@ -2890,7 +2697,7 @@ struct FUN_00ccf4f0_cls : FUN_00c9fb00
 // @fnv 0x00ccf4f0
 FUN_00ccf4f0_cls::~FUN_00ccf4f0_cls()
 {
-    ((FUN_00c876a0_holder*)this)->FUN_00c876a0();
+    reinterpret_cast<ProjectileListener*>(this)->FUN_00c876a0();
 }
 
 extern int DAT_012686c0;
@@ -2909,23 +2716,14 @@ FUN_00ccf740_cls::~FUN_00ccf740_cls()
     --DAT_012686c0;
 }
 
-class NiObjectC9E
-{
-  public:
-    static void* operator new(unsigned int uiSize);
-    static void operator delete(void* pvMem, unsigned int uiSize);
 
-    virtual ~NiObjectC9E();
-};
-
-class NiControllerC9E : public NiObjectC9E
+class NiControllerC9E : public NiObject
 {
   public:
     NiControllerC9E();
 
-    static NiObjectC9E* FUN_00c9ef30();
+    static NiObject* FUN_00c9ef30();
 
-    unsigned int m_uiRefCount;
     int unk08;
     int unk0C;
     int unk10;
@@ -2933,7 +2731,7 @@ class NiControllerC9E : public NiObjectC9E
 };
 
 // @fnv 0x00c9ef30
-NiObjectC9E* NiControllerC9E::FUN_00c9ef30()
+NiObject* NiControllerC9E::FUN_00c9ef30()
 {
     return new NiControllerC9E;
 }
@@ -2943,7 +2741,8 @@ extern const char* DAT_0126823c;
 void FUN_00c9f970_cls::FUN_00c9f480(BC9F970StringArray* pkArray)
 {
     TlsGuard_t kGuard;
-    ((bhkWorldObject_c86190*)this)->FUN_00c86190((DebugStrArray*)pkArray);
+    typedef void (__thiscall* AppendStrings)(bhkWorldObject*, DebugStrArray*);
+    ((AppendStrings)FUN_00c86190)((bhkWorldObject*)this, (DebugStrArray*)pkArray);
     pkArray->Add(FUN_00a7d330(DAT_0126823c));
 }
 
@@ -3686,40 +3485,24 @@ struct Pair8
 {
     int a, b;
 };
-template <class T> struct hkArr
+// hkArray::clearAndDeallocate through the pool's allocator.
+template <class T> static __forceinline void ClearAndRelease(hkArrayBase<T>& a, Pool* pool)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void clear()
-    {
-        m_iElementCount = 0;
-    }
-    void _clearAndDeallocate(FreeAllocator& alloc)
-    {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0)
-            alloc.ReturnMemory(m_data, getCapacity() * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    void ClearAndRelease(Pool* pool)
-    {
-        _clearAndDeallocate(*static_cast<FreeAllocator*>(pool->allocator));
-    }
-};
+    FreeAllocator& alloc = *static_cast<FreeAllocator*>(pool->allocator);
+    a.m_iElementCount = 0;
+    if ((a.m_iCapacityState & 0x80000000) == 0)
+        alloc.ReturnMemory(a.m_data, a.getCapacity() * sizeof(T));
+    a.m_data = 0;
+    a.m_iCapacityState = 0x80000000;
+}
 struct Info
 {
     unsigned int value;
     RefLink* link;
     unsigned int unk08;
-    hkArr<Pair8> arr;
+    hkArray<Pair8> arr;
 };
-void __cdecl FUN_00cf0930(Info*, int, hkArr<Pair8>*);
+void __cdecl FUN_00cf0930(Info*, int, hkArray<Pair8>*);
 struct Stream86060
 {
     virtual void v0();
@@ -3920,7 +3703,7 @@ void Obj86060::FUN_00c86060(Stream86060& stream)
         FUN_00cf0930(info, kind, &info->arr);
         info->value = _byteswap_ulong(info->value);
     }
-    info->arr.ClearAndRelease(FUN_00c85750());
+    ClearAndRelease(info->arr, FUN_00c85750());
     RefLink* ref = info->link;
     ref = ref ? ref->ref : 0;
     stream.WriteRef(ref);
@@ -3930,15 +3713,11 @@ void Obj86060::FUN_00c86060(Stream86060& stream)
 
 extern int DAT_01268244;
 
-struct FUN_00c9f530 : FUN_00c9f3b0
-{
-    virtual ~FUN_00c9f530();
-};
 
 // @fnv 0x00c9f530
-FUN_00c9f530::~FUN_00c9f530()
+bhkAabbPhantom::~bhkAabbPhantom()
 {
-    FUN_00c876a0();
+    reinterpret_cast<ProjectileListener*>(this)->FUN_00c876a0();
     DAT_01268244--;
 }
 
@@ -5331,132 +5110,49 @@ extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(volatile lo
 extern int DAT_012681bc;
 extern int DAT_012683c0;
 
-struct NiStream;
-struct CloningProcess;
 
-struct NiRefObjectBase
+
+
+// These helpers retain the unit's inlined Havok access path.  The shared
+// bhkWorldObject declaration supplies the object layout and constructor.
+void __fastcall SetHavokWorldObject(bhkWorldObject*, void*, hkReferencedObject*);
+void __fastcall CheckHavokWorldObject(bhkWorldObject*, void*);
+
+extern "C" void _ReadWriteBarrier();
+#pragma intrinsic(_ReadWriteBarrier)
+
+inline bhkSerializable::bhkSerializable()
+{}
+
+inline bhkWorldObject::bhkWorldObject()
 {
-    virtual ~NiRefObjectBase();
-    virtual void DeleteThis();
-    volatile long m_uiRefCount;
-    void IncRefCount()
+    _ReadWriteBarrier();
+    pInfo = 0;
+    iFlags = 0;
+    _ReadWriteBarrier();
+    ++DAT_0126810c;
+}
+
+static __forceinline NiObject* GetWorldObjectShape(bhkWorldObject* object)
+{
+    hkpWorldObject* pkObject = (hkpWorldObject*)object->m_pHavokObject;
+    if (pkObject)
     {
-        InterlockedIncrement(&m_uiRefCount);
-    }
-    void DecRefCount()
-    {
-        if (InterlockedDecrement(&m_uiRefCount) == 0)
-            DeleteThis();
-    }
-};
-
-struct NiObjectBase : NiRefObjectBase
-{
-    virtual const NiRTTI* GetRTTI();
-    virtual void* IsNiNode();
-    virtual void* IsFadeNode();
-    virtual void* IsMultiBoundNode();
-    virtual void* IsGeometry();
-    virtual void* IsTriBasedGeometry();
-    virtual void* IsTriStrips();
-    virtual void* IsTriShape();
-    virtual void* IsSegmentedTriShape();
-    virtual void* IsResizableTriShape();
-    virtual void* IsParticles();
-    virtual void* IsLines();
-    virtual void* IsLimitedHingeConstraint();
-    virtual void* IsRigidBody();
-    virtual void* IsCollisionObject();
-    virtual NiObjectBase* MakeClone(CloningProcess* pkCloning);
-    virtual void LoadBinary(NiStream* pkStream);
-    virtual void LinkObject(NiStream* pkStream);
-    virtual bool RegisterStreamables(NiStream* pkStream);
-    virtual void SaveBinary(NiStream* pkStream);
-    virtual bool IsEqual(NiObjectBase* pkObject);
-    virtual void GetViewerStrings(void* pkStrings);
-    virtual void AddViewerStrings(void* pkStrings);
-    virtual void ProcessClone(CloningProcess* pkCloning);
-    virtual void PostLinkObject(NiStream* pkStream);
-    virtual bool StreamCanSkip();
-    virtual const NiRTTI* GetStreamableRTTI();
-    virtual unsigned int GetBlockAllocationSize();
-    virtual void* GetGroup();
-    virtual void SetGroup(void* pkGroup);
-    virtual void* IsNiControllerManager();
-    virtual void PrepareForSave();
-    virtual void Unknown33();
-};
-
-struct hkpShapeStandIn
-{
-    void* vfptr;
-    int m_usMemSizeAndFlags;
-    NiObjectBase* m_ulUserData;
-};
-
-struct hkpCollidableStandIn
-{
-    hkpShapeStandIn* m_pCollisionShape;
-    const hkpShapeStandIn* getShape() const
-    {
-        return m_pCollisionShape;
-    }
-};
-
-struct hkpWorldObjectStandIn : hkReferencedObject
-{
-    void FUN_00c90510();
-    void* unk00;
-    int m_usMemSizeAndFlags;
-    void* m_pOwningWorld;
-    void* m_ulUserData;
-    hkpCollidableStandIn m_kCollidable;
-};
-
-struct bhkRefObjectBase : NiObjectBase
-{
-    virtual void SetHavokObject(hkpWorldObjectStandIn* pkObject);
-    hkpWorldObjectStandIn* m_pkHavokObject;
-    bhkRefObjectBase();
-};
-
-struct WorldObjectPair
-{
-    int unk00;
-    int unk04;
-    WorldObjectPair() : unk00(0), unk04(0)
-    {}
-};
-
-struct bhkWorldObjectBase : bhkRefObjectBase
-{
-    virtual void SetHavokObject(hkpWorldObjectStandIn* pkObject);
-    WorldObjectPair unk0C;
-    bhkWorldObjectBase()
-    {
-        ++DAT_0126810c;
-    }
-    void FUN_00a29680();
-    NiObjectBase* GetShape()
-    {
-        hkpWorldObjectStandIn* pkObject = m_pkHavokObject;
-        if (pkObject)
+        typedef void (__thiscall* CheckObject)(bhkWorldObject*);
+        ((CheckObject)CheckHavokWorldObject)(object);
+        const hkpCollidable* pkCollidable = &pkObject->m_kCollidable;
+        ((CheckObject)CheckHavokWorldObject)(object);
+        if (pkCollidable)
         {
-            FUN_00a29680();
-            const hkpCollidableStandIn* pkCollidable = &pkObject->m_kCollidable;
-            FUN_00a29680();
-            if (pkCollidable)
-            {
-                const hkpShapeStandIn* pkShape = pkCollidable->getShape();
-                if (pkShape)
-                    return pkShape->m_ulUserData;
-            }
+            const hkpShape* pkShape = pkCollidable->m_pCollisionShape;
+            if (pkShape)
+                return reinterpret_cast<NiObject*>(pkShape->m_ulUserData);
         }
-        return 0;
     }
-};
+    return 0;
+}
 
-struct bhkEntityBase : bhkWorldObjectBase
+struct bhkEntityBase : bhkWorldObject
 {
     bhkEntityBase()
     {
@@ -5487,14 +5183,16 @@ struct FUN_00cb38c0 : bhkRigidBodyBase
 FUN_00cb38c0::FUN_00cb38c0(bhkRigidBodyBase* pkSource)
 {
     ++DAT_012683c0;
-    hkpWorldObjectStandIn* pkObject = pkSource->m_pkHavokObject;
-    pkObject->FUN_00c90510();
-    NiObjectBase* pkShape = pkSource->GetShape();
+    hkpWorldObject* pkObject = (hkpWorldObject*)pkSource->m_pHavokObject;
+    pkObject->addReference();
+    NiObject* pkShape = GetWorldObjectShape(pkSource);
     if (pkShape)
-        pkShape->IncRefCount();
-    pkSource->SetHavokObject(0);
-    SetHavokObject(pkObject);
-    pkShape->DecRefCount();
+        InterlockedIncrement((volatile long*)&pkShape->m_uiRefCount);
+    typedef void (__thiscall* SetObject)(bhkWorldObject*, hkReferencedObject*);
+    ((SetObject)(*(void***)pkSource)[35])(pkSource, 0);
+    ((SetObject)SetHavokWorldObject)(this, pkObject);
+    if (InterlockedDecrement((volatile long*)&pkShape->m_uiRefCount) == 0)
+        pkShape->DeleteThis();
     pkObject->removeReference();
 }
 
@@ -6329,7 +6027,8 @@ void ShapeViewerFields::FUN_00c851c0(BCA05B0StringArray* output)
 {
     TlsGuard_ca0090 context;
     DebugStrArray* strings = reinterpret_cast<DebugStrArray*>(output);
-    reinterpret_cast<bhkBase_c878c0*>(this)->BaseDebugInfo(strings);
+    typedef void (__thiscall* AppendStrings)(bhkRefObject*, DebugStrArray*);
+    ((AppendStrings)AppendHavokViewerStrings)((bhkRefObject*)this, strings);
     strings->Add(FUN_00a7d330(DAT_01268100));
     strings->Add(FUN_00a7d4d0(DAT_010c59cc, reinterpret_cast<ShapeViewerFields*>(this)->Layer()));
 }

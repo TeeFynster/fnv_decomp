@@ -1,46 +1,46 @@
 // src/havok/common/visualize/serialize/hkdisplayserializeistream.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/serialize/hkdisplayserializeistream.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct DdabeTag
+#define FNV_VEC4_SIMD
+#include "../../../../../include/Vec4.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/BSAudio.h"
+#include "../../../../../include/hkDisplaySerializeIStream.h"
+#include "../../../../../include/hkIArchive.h"
+#include "../../../../../include/hkVector4.h"
+#include "../../../../../include/hkTransform.h"
+#include "../../../../../include/hkRotation.h"
+
+struct ArchiveByteFlag
 {
     bool b;
-    DdabeTag() : b(false)
+    ArchiveByteFlag() : b(false)
     {}
-    DdabeTag(const DdabeTag& o) : b(o.b)
+    ArchiveByteFlag(const ArchiveByteFlag& o) : b(o.b)
     {}
 };
 
-struct DdabeBase
-{
-    DdabeBase(int a, DdabeTag t);
-    virtual void unk00();
-};
-
-struct FUN_00ddabe0 : DdabeBase
-{
-    FUN_00ddabe0(int a);
-    virtual void unk00();
-};
+// The shared headers do not declare these constructors. Keep their ABI here
+// without a local archive or display-stream class.
+extern "C" void ConstructIArchive();
+extern "C" void* DisplaySerializeIStreamVtable[];
+typedef void (__thiscall* IArchiveConstructor)(hkIArchive*, int, ArchiveByteFlag);
 
 // @fnv 0x00ddabe0
-FUN_00ddabe0::FUN_00ddabe0(int a) : DdabeBase(a, DdabeTag())
-{}
-
-struct FUN_00ddac60_Obj
+hkDisplaySerializeIStream* __fastcall ConstructDisplaySerializeIStream(
+    hkDisplaySerializeIStream* stream, void*, int a)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    float unk0C;
-};
-
-void __stdcall FUN_00dd8fe0(FUN_00ddac60_Obj* obj, int a, int b);
+    reinterpret_cast<IArchiveConstructor>(&ConstructIArchive)(stream, a, ArchiveByteFlag());
+    *reinterpret_cast<void***>(stream) = DisplaySerializeIStreamVtable;
+    return stream;
+}
 
 // @fnv 0x00ddac60
-void __stdcall FUN_00ddac60(FUN_00ddac60_Obj* obj)
+__declspec(noinline) void hkDisplaySerializeIStream::FUN_00ddac60(hkVector4& obj)
 {
-    FUN_00dd8fe0(obj, 4, 3);
-    obj->unk0C = 0.0f;
+    FUN_00dd8fe0(&obj, 4, 3);
+    obj.w = 0.0f;
 }
 
 struct ArrayRecord
@@ -54,21 +54,17 @@ struct ArrayPair
     ArrayRecord first;
     ArrayRecord second;
 };
-struct BSAudio
-{
-};
 BSAudio* __cdecl FUN_00c85750();
 extern "C" void __cdecl FUN_00c908c0(void*, void*, int, int);
-struct FUN_00ddacd0_shell
-{
-    void __thiscall FUN_00dd8fe0(void* output, int elementSize, int count);
-    void __thiscall FUN_00ddac60(void* output);
-    void __thiscall FUN_00ddac00(void* output);
-    void __thiscall FUN_00ddacd0(ArrayPair* arrays);
-};
+// The triangle reader is absent from the shared stream declaration. The unused
+// fastcall register argument leaves its original thiscall entry ABI intact.
+__declspec(noinline) void __fastcall ReadDisplayTriangle(hkDisplaySerializeIStream*, void*, void*);
+typedef void (__thiscall* DisplayTriangleReader)(hkDisplaySerializeIStream*, void*);
+
 // @fnv 0x00ddacd0
-void __thiscall FUN_00ddacd0_shell::FUN_00ddacd0(ArrayPair* arrays)
+void hkDisplaySerializeIStream::FUN_00ddacd0(hkGeometry* geometry)
 {
+    ArrayPair* arrays = reinterpret_cast<ArrayPair*>(geometry);
     {
         int firstCount;
         FUN_00dd8fe0(&firstCount, 4, 1);
@@ -77,7 +73,7 @@ void __thiscall FUN_00ddacd0_shell::FUN_00ddacd0(ArrayPair* arrays)
             for (int remaining = firstCount; remaining != 0; --remaining)
             {
                 BSAudio* allocator = FUN_00c85750();
-                void* growFunction = *(void**)((char*)allocator + 0x10);
+                hkMemoryAllocator* growFunction = reinterpret_cast<hkMemoryAllocator*>(reinterpret_cast<hkMemoryRouter*>(allocator)->m_heap);
                 ArrayRecord* array = &arrays->first;
                 int size = array->size;
                 int needed = size + 1;
@@ -91,7 +87,7 @@ void __thiscall FUN_00ddacd0_shell::FUN_00ddacd0(ArrayPair* arrays)
                 }
                 ++array->size;
                 void* output = (char*)array->data + size * 16;
-                FUN_00ddac60(output);
+                FUN_00ddac60(*reinterpret_cast<hkVector4*>(output));
             }
         }
     }
@@ -104,7 +100,7 @@ void __thiscall FUN_00ddacd0_shell::FUN_00ddacd0(ArrayPair* arrays)
             for (int remaining = secondCount; remaining != 0; --remaining)
             {
                 BSAudio* allocator = FUN_00c85750();
-                void* growFunction = *(void**)((char*)allocator + 0x10);
+                hkMemoryAllocator* growFunction = reinterpret_cast<hkMemoryAllocator*>(reinterpret_cast<hkMemoryRouter*>(allocator)->m_heap);
                 int size = array->size;
                 int needed = size + 1;
                 int capacity = array->capacity & 0x3fffffff;
@@ -117,117 +113,59 @@ void __thiscall FUN_00ddacd0_shell::FUN_00ddacd0(ArrayPair* arrays)
                 }
                 ++array->size;
                 void* output = (char*)array->data + size * 16;
-                FUN_00ddac00(output);
+                reinterpret_cast<DisplayTriangleReader>(&ReadDisplayTriangle)(this, output);
             }
         }
     }
 }
 
-struct AudioAllocator
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-};
-
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
-
-struct FUN_00dd9210_cls
-{
-    int unk00;
-    unsigned short m_uSize;
-    unsigned short m_u06;
-
-    void FUN_00dd91f0();
-
-    FUN_00dd9210_cls* FUN_00dd9210(unsigned char acFlags);
-};
-
-// Calls FUN_00dd91f0, then if acFlags bit 0 is set frees this via the allocator from FUN_00c85750 with m_uSize, and returns this.
+// Calls the archive destructor, optionally frees its allocated size, and returns the archive.
 // @fnv 0x00dd9210
-FUN_00dd9210_cls* FUN_00dd9210_cls::FUN_00dd9210(unsigned char acFlags)
+hkIArchive* __fastcall DeleteIArchive(hkIArchive* archive, void*, unsigned char acFlags)
 {
-    FUN_00dd91f0();
+    archive->FUN_00dd91f0();
     if (acFlags & 1)
     {
-        AudioHolder* pHolder = reinterpret_cast<AudioHolder*>(FUN_00c85750());
-        AudioAllocator* pAllocator = pHolder->m_pAllocator;
-        pAllocator->Free(this, m_uSize);
+        hkMemoryRouter* pHolder = reinterpret_cast<hkMemoryRouter*>(FUN_00c85750());
+        hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
+        // Preserve the allocator's virtual free dispatch at vtable slot 2.
+        typedef void (__thiscall* FreeFunction)(hkMemoryAllocator*, void*, unsigned int);
+        reinterpret_cast<FreeFunction>((*reinterpret_cast<void***>(pAllocator))[2])(pAllocator, archive, archive->m_usMemSizeAndFlags);
     }
-    return this;
+    return archive;
 }
 
-#include <xmmintrin.h>
-struct __declspec(align(16)) Vec4
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct FUN_008cd6a0_Class
-{
-    void FUN_00cb2d90(void* value);
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    __m128 unk30;
-};
-struct hkIArchive
-{
-    void FUN_00dd8fe0(void* destination, int componentSize, int components);
-};
-struct hkDisplaySerializeIStream : hkIArchive
-{
-    void FUN_00ddac80(FUN_008cd6a0_Class* target);
-};
-// Reads a 3-component vector (w set to 1.0f) into target->unk30 and a 4-component value that is passed to target->FUN_00cb2d90.
+// Reads the translation (w set to 1.0f), then a quaternion used to set the rotation.
 // @fnv 0x00ddac80
-void hkDisplaySerializeIStream::FUN_00ddac80(FUN_008cd6a0_Class* target)
+void hkDisplaySerializeIStream::FUN_00ddac80(hkTransform* target)
 {
     Vec4 source;
     Vec4 destination;
     FUN_00dd8fe0(&source, 4, 3);
     source.w = 1.0f;
     FUN_00dd8fe0(&destination, 4, 4);
-    target->unk30 = *(__m128*)&source;
-    target->FUN_00cb2d90(&destination);
+    target->m_vTranslation = *(__m128*)&source;
+    target->m_rotation.FUN_00cb2d90(reinterpret_cast<const hkQuaternion&>(destination));
 }
 
 // Reads three 4-byte integers via FUN_00dd8fe0 and stores them sequentially into the output buffer.
 // @fnv 0x00ddac00
-__declspec(noinline) void __thiscall FUN_00ddacd0_shell::FUN_00ddac00(void* output)
+__declspec(noinline) void __fastcall ReadDisplayTriangle(hkDisplaySerializeIStream* stream, void*, void* output)
 {
     int* dst = (int*)output;
     {
         int val1;
-        FUN_00dd8fe0(&val1, 4, 1);
+        stream->FUN_00dd8fe0(&val1, 4, 1);
         dst[0] = val1;
     }
     {
         int val2;
-        FUN_00dd8fe0(&val2, 4, 1);
+        stream->FUN_00dd8fe0(&val2, 4, 1);
         dst[1] = val2;
     }
     {
         int val3;
-        FUN_00dd8fe0(&val3, 4, 1);
+        stream->FUN_00dd8fe0(&val3, 4, 1);
         dst[2] = val3;
     }
 }

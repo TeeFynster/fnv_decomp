@@ -1,6 +1,8 @@
-// bssystem/bspackedtaskqueue_decls.h: declares GarbageCollectorObjectPtr, BSPackedTask, PackedTaskQueueProcessor
+// bssystem/bspackedtaskqueue_decls.h: declares GarbageCollectorObjectPtr, PackedTaskQueueProcessor
 #ifndef BSPACKEDTASKQUEUE_DECLS_H
 #define BSPACKEDTASKQUEUE_DECLS_H
+
+#include "../../include/BSPackedTask.h"
 
 class NiAVObject;
 class GarbageCollectorObjectPtr
@@ -8,11 +10,6 @@ class GarbageCollectorObjectPtr
   public:
     NiAVObject* operator->() const;
     unsigned char storage[12];
-};
-class BSPackedTask
-{
-  public:
-    char data[32];
 };
 class PackedTaskQueueProcessor
 {

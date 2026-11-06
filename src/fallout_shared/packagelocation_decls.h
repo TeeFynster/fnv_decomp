@@ -4,22 +4,8 @@
 
 
 class TESForm;
-class TESObjectREFR;
-class TESObjectCELL;
-class MobileObject;
 
-enum PACK_LOC_TYPE
-{
-    PLT_NONE = -1,
-    PLT_REFERENCE = 0,
-    PLT_CELL = 1,
-    PLT_CURRLOC = 2,
-    PLT_EDITORLOC = 3,
-    PLT_OBJECT = 4,
-    PLT_TYPE = 5,
-    PLT_LINKEDREF = 6,
-    PLT_FIRSTLOC = 7
-};
+#include "../../include/PACK_LOC_TYPE.h"
 
 // LocationDescriptor's nonvirtual, 12-byte layout is shared by the PC accessors
 class LocationDescriptor

@@ -3,6 +3,10 @@
 
 
 #include <windows.h>
+#include "../../include/hkArray.h"
+#include "../../include/hkBool.h"
+#include "../../include/hkLargeBlockAllocator.h"
+#include "../../include/hkMemoryRouter.h"
 // src/staging/blk_00dc0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
@@ -625,7 +629,8 @@ static __declspec(noinline) FNVInt64 S_00dcc8a0_ParseInt(S_00dcc8a0_Handle h, un
         return 0;
     return (FNVInt64)reader->read(count);
 }
-struct hkEntryDCB1
+// GetEntryRef (0x00dcb1a0) indexes 8-byte records; the Xbox PDB hkEntry is 12 bytes.
+struct TableFilterEntry
 {
     int m_uiFilterValue;
     int m_04;
@@ -635,7 +640,7 @@ struct hkTableDCB1
     int m_00;
     int m_04;
     int m_08;
-    hkEntryDCB1* m_entries;
+    TableFilterEntry* m_entries;
 };
 class hkOwnerDCB1;
 struct hkRefDCB1
@@ -709,23 +714,15 @@ struct Allocator388
 static void FUN_00dd8fd0(unsigned char* a, unsigned char* b);
 extern "C" unsigned char* GetPtr();
 void Caller(unsigned char* a);
-class hkMemoryAllocatorDDFB;
-struct hkMemoryRouterDDFB
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorDDFB* m_pStreamAllocator;
-    hkMemoryAllocatorDDFB& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
+// The c85750 router exposes its heap at +0x10, as in the shared hkMemoryRouter.
 namespace hkRouterDDFB {
-extern "C" hkMemoryRouterDDFB& __cdecl FUN_00c85750() throw();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 }
-void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iElemSize);
+
+inline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+    return *hkRouterDDFB::FUN_00c85750().m_heap;
+}
 struct hkPairDDFB
 {
     void* m_object;
@@ -738,32 +735,19 @@ struct hkPairDDFB
         return p;
     }
 };
-template <class T> class hkArrayDDFB
+template <class T> __forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& t)
 {
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    void AddBack(const T& t)
-    {
-        hkMemoryAllocatorDDFB& kAlloc = hkRouterDDFB::FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&kAlloc, this, sizeof(T));
-        new (m_data + m_iElementCount) T(t);
-        m_iElementCount++;
-    }
-};
+    if (m_iElementCount == getCapacity())
+        hkArrayUtil::_reserveMore(alloc, this, sizeof(T));
+    new (m_data + m_iElementCount) T(t);
+    m_iElementCount++;
+}
 class hkOwnerDDFB
 {
   public:
     int unk00;
     int unk04;
-    hkArrayDDFB<hkPairDDFB> m_pairs;
+    hkArray<hkPairDDFB> m_pairs;
 
     void AddPairIfKeyAbsent(void* object, void* key);
 };
@@ -930,64 +914,8 @@ struct S00dcd270_cls
     S00dcd270_Arr arr;
     S00dcd270_Rec* AddRecord(const S00dcd270_Rec* a0);
 };
-class hkBoolDD8
-{
-  public:
-    hkBoolDD8(bool b)
-    {
-        m_cBooleanValue = static_cast<char>(b);
-    }
-    operator bool() const
-    {
-        return m_cBooleanValue != 0;
-    }
-    char m_cBooleanValue;
-};
-struct MemChunkDD8
-{
-    enum
-    {
-        PINUSE_BIT = 1,
-        CINUSE_BIT = 2,
-        INUSE_BITS = 3,
-        PAYLOAD_OFFSET = 16
-    };
-    unsigned int m_uiPreviousChunkSize;
-    unsigned int head;
-    hkBoolDD8 isInuse() const
-    {
-        return (head & CINUSE_BIT) != 0;
-    }
-    hkBoolDD8 isPinuse() const
-    {
-        return (head & PINUSE_BIT) != 0;
-    }
-    unsigned int getChunkSize() const
-    {
-        return head & ~(unsigned int)INUSE_BITS;
-    }
-    const MemChunkDD8* chunkPlusOffset(unsigned int s) const
-    {
-        return (const MemChunkDD8*)((const char*)this + s);
-    }
-    const MemChunkDD8* chunkMinusOffset(unsigned int s) const
-    {
-        return (const MemChunkDD8*)((const char*)this - s);
-    }
-    static const MemChunkDD8* toChunk(const void* in)
-    {
-        return (const MemChunkDD8*)((const char*)in - PAYLOAD_OFFSET);
-    }
-};
-class hkLargeBlockAllocatorDD8
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    const MemChunkDD8* m_pMemoryChunk;
-    bool IsValidChunk(const void* in) const;
-};
+// The original 0x00dd8c40 chunk validator belongs to hkLargeBlockAllocator;
+// its unused local declaration and partial Chunk copy are unnecessary in this RTM unit.
 extern "C" int FUN_00d86940();
 int FUN_00dc1be0();
 struct S_00dc6fc0_Target
@@ -1031,22 +959,12 @@ inline void memCpy4_d061(void* dst, const void* src, int nbytes)
     for (int i = 0; i < nbytes; i += 4)
         *(unsigned int*)((char*)dst + i) = *(const unsigned int*)((const char*)src + i);
 }
-template <class T> struct hkArray_d061
+template <class T> __forceinline void hkArrayBase<T>::removeAt(int index)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    T& operator[](int i)
-    {
-        return m_data[i];
-    }
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            memCpy4_d061(m_data + index, m_data + m_iElementCount, sizeof(T));
-    }
-};
+    m_iElementCount--;
+    if (m_iElementCount != index)
+        memCpy4_d061(m_data + index, m_data + m_iElementCount, sizeof(T));
+}
 struct FUN_00dceb90_Class
 {
     void* vftable;
@@ -1066,7 +984,7 @@ struct FUN_00dceb90_Class
     int unk38;
     int unk3C;
     int unk40;
-    hkArray_d061<RefObj*> m_refs;
+    hkArray<RefObj*> m_refs;
     void RemoveRef(int index);
 };
 #include <math.h>
@@ -1119,47 +1037,48 @@ __forceinline float Clamp(const float& value, const float& hi, const float& lo)
 }
 void __cdecl FUN_00dcfff0(ObjA* a, ObjB* b, float* out);
 #ifndef _INCLUDED_MM2
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00dcfec0 FUN_00dcfec0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
-};
+} __m128, LocalM128;
 #endif
 #ifndef _INCLUDED_MM2
 extern "C"
 {
-    __m128 _mm_setzero_ps();
-    __m128 _mm_cmplt_ps(__m128, __m128);
-    __m128 _mm_cmple_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_or_ps(__m128, __m128);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_add_ps(__m128, __m128);
-    __m128 _mm_shuffle_ps(__m128, __m128, int);
-    int _mm_movemask_ps(__m128);
+    LocalM128 _mm_setzero_ps();
+    LocalM128 _mm_cmplt_ps(LocalM128, LocalM128);
+    LocalM128 _mm_cmple_ps(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+    LocalM128 _mm_or_ps(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ps(LocalM128, LocalM128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+    int _mm_movemask_ps(LocalM128);
 }
 #endif
-extern __m128 DAT_010c7170;
-static __forceinline __m128 choose(__m128 mask, __m128 yes, __m128 no)
+extern LocalM128 DAT_010c7170;
+static __forceinline LocalM128 choose(LocalM128 mask, LocalM128 yes, LocalM128 no)
 {
     return _mm_or_ps(_mm_andnot_ps(mask, no), _mm_and_ps(mask, yes));
 }
-static __forceinline __m128 sum4(__m128 v)
+static __forceinline LocalM128 sum4(LocalM128 v)
 {
-    __m128 pair = _mm_add_ps(_mm_shuffle_ps(v, v, 0x4e), v);
+    LocalM128 pair = _mm_add_ps(_mm_shuffle_ps(v, v, 0x4e), v);
     return _mm_add_ps(_mm_shuffle_ps(pair, pair, 0xb1), pair);
 }
-static __forceinline __m128 dot4(__m128 a, __m128 b)
+static __forceinline LocalM128 dot4(LocalM128 a, LocalM128 b)
 {
     return sum4(_mm_mul_ps(a, b));
 }
 struct OW
 {
-    const __m128* p;
-    OW(const __m128* q) : p(q)
+    const LocalM128* p;
+    OW(const LocalM128* q) : p(q)
     {}
 };
-static int FUN_00dd3120(const __m128* self, OW other, const __m128* a);
+static int FUN_00dd3120(const LocalM128* self, OW other, const LocalM128* a);
 volatile int g_s, g_a, g_o, g_r;
 void mask_test_caller();
 static void CopyFloatsFromBytes(float* dst, const unsigned char* src);
@@ -1344,15 +1263,15 @@ float MatchCaller(TokenReader* s);
 void __stdcall FUN_00dccb60(int value);
 extern "C"
 {
-    __m128 _mm_unpackhi_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    void _mm_store_ss(float*, __m128);
+    LocalM128 _mm_unpackhi_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    void _mm_store_ss(float*, LocalM128);
 }
 class S00dd0ff0_SimdReal
 {
   public:
-    S00dd0ff0_SimdReal(const __m128& x) : m_vValue(x)
+    S00dd0ff0_SimdReal(const LocalM128& x) : m_vValue(x)
     {}
     operator float() const
     {
@@ -1360,7 +1279,7 @@ class S00dd0ff0_SimdReal
         _mm_store_ss(&s, m_vValue);
         return s;
     }
-    __m128 m_vValue;
+    LocalM128 m_vValue;
 };
 class S00dd0ff0_Vector4
 {
@@ -1410,16 +1329,16 @@ class S00dd0ff0_Vector4
     }
     S00dd0ff0_SimdReal horizontalAdd3() const
     {
-        __m128 xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55), m_vComponents);
+        LocalM128 xySum = _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x55), m_vComponents);
         return _mm_add_ss(_mm_shuffle_ps(m_vComponents, m_vComponents, 0xaa), xySum);
     }
     S00dd0ff0_SimdReal horizontalAdd4() const
     {
-        __m128 sum0 = _mm_add_ps(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x4e), m_vComponents);
-        __m128 sum1 = _mm_shuffle_ps(sum0, sum0, 0xb1);
+        LocalM128 sum0 = _mm_add_ps(_mm_shuffle_ps(m_vComponents, m_vComponents, 0x4e), m_vComponents);
+        LocalM128 sum1 = _mm_shuffle_ps(sum0, sum0, 0xb1);
         return _mm_add_ps(sum0, sum1);
     }
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 };
 struct S00dd0ff0_VelocityAccumulator
 {
@@ -1519,7 +1438,7 @@ struct S_00dd1180_Hdr
     float f0c;
 };
 void FUN_00dd1180(int n, float a, float b, float c, char** src, int stride, int u1, int u2, char** pp);
-typedef __m128* V;
+typedef LocalM128* V;
 struct Wrap
 {
     V p;
@@ -1532,8 +1451,8 @@ void call_interleave(V B, V A, V C, V O, Wrap E, V D, V M1, V M2);
 namespace S00dcfec0_Intrinsics {
 extern "C"
 {
-    __m128 _mm_load_ss(const float*);
-    __m128 _mm_sqrt_ss(__m128);
+    LocalM128 _mm_load_ss(const float*);
+    LocalM128 _mm_sqrt_ss(LocalM128);
 }
 }
 
@@ -1541,10 +1460,10 @@ float __cdecl Atan2(float a, float b);
 
 struct S00dcfec0_SimdReal
 {
-    __m128 m_vValue;
+    LocalM128 m_vValue;
     __forceinline S00dcfec0_SimdReal(float x) : m_vValue(S00dcfec0_Intrinsics::_mm_load_ss(&x))
     {}
-    __forceinline S00dcfec0_SimdReal(__m128 r) : m_vValue(r)
+    __forceinline S00dcfec0_SimdReal(LocalM128 r) : m_vValue(r)
     {}
     __forceinline operator float() const
     {
@@ -1556,7 +1475,7 @@ struct S00dcfec0_SimdReal
 
 struct S00dcfec0_V
 {
-    __m128 m_vComponents;
+    LocalM128 m_vComponents;
 
     template <int I> __forceinline S00dcfec0_V permuted() const
     {
@@ -1608,8 +1527,8 @@ struct S00dcfec0_V
     }
     __forceinline S00dcfec0_SimdReal dot3(const S00dcfec0_V& b) const
     {
-        __m128 m = ::_mm_mul_ps(m_vComponents, b.m_vComponents);
-        __m128 y = ::_mm_add_ss(::_mm_shuffle_ps(m, m, 0x55), m);
+        LocalM128 m = ::_mm_mul_ps(m_vComponents, b.m_vComponents);
+        LocalM128 y = ::_mm_add_ss(::_mm_shuffle_ps(m, m, 0x55), m);
         return ::_mm_add_ss(::_mm_shuffle_ps(m, m, 0xaa), y);
     }
     __forceinline void crossFirst(const S00dcfec0_V& v0, const S00dcfec0_V& v1)
@@ -1618,10 +1537,10 @@ struct S00dcfec0_V
     }
     __forceinline void crossSecond(const S00dcfec0_V& v0, const S00dcfec0_V& v1)
     {
-        __m128 y = v1.m_vComponents;
-        __m128 x = v0.m_vComponents;
-        __m128 cross0 = ::_mm_mul_ps(::_mm_shuffle_ps(x, x, 0xc9), ::_mm_shuffle_ps(y, y, 0xd2));
-        __m128 cross1 = ::_mm_mul_ps(::_mm_shuffle_ps(x, x, 0xd2), ::_mm_shuffle_ps(y, y, 0xc9));
+        LocalM128 y = v1.m_vComponents;
+        LocalM128 x = v0.m_vComponents;
+        LocalM128 cross0 = ::_mm_mul_ps(::_mm_shuffle_ps(x, x, 0xc9), ::_mm_shuffle_ps(y, y, 0xd2));
+        LocalM128 cross1 = ::_mm_mul_ps(::_mm_shuffle_ps(x, x, 0xd2), ::_mm_shuffle_ps(y, y, 0xc9));
         m_vComponents = ::_mm_sub_ps(cross0, cross1);
     }
 };
@@ -1665,10 +1584,6 @@ void __cdecl FUN_00dcfec0(const S00dcfec0_V& a, const S00dcfec0_V& b, const S00d
     out = axis;
 }
 
-struct LargestBlockDD8D
-{
-    unsigned int FUN_00dd8350();
-};
 struct AllocatorStatisticsDD8D
 {
     int m_00;
@@ -1728,6 +1643,6 @@ void __thiscall AllocatorStatisticsDD8D::FUN_00dd8d70(unsigned int* out)
     out[0] = ((FUN_00dd8c20_class*)this)->SumListValues();
     out[1] = (unsigned int)m_c0;
     out[3] = out[0] - (unsigned int)m_c0;
-    out[5] = (unsigned int)((LargestBlockDD8D*)this)->FUN_00dd8350();
+    out[5] = (unsigned int)((hkLargeBlockAllocator*)this)->FUN_00dd8350();
     out[4] = 0;
 }

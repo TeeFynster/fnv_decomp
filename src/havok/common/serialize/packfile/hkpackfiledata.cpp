@@ -2,6 +2,14 @@
 // src/havok/common/serialize/packfile/hkpackfiledata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/serialize/packfile/hkpackfiledata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkArray.h"
+#include "../../../../../include/hkBool.h"
+#include "../../../../../include/hkClass.h"
+
+
 struct FUN_00cb1930_Class
 {
     void* m_kPointA;
@@ -32,12 +40,6 @@ unsigned long FUN_00e05140_Class::FUN_00e05140()
     return 0;
 }
 
-struct hkReferencedObject
-{
-    void RetainReference();
-    void removeReference();
-};
-
 struct hkPackFileData
 {
     hkReferencedObject* m_pObject;
@@ -48,7 +50,7 @@ struct hkPackFileData
 void hkPackFileData::SetObject(hkReferencedObject* pObject)
 {
     if (pObject)
-        pObject->RetainReference();
+        pObject->addReference();
     if (*(hkReferencedObject**)((char*)this + 0x2c))
         (*(hkReferencedObject**)((char*)this + 0x2c))->removeReference();
     *(hkReferencedObject**)((char*)this + 0x2c) = pObject;
@@ -288,18 +290,7 @@ bool FUN_00e05240_cls::FUN_00e05240()
     return m_20 != 0;
 }
 
-struct hkAllocatorE054;
-
-struct hkMemoryRouterE054
-{
-    void* m_apvUnk00[4];
-    hkAllocatorE054* m_pkHeap;
-    hkAllocatorE054& heap()
-    {
-        return *m_pkHeap;
-    }
-};
-void __cdecl FUN_00c908c0(hkAllocatorE054& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
+void __cdecl FUN_00c908c0(hkMemoryAllocator& kAlloc, void* apvArray, int aiNumElements, int iSizeElem) throw();
 
 inline void* __cdecl operator new(unsigned int, void* p) throw()
 {
@@ -325,61 +316,57 @@ template <typename T> __forceinline void constructWithArrayE054(T* dst, int n, c
         new (dst + i) T(src[i]);
 }
 
-template <typename T> struct hkArrayE054
+template <typename T> __forceinline void hkArrayBase<T>::GrowArrayCapacity(hkMemoryAllocator& kAlloc, int n)
 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+    const int iCapacity = getCapacity();
+    if (iCapacity < n)
+    {
+        int iCap2 = 2 * iCapacity;
+        int iNewSize = (n < iCap2) ? iCap2 : n;
+        FUN_00c908c0(kAlloc, this, iNewSize, sizeof(T));
+    }
+}
 
-    int getCapacity() const
-    {
-        return m_iCapacityState & 0x3fffffff;
-    }
-    __forceinline void GrowArrayCapacity(hkAllocatorE054& kAlloc, int n)
-    {
-        const int iCapacity = getCapacity();
-        if (iCapacity < n)
-        {
-            int iCap2 = 2 * iCapacity;
-            int iNewSize = (n < iCap2) ? iCap2 : n;
-            FUN_00c908c0(kAlloc, this, iNewSize, sizeof(T));
-        }
-    }
-    __forceinline void _copyFromArray(hkAllocatorE054& kAlloc, const hkArrayE054<T>& a)
-    {
-        const int iOldSize = m_iElementCount;
-        int iNewSize = a.m_iElementCount;
-        int iCopiedSize = (iNewSize > iOldSize) ? iOldSize : iNewSize;
-        GrowArrayCapacity(kAlloc, iNewSize);
-        copyE054<T>(m_data, a.m_data, iCopiedSize);
-        constructWithArrayE054<T>(m_data + iCopiedSize, iNewSize - iCopiedSize, a.m_data + iCopiedSize);
-        m_iElementCount = iNewSize;
-    }
-    __forceinline hkArrayE054& operator=(const hkArrayE054<T>& a)
-    {
-        _copyFromArray(((hkMemoryRouterE054*)FUN_00c85750())->heap(), a);
-        return *this;
-    }
+template <typename T, typename Allocator>
+__forceinline hkArray<T, Allocator>& hkArray<T, Allocator>::operator=(const hkArray<T, Allocator>& a)
+{
+    hkMemoryAllocator& kAlloc = ((hkMemoryRouter*)FUN_00c85750())->heap();
+    const int iOldSize = this->m_iElementCount;
+    int iNewSize = a.m_iElementCount;
+    int iCopiedSize = (iNewSize > iOldSize) ? iOldSize : iNewSize;
+    this->GrowArrayCapacity(kAlloc, iNewSize);
+    copyE054<T>(this->m_data, a.m_data, iCopiedSize);
+    constructWithArrayE054<T>(this->m_data + iCopiedSize, iNewSize - iCopiedSize, a.m_data + iCopiedSize);
+    this->m_iElementCount = iNewSize;
+    return *this;
+}
+
+// hkPackfileData's +0x4c array holds hkResource::Export (name, data), not the unrelated shared Pair.
+struct PackfileExport
+{
+    const char* name;
+    void* data;
 };
 
-struct PairE054
+// hkPackfileData's +0x58 array holds hkResource::Import (name, location), not the unrelated shared Pair.
+struct PackfileImport
 {
-    int m_kPointA;
-    int m_kPointB;
+    const char* name;
+    void** location;
 };
 
 class FUN_00e05410_Owner
 {
   public:
     char m_pad00[0x4c];
-    hkArrayE054<PairE054> m_iSecondInteger;
-    hkArrayE054<PairE054> m_pHeadNode;
+    hkArray<PackfileExport> m_iSecondInteger;
+    hkArray<PackfileImport> m_pHeadNode;
 
-    void CopyPairArrays(hkArrayE054<PairE054>& kFirstOut, hkArrayE054<PairE054>& kSecondOut) const throw();
+    void CopyPairArrays(hkArray<PackfileImport>& kFirstOut, hkArray<PackfileExport>& kSecondOut) const throw();
 };
 
 // @fnv 0x00e05410
-void FUN_00e05410_Owner::CopyPairArrays(hkArrayE054<PairE054>& kFirstOut, hkArrayE054<PairE054>& kSecondOut) const
+void FUN_00e05410_Owner::CopyPairArrays(hkArray<PackfileImport>& kFirstOut, hkArray<PackfileExport>& kSecondOut) const
     throw()
 {
     kFirstOut = m_pHeadNode;
@@ -396,18 +383,6 @@ struct FUN_00d874d0_s
     void FUN_00d874d0(const char* pcKey, int iValue);
 };
 
-struct hkBoolE055
-{
-    char m_bValue;
-    hkBoolE055()
-    {}
-};
-
-struct hkClassE055
-{
-    hkBoolE055 FUN_00d46d80(const hkClassE055& kOther) const;
-};
-
 class hkClassRegistryE055
 {
   public:
@@ -415,7 +390,7 @@ class hkClassRegistryE055
     virtual void V1();
     virtual void V2();
     virtual void V3();
-    virtual const hkClassE055* GetClassByName(const char* pcName) const;
+    virtual const hkClass* GetClassByName(const char* pcName) const;
 };
 
 class hkFinishRegistryE055
@@ -460,7 +435,8 @@ struct hkPointerMapE055 : public FUN_00e05950_class
     }
 };
 
-class hkPackfileDataE055
+// Retained locally: include/ has no hkPackfileData.h yet.
+class hkPackfileData
 {
   public:
     int m_iUnk00;
@@ -477,7 +453,7 @@ class hkPackfileDataE055
 };
 
 // @fnv 0x00e055f0
-void* hkPackfileDataE055::FUN_00e055f0(const char* pcExpectedClassName, const hkFinishRegistryE055* pkFinish)
+void* hkPackfileData::FUN_00e055f0(const char* pcExpectedClassName, const hkFinishRegistryE055* pkFinish)
 {
     if (m_pvTopLevelObject)
     {
@@ -486,9 +462,9 @@ void* hkPackfileDataE055::FUN_00e055f0(const char* pcExpectedClassName, const hk
         if (pcExpectedClassName)
         {
             const hkClassRegistryE055* pkRegistry = m_pkClassRegistry;
-            const hkClassE055* pkTopClass = pkRegistry->GetClassByName(pcTopClassName);
-            const hkClassE055* pkExpected = pkRegistry->GetClassByName(pcExpectedClassName);
-            if (!pkExpected->FUN_00d46d80(*pkTopClass).m_bValue)
+            const hkClass* pkTopClass = pkRegistry->GetClassByName(pcTopClassName);
+            const hkClass* pkExpected = pkRegistry->GetClassByName(pcExpectedClassName);
+            if (!pkExpected->FUN_00d46d80(*pkTopClass).m_cBooleanValue)
                 goto fail;
         }
         if (FUN_00e05240() == 0 && pkFinish)
@@ -520,60 +496,23 @@ extern int DAT_0102e388;
 void* FUN_00c85750();
 void __cdecl FUN_00c856c0(void* heap, void* ptr);
 
-struct hkMemoryAllocator
+template <typename T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
 {
-    virtual void func0() = 0;
-    virtual void func4() = 0;
-    virtual void ReleaseBlock(void* ptr, int numBytes) = 0;
-    virtual void funcC() = 0;
-    virtual void deallocateChunk(void* ptr, int numBytes) = 0;
-};
-
-struct NineIntegerRecord
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocator* m_pStreamAllocator;
-};
-
-template <typename T> struct hkArray
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    void ClearAndRelease(hkMemoryAllocator* alloc)
+    int cap = this->m_iCapacityState;
+    this->m_iElementCount = 0;
+    if ((cap & 0x80000000) == 0)
     {
-        int cap = this->m_iCapacityState;
-        this->m_iElementCount = 0;
-        if ((cap & 0x80000000) == 0)
-        {
-            alloc->deallocateChunk(this->m_data, (cap & 0x3fffffff) * sizeof(T));
-        }
-        this->m_data = 0;
-        this->m_iCapacityState = 0x80000000;
+        alloc.bufFree(this->m_data, (cap & 0x3fffffff) * sizeof(T));
     }
-};
+    this->m_data = 0;
+    this->m_iCapacityState = 0x80000000;
+}
 
 struct Chunk
 {
     void* data;
     int size;
     int unk8;
-};
-
-struct Export
-{
-    int a;
-    int b;
-};
-
-struct Import
-{
-    int a;
-    int b;
 };
 
 struct Map1Type
@@ -586,8 +525,8 @@ struct Map1Type
 
     void ClearAndRelease()
     {
-        NineIntegerRecord* router = (NineIntegerRecord*)FUN_00c85750();
-        this->ProcessArgument(router->m_pStreamAllocator);
+        hkMemoryRouter* router = (hkMemoryRouter*)FUN_00c85750();
+        this->ProcessArgument(router->m_heap);
         this->FUN_00a29680();
     }
 };
@@ -613,8 +552,8 @@ struct FUN_00e057c0_Class
     int unk30;
     hkArray<void*> m_pMemoryAllocator;
     hkArray<Chunk> m_kChunks;
-    hkArray<Export> m_kExports;
-    hkArray<Import> m_kImports;
+    hkArray<PackfileExport> m_kExports;
+    hkArray<PackfileImport> m_kImports;
 
     void Clear();
     void FUN_00e057c0();
@@ -630,33 +569,33 @@ void FUN_00e057c0_Class::FUN_00e057c0()
     for (i = 0; i < this->m_pMemoryAllocator.m_iElementCount; ++i)
     {
         void* item = this->m_pMemoryAllocator.m_data[i];
-        NineIntegerRecord* router = (NineIntegerRecord*)FUN_00c85750();
-        FUN_00c856c0(router->m_pStreamAllocator, item);
+        hkMemoryRouter* router = (hkMemoryRouter*)FUN_00c85750();
+        FUN_00c856c0(router->m_heap, item);
     }
 
     for (i = 0; i < this->m_kChunks.m_iElementCount; ++i)
     {
         int size = this->m_kChunks.m_data[i].size;
         void* data = this->m_kChunks.m_data[i].data;
-        NineIntegerRecord* router = (NineIntegerRecord*)FUN_00c85750();
-        router->m_pStreamAllocator->ReleaseBlock(data, size);
+        hkMemoryRouter* router = (hkMemoryRouter*)FUN_00c85750();
+        router->m_heap->blockFree(data, size);
     }
 
     void* unk0c = this->unk0c;
-    NineIntegerRecord* router = (NineIntegerRecord*)FUN_00c85750();
-    FUN_00c856c0(router->m_pStreamAllocator, unk0c);
+    hkMemoryRouter* router = (hkMemoryRouter*)FUN_00c85750();
+    FUN_00c856c0(router->m_heap, unk0c);
 
-    NineIntegerRecord* r1 = (NineIntegerRecord*)FUN_00c85750();
-    this->m_kImports.ClearAndRelease(r1->m_pStreamAllocator);
+    hkMemoryRouter* r1 = (hkMemoryRouter*)FUN_00c85750();
+    this->m_kImports._clearAndDeallocate(*r1->m_heap);
 
-    NineIntegerRecord* r2 = (NineIntegerRecord*)FUN_00c85750();
-    this->m_kExports.ClearAndRelease(r2->m_pStreamAllocator);
+    hkMemoryRouter* r2 = (hkMemoryRouter*)FUN_00c85750();
+    this->m_kExports._clearAndDeallocate(*r2->m_heap);
 
-    NineIntegerRecord* r3 = (NineIntegerRecord*)FUN_00c85750();
-    this->m_kChunks.ClearAndRelease(r3->m_pStreamAllocator);
+    hkMemoryRouter* r3 = (hkMemoryRouter*)FUN_00c85750();
+    this->m_kChunks._clearAndDeallocate(*r3->m_heap);
 
-    NineIntegerRecord* r4 = (NineIntegerRecord*)FUN_00c85750();
-    this->m_pMemoryAllocator.ClearAndRelease(r4->m_pStreamAllocator);
+    hkMemoryRouter* r4 = (hkMemoryRouter*)FUN_00c85750();
+    this->m_pMemoryAllocator._clearAndDeallocate(*r4->m_heap);
 
     if (this->m_obj)
     {
@@ -677,28 +616,6 @@ class FUN_00e057c0
     ~FUN_00e057c0() throw();
 };
 
-class hkMemoryAllocatorXe05970
-{
-  public:
-    virtual ~hkMemoryAllocatorXe05970() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterXe05970
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorXe05970* m_pStreamAllocator;
-
-    hkMemoryAllocatorXe05970& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-
 class hkObje05970 : public FUN_00e057c0
 {
   public:
@@ -706,9 +623,9 @@ class hkObje05970 : public FUN_00e057c0
 
     static void operator delete(void* p) throw()
     {
-        static_cast<hkMemoryRouterXe05970*>(FUN_00c85750())
+        static_cast<hkMemoryRouter*>(FUN_00c85750())
             ->heap()
-            .ReleaseBlock(p, static_cast<hkObje05970*>(p)->GetAllocationSize());
+            .blockFree(p, static_cast<hkObje05970*>(p)->GetAllocationSize());
     }
     int GetAllocationSize() const
     {
@@ -726,18 +643,13 @@ hkObje05970* hkObje05970::FUN_00e05970(unsigned int uiFlags) throw()
     return this;
 }
 
-struct Crux53_HkRouter
-{
-    int unk00, unk04, unk08, unk0c;
-    void* heap;
-};
 void* FUN_00c85750();
 void __cdecl FUN_00c856c0(void* heap, void* ptr);
 char* __cdecl FUN_00cb1410(const char* src);
 inline void Crux53_FreeName(char* existing)
 {
-    Crux53_HkRouter* router = (Crux53_HkRouter*)FUN_00c85750();
-    FUN_00c856c0(router->heap, existing);
+    hkMemoryRouter* router = (hkMemoryRouter*)FUN_00c85750();
+    FUN_00c856c0(router->m_heap, existing);
 }
 struct Crux53_Named
 {
@@ -764,96 +676,50 @@ template <int SIZE> __forceinline void memCpyOneAlignedE051(void* dst, const voi
     } while (++i < SIZE / 4);
 }
 
-template <class T> class hkArrayE051
+template <typename T> __forceinline void hkArrayBase<T>::removeAt(int index)
 {
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    __forceinline void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            memCpyOneAlignedE051<sizeof(T)>(m_data + index, m_data + m_iElementCount);
-    }
-};
-
-struct hkEntryE051
-{
-    void* m_object;
-    int m_key;
-};
+    m_iElementCount--;
+    if (m_iElementCount != index)
+        memCpyOneAlignedE051<sizeof(T)>(m_data + index, m_data + m_iElementCount);
+}
 
 class hkListenerE051
 {
   public:
     int unk00[19];
-    hkArrayE051<hkEntryE051> m_entries;
+    hkArray<PackfileExport> m_entries;
 
     void FUN_00e05190(int key);
 };
 
-// Removes all entries from m_entries whose m_key matches key by calling removeAt on each matching index.
+// Removes exports whose data pointer matches key; these 8-byte entries are not the 12-byte hkEntry type.
 // @fnv 0x00e05190
 void hkListenerE051::FUN_00e05190(int key)
 {
     for (int i = m_entries.m_iElementCount - 1; i >= 0; i--)
     {
-        if (m_entries.m_data[i].m_key == key)
+        if (m_entries.m_data[i].data == (void*)key)
             m_entries.removeAt(i);
     }
 }
 
 namespace fnv_00e051e0 {
-struct PairE051
-{
-    int m_key;
-    void* m_pIntegerData;
-};
-
-template <unsigned int SIZE> inline void memCpyOneAlignedE051(void* dst, const void* src)
-{
-    const unsigned int* s = (const unsigned int*)src;
-    unsigned int* d = (unsigned int*)dst;
-    int i = 0;
-    do
-    {
-        d[i] = s[i];
-    } while (++i < (int)(SIZE / 4));
-}
-
-template <class T> class hkArrayE051
-{
-  public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            memCpyOneAlignedE051<sizeof(T)>(m_data + index, m_data + m_iElementCount);
-    }
-};
-
 class FUN_00e051e0_C
 {
   public:
     char unk00[0x58];
-    hkArrayE051<PairE051> m_entries;
+    hkArray<PackfileImport> m_entries;
 
     void RemoveEntry(void* pValue);
 };
 
-// Finds the entry in m_entries whose m_pIntegerData equals pValue and removes it from the array.
+// Finds the import whose location equals pValue and removes it from the array.
 // @fnv 0x00e051e0
 void FUN_00e051e0_C::RemoveEntry(void* pValue)
 {
     for (int i = m_entries.m_iElementCount - 1; i >= 0; i--)
     {
-        if (m_entries.m_data[i].m_pIntegerData == pValue)
+        if (m_entries.m_data[i].location == (void**)pValue)
         {
             m_entries.removeAt(i);
             return;
@@ -939,11 +805,6 @@ struct FUN_00cb1fe0_Class
 struct FUN_00d87790_Class
 {
     void __thiscall FUN_00d87790(int arg);
-};
-
-struct FUN_00c90510_Class
-{
-    void __thiscall FUN_00c90510();
 };
 
 struct FUN_01268B08_Obj
@@ -1033,7 +894,7 @@ S00e05700_Class* __thiscall S00e05700_Class::FUN_00e05700()
 
     if (result != 0)
     {
-        reinterpret_cast<FUN_00c90510_Class*>(result)->FUN_00c90510();
+        reinterpret_cast<hkReferencedObject*>(result)->addReference();
     }
 
     if (unk2C != 0)

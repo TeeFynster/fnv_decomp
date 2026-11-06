@@ -2,7 +2,7 @@
 // src/havok/common/base/reflection/hkclassenum.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/reflection/hkclassenum.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkClassEnum.h"
+#include "../../../../../include/hkCustomAttributes.h"
 
 extern "C" int __cdecl FUN_00d86980();
 
@@ -25,11 +25,6 @@ int __stdcall ReadSignedValueBySize(const void* apData)
     }
     return r;
 }
-
-struct hkCustomAttributes
-{
-    void* __thiscall getAttribute(void* arg);
-};
 
 struct FUN_00db76a0_Class
 {
@@ -97,8 +92,8 @@ extern "C" hkMemoryRouterXdb76f0& __cdecl FUN_00c85750() throw();
 }
 void __cdecl ResizeAudioStream(void* m_pPoolBase, void* pArray, int iSizeElem);
 
-template <class T> class hkArrayXdb76f0
-{
+template <class T> class hkArrayXdb76f0LocalForm
+{ // local form of hkArray: 0x00db76f0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
   public:
     T* m_data;
     int m_iElementCount;
@@ -128,14 +123,14 @@ class hkOwnerXdb76f0
 {
   public:
     int unk00;
-    hkArrayXdb76f0<hkEntryXdb76f0> m_entries;
+    hkArrayXdb76f0LocalForm<hkEntryXdb76f0> m_entries;
 
-    bool CollectMatchingEntries(unsigned int flags, hkArrayXdb76f0<void*>& out, unsigned int* remaining);
+    bool CollectMatchingEntries(unsigned int flags, hkArrayXdb76f0LocalForm<void*>& out, unsigned int* remaining);
 };
 
 // Iterates m_entries in reverse, adds entries whose m_flags are a subset of flags to out, and stores the unmatched bits in remaining.
 // @fnv 0x00db76f0
-bool hkOwnerXdb76f0::CollectMatchingEntries(unsigned int flags, hkArrayXdb76f0<void*>& out, unsigned int* remaining)
+bool hkOwnerXdb76f0::CollectMatchingEntries(unsigned int flags, hkArrayXdb76f0LocalForm<void*>& out, unsigned int* remaining)
 {
     out.m_iElementCount = 0;
     for (int i = m_entries.m_iElementCount - 1; i >= 0 && flags; i--)

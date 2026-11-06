@@ -6,13 +6,13 @@
 void DecalData::Copy(DecalData* source)
 {
     if (source)
-        memcpy(this, source, sizeof(ImpactDecalData));
+        memcpy(this, source, sizeof(DecalData::DataRecordView));
 }
 
 // @fnv 0x00593450
 void DecalData::Load(TESFile* file)
 {
-    file->GetChunkData(this, sizeof(ImpactDecalData));
+    file->GetChunkData(this, sizeof(DecalData::DataRecordView));
     if (file->IsEndianConversionRequired())
         SwapEndianFields();
 }

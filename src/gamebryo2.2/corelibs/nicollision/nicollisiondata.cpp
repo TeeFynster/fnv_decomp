@@ -1,3 +1,51 @@
+#include "../../../../include/NiAVObject.h"
+#include "../../../../include/NiBinaryStream.h"
+#include "../../../../include/NiObject.h"
+#include "../../../../include/NiCollisionData.h"
+#include "../../../../include/NiTransform.h"
+#include "../../../../include/NiBoundingVolume.h"
+#include "../../../../include/NiCollisionObject.h"
+#include "../../../../include/NiStream.h"
+#include "../../../../include/StrArr.h"
+#include "../../../../include/MemoryManager.h"
+#include "../../../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../../../include/NiRTTI.h"
+#include "../../../../include/NiPoint3.h"
+
+// Read the serialized file version at its fixed stream offset.
+inline unsigned int GetFileVersion(const NiStream& stream)
+{
+    return *reinterpret_cast<const unsigned int*>((const char*)&stream + 0xD8);
+}
+
+inline unsigned int StrArr::AddInline(char* pcElement)
+{
+    unsigned int uiIndex = m_usSize;
+    if (uiIndex >= m_usMaxSize)
+        SetSize(uiIndex + m_usGrowBy);
+    SetAt(uiIndex, pcElement);
+    return uiIndex;
+}
 
 // src/gamebryo2.2/corelibs/nicollision/nicollisiondata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nicollision/nicollisiondata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -51,16 +99,6 @@ extern "C" void* _NiPoint3_ZERO;
 extern unsigned char DAT_011f4270;
 extern unsigned char DAT_011f4274;
 
-struct NiPoint3
-{
-    float x, y, z;
-};
-
-struct NiCollisionData
-{
-    NiPoint3 FUN_00eacd30();
-};
-
 // @fnv 0x00eacd30
 NiPoint3 NiCollisionData::FUN_00eacd30()
 {
@@ -71,85 +109,40 @@ NiPoint3 NiCollisionData::FUN_00eacd30()
     return p;
 }
 
-namespace fnv_00eace50 {
-struct NiBoundingVolume
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2(int);
-    virtual void v3();
-    virtual void v4();
-    virtual void v5(NiBoundingVolume*, void*);
-    virtual NiBoundingVolume* v6();
-};
-struct NiCollisionData
-{
-    char _00[8];
-    char* _08;
-    char _0c[32];
-    NiBoundingVolume* _2c;
-    NiBoundingVolume* _30;
-    void SetBoundingVolume(NiBoundingVolume* pkBV);
-};
 // @fnv 0x00eace50
 void NiCollisionData::SetBoundingVolume(NiBoundingVolume* pkBV)
 {
-    if (_2c)
-        _2c->v2(1);
-    if (_30)
-        _30->v2(1);
-    _2c = pkBV;
+    if (m_pkModelABV)
+        delete m_pkModelABV;
+    if (unk30)
+        delete unk30;
+    m_pkModelABV = pkBV;
     if (pkBV)
     {
-        _30 = pkBV->v6();
-        if (_08)
-            _30->v5(_2c, _08 + 0x68);
+        unk30 = pkBV->v6();
+        if (m_pkSceneObject)
+            unk30->v5(m_pkModelABV, &m_pkSceneObject->m_kWorld);
     }
     else
     {
-        _30 = 0;
+        unk30 = 0;
     }
 }
-}  // namespace fnv_00eace50
 
 extern void* __cdecl FUN_00e9cab0(void*);
-struct FUN_00eace50_shell
-{
-    void __thiscall SetBoundingVolume(void*);
-};
-struct FUN_00eaceb0_shell
-{
-    void* vft;
-    void* m_04;
-    void* m_08;
-    void* m_0c;
-    void* m_10;
-    void* m_14;
-    void* m_18;
-    void* m_1c;
-    void* m_20;
-    void* m_24;
-    void* m_28;
-    void __thiscall AssignFromSource(void*);
-};
+
 // @fnv 0x00eaceb0
-void __thiscall FUN_00eaceb0_shell::AssignFromSource(void* pSource)
+void __fastcall AssignFromSource(NiCollisionData* self, void*, void* pSource)
 {
-    ((void(__thiscall*)(void*, void*))(*(void***)this)[35])(this, *(void**)pSource);
-    m_24 = *(void**)((char*)pSource + 4);
+    self->SetSceneObject(*(NiAVObject**)pSource);
+    self->m_ePropagationMode = *(int*)((char*)pSource + 4);
     if (*(int*)((char*)pSource + 8))
     {
         void* bv = FUN_00e9cab0(*(void**)((char*)pSource + 12));
-        ((FUN_00eace50_shell*)this)->SetBoundingVolume(bv);
+        self->SetBoundingVolume((NiBoundingVolume*)bv);
     }
 }
 
-namespace fnv_00ead0b0 {
-struct NiCollisionData
-{
-    void FUN_00eacde0();
-    void* DestroyIfFlagged(unsigned int);
-};
 void __cdecl _delete(void*, unsigned int);
 // Calls FUN_00eacde0, then deletes this with size 0x50 when bit 0 of uFlags is set, and returns this.
 // @fnv 0x00ead0b0
@@ -160,41 +153,7 @@ void* NiCollisionData::DestroyIfFlagged(unsigned int auiFlags)
         _delete(this, 0x50);
     return this;
 }
-}  // namespace fnv_00ead0b0
 
-namespace fnv_00ead610 {
-struct CloningProcess
-{
-    int _00;
-};
-struct NiBoundingVolume
-{
-    virtual void F0();
-    virtual void F1();
-    virtual void F2();
-    virtual void F3();
-    virtual void F4();
-    virtual void F5();
-    virtual void F6();
-    virtual NiBoundingVolume* Clone();
-};
-struct NiCollisionData
-{
-    char _00[0x24];
-    int m_ePropagationMode;
-    int m_eCollisionMode;
-    NiBoundingVolume* m_pkModelABV;
-    char _30[4];
-    void* m_pCollisionObject;
-    char _38[8];
-    void* m_pWorldVertices;
-    void FUN_00aa1000(NiCollisionData*, CloningProcess&);
-    void SetBoundingVolume(NiBoundingVolume*);
-    void FUN_00ead1e0();
-    void FUN_00ead250();
-    void CreateTriData(int);
-    void CloneCollisionData(NiCollisionData*, CloningProcess&);
-};
 // @fnv 0x00ead610
 void NiCollisionData::CloneCollisionData(NiCollisionData* pkDest, CloningProcess& kCloning)
 {
@@ -213,104 +172,54 @@ void NiCollisionData::CloneCollisionData(NiCollisionData* pkDest, CloningProcess
         pkDest->CreateTriData(1);
     }
 }
-}  // namespace fnv_00ead610
 
-namespace fnv_00ead330 {
 struct Helper38
 {
     char _pad[0x38];
     unsigned char m_uiObjectFlags;
 };
-struct NiAVObject
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual int f6();
-    char _pad[0xb8 - 4];
-    Helper38* m_pkHelper;
-};
-struct NiCollisionObject
-{
-    void SetSceneObject(NiAVObject* pkObj);
-    char _pad0[8];
-    NiAVObject* m_pkSceneObj;
-    char _pad1[0x28 - 12];
-};
-struct NiCollisionData : NiCollisionObject
-{
-    int m_eCollisionMode;
-    void FUN_00ead330(NiAVObject* pkSceneObject);
-};
+
 // @fnv 0x00ead330
 void NiCollisionData::FUN_00ead330(NiAVObject* pkSceneObject)
 {
-    SetSceneObject(pkSceneObject);
+    NiCollisionObject::SetSceneObject(pkSceneObject);
     int iMode = m_eCollisionMode;
-    NiAVObject* pkObj = m_pkSceneObj;
+    NiAVObject* pkObj = m_pkSceneObject;
     if (!pkObj)
         return;
-    if (!pkObj->f6())
+    if (!pkObj->IsGeometry())
         return;
-    Helper38* pkHelper = pkObj->m_pkHelper;
+    Helper38* pkHelper = *reinterpret_cast<Helper38**>((char*)pkObj + 0xB8);
     if (!pkHelper)
         return;
     if (iMode == 0 || iMode == 1)
         pkHelper->m_uiObjectFlags |= 0x33;
 }
-}  // namespace fnv_00ead330
 
-namespace fnv_00ead760 {
-struct NiStream
-{
-    unsigned char _pad[0xD8];
-    unsigned int m_uiNifVersion;
-};
 struct TargetObj
 {
     unsigned char _pad[0x38];
     unsigned char m_ucFlag;
 };
-struct SceneObj
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual int Pred();
-    unsigned char _pad2[0xB4];
-    TargetObj* m_pFlagTarget;
-};
-struct NiCollisionObject
-{
-    virtual void LinkObject(NiStream&);
-    int _m04;
-    SceneObj* m_pkScene;
-};
-struct NiCollisionData : NiCollisionObject
-{
-    unsigned char _padC[0x1C];
-    int m_eCollisionMode;
-    void FUN_00ead760(NiStream&);
-};
+
+// Stream boundary declarations use opaque arguments until NiStream has one
+// approved tag kind; the bodies use the shared stream and collision layouts.
+void __cdecl LinkCollisionObject();
+
 // @fnv 0x00ead760
-void NiCollisionData::FUN_00ead760(NiStream& kStream)
+void __fastcall LinkCollisionData(NiCollisionData* self, void*, void* stream)
 {
-    NiCollisionObject::LinkObject(kStream);
-    if (kStream.m_uiNifVersion < 0x0A000110)
+    NiStream& kStream = *(NiStream*)stream;
+    ((void (__thiscall*)(NiCollisionData*, void*))LinkCollisionObject)(self, stream);
+    if (GetFileVersion(kStream) < 0x0A000110)
     {
-        int iMode = m_eCollisionMode;
-        SceneObj* pkScene = m_pkScene;
+        int iMode = self->m_eCollisionMode;
+        NiAVObject* pkScene = self->m_pkSceneObject;
         if (pkScene)
         {
-            if (pkScene->Pred())
+            if (pkScene->IsGeometry())
             {
-                TargetObj* pkTarget = pkScene->m_pFlagTarget;
+                TargetObj* pkTarget = *reinterpret_cast<TargetObj**>((char*)pkScene + 0xB8);
                 if (pkTarget)
                 {
                     if (iMode == 0 || iMode == 1)
@@ -320,76 +229,21 @@ void NiCollisionData::FUN_00ead760(NiStream& kStream)
         }
     }
 }
-}  // namespace fnv_00ead760
 
-namespace fnv_00ead870 {
-struct StrArr
-{
-    unsigned char _pad[8];
-    unsigned short m_usMax;
-    unsigned short m_usSize;
-    unsigned short _pad2;
-    unsigned short m_usGrow;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-    unsigned short GetSize() const
-    {
-        return m_usSize;
-    }
-    unsigned short GetAllocatedSize() const
-    {
-        return m_usMax;
-    }
-    unsigned short GetGrowSize() const
-    {
-        return m_usGrow;
-    }
-};
 char* __cdecl _FUN_00a7d330(const char*);
-struct NiCollisionData
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void VirtAt64(StrArr*);
-    void FUN_00a81100(StrArr*);
-    void FUN_00ead870(StrArr*);
-};
+
 // @fnv 0x00ead870
 void NiCollisionData::FUN_00ead870(StrArr* pkStrings)
 {
     FUN_00a81100(pkStrings);
     char* pszDup = _FUN_00a7d330((const char*)g_0126fab4);
-    unsigned int uiSize = pkStrings->GetSize();
-    unsigned int uiMax = pkStrings->GetAllocatedSize();
+    unsigned int uiSize = pkStrings->m_usSize;
+    unsigned int uiMax = pkStrings->m_usMaxSize;
     if (uiSize >= uiMax)
-        pkStrings->SetSize(uiSize + pkStrings->GetGrowSize());
+        pkStrings->SetSize(uiSize + pkStrings->m_usGrowBy);
     pkStrings->SetAt(uiSize, pszDup);
-    VirtAt64(pkStrings);
+    AddViewerStrings((NiViewerStringsArray*)pkStrings);
 }
-}  // namespace fnv_00ead870
 
 // FUN_00eacd00 - forwards its single argument to the collection's stream
 // writer and reports the writer's byte sized result as a bool.
@@ -416,61 +270,32 @@ bool __stdcall FUN_00eacd00(void* pStream)
 extern unsigned char DAT_010f18bc;
 extern unsigned int DAT_011f426c;
 
-struct FUN_00eacd60
-{
-    void* m_00;
-    unsigned int m_04;
-    unsigned int m_08;
-    unsigned int m_0c;
-    unsigned int m_10;
-    unsigned int m_14;
-    unsigned int m_18;
-    unsigned int m_1c;
-    unsigned int m_20;
-    unsigned int m_24;
-    unsigned int m_28;
-    unsigned int m_2c;
-    unsigned int m_30;
-    unsigned int m_34;
-    unsigned int m_38;
-    unsigned int m_3c;
-    unsigned int m_40;
-    unsigned int m_44;
-    unsigned char m_48;
-    unsigned char m_49;
-    unsigned short unk4a;
-    unsigned short m_4c;
-    unsigned char m_4e;
+inline void* __cdecl operator new(unsigned int, void* memory) { return memory; }
 
-    void Init(unsigned int);
-    FUN_00eacd60();
-};
-
-// Constructor: calls Init(0), zeroes several fields, stores pointers to DAT_010f18bc and values from DAT_011f426c/4270/4274, and sets m_24=2, m_28=3.
+// Initialize the base, zero collision buffers and copy the default velocities.
 // @fnv 0x00eacd60
-FUN_00eacd60::FUN_00eacd60()
+NiCollisionData::NiCollisionData() : NiCollisionObject((void*)0)
 {
-    Init(0);
-    m_40 = 0;
-    m_44 = 0;
-    m_48 = 0;
-    m_49 = 0;
-    m_00 = (void*)&DAT_010f18bc;
-    m_0c = DAT_011f426c;
-    m_10 = *(unsigned int*)&DAT_011f4270;
-    m_14 = *(unsigned int*)&DAT_011f4274;
-    m_18 = DAT_011f426c;
-    m_1c = *(unsigned int*)&DAT_011f4270;
-    m_20 = *(unsigned int*)&DAT_011f4274;
-    m_4c = 0;
-    m_2c = 0;
-    m_30 = 0;
-    m_34 = 0;
-    m_38 = 0;
-    m_3c = 0;
-    m_4e = 0;
-    m_24 = 2;
-    m_28 = 3;
+    m_pWorldVertices = 0;
+    unk44 = 0;
+    unk48 = 0;
+    unk49 = 0;
+    *(unsigned int*)&m_kLocalVelocity.x = DAT_011f426c;
+    *(unsigned int*)&m_kLocalVelocity.y = *(unsigned int*)&DAT_011f4270;
+    *(unsigned int*)&m_kLocalVelocity.z = *(unsigned int*)&DAT_011f4274;
+    *(unsigned int*)&m_kWorldVelocity.x = DAT_011f426c;
+    *(unsigned int*)&m_kWorldVelocity.y = *(unsigned int*)&DAT_011f4270;
+    *(unsigned int*)&m_kWorldVelocity.z = *(unsigned int*)&DAT_011f4274;
+    unk4C = 0;
+    m_pkModelABV = 0;
+    unk30 = 0;
+    m_pCollisionObject = 0;
+    unk38 = 0;
+    unk3C = 0;
+    unk4E = 0;
+    m_ePropagationMode = 2;
+    m_eCollisionMode = 3;
+
 }
 
 extern unsigned char DAT_010f18bc;
@@ -481,10 +306,7 @@ struct FUN_00aa4060_shell
     void __thiscall FUN_00aa4060(unsigned int);
 };
 
-struct FUN_00a80fc0_shell
-{
-    void __thiscall FUN_00a80fc0();
-};
+void __fastcall DestroyCollisionObject(NiCollisionObject*);
 
 struct SpawnedObj
 {
@@ -493,51 +315,27 @@ struct SpawnedObj
     virtual void v08(int);
 };
 
-struct FUN_00eacde0_cls
-{
-    void* m_00;
-    unsigned int m_04;
-    unsigned int m_08;
-    unsigned int m_0c;
-    unsigned int m_10;
-    unsigned int m_14;
-    unsigned int m_18;
-    unsigned int m_1c;
-    unsigned int m_20;
-    unsigned int m_24;
-    unsigned int m_28;
-    SpawnedObj* m_2c;
-    SpawnedObj* m_30;
-    SpawnedObj* m_34;
-    unsigned int m_38;
-    unsigned int m_3c;
-    unsigned int m_40;
-    unsigned int m_44;
-
-    void FUN_00eacde0();
-};
-
 // @fnv 0x00eacde0
-void FUN_00eacde0_cls::FUN_00eacde0()
+void NiCollisionData::FUN_00eacde0()
 {
-    unsigned int a = m_40;
-    m_00 = &DAT_010f18bc;
+    unsigned int a = (unsigned int)m_pWorldVertices;
+    *(void**)this = &DAT_010f18bc;
     ((FUN_00aa4060_shell*)&DAT_011f6238)->FUN_00aa4060(a);
-    ((FUN_00aa4060_shell*)&DAT_011f6238)->FUN_00aa4060(m_44);
-    if (m_2c != 0)
+    ((FUN_00aa4060_shell*)&DAT_011f6238)->FUN_00aa4060((unsigned int)unk44);
+    if (m_pkModelABV != 0)
     {
-        m_2c->v08(1);
+        delete m_pkModelABV;
     }
-    if (m_30 != 0)
+    if (unk30 != 0)
     {
-        m_30->v08(1);
+        delete unk30;
     }
-    if (m_34 != 0)
+    if (m_pCollisionObject != 0)
     {
-        m_34->v00(1);
+        ((SpawnedObj*)m_pCollisionObject)->v00(1);
     }
-    m_34 = 0;
-    ((FUN_00a80fc0_shell*)this)->FUN_00a80fc0();
+    m_pCollisionObject = 0;
+    DestroyCollisionObject((NiCollisionObject*)this);
 }
 
 extern void(__cdecl* g_011aa050)(unsigned short, unsigned int, void*, void*);
@@ -631,115 +429,23 @@ struct S_00ead250_Second
     unsigned int unk20;
 };
 
-struct S_00ead250_First
-{
-    virtual void m00()
-    {}
-    virtual void m04()
-    {}
-    virtual void m08()
-    {}
-    virtual void m0c()
-    {}
-    virtual void m10()
-    {}
-    virtual void m14()
-    {}
-    virtual S_00ead250_First* m18()
-    {
-        return 0;
-    }
-
-    void* unk04;
-    void* unk08;
-    void* unk0c;
-    void* unk10;
-    void* unk14;
-    void* unk18;
-    void* unk1c;
-    void* unk20;
-    void* unk24;
-    void* unk28;
-    void* unk2c;
-    void* unk30;
-    void* unk34;
-    void* unk38;
-    void* unk3c;
-    void* unk40;
-    void* unk44;
-    void* unk48;
-    void* unk4c;
-    void* unk50;
-    void* unk54;
-    void* unk58;
-    void* unk5c;
-    void* unk60;
-    void* unk64;
-    void* unk68;
-    void* unk6c;
-    void* unk70;
-    void* unk74;
-    void* unk78;
-    void* unk7c;
-    void* unk80;
-    void* unk84;
-    void* unk88;
-    void* unk8c;
-    void* unk90;
-    void* unk94;
-    void* unk98;
-    void* unk9c;
-    void* unkA0;
-    void* unkA4;
-    void* unkA8;
-    void* unkAC;
-    void* unkB0;
-    void* unkB4;
-    S_00ead250_Second* unkB8;
-};
-
-struct S_00ead250
-{
-    void* unk00;
-    void* unk04;
-    S_00ead250_First* unk08;
-    void* unk0c;
-    void* unk10;
-    void* unk14;
-    void* unk18;
-    void* unk1c;
-    void* unk20;
-    void* unk24;
-    void* unk28;
-    void* unk2c;
-    void* unk30;
-    void* unk34;
-    void* unk38;
-    void* unk3c;
-    void* unk40;
-    void* unk44;
-    unsigned char unk48;
-
-    void FUN_00ead250();
-};
-
-// If unk08's m18() result is non-null and unk40 and unk48 are set, calls g_011aa050 with the second object's unk20 and m90() and clears unk48.
+// If unk08's m18() result is non-null and m_pWorldVertices and unk48 are set, calls g_011aa050 with the second object's unk20 and m90() and clears unk48.
 // @fnv 0x00ead250
-void S_00ead250::FUN_00ead250()
+void NiCollisionData::FUN_00ead250()
 {
-    S_00ead250_First* first = unk08;
+    NiAVObject* first = m_pkSceneObject;
 
     if (first != 0)
     {
-        S_00ead250_First* object = first->m18();
+        NiAVObject* object = (NiAVObject*)first->IsGeometry();
 
-        if (object != 0 && unk40 != 0 && unk48 != 0)
+        if (object != 0 && m_pWorldVertices != 0 && unk48 != 0)
         {
-            S_00ead250_Second* second = object->unkB8;
+            S_00ead250_Second* second = *reinterpret_cast<S_00ead250_Second**>((char*)object + 0xB8);
             unsigned int value20 = second->unk20;
             unsigned short value90 = second->m90();
 
-            g_011aa050(value90, value20, unk40, (void*)((char*)object + 0x68));
+            g_011aa050(value90, value20, m_pWorldVertices, (void*)((char*)object + 0x68));
 
             unk48 = 0;
         }
@@ -752,35 +458,19 @@ struct FUN_00ead2b0_node
     FUN_00ead2b0_node* m_04;
 };
 
-struct FUN_00ead2b0_cls
-{
-    virtual void unk00();
-    virtual void unk04();
-    virtual FUN_00ead2b0_node* unk08();
-    virtual int unk0c();
-    int m_04;
-    int m_08;
-    int m_0c;
-    int m_10;
-    int m_14;
-    int m_18;
-    int m_1c;
-    int m_20;
-    int m_24;
-    int m_28;
-    FUN_00ead2b0_cls* m_2c;
-    bool __thiscall Probe(void* p);
-    bool __thiscall MatchesOther(FUN_00ead2b0_cls* other);
-};
+// These base implementations are absent from the shared NiCollisionObject
+// declaration. Call them with their original thiscall ABI without a proxy class.
+bool __cdecl CollisionObjectIsEqual();
 
 // Checks Probe(other), a node list for g_0126fab4, equal m_28/m_24, and equal m_2c unk0c values; returns true on match, false otherwise.
 // @fnv 0x00ead2b0
-bool FUN_00ead2b0_cls::MatchesOther(FUN_00ead2b0_cls* other)
+bool NiCollisionData::IsEqual(NiObject* pkOther) const
 {
+    NiCollisionData* other = (NiCollisionData*)pkOther;
     FUN_00ead2b0_node* node;
-    FUN_00ead2b0_cls* a;
-    FUN_00ead2b0_cls* b;
-    if (!Probe(other))
+    NiBoundingVolume* a;
+    NiBoundingVolume* b;
+    if (!((bool (__thiscall*)(const NiCollisionData*, NiObject*))CollisionObjectIsEqual)(this, other))
     {
         goto fail;
     }
@@ -788,7 +478,7 @@ bool FUN_00ead2b0_cls::MatchesOther(FUN_00ead2b0_cls* other)
     {
         goto fail;
     }
-    node = other->unk08();
+    node = (FUN_00ead2b0_node*)other->GetRTTI();
     if (node == 0)
     {
         goto fail;
@@ -803,24 +493,24 @@ bool FUN_00ead2b0_cls::MatchesOther(FUN_00ead2b0_cls* other)
     } while (node != 0);
     goto fail;
 found:
-    if (other->m_28 != m_28)
+    if (other->m_eCollisionMode != m_eCollisionMode)
     {
         goto fail;
     }
-    if (other->m_24 != m_24)
+    if (other->m_ePropagationMode != m_ePropagationMode)
     {
         goto fail;
     }
-    a = other->m_2c;
+    a = other->m_pkModelABV;
     if (a == 0)
     {
         goto tail;
     }
-    b = m_2c;
+    b = m_pkModelABV;
     if (b != 0)
     {
-        int ra = a->unk0c();
-        int rb = b->unk0c();
+        int ra = a->F3();
+        int rb = b->F3();
         if (ra == rb)
         {
             goto ok;
@@ -828,7 +518,7 @@ found:
         goto fail;
     }
 tail:
-    if (a != m_2c)
+    if (a != m_pkModelABV)
     {
         goto fail;
     }
@@ -838,20 +528,9 @@ fail:
     return false;
 }
 
-struct NiRTTI
-{
-    const char* m_pcName;
-    const NiRTTI* m_pBaseRTTI;
-};
-
 extern NiRTTI g_NiTriShapeRTTI;
 extern NiRTTI g_NiTriStripsRTTI;
 
-struct MemoryManager
-{
-    void* Allocate(unsigned int size);
-    void Deallocate(void* p);
-};
 extern MemoryManager _g_memoryManager;
 
 void* __cdecl NiMalloc(unsigned int size);
@@ -860,24 +539,6 @@ inline void NiFreeHelper(void* p)
 {
     _g_memoryManager.Deallocate(p);
 }
-
-struct NiObjectStub
-{
-    virtual void v00();
-    virtual void v04();
-    virtual const NiRTTI* GetRTTI() const;
-    bool IsKindOfType(const NiRTTI* pkRTTI) const
-    {
-        const NiRTTI* pkTmp = GetRTTI();
-        while (pkTmp)
-        {
-            if (pkTmp == pkRTTI)
-                return true;
-            pkTmp = pkTmp->m_pBaseRTTI;
-        }
-        return false;
-    }
-};
 
 struct GeomData
 {
@@ -959,9 +620,8 @@ struct GeomData
     }
 };
 
-struct GeomObj : NiObjectStub
+struct GeomObj : NiObject
 {
-    int unk04;
     int unk08;
     int unk0C;
     int unk10;
@@ -976,7 +636,7 @@ struct GeomObj : NiObjectStub
     int unk34;
     int unk38;
     int unk3C;
-    int unk40;
+    int m_pWorldVertices;
     int unk44;
     int unk48;
     int unk4C;
@@ -1041,14 +701,14 @@ struct TriData
     int unk34;
     int unk38;
     int unk3C;
-    int unk40;
+    int m_pWorldVertices;
     int unk44;
     int unk48;
     int unk4C;
     int unk50;
 };
 
-inline bool IsKindOfHelper(const NiRTTI& rtti, NiObjectStub* obj)
+inline bool IsKindOfHelper(const NiRTTI& rtti, NiObject* obj)
 {
     if (obj)
     {
@@ -1061,59 +721,34 @@ inline bool IsKindOfHelper(const NiRTTI& rtti, NiObjectStub* obj)
     return false;
 }
 
-struct CollisionData
-{
-    int unk00;
-    int unk04;
-    GeomObj* m_pkSceneObject;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    TriData* m_pkTriData;
-    int unk38;
-    int unk3C;
-    void* m_pWorldVertices;
-
-    void CreateWorldVertexData();
-    void CreateWorldNormals();
-    void CreateTriData(int iParam);
-};
-
-// Builds m_pkTriData from the scene object's triangle or triangle-strip geometry, creating world normals first if needed.
+// Builds m_pCollisionObject from the scene object's triangle or triangle-strip geometry, creating world normals first if needed.
 // @fnv 0x00ead380
-void CollisionData::CreateTriData(int iParam)
+void NiCollisionData::CreateTriData(int iParam)
 {
-    if (m_pkSceneObject && m_pkSceneObject->IsKindOfType(&g_NiTriShapeRTTI))
+    if (m_pkSceneObject && IsKindOfHelper(g_NiTriShapeRTTI, (NiObject*)m_pkSceneObject))
     {
-        if (m_pkTriData)
+        if (m_pCollisionObject)
             return;
         if (!m_pWorldVertices)
         {
-            CreateWorldVertexData();
-            CreateWorldNormals();
+            FUN_00ead1e0();
+            FUN_00ead250();
         }
-        GeomObj* pkShape = m_pkSceneObject;
-        m_pkTriData =
+        GeomObj* pkShape = (GeomObj*)m_pkSceneObject;
+        m_pCollisionObject =
             new TriData(pkShape->m_spGeometryData->GetTriangleCount(), pkShape->m_spGeometryData->GetTriangleList(),
                         pkShape->m_spGeometryData->GetVertices(), m_pWorldVertices, iParam);
     }
-    else if (m_pkSceneObject && m_pkSceneObject->IsKindOfType(&g_NiTriStripsRTTI))
+    else if (m_pkSceneObject && IsKindOfHelper(g_NiTriStripsRTTI, (NiObject*)m_pkSceneObject))
     {
-        if (m_pkTriData)
+        if (m_pCollisionObject)
             return;
         if (!m_pWorldVertices)
         {
-            CreateWorldVertexData();
-            CreateWorldNormals();
+            FUN_00ead1e0();
+            FUN_00ead250();
         }
-        GeomObj* pkStrips = m_pkSceneObject;
+        GeomObj* pkStrips = (GeomObj*)m_pkSceneObject;
         unsigned int uiTriangleCount = 0;
         unsigned int uiTriangles = pkStrips->m_spGeometryData->m_usTriangles;
         unsigned short* pusTriList = (unsigned short*)NiMalloc(uiTriangles * 3 * sizeof(unsigned short));
@@ -1127,19 +762,12 @@ void CollisionData::CreateTriData(int iParam)
                 uiTriangleCount++;
             }
         }
-        m_pkTriData = new TriData(uiTriangleCount, pusTriList, pkStrips->m_spGeometryData->GetVertices(),
+        m_pCollisionObject = new TriData(uiTriangleCount, pusTriList, pkStrips->m_spGeometryData->GetVertices(),
                                   m_pWorldVertices, iParam);
         NiFreeHelper(pusTriList);
     }
 }
 
-// Stand-in model for the NiCollisionData-like object that owns UpdateCollideState.
-//
-// Layout of the "other collision object" (the one this->m_08 points at):
-//   +0x00  vptr
-//   +0xb8  pointer to a small flags object
-// The virtual used by the original lives at vtable offset 0x18 (slot 6) and
-// returns a value that is tested.
 struct FNV_CollideFlags
 {
     int unk00;
@@ -1159,532 +787,193 @@ struct FNV_CollideFlags
     unsigned char m_38;
 };
 
-struct FNV_Collide
+__forceinline void CollisionModeThen(NiCollisionData* self)
 {
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAc;
-    int unkB0;
-    int unkB4;
-    FNV_CollideFlags* m_b8;
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual int v6();
-};
+    NiAVObject* obj = self->m_pkSceneObject;
+    if (obj)
+        obj->IsGeometry();
+}
 
-struct FNV_Owner
+__forceinline void CollisionModeElse(NiCollisionData* self)
 {
-    int unk00;
-    int unk04;
-    FNV_Collide* m_08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int m_24;
-    int m_28;
-    int m_2c;
-
-    void UpdateCollideState(unsigned int arg, unsigned int arg2);
-
-    // "then" arm of the m_2c test: the partner object's slot-6 virtual is
-    // invoked and its result is ignored.
-    __forceinline void DoThen()
+    NiAVObject* obj = self->m_pkSceneObject;
+    self->m_eCollisionMode = 0;
+    if (obj)
     {
-        FNV_Collide* obj = m_08;
-        if (obj)
-            obj->v6();
-    }
-
-    // "else" arm: the partner's slot-6 virtual result gates a flag update.
-    __forceinline void DoElse()
-    {
-        FNV_Collide* obj = m_08;
-        m_28 = 0;
-        if (obj)
+        if (obj->IsGeometry())
         {
-            if (obj->v6())
-            {
-                FNV_CollideFlags* flags = obj->m_b8;
-                if (flags)
-                    flags->m_38 |= 0x33;
-            }
+            FNV_CollideFlags* flags = *reinterpret_cast<FNV_CollideFlags**>((char*)obj + 0xB8);
+            if (flags)
+                flags->m_38 |= 0x33;
         }
     }
-};
+}
 
 // @fnv 0x00ead550
-void FNV_Owner::UpdateCollideState(unsigned int arg, unsigned int arg2)
+void __fastcall UpdateCollideState(NiCollisionData* self, void*, unsigned int arg, unsigned int arg2)
 {
     (void)arg2;
     if (arg >= 0x0a000106u)
         return;
-    switch (m_24)
+    switch (self->m_ePropagationMode)
     {
     case 0:
-        m_24 = 3;
-        if (m_2c != 0)
+        self->m_ePropagationMode = 3;
+        if (self->m_pkModelABV != 0)
         {
-            m_28 = 2;
-            DoThen();
+            self->m_eCollisionMode = 2;
+            CollisionModeThen(self);
         }
         else
         {
-            DoElse();
+            CollisionModeElse(self);
         }
         break;
     case 1:
-        m_24 = 3;
+        self->m_ePropagationMode = 3;
         break;
     case 2:
-        m_24 = 0;
-        if (m_2c != 0)
+        self->m_ePropagationMode = 0;
+        if (self->m_pkModelABV != 0)
         {
-            m_28 = 2;
-            DoThen();
+            self->m_eCollisionMode = 2;
+            CollisionModeThen(self);
         }
         else
         {
-            DoElse();
+            CollisionModeElse(self);
         }
         break;
     case 3:
-        m_24 = 2;
-        if (m_2c != 0)
+        self->m_ePropagationMode = 2;
+        if (self->m_pkModelABV != 0)
         {
-            m_28 = 2;
-            DoThen();
+            self->m_eCollisionMode = 2;
+            CollisionModeThen(self);
         }
         else
         {
-            DoElse();
+            CollisionModeElse(self);
         }
         break;
     case 4:
-        m_24 = 2;
+        self->m_ePropagationMode = 2;
         break;
     }
 }
 
-struct NiBinaryStreamStandIn
+inline unsigned int NiBinaryStream::BinaryRead(void* pvBuffer, unsigned int uiTotalBytes,
+                                               unsigned int* puiComponentSizes, unsigned int uiNumComponents)
 {
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void SetEndianSwap(bool bSwap);
-
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(NiBinaryStreamStandIn* pkThis, void* pvBuffer, unsigned int uiBytes,
-                                     unsigned int* puiComponentSizes, unsigned int uiNumComponents);
-
-    unsigned int BinaryRead(void* pvBuffer, unsigned int uiTotalBytes, unsigned int* puiComponentSizes,
-                            unsigned int uiNumComponents)
-    {
-        unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
-        m_uiStreamFlags += uiBytesRead;
-        return uiBytesRead;
-    }
-    template <class T> T ReadV()
-    {
-        T v;
-        unsigned int uiSize = sizeof(T);
-        unsigned int n = m_pfnRead(this, &v, sizeof(T), &uiSize, 1);
-        T r = v;
-        m_uiStreamFlags += n;
-        return r;
-    }
-    template <class T> unsigned int Read(T* pValue)
-    {
-        unsigned int uiSize = sizeof(T);
-        return BinaryRead(pValue, sizeof(T), &uiSize, 1);
-    }
-};
-
-struct NiStreamImpl
-{
-    char pad[0xd8];
-    unsigned int m_uiNifVersion;
-    char pad2[0x24c - 0xdc];
-    NiBinaryStreamStandIn* m_pUnderlyingStream;
-    unsigned int GetFileVersion() const
-    {
-        return m_uiNifVersion;
-    }
-};
-
-template <class T> inline void ReadBinaryValue(NiStreamImpl& stream, T& value)
-{
-    stream.m_pUnderlyingStream->Read(&value);
+    unsigned int uiBytesRead = m_pfnRead(this, pvBuffer, uiTotalBytes, puiComponentSizes, uiNumComponents);
+    m_uiAbsoluteCurrentPos += uiBytesRead;
+    return uiBytesRead;
 }
 
-template <class T> inline T LoadValue(NiStreamImpl& stream)
+template <class T> inline void NiBinaryStream::Read(T& value)
 {
-    return stream.m_pUnderlyingStream->ReadV<T>();
+    unsigned int uiSize = sizeof(T);
+    BinaryRead(&value, sizeof(T), &uiSize, 1);
 }
 
-struct Obj_ead
+template <class T> inline void ReadBinaryValue(NiStream& stream, T& value)
 {
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual int v06();
-};
+    stream.m_pkIstr->Read(value);
+}
 
-Obj_ead* __cdecl FUN_00e9cab0(NiStreamImpl& stream);
-
-struct FUN_00ead670_cls
+template <class T> inline T ReadBinaryScalar(NiBinaryStream& stream)
 {
-    char pad[0x24];
-    int m_i24;
-    int m_i28;
-    Obj_ead* m_pkObj;
-    int m_i30;
+    T v;
+    unsigned int uiSize = sizeof(T);
+    unsigned int n = stream.m_pfnRead(&stream, &v, sizeof(T), &uiSize, 1);
+    T r = v;
+    stream.m_uiAbsoluteCurrentPos += n;
+    return r;
+}
 
-    void FUN_00a80fd0(NiStreamImpl& stream);
-    void LoadFromStream(NiStreamImpl& stream);
-};
+template <class T> inline T LoadValue(NiStream& stream)
+{
+    return ReadBinaryScalar<T>(*stream.m_pkIstr);
+}
+
+NiBoundingVolume* __cdecl LoadBoundingVolume(void* stream);
+void __cdecl LoadCollisionObject();
 
 // Reads two ints (or one for older file versions), a bool, and if set loads an object and stores its v06() result.
 // @fnv 0x00ead670
-void FUN_00ead670_cls::LoadFromStream(NiStreamImpl& stream)
+void __fastcall LoadCollisionData(NiCollisionData* self, void*, void* source)
 {
-    FUN_00a80fd0(stream);
-    if (stream.GetFileVersion() >= 0x0A000106)
+    NiStream& stream = *(NiStream*)source;
+    ((void (__thiscall*)(NiCollisionData*, void*))LoadCollisionObject)(self, source);
+    if (GetFileVersion(stream) >= 0x0A000106)
     {
-        m_i24 = LoadValue<int>(stream);
-        m_i28 = LoadValue<int>(stream);
+        self->m_ePropagationMode = LoadValue<int>(stream);
+        self->m_eCollisionMode = LoadValue<int>(stream);
     }
     else
     {
-        m_i24 = LoadValue<int>(stream);
+        self->m_ePropagationMode = LoadValue<int>(stream);
     }
     bool bHasObject;
     ReadBinaryValue(stream, bHasObject);
     if (bHasObject)
     {
-        m_pkObj = FUN_00e9cab0(stream);
-        m_i30 = m_pkObj->v06();
+        self->m_pkModelABV = LoadBoundingVolume(source);
+        self->unk30 = self->m_pkModelABV->v6();
     }
 }
 
-class EAD7B0BinaryStream
+inline unsigned int NiBinaryStream::BinaryWrite(const void* p, unsigned int n, unsigned int* sizes,
+                                                unsigned int count)
 {
-  public:
-    void* m_ppVirtualMethodTable;
-    unsigned int m_uiStreamFlags;
-    unsigned int(__cdecl* m_pfnRead)(EAD7B0BinaryStream*, void*, unsigned int, unsigned int*, unsigned int);
-    unsigned int(__cdecl* m_pfnWrite)(EAD7B0BinaryStream*, const void*, unsigned int, unsigned int*, unsigned int);
-
-    unsigned int BinaryWrite(const void* p, unsigned int n, unsigned int* sizes, unsigned int count)
-    {
-        unsigned int written = m_pfnWrite(this, p, n, sizes, count);
-        m_uiStreamFlags += written;
-        return written;
-    }
-};
-
-class EAD7B0Object;
-
-class EAD7B0Stream
-{
-  public:
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual void unk10();
-    virtual void unk14();
-    virtual void unk18();
-    virtual void unk1C();
-    virtual void unk20();
-    virtual void unk24();
-    virtual void unk28();
-    virtual void unk2C();
-    virtual void SaveLinkID(EAD7B0Object* pkObject);
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    int unk158;
-    int unk15C;
-    int unk160;
-    int unk164;
-    int unk168;
-    int unk16C;
-    int unk170;
-    int unk174;
-    int unk178;
-    int unk17C;
-    int unk180;
-    int unk184;
-    int unk188;
-    int unk18C;
-    int unk190;
-    int unk194;
-    int unk198;
-    int unk19C;
-    int unk1A0;
-    int unk1A4;
-    int unk1A8;
-    int unk1AC;
-    int unk1B0;
-    int unk1B4;
-    int unk1B8;
-    int unk1BC;
-    int unk1C0;
-    int unk1C4;
-    int unk1C8;
-    int unk1CC;
-    int unk1D0;
-    int unk1D4;
-    int unk1D8;
-    int unk1DC;
-    int unk1E0;
-    int unk1E4;
-    int unk1E8;
-    int unk1EC;
-    int unk1F0;
-    int unk1F4;
-    int unk1F8;
-    int unk1FC;
-    int unk200;
-    int unk204;
-    int unk208;
-    int unk20C;
-    int unk210;
-    int unk214;
-    int unk218;
-    int unk21C;
-    int unk220;
-    int unk224;
-    int unk228;
-    int unk22C;
-    int unk230;
-    int unk234;
-    int unk238;
-    int unk23C;
-    int unk240;
-    int unk244;
-    int unk248;
-    int unk24C;
-    EAD7B0BinaryStream* m_pBackingStream;
-};
+    unsigned int written = m_pfnWrite(this, p, n, sizes, count);
+    m_uiAbsoluteCurrentPos += written;
+    return written;
+}
 
 template <class T>
-inline void EAD7B0BinaryStreamSave(EAD7B0BinaryStream& kOstr, const T* pValue, unsigned int uiNumEls = 1)
+inline void SaveBinaryValue(NiBinaryStream& kOstr, const T* pValue, unsigned int uiNumEls = 1)
 {
     unsigned int uiSize = sizeof(T);
     kOstr.BinaryWrite(pValue, uiNumEls * uiSize, &uiSize, 1);
 }
 
-template <class T> inline void EAD7B0SaveBinary(EAD7B0Stream& kStream, const T& value)
+template <class T> inline void SaveBinaryValue(NiStream& kStream, const T& value)
 {
-    EAD7B0BinaryStreamSave(*kStream.m_pBackingStream, &value);
+    SaveBinaryValue(*kStream.m_pkOstr, &value);
 }
 
-class EAD7B0Saveable
-{
-  public:
-    virtual void vfn00();
-    virtual void SaveBinary(EAD7B0Stream& kStream);
-};
+void __cdecl SaveCollisionObject();
 
-class EAD7B0Base
-{
-  public:
-    void SaveBinaryBase(EAD7B0Stream& kStream);
-
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-};
-
-class EAD7B0Object : public EAD7B0Base
-{
-  public:
-    void FUN_00ead7b0(EAD7B0Stream& kStream);
-
-    int m_iValue0;
-    int m_iValue1;
-    EAD7B0Saveable* m_pkChild;
-};
-
-// Saves the base fields, m_iValue0 and m_iValue1, then a presence flag and the child's SaveBinary if m_pkChild is set.
+// Saves the base fields, m_ePropagationMode and m_eCollisionMode, then a presence flag and the child's SaveBinary if m_pkModelABV is set.
 // @fnv 0x00ead7b0
-void EAD7B0Object::FUN_00ead7b0(EAD7B0Stream& kStream)
+void __fastcall SaveCollisionData(NiCollisionData* self, void*, void* target)
 {
-    SaveBinaryBase(kStream);
-    EAD7B0SaveBinary(kStream, m_iValue0);
-    EAD7B0SaveBinary(kStream, m_iValue1);
-    if (m_pkChild)
+    NiStream& kStream = *(NiStream*)target;
+    ((void (__thiscall*)(NiCollisionData*, void*))SaveCollisionObject)(self, target);
+    SaveBinaryValue(kStream, self->m_ePropagationMode);
+    SaveBinaryValue(kStream, self->m_eCollisionMode);
+    if (self->m_pkModelABV)
     {
-        EAD7B0SaveBinary(kStream, true);
-        m_pkChild->SaveBinary(kStream);
+        SaveBinaryValue(kStream, true);
+        self->m_pkModelABV->SaveBinary(kStream);
     }
     else
     {
-        EAD7B0SaveBinary(kStream, false);
+        SaveBinaryValue(kStream, false);
     }
 }
 
 void* __cdecl FUN_00aa13e0(unsigned int);
 
-struct FUN_00eacd60_shell
-{
-    void* __thiscall FUN_00eacd60();
-};
-
-struct FUN_00eada20_cls
-{
-    void __thiscall CloneCollisionData(void* a, void* b);
-    void* __thiscall FUN_00eada20(void* arg);
-};
-
 // @fnv 0x00eada20
-void* __thiscall FUN_00eada20_cls::FUN_00eada20(void* arg)
+NiObject* NiCollisionData::MakeClone(CloningProcess& arg)
 {
-    void* result;
+    NiCollisionData* result;
     void* mem = FUN_00aa13e0(0x50);
     if (mem != 0)
     {
-        result = ((FUN_00eacd60_shell*)mem)->FUN_00eacd60();
+        result = ::new (mem) NiCollisionData();
     }
     else
     {
@@ -1696,141 +985,60 @@ void* __thiscall FUN_00eada20_cls::FUN_00eada20(void* arg)
 
 extern unsigned char DAT_0126fab0;
 
-struct NiPoint3b
+__forceinline NiPoint3 AddVelocity(const NiPoint3& kA, const NiPoint3& kB)
 {
-    float x, y, z;
-};
-
-struct M_004b4500
-{
-    NiPoint3b FUN_004b4500(const NiPoint3* pkPoint);
-};
-
-struct NiTransform : M_004b4500
-{
-};
-
-struct NiCollUpdateTarget
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0C();
-    virtual void v10();
-    virtual void v14(void* pkObject, NiTransform& kWorld);
-};
-
-struct NiCollDataStandIn;
-
-struct NiAVObjectStandIn
-{
-    void* m_pkVtable;
-    int m_iRefCount;
-    int m_i08;
-    int m_i0C;
-    int m_i10;
-    int m_i14;
-    NiAVObjectStandIn* m_pParentNode;
-    NiCollDataStandIn* m_pkCollisionObject;
-    int m_i20;
-    int m_i24;
-    int m_i28;
-    int m_i2C;
-    int m_i30;
-    int m_i34;
-    int m_i38;
-    int m_i3C;
-    int m_i40;
-    int m_i44;
-    int m_i48;
-    int m_i4C;
-    int m_i50;
-    int m_i54;
-    int m_i58;
-    int m_i5C;
-    int m_i60;
-    int m_i64;
-    NiTransform m_kWorldSpaceTransform;
-};
-
-struct NiCollDataStandIn
-{
-    void* m_pkVtable;
-    int m_iRefCount;
-    NiAVObjectStandIn* m_pkSceneObject;
-    NiPoint3b m_kLocalVelocity;
-    NiPoint3b m_kWorldVelocity;
-    int m_ePropagate;
-    int m_eCollisionMode;
-    void* m_pkCollisionObject;
-    NiCollUpdateTarget* m_pkTarget;
-    int m_i34;
-    int m_i38;
-    int m_i3C;
-    int m_i40;
-    int m_i44;
-    unsigned char m_b48;
-    unsigned char m_b49;
-    int m_i4C;
-
-    __declspec(noinline) NiAVObjectStandIn* FUN_00ead0d0(NiAVObjectStandIn* pkNode);
-    void UpdateCollision(NiAVObjectStandIn* pkObject);
-};
-
-__forceinline NiPoint3b operator+(const NiPoint3b& kA, const NiPoint3b& kB)
-{
-    NiPoint3b kResult;
+    NiPoint3 kResult;
     kResult.x = kA.x + kB.x;
     kResult.y = kA.y + kB.y;
     kResult.z = kA.z + kB.z;
     return kResult;
 }
 
-NiAVObjectStandIn* NiCollDataStandIn::FUN_00ead0d0(NiAVObjectStandIn* pkNode)
+__declspec(noinline) NiAVObject* __stdcall FindCollisionParent(NiAVObject* pkNode)
 {
     if (pkNode == 0)
         return 0;
     do
     {
-        pkNode = pkNode->m_pParentNode;
+        pkNode = (NiAVObject*)pkNode->m_pkParent;
         if (pkNode == 0)
             return 0;
-    } while (pkNode->m_pkCollisionObject == 0);
+    } while (pkNode->m_spCollisionObject.m_pObject == 0);
     return pkNode;
 }
 
 // @fnv 0x00ead0f0
-void NiCollDataStandIn::UpdateCollision(NiAVObjectStandIn* pkObject)
+void NiCollisionData::Unk_24(NiUpdateData& arData)
 {
-    if (m_pkCollisionObject)
+    if (m_pkModelABV)
     {
-        m_pkTarget->v14(m_pkCollisionObject, m_pkSceneObject->m_kWorldSpaceTransform);
+        unk30->v5(m_pkModelABV, &m_pkSceneObject->m_kWorld);
     }
     if (DAT_0126fab0)
     {
-        NiAVObjectStandIn* pkParent = m_pkSceneObject->m_pParentNode;
+        NiAVObject* pkParent = (NiAVObject*)m_pkSceneObject->m_pkParent;
         if (pkParent)
         {
-            NiCollDataStandIn* pkData = 0;
+            NiCollisionData* pkData = 0;
             if (m_pkSceneObject)
             {
-                NiAVObjectStandIn* pkNode = m_pkSceneObject->m_pParentNode;
+                NiAVObject* pkNode = (NiAVObject*)m_pkSceneObject->m_pkParent;
                 if (pkNode)
                 {
-                    if (pkNode->m_pkCollisionObject == 0)
-                        pkNode = FUN_00ead0d0(pkNode);
+                    if (pkNode->m_spCollisionObject.m_pObject == 0)
+                        pkNode = ((NiAVObject* (__thiscall*)(NiCollisionData*, NiAVObject*))FindCollisionParent)(this, pkNode);
                     if (pkNode)
-                        pkData = pkNode->m_pkCollisionObject;
+                        pkData = (NiCollisionData*)pkNode->m_spCollisionObject.m_pObject;
                 }
             }
             if (pkData)
             {
                 m_kWorldVelocity =
-                    pkData->m_kWorldVelocity + pkParent->m_kWorldSpaceTransform.FUN_004b4500((const NiPoint3*)&m_kLocalVelocity);
+                    AddVelocity(pkData->m_kWorldVelocity, pkParent->m_kWorld.FUN_004b4500(&m_kLocalVelocity));
             }
             else
             {
-                m_kWorldVelocity = pkParent->m_kWorldSpaceTransform.FUN_004b4500((const NiPoint3*)&m_kLocalVelocity);
+                m_kWorldVelocity = pkParent->m_kWorld.FUN_004b4500(&m_kLocalVelocity);
             }
         }
         else
@@ -1838,82 +1046,31 @@ void NiCollDataStandIn::UpdateCollision(NiAVObjectStandIn* pkObject)
             m_kWorldVelocity = m_kLocalVelocity;
         }
     }
-    m_b49 = m_b48 = true;
+    unk49 = unk48 = true;
 }
 
-struct StrArr
-{
-    void* m_pVtbl;
-    char** m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-    void SetSize(unsigned int uiMaxSize);
-    void SetAt(unsigned int uiIndex, char*& pcElement);
-    unsigned int Add(char* pcElement)
-    {
-        unsigned int uiIndex = m_usSize;
-        if (uiIndex >= m_usMaxSize)
-            SetSize(uiIndex + m_usGrowBy);
-        SetAt(uiIndex, pcElement);
-        return uiIndex;
-    }
-};
-struct NiPoint3Viewer
-{
-    float x, y, z;
-    char* FUN_00a59af0(const char* pcPrefix);
-};
 char* FUN_00a7d330(char* pcText);
-struct NiCollisionModel
-{
-    virtual void Unk_00();
-    virtual void Unk_01();
-    virtual void Unk_02();
-    virtual void Unk_03();
-    virtual void Unk_04();
-    virtual void Unk_05();
-    virtual void Unk_06();
-    virtual void Unk_07();
-    virtual void Unk_08();
-    virtual void Unk_09();
-    virtual void Unk_0A();
-    virtual void GetViewerStrings(const char* pcPrefix, StrArr* pkStrings);
-};
-struct FUN_00a81160_base
-{
-    void WriteToStream(StrArr* pkStrings);
-};
-struct FUN_00ead8d0_shell : FUN_00a81160_base
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    NiPoint3Viewer m_kLocalVelocity;
-    NiPoint3Viewer m_kWorldVelocity;
-    unsigned int m_ePropagationMode;
-    unsigned int m_eCollisionMode;
-    NiCollisionModel* m_pkModelABV;
-    char* FormatName(const char* pcPrefix, unsigned int eMode);
-    char* FUN_00eacef0(const char* pcPrefix, unsigned int eMode);
-    void FUN_00ead8d0(StrArr* pkStrings);
-};
+char* __stdcall FormatName(const char* name, int mode);
+
+void __cdecl AddCollisionObjectViewerStrings();
 
 // Appends viewer strings for propagation/collision modes, the ABV model and local/world velocities to pkStrings.
 // @fnv 0x00ead8d0
-void FUN_00ead8d0_shell::FUN_00ead8d0(StrArr* pkStrings)
+void NiCollisionData::AddViewerStrings(NiViewerStringsArray* strings)
 {
-    WriteToStream(pkStrings);
-    pkStrings->Add(FUN_00a7d330((char*)g_0126fab4));
+    StrArr* pkStrings = (StrArr*)strings;
+    ((void (__thiscall*)(NiCollisionData*, StrArr*))AddCollisionObjectViewerStrings)(this, pkStrings);
+    pkStrings->AddInline(FUN_00a7d330((char*)g_0126fab4));
+    // The original callers also supply the collision owner in ECX to these
+    // stateless formatters; preserve that calling convention.
     unsigned int propagationMode = m_ePropagationMode;
-    pkStrings->Add(FormatName("m_ePropagationMode", propagationMode));
+    pkStrings->AddInline(((char* (__thiscall*)(NiCollisionData*, const char*, unsigned int))FormatName)(this, "m_ePropagationMode", propagationMode));
     unsigned int collisionMode = m_eCollisionMode;
-    pkStrings->Add(FUN_00eacef0("m_eCollisionMode", collisionMode));
+    pkStrings->AddInline(((char* (__thiscall*)(NiCollisionData*, const char*, unsigned int))FUN_00eacef0)(this, "m_eCollisionMode", collisionMode));
     if (m_pkModelABV)
-        m_pkModelABV->GetViewerStrings("m_pkModelABV->Type", pkStrings);
-    pkStrings->Add(m_kLocalVelocity.FUN_00a59af0("m_kLocalVelocity"));
-    pkStrings->Add(m_kWorldVelocity.FUN_00a59af0("m_kWorldVelocity"));
+        m_pkModelABV->AddViewerStrings("m_pkModelABV->Type", (NiTPrimitiveArray<char*>*)pkStrings);
+    pkStrings->AddInline(m_kLocalVelocity.FUN_00a59af0("m_kLocalVelocity"));
+    pkStrings->AddInline(m_kWorldVelocity.FUN_00a59af0("m_kWorldVelocity"));
 }
 
 extern const char str_010f19fc[];
@@ -1961,10 +1118,6 @@ void* __cdecl operator new[](unsigned int n)
 {
     return reinterpret_cast<Allocator&>(DAT_011f6238).FUN_00aa3e40(n);
 }
-struct Point
-{
-    float x, y, z;
-};
 struct GeometryData
 {
     void* m_00;
@@ -2036,58 +1189,22 @@ struct Geometry
     void* m_b4;
     GeometryData* geometryData;
 };
-struct Node
-{
-    virtual void V0();
-    virtual void V1();
-    virtual void V2();
-    virtual void V3();
-    virtual void V4();
-    virtual void V5();
-    virtual void V6();
-    virtual Geometry* GetGeometry();
-};
-struct Target
-{
-    void* m_00;
-    void* m_04;
-    Node* node;
-    void* m_0c;
-    void* m_10;
-    void* m_14;
-    void* m_18;
-    void* m_1c;
-    void* m_20;
-    void* m_24;
-    void* m_28;
-    void* m_2c;
-    void* m_30;
-    void* m_34;
-    void* m_38;
-    void* m_3c;
-    Point* points;
-    unsigned int m_44;
-    unsigned char hasPoints;
-    unsigned char m_49;
-    unsigned short pointCount;
-    unsigned short geomFlags;
-    void FUN_00ead1e0();
-};
+
 // @fnv 0x00ead1e0
-void Target::FUN_00ead1e0()
+void NiCollisionData::FUN_00ead1e0()
 {
-    if (node)
+    if (m_pkSceneObject)
     {
-        Geometry* geometry = node->GetGeometry();
-        if (geometry && !points)
+        Geometry* geometry = (Geometry*)m_pkSceneObject->IsTriBasedGeometry();
+        if (geometry && !m_pWorldVertices)
         {
             unsigned short count = geometry->geometryData->vertexCount;
             if (count != 0)
             {
-                pointCount = count;
-                points = new Point[count];
-                hasPoints = 1;
-                geomFlags = geometry->geometryData->geomFlags;
+                unk4A = count;
+                m_pWorldVertices = new NiPoint3[count];
+                unk48 = 1;
+                unk4C = geometry->geometryData->geomFlags;
             }
         }
     }

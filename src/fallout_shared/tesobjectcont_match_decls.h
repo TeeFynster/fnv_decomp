@@ -7,10 +7,7 @@ class TESObjectCONT_TESScriptableInitCall
     void InitItem(TESForm*);
 };
 
-class TESSound : public TESForm
-{
-};
-
+#include "../../include/TESSound.h"
 class TESFileFormVersion
 {
   public:
@@ -35,25 +32,10 @@ struct ContainerItemExtraOwner
 };
 
 class CombatController;
-class CombatProcedure
-{
-  public:
-    void Initialize(CombatController*);
-};
-
-class EffectSetting
-{
-  public:
-    void SetAreaSound(TESSound*);
-};
-
+#include "../../include/CombatProcedure.h"
+#include "../../include/EffectSetting.h"
 class BGSVoiceType;
-class BGSTalkingActivator
-{
-  public:
-    void SetVoiceType(BGSVoiceType*);
-};
-
+#include "../../include/BGSTalkingActivator.h"
 struct CNTOChunkData
 {
     unsigned int formID;

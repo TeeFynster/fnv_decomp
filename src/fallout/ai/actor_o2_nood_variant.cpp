@@ -1,14 +1,162 @@
+#include "../../../include/hkArray.h"
 
 // src/fallout/ai/actor_o2_nood_variant.cpp - flag-variant unit created 2026-10-24 by flag_moves.py: the bytes and the matched neighbours of these functions
 // say /MT /O2 /GS /EHsc /Gy (unit src/fallout/ai/actor.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions to their real
 // unit once identified.
 
 #include "Actor.h"
+#include "../../../include/hkpUpdateCollisionFilterOnEntityMode.h"
+#include "../../../include/hkpEntityActivation.h"
+#include "../../../include/hkpCollidableQualityType.h"
+#include "../../../include/hkaSkeleton.h"
+#include "../../../include/hkReferencedObject.h"
+#include "../../../include/hkMonitorStream.h"
+#include "../../../include/hkMonitorStream.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/NiTMapItem.h"
+#include "../../../include/hkMemoryRouter.h"
+#include "../../../include/hkMonitorStream.h"
+#include "../../../include/hkStackMemory.h"
+#include "../../../include/hkBool.h"
+#include "../../../include/hkMemoryAllocator.h"
+#include "../../../include/hkStringPtr.h"
+#include "../../../include/hkaBone.h"
 
-union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; };
+
+// Keep the original float-only intrinsic storage for the compiler alias analysis.
+// Exe 0x00c7d030 FUN_00c7d030: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4]; } __m128, LocalM128;
+#define FNV_VEC4_NO_SSE
+#define FNV_VEC4_SIMD
+#include "../../../include/Vec4.h"
+#include "../../../include/hkSimdReal.h"
+
+__forceinline void Vec4::operator=(const Vec4& rhs) { m_vComponents=rhs.m_vComponents; }
+
+namespace FloatHardware { extern "C" ::LocalM128 _mm_sub_ps(::LocalM128,::LocalM128); }
+extern "C" {
+extern ::LocalM128 _mm_shuffle_ps(::LocalM128, ::LocalM128, int);
+extern ::LocalM128 _mm_load_ss(float const*);
+extern void _mm_store_ss(float*, ::LocalM128);
+extern ::LocalM128 _mm_mul_ps(::LocalM128, ::LocalM128);
+extern ::LocalM128 _mm_add_ps(::LocalM128, ::LocalM128);
+extern ::LocalM128 _mm_add_ss(::LocalM128, ::LocalM128);
+extern ::LocalM128 _mm_unpackhi_ps(::LocalM128, ::LocalM128);
+extern ::LocalM128 _mm_rsqrt_ps(::LocalM128);
+extern void _mm_prefetch(char const*, int);
+__declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
+extern const ::LocalM128 DAT_010c71c0;
+extern const ::LocalM128 DAT_010c71d0;
+extern const ::LocalM128 DAT_010c71e0;
+}
+
+typedef ::LocalM128 hkQuadReal;
+typedef float hkReal;
+
+__forceinline hkSimdReal::hkSimdReal(const hkQuadReal& x) : m_vValue(x) {}
+__forceinline hkSimdReal::hkSimdReal() {}
+__forceinline hkQuadReal hkSimdReal::broadcast() const { return (_mm_shuffle_ps)(m_vValue, m_vValue, 0); }
+__forceinline const hkQuadReal& hkSimdReal::getQuad() const { return m_vValue; }
+typedef const hkSimdReal& hkSimdRealParameter;
+
+
+class ActorQuaternionLocal_00ce3a00;
+class hkQsTransform;
+
+// Retained: including the shared SIMD definitions changes the bytes of FUN_00ce3a00.
+// local form of hkVector4: 0x00ce3a00 needs the unit FloatHardware intrinsics and force-inline packet form; the shared definitions change its bytes.
+class __declspec(align(16)) ActorVectorLocal_00ce3a00 {
+public:
+    __forceinline ActorVectorLocal_00ce3a00() {}
+    __forceinline hkQuadReal& getQuad() { return m_vComponents; }
+    __forceinline void operator=(const ActorVectorLocal_00ce3a00& v) { m_vComponents = v.m_vComponents; }
+    __forceinline void SetAllComponents(hkSimdRealParameter a) { m_vComponents = (_mm_shuffle_ps)(a.getQuad(), a.getQuad(), 0); }
+    __forceinline void add4(const ActorVectorLocal_00ce3a00& v) { m_vComponents = (_mm_add_ps)(m_vComponents, v.m_vComponents); }
+    __forceinline void setAdd4(const ActorVectorLocal_00ce3a00& v0, const ActorVectorLocal_00ce3a00& v1) { m_vComponents = (_mm_add_ps)(v0.m_vComponents, v1.m_vComponents); }
+    __forceinline void setSub4(const ActorVectorLocal_00ce3a00& v0, const ActorVectorLocal_00ce3a00& v1) { m_vComponents = (FloatHardware::_mm_sub_ps)(v0.m_vComponents, v1.m_vComponents); }
+    __forceinline void sub4(const ActorVectorLocal_00ce3a00& v) { m_vComponents = (FloatHardware::_mm_sub_ps)(m_vComponents, v.m_vComponents); }
+    __forceinline void mul4(const ActorVectorLocal_00ce3a00& v) { m_vComponents = (_mm_mul_ps)(m_vComponents, v.m_vComponents); }
+    __forceinline void setMul4(const ActorVectorLocal_00ce3a00& a, const ActorVectorLocal_00ce3a00& b) { m_vComponents = (_mm_mul_ps)(a.m_vComponents, b.m_vComponents); }
+    __forceinline void mul4(hkSimdRealParameter s) { m_vComponents = (_mm_mul_ps)(s.broadcast(), m_vComponents); }
+    __forceinline void addMul4(const ActorVectorLocal_00ce3a00& x, const ActorVectorLocal_00ce3a00& y) { m_vComponents = (_mm_add_ps)(m_vComponents, (_mm_mul_ps)(x.m_vComponents, y.m_vComponents)); }
+    __forceinline void setAddMul4(const ActorVectorLocal_00ce3a00& a, const ActorVectorLocal_00ce3a00& x, const ActorVectorLocal_00ce3a00& y) { m_vComponents = (_mm_add_ps)(a.m_vComponents, (_mm_mul_ps)(x.m_vComponents, y.m_vComponents)); }
+    __forceinline void addMul4(hkSimdRealParameter r, const ActorVectorLocal_00ce3a00& v1) { m_vComponents = (_mm_add_ps)(m_vComponents, (_mm_mul_ps)(r.broadcast(), v1.m_vComponents)); }
+    __forceinline void setCross(const ActorVectorLocal_00ce3a00& v0, const ActorVectorLocal_00ce3a00& v1) {
+        hkQuadReal cross0;
+        cross0 = (_mm_mul_ps)((_mm_shuffle_ps)(v0.m_vComponents, v0.m_vComponents, 0xc9), (_mm_shuffle_ps)(v1.m_vComponents, v1.m_vComponents, 0xd2));
+        hkQuadReal cross1;
+        cross1 = (_mm_mul_ps)((_mm_shuffle_ps)(v0.m_vComponents, v0.m_vComponents, 0xd2), (_mm_shuffle_ps)(v1.m_vComponents, v1.m_vComponents, 0xc9));
+        m_vComponents = (FloatHardware::_mm_sub_ps)(cross0, cross1);
+    }
+    __forceinline hkSimdReal dot3(const ActorVectorLocal_00ce3a00& a) const {
+        hkQuadReal x2 = (_mm_mul_ps)(m_vComponents, a.m_vComponents);
+        hkQuadReal xySum = (_mm_add_ss)((_mm_shuffle_ps)(x2, x2, 0x55), x2);
+        return (_mm_add_ss)((_mm_shuffle_ps)(x2, x2, 0xaa), xySum);
+    }
+    __forceinline hkSimdReal lengthSquared3() const { return this->dot3(*this); }
+    __forceinline void setXYZW(const ActorVectorLocal_00ce3a00& xyz, const ActorVectorLocal_00ce3a00& w) {
+        m_vComponents = (_mm_shuffle_ps)(xyz.m_vComponents, (_mm_unpackhi_ps)(xyz.m_vComponents, w.m_vComponents), 0xc4);
+    }
+    __forceinline void setSqrtInverse4(const ActorVectorLocal_00ce3a00& vec) {
+        hkQuadReal r = vec.m_vComponents;
+        hkQuadReal e = (_mm_rsqrt_ps)(r);
+        hkQuadReal he = (_mm_mul_ps)(DAT_010c71d0, e);
+        hkQuadReal ree = (_mm_mul_ps)((_mm_mul_ps)(r, e), e);
+        m_vComponents = (_mm_mul_ps)(he, (FloatHardware::_mm_sub_ps)(DAT_010c71c0, ree));
+    }
+    __forceinline hkSimdReal getSimdAt(int i) const {
+        switch (i) {
+        case 0: return m_vComponents;
+        case 1: return (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0x55);
+        case 2: return (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0xaa);
+        default: return (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0xff);
+        }
+    }
+    __forceinline void broadcast(int i) {
+        if (i == 0) m_vComponents = (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0);
+        else if (i == 1) m_vComponents = (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0x55);
+        else if (i == 2) m_vComponents = (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0xaa);
+        else if (i == 3) m_vComponents = (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0xff);
+    }
+    __forceinline void setBroadcast(const ActorVectorLocal_00ce3a00& v, int i) {
+        if (i == 0) m_vComponents = (_mm_shuffle_ps)(v.m_vComponents, v.m_vComponents, 0);
+        else if (i == 1) m_vComponents = (_mm_shuffle_ps)(v.m_vComponents, v.m_vComponents, 0x55);
+        else if (i == 2) m_vComponents = (_mm_shuffle_ps)(v.m_vComponents, v.m_vComponents, 0xaa);
+        else if (i == 3) m_vComponents = (_mm_shuffle_ps)(v.m_vComponents, v.m_vComponents, 0xff);
+    }
+    __forceinline void SetRotatedDirection(const ActorQuaternionLocal_00ce3a00& quat, const ActorVectorLocal_00ce3a00& direction);
+    __forceinline void _setTransformedPos(const hkQsTransform& a, const ActorVectorLocal_00ce3a00& b);
+    hkQuadReal m_vComponents;
+};
+
+// local form of hkQuaternion: 0x00ce3a00 needs the unit FloatHardware intrinsics and force-inline packet form; the shared definitions change its bytes.
+class __declspec(align(16)) ActorQuaternionLocal_00ce3a00 {
+public:
+    __forceinline ActorQuaternionLocal_00ce3a00() {}
+    __forceinline const ActorVectorLocal_00ce3a00& getImag() const { return m_vec; }
+    __forceinline void operator=(const ActorQuaternionLocal_00ce3a00& q) { m_vec = q.m_vec; }
+    void FUN_00c66320(const ActorQuaternionLocal_00ce3a00& q0, const ActorQuaternionLocal_00ce3a00& q1);
+    void FUN_00cd9d10(const ActorVectorLocal_00ce3a00& from, const ActorVectorLocal_00ce3a00& to);
+    ActorVectorLocal_00ce3a00 m_vec;
+};
+
+// local form of hkVector4/hkQuaternion: 0x00ce3a00 needs the FloatHardware
+// packet types in its transform; select them explicitly, keeping shared names intact.
+#define FNV64_HKQSTRANSFORM_LOCAL_TYPES
+#define FNV64_HKQSTRANSFORM_VECTOR_TYPE ActorVectorLocal_00ce3a00
+#define FNV64_HKQSTRANSFORM_QUATERNION_TYPE ActorQuaternionLocal_00ce3a00
+#include "../../../include/hkQsTransform.h"
+#undef FNV64_HKQSTRANSFORM_QUATERNION_TYPE
+#undef FNV64_HKQSTRANSFORM_VECTOR_TYPE
+#undef FNV64_HKQSTRANSFORM_LOCAL_TYPES
+#include "../../../include/hkaSkeletonMapper.h"
+
+
 struct __declspec(align(16)) BlendQuat {
     float x, y, z, w;
-    BlendQuat& operator=(const BlendQuat& other) { *(__m128*)&x=*(const __m128*)&other.x; return *this; }
+    BlendQuat& operator=(const BlendQuat& other) { *(LocalM128*)&x=*(const LocalM128*)&other.x; return *this; }
     void __thiscall FUN_00cb2850(const BlendQuat&, const BlendQuat&, float);
 };
 struct BlendTransform { BlendQuat rotation; BlendQuat translation; BlendQuat scale; };
@@ -79,8 +227,6 @@ struct BlendAccess {
     int valueA() {return *FUN_00cda4b0();}
     int valueB() {return *FUN_00cdb290();}
 };
-struct BlendAllocator { char* top; };
-extern BlendAllocator* __cdecl FUN_00c85750();
 extern __int64 __cdecl FUN_00aa4d80();
 extern void __cdecl FUN_00cddef0(int, BlendTransform*, BlendTransform*, BlendTransform*);
 extern void __cdecl CallWithGlobal(int, BlendTransform*, void*, BlendTransform*);
@@ -88,14 +234,14 @@ extern void __cdecl FUN_00ce3a00(int, int, int, BlendTransform*, int);
 struct BlendBuffer {
     BlendTransform* data; int size;
     static BlendTransform* allocate(int n) {
-        BlendAllocator* a=FUN_00c85750();
-        BlendTransform* result=(BlendTransform*)a->top;
+        hkMemoryRouter* a=&hkMemoryRouter::getInstance();
+        BlendTransform* result=(BlendTransform*)a->m_stack.m_next.m_storage;
         int bytes=(n*(int)sizeof(BlendTransform)+127)&~127;
-        a->top = a->top + bytes;
+        a->m_stack.m_next.m_storage = (char*)a->m_stack.m_next.m_storage + bytes;
         return result;
     }
     BlendBuffer(int n) { data=allocate(n); }
-    ~BlendBuffer() { FUN_00c85750()->top=(char*)data; }
+    ~BlendBuffer() { hkMemoryRouter::getInstance().m_stack.m_next.m_storage=(char*)data; }
 };
 struct BlendController {
     int unk000;
@@ -318,7 +464,7 @@ void BlendController::FUN_00c7c870() {
     }
 }
 
-union __declspec(align(16)) PackedVector { __m128 vector; unsigned char lanes[16]; };
+union __declspec(align(16)) PackedVector { LocalM128 vector; unsigned char lanes[16]; };
 struct InternedHeader { long references; unsigned int length; };
 
 
@@ -391,20 +537,14 @@ struct Allocator {
     virtual void ReservedC();
     virtual void* Resize(void*, unsigned int);
 };
-struct MemoryRouter {
-    char* top;
-    int FunctionAtSlot4, VirtualFunction8, reservedC;
-    Allocator* allocator;
-    __forceinline Allocator& AllocatorInstance() { return *allocator; }
-};
-__forceinline MemoryRouter* GetRouter() { return (MemoryRouter*)FUN_00c85750(); }
+__forceinline hkMemoryRouter* GetRouter() { return (hkMemoryRouter*)(&hkMemoryRouter::getInstance()); }
 struct ArrayStorage {
     void* data;
     int size;
     int capacity;
     __forceinline ArrayStorage() : data(0), size(0), capacity(0x80000000) {}
     __forceinline ~ArrayStorage() {
-        Allocator& a = GetRouter()->AllocatorInstance();
+        Allocator& a = reinterpret_cast<Allocator&>(GetRouter()->heap());
         size = 0;
         if ((capacity & 0x80000000) == 0) a.Resize(data, (capacity & 0x3fffffff) * 4);
         data = 0; capacity = 0x80000000;
@@ -413,16 +553,16 @@ struct ArrayStorage {
 struct ScratchArray : ArrayStorage {
     char* saved;
     __forceinline ScratchArray() {
-        MemoryRouter* m = GetRouter();
-        char* p = m->top;
-        m->top = p + 0x100;
+        hkMemoryRouter* m = GetRouter();
+        char* p = static_cast<char*>(reinterpret_cast<hkStackMemory*>(m)->m_next.val());
+        reinterpret_cast<hkStackMemory*>(m)->m_next = p + 0x100;
         data = p; capacity = 0x80000040; saved = p;
     }
     __forceinline ~ScratchArray() {
         char* original = saved;
         bool owned = original != data;
         if (!owned) size = 0;
-        GetRouter()->top = original;
+        reinterpret_cast<hkStackMemory*>(GetRouter())->m_next = original;
     }
 };
 struct MatrixTransform {
@@ -474,7 +614,7 @@ struct FUN_00ce4a20 {
     int reserved60, reserved64, reserved68, reserved6c;
     int reserved70, reserved74, reserved78, reserved7c;
     FUN_00ce4a20(PoseBuffer* p);
-    __forceinline static void* operator new(unsigned int n) { FUN_00ce4a20* p = (FUN_00ce4a20*)GetRouter()->AllocatorInstance().Allocate(n); p->allocationSize = (unsigned short)n; return p; }
+    __forceinline static void* operator new(unsigned int n) { FUN_00ce4a20* p = (FUN_00ce4a20*)GetRouter()->heap().blockAlloc(n); p->allocationSize = (unsigned short)n; return p; }
     static void operator delete(void*);
 };
 typedef FUN_00ce4a20 PoseSource;
@@ -533,7 +673,7 @@ struct FUN_00cdb400 {
     int reserved20, VirtualFunction24, VirtualFunction28, reserved2c, reserved30, reserved34, reserved38, reserved3c;
     int reserved40, reserved44;
     FUN_00cdb400(void* p);
-    __forceinline static void* operator new(unsigned int n) { return GetRouter()->AllocatorInstance().Allocate(n); }
+    __forceinline static void* operator new(unsigned int n) { return GetRouter()->heap().blockAlloc(n); }
     static void operator delete(void*);
 };
 typedef FUN_00cdb400 SkinState;
@@ -817,17 +957,19 @@ void SceneOwner::FUN_00c7e9a0(Argument* sourceInput, const char* requestedName) 
 }
 
 namespace VectorHardware {
-union __declspec(intrin_type) __declspec(align(16)) __m128 {
+// Exe 0x00c7d030 FUN_00c7d030: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned char m128_u8[16];
-};
-extern "C" __m128 _mm_sub_ps(__m128,__m128);
-extern "C" __m128 _mm_set_ps1(float);
-extern "C" __m128 _mm_and_ps(__m128,__m128);
-extern "C" __m128 _mm_cmple_ps(__m128,__m128);
-extern "C" int _mm_movemask_ps(__m128);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_sub_ps(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_set_ps1(float);
+extern "C" LocalM128 _mm_and_ps(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_cmple_ps(LocalM128,LocalM128);
+extern "C" int _mm_movemask_ps(LocalM128);
 }
-typedef VectorHardware::__m128 VectorBits;
+typedef VectorHardware::LocalM128 VectorBits;
 using VectorHardware::_mm_sub_ps;
 using VectorHardware::_mm_set_ps1;
 using VectorHardware::_mm_and_ps;
@@ -853,7 +995,6 @@ template<class T> class PointerView {
 public:
     T* get() const { return value; }
 };
-extern BlendAllocator* FUN_00c85750();
 extern float DAT_011b02e8;
 extern float DAT_011ac39c;
 extern const float DAT_01017d00;
@@ -988,9 +1129,6 @@ public:
 };
 
 enum MotionKind { KindInvalid=0,KindDynamic=1,KindSphere=2,KindBox=3,KindKeyframed=4,KindFixed=5,KindThin=6,KindCharacter=7,KindMax=8 };
-enum QualityKind { QualityInvalid=-1,QualityFixed=0,QualityKeyframed=1,QualityDebris=2,QualityMoving=4 };
-enum ActivationMode { LeaveInactive=0,ActivateNow=1 };
-enum FilterMode { UpdateFull=0,UpdatePartial=1 };
 template<class E,class S> class EnumCell {
     S stored;
 public:
@@ -1131,40 +1269,30 @@ struct EntityView : WorldView {
 };
 struct BodyView : EntityView {
     MotionKind getMotionType() const { return m_pMotionState.getType(); }
-    QualityKind getQualityType() const { return (QualityKind)getCollidable()->getBroadPhaseHandle()->m_ucObjectQualityType; }
-    void setQualityType(QualityKind value) { getCollidableRw()->getBroadPhaseHandle()->m_ucObjectQualityType=(char)value; }
+    hkpCollidableQualityType getQualityType() const { return (hkpCollidableQualityType)getCollidable()->getBroadPhaseHandle()->m_ucObjectQualityType; }
+    void setQualityType(hkpCollidableQualityType value) { getCollidableRw()->getBroadPhaseHandle()->m_ucObjectQualityType=(char)value; }
     const VectorValue& getLinearVelocity() const { return m_pMotionState.getLinearVelocity(); }
     const VectorValue& getAngularVelocity() const { return m_pMotionState.getAngularVelocity(); }
-    void FUN_00ca8420(MotionKind,ActivationMode,FilterMode);
+    void FUN_00ca8420(MotionKind,hkpEntityActivation,hkpUpdateCollisionFilterOnEntityMode);
     void FUN_00ca8630(bool);
 };
 template<class T> __forceinline T* AddBytes(T* p,int bytes) { return (T*)((char*)p+bytes); }
 __forceinline int ByteDistance(const void* from,const void* to) { return (int)((const char*)to-(const char*)from); }
-struct StackView {
-    OwnedCell<char*> next;
-    OwnedCell<void*> start;
-    OwnedCell<void*> end;
-    StackView();
-    __forceinline int freeBytes() const { return ByteDistance(next,end); }
-    __forceinline ~StackView() {}
-    __forceinline void* allocate(int bytes,const char* label=0) {
-        if(bytes>freeBytes()) {}
-        char* saved=next;
-        next=AddBytes(saved,bytes);
-        return saved;
-    }
-    __forceinline void release(void* saved) { next=(char*)saved; }
-};
-struct RouterView {
-    StackView area;
-    static RouterView& FUN_00c85750();
-    __forceinline StackView& stack() { return area; }
-};
-template<class T> __forceinline T* AllocateView(int n,const char* label=0) {
-    RouterView& memory=RouterView::FUN_00c85750();
-    return (T*)memory.stack().allocate((n*(int)sizeof(T)+127)&~127,label);
+// hkMemoryRouter::get (0x00c85750) returns the same thread-local object; its first three pointers are the stack allocator.
+__forceinline int hkStackMemory::getFreeStackSize() { return ByteDistance(m_next,m_end); }
+__forceinline void* hkStackMemory::allocateStack(int bytes,const char* label) {
+    if(bytes>getFreeStackSize()) {}
+    char* saved=static_cast<char*>(m_next.val());
+    m_next=AddBytes(saved,bytes);
+    return saved;
 }
-template<class T> __forceinline void ReleaseView(T* p) { RouterView::FUN_00c85750().stack().release(p); }
+template<class T> __forceinline T* AllocateView(int n,const char* label=0) {
+    hkMemoryRouter& memory=hkMemoryRouter::getInstance();
+    return (T*)memory.stack().allocateStack((n*(int)sizeof(T)+127)&~127,label);
+}
+template<class T> __forceinline void ReleaseView(T* p) {
+    hkMemoryRouter::getInstance().stack().deallocateStack(p);
+}
 struct FixedBuffer {
 protected:
     OwnedCell<VectorValue*> data;
@@ -1419,11 +1547,11 @@ void Controller::FUN_00c7b6a0(bool enable) {
                 if(selection.get()->selection->find((unsigned short)i)!=-1) {
                     if(enable) {
                         if(body->getMotionType()==4 || body->getQualityType()!=4) {
-                            body->FUN_00ca8420(KindDynamic,ActivateNow,UpdateFull); body->setQualityType((QualityKind)4); body->FUN_00ca8630(false);
+                            body->FUN_00ca8420(KindDynamic,HK_ENTITY_ACTIVATION_DO_ACTIVATE,HK_UPDATE_FILTER_ON_ENTITY_FULL_CHECK); body->setQualityType((hkpCollidableQualityType)4); body->FUN_00ca8630(false);
                         }
                     } else {
                         if(body->getMotionType()!=4 || body->getQualityType()!=1) {
-                            body->FUN_00ca8420(KindKeyframed,ActivateNow,UpdateFull); body->setQualityType((QualityKind)1); body->FUN_00ca8630(true);
+                            body->FUN_00ca8420(KindKeyframed,HK_ENTITY_ACTIVATION_DO_ACTIVATE,HK_UPDATE_FILTER_ON_ENTITY_FULL_CHECK); body->setQualityType((hkpCollidableQualityType)1); body->FUN_00ca8630(true);
                         }
                     }
                 }
@@ -1437,19 +1565,19 @@ void Controller::FUN_00c7b6a0(bool enable) {
 
 inline void* operator new(unsigned int, void* p) { return p; }
 inline void operator delete(void*,void*) {}
-extern "C" __m128 _mm_setr_ps(float, float, float, float);
+extern "C" LocalM128 _mm_setr_ps(float, float, float, float);
 struct Heap { virtual void Unused(); virtual void* Allocate(unsigned); };
-struct Context { int unk00, unk04, unk08, unk0c; Heap* heap; };
 extern void* __cdecl FUN_00c74ea0(unsigned);
 extern void __cdecl FUN_00c74dd0(void*, void*);
 extern float DAT_01050c98, DAT_01050c48, DAT_01011d78, DAT_01012068;
 extern void* UNK_010c4dec;
-static __forceinline void* AllocateBuffer(unsigned n) { Context* context=(Context*)(void*)FUN_00c85750(); Heap* heap=context->heap; return (heap->Allocate)(n); }
+static __forceinline void* AllocateBuffer(unsigned n) { hkMemoryRouter* context=&hkMemoryRouter::getInstance(); Heap* heap=reinterpret_cast<Heap*&>(context->m_heap); return (heap->Allocate)(n); }
 static __forceinline int Maximum(int first,int second) { return first >= second ? first : second; }
 struct SmallMember { unsigned data; __forceinline SmallMember() { FUN_00cb0a60(); } __forceinline ~SmallMember() { FUN_00cb0c00(); } void FUN_00cb0a60(); void FUN_00cb0c00(); };
 struct Entry { SmallMember member; unsigned char enabled; __forceinline Entry():enabled(0) {} };
 extern void __cdecl FUN_00c908c0(Heap&, void*, int, unsigned);
-struct __declspec(align(16)) Transform { __m128 x,y,z; };
+// Mesh data arrays use 0x30-byte records of three SIMD packets; these are not the shared 0x40-byte Transform.
+struct __declspec(align(16)) MeshPacketRecord48 { LocalM128 x,y,z; };
 struct S7de60_IsPod {}; struct S7de60_IsClass {};
 template<class T> struct S7de60_PodTrait { typedef S7de60_IsPod type; };
 template<> struct S7de60_PodTrait<Entry> { typedef S7de60_IsClass type; };
@@ -1460,38 +1588,37 @@ struct S7de60_ArrayUtil {
     template<class T> static __forceinline void destruct(T* t, int n, S7de60_IsPod) {}
     template<class T> static __forceinline void destruct(T* t, int n, S7de60_IsClass) { for(int i=0;i<n;++i) t[i].~T(); }
 };
-struct S7de60_Router { __forceinline Heap& heap() { return *((Context*)this)->heap; } };
-struct S7de60_HeapAlloc { __forceinline Heap& get(const void*) { return ((S7de60_Router*)(void*)FUN_00c85750())->heap(); } };
-template<class T> struct ArrayBase {
-    T* data; int count; int capacity;
-    __forceinline ArrayBase():data(0),count(0),capacity(0x80000000) {}
-    __forceinline int GetLogicalSize() const { return count; }
-    __forceinline int getCapacity() const { return capacity & 0x3fffffff; }
-    __forceinline void _reserveExactly(Heap& alloc, int n) { if(getCapacity()<n) { FUN_00c908c0(alloc,this,n,sizeof(T)); } }
-    __forceinline void GrowArrayCapacity(Heap& alloc, int n) {
-        const int cap=getCapacity();
-        if(cap<n) { int cap2=2*cap; int newSize=(n<cap2)?cap2:n; FUN_00c908c0(alloc,this,newSize,sizeof(T)); }
-    }
-    __forceinline void _setSize(Heap& alloc, int n) {
-        GrowArrayCapacity(alloc,n);
-        S7de60_ArrayUtil::destruct(data+n,count-n,typename S7de60_PodTrait<T>::type());
-        S7de60_ArrayUtil::construct(data+count,n-count,typename S7de60_PodTrait<T>::type());
-        count=n;
-    }
-    __forceinline void _setSize(Heap& alloc, int n, const T& fill) {
-        GrowArrayCapacity(alloc,n);
-        S7de60_ArrayUtil::destruct(data+n,count-n,typename S7de60_PodTrait<T>::type());
-        S7de60_ArrayUtil::constructWithCopy(data+count,n-count,fill,typename S7de60_PodTrait<T>::type());
-        count=n;
-    }
-};
-template<class T> struct DynamicArray : ArrayBase<T> {
-    ~DynamicArray();
-    __forceinline void Reserve(int n) { ArrayBase<T>::_reserveExactly(S7de60_HeapAlloc().get(this),n); }
-    __forceinline void Resize(int n) { ArrayBase<T>::_setSize(S7de60_HeapAlloc().get(this),n); }
-    __forceinline void ResizeEntries(int n) { Resize(n); }
-    __forceinline void ResizeInts(int n, const T& value) { ArrayBase<T>::_setSize(S7de60_HeapAlloc().get(this),n,value); }
-};
+__forceinline Heap& GetRenderHeap(hkMemoryRouter& router) { return *reinterpret_cast<Heap*&>(router.m_heap); }
+struct S7de60_HeapAlloc { __forceinline Heap& get(const void*) { return GetRenderHeap(hkMemoryRouter::getInstance()); } };
+
+
+// Exe 0x00c7de60: Havok arrays retain their original heap growth and element construction inlines.
+template <> __forceinline void hkArray<MeshPacketRecord48,hkContainerHeapAllocator>::setSize(int n) {
+ ::Heap& alloc=::S7de60_HeapAlloc().get(this);
+ const int cap=getCapacity(); if(cap<n) { int cap2=2*cap; int newSize=(n<cap2)?cap2:n; FUN_00c908c0(alloc,this,newSize,sizeof(MeshPacketRecord48)); }
+ S7de60_ArrayUtil::destruct(m_data+n,m_iElementCount-n,S7de60_PodTrait<MeshPacketRecord48>::type());
+ S7de60_ArrayUtil::construct(m_data+m_iElementCount,n-m_iElementCount,S7de60_PodTrait<MeshPacketRecord48>::type()); m_iElementCount=n;
+}
+template <> __forceinline void hkArray<int,hkContainerHeapAllocator>::setSize(int n) {
+ ::Heap& alloc=::S7de60_HeapAlloc().get(this);
+ const int cap=getCapacity(); if(cap<n) { int cap2=2*cap; int newSize=(n<cap2)?cap2:n; FUN_00c908c0(alloc,this,newSize,sizeof(int)); }
+ S7de60_ArrayUtil::destruct(m_data+n,m_iElementCount-n,S7de60_PodTrait<int>::type());
+ S7de60_ArrayUtil::construct(m_data+m_iElementCount,n-m_iElementCount,S7de60_PodTrait<int>::type()); m_iElementCount=n;
+}
+template <> __forceinline void hkArray<Entry,hkContainerHeapAllocator>::setSize(int n) {
+ ::Heap& alloc=::S7de60_HeapAlloc().get(this);
+ const int cap=getCapacity(); if(cap<n) { int cap2=2*cap; int newSize=(n<cap2)?cap2:n; FUN_00c908c0(alloc,this,newSize,sizeof(Entry)); }
+ S7de60_ArrayUtil::destruct(m_data+n,m_iElementCount-n,S7de60_PodTrait<Entry>::type());
+ S7de60_ArrayUtil::construct(m_data+m_iElementCount,n-m_iElementCount,S7de60_PodTrait<Entry>::type()); m_iElementCount=n;
+}
+template <> __forceinline void hkArray<short,hkContainerHeapAllocator>::setSize(int n) {
+ ::Heap& alloc=::S7de60_HeapAlloc().get(this);
+ const int cap=getCapacity(); if(cap<n) { int cap2=2*cap; int newSize=(n<cap2)?cap2:n; FUN_00c908c0(alloc,this,newSize,sizeof(short)); }
+ S7de60_ArrayUtil::destruct(m_data+n,m_iElementCount-n,S7de60_PodTrait<short>::type());
+ S7de60_ArrayUtil::construct(m_data+m_iElementCount,n-m_iElementCount,S7de60_PodTrait<short>::type()); m_iElementCount=n;
+}
+template <> __forceinline void hkArray<float,hkContainerHeapAllocator>::reserveExactly(int n) { ::Heap& alloc=::S7de60_HeapAlloc().get(this); if(getCapacity()<n) FUN_00c908c0(alloc,this,n,sizeof(float)); }
+template <> __forceinline void hkArray<float,hkContainerHeapAllocator>::setSize(int n,const float& fill) { ::Heap& alloc=::S7de60_HeapAlloc().get(this); const int cap=getCapacity(); if(cap<n) { int cap2=2*cap; int newSize=(n<cap2)?cap2:n; FUN_00c908c0(alloc,this,newSize,sizeof(float)); } S7de60_ArrayUtil::destruct(m_data+n,m_iElementCount-n,S7de60_PodTrait<float>::type()); S7de60_ArrayUtil::constructWithCopy(m_data+m_iElementCount,n-m_iElementCount,fill,S7de60_PodTrait<float>::type()); m_iElementCount=n; }
 struct SourceBase {
     unsigned short size,version;
     __forceinline SourceBase():version(1) {}
@@ -1500,7 +1627,7 @@ struct SourceBase {
 struct LocalFrameRecord { void* frame; int bone; };
 struct SourceBuffer : SourceBase {
     SmallMember member;
-    DynamicArray<short> points; DynamicArray<Entry> indices; DynamicArray<Transform> vertices; DynamicArray<SmallMember> transforms; DynamicArray<LocalFrameRecord> extra;
+    hkArray<short> points; hkArray<Entry> indices; hkArray<MeshPacketRecord48> vertices; hkArray<SmallMember> transforms; hkArray<LocalFrameRecord> extra;
     static __forceinline void* operator new(unsigned n) { SourceBuffer* p=(SourceBuffer*)AllocateBuffer(n); p->size=(unsigned short)n; return p; }
     static void operator delete(void*);
     __forceinline SourceBuffer() {}
@@ -1512,23 +1639,22 @@ struct PoseSync91 {
 };
 struct CloneBuffer {
     SourceBuffer* original;
-    DynamicArray<Transform> positions,normals; DynamicArray<int> triangles;
+    hkArray<MeshPacketRecord48> positions,normals; hkArray<int> triangles;
     PoseSync91 enabled,modified; unsigned short flags;
-    DynamicArray<float> remap;
+    hkArray<float> remap;
     static __forceinline void* operator new(unsigned n) { return AllocateBuffer(n); }
     static void operator delete(void*);
     __forceinline CloneBuffer(SourceBuffer* p):original(p),enabled(0),modified(0) {
-        int count=original->indices.count;
-        normals.Resize(count);
-        positions.Resize(count);
-        triangles.Resize(count);
+        int count=original->indices.m_iElementCount;
+        normals.setSize(count);
+        positions.setSize(count);
+        triangles.setSize(count);
         const int sizeRoundedUp=(original->transforms.GetLogicalSize()+3)&~3;
-        remap.Reserve(sizeRoundedUp);
-        remap.ResizeInts(original->transforms.count,0.0f);
+        remap.reserveExactly(sizeRoundedUp);
+        remap.setSize(original->transforms.m_iElementCount,0.0f);
     }
     void FUN_00cda110(); void FUN_00cda340();
 };
-struct __declspec(align(16)) Vec4 { __m128 value; __forceinline Vec4& operator=(const Vec4& rhs) { value=rhs.value; return *this; } };
 struct Root {
     SourceBuffer* src; __forceinline void SetSource(SourceBuffer* p) { src=p; } int unk04,unk08,unk0c;
     Vec4 a,b;
@@ -1536,7 +1662,7 @@ struct Root {
     __forceinline Root():src(0) {}
 };
 struct Owner { int unk00,unk04,unk08,unk0c,unk10,unk14,unk18; Root* root; __forceinline void SetRoot(Root* p) { root=p; } };
-union Vec128 { __m128 value; char bytes[16]; };
+union Vec128 { LocalM128 value; char bytes[16]; };
 struct FramePoint { float x,y,z; };
 struct FrameState { FramePoint rotation[3]; FramePoint point; float scale; void FUN_00a86bf0(); };
 struct __declspec(align(16)) LookBoneParams91 {
@@ -1698,16 +1824,16 @@ bool RenderNode::FUN_00c7de60(const char* item) {
             if(!owner->root) {
                 owner->SetRoot(new Root);
                 owner->root->src=new SourceBuffer;
-                owner->root->src->indices.ResizeEntries(2);
-                owner->root->src->points.Resize(2);
-                owner->root->src->vertices.Resize(2);
-                ((short*)owner->root->src->points.data)[0]=-1;
-                ((short*)owner->root->src->points.data)[1]=0;
+                owner->root->src->indices.setSize(2);
+                owner->root->src->points.setSize(2);
+                owner->root->src->vertices.setSize(2);
+                ((short*)owner->root->src->points.m_data)[0]=-1;
+                ((short*)owner->root->src->points.m_data)[1]=0;
                 FrameState frame;
                 frame.FUN_00a86bf0();
-                FUN_00c74dd0(owner->root->src->vertices.data,&frame);
+                FUN_00c74dd0(owner->root->src->vertices.m_data,&frame);
                 frame.point.x=DAT_01050c98; frame.point.y=DAT_01050c48; frame.point.z=0;
-                FUN_00c74dd0(owner->root->src->vertices.data+1,&frame);
+                FUN_00c74dd0(owner->root->src->vertices.m_data+1,&frame);
                 owner->root->a=boneParams[1].forwardParent;
                 owner->root->b=boneParams[1].forwardLocal;
             }
@@ -1717,8 +1843,8 @@ bool RenderNode::FUN_00c7de60(const char* item) {
             buffer->FUN_00cda340();
             Vec128 unit; unit.value=_mm_setr_ps(DAT_01011d78,DAT_01012068,DAT_01011d78,DAT_01011d78);
             boneParams[0].bone=1;
-            boneParams[0].forwardLocal.value=unit.value;
-            boneParams[0].forwardParent.value=boneParams[0].forwardLocal.value;
+            boneParams[0].forwardLocal.m_vComponents=unit.value;
+            boneParams[0].forwardParent.m_vComponents=boneParams[0].forwardLocal.m_vComponents;
             boneParams[0].parent=0;
             boneParams[0].pose=buffer;
             state=0;
@@ -1741,6 +1867,7 @@ struct C74Transform {
     float m_fScale;
 };
 
+// local form of NiQuaternion: 0x00c74dd0 needs POD default construction; the shared ctor adds bytes.
 struct C74NiQuaternion {
     float m_fVectorX;
     float m_fVectorY;
@@ -1760,37 +1887,36 @@ struct C74Quaternion {
     void normalize();
 };
 
-struct C74QsTransform {
-    C74Vector4 m_vTranslation;
-    C74Quaternion m_rotation;
-    C74Vector4 m_vScale;
-};
+// hkQsTransform was included above with the explicit packet storage types.
+
 
 extern float DAT_01267c20;
 
 // @fnv 0x00c74dd0
-C74QsTransform* FUN_00c74dd0(C74QsTransform* out, const C74Transform* in)
+hkQsTransform* FUN_00c74dd0(hkQsTransform* out, const C74Transform* in)
 {
     C74NiQuaternion q;
     q.FromRotationMatrix(in->m_kOrientation);
-    out->m_rotation.set(q.m_fVectorY, q.m_fVectorZ, q.m_fScalarPart, q.m_fVectorX);
-    out->m_rotation.normalize();
+    reinterpret_cast<C74Quaternion&>(out->m_rotation).set(q.m_fVectorY, q.m_fVectorZ, q.m_fScalarPart, q.m_fVectorX);
+    reinterpret_cast<C74Quaternion&>(out->m_rotation).normalize();
     C74Vector4 t;
     t(0) = in->m_TranslateX * DAT_01267c20;
     t(1) = in->m_TranslateY * DAT_01267c20;
     t(2) = in->m_TranslateZ * DAT_01267c20;
     t(3) = 0.0f;
-    out->m_vTranslation.m_vComponents = t.m_vComponents;
-    out->m_vScale.m_vComponents = _mm_set_ps1(in->m_fScale);
+    out->m_vTranslation.m_vComponents = reinterpret_cast<const hkQuadReal&>(t.m_vComponents);
+    out->m_vScale.m_vComponents = reinterpret_cast<const hkQuadReal&>(_mm_set_ps1(in->m_fScale));
     return out;
 }
 
 namespace EntryHardware {
-union __declspec(intrin_type) __declspec(align(16)) __m128 {
+// Exe 0x00c7d030 FUN_00c7d030: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     PackedVector storage;
     struct { float x,y,z,w; };
-};
-extern "C" __m128 _mm_setr_ps(float,float,float,float);
+} __m128, LocalM128;
+extern "C" LocalM128 _mm_setr_ps(float,float,float,float);
 }
 
 extern int DAT_011f49e0;
@@ -1812,7 +1938,7 @@ struct __declspec(align(16)) Scratch {
     int owner;
     short first, second, third, unk0a;
     int unk0c;
-    EntryHardware::__m128 axisA, axisB, axisC, axisD;
+    EntryHardware::LocalM128 axisA, axisB, axisC, axisD;
     float strength, f54, f58, f5c, f60, f64, f68, threshold, radius;
     bool flag;
     void __thiscall FUN_00cd8920();
@@ -1868,7 +1994,6 @@ struct GameForm {
 };
 struct Material { int unk00,unk04; int name; };
 struct Resource { int unk00,unk04; Material* material; };
-struct Runtime { int unk00,unk04,unk08,unk0c; Allocator* allocator; Allocator& heap() { return *allocator; } };
 struct IndexedRecord { void __thiscall FUN_00c905b0(); };
 struct FUN_00cd8820 : IndexedRecord {
     int vtable;
@@ -2170,12 +2295,12 @@ struct ParticleTable {
 };
 
 extern GameForm* __cdecl FUN_00c4b470(void*, ResourceName const&, int);
-static __forceinline Runtime* GetEntryRuntime() { return reinterpret_cast<Runtime*>(FUN_00c85750()); }
+static __forceinline hkMemoryRouter* GetEntryRuntime() { return reinterpret_cast<hkMemoryRouter*>(&hkMemoryRouter::getInstance()); }
 extern "C" void __cdecl FUN_00c908c0(Allocator*, EntryArray*, int, unsigned);
 extern "C" Resource* __cdecl FUN_00c802d0(GameForm*);
 extern "C" short __cdecl FindIndexByKey(int,int,int);
 __forceinline void* FUN_00cd8820::operator new(size_t bytes) {
-    void* ptr=GetEntryRuntime()->heap().Allocate(bytes);
+    void* ptr=GetEntryRuntime()->heap().blockAlloc(bytes);
     static_cast<FUN_00cd8820*>(ptr)->size=(unsigned short)bytes;
     return ptr;
 }
@@ -2187,7 +2312,7 @@ static __forceinline int const& materialName(Resource* resource) {
     return resource ? resource->material->name : DAT_011f49e0;
 }
 __forceinline void EntryArray::resize(int size) {
-    Allocator& allocator=GetEntryRuntime()->heap();
+    Allocator& allocator=reinterpret_cast<Allocator&>(GetEntryRuntime()->heap());
     int cap=capacity & 0x3fffffff;
     if (cap<size) {
         cap*=2;
@@ -2262,21 +2387,21 @@ void __thiscall ParticleTable::FUN_00c7c3a0(FNVInput* incoming) {
     complete=success;
 }
 
-extern "C" __m128 _mm_mul_ps(__m128,__m128);
-extern "C" __m128 _mm_shuffle_ps(__m128,__m128,int);
-extern "C" __m128 _mm_add_ss(__m128,__m128);
-extern "C" void _mm_store_ss(float*,__m128);
-struct VectorStorage {protected:__m128 value; __forceinline VectorStorage(){} __forceinline VectorStorage(const __m128& v):value(v){} };
+extern "C" LocalM128 _mm_mul_ps(LocalM128,LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128,LocalM128,int);
+extern "C" LocalM128 _mm_add_ss(LocalM128,LocalM128);
+extern "C" void _mm_store_ss(float*,LocalM128);
+struct VectorStorage {protected:LocalM128 value; __forceinline VectorStorage(){} __forceinline VectorStorage(const LocalM128& v):value(v){} };
 struct VecLane:private VectorStorage {
 private:
 public:
  __forceinline VecLane() {}
  __forceinline VecLane(const VecLane& rhs):VectorStorage(rhs.value) {}
  __forceinline void operator=(const VecLane& rhs) { setRaw(rhs.getRaw()); }
- __forceinline void operator=(const __m128& rhs) { value=rhs; }
- __forceinline __m128 getRaw() const{return value;}
- __forceinline void setRaw(__m128 v){value=v;}
- __forceinline operator __m128() const { return getRaw(); }
+ __forceinline void operator=(const LocalM128& rhs) { value=rhs; }
+ __forceinline LocalM128 getRaw() const{return value;}
+ __forceinline void setRaw(LocalM128 v){value=v;}
+ __forceinline operator LocalM128() const { return getRaw(); }
 };
 struct QuatLane {VecLane value; __forceinline void operator=(const QuatLane& rhs) {value=rhs.value;} };
 struct Transform48 {VecLane translation; QuatLane rotation; VecLane scale;};
@@ -2314,7 +2439,7 @@ struct ScratchState {ArenaStack arena;int unk0c;TempAllocator* allocator;
  __forceinline TempAllocator& heap() {return *allocator;}
  __forceinline ArenaStack& stack() {return arena;}
 };
-__forceinline ScratchState& getRouter() {return *(ScratchState*)FUN_00c85750();}
+__forceinline ScratchState& getRouter() {return *(ScratchState*)(&hkMemoryRouter::getInstance());}
 template<class T> __forceinline T* allocateScratch(int n,const char* tag=0) {
  ScratchState& a=getRouter();
  return (T*)a.stack().allocate((n*(int)sizeof(T)+127)&~127,tag);
@@ -2347,14 +2472,14 @@ template<class T,class P=HeapPolicy> struct OwnedBuffer:OwnedBase<T> {
 typedef OwnedBuffer<int> IntBuffer;
 struct LaneScalar {
  PackedVector storage;
- __forceinline LaneScalar(const __m128& v){storage.vector=v;}
+ __forceinline LaneScalar(const LocalM128& v){storage.vector=v;}
  __forceinline operator float() const {float v;_mm_store_ss(&v,storage.vector);return v;}
 };
 struct VelocityVector {
- __m128 value;
+ LocalM128 value;
  __forceinline LaneScalar dot(const VelocityVector& r) const {
-  __m128 m=_mm_mul_ps(value,r.value);
-  __m128 t=_mm_shuffle_ps(m,m,0x55);
+  LocalM128 m=_mm_mul_ps(value,r.value);
+  LocalM128 t=_mm_shuffle_ps(m,m,0x55);
   t=_mm_add_ss(t,m);
   m=_mm_shuffle_ps(m,m,0xaa);
   return LaneScalar(_mm_add_ss(m,t));
@@ -2715,8 +2840,8 @@ void RagdollUpdateController::FUN_00c7d030(const Transform48* input) {
  if(forceMode) { mode=oldMode; forceMode=false; }
 }
 
-extern "C" __m128 _mm_setzero_ps();
-namespace ControllerFloatHardware { extern "C" __m128 _mm_set_ps1(float); }
+extern "C" LocalM128 _mm_setzero_ps();
+namespace ControllerFloatHardware { extern "C" LocalM128 _mm_set_ps1(float); }
 extern void* DAT_010c4ddc;
 extern void* DAT_01071aec;
 extern void* DAT_010c4db8;
@@ -2724,7 +2849,7 @@ extern char* DAT_0109b220;
 extern const float DAT_010c4df8;
 extern const float DAT_01022958;
 extern const float DAT_01017868;
-extern const __m128 DAT_010c71b0;
+extern const LocalM128 DAT_010c71b0;
 struct RefTarget {
     virtual void unused();
     virtual void destroy();
@@ -2762,7 +2887,7 @@ struct __declspec(align(16)) StateRecord {
     short first,second;
     float weight;
     unsigned int unk0c;
-    __m128 position,velocity,rotation;
+    LocalM128 position,velocity,rotation;
     bool active,valid;
     unsigned short unk42;
     float time,blend;
@@ -2785,8 +2910,8 @@ struct ConstructorBase { virtual ~ConstructorBase(); };
 struct LastArray { unsigned int data,size,capacity,extra; LastArray():data(0),size(0),capacity(0),extra(0){} };
 struct ThirdArg { unsigned int value; };
 union NodeOrFlag { NodeArg* node; bool flag; };
-struct VecStore { __m128 value; VecStore& operator=(__m128 other) { value=other; return *this; } };
-union SimdVector { __m128 value; signed char lanes[16]; };
+struct VecStore { LocalM128 value; VecStore& operator=(LocalM128 other) { value=other; return *this; } };
+union SimdVector { LocalM128 value; signed char lanes[16]; };
 class FUN_00c7f060 : public ConstructorBase {
 public:
     bool unk04;
@@ -2843,9 +2968,9 @@ public:
     unsigned char unkb7;
     unsigned int unkb8;
     unsigned int unkbc;
-    __m128 unkc0;
-    __m128 unkd0;
-    __m128 unke0;
+    LocalM128 unkc0;
+    LocalM128 unkd0;
+    LocalM128 unke0;
     StateRecord records[2];
     bool unk190;
     unsigned char unk191;
@@ -2997,14 +3122,14 @@ FUN_00c7f060::FUN_00c7f060(NodeArg* a,NodeOrFlag b,void* c) {
 }
 
 namespace InversePositionHardware {
-extern "C" __m128 _mm_sub_ps(__m128, __m128);
+extern "C" LocalM128 _mm_sub_ps(LocalM128, LocalM128);
 }
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ps(__m128, __m128);
-extern "C" __m128 _mm_add_ss(__m128, __m128);
-extern "C" __m128 _mm_shuffle_ps(__m128, __m128, int);
-extern "C" __m128 _mm_rcp_ps(__m128);
-extern const __m128 g_rotationOffset;
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ps(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_add_ss(LocalM128, LocalM128);
+extern "C" LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, int);
+extern "C" LocalM128 _mm_rcp_ps(LocalM128);
+extern const LocalM128 g_rotationOffset;
 
 struct InversePositionVector : Vec4 {
     void FUN_00c7f840(const Vec4* t, const Vec4* p);
@@ -3013,200 +3138,80 @@ struct InversePositionVector : Vec4 {
 // @fnv 0x00c7f840
 void InversePositionVector::FUN_00c7f840(const Vec4* t, const Vec4* p)
 {
-    const __m128 d = InversePositionHardware::_mm_sub_ps(p->value, t[0].value);
-    const __m128 q = t[1].value;
-    const __m128 w4 = _mm_shuffle_ps(q, q, 0xff);
-    const __m128 qd = _mm_mul_ps(q, d);
-    __m128 dot = _mm_add_ss(_mm_shuffle_ps(qd, qd, 0x55), qd);
+    const LocalM128 d = InversePositionHardware::_mm_sub_ps(p->m_vComponents, t[0].m_vComponents);
+    const LocalM128 q = t[1].m_vComponents;
+    const LocalM128 w4 = _mm_shuffle_ps(q, q, 0xff);
+    const LocalM128 qd = _mm_mul_ps(q, d);
+    LocalM128 dot = _mm_add_ss(_mm_shuffle_ps(qd, qd, 0x55), qd);
     dot = _mm_add_ss(_mm_shuffle_ps(qd, qd, 0xaa), dot);
-    const __m128 c1 = _mm_mul_ps(_mm_shuffle_ps(q, q, 0xc9), _mm_shuffle_ps(d, d, 0xd2));
-    const __m128 c2 = _mm_mul_ps(_mm_shuffle_ps(q, q, 0xd2), _mm_shuffle_ps(d, d, 0xc9));
-    const __m128 cr = InversePositionHardware::_mm_sub_ps(c2, c1);
-    __m128 r = _mm_mul_ps(_mm_add_ps(_mm_mul_ps(w4, w4), g_rotationOffset), d);
+    const LocalM128 c1 = _mm_mul_ps(_mm_shuffle_ps(q, q, 0xc9), _mm_shuffle_ps(d, d, 0xd2));
+    const LocalM128 c2 = _mm_mul_ps(_mm_shuffle_ps(q, q, 0xd2), _mm_shuffle_ps(d, d, 0xc9));
+    const LocalM128 cr = InversePositionHardware::_mm_sub_ps(c2, c1);
+    LocalM128 r = _mm_mul_ps(_mm_add_ps(_mm_mul_ps(w4, w4), g_rotationOffset), d);
     r = _mm_add_ps(r, _mm_mul_ps(_mm_shuffle_ps(dot, dot, 0), q));
     r = _mm_add_ps(_mm_mul_ps(cr, w4), r);
-    const __m128 v = _mm_add_ps(r, r);
-    value = v;
-    const __m128 s = t[2].value;
-    const __m128 rc = _mm_rcp_ps(s);
-    const __m128 e = _mm_mul_ps(_mm_mul_ps(rc, s), rc);
-    value = _mm_mul_ps(InversePositionHardware::_mm_sub_ps(_mm_add_ps(rc, rc), e), v);
+    const LocalM128 v = _mm_add_ps(r, r);
+    m_vComponents = v;
+    const LocalM128 s = t[2].m_vComponents;
+    const LocalM128 rc = _mm_rcp_ps(s);
+    const LocalM128 e = _mm_mul_ps(_mm_mul_ps(rc, s), rc);
+    m_vComponents = _mm_mul_ps(InversePositionHardware::_mm_sub_ps(_mm_add_ps(rc, rc), e), v);
 }
 
-namespace FloatHardware { extern "C" ::__m128 _mm_sub_ps(::__m128,::__m128); }
-extern "C" {
-extern ::__m128 _mm_load_ss(float const*);
-extern void _mm_store_ss(float*, ::__m128);
-extern ::__m128 _mm_mul_ps(::__m128, ::__m128);
-extern ::__m128 _mm_add_ps(::__m128, ::__m128);
-extern ::__m128 _mm_add_ss(::__m128, ::__m128);
-extern ::__m128 _mm_unpackhi_ps(::__m128, ::__m128);
-extern ::__m128 _mm_rsqrt_ps(::__m128);
-extern void _mm_prefetch(char const*, int);
-__declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
-extern const ::__m128 DAT_010c71c0;
-extern const ::__m128 DAT_010c71d0;
-extern const ::__m128 DAT_010c71e0;
-}
-
-typedef ::__m128 hkQuadReal;
-typedef float hkReal;
-
-class VectorComponentValue {
-public:
-    __forceinline VectorComponentValue(const hkQuadReal& x) : m_vValue(x) {}
-    __forceinline VectorComponentValue() {}
-    __forceinline hkQuadReal broadcast() const { return (_mm_shuffle_ps)(m_vValue, m_vValue, 0); }
-    __forceinline const hkQuadReal& getQuad() const { return m_vValue; }
-    hkQuadReal m_vValue;
-};
-typedef const VectorComponentValue& hkSimdRealParameter;
-
-class hkBool {
-public:
-    __forceinline hkBool() {}
-    __forceinline hkBool(bool b) { m_cBooleanValue = (char)b; }
-    __forceinline operator bool() const { return m_cBooleanValue != 0; }
-    char m_cBooleanValue;
-};
-
-class hkQuaternion;
-class hkQsTransform;
-
-class __declspec(align(16)) hkVector4 {
-public:
-    __forceinline hkVector4() {}
-    __forceinline hkQuadReal& getQuad() { return m_vComponents; }
-    __forceinline void operator=(const hkVector4& v) { m_vComponents = v.m_vComponents; }
-    __forceinline void SetAllComponents(hkSimdRealParameter a) { m_vComponents = (_mm_shuffle_ps)(a.getQuad(), a.getQuad(), 0); }
-    __forceinline void add4(const hkVector4& v) { m_vComponents = (_mm_add_ps)(m_vComponents, v.m_vComponents); }
-    __forceinline void setAdd4(const hkVector4& v0, const hkVector4& v1) { m_vComponents = (_mm_add_ps)(v0.m_vComponents, v1.m_vComponents); }
-    __forceinline void setSub4(const hkVector4& v0, const hkVector4& v1) { m_vComponents = (FloatHardware::_mm_sub_ps)(v0.m_vComponents, v1.m_vComponents); }
-    __forceinline void sub4(const hkVector4& v) { m_vComponents = (FloatHardware::_mm_sub_ps)(m_vComponents, v.m_vComponents); }
-    __forceinline void mul4(const hkVector4& v) { m_vComponents = (_mm_mul_ps)(m_vComponents, v.m_vComponents); }
-    __forceinline void setMul4(const hkVector4& a, const hkVector4& b) { m_vComponents = (_mm_mul_ps)(a.m_vComponents, b.m_vComponents); }
-    __forceinline void mul4(hkSimdRealParameter s) { m_vComponents = (_mm_mul_ps)(s.broadcast(), m_vComponents); }
-    __forceinline void addMul4(const hkVector4& x, const hkVector4& y) { m_vComponents = (_mm_add_ps)(m_vComponents, (_mm_mul_ps)(x.m_vComponents, y.m_vComponents)); }
-    __forceinline void setAddMul4(const hkVector4& a, const hkVector4& x, const hkVector4& y) { m_vComponents = (_mm_add_ps)(a.m_vComponents, (_mm_mul_ps)(x.m_vComponents, y.m_vComponents)); }
-    __forceinline void addMul4(hkSimdRealParameter r, const hkVector4& v1) { m_vComponents = (_mm_add_ps)(m_vComponents, (_mm_mul_ps)(r.broadcast(), v1.m_vComponents)); }
-    __forceinline void setCross(const hkVector4& v0, const hkVector4& v1) {
-        hkQuadReal cross0;
-        cross0 = (_mm_mul_ps)((_mm_shuffle_ps)(v0.m_vComponents, v0.m_vComponents, 0xc9), (_mm_shuffle_ps)(v1.m_vComponents, v1.m_vComponents, 0xd2));
-        hkQuadReal cross1;
-        cross1 = (_mm_mul_ps)((_mm_shuffle_ps)(v0.m_vComponents, v0.m_vComponents, 0xd2), (_mm_shuffle_ps)(v1.m_vComponents, v1.m_vComponents, 0xc9));
-        m_vComponents = (FloatHardware::_mm_sub_ps)(cross0, cross1);
-    }
-    __forceinline VectorComponentValue dot3(const hkVector4& a) const {
-        hkQuadReal x2 = (_mm_mul_ps)(m_vComponents, a.m_vComponents);
-        hkQuadReal xySum = (_mm_add_ss)((_mm_shuffle_ps)(x2, x2, 0x55), x2);
-        return (_mm_add_ss)((_mm_shuffle_ps)(x2, x2, 0xaa), xySum);
-    }
-    __forceinline VectorComponentValue lengthSquared3() const { return this->dot3(*this); }
-    __forceinline void setXYZW(const hkVector4& xyz, const hkVector4& w) {
-        m_vComponents = (_mm_shuffle_ps)(xyz.m_vComponents, (_mm_unpackhi_ps)(xyz.m_vComponents, w.m_vComponents), 0xc4);
-    }
-    __forceinline void setSqrtInverse4(const hkVector4& vec) {
-        hkQuadReal r = vec.m_vComponents;
-        hkQuadReal e = (_mm_rsqrt_ps)(r);
-        hkQuadReal he = (_mm_mul_ps)(DAT_010c71d0, e);
-        hkQuadReal ree = (_mm_mul_ps)((_mm_mul_ps)(r, e), e);
-        m_vComponents = (_mm_mul_ps)(he, (FloatHardware::_mm_sub_ps)(DAT_010c71c0, ree));
-    }
-    __forceinline VectorComponentValue getSimdAt(int i) const {
-        switch (i) {
-        case 0: return m_vComponents;
-        case 1: return (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0x55);
-        case 2: return (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0xaa);
-        default: return (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0xff);
-        }
-    }
-    __forceinline void broadcast(int i) {
-        if (i == 0) m_vComponents = (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0);
-        else if (i == 1) m_vComponents = (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0x55);
-        else if (i == 2) m_vComponents = (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0xaa);
-        else if (i == 3) m_vComponents = (_mm_shuffle_ps)(m_vComponents, m_vComponents, 0xff);
-    }
-    __forceinline void setBroadcast(const hkVector4& v, int i) {
-        if (i == 0) m_vComponents = (_mm_shuffle_ps)(v.m_vComponents, v.m_vComponents, 0);
-        else if (i == 1) m_vComponents = (_mm_shuffle_ps)(v.m_vComponents, v.m_vComponents, 0x55);
-        else if (i == 2) m_vComponents = (_mm_shuffle_ps)(v.m_vComponents, v.m_vComponents, 0xaa);
-        else if (i == 3) m_vComponents = (_mm_shuffle_ps)(v.m_vComponents, v.m_vComponents, 0xff);
-    }
-    __forceinline void SetRotatedDirection(const hkQuaternion& quat, const hkVector4& direction);
-    __forceinline void _setTransformedPos(const hkQsTransform& a, const hkVector4& b);
-    hkQuadReal m_vComponents;
-};
-
-class __declspec(align(16)) hkQuaternion {
-public:
-    __forceinline hkQuaternion() {}
-    __forceinline const hkVector4& getImag() const { return m_vec; }
-    __forceinline void operator=(const hkQuaternion& q) { m_vec = q.m_vec; }
-    void FUN_00c66320(const hkQuaternion& q0, const hkQuaternion& q1);
-    void FUN_00cd9d10(const hkVector4& from, const hkVector4& to);
-    hkVector4 m_vec;
-};
-
-inline __declspec(noinline) void hkQuaternion::FUN_00c66320(const hkQuaternion& q0, const hkQuaternion& q1) {
-    hkVector4 vec;
+inline __declspec(noinline) void ActorQuaternionLocal_00ce3a00::FUN_00c66320(const ActorQuaternionLocal_00ce3a00& q0, const ActorQuaternionLocal_00ce3a00& q1) {
+    ActorVectorLocal_00ce3a00 vec;
     vec.setCross(q0.getImag(), q1.getImag());
     vec.addMul4(q0.m_vec.getSimdAt(3), q1.getImag());
     vec.addMul4(q1.m_vec.getSimdAt(3), q0.getImag());
-    hkVector4 dot;
+    ActorVectorLocal_00ce3a00 dot;
     dot.SetAllComponents(q0.m_vec.dot3(q1.m_vec));
-    hkVector4 w;
+    ActorVectorLocal_00ce3a00 w;
     w.setMul4(q0.m_vec, q1.m_vec);
     w.sub4(dot);
     m_vec.setXYZW(vec, w);
 }
 
-class __declspec(align(16)) hkQsTransform {
-public:
-    __forceinline hkQsTransform() {}
-    __forceinline const hkVector4& getTranslation() const { return m_vTranslation; }
-    __forceinline const hkQuaternion& getRotation() const { return m_rotation; }
-    __forceinline void SetBodyOrientation(const hkQuaternion& rotation) { m_rotation = rotation; }
-    __forceinline void operator=(const hkQsTransform& t) {
-        m_vTranslation = t.m_vTranslation;
-        m_rotation = t.m_rotation;
-        m_vScale = t.m_vScale;
-    }
-    __forceinline void SetProduct(const hkQsTransform& aTb, const hkQsTransform& bTc) {
-        hkVector4 extraTrans;
-        extraTrans.SetRotatedDirection(aTb.m_rotation, bTc.m_vTranslation);
-        m_vTranslation.setAdd4(aTb.m_vTranslation, extraTrans);
-        m_rotation.FUN_00c66320(aTb.m_rotation, bTc.m_rotation);
-        m_vScale.setMul4(aTb.m_vScale, bTc.m_vScale);
-    }
-    hkVector4 m_vTranslation;
-    hkQuaternion m_rotation;
-    hkVector4 m_vScale;
-};
+__forceinline hkQsTransform::hkQsTransform() {}
+__forceinline const ActorVectorLocal_00ce3a00& hkQsTransform::getTranslation() const { return m_vTranslation; }
+__forceinline const ActorQuaternionLocal_00ce3a00& hkQsTransform::getRotation() const { return m_rotation; }
+__forceinline void hkQsTransform::SetBodyOrientation(const ActorQuaternionLocal_00ce3a00& rotation) { m_rotation = rotation; }
+__forceinline void hkQsTransform::operator=(const hkQsTransform& t) {
+    m_vTranslation = t.m_vTranslation;
+    m_rotation = t.m_rotation;
+    m_vScale = t.m_vScale;
+}
+__forceinline void hkQsTransform::SetProduct(const hkQsTransform& kLeft, const hkQsTransform& kRight) {
+    ActorVectorLocal_00ce3a00 kMovedTrans;
+    kMovedTrans.SetRotatedDirection(kLeft.m_rotation, kRight.m_vTranslation);
+    m_vTranslation.setAdd4(kLeft.m_vTranslation, kMovedTrans);
+    m_rotation.FUN_00c66320(kLeft.m_rotation, kRight.m_rotation);
+    m_vScale.setMul4(kLeft.m_vScale, kRight.m_vScale);
+}
 
-__forceinline void hkVector4::SetRotatedDirection(const hkQuaternion& quat, const hkVector4& direction) {
-    hkVector4 minusHalf; minusHalf.getQuad() = DAT_010c71e0;
-    hkVector4 qreal;
+__forceinline void ActorVectorLocal_00ce3a00::SetRotatedDirection(const ActorQuaternionLocal_00ce3a00& quat, const ActorVectorLocal_00ce3a00& direction) {
+    ActorVectorLocal_00ce3a00 minusHalf; minusHalf.getQuad() = DAT_010c71e0;
+    ActorVectorLocal_00ce3a00 qreal;
     qreal.setBroadcast(quat.m_vec, 3);
-    hkVector4 q2minus1;
+    ActorVectorLocal_00ce3a00 q2minus1;
     q2minus1.setAddMul4(minusHalf, qreal, qreal);
 
-    hkVector4 ret;
+    ActorVectorLocal_00ce3a00 ret;
     ret.setMul4(direction, q2minus1);
 
-    hkVector4 imagDotDir;
+    ActorVectorLocal_00ce3a00 imagDotDir;
     imagDotDir.getQuad() = quat.getImag().dot3(direction).getQuad();
     imagDotDir.broadcast(0);
     ret.addMul4(imagDotDir, quat.getImag());
 
-    hkVector4 imagCrossDir;
+    ActorVectorLocal_00ce3a00 imagCrossDir;
     imagCrossDir.setCross(quat.getImag(), direction);
     ret.addMul4(qreal, imagCrossDir);
 
     this->setAdd4(ret, ret);
 }
 
-__forceinline void hkVector4::_setTransformedPos(const hkQsTransform& a, const hkVector4& b) {
-    hkVector4 temp(b);
+__forceinline void ActorVectorLocal_00ce3a00::_setTransformedPos(const hkQsTransform& a, const ActorVectorLocal_00ce3a00& b) {
+    ActorVectorLocal_00ce3a00 temp(b);
     temp.mul4(a.m_vScale);
     SetRotatedDirection(a.m_rotation, temp);
     add4(a.m_vTranslation);
@@ -3219,87 +3224,38 @@ template <class T> __forceinline const T* hkAddByteOffsetConst(const T* base, lo
     return reinterpret_cast<const T*>(reinterpret_cast<const char*>(base) + offset);
 }
 
-class hkMemoryAllocator {
-public:
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual void v0c();
-    virtual void ReturnMemory(void* p, int numBytes);
-    template <class T> __forceinline void _bufFree(void* p, int numElem) { ReturnMemory(p, numElem * sizeof(T)); }
-};
+template <class T> __forceinline void hkMemoryAllocator::_bufFree(void* p, int numElem) { bufFree(p, numElem * sizeof(T)); }
 
-template <class T> class ValueWrapper {
-public:
-    __forceinline void operator=(T e) { m_kStorage = e; }
-    __forceinline T val() const { return m_kStorage; }
-    __forceinline operator T() const { return m_kStorage; }
-    T m_kStorage;
-};
 
 template <class T> __forceinline T* hkAddByteOffset(T* base, long offset) {
     return reinterpret_cast<T*>(reinterpret_cast<char*>(base) + offset);
 }
 
-struct StringPointerTriple {
-    ValueWrapper<void*> m_next;
-    __forceinline void* allocateStack(int numBytes, const char* what) {
-        void* current = m_next;
-        m_next = hkAddByteOffset(current, numBytes);
-        return current;
-    }
-    __forceinline void deallocateStack(void* p) { m_next = p; }
-};
+__forceinline void hkStackMemory::deallocateStack(void* p) { m_next = p; }
 
-class NineIntegerRecord {
-public:
-    static __forceinline NineIntegerRecord& GetMonitorStream() { return *(NineIntegerRecord*)FUN_00c85750(); }
-    __forceinline StringPointerTriple& stack() { return m_aiEntries; }
-    __forceinline hkMemoryAllocator& heap() { return *m_pStreamAllocator; }
-    StringPointerTriple m_aiEntries;
-    int unk04, unk08, unk0c;
-    hkMemoryAllocator* m_pStreamAllocator;
-};
 
 template <class T> __forceinline T* hkAllocateStack(int n, const char* what = 0) {
-    NineIntegerRecord& mem = NineIntegerRecord::GetMonitorStream();
+    hkMemoryRouter& mem = hkMemoryRouter::getInstance();
     return static_cast<T*>(mem.stack().allocateStack(((n * (int)sizeof(T)) + 127) & ~127, what));
 }
 template <class T> __forceinline void hkDeallocateStack(T* ptr) {
-    NineIntegerRecord::GetMonitorStream().stack().deallocateStack(static_cast<void*>(ptr));
+    hkMemoryRouter::getInstance().stack().deallocateStack(static_cast<void*>(ptr));
 }
 
-struct RouterHeapAllocatorProvider {
-    __forceinline hkMemoryAllocator& get(const void*) { return NineIntegerRecord::GetMonitorStream().heap(); }
-};
+__forceinline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*) { return hkMemoryRouter::getInstance().heap(); }
 
-struct hkTypeIsPod {};
 namespace HavokArrayUtilities {
     template <class T> __forceinline void destruct(T*, int, hkTypeIsPod) {}
 }
 
-template <class T> class HavokElementArray {
-public:
-    __forceinline const T& operator[](int i) const { return m_data[i]; }
-    __forceinline T& operator[](int i) { return m_data[i]; }
-    __forceinline int GetLogicalSize() const { return m_iElementCount; }
-    __forceinline int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    __forceinline void clear() { HavokArrayUtilities::destruct(m_data, m_iElementCount, hkTypeIsPod()); m_iElementCount = 0; }
-    __forceinline void _clearAndDeallocate(hkMemoryAllocator& alloc) {
-        clear();
-        if ((m_iCapacityState & 0x80000000) == 0) alloc._bufFree<T>(m_data, getCapacity());
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
-template <class T> class hkArray : public HavokElementArray<T> {
-public:
-    __forceinline void ClearAndRelease() { HavokElementArray<T>::_clearAndDeallocate(RouterHeapAllocatorProvider().get(this)); }
-};
-template <class T> class StackAllocatedArray : public hkArray<T> {
+template <class T> __forceinline void hkArrayBase<T>::clear() { HavokArrayUtilities::destruct(m_data, m_iElementCount, hkTypeIsPod()); m_iElementCount = 0; }
+template <class T> __forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc) {
+    clear();
+    if ((m_iCapacityState & 0x80000000) == 0) alloc._bufFree<T>(m_data, getCapacity());
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
+template <class T> class StackAllocatedArray : public hkArrayBase<T> {
 public:
     __forceinline void init(int capacity) {
         this->m_data = 0;
@@ -3311,23 +3267,19 @@ public:
     }
     __forceinline hkBool wasReallocated() const { return m_pStackAllocation != this->m_data; }
     __forceinline void destroy() {
-        if (!wasReallocated()) hkArray<T>::clear();
+        if (!wasReallocated()) hkArrayBase<T>::clear();
         hkDeallocateStack<T>(m_pStackAllocation);
-        hkArray<T>::ClearAndRelease();
+        hkArrayBase<T>::_clearAndDeallocate(hkContainerHeapAllocator().get(this));
     }
     T* m_pStackAllocation;
 };
 
-class hkaSkeleton {
-public:
-    int unk00, unk04, unk08;
-    hkArray<short> m_kParentIndices;
-};
 
 hkBool __cdecl WalkChainUntilLimit(const hkaSkeleton& skeleton, short start, short end, hkArray<short>& chain);
 extern "C" void __cdecl FUN_00cde1d0(const hkaSkeleton& skeleton, hkQsTransform* pose);
 extern "C" void __cdecl FUN_00cde2d0(const hkaSkeleton& skeleton, const hkQsTransform* ref, hkQsTransform* pose);
 
+// Preserve the original access types when viewing the shared mapper storage.
 template <class T> class ReferenceCountedPointer {
 public:
     __forceinline T* val() const { return m_pRetainedObject; }
@@ -3336,133 +3288,96 @@ public:
     T* m_pRetainedObject;
 };
 
-class __declspec(align(16)) hkaSkeletonMapperData {
+class __declspec(align(16)) hkaSkeletonMapperDataSimpleMapping {
 public:
-    struct __declspec(align(16)) SimpleMapping {
-        short m_sBoneA;
-        short m_sBoneB;
-        hkQsTransform m_kAFromBTransform;
-    };
-    struct __declspec(align(16)) ChainMapping {
-        short m_sStartBoneA;
-        short m_sEndBoneA;
-        short m_sStartBoneB;
-        short m_sEndBoneB;
-        hkQsTransform m_kStartAFromBTransform;
-        hkQsTransform m_kEndAFromBTransform;
-    };
-    ReferenceCountedPointer<const hkaSkeleton> m_pSkeletonA;
-    ReferenceCountedPointer<const hkaSkeleton> m_pSkeletonB;
-    hkArray<SimpleMapping> m_kSimpleMappings;
-    hkArray<ChainMapping> m_kChainMappings;
-    hkArray<short> m_kUnmappedBones;
-    hkQsTransform m_kExtractedMotionMapping;
-    hkBool m_bKeepUnmappedLocal;
+    short m_sBoneA;
+    short m_sBoneB;
+    hkQsTransform m_kAFromBTransform;
 };
 
-struct hkThreadLocalData {
-    unsigned long m_slotID;
-    __forceinline void* getData() const { return TlsGetValue(m_slotID); }
-};
-extern "C" hkThreadLocalData DAT_0126835c;
-
-class StringCursor {
+class __declspec(align(16)) hkaSkeletonMapperDataChainMapping {
 public:
-    static __forceinline StringCursor& GetMonitorStream() { return *(StringCursor*)DAT_0126835c.getData(); }
-    __forceinline char* GetStreamEnd() { return m_kRayEnd.val(); }
-    __forceinline char* getCapacityMinus16() { return m_pCurrentCommand.val(); }
-    __forceinline hkBool memoryAvailable() { return GetStreamEnd() < getCapacityMinus16(); }
-    __forceinline void setEnd(char* ptr) { m_kRayEnd = ptr; }
-    struct Command { const char* m_pCommandName; };
-    struct CommandTimingEntry : public Command {
-        unsigned int m_uiStartTicks;
-        unsigned int m_uiEndTicks;
-        __forceinline void setTime();
-    };
-    struct TimedNameRecord : public CommandTimingEntry {
-        const char* m_pFirst;
-    };
-    ValueWrapper<char*> m_kRayStart;
-    ValueWrapper<char*> m_kRayEnd;
-    ValueWrapper<char*> m_pRayCursor;
-    ValueWrapper<char*> m_pCurrentCommand;
+    short m_sStartBoneA;
+    short m_sEndBoneA;
+    short m_sStartBoneB;
+    short m_sEndBoneB;
+    hkQsTransform m_kStartAFromBTransform;
+    hkQsTransform m_kEndAFromBTransform;
 };
-__forceinline void StringCursor::CommandTimingEntry::setTime() {
+
+#include "../../../include/hkThreadLocalData.h"
+// Havok's monitor-stream TLS slot (hkMonitorStream::m_instance).
+extern "C" hkThreadLocalData<void*> DAT_0126835c;
+
+__forceinline hkMonitorStream& hkMonitorStream::getInstance() { return *(hkMonitorStream*)DAT_0126835c.getData(); }
+__forceinline char* __cdecl hkMonitorStream::getEnd() { return m_end.val(); }
+__forceinline char* __cdecl hkMonitorStream::getCapacityMinus16() { return m_capacityMinus16.val(); }
+__forceinline hkBool __cdecl hkMonitorStream::memoryAvailable() { return getEnd() < getCapacityMinus16(); }
+__forceinline void __cdecl hkMonitorStream::setEnd(char* ptr) { m_end = ptr; }
+__forceinline void hkMonitorStream::TimerCommand::setTime() {
     unsigned int ticks;
     __asm {
         rdtsc
         mov dword ptr[ticks], eax
     }
-    m_uiStartTicks = ticks;
+    m_time0 = ticks;
 }
 
-static __declspec(noinline) void FUN_00ce2a50(hkVector4& a, hkVector4& b) {
-    hkVector4 aLen; aLen.SetAllComponents(a.lengthSquared3());
-    hkVector4 bLen; bLen.SetAllComponents(b.lengthSquared3());
-    hkVector4 lens; lens.setXYZW(aLen, bLen);
-    hkVector4 inv; inv.setSqrtInverse4(lens);
+static __declspec(noinline) void FUN_00ce2a50(ActorVectorLocal_00ce3a00& a, ActorVectorLocal_00ce3a00& b) {
+    ActorVectorLocal_00ce3a00 aLen; aLen.SetAllComponents(a.lengthSquared3());
+    ActorVectorLocal_00ce3a00 bLen; bLen.SetAllComponents(b.lengthSquared3());
+    ActorVectorLocal_00ce3a00 lens; lens.setXYZW(aLen, bLen);
+    ActorVectorLocal_00ce3a00 inv; inv.setSqrtInverse4(lens);
     a.mul4(inv.getSimdAt(0));
     b.mul4(inv.getSimdAt(3));
 }
 
-class hkReferencedObject {
-public:
-    virtual ~hkReferencedObject();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-};
-
-class hkaSkeletonMapper : public hkReferencedObject {
-public:
-    void __cdecl FUN_00ce3a00(const hkQsTransform* poseAModelSpace, const hkQsTransform* originalPoseBLocalSpace, hkQsTransform* poseBModelSpace, int source) const;
-    hkaSkeletonMapperData m_kMappingData;
-};
 
 // @fnv 0x00ce3a00
 void __cdecl hkaSkeletonMapper::FUN_00ce3a00(const hkQsTransform* poseAModelSpace, const hkQsTransform* originalPoseBLocalSpace, hkQsTransform* poseBModelSpace, int source) const {
     {
-        StringCursor& mStream = StringCursor::GetMonitorStream();
+        hkMonitorStream& mStream = hkMonitorStream::getInstance();
         if (mStream.memoryAvailable()) {
-            StringCursor::TimedNameRecord* h = reinterpret_cast<StringCursor::TimedNameRecord*>(mStream.GetStreamEnd());
-            h->m_pCommandName = "LtMapPoseModelSpace";
-            h->m_pFirst = "Stinit";
+            hkMonitorStream::TimerBeginListCommand* h = reinterpret_cast<hkMonitorStream::TimerBeginListCommand*>(mStream.getEnd());
+            h->m_commandAndMonitor = "LtMapPoseModelSpace";
+            h->m_nameOfFirstSplit = "Stinit";
             h->setTime();
             mStream.setEnd((char*)(h + 1));
         }
     }
     {
-        StringCursor& mStream = StringCursor::GetMonitorStream();
+        hkMonitorStream& mStream = hkMonitorStream::getInstance();
         if (mStream.memoryAvailable()) {
-            StringCursor::CommandTimingEntry* h = reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());
-            h->m_pCommandName = "StsimpleMappings";
+            hkMonitorStream::TimerCommand* h = reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());
+            h->m_commandAndMonitor = "StsimpleMappings";
             h->setTime();
             mStream.setEnd((char*)(h + 1));
         }
     }
     {
-        const int numSimpleMappings = m_kMappingData.m_kSimpleMappings.GetLogicalSize();
+        const int numSimpleMappings = (reinterpret_cast<const hkArray<hkaSkeletonMapperDataSimpleMapping>&>(m_kMappingData.m_kSimpleMappings)).GetLogicalSize();
         for (int i = 0; i < numSimpleMappings; i++) {
             const int prefetchDistance = 128;
-            MathUtilities::prefetch128(hkAddByteOffsetConst(&m_kMappingData.m_kSimpleMappings[i], prefetchDistance));
-            const hkaSkeletonMapperData::SimpleMapping& simpleMapping = m_kMappingData.m_kSimpleMappings[i];
+            MathUtilities::prefetch128(hkAddByteOffsetConst(&(reinterpret_cast<const hkArray<hkaSkeletonMapperDataSimpleMapping>&>(m_kMappingData.m_kSimpleMappings))[i], prefetchDistance));
+            const hkaSkeletonMapperDataSimpleMapping& simpleMapping = (reinterpret_cast<const hkArray<hkaSkeletonMapperDataSimpleMapping>&>(m_kMappingData.m_kSimpleMappings))[i];
             poseBModelSpace[simpleMapping.m_sBoneB].SetProduct(poseAModelSpace[simpleMapping.m_sBoneA], simpleMapping.m_kAFromBTransform);
             MathUtilities::prefetch128(hkAddByteOffsetConst(&poseAModelSpace[simpleMapping.m_sBoneA], prefetchDistance));
             MathUtilities::prefetch128(hkAddByteOffsetConst(&poseBModelSpace[simpleMapping.m_sBoneB], prefetchDistance));
         }
     }
     {
-        StringCursor& mStream = StringCursor::GetMonitorStream();
+        hkMonitorStream& mStream = hkMonitorStream::getInstance();
         if (mStream.memoryAvailable()) {
-            StringCursor::CommandTimingEntry* h = reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());
-            h->m_pCommandName = "StchainMappings";
+            hkMonitorStream::TimerCommand* h = reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());
+            h->m_commandAndMonitor = "StchainMappings";
             h->setTime();
             mStream.setEnd((char*)(h + 1));
         }
     }
     {
-        const int numChainMappings = m_kMappingData.m_kChainMappings.GetLogicalSize();
+        const int numChainMappings = (reinterpret_cast<const hkArray<hkaSkeletonMapperDataChainMapping>&>(m_kMappingData.m_kChainMappings)).GetLogicalSize();
         for (int i = 0; i < numChainMappings; i++) {
-            const hkaSkeletonMapperData::ChainMapping& chainMapping = m_kMappingData.m_kChainMappings[i];
+            const hkaSkeletonMapperDataChainMapping& chainMapping = (reinterpret_cast<const hkArray<hkaSkeletonMapperDataChainMapping>&>(m_kMappingData.m_kChainMappings))[i];
             const short startBoneA = chainMapping.m_sStartBoneA;
             const short endBoneA = chainMapping.m_sEndBoneA;
             const short startBoneB = chainMapping.m_sStartBoneB;
@@ -3472,9 +3387,9 @@ void __cdecl hkaSkeletonMapper::FUN_00ce3a00(const hkQsTransform* poseAModelSpac
 
             StackAllocatedArray<short> chainBones;
             chainBones.init(endBoneB - startBoneB + 1);
-            WalkChainUntilLimit(*m_kMappingData.m_pSkeletonB, startBoneB, endBoneB, chainBones);
+            WalkChainUntilLimit(*(reinterpret_cast<const ReferenceCountedPointer<const hkaSkeleton>&>(m_kMappingData.m_pSkeletonB)), startBoneB, endBoneB, static_cast<hkArray<short>&>(static_cast<hkArrayBase<short>&>(chainBones)));
 
-            hkVector4 currentEndModelSpacePos;
+            ActorVectorLocal_00ce3a00 currentEndModelSpacePos;
             currentEndModelSpacePos = originalPoseBLocalSpace[endBoneB].getTranslation();
             for (int b = chainBones.GetLogicalSize() - 2; b >= 1; b--) {
                 const short bone = chainBones[b];
@@ -3483,20 +3398,20 @@ void __cdecl hkaSkeletonMapper::FUN_00ce3a00(const hkQsTransform* poseAModelSpac
             currentEndModelSpacePos._setTransformedPos(poseBModelSpace[startBoneB], currentEndModelSpacePos);
 
             {
-                const hkVector4& startModelSpacePos = poseBModelSpace[startBoneB].getTranslation();
+                const ActorVectorLocal_00ce3a00& startModelSpacePos = poseBModelSpace[startBoneB].getTranslation();
                 hkQsTransform desiredEndModelSpace;
                 desiredEndModelSpace.SetProduct(poseAModelSpace[endBoneA], chainMapping.m_kEndAFromBTransform);
-                const hkVector4& desiredEndModelSpacePos = desiredEndModelSpace.getTranslation();
+                const ActorVectorLocal_00ce3a00& desiredEndModelSpacePos = desiredEndModelSpace.getTranslation();
 
-                hkVector4 currentDirection; currentDirection.setSub4(currentEndModelSpacePos, startModelSpacePos);
-                hkVector4 desiredDirection; desiredDirection.setSub4(desiredEndModelSpacePos, startModelSpacePos);
+                ActorVectorLocal_00ce3a00 currentDirection; currentDirection.setSub4(currentEndModelSpacePos, startModelSpacePos);
+                ActorVectorLocal_00ce3a00 desiredDirection; desiredDirection.setSub4(desiredEndModelSpacePos, startModelSpacePos);
                 FUN_00ce2a50(currentDirection, desiredDirection);
 
-                hkQuaternion rotationQuaternion;
+                ActorQuaternionLocal_00ce3a00 rotationQuaternion;
                 rotationQuaternion.FUN_00cd9d10(currentDirection, desiredDirection);
 
-                hkQuaternion currentRot = poseBModelSpace[startBoneB].getRotation();
-                hkQuaternion temp;
+                ActorQuaternionLocal_00ce3a00 currentRot = poseBModelSpace[startBoneB].getRotation();
+                ActorQuaternionLocal_00ce3a00 temp;
                 temp.FUN_00c66320(rotationQuaternion, currentRot);
                 poseBModelSpace[startBoneB].SetBodyOrientation(temp);
             }
@@ -3512,20 +3427,20 @@ void __cdecl hkaSkeletonMapper::FUN_00ce3a00(const hkQsTransform* poseAModelSpac
         }
     }
     {
-        StringCursor& mStream = StringCursor::GetMonitorStream();
+        hkMonitorStream& mStream = hkMonitorStream::getInstance();
         if (mStream.memoryAvailable()) {
-            StringCursor::CommandTimingEntry* h = reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());
-            h->m_pCommandName = "StunmappedBones";
+            hkMonitorStream::TimerCommand* h = reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());
+            h->m_commandAndMonitor = "StunmappedBones";
             h->setTime();
             mStream.setEnd((char*)(h + 1));
         }
     }
     {
-        const int numUnmapped = m_kMappingData.m_kUnmappedBones.GetLogicalSize();
+        const int numUnmapped = (reinterpret_cast<const hkArray<short>&>(m_kMappingData.m_kUnmappedBones)).GetLogicalSize();
         if (m_kMappingData.m_bKeepUnmappedLocal) {
             for (int i = 0; i < numUnmapped; i++) {
-                const short boneIdx = m_kMappingData.m_kUnmappedBones[i];
-                const short parentIdx = m_kMappingData.m_pSkeletonB->m_kParentIndices[boneIdx];
+                const short boneIdx = (reinterpret_cast<const hkArray<short>&>(m_kMappingData.m_kUnmappedBones))[i];
+                const short parentIdx = (reinterpret_cast<const ReferenceCountedPointer<const hkaSkeleton>&>(m_kMappingData.m_pSkeletonB))->m_kParentIndices.m_data[boneIdx];
                 if (parentIdx != -1) {
                     const hkQsTransform& parentFromChild = originalPoseBLocalSpace[boneIdx];
                     const hkQsTransform& modelFromParent = poseBModelSpace[parentIdx];
@@ -3537,27 +3452,27 @@ void __cdecl hkaSkeletonMapper::FUN_00ce3a00(const hkQsTransform* poseAModelSpac
         }
     }
     {
-        StringCursor& mStream = StringCursor::GetMonitorStream();
+        hkMonitorStream& mStream = hkMonitorStream::getInstance();
         if (mStream.memoryAvailable()) {
-            StringCursor::CommandTimingEntry* h = reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());
-            h->m_pCommandName = "StenforceConstraints";
+            hkMonitorStream::TimerCommand* h = reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());
+            h->m_commandAndMonitor = "StenforceConstraints";
             h->setTime();
             mStream.setEnd((char*)(h + 1));
         }
     }
     switch (source) {
     case 1:
-        FUN_00cde1d0(*m_kMappingData.m_pSkeletonB, poseBModelSpace);
+        FUN_00cde1d0(*(reinterpret_cast<const ReferenceCountedPointer<const hkaSkeleton>&>(m_kMappingData.m_pSkeletonB)), poseBModelSpace);
         break;
     case 2:
-        FUN_00cde2d0(*m_kMappingData.m_pSkeletonB, originalPoseBLocalSpace, poseBModelSpace);
+        FUN_00cde2d0(*(reinterpret_cast<const ReferenceCountedPointer<const hkaSkeleton>&>(m_kMappingData.m_pSkeletonB)), originalPoseBLocalSpace, poseBModelSpace);
         break;
     }
     {
-        StringCursor& mStream = StringCursor::GetMonitorStream();
+        hkMonitorStream& mStream = hkMonitorStream::getInstance();
         if (mStream.memoryAvailable()) {
-            StringCursor::CommandTimingEntry* h = reinterpret_cast<StringCursor::CommandTimingEntry*>(mStream.GetStreamEnd());
-            h->m_pCommandName = "lt";
+            hkMonitorStream::TimerCommand* h = reinterpret_cast<hkMonitorStream::TimerCommand*>(mStream.getEnd());
+            h->m_commandAndMonitor = "lt";
             h->setTime();
             mStream.setEnd((char*)(h + 1));
         }
@@ -3574,42 +3489,51 @@ struct MM {
 };
 extern MM _g_memoryManager;
 
+__forceinline hkStringPtr::hkStringPtr() throw() { Init(); }
+__forceinline hkStringPtr::~hkStringPtr() throw() { release(); }
+__forceinline hkaBone::hkaBone() { m_bLockTranslation = false; }
+__forceinline void* hkaBone::operator new(unsigned int, void* p) { return p; }
+__forceinline void hkaBone::operator delete(void*, void*) {}
+
+inline hkMemoryAllocator* ReferenceHeapAllocator() {
+    hkMemoryRouter* r = reinterpret_cast<hkMemoryRouter*>((&hkMemoryRouter::getInstance()));
+    return r->m_heap;
+}
+__forceinline void* __cdecl hkReferencedObject::operator new(std::size_t n) {
+    hkReferencedObject* b = static_cast<hkReferencedObject*>(ReferenceHeapAllocator()->blockAlloc(n));
+    b->m_usMemSizeAndFlags = static_cast<unsigned short>(n);
+    return b;
+}
+__forceinline void hkReferencedObject::operator delete(void* p, unsigned int n) {
+    reinterpret_cast<hkMemoryRouter*>((&hkMemoryRouter::getInstance()))->m_heap->blockFree(p, n);
+}
+
 namespace SkeletonBuild {
 
 // ---- Havok memory ----
-struct hkMemoryAllocator {
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-    virtual void ReleaseBlock(void* p, int numBytes);
-};
-struct NineIntegerRecord {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocator* heap;
-};
+
+
 int __cdecl FUN_00c908c0(hkMemoryAllocator* alloc, void* array, int capacity, int elemSize);
 const char* __cdecl FUN_00cb1410(int name);
 
 inline hkMemoryAllocator* HeapAllocator()
 {
-    NineIntegerRecord* r = reinterpret_cast<NineIntegerRecord*>(FUN_00c85750());
-    return r->heap;
+    hkMemoryRouter* r = reinterpret_cast<hkMemoryRouter*>((&hkMemoryRouter::getInstance()));
+    return r->m_heap;
 }
 
-template<class T> struct HkArray {
+template<class T> struct HkArrayLocalForm { // local form of hkArray: 0x00c7e3b0 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    HkArray() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
-    ~HkArray()
+    HkArrayLocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000) {}
+    ~HkArrayLocalForm()
     {
         destruct(m_data, m_iElementCount);
         m_iElementCount = 0;
         if (m_iCapacityState >= 0)
-            HeapAllocator()->ReleaseBlock(m_data, getCapacity() * sizeof(T));
+            HeapAllocator()->blockFree(m_data, getCapacity() * sizeof(T));
     }
     int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
     __forceinline void reserve(int n)
@@ -3661,95 +3585,46 @@ template<class T> struct HkArray {
     T& operator[](int i) { return m_data[i]; }
 };
 
-namespace SkeletonBuildHardware {
-union __declspec(intrin_type) __declspec(align(16)) __m128 {
-    float x, y, z, w;
-};
+// The shared hkaSkeleton's arrays seen through this unit's HkArrayLocalForm.
+template<class T, class U> __forceinline HkArrayLocalForm<T>& View(U& a) { return reinterpret_cast<HkArrayLocalForm<T>&>(a); }
+template<class T, class U> __forceinline const HkArrayLocalForm<T>& View(const U& a) { return reinterpret_cast<const HkArrayLocalForm<T>&>(a); }
+template<class T, class U> __forceinline void ConstructView(U& a) { View<T>(a).HkArrayLocalForm<T>::HkArrayLocalForm(); }
+
+} // namespace SkeletonBuild
+
+// HK_DECLARE_CLASS_ALLOCATOR: the same heap block as hkReferencedObject's.
+__forceinline void* __cdecl hkaSkeleton::operator new(unsigned int n)
+{
+    return hkReferencedObject::operator new(n);
 }
 
-struct hkVector4 {
-    SkeletonBuildHardware::__m128 m_vComponents;
-    void operator=(const hkVector4& v) { m_vComponents = v.m_vComponents; }
-};
-struct hkBool {
-    char m_cBooleanValue;
-    hkBool() {}
-    hkBool(bool b) : m_cBooleanValue(b) {}
-    hkBool& operator=(bool b) { m_cBooleanValue = b; return *this; }
-};
-struct hkQsTransform {
-    hkVector4 m_vTranslation;
-    hkVector4 m_rotation;
-    hkVector4 m_vScale;
-    void operator=(const hkQsTransform& t) {
-        m_vTranslation = t.m_vTranslation;
-        m_rotation = t.m_rotation;
-        m_vScale = t.m_vScale;
-    }
-};
+// The members' hkArray() constructors run (shared hkArray).
+__forceinline hkaSkeleton::hkaSkeleton()
+{
+}
 
-struct hkStringPtr {
-    const char* m_pcText;
-    void FUN_00cb0a60();
-    void FUN_00cb0c00();
-    void FUN_00cb0c10(const char* s);
-    hkStringPtr() { FUN_00cb0a60(); }
-    ~hkStringPtr() { FUN_00cb0c00(); }
-};
-
-struct hkaBone {
-    hkStringPtr m_name;
-    hkBool m_bLockTranslation;
-    hkaBone() { m_bLockTranslation = false; }
-    void* operator new(unsigned int, void* p) { return p; }
-    void operator delete(void*, void*) {}
-};
-
-struct hkReferencedObject {
-    short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-    __forceinline hkReferencedObject() { m_sReferenceCount = 1; }
-    virtual ~hkReferencedObject() {}
-    void* operator new(unsigned int n)
-    {
-        hkReferencedObject* b = static_cast<hkReferencedObject*>(HeapAllocator()->AllocateMemoryBlock(n));
-        b->m_usMemSizeAndFlags = static_cast<short>(n);
-        return b;
-    }
-    void operator delete(void* p, unsigned int n) { HeapAllocator()->ReleaseBlock(p, n); }
-};
-
-struct hkaSkeleton : hkReferencedObject {
-    hkStringPtr m_name;
-    HkArray<short> m_kParentIndices;
-    HkArray<hkaBone> m_kBones;
-    HkArray<hkQsTransform> m_kReferencePose;
-    HkArray<float> m_referenceFloats;
-    HkArray<hkStringPtr> m_kBoneNames;
-    __forceinline hkaSkeleton() {}
-    virtual ~hkaSkeleton();
-};
+namespace SkeletonBuild {
 
 struct SkeletonPoseData {
     const hkaSkeleton* m_pSkeleton;
-    HkArray<hkQsTransform> m_pLocalPose;
-    HkArray<hkQsTransform> m_pModelPose;
-    HkArray<unsigned int> m_pBoneFlags;
+    HkArrayLocalForm<hkQsTransform> m_pLocalPose;
+    HkArrayLocalForm<hkQsTransform> m_pModelPose;
+    HkArrayLocalForm<unsigned int> m_pBoneFlags;
     hkBool m_bPoseFlag;
     hkBool m_bPoseInitialized;
-    HkArray<float> m_kPoseData;
+    HkArrayLocalForm<float> m_kPoseData;
 
-    void* operator new(unsigned int n) { return HeapAllocator()->AllocateMemoryBlock(n); }
-    void operator delete(void* p, unsigned int n) { HeapAllocator()->ReleaseBlock(p, n); }
+    void* operator new(unsigned int n) { return HeapAllocator()->blockAlloc(n); }
+    void operator delete(void* p, unsigned int n) { HeapAllocator()->blockFree(p, n); }
 
     __forceinline SkeletonPoseData(const hkaSkeleton* skeleton) : m_pSkeleton(skeleton), m_bPoseFlag(false), m_bPoseInitialized(false)
     {
-        const int numBones = m_pSkeleton->m_kBones.GetLogicalSize();
+        const int numBones = View<hkaBone>(m_pSkeleton->m_kBones).GetLogicalSize();
         m_pModelPose.setSizePod(numBones);
         m_pLocalPose.setSizePod(numBones);
         m_pBoneFlags.setSizePod(numBones);
-        m_kPoseData.reserveExactly((m_pSkeleton->m_referenceFloats.GetLogicalSize() + 3) & ~3);
-        m_kPoseData.setSizeFill(m_pSkeleton->m_referenceFloats.GetLogicalSize(), 0);
+        m_kPoseData.reserveExactly((View<hkStringPtr>(m_pSkeleton->m_kFloatSlots).GetLogicalSize() + 3) & ~3);
+        m_kPoseData.setSizeFill(View<hkStringPtr>(m_pSkeleton->m_kFloatSlots).GetLogicalSize(), 0);
     }
     void FUN_00cda110();
 };
@@ -3787,26 +3662,22 @@ struct BoneRecordArray {
     }
 };
 
-struct NiTMapItemStub {
-    NiTMapItemStub* m_pkNext;
-    int m_key;
-    int m_val;
-};
-
-struct NiTMapBaseStub {
+// RTTI NiTMapBase<DFALL<NiTMapItem<NiAVObject *,short> >,NiAVObject *,short> (vftable 0x010c4cf8); the
+// map below is NiTMap<NiAVObject *,short> (vftable 0x010c4d18).
+struct NiTMapBase_NiAVObject_short {
     unsigned int m_uiHashSize;
-    NiTMapItemStub** m_ppkHashTable;
+    NiTMapItem<NiAVObject*, short>** m_ppkHashTable;
     unsigned int m_uiCount;
-    NiTMapBaseStub(unsigned int uiHashSize = 37)
+    NiTMapBase_NiAVObject_short(unsigned int uiHashSize = 37)
     {
         m_uiHashSize = uiHashSize;
         m_uiCount = 0;
-        unsigned int uiSize = sizeof(NiTMapItemStub*) * m_uiHashSize;
-        m_ppkHashTable = static_cast<NiTMapItemStub**>(NiMalloc(uiSize));
-        unsigned int bytes = m_uiHashSize * sizeof(NiTMapItemStub*);
+        unsigned int uiSize = sizeof(NiTMapItem<NiAVObject*, short>*) * m_uiHashSize;
+        m_ppkHashTable = static_cast<NiTMapItem<NiAVObject*, short>**>(NiMalloc(uiSize));
+        unsigned int bytes = m_uiHashSize * sizeof(NiTMapItem<NiAVObject*, short>*);
         _fnv_zlib_memset(m_ppkHashTable, 0, bytes);
     }
-    virtual ~NiTMapBaseStub()
+    virtual ~NiTMapBase_NiAVObject_short()
     {
         RemoveAll();
         NiFree(m_ppkHashTable);
@@ -3815,7 +3686,7 @@ struct NiTMapBaseStub {
     void RemoveAll();
 };
 
-struct BoneRecordMap : NiTMapBaseStub {
+struct BoneRecordMap : NiTMapBase_NiAVObject_short {
     BoneRecordMap() {}
     virtual ~BoneRecordMap() { RemoveAll(); }
 };
@@ -3878,7 +3749,7 @@ struct AnimationOwner {
     SkeletonPoseData* pose;
     int unk08c;
     int unk090;
-    HkArray<hkQsTransform> transforms;
+    HkArrayLocalForm<hkQsTransform> transforms;
     int unk0a0;
     int unk0a4;
     int unk0a8;
@@ -4029,15 +3900,15 @@ void AnimationOwner::FUN_00c7e3b0()
     if (!holder->m_pSkeleton) {
         skeletonHolder->m_pSkeleton = new hkaSkeleton;
         int numBones = records.m_uiSize;
-        skeletonHolder->m_pSkeleton->m_kBones.setSizeObj(numBones);
-        skeletonHolder->m_pSkeleton->m_kParentIndices.setSizePod(numBones);
-        skeletonHolder->m_pSkeleton->m_kReferencePose.setSizePod(numBones);
+        View<hkaBone>(skeletonHolder->m_pSkeleton->m_kBones).setSizeObj(numBones);
+        View<short>(skeletonHolder->m_pSkeleton->m_kParentIndices).setSizePod(numBones);
+        View<hkQsTransform>(skeletonHolder->m_pSkeleton->m_kReferencePose).setSizePod(numBones);
         for (unsigned int i = 0; i < records.m_uiSize; ++i) {
-            hkaBone& bone = skeletonHolder->m_pSkeleton->m_kBones[i];
-            bone.m_name.FUN_00cb0c10(FUN_00cb1410(records.m_pBase[i]->name));
-            skeletonHolder->m_pSkeleton->m_kBones[i].m_bLockTranslation = true;
-            skeletonHolder->m_pSkeleton->m_kReferencePose[i] = records.m_pBase[i]->transform;
-            skeletonHolder->m_pSkeleton->m_kParentIndices[i] = records.m_pBase[i]->parent;
+            hkaBone& bone = View<hkaBone>(skeletonHolder->m_pSkeleton->m_kBones)[i];
+            bone.m_name.Assign(FUN_00cb1410(records.m_pBase[i]->name));
+            View<hkaBone>(skeletonHolder->m_pSkeleton->m_kBones)[i].m_bLockTranslation = true;
+            View<hkQsTransform>(skeletonHolder->m_pSkeleton->m_kReferencePose)[i] = records.m_pBase[i]->transform;
+            View<short>(skeletonHolder->m_pSkeleton->m_kParentIndices)[i] = records.m_pBase[i]->parent;
         }
     }
 
@@ -4050,7 +3921,7 @@ void AnimationOwner::FUN_00c7e3b0()
 
     pose = new SkeletonPoseData(skeletonHolder->m_pSkeleton);
     pose->FUN_00cda110();
-    transforms.setSizePod(skeletonHolder->m_pSkeleton->m_kBones.GetLogicalSize());
+    transforms.setSizePod(View<hkaBone>(skeletonHolder->m_pSkeleton->m_kBones).GetLogicalSize());
 }
 
 } // namespace SkeletonBuild

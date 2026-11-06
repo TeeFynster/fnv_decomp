@@ -1,3 +1,14 @@
+#include "../../../../include/BaseProcess.h"
+#include "../../../../include/MobileObject.h"
+#include "../../../../include/TESForm.h"
+#include "../../../../include/TESObjectREFR.h"
+#include "../../../../include/TESQuest.h"
+#include "../../../../include/TESTopicInfo.h"
+#include "../../../../include/BGSSaveLoadGame.h"
+#include "../../../../include/BSFile.h"
+#include "../../../../include/DummyPointerMap.h"
+#include "../../../../include/SL.h"
+#include "../../../../include/TESFullName.h"
 
 // src/fallout/misc/saveload/bgssaveloadstructs.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/misc/saveload/bgssaveloadstructs.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -161,7 +172,8 @@ struct FormIDConverter
 {
     unsigned int RegisterFormID(unsigned int);
 };
-struct ArrSI
+// Exe 0x00853570: local storage view; GetFlags binds the folded DWORD-at-+8 accessor 0x0044ddc0.
+struct BgssaveloadstructsOffset08View
 {
     unsigned int GetFlags();
 };
@@ -174,7 +186,7 @@ struct FUN_00853570_shell
 // @fnv 0x00853570
 void FUN_00853570_shell::WriteFormIDBytes(unsigned int numericID)
 {
-    unsigned int iElementIndex = reinterpret_cast<FormIDConverter*>(reinterpret_cast<ArrSI*>(g_BGSSaveLoadGame)->GetFlags())
+    unsigned int iElementIndex = reinterpret_cast<FormIDConverter*>(reinterpret_cast<BgssaveloadstructsOffset08View*>(g_BGSSaveLoadGame)->GetFlags())
                               ->RegisterFormID(numericID);
     unsigned int ifileIndex = iElementIndex >> 24;
     if (ifileIndex == 0xFF)
@@ -281,189 +293,6 @@ int FUN_00854960(FUN_008547f0_shell* pFirst, FUN_008547f0_shell* pSecond)
     }
 }
 
-struct TESForm
-{
-    virtual bool v00() = 0;
-    virtual bool v01() = 0;
-    virtual bool v02() = 0;
-    virtual bool v03() = 0;
-    virtual bool v04() = 0;
-    virtual bool v05() = 0;
-    virtual bool v06() = 0;
-    virtual bool v07() = 0;
-    virtual bool v08() = 0;
-    virtual bool v09() = 0;
-    virtual bool v10() = 0;
-    virtual bool v11() = 0;
-    virtual bool v12() = 0;
-    virtual bool v13() = 0;
-    virtual bool v14() = 0;
-    virtual bool v15() = 0;
-    virtual bool v16() = 0;
-    virtual bool v17() = 0;
-    virtual bool v18() = 0;
-    virtual bool v19() = 0;
-    virtual bool v20() = 0;
-    virtual bool v21() = 0;
-    virtual bool v22() = 0;
-    virtual bool v23() = 0;
-    virtual bool v24() = 0;
-    virtual bool v25() = 0;
-    virtual bool v26() = 0;
-    virtual bool v27() = 0;
-    virtual bool v28() = 0;
-    virtual bool v29() = 0;
-    virtual bool v30() = 0;
-    virtual bool v31() = 0;
-    virtual bool v32() = 0;
-    virtual bool v33() = 0;
-    virtual bool v34() = 0;
-    virtual bool v35() = 0;
-    virtual bool v36() = 0;
-    virtual bool v37() = 0;
-    virtual bool v38() = 0;
-    virtual bool v39() = 0;
-    virtual bool v40() = 0;
-    virtual bool v41() = 0;
-    virtual bool v42() = 0;
-    virtual bool v43() = 0;
-    virtual bool v44() = 0;
-    virtual bool v45() = 0;
-    virtual bool v46() = 0;
-    virtual bool v47() = 0;
-    virtual bool v48() = 0;
-    virtual bool v49() = 0;
-    virtual bool v50() = 0;
-    virtual bool v51() = 0;
-    virtual bool v52() = 0;
-    virtual bool v53() = 0;
-    virtual bool v54() = 0;
-    virtual bool v55() = 0;
-    virtual bool v56() = 0;
-    virtual bool v57() = 0;
-    virtual bool v58() = 0;
-    virtual bool v59() = 0;
-    virtual bool IsMobileObject() = 0;
-    virtual bool v61() = 0;
-    virtual bool v62() = 0;
-    virtual bool v63() = 0;
-    virtual bool v64() = 0;
-    virtual bool v65() = 0;
-    virtual bool v66() = 0;
-    virtual bool v67() = 0;
-    virtual bool v68() = 0;
-    virtual bool v69() = 0;
-    virtual bool v70() = 0;
-    virtual bool v71() = 0;
-    virtual bool v72() = 0;
-    virtual bool v73() = 0;
-    virtual bool v74() = 0;
-    virtual bool v75() = 0;
-    virtual char const* GetName() = 0;
-    unsigned int FNV_GetFormType() const;
-};
-
-struct MobileObject : TESForm
-{
-    char const* __thiscall GetFullName();
-};
-
-struct TESObjectREFR : MobileObject
-{
-};
-
-struct TESQuest
-{
-    virtual bool q00() = 0;
-    virtual bool q01() = 0;
-    virtual bool q02() = 0;
-    virtual bool q03() = 0;
-    virtual bool q04() = 0;
-    virtual bool q05() = 0;
-    virtual bool q06() = 0;
-    virtual bool q07() = 0;
-    virtual bool q08() = 0;
-    virtual bool q09() = 0;
-    virtual bool q10() = 0;
-    virtual bool q11() = 0;
-    virtual bool q12() = 0;
-    virtual bool q13() = 0;
-    virtual bool q14() = 0;
-    virtual bool q15() = 0;
-    virtual bool q16() = 0;
-    virtual bool q17() = 0;
-    virtual bool q18() = 0;
-    virtual bool q19() = 0;
-    virtual bool q20() = 0;
-    virtual bool q21() = 0;
-    virtual bool q22() = 0;
-    virtual bool q23() = 0;
-    virtual bool q24() = 0;
-    virtual bool q25() = 0;
-    virtual bool q26() = 0;
-    virtual bool q27() = 0;
-    virtual bool q28() = 0;
-    virtual bool q29() = 0;
-    virtual bool q30() = 0;
-    virtual bool q31() = 0;
-    virtual bool q32() = 0;
-    virtual bool q33() = 0;
-    virtual bool q34() = 0;
-    virtual bool q35() = 0;
-    virtual bool q36() = 0;
-    virtual bool q37() = 0;
-    virtual bool q38() = 0;
-    virtual bool q39() = 0;
-    virtual bool q40() = 0;
-    virtual bool q41() = 0;
-    virtual bool q42() = 0;
-    virtual bool q43() = 0;
-    virtual bool q44() = 0;
-    virtual bool q45() = 0;
-    virtual bool q46() = 0;
-    virtual bool q47() = 0;
-    virtual bool q48() = 0;
-    virtual bool q49() = 0;
-    virtual bool q50() = 0;
-    virtual bool q51() = 0;
-    virtual bool q52() = 0;
-    virtual bool q53() = 0;
-    virtual bool q54() = 0;
-    virtual bool q55() = 0;
-    virtual bool q56() = 0;
-    virtual bool q57() = 0;
-    virtual bool q58() = 0;
-    virtual bool q59() = 0;
-    virtual bool q60() = 0;
-    virtual bool q61() = 0;
-    virtual bool q62() = 0;
-    virtual bool q63() = 0;
-    virtual bool q64() = 0;
-    virtual bool q65() = 0;
-    virtual bool q66() = 0;
-    virtual bool q67() = 0;
-    virtual bool q68() = 0;
-    virtual bool q69() = 0;
-    virtual bool q70() = 0;
-    virtual bool q71() = 0;
-    virtual bool q72() = 0;
-    virtual bool q73() = 0;
-    virtual bool q74() = 0;
-    virtual bool q75() = 0;
-    virtual bool q76() = 0;
-    virtual bool q77() = 0;
-    virtual char const* GetName() = 0;
-};
-
-struct TESTopicInfo : TESForm
-{
-    TESQuest* __thiscall GetParentQuest();
-};
-
-struct TESFullName
-{
-    static char const* __cdecl GetFullName(TESForm*);
-};
 
 struct TaskQueueInterface
 {
@@ -488,7 +317,7 @@ struct FormNameEntry
 // @fnv 0x008536d0
 void __thiscall FormNameEntry::BuildFormName(char* apName, unsigned int aiNameSize)
 {
-    TESObjectREFR* pRefr;
+    MobileObject* pRefr;
     TESTopicInfo* pTopicInfo;
 
     if (!this->pForm)
@@ -497,7 +326,7 @@ void __thiscall FormNameEntry::BuildFormName(char* apName, unsigned int aiNameSi
         return;
     }
 
-    pRefr = this->pForm->IsMobileObject() ? static_cast<TESObjectREFR*>(this->pForm) : 0;
+    pRefr = this->pForm->GetIsReference() ? static_cast<MobileObject*>(this->pForm) : 0;
 
     if (pRefr)
     {
@@ -519,7 +348,7 @@ void __thiscall FormNameEntry::BuildFormName(char* apName, unsigned int aiNameSi
         {
         case 0x46:
             pTopicInfo = static_cast<TESTopicInfo*>(this->pForm);
-            TaskQueueInterface::CopyStringToBuffer(apName, aiNameSize, pTopicInfo->GetParentQuest()->GetName());
+            TaskQueueInterface::CopyStringToBuffer(apName, aiNameSize, pTopicInfo->GetParentQuest()->GetEditorName());
             break;
         }
     }
@@ -536,15 +365,7 @@ struct AEList
     void Insert(void*, int(__cdecl*)(void*, void*));
 };
 
-struct SL : public AEList
-{
-    SL();
-};
 
-struct DummyPointerMap
-{
-    bool GetAt(unsigned int, unsigned int&);
-};
 
 struct SetAtHelper
 {
@@ -679,36 +500,6 @@ FUN_008538b0::~FUN_008538b0()
 
 class B4B10Response;
 
-class B4B10Speaker
-{
-  public:
-    virtual void Unk_00();
-    virtual void Unk_01();
-    virtual void Unk_02();
-    virtual void Unk_03();
-    virtual void Unk_04();
-    virtual void Unk_05();
-    virtual void Unk_06();
-    virtual void Unk_07();
-    virtual void Unk_08();
-    virtual void Unk_09();
-    virtual void Unk_0A();
-    virtual void Unk_0B();
-    virtual void Unk_0C();
-    virtual void Unk_0D();
-    virtual void Unk_0E();
-    virtual void Unk_0F();
-    virtual void Unk_10();
-    virtual void Unk_11();
-    virtual void Unk_12();
-    virtual void Unk_13();
-    virtual void Unk_14();
-    virtual void OnResponseReady(B4B10Response* pkResponse);
-
-    void* GetVoiceType();
-    unsigned int GetFormType();
-};
-
 class B4B10DialogueManager
 {
   public:
@@ -721,27 +512,27 @@ class B4B10Response
   public:
     void Reset();
     void Init(void* pvVoiceType, int iTopic, unsigned int uiFormType, int m_uiSoundID);
-    void SetSpeaker(B4B10Speaker* pkSpeaker);
+    void SetSpeaker(TESForm* pkSpeaker);
 };
 
-void __cdecl B4B10SetupResponse(B4B10Response* pkResponse, B4B10Speaker* pkSpeaker, int iTopic);
+void __cdecl B4B10SetupResponse(B4B10Response* pkResponse, TESForm* pkSpeaker, int iTopic);
 
 class B4B10Dialogue
 {
   public:
-    void SetupResponse(B4B10Speaker* pkSpeaker, int iTopic, B4B10Response* pkResponse);
+    void SetupResponse(TESForm* pkSpeaker, int iTopic, B4B10Response* pkResponse);
 };
 
 // Resets and initialises the response from the speaker's voice type, form type and current dialogue ID, then sets the speaker and notifies it.
 // @fnv 0x00854b10
-void B4B10Dialogue::SetupResponse(B4B10Speaker* pkSpeaker, int iTopic, B4B10Response* pkResponse)
+void B4B10Dialogue::SetupResponse(TESForm* pkSpeaker, int iTopic, B4B10Response* pkResponse)
 {
     pkResponse->Reset();
-    pkResponse->Init(pkSpeaker->GetVoiceType(), iTopic, pkSpeaker->GetFormType(),
+    pkResponse->Init(reinterpret_cast<void*>(pkSpeaker->FUN_0084e3a0()), iTopic, static_cast<const TESForm*>(pkSpeaker)->FNV_GetFormType(),
                      g_pkB4B10DialogueManager->GetCurrentID());
     pkResponse->SetSpeaker(pkSpeaker);
     B4B10SetupResponse(pkResponse, pkSpeaker, iTopic);
-    pkSpeaker->OnResponseReady(pkResponse);
+    pkSpeaker->SaveGame(reinterpret_cast<BGSSaveFormBuffer*>(pkResponse));
 }
 
 struct SavedBuffer
@@ -781,10 +572,6 @@ struct SavedEntryMap
 {
     void* FUN_004b9ba0();
     void FUN_006b7f20(void*&, unsigned int&, SavedEntry*&);
-};
-struct BGSSaveLoadGame
-{
-    SavedEntryMap* FUN_00559450();
 };
 TESForm* __cdecl FUN_004839c0(unsigned int);
 bool __cdecl FUN_0084bcd0(unsigned int, SavedBuffer*);
@@ -843,96 +630,6 @@ int GameStrcpy(char* dst, unsigned int size, const char* src);
 int GameStrcat(char* dst, unsigned int size, const char* src);
 int FUN_00ecbf05(const char* path, int mode);
 
-struct BSFile
-{
-    int unk000;
-    int unk004;
-    int unk008;
-    int unk00C;
-    int unk010;
-    int unk014;
-    int unk018;
-    int unk01C;
-    int unk020;
-    int unk024;
-    int unk028;
-    int unk02C;
-    int unk030;
-    int unk034;
-    int unk038;
-    int unk03C;
-    int unk040;
-    int unk044;
-    int unk048;
-    int unk04C;
-    int unk050;
-    int unk054;
-    int unk058;
-    int unk05C;
-    int unk060;
-    int unk064;
-    int unk068;
-    int unk06C;
-    int unk070;
-    int unk074;
-    int unk078;
-    int unk07C;
-    int unk080;
-    int unk084;
-    int unk088;
-    int unk08C;
-    int unk090;
-    int unk094;
-    int unk098;
-    int unk09C;
-    int unk0A0;
-    int unk0A4;
-    int unk0A8;
-    int unk0AC;
-    int unk0B0;
-    int unk0B4;
-    int unk0B8;
-    int unk0BC;
-    int unk0C0;
-    int unk0C4;
-    int unk0C8;
-    int unk0CC;
-    int unk0D0;
-    int unk0D4;
-    int unk0D8;
-    int unk0DC;
-    int unk0E0;
-    int unk0E4;
-    int unk0E8;
-    int unk0EC;
-    int unk0F0;
-    int unk0F4;
-    int unk0F8;
-    int unk0FC;
-    int unk100;
-    int unk104;
-    int unk108;
-    int unk10C;
-    int unk110;
-    int unk114;
-    int unk118;
-    int unk11C;
-    int unk120;
-    int unk124;
-    int unk128;
-    int unk12C;
-    int unk130;
-    int unk134;
-    int unk138;
-    int unk13C;
-    int unk140;
-    int unk144;
-    int unk148;
-    int unk14C;
-    int unk150;
-    int unk154;
-    BSFile(const char* name, int mode, unsigned int bufferSize, bool textMode);
-};
 
 struct TextDumpWriter
 {
@@ -1003,80 +700,6 @@ struct xStats
     float GetAverage();
     int m_uiItemCount, m_data, m_overhead, m_pDebugAllocator, m_kMinimumCorner, m_kMaximumCorner;
 };
-struct xLevelHolder
-{
-    int GetLevel();
-};
-
-struct xForm
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual bool IsActorType();
-    virtual void v61();
-    virtual void v62();
-    virtual bool HasLevel();
-    xLevelHolder* GetLevelHolder();
-};
-
 struct xChangeFlags
 {
     bool Test(unsigned int) const;
@@ -1088,7 +711,7 @@ struct xChange
     unsigned int m_formID;
     xChangeFlags m_flags;
     unsigned int m_8, m_iThirdValue, m_10;
-    xForm* m_form;
+    TESForm* m_form;
     unsigned char m_ver;
     void Describe(char*, unsigned int);
     int GetSize();
@@ -1123,7 +746,7 @@ struct SaveLoadStatsDump
     void Write(const char*);
     void* GetFirstPos();
     void GetNext(void*&, unsigned int&, xNodeL*&);
-    void Measure(xForm*, xSizeArg, xSizer*);
+    void Measure(TESForm*, xSizeArg, xSizer*);
 };
 
 // Writes a formatted dump of save/load form stats, misc stats, and save game history via Write.
@@ -1160,7 +783,7 @@ void SaveLoadStatsDump::FUN_00853e10()
                 char qpia[0x3e8];
                 qpia[0] = *"";
                 _fnv_zlib_memset(qpia + 1, 0, sizeof(qpia) - 1);
-                xForm* qZWI;
+                TESForm* qZWI;
                 char qQGWBE[0x3e8];
                 int qkJsUdT;
                 char qIrY[0x3e8];
@@ -1174,15 +797,15 @@ void SaveLoadStatsDump::FUN_00853e10()
                     if (qkJsUdT)
                     {
                         xStrcpy(qQGWBE, 0x3e8, "Base");
-                        if (qJDuOZ->m_form->IsActorType())
+                        if (qJDuOZ->m_form->GetIsReference())
                         {
                             qZWI = qJDuOZ->m_form;
-                            if (qZWI->HasLevel())
+                            if (qZWI->IsMobileObject())
                             {
-                                xForm* qIpA = qZWI;
+                                MobileObject* qIpA = static_cast<MobileObject*>(qZWI);
                                 int qXMUYT = -1;
-                                if (qIpA->GetLevelHolder())
-                                    qXMUYT = qIpA->GetLevelHolder()->GetLevel();
+                                if (qIpA->FUN_008d8520())
+                                    qXMUYT = qIpA->FUN_008d8520()->FUN_0045cd60();
                                 switch (qXMUYT)
                                 {
                                 case -1:

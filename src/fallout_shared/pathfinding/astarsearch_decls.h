@@ -11,46 +11,18 @@
 
 
 #include "layout_support.h"
+#include "../../../include/BSWin32TaskletManager.h"
+#include "../../../include/NavMeshSearch.h"
+#include "../../../include/NavMeshTriangleEdgeReference.h"
+#include "../../../include/NavMeshTriangleReference.h"
 
-enum CREATE_ASTARNODE_RESULT
-{
-    CREATE_ASTARNODE_RESULT_ASTAR_CREATED_NEW_NODE = 0,
-    CREATE_ASTARNODE_RESULT_ASTAR_MUST_SET_LINKDATA = 1,
-    CREATE_ASTARNODE_RESULT_ASTAR_OLD_COST_IS_BETTER = 2
-};
-
-class NavMesh;
-class NavMeshTriangleReference;
-#pragma pack(push, 4)
-class NavMeshTriangleReference
-{
-  public:
-    NavMesh* m_pLocationNavMesh;            // +0x0, 4 bytes
-    unsigned short m_usTriangleIdentifier;  // +0x4, 2 bytes
-    unsigned char layoutPadding6[2];
-    float GetCenterX;  // +0x8, 4 bytes
-    float m_fCenterY;  // +0xC, 4 bytes
-    float m_fCenterZ;  // +0x10, 4 bytes
-};
-#pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NavMeshTriangleReference) == 20);
 FNV_STATIC_ASSERT(offsetof(NavMeshTriangleReference, m_pLocationNavMesh) == 0);
 FNV_STATIC_ASSERT(offsetof(NavMeshTriangleReference, m_usTriangleIdentifier) == 4);
-FNV_STATIC_ASSERT(offsetof(NavMeshTriangleReference, GetCenterX) == 8);
+FNV_STATIC_ASSERT(offsetof(NavMeshTriangleReference, m_fCenterX) == 8);
 FNV_STATIC_ASSERT(offsetof(NavMeshTriangleReference, m_fCenterY) == 12);
 FNV_STATIC_ASSERT(offsetof(NavMeshTriangleReference, m_fCenterZ) == 16);
 
-class NavMeshTriangleEdgeReference;
-#pragma pack(push, 4)
-class NavMeshTriangleEdgeReference
-{
-  public:
-    NavMesh* m_pLocationNavMesh;            // +0x0, 4 bytes
-    unsigned short m_usTriangleIdentifier;  // +0x4, 2 bytes
-    unsigned char layoutPadding6[2];
-    int m_iEdgeIndex;  // +0x8, 4 bytes
-};
-#pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(NavMeshTriangleEdgeReference) == 12);
 FNV_STATIC_ASSERT(offsetof(NavMeshTriangleEdgeReference, m_pLocationNavMesh) == 0);
 FNV_STATIC_ASSERT(offsetof(NavMeshTriangleEdgeReference, m_usTriangleIdentifier) == 4);
@@ -123,32 +95,15 @@ template <class BoundingVolumeNode, class TLink> class AStarConnectionArray
     unsigned int m_uiData4;
 };
 
-template <class BoundingVolumeNode, class TLink> class AStarSearch
-{
-  public:
-    virtual ~AStarSearch();
-    AStarNodeAllocator<BoundingVolumeNode, TLink> m_kNodeAllocator;  // +0x4
-    AStarNodeHashTable<BoundingVolumeNode, TLink> m_kNodeHashTable;  // +0x14
-    AStarOpenList<BoundingVolumeNode, TLink> AStarBucketQueue;       // +0x1FF4
-    AStarNode<BoundingVolumeNode, TLink>* m_pFirstNode;              // +0x2048
-    AStarNode<BoundingVolumeNode, TLink>* m_pCurrentNode;            // +0x204C
-    AStarNode<BoundingVolumeNode, TLink>* m_pLastCreatedNode;        // +0x2050
-    bool m_bUseBestNode;                                             // +0x2054
-    unsigned char m_Padding2055[3];
+// Select the exe concrete layouts after their private storage types are complete.
+#define FNV64_ASTARSEARCH_STORED_SPECIALIZATIONS
+#include "../../../include/AStarSearch.h"
+#undef FNV64_ASTARSEARCH_STORED_SPECIALIZATIONS
+// The shared primary template also serves the distinct NavMeshSearchNode instantiation.
 
-    virtual void CollectConnections(AStarNode<BoundingVolumeNode, TLink>* pNode,
-                                    AStarConnectionArray<BoundingVolumeNode, TLink>* pConnectionArray);
-    virtual bool HasReachedGoal(AStarNode<BoundingVolumeNode, TLink>* pNode);
 
-    CREATE_ASTARNODE_RESULT CreateOrUpdateNode(unsigned int uiKey, float m_fPathingCostCur,
-                                               AStarNode<BoundingVolumeNode, TLink>*& pNodeOut);
-    AStarNode<BoundingVolumeNode, TLink>* FindOrCreateSearchNode(unsigned int uiKey,
-                                                                 const BoundingVolumeNode& ObjectResolver,
-                                                                 float m_fCost);
-    AStarNode<BoundingVolumeNode, TLink>* ComputePath();
-    bool FUN_006a8290(AStarNode<BoundingVolumeNode, TLink>* pNode, unsigned int uiParam1, unsigned int uiParam2);
-    bool Search(unsigned int uiParam1, unsigned int uiParam2, bool bUseBestNode);
-};
+
+
 
 typedef AStarNode<NavMeshTriangleReference, NavMeshTriangleEdgeReference> NavMeshAStarNode;
 typedef AStarNode<AStarNodeData*, AStarNodeLink*> CombatPlanAStarNode;
@@ -166,30 +121,7 @@ FNV_STATIC_ASSERT(offsetof(NavMeshAStarSearch, m_pFirstNode) == 0x2048);
 FNV_STATIC_ASSERT(offsetof(NavMeshAStarSearch, m_pLastCreatedNode) == 0x2050);
 FNV_STATIC_ASSERT(offsetof(NavMeshAStarSearch, m_bUseBestNode) == 0x2054);
 
-// Tasklet manager behind GetTaskletManager. Slots 0-2 are unrecovered
-// (never called by the matched functions); slot 3 takes the
-// a tasklet. Exact extent unrecovered; size is not observable here.
-class BSWin32TaskletManager
-{
-  public:
-    BSWin32TaskletManager(unsigned int uiThreadCount);
-    ~BSWin32TaskletManager();
-    virtual void LockTasklets();
-    virtual void UnlockTasklets();
-    virtual void WaitForTasklets();
-    virtual bool TryRunAsTasklet(unsigned int uiThreadId);
-
-  private:
-    unsigned char m_Data[64];
-};
-
 unsigned int gm_GetCurrentThreadId();
-
-class NavMeshSearch
-{
-  public:
-    int CreateOrUpdateNode(unsigned int, float, NavMeshAStarNode*&);
-};
 
 void FUN_0040fca0(unsigned long);
 #endif

@@ -1,9 +1,11 @@
 // fallout/misc/calendar.cpp: Calendar, CalendarProxy, CalendarDateFormatter, Thing (17 functions)
 
+#include "../../../include/BSSimpleArray.h"
 #include "calendar_types_CALENDAR_MONTH.h"
 #include "calendar_types_DAYS_OF_THE_WEEK.h"
 #include "calendar_types_Calendar.h"
 #include "calendar_decls.h"
+#include "../../../include/StartMenu.h"
 
 // @fnv 0x0086a460
 char Calendar::GetGameHour()
@@ -164,10 +166,6 @@ void __fastcall FUN_00867a20(void* aThis)
     *(char*)((char*)aThis + 0x1C) = 1;
 }
 
-struct StartMenu
-{
-    const char* GetMenuTitle();
-};
 extern StartMenu* DAT_011895b8[7];
 struct CalendarProxy : public Calendar
 {
@@ -180,7 +178,7 @@ const char* CalendarProxy::GetDayName()
     DAYS_OF_THE_WEEK eday;
     eday = GetGameDayOfWeek();
     if (eday != DAYS_OF_THE_WEEK_DAY_NONE && eday < DAYS_OF_THE_WEEK_DAY_COUNT)
-        return DAT_011895b8[eday]->GetMenuTitle();
+        return static_cast<const StartMenu*>(DAT_011895b8[eday])->GetMenuTitle();
     return "Bad Day";
 }
 

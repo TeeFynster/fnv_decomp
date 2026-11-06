@@ -1,6 +1,46 @@
+#include "../../include/ImageSpaceTexture.h"
 // bsshader/tallgrassshader.cpp: TallGrassShader, Self, ShaderRegister, TallGrassPrograms and more (25 functions)
 
 #include "tallgrassshader_decls.h"
+#include "../../include/BSFadeNode.h"
+#include "../../include/BSShader.h"
+#include "../../include/AutoMemContext.h"
+#include "../../include/NiPoint3.h"
+// In-class bodies of the former Point stand-in.
+__forceinline NiPoint3::NiPoint3(float px, float py, float pz) : x(px), y(py), z(pz)
+{}
+inline NiPoint3 NiPoint3::operator-() const
+{
+    return NiPoint3(-x, -y, -z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float scalar) const
+{
+    return NiPoint3(scalar * x, scalar * y, scalar * z);
+}
+__forceinline NiPoint3 NiPoint3::operator/(float scalar) const
+{
+    float inverse = 1.0f / scalar;
+    return NiPoint3(x * inverse, y * inverse, z * inverse);
+}
+inline bool NiPoint3::operator==(const NiPoint3& other) const
+{
+    return other.x == x && other.y == y && other.z == z;
+}
+#include "../../include/NiDX9Renderer.h"
+
+extern __declspec(thread) int gShaderAllocationContext;
+
+inline AutoMemContext::AutoMemContext(int context)
+{
+    m_eMemoryContext = static_cast<MEM_CONTEXT>(gShaderAllocationContext);
+    gShaderAllocationContext = context;
+}
+
+inline AutoMemContext::~AutoMemContext()
+{
+    gShaderAllocationContext = m_eMemoryContext;
+}
+
 // Creates the constants object with the given count (defaulting to 5 when count is -1) if it does not already exist.
 // @fnv 0x00ba95e0
 void TallGrassShader::InitializeConstants(unsigned int count)
@@ -191,16 +231,16 @@ void __fastcall FUN_00ba9230(void** self, int)
     g_memoryManager.Deallocate(p);
 }
 
-struct BSFadeNode
+struct FUN_00ba8e50
 {
-    static void* operator new(unsigned int);
-};
-struct FUN_00ba8e50 : BSFadeNode
-{
+    static __forceinline void* operator new(unsigned int size)
+    {
+        return BSFadeNode::operator new(size);
+    }
     int pad[24];
     FUN_00ba8e50();
 };
-// Allocates and constructs a new FUN_00ba8e50 (BSFadeNode-derived) object, returning the pointer.
+// Allocates and constructs a new property object, returning the pointer.
 // @fnv 0x00ba9250
 FUN_00ba8e50* FUN_00ba9250()
 {
@@ -442,12 +482,7 @@ void* __fastcall FUN_00baced0(void* self, int, unsigned int flags)
 }
 
 struct NiTexture;
-struct ImageSpaceTexture
-{
-    NiTexture* GetTexture() const;
-    void AddRenderedTexture();
-    void FUN_00ba38b0();
-};
+
 extern ImageSpaceTexture DAT_012005a4;
 // @fnv 0x00bad4a0
 void FUN_00bad4a0()
@@ -483,32 +518,14 @@ struct RefPtr_bacd00
     {
         if (m_pObject != pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = pObject;
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->IncRefCount();
         }
         return *this;
     }
-};
-class NiD3DPass;
-class NiD3DPixelShader;
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-    NiPointer();
-    ~NiPointer();
-};
-struct BSShader
-{
-    BSShader();
-    virtual ~BSShader();
-    char pad04[0x24];
-    RefPtr_bacd00 m_spDecl;
-    char pad2c[0x3c];
-    int m_i68;
 };
 struct V4_bacd00
 {
@@ -553,8 +570,8 @@ struct FUN_00bacd00 : BSShader
 FUN_00bacd00::FUN_00bacd00(RefObj_bacd00* pDecl)
     : m_k1(0.0f, 0.0f, 0.0f, 0.0f), m_k2(0.0f, 0.0f, 0.0f, 0.0f), m_k3(0.0f, 0.0f, 0.0f, 0.0f)
 {
-    m_i68 = 6;
-    m_spDecl = pDecl;
+    iShaderType = 6;
+    reinterpret_cast<RefPtr_bacd00&>(m_spShaderDecl) = pDecl;
     m_f11c = 0.0f;
     DAT_01200570 = DAT_011a9bd0;
     if (_fnv_particle_shader_renderer_level >= 2)
@@ -565,8 +582,8 @@ FUN_00bacd00::FUN_00bacd00(RefObj_bacd00* pDecl)
     m_i1a8 = 0;
 }
 
+class NiRenderer;
 namespace fnv_00bacf00 {
-struct NiRenderer;
 struct NiD3DVertexDeclaration
 {
     virtual void d0();
@@ -619,22 +636,12 @@ struct NiD3DVertexDeclaration
     static NiD3DVertexDeclaration* Create(NiRenderer*, unsigned int, unsigned int);
 };
 extern NiRenderer* DAT_011f9508;
-extern __declspec(thread) int QMemContextTls[0x2b8 / 4];
-struct QAutoMemContext
+struct FUN_00bacd00
 {
-    int m_eMemoryContext;
-    QAutoMemContext(int iNew)
+    static __forceinline void* operator new(unsigned int size)
     {
-        m_eMemoryContext = QMemContextTls[0x2b4 / 4];
-        QMemContextTls[0x2b4 / 4] = iNew;
+        return BSFadeNode::operator new(size);
     }
-    ~QAutoMemContext()
-    {
-        QMemContextTls[0x2b4 / 4] = m_eMemoryContext;
-    }
-};
-struct FUN_00bacd00 : BSFadeNode
-{
     virtual void s0();
     virtual void s1();
     virtual void s2();
@@ -722,7 +729,7 @@ struct FUN_00bacd00 : BSFadeNode
 // @fnv 0x00bacf00
 FUN_00bacd00* CreateShaderFadeNode()
 {
-    QAutoMemContext tempMemContext(0x1c);
+    AutoMemContext tempMemContext(0x1c);
     NiD3DVertexDeclaration* m_pVertexDeclaration1 = NiD3DVertexDeclaration::Create(DAT_011f9508, 5, 1);
     m_pVertexDeclaration1->SetEntry(0, 0, 0, 2, 0);
     m_pVertexDeclaration1->SetEntry(1, 3, 3, 2, 0);
@@ -942,30 +949,6 @@ FUN_00ba9520::~FUN_00ba9520()
     unk10 = &DAT_00ffdead;
 }
 
-namespace fnv_anon_00bad060 {}
-using namespace fnv_anon_00bad060;
-namespace fnv_anon_00bad060 {
-struct TLS_bad060
-{
-    char pad[0x2b4];
-    int m_iThreadLocalValue;
-};
-}
-extern __declspec(thread) TLS_bad060 tls_bad060;
-
-struct AutoMemContext_bad060
-{
-    int m_eOldContext;
-    AutoMemContext_bad060(int aeMemoryContext)
-    {
-        m_eOldContext = tls_bad060.m_iThreadLocalValue;
-        tls_bad060.m_iThreadLocalValue = aeMemoryContext;
-    }
-    ~AutoMemContext_bad060()
-    {
-        tls_bad060.m_iThreadLocalValue = m_eOldContext;
-    }
-};
 
 void __cdecl FUN_00e804d0(void*);
 
@@ -979,7 +962,7 @@ struct Shader_bad060 : BSShader
 // @fnv 0x00bad060
 bool Shader_bad060::FUN_00bad060()
 {
-    AutoMemContext_bad060 kContext(0x1c);
+    AutoMemContext kContext(0x1c);
     for (int i = 0; i < 0x2c; ++i)
     {
         FUN_00e804d0(&m_aspPass[i]);
@@ -988,24 +971,11 @@ bool Shader_bad060::FUN_00bad060()
     return true;
 }
 
-extern __declspec(thread) int gShaderAllocationContext;
 extern "C" void* __cdecl FUN_00aa13e0(unsigned int);
 extern "C" char DAT_010a1e50, DAT_010af648, DAT_01011584;
 extern "C" char DAT_010b8c54, DAT_010b8c48, DAT_010b8c34, DAT_010b8c24;
 extern "C" char DAT_010b8c10, DAT_010b8bfc, DAT_010b8bec;
 extern "C" char DAT_011fd884, DAT_011fa280, DAT_011fa290, DAT_01200510;
-struct AllocationScope
-{
-    int previous;
-    AllocationScope() : previous(gShaderAllocationContext)
-    {
-        gShaderAllocationContext = 28;
-    }
-    ~AllocationScope()
-    {
-        gShaderAllocationContext = previous;
-    }
-};
 struct ShaderVariableMap : RefObj_bacd00
 {
     ShaderVariableMap(void* context, int mode);
@@ -1029,7 +999,7 @@ struct ShaderRegister
 // @fnv 0x00bad100
 void ShaderRegister::InitializeShaderVariableMaps()
 {
-    AllocationScope allocScope;
+    AutoMemContext allocScope(28);
     RefPtr_bacd00& mainGroup = *reinterpret_cast<RefPtr_bacd00*>(reinterpret_cast<char*>(this) + 0x34);
     RefPtr_bacd00& extraGroup = *reinterpret_cast<RefPtr_bacd00*>(reinterpret_cast<char*>(this) + 0x30);
     if (!mainGroup.m_pObject)
@@ -1111,91 +1081,6 @@ struct Matrix215
 {
     float elements[4][4];
 };
-struct Renderer215
-{
-    unsigned unknown000, unknown004, unknown008, unknown00c, unknown010, unknown014, unknown018, unknown01c;
-    unsigned unknown020, unknown024, unknown028, unknown02c, unknown030, unknown034, unknown038, unknown03c;
-    unsigned unknown040, unknown044, unknown048, unknown04c, unknown050, unknown054, unknown058, unknown05c;
-    unsigned unknown060, unknown064, unknown068, unknown06c, unknown070, unknown074, unknown078, unknown07c;
-    unsigned unknown080, unknown084, unknown088, unknown08c, unknown090, unknown094, unknown098, unknown09c;
-    unsigned unknown0a0, unknown0a4, unknown0a8, unknown0ac, unknown0b0, unknown0b4, unknown0b8, unknown0bc;
-    unsigned unknown0c0, unknown0c4, unknown0c8, unknown0cc, unknown0d0, unknown0d4, unknown0d8, unknown0dc;
-    unsigned unknown0e0, unknown0e4, unknown0e8, unknown0ec, unknown0f0, unknown0f4, unknown0f8, unknown0fc;
-    unsigned unknown100, unknown104, unknown108, unknown10c, unknown110, unknown114, unknown118, unknown11c;
-    unsigned unknown120, unknown124, unknown128, unknown12c, unknown130, unknown134, unknown138, unknown13c;
-    unsigned unknown140, unknown144, unknown148, unknown14c, unknown150, unknown154, unknown158, unknown15c;
-    unsigned unknown160, unknown164, unknown168, unknown16c, unknown170, unknown174, unknown178, unknown17c;
-    unsigned unknown180, unknown184, unknown188, unknown18c, unknown190, unknown194, unknown198, unknown19c;
-    unsigned unknown1a0, unknown1a4, unknown1a8, unknown1ac, unknown1b0, unknown1b4, unknown1b8, unknown1bc;
-    unsigned unknown1c0, unknown1c4, unknown1c8, unknown1cc, unknown1d0, unknown1d4, unknown1d8, unknown1dc;
-    unsigned unknown1e0, unknown1e4, unknown1e8, unknown1ec, unknown1f0, unknown1f4, unknown1f8, unknown1fc;
-    unsigned unknown200, unknown204, unknown208, unknown20c, unknown210, unknown214, unknown218, unknown21c;
-    unsigned unknown220, unknown224, unknown228, unknown22c, unknown230, unknown234, unknown238, unknown23c;
-    unsigned unknown240, unknown244, unknown248, unknown24c, unknown250, unknown254, unknown258, unknown25c;
-    unsigned unknown260, unknown264, unknown268, unknown26c, unknown270, unknown274, unknown278, unknown27c;
-    unsigned unknown280, unknown284, unknown288, unknown28c, unknown290, unknown294, unknown298, unknown29c;
-    unsigned unknown2a0, unknown2a4, unknown2a8, unknown2ac, unknown2b0, unknown2b4, unknown2b8, unknown2bc;
-    unsigned unknown2c0, unknown2c4, unknown2c8, unknown2cc, unknown2d0, unknown2d4, unknown2d8, unknown2dc;
-    unsigned unknown2e0, unknown2e4, unknown2e8, unknown2ec, unknown2f0, unknown2f4, unknown2f8, unknown2fc;
-    unsigned unknown300, unknown304, unknown308, unknown30c, unknown310, unknown314, unknown318, unknown31c;
-    unsigned unknown320, unknown324, unknown328, unknown32c, unknown330, unknown334, unknown338, unknown33c;
-    unsigned unknown340, unknown344, unknown348, unknown34c, unknown350, unknown354, unknown358, unknown35c;
-    unsigned unknown360, unknown364, unknown368, unknown36c, unknown370, unknown374, unknown378, unknown37c;
-    unsigned unknown380, unknown384, unknown388, unknown38c, unknown390, unknown394, unknown398, unknown39c;
-    unsigned unknown3a0, unknown3a4, unknown3a8, unknown3ac, unknown3b0, unknown3b4, unknown3b8, unknown3bc;
-    unsigned unknown3c0, unknown3c4, unknown3c8, unknown3cc, unknown3d0, unknown3d4, unknown3d8, unknown3dc;
-    unsigned unknown3e0, unknown3e4, unknown3e8, unknown3ec, unknown3f0, unknown3f4, unknown3f8, unknown3fc;
-    unsigned unknown400, unknown404, unknown408, unknown40c, unknown410, unknown414, unknown418, unknown41c;
-    unsigned unknown420, unknown424, unknown428, unknown42c, unknown430, unknown434, unknown438, unknown43c;
-    unsigned unknown440, unknown444, unknown448, unknown44c, unknown450, unknown454, unknown458, unknown45c;
-    unsigned unknown460, unknown464, unknown468, unknown46c, unknown470, unknown474, unknown478, unknown47c;
-    unsigned unknown480, unknown484, unknown488, unknown48c, unknown490, unknown494, unknown498, unknown49c;
-    unsigned unknown4a0, unknown4a4, unknown4a8, unknown4ac, unknown4b0, unknown4b4, unknown4b8, unknown4bc;
-    unsigned unknown4c0, unknown4c4, unknown4c8, unknown4cc, unknown4d0, unknown4d4, unknown4d8, unknown4dc;
-    unsigned unknown4e0, unknown4e4, unknown4e8, unknown4ec, unknown4f0, unknown4f4, unknown4f8, unknown4fc;
-    unsigned unknown500, unknown504, unknown508, unknown50c, unknown510, unknown514, unknown518, unknown51c;
-    unsigned unknown520, unknown524, unknown528, unknown52c, unknown530, unknown534, unknown538, unknown53c;
-    unsigned unknown540, unknown544, unknown548, unknown54c, unknown550, unknown554, unknown558, unknown55c;
-    unsigned unknown560, unknown564, unknown568, unknown56c, unknown570, unknown574, unknown578, unknown57c;
-    unsigned unknown580, unknown584, unknown588, unknown58c, unknown590, unknown594, unknown598, unknown59c;
-    unsigned unknown5a0, unknown5a4, unknown5a8, unknown5ac, unknown5b0, unknown5b4, unknown5b8, unknown5bc;
-    unsigned unknown5c0, unknown5c4, unknown5c8, unknown5cc, unknown5d0, unknown5d4, unknown5d8, unknown5dc;
-    unsigned unknown5e0, unknown5e4, unknown5e8, unknown5ec, unknown5f0, unknown5f4, unknown5f8, unknown5fc;
-    unsigned unknown600, unknown604, unknown608, unknown60c, unknown610, unknown614, unknown618, unknown61c;
-    unsigned unknown620, unknown624, unknown628, unknown62c, unknown630, unknown634, unknown638, unknown63c;
-    unsigned unknown640, unknown644, unknown648, unknown64c, unknown650, unknown654, unknown658, unknown65c;
-    unsigned unknown660, unknown664, unknown668, unknown66c, unknown670, unknown674, unknown678, unknown67c;
-    unsigned unknown680, unknown684, unknown688, unknown68c, unknown690, unknown694, unknown698, unknown69c;
-    unsigned unknown6a0, unknown6a4, unknown6a8, unknown6ac, unknown6b0, unknown6b4, unknown6b8, unknown6bc;
-    unsigned unknown6c0, unknown6c4, unknown6c8, unknown6cc, unknown6d0, unknown6d4, unknown6d8, unknown6dc;
-    unsigned unknown6e0, unknown6e4, unknown6e8, unknown6ec, unknown6f0, unknown6f4, unknown6f8, unknown6fc;
-    unsigned unknown700, unknown704, unknown708, unknown70c, unknown710, unknown714, unknown718, unknown71c;
-    unsigned unknown720, unknown724, unknown728, unknown72c, unknown730, unknown734, unknown738, unknown73c;
-    unsigned unknown740, unknown744, unknown748, unknown74c, unknown750, unknown754, unknown758, unknown75c;
-    unsigned unknown760, unknown764, unknown768, unknown76c, unknown770, unknown774, unknown778, unknown77c;
-    unsigned unknown780, unknown784, unknown788, unknown78c, unknown790, unknown794, unknown798, unknown79c;
-    unsigned unknown7a0, unknown7a4, unknown7a8, unknown7ac, unknown7b0, unknown7b4, unknown7b8, unknown7bc;
-    unsigned unknown7c0, unknown7c4, unknown7c8, unknown7cc, unknown7d0, unknown7d4, unknown7d8, unknown7dc;
-    unsigned unknown7e0, unknown7e4, unknown7e8, unknown7ec, unknown7f0, unknown7f4, unknown7f8, unknown7fc;
-    unsigned unknown800, unknown804, unknown808, unknown80c, unknown810, unknown814, unknown818, unknown81c;
-    unsigned unknown820, unknown824, unknown828, unknown82c, unknown830, unknown834, unknown838, unknown83c;
-    unsigned unknown840, unknown844, unknown848, unknown84c, unknown850, unknown854, unknown858, unknown85c;
-    unsigned unknown860, unknown864, unknown868, unknown86c, unknown870, unknown874, unknown878, unknown87c;
-    unsigned unknown880, unknown884, unknown888, unknown88c, unknown890, unknown894, unknown898, unknown89c;
-    unsigned unknown8a0, unknown8a4, unknown8a8, unknown8ac, unknown8b0, unknown8b4, unknown8b8, unknown8bc;
-    unsigned unknown8c0, unknown8c4, unknown8c8, unknown8cc, unknown8d0, unknown8d4, unknown8d8, unknown8dc;
-    unsigned unknown8e0, unknown8e4, unknown8e8, unknown8ec, unknown8f0, unknown8f4, unknown8f8, unknown8fc;
-    unsigned unknown900, unknown904, unknown908, unknown90c, unknown910, unknown914, unknown918, unknown91c;
-    unsigned unknown920, unknown924, unknown928, unknown92c, unknown930, unknown934, unknown938, unknown93c;
-    unsigned unknown940, unknown944, unknown948, unknown94c, unknown950, unknown954, unknown958, unknown95c;
-    unsigned unknown960, unknown964, unknown968, unknown96c, unknown970, unknown974, unknown978, unknown97c;
-    Matrix215 first;
-    Matrix215 second;
-};
-struct Point215
-{
-    float x, y, z;
-};
 struct Source215
 {
     unsigned unknown00, unknown04, unknown08, unknown0c, unknown10, unknown14, unknown18, unknown1c;
@@ -1209,20 +1094,20 @@ struct Source215
     float z;
 };
 extern bool DAT_0120045c, DAT_0120045d, DAT_0120045e, DAT_011adcdc;
-extern Renderer215* DAT_011f9508;
+extern NiDX9Renderer* DAT_011f9508;
 extern Matrix215 DAT_01200470, DAT_012004b0;
-extern Point215 DAT_012004f0;
+extern NiPoint3 DAT_012004f0;
 // If neither flag is set, copies the renderer's two matrices and the source's x/y/z point into globals and sets DAT_0120045e true and DAT_011adcdc false.
 // @fnv 0x00ba9420
 void FUN_00ba9420(const Source215* source)
 {
     if (!DAT_0120045c && !DAT_0120045d)
     {
-        DAT_01200470 = DAT_011f9508->first;
-        DAT_012004b0 = DAT_011f9508->second;
+        DAT_01200470 = *reinterpret_cast<const Matrix215*>(DAT_011f9508->kD3DView);
+        DAT_012004b0 = *reinterpret_cast<const Matrix215*>(DAT_011f9508->kD3DProj);
         DAT_0120045e = true;
         DAT_011adcdc = false;
-        Point215 point = {source->x, source->y, source->z};
+        NiPoint3 point(source->x, source->y, source->z);
         DAT_012004f0 = point;
     }
 }
@@ -2321,21 +2206,6 @@ struct StagePtr_c160
             object->DecRefCount();
     }
 };
-struct Scope_c160
-{
-    int previous;
-    TLS_bad060* tls;
-    Scope_c160()
-    {
-        tls = &tls_bad060;
-        previous = tls->m_iThreadLocalValue;
-        tls->m_iThreadLocalValue = 28;
-    }
-    ~Scope_c160()
-    {
-        tls->m_iThreadLocalValue = previous;
-    }
-};
 struct Pass_c160
 {
     unsigned int unk00;
@@ -2384,7 +2254,7 @@ struct Shader_c160 : BSShader
 // @fnv 0x00bac160
 void Shader_c160::ConfigureBeamPasses()
 {
-    AutoMemContext_bad060 scope(28);
+    AutoMemContext scope(28);
     StagePtr_c160 stage;
     int i;
     for (i = 0; i <= 19; ++i)
@@ -2537,7 +2407,6 @@ void Shader_c160::ConfigureBeamPasses()
 }
 
 #include <math.h>
-struct NiBound;
 struct GeomSub
 {
     int unk00;
@@ -2748,24 +2617,6 @@ struct PassHandler
                          NiBound* bound, int zero3, int one);
 };
 
-struct BSShaderFields
-{
-    void* vtable;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    RefPtr_bacd00 m_spDecl;
-    int unk2c;
-    PassHandler* unk30;
-    PassHandler* unk34;
-};
-
 struct BloodSplatterShader
 {
     int unk00;
@@ -2905,8 +2756,7 @@ void BSParticleShader::SetShaderParams(Param1* p1)
         FUN_00b97f20((p1->unk00->word18 >> 10) & 7, p1->unk00->byte1A, 0);
     }
 
-    BSShaderFields* fields = (BSShaderFields*)this;
-    PassHandler* pass = fields->unk30;
+    PassHandler* pass = reinterpret_cast<PassHandler*>(m_spPixelConstantMap.m_pObject);
     if (pass)
     {
         int unk44 = ((BloodSplatterShader*)DAT_0126f74c)->unk44;
@@ -2915,7 +2765,7 @@ void BSParticleShader::SetShaderParams(Param1* p1)
             pass->vfunc30(unk44, geom, unkBC, 0, unk34, p1, 0, &geom->m_kWorldSpaceTransform, bound, 0, 1);
         }
     }
-    pass = fields->unk34;
+    pass = reinterpret_cast<PassHandler*>(m_spVertexConstantMap.m_pObject);
     if (pass)
     {
         int unk5c = ((BloodSplatterShader*)DAT_0126f74c)->unk5c;

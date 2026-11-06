@@ -1,19 +1,15 @@
+#include "../../include/BGSMusicType.h"
 // fallout_shared/bgsmusictype.cpp: BGSMusicType, MusicTypeDeletion, MusicTypeWriter, MusicTypeCopyEntry and more (8 functions)
 
-#define BSSimpleList BSSimpleListWithoutItemsInList
+#define FNV_TESFILE_H  // the shared TESFile below replaces layout_support.h's stub
+#include "../../include/NiFile.h"
 #include "music_local.h"
-#undef BSSimpleList
 #include <malloc.h>
-
-template <class T> struct BSSimpleList
-{
-    bool IsEmpty();
-    unsigned int ItemsInList();
-};
+#include "../../include/TESFile.h"
 
 // Loads a music type record: reads the header, then handles EDID, OBND, FNAM and ANAM chunks until no more chunks remain, returning true.
 // @fnv 0x00591550
-bool BGSMusicType::Load(TESFile* file)
+bool BGSMusicType::LoadForm(TESFile* file)
 {
     int iChunkID;
     unsigned int size = 0;
@@ -35,7 +31,7 @@ bool BGSMusicType::Load(TESFile* file)
         case 0x4d414e46: {
             char* soundFile = static_cast<char*>(_alloca(file->GetChunkSize()));
             file->GetChunkData(soundFile, 0);
-            SetSoundFile(soundFile);
+            SetSoundFile(static_cast<const char*>(soundFile));
             break;
         }
         case 0x4d414e41: {
@@ -77,7 +73,7 @@ void BGSMusicType::InitItem()
             soundFileNames.name = GetSoundFile();
             char fullPath[260];
             sprintf_s(fullPath, 260, "%s\\%s", "Data\\Music", soundFileNames.name);
-            SetSoundFile(fullPath);
+            SetSoundFile(static_cast<const char*>(fullPath));
         }
     }
     m_uiSelectedSoundIndex =
@@ -102,19 +98,11 @@ void* MusicTypeDeletion::FUN_005912a0(unsigned int flags)
     return this;
 }
 
-class MusicType_00591320 : public TESForm, public TESSoundFile
-{
-  public:
-    float fVolumeScale;
-    BSSimpleListWithoutItemsInList<BGSMusicType::MusicTrack*> m_kMusicFiles;
-    unsigned int m_uiSelectedSoundIndex;
-    void FUN_005913b0();
-    virtual ~MusicType_00591320();
-};
 
-// Destructor for MusicType_00591320 that calls FUN_005913b0 to perform cleanup.
+
+// Destructor for BGSMusicType that calls FUN_005913b0 to perform cleanup.
 // @fnv 0x00591320
-MusicType_00591320::~MusicType_00591320()
+BGSMusicType::~BGSMusicType()
 {
     FUN_005913b0();
 }

@@ -1,8 +1,11 @@
 // fallout_shared/mapmarkerdata.cpp: MapMarkerData, MapMarkerCompare, StringHolder (7 functions)
 
+#define FNV_TESFILE_H  // the shared TESFile below replaces layout_support.h's stub
+#include "../../include/NiFile.h"
 #include "layout_support.h"
-#include "TESFullName.h"
+#include "../../include/TESFullName.h"
 #include "TESFile.h"
+#include "../../include/TESFile.h"
 
 class TESReputation;
 

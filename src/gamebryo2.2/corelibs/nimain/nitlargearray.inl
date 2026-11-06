@@ -2,6 +2,7 @@
 #include "nitlargearray_decls.h"
 
 // @fnv 0x00486b80
+template <>
 TESTopicInfo* NiTLargeArray<TESTopicInfo*, NiTMallocInterface<TESTopicInfo*> >::RemoveAt(unsigned int index)
 {
     if (index >= m_uiSize)
@@ -17,6 +18,7 @@ TESTopicInfo* NiTLargeArray<TESTopicInfo*, NiTMallocInterface<TESTopicInfo*> >::
 
 #pragma optimize("gty", on)
 // @fnv 0x00a64250
+template <>
 void NiTLargeArray<unsigned int, NiTMallocInterface<unsigned int> >::RemoveAll()
 {
     register NiTLargeArray<unsigned int, NiTMallocInterface<unsigned int> >* array = this;
@@ -41,6 +43,7 @@ void NiTLargeArray<unsigned int, NiTMallocInterface<unsigned int> >::RemoveAll()
 
 #pragma optimize("", off)
 // @fnv 0x00864240
+template <>
 unsigned int NiTLargeArray<unsigned int, NiTMallocInterface<unsigned int> >::SetAtGrow(unsigned int index, const unsigned int& value)
 {
     if (index >= m_uiMaxSize)
@@ -67,10 +70,11 @@ void NiFormArray::SetSize(unsigned int index, unsigned int* value)
     {
         --m_uiESize;
     }
-    m_pBase[index] = *value;
+    m_pBase[index] = reinterpret_cast<TESForm*>(*value);
 }
 
 // @fnv 0x0061bdc0
+template <>
 void NiTLargeArray<TESTopicInfo*, NiTMallocInterface<TESTopicInfo*> >::Compact()
 {
     if (m_uiESize == m_uiSize)
@@ -94,7 +98,7 @@ void NiTLargeArray<TESTopicInfo*, NiTMallocInterface<TESTopicInfo*> >::Compact()
     m_uiMaxSize = m_uiSize;
     if (m_uiMaxSize > 0)
     {
-        m_pBase = reinterpret_cast<TESTopicInfo**>(reinterpret_cast<ActorCombatGroup** (__cdecl*)(unsigned int)>(&NiTMallocInterface<ActorCombatGroup*>::Allocate)(m_uiMaxSize));
+        m_pBase = NiTMallocInterface<TESTopicInfo*>::Allocate(m_uiMaxSize);
         for (unsigned int index = 0; index < m_uiSize; ++index)
             m_pBase[index] = oldBase[index];
     }
@@ -102,12 +106,14 @@ void NiTLargeArray<TESTopicInfo*, NiTMallocInterface<TESTopicInfo*> >::Compact()
     {
         m_pBase = 0;
     }
-    NiTMallocInterface<ActorCombatGroup*>::Deallocate(reinterpret_cast<ActorCombatGroup**>(oldBase));
+    NiTMallocInterface<TESTopicInfo*>::Deallocate(oldBase);
 }
 // @fnv 0x00864280
+// NiFormArray.h instantiates the shared template: an explicit specialization of the member
+template <>
 void NiTLargeArray<TESForm*, NiTMallocInterface<TESForm*> >::SetSize(unsigned int size)
 {
-    unsigned int* pOldBase;
+    TESForm** pOldBase;
     unsigned int ui;
     if (size == m_uiMaxSize)
         return;
@@ -127,7 +133,7 @@ void NiTLargeArray<TESForm*, NiTMallocInterface<TESForm*> >::SetSize(unsigned in
     m_uiMaxSize = size;
     if (size > 0)
     {
-        m_pBase = reinterpret_cast<unsigned int*>(reinterpret_cast<ActorCombatGroup** (__cdecl*)(unsigned int)>(&NiTMallocInterface<ActorCombatGroup*>::Allocate)(m_uiMaxSize));
+        m_pBase = NiTMallocInterface<TESForm*>::Allocate(m_uiMaxSize);
         for (ui = 0; ui < m_uiSize; ++ui)
             m_pBase[ui] = pOldBase[ui];
         for (ui = m_uiSize; ui < m_uiMaxSize; ++ui)
@@ -137,6 +143,6 @@ void NiTLargeArray<TESForm*, NiTMallocInterface<TESForm*> >::SetSize(unsigned in
     {
         m_pBase = 0;
     }
-    NiTMallocInterface<ActorCombatGroup*>::Deallocate(reinterpret_cast<ActorCombatGroup**>(pOldBase));
+    NiTMallocInterface<TESForm*>::Deallocate(pOldBase);
 }
 

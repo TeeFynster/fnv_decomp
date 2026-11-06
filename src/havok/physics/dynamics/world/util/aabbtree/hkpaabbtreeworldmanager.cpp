@@ -2,41 +2,76 @@
 // src/havok/physics/dynamics/world/util/aabbtree/hkpaabbtreeworldmanager.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/world/util/aabbtree/hkpaabbtreeworldmanager.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkResult.h"
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkpBroadPhaseCastCollector.h"
+#include "../../../../../../../include/hkpCollidableCollidableFilter.h"
+#include "../../../../../../../include/hkpCollidable.h"
+#include "../../../../../../../include/hkpCollisionFilter.h"
+#include "../../../../../../../include/hkpEntity.h"
+#include "../../../../../../../include/hkpRayCollidableFilter.h"
+#include "../../../../../../../include/hkpRayShapeCollectionFilter.h"
+#include "../../../../../../../include/hkpShapeCollectionFilter.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/BSAudio.h"
+#include "../../../../../../../include/hkMonitorStream.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkArray.h"
+#include "../../../../../../../include/hkBaseObject.h"
+#include "../../../../../../../include/hkKdTreeCastCollector.h"
+#include "../../../../../../../include/hkReferencedObject.h"
+#include "../../../../../../../include/hkpWorldPostSimulationListener.h"
+#include "../../../../../../../include/hkpSimulationIsland.h"
+#include "../../../../../../../include/hkpWorld.h"
+#include "../../../../../../../include/hkpWorldRayCastOutput.h"
+#include "../../../../../../../include/hkVector4.h"
+
+inline void* operator new(unsigned int, void* location) { return location; }
+
+template <class T>
+inline T& heap(hkMemoryRouter& router)
+{
+    return *reinterpret_cast<T*>(router.m_heap);
+}
+
+// Preserve the original inline base teardown in this unit.
+inline hkpBroadPhaseCastCollector::~hkpBroadPhaseCastCollector() {}
+inline hkKdTreeCastCollector::~hkKdTreeCastCollector() {}
+inline hkpWorldPostSimulationListener::~hkpWorldPostSimulationListener() throw() {}
+
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
+
+inline hkMemoryAllocator& hkContainerHeapAllocator::get(const void*)
+{
+    return heap<hkMemoryAllocator>(FUN_00c85750());
+}
+
+template <class T>
+__forceinline void hkArrayBase<T>::_clearAndDeallocate(hkMemoryAllocator& alloc)
+{
+    m_iElementCount = 0;
+    if ((m_iCapacityState & 0x80000000) == 0)
+        alloc.bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
+    m_data = 0;
+    m_iCapacityState = 0x80000000;
+}
+
+template <class T, class Allocator>
+__forceinline hkArray<T, Allocator>::~hkArray() throw()
+{
+    clearAndDeallocate();
+}
+
+template <class T>
+__forceinline void hkArrayBase<T>::removeAt(int index)
+{
+    m_iElementCount--;
+    if (m_iElementCount != index)
+        m_data[index] = m_data[m_iElementCount];
+}
+
 extern "C" void __cdecl Deallocate(void*);
-extern "C" void* DAT_010ccf7c;
-
-struct FUN_00d08330 {
-    void* m_p;
-    FUN_00d08330(char);
-};
-
-// @fnv 0x00d08330
-FUN_00d08330::FUN_00d08330(char acFlags)
-{
-    m_p = &DAT_010ccf7c;
-    if (acFlags & 1)
-        Deallocate(this);
-}
-
-extern int DAT_010ccf8c;
-extern void __cdecl Deallocate(void*);
-
-struct FUN_00d08350 {
-    void* m_p;
-    void* __thiscall Set(void* arg);
-};
-
-// Stores the address of DAT_010ccf8c into m_p and, if arg's low bit is set, deallocates self before returning it.
-// @fnv 0x00d08350
-void* __thiscall FUN_00d08350::Set(void* arg)
-{
-    void* self = this;
-    m_p = &DAT_010ccf8c;
-    if ((int)arg & 1)
-        Deallocate(self);
-    return self;
-}
-
 struct FUN_00d083a0_class {
     void __thiscall FUN_00d083a0(int a);
 };
@@ -48,23 +83,15 @@ void __thiscall FUN_00d083a0_class::FUN_00d083a0(int aiValue)
     *(int*)((char*)this + 0x34) = (*(int*)((char*)this + 0x38) << 4) + aiValue;
 }
 
-struct FUN_00d08ff0_t {
-    int a;
-    int b;
-    int c;
-    int d;
-    void FUN_00d08ac0(int);
-    void FUN_00d08b90(int);
-};
-void FUN_00d08ac0(FUN_00d08ff0_t* self, int arg);
-void FUN_00d08b90(FUN_00d08ff0_t* self, int arg);
-// Clears self->b, then calls FUN_00d08ac0 and FUN_00d08b90 with self and arg.
+void FUN_00d08ac0(hkArray<hkpCollidable*>* self, int arg);
+void FUN_00d08b90(hkArray<int*>& self, hkpWorld* arg);
+// Clears the array size, then gathers entries with FUN_00d08ac0 and FUN_00d08b90.
 // @fnv 0x00d08ff0
-void FUN_00d08ff0(FUN_00d08ff0_t* self, int arg)
+void FUN_00d08ff0(hkArray<hkpCollidable*>* self, int arg)
 {
-    self->b = 0;
+    self->m_iElementCount = 0;
     FUN_00d08ac0(self, arg);
-    FUN_00d08b90(self, arg);
+    FUN_00d08b90(*reinterpret_cast<hkArray<int*>*>(self), reinterpret_cast<hkpWorld*>(arg));
 }
 
 extern int DAT_010ccfac;
@@ -333,85 +360,22 @@ struct FUN_00cd29f0_cls {
     void FUN_00cd29f0(int iValue);
 };
 
-struct FUN_00d08400_cls {
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    signed char m_targetOffset;
-};
-
 // @fnv 0x00d08400
-void __cdecl DispatchToOffsetTarget(FUN_00d08400_cls* pkObject, unsigned short usValue)
+__declspec(noinline) void __cdecl DispatchToOffsetTarget(hkpCollidable* pkObject, unsigned short usValue)
 {
-    reinterpret_cast<FUN_00cd29f0_cls*>(reinterpret_cast<char*>(pkObject) + pkObject->m_targetOffset)->FUN_00cd29f0(usValue);
+    reinterpret_cast<FUN_00cd29f0_cls*>(reinterpret_cast<char*>(pkObject) + pkObject->m_iOwnerOffset)->FUN_00cd29f0(usValue);
 }
 
-struct __declspec(align(16)) hkVector4D084 {
-    float x, y, z, w;
-};
 
-struct hkpWorldRayCastInputD084 {
-    hkVector4D084 m_vFrom;
-    hkVector4D084 m_vTo;
+// No shared hkpWorldRayCastInput header yet; the ray endpoints and filter occupy 0x00..0x27.
+struct hkpWorldRayCastInput {
+    hkVector4 m_vFrom;
+    hkVector4 m_vTo;
     bool m_bEnableShapeCollectionFilter;
     unsigned int m_uiFilterInfo;
 };
 
-struct hkpShapeRayCastOutputD084 {
-    hkVector4D084 m_vHitNormal;
-    float m_fHitFraction;
-    int m_iExtraInfo;
-    int m_pad18;
-    int m_pad1c;
-    unsigned int m_uiShapeKeys[8];
-    int m_uiShapeKeyIndex;
-
-    hkpShapeRayCastOutputD084()
-    {
-        m_fHitFraction = 1.0f;
-        m_iExtraInfo = -1;
-        m_uiShapeKeys[0] = 0xffffffff;
-        m_uiShapeKeyIndex = 0;
-    }
-};
-
-struct hkpWorldRayCastOutputD084 : public hkpShapeRayCastOutputD084 {
-    const void* m_pRootCollidable;
-
-    hkpWorldRayCastOutputD084() { m_pRootCollidable = 0; }
-};
-
 struct hkpRayHitCollectorD084;
-
-class hkpRayShapeCollectionFilterD084 {
-public:
-    virtual ~hkpRayShapeCollectionFilterD084() throw();
-};
-
-class hkpRayCollidableFilterD084 {
-public:
-    virtual ~hkpRayCollidableFilterD084() throw();
-};
-
-class hkpCollidableCollidableFilterD084 {
-public:
-    virtual ~hkpCollidableCollidableFilterD084() throw();
-};
-
-class hkpShapeCollectionFilterD084 {
-public:
-    virtual ~hkpShapeCollectionFilterD084() throw();
-};
-
-class hkReferencedObjectD084 {
-public:
-    virtual ~hkReferencedObjectD084() throw();
-    int m_usMemSizeAndFlags;
-};
-
-class hkpCollisionFilterD084 : public hkReferencedObjectD084, public hkpCollidableCollidableFilterD084, public hkpShapeCollectionFilterD084, public hkpRayShapeCollectionFilterD084, public hkpRayCollidableFilterD084 {
-};
 
 class hkpRayCastCollectorBaseD084 {
 public:
@@ -425,37 +389,30 @@ public:
 
 class FUN_00d9a040 : public hkpRayCastCollectorBaseD084, public hkpTreeCastCallbackD084 {
 public:
-    const hkpWorldRayCastInputD084* m_pRayCastInput;
-    const hkpRayCollidableFilterD084* m_iFilter;
-    const hkpRayShapeCollectionFilterD084* m_shapeFilter;
-    hkpWorldRayCastOutputD084* m_pRayCastOutput;
+    const hkpWorldRayCastInput* m_pRayCastInput;
+    const hkpRayCollidableFilter* m_iFilter;
+    const hkpRayShapeCollectionFilter* m_shapeFilter;
+    hkpWorldRayCastOutput* m_pRayCastOutput;
     hkpRayHitCollectorD084* m_kCollector;
     int m_1c;
 
     FUN_00d9a040() throw();
 };
 
-class hkpBroadPhaseCastCollectorD084 {
+// Vtable 0x010ccfb8 dispatches to kd-tree ray casting at 0x00d97a40, unlike hkpWorldRayCaster::CastRay at 0x00cbf710.
+class KdTreeRayCastCallback : public hkpBroadPhaseCastCollector {
 public:
-    virtual void ReleaseCollector() throw();
-};
-
-class hkpWorldRayCasterD084 : public hkpBroadPhaseCastCollectorD084 {
-public:
-    const hkpWorldRayCastInputD084* m_pRayCastInput;
-    const hkpRayCollidableFilterD084* m_iFilter;
-    const hkpRayShapeCollectionFilterD084* m_shapeFilter;
-    hkpWorldRayCastOutputD084* m_pRayCastOutput;
+    const hkpWorldRayCastInput* m_pRayCastInput;
+    const hkpRayCollidableFilter* m_iFilter;
+    const hkpRayShapeCollectionFilter* m_shapeFilter;
+    hkpWorldRayCastOutput* m_pRayCastOutput;
     hkpRayHitCollectorD084* m_kCollector;
+
+    virtual float ReleaseCollector(const hkpBroadPhaseHandle*, int);
 };
 
-struct hkBoolD084 {
-    char m_cBooleanValue;
-    hkBoolD084(bool b) { m_cBooleanValue = (char)b; }
-};
-
-hkBoolD084 __cdecl FUN_00d98ca0(void* pkBroadPhase, const hkVector4D084& kFrom, const hkVector4D084& kTo, hkpWorldRayCasterD084* pkCaster) throw();
-void __cdecl FUN_00d1bd00(void* pkTree, const hkVector4D084& kFrom, const hkVector4D084& kTo, hkpTreeCastCallbackD084* pkCaster, float fEarlyOut) throw();
+hkBool __cdecl FUN_00d98ca0(void* pkBroadPhase, const hkVector4& kFrom, const hkVector4& kTo, KdTreeRayCastCallback* pkCaster) throw();
+void __cdecl FUN_00d1bd00(void* pkTree, const hkVector4& kFrom, const hkVector4& kTo, hkpTreeCastCallbackD084* pkCaster, float fEarlyOut) throw();
 
 class hkpRayCastQueryD084 {
 public:
@@ -470,27 +427,27 @@ public:
     int m_20;
     bool m_useTree;
 
-    void CastRay(const hkpWorldRayCastInputD084& kInput, const hkpCollisionFilterD084* pkFilter, hkpRayHitCollectorD084* pkCollector) const throw();
+    void CastRay(const hkpWorldRayCastInput& kInput, const hkpCollisionFilter* pkFilter, hkpRayHitCollectorD084* pkCollector) const throw();
 };
 
 // @fnv 0x00d08420
-void hkpRayCastQueryD084::CastRay(const hkpWorldRayCastInputD084& kInput, const hkpCollisionFilterD084* pkFilter, hkpRayHitCollectorD084* pkCollector) const throw()
+void hkpRayCastQueryD084::CastRay(const hkpWorldRayCastInput& kInput, const hkpCollisionFilter* pkFilter, hkpRayHitCollectorD084* pkCollector) const throw()
 {
     FUN_00d9a040 kTreeCaster;
     kTreeCaster.m_pRayCastInput = &kInput;
     kTreeCaster.m_kCollector = pkCollector;
     kTreeCaster.m_iFilter = pkFilter;
     kTreeCaster.m_shapeFilter = pkFilter;
-    hkpWorldRayCastOutputD084 kTreeOutput;
+    hkpWorldRayCastOutput kTreeOutput;
     kTreeCaster.m_pRayCastOutput = &kTreeOutput;
 
     if (m_pJobSemaphore) {
-        hkpWorldRayCasterD084 kCaster;
+        KdTreeRayCastCallback kCaster;
         kCaster.m_pRayCastInput = &kInput;
         kCaster.m_kCollector = pkCollector;
         kCaster.m_iFilter = pkFilter;
         kCaster.m_shapeFilter = pkFilter;
-        hkpWorldRayCastOutputD084 kOutput;
+        hkpWorldRayCastOutput kOutput;
         kCaster.m_pRayCastOutput = &kOutput;
         FUN_00d98ca0(m_pJobSemaphore, kInput.m_vFrom, kInput.m_vTo, &kCaster);
     }
@@ -498,41 +455,9 @@ void hkpRayCastQueryD084::CastRay(const hkpWorldRayCastInputD084& kInput, const 
         FUN_00d1bd00(m_iValueAt40, kInput.m_vFrom, kInput.m_vTo, &kTreeCaster, 1.0f);
 }
 
-template <class T>
-class hkArrayD085 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int indexOf(const T& t) const
-    {
-        for (int i = 0; i < m_iElementCount; ++i) {
-            if (m_data[i] == t)
-                return i;
-        }
-        return -1;
-    }
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            m_data[index] = m_data[m_iElementCount];
-    }
-};
-
 class hkBroadPhaseD085 {
 public:
     void FUN_00d9c7d0(unsigned short id);
-};
-
-struct hkCollidableD085 {
-    int unk00;
-};
-
-struct hkEntityD085 {
-    int unk00[4];
-    hkCollidableD085 m_kCollidable;
 };
 
 class hkHandlerD085 {
@@ -542,16 +467,16 @@ public:
     int unk10[5];
     bool m_enabled;
     char unk25[0x1f];
-    hkArrayD085<hkCollidableD085*> m_kCollidables;
+    hkArray<hkpCollidable*> m_kCollidables;
 
-    unsigned short FUN_00d083e0(hkCollidableD085* c);
-    void FUN_00d08570(hkEntityD085* entity);
+    unsigned short FUN_00d083e0(hkpCollidable* c);
+    void FUN_00d08570(hkpEntity* entity);
 };
 
 // @fnv 0x00d08570
-void hkHandlerD085::FUN_00d08570(hkEntityD085* entity)
+void hkHandlerD085::FUN_00d08570(hkpEntity* entity)
 {
-    hkCollidableD085* c = &entity->m_kCollidable;
+    hkpCollidable* c = &entity->m_kCollidable;
     if (m_enabled) {
         unsigned short id = FUN_00d083e0(c);
         int i = m_kCollidables.indexOf(c);
@@ -569,75 +494,51 @@ inline void* operator new(unsigned int, void* p, PlaceTagD088) throw() { __assum
 inline void operator delete(void*, void*, PlaceTagD088) throw() {}
 
 template <class T>
-struct hkArrayD088 {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
+__forceinline void hkArrayBase<T>::pushBackUnchecked(const T& e)
+{
+    new (&m_data[m_iElementCount], PlaceTagD088()) T(e);
+    m_iElementCount++;
+}
 
-    void pushBackUnchecked(const T& e)
-    {
-        new (&m_data[m_iElementCount], PlaceTagD088()) T(e);
-        m_iElementCount++;
-    }
-    void removeAt(int index)
-    {
-        m_iElementCount--;
-        if (m_iElementCount != index)
-            m_data[index] = m_data[m_iElementCount];
-    }
-};
+__forceinline void* hkpCollidable::getOwner() const
+{
+    return reinterpret_cast<char*>(const_cast<hkpCollidable*>(this)) + m_iOwnerOffset;
+}
 
-struct hkBoolRetD088 {
-    char m_cBooleanValue;
-    hkBoolRetD088() throw() {}
-};
-
-class hkpEntityD088 {
-public:
-    hkBoolRetD088 FUN_00c9bff0() const throw();
-};
-
-struct hkpCollidableD088 {
-    const void* m_pCollisionShape;
-    unsigned int m_uiCollisionShapeKey;
-    const void* m_pMotionState;
-    const void* m_parent;
-    signed char m_iOwnerOffset;
-    char m_pad11[3];
-    unsigned int m_iOwnerObjectOffset;
-    char m_type;
-
-    hkpEntityD088* getOwner() const { return (hkpEntityD088*)((char*)this + m_iOwnerOffset); }
-};
+__forceinline unsigned char isEntityActive(hkpEntity* entity)
+{
+    unsigned char active;
+    return *entity->FUN_00c9bff0(&active);
+}
 
 class hkpEntityListD088 {
 public:
     char m_pad00[0x44];
-    hkArrayD088<hkpCollidableD088*> m_kCollidables;
+    hkArray<hkpCollidable*> m_kCollidables;
     char m_pad50[0xc];
     bool m_checkAll;
     char m_pad5d[3];
     int m_currentIndex;
     int m_maxChecksPerCall;
 
-    __forceinline void checkCollidable(int i, hkArrayD088<hkpCollidableD088*>& kInactive)
+    __forceinline void checkCollidable(int i, hkArray<hkpCollidable*>& kInactive)
     {
-        hkpCollidableD088* pkCollidable = m_kCollidables.m_data[i];
-        if (pkCollidable->m_type == 1) {
-            hkpEntityD088* pkEntity = pkCollidable->getOwner();
-            if (pkEntity && !pkEntity->FUN_00c9bff0().m_cBooleanValue) {
+        hkpCollidable* pkCollidable = m_kCollidables.m_data[i];
+        if (pkCollidable->m_kBroadPhaseHandle.m_type == 1) {
+            hkpEntity* pkEntity = static_cast<hkpEntity*>(pkCollidable->getOwner());
+            if (pkEntity && !isEntityActive(pkEntity)) {
                 kInactive.pushBackUnchecked(m_kCollidables.m_data[i]);
                 m_kCollidables.removeAt(i);
             }
         }
     }
 
-    bool CheckCollidables(hkArrayD088<hkpCollidableD088*>& kInactive) throw();
+    bool CheckCollidables(hkArray<hkpCollidable*>& kInactive) throw();
 };
 
 // Moves inactive collidables from the list into kInactive, checking all entries when m_checkAll is set or up to m_maxChecksPerCall entries otherwise.
 // @fnv 0x00d08800
-bool hkpEntityListD088::CheckCollidables(hkArrayD088<hkpCollidableD088*>& kInactive) throw()
+bool hkpEntityListD088::CheckCollidables(hkArray<hkpCollidable*>& kInactive) throw()
 {
     if (m_checkAll) {
         for (int i = m_kCollidables.m_iElementCount - 1; i >= 0; i--)
@@ -663,19 +564,7 @@ struct hkObjectE02;
 struct hkLoaderE02 {
     int Get(char const* name, hkObjectE02** out);
 };
-struct Router {
-    int a;
-    int b;
-    int c;
-    int d;
-    int e;
-    int f;
-    int g;
-    int h;
-    int i;
-    int j;
-};
-Router* __cdecl _FNV_e03300_arena();
+hkMemoryRouter* __cdecl _FNV_e03300_arena();
 struct Sink {
     void FUN_00cb1870(void*, int, int);
 };
@@ -703,15 +592,15 @@ struct FUN_00d08940_shell {
     hkLoaderE02 loader;
     void FUN_00d08940(char const* name);
 };
-// Looks up name via loader.Get and, on success, passes the arena router's e field and name to the sink at offset 0x50.
+// Looks up name via loader.Get and, on success, passes the arena router's heap allocator and name to the sink at offset 0x50.
 // @fnv 0x00d08940
 void FUN_00d08940_shell::FUN_00d08940(char const* name)
 {
     hkObjectE02* obj;
     if (loader.Get(name, &obj)) {
-        Router* router = _FNV_e03300_arena();
+        hkMemoryRouter* router = _FNV_e03300_arena();
         reinterpret_cast<Sink*>(reinterpret_cast<char*>(this) + 0x50)->FUN_00cb1870(
-            reinterpret_cast<void*>(router->e), reinterpret_cast<int>(name), 1);
+            router->m_heap, reinterpret_cast<int>(name), 1);
     }
 }
 
@@ -734,17 +623,7 @@ void FUN_00d08c70_class::FUN_00d08c70(void* arg)
     ((FUN_00d9a4d0_class*)((char*)unk0C + 0x1c))->GetEntryOffset(value);
 }
 
-class hkMemoryAllocatorD08C;
-
-struct hkMemoryRouterD08C {
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorD08C* m_pStreamAllocator;
-    hkMemoryAllocatorD08C& heap() { return *m_pStreamAllocator; }
-};
-extern "C" hkMemoryRouterD08C& __cdecl FUN_00c85750();
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
 
 void __cdecl ResizeAudioStream(void* pvAlloc, void* apvArray, int iElemSize);
 
@@ -756,26 +635,13 @@ __forceinline void constructWithCopyD08C(T* p, int n, const T& t)
 }
 
 template <class T>
-class hkArrayD08C {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    int getCapacity() const { return m_iCapacityState & 0x3fffffff; }
-    void AddBack(const T& t)
-    {
-        hkMemoryAllocatorD08C& kAlloc = FUN_00c85750().heap();
-        if (m_iElementCount == getCapacity())
-            ResizeAudioStream(&kAlloc, this, sizeof(T));
-        constructWithCopyD08C(m_data + m_iElementCount, 1, t);
-        m_iElementCount++;
-    }
-};
-
-class hkpEntityD08C;
-
-void __cdecl DispatchToOffsetTarget(hkpEntityD08C* pkEntity, int iFlags);
+__forceinline void hkArrayBase<T>::_pushBack(hkMemoryAllocator& alloc, const T& t)
+{
+    if (m_iElementCount == getCapacity())
+        ResizeAudioStream(&alloc, this, sizeof(T));
+    constructWithCopyD08C(m_data + m_iElementCount, 1, t);
+    m_iElementCount++;
+}
 
 class hkpEntityListD08C {
 public:
@@ -796,47 +662,30 @@ public:
     int unk38;
     int unk3C;
     int unk40;
-    hkArrayD08C<hkpEntityD08C*> m_kActorEntries;
+    hkArray<hkpCollidable*> m_kActorEntries;
 
-    void FUN_00d08c90(hkpEntityD08C* pkEntity);
+    void FUN_00d08c90(hkpCollidable* pkEntity);
 };
 
 // If the list is enabled, applies flags 0xffff to pkEntity and appends it to the entity array.
 // @fnv 0x00d08c90
-void hkpEntityListD08C::FUN_00d08c90(hkpEntityD08C* pkEntity)
+void hkpEntityListD08C::FUN_00d08c90(hkpCollidable* pkEntity)
 {
     if (m_enabled) {
         DispatchToOffsetTarget(pkEntity, 0xffff);
-        m_kActorEntries.AddBack(pkEntity);
+        m_kActorEntries.pushBack(pkEntity);
     }
 }
 
 namespace fnv_00d08cf0 {
-struct IAllocator {
-    virtual void unk00();
-    virtual void* allocate(unsigned int size);
-};
-
-struct BSAudio {
-    int unk00; int unk04; int unk08; int unk0c;
-    IAllocator* allocator;
-};
-
-extern "C" BSAudio* __cdecl FUN_00c85750();
-
-struct MyArray {
-    void* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-    MyArray() : m_data(0), m_iElementCount(0), m_iCapacityState((int)0x80000000) {}
-};
+extern "C" hkMemoryRouter* __cdecl FUN_00c85750();
 
 struct MyMapBase {
     void* m_table;
     int m_iCapacityFlags;
     int m_iPairCount;
     MyMapBase() : m_table(0), m_iCapacityFlags(0), m_iPairCount(-1) {}
-    void __thiscall EnsureCapacity(IAllocator* allocator, int type);
+    void __thiscall EnsureCapacity(hkMemoryAllocator* allocator, int type);
 };
 
 struct Semaphore {
@@ -907,6 +756,7 @@ struct MyBase3
 struct MyBase4
 {
     virtual void vfunc4_0();
+    virtual void vfunc5_0();
     virtual void vfunc4_1();
     virtual void vfunc4_2();
     virtual void vfunc4_3();
@@ -933,7 +783,7 @@ struct FUN_00d08cf0 : MyBase1, MyBase2, MyBase3, MyBase4, MyBase5
     int unk38;
     void* unk3c;
     float unk40;
-    MyArray unk44;
+    hkArrayBase<void*> unk44;
     MyMapBase unk50;
     char unk5c;
     char unk5d;
@@ -961,14 +811,14 @@ struct FUN_00d08cf0 : MyBase1, MyBase2, MyBase3, MyBase4, MyBase5
 FUN_00d08cf0::FUN_00d08cf0(ListenerManager* apListenerManager, int a2, float afValue)
     : unk28(apListenerManager)
 {
-    BSAudio* audio = FUN_00c85750();
-    this->unk50.EnsureCapacity(audio->allocator, 0);
+    hkMemoryRouter* audio = FUN_00c85750();
+    this->unk50.EnsureCapacity(reinterpret_cast<hkMemoryAllocator*>(audio->m_heap), 0);
     this->unk30 = 0;
     this->unk34 = 0;
-    BSAudio* pAudio = FUN_00c85750();
-    this->unk3c = pAudio->allocator->allocate(0x10);
-    BSAudio* audio3 = FUN_00c85750();
-    void* pSemaphore = audio3->allocator->allocate(4);
+    hkMemoryRouter* pAudio = FUN_00c85750();
+    this->unk3c = reinterpret_cast<hkMemoryAllocator*>(pAudio->m_heap)->blockAlloc(0x10);
+    hkMemoryRouter* audio3 = FUN_00c85750();
+    void* pSemaphore = reinterpret_cast<hkMemoryAllocator*>(audio3->m_heap)->blockAlloc(4);
     if (pSemaphore) {
         pSemaphore = ((Semaphore*)pSemaphore)->Create(0, 1000);
     } else {
@@ -991,8 +841,8 @@ FUN_00d08cf0::FUN_00d08cf0(ListenerManager* apListenerManager, int a2, float afV
     this->unk28->FUN_00c93920((MyBase5*)this);
     if (this->unk24) {
         char* edi = this->unk28->unk78 + 0x20;
-        BSAudio* audio4 = FUN_00c85750();
-        void* pObj = audio4->allocator->allocate(0x80);
+        hkMemoryRouter* audio4 = FUN_00c85750();
+        void* pObj = reinterpret_cast<hkMemoryAllocator*>(audio4->m_heap)->blockAlloc(0x80);
         if (pObj) {
             pObj = ((Class0xd9c180*)pObj)->FUN_00d9c180(edi, edi + 0x10, edi + 0x20);
         } else {
@@ -1077,19 +927,7 @@ char __thiscall FUN_00d0a1e0_class::FUN_00d0a1e0() {
 }
 
 namespace fnv_00d0a240 {
-struct FnvCpu_FUN_00d0a240_CpuAllocator {
-    virtual void slot00();
-    virtual void slot04();
-    virtual void Invoke(void* block, unsigned int size);
-};
-struct FnvCpu_FUN_00d0a240_CpuAllocatorHolder {
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    FnvCpu_FUN_00d0a240_CpuAllocator* allocator;
-};
-FnvCpu_FUN_00d0a240_CpuAllocatorHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 struct FnvCpu_FUN_00d0a240_CpuObject {
     unsigned int unk00;
     unsigned short size;
@@ -1101,8 +939,8 @@ FnvCpu_FUN_00d0a240_CpuObject* FnvCpu_FUN_00d0a240_CpuObject::FUN_00d0a240(unsig
 {
     Destructor();
     if (flags & 1) {
-        FnvCpu_FUN_00d0a240_CpuAllocatorHolder* pAllocatorHolder = FUN_00c85750();
-        pAllocatorHolder->allocator->Invoke(this, size);
+        hkMemoryRouter* pAllocatorHolder = FUN_00c85750();
+        reinterpret_cast<hkMemoryAllocator*>(pAllocatorHolder->m_heap)->blockFree(this, size);
     }
     return this;
 }
@@ -1186,20 +1024,8 @@ void S00d08740_cls::Collect(void* kFrom, void* kTo, void* pkRoot, void* pkFilter
     }
 }
 
-class hkMemoryAllocatorD089;
+namespace fnvc_adapt { extern "C" hkMemoryRouter* __cdecl FUN_00c85750(); }
 
-struct hkMemoryRouterD089 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkMemoryAllocatorD089* m_pStreamAllocator;
-    hkMemoryAllocatorD089& heap() { return *m_pStreamAllocator; }
-};
-
-namespace fnvc_adapt { extern "C" hkMemoryRouterD089* __cdecl FUN_00c85750(); }
-
-enum hkResultD089 { HK_SUCCESS = 0, HK_FAILURE = 1 };
 
 class hkMapBaseD089 {
 public:
@@ -1207,8 +1033,8 @@ public:
     int m_iCapacityFlags;
     int m_iPairCount;
 
-    hkResultD089 LookupBucketValue(unsigned int key, unsigned int* out) const;
-    int FUN_00cb1870(hkMemoryAllocatorD089& alloc, unsigned int key, unsigned int val);
+    hkResult LookupBucketValue(unsigned int key, unsigned int* out) const;
+    int FUN_00cb1870(hkMemoryAllocator& alloc, unsigned int key, unsigned int val);
 };
 
 class OwnerD089 {
@@ -1244,49 +1070,9 @@ void OwnerD089::FUN_00d08980(unsigned int key)
 {
     unsigned int dummy;
     if (m_map.LookupBucketValue(key, &dummy) != HK_SUCCESS)
-        m_map.FUN_00cb1870(fnvc_adapt::FUN_00c85750()->heap(), key, (unsigned int)-1);
+        m_map.FUN_00cb1870(heap<hkMemoryAllocator>(*fnvc_adapt::FUN_00c85750()), key, (unsigned int)-1);
 }
 
-struct hkpCollidableD08 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    unsigned int m_broadPhaseId;
-    signed char m_cBroadPhaseType;
-};
-
-struct hkpEntityD08 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    hkpCollidableD08 m_kCollidable;
-};
-
-struct hkpSimulationIslandD08 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    hkpEntityD08** m_kActorEntries;
-    int m_iActorEntryCount;
-};
 
 class hkpPrimaryD08 {
 public:
@@ -1301,8 +1087,8 @@ public:
 
 class hkpIslandListenerD08 {
 public:
-    virtual void islandAddedCallback(hkpSimulationIslandD08* island);
-    virtual void FUN_00d089f0(hkpSimulationIslandD08* island);
+    virtual void islandAddedCallback(hkpSimulationIsland* island);
+    virtual void FUN_00d089f0(hkpSimulationIsland* island);
 };
 
 class TrackerD08 : public hkpPrimaryD08, public hkpIslandListenerD08 {
@@ -1330,20 +1116,20 @@ public:
     bool m_dirty;
     bool m_needsUpdate;
 
-    void FUN_00d08980(hkpCollidableD08* collidable);
-    virtual void FUN_00d089f0(hkpSimulationIslandD08* island);
+    void FUN_00d08980(hkpCollidable* collidable);
+    virtual void FUN_00d089f0(hkpSimulationIsland* island);
 };
 
 // When enabled, marks the tracker for update and calls FUN_00d08980 on each broad-phase-type-1 collidable in the island's actor entries.
 // @fnv 0x00d089f0
-void TrackerD08::FUN_00d089f0(hkpSimulationIslandD08* island)
+void TrackerD08::FUN_00d089f0(hkpSimulationIsland* island)
 {
     if (m_enabled) {
         m_needsUpdate = true;
         m_dirty = false;
         for (int i = 0; i < island->m_iActorEntryCount; i++) {
-            hkpCollidableD08* collidable = &island->m_kActorEntries[i]->m_kCollidable;
-            if (collidable->m_cBroadPhaseType == 1)
+            hkpCollidable* collidable = &island->m_kActorEntries[i]->m_kCollidable;
+            if (collidable->m_kBroadPhaseHandle.m_type == 1)
                 FUN_00d08980(collidable);
         }
     }
@@ -1361,24 +1147,7 @@ extern int DAT_0102e388;
 extern int DAT_0104e3d0;
 extern "C" void* DAT_0102f13c;
 
-struct Hk_d08e80_Alloc {
-    virtual void func0() = 0;
-    virtual void func1() = 0;
-    virtual void ReleaseBlock(void* p, int numBytes) = 0;
-    virtual void func3() = 0;
-    virtual void ReturnMemory(void* p, int numBytes) = 0;
-};
-
-struct Hk_d08e80_Mem {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    Hk_d08e80_Alloc* m_alloc;
-    Hk_d08e80_Alloc& heap() { return *m_alloc; }
-};
-
-namespace fnvc_adapt { Hk_d08e80_Mem* __cdecl FUN_00c85750(); }
+namespace fnvc_adapt { hkMemoryRouter* __cdecl FUN_00c85750(); }
 
 struct Cls_00c917a0 { void __thiscall FUN_00c917a0(void*); };
 struct Cls_00c917f0 { void __thiscall FUN_00c917f0(void*); };
@@ -1386,7 +1155,7 @@ struct Cls_00c91840 { void __thiscall RemovePointer(void*); };
 struct Cls_00c918e0 { void __thiscall ClearValue(void*); };
 struct Cls_00d97850 { void __thiscall ClearBuffers(); };
 struct Cls_00d04370 { void __thiscall FUN_00d04370(); };
-struct Cls_00cb1a90 { void __thiscall ProcessArgument(Hk_d08e80_Alloc*); };
+struct Cls_00cb1a90 { void __thiscall ProcessArgument(hkMemoryAllocator*); };
 struct Cls_00a29680 { void __thiscall FUN_00a29680(); };
 
 struct Virt_d08e80 {
@@ -1398,10 +1167,10 @@ struct Arr_d08e80 {
     int m_iElementCount;
     int m_capFlags;
     ~Arr_d08e80() {
-        Hk_d08e80_Alloc& a = fnvc_adapt::FUN_00c85750()->heap();
+        hkMemoryAllocator& a = heap<hkMemoryAllocator>(*fnvc_adapt::FUN_00c85750());
         m_iElementCount = 0;
         if ((m_capFlags & 0x80000000) == 0) {
-            a.ReturnMemory(m_data, (m_capFlags & 0x3fffffff) * 4);
+            a.bufFree(m_data, (m_capFlags & 0x3fffffff) * 4);
         }
         m_data = 0;
         m_capFlags = 0x80000000;
@@ -1462,19 +1231,19 @@ void Tgt_d08e80::Destructor()
     Cls_00d97850* p10 = unk10;
     if (p10) {
         p10->ClearBuffers();
-        fnvc_adapt::FUN_00c85750()->heap().ReleaseBlock(p10, 0x50);
+        heap<hkMemoryAllocator>(*fnvc_adapt::FUN_00c85750()).blockFree(p10, 0x50);
     }
 
     void* pBlock3C = unk3C;
-    fnvc_adapt::FUN_00c85750()->heap().ReleaseBlock(pBlock3C, 0x10);
+    heap<hkMemoryAllocator>(*fnvc_adapt::FUN_00c85750()).blockFree(pBlock3C, 0x10);
 
     Cls_00d04370* pBlock6C = unk6C;
     if (pBlock6C) {
         pBlock6C->FUN_00d04370();
-        fnvc_adapt::FUN_00c85750()->heap().ReleaseBlock(pBlock6C, 4);
+        heap<hkMemoryAllocator>(*fnvc_adapt::FUN_00c85750()).blockFree(pBlock6C, 4);
     }
 
-    ((Cls_00cb1a90*)&unk50)->ProcessArgument(fnvc_adapt::FUN_00c85750()->m_alloc);
+    ((Cls_00cb1a90*)&unk50)->ProcessArgument(reinterpret_cast<hkMemoryAllocator*>(fnvc_adapt::FUN_00c85750()->m_heap));
     ((Cls_00a29680*)&unk50)->FUN_00a29680();
 
     m_aiIndexedValues.destroy();
@@ -1552,41 +1321,22 @@ void __cdecl FUN_00d083c0()
 {
 }
 
-struct hkpEntityB90 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    int m_kCollidable;
-};
-struct hkpSimulationIslandB90 {
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
-    int unk30, unk34, unk38, unk3C, unk40, unk44;
-    hkArrayD08C<hkpEntityB90*> m_kActorEntries;
-};
-struct hkpWorldB90 {
-    int unk00, unk04, unk08, unk0C, unk10, unk14, unk18, unk1C;
-    hkpSimulationIslandB90* m_pFixedIsland;
-    hkpEntityB90* m_pFixedRigidBody;
-    int unk28, unk2C, unk30;
-    hkArrayD08C<hkpSimulationIslandB90*> m_kActiveSimulationIslands;
-};
 
-// Appends pointers to the m_kCollidable field of every active and fixed island actor, except the fixed rigid body, into out.
+// Appends collidables from the inactive and fixed islands, excluding the fixed rigid body.
 // @fnv 0x00d08b90
-void __cdecl FUN_00d08b90(hkArrayD08C<int*>& out, hkpWorldB90* world)
+void __cdecl FUN_00d08b90(hkArray<int*>& out, hkpWorld* world)
 {
-    const hkArrayD08C<hkpSimulationIslandB90*>& islands = world->m_kActiveSimulationIslands;
+    const hkArray<void*>& islands = world->m_kInactiveSimulationIslands;
     for (int i = 0; i < islands.m_iElementCount; i++) {
-        for (int j = 0; j < islands.m_data[i]->m_kActorEntries.m_iElementCount; j++)
-            out.AddBack(&islands.m_data[i]->m_kActorEntries.m_data[j]->m_kCollidable);
+        for (int j = 0; j < static_cast<hkpSimulationIsland*>(islands.m_data[i])->m_iActorEntryCount; j++)
+            out.pushBack(reinterpret_cast<int*>(&static_cast<hkpSimulationIsland*>(islands.m_data[i])->m_kActorEntries[j]->m_kCollidable));
     }
-    hkpSimulationIslandB90* fixedIsland = world->m_pFixedIsland;
-    hkpEntityB90* fixedBody = world->m_pFixedRigidBody;
-    for (int k = 0; k < fixedIsland->m_kActorEntries.m_iElementCount; k++) {
-        hkpEntityB90* body = fixedIsland->m_kActorEntries.m_data[k];
+    hkpSimulationIsland* fixedIsland = static_cast<hkpSimulationIsland*>(world->m_pFixedIsland);
+    hkpEntity* fixedBody = static_cast<hkpEntity*>(world->m_pFixedRigidBody);
+    for (int k = 0; k < fixedIsland->m_iActorEntryCount; k++) {
+        hkpEntity* body = fixedIsland->m_kActorEntries[k];
         if (body != fixedBody)
-            out.AddBack(&body->m_kCollidable);
+            out.pushBack(reinterpret_cast<int*>(&body->m_kCollidable));
     }
 }
 
@@ -1597,7 +1347,6 @@ extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long);
 extern "C" unsigned __int64 __rdtsc();
 extern "C" void _ReadWriteBarrier();
 struct MonitorEvent { const char* tag; unsigned int time; unsigned int extra; };
-struct MonitorStream { int unk00; MonitorEvent* current; int unk08; MonitorEvent* end; };
 struct UpdateOwner {
     int unk00;
     int unk04;
@@ -1634,39 +1383,39 @@ struct UpdateOwner {
 // @fnv 0x00d0a060
 void UpdateOwner::FUN_00d0a060(void* a, void* b) {
     void* (__stdcall *getTls)(unsigned long) = TlsGetValue;
-    MonitorStream* stream = (MonitorStream*)getTls(DAT_0126835c);
-    MonitorEvent* event = stream->current;
-    if (event < stream->end) {
+    hkMonitorStream* stream = (hkMonitorStream*)getTls(DAT_0126835c);
+    MonitorEvent* event = (MonitorEvent*)stream->m_end.m_storage;
+    if ((char*)event < stream->m_capacityMinus16.m_storage) {
         event->tag = DAT_010cd234;
         _ReadWriteBarrier();
         volatile unsigned int stamp = (unsigned int)__rdtsc();
         event->time = stamp;
-        stream->current = event + 1;
+        stream->m_end.m_storage = (char*)(event + 1);
     }
     dirty = true;
     if (!initialized) {
         FUN_00d09df0(a,b);
         initialized = true;
-        MonitorStream* tail = (MonitorStream*)getTls(DAT_0126835c);
-        MonitorEvent* e = tail->current;
-        if (e < tail->end) {
+        hkMonitorStream* tail = (hkMonitorStream*)getTls(DAT_0126835c);
+        MonitorEvent* e = (MonitorEvent*)tail->m_end.m_storage;
+        if ((char*)e < tail->m_capacityMinus16.m_storage) {
             e->tag = DAT_010c41f8;
             _ReadWriteBarrier();
             volatile unsigned int stamp = (unsigned int)__rdtsc();
             e->time = stamp;
-            tail->current = e + 1;
+            tail->m_end.m_storage = (char*)(e + 1);
         }
         return;
     }
     FUN_00d099d0(a,b);
-    MonitorStream* tail = (MonitorStream*)getTls(DAT_0126835c);
-    MonitorEvent* e = tail->current;
-    if (e < tail->end) {
+    hkMonitorStream* tail = (hkMonitorStream*)getTls(DAT_0126835c);
+    MonitorEvent* e = (MonitorEvent*)tail->m_end.m_storage;
+    if ((char*)e < tail->m_capacityMinus16.m_storage) {
         e->tag = DAT_010c41f8;
         _ReadWriteBarrier();
         volatile unsigned int stamp = (unsigned int)__rdtsc();
         e->time = stamp;
-        tail->current = e + 1;
+        tail->m_end.m_storage = (char*)(e + 1);
     }
 }
 
@@ -1814,79 +1563,80 @@ extern "C" char str_010cd014[], str_010cd004[], str_010ccff4[], str_01076f38[];
 extern "C" __declspec(dllimport) void* __stdcall TlsGetValue(unsigned long index);
 extern "C" unsigned __int64 __rdtsc();
 struct MyBool0 { int m_v; MyBool0(bool b) { m_v = (int)b; } };
-__declspec(noalias) void __cdecl bpv(void*, void*, const hkVector4D084&, const hkVector4D084&, hkpWorldRayCasterD084*) throw();
+__declspec(noalias) void __cdecl bpv(void*, void*, const hkVector4&, const hkVector4&, KdTreeRayCastCallback*) throw();
 union Scratch { volatile unsigned int tick; unsigned int result; Scratch() {} };
 struct OtherObject { int unk00, unk04, unk08, unk0c, unk10, unk14; };
 struct Trace16 { const char* eventName; unsigned int time; unsigned int unk08; const char* category; };
 struct Trace12 { const char* eventName; unsigned int time; unsigned int unk08; };
-struct TLSBuffer { int unk00; unsigned char* current; int unk08; unsigned char* finish; };
 struct FUN_00d085e0_class {
     int unk00, unk04, unk08;
     void* arg0c;
     void* arg10;
     int unk14, unk18, unk1c, unk20;
     char flag24;
-    void __thiscall FUN_00d085e0(const hkpWorldRayCastInputD084& input, const OtherObject* b, hkpWorldRayCastOutputD084* c);
+    void __thiscall FUN_00d085e0(const hkpWorldRayCastInput& input, const OtherObject* b, hkpWorldRayCastOutput* c);
 };
 
 // Performs a broad-phase ray cast via bpv and an optional tree cast, recording trace events to a TLS buffer.
 // @fnv 0x00d085e0
-void FUN_00d085e0_class::FUN_00d085e0(const hkpWorldRayCastInputD084& input, const OtherObject* apFilters, hkpWorldRayCastOutputD084* apRayCastOutput)
+void FUN_00d085e0_class::FUN_00d085e0(const hkpWorldRayCastInput& input, const OtherObject* apFilters, hkpWorldRayCastOutput* apRayCastOutput)
 {
     Scratch scratch;
     class FUN_00d9a040 ctx;
     ctx.m_pRayCastOutput = apRayCastOutput;
     ctx.m_pRayCastInput = &input;
     if (apFilters) {
-        const_cast<const hkpRayCollidableFilterD084* volatile&>(ctx.m_iFilter) = (const hkpRayCollidableFilterD084*) &apFilters->unk14;
-        const_cast<const hkpRayShapeCollectionFilterD084* volatile&>(ctx.m_shapeFilter) = (const hkpRayShapeCollectionFilterD084*) &apFilters->unk10;
+        const_cast<const hkpRayCollidableFilter* volatile&>(ctx.m_iFilter) = (const hkpRayCollidableFilter*) &apFilters->unk14;
+        const_cast<const hkpRayShapeCollectionFilter* volatile&>(ctx.m_shapeFilter) = (const hkpRayShapeCollectionFilter*) &apFilters->unk10;
     } else {
-        const_cast<const hkpRayCollidableFilterD084* volatile&>(ctx.m_iFilter) = (const hkpRayCollidableFilterD084*) 0;
-        const_cast<const hkpRayShapeCollectionFilterD084* volatile&>(ctx.m_shapeFilter) = (const hkpRayShapeCollectionFilterD084*) 0;
+        const_cast<const hkpRayCollidableFilter* volatile&>(ctx.m_iFilter) = (const hkpRayCollidableFilter*) 0;
+        const_cast<const hkpRayShapeCollectionFilter* volatile&>(ctx.m_shapeFilter) = (const hkpRayShapeCollectionFilter*) 0;
     }
-    TLSBuffer* pTlsBuffer = (TLSBuffer*)TlsGetValue(DAT_0126835c);
-    volatile Trace16* e = (Trace16*)pTlsBuffer->current;
-    if ((unsigned char*)e < pTlsBuffer->finish) {
+    hkMonitorStream* pTlsBuffer = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    volatile Trace16* e = (Trace16*)pTlsBuffer->m_end.m_storage;
+    if ((char*)e < pTlsBuffer->m_capacityMinus16.m_storage) {
         e->eventName = str_010cd014;
         e->category = str_010cd004;
         _ReadWriteBarrier();
         scratch.tick = (unsigned int)__rdtsc(); e->time = scratch.tick;
-        pTlsBuffer->current = (unsigned char*)(e + 1);
+        pTlsBuffer->m_end.m_storage = (char*)(e + 1);
     }
 
     void* tls = arg10;
     if (tls) {
-        hkpWorldRayCasterD084 broadPhase;
+        // This temporary callback owns no resources; its storage expires after the cast.
+        void* casterStorage[sizeof(KdTreeRayCastCallback) / sizeof(void*)];
+        KdTreeRayCastCallback& broadPhase = *new (casterStorage) KdTreeRayCastCallback;
         broadPhase.m_kCollector = 0;
         broadPhase.m_pRayCastOutput = apRayCastOutput;
         broadPhase.m_pRayCastInput = &input;
         if (apFilters) {
-            const_cast<const hkpRayCollidableFilterD084* volatile&>(broadPhase.m_iFilter) = (const hkpRayCollidableFilterD084*) &apFilters->unk14;
-            const_cast<const hkpRayShapeCollectionFilterD084* volatile&>(broadPhase.m_shapeFilter) = (const hkpRayShapeCollectionFilterD084*) &apFilters->unk10;
+            const_cast<const hkpRayCollidableFilter* volatile&>(broadPhase.m_iFilter) = (const hkpRayCollidableFilter*) &apFilters->unk14;
+            const_cast<const hkpRayShapeCollectionFilter* volatile&>(broadPhase.m_shapeFilter) = (const hkpRayShapeCollectionFilter*) &apFilters->unk10;
         } else {
-            const_cast<const hkpRayCollidableFilterD084* volatile&>(broadPhase.m_iFilter) = (const hkpRayCollidableFilterD084*) 0;
-            const_cast<const hkpRayShapeCollectionFilterD084* volatile&>(broadPhase.m_shapeFilter) = (const hkpRayShapeCollectionFilterD084*) 0;
+            const_cast<const hkpRayCollidableFilter* volatile&>(broadPhase.m_iFilter) = (const hkpRayCollidableFilter*) 0;
+            const_cast<const hkpRayShapeCollectionFilter* volatile&>(broadPhase.m_shapeFilter) = (const hkpRayShapeCollectionFilter*) 0;
         }
         bpv(&scratch.result, tls, input.m_vFrom, input.m_vTo, &broadPhase);
     }
-    pTlsBuffer = (TLSBuffer*)TlsGetValue(DAT_0126835c);
-    volatile Trace12* p = (Trace12*)pTlsBuffer->current;
-    if ((unsigned char*)p < pTlsBuffer->finish) {
+    pTlsBuffer = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    volatile Trace12* p = (Trace12*)pTlsBuffer->m_end.m_storage;
+    if ((char*)p < pTlsBuffer->m_capacityMinus16.m_storage) {
         p->eventName = str_010ccff4;
         _ReadWriteBarrier();
         scratch.tick = (unsigned int)__rdtsc(); p->time = scratch.tick;
-        pTlsBuffer->current = (unsigned char*)(p + 1);
+        pTlsBuffer->m_end.m_storage = (char*)(p + 1);
     }
     if (flag24) {
         FUN_00d1bd00(arg0c, input.m_vFrom, input.m_vTo, static_cast<hkpTreeCastCallbackD084*>(&ctx), 1.0f);
     }
-    pTlsBuffer = (TLSBuffer*)TlsGetValue(DAT_0126835c);
-    volatile Trace12* pTrace12 = (Trace12*)pTlsBuffer->current;
-    if ((unsigned char*)pTrace12 < pTlsBuffer->finish) {
+    pTlsBuffer = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    volatile Trace12* pTrace12 = (Trace12*)pTlsBuffer->m_end.m_storage;
+    if ((char*)pTrace12 < pTlsBuffer->m_capacityMinus16.m_storage) {
         pTrace12->eventName = str_01076f38;
         _ReadWriteBarrier();
         scratch.tick = (unsigned int)__rdtsc(); pTrace12->time = scratch.tick;
-        pTlsBuffer->current = (unsigned char*)(pTrace12 + 1);
+        pTlsBuffer->m_end.m_storage = (char*)(pTrace12 + 1);
     }
 }
 }  // namespace fnv_00d085e0
@@ -1905,16 +1655,15 @@ extern const char str_01076f38[];
 extern const char str_010cd0b8[];
 
 struct S00d094a0_Cmd { const char* m_name; unsigned m_uiCommandId; int m_08; const char* m_detail; };
-struct S00d094a0_Stream { char* m_00; char* m_kRayEnd; char* m_08; char* m_capEnd; };
 
 union CountPhase { volatile unsigned ticks; int bytes; };
-union StreamPhase { S00d094a0_Stream* stream; int capacity; };
+union StreamPhase { hkMonitorStream* stream; int capacity; };
 struct CapPair {StreamPhase pointer;int capacity2;};
 __forceinline void S00d094a0_beginList(const char* name, const char* detail)
 {
-    S00d094a0_Stream* t = (S00d094a0_Stream*)TlsGetValue(DAT_0126835c);
-    S00d094a0_Cmd* p = (S00d094a0_Cmd*)t->m_kRayEnd;
-    if ((char*)p < t->m_capEnd) {
+    hkMonitorStream* t = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    S00d094a0_Cmd* p = (S00d094a0_Cmd*)t->m_end.m_storage;
+    if ((char*)p < t->m_capacityMinus16.m_storage) {
         p->m_name = name;
         p->m_detail = detail;
         _ReadWriteBarrier();
@@ -1924,14 +1673,14 @@ __forceinline void S00d094a0_beginList(const char* name, const char* detail)
             mov dword ptr[stamp], eax
         }
         p->m_uiCommandId = stamp;
-        t->m_kRayEnd = (char*)p + 16;
+        t->m_end.m_storage = (char*)p + 16;
     }
 }
 __forceinline void S00d094a0_timer(const char* name)
 {
-    S00d094a0_Stream* t = (S00d094a0_Stream*)TlsGetValue(DAT_0126835c);
-    S00d094a0_Cmd* p = (S00d094a0_Cmd*)t->m_kRayEnd;
-    if ((char*)p < t->m_capEnd) {
+    hkMonitorStream* t = (hkMonitorStream*)TlsGetValue(DAT_0126835c);
+    S00d094a0_Cmd* p = (S00d094a0_Cmd*)t->m_end.m_storage;
+    if ((char*)p < t->m_capacityMinus16.m_storage) {
         p->m_name = name;
         _ReadWriteBarrier();
         unsigned stamp;
@@ -1940,25 +1689,25 @@ __forceinline void S00d094a0_timer(const char* name)
             mov dword ptr[stamp], eax
         }
         p->m_uiCommandId = stamp;
-        t->m_kRayEnd = (char*)p + 12;
+        t->m_end.m_storage = (char*)p + 12;
     }
 }
 
-struct S00d094a0_Alloc {
-    virtual void f00();
-    virtual void* AllocateMemoryBlock(int);
-    virtual void f08();
-    virtual void* AllocateBufferWithSize(int&);
-    virtual void ReturnMemory(void*, int);
-    template<class T> __forceinline T* elements(int& count) {int bytes=count*4; void* p=AllocateBufferWithSize(bytes);count=bytes/4;return (T*)p;}
+template <typename TYPE>
+__forceinline TYPE* hkMemoryAllocator::_bufAlloc(int& count)
+{
+    int bytes = count * sizeof(TYPE);
+    void* p = bufAlloc(bytes);
+    count = bytes / static_cast<int>(sizeof(TYPE));
+    return static_cast<TYPE*>(p);
+}
 
-};
-__forceinline S00d094a0_Alloc& S00d094a0_heap() { return *(S00d094a0_Alloc*)&FUN_00c85750().heap(); }
+__forceinline hkMemoryAllocator& S00d094a0_heap() { return heap<hkMemoryAllocator>(FUN_00c85750()); }
 
 __forceinline void* reserveExternal(void*& data, int& capacity, int& bytes, int n) {
-    S00d094a0_Alloc& a = S00d094a0_heap();
+    hkMemoryAllocator& a = S00d094a0_heap();
     bytes=n*4;
-    void* p=a.AllocateBufferWithSize(bytes);
+    void* p=a.bufAlloc(bytes);
     int amount=bytes/4;
     data=p;
     capacity=amount;
@@ -2056,18 +1805,16 @@ struct S00d094a0_Owner {
     void FUN_00d094a0(S00d094a0_Tree** tree, S00d094a0_Input* input, S00d094a0_Ctx* ctx, S00d094a0_Queue* queue, S00d094a0_Sync* sync);
 };
 
-
-template<class T> struct TempArray {
-    T* data; int size; int flags;
-    __forceinline TempArray(int count) {
-        S00d094a0_Alloc& heap=S00d094a0_heap();
-        T* pointer=count?heap.elements<T>(count):0;
-        int cap=count?count:0x80000000;
-        data=pointer;size=count;flags=cap;
-    }
-    __forceinline void release() {S00d094a0_Alloc& heap=S00d094a0_heap(); if(!(flags&0x80000000))heap.ReturnMemory(data,(flags&0x3fffffff)*sizeof(T));}
-    __forceinline T* begin(){return data;}
-};
+template <class T>
+__forceinline void AllocateTempArray(hkArrayBase<T>& array, int count)
+{
+    hkMemoryAllocator& allocator = S00d094a0_heap();
+    T* pointer = count ? allocator._bufAlloc<T>(count) : 0;
+    int cap = count ? count : 0x80000000;
+    array.m_data = pointer;
+    array.m_iElementCount = count;
+    array.m_iCapacityState = cap;
+}
 
 // @fnv 0x00d094a0
 void S00d094a0_Owner::FUN_00d094a0(S00d094a0_Tree** tree, S00d094a0_Input* input, S00d094a0_Ctx* ctx, S00d094a0_Queue* queue, S00d094a0_Sync* sync) {
@@ -2078,10 +1825,12 @@ void S00d094a0_Owner::FUN_00d094a0(S00d094a0_Tree** tree, S00d094a0_Input* input
         desc.FUN_00d976d0(); desc.m_uiItemCount=count;desc.m_isMt=1;
         ctx->m_pCollisionShape->getAabb(&desc.m_kMinimumCorner,&desc.m_kMaximumCorner);
         if(*tree)(*tree)->FUN_00d978d0(&desc);
-        else {S00d094a0_Tree* p=(S00d094a0_Tree*)S00d094a0_heap().AllocateMemoryBlock(0x50);*tree=p?p->Init(&desc):0;}
+        else {S00d094a0_Tree* p=(S00d094a0_Tree*)S00d094a0_heap().blockAlloc(0x50);*tree=p?p->Init(&desc):0;}
         *m_3c=4;
-        TempArray<int> arrayA(4);
-        TempArray<int> arrayB(4);
+        hkArrayBase<int> arrayA;
+        AllocateTempArray(arrayA, 4);
+        hkArrayBase<int> arrayB;
+        AllocateTempArray(arrayB, 4);
         S00d094a0_Job task(m_3c,ctx);
         task.m_10=m_6c;task.m_50=input->m_00;
         task.m_20=m_30;task.m_24=m_34;
@@ -2098,39 +1847,21 @@ void S00d094a0_Owner::FUN_00d094a0(S00d094a0_Tree** tree, S00d094a0_Input* input
         m_6c->FUN_00d04380();S00d094a0_timer(str_010cd0c4);
         FUN_00d9d950(*tree,count,task.m_30,task.m_34);
         S00d094a0_timer(str_01076f38);S00d094a0_timer(str_010cd0b8);S00d094a0_timer(str_01076f38);
-        arrayB.release();arrayA.release();
+        arrayB._clearAndDeallocate(heap<hkMemoryAllocator>(FUN_00c85750()));
+        arrayA._clearAndDeallocate(heap<hkMemoryAllocator>(FUN_00c85750()));
     } else {
         S00d094a0_Fallback fallback;fallback.InitWalker(input,ctx);
         const int count=fallback.FUN_00d9e000();
         S00d094a0_Desc desc;desc.FUN_00d976d0();desc.m_uiItemCount=count;desc.m_isMt=0;
         ctx->m_pCollisionShape->getAabb(&desc.m_kMinimumCorner,&desc.m_kMaximumCorner);
         if(*tree)(*tree)->FUN_00d978d0(&desc);
-        else {S00d094a0_Tree* p=(S00d094a0_Tree*)S00d094a0_heap().AllocateMemoryBlock(0x50);*tree=p?p->Init(&desc):0;}
+        else {S00d094a0_Tree* p=(S00d094a0_Tree*)S00d094a0_heap().blockAlloc(0x50);*tree=p?p->Init(&desc):0;}
         FillAabbArray(&fallback,0,count,m_30);DrawIfCountPositive(&m_30,*tree);
     }
 }
 
 namespace fnv_00d0a170 {
-class hkMemoryAllocatorD0A1 {
-public:
-    virtual ~hkMemoryAllocatorD0A1() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterD0A1 {
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorD0A1* m_pStreamAllocator;
-
-    hkMemoryAllocatorD0A1& heap() { return *m_pStreamAllocator; }
-};
-
-extern "C" hkMemoryRouterD0A1& __cdecl FUN_00c85750() throw();
-
-class hkKdTreeCastCollector {
-public:
-    virtual ~hkKdTreeCastCollector() throw() {}
-};
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 
 class CollectorD0A1 : public hkKdTreeCastCollector {
 public:
@@ -2138,7 +1869,7 @@ public:
 
     static void operator delete(void* p)
     {
-        FUN_00c85750().heap().ReleaseBlock(p, sizeof(CollectorD0A1));
+        heap<hkMemoryAllocator>(FUN_00c85750()).blockFree(p, sizeof(CollectorD0A1));
     }
     CollectorD0A1* FUN_00d0a170(unsigned int uiFlags);
 };
@@ -2155,64 +1886,13 @@ CollectorD0A1* CollectorD0A1::FUN_00d0a170(unsigned int uiFlags)
 }  // namespace fnv_00d0a170
 
 namespace fnv_00d0b0d0 {
-class hkMemoryAllocatorD0B0 {
-public:
-    virtual ~hkMemoryAllocatorD0B0() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void unk08() throw();
-    virtual void unk0C() throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
 
-struct hkMemoryRouterD0B0 {
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorD0B0* m_pStreamAllocator;
-
-    hkMemoryAllocatorD0B0& heap() { return *m_pStreamAllocator; }
-};
-
-
-extern "C" hkMemoryRouterD0B0& __cdecl FUN_00c85750() throw();
-
-template <class T>
-class hkArrayD0B0 {
-public:
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    ~hkArrayD0B0() throw()
-    {
-        hkMemoryAllocatorD0B0& kAlloc = FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_iCapacityState & 0x80000000) == 0)
-            kAlloc.ReleaseBlock(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(T));
-        m_data = 0;
-        m_iCapacityState = 0x80000000;
-    }
-};
-
-namespace hkD0B0 {
-    class hkBaseObject {
-    public:
-        virtual ~hkBaseObject() throw() {}
-    };
-
-    class hkReferencedObject : public hkBaseObject {
-    public:
-        unsigned short m_usMemSizeAndFlags;
-        short m_sReferenceCount;
-        void FUN_00c905b0() throw();
-    };
-}
-
-class hkpWorldPostSimulationListener {
-public:
-    virtual ~hkpWorldPostSimulationListener() throw() {}
-};
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750() throw();
 
 namespace hkD0B0 {
     class ListenerD0B0 : public hkReferencedObject, public hkpWorldPostSimulationListener {
+    public:
+        virtual void postSimulationCallback(hkpWorld* world);
     };
 
     struct Elem12D0B0 {
@@ -2230,9 +1910,9 @@ public:
 
     hkD0B0::ListenerD0B0 m_kListener;
     int unk0C, unk10;
-    hkArrayD0B0<hkD0B0::Elem12D0B0> m_kFirst;
-    hkArrayD0B0<hkD0B0::Elem16D0B0> m_kSecond;
-    hkArrayD0B0<hkD0B0::Elem12D0B0> m_kThird;
+    hkArray<hkD0B0::Elem12D0B0> m_kFirst;
+    hkArray<hkD0B0::Elem16D0B0> m_kSecond;
+    hkArray<hkD0B0::Elem12D0B0> m_kThird;
 };
 
 // Destroys the FUN_00d0b0d0 object, allowing member destructors to run.
@@ -2242,17 +1922,12 @@ FUN_00d0b0d0::~FUN_00d0b0d0()
 }
 }  // namespace fnv_00d0b0d0
 
-inline void* operator new(unsigned int, void* location) { return location; }
-struct Target {
-    int unk00;
-};
-
 struct Item1 {
     int unk00;
     int unk04;
     int unk08;
     int unk0C;
-    Target m_target;
+    hkpCollidable m_target;
 };
 
 struct Item2 {
@@ -2260,35 +1935,21 @@ struct Item2 {
     int unk04;
     int unk08;
     int unk0C;
-    Target m_target;
-};
-
-struct AllocHolder {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0C;
-    void* m_alloc;
+    hkpCollidable m_target;
 };
 
 void ResizeAudioStream(void* alloc, void* array, int elemSize);
 
 template <typename T>
-struct hkArray {
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-
-    void AddBack(AllocHolder* h, T val) {
-        if (m_iElementCount == (m_iCapacityState & 0x3fffffff)) {
-            ResizeAudioStream(h->m_alloc, this, sizeof(T));
-        }
-        T* slot = m_data + m_iElementCount;
-        __assume(slot != 0);
-        new (slot) T(val);
-        ++m_iElementCount;
-    }
-};
+__forceinline void AppendArray(hkArray<T>& array, hkMemoryRouter* h, T val)
+{
+    if (array.m_iElementCount == (array.m_iCapacityState & 0x3fffffff))
+        ResizeAudioStream(h->m_heap, &array, sizeof(T));
+    T* slot = array.m_data + array.m_iElementCount;
+    __assume(slot != 0);
+    new (slot) T(val);
+    ++array.m_iElementCount;
+}
 
 struct SubStruct1 {
     int unk00;
@@ -2382,28 +2043,22 @@ struct Container {
     hkArray<Item2*> m_array2;
 };
 
-// Gathers Target pointers from m_array1 items and m_array2 entries into out, skipping m_array2 entries whose m_target.unk00 is zero.
+// Gathers hkpCollidable pointers from m_array1 items and m_array2 entries into out, skipping m_array2 entries whose m_target.m_pCollisionShape is zero.
 // @fnv 0x00d08ac0
-void FUN_00d08ac0(hkArray<Target*>* out, int containerHandle) {
+void FUN_00d08ac0(hkArray<hkpCollidable*>* out, int containerHandle) {
     Container* c = reinterpret_cast<Container*>(containerHandle);
     for (containerHandle = 0; containerHandle < c->m_array1.m_iElementCount; containerHandle++) {
         for (int j = 0; j < c->m_array1.m_data[containerHandle]->m_items.m_iElementCount; j++) {
-            out->AddBack((AllocHolder*)&FUN_00c85750(), &c->m_array1.m_data[containerHandle]->m_items.m_data[j]->m_target);
+            AppendArray(*out, (hkMemoryRouter*)&FUN_00c85750(), &c->m_array1.m_data[containerHandle]->m_items.m_data[j]->m_target);
         }
     }
     for (int k = 0; k < c->m_array2.m_iElementCount; k++) {
-        if (c->m_array2.m_data[k]->m_target.unk00) {
-            out->AddBack((AllocHolder*)&FUN_00c85750(), &c->m_array2.m_data[k]->m_target);
+        if (c->m_array2.m_data[k]->m_target.m_pCollisionShape) {
+            AppendArray(*out, (hkMemoryRouter*)&FUN_00c85750(), &c->m_array2.m_data[k]->m_target);
         }
     }
 }
 
-struct MarkerBuf {
-    int unk0;
-    int* m_cursor;
-    int unk8;
-    int* m_kRayEnd;
-};
 extern int DAT_00fdf044;
 extern unsigned int DAT_0126835c;
 extern char DAT_010cd224;
@@ -2425,26 +2080,6 @@ struct ActiveTreeBuilder {
 struct TreeCleanMarker {
     void __thiscall FUN_00d08550();
 };
-struct AllocV {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void __thiscall ReleaseBlock(void* p, int bytes);
-};
-
-struct TempArr {
-    int* m_data;
-    int m_iElementCount;
-    int m_capFlags;
-    void destroy()
-    {
-        hkMemoryAllocatorD08C& a = FUN_00c85750().heap();
-        m_iElementCount = 0;
-        if ((m_capFlags & 0x80000000) == 0)
-            ((AllocV&)a).ReleaseBlock(m_data, (m_capFlags & 0x3fffffff) * 4);
-    }
-};
 
 struct EntListSelf {
     int unk00;
@@ -2464,34 +2099,34 @@ struct EntListSelf {
     int unk38;
     int unk3c;
     int unk40;
-    hkpEntityD08C** m_entData;
+    hkpCollidable** m_entData;
     int m_entSize;
     int m_entCap;
 
     void __thiscall FUN_00d09df0(void* p1, void* p2);
 };
 
-static __forceinline void mark16(MarkerBuf* buf, char* name, char* name2, volatile unsigned int* stampOut)
+static __forceinline void mark16(hkMonitorStream* buf, char* name, char* name2, volatile unsigned int* stampOut)
 {
-    int* cur = buf->m_cursor;
-    if (cur < buf->m_kRayEnd) {
+    int* cur = (int*)buf->m_end.m_storage;
+    if ((char*)cur < buf->m_capacityMinus16.m_storage) {
         cur[0] = (int)name;
         cur[3] = (int)name2;
         _ReadWriteBarrier();
         *stampOut = (unsigned int)__rdtsc();
         cur[1] = (int)*stampOut;
-        buf->m_cursor = cur + 4;
+        buf->m_end.m_storage = (char*)(cur + 4);
     }
 }
-static __forceinline void mark12(MarkerBuf* buf, char* name, volatile unsigned int* stampOut)
+static __forceinline void mark12(hkMonitorStream* buf, char* name, volatile unsigned int* stampOut)
 {
-    int* cur = buf->m_cursor;
-    if (cur < buf->m_kRayEnd) {
+    int* cur = (int*)buf->m_end.m_storage;
+    if ((char*)cur < buf->m_capacityMinus16.m_storage) {
         cur[0] = (int)name;
         _ReadWriteBarrier();
         *stampOut = (unsigned int)__rdtsc();
         cur[1] = (int)*stampOut;
-        buf->m_cursor = cur + 3;
+        buf->m_end.m_storage = (char*)(cur + 3);
     }
 }
 
@@ -2500,18 +2135,15 @@ static __forceinline void mark12(MarkerBuf* buf, char* name, volatile unsigned i
 void __thiscall EntListSelf::FUN_00d09df0(void* p1, void* p2)
 {
     volatile unsigned int stamp;
-    MarkerBuf* (__stdcall *getBuf)(int) = (MarkerBuf* (__stdcall *)(int))DAT_00fdf044;
-    TempArr arr;
-    arr.m_data = 0;
-    arr.m_iElementCount = 0;
-    arr.m_capFlags = (int)0x80000000;
+    hkMonitorStream* (__stdcall *getBuf)(int) = (hkMonitorStream* (__stdcall *)(int))DAT_00fdf044;
+    hkArrayBase<int*> arr;
 
     mark16(getBuf(DAT_0126835c), "LtActiveTree", &DAT_010cd154, &stamp);
 
     m_entSize = 0;
-    FUN_00d08ac0((FUN_00d08ff0_t*)&m_entData, m_28);
+    FUN_00d08ac0((hkArray<hkpCollidable*>*)&m_entData, m_28);
     if (!m_enabled)
-        FUN_00d08b90((FUN_00d08ff0_t*)&m_entData, m_28);
+        FUN_00d08b90(*reinterpret_cast<hkArray<int*>*>(&m_entData), reinterpret_cast<hkpWorld*>(m_28));
 
     for (int i = 0; i < m_entSize; i++)
         DispatchToOffsetTarget(m_entData[i], 0xffff);
@@ -2526,7 +2158,7 @@ void __thiscall EntListSelf::FUN_00d09df0(void* p1, void* p2)
     if (m_enabled) {
         mark16(getBuf(DAT_0126835c), &DAT_010cd214, &DAT_010cd154, &stamp);
         arr.m_iElementCount = 0;
-        FUN_00d08b90((FUN_00d08ff0_t*)&arr, m_28);
+        FUN_00d08b90(*reinterpret_cast<hkArray<int*>*>(&arr), reinterpret_cast<hkpWorld*>(m_28));
         mark12(getBuf(DAT_0126835c), &DAT_010cd14c, &stamp);
         m_0c->FUN_00d9bed0();
         mark12(getBuf(DAT_0126835c), &DAT_010cd140, &stamp);
@@ -2536,7 +2168,7 @@ void __thiscall EntListSelf::FUN_00d09df0(void* p1, void* p2)
 
     ((TreeCleanMarker*)this)->FUN_00d08550();
 
-    arr.destroy();
+    arr._clearAndDeallocate(heap<hkMemoryAllocator>(FUN_00c85750()));
 }
 
 namespace RaycasterRework {
@@ -2544,10 +2176,10 @@ namespace RaycasterRework {
 class FUN_00d9a040 : public hkpRayCastCollectorBaseD084,
                      public hkpTreeCastCallbackD084 {
 public:
-    const hkpWorldRayCastInputD084* m_pRayCastInput;
-    const hkpRayCollidableFilterD084* m_iFilter;
-    const hkpRayShapeCollectionFilterD084* m_shapeFilter;
-    hkpWorldRayCastOutputD084* m_pRayCastOutput;
+    const hkpWorldRayCastInput* m_pRayCastInput;
+    const hkpRayCollidableFilter* m_iFilter;
+    const hkpRayShapeCollectionFilter* m_shapeFilter;
+    hkpWorldRayCastOutput* m_pRayCastOutput;
     hkpRayHitCollectorD084* m_kCollector;
     float m_fEarlyOutHitFraction;
 

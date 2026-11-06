@@ -3,12 +3,10 @@
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
 #include "tesidleform_match_decls.h"
-class LowProcess
-{
-  public:
-    TESObjectREFR* GetActiveCombatTarget();
-};
-extern "C" char* __cdecl strrchr(const char* string, int character);
+// layout_support.h already defines BSSimpleList.
+#define FNV64_BSSIMPLELIST_DEFINED
+#include "../../include/LowProcess.h"
+// strrchr comes from <string.h> (read through include/TESFile.h)
 extern "C" int __cdecl stricmp(const char* string1, const char* string2);
 template <int N> struct EndianSizeTag
 {

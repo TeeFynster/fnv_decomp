@@ -6,6 +6,9 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <xmmintrin.h>
+#include "../../include/hkMemoryAllocator.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/hkVector4.h"
 extern __declspec(thread) int g_iThreadState2B4;
 struct ThreadStateGuard
 {
@@ -20,30 +23,7 @@ struct ThreadStateGuard
         g_iThreadState2B4 = m_iSaved;
     }
 };
-struct hkMemoryAllocatorX
-{
-    virtual void unk00();
-    virtual void* AllocateMemoryBlock(int);
-    virtual void ReleaseBlock(void*, int);
-};
-struct hkMemoryRouterX
-{
-    int unk00, unk04, unk08, unk0C;
-    hkMemoryAllocatorX* m_pHeap;
-    hkMemoryAllocatorX& heap()
-    {
-        return *m_pHeap;
-    }
-};
-hkMemoryRouterX* __cdecl FUN_00c85750();
-struct hkVector4X
-{
-    __m128 m_vComponents;
-    hkVector4X(float x, float y, float z, float w)
-    {
-        m_vComponents = _mm_setr_ps(x, y, z, w);
-    }
-};
+// The router returned at 0x00c85750 is shared as hkMemoryRouter; its heap is at +0x10.
 struct SpawnSource
 {
     int unk00, unk04, unk08, unk0C;
@@ -58,15 +38,15 @@ struct SpawnedRefObject
     int unk08, unk0C, unk10, unk14, unk18, unk1C, unk20, unk24, unk28, unk2C;
     static void* operator new(unsigned int n)
     {
-        SpawnedRefObject* b = (SpawnedRefObject*)FUN_00c85750()->heap().AllocateMemoryBlock(n);
+        SpawnedRefObject* b = (SpawnedRefObject*)hkMemoryRouter::getInstance().heap().blockAlloc(n);
         b->m_usMemSizeAndFlags = (unsigned short)n;
         return b;
     }
     static void operator delete(void* p, unsigned int n)
     {
-        FUN_00c85750()->m_pHeap->ReleaseBlock(p, n);
+        hkMemoryRouter::getInstance().m_heap->blockFree(p, n);
     }
-    SpawnedRefObject(const hkVector4X&, float);
+    SpawnedRefObject(const hkVector4&, float);
     void FUN_00c905b0();
 };
 struct SpawnOwner
@@ -125,8 +105,10 @@ struct SpawnOwner
 void SpawnOwner::FUN_00ca0190(SpawnSource* pSource)
 {
     ThreadStateGuard kGuard;
+    // Keep the SIMD temporary: VC9 /GS omits the original cookie for a shared hkVector4 temporary.
     SpawnedRefObject* pObject = new SpawnedRefObject(
-        hkVector4X(pSource->m_fVectorY, pSource->m_fVectorZ, pSource->m_fScalarPart, pSource->m_fVectorX),
+        reinterpret_cast<const hkVector4&>(static_cast<const __m128&>(
+            _mm_setr_ps(pSource->m_fVectorY, pSource->m_fVectorZ, pSource->m_fScalarPart, pSource->m_fVectorX))),
         DAT_010c72bc);
     v35(pObject);
     pObject->FUN_00c905b0();

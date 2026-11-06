@@ -1,21 +1,16 @@
+#include "../../../../include/CombatProcedure.h"
+#include "../../../../include/CombatProcedureEvade.h"
+#include "../../../../include/Actor.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/BGSSaveFormBuffer.h"
+#include "../../../../include/CombatProcedureEngageTarget.h"
+#include "../../../../include/PathingLocation.h"
+#include "../../../../include/PathingRequest.h"
+#include "../../../../include/PathingRequestFlee.h"
+#include "../../../../include/BGSLoadFormBuffer.h"
 
 // src/fallout/ai/combat/combatprocedureevade.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout/ai/combat/combatprocedureevade.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
-
-struct BGSLoadFormBuffer
-{
-    void ReadTypedData(void*, unsigned int);
-};
-
-struct CombatProcedure
-{
-    virtual void LoadGame(BGSLoadFormBuffer*);
-};
-
-struct CombatProcedureEvade : CombatProcedure
-{
-    void LoadGame(BGSLoadFormBuffer*);
-};
 
 struct FUN_009d5ff0_shell : CombatProcedureEvade
 {
@@ -26,8 +21,8 @@ struct FUN_009d5ff0_shell : CombatProcedureEvade
 void FUN_009d5ff0_shell::FUN_009d5ff0(BGSLoadFormBuffer* buffer)
 {
     CombatProcedure::LoadGame(buffer);
-    buffer->ReadTypedData((void*)((char*)this + 0x10), 4);
-    buffer->ReadTypedData((void*)((char*)this + 0x14), 4);
+    buffer->ReadTypedData((void*)((char*)this + 0x10), 4u);
+    buffer->ReadTypedData((void*)((char*)this + 0x14), 4u);
 }
 
 struct FUN_009ca6c0_shell
@@ -83,17 +78,9 @@ void* FUN_009d5b10_shell::DestroyIfFlagged(unsigned int flags)
     return this;
 }
 
-struct Actor
-{
-    void StopMoving();
-};
 struct FUN_009cc4d0_shell
 {
     Actor* FUN_00996de0();
-};
-struct CombatProcedureEngageTarget
-{
-    void FUN_00996e40();
 };
 struct FUN_009d5b60_shell : CombatProcedureEvade
 {
@@ -107,10 +94,6 @@ void FUN_009d5b60_shell::StopAndEngageTarget()
     reinterpret_cast<CombatProcedureEngageTarget*>(this)->FUN_00996e40();
 }
 
-struct BGSSaveFormBuffer
-{
-    void SaveData(void*, int, int);
-};
 struct CombatProcedure_SaveHelper
 {
     void SaveGame(BGSSaveFormBuffer*);
@@ -128,95 +111,6 @@ void FUN_009d5fb0_shell::SaveEvadeProcedure(BGSSaveFormBuffer* apSaveGameBuffer)
     apSaveGameBuffer->SaveData((void*)((char*)this + 0x14), 4, 0);
 }
 
-struct TESObjectREFR;
-class NiPoint3
-{
-  public:
-    float x, y, z;
-    NiPoint3();
-};
-class PathingLocation
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-
-    PathingLocation(const NiPoint3&, TESObjectREFR*);
-    ~PathingLocation();
-};
-struct EvadeActor;
-class PathingRequest
-{
-  public:
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-
-    ~PathingRequest();
-    void InitFromActor(EvadeActor*);
-    void SetInitialPathHeading(float);
-    void SetCantOpenDoors(bool);
-    void FUN_00507610(float);
-    void FUN_008df000();
-    void SetDestination(PathingLocation*);
-    void FUN_006d61e0(int);
-    void SetByteAtOffset9B(bool);
-};
-class PathingRequestFlee : public PathingRequest
-{
-  public:
-    PathingRequestFlee();
-};
 struct EvadeActorBaseData
 {
     virtual void slot0();
@@ -497,7 +391,7 @@ void EvadeProcedure::UpdateFleeState()
     case 0: {
         NiPoint3 actorPosition = *actor->GetPosition();
         PathingRequestFlee fleeRequest;
-        fleeRequest.InitFromActor(actor);
+        fleeRequest.PathingRequest::InitFromActor(actor);
         fleeRequest.SetInitialPathHeading(actor->GetRadius(0));
         if (actor->IsCreature())
             fleeRequest.SetCantOpenDoors(actor->FUN_004181e0()->data.CanSwim());
@@ -523,7 +417,7 @@ void EvadeProcedure::UpdateFleeState()
             destination = context->FUN_004fb070()->BuildAvoidNodes(actor, 0);
             break;
         }
-        fleeRequest.FUN_006d61e0(destination);
+        fleeRequest.FUN_006d61e0(reinterpret_cast<PathingAvoidNodeArray*>(destination));
         fleeRequest.SetByteAtOffset9B(true);
         if (!actor->FUN_008bb630(&fleeRequest))
         {

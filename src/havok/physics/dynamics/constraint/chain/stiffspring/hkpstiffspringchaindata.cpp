@@ -2,20 +2,87 @@
 // src/havok/physics/dynamics/constraint/chain/stiffspring/hkpstiffspringchaindata.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/dynamics/constraint/chain/stiffspring/hkpstiffspringchaindata.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpStiffSpringChainData.h"
-
-struct hkStiffSpringChainData
+// Retain the original float/word SIMD intrinsic type: the CRT's byte-array
+// lanes would add /GS stack cookies to this unit's solver scratch frame.
+#define _INCLUDED_MM2
+// Exe 0x00e3b0f0 FUN_00e3b0f0: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
+    float m128_f32[4];
+    unsigned __int64 m128_u64[2];
+} __m128, LocalM128;
+extern "C"
 {
-    unsigned int m_uiCurrentValue;
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_andnot_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ss(LocalM128, LocalM128);
+    LocalM128 _mm_mul_ss(LocalM128, LocalM128);
+    LocalM128 _mm_rsqrt_ss(LocalM128);
+    LocalM128 _mm_cmpeq_ss(LocalM128, LocalM128);
+    LocalM128 _mm_set_ss(float);
+    void _mm_store_ss(float*, LocalM128);
+}
+
+#include "../../../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../../../include/hkMemoryRouter.h"
+#include "../../../../../../../include/hkpConstraintChainData.h"
+#include "../../../../../../../include/hkpBridgeAtoms.h"
+#include "../../../../../../../include/hkpConstraintChainInstance.h"
+#include "../../../../../../../include/hkpEntity.h"
+
+// The TLS accessor at 0x00c85750 and heap pointer at +0x10 identify hkMemoryRouter,
+// represented by the shared hkMemoryRouter declaration.
+extern "C" hkMemoryRouter& __cdecl FUN_00c85750();
+
+struct ConstraintInfo
+{
+    int m_maxNumExternalSlaveContactPoints;
+    int m_iSchemaByteSize;
+    int m_iSolverResultCount;
+    int m_iSolverElementTemporaryCount;
+    hkpBridgeAtoms* m_kBridgeAtoms;
+    int m_usSizeOfAllAtoms;
+};
+
+
+struct SixteenWordFloatRecord;
+struct QueryResultSchema;
+class hkpStiffSpringChainDataConstraintInfo;
+
+// include/ has no hkpStiffSpringChainData.h yet; retain its reflected 0x30 layout
+// and this unit's methods together until that shared declaration is available.
+class hkpStiffSpringChainData : public hkpConstraintChainData
+{
+public:
+    virtual ~hkpStiffSpringChainData() throw();
+
+    hkpBridgeAtoms m_kBridgeAtoms;
+    hkArray<hkpStiffSpringChainDataConstraintInfo> m_pConstraintInfo;
+    hkReal m_fTau;
+    hkReal m_fMotorDamping;
+    hkReal m_fMaxErrorDistance;
+
     void FUN_00e3af80(bool bFlag, unsigned int* pOut);
+    void FUN_00e3af40(::ConstraintInfo& info);
+    void FUN_00e3b0f0(const SixteenWordFloatRecord& inNonConst, QueryResultSchema& out) volatile;
+    hkpStiffSpringChainData* DestroyAndFree(unsigned int uiFlags) throw();
+
+    static void operator delete(void* p) throw()
+    {
+        FUN_00c85750().heap().blockFree(
+            p, static_cast<hkpStiffSpringChainData*>(p)->m_usMemSizeAndFlags);
+    }
 };
 
 // @fnv 0x00e3af80
-void hkStiffSpringChainData::FUN_00e3af80(bool bFlag, unsigned int* pOut)
+void hkpStiffSpringChainData::FUN_00e3af80(bool bFlag, unsigned int* pOut)
 {
     if (bFlag)
     {
-        unsigned int u = *(unsigned int*)((char*)this + 0x1c);
+        unsigned int u = static_cast<unsigned int>(m_pConstraintInfo.m_iElementCount);
         pOut[1] = u;
         pOut[0] = u * 8;
     }
@@ -32,24 +99,8 @@ int __cdecl FUN_00e3af30()
     return 0x64;
 }
 
-struct ConstraintInfo
-{
-    int m_maxNumExternalSlaveContactPoints;
-    int m_iSchemaByteSize;
-    int m_iSolverResultCount;
-    int m_iSolverElementTemporaryCount;
-    hkpBridgeAtoms* m_kBridgeAtoms;
-    int m_usSizeOfAllAtoms;
-};
-
-class hkpStiffSpringChain : public hkpStiffSpringChainData
-{
-  public:
-    void FUN_00e3af40(ConstraintInfo& info);
-};
-
 // @fnv 0x00e3af40
-void hkpStiffSpringChain::FUN_00e3af40(ConstraintInfo& info)
+void hkpStiffSpringChainData::FUN_00e3af40(::ConstraintInfo& info)
 {
     info.m_kBridgeAtoms = &m_kBridgeAtoms;
     info.m_iSolverResultCount = 0;
@@ -64,162 +115,19 @@ void hkpStiffSpringChain::FUN_00e3af40(ConstraintInfo& info)
     info.m_iSolverElementTemporaryCount = size;
 }
 
-class hkMemoryAllocatorE3B4
-{
-  public:
-    virtual ~hkMemoryAllocatorE3B4() throw();
-    virtual void* AllocateMemoryBlock(int iNumBytes) throw();
-    virtual void ReleaseBlock(void* p, int iNumBytes) throw();
-};
-
-struct hkMemoryRouterE3B4
-{
-    int m_00;
-    int m_04;
-    int m_08;
-    int m_0c;
-    hkMemoryAllocatorE3B4* m_pStreamAllocator;
-    hkMemoryAllocatorE3B4& heap()
-    {
-        return *m_pStreamAllocator;
-    }
-};
-extern "C" hkMemoryRouterE3B4& __cdecl FUN_00c85750();
-
-class FUN_00e3b0a0
-{
-  public:
-    virtual ~FUN_00e3b0a0() throw();
-    unsigned short m_usMemSizeAndFlags;
-    short m_sReferenceCount;
-
-    static void operator delete(void* p) throw()
-    {
-        FUN_00c85750().heap().ReleaseBlock(p, static_cast<FUN_00e3b0a0*>(p)->m_usMemSizeAndFlags);
-    }
-
-    FUN_00e3b0a0* DestroyAndFree(unsigned int uiFlags) throw();
-};
-
 // Runs the destructor and, when bit 0 of uiFlags is set, frees the object through operator delete; returns this.
 // @fnv 0x00e3b4a0
-FUN_00e3b0a0* FUN_00e3b0a0::DestroyAndFree(unsigned int uiFlags) throw()
+hkpStiffSpringChainData* hkpStiffSpringChainData::DestroyAndFree(unsigned int uiFlags) throw()
 {
-    this->FUN_00e3b0a0::~FUN_00e3b0a0();
+    this->hkpStiffSpringChainData::~hkpStiffSpringChainData();
     if (uiFlags & 1)
-        FUN_00e3b0a0::operator delete(this);
+        hkpStiffSpringChainData::operator delete(this);
     return this;
 }
 
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
-    float m128_f32[4];
-    unsigned __int64 m128_u64[2];
-};
-extern "C"
-{
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_andnot_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_sub_ss(__m128, __m128);
-    __m128 _mm_mul_ss(__m128, __m128);
-    __m128 _mm_rsqrt_ss(__m128);
-    __m128 _mm_cmpeq_ss(__m128, __m128);
-    __m128 _mm_set_ss(float);
-    void _mm_store_ss(float*, __m128);
-}
-union hkVector4q
-{
-    __m128 m_vComponents;
-    hkVector4 m_vec;
-};
-extern "C" const __m128 DAT_01268370;
+extern "C" const LocalM128 DAT_01268370;
 struct QuantizedBoundsData;
 struct SolverSchemaHeader;
-struct hkpEntityS
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    hkUint32 m_uiFilterInfo;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    int unkb8;
-    int unkbc;
-    int unkc0;
-    int unkc4;
-    int unkc8;
-    int unkcc;
-    int unkd0;
-    int unkd4;
-    int unkd8;
-    int unkdc;
-    int unke0;
-    int unke4;
-    int unke8;
-    int unkec;
-    hkTransform m_kMotionTransform;
-};
-struct hkpConstraintChainInstanceS
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    hkpEntityS* m_pEntityA;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    hkArray<hkpEntityS*> m_ppRigidBodies;
-};
 struct SixteenWordFloatRecord
 {
     int m_unk00;
@@ -246,7 +154,7 @@ struct SixteenWordFloatRecord
     int m_unk54;
     int m_unk58;
     int m_unk5c;
-    hkpConstraintChainInstanceS* m_pConstraintChainInstance;
+    hkpConstraintChainInstance* m_pConstraintChainInstance;
     void* m_pByteBuffer;
     int m_unk68;
     int m_unk6c;
@@ -283,11 +191,16 @@ struct QueryResultSchema
 {
     OutputSlot31<SolverSchemaHeader> m_pQueryResultSchema;
 };
+// POD SIMD storage keeps the solver scratch frame free of vector construction.
+union SolverVectorStorage
+{
+    LocalM128 m_vComponents;
+};
 struct hk1dLinearBilateralConstraintInfo
 {
-    hkVector4q m_kPivotA;
-    hkVector4q m_kPivotB;
-    hkVector4q m_kConstraintAxis;
+    SolverVectorStorage m_kPivotA;
+    SolverVectorStorage m_kPivotB;
+    SolverVectorStorage m_kConstraintAxis;
 };
 class hkpStiffSpringChainDataConstraintInfo
 {
@@ -299,25 +212,11 @@ class hkpStiffSpringChainDataConstraintInfo
     int unk28;
     int unk2c;
 };
-struct hkVector4T : public hkVector4
+// A declaration-only view preserves the no-throw call at 0x00c7f640; the
+// shared hkVector4 method omits that contract, and this view adds no data.
+struct SolverPointTransform : public hkVector4
 {
     void SetTransformedPoint(const hkTransform& t, const hkVector4& v) throw();
-};
-struct hkMemoryAllocator
-{
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual void ReturnMemory(void* p, int numBytes) throw();
-};
-struct hkMemoryRouterS
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    hkMemoryAllocator* m_pStreamAllocator;
 };
 void __cdecl ResizeAudioStream(hkMemoryAllocator* alloc, void* array, int sizeElem) throw();
 extern "C" void __cdecl AppendEventRecord(const SixteenWordFloatRecord& in, QueryResultSchema& out, void* solverResults,
@@ -346,11 +245,11 @@ struct hkInplaceIntArray32
     }
     __forceinline ~hkInplaceIntArray32()
     {
-        hkMemoryAllocator* alloc = reinterpret_cast<hkMemoryAllocator*>(&FUN_00c85750().heap());
+        hkMemoryAllocator* alloc = &FUN_00c85750().heap();
         m_iElementCount = 0;
         if ((m_iCapacityState & 0x80000000) == 0)
         {
-            alloc->ReturnMemory(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(int));
+            alloc->bufFree(m_data, (m_iCapacityState & 0x3fffffff) * sizeof(int));
         }
     }
     __forceinline void pushBackUnchecked(int v)
@@ -358,57 +257,53 @@ struct hkInplaceIntArray32
         m_data[m_iElementCount] = v;
         m_iElementCount++;
     }
-    __forceinline void AddBack(hkMemoryRouterS* alloc, int v)
+    __forceinline void AddBack(hkMemoryRouter* alloc, int v)
     {
         if (m_iElementCount == (m_iCapacityState & 0x3fffffff))
         {
-            ResizeAudioStream(alloc->m_pStreamAllocator, this, sizeof(int));
+            ResizeAudioStream(alloc->m_heap, this, sizeof(int));
         }
         new (&m_data[m_iElementCount]) int(v);
         m_iElementCount++;
     }
 };
-static __forceinline __m128 hkLengthSquared3(const hkVector4q& v)
+static __forceinline LocalM128 hkLengthSquared3(const SolverVectorStorage& v)
 {
-    __m128 p = _mm_mul_ps(v.m_vComponents, v.m_vComponents);
+    LocalM128 p = _mm_mul_ps(v.m_vComponents, v.m_vComponents);
     return _mm_add_ss(_mm_shuffle_ps(p, p, 0xaa), _mm_add_ss(_mm_shuffle_ps(p, p, 0x55), p));
 }
-static __forceinline __m128 hkLengthInverse3(const hkVector4q& v)
+static __forceinline LocalM128 hkLengthInverse3(const SolverVectorStorage& v)
 {
-    __m128 len2 = hkLengthSquared3(v);
-    __m128 e = _mm_rsqrt_ss(len2);
-    __m128 r =
+    LocalM128 len2 = hkLengthSquared3(v);
+    LocalM128 e = _mm_rsqrt_ss(len2);
+    LocalM128 r =
         _mm_mul_ss(_mm_mul_ss(_mm_set_ss(0.5f), e), _mm_sub_ss(_mm_set_ss(3.0f), _mm_mul_ss(_mm_mul_ss(len2, e), e)));
     return _mm_andnot_ps(_mm_cmpeq_ss(len2, _mm_set_ss(0.0f)), r);
 }
-static __forceinline hkReal hkNormalizeWithLength3(hkVector4q& v)
+static __forceinline hkReal hkNormalizeWithLength3(SolverVectorStorage& v)
 {
-    __m128 invLen = hkLengthInverse3(v);
+    LocalM128 invLen = hkLengthInverse3(v);
     invLen = _mm_shuffle_ps(invLen, invLen, 0);
     hkReal length;
     _mm_store_ss(&length, _mm_mul_ss(hkLengthSquared3(v), invLen));
     v.m_vComponents = _mm_mul_ps(invLen, v.m_vComponents);
     return length;
 }
-struct hkpStiffSpringChainDataEx : public hkpStiffSpringChainData
-{
 // @fnv 0x00e3b0f0
-    void FUN_00e3b0f0(const SixteenWordFloatRecord& inNonConst, QueryResultSchema& out) volatile;
-};
-void hkpStiffSpringChainDataEx::FUN_00e3b0f0(const SixteenWordFloatRecord& inNonConst, QueryResultSchema& out) volatile
+void hkpStiffSpringChainData::FUN_00e3b0f0(const SixteenWordFloatRecord& inNonConst, QueryResultSchema& out) volatile
 {
     AppendEventRecord(inNonConst, out, inNonConst.m_pByteBuffer, 8);
     SixteenWordFloatRecord in = inNonConst;
     in.m_pConstraintChainInstance = 0;
     in.m_pByteBuffer = 0;
     hkInplaceIntArray32 velocityAccumulatorsOffsets;
-    hkpConstraintChainInstanceS* instance = inNonConst.m_pConstraintChainInstance;
+    hkpConstraintChainInstance* instance = inNonConst.m_pConstraintChainInstance;
     int numConstraints = instance->m_ppRigidBodies.m_iElementCount - 1;
-    hkUint32 base = (hkUint32)inNonConst.m_pBodyA - instance->m_pEntityA->m_uiFilterInfo;
-    hkpEntityS* rA = instance->m_ppRigidBodies.m_data[0];
+    hkUint32 base = (hkUint32)inNonConst.m_pBodyA - instance->m_kActorEntries[0]->m_uiFilterInfo;
+    hkpEntity* rA = instance->m_ppRigidBodies.m_data[0];
     in.m_pBodyB = (const QuantizedBoundsData*)(base + rA->m_uiFilterInfo);
     velocityAccumulatorsOffsets.pushBackUnchecked((hkUint32)in.m_pBodyB - base);
-    in.m_kBodyBLocalFrame = &rA->m_kMotionTransform;
+    in.m_kBodyBLocalFrame = &rA->m_pMotionState.m_kMotionState.m_kMotionTransform;
     in.m_fFourthQueryValue = 1.0f;
     in.m_iBeforeFourthQueryValue = in.m_fQueryInputValue;
     SolverSchemaHeader* schema = FUN_00dd13b0(out.m_pQueryResultSchema.value());
@@ -416,17 +311,15 @@ void hkpStiffSpringChainDataEx::FUN_00e3b0f0(const SixteenWordFloatRecord& inNon
     {
         in.m_pBodyA = in.m_pBodyB;
         in.m_kBodyALocalFrame = in.m_kBodyBLocalFrame;
-        hkpEntityS* rB = instance->m_ppRigidBodies.m_data[i + 1];
+        hkpEntity* rB = instance->m_ppRigidBodies.m_data[i + 1];
         in.m_pBodyB = (const QuantizedBoundsData*)(base + rB->m_uiFilterInfo);
-        velocityAccumulatorsOffsets.AddBack(reinterpret_cast<hkMemoryRouterS*>(&FUN_00c85750()),
+        velocityAccumulatorsOffsets.AddBack(&FUN_00c85750(),
                                             (hkUint32)in.m_pBodyB - base);
-        in.m_kBodyBLocalFrame = &rB->m_kMotionTransform;
+        in.m_kBodyBLocalFrame = &rB->m_pMotionState.m_kMotionState.m_kMotionTransform;
         hk1dLinearBilateralConstraintInfo bp;
-        static_cast<hkVector4T&>(bp.m_kPivotA.m_vec)
-            .SetTransformedPoint(*in.m_kBodyALocalFrame, m_pConstraintInfo.m_data[i].m_kPivotInA);
-        static_cast<hkVector4T&>(bp.m_kPivotB.m_vec)
-            .SetTransformedPoint(*in.m_kBodyBLocalFrame, m_pConstraintInfo.m_data[i].m_kPivotInB);
-        hkVector4q dir;
+        reinterpret_cast<SolverPointTransform&>(bp.m_kPivotA).SetTransformedPoint(*in.m_kBodyALocalFrame, m_pConstraintInfo.m_data[i].m_kPivotInA);
+        reinterpret_cast<SolverPointTransform&>(bp.m_kPivotB).SetTransformedPoint(*in.m_kBodyBLocalFrame, m_pConstraintInfo.m_data[i].m_kPivotInB);
+        SolverVectorStorage dir;
         dir.m_vComponents = _mm_sub_ps(bp.m_kPivotA.m_vComponents, bp.m_kPivotB.m_vComponents);
         hkReal length = hkNormalizeWithLength3(dir);
         if (length > 0.0f)

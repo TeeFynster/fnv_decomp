@@ -1,13 +1,40 @@
 // fallout/audio/falloutaudio.cpp: SoundPlaybackManager, PlayerCharacter, std, Interface and more (14 functions)
 
+#include "../../../include/BGSAcousticSpace.h"
+#include "../../../include/BGSImpactData.h"
+#include "../../../include/BGSLoadGameBuffer.h"
+#include "../../../include/BSAudio.h"
+#include "../../../include/Clouds.h"
+#include "../../../include/LowProcess.h"
+#include "../../../include/NiGeometry.h"
+#include "../../../include/NiNode.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiTPointerMap.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/Precipitation.h"
+#include "../../../include/Sky.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/Sun.h"
+#include "../../../include/TES.h"
+#include "../../../include/TESDataHandler.h"
+#include "../../../include/TESForm.h"
+#include "../../../include/TESLandTexture.h"
+#include "../../../include/TESObjectCELL.h"
+#include "../../../include/TESRegionData.h"
+#include "../../../include/TESSound.h"
+#include "../../../include/TESTopicInfo.h"
+#include "../../../include/TESWeather.h"
+#include "../../../include/BSAudioListener.h"
+#include "../../../include/BSSimpleList.h"
 #include "falloutaudio_decls.h"
+#include "../../../include/BGSSaveFormBuffer.h"
 // Updates ambient and region sounds from the player's target acoustic space, weather and time of day, starting/stopping sound handles and pruning stale ones.
 // @fnv 0x0082d7c0
 void SoundPlaybackManager::ProcessPendingSounds()
 {
     bool updated = false;
-    SoundPlaybackHandle* pendingHandle = 0;
-    SoundPlaybackHandle* existingHandle;
+    BSSoundHandle* pendingHandle = 0;
+    BSSoundHandle* existingHandle;
     float fStartHour;
     float soundEndHour;
     BSSimpleList<RegionSound*>* sounds = g_thePlayer->GetRegionSounds();
@@ -42,11 +69,11 @@ void SoundPlaybackManager::ProcessPendingSounds()
         SetAcousticSpace(g_thePlayer->GetTarget()->GetAcousticSpace());
     else if (!g_thePlayer || (!g_thePlayer->GetTarget() && !g_thePlayer->IsRegionSoundsEnabled()))
         ResetAcousticSpace(0);
-    if (DAT_011dcfb4 && DAT_011dcfb4->GetDecalTextureSet())
+    if (DAT_011dcfb4 && reinterpret_cast<BGSImpactData*>(DAT_011dcfb4)->GetDecalTextureSet())
     {
         RegionSoundSource source;
-        source.region = DAT_011dcfb4->GetDecalTextureSet();
-        source.data = source.region->GetParent()->Find(7);
+        source.region = reinterpret_cast<NiAVObject*>(reinterpret_cast<BGSImpactData*>(DAT_011dcfb4)->GetDecalTextureSet());
+        source.data = reinterpret_cast<RegionDataList*>(source.region->GetParent())->Find(7);
         if (source.data)
             sounds = source.data->GetOffsetC();
     }
@@ -57,11 +84,11 @@ void SoundPlaybackManager::ProcessPendingSounds()
     if (isSubmerged && g_thePlayer->GetTarget() && !DAT_011dd0a0.IsPlaying())
     {
         DAT_011dd0a0 = TESLandTexture::GetSoundSystem()->GetSoundHandleByEditorID("AMBUnderwaterLP", 0x2101);
-        DAT_011dd0a0.SetFormType(1);
+        DAT_011dd0a0.SetAssumeSuccess(1);
         DAT_011dd0a0.Play(false);
     }
     else if ((!isSubmerged || !g_thePlayer->GetTarget()) && DAT_011dd0a0.IsPlaying())
-        DAT_011dd0a0.StopWithFade(300);
+        DAT_011dd0a0.FadeOutAndRelease(300);
     InitFootstepImpacts();
     InitializeSlots();
     if (DAT_011dcfa6)
@@ -94,16 +121,16 @@ void SoundPlaybackManager::ProcessPendingSounds()
                     }
                     if (DAT_011dd0d8.IsPlaying())
                     {
-                        DAT_011dd0d8.StopWithFade((unsigned int)(DAT_011dd050.Float()->f * 500.0));
-                        DAT_011dd0d8.FUN_004188d0();
+                        DAT_011dd0d8.FadeOutAndRelease((unsigned int)(DAT_011dd050.Float()->f * 500.0));
+                        DAT_011dd0d8.Clear();
                     }
                     DAT_011dcfb0 = false;
-                    TESSound* sound = reinterpret_cast<LowProcess*>(DAT_011dcfb4)->GetCurrentBoundObject();
+                    TESSound* sound = reinterpret_cast<TESSound*>(reinterpret_cast<LowProcess*>(DAT_011dcfb4)->BaseProcess::GetCurrentBoundObject());
                     if (sound)
                     {
                         DAT_011dd0d8 = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(sound->FUN_00511840(),
                                                                                                   0x11011, sound);
-                        DAT_011dd0d8.SetFadeInTime((unsigned int)(fade * 1000.0));
+                        DAT_011dd0d8.FadeInPlay((unsigned int)(fade * 1000.0));
                     }
                 }
             }
@@ -141,8 +168,8 @@ void SoundPlaybackManager::ProcessPendingSounds()
                     }
                     else
                     {
-                        DAT_011dd0d8.StopWithFade((unsigned int)(DAT_011dd050.Float()->f * 1000.0));
-                        DAT_011dd0d8.FUN_004188d0();
+                        DAT_011dd0d8.FadeOutAndRelease((unsigned int)(DAT_011dd050.Float()->f * 1000.0));
+                        DAT_011dd0d8.Clear();
                     }
                     DAT_011dcfb0 = false;
                     TESSound* sound;
@@ -154,45 +181,45 @@ void SoundPlaybackManager::ProcessPendingSounds()
                             {
                                 if (time > DAT_011f6de4.Float()->f)
                                 {
-                                    sound = reinterpret_cast<LowProcess*>(DAT_011dcfb4)->GetTarget();
+                                    sound = reinterpret_cast<TESSound*>(reinterpret_cast<LowProcess*>(DAT_011dcfb4)->LowProcess::GetTarget());
                                     DAT_011dcfac = 3;
                                 }
                                 else
                                 {
-                                    sound = reinterpret_cast<TESTopicInfo*>(DAT_011dcfb4)->GetSpeaker();
+                                    sound = reinterpret_cast<TESSound*>(reinterpret_cast<TESTopicInfo*>(DAT_011dcfb4)->GetSpeaker());
                                     DAT_011dcfac = 2;
                                 }
                             }
                             else
                             {
-                                sound = reinterpret_cast<TESTopicInfo*>(DAT_011dcfb4)->GetConversationData();
+                                sound = reinterpret_cast<TESSound*>(reinterpret_cast<TESTopicInfo*>(DAT_011dcfb4)->GetConversationData());
                                 DAT_011dcfac = 1;
                             }
                         }
                         else
                         {
-                            sound = reinterpret_cast<LowProcess*>(DAT_011dcfb4)->GetCurrentBoundObject();
+                            sound = reinterpret_cast<TESSound*>(reinterpret_cast<LowProcess*>(DAT_011dcfb4)->BaseProcess::GetCurrentBoundObject());
                             DAT_011dcfac = 0;
                         }
                     }
                     else
                     {
-                        sound = reinterpret_cast<LowProcess*>(DAT_011dcfb4)->GetTarget();
+                        sound = reinterpret_cast<TESSound*>(reinterpret_cast<LowProcess*>(DAT_011dcfb4)->LowProcess::GetTarget());
                         DAT_011dcfac = 3;
                     }
                     if (sound)
                     {
                         DAT_011dd0d8 = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(sound->FUN_00511840(),
                                                                                                   0x11011, sound);
-                        DAT_011dd0d8.SetFadeInTime((unsigned int)(fade * 1000.0));
+                        DAT_011dd0d8.FadeInPlay((unsigned int)(fade * 1000.0));
                     }
                 }
             }
         }
         else
         {
-            DAT_011dd0d8.StopWithFade(1000);
-            DAT_011dd0d8.FUN_004188d0();
+            DAT_011dd0d8.FadeOutAndRelease(1000);
+            DAT_011dd0d8.Clear();
         }
         if (!sounds->IsEmpty() && !Interface::GetSelectedTargetIndex(Interface::MenuLoading))
         {
@@ -200,14 +227,14 @@ void SoundPlaybackManager::ProcessPendingSounds()
             BSSimpleList<RegionSound*>* pRegionCursor = sounds;
             RegionSound* soundEntry = 0;
             TESSound* pActiveSound = 0;
-            SoundPlaybackHandle* loopSoundHandle = 0;
-            SoundPlaybackHandle kPlaybackHandle(false);
+            BSSoundHandle* loopSoundHandle = 0;
+            BSSoundHandle kPlaybackHandle(0u);
             NiPoint3 location;
             bool isSoundAllowed = true;
             bool looping = false;
             bool soundFound = false;
             float fPlayProbability;
-            BSAudio* pCurrentListener = static_cast<BSAudio*>(TESLandTexture::GetSoundSystem()->GetAudioBackendData());
+            BSAudioListener* pCurrentListener = static_cast<BSAudioListener*>(TESLandTexture::GetSoundSystem()->GetAudioBackendData());
             while (pRegionCursor && !pRegionCursor->IsEmpty())
             {
                 isSoundAllowed = true;
@@ -220,7 +247,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
                 }
                 fStartHour = pActiveSound->GetHighByteOfField4E() * 0.09375;
                 soundEndHour = pActiveSound->FUN_0082d700() * 0.09375;
-                looping = TESSound::GetPlaybackFlags(pActiveSound->CopyBig().flags) != 0;
+                looping = TESSound::GetPlaybackFlags(pActiveSound->CopyBig().iFlags) != 0;
                 if (pWeatherSky)
                 {
                     if ((soundEntry->weatherFlags & 0xffff) && pWeatherSky->GetAudioBackendData())
@@ -239,38 +266,38 @@ void SoundPlaybackManager::ProcessPendingSounds()
                 soundFound = DAT_011dd014.GetAt(pActiveSound->Deallocate(), existingHandle);
                 if (looping && !soundFound && isSoundAllowed)
                 {
-                    loopSoundHandle = new SoundPlaybackHandle;
+                    loopSoundHandle = new BSSoundHandle;
                     *loopSoundHandle = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(
                         pActiveSound->FUN_00511840(), 0x11011, pActiveSound);
-                    loopSoundHandle->SetFormType(1);
+                    loopSoundHandle->SetAssumeSuccess(1);
                     DAT_011dd014.SetAt(pActiveSound->Deallocate(), loopSoundHandle);
-                    loopSoundHandle->SetFadeInTime((unsigned int)(DAT_011dd06c.Float()->f * 1000.0));
+                    loopSoundHandle->FadeInPlay((unsigned int)(DAT_011dd06c.Float()->f * 1000.0));
                 }
                 else if (looping && soundFound)
                 {
                     if (existingHandle->IsPlaying() && !isSoundAllowed)
                     {
-                        existingHandle->StopWithFade((unsigned int)(DAT_011dcfe4.Float()->f * 1000.0));
+                        existingHandle->FadeOutAndRelease((unsigned int)(DAT_011dcfe4.Float()->f * 1000.0));
                         DAT_011dd014.RemoveAt(pActiveSound->Deallocate());
                         delete existingHandle;
                     }
                     else if (existingHandle->IsValid() && !existingHandle->IsPlaying() && isSoundAllowed)
-                        existingHandle->SetFadeInTime((unsigned int)(DAT_011dd06c.Float()->f * 1000.0));
+                        existingHandle->FadeInPlay((unsigned int)(DAT_011dd06c.Float()->f * 1000.0));
                 }
                 else if (!looping && isSoundAllowed)
                 {
                     fPlayProbability = soundEntry->chance / 20000000.0;
                     if (RandomBoolean(fPlayProbability))
                     {
-                        if (pActiveSound->CopyBig().flags & 0x40)
+                        if (pActiveSound->CopyBig().iFlags & 0x40)
                             kPlaybackHandle = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(
                                 pActiveSound->FUN_00511840(), 0x11101, pActiveSound);
                         else
                             kPlaybackHandle = TESLandTexture::GetSoundSystem()->GetSoundHandleByFilePath(
                                 pActiveSound->FUN_00511840(), 0x11102, pActiveSound);
-                        location = g_thePlayer->GetPos();
+                        location = *static_cast<const TESObjectREFR*>(g_thePlayer)->GetPos();
                         if (pCurrentListener)
-                            location = pCurrentListener->GetPosition();
+                            location = pCurrentListener->FUN_00aeaad0();
                         RegionSoundOffset offset;
                         offset.x = DialogueRandom() % 650 + 100;
                         offset.y = DialogueRandom() % 650 + 100;
@@ -281,7 +308,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
                         location.x += offset.x;
                         location.y += offset.y;
                         location.z += 200.0;
-                        kPlaybackHandle.SetPriority(255);
+                        kPlaybackHandle.SetPriority(static_cast<unsigned char>(255));
                         kPlaybackHandle.SetPosition(location.x, location.y, location.z);
                         kPlaybackHandle.Play(false);
                     }
@@ -310,7 +337,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
                 {
                     DAT_011dd014.RemoveAt(key);
                     soundIterator = DAT_011dd014.GetFirstPos();
-                    existingHandle->StopWithFade((unsigned int)(DAT_011dcfe4.Float()->f * 1000.0));
+                    existingHandle->FadeOutAndRelease((unsigned int)(DAT_011dcfe4.Float()->f * 1000.0));
                     delete existingHandle;
                     existingHandle = 0;
                 }
@@ -330,7 +357,7 @@ void SoundPlaybackManager::ProcessPendingSounds()
                 DAT_011dd014.GetNext(pos, key, existingHandle);
                 DAT_011dd014.RemoveAt(key);
                 pos = DAT_011dd014.GetFirstPos();
-                existingHandle->StopWithFade(300);
+                existingHandle->FadeOutAndRelease(300);
                 delete existingHandle;
                 existingHandle = 0;
             }
@@ -340,26 +367,26 @@ void SoundPlaybackManager::ProcessPendingSounds()
 
 // Switches the sky mode, unloading textures and stopping sounds when leaving full/exterior mode, then updates HDR values.
 // @fnv 0x0063a3f0
-void Sky::SetMode(Sky__SKY_MODE mode)
+void Sky::SetMode(Sky::SKY_MODE mode)
 {
-    if ((eMode == SM_NONE || eMode == SM_INTERIOR || eMode == SM_COUNT) && (mode == SM_FULL || mode == SM_FAKEEXTERIOR))
+    if ((eMode == Sky::SM_NONE || eMode == Sky::SM_INTERIOR || eMode == Sky::SM_COUNT) && (mode == Sky::SM_FULL || mode == Sky::SM_FAKEEXTERIOR))
     {
         LoadAllTextures();
         if (m_pClouds)
             m_pClouds->FUN_0063a610();
-        if (static_cast<NiNode*>(m_pRootNode))
-            static_cast<NiNode*>(m_pRootNode)->FUN_00450f90(false);
+        if (static_cast<NiAVObject*>(m_pRootNode))
+            static_cast<NiAVObject*>(m_pRootNode)->FUN_00450f90(false);
         if (m_pSun)
-            m_pSun->GetObject3D()->FUN_00450f90(false);
+            static_cast<const SkyObject*>(m_pSun)->GetRoot()->FUN_00450f90(false);
     }
-    else if ((eMode == SM_FULL || eMode == SM_FAKEEXTERIOR || eMode == SM_COUNT) &&
-             (mode == SM_NONE || mode == SM_INTERIOR))
+    else if ((eMode == Sky::SM_FULL || eMode == Sky::SM_FAKEEXTERIOR || eMode == Sky::SM_COUNT) &&
+             (mode == Sky::SM_NONE || mode == Sky::SM_INTERIOR))
     {
         UnloadAllTextures();
-        if (static_cast<NiNode*>(m_pRootNode))
-            static_cast<NiNode*>(m_pRootNode)->FUN_00450f90(true);
+        if (static_cast<NiAVObject*>(m_pRootNode))
+            static_cast<NiAVObject*>(m_pRootNode)->FUN_00450f90(true);
         if (m_pSun)
-            m_pSun->GetObject3D()->FUN_00450f90(true);
+            static_cast<const SkyObject*>(m_pSun)->GetRoot()->FUN_00450f90(true);
         while (!m_pSkySounds->IsEmpty())
         {
             if (m_pSkySounds->GetItem()->IsPlaying())
@@ -371,7 +398,7 @@ void Sky::SetMode(Sky__SKY_MODE mode)
         DAT_011ccb74 = false;
         eMode = mode;
         if (m_pPrecipitation)
-            m_pPrecipitation->FUN_00636ed0(0.0f);
+            m_pPrecipitation->Update(0.0f);
         m_fWeatherFade = 0.0f;
     }
     eMode = mode;
@@ -394,7 +421,7 @@ bool SoundPlaybackManager::ResolveSoundFile(const char* name, char* path, unsign
             Warning("Audio: Could not find TESSound corresponding to form name \"%s\"", name);
         return false;
     }
-    if (sound->CopyBig().flags & 0x40)
+    if (sound->CopyBig().iFlags & 0x40)
     {
         *apuiFlags |= 1;
         *apuiFlags &= ~2;
@@ -404,11 +431,11 @@ bool SoundPlaybackManager::ResolveSoundFile(const char* name, char* path, unsign
         *apuiFlags |= 2;
         *apuiFlags &= ~1;
     }
-    if (sound->CopyBig().flags & 1)
+    if (sound->CopyBig().iFlags & 1)
         *apuiFlags |= 0x40;
-    if (sound->CopyBig().flags & 0x800)
+    if (sound->CopyBig().iFlags & 0x800)
         *apuiFlags |= 0x8000000;
-    *apuiFlags |= TESSound::GetPlaybackFlags(sound->CopyBig().flags);
+    *apuiFlags |= TESSound::GetPlaybackFlags(sound->CopyBig().iFlags);
     *extra = sound;
     return true;
 }
@@ -417,11 +444,11 @@ bool SoundPlaybackManager::ResolveSoundFile(const char* name, char* path, unsign
 // @fnv 0x0082eca0
 bool SoundPlaybackManager::CanPlaySoundAt(TESSound* sound, NiPoint3 position, float scale)
 {
-    BSAudio* m_pAudioListener = static_cast<BSAudio*>(TESLandTexture::GetSoundSystem()->GetAudioBackendData());
+    BSAudioListener* m_pAudioListener = static_cast<BSAudioListener*>(TESLandTexture::GetSoundSystem()->GetAudioBackendData());
     if (!sound || !m_pAudioListener)
         return false;
     {
-        NiPoint3 kListenerPosition = m_pAudioListener->GetPosition();
+        NiPoint3 kListenerPosition = m_pAudioListener->FUN_00aeaad0();
         float fDistance = sound->GetField45() * 100.0 * scale;
         if (std::abs(position.x - kListenerPosition.x) > fDistance ||
             std::abs(position.y - kListenerPosition.y) > fDistance ||
@@ -436,8 +463,8 @@ void SoundPlaybackManager::ResetAcousticSpace(BGSAcousticSpace* space)
 {
     if (DAT_011dcfa7 || (space && space != DAT_011dcfb4) || !DAT_011dcfb4)
         return;
-    DAT_011dd0d8.StopWithFade((unsigned int)(DAT_011dd050.Float()->f * 1000.0));
-    DAT_011dd0d8.FUN_004188d0();
+    DAT_011dd0d8.FadeOutAndRelease((unsigned int)(DAT_011dd050.Float()->f * 1000.0));
+    DAT_011dd0d8.Clear();
     DAT_011dcfb4 = 0;
     DAT_011dcfb1 = true;
     TESLandTexture::GetSoundSystem()->FUN_00ad79b0(0);
@@ -454,8 +481,8 @@ void SoundPlaybackManager::SetAcousticSpace(BGSAcousticSpace* space)
 {
     if (DAT_011dcfb4 == space)
         return;
-    DAT_011dd0d8.StopWithFade((unsigned int)(DAT_011dd050.Float()->f * 1000.0));
-    DAT_011dd0d8.FUN_004188d0();
+    DAT_011dd0d8.FadeOutAndRelease((unsigned int)(DAT_011dd050.Float()->f * 1000.0));
+    DAT_011dd0d8.Clear();
     if (space)
         TESLandTexture::GetSoundSystem()->FUN_00ad79b0(space->GetField4C());
     DAT_011dcfb4 = space;
@@ -489,33 +516,25 @@ TESSound* __cdecl GetUIActivateNothingSound()
     return DAT_011dcfa8;
 }
 
-struct BGSSaveFormBuffer
-{
-    void SerializeFormData(void* p, int id);
-};
 // @fnv 0x0082ec40
 void FUN_0082ec40(BGSSaveFormBuffer* buffer)
 {
     buffer->SerializeFormData(DAT_011dcfa8, 0);
 }
 
-struct Snd_
-{
-    void FUN_00ad7fa0(const char*, int);
-};
 // @fnv 0x0082ed80
 void __cdecl PlayMysteriousStrangerMusic()
 {
-    SoundPlaybackHandle hndle =
+    BSSoundHandle hndle =
         TESLandTexture::GetSoundSystem()->GetSoundHandleByEditorID("MUSMysteriousStrangerA01", 0x210101);
     hndle.Play(false);
-    ((Snd_*)TESLandTexture::GetSoundSystem())->FUN_00ad7fa0("MUSMysteriousStrangerA02", 0x20200101);
+    TESLandTexture::GetSoundSystem()->FUN_00ad7fa0("MUSMysteriousStrangerA02", 0x20200101);
 }
 
 // @fnv 0x0082ee10
 void __cdecl PlayMysteriousStrangerSound()
 {
-    SoundPlaybackHandle hndle =
+    BSSoundHandle hndle =
         TESLandTexture::GetSoundSystem()->GetSoundHandleByEditorID("MUSMysteriousStrangerA02", 0x200101);
     hndle.Play(false);
 }

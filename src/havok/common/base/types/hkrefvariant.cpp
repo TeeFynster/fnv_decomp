@@ -2,11 +2,8 @@
 // src/havok/common/base/types/hkrefvariant.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/types/hkrefvariant.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkReferencedObject
-{
-    void RetainReference();
-    void removeReference();
-};
+#include "../../../../../include/hkReferencedObject.h"
+#include "../../../../../include/hkVtableClassRegistry.h"
 
 struct FUN_00d47770
 {
@@ -18,20 +15,11 @@ struct FUN_00d47770
 void __thiscall FUN_00d47770::SetObject(hkReferencedObject* object, int extra)
 {
     if (object)
-        object->RetainReference();
+        object->addReference();
     if (m_pObject)
         m_pObject->removeReference();
     m_pObject = object;
 }
-
-struct hkVtableClassRegistry
-{
-    virtual void m_00();
-    virtual void m_04();
-    virtual void m_08();
-    virtual void m_0C();
-    virtual void* m_10(hkReferencedObject* object);
-};
 
 extern hkVtableClassRegistry* DAT_01269b10;
 
@@ -46,7 +34,7 @@ void* ReferencedObjectHolder::FUN_00d477a0()
 {
     hkReferencedObject* object = m_pObject;
     if (object)
-        return DAT_01269b10->m_10(object);
+        return const_cast<hkClass*>(DAT_01269b10->GetClassFromVirtualInstance(object));
     return 0;
 }
 

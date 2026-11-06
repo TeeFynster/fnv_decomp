@@ -1,44 +1,71 @@
-// bsmenu/tile3d.cpp: Tile3D, Tile3DCalc, AnimTile, Interface and more (12 functions)
+#include "../../include/NiTMapItem.h"
+// bsmenu/tile3d.cpp: Tile3D, Tile3DCalc, AnimTile, Tile3dInterfaceView and more (12 functions)
 
-#include "tile3d_decls.h"
+#include "../../include/BSStringT.h"
+#include "../../include/NiMemObject.h"
+#include <string.h>
+#include "../../include/GameTimerRecord.h"
 
-class NiNode;
-class RgbaColor;
+#include "../../include/NiColorA.h"
+#include "../../include/TileShaderProperty.h"
 
-template <> class BSStringT<char>
+#include "../../include/DummyPointerMap.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiControllerManager.h"
+#include "../../include/NiControllerSequence.h"
+#include "../../include/NiExtraData.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiObjectNET.h"
+#include "../../include/Tile.h"
+
+template <class T> inline NiPointer<T>::operator T*() const
 {
-  public:
-    char opaque[8];
-    bool Set(const char* value, unsigned int length);
+    return m_pObject;
+}
+template <class T> inline T* NiPointer<T>::operator->() const
+{
+    T* result = m_pObject;
+    return result;
+}
+
+template <class T> inline NiPointer<T>::NiPointer(T* p)
+{
+    m_pObject = p;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* p)
+{
+    if (m_pObject != p)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = p;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+
+// Keep array operations local: the approved NiNode.h declares them on NiTArray,
+// while the working header declares them on NiTObjectArray.
+template <class T> struct Tile3DArrayAccess : NiTObjectArray<T>
+{
+    T& GetAt(unsigned int i)
+    {
+        return this->m_pBase[i];
+    }
+    void RemoveAll()
+    {
+        for (unsigned short i = 0; i < this->m_usSize; i++)
+            this->m_pBase[i] = T(0);
+        this->m_usSize = 0;
+        this->m_usESize = 0;
+    }
 };
 
-class Tile
-{
-  public:
-    virtual Tile* Destroy(bool doFree);
-    virtual void Init(Tile* parent, const char* name, Tile* replacedChild);
-    virtual NiNode* CalcNode();
-    virtual unsigned int GetType();
-    virtual const char* GetTypeStr();
-    virtual bool Unk05(float first, float second);
-    virtual Tile* UpdateField(unsigned int valueID, float floatValue, const char* strValue);
-    virtual void ClearTextures();
-    virtual void* GetShaderProperty();
-    virtual void SetAlphaAndOverlayColor(NiNode* node, float alpha, const RgbaColor& color);
-
-    char layoutPadding[0x34];
-};
-
-class Tile3D : public Tile
-{
-  public:
-    virtual Tile* SetTraitValue(int value, float number, const char* text);
-
-    void* m_pParent;
-    void* m_pChildTile;
-    BSStringT<char> m_kName;
-    BSStringT<char> strFilename;
-};
+#include "../../include/Tile3D.h"
 
 // Handles field value 0xFC4 by clearing the string, then returns null.
 // @fnv 0x00a20c50
@@ -77,18 +104,9 @@ void __fastcall FUN_0078a9f0(char* pThis)
     }
 }
 
-struct GameTimerRecord
-{
-    void Update(unsigned int);
-    void Enable();
-};
 extern GameTimerRecord DAT_011f3560;
 __declspec(dllimport) unsigned long __stdcall GetTickCount();
-struct TileNU
-{
-    void SetTileType(int);
-    void Set(int, float, bool);
-};
+
 struct FUN_00a20720_shell : public Tile3D
 {
     void InitTile(Tile* apParent, const char* apName, Tile* apReplacedTile);
@@ -97,13 +115,13 @@ struct FUN_00a20720_shell : public Tile3D
 void FUN_00a20720_shell::InitTile(Tile* apParent, const char* apName, Tile* apReplacedTile)
 {
     Tile::Init(apParent, apName, apReplacedTile);
-    ((TileNU*)this)->Set(0xff5, 255.0f, true);
-    ((TileNU*)this)->Set(0xfb2, 255.0f, true);
-    ((TileNU*)this)->Set(0xfb3, 255.0f, true);
-    ((TileNU*)this)->Set(0xfb4, 255.0f, true);
-    ((TileNU*)this)->Set(0xfa9, 255.0f, true);
-    ((TileNU*)this)->Set(0xfa3, 1.0f, true);
-    ((TileNU*)this)->SetTileType(3);
+    this->Set(0xff5, 255.0f, true);
+    this->Set(0xfb2, 255.0f, true);
+    this->Set(0xfb3, 255.0f, true);
+    this->Set(0xfb4, 255.0f, true);
+    this->Set(0xfa9, 255.0f, true);
+    this->Set(0xfa3, 1.0f, true);
+    this->SetTileType(3);
     DAT_011f3560.Enable();
     DAT_011f3560.Update(GetTickCount());
 }
@@ -111,10 +129,7 @@ void FUN_00a20720_shell::InitTile(Tile* apParent, const char* apName, Tile* apRe
 struct NiTimeController;
 struct NiRTTI;
 extern NiRTTI DAT_011f36ac;
-struct NiAVObject
-{
-    NiTimeController* GetController(NiRTTI const*);
-};
+
 struct FUN_00a20c80_shell : public Tile3D
 {
     bool AttachController(NiAVObject* obj);
@@ -136,33 +151,20 @@ struct PropHelper
 {
     void* GetProperty(unsigned int);
 };
-struct Col16
-{
-    float r, g, b, a;
-};
-struct AVObj
-{
-    virtual void v00();
-    virtual void v01();
-    virtual void v02();
-    virtual NiNode* IsSceneNode();
-    virtual void v04();
-    virtual void v05();
-    virtual PropHelper* IsGeometry();
-};
+
 struct FUN_00a21570_shell : public Tile3D
 {
-    void ApplyAlphaToChildren(NiNode* apNode, float afAlpha, const RgbaColor* apTextColor);
+    void ApplyAlphaToChildren(NiNode* apNode, float afAlpha, const NiColorA* apTextColor);
 };
 
 // @fnv 0x00a21570
-void FUN_00a21570_shell::ApplyAlphaToChildren(NiNode* apNode, float afAlpha, const RgbaColor* apColor)
+void FUN_00a21570_shell::ApplyAlphaToChildren(NiNode* apNode, float afAlpha, const NiColorA* apColor)
 {
     if (!apNode)
         return;
     for (unsigned int ui = 0; ui < *(unsigned short*)((char*)apNode + 0xa6); ui++)
     {
-        AVObj* pchild;
+        NiAVObject* pchild;
         {
             PropHelper* pgeom;
             {
@@ -170,22 +172,22 @@ void FUN_00a21570_shell::ApplyAlphaToChildren(NiNode* apNode, float afAlpha, con
                 {
                     char* ptsp;
                     {
-                        AVObj** pp = &(*(AVObj***)((char*)apNode + 0xa0))[ui];
+                        NiAVObject** pp = &(*(NiAVObject***)((char*)apNode + 0xa0))[ui];
                         {
-                            AVObj* p = *pp;
+                            NiAVObject* p = *pp;
                             pchild = p;
                         }
                     }
                     if (pchild)
                     {
-                        SetAlphaAndOverlayColor(pchild->IsSceneNode(), afAlpha, *apColor);
-                        pgeom = pchild->IsGeometry();
+                        SetAlphaAndOverlayColor(pchild->IsSceneNode(), afAlpha, (NiColorAlpha*)apColor);
+                        pgeom = (PropHelper*)pchild->IsGeometry();
                         if (pgeom)
                         {
                             pprop = pgeom->GetProperty(3);
                             ptsp = (char*)pprop;
                             *(float*)(ptsp + 0x78) = afAlpha;
-                            *(Col16*)(ptsp + 0x68) = *(const Col16*)apColor;
+                            *(NiColorA*)(ptsp + 0x68) = *apColor;
                         }
                     }
                 }
@@ -196,17 +198,7 @@ void FUN_00a21570_shell::ApplyAlphaToChildren(NiNode* apNode, float afAlpha, con
 
 void __fastcall FUN_004afc80(void*);
 void __fastcall TrimTrailingNullPointers(void*);
-struct NiAVObjectRP
-{
-    void RemoveProperty(unsigned int);
-};
-struct NiObjVtX
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void* v3();
-};
+
 struct FUN_00a20ba0_X
 {
     void RemovePropertyRecursive(char* pTarget);
@@ -218,7 +210,7 @@ void FUN_00a20ba0_X::RemovePropertyRecursive(char* pTarget)
     void* pobj;
     char* val;
     int unused[5];
-    ((NiAVObjectRP*)pTarget)->RemoveProperty(2);
+    ((NiAVObject*)pTarget)->RemoveProperty(2);
     FUN_004afc80(pTarget + 0x9c);
     TrimTrailingNullPointers(pTarget + 0x9c);
     for (a = 0; a < *(unsigned short*)(pTarget + 0xa8); a++)
@@ -230,8 +222,8 @@ void FUN_00a20ba0_X::RemovePropertyRecursive(char* pTarget)
         }
         if (pobj)
         {
-            ((NiAVObjectRP*)pobj)->RemoveProperty(2);
-            val = (char*)((NiObjVtX*)pobj)->v3();
+            ((NiAVObject*)pobj)->RemoveProperty(2);
+            val = (char*)((NiAVObject*)pobj)->IsSceneNode();
             if (val)
                 RemovePropertyRecursive(val);
         }
@@ -240,161 +232,61 @@ void FUN_00a20ba0_X::RemovePropertyRecursive(char* pTarget)
 
 extern char* EmptyFS;
 extern "C" __declspec(dllimport) long __stdcall InterlockedDecrement(long volatile*);
-struct NiGlobalStringTable
+
+inline NiFixedString::operator const char*() const
 {
-    static char* __cdecl AddString(const char*);
-    static long* GetRealBufferStart(char* const& h)
-    {
-        return ((long*)h) - 2;
-    }
-    static void DecRefCount(char*& h)
-    {
-        if (h == EmptyFS)
-            return;
-        NiAtomicSubtract(GetRealBufferStart(h)[0]);
-    }
-    static const char* GetString(char* const& h)
-    {
-        return h;
-    }
-    static long NiAtomicSubtract(long& v)
-    {
-        return InterlockedDecrement(&v);
-    }
-};
-class NiFixedString
+    return NiGlobalStringTable::GetString(m_kHandle);
+}
+inline int NiControllerSequence::GetState()
 {
-  public:
-    NiFixedString(const char* pc)
-    {
-        if (pc == 0)
-            m_kHandle = EmptyFS;
-        else
-            m_kHandle = NiGlobalStringTable::AddString(pc);
-    }
-    ~NiFixedString()
-    {
-        NiGlobalStringTable::DecRefCount(m_kHandle);
-    }
-    operator const char*() const
-    {
-        return NiGlobalStringTable::GetString(m_kHandle);
-    }
-    char* m_kHandle;
-};
-struct DummyPointerMapItem
+    return m_eAnimationState;
+}
+inline void NiControllerManager::SetBit(bool bVal, unsigned short uMask)
 {
-    DummyPointerMapItem* m_pkNext;
-    unsigned int m_key;
-    unsigned int m_val;
-};
-struct DummyPointerMap
+    if (bVal)
+        m_uiObjectFlags |= uMask;
+    else
+        m_uiObjectFlags &= ~uMask;
+}
+inline NiControllerSequence* NiControllerManager::FindSequenceByName(const NiFixedString& kName)
 {
-    virtual void V0();
-    virtual unsigned int KeyToHashIndex(unsigned int key);
-    virtual bool IsKeysEqual(unsigned int a, unsigned int b);
-    unsigned int m_uiHashSize;
-    DummyPointerMapItem** m_ppkHashTable;
-    unsigned int m_uiCount;
-    bool GetAt(unsigned int key, unsigned int& val)
+    NiControllerSequence* pkSequence;
+    if (((DummyPointerMap*)&m_kObjectMap)->GetAt((unsigned int)(const char*)kName, (unsigned int&)pkSequence))
+        return pkSequence;
+    return 0;
+}
+inline bool NiControllerManager::StopSequence(NiControllerSequence* pkSequence, float fEaseOutTime)
+{
+    return pkSequence->Deactivate(fEaseOutTime, false);
+}
+inline bool NiControllerManager::ActivateControllerSequence(NiControllerSequence* pkSequence, int iPriority, bool bStartOver,
+                                                          float fWeight, float fEaseInTime, NiControllerSequence* pkTimeSyncSeq)
+{
+    return pkSequence->Activate((char)iPriority, bStartOver, fWeight, fEaseInTime, pkTimeSyncSeq, false);
+}
+
+
+inline bool DummyPointerMap::GetAt(unsigned int key, unsigned int& val)
+{
+    unsigned int uiIndex = ((unsigned int (__thiscall*)(DummyPointerMap*, unsigned int))(*(void***)this)[1])(this, key);
+    NiTMapItem<unsigned int, unsigned int>* pkItem = ((NiTMapItem<unsigned int, unsigned int>**)c)[uiIndex];
+    while (pkItem)
     {
-        unsigned int uiIndex = KeyToHashIndex(key);
-        DummyPointerMapItem* pkItem = m_ppkHashTable[uiIndex];
-        while (pkItem)
+        if (((bool (__thiscall*)(DummyPointerMap*, unsigned int, unsigned int))(*(void***)this)[2])(this, pkItem->m_key, key))
         {
-            if (IsKeysEqual(pkItem->m_key, key))
-            {
-                val = pkItem->m_val;
-                return true;
-            }
-            pkItem = pkItem->m_pkNext;
+            val = pkItem->m_val;
+            return true;
         }
-        return false;
+        pkItem = pkItem->m_pkNext;
     }
-};
+    return false;
+}
+
 struct Dummy_00a20ed0
 {
     void UpdateAnimation(float, int);
 };
-class NiControllerSequence
-{
-  public:
-    virtual void V00();
-    virtual void V01();
-    virtual void V02();
-    virtual void V03();
-    virtual void V04();
-    virtual void V05();
-    virtual void V06();
-    virtual void V07();
-    virtual void V08();
-    virtual void V09();
-    virtual void V10();
-    virtual void V11();
-    virtual void V12();
-    virtual void V13();
-    virtual void V14();
-    virtual void V15();
-    virtual void V16();
-    virtual void V17();
-    virtual void V18();
-    virtual void V19();
-    virtual void V20();
-    virtual void V21();
-    virtual void V22();
-    virtual void V23();
-    virtual void V24();
-    virtual void V25();
-    virtual void V26();
-    virtual void V27();
-    virtual void V28();
-    virtual void V29();
-    virtual void V30();
-    virtual void V31();
-    virtual void V32();
-    virtual void V33();
-    virtual void V34();
-    virtual bool Deactivate(float fEaseOutTime, bool bTransition);
-    bool Activate(char, bool, float, float, NiControllerSequence*, bool);
-    int GetState()
-    {
-        return m_eAnimationState;
-    }
-    char pad[0x40];
-    int m_eAnimationState;
-};
-struct NiControllerManager
-{
-    void* vt;
-    long rc;
-    unsigned short m_uiObjectFlags;
-    char pad[0x46];
-    DummyPointerMap m_kPointerMap;
-    void SetBit(bool bVal, unsigned short uMask)
-    {
-        if (bVal)
-            m_uiObjectFlags |= uMask;
-        else
-            m_uiObjectFlags &= ~uMask;
-    }
-    NiControllerSequence* FindSequenceByName(const NiFixedString& kName)
-    {
-        NiControllerSequence* pkSequence;
-        if (m_kPointerMap.GetAt((unsigned int)(const char*)kName, (unsigned int&)pkSequence))
-            return pkSequence;
-        return 0;
-    }
-    bool StopSequence(NiControllerSequence* pkSequence, float fEaseOutTime = 0.0f)
-    {
-        return pkSequence->Deactivate(fEaseOutTime, false);
-    }
-    bool ActivateControllerSequence(NiControllerSequence* pkSequence, int iPriority = 0, bool bStartOver = false,
-                                    float fWeight = 1.0f, float fEaseInTime = 0.0f,
-                                    NiControllerSequence* pkTimeSyncSeq = 0)
-    {
-        return pkSequence->Activate((char)iPriority, bStartOver, fWeight, fEaseInTime, pkTimeSyncSeq, false);
-    }
-};
+
 struct FUN_00a20cc0_t : public Tile3D
 {
     NiNode* GetNode()
@@ -439,31 +331,12 @@ bool FUN_00a20cc0_t::FUN_00a20cc0(const char* apSequenceName)
     return false;
 }
 
-struct Tile3DStrField : BSStringT<char>
+template <class T> inline BSStringT<T>::~BSStringT()
 {
-    ~Tile3DStrField()
-    {
-        Set(0, 0);
-    }
-};
+    Set(0, 0);
+}
 
-struct Tile3DBaseDtor : Tile
-{
-    virtual ~Tile3DBaseDtor();
-};
 
-struct FUN_00a20650_cls : Tile3DBaseDtor
-{
-    void* m_pParent;
-    void* m_pChildTile;
-    Tile3DStrField m_kName;
-    Tile3DStrField strFilename;
-    __forceinline bool TestFlag(unsigned int mask) const
-    {
-        return (*(const unsigned int*)((const char*)this + 0x30) & mask) != 0;
-    }
-    virtual ~FUN_00a20650_cls();
-};
 
 void __cdecl FUN_00707640(unsigned int value);
 void __fastcall FUN_009ff690(void* pThis);
@@ -473,8 +346,13 @@ struct FUN_00a20650_pad
     unsigned int f00, f04, f08, f0c, f10, f14, f18, f1c, f20, f24, f28, f2c, f30, f34, f38;
 };
 
+__forceinline bool Tile3D::TestFlag(unsigned int mask) const
+{
+    return (*(const unsigned int*)((const char*)this + 0x30) & mask) != 0;
+}
+
 // @fnv 0x00a20650
-FUN_00a20650_cls::~FUN_00a20650_cls()
+Tile3D::~Tile3D()
 {
     FUN_00a20650_pad unkPad;
     unsigned int unkX;
@@ -489,138 +367,6 @@ FUN_00a20650_cls::~FUN_00a20650_cls()
         FUN_009ff690(this);
     }
 }
-
-class NiExtraData
-{
-  public:
-    NiExtraData();
-    virtual ~NiExtraData();
-    void SetName(const NiFixedString& name);
-    int unk04;
-    int unk08;
-};
-
-class NiObjectNET
-{
-  public:
-    virtual ~NiObjectNET();
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void v07();
-    virtual void v08();
-    virtual void v09();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void AttachChildInAvailableSlot(NiNode* child, bool firstAvail);
-    bool AddExtraData(NiExtraData* extra);
-    void DecRefCount();
-    void IncRefCount();
-};
-
-struct NiNodeChildArray
-{
-    NiNodeChildArray(int maxSize, int growBy);
-    ~NiNodeChildArray();
-    void RemoveAll();
-    void* vtbl;
-    int m_pBase;
-    int m_usMaxSize;
-    int m_usGrowBy;
-};
-
-class NiNode : public NiObjectNET
-{
-  public:
-    NiNode(unsigned short arraySize);
-    void UpdateModel();
-    static void* operator new(unsigned int size);
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    NiNode* m_pParentNode;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    unsigned int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    NiNodeChildArray m_kChildList;
-};
 
 template <class T> struct NiPtrX
 {
@@ -649,19 +395,9 @@ struct Tile__Extra : NiExtraData
     static void* operator new(unsigned int size);
 };
 
-struct TileX
-{
-    NiNode* GetNiNode();
-};
+NiNode* __fastcall GetTileNiNode(Tile* tile);
 NiNode* FUN_00706d30();
 
-extern "C" char* __cdecl strstr(const char*, const char*);
-struct ModelPath
-{
-    char* buffer;
-    unsigned int length;
-};
-int __cdecl FormatModelPath(ModelPath*, const char*, ...);
 const char* __cdecl ModelRoot();
 NiNode* __cdecl LoadTileModel(const char*, bool*);
 NiNode* __cdecl CopyTileModel(NiNode*);
@@ -680,16 +416,16 @@ struct Tile3DCalc
     int unk1c;
     int unk20;
     int unk24;
-    TileX* parent;
+    Tile* parent;
     NiPtrX<NiNode> node;
 
-    TileX* GetParent()
+    Tile* GetParent()
     {
         return parent;
     }
     unsigned int flags;
     int unk34, unk38, unk3c, unk40, unk44;
-    ModelPath filename;
+    BSStringT<char> filename;
     const char* GetString(int);
     bool InitControllers(NiNode*);
     void CreateMenuBackgroundGeometry(NiNode*);
@@ -703,11 +439,11 @@ struct Tile3DCalc
         if (!name)
             return;
         if (strstr(name, "\\Data"))
-            FormatModelPath(&filename, "%s", name);
+            filename.PrintfString("%s", name);
         else
-            FormatModelPath(&filename, "%s\\%s", ModelRoot(), name);
+            filename.PrintfString("%s\\%s", ModelRoot(), name);
         bool loaded = false;
-        NiNode* model = LoadTileModel(filename.buffer, &loaded);
+        NiNode* model = LoadTileModel(filename.pString, &loaded);
         if (!model)
         {
             node = 0;
@@ -717,18 +453,18 @@ struct Tile3DCalc
             flags |= 0x20000;
         else
             flags &= ~0x20000;
-        if (model->m_pParentNode)
+        if (model->m_pkParent)
             model = CopyTileModel(model);
         InitControllers(model);
-        node.m_pObject->m_kChildList.RemoveAll();
+        ((Tile3DArrayAccess<NiPointer<NiAVObject> >*)&node.m_pObject->m_kChildren)->RemoveAll();
         CreateMenuBackgroundGeometry(model);
         InitProperties(model);
         node.m_pObject->AttachChildInAvailableSlot(model, true);
         SetValue(0xfa8, 1.0f, true);
         if (!GetBool(0xfa3))
-            node.m_pObject->unk30 |= 1;
+            node.m_pObject->m_uFlags |= 1;
         else
-            node.m_pObject->unk30 &= ~1;
+            node.m_pObject->m_uFlags &= ~1;
         node->UpdateModel();
         if (flags & 0x40)
             flags ^= 0x40;
@@ -744,51 +480,52 @@ NiNode* Tile3DCalc::CreateTileNode()
 {
     if (node)
     {
-        node->m_pParentNode = 0;
+        node->m_pkParent = 0;
         node = 0;
     }
     node = new NiNode(0);
     LoadTile();
     if (node)
     {
-        NiNode* parentNode = GetParent()->GetNiNode();
+        NiNode* parentNode = GetTileNiNode(GetParent());
         if (!parentNode)
             parentNode = FUN_00706d30();
-        parentNode->AttachChildInAvailableSlot(node, true);
+        parentNode->AttachChildInAvailableSlot((NiAVObject*)(NiNode*)node, true);
         node->AddExtraData(new Tile__Extra(reinterpret_cast<Tile*>(this), node));
     }
     return node;
 }
 
 extern "C" unsigned int __cdecl strlen(const char*);
-struct AnimString
+template <class T> inline const T* BSStringT<T>::String() const
 {
-    char* text;
-    unsigned short length, capacity;
-    int StrCmp(const char*, bool) const;
-    bool Set(const char*, unsigned int);
-    const char* Get() const
-    {
-        return text;
-    }
-    bool operator==(const char* rhs) const
-    {
-        return !StrCmp(rhs, true);
-    }
-    AnimString& operator=(const char* rhs)
-    {
-        Set(rhs, 0);
-        return *this;
-    }
-    bool operator!=(const char* rhs) const
-    {
-        return !(*this == rhs);
-    }
-    unsigned int Length() const
-    {
-        return length == 65535 ? strlen(Get()) : length;
-    }
-};
+    return pString;
+}
+template <class T> inline BSStringT<T>& BSStringT<T>::operator=(const T* rhs)
+{
+    Set(rhs, 0);
+    return *this;
+}
+template <class T> inline unsigned int BSStringT<T>::Length() const
+{
+    return sLen == 65535 ? strlen(String()) : sLen;
+}
+// Comparison operators are absent from the shared interface.
+inline bool operator==(const BSStringT<char>& lhs, const char* rhs)
+{
+    return !lhs.StrCmp(rhs, true);
+}
+inline bool operator!=(const BSStringT<char>& lhs, const char* rhs)
+{
+    return !(lhs == rhs);
+}
+inline void NiAVObject::SetBit(bool val, unsigned int mask)
+{
+    if (val)
+        m_uFlags |= mask;
+    else
+        m_uFlags &= ~mask;
+}
 struct UpdateData
 {
     float time;
@@ -796,105 +533,15 @@ struct UpdateData
     UpdateData(float t) : time(t), controllers(true), geom(false), transforms(false), selective(false), rigid(false)
     {}
 };
-struct AnimNode
+
+inline float GetSequenceTime(const NiControllerSequence* sequence)
 {
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    unsigned int flags;
-    void SetFlag(bool b, unsigned int mask)
-    {
-        if (b)
-            flags |= mask;
-        else
-            flags &= ~mask;
-    }
-    void Update(UpdateData&);
-};
-struct AnimSequence
+    return sequence->m_fLastTime;
+}
+inline float GetSequenceDuration(const NiControllerSequence* sequence)
 {
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual bool Deactivate(float, bool);
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    float duration, time;
-    float GetTime() const
-    {
-        return time;
-    }
-    float GetDuration() const
-    {
-        return duration;
-    }
-};
-struct AnimManager
-{
-    int unk00, unk04;
-    unsigned short flags;
-    void SetBit(bool b, unsigned short mask)
-    {
-        if (b)
-            flags |= mask;
-        else
-            flags &= ~mask;
-    }
-    bool StopSequence(AnimSequence* seq, float ease = 0.0f)
-    {
-        return seq->Deactivate(ease, false);
-    }
-};
+    return sequence->m_fLastKeyTime;
+}
 
 extern float DAT_011f356c;
 inline float DeltaTime()
@@ -904,7 +551,8 @@ inline float DeltaTime()
 }
 extern float DAT_01095728;
 __declspec(dllimport) unsigned long __stdcall GetTickCount();
-struct Interface
+// Exe 0x00a20ed0: unit-local Tile3dInterfaceView view used by this matched implementation.
+struct Tile3dInterfaceView
 {
     static bool PlayNifSounds(NiControllerSequence*);
 };
@@ -921,15 +569,15 @@ struct AnimTile
     int unk20;
     int unk24;
     int unk28;
-    AnimNode* node;
+    NiNode* node;
     int unk30, unk34;
-    AnimManager* manager;
-    AnimSequence* sequence;
-    AnimString name;
+    NiControllerManager* manager;
+    NiControllerSequence* sequence;
+    BSStringT<char> name;
     const char* GetString(int);
     bool HasValue(int);
     bool LoadSequence(const char*);
-    AnimNode* GetNode()
+    NiNode* GetNode()
     {
         return node;
     }
@@ -949,35 +597,35 @@ inline float MinTime(float value, float high)
 bool AnimTile::UpdateAnimation(float value, bool force)
 {
     const char* r = GetString(0xfd2);
-    if ((name.Get() || r) && name != r)
+    if ((name.String() || r) && name != r)
     {
         name = r;
-        if (name.Length() && !LoadSequence(name.Get()))
+        if (name.Length() && !LoadSequence(name.String()))
             name = 0;
     }
     if (!GetNode() || !manager || !HasValue(0xfa3))
         return false;
     if (!HasValue(0xfa3))
-        GetNode()->SetFlag(true, 1);
+        GetNode()->SetBit(true, 1);
     if (!sequence)
         return false;
-    if (sequence->GetTime() == -DAT_01095728)
+    if (GetSequenceTime(sequence) == -DAT_01095728)
     {
         UpdateData update(0.0f);
-        GetNode()->Update(update);
+        GetNode()->Update((NiUpdateData&)update);
     }
     else if (value == -1.0)
     {
         float time3;
-        time3 = sequence->GetTime() + DeltaTime();
+        time3 = GetSequenceTime(sequence) + DeltaTime();
         float ptr;
-        ptr = sequence->GetDuration();
+        ptr = GetSequenceDuration(sequence);
         while (time3 > ptr)
             time3 -= ptr;
         DAT_011f3560.Update(GetTickCount());
         UpdateData loopUpdate7(time3);
-        GetNode()->Update(loopUpdate7);
-        if (Interface::PlayNifSounds((NiControllerSequence*)sequence))
+        GetNode()->Update((NiUpdateData&)loopUpdate7);
+        if (Tile3dInterfaceView::PlayNifSounds((NiControllerSequence*)sequence))
         {
             manager->StopSequence(sequence);
             sequence = 0;
@@ -987,157 +635,24 @@ bool AnimTile::UpdateAnimation(float value, bool force)
     else if (force || value > 1.0)
     {
         float kSeekTime;
-        kSeekTime = sequence->GetDuration();
+        kSeekTime = GetSequenceDuration(sequence);
         float c = MinTime(MaxTime(kSeekTime * value, 0.0f), kSeekTime);
         UpdateData seekUpdate9(c);
-        GetNode()->Update(seekUpdate9);
+        GetNode()->Update((NiUpdateData&)seekUpdate9);
     }
     else
     {
         UpdateData update(value);
-        GetNode()->Update(update);
+        GetNode()->Update((NiUpdateData&)update);
     }
     return true;
 }
 
+class NiTexture;
 namespace fnv_00a21340 {
-struct NiMemObject
-{
-    static void* operator new(unsigned int);
-    static void operator delete(void*);
-};
-struct NiTexture;
-struct TileShaderProperty : NiMemObject
-{
-    unsigned int f00;
-    unsigned int f04;
-    unsigned int f08;
-    unsigned int f0c;
-    unsigned int f10;
-    unsigned int f14;
-    unsigned int f18;
-    unsigned int f1c;
-    unsigned int f20;
-    unsigned int f24;
-    unsigned int f28;
-    unsigned int f2c;
-    unsigned int f30;
-    unsigned int f34;
-    unsigned int f38;
-    unsigned int f3c;
-    unsigned int f40;
-    unsigned int f44;
-    unsigned int f48;
-    unsigned int f4c;
-    unsigned int f50;
-    unsigned int f54;
-    unsigned int f58;
-    unsigned int f5c;
-    unsigned int f60;
-    unsigned int f64;
-    unsigned int f68;
-    unsigned int f6c;
-    unsigned int f70;
-    unsigned int f74;
-    unsigned int f78;
-    unsigned int f7c;
-    unsigned int f80;
-    unsigned int f84;
-    unsigned int f88;
-    unsigned int f8c;
-    unsigned int f90;
-    unsigned int f94;
-    unsigned int f98;
-    unsigned int f9c;
-    unsigned int fa0;
-    unsigned int fa4;
-    unsigned int fa8;
-    unsigned int fac;
-    TileShaderProperty(bool);
-    void FUN_00bb7a10(NiTexture*);
-};
+using ::NiMemObject;
 
-struct AVObj;
 struct Geometry;
-struct NiNode;
-
-struct AVObj
-{
-    virtual void v00();
-    virtual void v04();
-    virtual void v08();
-    virtual NiNode* IsSceneNode();
-    virtual void v10();
-    virtual void v14();
-    virtual Geometry* IsGeometry();
-};
-
-struct NodePointer
-{
-    AVObj* ptr;
-    operator AVObj*() const
-    {
-        return ptr;
-    }
-    AVObj* operator->() const
-    {
-        AVObj* result = ptr;
-        return result;
-    }
-};
-struct NodeArray
-{
-    void* vf;
-    NodePointer* data;
-    unsigned short capacity, allocated, size;
-    NodePointer& operator[](unsigned int i)
-    {
-        return data[i];
-    }
-};
-
-struct NiNode : AVObj
-{
-    unsigned int f04;
-    unsigned int f08;
-    unsigned int f0c;
-    unsigned int f10;
-    unsigned int f14;
-    unsigned int f18;
-    unsigned int f1c;
-    unsigned int f20;
-    unsigned int f24;
-    unsigned int f28;
-    unsigned int f2c;
-    unsigned int f30;
-    unsigned int f34;
-    unsigned int f38;
-    unsigned int f3c;
-    unsigned int f40;
-    unsigned int f44;
-    unsigned int f48;
-    unsigned int f4c;
-    unsigned int f50;
-    unsigned int f54;
-    unsigned int f58;
-    unsigned int f5c;
-    unsigned int f60;
-    unsigned int f64;
-    unsigned int f68;
-    unsigned int f6c;
-    unsigned int f70;
-    unsigned int f74;
-    unsigned int f78;
-    unsigned int f7c;
-    unsigned int f80;
-    unsigned int f84;
-    unsigned int f88;
-    unsigned int f8c;
-    unsigned int f90;
-    unsigned int f94;
-    unsigned int f98;
-    NodeArray children;
-};
 
 struct Prop
 {
@@ -1266,11 +781,11 @@ void FUN_00a21340_shell::ConvertShadersToTileShader(NiNode* node)
 {
     if (node)
     {
-        for (unsigned int i8 = 0; i8 < node->children.size; ++i8)
+        for (unsigned int i8 = 0; i8 < node->m_kChildren.m_usESize; ++i8)
         {
-            if (node->children[i8])
+            if (((Tile3DArrayAccess<NiPointer<NiAVObject> >*)&node->m_kChildren)->GetAt(i8))
             {
-                Geometry* child_ = (Geometry*)node->children[i8]->IsGeometry();
+                Geometry* child_ = (Geometry*)((Tile3DArrayAccess<NiPointer<NiAVObject> >*)&node->m_kChildren)->GetAt(i8)->IsGeometry();
                 if (child_)
                 {
                     Prop* shader = (Prop*)child_->GetProperty(3);
@@ -1287,7 +802,7 @@ void FUN_00a21340_shell::ConvertShadersToTileShader(NiNode* node)
                         child_->shader = texturing2;
                     }
                 }
-                NiNode* geometry9 = node->children[i8]->IsSceneNode();
+                NiNode* geometry9 = ((Tile3DArrayAccess<NiPointer<NiAVObject> >*)&node->m_kChildren)->GetAt(i8)->IsSceneNode();
                 if (geometry9)
                     ConvertShadersToTileShader(geometry9);
             }
@@ -1296,209 +811,46 @@ void FUN_00a21340_shell::ConvertShadersToTileShader(NiNode* node)
 }
 }  // namespace fnv_00a21340
 
+inline NiNode* NiAVObject::GetParent()
+{
+    return m_pkParent;
+}
+inline void NiAVObject::SetAppCulled(bool val)
+{
+    SetBit(val, 1);
+}
+
+inline void NiNode::SetAppCulled(bool val)
+{
+    SetBit(val, 1);
+}
+
 namespace fnv_00a20980 {
 long FinishScriptRunLock(void* p);
 long InitScriptRunLock(void* p);
-
-class NiAVObject
+}
+inline void NiAVObject::IncRefCount()
 {
-  public:
-    void IncRefCount()
-    {
-        InitScriptRunLock(&unk04);
-    }
-    void DecRefCount()
-    {
-        if (!FinishScriptRunLock(&unk04))
-            DeleteThis();
-    }
-    virtual void vf00();
-    virtual void DeleteThis();
-    virtual void vf02();
-    virtual void vf03();
-    virtual void vf04();
-    virtual void vf05();
-    virtual void vf06();
-    virtual void vf07();
-    virtual void vf08();
-    virtual void vf09();
-    virtual void vf0a();
-    virtual void vf0b();
-    virtual void vf0c();
-    virtual void vf0d();
-    virtual void vf0e();
-    virtual void vf0f();
-    virtual void vf10();
-    virtual void vf11();
-    virtual void vf12();
-    virtual void vf13();
-    virtual void vf14();
-    virtual void vf15();
-    virtual void vf16();
-    virtual void vf17();
-    virtual void vf18();
-    virtual void vf19();
-    virtual void vf1a();
-    virtual void vf1b();
-    virtual void vf1c();
-    virtual void vf1d();
-    virtual void vf1e();
-    virtual void vf1f();
-    virtual void vf20();
-    virtual void vf21();
-    virtual void vf22();
-    virtual void vf23();
-    virtual void vf24();
-    virtual void vf25();
-    virtual void vf26();
-    virtual void vf27();
-    virtual void vf28();
-    virtual void vf29();
-    virtual void vf2a();
-    virtual void vf2b();
-    virtual void vf2c();
-    virtual void vf2d();
-    virtual void vf2e();
-    virtual void vf2f();
-    virtual void vf30();
-    virtual void vf31();
-    virtual void vf32();
-    virtual void vf33();
-    virtual void vf34();
-    virtual void vf35();
-    virtual void vf36();
-    virtual void AttachChildInAvailableSlot(NiAVObject* child, bool firstAvail);
-
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    NiAVObject* m_parent;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    unsigned int m_flags;
-
-    NiAVObject* GetParent()
-    {
-        return m_parent;
-    }
-    void SetBit(bool val, unsigned int mask)
-    {
-        if (val)
-            m_flags |= mask;
-        else
-            m_flags &= ~mask;
-    }
-    void SetAppCulled(bool val)
-    {
-        SetBit(val, 1);
-    }
-};
-
-template <class T> class NiPtr;
-
-template <class T> class NiTArray
+    fnv_00a20980::InitScriptRunLock(&m_uiRefCount);
+}
+inline void NiAVObject::DecRefCount()
 {
-  public:
-    virtual void vf00();
-
-    T* m_pBase;
-    unsigned short m_usMaxSize;
-    unsigned short m_usSize;
-    unsigned short m_usESize;
-    unsigned short m_usGrowBy;
-
-    void RemoveAll()
-    {
-        for (unsigned short i = 0; i < m_usSize; i++)
-            m_pBase[i] = T(0);
-        m_usSize = 0;
-        m_usESize = 0;
-    }
-};
-
-class NiNode : public NiAVObject
+    if (!fnv_00a20980::FinishScriptRunLock(&m_uiRefCount))
+        DeleteThis();
+}
+inline void NiNode::IncRefCount()
 {
-  public:
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    NiTArray<NiPtr<NiAVObject> > m_children;
-    void FUN_00a5a040();
-};
-
-template <class T> class NiPtr
+    fnv_00a20980::InitScriptRunLock(&m_uiRefCount);
+}
+inline void NiNode::DecRefCount()
 {
-  public:
-    T* m_object;
-    NiPtr(T* p)
-    {
-        m_object = p;
-        if (m_object)
-            m_object->IncRefCount();
-    }
-    ~NiPtr();
-    NiPtr& operator=(const NiPtr& p);
-    NiPtr& operator=(T* p)
-    {
-        if (m_object != p)
-        {
-            if (m_object)
-                m_object->DecRefCount();
-            m_object = p;
-            if (m_object)
-                m_object->IncRefCount();
-        }
-        return *this;
-    }
-    T* operator->() const
-    {
-        return m_object;
-    }
-    operator T*() const
-    {
-        return m_object;
-    }
-};
+    if (!fnv_00a20980::FinishScriptRunLock(&m_uiRefCount))
+        DeleteThis();
+}
 
-class BSString
-{
-  public:
-    char* m_data;
-    int m_len;
-    const char* CStr()
-    {
-        return m_data;
-    }
-    int Sprintf(const char* fmt, ...);
-};
+namespace fnv_00a20980 {
+long FinishScriptRunLock(void* p);
+long InitScriptRunLock(void* p);
 
 const char* FUN_00707860();
 NiAVObject* FUN_00707660(const char* path, bool* flag);
@@ -1506,76 +858,53 @@ NiAVObject* FUN_00707870(NiAVObject* obj);
 void FUN_00707930(int a);
 void FUN_00707820();
 
-class Tile3DX
+}  // namespace fnv_00a20980
+
+// The approved Tile interface has no helper for the model ownership flag.
+inline void SetModelLoaded(Tile* tile, bool loaded)
 {
-  public:
-    virtual void vf00();
+    loaded ? (tile->uiFlags |= 0x20000) : (tile->uiFlags &= ~0x20000);
+}
 
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    NiPtr<NiNode> node;
-    unsigned int flags;
-    int unk34;
-    void* m_pParent;
-    void* m_pChildTile;
-    BSString m_kName;
-    BSString strFilename;
-
-    const char* GetString(int id);
-    bool GetBool(int id);
-    void Set(int id, float value, bool b);
-    void SetChangeFlag(int a);
-    bool AttachController(NiAVObject* obj);
-    void RemovePropertyRecursive(NiAVObject* obj);
-    void ConvertShadersToTileShader(NiAVObject* obj);
-    void SetFlag20000(bool b)
-    {
-        b ? (flags |= 0x20000) : (flags &= ~0x20000);
-    }
-    void LoadTile();
-};
+template <> inline NiNode* NiPointer<NiNode>::operator->() const
+{
+    return m_pObject;
+}
 
 // Loads an object from a constructed path, attaches it beneath the node, converts its shaders, and updates culling and flags.
 // @fnv 0x00a20980
-void Tile3DX::LoadTile()
+void Tile3D::LoadTile()
 {
+    using namespace fnv_00a20980;
     const char* pszName = GetString(0xfcc);
     if (!pszName)
         return;
     if (strstr(pszName, "\\Data"))
-        strFilename.Sprintf("%s", pszName);
+        strFilename.PrintfString("%s", pszName);
     else
-        strFilename.Sprintf("%s\\%s", FUN_00707860(), pszName);
+        strFilename.PrintfString("%s\\%s", FUN_00707860(), pszName);
     bool flag = false;
-    NiAVObject* m_kModelObjectsItem = FUN_00707660(strFilename.CStr(), &flag);
+    NiAVObject* m_kModelObjectsItem = FUN_00707660(strFilename.String(), &flag);
     if (!m_kModelObjectsItem)
     {
-        node = 0;
+        m_pRenderedNodeEntry = 0;
         return;
     }
-    SetFlag20000(flag);
+    SetModelLoaded(this, flag);
     if (m_kModelObjectsItem->GetParent())
         m_kModelObjectsItem = FUN_00707870(m_kModelObjectsItem);
     AttachController(m_kModelObjectsItem);
-    node->m_children.RemoveAll();
+    ((Tile3DArrayAccess<NiPointer<NiAVObject> >*)&m_pRenderedNodeEntry->m_kChildren)->RemoveAll();
     RemovePropertyRecursive(m_kModelObjectsItem);
     ConvertShadersToTileShader(m_kModelObjectsItem);
-    node->AttachChildInAvailableSlot(m_kModelObjectsItem, true);
+    m_pRenderedNodeEntry->AttachChildInAvailableSlot(m_kModelObjectsItem, true);
     Set(0xfa8, 1.0f, true);
-    node->SetAppCulled(!GetBool(0xfa3));
-    node->FUN_00a5a040();
-    if (flags & 0x40)
-        flags ^= 0x40;
+    m_pRenderedNodeEntry->SetAppCulled(!IsTraitNonZero(0xfa3));
+    m_pRenderedNodeEntry->FUN_00a5a040();
+    if (uiFlags & 0x40)
+        uiFlags ^= 0x40;
     SetChangeFlag(9);
     FUN_00707930(1);
     FUN_00707820();
 }
-}  // namespace fnv_00a20980
+

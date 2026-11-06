@@ -3,7 +3,7 @@
 #define FNV_BGSLOADFORMBUFFER_H
 
 #include "layout_support.h"
-#include "TESForm.h"
+#include "../../include/TESForm.h"
 class FormChangeMask;
 class BGSLoadFormBuffer;
 class BGSLoadGameBuffer;

@@ -1,206 +1,83 @@
+#include "../../include/ImageSpaceTexture.h"
 
 // src/bsshader/imagespaceshadermenuunpack.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/bsshader/imagespaceshadermenuunpack.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <windows.h>
-struct NiRefObject
-{
-    virtual void vf00();
-    virtual void DeleteThis();
-    volatile long refCount;
-    NiRefObject() : refCount(0)
-    {}
-    static void* operator new(unsigned int size);
-    void IncRefCount()
-    {
-        InterlockedIncrement(&refCount);
-    }
-    void DecRefCount()
-    {
-        if (!InterlockedDecrement(&refCount))
-            DeleteThis();
-    }
-};
+#include "../../include/NiFixedString.h"
+#include "../../include/NiRefObject.h"
+#include "../../include/BSRenderedTexture.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/NiScreenElements.h"
+#include "../../include/NiScreenElementsData.h"
 
-template <class T> struct NiPointer
+inline void NiRefObject::IncRefCount()
 {
-    T* ptr;
-    NiPointer() : ptr(0)
-    {}
-    NiPointer(T* p) : ptr(p)
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+
+inline void NiRefObject::DecRefCount()
+{
+    if (!InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)))
+        DeleteThis();
+}
+
+template <class T> inline NiPointer<T>::NiPointer() : m_pObject(0)
+{}
+
+template <class T> inline NiPointer<T>::NiPointer(T* p) : m_pObject(p)
+{
+    if (m_pObject)
+        reinterpret_cast<NiRefObject*>(m_pObject)->NiRefObject::IncRefCount();
+}
+
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject)
+        reinterpret_cast<NiRefObject*>(m_pObject)->NiRefObject::DecRefCount();
+}
+
+template <class T> inline void ReleasePointer(NiPointer<T>& pointer)
+{
+    T* old = pointer.m_pObject;
+    if (old)
     {
-        if (ptr)
-            ptr->IncRefCount();
+        volatile long& refs = *reinterpret_cast<volatile long*>(&old->m_uiRefCount);
+        if (!InterlockedDecrement(&refs))
+            old->DeleteThis();
+        pointer.m_pObject = 0;
     }
-    ~NiPointer()
+}
+
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(T* p)
+{
+    T* old = m_pObject;
+    if (old != p)
     {
-        if (ptr)
-            ptr->DecRefCount();
-    }
-    void Release()
-    {
-        T* old = ptr;
         if (old)
-        {
-            volatile long& refs = old->refCount;
-            if (!InterlockedDecrement(&refs))
-                old->DeleteThis();
-            ptr = 0;
-        }
+            old->NiRefObject::DecRefCount();
+        m_pObject = p;
+        p->NiRefObject::IncRefCount();
     }
-    NiPointer& operator=(T* p)
-    {
-        T* old = ptr;
-        if (old != p)
-        {
-            if (old)
-                old->DecRefCount();
-            ptr = p;
-            p->IncRefCount();
-        }
-        return *this;
-    }
-    operator T*() const
-    {
-        return ptr;
-    }
-    T* operator->() const
-    {
-        return ptr;
-    }
-};
+    return *this;
+}
 
-extern char* DAT_0109b220;
+template <class T> inline NiPointer<T>::operator T*() const
+{
+    return m_pObject;
+}
 
-struct NiFixedString
+template <class T> inline T* NiPointer<T>::operator->() const
 {
-    char* handle;
-    NiFixedString(char* h) : handle(h)
-    {}
-    ~NiFixedString()
-    {
-        if (handle != DAT_0109b220)
-            InterlockedDecrement((volatile long*)(handle - 8));
-    }
-};
-struct NiGlobalStringTable
-{
-    static char* __cdecl AddString(const char*);
-};
+    return m_pObject;
+}
 
-struct BSRenderedTexture : NiRefObject
-{
-};
-struct ImageSpaceTexture
-{
-    BSRenderedTexture* FUN_00ba3770();
-};
+inline NiUpdateData::NiUpdateData()
+    : fTime(0.0f), pad1(false), pad2(false), pad3(false), pad4(false), pad5(false)
+{}
 
-struct NiScreenElementsData
-{
-    static void* operator new(unsigned int size);
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    NiScreenElementsData(bool a, bool b, unsigned short c, int d, int e, int f, int g, int h, int i);
-    bool FUN_00a87ae0(int a, int b, int c);
-    bool SetRectangle(int i, float a, float b, float c, float d);
-    void FUN_00a87900();
-    bool FUN_00a88130(int i, int j, float a, float b, float c, float d);
-    void FUN_00a67050(int a);
-};
 
-struct NiUpdateData
-{
-    float fTime;
-    bool b0, b1, b2, b3, b4;
-    NiUpdateData() : fTime(0.0f), b0(false), b1(false), b2(false), b3(false), b4(false)
-    {}
-};
 
-struct HudOwner;
-struct ScreenSink;
-
-struct NiScreenElements : NiRefObject
-{
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6c;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7c;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8c;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9c;
-    int unka0;
-    int unka4;
-    int unka8;
-    int unkac;
-    int unkb0;
-    int unkb4;
-    NiScreenElementsData* unkb8;
-    int unkbc;
-    HudOwner* unkc0;
-    NiScreenElements(NiScreenElementsData* d);
-    void AssignFixedString(NiFixedString* s);
-    void FUN_00a5a040();
-    void FUN_00a59c60(NiUpdateData* u);
-    void FUN_00a87790(ScreenSink* s);
-};
 
 struct ColorA
 {
@@ -635,7 +512,7 @@ void HudInner::UpdateHudGeometry(int aiUnk, SurfaceOwner* apSurface, HudParam* a
         if (DAT_011ae5d4)
         {
             NiPointer<BSRenderedTexture> pTexture = (*unk2c)->FUN_00ba3770();
-            DAT_011f91ac->unk200.Release();
+            ReleasePointer(DAT_011f91ac->unk200);
             NiScreenElements* pScreenElements =
                 new NiScreenElements(new NiScreenElementsData(false, false, 1, 1, 1, 4, 1, 2, 1));
             int i = 0;
@@ -645,7 +522,7 @@ void HudInner::UpdateHudGeometry(int aiUnk, SurfaceOwner* apSurface, HudParam* a
                 unsigned h = apSurface->GetHeight();
                 float aspect = (float)w / (float)h;
                 aspect = aspect / 1.3333333730697632;
-                pScreenElements->unkb8->FUN_00a87ae0(4, 0, 0);
+                static_cast<NiScreenElementsData*>(pScreenElements->m_spModelData.m_pObject)->FUN_00a87ae0(4, 0, 0);
                 RecEntry* pRecEntry = DAT_011ae5dc[i];
                 double fScale = aspect * 1280.0;
                 float qx = pRecEntry->f10 / fScale;
@@ -660,18 +537,18 @@ void HudInner::UpdateHudGeometry(int aiUnk, SurfaceOwner* apSurface, HudParam* a
                 float fH = 2.0 * -qh;
                 float e0 = qw + v4;
                 float e1 = qh + v5;
-                pScreenElements->unkb8->SetRectangle(i, fX, fY, fW, fH);
-                pScreenElements->unkb8->FUN_00a87900();
-                NiScreenElementsData* pScreenElementsData = pScreenElements->unkb8;
+                static_cast<NiScreenElementsData*>(pScreenElements->m_spModelData.m_pObject)->SetRectangle(i, fX, fY, fW, fH);
+                static_cast<NiScreenElementsData*>(pScreenElements->m_spModelData.m_pObject)->FUN_00a87900();
+                NiScreenElementsData* pScreenElementsData = static_cast<NiScreenElementsData*>(pScreenElements->m_spModelData.m_pObject);
                 pScreenElementsData->FUN_00a88130(i, 0, v4, v5, e0, e1);
-                pScreenElements->unkb8->FUN_00a67050(0);
-                NiFixedString sName(NiGlobalStringTable::AddString("Interface: HUD Unpack Geometry"));
+                static_cast<NiScreenElementsData*>(pScreenElements->m_spModelData.m_pObject)->FUN_00a67050(0);
+                NiFixedString sName(NiGlobalStringTable::AddString("Interface: HUD Unpack Geometry"), 0);
                 pScreenElements->AssignFixedString(&sName);
             }
             pScreenElements->FUN_00a5a040();
             NiUpdateData ud;
             pScreenElements->FUN_00a59c60(&ud);
-            pScreenElements->unkc0 = (HudOwner*)((char*)this - 0x6c);
+            pScreenElements->m_spShader = reinterpret_cast<NiShader*>((char*)this - 0x6c);
             DAT_011f91ac->unk200 = pScreenElements;
         }
         NiScreenElements* spr = DAT_011f91ac->unk200;

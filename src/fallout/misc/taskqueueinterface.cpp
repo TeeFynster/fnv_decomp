@@ -1,28 +1,169 @@
+#include "../../../include/SettingT.h"
+#include "../../../include/BSPackedTask.h"
+#include "../../../include/InterfaceManager.h"
 // fallout/misc/taskqueueinterface.cpp: TaskQueueInterface, Holder, Host, TaskQueueProxy and more (69 functions)
 
-#include "taskqueueinterface_decls.h"
-#include "NiPoint3.h"
+#include <stddef.h>
+#include "../../../include/SETTING_VALUE.h"
+#include "../../../include/ActorCombatGroup.h"
+#include "../../../include/TESWaterSystem.h"
+#include "../../../include/BaseProcess.h"
+#include "../../../include/HighProcess.h"
+#include "../../../include/Creature.h"
+#include "../../../include/MagicHitEffect.h"
+#include "../../../include/Actor.h"
+#include "../../../include/Character.h"
+#include "../../../include/ExtraDataList.h"
+#include "../../../include/PlayerCharacter.h"
+#include "../../../include/TESObjectWEAP.h"
+#include "../../../include/NiAdditionalGeometryData.h"
+#include "../../../include/NiUpdateData.h"
+#include "../../../include/BSFadeNode.h"
+#include "../../../include/TESSound.h"
+#include "../../../include/BSSimpleList.h"
+#include "../../../include/ActiveEffect.h"
+#include "../../../include/BGSOpenCloseForm.h"
+#include "../../../include/DetailedActorPathHandler.h"
+#include "../../../include/Script.h"
+#include "../../../include/TES.h"
+#include "../../../include/TESWaterListener.h"
+#include "../../../include/bhkCharacterController.h"
+#include "../../../include/bhkWorld.h"
+#include "../../../include/NavMeshObstacleManager.h"
+#include "../../../include/BSScrapArray.h"
+#include "../../../include/BSSimpleArray.h"
+#include "../../../include/DFALL.h"
+#include "../../../include/NiTMapBase.h"
+
+#define FNV_JOIN_IMPL(a, b) a##b
+#define FNV_JOIN(a, b) FNV_JOIN_IMPL(a, b)
+#define FNV_STATIC_ASSERT(condition) typedef char FNV_JOIN(fnv_static_assert_, __LINE__)[(condition) ? 1 : -1]
+
+class TESObjectCELL;
+class TESQuest;
+#include "../../../include/NiTMapItem.h"
+
+// Remaining unit-specific declarations from taskqueueinterface_decls.h.
+class BSPackedTask;
+class BooleanFloatQuery;
+class DismemberLimbTaskData;
+class Date;
+class bhkWorld;
+class bhkCharacterController;
+class CombatThreatRecord;
+class ParentSpaceNode;
+class SandboxProcedureData;
+class TaskQueueParallelWork;
+class TaskQueueParallelManager;
+#define TASK_PROCESS(actor) ((actor)->MobileObject::FUN_008d8520())
+class BooleanFloatQuery
+{
+  public:
+    Actor* m_pkAttacker;
+    char layoutPadding04_pad4[4];
+    void* m_pSourceReference;
+    int m_uiHitLocation;
+    int m_uiHitFlags;
+    float afDamageAmount;
+    void DecRefCount();  // @ref 0x0087cea0 DecRefCount@BooleanFloatQuery
+    float m_fArmorDamage;
+    float m_fHealthDamage;
+    float m_fLimbDamage;
+    float m_fFatigueDamage;
+    float m_fSneakAttackMultiplier;
+    float m_fCriticalHitMultiplier;
+    void* pWeapon;
+    float m_fWeaponDamage;
+    char m_vOffset1[12];
+    char m_vOffset2[12];
+    void* m_pHitDataObjectAtOffset50;
+    void* m_pHitDataObjectAtOffset54;
+    unsigned int uiFlags;
+    float m_fHitValueAtOffset5C;
+    int BackgroundTask;
+};
+class DismemberLimbTaskData
+{
+  public:
+    unsigned int uiLimb;
+    int iDismembermentOption;
+    Actor* pActor;
+};
+class BipedAnim
+{
+  public:
+    static void SetNodeTranslation(NiAVObject*);                   // @ref 0x004ab0c0 SetNodeTranslation@BipedAnim
+    static void SetNodeTranslation(NiAVObject*, const NiPoint3&);  // @ref 0x00b553d0 SetNodeTranslation@BipedAnim
+    void AttachFaceGenNode();                                      // @ref 0x00571b50 AttachFaceGenNode@BipedAnim
+};
+FNV_STATIC_ASSERT(sizeof(NiUpdateData) == 12);
+void FUN_005c0740(TESObjectREFR*, unsigned char, float);  // @ref 0x005c0740 FUN_005c0740
+void FUN_005c0b10(TESObjectREFR*, unsigned char, float);  // @ref 0x005c0b10 FUN_005c0b10
+void FUN_005d3c20(TESObjectREFR*, float);                 // @ref 0x005d3c20 FUN_005d3c20
+void FUN_005d4c20(TESObjectREFR*, float);                 // @ref 0x005d4c20 FUN_005d4c20
+void UpdateSceneGraph(NiAVObject*);                       // @ref 0x005526f0 UpdateSceneGraph
+void UpdateControllersRecursive(NiAVObject*);             // @ref 0x00552790 UpdateControllersRecursive
+void FUN_00892460(TESObjectREFR*, bool);                  // @ref 0x00892460 FUN_00892460
+void FUN_00c6a270(NiAVObject*, bool, bool, int);          // @ref 0x00c6a270 FUN_00c6a270
+void FUN_00c69fc0(NiAVObject*, bool, bool, bool);         // @ref 0x00c69fc0 FUN_00c69fc0
+void* GetObjectFromNode(NiAVObject*, bool, int);  // @ref 0x00c69ee0 GetObjectFromNode
+void* FUN_00458b20();  // @ref 0x00458b20 FUN_00458b20
+class TaskQueueParallelWork
+{
+  public:
+    void(__cdecl* pCallback)(unsigned int, void*);
+    void* pData;
+    unsigned int ItemUpdateArray;
+    unsigned int uiNext;
+    void Construct(void(__cdecl*)(unsigned int, void*), void*, unsigned int);  // @ref 0x0087cf10 Construct
+};
+class TaskQueueParallelManager
+{
+  public:
+    void FUN_00c44c90(TaskQueueParallelWork*);  // @ref 0x00c44c90 FUN_00c44c90
+};
+class BSSimpleArray_SandBoxChoiceListItem_1024_
+{
+  public:
+    void Clear(bool);  // @ref 0x008454f0 Clear@BSSimpleArray_SandBoxChoiceListItem_1024_
+};
+class INISettingCollection;
+using ::SettingT;                                                              // @ref 0x00408d60 Bool@?$SettingT
+void UpdateAnimObjFromTask(unsigned int, void*);                // @ref 0x0087cf50 UpdateAnimObjFromTask
+void FUN_0087cfb0(unsigned int, void*);                         // @ref 0x0087cfb0 FUN_0087cfb0
+void FUN_0087d030(BSScrapArray<NiPointer<NiAVObject>, 1024>*);  // @ref 0x0087d030 FUN_0087d030
+NiTMapBase<DFALL<NiTMapItem<unsigned int, CombatThreatRecord*> >, unsigned int, CombatThreatRecord*>*
+FUN_0087ce70();                                            // @ref 0x0087ce70 FUN_0087ce70
+extern BSSimpleArray<ParentSpaceNode, 1024> DAT_011df244;  // @ref 0x011df244 DAT_011df244
+extern BSSimpleArray<ParentSpaceNode, 1024> DAT_011df1c4;  // @ref 0x011df1c4 DAT_011df1c4
+extern SettingT<INISettingCollection> DAT_011df1b8;        // @ref 0x011df1b8 DAT_011df1b8
+extern TaskQueueParallelManager* DAT_01202df4;             // @ref 0x01202df4 DAT_01202df4
+extern TES* g_TES;
+extern PlayerCharacter* g_thePlayer;
+int Warning(const char*, ...);
+void operator delete(void*);
+extern bool DAT_011a31f4;
+extern "C" __declspec(dllimport) void __stdcall DebugBreak();
+
+
+
+class QuestStage
+{
+  public:
+    unsigned char GetIndex();
+};
+
+InterfaceManager* FUN_004b7210();
+#include "../../../include/CountingSemaphore.h"
+#include "../../../include/GO.h"
 
 // Names of nested/template specializations use the canonical generator identifier mapping.
 #ifndef FNV_BSPACKEDTASK_H
 #define FNV_BSPACKEDTASK_H
-#include "layout_support.h"
 class BSPackedTask;
 union BSPackedTask__PackedTaskVariantData;
 #pragma pack(push, 4)
-union BSPackedTask__PackedTaskVariantData
-{
-  public:
-    union
-    {                      // overlapping CodeView storage
-        bool bData;        // +0x0, 1 bytes
-        char pcDataA[4];   // +0x0, 4 bytes
-        short psDataA[2];  // +0x0, 4 bytes
-        int iData;         // +0x0, 4 bytes
-        float fData;       // +0x0, 4 bytes
-        void* pData;       // +0x0, 4 bytes
-    };
-};
+
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(BSPackedTask__PackedTaskVariantData) == 4);
 FNV_STATIC_ASSERT(offsetof(BSPackedTask__PackedTaskVariantData, bData) == 0);
@@ -32,11 +173,7 @@ FNV_STATIC_ASSERT(offsetof(BSPackedTask__PackedTaskVariantData, iData) == 0);
 FNV_STATIC_ASSERT(offsetof(BSPackedTask__PackedTaskVariantData, fData) == 0);
 FNV_STATIC_ASSERT(offsetof(BSPackedTask__PackedTaskVariantData, pData) == 0);
 #pragma pack(push, 4)
-class BSPackedTask
-{
-  public:
-    BSPackedTask__PackedTaskVariantData m_akPackedTaskVariantData[8];  // +0x0, 32 bytes
-};
+
 #pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(BSPackedTask) == 32);
 FNV_STATIC_ASSERT(offsetof(BSPackedTask, m_akPackedTaskVariantData) == 0);
@@ -45,11 +182,9 @@ FNV_STATIC_ASSERT(offsetof(BSPackedTask, m_akPackedTaskVariantData) == 0);
 // Names of nested/template specializations use the canonical generator identifier mapping.
 #ifndef FNV_BSPACKEDTASKQUEUE_H
 #define FNV_BSPACKEDTASKQUEUE_H
-#include "layout_support.h"
 class BSPackedTask;
 class PackedTaskQueueProcessor;
 class BSScrapHeapQueueElem_BSPackedTask_;
-class CountingSemaphore;
 class BSTCommonMessageQueue_BSPackedTask_;
 class BSTCommonScrapHeapMessageQueue_BSPackedTask_;
 class BSTMessageQueue_BSPackedTask_;
@@ -106,23 +241,6 @@ FNV_STATIC_ASSERT(sizeof(BSTCommonScrapHeapMessageQueue_BSPackedTask_) == 20);
 FNV_STATIC_ASSERT(offsetof(BSTCommonScrapHeapMessageQueue_BSPackedTask_, m_pAllocator) == 8);
 FNV_STATIC_ASSERT(offsetof(BSTCommonScrapHeapMessageQueue_BSPackedTask_, pHead) == 12);
 FNV_STATIC_ASSERT(offsetof(BSTCommonScrapHeapMessageQueue_BSPackedTask_, m_ppTailLink) == 16);
-#pragma pack(push, 4)
-class CountingSemaphore
-{
-  public:
-    volatile int iCount;  // +0x0, 4 bytes
-    void* hSemaphore;     // +0x4, 4 bytes
-    int m_iMaximumCount;  // +0x8, 4 bytes
-    // CountingSemaphore
-    // void __cdecl CountingSemaphore::*()
-    // int __cdecl CountingSemaphore::*()
-    // int __cdecl CountingSemaphore::*()
-    // int __cdecl CountingSemaphore::*()
-    // int __cdecl CountingSemaphore::*()
-    // bool __cdecl CountingSemaphore::*()
-    // void* __cdecl CountingSemaphore::*(unsigned int)
-};
-#pragma pack(pop)
 FNV_STATIC_ASSERT(sizeof(CountingSemaphore) == 12);
 FNV_STATIC_ASSERT(offsetof(CountingSemaphore, iCount) == 0);
 FNV_STATIC_ASSERT(offsetof(CountingSemaphore, hSemaphore) == 4);
@@ -161,7 +279,6 @@ FNV_STATIC_ASSERT(offsetof(PackedTaskQueueProcessor, m_bIsProcessing) == 36);
 // Names of nested/template specializations use the canonical generator identifier mapping.
 #ifndef FNV_TASKQUEUEINTERFACE_H
 #define FNV_TASKQUEUEINTERFACE_H
-#include "layout_support.h"
 class PackedTaskQueueProcessor;
 class TaskQueueInterface;
 #pragma pack(push, 4)
@@ -330,6 +447,17 @@ void TaskQueueInterface::ThreadProcessSecondaryInput()
         FUN_004b7210()->ClearActivatePickResults();
 }
 
+struct CallTarget
+{
+    float Tail();
+};
+
+struct FUN_0087ce50_cls
+{
+    CallTarget* Head();
+    float GetHeadTail();
+};
+
 // Dispatches a packed task by its opcode, calling the matching engine routine for each case.
 // @fnv 0x0087b990
 void TaskQueueInterface::ProcessQueuedTask(const BSPackedTask& akTask)
@@ -392,8 +520,9 @@ void TaskQueueInterface::ProcessQueuedTask(const BSPackedTask& akTask)
                     Actor* pActor = static_cast<Actor*>(m_pWorldReferenceInfo);
                     if (TASK_PROCESS(pActor))
                     {
-                        if (reinterpret_cast<MobileObject*>(pActor)->GetCurrentProcessLevel() == 0 &&
-                            pActor->GetAlpha() > 0.0 && iFade > 0.0)
+                        // Actor.h names slot 0x420 Unk_108; this call consumes its float result.
+                    if (reinterpret_cast<MobileObject*>(pActor)->GetCurrentProcessLevel() == 0 &&
+                            reinterpret_cast<float (__thiscall*)(Actor*)>((*reinterpret_cast<void***>(pActor))[0x420 / 4])(pActor) > 0.0 && iFade > 0.0)
                         {
                             HighProcess* pProcess = static_cast<HighProcess*>(TASK_PROCESS(pActor));
                             pProcess->RefreshProcessState(pActor, target, fX, fY, fZ);
@@ -444,7 +573,7 @@ void TaskQueueInterface::ProcessQueuedTask(const BSPackedTask& akTask)
                             reinterpret_cast<BSSimpleArray<ParentSpaceNode, 1024>*>(&nodeList)->GetSize());
             DAT_01202df4->FUN_00c44c90(&kWork);
         }
-        if (!DAT_011df1b8.Bool()->b)
+        if (!DAT_011df1b8.Bool()[0])
             g_TES->FUN_00453900();
         break;
     }
@@ -456,10 +585,10 @@ void TaskQueueInterface::ProcessQueuedTask(const BSPackedTask& akTask)
     case 5: {
         NiAVObject* pObject = static_cast<NiAVObject*>(akTask.m_akPackedTaskVariantData[1].pData);
         bool bTestMultibounds = false;
-        if (pObject->GetHeadTail() == 0.0)
+        if (reinterpret_cast<FUN_0087ce50_cls*>(pObject)->GetHeadTail() == 0.0)
             bTestMultibounds = true;
         UpdateSceneGraph(pObject);
-        if (bTestMultibounds && pObject->GetHeadTail() > 0.0)
+        if (bTestMultibounds && reinterpret_cast<FUN_0087ce50_cls*>(pObject)->GetHeadTail() > 0.0)
             reinterpret_cast<DetailedActorPathHandler*>(g_TES->GetDetailedActorPathHandler())
                 ->HandleReferenceUpdate(TESObjectREFR::GetReferenceFromNiAVObject(pObject), false, false);
         pObject->FUN_00401970();
@@ -476,8 +605,8 @@ void TaskQueueInterface::ProcessQueuedTask(const BSPackedTask& akTask)
         NiNode* pParent = static_cast<NiNode*>(akTask.m_akPackedTaskVariantData[2].pData);
         bool bFirstFree = akTask.m_akPackedTaskVariantData[3].bData;
         bool bUpdate = akTask.m_akPackedTaskVariantData[4].bData;
-        pParent->AddObject(pObject, bFirstFree);
-        pObject->UpdateUpwardPassParent();
+        pParent->AttachChildInAvailableSlot(pObject, bFirstFree);
+        pObject->CompleteAttachUpdate();
         if (bUpdate)
             pObject->UpdateSceneObject();
         pObject->FUN_00401970();
@@ -503,15 +632,14 @@ void TaskQueueInterface::ProcessQueuedTask(const BSPackedTask& akTask)
         ShadowSceneNode* pScene =
             NiAdditionalGeometryData::GetShadowSceneNodeForIndex(akTask.m_akPackedTaskVariantData[2].iData);
         if (pScene)
-            pScene->RemoveObject(pObject);
+            pScene->ShadowSceneNode::RemoveObject(pObject);
         pObject->FUN_00401970();
         break;
     }
     case 10: {
         NiAVObject* pObject = static_cast<NiAVObject*>(akTask.m_akPackedTaskVariantData[1].pData);
-        NiUpdateData kUpdate;
-        kUpdate.FUN_0043d410(0.0f, false, false);
-        pObject->Update(kUpdate);
+        NiUpdateData kUpdate(0.0f, false, false);
+        pObject->Update(static_cast<const NiUpdateData&>(kUpdate));
         pObject->FUN_00401970();
         break;
     }
@@ -529,7 +657,7 @@ void TaskQueueInterface::ProcessQueuedTask(const BSPackedTask& akTask)
         if (m_pWorldReferenceInfo->IsExplosion())
         {
             Actor* pActor = static_cast<Actor*>(m_pWorldReferenceInfo);
-            pActor->IsGuard();
+            pActor->Unk_C1();
         }
     }
     case 13: {
@@ -582,7 +710,7 @@ void TaskQueueInterface::ProcessQueuedTask(const BSPackedTask& akTask)
     case 14: {
         Actor* pActor = static_cast<Actor*>(akTask.m_akPackedTaskVariantData[1].pData);
         float* afDamageAmount = static_cast<float*>(akTask.m_akPackedTaskVariantData[2].pData);
-        pActor->Kill(pActor->pKillerEntry, *afDamageAmount);
+        pActor->Kill(pActor->m_pActorReference, *afDamageAmount);
         DismemberLimbTaskData* pLimbData =
             static_cast<DismemberLimbTaskData*>(akTask.m_akPackedTaskVariantData[3].pData);
         if (pLimbData)
@@ -661,14 +789,15 @@ void TaskQueueInterface::ProcessQueuedTask(const BSPackedTask& akTask)
     case 22: {
         Actor* pTargetActor = static_cast<Actor*>(akTask.m_akPackedTaskVariantData[1].pData);
         unsigned int uiObjectID = akTask.m_akPackedTaskVariantData[2].iData;
-        if (TASK_PROCESS(pTargetActor) && TASK_PROCESS(pTargetActor)->GetWeaponInfo())
+        if (TASK_PROCESS(pTargetActor) && TASK_PROCESS(pTargetActor)->GetActiveWeapon())
         {
-            BSSimpleArray<ParentSpaceNode, 1024>* pEntry = TASK_PROCESS(pTargetActor)->GetWeaponInfo();
+            BSSimpleArray<ParentSpaceNode, 1024>* pEntry =
+                reinterpret_cast<BSSimpleArray<ParentSpaceNode, 1024>*>(TASK_PROCESS(pTargetActor)->GetActiveWeapon());
             if (pEntry->GetSize() == uiObjectID)
             {
                 reinterpret_cast<BipedAnim*>(pTargetActor)->AttachFaceGenNode();
                 if (TASK_PROCESS(pTargetActor))
-                    TASK_PROCESS(pTargetActor)->Unk_58(0, 0, false);
+                    TASK_PROCESS(pTargetActor)->SetCurrentArmor(0, 0, false);
             }
         }
         break;
@@ -815,7 +944,7 @@ void TaskQueueInterface::ProcessQueuedTask(const BSPackedTask& akTask)
         bhkCharacterController* pController = pActor->GetPhysicsCharacterController();
         if (pController)
         {
-            pController->FUN_005620e0(pActor->SetBipedAnim());
+            pController->FUN_005620e0(static_cast<const TESObjectREFR*>(pActor)->GetPos());
             pController->FUN_0080fb00(FUN_00458b20());
             pController->FUN_005d10f0();
             pController->FUN_0087cee0();
@@ -903,11 +1032,6 @@ struct FUN_0087b2b0_shell : public TaskQueueInterface
     void FUN_0087b2b0(TESObjectREFR*);
 };
 
-class TESSound
-{
-  public:
-    unsigned int Deallocate(void);
-};
 
 // @fnv 0x0087b2b0
 void FUN_0087b2b0_shell::FUN_0087b2b0(TESObjectREFR* apRef)
@@ -1002,10 +1126,6 @@ struct RagH
     bool FUN_00552490();
 };
 
-struct BSFadeNode
-{
-    bool FUN_00552470() const;
-};
 
 struct FUN_00844160_entry
 {
@@ -1335,163 +1455,22 @@ void FUN_0087ae10_shell::FUN_0087ae10(int a, FUN_0087adf0_shell* b)
 }
 }  // namespace fnv_0087ae10
 
-struct FakeObj
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual void f6();
-    virtual void f7();
-    virtual void f8();
-    virtual void f9();
-    virtual void f10();
-    virtual void f11();
-    virtual void f12();
-    virtual void f13();
-    virtual void f14();
-    virtual void f15();
-    virtual void f16();
-    virtual void f17();
-    virtual void f18();
-    virtual void f19();
-    virtual void f20();
-    virtual void f21();
-    virtual void f22();
-    virtual void f23();
-    virtual void f24();
-    virtual void f25();
-    virtual void f26();
-    virtual void f27();
-    virtual void f28();
-    virtual void f29();
-    virtual void f30();
-    virtual void f31();
-    virtual void f32();
-    virtual void f33();
-    virtual void f34();
-    virtual void f35();
-    virtual void f36();
-    virtual void f37();
-    virtual void f38();
-    virtual void f39();
-    virtual void f40();
-    virtual void f41();
-    virtual void f42();
-    virtual void f43();
-    virtual void f44();
-    virtual void f45();
-    virtual void f46();
-    virtual void f47();
-    virtual void f48();
-    virtual void f49();
-    virtual void f50();
-    virtual void f51();
-    virtual void f52();
-    virtual void f53();
-    virtual void f54();
-    virtual void f55();
-    virtual void f56();
-    virtual void f57();
-    virtual void f58();
-    virtual void f59();
-    virtual void f60();
-    virtual void f61();
-    virtual void f62();
-    virtual void f63();
-    virtual void f64();
-    virtual void f65();
-    virtual void f66();
-    virtual void f67();
-    virtual void f68();
-    virtual void f69();
-    virtual void f70();
-    virtual void f71();
-    virtual void f72();
-    virtual void f73();
-    virtual void f74();
-    virtual void f75();
-    virtual void f76();
-    virtual void f77();
-    virtual void f78();
-    virtual void f79();
-    virtual void f80();
-    virtual void f81();
-    virtual void f82();
-    virtual void f83();
-    virtual void f84();
-    virtual void f85();
-    virtual void f86();
-    virtual void f87();
-    virtual void f88();
-    virtual void f89();
-    virtual void f90();
-    virtual void f91();
-    virtual void f92();
-    virtual void f93();
-    virtual void f94();
-    virtual void f95();
-    virtual void f96();
-    virtual void f97();
-    virtual void f98();
-    virtual void f99();
-    virtual void f100();
-    virtual void f101();
-    virtual void f102();
-    virtual void f103();
-    virtual void f104();
-    virtual void f105();
-    virtual void f106();
-    virtual void f107();
-    virtual void f108();
-    virtual void f109();
-    virtual void f110();
-    virtual void f111();
-    virtual void f112();
-    virtual void f113();
-    virtual void f114();
-    virtual void f115();
-    virtual void f116();
-    virtual void f117();
-    virtual void f118();
-    virtual void f119();
-    virtual void f120();
-    virtual void f121();
-    virtual void f122();
-    virtual void f123();
-    virtual void f124();
-    virtual void f125();
-    virtual void f126();
-    virtual void f127();
-    virtual void f128();
-    virtual void f129();
-    virtual void f130();
-    virtual void f131();
-    virtual void f132();
-    virtual void f133();
-    virtual void f134();
-    virtual void f135();
-    virtual bool Check();
-};
 struct Host
 {
-    void QueueCheckTask(FakeObj* p);
+    void QueueCheckTask(TESObjectREFR* p);
 };
 // @fnv 0x0087ae60
-void Host::QueueCheckTask(FakeObj* pObj)
+void Host::QueueCheckTask(TESObjectREFR* pObj)
 {
-    if (pObj && pObj->Check())
+    if (pObj && pObj->IsExplosion())
     {
         char buf[32];
         ((int*)buf)[0] = 12;
-        ((FakeObj**)buf)[1] = pObj;
+        ((TESObjectREFR**)buf)[1] = pObj;
         ((TaskQueueInterface*)this)->ProcessPackedTask(*(BSPackedTask*)buf);
     }
 }
 
-class TESObjectREFR;
 struct TaskBuf
 {
     int i0;
@@ -1544,7 +1523,6 @@ void FUN_0087aff0_This::FUN_0087aff0(void* a1, void* a2, void* a3)
     }
 }
 
-class Actor;
 struct FUN_0087b040_shell : public TaskQueueInterface
 {
     void QueuePowerAttackTask(Actor* apActor, bool abPowerAttack, bool abInCombatAttack);
@@ -1890,11 +1868,6 @@ void S_0087cea0::ReleaseScriptRunLock()
     }
 }
 
-class Actor;
-struct ActorCombatGroup
-{
-    bool ContainsActor(Actor*);
-};
 struct Unk_0097fa10
 {
     char _pad[128];
@@ -1947,12 +1920,6 @@ namespace fnv_0087aad0 {
 struct GlobalObject_0045cf30
 {
     unsigned char* Bool();
-};
-struct GO
-{
-    GO(int);
-    ~GO();
-    int p;
 };
 struct S2f850
 {
@@ -2077,16 +2044,6 @@ void __cdecl ClearTaskQueue()
 }
 }  // namespace fnv_0087b950
 
-struct CallTarget
-{
-    float Tail();
-};
-
-struct FUN_0087ce50_cls
-{
-    CallTarget* Head();
-    float GetHeadTail();
-};
 
 // @fnv 0x0087ce50
 float FUN_0087ce50_cls::GetHeadTail()
@@ -2094,8 +2051,8 @@ float FUN_0087ce50_cls::GetHeadTail()
     return Head()->Tail();
 }
 
-extern NiTMapBase<DFALL<NiTMapItem<unsigned int, CombatThreatRecord*> >, unsigned int, CombatThreatRecord*>
-    DAT_011c4104;
+// the map object is a concrete NiTMap (NiTMapBase is abstract)
+extern NiTMap<unsigned int, CombatThreatRecord*> DAT_011c4104;
 
 // @fnv 0x0087ce70
 NiTMapBase<DFALL<NiTMapItem<unsigned int, CombatThreatRecord*> >, unsigned int,
@@ -2177,8 +2134,7 @@ void UpdateAnimObjFromTask(unsigned int auiTask, void* pvArg)
     AnimObj* pObj = pTask->FUN_006a7ad0(pvArg)->FUN_00559450();
     if (pObj != 0)
     {
-        NiUpdateData upd;
-        upd.FUN_0043d410(0.0f, false, false);
+        NiUpdateData upd(0.0f, false, false);
         pObj->Update(upd);
     }
 }
@@ -2426,7 +2382,7 @@ void __cdecl FUN_0087a8b0(TaskQueueInterface* queue, unsigned int opcode, FormTa
     queue->ProcessPackedTask(*(const BSPackedTask*)&task);
 }
 
-// NiAVObject in the pack has no IncRefCount: use the game's out-of-line ctor/dtor.
+// Use the game's out-of-line smart-pointer constructor and destructor.
 template <> NiPointer<NiAVObject>::NiPointer(NiAVObject* object);
 template <> NiPointer<NiAVObject>::~NiPointer();
 

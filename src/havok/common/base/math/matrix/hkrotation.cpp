@@ -2,6 +2,10 @@
 // src/havok/common/base/math/matrix/hkrotation.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/base/math/matrix/hkrotation.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../../../include/hkBool.h"
+#include "../../../../../../include/hkVector4q.h"
+
+
 struct CB2FC0Object;
 
 struct __declspec(align(16)) CB2FC0Snapshot
@@ -80,68 +84,52 @@ FUN_00cb2ff0::~FUN_00cb2ff0()
 #include <xmmintrin.h>
 #include <math.h>
 namespace fnv_00cb2e70 {
-union __declspec(intrin_type) __declspec(align(16)) __m128
-{
+// Exe 0x00cb2e70 IsOrthonormal: retain this LocalM128 view; the CRT type changes the matched code.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) {
     float m128_f32[4];
     unsigned __int64 m128_u64[2];
-};
+} __m128, LocalM128;
 extern "C"
 {
-    __m128 _mm_shuffle_ps(__m128, __m128, unsigned int);
-    __m128 _mm_mul_ps(__m128, __m128);
-    __m128 _mm_sub_ps(__m128, __m128);
-    __m128 _mm_and_ps(__m128, __m128);
-    __m128 _mm_add_ss(__m128, __m128);
-    __m128 _mm_cmple_ps(__m128, __m128);
-    __m128 _mm_set_ps1(float);
-    void _mm_store_ss(float*, __m128);
-    int _mm_movemask_ps(__m128);
+    LocalM128 _mm_shuffle_ps(LocalM128, LocalM128, unsigned int);
+    LocalM128 _mm_mul_ps(LocalM128, LocalM128);
+    LocalM128 _mm_sub_ps(LocalM128, LocalM128);
+    LocalM128 _mm_and_ps(LocalM128, LocalM128);
+    LocalM128 _mm_add_ss(LocalM128, LocalM128);
+    LocalM128 _mm_cmple_ps(LocalM128, LocalM128);
+    LocalM128 _mm_set_ps1(float);
+    void _mm_store_ss(float*, LocalM128);
+    int _mm_movemask_ps(LocalM128);
+}
+extern LocalM128 DAT_01017d10;
+}  // namespace fnv_00cb2e70
+
+__forceinline float hkVector4q::lengthSquared3() const
+{
+    typedef fnv_00cb2e70::LocalM128 Quad;
+    const Quad& components = reinterpret_cast<const Quad&>(m_vComponents);
+    Quad sq = _mm_mul_ps(components, components);
+    Quad t = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
+    t = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), t);
+    float r;
+    _mm_store_ss(&r, t);
+    return r;
 }
 
-extern __m128 DAT_01017d10;
-
-class hkBool
+__forceinline hkBool hkVector4q::equals3(const hkVector4q& v, float epsilon) const
 {
-  public:
-    hkBool(bool b)
-    {
-        m_cBooleanValue = (char)b;
-    }
-    char m_cBooleanValue;
-};
+    typedef fnv_00cb2e70::LocalM128 Quad;
+    Quad diff = _mm_and_ps(_mm_sub_ps(reinterpret_cast<const Quad&>(m_vComponents),
+                                    reinterpret_cast<const Quad&>(v.m_vComponents)), fnv_00cb2e70::DAT_01017d10);
+    Quad eps = fnv_00cb2e70::_mm_set_ps1(epsilon);
+    int mask = _mm_movemask_ps(_mm_cmple_ps(diff, eps)) & 7;
+    return mask == 7;
+}
+#include "../../../../../../include/hkRotation.h"
 
-struct hkVector4q
-{
-    __m128 m_vComponents;
 
-    __forceinline float lengthSquared3() const
-    {
-        __m128 sq = _mm_mul_ps(m_vComponents, m_vComponents);
-        __m128 t = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0x55), sq);
-        t = _mm_add_ss(_mm_shuffle_ps(sq, sq, 0xaa), t);
-        float r;
-        _mm_store_ss(&r, t);
-        return r;
-    }
-
-    __forceinline void setCross(const hkVector4q& v1, const hkVector4q& v2)
-    {
-        __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xc9),
-                                   _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xd2));
-        __m128 cross1 = _mm_mul_ps(_mm_shuffle_ps(v1.m_vComponents, v1.m_vComponents, 0xd2),
-                                   _mm_shuffle_ps(v2.m_vComponents, v2.m_vComponents, 0xc9));
-        m_vComponents = _mm_sub_ps(cross0, cross1);
-    }
-
-    __forceinline hkBool equals3(const hkVector4q& v, float epsilon) const
-    {
-        __m128 diff = _mm_and_ps(_mm_sub_ps(m_vComponents, v.m_vComponents), DAT_01017d10);
-        __m128 eps = _mm_set_ps1(epsilon);
-        int mask = _mm_movemask_ps(_mm_cmple_ps(diff, eps)) & 7;
-        return mask == 7;
-    }
-};
-
+namespace fnv_00cb2e70 {
 __forceinline __m128 hkCross(__m128 a, __m128 b)
 {
     __m128 cross0 = _mm_mul_ps(_mm_shuffle_ps(a, a, 0xc9), _mm_shuffle_ps(b, b, 0xd2));
@@ -157,44 +145,36 @@ __forceinline float hkLen2(__m128 v)
     _mm_store_ss(&r, t);
     return r;
 }
-class hkMatrix3q
-{
-  public:
-    hkVector4q m_kColumn0;
-    hkVector4q m_kColumn1;
-    hkVector4q m_kColumn2;
 
-    __forceinline const hkVector4q& getColumn(int i) const
-    {
-        return (&m_kColumn0)[i];
-    }
-    hkBool IsOrthonormal(float epsilon) const;
-};
 
 // Checks that each column's squared length is within epsilon of 1 and the first two columns' cross product matches the third within epsilon.
 // @fnv 0x00cb2e70
-hkBool hkMatrix3q::IsOrthonormal(float epsilon) const
+} // namespace fnv_00cb2e70
+
+hkBool hkRotation::IsOrthonormal(float epsilon) const
 {
-    float colNorm0 = m_kColumn0.lengthSquared3();
+    float colNorm0 = reinterpret_cast<const hkVector4q&>(m_kColumn0).lengthSquared3();
     if ((float)fabs(colNorm0 - 1.0f) > epsilon)
     {
         return false;
     }
-    float colNorm1 = m_kColumn1.lengthSquared3();
+    float colNorm1 = reinterpret_cast<const hkVector4q&>(m_kColumn1).lengthSquared3();
     if ((float)fabs(colNorm1 - 1.0f) > epsilon)
     {
         return false;
     }
-    float colNorm2 = m_kColumn2.lengthSquared3();
+    float colNorm2 = reinterpret_cast<const hkVector4q&>(m_kColumn2).lengthSquared3();
     if ((float)fabs(colNorm2 - 1.0f) > epsilon)
     {
         return false;
     }
     hkVector4q col0crosscol1;
-    col0crosscol1.m_vComponents = hkCross(m_kColumn0.m_vComponents, m_kColumn1.m_vComponents);
-    return col0crosscol1.equals3(m_kColumn2, epsilon);
+    fnv_00cb2e70::LocalM128 cross = fnv_00cb2e70::hkCross(reinterpret_cast<const fnv_00cb2e70::LocalM128&>(m_kColumn0.m_vComponents),
+                             reinterpret_cast<const fnv_00cb2e70::LocalM128&>(m_kColumn1.m_vComponents));
+    col0crosscol1.m_vComponents = reinterpret_cast<const ::__m128&>(cross);
+    return col0crosscol1.equals3(reinterpret_cast<const hkVector4q&>(m_kColumn2), epsilon);
 }
-}  // namespace fnv_00cb2e70
+
 
 struct FUN_00cd4d90_cls
 {

@@ -2,8 +2,6 @@
 // src/fallout_shared/teswater_o2_variant.cpp - flag-variant unit created 2026-10-17 by flag_variants.py for src/fallout_shared/teswater.cpp functions whose prologue its flags cannot
 // produce (frameless code in an /Od unit). Declarations copied from that unit's skeleton; move the functions to their real unit once identified.
 
-#include "teswater_decls.h"
-#include "teswater_work.h"
 
 extern int DAT_0109cb9c;
 void __fastcall FUN_00a5a390(void* p);

@@ -32,20 +32,13 @@ struct MemoryManager
     virtual void unused1();
     virtual void release(void* object, unsigned short value);
 };
-struct MemoryRouter
-{
-    void* ReportDiagnostic;
-    void* unused1;
-    void* unused2;
-    void* FlushUsageData;
-    MemoryManager* manager;
-};
+#include "../../../../../include/hkMemoryRouter.h"
 struct FUN_00ce29b0_standin
 {
     void FUN_00ce2600();
     void* Destroy(unsigned char deletingFlag);
 };
-MemoryRouter* _D1A0E0GetMemoryRouter();
+hkMemoryRouter* _D1A0E0GetMemoryRouter();
 extern int DAT_010cfd84;
 struct FnvVtObj
 {

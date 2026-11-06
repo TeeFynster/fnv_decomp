@@ -1,8 +1,13 @@
+#include "../../include/BSThreadCriticalSectionPC.h"
 
 // src/staging/blk_00b00000_od.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, od code style). Not a real source path: move functions to their real units once identified.
 
 #include "../../include/layout_support.h"
+#include "../../include/Mat3.h"
+#include "../../include/MemoryManager.h"
+#include "../../include/BSWin32TaskletManager.h"
+#include "../../include/CountingSemaphore.h"
 
 struct FUN_00b007d0_shell
 {
@@ -135,17 +140,13 @@ char QueueTasklet(int param_1)
     return result;
 }
 
-struct FUN_00b12af0_shell
-{
-    void __thiscall FUN_00b12af0();
-};
 struct FUN_00b130a0
 {
     float a, b, c;
     float d, e, f;
     FUN_00b130a0();
 };
-// Zeroes the six float members a-f and calls FUN_00b12af0 on the object at offset 0x1c.
+// Zeroes the six float members a-f and constructs the matrix at offset 0x1c.
 // @fnv 0x00b130a0
 FUN_00b130a0::FUN_00b130a0()
 {
@@ -156,7 +157,7 @@ FUN_00b130a0::FUN_00b130a0()
     p[2] = 0.0f;
     p[1] = 0.0f;
     p[0] = 0.0f;
-    ((FUN_00b12af0_shell*)((char*)this + 0x1c))->FUN_00b12af0();
+    ((Mat3*)((char*)this + 0x1c))->Mat3::Mat3();
 }
 
 struct FUN_00b0cf90_class
@@ -330,10 +331,6 @@ void FUN_00b01f00_class::DestroyAndFreeLibraries()
     FreeLibrary(*(void**)((char*)this + 0xc));
 }
 
-struct MemoryManager
-{
-    void Deallocate(void*);
-};
 extern MemoryManager g_memoryManager;
 struct FUN_00b02970
 {
@@ -350,10 +347,6 @@ void* FUN_00b02970::DeleteThis(unsigned int flags)
 }
 
 namespace fnv_00b0e7f0 {
-struct MemoryManager
-{
-    void __thiscall Deallocate(void* ptr);
-};
 
 extern MemoryManager _g_memoryManager;
 
@@ -459,34 +452,7 @@ struct FUN_00b008a0_cls
 void FUN_00b008a0_cls::FUN_00b008a0()
 {}
 
-class BSWin32TaskletManager
-{
-  public:
-    virtual void vf00();
-    virtual void vf04();
-    virtual void vf08();
-    virtual void vf0c();
-    virtual bool vf10(int& value);
-
-    unsigned char unk04;
-
-    bool __thiscall GetTaskletValue(void* result);
-};
-
-inline void BSWin32TaskletManager::vf00()
-{}
-inline void BSWin32TaskletManager::vf04()
-{}
-inline void BSWin32TaskletManager::vf08()
-{}
-inline void BSWin32TaskletManager::vf0c()
-{}
-inline bool BSWin32TaskletManager::vf10(int&)
-{
-    return false;
-}
-
-// If unk04 is set, calls vf10 to obtain a value and stores it through result, returning the call's success; otherwise stores 0 and returns false.
+// If the low byte of _04 is set, obtains a value through virtual slot 0x10 and stores it through result.
 // @fnv 0x00b00a80
 bool __thiscall BSWin32TaskletManager::GetTaskletValue(void* result)
 {
@@ -496,14 +462,16 @@ bool __thiscall BSWin32TaskletManager::GetTaskletValue(void* result)
         int outputValue;
 
         {
-            unsigned char enabled = this->unk04;
+            unsigned char enabled = *reinterpret_cast<unsigned char*>(&this->_04);
 
             {
                 int copiedValue;
 
                 if (enabled != 0)
                 {
-                    operationSucceeded = this->vf10(outputValue);
+                    // This slot uses a value-output signature absent from the shared header.
+                    typedef bool (__thiscall *GetValueFunction)(BSWin32TaskletManager*, int&);
+                    operationSucceeded = reinterpret_cast<GetValueFunction>((*reinterpret_cast<void***>(this))[4])(this, outputValue);
                     copiedValue = outputValue;
                     *static_cast<int*>(result) = copiedValue;
                 }
@@ -619,12 +587,6 @@ void B00C20Pool::ReleaseItem(B00C20Item*& rpkItem)
 extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void* hSemaphore, long lReleaseCount,
                                                                 long* lpPreviousCount);
 
-struct FUN_00b00df0_sub
-{
-    long m_00;
-    void* m_04;
-};
-
 class FUN_00b00df0_cls
 {
   public:
@@ -642,7 +604,7 @@ class FUN_00b00df0_cls
     unsigned char m_05;
     unsigned char m_06;
     unsigned char m_07;
-    FUN_00b00df0_sub m_08;
+    CountingSemaphore m_08;
     void ReleaseAndSignal();
 };
 
@@ -650,9 +612,9 @@ class FUN_00b00df0_cls
 // @fnv 0x00b00df0
 void FUN_00b00df0_cls::ReleaseAndSignal()
 {
-    FUN_00b00df0_sub* p = &m_08;
-    ReleaseSemaphore(p->m_04, 1, 0);
-    InterlockedIncrement(&p->m_00);
+    CountingSemaphore* p = &m_08;
+    ReleaseSemaphore(p->hSemaphore, 1, 0);
+    InterlockedIncrement((volatile long*)&p->iCount);
     m_05 = 1;
     vfn_9();
 }
@@ -729,12 +691,6 @@ extern "C" void(__stdcall* fnv_LeaveCriticalSection)(void* pkSection);
 extern "C" __declspec(dllimport) int __stdcall ReleaseSemaphore(void* hSemaphore, long lReleaseCount,
                                                                 long* plPreviousCount);
 
-struct B02670Semaphore
-{
-    long m_lCount;
-    void* m_pSemaphore;
-};
-
 struct B02670CriticalSection
 {
     int unk00;
@@ -750,8 +706,7 @@ class B02670Task
   public:
     int unk00;
     int unk04;
-    B02670Semaphore m_kCompletionSemaphore;
-    int unk10;
+    CountingSemaphore m_kCompletionSemaphore;
     B02670CriticalSection m_kLock;
     unsigned char unk2C;
     bool m_bCancelled;
@@ -774,9 +729,9 @@ void B02670Task::CompleteTask()
     fnv_LeaveCriticalSection(&m_kLock);
     if (bSignal)
     {
-        B02670Semaphore* pkSemaphore = &m_kCompletionSemaphore;
-        ReleaseSemaphore(pkSemaphore->m_pSemaphore, 1, 0);
-        InterlockedIncrement(&pkSemaphore->m_lCount);
+        CountingSemaphore* pkSemaphore = &m_kCompletionSemaphore;
+        ReleaseSemaphore(pkSemaphore->hSemaphore, 1, 0);
+        InterlockedIncrement((volatile long*)&pkSemaphore->iCount);
     }
 }
 
@@ -892,12 +847,7 @@ bool __thiscall FUN_00b10490_class::FUN_00b10490(const FUN_00b10490_class* rhs)
     return !((unsigned char)(int)(second == rhs->second));
 }
 
-struct FUN_00b108e0_pool
-{
-    void* FUN_00aa3e40(unsigned int size);
-};
-
-extern "C" FUN_00b108e0_pool DAT_011f6238;
+extern "C" MemoryManager DAT_011f6238;
 extern "C" char DAT_010176f8[];
 extern "C" char DAT_01140ef8[];
 extern "C" void __stdcall FUN_00ec7894(void* err2, const char* msg);
@@ -931,15 +881,6 @@ void* __cdecl AllocatePoolArray(unsigned int count)
     }
     return DAT_011f6238.FUN_00aa3e40(count * 0x1c);
 }
-
-struct Mat3
-{
-    float m00, m01, m02;
-    float m10, m11, m12;
-    float m20, m21, m22;
-    Mat3();
-    Mat3 Multiply(const Mat3& rhs) const;
-};
 
 // Multiplies this 3x3 matrix by rhs and returns the resulting matrix.
 // @fnv 0x00b12940
@@ -1445,11 +1386,7 @@ struct DirectoryFindData
 extern void*(__stdcall* DAT_00fdf070)(const char* pattern, DirectoryFindData* data);
 extern int(__stdcall* DAT_00fdf068)(void* handle, DirectoryFindData* data);
 
-struct DirAllocator
-{
-    void* Allocate(unsigned int size);
-};
-extern DirAllocator g_dirAllocator;
+extern MemoryManager g_dirAllocator;
 
 // Enumerates files matching pattern, builds full paths from path and adds each to list, then closes the find handle.
 // @fnv 0x00b01930
@@ -1629,30 +1566,15 @@ CopyElem12* __cdecl FUN_00b17b40(CopyElem12* src, CopyElem12* srcEnd, CopyElem12
 typedef void* HANDLE;
 typedef unsigned long DWORD;
 typedef DWORD(__stdcall* ThreadStartFn)(void*);
-struct CRITICAL_SECTION
-{
-    void* DebugInfo;
-    long LockCount;
-    long RecursionCount;
-    void* OwningThread;
-    void* LockSemaphore;
-    unsigned long SpinCount;
-};
-extern "C" __declspec(dllimport) void __stdcall InitializeCriticalSection(CRITICAL_SECTION*);
+
+extern "C" __declspec(dllimport) void __stdcall InitializeCriticalSection(BSThreadCriticalSectionPC*);
 extern "C" __declspec(dllimport) HANDLE __stdcall CreateSemaphoreA(void*, long, long, const char*);
 extern "C" __declspec(dllimport) HANDLE
     __stdcall CreateThread(void*, unsigned long, ThreadStartFn, void*, DWORD, DWORD*);
 
-struct BSSemaphoreStandIn
-{
-    int count;
-    HANDLE semaphore;
-    int maxCount;
-};
-
 struct CriticalSectionInit
 {
-    CRITICAL_SECTION* section;
+    BSThreadCriticalSectionPC* section;
     int state;
 };
 
@@ -1660,7 +1582,7 @@ struct TaskThreadPoolBase
 {
     bool bActive;
     bool m_bThirdThreadFlag;
-    BSSemaphoreStandIn baseSemaphore;
+    CountingSemaphore baseSemaphore;
     TaskThreadPoolBase();
     virtual ~TaskThreadPoolBase();
 };
@@ -1676,7 +1598,7 @@ struct FUN_00b01d50 : TaskThreadPoolBase
     HANDLE threads[6];
     DWORD threadIDs[6];
     bool unk50;
-    CRITICAL_SECTION critSection;
+    BSThreadCriticalSectionPC critSection;
     void* slots[64];
     int unk16c, unk170, unk174, unk178, unk17c, unk180, unk184, unk188;
     int unk18c, unk190, unk194, unk198, unk19c, unk1a0, unk1a4, unk1a8;
@@ -1686,7 +1608,8 @@ struct FUN_00b01d50 : TaskThreadPoolBase
     int unk20c, unk210, unk214, unk218, unk21c, unk220, unk224, unk228;
     int unk22c, unk230, unk234, unk238, unk23c, unk240, unk244, unk248;
     int unk24c, unk250, unk254, unk258, unk25c, unk260, unk264, unk268;
-    BSSemaphoreStandIn semaphore;
+    // Its constructor is expanded below; avoid an additional out-of-line constructor call.
+    int semaphoreStorage[sizeof(CountingSemaphore) / sizeof(int)];
 
     FUN_00b01d50(unsigned int count);
     virtual ~FUN_00b01d50();
@@ -1707,10 +1630,10 @@ FUN_00b01d50::FUN_00b01d50(unsigned int count)
         InitializeCriticalSection(initCS.section);
     }
     {
-        BSSemaphoreStandIn* pSem = &semaphore;
-        pSem->count = 0;
-        pSem->maxCount = 0x7fffffff;
-        pSem->semaphore = CreateSemaphoreA(0, pSem->count, pSem->maxCount, 0);
+        CountingSemaphore* pSem = (CountingSemaphore*)&semaphoreStorage;
+        pSem->iCount = 0;
+        pSem->m_iMaximumCount = 0x7fffffff;
+        pSem->hSemaphore = CreateSemaphoreA(0, pSem->iCount, pSem->m_iMaximumCount, 0);
     }
     unsigned int i;
     for (i = 0; i < 64; i++)
@@ -1779,7 +1702,7 @@ FUN_00b027c0::FUN_00b027c0()
     pCS->LockCount = 0;
     pCS->Pad1 = 1;
     pCS->Semaphore = (long)CreateSemaphoreA(0, 0, 1, 0);
-    CRITICAL_SECTION* pCS2 = (CRITICAL_SECTION*)((char*)this + 0x14);
+    BSThreadCriticalSectionPC* pCS2 = (BSThreadCriticalSectionPC*)((char*)this + 0x14);
     InitializeCriticalSection(pCS2);
     ((char*)this)[0x2c] = 0;
     ((char*)this)[0x2d] = 0;

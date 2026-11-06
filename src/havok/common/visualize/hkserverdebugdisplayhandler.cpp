@@ -1,6 +1,10 @@
+#include "../../../../include/hkArray.h"
 
 // src/havok/common/visualize/hkserverdebugdisplayhandler.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/common/visualize/hkserverdebugdisplayhandler.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+
+#define FNV_VEC4_SIMD
+#include "../../../../include/Vec4.h"
 
 extern int DAT_010d7cfc;
 void __cdecl _Deallocate(void*);
@@ -181,12 +185,7 @@ bool S_00dd9c60::FUN_00dd9c60()
 
 int __cdecl FUN_00dda850(const char* str);
 
-struct DD9D70StringArray
-{
-    const char** m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
+typedef hkArray<const char*> DD9D70StringArray;
 
 // @fnv 0x00dd9d70
 static __declspec(noinline) int FUN_00dd9d70(const DD9D70StringArray& strings)
@@ -865,27 +864,19 @@ int DD9FE0DisplayHandler::WriteTriangle(const DD9FE0Vector4& a, const DD9FE0Vect
     return ok ? 0 : 1;
 }
 
-struct Vec4_dda340
-{
-    float x;
-    float y;
-    float z;
-    float w;
-};
-
 struct __declspec(align(16)) Transform_dda340
 {
-    Vec4_dda340 rotation0;
-    Vec4_dda340 rotation1;
-    Vec4_dda340 rotation2;
-    Vec4_dda340 translation;
+    Vec4 rotation0;
+    Vec4 rotation1;
+    Vec4 rotation2;
+    Vec4 translation;
 };
 
 struct QsTransform_dda340
 {
-    Vec4_dda340 translation;
-    Vec4_dda340 rotation;
-    Vec4_dda340 scale;
+    Vec4 translation;
+    Vec4 rotation;
+    Vec4 scale;
 
     void FUN_00ce5300(Transform_dda340* out);
 };
@@ -911,21 +902,16 @@ struct ThreadMemory_dda340
 ThreadMemory_dda340* FUN_00c85750();
 void __cdecl ResizeAudioStream(void* allocator, void* array, int elemSize);
 
-template <typename T> struct ArrayRef_dda340
-{
-    T* m_data;
-    int m_iElementCount;
-    int m_iCapacityState;
-};
 
-class Array_dda340
-{
+
+class Array_dda340LocalForm
+{ // local form of hkArray: 0x00dda340 needs the original inline/out-of-line helper split; shared replacement changes bytes.
   public:
     int* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    Array_dda340() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
+    Array_dda340LocalForm() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {}
 
     void ClearAndRelease()
@@ -958,24 +944,25 @@ struct Config_dda340 : public FUN_00d605d0_Class
     void WriteTransform(const Transform_dda340* t);
 };
 
-struct Writer_dda340
+// 0x00dda340 serializes behavior arrays via the display stream at +4 under the lock at +8.
+struct BehaviorGraphDisplaySerializer
 {
     int unk00;
     Config_dda340* config;
     void* criticalSection;
 
-    bool Write(const ArrayRef_dda340<unsigned int>& a1, const ArrayRef_dda340<unsigned int>& a2,
-               const ArrayRef_dda340<unsigned int>& a3, const ArrayRef_dda340<Vec4_dda340>& a4,
-               const ArrayRef_dda340<const char*>& a5, const ArrayRef_dda340<unsigned int>& a6,
-               const ArrayRef_dda340<unsigned int>& a7, const ArrayRef_dda340<QsTransform_dda340>& a8);
+    bool Write(const hkArrayBase<unsigned int>& a1, const hkArrayBase<unsigned int>& a2,
+               const hkArrayBase<unsigned int>& a3, const hkArrayBase<Vec4>& a4,
+               const hkArrayBase<const char*>& a5, const hkArrayBase<unsigned int>& a6,
+               const hkArrayBase<unsigned int>& a7, const hkArrayBase<QsTransform_dda340>& a8);
 };
 
 // Writes supplied data when a config exists; returns false only when the forwarded value is nonzero.
 // @fnv 0x00dda340
-bool Writer_dda340::Write(const ArrayRef_dda340<unsigned int>& a1, const ArrayRef_dda340<unsigned int>& a2,
-                          const ArrayRef_dda340<unsigned int>& a3, const ArrayRef_dda340<Vec4_dda340>& a4,
-                          const ArrayRef_dda340<const char*>& a5, const ArrayRef_dda340<unsigned int>& a6,
-                          const ArrayRef_dda340<unsigned int>& a7, const ArrayRef_dda340<QsTransform_dda340>& a8)
+bool BehaviorGraphDisplaySerializer::Write(const hkArrayBase<unsigned int>& a1, const hkArrayBase<unsigned int>& a2,
+                          const hkArrayBase<unsigned int>& a3, const hkArrayBase<Vec4>& a4,
+                          const hkArrayBase<const char*>& a5, const hkArrayBase<unsigned int>& a6,
+                          const hkArrayBase<unsigned int>& a7, const hkArrayBase<QsTransform_dda340>& a8)
 {
     _fnv_EnterCriticalSection(this->criticalSection);
     if (this->config)
@@ -983,7 +970,7 @@ bool Writer_dda340::Write(const ArrayRef_dda340<unsigned int>& a1, const ArrayRe
         int size2 = a2.m_iElementCount;
         int iVec4Count = a4.m_iElementCount;
         int totalSize = ((size2 + iVec4Count * 2) * 2 + a8.m_iElementCount * 7 + a6.m_iElementCount + a7.m_iElementCount) * 4 + 25;
-        Array_dda340 stringLengths;
+        Array_dda340LocalForm stringLengths;
         for (int i = 0; i < a5.m_iElementCount; ++i)
         {
             if (a5.m_data[i] != 0)

@@ -1,6 +1,47 @@
+#include "../../include/NiRect.h"
+#include "../../include/NiFrustum.h"
+#include "../../include/NiTListItem.h"
+#include "../../include/NiTPointerListBase.h"
 // bsshader/bsshaderaccumulator.cpp: BSShaderAccumulator, AccumWIP, AccumS, Candidate and more (38 functions)
 
+#include "../../include/NiObject.h"
+#include "../../include/BSTextureManager.h"
+#include "../../include/BSRenderedTexture.h"
+#include "../../include/NiTPointerMap.h"
+#include "../../include/NiColorA.h"
 #include "bsshaderaccumulator_types.h"
+#include "../../include/NiTexture.h"
+#include "../../include/BSShaderLightingProperty.h"
+#include "../../include/ImageSpaceManager.h"
+#include "../../include/NiAVObject.h"
+#include "../../include/NiAlphaProperty.h"
+#include "../../include/NiFixedString.h"
+#include "../../include/NiGPUProgram.h"
+#include "../../include/NiNode.h"
+#include "../../include/NiRenderer.h"
+#include "../../include/NiTMapBase.h"
+#include "../../include/NiUpdateData.h"
+#include "../../include/RecursiveSpinLock.h"
+#include "../../include/BSShaderAccumulator.h"
+#include "../../include/BSBatchRenderer.h"
+#include "../../include/NiTListItem.h"
+
+
+inline NiColorA::NiColorA(float red, float green, float blue, float alpha)
+    : r(red), g(green), b(blue), a(alpha)
+{}
+
+inline void NiRefObject::IncRefCount()
+{
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&m_uiRefCount));
+}
+inline void NiRefObject::DecRefCount()
+{
+    if (InterlockedDecrement(reinterpret_cast<volatile long*>(&m_uiRefCount)) == 0)
+        DeleteThis();
+}
+inline void NiGPUProgram::IncRefCount() throw() { NiRefObject::IncRefCount(); }
+inline void NiGPUProgram::DecRefCount() throw() { NiRefObject::DecRefCount(); }
 
 // offset-exact local views to dodge the task headers' mutually conflicting
 // into the unit header and declare the methods on the real classes
@@ -9,12 +50,6 @@ struct GroupView
 {
     unsigned char m_ucEntryType;
     void RenderGroup(bool bFlag);
-};
-
-struct BRView
-{
-    unsigned char pad[0x3C];
-    GroupView* m_pGeometryGroups[13];
 };
 
 class AccumWIP : public BSShaderAccumulator
@@ -27,14 +62,14 @@ class AccumWIP : public BSShaderAccumulator
 // @fnv 0x00b639e0
 void AccumWIP::SetShaderPassEnabled(unsigned int uiGroupIndex, bool bFlag)
 {
-    GroupView* pkGroup = reinterpret_cast<BRView*>(m_pGroupRenderer[0])->m_pGeometryGroups[uiGroupIndex];
+    GroupView* pkGroup = reinterpret_cast<GroupView*>(pBatchRenderer[0]->pGeometryGroupsA[uiGroupIndex]);
     if (!pkGroup)
         return;
     if ((pkGroup->m_ucEntryType & 1u) > 0)
     {
-        for (unsigned int i = 0; i < m_uiRendererCount; ++i)
+        for (unsigned int i = 0; i < uiBatchRendererCount; ++i)
         {
-            reinterpret_cast<BRView*>(m_pGroupRenderer[i])->m_pGeometryGroups[uiGroupIndex]->RenderGroup(bFlag);
+            reinterpret_cast<GroupView*>(pBatchRenderer[i]->pGeometryGroupsA[uiGroupIndex])->RenderGroup(bFlag);
         }
     }
     else
@@ -43,8 +78,10 @@ void AccumWIP::SetShaderPassEnabled(unsigned int uiGroupIndex, bool bFlag)
     }
 }
 
-#include "bsshaderaccumulator_batchrenderer.h"
 #include "MemoryManager.h"
+#include "../../include/GO.h"
+#include "../../include/NP.h"
+#include "../../include/NiBound.h"
 
 extern MemoryManager g_memoryManager;
 
@@ -75,8 +112,8 @@ template <> void BSSimpleList<unsigned short>::RemoveAll()
 // @fnv 0x00b65580
 void BSShaderAccumulator::ClearActivePasses()
 {
-    for (unsigned int i = 0; i < m_uiRendererCount; ++i)
-        m_pGroupRenderer[i]->m_kActivePassList.RemoveAll();
+    for (unsigned int i = 0; i < uiBatchRendererCount; ++i)
+        pBatchRenderer[i]->kActivePassIndexList.RemoveAll();
 }
 
 // @fnv 0x00b65550
@@ -87,28 +124,6 @@ void BSShaderAccumulator::SetupDepth(NiCamera* camera, NiCamera* firstPersonCame
 
 struct NiPoint3;
 struct NiStream;
-struct NiBound
-{
-    void SetGridPosition(float, float, float);
-    void SetGridPosition(void*);
-    void* GetNavMeshData();
-    void SetRadius(float);
-    float GetRadius();
-    void SetCenterAndRadius(void*, float);
-    void ComputeFromPoints(int, void*);
-    void Update(void*);
-    void Update(void*, void*);
-    void ComputeMinimalBound(void*);
-    void Merge(void*);
-    int WhichSide(void*);
-    static bool TestIntersect(float, void*, void*, void*, void*);
-    static bool FindIntersect(float, void*, void*, void*, void*, float*, NiPoint3*, bool, NiPoint3*, NiPoint3*);
-    void LoadBinary(NiStream*);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    char m_kCenter[12];
-    float m_fBoundRadius;
-};
 typedef char _sizecheck_NiBound[sizeof(NiBound) == 16 ? 1 : -1];
 struct FUN_00b63500_shell : public BSShaderAccumulator
 {
@@ -118,21 +133,13 @@ struct FUN_00b63500_shell : public BSShaderAccumulator
 __declspec(thread) char tls_data[0x2c0];
 void __fastcall AddSortedGroup(void* pThis, int, void* aBound, bool abZPrePass, void* pkCamera, bool bFlag);
 
-struct BatchRendererDummy
-{
-    __forceinline void AddBoundToRenderGroup(void* aBound, bool abZPrePass, void* pkCamera, bool bFlag)
-    {
-        ((void(__thiscall*)(void*, void*, bool, void*, bool))AddSortedGroup)(this, aBound, abZPrePass, pkCamera, bFlag);
-    }
-};
-
 // @fnv 0x00b63500
 void FUN_00b63500_shell::RenderBound(void* aBound, bool abZPrePass)
 {
     unsigned int uiIndex = *(unsigned int*)&tls_data[0x2bc] % *(unsigned int*)((char*)this + 0x18c);
-    BatchRendererDummy* m_pGroupRenderer = *(BatchRendererDummy**)((char*)this + uiIndex * 4 + 0x174);
-    m_pGroupRenderer->AddBoundToRenderGroup(aBound, abZPrePass, *(void**)((char*)this + 8),
-                                            *(bool*)((char*)this + 0x31));
+    BSBatchRenderer* batchRenderer = *(BSBatchRenderer**)((char*)this + uiIndex * 4 + 0x174);
+    ((void(__thiscall*)(BSBatchRenderer*, void*, bool, void*, bool))AddSortedGroup)(
+        batchRenderer, aBound, abZPrePass, *(void**)((char*)this + 8), *(bool*)((char*)this + 0x31));
 }
 
 void __cdecl FUN_00b97e30(unsigned int, unsigned int);
@@ -171,55 +178,26 @@ class BSBatchRenderer__GeometryGroup
     void ClearPassTextureSlots();
 };
 
-class BSShaderLightingProperty
-{
-  public:
-    void ClearLights();
-};
 
-struct AlphaGroupNode
+static inline BSBatchRenderer__GeometryGroup*& GetNextAlphaGroup(
+    NiTListItem<BSBatchRenderer__GeometryGroup*>*& pkPos)
 {
-    AlphaGroupNode* m_pkNext;
-    AlphaGroupNode* m_pkPrev;
-    BSBatchRenderer__GeometryGroup* m_pkItem;
-};
-
-struct AlphaGeometryList
-{
-    AlphaGroupNode* m_pkHead;
-    AlphaGroupNode* m_pkTail;
-    unsigned int m_uiCount;
-
-    AlphaGroupNode* GetHeadPos() const
-    {
-        return m_pkHead;
-    }
-    BSBatchRenderer__GeometryGroup*& GetNext(AlphaGroupNode*& pkPos) const
-    {
-        BSBatchRenderer__GeometryGroup*& rItem = pkPos->m_pkItem;
-        pkPos = pkPos->m_pkNext;
-        return rItem;
-    }
-};
-
-struct BSBatchRendererView
-{
-    unsigned char pad00[0x70];
-    BSBatchRenderer__GeometryGroup* pAlphaGroups[2];  // +0x70
-    AlphaGeometryList kAlphaGroupLists[2];            // +0x78
-    unsigned int uiAlphaGroupCounts[2];               // +0x90
-};
+    BSBatchRenderer__GeometryGroup*& rItem = pkPos->m_element;
+    pkPos = pkPos->m_pkNext;
+    return rItem;
+}
 
 // @fnv 0x00b64f20
-void __fastcall FUN_00b64f20(BSBatchRendererView* pThis, int, unsigned int uiIndex)
+void __fastcall FUN_00b64f20(BSBatchRenderer* pThis, int, unsigned int uiIndex)
 {
-    pThis->pAlphaGroups[uiIndex]->ClearPassTextureSlots();
+    pThis->pAlphaGroupA[uiIndex]->ClearPassTextureSlots();
 
-    AlphaGeometryList* pkList = &pThis->kAlphaGroupLists[uiIndex];
-    AlphaGroupNode* pkIter = pkList->GetHeadPos();
+    NiTPointerList_BSBatchRenderer__GeometryGroup___* pkList = &pThis->AlphaGroupList[uiIndex];
+    NiTListItem<BSBatchRenderer__GeometryGroup*>* pkIter =
+        reinterpret_cast<NiTListItem<BSBatchRenderer__GeometryGroup*>*>(pkList->m_pkHead);
     while (pkIter)
     {
-        BSBatchRenderer__GeometryGroup* pkGroup = pkList->GetNext(pkIter);
+        BSBatchRenderer__GeometryGroup* pkGroup = GetNextAlphaGroup(pkIter);
         if (pkGroup)
         {
             pkGroup->~BSBatchRenderer__GeometryGroup();
@@ -227,16 +205,10 @@ void __fastcall FUN_00b64f20(BSBatchRendererView* pThis, int, unsigned int uiInd
         }
     }
 
-    reinterpret_cast<BSShaderLightingProperty*>(pkList)->ClearLights();
-    pThis->uiAlphaGroupCounts[uiIndex] = 0;
+    pkList->FUN_00b71300();
+    pThis->pCurrentAlphaGroup[uiIndex] = 0;
 }
 
-class RecursiveSpinLock
-{
-  public:
-    unsigned int value;
-    void Lock(char const*);
-};
 
 void __fastcall FUN_00c4ed40(void*);
 extern RecursiveSpinLock g_011c5f80;
@@ -292,7 +264,7 @@ void __fastcall FUN_00b655b0(Self_00b655b0* self)
         PoolAllocatorBase<unsigned int>::ms_pFreeList = node;
         if (--DAT_011c5f84 == 0)
         {
-            g_011c5f80.value = 0;
+            g_011c5f80.m_uiOwningThreadID = 0;
         }
         --self->count;
     }
@@ -439,9 +411,16 @@ struct V42
 
 extern void __fastcall FUN_00b64f90(void*);
 
-struct BSRenderStateManager
+// BSRenderStateManager_bsshaderaccumulator: local type (was include/BSRenderStateManager.h, which had no evidence of one real class); its methods are 0x00b97fa0 BSRenderState::SetAlphaBlendEnable, 0x00b98380 BSRenderState::SetColorWriteEnable
+#include "../../include/BSRENDERSTATE_LOCK.h"
+
+class BSRenderStateManager_bsshaderaccumulator
 {
+public:
+    static void __cdecl SetDepthBufferEnabled(bool, BSRENDERSTATE_LOCK);
     static void __cdecl SetDepthBufferEnabled(bool, int);
+    static void __cdecl SetColorWriteMask(unsigned int, BSRENDERSTATE_LOCK);
+    static void __cdecl SetColorWriteMask(unsigned int, unsigned int);
 };
 
 // @fnv 0x00b65e80
@@ -452,14 +431,10 @@ void __cdecl FUN_00b65e80(void* pObject)
         *(int*)((unsigned char*)pObject + 0x18) = 0;
         reinterpret_cast<V42*>(pObject)->f40();
         FUN_00b64f90(pObject);
-        BSRenderStateManager::SetDepthBufferEnabled(0, 0);
+        BSRenderStateManager_bsshaderaccumulator::SetDepthBufferEnabled(0, 0);
     }
 }
 
-struct NiGPUProgram : public NiRefObject
-{
-};
-struct NiRenderer;
 struct BloodSplatterBeamShader
 {
     static NiGPUProgram* __cdecl CreateShader();
@@ -488,7 +463,7 @@ struct PoolModeGuard
     }
 };
 extern NiRenderer* DAT_011f9508;
-extern NiPointer<NiGPUProgram> DAT_011f956c;
+extern AccumulatorPointer<NiGPUProgram> DAT_011f956c;
 // If a renderer exists, creates the shader when missing and then calls DrawSlots(0) on it.
 // @fnv 0x00b55a10
 void FUN_00b55a10()
@@ -510,14 +485,10 @@ struct FUN_00b63090_shell : public BSShaderAccumulator
     void DispatchBatchRenderer();
 };
 
-struct BatchStub
-{
-    void ReleaseGeometryGroups();
-};
 struct AccumStub
 {
     char pad[0x174];
-    BatchStub* m_pBatchRenderer[1];
+    BSBatchRenderer* m_pBatchRenderer[1];
 };
 extern __declspec(thread) unsigned int g_threadIndex;
 // @fnv 0x00b63090
@@ -703,10 +674,6 @@ void __fastcall FUN_00b63a50(AccumStub* pAccum)
 }  // namespace fnv_00b63a50
 
 namespace fnv_00b65570 {
-struct BSShaderLightingProperty
-{
-    void ClearLights();
-};
 // @fnv 0x00b65570
 void __fastcall FUN_00b65570(char* self, int unused)
 {
@@ -732,30 +699,25 @@ void __cdecl FUN_00b665a0(void* p)
 }
 
 namespace fnv_00b64f90 {
-struct RecursiveSpinLock
-{
-    unsigned int m_uiOwningThreadID;
-    unsigned int m_uiRecursionCount;
-    void Lock(char const*);
-};
 void __cdecl FUN_00b988e0();
 void __cdecl FUN_00b994f0(void*, unsigned short, int, int, int);
 extern RecursiveSpinLock g_011c5f80;
 typedef PoolAllocatorBase<unsigned int> PoolAlloc;
-struct ListNode
+// Exe 0x00b64f90: unit-local ListNode view; declarations and layout are preserved.
+struct BsshaderaccumulatorListNodeView
 {
-    ListNode* m_pkNext;
-    ListNode* m_pkPrev;
+    BsshaderaccumulatorListNodeView* m_pkNext;
+    BsshaderaccumulatorListNodeView* m_pkPrev;
     unsigned int m_element;
 };
 struct PtrList
 {
-    ListNode* m_pkHead;
-    ListNode* m_pkTail;
+    BsshaderaccumulatorListNodeView* m_pkHead;
+    BsshaderaccumulatorListNodeView* m_pkTail;
     unsigned int m_uiCount;
     void RemoveHead()
     {
-        ListNode* pkNode = m_pkHead;
+        BsshaderaccumulatorListNodeView* pkNode = m_pkHead;
         m_pkHead = pkNode->m_pkNext;
         if (m_pkHead)
             m_pkHead->m_pkPrev = 0;
@@ -764,7 +726,7 @@ struct PtrList
         pkNode->m_element = 0;
         g_011c5f80.Lock(0);
         pkNode->m_pkPrev = 0;
-        pkNode->m_pkNext = (ListNode*)PoolAlloc::ms_pFreeList;
+        pkNode->m_pkNext = (BsshaderaccumulatorListNodeView*)PoolAlloc::ms_pFreeList;
         PoolAlloc::ms_pFreeList = (PoolAlloc::LinkedListEntry*)pkNode;
         if (--g_011c5f80.m_uiRecursionCount == 0)
             g_011c5f80.m_uiOwningThreadID = 0;
@@ -828,16 +790,28 @@ void AccumS::FUN_00b64f90()
 }
 }  // namespace fnv_00b64f90
 
+
 namespace fnv_00b656e0 {
 void __cdecl NiFree(void*);
+}
+
+template <>
+inline NiTMapBase<NiTPointerAllocator<unsigned int>, NiAVObject*, bool>::~NiTMapBase()
+{
+    RemoveAll();
+    fnv_00b656e0::NiFree(m_ppkHashTable);
+}
+
+template <>
+inline NiTPointerMap<NiAVObject*, bool>::~NiTPointerMap()
+{
+    RemoveAll();
+}
+
+namespace fnv_00b656e0 {
 void __fastcall FUN_00c4ed40(void*);
 void __fastcall FUN_00bd9150(void*);
 void __fastcall FUN_00ba8cd0(char*);
-struct RecursiveSpinLock
-{
-    unsigned int m_uiOwningThreadID;
-    void Lock(const char*);
-};
 extern RecursiveSpinLock g_011c5f80;
 extern unsigned int DAT_011c5f84;
 struct OMNode
@@ -847,12 +821,7 @@ struct OMNode
     unsigned int m_element;
 };
 typedef PoolAllocatorBase<unsigned int>::LinkedListEntry OMAllocNode;
-extern "C" __declspec(dllimport) void __stdcall DeleteCriticalSection(_RTL_CRITICAL_SECTION*);
-class BSShaderLightingProperty
-{
-  public:
-    void ClearLights() throw();
-};
+extern "C" __declspec(dllimport) void __stdcall DeleteCriticalSection(AccumulatorCriticalSection*);
 struct OMList
 {
     OMNode* m_pkHead;
@@ -914,41 +883,20 @@ struct OMRefPtr
     OMRef* m_pObject;
     ~OMRefPtr()
     {
-        if (m_pObject)
+        if (m_pObject != 0)
             m_pObject->DecRefCount();
     }
     OMRefPtr& operator=(OMRef* pObject)
     {
         if (m_pObject != pObject)
         {
-            if (m_pObject)
+            if (m_pObject != 0)
                 m_pObject->DecRefCount();
             m_pObject = pObject;
             if (m_pObject)
                 InterlockedIncrement(&m_pObject->m_uiRefCount);
         }
         return *this;
-    }
-};
-class NiTMapBaseStub
-{
-  public:
-    virtual ~NiTMapBaseStub()
-    {
-        RemoveAll();
-        NiFree(m_ppkHashTable);
-    }
-    void RemoveAll();
-    unsigned int m_uiHashSize;
-    void** m_ppkHashTable;
-    unsigned int m_uiCount;
-};
-class OMMap : public NiTMapBaseStub
-{
-  public:
-    virtual ~OMMap()
-    {
-        RemoveAll();
     }
 };
 struct OMMember1a4
@@ -1004,7 +952,7 @@ struct OMPod
 };
 struct OMCS
 {
-    _RTL_CRITICAL_SECTION m_kCS;
+    AccumulatorCriticalSection m_kCS;
     ~OMCS()
     {
         DeleteCriticalSection(&m_kCS);
@@ -1041,7 +989,7 @@ struct FUN_00b656e0 : public FUN_00a9b4a0
     unsigned int m_u19c;
     OMRefPtr m_sp1a0;
     OMMember1a4 m_k1a4;
-    OMMap m_kMap1b4;
+    NiTPointerMap<NiAVObject*, bool> m_kMap1b4;
     char pad1c4[0x3c];
     OMCS m_kCS;
     virtual ~FUN_00b656e0();
@@ -1099,29 +1047,7 @@ FUN_00b656e0::~FUN_00b656e0()
 }  // namespace fnv_00b656e0
 
 namespace fnv_00b65c60 {
-struct NiRenderTargetGroup;
-struct NiRenderer
-{
-    void SetCurrentCamera(NiCamera*);
-};
-struct BSRenderedTexture
-{
-    NiRenderTargetGroup* GetGroup();
-    static void EndAllAndResetRendererState();
-};
-struct BSTextureManager
-{
-    void AddRenderedTexture(BSRenderedTexture*);
-    BSRenderedTexture* CreateRenderTargetTexture(NiRenderer*, int, unsigned int, BSRenderedTexture*, unsigned int);
-};
-struct ImageSpaceManager
-{
-    void FUN_00b97550(int, NiRenderer*, BSRenderedTexture*, BSRenderedTexture*, int, bool);
-};
-struct BSRenderStateManager
-{
-    static void SetDepthBufferEnabled(bool, int);
-};
+using ::BSTextureManager;
 struct AccumStub
 {
     bool FUN_00b63120(int, int);
@@ -1162,18 +1088,14 @@ void FUN_00b65c60(AccumWIP* apAccum)
         ((AccumStub*)apAccum)->UpdatePasses(true);
     else
         ((AccumStub*)apAccum)->UpdatePasses(false);
-    BSRenderStateManager::SetDepthBufferEnabled(false, 0);
-    BSRenderStateManager::SetDepthBufferEnabled(false, 0);
+    BSRenderStateManager_bsshaderaccumulator::SetDepthBufferEnabled(false, 0);
+    BSRenderStateManager_bsshaderaccumulator::SetDepthBufferEnabled(false, 0);
     apAccum->RenderPassGroup(0x2cf, 0x2d7, false, -1);
     apAccum->SetShaderPassEnabled(1, false);
 }
 }  // namespace fnv_00b65c60
 
 namespace fnv_00b65ae0 {
-struct GO
-{
-    void operator=(void*);
-};
 extern GO DAT_011fa008;
 extern bool DAT_011f9fc1;
 extern int DAT_011a9608;
@@ -1189,7 +1111,7 @@ struct AccumView
 // @fnv 0x00b65ae0
 void __cdecl FUN_00b65ae0(AccumWIP* pAccum)
 {
-    if (pAccum->m_pkAccumulationCamera)
+    if (pAccum->m_pkCamera)
     {
         unsigned char* raw = (unsigned char*)pAccum;
         int mode = *(int*)(raw + 0x19c);
@@ -1239,57 +1161,16 @@ void __cdecl FUN_00b65ae0(AccumWIP* pAccum)
 }
 }  // namespace fnv_00b65ae0
 
-struct NiUpdateData
-{
-    float fTime;
-    bool bUpdate;
-    bool bRender;
-    bool bInterpolate;
-    bool bTimeToDie;
-    bool bVisible;
-};
 
-struct A51BF0Base
-{
-    static void* __cdecl operator new(unsigned int);
-};
 
-struct NiAVObject : A51BF0Base
-{
-    void SetName(NiFixedString const&);
-};
 
-struct NiNode : NiAVObject
-{
-    unsigned char m_auiShapeKeys[0xAC];
 
-    NiNode(unsigned short);
-    void Update(NiUpdateData const&);
-};
-
-struct NiGlobalStringTable
-{
-    static char* __cdecl AddString(char const*);
-};
-
-extern char* _EmptyFS;
-extern unsigned int _data_011c16bc;
 
 extern "C" __declspec(dllimport) void __stdcall _free(void*);
 
-struct NiFixedString
-{
-    char* m_pString;
 
-    NiFixedString(char* pString) : m_pString(pString)
-    {}
-
-    ~NiFixedString()
-    {
-        if (m_pString != _EmptyFS)
-            _free(m_pString - 8);
-    }
-};
+// These operations were inline in this unit in the original build.
+inline NiUpdateData::NiUpdateData() {}
 
 // Creates a NiNode named "RenderPasses", initializes a NiUpdateData with zeroed flags, updates the node, and returns it.
 // @fnv 0x00b63420
@@ -1300,18 +1181,18 @@ NiNode* __cdecl CreateRenderPassesNode()
     int i = 0;
 
     {
-        NiFixedString fixedString(NiGlobalStringTable::AddString("RenderPasses"));
-        pNode->SetName(fixedString);
+        NiFixedString fixedString("RenderPasses");
+        pNode->NiAVObject::SetName(fixedString);
     }
 
     UpdateData.fTime = 0.0f;
-    UpdateData.bUpdate = false;
-    UpdateData.bRender = false;
-    UpdateData.bInterpolate = false;
-    UpdateData.bTimeToDie = false;
-    UpdateData.bVisible = false;
+    UpdateData.pad1 = false;
+    UpdateData.pad2 = false;
+    UpdateData.pad3 = false;
+    UpdateData.pad4 = false;
+    UpdateData.pad5 = false;
 
-    pNode->Update(UpdateData);
+    pNode->Update(static_cast<const NiUpdateData&>(UpdateData));
     return pNode;
 }
 
@@ -1363,7 +1244,7 @@ struct ManagerLocal
 extern ManagerLocal* DAT_011f4748;
 void __cdecl FUN_00ba8ec0(void*, void*, unsigned short, unsigned char, bool, bool);
 void __cdecl FUN_00b994f0(void*, unsigned short, int, int, int);
-struct FUN_00ba8cd0 : BSShaderProperty__RenderPass
+struct FUN_00ba8cd0 : BSShaderAccumulator::BSShaderProperty__RenderPass
 {
     FUN_00ba8cd0(void* geometry, unsigned short pass, unsigned char hint, bool first, bool last)
     {
@@ -1378,31 +1259,31 @@ struct Candidate : BSShaderAccumulator
 // @fnv 0x00b64bf0
 void Candidate::RenderGeometryPass(void* geometry, unsigned int index, void* camera)
 {
-    if (m_bSkipGeometryPass || index >= 3 || m_akRenderQueryStates[index].m_bQueryPending)
+    if (bWaitingForSunQueury || index >= 3 || pSunTests[index].m_bQueryPending)
         return;
-    if (!m_akRenderQueryStates[index].m_pRenderQuery)
+    if (!pSunTests[index].m_pRenderQuery)
     {
-        m_akRenderQueryStates[index].m_pRenderQuery = reinterpret_cast<RenderQuery*>(new FUN_00c4ecf0);
+        pSunTests[index].m_pRenderQuery = reinterpret_cast<RenderQuery*>(new FUN_00c4ecf0);
     }
-    if (m_akRenderQueryStates[index].m_pRenderQuery)
+    if (pSunTests[index].m_pRenderQuery)
     {
         ShaderLocal* shader = FUN_00b55560(1);
         FUN_00b7a870(9, 0);
         shader->stage34->Reset();
         shader->stage30->Reset();
-        reinterpret_cast<QueryLocal*>(m_akRenderQueryStates[index].m_pRenderQuery)->FUN_00c4ed70();
+        reinterpret_cast<QueryLocal*>(pSunTests[index].m_pRenderQuery)->FUN_00c4ed70();
         DAT_011f4748->SetFromCamera(camera);
         FUN_00ba8cd0 pass(geometry, 9, 1, false, false);
         FUN_00b994f0(&pass, 9, 0, 0, 0);
-        reinterpret_cast<QueryLocal*>(m_akRenderQueryStates[index].m_pRenderQuery)->FUN_00c4edb0();
-        m_akRenderQueryStates[index].m_bQueryPending = true;
-        m_akRenderQueryStates[index].m_uiQueryResult = 0;
+        reinterpret_cast<QueryLocal*>(pSunTests[index].m_pRenderQuery)->FUN_00c4edb0();
+        pSunTests[index].m_bQueryPending = true;
+        pSunTests[index].m_uiQueryResult = 0;
     }
     else
     {
-        m_akRenderQueryStates[index].m_fQueryValue = 0.0f;
-        m_akRenderQueryStates[index].m_bQueryPending = false;
-        m_akRenderQueryStates[index].m_uiQueryResult = 0;
+        pSunTests[index].m_fQueryValue = 0.0f;
+        pSunTests[index].m_bQueryPending = false;
+        pSunTests[index].m_uiQueryResult = 0;
     }
 }
 
@@ -1484,72 +1365,72 @@ void RenderAccumulator::FUN_00b63770(unsigned int uiFirstPass, unsigned int last
         FUN_00bbb840();
     if (group > -1)
     {
-        for (unsigned int i = 0; i < m_uiRendererCount; ++i)
+        for (unsigned int i = 0; i < uiBatchRendererCount; ++i)
         {
-            groups[i] = (RenderGroup*)m_pGroupRenderer[i]->m_pGeometryGroups[group];
+            groups[i] = (RenderGroup*)pBatchRenderer[i]->pGeometryGroupsA[group];
             renderers[i] = groups[i]->renderer;
         }
     }
     else
     {
-        for (unsigned int i = 0; i < m_uiRendererCount; ++i)
+        for (unsigned int i = 0; i < uiBatchRendererCount; ++i)
         {
-            renderers[i] = (RenderBatch*)m_pGroupRenderer[i];
+            renderers[i] = (RenderBatch*)pBatchRenderer[i];
             groups[i] = 0;
         }
     }
-    for (unsigned int i = 0; i < m_uiRendererCount; ++i)
+    for (unsigned int i = 0; i < uiBatchRendererCount; ++i)
     {
-        m_puiRendererOutput[i] = 0;
+        puicurrentPassA[i] = 0;
         if (renderers[i])
         {
-            renderers[i]->m_uiPassCount = uiFirstPass;
-            renderers[i]->m_uiBucketCount = last;
-            m_pbRendererResults[i] =
-                renderers[i]->FUN_00b9a090(&m_puiRendererOutput[i], &m_piRendererOutput[i], &m_pbRendererOutput[i]);
+            renderers[i]->uiCurrentFirstPass = uiFirstPass;
+            renderers[i]->uiCurrentLastPass = last;
+            pbcurrentActiveA[i] =
+                renderers[i]->FUN_00b9a090(&puicurrentPassA[i], &picurrentBucketA[i], &pbcurrentFirstPassA[i]);
         }
         else
         {
-            m_pbRendererResults[i] = false;
+            pbcurrentActiveA[i] = false;
         }
     }
     for (;;)
     {
-        bool active = m_pbRendererResults[0];
+        bool active = pbcurrentActiveA[0];
         unsigned int selected = 0;
-        for (unsigned int i = 1; i < m_uiRendererCount; ++i)
+        for (unsigned int i = 1; i < uiBatchRendererCount; ++i)
         {
-            if (!active && m_pbRendererResults[i])
+            if (!active && pbcurrentActiveA[i])
             {
                 active = true;
                 selected = i;
             }
-            else if (m_pbRendererResults[i] &&
-                     (m_puiRendererOutput[i] < m_puiRendererOutput[selected] ||
-                      (m_puiRendererOutput[i] == m_puiRendererOutput[selected] &&
-                       (m_piRendererOutput[i] < m_piRendererOutput[selected] ||
-                        (m_piRendererOutput[i] == m_piRendererOutput[selected] && m_pbRendererOutput[i])))))
+            else if (pbcurrentActiveA[i] &&
+                     (puicurrentPassA[i] < puicurrentPassA[selected] ||
+                      (puicurrentPassA[i] == puicurrentPassA[selected] &&
+                       (picurrentBucketA[i] < picurrentBucketA[selected] ||
+                        (picurrentBucketA[i] == picurrentBucketA[selected] && pbcurrentFirstPassA[i])))))
             {
                 selected = i;
             }
         }
         if (!active)
             break;
-        unsigned int pass = m_puiRendererOutput[selected];
+        unsigned int pass = puicurrentPassA[selected];
         if (((pass >= 0x1c4 && pass <= 0x1c7) || (pass >= 0x231 && pass <= 0x234) ||
              (pass >= 0x284 && pass <= 0x287)) &&
-            (m_bFirstSpecialPassFlag || m_bSecondSpecialPassFlag))
+            (bWaterReflection || bWaterRefraction))
         {
-            m_pbRendererResults[selected] = renderers[selected]->FUN_00b9a3c0(
-                &m_puiRendererOutput[selected], &m_piRendererOutput[selected], &m_pbRendererOutput[selected], false);
+            pbcurrentActiveA[selected] = renderers[selected]->FUN_00b9a3c0(
+                &puicurrentPassA[selected], &picurrentBucketA[selected], &pbcurrentFirstPassA[selected], false);
         }
         else
         {
-            m_pbRendererResults[selected] = renderers[selected]->FUN_00b9a120(
-                &m_puiRendererOutput[selected], &m_piRendererOutput[selected], &m_pbRendererOutput[selected], flag);
+            pbcurrentActiveA[selected] = renderers[selected]->FUN_00b9a120(
+                &puicurrentPassA[selected], &picurrentBucketA[selected], &pbcurrentFirstPassA[selected], flag);
         }
     }
-    for (unsigned int i = 0; i < m_uiRendererCount; ++i)
+    for (unsigned int i = 0; i < uiBatchRendererCount; ++i)
     {
         if (groups[i])
             groups[i]->FUN_00b9a490();
@@ -1641,36 +1522,25 @@ struct RefVolItem
     unsigned int unk1c;
 };
 
-struct RefVolNode
-{
-    RefVolNode* m_pkNext;
-    RefVolNode* m_pkPrev;
-    RefVolItem* m_element;
-};
+typedef NiTListItem<RefVolItem* > RefVolNode;
 
 struct RefVolAlloc
 {
-    unsigned int m_uiCount;
+
     RefVolNode* LinkedListEntry();
 };
 
-struct RefVolList
+typedef NiTPointerListBase<RefVolAlloc, RefVolItem* > RefVolList;
+template <> inline RefVolItem*& NiTPointerListBase<RefVolAlloc, RefVolItem* >::GetNext(void*& pos)
 {
-    RefVolNode* m_pkHead;
-    RefVolNode* m_pkTail;
-    RefVolAlloc m_kItemCount;
-
-    RefVolItem*& GetNext(void*& pos)
-    {
         RefVolItem*& r = ((RefVolNode*)pos)->m_element;
         pos = ((RefVolNode*)pos)->m_pkNext;
         return r;
     }
-    RefVolNode* GetHeadPos()
-    {
+template <> inline void* NiTListBase<RefVolAlloc, RefVolItem* >::GetHeadPos() const
+{
         return m_pkHead;
     }
-};
 
 class RefVolAccum : public BSShaderAccumulator
 {
@@ -1681,7 +1551,7 @@ class RefVolAccum : public BSShaderAccumulator
 // @fnv 0x00b65f60
 void RefVolAccum::UpdateOrAddItem(unsigned int key, const RefVolSrc* src, bool flag)
 {
-    RefVolList* list = (RefVolList*)&m_kReferenceVolumeList;
+    RefVolList* list = (RefVolList*)&ReferenceVolumeList;
     void* pos = list->GetHeadPos();
     while (pos)
     {
@@ -1741,15 +1611,6 @@ struct ShPoint3
     float y;
     float z;
 };
-struct ShColor
-{
-    float r;
-    float g;
-    float b;
-    float a;
-    ShColor(float fR = 0.0f, float fG = 0.0f, float fB = 0.0f, float fA = 0.0f) : r(fR), g(fG), b(fB), a(fA)
-    {}
-};
 struct ShMatrix3
 {
     float m_afEntries[3][3];
@@ -1760,23 +1621,8 @@ struct ShMatrix3
         kCol.z = m_afEntries[2][uiCol];
     }
 };
-struct ShFrustum
-{
-    float m_fLeftBound;
-    float m_fRightBound;
-    float m_fTopBound;
-    float m_fBottomBound;
-    float m_fNearPlane;
-    float m_fFarPlane;
-    bool m_bOrthographic;
-};
-struct ShRect
-{
-    float m_fMinimumU;
-    float m_fMaximumU;
-    float m_fMinimumV;
-    float m_fMaximumV;
-};
+
+
 struct ShCamera
 {
     int unk00;
@@ -1824,10 +1670,10 @@ struct ShCamera
     int unkD0;
     int unkD4;
     int unkD8;
-    ShFrustum m_kViewFrustum;
+    ::NiFrustum m_kViewFrustum;
     int unkF8;
     int unkFC;
-    ShRect m_kPort;
+    ::NiRect<float> m_kPort;
 };
 struct ShRenderer
 {
@@ -1874,9 +1720,9 @@ struct ShRenderer
     virtual void v0A0();
     virtual void v0A4();
     virtual void v0A8();
-    virtual void SetBackgroundColor(const ShColor& kColor);
+    virtual void SetBackgroundColor(const NiColorA& kColor);
     virtual void v0B0();
-    virtual void GetBackgroundColor(ShColor& kColor);
+    virtual void GetBackgroundColor(NiColorA& kColor);
     virtual void v0B8();
     virtual void v0BC();
     virtual void v0C0();
@@ -1931,7 +1777,7 @@ struct ShRenderer
     virtual void v184();
     virtual void v188();
     virtual void Do_SetCameraData(const ShPoint3& kWorldLoc, const ShPoint3& kWorldDir, const ShPoint3& kWorldUp,
-                                  const ShPoint3& kWorldRight, const ShFrustum& kFrustum, const ShRect& kPort);
+                                  const ShPoint3& kWorldRight, const ::NiFrustum& kFrustum, const ::NiRect<float>& kPort);
     int unk004;
     int unk008;
     int unk00C;
@@ -2064,7 +1910,7 @@ struct ShRenderer
     bool m_bInsideRenderTarget;
 
     __forceinline void SetCurrentCamera(const ShPoint3& kWorldLoc, const ShMatrix3& kWorldRot,
-                                        const ShFrustum& kFrustum, const ShRect& kPort)
+                                        const ::NiFrustum& kFrustum, const ::NiRect<float>& kPort)
     {
         ShPoint3 kWorldPosition, kUp, kRight;
         kWorldRot.GetCol(2, kRight);
@@ -2074,13 +1920,9 @@ struct ShRenderer
             Do_SetCameraData(kWorldLoc, kWorldPosition, kUp, kRight, kFrustum, kPort);
     }
 };
-struct ShManager
-{
-    int FUN_00b6b260();
-};
-ShManager* __cdecl FUN_00b4f530();
+BSRenderedTexture* __cdecl FUN_00b4f530();
 void __cdecl FUN_00b6b790();
-void __cdecl FUN_00b6b8d0(int aiType, int aiValue);
+void __cdecl FUN_00b6b8d0(int aiType, NiRenderTargetGroup* aiValue);
 extern ShRenderer* g_pShRenderer;
 
 struct FUN_00b64a00_Pass
@@ -2097,14 +1939,14 @@ struct FUN_00b64a00_Pass
 void FUN_00b64a00_Pass::FUN_00b64a00(ShCamera* pkCamera, ShCamera* pkOther)
 {
     ShRenderer* pkRenderer = g_pShRenderer;
-    ShColor kSaved;
+    NiColorA kSaved;
     pkRenderer->GetBackgroundColor(kSaved);
-    pkRenderer->SetBackgroundColor(ShColor(1.0f, 1.0f, 1.0f, 1.0f));
+    pkRenderer->SetBackgroundColor(NiColorA(1.0f, 1.0f, 1.0f, 1.0f));
 
-    ShManager* pkManager = FUN_00b4f530();
+    BSRenderedTexture* pkManager = FUN_00b4f530();
     if (g_pShRenderer->m_iRendererState)
         FUN_00b6b790();
-    FUN_00b6b8d0(7, pkManager->FUN_00b6b260());
+    FUN_00b6b8d0(7, pkManager->GetGroup());
 
     m_pkAccumulationCamera = pkCamera;
     pkRenderer->SetCurrentCamera(m_pkAccumulationCamera->m_kWorldTranslate, m_pkAccumulationCamera->m_kWorldRotate,
@@ -2129,15 +1971,6 @@ struct ShPoint3
     float y;
     float z;
 };
-struct ShColor
-{
-    float r;
-    float g;
-    float b;
-    float a;
-    ShColor(float fR = 0.0f, float fG = 0.0f, float fB = 0.0f, float fA = 0.0f) : r(fR), g(fG), b(fB), a(fA)
-    {}
-};
 struct ShMatrix3
 {
     float m_afEntries[3][3];
@@ -2148,23 +1981,8 @@ struct ShMatrix3
         kCol.z = m_afEntries[2][uiCol];
     }
 };
-struct ShFrustum
-{
-    float m_fLeftBound;
-    float m_fRightBound;
-    float m_fTopBound;
-    float m_fBottomBound;
-    float m_fNearPlane;
-    float m_fFarPlane;
-    bool m_bOrthographic;
-};
-struct ShRect
-{
-    float m_fMinimumU;
-    float m_fMaximumU;
-    float m_fMinimumV;
-    float m_fMaximumV;
-};
+
+
 struct ShCamera
 {
     int unk00;
@@ -2212,10 +2030,10 @@ struct ShCamera
     int unkD0;
     int unkD4;
     int unkD8;
-    ShFrustum m_kViewFrustum;
+    ::NiFrustum m_kViewFrustum;
     int unkF8;
     int unkFC;
-    ShRect m_kPort;
+    ::NiRect<float> m_kPort;
 };
 struct ShRenderer
 {
@@ -2262,9 +2080,9 @@ struct ShRenderer
     virtual void v0A0();
     virtual void v0A4();
     virtual void v0A8();
-    virtual void SetBackgroundColor(const ShColor& kColor);
+    virtual void SetBackgroundColor(const NiColorA& kColor);
     virtual void v0B0();
-    virtual void GetBackgroundColor(ShColor& kColor);
+    virtual void GetBackgroundColor(NiColorA& kColor);
     virtual void v0B8();
     virtual void v0BC();
     virtual void v0C0();
@@ -2319,7 +2137,7 @@ struct ShRenderer
     virtual void v184();
     virtual void v188();
     virtual void Do_SetCameraData(const ShPoint3& kWorldLoc, const ShPoint3& kWorldDir, const ShPoint3& kWorldUp,
-                                  const ShPoint3& kWorldRight, const ShFrustum& kFrustum, const ShRect& kPort);
+                                  const ShPoint3& kWorldRight, const ::NiFrustum& kFrustum, const ::NiRect<float>& kPort);
     int unk004;
     int unk008;
     int unk00C;
@@ -2452,7 +2270,7 @@ struct ShRenderer
     bool m_bInsideRenderTarget;
 
     __forceinline void SetCurrentCamera(const ShPoint3& kWorldLoc, const ShMatrix3& kWorldRot,
-                                        const ShFrustum& kFrustum, const ShRect& kPort)
+                                        const ::NiFrustum& kFrustum, const ::NiRect<float>& kPort)
     {
         ShPoint3 kWorldPosition, kUp, kRight;
         kWorldRot.GetCol(2, kRight);
@@ -2462,12 +2280,8 @@ struct ShRenderer
             Do_SetCameraData(kWorldLoc, kWorldPosition, kUp, kRight, kFrustum, kPort);
     }
 };
-struct ShManager
-{
-    int FUN_00b6b260();
-};
 void __cdecl FUN_00b6b790();
-void __cdecl FUN_00b6b8d0(int aiType, int aiValue);
+void __cdecl FUN_00b6b8d0(int aiType, NiRenderTargetGroup* aiValue);
 extern ShRenderer* g_pShRenderer;
 
 struct Sh651_BaseA
@@ -2506,7 +2320,7 @@ struct Sh651_BaseB
 };
 struct Sh651_Accum : Sh651_BaseA, Sh651_BaseB
 {
-    ShManager* FUN_00b63c60();
+    BSRenderedTexture* FUN_00b63c60();
     void FUN_00b63d10();
 };
 struct Sh651_Cam
@@ -2535,7 +2349,7 @@ struct Sh651_Cam
     int unk4C;
     int unk50;
     int unk54;
-    ShColor m_kFogTint;
+    NiColorA m_kFogTint;
 };
 struct Sh651_Scene
 {
@@ -2588,7 +2402,7 @@ struct Sh651_Holder
     int unk00;
     int unk04;
     Sh651_Scene* m_pkScene;
-    void FUN_00b97550(int aiPass, ShRenderer* pkRenderer, ShManager* pkA, ShManager* pkB, int aiC, int aiD);
+    void FUN_00b97550(int aiPass, ShRenderer* pkRenderer, BSRenderedTexture* pkA, BSRenderedTexture* pkB, int aiC, int aiD);
 };
 extern Sh651_Holder* g_pSh651Holder;
 extern bool g_bSh651Flag;
@@ -2654,7 +2468,7 @@ struct Sh651_Geom
     int unk54;
     int unk58;
     int unk5C;
-    ShColor m_kFogTint;
+    NiColorA m_kFogTint;
     int GetType() const
     {
         return m_eRequestType;
@@ -2869,12 +2683,12 @@ struct Sh651_Batch
     int unk88;
     int unk8C;
     Sh651_List m_kList;
-    bool FUN_00b651e0(ShCamera* pkCamera, ShManager* pkManager);
+    bool FUN_00b651e0(ShCamera* pkCamera, BSRenderedTexture* pkManager);
 };
 
 // Renders items whose geometry passes the type check, issuing selected passes and updating fog state.
 // @fnv 0x00b651e0
-bool Sh651_Batch::FUN_00b651e0(ShCamera* pkCamera, ShManager* pkManager)
+bool Sh651_Batch::FUN_00b651e0(ShCamera* pkCamera, BSRenderedTexture* pkManager)
 {
     unsigned int ItemUpdateArray = m_kList.m_uiCount;
     if (ItemUpdateArray > 0)
@@ -2882,14 +2696,14 @@ bool Sh651_Batch::FUN_00b651e0(ShCamera* pkCamera, ShManager* pkManager)
         if (g_pShRenderer->m_iRendererState)
             FUN_00b6b790();
         ShRenderer* pkRenderer = g_pShRenderer;
-        ShColor kSaved;
-        ShManager* pkAccumMgr = static_cast<Sh651_Accum*>(g_pSh651Holder->m_pkScene->m_pkAccum)->FUN_00b63c60();
+        NiColorA kSaved;
+        BSRenderedTexture* pkAccumMgr = static_cast<Sh651_Accum*>(g_pSh651Holder->m_pkScene->m_pkAccum)->FUN_00b63c60();
         Sh651_Pass kPass;
         bool bFlag = g_bSh651Flag;
         ShCamera* pkSavedCamera = m_pkAccumulationCamera;
         m_pkAccumulationCamera = pkCamera;
         pkRenderer->GetBackgroundColor(kSaved);
-        pkRenderer->SetBackgroundColor(ShColor(0.0f, 0.0f, 0.0f, 1.0f));
+        pkRenderer->SetBackgroundColor(NiColorA(0.0f, 0.0f, 0.0f, 1.0f));
         m_pkList = &m_kList;
         Prepare();
         kPass.m_usPass = 0x25b;
@@ -2903,7 +2717,7 @@ bool Sh651_Batch::FUN_00b651e0(ShCamera* pkCamera, ShManager* pkManager)
                 pkGeom = pkItem->m_pkGeom;
                 if (pkGeom)
                 {
-                    FUN_00b6b8d0(3, pkAccumMgr->FUN_00b6b260());
+                    fnv_00b651e0::FUN_00b6b8d0(3, pkAccumMgr->GetGroup());
                     pkRenderer->SetCurrentCamera(
                         m_pkAccumulationCamera->m_kWorldTranslate, m_pkAccumulationCamera->m_kWorldRotate,
                         m_pkAccumulationCamera->m_kViewFrustum, m_pkAccumulationCamera->m_kPort);
@@ -2922,8 +2736,8 @@ bool Sh651_Batch::FUN_00b651e0(ShCamera* pkCamera, ShManager* pkManager)
                         pkItem->Render(g_pShRenderer);
                     }
                     FUN_00b6b790();
-                    FUN_00b6b8d0(0, pkManager->FUN_00b6b260());
-                    ShColor kColor = pkGeom->m_kFogTint;
+                    fnv_00b651e0::FUN_00b6b8d0(0, pkManager->GetGroup());
+                    NiColorA kColor = pkGeom->m_kFogTint;
                     Sh651_Cam* pkCam = g_pSh651Holder->m_pkScene->m_pkCam;
                     pkCam->m_bValueAt0C = true;
                     pkCam->m_kFogTint = kColor;
@@ -3006,14 +2820,7 @@ void QueryOwner_b64d::UpdateQueries()
     }
 }
 
-enum BSRENDERSTATE_LOCK
-{
-};
 
-struct NP
-{
-    NP& operator=(void*);
-};
 extern NP DAT_011fa008;
 extern bool DAT_011f9fc1;
 
@@ -3077,7 +2884,7 @@ struct VtblSlot41
 // @fnv 0x00b65dc0
 void __cdecl RenderAccumulationPasses(AccumWIP2* apAccumWIP)
 {
-    if (!apAccumWIP->m_pkAccumulationCamera)
+    if (!apAccumWIP->m_pkCamera)
         return;
 
     if (DAT_011f9fc1)
@@ -3103,7 +2910,7 @@ void __cdecl RenderAccumulationPasses(AccumWIP2* apAccumWIP)
     else
         apAccumWIP->UpdatePasses(0);
 
-    BSRenderStateManager::SetDepthBufferEnabled(false, (BSRENDERSTATE_LOCK)0);
+    BSRenderStateManager_bsshaderaccumulator::SetDepthBufferEnabled(false, (BSRENDERSTATE_LOCK)0);
     apAccumWIP->RenderPassGroup(0x2cf, 0x2d7, false, -1);
     apAccumWIP->ClearActivePasses();
 }
@@ -3286,37 +3093,37 @@ void SunQueryAccum::PollQuery(unsigned int uiSlot)
 {
     if (uiSlot >= 3)
         return;
-    if (!m_akRenderQueryStates[uiSlot].m_bQueryPending)
+    if (!pSunTests[uiSlot].m_bQueryPending)
         return;
-    if (!m_akRenderQueryStates[uiSlot].m_pRenderQuery)
+    if (!pSunTests[uiSlot].m_pRenderQuery)
         return;
     unsigned int count;
-    unsigned char status = m_akRenderQueryStates[uiSlot].m_pRenderQuery->FUN_00c4ee40(&count, 1);
+    unsigned char status = pSunTests[uiSlot].m_pRenderQuery->FUN_00c4ee40(&count, 1);
     if (status == 1)
     {
         if (count == 0)
         {
-            m_akRenderQueryStates[uiSlot].m_fQueryValue = 1.0f;
+            pSunTests[uiSlot].m_fQueryValue = 1.0f;
         }
         else
         {
             unsigned int limited = count > 1500u ? 1500u : count;
             float visibility = 1.0f - (double)(float)limited / DAT_010737c8;
-            m_akRenderQueryStates[uiSlot].m_fQueryValue = visibility;
+            pSunTests[uiSlot].m_fQueryValue = visibility;
         }
-        m_akRenderQueryStates[uiSlot].m_uiQueryFlags = count;
-        m_akRenderQueryStates[uiSlot].m_bQueryPending = false;
+        pSunTests[uiSlot].m_uiQueryFlags = count;
+        pSunTests[uiSlot].m_bQueryPending = false;
     }
     else if (status != 0)
     {
-        RenderQuery* query = m_akRenderQueryStates[uiSlot].m_pRenderQuery;
+        RenderQuery* query = pSunTests[uiSlot].m_pRenderQuery;
         if (query)
         {
             query->FUN_00c4ed40();
             g_memoryManager.Deallocate(query);
         }
-        m_akRenderQueryStates[uiSlot].m_pRenderQuery = 0;
-        m_akRenderQueryStates[uiSlot].m_bQueryPending = false;
+        pSunTests[uiSlot].m_pRenderQuery = 0;
+        pSunTests[uiSlot].m_bQueryPending = false;
     }
 }
 
@@ -3385,26 +3192,9 @@ struct RenderSurface
     virtual void slotb0();
     virtual void* GetData();
 };
-struct TextureView
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1c;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2c;
-    NiPointer<NiRefObject> texture;
-    RenderSurface* FUN_00b6b260();
-};
 struct TextureProvider
 {
-    TextureView* FUN_00bd9380(bool);
+    BSRenderedTexture* FUN_00bd9380(bool);
 };
 struct ProviderNode
 {
@@ -3760,7 +3550,7 @@ struct CountView
 };
 void __cdecl FUN_00b98380(int, int);
 void __cdecl FUN_00b6b790();
-void __cdecl FUN_00b6b8d0(int, RenderSurface*);
+void __cdecl FUN_00b6b8d0(int, NiRenderTargetGroup*);
 extern bool DAT_011f9fc2;
 struct LightingShaderView
 {
@@ -3771,48 +3561,48 @@ LightingShaderView* __cdecl FUN_00b55560(int);
 struct DepthAccumulator : BSShaderAccumulator
 {
     void FUN_00b639e0(int, bool);
-    bool FUN_00b64570(NiCamera* camera, TextureView* target);
+    bool FUN_00b64570(NiCamera* camera, BSRenderedTexture* target);
 };
 // Processes geometry groups using a depth surface and may update a lighting shader texture; restores the saved rectangle and camera.
 // @fnv 0x00b64570
-bool DepthAccumulator::FUN_00b64570(NiCamera* camera, TextureView* target)
+bool DepthAccumulator::FUN_00b64570(NiCamera* camera, BSRenderedTexture* target)
 {
     if (!target)
         return false;
     bool changedRect = false;
     bool rendered = false;
     RenderRect oldRect(0, 0, 0, 0);
-    const NiCamera* savedCamera = m_pkAccumulationCamera;
-    m_pkAccumulationCamera = camera;
+    const NiCamera* savedCamera = m_pkCamera;
+    m_pkCamera = camera;
     RenderManagerView* renderer = (RenderManagerView*)DAT_011f4748;
-    TextureView* depth = DAT_011f91ac->node->provider->FUN_00bd9380(false);
+    BSRenderedTexture* depth = DAT_011f91ac->node->provider->FUN_00bd9380(false);
     FUN_00b98380(15, 0);
     int preCount = 0;
-    for (unsigned int i = 0; i < m_uiRendererCount; ++i)
-        preCount += ((CountView*)m_pGroupRenderer[i]->m_pGeometryGroups[8])->count;
+    for (unsigned int i = 0; i < uiBatchRendererCount; ++i)
+        preCount += ((CountView*)pBatchRenderer[i]->pGeometryGroupsA[8])->count;
     if (depth && preCount > 0)
     {
-        RenderSurface* source = target->FUN_00b6b260();
-        RenderSurface* destination = depth->FUN_00b6b260();
+        RenderSurface* source = reinterpret_cast<RenderSurface*>(target->GetGroup());
+        RenderSurface* destination = reinterpret_cast<RenderSurface*>(depth->GetGroup());
         destination->SetData(source->GetData());
         renderer->GetRect(oldRect);
         renderer->SetRect(RenderRect(0.5f, 0.5f, 0, 0));
         changedRect = true;
         if (((RenderManagerView*)DAT_011f4748)->mode)
             FUN_00b6b790();
-        FUN_00b6b8d0(0, depth->FUN_00b6b260());
+        fnv_00b64570::FUN_00b6b8d0(0, depth->GetGroup());
         renderer->SetupCamera(
-            ((CameraView*)m_pkAccumulationCamera)->position, ((CameraView*)m_pkAccumulationCamera)->GetDirection(),
-            ((CameraView*)m_pkAccumulationCamera)->GetRight(), ((CameraView*)m_pkAccumulationCamera)->GetUp(),
-            ((CameraView*)m_pkAccumulationCamera)->frustum, ((CameraView*)m_pkAccumulationCamera)->viewport);
+            ((CameraView*)m_pkCamera)->position, ((CameraView*)m_pkCamera)->GetDirection(),
+            ((CameraView*)m_pkCamera)->GetRight(), ((CameraView*)m_pkCamera)->GetUp(),
+            ((CameraView*)m_pkCamera)->frustum, ((CameraView*)m_pkCamera)->viewport);
         FUN_00b639e0(8, false);
         rendered = true;
     }
-    for (unsigned int i = 0; i < m_uiRendererCount; ++i)
-        ((CountView*)m_pGroupRenderer[i]->m_pGeometryGroups[8])->FUN_00b9a490();
+    for (unsigned int i = 0; i < uiBatchRendererCount; ++i)
+        ((CountView*)pBatchRenderer[i]->pGeometryGroupsA[8])->FUN_00b9a490();
     unsigned int count = 0;
-    for (unsigned int i = 0; i < m_uiRendererCount; ++i)
-        count += ((CountView*)m_pGroupRenderer[i]->m_pGeometryGroups[6])->count;
+    for (unsigned int i = 0; i < uiBatchRendererCount; ++i)
+        count += ((CountView*)pBatchRenderer[i]->pGeometryGroupsA[6])->count;
     if (count > 0)
     {
         if (!rendered)
@@ -3823,16 +3613,16 @@ bool DepthAccumulator::FUN_00b64570(NiCamera* camera, TextureView* target)
                 depth = DAT_011f91ac->node->provider->FUN_00bd9380(true);
                 fallback = true;
             }
-            RenderSurface* source = target->FUN_00b6b260();
-            RenderSurface* destination = depth->FUN_00b6b260();
+            RenderSurface* source = reinterpret_cast<RenderSurface*>(target->GetGroup());
+            RenderSurface* destination = reinterpret_cast<RenderSurface*>(depth->GetGroup());
             destination->SetData(source->GetData());
             renderer->GetRect(oldRect);
             renderer->SetRect(RenderRect(0.5f, 0.5f, 0, 0));
             changedRect = true;
             FUN_00b6b790();
-            FUN_00b6b8d0(fallback ? 1 : 0, depth->FUN_00b6b260());
-            const NiCamera*& activeCamera = m_pkAccumulationCamera;
-            renderer->SetupCamera(((CameraView*)m_pkAccumulationCamera)->position,
+            fnv_00b64570::FUN_00b6b8d0(fallback ? 1 : 0, depth->GetGroup());
+            const NiCamera*& activeCamera = m_pkCamera;
+            renderer->SetupCamera(((CameraView*)m_pkCamera)->position,
                                   ((CameraView*)activeCamera)->GetDirection(), ((CameraView*)activeCamera)->GetRight(),
                                   ((CameraView*)activeCamera)->GetUp(), ((CameraView*)activeCamera)->frustum,
                                   ((CameraView*)activeCamera)->viewport);
@@ -3841,7 +3631,7 @@ bool DepthAccumulator::FUN_00b64570(NiCamera* camera, TextureView* target)
         if (DAT_011f9fc2)
         {
             NiRefObject* texture =
-                (depth ? depth->texture : (const NiPointer<NiRefObject>&)NiPointer<NiRefObject>()).m_pObject;
+                (depth ? reinterpret_cast<const AccumulatorPointer<NiRefObject>&>(depth->spTexture[0]) : (const AccumulatorPointer<NiRefObject>&)AccumulatorPointer<NiRefObject>()).m_pObject;
             LightingShaderView* shader = FUN_00b55560(9);
             shader->AddTexture(texture);
         }
@@ -3850,24 +3640,23 @@ bool DepthAccumulator::FUN_00b64570(NiCamera* camera, TextureView* target)
         FUN_00b6b790();
     if (depth)
     {
-        RenderSurface* source = target->FUN_00b6b260();
-        RenderSurface* destination = depth->FUN_00b6b260();
+        RenderSurface* source = reinterpret_cast<RenderSurface*>(target->GetGroup());
+        RenderSurface* destination = reinterpret_cast<RenderSurface*>(depth->GetGroup());
         destination->SetData(source->GetData());
     }
     if (changedRect)
         renderer->SetRect(oldRect);
-    m_pkAccumulationCamera = savedCamera;
+    m_pkCamera = savedCamera;
     return false;
 }
 }  // namespace fnv_00b64570
 
-extern "C" __declspec(dllimport) void __stdcall InitializeCriticalSection(void*);
 struct LocalCriticalSection
 {
     unsigned unk00, unk04, unk08, unk0c, unk10, unk14;
     LocalCriticalSection()
     {
-        InitializeCriticalSection(this);
+        InitializeCriticalSection(reinterpret_cast<CRITICAL_SECTION*>(this));
     }
     ~LocalCriticalSection();
 };
@@ -3876,12 +3665,6 @@ inline void* operator new[](unsigned n)
 {
     return g_memoryManager.Allocate(n);
 }
-struct NiAlphaProperty
-{
-    int unk04, unk08, unk0c, unk10, unk14, unk18, unk1c, unk20, unk24, unk28, unk2c, unk30;
-    NiAlphaProperty();
-    virtual ~NiAlphaProperty();
-};
 struct SunTest
 {
     void* query;
@@ -3966,65 +3749,28 @@ struct FUN_00bd9120
     FUN_00bd9120();
 };
 void* __cdecl FUN_00aa13e0(unsigned);
-struct FUN_00b9a5b0
-{
-    void* vtable;
-    unsigned refs;
-    void* renderPasses;
-    void* mapVtable;
-    unsigned hashSize;
-    void* table;
-    unsigned mapCount;
-    unsigned passCount, firstPass, lastPass;
-    void* renderer;
-    unsigned short activePass;
-    void* nextPass;
-    int grouping;
-    bool zPrePass;
-    void* geometryGroups[13];
-    void* alphaGroups[2];
-    List12 alphaLists[2];
-    void* currentGroups[2];
-    static void* operator new(unsigned n)
-    {
-        return FUN_00aa13e0(n);
-    }
-    FUN_00b9a5b0(unsigned, int);
-};
 void* __cdecl FUN_00aa1070(unsigned);
 void* __cdecl FUN_00aa13e0(unsigned);
-extern void* DAT_010adfbc[];
-extern void* DAT_010adfd8[];
 void* __cdecl FUN_00ec61c0(void*, int, unsigned);
-struct Map16
+template <>
+inline NiTMapBase<NiTPointerAllocator<unsigned int>, NiAVObject*, bool>::NiTMapBase(unsigned int hashSize)
 {
-    void** vtable;
-    unsigned size;
-    void* table;
-    unsigned count;
-    Map16()
-    {
-        vtable = DAT_010adfbc;
-        size = 37;
-        count = 0;
-        table = FUN_00aa1070(148);
-        unsigned bytes = size * 4;
-        FUN_00ec61c0(table, 0, bytes);
-        vtable = DAT_010adfd8;
-    }
-    ~Map16();
-};
+    m_uiHashSize = hashSize;
+    m_kItemCount.m_uiCount = 0;
+    m_ppkHashTable = static_cast<NiTMapItem<NiAVObject*, bool>**>(FUN_00aa1070(hashSize * 4));
+    unsigned bytes = m_uiHashSize * 4;
+    FUN_00ec61c0(m_ppkHashTable, 0, bytes);
+}
+template <>
+inline NiTPointerMap<NiAVObject*, bool>::NiTPointerMap(unsigned int hashSize)
+    : NiTMapBase<NiTPointerAllocator<unsigned int>, NiAVObject*, bool>(hashSize)
+{
+}
+
 extern void** vftable_BSShaderAccumulator;
-extern void* DAT_010adfbc[];
-extern void* DAT_010adfd8[];
-struct LocalColor
-{
-    float r, g, b, a;
-    LocalColor(float R, float G, float B, float A) : r(R), g(G), b(B), a(A)
-    {}
-};
 struct FUN_00b660d0 : NiAlphaProperty
 {
+    unsigned char accumulatorBasePadding[0x18];
     unsigned mode;
     bool world, cache, depth;
     unsigned sunPixels;
@@ -4040,13 +3786,13 @@ struct FUN_00b660d0 : NiAlphaProperty
     List12 volumes;
     unsigned lastRef;
     bool lastResult;
-    LocalColor silhouette;
+    NiColorA silhouette;
     bool reflection, refraction, cellWater, underwater;
     int waterHeight;
     bool decals;
     FUN_00bd9120* instance;
-    FUN_00b9a5b0* batch;
-    FUN_00b9a5b0* batch2;
+    BSBatchRenderer* batch;
+    BSBatchRenderer* batch2;
     unsigned* passes;
     int* buckets;
     bool* firsts;
@@ -4057,7 +3803,7 @@ struct FUN_00b660d0 : NiAlphaProperty
     int renderMode;
     RefPtr shadow;
     struct FUN_00ba8ec0 alpha;
-    Map16 room;
+    NiTPointerMap<NiAVObject*, bool> room;
     int unk1c4, unk1c8, unk1cc, unk1d0, unk1d4, unk1d8, unk1dc, unk1e0, unk1e4, unk1e8, unk1ec, unk1f0, unk1f4, unk1f8,
         unk1fc;
     LocalCriticalSection crit;
@@ -4246,7 +3992,7 @@ struct RenderTLS
 extern __declspec(thread) RenderTLS g_renderTLS;
 // @fnv 0x00b660d0
 FUN_00b660d0::FUN_00b660d0(int flags, unsigned count, unsigned pass)
-    : silhouette(0, 0, 0, 0), alpha(0, 0x2f5, true, 0, 0)
+    : silhouette(0, 0, 0, 0), alpha(0, 0x2f5, true, 0, 0), room(37)
 {
     accumulate = true;
     firstPerson = false;
@@ -4273,10 +4019,10 @@ FUN_00b660d0::FUN_00b660d0(int flags, unsigned count, unsigned pass)
     instance = new FUN_00bd9120;
     batchCount = count;
     passCount = pass;
-    batch = new FUN_00b9a5b0(passCount, flags);
+    batch = new BSBatchRenderer(passCount, flags);
     if (batchCount == 2)
     {
-        batch2 = new FUN_00b9a5b0(passCount, flags);
+        batch2 = new BSBatchRenderer(passCount, flags);
     }
     else
         batch2 = 0;
@@ -4290,5 +4036,5 @@ FUN_00b660d0::FUN_00b660d0(int flags, unsigned count, unsigned pass)
     decals = true;
     waterTarget.clear();
     depth = false;
-    silhouette = LocalColor(0.3f, 0.3f, 0.3f, 1.0f);
+    silhouette = NiColorA(0.3f, 0.3f, 0.3f, 1.0f);
 }

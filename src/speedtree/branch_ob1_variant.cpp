@@ -5,6 +5,10 @@
 
 // src/speedtree/branch.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/speedtree/branch.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+#include "../../include/NiPoint3.h"
+
 extern int DAT_011ad14c;
 struct FUN_00b14ae0_class
 {
@@ -18,10 +22,6 @@ struct FUN_00b15170
     char* m_10;
     char* GetElement(unsigned int a);
 };
-struct NiPoint3
-{
-    float x, y, z;
-};
 struct FUN_00b2a180
 {
     float a;
@@ -30,18 +30,6 @@ struct FUN_00b2a180
     float Dot(const NiPoint3& point);
 };
 double __cdecl FUN_00ec6054(double);
-struct FUN_00b12790_class
-{
-    float x, y, z;
-    void FUN_00b12790();
-};
-struct FUN_00b0cff0_class
-{
-    float x;
-    float y;
-    float z;
-    NiPoint3* __thiscall ScaleSwizzled(NiPoint3* output, float factor);
-};
 extern double __cdecl FUN_00eca190(double value);
 struct This : FUN_00b2a180
 {
@@ -157,23 +145,12 @@ struct FUN_00b14be0_cls
     void FindSegment(OutPair* out, float v);
 };
 float __cdecl FUN_00b15110(Link* link);
-// Stand-in for the game's vector type: three floats plus the vector helpers
-// the original calls (difference, normalisation, scaling, sum and dot product).
-struct Vec
-{
-    float x, y, z;
-    void FUN_00b12790();                         // normalise in place
-    void FUN_00b13040(Vec* out, const Vec* p);   // *out = *this - *p
-    Vec* ScaleSwizzled(Vec* out, float factor);  // *out = *this * factor
-    void AddVector(Vec* out, const Vec* other);  // *out = *this + *other
-    float Dot(const Vec& p);
-};
 // The class that owns ProjectOntoLine (in the game it derives from the vector
 // class, so `this` points at the three floats a, b and c).
 struct MyThis
 {
     float a, b, c;
-    Vec* ProjectOntoLine(Vec* out, Vec* a, Vec* b, Vec* c);
+    NiPoint3* ProjectOntoLine(NiPoint3* out, NiPoint3* a, NiPoint3* b, NiPoint3* c);
 };
 extern unsigned int __cdecl FUN_00ec7c56(void);
 struct NiPoint3x
@@ -240,27 +217,18 @@ struct S_00b14280_This
     bool IsPointClearOfEntries(const NiPoint3x& pt, unsigned int index, S_00b14280_List* list);
 };
 
-struct Pt3
+
+inline NiPoint3::NiPoint3(float fX, float fY, float fZ)
 {
-    float x, y, z;
-    Pt3()
-    {}
-    Pt3(float fX, float fY, float fZ)
-    {
-        x = fX;
-        y = fY;
-        z = fZ;
-    }
-};
-struct CrossPt
-{
-    float x, y, z;
-    Pt3 FUN_00b12810(const Pt3& pt) const;
-};
+    x = fX;
+    y = fY;
+    z = fZ;
+}
+
 // @fnv 0x00b12810
-Pt3 CrossPt::FUN_00b12810(const Pt3& pt) const
+NiPoint3 NiPoint3::Cross(const NiPoint3& pt) const
 {
-    return Pt3(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
+    return NiPoint3(y * pt.z - z * pt.y, z * pt.x - x * pt.z, x * pt.y - y * pt.x);
 }
 
 extern float runtimeInitializationFloat4160;

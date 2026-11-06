@@ -1,137 +1,284 @@
-// Source layout: TESFile. PC corrections are in generate_headers.py.
-#ifndef FNV_TESFILE_H
-#define FNV_TESFILE_H
-#include "layout_support.h"
-#include "TESFileHeader.h"
+#pragma once
+
+#include <windows.h>
 #include "FormRecordHeader.h"
-#include "_FILETIME.h"
-#include "_WIN32_FIND_DATAA.h"
+#include "TESFileHeader.h"
+#ifndef FNV_LAYOUT_SUPPORT_H
+#include "NiFile.h"
+#include "MagicTarget.h"
+#include "TESFullName.h"
+#endif
+
+class BSFile;
+class TESBitArrayFile;
+class TESObjectCELL;
+class TESFileGroup;
+class TESForm;
+class TESRecordHeader;
+class Flt;
+template <class T_Key, class T_Data> class NiTPointerMap;
+enum TES_RETURN_CODE;
+enum CHUNK_ID;
+
 #pragma pack(push, 4)
 class TESFile
 {
-  public:
-    TES_RETURN_CODE m_eReturnCode;                                // +0x0
-    TESFile* m_pThreadSafeParent;                                 // +0x4
-    NiTPointerMap<unsigned int, TESFile*>* m_pThreadSafeFileMap;  // +0x8
-    BSFile* m_pSecondaryFile;                                     // +0xC
-    BSFile* m_pFile;                                              // +0x10
-    TESBitArrayFile* m_pBitArrayFile1;                            // +0x14
-    TESBitArrayFile* m_pBitArrayFile2;                            // +0x18
-    TESBitArrayFile* m_pBitArrayFile3;                            // +0x1C
-    char m_acFilename[260];                                       // +0x20
-    char m_acPath[260];                                           // +0x124
-    char* m_pBuffer;                                              // +0x228
-    unsigned int m_uiBufferAllocSize;                             // +0x22C
-    unsigned int m_uiReadPosition;                                // +0x230
-    unsigned int m_uiBufferSize;                                  // +0x234
-    TESObjectCELL* m_pCurrentCell;                                // +0x238
-    unsigned int m_uiFormCount;                                   // +0x23C
-    FormRecordHeader m_kRecordInfo;                                           // +0x240
-    CHUNK_ID m_eChunkID;                                          // +0x258
-    unsigned int m_uiChunkSize;                                   // +0x25C
-    unsigned int m_uiChunkOffset;                                 // +0x260
-    unsigned int m_uiRecordSize;                                  // +0x264
-    unsigned int m_uiRecordOffset;                                // +0x268
-    unsigned int m_uiCurrentOffset;                               // +0x26C
-    FormRecordHeader m_kChunkInfo;                                            // +0x270
-    unsigned int m_uiChunkValue1;                                 // +0x288
-    unsigned int m_uiChunkValue2;                                 // +0x28C
-    BSSimpleList<TESFileGroup*> m_kRecordList;                      // +0x290
-    bool m_bIsLoading;                                            // +0x298
-    bool m_bIsSaving;                                             // +0x299
-    bool m_bHasCurrentGroup;                                      // +0x29A
+public:
+    struct FormRecord
+    {
+        unsigned int form;
+        unsigned int length;
+        unsigned int flags;
+        unsigned int id;
+        unsigned int version;
+        unsigned int control;
+    };
+
+    TES_RETURN_CODE m_eReturnCode;
+    TESFile* m_pThreadSafeParent;
+    NiTPointerMap<unsigned int, TESFile*>* m_pThreadSafeFileMap;
+    BSFile* m_pSecondaryFile;
+    BSFile* m_pFile;
+    TESBitArrayFile* m_pBitArrayFile1;
+    TESBitArrayFile* m_pBitArrayFile2;
+    TESBitArrayFile* m_pBitArrayFile3;
+    char m_acFilename[260];
+    char m_acPath[260];
+    char* m_pBuffer;
+    unsigned int m_uiBufferAllocSize;
+    unsigned int m_uiReadPosition;
+    unsigned int m_uiBufferSize;
+    TESObjectCELL* m_pCurrentCell;
+    unsigned int m_uiFormCount;
+    FormRecordHeader m_kRecordInfo;
+    CHUNK_ID m_eChunkID;
+    unsigned int m_uiChunkSize;
+    unsigned int m_uiChunkOffset;
+    unsigned int m_uiRecordSize;
+    unsigned int m_uiRecordOffset;
+    unsigned int m_uiCurrentOffset;
+    FormRecordHeader m_kChunkInfo;
+    unsigned int m_uiChunkValue1;
+    unsigned int m_uiChunkValue2;
+    BSSimpleList<TESFileGroup*> m_kRecordList;
+    bool m_bIsLoading;
+    bool m_bIsSaving;
+    bool m_bHasCurrentGroup;
     unsigned char layoutPadding29B;
-    _WIN32_FIND_DATAA m_kFindData;                   // +0x29C
-    TESFileHeader m_kFileMetadata;                     // +0x3DC
-    unsigned int m_uiFileCount;                      // +0x3E8
-    BSSimpleList<char*> m_kFilenameList;             // +0x3EC
-    BSSimpleList<_ULARGE_INTEGER*> m_kFileSizeList;  // +0x3F4
-    unsigned int m_uiTESFileCount;                   // +0x3FC
-    TESFile** m_ppTESFiles;                          // +0x400
-    _FILETIME m_kLastWriteTime;                      // +0x404
-    unsigned char m_ucCompileIndex;                  // +0x40C
+    _WIN32_FIND_DATAA m_kFindData;
+    TESFileHeader m_kFileMetadata;
+    unsigned int m_uiFileCount;
+    BSSimpleList<char*> m_kFilenameList;
+    BSSimpleList<_ULARGE_INTEGER*> m_kFileSizeList;
+    unsigned int m_uiTESFileCount;
+    TESFile** m_ppTESFiles;
+    _FILETIME m_kLastWriteTime;
+    unsigned char m_ucCompileIndex;
     unsigned char layoutPadding40D;
     unsigned short layoutPadding40E;
-    BSStringT<char> m_kCreator;       // +0x410
-    BSStringT<char> m_kSummary;       // +0x418
-    char* m_pDecompressedFormBuffer;  // +0x420
-    unsigned int m_uiAuxBufferSize;   // +0x424
-    bool m_bIsMaster;                 // +0x428
-    bool m_bOptimizedFile;            // +0x429
-    bool m_bIsDLC;                    // +0x42A
+    BSStringT<char> m_kCreator;
+    BSStringT<char> m_kSummary;
+    char* m_pDecompressedFormBuffer;
+    unsigned int m_uiAuxBufferSize;
+    bool m_bIsMaster;
+    bool m_bOptimizedFile;
+    bool m_bIsDLC;
     unsigned char layoutPadding42B;
+
+    bool CreateTES(char*, char*, int);
+    bool CreateTES(int);
+    bool OpenTESFile(char*, char*, int, bool);
+    bool OpenTESFile(int, bool);
+    bool CloseTESFile();
+    bool DeleteTES();
+    bool IsOpen();
+    bool QDLC();
+    void SetDLC(bool);
+    int ReadTESInfo();
+    int SaveTESInfo();
+    int RewriteFormHeader();
+    TESForm* BuildTESInfoForm();
+    int GetFormCount();
+    void ModFormCount(int);
+    void SetFormCount(int);
+    int GetFileLanguage();
+    void SetFileLanguage(int);
+    float GetFileVersion();
+    void SetFileVersion(float);
+    bool IsValidFileVersion();
+    unsigned int GetFORMSize();
+    const char* GetPath();
+    const char* GetFilename();
+    unsigned int GetFileSize();
+    _WIN32_FIND_DATAA* GetFileData();
+    void GetCreateTime(_SYSTEMTIME*);
+    void GetLastWriteTime(_FILETIME*);
+    void GetLastWriteTime(_SYSTEMTIME*);
+    void* GetCreator();
+    void* GetSummary();
+    bool MastersChecked(void*);
+    bool CheckMasterFiles(void*, bool);
+    TESFile* GetMasterFile(unsigned int);
+    char* GetMasterFileName(unsigned int);
+    unsigned int GetMasterFileCount();
+    unsigned int GetFileIndex(TESFile*);
+    void ClearMasters();
+    void AddMaster(char*);
+    bool AddMasters(void*);
+    void RemoveMaster(unsigned int);
+    bool DependsOnMaster(char*);
+    bool MastersChanged();
+    bool CheckLODPlugins();
+    void* GetMasterList();
+    unsigned char GetFileCompileIndex();
+    void SetCompileIndex(unsigned char);
+    void AddToDataHandler();
+    bool CurrentGroupMayContainForm(TESForm*);
+    void GetAnimationSequence(FormRecordHeader*);
+    void ClearGroupStack();
+    void OpenGroup(FormRecordHeader*);
+    void CloseGroup();
+    bool IsFormInCurrentGroup(TESForm*);
+    bool IsGroupOpen();
+    void SetCurrentForm(TESForm*);
+    void ResetCurrentForm();
+    void ResetFileState(bool getform);
+    TESFileGroup* GetCurrentGroup();
+    void* GetGroupList();
+    void SetGroupMode(bool);
+    void TESRewindChunk();
+    bool NextForm(bool);
+    bool HasNextForm();
+    void RewindForm();
+    unsigned char GetTESForm();
+    unsigned int GetOffset();
+    unsigned int GetOffsetChunk();
+    bool SetOffset(unsigned int);
+    bool SetOffsetChunk(unsigned int);
+    int GetFormAtOffset(unsigned int);
+    unsigned int CopyCurrentFormToBuffer(void*, unsigned int);
+    int ReadCurrentForm();
+    bool NextChunk();
+    unsigned int GetChunkSize();
+    bool GetChunkData(unsigned short*);
+    bool GetChunkData(short*);
+    bool GetChunkData(float*);
+    bool GetChunkData(unsigned int*);
+    bool GetChunkData(int*);
+    bool GetChunkData(void*, unsigned int);
+    void ClearCurrentChunk();
+    bool HasMaster(char*);
+    int WriteForm(TESForm*);
+    int WriteFormContents(TESForm*);
+    void LoadForm(TESForm*);
+    int WriteChunkData(int, void*, unsigned int);
+    unsigned int GetCurrentReadPosition();
+    bool ForceSaveFormHeader(FormRecordHeader*, unsigned int);
+    void SetMasterFile(bool);
+    bool IsMasterFile();
+    void SetOptimizedFile(bool);
+    bool GetOptimizedFile();
+    void SetChecked(bool);
+    bool GetIsChecked();
+    void SetAltered(bool);
+    bool GetAltered();
+    void SetActive(bool);
+    bool GetActive();
+    void SetLittleEndian(bool);
+    bool GetLittleEndian();
+    bool QEndian();
+    void SetUnicode(bool);
+    bool GetUnicode();
+    bool GetHasGroups();
+    void SetHasGroups(bool);
+    float GetPercentage();
+    void CopyToBackup();
+    static void DeleteFileList(void*);
     TESFile* GetParentTESFile();
     TESFile* GetThreadSafeRootFile();
-    TESFile* GetFileForThread(unsigned int threadID);
-    bool IsEndianConversionRequired();
-    bool IsCurrentFormCompressed();
-    TESFile(const char* path, const char* filename, NiFile::OpenMode openMode);
-    const char* GetFilename();
-    const char* GetPath();
-    bool IsMasterFile();
-    void SetMasterFile(bool master);
-    unsigned char GetFileCompileIndex();
-    void SetCompileIndex(unsigned char index);
-    bool CheckMasterFiles(BSSimpleList<TESFile*>* files, bool unknown);
-    void SetThreadSafeParent(TESFile* parent);
-    bool OpenTESFile(NiFile::OpenMode openMode, bool closeOverride);
-    void InitializeComponent();
-    bool SetOffset(unsigned int offset);
-    unsigned char GetTESForm();
-    unsigned int GetChunkID();
-    unsigned int GetChunkSize();
-    bool GetChunkData(void* data, unsigned int size);
-    bool GetChunkData(unsigned int* value);
-    bool NextChunk();
+    void CopyThreadSafeParentAuxBuffer();
+    void ClearAuxBuffer();
+    void SetFile(BSFile*);
+    BSFile* GetFile();
+    int GetLastFileError();
+    FormRecordHeader* GetFormData();
+    unsigned int GetID();
+    unsigned short GetFormVersion();
+    bool TakeOwnership();
+    static bool TakeFileOwnership(char*);
+    static unsigned short GetFileFormVersion();
+    void SetCached(bool);
+    void SetCaching(bool);
+    void ResetWithCachedFile();
     bool GetCached();
-    unsigned int GetOffset();
+    bool GetCaching();
+    unsigned int GetMasterCount();
+    unsigned int GetFlags();
+    unsigned int GetFNVVersionInfo();
+    void InitEndian();
+    bool IsCurrentFormCompressed();
+    void InflateCompressedForm();
+    unsigned int GetDecompressedBufferSize();
+    char* GetDecompressedBuffer();
+    void ReleaseDecompressedBuffer();
+    void ClearDecompressedBuffer();
+    void ClearDecompressedFormBuffer();
+    bool ReadFormHeader();
+    bool ReadChunkHeader();
+    BSSimpleList<_ULARGE_INTEGER*>* GetMasterDataList();
+    void ClearMasterLists();
+    void ClearThreadSafeFiles();
+    void SetThreadSafeParent(TESFile*);
+    TESFile* GetFileForThread(unsigned int);
+    int ReadFileBuffer(void*, unsigned int);
+    void MoveToFilePosition(int);
+    bool IsTempIDLoadable(unsigned int, unsigned int);
+    void SetTempIDOwner(bool);
+    bool GetTempIDOwner();
+    static void SetTempIDOwnerForForm(unsigned int, TESFile*);
+    static bool GetTempIDCanLoadFromFile(unsigned int, TESFile*);
+    static TESFile* GetTempIDOwnerFile(unsigned int);
+    void ClearTempIDOwner();
+
+    bool FUN_004734d0(TESForm*);
+    unsigned int FUN_00471ad0();
+    const char* FUN_00471a60(unsigned int);
+    BSSimpleList<TESFile*>* FUN_00464df0();
+    TESForm* FUN_0044edb0();
+    void FUN_004720d0();
+    bool FUN_00470c70(int, int);
+    bool FUN_00472150(bool);
+    bool FUN_00473660();
+    unsigned char FUN_00473250();
+    int FUN_004726b0();
+    bool FUN_00472890(void*, unsigned int);
+    bool FUN_004726f0();
+    void FUN_00471130();
+
+    TESFile(const char* path, const char* filename, NiFile::OpenMode openMode);
+    ~TESFile();
+    bool IsEndianConversionRequired();
+    bool CheckMasterFiles(BSSimpleList<TESFile*>* files, bool unknown);
+    bool OpenTESFile(NiFile::OpenMode openMode, bool closeOverride);
+    bool OpenTESFile(const char* path, const char* filename, NiFile::OpenMode openMode, bool closeOverride);
+    void InitializeComponent();
+    unsigned int GetChunkID();
+    bool GetChunkData();
+    bool GetNextChunk();
+    bool GetByteAt428();
+    Flt& GetField418();
+    static char* IsTempIDLoadable();
+    const char* GetName();
+    void GetZeroByte();
+    void LoadFormAndUpdateFlag();
+    void SetField3DC(float);
+    unsigned int GetFormID();
+    TESRecordHeader* GetRecordHeader();
+    void SetBufferSize(int);
+    bool HasMasterFileChanged();
+    unsigned int GetFieldAt3E0();
+    void ReadTESInfo(TESForm*, CHUNK_ID);
+    TESFile* GetFileByIndex(unsigned int);
+    unsigned int GetField25C();
 };
 #pragma pack(pop)
-FNV_STATIC_ASSERT(sizeof(TESFile) == 0x42C);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_eReturnCode) == 0x0);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_pThreadSafeParent) == 0x4);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_pThreadSafeFileMap) == 0x8);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_pSecondaryFile) == 0xC);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_pFile) == 0x10);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_pBitArrayFile1) == 0x14);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_pBitArrayFile2) == 0x18);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_pBitArrayFile3) == 0x1C);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_acFilename) == 0x20);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_acPath) == 0x124);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_pBuffer) == 0x228);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiBufferAllocSize) == 0x22C);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiReadPosition) == 0x230);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiBufferSize) == 0x234);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_pCurrentCell) == 0x238);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiFormCount) == 0x23C);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_kRecordInfo) == 0x240);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_eChunkID) == 0x258);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiChunkSize) == 0x25C);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiChunkOffset) == 0x260);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiRecordSize) == 0x264);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiRecordOffset) == 0x268);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiCurrentOffset) == 0x26C);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_kChunkInfo) == 0x270);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiChunkValue1) == 0x288);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiChunkValue2) == 0x28C);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_kRecordList) == 0x290);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_bIsLoading) == 0x298);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_bIsSaving) == 0x299);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_bHasCurrentGroup) == 0x29A);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_kFindData) == 0x29C);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_kFileMetadata) == 0x3DC);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiFileCount) == 0x3E8);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_kFilenameList) == 0x3EC);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_kFileSizeList) == 0x3F4);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiTESFileCount) == 0x3FC);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_ppTESFiles) == 0x400);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_kLastWriteTime) == 0x404);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_ucCompileIndex) == 0x40C);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_kCreator) == 0x410);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_kSummary) == 0x418);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_pDecompressedFormBuffer) == 0x420);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_uiAuxBufferSize) == 0x424);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_bIsMaster) == 0x428);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_bOptimizedFile) == 0x429);
-FNV_STATIC_ASSERT(offsetof(TESFile, m_bIsDLC) == 0x42A);
-#endif

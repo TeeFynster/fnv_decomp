@@ -1,3 +1,26 @@
+#include "../../../include/BSAudio.h"
+#include "../../../include/Actor.h"
+#include "../../../include/MemoryManager.h"
+#include "../../../include/TESCreature.h"
+#include "../../../include/TESObjectWEAP.h"
+#include "../../../include/AutoMemHelper.h"
+#include "../../../include/BGSImpactData.h"
+#include "../../../include/NiPoint3.h"
+// In-class bodies of the former NiPoint3_ext stand-in.
+inline float NiPoint3::operator*(const NiPoint3& point) const
+{
+    return x * point.x + y * point.y + z * point.z;
+}
+inline NiPoint3 operator*(float scalar, const NiPoint3& point)
+{
+    return NiPoint3(scalar * point.x, scalar * point.y, scalar * point.z);
+}
+#include "../../../include/TESForm.h"
+#include "../../../include/BSSoundHandle.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/TESBoundObject.h"
+#include "../../../include/TESObjectREFR.h"
+#include "../../../include/TESSound.h"
 
 // src/fallout/audio/impactmixer_ob1_variant.cpp - flag-variant unit created 2026-10-25 by flag_proofs.py: contributor code for these functions matched byte for
 // byte only under /MT /Od /Oy- /GS /EHsc /Gy /Ob1 (unit src/fallout/audio/impactmixer.cpp lists /MT /Od /Oy- /GS /EHsc /Gy). Declarations copied from that unit's skeleton; move the functions
@@ -11,20 +34,6 @@ extern int DAT_011dd878;
 void FUN_00839dc0(bool b);
 extern int DAT_011a17f8[0x24];
 int GetTypeValue(int aiType);
-struct FUN_00acbb70_shell
-{
-    int FUN_00acbb70();
-};
-struct FUN_008397d0_shell
-{
-    unsigned char GetByteAt7C6();
-};
-struct AutoMemHelper
-{
-    int m;
-    AutoMemHelper(int, bool, char const*, int);
-    ~AutoMemHelper();
-};
 void FUN_00837520();
 extern int DAT_01000000;
 struct DummyFlags
@@ -53,33 +62,7 @@ struct FUN_0063a3c0_cls
     FUN_0063a3c0_cls* FUN_0063a3c0(unsigned int auiFlags);
     static void operator delete(void* apMemory) throw();
 };
-struct NiPoint3
-{
-    float x, y, z;
-};
-struct SoundPlaybackHandle
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    SoundPlaybackHandle();
-    ~SoundPlaybackHandle();
-    SoundPlaybackHandle& operator=(const SoundPlaybackHandle& kOther);
-    void FUN_00ad89e0(float m_fSoundVolume);
-    bool FUN_00ad8830(int iFlags);
-    void FUN_00ad8b60(float fX, float fY, float fZ);
-    void FUN_00ad8f20(void* pkNode);
-};
 struct BGSSoundDescriptor;
-struct BSAudioStandIn
-{
-    static BSAudioStandIn* GetSingleton();
-    SoundPlaybackHandle FUN_00ad73b0(BGSSoundDescriptor* pkSound);
-};
-struct BGSImpactData
-{
-    BGSSoundDescriptor* FUN_0084e3a0(int iType);
-};
 struct BGSImpactDataEntry
 {
     BGSImpactData* pkImpact;
@@ -87,141 +70,7 @@ struct BGSImpactDataEntry
 };
 extern BGSImpactDataEntry g_akImpactData_011dd670[];
 struct TESWorldSpace;
-struct FootstepActor
-{
-    virtual void v000();
-    virtual void v001();
-    virtual void v002();
-    virtual void v003();
-    virtual void v004();
-    virtual void v005();
-    virtual void v006();
-    virtual void v007();
-    virtual void v008();
-    virtual void v009();
-    virtual void v010();
-    virtual void v011();
-    virtual void v012();
-    virtual void v013();
-    virtual void v014();
-    virtual void v015();
-    virtual void v016();
-    virtual void v017();
-    virtual void v018();
-    virtual void v019();
-    virtual void v020();
-    virtual void v021();
-    virtual void v022();
-    virtual void v023();
-    virtual void v024();
-    virtual void v025();
-    virtual void v026();
-    virtual void v027();
-    virtual void v028();
-    virtual void v029();
-    virtual void v030();
-    virtual void v031();
-    virtual void v032();
-    virtual void v033();
-    virtual void v034();
-    virtual void v035();
-    virtual void v036();
-    virtual void v037();
-    virtual void v038();
-    virtual void v039();
-    virtual void v040();
-    virtual void v041();
-    virtual void v042();
-    virtual void v043();
-    virtual void v044();
-    virtual void v045();
-    virtual void v046();
-    virtual void v047();
-    virtual void v048();
-    virtual void v049();
-    virtual void v050();
-    virtual void v051();
-    virtual void v052();
-    virtual void v053();
-    virtual void v054();
-    virtual void v055();
-    virtual void v056();
-    virtual void v057();
-    virtual void v058();
-    virtual void v059();
-    virtual void v060();
-    virtual void v061();
-    virtual void v062();
-    virtual void v063();
-    virtual bool IsActor();
-    virtual void v065();
-    virtual void v066();
-    virtual void v067();
-    virtual void v068();
-    virtual void v069();
-    virtual void v070();
-    virtual void v071();
-    virtual void v072();
-    virtual void v073();
-    virtual void v074();
-    virtual void v075();
-    virtual void v076();
-    virtual void v077();
-    virtual void v078();
-    virtual void v079();
-    virtual void v080();
-    virtual void v081();
-    virtual void v082();
-    virtual void v083();
-    virtual void v084();
-    virtual void v085();
-    virtual void v086();
-    virtual void v087();
-    virtual void v088();
-    virtual void v089();
-    virtual void v090();
-    virtual void v091();
-    virtual void v092();
-    virtual void v093();
-    virtual void v094();
-    virtual void v095();
-    virtual void v096();
-    virtual void v097();
-    virtual void v098();
-    virtual void v099();
-    virtual void v100();
-    virtual void v101();
-    virtual void v102();
-    virtual void v103();
-    virtual void v104();
-    virtual void v105();
-    virtual void v106();
-    virtual void v107();
-    virtual void v108();
-    virtual void v109();
-    virtual void v110();
-    virtual void v111();
-    virtual void v112();
-    virtual void v113();
-    virtual void v114();
-    virtual void v115();
-    virtual void* Get3D();
-    virtual void v117();
-    virtual void v118();
-    virtual void v119();
-    virtual void v120();
-    virtual void v121();
-    virtual void v122();
-    virtual void v123();
-    virtual void v124();
-    virtual const NiPoint3& GetPos();
-
-    bool FUN_005a2030();
-    float FUN_0057b0a0();
-    bool GetByteAt7C6();
-    bool FUN_00524d10();
-};
-extern FootstepActor* g_player_011dea3c;
+extern Actor* g_player_011dea3c;
 struct MaterialRecord
 {
     int GetField1C();
@@ -268,7 +117,7 @@ bool __cdecl FUN_0082eca0(BGSImpactData* pkImpact, NiPoint3 kPos, float fScale);
 extern float g_fFootstepRand_0101e2bc;
 static const char s_szBabyLand[] = "FSTBabyLand";
 extern const char g_szFootstepEnd[] = "";
-void __cdecl PlayFootstepImpact(FootstepActor* pActor, int iMaterial);
+void __cdecl PlayFootstepImpact(Actor* pActor, int iMaterial);
 struct SetObj
 {
     float* FUN_00403e20();
@@ -367,51 +216,8 @@ static const char kStr_PHYTile[] = "PHYTile";
 static const char kStr_PHYCarpet[] = "PHYCarpet";
 static const char kStr_PHYTumbleweed[] = "PHYTumbleweed";
 int __cdecl FUN_00839e00(int type, float fA, float fB);
-struct S_0083a930_Point3
-{
-    float x;
-    float y;
-    float z;
-};
-struct S_0083a930_NiNode;
+struct Point3;
 class TESSound;
-struct S_0083a930_SoundHandle
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    S_0083a930_SoundHandle();
-    ~S_0083a930_SoundHandle();
-    S_0083a930_SoundHandle& operator=(const S_0083a930_SoundHandle& other);
-    bool FUN_00ad8b60(float x, float y, float z);
-    void FUN_00ad8f20(S_0083a930_NiNode* node);
-    bool FUN_00ad89e0(float volume);
-    bool FUN_00ad8830(bool flag);
-};
-struct S_0083a930_Audio
-{
-    static S_0083a930_Audio* FUN_00453a70();
-    S_0083a930_SoundHandle FUN_00ad7480(const char* path, unsigned int flags, TESSound* sound);
-};
-class TESForm
-{
-  public:
-    virtual void v000();
-};
-class TESBoundObject : public TESForm
-{
-};
-class TESSound : public TESBoundObject
-{
-  public:
-    const char* FUN_00511840();
-};
-class TESObjectWEAP : public TESBoundObject
-{
-  public:
-    TESSound* GetField238();
-    TESSound* GetField23C();
-};
 struct S_0083a930_EntryData
 {
     TESBoundObject* FUN_0044ddc0();
@@ -502,142 +308,6 @@ struct S_0083a930_Process
     virtual void v144();
     virtual S_0083a930_EntryData* GetWeaponInfo();  // +0x148
 };
-class TESObjectREFR
-{
-  public:
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual S_0083a930_NiNode* GetNode();  // +0x1d0
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual S_0083a930_Point3* GetPos();  // +0x1f4
-};
-class Actor : public TESObjectREFR
-{
-  public:
-    S_0083a930_Process* FUN_008d8520();
-    bool FUN_004997b0();
-};
 struct S_0083a930_Setting
 {
     float* FUN_00403e20();
@@ -645,7 +315,7 @@ struct S_0083a930_Setting
 extern S_0083a930_Setting DAT_011dd900;
 extern Actor* DAT_011dea3c;
 extern const float DAT_010231a8;
-bool FUN_0082eca0(TESSound* sound, S_0083a930_Point3 pos, float volume);
+bool FUN_0082eca0(TESSound* sound, Point3 pos, float volume);
 void PlayWeaponImpactSound(TESObjectREFR* ref, int type);
 struct FootstepQuery
 {
@@ -701,12 +371,6 @@ struct SoundOps
     unsigned char GetField45();
     BGSSoundDescriptor* FUN_0084e3a0(int);
     const char* FUN_00511840();
-};
-class TESCreature : public TESBoundObject
-{
-  public:
-    SoundOps* FUN_005f92d0(int);
-    void* FUN_00acbb70();
 };
 struct MaterialOps
 {
@@ -977,164 +641,6 @@ struct SkinOps
     MaterialOps material;
     bool FUN_00838750();
 };
-struct ActorOps
-{
-    virtual void v000();
-    virtual void v004();
-    virtual void v008();
-    virtual void v00c();
-    virtual void v010();
-    virtual void v014();
-    virtual void v018();
-    virtual void v01c();
-    virtual void v020();
-    virtual void v024();
-    virtual void v028();
-    virtual void v02c();
-    virtual void v030();
-    virtual void v034();
-    virtual void v038();
-    virtual void v03c();
-    virtual void v040();
-    virtual void v044();
-    virtual void v048();
-    virtual void v04c();
-    virtual void v050();
-    virtual void v054();
-    virtual void v058();
-    virtual void v05c();
-    virtual void v060();
-    virtual void v064();
-    virtual void v068();
-    virtual void v06c();
-    virtual void v070();
-    virtual void v074();
-    virtual void v078();
-    virtual void v07c();
-    virtual void v080();
-    virtual void v084();
-    virtual void v088();
-    virtual void v08c();
-    virtual void v090();
-    virtual void v094();
-    virtual void v098();
-    virtual void v09c();
-    virtual void v0a0();
-    virtual void v0a4();
-    virtual void v0a8();
-    virtual void v0ac();
-    virtual void v0b0();
-    virtual void v0b4();
-    virtual void v0b8();
-    virtual void v0bc();
-    virtual void v0c0();
-    virtual void v0c4();
-    virtual void v0c8();
-    virtual void v0cc();
-    virtual void v0d0();
-    virtual void v0d4();
-    virtual void v0d8();
-    virtual void v0dc();
-    virtual void v0e0();
-    virtual void v0e4();
-    virtual void v0e8();
-    virtual void v0ec();
-    virtual void v0f0();
-    virtual void v0f4();
-    virtual void v0f8();
-    virtual void v0fc();
-    virtual void v100();
-    virtual void v104();
-    virtual void v108();
-    virtual void v10c();
-    virtual void v110();
-    virtual void v114();
-    virtual void v118();
-    virtual void v11c();
-    virtual void v120();
-    virtual void v124();
-    virtual void v128();
-    virtual void v12c();
-    virtual void v130();
-    virtual void v134();
-    virtual void v138();
-    virtual void v13c();
-    virtual void v140();
-    virtual void v144();
-    virtual void v148();
-    virtual void v14c();
-    virtual void v150();
-    virtual void v154();
-    virtual void v158();
-    virtual void v15c();
-    virtual void v160();
-    virtual void v164();
-    virtual void v168();
-    virtual void v16c();
-    virtual void v170();
-    virtual void v174();
-    virtual void v178();
-    virtual void v17c();
-    virtual void v180();
-    virtual void v184();
-    virtual void v188();
-    virtual void v18c();
-    virtual void v190();
-    virtual void v194();
-    virtual void v198();
-    virtual void v19c();
-    virtual void v1a0();
-    virtual void v1a4();
-    virtual void v1a8();
-    virtual void v1ac();
-    virtual void v1b0();
-    virtual void v1b4();
-    virtual void v1b8();
-    virtual void v1bc();
-    virtual void v1c0();
-    virtual void v1c4();
-    virtual void v1c8();
-    virtual void v1cc();
-    virtual void v1d0();
-    virtual void v1d4();
-    virtual void v1d8();
-    virtual void v1dc();
-    virtual void v1e0();
-    virtual void v1e4();
-    virtual void v1e8();
-    virtual void v1ec();
-    virtual void v1f0();
-    virtual void v1f4();
-    virtual void v1f8();
-    virtual void v1fc();
-    virtual void v200();
-    virtual void v204();
-    virtual void v208();
-    virtual void v20c();
-    virtual void v210();
-    virtual void v214();
-    virtual void v218();
-    virtual bool IsCreature();
-    virtual void v220();
-    virtual void v224();
-    virtual void v228();
-    virtual bool SuppressFootsteps(int);
-    TESBoundObject* FUN_007af430();
-    bool FUN_005a2030();
-    float FUN_0057b0a0();
-    SkinOps* FUN_009306d0();
-    bool FUN_004997b0();
-    bool FUN_00884730();
-    bool FUN_008ba410();
-    bool FUN_008ba440();
-};
-struct AudioOps
-{
-    static AudioOps* FUN_00453a70();
-    ListenerOps* FUN_0044edb0();
-    SoundPlaybackHandle FUN_00ad73b0(BGSSoundDescriptor*);
-    SoundPlaybackHandle FUN_00ad7480(const char*, unsigned int, SoundOps*);
-};
 extern S_0083a930_Setting DAT_011dd988;
 extern SoundOps* DAT_011dd860;
 extern SoundOps* DAT_011dd864;
@@ -1145,56 +651,10 @@ struct FootstepEntry
     SoundOps* sounds[10];
 };
 extern FootstepEntry DAT_011dd650[];
-void PlayFootstepSound(FootstepActor* ref, int foot);
-struct FUN_00ad8b60_h
-{
-    bool FUN_00ad8b60(float x, float y, float z);
-};
-struct FUN_00ad8830_shell : FUN_00ad8b60_h
-{
-    bool FUN_00ad8830(bool flag);
-};
-struct SH_00418890 : FUN_00ad8830_shell
-{
-    void FUN_copy(const void* src);
-};
-struct GlobalObject_0041a250 : SH_00418890
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    GlobalObject_0041a250();
-    ~GlobalObject_0041a250();
-};
-struct BSSoundHandleEx
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    ~BSSoundHandleEx();
-};
-class BSAudio
-{
-  public:
-    static BSAudio* GetSingleton();
-    BSSoundHandleEx FUN_00ad7480(const char* path, unsigned int flags, unsigned int sound);
-    BSSoundHandleEx GetSoundHandleByEditorID(const char* name, unsigned int flags);
-};
-struct FUN_005224e0_class
-{
-    unsigned int GetField230();
-};
-struct FUN_00522df0_shell : FUN_005224e0_class
-{
-    int FUN_00446390();
-};
-struct NiPoint3_ext : NiPoint3
-{
-    NiPoint3_ext();
-};
+void PlayFootstepSound(Actor* ref, int foot);
 float FUN_0040ebd0(float a, float b);
 float FUN_00404010(float a, float b);
-void PlayBlockSound(int aUnused, FUN_00522df0_shell* a1, float x0, float y0, float z0, float x1, float y1, float z1);
+void PlayBlockSound(int aUnused, TESObjectWEAP* a1, float x0, float y0, float z0, float x1, float y1, float z1);
 
 inline void* operator new(unsigned int, void* location)
 {
@@ -1208,51 +668,36 @@ inline void* operator new[](unsigned int, void* location)
 }
 inline void operator delete[](void*, void*)
 {}
-struct MemoryManager
-{
-    void* FUN_00aa3e40(unsigned int size);
-};
 extern MemoryManager DAT_011f6238;
 inline void* operator new[](unsigned int size)
 {
     return DAT_011f6238.FUN_00aa3e40(size);
 }
-struct Point3
+void operator delete[](void* memory);
+// The original's point type here is NiPoint3: operator- 0x439ef0, Cross 0x4b3800, Unitize 0x4a0c10 and operator+
+// 0x439e90 are called; the constructor, operator+ and operator*(float) are expanded inline under /Ob1.
+__forceinline NiPoint3::NiPoint3(float a, float b, float c) : x(a), y(b), z(c)
+{}
+__forceinline NiPoint3 NiPoint3::operator+(const NiPoint3& o) const
 {
-    float x;
-    float y;
-    float z;
-    static void operator delete[](void*);
-    __forceinline Point3()
-    {}
-    __forceinline Point3(float a, float b, float c) : x(a), y(b), z(c)
-    {}
-    static __forceinline void* operator new[](unsigned int size)
-    {
-        return DAT_011f6238.FUN_00aa3e40(size);
-    }
-    __forceinline Point3 operator+(const Point3& o) const
-    {
-        return Point3(o.x + x, o.y + y, o.z + z);
-    }
-    __forceinline Point3 operator*(float s) const
-    {
-        return Point3(s * x, s * y, s * z);
-    }
-    Point3 FUN_00439ef0(const Point3& other) const
-    {
-        const Point3* self = this;
-        return Point3(self->x - other.x, self->y - other.y, self->z - other.z);
-    }
-    Point3 FUN_004b3800(const Point3& axis) const
-    {
-        const Point3* self = this;
-        return Point3(self->y * axis.z - self->z * axis.y, self->z * axis.x - self->x * axis.z,
-                      self->x * axis.y - self->y * axis.x);
-    }
-    void FUN_004a0c10();
-    Point3 FUN_00439e90(const Point3& shift) const;
-};
+    return NiPoint3(o.x + x, o.y + y, o.z + z);
+}
+__forceinline NiPoint3 NiPoint3::operator*(float s) const
+{
+    return NiPoint3(s * x, s * y, s * z);
+}
+// Inline in the original too (their frame slots are reserved), but /Ob1 leaves them as calls.
+inline NiPoint3 NiPoint3::operator-(const NiPoint3& other) const
+{
+    const NiPoint3* self = this;
+    return NiPoint3(self->x - other.x, self->y - other.y, self->z - other.z);
+}
+inline NiPoint3 NiPoint3::Cross(const NiPoint3& axis) const
+{
+    const NiPoint3* self = this;
+    return NiPoint3(self->y * axis.z - self->z * axis.y, self->z * axis.x - self->x * axis.z,
+                    self->x * axis.y - self->y * axis.x);
+}
 
 struct FilterData
 {
@@ -1403,24 +848,24 @@ struct CollisionGenerator : CollisionShape
         return FUN_00aa13e0(size);
     }
     static void operator delete(void*);
-    CollisionGenerator(unsigned int count, Point3* vertices, int unused, FilterData* _filters, int a, int b, int c,
+    CollisionGenerator(unsigned int count, NiPoint3* vertices, int unused, FilterData* _filters, int a, int b, int c,
                        int d, void* data);
 };
 // @fnv 0x00c55d50
-CollisionShape* __cdecl FUN_00c55d50(Point3* start, Point3* end, float forwardExtent, float backwardExtent,
+CollisionShape* __cdecl FUN_00c55d50(NiPoint3* start, NiPoint3* end, float forwardExtent, float backwardExtent,
                                      float upExtent, float downExtent, FilterData* nearFilter, FilterData* farFilter)
 {
-    Point3* verticesX;
-    verticesX = new Point3[8];
-    Point3 directionX = start->FUN_00439ef0(*end);
-    Point3 verticalAxisB(0.0f, 0.0f, 1.0f);
-    Point3 crossVal2 = directionX.FUN_004b3800(verticalAxisB);
+    NiPoint3* verticesX;
+    verticesX = new NiPoint3[8];
+    NiPoint3 directionX = *start - *end;
+    NiPoint3 verticalAxisB(0.0f, 0.0f, 1.0f);
+    NiPoint3 crossVal2 = directionX.Cross(verticalAxisB);
     crossVal2.z = 0.0f;
-    crossVal2.FUN_004a0c10();
-    Point3 forwardVectorB = crossVal2 * forwardExtent;
-    Point3 reverseVector2 = crossVal2 * (-backwardExtent);
-    Point3 offset(0.0f, 0.0f, upExtent);
-    Point3 below2(0.0f, 0.0f, -downExtent);
+    crossVal2.Unitize();
+    NiPoint3 forwardVectorB = crossVal2 * forwardExtent;
+    NiPoint3 reverseVector2 = crossVal2 * (-backwardExtent);
+    NiPoint3 offset(0.0f, 0.0f, upExtent);
+    NiPoint3 below2(0.0f, 0.0f, -downExtent);
     verticesX[0] = offset + (reverseVector2 + *end);
     verticesX[1] = offset + (forwardVectorB + *end);
     verticesX[2] = below2 + (reverseVector2 + *end);

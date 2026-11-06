@@ -1,7 +1,33 @@
+#include "../../../../include/NiTMapItem.h"
 
 // to their real unit once identified.
 
 #include "nid3dshaderfactory_decls.h"
+
+template <class T> inline NiPointer<T>::NiPointer(const NiPointer& kSrc)
+{
+    m_pObject = kSrc.m_pObject;
+    if (m_pObject != 0)
+        m_pObject->IncRefCount();
+}
+template <class T> inline NiPointer<T>::~NiPointer()
+{
+    if (m_pObject != 0)
+        m_pObject->DecRefCount();
+}
+template <class T> inline NiPointer<T>& NiPointer<T>::operator=(const NiPointer& kSrc)
+{
+    if (m_pObject != kSrc.m_pObject)
+    {
+        if (m_pObject != 0)
+            m_pObject->DecRefCount();
+        m_pObject = kSrc.m_pObject;
+        if (m_pObject != 0)
+            m_pObject->IncRefCount();
+    }
+    return *this;
+}
+
 const char kFailedShaderFactoryMessage[] = "Failed to create shader factory!";
 
 class ShaderRefObject
@@ -21,12 +47,7 @@ class ShaderRefObject
     }
 };
 
-struct ShaderMapItem
-{
-    ShaderMapItem* m_pkNext;
-    const char* m_key;
-    NiPointer<ShaderRefObject> m_val;
-};
+
 
 struct ShaderMapAllocator
 {
@@ -40,10 +61,10 @@ class ShaderStringPointerMap
     virtual ~ShaderStringPointerMap();
     virtual unsigned int KeyToHashIndex(const char* key) const;
     virtual bool IsKeysEqual(const char* key1, const char* key2) const;
-    virtual void SetValue(ShaderMapItem* pkItem, const char* key, NiPointer<ShaderRefObject> val);
+    virtual void SetValue(NiTMapItem<const char*, NiPointer<ShaderRefObject> >* pkItem, const char* key, NiPointer<ShaderRefObject> val);
 
     unsigned int m_uiHashSize;
-    ShaderMapItem** m_ppkHashTable;
+    NiTMapItem<const char*, NiPointer<ShaderRefObject> >** m_ppkHashTable;
     ShaderMapAllocator m_kItemCount;
     bool m_bCopy;
 
@@ -54,7 +75,7 @@ class ShaderStringPointerMap
 void ShaderStringPointerMap::FUN_00e927f0(const char* key, NiPointer<ShaderRefObject> val)
 {
     unsigned int uiIndex = KeyToHashIndex(key);
-    ShaderMapItem* pkItem = m_ppkHashTable[uiIndex];
+    NiTMapItem<const char*, NiPointer<ShaderRefObject> >* pkItem = m_ppkHashTable[uiIndex];
     while (pkItem)
     {
         if (IsKeysEqual(key, pkItem->m_key))
@@ -67,7 +88,7 @@ void ShaderStringPointerMap::FUN_00e927f0(const char* key, NiPointer<ShaderRefOb
         pkItem = pkItem->m_pkNext;
     }
 
-    pkItem = (ShaderMapItem*)m_kItemCount.Allocate();
+    pkItem = (NiTMapItem<const char*, NiPointer<ShaderRefObject> >*)m_kItemCount.Allocate();
     SetValue(pkItem, key, val);
     pkItem->m_pkNext = m_ppkHashTable[uiIndex];
     m_ppkHashTable[uiIndex] = pkItem;

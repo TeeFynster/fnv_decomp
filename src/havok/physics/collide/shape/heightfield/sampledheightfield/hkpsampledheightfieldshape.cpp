@@ -2,12 +2,24 @@
 // src/havok/physics/collide/shape/heightfield/sampledheightfield/hkpsampledheightfieldshape.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/physics/collide/shape/heightfield/sampledheightfield/hkpsampledheightfieldshape.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-#include "havok/hkpSampledHeightFieldShape.h"
+// Exe 0x00d24670 FUN_00d24670: retain this LocalM128 view; the CRT type does not preserve this unit.
+// VC9 requires the __m128 compatibility typedef for its native SIMD ABI (renamed tags fail C2719).
+typedef union __declspec(intrin_type) __declspec(align(16)) { float m128_f32[4]; unsigned __int64 m128_u64[2]; } __m128, LocalM128;
+
+#include "../../../../../../../include/hkBool.h"
+#include "../../../../../../../include/hkBoolResult.h"
+#define FNV64_HKVECTOR4_OWN_COPY
+#include "../../../../../../../include/hkpSampledHeightFieldShape.h"
+
+__forceinline hkVector4::hkVector4(const hkVector4& vector)
+{
+    for (int i = 0; i < 4; ++i)
+        reinterpret_cast<unsigned int*>(this)[i] = reinterpret_cast<const unsigned int*>(&vector)[i];
+}
 
 #include "fnv_asm_helpers.h"   // project x87 helpers (fnv_SinCos, fnv_FloatToInt), kept last so earlier code is unchanged
 
-union __declspec(intrin_type) __declspec(align(16)) __m128 { float m128_f32[4]; unsigned __int64 m128_u64[2]; };
-extern "C" __m128 _mm_load_ps1(const float*);
+extern "C" LocalM128 _mm_load_ps1(const float*);
 extern float DAT_01012068;
 extern double DAT_01012070;
 
@@ -18,11 +30,11 @@ struct Cls_00d24670 {
     virtual void v30();
     virtual float getH(int x, int y);
     virtual void getFlip(bool& flip);
-    void FUN_00d24670(int x, int y, float fx, float fy, __m128* nrm, float* height, int* flag);
+    void FUN_00d24670(int x, int y, float fx, float fy, LocalM128* nrm, float* height, int* flag);
 };
 
 // @fnv 0x00d24670
-void Cls_00d24670::FUN_00d24670(int x, int y, float fx, float fy, __m128* nrm, float* height, int* flag)
+void Cls_00d24670::FUN_00d24670(int x, int y, float fx, float fy, LocalM128* nrm, float* height, int* flag)
 {
     *nrm = _mm_load_ps1(&DAT_01012068);
     bool flip;
@@ -78,14 +90,6 @@ struct hkInfoD260 {
     float m_fScalar;
 };
 
-class hkBoolD260 {
-public:
-    hkBoolD260(bool b) { m_cBooleanValue = (char)b; }
-    hkBoolD260(const hkBoolD260& o) { m_cBooleanValue = o.m_cBooleanValue; }
-
-    char m_cBooleanValue;
-};
-
 class hkCollectorD260 {
 public:
     hkCollectorD260(hkInfoD260* info) : m_fScalar(info->m_fScalar), m_bHasHit(false), m_info(info) {}
@@ -96,25 +100,28 @@ public:
     hkInfoD260* m_info;
 };
 
+// These call/return flags use the nontrivial byte-copy ABI of shared hkBoolResult.
 struct FUN_00d24b50_Obj {
-    void __thiscall FUN_00d24b50(void* object, int flags, hkBoolD260 flag2, float f, hkCollectorD260* collector);
+    void __thiscall FUN_00d24b50(void* object, int flags, hkBoolResult flag2, float f, hkCollectorD260* collector);
 };
 
 class hkShapeD260 : public FUN_00d24b50_Obj {
 public:
-    hkBoolD260 __thiscall FUN_00d26080(void* object, hkInfoD260* info);
+    hkBoolResult __thiscall FUN_00d26080(void* object, hkInfoD260* info);
 };
 
 // Runs FUN_00d24b50 on object with a collector built from info and returns whether the collector recorded a hit.
 // @fnv 0x00d26080
-hkBoolD260 __thiscall hkShapeD260::FUN_00d26080(void* object, hkInfoD260* info) {
+hkBoolResult __thiscall hkShapeD260::FUN_00d26080(void* object, hkInfoD260* info) {
     hkCollectorD260 collector(info);
-    this->FUN_00d24b50(object, 0, hkBoolD260(false), 0.0f, &collector);
-    return collector.m_bHasHit;
+    this->FUN_00d24b50(object, 0, hkBoolResult(false), 0.0f, &collector);
+    hkBoolResult result;
+    result.m_cBooleanValue = static_cast<char>(collector.m_bHasHit);
+    return result;
 }
 
 struct S00d261b0_Elem {
-    __m128 v00;
+    LocalM128 v00;
     float f10;
     int i14;
     int unk18;
@@ -159,18 +166,12 @@ struct Local12 {
     const Arg3* m_08;
 };
 
-struct Val1 {
-    unsigned char m_00;
-    Val1() : m_00(0) {}
-    Val1(const Val1& o) : m_00(o.m_00) {}
-};
-
 struct Host {
-    void FUN_00d24b50(int a1, int a2, Val1 v, float f, Local12* pLocal);
+    void FUN_00d24b50(int a1, int a2, hkBoolResult v, float f, Local12* pLocal);
     void FUN_00d260d0(int a1, int a2, const Arg3* a3);
 };
 
-// Builds a local record from DAT_010ce310 and a3 (its float and pointer), then calls FUN_00d24b50 with a1, a2, a default Val1, 0.0f and that record.
+// Builds a local record from DAT_010ce310 and a3 (its float and pointer), then calls FUN_00d24b50 with a1, a2, a false hkBoolResult, 0.0f and that record.
 // @fnv 0x00d260d0
 void Host::FUN_00d260d0(int a1, int a2, const Arg3* a3)
 {
@@ -178,7 +179,7 @@ void Host::FUN_00d260d0(int a1, int a2, const Arg3* a3)
     local.m_00 = &DAT_010ce310;
     local.m_04 = a3->m_04;
     local.m_08 = a3;
-    FUN_00d24b50(a1, a2, Val1(), 0.0f, &local);
+    FUN_00d24b50(a1, a2, hkBoolResult(false), 0.0f, &local);
 }
 
 struct __declspec(align(16)) RayData {
@@ -205,7 +206,7 @@ struct Obj {
     int unk20;
     float unk24;
 
-    void FUN_00d24b50(RayData* data, void* arg2, hkBoolD260 arg3, float arg4, void* arg5);
+    void FUN_00d24b50(RayData* data, void* arg2, hkBoolResult arg3, float arg4, void* arg5);
     void FUN_00d26120(Input* input, void* arg2, void* arg3);
 };
 
@@ -224,24 +225,11 @@ void Obj::FUN_00d26120(Input* input, void* arg2, void* arg3) {
     this->FUN_00d24b50(&local, arg2, true, input->f34, arg3);
 }
 
-extern "C" __m128 _mm_mul_ps(__m128, __m128);
+extern "C" LocalM128 _mm_mul_ps(LocalM128, LocalM128);
 
-__declspec(align(16)) const hkVector4 halfScale = {0.5f, 0.5f, 0.5f, 0.5f};
+__declspec(align(16)) const float halfScale[4] = {0.5f, 0.5f, 0.5f, 0.5f};
 
 struct SampledHeightField : hkpSampledHeightFieldShape {
-    virtual void slot01();
-    virtual void slot02();
-    virtual void slot03();
-    virtual void slot04();
-    virtual void slot05();
-    virtual void slot06();
-    virtual void slot07();
-    virtual void slot08();
-    virtual void slot09();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual float getHeightAt(int x, int z);
     void FUN_00d249f0(hkUlong transform, float tolerance, hkUlong aabb);
 };
 
@@ -251,12 +239,12 @@ void __cdecl FUN_00d26230(hkUlong, const hkVector4&, const hkVector4&, float, hk
 // @fnv 0x00d249f0
 void SampledHeightField::FUN_00d249f0(hkUlong transform, float tolerance, hkUlong aabb)
 {
-    float fMinHeight = getHeightAt(0, 0);
+    float fMinHeight = GetHeightAtGridPoint(0, 0);
     float maximum = fMinHeight;
     if (SetCenterPosition.y < 0.0f) {
         for (int x = 0; x < m_iXResolution; ++x) {
             for (int z = 0; z < m_iZResolution; ++z) {
-                float height = getHeightAt(x, z);
+                float height = GetHeightAtGridPoint(x, z);
                 fMinHeight = fMinHeight < height ? fMinHeight : height;
                 maximum = maximum > height ? maximum : height;
             }
@@ -270,7 +258,7 @@ void SampledHeightField::FUN_00d249f0(hkUlong transform, float tolerance, hkUlon
         SetCenterPosition.y = maximum - fMinHeight;
     }
     __declspec(align(16)) hkVector4 center;
-    *reinterpret_cast<__m128*>(&center) = _mm_mul_ps(*reinterpret_cast<const __m128*>(&SetCenterPosition), *reinterpret_cast<const __m128*>(&halfScale));
+    *reinterpret_cast<LocalM128*>(&center) = _mm_mul_ps(*reinterpret_cast<const LocalM128*>(&SetCenterPosition), *reinterpret_cast<const LocalM128*>(&halfScale));
     __declspec(align(16)) hkVector4 halfExtents = center;
     center.y = m_fHeightScale;
     FUN_00d26230(transform, halfExtents, center, tolerance, aabb);

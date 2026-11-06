@@ -39,39 +39,19 @@ class BSTempEffect : public NiObject
 {
   public:
     // NiObject slots (see the note above)
-    virtual const NiRTTI* GetRTTI();                                     // v08
-    virtual NiNode* IsSceneNode();                                       // v0C
-    virtual BSFadeNode* IsFadeNode();                                    // v10
-    virtual BSMultiBoundNode* IsMultiBoundNode();                        // v14
-    virtual NiGeometry* IsGeometry();                                    // v18
-    virtual NiTriBasedGeom* IsTriBasedGeom();                            // v1C
-    virtual NiTriStrips* IsTriStrips();                                  // v20
-    virtual NiTriShape* IsTriShape();                                    // v24
-    virtual BSSegmentedTriShape* IsSegmentedTriShape();                  // v28
-    virtual BSResizableTriShape* IsResizableTriShape();                  // v2C
-    virtual NiParticles* IsParticlesGeom();                              // v30
-    virtual NiLines* IsLineGeometry();                                   // v34
-    virtual bhkNiCollisionObject* IsBhkNiCollisionObject();              // v38
-    virtual bhkBlendCollisionObject* IsBhkBlendCollisionObject();        // v3C
-    virtual bhkRigidBody* IsBhkRigidBody();                              // v40
-    virtual bhkLimitedHingeConstraint* IsBhkLimitedHingeConstraint();    // v44
+    // GetRTTI, the Is* casts, IsEqual, Get/AddViewerStrings, SetObjectBound and IsControllerManager are the shared NiObject virtuals
     virtual NiObject* MakeClone(CloningProcess& arCloning);              // v48
     virtual void LoadBinary(NiStream& arStream);                         // v4C
     virtual void LinkObject(NiStream& arStream);                         // v50
     virtual bool RegisterStreamables(NiStream& arStream);                // v54
     virtual void SaveBinary(NiStream& arStream);                         // v58
-    virtual bool IsEqual(NiObject* apObject);                            // v5C
-    virtual void GetViewerStrings(NiTPrimitiveArray<char*>* apStrings);  // v60
-    virtual void AddViewerStrings(NiTPrimitiveArray<char*>* apStrings);  // v64
     virtual void ProcessClone(CloningProcess& arCloning);                // v68
     virtual void PostLinkObject(NiStream& arStream);                     // v6C
     virtual bool StreamCanSkip();                                        // v70
     virtual const NiRTTI* GetStreamableRTTI();                           // v74
-    virtual void SetObjectBound(FourComponentFloatVector* apBound);      // v78
     virtual unsigned int GetBlockAllocationSize();                       // v7C
     virtual NiObjectGroup* GetGroup();                                   // v80
     virtual void SetGroup(NiObjectGroup* apGroup);                       // v84
-    virtual NiControllerManager* IsNiControllerManager();                // v88
     // BSTempEffect slots
     virtual void Initialize();             // v8C
     virtual void Detach();                 // v90

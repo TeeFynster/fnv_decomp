@@ -111,13 +111,6 @@ class FUN_00dac9e0_cls
     void ProcessGskContact(const hkpCdBody* bodyA, const hkpCdBody* bodyB, const GskAgentInput* input,
                            hkpCdPointCollector* collector);
 };
-struct StringCursor
-{
-    void* m_kRayStart;
-    char* m_cur;
-    void* m_auiShapeKeys;
-    char* m_kRayEnd;
-};
 void __stdcall FUN_00dabe80(int, int, int, int);
 extern "C" __m128 _mm_shuffle_ps(__m128 a, __m128 b, unsigned int imm);
 extern "C" __m128 _mm_mul_ps(__m128 a, __m128 b);

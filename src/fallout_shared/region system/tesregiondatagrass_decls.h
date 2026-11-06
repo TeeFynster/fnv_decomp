@@ -1,29 +1,15 @@
-// fallout_shared/region system/tesregiondatagrass_decls.h: declares TESRegionData, TESRegionDataGrass
+// fallout_shared/region system/tesregiondatagrass_decls.h: declares TESRegionDataGrass
 #ifndef TESREGIONDATAGRASS_DECLS_H
 #define TESREGIONDATAGRASS_DECLS_H
 
 class TESGrass;
-template <class T> class BSSimpleList
+#include "../../../include/BSSimpleList.h"
+// LocalTESRegionDataGrass: unit-local; its ctor 0x004f1ed0 constructs an 8-byte list at +8 (0x0096a2d0), the shared TESRegionDataGrass has a 4-byte object-list pointer there (size 12, RTTI object size and Xbox PDB)
+class LocalTESRegionDataGrass : public TESRegionData
 {
   public:
-    BSSimpleList();
-    T m_item;
-    BSSimpleList<T>* m_pkNext;
-};
-class TESRegionData
-{
-  public:
-    TESRegionData();
-    virtual ~TESRegionData();
-    bool bOverride;
-    bool m_bHasRegionData;
-    unsigned char m_ucRegionPriority;
-};
-class TESRegionDataGrass : public TESRegionData
-{
-  public:
-    TESRegionDataGrass();
-    virtual ~TESRegionDataGrass();
+    LocalTESRegionDataGrass();
+    virtual ~LocalTESRegionDataGrass();
     BSSimpleList<TESGrass*> kObjects;
 };
 #endif

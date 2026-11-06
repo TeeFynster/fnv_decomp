@@ -1,28 +1,19 @@
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkMemoryRouter.h"
+#include "../../../../../include/hkMemoryAllocator.h"
+#include "../../../../../include/hkReferencedObject.h"
 
 // src/havok/animation/animation/motionanalysis/hkafootstepanalysisinfo.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/projects/fallout/code/havok/source/animation/animation/motionanalysis/hkafootstepanalysisinfo.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
-struct hkMemoryAllocator
-{
-    virtual ~hkMemoryAllocator();
-    virtual void* AllocateMemoryBlock(int numBytes);
-};
 
-struct AudioMgr
-{
-    int unk00, unk04, unk08, unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
 
 struct BSAudio;
 __declspec(nothrow) BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
+inline hkMemoryRouter* audio()
 {
-    return (AudioMgr*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
 
 __declspec(nothrow) void __cdecl ResizeAudioStream(void*, void*, int);
@@ -113,7 +104,7 @@ struct Owner
 
 inline void* hkAlloc(int n)
 {
-    RefObj* p = (RefObj*)audio()->heap().AllocateMemoryBlock(n);
+    RefObj* p = (RefObj*)audio()->heap().blockAlloc(n);
     p->m_usMemSizeAndFlags = (short)n;
     return p;
 }
@@ -165,10 +156,6 @@ namespace fnv_00e40fd0 {
 extern int DAT_010e56d4;
 extern int DAT_0102e388;
 void* __cdecl FUN_00c85750();
-struct hkReferencedObject
-{
-    void removeReference();
-};
 struct Allocator;
 typedef void(__thiscall* FreeFunction)(Allocator*, void*, unsigned int);
 struct AllocatorVTable
@@ -183,14 +170,6 @@ struct Allocator
 {
     AllocatorVTable* vtable;
 };
-struct HolderLayout
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    Allocator* allocator;
-};
 struct Owner
 {
     int* vtable;
@@ -204,7 +183,7 @@ struct Owner
 void Owner::ClearItems()
 {
     vtable = &DAT_010e56d4;
-    Allocator* allocator = ((HolderLayout*)FUN_00c85750())->allocator;
+    Allocator* allocator = (Allocator*)((hkMemoryRouter*)FUN_00c85750())->m_heap;
     hkReferencedObject** pItems = items;
     int n = count;
     for (int i = 0; i < n; ++i)
@@ -305,36 +284,29 @@ struct S_00e40800_Allocator
     }
 };
 
-struct S_00e40800_Router
-{
-    int unk0;
-    int unk4;
-    int unk8;
-    int unkC;
-    S_00e40800_Allocator* m_pStreamAllocator;
-    S_00e40800_Allocator& heap() throw()
-    {
-        return *m_pStreamAllocator;
-    }
-};
 
-S_00e40800_Router* FUN_00c85750() throw();
+inline S_00e40800_Allocator& heap(hkMemoryRouter* holder) throw()
+{
+    return *(S_00e40800_Allocator*)holder->m_heap;
+}
+
+hkMemoryRouter* FUN_00c85750() throw();
 int FUN_00cb10d0(const char* s) throw();
 char* FUN_00cb1090(char* dst, const char* src) throw();
 void FUN_00c908c0(S_00e40800_Allocator& alloc, void* array, int numElem, int sizeElem) throw();
 
-template <typename T> struct S_00e40800_Array
-{
+template <typename T> struct S_00e40800_ArrayLocalForm
+{ // local form of hkArray: 0x00e40800 needs the original inline/out-of-line helper split; shared replacement changes bytes.
     T* m_data;
     int m_iElementCount;
     int m_iCapacityState;
 
-    __forceinline S_00e40800_Array() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
+    __forceinline S_00e40800_ArrayLocalForm() throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {}
 
-    __forceinline S_00e40800_Array(int size, const T& fill) throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
+    __forceinline S_00e40800_ArrayLocalForm(int size, const T& fill) throw() : m_data(0), m_iElementCount(0), m_iCapacityState(0x80000000)
     {
-        S_00e40800_Allocator& a = FUN_00c85750()->heap();
+        S_00e40800_Allocator& a = heap(FUN_00c85750());
         T* p = size ? a._bufAlloc<T>(size) : 0;
         int cap = size ? size : 0x80000000;
         m_data = p;
@@ -371,13 +343,13 @@ template <typename T> struct S_00e40800_Array
 
     __forceinline void SetSizeAndGrow(int n) throw()
     {
-        _setSize(FUN_00c85750()->heap(), n);
+        _setSize(heap(FUN_00c85750()), n);
     }
 };
 
 struct S_00e40800_String
 {
-    S_00e40800_Array<char> m_kStringBuffer;
+    S_00e40800_ArrayLocalForm<char> m_kStringBuffer;
 
     __forceinline void set(const char* s) throw()
     {
@@ -403,12 +375,12 @@ struct FUN_00e40800 : S_00e40800_RefObject
     S_00e40800_String m_name20;
     S_00e40800_String m_name2c;
     S_00e40800_String m_name38;
-    S_00e40800_Array<float> m_arr44;
-    S_00e40800_Array<float> m_arr50;
-    S_00e40800_Array<float> m_arr5c;
-    S_00e40800_Array<float> m_arr68;
-    S_00e40800_Array<float> m_arr74;
-    S_00e40800_Array<float> m_arr80;
+    S_00e40800_ArrayLocalForm<float> m_arr44;
+    S_00e40800_ArrayLocalForm<float> m_arr50;
+    S_00e40800_ArrayLocalForm<float> m_arr5c;
+    S_00e40800_ArrayLocalForm<float> m_arr68;
+    S_00e40800_ArrayLocalForm<float> m_arr74;
+    S_00e40800_ArrayLocalForm<float> m_arr80;
     float m_f8c;
     float m_f90;
     float m_f94;
@@ -459,15 +431,7 @@ struct CpuAllocator
     virtual void slot04();
     virtual void Invoke(void* block, unsigned int size);
 };
-struct CpuAllocatorHolder
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0c;
-    CpuAllocator* allocator;
-};
-CpuAllocatorHolder* __cdecl FUN_00c85750();
+hkMemoryRouter* __cdecl FUN_00c85750();
 struct CpuObject
 {
     unsigned int unk00;
@@ -482,33 +446,23 @@ CpuObject* CpuObject::FUN_00e41050(unsigned int flags)
     FUN_00e40cb0();
     if (flags & 1)
     {
-        CpuAllocatorHolder* holder = FUN_00c85750();
-        holder->allocator->Invoke(this, size);
+        hkMemoryRouter* holder = FUN_00c85750();
+        ((CpuAllocator*)holder->m_heap)->Invoke(this, size);
     }
     return this;
 }
 }  // namespace fnv_00e41050
 
 namespace fnv_00e41e20 {
-struct AudioAllocator
+// The shared allocator declares FreeArray nonvirtual; preserve this call site's vtable dispatch.
+inline void FreeAudioArray(hkMemoryAllocator* allocator, void* memory, unsigned int size) throw()
 {
-    virtual void v00();
-    virtual void v04();
-    virtual void Free(void* apMemory, unsigned int auiSize) throw();
-    virtual void v0C();
-    virtual void FreeArray(void* apMemory, unsigned int auiSize) throw();
-};
+    typedef void(__thiscall* FreeArrayFunction)(hkMemoryAllocator*, void*, unsigned int);
+    (*(FreeArrayFunction**)allocator)[4](allocator, memory, size);
+}
 
-struct AudioHolder
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    int unk0c;
-    AudioAllocator* m_pAllocator;
-};
 
-AudioHolder* __cdecl FUN_00c85750() throw();
+hkMemoryRouter* __cdecl FUN_00c85750() throw();
 extern int DAT_010e58c8;
 extern int DAT_0102e388;
 
@@ -528,13 +482,13 @@ struct FUN_00e41e20_cls
 void FUN_00e41e20_cls::FUN_00e41e20()
 {
     m_vptr00 = (int)&DAT_010e58c8;
-    AudioHolder* pHolder = FUN_00c85750();
-    AudioAllocator* pAllocator = pHolder->m_pAllocator;
+    hkMemoryRouter* pHolder = FUN_00c85750();
+    hkMemoryAllocator* pAllocator = reinterpret_cast<hkMemoryAllocator*>(pHolder->m_heap);
     unsigned int uCapBits = m_uCapBits;
     m_iArrayLength = 0;
     if ((uCapBits & 0x80000000u) == 0)
     {
-        pAllocator->FreeArray(m_pData, (uCapBits & 0x3fffffffu) * 4);
+        FreeAudioArray(pAllocator, m_pData, (uCapBits & 0x3fffffffu) * 4);
     }
     m_pData = 0;
     m_uCapBits = 0x80000000u;

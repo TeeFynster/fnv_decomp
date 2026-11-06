@@ -6,6 +6,11 @@
 // src/staging/blk_00da0000_o2.cpp - STAGING unit created 2026-10-16 by stage_units.py for functions with no attributed unit
 // (128 KB address window, o2 code style). Not a real source path: move functions to their real units once identified.
 #include "../../include/layout_support.h"
+#include "../../include/hkResult.h"
+#include "../../include/BSAudio.h"
+#include "../../include/hkMemoryRouter.h"
+#include "../../include/Vec4.h"
+#include "../../include/GridArray.h"
 extern "C" void __cdecl FUN_00cb0a70(void*);
 extern int DAT_010d461c;
 struct FUN_00da07b0_class
@@ -326,11 +331,6 @@ struct DB7570Pair
     unsigned int m_key;
     unsigned int m_uiFilterValue;
 };
-enum DB7570Result
-{
-    DB7570_SUCCESS = 0,
-    DB7570_FAILURE = 1
-};
 class DB7570Map
 {
   public:
@@ -338,7 +338,7 @@ class DB7570Map
     DB7570Pair* m_data;
     int m_iElementCount;
 
-    DB7570Result Lookup(unsigned int key, unsigned int& valueOut) const;
+    hkResult Lookup(unsigned int key, unsigned int& valueOut) const;
 };
 extern "C" int __cdecl CompareStringsCaseInsensitive(int a1, int a2);
 struct FUN_00db75b0_entry
@@ -370,22 +370,10 @@ class FUN_00db78a0_cls
     virtual void vSlot0c(void* field, void* item);
     void FUN_00db78a0(FUN_00db78a0_item** a, void** b);
 };
-struct hkMemoryAllocator;
-struct AudioMgr
-{
-    int unk00, unk04, unk08;
-    hkMemoryAllocator* unk0c;
-    hkMemoryAllocator* unk10;
-    hkMemoryAllocator& heap()
-    {
-        return *unk10;
-    }
-};
-struct BSAudio;
 BSAudio* __cdecl FUN_00c85750();
-inline AudioMgr* audio()
+inline hkMemoryRouter* audio()
 {
-    return (AudioMgr*)FUN_00c85750();
+    return (hkMemoryRouter*)FUN_00c85750();
 }
 struct MapPair
 {
@@ -489,14 +477,6 @@ struct DBB100Writer
 };
 static void FUN_00dbb100(const DBB100Registry* registry, const void* object, DBB100Writer* writer);
 void DBB100WriteClassNames(const DBB100Registry* registry, const void** objects, DBB100Writer* writer);
-struct hkMemoryAllocator
-{
-    virtual void vSlot00();
-    virtual void vSlot04();
-    virtual void vSlot08();
-    virtual void vSlot0C(void* field, void* item);
-    virtual void free(void* p, unsigned int nbytes);
-};
 struct AudioRouter
 {
     int unk00;
@@ -610,14 +590,6 @@ struct DBA430Inner
 {
     void __thiscall Sync(DBA430Listener* listener);
     void __thiscall Mark();
-};
-struct BSAudio
-{
-    virtual void vf00();
-    int unk04;
-    int unk08;
-    int unk0c;
-    DBA430Listener* m_10;
 };
 BSAudio* __cdecl FUN_00c85750();
 struct DBA430Owner
@@ -852,20 +824,25 @@ extern unsigned short DAT_01269b7e;
 void* __cdecl FUN_00dba610();
 
 #include <xmmintrin.h>
-struct Vec4
-{
-    __declspec(align(16)) float v[4];
-};
+#include "../../include/hkMemoryAllocator.h"
 
 // @fnv 0x00db0dc0
 static __declspec(noinline) void FUN_00db0dc0(float* pFirst, float* pSecond, int idxFirst, int idxSecond,
                                               unsigned char* pOut)
 {
-    Vec4 first = *(Vec4*)pFirst;
-    Vec4 second = *(Vec4*)pSecond;
+    __declspec(align(16)) Vec4 first;
+    __declspec(align(16)) Vec4 second;
+    first.xb = ((const Vec4*)pFirst)->xb;
+    first.yb = ((const Vec4*)pFirst)->yb;
+    first.zb = ((const Vec4*)pFirst)->zb;
+    first.wb = ((const Vec4*)pFirst)->wb;
+    second.xb = ((const Vec4*)pSecond)->xb;
+    second.yb = ((const Vec4*)pSecond)->yb;
+    second.zb = ((const Vec4*)pSecond)->zb;
+    second.wb = ((const Vec4*)pSecond)->wb;
 
-    first.v[idxFirst] = 1.0f;
-    second.v[idxSecond] = 1.0f;
+    (&first.x)[idxFirst] = 1.0f;
+    (&second.x)[idxSecond] = 1.0f;
 
     __m128 zero = _mm_setzero_ps();
     unsigned int maskFirst = _mm_movemask_ps(_mm_cmplt_ps(*(const __m128*)&first, zero));
@@ -1198,19 +1175,6 @@ class GridUInt
             __m128 lowFloat = _mm_cvtepi32_ps(bottom);
             out.quad() = _mm_add_ps(highFloat, lowFloat);
         }
-    }
-};
-struct GridArray
-{
-    GridVector* data;
-    int count;
-    __forceinline int size() const
-    {
-        return count;
-    }
-    __forceinline GridVector& operator[](int i)
-    {
-        return data[i];
     }
 };
 struct GridMesh

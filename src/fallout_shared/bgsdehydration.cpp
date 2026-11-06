@@ -1,14 +1,74 @@
+#include "../../include/SettingT.h"
 // fallout_shared/bgsdehydration.cpp: BGSDehydrationStage, BGSHungerStage, WaitableObject, TESForm and more (45 functions)
 
-#include "bgsdehydration_decls.h"
-#include "bgsdehydration_types_BGSDehydrationStage.h"
-#include "bgsdehydration_types_BGSHungerStage.h"
+// Use shared form bases instead of the generated unit-local declarations.
+#define FNV_TESFILE_H
+#define FNV_TESFORM_H
+#define FNV_BASEFORMCOMPONENT_H
+#include "layout_support.h"
+#include "../../include/TESForm.h"
+#include "../../include/TESLoadScreenType.h"
+#include "../../include/NiFile.h"
+#include "../../include/TESFile.h"
+// MapMenu's private array layout is distinct from the shared BSSimpleArray.
+#include "../../include/MapMenu.h"
+#include <windows.h>
+#include "../../include/BGSTerrainManager.h"
+double FUN_00ec6054(double value);
+float ConvertDoubleResult(float value);
+unsigned long WaitForSingleObjectEx(long* value);
+class WaitableObject
+{
+public:
+    virtual void vfn_0000();
+    virtual void vfn_0004();
+    long references;
+    void FUN_00401970();
+};
+#include "../../include/BGSDehydrationStage.h"
+#include "../../include/BGSHungerStage.h"
+#include "../../include/HungerStageData.h"
+
+// The shared hunger stage does not declare its out-of-line data accessor.
+class HungerStageDataAccess : public BGSHungerStage
+{
+public:
+    HungerStageData* GetData();
+};
 #define IsFormInitialized GetInitialized
 #include <malloc.h>
+#include "../../include/BSSoundHandle.h"
+#include "../../include/CachedValuesOwner.h"
+#include "../../include/TESChildCell.h"
+#include "../../include/Actor.h"
+#include "../../include/Setting.h"
+#include "../../include/ActorValueOwner.h"
+#include "../../include/BGSCameraPath.h"
+#include "../../include/BSAudio.h"
+#include "../../include/DialoguePackage.h"
+#include "../../include/ExtraDataList.h"
+#include "../../include/PlayerCharacter.h"
+#include "../../include/Script.h"
+#include "../../include/SpellItem.h"
+#include "../../include/StartMenu.h"
+#include "../../include/TESFaction.h"
+#include "../../include/TESFullName.h"
+#include "../../include/TESNPC.h"
+#include "../../include/TESObjectCELL.h"
+#include "../../include/TESObjectLIGH.h"
+#include "../../include/TESObjectREFR.h"
+#include "../../include/TESPackage.h"
+#include "../../include/TESTopic.h"
 
-class SpellItem : public TESForm
+// The shared audio manager still declares these factories with legacy handle types.
+class SoundHandleAudioAccess : public BSAudio
 {
+public:
+    BSSoundHandle GetSoundHandleByEditorID(const char*, unsigned int);
+    BSSoundHandle FUN_00ad73b0(unsigned int, unsigned int);
+    BSSoundHandle FUN_00ad7550(const char*, unsigned int);
 };
+
 void FUN_004016a0(BGSDehydrationStage* stage);
 extern "C" unsigned int DAT_011c3180;
 extern "C" BGSDehydrationStage** DAT_011c3184;
@@ -35,7 +95,7 @@ void BGSDehydrationStage::ClearData()
 // @fnv 0x00401b20
 void BGSHungerStage::ResetFormData()
 {
-    FUN_00500940()->Reinitialize();
+    static_cast<HungerStageDataAccess*>(this)->GetData()->Reinitialize();
 }
 
 // Allocates a zero-initialized array of count BGSDehydrationStage pointers, returning null when count is zero.
@@ -51,10 +111,17 @@ BGSDehydrationStage** BGSDehydrationStage::AllocateStageArray(unsigned int count
     return stages;
 }
 
-// Constructs a BGSDehydrationStage and sets its form type to 0x6e.
-// @fnv 0x005a7160
-BGSDehydrationStage::BGSDehydrationStage()
+// The shared form stores its data as bytes; preserve the original data initialization call.
+struct LoadScreenTypeDataAccess
 {
+    void Initialize();
+};
+
+// Constructs a load-screen type and sets its form type to 0x6e.
+// @fnv 0x005a7160
+TESLoadScreenType::TESLoadScreenType()
+{
+    reinterpret_cast<LoadScreenTypeDataAccess*>(formData)->Initialize();
     SetFormType((ENUM_FORM_ID)0x6e);
 }
 
@@ -211,7 +278,7 @@ float ConvertDoubleResult(float value)
 // @fnv 0x004013e0
 bool TESForm::GetInitialized() const
 {
-    return (m_uiFormFlags & 8) ? true : false;
+    return (iFormFlags & 8) ? true : false;
 }
 // @fnv 0x004019f0
 HungerStageData::HungerStageData()
@@ -234,24 +301,16 @@ struct Base5a
     virtual ~Base5a();
 };
 
-class FUN_004012d0_shell : public BGSDehydrationStage
-{
-  public:
-    ~FUN_004012d0_shell();
-};
-
 // @fnv 0x004012d0
-FUN_004012d0_shell::~FUN_004012d0_shell()
+BGSDehydrationStage::~BGSDehydrationStage()
 {
     ClearData();
 }
 
 struct ActiveEffect;
-struct Actor;
 struct ActorCause;
 struct ActorMover;
 struct AlchemyItem;
-struct Animation;
 struct TwoIntegerValues;
 struct MediaLocation;
 struct BGSEncounterZone;
@@ -272,7 +331,6 @@ struct BSFaceGenAnimationData;
 struct BSFaceGenNiNode;
 struct BSMultiBound;
 struct BSMultiBoundRoom;
-struct SoundPlaybackHandle;
 struct BaseProcess;
 struct BipedAnim;
 struct CombatGroupCollection;
@@ -286,7 +344,6 @@ struct DialogueResponse;
 struct DetectionParameters;
 struct TeleportableReference;
 struct EffectItem;
-struct ExtraDataList;
 struct ExtraLock;
 struct FormRecordHeader;
 struct TESFileGroup;
@@ -312,7 +369,7 @@ struct NiControllerSequence;
 struct NiFixedString;
 struct NiGeometry;
 struct NiLight;
-struct ThreeByThreeMatrix;
+class NiMatrix3;
 struct NiNode;
 struct NiPoint3;
 struct NiPointLight;
@@ -328,7 +385,6 @@ struct ReferenceLightData;
 struct LockExtraData;
 struct ReferenceIntersectionData;
 struct RagDollData;
-struct Script;
 struct ScriptLocals;
 struct TESActorBase;
 struct TESAmmo;
@@ -336,23 +392,17 @@ struct TESBoundObject;
 struct TESClass;
 struct TESCombatStyle;
 struct TESContainer;
-struct TESFaction;
 struct TESGlobal;
 struct TESIdleForm;
 struct TESModel;
 struct TESObject;
 struct TESObjectARMO;
 struct TESObjectBOOK;
-struct TESObjectCELL;
 struct TESObjectCLOT;
-struct TESObjectLIGH;
-struct TESObjectREFR;
 struct TESObjectWEAP;
-struct TESPackage;
 struct TESRace;
 struct TESSkill;
 struct TESSound;
-struct TESTopic;
 struct TESTopicInfo;
 struct TESWorldSpace;
 struct TargetEntry;
@@ -382,49 +432,8 @@ struct blob48
 {
     char b[48];
 };
-struct TESChildCell
-{
-    virtual TESObjectCELL* GetSaveParentCell();
-};
 typedef char _sizecheck_TESChildCell[sizeof(TESChildCell) == 4 ? 1 : -1];
-struct ActorValueOwner
-{
-    virtual int GetBaseActorValue(int);
-    virtual float GetBaseActorValueFloat(int);
-    virtual int GetActorValue(int);
-    virtual float GetCurrentActorValue(int);
-    virtual float GetPermanentActorValueFloat(int);
-    virtual float GetTemporaryActorValue(int);
-    virtual float GetDamageActorValue(int);
-    virtual int GetPermanentActorValue(int);
-    virtual float GetPermanentActorValueAdjustment(int);
-    virtual TESForm* GetActorValueOwnerForm();
-    virtual unsigned short GetActorValueOwnerType();
-    int GetActorValueAsInteger(int);
-    float GetActorValueFloatByIndex(int);
-};
 typedef char _sizecheck_ActorValueOwner[sizeof(ActorValueOwner) == 4 ? 1 : -1];
-struct CachedValuesOwner
-{
-    virtual float GetFloatValue0();
-    virtual float GetFloatValue1();
-    virtual float GetFloatValue2();
-    virtual float GetFloatValue3();
-    virtual float GetFloatValue4();
-    virtual float GetFloatValue5();
-    virtual float GetFloatValue6();
-    virtual float GetFloatValue7();
-    virtual float GetFloatValue8();
-    virtual float GetFloatValue9();
-    virtual float GetFloatValue10();
-    virtual float GetFloatValue11();
-    virtual int GetIntegerValue12();
-    virtual int GetIntegerValue13();
-    virtual float GetFloatValue14();
-    virtual float GetFloatValue15();
-    virtual bool GetBooleanValue16();
-    void PrecalculateCachedValues();
-};
 typedef char _sizecheck_CachedValuesOwner[sizeof(CachedValuesOwner) == 4 ? 1 : -1];
 struct FUN_00401190_shell : public TESForm
 {
@@ -434,7 +443,7 @@ struct FUN_00401190_shell : public TESForm
 // @fnv 0x00401190
 bool FUN_00401190_shell::FUN_00401190()
 {
-    return (m_uiFormFlags & 0x400) ? true : false;
+    return (iFormFlags & 0x400) ? true : false;
 }
 
 struct FUN_00401230_shell
@@ -460,15 +469,15 @@ void FUN_009f87b0_shell::FUN_009f87b0()
 }
 
 void __cdecl _Deallocate(void*);
-struct FUN_004012a0_Holder
+struct DehydrationStageDeletionAccess
 {
-    void* FUN_004012a0(unsigned int);
+    void* DeleteThis(unsigned int);
 };
 // Runs the destructor on this object, frees it with _Deallocate when flags has bit 0 set, and returns this.
 // @fnv 0x004012a0
-void* FUN_004012a0_Holder::FUN_004012a0(unsigned int flags)
+void* DehydrationStageDeletionAccess::DeleteThis(unsigned int flags)
 {
-    ((FUN_004012d0_shell*)this)->FUN_004012d0_shell::~FUN_004012d0_shell();
+    ((BGSDehydrationStage*)this)->BGSDehydrationStage::~BGSDehydrationStage();
     if (flags & 1)
         _Deallocate(this);
     return this;
@@ -479,27 +488,22 @@ struct FUN_005e78f0_t
 {
     void FUN_004851b0(TESForm*);
 };
-struct FUN_00401400_class
+// The copy helper is not yet declared by the shared stage.
+struct DehydrationStageCopyAccess : public BGSDehydrationStage
 {
     void CopyFromDehydrationStage(TESForm* apCopy);
 };
 // @fnv 0x00401400
-void FUN_00401400_class::CopyFromDehydrationStage(TESForm* apCopy)
+void DehydrationStageCopyAccess::CopyFromDehydrationStage(TESForm* apCopy)
 {
     BGSDehydrationStage* pcopy;
     pcopy = dynamic_cast<BGSDehydrationStage*>(apCopy);
     if (!pcopy)
         return;
     ((FUN_005e78f0_t*)this)->FUN_004851b0(pcopy);
-    __memcpy(((BGSHungerStage*)this)->FUN_00500940(), ((BGSHungerStage*)pcopy)->FUN_00500940(), 8);
+    __memcpy(((HungerStageDataAccess*)this)->GetData(), ((HungerStageDataAccess*)pcopy)->GetData(), 8);
 }
 
-struct TESObjectLIGH
-{
-    bool FUN_0046f070();
-    bool InvokeAction(unsigned int, unsigned int, bool, unsigned int, unsigned int);
-    bool FUN_0050e4b0(unsigned int, unsigned int, bool, unsigned int, unsigned int);
-};
 // Returns false if FUN_0046f070 fails, otherwise forwards the arguments to InvokeAction and returns its result.
 // @fnv 0x0050e4b0
 bool TESObjectLIGH::FUN_0050e4b0(unsigned int a1, unsigned int a2, bool bFlag, unsigned int a4, unsigned int a5)
@@ -521,14 +525,6 @@ void Unk515010::ForwardToF670(int aiArg1, int aiArg2, bool abFlag, int aiArg4, i
     InvokeAction(aiArg1, aiArg2, abFlag, aiArg4, aiArg5);
 }
 
-struct TESObjectREFR
-{
-    virtual ~TESObjectREFR()
-    {}
-};
-struct Actor : TESObjectREFR
-{
-};
 struct Dummy25750
 {
     void InvokeAction(int, TESObjectREFR*, bool, int, int);
@@ -542,97 +538,69 @@ void Dummy25750::CastToActorAndCall(int aiArg1, TESObjectREFR* apRefr, bool abFl
     InvokeAction(aiArg1, apRefr, abFlag, aiArg4, aiArg5);
 }
 
-namespace fnv_00551740 {
-struct Actor;
-struct BGSAcousticSpace;
+class BGSAcousticSpace;
 struct BGSEncounterZone;
-struct BGSLightingTemplate;
-struct BGSLoadFormBuffer;
+class BGSLightingTemplate;
+class BGSLoadFormBuffer;
 struct BGSMusicType;
-struct BGSSaveFormBuffer;
-struct BSFile;
-struct BSMultiBoundNode;
-struct BSPortalGraph;
-struct CellMopp;
+class BGSSaveFormBuffer;
+class BSFile;
+class BSMultiBoundNode;
+class BSPortalGraph;
+class CellMopp;
+class FormRecordHeader;
+class InteriorData;
+class IntSeenData;
+struct InventoryChanges;
+class NavMeshCollection;
+class NiAVObject;
+class NiCamera;
+class NiColor;
+class NiNode;
+class NiPick;
+class NiPoint3;
+class NiRenderedTexture;
+class SeenData;
+class TESActorBase;
+class TESClimate;
+class TESGlobal;
+struct TESImageSpace;
+class TESObject;
+class TESObjectLAND;
+class TESRegionObjectBase;
+struct TESWaterForm;
+class TESWorldSpace;
+class bhkWorld;
+namespace fnv_00551740 {
 struct CellRecord;
 struct ExteriorData;
-struct ExtraDataList;
-struct FormRecordHeader;
 struct TESFileGroup;
-struct InteriorData;
 struct ImpactSwap;
-struct IntSeenData;
-struct InventoryChanges;
 struct LoadedCellData;
-struct NavMeshCollection;
-struct NiAVObject;
-struct NiCamera;
-struct NiColor;
-struct NiNode;
-struct NiPick;
-struct NiPoint3;
-struct NiRenderedTexture;
-struct SeenData;
-struct TESActorBase;
-struct TESClimate;
-struct TESGlobal;
-struct TESImageSpace;
-struct TESObject;
-struct TESObjectCELL;
-struct TESObjectLAND;
-struct TESObjectREFR;
 struct TESRegionList;
-struct TESRegionObjectBase;
 struct RegionPoint;
-struct TESWaterForm;
-struct TESWorldSpace;
 struct _D3DLOCKED_RECT;
 struct BhkPickData;
-struct bhkWorld;
 struct bhkWorldM;
 struct blob12
 {
     char b[12];
 };
-struct TESFullName : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetFullNameLength(TESForm*);
-    unsigned int GetFullNameLength();
-    static char* GetFullName(TESForm*);
-    char* GetFullName();
-    void SetFullName(char*);
-    static void LoadFullNameChunk(TESFullName*, TESFile*);
-    void* GetFullNameString();
-    void* __vecDelDtor(unsigned int);
-    char m_kName[8];
-};
 typedef char _sizecheck_TESFullName[sizeof(TESFullName) == 12 ? 1 : -1];
-struct FUN_00551740_shell : public TESForm
+// The shared cell has no declaration for this display-name helper.
+// Extend it locally without duplicating its fields or virtual functions.
+struct CellDisplayNameAccess : public TESObjectCELL
 {
     char* GetCellName();
 };
 
-struct StartMenu
-{
-    char const* GetMenuTitle();
-};
 extern StartMenu g_011ca130;
-struct TESObjectCELL
-{
-    bool IsInterior();
-    char* FUN_00451cb0();
-};
 struct CellExtra28
 {
     char* FUN_0041c7c0();
 };
 // @fnv 0x00551740
-char* FUN_00551740_shell::GetCellName()
+char* CellDisplayNameAccess::GetCellName()
 {
     if (reinterpret_cast<CellExtra28*>(reinterpret_cast<char*>(this) + 0x28)->FUN_0041c7c0())
         return reinterpret_cast<CellExtra28*>(reinterpret_cast<char*>(this) + 0x28)->FUN_0041c7c0();
@@ -658,14 +626,13 @@ char* FUN_005f0060_shell::FUN_005f0060()
     return (unsigned int)(*(Flt*)((char*)this + 0x1c)) ? (char*)(unsigned int)(*(Flt*)((char*)this + 0x1c)) : "";
 }
 
+class NiFormArray;
+class PerkEntryConditionSet;
+class TESIdleForm;
+class TESModel;
+class TESModelTextureSwap;
+class FileEntryList;
 namespace fnv_005fe0f0 {
-struct NiFormArray;
-struct PerkEntryConditionSet;
-struct TESIdleForm;
-struct TESModel;
-struct TESModelTextureSwap;
-struct TESObjectREFR;
-struct FileEntryList;
 struct FUN_005fe0f0_shell : public TESForm
 {
     char* FUN_005fe0f0();
@@ -682,114 +649,15 @@ char* FUN_005fe0f0_shell::FUN_005fe0f0()
 }
 }  // namespace fnv_005fe0f0
 
+class DialogueTopicData;
+class DialogueItem;
+class FormRecordHeader;
+class QuestDialogueInfo;
+class TESQuest;
+class TESTopicInfo;
+class TopicInfoArray;
 namespace fnv_00618660 {
-struct Actor;
-struct DialogueTopicData;
-struct DialogueItem;
-struct FormRecordHeader;
-struct QuestDialogueInfo;
-struct TESObjectREFR;
-struct TESQuest;
-struct TESTopicInfo;
-struct TopicInfoArray;
-struct TESFullName : public BaseFormComponent
-{
-    virtual void InitializeComponent();
-    virtual void ClearComponent();
-    void Save();
-    virtual void BaseFormRecord(BaseFormComponent*);
-    virtual bool IsEqualToBase(BaseFormComponent*);
-    static unsigned int GetFullNameLength(TESForm*);
-    unsigned int GetFullNameLength();
-    static char* GetFullName(TESForm*);
-    char* GetFullName();
-    void SetFullName(char*);
-    static void LoadFullNameChunk(TESFullName*, TESFile*);
-    void* GetFullNameString();
-    void* __vecDelDtor(unsigned int);
-    char m_kName[8];
-};
 typedef char _sizecheck_TESFullName[sizeof(TESFullName) == 12 ? 1 : -1];
-struct TESTopic : public TESForm, public TESFullName
-{
-    virtual void __vslot_10();
-    static void BadQuestInfo(QuestDialogueInfo*);
-    virtual bool Save(TESFile*);
-    virtual void Save();
-    virtual bool ReadTopicData(TESFile*);
-    virtual bool Load(TESFile*);
-    virtual void InitItem();
-    virtual void ResetFormData();
-    virtual bool CopyTopicData(FormRecordHeader*);
-    virtual bool CopyTopicData(TESForm*);
-    DialogueTopicData* GetData();
-    int GetDialogueType();
-    float GetPriority();
-    void SetPriority(float);
-    bool IsRemappedRumors();
-    void SetRemappedRumors(bool);
-    bool IsTopLevel();
-    void SetTopLevel(bool);
-    int GetDummyNodeState();
-    void SetDummyNodeState(int);
-    bool IsPersuasion();
-    bool IsNonMenuTopic();
-    void* GetQuestInfoList();
-    TopicInfoArray* GetInfoArray(TESQuest*);
-    TESTopicInfo* GetInfoByID(TESQuest*, unsigned int, bool);
-    TESTopicInfo* GetInfoByID(unsigned int, bool);
-    static TESTopicInfo* GetInfoByIndex(QuestDialogueInfo*, unsigned int);
-    TESTopicInfo* GetInfoByIndex(TESQuest*, unsigned int);
-    TESQuest* GetParentQuest(TESTopicInfo*);
-    QuestDialogueInfo* GetQuestInfoForInfo(TESTopicInfo*);
-    void* GetDummyPrompt();
-    void SetDummyPrompt(char*);
-    bool HasDummyPrompt();
-    void RemoveQuestInfo(TESQuest*);
-    static void RemoveQuestFromAllTopics(TESQuest*);
-    bool HasQuest(void*, bool);
-    bool HasQuest(TESQuest*, bool);
-    static void CompactTopicInfos(TopicInfoArray*);
-    void CompactTopicInfos(TESQuest*);
-    bool InsertInfoAfter(TESQuest*, TESTopicInfo*, unsigned int);
-    QuestDialogueInfo* GetQuestInfoForQuest(TESQuest*, bool);
-    bool AddInfoToEnd(TESQuest*, TESTopicInfo*);
-    TESTopicInfo* CreateInfoAtIndex(TESQuest*, int);
-    static void AddDefaultTopics();
-    static void RemoveDefaultTopics();
-    static TESTopic* GetAudioBackendData(int, int);
-    static TESTopic* GetTopicFromInfo(TESTopicInfo*);
-    static void AlterOwner(TESTopicInfo*);
-    static void UpdateTopic(TESTopic*, void*, bool);
-    static bool CompareTopics(TESTopic*, TESTopic*, bool);
-    static void ReorderTopics(bool, void*);
-    bool SortQuests();
-    static bool IsQuestValidForTopics(TESQuest*);
-    virtual bool IsParentForm();
-    virtual bool IsFormType(unsigned char);
-    static bool IsFormTypeDialogueChild(unsigned char);
-    static unsigned int GetDialogueTopicFlags(TESObjectREFR*, TESObjectREFR*, void*, TESTopic*);
-    DialogueItem* CreateDialogueItem(TESObjectREFR*, TESObjectREFR*, TESTopic*, void*, bool);
-    static TESTopicInfo* FindMatchingTopicInfo(void*, bool*, TESObjectREFR*, TESObjectREFR*, bool, TESTopic*, void*);
-    TESTopicInfo* FindMatchingTopicInfo(bool*, TESObjectREFR*, TESObjectREFR*, bool, TESTopic*, void*);
-    TESTopicInfo* FindMatchingTopicInfo(bool*, TESObjectREFR*, TESObjectREFR*);
-    TESTopicInfo* FindMatchingTopicInfo(TESObjectREFR*, TESObjectREFR*);
-    static TESTopicInfo* FindFollowupTopicInfo(TESTopicInfo*, bool*, TESObjectREFR*, TESObjectREFR*, bool, void*);
-    static void ResetAllTopics();
-    void ResetTopics();
-    int GetJournalIndex();
-    void SetJournalIndex(int);
-    bool AddJournalEntry(int, Actor*);
-    static void SetShowConversationStats(bool);
-    static bool GetShowConversationStats();
-    char m_Data[2];
-    char _pad_26[2];
-    float m_fTopicParamB;
-    char m_kQuestInfoList[8];
-    char m_kDummyPrompt[8];
-    int m_iTopicFlags;
-};
-typedef char _sizecheck_TESTopic[sizeof(TESTopic) == 64 ? 1 : -1];
 struct FUN_00618660_shell : public TESForm
 {
     char* FUN_00618660();
@@ -799,27 +667,25 @@ struct Flt
 {
     operator unsigned int() const;
 };
-extern char $SG5889[];
 // @fnv 0x00618660
 char* FUN_00618660_shell::FUN_00618660()
 {
     return ((Flt*)((char*)this + 0x40))->operator unsigned int()
                ? (char*)((Flt*)((char*)this + 0x40))->operator unsigned int()
-               : $SG5889;
+               : (char*)"";
 }
 }  // namespace fnv_00618660
 
-struct FUN_004fcbd0_shell
+// The activation-byte setter is not declared by the shared player header.
+struct PlayerActivationAccess : public PlayerCharacter
 {
-    char pad0x000_0x79a[0x79a];
-    unsigned char m_0x79a;
     void SetByteAt79a(unsigned char value);
 };
 
 // @fnv 0x004fcbd0
-void FUN_004fcbd0_shell::SetByteAt79a(unsigned char value)
+void PlayerActivationAccess::SetByteAt79a(unsigned char value)
 {
-    m_0x79a = value;
+    unk799[1] = value;
 }
 
 struct FUN_0067fb20_target
@@ -850,7 +716,6 @@ void FUN_006796c0_shell::FUN_006796c0()
         m_30->ResolveTargetForm();
 }
 
-extern const char $SG3295[];
 
 struct DH
 {
@@ -859,15 +724,6 @@ struct DH
 
 DH* g_dataHandler;
 
-struct BGSCameraPath
-{
-    int HasNameForWarning();
-};
-
-struct XActor
-{
-    void* GetExtra() const;
-};
 
 struct FUN_00401280_shell
 {
@@ -876,110 +732,26 @@ struct FUN_00401280_shell
 
 TESActorBase* __fastcall FUN_004216f0(ExtraDataList* extraDataList);
 
-struct FUN_0055d480_name_object
-{
-    virtual void f000() = 0;
-    virtual void f001() = 0;
-    virtual void f002() = 0;
-    virtual void f003() = 0;
-    virtual void f004() = 0;
-    virtual void f005() = 0;
-    virtual void f006() = 0;
-    virtual void f007() = 0;
-    virtual void f008() = 0;
-    virtual void f009() = 0;
-    virtual void f010() = 0;
-    virtual void f011() = 0;
-    virtual void f012() = 0;
-    virtual void f013() = 0;
-    virtual void f014() = 0;
-    virtual void f015() = 0;
-    virtual void f016() = 0;
-    virtual void f017() = 0;
-    virtual void f018() = 0;
-    virtual void f019() = 0;
-    virtual void f020() = 0;
-    virtual void f021() = 0;
-    virtual void f022() = 0;
-    virtual void f023() = 0;
-    virtual void f024() = 0;
-    virtual void f025() = 0;
-    virtual void f026() = 0;
-    virtual void f027() = 0;
-    virtual void f028() = 0;
-    virtual void f029() = 0;
-    virtual void f030() = 0;
-    virtual void f031() = 0;
-    virtual void f032() = 0;
-    virtual void f033() = 0;
-    virtual void f034() = 0;
-    virtual void f035() = 0;
-    virtual void f036() = 0;
-    virtual void f037() = 0;
-    virtual void f038() = 0;
-    virtual void f039() = 0;
-    virtual void f040() = 0;
-    virtual void f041() = 0;
-    virtual void f042() = 0;
-    virtual void f043() = 0;
-    virtual void f044() = 0;
-    virtual void f045() = 0;
-    virtual void f046() = 0;
-    virtual void f047() = 0;
-    virtual void f048() = 0;
-    virtual void f049() = 0;
-    virtual void f050() = 0;
-    virtual void f051() = 0;
-    virtual void f052() = 0;
-    virtual void f053() = 0;
-    virtual void f054() = 0;
-    virtual void f055() = 0;
-    virtual void f056() = 0;
-    virtual void f057() = 0;
-    virtual void f058() = 0;
-    virtual void f059() = 0;
-    virtual void f060() = 0;
-    virtual void f061() = 0;
-    virtual void f062() = 0;
-    virtual void f063() = 0;
-    virtual void f064() = 0;
-    virtual void f065() = 0;
-    virtual void f066() = 0;
-    virtual void f067() = 0;
-    virtual void f068() = 0;
-    virtual void f069() = 0;
-    virtual void f070() = 0;
-    virtual void f071() = 0;
-    virtual void f072() = 0;
-    virtual void f073() = 0;
-    virtual void f074() = 0;
-    virtual void f075() = 0;
-    virtual const char* GetName() = 0;
-};
 
-struct FUN_0055d480_shell
-{
-    const char* FUN_0055d480();
-};
 
 // @fnv 0x0055d480
-const char* FUN_0055d480_shell::FUN_0055d480()
+const char* TESObjectREFR::GetFullName()
 {
     const char* name;
 
     if (((BGSCameraPath*)this)->HasNameForWarning())
         return ((FUN_00401280_shell*)this)->FUN_00401280();
 
-    if (!*(FUN_0055d480_name_object**)((char*)this + 0x20) || g_dataHandler->FUN_004226e0())
-        return $SG3295;
+    if (!data.m_pPlacedObject || g_dataHandler->FUN_004226e0())
+        return "";
 
-    name = ((FUN_0055d480_name_object*)*(FUN_0055d480_name_object**)((char*)this + 0x20))->GetName();
+    name = ((TESForm*)data.m_pPlacedObject)->GetName();
 
     if (!name || !*name)
     {
-        TESActorBase* actor = FUN_004216f0((ExtraDataList*)((XActor*)this)->GetExtra());
+        TESActorBase* actor = FUN_004216f0((ExtraDataList*)GetExtra());
         if (actor)
-            name = ((FUN_0055d480_name_object*)actor)->GetName();
+            name = actor->GetName();
     }
 
     return name;
@@ -1261,76 +1033,6 @@ struct FormTypeAccess : public TESForm
     int GetFormTypeID();
 };
 
-class TESFaction : public TESForm
-{
-  public:
-    bool IsHiddenFlagSet();
-};
-
-class TESNPC : public TESForm
-{
-  public:
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4C;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5C;
-    int unk60;
-    int unk64;
-    int unk68;
-    int unk6C;
-    int unk70;
-    int unk74;
-    int unk78;
-    int unk7C;
-    int unk80;
-    int unk84;
-    int unk88;
-    int unk8C;
-    int unk90;
-    int unk94;
-    int unk98;
-    int unk9C;
-    int unkA0;
-    int unkA4;
-    int unkA8;
-    int unkAC;
-    int unkB0;
-    int unkB4;
-    int unkB8;
-    int unkBC;
-    int unkC0;
-    int unkC4;
-    int unkC8;
-    int unkCC;
-    int unkD0;
-    int unkD4;
-    int unkD8;
-    int unkDC;
-    int unkE0;
-    int unkE4;
-    int unkE8;
-    int unkEC;
-    int unkF0;
-    int unkF4;
-    int unkF8;
-    int unkFC;
-    ActorValueOwner avOwner;
-};
-
 struct RefrAccess : public TESObjectREFR
 {
     TESForm* GetOwner();
@@ -1338,20 +1040,10 @@ struct RefrAccess : public TESObjectREFR
     void Disable();
 };
 
-struct PlayerCharacter : public Actor
-{
-    void ModifyKarmaForTheft(int aiAmount);
-    void ModifyKarmaForStolenItem(TESForm* apObject, int aiCount);
-};
-
 extern PlayerCharacter* _g_thePlayer;
 
 class GameSettingCollection;
-template <class T> class SettingT
-{
-  public:
-    float* Float();
-};
+using ::SettingT;
 extern SettingT<GameSettingCollection> originalRuntimeFloatSetting282;
 
 unsigned int GetKarmaLevelFor(float afKarma);
@@ -1385,7 +1077,7 @@ bool TESActivatableItem::FUN_005e9360(RefrAccess* apRef, TESObjectREFR* apActiva
                 TESNPC* pNPC = (TESNPC*)pOwner;
                 if (pNPC)
                 {
-                    unsigned int uiKarmaLevel = GetKarmaLevelFor(pNPC->avOwner.GetCurrentActorValue(0x17));
+                    unsigned int uiKarmaLevel = GetKarmaLevelFor(pNPC->GetCurrentActorValue((ActorValue::Index)0x17));
                     if (uiKarmaLevel != 2 && uiKarmaLevel != 4)
                         bStolen = true;
                 }
@@ -1725,7 +1417,7 @@ struct ExtraHolder
     int unk00;
     int unk04;
     int unk08;
-    struct ActorLike* unk0C;
+    Actor* unk0C;
 };
 
 struct ExtraListLike
@@ -1805,119 +1497,18 @@ struct RefLike
     RefLike* GetBaseForm();
 };
 
-struct ActorLike : RefLike
-{
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v4a();
-    virtual void v4b();
-    virtual void v4c();
-    virtual void v4d();
-    virtual void v4e();
-    virtual void v4f();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59();
-    virtual void v5a();
-    virtual void v5b();
-    virtual void v5c();
-    virtual void v5d();
-    virtual void v5e();
-    virtual void v5f();
-    virtual void v60();
-    virtual void v61();
-    virtual void v62();
-    virtual void v63();
-    virtual void v64();
-    virtual void v65();
-    virtual void v66();
-    virtual void v67();
-    virtual void v68();
-    virtual void v69();
-    virtual void v6a();
-    virtual void v6b();
-    virtual void v6c();
-    virtual void v6d();
-    virtual void v6e();
-    virtual void v6f();
-    virtual void v70();
-    virtual void v71();
-    virtual void v72();
-    virtual void v73();
-    virtual void v74();
-    virtual void v75();
-    virtual void v76();
-    virtual void v77();
-    virtual void v78();
-    virtual void v79();
-    virtual void v7a();
-    virtual void v7b();
-    virtual void v7c();
-    virtual void v7d();
-    virtual void v7e();
-    virtual void v7f();
-    virtual void v80();
-    virtual void v81();
-    virtual void v82();
-    virtual void v83();
-    virtual void v84();
-    virtual void v85();
-    virtual void v86();
-    virtual void v87();
-    virtual void v88();
-    virtual void v89();
-    virtual void v8a();
-    virtual void v8b();
-    virtual void v8c();
-    virtual void v8d();
-    virtual void v8e();
-    virtual void v8f();
-    virtual void v90();
-    virtual void v91();
-    virtual void v92();
-    virtual void v93();
-    virtual void v94();
-    virtual void v95();
-    virtual void v96();
-    virtual void v97();
-    virtual void v98();
-    virtual void v99();
-    virtual void v9a();
-    virtual void v9b();
-    virtual void v9c();
-    virtual void v9d();
-    virtual void v9e();
-    virtual void v9f();
-    virtual void StartConversation(RefLike* apTarget, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
-    PackageLike* GetCurrentPackage();
-};
 
-struct GameSettingLike
-{
-    const char* String();
-};
-extern GameSettingLike g_011d4810;
+
+
+extern Setting g_011d4810;
 extern float DAT_010162c0;
 
-struct VATSLike
+// No shared VATS.h yet; inventorychanges.cpp identifies 0x009c8950 as the VATS reset.
+struct VATS
 {
     void Reset(bool a1, bool a2);
 };
-extern VATSLike DAT_011f2250;
+extern VATS DAT_011f2250;
 
 bool QueueUIMessage(const char* apText, int aiIcon, const char* apSound, const char* apUnk, float afTime, bool abUnk);
 void FUN_00709470(int a1, int a2, int a3, int a4, int a5, int a6);
@@ -1977,10 +1568,10 @@ bool DialogueStarter::FUN_004feeb0(RefLike* apRef, RefLike* apTarget, int aiUnus
             return false;
         }
     }
-    ActorLike* pSpeakerActor = 0;
+    Actor* pSpeakerActor = 0;
     if (apRef->IsActor())
     {
-        pSpeakerActor = (ActorLike*)apRef;
+        pSpeakerActor = (Actor*)apRef;
     }
     else
     {
@@ -2008,9 +1599,9 @@ bool DialogueStarter::FUN_004feeb0(RefLike* apRef, RefLike* apTarget, int aiUnus
         else
         {
             PackageLike* pCurrentPackage = 0;
-            if (pSpeakerActor->GetCurrentPackage() && pSpeakerActor->GetCurrentPackage()->GetPackType() == 0x1c)
+            if (pSpeakerActor->MobileObject::GetCurrentPackage() && pSpeakerActor->MobileObject::GetCurrentPackage()->GetPackType() == 0x1c)
             {
-                pCurrentPackage = pSpeakerActor->GetCurrentPackage();
+                pCurrentPackage = reinterpret_cast<PackageLike*>(pSpeakerActor->MobileObject::GetCurrentPackage());
             }
             if (pCurrentPackage && FUN_009ee040(pCurrentPackage) == (int)pTargetForm)
             {
@@ -2018,7 +1609,7 @@ bool DialogueStarter::FUN_004feeb0(RefLike* apRef, RefLike* apTarget, int aiUnus
             }
             else
             {
-                pSpeakerActor->StartConversation(pTargetForm, 0, 0, 1, 0, 0, 0, 0, 0);
+                pSpeakerActor->vfn_280(reinterpret_cast<PlayerCharacter*>(pTargetForm), 0, 0, 1, 0, 0, 0, 0, 0);
             }
         }
     }
@@ -2026,58 +1617,6 @@ bool DialogueStarter::FUN_004feeb0(RefLike* apRef, RefLike* apTarget, int aiUnus
 }
 
 namespace fnv_00508a40 {
-class Script
-{
-  public:
-    ScriptLocals* FUN_005abf60();
-    bool Run(TESObjectREFR*, ScriptLocals*, TESObjectREFR*, bool);
-};
-struct ExtraDataList
-{
-    int head;
-    int tail;
-    int flags;
-    int presence;
-    int data10;
-    int data14;
-    int data18;
-    int data1c;
-    ExtraDataList();
-    void FUN_00419ad0(unsigned short);
-    Script* FUN_00418800();
-    void FUN_00419ed0(Script*);
-    void FUN_00419f80(ScriptLocals*);
-    ScriptLocals* FUN_00418830();
-};
-struct FUN_0055a2f0 : TESObjectREFR
-{
-    int unk04;
-    int unk08;
-    int unk0c;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1c;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2c;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3c;
-    int unk40;
-    int unk44;
-    int unk48;
-    int unk4c;
-    int unk50;
-    int unk54;
-    int unk58;
-    int unk5c;
-    int unk60;
-    int unk64;
-    FUN_0055a2f0();
-};
 struct NameComponent
 {
     const char* FUN_00408da0();
@@ -2099,137 +1638,16 @@ struct TopicInfo
 };
 struct Script* FUN_004826d0(Topic*);
 unsigned int DialogueRandom();
-struct CalendarView
+// No shared Calendar.h yet; 0x00867ca0 in calendar.cpp computes the season.
+struct Calendar
 {
     int FUN_00867ca0();
 };
-extern "C" CalendarView DAT_011de7b8;
-struct SettingView
-{
-    const char* FUN_00403df0();
-};
-extern "C" SettingView DAT_011c856c;
-extern "C" SettingView DAT_011c8590;
+extern "C" Calendar DAT_011de7b8;
+
+extern "C" Setting DAT_011c856c;
+extern "C" Setting DAT_011c8590;
 extern "C" Actor* DAT_011dea3c;
-struct ActorActions : Actor
-{
-    virtual void slot01();
-    virtual void slot02();
-    virtual void slot03();
-    virtual void slot04();
-    virtual void slot05();
-    virtual void slot06();
-    virtual void slot07();
-    virtual void slot08();
-    virtual void slot09();
-    virtual void slot0a();
-    virtual void slot0b();
-    virtual void slot0c();
-    virtual void slot0d();
-    virtual void slot0e();
-    virtual void slot0f();
-    virtual void slot10();
-    virtual void slot11();
-    virtual void slot12();
-    virtual void slot13();
-    virtual void slot14();
-    virtual void slot15();
-    virtual void slot16();
-    virtual void slot17();
-    virtual void slot18();
-    virtual void slot19();
-    virtual void slot1a();
-    virtual void slot1b();
-    virtual void slot1c();
-    virtual void slot1d();
-    virtual void slot1e();
-    virtual void slot1f();
-    virtual void slot20();
-    virtual void slot21();
-    virtual void slot22();
-    virtual void slot23();
-    virtual void slot24();
-    virtual void slot25();
-    virtual void slot26();
-    virtual void slot27();
-    virtual void slot28();
-    virtual void slot29();
-    virtual void slot2a();
-    virtual void slot2b();
-    virtual void slot2c();
-    virtual void slot2d();
-    virtual void slot2e();
-    virtual void slot2f();
-    virtual void slot30();
-    virtual void slot31();
-    virtual void slot32();
-    virtual void slot33();
-    virtual void slot34();
-    virtual void slot35();
-    virtual void slot36();
-    virtual void slot37();
-    virtual void slot38();
-    virtual void slot39();
-    virtual void slot3a();
-    virtual void slot3b();
-    virtual void slot3c();
-    virtual void slot3d();
-    virtual void slot3e();
-    virtual void slot3f();
-    virtual void slot40();
-    virtual void slot41();
-    virtual void slot42();
-    virtual void slot43();
-    virtual void slot44();
-    virtual void slot45();
-    virtual void slot46();
-    virtual void slot47();
-    virtual void slot48();
-    virtual void slot49();
-    virtual void slot4a();
-    virtual void slot4b();
-    virtual void slot4c();
-    virtual void slot4d();
-    virtual void slot4e();
-    virtual void slot4f();
-    virtual void slot50();
-    virtual void slot51();
-    virtual void slot52();
-    virtual void slot53();
-    virtual void slot54();
-    virtual void slot55();
-    virtual void slot56();
-    virtual void slot57();
-    virtual void slot58();
-    virtual void slot59();
-    virtual void slot5a();
-    virtual void slot5b();
-    virtual void slot5c();
-    virtual void slot5d();
-    virtual void slot5e();
-    virtual void slot5f();
-    virtual void slot60();
-    virtual void slot61();
-    virtual void slot62();
-    virtual void slot63();
-    virtual void AddTopic(Topic*, ExtraDataList*, bool);
-    void FUN_00574fa0(Topic*, int, bool);
-};
-struct GlobalObject_0041a250
-{
-    unsigned int id;
-    unsigned int state;
-    unsigned int message;
-    GlobalObject_0041a250();
-    ~GlobalObject_0041a250();
-    void FUN_00418900(const GlobalObject_0041a250&);
-    bool FUN_00ad8830(bool);
-};
-struct BSAudio
-{
-    static BSAudio* FUN_00453a70();
-    GlobalObject_0041a250 FUN_00ad7550(const char*, unsigned int);
-};
 int FUN_00406f60(BSStringT<char>*, const char*, ...);
 bool QueueUIMessage(const char*, int, const char*, const char*, float, bool);
 void FUN_00706f30(int);
@@ -2283,23 +1701,23 @@ bool Action::TryAddTopic(TopicInfo* pTopicInfo, TESObjectREFR* reference, int ar
                 {
                     extra->FUN_00419ed0(pScript);
                     extra->FUN_00419f80(extra->FUN_00418800()->FUN_005abf60());
-                    TESObjectREFR* temporary = new FUN_0055a2f0;
-                    pScript->Run(temporary, extra->FUN_00418830(), 0, false);
+                    TESObjectREFR* temporary = new TESObjectREFR;
+                    pScript->FUN_005ac1e0(temporary, extra->FUN_00418830(), 0, false);
                 }
-                reinterpret_cast<ActorActions*>(actor)->AddTopic(script, extra, true);
+                actor->AddItem(script, extra, true);
             }
             else
             {
-                reinterpret_cast<ActorActions*>(actor)->FUN_00574fa0(script, 0, true);
+                actor->FUN_00574fa0(script, 0, true);
             }
             if (actor == DAT_011dea3c)
             {
                 BSStringT<char> sound;
                 FUN_00406f60(&sound, DAT_011c856c.FUN_00403df0(), script->name.FUN_00408da0());
                 QueueUIMessage(sound.String(), 0, 0, 0, 2.0f, false);
-                GlobalObject_0041a250 message;
-                message.FUN_00418900(BSAudio::FUN_00453a70()->FUN_00ad7550("ITMPickupOrganic", 0x120));
-                message.FUN_00ad8830(false);
+                BSSoundHandle message;
+                message = static_cast<SoundHandleAudioAccess*>(BSAudio::FUN_00453a70())->FUN_00ad7550("ITMPickupOrganic", 0x120);
+                message.Play(false);
             }
         }
         else if (actor == DAT_011dea3c)
@@ -2925,7 +2343,7 @@ struct ActivateReference
     ActivateLock* FUN_00569160();
     ActivateExtra* FUN_005691f0();
     void FUN_005789b0();
-    void Activate(ActivateActor*, int, int, int);
+    void FUN_00573170(ActivateActor*, int, int, int);
     void* FUN_00567790();
 };
 struct ActivateActorAction
@@ -3138,18 +2556,6 @@ struct ActivateObject
     ActivateSound* FUN_008ce390();
     bool FUN_00516dc0(ActivateReference*, TESObjectREFR*, int, int, int);
 };
-struct BSSoundHandleEx
-{
-    int unk00, unk04, unk08;
-    ~BSSoundHandleEx();
-    bool Play(bool);
-    bool FUN_00ad8b60(float, float, float);
-};
-struct BSAudio
-{
-    BSSoundHandleEx GetSoundHandleByEditorID(const char*, unsigned int);
-    BSSoundHandleEx FUN_00ad73b0(unsigned int, unsigned int);
-};
 BSAudio* FUN_00453a70();
 struct ActivateMessage
 {
@@ -3197,12 +2603,12 @@ bool ActivateObject::FUN_00516dc0(ActivateReference* apTarget, TESObjectREFR* ac
                         unlocked->FUN_00517360();
                         apTarget->FUN_005789b0();
                     }
-                    FUN_00453a70()->GetSoundHandleByEditorID(DAT_0102b13c, 0x121).Play(false);
+                    static_cast<SoundHandleAudioAccess*>(FUN_00453a70())->GetSoundHandleByEditorID(DAT_0102b13c, 0x121).Play(false);
                     {
                         char message[256];
                         FUN_00406d00(message, 255, DAT_011d5110.FUN_00403df0(), lock->key->name.FUN_00408da0());
                         DispatchMessageToSink(message, 0, DAT_0102b108, 0, DAT_010162c0, 0);
-                        DAT_011c92d0->Activate(DAT_011dea3c, 0, 0, 1);
+                        DAT_011c92d0->FUN_00573170(DAT_011dea3c, 0, 0, 1);
                         DAT_011c92d0 = 0;
                         return true;
                     }
@@ -3246,9 +2652,9 @@ bool ActivateObject::FUN_00516dc0(ActivateReference* apTarget, TESObjectREFR* ac
         }
         if (actor2 != DAT_011dea3c && FUN_008ce390() && apTarget && apTarget->GetScene())
         {
-            BSSoundHandleEx sound = FUN_00453a70()->FUN_00ad73b0(FUN_008ce390()->FUN_0084e3a0(), 0x102);
+            BSSoundHandle sound = static_cast<SoundHandleAudioAccess*>(FUN_00453a70())->FUN_00ad73b0(FUN_008ce390()->FUN_0084e3a0(), 0x102u);
             ActivatePoint position = *apTarget->GetPosition();
-            sound.FUN_00ad8b60(position.x, position.y, position.z);
+            sound.SetPosition(position.x, position.y, position.z);
             sound.Play(false);
         }
         if (actor2 == DAT_011dea3c)
@@ -3404,36 +2810,28 @@ struct SoundView
     SoundRecord CopyBig();
     const char* FUN_00511840();
 };
-struct AudioPlaybackHandle
-{
-    int unk00;
-    int unk04;
-    int unk08;
-    ~AudioPlaybackHandle();
-    bool FUN_00ad8b60(float, float, float);
-    void FUN_00ad8f20(SceneView*);
-    bool FUN_00ad8830(bool);
-};
 struct AudioView
 {
     static AudioView* FUN_00453a70();
-    AudioPlaybackHandle FUN_00ad7480(const char*, unsigned int, SoundView*);
+    BSSoundHandle FUN_00ad7480(const char*, unsigned int, SoundView*);
 };
 struct ExtraView
 {
-    void FUN_0041a6a0(AudioPlaybackHandle*);
+    void FUN_0041a6a0(BSSoundHandle*);
 };
-struct AnimationView
+// No shared Animation.h yet; animation.cpp identifies 0x00496080 as the animation section reset.
+struct Animation
 {
     void FUN_00496080(bool, float);
 };
 struct PlayerView
 {
     void SetByteAt79a(bool);
-    AnimationView* FUN_00950a60(bool);
+    Animation* FUN_00950a60(bool);
     ExtraView* FUN_005d43c0();
 };
-struct ActorView
+// Shared Actor supplies the layout; its 0x008c0ec0 changed-unit dispatcher is not declared yet.
+struct ChangedUnitDialogueDispatch : Actor
 {
     void UpdateTargetUnits(ActivationRef*, void*, int);
 };
@@ -3523,7 +2921,7 @@ bool FUN_005113f0_shell::FUN_005113f0(ActivationRef* ref, ActivationRef* activat
             ((PlayerView*)DAT_011dea3c)->FUN_00950a60(false)->FUN_00496080(true, 0.0f);
         }
         if (!((RefView*)ref)->FUN_005785e0(h, true))
-            ((ActorView*)h)->UpdateTargetUnits(ref, ((RefView*)ref)->FUN_00567790(), -1);
+            ((ChangedUnitDialogueDispatch*)h)->UpdateTargetUnits(ref, ((RefView*)ref)->FUN_00567790(), -1);
     }
     if (FUN_00407820())
     {
@@ -3534,13 +2932,13 @@ bool FUN_005113f0_shell::FUN_005113f0(ActivationRef* ref, ActivationRef* activat
         int i = 0;
         if (p)
             i = GetFlagMask(FUN_00407820()->CopyBig().unk04);
-        AudioPlaybackHandle AB =
+        BSSoundHandle AB =
             AudioView::FUN_00453a70()->FUN_00ad7480(FUN_00407820()->FUN_00511840(), i | 0x40000102, FUN_00407820());
         if (p)
             ((PlayerView*)DAT_011dea3c)->FUN_005d43c0()->FUN_0041a6a0(&AB);
-        AB.FUN_00ad8b60(h.x, h.y, h.z);
-        AB.FUN_00ad8f20(((NodeView*)ref)->Node());
-        AB.FUN_00ad8830(false);
+        AB.SetPosition(h.x, h.y, h.z);
+        AB.SetObjectToFollow(reinterpret_cast<NiAVObject*>(((NodeView*)ref)->Node()));
+        AB.Play(false);
     }
     if (unk80)
         unk80->Activate(ref, activator, arg3, arg4, arg5);
@@ -3555,20 +2953,6 @@ bool FUN_005113f0_shell::FUN_005113f0(ActivationRef* ref, ActivationRef* activat
     }
     return true;
 }
-
-struct TESBoundObject
-{
-    virtual void vfn00();
-};
-struct TESPackage
-{
-    virtual void vfn00();
-};
-struct DialoguePackage : TESPackage
-{
-    int unk04[34];
-    int m_iTopic;  // +0x8c
-};
 
 struct AAPoint
 {
@@ -4530,7 +3914,7 @@ bool AAHandler::OnActivate(TESObjectREFR* pkRef, TESObjectREFR* pkActivatorRef, 
                 pkSpeaker = (TESObjectREFR*)pkActivator;
                 DialoguePackage* pkDialogueOld = dynamic_cast<DialoguePackage*>(pkActivator->FUN_009344a0());
                 if (pkDialogueOld)
-                    iDialogueTopic = pkDialogueOld->m_iTopic;
+                    iDialogueTopic = pkDialogueOld->topic;
                 if (pkActivatorPackageTmp->FUN_0041d8a0() && !pkActivatorPackageTmp->FUN_0041d8a0()->FUN_00726070())
                     pkActivator->FUN_008d8520()->SetConversationState(pkActivator, 2);
                 else

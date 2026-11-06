@@ -1,57 +1,23 @@
-// gamebryo2.2/corelibs/nimain/nitristrips.cpp: NiTriStrips, Holder (10 functions)
+// gamebryo2.2/corelibs/nimain/nitristrips.cpp: NiTriStrips (10 functions)
 
-#include "nitristrips_decls.h"
+#include "../../../../include/NiDX9Renderer.h"
+#include "../../../../include/NiParticleMeshes.h"
+#include "../../../../include/NiRenderer.h"
+#include "../../../../include/StrArr.h"
+#include "../../../../include/BSFadeNode.h"
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiGeometry.h"
+#include "../../../../include/NiTriStrips.h"
+extern unsigned int DAT_0109ed94;
+
+// The shared base has no default constructor declaration.
 // @fnv 0x00a89740
-NiTriStrips::NiTriStrips()
+__declspec(noinline) NiTriBasedGeom* __fastcall InitTriBasedGeom(NiTriBasedGeom* self, void*)
 {
-    vtable = &DAT_0109ed94;
+    self->NiGeometry::NiGeometry();
+    *reinterpret_cast<unsigned int**>(self) = &DAT_0109ed94;
+    return self;
 }
-
-struct NiStream;
-struct blob12
-{
-    char b[12];
-};
-struct NiPoint3
-{
-    static struct blob12 ComponentProduct(void*, void*);
-    float Length();
-    float SqrLength();
-    float XYLength();
-    float SqrXYLength();
-    float Dot(void*);
-    void Unitize();
-    float GetLengthSquared();
-    struct blob12 Cross(void*);
-    struct blob12 CrossProduct(void*);
-    struct blob12 Perpendicular();
-    static void LoadBinary(NiStream*, NiPoint3*, unsigned int);
-    void LoadBinary(NiStream*);
-    static void SaveBinary(NiStream*, NiPoint3*, unsigned int);
-    void SaveBinary(NiStream*);
-    char* FormatToBuffer(char*);
-    static void InitializePoint3();
-    static void ShutdownPoint3();
-    static void ProcessPointArray(NiPoint3*, unsigned int, unsigned int);
-    static void ComputeMagnitude(NiPoint3*);
-    static float VectorLength(void*);
-    static void PointsPlusEqualFloatTimesPoints(NiPoint3*, float, void*, unsigned int);
-    static void WeightedPointsPlusWeightedPoints(NiPoint3*, float, void*, unsigned int);
-    static unsigned int* InitSqrtTable();
-    float x;
-    float y;
-    float z;
-};
-typedef char _sizecheck_NiPoint3[sizeof(NiPoint3) == 12 ? 1 : -1];
-struct NiMemObject
-{
-    char _pad_0[1];
-};
-typedef char _sizecheck_NiMemObject[sizeof(NiMemObject) == 1 ? 1 : -1];
-struct FUN_00a71e00_shell : public NiTriStrips
-{
-    void GetTriangleVertices(unsigned short, NiPoint3**, NiPoint3**, NiPoint3**);
-};
 
 struct _FakeTriData
 {
@@ -104,10 +70,10 @@ struct _FakeTriData
 };
 
 // @fnv 0x00a71e00
-void FUN_00a71e00_shell::GetTriangleVertices(unsigned short m_usTriangleID, NiPoint3** pkP0, NiPoint3** pkP1,
-                                             NiPoint3** pkP2)
+void __fastcall GetTriangleVertices(NiTriStrips* self, void*, unsigned short m_usTriangleID,
+                                    NiPoint3** pkP0, NiPoint3** pkP1, NiPoint3** pkP2)
 {
-    _FakeTriData* pkModelData = *reinterpret_cast<_FakeTriData**>(reinterpret_cast<char*>(this) + 0xb8);
+    _FakeTriData* pkModelData = reinterpret_cast<_FakeTriData*>(self->m_spModelData.m_pObject);
     NiPoint3* pkVertex = pkModelData->m_pkVertex;
     unsigned short usIndex0, usIndex1, usIndex2;
     pkModelData->GetTriangleVertexIndices(m_usTriangleID, usIndex0, usIndex1, usIndex2);
@@ -124,21 +90,6 @@ char const* const* __cdecl FUN_00a71d20()
     return &g_012024b8_arg1;
 }
 
-struct NiGeometry
-{
-    NiGeometry(void);
-};
-
-struct NiParticleMeshes
-{
-    static const void* vftable;
-};
-
-struct BSFadeNode
-{
-    static void* __cdecl operator new(unsigned int);
-};
-
 // Allocates 0xc4 bytes, constructs a NiGeometry in place, sets its vtable to NiParticleMeshes::vftable, and returns the pointer or 0 on failure.
 // @fnv 0x00a9b150
 void* __cdecl FUN_00a9b150()
@@ -154,115 +105,58 @@ void* __cdecl FUN_00a9b150()
     return 0;
 }
 
-struct NiRenderer;
-struct FUN_00a80610_shell
-{
-    void __thiscall FUN_00a80610(NiRenderer*);
-};
-struct FUN_00a71d70_shell
-{
-    void __thiscall FUN_00a71d70(NiRenderer*);
-};
 // Calls FUN_00a80610, then if the renderer's field at 0x200 is 1 or 2 and the byte at 0x208 is 1, invokes virtual slot 110 with this.
 // @fnv 0x00a71d70
-void __thiscall FUN_00a71d70_shell::FUN_00a71d70(NiRenderer* apkRenderer)
+void __fastcall RenderTriStrips(NiTriStrips* self, void*, NiRenderer* apkRenderer)
 {
-    ((FUN_00a80610_shell*)this)->FUN_00a80610(apkRenderer);
-    int i = *(int*)((char*)apkRenderer + 0x200);
-    if ((i == 1 || i == 2) && *(char*)((char*)apkRenderer + 0x208) == 1)
+    self->NiGeometry::RenderImmediate(apkRenderer);
+    int i = apkRenderer->m_eFrameState;
+    if ((i == 1 || i == 2) && apkRenderer->m_bRenderTargetGroupActive == 1)
     {
         void** vtbl = *(void***)apkRenderer;
-        ((void(__thiscall*)(NiRenderer*, void*))vtbl[110])(apkRenderer, this);
+        ((void(__thiscall*)(NiRenderer*, void*))vtbl[110])(apkRenderer, self);
     }
 }
 
-struct StrArr
-{
-    char _0[8];
-    unsigned short m8;
-    unsigned short mA;
-    char _C[2];
-    unsigned short mE;
-    void SetSize(unsigned int);
-    void SetAt(unsigned int, char*&);
-};
-struct BaseA
-{
-    void FUN_00a897c0(StrArr*);
-};
-struct Holder : BaseA
-{
-    void AppendString(StrArr*);
-};
-extern char const* const g_012024b8_arg1;
 char* _FUN_00a7d330(char const*);
-// Calls the base handler, then appends the string returned by _FUN_00a7d330 to pkStrings, growing it by mE when mA has reached m8.
+// Calls the base handler, then appends the string returned by _FUN_00a7d330 to pkStrings, growing it by m_usGrowBy when m_usSize has reached m_usMaxSize.
 // @fnv 0x00a71e70
-void Holder::AppendString(StrArr* pkStrings)
+void __fastcall AppendString(NiTriStrips* self, void*, StrArr* pkStrings)
 {
-    FUN_00a897c0(pkStrings);
+    self->NiTriBasedGeom::GetViewerStrings(reinterpret_cast<NiViewerStringsArray*>(pkStrings));
     char* tmp = _FUN_00a7d330(g_012024b8_arg1);
-    unsigned int sz = pkStrings->mA;
-    if (sz >= pkStrings->m8)
-        pkStrings->SetSize(sz + pkStrings->mE);
+    unsigned int sz = pkStrings->m_usSize;
+    if (sz >= pkStrings->m_usMaxSize)
+        pkStrings->SetSize(sz + pkStrings->m_usGrowBy);
     pkStrings->SetAt(sz, tmp);
 }
 
-namespace fnv_00a71d30 {
-struct NiRenderer
-{
-    char _pad0[0x200];
-    int m_iRendererState;
-    char _pad1[4];
-    unsigned char m_bRendererFlagA;
-};
-struct NiDX9Renderer : NiRenderer
-{
-};
-struct FUN_00a80610_shell
-{
-    void FUN_00a80610(NiRenderer*);
-};
-struct FUN_00a71d30_shell
-{
-    void FUN_00a71d30(NiRenderer*);
-};
 // @fnv 0x00a71d30
-void FUN_00a71d30_shell::FUN_00a71d30(NiRenderer* apkRenderer)
+void __fastcall RenderTriStripsAlt(NiTriStrips* self, void*, NiRenderer* apkRenderer)
 {
     NiDX9Renderer* pkRenderer = (NiDX9Renderer*)apkRenderer;
-    ((FUN_00a80610_shell*)this)->FUN_00a80610(apkRenderer);
-    if ((pkRenderer->m_iRendererState == 1 || pkRenderer->m_iRendererState == 2) && pkRenderer->m_bRendererFlagA == 1)
-        ((void(__thiscall**)(NiRenderer*, void*)) * (void***)pkRenderer)[108](pkRenderer, this);
+    self->NiGeometry::RenderImmediate(apkRenderer);
+    if ((pkRenderer->m_eFrameState == 1 || pkRenderer->m_eFrameState == 2) && pkRenderer->m_bRenderTargetGroupActive == 1)
+        ((void(__thiscall**)(NiRenderer*, void*)) * (void***)pkRenderer)[108](pkRenderer, self);
 }
-}  // namespace fnv_00a71d30
 
 void* __cdecl FUN_00aa13e0(unsigned int size);
 extern "C" void* DAT_0109cd44;
-struct NiTriStripsObject
-{
-    void* vtable;
-    void FUN_00a89740();
-    static void* operator new(unsigned int size, unsigned int extraBytes)
-    {
-        return FUN_00aa13e0(size + extraBytes);
-    }
-    NiTriStripsObject()
-    {
-        FUN_00a89740();
-        vtable = &DAT_0109cd44;
-    }
-};
-struct FUN_00a71db0_class
-{
-    void FUN_00a9b140(NiTriStripsObject* strips, int value);
-    NiTriStripsObject* CreateTriStripsObject(int value);
-};
+void __fastcall CopyTriStrips(NiTriStrips* self, void*, NiTriStrips* strips, int value);
 // @fnv 0x00a71db0
-NiTriStripsObject* FUN_00a71db0_class::CreateTriStripsObject(int value)
+NiTriStrips* __fastcall CreateTriStripsObject(NiTriStrips* self, void*, int value)
 {
-    NiTriStripsObject* strips = new (0xc0) NiTriStripsObject;
-    FUN_00a9b140(strips, value);
+    NiTriStrips* strips = static_cast<NiTriStrips*>(FUN_00aa13e0(sizeof(NiTriStrips)));
+    if (strips)
+    {
+        reinterpret_cast<NiTriBasedGeom*(__thiscall*)(NiTriBasedGeom*)>(InitTriBasedGeom)(strips);
+        *reinterpret_cast<void**>(strips) = &DAT_0109cd44;
+    }
+    else
+    {
+        strips = 0;
+    }
+    reinterpret_cast<void(__thiscall*)(NiTriStrips*, NiTriStrips*, int)>(CopyTriStrips)(self, strips, value);
     return strips;
 }
 

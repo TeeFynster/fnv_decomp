@@ -1,6 +1,18 @@
 // fallout_shared/region system/tesregiondatalandscape.cpp: TESRegionDataLandscape, ThisT (15 functions)
 
-#include "tesregiondatalandscape_decls.h"
+void* __cdecl operator new(unsigned int) throw();
+void __cdecl operator delete(void*);
+#include "../../../include/GO.h"
+#include "../../../include/NiFixedString.h"
+#include "../../../include/NiTexturingProperty.h"
+#include "../../../include/NiPixelData.h"
+
+#include "../../../include/BSStringT.h"
+
+#include "../../../include/TESFile.h"
+#include "../../../include/TESTexture.h"
+#include "../../../include/TESRegionData.h"
+#include "../../../include/TESRegionDataLandscape.h"
 // @fnv 0x004f2a20
 bool TESRegionDataLandscape::ReadLandscapeData(TESFile* file)
 {
@@ -50,31 +62,29 @@ void __fastcall FUN_004f32b0(FUN_004f32b0_This* this_ptr, FUN_004f32b0_Arg aValu
     this_ptr->SetMaskedBits(aValue.val, 0x3000, 0xc);
 }
 
-void* __fastcall FUN_004f2930(void* this_ptr);
-
-struct FUN_004f2840_shell
+struct LandscapeDeleter : TESRegionDataLandscape
 {
-    void* __thiscall FUN_004f2840(unsigned int flags);
+    void* __thiscall DestroyLandscape(unsigned int flags);
 };
 
-// Calls FUN_004f2930 on this, deletes this when flags has bit 0 set, and returns this.
+// Destroys the landscape, deletes it when flags has bit 0 set, and returns this.
 // @fnv 0x004f2840
-void* FUN_004f2840_shell::FUN_004f2840(unsigned int flags)
+void* LandscapeDeleter::DestroyLandscape(unsigned int flags)
 {
-    FUN_004f2930(this);
+    TESRegionDataLandscape::~TESRegionDataLandscape();
     if (flags & 1)
         operator delete(this);
     return this;
 }
 
-struct FUN_004f29c0_This : TESTexture
+struct TextureDeleter : TESTexture
 {
-    void* __thiscall FUN_004f29c0(unsigned int flags);
+    void* __thiscall DestroyTexture(unsigned int flags);
 };
 
 // Destroys the TESTexture base and, when flags has bit 0 set, frees the object, returning this.
 // @fnv 0x004f29c0
-void* __thiscall FUN_004f29c0_This::FUN_004f29c0(unsigned int flags)
+void* __thiscall TextureDeleter::DestroyTexture(unsigned int flags)
 {
     TESTexture::~TESTexture();
     if (flags & 1)
@@ -82,176 +92,70 @@ void* __thiscall FUN_004f29c0_This::FUN_004f29c0(unsigned int flags)
     return this;
 }
 
-struct TESModel
+class LandscapeCopy;
+
+// The shared landscape header does not yet declare these entry points.
+// This helper uses its layout without adding data or virtual slots.
+struct LandscapeOperations : TESRegionDataLandscape
 {
-    unsigned int __thiscall GetModelLength() const;
+    bool HasModel();
+    void SetFullName(BSStringT<char>& aDest);
+    void SaveLandscapeData();
+    bool SetTextureName(const Flt& aName);
+    LandscapeCopy* CloneLandscapeData();
 };
 
-struct FUN_004f2eb0_shell
-{
-    int _0;
-    int _4;
-    TESModel* m_pLandscapeTexture;
-    bool __thiscall HasModel();
-};
-
-// Returns true if the TESModel pointer is set and its model length is non-zero, otherwise false.
+// Returns true if the landscape texture has a non-empty path.
 // @fnv 0x004f2eb0
-bool __thiscall FUN_004f2eb0_shell::HasModel()
+bool __thiscall LandscapeOperations::HasModel()
 {
-    if (!this->m_pLandscapeTexture || !this->m_pLandscapeTexture->GetModelLength())
+    if (!this->m_pLandscapeTexture || !this->m_pLandscapeTexture->GetTextureNameLength())
         return false;
     return true;
 }
 
-struct BSStr
-{
-    bool __thiscall Set(const char* s, unsigned int len);
-};
-
-struct FNStub
-{
-    const char* __thiscall GetFullName() const;
-};
-
-extern const char $SG5889[];
-
-struct FUN_004f2a70_shell
-{
-    void* _0;
-    void* _4;
-    FNStub* _8;
-    void __thiscall SetFullName(BSStr& aDest);
-};
-
 // @fnv 0x004f2a70
-void FUN_004f2a70_shell::SetFullName(BSStr& aDest)
+void LandscapeOperations::SetFullName(BSStringT<char>& aDest)
 {
-    if (!_8)
-        aDest.Set($SG5889, 0);
+    if (!m_pLandscapeTexture)
+        aDest.Set("", 0);
     else
-        aDest.Set(_8->GetFullName(), 0);
+        aDest.Set(m_pLandscapeTexture->GetTextureResourceName(), 0);
 }
 
-struct FUN_0048e370_obj
-{
-    void __thiscall FUN_0048e370(unsigned int);
-};
-void __fastcall WriteSaveData(void* this_ptr);
-struct FUN_004f29f0_shell
-{
-    char _0[8];
-    FUN_0048e370_obj* _8;
-    void __thiscall FUN_004f29f0();
-};
 // @fnv 0x004f29f0
-void __thiscall FUN_004f29f0_shell::FUN_004f29f0()
+void __thiscall LandscapeOperations::SaveLandscapeData()
 {
-    WriteSaveData(this);
-    _8->FUN_0048e370(0x4E4F4349);
+    TESRegionData::Save();
+    m_pLandscapeTexture->Save(0x4E4F4349);
 }
 
 struct Flt
 {
     operator unsigned int() const;
 };
-int __cdecl _stricmp(const char*, const char*);
-struct FUN_004f2ab0_shell : public FUN_004f2eb0_shell
-{
-    bool __thiscall FUN_004f2ab0(const Flt& aName);
-};
+int __cdecl CompareTexturePaths(const char*, const char*);
 // @fnv 0x004f2ab0
-bool __thiscall FUN_004f2ab0_shell::FUN_004f2ab0(const Flt& aName)
+bool __thiscall LandscapeOperations::SetTextureName(const Flt& aName)
 {
     if (m_pLandscapeTexture)
     {
-        if (!m_pLandscapeTexture->GetModelLength() ||
-            _stricmp(((FNStub*)m_pLandscapeTexture)->GetFullName(), (const char*)aName.operator unsigned int()) != 0)
+        if (!m_pLandscapeTexture->GetTextureNameLength() ||
+            CompareTexturePaths(m_pLandscapeTexture->GetTextureResourceName(), (const char*)aName.operator unsigned int()) != 0)
         {
-            ((TESTexture*)m_pLandscapeTexture)->AssignTextureName((const char*)aName.operator unsigned int());
+            m_pLandscapeTexture->AssignTextureName((const char*)aName.operator unsigned int());
             return true;
         }
     }
     return false;
 }
 
-struct NiPixelFormat;
 extern const NiPixelFormat gNiPoint3StartupSrc;
-struct NiPixelData
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    unsigned int unk30;
-    unsigned int unk34;
-    unsigned int unk38;
-    unsigned int unk3C;
-    unsigned int unk40;
-    unsigned int unk44;
-    unsigned int unk48;
-    unsigned int unk4C;
-    unsigned int unk50;
-    unsigned int unk54;
-    unsigned int unk58;
-    unsigned int unk5C;
-    unsigned int unk60;
-    unsigned int unk64;
-    unsigned int unk68;
-    unsigned int unk6C;
-    unsigned int unk70;
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    NiPixelData(unsigned int, unsigned int, const NiPixelFormat&, unsigned int, unsigned int);
-    unsigned char* FUN_0064dac0(int, int);
-    void AddString();
-};
-struct NiFixedString
-{
-    const char* m_kHandle;
-    NiFixedString(const char*);
-    ~NiFixedString();
-};
 struct TextureFormatPreferences
 {
     int m_iWordAt00;
     int m_iWordAt04;
     int m_8;
-};
-struct NiTexturingProperty
-{
-    void SetBaseMapClampMode(int);
-};
-struct FUN_00a6abb0
-{
-    unsigned int unk00;
-    unsigned int unk04;
-    unsigned int unk08;
-    unsigned int unk0C;
-    unsigned int unk10;
-    unsigned int unk14;
-    unsigned int unk18;
-    unsigned int unk1C;
-    unsigned int unk20;
-    unsigned int unk24;
-    unsigned int unk28;
-    unsigned int unk2C;
-    static void* operator new(unsigned int);
-    static void operator delete(void*, unsigned int);
-    FUN_00a6abb0(NiPixelData*, const NiFixedString&, TextureFormatPreferences&);
-};
-struct GO
-{
-    operator NiTexturingProperty*() const;
-    void operator=(void*);
 };
 extern GO g_011c7f0c;
 float RandomFloat(float, float);
@@ -264,9 +168,9 @@ NiTexturingProperty* GetDefaultFullMaskTextureProperty()
     unsigned int iy;
     TextureFormatPreferences myPrefs;
     unsigned int ix;
-    if (g_011c7f0c)
+    if ((NiTexturingProperty*)g_011c7f0c)
         return g_011c7f0c;
-    ppixeldata = new NiPixelData(64, 64, gNiPoint3StartupSrc, 1, 1);
+    ppixeldata = new NiPixelData(64, 64, &gNiPoint3StartupSrc, 1, 1);
     ppixels = ppixeldata->FUN_0064dac0(0, 0);
     for (iy = 0; iy < 64; iy++)
     {
@@ -280,72 +184,48 @@ NiTexturingProperty* GetDefaultFullMaskTextureProperty()
     }
     ppixeldata->AddString();
     InitIntArray((int*)&myPrefs);
-    g_011c7f0c = new FUN_00a6abb0(ppixeldata, NiFixedString("DefaultFullMaskTextureProp"), myPrefs);
+    g_011c7f0c = new NiTexturingProperty(ppixeldata, NiFixedString("DefaultFullMaskTextureProp"), myPrefs);
     ((NiTexturingProperty*)g_011c7f0c)->SetBaseMapClampMode(0);
     return g_011c7f0c;
 }
 
-struct FUN_004f2870
+// The shared landscape header has no explicit copy constructor. Retain this
+// copy-construction layout until it can call the shared base copy constructor.
+class LandscapeCopy : public TESRegionData
 {
-    char _0[12];
-    FUN_004f2870(const void*);
-    ~FUN_004f2870();
+  public:
+    LandscapeCopy(const LandscapeCopy& kOther);
+    virtual ~LandscapeCopy();
+
+    TESTexture* m_pkTexture;
 };
-struct FUN_004f2b10_shell
-{
-    FUN_004f2870* FUN_004f2b10();
-};
-// Allocates a new FUN_004f2870 constructed from this object and returns the pointer.
+
+// Allocates a copy of this landscape region and its texture.
 // @fnv 0x004f2b10
-FUN_004f2870* FUN_004f2b10_shell::FUN_004f2b10()
+LandscapeCopy* LandscapeOperations::CloneLandscapeData()
 {
-    FUN_004f2870* pdata = new FUN_004f2870(this);
+    LandscapeCopy* pdata = new LandscapeCopy(*(const LandscapeCopy*)this);
     return pdata;
 }
 
-struct FUN_004f2930_tex
-{
-    void* FUN_004f29c0(unsigned int flags);
-};
-
-struct FUN_004f2930_base
-{
-    virtual ~FUN_004f2930_base();
-    int unk04;
-};
-
-struct FUN_004f2930_cls : FUN_004f2930_base
-{
-    FUN_004f2930_tex* m_08;
-    virtual ~FUN_004f2930_cls();
-};
-
 // @fnv 0x004f2930
-FUN_004f2930_cls::~FUN_004f2930_cls()
+TESRegionDataLandscape::~TESRegionDataLandscape()
 {
-    FUN_004f2930_tex* copy;
-    FUN_004f2930_tex* tmp;
-    if (m_08 != 0)
+    TextureDeleter* copy;
+    TextureDeleter* tmp;
+    if (m_pLandscapeTexture != 0)
     {
-        copy = m_08;
+        copy = (TextureDeleter*)m_pLandscapeTexture;
         tmp = copy;
-        tmp != 0 ? tmp->FUN_004f29c0(1) : 0;
+        tmp != 0 ? tmp->DestroyTexture(1) : 0;
     }
 }
-
-template <class T> class BSStringT
-{
-  public:
-    T* pString;
-    unsigned short sLen;
-    unsigned short sMaxLen;
-    BSStringT();
-    ~BSStringT();
-};
 
 extern double DAT_01023b88;
 float __cdecl floor(float);
 
+// The shared landscape virtual string accessors have no parameters, and its
+// base lacks the override/priority accessors used by this merge entry point.
 struct ThisT
 {
     virtual void Slot00();
@@ -434,44 +314,10 @@ void __thiscall ThisT::UpdateFromSource(ThisT* a1, int a2)
     }
 }
 
-// TESRegionDataLandscape copy constructor: copy the base region data and clone the texture.
-
-void* __cdecl operator new(unsigned int uiSize);
-
-class F2870Texture
-{
-  public:
-    F2870Texture();
-    virtual ~F2870Texture();
-    const char* GetTexturePath() const;
-    void SetTexturePath(const char* pcPath);
-
-    char* m_pcPath;
-    unsigned short m_usLen;
-    unsigned short m_usMax;
-};
-
-class F2870RegionData
-{
-  public:
-    F2870RegionData(const F2870RegionData& kOther);
-    virtual ~F2870RegionData();
-    int unk04;
-};
-
-class FUN_004f2870_Landscape : public F2870RegionData
-{
-  public:
-    FUN_004f2870_Landscape(const FUN_004f2870_Landscape& kOther);
-    virtual ~FUN_004f2870_Landscape();
-
-    F2870Texture* m_pkTexture;
-};
-
 // Copy-constructs a landscape region, allocating a new texture and copying the source texture's path into it.
 // @fnv 0x004f2870
-FUN_004f2870_Landscape::FUN_004f2870_Landscape(const FUN_004f2870_Landscape& kOther) : F2870RegionData(kOther)
+LandscapeCopy::LandscapeCopy(const LandscapeCopy& kOther) : TESRegionData(kOther)
 {
-    m_pkTexture = new F2870Texture;
-    m_pkTexture->SetTexturePath(kOther.m_pkTexture->GetTexturePath());
+    m_pkTexture = new TESTexture;
+    m_pkTexture->AssignTextureName(kOther.m_pkTexture->GetTextureResourceName());
 }

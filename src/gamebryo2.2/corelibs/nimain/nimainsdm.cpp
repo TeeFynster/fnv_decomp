@@ -2,6 +2,9 @@
 // src/gamebryo2.2/corelibs/nimain/nimainsdm.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/gamebryo2.2/corelibs/nimain/nimainsdm.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
+#include "../../../../include/NiPoint3.h"
+#include "../../../../include/NiStream.h"
+
 struct MM
 {
     void __thiscall _DeallocateAlias(void*);
@@ -60,10 +63,6 @@ void FreeMemoryList()
 }
 }  // namespace fnv_00a8a240
 
-struct NiStream
-{
-    static void __cdecl UnregisterObjectLoader(char const*);
-};
 
 struct FUN_00a8f730
 {
@@ -276,15 +275,9 @@ void __cdecl FUN_00a8a280()
     }
 }
 
-struct Vector3
-{
-    float x;
-    float y;
-    float z;
-};
 extern char DAT_011f5b80;
-extern Vector3 DAT_011f426c;
-extern Vector3 DAT_011f4288;
+extern NiPoint3 DAT_011f426c;
+extern NiPoint3 DAT_011f4288;
 extern float DAT_011f4294;
 void __cdecl FUN_00a5b630();
 void __cdecl InitTrigTables();

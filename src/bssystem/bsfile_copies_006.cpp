@@ -10,5 +10,5 @@ struct Twin_009c0070 : public BSFile
 // @fnv 0x009c0070
 unsigned int Twin_009c0070::GetFilePosition()
 {
-    return fileSizeAt154;
+    return m_uiValueId;
 }

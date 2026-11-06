@@ -3,6 +3,7 @@
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
 
 #include <xmmintrin.h>
+#include "../../../../../include/hkAabb.h"
 struct VertexBuffer
 {
     __m128* values;
@@ -87,7 +88,7 @@ void BoundsWriter::WriteBoundsVertices(VertexBuffer* output, unsigned int alloca
 
 namespace fnv_00de15c0 {
 // InitBoxMesh worker9 v1: __thiscall, no stack args, no frame in ORIG.
-// Allocates a 24B Pair { VertArr verts; FaceArr faces; } via the singleton
+// Allocates a 24B DisplayGeometry { VertArr verts; FaceArr faces; } via the singleton
 // allocator vtable slot +4, stores it at this->m_08, then pushes the 8 box
 // corners (this->m_60 / this->m_70) into verts and 12 index triples into faces.
 
@@ -146,29 +147,18 @@ struct FaceArr
     int size;
     int cap;
 };
-struct Pair
+// hkGeometry layout (hkArray<hkVector4> vertices, hkArray<Triangle> triangles; 24 bytes) built locally with this unit's inline array growth
+struct DisplayGeometry
 {
     VertArr verts;
     FaceArr faces;
-};
-
-struct Bounds
-{
-    float ax;
-    float ay;
-    float az;
-    float aw;
-    float bx;
-    float by;
-    float bz;
-    float bw;
 };
 
 struct ThisCls
 {
     int m_00;
     int m_04;
-    Pair* m_08;
+    DisplayGeometry* m_08;
     int m_0c;
     int m_10;
     int m_14;
@@ -190,18 +180,18 @@ struct ThisCls
     int m_54;
     int m_58;
     int m_5c;
-    Bounds m_60;
+    hkAabb m_60;
     void InitBoxMesh();
 };
 
-// Allocates a Pair at m_08, appends the eight corners of the m_60 bounds as vertices, then appends 12 faces of three indices plus -1.
+// Allocates a DisplayGeometry at m_08, appends the eight corners of the m_60 bounds as vertices, then appends 12 faces of three indices plus -1.
 // @fnv 0x00de15c0
 void ThisCls::InitBoxMesh()
 {
     Singleton* s = FUN_00c85750();
     AllocObj* ao = s->m_10;
-    Pair* p = (Pair*)ao->vt->allocFn(ao, 24);
-    Pair* result;
+    DisplayGeometry* p = (DisplayGeometry*)ao->vt->allocFn(ao, 24);
+    DisplayGeometry* result;
     if (p)
     {
         VertArr* va = &p->verts;
@@ -235,7 +225,7 @@ void ThisCls::InitBoxMesh()
             FUN_00c908c0(ctx, a, newSize, 16);
         }
         a->size += 1;
-        StorePs(&a->data[sz], _mm_setr_ps(m_60.ax, m_60.ay, m_60.az, DAT_01011d78));
+        StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMinimumCorner.x, m_60.m_kMinimumCorner.y, m_60.m_kMinimumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
@@ -251,7 +241,7 @@ void ThisCls::InitBoxMesh()
             FUN_00c908c0(ctx, a, newSize, 16);
         }
         a->size += 1;
-        StorePs(&a->data[sz], _mm_setr_ps(m_60.ax, m_60.ay, m_60.bz, DAT_01011d78));
+        StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMinimumCorner.x, m_60.m_kMinimumCorner.y, m_60.m_kMaximumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
@@ -267,7 +257,7 @@ void ThisCls::InitBoxMesh()
             FUN_00c908c0(ctx, a, newSize, 16);
         }
         a->size += 1;
-        StorePs(&a->data[sz], _mm_setr_ps(m_60.bx, m_60.ay, m_60.bz, DAT_01011d78));
+        StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMaximumCorner.x, m_60.m_kMinimumCorner.y, m_60.m_kMaximumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
@@ -283,7 +273,7 @@ void ThisCls::InitBoxMesh()
             FUN_00c908c0(ctx, a, newSize, 16);
         }
         a->size += 1;
-        StorePs(&a->data[sz], _mm_setr_ps(m_60.bx, m_60.ay, m_60.az, DAT_01011d78));
+        StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMaximumCorner.x, m_60.m_kMinimumCorner.y, m_60.m_kMinimumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
@@ -299,7 +289,7 @@ void ThisCls::InitBoxMesh()
             FUN_00c908c0(ctx, a, newSize, 16);
         }
         a->size += 1;
-        StorePs(&a->data[sz], _mm_setr_ps(m_60.ax, m_60.by, m_60.az, DAT_01011d78));
+        StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMinimumCorner.x, m_60.m_kMaximumCorner.y, m_60.m_kMinimumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
@@ -315,7 +305,7 @@ void ThisCls::InitBoxMesh()
             FUN_00c908c0(ctx, a, newSize, 16);
         }
         a->size += 1;
-        StorePs(&a->data[sz], _mm_setr_ps(m_60.ax, m_60.by, m_60.bz, DAT_01011d78));
+        StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMinimumCorner.x, m_60.m_kMaximumCorner.y, m_60.m_kMaximumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
@@ -331,7 +321,7 @@ void ThisCls::InitBoxMesh()
             FUN_00c908c0(ctx, a, newSize, 16);
         }
         a->size += 1;
-        StorePs(&a->data[sz], _mm_setr_ps(m_60.bx, m_60.by, m_60.bz, DAT_01011d78));
+        StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMaximumCorner.x, m_60.m_kMaximumCorner.y, m_60.m_kMaximumCorner.z, DAT_01011d78));
     }
     {
         VertArr* a = &m_08->verts;
@@ -347,7 +337,7 @@ void ThisCls::InitBoxMesh()
             FUN_00c908c0(ctx, a, newSize, 16);
         }
         a->size += 1;
-        StorePs(&a->data[sz], _mm_setr_ps(m_60.bx, m_60.by, m_60.az, DAT_01011d78));
+        StorePs(&a->data[sz], _mm_setr_ps(m_60.m_kMaximumCorner.x, m_60.m_kMaximumCorner.y, m_60.m_kMinimumCorner.z, DAT_01011d78));
     }
 
     // 12 index triples into faces

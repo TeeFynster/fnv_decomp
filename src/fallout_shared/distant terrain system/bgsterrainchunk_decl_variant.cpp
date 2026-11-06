@@ -1,7 +1,20 @@
+#include "../../../include/BSMultiBound.h"
+#include "../../../include/BGSTerrainChunkLoadTask.h"
+#include "../../../include/NiGeometry.h"
+#include "../../../include/NiGeometryData.h"
+#include "../../../include/QueuedFile.h"
+#include "../../../include/QueuedFileEntry.h"
+#include "../../../include/GO.h"
+#include "../../../include/IOManager.h"
+#include "../../../include/IOTask.h"
+#include "../../../include/NiFixedString.h"
+#include "../../../include/NiProperty.h"
+#include "../../../include/NiPoint3.h"
+#include "../../../include/NiTPointerMap.h"
+#include "../../../include/NiRenderer.h"
 
 // src/fallout_shared/distant terrain system/bgsterrainchunk_decl_variant.cpp - declaration variant unit created 2026-10-26 by decl_variants.py for paused function 0x006fb980: the skeleton of src/fallout_shared/distant terrain system/bgsterrainchunk.cpp
-// with declarations corrected to what the original code does (unit: struct QueuedFileEntry { int f0[0x34 / 4]; }; -> class TESWorldSpace; struct QueuedFileEntry { virtual ~Q; unit: struct BGSTerrainChunkLoadTask : QueuedFileEntry { int i -> struct BGSTerrainChunkLoadTask : QueuedFileEntry { bool ). Move the function to its real unit once
-// that unit declares it this way.
+// Shared declarations now supply the corrected polymorphic bases; no private base definition remains.
 
 // src/fallout_shared/distant terrain system/bgsterrainchunk.cpp - unit created 2026-10-16 from the whole-binary attribution (360 source path: d:/_fallout3/platforms/common/code/fallout shared/distant terrain system/bgsterrainchunk.cpp).
 // Functions are listed by their @fnv annotations; compile flags inferred from the PC code.
@@ -12,10 +25,6 @@ struct FUN_006fa840_shell
 struct FUN_006fb150_shell
 {
     unsigned char GetByteAtOffset5C();
-};
-struct NiAVObject
-{
-    void SetAppCulled(bool);
 };
 struct Flt
 {
@@ -28,37 +37,6 @@ struct FUN_006fb6e0_shell
 struct FUN_006fb940_shell
 {
     void FUN_006fb940(float a, float b, float c);
-};
-class TESWorldSpace;
-struct QueuedFileEntry
-{
-    virtual ~QueuedFileEntry();
-    int f4[0x2c / 4];
-    QueuedFileEntry(int priority);
-    void FUN_00c3cee0(const char* name);
-    void LookupFileEntryByArchive(int a);
-};
-template <class T> struct ChunkPtr
-{
-    ChunkPtr(T* p);
-    ~ChunkPtr();
-    T* p;
-};
-struct BGSTerrainChunkLoadTask : QueuedFileEntry
-{
-    bool unk30;
-    int iX;
-    int iY;
-    int iLevel;
-    void* owner;
-    TESWorldSpace* world;
-    ChunkPtr<void> unk48;
-    ChunkPtr<void> unk4c;
-    ChunkPtr<void> unk50;
-    ChunkPtr<void> unk54;
-    bool unk58;
-    BGSTerrainChunkLoadTask(void* block, TESWorldSpace* space, int x, int y, int level);
-    bool FUN_006fc400(char* apDescription, unsigned int aiBufferSize);
 };
 extern int _sprintf_s(char*, unsigned int, const char*, ...);
 extern "C" void __cdecl UpdateListItems();
@@ -230,60 +208,13 @@ struct FUN_006fb760_shell
 {
     void FUN_006fb760();
 };
-struct S_006fbae0
-{
-    void FUN_006fbb10();
-    void* DestroyIfFlagged(unsigned int);
-};
 void __cdecl _Deallocate(void*);
-struct FUN_006fbcd0_shell
-{
-    void FUN_00c3cb70(int a, int b);
-    void SetFlagAndCall(int a, int b);
-};
 struct FUN_006fbfe0_shell
 {
     unsigned int GetFlagOrValue();
 };
-struct IOTask
-{
-    bool FUN_0043caa0();
-    void NotifyParents();
-};
-struct SoundPlaybackHandle;
-template <class K, class V> struct NiTPointerMap
-{
-    bool IsEmpty();
-};
-struct IOManager
-{
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void vfn_48(void*);
-};
+class BSSoundHandle;
 extern IOManager* DAT_01202d98;
-struct FUN_006f7140_shell : IOTask
-{
-    char _pad[48];
-    bool b30;
-    void ProcessTask();
-};
 struct FakeObj
 {
     virtual void v0();
@@ -371,11 +302,6 @@ struct FUN_006fea10_Class
 {
     unsigned char FUN_006fe920(bool);
 };
-struct GO
-{
-    FUN_006fea10_Class* f0;
-    operator unsigned int() const;
-};
 struct SoundListView
 {
     bool _ref_008256d0();
@@ -384,9 +310,6 @@ struct SoundListView
 };
 extern SoundListView g_011d8624;
 void UpdateSoundListItems();
-struct QueuedFile
-{
-};
 struct ModelLoader
 {
     void QueueModelFilePath(const char*, int, QueuedFile*);
@@ -395,66 +318,10 @@ struct FUN_0043cc60_shell
 {
     int FUN_0043cc60();
 };
-struct FUN_006fbbd0_virtual
-{
-    virtual void f0();
-    virtual void f1();
-    virtual void f2();
-    virtual void f3();
-    virtual void f4();
-    virtual void f5();
-    virtual void f6();
-    virtual void f7();
-    virtual void f8();
-    virtual void f9();
-    virtual void f10();
-};
-struct FUN_006fbbd0_shell : BGSTerrainChunkLoadTask
-{
-    void LoadTerrainChunkTextures();
-};
 extern ModelLoader* g_modelLoader;
 void __cdecl BuildLODDiffuseTexturePath(char*, FakeObj*, int, short, short);
-struct FUN_006fbb10_base
-{
-    virtual ~FUN_006fbb10_base();
-};
-struct FUN_006fbb10_sub
-{
-    int unk00;
-    ~FUN_006fbb10_sub();
-    void Reset(int aiValue);
-};
-struct FUN_006fbb10 : FUN_006fbb10_base
-{
-    virtual ~FUN_006fbb10();
-    int unk04;
-    int unk08;
-    int unk0C;
-    int unk10;
-    int unk14;
-    int unk18;
-    int unk1C;
-    int unk20;
-    int unk24;
-    int unk28;
-    int unk2C;
-    int unk30;
-    int unk34;
-    int unk38;
-    int unk3C;
-    int unk40;
-    int unk44;
-    FUN_006fbb10_sub m_48;
-    FUN_006fbb10_sub m_4c;
-    FUN_006fbb10_sub m_50;
-    FUN_006fbb10_sub m_54;
-};
 extern "C" char DAT_011d85ec;
-struct Point006fac
-{
-    float x, y, z;
-};
+// NiPoint3: FUN_00439680 at 0x00439680 takes const NiPoint3& in Bound and bgsautowater.
 struct FUN_0043d410
 {
     int a, b, c;
@@ -478,8 +345,8 @@ struct Obj006fac
     Obj006fac* FUN_004ea9a0();
     Obj006fac* FUN_006629f0();
     Obj006fac* FUN_0043b230();
-    Point006fac& GetOffsetC();
-    Point006fac& FUN_00500940();
+    NiPoint3& GetOffsetC();
+    NiPoint3& FUN_00500940();
     float GetFieldCC();
     void FUN_00439920(void*);
     void FUN_00a5a040();
@@ -593,19 +460,13 @@ struct FUN_00c37ec0 : TESObjectDoorController
     virtual void v43();
     virtual void v44();
     virtual void v45();
-    virtual void position(const Point006fac&);
-    void FUN_00439680(const Point006fac&);
+    virtual void position(const NiPoint3&);
+    void FUN_00439680(const NiPoint3&);
 };
 struct FUN_00c46970 : TESObjectDoorController
 {
     int pad[45];
     FUN_00c46970();
-};
-struct BSMultiBound : TESObjectDoorController
-{
-    int pad[4];
-    BSMultiBound();
-    void FUN_004addc0(FUN_00c37ec0*);
 };
 struct Target006fac
 {
@@ -637,28 +498,6 @@ struct B5D0List
     B5D0List* FUN_00726070();
 };
 void __cdecl UpdateListItems();
-template <class T> class NiPointer
-{
-  public:
-    T* m_pObject;
-    operator T*() const;
-    NiPointer& operator=(T*);
-};
-class NiNode;
-class NiGeometry;
-class NiProperty;
-class NiProperty : public FUN_006fb940_shell
-{
-  public:
-    void FUN_00441130(int, int);
-};
-class NiGeometryData
-{
-  public:
-    void SetByteAtOffset38(int);
-    void FUN_00a67050(int);
-    void FUN_004410f0(int);
-};
 struct PropState
 {
     virtual void v0();
@@ -733,78 +572,6 @@ struct PropState
     virtual void v69();
     virtual void* v70(NiGeometry*, NiProperty*);
 };
-class NiRenderer
-{
-  public:
-    virtual void v0();
-    virtual void v1();
-    virtual void v2();
-    virtual void v3();
-    virtual void v4();
-    virtual void v5();
-    virtual void v6();
-    virtual void v7();
-    virtual void v8();
-    virtual void v9();
-    virtual void v10();
-    virtual void v11();
-    virtual void v12();
-    virtual void v13();
-    virtual void v14();
-    virtual void v15();
-    virtual void v16();
-    virtual void v17();
-    virtual void v18();
-    virtual void v19();
-    virtual void v20();
-    virtual void v21();
-    virtual void v22();
-    virtual void v23();
-    virtual void v24();
-    virtual void v25();
-    virtual void v26();
-    virtual void v27();
-    virtual void v28();
-    virtual void v29();
-    virtual void v30();
-    virtual void v31();
-    virtual void v32();
-    virtual void v33();
-    virtual void v34();
-    virtual void v35();
-    virtual void v36();
-    virtual void v37();
-    virtual void v38();
-    virtual void v39();
-    virtual void v40();
-    virtual void v41();
-    virtual void v42();
-    virtual void v43();
-    virtual void v44();
-    virtual void v45();
-    virtual void v46();
-    virtual void v47();
-    virtual void v48();
-    virtual void v49();
-    virtual void v50();
-    virtual void v51();
-    virtual void v52();
-    virtual void v53();
-    virtual void v54();
-    virtual void v55();
-    virtual void v56();
-    virtual void v57();
-    virtual void v58();
-    virtual void v59(NiGeometry*, int, int, void*);
-    void FUN_00e74120();
-};
-class NiGeometry : public NiAVObject
-{
-  public:
-    NiProperty* GetProperty(unsigned int);
-    NiGeometryData* FUN_005495f0();
-    PropState* FUN_004030b0();
-};
 int FUN_00438220();
 void __cdecl FUN_00b57e30(NiGeometry*, int, int);
 NiRenderer* FUN_0043c4b0();
@@ -828,13 +595,6 @@ class TerrainChunk
 
     void FUN_006fb7e0();
 };
-struct NiFixedString
-{
-    unsigned int m_data;
-    NiFixedString(const char*);
-    ~NiFixedString();
-    operator const char*() const;
-};
 struct LoadedNode
 {
     void AssignFixedString(const NiFixedString&);
@@ -848,17 +608,6 @@ struct NodeRef
 struct FinalObject
 {
     void FUN_006fa990();
-};
-struct TerrainTask : BGSTerrainChunkLoadTask
-{
-    FinalObject* m_pExtra40;
-    unsigned int m_unk44;
-    NodeRef m_ref48;
-    NodeRef m_ref4c;
-    NodeRef m_ref50;
-    unsigned int m_unk54;
-    bool m_bDisabled58;
-    void UpdateTerrainLODNames();
 };
 
 void BuildLodMeshPath(char*, TESWorldSpace*, int, short, short);

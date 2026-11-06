@@ -1,8 +1,12 @@
 
 // bgsmusictype_ctx_variant.cpp: context variant of src/fallout_shared/bgsmusictype.cpp: its stripped skeleton, as these functions were checked
 // against, for verified matches whose own declarations clash with the unit's current types.
+#define FNV_TESFILE_H  // the shared TESFile below replaces layout_support.h's stub
+#include "../../include/NiFile.h"
 #include "music_local.h"
+#include "../../include/AutoMemHelper.h"
 #include <malloc.h>
+#include "../../include/TESFile.h"
 extern "C" int __cdecl sprintf_s(char* buffer, unsigned int size, const char* format, ...);
 unsigned int __cdecl GetRandomNumberInRange(int minimum, int maximum);
 
@@ -11,14 +15,6 @@ unsigned int __cdecl GetRandomNumberInRange(int minimum, int maximum);
 int __cdecl FUN_00462d40(const char* path, char* drive, unsigned int driveLen, char* dir, unsigned int dirLen,
                          char* fname, unsigned int fnameLen, char* ext, unsigned int extLen);
 int __cdecl FUN_00404dc0(const char* a, const char* b);
-
-class AutoMemHelper
-{
-  public:
-    int unk00;
-    AutoMemHelper(int context, bool leave, const char* file, int line);
-    ~AutoMemHelper();
-};
 
 class BSDirectoryIterator
 {

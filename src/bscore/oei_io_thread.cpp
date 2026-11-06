@@ -1,6 +1,19 @@
 // bscore/oei_io_thread.cpp: IO_Thread (2 functions)
 
 #include "oei_io_thread_decls.h"
+#include "../../include/MemoryManager.h"
+
+__forceinline void CountingSemaphore::Wait()
+{
+    WaitForSingleObject(hSemaphore, 0xffffffffUL);
+    InterlockedDecrement(reinterpret_cast<volatile long*>(&iCount));
+}
+
+__forceinline void CountingSemaphore::Signal()
+{
+    ReleaseSemaphore(hSemaphore, 1, 0);
+    InterlockedIncrement(reinterpret_cast<volatile long*>(&iCount));
+}
 
 // @fnv 0x00aa8430
 unsigned int OEI::IO::IO_Thread::ThreadProc()
@@ -40,10 +53,6 @@ unsigned int OEI::IO::IO_Thread::ThreadProc()
     return 0;
 }
 
-struct MemoryManager
-{
-    void Deallocate(void* p);
-};
 extern MemoryManager g_memoryManager;
 
 struct FUN_00aa89d0_holder
